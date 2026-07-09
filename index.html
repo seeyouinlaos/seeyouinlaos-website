@@ -60,7 +60,7 @@ section { padding: 110px 6vw; position: relative; }
 .hero .bg { position: absolute; inset: -12% 0 0 0; background: url('img-hero.jpg') center 55% / cover no-repeat; will-change: transform; }
 .hero::after { content:''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(33,31,28,.42) 0%, rgba(33,31,28,.08) 40%, rgba(33,31,28,.18) 72%, rgba(33,31,28,.5) 100%); z-index: 1; }
 .hero > *:not(.bg) { position: absolute; z-index: 2; }
-.hero .badge { top: 44px; left: 52px; border: 1px solid rgba(242,236,225,.6); padding: 14px 20px; font-size: 13px; letter-spacing: .05em; max-width: 290px; line-height: 1.5; }
+.hero .badge { top: 104px; left: 50%; transform: translateX(-50%); width: 92%; max-width: 640px; text-align: center; font-size: 12.5px; letter-spacing: .16em; text-transform: uppercase; line-height: 1.7; }
 .hero .logo { top: 44px; left: 50%; transform: translateX(-50%); font-family: 'PP Editorial Old', serif; font-size: 40px; white-space: nowrap; }
 .hero .logo .dot { color: var(--cherry-photo); }
 .hero .statement { top: 40%; left: 50%; transform: translate(-50%,-50%); width: 92%; max-width: 1060px; text-align: center; font-family: 'PP Editorial Old', serif; font-weight: 200; font-size: clamp(38px, 4.8vw, 76px); line-height: 1.28; text-wrap: balance; }
@@ -249,6 +249,25 @@ body.pv-lock { overflow: hidden; }
 .dn-note { margin-top: 44px; font-family: 'PP Editorial Old', serif; font-style: italic; font-size: 21px; }
 .dn-note .d { color: var(--cherry); }
 @media (max-width: 900px) { .dn { grid-template-columns: 1fr; gap: 14px; } .dn .dn-im { max-width: 300px; } }
+/* ---------- ORDER OF THE WEEKEND (hybrid table) ---------- */
+.order { margin-top: 66px; }
+.od-day { display: flex; align-items: baseline; gap: 18px; margin-top: 52px; padding-bottom: 12px; border-bottom: 1px solid rgba(168,131,125,.4); }
+.od-day:first-child { margin-top: 0; }
+.od-day h3 { font-family: 'PP Editorial Old', serif; font-weight: 200; font-size: clamp(28px, 3vw, 40px); line-height: 1; }
+.od-day .od-date { font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: var(--rose); }
+.od-row { display: grid; grid-template-columns: 140px 1fr; gap: 28px; padding: 19px 2px; border-bottom: 1px solid rgba(168,131,125,.18); align-items: baseline; }
+.od-row:last-child { border-bottom: none; }
+.od-row.key .od-what { color: var(--cherry); }
+.od-time { font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: var(--rose); white-space: nowrap; }
+.od-what { font-family: 'PP Editorial Old', serif; font-weight: 400; font-size: clamp(18px, 1.7vw, 22px); line-height: 1.28; }
+.od-what .od-where { color: var(--rose); font-family: 'Hanken Grotesk', sans-serif; font-weight: 400; font-size: 14px; letter-spacing: .01em; }
+.od-meta { margin-top: 7px; font-size: 13px; color: var(--rose); line-height: 1.5; }
+.od-meta .dress { color: var(--cherry); text-transform: uppercase; letter-spacing: .1em; font-size: 11px; }
+@media (max-width: 640px) {
+  .od-row { grid-template-columns: 1fr; gap: 5px; padding: 16px 0; }
+  .od-time { font-size: 11px; }
+  .od-day { margin-top: 40px; }
+}
 
 /* ---------- PRACTICAL (blush) ---------- */
 .practical { background: var(--blush); padding-top: 130px; padding-bottom: 130px; }
@@ -334,8 +353,8 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
   .stop:nth-child(even) .im { order: 1; } .stop:nth-child(even) .txt { order: 2; text-align: left; }
   .tl-path, .stop .dotmark { display: none; }
   .stop.small .im { width: 100%; }
-  .hero .badge { display: none; }
-  .hero .logo { font-size: 28px; }
+  .hero .badge { top: 82px; font-size: 10.5px; letter-spacing: .12em; }
+  .hero .logo { font-size: 26px; }
   .menu-btn { top: 30px; right: 20px; }
   section { padding: 80px 7vw; }
 }
@@ -356,14 +375,13 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
     <div class="m-eyebrow">Explore the journey</div>
     <nav>
       <a class="m-link" href="#story"><span class="n">01</span><span class="t">The Story</span></a>
-      <a class="m-link" href="#weekend"><span class="n">02</span><span class="t">The Wedding Weekend</span></a>
+      <a class="m-link" href="#weekend"><span class="n">02</span><span class="t">The Moments</span></a>
       <a class="m-link" href="#places"><span class="n">03</span><span class="t">The Places</span></a>
-      <a class="m-link" href="#journey"><span class="n">04</span><span class="t">Guest Journey</span></a>
-      <a class="m-link" href="#dresscode"><span class="n">05</span><span class="t">The Dress Guide</span></a>
-      <a class="m-link" href="#dining"><span class="n">06</span><span class="t">Dining</span></a>
-      <a class="m-link" href="#travel"><span class="n">07</span><span class="t">Before You Travel</span></a>
-      <a class="m-link" href="#portal"><span class="n">08</span><span class="t">Your Guest Area</span></a>
-      <a class="m-link" href="#rsvp"><span class="n">09</span><span class="t">Say Yes</span></a>
+      <a class="m-link" href="#dresscode"><span class="n">04</span><span class="t">The Dress Guide</span></a>
+      <a class="m-link" href="#journey"><span class="n">05</span><span class="t">The Weekend, in Order</span></a>
+      <a class="m-link" href="#travel"><span class="n">06</span><span class="t">Before You Travel</span></a>
+      <a class="m-link" href="#portal"><span class="n">07</span><span class="t">Your Guest Area</span></a>
+      <a class="m-link" href="#rsvp"><span class="n">08</span><span class="t">Say Yes</span></a>
     </nav>
   </div>
   <div class="m-foot">
@@ -375,7 +393,7 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
 <!-- HERO -->
 <header class="hero" id="top">
   <div class="bg"></div>
-  <div class="badge" data-hero>Save the date · Sunday, 28 February 2027 · Luang Prabang, Laos</div>
+  <div class="badge" data-hero>Sunday, 28 February 2027 · Luang Prabang, Laos</div>
   <div class="logo" data-hero>see you in laos<span class="dot">.</span></div>
   <h1 class="statement split-h">Travel first. Wedding second.<br>Memory always.</h1>
   <div class="sub" data-hero>Haruthai &amp; Suthep are getting married, and you are invited on the journey.</div>
@@ -421,7 +439,7 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
 <section class="timeline" id="weekend" style="padding-top: 0">
   <div class="inner">
     <div class="head">
-      <div class="eyebrow rv">The Wedding Weekend</div>
+      <div class="eyebrow rv">The Moments</div>
       <h2 class="h-big split-h">Three days along the Mekong.</h2>
     </div>
     <div class="tl-wrap">
@@ -431,23 +449,12 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
       </svg></div>
 
       <div class="stop">
-        <div class="im"><img class="clip-img" src="tl-arrival.jpg" alt="Arrival at AVANI+ Luang Prabang" data-speed="-5"></div>
-        <div class="txt">
-          <div class="when">Saturday, 27 Feb · Morning</div>
-          <h3>Arrival</h3>
-          <p>Vans meet every flight from Bangkok. A personal welcome at the hotel, with no desk and no queue. Then the afternoon is yours: pool, spa, or the old town.</p>
-          <div class="meta">LPQ Airport → AVANI+ · luggage goes straight to your room</div>
-        </div>
-        <span class="dotmark"></span>
-      </div>
-
-      <div class="stop">
         <div class="im"><img class="clip-img" src="tl-cruise.jpg" alt="Sunset cruise on the Mekong" data-speed="6"></div>
         <div class="txt">
-          <div class="when">Saturday · Evening</div>
-          <h3>Sunset Mekong Cruise</h3>
-          <p>The first shared toast of the weekend: local food, traditional Lao music and the sun sinking behind the mountains.</p>
-          <div class="meta">Mekong River · dress code: white attire</div>
+          <div class="when">Saturday, 27 Feb · Evening</div>
+          <h3>The Sunset Cruise</h3>
+          <p>The first shared toast of the weekend: local food, traditional Lao music and the sun sinking behind the mountains. The river is where the journey together begins.</p>
+          <div class="meta">The Mekong · dress: blue jeans, white shirt</div>
         </div>
         <span class="dotmark"></span>
       </div>
@@ -455,10 +462,21 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
       <div class="stop">
         <div class="im"><img class="clip-img" src="tl-alms.jpg" alt="The Alms Giving Ceremony at dawn" data-speed="-7"></div>
         <div class="txt">
-          <div class="when">Sunday · Before sunrise</div>
-          <h3>The Alms Giving<br>Ceremony</h3>
+          <div class="when">Sunday, 28 Feb · Dawn</div>
+          <h3>The Alms Giving</h3>
           <p>Monks in saffron robes, guests in white, sticky rice in hand: the Buddhist ritual this city has kept alive for centuries. The wedding day begins with meaning, not logistics.</p>
-          <div class="meta">Luang Prabang old town · dress code: blue jeans, white shirt</div>
+          <div class="meta">Luang Prabang old town · dress: white attire</div>
+        </div>
+        <span class="dotmark"></span>
+      </div>
+
+      <div class="stop">
+        <div class="im"><img class="clip-img" src="dn-lunch.jpg" alt="A relaxed table at Main Street Bar and Grill" data-speed="6"></div>
+        <div class="txt">
+          <div class="when">Sunday, 28 Feb · 13:00</div>
+          <h3>Sunday Lunch</h3>
+          <p>A relaxed Lao lunch at the hotel's own grill, before the afternoon quiets towards the ceremony. An easy hour together in the middle of the day, so no one reaches golden hour running on empty.</p>
+          <div class="meta">Main Street Bar &amp; Grill · relaxed</div>
         </div>
         <span class="dotmark"></span>
       </div>
@@ -466,10 +484,10 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
       <div class="stop">
         <div class="im"><img class="clip-img" src="tl-ceremony.jpg" alt="Poolside at golden hour, the ceremony venue" data-speed="7"></div>
         <div class="txt">
-          <div class="when">Sunday · Golden hour</div>
+          <div class="when">Sunday, 28 Feb · 17:19</div>
           <h3>The Ceremony</h3>
           <p>Poolside, as golden hour begins. Not performed, but held: stillness, presence, and the vow made public in front of the people who matter most.</p>
-          <div class="meta">AVANI+ Poolside · dress code: black tie</div>
+          <div class="meta">AVANI+ poolside · dress: black tie</div>
         </div>
         <span class="dotmark"></span>
       </div>
@@ -477,21 +495,10 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
       <div class="stop">
         <div class="im"><img class="clip-img" src="tl-dinner.jpg" alt="Dinner under the red lanterns of Manda de Laos" data-speed="-5"></div>
         <div class="txt">
-          <div class="when">Sunday · Evening</div>
+          <div class="when">Sunday, 28 Feb · Evening</div>
           <h3>The Wedding Dinner</h3>
           <p>A short transfer, a grand entrance, and an eight-course Laotian tasting menu beside a UNESCO-listed lily pond, under the red lanterns of Manda de Laos.</p>
-          <div class="meta">Manda de Laos · string quartet · the cake, the toasts</div>
-        </div>
-        <span class="dotmark"></span>
-      </div>
-
-      <div class="stop">
-        <div class="im"><img class="clip-img" src="tl-goodbye.jpg" alt="Dusk over the Mekong" data-speed="6"></div>
-        <div class="txt">
-          <div class="when">Monday, 1 Mar</div>
-          <h3>A Slow Goodbye</h3>
-          <p>Breakfast, one last morning by the pool, and a departure with room for real goodbyes, or for the start of your own onward journey.</p>
-          <div class="meta">Transfers arranged · extend your stay if you like</div>
+          <div class="meta">Manda de Laos · dress: elegant evening</div>
         </div>
         <span class="dotmark"></span>
       </div>
@@ -540,86 +547,64 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
 </section>
 <div class="wave" style="background: var(--ink-s)"><svg viewBox="0 0 1440 90" preserveAspectRatio="none"><path d="M0,90 L0,50 C220,20 460,72 720,42 C980,15 1220,65 1440,35 L1440,90 Z" fill="#F2ECE1"/></svg></div>
 
-<!-- JOURNEY -->
-<section class="journey" id="journey" style="padding-top: 40px">
-  <div class="inner">
-    <div class="eyebrow rv">The Weekend, in Order</div>
-    <h2 class="h-big split-h">How the days unfold.</h2>
-    <p class="lead rv">One glance at the rhythm of the weekend, from the moment you land to the last slow goodbye. Nothing to plan; every transition is arranged for you.</p>
-
-    <div class="rhythm">
-      <div class="step rv"><div class="dot"></div><div class="day">Sat · Morning</div><div class="ttl">Arrival</div><div class="sub">Met at the airport, welcomed at the hotel</div></div>
-      <div class="step rv"><div class="dot"></div><div class="day">Sat · Evening</div><div class="ttl">Sunset Cruise</div><div class="sub">The first shared toast, on the Mekong</div></div>
-      <div class="step rv"><div class="dot"></div><div class="day">Sun · Dawn</div><div class="ttl">Alms Giving</div><div class="sub">A quiet Buddhist ritual to open the day</div></div>
-      <div class="step rv key"><div class="dot"></div><div class="day">Sun · Golden hour</div><div class="ttl">The Ceremony</div><div class="sub">Poolside, as the sun sets</div></div>
-      <div class="step rv"><div class="dot"></div><div class="day">Sun · Night</div><div class="ttl">Celebration Dinner</div><div class="sub">Eight courses under the lanterns</div></div>
-      <div class="step rv"><div class="dot"></div><div class="day">Mon</div><div class="ttl">Departure</div><div class="sub">A slow morning, then home</div></div>
-    </div>
-
-    <div class="j-note rv">Your exact times, meeting points and transfers arrive later in <a href="#portal">your Guest Area</a>.</div>
-  </div>
-</section>
-
-<div class="wave" style="background: var(--ivory)"><svg viewBox="0 0 1440 90" preserveAspectRatio="none"><path d="M0,90 L0,48 C250,78 500,22 770,52 C1040,80 1250,30 1440,52 L1440,90 Z" fill="#2B2823"/></svg></div>
-
 <!-- DRESS GUIDE -->
 <section class="dressguide" id="dresscode" style="padding-top: 70px">
   <div class="inner">
     <div class="eyebrow rv">The Dress Guide</div>
     <h2 class="h-big split-h">What to wear,<br>day by day.</h2>
-    <p class="dg-intro rv">Four looks across four days, down to the fabric and the shoes, so packing feels easy and nothing is left to guess. One gentle note that matters here: on the wedding day itself, we step away from full white, which the bride wears alone. Late February is warm and dry by day, cool at dawn and after dark, so think breathable layers.</p>
+    <p class="dg-intro rv">Four looks across the weekend, down to the fabric and the shoes, so packing feels easy and nothing is left to guess. One gentle note that matters here: full white belongs to the Sunday dawn Alms Giving, where it is the traditional, respectful colour; for the ceremony and dinner we step away from white, which the bride wears alone. Late February is warm and dry by day, cool at dawn and after dark, so think breathable layers.</p>
 
     <!-- Saturday · Cruise · WHITE -->
     <div class="dg-cat rv">
       <div class="dg-top">
         <div>
-          <div class="dg-when">Saturday · Sunset Cruise</div>
-          <h3 class="dg-title">White on the water</h3>
+          <div class="dg-when">Saturday, 27 Feb · Sunset Cruise</div>
+          <h3 class="dg-title">Denim and white</h3>
         </div>
         <ul class="dg-notes">
-          <li><span>The look</span> White or ivory, easy and elegant</li>
-          <li><span>Colour</span> White is welcome; Saturday is not the wedding day</li>
-          <li><span>Fabrics</span> Cotton, linen, a soft drape</li>
+          <li><span>The look</span> Blue jeans and a white shirt, easy and relaxed</li>
+          <li><span>Colour</span> Denim and white; save the full white for Sunday morning</li>
+          <li><span>Fabrics</span> Cotton, chambray, a soft drape</li>
           <li><span>Footwear</span> Flat, deck-friendly for the pier</li>
           <li><span>Note</span> Warm evening, a gentle river breeze</li>
         </ul>
       </div>
       <div class="dg-collage">
-        <div class="cim"><img class="clip-img" src="dg2-cruise-1.jpg" alt="White look on the water"></div>
-        <div class="cim"><img class="clip-img" src="dg2-cruise-2.jpg" alt="White menswear"></div>
-        <div class="cim"><img class="clip-img" src="dg2-cruise-3.jpg" alt="Ivory dress"></div>
-        <div class="cim"><img class="clip-img" src="dg2-cruise-4.jpg" alt="Ivory looks"></div>
-        <div class="cim"><img class="clip-img" src="dg2-cruise-5.jpg" alt="Guests in white"></div>
-        <div class="cim"><img class="clip-img" src="dg2-cruise-6.jpg" alt="White resort look"></div>
-        <div class="cim"><img class="clip-img" src="dg2-cruise-7.jpg" alt="Linen menswear in white"></div>
-        <div class="cim"><img class="clip-img" src="dg2-cruise-8.jpg" alt="Ivory summer dress"></div>
+        <div class="cim"><img class="clip-img" src="dg2-cruise-1.jpg" alt="White shirt and blue jeans"></div>
+        <div class="cim"><img class="clip-img" src="dg2-cruise-2.jpg" alt="White shirt and denim"></div>
+        <div class="cim"><img class="clip-img" src="dg2-cruise-3.jpg" alt="Men's white shirt and jeans"></div>
+        <div class="cim"><img class="clip-img" src="dg2-cruise-4.jpg" alt="Relaxed white shirt and jeans"></div>
+        <div class="cim"><img class="clip-img" src="dg2-cruise-5.jpg" alt="Wide denim and white shirt"></div>
+        <div class="cim"><img class="clip-img" src="dg2-cruise-6.jpg" alt="White shirt and jeans"></div>
+        <div class="cim"><img class="clip-img" src="dg2-cruise-7.jpg" alt="Crisp white shirt and denim"></div>
+        <div class="cim"><img class="clip-img" src="dg2-cruise-8.jpg" alt="Relaxed denim and white shirt"></div>
       </div>
     </div>
 
-    <!-- Sunday morning · Alms · DENIM + WHITE SHIRT -->
+    <!-- Sunday morning · Alms · WHITE ATTIRE -->
     <div class="dg-cat rv">
       <div class="dg-top">
         <div>
-          <div class="dg-when">Sunday morning · Alms Giving</div>
-          <h3 class="dg-title">Denim and white</h3>
+          <div class="dg-when">Sunday, 28 Feb · Alms Giving</div>
+          <h3 class="dg-title">White attire</h3>
         </div>
         <ul class="dg-notes">
-          <li><span>The look</span> Blue jeans and a white shirt, modest and easy</li>
-          <li><span>Colour</span> Not full white today; the bride wears white alone</li>
-          <li><span>Fabrics</span> Cotton, chambray, breathable</li>
+          <li><span>The look</span> White or ivory, modest and easy</li>
+          <li><span>Colour</span> White is right here; it is the traditional, respectful colour for the Buddhist ritual</li>
+          <li><span>Fabrics</span> Cotton, linen, breathable</li>
           <li><span>Footwear</span> Easy to slip off for the ritual</li>
           <li><span>Note</span> Cool and still at dawn; bring a light layer</li>
         </ul>
       </div>
       <div class="dg-collage">
-        <div class="cim"><img class="clip-img" src="dg2-alms-1.jpg" alt="White shirt and blue jeans"></div>
-        <div class="cim"><img class="clip-img" src="dg2-alms-2.jpg" alt="White shirt and denim"></div>
-        <div class="cim"><img class="clip-img" src="dg2-alms-3.jpg" alt="Men's white shirt and jeans"></div>
-        <div class="cim"><img class="clip-img" src="dg2-alms-4.jpg" alt="Relaxed white shirt and jeans"></div>
-        <div class="cim"><img class="clip-img" src="dg2-alms-5.jpg" alt="Wide denim and white shirt"></div>
-        <div class="cim"><img class="clip-img" src="dg2-alms-6.jpg" alt="White shirt and jeans"></div>
-        <div class="cim"><img class="clip-img" src="dg2-alms-7.jpg" alt="Crisp white shirt and denim"></div>
-        <div class="cim"><img class="clip-img" src="dg2-alms-8.jpg" alt="Relaxed denim and white shirt"></div>
+        <div class="cim"><img class="clip-img" src="dg2-alms-1.jpg" alt="White look for the morning"></div>
+        <div class="cim"><img class="clip-img" src="dg2-alms-2.jpg" alt="White menswear"></div>
+        <div class="cim"><img class="clip-img" src="dg2-alms-3.jpg" alt="Ivory dress"></div>
+        <div class="cim"><img class="clip-img" src="dg2-alms-4.jpg" alt="Ivory looks"></div>
+        <div class="cim"><img class="clip-img" src="dg2-alms-5.jpg" alt="Guests in white"></div>
+        <div class="cim"><img class="clip-img" src="dg2-alms-6.jpg" alt="White resort look"></div>
+        <div class="cim"><img class="clip-img" src="dg2-alms-7.jpg" alt="Linen menswear in white"></div>
+        <div class="cim"><img class="clip-img" src="dg2-alms-8.jpg" alt="Ivory summer dress"></div>
       </div>
     </div>
 
@@ -627,7 +612,7 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
     <div class="dg-cat rv">
       <div class="dg-top">
         <div>
-          <div class="dg-when">Sunday evening · Ceremony &amp; Dinner <span class="dg-badge">Black tie</span></div>
+          <div class="dg-when">Sunday, 28 Feb · Ceremony &amp; Dinner <span class="dg-badge">Black tie</span></div>
           <h3 class="dg-title">Evening elegance</h3>
         </div>
         <ul class="dg-notes">
@@ -657,7 +642,7 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
     <div class="dg-cat rv">
       <div class="dg-top">
         <div>
-          <div class="dg-when">Monday · Departure &amp; free time</div>
+          <div class="dg-when">Monday, 1 Mar · Departure &amp; free time</div>
           <h3 class="dg-title">Travelling home</h3>
         </div>
         <ul class="dg-notes">
@@ -694,85 +679,34 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
   </div>
 </section>
 
-<div class="wave" style="background: var(--ink-s)"><svg viewBox="0 0 1440 90" preserveAspectRatio="none"><path d="M0,90 L0,52 C230,20 470,74 730,44 C990,18 1230,66 1440,38 L1440,90 Z" fill="#F2ECE1"/></svg></div>
-
-<!-- DINING -->
-<section class="dining" id="dining">
+<!-- WEEKEND IN ORDER -->
+<section class="journey" id="journey" style="padding-top: 70px">
   <div class="inner">
-    <div class="eyebrow rv">Dining</div>
-    <h2 class="h-big split-h">A table is always set.</h2>
-    <p class="rv" style="max-width: 580px; margin-top: 28px">Dining is not a service interval between the events. It carries its own part of the journey. Here is when, where, and what's already taken care of.</p>
-    <div style="height: 34px"></div>
+    <div class="eyebrow rv">The Weekend, in Order</div>
+    <h2 class="h-big split-h">How the days unfold.</h2>
+    <p class="lead rv">One complete glance at the weekend, from the moment you land to the last slow goodbye. A table is always set; every meal and transfer is arranged for you. Nothing to plan.</p>
 
-    <div class="dn rv">
-      <div class="when">Sunday &amp; Monday<br>after each night</div>
-      <div>
-        <h3>Breakfast at AVANI+</h3>
-        <p>The morning after each night at the hotel, breakfast is set for you, with the full breakfast beverage service. On the wedding day it opens after the Alms Giving; on Monday it runs into the late morning, before the slow goodbye. (Saturday you land mid-morning; the day begins with a welcome, and the river feeds you at sunset.)</p>
-        <div class="chips-row"><span class="chip-tag">Included</span><span class="chip-tag">Drinks included</span></div>
-      </div>
-      <div class="dn-im dn-car" data-car>
-        <div class="car-track">
-          <img src="dn-breakfast.jpg" alt="Breakfast trays at AVANI+">
-          <img src="dn-breakfast-002.jpg" alt="">
-          <img src="dn-breakfast-003.jpg" alt="">
-        </div>
-        <div class="car-dots" aria-hidden="true"><span class="on"></span><span></span><span></span></div>
-      </div>
+    <div class="order rv">
+      <div class="od-day"><h3>Saturday</h3><span class="od-date">27 February 2027</span></div>
+      <div class="od-row"><div class="od-time">09:05</div><div class="od-body"><div class="od-what">Arrival <span class="od-where">· met and transferred</span></div><div class="od-meta">LPQ Airport → AVANI+</div></div></div>
+      <div class="od-row"><div class="od-time">Afternoon</div><div class="od-body"><div class="od-what">Check-in <span class="od-where">· free time</span></div><div class="od-meta">AVANI+ · the afternoon is yours</div></div></div>
+      <div class="od-row"><div class="od-time">17:30</div><div class="od-body"><div class="od-what">Sunset Mekong Cruise <span class="od-where">· The Mekong</span></div><div class="od-meta"><span class="dress">Dress · blue jeans, white shirt</span> · welcome dinner aboard, drinks included</div></div></div>
+
+      <div class="od-day"><h3>Sunday</h3><span class="od-date">28 February 2027</span></div>
+      <div class="od-row"><div class="od-time">Dawn</div><div class="od-body"><div class="od-what">Alms Giving <span class="od-where">· Old Town</span></div><div class="od-meta"><span class="dress">Dress · white attire</span> · a quiet Buddhist ritual to open the day</div></div></div>
+      <div class="od-row"><div class="od-time">Morning</div><div class="od-body"><div class="od-what">Breakfast <span class="od-where">· AVANI+</span></div><div class="od-meta">Included, drinks included · free time by the pool</div></div></div>
+      <div class="od-row"><div class="od-time">13:00</div><div class="od-body"><div class="od-what">Lunch <span class="od-where">· Main Street Bar &amp; Grill</span></div><div class="od-meta"><span class="dress">Dress · relaxed</span> · Lao set lunch included, bar drinks on you</div></div></div>
+      <div class="od-row key"><div class="od-time">17:19</div><div class="od-body"><div class="od-what">The Wedding Ceremony <span class="od-where">· AVANI+ poolside</span></div><div class="od-meta"><span class="dress">Dress · black tie</span> · poolside, as golden hour begins</div></div></div>
+      <div class="od-row"><div class="od-time">Evening</div><div class="od-body"><div class="od-what">The Wedding Dinner <span class="od-where">· Manda de Laos</span></div><div class="od-meta"><span class="dress">Dress · elegant evening</span> · eight-course tasting, drinks included</div></div></div>
+
+      <div class="od-day"><h3>Monday</h3><span class="od-date">1 March 2027</span></div>
+      <div class="od-row"><div class="od-time">Morning</div><div class="od-body"><div class="od-what">Breakfast <span class="od-where">· check-out</span></div><div class="od-meta">AVANI+ · included, drinks included · a slow last morning</div></div></div>
+      <div class="od-row"><div class="od-time">Midday</div><div class="od-body"><div class="od-what">Airport transfer <span class="od-where">· to LPQ</span></div><div class="od-meta">Arranged for you</div></div></div>
+      <div class="od-row"><div class="od-time">16:05</div><div class="od-body"><div class="od-what">Departure <span class="od-where">· LPQ → Bangkok</span></div><div class="od-meta">Onward, or extend your stay</div></div></div>
     </div>
 
-    <div class="dn rv">
-      <div class="when">Saturday evening<br>Mekong River</div>
-      <div>
-        <h3>Welcome Dinner on the water</h3>
-        <p>Dinner is served aboard during the sunset cruise: a welcome drink as you step on, local snacks, a three-course meal of Lao and Western dishes, and a glass of wine, beer or juice with it. Traditional Lao music and dance carry the evening, about two and a half hours on the river.</p>
-        <div class="chips-row"><span class="chip-tag">Included</span><span class="chip-tag">Welcome drink + one drink included</span></div>
-      </div>
-      <div class="dn-im dn-car" data-car>
-        <div class="car-track">
-          <img src="dn-cruise.jpg" alt="A set table aboard, the Mekong beyond the window">
-          <img src="dn-cruise-002.jpg" alt="">
-          <img src="dn-cruise-003.jpg" alt="">
-        </div>
-        <div class="car-dots" aria-hidden="true"><span class="on"></span><span></span><span></span></div>
-      </div>
-    </div>
-
-    <div class="dn rv">
-      <div class="when">Sunday midday<br>Main Street Bar &amp; Grill, AVANI+</div>
-      <div>
-        <h3>Sunday Lunch</h3>
-        <p>A relaxed Lao set lunch at the hotel's own BBQ &amp; grill restaurant, before the afternoon quiets down towards the ceremony. The meal is on us; drinks at the bar are the one thing on you all weekend.</p>
-        <div class="chips-row"><span class="chip-tag">Lunch included</span><span class="chip-tag full">Drinks on you</span></div>
-      </div>
-      <div class="dn-im dn-car" data-car>
-        <div class="car-track">
-          <img src="dn-lunch.jpg" alt="A table at Main Street Bar & Grill">
-          <img src="dn-lunch-002.jpg" alt="">
-          <img src="dn-lunch-003.jpg" alt="">
-        </div>
-        <div class="car-dots" aria-hidden="true"><span class="on"></span><span></span><span></span></div>
-      </div>
-    </div>
-
-    <div class="dn rv">
-      <div class="when">Sunday evening<br>Manda de Laos</div>
-      <div>
-        <h3>Social Hour &amp; Wedding Dinner</h3>
-        <p>Arrival drinks and canapés by the lily pond, then the eight-course Namkong tasting menu, accompanied by a curated selection of drinks, included through the evening. Which wines and pours make the list is decided together with the final menu, closer to the date. Every guest is personally seated; your place will be waiting.</p>
-        <div class="chips-row"><span class="chip-tag">Included</span><span class="chip-tag full">Selected drinks included</span></div>
-      </div>
-      <div class="dn-im dn-car" data-car>
-        <div class="car-track">
-          <img src="tl-dinner.jpg" alt="Evening at Manda de Laos under the red umbrella">
-          <img src="tl-dinner-002.jpg" alt="">
-          <img src="tl-dinner-003.jpg" alt="">
-        </div>
-        <div class="car-dots" aria-hidden="true"><span class="on"></span><span></span><span></span></div>
-      </div>
-    </div>
-
-    <div class="dn-note rv">short version <span class="d">·</span> from touchdown to takeoff, meals are taken care of <span class="d">·</span> only Sunday-lunch drinks are on you</div>
+    <div class="dn-note rv">from touchdown to takeoff, every meal is taken care of <span class="d">·</span> only Sunday-lunch bar drinks are on you</div>
+    <div class="j-note rv">Only your private pick-up times and meeting points arrive later in <a href="#portal">your Guest Area</a>.</div>
   </div>
 </section>
 
@@ -786,10 +720,29 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
       <div class="rv"><h3>Getting there</h3><p>Fly Bangkok (DMK) → Luang Prabang (LPQ), about 1h25 nonstop. Book your own flight once we give the green light; vans meet every arrival.</p></div>
       <div class="rv"><h3>Weather in late February</h3><p class="big">30° / 15°</p><p>Dry season: warm days, cool mornings (bring a layer for the dawn Alms Giving), and the driest month of the year.</p></div>
       <div class="rv"><h3>Visa &amp; currency</h3><p>Visa-on-arrival for most nationalities; our team meets you at immigration and guides you through. Currency: Lao Kip (LAK); US dollars widely accepted.</p></div>
-      <div class="rv"><h3>Your contacts</h3><p>Before you travel, write to <a class="mail-link" href="mailto:seeyouinlaos@gmail.com">seeyouinlaos@gmail.com</a> or message us on LINE (ID <strong>seeyouinlaos</strong>). On the ground in Laos, your Guest Relations Managers Paddy and Ju look after you personally, from immigration to the last transfer.</p></div>
-      <div class="rv"><h3>Extend your journey</h3><p>Warmly encouraged. A dedicated travel agent can help you stay longer: Bangkok, more of Laos, or onward through Southeast Asia. Our guest relations team is happy to plan your individual booking; <a class="mail-link" href="mailto:seeyouinlaos@gmail.com?subject=See%20you%20in%20Laos%3A%20extending%20our%20journey&body=Hello%20Haruthai%2C%0A%0AWe%27d%20love%20to%20extend%20our%20trip%20around%20the%20wedding.%20Our%20idea%3A%20">just write to us</a>.</p></div>
+      <div class="rv"><h3>Your contacts</h3><p>Before you travel, write to <a class="mail-link" href="mailto:suthep.hrg@gmail.com">suthep.hrg@gmail.com</a> or message us on LINE (ID <strong>seeyouinlaos</strong>). On the ground in Laos, your Guest Relations Managers Paddy and Ju look after you personally, from immigration to the last transfer.</p></div>
+      <div class="rv"><h3>Extend your journey</h3><p>Warmly encouraged. A dedicated travel agent can help you stay longer: Bangkok, more of Laos, or onward through Southeast Asia. Our guest relations team is happy to plan your individual booking; <a class="mail-link" href="mailto:suthep.hrg@gmail.com?subject=See%20you%20in%20Laos%3A%20extending%20our%20journey&body=Hello%20Haruthai%2C%0A%0AWe%27d%20love%20to%20extend%20our%20trip%20around%20the%20wedding.%20Our%20idea%3A%20">just write to us</a>.</p></div>
     </div>
-    <div class="note rv">Please don't book flights yet. Once your stay is confirmed, your Guest Area gives you the exact reference flight to match, so the whole group lands and leaves together.</div>
+    <div class="flights rv">
+      <div class="fl-title">The reference flights: what the weekend is planned around</div>
+      <div class="fl-leg">
+        <div class="lg">Outbound<br>Sat, 27 Feb 2027</div>
+        <div>
+          <div class="tm">07:40 <span class="arr">→</span> 09:05</div>
+          <div class="rt">Bangkok Don Mueang (DMK) → Luang Prabang (LPQ)</div>
+        </div>
+        <div class="mt">Thai AirAsia FD 1032<br>1 h 25 · nonstop</div>
+      </div>
+      <div class="fl-leg">
+        <div class="lg">Return<br>Mon, 1 Mar 2027</div>
+        <div>
+          <div class="tm">16:05 <span class="arr">→</span> 17:30</div>
+          <div class="rt">Luang Prabang (LPQ) → Bangkok Don Mueang (DMK)</div>
+        </div>
+        <div class="mt">Thai AirAsia FD 1031<br>1 h 25 · nonstop</div>
+      </div>
+      <div class="fl-foot">Round trips from about €170 in economy (Thai AirAsia, checked July 2026; prices move daily). An earlier Monday return exists, but it would cost you the slow last morning, as transfers run for the afternoon flight.</div>
+    </div>
   </div>
 </section>
 
@@ -806,7 +759,7 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
     <h2 class="h-big split-h">How to say yes.</h2>
     <div style="height: 30px"></div>
     <ol>
-      <li class="rv"><div><h3>Tell us you're in</h3><p>One line is enough. Write to <a class="mail-link" href="mailto:seeyouinlaos@gmail.com?subject=We%27re%20in!%20See%20you%20in%20Laos&body=Hello%20Haruthai%20%26%20Suthep%2C%0A%0AWe%27re%20in!%20See%20you%20in%20Laos.%0A%0ANames%3A%20">seeyouinlaos@gmail.com</a>, or message us on LINE (ID seeyouinlaos). This is your address for every question until you land in Laos.</p></div></li>
+      <li class="rv"><div><h3>Tell us you're in</h3><p>One line is enough. Write to <a class="mail-link" href="mailto:suthep.hrg@gmail.com?subject=We%27re%20in!%20See%20you%20in%20Laos&body=Hello%20Haruthai%20%26%20Suthep%2C%0A%0AWe%27re%20in!%20See%20you%20in%20Laos.%0A%0ANames%3A%20">suthep.hrg@gmail.com</a>, or message us on LINE (ID seeyouinlaos). This is your address for every question until you land in Laos.</p></div></li>
       <li class="rv"><div><h3>Wait for the green light</h3><p>We confirm the hotel first; then you book your own flight for the best price and flexibility. You'll hear from us the moment it's safe to book.</p></div></li>
       <li class="rv"><div><h3>Send us your flight number</h3><p>Reply to the same email with your booking number. That locks in your room, your transfers, and your seat at every table.</p></div></li>
       <li class="rv"><div><h3>Enjoy the ride</h3><p>From the moment you land, you're our guest: vans, rooms, dinners and every transition are taken care of.</p></div></li>
@@ -841,11 +794,11 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
 <!-- FOOTER -->
 <footer id="rsvp" style="padding-top: 60px">
   <div class="ask split-h">See you <em>in Laos?</em></div>
-  <a class="cta rv" href="mailto:seeyouinlaos@gmail.com?subject=We%27re%20in!%20See%20you%20in%20Laos&body=Hello%20Haruthai%20%26%20Suthep%2C%0A%0AWe%27re%20in!%20See%20you%20in%20Laos.%0A%0ANames%3A%20">tell us you're in</a>
+  <a class="cta rv" href="mailto:suthep.hrg@gmail.com?subject=We%27re%20in!%20See%20you%20in%20Laos&body=Hello%20Haruthai%20%26%20Suthep%2C%0A%0AWe%27re%20in!%20See%20you%20in%20Laos.%0A%0ANames%3A%20">tell us you're in</a>
   <div class="cta-hint rv">One email is all it takes, and it opens ready to send.</div>
   <div class="mark rv">see you in laos<span class="dot">.</span></div>
   <div class="foot-contact rv">
-    <div><span class="fc-label">Contact</span><a href="mailto:seeyouinlaos@gmail.com">seeyouinlaos@gmail.com</a> · LINE seeyouinlaos</div>
+    <div><span class="fc-label">Contact</span><a href="mailto:suthep.hrg@gmail.com">suthep.hrg@gmail.com</a> · LINE seeyouinlaos</div>
   </div>
   <div class="fine">Haruthai &amp; Suthep · Sunday, 28 February 2027 · Luang Prabang, Laos<br>Draft v2 · internal preview · not for distribution</div>
 </footer>
