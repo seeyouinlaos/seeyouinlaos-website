@@ -1,0 +1,12 @@
+{
+  "name": "seeyouinlaos-flight-tracker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "See You In Laos wedding website — Flight Tracker Travel Service (serverless).",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@netlify/blobs": "^8.1.0"
+  }
+}

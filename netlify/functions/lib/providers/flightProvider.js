@@ -1,0 +1,90 @@
+'use strict';
+/**
+ * Provider abstraction for the See You In Laos Flight Tracker.
+ *
+ * The rest of the application NEVER talks to an airline/GDS API directly.
+ * It talks to the Travel Service, which talks to ONE FlightProvider adapter.
+ * Swapping the provider (or adding a second one) means writing a new adapter that
+ * implements this interface — nothing else in the app changes.
+ *
+ * All shapes below are provider-neutral. Adapters must map their raw responses
+ * onto these types so the UI/business logic never sees provider-specific fields.
+ *
+ * @typedef {{ amount:number, currency:string }} Money
+ * @typedef {{ iataCode:string, at:string }} Endpoint   // at = ISO datetime
+ * @typedef {{ from:Endpoint, to:Endpoint, carrier:string, carrierName?:string,
+ *             flightNumber:string, stops:number, durationMinutes:number }} Leg
+ * @typedef {{ id:string, provider:string, price:Money, cabin:string,
+ *             bagsIncluded:(number|null), outbound:Leg, inbound:(Leg|null) }} FlightOffer
+ * @typedef {{ departureDate:string, returnDate:(string|null), price:Money }} CheapestDate
+ * @typedef {{ currency:string, min:number, q1:number, median:number, q3:number, max:number }} PriceMetrics
+ * @typedef {{ origin:string, destination:string, departureDate:string,
+ *             returnDate:(string|null), adults:number, cabin:string,
+ *             maxStops:(number|null), nonStop:boolean, currency:string,
+ *             departureRange?:string, durationDays?:string }} SearchQuery
+ */
+
+/**
+ * Abstract base. Adapters extend this. The Travel Service only ever calls
+ * these four members — it knows nothing about the concrete provider, tokens, etc.
+ */
+class FlightProvider {
+  /** @returns {string} stable provider id, e.g. "duffel" */
+  get name() { throw new Error('provider.name not implemented'); }
+
+  /** @returns {boolean} true only when credentials are present and usable */
+  get isConfigured() { return false; }
+
+  /**
+   * OPTIONAL native flexible-date landscape (cheapest round-trip per date pair).
+   * Return null when the provider has no cheapest-date endpoint (e.g. Duffel);
+   * the Travel Service then builds the landscape itself by enumerating date pairs
+   * and calling searchOffers — so flexible-date search is provider-independent.
+   * @param {SearchQuery} _q
+   * @returns {Promise<CheapestDate[]|null>}
+   */
+  async cheapestDates(_q) { return null; }
+
+  /**
+   * Full priced offers for one specific date pair (fares, carriers, bags, cabin, stops).
+   * @param {SearchQuery} _q
+   * @returns {Promise<FlightOffer[]>}
+   */
+  async searchOffers(_q) { throw new Error('searchOffers not implemented'); }
+
+  /**
+   * Historical price benchmark for a route/date (min..max quartiles), or null if unsupported.
+   * @param {SearchQuery} _q
+   * @returns {Promise<PriceMetrics|null>}
+   */
+  async priceAnalysis(_q) { return null; }
+}
+
+/* ---- helpers shared by adapters ---- */
+
+/** ISO-8601 duration ("PT14H30M") -> minutes. */
+function isoDurationToMinutes(s) {
+  const m = /PT(?:(\d+)H)?(?:(\d+)M)?/.exec(s || '');
+  return m ? ((+m[1] || 0) * 60 + (+m[2] || 0)) : 0;
+}
+
+/**
+ * Registry: pick the configured provider from environment.
+ * PROVIDER selects the adapter (default "duffel"). Adding another provider is one
+ * new case here plus its adapter file — the Travel Service and UI are untouched.
+ * @param {Record<string,string|undefined>} env
+ * @returns {FlightProvider}
+ */
+function getProvider(env) {
+  const which = (env.PROVIDER || 'duffel').toLowerCase();
+  switch (which) {
+    case 'duffel': {
+      const { DuffelAdapter } = require('./duffelAdapter');
+      return new DuffelAdapter(env);
+    }
+    default:
+      throw new Error(`Unknown PROVIDER "${which}"`);
+  }
+}
+
+module.exports = { FlightProvider, getProvider, isoDurationToMinutes };

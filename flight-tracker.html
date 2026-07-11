@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flight Tracker · See You In Laos</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%232B2823'/%3E%3Ccircle cx='16' cy='16' r='5' fill='%23B33A3F'/%3E%3C/svg%3E">
+<style>
+@font-face { font-family: 'PP Editorial Old'; src: url('PPEditorialOld-Ultralight.otf') format('opentype'); font-weight: 200; font-style: normal; font-display: swap; }
+@font-face { font-family: 'PP Editorial Old'; src: url('PPEditorialOld-Regular.otf') format('opentype'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'PP Editorial Old'; src: url('PPEditorialOld-Italic.otf') format('opentype'); font-weight: 400; font-style: italic; font-display: swap; }
+
+:root{
+  --ivory:#F2ECE1; --ink:#211F1C; --ink-s:#2B2823; --blush:#EAD9D4;
+  --rose:#A8837D; --cherry:#74070E; --cherry-photo:#B33A3F;
+  --card:#FBF8F2; --line:rgba(168,131,125,.28); --line-strong:rgba(168,131,125,.5);
+  --serif:'PP Editorial Old', Georgia, 'Times New Roman', serif;
+  --sans:system-ui, -apple-system, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  --good:#2f6f4f; --warn:#9a6b1e;
+}
+*{ box-sizing:border-box; margin:0; padding:0; }
+html,body{ background:var(--ivory); color:var(--ink); font-family:var(--sans); -webkit-font-smoothing:antialiased; }
+body{ line-height:1.5; }
+a{ color:var(--cherry); text-decoration:none; }
+button{ font-family:inherit; cursor:pointer; }
+.eyebrow{ font-size:10.5px; letter-spacing:.22em; text-transform:uppercase; color:var(--rose); }
+
+.topbar{ display:flex; align-items:baseline; justify-content:space-between; gap:16px;
+  padding:22px clamp(18px,4vw,46px); border-bottom:1px solid var(--line); flex-wrap:wrap; }
+.brand{ font-family:var(--serif); font-weight:400; font-size:22px; letter-spacing:.01em; }
+.brand .dot{ color:var(--cherry-photo); }
+.brand small{ display:block; font-family:var(--sans); font-size:10.5px; letter-spacing:.2em; text-transform:uppercase; color:var(--rose); margin-top:3px; }
+.topbar .back{ font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--rose); }
+.topbar .back:hover{ color:var(--cherry); }
+
+.wrap{ display:grid; grid-template-columns:300px 1fr; gap:0; min-height:calc(100vh - 70px); }
+.side{ border-right:1px solid var(--line); padding:26px clamp(16px,2vw,24px); }
+.main{ padding:30px clamp(18px,4vw,46px) 80px; min-width:0; }
+@media (max-width:860px){ .wrap{ grid-template-columns:1fr; } .side{ border-right:none; border-bottom:1px solid var(--line); } }
+
+.side h2{ font-family:var(--serif); font-weight:200; font-size:26px; margin:6px 0 18px; }
+.trip-item{ width:100%; text-align:left; background:var(--card); border:1px solid var(--line);
+  border-radius:2px; padding:14px 15px; margin-bottom:10px; display:block; transition:border-color .15s, background .15s; }
+.trip-item:hover{ border-color:var(--rose); }
+.trip-item.active{ border-color:var(--cherry); background:#fff; }
+.trip-item .r{ display:flex; justify-content:space-between; align-items:baseline; gap:10px; }
+.trip-item .nm{ font-family:var(--serif); font-weight:400; font-size:17px; }
+.trip-item .rt{ font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--rose); margin-top:3px; }
+.trip-item .pr{ font-family:var(--serif); font-weight:200; font-size:20px; white-space:nowrap; }
+.trip-item .tr{ font-size:11px; margin-top:2px; text-align:right; color:var(--rose); }
+.tr.fall{ color:var(--good); } .tr.rise{ color:var(--cherry); }
+
+.btn{ display:inline-flex; align-items:center; gap:8px; border:1px solid var(--ink); background:transparent;
+  color:var(--ink); padding:11px 18px; font-size:11px; letter-spacing:.18em; text-transform:uppercase; border-radius:2px;
+  transition:background .15s, color .15s, border-color .15s; }
+.btn:hover{ background:var(--ink); color:var(--ivory); }
+.btn.primary{ background:var(--cherry); border-color:var(--cherry); color:#fff; }
+.btn.primary:hover{ background:#5c060b; }
+.btn.small{ padding:8px 13px; font-size:10px; }
+.btn.ghost{ border-color:var(--line-strong); color:var(--rose); }
+.btn.ghost:hover{ background:var(--blush); color:var(--ink); border-color:var(--rose); }
+.btn:disabled{ opacity:.5; cursor:default; }
+.side .btn{ width:100%; justify-content:center; margin-top:8px; }
+
+.detail-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap; }
+.detail-head h1{ font-family:var(--serif); font-weight:200; font-size:clamp(30px,4vw,46px); line-height:1.05; }
+.detail-head .sub{ font-size:12.5px; letter-spacing:.06em; color:var(--rose); margin-top:8px; text-transform:uppercase; }
+.head-actions{ display:flex; gap:10px; flex-wrap:wrap; }
+
+.notice{ margin-top:22px; border:1px solid var(--line-strong); border-radius:2px; padding:18px 20px; background:var(--card); }
+.notice.warn{ border-color:var(--warn); background:rgba(154,107,30,.06); }
+.notice.info{ border-color:var(--rose); }
+.notice h4{ font-family:var(--serif); font-weight:400; font-size:19px; margin-bottom:8px; }
+.notice p{ font-size:13.5px; color:var(--ink); opacity:.9; }
+.notice code{ font-family:ui-monospace, Menlo, monospace; font-size:12px; background:rgba(168,131,125,.16); padding:2px 6px; border-radius:3px; }
+
+.banner{ margin-top:22px; border:1px solid var(--cherry); border-radius:2px; padding:14px 18px; display:flex;
+  align-items:center; gap:12px; background:rgba(179,58,63,.06); flex-wrap:wrap; }
+.banner.ok{ border-color:var(--good); background:rgba(47,111,79,.07); }
+.banner .big{ font-family:var(--serif); font-weight:200; font-size:22px; }
+.banner .t{ font-size:13px; }
+.bench{ margin-left:auto; font-size:11px; letter-spacing:.1em; text-transform:uppercase; padding:5px 10px; border-radius:2px; border:1px solid var(--line-strong); color:var(--rose); }
+.bench.low{ color:var(--good); border-color:var(--good); } .bench.high{ color:var(--cherry); border-color:var(--cherry); }
+
+.budget{ margin-top:16px; }
+.budget .lab{ display:flex; justify-content:space-between; font-size:11.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--rose); margin-bottom:6px; }
+.bar{ height:8px; background:var(--blush); border-radius:20px; overflow:hidden; }
+.bar > span{ display:block; height:100%; background:var(--cherry-photo); border-radius:20px; transition:width .4s; }
+.bar > span.over{ background:var(--cherry); }
+
+.tiles{ margin-top:26px; display:grid; grid-template-columns:repeat(6,1fr); gap:12px; }
+@media (max-width:1100px){ .tiles{ grid-template-columns:repeat(3,1fr); } }
+@media (max-width:520px){ .tiles{ grid-template-columns:repeat(2,1fr); } }
+.tile{ background:var(--card); border:1px solid var(--line); border-radius:2px; padding:15px 14px; }
+.tile .k{ font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--rose); }
+.tile .v{ font-family:var(--serif); font-weight:200; font-size:clamp(24px,2.4vw,30px); line-height:1.1; margin-top:8px; }
+.tile.key{ background:#fff; border-color:var(--cherry); } .tile.key .v{ color:var(--cherry); }
+.tile .d{ font-size:11px; margin-top:4px; color:var(--rose); }
+.tile .d.fall{ color:var(--good); } .tile .d.rise{ color:var(--cherry); }
+
+.section{ margin-top:40px; }
+.section > h3{ font-family:var(--serif); font-weight:200; font-size:24px; margin-bottom:4px; }
+.section > .lead{ font-size:13px; color:var(--rose); margin-bottom:18px; }
+
+.chart-card{ background:var(--card); border:1px solid var(--line); border-radius:2px; padding:20px 18px 12px; }
+.chart-wrap{ width:100%; overflow-x:auto; }
+svg.chart{ display:block; width:100%; height:220px; }
+.chart .grid-line{ stroke:var(--line); stroke-width:1; }
+.chart .price-line{ fill:none; stroke:var(--cherry-photo); stroke-width:2; }
+.chart .price-area{ fill:rgba(179,58,63,.10); stroke:none; }
+.chart .dot{ fill:var(--cherry); }
+.chart .lbl{ font-family:var(--sans); font-size:10px; fill:var(--rose); }
+.chart .lowest{ stroke:var(--good); stroke-dasharray:4 4; stroke-width:1; }
+
+.tbl-wrap{ overflow-x:auto; border:1px solid var(--line); border-radius:2px; }
+table{ width:100%; border-collapse:collapse; font-size:14px; min-width:420px; }
+th,td{ text-align:left; padding:13px 16px; border-bottom:1px solid var(--line); white-space:nowrap; }
+th{ font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--rose); font-weight:400; }
+tbody tr:last-child td{ border-bottom:none; }
+tbody tr.best{ background:rgba(179,58,63,.08); }
+td.price{ font-family:var(--serif); font-weight:400; font-size:17px; }
+tr.best td.price{ color:var(--cherry); }
+.star{ color:var(--cherry-photo); }
+.len{ color:var(--rose); font-size:12.5px; }
+@media (max-width:520px){ table{ min-width:0; font-size:13px; } th,td{ padding:12px 10px; } td.price{ font-size:15px; }
+  th:nth-child(3), td:nth-child(3){ padding-left:4px; padding-right:4px; } }
+
+.itin{ background:var(--card); border:1px solid var(--line); border-radius:2px; padding:20px; display:grid; gap:16px; }
+.itin .leg{ display:grid; grid-template-columns:70px 1fr; gap:14px; align-items:center; }
+.itin .leg + .leg{ border-top:1px solid var(--line); padding-top:16px; }
+.itin .dir{ font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--rose); }
+.itin .route{ font-family:var(--serif); font-size:20px; }
+.itin .meta{ font-size:12.5px; color:var(--rose); margin-top:3px; }
+.itin .foot{ display:flex; gap:14px; flex-wrap:wrap; font-size:12px; color:var(--rose); border-top:1px solid var(--line); padding-top:14px; }
+.itin .foot b{ color:var(--ink); font-weight:600; }
+
+.editor{ margin-top:14px; background:var(--card); border:1px solid var(--line); border-radius:2px; padding:22px; }
+.editor.hidden{ display:none; }
+.grid-form{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:16px 18px; }
+.field label{ display:block; font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--rose); margin-bottom:6px; }
+.field input, .field select{ width:100%; padding:10px 12px; border:1px solid var(--line-strong); border-radius:2px;
+  background:#fff; color:var(--ink); font-family:var(--sans); font-size:14px; }
+.field input:focus, .field select:focus{ outline:none; border-color:var(--cherry); }
+.editor .actions{ margin-top:20px; display:flex; gap:10px; flex-wrap:wrap; }
+.editor h4{ font-family:var(--serif); font-weight:400; font-size:18px; margin-bottom:16px; }
+
+.footnote{ margin-top:46px; padding-top:20px; border-top:1px solid var(--line); font-size:12.5px; color:var(--rose); line-height:1.7; max-width:820px; }
+.footnote strong{ color:var(--ink); font-weight:600; }
+.empty{ padding:40px 4px; color:var(--rose); font-size:14px; }
+.spin{ display:inline-block; width:13px; height:13px; border:2px solid var(--rose); border-top-color:transparent; border-radius:50%; animation:sp .7s linear infinite; vertical-align:-2px; margin-right:8px; }
+@keyframes sp{ to{ transform:rotate(360deg); } }
+.hide{ display:none !important; }
+/* accessibility: visible keyboard focus + honour reduced motion */
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible{ outline:2px solid var(--cherry); outline-offset:2px; }
+@media (prefers-reduced-motion: reduce){ .spin{ animation:none; } *{ transition:none !important; } }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">see you in laos<span class="dot">.</span><small>Flight Tracker · a wedding website tool</small></div>
+  <a class="back" href="index.html">← Back to the website</a>
+</div>
+
+<div class="wrap">
+  <aside class="side">
+    <div class="eyebrow">Your trips</div>
+    <h2>Flight portfolio</h2>
+    <div id="tripList"></div>
+    <button type="button" class="btn" id="addTrip">＋ New trip</button>
+    <button type="button" class="btn ghost small" id="clearLocal" style="margin-top:14px">Reset saved trips</button>
+  </aside>
+
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+"use strict";
+/* ============================================================================
+   See You In Laos — Flight Tracker (Wedding Website feature)
+
+   PRODUCTION ARCHITECTURE — no simulated prices anywhere in this file.
+      UI (this page) ─▶ Travel Service (/.netlify/functions/travel)
+                        ─▶ Provider Adapter (Duffel) ─▶ Duffel API
+   The browser never holds an API key and never calls a flight API directly.
+   Fares, carriers, flight numbers, times, baggage and cabins are REAL, supplied
+   by the provider through the Travel Service. Until the Travel Service is
+   reachable and a provider is configured, the UI shows an honest setup state and
+   NO numbers — it does not invent data.
+   ============================================================================ */
+
+const API = '/.netlify/functions/travel';
+const STORE_KEY = 'svil_flight_tracker_v2';
+const $ = (s, r=document) => r.querySelector(s);
+const DAY = 86400000;
+
+/* ---------- Travel Service client (the only network boundary) ---------- */
+const travel = {
+  async call(action, payload = {}) {
+    const res = await fetch(API, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action, ...payload }),
+    });
+    return res.json();
+  },
+  status()               { return this.call('status'); },
+  cheapestDates(query)   { return this.call('cheapestDates', { query }); },
+  search(query)          { return this.call('search', { query }); },
+  priceAnalysis(query)   { return this.call('priceAnalysis', { query }); },
+  saveTrip(trip)         { return this.call('saveTrip', { trip }); },
+};
+
+/* ---------- money / date helpers ---------- */
+const iso = d => d.toISOString().slice(0,10);
+const parse = s => { const [y,m,dd]=s.split('-').map(Number); return new Date(Date.UTC(y,m-1,dd)); };
+const addDays = (s,n) => iso(new Date(parse(s).getTime()+n*DAY));
+const nights = (a,b) => Math.round((parse(b)-parse(a))/DAY);
+const todayISO = () => iso(new Date());
+const fmtDay = s => parse(s).toLocaleDateString('en-GB',{day:'2-digit',month:'short',timeZone:'UTC'});
+const money = (m) => m ? new Intl.NumberFormat('de-DE',{style:'currency',currency:m.currency||'EUR',maximumFractionDigits:0}).format(m.amount) : '—';
+const fmtTime = at => { try { return new Date(at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}); } catch { return ''; } };
+const fmtDur = min => `${Math.floor(min/60)}h ${String(min%60).padStart(2,'0')}m`;
+
+/* ---------- strategy → Travel Service query ---------- */
+function tripQuery(trip){
+  const flex = Number(trip.flexDays)||0;
+  return {
+    origin: trip.origin, destination: trip.destination,
+    departureDate: trip.departure, returnDate: trip.return,
+    departureRange: flex ? `${addDays(trip.departure,-flex)},${addDays(trip.departure,flex)}` : trip.departure,
+    durationDays: `${trip.lenMin||1},${trip.lenMax||30}`,
+    lenMin: trip.lenMin||1, lenMax: trip.lenMax||30,   // Travel Service applies the nights rule authoritatively
+    adults: 1, cabin: trip.cabin, maxStops: trip.maxStops,
+    nonStop: trip.maxStops===0, currency: trip.currency||'EUR',
+  };
+}
+
+/* ---------- derivations from REAL tracked history ---------- */
+function metrics(trip){
+  const h = trip.history||[];
+  if(!h.length) return null;
+  const prices = h.map(x=>x.price);
+  const today = h[h.length-1];
+  const yesterday = h.length>1 ? h[h.length-2].price : null;
+  const lowest = Math.min(...prices);
+  const avg = prices.reduce((a,b)=>a+b,0)/prices.length;
+  const tail = prices.slice(-3), prev = prices.slice(-6,-3);
+  const a = tail.reduce((x,y)=>x+y,0)/Math.max(1,tail.length);
+  const p = prev.length ? prev.reduce((x,y)=>x+y,0)/prev.length : a;
+  const trend = a < p-4 ? 'fall' : a > p+4 ? 'rise' : 'flat';
+  return { today, yesterday, lowest, avg, trend, currency: today.currency };
+}
+
+/* ---------- local store (strategies + REAL fetched observations) ---------- */
+let state = { trips:[], selected:null, backend:{ reachable:false, configured:false, provider:'', checked:false } };
+function save(){ localStorage.setItem(STORE_KEY, JSON.stringify({ trips:state.trips, selected:state.selected })); }
+function load(){
+  try{ const raw = JSON.parse(localStorage.getItem(STORE_KEY)); if(raw&&raw.trips){ state.trips=raw.trips; state.selected=raw.selected; } }catch(e){}
+  if(!state.trips.length) seedStrategy();
+  if(!state.selected || !state.trips.find(t=>t.id===state.selected)) state.selected = state.trips[0]?.id || null;
+}
+function seedStrategy(){
+  // A STRATEGY only (no prices, no history). Prices come from the Travel Service.
+  state.trips = [{
+    id:'wedding', name:'Wedding Trip', origin:'HAM', destination:'BKK',
+    cabin:'Economy', maxStops:1, bags:1,
+    departure:'2027-02-21', return:'2027-03-10', flexDays:3, lenMin:16, lenMax:18,
+    maxBudget:750, notifyBelow:680, currency:'EUR',
+    history:[], lastResult:null, itinerary:null, benchmark:null, alertsEnabled:false,
+  }];
+  state.selected='wedding';
+}
+function newTrip(){
+  const id='t'+Date.now();
+  state.trips.push({ id, name:'New trip', origin:'HAM', destination:'BKK', cabin:'Economy', maxStops:1, bags:1,
+    departure:'2027-02-21', return:'2027-03-10', flexDays:3, lenMin:14, lenMax:21, maxBudget:800, notifyBelow:700,
+    currency:'EUR', history:[], lastResult:null, itinerary:null, benchmark:null, alertsEnabled:false });
+  state.selected=id; save(); render(); openEditor();
+}
+
+/* ============================================================================
+   ACTIONS (all real network calls; graceful, honest failure states)
+   ============================================================================ */
+async function refreshBackend(){
+  try{
+    const s = await travel.status();
+    state.backend = { reachable:true, configured:!!s.configured, provider:s.provider||'', checked:true };
+  }catch(e){
+    state.backend = { reachable:false, configured:false, provider:'', checked:true };
+  }
+}
+async function checkNow(trip){
+  const btn = $('#checkNow'); if(btn){ btn.disabled=true; btn.innerHTML='<span class="spin"></span>Checking'; }
+  try{
+    const res = await travel.cheapestDates(tripQuery(trip));
+    if(res.status==='not_configured'){ state.backend.configured=false; render(); return; }
+    if(res.status!=='ok'){
+      trip.error = res.code===429
+        ? 'The provider is rate-limiting requests right now. Please try again in a moment.'
+        : (res.message || (res.errors&&res.errors.join('; ')) || 'request failed');
+      render(); return;
+    }
+    trip.error = null;
+    const combos = res.data || [];   // already valid + cheapest-first, with nights, from the Travel Service
+    trip.lastResult = combos;
+    const best = combos[0];
+    if(best){
+      // append a REAL observation for today (one per day)
+      trip.history = (trip.history||[]).filter(h=>h.date!==todayISO());
+      trip.history.push({ date:todayISO(), price:best.price.amount, currency:best.price.currency, departureDate:best.departureDate, returnDate:best.returnDate });
+      // enrich: real itinerary for the winning pair + historical benchmark (best-effort)
+      await Promise.all([
+        travel.search({ ...tripQuery(trip), departureDate:best.departureDate, returnDate:best.returnDate })
+          .then(r => { trip.itinerary = (r.status==='ok' && r.data && r.data[0]) ? r.data[0] : null; }).catch(()=>{}),
+        travel.priceAnalysis({ ...tripQuery(trip), departureDate:best.departureDate })
+          .then(r => { trip.benchmark = (r.status==='ok') ? r.data : null; }).catch(()=>{}),
+      ]);
+    }
+    save();
+  }catch(e){
+    state.backend.reachable=false;
+  }finally{ render(); }
+}
+async function enableAlerts(trip){
+  const btn=$('#alertBtn'); if(btn){ btn.disabled=true; btn.textContent='Saving…'; }
+  try{
+    const r = await travel.saveTrip(trip);
+    trip.alertsEnabled = r.status==='ok';
+  }catch(e){ trip.alertsEnabled=false; }
+  save(); render();
+}
+
+/* ============================================================================
+   RENDER
+   ============================================================================ */
+function render(){ renderSidebar(); renderDetail(); }
+function trendMeta(tr){ return tr==='fall'?{cls:'fall',arrow:'↘',word:'Falling'}:tr==='rise'?{cls:'rise',arrow:'↗',word:'Rising'}:{cls:'',arrow:'→',word:'Stable'}; }
+
+function renderSidebar(){
+  const el=$('#tripList'); el.innerHTML='';
+  state.trips.forEach(t=>{
+    const m=metrics(t); const tm=m?trendMeta(m.trend):trendMeta('flat');
+    const b=document.createElement('button');
+    b.type='button';
+    b.setAttribute('aria-pressed', String(t.id===state.selected));
+    b.className='trip-item'+(t.id===state.selected?' active':'');
+    b.innerHTML=`<div class="r">
+      <div><div class="nm">${esc(t.name)}</div><div class="rt">${esc(t.origin)} → ${esc(t.destination)}</div></div>
+      <div><div class="pr">${m?money(m.today):'—'}</div><div class="tr ${tm.cls}">${m?tm.arrow+' '+tm.word:'not checked'}</div></div>
+    </div>`;
+    b.onclick=()=>{ state.selected=t.id; save(); closeEditor(); render(); };
+    el.appendChild(b);
+  });
+}
+
+function backendNotice(){
+  const b=state.backend;
+  if(!b.checked) return '';
+  if(!b.reachable) return `<div class="notice warn" role="status"><h4>Travel Service not reachable</h4>
+    <p>This page talks to a serverless Travel Service at <code>${API}</code>. It runs on Netlify (or <code>netlify dev</code> locally). Deploy the site with its functions to fetch live fares. No prices are shown until then — nothing here is simulated.</p></div>`;
+  if(!b.configured) return `<div class="notice info" role="status"><h4>Connect a flight provider to go live</h4>
+    <p>The Travel Service is running but no provider credentials are set. Add <code>DUFFEL_ACCESS_TOKEN</code> in the Netlify environment (provider: <b>${esc(b.provider||'duffel')}</b>). Then “Check live fares” returns real Duffel data through the same screen.</p></div>`;
+  return '';
+}
+
+function renderDetail(){
+  const main=$('#main');
+  const t=state.trips.find(x=>x.id===state.selected);
+  if(!t){ main.innerHTML=`<div class="empty">No trip selected. Create one to start tracking real fares.</div>`; return; }
+  const m=metrics(t);
+  const combos=t.lastResult||[];
+  const canQuery = state.backend.reachable && state.backend.configured;
+  const tm=m?trendMeta(m.trend):trendMeta('flat');
+  const belowAlert = m && m.today.price <= t.notifyBelow;
+  const overBudget = m && m.today.price > t.maxBudget;
+  const budgetPct = m ? Math.min(100, Math.round(m.today.price/t.maxBudget*100)) : 0;
+  const bench = t.benchmark;
+  const benchTag = bench && m ? benchmarkTag(m.today.price, bench) : '';
+
+  main.innerHTML = `
+    <div class="detail-head">
+      <div>
+        <div class="eyebrow">Tracking strategy</div>
+        <h1>${esc(t.name)}</h1>
+        <div class="sub">${esc(t.origin)} → ${esc(t.destination)} · ${esc(t.cabin)} · max ${t.maxStops} stop${t.maxStops==1?'':'s'} · ${t.bags} bag${t.bags==1?'':'s'} · ${fmtDay(t.departure)} → ${fmtDay(t.return)} · ±${t.flexDays}d · ${t.lenMin}–${t.lenMax} nights</div>
+      </div>
+      <div class="head-actions">
+        <button class="btn primary small" id="checkNow" ${canQuery?'':'disabled'}>Check live fares</button>
+        <button class="btn small" id="alertBtn" ${canQuery?'':'disabled'}>${t.alertsEnabled?'Alerts on ✓':'Enable daily alerts'}</button>
+        <button class="btn small" id="editBtn">Edit strategy</button>
+      </div>
+    </div>
+
+    ${backendNotice()}
+    ${t.error?`<div class="notice warn" role="alert"><h4>Provider request failed</h4><p>${esc(t.error)}</p></div>`:''}
+
+    ${ m ? `
+    <div class="banner ${belowAlert?'ok':''}" role="status" aria-live="polite">
+      <div class="big">${money(m.today)}</div>
+      <div class="t">${belowAlert?`Below your alert of ${money({amount:t.notifyBelow,currency:m.currency})} — best combination tracked.`:`Best tracked. Alert triggers below ${money({amount:t.notifyBelow,currency:m.currency})}.`}</div>
+      ${benchTag}
+    </div>
+    <div class="budget">
+      <div class="lab"><span>Best vs. max budget</span><span>${money(m.today)} / ${money({amount:t.maxBudget,currency:m.currency})}${overBudget?' · over budget':''}</span></div>
+      <div class="bar"><span class="${overBudget?'over':''}" style="width:${budgetPct}%"></span></div>
+    </div>
+    <div class="tiles">
+      <div class="tile key"><div class="k">Current best</div><div class="v">${money(m.today)}</div><div class="d">${fmtDay(m.today.departureDate)} → ${fmtDay(m.today.returnDate)}</div></div>
+      <div class="tile"><div class="k">Yesterday</div><div class="v">${m.yesterday!=null?money({amount:m.yesterday,currency:m.currency}):'—'}</div><div class="d">${m.yesterday!=null?(m.today.price<m.yesterday?'▼ '+money({amount:m.yesterday-m.today.price,currency:m.currency}):m.today.price>m.yesterday?'▲ '+money({amount:m.today.price-m.yesterday,currency:m.currency}):'no change'):'first check'}</div></div>
+      <div class="tile"><div class="k">Lowest tracked</div><div class="v">${money({amount:m.lowest,currency:m.currency})}</div><div class="d">${t.history.length} check${t.history.length==1?'':'s'}</div></div>
+      <div class="tile"><div class="k">Average</div><div class="v">${money({amount:m.avg,currency:m.currency})}</div><div class="d">tracked</div></div>
+      <div class="tile"><div class="k">Benchmark</div><div class="v">${bench&&bench.median!=null?money({amount:bench.median,currency:m.currency}):'—'}</div><div class="d">typical (median)</div></div>
+      <div class="tile"><div class="k">Trend</div><div class="v">${tm.arrow}</div><div class="d ${tm.cls}">${tm.word}</div></div>
+    </div>
+
+    <div class="section">
+      <h3>Price history</h3>
+      <div class="lead">Real best-price observations recorded each time fares are checked (client + daily server check).</div>
+      <div class="chart-card"><div class="chart-wrap">${chartSVG(t)}</div></div>
+    </div>
+
+    ${ t.itinerary ? `
+    <div class="section">
+      <h3>Best itinerary today</h3>
+      <div class="lead">Real flights for the winning date pair, from ${esc(t.itinerary.provider||'the provider')}.</div>
+      ${itinCard(t.itinerary)}
+    </div>` : '' }
+
+    <div class="section">
+      <h3>Best combinations</h3>
+      <div class="lead">Every date pair inside your flexibility, cheapest first. The star is today's winner.</div>
+      ${ combos.length ? `<div class="tbl-wrap"><table>
+        <thead><tr><th>Outbound</th><th>Return</th><th>Nights</th><th>Price</th></tr></thead>
+        <tbody>${combos.slice(0,8).map((c,i)=>`<tr class="${i===0?'best':''}">
+          <td>${fmtDay(c.departureDate)}</td><td>${fmtDay(c.returnDate)}</td>
+          <td class="len">${c.nights}</td>
+          <td class="price">${money(c.price)} ${i===0?'<span class="star">★</span>':''}</td></tr>`).join('')}</tbody>
+      </table></div>` : `<div class="empty">${canQuery?'No fares checked yet — hit “Check live fares”.':'Live fares appear here once the Travel Service and a provider are configured.'}</div>` }
+    </div>
+
+    ` : `<div class="section"><div class="empty">${canQuery?'No fares yet — hit “Check live fares” to load real prices for this strategy.':'This is your saved search strategy. Real prices load once the Travel Service + provider are configured.'}</div></div>` }
+
+    <div class="editor hidden" id="editor">
+      <h4>Search strategy</h4>
+      <div class="grid-form">
+        <div class="field"><label>Trip name</label><input id="f-name" value="${escA(t.name)}"></div>
+        <div class="field"><label>Origin (IATA)</label><input id="f-origin" value="${escA(t.origin)}" maxlength="3"></div>
+        <div class="field"><label>Destination (IATA)</label><input id="f-dest" value="${escA(t.destination)}" maxlength="3"></div>
+        <div class="field"><label>Cabin</label><select id="f-cabin">${['Economy','Premium','Business','First'].map(c=>`<option ${c===t.cabin?'selected':''}>${c}</option>`).join('')}</select></div>
+        <div class="field"><label>Max stops</label><select id="f-stops">${[0,1,2].map(s=>`<option value="${s}" ${s===t.maxStops?'selected':''}>${s}</option>`).join('')}</select></div>
+        <div class="field"><label>Checked bags</label><input id="f-bags" type="number" min="0" max="4" value="${t.bags}"></div>
+        <div class="field"><label>Departure</label><input id="f-dep" type="date" value="${t.departure}"></div>
+        <div class="field"><label>Return</label><input id="f-ret" type="date" value="${t.return}"></div>
+        <div class="field"><label>Flexible ± days</label><input id="f-flex" type="number" min="0" max="7" value="${t.flexDays}"></div>
+        <div class="field"><label>Min nights</label><input id="f-lmin" type="number" min="1" value="${t.lenMin}"></div>
+        <div class="field"><label>Max nights</label><input id="f-lmax" type="number" min="1" value="${t.lenMax}"></div>
+        <div class="field"><label>Currency</label><select id="f-cur">${['EUR','USD','GBP','THB'].map(c=>`<option ${c===(t.currency||'EUR')?'selected':''}>${c}</option>`).join('')}</select></div>
+        <div class="field"><label>Max budget</label><input id="f-budget" type="number" min="0" value="${t.maxBudget}"></div>
+        <div class="field"><label>Notify below</label><input id="f-notify" type="number" min="0" value="${t.notifyBelow}"></div>
+      </div>
+      <div class="actions">
+        <button class="btn primary small" id="saveEdit">Save strategy</button>
+        <button class="btn small" id="cancelEdit">Cancel</button>
+        <button class="btn ghost small" id="deleteTrip" style="margin-left:auto">Delete trip</button>
+      </div>
+    </div>
+
+    <div class="footnote">
+      <strong>How prices are sourced.</strong> This screen calls the site's own <strong>Travel Service</strong>
+      (<code>${API}</code>), which calls a flight provider (currently <b>Duffel</b>) through a
+      replaceable adapter. Fares, carriers, flight numbers, times, connections, baggage and cabin classes are
+      <strong>real provider data</strong>; the app owns the strategy, the “best combination” rule, price history,
+      alerts and the portfolio. Swapping providers (e.g. Duffel) means one new adapter — this screen is unchanged.
+      Going live requires provider API keys in the server environment; the browser never sees them.
+    </div>`;
+
+  $('#checkNow') && ($('#checkNow').onclick=()=>checkNow(t));
+  $('#alertBtn') && ($('#alertBtn').onclick=()=>enableAlerts(t));
+  $('#editBtn') && ($('#editBtn').onclick=openEditor);
+  $('#saveEdit') && ($('#saveEdit').onclick=()=>saveEditor(t));
+  $('#cancelEdit') && ($('#cancelEdit').onclick=closeEditor);
+  $('#deleteTrip') && ($('#deleteTrip').onclick=()=>deleteTrip(t));
+}
+
+function benchmarkTag(price, b){
+  if(b.min==null||b.max==null) return '';
+  if(price<=b.q1) return `<span class="bench low">Below typical</span>`;
+  if(price>=b.q3) return `<span class="bench high">Above typical</span>`;
+  return `<span class="bench">Around typical</span>`;
+}
+
+function itinCard(o){
+  const leg = (l,dir) => l?`<div class="leg">
+      <div class="dir">${dir}</div>
+      <div>
+        <div class="route">${esc(l.from.iataCode)} ${fmtTime(l.from.at)} → ${esc(l.to.iataCode)} ${fmtTime(l.to.at)}</div>
+        <div class="meta">${esc(l.carrierName||l.carrier)} · ${esc(l.flightNumber)} · ${l.stops===0?'nonstop':l.stops+' stop'+(l.stops>1?'s':'')} · ${fmtDur(l.durationMinutes)}</div>
+      </div></div>`:'';
+  return `<div class="itin">
+    ${leg(o.outbound,'Out')}
+    ${leg(o.inbound,'Return')}
+    <div class="foot">
+      <span><b>${money(o.price)}</b> total</span>
+      <span>Cabin: <b>${esc((o.cabin||'').replace('_',' ').toLowerCase())}</b></span>
+      <span>Checked bags: <b>${o.bagsIncluded==null?'see fare':o.bagsIncluded}</b></span>
+    </div></div>`;
+}
+
+function chartSVG(trip){
+  const h=trip.history||[];
+  if(h.length<2) return `<p class="empty" style="padding:8px 0">Not enough data yet — check fares over a few days to see the trend.</p>`;
+  const W=760,H=200,padL=52,padR=12,padT=14,padB=26;
+  const prices=h.map(x=>x.price); let min=Math.min(...prices),max=Math.max(...prices);
+  const span=Math.max(1,max-min); min-=span*0.15; max+=span*0.15;
+  const X=i=>padL+i*(W-padL-padR)/(h.length-1);
+  const Y=p=>padT+(1-(p-min)/(max-min))*(H-padT-padB);
+  const pts=h.map((d,i)=>[X(i),Y(d.price)]);
+  const line=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
+  const area=line+` L ${X(h.length-1).toFixed(1)} ${H-padB} L ${padL} ${H-padB} Z`;
+  const cur=h[h.length-1].currency||'EUR';
+  const fmt=v=>new Intl.NumberFormat('de-DE',{style:'currency',currency:cur,maximumFractionDigits:0}).format(v);
+  const grid=[0,.5,1].map(f=>{const yv=min+(max-min)*f;const y=Y(yv);return `<line class="grid-line" x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}"/><text class="lbl" x="6" y="${y+3}">${fmt(yv)}</text>`;}).join('');
+  const xl=h.map((d,i)=>(i%Math.ceil(h.length/6)===0||i===h.length-1)?`<text class="lbl" x="${X(i)}" y="${H-8}" text-anchor="middle">${fmtDay(d.date)}</text>`:'').join('');
+  const lowY=Y(Math.min(...prices));
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Price history">
+    ${grid}<line class="lowest" x1="${padL}" y1="${lowY}" x2="${W-padR}" y2="${lowY}"/>
+    <path class="price-area" d="${area}"/><path class="price-line" d="${line}"/>
+    <circle class="dot" cx="${pts[pts.length-1][0]}" cy="${pts[pts.length-1][1]}" r="4"/>${xl}</svg>`;
+}
+
+/* ---------- editor ---------- */
+function openEditor(){ const e=$('#editor'); if(e){ e.classList.remove('hidden'); e.scrollIntoView({behavior:'smooth',block:'nearest'}); } }
+function closeEditor(){ const e=$('#editor'); if(e) e.classList.add('hidden'); }
+function saveEditor(t){
+  t.name=$('#f-name').value.trim()||'Untitled trip';
+  t.origin=($('#f-origin').value.trim()||'HAM').toUpperCase();
+  t.destination=($('#f-dest').value.trim()||'BKK').toUpperCase();
+  t.cabin=$('#f-cabin').value; t.maxStops=Number($('#f-stops').value); t.bags=Number($('#f-bags').value)||0;
+  t.departure=$('#f-dep').value||t.departure; t.return=$('#f-ret').value||t.return;
+  t.flexDays=Number($('#f-flex').value)||0; t.lenMin=Number($('#f-lmin').value)||1; t.lenMax=Number($('#f-lmax').value)||9999;
+  t.currency=$('#f-cur').value; t.maxBudget=Number($('#f-budget').value)||0; t.notifyBelow=Number($('#f-notify').value)||0;
+  // strategy changed → previous fares no longer match; clear derived data (never fabricate)
+  t.lastResult=null; t.itinerary=null; t.benchmark=null; t.history=[]; t.alertsEnabled=false;
+  save(); closeEditor(); render();
+}
+function deleteTrip(t){
+  if(!confirm('Delete “'+t.name+'”? This removes its tracked history.')) return;
+  state.trips=state.trips.filter(x=>x.id!==t.id); state.selected=state.trips[0]?.id||null; save(); render();
+}
+
+/* ---------- misc ---------- */
+function esc(s){ return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function escA(s){ return esc(s); }
+
+$('#addTrip').onclick=newTrip;
+$('#clearLocal').onclick=()=>{ if(confirm('Reset saved trips to the default strategy? (Local only.)')){ localStorage.removeItem(STORE_KEY); state.trips=[]; state.selected=null; load(); render(); } };
+
+/* ---------- boot ---------- */
+load();
+render();
+refreshBackend().then(render);
+</script>
+</body>
+</html>

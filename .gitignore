@@ -1,0 +1,14 @@
+# dependencies (installed by Netlify at build time)
+node_modules/
+
+# local env with real secrets — never commit; use Netlify env vars
+.env
+.env.local
+
+# tooling / os
+.DS_Store
+.playwright-mcp/
+.netlify/
+
+# stray nested duplicate folder (has its own .git)
+seeyouinlaos-website/
