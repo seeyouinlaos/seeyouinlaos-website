@@ -21,6 +21,11 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     if (url.pathname === '/api/travel') return handleTravel(request, env);
+    // Any other /api/* path is a real 404 (never fall through to static assets).
+    if (url.pathname.startsWith('/api/')) {
+      return new Response(JSON.stringify({ status: 'error', message: 'not found' }),
+        { status: 404, headers: { 'Content-Type': 'application/json' } });
+    }
     // Everything else is a static asset (index.html, flight-tracker.html, images…).
     return env.ASSETS.fetch(request);
   },

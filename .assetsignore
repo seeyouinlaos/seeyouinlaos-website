@@ -1,8 +1,12 @@
 # Files in this directory that must NOT be served as public static assets.
-# (Worker source, config, docs, dependencies, tooling.)
+# (Worker source, config, docs, dependencies, tooling, tests.)
+.git
 src
+test
+dist
 node_modules
 .wrangler
+.dev.vars
 wrangler.jsonc
 package.json
 package-lock.json
