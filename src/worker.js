@@ -24,7 +24,7 @@ export default {
     // Any other /api/* path is a real 404 (never fall through to static assets).
     if (url.pathname.startsWith('/api/')) {
       return new Response(JSON.stringify({ status: 'error', message: 'not found' }),
-        { status: 404, headers: { 'Content-Type': 'application/json' } });
+        { status: 404, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
     }
     // Everything else is a static asset (index.html, flight-tracker.html, images…).
     return env.ASSETS.fetch(request);
@@ -46,6 +46,8 @@ async function handleTravel(request, env) {
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
     'Content-Type': 'application/json',
+    // Live fares are volatile — never let a browser or CDN cache API responses.
+    'Cache-Control': 'no-store',
   };
   if (request.method === 'OPTIONS') return new Response('', { status: 204, headers: cors });
 
