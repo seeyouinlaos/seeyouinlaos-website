@@ -180,7 +180,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
    See You In Laos — Flight Tracker (Wedding Website feature)
 
    PRODUCTION ARCHITECTURE — no simulated prices anywhere in this file.
-      UI (this page) ─▶ Travel Service (/.netlify/functions/travel)
+      UI (this page) ─▶ Travel Service (Cloudflare Worker at /api/travel)
                         ─▶ Provider Adapter (Duffel) ─▶ Duffel API
    The browser never holds an API key and never calls a flight API directly.
    Fares, carriers, flight numbers, times, baggage and cabins are REAL, supplied
@@ -189,7 +189,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
    NO numbers — it does not invent data.
    ============================================================================ */
 
-const API = '/.netlify/functions/travel';
+const API = '/api/travel';
 const STORE_KEY = 'svil_flight_tracker_v2';
 const $ = (s, r=document) => r.querySelector(s);
 const DAY = 86400000;
@@ -374,9 +374,9 @@ function backendNotice(){
   const b=state.backend;
   if(!b.checked) return '';
   if(!b.reachable) return `<div class="notice warn" role="status"><h4>Travel Service not reachable</h4>
-    <p>This page talks to a serverless Travel Service at <code>${API}</code>. It runs on Netlify (or <code>netlify dev</code> locally). Deploy the site with its functions to fetch live fares. No prices are shown until then — nothing here is simulated.</p></div>`;
+    <p>This page talks to a Cloudflare Worker at <code>${API}</code> (run <code>wrangler dev</code> locally, or deploy the Worker). Static file hosting alone will not answer this endpoint. No prices are shown until then — nothing here is simulated.</p></div>`;
   if(!b.configured) return `<div class="notice info" role="status"><h4>Connect a flight provider to go live</h4>
-    <p>The Travel Service is running but no provider credentials are set. Add <code>DUFFEL_ACCESS_TOKEN</code> in the Netlify environment (provider: <b>${esc(b.provider||'duffel')}</b>). Then “Check live fares” returns real Duffel data through the same screen.</p></div>`;
+    <p>The Travel Service is running but no provider credentials are set. Add the <code>DUFFEL_ACCESS_TOKEN</code> secret to the Worker (<code>wrangler secret put DUFFEL_ACCESS_TOKEN</code>, provider: <b>${esc(b.provider||'duffel')}</b>). Then “Check live fares” returns real Duffel data through the same screen.</p></div>`;
   return '';
 }
 

@@ -1,0 +1,41 @@
+{
+  // Cloudflare Worker for the See You In Laos wedding website + Flight Tracker.
+  // This makes the deployment a REAL Worker (not "static assets only"), so
+  // Secrets like DUFFEL_ACCESS_TOKEN can be attached.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "seeyouinlaos",
+  "main": "src/worker.js",
+  "compatibility_date": "2025-01-15",
+  "compatibility_flags": ["nodejs_compat"],
+
+  // Serve the static site through the Worker's ASSETS binding. The Worker handles
+  // /api/travel; everything else is served from this directory (see .assetsignore
+  // for what is excluded from public assets).
+  "assets": {
+    "directory": ".",
+    "binding": "ASSETS"
+  },
+
+  // KV namespace for server-side price tracking (trips + history snapshots).
+  // Create it once:  npx wrangler kv namespace create KV
+  // then paste the returned id below (and a preview_id for `wrangler dev`).
+  "kv_namespaces": [
+    { "binding": "KV", "id": "REPLACE_WITH_KV_NAMESPACE_ID" }
+  ],
+
+  // Daily price check + alerts (the real "checks every day" loop).
+  "triggers": {
+    "crons": ["0 6 * * *"]
+  },
+
+  // Non-secret vars. Secrets (DUFFEL_ACCESS_TOKEN) are set separately:
+  //   npx wrangler secret put DUFFEL_ACCESS_TOKEN
+  "vars": {
+    "PROVIDER": "duffel",
+    "DUFFEL_VERSION": "v2",
+    "SITE_ORIGIN": "https://seeyouinlaos.pages.dev",
+    "NOTIFY_CHANNEL": "log"
+  },
+
+  "observability": { "enabled": true }
+}

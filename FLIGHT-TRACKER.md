@@ -9,78 +9,93 @@ and can alert when a fare drops below a threshold.
 baggage and cabin classes come from a real provider (**Duffel**) through a
 replaceable adapter.
 
+## Platform
+
+Deployed as a **Cloudflare Worker with static assets** (Workers + Assets). One
+Worker both serves the static site (via the `ASSETS` binding) and runs the backend
+API + daily cron — which is what lets Cloudflare attach Secrets like
+`DUFFEL_ACCESS_TOKEN`. (A static-assets-only deployment cannot hold Secrets.)
+
 ## Architecture
 
 ```
 Browser UI (flight-tracker.html)         ← never holds an API token
-        │  POST /.netlify/functions/travel
+        │  POST /api/travel
         ▼
-Travel Service (netlify/functions/travel.js + lib/travelService.js)
+Cloudflare Worker (src/worker.js)
+        │  fetch()  → Travel Service (API)      scheduled() → daily cron
+        ▼
+Travel Service (src/lib/travelService.js)
         │  validates, normalizes, owns the "best combination" rule,
         │  and builds the flexible-date landscape from searchOffers
         ▼
-Provider Adapter (lib/providers/duffelAdapter.js  implements  flightProvider.js)
+Provider Adapter (src/lib/providers/duffelAdapter.js  implements  flightProvider.js)
         │  the ONLY provider-specific code — swappable behind the interface
         ▼
 Duffel Flight Offers API
 ```
 
 - **Business logic stays in the app / Travel Service.** The adapter only supplies flight data.
-- **Provider is swappable** via `PROVIDER` env + one new adapter file; the Travel
-  Service and UI are untouched.
-- **Flexible-date search is provider-independent.** Duffel has no "cheapest date"
-  endpoint, so the Travel Service enumerates candidate date pairs (bounded, rate-limit
-  friendly) and asks the adapter for the cheapest offer per pair. A provider that *does*
-  have a native cheapest-date endpoint can implement `cheapestDates()` and skip that.
-- **Daily checks + alerts:** `netlify/functions/travel-cron.js` runs on a schedule
-  (see `netlify.toml`), persists real snapshots (Netlify Blobs), and fires alerts
-  through the notifier seam.
+- **Provider is swappable** via `PROVIDER` var + one new adapter file; the Worker,
+  Travel Service and UI are untouched.
+- **Flexible-date search is provider-independent** (Travel Service enumerates date
+  pairs, bounded + concurrency-limited, and asks the adapter for the cheapest offer per pair).
+- **Daily checks + alerts:** the Worker's `scheduled()` handler runs on a Cron
+  Trigger (`wrangler.jsonc → triggers.crons`), persists real snapshots to **KV**,
+  and fires alerts through the notifier seam.
+- **Persistence:** Cloudflare **KV** (`env.KV`), no external DB.
 
 ## Files
 
 | File | Role |
 |---|---|
-| `flight-tracker.html` | UI. Calls the Travel Service only. Honest states when not configured. |
-| `netlify/functions/travel.js` | HTTP endpoint (status, cheapestDates, search, priceAnalysis, saveTrip, listTrips, history). |
-| `netlify/functions/travel-cron.js` | Scheduled price check + alert loop. |
-| `netlify/functions/lib/travelService.js` | Validation, normalization, best-combination rule, flexible-date enumeration. |
-| `netlify/functions/lib/providers/flightProvider.js` | Provider interface + normalized types + registry. |
-| `netlify/functions/lib/providers/duffelAdapter.js` | Duffel implementation (offer_requests + mapping). |
-| `netlify/functions/lib/store.js` | Persistence (Netlify Blobs, memory fallback). |
-| `netlify/functions/lib/notifier.js` | Alert delivery seam (log default; email seam). |
-| `netlify.toml`, `package.json`, `.env.example` | Config. |
+| `flight-tracker.html` | UI. Calls `/api/travel` only. Honest states when not configured. |
+| `src/worker.js` | Cloudflare Worker: `fetch` (API + static assets) + `scheduled` (cron). |
+| `src/lib/travelService.js` | Validation, normalization, best-combination rule, flexible-date enumeration. |
+| `src/lib/providers/flightProvider.js` | Provider interface + normalized types + registry. |
+| `src/lib/providers/duffelAdapter.js` | Duffel implementation (offer_requests + mapping). |
+| `src/lib/store.js` | Persistence — `createStore(env.KV)` (KV, memory fallback). |
+| `src/lib/notifier.js` | Alert delivery seam (log default; email seam). |
+| `wrangler.jsonc`, `.assetsignore`, `package.json`, `.env.example` | Config. |
 
 ## Go live (what's required)
 
-1. **Create a Duffel account** at <https://app.duffel.com>, then **Developer →
-   Access tokens** → create a token. Test tokens start `duffel_test_`, live tokens
-   `duffel_live_`. (Test mode is free; production is pay-as-you-go on bookings.)
-2. **Set environment variables** on the Netlify site (Site settings → Environment
-   variables) — see `.env.example`:
-   - `DUFFEL_ACCESS_TOKEN` — your token
-   - `DUFFEL_VERSION` — optional (defaults to `v2`)
-   - `PROVIDER=duffel`
-   The browser never sees these; only the Travel Service reads them.
-3. **Deploy to Netlify.** Netlify installs `@netlify/blobs`, serves the static site,
-   and runs the functions. The scheduled check runs per `netlify.toml`.
-4. Open `flight-tracker.html`, pick a strategy, **Check live fares** → real Duffel data.
+1. **Create a Duffel account** at <https://app.duffel.com> → **Developer → Access
+   tokens** → create a token (test starts `duffel_test_`, live `duffel_live_`).
+2. **Create a KV namespace** and paste its id into `wrangler.jsonc` → `kv_namespaces`:
+   ```
+   npx wrangler kv namespace create KV
+   ```
+3. **Set the Duffel token as a Worker Secret** (never committed):
+   ```
+   npx wrangler secret put DUFFEL_ACCESS_TOKEN
+   ```
+   Non-secret vars (`PROVIDER`, `DUFFEL_VERSION`, `SITE_ORIGIN`, `NOTIFY_CHANNEL`)
+   are in `wrangler.jsonc → vars`.
+4. **Deploy the Worker:**
+   ```
+   npx wrangler deploy
+   ```
+   This uploads the Worker + static assets and registers the Cron Trigger.
+5. Open the site, go to the Flight Tracker, pick a strategy, **Check live fares** →
+   real Duffel data.
 
 ### Local development
-- `netlify dev` runs the functions locally (needs Netlify CLI + `npm install`).
-- Plain `python3 -m http.server` serves the static UI but **not** the functions;
-  the UI then correctly shows "Travel Service not reachable" and no prices — by design.
+- `npx wrangler dev` runs the Worker (API + assets) locally with your vars/secrets.
+- A plain static file server serves the UI but **not** `/api/travel`; the UI then
+  correctly shows "Travel Service not reachable" and no prices — by design.
 
 ## Switching provider
-Add `lib/providers/<name>Adapter.js` implementing `FlightProvider`, register it in
-`getProvider()`, set `PROVIDER=<name>`. The UI and Travel Service are untouched.
-The normalized `FlightOffer` model is what the app consumes, regardless of provider.
+Add `src/lib/providers/<name>Adapter.js` implementing `FlightProvider`, register it
+in `getProvider()`, set `PROVIDER=<name>`. The Worker, Travel Service and UI are
+untouched. The normalized `FlightOffer` model is what the app consumes.
 
 ## Future: hotels & transfers
 Same pattern — add a `HotelProvider` interface + adapter behind the Travel Service.
 
 ## Notes on data ownership
-- **Historical price tracking is ours:** every check writes a real snapshot; the
-  chart/lowest/average/trend are computed from those.
+- **Historical price tracking is ours:** every check writes a real snapshot to KV;
+  the chart/lowest/average/trend are computed from those.
 - **Alerts** are computed from real fares; delivery is a pluggable channel
   (`log` by default; wire an email provider to enable email).
 - **Rate limits:** the flexible-date search is capped and concurrency-limited; a

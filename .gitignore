@@ -1,14 +1,17 @@
-# dependencies (installed by Netlify at build time)
+# dependencies
 node_modules/
 
-# local env with real secrets — never commit; use Netlify env vars
+# local env with real secrets — never commit; use `wrangler secret put`
 .env
 .env.local
+
+# cloudflare / wrangler
+.wrangler/
+.dev.vars
 
 # tooling / os
 .DS_Store
 .playwright-mcp/
-.netlify/
 
 # stray nested duplicate folder (has its own .git)
 seeyouinlaos-website/

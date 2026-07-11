@@ -1,0 +1,16 @@
+# Files in this directory that must NOT be served as public static assets.
+# (Worker source, config, docs, dependencies, tooling.)
+src
+node_modules
+.wrangler
+wrangler.jsonc
+package.json
+package-lock.json
+.env
+.env.example
+.gitignore
+.assetsignore
+*.md
+.DS_Store
+.playwright-mcp
+seeyouinlaos-website

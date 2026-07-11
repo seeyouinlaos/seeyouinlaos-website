@@ -12,7 +12,7 @@
  *   DUFFEL_ACCESS_TOKEN   (test token starts "duffel_test_", live "duffel_live_")
  *   DUFFEL_VERSION        (optional, defaults to the pinned version below)
  *
- * Uses global fetch (Node 18+, which Netlify Functions run on). No npm deps.
+ * Uses global fetch (native in Cloudflare Workers). No npm deps.
  */
 const { FlightProvider, isoDurationToMinutes } = require('./flightProvider');
 
