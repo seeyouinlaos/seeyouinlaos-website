@@ -180,6 +180,33 @@ test('Airport search: DuffelAdapter.suggestPlaces maps Places results', async ()
   assert.deepEqual(await a.suggestPlaces('x'), [], 'short query returns [] without a call');
 });
 
+test('Rich offer mapping: logo, aircraft, cabin, fare, carry-on, conditions', async () => {
+  const { DuffelAdapter } = require(`${L}/providers/duffelAdapter`);
+  global.fetch = async () => ({ ok: true, text: async () => JSON.stringify({ data: { offers: [{
+    id: 'off_1', total_amount: '540.00', total_currency: 'EUR', total_emissions_kg: '512',
+    owner: { name: 'Iberia', iata_code: 'IB', logo_symbol_url: 'https://assets.duffel.com/IB.svg' },
+    conditions: { refund_before_departure: { allowed: false }, change_before_departure: { allowed: true, penalty_amount: '40.00', penalty_currency: 'EUR' } },
+    slices: [{ duration: 'PT11H35M', segments: [{
+      marketing_carrier: { iata_code: 'IB', name: 'Iberia' }, marketing_carrier_flight_number: '3179',
+      aircraft: { name: 'Airbus A350' }, origin: { iata_code: 'LHR' }, destination: { iata_code: 'JFK' },
+      departing_at: '2027-02-21T10:05:00', arriving_at: '2027-02-21T21:40:00', duration: 'PT11H35M',
+      passengers: [{ cabin_class: 'economy', cabin_class_marketing_name: 'Economy', fare_basis_code: 'Y20LGTN2',
+        baggages: [{ type: 'checked', quantity: 1 }, { type: 'carry_on', quantity: 1 }] }] }] }],
+  }] } }) });
+  const [o] = await new DuffelAdapter(ENV).searchOffers({ origin: 'LHR', destination: 'JFK', departureDate: '2027-02-21', adults: 1, cabin: 'Economy', currency: 'EUR' });
+  assert.equal(o.owner, 'Iberia');
+  assert.equal(o.logoUrl, 'https://assets.duffel.com/IB.svg');
+  assert.equal(o.cabin, 'Economy');            // marketing name preferred
+  assert.equal(o.fareClass, 'Y20LGTN2');
+  assert.equal(o.bagsIncluded, 1);
+  assert.equal(o.carryOn, 1);
+  assert.equal(o.outbound.aircraft, 'Airbus A350');
+  assert.equal(o.conditions.refundable, false);
+  assert.equal(o.conditions.changeable, true);
+  assert.deepEqual(o.conditions.changePenalty, { amount: 40, currency: 'EUR' });
+  assert.equal(o.emissionsKg, 512);
+});
+
 test('Travel Service: places action routes to the provider', async () => {
   global.fetch = async () => ({ ok: true, text: async () => JSON.stringify({ data: [
     { type: 'airport', iata_code: 'BKK', name: 'Suvarnabhumi Airport', city: { name: 'Bangkok' } },

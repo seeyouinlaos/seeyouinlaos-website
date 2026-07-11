@@ -141,21 +141,39 @@ function mapLeg(slice) {
     flightNumber: `${mc.iata_code || ''}${first.marketing_carrier_flight_number || ''}`,
     stops: segs.length - 1,
     durationMinutes: isoDurationToMinutes(slice.duration || first.duration),
+    aircraft: (first.aircraft && first.aircraft.name) || null,
   };
 }
-function checkedBags(slice) {
-  // Sum checked-bag quantity from the first segment's first passenger, if present.
+function _firstPax(slice) {
   const seg = slice && slice.segments && slice.segments[0];
-  const pax = seg && seg.passengers && seg.passengers[0];
-  if (!pax || !Array.isArray(pax.baggages)) return null;
-  const checked = pax.baggages.filter((b) => b.type === 'checked');
-  if (!checked.length) return 0;
-  return checked.reduce((n, b) => n + (Number(b.quantity) || 0), 0);
+  return seg && seg.passengers && seg.passengers[0];
 }
+function _bagQty(slice, type) {
+  const pax = _firstPax(slice);
+  if (!pax || !Array.isArray(pax.baggages)) return null;
+  const b = pax.baggages.filter((x) => x.type === type);
+  return b.length ? b.reduce((n, x) => n + (Number(x.quantity) || 0), 0) : 0;
+}
+function checkedBags(slice) { return _bagQty(slice, 'checked'); }
+function carryOnBags(slice) { return _bagQty(slice, 'carry_on'); }
 function cabinOf(slice) {
-  const seg = slice && slice.segments && slice.segments[0];
-  const pax = seg && seg.passengers && seg.passengers[0];
-  return (pax && pax.cabin_class) || 'economy';
+  const pax = _firstPax(slice);
+  return (pax && (pax.cabin_class_marketing_name || pax.cabin_class)) || 'economy';
+}
+function fareClassOf(slice) {
+  const pax = _firstPax(slice);
+  return (pax && pax.fare_basis_code) || null;
+}
+function conditionsOf(o) {
+  const c = o.conditions || {};
+  const r = c.refund_before_departure || {}, ch = c.change_before_departure || {};
+  const pen = (x) => (x.penalty_amount != null ? { amount: Number(x.penalty_amount), currency: x.penalty_currency } : null);
+  return {
+    refundable: r.allowed === true,
+    changeable: ch.allowed === true,
+    refundPenalty: pen(r),
+    changePenalty: pen(ch),
+  };
 }
 function mapOffer(o, providerName) {
   const sl = o.slices || [];
@@ -166,8 +184,14 @@ function mapOffer(o, providerName) {
     id: o.id,
     provider: providerName,
     price: { amount: Number(o.total_amount), currency: o.total_currency },
+    owner: (o.owner && o.owner.name) || outbound.carrierName,
+    logoUrl: (o.owner && o.owner.logo_symbol_url) || null,
     cabin: cabinOf(sl[0]),
+    fareClass: fareClassOf(sl[0]),
     bagsIncluded: checkedBags(sl[0]),
+    carryOn: carryOnBags(sl[0]),
+    conditions: conditionsOf(o),
+    emissionsKg: o.total_emissions_kg != null ? Number(o.total_emissions_kg) : null,
     outbound,
     inbound,
   };
