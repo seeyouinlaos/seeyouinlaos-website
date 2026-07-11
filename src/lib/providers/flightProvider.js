@@ -58,6 +58,13 @@ class FlightProvider {
    * @returns {Promise<PriceMetrics|null>}
    */
   async priceAnalysis(_q) { return null; }
+
+  /**
+   * OPTIONAL airport/city autocomplete. Returns [] when unsupported.
+   * @param {string} _query
+   * @returns {Promise<{iata:string, name:string, city:(string|null), country:(string|null), type:string}[]>}
+   */
+  async suggestPlaces(_query) { return []; }
 }
 
 /* ---- helpers shared by adapters ---- */

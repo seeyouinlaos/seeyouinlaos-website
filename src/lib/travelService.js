@@ -72,6 +72,17 @@ async function handleAction(action, rawQuery, env) {
       message: `Live fares are not available yet: set ${envKeysFor(provider.name)} to go live.` };
   }
 
+  // Airport/city autocomplete (its own lightweight input, not a flight query).
+  if (action === 'places') {
+    const q = String((rawQuery && (rawQuery.q || rawQuery.query)) || '').trim();
+    try {
+      const data = await provider.suggestPlaces(q);
+      return { status: 'ok', provider: provider.name, data };
+    } catch (e) {
+      return { status: 'error', provider: provider.name, message: e.message || 'places request failed', code: e.status };
+    }
+  }
+
   const { query, errors } = normalizeQuery(rawQuery);
   if (errors.length) return { status: 'invalid', errors };
 

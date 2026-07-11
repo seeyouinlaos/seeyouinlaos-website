@@ -159,3 +159,34 @@ test('Provider registry: default duffel, unknown rejected', () => {
   assert.equal(getProvider(ENV).name, 'duffel');
   assert.throws(() => getProvider({ PROVIDER: 'nope' }), /Unknown PROVIDER/);
 });
+
+test('Airport search: DuffelAdapter.suggestPlaces maps Places results', async () => {
+  const { DuffelAdapter } = require(`${L}/providers/duffelAdapter`);
+  global.fetch = async (url) => {
+    assert.match(String(url), /\/places\/suggestions\?query=luang/);
+    return { ok: true, text: async () => JSON.stringify({ data: [
+      { type: 'airport', iata_code: 'LPQ', name: 'Luang Prabang International Airport', city: { name: 'Luang Prabang' }, iata_country_code: 'LA' },
+      { type: 'city', iata_code: 'LPQ', name: 'Luang Prabang', city_name: null },
+      { type: 'airport', name: 'No IATA place' }, // filtered out (no iata)
+    ] }) };
+  };
+  const a = new DuffelAdapter(ENV);
+  const out = await a.suggestPlaces('luang');
+  assert.equal(out.length, 2, 'places without iata are dropped');
+  assert.equal(out[0].iata, 'LPQ');
+  assert.equal(out[0].name, 'Luang Prabang International Airport');
+  assert.equal(out[0].city, 'Luang Prabang');
+  assert.equal(out[0].country, 'LA');
+  assert.deepEqual(await a.suggestPlaces('x'), [], 'short query returns [] without a call');
+});
+
+test('Travel Service: places action routes to the provider', async () => {
+  global.fetch = async () => ({ ok: true, text: async () => JSON.stringify({ data: [
+    { type: 'airport', iata_code: 'BKK', name: 'Suvarnabhumi Airport', city: { name: 'Bangkok' } },
+  ] }) });
+  const r = await handleAction('places', { q: 'bangkok' }, ENV);
+  assert.equal(r.status, 'ok');
+  assert.equal(r.data[0].iata, 'BKK');
+  const nc = await handleAction('places', { q: 'bangkok' }, { PROVIDER: 'duffel' });
+  assert.equal(nc.status, 'not_configured');
+});

@@ -100,3 +100,15 @@ Same pattern — add a `HotelProvider` interface + adapter behind the Travel Ser
   (`log` by default; wire an email provider to enable email).
 - **Rate limits:** the flexible-date search is capped and concurrency-limited; a
   provider 429 is surfaced to the UI as a friendly "try again shortly" message.
+- **Airport search:** the origin/destination fields autocomplete via the `places`
+  action (Duffel Places suggestions); the Travel Service action set is
+  `status · places · cheapestDates · search · priceAnalysis · saveTrip · listTrips · history`.
+
+## Verified end-to-end (Duffel test API)
+
+Confirmed against the live Duffel test API through the real Travel Service:
+airport search (e.g. LPQ Luang Prabang), flight search + offer retrieval
+(real carriers, flight numbers, cabins, baggage, durations), price tracking /
+timeline updates, error handling and loading states. The token is provided only
+as the Worker secret `DUFFEL_ACCESS_TOKEN` (or a git-ignored `.dev.vars` locally);
+it is never committed.

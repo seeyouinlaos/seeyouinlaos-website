@@ -29,29 +29,61 @@ class DuffelAdapter extends FlightProvider {
   get name() { return 'duffel'; }
   get isConfigured() { return Boolean(this._token); }
 
+  _headers(extra) {
+    return {
+      Authorization: `Bearer ${this._token}`,
+      'Duffel-Version': this._version,
+      Accept: 'application/json',
+      ...(extra || {}),
+    };
+  }
+
+  _throwForStatus(res, text) {
+    let json; try { json = text ? JSON.parse(text) : {}; } catch { json = {}; }
+    if (res.status === 429) {
+      const retry = res.headers && res.headers.get ? res.headers.get('retry-after') : null;
+      throw new DuffelError(`rate limit reached${retry ? `, retry after ${retry}s` : ''}`, 429, text);
+    }
+    const err = json.errors && json.errors[0];
+    throw new DuffelError((err && (err.message || err.title)) || `HTTP ${res.status}`, res.status, text);
+  }
+
   async _post(path, body) {
     const res = await fetch(`${BASE}${path}`, {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${this._token}`,
-        'Duffel-Version': this._version,
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
+      headers: this._headers({ 'Content-Type': 'application/json' }),
       body: JSON.stringify(body),
     });
     const text = await res.text();
-    let json; try { json = text ? JSON.parse(text) : {}; } catch { json = {}; }
-    if (!res.ok) {
-      if (res.status === 429) {
-        const retry = res.headers && res.headers.get ? res.headers.get('retry-after') : null;
-        throw new DuffelError(`rate limit reached${retry ? `, retry after ${retry}s` : ''}`, 429, text);
-      }
-      const err = json.errors && json.errors[0];
-      const msg = (err && (err.message || err.title)) || `HTTP ${res.status}`;
-      throw new DuffelError(msg, res.status, text);
-    }
-    return json;
+    if (!res.ok) this._throwForStatus(res, text);
+    try { return text ? JSON.parse(text) : {}; } catch { return {}; }
+  }
+
+  async _get(path, params) {
+    const url = new URL(`${BASE}${path}`);
+    Object.entries(params || {}).forEach(([k, v]) => { if (v != null && v !== '') url.searchParams.set(k, String(v)); });
+    const res = await fetch(url, { headers: this._headers() });
+    const text = await res.text();
+    if (!res.ok) this._throwForStatus(res, text);
+    try { return text ? JSON.parse(text) : {}; } catch { return {}; }
+  }
+
+  /**
+   * Airport/city search for autocomplete (Duffel Places suggestions).
+   * @param {string} query
+   * @returns {Promise<{iata:string, name:string, city:(string|null), country:(string|null), type:string}[]>}
+   */
+  async suggestPlaces(query) {
+    const q = String(query || '').trim();
+    if (q.length < 2) return [];
+    const json = await this._get('/places/suggestions', { query: q });
+    return (json.data || []).map((p) => ({
+      iata: p.iata_code || null,
+      name: p.name,
+      city: (p.city && p.city.name) || p.city_name || null,
+      country: p.iata_country_code || null,
+      type: p.type,
+    })).filter((p) => p.iata);
   }
 
   /** Native cheapest-date landscape is unsupported by Duffel → Travel Service enumerates. */

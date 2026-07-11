@@ -85,7 +85,7 @@ button{ font-family:inherit; cursor:pointer; }
 .budget{ margin-top:16px; }
 .budget .lab{ display:flex; justify-content:space-between; font-size:11.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--rose); margin-bottom:6px; }
 .bar{ height:8px; background:var(--blush); border-radius:20px; overflow:hidden; }
-.bar > span{ display:block; height:100%; background:var(--cherry-photo); border-radius:20px; transition:width .4s; }
+.bar > span{ display:block; height:100%; width:100%; background:var(--cherry-photo); border-radius:20px; transform-origin:left; transform:scaleX(0); transition:transform .4s; }
 .bar > span.over{ background:var(--cherry); }
 
 .tiles{ margin-top:26px; display:grid; grid-template-columns:repeat(6,1fr); gap:12px; }
@@ -141,6 +141,14 @@ tr.best td.price{ color:var(--cherry); }
 .field input, .field select{ width:100%; padding:10px 12px; border:1px solid var(--line-strong); border-radius:2px;
   background:#fff; color:var(--ink); font-family:var(--sans); font-size:14px; }
 .field input:focus, .field select:focus{ outline:none; border-color:var(--cherry); }
+.field{ position:relative; }
+.ac-menu{ position:absolute; top:100%; left:0; right:0; z-index:40; background:#fff; border:1px solid var(--line-strong); border-top:none; border-radius:0 0 3px 3px; max-height:230px; overflow:auto; box-shadow:0 10px 24px rgba(33,31,28,.10); }
+.ac-menu.hidden{ display:none; }
+.ac-item{ display:flex; justify-content:space-between; align-items:baseline; gap:10px; padding:9px 12px; cursor:pointer; border-bottom:1px solid var(--line); }
+.ac-item:last-child{ border-bottom:none; }
+.ac-item:hover, .ac-item[aria-selected="true"]{ background:var(--blush); }
+.ac-item .code{ font-family:var(--serif); font-weight:400; color:var(--cherry); font-size:14px; }
+.ac-item .nm{ color:var(--rose); font-size:12px; text-align:right; }
 .editor .actions{ margin-top:20px; display:flex; gap:10px; flex-wrap:wrap; }
 .editor h4{ font-family:var(--serif); font-weight:400; font-size:18px; margin-bottom:16px; }
 
@@ -209,6 +217,7 @@ const travel = {
   priceAnalysis(query)   { return this.call('priceAnalysis', { query }); },
   saveTrip(trip)         { return this.call('saveTrip', { trip }); },
   history(tripId)        { return this.call('history', { tripId }); },
+  places(q)              { return this.call('places', { query: { q } }); },
 };
 
 /* ---------- money / date helpers ---------- */
@@ -218,7 +227,7 @@ const addDays = (s,n) => iso(new Date(parse(s).getTime()+n*DAY));
 const nights = (a,b) => Math.round((parse(b)-parse(a))/DAY);
 const todayISO = () => iso(new Date());
 const fmtDay = s => parse(s).toLocaleDateString('en-GB',{day:'2-digit',month:'short',timeZone:'UTC'});
-const money = (m) => m ? new Intl.NumberFormat('de-DE',{style:'currency',currency:m.currency||'EUR',maximumFractionDigits:0}).format(m.amount) : '—';
+const money = (m) => { const a = m ? (m.amount ?? m.price) : null; return (a==null || isNaN(a)) ? '—' : new Intl.NumberFormat('de-DE',{style:'currency',currency:(m&&m.currency)||'EUR',maximumFractionDigits:0}).format(a); };
 const fmtTime = at => { try { return new Date(at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}); } catch { return ''; } };
 const fmtDur = min => `${Math.floor(min/60)}h ${String(min%60).padStart(2,'0')}m`;
 
@@ -419,7 +428,7 @@ function renderDetail(){
     </div>
     <div class="budget">
       <div class="lab"><span>Best vs. max budget</span><span>${money(m.today)} / ${money({amount:t.maxBudget,currency:m.currency})}${overBudget?' · over budget':''}</span></div>
-      <div class="bar"><span class="${overBudget?'over':''}" style="width:${budgetPct}%"></span></div>
+      <div class="bar"><span class="${overBudget?'over':''}" style="transform:scaleX(${(budgetPct/100).toFixed(3)})"></span></div>
     </div>
     <div class="tiles">
       <div class="tile key"><div class="k">Current best</div><div class="v">${money(m.today)}</div><div class="d">${fmtDay(m.today.departureDate)} → ${fmtDay(m.today.returnDate)}</div></div>
@@ -461,8 +470,8 @@ function renderDetail(){
       <h4>Search strategy</h4>
       <div class="grid-form">
         <div class="field"><label>Trip name</label><input id="f-name" value="${escA(t.name)}"></div>
-        <div class="field"><label>Origin (IATA)</label><input id="f-origin" value="${escA(t.origin)}" maxlength="3"></div>
-        <div class="field"><label>Destination (IATA)</label><input id="f-dest" value="${escA(t.destination)}" maxlength="3"></div>
+        <div class="field"><label>Origin</label><input id="f-origin" value="${escA(t.origin)}" placeholder="City or airport" autocomplete="off" spellcheck="false" role="combobox" aria-autocomplete="list" aria-expanded="false" data-ac></div>
+        <div class="field"><label>Destination</label><input id="f-dest" value="${escA(t.destination)}" placeholder="City or airport" autocomplete="off" spellcheck="false" role="combobox" aria-autocomplete="list" aria-expanded="false" data-ac></div>
         <div class="field"><label>Cabin</label><select id="f-cabin">${['Economy','Premium','Business','First'].map(c=>`<option ${c===t.cabin?'selected':''}>${c}</option>`).join('')}</select></div>
         <div class="field"><label>Max stops</label><select id="f-stops">${[0,1,2].map(s=>`<option value="${s}" ${s===t.maxStops?'selected':''}>${s}</option>`).join('')}</select></div>
         <div class="field"><label>Checked bags</label><input id="f-bags" type="number" min="0" max="4" value="${t.bags}"></div>
@@ -497,6 +506,38 @@ function renderDetail(){
   $('#saveEdit') && ($('#saveEdit').onclick=()=>saveEditor(t));
   $('#cancelEdit') && ($('#cancelEdit').onclick=closeEditor);
   $('#deleteTrip') && ($('#deleteTrip').onclick=()=>deleteTrip(t));
+  document.querySelectorAll('#editor [data-ac]').forEach(attachAutocomplete);
+}
+
+/* ---------- airport/city autocomplete (Duffel Places) ---------- */
+function attachAutocomplete(input){
+  if(input._acBound) return; input._acBound=true;
+  const menu=document.createElement('div'); menu.className='ac-menu hidden'; menu.setAttribute('role','listbox');
+  input.parentElement.appendChild(menu);
+  let items=[], deb;
+  const hide=()=>{ menu.classList.add('hidden'); menu.innerHTML=''; input.setAttribute('aria-expanded','false'); };
+  const choose=(p)=>{ if(!p) return; input.value=p.iata; hide(); };
+  input.addEventListener('input',()=>{
+    clearTimeout(deb);
+    const q=input.value.trim();
+    if(q.length<2){ hide(); return; }
+    deb=setTimeout(async()=>{
+      try{
+        const r=await travel.places(q);
+        items=(r&&r.status==='ok'&&Array.isArray(r.data))?r.data.slice(0,7):[];
+        if(!items.length){ hide(); return; }
+        menu.innerHTML=items.map(p=>`<div class="ac-item" role="option"><span class="code">${esc(p.iata)}</span><span class="nm">${esc(p.name)}${p.city&&p.city!==p.name?' · '+esc(p.city):''}</span></div>`).join('');
+        [...menu.children].forEach((el,i)=>el.addEventListener('mousedown',e=>{ e.preventDefault(); choose(items[i]); }));
+        menu.classList.remove('hidden'); input.setAttribute('aria-expanded','true');
+      }catch(e){ hide(); }
+    },250);
+  });
+  input.addEventListener('blur',()=>setTimeout(()=>{
+    const v=input.value.trim();
+    if(v && !/^[A-Za-z]{3}$/.test(v) && items.length) input.value=items[0].iata;   // snap free text to best match
+    input.value=input.value.trim().toUpperCase();
+    hide();
+  },160));
 }
 
 function benchmarkTag(price, b){
