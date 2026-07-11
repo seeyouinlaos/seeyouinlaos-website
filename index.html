@@ -14,7 +14,7 @@
 
 :root {
   --ivory: #F2ECE1; --ink: #211F1C; --ink-s: #2B2823;
-  --blush: #EAD9D4; --rose: #A8837D; --cherry: #74070E; --cherry-photo: #B33A3F;
+  --blush: #EAD9D4; --rose: #805A52; --cherry: #74070E; --cherry-photo: #B33A3F;
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: 'Hanken Grotesk', sans-serif; font-weight: 300; background: var(--ivory); color: var(--ink); font-size: 17px; line-height: 1.6; overflow-x: hidden; }
@@ -26,6 +26,8 @@ h1, h2, h3 { font-weight: 200; }
 
 .label { font-size: 12px; letter-spacing: .22em; text-transform: uppercase; font-weight: 300; }
 .eyebrow { font-size: 12px; letter-spacing: .24em; text-transform: uppercase; color: var(--cherry); margin-bottom: 24px; }
+/* On dark backgrounds the muted accents must go lighter (not darker) to hold WCAG AA. */
+.dark, .portal, footer, .menu-overlay, .dg-detail { --rose: #B4938C; --cherry-photo: #D5847A; }
 .dark .eyebrow { color: var(--rose); }
 .h-big { font-family: 'PP Editorial Old', serif; font-weight: 200; font-size: clamp(42px, 5vw, 78px); line-height: 1.14; text-wrap: balance; }
 
