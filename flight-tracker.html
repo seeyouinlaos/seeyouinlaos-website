@@ -208,6 +208,7 @@ const travel = {
   search(query)          { return this.call('search', { query }); },
   priceAnalysis(query)   { return this.call('priceAnalysis', { query }); },
   saveTrip(trip)         { return this.call('saveTrip', { trip }); },
+  history(tripId)        { return this.call('history', { tripId }); },
 };
 
 /* ---------- money / date helpers ---------- */
@@ -328,6 +329,22 @@ async function enableAlerts(trip){
     trip.alertsEnabled = r.status==='ok';
   }catch(e){ trip.alertsEnabled=false; }
   save(); render();
+  syncServerHistory(trip);   // pull any daily-cron snapshots the server already has
+}
+/** Merge server-side (daily cron) snapshots into local history. Both are REAL
+ *  observations; the server is authoritative for a given day. */
+async function syncServerHistory(trip){
+  if(!trip.alertsEnabled || !(state.backend.reachable && state.backend.configured)) return;
+  try{
+    const r = await travel.history(trip.id);
+    if(r.status==='ok' && Array.isArray(r.data) && r.data.length){
+      const byDate = {};
+      (trip.history||[]).forEach(h=>{ byDate[h.date]=h; });
+      r.data.forEach(h=>{ byDate[h.date]=h; });            // server wins per day
+      trip.history = Object.values(byDate).sort((a,b)=>a.date.localeCompare(b.date));
+      save(); render();
+    }
+  }catch(e){ /* server history is best-effort; local real checks still stand */ }
 }
 
 /* ============================================================================
@@ -348,7 +365,7 @@ function renderSidebar(){
       <div><div class="nm">${esc(t.name)}</div><div class="rt">${esc(t.origin)} → ${esc(t.destination)}</div></div>
       <div><div class="pr">${m?money(m.today):'—'}</div><div class="tr ${tm.cls}">${m?tm.arrow+' '+tm.word:'not checked'}</div></div>
     </div>`;
-    b.onclick=()=>{ state.selected=t.id; save(); closeEditor(); render(); };
+    b.onclick=()=>{ state.selected=t.id; save(); closeEditor(); render(); syncServerHistory(t); };
     el.appendChild(b);
   });
 }
@@ -558,7 +575,11 @@ $('#clearLocal').onclick=()=>{ if(confirm('Reset saved trips to the default stra
 /* ---------- boot ---------- */
 load();
 render();
-refreshBackend().then(render);
+refreshBackend().then(()=>{
+  render();
+  const t = state.trips.find(x=>x.id===state.selected);
+  if(t) syncServerHistory(t);   // reflect daily-cron snapshots on load
+});
 </script>
 </body>
 </html>
