@@ -20,7 +20,7 @@
   // Create it once:  npx wrangler kv namespace create KV
   // then paste the returned id below (and a preview_id for `wrangler dev`).
   "kv_namespaces": [
-    { "binding": "KV", "id": "REPLACE_WITH_KV_NAMESPACE_ID" }
+    { "binding": "KV", "id": "4b56c4f479b24e18b134d582cb268f1a" }
   ],
 
   // Daily price check + alerts (the real "checks every day" loop).
