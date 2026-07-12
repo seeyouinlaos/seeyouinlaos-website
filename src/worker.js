@@ -13,7 +13,7 @@
  *
  * Secrets/vars come from `env` (never the browser). KV is bound as `env.KV`.
  */
-import { handleAction } from './lib/travelService.js';
+import { handleAction, marketOverview, refreshMarket } from './lib/travelService.js';
 import { createStore } from './lib/store.js';
 import { getNotifier } from './lib/notifier.js';
 
@@ -74,6 +74,11 @@ async function handleTravel(request, env) {
       const id = (isPost ? body.tripId : params.tripId) || '';
       return json(200, { status: 'ok', data: await store.getHistory(id) });
     }
+    if (action === 'market') {
+      // Live monitored-route dashboard. Seeds/refreshes stale routes unless disabled.
+      const refresh = isPost ? (body.refresh !== false) : (params.refresh !== 'false');
+      return json(200, await marketOverview(env, store, { refresh }));
+    }
 
     const result = await handleAction(action, query, env);
     const code = result.status === 'ok' ? 200
@@ -93,6 +98,16 @@ async function runCron(env) {
   const store = createStore(env.KV);
   const notifier = getNotifier(env);
   const today = new Date().toISOString().slice(0, 10);
+
+  // 1) Refresh the monitored-route market so the dashboard builds real history daily.
+  try {
+    const market = await refreshMarket(env, store);
+    console.log('[market-cron]', JSON.stringify({ at: new Date().toISOString(), ...market }));
+  } catch (e) {
+    console.log('[market-cron] error', e.message);
+  }
+
+  // 2) Check each guest's saved strategy and fire alerts.
   const trips = await store.listTrips();
   const summary = [];
 

@@ -13,9 +13,11 @@ const assert = require('node:assert/strict');
 const L = `${__dirname}/../src/lib`;
 const { DuffelAdapter } = require(`${L}/providers/duffelAdapter`);
 const { getProvider } = require(`${L}/providers/flightProvider`);
-const { handleAction } = require(`${L}/travelService`);
+const { handleAction, marketOverview, refreshMarket } = require(`${L}/travelService`);
 const { createStore } = require(`${L}/store`);
 const { getNotifier } = require(`${L}/notifier`);
+const { getProviders } = require(`${L}/providers/flightProvider`);
+const { MONITORED_ROUTES, defaultAirportForCountry, routeKey, routeQuery } = require(`${L}/monitoredRoutes`);
 
 const ENV = { PROVIDER: 'duffel', DUFFEL_ACCESS_TOKEN: 'duffel_test_x', NOTIFY_CHANNEL: 'log' };
 
@@ -216,4 +218,94 @@ test('Travel Service: places action routes to the provider', async () => {
   assert.equal(r.data[0].iata, 'BKK');
   const nc = await handleAction('places', { q: 'bangkok' }, { PROVIDER: 'duffel' });
   assert.equal(nc.status, 'not_configured');
+});
+
+/* ---------------- provider-independent booking + multi-provider ---------------- */
+test('Booking descriptor: provider-independent shape + itinerary key', async () => {
+  stubFetch('ok');
+  const [o] = await new DuffelAdapter(ENV).searchOffers({ origin: 'BKK', destination: 'LPQ', departureDate: '2027-02-27', adults: 1, cabin: 'Economy', currency: 'EUR' });
+  const b = o.booking;
+  assert.deepEqual(Object.keys(b).sort(), ['bookingUrl', 'branding', 'checkoutType', 'label', 'offerId', 'provider'].sort());
+  assert.equal(b.provider, 'duffel');
+  assert.equal(b.offerId, o.id);
+  assert.match(b.bookingUrl, /^https:\/\//);
+  assert.equal(typeof b.branding.name, 'string');
+  assert.ok('logoUrl' in b.branding);
+  assert.equal(b.checkoutType, 'options');       // Duffel is API-book → hand-off
+  assert.ok(o.itineraryKey && o.itineraryKey.includes('@'), 'itinerary signature present for multi-provider grouping');
+});
+
+test('Provider registry: getProviders returns an ordered, deduped list', () => {
+  assert.deepEqual(getProviders(ENV).map((p) => p.name), ['duffel']);
+  assert.deepEqual(getProviders({ ...ENV, PROVIDERS: 'duffel,duffel' }).map((p) => p.name), ['duffel']);
+});
+
+/* ---------------- monitored-route market layer ---------------- */
+test('Monitored routes: ten canonical routes + country-aware defaults', () => {
+  assert.equal(MONITORED_ROUTES.length, 10);
+  const ids = MONITORED_ROUTES.map((r) => r.id);
+  ['HAM-BKK', 'FRA-BKK', 'MUC-BKK', 'TUN-BKK', 'ATH-BKK', 'LIS-BKK', 'DXB-BKK', 'NRT-BKK', 'BKK-LPQ', 'LPQ-BKK']
+    .forEach((id) => assert.ok(ids.includes(id), `route ${id}`));
+  assert.equal(defaultAirportForCountry('DE'), 'HAM');
+  assert.equal(defaultAirportForCountry('JP'), 'NRT');
+  assert.equal(defaultAirportForCountry('XX'), null);
+  const q = routeQuery(MONITORED_ROUTES[0], new Date('2027-01-01T00:00:00Z'));
+  assert.equal(q.origin, 'HAM');
+  assert.equal(q.returnDate, null);
+  assert.equal(q.departureDate, '2027-02-15'); // +45 days
+});
+
+test('KV store: route snapshots dedupe by day and stay bounded', async () => {
+  const store = createStore(undefined);
+  if (createStore._mem) createStore._mem.clear();
+  const k = routeKey('HAM', 'BKK');
+  await store.appendRouteSnapshot(k, { date: '2027-01-10', ts: 1, price: 500, currency: 'EUR', offers: 100 });
+  await store.appendRouteSnapshot(k, { date: '2027-01-10', ts: 2, price: 480, currency: 'EUR', offers: 90 }); // same day replaces
+  await store.appendRouteSnapshot(k, { date: '2027-01-11', ts: 3, price: 470, currency: 'EUR', offers: 88 });
+  const snaps = await store.getRouteSnapshots(k);
+  assert.equal(snaps.length, 2);
+  assert.equal(snaps[0].price, 480, 'same-day snapshot replaced');
+  for (let i = 0; i < 60; i++) await store.appendRouteSnapshot(k, { date: `2027-03-${String((i % 28) + 1).padStart(2, '0')}`, ts: 100 + i, price: 400, currency: 'EUR', offers: 1 });
+  assert.ok((await store.getRouteSnapshots(k)).length <= 40, 'series is trimmed');
+});
+
+test('Market overview: seeds live snapshots and computes real cards', async () => {
+  stubFetch('ok');
+  const store = createStore(undefined);
+  if (createStore._mem) createStore._mem.clear();
+  const m = await marketOverview(ENV, store, { refresh: true, now: new Date('2027-01-01T09:00:00Z') });
+  assert.equal(m.status, 'ok');
+  assert.equal(m.routes.length, 10);
+  const ham = m.routes.find((r) => r.id === 'HAM-BKK');
+  assert.ok(ham.current && ham.current.price > 0, 'seeded a live price');
+  assert.equal(ham.status, 'collecting', 'one snapshot = collecting');
+  assert.ok(ham.current.branding && ham.current.offers >= 1);
+});
+
+test('Market overview: trend, change, sparkline and 30-day low from history', async () => {
+  const store = createStore(undefined);
+  if (createStore._mem) createStore._mem.clear();
+  const k = routeKey('HAM', 'BKK');
+  const now = Date.now();
+  await store.appendRouteSnapshot(k, { date: '2027-01-09', ts: now - 2 * 86400000, price: 420, currency: 'EUR', offers: 120, provider: 'duffel', branding: { name: 'BA' } });
+  await store.appendRouteSnapshot(k, { date: '2027-01-10', ts: now - 1 * 86400000, price: 399, currency: 'EUR', offers: 130, provider: 'duffel', branding: { name: 'BA' } });
+  const m = await marketOverview(ENV, store, { refresh: false });
+  const c = m.routes.find((r) => r.id === 'HAM-BKK');
+  assert.equal(c.status, 'ok');
+  assert.equal(c.current.price, 399);
+  assert.equal(c.previous, 420);
+  assert.equal(c.change, -21);
+  assert.equal(c.changePct, -5);
+  assert.equal(c.trend, 'down');
+  assert.deepEqual(c.spark, [420, 399]);
+  assert.equal(c.low30, 399);
+});
+
+test('Market refresh (cron): prices every route and persists a snapshot', async () => {
+  stubFetch('ok');
+  const store = createStore(undefined);
+  if (createStore._mem) createStore._mem.clear();
+  const res = await refreshMarket(ENV, store, new Date('2027-01-02T06:00:00Z'));
+  assert.equal(res.refreshed, 10);
+  assert.ok((await store.getRouteSnapshots(routeKey('BKK', 'LPQ'))).length >= 1);
 });

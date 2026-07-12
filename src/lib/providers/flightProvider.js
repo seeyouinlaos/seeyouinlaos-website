@@ -94,4 +94,26 @@ function getProvider(env) {
   }
 }
 
-module.exports = { FlightProvider, getProvider, isoDurationToMinutes };
+/**
+ * All configured providers, in priority order. Today this is a single-element
+ * list (Duffel is Provider #1), but the market overview and future aggregated
+ * search iterate this so adding Amadeus/Sabre/Travelport/an airline API is one
+ * new adapter + one entry here — the Travel Service and UI never change.
+ * `PROVIDERS` (comma-separated) overrides; otherwise it falls back to PROVIDER.
+ * @param {Record<string,string|undefined>} env
+ * @returns {FlightProvider[]}
+ */
+function getProviders(env) {
+  const list = String(env.PROVIDERS || env.PROVIDER || 'duffel')
+    .split(',').map((s) => s.trim().toLowerCase()).filter(Boolean);
+  const seen = new Set();
+  const out = [];
+  for (const which of list) {
+    if (seen.has(which)) continue;
+    seen.add(which);
+    out.push(getProvider({ ...env, PROVIDER: which }));
+  }
+  return out;
+}
+
+module.exports = { FlightProvider, getProvider, getProviders, isoDurationToMinutes };

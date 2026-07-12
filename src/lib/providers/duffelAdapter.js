@@ -177,16 +177,19 @@ function conditionsOf(o) {
 }
 /**
  * Provider-independent booking descriptor. Each provider adapter fills this so
- * the UI can render one primary booking CTA without knowing the provider.
- *  - provider:  which provider produced the offer (for future multi-provider UIs)
- *  - offerId:   the provider's own offer identifier (opaque)
- *  - url:       a deep link the guest can act on now
- *  - label:     the CTA wording appropriate to how this provider books
- *  - kind:      'checkout' (direct order) | 'options' (hand-off to booking options)
+ * the UI renders one primary booking CTA without ever naming the provider in code
+ * (it shows `branding` instead). The shape is fixed across providers:
+ *  - provider:     stable provider id (e.g. "duffel") — routing/telemetry only
+ *  - offerId:      the provider's own offer identifier (opaque)
+ *  - bookingUrl:   a deep link the guest can act on now
+ *  - branding:     { name, logoUrl } — what the UI shows to attribute the offer
+ *  - checkoutType: 'redirect' (hosted checkout) | 'options' (hand-off to booking
+ *                  options) | 'api' (server-completed order)
+ *  - label:        CTA wording appropriate to how this provider books
  * Duffel is an API-book provider (no hosted consumer page for an arbitrary offer),
- * so we hand off to prefilled booking options for the same route/airline/dates.
- * A future provider with a hosted checkout sets kind:'checkout' + its own url;
- * the UI does not change.
+ * so checkoutType is 'options' and we hand off to prefilled booking options for
+ * the same route/airline/dates. A future provider with a hosted checkout sets
+ * checkoutType:'redirect' + its own bookingUrl; the UI does not change.
  */
 function bookingFor(offer, ownerName) {
   const out = offer.outbound, inb = offer.inbound;
@@ -197,10 +200,21 @@ function bookingFor(offer, ownerName) {
   return {
     provider: offer.provider,
     offerId: offer.id,
-    url: `https://www.google.com/travel/flights?q=${encodeURIComponent(q)}`,
+    bookingUrl: `https://www.google.com/travel/flights?q=${encodeURIComponent(q)}`,
+    branding: { name: ownerName || 'Duffel', logoUrl: offer.logoUrl || null },
+    checkoutType: 'options',
     label: 'View booking options',
-    kind: 'options',
   };
+}
+
+/**
+ * Provider-neutral signature of an itinerary (carriers + flight numbers + times).
+ * Two offers with the same key are the SAME flights — possibly from different
+ * providers — so the UI can collapse them and show provider choices.
+ */
+function itineraryKeyOf(outbound, inbound) {
+  const leg = (l) => l ? `${l.flightNumber}@${(l.from.at || '').slice(0, 16)}` : '';
+  return [leg(outbound), leg(inbound)].filter(Boolean).join('|');
 }
 function mapOffer(o, providerName) {
   const sl = o.slices || [];
@@ -222,6 +236,7 @@ function mapOffer(o, providerName) {
     emissionsKg: o.total_emissions_kg != null ? Number(o.total_emissions_kg) : null,
     outbound,
     inbound,
+    itineraryKey: itineraryKeyOf(outbound, inbound),
   };
   offer.booking = bookingFor(offer, ownerName);
   return offer;

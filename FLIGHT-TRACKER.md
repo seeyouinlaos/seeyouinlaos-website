@@ -85,6 +85,31 @@ Duffel Flight Offers API
 - A plain static file server serves the UI but **not** `/api/travel`; the UI then
   correctly shows "Travel Service not reachable" and no prices — by design.
 
+## Flight Market (monitored-route dashboard)
+
+Before any search, the Flight Tracker shows a live **market** of ten monitored
+routes (long-haul feeders into Bangkok plus the two Bangkok–Luang Prabang hops).
+It is provider-independent and real:
+
+- `src/lib/monitoredRoutes.js` — the ten routes, the country→airport map used for
+  country-aware journey defaults, and the sample date each route is priced on.
+- `marketOverview(env, store, {refresh})` (Travel Service) asks **every configured
+  provider** (`getProviders`) for the cheapest live offer per route, keeps the
+  best, and persists a daily snapshot (`store.appendRouteSnapshot`). Cards are
+  computed from real history: current best, change vs previous, 7-day sparkline,
+  30-day low, live-offer count, trend and last-updated. With one snapshot a card
+  reads **“Collecting history…”** and keeps the same layout; the daily cron
+  (`refreshMarket`) deepens the series so it becomes a true market over time.
+- Multi-provider ready: each offer carries a provider-neutral booking descriptor
+  `{ provider, offerId, bookingUrl, branding, checkoutType }` plus an
+  `itineraryKey`, so identical itineraries from different providers can be grouped
+  and the UI attributes offers through `branding` — never a hard-coded provider.
+  Adding Amadeus/Sabre/Travelport/an airline API is one adapter + one registry
+  entry; the dashboard, comparison and cards do not change.
+
+The UI persists last search, filters, comparison, selected journey and scroll
+(session + local storage) so the Back button restores the exact previous state.
+
 ## Switching provider
 Add `src/lib/providers/<name>Adapter.js` implementing `FlightProvider`, register it
 in `getProvider()`, set `PROVIDER=<name>`. The Worker, Travel Service and UI are

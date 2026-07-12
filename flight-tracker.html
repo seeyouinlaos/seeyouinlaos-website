@@ -221,6 +221,58 @@ svg.chart{ display:block; width:100%; height:180px; }
 .chart .ar{ fill:rgba(179,58,63,.10); } .chart .dot{ fill:var(--cherry); } .chart .lbl{ font-size:10px; fill:var(--rose); }
 .foot{ margin-top:40px; padding-top:18px; border-top:1px solid var(--line); font-size:12px; color:var(--rose); line-height:1.7; max-width:820px; }
 .foot strong{ color:var(--ink); }
+
+/* ---- flight market dashboard (live monitored routes) ---- */
+.market{ margin:30px 0 0; }
+.mkt-head{ display:flex; align-items:baseline; justify-content:space-between; gap:12px 20px; flex-wrap:wrap; margin-bottom:5px; }
+.mkt-head h3{ font-family:var(--serif); font-weight:200; font-size:clamp(23px,2.7vw,32px); }
+.mkt-head .asof{ font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--rose); display:inline-flex; align-items:center; gap:7px; }
+.mkt-head .asof .live{ width:7px; height:7px; border-radius:50%; background:var(--good); box-shadow:0 0 0 0 rgba(47,111,79,.5); animation:live 2s ease-out infinite; }
+@keyframes live{ 0%{ box-shadow:0 0 0 0 rgba(47,111,79,.45);} 70%{ box-shadow:0 0 0 6px rgba(47,111,79,0);} 100%{ box-shadow:0 0 0 0 rgba(47,111,79,0);} }
+.mkt-sub{ font-size:12.5px; color:var(--rose); margin-bottom:16px; max-width:620px; }
+.mkt-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(236px,1fr)); gap:12px; }
+.mcard{ background:var(--card); border:1px solid var(--line); border-radius:5px; padding:15px 16px 14px; display:flex; flex-direction:column; gap:11px; text-align:left; width:100%;
+  transition:transform .2s cubic-bezier(.2,.7,.2,1), box-shadow .2s, border-color .2s; }
+.mcard:hover{ transform:translateY(-3px); border-color:var(--line-strong); box-shadow:0 12px 30px rgba(33,31,28,.10); }
+.mcard .m-top{ display:flex; align-items:flex-start; justify-content:space-between; gap:8px; }
+.mcard .m-flag{ font-size:18px; line-height:1; }
+.mcard .m-city{ font-size:11.5px; color:var(--rose); letter-spacing:.02em; }
+.mcard .m-pair{ font-family:var(--serif); font-size:15.5px; letter-spacing:.03em; margin-top:1px; }
+.mcard .m-trend{ font-size:15px; line-height:1; opacity:.9; }
+.m-price-row{ display:flex; align-items:baseline; gap:9px; flex-wrap:wrap; }
+.mcard .m-price{ font-family:var(--serif); font-weight:200; font-size:29px; line-height:1; }
+.mcard .m-price .cur{ font-size:16px; opacity:.6; }
+.m-chg{ font-size:12px; font-weight:600; display:inline-flex; align-items:center; gap:3px; }
+.m-chg.down{ color:var(--good); } .m-chg.up{ color:var(--cherry-photo); } .m-chg.flat{ color:var(--rose); }
+.m-chg .arw{ display:inline-block; }
+.m-chg.down .arw{ animation:bobD 1.9s ease-in-out infinite; }
+.m-chg.up .arw{ animation:bobU 1.9s ease-in-out infinite; }
+@keyframes bobD{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(2px);} }
+@keyframes bobU{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(-2px);} }
+.mspark{ display:block; width:100%; height:34px; overflow:visible; }
+.mspark .ar{ fill:rgba(179,58,63,.09); }
+.mspark .ln{ fill:none; stroke:var(--cherry-photo); stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
+.mspark .dt{ fill:var(--cherry); }
+.mspark .base{ stroke:var(--line-strong); stroke-width:1; stroke-dasharray:2 4; }
+.m-meta{ display:flex; flex-wrap:wrap; gap:3px 12px; font-size:10.5px; color:var(--rose); letter-spacing:.01em; }
+.m-meta b{ color:var(--ink); font-weight:600; }
+.m-prov{ display:inline-flex; align-items:center; gap:5px; font-size:10px; color:var(--rose); }
+.m-prov img{ width:15px; height:15px; object-fit:contain; border-radius:2px; background:#fff; }
+.m-collecting{ font-size:10.5px; color:var(--rose); font-style:italic; display:inline-flex; align-items:center; gap:6px; }
+.m-collecting .pulse{ width:6px; height:6px; border-radius:50%; background:var(--cherry-photo); animation:pulse 1.4s ease-in-out infinite; }
+@keyframes pulse{ 0%,100%{ opacity:.3;} 50%{ opacity:1;} }
+.m-cta{ margin-top:1px; display:inline-flex; align-items:center; justify-content:center; gap:6px; background:transparent; border:1px solid var(--line-strong); color:var(--ink); padding:9px; border-radius:2px; font-size:10px; letter-spacing:.14em; text-transform:uppercase; width:100%; transition:background .15s,color .15s,border-color .15s; }
+.mcard:hover .m-cta{ background:var(--cherry); border-color:var(--cherry); color:#fff; }
+.mskel{ height:186px; border-radius:5px; background:linear-gradient(90deg,var(--card),#fff,var(--card)); background-size:200% 100%; animation:sh 1.2s linear infinite; border:1px solid var(--line); }
+
+/* ---- editable wedding journey ---- */
+.journey .j-country{ margin-top:16px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; font-size:12px; color:#C6ADA5; }
+.journey .j-country select{ background:rgba(242,236,225,.08); color:var(--ivory); border:1px solid rgba(242,236,225,.22); border-radius:3px; padding:7px 11px; font-family:var(--sans); font-size:13px; }
+.jleg .edit{ font-size:9px; letter-spacing:.13em; text-transform:uppercase; color:#8a6a62; margin-top:7px; }
+.provchips{ display:flex; gap:5px; flex-wrap:wrap; margin-top:4px; }
+.provchip{ font-size:9.5px; letter-spacing:.04em; border:1px solid var(--line); border-radius:20px; padding:3px 8px; color:var(--rose); display:inline-flex; align-items:center; gap:4px; }
+.provchip img{ width:12px; height:12px; object-fit:contain; }
+
 .hide{ display:none !important; }
 </style>
 </head>
@@ -251,6 +303,7 @@ const travel={
   cheapestDates(query){ return this.call('cheapestDates',{query}); },
   saveTrip(trip){ return this.call('saveTrip',{trip}); },
   history(tripId){ return this.call('history',{tripId}); },
+  market(refresh=true){ return this.call('market',{refresh}); },
 };
 
 /* ---------- helpers ---------- */
@@ -277,10 +330,28 @@ const PRESETS=[
 ];
 const DEFAULT_FILTERS={ sort:'price', maxStops:'any', maxPrice:'', refundableOnly:false };
 
+/* ---------- market: monitored routes shown before any search ---------- */
+const MARKET_LEAD=45; // must match the server's sample lead (monitoredRoutes.js)
+const marketSampleDate=()=>addDays(todayISO(),MARKET_LEAD);
+/* Country → preferred departure airports (first = default pick). Mirrors the
+   backend country map; the journey stays generic and always editable. */
+const COUNTRY_AIRPORTS={ '':['HAM'], DE:['HAM','FRA','MUC'], TN:['TUN'], GR:['ATH'], PT:['LIS'], AE:['DXB'], JP:['NRT'] };
+const COUNTRY_LABELS={ '':'Not set (generic)', DE:'Germany', TN:'Tunisia', GR:'Greece', PT:'Portugal', AE:'United Arab Emirates', JP:'Japan' };
+const homeAirport=()=> (COUNTRY_AIRPORTS[state.journeyCountry]||['HAM'])[0];
+/* Suggested wedding journey legs (defaults only — always editable). */
+function journeyLegs(){ const home=homeAirport(); return [
+  { key:'out',  from:home,  to:'BKK', title:`${home} → Bangkok`,        note:'The long haul to Thailand',   round:true,  dep:DEFAULTS.departDate, ret:DEFAULTS.returnDate },
+  { key:'up',   from:'BKK', to:'LPQ', title:'Bangkok → Luang Prabang',  note:'The short hop to the wedding', round:false, dep:'2027-02-27' },
+  { key:'down', from:'LPQ', to:'BKK', title:'Luang Prabang → Bangkok',  note:'Back down after the weekend',  round:false, dep:'2027-03-01' },
+  { key:'home', from:'BKK', to:home,  title:`Bangkok → ${home}`,        note:'The way home',                round:false, dep:DEFAULTS.returnDate },
+]; }
+
 /* ---------- state ---------- */
 let state={ search:{...DEFAULTS}, filters:{...DEFAULT_FILTERS},
   results:{status:'idle',offers:[],error:null,forPair:null},
   calendar:{status:'idle',days:[]},
+  market:{status:'idle',asOf:null,routes:[]},
+  journeyCountry:'',
   tracked:[], selectedTrack:null, compare:[],
   backend:{reachable:false,configured:false,checked:false} };
 const totalDur=o=>o.outbound.durationMinutes+(o.inbound?o.inbound.durationMinutes:0);
@@ -299,10 +370,28 @@ function computeBadges(offers){
   return { cheapest:byP[0].id, fastest:byD[0].id, best, recommended:rec };
 }
 function toggleCompare(id){ const i=state.compare.indexOf(id); if(i>=0) state.compare.splice(i,1); else { if(state.compare.length>=4) state.compare.shift(); state.compare.push(id); } save(); render(); }
-function bookOffer(id){ const o=state.results.offers.find(x=>x.id===id); if(o&&o.booking&&o.booking.url) window.open(o.booking.url,'_blank','noopener'); }
+const bookingUrlOf=o=>o&&o.booking&&(o.booking.bookingUrl||o.booking.url)||null;
+function bookOffer(id){ const o=(state.results.offers||[]).find(x=>x.id===id); const u=bookingUrlOf(o); if(u) window.open(u,'_blank','noopener'); }
+function providerBrand(o){ return (o&&o.booking&&o.booking.branding)||{name:(o&&o.owner)||(o&&o.provider)||'',logoUrl:(o&&o.logoUrl)||null}; }
+/* Provider choices for the SAME itinerary (multi-provider aware; today Duffel only). */
+function providerChoices(offer){
+  const key=offer.itineraryKey; if(!key) return [offer];
+  const same=(state.results.offers||[]).filter(o=>o.itineraryKey===key);
+  const byProv={}; same.forEach(o=>{ const p=o.provider; if(!byProv[p]||o.price.amount<byProv[p].price.amount) byProv[p]=o; });
+  return Object.values(byProv).sort((a,b)=>a.price.amount-b.price.amount);
+}
 
-function save(){ localStorage.setItem(KEY,JSON.stringify({search:state.search,filters:state.filters,tracked:state.tracked,selectedTrack:state.selectedTrack})); }
-function load(){ try{const r=JSON.parse(localStorage.getItem(KEY)); if(r){ state.search={...DEFAULTS,...r.search}; state.filters={...DEFAULT_FILTERS,...r.filters}; state.tracked=r.tracked||[]; state.selectedTrack=r.selectedTrack||null; }}catch(e){} }
+const SKEY='svil_ft_session';
+function save(){
+  localStorage.setItem(KEY,JSON.stringify({search:state.search,filters:state.filters,tracked:state.tracked,selectedTrack:state.selectedTrack,compare:state.compare,journeyCountry:state.journeyCountry}));
+  saveSession();
+}
+/* Volatile session snapshot so the Back button / a reload restores the exact
+   previous state (results, calendar, market, comparison, scroll) — never start over. */
+function saveSession(){ try{ sessionStorage.setItem(SKEY,JSON.stringify({
+  results:state.results, calendar:state.calendar, market:state.market, compare:state.compare, scrollY:window.scrollY })); }catch(e){} }
+function load(){ try{const r=JSON.parse(localStorage.getItem(KEY)); if(r){ state.search={...DEFAULTS,...r.search}; state.filters={...DEFAULT_FILTERS,...r.filters}; state.tracked=r.tracked||[]; state.selectedTrack=r.selectedTrack||null; state.compare=r.compare||[]; state.journeyCountry=r.journeyCountry||''; }}catch(e){} }
+function loadSession(){ try{const r=JSON.parse(sessionStorage.getItem(SKEY)); if(r){ if(r.results) state.results=r.results; if(r.calendar) state.calendar=r.calendar; if(r.market) state.market=r.market; if(r.compare) state.compare=r.compare; return r; }}catch(e){} return null; }
 function presetActive(p){ const s=state.search; return s.origin===p.s.origin && s.destination===p.s.destination && s.departDate===(p.s.departDate) && (s.oneWay===!!p.s.oneWay); }
 
 /* ---------- query builder ---------- */
@@ -357,6 +446,34 @@ function applyPreset(p){ state.search={...DEFAULTS,...state.search,...p.s}; if(p
 function pickDate(day){ state.search.departDate=day.departureDate; if(day.returnDate) state.search.returnDate=day.returnDate; save(); runSearch(); }
 function shiftDay(delta){ state.search.departDate=addDays(state.search.departDate,delta); if(!state.search.oneWay&&state.search.returnDate) state.search.returnDate=addDays(state.search.returnDate,delta); save(); runSearch(); }
 
+/* ---------- flight market dashboard ---------- */
+async function loadMarket(){
+  if(!(state.backend.reachable&&state.backend.configured)) return;
+  if(state.market.status==='loading') return;
+  const had=state.market.routes.length;
+  state.market={...state.market,status:had?'ok':'loading'}; render();
+  try{
+    const r=await travel.market(true);
+    if(r&&r.status==='ok') state.market={status:'ok',asOf:r.asOf,routes:r.routes||[]};
+    else state.market={status:'empty',asOf:null,routes:r&&r.routes||[]};
+  }catch(e){ state.market={...state.market,status:had?'ok':'error'}; }
+  save(); render();
+}
+/* "View live fares" on a market card → load that exact route (near-term one-way,
+   matching the quoted price) into the search and run it. Fully editable after. */
+function applyMarketRoute(id){
+  const r=(state.market.routes||[]).find(x=>x.id===id); if(!r) return;
+  state.search={...state.search,origin:r.origin,destination:r.destination,departDate:marketSampleDate(),returnDate:null,oneWay:true};
+  save(); runSearch(); scrollToResults();
+}
+function applyJourneyLeg(leg){
+  state.search={...state.search,origin:leg.from,destination:leg.to,oneWay:!leg.round,departDate:leg.dep,returnDate:leg.round?leg.ret:null};
+  save(); runSearch(); scrollToSearch();
+}
+function setCountry(code){ state.journeyCountry=code; state.search.origin=homeAirport(); save(); render(); }
+function scrollToResults(){ setTimeout(()=>{const e=$('#results-anchor'); if(e) e.scrollIntoView({behavior:'smooth',block:'start'});},60); }
+function scrollToSearch(){ setTimeout(()=>{const e=$('#search-anchor'); if(e) e.scrollIntoView({behavior:'smooth',block:'start'});},60); }
+
 /* reset menu (non-destructive) */
 function clearDates(){ state.search.departDate=DEFAULTS.departDate; state.search.returnDate=state.search.oneWay?null:DEFAULTS.returnDate; save(); render(); }
 function clearAirports(){ state.search.origin=''; state.search.destination=''; save(); render(); }
@@ -398,24 +515,78 @@ function filteredOffers(){
 /* ============================================================================
    RENDER
    ============================================================================ */
-function render(){ $('#app').innerHTML = viewSearch()+viewBackendNotice()+viewJourney()+viewCalendar()+viewCompare()+viewResults()+viewTracked()+viewFoot(); wire(); }
+function render(){
+  $('#app').innerHTML = `<div id="search-anchor"></div>`+viewSearch()+viewBackendNotice()+viewMarket()+viewJourney()
+    +viewCalendar()+viewCompare()+`<div id="results-anchor"></div>`+viewResults()+viewTracked()+viewFoot();
+  wire();
+}
 
-/* recommended journey (the guest travel flow); data-jleg = preset index */
+/* ---------- flight market dashboard (live monitored routes) ---------- */
+function sparkSVG(spark){
+  const W=100,H=30,pad=3;
+  if(!spark||!spark.length) return `<svg class="mspark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><line class="base" x1="0" y1="${H-pad}" x2="${W}" y2="${H-pad}"/></svg>`;
+  if(spark.length===1){ const y=H/2; return `<svg class="mspark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><line class="base" x1="0" y1="${y}" x2="${W}" y2="${y}"/><circle class="dt" cx="${W-4}" cy="${y}" r="2.4"/></svg>`; }
+  const min=Math.min(...spark),max=Math.max(...spark),rng=(max-min)||1;
+  const pts=spark.map((v,i)=>{ const x=pad+(i*(W-2*pad))/(spark.length-1); const y=H-pad-((v-min)/rng)*(H-2*pad); return [x,y]; });
+  const line=pts.map((p,i)=>`${i?'L':'M'}${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(' ');
+  const area=`M${pts[0][0].toFixed(1)} ${H} `+pts.map(p=>`L${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(' ')+`L${pts[pts.length-1][0].toFixed(1)} ${H} Z`;
+  const last=pts[pts.length-1];
+  return `<svg class="mspark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><path class="ar" d="${area}"/><path class="ln" d="${line}"/><circle class="dt" cx="${last[0].toFixed(1)}" cy="${last[1].toFixed(1)}" r="2.2"/></svg>`;
+}
+function ago(ts){ if(!ts) return '—'; const s=Math.max(0,Date.now()-ts); const h=Math.floor(s/3600000); if(h>=24) return Math.floor(h/24)+'d ago'; if(h>=1) return h+'h ago'; const m=Math.floor(s/60000); return m<=1?'just now':m+'m ago'; }
+function marketCard(r){
+  const c=r.current;
+  const trendArrow=r.trend==='down'?'▼':r.trend==='up'?'▲':r.trend==='flat'?'▬':'';
+  const chg=(r.change!=null&&r.changePct!=null)?`<span class="m-chg ${r.trend}"><span class="arw">${trendArrow}</span>${r.change<0?'−':r.change>0?'+':''}${money(Math.abs(r.change),c?c.currency:'EUR')} · ${r.changePct>0?'+':''}${r.changePct}%</span>`:'';
+  const brand=c&&c.branding||{};
+  const provRow=c?`<span class="m-prov">${brand.logoUrl?`<img src="${esc(brand.logoUrl)}" alt="" onerror="this.style.display='none'">`:''}${esc(brand.name||c.provider||'')}</span>`:'';
+  const priceBlock=c?`<div class="m-price-row"><span class="m-price">${money(c.price,c.currency)}</span>${chg}</div>`
+    :`<div class="m-price-row"><span class="m-price" style="opacity:.4">—</span></div>`;
+  const meta = c ? (r.history>=2
+      ? `<div class="m-meta"><span>30-day low <b>${money(r.low30,c.currency)}</b></span><span><b>${c.offers}</b> live offers</span><span>updated ${ago(c.ts)}</span></div>`
+      : `<div class="m-meta"><span><b>${c.offers}</b> live offers</span><span>updated ${ago(c.ts)}</span></div><div class="m-collecting"><span class="pulse"></span>Collecting history…</div>`)
+    : `<div class="m-collecting"><span class="pulse"></span>Collecting history…</div>`;
+  return `<button type="button" class="mcard" data-mroute="${esc(r.id)}">
+    <div class="m-top">
+      <div><div class="m-city">${r.flag} ${esc(r.originCity)}</div><div class="m-pair">${esc(r.origin)} → ${esc(r.destination)}</div></div>
+      <div class="m-trend">${provRow}</div>
+    </div>
+    ${priceBlock}
+    ${sparkSVG(r.spark)}
+    ${meta}
+    <span class="m-cta">View live fares →</span>
+  </button>`;
+}
+function viewMarket(){
+  if(!(state.backend.reachable&&state.backend.configured)) return '';
+  const m=state.market;
+  const head=(sub)=>`<div class="mkt-head"><h3>Flight Market</h3><span class="asof"><span class="live"></span>${sub}</span></div>
+    <p class="mkt-sub">Live cheapest fares on the routes our guests fly, refreshed from the same real providers behind every search. Prices build a history over time — a quiet market you can watch before you book.</p>`;
+  if(m.status==='loading'&&!m.routes.length){
+    return `<section class="market">${head('Loading live routes…')}<div class="mkt-grid">${Array.from({length:10}).map(()=>`<div class="mskel"></div>`).join('')}</div></section>`;
+  }
+  if(!m.routes.length) return '';
+  const asOf=m.asOf?('as of '+new Date(m.asOf).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})):'live';
+  return `<section class="market">${head(asOf)}<div class="mkt-grid">${m.routes.map(marketCard).join('')}</div></section>`;
+}
+
+/* editable wedding journey (suggested defaults; every field editable in search) */
 function viewJourney(){
   if(!(state.backend.reachable&&state.backend.configured)) return '';
+  const legs=journeyLegs();
+  const opts=Object.keys(COUNTRY_LABELS).map(c=>`<option value="${c}" ${c===state.journeyCountry?'selected':''}>${esc(COUNTRY_LABELS[c])}</option>`).join('');
+  const cells=[];
+  legs.forEach((l,i)=>{ cells.push(`<button type="button" class="jleg" data-jkey="${l.key}"><div class="r">${esc(l.title)}</div><div class="d">${esc(l.note)}</div><div class="edit">Load into search ›</div></button>`);
+    if(i<legs.length-1) cells.push('<span class="jarrow">→</span>'); });
   return `<section class="journey">
-    <div class="eyebrow">The recommended journey</div>
-    <h3>Hamburg to Luang Prabang, and home again.</h3>
-    <p>Most guests travel Germany → Bangkok, then the short connection up to Luang Prabang for the wedding, and back the same way. Fares to Asia move a lot in the months ahead, so it pays to start watching early. Search any leg below.</p>
-    <div class="jflow">
-      <button type="button" class="jleg" data-jleg="0"><div class="r">Hamburg</div><div class="d">HAM · start</div></button>
-      <span class="jarrow">→</span>
-      <button type="button" class="jleg" data-jleg="0"><div class="r">Bangkok</div><div class="d">BKK · long haul</div><div class="go">Search HAM → BKK</div></button>
-      <span class="jarrow">→</span>
-      <button type="button" class="jleg" data-jleg="1"><div class="r">Luang Prabang</div><div class="d">LPQ · the wedding</div><div class="go">Search BKK → LPQ</div></button>
-      <span class="jarrow">→</span>
-      <button type="button" class="jleg" data-jleg="2"><div class="r">Bangkok → Hamburg</div><div class="d">the way home</div><div class="go">Search return</div></button>
+    <div class="eyebrow">Your wedding journey</div>
+    <h3>Home to Luang Prabang, and home again.</h3>
+    <p>A suggested flow for the weekend: your city to Bangkok, the short hop up to Luang Prabang for the wedding, then back the same way. These are only defaults — load any leg into the search and change the airports, dates, cabin or passengers freely.</p>
+    <div class="j-country"><label for="j-country">Flying from</label>
+      <select id="j-country">${opts}</select>
+      <span>We preselect a sensible home airport (${esc(homeAirport())}); you can always edit it.</span>
     </div>
+    <div class="jflow">${cells.join('')}</div>
   </section>`;
 }
 
@@ -431,6 +602,8 @@ function viewCompare(){
     <div class="cmp-grid">${offers.map(o=>{
       const win=o.id===b.recommended;
       const badge=o.id===b.recommended?'<span class="badge rec">Recommended</span>':o.id===b.best?'<span class="badge val">Best value</span>':o.id===b.cheapest?'<span class="badge cheap">Cheapest</span>':o.id===b.fastest?'<span class="badge fast">Fastest</span>':'';
+      const brand=providerBrand(o); const choices=providerChoices(o);
+      const provs=choices.length>1?`<div class="provchips">${choices.map(pc=>{const pb=providerBrand(pc);return `<span class="provchip">${pb.logoUrl?`<img src="${esc(pb.logoUrl)}" alt="">`:''}${esc(pb.name)} · ${money(pc.price)}</span>`;}).join('')}</div>`:'';
       return `<div class="cmp-col ${win?'win':''}">
         <div class="fc-badges">${badge}</div>
         <div class="al">${o.logoUrl?`<img src="${esc(o.logoUrl)}" alt="" onerror="this.style.display='none'">`:''}${esc(o.owner)}</div>
@@ -440,7 +613,8 @@ function viewCompare(){
         <div class="cmp-row"><span class="k">Cabin</span><span>${esc(o.cabin||'—')}</span></div>
         <div class="cmp-row"><span class="k">Checked bag</span><span>${o.bagsIncluded==null?'—':o.bagsIncluded}</span></div>
         <div class="cmp-row"><span class="k">Refundable</span><span>${o.conditions&&o.conditions.refundable?'Yes':'No'}</span></div>
-        <button type="button" class="book" data-book="${esc(o.id)}">Book · via Duffel</button>
+        ${provs?`<div class="cmp-row"><span class="k">Also via</span></div>${provs}`:''}
+        <button type="button" class="book" data-book="${esc(o.id)}">Book · via ${esc(brand.name||'provider')}</button>
       </div>`;}).join('')}</div>
   </div>`;
 }
@@ -556,15 +730,18 @@ function flightCard(o,b){
     cond.changeable?`<span class="tag ok">Changeable${cond.changePenalty?' '+money(cond.changePenalty):''}</span>`:'',
   ].filter(Boolean).join('');
   const cmp=state.compare.includes(o.id);
+  const choices=providerChoices(o);
+  const provRow=choices.length>1?`<div class="provchips">${choices.map(pc=>{const pb=providerBrand(pc);return `<span class="provchip">${pb.logoUrl?`<img src="${esc(pb.logoUrl)}" alt="">`:''}${esc(pb.name)} · ${money(pc.price)}</span>`;}).join('')}</div>`:'';
   return `<article class="fcard ${o.id===b.recommended?'rec':''}">
     <div class="fc-main">
       ${badges?`<div class="fc-badges">${badges}</div>`:''}
       <div class="fc-airline">${o.logoUrl?`<img src="${esc(o.logoUrl)}" alt="" loading="lazy" onerror="this.style.display='none'">`:''}<span class="nm">${esc(o.owner||o.outbound.carrierName)}</span><span class="fn">${esc(fn)}</span></div>
       ${legRow(o.outbound,'out')}${legRow(o.inbound,'return')}
       <div class="fc-tags">${tags}</div>
+      ${provRow}
     </div>
     <div class="fc-side">
-      <div class="fc-price">${money(o.price)}</div><div class="via">total · ${esc(o.provider||'duffel')}</div>
+      <div class="fc-price">${money(o.price)}</div><div class="via">total · via ${esc(o.provider||'provider')}</div>
       <button type="button" class="book" data-book="${esc(o.id)}">${esc((o.booking&&o.booking.label)||'View booking options')} →</button>
       <div class="row2"><label class="cmp"><input type="checkbox" data-cmp="${esc(o.id)}" ${cmp?'checked':''}> Compare</label><button type="button" class="track2" data-track-offer>Track route</button></div>
     </div>
@@ -649,11 +826,15 @@ function wire(){
   document.querySelectorAll('[data-track-offer]').forEach(b=>b.onclick=trackCurrent);
   document.querySelectorAll('[data-track]').forEach(b=>b.onclick=()=>selectTrack(b.dataset.track));
   document.querySelectorAll('[data-untrack]').forEach(b=>b.onclick=()=>removeTrack(b.dataset.untrack));
-  // booking + compare + recommended journey
+  // booking + compare
   document.querySelectorAll('[data-book]').forEach(b=>b.onclick=()=>bookOffer(b.dataset.book));
   document.querySelectorAll('[data-cmp]').forEach(b=>b.onchange=()=>toggleCompare(b.dataset.cmp));
-  document.querySelectorAll('[data-jleg]').forEach(b=>b.onclick=()=>applyPreset(PRESETS[+b.dataset.jleg]));
   $('#cmp-clear')&&($('#cmp-clear').onclick=()=>{state.compare=[];save();render();});
+  // market dashboard + editable journey
+  document.querySelectorAll('[data-mroute]').forEach(b=>b.onclick=()=>applyMarketRoute(b.dataset.mroute));
+  const legs=journeyLegs();
+  document.querySelectorAll('[data-jkey]').forEach(b=>b.onclick=()=>{const l=legs.find(x=>x.key===b.dataset.jkey);if(l)applyJourneyLeg(l);});
+  $('#j-country')&&($('#j-country').onchange=e=>setCountry(e.target.value));
 }
 function commitAndSearch(){
   // pull latest field values (in case not blurred) then search
@@ -681,10 +862,25 @@ function attachAutocomplete(input){
   input.addEventListener('blur',()=>setTimeout(()=>{const v=input.value.trim();if(v&&!/^[A-Za-z]{3}$/.test(v)&&items.length)choose(items[0]);else{input.value=v.toUpperCase();state.search[input.id==='f-origin'?'origin':'destination']=v.toUpperCase();}hide();},160));
 }
 
+/* ---------- persistence: keep scroll position + restore on back/reload ---------- */
+let _scrollT;
+window.addEventListener('scroll',()=>{ clearTimeout(_scrollT); _scrollT=setTimeout(saveSession,300); },{passive:true});
+window.addEventListener('pagehide',saveSession);
+function restoreScroll(y){ if(!y) return; let n=0; const t=setInterval(()=>{ window.scrollTo(0,y); if(++n>10||Math.abs(window.scrollY-y)<4) clearInterval(t); },40); }
+
 /* ---------- boot ---------- */
 load();
+const _sess=loadSession();
 render();
-refreshBackend().then(()=>{ render(); if(state.backend.reachable&&state.backend.configured) runSearch(); });
+refreshBackend().then(()=>{
+  render();
+  if(state.backend.reachable&&state.backend.configured){
+    loadMarket();                                   // live market dashboard (seeds/refreshes)
+    const restored=_sess&&_sess.results&&(_sess.results.status==='ok'||_sess.results.status==='empty')&&_sess.results.offers&&_sess.results.offers.length;
+    if(restored){ render(); restoreScroll(_sess.scrollY); }   // never start over
+    else runSearch();                               // fresh visit → search the wedding default
+  }
+});
 </script>
 </body>
 </html>

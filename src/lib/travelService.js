@@ -14,7 +14,8 @@
  * valid, which is best, budget/alert logic) lives here or in the app — never in
  * the adapter, and never in the browser's reach of a secret.
  */
-const { getProvider } = require('./providers/flightProvider');
+const { getProvider, getProviders } = require('./providers/flightProvider');
+const { MONITORED_ROUTES, routeKey, routeQuery } = require('./monitoredRoutes');
 
 const IATA = /^[A-Z]{3}$/;
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -177,4 +178,156 @@ function envKeysFor(name) {
   return 'the provider credentials';
 }
 
-module.exports = { handleAction, normalizeQuery, bestCombinations };
+/* ============================================================================
+   Flight Market — the monitored-route dashboard (provider-independent)
+   ============================================================================
+   The market asks EVERY configured provider for the cheapest live offer on each
+   monitored route, keeps the best, and persists a daily snapshot. Cards are
+   computed from that real history; nothing is fabricated. When a route has no
+   history yet the card reports status 'collecting' and a snapshot is seeded so
+   history begins immediately. The daily cron deepens the series over time. */
+
+const ROUTE_REFRESH_TTL_MS = 6 * 3600 * 1000; // don't re-price a route more than every 6h on read
+const MARKET_CONCURRENCY = 5;
+
+/**
+ * Price ONE monitored route across all configured providers; return the best
+ * offer plus a per-provider breakdown, or null if nobody had inventory.
+ */
+async function priceRoute(providers, route, now = new Date()) {
+  const q = routeQuery(route, now);
+  const byProvider = [];
+  for (const p of providers) {
+    if (!p.isConfigured) continue;
+    try {
+      const offers = await p.searchOffers(q);
+      if (offers && offers.length) {
+        const best = offers[0]; // adapters return cheapest-first
+        byProvider.push({
+          provider: p.name,
+          price: best.price.amount,
+          currency: best.price.currency,
+          offers: offers.length,
+          branding: (best.booking && best.booking.branding) || { name: p.name, logoUrl: best.logoUrl || null },
+          bookingUrl: (best.booking && best.booking.bookingUrl) || null,
+          offerId: best.id,
+        });
+      }
+    } catch (e) {
+      if (e && e.status === 429) throw e; // let a rate-limit surface
+      // otherwise treat as "no inventory from this provider right now"
+    }
+  }
+  if (!byProvider.length) return null;
+  byProvider.sort((a, b) => a.price - b.price);
+  const win = byProvider[0];
+  return {
+    date: now.toISOString().slice(0, 10),
+    ts: now.getTime(),
+    price: win.price,
+    currency: win.currency,
+    offers: win.offers,
+    provider: win.provider,
+    branding: win.branding,
+    bookingUrl: win.bookingUrl,
+    offerId: win.offerId,
+    byProvider,
+  };
+}
+
+/** Refresh every monitored route now and persist a snapshot (used by the cron). */
+async function refreshMarket(env, store, now = new Date()) {
+  const providers = getProviders(env).filter((p) => p.isConfigured);
+  const summary = [];
+  const routes = [...MONITORED_ROUTES];
+  for (let i = 0; i < routes.length; i += MARKET_CONCURRENCY) {
+    const batch = routes.slice(i, i + MARKET_CONCURRENCY);
+    await Promise.all(batch.map(async (route) => {
+      try {
+        const snap = await priceRoute(providers, route, now);
+        if (snap) { await store.appendRouteSnapshot(routeKey(route.origin, route.destination), snap); summary.push({ route: route.id, price: snap.price }); }
+        else summary.push({ route: route.id, skipped: 'no-inventory' });
+      } catch (e) { summary.push({ route: route.id, error: e.message }); }
+    }));
+  }
+  return { refreshed: summary.length, summary };
+}
+
+/** Trend/percent helpers over a snapshot series (real numbers only). */
+function computeCard(route, snaps) {
+  if (!snaps.length) {
+    return { ...routePublic(route), status: 'collecting', current: null, previous: null,
+      change: null, changePct: null, spark: [], low30: null, trend: null, history: 0 };
+  }
+  const last = snaps[snaps.length - 1];
+  const prev = snaps.length > 1 ? snaps[snaps.length - 2] : null;
+  const change = prev ? +(last.price - prev.price).toFixed(2) : null;
+  const changePct = prev && prev.price ? +(((last.price - prev.price) / prev.price) * 100).toFixed(1) : null;
+  const spark = snaps.slice(-7).map((s) => s.price);
+  const cutoff = last.ts - 30 * 86400000;
+  const low30 = Math.min(...snaps.filter((s) => (s.ts || 0) >= cutoff).map((s) => s.price));
+  const trend = change == null ? null : (changePct >= 0.5 ? 'up' : changePct <= -0.5 ? 'down' : 'flat');
+  return {
+    ...routePublic(route),
+    status: snaps.length < 2 ? 'collecting' : 'ok', // one point = live price shown, sparkline still gathering
+    current: { price: last.price, currency: last.currency, offers: last.offers, provider: last.provider,
+      branding: last.branding, bookingUrl: last.bookingUrl, offerId: last.offerId, ts: last.ts, date: last.date,
+      byProvider: last.byProvider || null },
+    previous: prev ? prev.price : null,
+    change, changePct, spark, low30, trend, history: snaps.length,
+  };
+}
+function routePublic(r) {
+  return { id: r.id, origin: r.origin, destination: r.destination, originCity: r.originCity,
+    country: r.country, flag: r.flag, kind: r.kind };
+}
+
+/**
+ * Build the full market overview for the dashboard. Seeds any route that has no
+ * fresh snapshot (older than the TTL) unless refresh is explicitly disabled.
+ * @returns {Promise<{status:string, asOf:string, currency:string, routes:any[]}>}
+ */
+async function marketOverview(env, store, opts = {}) {
+  const providers = getProviders(env);
+  const configured = providers.filter((p) => p.isConfigured);
+  const now = opts.now || new Date();
+  const refresh = opts.refresh !== false && configured.length > 0;
+
+  // Decide which routes need a live price now (missing or stale), then seed them.
+  const routeSnaps = {};
+  const stale = [];
+  for (const route of MONITORED_ROUTES) {
+    const key = routeKey(route.origin, route.destination);
+    const snaps = await store.getRouteSnapshots(key);
+    routeSnaps[key] = snaps;
+    const last = snaps[snaps.length - 1];
+    if (refresh && (!last || (now.getTime() - (last.ts || 0)) > ROUTE_REFRESH_TTL_MS)) stale.push(route);
+  }
+  if (stale.length) {
+    for (let i = 0; i < stale.length; i += MARKET_CONCURRENCY) {
+      const batch = stale.slice(i, i + MARKET_CONCURRENCY);
+      await Promise.all(batch.map(async (route) => {
+        try {
+          const snap = await priceRoute(configured, route, now);
+          if (snap) {
+            const key = routeKey(route.origin, route.destination);
+            await store.appendRouteSnapshot(key, snap);
+            routeSnaps[key] = await store.getRouteSnapshots(key);
+          }
+        } catch (e) { /* leave the route on its existing history; card shows 'collecting' */ }
+      }));
+    }
+  }
+
+  const routes = MONITORED_ROUTES.map((route) =>
+    computeCard(route, routeSnaps[routeKey(route.origin, route.destination)] || []));
+  return {
+    status: configured.length ? 'ok' : 'not_configured',
+    provider: configured[0] ? configured[0].name : (providers[0] && providers[0].name),
+    asOf: now.toISOString(),
+    currency: 'EUR',
+    routes,
+  };
+}
+
+module.exports = { handleAction, normalizeQuery, bestCombinations, marketOverview, refreshMarket };

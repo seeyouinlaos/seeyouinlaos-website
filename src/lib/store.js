@@ -7,8 +7,9 @@
  * is present (local `wrangler dev` without KV, or unit tests) it falls back to an
  * in-memory map so nothing hard-crashes.
  *
- * Key scheme:  trip:<id>   → the monitored strategy
- *              hist:<id>   → append-only array of daily price snapshots
+ * Key scheme:  trip:<id>    → the monitored strategy
+ *              hist:<id>    → append-only array of daily price snapshots
+ *              route:<key>  → append-only market snapshots for a monitored route
  */
 
 function createStore(kv) {
@@ -66,7 +67,23 @@ function createStore(kv) {
       return next.length;
     },
     async getHistory(tripId) { return (await getJSON(`hist:${tripId}`)) || []; },
+
+    /* ---- monitored-route market history (one snapshot per calendar day) ----
+       A snapshot is { date, ts, price, currency, offers, provider }. Kept to the
+       last MAX_ROUTE_SNAPSHOTS days so a route's series stays bounded in KV. */
+    async appendRouteSnapshot(key, snapshot) {
+      const k = `route:${key}`;
+      const hist = (await getJSON(k)) || [];
+      const next = hist.filter((h) => h.date !== snapshot.date).concat([snapshot]);
+      next.sort((a, b) => a.date.localeCompare(b.date));
+      const trimmed = next.slice(-MAX_ROUTE_SNAPSHOTS);
+      await setJSON(k, trimmed);
+      return trimmed.length;
+    },
+    async getRouteSnapshots(key) { return (await getJSON(`route:${key}`)) || []; },
   };
 }
+
+const MAX_ROUTE_SNAPSHOTS = 40;
 
 module.exports = { createStore };
