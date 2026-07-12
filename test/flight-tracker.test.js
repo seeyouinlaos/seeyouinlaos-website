@@ -244,7 +244,7 @@ test('Provider registry: getProviders returns an ordered, deduped list', () => {
 test('Monitored routes: ten canonical routes + country-aware defaults', () => {
   assert.equal(MONITORED_ROUTES.length, 10);
   const ids = MONITORED_ROUTES.map((r) => r.id);
-  ['HAM-BKK', 'FRA-BKK', 'MUC-BKK', 'TUN-BKK', 'ATH-BKK', 'LIS-BKK', 'DXB-BKK', 'NRT-BKK', 'BKK-LPQ', 'LPQ-BKK']
+  ['HAM-BKK', 'FRA-BKK', 'MUC-BKK', 'TUN-BKK', 'ATH-BKK', 'LIS-BKK', 'LAS-BKK', 'NRT-BKK', 'BKK-LPQ', 'LPQ-BKK']
     .forEach((id) => assert.ok(ids.includes(id), `route ${id}`));
   assert.equal(defaultAirportForCountry('DE'), 'HAM');
   assert.equal(defaultAirportForCountry('JP'), 'NRT');

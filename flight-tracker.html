@@ -414,8 +414,8 @@ const MARKET_LEAD=45; // must match the server's sample lead (monitoredRoutes.js
 const marketSampleDate=()=>addDays(todayISO(),MARKET_LEAD);
 /* Country → preferred departure airports (first = default pick). Mirrors the
    backend country map; the journey stays generic and always editable. */
-const COUNTRY_AIRPORTS={ '':['HAM'], DE:['HAM','FRA','MUC'], TN:['TUN'], GR:['ATH'], PT:['LIS'], AE:['DXB'], JP:['NRT'] };
-const COUNTRY_LABELS={ '':'Not set (generic)', DE:'Germany', TN:'Tunisia', GR:'Greece', PT:'Portugal', AE:'United Arab Emirates', JP:'Japan' };
+const COUNTRY_AIRPORTS={ '':['HAM'], DE:['HAM','FRA','MUC'], TN:['TUN'], GR:['ATH'], PT:['LIS'], US:['LAS'], JP:['NRT'] };
+const COUNTRY_LABELS={ '':'Not set (generic)', DE:'Germany', TN:'Tunisia', GR:'Greece', PT:'Portugal', US:'United States', JP:'Japan' };
 const homeAirport=()=> (COUNTRY_AIRPORTS[state.journeyCountry]||['HAM'])[0];
 /* Default wedding-journey legs (intelligent defaults; the builder is fully editable). */
 let _legSeq=0; const legId=()=>'l'+(Date.now().toString(36))+(_legSeq++);
