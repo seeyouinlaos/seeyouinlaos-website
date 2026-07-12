@@ -111,10 +111,12 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 .cal .day{ scroll-snap-align:start; flex:0 0 auto; min-width:96px; border:1px solid var(--line); background:var(--card); border-radius:3px; padding:10px 12px; text-align:center; cursor:pointer; transition:border-color .15s, background .15s; }
 .cal .day:hover{ border-color:var(--rose); }
 .cal .day.active{ border-color:var(--cherry); background:#fff; }
-.cal .day.cheapest{ box-shadow:inset 0 0 0 1px var(--good); }
+.cal .day.cheapest{ border-color:var(--good); background:rgba(47,111,79,.10); box-shadow:inset 0 0 0 1px var(--good); }
+.cal .day.cheapest.active{ background:rgba(47,111,79,.16); }
 .cal .day .d{ font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--rose); }
 .cal .day .p{ font-family:var(--serif); font-weight:200; font-size:19px; margin-top:5px; }
 .cal .day .p.lo{ color:var(--good); }
+.cal .day .lo-tag{ display:block; font-size:8.5px; letter-spacing:.12em; text-transform:uppercase; color:#fff; background:var(--good); border-radius:20px; padding:1px 0; margin-top:5px; font-weight:600; }
 .cal-empty{ font-size:13px; color:var(--rose); padding:10px 0; }
 
 /* results toolbar */
@@ -159,7 +161,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 .badge{ font-size:9.5px; letter-spacing:.14em; text-transform:uppercase; padding:4px 10px; border-radius:20px; font-weight:600; }
 .badge.rec{ background:var(--cherry); color:#fff; }
 .badge.val{ background:var(--ink); color:var(--ivory); }
-.badge.cheap{ background:rgba(47,111,79,.14); color:var(--good); border:1px solid rgba(47,111,79,.4); }
+.badge.cheap{ background:var(--good); color:#fff; border:none; }
 .badge.fast{ background:var(--blush); color:var(--ink); }
 .fc-side .book{ display:inline-flex; align-items:center; justify-content:center; gap:7px; background:var(--cherry); border:1px solid var(--cherry); color:#fff; padding:12px 20px; font-size:11px; letter-spacing:.14em; text-transform:uppercase; border-radius:2px; width:100%; transition:background .15s; }
 .fc-side .book:hover{ background:#5c060b; color:#fff; }
@@ -167,6 +169,13 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 .fc-side .row2 .cmp{ display:flex; align-items:center; gap:6px; font-size:11px; color:var(--rose); cursor:pointer; white-space:nowrap; }
 .fc-side .track2{ font-size:11px; color:var(--rose); text-decoration:underline; text-underline-offset:2px; background:none; border:none; padding:0; }
 .fcard.rec{ border-color:var(--cherry); box-shadow:0 0 0 1px rgba(116,7,14,.14); }
+.fcard.cheapest{ border-color:var(--good); box-shadow:0 0 0 1px rgba(47,111,79,.18); }
+.fc-trip{ font-size:12.5px; color:var(--rose); margin-bottom:10px; letter-spacing:.02em; }
+.fc-trip b{ color:var(--ink); }
+.leg-head{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin:10px 0 2px; }
+.leg-head .dir{ font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--rose); }
+.leg-head .leg-date{ font-size:13px; font-weight:600; color:var(--ink); letter-spacing:.01em; }
+.res-sub .rs-date{ color:var(--ink); } .res-sub .rs-trip{ color:var(--cherry); }
 @media (max-width:640px){ .fcard{ grid-template-columns:1fr; } .fc-side{ align-items:stretch; text-align:left; width:100%; border-top:1px solid var(--line); padding-top:14px; }
   .fc-side .fc-price{ font-size:26px; } .fc-side .book{ font-size:12px; padding:14px; } }
 
@@ -374,7 +383,7 @@ svg.chart{ display:block; width:100%; height:180px; }
    Real fares only. No simulated data. Token lives only as the Worker secret.
    ============================================================================ */
 const API='/api/travel';
-const KEY='svil_ft_v3';
+const KEY='svil_ft_v4';
 const $=(s,r=document)=>r.querySelector(s);
 const DAY=86400000;
 
@@ -401,6 +410,7 @@ const fmtDay=s=>s?parse(s).toLocaleDateString('en-GB',{weekday:'short',day:'2-di
 const fmtDayShort=s=>s?parse(s).toLocaleDateString('en-GB',{day:'2-digit',month:'short',timeZone:'UTC'}):'—';
 const fmtDayY=s=>s?parse(s).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric',timeZone:'UTC'}):'—';
 const fmtT=at=>{try{return new Date(at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});}catch{return '';}};
+const fmtDateWk=at=>{try{return new Date(at).toLocaleDateString('en-GB',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});}catch{return '';}};
 const fmtDur=m=>m?`${Math.floor(m/60)}h ${String(m%60).padStart(2,'0')}m`:'';
 /* All formatting goes through the one Money library (money.js). `a` may be a
    number or a {amount,currency} object; server prices already carry their currency. */
@@ -415,8 +425,8 @@ const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;'
 const dayOffset=(a,b)=>{try{const d=Math.round((new Date(b).setHours(0,0,0,0)-new Date(a).setHours(0,0,0,0))/DAY);return d>0?d:0;}catch{return 0;}};
 
 /* ---------- defaults & presets (wedding) ---------- */
-const DEFAULTS={ origin:'HAM', destination:'BKK', departDate:'2027-02-21', returnDate:'2027-03-10',
-  nightsMin:16, nightsMax:18, adults:1, cabin:'Economy', maxStops:1, maxBudget:900, flexDays:3, oneWay:false };
+const DEFAULTS={ origin:'HAM', destination:'BKK', departDate:'2027-02-21', returnDate:'2027-03-02',
+  nightsMin:9, nightsMax:12, adults:1, cabin:'Economy', maxStops:1, maxBudget:1200, flexDays:3, oneWay:false };
 const PRESETS=[
   { label:'Germany → Wedding', s:{origin:'HAM',destination:'BKK',departDate:'2027-02-21',returnDate:'2027-03-10',oneWay:false,nightsMin:16,nightsMax:18} },
   { label:'Bangkok → Wedding', s:{origin:'BKK',destination:'LPQ',departDate:'2027-02-27',returnDate:'2027-03-01',oneWay:false,nightsMin:1,nightsMax:4} },
@@ -489,7 +499,7 @@ function providerChoices(offer){
   return Object.values(byProv).sort((a,b)=>a.price.amount-b.price.amount);
 }
 
-const SKEY='svil_ft_session';
+const SKEY='svil_ft_session_v4';
 function save(){
   localStorage.setItem(KEY,JSON.stringify({search:state.search,filters:state.filters,tracked:state.tracked,selectedTrack:state.selectedTrack,compare:state.compare,journeyCountry:state.journeyCountry,journey:state.journey,currency:state.currency}));
   saveSession();
@@ -550,9 +560,9 @@ async function loadCalendar(){
   }catch(e){ state.calendar={status:'empty',days:[]}; }
   render();
 }
-function applyPreset(p){ state.search={...DEFAULTS,...state.search,...p.s}; if(p.s.oneWay) state.search.returnDate=null; save(); runSearch(); }
-function pickDate(day){ state.search.departDate=day.departureDate; if(day.returnDate) state.search.returnDate=day.returnDate; save(); runSearch(); }
-function shiftDay(delta){ state.search.departDate=addDays(state.search.departDate,delta); if(!state.search.oneWay&&state.search.returnDate) state.search.returnDate=addDays(state.search.returnDate,delta); save(); runSearch(); }
+function applyPreset(p){ state.search={...DEFAULTS,...state.search,...p.s}; if(p.s.oneWay) state.search.returnDate=null; save(); runSearch(); scrollToResults(); }
+function pickDate(day){ state.search.departDate=day.departureDate; if(day.returnDate) state.search.returnDate=day.returnDate; save(); runSearch(); scrollToResults(); }
+function shiftDay(delta){ state.search.departDate=addDays(state.search.departDate,delta); if(!state.search.oneWay&&state.search.returnDate) state.search.returnDate=addDays(state.search.returnDate,delta); save(); runSearch(); scrollToResults(); }
 
 /* ---------- flight market dashboard ---------- */
 async function loadMarket(){
@@ -918,7 +928,7 @@ function viewCalendar(){
       c.status==='loading'?`<div class="cal-empty"><span class="spin"></span>Comparing nearby dates…</div>`:
       c.status==='empty'?`<div class="cal-empty">No nearby-date prices for this route in test data.</div>`:
       c.days.map(d=>`<button type="button" class="day ${d.departureDate===s.departDate?'active':''} ${d.price.amount===cheapest?'cheapest':''}" data-cal="${d.departureDate}|${d.returnDate||''}">
-        <div class="d">${fmtDay(d.departureDate)}</div><div class="p ${d.price.amount===cheapest?'lo':''}">${money(d.price)}</div></button>`).join('')
+        <div class="d">${fmtDay(d.departureDate)}</div><div class="p ${d.price.amount===cheapest?'lo':''}">${money(d.price)}</div>${d.price.amount===cheapest?'<span class="lo-tag">Cheapest</span>':''}</button>`).join('')
     }</div>
     <button type="button" class="nav" id="cal-next" aria-label="Later day">›</button>
   </div>`;
@@ -929,7 +939,10 @@ function viewResults(){
   if(r.status==='idle') return `<div class="section-h"><h3>Flights</h3></div><div class="state"><div class="serif">Ready when you are</div><p>${(state.backend.reachable&&state.backend.configured)?'Set your route and dates, then search live Duffel fares.':'Live fares appear once the Travel Service and a provider are configured.'}</p></div>`;
   const offers=filteredOffers();
   const cheapest=offers.length?offers[0].price.amount:null;
-  const head=`<div class="res-head"><h3>Flights</h3>${offers.length?`<span class="res-sub">${offers.length} of ${r.offers.length} · ${esc(s.origin)} → ${esc(s.destination)} · ${fmtDayShort(s.departDate)}${s.oneWay?'':' → '+fmtDayShort(s.returnDate)} · from ${money(offers[0].price)}</span>`:''}</div>`;
+  const rt=!s.oneWay, tn=rt?nights(s.departDate,s.returnDate):0;
+  const tripTxt=rt?`Round trip · ${tn} night${tn===1?'':'s'}`:'One way';
+  const dateTxt=`${fmtDayShort(s.departDate)}${rt?' → '+fmtDayShort(s.returnDate):''}`;
+  const head=`<div class="res-head"><h3>Flights</h3>${offers.length?`<span class="res-sub"><b class="rs-date">${esc(dateTxt)}</b> · <b class="rs-trip">${tripTxt}</b> · ${esc(s.origin)} → ${esc(s.destination)} · ${offers.length} of ${r.offers.length} · from ${money(offers[0].price)}</span>`:''}</div>`;
   const filters=`<div class="filters">
     <div class="fl"><label>Sort</label><select id="fl-sort">${SORTS.map(([v,l])=>`<option value="${v}" ${state.filters.sort===v?'selected':''}>${l}</option>`).join('')}</select></div>
     <div class="fl"><label>Stops</label><select id="fl-stops">${[['any','Any'],['0','Nonstop'],['1','≤1 stop']].map(([v,l])=>`<option value="${v}" ${state.filters.maxStops===v?'selected':''}>${l}</option>`).join('')}</select></div>
@@ -947,7 +960,8 @@ function viewResults(){
 function legRow(l,dir){
   if(!l) return '';
   const plus=dayOffset(l.from.at,l.to.at);
-  return `<div class="leg">
+  return `<div class="leg-head"><span class="dir">${dir==='return'?'↩ Return':'✈ Outbound'}</span><span class="leg-date">${esc(fmtDateWk(l.from.at))}</span></div>
+  <div class="leg">
     <div class="pt"><div class="t">${fmtT(l.from.at)}</div><div class="a">${esc(l.from.iataCode)}</div></div>
     <div class="mid"><div class="dur">${fmtDur(l.durationMinutes)}</div><div class="bar"></div><div class="st ${l.stops===0?'nonstop':''}">${l.stops===0?'Nonstop':l.stops+' stop'+(l.stops>1?'s':'')}</div></div>
     <div class="pt"><div class="t">${fmtT(l.to.at)}${plus?`<span class="plus">+${plus}</span>`:''}</div><div class="a">${esc(l.to.iataCode)}</div></div>
@@ -973,10 +987,15 @@ function flightCard(o,b){
   const cmp=state.compare.includes(o.id);
   const choices=providerChoices(o);
   const provRow=choices.length>1?`<div class="provchips">${choices.map(pc=>{const pb=providerBrand(pc);return `<span class="provchip">${pb.logoUrl?`<img src="${esc(pb.logoUrl)}" alt="">`:''}${esc(pb.name)} · ${money(pc.price)}</span>`;}).join('')}</div>`:'';
-  return `<article class="fcard ${o.id===b.recommended?'rec':''}">
+  const rt=!!o.inbound;
+  const n=rt?nights(o.outbound.from.at.slice(0,10),o.inbound.from.at.slice(0,10)):0;
+  const trip=`<div class="fc-trip">${rt?`Round trip · <b>${n} night${n===1?'':'s'}</b>`:'One way'}</div>`;
+  const cls=o.id===b.recommended?'rec':o.id===b.cheapest?'cheapest':'';
+  return `<article class="fcard ${cls}">
     <div class="fc-main">
       ${badges?`<div class="fc-badges">${badges}</div>`:''}
       <div class="fc-airline">${o.logoUrl?`<img src="${esc(o.logoUrl)}" alt="" loading="lazy" onerror="this.style.display='none'">`:''}<span class="nm">${esc(o.owner||o.outbound.carrierName)}</span><span class="fn">${esc(fn)}</span></div>
+      ${trip}
       ${legRow(o.outbound,'out')}${legRow(o.inbound,'return')}
       <div class="fc-tags">${tags}</div>
       ${provRow}
@@ -1133,7 +1152,7 @@ function commitAndSearch(){
   state.search.destination=(g('#f-dest')||state.search.destination).trim().toUpperCase();
   if(g('#f-dep'))state.search.departDate=g('#f-dep');
   if(g('#f-ret')&&!state.search.oneWay)state.search.returnDate=g('#f-ret');
-  save(); runSearch();
+  save(); runSearch(); scrollToResults();
 }
 
 /* ---------- search origin/destination fields (Duffel Places) ---------- */
