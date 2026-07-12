@@ -272,6 +272,14 @@ test('Market card exposes the EXACT dates behind its price', async () => {
   assert.equal(hop.current.departureDate, '2027-02-15');
   assert.equal(hop.current.returnDate, null);
   assert.equal(hop.current.oneWay, true);
+  // decision context: airline + stops + outbound duration of the priced itinerary
+  assert.equal(ham.current.airline, 'Thai Airways');
+  assert.equal(ham.current.stops, 0);
+  assert.equal(ham.current.durationMinutes, 695); // PT11H35M
+  const snap = (await store.getRouteSnapshots(routeKey('HAM', 'BKK'))).slice(-1)[0];
+  assert.equal(snap.stops, 0);
+  assert.equal(snap.durationMinutes, 695);
+  assert.equal(snap.airline, 'Thai Airways');
   // the stored snapshot carries the same dates → card and Duffel search never drift
   const snaps = await store.getRouteSnapshots(routeKey('HAM', 'BKK'));
   assert.equal(snaps[snaps.length - 1].departureDate, '2027-02-15');

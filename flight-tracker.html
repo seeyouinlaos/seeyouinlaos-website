@@ -252,6 +252,8 @@ svg.chart{ display:block; width:100%; height:180px; }
 @keyframes bobU{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(-2px);} }
 .m-dates{ font-size:12.5px; color:var(--ink); letter-spacing:.01em; }
 .m-dates .sub{ display:block; font-size:10.5px; color:var(--rose); margin-top:2px; letter-spacing:.06em; text-transform:uppercase; }
+.m-itin{ font-size:11px; color:var(--rose); letter-spacing:.02em; margin-top:-2px; }
+.m-itin .nonstop{ color:var(--good); }
 .mspark{ display:block; width:100%; height:34px; overflow:visible; }
 .mspark .ar{ fill:rgba(179,58,63,.09); }
 .mspark .ln{ fill:none; stroke:var(--cherry-photo); stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
@@ -687,6 +689,7 @@ function marketCard(r){
   const priceBlock=c?`<div class="m-price-row"><span class="m-price">${money(c.price,c.currency)}</span>${chg}</div>`
     :`<div class="m-price-row"><span class="m-price" style="opacity:.4">—</span></div>`;
   const dates=marketDates(c);
+  const itin=marketItin(c);
   const stat=`<span class="m-stat ${r.status}">${r.status==='ok'?'● Live':c?'● Collecting':'● No data'}</span>`;
   const meta = c ? (r.history>=2
       ? `<div class="m-meta">${stat}<span>30-day low <b>${money(r.low30,c.currency)}</b></span><span><b>${c.offers}</b> live offers</span><span>updated ${ago(c.ts)}</span></div>`
@@ -699,6 +702,7 @@ function marketCard(r){
     </div>
     ${priceBlock}
     ${dates}
+    ${itin}
     ${sparkSVG(r.spark)}
     ${meta}
     <span class="m-cta">View live fares →</span>
@@ -710,6 +714,13 @@ function marketDates(c){
   if(c.oneWay||!c.returnDate) return `<div class="m-dates">${esc(fmtDayY(c.departureDate))}<span class="sub">One way</span></div>`;
   const n=c.nights!=null?c.nights:nights(c.departureDate,c.returnDate);
   return `<div class="m-dates">${esc(fmtDayShort(c.departureDate))} → ${esc(fmtDayY(c.returnDate))}<span class="sub">${n} night${n===1?'':'s'}</span></div>`;
+}
+/* Stops + outbound duration of the priced itinerary (airline is shown top-right). */
+function marketItin(c){
+  if(!c||(c.stops==null&&!c.durationMinutes)) return '';
+  const stops=c.stops==null?'':`<span class="${c.stops===0?'nonstop':''}">${c.stops===0?'Nonstop':c.stops+' stop'+(c.stops>1?'s':'')}</span>`;
+  const dur=c.durationMinutes?`${fmtDur(c.durationMinutes)}`:'';
+  return `<div class="m-itin">${[stops,dur].filter(Boolean).join(' · ')}</div>`;
 }
 function viewMarket(){
   if(!(state.backend.reachable&&state.backend.configured)) return '';

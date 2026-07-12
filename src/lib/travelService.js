@@ -246,6 +246,9 @@ async function priceRoute(providers, route, now = new Date()) {
           currency: best.price.currency,
           offers: offers.length,
           branding: (best.booking && best.booking.branding) || { name: p.name, logoUrl: best.logoUrl || null },
+          airline: best.owner || (best.outbound && best.outbound.carrierName) || null,
+          stops: best.outbound ? best.outbound.stops : null,          // outbound leg (to the destination)
+          durationMinutes: best.outbound ? best.outbound.durationMinutes : null,
           bookingUrl: (best.booking && best.booking.bookingUrl) || null,
           offerId: best.id,
         });
@@ -275,6 +278,9 @@ async function priceRoute(providers, route, now = new Date()) {
     returnDate: q.returnDate,
     oneWay: !q.returnDate,
     nights,
+    airline: win.airline || (win.branding && win.branding.name) || null,
+    stops: win.stops != null ? win.stops : null,
+    durationMinutes: win.durationMinutes != null ? win.durationMinutes : null,
     byProvider,
   };
 }
@@ -327,6 +333,8 @@ function computeCard(route, snaps, to, rateTo) {
       nativePrice: last.price, nativeCurrency: nativeCur,
       departureDate: last.departureDate || null, returnDate: last.returnDate || null,
       oneWay: last.oneWay != null ? last.oneWay : (last.returnDate ? false : true), nights: last.nights != null ? last.nights : null,
+      airline: last.airline || (last.branding && last.branding.name) || null,
+      stops: last.stops != null ? last.stops : null, durationMinutes: last.durationMinutes != null ? last.durationMinutes : null,
       byProvider: (last.byProvider || []).map((b) => ({ ...b, price: cv(b.price), currency: dispCur })) },
     previous: prev ? cv(prev.price) : null,
     change: cv(change), changePct, spark: snaps.slice(-7).map((s) => cv(s.price)), low30: cv(low30), trend,
