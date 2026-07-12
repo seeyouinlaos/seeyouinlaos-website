@@ -3,7 +3,7 @@
   // This makes the deployment a REAL Worker (not "static assets only"), so
   // Secrets like DUFFEL_ACCESS_TOKEN can be attached.
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "seeyouinlaos",
+  "name": "seeyouinlaos-website",
   "main": "src/worker.js",
   "compatibility_date": "2025-01-15",
   "compatibility_flags": ["nodejs_compat"],
