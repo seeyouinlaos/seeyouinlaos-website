@@ -34,7 +34,12 @@
     "PROVIDER": "duffel",
     "DUFFEL_VERSION": "v2",
     "SITE_ORIGIN": "https://seeyouinlaos.pages.dev",
-    "NOTIFY_CHANNEL": "log"
+    "NOTIFY_CHANNEL": "log",
+    // Exchange-rate source for currency conversion (used only when the flight
+    // provider can't price in the requested currency). "static" = indicative
+    // offline table; set "ecb" or "exchangerate.host" (no key) or configure
+    // OXR_APP_ID / FIXER_API_KEY / CURRENCYLAYER_KEY as secrets for those.
+    "FX_PROVIDER": "ecb"
   },
 
   "observability": { "enabled": true }

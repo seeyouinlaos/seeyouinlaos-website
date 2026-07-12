@@ -115,16 +115,32 @@ after every search and never locks.
 
 ## Multi-currency (provider-native first)
 
-`src/lib/money.js` is the currency seam. The rule: prefer **provider-native**
-pricing — a provider that can price in the requested currency
-(`FlightProvider.supportsCurrency`) is used verbatim. Only when it cannot does the
-Travel Service convert, once, via an indicative EUR-based rate table (swap
-`RATES_EUR` for a live-rate source; nothing else changes). Converted money is
-marked `converted:true` and keeps its native `source`, so the UI labels it “≈” and
-booking falls back to the original fare currency. The selector (🇺🇸 USD default,
-🇪🇺 EUR, 🇹🇭 THB) re-prices the market, results, comparison, journey and tracked
-routes and persists across sessions. Stored market/price history stays native;
-display currency is applied on read, never mutating history.
+The rule: prefer **provider-native** pricing — a flight provider that can price in
+the requested currency (`FlightProvider.supportsCurrency`) is used verbatim and
+never converted. Only when it cannot does the Travel Service convert, once.
+
+Where rates come from is a **pluggable abstraction**, not a hardcoded table:
+
+- `src/lib/fx/exchangeRateProvider.js` — the `ExchangeRateProvider` interface plus
+  implementations: **ECB** and **exchangerate.host** (live, no key), **Open
+  Exchange Rates / Fixer / CurrencyLayer** (live, key via secret), and **static**
+  (indicative offline fallback). `FX_PROVIDER` (wrangler var, default `ecb`)
+  selects one; the app never knows where rates originate.
+- `src/lib/fx/currencyService.js` — asks the provider for its base rates,
+  **caches** them (in-process memo + KV, honouring the provider TTL), cross-computes
+  any pair, converts once, and preserves the provider-native `source`. On a live
+  failure it falls back to the indicative static table and marks it. It never
+  mutates the caller's money and never fabricates an unknown pair (returns null).
+- `src/lib/money.js` now holds only currency facts (supported set + default); no
+  rates live in the app.
+
+Converted money is marked `converted:true`; the UI shows a subtle
+“≈ Converted from EUR”. When the provider returns the requested currency
+natively, nothing is shown. The selector (🇺🇸 USD default, 🇪🇺 EUR, 🇹🇭 THB)
+re-prices the market, results, comparison, journey and tracked routes and persists
+across sessions. Stored market/price history stays native; display currency is
+applied on read, never mutating history. The same currency layer serves any future
+flight or hotel provider with no UI change.
 
 ## Switching provider
 Add `src/lib/providers/<name>Adapter.js` implementing `FlightProvider`, register it

@@ -16,24 +16,34 @@
  */
 const { getProvider, getProviders } = require('./providers/flightProvider');
 const { MONITORED_ROUTES, routeKey, routeQuery } = require('./monitoredRoutes');
-const { convertMoney, DEFAULT_CURRENCY } = require('./money');
+const { DEFAULT_CURRENCY } = require('./money');
+const { createCurrencyService } = require('./fx/currencyService');
+const { createStore } = require('./store');
+
+/** A CurrencyService bound to the env's FX provider + the KV cache. */
+function currencyFor(env, store) { return createCurrencyService(env, store || createStore(env.KV)); }
 
 /**
- * Re-price provider-native offers into the requested currency. If the provider
- * prices natively in `to`, offers are returned verbatim; otherwise each price is
- * converted once (money seam) and marked, preserving the native source.
+ * Re-price provider-native offers into the requested currency. PROVIDER-FIRST: if
+ * the flight provider already priced natively in `to` (supportsCurrency) offers
+ * are returned verbatim — nothing the provider returns natively is ever converted.
+ * Otherwise each price is converted once through the CurrencyService (which owns
+ * the FX provider + cache) and marked, preserving the provider-native source.
  */
-function priceOffers(offers, to, provider) {
+async function priceOffers(offers, to, provider, cur) {
   if (!to || (provider.supportsCurrency && provider.supportsCurrency(to))) return offers;
-  return offers.map((o) => {
-    const m = convertMoney(o.price, to);
-    if (!m.converted) return o;
-    return { ...o, price: { amount: m.amount, currency: m.currency }, priceConverted: true, priceSource: m.source };
-  });
+  const out = [];
+  for (const o of offers) {
+    const m = await cur.convertMoney(o.price, to);
+    out.push(m.converted
+      ? { ...o, price: { amount: m.amount, currency: m.currency }, priceConverted: true, priceSource: m.source }
+      : o);
+  }
+  return out;
 }
-/** Convert a bare {amount,currency} for calendar/market display (native preserved). */
-function priceMoney(money, to) {
-  const m = convertMoney(money, to);
+/** Convert a bare {amount,currency} for calendar display (native preserved). */
+async function priceMoney(money, to, cur) {
+  const m = await cur.convertMoney(money, to);
   return { amount: m.amount, currency: m.currency, converted: !!m.converted, source: m.source || null };
 }
 
@@ -119,13 +129,16 @@ async function handleAction(action, rawQuery, env) {
         data = bestCombinations(data, query.lenMin, query.lenMax);
       }
       if (!(provider.supportsCurrency && provider.supportsCurrency(query.currency))) {
-        data = data.map((c) => ({ ...c, price: priceMoney(c.price, query.currency) }));
+        const cur = currencyFor(env);
+        const priced = [];
+        for (const c of data) priced.push({ ...c, price: await priceMoney(c.price, query.currency, cur) });
+        data = priced;
       }
       return { status: 'ok', provider: provider.name, currency: query.currency, data };
     }
     if (action === 'search') {
       const offers = await provider.searchOffers(query);
-      const data = priceOffers(offers, query.currency, provider);
+      const data = await priceOffers(offers, query.currency, provider, currencyFor(env));
       return { status: 'ok', provider: provider.name, currency: query.currency, data };
     }
     if (action === 'priceAnalysis') {
@@ -279,8 +292,9 @@ async function refreshMarket(env, store, now = new Date()) {
 
 /** Trend/percent helpers over a snapshot series (real numbers only).
  *  Values are computed in the snapshot's NATIVE currency, then the monetary
- *  fields are converted for display into `to` (history in the store stays native). */
-function computeCard(route, snaps, to) {
+ *  fields are converted for display into `to` using a pre-fetched `rateTo` map
+ *  (nativeCurrency -> multiplier). History in the store always stays native. */
+function computeCard(route, snaps, to, rateTo) {
   if (!snaps.length) {
     return { ...routePublic(route), status: 'collecting', currency: to, converted: false, current: null,
       previous: null, change: null, changePct: null, spark: [], low30: null, trend: null, history: 0 };
@@ -288,14 +302,15 @@ function computeCard(route, snaps, to) {
   const last = snaps[snaps.length - 1];
   const prev = snaps.length > 1 ? snaps[snaps.length - 2] : null;
   const nativeCur = last.currency || 'EUR';
-  const cv = (n) => (n == null ? null : priceMoney({ amount: n, currency: nativeCur }, to).amount);
-  const conv = priceMoney({ amount: last.price, currency: nativeCur }, to).converted;
+  const mult = rateTo && rateTo[nativeCur] != null ? rateTo[nativeCur] : (nativeCur === to ? 1 : null);
+  const conv = mult != null && nativeCur !== to;
+  const dispCur = (mult != null) ? to : nativeCur;
+  const cv = (n) => (n == null ? null : (mult != null ? Math.round(n * mult * 100) / 100 : n));
   const change = prev ? +(last.price - prev.price).toFixed(2) : null;
   const changePct = prev && prev.price ? +(((last.price - prev.price) / prev.price) * 100).toFixed(1) : null;
   const cutoff = last.ts - 30 * 86400000;
   const low30 = Math.min(...snaps.filter((s) => (s.ts || 0) >= cutoff).map((s) => s.price));
   const trend = change == null ? null : (changePct >= 0.5 ? 'up' : changePct <= -0.5 ? 'down' : 'flat');
-  const dispCur = to || nativeCur;
   return {
     ...routePublic(route),
     status: snaps.length < 2 ? 'collecting' : 'ok', // one point = live price shown, sparkline still gathering
@@ -352,8 +367,20 @@ async function marketOverview(env, store, opts = {}) {
     }
   }
 
+  // Pre-fetch (and cache) one rate per distinct native currency → display currency,
+  // so the whole dashboard converts from a single cached FX read, not per card.
+  const cur = currencyFor(env, store);
+  const natives = new Set();
+  MONITORED_ROUTES.forEach((route) => {
+    const s = routeSnaps[routeKey(route.origin, route.destination)] || [];
+    const last = s[s.length - 1];
+    if (last) natives.add((last.currency || 'EUR').toUpperCase());
+  });
+  const rateTo = {};
+  for (const n of natives) rateTo[n] = n === currency ? 1 : await cur.getRate(n, currency);
+
   const routes = MONITORED_ROUTES.map((route) =>
-    computeCard(route, routeSnaps[routeKey(route.origin, route.destination)] || [], currency));
+    computeCard(route, routeSnaps[routeKey(route.origin, route.destination)] || [], currency, rateTo));
   return {
     status: configured.length ? 'ok' : 'not_configured',
     provider: configured[0] ? configured[0].name : (providers[0] && providers[0].name),

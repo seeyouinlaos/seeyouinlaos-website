@@ -303,19 +303,75 @@ test('Market overview: trend, change, sparkline and 30-day low from history', as
   assert.equal(c.low30, 399);
 });
 
-/* ---------------- multi-currency (provider-independent) ---------------- */
-test('Money seam: convert marks converted + preserves native source', () => {
-  const { convertMoney, convert, isSupported, DEFAULT_CURRENCY } = require(`${L}/money`);
+/* ---------------- multi-currency (provider-independent FX architecture) ---------------- */
+const { getExchangeRateProvider } = require(`${L}/fx/exchangeRateProvider`);
+const { createCurrencyService, _clearFxMemo } = require(`${L}/fx/currencyService`);
+
+test('Money facts: supported set + default currency', () => {
+  const { isSupported, DEFAULT_CURRENCY } = require(`${L}/money`);
   assert.equal(DEFAULT_CURRENCY, 'USD');
   assert.ok(isSupported('THB') && !isSupported('XYZ'));
-  const same = convertMoney({ amount: 100, currency: 'EUR' }, 'EUR');
+});
+
+test('ExchangeRateProvider registry: default static, selectable', () => {
+  assert.equal(getExchangeRateProvider({}).name, 'static');
+  assert.equal(getExchangeRateProvider({ FX_PROVIDER: 'ecb' }).name, 'ecb');
+  assert.equal(getExchangeRateProvider({ FX_PROVIDER: 'exchangerate.host' }).name, 'exchangerate.host');
+  assert.equal(getExchangeRateProvider({ FX_PROVIDER: 'fixer' }).name, 'fixer');
+});
+
+test('CurrencyService: converts, marks source, and never fabricates unknown pairs', async () => {
+  _clearFxMemo();
+  const cur = createCurrencyService({ FX_PROVIDER: 'static' }, null);
+  const same = await cur.convertMoney({ amount: 100, currency: 'EUR' }, 'EUR');
   assert.equal(same.converted, false);
-  const usd = convertMoney({ amount: 100, currency: 'EUR' }, 'USD');
+  const usd = await cur.convertMoney({ amount: 100, currency: 'EUR' }, 'USD');
   assert.equal(usd.currency, 'USD');
   assert.equal(usd.converted, true);
+  assert.equal(usd.rateProvider, 'static');
   assert.deepEqual(usd.source, { amount: 100, currency: 'EUR' });
-  assert.ok(usd.amount > 100); // EUR→USD > 1
-  assert.equal(convert(100, 'EUR', 'ZZZ'), null); // unknown currency → null (no fabrication)
+  assert.ok(usd.amount > 100);
+  const thbFromUsd = await cur.getRate('USD', 'THB'); // cross-rate via EUR base
+  assert.ok(thbFromUsd > 1);
+  assert.equal(await cur.getRate('EUR', 'ZZZ'), null); // unknown pair → null, no fabrication
+});
+
+test('CurrencyService: caches rates so the FX source is hit once per TTL', async () => {
+  _clearFxMemo();
+  let fetches = 0;
+  global.fetch = async () => { fetches++; return { ok: true, text: async () => `<Cube currency='USD' rate='1.10'/><Cube currency='THB' rate='40'/>` }; };
+  const store = createStore(undefined); if (createStore._mem) createStore._mem.clear();
+  const cur = createCurrencyService({ FX_PROVIDER: 'ecb' }, store);
+  await cur.getRate('EUR', 'USD');
+  await cur.getRate('EUR', 'THB');
+  await cur.convertMoney({ amount: 50, currency: 'EUR' }, 'USD');
+  assert.equal(fetches, 1, 'FX source fetched once, then served from cache');
+  const cached = await store.getKV('fxrates:ecb:EUR');
+  assert.ok(cached && cached.fetchedAt, 'rate set persisted to KV cache');
+  _clearFxMemo(); // new isolate: KV cache is reused without refetching
+  const cur2 = createCurrencyService({ FX_PROVIDER: 'ecb' }, store);
+  await cur2.getRate('EUR', 'USD');
+  assert.equal(fetches, 1, 'KV cache reused across instances within TTL');
+});
+
+test('ECB provider: parses the daily reference XML (base EUR)', async () => {
+  const prov = getExchangeRateProvider({ FX_PROVIDER: 'ecb' });
+  global.fetch = async () => ({ ok: true, text: async () => `<gesmes:Envelope><Cube><Cube time='2027-01-02'>
+    <Cube currency='USD' rate='1.0850'/><Cube currency='THB' rate='38.20'/></Cube></Cube></gesmes:Envelope>` });
+  const { base, rates } = await prov.getRates();
+  assert.equal(base, 'EUR');
+  assert.equal(rates.EUR, 1);
+  assert.equal(rates.USD, 1.085);
+  assert.equal(rates.THB, 38.2);
+});
+
+test('CurrencyService: live-provider failure falls back to indicative static', async () => {
+  _clearFxMemo();
+  global.fetch = async () => { throw new Error('network down'); };
+  const cur = createCurrencyService({ FX_PROVIDER: 'ecb' }, null);
+  const usd = await cur.convertMoney({ amount: 100, currency: 'EUR' }, 'USD');
+  assert.equal(usd.converted, true);
+  assert.match(usd.rateProvider, /static/); // fell back, still converts, still marked
 });
 
 test('Travel Service: search re-prices provider-native offers into requested currency', async () => {

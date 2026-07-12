@@ -81,6 +81,13 @@ function createStore(kv) {
       return trimmed.length;
     },
     async getRouteSnapshots(key) { return (await getJSON(`route:${key}`)) || []; },
+
+    /* ---- generic cache (used by the FX rate cache; honours KV TTL) ---- */
+    async getKV(key) { return getJSON(key); },
+    async setKV(key, value, ttlSeconds) {
+      if (kv) { await kv.put(key, JSON.stringify(value), ttlSeconds ? { expirationTtl: Math.max(60, ttlSeconds) } : undefined); return; }
+      mem.set(key, value);
+    },
   };
 }
 
