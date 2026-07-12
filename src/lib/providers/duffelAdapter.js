@@ -175,16 +175,44 @@ function conditionsOf(o) {
     changePenalty: pen(ch),
   };
 }
+/**
+ * Provider-independent booking descriptor. Each provider adapter fills this so
+ * the UI can render one primary booking CTA without knowing the provider.
+ *  - provider:  which provider produced the offer (for future multi-provider UIs)
+ *  - offerId:   the provider's own offer identifier (opaque)
+ *  - url:       a deep link the guest can act on now
+ *  - label:     the CTA wording appropriate to how this provider books
+ *  - kind:      'checkout' (direct order) | 'options' (hand-off to booking options)
+ * Duffel is an API-book provider (no hosted consumer page for an arbitrary offer),
+ * so we hand off to prefilled booking options for the same route/airline/dates.
+ * A future provider with a hosted checkout sets kind:'checkout' + its own url;
+ * the UI does not change.
+ */
+function bookingFor(offer, ownerName) {
+  const out = offer.outbound, inb = offer.inbound;
+  const dep = out.from.at ? out.from.at.slice(0, 10) : '';
+  const q = `flights ${out.from.iataCode} to ${out.to.iataCode} ${dep}`
+    + (inb && inb.from.at ? ` returning ${inb.from.at.slice(0, 10)}` : '')
+    + (ownerName ? ` ${ownerName}` : '');
+  return {
+    provider: offer.provider,
+    offerId: offer.id,
+    url: `https://www.google.com/travel/flights?q=${encodeURIComponent(q)}`,
+    label: 'View booking options',
+    kind: 'options',
+  };
+}
 function mapOffer(o, providerName) {
   const sl = o.slices || [];
   const outbound = mapLeg(sl[0]);
   if (!outbound) return null;
   const inbound = sl[1] ? mapLeg(sl[1]) : null;
-  return {
+  const ownerName = (o.owner && o.owner.name) || outbound.carrierName;
+  const offer = {
     id: o.id,
     provider: providerName,
     price: { amount: Number(o.total_amount), currency: o.total_currency },
-    owner: (o.owner && o.owner.name) || outbound.carrierName,
+    owner: ownerName,
     logoUrl: (o.owner && o.owner.logo_symbol_url) || null,
     cabin: cabinOf(sl[0]),
     fareClass: fareClassOf(sl[0]),
@@ -195,6 +223,8 @@ function mapOffer(o, providerName) {
     outbound,
     inbound,
   };
+  offer.booking = bookingFor(offer, ownerName);
+  return offer;
 }
 
 class DuffelError extends Error {

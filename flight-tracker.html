@@ -154,7 +154,48 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 .fc-side{ text-align:right; display:flex; flex-direction:column; align-items:flex-end; gap:8px; min-width:120px; }
 .fc-price{ font-family:var(--serif); font-weight:200; font-size:30px; line-height:1; }
 .fc-side .via{ font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--rose); }
-@media (max-width:640px){ .fcard{ grid-template-columns:1fr; } .fc-side{ align-items:flex-start; text-align:left; flex-direction:row; justify-content:space-between; width:100%; border-top:1px solid var(--line); padding-top:12px; } }
+.fc-badges{ display:flex; gap:6px; flex-wrap:wrap; margin-bottom:9px; }
+.badge{ font-size:9.5px; letter-spacing:.14em; text-transform:uppercase; padding:4px 10px; border-radius:20px; font-weight:600; }
+.badge.rec{ background:var(--cherry); color:#fff; }
+.badge.val{ background:var(--ink); color:var(--ivory); }
+.badge.cheap{ background:rgba(47,111,79,.14); color:var(--good); border:1px solid rgba(47,111,79,.4); }
+.badge.fast{ background:var(--blush); color:var(--ink); }
+.fc-side .book{ display:inline-flex; align-items:center; justify-content:center; gap:7px; background:var(--cherry); border:1px solid var(--cherry); color:#fff; padding:12px 20px; font-size:11px; letter-spacing:.14em; text-transform:uppercase; border-radius:2px; width:100%; transition:background .15s; }
+.fc-side .book:hover{ background:#5c060b; color:#fff; }
+.fc-side .row2{ display:flex; gap:8px; align-items:center; width:100%; }
+.fc-side .row2 .cmp{ display:flex; align-items:center; gap:6px; font-size:11px; color:var(--rose); cursor:pointer; white-space:nowrap; }
+.fc-side .track2{ font-size:11px; color:var(--rose); text-decoration:underline; text-underline-offset:2px; background:none; border:none; padding:0; }
+.fcard.rec{ border-color:var(--cherry); box-shadow:0 0 0 1px rgba(116,7,14,.14); }
+@media (max-width:640px){ .fcard{ grid-template-columns:1fr; } .fc-side{ align-items:stretch; text-align:left; width:100%; border-top:1px solid var(--line); padding-top:14px; }
+  .fc-side .fc-price{ font-size:26px; } .fc-side .book{ font-size:12px; padding:14px; } }
+
+/* recommended journey */
+.journey{ background:var(--ink-s); color:var(--ivory); border-radius:5px; padding:26px clamp(16px,3vw,30px); margin:34px 0 0; }
+.journey .eyebrow{ color:#B4938C; }
+.journey h3{ font-family:var(--serif); font-weight:200; font-size:clamp(24px,3vw,32px); margin:6px 0 6px; }
+.journey p{ font-size:13.5px; color:#D8CCC4; max-width:640px; }
+.jflow{ display:flex; align-items:stretch; gap:8px; margin-top:20px; flex-wrap:wrap; }
+.jleg{ flex:1 1 150px; min-width:130px; background:rgba(242,236,225,.06); border:1px solid rgba(242,236,225,.14); border-radius:3px; padding:13px 14px; text-align:left; color:var(--ivory); cursor:pointer; transition:background .15s, border-color .15s; }
+.jleg:hover{ background:rgba(242,236,225,.12); border-color:#B4938C; }
+.jleg .r{ font-family:var(--serif); font-size:17px; }
+.jleg .d{ font-size:11px; color:#C6ADA5; margin-top:4px; letter-spacing:.04em; }
+.jleg .go{ font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:#D5847A; margin-top:8px; }
+.jarrow{ align-self:center; color:#8a6a62; font-size:16px; }
+@media (max-width:720px){ .jflow{ flex-direction:column; } .jarrow{ transform:rotate(90deg); align-self:flex-start; margin-left:20px; } }
+
+/* comparison */
+.compare{ margin-top:26px; background:var(--card); border:1px solid var(--cherry); border-radius:5px; padding:20px; }
+.compare h3{ font-family:var(--serif); font-weight:200; font-size:22px; margin-bottom:4px; }
+.cmp-grid{ display:grid; grid-auto-flow:column; grid-auto-columns:minmax(180px,1fr); gap:14px; overflow-x:auto; margin-top:14px; }
+.cmp-col{ border:1px solid var(--line); border-radius:4px; padding:14px; background:#fff; display:flex; flex-direction:column; gap:8px; }
+.cmp-col.win{ border-color:var(--cherry); }
+.cmp-col .al{ display:flex; align-items:center; gap:8px; font-family:var(--serif); font-size:15px; }
+.cmp-col .al img{ width:22px; height:22px; object-fit:contain; }
+.cmp-col .pr{ font-family:var(--serif); font-weight:200; font-size:26px; }
+.cmp-row{ display:flex; justify-content:space-between; font-size:12px; border-top:1px solid var(--line); padding-top:6px; }
+.cmp-row .k{ color:var(--rose); }
+.cmp-col .book{ margin-top:auto; background:var(--cherry); color:#fff; border:none; padding:10px; border-radius:2px; font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; text-align:center; }
+.cmp-clear{ background:none; border:none; color:var(--rose); font-size:11px; text-decoration:underline; cursor:pointer; }
 
 /* states */
 .state{ background:var(--card); border:1px solid var(--line); border-radius:4px; padding:34px 22px; text-align:center; color:var(--rose); }
@@ -240,8 +281,25 @@ const DEFAULT_FILTERS={ sort:'price', maxStops:'any', maxPrice:'', refundableOnl
 let state={ search:{...DEFAULTS}, filters:{...DEFAULT_FILTERS},
   results:{status:'idle',offers:[],error:null,forPair:null},
   calendar:{status:'idle',days:[]},
-  tracked:[], selectedTrack:null,
+  tracked:[], selectedTrack:null, compare:[],
   backend:{reachable:false,configured:false,checked:false} };
+const totalDur=o=>o.outbound.durationMinutes+(o.inbound?o.inbound.durationMinutes:0);
+const stopsOf=o=>Math.max(o.outbound.stops,o.inbound?o.inbound.stops:0);
+function computeBadges(offers){
+  if(!offers.length) return {};
+  const byP=[...offers].sort((a,b)=>a.price.amount-b.price.amount);
+  const byD=[...offers].sort((a,b)=>totalDur(a)-totalDur(b));
+  const minP=byP[0].price.amount,maxP=byP[byP.length-1].price.amount;
+  const minD=byD[0]?totalDur(byD[0]):0,maxD=byD[byD.length-1]?totalDur(byD[byD.length-1]):0;
+  let best=null,bs=Infinity;
+  offers.forEach(o=>{ const np=(o.price.amount-minP)/((maxP-minP)||1); const nd=(totalDur(o)-minD)/((maxD-minD)||1);
+    const s=np*0.55+nd*0.3+stopsOf(o)*0.15; if(s<bs){bs=s;best=o.id;} });
+  const third=byP.slice(0,Math.max(1,Math.ceil(byP.length/3)));
+  const rec=[...third].sort((a,b)=>(stopsOf(a)-stopsOf(b))||(a.price.amount-b.price.amount))[0].id;
+  return { cheapest:byP[0].id, fastest:byD[0].id, best, recommended:rec };
+}
+function toggleCompare(id){ const i=state.compare.indexOf(id); if(i>=0) state.compare.splice(i,1); else { if(state.compare.length>=4) state.compare.shift(); state.compare.push(id); } save(); render(); }
+function bookOffer(id){ const o=state.results.offers.find(x=>x.id===id); if(o&&o.booking&&o.booking.url) window.open(o.booking.url,'_blank','noopener'); }
 
 function save(){ localStorage.setItem(KEY,JSON.stringify({search:state.search,filters:state.filters,tracked:state.tracked,selectedTrack:state.selectedTrack})); }
 function load(){ try{const r=JSON.parse(localStorage.getItem(KEY)); if(r){ state.search={...DEFAULTS,...r.search}; state.filters={...DEFAULT_FILTERS,...r.filters}; state.tracked=r.tracked||[]; state.selectedTrack=r.selectedTrack||null; }}catch(e){} }
@@ -340,7 +398,52 @@ function filteredOffers(){
 /* ============================================================================
    RENDER
    ============================================================================ */
-function render(){ $('#app').innerHTML = viewSearch()+viewBackendNotice()+viewCalendar()+viewResults()+viewTracked()+viewFoot(); wire(); }
+function render(){ $('#app').innerHTML = viewSearch()+viewBackendNotice()+viewJourney()+viewCalendar()+viewCompare()+viewResults()+viewTracked()+viewFoot(); wire(); }
+
+/* recommended journey (the guest travel flow); data-jleg = preset index */
+function viewJourney(){
+  if(!(state.backend.reachable&&state.backend.configured)) return '';
+  return `<section class="journey">
+    <div class="eyebrow">The recommended journey</div>
+    <h3>Hamburg to Luang Prabang, and home again.</h3>
+    <p>Most guests travel Germany → Bangkok, then the short connection up to Luang Prabang for the wedding, and back the same way. Fares to Asia move a lot in the months ahead, so it pays to start watching early. Search any leg below.</p>
+    <div class="jflow">
+      <button type="button" class="jleg" data-jleg="0"><div class="r">Hamburg</div><div class="d">HAM · start</div></button>
+      <span class="jarrow">→</span>
+      <button type="button" class="jleg" data-jleg="0"><div class="r">Bangkok</div><div class="d">BKK · long haul</div><div class="go">Search HAM → BKK</div></button>
+      <span class="jarrow">→</span>
+      <button type="button" class="jleg" data-jleg="1"><div class="r">Luang Prabang</div><div class="d">LPQ · the wedding</div><div class="go">Search BKK → LPQ</div></button>
+      <span class="jarrow">→</span>
+      <button type="button" class="jleg" data-jleg="2"><div class="r">Bangkok → Hamburg</div><div class="d">the way home</div><div class="go">Search return</div></button>
+    </div>
+  </section>`;
+}
+
+/* comparison tray */
+function viewCompare(){
+  const ids=state.compare; if(ids.length<2) return '';
+  const offers=ids.map(id=>state.results.offers.find(o=>o.id===id)).filter(Boolean);
+  if(offers.length<2) return '';
+  const b=computeBadges(state.results.offers);
+  const cheapest=Math.min(...offers.map(o=>o.price.amount)), fastest=Math.min(...offers.map(totalDur));
+  return `<div class="compare">
+    <div class="section-h" style="margin:0 0 2px"><h3>Compare ${offers.length} flights</h3><button type="button" class="cmp-clear" id="cmp-clear">Clear comparison</button></div>
+    <div class="cmp-grid">${offers.map(o=>{
+      const win=o.id===b.recommended;
+      const badge=o.id===b.recommended?'<span class="badge rec">Recommended</span>':o.id===b.best?'<span class="badge val">Best value</span>':o.id===b.cheapest?'<span class="badge cheap">Cheapest</span>':o.id===b.fastest?'<span class="badge fast">Fastest</span>':'';
+      return `<div class="cmp-col ${win?'win':''}">
+        <div class="fc-badges">${badge}</div>
+        <div class="al">${o.logoUrl?`<img src="${esc(o.logoUrl)}" alt="" onerror="this.style.display='none'">`:''}${esc(o.owner)}</div>
+        <div class="pr">${money(o.price)}</div>
+        <div class="cmp-row"><span class="k">Stops</span><span>${stopsOf(o)===0?'Nonstop':stopsOf(o)+' stop'+(stopsOf(o)>1?'s':'')}</span></div>
+        <div class="cmp-row"><span class="k">Duration</span><span>${fmtDur(o.outbound.durationMinutes)}${o.inbound?' / '+fmtDur(o.inbound.durationMinutes):''}</span></div>
+        <div class="cmp-row"><span class="k">Cabin</span><span>${esc(o.cabin||'—')}</span></div>
+        <div class="cmp-row"><span class="k">Checked bag</span><span>${o.bagsIncluded==null?'—':o.bagsIncluded}</span></div>
+        <div class="cmp-row"><span class="k">Refundable</span><span>${o.conditions&&o.conditions.refundable?'Yes':'No'}</span></div>
+        <button type="button" class="book" data-book="${esc(o.id)}">Book · via Duffel</button>
+      </div>`;}).join('')}</div>
+  </div>`;
+}
 
 function viewSearch(){
   const s=state.search;
@@ -422,7 +525,7 @@ function viewResults(){
   if(r.status==='loading') body=`<div class="skel"></div><div class="skel"></div><div class="skel"></div>`;
   else if(r.status==='error') body=`<div class="notice warn" role="alert"><h4>Search failed</h4><p>${esc(r.error)}</p></div>`;
   else if(r.status==='empty'||!offers.length) body=`<div class="state"><div class="serif">No flights match</div><p>${r.offers.length&&!offers.length?'No results for these filters — try clearing filters.':'The provider returned no flights for this route and date. Try a nearby date or a different route.'}</p></div>`;
-  else body=`<div class="cards">${offers.slice(0,20).map((o,i)=>flightCard(o,i===0)).join('')}</div>`;
+  else { const b=computeBadges(offers); body=`<div class="cards">${offers.slice(0,20).map(o=>flightCard(o,b)).join('')}</div>`; }
   return head+(r.status==='ok'&&offers.length?filters:'')+body;
 }
 
@@ -435,9 +538,14 @@ function legRow(l,dir){
     <div class="pt"><div class="t">${fmtT(l.to.at)}${plus?`<span class="plus">+${plus}</span>`:''}</div><div class="a">${esc(l.to.iataCode)}</div></div>
   </div>`;
 }
-function flightCard(o,best){
+function flightCard(o,b){
+  b=b||{};
   const fn=[o.outbound.flightNumber,o.inbound&&o.inbound.flightNumber].filter(Boolean).join(' · ');
   const cond=o.conditions||{};
+  const badge = o.id===b.recommended?'<span class="badge rec">Recommended</span>'
+    : o.id===b.best?'<span class="badge val">Best value</span>':'';
+  const extra=[ o.id===b.cheapest?'<span class="badge cheap">Cheapest</span>':'', o.id===b.fastest?'<span class="badge fast">Fastest</span>':'' ].filter(Boolean).join('');
+  const badges=(badge+extra);
   const tags=[
     o.cabin?`<span class="tag">${esc(o.cabin)}</span>`:'',
     o.fareClass?`<span class="tag">Fare ${esc(o.fareClass)}</span>`:'',
@@ -447,14 +555,19 @@ function flightCard(o,best){
     cond.refundable?`<span class="tag ok">Refundable</span>`:`<span class="tag no">Non-refundable</span>`,
     cond.changeable?`<span class="tag ok">Changeable${cond.changePenalty?' '+money(cond.changePenalty):''}</span>`:'',
   ].filter(Boolean).join('');
-  return `<article class="fcard ${best?'best':''}">
+  const cmp=state.compare.includes(o.id);
+  return `<article class="fcard ${o.id===b.recommended?'rec':''}">
     <div class="fc-main">
+      ${badges?`<div class="fc-badges">${badges}</div>`:''}
       <div class="fc-airline">${o.logoUrl?`<img src="${esc(o.logoUrl)}" alt="" loading="lazy" onerror="this.style.display='none'">`:''}<span class="nm">${esc(o.owner||o.outbound.carrierName)}</span><span class="fn">${esc(fn)}</span></div>
       ${legRow(o.outbound,'out')}${legRow(o.inbound,'return')}
       <div class="fc-tags">${tags}</div>
     </div>
-    <div class="fc-side"><div class="fc-price">${money(o.price)}</div><div class="via">total · via Duffel</div>
-      <button type="button" class="btn ghost small" data-track-offer>Track this route</button></div>
+    <div class="fc-side">
+      <div class="fc-price">${money(o.price)}</div><div class="via">total · ${esc(o.provider||'duffel')}</div>
+      <button type="button" class="book" data-book="${esc(o.id)}">${esc((o.booking&&o.booking.label)||'View booking options')} →</button>
+      <div class="row2"><label class="cmp"><input type="checkbox" data-cmp="${esc(o.id)}" ${cmp?'checked':''}> Compare</label><button type="button" class="track2" data-track-offer>Track route</button></div>
+    </div>
   </article>`;
 }
 
@@ -536,6 +649,11 @@ function wire(){
   document.querySelectorAll('[data-track-offer]').forEach(b=>b.onclick=trackCurrent);
   document.querySelectorAll('[data-track]').forEach(b=>b.onclick=()=>selectTrack(b.dataset.track));
   document.querySelectorAll('[data-untrack]').forEach(b=>b.onclick=()=>removeTrack(b.dataset.untrack));
+  // booking + compare + recommended journey
+  document.querySelectorAll('[data-book]').forEach(b=>b.onclick=()=>bookOffer(b.dataset.book));
+  document.querySelectorAll('[data-cmp]').forEach(b=>b.onchange=()=>toggleCompare(b.dataset.cmp));
+  document.querySelectorAll('[data-jleg]').forEach(b=>b.onclick=()=>applyPreset(PRESETS[+b.dataset.jleg]));
+  $('#cmp-clear')&&($('#cmp-clear').onclick=()=>{state.compare=[];save();render();});
 }
 function commitAndSearch(){
   // pull latest field values (in case not blurred) then search
