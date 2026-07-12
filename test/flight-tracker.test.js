@@ -9,6 +9,7 @@
  */
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
 
 const L = `${__dirname}/../src/lib`;
 const { DuffelAdapter } = require(`${L}/providers/duffelAdapter`);
@@ -20,6 +21,12 @@ const { getProviders } = require(`${L}/providers/flightProvider`);
 const { MONITORED_ROUTES, defaultAirportForCountry, routeKey, routeQuery } = require(`${L}/monitoredRoutes`);
 
 const ENV = { PROVIDER: 'duffel', DUFFEL_ACCESS_TOKEN: 'duffel_test_x', NOTIFY_CHANNEL: 'log' };
+
+test('main-menu leaves Flight Tracker links as real navigation instead of treating them as page anchors', () => {
+  const home = fs.readFileSync(`${__dirname}/../index.html`, 'utf8');
+  assert.match(home, /href="flight-tracker\.html"/);
+  assert.match(home, /if\s*\(!href\.startsWith\('#'\)\)\s*return/);
+});
 
 function duffelOffer(slices, amount) {
   const leg = (o, d, dep, fn) => ({
