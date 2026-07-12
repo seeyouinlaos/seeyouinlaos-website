@@ -425,8 +425,10 @@ const PRESETS=[
 const DEFAULT_FILTERS={ sort:'price', maxStops:'any', maxPrice:'', refundableOnly:false };
 
 /* ---------- market: monitored routes shown before any search ---------- */
-const MARKET_LEAD=45; // must match the server's sample lead (monitoredRoutes.js)
-const marketSampleDate=()=>addDays(todayISO(),MARKET_LEAD);
+/* Canonical Bangkok arrival (mirrors monitoredRoutes.WEDDING_DATES); used only as
+   a safety fallback — market snapshots always carry their own exact dates. */
+const WEDDING_ARRIVAL='2027-02-21';
+const marketSampleDate=()=>WEDDING_ARRIVAL;
 /* Country → preferred departure airports (first = default pick). Mirrors the
    backend country map; the journey stays generic and always editable. */
 const COUNTRY_AIRPORTS={ '':['HAM'], DE:['HAM','FRA','MUC'], TN:['TUN'], GR:['ATH'], PT:['LIS'], US:['LAS'], JP:['NRT'] };

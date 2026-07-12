@@ -56,37 +56,46 @@ function routeKey(origin, destination) {
   return `${String(origin).toUpperCase()}-${String(destination).toUpperCase()}`;
 }
 
-const LEAD_DAYS = 45;   // rolling lead time so live inventory always exists
-const SAMPLE_NIGHTS = 5; // sample round-trip length for long-haul market quotes
+/**
+ * The ONE canonical wedding travel timeline (See You In Laos, 28 Feb 2027).
+ * Every monitored origin is priced on the SAME real guest journey so fares are
+ * directly comparable. No rolling/arbitrary sample dates.
+ *
+ *   Origin -> Bangkok        21 Feb 2027  (arrival, 6 days before the group flight)
+ *   Bangkok -> Luang Prabang 27 Feb 2027  (the fixed group flight)
+ *   [ Wedding                28 Feb 2027 ]
+ *   Luang Prabang -> Bangkok  1 Mar 2027  (fixed return after the wedding)
+ *   Bangkok -> Home          individual   (NOT a monitored market route)
+ *
+ * Each leg is one-way (the monitored market watches the guest journey's flights,
+ * not round trips). These dates are stored on the snapshot, shown on the card,
+ * and loaded verbatim by "View live fares" — card, snapshot and search never drift.
+ */
+const WEDDING_DATES = {
+  bangkokArrival: '2027-02-21', // Origin -> Bangkok (5-6 days before the group flight)
+  groupToLPQ:     '2027-02-27', // Bangkok -> Luang Prabang (the group flight)
+  weddingDay:     '2027-02-28',
+  returnToBKK:    '2027-03-01', // Luang Prabang -> Bangkok (after the wedding)
+};
 
-/** Add whole days to a Date and return an ISO date string. */
-function isoAddDays(now, days) {
-  return new Date(now.getTime() + days * 86400000).toISOString().slice(0, 10);
+/** The canonical departure date for a monitored route's leg of the wedding journey. */
+function routeDepartureDate(route) {
+  if (route.destination === 'LPQ') return WEDDING_DATES.groupToLPQ;              // Bangkok -> Luang Prabang
+  if (route.origin === 'LPQ' && route.destination === 'BKK') return WEDDING_DATES.returnToBKK; // Luang Prabang -> Bangkok
+  return WEDDING_DATES.bangkokArrival;                                          // Origin -> Bangkok (arrival leg)
 }
 
 /**
- * The sample departure date a monitored route is priced on. A rolling near-future
- * date (relative to the real clock, not any wedding date) so the provider's live
- * inventory always has offers. The offset is constant so snapshots stay comparable.
- * @param {Date} [now]
+ * A provider-neutral search query that prices one monitored route on the canonical
+ * wedding journey. All legs are one-way. The date is fixed (not clock-relative),
+ * so the market compares the same real itinerary for every origin.
  */
-function sampleDate(now = new Date()) { return isoAddDays(now, LEAD_DAYS); }
-
-/**
- * A provider-neutral search query that prices one monitored route. Long-haul
- * feeder routes are quoted as a round trip (a real trip cost, SAMPLE_NIGHTS long);
- * the regional Bangkok<->Luang Prabang hops are quoted one-way. The EXACT dates
- * used here are stored on the snapshot and shown on the card, so what a guest sees
- * always matches the Duffel search behind the price.
- */
-function routeQuery(route, now = new Date()) {
-  const departureDate = sampleDate(now);
-  const roundTrip = route.kind === 'longhaul';
+function routeQuery(route) {
   return {
     origin: route.origin,
     destination: route.destination,
-    departureDate,
-    returnDate: roundTrip ? isoAddDays(now, LEAD_DAYS + SAMPLE_NIGHTS) : null,
+    departureDate: routeDepartureDate(route),
+    returnDate: null,
     adults: 1,
     cabin: 'Economy',
     maxStops: null,
@@ -99,8 +108,7 @@ module.exports = {
   COUNTRY_AIRPORTS,
   defaultAirportForCountry,
   routeKey,
-  sampleDate,
   routeQuery,
-  LEAD_DAYS,
-  SAMPLE_NIGHTS,
+  routeDepartureDate,
+  WEDDING_DATES,
 };
