@@ -77,7 +77,8 @@ async function handleTravel(request, env) {
     if (action === 'market') {
       // Live monitored-route dashboard. Seeds/refreshes stale routes unless disabled.
       const refresh = isPost ? (body.refresh !== false) : (params.refresh !== 'false');
-      return json(200, await marketOverview(env, store, { refresh }));
+      const currency = (isPost ? (body.query && body.query.currency) || body.currency : params.currency) || undefined;
+      return json(200, await marketOverview(env, store, { refresh, currency }));
     }
 
     const result = await handleAction(action, query, env);

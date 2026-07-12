@@ -65,6 +65,16 @@ class FlightProvider {
    * @returns {Promise<{iata:string, name:string, city:(string|null), country:(string|null), type:string}[]>}
    */
   async suggestPlaces(_query) { return []; }
+
+  /**
+   * OPTIONAL: does this provider price NATIVELY in `cur`? When true, the Travel
+   * Service passes the currency through and uses the returned prices verbatim (no
+   * conversion). Default false → the app converts once, in the money seam, and
+   * marks the result as converted. A future provider that can price in USD/THB/…
+   * returns true here and the UI never changes.
+   * @param {string} _cur
+   */
+  supportsCurrency(_cur) { return false; }
 }
 
 /* ---- helpers shared by adapters ---- */

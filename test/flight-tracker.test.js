@@ -289,9 +289,11 @@ test('Market overview: trend, change, sparkline and 30-day low from history', as
   const now = Date.now();
   await store.appendRouteSnapshot(k, { date: '2027-01-09', ts: now - 2 * 86400000, price: 420, currency: 'EUR', offers: 120, provider: 'duffel', branding: { name: 'BA' } });
   await store.appendRouteSnapshot(k, { date: '2027-01-10', ts: now - 1 * 86400000, price: 399, currency: 'EUR', offers: 130, provider: 'duffel', branding: { name: 'BA' } });
-  const m = await marketOverview(ENV, store, { refresh: false });
+  const m = await marketOverview(ENV, store, { refresh: false, currency: 'EUR' });
   const c = m.routes.find((r) => r.id === 'HAM-BKK');
   assert.equal(c.status, 'ok');
+  assert.equal(c.currency, 'EUR');
+  assert.equal(c.converted, false);
   assert.equal(c.current.price, 399);
   assert.equal(c.previous, 420);
   assert.equal(c.change, -21);
@@ -299,6 +301,54 @@ test('Market overview: trend, change, sparkline and 30-day low from history', as
   assert.equal(c.trend, 'down');
   assert.deepEqual(c.spark, [420, 399]);
   assert.equal(c.low30, 399);
+});
+
+/* ---------------- multi-currency (provider-independent) ---------------- */
+test('Money seam: convert marks converted + preserves native source', () => {
+  const { convertMoney, convert, isSupported, DEFAULT_CURRENCY } = require(`${L}/money`);
+  assert.equal(DEFAULT_CURRENCY, 'USD');
+  assert.ok(isSupported('THB') && !isSupported('XYZ'));
+  const same = convertMoney({ amount: 100, currency: 'EUR' }, 'EUR');
+  assert.equal(same.converted, false);
+  const usd = convertMoney({ amount: 100, currency: 'EUR' }, 'USD');
+  assert.equal(usd.currency, 'USD');
+  assert.equal(usd.converted, true);
+  assert.deepEqual(usd.source, { amount: 100, currency: 'EUR' });
+  assert.ok(usd.amount > 100); // EUR→USD > 1
+  assert.equal(convert(100, 'EUR', 'ZZZ'), null); // unknown currency → null (no fabrication)
+});
+
+test('Travel Service: search re-prices provider-native offers into requested currency', async () => {
+  stubFetch('ok');
+  const r = await handleAction('search', { origin: 'BKK', destination: 'LPQ', departureDate: '2027-02-27', adults: 1, cabin: 'Economy', currency: 'THB' }, ENV);
+  assert.equal(r.status, 'ok');
+  assert.equal(r.currency, 'THB');
+  const o = r.data[0];
+  assert.equal(o.price.currency, 'THB');
+  assert.equal(o.priceConverted, true);
+  assert.equal(o.priceSource.currency, 'EUR'); // native fare currency preserved
+  // native currency requested → no conversion
+  const eur = await handleAction('search', { origin: 'BKK', destination: 'LPQ', departureDate: '2027-02-27', adults: 1, cabin: 'Economy', currency: 'EUR' }, ENV);
+  assert.equal(eur.data[0].price.currency, 'EUR');
+  assert.ok(!eur.data[0].priceConverted);
+});
+
+test('Market overview: converts display prices while history stays native', async () => {
+  const store = createStore(undefined);
+  if (createStore._mem) createStore._mem.clear();
+  const k = routeKey('HAM', 'BKK');
+  const now = Date.now();
+  await store.appendRouteSnapshot(k, { date: '2027-01-10', ts: now, price: 300, currency: 'EUR', offers: 100, branding: { name: 'BA' } });
+  const usd = await marketOverview(ENV, store, { refresh: false, currency: 'USD' });
+  const c = usd.routes.find((r) => r.id === 'HAM-BKK');
+  assert.equal(c.current.currency, 'USD');
+  assert.equal(c.converted, true);
+  assert.ok(c.current.price > 300);                       // converted up from EUR
+  assert.equal(c.current.nativePrice, 300);               // native preserved for the UI
+  assert.equal(c.current.nativeCurrency, 'EUR');
+  const snaps = await store.getRouteSnapshots(k);
+  assert.equal(snaps[0].price, 300, 'stored history untouched by display conversion');
+  assert.equal(snaps[0].currency, 'EUR');
 });
 
 test('Market refresh (cron): prices every route and persists a snapshot', async () => {

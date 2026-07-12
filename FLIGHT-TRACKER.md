@@ -107,8 +107,24 @@ It is provider-independent and real:
   Adding Amadeus/Sabre/Travelport/an airline API is one adapter + one registry
   entry; the dashboard, comparison and cards do not change.
 
-The UI persists last search, filters, comparison, selected journey and scroll
-(session + local storage) so the Back button restores the exact previous state.
+The UI persists last search, journey, currency, filters, sorting, comparison and
+scroll (session + local storage) so the Back button restores the exact previous
+state. The **wedding journey** is an editable multi-leg builder (change/search
+airports, swap, change dates, delete, duplicate, add legs); it stays visible
+after every search and never locks.
+
+## Multi-currency (provider-native first)
+
+`src/lib/money.js` is the currency seam. The rule: prefer **provider-native**
+pricing — a provider that can price in the requested currency
+(`FlightProvider.supportsCurrency`) is used verbatim. Only when it cannot does the
+Travel Service convert, once, via an indicative EUR-based rate table (swap
+`RATES_EUR` for a live-rate source; nothing else changes). Converted money is
+marked `converted:true` and keeps its native `source`, so the UI labels it “≈” and
+booking falls back to the original fare currency. The selector (🇺🇸 USD default,
+🇪🇺 EUR, 🇹🇭 THB) re-prices the market, results, comparison, journey and tracked
+routes and persists across sessions. Stored market/price history stays native;
+display currency is applied on read, never mutating history.
 
 ## Switching provider
 Add `src/lib/providers/<name>Adapter.js` implementing `FlightProvider`, register it

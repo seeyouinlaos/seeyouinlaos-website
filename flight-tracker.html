@@ -258,6 +258,8 @@ svg.chart{ display:block; width:100%; height:180px; }
 .m-meta b{ color:var(--ink); font-weight:600; }
 .m-prov{ display:inline-flex; align-items:center; gap:5px; font-size:10px; color:var(--rose); }
 .m-prov img{ width:15px; height:15px; object-fit:contain; border-radius:2px; background:#fff; }
+.m-stat{ font-size:9.5px; letter-spacing:.06em; text-transform:uppercase; }
+.m-stat.ok{ color:var(--good); } .m-stat.collecting{ color:var(--warn); }
 .m-collecting{ font-size:10.5px; color:var(--rose); font-style:italic; display:inline-flex; align-items:center; gap:6px; }
 .m-collecting .pulse{ width:6px; height:6px; border-radius:50%; background:var(--cherry-photo); animation:pulse 1.4s ease-in-out infinite; }
 @keyframes pulse{ 0%,100%{ opacity:.3;} 50%{ opacity:1;} }
@@ -272,6 +274,40 @@ svg.chart{ display:block; width:100%; height:180px; }
 .provchips{ display:flex; gap:5px; flex-wrap:wrap; margin-top:4px; }
 .provchip{ font-size:9.5px; letter-spacing:.04em; border:1px solid var(--line); border-radius:20px; padding:3px 8px; color:var(--rose); display:inline-flex; align-items:center; gap:4px; }
 .provchip img{ width:12px; height:12px; object-fit:contain; }
+
+/* ---- currency selector ---- */
+.topctl{ display:flex; justify-content:flex-end; align-items:center; gap:12px; margin-bottom:14px; }
+.cur-seg{ display:inline-flex; border:1px solid var(--line-strong); border-radius:22px; overflow:hidden; background:#fff; }
+.cur-seg .cur{ padding:7px 14px; font-size:12px; letter-spacing:.04em; background:transparent; color:var(--rose); border:none; }
+.cur-seg .cur+.cur{ border-left:1px solid var(--line); }
+.cur-seg .cur.on{ background:var(--ink); color:var(--ivory); }
+.cur-seg .cur:hover:not(.on){ background:var(--blush); color:var(--ink); }
+.cur-note{ font-size:10.5px; color:var(--rose); font-style:italic; }
+.approx{ font-style:normal; }
+
+/* ---- editable wedding-journey builder ---- */
+.jbuild{ margin:30px 0 0; background:var(--card); border:1px solid var(--line); border-radius:5px; padding:20px clamp(14px,2.2vw,22px); }
+.jbuild .jb-head{ display:flex; align-items:flex-start; justify-content:space-between; gap:12px 20px; flex-wrap:wrap; }
+.jbuild .jb-head h3{ font-family:var(--serif); font-weight:200; font-size:clamp(21px,2.5vw,28px); margin-top:2px; }
+.jbuild .jb-country{ font-size:11px; letter-spacing:.04em; text-transform:uppercase; color:var(--rose); display:inline-flex; align-items:center; gap:8px; }
+.jbuild .jb-country select{ text-transform:none; letter-spacing:0; padding:8px 10px; border:1px solid var(--line-strong); border-radius:2px; background:#fff; font-family:var(--sans); font-size:13px; color:var(--ink); }
+.jb-sub{ font-size:12.5px; color:var(--rose); margin:5px 0 12px; max-width:660px; }
+.jrow{ display:grid; grid-template-columns:1fr auto 1fr 148px auto; gap:10px; align-items:end; padding:12px 0; border-top:1px dashed var(--line); }
+.jrow:first-of-type{ border-top:none; padding-top:4px; }
+.jrow .jf{ display:flex; flex-direction:column; position:relative; min-width:0; }
+.jrow .jf label{ font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:var(--rose); margin-bottom:5px; }
+.jrow input{ width:100%; padding:10px 11px; border:1px solid var(--line-strong); border-radius:2px; background:#fff; font-size:14px; font-family:var(--sans); color:var(--ink); }
+.jrow input:focus{ outline:none; border-color:var(--cherry); }
+.jrow .jswap{ align-self:end; width:36px; height:40px; border:1px solid var(--line-strong); background:#fff; border-radius:2px; color:var(--rose); font-size:15px; }
+.jrow .jswap:hover{ background:var(--blush); border-color:var(--rose); }
+.jrow .jacts{ display:flex; gap:6px; align-self:end; }
+.jrow .jacts button{ border:1px solid var(--line-strong); background:#fff; border-radius:2px; height:40px; padding:0 11px; font-size:12px; color:var(--rose); white-space:nowrap; transition:background .15s,border-color .15s,color .15s; }
+.jrow .jacts button:hover{ border-color:var(--rose); background:var(--blush); color:var(--ink); }
+.jrow .jacts .jsearch{ background:var(--cherry); border-color:var(--cherry); color:#fff; font-size:10px; letter-spacing:.12em; text-transform:uppercase; padding:0 15px; }
+.jrow .jacts .jsearch:hover{ background:#5c060b; color:#fff; }
+.jb-add{ margin-top:14px; }
+.jbuild .ac-menu{ position:absolute; top:100%; left:0; right:0; z-index:20; }
+@media (max-width:760px){ .jrow{ grid-template-columns:1fr auto 1fr; } .jrow .jf.date{ grid-column:1 / -1; } .jrow .jacts{ grid-column:1 / -1; } .jrow .jacts .jsearch{ flex:1; } }
 
 .hide{ display:none !important; }
 </style>
@@ -303,7 +339,7 @@ const travel={
   cheapestDates(query){ return this.call('cheapestDates',{query}); },
   saveTrip(trip){ return this.call('saveTrip',{trip}); },
   history(tripId){ return this.call('history',{tripId}); },
-  market(refresh=true){ return this.call('market',{refresh}); },
+  market(refresh=true,currency){ return this.call('market',{refresh,query:{currency}}); },
 };
 
 /* ---------- helpers ---------- */
@@ -316,7 +352,12 @@ const fmtDay=s=>s?parse(s).toLocaleDateString('en-GB',{weekday:'short',day:'2-di
 const fmtDayShort=s=>s?parse(s).toLocaleDateString('en-GB',{day:'2-digit',month:'short',timeZone:'UTC'}):'—';
 const fmtT=at=>{try{return new Date(at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});}catch{return '';}};
 const fmtDur=m=>m?`${Math.floor(m/60)}h ${String(m%60).padStart(2,'0')}m`:'';
-const money=(a,c='EUR')=>{const n=(a&&typeof a==='object')?(a.amount??a.price):a;return(n==null||isNaN(n))?'—':new Intl.NumberFormat('de-DE',{style:'currency',currency:(a&&a.currency)||c,maximumFractionDigits:0}).format(n);};
+const money=(a,c='EUR')=>{const n=(a&&typeof a==='object')?(a.amount??a.price):a;const cur=(a&&a.currency)||c;return(n==null||isNaN(n))?'—':new Intl.NumberFormat(cur==='THB'?'th-TH':cur==='USD'?'en-US':'de-DE',{style:'currency',currency:cur,maximumFractionDigits:0}).format(n);};
+/* Display an already-fetched NATIVE value (e.g. stored EUR history) in the chosen
+   currency. Server-fetched market/search prices already arrive converted. */
+const dispMoney=(amount,nativeCur='EUR')=>money({amount:fx(amount,nativeCur,state.currency),currency:state.currency});
+const isConverted=()=>state.currency!=='EUR'; // Duffel prices natively in EUR
+const curNote=()=>isConverted()?`<span class="cur-note">Prices shown in ${esc(state.currency)} are an <span class="approx">≈</span> indicative conversion from the fare currency; you book in the original currency.</span>`:'';
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const dayOffset=(a,b)=>{try{const d=Math.round((new Date(b).setHours(0,0,0,0)-new Date(a).setHours(0,0,0,0))/DAY);return d>0?d:0;}catch{return 0;}};
 
@@ -338,22 +379,33 @@ const marketSampleDate=()=>addDays(todayISO(),MARKET_LEAD);
 const COUNTRY_AIRPORTS={ '':['HAM'], DE:['HAM','FRA','MUC'], TN:['TUN'], GR:['ATH'], PT:['LIS'], AE:['DXB'], JP:['NRT'] };
 const COUNTRY_LABELS={ '':'Not set (generic)', DE:'Germany', TN:'Tunisia', GR:'Greece', PT:'Portugal', AE:'United Arab Emirates', JP:'Japan' };
 const homeAirport=()=> (COUNTRY_AIRPORTS[state.journeyCountry]||['HAM'])[0];
-/* Suggested wedding journey legs (defaults only — always editable). */
-function journeyLegs(){ const home=homeAirport(); return [
-  { key:'out',  from:home,  to:'BKK', title:`${home} → Bangkok`,        note:'The long haul to Thailand',   round:true,  dep:DEFAULTS.departDate, ret:DEFAULTS.returnDate },
-  { key:'up',   from:'BKK', to:'LPQ', title:'Bangkok → Luang Prabang',  note:'The short hop to the wedding', round:false, dep:'2027-02-27' },
-  { key:'down', from:'LPQ', to:'BKK', title:'Luang Prabang → Bangkok',  note:'Back down after the weekend',  round:false, dep:'2027-03-01' },
-  { key:'home', from:'BKK', to:home,  title:`Bangkok → ${home}`,        note:'The way home',                round:false, dep:DEFAULTS.returnDate },
+/* Default wedding-journey legs (intelligent defaults; the builder is fully editable). */
+let _legSeq=0; const legId=()=>'l'+(Date.now().toString(36))+(_legSeq++);
+function defaultJourney(){ const home=homeAirport(); return [
+  { id:legId(), from:home,  to:'BKK', dep:'2027-02-21' },
+  { id:legId(), from:'BKK', to:'LPQ', dep:'2027-02-27' },
+  { id:legId(), from:'LPQ', to:'BKK', dep:'2027-03-01' },
+  { id:legId(), from:'BKK', to:home,  dep:'2027-03-10' },
 ]; }
+
+/* ---------- currency (provider-native first; app converts only as fallback) ---------- */
+const CURRENCIES=[['USD','🇺🇸'],['EUR','🇪🇺'],['THB','🇹🇭']];
+const CUR_FLAG={USD:'🇺🇸',EUR:'🇪🇺',THB:'🇹🇭'};
+/* Client mirror of the server's indicative rates (base EUR) — used ONLY to display
+   already-fetched native values (tracked routes / history) in the chosen currency.
+   Market & search prices are converted server-side; this never re-converts those. */
+const FX_EUR={ EUR:1, USD:1.09, THB:39.0, GBP:0.85 };
+function fx(amount,from,to){ from=(from||'EUR').toUpperCase(); to=(to||'EUR').toUpperCase(); if(from===to||amount==null) return amount; const f=FX_EUR[from],t=FX_EUR[to]; return (f&&t)?amount*(t/f):amount; }
 
 /* ---------- state ---------- */
 let state={ search:{...DEFAULTS}, filters:{...DEFAULT_FILTERS},
   results:{status:'idle',offers:[],error:null,forPair:null},
   calendar:{status:'idle',days:[]},
   market:{status:'idle',asOf:null,routes:[]},
-  journeyCountry:'',
+  journeyCountry:'', journey:null, currency:'USD',
   tracked:[], selectedTrack:null, compare:[],
   backend:{reachable:false,configured:false,checked:false} };
+state.journey=defaultJourney();
 const totalDur=o=>o.outbound.durationMinutes+(o.inbound?o.inbound.durationMinutes:0);
 const stopsOf=o=>Math.max(o.outbound.stops,o.inbound?o.inbound.stops:0);
 function computeBadges(offers){
@@ -383,21 +435,21 @@ function providerChoices(offer){
 
 const SKEY='svil_ft_session';
 function save(){
-  localStorage.setItem(KEY,JSON.stringify({search:state.search,filters:state.filters,tracked:state.tracked,selectedTrack:state.selectedTrack,compare:state.compare,journeyCountry:state.journeyCountry}));
+  localStorage.setItem(KEY,JSON.stringify({search:state.search,filters:state.filters,tracked:state.tracked,selectedTrack:state.selectedTrack,compare:state.compare,journeyCountry:state.journeyCountry,journey:state.journey,currency:state.currency}));
   saveSession();
 }
 /* Volatile session snapshot so the Back button / a reload restores the exact
    previous state (results, calendar, market, comparison, scroll) — never start over. */
 function saveSession(){ try{ sessionStorage.setItem(SKEY,JSON.stringify({
   results:state.results, calendar:state.calendar, market:state.market, compare:state.compare, scrollY:window.scrollY })); }catch(e){} }
-function load(){ try{const r=JSON.parse(localStorage.getItem(KEY)); if(r){ state.search={...DEFAULTS,...r.search}; state.filters={...DEFAULT_FILTERS,...r.filters}; state.tracked=r.tracked||[]; state.selectedTrack=r.selectedTrack||null; state.compare=r.compare||[]; state.journeyCountry=r.journeyCountry||''; }}catch(e){} }
+function load(){ try{const r=JSON.parse(localStorage.getItem(KEY)); if(r){ state.search={...DEFAULTS,...r.search}; state.filters={...DEFAULT_FILTERS,...r.filters}; state.tracked=r.tracked||[]; state.selectedTrack=r.selectedTrack||null; state.compare=r.compare||[]; state.journeyCountry=r.journeyCountry||''; if(Array.isArray(r.journey)&&r.journey.length) state.journey=r.journey; if(r.currency&&CUR_FLAG[r.currency]) state.currency=r.currency; }}catch(e){} }
 function loadSession(){ try{const r=JSON.parse(sessionStorage.getItem(SKEY)); if(r){ if(r.results) state.results=r.results; if(r.calendar) state.calendar=r.calendar; if(r.market) state.market=r.market; if(r.compare) state.compare=r.compare; return r; }}catch(e){} return null; }
 function presetActive(p){ const s=state.search; return s.origin===p.s.origin && s.destination===p.s.destination && s.departDate===(p.s.departDate) && (s.oneWay===!!p.s.oneWay); }
 
 /* ---------- query builder ---------- */
 function baseQuery(){ const s=state.search; return {
   origin:s.origin, destination:s.destination, departureDate:s.departDate, returnDate:s.oneWay?null:s.returnDate,
-  adults:s.adults, cabin:s.cabin, maxStops:s.maxStops, currency:'EUR' }; }
+  adults:s.adults, cabin:s.cabin, maxStops:s.maxStops, currency:state.currency }; }
 function calendarQuery(){ const s=state.search;
   // Compare nearby DEPARTURE days at one fixed trip length (fast + clear, one price per day).
   const base = (s.returnDate&&!s.oneWay)?nights(s.departDate,s.returnDate):Math.round((s.nightsMin+s.nightsMax)/2);
@@ -453,7 +505,7 @@ async function loadMarket(){
   const had=state.market.routes.length;
   state.market={...state.market,status:had?'ok':'loading'}; render();
   try{
-    const r=await travel.market(true);
+    const r=await travel.market(true,state.currency);
     if(r&&r.status==='ok') state.market={status:'ok',asOf:r.asOf,routes:r.routes||[]};
     else state.market={status:'empty',asOf:null,routes:r&&r.routes||[]};
   }catch(e){ state.market={...state.market,status:had?'ok':'error'}; }
@@ -466,11 +518,29 @@ function applyMarketRoute(id){
   state.search={...state.search,origin:r.origin,destination:r.destination,departDate:marketSampleDate(),returnDate:null,oneWay:true};
   save(); runSearch(); scrollToResults();
 }
-function applyJourneyLeg(leg){
-  state.search={...state.search,origin:leg.from,destination:leg.to,oneWay:!leg.round,departDate:leg.dep,returnDate:leg.round?leg.ret:null};
-  save(); runSearch(); scrollToSearch();
+
+/* ---------- currency ---------- */
+function setCurrency(c){ if(!CUR_FLAG[c]||c===state.currency) return; state.currency=c; save();
+  loadMarket();                                         // re-price the market natively/converted
+  if(state.results.status==='ok'||state.results.status==='empty') runSearch(); // re-price results
+  render();
 }
-function setCountry(code){ state.journeyCountry=code; state.search.origin=homeAirport(); save(); render(); }
+
+/* ---------- editable journey builder (add / delete / duplicate / swap / edit) ---------- */
+function findLeg(id){ return (state.journey||[]).find(l=>l.id===id); }
+function editLeg(id,field,value){ const l=findLeg(id); if(!l) return; l[field]=field==='dep'?value:String(value||'').toUpperCase(); save(); }
+function swapLeg(id){ const l=findLeg(id); if(!l) return; [l.from,l.to]=[l.to,l.from]; save(); render(); }
+function deleteLeg(id){ state.journey=state.journey.filter(l=>l.id!==id); if(!state.journey.length) state.journey=[{id:legId(),from:'',to:'',dep:DEFAULTS.departDate}]; save(); render(); }
+function duplicateLeg(id){ const i=state.journey.findIndex(l=>l.id===id); if(i<0) return; state.journey.splice(i+1,0,{...state.journey[i],id:legId()}); save(); render(); }
+function addLeg(){ state.journey.push({id:legId(),from:'',to:'',dep:DEFAULTS.departDate}); save(); render(); }
+function searchLeg(id){ const l=findLeg(id); if(!l||!l.from||!l.to) return;
+  state.search={...state.search,origin:l.from,destination:l.to,departDate:l.dep||DEFAULTS.departDate,oneWay:true,returnDate:null};
+  save(); runSearch(); scrollToResults();
+}
+/* Country default only remaps legs still on the previous home airport (never locks). */
+function setCountry(code){ const old=homeAirport(); state.journeyCountry=code; const now=homeAirport();
+  if(old!==now) state.journey.forEach(l=>{ if(l.from===old)l.from=now; if(l.to===old)l.to=now; });
+  save(); render(); }
 function scrollToResults(){ setTimeout(()=>{const e=$('#results-anchor'); if(e) e.scrollIntoView({behavior:'smooth',block:'start'});},60); }
 function scrollToSearch(){ setTimeout(()=>{const e=$('#search-anchor'); if(e) e.scrollIntoView({behavior:'smooth',block:'start'});},60); }
 
@@ -500,14 +570,24 @@ async function selectTrack(id){ state.selectedTrack=id; save(); render();
 function removeTrack(id){ state.tracked=state.tracked.filter(x=>x.id!==id); if(state.selectedTrack===id) state.selectedTrack=null; save(); render(); }
 
 /* ---------- client-side filtering (independent, no re-fetch) ---------- */
+const SORTS=[['price','Lowest price'],['duration','Shortest duration'],['stops','Fewest stops'],['best','Best overall'],['depart','Earliest departure'],['late','Latest departure']];
+function bestScore(o,all){
+  const P=all.map(x=>x.price.amount),D=all.map(totalDur);
+  const minP=Math.min(...P),maxP=Math.max(...P),minD=Math.min(...D),maxD=Math.max(...D);
+  const np=(o.price.amount-minP)/((maxP-minP)||1), nd=(totalDur(o)-minD)/((maxD-minD)||1);
+  return np*0.55+nd*0.3+stopsOf(o)*0.15;
+}
 function filteredOffers(){
   let o=[...state.results.offers]; const f=state.filters;
   if(f.maxStops!=='any'){ const m=Number(f.maxStops); o=o.filter(x=>Math.max(x.outbound.stops,x.inbound?x.inbound.stops:0)<=m); }
   if(f.maxPrice) o=o.filter(x=>x.price.amount<=Number(f.maxPrice));
   if(f.refundableOnly) o=o.filter(x=>x.conditions&&x.conditions.refundable);
-  const sort=f.sort;
-  o.sort((a,b)=> sort==='duration'?(a.outbound.durationMinutes-b.outbound.durationMinutes)
+  const all=o, sort=f.sort;
+  o.sort((a,b)=> sort==='duration'?(totalDur(a)-totalDur(b))
+    : sort==='stops'?((stopsOf(a)-stopsOf(b))||(a.price.amount-b.price.amount))
+    : sort==='best'?(bestScore(a,all)-bestScore(b,all))
     : sort==='depart'?(new Date(a.outbound.from.at)-new Date(b.outbound.from.at))
+    : sort==='late'?(new Date(b.outbound.from.at)-new Date(a.outbound.from.at))
     : (a.price.amount-b.price.amount));
   return o;
 }
@@ -516,9 +596,18 @@ function filteredOffers(){
    RENDER
    ============================================================================ */
 function render(){
-  $('#app').innerHTML = `<div id="search-anchor"></div>`+viewSearch()+viewBackendNotice()+viewMarket()+viewJourney()
+  $('#app').innerHTML = viewTopControls()+`<div id="search-anchor"></div>`+viewSearch()+viewBackendNotice()+viewMarket()+viewJourney()
     +viewCalendar()+viewCompare()+`<div id="results-anchor"></div>`+viewResults()+viewTracked()+viewFoot();
   wire();
+}
+function viewTopControls(){
+  if(!(state.backend.reachable&&state.backend.configured)) return '';
+  return `<div class="topctl">
+    ${isConverted()?`<span class="cur-note"><span class="approx">≈</span> ${esc(state.currency)} is an indicative conversion</span>`:''}
+    <div class="cur-seg" role="group" aria-label="Display currency">
+      ${CURRENCIES.map(([c,fl])=>`<button type="button" class="cur ${state.currency===c?'on':''}" data-cur="${c}">${fl} ${c}</button>`).join('')}
+    </div>
+  </div>`;
 }
 
 /* ---------- flight market dashboard (live monitored routes) ---------- */
@@ -542,10 +631,11 @@ function marketCard(r){
   const provRow=c?`<span class="m-prov">${brand.logoUrl?`<img src="${esc(brand.logoUrl)}" alt="" onerror="this.style.display='none'">`:''}${esc(brand.name||c.provider||'')}</span>`:'';
   const priceBlock=c?`<div class="m-price-row"><span class="m-price">${money(c.price,c.currency)}</span>${chg}</div>`
     :`<div class="m-price-row"><span class="m-price" style="opacity:.4">—</span></div>`;
+  const stat=`<span class="m-stat ${r.status}">${r.status==='ok'?'● Live':c?'● Collecting':'● No data'}</span>`;
   const meta = c ? (r.history>=2
-      ? `<div class="m-meta"><span>30-day low <b>${money(r.low30,c.currency)}</b></span><span><b>${c.offers}</b> live offers</span><span>updated ${ago(c.ts)}</span></div>`
-      : `<div class="m-meta"><span><b>${c.offers}</b> live offers</span><span>updated ${ago(c.ts)}</span></div><div class="m-collecting"><span class="pulse"></span>Collecting history…</div>`)
-    : `<div class="m-collecting"><span class="pulse"></span>Collecting history…</div>`;
+      ? `<div class="m-meta">${stat}<span>30-day low <b>${money(r.low30,c.currency)}</b></span><span><b>${c.offers}</b> live offers</span><span>updated ${ago(c.ts)}</span></div>`
+      : `<div class="m-meta">${stat}<span><b>${c.offers}</b> live offers</span><span>updated ${ago(c.ts)}</span></div><div class="m-collecting"><span class="pulse"></span>Collecting history…</div>`)
+    : `<div class="m-meta">${stat}</div><div class="m-collecting"><span class="pulse"></span>Collecting history…</div>`;
   return `<button type="button" class="mcard" data-mroute="${esc(r.id)}">
     <div class="m-top">
       <div><div class="m-city">${r.flag} ${esc(r.originCity)}</div><div class="m-pair">${esc(r.origin)} → ${esc(r.destination)}</div></div>
@@ -560,8 +650,8 @@ function marketCard(r){
 function viewMarket(){
   if(!(state.backend.reachable&&state.backend.configured)) return '';
   const m=state.market;
-  const head=(sub)=>`<div class="mkt-head"><h3>Flight Market</h3><span class="asof"><span class="live"></span>${sub}</span></div>
-    <p class="mkt-sub">Live cheapest fares on the routes our guests fly, refreshed from the same real providers behind every search. Prices build a history over time — a quiet market you can watch before you book.</p>`;
+  const head=(sub)=>`<div class="mkt-head"><h3>Flight Market</h3><span class="asof"><span class="live"></span>${sub} · ${esc(state.currency)}</span></div>
+    <p class="mkt-sub">Live cheapest fares on the routes our guests fly, refreshed from the same real providers behind every search. Prices build a history over time — a quiet market you can watch before you book. ${curNote()}</p>`;
   if(m.status==='loading'&&!m.routes.length){
     return `<section class="market">${head('Loading live routes…')}<div class="mkt-grid">${Array.from({length:10}).map(()=>`<div class="mskel"></div>`).join('')}</div></section>`;
   }
@@ -570,23 +660,31 @@ function viewMarket(){
   return `<section class="market">${head(asOf)}<div class="mkt-grid">${m.routes.map(marketCard).join('')}</div></section>`;
 }
 
-/* editable wedding journey (suggested defaults; every field editable in search) */
+/* editable wedding-journey builder (intelligent defaults; never locked) */
+function jrow(l){
+  return `<div class="jrow" data-leg="${l.id}">
+    <div class="jf"><label>From</label><input class="jac" data-jset="${l.id}:from" data-role="origin" value="${esc(l.from)}" placeholder="City or airport" autocomplete="off" spellcheck="false"></div>
+    <button type="button" class="jswap" data-jswap="${l.id}" title="Swap airports" aria-label="Swap airports">⇄</button>
+    <div class="jf"><label>To</label><input class="jac" data-jset="${l.id}:to" data-role="destination" value="${esc(l.to)}" placeholder="City or airport" autocomplete="off" spellcheck="false"></div>
+    <div class="jf date"><label>Depart</label><input type="date" data-jset="${l.id}:dep" value="${esc(l.dep||'')}"></div>
+    <div class="jacts">
+      <button type="button" class="jsearch" data-jsearch="${l.id}">Search</button>
+      <button type="button" data-jdup="${l.id}" title="Duplicate leg" aria-label="Duplicate leg">⧉</button>
+      <button type="button" data-jdel="${l.id}" title="Delete leg" aria-label="Delete leg">✕</button>
+    </div>
+  </div>`;
+}
 function viewJourney(){
   if(!(state.backend.reachable&&state.backend.configured)) return '';
-  const legs=journeyLegs();
   const opts=Object.keys(COUNTRY_LABELS).map(c=>`<option value="${c}" ${c===state.journeyCountry?'selected':''}>${esc(COUNTRY_LABELS[c])}</option>`).join('');
-  const cells=[];
-  legs.forEach((l,i)=>{ cells.push(`<button type="button" class="jleg" data-jkey="${l.key}"><div class="r">${esc(l.title)}</div><div class="d">${esc(l.note)}</div><div class="edit">Load into search ›</div></button>`);
-    if(i<legs.length-1) cells.push('<span class="jarrow">→</span>'); });
-  return `<section class="journey">
-    <div class="eyebrow">Your wedding journey</div>
-    <h3>Home to Luang Prabang, and home again.</h3>
-    <p>A suggested flow for the weekend: your city to Bangkok, the short hop up to Luang Prabang for the wedding, then back the same way. These are only defaults — load any leg into the search and change the airports, dates, cabin or passengers freely.</p>
-    <div class="j-country"><label for="j-country">Flying from</label>
-      <select id="j-country">${opts}</select>
-      <span>We preselect a sensible home airport (${esc(homeAirport())}); you can always edit it.</span>
+  return `<section class="jbuild">
+    <div class="jb-head">
+      <div><div class="eyebrow">Your wedding journey</div><h3>Home to Luang Prabang, and home again.</h3></div>
+      <label class="jb-country">Flying from <select id="j-country">${opts}</select></label>
     </div>
-    <div class="jflow">${cells.join('')}</div>
+    <p class="jb-sub">Intelligent defaults — everything is editable. Change or search airports, swap them, change dates, delete or duplicate a leg, or add another. Your journey stays here after every search; “Search” loads a leg into live fares below.</p>
+    ${state.journey.map(jrow).join('')}
+    <button type="button" class="btn ghost small jb-add" id="jb-add">＋ Add a leg</button>
   </section>`;
 }
 
@@ -690,9 +788,9 @@ function viewResults(){
   const cheapest=offers.length?offers[0].price.amount:null;
   const head=`<div class="res-head"><h3>Flights</h3>${offers.length?`<span class="res-sub">${offers.length} of ${r.offers.length} · ${esc(s.origin)} → ${esc(s.destination)} · ${fmtDayShort(s.departDate)}${s.oneWay?'':' → '+fmtDayShort(s.returnDate)} · from ${money(offers[0].price)}</span>`:''}</div>`;
   const filters=`<div class="filters">
-    <div class="fl"><label>Sort</label><select id="fl-sort">${[['price','Cheapest'],['duration','Fastest'],['depart','Earliest']].map(([v,l])=>`<option value="${v}" ${state.filters.sort===v?'selected':''}>${l}</option>`).join('')}</select></div>
+    <div class="fl"><label>Sort</label><select id="fl-sort">${SORTS.map(([v,l])=>`<option value="${v}" ${state.filters.sort===v?'selected':''}>${l}</option>`).join('')}</select></div>
     <div class="fl"><label>Stops</label><select id="fl-stops">${[['any','Any'],['0','Nonstop'],['1','≤1 stop']].map(([v,l])=>`<option value="${v}" ${state.filters.maxStops===v?'selected':''}>${l}</option>`).join('')}</select></div>
-    <div class="fl"><label>Max price €</label><input id="fl-price" type="number" min="0" placeholder="any" value="${state.filters.maxPrice}"></div>
+    <div class="fl"><label>Max price (${esc(state.currency)})</label><input id="fl-price" type="number" min="0" placeholder="any" value="${state.filters.maxPrice}"></div>
     <label class="toggle"><input type="checkbox" id="fl-refund" ${state.filters.refundableOnly?'checked':''}> Refundable only</label>
   </div>`;
   let body;
@@ -756,7 +854,7 @@ function viewTracked(){
     <div class="section-h"><h3>Tracked routes</h3><span class="sub">Save a search to record its price over time and get an alert when it drops. The daily check runs on the server.</span></div>
     <div class="tracked-list">
       ${state.tracked.map(t=>{const m=metrics(t);const tm=m?trend(m.trend):null;return `<button type="button" class="tchip ${t.id===state.selectedTrack?'active':''}" data-track="${t.id}">
-        <div class="r">${esc(t.origin)} → ${esc(t.destination)}</div><div class="pr">${m?money({amount:m.today.price,currency:m.today.currency}):'—'}</div>
+        <div class="r">${esc(t.origin)} → ${esc(t.destination)}</div><div class="pr">${m?dispMoney(m.today.price,m.today.currency||'EUR'):'—'}</div>
         <div class="tr ${tm?tm.cls:''}">${m?tm.arrow+' '+t.history.length+' check'+(t.history.length>1?'s':''):'saved'}${t.alertsEnabled?' · alerts on':''}</div></button>`;}).join('')}
       ${canTrack?`<button type="button" class="btn small" id="trackBtn" style="align-self:center">＋ Track current search</button>`:''}
     </div>
@@ -830,11 +928,35 @@ function wire(){
   document.querySelectorAll('[data-book]').forEach(b=>b.onclick=()=>bookOffer(b.dataset.book));
   document.querySelectorAll('[data-cmp]').forEach(b=>b.onchange=()=>toggleCompare(b.dataset.cmp));
   $('#cmp-clear')&&($('#cmp-clear').onclick=()=>{state.compare=[];save();render();});
-  // market dashboard + editable journey
+  // currency
+  document.querySelectorAll('[data-cur]').forEach(b=>b.onclick=()=>setCurrency(b.dataset.cur));
+  // market dashboard
   document.querySelectorAll('[data-mroute]').forEach(b=>b.onclick=()=>applyMarketRoute(b.dataset.mroute));
-  const legs=journeyLegs();
-  document.querySelectorAll('[data-jkey]').forEach(b=>b.onclick=()=>{const l=legs.find(x=>x.key===b.dataset.jkey);if(l)applyJourneyLeg(l);});
+  // editable journey builder
+  document.querySelectorAll('.jac').forEach(attachJourneyAC);
+  document.querySelectorAll('.jrow input[type="date"][data-jset]').forEach(inp=>inp.onchange=()=>{const[id,f]=inp.dataset.jset.split(':');editLeg(id,f,inp.value);});
+  document.querySelectorAll('[data-jswap]').forEach(b=>b.onclick=()=>swapLeg(b.dataset.jswap));
+  document.querySelectorAll('[data-jdup]').forEach(b=>b.onclick=()=>duplicateLeg(b.dataset.jdup));
+  document.querySelectorAll('[data-jdel]').forEach(b=>b.onclick=()=>deleteLeg(b.dataset.jdel));
+  document.querySelectorAll('[data-jsearch]').forEach(b=>b.onclick=()=>searchLeg(b.dataset.jsearch));
+  $('#jb-add')&&($('#jb-add').onclick=addLeg);
   $('#j-country')&&($('#j-country').onchange=e=>setCountry(e.target.value));
+}
+/* autocomplete for journey-leg airport inputs (same Duffel Places source) */
+function attachJourneyAC(input){
+  if(input._ac) return; input._ac=true;
+  const [id,field]=input.dataset.jset.split(':');
+  const menu=document.createElement('div'); menu.className='ac-menu hidden'; menu.setAttribute('role','listbox'); input.parentElement.appendChild(menu);
+  let items=[],deb;
+  const hide=()=>{menu.classList.add('hidden');menu.innerHTML='';};
+  const choose=p=>{if(!p)return; input.value=p.iata; editLeg(id,field,p.iata); hide();};
+  input.addEventListener('input',()=>{clearTimeout(deb);const q=input.value.trim(); editLeg(id,field,q); if(q.length<2){hide();return;}
+    deb=setTimeout(async()=>{try{const r=await travel.places(q); items=(r&&r.status==='ok'&&Array.isArray(r.data))?r.data.slice(0,7):[];
+      if(!items.length){hide();return;}
+      menu.innerHTML=items.map(p=>`<div class="ac-item" role="option"><span class="code">${esc(p.iata)}</span><span class="nm">${esc(p.name)}${p.city&&p.city!==p.name?' · '+esc(p.city):''}</span></div>`).join('');
+      [...menu.children].forEach((el,i)=>el.addEventListener('mousedown',e=>{e.preventDefault();choose(items[i]);}));
+      menu.classList.remove('hidden');}catch(e){hide();}},250);});
+  input.addEventListener('blur',()=>setTimeout(()=>{const v=input.value.trim(); if(v&&!/^[A-Za-z]{3}$/.test(v)&&items.length)choose(items[0]); else editLeg(id,field,v.toUpperCase()); hide();},160));
 }
 function commitAndSearch(){
   // pull latest field values (in case not blurred) then search

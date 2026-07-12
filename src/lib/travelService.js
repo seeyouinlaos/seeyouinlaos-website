@@ -16,6 +16,26 @@
  */
 const { getProvider, getProviders } = require('./providers/flightProvider');
 const { MONITORED_ROUTES, routeKey, routeQuery } = require('./monitoredRoutes');
+const { convertMoney, DEFAULT_CURRENCY } = require('./money');
+
+/**
+ * Re-price provider-native offers into the requested currency. If the provider
+ * prices natively in `to`, offers are returned verbatim; otherwise each price is
+ * converted once (money seam) and marked, preserving the native source.
+ */
+function priceOffers(offers, to, provider) {
+  if (!to || (provider.supportsCurrency && provider.supportsCurrency(to))) return offers;
+  return offers.map((o) => {
+    const m = convertMoney(o.price, to);
+    if (!m.converted) return o;
+    return { ...o, price: { amount: m.amount, currency: m.currency }, priceConverted: true, priceSource: m.source };
+  });
+}
+/** Convert a bare {amount,currency} for calendar/market display (native preserved). */
+function priceMoney(money, to) {
+  const m = convertMoney(money, to);
+  return { amount: m.amount, currency: m.currency, converted: !!m.converted, source: m.source || null };
+}
 
 const IATA = /^[A-Z]{3}$/;
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -98,10 +118,14 @@ async function handleAction(action, rawQuery, env) {
       if (query.lenMin != null || query.lenMax != null) {
         data = bestCombinations(data, query.lenMin, query.lenMax);
       }
+      if (!(provider.supportsCurrency && provider.supportsCurrency(query.currency))) {
+        data = data.map((c) => ({ ...c, price: priceMoney(c.price, query.currency) }));
+      }
       return { status: 'ok', provider: provider.name, currency: query.currency, data };
     }
     if (action === 'search') {
-      const data = await provider.searchOffers(query);
+      const offers = await provider.searchOffers(query);
+      const data = priceOffers(offers, query.currency, provider);
       return { status: 'ok', provider: provider.name, currency: query.currency, data };
     }
     if (action === 'priceAnalysis') {
@@ -253,28 +277,36 @@ async function refreshMarket(env, store, now = new Date()) {
   return { refreshed: summary.length, summary };
 }
 
-/** Trend/percent helpers over a snapshot series (real numbers only). */
-function computeCard(route, snaps) {
+/** Trend/percent helpers over a snapshot series (real numbers only).
+ *  Values are computed in the snapshot's NATIVE currency, then the monetary
+ *  fields are converted for display into `to` (history in the store stays native). */
+function computeCard(route, snaps, to) {
   if (!snaps.length) {
-    return { ...routePublic(route), status: 'collecting', current: null, previous: null,
-      change: null, changePct: null, spark: [], low30: null, trend: null, history: 0 };
+    return { ...routePublic(route), status: 'collecting', currency: to, converted: false, current: null,
+      previous: null, change: null, changePct: null, spark: [], low30: null, trend: null, history: 0 };
   }
   const last = snaps[snaps.length - 1];
   const prev = snaps.length > 1 ? snaps[snaps.length - 2] : null;
+  const nativeCur = last.currency || 'EUR';
+  const cv = (n) => (n == null ? null : priceMoney({ amount: n, currency: nativeCur }, to).amount);
+  const conv = priceMoney({ amount: last.price, currency: nativeCur }, to).converted;
   const change = prev ? +(last.price - prev.price).toFixed(2) : null;
   const changePct = prev && prev.price ? +(((last.price - prev.price) / prev.price) * 100).toFixed(1) : null;
-  const spark = snaps.slice(-7).map((s) => s.price);
   const cutoff = last.ts - 30 * 86400000;
   const low30 = Math.min(...snaps.filter((s) => (s.ts || 0) >= cutoff).map((s) => s.price));
   const trend = change == null ? null : (changePct >= 0.5 ? 'up' : changePct <= -0.5 ? 'down' : 'flat');
+  const dispCur = to || nativeCur;
   return {
     ...routePublic(route),
     status: snaps.length < 2 ? 'collecting' : 'ok', // one point = live price shown, sparkline still gathering
-    current: { price: last.price, currency: last.currency, offers: last.offers, provider: last.provider,
+    currency: dispCur, converted: conv,
+    current: { price: cv(last.price), currency: dispCur, offers: last.offers, provider: last.provider,
       branding: last.branding, bookingUrl: last.bookingUrl, offerId: last.offerId, ts: last.ts, date: last.date,
-      byProvider: last.byProvider || null },
-    previous: prev ? prev.price : null,
-    change, changePct, spark, low30, trend, history: snaps.length,
+      nativePrice: last.price, nativeCurrency: nativeCur,
+      byProvider: (last.byProvider || []).map((b) => ({ ...b, price: cv(b.price), currency: dispCur })) },
+    previous: prev ? cv(prev.price) : null,
+    change: cv(change), changePct, spark: snaps.slice(-7).map((s) => cv(s.price)), low30: cv(low30), trend,
+    history: snaps.length,
   };
 }
 function routePublic(r) {
@@ -291,6 +323,7 @@ async function marketOverview(env, store, opts = {}) {
   const providers = getProviders(env);
   const configured = providers.filter((p) => p.isConfigured);
   const now = opts.now || new Date();
+  const currency = String(opts.currency || DEFAULT_CURRENCY).toUpperCase();
   const refresh = opts.refresh !== false && configured.length > 0;
 
   // Decide which routes need a live price now (missing or stale), then seed them.
@@ -320,12 +353,12 @@ async function marketOverview(env, store, opts = {}) {
   }
 
   const routes = MONITORED_ROUTES.map((route) =>
-    computeCard(route, routeSnaps[routeKey(route.origin, route.destination)] || []));
+    computeCard(route, routeSnaps[routeKey(route.origin, route.destination)] || [], currency));
   return {
     status: configured.length ? 'ok' : 'not_configured',
     provider: configured[0] ? configured[0].name : (providers[0] && providers[0].name),
     asOf: now.toISOString(),
-    currency: 'EUR',
+    currency,
     routes,
   };
 }
