@@ -87,7 +87,8 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 .ac-menu.hidden{ display:none; }
 .ac-item{ display:flex; justify-content:space-between; align-items:baseline; gap:10px; padding:9px 12px; cursor:pointer; border-bottom:1px solid var(--line); }
 .ac-item:last-child{ border-bottom:none; }
-.ac-item:hover{ background:var(--blush); }
+.ac-item:hover, .ac-item.active{ background:var(--blush); }
+.ac-item.active{ box-shadow:inset 3px 0 0 var(--cherry); }
 .ac-item .code{ font-family:var(--serif); color:var(--cherry); font-size:14px; }
 .ac-item .nm{ color:var(--rose); font-size:12px; text-align:right; }
 
@@ -1030,21 +1031,44 @@ function wire(){
   $('#jb-add')&&($('#jb-add').onclick=addLeg);
   $('#j-country')&&($('#j-country').onchange=e=>setCountry(e.target.value));
 }
-/* autocomplete for journey-leg airport inputs (same Duffel Places source) */
-function attachJourneyAC(input){
+/* ---------- accessible airport autocomplete (WAI-ARIA combobox) ----------
+   One keyboard-navigable, screen-reader-friendly combobox used by BOTH the search
+   fields and the journey-leg fields. Arrow keys move the active option, Enter
+   selects it, Escape closes, Home/End jump, mouse still works. The input is a
+   role=combobox with aria-expanded + aria-activedescendant; the menu is a
+   role=listbox of role=option items. */
+let _acSeq=0;
+function attachAirportAC(input, opts){
   if(input._ac) return; input._ac=true;
+  const on=opts||{};
+  const menuId='ac-menu-'+(_acSeq++);
+  const menu=document.createElement('div'); menu.className='ac-menu hidden'; menu.id=menuId; menu.setAttribute('role','listbox');
+  input.parentElement.appendChild(menu);
+  input.setAttribute('role','combobox'); input.setAttribute('aria-autocomplete','list');
+  input.setAttribute('aria-expanded','false'); input.setAttribute('aria-controls',menuId);
+  let items=[], active=-1, deb;
+  const isOpen=()=>!menu.classList.contains('hidden');
+  const hide=()=>{ menu.classList.add('hidden'); menu.innerHTML=''; items=[]; active=-1; input.setAttribute('aria-expanded','false'); input.removeAttribute('aria-activedescendant'); };
+  const paint=()=>{ [...menu.children].forEach((el,i)=>{ const sel=i===active; el.classList.toggle('active',sel); el.setAttribute('aria-selected',sel?'true':'false'); if(sel){ input.setAttribute('aria-activedescendant',el.id); el.scrollIntoView({block:'nearest'}); } }); if(active<0) input.removeAttribute('aria-activedescendant'); };
+  const choose=p=>{ if(!p) return; input.value=p.iata; on.onChoose&&on.onChoose(p); hide(); };
+  const build=()=>{ menu.innerHTML=items.map((p,i)=>`<div class="ac-item" role="option" id="${menuId}-o${i}"><span class="code">${esc(p.iata)}</span><span class="nm">${esc(p.name)}${p.city&&p.city!==p.name?' · '+esc(p.city):''}</span></div>`).join(''); [...menu.children].forEach((el,i)=>{ el.addEventListener('mousedown',e=>{e.preventDefault();choose(items[i]);}); el.addEventListener('mousemove',()=>{ if(active!==i){active=i;paint();} }); }); active=-1; };
+  input.addEventListener('input',()=>{ clearTimeout(deb); const q=input.value.trim(); on.onInput&&on.onInput(q); if(q.length<2){ hide(); return; }
+    deb=setTimeout(async()=>{ try{ const r=await travel.places(q); items=(r&&r.status==='ok'&&Array.isArray(r.data))?r.data.slice(0,7):[]; if(!items.length){ hide(); return; }
+      build(); menu.classList.remove('hidden'); input.setAttribute('aria-expanded','true'); }catch(e){ hide(); } },250); });
+  input.addEventListener('keydown',e=>{
+    if(e.key==='ArrowDown'){ if(isOpen()&&items.length){ e.preventDefault(); active=(active+1)%items.length; paint(); } }
+    else if(e.key==='ArrowUp'){ if(isOpen()&&items.length){ e.preventDefault(); active=(active-1+items.length)%items.length; paint(); } }
+    else if(e.key==='Home'){ if(isOpen()&&items.length){ e.preventDefault(); active=0; paint(); } }
+    else if(e.key==='End'){ if(isOpen()&&items.length){ e.preventDefault(); active=items.length-1; paint(); } }
+    else if(e.key==='Enter'){ if(isOpen()&&items.length){ e.preventDefault(); choose(items[active>=0?active:0]); } }
+    else if(e.key==='Escape'){ if(isOpen()){ e.preventDefault(); e.stopPropagation(); hide(); } }
+  });
+  input.addEventListener('blur',()=>setTimeout(()=>{ const v=input.value.trim(); if(v&&!/^[A-Za-z]{3}$/.test(v)&&items.length) choose(items[active>=0?active:0]); else { on.onBlur&&on.onBlur(v); } hide(); },160));
+}
+/* journey-leg airport fields */
+function attachJourneyAC(input){
   const [id,field]=input.dataset.jset.split(':');
-  const menu=document.createElement('div'); menu.className='ac-menu hidden'; menu.setAttribute('role','listbox'); input.parentElement.appendChild(menu);
-  let items=[],deb;
-  const hide=()=>{menu.classList.add('hidden');menu.innerHTML='';};
-  const choose=p=>{if(!p)return; input.value=p.iata; editLeg(id,field,p.iata); hide();};
-  input.addEventListener('input',()=>{clearTimeout(deb);const q=input.value.trim(); editLeg(id,field,q); if(q.length<2){hide();return;}
-    deb=setTimeout(async()=>{try{const r=await travel.places(q); items=(r&&r.status==='ok'&&Array.isArray(r.data))?r.data.slice(0,7):[];
-      if(!items.length){hide();return;}
-      menu.innerHTML=items.map(p=>`<div class="ac-item" role="option"><span class="code">${esc(p.iata)}</span><span class="nm">${esc(p.name)}${p.city&&p.city!==p.name?' · '+esc(p.city):''}</span></div>`).join('');
-      [...menu.children].forEach((el,i)=>el.addEventListener('mousedown',e=>{e.preventDefault();choose(items[i]);}));
-      menu.classList.remove('hidden');}catch(e){hide();}},250);});
-  input.addEventListener('blur',()=>setTimeout(()=>{const v=input.value.trim(); if(v&&!/^[A-Za-z]{3}$/.test(v)&&items.length)choose(items[0]); else editLeg(id,field,v.toUpperCase()); hide();},160));
+  attachAirportAC(input,{ onChoose:p=>editLeg(id,field,p.iata), onInput:q=>editLeg(id,field,q), onBlur:v=>editLeg(id,field,v.toUpperCase()) });
 }
 function commitAndSearch(){
   // pull latest field values (in case not blurred) then search
@@ -1056,20 +1080,10 @@ function commitAndSearch(){
   save(); runSearch();
 }
 
-/* ---------- airport/city autocomplete (Duffel Places) ---------- */
+/* ---------- search origin/destination fields (Duffel Places) ---------- */
 function attachAutocomplete(input){
-  if(input._ac) return; input._ac=true;
-  const menu=document.createElement('div'); menu.className='ac-menu hidden'; menu.setAttribute('role','listbox'); input.parentElement.appendChild(menu);
-  let items=[],deb;
-  const hide=()=>{menu.classList.add('hidden');menu.innerHTML='';};
-  const choose=p=>{if(!p)return;input.value=p.iata;state.search[input.id==='f-origin'?'origin':'destination']=p.iata;save();hide();};
-  input.addEventListener('input',()=>{clearTimeout(deb);const q=input.value.trim();if(q.length<2){hide();return;}
-    deb=setTimeout(async()=>{try{const r=await travel.places(q);items=(r&&r.status==='ok'&&Array.isArray(r.data))?r.data.slice(0,7):[];
-      if(!items.length){hide();return;}
-      menu.innerHTML=items.map(p=>`<div class="ac-item" role="option"><span class="code">${esc(p.iata)}</span><span class="nm">${esc(p.name)}${p.city&&p.city!==p.name?' · '+esc(p.city):''}</span></div>`).join('');
-      [...menu.children].forEach((el,i)=>el.addEventListener('mousedown',e=>{e.preventDefault();choose(items[i]);}));
-      menu.classList.remove('hidden');}catch(e){hide();}},250);});
-  input.addEventListener('blur',()=>setTimeout(()=>{const v=input.value.trim();if(v&&!/^[A-Za-z]{3}$/.test(v)&&items.length)choose(items[0]);else{input.value=v.toUpperCase();state.search[input.id==='f-origin'?'origin':'destination']=v.toUpperCase();}hide();},160));
+  const key=input.id==='f-origin'?'origin':'destination';
+  attachAirportAC(input,{ onChoose:p=>{ state.search[key]=p.iata; save(); }, onBlur:v=>{ input.value=v.toUpperCase(); state.search[key]=v.toUpperCase(); save(); } });
 }
 
 /* ---------- persistence: keep scroll position + restore on back/reload ---------- */
