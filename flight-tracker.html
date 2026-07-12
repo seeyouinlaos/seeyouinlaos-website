@@ -254,6 +254,16 @@ svg.chart{ display:block; width:100%; height:180px; }
 .m-dates .sub{ display:block; font-size:10.5px; color:var(--rose); margin-top:2px; letter-spacing:.06em; text-transform:uppercase; }
 .m-itin{ font-size:11px; color:var(--rose); letter-spacing:.02em; margin-top:-2px; }
 .m-itin .nonstop{ color:var(--good); }
+.m-insight{ border-top:1px solid var(--line); padding-top:9px; display:flex; flex-direction:column; gap:4px; }
+.m-insight .mi-h{ font-size:9px; letter-spacing:.16em; text-transform:uppercase; color:var(--rose); margin-bottom:2px; }
+.m-insight .mi-row{ display:flex; justify-content:space-between; align-items:baseline; font-size:11.5px; color:var(--ink); }
+.m-insight .mi-row .k{ color:var(--rose); }
+.m-insight .good{ color:var(--good); } .m-insight .up{ color:var(--cherry-photo); } .m-insight .flat{ color:var(--rose); }
+.m-insight .mi-conf{ font-size:9.5px; letter-spacing:.08em; text-transform:uppercase; font-weight:600; padding:2px 8px; border-radius:20px; }
+.m-insight .mi-conf.high{ background:rgba(47,111,79,.14); color:var(--good); }
+.m-insight .mi-conf.medium{ background:var(--blush); color:var(--ink); }
+.m-insight .mi-conf.low{ background:rgba(154,107,30,.14); color:var(--warn); }
+.m-insight .mi-collect{ font-size:10.5px; color:var(--rose); font-style:italic; display:inline-flex; align-items:center; gap:6px; }
 .mspark{ display:block; width:100%; height:34px; overflow:visible; }
 .mspark .ar{ fill:rgba(179,58,63,.09); }
 .mspark .ln{ fill:none; stroke:var(--cherry-photo); stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
@@ -691,10 +701,9 @@ function marketCard(r){
   const dates=marketDates(c);
   const itin=marketItin(c);
   const stat=`<span class="m-stat ${r.status}">${r.status==='ok'?'● Live':c?'● Collecting':'● No data'}</span>`;
-  const meta = c ? (r.history>=2
-      ? `<div class="m-meta">${stat}<span>30-day low <b>${money(r.low30,c.currency)}</b></span><span><b>${c.offers}</b> live offers</span><span>updated ${ago(c.ts)}</span></div>`
-      : `<div class="m-meta">${stat}<span><b>${c.offers}</b> live offers</span><span>updated ${ago(c.ts)}</span></div><div class="m-collecting"><span class="pulse"></span>Collecting history…</div>`)
-    : `<div class="m-meta">${stat}</div><div class="m-collecting"><span class="pulse"></span>Collecting history…</div>`;
+  const meta = c
+    ? `<div class="m-meta">${stat}<span><b>${c.offers}</b> live offers</span><span>updated ${ago(c.ts)}</span></div>`
+    : `<div class="m-meta">${stat}</div>`;
   return `<button type="button" class="mcard" data-mroute="${esc(r.id)}">
     <div class="m-top">
       <div><div class="m-city">${r.flag} ${esc(r.originCity)}</div><div class="m-pair">${esc(r.origin)} → ${esc(r.destination)}</div></div>
@@ -705,6 +714,7 @@ function marketCard(r){
     ${itin}
     ${sparkSVG(r.spark)}
     ${meta}
+    ${marketInsight(r)}
     <span class="m-cta">View live fares →</span>
   </button>`;
 }
@@ -714,6 +724,23 @@ function marketDates(c){
   if(c.oneWay||!c.returnDate) return `<div class="m-dates">${esc(fmtDayY(c.departureDate))}<span class="sub">One way</span></div>`;
   const n=c.nights!=null?c.nights:nights(c.departureDate,c.returnDate);
   return `<div class="m-dates">${esc(fmtDayShort(c.departureDate))} → ${esc(fmtDayY(c.returnDate))}<span class="sub">${n} night${n===1?'':'s'}</span></div>`;
+}
+/* Market Insight — real snapshot stats only; "Collecting history" until 2+ days. */
+function marketInsight(r){
+  const c=r.current; if(!c) return '';
+  const cur=c.currency, ins=r.insight;
+  if(!ins) return `<div class="m-insight"><div class="mi-h">Market insight</div><div class="mi-collect"><span class="pulse"></span>Collecting history…</div></div>`;
+  const conf=ins.confidence, confLabel=conf.charAt(0).toUpperCase()+conf.slice(1);
+  const avgCls=ins.vsAvgPct<=-0.5?'good':ins.vsAvgPct>=0.5?'up':'flat';
+  const lowCls=ins.vsLow30Pct==null?'':(ins.vsLow30Pct<=0.5?'good':'up');
+  const pct=v=>`${v>0?'+':''}${v}%`;
+  return `<div class="m-insight">
+    <div class="mi-h">Market insight</div>
+    <div class="mi-row"><span class="k">This week</span><span>${money(ins.low7,cur)} – ${money(ins.high7,cur)}</span></div>
+    <div class="mi-row"><span class="k">vs 7-day avg</span><span class="${avgCls}">${pct(ins.vsAvgPct)}</span></div>
+    ${ins.vsLow30Pct!=null?`<div class="mi-row"><span class="k">vs 30-day low</span><span class="${lowCls}">${pct(ins.vsLow30Pct)}</span></div>`:''}
+    <div class="mi-row"><span class="k">Confidence</span><span class="mi-conf ${conf}">${confLabel}</span></div>
+  </div>`;
 }
 /* Stops + outbound duration of the priced itinerary (airline is shown top-right). */
 function marketItin(c){

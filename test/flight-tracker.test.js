@@ -286,6 +286,32 @@ test('Market card exposes the EXACT dates behind its price', async () => {
   assert.equal(snaps[snaps.length - 1].returnDate, '2027-02-20');
 });
 
+test('Market Insight: computed from real snapshots; collecting until 2 days', async () => {
+  const store = createStore(undefined); if (createStore._mem) createStore._mem.clear();
+  const k = routeKey('HAM', 'BKK');
+  const now = Date.now();
+  await store.appendRouteSnapshot(k, { date: '2027-01-05', ts: now - 4 * 86400000, price: 600, currency: 'EUR', offers: 100 });
+  let m = await marketOverview(ENV, store, { refresh: false, currency: 'EUR' });
+  let c = m.routes.find((r) => r.id === 'HAM-BKK');
+  assert.equal(c.status, 'collecting');
+  assert.equal(c.insight, null); // one day → collecting, nothing fabricated
+  // accrue real daily snapshots
+  await store.appendRouteSnapshot(k, { date: '2027-01-06', ts: now - 3 * 86400000, price: 640, currency: 'EUR', offers: 110 });
+  await store.appendRouteSnapshot(k, { date: '2027-01-07', ts: now - 2 * 86400000, price: 620, currency: 'EUR', offers: 120 });
+  await store.appendRouteSnapshot(k, { date: '2027-01-08', ts: now - 1 * 86400000, price: 660, currency: 'EUR', offers: 130 });
+  await store.appendRouteSnapshot(k, { date: '2027-01-09', ts: now, price: 610, currency: 'EUR', offers: 140 });
+  m = await marketOverview(ENV, store, { refresh: false, currency: 'EUR' });
+  const ins = m.routes.find((r) => r.id === 'HAM-BKK').insight;
+  assert.ok(ins, 'insight present with 5 days');
+  assert.equal(ins.low7, 600);   // lowest fare this week
+  assert.equal(ins.high7, 660);  // highest fare this week
+  assert.equal(ins.avg7, 626);   // (600+640+620+660+610)/5
+  assert.equal(ins.vsAvgPct, -2.6);   // current 610 vs 7-day avg 626
+  assert.equal(ins.vsLow30Pct, 1.7);  // current 610 vs 30-day low 600
+  assert.equal(ins.confidence, 'medium'); // 5 days
+  assert.equal(ins.days, 5);
+});
+
 test('KV store: route snapshots dedupe by day and stay bounded', async () => {
   const store = createStore(undefined);
   if (createStore._mem) createStore._mem.clear();

@@ -309,7 +309,7 @@ async function refreshMarket(env, store, now = new Date()) {
  *  (nativeCurrency -> multiplier). History in the store always stays native. */
 function computeCard(route, snaps, to, rateTo) {
   if (!snaps.length) {
-    return { ...routePublic(route), status: 'collecting', currency: to, converted: false, current: null,
+    return { ...routePublic(route), status: 'collecting', currency: to, converted: false, insight: null, current: null,
       previous: null, change: null, changePct: null, spark: [], low30: null, trend: null, history: 0 };
   }
   const last = snaps[snaps.length - 1];
@@ -322,12 +322,25 @@ function computeCard(route, snaps, to, rateTo) {
   const change = prev ? +(last.price - prev.price).toFixed(2) : null;
   const changePct = prev && prev.price ? +(((last.price - prev.price) / prev.price) * 100).toFixed(1) : null;
   const cutoff = last.ts - 30 * 86400000;
-  const low30 = Math.min(...snaps.filter((s) => (s.ts || 0) >= cutoff).map((s) => s.price));
+  const low30n = Math.min(...snaps.filter((s) => (s.ts || 0) >= cutoff).map((s) => s.price));
   const trend = change == null ? null : (changePct >= 0.5 ? 'up' : changePct <= -0.5 ? 'down' : 'flat');
+  // Market Insight — derived only from real stored snapshots. Null (→ "Collecting
+  // history" in the UI) until at least two days exist so nothing is fabricated.
+  const week = snaps.slice(-7).map((s) => s.price); // last up-to-7 daily snapshots = this week
+  const avg7n = week.reduce((a, b) => a + b, 0) / week.length;
+  const insight = snaps.length >= 2 ? {
+    low7: cv(Math.min(...week)),
+    high7: cv(Math.max(...week)),
+    avg7: cv(Math.round(avg7n * 100) / 100),
+    vsAvgPct: +(((last.price - avg7n) / avg7n) * 100).toFixed(1),
+    vsLow30Pct: low30n ? +(((last.price - low30n) / low30n) * 100).toFixed(1) : null,
+    confidence: snaps.length >= 14 ? 'high' : snaps.length >= 5 ? 'medium' : 'low',
+    days: snaps.length,
+  } : null;
   return {
     ...routePublic(route),
     status: snaps.length < 2 ? 'collecting' : 'ok', // one point = live price shown, sparkline still gathering
-    currency: dispCur, converted: conv,
+    currency: dispCur, converted: conv, insight,
     current: { price: cv(last.price), currency: dispCur, offers: last.offers, provider: last.provider,
       branding: last.branding, bookingUrl: last.bookingUrl, offerId: last.offerId, ts: last.ts, date: last.date,
       nativePrice: last.price, nativeCurrency: nativeCur,
@@ -337,7 +350,7 @@ function computeCard(route, snaps, to, rateTo) {
       stops: last.stops != null ? last.stops : null, durationMinutes: last.durationMinutes != null ? last.durationMinutes : null,
       byProvider: (last.byProvider || []).map((b) => ({ ...b, price: cv(b.price), currency: dispCur })) },
     previous: prev ? cv(prev.price) : null,
-    change: cv(change), changePct, spark: snaps.slice(-7).map((s) => cv(s.price)), low30: cv(low30), trend,
+    change: cv(change), changePct, spark: snaps.slice(-7).map((s) => cv(s.price)), low30: cv(low30n), trend,
     history: snaps.length,
   };
 }
