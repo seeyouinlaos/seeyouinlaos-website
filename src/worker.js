@@ -13,7 +13,7 @@
  *
  * Secrets/vars come from `env` (never the browser). KV is bound as `env.KV`.
  */
-import { handleAction, marketOverview, refreshMarket } from './lib/travelService.js';
+import { handleAction, marketOverview, refreshMarket, hotelsOverview, ratesOverview } from './lib/travelService.js';
 import { createStore } from './lib/store.js';
 import { getNotifier } from './lib/notifier.js';
 
@@ -79,6 +79,13 @@ async function handleTravel(request, env) {
       const refresh = isPost ? (body.refresh !== false) : (params.refresh !== 'false');
       const currency = (isPost ? (body.query && body.query.currency) || body.currency : params.currency) || undefined;
       return json(200, await marketOverview(env, store, { refresh, currency }));
+    }
+    if (action === 'hotels') {
+      const q = (isPost ? body.query : params) || {};
+      return json(200, await hotelsOverview(env, store, { city: q.city, nights: q.nights, currency: q.currency }));
+    }
+    if (action === 'rates') {
+      return json(200, await ratesOverview(env, store));
     }
 
     const result = await handleAction(action, query, env);

@@ -137,10 +137,28 @@ Where rates come from is a **pluggable abstraction**, not a hardcoded table:
 Converted money is marked `converted:true`; the UI shows a subtle
 “≈ Converted from EUR”. When the provider returns the requested currency
 natively, nothing is shown. The selector (🇺🇸 USD default, 🇪🇺 EUR, 🇹🇭 THB)
-re-prices the market, results, comparison, journey and tracked routes and persists
-across sessions. Stored market/price history stays native; display currency is
-applied on read, never mutating history. The same currency layer serves any future
-flight or hotel provider with no UI change.
+re-prices the market, results, comparison, journey, hotels and tracked routes and
+persists across sessions.
+
+**Historical rates.** Market/price history is always stored in the provider-native
+currency; the display currency is applied on read at the current rate, so history
+stays consistent and traceable and is never mutated.
+
+**One Money library.** `money.js` (repo root, UMD) is the single place for
+rounding, currency symbol, locale, formatting, conversion math and the
+native/converted marking. It is `require`d by the Worker (CurrencyService, Travel
+Service) AND loaded by the browser via `<script src="money.js">`, so Flight
+Market, flight cards, comparison, journey, hotel cards and hotel overview all
+format through the exact same code. The browser holds no rate table: it reads the
+current rates from the `rates` action (same rates the server uses) to display
+locally-held native values.
+
+**Hotels on the same layer.** `src/lib/providers/hotelProvider.js` (a `HotelProvider`
+mirroring `FlightProvider`) plus the `hotels` action price a curated collection
+(AVANI+ Luang Prabang, the Bangkok stop-over set) through the SAME CurrencyService
+and Money library — Luang Prabang priced natively in USD, Bangkok in THB, each
+converted for display with the native value preserved. Adding Expedia Rapid /
+Booking.com / an Avani API is one adapter; no currency logic and no UI change.
 
 ## Switching provider
 Add `src/lib/providers/<name>Adapter.js` implementing `FlightProvider`, register it

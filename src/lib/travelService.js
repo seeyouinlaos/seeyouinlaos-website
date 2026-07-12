@@ -16,7 +16,7 @@
  */
 const { getProvider, getProviders } = require('./providers/flightProvider');
 const { MONITORED_ROUTES, routeKey, routeQuery } = require('./monitoredRoutes');
-const { DEFAULT_CURRENCY } = require('./money');
+const { DEFAULT_CURRENCY } = require('../../money.js');
 const { createCurrencyService } = require('./fx/currencyService');
 const { createStore } = require('./store');
 
@@ -390,4 +390,42 @@ async function marketOverview(env, store, opts = {}) {
   };
 }
 
-module.exports = { handleAction, normalizeQuery, bestCombinations, marketOverview, refreshMarket };
+/* ============================================================================
+   Hotels — same currency architecture as flights (provider-independent)
+   ============================================================================ */
+const { getHotelProvider } = require('./providers/hotelProvider');
+
+/**
+ * Curated/live hotels for a city, priced through the SAME CurrencyService as
+ * flights. Each hotel's native price is preserved; display currency is applied on
+ * read. Adding Expedia/Booking/Rapid is a new HotelProvider — nothing here or in
+ * the UI changes.
+ */
+async function hotelsOverview(env, store, opts = {}) {
+  const provider = getHotelProvider(env);
+  const currency = String(opts.currency || DEFAULT_CURRENCY).toUpperCase();
+  const cur = currencyFor(env, store);
+  const list = await provider.searchHotels({ city: opts.city, nights: opts.nights, currency });
+  const hotels = [];
+  for (const h of list) {
+    const nightly = await cur.convertMoney(h.nightlyFrom, currency);
+    const total = await cur.convertMoney(h.total, currency);
+    hotels.push({
+      ...h,
+      nightlyFrom: { amount: nightly.amount, currency: nightly.currency },
+      total: { amount: total.amount, currency: total.currency },
+      nativeNightly: h.nightlyFrom, nativeTotal: h.total,
+      converted: !!nightly.converted,
+    });
+  }
+  return { status: 'ok', provider: provider.name, currency, hotels };
+}
+
+/** Current exchange-rate document (base + rates + provider) for the client to
+ *  display locally-held native values with the same rates the server uses. */
+async function ratesOverview(env, store) {
+  const doc = await currencyFor(env, store).rates();
+  return { status: 'ok', base: doc.base, rates: doc.rates, provider: doc.provider, fetchedAt: doc.fetchedAt };
+}
+
+module.exports = { handleAction, normalizeQuery, bestCombinations, marketOverview, refreshMarket, hotelsOverview, ratesOverview };

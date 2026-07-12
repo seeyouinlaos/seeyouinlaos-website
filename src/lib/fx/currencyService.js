@@ -13,6 +13,7 @@
  * The same service is used for flights today and hotels/anything tomorrow.
  */
 const { getExchangeRateProvider, STATIC_RATES } = require('./exchangeRateProvider');
+const Money = require('../../../money.js'); // the one money library (cross-rate + convert math)
 
 const _memo = new Map(); // cacheKey -> { base, rates, fetchedAt }
 
@@ -50,38 +51,26 @@ function createCurrencyService(env = {}, store = null) {
     return doc;
   }
 
-  function crossRate(doc, from, to) {
-    from = String(from).toUpperCase(); to = String(to).toUpperCase();
-    if (from === to) return 1;
-    const per = (c) => (c === doc.base ? 1 : (doc.rates[c] != null ? doc.rates[c] : null));
-    const pf = per(from), pt = per(to);
-    if (pf == null || pt == null || !pf) return null; // unknown pair → no fabrication
-    return pt / pf;
-  }
-
   return {
     providerName: provider.name,
 
+    /** The current cached rates document ({ base, rates, provider, fetchedAt }). */
+    async rates() { return ratesDoc(); },
+
     /** Multiplier from `from` to `to`, or null if the pair is unknown. */
-    async getRate(from, to) { return crossRate(await ratesDoc(), from, to); },
+    async getRate(from, to) { return Money.crossRate(await ratesDoc(), from, to); },
 
     /**
-     * Convert `{amount,currency}` into `to`. Returns unchanged+unmarked when already
-     * in `to` or when the pair is unknown; otherwise `converted:true` with the
-     * native `source`, the applied `rate`, and which `rateProvider` supplied it.
+     * Convert `{amount,currency}` into `to` using the shared Money math on top of
+     * the fetched+cached rates. Unchanged+unmarked when already in `to` or unknown
+     * pair; otherwise `converted:true` with native `source`, `rate`, and which
+     * `rateProvider` supplied it.
      */
     async convertMoney(money, to) {
-      if (!money || money.amount == null) return money;
-      to = String(to || '').toUpperCase();
-      const from = String(money.currency || 'EUR').toUpperCase();
-      if (from === to) return { amount: money.amount, currency: to, converted: false };
       const doc = await ratesDoc();
-      const r = crossRate(doc, from, to);
-      if (r == null) return { amount: money.amount, currency: from, converted: false };
-      return {
-        amount: Math.round(money.amount * r * 100) / 100, currency: to, converted: true,
-        rate: r, rateProvider: doc.provider, source: { amount: money.amount, currency: from },
-      };
+      const m = Money.convertMoney(money, to, doc);
+      if (m && m.converted) m.rateProvider = doc.provider;
+      return m;
     },
   };
 }

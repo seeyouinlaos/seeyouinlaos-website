@@ -307,10 +307,25 @@ test('Market overview: trend, change, sparkline and 30-day low from history', as
 const { getExchangeRateProvider } = require(`${L}/fx/exchangeRateProvider`);
 const { createCurrencyService, _clearFxMemo } = require(`${L}/fx/currencyService`);
 
-test('Money facts: supported set + default currency', () => {
-  const { isSupported, DEFAULT_CURRENCY } = require(`${L}/money`);
-  assert.equal(DEFAULT_CURRENCY, 'USD');
-  assert.ok(isSupported('THB') && !isSupported('XYZ'));
+const Money = require(`${__dirname}/../money.js`);
+
+test('Money library: one place for format, round, locale, convert, marking', () => {
+  assert.equal(Money.DEFAULT_CURRENCY, 'USD');
+  assert.ok(Money.isSupported('THB') && !Money.isSupported('XYZ'));
+  // formatting (symbol + locale + rounding) — the single source
+  assert.match(Money.format(1234.5, 'USD'), /\$1,235|\$1,234/);
+  assert.equal(Money.format(null, 'USD'), '—');
+  assert.equal(Money.formatMoney({ amount: 55, currency: 'THB' }).includes('55'), true);
+  // pure conversion given a ratesDoc (no rates hardcoded, no I/O)
+  const doc = { base: 'EUR', rates: { EUR: 1, USD: 1.1, THB: 40 } };
+  assert.equal(Money.crossRate(doc, 'EUR', 'USD'), 1.1);
+  assert.ok(Math.abs(Money.crossRate(doc, 'USD', 'THB') - (40 / 1.1)) < 1e-9); // cross via base
+  const m = Money.convertMoney({ amount: 100, currency: 'EUR' }, 'USD', doc);
+  assert.equal(m.currency, 'USD'); assert.equal(m.converted, true);
+  assert.deepEqual(m.source, { amount: 100, currency: 'EUR' });
+  assert.equal(Money.convertMoney({ amount: 100, currency: 'USD' }, 'USD', doc).converted, false);
+  assert.equal(Money.crossRate(doc, 'EUR', 'ZZZ'), null); // unknown → null
+  assert.equal(Money.convertedLabel('EUR'), '≈ Converted from EUR');
 });
 
 test('ExchangeRateProvider registry: default static, selectable', () => {
@@ -414,4 +429,34 @@ test('Market refresh (cron): prices every route and persists a snapshot', async 
   const res = await refreshMarket(ENV, store, new Date('2027-01-02T06:00:00Z'));
   assert.equal(res.refreshed, 10);
   assert.ok((await store.getRouteSnapshots(routeKey('BKK', 'LPQ'))).length >= 1);
+});
+
+/* ---------------- hotels reuse the same currency architecture ---------------- */
+const { hotelsOverview, ratesOverview } = require(`${L}/travelService`);
+const { getHotelProvider } = require(`${L}/providers/hotelProvider`);
+
+test('Hotels: same CurrencyService — multi-native prices converted, native preserved', async () => {
+  const store = createStore(undefined); if (createStore._mem) createStore._mem.clear();
+  const r = await hotelsOverview({ FX_PROVIDER: 'static' }, store, { currency: 'USD', nights: 2 });
+  assert.equal(r.status, 'ok');
+  assert.ok(r.hotels.length >= 4);
+  const lpq = r.hotels.find((h) => h.cityCode === 'LPQ'); // native USD → no conversion
+  assert.equal(lpq.nightlyFrom.currency, 'USD');
+  assert.equal(lpq.converted, false);
+  assert.equal(lpq.nativeNightly.currency, 'USD');
+  const bkk = r.hotels.find((h) => h.cityCode === 'BKK'); // native THB → converted to USD
+  assert.equal(bkk.nightlyFrom.currency, 'USD');
+  assert.equal(bkk.converted, true);
+  assert.equal(bkk.nativeNightly.currency, 'THB');           // provider-native preserved
+  assert.ok(bkk.nightlyFrom.amount < bkk.nativeNightly.amount); // THB→USD shrinks the number
+  assert.equal(getHotelProvider({}).name, 'curated');        // pluggable, default curated
+});
+
+test('Rates action: exposes base/rates/provider for client-side native display', async () => {
+  const store = createStore(undefined); if (createStore._mem) createStore._mem.clear();
+  const r = await ratesOverview({ FX_PROVIDER: 'static' }, store);
+  assert.equal(r.status, 'ok');
+  assert.equal(r.base, 'EUR');
+  assert.ok(r.rates && r.rates.USD > 0 && r.rates.THB > 0);
+  assert.equal(r.provider, 'static');
 });

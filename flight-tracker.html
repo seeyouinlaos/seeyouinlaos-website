@@ -275,6 +275,26 @@ svg.chart{ display:block; width:100%; height:180px; }
 .provchip{ font-size:9.5px; letter-spacing:.04em; border:1px solid var(--line); border-radius:20px; padding:3px 8px; color:var(--rose); display:inline-flex; align-items:center; gap:4px; }
 .provchip img{ width:12px; height:12px; object-fit:contain; }
 
+/* ---- hotels (same currency + Money layer as flights) ---- */
+.hotels{ margin:30px 0 0; }
+.hotels h3{ font-family:var(--serif); font-weight:200; font-size:clamp(23px,2.7vw,32px); }
+.hotels .h-sub{ font-size:12.5px; color:var(--rose); margin:5px 0 16px; max-width:640px; }
+.hotels .h-city{ font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--rose); margin:16px 0 10px; }
+.hgrid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:12px; }
+.hcard{ background:var(--card); border:1px solid var(--line); border-radius:5px; padding:15px 16px 14px; display:flex; flex-direction:column; gap:9px; transition:transform .2s cubic-bezier(.2,.7,.2,1), box-shadow .2s, border-color .2s; }
+.hcard:hover{ transform:translateY(-3px); border-color:var(--line-strong); box-shadow:0 12px 30px rgba(33,31,28,.10); }
+.hcard .h-name{ font-family:var(--serif); font-size:17px; line-height:1.15; }
+.hcard .h-meta{ font-size:11px; color:var(--rose); letter-spacing:.02em; }
+.hcard .h-stars{ color:var(--cherry-photo); letter-spacing:.05em; }
+.hcard .h-tags{ display:flex; gap:5px; flex-wrap:wrap; }
+.hcard .h-tag{ font-size:10px; letter-spacing:.03em; border:1px solid var(--line); border-radius:20px; padding:3px 9px; color:var(--rose); }
+.hcard .h-price{ margin-top:auto; display:flex; align-items:baseline; gap:6px; }
+.hcard .h-price .amt{ font-family:var(--serif); font-weight:200; font-size:25px; line-height:1; }
+.hcard .h-price .per{ font-size:11px; color:var(--rose); }
+.hcard .h-approx{ font-size:10px; color:var(--rose); font-style:italic; }
+.hcard .h-book{ display:inline-flex; align-items:center; justify-content:center; gap:6px; background:var(--cherry); border:1px solid var(--cherry); color:#fff; padding:11px; font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; border-radius:2px; width:100%; transition:background .15s; }
+.hcard .h-book:hover{ background:#5c060b; color:#fff; }
+
 /* ---- currency selector ---- */
 .topctl{ display:flex; justify-content:flex-end; align-items:center; gap:12px; margin-bottom:14px; }
 .cur-seg{ display:inline-flex; border:1px solid var(--line-strong); border-radius:22px; overflow:hidden; background:#fff; }
@@ -319,6 +339,7 @@ svg.chart{ display:block; width:100%; height:180px; }
 </div>
 <main class="wrap" id="app"></main>
 
+<script src="money.js"></script>
 <script>
 "use strict";
 /* ============================================================================
@@ -340,6 +361,8 @@ const travel={
   saveTrip(trip){ return this.call('saveTrip',{trip}); },
   history(tripId){ return this.call('history',{tripId}); },
   market(refresh=true,currency){ return this.call('market',{refresh,query:{currency}}); },
+  hotels(currency,nights){ return this.call('hotels',{query:{currency,nights}}); },
+  rates(){ return this.call('rates'); },
 };
 
 /* ---------- helpers ---------- */
@@ -352,12 +375,15 @@ const fmtDay=s=>s?parse(s).toLocaleDateString('en-GB',{weekday:'short',day:'2-di
 const fmtDayShort=s=>s?parse(s).toLocaleDateString('en-GB',{day:'2-digit',month:'short',timeZone:'UTC'}):'—';
 const fmtT=at=>{try{return new Date(at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});}catch{return '';}};
 const fmtDur=m=>m?`${Math.floor(m/60)}h ${String(m%60).padStart(2,'0')}m`:'';
-const money=(a,c='EUR')=>{const n=(a&&typeof a==='object')?(a.amount??a.price):a;const cur=(a&&a.currency)||c;return(n==null||isNaN(n))?'—':new Intl.NumberFormat(cur==='THB'?'th-TH':cur==='USD'?'en-US':'de-DE',{style:'currency',currency:cur,maximumFractionDigits:0}).format(n);};
+/* All formatting goes through the one Money library (money.js). `a` may be a
+   number or a {amount,currency} object; server prices already carry their currency. */
+const money=(a,c)=>Money.format(a, (a&&typeof a==='object'&&a.currency)||c||state.currency);
 /* Display an already-fetched NATIVE value (e.g. stored EUR history) in the chosen
-   currency. Server-fetched market/search prices already arrive converted. */
-const dispMoney=(amount,nativeCur='EUR')=>money({amount:fx(amount,nativeCur,state.currency),currency:state.currency});
-const isConverted=()=>state.currency!=='EUR'; // Duffel prices natively in EUR
-const curNote=()=>isConverted()?`<span class="cur-note">Prices shown in ${esc(state.currency)} are an <span class="approx">≈</span> indicative conversion from the fare currency; you book in the original currency.</span>`:'';
+   currency, converting with the SERVER's rates (state.fxRates) via Money — the UI
+   holds no rate table. Server-fetched market/search/hotel prices already arrive converted. */
+const dispMoney=(amount,nativeCur='EUR')=>{ const m=Money.convertMoney({amount,currency:nativeCur}, state.currency, state.fxRates); return Money.formatMoney(m); };
+const isConverted=()=>state.currency!=='EUR'; // Duffel/hotels feed EUR- or THB-native; EUR display never converts flights
+const curNote=()=>isConverted()?`<span class="cur-note"><span class="approx">≈</span> Converted to ${esc(state.currency)} at the current rate; you book in the original currency.</span>`:'';
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const dayOffset=(a,b)=>{try{const d=Math.round((new Date(b).setHours(0,0,0,0)-new Date(a).setHours(0,0,0,0))/DAY);return d>0?d:0;}catch{return 0;}};
 
@@ -391,17 +417,18 @@ function defaultJourney(){ const home=homeAirport(); return [
 /* ---------- currency (provider-native first; app converts only as fallback) ---------- */
 const CURRENCIES=[['USD','🇺🇸'],['EUR','🇪🇺'],['THB','🇹🇭']];
 const CUR_FLAG={USD:'🇺🇸',EUR:'🇪🇺',THB:'🇹🇭'};
-/* Client mirror of the server's indicative rates (base EUR) — used ONLY to display
-   already-fetched native values (tracked routes / history) in the chosen currency.
-   Market & search prices are converted server-side; this never re-converts those. */
-const FX_EUR={ EUR:1, USD:1.09, THB:39.0, GBP:0.85 };
-function fx(amount,from,to){ from=(from||'EUR').toUpperCase(); to=(to||'EUR').toUpperCase(); if(from===to||amount==null) return amount; const f=FX_EUR[from],t=FX_EUR[to]; return (f&&t)?amount*(t/f):amount; }
+/* Exchange rates come from the server's ExchangeRateProvider via the `rates`
+   action (state.fxRates) — no rates are hardcoded in the UI. Used only to display
+   already-fetched NATIVE values (tracked routes / history) in the chosen currency;
+   market/search/hotel prices are converted server-side. All formatting + this
+   conversion go through the one Money library (money.js). */
 
 /* ---------- state ---------- */
 let state={ search:{...DEFAULTS}, filters:{...DEFAULT_FILTERS},
   results:{status:'idle',offers:[],error:null,forPair:null},
   calendar:{status:'idle',days:[]},
   market:{status:'idle',asOf:null,routes:[]},
+  hotels:{status:'idle',list:[]}, fxRates:null,
   journeyCountry:'', journey:null, currency:'USD',
   tracked:[], selectedTrack:null, compare:[],
   backend:{reachable:false,configured:false,checked:false} };
@@ -520,8 +547,17 @@ function applyMarketRoute(id){
 }
 
 /* ---------- currency ---------- */
+async function loadRates(){ try{ const r=await travel.rates(); if(r&&r.status==='ok'){ state.fxRates={base:r.base,rates:r.rates,provider:r.provider}; render(); } }catch(e){} }
+async function loadHotels(){
+  if(!(state.backend.reachable&&state.backend.configured)) return;
+  if(!state.hotels.list.length) { state.hotels={status:'loading',list:[]}; render(); }
+  try{ const r=await travel.hotels(state.currency,2); state.hotels={status:'ok',list:(r&&r.hotels)||[]}; }
+  catch(e){ state.hotels={status:'error',list:[]}; }
+  render();
+}
 function setCurrency(c){ if(!CUR_FLAG[c]||c===state.currency) return; state.currency=c; save();
   loadMarket();                                         // re-price the market natively/converted
+  loadHotels();                                         // re-price hotels through the same layer
   if(state.results.status==='ok'||state.results.status==='empty') runSearch(); // re-price results
   render();
 }
@@ -596,7 +632,7 @@ function filteredOffers(){
    RENDER
    ============================================================================ */
 function render(){
-  $('#app').innerHTML = viewTopControls()+`<div id="search-anchor"></div>`+viewSearch()+viewBackendNotice()+viewMarket()+viewJourney()
+  $('#app').innerHTML = viewTopControls()+`<div id="search-anchor"></div>`+viewSearch()+viewBackendNotice()+viewMarket()+viewJourney()+viewHotels()
     +viewCalendar()+viewCompare()+`<div id="results-anchor"></div>`+viewResults()+viewTracked()+viewFoot();
   wire();
 }
@@ -685,6 +721,32 @@ function viewJourney(){
     <p class="jb-sub">Intelligent defaults — everything is editable. Change or search airports, swap them, change dates, delete or duplicate a leg, or add another. Your journey stays here after every search; “Search” loads a leg into live fares below.</p>
     ${state.journey.map(jrow).join('')}
     <button type="button" class="btn ghost small jb-add" id="jb-add">＋ Add a leg</button>
+  </section>`;
+}
+
+/* hotels overview — same currency + Money layer as flights */
+function hotelCard(h){
+  const stars='★'.repeat(h.stars||0);
+  const approx=h.converted?`<span class="h-approx">${esc(Money.convertedLabel((h.nativeNightly&&h.nativeNightly.currency)||'EUR'))}</span>`:'';
+  return `<div class="hcard">
+    <div><div class="h-name">${esc(h.name)}</div><div class="h-meta"><span class="h-stars">${stars}</span> · ${esc(h.area||h.city)}</div></div>
+    <div class="h-tags">${(h.tags||[]).map(t=>`<span class="h-tag">${esc(t)}</span>`).join('')}</div>
+    <div class="h-price"><span class="amt">${money(h.nightlyFrom)}</span><span class="per">/ night from</span></div>
+    ${approx}
+    <button type="button" class="h-book" data-hbook="${esc(h.booking&&h.booking.bookingUrl||'')}">${esc((h.booking&&h.booking.label)||'View rooms')} →</button>
+  </div>`;
+}
+function viewHotels(){
+  if(!(state.backend.reachable&&state.backend.configured)) return '';
+  const h=state.hotels;
+  if(h.status==='loading'&&!h.list.length) return `<section class="hotels"><h3>Where you'll stay</h3><p class="h-sub">Loading stays…</p><div class="hgrid">${Array.from({length:4}).map(()=>`<div class="mskel" style="height:150px"></div>`).join('')}</div></section>`;
+  if(!h.list.length) return '';
+  const byCity={}; h.list.forEach(x=>{ (byCity[x.city]=byCity[x.city]||[]).push(x); });
+  const order=['Luang Prabang','Bangkok']; const cities=Object.keys(byCity).sort((a,b)=>(order.indexOf(a)+99*(order.indexOf(a)<0))-(order.indexOf(b)+99*(order.indexOf(b)<0)));
+  return `<section class="hotels">
+    <h3>Where you'll stay</h3>
+    <p class="h-sub">The wedding hotel in Luang Prabang and a hand-picked Bangkok collection for your stop-over — priced through the same live currency layer as your flights. ${curNote()}</p>
+    ${cities.map(c=>`<div class="h-city">${esc(c)}</div><div class="hgrid">${byCity[c].map(hotelCard).join('')}</div>`).join('')}
   </section>`;
 }
 
@@ -932,6 +994,8 @@ function wire(){
   document.querySelectorAll('[data-cur]').forEach(b=>b.onclick=()=>setCurrency(b.dataset.cur));
   // market dashboard
   document.querySelectorAll('[data-mroute]').forEach(b=>b.onclick=()=>applyMarketRoute(b.dataset.mroute));
+  // hotel booking (opens the provider in a new tab)
+  document.querySelectorAll('[data-hbook]').forEach(b=>b.onclick=()=>{const u=b.dataset.hbook;if(u)window.open(u,'_blank','noopener');});
   // editable journey builder
   document.querySelectorAll('.jac').forEach(attachJourneyAC);
   document.querySelectorAll('.jrow input[type="date"][data-jset]').forEach(inp=>inp.onchange=()=>{const[id,f]=inp.dataset.jset.split(':');editLeg(id,f,inp.value);});
@@ -997,6 +1061,8 @@ render();
 refreshBackend().then(()=>{
   render();
   if(state.backend.reachable&&state.backend.configured){
+    loadRates();                                    // current FX table (for native-value display)
+    loadHotels();                                   // curated stays, same currency layer
     loadMarket();                                   // live market dashboard (seeds/refreshes)
     const restored=_sess&&_sess.results&&(_sess.results.status==='ok'||_sess.results.status==='empty')&&_sess.results.offers&&_sess.results.offers.length;
     if(restored){ render(); restoreScroll(_sess.scrollY); }   // never start over
