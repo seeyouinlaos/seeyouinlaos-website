@@ -154,11 +154,28 @@ current rates from the `rates` action (same rates the server uses) to display
 locally-held native values.
 
 **Hotels on the same layer.** `src/lib/providers/hotelProvider.js` (a `HotelProvider`
-mirroring `FlightProvider`) plus the `hotels` action price a curated collection
-(AVANI+ Luang Prabang, the Bangkok stop-over set) through the SAME CurrencyService
-and Money library — Luang Prabang priced natively in USD, Bangkok in THB, each
-converted for display with the native value preserved. Adding Expedia Rapid /
-Booking.com / an Avani API is one adapter; no currency logic and no UI change.
+mirroring `FlightProvider`) plus the `hotels` action price the collection through
+the SAME CurrencyService and Money library (USD-native planning prices → EUR/THB
+on display, native preserved). Adding Expedia Rapid / Booking.com / Google Hotels /
+Amadeus Hotels is one adapter; no currency logic and no UI change.
+
+**Hotel data quality (permanent rule).** Never invent hotel data. Every hotel is a
+real official property; only VERIFIED fields (from the hotel's official website)
+are filled — anything unverified is left empty, never fabricated (no invented
+descriptions, facilities, room categories, contacts, images, logos or copy). The
+`curated` provider is a FIXED editorial set, intentionally not live search
+results: **planning prices only**, shown with the note *"Approximate February
+planning rates. Exclusive wedding rates may be available through our Guest
+Relations Team."*
+- Luang Prabang: the exclusive wedding hotel (Avani+ Luang Prabang Hotel), shown
+  separately, arranged in the wedding block (no advertised rate, no alternatives).
+- Bangkok collection (fixed): Capella · Four Seasons at Chao Phraya River · Siam
+  Kempinski · 137 Pillars Suites & Residences · Oakwood Studios Sukhumvit · The
+  Salil Riverside, with the owner's planning prices.
+Each hotel exposes **two booking paths** (switchable per hotel via a `primary`
+flag, no UI change): `direct` (official booking page) and `guest-relations`
+(request the exclusive wedding rate by email). A live hotel provider replaces the
+curated one behind the same interface.
 
 ## Switching provider
 Add `src/lib/providers/<name>Adapter.js` implementing `FlightProvider`, register it

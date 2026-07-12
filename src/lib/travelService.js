@@ -405,18 +405,16 @@ async function hotelsOverview(env, store, opts = {}) {
   const provider = getHotelProvider(env);
   const currency = String(opts.currency || DEFAULT_CURRENCY).toUpperCase();
   const cur = currencyFor(env, store);
-  const list = await provider.searchHotels({ city: opts.city, nights: opts.nights, currency });
+  const list = await provider.searchHotels({ city: opts.city, currency });
   const hotels = [];
   for (const h of list) {
-    const nightly = await cur.convertMoney(h.nightlyFrom, currency);
-    const total = await cur.convertMoney(h.total, currency);
-    hotels.push({
-      ...h,
-      nightlyFrom: { amount: nightly.amount, currency: nightly.currency },
-      total: { amount: total.amount, currency: total.currency },
-      nativeNightly: h.nightlyFrom, nativeTotal: h.total,
-      converted: !!nightly.converted,
-    });
+    let planningPrice = null, converted = false;
+    if (h.planningPrice) {
+      const m = await cur.convertMoney(h.planningPrice, currency);
+      planningPrice = { amount: m.amount, currency: m.currency };
+      converted = !!m.converted;
+    }
+    hotels.push({ ...h, planningPrice, nativePlanning: h.planningPrice || null, converted });
   }
   return { status: 'ok', provider: provider.name, currency, hotels };
 }

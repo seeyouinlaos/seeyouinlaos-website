@@ -288,12 +288,23 @@ svg.chart{ display:block; width:100%; height:180px; }
 .hcard .h-stars{ color:var(--cherry-photo); letter-spacing:.05em; }
 .hcard .h-tags{ display:flex; gap:5px; flex-wrap:wrap; }
 .hcard .h-tag{ font-size:10px; letter-spacing:.03em; border:1px solid var(--line); border-radius:20px; padding:3px 9px; color:var(--rose); }
+.hgrid.one{ grid-template-columns:minmax(260px,420px); }
+.hcard.wed{ border-color:var(--cherry); box-shadow:0 0 0 1px rgba(116,7,14,.12); }
 .hcard .h-price{ margin-top:auto; display:flex; align-items:baseline; gap:6px; }
 .hcard .h-price .amt{ font-family:var(--serif); font-weight:200; font-size:25px; line-height:1; }
 .hcard .h-price .per{ font-size:11px; color:var(--rose); }
 .hcard .h-approx{ font-size:10px; color:var(--rose); font-style:italic; }
-.hcard .h-book{ display:inline-flex; align-items:center; justify-content:center; gap:6px; background:var(--cherry); border:1px solid var(--cherry); color:#fff; padding:11px; font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; border-radius:2px; width:100%; transition:background .15s; }
-.hcard .h-book:hover{ background:#5c060b; color:#fff; }
+.hcard .h-arranged{ margin-top:auto; font-size:12px; color:var(--cherry); font-style:italic; line-height:1.4; }
+.hcard .h-book-row{ display:flex; flex-direction:column; gap:7px; }
+.hcard .h-book{ display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:11px; font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; border-radius:2px; width:100%; transition:background .15s,color .15s,border-color .15s; }
+.hcard .h-book.primary{ background:var(--cherry); border:1px solid var(--cherry); color:#fff; }
+.hcard .h-book.primary:hover{ background:#5c060b; color:#fff; }
+.hcard .h-book.ghost{ background:transparent; border:1px solid var(--line-strong); color:var(--ink); }
+.hcard .h-book.ghost:hover{ background:var(--blush); border-color:var(--rose); }
+.hcard .h-official{ font-size:11px; color:var(--rose); text-decoration:none; border-bottom:1px solid var(--line); padding-bottom:1px; align-self:flex-start; }
+.hcard .h-official:hover{ color:var(--cherry); border-color:var(--cherry-photo); }
+.hotels .h-editorial{ font-size:12px; color:var(--rose); line-height:1.6; max-width:680px; margin:0 0 12px; }
+.hotels .h-editorial strong{ color:var(--ink); }
 
 /* ---- currency selector ---- */
 .topctl{ display:flex; justify-content:flex-end; align-items:center; gap:12px; margin-bottom:14px; }
@@ -724,16 +735,25 @@ function viewJourney(){
   </section>`;
 }
 
-/* hotels overview — same currency + Money layer as flights */
-function hotelCard(h){
-  const stars='★'.repeat(h.stars||0);
-  const approx=h.converted?`<span class="h-approx">${esc(Money.convertedLabel((h.nativeNightly&&h.nativeNightly.currency)||'EUR'))}</span>`:'';
-  return `<div class="hcard">
-    <div><div class="h-name">${esc(h.name)}</div><div class="h-meta"><span class="h-stars">${stars}</span> · ${esc(h.area||h.city)}</div></div>
-    <div class="h-tags">${(h.tags||[]).map(t=>`<span class="h-tag">${esc(t)}</span>`).join('')}</div>
-    <div class="h-price"><span class="amt">${money(h.nightlyFrom)}</span><span class="per">/ night from</span></div>
-    ${approx}
-    <button type="button" class="h-book" data-hbook="${esc(h.booking&&h.booking.bookingUrl||'')}">${esc((h.booking&&h.booking.label)||'View rooms')} →</button>
+/* hotels — verified official data only; two booking paths; same Money layer.
+   Never renders a field the provider left empty (no invented descriptions/copy). */
+function bookingPathBtns(h){
+  const paths=(h.bookingPaths||[]).slice().sort((a,b)=>(b.primary?1:0)-(a.primary?1:0));
+  return `<div class="h-book-row">${paths.map(p=>`<button type="button" class="h-book ${p.primary?'primary':'ghost'}" data-hbook="${esc(p.url)}" data-hpath="${esc(p.type)}">${esc(p.label)} →</button>`).join('')}</div>`;
+}
+function hotelPrice(h){
+  if(!h.planningPrice) return h.planningNote?`<div class="h-arranged">${esc(h.planningNote)}</div>`:'';
+  const approx=h.converted?`<span class="h-approx">${esc(Money.convertedLabel((h.nativePlanning&&h.nativePlanning.currency)||'USD'))}</span>`:'';
+  return `<div class="h-price"><span class="amt">${money(h.planningPrice)}</span><span class="per">/ night, planning from</span></div>${approx}`;
+}
+function hotelCard(h,wedding){
+  const stars=h.stars?'★'.repeat(h.stars):'';
+  const meta=[stars?`<span class="h-stars">${stars}</span>`:'',esc(h.area||h.city)].filter(Boolean).join(' · ');
+  return `<div class="hcard${wedding?' wed':''}">
+    <div><div class="h-name">${esc(h.name)}</div><div class="h-meta">${meta}</div></div>
+    ${hotelPrice(h)}
+    ${bookingPathBtns(h)}
+    ${h.website?`<a class="h-official" href="${esc(h.website)}" target="_blank" rel="noopener">Official site ↗</a>`:''}
   </div>`;
 }
 function viewHotels(){
@@ -741,12 +761,16 @@ function viewHotels(){
   const h=state.hotels;
   if(h.status==='loading'&&!h.list.length) return `<section class="hotels"><h3>Where you'll stay</h3><p class="h-sub">Loading stays…</p><div class="hgrid">${Array.from({length:4}).map(()=>`<div class="mskel" style="height:150px"></div>`).join('')}</div></section>`;
   if(!h.list.length) return '';
-  const byCity={}; h.list.forEach(x=>{ (byCity[x.city]=byCity[x.city]||[]).push(x); });
-  const order=['Luang Prabang','Bangkok']; const cities=Object.keys(byCity).sort((a,b)=>(order.indexOf(a)+99*(order.indexOf(a)<0))-(order.indexOf(b)+99*(order.indexOf(b)<0)));
+  const wed=h.list.filter(x=>x.kind==='wedding-hotel');
+  const coll=h.list.filter(x=>x.kind!=='wedding-hotel');
+  const note=coll.find(x=>x.planningNote&&/planning rates/i.test(x.planningNote));
   return `<section class="hotels">
     <h3>Where you'll stay</h3>
-    <p class="h-sub">The wedding hotel in Luang Prabang and a hand-picked Bangkok collection for your stop-over — priced through the same live currency layer as your flights. ${curNote()}</p>
-    ${cities.map(c=>`<div class="h-city">${esc(c)}</div><div class="hgrid">${byCity[c].map(hotelCard).join('')}</div>`).join('')}
+    <p class="h-sub">Every hotel below is a real, official property — priced through the same live currency layer as your flights, in ${esc(state.currency)}. ${curNote()}</p>
+    ${wed.length?`<div class="h-city">The wedding hotel · Luang Prabang</div><div class="hgrid one">${wed.map(x=>hotelCard(x,true)).join('')}</div>`:''}
+    ${coll.length?`<div class="h-city">The Bangkok collection · for your stop-over</div>
+      <p class="h-editorial">Curated editorial recommendations, not live search results. <strong>Approximate February planning rates.</strong> Exclusive wedding rates may be available through our Guest Relations Team.</p>
+      <div class="hgrid">${coll.map(x=>hotelCard(x,false)).join('')}</div>`:''}
   </section>`;
 }
 

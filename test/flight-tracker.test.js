@@ -435,21 +435,66 @@ test('Market refresh (cron): prices every route and persists a snapshot', async 
 const { hotelsOverview, ratesOverview } = require(`${L}/travelService`);
 const { getHotelProvider } = require(`${L}/providers/hotelProvider`);
 
-test('Hotels: same CurrencyService — multi-native prices converted, native preserved', async () => {
+test('Hotels: fixed verified collection (no invented data)', async () => {
   const store = createStore(undefined); if (createStore._mem) createStore._mem.clear();
-  const r = await hotelsOverview({ FX_PROVIDER: 'static' }, store, { currency: 'USD', nights: 2 });
+  const r = await hotelsOverview({ FX_PROVIDER: 'static' }, store, { currency: 'USD' });
   assert.equal(r.status, 'ok');
-  assert.ok(r.hotels.length >= 4);
-  const lpq = r.hotels.find((h) => h.cityCode === 'LPQ'); // native USD → no conversion
-  assert.equal(lpq.nightlyFrom.currency, 'USD');
-  assert.equal(lpq.converted, false);
-  assert.equal(lpq.nativeNightly.currency, 'USD');
-  const bkk = r.hotels.find((h) => h.cityCode === 'BKK'); // native THB → converted to USD
-  assert.equal(bkk.nightlyFrom.currency, 'USD');
-  assert.equal(bkk.converted, true);
-  assert.equal(bkk.nativeNightly.currency, 'THB');           // provider-native preserved
-  assert.ok(bkk.nightlyFrom.amount < bkk.nativeNightly.amount); // THB→USD shrinks the number
-  assert.equal(getHotelProvider({}).name, 'curated');        // pluggable, default curated
+  assert.equal(r.hotels.length, 7); // 1 wedding hotel + 6 fixed Bangkok
+  // exclusive wedding hotel, shown separately, arranged (no advertised rate)
+  const wed = r.hotels.filter((h) => h.kind === 'wedding-hotel');
+  assert.equal(wed.length, 1);
+  assert.equal(wed[0].name, 'Avani+ Luang Prabang Hotel');
+  assert.equal(wed[0].planningPrice, null);
+  // the fixed Bangkok collection, exactly these six with the given planning prices (USD)
+  const bkk = r.hotels.filter((h) => h.kind === 'editorial-collection');
+  const byName = Object.fromEntries(bkk.map((h) => [h.name, h.nativePlanning.amount]));
+  assert.deepEqual(byName, {
+    'Capella Bangkok': 800,
+    'Four Seasons Hotel Bangkok at Chao Phraya River': 500,
+    'Siam Kempinski Hotel Bangkok': 300,
+    '137 Pillars Suites & Residences Bangkok': 200,
+    'Oakwood Studios Sukhumvit Bangkok': 75,
+    'The Salil Hotel Riverside Bangkok': 160,
+  });
+  // never-invent rule: unverified fields are empty, not fabricated
+  r.hotels.forEach((h) => {
+    assert.equal(h.verified, true);
+    assert.equal(h.description, null);
+    assert.deepEqual(h.facilities, []);
+    assert.deepEqual(h.roomCategories, []);
+    assert.deepEqual(h.images, []);
+    assert.equal(h.logo, null);
+    assert.ok(h.website && /^https:\/\//.test(h.website)); // real official site
+  });
+  assert.equal(getHotelProvider({}).name, 'curated'); // pluggable, default curated
+});
+
+test('Hotels: two booking paths per hotel (direct + Guest Relations wedding rate)', async () => {
+  const store = createStore(undefined); if (createStore._mem) createStore._mem.clear();
+  const r = await hotelsOverview({ FX_PROVIDER: 'static' }, store, { currency: 'USD' });
+  r.hotels.forEach((h) => {
+    const types = h.bookingPaths.map((p) => p.type).sort();
+    assert.deepEqual(types, ['direct', 'guest-relations']);
+    assert.equal(h.bookingPaths.filter((p) => p.primary).length, 1); // exactly one primary
+    const gr = h.bookingPaths.find((p) => p.type === 'guest-relations');
+    assert.match(gr.url, /^mailto:suthep\.hrg@gmail\.com/);
+  });
+  // wedding hotel leads with the wedding-rate path; a collection hotel leads with direct
+  const wed = r.hotels.find((h) => h.kind === 'wedding-hotel');
+  assert.equal(wed.bookingPaths.find((p) => p.primary).type, 'guest-relations');
+  const capella = r.hotels.find((h) => h.name === 'Capella Bangkok');
+  assert.equal(capella.bookingPaths.find((p) => p.primary).type, 'direct');
+});
+
+test('Hotels: planning prices convert through the same Money/CurrencyService', async () => {
+  const store = createStore(undefined); if (createStore._mem) createStore._mem.clear();
+  const eur = await hotelsOverview({ FX_PROVIDER: 'static' }, store, { currency: 'EUR' });
+  const capella = eur.hotels.find((h) => h.name === 'Capella Bangkok');
+  assert.equal(capella.planningPrice.currency, 'EUR');
+  assert.equal(capella.converted, true);                 // USD-native → EUR converted
+  assert.equal(capella.nativePlanning.currency, 'USD');  // native preserved
+  assert.equal(capella.nativePlanning.amount, 800);
+  assert.ok(capella.planningPrice.amount < 800);         // USD→EUR shrinks the number
 });
 
 test('Rates action: exposes base/rates/provider for client-side native display', async () => {
