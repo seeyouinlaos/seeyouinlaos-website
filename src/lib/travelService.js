@@ -258,6 +258,7 @@ async function priceRoute(providers, route, now = new Date()) {
   if (!byProvider.length) return null;
   byProvider.sort((a, b) => a.price - b.price);
   const win = byProvider[0];
+  const nights = q.returnDate ? Math.round((Date.parse(q.returnDate) - Date.parse(q.departureDate)) / 86400000) : null;
   return {
     date: now.toISOString().slice(0, 10),
     ts: now.getTime(),
@@ -268,6 +269,12 @@ async function priceRoute(providers, route, now = new Date()) {
     branding: win.branding,
     bookingUrl: win.bookingUrl,
     offerId: win.offerId,
+    // The EXACT Duffel search behind this price — shown on the card and loaded
+    // verbatim by "View live fares" so the two never drift.
+    departureDate: q.departureDate,
+    returnDate: q.returnDate,
+    oneWay: !q.returnDate,
+    nights,
     byProvider,
   };
 }
@@ -318,6 +325,8 @@ function computeCard(route, snaps, to, rateTo) {
     current: { price: cv(last.price), currency: dispCur, offers: last.offers, provider: last.provider,
       branding: last.branding, bookingUrl: last.bookingUrl, offerId: last.offerId, ts: last.ts, date: last.date,
       nativePrice: last.price, nativeCurrency: nativeCur,
+      departureDate: last.departureDate || null, returnDate: last.returnDate || null,
+      oneWay: last.oneWay != null ? last.oneWay : (last.returnDate ? false : true), nights: last.nights != null ? last.nights : null,
       byProvider: (last.byProvider || []).map((b) => ({ ...b, price: cv(b.price), currency: dispCur })) },
     previous: prev ? cv(prev.price) : null,
     change: cv(change), changePct, spark: snaps.slice(-7).map((s) => cv(s.price)), low30: cv(low30), trend,

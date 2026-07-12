@@ -249,10 +249,33 @@ test('Monitored routes: ten canonical routes + country-aware defaults', () => {
   assert.equal(defaultAirportForCountry('DE'), 'HAM');
   assert.equal(defaultAirportForCountry('JP'), 'NRT');
   assert.equal(defaultAirportForCountry('XX'), null);
-  const q = routeQuery(MONITORED_ROUTES[0], new Date('2027-01-01T00:00:00Z'));
-  assert.equal(q.origin, 'HAM');
-  assert.equal(q.returnDate, null);
-  assert.equal(q.departureDate, '2027-02-15'); // +45 days
+  // long-haul feeder → round trip (SAMPLE_NIGHTS long); regional hop → one way
+  const ham = routeQuery(MONITORED_ROUTES.find((r) => r.id === 'HAM-BKK'), new Date('2027-01-01T00:00:00Z'));
+  assert.equal(ham.origin, 'HAM');
+  assert.equal(ham.departureDate, '2027-02-15');    // +45 days
+  assert.equal(ham.returnDate, '2027-02-20');       // +5 nights
+  const hop = routeQuery(MONITORED_ROUTES.find((r) => r.id === 'BKK-LPQ'), new Date('2027-01-01T00:00:00Z'));
+  assert.equal(hop.returnDate, null);               // regional hop is one-way
+  assert.equal(hop.departureDate, '2027-02-15');
+});
+
+test('Market card exposes the EXACT dates behind its price', async () => {
+  stubFetch('ok');
+  const store = createStore(undefined); if (createStore._mem) createStore._mem.clear();
+  const m = await marketOverview(ENV, store, { refresh: true, currency: 'EUR', now: new Date('2027-01-01T00:00:00Z') });
+  const ham = m.routes.find((r) => r.id === 'HAM-BKK');   // long-haul → round trip
+  assert.equal(ham.current.departureDate, '2027-02-15');
+  assert.equal(ham.current.returnDate, '2027-02-20');
+  assert.equal(ham.current.oneWay, false);
+  assert.equal(ham.current.nights, 5);
+  const hop = m.routes.find((r) => r.id === 'BKK-LPQ');    // regional → one-way
+  assert.equal(hop.current.departureDate, '2027-02-15');
+  assert.equal(hop.current.returnDate, null);
+  assert.equal(hop.current.oneWay, true);
+  // the stored snapshot carries the same dates → card and Duffel search never drift
+  const snaps = await store.getRouteSnapshots(routeKey('HAM', 'BKK'));
+  assert.equal(snaps[snaps.length - 1].departureDate, '2027-02-15');
+  assert.equal(snaps[snaps.length - 1].returnDate, '2027-02-20');
 });
 
 test('KV store: route snapshots dedupe by day and stay bounded', async () => {

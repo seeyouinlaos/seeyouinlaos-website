@@ -56,26 +56,37 @@ function routeKey(origin, destination) {
   return `${String(origin).toUpperCase()}-${String(destination).toUpperCase()}`;
 }
 
-/**
- * The sample date a monitored route is priced on. A rolling near-future one-way
- * (relative to the real clock, not any wedding date) so the provider's live
- * inventory always has offers. Snapshots are comparable because the offset is
- * constant; the dashboard is a market quote, not a booking.
- * @param {Date} [now]
- */
-function sampleDate(now = new Date()) {
-  const LEAD_DAYS = 45;
-  const d = new Date(now.getTime() + LEAD_DAYS * 86400000);
-  return d.toISOString().slice(0, 10);
+const LEAD_DAYS = 45;   // rolling lead time so live inventory always exists
+const SAMPLE_NIGHTS = 5; // sample round-trip length for long-haul market quotes
+
+/** Add whole days to a Date and return an ISO date string. */
+function isoAddDays(now, days) {
+  return new Date(now.getTime() + days * 86400000).toISOString().slice(0, 10);
 }
 
-/** A provider-neutral search query that prices one monitored route (one-way). */
+/**
+ * The sample departure date a monitored route is priced on. A rolling near-future
+ * date (relative to the real clock, not any wedding date) so the provider's live
+ * inventory always has offers. The offset is constant so snapshots stay comparable.
+ * @param {Date} [now]
+ */
+function sampleDate(now = new Date()) { return isoAddDays(now, LEAD_DAYS); }
+
+/**
+ * A provider-neutral search query that prices one monitored route. Long-haul
+ * feeder routes are quoted as a round trip (a real trip cost, SAMPLE_NIGHTS long);
+ * the regional Bangkok<->Luang Prabang hops are quoted one-way. The EXACT dates
+ * used here are stored on the snapshot and shown on the card, so what a guest sees
+ * always matches the Duffel search behind the price.
+ */
 function routeQuery(route, now = new Date()) {
+  const departureDate = sampleDate(now);
+  const roundTrip = route.kind === 'longhaul';
   return {
     origin: route.origin,
     destination: route.destination,
-    departureDate: sampleDate(now),
-    returnDate: null,
+    departureDate,
+    returnDate: roundTrip ? isoAddDays(now, LEAD_DAYS + SAMPLE_NIGHTS) : null,
     adults: 1,
     cabin: 'Economy',
     maxStops: null,
@@ -90,4 +101,6 @@ module.exports = {
   routeKey,
   sampleDate,
   routeQuery,
+  LEAD_DAYS,
+  SAMPLE_NIGHTS,
 };

@@ -250,6 +250,8 @@ svg.chart{ display:block; width:100%; height:180px; }
 .m-chg.up .arw{ animation:bobU 1.9s ease-in-out infinite; }
 @keyframes bobD{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(2px);} }
 @keyframes bobU{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(-2px);} }
+.m-dates{ font-size:12.5px; color:var(--ink); letter-spacing:.01em; }
+.m-dates .sub{ display:block; font-size:10.5px; color:var(--rose); margin-top:2px; letter-spacing:.06em; text-transform:uppercase; }
 .mspark{ display:block; width:100%; height:34px; overflow:visible; }
 .mspark .ar{ fill:rgba(179,58,63,.09); }
 .mspark .ln{ fill:none; stroke:var(--cherry-photo); stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
@@ -385,6 +387,7 @@ const nights=(a,b)=>Math.round((parse(b)-parse(a))/DAY);
 const todayISO=()=>iso(new Date());
 const fmtDay=s=>s?parse(s).toLocaleDateString('en-GB',{weekday:'short',day:'2-digit',month:'short',timeZone:'UTC'}):'—';
 const fmtDayShort=s=>s?parse(s).toLocaleDateString('en-GB',{day:'2-digit',month:'short',timeZone:'UTC'}):'—';
+const fmtDayY=s=>s?parse(s).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric',timeZone:'UTC'}):'—';
 const fmtT=at=>{try{return new Date(at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});}catch{return '';}};
 const fmtDur=m=>m?`${Math.floor(m/60)}h ${String(m%60).padStart(2,'0')}m`:'';
 /* All formatting goes through the one Money library (money.js). `a` may be a
@@ -550,12 +553,16 @@ async function loadMarket(){
   }catch(e){ state.market={...state.market,status:had?'ok':'error'}; }
   save(); render();
 }
-/* "View live fares" on a market card → load that exact route (near-term one-way,
-   matching the quoted price) into the search and run it. Fully editable after. */
+/* "View live fares" on a market card → load the EXACT dates shown on the card
+   (the same query behind the quoted price) into the search and run it. Editable after. */
 function applyMarketRoute(id){
   const r=(state.market.routes||[]).find(x=>x.id===id); if(!r) return;
-  state.search={...state.search,origin:r.origin,destination:r.destination,departDate:marketSampleDate(),returnDate:null,oneWay:true};
-  save(); runSearch(); scrollToResults();
+  const c=r.current||{};
+  const dep=c.departureDate||marketSampleDate();
+  const oneWay=c.oneWay!=null?!!c.oneWay:true;
+  const s={...state.search,origin:r.origin,destination:r.destination,departDate:dep,oneWay,returnDate:oneWay?null:(c.returnDate||null)};
+  if(!oneWay&&c.nights){ s.nightsMin=c.nights; s.nightsMax=c.nights; }
+  state.search=s; save(); runSearch(); scrollToResults();
 }
 
 /* ---------- currency ---------- */
@@ -679,6 +686,7 @@ function marketCard(r){
   const provRow=c?`<span class="m-prov">${brand.logoUrl?`<img src="${esc(brand.logoUrl)}" alt="" onerror="this.style.display='none'">`:''}${esc(brand.name||c.provider||'')}</span>`:'';
   const priceBlock=c?`<div class="m-price-row"><span class="m-price">${money(c.price,c.currency)}</span>${chg}</div>`
     :`<div class="m-price-row"><span class="m-price" style="opacity:.4">—</span></div>`;
+  const dates=marketDates(c);
   const stat=`<span class="m-stat ${r.status}">${r.status==='ok'?'● Live':c?'● Collecting':'● No data'}</span>`;
   const meta = c ? (r.history>=2
       ? `<div class="m-meta">${stat}<span>30-day low <b>${money(r.low30,c.currency)}</b></span><span><b>${c.offers}</b> live offers</span><span>updated ${ago(c.ts)}</span></div>`
@@ -690,10 +698,18 @@ function marketCard(r){
       <div class="m-trend">${provRow}</div>
     </div>
     ${priceBlock}
+    ${dates}
     ${sparkSVG(r.spark)}
     ${meta}
     <span class="m-cta">View live fares →</span>
   </button>`;
+}
+/* The exact travel dates behind a card's price (matches the Duffel search). */
+function marketDates(c){
+  if(!c||!c.departureDate) return '';
+  if(c.oneWay||!c.returnDate) return `<div class="m-dates">${esc(fmtDayY(c.departureDate))}<span class="sub">One way</span></div>`;
+  const n=c.nights!=null?c.nights:nights(c.departureDate,c.returnDate);
+  return `<div class="m-dates">${esc(fmtDayShort(c.departureDate))} → ${esc(fmtDayY(c.returnDate))}<span class="sub">${n} night${n===1?'':'s'}</span></div>`;
 }
 function viewMarket(){
   if(!(state.backend.reachable&&state.backend.configured)) return '';
