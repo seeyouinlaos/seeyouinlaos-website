@@ -1,14 +1,13 @@
 {
-  "name": "seeyouinlaos-flight-tracker",
+  "name": "seeyouinlaos-website",
   "version": "1.0.0",
   "private": true,
-  "description": "See You In Laos wedding website + Flight Tracker Travel Service (Cloudflare Worker).",
+  "description": "See You In Laos wedding website (static, served via Cloudflare Worker assets).",
   "main": "src/worker.js",
   "engines": {
     "node": ">=18"
   },
   "scripts": {
-    "test": "node --test",
     "dev": "wrangler dev",
     "build": "wrangler deploy --dry-run --outdir dist",
     "deploy": "wrangler deploy"
