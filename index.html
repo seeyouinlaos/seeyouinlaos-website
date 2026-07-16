@@ -8,9 +8,9 @@
 <link href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%232B2823'/%3E%3Ccircle cx='16' cy='16' r='5' fill='%23B33A3F'/%3E%3C/svg%3E" rel="icon"/>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500&display=swap');
-@font-face { font-family: 'PP Editorial Old'; src: url('PPEditorialOld-Regular.otf') format('opentype'); font-weight: 400; font-display: block; }
-@font-face { font-family: 'PP Editorial Old'; src: url('PPEditorialOld-Ultralight.otf') format('opentype'); font-weight: 200; font-display: block; }
-@font-face { font-family: 'PP Editorial Old'; src: url('PPEditorialOld-Italic.otf') format('opentype'); font-weight: 400; font-style: italic; font-display: block; }
+@font-face { font-family: 'PP Editorial Old'; src: url('assets/fonts/PPEditorialOld-Regular.otf') format('opentype'); font-weight: 400; font-display: block; }
+@font-face { font-family: 'PP Editorial Old'; src: url('assets/fonts/PPEditorialOld-Ultralight.otf') format('opentype'); font-weight: 200; font-display: block; }
+@font-face { font-family: 'PP Editorial Old'; src: url('assets/fonts/PPEditorialOld-Italic.otf') format('opentype'); font-weight: 400; font-style: italic; font-display: block; }
 
 :root {
   --ivory: #F2ECE1; --ink: #211F1C; --ink-s: #2B2823;
@@ -61,7 +61,7 @@ section { padding: 110px 6vw; position: relative; }
 
 /* ---------- HERO ---------- */
 .hero { position: relative; height: 100vh; min-height: 640px; overflow: hidden; color: var(--ivory); padding: 0; }
-.hero .bg { position: absolute; inset: -12% 0 0 0; background: url('img-hero.jpg') center 55% / cover no-repeat; will-change: transform; }
+.hero .bg { position: absolute; inset: -12% 0 0 0; background: url('assets/images/hero/img-hero.jpg') center 55% / cover no-repeat; will-change: transform; }
 .hero::after { content:''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(33,31,28,.42) 0%, rgba(33,31,28,.08) 40%, rgba(33,31,28,.18) 72%, rgba(33,31,28,.5) 100%); z-index: 1; }
 .hero > *:not(.bg) { position: absolute; z-index: 2; }
 .hero .badge { top: 104px; left: 50%; transform: translateX(-50%); width: 92%; max-width: 640px; text-align: center; font-size: 12.5px; letter-spacing: .16em; text-transform: uppercase; line-height: 1.7; }
@@ -293,7 +293,7 @@ body.pv-lock { overflow: hidden; }
 
 /* ---------- AERIAL ---------- */
 .aerial { padding: 0; height: 76vh; min-height: 480px; overflow: hidden; position: relative; }
-.aerial .bg { position: absolute; inset: -14% 0; background: url('wide-aerial.jpg') center / cover no-repeat; will-change: transform; }
+.aerial .bg { position: absolute; inset: -14% 0; background: url('assets/images/hero/wide-aerial.jpg') center / cover no-repeat; will-change: transform; }
 .aerial .cap { position: absolute; bottom: 30px; left: 6vw; color: var(--ivory); font-size: 11px; letter-spacing: .22em; text-transform: uppercase; z-index: 2; }
 .aerial::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(33,31,28,.12), rgba(33,31,28,.05) 40%, rgba(33,31,28,.25)); }
 
@@ -426,8 +426,8 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
 <div class="coords-label rv">Luang Prabang · Lao PDR · UNESCO World Heritage</div>
 </div>
 <div class="collage">
-<div class="ph ph-1"><img alt="Walking through the AVANI+ courtyard" class="clip-img" data-speed="-6" src="img-story-1.jpg"/></div>
-<div class="ph ph-2"><img alt="On the way to the lobby" class="clip-img" data-speed="8" src="img-story-2.jpg"/></div>
+<div class="ph ph-1"><img alt="Walking through the AVANI+ courtyard" class="clip-img" data-speed="-6" src="assets/images/story/img-story-1.jpg"/></div>
+<div class="ph ph-2"><img alt="On the way to the lobby" class="clip-img" data-speed="8" src="assets/images/story/img-story-2.jpg"/></div>
 <div class="cap rv">AVANI+ Luang Prabang · our home for the weekend</div>
 </div>
 </div>
@@ -446,7 +446,7 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
 <path d="M160,0 C40,220 280,420 160,640 C40,860 280,1060 160,1280 C40,1500 280,1700 160,1920 C60,2110 260,2300 160,2600" id="tlPath" mask="url(#tlMask)"></path>
 </svg></div>
 <div class="stop">
-<div class="im"><img alt="Sunset cruise on the Mekong" class="clip-img" data-speed="6" src="tl-cruise.jpg"/></div>
+<div class="im"><img alt="Sunset cruise on the Mekong" class="clip-img" data-speed="6" src="assets/images/timeline/tl-cruise.jpg"/></div>
 <div class="txt">
 <div class="when">Saturday, 27 Feb · Evening</div>
 <h3>The Sunset Cruise</h3>
@@ -456,7 +456,7 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
 <span class="dotmark"></span>
 </div>
 <div class="stop">
-<div class="im"><img alt="The Alms Giving Ceremony at dawn" class="clip-img" data-speed="-7" src="tl-alms.jpg"/></div>
+<div class="im"><img alt="The Alms Giving Ceremony at dawn" class="clip-img" data-speed="-7" src="assets/images/timeline/tl-alms.jpg"/></div>
 <div class="txt">
 <div class="when">Sunday, 28 Feb · Dawn</div>
 <h3>The Alms Giving</h3>
@@ -466,7 +466,7 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
 <span class="dotmark"></span>
 </div>
 <div class="stop">
-<div class="im"><img alt="A relaxed table at Main Street Bar and Grill" class="clip-img" data-speed="6" src="dn-lunch.jpg"/></div>
+<div class="im"><img alt="A relaxed table at Main Street Bar and Grill" class="clip-img" data-speed="6" src="assets/images/dining/dn-lunch.jpg"/></div>
 <div class="txt">
 <div class="when">Sunday, 28 Feb · 13:00</div>
 <h3>Sunday Lunch</h3>
@@ -476,7 +476,7 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
 <span class="dotmark"></span>
 </div>
 <div class="stop">
-<div class="im"><img alt="Poolside at golden hour, the ceremony venue" class="clip-img" data-speed="7" src="tl-ceremony.jpg"/></div>
+<div class="im"><img alt="Poolside at golden hour, the ceremony venue" class="clip-img" data-speed="7" src="assets/images/timeline/tl-ceremony.jpg"/></div>
 <div class="txt">
 <div class="when">Sunday, 28 Feb · 17:19</div>
 <h3>The Ceremony</h3>
@@ -486,7 +486,7 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
 <span class="dotmark"></span>
 </div>
 <div class="stop">
-<div class="im"><img alt="Dinner under the red lanterns of Manda de Laos" class="clip-img" data-speed="-5" src="tl-dinner.jpg"/></div>
+<div class="im"><img alt="Dinner under the red lanterns of Manda de Laos" class="clip-img" data-speed="-5" src="assets/images/timeline/tl-dinner.jpg"/></div>
 <div class="txt">
 <div class="when">Sunday, 28 Feb · Evening</div>
 <h3>The Wedding Dinner</h3>
@@ -513,21 +513,21 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
 <h2 class="h-big split-h">Where you'll wake, swim<br/>and dine.</h2>
 <div class="grid">
 <button aria-haspopup="dialog" class="card rv" data-panel="pv-stay">
-<div class="im"><img alt="Deluxe room at AVANI+ Luang Prabang" src="card-room.jpg"/><span class="ovl">two<br/>nights.</span></div>
+<div class="im"><img alt="Deluxe room at AVANI+ Luang Prabang" src="assets/images/cards/card-room.jpg"/><span class="ovl">two<br/>nights.</span></div>
 <div class="tag">Your stay</div>
 <h3>AVANI+ Luang Prabang</h3>
 <p>Garden-view rooms with a private balcony, in the heart of the UNESCO old town. Two nights, breakfast included, all arranged for you.</p>
 <span class="more">Take a look</span>
 </button>
 <button aria-haspopup="dialog" class="card rv" data-panel="pv-pool">
-<div class="im"><img alt="The pool at AVANI+, seen from above" src="card-pool.jpg"/><span class="ovl">at<br/>sunset.</span></div>
+<div class="im"><img alt="The pool at AVANI+, seen from above" src="assets/images/cards/card-pool.jpg"/><span class="ovl">at<br/>sunset.</span></div>
 <div class="tag">The centre of it all</div>
 <h3>The Poolside</h3>
 <p>Morning swims, slow afternoons. And on Sunday, as golden hour begins, the place where we say yes.</p>
 <span class="more">The ceremony</span>
 </button>
 <button aria-haspopup="dialog" class="card rv" data-panel="pv-manda">
-<div class="im"><img alt="Manda de Laos, dining beside the lily pond" src="card-manda.jpg"/><span class="ovl">eight<br/>courses.</span></div>
+<div class="im"><img alt="Manda de Laos, dining beside the lily pond" src="assets/images/cards/card-manda.jpg"/><span class="ovl">eight<br/>courses.</span></div>
 <div class="tag">The wedding dinner</div>
 <h3>Manda de Laos</h3>
 <p>Laotian family cuisine beside a UNESCO-classified lily pond: red lanterns, warm light, and a table that waits for you.</p>
@@ -559,14 +559,14 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
 </ul>
 </div>
 <div class="dg-collage">
-<div class="cim"><img alt="White shirt and blue jeans" class="clip-img" src="dg2-cruise-1.jpg"/></div>
-<div class="cim"><img alt="White shirt and denim" class="clip-img" src="dg2-cruise-2.jpg"/></div>
-<div class="cim"><img alt="Men's white shirt and jeans" class="clip-img" src="dg2-cruise-3.jpg"/></div>
-<div class="cim"><img alt="Relaxed white shirt and jeans" class="clip-img" src="dg2-cruise-4.jpg"/></div>
-<div class="cim"><img alt="Wide denim and white shirt" class="clip-img" src="dg2-cruise-5.jpg"/></div>
-<div class="cim"><img alt="White shirt and jeans" class="clip-img" src="dg2-cruise-6.jpg"/></div>
-<div class="cim"><img alt="Crisp white shirt and denim" class="clip-img" src="dg2-cruise-7.jpg"/></div>
-<div class="cim"><img alt="Relaxed denim and white shirt" class="clip-img" src="dg2-cruise-8.jpg"/></div>
+<div class="cim"><img alt="White shirt and blue jeans" class="clip-img" src="assets/images/dressguide/dg2-cruise-1.jpg"/></div>
+<div class="cim"><img alt="White shirt and denim" class="clip-img" src="assets/images/dressguide/dg2-cruise-2.jpg"/></div>
+<div class="cim"><img alt="Men's white shirt and jeans" class="clip-img" src="assets/images/dressguide/dg2-cruise-3.jpg"/></div>
+<div class="cim"><img alt="Relaxed white shirt and jeans" class="clip-img" src="assets/images/dressguide/dg2-cruise-4.jpg"/></div>
+<div class="cim"><img alt="Wide denim and white shirt" class="clip-img" src="assets/images/dressguide/dg2-cruise-5.jpg"/></div>
+<div class="cim"><img alt="White shirt and jeans" class="clip-img" src="assets/images/dressguide/dg2-cruise-6.jpg"/></div>
+<div class="cim"><img alt="Crisp white shirt and denim" class="clip-img" src="assets/images/dressguide/dg2-cruise-7.jpg"/></div>
+<div class="cim"><img alt="Relaxed denim and white shirt" class="clip-img" src="assets/images/dressguide/dg2-cruise-8.jpg"/></div>
 </div>
 </div>
 <!-- Sunday morning · Alms · WHITE ATTIRE -->
@@ -585,14 +585,14 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
 </ul>
 </div>
 <div class="dg-collage">
-<div class="cim"><img alt="White look for the morning" class="clip-img" src="dg2-alms-1.jpg"/></div>
-<div class="cim"><img alt="White menswear" class="clip-img" src="dg2-alms-2.jpg"/></div>
-<div class="cim"><img alt="Ivory dress" class="clip-img" src="dg2-alms-3.jpg"/></div>
-<div class="cim"><img alt="Ivory looks" class="clip-img" src="dg2-alms-4.jpg"/></div>
-<div class="cim"><img alt="Guests in white" class="clip-img" src="dg2-alms-5.jpg"/></div>
-<div class="cim"><img alt="White resort look" class="clip-img" src="dg2-alms-6.jpg"/></div>
-<div class="cim"><img alt="Linen menswear in white" class="clip-img" src="dg2-alms-7.jpg"/></div>
-<div class="cim"><img alt="Ivory summer dress" class="clip-img" src="dg2-alms-8.jpg"/></div>
+<div class="cim"><img alt="White look for the morning" class="clip-img" src="assets/images/dressguide/dg2-alms-1.jpg"/></div>
+<div class="cim"><img alt="White menswear" class="clip-img" src="assets/images/dressguide/dg2-alms-2.jpg"/></div>
+<div class="cim"><img alt="Ivory dress" class="clip-img" src="assets/images/dressguide/dg2-alms-3.jpg"/></div>
+<div class="cim"><img alt="Ivory looks" class="clip-img" src="assets/images/dressguide/dg2-alms-4.jpg"/></div>
+<div class="cim"><img alt="Guests in white" class="clip-img" src="assets/images/dressguide/dg2-alms-5.jpg"/></div>
+<div class="cim"><img alt="White resort look" class="clip-img" src="assets/images/dressguide/dg2-alms-6.jpg"/></div>
+<div class="cim"><img alt="Linen menswear in white" class="clip-img" src="assets/images/dressguide/dg2-alms-7.jpg"/></div>
+<div class="cim"><img alt="Ivory summer dress" class="clip-img" src="assets/images/dressguide/dg2-alms-8.jpg"/></div>
 </div>
 </div>
 <!-- Sunday evening · Ceremony · BLACK TIE -->
@@ -611,17 +611,17 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
 </ul>
 </div>
 <div class="dg-collage">
-<div class="cim"><img alt="Black-tie evening elegance" class="clip-img" src="dg2-ceremony-12.jpg"/></div>
-<div class="cim"><img alt="Black-tie couple" class="clip-img" src="dg2-ceremony-2.jpg"/></div>
-<div class="cim"><img alt="Black tuxedo" class="clip-img" src="dg2-ceremony-1.jpg"/></div>
-<div class="cim"><img alt="Black evening gown" class="clip-img" src="dg2-ceremony-4.jpg"/></div>
-<div class="cim"><img alt="Evening couple" class="clip-img" src="dg2-ceremony-5.jpg"/></div>
-<div class="cim"><img alt="Black-tie gathering" class="clip-img" src="dg2-ceremony-6.jpg"/></div>
-<div class="cim"><img alt="Black-tie couple in the evening" class="clip-img" src="dg2-ceremony-7.jpg"/></div>
-<div class="cim"><img alt="Tuxedo look" class="clip-img" src="dg2-ceremony-8.jpg"/></div>
-<div class="cim"><img alt="Midnight-blue tuxedo" class="clip-img" src="dg2-ceremony-9.jpg"/></div>
-<div class="cim"><img alt="Evening gown and tuxedo" class="clip-img" src="dg2-ceremony-10.jpg"/></div>
-<div class="cim"><img alt="Floor-length evening gown" class="clip-img" src="dg2-ceremony-11.jpg"/></div><div class="cim"><img alt="Evening gown" class="clip-img" src="dg2-ceremony-3.jpg"/></div>
+<div class="cim"><img alt="Black-tie evening elegance" class="clip-img" src="assets/images/dressguide/dg2-ceremony-12.jpg"/></div>
+<div class="cim"><img alt="Black-tie couple" class="clip-img" src="assets/images/dressguide/dg2-ceremony-2.jpg"/></div>
+<div class="cim"><img alt="Black tuxedo" class="clip-img" src="assets/images/dressguide/dg2-ceremony-1.jpg"/></div>
+<div class="cim"><img alt="Black evening gown" class="clip-img" src="assets/images/dressguide/dg2-ceremony-4.jpg"/></div>
+<div class="cim"><img alt="Evening couple" class="clip-img" src="assets/images/dressguide/dg2-ceremony-5.jpg"/></div>
+<div class="cim"><img alt="Black-tie gathering" class="clip-img" src="assets/images/dressguide/dg2-ceremony-6.jpg"/></div>
+<div class="cim"><img alt="Black-tie couple in the evening" class="clip-img" src="assets/images/dressguide/dg2-ceremony-7.jpg"/></div>
+<div class="cim"><img alt="Tuxedo look" class="clip-img" src="assets/images/dressguide/dg2-ceremony-8.jpg"/></div>
+<div class="cim"><img alt="Midnight-blue tuxedo" class="clip-img" src="assets/images/dressguide/dg2-ceremony-9.jpg"/></div>
+<div class="cim"><img alt="Evening gown and tuxedo" class="clip-img" src="assets/images/dressguide/dg2-ceremony-10.jpg"/></div>
+<div class="cim"><img alt="Floor-length evening gown" class="clip-img" src="assets/images/dressguide/dg2-ceremony-11.jpg"/></div><div class="cim"><img alt="Evening gown" class="clip-img" src="assets/images/dressguide/dg2-ceremony-3.jpg"/></div>
 </div>
 </div>
 <!-- Monday · Departure · CASUAL -->
@@ -782,11 +782,11 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
 <button class="pv-close" data-close="">Close</button>
 <div class="pv-tag">Your stay</div>
 <h3>A room that is part<br/>of the journey.</h3>
-<img alt="Deluxe room with private terrace at AVANI+" src="card-room.jpg"/>
+<img alt="Deluxe room with private terrace at AVANI+" src="assets/images/cards/card-room.jpg"/>
 <p>Your Deluxe Room at AVANI+ Luang Prabang opens onto the garden: 35 m², a private terrace or balcony with room for a day bed, a coffee &amp; tea maker for slow mornings, and breakfast included on all days.</p>
 <div class="pv-grid">
-<img alt="Shaded veranda at AVANI+" src="pv-stay-1.jpg"/>
-<img alt="Balcony seating with garden view" src="pv-stay-2.jpg"/>
+<img alt="Shaded veranda at AVANI+" src="assets/images/preview/pv-stay-1.jpg"/>
+<img alt="Balcony seating with garden view" src="assets/images/preview/pv-stay-2.jpg"/>
 </div>
 <p>The hotel sits in the heart of the UNESCO-listed old town; temples, cafés and the night market are all a short walk away, and the pool is never more than a minute from your door.</p>
 <p>Your room is arranged as part of the wedding block. Nothing to book, nothing to pay at check-in. You are our guest.</p>
@@ -796,11 +796,11 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
 <button class="pv-close" data-close="">Close</button>
 <div class="pv-tag">The centre of it all</div>
 <h3>By day a pool.<br/>At sunset, the ceremony.</h3>
-<img alt="The AVANI+ pool from above" src="card-pool.jpg"/>
+<img alt="The AVANI+ pool from above" src="assets/images/cards/card-pool.jpg"/>
 <p>The dark-tiled pool in the courtyard is where the weekend breathes: morning swims, slow afternoons under the umbrellas, the architecture reflected in still water.</p>
 <div class="pv-grid">
-<img alt="The pool, perfectly still" src="pv-pool-1.jpg"/>
-<img alt="Poolside in the evening light" src="pv-pool-2.jpg"/>
+<img alt="The pool, perfectly still" src="assets/images/preview/pv-pool-1.jpg"/>
+<img alt="Poolside in the evening light" src="assets/images/preview/pv-pool-2.jpg"/>
 </div>
 <p>On Sunday it becomes the ceremony. Paddy &amp; Ju welcome you personally and show you to your seat; there are warm cotton towels, a string-quartet prelude, and then, just as golden hour reaches the courtyard, we say yes. Your exact arrival time and seat arrive in your Guest Area closer to the day.</p>
 <div class="pv-meta">Sunday · at golden hour · AVANI+ Poolside<br/>dress code: black tie</div>
@@ -809,19 +809,19 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
 <button class="pv-close" data-close="">Close</button>
 <div class="pv-tag">The wedding dinner</div>
 <h3>Dinner beside<br/>the lily pond.</h3>
-<img alt="Table setting at Manda de Laos" src="card-manda.jpg"/>
+<img alt="Table setting at Manda de Laos" src="assets/images/cards/card-manda.jpg"/>
 <p>Manda de Laos is a family home turned restaurant, built around a UNESCO-classified lily pond and the recipes of "Maman Phiew", cooked here since 2015. Red lanterns, warm light, water everywhere.</p>
 <div class="pv-grid">
-<img alt="The dining pavilion in the garden" src="pv-manda-1.jpg"/>
-<img alt="Red umbrellas over the tables" src="pv-manda-2.jpg"/>
+<img alt="The dining pavilion in the garden" src="assets/images/preview/pv-manda-1.jpg"/>
+<img alt="Red umbrellas over the tables" src="assets/images/preview/pv-manda-2.jpg"/>
 </div>
 <p>We take over the pond-side tables for the evening: the Namkong tasting menu, eight courses of Laotian family cuisine, with a curated selection of drinks included through the evening. Every guest is personally seated; your place will be waiting. A string quartet plays us in, and later the cake is cut.</p>
 <p>It is a short transfer from AVANI+; vans run for you in both directions, no outfit change needed.</p>
 <div class="pv-meta">Sunday evening · Manda de Laos · 8-course tasting menu<br/>selected drinks included · seated dinner</div>
 </article>
-<script src="gsap.min.js"></script>
-<script src="ScrollTrigger.min.js"></script>
-<script src="SplitText.min.js"></script>
+<script src="assets/vendor/gsap.min.js"></script>
+<script src="assets/vendor/ScrollTrigger.min.js"></script>
+<script src="assets/vendor/SplitText.min.js"></script>
 <script>
 (function () {
   const params = new URLSearchParams(location.search);

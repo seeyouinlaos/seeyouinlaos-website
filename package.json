@@ -10,6 +10,7 @@
   "scripts": {
     "dev": "wrangler dev",
     "build": "wrangler deploy --dry-run --outdir dist",
+    "build:standalone": "node src/build-standalone.cjs",
     "deploy": "wrangler deploy"
   },
   "devDependencies": {

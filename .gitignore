@@ -12,6 +12,4 @@ node_modules/
 # tooling / os
 .DS_Store
 .playwright-mcp/
-
-# stray nested duplicate folder (has its own .git)
-seeyouinlaos-website/
+.impeccable/
