@@ -871,7 +871,11 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
     overlay.setAttribute('aria-hidden', !open);
     if (open) overlay.removeAttribute('inert'); else overlay.setAttribute('inert', '');
     btn.classList.toggle('solid', open || window.scrollY > innerHeight * .8);
-    if (hasGsap && !reduced) { open ? menuTl.timeScale(1).play() : menuTl.timeScale(1.6).reverse(); }
+    if (hasGsap && !reduced) {
+      // Make the overlay focusable synchronously; the timeline animates on top.
+      if (open) overlay.style.visibility = 'visible';
+      open ? menuTl.timeScale(1).play() : menuTl.timeScale(1.6).reverse();
+    }
     else { overlay.style.visibility = open ? 'visible' : 'hidden'; overlay.style.clipPath = 'none'; }
     if (open) { if (links[0]) links[0].focus(); }
     else btn.focus();
