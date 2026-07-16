@@ -56,8 +56,38 @@ final layout, which is what the visual checks below used.
 | Workers build | check-run | success |
 | GitHub build | check-runs (build/deploy/report) | success |
 
+## Owner Acceptance Review 2026-07-16: layout regressions found and fixed
+
+The owner rejected the first acceptance pass: broken dress-guide slider,
+distorted panel images, shifted rhythm. Root causes (both confirmed):
+
+1. **`<picture>` wrappers** (9x) inserted an inline element between the layout
+   containers (`.cim`, `.im`, `.ph`, panels) and the `img`, breaking
+   `height: 100%` / `object-fit: cover` chains. Fix: all wrappers removed;
+   `<img>` uses JPG only. WebP stays where it is layout-neutral (hero + aerial
+   CSS backgrounds via `image-set()`); the 8 orphaned img-WebP files deleted.
+2. **`height` attribute as presentational hint**: where CSS sets only
+   `width: 100%` (panel images), the injected `height="..."` fixed the box
+   height and distorted proportions. Fix: standard `img { height: auto }` in
+   the global rule (container rules with `height: 100%` still win on
+   specificity; CLS reservation via attribute aspect-ratio is preserved).
+
+**Pixel-equivalence proof** (geometry diff vs. pre-optimization baseline
+`4ee593c`, 22 selectors incl. slider tiles, cards, collage, panels, all
+sections, document height, at 1440x900 AND 390x844):
+
+- 1440: zero deviations except footer/document -22px
+- 390: zero deviations except footer/document -44px
+- The footer delta is the approved P3 removal of the draft notice line
+  (one line at 1440, two wrapped lines at 390).
+
+After-fix visual checks: dress-guide slider (3-up, aligned, counter, arrow) OK;
+place panel open (image at natural 900:643 ratio) OK. Asset inventory back to
+54/54 referenced, 0 orphans.
+
 ## Status
 
-P0-P3 implemented and technically verified. Open: P4 (typography weights),
+P0-P3 implemented; regression from the first pass fixed and proven
+pixel-equivalent to the original layout. Open: P4 (typography weights),
 P5 (dvh migration + hero positioning with breakpoint screenshots), P6 (UX
 polish) - deferred pending owner review and explicit approval.
