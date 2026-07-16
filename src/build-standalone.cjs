@@ -24,6 +24,15 @@ const exists = (f) => { try { fs.accessSync(path.join(ROOT, f)); return true; } 
 
 let counts = { js: 0, font: 0, img: 0, css: 0, miss: [] };
 
+// FIRST (before any inlining turns urls into data: URIs):
+// WebP is a network optimization; in the self-contained artifact it would only
+// double the payload (webp + jpg both inlined). Strip the <source> variants and
+// image-set() declarations so the inlined JPG is the single source. Preload
+// hints point at network paths that do not exist next to a standalone file.
+html = html.replace(/<source srcset="[^"]+\.webp" type="image\/webp"\/>/g, '');
+html = html.replace(/\s*background-image:\s*image-set\([^;]*\);/g, '');
+html = html.replace(/<link rel="preload"[^>]*\/>\n?/g, '');
+
 // <script src="assets/vendor/x.js"> -> inline <script>
 html = html.replace(/<script([^>]*)\ssrc="([^"]+\.js)"([^>]*)><\/script>/g, (m, a, src, b) => {
   if (/^https?:\/\//.test(src) || !exists(src)) { if (!/^https?:/.test(src)) counts.miss.push(src); return m; }
