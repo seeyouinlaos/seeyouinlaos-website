@@ -1,0 +1,13 @@
+{
+  "name": "See You In Laos — The Journey",
+  "short_name": "The Journey",
+  "description": "Scroll through the wedding journey of Haruthai & Suthep in Luang Prabang.",
+  "start_url": "./",
+  "display": "browser",
+  "background_color": "#F7F2E9",
+  "theme_color": "#F7F2E9",
+  "icons": [
+    { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
