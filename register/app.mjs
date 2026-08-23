@@ -92,16 +92,33 @@ function renderStep(i) {
   if (name === 'send') renderSend();
 }
 
-/* ---------------- invitation overlay (§7) ---------------- */
+/* ---------------- invitation overlay (§7) ----------------
+ * ONE authoritative open/close transition. The opened-state key is STABLE
+ * from the first millisecond: it prefers the URL token (known synchronously
+ * at load), then the adopted invitation token — so a click before the async
+ * lookup finishes persists under the SAME key every later check reads.
+ * An in-memory session flag guarantees the invitation never reopens within
+ * the running session even when storage is unavailable (private mode).
+ * openInvitation() is called from exactly two places: init() (once) and the
+ * explicit "Reopen your invitation" link. Nothing else may call it. */
 const overlay = document.getElementById('invitation');
-function invitationSeen() { try { return !!localStorage.getItem(SEEN_KEY + (S.invitation ? S.invitation.token : 'first')); } catch (e) { return false; } }
-function markInvitationSeen() { try { localStorage.setItem(SEEN_KEY + (S.invitation ? S.invitation.token : 'first'), '1'); } catch (e) { /* ignore */ } }
+const urlToken = (new URLSearchParams(location.search).get('invite') || '').trim().toLowerCase();
+let invitationOpenedThisSession = false;
+function openedKey() { return SEEN_KEY + (urlToken || (S.invitation ? S.invitation.token : 'first')); }
+function invitationOpened() {
+  if (invitationOpenedThisSession) return true;
+  try { return !!localStorage.getItem(openedKey()); } catch (e) { return false; }
+}
+function markInvitationOpened() {
+  invitationOpenedThisSession = true;
+  try { localStorage.setItem(openedKey(), '1'); } catch (e) { /* private mode — session flag carries it */ }
+}
 function openInvitation() {
   overlay.hidden = false; document.body.classList.add('inv-lock');
   overlay.querySelector('.inv-cta').focus();
 }
 function closeInvitation() {
-  markInvitationSeen();
+  markInvitationOpened();
   document.body.classList.remove('inv-lock');
   if (reduced) { overlay.hidden = true; return; }
   overlay.classList.add('closing');
@@ -109,7 +126,6 @@ function closeInvitation() {
 }
 document.querySelector('.inv-cta').addEventListener('click', closeInvitation);
 document.getElementById('reopen-invitation').addEventListener('click', (e) => { e.preventDefault(); openInvitation(); });
-if (!invitationSeen() && !S.submitted) openInvitation();
 
 /* ---------------- step 1 · find your invitation (§9) ---------------- */
 const findInput = document.getElementById('find-input');
@@ -146,16 +162,7 @@ function adoptInvitation(inv) {
   }
   saveDraft();
 }
-// deep-link: ?invite=<token>
-const tokenParam = new URLSearchParams(location.search).get('invite');
-if (tokenParam) {
-  lookupInvitation(tokenParam).then((inv) => {
-    if (!inv) return;
-    const isNew = !S.invitation || S.invitation.invitationId !== inv.invitationId;
-    adoptInvitation(inv);
-    if (isNew && !S.submitted) show(idx('party'), false);
-  });
-}
+// Deep-link resolution happens inside init() — no competing initializer.
 
 /* ---------------- step 2 · party link (§10) ---------------- */
 function renderParty() {
@@ -683,13 +690,25 @@ function announce(msg) {
 const pad = (n) => ('0' + n).slice(-2);
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 
-/* ---------------- boot ---------------- */
-if (S.invitation) {
-  // returning guest continues their saved journey
-  show(S.submitted ? idx('received') : idx('party'), false);
-  if (S.submitted) document.getElementById('received-when').textContent =
-    'Submitted ' + new Date(S.registration_submitted_at).toLocaleString('en-GB', { dateStyle: 'long', timeStyle: 'short' }) + ' · status: UNDER REVIEW';
-} else {
-  show(0, false);
+/* ---------------- boot: ONE authoritative initialization ----------------
+ * Order: resolve the deep-link token first (await), THEN decide overlay and
+ * step exactly once. No later callback reopens the invitation or reassigns
+ * the current step. */
+async function init() {
+  if (urlToken) {
+    try {
+      const inv = await lookupInvitation(urlToken);
+      if (inv) adoptInvitation(inv); // preserves an existing same-invitation draft
+    } catch (e) { /* offline/failed lookup: guest can still use the code field */ }
+  }
+  if (S.invitation) {
+    show(S.submitted ? idx('received') : idx('party'), false);
+    if (S.submitted) document.getElementById('received-when').textContent =
+      'Submitted ' + new Date(S.registration_submitted_at).toLocaleString('en-GB', { dateStyle: 'long', timeStyle: 'short' }) + ' · status: UNDER REVIEW';
+  } else {
+    show(0, false);
+  }
+  renderSummary();
+  if (!invitationOpened() && !S.submitted) openInvitation();
 }
-renderSummary();
+init();
