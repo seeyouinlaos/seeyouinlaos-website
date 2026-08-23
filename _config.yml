@@ -1,0 +1,15 @@
+# GitHub Pages (mirror) build config.
+# The mirror must serve ONLY the public guest surfaces. Internal docs, worker
+# source, tooling, tests and the legacy /journey/ site are excluded here
+# (Cloudflare handles the same via .assetsignore).
+exclude:
+  - docs
+  - src
+  - test
+  - journey
+  - node_modules
+  - README.md
+  - package.json
+  - package-lock.json
+  - wrangler.jsonc
+include: []

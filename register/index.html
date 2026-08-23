@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Your Invitation · See You In Laos</title>
+<meta name="robots" content="noindex"/>
+<link href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%232B2823'/%3E%3Ccircle cx='16' cy='16' r='5' fill='%23B33A3F'/%3E%3C/svg%3E" rel="icon"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500&amp;display=swap" rel="stylesheet"/>
+<style>
+@font-face { font-family: 'PP Editorial Old'; src: url('../assets/fonts/PPEditorialOld-Regular.otf') format('opentype'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'PP Editorial Old'; src: url('../assets/fonts/PPEditorialOld-Ultralight.otf') format('opentype'); font-weight: 200; font-display: swap; }
+@font-face { font-family: 'PP Editorial Old'; src: url('../assets/fonts/PPEditorialOld-Italic.otf') format('opentype'); font-weight: 400; font-style: italic; font-display: swap; }
+
+:root {
+  --ivory: #F2ECE1; --ink: #211F1C; --ink-s: #2B2823;
+  --blush: #EAD9D4; --rose: #805A52; --cherry: #74070E; --cherry-photo: #B33A3F;
+  --line: rgba(168,131,125,.35);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Hanken Grotesk', sans-serif; font-weight: 300; background: var(--ivory); color: var(--ink); font-size: 17px; line-height: 1.6; }
+a { color: inherit; }
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, summary:focus-visible { outline: 2px solid var(--cherry-photo); outline-offset: 3px; border-radius: 1px; }
+.serif { font-family: 'PP Editorial Old', serif; }
+.serif-it { font-family: 'PP Editorial Old', serif; font-style: italic; }
+.label { font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: var(--rose); }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+header.top { padding: 40px 6vw 0; display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap; }
+header.top .mark { font-family: 'PP Editorial Old', serif; font-size: 26px; }
+header.top .mark .dot { color: var(--cherry-photo); }
+header.top nav { display: flex; gap: 22px; font-size: 11px; letter-spacing: .18em; text-transform: uppercase; }
+header.top nav a { text-decoration: none; border-bottom: 1px solid transparent; padding-bottom: 2px; }
+header.top nav a:hover { border-color: var(--cherry); }
+
+.wrap { max-width: 780px; margin: 0 auto; padding: 40px 6vw 140px; }
+.eyebrow { font-size: 12px; letter-spacing: .24em; text-transform: uppercase; color: var(--cherry); margin-bottom: 18px; }
+h1 { font-family: 'PP Editorial Old', serif; font-weight: 200; font-size: clamp(38px, 6vw, 58px); line-height: 1.12; text-wrap: balance; margin-bottom: 18px; }
+h2 { font-family: 'PP Editorial Old', serif; font-weight: 200; font-size: clamp(28px, 4.4vw, 40px); line-height: 1.14; margin-bottom: 10px; }
+h3 { font-family: 'PP Editorial Old', serif; font-weight: 400; font-size: 20px; margin-bottom: 6px; }
+p.lead { max-width: 58ch; }
+.note { font-size: 13px; color: var(--rose); max-width: 60ch; }
+.note strong { color: var(--cherry); font-weight: 500; }
+.step-eyebrow { font-size: 11px; letter-spacing: .24em; text-transform: uppercase; color: var(--rose); margin-bottom: 12px; }
+
+.progress { display: flex; gap: 6px; margin: 26px 0 40px; }
+.progress span { flex: 1; height: 2px; background: rgba(168,131,125,.3); }
+.progress span.on { background: var(--cherry); }
+
+.step { display: none; }
+.step.active { display: block; animation: rise .45s ease; }
+@keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+/* fields */
+.field { margin-top: 24px; }
+.field > label, fieldset legend { display: block; font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--rose); margin-bottom: 9px; }
+fieldset { border: none; margin-top: 30px; padding-top: 18px; border-top: 1px solid var(--line); }
+fieldset legend { color: var(--cherry); padding-right: 14px; }
+input[type=text], input[type=email], input[type=tel], input[type=date], input[type=time], input[type=number], select, textarea {
+  width: 100%; font: inherit; font-weight: 300; color: var(--ink);
+  background: transparent; border: none; border-bottom: 1px solid rgba(33,31,28,.35);
+  padding: 8px 2px 10px; border-radius: 0; -webkit-appearance: none; appearance: none; min-height: 44px;
+}
+select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7'%3E%3Cpath d='M1 1l4.5 4.5L10 1' fill='none' stroke='%23805A52' stroke-width='1.4'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 4px center; padding-right: 24px; }
+textarea { min-height: 84px; resize: vertical; }
+input:focus, select:focus, textarea:focus { border-bottom-color: var(--cherry); }
+.cols2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 28px; }
+@media (max-width: 620px) { .cols2 { grid-template-columns: 1fr; } }
+
+/* join toggles */
+.join { display: flex; gap: 8px; flex-wrap: wrap; }
+.join label { position: relative; }
+.join input { position: absolute; opacity: 0; inset: 0; }
+.join span { display: inline-block; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; padding: 11px 14px; border: 1px solid rgba(33,31,28,.3); cursor: pointer; transition: all .25s; min-height: 44px; }
+.join input:checked + span.yes { background: var(--cherry); border-color: var(--cherry); color: var(--ivory); }
+.join input:checked + span.no { background: var(--ink-s); border-color: var(--ink-s); color: var(--ivory); }
+.join input:disabled + span { opacity: .35; cursor: not-allowed; }
+.join input:focus-visible + span { outline: 2px solid var(--cherry-photo); outline-offset: 2px; }
+
+.mod { border-top: 1px solid var(--line); padding: 24px 0; }
+.mod:last-of-type { border-bottom: 1px solid var(--line); }
+.mod .mod-head { display: flex; justify-content: space-between; gap: 18px; flex-wrap: wrap; }
+.mod .when { font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--cherry); margin-bottom: 6px; }
+.mod p { font-size: 14.5px; opacity: .85; max-width: 44ch; margin-top: 4px; }
+.mod .cap-full { color: var(--cherry); letter-spacing: .14em; text-transform: uppercase; font-size: 11px; }
+.join-col { display: flex; flex-direction: column; gap: 10px; }
+.join-row { display: flex; align-items: center; gap: 14px; justify-content: flex-end; }
+.join-who { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--rose); }
+.plans-toggle { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 22px; }
+.plans-toggle label { position: relative; }
+.plans-toggle input { position: absolute; opacity: 0; inset: 0; }
+.plans-toggle span { display: inline-block; font-size: 12px; letter-spacing: .08em; padding: 10px 16px; border: 1px solid rgba(33,31,28,.3); cursor: pointer; min-height: 44px; }
+.plans-toggle input:checked + span { background: var(--ink-s); color: var(--ivory); border-color: var(--ink-s); }
+.plans-toggle input:focus-visible + span { outline: 2px solid var(--cherry-photo); outline-offset: 2px; }
+
+.cond { display: none; }
+.cond.show { display: block; }
+.err { color: var(--cherry); font-size: 13px; margin-top: 12px; display: none; }
+.err.show { display: block; }
+
+/* party link */
+.party-frame { display: flex; align-items: stretch; justify-content: center; gap: 0; margin: 40px 0 18px; flex-wrap: wrap; }
+.party-tile { border: 1px solid var(--line); padding: 30px 34px; text-align: center; min-width: 180px; background: rgba(255,255,255,.35); opacity: 0; transform: translateY(12px); animation: tile .6s ease forwards; }
+@keyframes tile { to { opacity: 1; transform: none; } }
+.party-init { display: block; font-size: 40px; font-weight: 200; color: var(--cherry); margin-bottom: 8px; }
+.party-name { display: block; font-size: 15px; }
+.party-lead { display: block; margin-top: 8px; font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--rose); }
+.party-tie { width: 46px; align-self: center; height: 1px; background: var(--cherry-photo); transform: scaleX(0); transform-origin: left; animation: tie .7s ease .5s forwards; }
+@keyframes tie { to { transform: scaleX(1); } }
+.party-line { text-align: center; font-size: 21px; margin-top: 8px; }
+@media (max-width: 560px) { .party-frame { flex-direction: column; align-items: center; } .party-tie { width: 1px; height: 34px; transform: scaleY(0); animation-name: tiev; } @keyframes tiev { to { transform: scaleY(1); } } }
+
+/* accommodation cards */
+.price-note { border: 1px solid var(--line); padding: 20px 24px; margin-bottom: 30px; }
+.acc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+@media (max-width: 720px) { .acc-grid { grid-template-columns: 1fr; } }
+.acc-card { border: 1px solid var(--line); padding: 24px 26px; display: flex; flex-direction: column; gap: 8px; background: rgba(255,255,255,.35); transition: border-color .3s; }
+.acc-card.sel { border-color: var(--cherry); box-shadow: inset 0 0 0 1px var(--cherry); }
+.acc-card.full { opacity: .75; }
+.acc-badge { font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--cherry); }
+.acc-head { display: flex; justify-content: space-between; gap: 14px; align-items: baseline; }
+.acc-price { text-align: right; }
+.acc-price .amt { font-family: 'PP Editorial Old', serif; font-size: 22px; display: block; }
+.acc-price .per { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--rose); }
+.acc-meta { font-size: 11.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--rose); }
+.acc-blurb { font-size: 14px; opacity: .85; }
+.acc-avail { font-size: 11.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--rose); border-top: 1px solid var(--line); padding-top: 12px; margin-top: auto; }
+.acc-avail.zero { color: var(--cherry); }
+.acc-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
+
+/* overlay */
+.pv-backdrop { position: fixed; inset: 0; background: rgba(33,31,28,.55); z-index: 80; }
+.pv { position: fixed; top: 0; right: 0; height: 100%; width: min(560px, 100vw); background: var(--ivory); z-index: 81; overflow-y: auto; padding: 80px 46px 60px; }
+.pv .pv-close { position: absolute; top: 26px; right: 26px; background: none; border: 1px solid rgba(33,31,28,.3); font: inherit; font-size: 11px; letter-spacing: .2em; text-transform: uppercase; padding: 10px 16px; cursor: pointer; }
+.pv .pv-tag { font-size: 11px; letter-spacing: .24em; text-transform: uppercase; color: var(--cherry); margin-bottom: 14px; }
+.pv h3 { font-weight: 200; font-size: clamp(30px, 4vw, 40px); line-height: 1.12; margin-bottom: 18px; }
+.pv-facts { margin-top: 20px; }
+.pv-facts div { display: grid; grid-template-columns: 130px 1fr; gap: 12px; padding: 8px 0; border-top: 1px solid var(--line); font-size: 14.5px; }
+.pv-facts dt { color: var(--rose); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; padding-top: 3px; }
+.incl { list-style: none; margin-top: 10px; }
+.incl li { padding: 7px 0 7px 22px; border-top: 1px solid var(--line); font-size: 14px; position: relative; }
+.incl li::before { content: '·'; position: absolute; left: 6px; color: var(--cherry); }
+body.pv-lock { overflow: hidden; }
+
+/* guest folds */
+.guest-block, .guest-fold { border: 1px solid var(--line); padding: 22px 26px; margin-top: 22px; background: rgba(255,255,255,.3); }
+.guest-fold summary { cursor: pointer; font-family: 'PP Editorial Old', serif; font-size: 20px; list-style: none; min-height: 44px; display: flex; align-items: center; }
+.guest-fold summary::-webkit-details-marker { display: none; }
+.guest-fold summary .n { font-family: 'Hanken Grotesk', sans-serif; font-size: 12px; letter-spacing: .18em; color: var(--rose); margin-right: 12px; }
+.trv-name { margin-top: 30px; }
+
+/* cost + review */
+.stay-sum { border: 1px solid var(--line); padding: 24px 28px; }
+.stay-sum .row { display: flex; justify-content: space-between; gap: 16px; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
+.stay-sum .row:last-child { border-bottom: none; }
+.stay-sum .row .r { text-align: right; color: var(--rose); }
+.stay-sum .row.total .r, .stay-sum .row.total .l { color: var(--cherry); }
+@media (max-width: 520px) { .stay-sum .row { flex-direction: column; gap: 2px; } .stay-sum .row .r { text-align: left; } }
+.rv-sec { border-top: 1px solid var(--line); padding: 20px 0; }
+.rv-sec:last-of-type { border-bottom: 1px solid var(--line); }
+.rv-sec .rv-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+.rv-sec .rv-head .t { font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: var(--cherry); }
+.rv-sec button.edit { background: none; border: none; font: inherit; font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--rose); border-bottom: 1px solid var(--line); cursor: pointer; padding: 0 0 2px; min-height: 32px; }
+.rv-sec dl div { display: grid; grid-template-columns: 170px 1fr; gap: 14px; padding: 4px 0; font-size: 14.5px; }
+.rv-sec dt { color: var(--rose); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; padding-top: 2px; }
+@media (max-width: 560px) { .rv-sec dl div { grid-template-columns: 1fr; gap: 1px; } }
+.confirm-row { display: grid; grid-template-columns: 24px 1fr; gap: 12px; margin-top: 26px; font-size: 14px; align-items: start; cursor: pointer; }
+.confirm-row input { width: 18px; height: 18px; margin-top: 3px; accent-color: var(--cherry); }
+
+/* nav + summary rail */
+.stepnav { display: flex; justify-content: space-between; align-items: center; margin-top: 44px; gap: 16px; }
+button.btn { font: inherit; cursor: pointer; letter-spacing: .18em; text-transform: uppercase; font-size: 12px; padding: 15px 30px; border: 1px solid var(--ink-s); background: var(--ink-s); color: var(--ivory); transition: background .3s, border-color .3s; min-height: 48px; }
+button.btn:hover { background: var(--cherry); border-color: var(--cherry); }
+button.btn.ghost { background: none; color: var(--ink); border-color: rgba(33,31,28,.3); }
+button.btn.ghost:hover { border-color: var(--cherry); color: var(--cherry); background: none; }
+button.btn.sm { padding: 10px 16px; font-size: 11px; min-height: 40px; }
+
+#summary { position: fixed; left: 0; right: 0; bottom: 0; background: var(--ink-s); color: var(--ivory); padding: 12px 6vw; font-size: 12.5px; letter-spacing: .03em; z-index: 40; display: flex; gap: 14px; align-items: baseline; }
+#summary .sum-label { font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: var(--cherry-photo); white-space: nowrap; }
+#summary .sum-line { opacity: .92; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* invitation overlay (§7) */
+#invitation { position: fixed; inset: 0; z-index: 100; display: grid; grid-template-columns: 1.1fr 1fr; background: var(--ink-s); }
+#invitation .inv-photo { background: url('../assets/images/souphattra/heritage-courtyard-aerial.jpg') center/cover no-repeat; }
+#invitation .inv-side { display: grid; place-items: center; padding: 6vmin; background: rgba(33,31,28,.96); }
+.inv-card { background: var(--ivory); color: var(--ink); max-width: 460px; width: 100%; padding: clamp(34px, 5vmin, 60px); text-align: center; box-shadow: 0 30px 80px rgba(0,0,0,.45); background-image: radial-gradient(rgba(168,131,125,.06) 1px, transparent 1px); background-size: 5px 5px; }
+.inv-card .inv-mono { font-family: 'PP Editorial Old', serif; font-size: 15px; letter-spacing: .3em; text-transform: uppercase; color: var(--cherry); }
+.inv-card h1 { font-size: clamp(30px, 4.6vmin, 44px); margin: 18px 0 8px; }
+.inv-card .inv-sub { font-size: 13px; letter-spacing: .06em; }
+.inv-card .inv-meta { margin: 22px 0; font-size: 12px; letter-spacing: .2em; text-transform: uppercase; color: var(--rose); line-height: 2.1; }
+.inv-card .inv-note { font-size: 13.5px; max-width: 34ch; margin: 0 auto; }
+.inv-card .inv-cta { margin-top: 28px; }
+#invitation.closing { animation: invout .65s ease forwards; }
+@keyframes invout { to { opacity: 0; transform: translateY(-3vh); } }
+body.inv-lock { overflow: hidden; }
+@media (max-width: 860px) { #invitation { grid-template-columns: 1fr; grid-template-rows: 38vh 1fr; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .step.active, .party-tile, .party-tie, #invitation.closing { animation: none !important; }
+  .party-tile { opacity: 1; transform: none; }
+  .party-tie { transform: none; }
+}
+</style>
+</head>
+<body>
+<div id="live" class="sr-only" role="status" aria-live="polite"></div>
+
+<!-- OPENING INVITATION (§7) -->
+<div id="invitation" hidden role="dialog" aria-modal="true" aria-label="Your invitation">
+<div class="inv-photo" role="img" aria-label="The courtyard pool of Souphattra Heritage Vientiane from above"></div>
+<div class="inv-side">
+<div class="inv-card">
+<div class="inv-mono">H&amp;S</div>
+<h1>See You<br/>In Laos</h1>
+<div class="inv-sub">A private invitation from Haruthai &amp; Suthep</div>
+<div class="inv-meta">Vientiane<br/>27 February – 1 March 2027</div>
+<p class="inv-note">Your journey, stay and wedding experience have been prepared for you.</p>
+<button type="button" class="btn inv-cta">Open your invitation</button>
+</div>
+</div>
+</div>
+
+<header class="top">
+<div class="mark serif">see you in laos<span class="dot">.</span></div>
+<nav aria-label="Site">
+<a href="../#weekend">Journey</a><a href="../#places">Stay</a><a href="../#dresscode">Wedding</a><a href="../#travel">Travel</a><a href="#" aria-current="page">Guest Area</a>
+</nav>
+</header>
+
+<main class="wrap">
+<div class="progress" id="progress" aria-hidden="true"></div>
+
+<!-- welcome -->
+<section class="step active" data-step="welcome" aria-label="Welcome">
+<div class="eyebrow">Guest Area</div>
+<h1>Join the journey.</h1>
+<p class="lead">Everything here has been prepared around you: the journey, the wedding days in Vientiane, your stay, and the small comforts in between. A few quiet questions, and Guest Relations takes it from there.</p>
+<p class="note" style="margin-top:24px">Everything you send is a <strong>registration request</strong> — Khun Ket and Khun Paddy confirm each arrangement with you personally.</p>
+<div class="stepnav"><a href="#" id="reopen-invitation" class="note" style="border-bottom:1px solid var(--line);text-decoration:none">Reopen your invitation</a><button class="btn" data-next>Begin</button></div>
+</section>
+
+<!-- 1 · find your invitation (§9) -->
+<section class="step" data-step="find" aria-label="Find your invitation">
+<div class="step-eyebrow">Find your invitation</div>
+<h2>Who are we<br/>welcoming?</h2>
+<p class="lead">Enter the private invitation code from your invitation letter — or simply open the personal link we sent you.</p>
+<div class="field"><label for="find-input">Your invitation code</label><input type="text" id="find-input" autocomplete="off" autocapitalize="none" spellcheck="false"/></div>
+<p class="err" id="find-err"></p>
+<p class="note" style="margin-top:20px">Lost your code? Write to <strong>guest.relation.seeyouinlaos@gmail.com</strong> or LINE <strong>seeyouinlaos</strong> and Guest Relations will help right away. Your invitation details are never published on this page.</p>
+<div class="stepnav"><button class="btn ghost" data-prev>Back</button><button class="btn" id="find-btn">Find my invitation</button></div>
+</section>
+
+<!-- 2 · party (§10) -->
+<section class="step" data-step="party" aria-label="Your party">
+<div class="step-eyebrow">Your invitation</div>
+<h2>You come<br/>as you belong.</h2>
+<div id="party-box"></div>
+<div style="margin-top:30px">
+<button type="button" class="btn ghost sm" id="addl-btn">Request an additional guest</button>
+<div class="cond" id="addl-wrap"><div class="field"><label for="addl-input">Who would you like to bring, and why?</label><textarea id="addl-input"></textarea></div>
+<p class="note">Additional guests are reviewed by Guest Relations and become part of your invitation only after approval. Nothing changes automatically.</p></div>
+</div>
+<div class="stepnav"><button class="btn ghost" data-prev>Back</button><button class="btn" data-next>Continue</button></div>
+</section>
+
+<!-- 3 · journey (§13) -->
+<section class="step" data-step="journey" aria-label="Your journey">
+<div class="step-eyebrow">Your journey</div>
+<h2>Which roads<br/>bring you to us?</h2>
+<div id="journey-box"></div>
+<div class="stepnav"><button class="btn ghost" data-prev>Back</button><button class="btn" data-next>Continue</button></div>
+</section>
+
+<!-- 4 · events -->
+<section class="step" data-step="events" aria-label="Your events">
+<div class="step-eyebrow">The wedding days</div>
+<h2>What you are<br/>there for.</h2>
+<p class="note" style="margin-bottom:22px">Join as much or as little as suits you — the dinner alone is a complete answer.</p>
+<div id="events-box"></div>
+<div class="stepnav"><button class="btn ghost" data-prev>Back</button><button class="btn" data-next>Continue</button></div>
+</section>
+
+<!-- 5 · stay (§18–§23) -->
+<section class="step" data-step="stay" aria-label="Your stay">
+<div class="step-eyebrow">Your stay</div>
+<h2>Where you<br/>wake up.</h2>
+<div id="stay-box"></div>
+<div class="stepnav"><button class="btn ghost" data-prev>Back</button><button class="btn" data-next>Continue</button></div>
+</section>
+
+<!-- 6 · travel (§15) -->
+<section class="step" data-step="travel" aria-label="Arrival and transfers">
+<div class="step-eyebrow">Arrival &amp; transfers</div>
+<h2>Getting you<br/>here and home.</h2>
+<div id="travel-box"></div>
+<div class="stepnav"><button class="btn ghost" data-prev>Back</button><button class="btn" data-next>Continue</button></div>
+</section>
+
+<!-- 7 · spa (§16) -->
+<section class="step" data-step="spa" aria-label="Spa and wellness">
+<div class="step-eyebrow">Spa &amp; wellness</div>
+<h2>A slower hour,<br/>if you like.</h2>
+<div id="spa-box"></div>
+<div class="stepnav"><button class="btn ghost" data-prev>Back</button><button class="btn" data-next>Continue</button></div>
+</section>
+
+<!-- 8 · each of you (§17) -->
+<section class="step" data-step="each" aria-label="Each of you">
+<div class="step-eyebrow">Each of you</div>
+<h2>The table is set<br/>around you.</h2>
+<p class="note">Dietary needs and allergies stay individual and reach only the kitchens that cook for you.</p>
+<div id="each-box"></div>
+<div class="stepnav"><button class="btn ghost" data-prev>Back</button><button class="btn" data-next>Continue</button></div>
+</section>
+
+<!-- 9 · cost -->
+<section class="step" data-step="cost" aria-label="Your contribution">
+<div class="step-eyebrow">Your contribution</div>
+<h2>Clear, and<br/>kept simple.</h2>
+<div id="cost-box"></div>
+<div class="stepnav"><button class="btn ghost" data-prev>Back</button><button class="btn" data-next>Review</button></div>
+</section>
+
+<!-- 10 · review (§28) -->
+<section class="step" data-step="review" aria-label="Your journey, reviewed">
+<div class="step-eyebrow">Review</div>
+<h2>Your journey,<br/>at a glance.</h2>
+<div id="review-box"></div>
+<div class="stepnav"><button class="btn ghost" data-prev>Back</button><button class="btn" data-next>Send my registration</button></div>
+</section>
+
+<!-- 11 · send (§30) -->
+<section class="step" data-step="send" aria-label="Send your registration">
+<div class="step-eyebrow">Send</div>
+<h2>To Guest<br/>Relations.</h2>
+<p class="lead">One message carries everything. Send it by email, or copy it into LINE (<strong>seeyouinlaos</strong>).</p>
+<div class="stepnav" style="justify-content:flex-start;gap:12px;margin-top:26px">
+<button class="btn" id="send-mail">Send by email</button>
+<button class="btn ghost" id="copy-out">Copy for LINE</button>
+</div>
+<pre id="send-out" style="white-space:pre-wrap;font-family:ui-monospace,Menlo,monospace;font-size:11.5px;line-height:1.6;background:var(--ink-s);color:var(--ivory);padding:24px;margin-top:24px;max-height:320px;overflow:auto" aria-label="Your registration"></pre>
+<div class="stepnav"><button class="btn ghost" data-prev>Back</button><span></span></div>
+</section>
+
+<!-- 12 · received (§29) -->
+<section class="step" data-step="received" aria-label="Registration received">
+<div class="step-eyebrow">Registration received</div>
+<h2>Thank you.</h2>
+<p class="lead">Your registration has been received. Guest Relations will review your selections, availability and personal requirements, and you will be contacted with confirmations or any additional information.</p>
+<p class="note" id="received-when" style="margin-top:20px"></p>
+<div class="stepnav"><span></span><button class="btn" id="return-journey">Return to your journey</button></div>
+</section>
+</main>
+
+<div id="summary" hidden aria-live="polite"><span class="sum-label">Your journey</span><span class="sum-line"></span></div>
+
+<!-- room detail overlay (§22) -->
+<div class="pv-backdrop" id="acc-backdrop" hidden></div>
+<article class="pv" id="acc-overlay" hidden inert="" role="dialog" aria-modal="true" aria-label="Accommodation details">
+<button type="button" class="pv-close">Close</button>
+<div class="pv-body"></div>
+</article>
+
+<script type="module" src="./app.mjs"></script>
+</body>
+</html>

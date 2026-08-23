@@ -13,3 +13,17 @@ node_modules/
 .DS_Store
 .playwright-mcp/
 .impeccable/
+
+# Edit Images dev tool: retained originals + drop staging (local only)
+_asset_originals/
+assets/images/incoming/
+
+# guest privacy: plaintext list + token register never enter git
+src/*.private.json
+src/*.private.csv
+
+# internal governance docs (contain budget/vendor figures) — never in the public repo
+docs/DECISION-REGISTER.md
+docs/PUBLICATION-DATA-MATRIX.md
+docs/RELEASE-GATES.md
+docs/REVIEW-VIENTIANE-PASS.md

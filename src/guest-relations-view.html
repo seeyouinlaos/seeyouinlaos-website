@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Guest Relations · Inventory (internal)</title>
+<meta name="robots" content="noindex"/>
+<style>
+  /* INTERNAL OPERATIONAL VIEW — never deployed (src/ is excluded from public
+     assets). PRODUCTION DEPENDENCY: this view must sit behind authenticated
+     access (e.g. Cloudflare Access) before any real guest data exists.
+     No credentials are invented here. */
+  body { font: 13px/1.55 -apple-system, sans-serif; background: #f6f3ec; color: #211F1C; padding: 30px; }
+  h1 { font-size: 19px; margin-bottom: 4px; }
+  .warn { color: #74070E; font-size: 12px; margin-bottom: 22px; }
+  table { border-collapse: collapse; width: 100%; margin-top: 14px; background: #fff; }
+  th, td { text-align: left; padding: 7px 10px; border: 1px solid #e2dbcd; font-size: 12.5px; }
+  th { background: #2B2823; color: #F2ECE1; font-weight: 500; letter-spacing: .04em; }
+  .zero { color: #74070E; font-weight: 600; }
+  h2 { font-size: 15px; margin-top: 28px; }
+  pre { background: #fff; border: 1px solid #e2dbcd; padding: 12px; font-size: 11.5px; overflow: auto; }
+</style>
+</head>
+<body>
+<h1>Guest Relations — inventory &amp; registrations</h1>
+<p class="warn">Internal only. This page reads the local demonstration state (browser localStorage). In production it requires an authenticated backend — documented dependency, not implemented here.</p>
+<div id="inv"></div>
+<h2>Latest registration draft / submission on this browser</h2>
+<pre id="reg">–</pre>
+<script type="module">
+import { ACCOMMODATIONS, TRAIN } from '../register/data.mjs';
+import { createInventory, remaining, unitsPending, availabilityLabel } from '../register/logic.mjs';
+let inv;
+try { inv = JSON.parse(localStorage.getItem('siyl.inv.demo.v1') || 'null'); } catch (e) { inv = null; }
+if (!inv) inv = createInventory([...ACCOMMODATIONS, TRAIN]);
+const rows = Object.values(inv).map((r) => {
+  const rem = remaining(r);
+  const wl = r.waitlist.length;
+  const reqs = r.allocations.filter((a) => a.status === 'REQUESTED');
+  const held = r.allocations.filter((a) => a.status === 'HELD');
+  const conf = r.allocations.filter((a) => a.status === 'CONFIRMED');
+  const rel = r.allocations.filter((a) => a.status === 'RELEASED');
+  return `<tr>
+    <td>${r.display_name}</td><td>${r.capacity_total} ${r.capacity_unit}</td>
+    <td class="${rem <= 0 ? 'zero' : ''}">${rem} (${availabilityLabel(r)})</td>
+    <td>${reqs.length} (${unitsPending(r)} units)</td><td>${held.length}</td><td>${conf.length}</td><td>${rel.length}</td><td>${wl}</td>
+    <td>${r.allocations.map((a) => `${a.partyId} · ${a.status} · ${a.requested_at || ''}`).join('<br>') || '—'}</td>
+  </tr>`;
+}).join('');
+document.getElementById('inv').innerHTML = `<table>
+  <tr><th>Resource</th><th>Total</th><th>Remaining</th><th>Requested</th><th>Held</th><th>Confirmed</th><th>Released</th><th>Waitlist</th><th>Allocations (party · status · submitted_at)</th></tr>${rows}</table>`;
+try {
+  const d = JSON.parse(localStorage.getItem('siyl.reg.draft.v2') || 'null');
+  if (d) document.getElementById('reg').textContent = JSON.stringify({
+    party: d.invitation && d.invitation.partyName,
+    submitted: d.submitted, submitted_at: d.registration_submitted_at,
+    stay: d.stay, guests: (d.guests || []).map((g) => ({ id: g.guestId, name: g.fullName, train: g.journey && g.journey.train, events: g.events, diet: g.diet, allergy: g.allergy })),
+  }, null, 2);
+} catch (e) { /* none */ }
+</script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+/* "Edit Images" dev-tool chrome. Injected on localhost only; never deployed.
+   Scoped to .eimg-* so it cannot affect the site's own design. */
+
+.eimg-bar {
+  position: fixed; left: 16px; bottom: 16px; z-index: 100000;
+  display: flex; align-items: center; gap: 10px;
+  font-family: -apple-system, "Hanken Grotesk", sans-serif; font-size: 12px;
+  background: #211F1C; color: #F2ECE1; padding: 8px 10px; border-radius: 6px;
+  box-shadow: 0 8px 30px rgba(0,0,0,.35);
+}
+.eimg-bar button {
+  font: inherit; letter-spacing: .04em; cursor: pointer;
+  background: transparent; color: #F2ECE1; border: 1px solid rgba(242,236,225,.35);
+  padding: 6px 12px; border-radius: 4px; transition: background .2s, border-color .2s;
+}
+.eimg-bar button:hover { border-color: #D5847A; }
+.eimg-bar .eimg-toggle.active { background: #74070E; border-color: #74070E; }
+.eimg-bar .eimg-status { opacity: .7; letter-spacing: .02em; max-width: 320px; }
+
+/* Editable targets: outline only (does not affect layout). */
+body.eimg-on .eimg-target {
+  outline: 1.5px dashed rgba(179,58,63,.7); outline-offset: -1.5px;
+  cursor: copy; position: relative;
+}
+body.eimg-on .eimg-target:hover { outline-color: #B33A3F; outline-style: solid; }
+
+/* "Drop image to replace" hint on hover / drag-over, drawn with ::after so no
+   wrapper element is added to the DOM. */
+body.eimg-on .eimg-target::after {
+  content: "Drop image to replace";
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
+  font-family: -apple-system, "Hanken Grotesk", sans-serif; font-size: 12px;
+  letter-spacing: .12em; text-transform: uppercase; color: #F2ECE1;
+  background: rgba(33,31,28,.72); padding: 8px 14px; border-radius: 4px;
+  opacity: 0; transition: opacity .18s; pointer-events: none; z-index: 5; white-space: nowrap;
+}
+body.eimg-on .eimg-target:hover::after,
+body.eimg-on .eimg-target.eimg-hot::after { opacity: 1; }
+body.eimg-on .eimg-target.eimg-hot { outline: 2px solid #B33A3F; }
+body.eimg-on .eimg-target.eimg-hot::before {
+  content: ""; position: absolute; inset: 0; background: rgba(179,58,63,.18); z-index: 4; pointer-events: none;
+}
+
+.eimg-toast {
+  position: fixed; left: 16px; bottom: 64px; z-index: 100001;
+  font-family: -apple-system, "Hanken Grotesk", sans-serif; font-size: 12.5px;
+  background: #2B2823; color: #F2ECE1; padding: 10px 14px; border-radius: 6px;
+  box-shadow: 0 8px 30px rgba(0,0,0,.35); border: 1px solid rgba(213,132,122,.5);
+  opacity: 0; transform: translateY(8px); transition: opacity .25s, transform .25s; max-width: 380px;
+}
+.eimg-toast.show { opacity: 1; transform: none; }
+.eimg-toast.bad { border-color: rgba(116,7,14,.8); }
+
+@media (prefers-reduced-motion: reduce) {
+  .eimg-toast { transition: none; }
+}

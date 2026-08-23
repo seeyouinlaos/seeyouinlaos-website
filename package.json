@@ -11,7 +11,10 @@
     "dev": "wrangler dev",
     "build": "wrangler deploy --dry-run --outdir dist",
     "build:standalone": "node src/build-standalone.cjs",
-    "deploy": "wrangler deploy"
+    "edit": "node src/dev-editor-server.cjs",
+    "test": "node --test 'test/registration.test.mjs'",
+    "deploy": "wrangler deploy",
+    "release-check": "node src/release-check.cjs"
   },
   "devDependencies": {
     "wrangler": "^3.90.0"
