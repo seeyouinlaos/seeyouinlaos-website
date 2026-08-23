@@ -9,6 +9,20 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500&amp;display=swap" rel="stylesheet"/>
+<script>
+/* Synchronous invitation-state boot: decided before first paint. Loading and
+   open share one stable visual (the invitation itself); closed never paints. */
+(function () {
+  var state = 'loading';
+  try {
+    var t = (new URLSearchParams(location.search).get('invite') || '').trim().toLowerCase();
+    var opened = null;
+    try { opened = localStorage.getItem('siyl.invitation.seen.' + (t || 'first')); } catch (e) { /* private mode */ }
+    if (opened) state = 'closed';
+  } catch (e) { /* keep loading */ }
+  document.documentElement.setAttribute('data-inv', state);
+})();
+</script>
 <style>
 @font-face { font-family: 'PP Editorial Old'; src: url('../assets/fonts/PPEditorialOld-Regular.otf') format('opentype'); font-weight: 400; font-display: swap; }
 @font-face { font-family: 'PP Editorial Old'; src: url('../assets/fonts/PPEditorialOld-Ultralight.otf') format('opentype'); font-weight: 200; font-display: swap; }
@@ -183,6 +197,7 @@ button.btn.sm { padding: 10px 16px; font-size: 11px; min-height: 40px; }
 
 /* invitation overlay (§7) */
 #invitation { position: fixed; inset: 0; z-index: 100; display: grid; grid-template-columns: 1.1fr 1fr; background: var(--ink-s); }
+html[data-inv="closed"] #invitation { display: none; pointer-events: none; visibility: hidden; }
 #invitation .inv-photo { background: url('../assets/images/souphattra/heritage-courtyard-aerial.jpg') center/cover no-repeat; }
 #invitation .inv-side { display: grid; place-items: center; padding: 6vmin; background: rgba(33,31,28,.96); }
 .inv-card { background: var(--ivory); color: var(--ink); max-width: 460px; width: 100%; padding: clamp(34px, 5vmin, 60px); text-align: center; box-shadow: 0 30px 80px rgba(0,0,0,.45); background-image: radial-gradient(rgba(168,131,125,.06) 1px, transparent 1px); background-size: 5px 5px; }
@@ -192,13 +207,11 @@ button.btn.sm { padding: 10px 16px; font-size: 11px; min-height: 40px; }
 .inv-card .inv-meta { margin: 22px 0; font-size: 12px; letter-spacing: .2em; text-transform: uppercase; color: var(--rose); line-height: 2.1; }
 .inv-card .inv-note { font-size: 13.5px; max-width: 34ch; margin: 0 auto; }
 .inv-card .inv-cta { margin-top: 28px; }
-#invitation.closing { animation: invout .65s ease forwards; }
-@keyframes invout { to { opacity: 0; transform: translateY(-3vh); } }
 body.inv-lock { overflow: hidden; }
 @media (max-width: 860px) { #invitation { grid-template-columns: 1fr; grid-template-rows: 38vh 1fr; } }
 
 @media (prefers-reduced-motion: reduce) {
-  .step.active, .party-tile, .party-tie, #invitation.closing { animation: none !important; }
+  .step.active, .party-tile, .party-tie { animation: none !important; }
   .party-tile { opacity: 1; transform: none; }
   .party-tie { transform: none; }
 }
@@ -208,7 +221,7 @@ body.inv-lock { overflow: hidden; }
 <div id="live" class="sr-only" role="status" aria-live="polite"></div>
 
 <!-- OPENING INVITATION (§7) -->
-<div id="invitation" hidden role="dialog" aria-modal="true" aria-label="Your invitation">
+<div id="invitation" role="dialog" aria-modal="true" aria-label="Your invitation">
 <div class="inv-photo" role="img" aria-label="The courtyard pool of Souphattra Heritage Vientiane from above"></div>
 <div class="inv-side">
 <div class="inv-card">

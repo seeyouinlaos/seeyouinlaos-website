@@ -281,3 +281,21 @@ export function buildNotification(reg, ctx) {
   out.push(L('SUBMITTED:', reg.registration_submitted_at));
   return out.join('\n');
 }
+
+/* ============ invitation overlay state machine (pure, testable) ============
+ * States: 'loading' | 'open' | 'closed'. ONE reducer decides every
+ * transition. Hard invariant: once the user has opened the invitation
+ * (userOpened), 'open' is forbidden unless the transition is an explicit
+ * user action (force), e.g. the "Reopen your invitation" link.
+ */
+export function nextInvitationState(current, action) {
+  const { to, userOpened = false, force = false, version, currentVersion } = action;
+  if (version !== undefined && currentVersion !== undefined && version < currentVersion) {
+    return { state: current.state, blocked: 'STALE_ASYNC_CALLBACK' };
+  }
+  if (to === 'open' && userOpened && !force) {
+    return { state: current.state, blocked: 'BLOCKED_INVALID_TRANSITION' };
+  }
+  if (to === current.state) return { state: current.state, blocked: null };
+  return { state: to, blocked: null };
+}

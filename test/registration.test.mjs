@@ -4,7 +4,7 @@ import {
   contributionPerGuest, partyCharges, partyTotal,
   createInventory, remaining, availabilityLabel, requestAllocation,
   holdAllocation, confirmAllocation, releaseAllocation, ALLOC,
-  validateRegistration, buildNotification,
+  validateRegistration, buildNotification, nextInvitationState,
 } from '../register/logic.mjs';
 import { ACCOMMODATIONS, TRAIN, DEMO_MODE } from '../register/data.mjs';
 import { tokenId, encryptInvitation, lookupByToken } from '../register/crypto.mjs';
@@ -308,4 +308,43 @@ test('shipped invitations.enc.json contains no plaintext guest data', async () =
   for (const r of records) {
     assert.deepEqual(Object.keys(r).sort(), ['ct', 'id', 'iv', 'salt']);
   }
+});
+
+/* ---------------- invitation overlay state machine ---------------- */
+
+test('user-opened invitation can never transition back to OPEN', () => {
+  const cur = { state: 'closed' };
+  const r = nextInvitationState(cur, { to: 'open', userOpened: true });
+  assert.equal(r.state, 'closed');
+  assert.equal(r.blocked, 'BLOCKED_INVALID_TRANSITION');
+});
+
+test('stale async callbacks cannot reopen the overlay', () => {
+  const cur = { state: 'closed' };
+  // callback created at version 0, but a user click already advanced to 2
+  const r = nextInvitationState(cur, { to: 'open', userOpened: false, version: 0, currentVersion: 2 });
+  assert.equal(r.state, 'closed');
+  assert.equal(r.blocked, 'STALE_ASYNC_CALLBACK');
+});
+
+test('explicit reopen link (force) is the only allowed reopen after user action', () => {
+  const cur = { state: 'closed' };
+  const r = nextInvitationState(cur, { to: 'open', userOpened: true, force: true });
+  assert.equal(r.state, 'open');
+  assert.equal(r.blocked, null);
+});
+
+test('normal init transitions work: loading -> open, loading -> closed', () => {
+  assert.equal(nextInvitationState({ state: 'loading' }, { to: 'open' }).state, 'open');
+  assert.equal(nextInvitationState({ state: 'loading' }, { to: 'closed' }).state, 'closed');
+});
+
+test('storage-unavailable session: userOpened flag alone keeps CLOSED', () => {
+  // simulates private mode where nothing persists — the in-memory flag suffices
+  let cur = { state: 'open' };
+  cur = { state: nextInvitationState(cur, { to: 'closed', userOpened: true }).state };
+  assert.equal(cur.state, 'closed');
+  const again = nextInvitationState(cur, { to: 'open', userOpened: true });
+  assert.equal(again.state, 'closed');
+  assert.ok(again.blocked);
 });

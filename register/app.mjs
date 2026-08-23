@@ -12,7 +12,7 @@ import {
 import {
   contributionPerGuest, partyCharges, partyTotal, money,
   createInventory, remaining, availabilityLabel, requestAllocation,
-  validateRegistration, buildNotification,
+  validateRegistration, buildNotification, nextInvitationState,
 } from './logic.mjs';
 
 /* ---------------- persistent state ---------------- */
@@ -92,40 +92,70 @@ function renderStep(i) {
   if (name === 'send') renderSend();
 }
 
-/* ---------------- invitation overlay (§7) ----------------
- * ONE authoritative open/close transition. The opened-state key is STABLE
- * from the first millisecond: it prefers the URL token (known synchronously
- * at load), then the adopted invitation token — so a click before the async
- * lookup finishes persists under the SAME key every later check reads.
- * An in-memory session flag guarantees the invitation never reopens within
- * the running session even when storage is unavailable (private mode).
- * openInvitation() is called from exactly two places: init() (once) and the
- * explicit "Reopen your invitation" link. Nothing else may call it. */
+/* ---------------- invitation overlay state machine (§7) ----------------
+ * ONE authoritative source of truth: INV.state ('loading'|'open'|'closed'),
+ * mutated ONLY by setInvitationState(). The pre-paint boot script decided the
+ * initial html[data-inv]; this module adopts it. Hard invariant: after the
+ * guest clicks OPEN YOUR INVITATION (INV.userOpened) no lifecycle path may
+ * reopen it — only the explicit reopen link (force). Every attempted stale or
+ * invalid transition is ignored (and logged with ?debug=inv). */
 const overlay = document.getElementById('invitation');
 const urlToken = (new URLSearchParams(location.search).get('invite') || '').trim().toLowerCase();
-let invitationOpenedThisSession = false;
+const INV_DEBUG = new URLSearchParams(location.search).has('debug');
+const INV = {
+  state: document.documentElement.getAttribute('data-inv') || 'loading',
+  version: 0,
+  userOpened: false,
+  initialized: false,
+};
 function openedKey() { return SEEN_KEY + (urlToken || (S.invitation ? S.invitation.token : 'first')); }
-function invitationOpened() {
-  if (invitationOpenedThisSession) return true;
-  try { return !!localStorage.getItem(openedKey()); } catch (e) { return false; }
+function wasOpenedPersisted() { try { return !!localStorage.getItem(openedKey()); } catch (e) { return false; } }
+function persistOpened() { try { localStorage.setItem(openedKey(), '1'); } catch (e) { /* private mode — INV.userOpened carries it in-session */ } }
+function invLog(msg, caller) {
+  if (INV_DEBUG) console.log('[INVITATION_STATE] ' + msg + ' caller=' + caller +
+    ' initialized=' + INV.initialized + ' v=' + INV.version + ' userOpened=' + INV.userOpened);
 }
-function markInvitationOpened() {
-  invitationOpenedThisSession = true;
-  try { localStorage.setItem(openedKey(), '1'); } catch (e) { /* private mode — session flag carries it */ }
+/** The ONLY function allowed to change invitation visibility. */
+function setInvitationState(to, caller, opts = {}) {
+  const r = nextInvitationState(INV, {
+    to, userOpened: INV.userOpened, force: !!opts.force,
+    version: opts.version, currentVersion: INV.version,
+  });
+  if (r.blocked) { invLog(r.blocked + ' (' + INV.state + ' -x-> ' + to + ')', caller); return; }
+  if (r.state === INV.state) return;
+  invLog(INV.state + ' -> ' + r.state, caller);
+  INV.state = r.state;
+  INV.version++;
+  document.documentElement.setAttribute('data-inv', r.state);
+  if (r.state === 'closed') {
+    overlay.setAttribute('aria-hidden', 'true');
+    overlay.setAttribute('inert', '');
+    document.body.classList.remove('inv-lock');
+  } else {
+    overlay.removeAttribute('aria-hidden');
+    overlay.removeAttribute('inert');
+    document.body.classList.add('inv-lock');
+    if (r.state === 'open') { const c = overlay.querySelector('.inv-cta'); if (c) c.focus(); }
+  }
 }
-function openInvitation() {
-  overlay.hidden = false; document.body.classList.add('inv-lock');
-  overlay.querySelector('.inv-cta').focus();
-}
-function closeInvitation() {
-  markInvitationOpened();
-  document.body.classList.remove('inv-lock');
-  if (reduced) { overlay.hidden = true; return; }
-  overlay.classList.add('closing');
-  setTimeout(() => { overlay.hidden = true; overlay.classList.remove('closing'); }, 650);
-}
-document.querySelector('.inv-cta').addEventListener('click', closeInvitation);
-document.getElementById('reopen-invitation').addEventListener('click', (e) => { e.preventDefault(); openInvitation(); });
+// adopt the pre-paint state's a11y attributes
+if (INV.state === 'closed') { overlay.setAttribute('aria-hidden', 'true'); overlay.setAttribute('inert', ''); }
+else { document.body.classList.add('inv-lock'); }
+
+document.querySelector('.inv-cta').addEventListener('click', () => {
+  INV.userOpened = true;             // invariant flag FIRST — wins over any pending init
+  persistOpened();
+  setInvitationState('closed', 'cta-click');
+  const h = document.querySelector('.step.active h1, .step.active h2');
+  if (h) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); }
+});
+document.getElementById('reopen-invitation').addEventListener('click', (e) => {
+  e.preventDefault();
+  setInvitationState('open', 'reopen-link', { force: true }); // explicit user action only
+});
+// lifecycle restores may only ever CLOSE, never open
+addEventListener('pageshow', () => { if (INV.userOpened || wasOpenedPersisted()) setInvitationState('closed', 'pageshow'); });
+addEventListener('visibilitychange', () => { if (!document.hidden && (INV.userOpened || wasOpenedPersisted())) setInvitationState('closed', 'visibilitychange'); });
 
 /* ---------------- step 1 · find your invitation (§9) ---------------- */
 const findInput = document.getElementById('find-input');
@@ -695,6 +725,8 @@ function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => (
  * step exactly once. No later callback reopens the invitation or reassigns
  * the current step. */
 async function init() {
+  if (INV.initialized) { invLog('init re-entry blocked', 'init'); return; }
+  const initVersion = INV.version;
   if (urlToken) {
     try {
       const inv = await lookupInvitation(urlToken);
@@ -709,6 +741,13 @@ async function init() {
     show(0, false);
   }
   renderSummary();
-  if (!invitationOpened() && !S.submitted) openInvitation();
+  INV.initialized = true;
+  // exactly ONE final initial state; a click during loading already set
+  // userOpened and the reducer blocks this open (stale/invalid).
+  if (INV.userOpened || wasOpenedPersisted() || S.submitted) {
+    setInvitationState('closed', 'init', { version: initVersion });
+  } else {
+    setInvitationState('open', 'init', { version: initVersion });
+  }
 }
 init();
