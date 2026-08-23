@@ -23,7 +23,7 @@
  *                          secure form endpoint (Gate 4, see docs/RELEASE-GATES.md).
  */
 export const PUBLICATION = {
-  rates: 'HOLD',
+  rates: 'APPROVED',
   inventoryDisplay: 'REQUEST',
   submit: 'endpoint',
   submitUrl: '/api/register',
@@ -71,7 +71,7 @@ export const EVENTS = [
 export const ACCOMMODATIONS = [
   {
     id: 'villa', name: 'Vientiane Urban Cozy Villa 2 (4BR)',
-    kind: 'villa',
+    kind: 'villa', property: 'Vientiane Urban Cozy Villa 2 (4BR)',
     stay: '25 February – 1 March 2027', nights: 4,
     contributionPerGuest: 0,
     capacityTotal: 4, capacityUnit: 'Party allocation', selectionScope: 'PARTY',
@@ -80,7 +80,7 @@ export const ACCOMMODATIONS = [
     image: null,
   },
   {
-    id: 'heritage', name: 'Heritage', kind: 'room',
+    id: 'heritage', name: 'Heritage', kind: 'room', property: 'Souphattra Vientiane Hotel',
     stay: '27 February – 1 March 2027', nights: 2,
     contributionPerGuest: 140.00,
     capacityTotal: 4, capacityUnit: 'Room', selectionScope: 'PARTY',
@@ -88,7 +88,7 @@ export const ACCOMMODATIONS = [
     image: null,
   },
   {
-    id: 'the-heritage', name: 'The Heritage', kind: 'room',
+    id: 'the-heritage', name: 'The Heritage', kind: 'room', property: 'Souphattra Vientiane Hotel',
     stay: '27 February – 1 March 2027', nights: 2,
     contributionPerGuest: 150.00,
     capacityTotal: 13, capacityUnit: 'Room', selectionScope: 'PARTY',
@@ -96,7 +96,7 @@ export const ACCOMMODATIONS = [
     image: null,
   },
   {
-    id: 'heritage-grand-premier', name: 'Heritage Grand Premier', kind: 'room',
+    id: 'heritage-grand-premier', name: 'Heritage Grand Premier', kind: 'room', property: 'Souphattra Vientiane Hotel',
     stay: '27 February – 1 March 2027', nights: 2,
     contributionPerGuest: 162.50,
     capacityTotal: 3, capacityUnit: 'Room', selectionScope: 'PARTY',
@@ -104,7 +104,7 @@ export const ACCOMMODATIONS = [
     image: null,
   },
   {
-    id: 'noble-courtyard', name: 'Noble Courtyard', kind: 'room',
+    id: 'noble-courtyard', name: 'Noble Courtyard', kind: 'room', property: 'Souphattra Vientiane Hotel',
     stay: '27 February – 1 March 2027', nights: 2,
     contributionPerGuest: 225.00,
     capacityTotal: 1, capacityUnit: 'Room', selectionScope: 'PARTY',
@@ -112,7 +112,7 @@ export const ACCOMMODATIONS = [
     image: null,
   },
   {
-    id: 'grand-majestic-suite', name: 'Grand Majestic Suite', kind: 'room',
+    id: 'grand-majestic-suite', name: 'Grand Majestic Suite', kind: 'room', property: 'Souphattra Vientiane Hotel',
     stay: '27 February – 1 March 2027', nights: 2,
     contributionPerGuest: 235.00,
     capacityTotal: 2, capacityUnit: 'Room', selectionScope: 'PARTY',
@@ -120,7 +120,7 @@ export const ACCOMMODATIONS = [
     image: null,
   },
   {
-    id: 'souphattra-majestic-suite', name: 'Souphattra Majestic Suite', kind: 'room',
+    id: 'souphattra-majestic-suite', name: 'Souphattra Majestic Suite', kind: 'room', property: 'Souphattra Vientiane Hotel',
     stay: '27 February – 1 March 2027', nights: 2,
     contributionPerGuest: 275.00,
     capacityTotal: 1, capacityUnit: 'Room', selectionScope: 'PARTY',

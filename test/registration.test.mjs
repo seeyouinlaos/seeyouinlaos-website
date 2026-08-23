@@ -261,8 +261,13 @@ test('notification carries party, per-guest data, charges, statuses', () => {
   assert.ok(text.includes('Nong Khai Arrival: Nong Khai Railway Station'));
   assert.ok(text.includes('Special Requirement: Light sleeper, lower deck please'));
   assert.ok(text.includes('Contribution: USD 150'));
-  assert.ok(text.includes('Party Total: USD 300'));
-  assert.ok(text.includes('REQUESTED — subject to Guest Relations review'));
+  assert.ok(text.includes('Property: Souphattra Vientiane Hotel'));
+  assert.ok(text.includes('Room Category: The Heritage'));
+  assert.ok(text.includes('Guests: Amara Demo; Theo Demo'));
+  assert.ok(text.includes('Guest Contribution: USD 150 each'));
+  assert.ok(text.includes('Party Contribution: USD 300'));
+  assert.ok(text.includes('Second Night: Complimentary / Hosted by Haruthai & Suthep'));
+  assert.ok(text.includes('Status: REQUESTED / UNDER REVIEW'));
   // privacy: no internal figures
   assert.ok(!/7,?800|21,?600|286\.77|USD 170\b|C00[0-7]/.test(text));
 });
@@ -347,4 +352,24 @@ test('storage-unavailable session: userOpened flag alone keeps CLOSED', () => {
   const again = nextInvitationState(cur, { to: 'open', userOpened: true });
   assert.equal(again.state, 'closed');
   assert.ok(again.blocked);
+});
+
+
+/* ---------------- approved-contribution publication matrix ---------------- */
+
+test('rates are APPROVED for publication (Gate 1 closed by owner)', async () => {
+  const data = (await import('node:fs')).readFileSync(new URL('../register/data.mjs', import.meta.url), 'utf8');
+  assert.ok(/rates:\s*'APPROVED'/.test(data));
+});
+
+test('solo and couple party contributions across every category', () => {
+  const cases = [
+    ['villa', 0, 0], ['heritage', 140, 280], ['the-heritage', 150, 300],
+    ['heritage-grand-premier', 162.5, 325], ['noble-courtyard', 225, 450],
+    ['grand-majestic-suite', 235, 470], ['souphattra-majestic-suite', 275, 550],
+  ];
+  for (const [id, solo, couple] of cases) {
+    assert.equal(partyTotal(byId(id), ['g1']), solo, id + ' solo');
+    assert.equal(partyTotal(byId(id), ['g1', 'g2']), couple, id + ' couple');
+  }
 });

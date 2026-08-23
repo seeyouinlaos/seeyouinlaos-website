@@ -236,13 +236,23 @@ export function buildNotification(reg, ctx) {
     out.push(L('  Contribution:', charge ? money(charge.amount) : (occ.length ? 'not occupying' : '-')));
     out.push('');
   }
-  out.push('STAY REQUEST');
-  out.push(L('Accommodation:', acc ? acc.name : 'None — staying independently'));
-  if (acc) {
+  out.push('ACCOMMODATION');
+  if (!acc) {
+    out.push('Room Requested: NO — staying independently');
+    out.push('Party Contribution: USD 0');
+  } else {
+    out.push(L('Property:', acc.property || acc.name));
+    out.push(L('Room Category:', acc.name));
     out.push(L('Inventory Requested:', '1 ' + acc.capacityUnit));
-    out.push(L('Occupants:', occ.length));
-    out.push(L('Party Total:', money(partyTotal(acc, occ))));
-    out.push('Status: REQUESTED — subject to Guest Relations review');
+    out.push(L('Guests:', occ.map((id) => {
+      const meta = invitation.guests.find((x) => x.guestId === id) || {};
+      return meta.fullName || id;
+    }).join('; ')));
+    out.push(L('Guest Contribution:', money(contributionPerGuest(acc)) + ' each'));
+    out.push(L('Party Contribution:', money(partyTotal(acc, occ))));
+    out.push(L('Stay:', acc.stay));
+    out.push('Second Night: ' + (acc.kind === 'villa' ? 'Fully hosted by Haruthai & Suthep' : 'Complimentary / Hosted by Haruthai & Suthep'));
+    out.push('Status: REQUESTED / UNDER REVIEW');
   }
   out.push('');
   out.push('OVERNIGHT TRAIN');

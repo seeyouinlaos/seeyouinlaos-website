@@ -332,6 +332,7 @@ function renderStay() {
       '<div class="acc-head"><h3>' + esc(a.name) + '</h3>' +
       '<div class="acc-price"><span class="amt">' + amountShown + '</span><span class="per">per guest · complete stay</span></div></div>' +
       '<div class="acc-meta">' + esc(a.stay) + ' · ' + a.nights + ' nights</div>' +
+      (a.kind === 'room' ? '<div class="acc-hosted">Second night complimentary · hosted by Haruthai &amp; Suthep</div>' : '') +
       '<p class="acc-blurb">' + esc(a.blurb) + '</p>' +
       '<div class="acc-avail' + (full ? ' zero' : '') + '" role="status">' + esc(guestAvailability(res)) + '</div>' +
       '<div class="acc-actions">' +
@@ -346,6 +347,7 @@ function renderStay() {
     '<div class="acc-grid">' + cards + '</div>' +
     '<div class="field" style="margin-top:30px"><label>Bed preference</label><select id="stay-bed"><option' + sel('') + '>No preference</option><option' + sel('One large bed') + '>One large bed</option><option' + sel('Two beds') + '>Two beds</option></select></div>' +
     '<div class="field"><label for="stay-req">Special request</label><textarea id="stay-req">' + esc(S.stay.request) + '</textarea></div>' +
+    '<div id="stay-selected"></div>' +
     '<div class="mod" style="border-bottom:1px solid var(--line)"><div class="mod-head"><div><h3>No room needed</h3><p>Staying elsewhere in Vientiane? Skip the stay request.</p></div>' +
     '<div class="join"><label><input type="radio" name="no-room" value="yes"' + (S.stay.accommodationId === 'none' ? ' checked' : '') + '/><span class="no">We’ll stay elsewhere</span></label></div></div></div>' +
     '<p class="note" style="margin-top:18px">' + esc(COPY.requestNote) + ' ' + esc(COPY.payment) + '</p>';
@@ -353,10 +355,14 @@ function renderStay() {
   box.querySelectorAll('[data-select]').forEach((b) => b.addEventListener('click', () => {
     S.stay.accommodationId = b.getAttribute('data-select');
     S.stay.rooms = 1;
+    S.stay.waitlist = false;
     S.stay.occupantGuestIds = S.guests.filter((g) => g.attending !== false).map((g) => g.guestId);
     saveDraft(); renderStay(); renderSummary();
-    announce('Requested ' + b.closest('.acc-card').querySelector('h3').textContent + ' for your Party. ' + COPY.requestNote);
+    const acc = currentAcc();
+    const occ = S.stay.occupantGuestIds;
+    announce('Requested ' + acc.name + ' for your Party. ' + occ.length + ' guest' + (occ.length > 1 ? 's' : '') + ', ' + money(contributionPerGuest(acc)) + ' per guest, party contribution ' + money(partyTotal(acc, occ)) + '. ' + COPY.requestNote);
   }));
+  renderStaySelected();
   box.querySelectorAll('[data-waitlist]').forEach((b) => b.addEventListener('click', () => {
     S.stay.accommodationId = b.getAttribute('data-waitlist'); S.stay.waitlist = true;
     saveDraft(); renderStay(); renderSummary();
@@ -367,6 +373,24 @@ function renderStay() {
   });
   const bed = box.querySelector('#stay-bed'); bed.addEventListener('change', () => { S.stay.bed = bed.value === 'No preference' ? '' : bed.value; saveDraft(); });
   box.querySelector('#stay-req').addEventListener('input', (e) => { S.stay.request = e.target.value; saveDraft(); });
+}
+
+/** Selected-room financial confirmation (one calculation path: logic.mjs). */
+function renderStaySelected() {
+  const el = document.getElementById('stay-selected');
+  if (!el) return;
+  const acc = currentAcc();
+  if (!acc) { el.innerHTML = ''; return; }
+  const occ = S.stay.occupantGuestIds;
+  const per = contributionPerGuest(acc);
+  el.innerHTML =
+    '<div class="stay-sum" style="margin-top:30px" aria-live="polite">' +
+    '<div class="row"><span class="l serif-it">Requested for your Party</span><span class="r">' + esc(acc.name) + (S.stay.waitlist ? ' · WAITLISTED' : '') + '</span></div>' +
+    '<div class="row"><span class="l">' + occ.length + ' guest' + (occ.length > 1 ? 's' : '') + '</span><span class="r">' + (per === 0 ? 'USD 0' : money(per)) + ' per guest · complete stay</span></div>' +
+    '<div class="row total"><span class="l serif-it">Your party contribution</span><span class="r">' + money(partyTotal(acc, occ)) + '</span></div>' +
+    '<div class="row"><span class="l">Second night</span><span class="r">' + (acc.kind === 'villa' ? 'Fully hosted by Haruthai &amp; Suthep' : 'Complimentary · hosted by Haruthai &amp; Suthep') + '</span></div>' +
+    '</div>' +
+    '<p class="note" style="margin-top:12px">' + esc(COPY.requestNote) + '</p>';
 }
 
 /* room detail overlay (§22) */
@@ -560,7 +584,9 @@ function renderCost() {
   const box = document.getElementById('cost-box');
   const acc = currentAcc();
   if (!acc) {
-    box.innerHTML = '<p class="lead">No stay request — no contribution. Your journey remains fully hosted where the programme includes you.</p>';
+    box.innerHTML = '<div class="stay-sum"><div class="row"><span class="l serif-it">Accommodation</span><span class="r">No room requested</span></div>' +
+      '<div class="row total"><span class="l serif-it">Total stay contribution</span><span class="r">USD 0</span></div></div>' +
+      '<p class="note" style="margin-top:14px">Your journey remains fully hosted where the programme includes you.</p>';
     return;
   }
   const occ = S.stay.occupantGuestIds;
@@ -571,7 +597,8 @@ function renderCost() {
       const g = S.guests.find((x) => x.guestId === c.guestId);
       return '<div class="row"><span class="l">' + esc(g ? g.fullName : c.guestId) + '</span><span class="r">' + (RATES_LIVE ? money(c.amount) : 'per approved guest rate — details to follow') + '</span></div>';
     }).join('') +
-    '<div class="row total"><span class="l serif-it">Party total</span><span class="r">' + (RATES_LIVE ? money(partyTotal(acc, occ)) : 'confirmed with your invoice') + '</span></div></div>' +
+    '<div class="row total"><span class="l serif-it">Total stay contribution</span><span class="r">' + money(partyTotal(acc, occ)) + '</span></div>' +
+    '<div class="row"><span class="l">Second night</span><span class="r">' + (acc.kind === 'villa' ? 'Fully hosted' : 'Complimentary · hosted by Haruthai &amp; Suthep') + '</span></div></div>' +
     '<p class="note" style="margin-top:16px">' + esc(COPY.priceNote) + ' ' + esc(COPY.hostedNight) + '</p>' +
     '<p class="note">' + esc(COPY.payment) + ' One person may settle the Party invoice; the charges above stay attributed per Guest.</p>';
 }
@@ -604,12 +631,13 @@ function renderReview() {
   ].concat(S.trainNote ? [['Note', esc(S.trainNote)]] : []) : [['Joined', 'Not joined']]);
   html += sec('Your Events', idx('events'), S.guests.map((g) => [esc(g.preferredName), esc(eventLine(g))]));
   html += sec('Your Stay', idx('stay'), acc ? [
-    ['Requested', esc(acc.name) + ' · 1 ' + esc(acc.capacityUnit.toLowerCase())],
-    ['Status', S.stay.waitlist ? 'WAITLISTED' : 'REQUESTED · under Guest Relations review'],
-    ['Contribution', RATES_LIVE ? occ.map((id) => { const g = S.guests.find((x) => x.guestId === id); return esc(g ? g.preferredName : id) + ' ' + money(contributionPerGuest(acc)); }).join(' · ') : 'Per approved guest rate — details to follow'],
-    ['Party total', RATES_LIVE ? money(partyTotal(acc, occ)) : 'Confirmed with your invoice'],
-    ['Hosted', esc(COPY.hostedNight)],
-  ] : [['Requested', 'No room — staying independently']]);
+    ['Requested', esc(acc.name) + ' · ' + esc(acc.stay)],
+    ['Status', S.stay.waitlist ? 'WAITLISTED' : 'REQUESTED · UNDER REVIEW'],
+    ['Guests', occ.length + ' · ' + money(contributionPerGuest(acc)) + ' per guest'],
+    ['Contribution', occ.map((id) => { const g = S.guests.find((x) => x.guestId === id); return esc(g ? g.preferredName : id) + ' ' + money(contributionPerGuest(acc)); }).join(' · ')],
+    ['Total', money(partyTotal(acc, occ))],
+    ['Second night', acc.kind === 'villa' ? 'Fully hosted by Haruthai & Suthep' : 'Complimentary · hosted by Haruthai & Suthep'],
+  ] : [['Requested', 'No room — staying independently'], ['Total', 'USD 0']]);
   const trv = S.arrival.shared !== false
     ? [['Together', esc([S.arrival.date, S.arrival.time, S.arrival.ref].filter(Boolean).join(' · ') || '—') + (S.arrival.pickupRequested ? ' · pickup REQUESTED' : '')]]
     : S.guests.map((g) => { const a = S.arrivalByGuest[g.guestId] || {}; return [esc(g.preferredName), esc([a.date, a.time, a.ref].filter(Boolean).join(' · ') || '—') + (a.pickupRequested ? ' · pickup REQUESTED' : '')]; });
