@@ -59,7 +59,7 @@ export const EVENTS = [
   { id: 'ceremony', label: 'Wedding Ceremony', when: 'Sunday, 28 February 2027',
     venue: 'Souphattra Heritage Vientiane', blurb: 'The vows, in front of everyone who matters.' },
   { id: 'dinner', label: 'Wedding Dinner & Reception', when: 'Sunday, 28 February 2027',
-    venue: 'Souphattra Vientiane Hotel', blurb: 'The evening of food, music and celebration.' },
+    venue: 'Souphattra Heritage Vientiane', blurb: 'Sunset cocktails beside the pool, then dinner in the courtyard garden. Food, music and celebration.' },
 ];
 
 /* ---------------- accommodation resources (§19, §20, §25) ----------------
