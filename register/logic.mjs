@@ -23,6 +23,20 @@ export function partyTotal(accommodation, guestIds) {
   return partyCharges(accommodation, guestIds).reduce((s, c) => s + c.amount, 0);
 }
 
+/** Train contribution for the party, or null while no public per-guest
+ *  amount is approved (the UI then shows "to be confirmed"). */
+export function trainContribution(train, riderCount) {
+  const per = train && typeof train.contributionPerGuest === 'number' ? train.contributionPerGuest : null;
+  return per === null ? null : per * riderCount;
+}
+
+/** Total journey contribution: stay + train (train only once approved). */
+export function journeyTotal(accommodation, guestIds, train, riderCount) {
+  const stay = accommodation ? partyTotal(accommodation, guestIds) : 0;
+  const t = trainContribution(train, riderCount);
+  return stay + (t || 0);
+}
+
 export function money(n) {
   return 'USD ' + (Number.isInteger(n) ? String(n) : n.toFixed(2));
 }
@@ -176,7 +190,11 @@ export function validateRegistration(reg, ctx) {
   const trainGuests = (reg.guests || []).filter((g) => g.journey && g.journey.train).length;
   if (trainGuests > trainCapacity) errors.push('train selection exceeds seat capacity');
 
-  // stay: party-scope, one room; charges = per-guest, sum matches
+  // stay: required (a Party without a stay is handled personally by Guest
+  // Relations, never as a digital flow); party-scope, one room
+  if (!(reg.stay && reg.stay.accommodationId)) {
+    errors.push('please select a stay for your Party — Guest Relations will help personally if you need something different');
+  }
   if (reg.stay && reg.stay.accommodationId) {
     const acc = accommodations.find((a) => a.id === reg.stay.accommodationId);
     if (!acc) errors.push('unknown accommodation: ' + reg.stay.accommodationId);
@@ -238,8 +256,7 @@ export function buildNotification(reg, ctx) {
   }
   out.push('ACCOMMODATION');
   if (!acc) {
-    out.push('Room Requested: NO — staying independently');
-    out.push('Party Contribution: USD 0');
+    out.push('Room Requested: NONE ON RECORD — to be handled personally by Guest Relations');
   } else {
     out.push(L('Property:', acc.property || acc.name));
     out.push(L('Room Category:', acc.name));

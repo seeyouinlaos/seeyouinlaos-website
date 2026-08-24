@@ -80,15 +80,15 @@ export const ACCOMMODATIONS = [
     image: null,
   },
   {
-    id: 'heritage', name: 'Heritage', kind: 'room', property: 'Souphattra Vientiane Hotel',
+    id: 'heritage', name: 'Heritage', kind: 'room', property: 'Souphattra Heritage Vientiane',
     stay: '27 February – 1 March 2027', nights: 2,
     contributionPerGuest: 140.00,
     capacityTotal: 4, capacityUnit: 'Room', selectionScope: 'PARTY',
-    blurb: 'A classic room at Souphattra Vientiane Hotel.',
+    blurb: 'A classic room at Souphattra Heritage Vientiane.',
     image: null,
   },
   {
-    id: 'the-heritage', name: 'The Heritage', kind: 'room', property: 'Souphattra Vientiane Hotel',
+    id: 'the-heritage', name: 'The Heritage', kind: 'room', property: 'Souphattra Heritage Vientiane',
     stay: '27 February – 1 March 2027', nights: 2,
     contributionPerGuest: 150.00,
     capacityTotal: 13, capacityUnit: 'Room', selectionScope: 'PARTY',
@@ -96,7 +96,7 @@ export const ACCOMMODATIONS = [
     image: null,
   },
   {
-    id: 'heritage-grand-premier', name: 'Heritage Grand Premier', kind: 'room', property: 'Souphattra Vientiane Hotel',
+    id: 'heritage-grand-premier', name: 'Heritage Grand Premier', kind: 'room', property: 'Souphattra Heritage Vientiane',
     stay: '27 February – 1 March 2027', nights: 2,
     contributionPerGuest: 162.50,
     capacityTotal: 3, capacityUnit: 'Room', selectionScope: 'PARTY',
@@ -104,7 +104,7 @@ export const ACCOMMODATIONS = [
     image: null,
   },
   {
-    id: 'noble-courtyard', name: 'Noble Courtyard', kind: 'room', property: 'Souphattra Vientiane Hotel',
+    id: 'noble-courtyard', name: 'Noble Courtyard', kind: 'room', property: 'Souphattra Heritage Vientiane',
     stay: '27 February – 1 March 2027', nights: 2,
     contributionPerGuest: 225.00,
     capacityTotal: 1, capacityUnit: 'Room', selectionScope: 'PARTY',
@@ -112,7 +112,7 @@ export const ACCOMMODATIONS = [
     image: null,
   },
   {
-    id: 'grand-majestic-suite', name: 'Grand Majestic Suite', kind: 'room', property: 'Souphattra Vientiane Hotel',
+    id: 'grand-majestic-suite', name: 'Grand Majestic Suite', kind: 'room', property: 'Souphattra Heritage Vientiane',
     stay: '27 February – 1 March 2027', nights: 2,
     contributionPerGuest: 235.00,
     capacityTotal: 2, capacityUnit: 'Room', selectionScope: 'PARTY',
@@ -120,7 +120,7 @@ export const ACCOMMODATIONS = [
     image: null,
   },
   {
-    id: 'souphattra-majestic-suite', name: 'Souphattra Majestic Suite', kind: 'room', property: 'Souphattra Vientiane Hotel',
+    id: 'souphattra-majestic-suite', name: 'Souphattra Majestic Suite', kind: 'room', property: 'Souphattra Heritage Vientiane',
     stay: '27 February – 1 March 2027', nights: 2,
     contributionPerGuest: 275.00,
     capacityTotal: 1, capacityUnit: 'Room', selectionScope: 'PARTY',
@@ -138,6 +138,10 @@ export const BERTH_PREFS = ['No preference', 'Sleeper berth · lower', 'Sleeper 
 export const TRAIN = {
   id: 'train', name: 'Overnight train · Bangkok → Nong Khai',
   capacityTotal: 8, capacityUnit: 'Guest seat', selectionScope: 'GUEST',
+  /* Approved public per-guest contribution. null = not yet approved for
+   * publication; the UI shows "to be confirmed" and excludes it from totals.
+   * Never derive this from internal procurement rates. */
+  contributionPerGuest: null,
 };
 
 /* ---------------- package (§23) ---------------- */
@@ -172,6 +176,7 @@ export const COPY = {
   hostedNight: 'Your second hotel night is hosted by Haruthai & Suthep.',
   payment: 'No deposit is required. After Guest Relations confirms your arrangements, you will receive an invoice with bank transfer or PayPal instructions. Payment is due within seven days.',
   requestNote: 'This is a registration request. Guest Relations will confirm your arrangements separately.',
+  sharedHome: 'To make this journey feel truly together, we have created a shared stay at Souphattra Heritage Vientiane: our closest family and friends gather in one place throughout the celebration.',
 };
 
 /* ---------------- Guest List — PRODUCTION LOOKUP (token-only) -------------

@@ -184,6 +184,27 @@ body.pv-lock { overflow: hidden; }
 .confirm-row { display: grid; grid-template-columns: 24px 1fr; gap: 12px; margin-top: 26px; font-size: 14px; align-items: start; cursor: pointer; }
 .confirm-row input { width: 18px; height: 18px; margin-top: 3px; accent-color: var(--cherry); }
 
+/* private member navigation (visible once the invitation is verified) */
+#privnav { display: flex; gap: 4px 20px; flex-wrap: wrap; align-items: baseline; padding: 18px 6vw 0; font-size: 11px; letter-spacing: .18em; text-transform: uppercase; }
+#privnav button { background: none; border: none; font: inherit; color: var(--rose); cursor: pointer; padding: 6px 0; border-bottom: 1px solid transparent; letter-spacing: inherit; text-transform: inherit; min-height: 32px; }
+#privnav button:hover { color: var(--cherry); }
+#privnav button[aria-current="true"] { color: var(--cherry); border-bottom-color: var(--cherry); }
+#privnav .pn-exit { margin-left: auto; display: flex; gap: 18px; }
+#privnav .pn-exit button { color: var(--rose); opacity: .85; }
+
+/* MY JOURNEY dashboard */
+.home-hello { font-size: 13px; letter-spacing: .06em; margin-bottom: 6px; color: var(--rose); }
+.home-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 34px; }
+@media (max-width: 680px) { .home-grid { grid-template-columns: 1fr; } }
+.home-card { text-align: left; font: inherit; border: 1px solid var(--line); background: rgba(255,255,255,.35); padding: 20px 24px; cursor: pointer; transition: border-color .3s; }
+.home-card:hover { border-color: var(--cherry); }
+.home-card .hc-label { font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: var(--rose); margin-bottom: 8px; }
+.home-card .hc-main { font-family: 'PP Editorial Old', serif; font-size: 19px; line-height: 1.25; }
+.home-card .hc-sub { font-size: 12.5px; color: var(--rose); margin-top: 6px; }
+.home-card .hc-status { display: inline-block; margin-top: 10px; font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--cherry); }
+.home-next { border: 1px solid var(--line); border-left: 2px solid var(--cherry); padding: 18px 24px; margin-top: 26px; font-size: 14.5px; }
+.home-next .label { margin-bottom: 6px; }
+
 /* nav + summary rail */
 .stepnav { display: flex; justify-content: space-between; align-items: center; margin-top: 44px; gap: 16px; }
 button.btn { font: inherit; cursor: pointer; letter-spacing: .18em; text-transform: uppercase; font-size: 12px; padding: 15px 30px; border: 1px solid var(--ink-s); background: var(--ink-s); color: var(--ivory); transition: background .3s, border-color .3s; min-height: 48px; }
@@ -243,6 +264,8 @@ body.inv-lock { overflow: hidden; }
 </nav>
 </header>
 
+<nav id="privnav" hidden aria-label="Your private journey"></nav>
+
 <main class="wrap">
 <div class="progress" id="progress" aria-hidden="true"></div>
 
@@ -264,6 +287,13 @@ body.inv-lock { overflow: hidden; }
 <p class="err" id="find-err"></p>
 <p class="note" style="margin-top:20px">Lost your code? Write to <strong>guest.relation.seeyouinlaos@gmail.com</strong> or LINE <strong>seeyouinlaos</strong> and Guest Relations will help right away. Your invitation details are never published on this page.</p>
 <div class="stepnav"><button class="btn ghost" data-prev>Back</button><button class="btn" id="find-btn">Find my invitation</button></div>
+</section>
+
+<!-- MY JOURNEY · private member dashboard -->
+<section class="step" data-step="home" aria-label="My journey">
+<div class="step-eyebrow">My journey</div>
+<h2 id="home-title">Your private<br/>journey.</h2>
+<div id="home-box"></div>
 </section>
 
 <!-- 2 · party (§10) -->

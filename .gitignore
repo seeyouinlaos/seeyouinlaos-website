@@ -27,3 +27,6 @@ docs/DECISION-REGISTER.md
 docs/PUBLICATION-DATA-MATRIX.md
 docs/RELEASE-GATES.md
 docs/REVIEW-VIENTIANE-PASS.md
+
+# local dev tooling (launch config)
+.claude/

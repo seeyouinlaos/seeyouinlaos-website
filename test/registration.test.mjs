@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   contributionPerGuest, partyCharges, partyTotal,
+  trainContribution, journeyTotal,
   createInventory, remaining, availabilityLabel, requestAllocation,
   holdAllocation, confirmAllocation, releaseAllocation, ALLOC,
   validateRegistration, buildNotification, nextInvitationState,
@@ -227,6 +228,28 @@ test('stay occupants outside the Party are rejected', () => {
   assert.ok(validateRegistration(reg, ctx(inv)).some((e) => e.includes('not in Party')));
 });
 
+test('a registration without a stay is rejected (no digital no-room flow)', () => {
+  const inv = lookupInvitation('demo-amara');
+  const reg = baseReg(inv);
+  reg.stay = { accommodationId: null };
+  assert.ok(validateRegistration(reg, ctx(inv)).some((e) => e.includes('please select a stay')));
+});
+
+test('train contribution stays null until an amount is approved; journey total = stay only', () => {
+  assert.equal(TRAIN.contributionPerGuest ?? null, null);
+  assert.equal(trainContribution(TRAIN, 2), null);
+  const acc = ACCOMMODATIONS.find((a) => a.id === 'the-heritage');
+  assert.equal(journeyTotal(acc, ['g1', 'g2'], TRAIN, 2), 300);
+  assert.equal(journeyTotal(null, [], TRAIN, 2), 0);
+});
+
+test('an approved train amount flows into the journey total (single calculation path)', () => {
+  const t = { ...TRAIN, contributionPerGuest: 25 };
+  assert.equal(trainContribution(t, 2), 50);
+  const acc = ACCOMMODATIONS.find((a) => a.id === 'the-heritage');
+  assert.equal(journeyTotal(acc, ['g1', 'g2'], t, 2), 350);
+});
+
 test('a Party may request exactly one room', () => {
   const inv = lookupInvitation('demo-amara');
   const reg = baseReg(inv);
@@ -261,7 +284,7 @@ test('notification carries party, per-guest data, charges, statuses', () => {
   assert.ok(text.includes('Nong Khai Arrival: Nong Khai Railway Station'));
   assert.ok(text.includes('Special Requirement: Light sleeper, lower deck please'));
   assert.ok(text.includes('Contribution: USD 150'));
-  assert.ok(text.includes('Property: Souphattra Vientiane Hotel'));
+  assert.ok(text.includes('Property: Souphattra Heritage Vientiane'));
   assert.ok(text.includes('Room Category: The Heritage'));
   assert.ok(text.includes('Guests: Amara Demo; Theo Demo'));
   assert.ok(text.includes('Guest Contribution: USD 150 each'));

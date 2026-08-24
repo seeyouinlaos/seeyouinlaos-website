@@ -11,6 +11,7 @@ import {
 } from './data.mjs';
 import {
   contributionPerGuest, partyCharges, partyTotal, money,
+  trainContribution, journeyTotal,
   createInventory, remaining, availabilityLabel, requestAllocation,
   validateRegistration, buildNotification, nextInvitationState,
 } from './logic.mjs';
@@ -19,6 +20,12 @@ import {
 const DRAFT_KEY = 'siyl.reg.draft.v2';
 const INV_KEY = 'siyl.inv.demo.v1';
 const SEEN_KEY = 'siyl.invitation.seen.';
+const AUTH_OUT_KEY = 'siyl.auth.out';
+
+/* member session: the invitation code is the key that CREATES the private
+ * area; it is never asked again unless the guest explicitly logs out. */
+function isAuthOut() { try { return !!localStorage.getItem(AUTH_OUT_KEY); } catch (e) { return false; } }
+function setAuthOut(v) { try { if (v) localStorage.setItem(AUTH_OUT_KEY, '1'); else localStorage.removeItem(AUTH_OUT_KEY); } catch (e) { /* private mode */ } }
 
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const RATES_LIVE = PUBLICATION.rates === 'APPROVED';
@@ -75,11 +82,13 @@ function show(i, focusHeading = true) {
   if (h && focusHeading) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); }
   renderStep(cur);
   renderSummary();
+  renderPrivnav();
 }
 const idx = (name) => stepEls.findIndex((s) => s.dataset.step === name);
 
 function renderStep(i) {
   const name = stepEls[i].dataset.step;
+  if (name === 'home') renderHome();
   if (name === 'party') renderParty();
   if (name === 'journey') renderJourney();
   if (name === 'events') renderEvents();
@@ -171,9 +180,10 @@ async function doFind() {
     return;
   }
   findErr.classList.remove('show');
+  setAuthOut(false); // the code is the key: it creates the private session
   adoptInvitation(inv);
-  show(idx('party'));
-  announce('Invitation found. ' + inv.partyName + ' — you belong to this invitation together.');
+  show(idx('home'));
+  announce('Invitation found. ' + inv.partyName + ' — welcome to your private journey.');
 }
 function adoptInvitation(inv) {
   if (!S.invitation || S.invitation.invitationId !== inv.invitationId) {
@@ -193,6 +203,93 @@ function adoptInvitation(inv) {
   saveDraft();
 }
 // Deep-link resolution happens inside init() — no competing initializer.
+
+/* ---------------- MY JOURNEY · private member area ---------------- */
+const PRIVNAV = [
+  ['home', 'My Journey'], ['journey', 'My Travel'], ['stay', 'My Stay'],
+  ['events', 'My Wedding'], ['each', 'My Profile'], ['cost', 'My Contribution'],
+];
+function renderPrivnav() {
+  const nav = document.getElementById('privnav');
+  if (!nav) return;
+  if (!S.invitation || isAuthOut()) { nav.hidden = true; return; }
+  nav.hidden = false;
+  const name = stepEls[cur].dataset.step;
+  nav.innerHTML = PRIVNAV.map(([st, label]) =>
+    '<button type="button" data-nav="' + st + '"' + (name === st ? ' aria-current="true"' : '') + '>' + label + '</button>').join('') +
+    '<span class="pn-exit"><button type="button" id="save-exit">Save &amp; exit</button><button type="button" id="log-out">Log out</button></span>';
+  nav.querySelectorAll('[data-nav]').forEach((b) => b.addEventListener('click', () => show(idx(b.getAttribute('data-nav')))));
+  nav.querySelector('#save-exit').addEventListener('click', () => {
+    saveDraft();
+    location.href = '../'; // progress is saved; the personal link reopens the journey
+  });
+  nav.querySelector('#log-out').addEventListener('click', () => {
+    saveDraft(); setAuthOut(true); // journey stays saved; code or link signs back in
+    location.href = './';
+  });
+}
+
+function renderHome() {
+  const box = document.getElementById('home-box');
+  if (!S.invitation) { show(idx('find')); return; }
+  const lead = S.invitation.guests.find((g) => g.guestId === S.invitation.partyLead) || S.invitation.guests[0];
+  document.getElementById('home-title').innerHTML =
+    'Welcome' + (S._returning ? ' back' : '') + ',<br/>' + esc(lead.preferredName) + '.';
+  const acc = currentAcc();
+  const occ = acc ? S.stay.occupantGuestIds : [];
+  const riders = S.guests.filter((g) => g.journey.train);
+  const anyEvents = S.guests.some((g) => Object.values(g.events || {}).some(Boolean));
+  const detailsMissing = S.guests.filter((g) => g.attending !== false && !(g.email || g.phone)).length;
+  const tc = trainContribution(TRAIN, riders.length);
+  const total = journeyTotal(acc, occ, TRAIN, riders.length);
+  const card = (step, label, main, sub, status) =>
+    '<button type="button" class="home-card" data-jump="' + step + '">' +
+    '<div class="hc-label">' + label + '</div>' +
+    '<div class="hc-main">' + main + '</div>' +
+    (sub ? '<div class="hc-sub">' + sub + '</div>' : '') +
+    (status ? '<span class="hc-status">' + status + '</span>' : '') +
+    '</button>';
+  box.innerHTML =
+    '<p class="home-hello">' + esc(S.invitation.partyName) + ' · Vientiane · February 2027</p>' +
+    '<p class="note">' + esc(COPY.sharedHome) + '</p>' +
+    '<div class="home-grid">' +
+    card('stay', 'My Stay', acc ? esc(acc.name) : 'Choose your room',
+      acc ? (contributionPerGuest(acc) === 0 ? 'USD 0' : showAmount(contributionPerGuest(acc))) + ' per guest · complete stay' : 'Souphattra Heritage Vientiane, our shared home',
+      acc ? (S.stay.waitlist ? 'WAITLISTED' : 'REQUESTED') : 'OPEN') +
+    card('journey', 'My Travel', riders.length ? 'Overnight Sleeper Train' : 'Your way to Laos',
+      riders.length ? riders.length + ' seat' + (riders.length > 1 ? 's' : '') + (tc === null ? ' · contribution to be confirmed' : ' · ' + money(tc)) : 'Bangkok · the night train · Vientiane',
+      riders.length ? 'REQUESTED' : null) +
+    card('events', 'My Wedding', 'The wedding days',
+      'Sunday, 28 February 2027 · Souphattra Heritage · dress code to be confirmed',
+      anyEvents ? 'REGISTERED' : 'OPEN') +
+    card('each', 'My Profile', detailsMissing ? detailsMissing + ' detail' + (detailsMissing > 1 ? 's' : '') + ' still needed' : 'Personal details',
+      'Contact, dietary needs and the small preferences that shape your stay',
+      detailsMissing ? 'OPEN' : 'COMPLETE') +
+    card('cost', 'My Contribution', money(total),
+      (acc ? 'Stay ' + money(partyTotal(acc, occ)) : 'No stay selected yet') +
+      (riders.length ? ' · train ' + (tc === null ? 'to be confirmed' : money(tc)) : ''),
+      S.submitted ? 'UNDER REVIEW' : null) +
+    card('review', 'Your Journey, at a glance', S.submitted ? 'Registration received' : 'Review & send',
+      S.submitted ? 'Guest Relations is preparing your journey' : 'One quiet look over everything before it reaches Guest Relations',
+      S.submitted ? 'UNDER REVIEW' : null) +
+    '</div>' +
+    '<div class="home-next"><div class="label">' + (S.submitted ? 'Status' : 'Next step') + '</div>' +
+    (S.submitted
+      ? 'Your registration is with Guest Relations. Khun Ket and Khun Paddy personally review every detail before welcoming you to Laos. No action needed.'
+      : (!acc ? 'Choose where you wake up: your room at Souphattra Heritage Vientiane.'
+        : detailsMissing ? 'A few personal details are still open so the table can be set around you.'
+        : 'Everything is in place. Review your journey and send it to Guest Relations.')) +
+    '</div>' +
+    '<div class="stepnav"><span></span><button class="btn" id="home-cta">' +
+    (S.submitted ? 'View your journey' : 'Continue your journey') + '</button></div>';
+  box.querySelectorAll('[data-jump]').forEach((b) => b.addEventListener('click', () => show(idx(b.getAttribute('data-jump')))));
+  box.querySelector('#home-cta').addEventListener('click', () => {
+    if (S.submitted) { show(idx('review')); return; }
+    if (!acc) { show(idx('stay')); return; }
+    if (detailsMissing) { show(idx('each')); return; }
+    show(idx('review'));
+  });
+}
 
 /* ---------------- step 2 · party link (§10) ---------------- */
 function renderParty() {
@@ -343,14 +440,13 @@ function renderStay() {
       '</div></article>';
   }).join('');
   box.innerHTML =
+    '<p class="note" style="margin-bottom:22px">' + esc(COPY.sharedHome) + '</p>' +
     '<div class="price-note"><div class="label">' + esc(COPY.priceLabel) + '</div><p class="note">' + esc(COPY.priceNote) + ' ' + esc(COPY.hostedNight) + '</p></div>' +
     '<div class="acc-grid">' + cards + '</div>' +
     '<div class="field" style="margin-top:30px"><label>Bed preference</label><select id="stay-bed"><option' + sel('') + '>No preference</option><option' + sel('One large bed') + '>One large bed</option><option' + sel('Two beds') + '>Two beds</option></select></div>' +
     '<div class="field"><label for="stay-req">Special request</label><textarea id="stay-req">' + esc(S.stay.request) + '</textarea></div>' +
     '<div id="stay-selected"></div>' +
-    '<div class="mod" style="border-bottom:1px solid var(--line)"><div class="mod-head"><div><h3>No room needed</h3><p>Staying elsewhere in Vientiane? Skip the stay request.</p></div>' +
-    '<div class="join"><label><input type="radio" name="no-room" value="yes"' + (S.stay.accommodationId === 'none' ? ' checked' : '') + '/><span class="no">We’ll stay elsewhere</span></label></div></div></div>' +
-    '<p class="note" style="margin-top:18px">' + esc(COPY.requestNote) + ' ' + esc(COPY.payment) + '</p>';
+    '<p class="note" style="margin-top:18px">' + esc(COPY.requestNote) + ' ' + esc(COPY.payment) + ' If your Party needs something different, Guest Relations arranges it personally.</p>';
   function sel(v) { return S.stay.bed === v ? ' selected' : ''; }
   box.querySelectorAll('[data-select]').forEach((b) => b.addEventListener('click', () => {
     S.stay.accommodationId = b.getAttribute('data-select');
@@ -368,9 +464,6 @@ function renderStay() {
     saveDraft(); renderStay(); renderSummary();
   }));
   box.querySelectorAll('[data-view]').forEach((b) => b.addEventListener('click', () => openAccOverlay(b.getAttribute('data-view'))));
-  box.querySelector('input[name="no-room"]').addEventListener('change', () => {
-    S.stay.accommodationId = 'none'; S.stay.occupantGuestIds = []; saveDraft(); renderStay(); renderSummary();
-  });
   const bed = box.querySelector('#stay-bed'); bed.addEventListener('change', () => { S.stay.bed = bed.value === 'No preference' ? '' : bed.value; saveDraft(); });
   box.querySelector('#stay-req').addEventListener('input', (e) => { S.stay.request = e.target.value; saveDraft(); });
 }
@@ -402,7 +495,7 @@ function openAccOverlay(id) {
   accTrigger = document.activeElement;
   const per = contributionPerGuest(a);
   accOverlay.querySelector('.pv-body').innerHTML =
-    '<div class="pv-tag">' + (a.kind === 'villa' ? 'Complimentary villa' : 'Souphattra Vientiane Hotel') + '</div>' +
+    '<div class="pv-tag">' + (a.kind === 'villa' ? 'Complimentary villa' : 'Souphattra Heritage Vientiane') + '</div>' +
     '<h3>' + esc(a.name) + '</h3>' +
     (a.badge ? '<p class="note" style="color:var(--cherry)">' + esc(a.badge) + '</p>' : '') +
     '<p>' + esc(a.blurb) + '</p>' +
@@ -583,22 +676,31 @@ function currentAcc() {
 function renderCost() {
   const box = document.getElementById('cost-box');
   const acc = currentAcc();
+  const occ = acc ? S.stay.occupantGuestIds : [];
+  const riders = S.guests.filter((g) => g.journey.train);
+  const tc = trainContribution(TRAIN, riders.length);
+  const total = journeyTotal(acc, occ, TRAIN, riders.length);
+  let rows = '';
   if (!acc) {
-    box.innerHTML = '<div class="stay-sum"><div class="row"><span class="l serif-it">Accommodation</span><span class="r">No room requested</span></div>' +
-      '<div class="row total"><span class="l serif-it">Total stay contribution</span><span class="r">USD 0</span></div></div>' +
-      '<p class="note" style="margin-top:14px">Your journey remains fully hosted where the programme includes you.</p>';
-    return;
+    rows += '<div class="row"><span class="l serif-it">Accommodation</span><span class="r">Not selected yet · please choose your room under My Stay</span></div>';
+  } else {
+    const charges = partyCharges(acc, occ);
+    rows += '<div class="row"><span class="l serif-it">' + esc(acc.name) + '</span><span class="r">1 ' + esc(acc.capacityUnit.toLowerCase()) + ' · ' + esc(acc.stay) + '</span></div>' +
+      charges.map((c) => {
+        const g = S.guests.find((x) => x.guestId === c.guestId);
+        return '<div class="row"><span class="l">' + esc(g ? g.fullName : c.guestId) + '</span><span class="r">' + (RATES_LIVE ? money(c.amount) : 'per approved guest rate — details to follow') + '</span></div>';
+      }).join('') +
+      '<div class="row"><span class="l">Stay contribution</span><span class="r">' + money(partyTotal(acc, occ)) + '</span></div>' +
+      '<div class="row"><span class="l">Second night</span><span class="r">' + (acc.kind === 'villa' ? 'Fully hosted' : 'Complimentary · hosted by Haruthai &amp; Suthep') + '</span></div>';
   }
-  const occ = S.stay.occupantGuestIds;
-  const charges = partyCharges(acc, occ);
+  if (riders.length) {
+    rows += '<div class="row"><span class="l serif-it">Overnight Sleeper Train</span><span class="r">Bangkok → Nong Khai · ' + riders.length + ' guest' + (riders.length > 1 ? 's' : '') + '</span></div>' +
+      '<div class="row"><span class="l">Train contribution</span><span class="r">' + (tc === null ? 'To be confirmed by Guest Relations' : money(tc)) + '</span></div>';
+  }
+  rows += '<div class="row total"><span class="l serif-it">Total journey contribution</span><span class="r">' + money(total) +
+    (riders.length && tc === null ? ' <span style="font-size:11px;letter-spacing:.06em">+ train, to be confirmed</span>' : '') + '</span></div>';
   box.innerHTML =
-    '<div class="stay-sum"><div class="row"><span class="l serif-it">' + esc(acc.name) + '</span><span class="r">1 ' + esc(acc.capacityUnit.toLowerCase()) + ' · ' + esc(acc.stay) + '</span></div>' +
-    charges.map((c) => {
-      const g = S.guests.find((x) => x.guestId === c.guestId);
-      return '<div class="row"><span class="l">' + esc(g ? g.fullName : c.guestId) + '</span><span class="r">' + (RATES_LIVE ? money(c.amount) : 'per approved guest rate — details to follow') + '</span></div>';
-    }).join('') +
-    '<div class="row total"><span class="l serif-it">Total stay contribution</span><span class="r">' + money(partyTotal(acc, occ)) + '</span></div>' +
-    '<div class="row"><span class="l">Second night</span><span class="r">' + (acc.kind === 'villa' ? 'Fully hosted' : 'Complimentary · hosted by Haruthai &amp; Suthep') + '</span></div></div>' +
+    '<div class="stay-sum" aria-live="polite">' + rows + '</div>' +
     '<p class="note" style="margin-top:16px">' + esc(COPY.priceNote) + ' ' + esc(COPY.hostedNight) + '</p>' +
     '<p class="note">' + esc(COPY.payment) + ' One person may settle the Party invoice; the charges above stay attributed per Guest.</p>';
 }
@@ -637,7 +739,7 @@ function renderReview() {
     ['Contribution', occ.map((id) => { const g = S.guests.find((x) => x.guestId === id); return esc(g ? g.preferredName : id) + ' ' + money(contributionPerGuest(acc)); }).join(' · ')],
     ['Total', money(partyTotal(acc, occ))],
     ['Second night', acc.kind === 'villa' ? 'Fully hosted by Haruthai & Suthep' : 'Complimentary · hosted by Haruthai & Suthep'],
-  ] : [['Requested', 'No room — staying independently'], ['Total', 'USD 0']]);
+  ] : [['Requested', 'No stay selected yet'], ['Action', 'Please choose your room under My Stay before sending']]);
   const trv = S.arrival.shared !== false
     ? [['Together', esc([S.arrival.date, S.arrival.time, S.arrival.ref].filter(Boolean).join(' · ') || '—') + (S.arrival.pickupRequested ? ' · pickup REQUESTED' : '')]]
     : S.guests.map((g) => { const a = S.arrivalByGuest[g.guestId] || {}; return [esc(g.preferredName), esc([a.date, a.time, a.ref].filter(Boolean).join(' · ') || '—') + (a.pickupRequested ? ' · pickup REQUESTED' : '')]; });
@@ -715,7 +817,7 @@ function showReceived() {
     'Submitted ' + new Date(S.registration_submitted_at).toLocaleString('en-GB', { dateStyle: 'long', timeStyle: 'short' }) + ' · status: UNDER REVIEW';
   show(idx('received'));
 }
-document.getElementById('return-journey').addEventListener('click', () => show(idx('review')));
+document.getElementById('return-journey').addEventListener('click', () => show(idx('home')));
 
 /* ---------------- persistent YOUR JOURNEY summary (§27) ---------------- */
 function renderSummary() {
@@ -735,6 +837,7 @@ function renderSummary() {
 /* ---------------- navigation ---------------- */
 document.querySelectorAll('[data-next]').forEach((b) => b.addEventListener('click', () => {
   const name = stepEls[cur].dataset.step;
+  if (name === 'welcome' && S.invitation && !isAuthOut()) { show(idx('home')); return; }
   if (name === 'review') { if (!trySubmit()) return; renderSend(); }
   show(Math.min(cur + 1, stepEls.length - 1));
 }));
@@ -755,14 +858,15 @@ function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => (
 async function init() {
   if (INV.initialized) { invLog('init re-entry blocked', 'init'); return; }
   const initVersion = INV.version;
+  S._returning = !!S.invitation; // a restored draft means a returning guest
   if (urlToken) {
     try {
       const inv = await lookupInvitation(urlToken);
-      if (inv) adoptInvitation(inv); // preserves an existing same-invitation draft
+      if (inv) { setAuthOut(false); adoptInvitation(inv); } // the personal link signs the guest back in
     } catch (e) { /* offline/failed lookup: guest can still use the code field */ }
   }
-  if (S.invitation) {
-    show(S.submitted ? idx('received') : idx('party'), false);
+  if (S.invitation && !isAuthOut()) {
+    show(idx('home'), false); // the private area is home — never a repeated code gate
     if (S.submitted) document.getElementById('received-when').textContent =
       'Submitted ' + new Date(S.registration_submitted_at).toLocaleString('en-GB', { dateStyle: 'long', timeStyle: 'short' }) + ' · status: UNDER REVIEW';
   } else {
