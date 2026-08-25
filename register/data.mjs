@@ -3,8 +3,10 @@
  *
  * Single source for everything the registration UI renders. Presentation
  * components read from here; nothing here is derived from internal
- * procurement rates. All monetary values are the APPROVED PUBLIC per-Guest
- * contributions from the implementation brief (§20) — never buy-out rates.
+ * procurement rates. All monetary values are the APPROVED guest rates from
+ * the Owner price master — never buy-out rates. Room prices are PRIVATE
+ * (authenticated Guest Area only); the public site shows rooms without
+ * prices but with live availability.
  *
  * Content states follow the governance model:
  *   CONFIRMED | PLANNING_BASIS | UNRESOLVED | LEGACY | PRIVATE_INTERNAL
@@ -63,10 +65,10 @@ export const EVENTS = [
     venue: 'Souphattra Heritage Vientiane', blurb: 'Sunset cocktails beside the pool, then dinner in the courtyard garden. Food, music and celebration.' },
 ];
 
-/* ---------------- accommodation resources (§19, §20, §25) ----------------
- * price unit: GUEST · inventory unit: ROOM (or Party allocation) ·
- * selection scope: PARTY. contributionPerGuest is the approved public value
- * for the complete hosted wedding stay — never a nightly room rate.
+/* ---------------- accommodation resources ----------------
+ * price unit: ROOM · inventory unit: ROOM (or Party allocation) ·
+ * selection scope: PARTY. ratePerNight/roomTotal are the approved guest
+ * rates from the Owner master — never internal buy-out rates.
  */
 
 /** Amenity set shared by the two heritage room categories. */
@@ -80,15 +82,22 @@ const RM = 'assets/images/rooms/';
 
 /* Category naming: `name` is the official Souphattra category as published by
  * the house; `contractRow` is the row name in the approved buy-out master
- * (docs/RELEASE-GATES.md Gate 1) and travels with the Guest Relations record
- * so a booking can always be traced back to the approved rate. Ordering,
- * size and rate are monotonic and were used to reconcile the two namings. */
+ * and travels with the Guest Relations record so a booking can always be
+ * traced back to the approved rate.
+ *
+ * PRICING MODEL (Owner master, 2026-08-25): rates are PER ROOM PER NIGHT with
+ * a fixed 2-night stay — `ratePerNight` × `nights` = `roomTotal`. The earlier
+ * per-guest contribution model is superseded. Prices are PRIVATE: they render
+ * only inside the authenticated Guest Area, never on the public website.
+ * Active guest inventory: 23 rooms (4+13+3+2+1). Noble Courtyard is
+ * CANCELLED (removed from the active model; governance record in
+ * docs/DECISION-REGISTER.md D-18). */
 export const ACCOMMODATIONS = [
   {
     id: 'villa', name: 'Vientiane Urban Cozy Villa 2 (4BR)',
     kind: 'villa', property: 'Vientiane Urban Cozy Villa 2 (4BR)',
     stay: '25 February – 1 March 2027', nights: 4,
-    contributionPerGuest: 0, selectable: true,
+    ratePerNight: 0, roomTotal: 0, selectable: true,
     capacityTotal: 4, capacityUnit: 'Party allocation', selectionScope: 'PARTY',
     badge: 'COMPLIMENTARY — HOSTED BY HARUTHAI & SUTHEP',
     size: 'Four-bedroom villa', bed: 'Four bedrooms', occupancy: 'One Party per allocation',
@@ -101,7 +110,7 @@ export const ACCOMMODATIONS = [
     id: 'heritage', name: 'The Heritage', contractRow: 'Heritage',
     kind: 'room', property: 'Souphattra Heritage Vientiane',
     stay: STAY_WINDOW, nights: 2,
-    contributionPerGuest: 140.00, selectable: true,
+    ratePerNight: 155, roomTotal: 310, selectable: true,
     capacityTotal: 4, capacityUnit: 'Room', selectionScope: 'PARTY',
     size: '31 sq.m.', bed: '1 King bed', occupancy: '2 adults · 1 child',
     location: '1st–3rd floor',
@@ -113,7 +122,7 @@ export const ACCOMMODATIONS = [
     id: 'the-heritage', name: 'Heritage Executive', contractRow: 'The Heritage',
     kind: 'room', property: 'Souphattra Heritage Vientiane',
     stay: STAY_WINDOW, nights: 2,
-    contributionPerGuest: 150.00, selectable: true,
+    ratePerNight: 180, roomTotal: 360, selectable: true,
     capacityTotal: 13, capacityUnit: 'Room', selectionScope: 'PARTY',
     size: '37–44 sq.m.', bed: 'King or twin', occupancy: 'Up to 2 adults · 1 child',
     location: 'Garden views · interconnecting rooms where available',
@@ -125,7 +134,7 @@ export const ACCOMMODATIONS = [
     id: 'heritage-grand-premier', name: 'Heritage Grand Premier',
     kind: 'room', property: 'Souphattra Heritage Vientiane',
     stay: STAY_WINDOW, nights: 2,
-    contributionPerGuest: 162.50, selectable: true,
+    ratePerNight: 255, roomTotal: 510, selectable: true,
     capacityTotal: 3, capacityUnit: 'Room', selectionScope: 'PARTY',
     size: '49 sq.m.', bed: '1 King bed', occupancy: '2 adults · 1 child sharing bedding',
     location: 'Garden and pool views',
@@ -134,22 +143,10 @@ export const ACCOMMODATIONS = [
     images: [RM + 'heritage-grand-premier-1.jpg', RM + 'heritage-grand-premier-2.jpg', RM + 'heritage-grand-premier-3.jpg'],
   },
   {
-    id: 'noble-courtyard', name: 'Noble Courtyard Suite',
-    kind: 'suite', property: 'Souphattra Heritage Vientiane',
-    stay: STAY_WINDOW, nights: 2,
-    contributionPerGuest: 225.00, selectable: true,
-    capacityTotal: 1, capacityUnit: 'Room', selectionScope: 'PARTY',
-    size: '63 sq.m.', bed: '1 King bed', occupancy: '2 adults · 1 child',
-    location: 'Courtyard garden · one suite only',
-    blurb: 'A suite made for two: a separate living area, two bathrooms, and the garden all around.',
-    amenities: ['Separate living area', 'Private balcony', 'Garden surroundings', 'Two bathrooms', 'King bed', 'Smart TV', 'Sofa', 'Afternoon tea area', 'Mini bar'],
-    images: [RM + 'noble-courtyard-1.jpg', RM + 'noble-courtyard-2.jpg', RM + 'noble-courtyard-3.jpg'],
-  },
-  {
     id: 'grand-majestic-suite', name: 'Grand Majestic Suite',
     kind: 'suite', property: 'Souphattra Heritage Vientiane',
     stay: STAY_WINDOW, nights: 2,
-    contributionPerGuest: 235.00, selectable: true,
+    ratePerNight: 275, roomTotal: 550, selectable: true,
     capacityTotal: 2, capacityUnit: 'Room', selectionScope: 'PARTY',
     size: '66–75 sq.m.', bed: '1 King bed', occupancy: '2 adults · 1 child',
     location: 'Private balcony',
@@ -161,7 +158,7 @@ export const ACCOMMODATIONS = [
     id: 'souphattra-majestic-suite', name: 'Souphattra Majestic Suite',
     kind: 'suite', property: 'Souphattra Heritage Vientiane',
     stay: STAY_WINDOW, nights: 2,
-    contributionPerGuest: 275.00, selectable: true,
+    ratePerNight: 310, roomTotal: 620, selectable: true,
     capacityTotal: 1, capacityUnit: 'Room', selectionScope: 'PARTY',
     size: '84 sq.m.', bed: '1 King bed', occupancy: '2 adults · 2 children',
     location: 'Pool and garden views · one suite only',
@@ -174,7 +171,7 @@ export const ACCOMMODATIONS = [
     id: 'souphattra-presidential', name: 'Souphattra Presidential',
     kind: 'suite', property: 'Souphattra Heritage Vientiane',
     stay: STAY_WINDOW, nights: 2,
-    contributionPerGuest: null, selectable: false,
+    ratePerNight: null, roomTotal: null, selectable: false,
     reservedNote: 'Reserved for the Bride & Groom · not available for guest requests',
     capacityTotal: 1, capacityUnit: 'Room', selectionScope: 'PARTY',
     size: '118 sq.m.', bed: 'Two bedrooms · king and twin', occupancy: '4 adults · 2 children',
@@ -197,11 +194,42 @@ export const BERTH_PREFS = ['No preference', 'Sleeper berth · lower', 'Sleeper 
 export const TRAIN = {
   id: 'train', name: 'Overnight train · Bangkok → Nong Khai',
   capacityTotal: 8, capacityUnit: 'Guest seat', selectionScope: 'GUEST',
-  /* Approved public per-guest contribution. null = not yet approved for
-   * publication; the UI shows "to be confirmed" and excludes it from totals.
-   * Never derive this from internal procurement rates. */
-  contributionPerGuest: null,
+  /* CONFIRMED guest price (Owner, 2026-08-25): USD 88 per participating
+   * guest. Charged only for guests who join the train. */
+  contributionPerGuest: 88,
 };
+
+/* ---------------- transfer products (Owner price master, 2026-08-25) -------
+ * Chargeable per UNIT (one vehicle journey), never multiplied by guest
+ * count. Guests request them; Guest Relations confirms the operation.
+ * `fields`: airport products collect flight data, LCR products collect
+ * train data — never both. */
+export const TRANSFERS = [
+  { id: 'apt-pickup-jaguar', group: 'Airport', name: 'Airport Pick-up by Jaguar',
+    pricePerUnit: 25, direction: 'arrival', fieldsFor: 'flight',
+    blurb: 'From Wattay International Airport to Souphattra Heritage, met in the arrivals hall.' },
+  { id: 'apt-dropoff-jaguar', group: 'Airport', name: 'Airport Drop-off by Jaguar',
+    pricePerUnit: 25, direction: 'departure', fieldsFor: 'flight',
+    blurb: 'From Souphattra Heritage to Wattay International Airport, timed to your flight.' },
+  { id: 'apt-pickup-merc', group: 'Airport', name: 'Airport Pick-up by Mercedes-Benz',
+    pricePerUnit: 40, direction: 'arrival', fieldsFor: 'flight',
+    blurb: 'From Wattay International Airport to Souphattra Heritage, met in the arrivals hall.' },
+  { id: 'apt-dropoff-merc', group: 'Airport', name: 'Airport Drop-off by Mercedes-Benz',
+    pricePerUnit: 40, direction: 'departure', fieldsFor: 'flight',
+    blurb: 'From Souphattra Heritage to Wattay International Airport, timed to your flight.' },
+  { id: 'lcr-pickup-jaguar', group: 'LCR Railway Station', name: 'LCR Station to Hotel by Jaguar',
+    pricePerUnit: 40, direction: 'arrival', fieldsFor: 'train',
+    blurb: 'From Vientiane railway station to Souphattra Heritage, met at your carriage exit.' },
+  { id: 'lcr-dropoff-jaguar', group: 'LCR Railway Station', name: 'Hotel to LCR Station by Jaguar',
+    pricePerUnit: 40, direction: 'departure', fieldsFor: 'train',
+    blurb: 'From Souphattra Heritage to Vientiane railway station, timed to your train.' },
+  { id: 'lcr-pickup-merc', group: 'LCR Railway Station', name: 'LCR Station to Hotel by Mercedes-Benz',
+    pricePerUnit: 60, direction: 'arrival', fieldsFor: 'train',
+    blurb: 'From Vientiane railway station to Souphattra Heritage, met at your carriage exit.' },
+  { id: 'lcr-dropoff-merc', group: 'LCR Railway Station', name: 'Hotel to LCR Station by Mercedes-Benz',
+    pricePerUnit: 60, direction: 'departure', fieldsFor: 'train',
+    blurb: 'From Souphattra Heritage to Vientiane railway station, timed to your train.' },
+];
 
 /* ---------------- package (§23) ---------------- */
 
@@ -230,8 +258,8 @@ export const STATUS = {
 };
 
 export const COPY = {
-  priceLabel: 'Your total contribution per guest for the complete hosted wedding stay',
-  priceNote: 'The amount shown is the complete contribution for each registered Guest, not a nightly room rate.',
+  priceLabel: 'Your room for the wedding stay',
+  priceNote: 'Rooms are priced per room and night for the fixed two-night wedding stay; the total covers the whole room, whatever your Party size.',
   hostedNight: 'Your second hotel night is hosted by Haruthai & Suthep.',
   payment: 'No deposit is required. After Guest Relations confirms your arrangements, you will receive an invoice with bank transfer or PayPal instructions. Payment is due within seven days.',
   requestNote: 'This is a registration request. Guest Relations will confirm your arrangements separately.',

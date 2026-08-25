@@ -4,37 +4,56 @@
  * by the guest flow, the Guest Relations view and the test suite.
  */
 
-/* ============ contributions (§18, §20) ============ */
+/* ============ journey cost (Owner price master) ============
+ * ONE calculation path. Rooms are priced PER ROOM (ratePerNight × nights =
+ * roomTotal); the train per participating guest; transfers per unit. Every
+ * surface (cards, selection state, live Journey Cost, review, submission,
+ * dashboard, Guest Relations record) reads these functions — never its own
+ * arithmetic. */
 
-/** Approved public contribution per Guest for a category (never derived from
- *  internal rates — values come from the data layer). */
-export function contributionPerGuest(accommodation) {
-  return accommodation ? Number(accommodation.contributionPerGuest) : 0;
+/** Nightly guest rate for a category (0 for the hosted villa, null when the
+ *  category is not priced for guests, e.g. the Presidential). */
+export function ratePerNight(accommodation) {
+  if (!accommodation) return 0;
+  return typeof accommodation.ratePerNight === 'number' ? accommodation.ratePerNight : null;
 }
 
-/** Individual charge records: one per occupying Guest, never multiplied by
- *  room count (a Party requests exactly one room / one allocation). */
-export function partyCharges(accommodation, guestIds) {
-  const per = contributionPerGuest(accommodation);
-  return (guestIds || []).map((guestId) => ({ guestId, amount: per }));
+/** Total room price for the fixed stay (per ROOM, never per guest). */
+export function roomTotal(accommodation) {
+  if (!accommodation) return 0;
+  if (typeof accommodation.roomTotal === 'number') return accommodation.roomTotal;
+  const per = ratePerNight(accommodation);
+  return per === null ? null : per * (accommodation.nights || 0);
 }
 
-export function partyTotal(accommodation, guestIds) {
-  return partyCharges(accommodation, guestIds).reduce((s, c) => s + c.amount, 0);
+/** A Party's stay charge — one room, one price, whatever the guest count. */
+export function partyTotal(accommodation) {
+  const t = roomTotal(accommodation);
+  return t === null ? 0 : t;
 }
 
-/** Train contribution for the party, or null while no public per-guest
- *  amount is approved (the UI then shows "to be confirmed"). */
+/** Train contribution: confirmed per-guest price × actual participants. */
 export function trainContribution(train, riderCount) {
   const per = train && typeof train.contributionPerGuest === 'number' ? train.contributionPerGuest : null;
   return per === null ? null : per * riderCount;
 }
 
-/** Total journey contribution: stay + train (train only once approved). */
-export function journeyTotal(accommodation, guestIds, train, riderCount) {
-  const stay = accommodation ? partyTotal(accommodation, guestIds) : 0;
-  const t = trainContribution(train, riderCount);
-  return stay + (t || 0);
+/** Transfer total: Σ pricePerUnit × selected units (never guest-multiplied).
+ *  `selected` is [{ transferId, units }]; `catalog` is data.TRANSFERS. */
+export function transfersTotal(catalog, selected) {
+  let sum = 0;
+  for (const s of selected || []) {
+    const t = (catalog || []).find((x) => x.id === s.transferId);
+    if (t) sum += t.pricePerUnit * (s.units || 1);
+  }
+  return sum;
+}
+
+/** The live Journey Cost: room + train + transfers. */
+export function journeyTotal(accommodation, train, riderCount, transferCatalog, selectedTransfers) {
+  return partyTotal(accommodation)
+    + (trainContribution(train, riderCount) || 0)
+    + transfersTotal(transferCatalog, selectedTransfers);
 }
 
 export function money(n) {
@@ -247,10 +266,21 @@ export function validateRegistration(reg, ctx) {
       const occ = reg.stay.occupantGuestIds || [];
       if (!occ.length) errors.push('stay request needs at least one occupying Guest');
       for (const id of occ) if (!guestIds.has(id)) errors.push('stay occupant not in Party: ' + id);
-      const charges = partyCharges(acc, occ);
-      const total = charges.reduce((s, c) => s + c.amount, 0);
-      if (total !== contributionPerGuest(acc) * occ.length) errors.push('party total must equal sum of individual contributions');
+      const total = roomTotal(acc);
+      if (total === null) errors.push(acc.name + ' carries no guest rate');
+      else if (total !== ratePerNight(acc) * acc.nights) errors.push('room total must equal rate × nights');
       if (reg.stay.rooms && reg.stay.rooms !== 1) errors.push('a Party requests exactly one room / allocation');
+    }
+  }
+  // transfers: known service, sane units, and the date the vehicle is needed
+  for (const s of reg.transfers || []) {
+    const t = (ctx.transfers || []).find((x) => x.id === s.transferId);
+    if (!t) { errors.push('unknown transfer service: ' + s.transferId); continue; }
+    if (s.units !== undefined && (!Number.isInteger(s.units) || s.units < 1)) {
+      errors.push(t.name + ': units must be a positive whole number');
+    }
+    if (!(s.details && s.details.date)) {
+      errors.push(t.name + ' needs a ' + (t.direction === 'arrival' ? 'travel date' : 'departure date'));
     }
   }
   // pickup needs sufficient arrival data
@@ -281,7 +311,8 @@ export function buildNotification(reg, ctx) {
   const acc = reg.stay && reg.stay.accommodationId
     ? accommodations.find((a) => a.id === reg.stay.accommodationId) : null;
   const occ = acc ? (reg.stay.occupantGuestIds || []) : [];
-  const charges = acc ? partyCharges(acc, occ) : [];
+  const transferCatalog = ctx.transfers || [];
+  const selectedTransfers = reg.transfers || [];
 
   for (const g of reg.guests || []) {
     const meta = invitation.guests.find((x) => x.guestId === g.guestId) || {};
@@ -295,8 +326,6 @@ export function buildNotification(reg, ctx) {
     out.push(L('  Accessibility:', g.access));
     out.push(L('  Spa:', g.spa && g.spa.requested ? [g.spa.type, g.spa.day, g.spa.time].filter(Boolean).join(' · ') : 'Not requested'));
     out.push(L('  Preferences:', [g.favFood && 'food ' + g.favFood, g.favDrink && 'drink ' + g.favDrink, g.favColour && 'colour ' + g.favColour, g.favFilm && 'film ' + g.favFilm].filter(Boolean).join('; ')));
-    const charge = charges.find((c) => c.guestId === g.guestId);
-    out.push(L('  Contribution:', charge ? money(charge.amount) : (occ.length ? 'not occupying' : '-')));
     out.push('');
   }
   out.push('ACCOMMODATION');
@@ -311,8 +340,8 @@ export function buildNotification(reg, ctx) {
       const meta = invitation.guests.find((x) => x.guestId === id) || {};
       return meta.fullName || id;
     }).join('; ')));
-    out.push(L('Guest Contribution:', money(contributionPerGuest(acc)) + ' each'));
-    out.push(L('Party Contribution:', money(partyTotal(acc, occ))));
+    out.push(L('Room Rate:', money(ratePerNight(acc) || 0) + ' per room / night × ' + acc.nights + ' nights'));
+    out.push(L('Room Total:', money(partyTotal(acc))));
     out.push(L('Stay:', acc.stay));
     out.push('Second Night: ' + (acc.kind === 'villa' ? 'Fully hosted by Haruthai & Suthep' : 'Complimentary / Hosted by Haruthai & Suthep'));
     out.push('Status: REQUESTED / UNDER REVIEW');
@@ -332,6 +361,33 @@ export function buildNotification(reg, ctx) {
       ? ((reg.arrival || {}).pickup ? 'YES' : 'NO')
       : ((reg.arrival || {}).pickupRequested ? 'YES' : 'NO')));
   }
+  out.push('');
+  out.push('TRANSFERS');
+  if (!selectedTransfers.length) {
+    out.push('Transfers Requested: NONE');
+  } else {
+    for (const s of selectedTransfers) {
+      const t = transferCatalog.find((x) => x.id === s.transferId) || {};
+      out.push(L('Service:', t.name || s.transferId));
+      out.push(L('  Units:', (s.units || 1) + ' × ' + money(t.pricePerUnit || 0)));
+      const d = s.details || {};
+      out.push(L('  Date / Time:', [d.date, d.time].filter(Boolean).join(' ')));
+      out.push(L('  ' + (t.fieldsFor === 'train' ? 'Train Number:' : 'Flight Number:'), d.ref));
+      out.push(L('  ' + (t.direction === 'arrival' ? 'From:' : 'To:'), d.place));
+      out.push(L('  ' + (t.direction === 'arrival' ? 'Pick-up Location:' : 'Drop-off Location:'), d.location));
+      out.push('  Status: REQUESTED / UNDER REVIEW');
+    }
+    out.push(L('Transfers Total:', money(transfersTotal(transferCatalog, selectedTransfers))));
+  }
+  out.push('');
+  out.push('JOURNEY COST');
+  const train = ctx.train || null;
+  const trainRiders = (reg.guests || []).filter((g) => g.journey && g.journey.train).length;
+  const trainSum = trainRiders ? (trainContribution(train, trainRiders) || 0) : 0;
+  if (acc) out.push(L('Room:', money(partyTotal(acc))));
+  if (trainRiders) out.push(L('Train:', trainRiders + ' × ' + money((train || {}).contributionPerGuest || 0) + ' = ' + money(trainSum)));
+  if (selectedTransfers.length) out.push(L('Transfers:', money(transfersTotal(transferCatalog, selectedTransfers))));
+  out.push(L('TOTAL:', money(journeyTotal(acc, train, trainRiders, transferCatalog, selectedTransfers))));
   out.push('');
   out.push('ARRIVAL');
   const a = reg.arrival || {};

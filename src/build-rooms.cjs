@@ -21,16 +21,9 @@ const END = '<!-- ROOMS:END -->';
 const esc = (s) => String(s == null ? '' : s)
   .replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-function money(n) {
-  return 'USD ' + (Number.isInteger(n) ? String(n) : n.toFixed(2));
-}
 
-function card(a, ratesLive) {
+function card(a, availLine) {
   const bookable = a.selectable !== false;
-  const per = a.contributionPerGuest;
-  const amount = !bookable ? 'Reserved'
-    : per === 0 ? 'USD 0'
-      : ratesLive ? money(per) : 'Details to follow';
   const specs = [['Size', a.size], ['Bed', a.bed], ['Guests', a.occupancy], ['Where', a.location]]
     .filter((r) => r[1]);
   return [
@@ -39,8 +32,7 @@ function card(a, ratesLive) {
       '" width="1600" height="1067" loading="lazy" decoding="async"/></figure>',
     '<div class="rm-body">',
     a.badge ? '<div class="rm-badge">' + esc(a.badge) + '</div>' : '',
-    '<div class="rm-head"><h3>' + esc(a.name) + '</h3><div class="rm-price"><span class="amt">' + amount + '</span>' +
-      (bookable ? '<span class="per">per guest · complete stay</span>' : '') + '</div></div>',
+    '<div class="rm-head"><h3>' + esc(a.name) + '</h3></div>',
     '<div class="rm-meta">' + esc(a.stay) + ' · ' + a.nights + ' nights</div>',
     bookable && a.kind !== 'villa' ? '<div class="rm-hosted">Second night complimentary · hosted by Haruthai &amp; Suthep</div>' : '',
     '<p class="rm-blurb">' + esc(a.blurb) + '</p>',
@@ -50,21 +42,33 @@ function card(a, ratesLive) {
         (a.amenities.length > 5 ? '<span class="more">+' + (a.amenities.length - 5) + ' more</span>' : '') + '</div>'
       : '',
     bookable
-      ? '<div class="rm-foot"><a class="rm-cta" href="register/">Request this room in your Guest Area</a></div>'
+      ? '<div class="rm-avail" role="status">' + esc(availLine) + '</div>' +
+        '<div class="rm-foot"><a class="rm-cta" href="register/">Request this room in your Guest Area</a></div>'
       : '<div class="rm-foot reserved">' + esc(a.reservedNote || 'Not available for guest requests') + '</div>',
     '</div></article>',
   ].filter(Boolean).join('\n');
 }
 
 async function main() {
-  const { ACCOMMODATIONS, PUBLICATION, COPY } = await import('../register/data.mjs');
-  const ratesLive = PUBLICATION.rates === 'APPROVED';
+  const { ACCOMMODATIONS, SELECTABLE_ACCOMMODATIONS, TRAIN, COPY } = await import('../register/data.mjs');
+  const { createInventory, remaining, availabilityLabel } = await import('../register/logic.mjs');
+  /* PUBLIC RULE: room information + LIVE availability are public; every
+   * commercial amount is private (authenticated Guest Area only). The
+   * availability line derives from the SAME inventory engine the booking
+   * flow uses — never a decorative static number. */
+  const inv = createInventory([...SELECTABLE_ACCOMMODATIONS, TRAIN]);
+  const availFor = (a) => {
+    const res = inv[a.id];
+    if (!res) return 'Not available for guest requests';
+    if (remaining(res) <= 0) return 'Fully allocated · waitlist available';
+    return availabilityLabel(res);
+  };
   const html = [
     '<p class="rm-intro rv">' + esc(COPY.sharedHome) + '</p>',
     '<div class="rm-grid">',
-    ACCOMMODATIONS.map((a) => card(a, ratesLive)).join('\n'),
+    ACCOMMODATIONS.map((a) => card(a, availFor(a))).join('\n'),
     '</div>',
-    '<p class="rm-note rv">' + esc(COPY.priceNote) + ' ' + esc(COPY.hostedNight) + ' ' + esc(COPY.requestNote) + '</p>',
+    '<p class="rm-note rv">' + esc(COPY.hostedNight) + ' Room rates and requests live in your private Guest Area. ' + esc(COPY.requestNote) + '</p>',
   ].join('\n');
 
   const page = fs.readFileSync(PAGE, 'utf8');
@@ -77,7 +81,9 @@ async function main() {
   const missing = ACCOMMODATIONS.flatMap((a) => a.images || [])
     .filter((p) => !fs.existsSync(path.join(ROOT, p)));
   if (missing.length) throw new Error('missing room images: ' + missing.join(', '));
+  const leaked = /USD\s*\d/.test(html);
+  if (leaked) throw new Error('PUBLIC PRICE LEAK: generated rooms section contains a USD amount');
   console.log('index.html rooms section: ' + ACCOMMODATIONS.length + ' categories, ' +
-    ACCOMMODATIONS.flatMap((a) => a.images || []).length + ' images, rates ' + PUBLICATION.rates);
+    ACCOMMODATIONS.flatMap((a) => a.images || []).length + ' images, NO public prices, live availability');
 }
 main().catch((e) => { console.error(e); process.exit(1); });
