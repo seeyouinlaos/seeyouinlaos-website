@@ -10,6 +10,7 @@
   "scripts": {
     "dev": "wrangler dev",
     "build": "wrangler deploy --dry-run --outdir dist",
+    "build:rooms": "node src/build-rooms.cjs",
     "build:standalone": "node src/build-standalone.cjs",
     "edit": "node src/dev-editor-server.cjs",
     "test": "node --test 'test/registration.test.mjs'",

@@ -72,6 +72,45 @@ export function remaining(res) {
   return res.capacity_total - res.capacity_held - res.capacity_confirmed;
 }
 
+/**
+ * The full inventory position of one resource — the structure Guest Relations
+ * and the release check read. `available` is what a further Party could still
+ * be given: total minus held, confirmed AND still-pending requests, so two
+ * Parties can never both be told an option is free. `locked` is capacity that
+ * confirmation has fixed and that only an explicit Guest Relations release
+ * (force) can free again.
+ */
+export function inventorySnapshot(res) {
+  const count = (status) => res.allocations
+    .filter((a) => a.status === status).reduce((s, a) => s + a.units, 0);
+  const requested = count(ALLOC.REQUESTED);
+  return {
+    resource_id: res.resource_id,
+    display_name: res.display_name,
+    total: res.capacity_total,
+    requested,
+    held: res.capacity_held,
+    confirmed: res.capacity_confirmed,
+    locked: res.capacity_confirmed,
+    waitlisted: count(ALLOC.WAITLISTED),
+    remaining: remaining(res),
+    available: Math.max(0, remaining(res) - requested),
+  };
+}
+
+/** The live allocation of one Party on one resource (ignores releases). */
+export function partyAllocation(inv, resourceId, partyId) {
+  const res = inv[resourceId];
+  if (!res) return null;
+  return res.allocations.find((a) => a.partyId === partyId && a.status !== ALLOC.RELEASED) || null;
+}
+
+/** A confirmed allocation is locked: it may not be changed in the guest flow. */
+export function isLocked(inv, resourceId, partyId) {
+  const a = partyAllocation(inv, resourceId, partyId);
+  return !!a && a.status === ALLOC.CONFIRMED;
+}
+
 /** Exact availability copy (§22, §14). */
 export function availabilityLabel(res) {
   const rem = remaining(res);
@@ -144,8 +183,12 @@ export function confirmAllocation(inv, allocId, at) {
   return alloc;
 }
 
-export function releaseAllocation(inv, allocId, at) {
+export function releaseAllocation(inv, allocId, at, opts = {}) {
   const { res, alloc } = find(inv, allocId);
+  // confirmed capacity is locked — freeing it is a deliberate Guest Relations act
+  if (alloc.status === ALLOC.CONFIRMED && !opts.force) {
+    throw new Error('confirmed allocation is locked: release requires { force: true }');
+  }
   if (alloc.status === ALLOC.HELD) res.capacity_held -= alloc.units;
   if (alloc.status === ALLOC.CONFIRMED) res.capacity_confirmed -= alloc.units;
   res.waitlist = res.waitlist.filter((id) => id !== allocId);
@@ -198,7 +241,9 @@ export function validateRegistration(reg, ctx) {
   if (reg.stay && reg.stay.accommodationId) {
     const acc = accommodations.find((a) => a.id === reg.stay.accommodationId);
     if (!acc) errors.push('unknown accommodation: ' + reg.stay.accommodationId);
-    else {
+    else if (acc.selectable === false) {
+      errors.push(acc.name + ' is not available for guest requests');
+    } else {
       const occ = reg.stay.occupantGuestIds || [];
       if (!occ.length) errors.push('stay request needs at least one occupying Guest');
       for (const id of occ) if (!guestIds.has(id)) errors.push('stay occupant not in Party: ' + id);
@@ -260,6 +305,7 @@ export function buildNotification(reg, ctx) {
   } else {
     out.push(L('Property:', acc.property || acc.name));
     out.push(L('Room Category:', acc.name));
+    if (acc.contractRow) out.push(L('Buy-out Row:', acc.contractRow));
     out.push(L('Inventory Requested:', '1 ' + acc.capacityUnit));
     out.push(L('Guests:', occ.map((id) => {
       const meta = invitation.guests.find((x) => x.guestId === id) || {};

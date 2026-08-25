@@ -5,14 +5,15 @@ import {
   trainContribution, journeyTotal,
   createInventory, remaining, availabilityLabel, requestAllocation,
   holdAllocation, confirmAllocation, releaseAllocation, ALLOC,
+  inventorySnapshot, partyAllocation, isLocked,
   validateRegistration, buildNotification, nextInvitationState,
 } from '../register/logic.mjs';
-import { ACCOMMODATIONS, TRAIN, DEMO_MODE } from '../register/data.mjs';
+import { ACCOMMODATIONS, SELECTABLE_ACCOMMODATIONS, TRAIN, DEMO_MODE } from '../register/data.mjs';
 import { tokenId, encryptInvitation, lookupByToken } from '../register/crypto.mjs';
 import { FIXTURE_INVITATIONS, lookupInvitation } from './fixtures.mjs';
 
 const byId = (id) => ACCOMMODATIONS.find((a) => a.id === id);
-const RES = [...ACCOMMODATIONS, TRAIN];
+const RES = [...SELECTABLE_ACCOMMODATIONS, TRAIN];
 
 /* ---------------- Party logic ---------------- */
 
@@ -103,8 +104,129 @@ test('hold + confirm reduce remaining; release restores it', () => {
   assert.equal(remaining(inv['the-heritage']), 12);
   confirmAllocation(inv, a.allocId, 't3');
   assert.equal(remaining(inv['the-heritage']), 12);
-  releaseAllocation(inv, a.allocId, 't4');
+  releaseAllocation(inv, a.allocId, 't4', { force: true }); // confirmed capacity is locked
   assert.equal(remaining(inv['the-heritage']), 13);
+});
+
+test('confirmed capacity is locked: release needs an explicit Guest Relations force', () => {
+  const inv = createInventory(RES);
+  const a = requestAllocation(inv, 'noble-courtyard', { partyId: 'P1', units: 1, submittedAt: 't1' });
+  holdAllocation(inv, a.allocId, 't2');
+  confirmAllocation(inv, a.allocId, 't3');
+  assert.equal(isLocked(inv, 'noble-courtyard', 'P1'), true);
+  assert.throws(() => releaseAllocation(inv, a.allocId, 't4'), /locked/);
+  assert.equal(inventorySnapshot(inv['noble-courtyard']).locked, 1);
+  releaseAllocation(inv, a.allocId, 't5', { force: true });
+  assert.equal(isLocked(inv, 'noble-courtyard', 'P1'), false);
+});
+
+test('inventory snapshot carries total / requested / confirmed / available / waitlist', () => {
+  const inv = createInventory(RES);
+  const a = requestAllocation(inv, 'grand-majestic-suite', { partyId: 'P1', units: 1, submittedAt: 't1' });
+  requestAllocation(inv, 'grand-majestic-suite', { partyId: 'P2', units: 1, submittedAt: 't2' });
+  let s = inventorySnapshot(inv['grand-majestic-suite']);
+  assert.deepEqual(
+    { total: s.total, requested: s.requested, confirmed: s.confirmed, available: s.available, waitlisted: s.waitlisted },
+    { total: 2, requested: 2, confirmed: 0, available: 0, waitlisted: 0 });
+  holdAllocation(inv, a.allocId, 't3');
+  confirmAllocation(inv, a.allocId, 't4');
+  s = inventorySnapshot(inv['grand-majestic-suite']);
+  assert.equal(s.confirmed, 1);
+  assert.equal(s.locked, 1);
+  assert.equal(s.remaining, 1);
+  assert.equal(s.available, 0); // one room left, but P2 already asked for it
+});
+
+test('no overbooking: more Parties than rooms produce exactly capacity requests, rest waitlisted', () => {
+  const inv = createInventory(RES);
+  const results = [];
+  for (let i = 1; i <= 6; i++) {
+    results.push(requestAllocation(inv, 'heritage-grand-premier',
+      { partyId: 'P' + i, units: 1, submittedAt: '2027-01-0' + i + 'T10:00:00Z' }));
+  }
+  const requested = results.filter((r) => r.status === ALLOC.REQUESTED);
+  const waitlisted = results.filter((r) => r.status === ALLOC.WAITLISTED);
+  assert.equal(requested.length, 3);           // capacity is 3
+  assert.equal(waitlisted.length, 3);
+  assert.deepEqual(waitlisted.map((w) => w.waitlist_position), [1, 2, 3]);
+  assert.equal(inventorySnapshot(inv['heritage-grand-premier']).available, 0);
+  // the single-room categories can never take a second Party
+  const solo = ['noble-courtyard', 'souphattra-majestic-suite'];
+  for (const id of solo) {
+    const first = requestAllocation(inv, id, { partyId: 'A', units: 1, submittedAt: 't1' });
+    const second = requestAllocation(inv, id, { partyId: 'B', units: 1, submittedAt: 't2' });
+    assert.equal(first.status, ALLOC.REQUESTED);
+    assert.equal(second.status, ALLOC.WAITLISTED);
+  }
+});
+
+test('the villa cannot be over-allocated beyond its four Party allocations', () => {
+  const inv = createInventory(RES);
+  const out = [];
+  for (let i = 1; i <= 6; i++) {
+    out.push(requestAllocation(inv, 'villa', { partyId: 'V' + i, units: 1, submittedAt: 't' + i }));
+  }
+  assert.equal(out.filter((o) => o.status === ALLOC.REQUESTED).length, 4);
+  assert.equal(out.filter((o) => o.status === ALLOC.WAITLISTED).length, 2);
+});
+
+/* ---------------- Accommodation model (complete room presentation) ------- */
+
+test('all seven Souphattra categories plus the villa are present and complete', () => {
+  const names = ACCOMMODATIONS.map((a) => a.name);
+  assert.deepEqual(names, [
+    'Vientiane Urban Cozy Villa 2 (4BR)',
+    'The Heritage', 'Heritage Executive', 'Heritage Grand Premier',
+    'Noble Courtyard Suite', 'Grand Majestic Suite', 'Souphattra Majestic Suite',
+    'Souphattra Presidential',
+  ]);
+  for (const a of ACCOMMODATIONS) {
+    assert.ok(a.size, a.name + ' needs a size');
+    assert.ok(a.bed, a.name + ' needs a bed configuration');
+    assert.ok(a.occupancy, a.name + ' needs an occupancy');
+    assert.ok(a.location, a.name + ' needs a location');
+    assert.ok(a.blurb && a.blurb.length > 20, a.name + ' needs a description');
+    assert.ok((a.amenities || []).length >= 4, a.name + ' needs amenities');
+    assert.ok((a.images || []).length >= 3, a.name + ' needs a hero image and gallery');
+    for (const src of a.images) assert.match(src, /^assets\/images\/rooms\/[a-z0-9-]+\.jpg$/);
+  }
+});
+
+test('room images exist on disk (no placeholders)', async () => {
+  const fs = await import('node:fs');
+  for (const a of ACCOMMODATIONS) {
+    for (const src of a.images) {
+      const p = new URL('../' + src, import.meta.url);
+      assert.ok(fs.existsSync(p), 'missing image: ' + src);
+      assert.ok(fs.statSync(p).size > 20000, 'suspiciously small image: ' + src);
+    }
+  }
+});
+
+test('the Presidential is visible, never selectable and never priced', () => {
+  const p = ACCOMMODATIONS.find((a) => a.id === 'souphattra-presidential');
+  assert.equal(p.selectable, false);
+  assert.equal(p.contributionPerGuest, null);
+  assert.match(p.reservedNote, /Bride & Groom/);
+  assert.ok(!SELECTABLE_ACCOMMODATIONS.includes(p));
+  const inv = createInventory(RES);
+  assert.equal(inv['souphattra-presidential'], undefined); // no inventory, no requests
+});
+
+test('a registration naming a non-selectable category is rejected', () => {
+  const inv = lookupInvitation('demo-amara');
+  const reg = baseReg(inv);
+  reg.stay = { accommodationId: 'souphattra-presidential', occupantGuestIds: ['g1', 'g2'], rooms: 1 };
+  assert.ok(validateRegistration(reg, ctx(inv))
+    .some((e) => e.includes('not available for guest requests')));
+});
+
+test('the Guest Relations record traces the category back to the approved buy-out row', () => {
+  const inv = lookupInvitation('demo-amara');
+  const reg = baseReg(inv);
+  const text = buildNotification(reg, { invitation: inv, accommodations: ACCOMMODATIONS });
+  assert.ok(text.includes('Room Category: Heritage Executive'));
+  assert.ok(text.includes('Buy-out Row: The Heritage'));
 });
 
 test('villa uses Party allocations; selection decreases by one per Party', () => {
@@ -285,7 +407,7 @@ test('notification carries party, per-guest data, charges, statuses', () => {
   assert.ok(text.includes('Special Requirement: Light sleeper, lower deck please'));
   assert.ok(text.includes('Contribution: USD 150'));
   assert.ok(text.includes('Property: Souphattra Heritage Vientiane'));
-  assert.ok(text.includes('Room Category: The Heritage'));
+  assert.ok(text.includes('Room Category: Heritage Executive'));
   assert.ok(text.includes('Guests: Amara Demo; Theo Demo'));
   assert.ok(text.includes('Guest Contribution: USD 150 each'));
   assert.ok(text.includes('Party Contribution: USD 300'));

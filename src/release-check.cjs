@@ -86,6 +86,23 @@ gate('R2', 'Guest Relations view stays private',
   /^src$/m.test(assetsignore),
   'src/ excluded from public assets — GR view needs authenticated hosting in production.');
 
+/* R3 — the public accommodation section is generated from the ONE model and
+ * every room image it names exists. Blocks a release where the public page
+ * and the Guest Area would describe different rooms. */
+const dataSrc = data.slice(data.indexOf('export const ACCOMMODATIONS'), data.indexOf('export const SELECTABLE_ACCOMMODATIONS'));
+const roomNames = [...dataSrc.matchAll(/^\s*id: '[a-z0-9-]+', name: '([^']+)'/gm)].map((m) => m[1]);
+const roomImages = [...dataSrc.matchAll(/RM \+ '([a-z0-9-]+\.jpg)'/g)].map((m) => 'assets/images/rooms/' + m[1]);
+const missingImages = roomImages.filter((p) => !fs.existsSync(path.join(ROOT, p)));
+const missingCards = roomNames.filter((n) => !indexHtml.includes('<h3>' + n + '</h3>'));
+const presidentialPriced = /souphattra-presidential[\s\S]{0,400}?contributionPerGuest: (?!null)/.test(dataSrc);
+gate('R3', 'Accommodation experience complete and single-sourced',
+  missingImages.length === 0 && missingCards.length === 0 && roomNames.length >= 8 && !presidentialPriced,
+  [missingImages.length && 'missing room images: ' + missingImages.join(', '),
+   missingCards.length && 'public page missing generated cards: ' + missingCards.join(', ') + " (run 'npm run build:rooms')",
+   presidentialPriced && 'Presidential must never carry a guest contribution']
+    .filter(Boolean).join(' · ') ||
+  roomNames.length + ' categories, ' + roomImages.length + ' images, public cards generated from register/data.mjs, Presidential display-only');
+
 let failed = 0;
 for (const r of results) {
   if (!r.ok) failed++;
