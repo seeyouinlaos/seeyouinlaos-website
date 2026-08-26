@@ -622,6 +622,7 @@ function openAccOverlay(id) {
     (a.badge ? '<p class="note" style="color:var(--cherry)">' + esc(a.badge) + '</p>' : '') +
     (!bookable ? '<p class="note" style="color:var(--cherry)">' + esc(a.reservedNote) + '</p>' : '') +
     '<p>' + esc(a.blurb) + '</p>' +
+    (a.referenceUrl ? '<p class="note">Already booked for the wedding nights. <a href="' + a.referenceUrl + '" rel="noopener" target="_blank">View the residence on Airbnb</a> — for reading only, nothing to book.</p>' : '') +
     '<div class="pv-gallery">' + (a.images || []).map((src, i) =>
       '<button type="button" class="pv-gimg" data-lightbox="' + a.id + '" data-index="' + i + '">' +
       '<img src="' + roomImg(src) + '" alt="' + esc(a.name) + ' · view ' + (i + 1) +

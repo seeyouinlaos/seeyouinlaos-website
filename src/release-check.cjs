@@ -95,22 +95,28 @@ const roomImages = [...dataSrc.matchAll(/RM \+ '([a-z0-9-]+\.jpg)'/g)].map((m) =
 const missingImages = roomImages.filter((p) => !fs.existsSync(path.join(ROOT, p)));
 const missingCards = roomNames.filter((n) => !indexHtml.includes('<h3>' + n + '</h3>'));
 const noblePresent = /noble-courtyard/.test(dataSrc) && /contributionPerGuest: 220/.test(dataSrc);
-const villaGone = !/villa|airbnb/i.test(dataSrc);
+const oldVillaGone = !/Cozy Villa|4BR|id: 'villa'/.test(dataSrc);
+const airbnbOk = /id: 'airbnb-2br'/.test(dataSrc)
+  && /airbnb-2br'[\s\S]{0,600}?contributionPerGuest: 0/.test(dataSrc)
+  && /airbnb-2br'[\s\S]{0,700}?capacityUnit: 'Party allocation'/.test(dataSrc);
+const bookingValueLeak = /123\.8/.test(dataSrc) || /123\.8/.test(appJs) || /123\.8/.test(indexHtml);
 const matrixOk = ['contributionPerGuest: 130', 'contributionPerGuest: 150', 'contributionPerGuest: 170',
   'contributionPerGuest: 220', 'contributionPerGuest: 260', 'contributionPerGuest: 290', 'contributionPerGuest: 766.50']
   .every((s) => dataSrc.includes(s));
 const capsOk = ['capacityTotal: 5', 'capacityTotal: 13', 'capacityTotal: 3', 'capacityTotal: 2']
-  .every((s) => dataSrc.includes(s)) && (dataSrc.match(/capacityTotal: 1\b/g) || []).length === 3;
-gate('R3', 'Accommodation matrix complete and single-sourced (26 rooms)',
-  missingImages.length === 0 && missingCards.length === 0 && roomNames.length === 7 && noblePresent && villaGone && matrixOk && capsOk,
+  .every((s) => dataSrc.includes(s)) && (dataSrc.match(/capacityTotal: 1\b/g) || []).length === 4; // 3 suites + airbnb
+gate('R3', 'Accommodation matrix complete and single-sourced (26 rooms + hosted Airbnb)',
+  missingImages.length === 0 && missingCards.length === 0 && roomNames.length === 8 && noblePresent && oldVillaGone && airbnbOk && !bookingValueLeak && matrixOk && capsOk,
   [missingImages.length && 'missing room images: ' + missingImages.join(', '),
    missingCards.length && "public page missing generated cards: " + missingCards.join(', ') + " (run 'npm run build:rooms')",
    !noblePresent && 'Noble Courtyard Suite must be active at USD 220 per guest',
-   !villaGone && 'villa/Airbnb must not exist in the active model',
+   !oldVillaGone && "the cancelled 4BR 'Vientiane Urban Cozy Villa 2' must never return",
+   !airbnbOk && 'the 2BR Airbnb must be present, hosted (USD 0) and outside the room matrix',
+   bookingValueLeak && 'INTERNAL BOOKING VALUE (USD 123.80) must never reach guest surfaces',
    !matrixOk && 'guest contributions must be 130/150/170/220/260/290/766.50',
    !capsOk && 'capacities must be 5/13/3/1/2/1/1 (26 rooms)']
     .filter(Boolean).join(' · ') ||
-  '7 categories incl. Noble Courtyard, 26 rooms, matrix 130-766.50 per guest, no villa/Airbnb');
+  '7 Souphattra categories (26 rooms) + hosted 2BR Airbnb outside the matrix; old 4BR villa gone; no booking-value leak');
 
 /* P1 — PUBLIC PRICE LEAK (release-blocking): no accommodation amount on the
  * public website. Prices live only behind invitation authentication. */
@@ -130,12 +136,12 @@ gate('P1', 'No accommodation prices on the public website',
 const availLines = (roomsSection.match(/class="rm-avail"/g) || []).length;
 const fakeLive = /\d+ of \d+ rooms remaining|Last room/.test(roomsSection);
 gate('P2', 'Public availability honest (request mode until KV sync)',
-  availLines === 7 && !fakeLive && roomsSection.includes('Request availability'),
+  availLines === 8 && !fakeLive && roomsSection.includes('Request availability'),
   fakeLive
     ? 'public page pretends live remaining counts without a shared backend'
-    : availLines !== 7
-      ? 'expected 7 availability lines, found ' + availLines
-      : "all 7 categories show 'Request availability'; exact counts stay internal");
+    : availLines !== 8
+      ? 'expected 8 availability lines, found ' + availLines
+      : "all 8 stay options show 'Request availability'; exact counts stay internal");
 
 /* P3 — image + venue corrections (owner): alms at Souphattra Heritage with
  * TWO distinct images (couple on the timeline, procession on the card); no

@@ -27,13 +27,16 @@ function card(a) {
     .filter((r) => r[1]);
   const gallery = JSON.stringify(a.images || []).replace(/"/g, '&quot;');
   const amen = a.amenities || [];
-  return [
-    '<article class="rm-card">',
-    '<figure class="rm-figure"><button type="button" class="rm-fig-btn" data-gallery="' + gallery +
+  const figure = (a.images || []).length
+    ? '<figure class="rm-figure"><button type="button" class="rm-fig-btn" data-gallery="' + gallery +
       '" data-name="' + esc(a.name) + '" aria-label="Open ' + esc(a.name) + ' photo gallery">' +
       '<img alt="' + esc(a.name) + ' at ' + esc(a.property) + '" src="' + a.images[0] +
       '" width="1600" height="1067" loading="lazy" decoding="async"/>' +
-      '<span class="rm-figcount">' + (a.images || []).length + ' photos</span></button></figure>',
+      '<span class="rm-figcount">' + (a.images || []).length + ' photos</span></button></figure>'
+    : '<div class="rm-nofig"><span>Photos follow with your travel documents</span></div>';
+  return [
+    '<article class="rm-card">',
+    figure,
     '<div class="rm-body">',
     a.badge ? '<div class="rm-badge">' + esc(a.badge) + '</div>' : '',
     '<div class="rm-head"><h3>' + esc(a.name) + '</h3></div>',

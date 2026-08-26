@@ -1,1 +1,1 @@
-This folder contains the built output assets for the worker "seeyouinlaos-website" generated at 2026-08-26T05:07:59.712Z.
+This folder contains the built output assets for the worker "seeyouinlaos-website" generated at 2026-08-26T07:51:22.833Z.

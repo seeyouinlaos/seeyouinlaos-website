@@ -332,7 +332,7 @@ button.btn.sm { padding: 10px 16px; font-size: 11px; min-height: 40px; }
 #summary .sum-line { opacity: .92; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* invitation overlay (§7) */
-#invitation { position: fixed; inset: 0; z-index: 100; display: grid; grid-template-columns: 1.1fr 1fr; background: var(--ink-s); }
+#invitation { position: fixed; inset: 0; z-index: 100; display: grid; grid-template-columns: 1.1fr 1fr; background: var(--ink-s); overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
 html[data-inv="closed"] #invitation { display: none; pointer-events: none; visibility: hidden; }
 #invitation .inv-photo { background: url('../assets/images/souphattra/heritage-courtyard-aerial.jpg') center/cover no-repeat; }
 #invitation .inv-side { display: grid; place-items: center; padding: 6vmin; background: rgba(33,31,28,.96); }
@@ -344,7 +344,14 @@ html[data-inv="closed"] #invitation { display: none; pointer-events: none; visib
 .inv-card .inv-note { font-size: 13.5px; max-width: 34ch; margin: 0 auto; }
 .inv-card .inv-cta { margin-top: 28px; }
 body.inv-lock { overflow: hidden; }
-@media (max-width: 860px) { #invitation { grid-template-columns: 1fr; grid-template-rows: 38vh 1fr; } }
+/* Mobile: the card may be TALLER than the viewport (personalised names,
+ * return link). The overlay itself scrolls; nothing is ever cut off. */
+@media (max-width: 860px) {
+  #invitation { grid-template-columns: 1fr; grid-template-rows: min(32svh, 260px) auto; }
+  #invitation .inv-photo { min-height: 180px; }
+  #invitation .inv-side { display: block; padding: 26px 5vw calc(48px + env(safe-area-inset-bottom)); }
+  .inv-card { margin: 0 auto; }
+}
 
 @media (prefers-reduced-motion: reduce) {
   .step.active, .party-tile, .party-tie { animation: none !important; }

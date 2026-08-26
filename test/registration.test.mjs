@@ -128,10 +128,31 @@ test('capacities match the final matrix: 26 rooms, no villa', () => {
   assert.equal(inv['souphattra-presidential'].capacity_total, 1);
   assert.equal(inv.train.capacity_total, 8);
   assert.equal(inv.train.selection_scope, 'GUEST');
-  assert.equal(inv.villa, undefined); // Airbnb/villa removed completely
+  assert.equal(inv.villa, undefined); // the cancelled 4BR villa has no inventory
   const total = Object.values(inv).filter((r) => r.capacity_unit === 'Room')
     .reduce((s, r) => s + r.capacity_total, 0);
-  assert.equal(total, 26);
+  assert.equal(total, 26); // Souphattra only — the Airbnb is outside the room matrix
+  assert.equal(inv['airbnb-2br'].capacity_total, 1);
+  assert.equal(inv['airbnb-2br'].capacity_unit, 'Party allocation');
+});
+
+test('the new 2BR Airbnb is hosted, separate from Souphattra, internal price never present', () => {
+  const b = ACCOMMODATIONS.find((a) => a.id === 'airbnb-2br');
+  assert.equal(b.kind, 'airbnb');
+  assert.equal(contributionPerGuest(b), 0);
+  assert.equal(b.property, 'Airbnb · Vientiane');
+  assert.equal(b.occupancy, 'Up to 4 adults');
+  assert.equal(b.stay, '27 February – 1 March 2027');
+  assert.match(b.referenceUrl, /airbnb\.com\/rooms\/23930245/);
+  assert.equal(partyTotal(b, ['g1', 'g2', 'g3', 'g4']), 0); // fully hosted
+});
+
+test('the internal 4BR booking value never reaches any guest-facing source', async () => {
+  const fs = await import('node:fs');
+  for (const f of ['../register/data.mjs', '../register/app.mjs', '../register/logic.mjs', '../index.html', '../register/index.html']) {
+    const t = fs.readFileSync(new URL(f, import.meta.url), 'utf8');
+    assert.ok(!t.includes('123.8'), 'internal booking value leaked into ' + f);
+  }
 });
 
 test('hold + confirm reduce remaining; release restores it', () => {
@@ -207,9 +228,9 @@ test('the active accommodation master is complete (final matrix, no villa)', () 
   assert.deepEqual(names, [
     'The Heritage', 'Heritage Executive', 'Heritage Grand Premier',
     'Noble Courtyard Suite', 'Grand Majestic Suite', 'Souphattra Majestic Suite',
-    'Souphattra Presidential',
+    'Souphattra Presidential', 'Airbnb Residence · Two Bedrooms',
   ]);
-  assert.ok(!names.some((n) => /Villa|Airbnb/i.test(n)), 'no villa/Airbnb product');
+  assert.ok(!names.some((n) => /Cozy Villa|4BR/i.test(n)), 'the cancelled 4BR villa never returns');
   assert.ok(!names.some((n) => /Heritage Exclusive/i.test(n)), 'it is Heritage Executive, never Exclusive');
   const noble = ACCOMMODATIONS.find((a) => a.id === 'noble-courtyard');
   assert.ok(/two bathrooms/.test(noble.blurb), 'Noble Courtyard keeps its full description');
@@ -221,7 +242,9 @@ test('the active accommodation master is complete (final matrix, no villa)', () 
     assert.ok(a.location, a.name + ' needs a location');
     assert.ok(a.blurb && a.blurb.length > 20, a.name + ' needs a description');
     assert.ok((a.amenities || []).length >= 4, a.name + ' needs amenities');
-    assert.ok((a.images || []).length >= 3, a.name + ' needs a hero image and gallery');
+    if (a.kind !== 'airbnb') {
+      assert.ok((a.images || []).length >= 3, a.name + ' needs a hero image and gallery');
+    }
     for (const src of a.images) assert.match(src, /^assets\/images\/rooms\/[a-z0-9-]+\.jpg$/);
   }
 });
