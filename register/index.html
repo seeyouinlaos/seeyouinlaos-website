@@ -29,6 +29,7 @@
 @font-face { font-family: 'PP Editorial Old'; src: url('../assets/fonts/PPEditorialOld-Italic.otf') format('opentype'); font-weight: 400; font-style: italic; font-display: swap; }
 
 :root {
+  --gold: #A8863B; --gold-soft: #C2A56A; --gold-line: rgba(168,134,59,.45);
   --ivory: #F2ECE1; --ink: #211F1C; --ink-s: #2B2823;
   --blush: #EAD9D4; --rose: #805A52; --cherry: #74070E; --cherry-photo: #B33A3F;
   --line: rgba(168,131,125,.35);
@@ -146,8 +147,9 @@ input:focus, select:focus, textarea:focus { border-bottom-color: var(--cherry); 
 .acc-figure { margin: 0 0 16px; }
 .acc-figure img { display: block; width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; }
 .acc-card.reserved { opacity: .92; }
-.acc-specs { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 18px; margin: 4px 0 2px; }
-.acc-specs div { display: flex; gap: 8px; font-size: 12.5px; }
+.acc-specs { display: grid; grid-template-columns: 1fr; gap: 3px 18px; margin: 4px 0 2px; }
+.acc-specs div { display: flex; gap: 8px; font-size: 12.5px; min-width: 0; }
+.acc-specs dd { min-width: 0; overflow-wrap: break-word; }
 .acc-specs dt { color: var(--rose); font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase; padding-top: 2px; min-width: 46px; }
 .acc-specs dd { color: var(--ink); }
 .acc-amen { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 2px; }
@@ -159,7 +161,7 @@ input:focus, select:focus, textarea:focus { border-bottom-color: var(--cherry); 
 .rv-room { display: grid; grid-template-columns: 200px 1fr; gap: 20px; align-items: center; border-top: 1px solid var(--line); padding: 20px 0; }
 .rv-room img { display: block; width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; }
 .rv-room h3 { margin: 4px 0; }
-@media (max-width: 560px) { .rv-room { grid-template-columns: 1fr; } .acc-specs { grid-template-columns: 1fr; } }
+@media (max-width: 560px) { .rv-room { grid-template-columns: 1fr; } }
 .home-card .hc-img { display: block; margin: -20px -24px 16px; }
 .home-card .hc-img img { display: block; width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; }
 .acc-avail { font-size: 11.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--rose); border-top: 1px solid var(--line); padding-top: 12px; margin-top: auto; }
@@ -244,6 +246,10 @@ body.pv-lock { overflow: hidden; }
 .jstatus li.here .s { font-weight: 500; }
 .jstatus li.next { opacity: .45; }
 
+.inv-card { position: relative; overflow: hidden; }
+.inv-motif { position: absolute; top: -90px; left: 50%; transform: translateX(-50%); width: 360px; height: auto; pointer-events: none; }
+.inv-card > *:not(.inv-motif) { position: relative; }
+
 /* invitation personalisation + return */
 #inv-for { margin: 16px 0 2px; animation: rise .8s ease .15s backwards; }
 #inv-for .inv-for-label { display: block; font-size: 10px; letter-spacing: .26em; text-transform: uppercase; color: var(--rose); margin-bottom: 5px; }
@@ -320,6 +326,42 @@ body.pv-lock { overflow: hidden; }
 .gr-qr .label { margin-top: 6px; font-size: 9.5px; }
 @media (max-width: 560px) { .gr-card { grid-template-columns: 1fr; } .gr-qr { text-align: left; } }
 
+
+/* inline swipe gallery on room cards */
+.acc-gal { position: relative; }
+.acc-track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch; cursor: grab; }
+.acc-track::-webkit-scrollbar { display: none; }
+.acc-track.drag { cursor: grabbing; scroll-snap-type: none; }
+.acc-track img { flex: 0 0 100%; width: 100%; height: auto; aspect-ratio: 3/2; object-fit: cover; scroll-snap-align: start; user-select: none; }
+.acc-gnav { position: absolute; top: 50%; transform: translateY(-50%); width: 38px; height: 38px; border-radius: 50%; border: 1px solid rgba(242,236,225,.55); background: rgba(33,31,28,.35); color: var(--ivory); font: inherit; font-size: 15px; cursor: pointer; opacity: 0; transition: opacity .3s; }
+.acc-gal:hover .acc-gnav, .acc-gnav:focus-visible { opacity: 1; }
+.acc-gprev { left: 10px; } .acc-gnext { right: 10px; }
+.acc-gcount { position: absolute; left: 10px; bottom: 8px; background: rgba(33,31,28,.72); color: var(--ivory); font-size: 10px; letter-spacing: .16em; padding: 4px 8px; }
+.acc-expand { position: absolute; right: 8px; bottom: 6px; width: 32px; height: 32px; border: 1px solid rgba(242,236,225,.55); background: rgba(33,31,28,.5); color: var(--ivory); font: inherit; font-size: 13px; cursor: pointer; }
+@media (hover: none) { .acc-gnav { opacity: 1; } }
+.acc-slots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 10px; aspect-ratio: 3/1.1; background: repeating-linear-gradient(45deg, rgba(168,134,59,.05), rgba(168,134,59,.05) 6px, transparent 6px, transparent 14px); border-bottom: 1px solid var(--line); }
+.acc-slot { display: grid; place-items: center; border: 1px dashed var(--gold-line); color: var(--gold); font-size: 10px; letter-spacing: .2em; }
+.acc-card.reserved .acc-avail { color: var(--gold); }
+.acc-avail { border-top-color: var(--gold-line); }
+
+/* guest-area badge */
+.pn-here { font-size: 10px; letter-spacing: .26em; text-transform: uppercase; color: var(--ivory); background: var(--ink-s); padding: 7px 12px; align-self: center; }
+
+/* profile photo + passport */
+.gf-ava { display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; overflow: hidden; margin-right: 12px; border: 1px solid var(--gold-line); background: rgba(255,255,255,.5); vertical-align: middle; }
+.gf-ava img { width: 100%; height: 100%; object-fit: cover; }
+.gf-ph { font-family: 'PP Editorial Old', serif; color: var(--gold); font-size: 15px; }
+.gf-media { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin: 18px 0 6px; }
+@media (max-width: 620px) { .gf-media { grid-template-columns: 1fr; } }
+.gf-pmrow { display: flex; align-items: center; gap: 14px; margin-top: 8px; }
+.gf-pimg { width: 62px; height: 62px; border-radius: 50%; object-fit: cover; border: 1px solid var(--gold-line); display: inline-grid; place-items: center; font-size: 24px; }
+.gf-passport .btn { margin-top: 8px; }
+.gold-note { color: var(--gold); }
+
+/* folio cost */
+.stay-sum.fol .fol-day { border-bottom: 1px solid var(--gold-line); }
+.stay-sum.fol .fol-day .l { color: var(--gold); font-size: 16px; }
+
 /* nav + summary rail */
 .stepnav { display: flex; justify-content: space-between; align-items: center; margin-top: 44px; gap: 16px; }
 button.btn { font: inherit; cursor: pointer; letter-spacing: .18em; text-transform: uppercase; font-size: 12px; padding: 15px 30px; border: 1px solid var(--ink-s); background: var(--ink-s); color: var(--ivory); transition: background .3s, border-color .3s; min-height: 48px; }
@@ -369,6 +411,7 @@ body.inv-lock { overflow: hidden; }
 <div class="inv-photo" role="img" aria-label="The courtyard pool of Souphattra Heritage Vientiane from above"></div>
 <div class="inv-side">
 <div class="inv-card">
+<svg class="inv-motif" aria-hidden="true" viewBox="0 0 400 400" fill="none"><g stroke="var(--gold-line)" stroke-width="0.6"><circle cx="200" cy="200" r="56" fill="var(--gold)" stroke="none" opacity=".16"/><circle cx="200" cy="200" r="86" stroke-dasharray="1 7"/><circle cx="200" cy="200" r="118" stroke-dasharray="1 8"/><circle cx="200" cy="200" r="150" stroke-dasharray="1 9"/><circle cx="200" cy="200" r="182" stroke-dasharray="1 10"/></g><circle cx="262" cy="140" r="2" fill="var(--gold-soft)"/><circle cx="128" cy="252" r="1.5" fill="var(--gold-soft)"/></svg>
 <div class="inv-mono">H&amp;S</div>
 <h1>See You<br/>In Laos</h1>
 <div class="inv-sub">A private invitation from Haruthai &amp; Suthep</div>
@@ -382,7 +425,7 @@ body.inv-lock { overflow: hidden; }
 </div>
 
 <header class="top">
-<div class="mark serif">see you in laos<span class="dot">.</span></div>
+<a class="mark serif" href="../" aria-label="Back to the See You In Laos website" style="text-decoration:none">see you in laos<span class="dot">.</span></a>
 <nav aria-label="Site">
 <a href="../#weekend">Journey</a><a href="../#places">Stay</a><a href="../#dresscode">Wedding</a><a href="../#travel">Travel</a><a href="#" aria-current="page">Guest Area</a>
 </nav>

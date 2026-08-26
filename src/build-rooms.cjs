@@ -25,31 +25,47 @@ const esc = (s) => String(s == null ? '' : s)
 function card(a) {
   const specs = [['Size', a.size], ['Bed', a.bed], ['Guests', a.occupancy], ['Where', a.location]]
     .filter((r) => r[1]);
-  const gallery = JSON.stringify(a.images || []).replace(/"/g, '&quot;');
   const amen = a.amenities || [];
-  const figure = (a.images || []).length
-    ? '<figure class="rm-figure"><button type="button" class="rm-fig-btn" data-gallery="' + gallery +
-      '" data-name="' + esc(a.name) + '" aria-label="Open ' + esc(a.name) + ' photo gallery">' +
-      '<img alt="' + esc(a.name) + ' at ' + esc(a.property) + '" src="' + a.images[0] +
-      '" width="1600" height="1067" loading="lazy" decoding="async"/>' +
-      '<span class="rm-figcount">' + (a.images || []).length + ' photos</span></button></figure>'
-    : '<div class="rm-nofig"><span>Photos follow with your travel documents</span></div>';
+  const imgs = a.images || [];
+  const reserved = a.selectable === false;
+  /* PRIMARY interaction: inline swipe gallery (scroll-snap). The lightbox
+   * remains a secondary option via the expand control. */
+  const gallery = imgs.length
+    ? '<div class="rm-gal" data-name="' + esc(a.name) + '">' +
+      '<div class="rm-track" tabindex="0" aria-label="' + esc(a.name) + ' photos — swipe or use arrow keys">' +
+      imgs.map((s, i) => '<img alt="' + esc(a.name) + ' · photo ' + (i + 1) + '" src="' + s +
+        '" width="1600" height="1067" loading="lazy" decoding="async" draggable="false"/>').join('') +
+      '</div>' +
+      (imgs.length > 1
+        ? '<button type="button" class="rm-gnav rm-gprev" aria-label="Previous photo">&#8592;</button>' +
+          '<button type="button" class="rm-gnav rm-gnext" aria-label="Next photo">&#8594;</button>' +
+          '<span class="rm-gcount">1 / ' + imgs.length + '</span>'
+        : '') +
+      '<button type="button" class="rm-expand" data-gallery="' + JSON.stringify(imgs).replace(/"/g, '&quot;') +
+        '" data-name="' + esc(a.name) + '" aria-label="Open ' + esc(a.name) + ' photos in full view">&#8599;</button>' +
+      '</div>'
+    : (a.imageSlots
+        ? '<div class="rm-slots">' + a.imageSlots.map((s) => '<span class="rm-slot">' + esc(s) + '</span>').join('') + '</div>'
+        : '');
   return [
-    '<article class="rm-card">',
-    figure,
+    '<article class="rm-card' + (reserved ? ' reserved' : '') + '">',
+    gallery,
     '<div class="rm-body">',
     a.badge ? '<div class="rm-badge">' + esc(a.badge) + '</div>' : '',
     '<div class="rm-head"><h3>' + esc(a.name) + '</h3></div>',
     '<div class="rm-meta">' + esc(a.stay) + ' · ' + a.nights + ' nights</div>',
-    a.kind !== 'airbnb' ? '<div class="rm-hosted">Second night complimentary · hosted by Haruthai &amp; Suthep</div>' : '',
+    a.kind !== 'airbnb' && !reserved ? '<div class="rm-hosted">Second night complimentary · hosted by Haruthai &amp; Suthep</div>' : '',
     '<p class="rm-blurb">' + esc(a.blurb) + '</p>',
     '<dl class="rm-specs">' + specs.map((r) => '<div><dt>' + r[0] + '</dt><dd>' + esc(r[1]) + '</dd></div>').join('') + '</dl>',
     amen.length
-      ? '<div class="rm-amen">' + amen.map((x, i) => '<span' + (i >= 5 ? ' class="rm-amen-x" hidden' : '') + '>' + esc(x) + '</span>').join('') +
-        (amen.length > 5 ? '<button type="button" class="more rm-more" aria-expanded="false">+' + (amen.length - 5) + ' more</button>' : '') + '</div>'
+      ? '<div class="rm-amen">' + amen.map((x) => '<span>' + esc(x) + '</span>').join('') + '</div>'
       : '',
-    '<div class="rm-avail" role="status">Request availability</div>',
-    '<div class="rm-foot"><a class="rm-cta" href="register/">Request this room in your Guest Area</a></div>',
+    reserved
+      ? '<div class="rm-avail rm-reserved" role="status">Reserved</div>'
+      : '<div class="rm-avail" role="status">Request availability</div>',
+    reserved
+      ? ''
+      : '<div class="rm-foot"><a class="rm-cta" href="register/">Request this room in your Guest Area</a></div>',
     '</div></article>',
   ].filter(Boolean).join('\n');
 }
@@ -74,16 +90,27 @@ const LIGHTBOX = [
   '  function open(list, name, from) { if (!list || !list.length) return; imgs = list; idx = 0; nm = name; trigger = from; render(); lb.hidden = false; document.body.style.overflow = "hidden"; lb.querySelector(".rm-lb-close").focus(); }',
   '  function close() { lb.hidden = true; document.body.style.overflow = ""; if (trigger) trigger.focus(); }',
   '  function step(d) { if (!imgs.length) { close(); return; } idx = (idx + d + imgs.length) % imgs.length; render(); }',
-  '  document.querySelectorAll(".rm-fig-btn").forEach(function (b) {',
+  '  document.querySelectorAll(".rm-expand").forEach(function (b) {',
   '    b.addEventListener("click", function () { open(JSON.parse(b.getAttribute("data-gallery")), b.getAttribute("data-name"), b); });',
   '  });',
-  '  document.querySelectorAll(".rm-more").forEach(function (b) {',
-  '    b.addEventListener("click", function () {',
-  '      var expanded = b.getAttribute("aria-expanded") === "true";',
-  '      b.parentElement.querySelectorAll(".rm-amen-x").forEach(function (s) { s.hidden = expanded; });',
-  '      b.setAttribute("aria-expanded", String(!expanded));',
-  '      b.textContent = expanded ? "+" + b.parentElement.querySelectorAll(".rm-amen-x").length + " more" : "show less";',
+  '  document.querySelectorAll(".rm-gal").forEach(function (gal) {',
+  '    var track = gal.querySelector(".rm-track");',
+  '    var count = gal.querySelector(".rm-gcount");',
+  '    var n = track.querySelectorAll("img").length;',
+  '    function pos() { return Math.round(track.scrollLeft / track.clientWidth); }',
+  '    function go(d) { track.scrollTo({ left: (pos() + d) * track.clientWidth, behavior: "smooth" }); }',
+  '    track.addEventListener("scroll", function () { if (count) count.textContent = (Math.min(pos(), n - 1) + 1) + " / " + n; }, { passive: true });',
+  '    var pv = gal.querySelector(".rm-gprev"), nx = gal.querySelector(".rm-gnext");',
+  '    if (pv) pv.addEventListener("click", function () { go(-1); });',
+  '    if (nx) nx.addEventListener("click", function () { go(1); });',
+  '    track.addEventListener("keydown", function (e) {',
+  '      if (e.key === "ArrowLeft") { e.preventDefault(); go(-1); }',
+  '      if (e.key === "ArrowRight") { e.preventDefault(); go(1); }',
   '    });',
+  '    var down = null;',
+  '    track.addEventListener("pointerdown", function (e) { if (e.pointerType === "mouse") { down = { x: e.clientX, s: track.scrollLeft }; track.classList.add("drag"); } });',
+  '    addEventListener("pointermove", function (e) { if (down) track.scrollLeft = down.s - (e.clientX - down.x); });',
+  '    addEventListener("pointerup", function () { if (down) { down = null; track.classList.remove("drag"); var p = pos(); track.scrollTo({ left: p * track.clientWidth, behavior: "smooth" }); } });',
   '  });',
   '  lb.querySelector(".rm-lb-close").addEventListener("click", close);',
   '  lb.querySelector(".rm-lb-prev").addEventListener("click", function () { step(-1); });',

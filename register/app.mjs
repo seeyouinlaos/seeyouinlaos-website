@@ -227,8 +227,9 @@ function adoptInvitation(inv) {
       journey: { bangkok: false, train: false, independent: true },
       events: { alms: true, ceremony: true, dinner: true },
       diet: 'No restrictions', allergy: 'no', allergyDetail: '', severe: false,
-      access: '', mobility: '', berth: '', spa: { requested: false },
-      favFood: '', favDrink: '', favColour: '', favFilm: '', note: '',
+      berth: '', spa: { requested: false },
+      favFood: '', favDrink: '', favColour: '', favFilm: '',
+      coffeeTea: '', sweetSavoury: '', favFlower: '', favSong: '',
     }));
     S.stay.occupantGuestIds = inv.guests.map((g) => g.guestId);
   }
@@ -248,10 +249,14 @@ function renderPrivnav() {
   if (!S.invitation || isAuthOut()) { nav.hidden = true; return; }
   nav.hidden = false;
   const name = stepEls[cur].dataset.step;
-  nav.innerHTML = '<button type="button" id="nav-invitation">Invitation</button>' +
+  nav.innerHTML = '<span class="pn-here">Guest Area</span>' +
+    '<button type="button" id="nav-invitation">Invitation</button>' +
     PRIVNAV.map(([st, label]) =>
     '<button type="button" data-nav="' + st + '"' + (name === st ? ' aria-current="true"' : '') + '>' + label + '</button>').join('') +
-    '<span class="pn-exit"><button type="button" id="save-exit">Save &amp; exit</button><button type="button" id="log-out">Log out</button></span>';
+    '<span class="pn-exit"><button type="button" id="pn-home">Website</button><button type="button" id="save-exit">Save &amp; exit</button><button type="button" id="log-out">Log out</button></span>';
+  nav.querySelector('#pn-home').addEventListener('click', () => {
+    saveDraft(); location.href = '../'; // progress saved; the personal link reopens the journey
+  });
   nav.querySelector('#nav-invitation').addEventListener('click', () => {
     setInvitationState('open', 'privnav-invitation', { force: true });
   });
@@ -481,12 +486,44 @@ function wireModulePicker(box, field) {
  * src/build-rooms.cjs from this very model), the selection cards here, the
  * review page and the confirmed journey. No second room description exists. */
 const roomImg = (p) => '../' + p;
-function roomFigure(a, i = 0) {
-  const src = (a.images || [])[i];
-  if (!src) return '';
-  return '<figure class="acc-figure"><button type="button" class="fig-btn" data-view="' + a.id + '" aria-label="Open ' + esc(a.name) + ' gallery and details">' +
-    '<img src="' + roomImg(src) + '" alt="' + esc(a.name) + ' at ' + esc(a.property) + '" width="1600" height="1067" loading="lazy" decoding="async"/>' +
-    '<span class="fig-count">' + (a.images || []).length + ' photos</span></button></figure>';
+function roomFigure(a) {
+  const imgs = a.images || [];
+  if (!imgs.length) {
+    return a.imageSlots
+      ? '<div class="acc-slots">' + a.imageSlots.map((s) => '<span class="acc-slot">' + esc(s) + '</span>').join('') + '</div>'
+      : '';
+  }
+  return '<div class="acc-gal"><div class="acc-track" tabindex="0" aria-label="' + esc(a.name) + ' photos — swipe or use arrow keys">' +
+    imgs.map((s, i) => '<img src="' + roomImg(s) + '" alt="' + esc(a.name) + ' · photo ' + (i + 1) + '" width="1600" height="1067" loading="lazy" decoding="async" draggable="false"/>').join('') +
+    '</div>' +
+    (imgs.length > 1
+      ? '<button type="button" class="acc-gnav acc-gprev" aria-label="Previous photo">&#8592;</button>' +
+        '<button type="button" class="acc-gnav acc-gnext" aria-label="Next photo">&#8594;</button>' +
+        '<span class="acc-gcount">1 / ' + imgs.length + '</span>'
+      : '') +
+    '<button type="button" class="acc-expand" data-view="' + a.id + '" aria-label="Open ' + esc(a.name) + ' details">&#8599;</button>' +
+    '</div>';
+}
+function wireCardGalleries(box) {
+  box.querySelectorAll('.acc-gal').forEach((gal) => {
+    const track = gal.querySelector('.acc-track');
+    const count = gal.querySelector('.acc-gcount');
+    const n = track.querySelectorAll('img').length;
+    const pos = () => Math.round(track.scrollLeft / track.clientWidth);
+    const go = (d) => track.scrollTo({ left: (pos() + d) * track.clientWidth, behavior: reduced ? 'auto' : 'smooth' });
+    track.addEventListener('scroll', () => { if (count) count.textContent = (Math.min(pos(), n - 1) + 1) + ' / ' + n; }, { passive: true });
+    const pv = gal.querySelector('.acc-gprev'), nx = gal.querySelector('.acc-gnext');
+    if (pv) pv.addEventListener('click', () => go(-1));
+    if (nx) nx.addEventListener('click', () => go(1));
+    track.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') { e.preventDefault(); go(-1); }
+      if (e.key === 'ArrowRight') { e.preventDefault(); go(1); }
+    });
+    let down = null;
+    track.addEventListener('pointerdown', (e) => { if (e.pointerType === 'mouse') { down = { x: e.clientX, s: track.scrollLeft }; track.classList.add('drag'); } });
+    addEventListener('pointermove', (e) => { if (down) track.scrollLeft = down.s - (e.clientX - down.x); });
+    addEventListener('pointerup', () => { if (down) { down = null; track.classList.remove('drag'); track.scrollTo({ left: pos() * track.clientWidth, behavior: 'smooth' }); } });
+  });
 }
 function roomSpecs(a) {
   const rows = [['Size', a.size], ['Bed', a.bed], ['Guests', a.occupancy], ['Where', a.location]]
@@ -495,8 +532,7 @@ function roomSpecs(a) {
   return '<dl class="acc-specs">' + rows.map((r) =>
     '<div><dt>' + r[0] + '</dt><dd>' + esc(r[1]) + '</dd></div>').join('') + '</dl>' +
     ((a.amenities || []).length
-      ? '<div class="acc-amen">' + a.amenities.slice(0, 5).map((x) => '<span>' + esc(x) + '</span>').join('') +
-        (a.amenities.length > 5 ? '<button type="button" class="more" data-view="' + a.id + '">+' + (a.amenities.length - 5) + ' more</button>' : '') + '</div>'
+      ? '<div class="acc-amen">' + a.amenities.map((x) => '<span>' + esc(x) + '</span>').join('') + '</div>'
       : '');
 }
 
@@ -556,6 +592,7 @@ function renderStay() {
     saveDraft(); renderStay(); renderSummary();
   }));
   box.querySelectorAll('[data-view]').forEach((b) => b.addEventListener('click', () => openAccOverlay(b.getAttribute('data-view'))));
+  wireCardGalleries(box);
   const bed = box.querySelector('#stay-bed'); bed.addEventListener('change', () => { S.stay.bed = bed.value === 'No preference' ? '' : bed.value; saveDraft(); });
   box.querySelector('#stay-req').addEventListener('input', (e) => { S.stay.request = e.target.value; saveDraft(); });
 }
@@ -861,7 +898,20 @@ function renderSpa() {
 function renderEach() {
   const box = document.getElementById('each-box');
   box.innerHTML = S.guests.map((g, i) =>
-    '<details class="guest-fold"' + (i === 0 ? ' open' : '') + '><summary><span class="n">' + pad(i + 1) + '</span>' + esc(g.fullName) + '</summary>' +
+    '<details class="guest-fold"' + (i === 0 ? ' open' : '') + '><summary><span class="n">' + pad(i + 1) + '</span>' +
+    '<span class="gf-ava">' + (g.photo ? '<img src="' + g.photo + '" alt=""/>' : '<span class="gf-ph">' + esc(g.preferredName.slice(0, 1)) + '</span>') + '</span>' +
+    esc(g.fullName) + '</summary>' +
+    '<div class="gf-media"><div class="gf-photo">' +
+    '<div class="label">Profile photo · optional</div>' +
+    '<div class="gf-pmrow">' + (g.photo ? '<img class="gf-pimg" src="' + g.photo + '" alt="Profile photo of ' + esc(g.preferredName) + '"/>' : '<span class="gf-pimg gf-ph">' + esc(g.preferredName.slice(0, 1)) + '</span>') +
+    '<span><button type="button" class="btn ghost sm" data-photo="' + g.guestId + '">' + (g.photo ? 'Replace photo' : 'Upload photo') + '</button>' +
+    (g.photo ? ' <button type="button" class="btn ghost sm" data-photo-rm="' + g.guestId + '">Remove</button>' : '') + '</span></div>' +
+    '<input type="file" accept="image/*" hidden data-photo-input="' + g.guestId + '"/></div>' +
+    '<div class="gf-passport"><div class="label">Passport · identity page</div>' +
+    (g.passport
+      ? '<p class="note">' + esc(g.passport.name) + ' · selected</p><p class="note gold-note">Held on this device only — the secure transfer to Guest Relations activates with the private document vault.</p><button type="button" class="btn ghost sm" data-pass-rm="' + g.guestId + '">Remove</button>'
+      : '<p class="note">One photo or scan of the passport identity page is all we need.</p><button type="button" class="btn ghost sm" data-pass="' + g.guestId + '">Select passport file</button>') +
+    '<input type="file" accept="image/*,.pdf" hidden data-pass-input="' + g.guestId + '"/></div></div>' +
     '<div class="cols2">' +
     ef(g, 'email', 'Email', 'email') + ef(g, 'phone', 'Telephone', 'tel') +
     '<div class="field"><label>Dietary preference</label><select data-ef="diet">' + ['No restrictions', 'Vegetarian', 'Vegan', 'Pescatarian', 'Gluten-free', 'Lactose-free', 'Other'].map((o) => '<option' + (g.diet === o ? ' selected' : '') + '>' + o + '</option>').join('') + '</select></div>' +
@@ -873,13 +923,16 @@ function renderEach() {
     '<div class="field"><label>Severe / needs special handling?</label><div class="join">' +
     '<label><input type="radio" name="sev-' + g.guestId + '" value="yes"' + (g.severe ? ' checked' : '') + '/><span class="yes">Yes, severe</span></label>' +
     '<label><input type="radio" name="sev-' + g.guestId + '" value="no"' + (!g.severe ? ' checked' : '') + '/><span class="no">Standard care</span></label></div></div></div>' +
-    '<div class="cols2">' +
-    ef(g, 'dislikes', 'Food dislikes or preferences') +
-    ef(g, 'access', 'Accessibility needs') + ef(g, 'mobility', 'Mobility needs') + ef(g, 'note', 'A personal celebration or note') +
-    '</div>' +
+    '<div class="cols2">' + ef(g, 'dislikes', 'Food dislikes or preferences') + '</div>' +
     '<div class="label" style="margin:22px 0 4px">A little about you</div>' +
-    '<div class="cols2">' + ef(g, 'favFood', 'Favourite food') + ef(g, 'favDrink', 'Favourite drink') + ef(g, 'favColour', 'Favourite colour') + ef(g, 'favFilm', 'Favourite film') + '</div>' +
-    '<p class="note">These little preferences help Guest Relations personalise your stay.</p>' +
+    '<div class="cols2">' +
+    ef(g, 'favFood', 'Favourite food') + ef(g, 'favDrink', 'Favourite drink') +
+    selEf(g, 'coffeeTea', 'Coffee or tea?', ['', 'Coffee', 'Tea', 'Both']) +
+    selEf(g, 'sweetSavoury', 'Sweet or savoury?', ['', 'Sweet', 'Savoury', 'Both']) +
+    ef(g, 'favColour', 'Favourite colour') + ef(g, 'favFlower', 'Favourite flower') +
+    ef(g, 'favFilm', 'A book or film you love') + ef(g, 'favSong', 'A song you never skip') +
+    '</div>' +
+    '<p class="note">These little preferences help Guest Relations shape quiet surprises. Nothing is ever displayed back.</p>' +
     '</details>').join('');
   box.querySelectorAll('.guest-fold').forEach((block, i) => {
     const g = S.guests[i];
@@ -893,7 +946,47 @@ function renderEach() {
     }));
     block.querySelectorAll('input[name^="sev-"]').forEach((el) => el.addEventListener('change', () => { g.severe = el.value === 'yes' && el.checked; saveDraft(); }));
   });
+  // profile photo: downscaled, stored locally with the draft
+  box.querySelectorAll('[data-photo]').forEach((b) => b.addEventListener('click', () =>
+    box.querySelector('[data-photo-input="' + b.getAttribute('data-photo') + '"]').click()));
+  box.querySelectorAll('[data-photo-rm]').forEach((b) => b.addEventListener('click', () => {
+    const g = S.guests.find((x) => x.guestId === b.getAttribute('data-photo-rm'));
+    if (g) { delete g.photo; saveDraft(); renderEach(); }
+  }));
+  box.querySelectorAll('[data-photo-input]').forEach((inp) => inp.addEventListener('change', () => {
+    const g = S.guests.find((x) => x.guestId === inp.getAttribute('data-photo-input'));
+    const f = inp.files && inp.files[0];
+    if (!g || !f) return;
+    const img = new Image();
+    img.onload = () => {
+      const c = document.createElement('canvas');
+      const s = Math.min(1, 256 / Math.max(img.width, img.height));
+      c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      g.photo = c.toDataURL('image/jpeg', 0.82);
+      URL.revokeObjectURL(img.src);
+      saveDraft(); renderEach();
+    };
+    img.src = URL.createObjectURL(f);
+  }));
+  // passport: metadata only on this device — NEVER uploaded/bundled anywhere yet
+  box.querySelectorAll('[data-pass]').forEach((b) => b.addEventListener('click', () =>
+    box.querySelector('[data-pass-input="' + b.getAttribute('data-pass') + '"]').click()));
+  box.querySelectorAll('[data-pass-rm]').forEach((b) => b.addEventListener('click', () => {
+    const g = S.guests.find((x) => x.guestId === b.getAttribute('data-pass-rm'));
+    if (g) { delete g.passport; saveDraft(); renderEach(); }
+  }));
+  box.querySelectorAll('[data-pass-input]').forEach((inp) => inp.addEventListener('change', () => {
+    const g = S.guests.find((x) => x.guestId === inp.getAttribute('data-pass-input'));
+    const f = inp.files && inp.files[0];
+    if (!g || !f) return;
+    g.passport = { name: f.name, size: f.size, selectedAt: new Date().toISOString() };
+    saveDraft(); renderEach();
+  }));
 }
+const selEf = (g, k, label, opts) =>
+  '<div class="field"><label>' + esc(label) + '</label><select data-ef="' + k + '">' +
+  opts.map((o) => '<option value="' + o + '"' + ((g[k] || '') === o ? ' selected' : '') + '>' + (o || '—') + '</option>').join('') + '</select></div>';
 const ef = (g, k, label, type = 'text') =>
   '<div class="field"><label>' + esc(label) + '</label><input type="' + type + '" data-ef="' + k + '" value="' + esc(g[k] || '') + '"/></div>';
 
@@ -910,35 +1003,47 @@ function renderCost() {
   const tc = trainContribution(TRAIN, riders.length) || 0;
   const trf = transfersTotal(TRANSFERS, S.transfers);
   const total = journeyTotal(acc, occ, TRAIN, riders.length, TRANSFERS, S.transfers);
+  const neutral = acc && acc.contributionPerGuest == null;
+  const row = (l, r, cls) => '<div class="row' + (cls ? ' ' + cls : '') + '"><span class="l">' + l + '</span><span class="r">' + r + '</span></div>';
+  const day = (t) => '<div class="row fol-day"><span class="l serif-it">' + t + '</span><span class="r"></span></div>';
   let rows = '';
-  if (!acc) {
-    rows += '<div class="row"><span class="l serif-it">Accommodation</span><span class="r">Not selected yet · please choose your room under My Stay</span></div>';
-  } else {
-    rows += '<div class="row"><span class="l serif-it">' + esc(acc.name) + '</span><span class="r">1 ' + esc(acc.capacityUnit.toLowerCase()) + ' · ' + esc(acc.stay) + '</span></div>' +
-      (acc.contributionPerGuest == null
-        ? '<div class="row"><span class="l">Stay</span><span class="r">Arranged separately · coordinated by Guest Relations</span></div>'
-        : partyCharges(acc, occ).map((c) => {
-            const g = S.guests.find((x) => x.guestId === c.guestId);
-            return '<div class="row"><span class="l">' + esc(g ? g.fullName : c.guestId) + '</span><span class="r">' + money(c.amount) + '</span></div>';
-          }).join('') +
-          '<div class="row"><span class="l">Stay contribution</span><span class="r">' + money(partyTotal(acc, occ)) + '</span></div>' +
-          '<div class="row"><span class="l">Second night</span><span class="r">Complimentary · hosted by Haruthai &amp; Suthep</span></div>');
-  }
-  if (riders.length) {
-    rows += '<div class="row"><span class="l serif-it">Overnight Sleeper Train</span><span class="r">' + riders.length + ' guest' + (riders.length > 1 ? 's' : '') + ' × ' + money(TRAIN.contributionPerGuest) + '</span></div>' +
-      '<div class="row"><span class="l">Bangkok → Nong Khai</span><span class="r">' + money(tc) + '</span></div>';
-  }
+  // 27 FEBRUARY — arrival
+  rows += day('Saturday · 27 February');
+  rows += row('Personal airport welcome &amp; arrival coordination', 'USD 0 · included');
   for (const s of S.transfers || []) {
     const t = TRANSFERS.find((x) => x.id === s.transferId);
-    if (!t) continue;
-    rows += '<div class="row"><span class="l serif-it">' + esc(t.name) + '</span><span class="r">' + (s.units || 1) + ' unit' + ((s.units || 1) > 1 ? 's' : '') + ' × ' + money(t.pricePerUnit) + '</span></div>' +
-      '<div class="row"><span class="l">' + esc([s.details && s.details.date, s.details && s.details.ref].filter(Boolean).join(' · ') || 'Details under My Travel') + '</span><span class="r">' + money(t.pricePerUnit * (s.units || 1)) + '</span></div>';
+    if (t && t.direction === 'arrival') rows += row(esc(t.name) + ' · ' + (s.units || 1) + ' unit' + ((s.units || 1) > 1 ? 's' : ''), money(t.pricePerUnit * (s.units || 1)));
   }
-  rows += '<div class="row total"><span class="l serif-it">Total journey cost</span><span class="r js-total">' + money(total) + '</span></div>';
+  if (riders.length) rows += row('Overnight Sleeper Train · Bangkok → Nong Khai · ' + riders.length + ' × ' + money(TRAIN.contributionPerGuest), money(tc));
+  if (!acc) {
+    rows += row('<span class="serif-it">Accommodation</span>', 'Not selected yet · choose under My Stay');
+  } else {
+    rows += row('<span class="serif-it">' + esc(acc.name) + '</span> · ' + esc(acc.size || '') + ' · night one',
+      neutral ? 'Arranged separately' : partyCharges(acc, occ).map((c) => { const g = S.guests.find((x) => x.guestId === c.guestId); return esc(g ? g.preferredName : c.guestId) + ' ' + money(c.amount); }).join(' · '));
+    rows += row('Welcome drink', 'USD 0 · included');
+  }
+  // 28 FEBRUARY — the wedding day
+  rows += day('Sunday · 28 February');
+  rows += row('Hosted breakfast', 'USD 0 · included');
+  rows += row('Alms Giving Ceremony', 'USD 0 · included');
+  rows += row('Wedding Ceremony', 'USD 0 · included');
+  rows += row('Sunset cocktails, cake reception &amp; Wedding Dinner', 'USD 0 · included');
+  rows += row('Two-hour beverage package', 'USD 0 · included');
+  if (acc && !neutral) rows += row('<span class="serif-it">' + esc(acc.name) + '</span> · night two', 'USD 0 · hosted by Haruthai &amp; Suthep');
+  // 1 MARCH — departure
+  rows += day('Monday · 1 March');
+  rows += row('Hosted breakfast', 'USD 0 · included');
+  rows += row('Departure coordination within the wedding programme', 'USD 0 · included');
+  for (const s of S.transfers || []) {
+    const t = TRANSFERS.find((x) => x.id === s.transferId);
+    if (t && t.direction === 'departure') rows += row(esc(t.name) + ' · ' + (s.units || 1) + ' unit' + ((s.units || 1) > 1 ? 's' : ''), money(t.pricePerUnit * (s.units || 1)));
+  }
+  rows += '<div class="row total"><span class="l serif-it">Total guest contribution</span><span class="r js-total">' + money(total) + '</span></div>';
   box.innerHTML =
-    '<div class="stay-sum" aria-live="polite">' + rows + '</div>' +
-    '<p class="note" style="margin-top:16px">' + esc(COPY.priceNote) + ' ' + esc(COPY.hostedNight) + '</p>' +
-    '<p class="note">' + esc(COPY.payment) + ' One person may settle the Party invoice.</p>';
+    '<p class="note" style="margin-bottom:18px">Everything below is part of your journey. Lines at USD 0 are included or hosted; your contribution is only what carries an amount.</p>' +
+    '<div class="stay-sum fol" aria-live="polite">' + rows + '</div>' +
+    '<p class="note" style="margin-top:16px">' + esc(COPY.priceNote) + '</p>' +
+    '<p class="note">' + esc(COPY.payment) + ' One person may settle the invoice for everyone travelling with them.</p>';
 }
 
 /* ---------------- step 10 · review (§28) ---------------- */
@@ -1006,7 +1111,7 @@ function renderReview() {
   html += sec('Your Journey Cost', idx('cost'), jcRows);
   html += sec('Each of You', idx('each'), S.guests.map((g) => [esc(g.preferredName),
     esc(g.diet) + (g.allergy === 'yes' ? ' · allergy: ' + esc(g.allergyDetail || 'yes') + (g.severe ? ' (severe)' : '') : '') +
-    (g.access ? ' · access: ' + esc(g.access) : '') + (g.spa && g.spa.requested ? ' · spa REQUESTED' : '')]));
+    (g.spa && g.spa.requested ? ' · spa REQUESTED' : '')]));
   if (S.additionalGuestRequest) html += sec('Additional guest request', idx('party'), [['Request', esc(S.additionalGuestRequest) + ' — subject to Guest Relations approval']]);
   html += '<label class="confirm-row"><input type="checkbox" id="confirm-accurate"/><span>We confirm this information is accurate. We understand this registration is a request and that Guest Relations confirms all arrangements separately.</span></label>';
   html += '<p class="err" id="review-err"></p>';
@@ -1021,8 +1126,10 @@ function trainOnwardLine() {
   return anyReq ? 'Requested · Guest Relations confirms' : 'Not requested';
 }
 function currentRegistration() {
+  // photos stay on this device; passports never leave it (document vault pending)
+  const guests = S.guests.map((g) => { const { photo, ...rest } = g; return { ...rest, passport: g.passport ? { name: g.passport.name, size: g.passport.size } : undefined }; });
   return {
-    guests: S.guests, stay: currentAcc() ? { ...S.stay } : { accommodationId: null },
+    guests, stay: currentAcc() ? { ...S.stay } : { accommodationId: null },
     arrival: { ...S.arrival, point: S.guests.some((g) => g.journey.train) ? 'Nong Khai Railway Station' : (S.arrival.point || WEDDING.airport) },
     departure: S.departure, transfers: S.transfers, additionalGuestRequest: S.additionalGuestRequest,
     trainNote: S.trainNote, notes: S.notes, registration_submitted_at: S.registration_submitted_at,

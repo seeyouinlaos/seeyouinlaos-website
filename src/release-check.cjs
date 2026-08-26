@@ -94,28 +94,33 @@ const roomNames = [...dataSrc.matchAll(/^\s*id: '[a-z0-9-]+', name: '([^']+)'/gm
 const roomImages = [...dataSrc.matchAll(/RM \+ '([a-z0-9-]+\.jpg)'/g)].map((m) => 'assets/images/rooms/' + m[1]);
 const missingImages = roomImages.filter((p) => !fs.existsSync(path.join(ROOT, p)));
 const missingCards = roomNames.filter((n) => !indexHtml.includes('<h3>' + n + '</h3>'));
-const noblePresent = /noble-courtyard/.test(dataSrc) && /contributionPerGuest: 220/.test(dataSrc);
+const noblePresent = /noble-courtyard/.test(dataSrc) && /contributionPerGuest: 240/.test(dataSrc);
 const oldVillaGone = !/Cozy Villa|4BR|id: 'villa'/.test(dataSrc);
 const airbnbSeg = dataSrc.slice(dataSrc.indexOf("id: 'airbnb-2br'"));
 const airbnbOk = airbnbSeg.length > 10
   && /contributionPerGuest: null/.test(airbnbSeg)
   && /capacityUnit: 'Party allocation'/.test(airbnbSeg)
-  && !/COMPLIMENTARY|fully hosted|hosted by|USD 0|nothing to book/i.test(airbnbSeg);
+  && !/COMPLIMENTARY|fully hosted|hosted by|USD 0|nothing to book|Photos follow with your travel documents/i.test(airbnbSeg);
 const bookingValueLeak = /123\.8/.test(dataSrc) || /123\.8/.test(appJs) || /123\.8/.test(indexHtml);
-const matrixOk = ['contributionPerGuest: 130', 'contributionPerGuest: 150', 'contributionPerGuest: 170',
-  'contributionPerGuest: 220', 'contributionPerGuest: 260', 'contributionPerGuest: 290', 'contributionPerGuest: 766.50']
+const matrixOk = ['contributionPerGuest: 145', 'contributionPerGuest: 155', 'contributionPerGuest: 170',
+  'contributionPerGuest: 240', 'contributionPerGuest: 250', 'contributionPerGuest: 290', 'contributionPerGuest: 750']
   .every((s) => dataSrc.includes(s));
+const reservedOk = (dataSrc.match(/reservedNote: 'Reserved'/g) || []).length === 2;
+const internalRatesLeak = ['390', '430', '450', '640', '690', '770', '2190', '2,190']
+  .some((n) => new RegExp('USD\\s*' + n.replace(',', ',?') + '\\b').test(indexHtml + appJs + data));
 const capsOk = ['capacityTotal: 5', 'capacityTotal: 13', 'capacityTotal: 3', 'capacityTotal: 2']
   .every((s) => dataSrc.includes(s)) && (dataSrc.match(/capacityTotal: 1\b/g) || []).length === 4; // 3 suites + airbnb
 gate('R3', 'Accommodation matrix complete and single-sourced (26 rooms + hosted Airbnb)',
-  missingImages.length === 0 && missingCards.length === 0 && roomNames.length === 8 && noblePresent && oldVillaGone && airbnbOk && !bookingValueLeak && matrixOk && capsOk,
+  missingImages.length === 0 && missingCards.length === 0 && roomNames.length === 8 && noblePresent && oldVillaGone && airbnbOk && !bookingValueLeak && matrixOk && capsOk && reservedOk && !internalRatesLeak,
   [missingImages.length && 'missing room images: ' + missingImages.join(', '),
    missingCards.length && "public page missing generated cards: " + missingCards.join(', ') + " (run 'npm run build:rooms')",
    !noblePresent && 'Noble Courtyard Suite must be active at USD 220 per guest',
    !oldVillaGone && "the cancelled 4BR 'Vientiane Urban Cozy Villa 2' must never return",
    !airbnbOk && 'the 2BR Airbnb must be present, commercially NEUTRAL (arranged separately) and outside the room matrix',
    bookingValueLeak && 'INTERNAL BOOKING VALUE (USD 123.80) must never reach guest surfaces',
-   !matrixOk && 'guest contributions must be 130/150/170/220/260/290/766.50',
+   !matrixOk && 'guest contributions must be 145/155/170/240/250/290/750',
+   !reservedOk && 'Majestic Suite + Presidential must be RESERVED',
+   internalRatesLeak && 'INTERNAL Public/Selling rates must never reach guest sources',
    !capsOk && 'capacities must be 5/13/3/1/2/1/1 (26 rooms)']
     .filter(Boolean).join(' · ') ||
   '7 Souphattra categories (26 rooms) + neutral 2BR Airbnb (arranged separately) outside the matrix; old 4BR villa gone; no booking-value leak');
@@ -125,7 +130,7 @@ gate('R3', 'Accommodation matrix complete and single-sourced (26 rooms + hosted 
 const roomsSection = indexHtml.slice(indexHtml.indexOf('<!-- ROOMS:START -->'), indexHtml.indexOf('<!-- ROOMS:END -->'));
 const perNightWording = /per room \/ night|per night|room\/night/i.test(roomsSection) || /per room \/ night/.test(appJs);
 const publicUsd = /USD\s*\d/.test(roomsSection) || perNightWording;
-const rateNumbers = ['130', '150', '170', '220', '260', '290', '766.50']
+const rateNumbers = ['145', '155', '170', '240', '250', '290', '750']
   .filter((n) => new RegExp('USD\\s*' + n.replace('.', '\\.')).test(indexHtml));
 gate('P1', 'No accommodation prices on the public website',
   !publicUsd && rateNumbers.length === 0,
@@ -136,14 +141,15 @@ gate('P1', 'No accommodation prices on the public website',
 /* P2 — public availability honesty: while no shared KV backend exists, the
  * public page must show "Request availability" and never fake live counts. */
 const availLines = (roomsSection.match(/class="rm-avail"/g) || []).length;
+const reservedLines = (roomsSection.match(/rm-avail rm-reserved"/g) || []).length;
 const fakeLive = /\d+ of \d+ rooms remaining|Last room/.test(roomsSection);
 gate('P2', 'Public availability honest (request mode until KV sync)',
-  availLines === 8 && !fakeLive && roomsSection.includes('Request availability'),
+  availLines === 6 && reservedLines === 2 && !fakeLive && roomsSection.includes('Request availability'),
   fakeLive
     ? 'public page pretends live remaining counts without a shared backend'
-    : availLines !== 8
-      ? 'expected 8 availability lines, found ' + availLines
-      : "all 8 stay options show 'Request availability'; exact counts stay internal");
+    : availLines !== 6 || reservedLines !== 2
+      ? 'expected 6 requestable + 2 reserved lines, found ' + availLines + ' + ' + reservedLines
+      : "6 requestable options show 'Request availability'; Majestic Suite + Presidential show 'Reserved'; exact counts stay internal");
 
 /* P3 — image + venue corrections (owner): alms at Souphattra Heritage with
  * TWO distinct images (couple on the timeline, procession on the card); no

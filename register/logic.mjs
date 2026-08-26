@@ -321,9 +321,12 @@ export function buildNotification(reg, ctx) {
     out.push(L('  Events:', ['alms', 'ceremony', 'dinner'].filter((k) => e[k]).join('; ')));
     out.push(L('  Dietary:', g.diet));
     out.push(L('  Allergies:', g.allergy === 'yes' ? (g.allergyDetail || 'YES') + (g.severe ? ' — SEVERE' : '') : 'None declared'));
-    out.push(L('  Accessibility:', g.access));
     out.push(L('  Spa:', g.spa && g.spa.requested ? [g.spa.type, g.spa.day, g.spa.time].filter(Boolean).join(' · ') : 'Not requested'));
-    out.push(L('  Preferences:', [g.favFood && 'food ' + g.favFood, g.favDrink && 'drink ' + g.favDrink, g.favColour && 'colour ' + g.favColour, g.favFilm && 'film ' + g.favFilm].filter(Boolean).join('; ')));
+    out.push(L('  Preferences:', [g.favFood && 'food ' + g.favFood, g.favDrink && 'drink ' + g.favDrink,
+      g.coffeeTea && 'coffee/tea ' + g.coffeeTea, g.sweetSavoury && 'sweet/savoury ' + g.sweetSavoury,
+      g.favColour && 'colour ' + g.favColour, g.favFlower && 'flower ' + g.favFlower,
+      g.favFilm && 'book/film ' + g.favFilm, g.favSong && 'song ' + g.favSong].filter(Boolean).join('; ')));
+    out.push(L('  Passport:', g.passport ? 'file selected on device — secure transfer pending document vault' : 'not yet provided'));
     out.push('');
   }
   out.push('ACCOMMODATION');
