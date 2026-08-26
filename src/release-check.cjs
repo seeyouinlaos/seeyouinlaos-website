@@ -96,9 +96,11 @@ const missingImages = roomImages.filter((p) => !fs.existsSync(path.join(ROOT, p)
 const missingCards = roomNames.filter((n) => !indexHtml.includes('<h3>' + n + '</h3>'));
 const noblePresent = /noble-courtyard/.test(dataSrc) && /contributionPerGuest: 220/.test(dataSrc);
 const oldVillaGone = !/Cozy Villa|4BR|id: 'villa'/.test(dataSrc);
-const airbnbOk = /id: 'airbnb-2br'/.test(dataSrc)
-  && /airbnb-2br'[\s\S]{0,600}?contributionPerGuest: 0/.test(dataSrc)
-  && /airbnb-2br'[\s\S]{0,700}?capacityUnit: 'Party allocation'/.test(dataSrc);
+const airbnbSeg = dataSrc.slice(dataSrc.indexOf("id: 'airbnb-2br'"));
+const airbnbOk = airbnbSeg.length > 10
+  && /contributionPerGuest: null/.test(airbnbSeg)
+  && /capacityUnit: 'Party allocation'/.test(airbnbSeg)
+  && !/COMPLIMENTARY|fully hosted|hosted by|USD 0|nothing to book/i.test(airbnbSeg);
 const bookingValueLeak = /123\.8/.test(dataSrc) || /123\.8/.test(appJs) || /123\.8/.test(indexHtml);
 const matrixOk = ['contributionPerGuest: 130', 'contributionPerGuest: 150', 'contributionPerGuest: 170',
   'contributionPerGuest: 220', 'contributionPerGuest: 260', 'contributionPerGuest: 290', 'contributionPerGuest: 766.50']
@@ -111,12 +113,12 @@ gate('R3', 'Accommodation matrix complete and single-sourced (26 rooms + hosted 
    missingCards.length && "public page missing generated cards: " + missingCards.join(', ') + " (run 'npm run build:rooms')",
    !noblePresent && 'Noble Courtyard Suite must be active at USD 220 per guest',
    !oldVillaGone && "the cancelled 4BR 'Vientiane Urban Cozy Villa 2' must never return",
-   !airbnbOk && 'the 2BR Airbnb must be present, hosted (USD 0) and outside the room matrix',
+   !airbnbOk && 'the 2BR Airbnb must be present, commercially NEUTRAL (arranged separately) and outside the room matrix',
    bookingValueLeak && 'INTERNAL BOOKING VALUE (USD 123.80) must never reach guest surfaces',
    !matrixOk && 'guest contributions must be 130/150/170/220/260/290/766.50',
    !capsOk && 'capacities must be 5/13/3/1/2/1/1 (26 rooms)']
     .filter(Boolean).join(' · ') ||
-  '7 Souphattra categories (26 rooms) + hosted 2BR Airbnb outside the matrix; old 4BR villa gone; no booking-value leak');
+  '7 Souphattra categories (26 rooms) + neutral 2BR Airbnb (arranged separately) outside the matrix; old 4BR villa gone; no booking-value leak');
 
 /* P1 — PUBLIC PRICE LEAK (release-blocking): no accommodation amount on the
  * public website. Prices live only behind invitation authentication. */

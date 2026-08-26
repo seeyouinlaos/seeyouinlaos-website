@@ -338,10 +338,14 @@ export function buildNotification(reg, ctx) {
       const meta = invitation.guests.find((x) => x.guestId === id) || {};
       return meta.fullName || id;
     }).join('; ')));
-    out.push(L('Guest Contribution:', money(contributionPerGuest(acc)) + ' each'));
-    out.push(L('Stay Total:', money(partyTotal(acc, occ)) + ' (' + occ.length + ' guest' + (occ.length > 1 ? 's' : '') + ')'));
+    if (acc.contributionPerGuest == null) {
+      out.push('Guest Contribution: ARRANGED SEPARATELY');
+    } else {
+      out.push(L('Guest Contribution:', money(contributionPerGuest(acc)) + ' each'));
+      out.push(L('Stay Total:', money(partyTotal(acc, occ)) + ' (' + occ.length + ' guest' + (occ.length > 1 ? 's' : '') + ')'));
+    }
     out.push(L('Stay:', acc.stay));
-    out.push('Second Night: Complimentary / Hosted by Haruthai & Suthep');
+    if (acc.kind !== 'airbnb') out.push('Second Night: Complimentary / Hosted by Haruthai & Suthep');
     out.push('Status: REQUESTED / UNDER REVIEW');
   }
   out.push('');
@@ -382,7 +386,7 @@ export function buildNotification(reg, ctx) {
   const train = ctx.train || null;
   const trainRiders = (reg.guests || []).filter((g) => g.journey && g.journey.train).length;
   const trainSum = trainRiders ? (trainContribution(train, trainRiders) || 0) : 0;
-  if (acc) out.push(L('Stay:', money(partyTotal(acc, occ))));
+  if (acc) out.push(L('Stay:', acc.contributionPerGuest == null ? 'Arranged separately' : money(partyTotal(acc, occ))));
   if (trainRiders) out.push(L('Train:', trainRiders + ' × ' + money((train || {}).contributionPerGuest || 0) + ' = ' + money(trainSum)));
   if (selectedTransfers.length) out.push(L('Transfers:', money(transfersTotal(transferCatalog, selectedTransfers))));
   out.push(L('TOTAL:', money(journeyTotal(acc, occ, train, trainRiders, transferCatalog, selectedTransfers))));

@@ -184,23 +184,22 @@ export const ACCOMMODATIONS = [
   },
   {
     /* SEPARATE from the Souphattra matrix (Owner decision 2026-08-26): an
-     * already-booked two-bedroom Airbnb residence, 27.02.–01.03.2027, up to
-     * four adults. The previous four-bedroom villa listing was cancelled by
-     * the landlord and stays retired (governance: D-20). The internal
-     * booking value stays internal — the guest stay is fully hosted.
-     * Photos follow once the Owner supplies them. NOT part of the 26 rooms. */
+     * ACTIVE two-bedroom Airbnb residence, 27.02.–01.03.2027, up to four
+     * adults. The previous four-bedroom listing was cancelled by the
+     * landlord and stays retired (governance: D-20). NO commercial terms
+     * are approved for guests — no price, no hosted/complimentary status,
+     * no inclusions: everything is ARRANGED SEPARATELY by Guest Relations.
+     * contributionPerGuest: null = no guest-facing amount exists.
+     * The internal booking value stays internal. NOT part of the 26 rooms. */
     id: 'airbnb-2br', name: 'Airbnb Residence · Two Bedrooms',
     kind: 'airbnb', property: 'Airbnb · Vientiane',
-    /* Approved listing (reference only — the stay is already booked; no
-     * booking action for guests). Tracking parameters stripped. */
     referenceUrl: 'https://www.airbnb.com/rooms/23930245?adults=4&check_in=2027-02-27&check_out=2027-03-01',
     stay: STAY_WINDOW, nights: 2,
-    contributionPerGuest: 0, selectable: true,
+    contributionPerGuest: null, selectable: true,
     capacityTotal: 1, capacityUnit: 'Party allocation', selectionScope: 'PARTY',
-    badge: 'COMPLIMENTARY — HOSTED BY HARUTHAI & SUTHEP',
     size: 'Two-bedroom residence', bed: 'Two bedrooms', occupancy: 'Up to 4 adults',
-    location: 'Vientiane · a short ride from Souphattra Heritage',
-    blurb: 'A separately secured two-bedroom residence in Vientiane, already booked for the wedding nights and offered as a fully hosted stay for one Party. Address and photos arrive with your travel documents; allocation is confirmed personally by Guest Relations.',
+    location: 'Vientiane',
+    blurb: 'An active two-bedroom residence in Vientiane for the wedding nights, for up to four adults. This stay is arranged separately from the hotel; Guest Relations coordinates every detail with you personally.',
     amenities: ['Two bedrooms', 'Living area', 'Wi-Fi', 'Air conditioning'],
     images: [],
   },

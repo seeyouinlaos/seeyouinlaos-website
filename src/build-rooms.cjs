@@ -41,7 +41,7 @@ function card(a) {
     a.badge ? '<div class="rm-badge">' + esc(a.badge) + '</div>' : '',
     '<div class="rm-head"><h3>' + esc(a.name) + '</h3></div>',
     '<div class="rm-meta">' + esc(a.stay) + ' · ' + a.nights + ' nights</div>',
-    '<div class="rm-hosted">Second night complimentary · hosted by Haruthai &amp; Suthep</div>',
+    a.kind !== 'airbnb' ? '<div class="rm-hosted">Second night complimentary · hosted by Haruthai &amp; Suthep</div>' : '',
     '<p class="rm-blurb">' + esc(a.blurb) + '</p>',
     '<dl class="rm-specs">' + specs.map((r) => '<div><dt>' + r[0] + '</dt><dd>' + esc(r[1]) + '</dd></div>').join('') + '</dl>',
     amen.length

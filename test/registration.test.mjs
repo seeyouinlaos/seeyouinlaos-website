@@ -136,15 +136,31 @@ test('capacities match the final matrix: 26 rooms, no villa', () => {
   assert.equal(inv['airbnb-2br'].capacity_unit, 'Party allocation');
 });
 
-test('the new 2BR Airbnb is hosted, separate from Souphattra, internal price never present', () => {
+test('the new 2BR Airbnb is commercially neutral and separate from Souphattra', () => {
   const b = ACCOMMODATIONS.find((a) => a.id === 'airbnb-2br');
   assert.equal(b.kind, 'airbnb');
-  assert.equal(contributionPerGuest(b), 0);
+  assert.equal(b.contributionPerGuest, null); // NO guest-facing amount exists
+  assert.equal(b.badge, undefined);           // no COMPLIMENTARY / hosted claim
   assert.equal(b.property, 'Airbnb · Vientiane');
   assert.equal(b.occupancy, 'Up to 4 adults');
   assert.equal(b.stay, '27 February – 1 March 2027');
   assert.match(b.referenceUrl, /airbnb\.com\/rooms\/23930245/);
-  assert.equal(partyTotal(b, ['g1', 'g2', 'g3', 'g4']), 0); // fully hosted
+  const banned = /COMPLIMENTARY|fully hosted|hosted by|USD 0|nothing to book/i;
+  assert.ok(!banned.test(JSON.stringify(b)), 'unapproved commercial claim on the Airbnb record');
+  assert.equal(partyTotal(b, ['g1', 'g2']), 0); // internal neutral total, never displayed as USD 0
+});
+
+test('the airbnb GR record says ARRANGED SEPARATELY, never USD 0 or hosted', () => {
+  const inv = lookupInvitation('demo-amara');
+  const reg = baseReg(inv);
+  reg.stay = { accommodationId: 'airbnb-2br', occupantGuestIds: ['g1', 'g2'], rooms: 1 };
+  const text = buildNotification(reg, ctx(inv));
+  assert.ok(text.includes('Guest Contribution: ARRANGED SEPARATELY'));
+  assert.ok(text.includes('Stay: Arranged separately'));
+  assert.ok(!/Guest Contribution: USD 0|Second Night: Complimentary[\s\S]{0,40}$/m.test(text.split('ACCOMMODATION')[1].split('OVERNIGHT TRAIN')[0].includes('Second Night') ? 'Second Night leaked' : ''));
+  const accBlock = text.split('ACCOMMODATION')[1].split('OVERNIGHT TRAIN')[0];
+  assert.ok(!accBlock.includes('Second Night'), 'hosted second-night claim must not apply to the Airbnb');
+  assert.ok(!accBlock.includes('USD 0'));
 });
 
 test('the internal 4BR booking value never reaches any guest-facing source', async () => {
