@@ -22,53 +22,100 @@ const esc = (s) => String(s == null ? '' : s)
   .replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 
-function card(a, availLine) {
-  const bookable = a.selectable !== false;
+function card(a) {
   const specs = [['Size', a.size], ['Bed', a.bed], ['Guests', a.occupancy], ['Where', a.location]]
     .filter((r) => r[1]);
+  const gallery = JSON.stringify(a.images || []).replace(/"/g, '&quot;');
+  const amen = a.amenities || [];
   return [
-    '<article class="rm-card' + (bookable ? '' : ' reserved') + '">',
-    '<figure class="rm-figure"><img alt="' + esc(a.name) + ' at ' + esc(a.property) + '" src="' + a.images[0] +
-      '" width="1600" height="1067" loading="lazy" decoding="async"/></figure>',
+    '<article class="rm-card">',
+    '<figure class="rm-figure"><button type="button" class="rm-fig-btn" data-gallery="' + gallery +
+      '" data-name="' + esc(a.name) + '" aria-label="Open ' + esc(a.name) + ' photo gallery">' +
+      '<img alt="' + esc(a.name) + ' at ' + esc(a.property) + '" src="' + a.images[0] +
+      '" width="1600" height="1067" loading="lazy" decoding="async"/>' +
+      '<span class="rm-figcount">' + (a.images || []).length + ' photos</span></button></figure>',
     '<div class="rm-body">',
     a.badge ? '<div class="rm-badge">' + esc(a.badge) + '</div>' : '',
     '<div class="rm-head"><h3>' + esc(a.name) + '</h3></div>',
     '<div class="rm-meta">' + esc(a.stay) + ' · ' + a.nights + ' nights</div>',
-    bookable && a.kind !== 'villa' ? '<div class="rm-hosted">Second night complimentary · hosted by Haruthai &amp; Suthep</div>' : '',
+    '<div class="rm-hosted">Second night complimentary · hosted by Haruthai &amp; Suthep</div>',
     '<p class="rm-blurb">' + esc(a.blurb) + '</p>',
     '<dl class="rm-specs">' + specs.map((r) => '<div><dt>' + r[0] + '</dt><dd>' + esc(r[1]) + '</dd></div>').join('') + '</dl>',
-    (a.amenities || []).length
-      ? '<div class="rm-amen">' + a.amenities.slice(0, 5).map((x) => '<span>' + esc(x) + '</span>').join('') +
-        (a.amenities.length > 5 ? '<span class="more">+' + (a.amenities.length - 5) + ' more</span>' : '') + '</div>'
+    amen.length
+      ? '<div class="rm-amen">' + amen.map((x, i) => '<span' + (i >= 5 ? ' class="rm-amen-x" hidden' : '') + '>' + esc(x) + '</span>').join('') +
+        (amen.length > 5 ? '<button type="button" class="more rm-more" aria-expanded="false">+' + (amen.length - 5) + ' more</button>' : '') + '</div>'
       : '',
-    bookable
-      ? '<div class="rm-avail" role="status">' + esc(availLine) + '</div>' +
-        '<div class="rm-foot"><a class="rm-cta" href="register/">Request this room in your Guest Area</a></div>'
-      : '<div class="rm-foot reserved">' + esc(a.reservedNote || 'Not available for guest requests') + '</div>',
+    '<div class="rm-avail" role="status">Request availability</div>',
+    '<div class="rm-foot"><a class="rm-cta" href="register/">Request this room in your Guest Area</a></div>',
     '</div></article>',
   ].filter(Boolean).join('\n');
 }
 
+const LIGHTBOX = [
+  '<div class="rm-lb" id="rm-lightbox" hidden role="dialog" aria-modal="true" aria-label="Room gallery">',
+  '<button type="button" class="rm-lb-close">Close</button>',
+  '<button type="button" class="rm-lb-prev" aria-label="Previous photo">&#8592;</button>',
+  '<img class="rm-lb-img" src="" alt=""/>',
+  '<button type="button" class="rm-lb-next" aria-label="Next photo">&#8594;</button>',
+  '<div class="rm-lb-count" aria-live="polite"></div>',
+  '</div>',
+  '<script>',
+  '(function () {',
+  '  var lb = document.getElementById("rm-lightbox");',
+  '  var imgs = [], idx = 0, nm = "", trigger = null, touchX = null;',
+  '  function render() {',
+  '    lb.querySelector(".rm-lb-img").src = imgs[idx];',
+  '    lb.querySelector(".rm-lb-img").alt = nm + " · photo " + (idx + 1);',
+  '    lb.querySelector(".rm-lb-count").textContent = (idx + 1) + " / " + imgs.length;',
+  '  }',
+  '  function open(list, name, from) { imgs = list; idx = 0; nm = name; trigger = from; render(); lb.hidden = false; document.body.style.overflow = "hidden"; lb.querySelector(".rm-lb-close").focus(); }',
+  '  function close() { lb.hidden = true; document.body.style.overflow = ""; if (trigger) trigger.focus(); }',
+  '  function step(d) { idx = (idx + d + imgs.length) % imgs.length; render(); }',
+  '  document.querySelectorAll(".rm-fig-btn").forEach(function (b) {',
+  '    b.addEventListener("click", function () { open(JSON.parse(b.getAttribute("data-gallery")), b.getAttribute("data-name"), b); });',
+  '  });',
+  '  document.querySelectorAll(".rm-more").forEach(function (b) {',
+  '    b.addEventListener("click", function () {',
+  '      var expanded = b.getAttribute("aria-expanded") === "true";',
+  '      b.parentElement.querySelectorAll(".rm-amen-x").forEach(function (s) { s.hidden = expanded; });',
+  '      b.setAttribute("aria-expanded", String(!expanded));',
+  '      b.textContent = expanded ? "+" + b.parentElement.querySelectorAll(".rm-amen-x").length + " more" : "show less";',
+  '    });',
+  '  });',
+  '  lb.querySelector(".rm-lb-close").addEventListener("click", close);',
+  '  lb.querySelector(".rm-lb-prev").addEventListener("click", function () { step(-1); });',
+  '  lb.querySelector(".rm-lb-next").addEventListener("click", function () { step(1); });',
+  '  lb.addEventListener("click", function (e) { if (e.target === lb) close(); });',
+  '  lb.addEventListener("touchstart", function (e) { touchX = e.changedTouches[0].clientX; }, { passive: true });',
+  '  lb.addEventListener("touchend", function (e) {',
+  '    if (touchX === null) return;',
+  '    var dx = e.changedTouches[0].clientX - touchX; touchX = null;',
+  '    if (Math.abs(dx) > 40) step(dx < 0 ? 1 : -1);',
+  '  }, { passive: true });',
+  '  addEventListener("keydown", function (e) {',
+  '    if (lb.hidden) return;',
+  '    if (e.key === "Escape") close();',
+  '    if (e.key === "ArrowLeft") step(-1);',
+  '    if (e.key === "ArrowRight") step(1);',
+  '  });',
+  '})();',
+  '<\/script>',
+].join('\n');
+
 async function main() {
-  const { ACCOMMODATIONS, SELECTABLE_ACCOMMODATIONS, TRAIN, COPY } = await import('../register/data.mjs');
-  const { createInventory, remaining, availabilityLabel } = await import('../register/logic.mjs');
-  /* PUBLIC RULE: room information + LIVE availability are public; every
-   * commercial amount is private (authenticated Guest Area only). The
-   * availability line derives from the SAME inventory engine the booking
-   * flow uses — never a decorative static number. */
-  const inv = createInventory([...SELECTABLE_ACCOMMODATIONS, TRAIN]);
-  const availFor = (a) => {
-    const res = inv[a.id];
-    if (!res) return 'Not available for guest requests';
-    if (remaining(res) <= 0) return 'Fully allocated · waitlist available';
-    return availabilityLabel(res);
-  };
+  const { ACCOMMODATIONS, COPY } = await import('../register/data.mjs');
+  /* PUBLIC RULE: room information is public; every commercial amount is
+   * private (authenticated Guest Area only). While cross-user inventory
+   * synchronisation (KV backend) is not yet active, the public page must
+   * NOT pretend counts are live — every category shows "Request
+   * availability". Exact counts stay inside the engine / Guest Relations. */
   const html = [
     '<p class="rm-intro rv">' + esc(COPY.sharedHome) + '</p>',
     '<div class="rm-grid">',
-    ACCOMMODATIONS.map((a) => card(a, availFor(a))).join('\n'),
+    ACCOMMODATIONS.map((a) => card(a)).join('\n'),
     '</div>',
     '<p class="rm-note rv">' + esc(COPY.hostedNight) + ' Room rates and requests live in your private Guest Area. ' + esc(COPY.requestNote) + '</p>',
+    LIGHTBOX,
   ].join('\n');
 
   const page = fs.readFileSync(PAGE, 'utf8');
@@ -84,6 +131,6 @@ async function main() {
   const leaked = /USD\s*\d/.test(html);
   if (leaked) throw new Error('PUBLIC PRICE LEAK: generated rooms section contains a USD amount');
   console.log('index.html rooms section: ' + ACCOMMODATIONS.length + ' categories, ' +
-    ACCOMMODATIONS.flatMap((a) => a.images || []).length + ' images, NO public prices, live availability');
+    ACCOMMODATIONS.flatMap((a) => a.images || []).length + ' images, NO public prices, request-availability mode, functional galleries');
 }
 main().catch((e) => { console.error(e); process.exit(1); });

@@ -94,57 +94,67 @@ const roomNames = [...dataSrc.matchAll(/^\s*id: '[a-z0-9-]+', name: '([^']+)'/gm
 const roomImages = [...dataSrc.matchAll(/RM \+ '([a-z0-9-]+\.jpg)'/g)].map((m) => 'assets/images/rooms/' + m[1]);
 const missingImages = roomImages.filter((p) => !fs.existsSync(path.join(ROOT, p)));
 const missingCards = roomNames.filter((n) => !indexHtml.includes('<h3>' + n + '</h3>'));
-const presidentialPriced = /souphattra-presidential[\s\S]{0,500}?(ratePerNight: (?!null)|roomTotal: (?!null))/.test(dataSrc);
-const nobleActive = /noble-courtyard/.test(dataSrc);
-gate('R3', 'Accommodation experience complete and single-sourced',
-  missingImages.length === 0 && missingCards.length === 0 && roomNames.length === 7 && !presidentialPriced && !nobleActive,
+const noblePresent = /noble-courtyard/.test(dataSrc) && /contributionPerGuest: 220/.test(dataSrc);
+const villaGone = !/villa|airbnb/i.test(dataSrc);
+const matrixOk = ['contributionPerGuest: 130', 'contributionPerGuest: 150', 'contributionPerGuest: 170',
+  'contributionPerGuest: 220', 'contributionPerGuest: 260', 'contributionPerGuest: 290', 'contributionPerGuest: 766.50']
+  .every((s) => dataSrc.includes(s));
+const capsOk = ['capacityTotal: 5', 'capacityTotal: 13', 'capacityTotal: 3', 'capacityTotal: 2']
+  .every((s) => dataSrc.includes(s)) && (dataSrc.match(/capacityTotal: 1\b/g) || []).length === 3;
+gate('R3', 'Accommodation matrix complete and single-sourced (26 rooms)',
+  missingImages.length === 0 && missingCards.length === 0 && roomNames.length === 7 && noblePresent && villaGone && matrixOk && capsOk,
   [missingImages.length && 'missing room images: ' + missingImages.join(', '),
-   missingCards.length && 'public page missing generated cards: ' + missingCards.join(', ') + " (run 'npm run build:rooms')",
-   presidentialPriced && 'Presidential must never carry a guest rate',
-   nobleActive && 'Noble Courtyard is cancelled and must not be in the active model']
+   missingCards.length && "public page missing generated cards: " + missingCards.join(', ') + " (run 'npm run build:rooms')",
+   !noblePresent && 'Noble Courtyard Suite must be active at USD 220 per guest',
+   !villaGone && 'villa/Airbnb must not exist in the active model',
+   !matrixOk && 'guest contributions must be 130/150/170/220/260/290/766.50',
+   !capsOk && 'capacities must be 5/13/3/1/2/1/1 (26 rooms)']
     .filter(Boolean).join(' · ') ||
-  roomNames.length + ' categories (Noble Courtyard cancelled), ' + roomImages.length + ' images, Presidential display-only');
+  '7 categories incl. Noble Courtyard, 26 rooms, matrix 130-766.50 per guest, no villa/Airbnb');
 
 /* P1 — PUBLIC PRICE LEAK (release-blocking): no accommodation amount on the
  * public website. Prices live only behind invitation authentication. */
 const roomsSection = indexHtml.slice(indexHtml.indexOf('<!-- ROOMS:START -->'), indexHtml.indexOf('<!-- ROOMS:END -->'));
-const publicUsd = /USD\s*\d/.test(roomsSection) || /per room \/ night/.test(indexHtml);
-const rateNumbers = ['155', '180', '255', '310', '360', '510', '550', '620']
-  .filter((n) => new RegExp('USD\\s*' + n).test(indexHtml));
+const perNightWording = /per room \/ night|per night|room\/night/i.test(roomsSection) || /per room \/ night/.test(appJs);
+const publicUsd = /USD\s*\d/.test(roomsSection) || perNightWording;
+const rateNumbers = ['130', '150', '170', '220', '260', '290', '766.50']
+  .filter((n) => new RegExp('USD\\s*' + n.replace('.', '\\.')).test(indexHtml));
 gate('P1', 'No accommodation prices on the public website',
   !publicUsd && rateNumbers.length === 0,
   publicUsd || rateNumbers.length
-    ? 'PUBLIC PRICE LEAK: ' + (publicUsd ? 'USD amount in public accommodation content' : 'rate value visible: USD ' + rateNumbers.join(', '))
-    : 'public site shows rooms without any USD amount; rates render only in the authenticated Guest Area');
+    ? 'PUBLIC PRICE LEAK: ' + (publicUsd ? 'USD amount or per-night wording in guest-facing accommodation content' : 'rate value visible: USD ' + rateNumbers.join(', '))
+    : 'no USD amount and no per-night wording on the public site; per-guest rates render only in the authenticated Guest Area');
 
-/* P2 — public availability (release-blocking): every active category shows a
- * live availability line derived from the inventory engine (build-rooms.cjs
- * imports createInventory/remaining/availabilityLabel — no static numbers). */
+/* P2 — public availability honesty: while no shared KV backend exists, the
+ * public page must show "Request availability" and never fake live counts. */
 const availLines = (roomsSection.match(/class="rm-avail"/g) || []).length;
-const buildRooms = read('src/build-rooms.cjs');
-const availFromEngine = /createInventory/.test(buildRooms) && /availabilityLabel/.test(buildRooms);
-const expectAvail = ['4 of 4 rooms remaining', '13 of 13 rooms remaining', '3 of 3 rooms remaining', '2 of 2 rooms remaining', 'Last room']
-  .filter((s) => !roomsSection.includes(s));
-gate('P2', 'Public room availability visible and engine-sourced',
-  availLines >= 6 && availFromEngine && expectAvail.length === 0,
-  expectAvail.length || !availFromEngine
-    ? [!availFromEngine && 'build-rooms.cjs must derive availability from the inventory engine',
-       expectAvail.length && 'missing availability lines: ' + expectAvail.join(' | ')].filter(Boolean).join(' · ')
-    : availLines + ' availability lines, derived from createInventory/availabilityLabel (23 active rooms)');
+const fakeLive = /\d+ of \d+ rooms remaining|Last room/.test(roomsSection);
+gate('P2', 'Public availability honest (request mode until KV sync)',
+  availLines === 7 && !fakeLive && roomsSection.includes('Request availability'),
+  fakeLive
+    ? 'public page pretends live remaining counts without a shared backend'
+    : availLines !== 7
+      ? 'expected 7 availability lines, found ' + availLines
+      : "all 7 categories show 'Request availability'; exact counts stay internal");
 
-/* P3 — image regression (owner corrections): the alms first image is the
- * original couple photograph; no bedroom image in the vow/dinner gallery. */
-const almsStop = indexHtml.slice(indexHtml.indexOf('<h3>The Alms Giving</h3>') - 600, indexHtml.indexOf('<h3>The Alms Giving</h3>'));
-const almsCoupleFirst = almsStop.includes('tl-alms.jpg');
+/* P3 — image + venue corrections (owner): alms at Souphattra Heritage with
+ * TWO distinct images (couple on the timeline, procession on the card); no
+ * bedroom image in the vow/dinner gallery. */
+const almsStop = indexHtml.slice(indexHtml.indexOf('<h3>The Alms Giving</h3>') - 600, indexHtml.indexOf('<h3>The Alms Giving</h3>') + 600);
+const almsCoupleFirst = almsStop.includes('tl-alms.jpg') && almsStop.includes('Souphattra Heritage Vientiane');
+const almsCardIdx = indexHtml.indexOf('data-panel="pv-alms"');
+const almsCard = indexHtml.slice(almsCardIdx, almsCardIdx + 600);
+const almsCardProcession = almsCard.includes('alms-procession.jpg');
+const almsExternal = /away from the hotel|not at the hotel|place to be confirmed/i.test(indexHtml);
 const dinnerPanel = indexHtml.slice(indexHtml.indexOf('id="pv-pool"'), indexHtml.indexOf('</article>', indexHtml.indexOf('id="pv-pool"')));
 const bedInDinner = dinnerPanel.includes('heritage-room.jpg');
-const processionKept = indexHtml.includes('alms-procession.jpg');
-gate('P3', 'Image corrections protected',
-  almsCoupleFirst && !bedInDinner && processionKept,
-  [!almsCoupleFirst && 'alms first image must be the original couple photograph (tl-alms.jpg)',
-   bedInDinner && 'bedroom image must not appear in the vow/dinner gallery',
-   !processionKept && 'approved alms procession image missing']
-    .filter(Boolean).join(' · ') || 'alms couple image first, procession preserved, no bedroom in the dinner gallery');
+gate('P3', 'Alms venue + image corrections protected',
+  almsCoupleFirst && almsCardProcession && !almsExternal && !bedInDinner,
+  [!almsCoupleFirst && 'alms timeline must use the couple photograph at Souphattra Heritage',
+   !almsCardProcession && 'alms places card must use the procession photograph (two images, never one twice)',
+   almsExternal && 'external-venue wording must be gone (alms is at Souphattra Heritage)',
+   bedInDinner && 'bedroom image must not appear in the vow/dinner gallery']
+    .filter(Boolean).join(' · ') || 'alms at Souphattra Heritage; couple + procession as two distinct images; no bedroom in the dinner gallery');
 
 /* P4 — wording + product guards */
 const exclusiveHit = /Heritage Exclusive/i.test(indexHtml) || /Heritage Exclusive/i.test(appJs) || /Heritage Exclusive/i.test(data) || /Heritage Exclusive/i.test(regHtml);

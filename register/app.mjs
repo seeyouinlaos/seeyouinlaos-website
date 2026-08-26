@@ -10,7 +10,7 @@ import {
   TRANSFERS, PACKAGE_INCLUSIONS, COPY, DEMO_MODE, PUBLICATION, TRAIN_REFERENCE, BERTH_PREFS, lookupInvitation,
 } from './data.mjs';
 import {
-  ratePerNight, roomTotal, partyTotal, money,
+  contributionPerGuest, partyCharges, partyTotal, money,
   trainContribution, transfersTotal, journeyTotal,
   createInventory, remaining, availabilityLabel, requestAllocation,
   validateRegistration, buildNotification, nextInvitationState,
@@ -30,13 +30,11 @@ function setAuthOut(v) { try { if (v) localStorage.setItem(AUTH_OUT_KEY, '1'); e
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const RATES_LIVE = PUBLICATION.rates === 'APPROVED';
 const showAmount = (n) => RATES_LIVE ? money(n) : 'Details to follow';
-/** Room price line shown BEFORE any request (per-room pricing model). */
+/** Guest price line shown BEFORE any request — per guest, never per night. */
 function roomPriceHtml(a) {
-  const t = roomTotal(a);
-  if (t === null) return '<div class="acc-price"><span class="per">Reserved</span></div>';
-  if (t === 0) return '<div class="acc-price"><span class="amt">USD 0</span><span class="per">fully hosted</span></div>';
-  return '<div class="acc-price"><span class="amt">' + showAmount(t) + '</span>' +
-    '<span class="per">' + money(ratePerNight(a)) + ' per room / night · ' + a.nights + ' nights</span></div>';
+  const per = contributionPerGuest(a);
+  return '<div class="acc-price"><span class="amt">' + showAmount(per) + '</span>' +
+    '<span class="per">per guest · complete stay</span></div>';
 }
 function guestAvailability(res) {
   if (remaining(res) <= 0) return 'Fully allocated';
@@ -265,6 +263,23 @@ function renderPrivnav() {
   });
 }
 
+function grCardHtml() {
+  return '<div class="gr-card">' +
+    '<div><div class="label">Guest Relations</div>' +
+    '<div class="gr-name">' + esc(CONTACTS.team) + '</div>' +
+    '<div class="gr-links">' +
+    '<a href="' + CONTACTS.lineUrl + '" rel="noopener" target="_blank">LINE · ' + esc(CONTACTS.line) + '</a>' +
+    '<a href="mailto:' + CONTACTS.email + '">Email</a>' +
+    (CONTACTS.whatsapp ? '<a href="https://wa.me/' + CONTACTS.whatsapp + '" rel="noopener" target="_blank">WhatsApp</a>' : '') +
+    '</div>' +
+    (CONTACTS.whatsapp ? '' : '<p class="note" style="margin-top:8px">WhatsApp contact follows with your travel documents.</p>') +
+    '</div>' +
+    '<div class="gr-qr"><a href="' + CONTACTS.lineUrl + '" rel="noopener" target="_blank">' +
+    '<img src="../assets/images/qr/line-qr.svg" alt="Scan to add Guest Relations on LINE" width="108" height="108" loading="lazy"/></a>' +
+    '<div class="label">Scan for LINE</div></div>' +
+    '</div>';
+}
+
 function renderHome() {
   const box = document.getElementById('home-box');
   if (!S.invitation) { show(idx('find')); return; }
@@ -278,7 +293,7 @@ function renderHome() {
   const detailsMissing = S.guests.filter((g) => g.attending !== false && !(g.email || g.phone)).length;
   const tc = trainContribution(TRAIN, riders.length) || 0;
   const trf = transfersTotal(TRANSFERS, S.transfers);
-  const total = journeyTotal(acc, TRAIN, riders.length, TRANSFERS, S.transfers);
+  const total = journeyTotal(acc, occ, TRAIN, riders.length, TRANSFERS, S.transfers);
   const card = (step, label, main, sub, status, image) =>
     '<button type="button" class="home-card" data-jump="' + step + '">' +
     (image ? '<span class="hc-img"><img src="' + roomImg(image) + '" alt="" width="1200" height="800" loading="lazy" decoding="async"/></span>' : '') +
@@ -292,7 +307,7 @@ function renderHome() {
     '<p class="note">' + esc(COPY.sharedHome) + '</p>' +
     '<div class="home-grid">' +
     card('stay', 'My Stay', acc ? esc(acc.name) : 'Choose your room',
-      acc ? (partyTotal(acc) === 0 ? 'Fully hosted' : showAmount(partyTotal(acc)) + ' · ' + money(ratePerNight(acc)) + ' per room / night') : 'Souphattra Heritage Vientiane, our shared home',
+      acc ? showAmount(contributionPerGuest(acc)) + ' per guest · party ' + money(partyTotal(acc, occ)) : 'Souphattra Heritage Vientiane, our shared home',
       acc ? (S.stay.waitlist ? 'WAITLISTED' : 'REQUESTED') : 'OPEN',
       acc ? (acc.images || [])[0] : null) +
     card('journey', 'My Travel', riders.length ? 'Overnight Sleeper Train' : 'Your way to Laos',
@@ -306,7 +321,7 @@ function renderHome() {
       'Contact, dietary needs and the small preferences that shape your stay',
       detailsMissing ? 'OPEN' : 'COMPLETE') +
     card('cost', 'My Contribution', money(total),
-      (acc ? 'Room ' + money(partyTotal(acc)) : 'No stay selected yet') +
+      (acc ? 'Stay ' + money(partyTotal(acc, occ)) : 'No stay selected yet') +
       (riders.length ? ' · train ' + money(tc) : '') +
       ((S.transfers || []).length ? ' · transfers ' + money(trf) : ''),
       S.submitted ? 'UNDER REVIEW' : null) +
@@ -321,6 +336,7 @@ function renderHome() {
         : detailsMissing ? 'A few personal details are still open so the table can be set around you.'
         : 'Everything is in place. Review your journey and send it to Guest Relations.')) +
     '</div>' +
+    grCardHtml() +
     '<div class="stepnav"><span></span><button class="btn" id="home-cta">' +
     (S.submitted ? 'View your journey' : 'Continue your journey') + '</button></div>';
   box.querySelectorAll('[data-jump]').forEach((b) => b.addEventListener('click', () => show(idx(b.getAttribute('data-jump')))));
@@ -465,8 +481,9 @@ const roomImg = (p) => '../' + p;
 function roomFigure(a, i = 0) {
   const src = (a.images || [])[i];
   if (!src) return '';
-  return '<figure class="acc-figure"><img src="' + roomImg(src) + '" alt="' + esc(a.name) +
-    ' at ' + esc(a.property) + '" width="1600" height="1067" loading="lazy" decoding="async"/></figure>';
+  return '<figure class="acc-figure"><button type="button" class="fig-btn" data-view="' + a.id + '" aria-label="Open ' + esc(a.name) + ' gallery and details">' +
+    '<img src="' + roomImg(src) + '" alt="' + esc(a.name) + ' at ' + esc(a.property) + '" width="1600" height="1067" loading="lazy" decoding="async"/>' +
+    '<span class="fig-count">' + (a.images || []).length + ' photos</span></button></figure>';
 }
 function roomSpecs(a) {
   const rows = [['Size', a.size], ['Bed', a.bed], ['Guests', a.occupancy], ['Where', a.location]]
@@ -476,7 +493,7 @@ function roomSpecs(a) {
     '<div><dt>' + r[0] + '</dt><dd>' + esc(r[1]) + '</dd></div>').join('') + '</dl>' +
     ((a.amenities || []).length
       ? '<div class="acc-amen">' + a.amenities.slice(0, 5).map((x) => '<span>' + esc(x) + '</span>').join('') +
-        (a.amenities.length > 5 ? '<span class="more">+' + (a.amenities.length - 5) + ' more</span>' : '') + '</div>'
+        (a.amenities.length > 5 ? '<button type="button" class="more" data-view="' + a.id + '">+' + (a.amenities.length - 5) + ' more</button>' : '') + '</div>'
       : '');
 }
 
@@ -495,7 +512,7 @@ function renderStay() {
       '<div class="acc-head"><h3>' + esc(a.name) + '</h3>' +
       (bookable ? roomPriceHtml(a) : '<div class="acc-price"><span class="per">Reserved</span></div>') + '</div>' +
       '<div class="acc-meta">' + esc(a.stay) + ' · ' + a.nights + ' nights</div>' +
-      (bookable && a.kind !== 'villa' ? '<div class="acc-hosted">Second night complimentary · hosted by Haruthai &amp; Suthep</div>' : '') +
+      '<div class="acc-hosted">Second night complimentary · hosted by Haruthai &amp; Suthep</div>' +
       '<p class="acc-blurb">' + esc(a.blurb) + '</p>' +
       roomSpecs(a) +
       (bookable
@@ -526,7 +543,7 @@ function renderStay() {
     saveDraft(); renderStay(); renderSummary();
     const acc = currentAcc();
     const occ = S.stay.occupantGuestIds;
-    announce('Requested ' + acc.name + ' for your Party. ' + money(ratePerNight(acc)) + ' per room and night, ' + acc.nights + ' nights, room total ' + money(partyTotal(acc)) + '. ' + COPY.requestNote);
+    announce('Requested ' + acc.name + ' for your Party. ' + occ.length + ' guest' + (occ.length > 1 ? 's' : '') + ', ' + money(contributionPerGuest(acc)) + ' per guest, party contribution ' + money(partyTotal(acc, occ)) + '. ' + COPY.requestNote);
   }));
   renderStaySelected();
   box.querySelectorAll('[data-waitlist]').forEach((b) => b.addEventListener('click', () => {
@@ -545,15 +562,50 @@ function renderStaySelected() {
   const acc = currentAcc();
   if (!acc) { el.innerHTML = ''; return; }
   const occ = S.stay.occupantGuestIds;
-  const rate = ratePerNight(acc);
   el.innerHTML =
     '<div class="stay-sum" style="margin-top:30px" aria-live="polite">' +
     '<div class="row"><span class="l serif-it">Requested for your Party</span><span class="r">' + esc(acc.name) + (S.stay.waitlist ? ' · WAITLISTED' : '') + '</span></div>' +
-    '<div class="row"><span class="l">' + occ.length + ' guest' + (occ.length > 1 ? 's' : '') + ' · one ' + esc(acc.capacityUnit.toLowerCase()) + '</span><span class="r">' + (rate === 0 ? 'Fully hosted' : money(rate) + ' per room / night · ' + acc.nights + ' nights') + '</span></div>' +
-    '<div class="row total"><span class="l serif-it">Room total</span><span class="r">' + money(partyTotal(acc)) + '</span></div>' +
-    '<div class="row"><span class="l">Second night</span><span class="r">' + (acc.kind === 'villa' ? 'Fully hosted by Haruthai &amp; Suthep' : 'Complimentary · hosted by Haruthai &amp; Suthep') + '</span></div>' +
+    '<div class="row"><span class="l">' + occ.length + ' guest' + (occ.length > 1 ? 's' : '') + ' · one ' + esc(acc.capacityUnit.toLowerCase()) + '</span><span class="r">' + money(contributionPerGuest(acc)) + ' per guest · complete stay</span></div>' +
+    '<div class="row total"><span class="l serif-it">Your party contribution</span><span class="r">' + money(partyTotal(acc, occ)) + '</span></div>' +
+    '<div class="row"><span class="l">Second night</span><span class="r">Complimentary · hosted by Haruthai &amp; Suthep</span></div>' +
     '</div>' +
     '<p class="note" style="margin-top:12px">' + esc(COPY.requestNote) + '</p>';
+}
+
+/* ---------------- room gallery lightbox (prev/next/count/close/keys) ------ */
+const lightbox = document.getElementById('lightbox');
+const LB = { images: [], index: 0, name: '', trigger: null };
+function lbRender() {
+  lightbox.querySelector('.lb-img').src = roomImg(LB.images[LB.index]);
+  lightbox.querySelector('.lb-img').alt = LB.name + ' · photo ' + (LB.index + 1);
+  lightbox.querySelector('.lb-count').textContent = (LB.index + 1) + ' / ' + LB.images.length;
+}
+function openLightbox(a, index) {
+  if (!lightbox || !(a.images || []).length) return;
+  LB.images = a.images; LB.index = index || 0; LB.name = a.name;
+  LB.trigger = document.activeElement;
+  lbRender();
+  lightbox.hidden = false; lightbox.removeAttribute('inert');
+  document.body.classList.add('pv-lock');
+  lightbox.querySelector('.lb-close').focus();
+}
+function closeLightbox() {
+  lightbox.hidden = true; lightbox.setAttribute('inert', '');
+  if (!accOverlay.hidden) { /* overlay still open keeps the scroll lock */ } else { document.body.classList.remove('pv-lock'); }
+  if (LB.trigger) LB.trigger.focus();
+}
+function lbStep(d) { LB.index = (LB.index + d + LB.images.length) % LB.images.length; lbRender(); }
+if (lightbox) {
+  lightbox.querySelector('.lb-close').addEventListener('click', closeLightbox);
+  lightbox.querySelector('.lb-prev').addEventListener('click', () => lbStep(-1));
+  lightbox.querySelector('.lb-next').addEventListener('click', () => lbStep(1));
+  lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
+  addEventListener('keydown', (e) => {
+    if (lightbox.hidden) return;
+    if (e.key === 'Escape') { e.stopPropagation(); closeLightbox(); }
+    if (e.key === 'ArrowLeft') lbStep(-1);
+    if (e.key === 'ArrowRight') lbStep(1);
+  }, true);
 }
 
 /* room detail overlay (§22) */
@@ -565,14 +617,15 @@ function openAccOverlay(id) {
   accTrigger = document.activeElement;
   const bookable = a.selectable !== false;
   accOverlay.querySelector('.pv-body').innerHTML =
-    '<div class="pv-tag">' + (a.kind === 'villa' ? 'Complimentary villa' : esc(a.property)) + '</div>' +
+    '<div class="pv-tag">' + esc(a.property) + '</div>' +
     '<h3>' + esc(a.name) + '</h3>' +
     (a.badge ? '<p class="note" style="color:var(--cherry)">' + esc(a.badge) + '</p>' : '') +
     (!bookable ? '<p class="note" style="color:var(--cherry)">' + esc(a.reservedNote) + '</p>' : '') +
     '<p>' + esc(a.blurb) + '</p>' +
     '<div class="pv-gallery">' + (a.images || []).map((src, i) =>
+      '<button type="button" class="pv-gimg" data-lightbox="' + a.id + '" data-index="' + i + '">' +
       '<img src="' + roomImg(src) + '" alt="' + esc(a.name) + ' · view ' + (i + 1) +
-      '" width="1200" height="800" loading="lazy" decoding="async"/>').join('') + '</div>' +
+      '" width="1200" height="800" loading="lazy" decoding="async"/></button>').join('') + '</div>' +
     '<dl class="pv-facts">' +
     '<div><dt>Stay</dt><dd>' + esc(a.stay) + ' · ' + a.nights + ' nights</dd></div>' +
     (a.size ? '<div><dt>Size</dt><dd>' + esc(a.size) + '</dd></div>' : '') +
@@ -580,8 +633,7 @@ function openAccOverlay(id) {
     (a.occupancy ? '<div><dt>Guests</dt><dd>' + esc(a.occupancy) + '</dd></div>' : '') +
     (a.location ? '<div><dt>Where</dt><dd>' + esc(a.location) + '</dd></div>' : '') +
     (bookable
-      ? '<div><dt>Rate</dt><dd>' + (roomTotal(a) === 0 ? 'Fully hosted by Haruthai & Suthep' : showAmount(ratePerNight(a)) + ' per room / night') + '</dd></div>' +
-        (roomTotal(a) ? '<div><dt>Room total</dt><dd>' + showAmount(roomTotal(a)) + ' · ' + a.nights + ' nights</dd></div>' : '') +
+      ? '<div><dt>Contribution</dt><dd>' + showAmount(contributionPerGuest(a)) + ' per guest · complete two-night stay</dd></div>' +
         '<div><dt>Availability</dt><dd>' + esc(guestAvailability(res)) + '</dd></div>' +
         '<div><dt>Selection</dt><dd>One ' + esc(a.capacityUnit.toLowerCase()) + ' per Party</dd></div>'
       : '') +
@@ -593,6 +645,8 @@ function openAccOverlay(id) {
     '<div class="label" style="margin-top:26px">Your wedding experience includes</div>' +
     '<ul class="incl">' + PACKAGE_INCLUSIONS.map((i) => '<li>' + esc(i.label) + '</li>').join('') + '</ul>' +
     '<p class="note">' + esc(COPY.requestNote) + '</p>';
+  accOverlay.querySelectorAll('[data-lightbox]').forEach((b) => b.addEventListener('click', () =>
+    openLightbox(a, parseInt(b.getAttribute('data-index'), 10) || 0)));
   accOverlay.hidden = false; accOverlay.removeAttribute('inert');
   document.getElementById('acc-backdrop').hidden = false;
   document.body.classList.add('pv-lock');
@@ -842,17 +896,22 @@ function currentAcc() {
 function renderCost() {
   const box = document.getElementById('cost-box');
   const acc = currentAcc();
+  const occ = acc ? S.stay.occupantGuestIds : [];
   const riders = S.guests.filter((g) => g.journey.train);
   const tc = trainContribution(TRAIN, riders.length) || 0;
   const trf = transfersTotal(TRANSFERS, S.transfers);
-  const total = journeyTotal(acc, TRAIN, riders.length, TRANSFERS, S.transfers);
+  const total = journeyTotal(acc, occ, TRAIN, riders.length, TRANSFERS, S.transfers);
   let rows = '';
   if (!acc) {
     rows += '<div class="row"><span class="l serif-it">Accommodation</span><span class="r">Not selected yet · please choose your room under My Stay</span></div>';
   } else {
     rows += '<div class="row"><span class="l serif-it">' + esc(acc.name) + '</span><span class="r">1 ' + esc(acc.capacityUnit.toLowerCase()) + ' · ' + esc(acc.stay) + '</span></div>' +
-      '<div class="row"><span class="l">' + (roomTotal(acc) === 0 ? 'Fully hosted by Haruthai &amp; Suthep' : money(ratePerNight(acc)) + ' per room / night × ' + acc.nights + ' nights') + '</span><span class="r">' + money(partyTotal(acc)) + '</span></div>' +
-      '<div class="row"><span class="l">Second night</span><span class="r">' + (acc.kind === 'villa' ? 'Fully hosted' : 'Complimentary · hosted by Haruthai &amp; Suthep') + '</span></div>';
+      partyCharges(acc, occ).map((c) => {
+        const g = S.guests.find((x) => x.guestId === c.guestId);
+        return '<div class="row"><span class="l">' + esc(g ? g.fullName : c.guestId) + '</span><span class="r">' + money(c.amount) + '</span></div>';
+      }).join('') +
+      '<div class="row"><span class="l">Stay contribution</span><span class="r">' + money(partyTotal(acc, occ)) + '</span></div>' +
+      '<div class="row"><span class="l">Second night</span><span class="r">Complimentary · hosted by Haruthai &amp; Suthep</span></div>';
   }
   if (riders.length) {
     rows += '<div class="row"><span class="l serif-it">Overnight Sleeper Train</span><span class="r">' + riders.length + ' guest' + (riders.length > 1 ? 's' : '') + ' × ' + money(TRAIN.contributionPerGuest) + '</span></div>' +
@@ -905,10 +964,10 @@ function renderReview() {
   html += sec('Your Stay', idx('stay'), acc ? [
     ['Requested', esc(acc.name) + ' · ' + esc(acc.stay)],
     ['Status', S.stay.waitlist ? 'WAITLISTED' : 'REQUESTED · UNDER REVIEW'],
-    ['Guests', occ.length + ' in one ' + esc(acc.capacityUnit.toLowerCase())],
-    ['Rate', roomTotal(acc) === 0 ? 'Fully hosted by Haruthai & Suthep' : money(ratePerNight(acc)) + ' per room / night · ' + acc.nights + ' nights'],
-    ['Room total', money(partyTotal(acc))],
-    ['Second night', acc.kind === 'villa' ? 'Fully hosted by Haruthai & Suthep' : 'Complimentary · hosted by Haruthai & Suthep'],
+    ['Guests', occ.length + ' · ' + money(contributionPerGuest(acc)) + ' per guest'],
+    ['Contribution', occ.map((id) => { const g = S.guests.find((x) => x.guestId === id); return esc(g ? g.preferredName : id) + ' ' + money(contributionPerGuest(acc)); }).join(' · ')],
+    ['Total', money(partyTotal(acc, occ))],
+    ['Second night', 'Complimentary · hosted by Haruthai & Suthep'],
   ] : [['Requested', 'No stay selected yet'], ['Action', 'Please choose your room under My Stay before sending']]);
   const trv = S.arrival.shared !== false
     ? [['Together', esc([S.arrival.date, S.arrival.time, S.arrival.ref].filter(Boolean).join(' · ') || '—') + (S.arrival.pickupRequested ? ' · pickup REQUESTED' : '')]]
@@ -927,10 +986,10 @@ function renderReview() {
     : [['Requested', 'None']]);
   const jcRiders = S.guests.filter((g) => g.journey.train).length;
   const jcRows = [];
-  if (acc) jcRows.push(['Room', esc(acc.name) + ' · ' + money(partyTotal(acc))]);
+  if (acc) jcRows.push(['Stay', esc(acc.name) + ' · ' + money(partyTotal(acc, occ))]);
   if (jcRiders) jcRows.push(['Train', jcRiders + ' × ' + money(TRAIN.contributionPerGuest) + ' = ' + money(trainContribution(TRAIN, jcRiders) || 0)]);
   if ((S.transfers || []).length) jcRows.push(['Transfers', money(transfersTotal(TRANSFERS, S.transfers))]);
-  jcRows.push(['Total journey cost', money(journeyTotal(acc, TRAIN, jcRiders, TRANSFERS, S.transfers))]);
+  jcRows.push(['Total journey cost', money(journeyTotal(acc, occ, TRAIN, jcRiders, TRANSFERS, S.transfers))]);
   html += sec('Your Journey Cost', idx('cost'), jcRows);
   html += sec('Each of You', idx('each'), S.guests.map((g) => [esc(g.preferredName),
     esc(g.diet) + (g.allergy === 'yes' ? ' · allergy: ' + esc(g.allergyDetail || 'yes') + (g.severe ? ' (severe)' : '') : '') +
@@ -1014,7 +1073,8 @@ function showReceived() {
     'Submitted ' + new Date(S.registration_submitted_at).toLocaleString('en-GB', { dateStyle: 'long', timeStyle: 'short' }) + ' · status: UNDER REVIEW';
   const st = document.getElementById('received-status');
   if (st) st.innerHTML = journeyStatusLadder() +
-    '<p class="note" style="margin-top:16px">From here, everything is in our hands. Khun Ket and Khun Paddy review your travel information, confirm your accommodation, coordinate your transfers and prepare your personal journey — usually within <strong>4–8 hours</strong>. Your private area stays open the whole time.</p>';
+    '<p class="note" style="margin-top:16px">From here, everything is in our hands. Khun Ket and Khun Paddy review your travel information, confirm your accommodation, coordinate your transfers and prepare your personal journey — usually within <strong>4–8 hours</strong>. Your private area stays open the whole time.</p>' +
+    grCardHtml();
   show(idx('received'));
 }
 document.getElementById('return-journey').addEventListener('click', () => show(idx('home')));
@@ -1029,7 +1089,7 @@ function renderSummary() {
   bits.push('<strong>' + esc(S.invitation.partyName) + '</strong>');
   const trainCount = S.guests.filter((g) => g.journey.train).length;
   if (trainCount) bits.push(trainCount + ' train seat' + (trainCount > 1 ? 's' : '') + ' · REQUESTED');
-  if (acc) bits.push(esc(acc.name) + (RATES_LIVE ? ' · ' + money(partyTotal(acc)) : '') + (S.stay.waitlist ? ' · WAITLISTED' : ' · REQUESTED'));
+  if (acc) bits.push(esc(acc.name) + (RATES_LIVE ? ' · ' + money(partyTotal(acc, S.stay.occupantGuestIds)) : '') + (S.stay.waitlist ? ' · WAITLISTED' : ' · REQUESTED'));
   if ((S.transfers || []).length) bits.push(S.transfers.length + ' transfer' + (S.transfers.length > 1 ? 's' : '') + ' · ' + money(transfersTotal(TRANSFERS, S.transfers)) + ' · REQUESTED');
   if (S.arrival.pickupRequested) bits.push('pickup REQUESTED');
   el.querySelector('.sum-line').innerHTML = bits.join(' &nbsp;·&nbsp; ');

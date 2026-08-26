@@ -42,6 +42,10 @@ export const WEDDING = {
 export const CONTACTS = {
   email: 'guest.relation.seeyouinlaos@gmail.com',
   line: 'seeyouinlaos',
+  lineUrl: 'https://line.me/R/ti/p/~seeyouinlaos',
+  /* whatsapp: no approved number in the source data yet — the QR slot stays
+   * pending until the Owner supplies one. Never invent a number. */
+  whatsapp: null,
   team: 'Khun Ket · Khun Paddy',
 };
 
@@ -57,8 +61,8 @@ export const JOURNEY_MODULES = [
 
 export const EVENTS = [
   { id: 'alms', label: 'Alms Giving', when: 'Sunday, 28 February 2027',
-    venue: 'In Vientiane · away from the hotel · place to be confirmed',
-    blurb: 'A quiet Buddhist ritual to open the wedding day, out in the city at first light. Transfers are arranged for you.' },
+    venue: 'Souphattra Heritage Vientiane',
+    blurb: 'A quiet Buddhist ritual to open the wedding day at first light.' },
   { id: 'ceremony', label: 'Wedding Ceremony', when: 'Sunday, 28 February 2027',
     venue: 'Souphattra Heritage Vientiane', blurb: 'The vows, in front of everyone who matters.' },
   { id: 'dinner', label: 'Wedding Dinner & Reception', when: 'Sunday, 28 February 2027',
@@ -66,9 +70,9 @@ export const EVENTS = [
 ];
 
 /* ---------------- accommodation resources ----------------
- * price unit: ROOM · inventory unit: ROOM (or Party allocation) ·
- * selection scope: PARTY. ratePerNight/roomTotal are the approved guest
- * rates from the Owner master — never internal buy-out rates.
+ * price unit: GUEST · inventory unit: ROOM · selection scope: PARTY.
+ * contributionPerGuest is the approved guest value from the final Owner
+ * room matrix — never an internal buy-out or nightly rate.
  */
 
 /** Amenity set shared by the two heritage room categories. */
@@ -85,33 +89,19 @@ const RM = 'assets/images/rooms/';
  * and travels with the Guest Relations record so a booking can always be
  * traced back to the approved rate.
  *
- * PRICING MODEL (Owner master, 2026-08-25): rates are PER ROOM PER NIGHT with
- * a fixed 2-night stay — `ratePerNight` × `nights` = `roomTotal`. The earlier
- * per-guest contribution model is superseded. Prices are PRIVATE: they render
- * only inside the authenticated Guest Area, never on the public website.
- * Active guest inventory: 23 rooms (4+13+3+2+1). Noble Courtyard is
- * CANCELLED (removed from the active model; governance record in
- * docs/DECISION-REGISTER.md D-18). */
+ * PRICING MODEL (Final Owner room matrix, 2026-08-25): every category has
+ * ONE guest-facing amount — `contributionPerGuest` (USD, per guest, for the
+ * complete two-night wedding stay). No per-room, per-night or internal rate
+ * ever reaches a guest surface. Prices are PRIVATE (authenticated Guest
+ * Area only). Hotel inventory: 26 rooms (5+13+3+1+2+1+1), Souphattra room
+ * categories only — no villa/Airbnb product. */
 export const ACCOMMODATIONS = [
-  {
-    id: 'villa', name: 'Vientiane Urban Cozy Villa 2 (4BR)',
-    kind: 'villa', property: 'Vientiane Urban Cozy Villa 2 (4BR)',
-    stay: '25 February – 1 March 2027', nights: 4,
-    ratePerNight: 0, roomTotal: 0, selectable: true,
-    capacityTotal: 4, capacityUnit: 'Party allocation', selectionScope: 'PARTY',
-    badge: 'COMPLIMENTARY — HOSTED BY HARUTHAI & SUTHEP',
-    size: 'Four-bedroom villa', bed: 'Four bedrooms', occupancy: 'One Party per allocation',
-    location: 'Vientiane · a short drive from Souphattra Heritage',
-    blurb: 'A fully hosted stay offered to four invited Parties. Allocation is based on completed registration order and remains subject to confirmation by Guest Relations.',
-    amenities: ['Four bedrooms', 'Living area', 'Kitchen', 'Wi-Fi', 'Air conditioning', 'Private parking'],
-    images: [RM + 'villa-1.jpg', RM + 'villa-2.jpg', RM + 'villa-3.jpg'],
-  },
   {
     id: 'heritage', name: 'The Heritage', contractRow: 'Heritage',
     kind: 'room', property: 'Souphattra Heritage Vientiane',
     stay: STAY_WINDOW, nights: 2,
-    ratePerNight: 155, roomTotal: 310, selectable: true,
-    capacityTotal: 4, capacityUnit: 'Room', selectionScope: 'PARTY',
+    contributionPerGuest: 130, selectable: true,
+    capacityTotal: 5, capacityUnit: 'Room', selectionScope: 'PARTY',
     size: '31 sq.m.', bed: '1 King bed', occupancy: '2 adults · 1 child',
     location: '1st–3rd floor',
     blurb: 'Colonial French elegance in 31 square metres, with a private balcony over the garden.',
@@ -122,7 +112,7 @@ export const ACCOMMODATIONS = [
     id: 'the-heritage', name: 'Heritage Executive', contractRow: 'The Heritage',
     kind: 'room', property: 'Souphattra Heritage Vientiane',
     stay: STAY_WINDOW, nights: 2,
-    ratePerNight: 180, roomTotal: 360, selectable: true,
+    contributionPerGuest: 150, selectable: true,
     capacityTotal: 13, capacityUnit: 'Room', selectionScope: 'PARTY',
     size: '37–44 sq.m.', bed: 'King or twin', occupancy: 'Up to 2 adults · 1 child',
     location: 'Garden views · interconnecting rooms where available',
@@ -134,7 +124,7 @@ export const ACCOMMODATIONS = [
     id: 'heritage-grand-premier', name: 'Heritage Grand Premier',
     kind: 'room', property: 'Souphattra Heritage Vientiane',
     stay: STAY_WINDOW, nights: 2,
-    ratePerNight: 255, roomTotal: 510, selectable: true,
+    contributionPerGuest: 170, selectable: true,
     capacityTotal: 3, capacityUnit: 'Room', selectionScope: 'PARTY',
     size: '49 sq.m.', bed: '1 King bed', occupancy: '2 adults · 1 child sharing bedding',
     location: 'Garden and pool views',
@@ -143,10 +133,22 @@ export const ACCOMMODATIONS = [
     images: [RM + 'heritage-grand-premier-1.jpg', RM + 'heritage-grand-premier-2.jpg', RM + 'heritage-grand-premier-3.jpg'],
   },
   {
+    id: 'noble-courtyard', name: 'Noble Courtyard Suite',
+    kind: 'suite', property: 'Souphattra Heritage Vientiane',
+    stay: STAY_WINDOW, nights: 2,
+    contributionPerGuest: 220, selectable: true,
+    capacityTotal: 1, capacityUnit: 'Room', selectionScope: 'PARTY',
+    size: '63 sq.m.', bed: '1 King bed', occupancy: '2 adults · 1 child',
+    location: 'Ground floor · central greenery · one suite only',
+    blurb: 'A 63 square metre retreat made for two: a King bed, two bathrooms and shower rooms for Her and His comfort, a separate living area with Smart TV and sofa for afternoon tea, and a private balcony over the garden and the pool.',
+    amenities: ['Bathrobe', 'Bathtub', 'Coffee & tea making facilities', 'Hair dryer', 'Mini bar', 'Nespresso machine', 'Safe deposit box', 'Shower', 'Slippers', 'Smart TV', 'Wardrobe', 'Wi-Fi access'],
+    images: [RM + 'noble-courtyard-1.jpg', RM + 'noble-courtyard-2.jpg', RM + 'noble-courtyard-3.jpg'],
+  },
+  {
     id: 'grand-majestic-suite', name: 'Grand Majestic Suite',
     kind: 'suite', property: 'Souphattra Heritage Vientiane',
     stay: STAY_WINDOW, nights: 2,
-    ratePerNight: 275, roomTotal: 550, selectable: true,
+    contributionPerGuest: 260, selectable: true,
     capacityTotal: 2, capacityUnit: 'Room', selectionScope: 'PARTY',
     size: '66–75 sq.m.', bed: '1 King bed', occupancy: '2 adults · 1 child',
     location: 'Private balcony',
@@ -158,7 +160,7 @@ export const ACCOMMODATIONS = [
     id: 'souphattra-majestic-suite', name: 'Souphattra Majestic Suite',
     kind: 'suite', property: 'Souphattra Heritage Vientiane',
     stay: STAY_WINDOW, nights: 2,
-    ratePerNight: 310, roomTotal: 620, selectable: true,
+    contributionPerGuest: 290, selectable: true,
     capacityTotal: 1, capacityUnit: 'Room', selectionScope: 'PARTY',
     size: '84 sq.m.', bed: '1 King bed', occupancy: '2 adults · 2 children',
     location: 'Pool and garden views · one suite only',
@@ -167,12 +169,12 @@ export const ACCOMMODATIONS = [
     images: [RM + 'souphattra-majestic-suite-1.jpg', RM + 'souphattra-majestic-suite-2.jpg', RM + 'souphattra-majestic-suite-3.jpg'],
   },
   {
-    /* Visible for the house's completeness — never requestable, never priced. */
+    /* Controlled category per the current Owner room matrix: priced and part
+     * of the 26-room inventory. */
     id: 'souphattra-presidential', name: 'Souphattra Presidential',
     kind: 'suite', property: 'Souphattra Heritage Vientiane',
     stay: STAY_WINDOW, nights: 2,
-    ratePerNight: null, roomTotal: null, selectable: false,
-    reservedNote: 'Reserved for the Bride & Groom · not available for guest requests',
+    contributionPerGuest: 766.50, selectable: true,
     capacityTotal: 1, capacityUnit: 'Room', selectionScope: 'PARTY',
     size: '118 sq.m.', bed: 'Two bedrooms · king and twin', occupancy: '4 adults · 2 children',
     location: 'One unit only',
@@ -258,12 +260,12 @@ export const STATUS = {
 };
 
 export const COPY = {
-  priceLabel: 'Your room for the wedding stay',
-  priceNote: 'Rooms are priced per room and night for the fixed two-night wedding stay; the total covers the whole room, whatever your Party size.',
+  priceLabel: 'Your contribution per guest for the complete wedding stay',
+  priceNote: 'The amount shown is per guest for the complete two-night wedding stay — never a nightly room rate.',
   hostedNight: 'Your second hotel night is hosted by Haruthai & Suthep.',
   payment: 'No deposit is required. After Guest Relations confirms your arrangements, you will receive an invoice with bank transfer or PayPal instructions. Payment is due within seven days.',
   requestNote: 'This is a registration request. Guest Relations will confirm your arrangements separately.',
-  sharedHome: 'To make this journey feel truly together, we have created a shared stay at Souphattra Heritage Vientiane: our closest family and friends gather in one place throughout the celebration.',
+  sharedHome: 'Haruthai & Suthep have brought the whole wedding party under one roof: Souphattra Heritage Vientiane is held for our closest family and friends as one shared wedding stay. Shared mornings, shared arrivals, the whole rhythm of the weekend in one place — you simply choose your room within the wedding allocation, and your second night is hosted where approved.',
 };
 
 /* ---------------- Guest List — PRODUCTION LOOKUP (token-only) -------------

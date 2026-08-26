@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  ratePerNight, roomTotal, partyTotal,
+  contributionPerGuest, partyCharges, partyTotal,
   trainContribution, transfersTotal, journeyTotal,
   createInventory, remaining, availabilityLabel, requestAllocation,
   holdAllocation, confirmAllocation, releaseAllocation, ALLOC,
@@ -49,23 +49,34 @@ test('no free additional-guest creation: unknown guest fails validation', () => 
 
 /* ---------------- Journey cost (Owner price master) ---------------- */
 
-const RATE_MASTER = {
-  heritage: [155, 310], 'the-heritage': [180, 360],
-  'heritage-grand-premier': [255, 510], 'grand-majestic-suite': [275, 550],
-  'souphattra-majestic-suite': [310, 620], villa: [0, 0],
+const GUEST_MATRIX = {
+  heritage: 130, 'the-heritage': 150, 'heritage-grand-premier': 170,
+  'noble-courtyard': 220, 'grand-majestic-suite': 260,
+  'souphattra-majestic-suite': 290, 'souphattra-presidential': 766.50,
 };
-for (const [id, [night, total]] of Object.entries(RATE_MASTER)) {
-  test('room rate — ' + id + ' = USD ' + night + '/night, USD ' + total + ' for 2 nights', () => {
-    assert.equal(ratePerNight(byId(id)), night);
-    assert.equal(roomTotal(byId(id)), total);
-    assert.equal(partyTotal(byId(id)), total);
-    if (night) assert.equal(night * byId(id).nights, total); // 155×2=310 etc.
+for (const [id, per] of Object.entries(GUEST_MATRIX)) {
+  test('guest contribution — ' + id + ' = USD ' + per + ' per guest', () => {
+    assert.equal(contributionPerGuest(byId(id)), per);
+    assert.equal(partyTotal(byId(id), ['g1']), per);
+    assert.equal(partyTotal(byId(id), ['g1', 'g2']), per * 2);
   });
 }
 
-test('the room price never multiplies with the guest count', () => {
-  const acc = byId('the-heritage');
-  assert.equal(partyTotal(acc), 360); // one room, one price — solo or couple
+test('couple examples from the final matrix', () => {
+  assert.equal(partyTotal(byId('heritage'), ['g1', 'g2']), 260);
+  assert.equal(partyTotal(byId('the-heritage'), ['g1', 'g2']), 300);
+  assert.equal(partyTotal(byId('heritage-grand-premier'), ['g1', 'g2']), 340);
+  assert.equal(partyTotal(byId('noble-courtyard'), ['g1', 'g2']), 440);
+  assert.equal(partyTotal(byId('grand-majestic-suite'), ['g1', 'g2']), 520);
+  assert.equal(partyTotal(byId('souphattra-majestic-suite'), ['g1', 'g2']), 580);
+  assert.equal(partyTotal(byId('souphattra-presidential'), ['g1', 'g2']), 1533);
+});
+
+test('no room-per-night pricing exists anywhere in the model', () => {
+  for (const a of ACCOMMODATIONS) {
+    assert.equal(a.ratePerNight, undefined, a.name);
+    assert.equal(a.roomTotal, undefined, a.name);
+  }
 });
 
 test('Night Train is USD 88 per participating guest — only riders are charged', () => {
@@ -89,12 +100,12 @@ test('transfer price master: per unit, never per guest', () => {
   assert.equal(transfersTotal(TRANSFERS, [{ transferId: 'lcr-pickup-merc', units: 2 }]), 120);
 });
 
-test('live Journey Cost: room + train + transfers from one calculation path', () => {
-  // §26 example: Heritage Executive 360 + 2×88 train + 1 Jaguar pickup 25 = 561
-  const total = journeyTotal(byId('the-heritage'), TRAIN, 2, TRANSFERS,
+test('live Journey Cost: stay + train + transfers from one calculation path', () => {
+  // Heritage Executive couple 300 + 2×88 train + 1 Jaguar pickup 25 = 501
+  const total = journeyTotal(byId('the-heritage'), ['g1', 'g2'], TRAIN, 2, TRANSFERS,
     [{ transferId: 'apt-pickup-jaguar', units: 1 }]);
-  assert.equal(total, 561);
-  assert.equal(journeyTotal(null, TRAIN, 0, TRANSFERS, []), 0);
+  assert.equal(total, 501);
+  assert.equal(journeyTotal(null, [], TRAIN, 0, TRANSFERS, []), 0);
 });
 
 test('airport transfers carry flight fields; LCR transfers carry train fields', () => {
@@ -106,21 +117,21 @@ test('airport transfers carry flight fields; LCR transfers carry train fields', 
 
 /* ---------------- Inventory logic (§25) ---------------- */
 
-test('capacities match the brief', () => {
+test('capacities match the final matrix: 26 rooms, no villa', () => {
   const inv = createInventory(RES);
-  assert.equal(inv.villa.capacity_total, 4);
-  assert.equal(inv.heritage.capacity_total, 4);
+  assert.equal(inv.heritage.capacity_total, 5);
   assert.equal(inv['the-heritage'].capacity_total, 13);
   assert.equal(inv['heritage-grand-premier'].capacity_total, 3);
+  assert.equal(inv['noble-courtyard'].capacity_total, 1);
   assert.equal(inv['grand-majestic-suite'].capacity_total, 2);
   assert.equal(inv['souphattra-majestic-suite'].capacity_total, 1);
+  assert.equal(inv['souphattra-presidential'].capacity_total, 1);
   assert.equal(inv.train.capacity_total, 8);
   assert.equal(inv.train.selection_scope, 'GUEST');
-  assert.equal(inv.villa.selection_scope, 'PARTY');
-  const activeRooms = ['heritage', 'the-heritage', 'heritage-grand-premier', 'grand-majestic-suite', 'souphattra-majestic-suite']
-    .reduce((s, id) => s + inv[id].capacity_total, 0);
-  assert.equal(activeRooms, 23); // active guest inventory
-  assert.equal(inv['noble-courtyard'], undefined); // cancelled — no inventory record
+  assert.equal(inv.villa, undefined); // Airbnb/villa removed completely
+  const total = Object.values(inv).filter((r) => r.capacity_unit === 'Room')
+    .reduce((s, r) => s + r.capacity_total, 0);
+  assert.equal(total, 26);
 });
 
 test('hold + confirm reduce remaining; release restores it', () => {
@@ -166,7 +177,7 @@ test('inventory snapshot carries total / requested / confirmed / available / wai
 });
 
 test('§09 capacity matrix: request N allowed, request N+1 never a normal allocation', () => {
-  const matrix = { heritage: 4, 'the-heritage': 13, 'heritage-grand-premier': 3, 'grand-majestic-suite': 2, 'souphattra-majestic-suite': 1 };
+  const matrix = { heritage: 5, 'the-heritage': 13, 'heritage-grand-premier': 3, 'noble-courtyard': 1, 'grand-majestic-suite': 2, 'souphattra-majestic-suite': 1, 'souphattra-presidential': 1 };
   const inv = createInventory(RES);
   for (const [id, cap] of Object.entries(matrix)) {
     const results = [];
@@ -182,36 +193,27 @@ test('§09 capacity matrix: request N allowed, request N+1 never a normal alloca
   }
 });
 
-test('cancelled and reserved categories can never be requested', () => {
+test('the removed villa can never be requested', () => {
   const inv = createInventory(RES);
-  assert.equal(inv['noble-courtyard'], undefined);
-  assert.equal(inv['souphattra-presidential'], undefined);
-  assert.throws(() => requestAllocation(inv, 'noble-courtyard', { partyId: 'X', units: 1, submittedAt: 't' }), /unknown resource/);
-  assert.throws(() => requestAllocation(inv, 'souphattra-presidential', { partyId: 'X', units: 1, submittedAt: 't' }), /unknown resource/);
+  assert.equal(inv.villa, undefined);
+  assert.throws(() => requestAllocation(inv, 'villa', { partyId: 'X', units: 1, submittedAt: 't' }), /unknown resource/);
 });
 
-test('the villa cannot be over-allocated beyond its four Party allocations', () => {
-  const inv = createInventory(RES);
-  const out = [];
-  for (let i = 1; i <= 6; i++) {
-    out.push(requestAllocation(inv, 'villa', { partyId: 'V' + i, units: 1, submittedAt: 't' + i }));
-  }
-  assert.equal(out.filter((o) => o.status === ALLOC.REQUESTED).length, 4);
-  assert.equal(out.filter((o) => o.status === ALLOC.WAITLISTED).length, 2);
-});
 
 /* ---------------- Accommodation model (complete room presentation) ------- */
 
-test('the active accommodation master is complete (Noble Courtyard cancelled)', () => {
+test('the active accommodation master is complete (final matrix, no villa)', () => {
   const names = ACCOMMODATIONS.map((a) => a.name);
   assert.deepEqual(names, [
-    'Vientiane Urban Cozy Villa 2 (4BR)',
     'The Heritage', 'Heritage Executive', 'Heritage Grand Premier',
-    'Grand Majestic Suite', 'Souphattra Majestic Suite',
+    'Noble Courtyard Suite', 'Grand Majestic Suite', 'Souphattra Majestic Suite',
     'Souphattra Presidential',
   ]);
-  assert.ok(!names.some((n) => /Noble Courtyard/.test(n)), 'Noble Courtyard is cancelled');
+  assert.ok(!names.some((n) => /Villa|Airbnb/i.test(n)), 'no villa/Airbnb product');
   assert.ok(!names.some((n) => /Heritage Exclusive/i.test(n)), 'it is Heritage Executive, never Exclusive');
+  const noble = ACCOMMODATIONS.find((a) => a.id === 'noble-courtyard');
+  assert.ok(/two bathrooms/.test(noble.blurb), 'Noble Courtyard keeps its full description');
+  assert.equal(noble.location, 'Ground floor · central greenery · one suite only');
   for (const a of ACCOMMODATIONS) {
     assert.ok(a.size, a.name + ' needs a size');
     assert.ok(a.bed, a.name + ' needs a bed configuration');
@@ -235,23 +237,14 @@ test('room images exist on disk (no placeholders)', async () => {
   }
 });
 
-test('the Presidential is visible, never selectable and never priced', () => {
+test('the Presidential is a controlled priced category per the final matrix', () => {
   const p = ACCOMMODATIONS.find((a) => a.id === 'souphattra-presidential');
-  assert.equal(p.selectable, false);
-  assert.equal(p.ratePerNight, null);
-  assert.equal(p.roomTotal, null);
-  assert.match(p.reservedNote, /Bride & Groom/);
-  assert.ok(!SELECTABLE_ACCOMMODATIONS.includes(p));
+  assert.equal(p.selectable, true);
+  assert.equal(contributionPerGuest(p), 766.50);
+  assert.equal(p.capacityTotal, 1);
+  assert.ok(SELECTABLE_ACCOMMODATIONS.includes(p));
   const inv = createInventory(RES);
-  assert.equal(inv['souphattra-presidential'], undefined); // no inventory, no requests
-});
-
-test('a registration naming a non-selectable category is rejected', () => {
-  const inv = lookupInvitation('demo-amara');
-  const reg = baseReg(inv);
-  reg.stay = { accommodationId: 'souphattra-presidential', occupantGuestIds: ['g1', 'g2'], rooms: 1 };
-  assert.ok(validateRegistration(reg, ctx(inv))
-    .some((e) => e.includes('not available for guest requests')));
+  assert.equal(inv['souphattra-presidential'].capacity_total, 1);
 });
 
 test('the Guest Relations record traces the category back to the approved buy-out row', () => {
@@ -260,16 +253,6 @@ test('the Guest Relations record traces the category back to the approved buy-ou
   const text = buildNotification(reg, { invitation: inv, accommodations: ACCOMMODATIONS });
   assert.ok(text.includes('Room Category: Heritage Executive'));
   assert.ok(text.includes('Buy-out Row: The Heritage'));
-});
-
-test('villa uses Party allocations; selection decreases by one per Party', () => {
-  const inv = createInventory(RES);
-  for (let i = 1; i <= 4; i++) {
-    const a = requestAllocation(inv, 'villa', { partyId: 'P' + i, units: 1, submittedAt: 't' + i });
-    holdAllocation(inv, a.allocId, 'h' + i);
-  }
-  assert.equal(remaining(inv.villa), 0);
-  assert.equal(availabilityLabel(inv.villa), 'Fully allocated');
 });
 
 test('train seats count per Guest; linked Guests may choose differently', () => {
@@ -313,10 +296,10 @@ test('duplicate submission does not double-decrease capacity (idempotent)', () =
 
 test('exact availability labels', () => {
   const inv = createInventory(RES);
-  assert.equal(availabilityLabel(inv.heritage), '4 of 4 rooms remaining');
+  assert.equal(availabilityLabel(inv.heritage), '5 of 5 rooms remaining');
   const a = requestAllocation(inv, 'heritage', { partyId: 'P1', units: 1, submittedAt: 't1' });
   holdAllocation(inv, a.allocId, 'h');
-  assert.equal(availabilityLabel(inv.heritage), '3 of 4 rooms remaining');
+  assert.equal(availabilityLabel(inv.heritage), '4 of 5 rooms remaining');
   const g = requestAllocation(inv, 'souphattra-majestic-suite', { partyId: 'P2', units: 1, submittedAt: 't2' });
   assert.equal(availabilityLabel(inv['souphattra-majestic-suite']), 'Last room');
   holdAllocation(inv, g.allocId, 'h2');
@@ -393,8 +376,8 @@ test('a registration without a stay is rejected (no digital no-room flow)', () =
 test('train is a confirmed USD 88 product inside the journey total', () => {
   assert.equal(trainContribution(TRAIN, 2), 176);
   const acc = ACCOMMODATIONS.find((a) => a.id === 'the-heritage');
-  assert.equal(journeyTotal(acc, TRAIN, 2, TRANSFERS, []), 360 + 176);
-  assert.equal(journeyTotal(null, TRAIN, 2, TRANSFERS, []), 176);
+  assert.equal(journeyTotal(acc, ['g1', 'g2'], TRAIN, 2, TRANSFERS, []), 300 + 176);
+  assert.equal(journeyTotal(null, [], TRAIN, 2, TRANSFERS, []), 176);
 });
 
 test('a transfer request needs its travel date; unknown services are rejected', () => {
@@ -418,7 +401,7 @@ test('the Guest Relations record carries transfers with units, price and status'
   assert.ok(text.includes('Units: 2 × USD 60'));
   assert.ok(text.includes('Train Number: C82'));
   assert.ok(text.includes('Transfers Total: USD 120'));
-  assert.ok(text.includes('TOTAL: USD 480')); // room 360 + transfers 120
+  assert.ok(text.includes('TOTAL: USD 420')); // stay 300 + transfers 120
 });
 
 test('a Party may request exactly one room', () => {
@@ -457,11 +440,11 @@ test('notification carries party, per-guest data, charges, statuses', () => {
   assert.ok(text.includes('Property: Souphattra Heritage Vientiane'));
   assert.ok(text.includes('Room Category: Heritage Executive'));
   assert.ok(text.includes('Guests: Amara Demo; Theo Demo'));
-  assert.ok(text.includes('Room Rate: USD 180 per room / night × 2 nights'));
-  assert.ok(text.includes('Room Total: USD 360'));
+  assert.ok(text.includes('Guest Contribution: USD 150 each'));
+  assert.ok(text.includes('Stay Total: USD 300 (2 guests)'));
   assert.ok(text.includes('JOURNEY COST'));
   assert.ok(text.includes('Train: 1 × USD 88 = USD 88'));
-  assert.ok(text.includes('TOTAL: USD 448'));
+  assert.ok(text.includes('TOTAL: USD 388'));
   assert.ok(text.includes('Second Night: Complimentary / Hosted by Haruthai & Suthep'));
   assert.ok(text.includes('Status: REQUESTED / UNDER REVIEW'));
   // privacy: no internal figures
@@ -558,13 +541,8 @@ test('rates are APPROVED for publication (Gate 1 closed by owner)', async () => 
   assert.ok(/rates:\s*'APPROVED'/.test(data));
 });
 
-test('room totals are identical for solo and couple parties (per-room pricing)', () => {
-  const cases = [
-    ['villa', 0], ['heritage', 310], ['the-heritage', 360],
-    ['heritage-grand-premier', 510], ['grand-majestic-suite', 550],
-    ['souphattra-majestic-suite', 620],
-  ];
-  for (const [id, total] of cases) {
-    assert.equal(partyTotal(byId(id)), total, id);
-  }
+test('per-guest charges: one charge record per occupying guest', () => {
+  const charges = partyCharges(byId('noble-courtyard'), ['g1', 'g2']);
+  assert.equal(charges.length, 2);
+  assert.deepEqual(charges.map((c) => c.amount), [220, 220]);
 });

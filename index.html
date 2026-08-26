@@ -178,6 +178,20 @@ section { padding: 110px 6vw; position: relative; }
 .rm-cta { display: inline-block; font-size: 11.5px; letter-spacing: .2em; text-transform: uppercase; text-decoration: none; padding-bottom: 5px; border-bottom: 1px solid var(--cherry-photo); }
 .rooms .rm-note { margin-top: 40px; font-size: 13px; color: var(--rose); max-width: 70ch; }
 
+.rm-fig-btn { display: block; width: 100%; padding: 0; border: none; background: none; cursor: zoom-in; position: relative; font: inherit; }
+.rm-fig-btn img { display: block; width: 100%; height: auto; aspect-ratio: 3/2; object-fit: cover; transition: transform .8s cubic-bezier(.25,.46,.45,.94); }
+.rm-card:hover .rm-fig-btn img { transform: scale(1.04); }
+.rm-figcount { position: absolute; right: 10px; bottom: 10px; background: rgba(33,31,28,.72); color: var(--ivory); font-size: 10px; letter-spacing: .16em; text-transform: uppercase; padding: 5px 9px; }
+.rm-amen button.more { font: inherit; font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--cherry); background: none; border: 1px solid var(--line); padding: 4px 8px; cursor: pointer; }
+.rm-amen button.more:hover { border-color: var(--cherry); }
+.rm-lb { position: fixed; inset: 0; z-index: 200; background: rgba(23,21,19,.93); display: grid; grid-template-columns: 64px 1fr 64px; align-items: center; justify-items: center; }
+.rm-lb .rm-lb-img { max-width: 100%; max-height: 84vh; width: auto; height: auto; display: block; box-shadow: 0 30px 80px rgba(0,0,0,.5); }
+.rm-lb .rm-lb-prev, .rm-lb .rm-lb-next { background: none; border: 1px solid rgba(242,236,225,.4); color: var(--ivory); font: inherit; font-size: 20px; width: 46px; height: 46px; cursor: pointer; border-radius: 50%; }
+.rm-lb .rm-lb-prev:hover, .rm-lb .rm-lb-next:hover { border-color: var(--ivory); }
+.rm-lb .rm-lb-close { position: absolute; top: 22px; right: 22px; background: none; border: 1px solid rgba(242,236,225,.4); color: var(--ivory); font: inherit; font-size: 11px; letter-spacing: .2em; text-transform: uppercase; padding: 10px 16px; cursor: pointer; }
+.rm-lb .rm-lb-count { position: absolute; bottom: 22px; left: 50%; transform: translateX(-50%); color: var(--ivory); font-size: 12px; letter-spacing: .2em; }
+@media (max-width: 640px) { .rm-lb { grid-template-columns: 44px 1fr 44px; } }
+
 /* ---------- PLACE PANELS ---------- */
 .pv-backdrop { position: fixed; inset: 0; background: rgba(33,31,28,.55); z-index: 80; opacity: 0; pointer-events: none; transition: opacity .5s ease; }
 .pv-backdrop.open { opacity: 1; pointer-events: auto; }
@@ -480,8 +494,8 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
 <div class="txt">
 <div class="when">Sunday, 28 Feb · at dawn</div>
 <h3>The Alms Giving</h3>
-<p>Monks in saffron robes at first light, a quiet Buddhist ritual to open the wedding day with meaning. This one happens away from the hotel, out in the city where it belongs.</p>
-<div class="meta">In Vientiane · not at the hotel · place and dress code to be confirmed</div>
+<p>Monks in saffron robes at first light, a quiet Buddhist ritual to open the wedding day with meaning.</p>
+<div class="meta">Souphattra Heritage Vientiane · dress code: to be confirmed</div>
 </div>
 <span class="dotmark"></span>
 </div>
@@ -531,9 +545,9 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
 </button>
 <button aria-haspopup="dialog" class="card rv" data-panel="pv-alms">
 <div class="im"><img alt="Monks receiving alms at a temple at first light" src="assets/images/alms/alms-procession.jpg" width="2000" height="1334" loading="lazy" decoding="async"/><span class="ovl">the<br/>alms.</span></div>
-<div class="tag">Not at the hotel</div>
+<div class="tag">At first light</div>
 <h3>The Alms Giving</h3>
-<p>The morning ritual belongs to the city, not to the house. We gather out in Vientiane at first light; the place will be confirmed.</p>
+<p>The wedding day opens with the morning ritual at Souphattra Heritage Vientiane: monks in procession, rice offered, nothing hurried.</p>
 <span class="more">The morning</span>
 </button>
 <button aria-haspopup="dialog" class="card rv" data-panel="pv-pool">
@@ -553,86 +567,142 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
 <div class="eyebrow rv">Where You Sleep</div>
 <h2 class="h-big split-h">The rooms of<br/>the house.</h2>
 <!-- ROOMS:START -->
-<p class="rm-intro rv">To make this journey feel truly together, we have created a shared stay at Souphattra Heritage Vientiane: our closest family and friends gather in one place throughout the celebration.</p>
+<p class="rm-intro rv">Haruthai &amp; Suthep have brought the whole wedding party under one roof: Souphattra Heritage Vientiane is held for our closest family and friends as one shared wedding stay. Shared mornings, shared arrivals, the whole rhythm of the weekend in one place — you simply choose your room within the wedding allocation, and your second night is hosted where approved.</p>
 <div class="rm-grid">
 <article class="rm-card">
-<figure class="rm-figure"><img alt="Vientiane Urban Cozy Villa 2 (4BR) at Vientiane Urban Cozy Villa 2 (4BR)" src="assets/images/rooms/villa-1.jpg" width="1600" height="1067" loading="lazy" decoding="async"/></figure>
-<div class="rm-body">
-<div class="rm-badge">COMPLIMENTARY — HOSTED BY HARUTHAI &amp; SUTHEP</div>
-<div class="rm-head"><h3>Vientiane Urban Cozy Villa 2 (4BR)</h3></div>
-<div class="rm-meta">25 February – 1 March 2027 · 4 nights</div>
-<p class="rm-blurb">A fully hosted stay offered to four invited Parties. Allocation is based on completed registration order and remains subject to confirmation by Guest Relations.</p>
-<dl class="rm-specs"><div><dt>Size</dt><dd>Four-bedroom villa</dd></div><div><dt>Bed</dt><dd>Four bedrooms</dd></div><div><dt>Guests</dt><dd>One Party per allocation</dd></div><div><dt>Where</dt><dd>Vientiane · a short drive from Souphattra Heritage</dd></div></dl>
-<div class="rm-amen"><span>Four bedrooms</span><span>Living area</span><span>Kitchen</span><span>Wi-Fi</span><span>Air conditioning</span><span class="more">+1 more</span></div>
-<div class="rm-avail" role="status">4 of 4 Party allocations remaining</div><div class="rm-foot"><a class="rm-cta" href="register/">Request this room in your Guest Area</a></div>
-</div></article>
-<article class="rm-card">
-<figure class="rm-figure"><img alt="The Heritage at Souphattra Heritage Vientiane" src="assets/images/rooms/the-heritage-1.jpg" width="1600" height="1067" loading="lazy" decoding="async"/></figure>
+<figure class="rm-figure"><button type="button" class="rm-fig-btn" data-gallery="[&quot;assets/images/rooms/the-heritage-1.jpg&quot;,&quot;assets/images/rooms/the-heritage-2.jpg&quot;,&quot;assets/images/rooms/the-heritage-3.jpg&quot;]" data-name="The Heritage" aria-label="Open The Heritage photo gallery"><img alt="The Heritage at Souphattra Heritage Vientiane" src="assets/images/rooms/the-heritage-1.jpg" width="1600" height="1067" loading="lazy" decoding="async"/><span class="rm-figcount">3 photos</span></button></figure>
 <div class="rm-body">
 <div class="rm-head"><h3>The Heritage</h3></div>
 <div class="rm-meta">27 February – 1 March 2027 · 2 nights</div>
 <div class="rm-hosted">Second night complimentary · hosted by Haruthai &amp; Suthep</div>
 <p class="rm-blurb">Colonial French elegance in 31 square metres, with a private balcony over the garden.</p>
 <dl class="rm-specs"><div><dt>Size</dt><dd>31 sq.m.</dd></div><div><dt>Bed</dt><dd>1 King bed</dd></div><div><dt>Guests</dt><dd>2 adults · 1 child</dd></div><div><dt>Where</dt><dd>1st–3rd floor</dd></div></dl>
-<div class="rm-amen"><span>Bathrobe</span><span>Bathtub</span><span>Coffee &amp; tea facilities</span><span>Hair dryer</span><span>Mini bar</span><span class="more">+7 more</span></div>
-<div class="rm-avail" role="status">4 of 4 rooms remaining</div><div class="rm-foot"><a class="rm-cta" href="register/">Request this room in your Guest Area</a></div>
+<div class="rm-amen"><span>Bathrobe</span><span>Bathtub</span><span>Coffee &amp; tea facilities</span><span>Hair dryer</span><span>Mini bar</span><span class="rm-amen-x" hidden>Nespresso machine</span><span class="rm-amen-x" hidden>Safe deposit box</span><span class="rm-amen-x" hidden>Shower</span><span class="rm-amen-x" hidden>Slippers</span><span class="rm-amen-x" hidden>Smart TV</span><span class="rm-amen-x" hidden>Wardrobe</span><span class="rm-amen-x" hidden>Wi-Fi</span><button type="button" class="more rm-more" aria-expanded="false">+7 more</button></div>
+<div class="rm-avail" role="status">Request availability</div>
+<div class="rm-foot"><a class="rm-cta" href="register/">Request this room in your Guest Area</a></div>
 </div></article>
 <article class="rm-card">
-<figure class="rm-figure"><img alt="Heritage Executive at Souphattra Heritage Vientiane" src="assets/images/rooms/heritage-executive-1.jpg" width="1600" height="1067" loading="lazy" decoding="async"/></figure>
+<figure class="rm-figure"><button type="button" class="rm-fig-btn" data-gallery="[&quot;assets/images/rooms/heritage-executive-1.jpg&quot;,&quot;assets/images/rooms/heritage-executive-2.jpg&quot;,&quot;assets/images/rooms/heritage-executive-3.jpg&quot;]" data-name="Heritage Executive" aria-label="Open Heritage Executive photo gallery"><img alt="Heritage Executive at Souphattra Heritage Vientiane" src="assets/images/rooms/heritage-executive-1.jpg" width="1600" height="1067" loading="lazy" decoding="async"/><span class="rm-figcount">3 photos</span></button></figure>
 <div class="rm-body">
 <div class="rm-head"><h3>Heritage Executive</h3></div>
 <div class="rm-meta">27 February – 1 March 2027 · 2 nights</div>
 <div class="rm-hosted">Second night complimentary · hosted by Haruthai &amp; Suthep</div>
 <p class="rm-blurb">French colonial rooms with a balcony over the garden, and the flexibility a family needs.</p>
 <dl class="rm-specs"><div><dt>Size</dt><dd>37–44 sq.m.</dd></div><div><dt>Bed</dt><dd>King or twin</dd></div><div><dt>Guests</dt><dd>Up to 2 adults · 1 child</dd></div><div><dt>Where</dt><dd>Garden views · interconnecting rooms where available</dd></div></dl>
-<div class="rm-amen"><span>Bathrobe</span><span>Bathtub</span><span>Coffee &amp; tea facilities</span><span>Hair dryer</span><span>Mini bar</span><span class="more">+7 more</span></div>
-<div class="rm-avail" role="status">13 of 13 rooms remaining</div><div class="rm-foot"><a class="rm-cta" href="register/">Request this room in your Guest Area</a></div>
+<div class="rm-amen"><span>Bathrobe</span><span>Bathtub</span><span>Coffee &amp; tea facilities</span><span>Hair dryer</span><span>Mini bar</span><span class="rm-amen-x" hidden>Nespresso machine</span><span class="rm-amen-x" hidden>Safe deposit box</span><span class="rm-amen-x" hidden>Shower</span><span class="rm-amen-x" hidden>Slippers</span><span class="rm-amen-x" hidden>Smart TV</span><span class="rm-amen-x" hidden>Wardrobe</span><span class="rm-amen-x" hidden>Wi-Fi</span><button type="button" class="more rm-more" aria-expanded="false">+7 more</button></div>
+<div class="rm-avail" role="status">Request availability</div>
+<div class="rm-foot"><a class="rm-cta" href="register/">Request this room in your Guest Area</a></div>
 </div></article>
 <article class="rm-card">
-<figure class="rm-figure"><img alt="Heritage Grand Premier at Souphattra Heritage Vientiane" src="assets/images/rooms/heritage-grand-premier-1.jpg" width="1600" height="1067" loading="lazy" decoding="async"/></figure>
+<figure class="rm-figure"><button type="button" class="rm-fig-btn" data-gallery="[&quot;assets/images/rooms/heritage-grand-premier-1.jpg&quot;,&quot;assets/images/rooms/heritage-grand-premier-2.jpg&quot;,&quot;assets/images/rooms/heritage-grand-premier-3.jpg&quot;]" data-name="Heritage Grand Premier" aria-label="Open Heritage Grand Premier photo gallery"><img alt="Heritage Grand Premier at Souphattra Heritage Vientiane" src="assets/images/rooms/heritage-grand-premier-1.jpg" width="1600" height="1067" loading="lazy" decoding="async"/><span class="rm-figcount">3 photos</span></button></figure>
 <div class="rm-body">
 <div class="rm-head"><h3>Heritage Grand Premier</h3></div>
 <div class="rm-meta">27 February – 1 March 2027 · 2 nights</div>
 <div class="rm-hosted">Second night complimentary · hosted by Haruthai &amp; Suthep</div>
 <p class="rm-blurb">A larger heritage room, with a private balcony over the garden and the pool.</p>
 <dl class="rm-specs"><div><dt>Size</dt><dd>49 sq.m.</dd></div><div><dt>Bed</dt><dd>1 King bed</dd></div><div><dt>Guests</dt><dd>2 adults · 1 child sharing bedding</dd></div><div><dt>Where</dt><dd>Garden and pool views</dd></div></dl>
-<div class="rm-amen"><span>Private balcony</span><span>Garden and pool views</span><span>Nespresso machine</span><span>Coffee &amp; tea facilities</span><span>Mini bar</span><span class="more">+3 more</span></div>
-<div class="rm-avail" role="status">3 of 3 rooms remaining</div><div class="rm-foot"><a class="rm-cta" href="register/">Request this room in your Guest Area</a></div>
+<div class="rm-amen"><span>Private balcony</span><span>Garden and pool views</span><span>Nespresso machine</span><span>Coffee &amp; tea facilities</span><span>Mini bar</span><span class="rm-amen-x" hidden>Smart TV</span><span class="rm-amen-x" hidden>Wi-Fi</span><span class="rm-amen-x" hidden>Bathroom amenities</span><button type="button" class="more rm-more" aria-expanded="false">+3 more</button></div>
+<div class="rm-avail" role="status">Request availability</div>
+<div class="rm-foot"><a class="rm-cta" href="register/">Request this room in your Guest Area</a></div>
 </div></article>
 <article class="rm-card">
-<figure class="rm-figure"><img alt="Grand Majestic Suite at Souphattra Heritage Vientiane" src="assets/images/rooms/grand-majestic-suite-1.jpg" width="1600" height="1067" loading="lazy" decoding="async"/></figure>
+<figure class="rm-figure"><button type="button" class="rm-fig-btn" data-gallery="[&quot;assets/images/rooms/noble-courtyard-1.jpg&quot;,&quot;assets/images/rooms/noble-courtyard-2.jpg&quot;,&quot;assets/images/rooms/noble-courtyard-3.jpg&quot;]" data-name="Noble Courtyard Suite" aria-label="Open Noble Courtyard Suite photo gallery"><img alt="Noble Courtyard Suite at Souphattra Heritage Vientiane" src="assets/images/rooms/noble-courtyard-1.jpg" width="1600" height="1067" loading="lazy" decoding="async"/><span class="rm-figcount">3 photos</span></button></figure>
+<div class="rm-body">
+<div class="rm-head"><h3>Noble Courtyard Suite</h3></div>
+<div class="rm-meta">27 February – 1 March 2027 · 2 nights</div>
+<div class="rm-hosted">Second night complimentary · hosted by Haruthai &amp; Suthep</div>
+<p class="rm-blurb">A 63 square metre retreat made for two: a King bed, two bathrooms and shower rooms for Her and His comfort, a separate living area with Smart TV and sofa for afternoon tea, and a private balcony over the garden and the pool.</p>
+<dl class="rm-specs"><div><dt>Size</dt><dd>63 sq.m.</dd></div><div><dt>Bed</dt><dd>1 King bed</dd></div><div><dt>Guests</dt><dd>2 adults · 1 child</dd></div><div><dt>Where</dt><dd>Ground floor · central greenery · one suite only</dd></div></dl>
+<div class="rm-amen"><span>Bathrobe</span><span>Bathtub</span><span>Coffee &amp; tea making facilities</span><span>Hair dryer</span><span>Mini bar</span><span class="rm-amen-x" hidden>Nespresso machine</span><span class="rm-amen-x" hidden>Safe deposit box</span><span class="rm-amen-x" hidden>Shower</span><span class="rm-amen-x" hidden>Slippers</span><span class="rm-amen-x" hidden>Smart TV</span><span class="rm-amen-x" hidden>Wardrobe</span><span class="rm-amen-x" hidden>Wi-Fi access</span><button type="button" class="more rm-more" aria-expanded="false">+7 more</button></div>
+<div class="rm-avail" role="status">Request availability</div>
+<div class="rm-foot"><a class="rm-cta" href="register/">Request this room in your Guest Area</a></div>
+</div></article>
+<article class="rm-card">
+<figure class="rm-figure"><button type="button" class="rm-fig-btn" data-gallery="[&quot;assets/images/rooms/grand-majestic-suite-1.jpg&quot;,&quot;assets/images/rooms/grand-majestic-suite-2.jpg&quot;,&quot;assets/images/rooms/grand-majestic-suite-3.jpg&quot;]" data-name="Grand Majestic Suite" aria-label="Open Grand Majestic Suite photo gallery"><img alt="Grand Majestic Suite at Souphattra Heritage Vientiane" src="assets/images/rooms/grand-majestic-suite-1.jpg" width="1600" height="1067" loading="lazy" decoding="async"/><span class="rm-figcount">3 photos</span></button></figure>
 <div class="rm-body">
 <div class="rm-head"><h3>Grand Majestic Suite</h3></div>
 <div class="rm-meta">27 February – 1 March 2027 · 2 nights</div>
 <div class="rm-hosted">Second night complimentary · hosted by Haruthai &amp; Suthep</div>
 <p class="rm-blurb">French colonial and Laotian design: a living room under a high ceiling, and a slower kind of morning.</p>
 <dl class="rm-specs"><div><dt>Size</dt><dd>66–75 sq.m.</dd></div><div><dt>Bed</dt><dd>1 King bed</dd></div><div><dt>Guests</dt><dd>2 adults · 1 child</dd></div><div><dt>Where</dt><dd>Private balcony</dd></div></dl>
-<div class="rm-amen"><span>Living room</span><span>High ceiling</span><span>Pantry</span><span>Private balcony</span><span>Smart TV</span><span class="more">+2 more</span></div>
-<div class="rm-avail" role="status">2 of 2 rooms remaining</div><div class="rm-foot"><a class="rm-cta" href="register/">Request this room in your Guest Area</a></div>
+<div class="rm-amen"><span>Living room</span><span>High ceiling</span><span>Pantry</span><span>Private balcony</span><span>Smart TV</span><span class="rm-amen-x" hidden>Mini bar</span><span class="rm-amen-x" hidden>Wi-Fi</span><button type="button" class="more rm-more" aria-expanded="false">+2 more</button></div>
+<div class="rm-avail" role="status">Request availability</div>
+<div class="rm-foot"><a class="rm-cta" href="register/">Request this room in your Guest Area</a></div>
 </div></article>
 <article class="rm-card">
-<figure class="rm-figure"><img alt="Souphattra Majestic Suite at Souphattra Heritage Vientiane" src="assets/images/rooms/souphattra-majestic-suite-1.jpg" width="1600" height="1067" loading="lazy" decoding="async"/></figure>
+<figure class="rm-figure"><button type="button" class="rm-fig-btn" data-gallery="[&quot;assets/images/rooms/souphattra-majestic-suite-1.jpg&quot;,&quot;assets/images/rooms/souphattra-majestic-suite-2.jpg&quot;,&quot;assets/images/rooms/souphattra-majestic-suite-3.jpg&quot;]" data-name="Souphattra Majestic Suite" aria-label="Open Souphattra Majestic Suite photo gallery"><img alt="Souphattra Majestic Suite at Souphattra Heritage Vientiane" src="assets/images/rooms/souphattra-majestic-suite-1.jpg" width="1600" height="1067" loading="lazy" decoding="async"/><span class="rm-figcount">3 photos</span></button></figure>
 <div class="rm-body">
 <div class="rm-head"><h3>Souphattra Majestic Suite</h3></div>
 <div class="rm-meta">27 February – 1 March 2027 · 2 nights</div>
 <div class="rm-hosted">Second night complimentary · hosted by Haruthai &amp; Suthep</div>
 <p class="rm-blurb">The house suite: a separate living area, pantry and bar, and a long balcony over the pool.</p>
 <dl class="rm-specs"><div><dt>Size</dt><dd>84 sq.m.</dd></div><div><dt>Bed</dt><dd>1 King bed</dd></div><div><dt>Guests</dt><dd>2 adults · 2 children</dd></div><div><dt>Where</dt><dd>Pool and garden views · one suite only</dd></div></dl>
-<div class="rm-amen"><span>Separate living area</span><span>Pantry</span><span>Bar</span><span>Large balcony</span><span>Pool and garden views</span><span class="more">+5 more</span></div>
-<div class="rm-avail" role="status">Last room</div><div class="rm-foot"><a class="rm-cta" href="register/">Request this room in your Guest Area</a></div>
+<div class="rm-amen"><span>Separate living area</span><span>Pantry</span><span>Bar</span><span>Large balcony</span><span>Pool and garden views</span><span class="rm-amen-x" hidden>High ceilings</span><span class="rm-amen-x" hidden>Nespresso machine</span><span class="rm-amen-x" hidden>Coffee &amp; tea facilities</span><span class="rm-amen-x" hidden>Mini bar</span><span class="rm-amen-x" hidden>Wi-Fi</span><button type="button" class="more rm-more" aria-expanded="false">+5 more</button></div>
+<div class="rm-avail" role="status">Request availability</div>
+<div class="rm-foot"><a class="rm-cta" href="register/">Request this room in your Guest Area</a></div>
 </div></article>
-<article class="rm-card reserved">
-<figure class="rm-figure"><img alt="Souphattra Presidential at Souphattra Heritage Vientiane" src="assets/images/rooms/souphattra-presidential-1.jpg" width="1600" height="1067" loading="lazy" decoding="async"/></figure>
+<article class="rm-card">
+<figure class="rm-figure"><button type="button" class="rm-fig-btn" data-gallery="[&quot;assets/images/rooms/souphattra-presidential-1.jpg&quot;,&quot;assets/images/rooms/souphattra-presidential-2.jpg&quot;,&quot;assets/images/rooms/souphattra-presidential-3.jpg&quot;]" data-name="Souphattra Presidential" aria-label="Open Souphattra Presidential photo gallery"><img alt="Souphattra Presidential at Souphattra Heritage Vientiane" src="assets/images/rooms/souphattra-presidential-1.jpg" width="1600" height="1067" loading="lazy" decoding="async"/><span class="rm-figcount">3 photos</span></button></figure>
 <div class="rm-body">
 <div class="rm-head"><h3>Souphattra Presidential</h3></div>
 <div class="rm-meta">27 February – 1 March 2027 · 2 nights</div>
+<div class="rm-hosted">Second night complimentary · hosted by Haruthai &amp; Suthep</div>
 <p class="rm-blurb">The largest suite of the house: two bedrooms, private bathrooms and a co-living space under a high ceiling.</p>
 <dl class="rm-specs"><div><dt>Size</dt><dd>118 sq.m.</dd></div><div><dt>Bed</dt><dd>Two bedrooms · king and twin</dd></div><div><dt>Guests</dt><dd>4 adults · 2 children</dd></div><div><dt>Where</dt><dd>One unit only</dd></div></dl>
-<div class="rm-amen"><span>Two bedrooms</span><span>Private bathrooms</span><span>Separate living area</span><span>Co-living space</span><span>Pantry</span><span class="more">+2 more</span></div>
-<div class="rm-foot reserved">Reserved for the Bride &amp; Groom · not available for guest requests</div>
+<div class="rm-amen"><span>Two bedrooms</span><span>Private bathrooms</span><span>Separate living area</span><span>Co-living space</span><span>Pantry</span><span class="rm-amen-x" hidden>Dining table</span><span class="rm-amen-x" hidden>High ceiling</span><button type="button" class="more rm-more" aria-expanded="false">+2 more</button></div>
+<div class="rm-avail" role="status">Request availability</div>
+<div class="rm-foot"><a class="rm-cta" href="register/">Request this room in your Guest Area</a></div>
 </div></article>
 </div>
 <p class="rm-note rv">Your second hotel night is hosted by Haruthai &amp; Suthep. Room rates and requests live in your private Guest Area. This is a registration request. Guest Relations will confirm your arrangements separately.</p>
+<div class="rm-lb" id="rm-lightbox" hidden role="dialog" aria-modal="true" aria-label="Room gallery">
+<button type="button" class="rm-lb-close">Close</button>
+<button type="button" class="rm-lb-prev" aria-label="Previous photo">&#8592;</button>
+<img class="rm-lb-img" src="" alt=""/>
+<button type="button" class="rm-lb-next" aria-label="Next photo">&#8594;</button>
+<div class="rm-lb-count" aria-live="polite"></div>
+</div>
+<script>
+(function () {
+  var lb = document.getElementById("rm-lightbox");
+  var imgs = [], idx = 0, nm = "", trigger = null, touchX = null;
+  function render() {
+    lb.querySelector(".rm-lb-img").src = imgs[idx];
+    lb.querySelector(".rm-lb-img").alt = nm + " · photo " + (idx + 1);
+    lb.querySelector(".rm-lb-count").textContent = (idx + 1) + " / " + imgs.length;
+  }
+  function open(list, name, from) { imgs = list; idx = 0; nm = name; trigger = from; render(); lb.hidden = false; document.body.style.overflow = "hidden"; lb.querySelector(".rm-lb-close").focus(); }
+  function close() { lb.hidden = true; document.body.style.overflow = ""; if (trigger) trigger.focus(); }
+  function step(d) { idx = (idx + d + imgs.length) % imgs.length; render(); }
+  document.querySelectorAll(".rm-fig-btn").forEach(function (b) {
+    b.addEventListener("click", function () { open(JSON.parse(b.getAttribute("data-gallery")), b.getAttribute("data-name"), b); });
+  });
+  document.querySelectorAll(".rm-more").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var expanded = b.getAttribute("aria-expanded") === "true";
+      b.parentElement.querySelectorAll(".rm-amen-x").forEach(function (s) { s.hidden = expanded; });
+      b.setAttribute("aria-expanded", String(!expanded));
+      b.textContent = expanded ? "+" + b.parentElement.querySelectorAll(".rm-amen-x").length + " more" : "show less";
+    });
+  });
+  lb.querySelector(".rm-lb-close").addEventListener("click", close);
+  lb.querySelector(".rm-lb-prev").addEventListener("click", function () { step(-1); });
+  lb.querySelector(".rm-lb-next").addEventListener("click", function () { step(1); });
+  lb.addEventListener("click", function (e) { if (e.target === lb) close(); });
+  lb.addEventListener("touchstart", function (e) { touchX = e.changedTouches[0].clientX; }, { passive: true });
+  lb.addEventListener("touchend", function (e) {
+    if (touchX === null) return;
+    var dx = e.changedTouches[0].clientX - touchX; touchX = null;
+    if (Math.abs(dx) > 40) step(dx < 0 ? 1 : -1);
+  }, { passive: true });
+  addEventListener("keydown", function (e) {
+    if (lb.hidden) return;
+    if (e.key === "Escape") close();
+    if (e.key === "ArrowLeft") step(-1);
+    if (e.key === "ArrowRight") step(1);
+  });
+})();
+</script>
 <!-- ROOMS:END -->
 </div>
 </section>
@@ -654,7 +724,7 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
 <div class="od-day"><h3>Saturday</h3><span class="od-date">27 February 2027</span></div>
 <div class="od-row"><div class="od-time">to be confirmed</div><div class="od-body"><div class="od-what">Arrival <span class="od-where">· Vientiane</span></div><div class="od-meta">via Bangkok and Nong Khai · met and transferred</div></div></div>
 <div class="od-day"><h3>Sunday</h3><span class="od-date">28 February 2027</span></div>
-<div class="od-row"><div class="od-time">at dawn</div><div class="od-body"><div class="od-what">Alms Giving <span class="od-where">· in Vientiane, away from the hotel</span></div><div class="od-meta"><span class="dress">Dress · to be confirmed</span> · a quiet Buddhist ritual to open the day · place to be confirmed</div></div></div>
+<div class="od-row"><div class="od-time">at dawn</div><div class="od-body"><div class="od-what">Alms Giving <span class="od-where">· Souphattra Heritage Vientiane</span></div><div class="od-meta"><span class="dress">Dress · to be confirmed</span> · a quiet Buddhist ritual to open the day</div></div></div>
 <div class="od-row key"><div class="od-time">to be confirmed</div><div class="od-body"><div class="od-what">Vow Ceremony <span class="od-where">· Souphattra Heritage Vientiane</span></div><div class="od-meta"><span class="dress">Dress · to be confirmed</span> · the vows, in front of everyone who matters</div></div></div>
 <div class="od-row"><div class="od-time">to be confirmed</div><div class="od-body"><div class="od-what">Sunset Cocktails &amp; Wedding Dinner <span class="od-where">· Souphattra Heritage Vientiane</span></div><div class="od-meta"><span class="dress">Dress · to be confirmed</span> · cocktails by the pool, then Lao food, music and celebration in the courtyard garden</div></div></div>
 </div>
@@ -765,13 +835,13 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
 </article>
 <article aria-label="The alms giving, in Vientiane" aria-modal="true" class="pv" id="pv-alms" inert="" role="dialog">
 <button class="pv-close" data-close="">Close</button>
-<div class="pv-tag">Not at the hotel</div>
-<h3>The morning<br/>belongs to the city.</h3>
+<div class="pv-tag">At first light</div>
+<h3>The morning<br/>opens the day.</h3>
 <img alt="Haruthai and Suthep kneeling with alms offerings at first light" src="assets/images/timeline/tl-alms.jpg" width="1200" height="800" loading="lazy" decoding="async"/>
 <img alt="Monks receiving alms at a temple at first light" src="assets/images/alms/alms-procession.jpg" width="2000" height="1334" loading="lazy" decoding="async"/>
-<p>Before the wedding day begins, we gather in the early light for the alms giving. Monks walk in procession, rice is offered, and nothing is hurried. It is a Lao morning, not a hotel programme point.</p>
-<p>This is the one part of the weekend that happens away from Souphattra Heritage. Transfers, timing and the exact place are arranged for you and will appear in your Guest Area.</p>
-<div class="pv-meta">Sunday, 28 February 2027 · at dawn<br/>in Vientiane · place and dress code to be confirmed</div>
+<p>Before the wedding day begins, we gather in the early light for the alms giving at Souphattra Heritage Vientiane. Monks walk in procession, rice is offered, and nothing is hurried. It is a Lao morning, and it opens the whole day.</p>
+<p>Your exact timing arrives with your Guest Area itinerary closer to the day.</p>
+<div class="pv-meta">Sunday, 28 February 2027 · at dawn<br/>Souphattra Heritage Vientiane · dress code to be confirmed</div>
 </article>
 <article aria-label="Souphattra Heritage Vientiane, vows and wedding dinner" aria-modal="true" class="pv" id="pv-pool" inert="" role="dialog">
 <button class="pv-close" data-close="">Close</button>

@@ -4,32 +4,30 @@
  * by the guest flow, the Guest Relations view and the test suite.
  */
 
-/* ============ journey cost (Owner price master) ============
- * ONE calculation path. Rooms are priced PER ROOM (ratePerNight × nights =
- * roomTotal); the train per participating guest; transfers per unit. Every
- * surface (cards, selection state, live Journey Cost, review, submission,
- * dashboard, Guest Relations record) reads these functions — never its own
- * arithmetic. */
+/* ============ journey cost (Final Owner room matrix) ============
+ * ONE calculation path. Rooms are priced PER GUEST (contributionPerGuest ×
+ * occupying guests, for the complete two-night stay); the train per
+ * participating guest (USD 88); transfers per unit. Every surface (cards,
+ * selection state, live Journey Cost, review, submission, dashboard, Guest
+ * Relations record) reads these functions — never its own arithmetic. No
+ * per-room or per-night amount exists anywhere in guest-facing logic. */
 
-/** Nightly guest rate for a category (0 for the hosted villa, null when the
- *  category is not priced for guests, e.g. the Presidential). */
-export function ratePerNight(accommodation) {
+/** Approved guest contribution for a category (per guest, complete stay). */
+export function contributionPerGuest(accommodation) {
   if (!accommodation) return 0;
-  return typeof accommodation.ratePerNight === 'number' ? accommodation.ratePerNight : null;
+  return typeof accommodation.contributionPerGuest === 'number' ? accommodation.contributionPerGuest : 0;
 }
 
-/** Total room price for the fixed stay (per ROOM, never per guest). */
-export function roomTotal(accommodation) {
-  if (!accommodation) return 0;
-  if (typeof accommodation.roomTotal === 'number') return accommodation.roomTotal;
-  const per = ratePerNight(accommodation);
-  return per === null ? null : per * (accommodation.nights || 0);
+/** Individual charge records: one per occupying Guest, never multiplied by
+ *  room count (a Party requests exactly one room). */
+export function partyCharges(accommodation, guestIds) {
+  const per = contributionPerGuest(accommodation);
+  return (guestIds || []).map((guestId) => ({ guestId, amount: per }));
 }
 
-/** A Party's stay charge — one room, one price, whatever the guest count. */
-export function partyTotal(accommodation) {
-  const t = roomTotal(accommodation);
-  return t === null ? 0 : t;
+/** A Party's stay charge: per-guest contribution × occupying guests. */
+export function partyTotal(accommodation, guestIds) {
+  return partyCharges(accommodation, guestIds).reduce((s, c) => s + c.amount, 0);
 }
 
 /** Train contribution: confirmed per-guest price × actual participants. */
@@ -49,9 +47,9 @@ export function transfersTotal(catalog, selected) {
   return sum;
 }
 
-/** The live Journey Cost: room + train + transfers. */
-export function journeyTotal(accommodation, train, riderCount, transferCatalog, selectedTransfers) {
-  return partyTotal(accommodation)
+/** The live Journey Cost: stay + train + transfers. */
+export function journeyTotal(accommodation, occupantGuestIds, train, riderCount, transferCatalog, selectedTransfers) {
+  return partyTotal(accommodation, occupantGuestIds)
     + (trainContribution(train, riderCount) || 0)
     + transfersTotal(transferCatalog, selectedTransfers);
 }
@@ -266,9 +264,9 @@ export function validateRegistration(reg, ctx) {
       const occ = reg.stay.occupantGuestIds || [];
       if (!occ.length) errors.push('stay request needs at least one occupying Guest');
       for (const id of occ) if (!guestIds.has(id)) errors.push('stay occupant not in Party: ' + id);
-      const total = roomTotal(acc);
-      if (total === null) errors.push(acc.name + ' carries no guest rate');
-      else if (total !== ratePerNight(acc) * acc.nights) errors.push('room total must equal rate × nights');
+      const charges = partyCharges(acc, occ);
+      const total = charges.reduce((s, c) => s + c.amount, 0);
+      if (total !== contributionPerGuest(acc) * occ.length) errors.push('party total must equal sum of individual contributions');
       if (reg.stay.rooms && reg.stay.rooms !== 1) errors.push('a Party requests exactly one room / allocation');
     }
   }
@@ -340,10 +338,10 @@ export function buildNotification(reg, ctx) {
       const meta = invitation.guests.find((x) => x.guestId === id) || {};
       return meta.fullName || id;
     }).join('; ')));
-    out.push(L('Room Rate:', money(ratePerNight(acc) || 0) + ' per room / night × ' + acc.nights + ' nights'));
-    out.push(L('Room Total:', money(partyTotal(acc))));
+    out.push(L('Guest Contribution:', money(contributionPerGuest(acc)) + ' each'));
+    out.push(L('Stay Total:', money(partyTotal(acc, occ)) + ' (' + occ.length + ' guest' + (occ.length > 1 ? 's' : '') + ')'));
     out.push(L('Stay:', acc.stay));
-    out.push('Second Night: ' + (acc.kind === 'villa' ? 'Fully hosted by Haruthai & Suthep' : 'Complimentary / Hosted by Haruthai & Suthep'));
+    out.push('Second Night: Complimentary / Hosted by Haruthai & Suthep');
     out.push('Status: REQUESTED / UNDER REVIEW');
   }
   out.push('');
@@ -384,10 +382,10 @@ export function buildNotification(reg, ctx) {
   const train = ctx.train || null;
   const trainRiders = (reg.guests || []).filter((g) => g.journey && g.journey.train).length;
   const trainSum = trainRiders ? (trainContribution(train, trainRiders) || 0) : 0;
-  if (acc) out.push(L('Room:', money(partyTotal(acc))));
+  if (acc) out.push(L('Stay:', money(partyTotal(acc, occ))));
   if (trainRiders) out.push(L('Train:', trainRiders + ' × ' + money((train || {}).contributionPerGuest || 0) + ' = ' + money(trainSum)));
   if (selectedTransfers.length) out.push(L('Transfers:', money(transfersTotal(transferCatalog, selectedTransfers))));
-  out.push(L('TOTAL:', money(journeyTotal(acc, train, trainRiders, transferCatalog, selectedTransfers))));
+  out.push(L('TOTAL:', money(journeyTotal(acc, occ, train, trainRiders, transferCatalog, selectedTransfers))));
   out.push('');
   out.push('ARRIVAL');
   const a = reg.arrival || {};
