@@ -276,13 +276,12 @@ function grCardHtml() {
     '<div><div class="label">Guest Relations</div>' +
     '<div class="gr-name">' + esc(CONTACTS.team) + '</div>' +
     '<div class="gr-links">' +
-    '<a href="' + CONTACTS.lineUrl + '" rel="noopener" target="_blank">LINE · ' + esc(CONTACTS.line) + '</a>' +
     '<a href="mailto:' + CONTACTS.email + '">Email</a>' +
     (CONTACTS.whatsapp ? '<a href="https://wa.me/' + CONTACTS.whatsapp + '" rel="noopener" target="_blank">WhatsApp</a>' : '') +
     '</div>' +
     '</div>' +
-    '<div class="gr-qr"><a href="' + CONTACTS.lineUrl + '" rel="noopener" target="_blank">' +
-    '<img src="../assets/images/qr/line-qr-official.png" alt="Scan to add Guest Relations on LINE" width="108" height="108" loading="lazy"/></a>' +
+    '<div class="gr-qr">' +
+    '<img src="../assets/images/qr/line-qr-official.png" alt="Scan to add Guest Relations on LINE" width="108" height="108" loading="lazy"/>' +
     '<div class="label">Scan for LINE</div></div>' +
     '<div class="gr-qr">' +
     '<img src="../assets/images/qr/whatsapp-qr-official.png" alt="Scan to reach Guest Relations on WhatsApp" width="108" height="108" loading="lazy"/>' +

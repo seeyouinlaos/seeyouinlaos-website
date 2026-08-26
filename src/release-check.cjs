@@ -196,6 +196,22 @@ gate('P4', 'Wording and product guards',
    !train88 && 'Night Train must be USD 88 per guest'].filter(Boolean).join(' · ')
   || "no 'Heritage Exclusive', no 'No room needed', train fixed at USD 88 per guest");
 
+/* P6 — LINE/QR owner rule (2026-08-26): no invented LINE ID, no line.me
+ * destination, no generated QR. Only the owner's original QR assets. */
+const fsQ = require('fs');
+const guestSources = [indexHtml, appJs, data, regHtml];
+const lineIdLeak = guestSources.some((s) => /line\.me/i.test(s) || /LINE[^a-z]{0,14}seeyouinlaos/.test(s) || /line: 'seeyouinlaos'/.test(s) || /Public Rate|Selling Rate/.test(s));
+const generatedQr = fsQ.existsSync('assets/images/qr/line-qr.svg');
+const qrOk = fsQ.existsSync('assets/images/qr/line-qr-official.png') && fsQ.existsSync('assets/images/qr/whatsapp-qr-official.png');
+const qrHashes = qrOk && require('crypto').createHash('sha256').update(fsQ.readFileSync('assets/images/qr/line-qr-official.png')).digest('hex') === '181fe3286cbbdd8c354ec3e58fc465e6ecdd225676ec5592f0209c27d2df55b5'
+  && require('crypto').createHash('sha256').update(fsQ.readFileSync('assets/images/qr/whatsapp-qr-official.png')).digest('hex') === '46dfbbe79c84cfe78c4f8a261f756dcc67a6ac15fdd21bd83c4615b2acce6688';
+gate('P6', 'LINE/WhatsApp QR owner rule (originals only, no invented LINE ID)',
+  !lineIdLeak && !generatedQr && qrHashes,
+  [lineIdLeak && 'invented LINE ID or line.me destination in guest-facing source',
+   generatedQr && 'generated line-qr.svg still present',
+   !qrHashes && 'official QR assets missing or altered (hash mismatch vs owner originals)'].filter(Boolean).join(' · ')
+  || 'owner-original LINE + WhatsApp QR verified by hash; zero written LINE IDs; generated QR removed');
+
 let failed = 0;
 for (const r of results) {
   if (!r.ok) failed++;

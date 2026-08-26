@@ -41,8 +41,6 @@ export const WEDDING = {
 
 export const CONTACTS = {
   email: 'guest.relation.seeyouinlaos@gmail.com',
-  line: 'seeyouinlaos',
-  lineUrl: 'https://line.me/R/ti/p/~seeyouinlaos',
   /* whatsapp: no approved number in the source data yet — the QR slot stays
    * pending until the Owner supplies one. Never invent a number. */
   whatsapp: null,
@@ -91,8 +89,8 @@ const RM = 'assets/images/rooms/';
  * traced back to the approved rate.
  *
  * PRICING MODEL (Final Owner matrix, 2026-08-26): every category has ONE
- * guest-facing amount — `contributionPerGuest` (USD per guest). Public Rate,
- * Selling Rate / Room / Night and discount are INTERNAL calculation values
+ * guest-facing amount — `contributionPerGuest` (USD per guest). All other
+ * commercial figures are INTERNAL calculation values
  * and never reach any guest surface. Prices render only in the
  * authenticated Guest Area. Hotel inventory: 26 rooms (5+13+3+1+2+1+1);
  * Souphattra Majestic Suite and Souphattra Presidential are RESERVED and
