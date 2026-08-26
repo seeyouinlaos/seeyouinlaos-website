@@ -205,8 +205,7 @@ export const ACCOMMODATIONS = [
     location: 'Downtown Vientiane · 300 m to the Mekong Night Market · 800 m to Wat Sisaket',
     blurb: 'A warm, private residence in downtown Vientiane, decorated with natural materials, wood furniture and Lao bamboo handicraft. Secured for the wedding nights for up to four adults; this stay is arranged separately, and Guest Relations coordinates every detail with you personally.',
     amenities: ['Wi-Fi', 'Air conditioning', 'Hot water', 'Washer & laundry area', 'Refrigerator', 'Kettle & kitchenette', 'Hair dryer', 'Free parking'],
-    images: [],
-    imageSlots: ['AIRBNB_01', 'AIRBNB_02', 'AIRBNB_03']
+    images: ['assets/images/airbnb/airbnb-01.jpg', 'assets/images/airbnb/airbnb-02.jpg', 'assets/images/airbnb/airbnb-03.jpg']
   },
 ];
 

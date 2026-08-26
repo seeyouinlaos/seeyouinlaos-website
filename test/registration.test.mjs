@@ -162,7 +162,12 @@ test('the new 2BR Airbnb is commercially neutral and separate from Souphattra', 
   assert.equal(b.property, 'Airbnb · Vientiane');
   assert.equal(b.occupancy, 'Up to 4 adults');
   assert.equal(b.stay, '27 February – 1 March 2027');
-  assert.deepEqual(b.imageSlots, ['AIRBNB_01', 'AIRBNB_02', 'AIRBNB_03']);
+  assert.equal(b.imageSlots, undefined); // real photos delivered 2026-08-26 replace the slots
+  assert.deepEqual(b.images, [
+    'assets/images/airbnb/airbnb-01.jpg',
+    'assets/images/airbnb/airbnb-02.jpg',
+    'assets/images/airbnb/airbnb-03.jpg',
+  ]);
   assert.match(b.referenceUrl, /airbnb\.com\/rooms\/23930245/);
   const banned = /COMPLIMENTARY|fully hosted|hosted by|USD 0|nothing to book/i;
   assert.ok(!banned.test(JSON.stringify(b)), 'unapproved commercial claim on the Airbnb record');
@@ -280,7 +285,7 @@ test('the active accommodation master is complete (final matrix, no villa)', () 
     if (a.kind !== 'airbnb') {
       assert.ok((a.images || []).length >= 3, a.name + ' needs a hero image and gallery');
     }
-    for (const src of a.images) assert.match(src, /^assets\/images\/rooms\/[a-z0-9-]+\.jpg$/);
+    for (const src of a.images) assert.match(src, /^assets\/images\/(rooms|airbnb)\/[a-z0-9-]+\.jpg$/);
   }
 });
 
