@@ -589,7 +589,7 @@ function lbRender() {
   lightbox.querySelector('.lb-count').textContent = (LB.index + 1) + ' / ' + LB.images.length;
 }
 function openLightbox(a, index) {
-  if (!lightbox || !(a.images || []).length) return;
+  if (!lightbox || !(a.images || []).length) return; // invariant: never open without images
   LB.images = a.images; LB.index = index || 0; LB.name = a.name;
   LB.trigger = document.activeElement;
   lbRender();
@@ -602,7 +602,7 @@ function closeLightbox() {
   if (!accOverlay.hidden) { /* overlay still open keeps the scroll lock */ } else { document.body.classList.remove('pv-lock'); }
   if (LB.trigger) LB.trigger.focus();
 }
-function lbStep(d) { LB.index = (LB.index + d + LB.images.length) % LB.images.length; lbRender(); }
+function lbStep(d) { if (!LB.images.length) { closeLightbox(); return; } LB.index = (LB.index + d + LB.images.length) % LB.images.length; lbRender(); }
 if (lightbox) {
   lightbox.querySelector('.lb-close').addEventListener('click', closeLightbox);
   lightbox.querySelector('.lb-prev').addEventListener('click', () => lbStep(-1));

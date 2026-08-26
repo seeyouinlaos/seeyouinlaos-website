@@ -183,6 +183,7 @@ section { padding: 110px 6vw; position: relative; }
 .rm-figcount { position: absolute; right: 10px; bottom: 10px; background: rgba(33,31,28,.72); color: var(--ivory); font-size: 10px; letter-spacing: .16em; text-transform: uppercase; padding: 5px 9px; }
 .rm-amen button.more { font: inherit; font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--cherry); background: none; border: 1px solid var(--line); padding: 4px 8px; cursor: pointer; }
 .rm-amen button.more:hover { border-color: var(--cherry); }
+.rm-lb[hidden] { display: none !important; }
 .rm-lb { position: fixed; inset: 0; z-index: 200; background: rgba(23,21,19,.93); display: grid; grid-template-columns: 64px 1fr 64px; align-items: center; justify-items: center; }
 .rm-lb .rm-lb-img { max-width: 100%; max-height: 84vh; width: auto; height: auto; display: block; box-shadow: 0 30px 80px rgba(0,0,0,.5); }
 .rm-lb .rm-lb-prev, .rm-lb .rm-lb-next { background: none; border: 1px solid rgba(242,236,225,.4); color: var(--ivory); font: inherit; font-size: 20px; width: 46px; height: 46px; cursor: pointer; border-radius: 50%; }
@@ -681,9 +682,9 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
     lb.querySelector(".rm-lb-img").alt = nm + " · photo " + (idx + 1);
     lb.querySelector(".rm-lb-count").textContent = (idx + 1) + " / " + imgs.length;
   }
-  function open(list, name, from) { imgs = list; idx = 0; nm = name; trigger = from; render(); lb.hidden = false; document.body.style.overflow = "hidden"; lb.querySelector(".rm-lb-close").focus(); }
+  function open(list, name, from) { if (!list || !list.length) return; imgs = list; idx = 0; nm = name; trigger = from; render(); lb.hidden = false; document.body.style.overflow = "hidden"; lb.querySelector(".rm-lb-close").focus(); }
   function close() { lb.hidden = true; document.body.style.overflow = ""; if (trigger) trigger.focus(); }
-  function step(d) { idx = (idx + d + imgs.length) % imgs.length; render(); }
+  function step(d) { if (!imgs.length) { close(); return; } idx = (idx + d + imgs.length) % imgs.length; render(); }
   document.querySelectorAll(".rm-fig-btn").forEach(function (b) {
     b.addEventListener("click", function () { open(JSON.parse(b.getAttribute("data-gallery")), b.getAttribute("data-name"), b); });
   });

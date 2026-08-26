@@ -164,6 +164,21 @@ gate('P3', 'Alms venue + image corrections protected',
    bedInDinner && 'bedroom image must not appear in the vow/dinner gallery']
     .filter(Boolean).join(' · ') || 'alms at Souphattra Heritage; couple + procession as two distinct images; no bedroom in the dinner gallery');
 
+/* P5 — overlay integrity (release-blocking): a hidden lightbox must actually
+ * be hidden (author display rules must not defeat the hidden attribute), and
+ * gallery navigation can never run on an empty list (NaN / 0 regression). */
+const publicLbHidden = /\.rm-lb\[hidden\] \{ display: none !important; \}/.test(indexHtml);
+const registerLbHidden = /\.lb\[hidden\] \{ display: none !important; \}/.test(regHtml);
+const publicGuard = /if \(!list \|\| !list\.length\) return;/.test(indexHtml) && /if \(!imgs\.length\) \{ close\(\); return; \}/.test(indexHtml);
+const registerGuard = /never open without images/.test(appJs) && /if \(!LB\.images\.length\) \{ closeLightbox\(\); return; \}/.test(appJs);
+gate('P5', 'Lightbox overlays: hidden wins, no empty-gallery navigation',
+  publicLbHidden && registerLbHidden && publicGuard && registerGuard,
+  [!publicLbHidden && 'public .rm-lb[hidden] must force display:none !important',
+   !registerLbHidden && 'register .lb[hidden] must force display:none !important',
+   !publicGuard && 'public lightbox needs empty-list guards (NaN / 0)',
+   !registerGuard && 'register lightbox needs empty-list guards']
+    .filter(Boolean).join(' · ') || 'hidden always wins; open/step guarded against empty galleries on both surfaces');
+
 /* P4 — wording + product guards */
 const exclusiveHit = /Heritage Exclusive/i.test(indexHtml) || /Heritage Exclusive/i.test(appJs) || /Heritage Exclusive/i.test(data) || /Heritage Exclusive/i.test(regHtml);
 const noRoomHit = /No room needed/i.test(appJs) || /No room needed/i.test(regHtml);
