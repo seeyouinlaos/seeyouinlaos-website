@@ -36,7 +36,7 @@ gate(1, 'Guest rates state is deliberate',
 const invExact = /inventoryDisplay:\s*'EXACT'/.test(data);
 gate(2, 'Inventory display decision recorded',
   true,
-  invExact ? "EXACT counts shown publicly — requires final allocation sign-off." : "REQUEST mode (guest UI shows 'Request availability'; exact counts stay internal). OK for release.");
+  invExact ? "EXACT counts shown publicly — requires final allocation sign-off." : "REQUEST mode (UI states the authoritative wedding allocation; live remaining counts stay internal). OK for release.");
 
 /* Gate 3 — production lookup: encrypted bundle, no demo data, no plaintext PII */
 const demoHits = [];
@@ -138,18 +138,17 @@ gate('P1', 'No accommodation prices on the public website',
     ? 'PUBLIC PRICE LEAK: ' + (publicUsd ? 'USD amount or per-night wording in guest-facing accommodation content' : 'rate value visible: USD ' + rateNumbers.join(', '))
     : 'no USD amount and no per-night wording on the public site; per-guest rates render only in the authenticated Guest Area');
 
-/* P2 — public availability honesty: while no shared KV backend exists, the
- * public page must show "Request availability" and never fake live counts. */
+/* P2 — public availability honesty: without shared real-time sync the page
+ * states the authoritative wedding allocation, never fake live counts. */
 const availLines = (roomsSection.match(/class="rm-avail"/g) || []).length;
 const reservedLines = (roomsSection.match(/rm-avail rm-reserved"/g) || []).length;
-const fakeLive = /\d+ of \d+ rooms remaining|Last room/.test(roomsSection);
-gate('P2', 'Public availability honest (request mode until KV sync)',
-  availLines === 6 && reservedLines === 2 && !fakeLive && roomsSection.includes('Request availability'),
+const allocLines = (roomsSection.match(/in the wedding allocation/g) || []).length;
+const fakeLive = /\d+ of \d+ (rooms )?(remaining|available)|Last room/i.test(roomsSection);
+gate('P2', 'Public availability honest (allocation wording until shared sync)',
+  availLines === 6 && reservedLines === 2 && allocLines === 5 && !fakeLive && roomsSection.includes('Arranged separately'),
   fakeLive
     ? 'public page pretends live remaining counts without a shared backend'
-    : availLines !== 6 || reservedLines !== 2
-      ? 'expected 6 requestable + 2 reserved lines, found ' + availLines + ' + ' + reservedLines
-      : "6 requestable options show 'Request availability'; Majestic Suite + Presidential show 'Reserved'; exact counts stay internal");
+    : "expected 5 allocation + 2 reserved + 1 arranged-separately lines, found alloc:" + allocLines + ' reserved:' + reservedLines + ' total:' + availLines);
 
 /* P3 — image + venue corrections (owner): alms at Souphattra Heritage with
  * TWO distinct images (couple on the timeline, procession on the card); no

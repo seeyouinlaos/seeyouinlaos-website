@@ -332,13 +332,9 @@ body.pv-lock { overflow: hidden; }
 .acc-track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch; cursor: grab; }
 .acc-track::-webkit-scrollbar { display: none; }
 .acc-track.drag { cursor: grabbing; scroll-snap-type: none; }
-.acc-track img { flex: 0 0 100%; width: 100%; height: auto; aspect-ratio: 3/2; object-fit: cover; scroll-snap-align: start; user-select: none; }
-.acc-gnav { position: absolute; top: 50%; transform: translateY(-50%); width: 38px; height: 38px; border-radius: 50%; border: 1px solid rgba(242,236,225,.55); background: rgba(33,31,28,.35); color: var(--ivory); font: inherit; font-size: 15px; cursor: pointer; opacity: 0; transition: opacity .3s; }
-.acc-gal:hover .acc-gnav, .acc-gnav:focus-visible { opacity: 1; }
-.acc-gprev { left: 10px; } .acc-gnext { right: 10px; }
+.acc-track img { object-position: center; transform: none; flex: 0 0 100%; width: 100%; height: auto; aspect-ratio: 3/2; object-fit: cover; scroll-snap-align: start; user-select: none; }
 .acc-gcount { position: absolute; left: 10px; bottom: 8px; background: rgba(33,31,28,.72); color: var(--ivory); font-size: 10px; letter-spacing: .16em; padding: 4px 8px; }
 .acc-expand { position: absolute; right: 8px; bottom: 6px; width: 32px; height: 32px; border: 1px solid rgba(242,236,225,.55); background: rgba(33,31,28,.5); color: var(--ivory); font: inherit; font-size: 13px; cursor: pointer; }
-@media (hover: none) { .acc-gnav { opacity: 1; } }
 .acc-slots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 10px; aspect-ratio: 3/1.1; background: repeating-linear-gradient(45deg, rgba(168,134,59,.05), rgba(168,134,59,.05) 6px, transparent 6px, transparent 14px); border-bottom: 1px solid var(--line); }
 .acc-slot { display: grid; place-items: center; border: 1px dashed var(--gold-line); color: var(--gold); font-size: 10px; letter-spacing: .2em; }
 .acc-card.reserved .acc-avail { color: var(--gold); }

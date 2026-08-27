@@ -39,9 +39,14 @@ function roomPriceHtml(a) {
   return '<div class="acc-price"><span class="amt">' + showAmount(per) + '</span>' +
     '<span class="per">per guest · complete stay</span></div>';
 }
-function guestAvailability(res) {
-  if (remaining(res) <= 0) return 'Fully allocated';
-  return PUBLICATION.inventoryDisplay === 'EXACT' ? availabilityLabel(res) : 'Request availability';
+function guestAvailability(res, unitPlural) {
+  if (!res) return '';
+  if (PUBLICATION.inventoryDisplay === 'EXACT') return availabilityLabel(res);
+  // no shared real-time sync yet: state the authoritative allocation honestly
+  if (remaining(res) <= 0) return 'Waitlist · Guest Relations will confirm';
+  const total = res.capacity_total;
+  const unit = unitPlural || 'rooms';
+  return total + ' ' + (total === 1 ? unit.replace(/s$/, '') : unit) + ' in the wedding allocation';
 }
 
 let inventory = loadInventory();
@@ -385,7 +390,7 @@ document.getElementById('addl-input').addEventListener('input', (e) => { S.addit
 function renderJourney() {
   const box = document.getElementById('journey-box');
   const trainRes = inventory.train;
-  const trainLabel = guestAvailability(trainRes);
+  const trainLabel = guestAvailability(trainRes, 'seats');
   const trainFull = remaining(trainRes) <= 0;
   const anyTrain = S.guests.some((g) => g.journey.train);
   box.innerHTML = '<p class="note" style="margin-bottom:22px">The road to the wedding: Bangkok · the overnight train · Nong Khai · Vientiane · the wedding days.</p>' + modulePicker({
@@ -497,11 +502,7 @@ function roomFigure(a) {
   return '<div class="acc-gal"><div class="acc-track" tabindex="0" aria-label="' + esc(a.name) + ' photos — swipe or use arrow keys">' +
     imgs.map((s, i) => '<img src="' + roomImg(s) + '" alt="' + esc(a.name) + ' · photo ' + (i + 1) + '" width="1600" height="1067" loading="lazy" decoding="async" draggable="false"/>').join('') +
     '</div>' +
-    (imgs.length > 1
-      ? '<button type="button" class="acc-gnav acc-gprev" aria-label="Previous photo">&#8592;</button>' +
-        '<button type="button" class="acc-gnav acc-gnext" aria-label="Next photo">&#8594;</button>' +
-        '<span class="acc-gcount">1 / ' + imgs.length + '</span>'
-      : '') +
+    (imgs.length > 1 ? '<span class="acc-gcount">1 / ' + imgs.length + '</span>' : '') +
     '<button type="button" class="acc-expand" data-view="' + a.id + '" aria-label="Open ' + esc(a.name) + ' details">&#8599;</button>' +
     '</div>';
 }
@@ -513,9 +514,6 @@ function wireCardGalleries(box) {
     const pos = () => Math.round(track.scrollLeft / track.clientWidth);
     const go = (d) => track.scrollTo({ left: (pos() + d) * track.clientWidth, behavior: reduced ? 'auto' : 'smooth' });
     track.addEventListener('scroll', () => { if (count) count.textContent = (Math.min(pos(), n - 1) + 1) + ' / ' + n; }, { passive: true });
-    const pv = gal.querySelector('.acc-gprev'), nx = gal.querySelector('.acc-gnext');
-    if (pv) pv.addEventListener('click', () => go(-1));
-    if (nx) nx.addEventListener('click', () => go(1));
     track.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowLeft') { e.preventDefault(); go(-1); }
       if (e.key === 'ArrowRight') { e.preventDefault(); go(1); }
@@ -556,7 +554,7 @@ function renderStay() {
       '<p class="acc-blurb">' + esc(a.blurb) + '</p>' +
       roomSpecs(a) +
       (bookable
-        ? '<div class="acc-avail' + (full ? ' zero' : '') + '" role="status">' + esc(guestAvailability(res)) + '</div>'
+        ? '<div class="acc-avail' + (full ? ' zero' : '') + '" role="status">' + esc(selected ? 'Requested · Guest Relations will confirm' : a.kind === 'airbnb' ? 'Arranged separately with Guest Relations' : guestAvailability(res)) + '</div>'
         : '<div class="acc-avail reserved-note">' + esc(a.reservedNote || 'Not available for guest requests') + '</div>') +
       '<div class="acc-actions">' +
       '<button type="button" class="btn ghost sm" data-view="' + a.id + '">View details</button>' +
@@ -681,7 +679,7 @@ function openAccOverlay(id) {
     (a.location ? '<div><dt>Where</dt><dd>' + esc(a.location) + '</dd></div>' : '') +
     (bookable
       ? '<div><dt>Contribution</dt><dd>' + (a.contributionPerGuest == null ? 'Arranged separately' : showAmount(contributionPerGuest(a)) + ' per guest · complete two-night stay') + '</dd></div>' +
-        '<div><dt>Availability</dt><dd>' + esc(guestAvailability(res)) + '</dd></div>' +
+        '<div><dt>Availability</dt><dd>' + esc(a.kind === 'airbnb' ? 'Arranged separately with Guest Relations' : guestAvailability(res)) + '</dd></div>' +
         '<div><dt>Selection</dt><dd>One ' + esc(a.capacityUnit.toLowerCase()) + ' per Party</dd></div>'
       : '') +
     '</dl>' +

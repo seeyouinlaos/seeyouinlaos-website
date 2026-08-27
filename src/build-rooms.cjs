@@ -36,11 +36,7 @@ function card(a) {
       imgs.map((s, i) => '<img alt="' + esc(a.name) + ' · photo ' + (i + 1) + '" src="' + s +
         '" width="1600" height="1067" loading="lazy" decoding="async" draggable="false"/>').join('') +
       '</div>' +
-      (imgs.length > 1
-        ? '<button type="button" class="rm-gnav rm-gprev" aria-label="Previous photo">&#8592;</button>' +
-          '<button type="button" class="rm-gnav rm-gnext" aria-label="Next photo">&#8594;</button>' +
-          '<span class="rm-gcount">1 / ' + imgs.length + '</span>'
-        : '') +
+      (imgs.length > 1 ? '<span class="rm-gcount">1 / ' + imgs.length + '</span>' : '') +
       '<button type="button" class="rm-expand" data-gallery="' + JSON.stringify(imgs).replace(/"/g, '&quot;') +
         '" data-name="' + esc(a.name) + '" aria-label="Open ' + esc(a.name) + ' photos in full view">&#8599;</button>' +
       '</div>'
@@ -62,7 +58,9 @@ function card(a) {
       : '',
     reserved
       ? '<div class="rm-avail rm-reserved" role="status">Reserved</div>'
-      : '<div class="rm-avail" role="status">Request availability</div>',
+      : '<div class="rm-avail" role="status">' + (a.kind === 'airbnb'
+          ? 'Arranged separately with Guest Relations'
+          : a.capacityTotal + (a.capacityTotal === 1 ? ' room' : ' rooms') + ' in the wedding allocation') + '</div>',
     reserved
       ? ''
       : '<div class="rm-foot"><a class="rm-cta" href="register/">Request this room in your Guest Area</a></div>',
@@ -100,9 +98,6 @@ const LIGHTBOX = [
   '    function pos() { return Math.round(track.scrollLeft / track.clientWidth); }',
   '    function go(d) { track.scrollTo({ left: (pos() + d) * track.clientWidth, behavior: "smooth" }); }',
   '    track.addEventListener("scroll", function () { if (count) count.textContent = (Math.min(pos(), n - 1) + 1) + " / " + n; }, { passive: true });',
-  '    var pv = gal.querySelector(".rm-gprev"), nx = gal.querySelector(".rm-gnext");',
-  '    if (pv) pv.addEventListener("click", function () { go(-1); });',
-  '    if (nx) nx.addEventListener("click", function () { go(1); });',
   '    track.addEventListener("keydown", function (e) {',
   '      if (e.key === "ArrowLeft") { e.preventDefault(); go(-1); }',
   '      if (e.key === "ArrowRight") { e.preventDefault(); go(1); }',
