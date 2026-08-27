@@ -37,13 +37,12 @@ function card(a) {
       : a.capacityTotal + ' of ' + a.capacityTotal + ' available';
   const gallery = imgs.length
     ? '<div class="rm-gal" data-name="' + esc(a.name) + '">' +
-      '<div class="rm-track" tabindex="0" aria-label="' + esc(a.name) + ' photos — swipe or use arrow keys">' +
+      '<div class="rm-track" tabindex="0" role="group" data-gallery="' + JSON.stringify(imgs).replace(/"/g, '&quot;') +
+      '" data-name="' + esc(a.name) + '" aria-label="' + esc(a.name) + ' photos — swipe, or press Enter for a larger view">' +
       imgs.map((s, i) => '<img alt="' + esc(a.name) + ' · photo ' + (i + 1) + '" src="' + s +
         '" width="1600" height="1067" loading="lazy" decoding="async" draggable="false"/>').join('') +
       '</div>' +
       (imgs.length > 1 ? '<span class="rm-gcount">1 / ' + imgs.length + '</span>' : '') +
-      '<button type="button" class="rm-expand" data-gallery="' + JSON.stringify(imgs).replace(/"/g, '&quot;') +
-        '" data-name="' + esc(a.name) + '" aria-label="Open ' + esc(a.name) + ' photos in full view">&#8599;</button>' +
       '<span class="rm-avstat" role="status">' + avstat + '</span>' +
       '</div>'
     : (a.imageSlots
@@ -78,9 +77,7 @@ function card(a) {
 const LIGHTBOX = [
   '<div class="rm-lb" id="rm-lightbox" hidden role="dialog" aria-modal="true" aria-label="Room gallery">',
   '<button type="button" class="rm-lb-close">Close</button>',
-  '<button type="button" class="rm-lb-prev" aria-label="Previous photo">&#8592;</button>',
   '<img class="rm-lb-img" src="" alt=""/>',
-  '<button type="button" class="rm-lb-next" aria-label="Next photo">&#8594;</button>',
   '<div class="rm-lb-count" aria-live="polite"></div>',
   '</div>',
   '<script>',
@@ -95,9 +92,7 @@ const LIGHTBOX = [
   '  function open(list, name, from) { if (!list || !list.length) return; imgs = list; idx = 0; nm = name; trigger = from; render(); lb.hidden = false; document.body.style.overflow = "hidden"; lb.querySelector(".rm-lb-close").focus(); }',
   '  function close() { lb.hidden = true; document.body.style.overflow = ""; if (trigger) trigger.focus(); }',
   '  function step(d) { if (!imgs.length) { close(); return; } idx = (idx + d + imgs.length) % imgs.length; render(); }',
-  '  document.querySelectorAll(".rm-expand").forEach(function (b) {',
-  '    b.addEventListener("click", function () { open(JSON.parse(b.getAttribute("data-gallery")), b.getAttribute("data-name"), b); });',
-  '  });',
+
   '  document.querySelectorAll(".rm-gal").forEach(function (gal) {',
   '    var track = gal.querySelector(".rm-track");',
   '    var count = gal.querySelector(".rm-gcount");',
@@ -109,14 +104,19 @@ const LIGHTBOX = [
   '      if (e.key === "ArrowLeft") { e.preventDefault(); go(-1); }',
   '      if (e.key === "ArrowRight") { e.preventDefault(); go(1); }',
   '    });',
-  '    var down = null;',
+  '    var down = null, moved = false;',
+  '    track.addEventListener("click", function () {',
+  '      if (moved) { moved = false; return; }',
+  '      open(JSON.parse(track.getAttribute("data-gallery")), track.getAttribute("data-name"), track);',
+  '    });',
+  '    track.addEventListener("keydown", function (e) {',
+  '      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(JSON.parse(track.getAttribute("data-gallery")), track.getAttribute("data-name"), track); }',
+  '    });',
   '    track.addEventListener("pointerdown", function (e) { if (e.pointerType === "mouse") { down = { x: e.clientX, s: track.scrollLeft }; track.classList.add("drag"); } });',
-  '    addEventListener("pointermove", function (e) { if (down) track.scrollLeft = down.s - (e.clientX - down.x); });',
+  '    addEventListener("pointermove", function (e) { if (down) { if (Math.abs(e.clientX - down.x) > 4) moved = true; track.scrollLeft = down.s - (e.clientX - down.x); } });',
   '    addEventListener("pointerup", function () { if (down) { down = null; track.classList.remove("drag"); var p = pos(); track.scrollTo({ left: p * track.clientWidth, behavior: "smooth" }); } });',
   '  });',
   '  lb.querySelector(".rm-lb-close").addEventListener("click", close);',
-  '  lb.querySelector(".rm-lb-prev").addEventListener("click", function () { step(-1); });',
-  '  lb.querySelector(".rm-lb-next").addEventListener("click", function () { step(1); });',
   '  lb.addEventListener("click", function (e) { if (e.target === lb) close(); });',
   '  lb.addEventListener("touchstart", function (e) { touchX = e.changedTouches[0].clientX; }, { passive: true });',
   '  lb.addEventListener("touchend", function (e) {',

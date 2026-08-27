@@ -509,11 +509,11 @@ function roomFigure(a, avstat) {
       ? '<div class="acc-slots">' + a.imageSlots.map((s) => '<span class="acc-slot">' + esc(s) + '</span>').join('') + '</div>'
       : '';
   }
-  return '<div class="acc-gal"><div class="acc-track" tabindex="0" aria-label="' + esc(a.name) + ' photos — swipe or use arrow keys">' +
+  return '<div class="acc-gal"><div class="acc-track" tabindex="0" role="group" data-view="' + a.id +
+    '" aria-label="' + esc(a.name) + ' photos — swipe, or press Enter for the room details">' +
     imgs.map((s, i) => '<img src="' + roomImg(s) + '" alt="' + esc(a.name) + ' · photo ' + (i + 1) + '" width="1600" height="1067" loading="lazy" decoding="async" draggable="false"/>').join('') +
     '</div>' +
     (imgs.length > 1 ? '<span class="acc-gcount">1 / ' + imgs.length + '</span>' : '') +
-    '<button type="button" class="acc-expand" data-view="' + a.id + '" aria-label="Open ' + esc(a.name) + ' details">&#8599;</button>' +
     (avstat ? '<span class="acc-avstat" role="status">' + esc(avstat) + '</span>' : '') +
     '</div>';
 }
@@ -529,9 +529,12 @@ function wireCardGalleries(box) {
       if (e.key === 'ArrowLeft') { e.preventDefault(); go(-1); }
       if (e.key === 'ArrowRight') { e.preventDefault(); go(1); }
     });
-    let down = null;
+    let down = null, moved = false;
+    const openDetails = () => openAccOverlay(track.getAttribute('data-view'));
+    track.addEventListener('click', () => { if (moved) { moved = false; return; } openDetails(); });
+    track.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDetails(); } });
     track.addEventListener('pointerdown', (e) => { if (e.pointerType === 'mouse') { down = { x: e.clientX, s: track.scrollLeft }; track.classList.add('drag'); } });
-    addEventListener('pointermove', (e) => { if (down) track.scrollLeft = down.s - (e.clientX - down.x); });
+    addEventListener('pointermove', (e) => { if (down) { if (Math.abs(e.clientX - down.x) > 4) moved = true; track.scrollLeft = down.s - (e.clientX - down.x); } });
     addEventListener('pointerup', () => { if (down) { down = null; track.classList.remove('drag'); track.scrollTo({ left: pos() * track.clientWidth, behavior: 'smooth' }); } });
   });
 }
@@ -603,7 +606,7 @@ function renderStay() {
     S.stay.accommodationId = b.getAttribute('data-waitlist'); S.stay.waitlist = true;
     saveDraft(); renderStay(); renderSummary();
   }));
-  box.querySelectorAll('[data-view]').forEach((b) => b.addEventListener('click', () => openAccOverlay(b.getAttribute('data-view'))));
+  box.querySelectorAll('button[data-view]').forEach((b) => b.addEventListener('click', () => openAccOverlay(b.getAttribute('data-view'))));
   wireCardGalleries(box);
   const bed = box.querySelector('#stay-bed'); bed.addEventListener('change', () => { S.stay.bed = bed.value === 'No preference' ? '' : bed.value; saveDraft(); });
   box.querySelector('#stay-req').addEventListener('input', (e) => { S.stay.request = e.target.value; saveDraft(); });
@@ -654,8 +657,6 @@ function closeLightbox() {
 function lbStep(d) { if (!LB.images.length) { closeLightbox(); return; } LB.index = (LB.index + d + LB.images.length) % LB.images.length; lbRender(); }
 if (lightbox) {
   lightbox.querySelector('.lb-close').addEventListener('click', closeLightbox);
-  lightbox.querySelector('.lb-prev').addEventListener('click', () => lbStep(-1));
-  lightbox.querySelector('.lb-next').addEventListener('click', () => lbStep(1));
   lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
   addEventListener('keydown', (e) => {
     if (lightbox.hidden) return;

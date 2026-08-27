@@ -201,25 +201,21 @@ section { padding: 110px 6vw; position: relative; }
 .rm-amen button.more { font: inherit; font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--cherry); background: none; border: 1px solid var(--line); padding: 4px 8px; cursor: pointer; }
 .rm-amen button.more:hover { border-color: var(--cherry); }
 .rm-lb[hidden] { display: none !important; }
-.rm-lb { position: fixed; inset: 0; z-index: 200; background: rgba(23,21,19,.93); display: grid; grid-template-columns: 64px 1fr 64px; align-items: center; justify-items: center; }
+.rm-lb { position: fixed; inset: 0; z-index: 200; background: rgba(23,21,19,.93); display: grid; grid-template-columns: 1fr; align-items: center; justify-items: center; padding: 0 18px; }
 .rm-lb .rm-lb-img { max-width: 100%; max-height: 84vh; width: auto; height: auto; display: block; box-shadow: 0 30px 80px rgba(0,0,0,.5); }
-.rm-lb .rm-lb-prev, .rm-lb .rm-lb-next { background: none; border: 1px solid rgba(242,236,225,.4); color: var(--ivory); font: inherit; font-size: 20px; width: 46px; height: 46px; cursor: pointer; border-radius: 50%; }
-.rm-lb .rm-lb-prev:hover, .rm-lb .rm-lb-next:hover { border-color: var(--ivory); }
 .rm-lb .rm-lb-close { position: absolute; top: 22px; right: 22px; background: none; border: 1px solid rgba(242,236,225,.4); color: var(--ivory); font: inherit; font-size: 11px; letter-spacing: .2em; text-transform: uppercase; padding: 10px 16px; cursor: pointer; }
 .rm-lb .rm-lb-count { position: absolute; bottom: 22px; left: 50%; transform: translateX(-50%); color: var(--ivory); font-size: 12px; letter-spacing: .2em; }
-@media (max-width: 640px) { .rm-lb { grid-template-columns: 44px 1fr 44px; } }
+
 
 /* inline swipe room gallery (primary interaction) */
 .rm-gal { position: relative; }
-.rm-track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch; cursor: grab; }
+.rm-track { cursor: zoom-in; display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch; cursor: grab; }
 .rm-track::-webkit-scrollbar { display: none; }
 .rm-track.drag { cursor: grabbing; scroll-snap-type: none; }
 .rm-track img { object-position: center; transform: none; flex: 0 0 100%; width: 100%; height: auto; aspect-ratio: 3/2; object-fit: cover; scroll-snap-align: start; user-select: none; }
 .rm-gal::after { content: ''; position: absolute; inset: 62% 0 0 0; background: linear-gradient(180deg, transparent, rgba(33,31,28,.42)); pointer-events: none; }
 .rm-avstat { position: absolute; left: 16px; bottom: 13px; z-index: 2; color: var(--ivory); font-size: 11px; letter-spacing: .22em; text-transform: uppercase; text-shadow: 0 1px 14px rgba(33,31,28,.6); pointer-events: none; }
 .rm-gcount { position: absolute; right: 16px; bottom: 13px; z-index: 2; color: var(--ivory); font-size: 10px; letter-spacing: .18em; text-shadow: 0 1px 12px rgba(33,31,28,.65); }
-.rm-expand { position: absolute; right: 10px; top: 10px; z-index: 2; width: 32px; height: 32px; border: 1px solid rgba(242,236,225,.45); background: rgba(33,31,28,.28); color: var(--ivory); font: inherit; font-size: 13px; cursor: pointer; transition: background .3s; }
-.rm-expand:hover { background: rgba(33,31,28,.55); }
 /* owner-replaceable airbnb photo slots */
 .rm-slots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; aspect-ratio: 3/1.1; padding: 10px; background: repeating-linear-gradient(45deg, rgba(168,134,59,.05), rgba(168,134,59,.05) 6px, transparent 6px, transparent 14px); border-bottom: 1px solid var(--line); }
 .rm-slot { display: grid; place-items: center; border: 1px dashed var(--gold-line); color: var(--gold); font-size: 10px; letter-spacing: .2em; }
@@ -284,9 +280,7 @@ body.pv-lock { overflow: hidden; }
 .dg-row .dg-when { font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: var(--rose); padding-top: 6px; }
 .dg-row .dg-what { font-family: 'PP Editorial Old', serif; font-weight: 200; font-size: clamp(24px, 3vw, 34px); grid-column: 2; grid-row: 1; }
 .dg-row .dg-note { grid-column: 2; font-size: 14px; opacity: .8; max-width: 52ch; }
-.dg-slots { grid-column: 2; display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-top: 14px; }
-.dg-slot { display: grid; place-items: center; aspect-ratio: 3/4; border: 1px dashed var(--gold-line); color: var(--gold); font-size: 9px; letter-spacing: .14em; }
-@media (max-width: 760px) { .dg-row { grid-template-columns: 1fr; } .dg-row .dg-what, .dg-row .dg-note, .dg-slots { grid-column: 1; } .dg-slots { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 760px) { .dg-row { grid-template-columns: 1fr; } .dg-row .dg-what, .dg-row .dg-note { grid-column: 1; } }
 .dressguide { background: var(--ivory); padding-top: 120px; padding-bottom: 130px; }
 .dg-intro { max-width: 640px; margin-top: 26px; font-size: 16px; }
 /* category blocks with collage */
@@ -299,24 +293,24 @@ body.pv-lock { overflow: hidden; }
 .dg-notes { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 8px 26px; }
 .dg-notes li { font-size: 13px; line-height: 1.45; padding: 7px 0; border-top: 1px solid rgba(168,131,125,.28); }
 .dg-notes li span { display: block; font-size: 9.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--rose); margin-bottom: 2px; }
-.dg-collage { display: grid; grid-template-columns: repeat(auto-fill, minmax(158px, 1fr)); gap: 12px; }
-.dg-collage .cim { overflow: hidden; aspect-ratio: 3/4; }
+.dg-collage { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+@media (min-width: 1100px) { .dg-collage { grid-template-columns: repeat(6, 1fr); } }
+.dg-collage .cim { overflow: hidden; aspect-ratio: 3/4; padding: 0; border: none; background: none; cursor: zoom-in; display: block; }
+.dg-collage .cim img { transition: transform .8s cubic-bezier(.25,.46,.45,.94); }
+.dg-collage .cim:hover img { transform: scale(1.04); }
+.dg-cat .dg-note { font-size: 14.5px; opacity: .82; max-width: 46ch; margin-top: 14px; }
+@media (max-width: 760px) { .dg-top { grid-template-columns: 1fr; gap: 24px; } .dg-notes { grid-template-columns: 1fr; }
+  .dg-collage { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; gap: 10px; }
+  .dg-collage::-webkit-scrollbar { display: none; }
+  .dg-collage .cim { flex: 0 0 62%; scroll-snap-align: start; } }
 .dg-collage img { width: 100%; height: 100%; object-fit: cover; will-change: transform, clip-path; }
 /* slider mode (set up by JS): show 3, click to reveal the rest */
-.dg-gallery { position: relative; }
-.dg-gallery .dg-view { overflow: hidden; }
 .dg-collage.slider { display: flex; gap: 12px; grid-template-columns: none; transition: transform .6s cubic-bezier(.7,0,.2,1); }
 .dg-collage.slider .cim { flex: 0 0 calc((100% - 24px) / 3); }
-.dg-nav { position: absolute; top: 50%; transform: translateY(-50%); z-index: 3; width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(33,31,28,.22); background: var(--ivory); color: var(--ink); font-family: 'PP Editorial Old', serif; font-size: 22px; line-height: 1; cursor: pointer; display: grid; place-items: center; transition: opacity .3s, border-color .3s, color .3s; }
-.dg-nav:hover { border-color: var(--cherry); color: var(--cherry); }
-.dg-nav.prev { left: -22px; } .dg-nav.next { right: -22px; }
-.dg-nav:disabled { opacity: 0; pointer-events: none; }
-.dg-count { position: absolute; right: 2px; top: -30px; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--rose); }
 @media (max-width: 760px) {
   .dg-top { grid-template-columns: 1fr; gap: 20px; align-items: start; }
   .dg-collage { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; }
   .dg-collage.slider .cim { flex-basis: calc((100% - 8px) / 2); }
-  .dg-nav.prev { left: -6px; } .dg-nav.next { right: -6px; }
 }
 /* ceremony detail strip */
 .dg-detail { margin-top: 80px; background: var(--ink-s); color: var(--ivory); padding: 54px 6vw; margin-left: -6vw; margin-right: -6vw; }
@@ -657,7 +651,7 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
 <p class="rm-intro rv">Souphattra Heritage Vientiane is held for the people we love. Everyone we invite stays under one roof: shared mornings, shared arrivals, the whole rhythm of the weekend in one quiet place. You simply choose the room where you wake up; the second night is hosted by Haruthai &amp; Suthep.</p>
 <div class="rm-grid">
 <article class="rm-card">
-<div class="rm-gal" data-name="The Heritage"><div class="rm-track" tabindex="0" aria-label="The Heritage photos — swipe or use arrow keys"><img alt="The Heritage · photo 1" src="assets/images/rooms/the-heritage-1.jpg" width="1600" height="1067" loading="lazy" decoding="async" draggable="false"/><img alt="The Heritage · photo 2" src="assets/images/rooms/the-heritage-2.jpg" width="1600" height="1067" loading="lazy" decoding="async" draggable="false"/><img alt="The Heritage · photo 3" src="assets/images/rooms/the-heritage-3.jpg" width="1600" height="1067" loading="lazy" decoding="async" draggable="false"/></div><span class="rm-gcount">1 / 3</span><button type="button" class="rm-expand" data-gallery="[&quot;assets/images/rooms/the-heritage-1.jpg&quot;,&quot;assets/images/rooms/the-heritage-2.jpg&quot;,&quot;assets/images/rooms/the-heritage-3.jpg&quot;]" data-name="The Heritage" aria-label="Open The Heritage photos in full view">&#8599;</button><span class="rm-avstat" role="status">5 of 5 available</span></div>
+<div class="rm-gal" data-name="The Heritage"><div class="rm-track" tabindex="0" role="group" data-gallery="[&quot;assets/images/rooms/the-heritage-1.jpg&quot;,&quot;assets/images/rooms/the-heritage-2.jpg&quot;,&quot;assets/images/rooms/the-heritage-3.jpg&quot;]" data-name="The Heritage" aria-label="The Heritage photos — swipe, or press Enter for a larger view"><img alt="The Heritage · photo 1" src="assets/images/rooms/the-heritage-1.jpg" width="1600" height="1067" loading="lazy" decoding="async" draggable="false"/><img alt="The Heritage · photo 2" src="assets/images/rooms/the-heritage-2.jpg" width="1600" height="1067" loading="lazy" decoding="async" draggable="false"/><img alt="The Heritage · photo 3" src="assets/images/rooms/the-heritage-3.jpg" width="1600" height="1067" loading="lazy" decoding="async" draggable="false"/></div><span class="rm-gcount">1 / 3</span><span class="rm-avstat" role="status">5 of 5 available</span></div>
 <div class="rm-body">
 <div class="rm-head"><h3>The Heritage</h3></div>
 <div class="rm-meta">27 February – 1 March 2027 · 2 nights</div>
@@ -668,7 +662,7 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
 <div class="rm-foot"><a class="rm-cta" href="register/">Request this room in your Guest Area</a></div>
 </div></article>
 <article class="rm-card">
-<div class="rm-gal" data-name="Heritage Executive"><div class="rm-track" tabindex="0" aria-label="Heritage Executive photos — swipe or use arrow keys"><img alt="Heritage Executive · photo 1" src="assets/images/rooms/heritage-executive-1.jpg" width="1600" height="1067" loading="lazy" decoding="async" draggable="false"/><img alt="Heritage Executive · photo 2" src="assets/images/rooms/heritage-executive-2.jpg" width="1600" height="1067" loading="lazy" decoding="async" draggable="false"/><img alt="Heritage Executive · photo 3" src="assets/images/rooms/heritage-executive-3.jpg" width="1600" height="1067" loading="lazy" decoding="async" draggable="false"/></div><span class="rm-gcount">1 / 3</span><button type="button" class="rm-expand" data-gallery="[&quot;assets/images/rooms/heritage-executive-1.jpg&quot;,&quot;assets/images/rooms/heritage-executive-2.jpg&quot;,&quot;assets/images/rooms/heritage-executive-3.jpg&quot;]" data-name="Heritage Executive" aria-label="Open Heritage Executive photos in full view">&#8599;</button><span class="rm-avstat" role="status">13 of 13 available</span></div>
+<div class="rm-gal" data-name="Heritage Executive"><div class="rm-track" tabindex="0" role="group" data-gallery="[&quot;assets/images/rooms/heritage-executive-1.jpg&quot;,&quot;assets/images/rooms/heritage-executive-2.jpg&quot;,&quot;assets/images/rooms/heritage-executive-3.jpg&quot;]" data-name="Heritage Executive" aria-label="Heritage Executive photos — swipe, or press Enter for a larger view"><img alt="Heritage Executive · photo 1" src="assets/images/rooms/heritage-executive-1.jpg" width="1600" height="1067" loading="lazy" decoding="async" draggable="false"/><img alt="Heritage Executive · photo 2" src="assets/images/rooms/heritage-executive-2.jpg" width="1600" height="1067" loading="lazy" decoding="async" draggable="false"/><img alt="Heritage Executive · photo 3" src="assets/images/rooms/heritage-executive-3.jpg" width="1600" height="1067" loading="lazy" decoding="async" draggable="false"/></div><span class="rm-gcount">1 / 3</span><span class="rm-avstat" role="status">13 of 13 available</span></div>
 <div class="rm-body">
 <div class="rm-head"><h3>Heritage Executive</h3></div>
 <div class="rm-meta">27 February – 1 March 2027 · 2 nights</div>
@@ -679,7 +673,7 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
 <div class="rm-foot"><a class="rm-cta" href="register/">Request this room in your Guest Area</a></div>
 </div></article>
 <article class="rm-card">
-<div class="rm-gal" data-name="Heritage Grand Premier"><div class="rm-track" tabindex="0" aria-label="Heritage Grand Premier photos — swipe or use arrow keys"><img alt="Heritage Grand Premier · photo 1" src="assets/images/rooms/heritage-grand-premier-1.jpg" width="1600" height="1067" loading="lazy" decoding="async" draggable="false"/><img alt="Heritage Grand Premier · photo 2" src="assets/images/rooms/heritage-grand-premier-2.jpg" width="1600" height="1067" loading="lazy" decoding="async" draggable="false"/><img alt="Heritage Grand Premier · photo 3" src="assets/images/rooms/heritage-grand-premier-3.jpg" width="1600" height="1067" loading="lazy" decoding="async" draggable="false"/></div><span class="rm-gcount">1 / 3</span><button type="button" class="rm-expand" data-gallery="[&quot;assets/images/rooms/heritage-grand-premier-1.jpg&quot;,&quot;assets/images/rooms/heritage-grand-premier-2.jpg&quot;,&quot;assets/images/rooms/heritage-grand-premier-3.jpg&quot;]" data-name="Heritage Grand Premier" aria-label="Open Heritage Grand Premier photos in full view">&#8599;</button><span class="rm-avstat" role="status">3 of 3 available</span></div>
+<div class="rm-gal" data-name="Heritage Grand Premier"><div class="rm-track" tabindex="0" role="group" data-gallery="[&quot;assets/images/rooms/heritage-grand-premier-1.jpg&quot;,&quot;assets/images/rooms/heritage-grand-premier-2.jpg&quot;,&quot;assets/images/rooms/heritage-grand-premier-3.jpg&quot;]" data-name="Heritage Grand Premier" aria-label="Heritage Grand Premier photos — swipe, or press Enter for a larger view"><img alt="Heritage Grand Premier · photo 1" src="assets/images/rooms/heritage-grand-premier-1.jpg" width="1600" height="1067" loading="lazy" decoding="async" draggable="false"/><img alt="Heritage Grand Premier · photo 2" src="assets/images/rooms/heritage-grand-premier-2.jpg" width="1600" height="1067" loading="lazy" decoding="async" draggable="false"/><img alt="Heritage Grand Premier · photo 3" src="assets/images/rooms/heritage-grand-premier-3.jpg" width="1600" height="1067" loading="lazy" decoding="async" draggable="false"/></div><span class="rm-gcount">1 / 3</span><span class="rm-avstat" role="status">3 of 3 available</span></div>
 <div class="rm-body">
 <div class="rm-head"><h3>Heritage Grand Premier</h3></div>
 <div class="rm-meta">27 February – 1 March 2027 · 2 nights</div>
@@ -690,7 +684,7 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
 <div class="rm-foot"><a class="rm-cta" href="register/">Request this room in your Guest Area</a></div>
 </div></article>
 <article class="rm-card">
-<div class="rm-gal" data-name="Noble Courtyard Suite"><div class="rm-track" tabindex="0" aria-label="Noble Courtyard Suite photos — swipe or use arrow keys"><img alt="Noble Courtyard Suite · photo 1" src="assets/images/rooms/noble-courtyard-1.jpg" width="1600" height="1067" loading="lazy" decoding="async" draggable="false"/><img alt="Noble Courtyard Suite · photo 2" src="assets/images/rooms/noble-courtyard-2.jpg" width="1600" height="1067" loading="lazy" decoding="async" draggable="false"/><img alt="Noble Courtyard Suite · photo 3" src="assets/images/rooms/noble-courtyard-3.jpg" width="1600" height="1067" loading="lazy" decoding="async" draggable="false"/></div><span class="rm-gcount">1 / 3</span><button type="button" class="rm-expand" data-gallery="[&quot;assets/images/rooms/noble-courtyard-1.jpg&quot;,&quot;assets/images/rooms/noble-courtyard-2.jpg&quot;,&quot;assets/images/rooms/noble-courtyard-3.jpg&quot;]" data-name="Noble Courtyard Suite" aria-label="Open Noble Courtyard Suite photos in full view">&#8599;</button><span class="rm-avstat" role="status">1 of 1 available</span></div>
+<div class="rm-gal" data-name="Noble Courtyard Suite"><div class="rm-track" tabindex="0" role="group" data-gallery="[&quot;assets/images/rooms/noble-courtyard-1.jpg&quot;,&quot;assets/images/rooms/noble-courtyard-2.jpg&quot;,&quot;assets/images/rooms/noble-courtyard-3.jpg&quot;]" data-name="Noble Courtyard Suite" aria-label="Noble Courtyard Suite photos — swipe, or press Enter for a larger view"><img alt="Noble Courtyard Suite · photo 1" src="assets/images/rooms/noble-courtyard-1.jpg" width="1600" height="1067" loading="lazy" decoding="async" draggable="false"/><img alt="Noble Courtyard Suite · photo 2" src="assets/images/rooms/noble-courtyard-2.jpg" width="1600" height="1067" loading="lazy" decoding="async" draggable="false"/><img alt="Noble Courtyard Suite · photo 3" src="assets/images/rooms/noble-courtyard-3.jpg" width="1600" height="1067" loading="lazy" decoding="async" draggable="false"/></div><span class="rm-gcount">1 / 3</span><span class="rm-avstat" role="status">1 of 1 available</span></div>
 <div class="rm-body">
 <div class="rm-head"><h3>Noble Courtyard Suite</h3></div>
 <div class="rm-meta">27 February – 1 March 2027 · 2 nights</div>
@@ -701,7 +695,7 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
 <div class="rm-foot"><a class="rm-cta" href="register/">Request this room in your Guest Area</a></div>
 </div></article>
 <article class="rm-card">
-<div class="rm-gal" data-name="Grand Majestic Suite"><div class="rm-track" tabindex="0" aria-label="Grand Majestic Suite photos — swipe or use arrow keys"><img alt="Grand Majestic Suite · photo 1" src="assets/images/rooms/grand-majestic-suite-1.jpg" width="1600" height="1067" loading="lazy" decoding="async" draggable="false"/><img alt="Grand Majestic Suite · photo 2" src="assets/images/rooms/grand-majestic-suite-2.jpg" width="1600" height="1067" loading="lazy" decoding="async" draggable="false"/><img alt="Grand Majestic Suite · photo 3" src="assets/images/rooms/grand-majestic-suite-3.jpg" width="1600" height="1067" loading="lazy" decoding="async" draggable="false"/></div><span class="rm-gcount">1 / 3</span><button type="button" class="rm-expand" data-gallery="[&quot;assets/images/rooms/grand-majestic-suite-1.jpg&quot;,&quot;assets/images/rooms/grand-majestic-suite-2.jpg&quot;,&quot;assets/images/rooms/grand-majestic-suite-3.jpg&quot;]" data-name="Grand Majestic Suite" aria-label="Open Grand Majestic Suite photos in full view">&#8599;</button><span class="rm-avstat" role="status">2 of 2 available</span></div>
+<div class="rm-gal" data-name="Grand Majestic Suite"><div class="rm-track" tabindex="0" role="group" data-gallery="[&quot;assets/images/rooms/grand-majestic-suite-1.jpg&quot;,&quot;assets/images/rooms/grand-majestic-suite-2.jpg&quot;,&quot;assets/images/rooms/grand-majestic-suite-3.jpg&quot;]" data-name="Grand Majestic Suite" aria-label="Grand Majestic Suite photos — swipe, or press Enter for a larger view"><img alt="Grand Majestic Suite · photo 1" src="assets/images/rooms/grand-majestic-suite-1.jpg" width="1600" height="1067" loading="lazy" decoding="async" draggable="false"/><img alt="Grand Majestic Suite · photo 2" src="assets/images/rooms/grand-majestic-suite-2.jpg" width="1600" height="1067" loading="lazy" decoding="async" draggable="false"/><img alt="Grand Majestic Suite · photo 3" src="assets/images/rooms/grand-majestic-suite-3.jpg" width="1600" height="1067" loading="lazy" decoding="async" draggable="false"/></div><span class="rm-gcount">1 / 3</span><span class="rm-avstat" role="status">2 of 2 available</span></div>
 <div class="rm-body">
 <div class="rm-head"><h3>Grand Majestic Suite</h3></div>
 <div class="rm-meta">27 February – 1 March 2027 · 2 nights</div>
@@ -712,7 +706,7 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
 <div class="rm-foot"><a class="rm-cta" href="register/">Request this room in your Guest Area</a></div>
 </div></article>
 <article class="rm-card reserved">
-<div class="rm-gal" data-name="Souphattra Majestic Suite"><div class="rm-track" tabindex="0" aria-label="Souphattra Majestic Suite photos — swipe or use arrow keys"><img alt="Souphattra Majestic Suite · photo 1" src="assets/images/rooms/souphattra-majestic-suite-1.jpg" width="1600" height="1067" loading="lazy" decoding="async" draggable="false"/><img alt="Souphattra Majestic Suite · photo 2" src="assets/images/rooms/souphattra-majestic-suite-2.jpg" width="1600" height="1067" loading="lazy" decoding="async" draggable="false"/><img alt="Souphattra Majestic Suite · photo 3" src="assets/images/rooms/souphattra-majestic-suite-3.jpg" width="1600" height="1067" loading="lazy" decoding="async" draggable="false"/></div><span class="rm-gcount">1 / 3</span><button type="button" class="rm-expand" data-gallery="[&quot;assets/images/rooms/souphattra-majestic-suite-1.jpg&quot;,&quot;assets/images/rooms/souphattra-majestic-suite-2.jpg&quot;,&quot;assets/images/rooms/souphattra-majestic-suite-3.jpg&quot;]" data-name="Souphattra Majestic Suite" aria-label="Open Souphattra Majestic Suite photos in full view">&#8599;</button><span class="rm-avstat" role="status">Reserved</span></div>
+<div class="rm-gal" data-name="Souphattra Majestic Suite"><div class="rm-track" tabindex="0" role="group" data-gallery="[&quot;assets/images/rooms/souphattra-majestic-suite-1.jpg&quot;,&quot;assets/images/rooms/souphattra-majestic-suite-2.jpg&quot;,&quot;assets/images/rooms/souphattra-majestic-suite-3.jpg&quot;]" data-name="Souphattra Majestic Suite" aria-label="Souphattra Majestic Suite photos — swipe, or press Enter for a larger view"><img alt="Souphattra Majestic Suite · photo 1" src="assets/images/rooms/souphattra-majestic-suite-1.jpg" width="1600" height="1067" loading="lazy" decoding="async" draggable="false"/><img alt="Souphattra Majestic Suite · photo 2" src="assets/images/rooms/souphattra-majestic-suite-2.jpg" width="1600" height="1067" loading="lazy" decoding="async" draggable="false"/><img alt="Souphattra Majestic Suite · photo 3" src="assets/images/rooms/souphattra-majestic-suite-3.jpg" width="1600" height="1067" loading="lazy" decoding="async" draggable="false"/></div><span class="rm-gcount">1 / 3</span><span class="rm-avstat" role="status">Reserved</span></div>
 <div class="rm-body">
 <div class="rm-head"><h3>Souphattra Majestic Suite</h3></div>
 <div class="rm-meta">27 February – 1 March 2027 · 2 nights</div>
@@ -721,7 +715,7 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
 <div class="rm-amen"><span>Separate living area</span><span>Pantry</span><span>Bar</span><span>Large balcony</span><span>Pool and garden views</span><span>High ceilings</span><span>Nespresso machine</span><span>Coffee &amp; tea facilities</span><span>Mini bar</span><span>Wi-Fi</span></div>
 </div></article>
 <article class="rm-card reserved">
-<div class="rm-gal" data-name="Souphattra Presidential"><div class="rm-track" tabindex="0" aria-label="Souphattra Presidential photos — swipe or use arrow keys"><img alt="Souphattra Presidential · photo 1" src="assets/images/rooms/souphattra-presidential-1.jpg" width="1600" height="1067" loading="lazy" decoding="async" draggable="false"/><img alt="Souphattra Presidential · photo 2" src="assets/images/rooms/souphattra-presidential-2.jpg" width="1600" height="1067" loading="lazy" decoding="async" draggable="false"/><img alt="Souphattra Presidential · photo 3" src="assets/images/rooms/souphattra-presidential-3.jpg" width="1600" height="1067" loading="lazy" decoding="async" draggable="false"/></div><span class="rm-gcount">1 / 3</span><button type="button" class="rm-expand" data-gallery="[&quot;assets/images/rooms/souphattra-presidential-1.jpg&quot;,&quot;assets/images/rooms/souphattra-presidential-2.jpg&quot;,&quot;assets/images/rooms/souphattra-presidential-3.jpg&quot;]" data-name="Souphattra Presidential" aria-label="Open Souphattra Presidential photos in full view">&#8599;</button><span class="rm-avstat" role="status">Reserved</span></div>
+<div class="rm-gal" data-name="Souphattra Presidential"><div class="rm-track" tabindex="0" role="group" data-gallery="[&quot;assets/images/rooms/souphattra-presidential-1.jpg&quot;,&quot;assets/images/rooms/souphattra-presidential-2.jpg&quot;,&quot;assets/images/rooms/souphattra-presidential-3.jpg&quot;]" data-name="Souphattra Presidential" aria-label="Souphattra Presidential photos — swipe, or press Enter for a larger view"><img alt="Souphattra Presidential · photo 1" src="assets/images/rooms/souphattra-presidential-1.jpg" width="1600" height="1067" loading="lazy" decoding="async" draggable="false"/><img alt="Souphattra Presidential · photo 2" src="assets/images/rooms/souphattra-presidential-2.jpg" width="1600" height="1067" loading="lazy" decoding="async" draggable="false"/><img alt="Souphattra Presidential · photo 3" src="assets/images/rooms/souphattra-presidential-3.jpg" width="1600" height="1067" loading="lazy" decoding="async" draggable="false"/></div><span class="rm-gcount">1 / 3</span><span class="rm-avstat" role="status">Reserved</span></div>
 <div class="rm-body">
 <div class="rm-head"><h3>Souphattra Presidential</h3></div>
 <div class="rm-meta">27 February – 1 March 2027 · 2 nights</div>
@@ -730,7 +724,7 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
 <div class="rm-amen"><span>Two bedrooms</span><span>Private bathrooms</span><span>Separate living area</span><span>Co-living space</span><span>Pantry</span><span>Dining table</span><span>High ceiling</span></div>
 </div></article>
 <article class="rm-card">
-<div class="rm-gal" data-name="Airbnb Residence"><div class="rm-track" tabindex="0" aria-label="Airbnb Residence photos — swipe or use arrow keys"><img alt="Airbnb Residence · photo 1" src="assets/images/airbnb/airbnb-01.jpg" width="1600" height="1067" loading="lazy" decoding="async" draggable="false"/><img alt="Airbnb Residence · photo 2" src="assets/images/airbnb/airbnb-02.jpg" width="1600" height="1067" loading="lazy" decoding="async" draggable="false"/><img alt="Airbnb Residence · photo 3" src="assets/images/airbnb/airbnb-03.jpg" width="1600" height="1067" loading="lazy" decoding="async" draggable="false"/></div><span class="rm-gcount">1 / 3</span><button type="button" class="rm-expand" data-gallery="[&quot;assets/images/airbnb/airbnb-01.jpg&quot;,&quot;assets/images/airbnb/airbnb-02.jpg&quot;,&quot;assets/images/airbnb/airbnb-03.jpg&quot;]" data-name="Airbnb Residence" aria-label="Open Airbnb Residence photos in full view">&#8599;</button><span class="rm-avstat" role="status">Arranged separately</span></div>
+<div class="rm-gal" data-name="Airbnb Residence"><div class="rm-track" tabindex="0" role="group" data-gallery="[&quot;assets/images/airbnb/airbnb-01.jpg&quot;,&quot;assets/images/airbnb/airbnb-02.jpg&quot;,&quot;assets/images/airbnb/airbnb-03.jpg&quot;]" data-name="Airbnb Residence" aria-label="Airbnb Residence photos — swipe, or press Enter for a larger view"><img alt="Airbnb Residence · photo 1" src="assets/images/airbnb/airbnb-01.jpg" width="1600" height="1067" loading="lazy" decoding="async" draggable="false"/><img alt="Airbnb Residence · photo 2" src="assets/images/airbnb/airbnb-02.jpg" width="1600" height="1067" loading="lazy" decoding="async" draggable="false"/><img alt="Airbnb Residence · photo 3" src="assets/images/airbnb/airbnb-03.jpg" width="1600" height="1067" loading="lazy" decoding="async" draggable="false"/></div><span class="rm-gcount">1 / 3</span><span class="rm-avstat" role="status">Arranged separately</span></div>
 <div class="rm-body">
 <div class="rm-head"><h3>Airbnb Residence</h3></div>
 <div class="rm-meta">27 February – 1 March 2027 · 2 nights</div>
@@ -743,9 +737,7 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
 <p class="rm-note rv">Your second hotel night is hosted by Haruthai &amp; Suthep. Room rates and requests live in your private Guest Area. This is a registration request. Guest Relations will confirm your arrangements separately.</p>
 <div class="rm-lb" id="rm-lightbox" hidden role="dialog" aria-modal="true" aria-label="Room gallery">
 <button type="button" class="rm-lb-close">Close</button>
-<button type="button" class="rm-lb-prev" aria-label="Previous photo">&#8592;</button>
 <img class="rm-lb-img" src="" alt=""/>
-<button type="button" class="rm-lb-next" aria-label="Next photo">&#8594;</button>
 <div class="rm-lb-count" aria-live="polite"></div>
 </div>
 <script>
@@ -760,9 +752,6 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
   function open(list, name, from) { if (!list || !list.length) return; imgs = list; idx = 0; nm = name; trigger = from; render(); lb.hidden = false; document.body.style.overflow = "hidden"; lb.querySelector(".rm-lb-close").focus(); }
   function close() { lb.hidden = true; document.body.style.overflow = ""; if (trigger) trigger.focus(); }
   function step(d) { if (!imgs.length) { close(); return; } idx = (idx + d + imgs.length) % imgs.length; render(); }
-  document.querySelectorAll(".rm-expand").forEach(function (b) {
-    b.addEventListener("click", function () { open(JSON.parse(b.getAttribute("data-gallery")), b.getAttribute("data-name"), b); });
-  });
   document.querySelectorAll(".rm-gal").forEach(function (gal) {
     var track = gal.querySelector(".rm-track");
     var count = gal.querySelector(".rm-gcount");
@@ -774,14 +763,19 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
       if (e.key === "ArrowLeft") { e.preventDefault(); go(-1); }
       if (e.key === "ArrowRight") { e.preventDefault(); go(1); }
     });
-    var down = null;
+    var down = null, moved = false;
+    track.addEventListener("click", function () {
+      if (moved) { moved = false; return; }
+      open(JSON.parse(track.getAttribute("data-gallery")), track.getAttribute("data-name"), track);
+    });
+    track.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(JSON.parse(track.getAttribute("data-gallery")), track.getAttribute("data-name"), track); }
+    });
     track.addEventListener("pointerdown", function (e) { if (e.pointerType === "mouse") { down = { x: e.clientX, s: track.scrollLeft }; track.classList.add("drag"); } });
-    addEventListener("pointermove", function (e) { if (down) track.scrollLeft = down.s - (e.clientX - down.x); });
+    addEventListener("pointermove", function (e) { if (down) { if (Math.abs(e.clientX - down.x) > 4) moved = true; track.scrollLeft = down.s - (e.clientX - down.x); } });
     addEventListener("pointerup", function () { if (down) { down = null; track.classList.remove("drag"); var p = pos(); track.scrollTo({ left: p * track.clientWidth, behavior: "smooth" }); } });
   });
   lb.querySelector(".rm-lb-close").addEventListener("click", close);
-  lb.querySelector(".rm-lb-prev").addEventListener("click", function () { step(-1); });
-  lb.querySelector(".rm-lb-next").addEventListener("click", function () { step(1); });
   lb.addEventListener("click", function (e) { if (e.target === lb) close(); });
   lb.addEventListener("touchstart", function (e) { touchX = e.changedTouches[0].clientX; }, { passive: true });
   lb.addEventListener("touchend", function (e) {
@@ -807,16 +801,10 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
 <div class="eyebrow rv">The Dress Guide</div>
 <h2 class="h-big split-h">What to wear,<br/>day by day.</h2>
 <p class="dg-intro rv">Four moments, four looks. Warm days, cooler evenings by the river; every dress note below is tied to its moment of the weekend.</p>
-<div class="dg-list rv">
-<div class="dg-row"><div class="dg-when">Arrival &amp; Stay</div><div class="dg-what">Elegant Resort Wear</div><p class="dg-note">Breathable, unhurried, made for warm afternoons in the courtyard.</p></div>
-<div class="dg-row"><div class="dg-when">Alms Giving · at dawn</div><div class="dg-what">Lao Traditional Dress</div><p class="dg-note">Culturally respectful dress for the morning ritual. Guidance and examples follow below.</p>
-<div class="dg-slots" aria-label="Alms Giving dress examples, images to follow">
-<span class="dg-slot">DRESS_ALMS_01</span><span class="dg-slot">DRESS_ALMS_02</span><span class="dg-slot">DRESS_ALMS_03</span>
-<span class="dg-slot">DRESS_ALMS_04</span><span class="dg-slot">DRESS_ALMS_05</span><span class="dg-slot">DRESS_ALMS_06</span>
-</div></div>
-<div class="dg-row"><div class="dg-when">Vow Ceremony</div><div class="dg-what">Black Tie</div><p class="dg-note">The most formal hour of the weekend.</p></div>
-<div class="dg-row"><div class="dg-when">Wedding Dinner</div><div class="dg-what">Black Tie</div><p class="dg-note">From sunset cocktails into the courtyard dinner.</p></div>
-</div>
+<div class="dg-cat rv" id="dress-resort"><div class="dg-top"><div><div class="dg-when"><span class="dg-badge">01</span>Arrival &amp; Stay</div><div class="dg-title">Elegant Resort Wear</div><p class="dg-note">Linen, silk, soft colour. Breathable and unhurried, made for warm afternoons in the courtyard.</p></div><ul class="dg-notes"><li><span>Women</span>Flowing dresses, elegant separates, sandals</li><li><span>Men</span>Linen shirt, chinos or tailored shorts, loafers</li><li><span>Colour</span>Ivory, sand, soft botanicals</li><li><span>Comfort</span>Vientiane is warm; choose fabric over structure</li></ul></div><div class="dg-collage" data-dressgroup="resort"><button type="button" class="cim" data-dressgal="resort" data-index="0" aria-label="Elegant Resort Wear dress reference 1, open larger"><img src="assets/images/dress/resort-01.jpg" alt="Elegant Resort Wear dress reference 1" width="1100" height="1400" loading="lazy" decoding="async" draggable="false"/></button><button type="button" class="cim" data-dressgal="resort" data-index="1" aria-label="Elegant Resort Wear dress reference 2, open larger"><img src="assets/images/dress/resort-02.jpg" alt="Elegant Resort Wear dress reference 2" width="1100" height="1400" loading="lazy" decoding="async" draggable="false"/></button><button type="button" class="cim" data-dressgal="resort" data-index="2" aria-label="Elegant Resort Wear dress reference 3, open larger"><img src="assets/images/dress/resort-03.jpg" alt="Elegant Resort Wear dress reference 3" width="1100" height="1400" loading="lazy" decoding="async" draggable="false"/></button><button type="button" class="cim" data-dressgal="resort" data-index="3" aria-label="Elegant Resort Wear dress reference 4, open larger"><img src="assets/images/dress/resort-04.jpg" alt="Elegant Resort Wear dress reference 4" width="1100" height="1400" loading="lazy" decoding="async" draggable="false"/></button><button type="button" class="cim" data-dressgal="resort" data-index="4" aria-label="Elegant Resort Wear dress reference 5, open larger"><img src="assets/images/dress/resort-05.jpg" alt="Elegant Resort Wear dress reference 5" width="1100" height="1400" loading="lazy" decoding="async" draggable="false"/></button><button type="button" class="cim" data-dressgal="resort" data-index="5" aria-label="Elegant Resort Wear dress reference 6, open larger"><img src="assets/images/dress/resort-06.jpg" alt="Elegant Resort Wear dress reference 6" width="1100" height="1400" loading="lazy" decoding="async" draggable="false"/></button></div></div>
+<div class="dg-cat rv" id="dress-tradition"><div class="dg-top"><div><div class="dg-when"><span class="dg-badge">02</span>Alms Giving · at dawn</div><div class="dg-title">Lao Traditional Dress</div><p class="dg-note">The morning ritual asks for covered shoulders and a long skirt. Sinh and silk scarves can be arranged in Vientiane if you would rather not travel with them.</p></div><ul class="dg-notes"><li><span>Women</span>Sinh (Lao skirt) with a covered-shoulder blouse and pha biang scarf</li><li><span>Men</span>Long trousers with a shirt; a silk scarf if you have one</li><li><span>Respect</span>Shoulders and knees covered throughout the ritual</li><li><span>Footwear</span>Slip-off shoes; you will be barefoot at moments</li></ul></div><div class="dg-collage" data-dressgroup="tradition"><button type="button" class="cim" data-dressgal="tradition" data-index="0" aria-label="Lao Traditional Dress dress reference 1, open larger"><img src="assets/images/dress/tradition-01.jpg" alt="Lao Traditional Dress dress reference 1" width="1100" height="1400" loading="lazy" decoding="async" draggable="false"/></button><button type="button" class="cim" data-dressgal="tradition" data-index="1" aria-label="Lao Traditional Dress dress reference 2, open larger"><img src="assets/images/dress/tradition-02.jpg" alt="Lao Traditional Dress dress reference 2" width="1100" height="1400" loading="lazy" decoding="async" draggable="false"/></button><button type="button" class="cim" data-dressgal="tradition" data-index="2" aria-label="Lao Traditional Dress dress reference 3, open larger"><img src="assets/images/dress/tradition-03.jpg" alt="Lao Traditional Dress dress reference 3" width="1100" height="1400" loading="lazy" decoding="async" draggable="false"/></button><button type="button" class="cim" data-dressgal="tradition" data-index="3" aria-label="Lao Traditional Dress dress reference 4, open larger"><img src="assets/images/dress/tradition-04.jpg" alt="Lao Traditional Dress dress reference 4" width="1100" height="1400" loading="lazy" decoding="async" draggable="false"/></button><button type="button" class="cim" data-dressgal="tradition" data-index="4" aria-label="Lao Traditional Dress dress reference 5, open larger"><img src="assets/images/dress/tradition-05.jpg" alt="Lao Traditional Dress dress reference 5" width="1100" height="1400" loading="lazy" decoding="async" draggable="false"/></button><button type="button" class="cim" data-dressgal="tradition" data-index="5" aria-label="Lao Traditional Dress dress reference 6, open larger"><img src="assets/images/dress/tradition-06.jpg" alt="Lao Traditional Dress dress reference 6" width="1100" height="1400" loading="lazy" decoding="async" draggable="false"/></button></div></div>
+<div class="dg-cat rv" id="dress-vow"><div class="dg-top"><div><div class="dg-when"><span class="dg-badge">03</span>Vow Ceremony</div><div class="dg-title">Black Tie</div><p class="dg-note">The most formal hour of the weekend, in the courtyard as the day softens.</p></div><ul class="dg-notes"><li><span>Women</span>Floor-length gown or refined formal dress</li><li><span>Men</span>Tuxedo, black bow tie, patent shoes</li><li><span>Note</span>No full white — reserved for the bride</li><li><span>Ground</span>Garden setting; a block heel travels better than a stiletto</li></ul></div><div class="dg-collage" data-dressgroup="vow"><button type="button" class="cim" data-dressgal="vow" data-index="0" aria-label="Black Tie dress reference 1, open larger"><img src="assets/images/dress/vow-01.jpg" alt="Black Tie dress reference 1" width="1100" height="1400" loading="lazy" decoding="async" draggable="false"/></button><button type="button" class="cim" data-dressgal="vow" data-index="1" aria-label="Black Tie dress reference 2, open larger"><img src="assets/images/dress/vow-02.jpg" alt="Black Tie dress reference 2" width="1100" height="1400" loading="lazy" decoding="async" draggable="false"/></button><button type="button" class="cim" data-dressgal="vow" data-index="2" aria-label="Black Tie dress reference 3, open larger"><img src="assets/images/dress/vow-03.jpg" alt="Black Tie dress reference 3" width="1100" height="1400" loading="lazy" decoding="async" draggable="false"/></button><button type="button" class="cim" data-dressgal="vow" data-index="3" aria-label="Black Tie dress reference 4, open larger"><img src="assets/images/dress/vow-04.jpg" alt="Black Tie dress reference 4" width="1100" height="1400" loading="lazy" decoding="async" draggable="false"/></button><button type="button" class="cim" data-dressgal="vow" data-index="4" aria-label="Black Tie dress reference 5, open larger"><img src="assets/images/dress/vow-05.jpg" alt="Black Tie dress reference 5" width="1100" height="1400" loading="lazy" decoding="async" draggable="false"/></button><button type="button" class="cim" data-dressgal="vow" data-index="5" aria-label="Black Tie dress reference 6, open larger"><img src="assets/images/dress/vow-06.jpg" alt="Black Tie dress reference 6" width="1100" height="1400" loading="lazy" decoding="async" draggable="false"/></button></div></div>
+<div class="dg-cat rv" id="dress-dinner"><div class="dg-top"><div><div class="dg-when"><span class="dg-badge">04</span>Wedding Dinner</div><div class="dg-title">Black Tie</div><p class="dg-note">From sunset cocktails beside the pool into the courtyard dinner, and late into the night.</p></div><ul class="dg-notes"><li><span>Women</span>Evening gown or elegant cocktail-length formal</li><li><span>Men</span>Tuxedo; a velvet or ivory dinner jacket is welcome</li><li><span>Evening</span>A light wrap for the river air after dark</li><li><span>Note</span>No full white — reserved for the bride</li></ul></div><div class="dg-collage" data-dressgroup="dinner"><button type="button" class="cim" data-dressgal="dinner" data-index="0" aria-label="Black Tie dress reference 1, open larger"><img src="assets/images/dress/dinner-01.jpg" alt="Black Tie dress reference 1" width="1100" height="1400" loading="lazy" decoding="async" draggable="false"/></button><button type="button" class="cim" data-dressgal="dinner" data-index="1" aria-label="Black Tie dress reference 2, open larger"><img src="assets/images/dress/dinner-02.jpg" alt="Black Tie dress reference 2" width="1100" height="1400" loading="lazy" decoding="async" draggable="false"/></button><button type="button" class="cim" data-dressgal="dinner" data-index="2" aria-label="Black Tie dress reference 3, open larger"><img src="assets/images/dress/dinner-03.jpg" alt="Black Tie dress reference 3" width="1100" height="1400" loading="lazy" decoding="async" draggable="false"/></button><button type="button" class="cim" data-dressgal="dinner" data-index="3" aria-label="Black Tie dress reference 4, open larger"><img src="assets/images/dress/dinner-04.jpg" alt="Black Tie dress reference 4" width="1100" height="1400" loading="lazy" decoding="async" draggable="false"/></button><button type="button" class="cim" data-dressgal="dinner" data-index="4" aria-label="Black Tie dress reference 5, open larger"><img src="assets/images/dress/dinner-05.jpg" alt="Black Tie dress reference 5" width="1100" height="1400" loading="lazy" decoding="async" draggable="false"/></button><button type="button" class="cim" data-dressgal="dinner" data-index="5" aria-label="Black Tie dress reference 6, open larger"><img src="assets/images/dress/dinner-06.jpg" alt="Black Tie dress reference 6" width="1100" height="1400" loading="lazy" decoding="async" draggable="false"/></button></div></div>
 </div>
 </section>
 <!-- WEEKEND IN ORDER -->
@@ -1111,36 +1099,6 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
   addEventListener('keydown', e => {
     if (e.key === 'Escape') closePanel();
     if (openPv) trapFocus(e, openPv);
-  });
-
-  /* DRESS GUIDE GALLERIES — show three, click to reveal the rest. No autoplay. */
-  document.querySelectorAll('.dg-collage').forEach(coll => {
-    const items = [...coll.children];
-    if (items.length <= 3) return;
-    const gallery = document.createElement('div'); gallery.className = 'dg-gallery';
-    const view = document.createElement('div'); view.className = 'dg-view';
-    coll.parentNode.insertBefore(gallery, coll);
-    gallery.appendChild(view); view.appendChild(coll);
-    coll.classList.add('slider');
-    const prev = document.createElement('button'); prev.type = 'button'; prev.className = 'dg-nav prev'; prev.setAttribute('aria-label', 'Previous looks'); prev.textContent = '‹';
-    const next = document.createElement('button'); next.type = 'button'; next.className = 'dg-nav next'; next.setAttribute('aria-label', 'More looks'); next.textContent = '›';
-    const count = document.createElement('div'); count.className = 'dg-count';
-    gallery.append(prev, next, count);
-    let idx = 0;
-    const perView = () => matchMedia('(max-width: 760px)').matches ? 2 : 3;
-    const stepPx = () => items[0].getBoundingClientRect().width + 12;
-    const maxIdx = () => Math.max(0, items.length - perView());
-    function render() {
-      idx = Math.min(idx, maxIdx());
-      coll.style.transform = 'translateX(' + (-idx * stepPx()) + 'px)';
-      prev.disabled = idx <= 0;
-      next.disabled = idx >= maxIdx();
-      count.textContent = Math.min(idx + perView(), items.length) + ' / ' + items.length;
-    }
-    prev.addEventListener('click', () => { idx = Math.max(0, idx - 1); render(); });
-    next.addEventListener('click', () => { idx = Math.min(maxIdx(), idx + 1); render(); });
-    let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(render, 150); });
-    render();
   });
 
   if (!hasGsap || reduced) {

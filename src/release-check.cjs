@@ -217,6 +217,27 @@ gate('P6', 'LINE/WhatsApp QR owner rule (originals only, no invented LINE ID)',
    !qrHashes && 'official QR assets missing or altered (hash mismatch vs owner originals)'].filter(Boolean).join(' · ')
   || 'owner-original LINE + WhatsApp QR verified by hash; zero written LINE IDs; generated QR removed');
 
+/* P7 — Dress Code imagery real (24 owner images) and ZERO visible gallery
+ * arrow/expand controls on any surface (owner rule 2026-08-27). */
+const dressRefs = [...indexHtml.matchAll(/assets\/images\/dress\/([a-z]+-0[1-6]\.jpg)/g)].map((m) => m[1]);
+const dressUnique = [...new Set(dressRefs)];
+const dressMissing = dressUnique.filter((f) => !fs.existsSync(path.join(ROOT, 'assets/images/dress', f)));
+const dressGroups = ['resort', 'tradition', 'vow', 'dinner']
+  .map((g) => dressUnique.filter((f) => f.startsWith(g + '-')).length);
+const dressOk = dressUnique.length === 24 && dressMissing.length === 0 && dressGroups.every((n) => n === 6)
+  && !/dg-slot|DRESS_ALMS_/.test(indexHtml);
+const standalone = fs.existsSync(path.join(ROOT, 'build/standalone.html')) ? read('build/standalone.html') : '';
+const arrowPattern = /rm-expand|acc-expand|rm-gnav|acc-gnav|rm-lb-prev|rm-lb-next|class="lb-prev|class="lb-next|&#8599;|&#8592;|&#8594;/;
+const arrowSurfaces = [['index.html', indexHtml], ['register/index.html', regHtml], ['register/app.mjs', appJs],
+  ['src/build-rooms.cjs', read('src/build-rooms.cjs')]].filter(([, s]) => arrowPattern.test(s)).map(([n]) => n);
+gate('P7', 'Dress Code imagery real (24) and zero gallery arrow controls',
+  dressOk && arrowSurfaces.length === 0,
+  [!dressOk && 'dress imagery incomplete: ' + dressUnique.length + ' refs, groups ' + dressGroups.join('/') +
+     (dressMissing.length ? ', missing files: ' + dressMissing.join(', ') : ''),
+   arrowSurfaces.length && 'arrow/expand controls still present in: ' + arrowSurfaces.join(', ')]
+    .filter(Boolean).join(' · ')
+  || '24 owner dress images across 4 groups; no expand/prev/next controls on any gallery surface');
+
 let failed = 0;
 for (const r of results) {
   if (!r.ok) failed++;
