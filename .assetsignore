@@ -4,6 +4,7 @@
 src
 test
 dist
+build
 node_modules
 .wrangler
 .dev.vars
