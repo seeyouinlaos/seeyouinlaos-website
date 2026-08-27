@@ -18,6 +18,7 @@ package-lock.json
 *.md
 .DS_Store
 .playwright-mcp
+.claude
 seeyouinlaos-website
 _asset_originals
 assets/images/incoming
