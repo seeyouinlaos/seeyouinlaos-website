@@ -138,7 +138,7 @@ section { padding: 110px 6vw; position: relative; }
 .places { background: var(--ink-s); color: var(--ivory); padding-top: 130px; padding-bottom: 140px; }
 .places .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 30px; margin-top: 70px; }
 @media (max-width: 1160px) { .places .grid { grid-template-columns: repeat(2, 1fr); } }
-.card { text-decoration: none; display: block; background: none; border: none; color: inherit; font: inherit; text-align: left; cursor: pointer; padding: 0; width: 100%; }
+.card { text-decoration: none; display: flex; flex-direction: column; align-items: stretch; background: none; border: none; color: inherit; font: inherit; text-align: left; cursor: pointer; padding: 0; width: 100%; }
 .card .im { overflow: hidden; aspect-ratio: 4/5; margin-bottom: 22px; position: relative; }
 .card .ovl { position: absolute; top: 16px; right: 18px; z-index: 2; font-family: 'PP Editorial Old', serif; font-weight: 200; font-size: clamp(26px, 2.3vw, 36px); line-height: 1.1; color: var(--ivory); text-align: right; text-shadow: 0 2px 22px rgba(33,31,28,.55); pointer-events: none; }
 .card .im::after { content: ''; position: absolute; inset: 0 0 60% 0; background: linear-gradient(180deg, rgba(33,31,28,.35), transparent); }
@@ -147,7 +147,7 @@ section { padding: 110px 6vw; position: relative; }
 .card .tag { font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: var(--rose); margin-bottom: 10px; }
 .card h3 { font-family: 'PP Editorial Old', serif; font-weight: 200; font-size: 30px; margin-bottom: 8px; }
 .card p { font-size: 14.5px; opacity: .8; max-width: 320px; }
-.card .more { display: inline-block; margin-top: 14px; font-size: 11.5px; letter-spacing: .2em; text-transform: uppercase; padding-bottom: 5px; border-bottom: 1px solid var(--cherry-photo); }
+.card .more { display: inline-block; align-self: flex-start; margin-top: 14px; font-size: 11.5px; letter-spacing: .2em; text-transform: uppercase; padding-bottom: 5px; border-bottom: 1px solid var(--cherry-photo); }
 
 /* concentric sun motif from the physical invitation — crafted moments only */
 .sun-motif { position: absolute; width: min(46vw, 420px); height: auto; opacity: .5; pointer-events: none; }
