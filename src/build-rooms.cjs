@@ -30,6 +30,11 @@ function card(a) {
   const reserved = a.selectable === false;
   /* PRIMARY interaction: inline swipe gallery (scroll-snap). The lightbox
    * remains a secondary option via the expand control. */
+  const avstat = reserved
+    ? 'Reserved'
+    : a.kind === 'airbnb'
+      ? 'Arranged separately'
+      : a.capacityTotal + ' of ' + a.capacityTotal + ' available';
   const gallery = imgs.length
     ? '<div class="rm-gal" data-name="' + esc(a.name) + '">' +
       '<div class="rm-track" tabindex="0" aria-label="' + esc(a.name) + ' photos — swipe or use arrow keys">' +
@@ -39,6 +44,7 @@ function card(a) {
       (imgs.length > 1 ? '<span class="rm-gcount">1 / ' + imgs.length + '</span>' : '') +
       '<button type="button" class="rm-expand" data-gallery="' + JSON.stringify(imgs).replace(/"/g, '&quot;') +
         '" data-name="' + esc(a.name) + '" aria-label="Open ' + esc(a.name) + ' photos in full view">&#8599;</button>' +
+      '<span class="rm-avstat" role="status">' + avstat + '</span>' +
       '</div>'
     : (a.imageSlots
         ? '<div class="rm-slots">' + a.imageSlots.map((s) => '<span class="rm-slot">' + esc(s) + '</span>').join('') + '</div>'
@@ -52,15 +58,16 @@ function card(a) {
     '<div class="rm-meta">' + esc(a.stay) + ' · ' + a.nights + ' nights</div>',
     a.kind !== 'airbnb' && !reserved ? '<div class="rm-hosted">Second night complimentary · hosted by Haruthai &amp; Suthep</div>' : '',
     '<p class="rm-blurb">' + esc(a.blurb) + '</p>',
-    '<dl class="rm-specs">' + specs.map((r) => '<div><dt>' + r[0] + '</dt><dd>' + esc(r[1]) + '</dd></div>').join('') + '</dl>',
+    '<dl class="rm-specs">' + specs.concat([['Availability', reserved
+        ? 'Reserved for the wedding couple\u2019s family'
+        : a.kind === 'airbnb'
+          ? 'Arranged separately with Guest Relations'
+          : a.capacityTotal + (a.capacityTotal === 1 ? ' room' : ' rooms') + ' allocated']])
+      .map((r) => '<div><dt>' + r[0] + '</dt><dd>' + esc(r[1]) + '</dd></div>').join('') + '</dl>',
     amen.length
       ? '<div class="rm-amen">' + amen.map((x) => '<span>' + esc(x) + '</span>').join('') + '</div>'
       : '',
-    reserved
-      ? '<div class="rm-avail rm-reserved" role="status">Reserved</div>'
-      : '<div class="rm-avail" role="status">' + (a.kind === 'airbnb'
-          ? 'Arranged separately with Guest Relations'
-          : a.capacityTotal + (a.capacityTotal === 1 ? ' room' : ' rooms') + ' in the wedding allocation') + '</div>',
+
     reserved
       ? ''
       : '<div class="rm-foot"><a class="rm-cta" href="register/">Request this room in your Guest Area</a></div>',

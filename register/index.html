@@ -135,7 +135,7 @@ input:focus, select:focus, textarea:focus { border-bottom-color: var(--cherry); 
 .acc-card.sel { border-color: var(--cherry); box-shadow: inset 0 0 0 1px var(--cherry); }
 .acc-card.full { opacity: .75; }
 .acc-badge { font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--cherry); }
-.acc-head { display: flex; justify-content: space-between; gap: 14px; align-items: baseline; }
+.acc-head { display: flex; justify-content: space-between; gap: 14px; align-items: baseline; border-bottom: 1px solid var(--gold-line); padding-bottom: 10px; margin-bottom: 4px; }
 .acc-price { text-align: right; }
 .acc-price .amt { font-family: 'PP Editorial Old', serif; font-size: 22px; display: block; }
 .acc-price .per { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--rose); }
@@ -147,11 +147,10 @@ input:focus, select:focus, textarea:focus { border-bottom-color: var(--cherry); 
 .acc-figure { margin: 0 0 16px; }
 .acc-figure img { display: block; width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; }
 .acc-card.reserved { opacity: .92; }
-.acc-specs { display: grid; grid-template-columns: 1fr; gap: 3px 18px; margin: 4px 0 2px; }
-.acc-specs div { display: flex; gap: 8px; font-size: 12.5px; min-width: 0; }
-.acc-specs dd { min-width: 0; overflow-wrap: break-word; }
-.acc-specs dt { color: var(--rose); font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase; padding-top: 2px; min-width: 46px; }
-.acc-specs dd { color: var(--ink); }
+.acc-specs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 20px; margin: 12px 0 2px; border-top: 1px solid var(--gold-line); padding-top: 14px; }
+.acc-specs div { display: block; font-size: 13px; min-width: 0; }
+.acc-specs dt { color: var(--rose); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; margin-bottom: 3px; }
+.acc-specs dd { color: var(--ink); overflow-wrap: break-word; }
 .acc-amen { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 2px; }
 .acc-amen span { font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--rose); border: 1px solid var(--line); padding: 4px 8px; }
 .acc-amen span.more { border-color: transparent; }
@@ -164,7 +163,7 @@ input:focus, select:focus, textarea:focus { border-bottom-color: var(--cherry); 
 @media (max-width: 560px) { .rv-room { grid-template-columns: 1fr; } }
 .home-card .hc-img { display: block; margin: -20px -24px 16px; }
 .home-card .hc-img img { display: block; width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; }
-.acc-avail { font-size: 11.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--rose); border-top: 1px solid var(--line); padding-top: 12px; margin-top: auto; }
+.acc-avail { font-size: 11.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--rose); padding-top: 12px; }
 .acc-avail.zero { color: var(--cherry); }
 .acc-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
 
@@ -333,8 +332,11 @@ body.pv-lock { overflow: hidden; }
 .acc-track::-webkit-scrollbar { display: none; }
 .acc-track.drag { cursor: grabbing; scroll-snap-type: none; }
 .acc-track img { object-position: center; transform: none; flex: 0 0 100%; width: 100%; height: auto; aspect-ratio: 3/2; object-fit: cover; scroll-snap-align: start; user-select: none; }
-.acc-gcount { position: absolute; left: 10px; bottom: 8px; background: rgba(33,31,28,.72); color: var(--ivory); font-size: 10px; letter-spacing: .16em; padding: 4px 8px; }
-.acc-expand { position: absolute; right: 8px; bottom: 6px; width: 32px; height: 32px; border: 1px solid rgba(242,236,225,.55); background: rgba(33,31,28,.5); color: var(--ivory); font: inherit; font-size: 13px; cursor: pointer; }
+.acc-gal::after { content: ''; position: absolute; inset: 62% 0 0 0; background: linear-gradient(180deg, transparent, rgba(33,31,28,.42)); pointer-events: none; }
+.acc-avstat { position: absolute; left: 14px; bottom: 11px; z-index: 2; color: var(--ivory); font-size: 10.5px; letter-spacing: .22em; text-transform: uppercase; text-shadow: 0 1px 14px rgba(33,31,28,.6); pointer-events: none; }
+.acc-gcount { position: absolute; right: 14px; bottom: 11px; z-index: 2; color: var(--ivory); font-size: 10px; letter-spacing: .18em; text-shadow: 0 1px 12px rgba(33,31,28,.65); }
+.acc-expand { position: absolute; right: 8px; top: 8px; z-index: 2; width: 30px; height: 30px; border: 1px solid rgba(242,236,225,.45); background: rgba(33,31,28,.28); color: var(--ivory); font: inherit; font-size: 12px; cursor: pointer; transition: background .3s; }
+.acc-expand:hover { background: rgba(33,31,28,.55); }
 .acc-slots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 10px; aspect-ratio: 3/1.1; background: repeating-linear-gradient(45deg, rgba(168,134,59,.05), rgba(168,134,59,.05) 6px, transparent 6px, transparent 14px); border-bottom: 1px solid var(--line); }
 .acc-slot { display: grid; place-items: center; border: 1px dashed var(--gold-line); color: var(--gold); font-size: 10px; letter-spacing: .2em; }
 .acc-card.reserved .acc-avail { color: var(--gold); }

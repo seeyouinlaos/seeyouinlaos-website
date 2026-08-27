@@ -42,11 +42,21 @@ function roomPriceHtml(a) {
 function guestAvailability(res, unitPlural) {
   if (!res) return '';
   if (PUBLICATION.inventoryDisplay === 'EXACT') return availabilityLabel(res);
-  // no shared real-time sync yet: state the authoritative allocation honestly
-  if (remaining(res) <= 0) return 'Waitlist · Guest Relations will confirm';
   const total = res.capacity_total;
   const unit = unitPlural || 'rooms';
-  return total + ' ' + (total === 1 ? unit.replace(/s$/, '') : unit) + ' in the wedding allocation';
+  if (remaining(res) <= 0) return 'Waitlist · Guest Relations will confirm';
+  return total + ' ' + (total === 1 ? unit.replace(/s$/, '') : unit) + ' allocated';
+}
+/* the availability statement printed onto the gallery photography */
+function availOverlay(a, res, selected) {
+  if (a.selectable === false) return 'Reserved';
+  if (a.kind === 'airbnb') return 'Arranged separately';
+  if (selected) return 'Requested';
+  if (!res) return '';
+  const total = res.capacity_total, rem = remaining(res);
+  if (rem <= 0) return 'Waitlist';
+  if (rem === 1 && total > 1) return 'Last room';
+  return rem + ' of ' + total + ' available';
 }
 
 let inventory = loadInventory();
@@ -492,7 +502,7 @@ function wireModulePicker(box, field) {
  * src/build-rooms.cjs from this very model), the selection cards here, the
  * review page and the confirmed journey. No second room description exists. */
 const roomImg = (p) => '../' + p;
-function roomFigure(a) {
+function roomFigure(a, avstat) {
   const imgs = a.images || [];
   if (!imgs.length) {
     return a.imageSlots
@@ -504,6 +514,7 @@ function roomFigure(a) {
     '</div>' +
     (imgs.length > 1 ? '<span class="acc-gcount">1 / ' + imgs.length + '</span>' : '') +
     '<button type="button" class="acc-expand" data-view="' + a.id + '" aria-label="Open ' + esc(a.name) + ' details">&#8599;</button>' +
+    (avstat ? '<span class="acc-avstat" role="status">' + esc(avstat) + '</span>' : '') +
     '</div>';
 }
 function wireCardGalleries(box) {
@@ -524,9 +535,10 @@ function wireCardGalleries(box) {
     addEventListener('pointerup', () => { if (down) { down = null; track.classList.remove('drag'); track.scrollTo({ left: pos() * track.clientWidth, behavior: 'smooth' }); } });
   });
 }
-function roomSpecs(a) {
+function roomSpecs(a, availRow) {
   const rows = [['Size', a.size], ['Bed', a.bed], ['Guests', a.occupancy], ['Where', a.location]]
     .filter((r) => r[1]);
+  if (availRow) rows.push(['Availability', availRow]);
   if (!rows.length) return '';
   return '<dl class="acc-specs">' + rows.map((r) =>
     '<div><dt>' + r[0] + '</dt><dd>' + esc(r[1]) + '</dd></div>').join('') + '</dl>' +
@@ -545,17 +557,18 @@ function renderStay() {
     const selected = S.stay.accommodationId === a.id;
     return '<article class="acc-card' + (selected ? ' sel' : '') + (full ? ' full' : '') +
       (bookable ? '' : ' reserved') + '" data-acc="' + a.id + '">' +
-      roomFigure(a) +
+      roomFigure(a, availOverlay(a, res, selected)) +
       (a.badge ? '<div class="acc-badge">' + esc(a.badge) + '</div>' : '') +
       '<div class="acc-head"><h3>' + esc(a.name) + '</h3>' +
       (bookable ? roomPriceHtml(a) : '<div class="acc-price"><span class="per">Reserved</span></div>') + '</div>' +
       '<div class="acc-meta">' + esc(a.stay) + ' · ' + a.nights + ' nights</div>' +
       (a.kind !== 'airbnb' ? '<div class="acc-hosted">Second night complimentary · hosted by Haruthai &amp; Suthep</div>' : '') +
       '<p class="acc-blurb">' + esc(a.blurb) + '</p>' +
-      roomSpecs(a) +
-      (bookable
-        ? '<div class="acc-avail' + (full ? ' zero' : '') + '" role="status">' + esc(selected ? 'Requested · Guest Relations will confirm' : a.kind === 'airbnb' ? 'Arranged separately with Guest Relations' : guestAvailability(res)) + '</div>'
-        : '<div class="acc-avail reserved-note">' + esc(a.reservedNote || 'Not available for guest requests') + '</div>') +
+      roomSpecs(a, bookable
+        ? (selected ? 'Requested · Guest Relations will confirm'
+           : a.kind === 'airbnb' ? 'Arranged separately with Guest Relations'
+           : guestAvailability(res))
+        : 'Reserved') +
       '<div class="acc-actions">' +
       '<button type="button" class="btn ghost sm" data-view="' + a.id + '">View details</button>' +
       (!bookable ? ''

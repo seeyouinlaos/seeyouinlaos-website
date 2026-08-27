@@ -138,17 +138,23 @@ gate('P1', 'No accommodation prices on the public website',
     ? 'PUBLIC PRICE LEAK: ' + (publicUsd ? 'USD amount or per-night wording in guest-facing accommodation content' : 'rate value visible: USD ' + rateNumbers.join(', '))
     : 'no USD amount and no per-night wording on the public site; per-guest rates render only in the authenticated Guest Area');
 
-/* P2 — public availability honesty: without shared real-time sync the page
- * states the authoritative wedding allocation, never fake live counts. */
-const availLines = (roomsSection.match(/class="rm-avail"/g) || []).length;
-const reservedLines = (roomsSection.match(/rm-avail rm-reserved"/g) || []).length;
-const allocLines = (roomsSection.match(/in the wedding allocation/g) || []).length;
-const fakeLive = /\d+ of \d+ (rooms )?(remaining|available)|Last room/i.test(roomsSection);
-gate('P2', 'Public availability honest (allocation wording until shared sync)',
-  availLines === 6 && reservedLines === 2 && allocLines === 5 && !fakeLive && roomsSection.includes('Arranged separately'),
-  fakeLive
-    ? 'public page pretends live remaining counts without a shared backend'
-    : "expected 5 allocation + 2 reserved + 1 arranged-separately lines, found alloc:" + allocLines + ' reserved:' + reservedLines + ' total:' + availLines);
+/* P2 — availability truthful and engine-derived: overlays state "N of N
+ * available" only where N equals the authoritative allocation (no shared
+ * real-time sync exists, so remaining == total at build time). */
+const avstats = [...roomsSection.matchAll(/class="rm-avstat"[^>]*>([^<]+)</g)].map((m) => m[1]);
+const expectOverlays = ['5 of 5 available', '13 of 13 available', '3 of 3 available', '1 of 1 available', '2 of 2 available', 'Reserved', 'Reserved', 'Arranged separately'];
+const overlaysOk = expectOverlays.every((t) => avstats.includes(t)) && avstats.length === 8;
+const availRows = (roomsSection.match(/<dt>Availability<\/dt>/g) || []).length;
+const staleRemaining = /rooms? remaining|Last room/i.test(roomsSection);
+gate('P2', 'Availability truthful, engine-derived, designed into the gallery',
+  overlaysOk && availRows === 8 && !staleRemaining,
+  !overlaysOk
+    ? 'gallery availability overlays wrong: ' + JSON.stringify(avstats)
+    : availRows !== 8
+      ? 'expected 8 Availability rows in the specification grids, found ' + availRows
+      : staleRemaining
+        ? 'live-remaining wording without a shared backend'
+        : 'all 8 galleries carry the engine-derived availability overlay; specification grids carry the allocation row');
 
 /* P3 — image + venue corrections (owner): alms at Souphattra Heritage with
  * TWO distinct images (couple on the timeline, procession on the card); no
