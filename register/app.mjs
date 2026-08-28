@@ -642,7 +642,7 @@ function renderStay() {
       '<div class="acc-head"><h3>' + esc(a.name) + '</h3>' +
       (bookable ? roomPriceHtml(a) : '<div class="acc-price"><span class="per">Reserved</span></div>') + '</div>' +
       '<div class="acc-meta">' + esc(a.stay) + ' · ' + a.nights + ' nights</div>' +
-      (a.kind !== 'airbnb' ? '<div class="acc-hosted"><span>Second night complimentary</span><span class="rh-b">Hosted by</span><span class="hs">Haruthai&nbsp;&amp;&nbsp;Suthep</span></div>' : '') +
+      (a.kind !== 'airbnb' ? '<div class="acc-hosted"><span>Breakfast included</span><span>Second night complimentary</span><span class="rh-b">Hosted by</span><span class="hs">Haruthai&nbsp;&amp;&nbsp;Suthep</span></div>' : '') +
       '<p class="acc-blurb">' + esc(a.blurb) + '</p>' +
       roomSpecs(a, bookable
         ? (selected ? 'Requested · Guest Relations will confirm'
@@ -790,6 +790,7 @@ function openAccOverlay(id) {
       '" width="1200" height="800" loading="lazy" decoding="async"/></button>').join('') + '</div>' +
     '<dl class="pv-facts">' +
     '<div><dt>Stay</dt><dd>' + esc(a.stay) + ' · ' + a.nights + ' nights</dd></div>' +
+    (a.kind !== 'airbnb' ? '<div><dt>Breakfast</dt><dd>Included</dd></div>' : '') +
     (a.size ? '<div><dt>Size</dt><dd>' + esc(a.size) + '</dd></div>' : '') +
     (a.bed ? '<div><dt>Bed</dt><dd>' + esc(a.bed) + '</dd></div>' : '') +
     (a.occupancy ? '<div><dt>Guests</dt><dd>' + esc(a.occupancy) + '</dd></div>' : '') +

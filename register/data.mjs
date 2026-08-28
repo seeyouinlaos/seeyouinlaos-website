@@ -76,7 +76,7 @@ export const EVENTS = [
 
 /** Amenity set shared by the two heritage room categories. */
 const HERITAGE_AMENITIES = [
-  'Breakfast included', 'Bathrobe', 'Bathtub', 'Coffee & tea facilities', 'Hair dryer', 'Mini bar',
+  'Bathrobe', 'Bathtub', 'Coffee & tea facilities', 'Hair dryer', 'Mini bar',
   'Nespresso machine', 'Safe deposit box', 'Shower', 'Slippers', 'Smart TV',
   'Wardrobe', 'Wi-Fi',
 ];
@@ -129,7 +129,7 @@ export const ACCOMMODATIONS = [
     size: '49 sq.m.', bed: '1 King bed', occupancy: '2 adults · 1 child sharing bedding',
     location: 'Garden and pool views',
     blurb: 'A larger heritage room, with a private balcony over the garden and the pool.',
-    amenities: ['Breakfast included', 'Private balcony', 'Garden and pool views', 'Nespresso machine', 'Coffee & tea facilities', 'Mini bar', 'Smart TV', 'Wi-Fi', 'Bathroom amenities'],
+    amenities: ['Private balcony', 'Garden and pool views', 'Nespresso machine', 'Coffee & tea facilities', 'Mini bar', 'Smart TV', 'Wi-Fi', 'Bathroom amenities'],
     images: [RM + 'heritage-grand-premier-1.jpg', RM + 'heritage-grand-premier-2.jpg', RM + 'heritage-grand-premier-3.jpg'],
   },
   {
@@ -141,7 +141,7 @@ export const ACCOMMODATIONS = [
     size: '63 sq.m.', bed: '1 King bed', occupancy: '2 adults · 1 child',
     location: 'Ground floor · central greenery · one suite only',
     blurb: 'A 63 square metre retreat made for two: a King bed, two bathrooms and shower rooms for Her and His comfort, a separate living area with Smart TV and sofa for afternoon tea, and a private balcony over the garden and the pool.',
-    amenities: ['Breakfast included', 'Bathrobe', 'Bathtub', 'Coffee & tea making facilities', 'Hair dryer', 'Mini bar', 'Nespresso machine', 'Safe deposit box', 'Shower', 'Slippers', 'Smart TV', 'Wardrobe', 'Wi-Fi access'],
+    amenities: ['Bathrobe', 'Bathtub', 'Coffee & tea making facilities', 'Hair dryer', 'Mini bar', 'Nespresso machine', 'Safe deposit box', 'Shower', 'Slippers', 'Smart TV', 'Wardrobe', 'Wi-Fi access'],
     images: [RM + 'noble-courtyard-1.jpg', RM + 'noble-courtyard-2.jpg', RM + 'noble-courtyard-3.jpg'],
   },
   {
@@ -153,7 +153,7 @@ export const ACCOMMODATIONS = [
     size: '66–75 sq.m.', bed: '1 King bed', occupancy: '2 adults · 1 child',
     location: 'Private balcony',
     blurb: 'French colonial and Laotian design: a living room under a high ceiling, and a slower kind of morning.',
-    amenities: ['Breakfast included', 'Living room', 'High ceiling', 'Pantry', 'Private balcony', 'Smart TV', 'Mini bar', 'Wi-Fi'],
+    amenities: ['Living room', 'High ceiling', 'Pantry', 'Private balcony', 'Smart TV', 'Mini bar', 'Wi-Fi'],
     images: [RM + 'grand-majestic-suite-1.jpg', RM + 'grand-majestic-suite-2.jpg', RM + 'grand-majestic-suite-3.jpg'],
   },
   {
@@ -166,7 +166,7 @@ export const ACCOMMODATIONS = [
     size: '84 sq.m.', bed: '1 King bed', occupancy: '2 adults · 2 children',
     location: 'Pool and garden views · one suite only',
     blurb: 'The house suite: a separate living area, pantry and bar, and a long balcony over the pool.',
-    amenities: ['Breakfast included', 'Separate living area', 'Pantry', 'Bar', 'Large balcony', 'Pool and garden views', 'High ceilings', 'Nespresso machine', 'Coffee & tea facilities', 'Mini bar', 'Wi-Fi'],
+    amenities: ['Separate living area', 'Pantry', 'Bar', 'Large balcony', 'Pool and garden views', 'High ceilings', 'Nespresso machine', 'Coffee & tea facilities', 'Mini bar', 'Wi-Fi'],
     images: [RM + 'souphattra-majestic-suite-1.jpg', RM + 'souphattra-majestic-suite-2.jpg', RM + 'souphattra-majestic-suite-3.jpg'],
   },
   {
@@ -181,7 +181,7 @@ export const ACCOMMODATIONS = [
     size: '118 sq.m.', bed: 'Two bedrooms · king and twin', occupancy: '4 adults · 2 children',
     location: 'One unit only',
     blurb: 'The largest suite of the house: two bedrooms, private bathrooms and a co-living space under a high ceiling.',
-    amenities: ['Breakfast included', 'Two bedrooms', 'Private bathrooms', 'Separate living area', 'Co-living space', 'Pantry', 'Dining table', 'High ceiling'],
+    amenities: ['Two bedrooms', 'Private bathrooms', 'Separate living area', 'Co-living space', 'Pantry', 'Dining table', 'High ceiling'],
     images: [RM + 'souphattra-presidential-1.jpg', RM + 'souphattra-presidential-2.jpg', RM + 'souphattra-presidential-3.jpg'],
   },
   {
