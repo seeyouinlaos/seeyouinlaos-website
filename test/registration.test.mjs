@@ -155,7 +155,7 @@ test('capacities match the final matrix: 26 physical rooms, 24 requestable', () 
   assert.equal(inv['airbnb-2br'].capacity_unit, 'Party allocation');
 });
 
-test('the new 2BR Airbnb is commercially neutral and separate from Souphattra', () => {
+test('the 2BR Airbnb is a complimentary limited-availability option, never priced (owner 2026-08-28)', () => {
   const b = ACCOMMODATIONS.find((a) => a.id === 'airbnb-2br');
   assert.equal(b.kind, 'airbnb');
   assert.equal(b.contributionPerGuest, null); // NO guest-facing amount exists
@@ -170,8 +170,10 @@ test('the new 2BR Airbnb is commercially neutral and separate from Souphattra', 
     'assets/images/airbnb/airbnb-03.jpg',
   ]);
   assert.match(b.referenceUrl, /airbnb\.com\/rooms\/23930245/);
-  const banned = /COMPLIMENTARY|fully hosted|hosted by|USD 0|nothing to book/i;
-  assert.ok(!banned.test(JSON.stringify(b)), 'unapproved commercial claim on the Airbnb record');
+  assert.match(b.blurb, /complimentary/i);          // generosity must be visible (owner §16)
+  assert.match(b.blurb, /limited availability/i);    // scarcity must be honest (owner §17)
+  const banned = /USD 0|fully hosted|nothing to book|guest rate/i;
+  assert.ok(!banned.test(JSON.stringify(b)), 'the residence is never priced or over-promised');
   assert.equal(partyTotal(b, ['g1', 'g2']), 0); // internal neutral total, never displayed as USD 0
 });
 

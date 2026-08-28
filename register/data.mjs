@@ -201,7 +201,7 @@ export const ACCOMMODATIONS = [
     capacityTotal: 1, capacityUnit: 'Party allocation', selectionScope: 'PARTY',
     size: 'Private residence', bed: 'Sleeps up to 4', occupancy: 'Up to 4 adults',
     location: 'Downtown Vientiane · 300 m to the Mekong Night Market · 800 m to Wat Sisaket',
-    blurb: 'A warm, private residence in downtown Vientiane, decorated with natural materials, wood furniture and Lao bamboo handicraft. Secured for the wedding nights for up to four adults; this stay is arranged separately, and Guest Relations coordinates every detail with you personally.',
+    blurb: 'A warm, private residence in downtown Vientiane, decorated with natural materials, wood furniture and Lao bamboo handicraft. Secured for the wedding nights for up to four adults. A complimentary option with limited availability; Guest Relations coordinates every detail with you personally.',
     amenities: ['Wi-Fi', 'Air conditioning', 'Hot water', 'Washer & laundry area', 'Refrigerator', 'Kettle & kitchenette', 'Hair dryer', 'Free parking'],
     images: ['assets/images/airbnb/airbnb-01.jpg', 'assets/images/airbnb/airbnb-02.jpg', 'assets/images/airbnb/airbnb-03.jpg']
   },
@@ -312,7 +312,7 @@ export const COPY = {
   hostedNight: 'Your second hotel night is complimentary — part of the hospitality of your hosts.',
   payment: 'No deposit is required. After Guest Relations confirms your arrangements, you will receive an invoice with bank transfer or PayPal instructions. Payment is due within seven days.',
   requestNote: 'This is a registration request. Guest Relations will confirm your arrangements separately.',
-  sharedHome: 'Souphattra Heritage Vientiane is held for the people we love. Everyone we invite stays under one roof: shared mornings, shared arrivals, the whole rhythm of the weekend in one quiet place. You simply choose the room where you wake up; the second night is hosted for you.',
+  sharedHome: 'Souphattra Heritage Vientiane is held for the people we love. Everyone we invite stays under one roof: shared mornings, shared arrivals, the whole rhythm of the weekend in one quiet place. You choose the room where you wake up: the first night at the guest rate, the second night complimentary \u2014 hosted for you.',
 };
 
 /* ---------------- Guest List — PRODUCTION LOOKUP (token-only) -------------

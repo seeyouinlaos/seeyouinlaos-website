@@ -100,7 +100,8 @@ const airbnbSeg = dataSrc.slice(dataSrc.indexOf("id: 'airbnb-2br'"));
 const airbnbOk = airbnbSeg.length > 10
   && /contributionPerGuest: null/.test(airbnbSeg)
   && /capacityUnit: 'Party allocation'/.test(airbnbSeg)
-  && !/COMPLIMENTARY|fully hosted|hosted by|USD 0|nothing to book|Photos follow with your travel documents/i.test(airbnbSeg);
+  && /complimentary/i.test(airbnbSeg) && /limited availability/i.test(airbnbSeg)
+  && !/USD\s*\d|per night|guest rate/i.test(airbnbSeg); // owner 2026-08-28: complimentary + limited, never priced
 const bookingValueLeak = /123\.8/.test(dataSrc) || /123\.8/.test(appJs) || /123\.8/.test(indexHtml);
 const matrixOk = ['contributionPerGuest: 145', 'contributionPerGuest: 155', 'contributionPerGuest: 170',
   'contributionPerGuest: 240', 'contributionPerGuest: 250', 'contributionPerGuest: 290', 'contributionPerGuest: 750']
@@ -116,14 +117,14 @@ gate('R3', 'Accommodation matrix complete and single-sourced (26 rooms + hosted 
    missingCards.length && "public page missing generated cards: " + missingCards.join(', ') + " (run 'npm run build:rooms')",
    !noblePresent && 'Noble Courtyard Suite must be active at USD 220 per guest',
    !oldVillaGone && "the cancelled 4BR 'Vientiane Urban Cozy Villa 2' must never return",
-   !airbnbOk && 'the 2BR Airbnb must be present, commercially NEUTRAL (arranged separately) and outside the room matrix',
+   !airbnbOk && 'the 2BR Airbnb must be present as COMPLIMENTARY + LIMITED AVAILABILITY (never priced) outside the room matrix',
    bookingValueLeak && 'INTERNAL BOOKING VALUE (USD 123.80) must never reach guest surfaces',
    !matrixOk && 'guest contributions must be 145/155/170/240/250/290/750',
    !reservedOk && 'Majestic Suite + Presidential must be RESERVED',
    internalRatesLeak && 'INTERNAL Public/Selling rates must never reach guest sources',
    !capsOk && 'capacities must be 5/13/3/1/2/1/1 (26 rooms)']
     .filter(Boolean).join(' · ') ||
-  '7 Souphattra categories (26 rooms) + neutral 2BR Airbnb (arranged separately) outside the matrix; old 4BR villa gone; no booking-value leak');
+  '7 Souphattra categories (26 rooms) + complimentary limited-availability 2BR Airbnb outside the matrix; old 4BR villa gone; no booking-value leak');
 
 /* P1 — PUBLIC PRICE LEAK (release-blocking): no accommodation amount on the
  * public website. Prices live only behind invitation authentication. */
@@ -142,7 +143,7 @@ gate('P1', 'No accommodation prices on the public website',
  * available" only where N equals the authoritative allocation (no shared
  * real-time sync exists, so remaining == total at build time). */
 const avstats = [...roomsSection.matchAll(/class="rm-avstat"[^>]*>([^<]+)</g)].map((m) => m[1]);
-const expectOverlays = ['5 of 5 available', '13 of 13 available', '3 of 3 available', '1 of 1 available', '2 of 2 available', 'Reserved', 'Reserved', 'Arranged separately'];
+const expectOverlays = ['5 of 5 available', '13 of 13 available', '3 of 3 available', '1 of 1 available', '2 of 2 available', 'Reserved', 'Reserved', 'Complimentary · limited availability'];
 const overlaysOk = expectOverlays.every((t) => avstats.includes(t)) && avstats.length === 8;
 const availRows = (roomsSection.match(/<dt>Availability<\/dt>/g) || []).length;
 const staleRemaining = /rooms? remaining|Last room/i.test(roomsSection);

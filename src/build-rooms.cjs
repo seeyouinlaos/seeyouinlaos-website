@@ -33,7 +33,7 @@ function card(a) {
   const avstat = reserved
     ? 'Reserved'
     : a.kind === 'airbnb'
-      ? 'Arranged separately'
+      ? 'Complimentary · limited availability'
       : a.capacityTotal + ' of ' + a.capacityTotal + ' available';
   const gallery = imgs.length
     ? '<div class="rm-gal" data-name="' + esc(a.name) + '">' +
@@ -55,16 +55,20 @@ function card(a) {
     a.badge ? '<div class="rm-badge">' + esc(a.badge) + '</div>' : '',
     '<div class="rm-head"><h3>' + esc(a.name) + '</h3></div>',
     '<div class="rm-meta">' + esc(a.stay) + ' · ' + a.nights + ' nights</div>',
-    a.kind !== 'airbnb' && !reserved ? '<div class="rm-hosted"><span>Breakfast included</span><span>Second night complimentary</span><span class="rh-b">Hosted by</span><span class="hs">Haruthai&nbsp;&amp;&nbsp;Suthep</span></div>' : '',
+    a.kind === 'airbnb'
+      ? '<div class="rm-hosted"><span>Complimentary stay</span><span>Limited availability</span><span class="rh-b">Personally coordinated by Guest Relations</span></div>'
+      : !reserved
+        ? '<div class="rm-hosted"><span>First night · guest rate</span><span>Second night · complimentary</span><span class="rh-b">Hosted by</span><span class="hs">Haruthai&nbsp;&amp;&nbsp;Suthep</span><span>Breakfast included</span></div>'
+        : '',
     '<p class="rm-blurb">' + esc(a.blurb) + '</p>',
     '<dl class="rm-specs">' + specs.concat([['Availability', reserved
         ? 'Reserved for the wedding couple\u2019s family'
         : a.kind === 'airbnb'
-          ? 'Arranged separately with Guest Relations'
+          ? 'Limited availability · personally coordinated by Guest Relations'
           : a.capacityTotal + (a.capacityTotal === 1 ? ' room' : ' rooms') + ' allocated']])
       .map((r) => '<div><dt>' + r[0] + '</dt><dd>' + esc(r[1]) + '</dd></div>').join('') + '</dl>',
     amen.length
-      ? '<div class="rm-amen"><div class="amen-t">In the room</div><div class="amen-g">' + amen.map((x) => '<span>' + esc(x) + '</span>').join('') + '</div></div>'
+      ? '<div class="rm-amen">' + amen.map((x) => '<span>' + esc(x) + '</span>').join('') + '</div>'
       : '',
 
     reserved

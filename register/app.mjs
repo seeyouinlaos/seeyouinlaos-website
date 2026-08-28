@@ -33,7 +33,7 @@ const showAmount = (n) => RATES_LIVE ? money(n) : 'Details to follow';
 /** Guest price line shown BEFORE any request — per guest, never per night. */
 function roomPriceHtml(a) {
   if (a.contributionPerGuest == null) {
-    return '<div class="acc-price"><span class="per">Arranged separately</span></div>';
+    return '<div class="acc-price"><span class="per">Complimentary · limited availability</span></div>';
   }
   const per = contributionPerGuest(a);
   return '<div class="acc-price"><span class="amt">' + showAmount(per) + '</span>' +
@@ -50,7 +50,7 @@ function guestAvailability(res, unitPlural) {
 /* the availability statement printed onto the gallery photography */
 function availOverlay(a, res, selected) {
   if (a.selectable === false) return 'Reserved';
-  if (a.kind === 'airbnb') return 'Arranged separately';
+  if (a.kind === 'airbnb') return 'Complimentary · limited';
   if (selected) return 'Requested';
   if (!res) return '';
   const total = res.capacity_total, rem = remaining(res);
@@ -408,7 +408,7 @@ function renderHome() {
     '<p class="note">' + esc(COPY.sharedHome) + '</p>' +
     '<div class="home-grid">' +
     card('stay', 'My Stay', acc ? esc(acc.name) : 'Choose your room',
-      acc ? (acc.contributionPerGuest == null ? 'Arranged separately · coordinated by Guest Relations' : showAmount(contributionPerGuest(acc)) + ' per guest · party ' + money(partyTotal(acc, occ))) : 'Souphattra Heritage Vientiane, our shared home',
+      acc ? (acc.contributionPerGuest == null ? 'Complimentary · coordinated by Guest Relations' : showAmount(contributionPerGuest(acc)) + ' per guest · party ' + money(partyTotal(acc, occ))) : 'Souphattra Heritage Vientiane, our shared home',
       acc ? (S.stay.waitlist ? 'WAITLISTED' : 'REQUESTED') : 'OPEN',
       acc ? (acc.images || [])[0] : null) +
     card('journey', 'My Travel', riders.length ? 'Overnight Sleeper Train' : 'Your way to Laos',
@@ -422,7 +422,7 @@ function renderHome() {
       'Contact, dietary needs and the small preferences that shape your stay',
       detailsMissing ? 'OPEN' : 'COMPLETE') +
     card('cost', 'My Contribution', money(total),
-      (acc ? (acc.contributionPerGuest == null ? 'Stay arranged separately' : 'Stay ' + money(partyTotal(acc, occ))) : 'No stay selected yet') +
+      (acc ? (acc.contributionPerGuest == null ? 'Stay complimentary · limited' : 'Stay ' + money(partyTotal(acc, occ))) : 'No stay selected yet') +
       (riders.length ? ' · train ' + money(tc) : '') +
       ((S.transfers || []).length ? ' · transfers ' + money(trf) : ''),
       S.submitted ? 'UNDER REVIEW' : null) +
@@ -623,7 +623,7 @@ function roomSpecs(a, availRow) {
   return '<dl class="acc-specs">' + rows.map((r) =>
     '<div><dt>' + r[0] + '</dt><dd>' + esc(r[1]) + '</dd></div>').join('') + '</dl>' +
     ((a.amenities || []).length
-      ? '<div class="acc-amen"><div class="amen-t">In the room</div><div class="amen-g">' + a.amenities.map((x) => '<span>' + esc(x) + '</span>').join('') + '</div></div>'
+      ? '<div class="acc-amen">' + a.amenities.map((x) => '<span>' + esc(x) + '</span>').join('') + '</div>'
       : '');
 }
 
@@ -642,11 +642,13 @@ function renderStay() {
       '<div class="acc-head"><h3>' + esc(a.name) + '</h3>' +
       (bookable ? roomPriceHtml(a) : '<div class="acc-price"><span class="per">Reserved</span></div>') + '</div>' +
       '<div class="acc-meta">' + esc(a.stay) + ' · ' + a.nights + ' nights</div>' +
-      (a.kind !== 'airbnb' ? '<div class="acc-hosted"><span>Breakfast included</span><span>Second night complimentary</span><span class="rh-b">Hosted by</span><span class="hs">Haruthai&nbsp;&amp;&nbsp;Suthep</span></div>' : '') +
+      (a.kind === 'airbnb'
+        ? '<div class="acc-hosted"><span>Complimentary stay</span><span>Limited availability</span><span class="rh-b">Personally coordinated by Guest Relations</span></div>'
+        : '<div class="acc-hosted"><span>First night · guest rate</span><span>Second night · complimentary</span><span class="rh-b">Hosted by</span><span class="hs">Haruthai&nbsp;&amp;&nbsp;Suthep</span><span>Breakfast included</span></div>') +
       '<p class="acc-blurb">' + esc(a.blurb) + '</p>' +
       roomSpecs(a, bookable
         ? (selected ? 'Requested · Guest Relations will confirm'
-           : a.kind === 'airbnb' ? 'Arranged separately with Guest Relations'
+           : a.kind === 'airbnb' ? 'Limited availability · personally coordinated by Guest Relations'
            : guestAvailability(res))
         : 'Reserved') +
       '<div class="acc-actions">' +
@@ -675,7 +677,7 @@ function renderStay() {
     const acc = currentAcc();
     const occ = S.stay.occupantGuestIds;
     announce('Requested ' + acc.name + ' for you. ' + (acc.contributionPerGuest == null
-      ? 'This stay is arranged separately by Guest Relations. '
+      ? 'This stay is complimentary and limited; Guest Relations coordinates it personally. '
       : occ.length + ' guest' + (occ.length > 1 ? 's' : '') + ', ' + money(contributionPerGuest(acc)) + ' per guest, party contribution ' + money(partyTotal(acc, occ)) + '. ') + COPY.requestNote);
   }));
   renderStaySelected();
@@ -796,8 +798,8 @@ function openAccOverlay(id) {
     (a.occupancy ? '<div><dt>Guests</dt><dd>' + esc(a.occupancy) + '</dd></div>' : '') +
     (a.location ? '<div><dt>Where</dt><dd>' + esc(a.location) + '</dd></div>' : '') +
     (bookable
-      ? '<div><dt>Contribution</dt><dd>' + (a.contributionPerGuest == null ? 'Arranged separately' : showAmount(contributionPerGuest(a)) + ' per guest · first night') + '</dd></div>' +
-        '<div><dt>Availability</dt><dd>' + esc(a.kind === 'airbnb' ? 'Arranged separately with Guest Relations' : guestAvailability(res)) + '</dd></div>' +
+      ? '<div><dt>Contribution</dt><dd>' + (a.contributionPerGuest == null ? 'Complimentary · personally coordinated' : showAmount(contributionPerGuest(a)) + ' per guest · first night') + '</dd></div>' +
+        '<div><dt>Availability</dt><dd>' + esc(a.kind === 'airbnb' ? 'Limited availability · personally coordinated by Guest Relations' : guestAvailability(res)) + '</dd></div>' +
         '<div><dt>Selection</dt><dd>One ' + esc(a.capacityUnit === 'Party allocation' ? 'residence' : a.capacityUnit.toLowerCase()) + ' per invitation</dd></div>'
       : '') +
     '</dl>' +
@@ -1005,7 +1007,7 @@ function renderEach() {
       : '<p class="note">One photo or scan of the passport identity page is all we need.</p><button type="button" class="btn ghost sm" data-pass="' + g.guestId + '">Select passport file</button>') +
     '<input type="file" accept="image/*,.pdf" hidden data-pass-input="' + g.guestId + '"/></div></div>' +
     '<div class="cols2">' +
-    ef(g, 'email', 'Email', 'email') + ef(g, 'phone', 'Telephone', 'tel') +
+    ef(g, 'email', 'Email', 'email') + /* Telephone removed from the guest-facing profile (master data keeps it) */
     '<div class="field"><label>Dietary preference</label><select data-ef="diet">' + ['No restrictions', 'Vegetarian', 'Vegan', 'Pescatarian', 'Gluten-free', 'Lactose-free', 'Other'].map((o) => '<option' + (g.diet === o ? ' selected' : '') + '>' + o + '</option>').join('') + '</select></div>' +
     '<div class="field"><label>Any food allergies?</label><div class="join">' +
     '<label><input type="radio" name="alg-' + g.guestId + '" value="yes"' + (g.allergy === 'yes' ? ' checked' : '') + '/><span class="yes">Yes</span></label>' +
@@ -1113,7 +1115,7 @@ function renderCost() {
     rows += row('<span class="serif-it">Accommodation</span>', 'Not selected yet · choose under My Stay');
   } else {
     rows += row('<span class="serif-it">' + esc(acc.name) + '</span> · ' + esc(acc.size || '') + ' · night one',
-      neutral ? 'Arranged separately' : partyCharges(acc, occ).map((c) => { const g = S.guests.find((x) => x.guestId === c.guestId); return esc(g ? g.preferredName : c.guestId) + ' ' + money(c.amount); }).join(' · '));
+      neutral ? 'Complimentary' : partyCharges(acc, occ).map((c) => { const g = S.guests.find((x) => x.guestId === c.guestId); return esc(g ? g.preferredName : c.guestId) + ' ' + money(c.amount); }).join(' · '));
     rows += row('Welcome drink', 'USD 0 · included');
   }
   // 28 FEBRUARY — the wedding day
@@ -1175,7 +1177,7 @@ function renderReview() {
     ['Requested', esc(acc.name) + ' · ' + esc(acc.stay)],
     ['Status', S.stay.waitlist ? 'WAITLISTED' : 'REQUESTED · UNDER REVIEW'],
     ...(acc.contributionPerGuest == null
-      ? [['Guests', String(occ.length)], ['Contribution', 'Arranged separately · coordinated by Guest Relations']]
+      ? [['Guests', String(occ.length)], ['Contribution', 'Complimentary · coordinated by Guest Relations']]
       : [['Guests', occ.length + ' · ' + money(contributionPerGuest(acc)) + ' per guest'],
          ['Contribution', occ.map((id) => { const g = S.guests.find((x) => x.guestId === id); return esc(g ? g.preferredName : id) + ' ' + money(contributionPerGuest(acc)); }).join(' · ')],
          ['Total', money(partyTotal(acc, occ))],
@@ -1198,7 +1200,7 @@ function renderReview() {
     : [['Requested', 'None']]);
   const jcRiders = S.guests.filter((g) => g.journey.train).length;
   const jcRows = [];
-  if (acc) jcRows.push(['Stay', esc(acc.name) + ' · ' + (acc.contributionPerGuest == null ? 'arranged separately' : money(partyTotal(acc, occ)))]);
+  if (acc) jcRows.push(['Stay', esc(acc.name) + ' · ' + (acc.contributionPerGuest == null ? 'complimentary' : money(partyTotal(acc, occ)))]);
   if (jcRiders) jcRows.push(['Train', jcRiders + ' × ' + money(TRAIN.contributionPerGuest) + ' = ' + money(trainContribution(TRAIN, jcRiders) || 0)]);
   if ((S.transfers || []).length) jcRows.push(['Transfers', money(transfersTotal(TRANSFERS, S.transfers))]);
   jcRows.push(['Total journey cost', money(journeyTotal(acc, occ, TRAIN, jcRiders, TRANSFERS, S.transfers))]);
