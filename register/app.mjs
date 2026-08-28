@@ -137,6 +137,7 @@ function renderStep(i) {
  * invalid transition is ignored (and logged with ?debug=inv). */
 const overlay = document.getElementById('invitation');
 const urlToken = (new URLSearchParams(location.search).get('invite') || '').trim().toLowerCase();
+const urlRoom = (new URLSearchParams(location.search).get('room') || '').trim().toLowerCase();
 const INV_DEBUG = new URLSearchParams(location.search).has('debug');
 const INV = {
   state: document.documentElement.getAttribute('data-inv') || 'loading',
@@ -203,6 +204,7 @@ function openIntoGuestArea(caller) {
     setInvitationState('closed', caller);   // hide the overlay before resetting the leaves
     document.documentElement.classList.remove('inv-anim-open');
     INV.opening = false;
+    if (urlRoom) { show(idx('stay'), false); setTimeout(scrollToRoom, 350); } // carry the room context through the opened box
     focusActiveHeading();
   }, 2600);
 }
@@ -309,8 +311,10 @@ function adoptInvitation(inv) {
       events: { alms: true, ceremony: true, dinner: true },
       diet: 'No restrictions', allergy: 'no', allergyDetail: '', severe: false,
       berth: '', spa: { requested: false },
-      favFood: '', favDrink: '', favColour: '', favFilm: '',
-      coffeeTea: '', sweetSavoury: '', favFlower: '', favSong: '',
+      favFood: '', favDrink: '', coffeeHow: '', teaLove: '', favSnack: '',
+      favColour: '', favFlower: '', bookLove: '', favFilm: '', favSong: '',
+      feelAtHome: '', longDayWaiting: '',
+      coffeeTea: '', sweetSavoury: '', // legacy answers: no longer asked, never destroyed
     }));
     S.stay.occupantGuestIds = inv.guests.map((g) => g.guestId);
   }
@@ -330,11 +334,15 @@ function renderPrivnav() {
   if (!S.invitation || isAuthOut()) { nav.hidden = true; return; }
   nav.hidden = false;
   const name = stepEls[cur].dataset.step;
-  nav.innerHTML = '<span class="pn-here">Guest Area</span>' +
+  /* level-2 rule (owner): exactly ONE active subsection. "Guest Area" stays
+   * available as the dashboard/home link but NEVER carries an active state —
+   * the active marker belongs to the one current subsection button. */
+  nav.innerHTML = '<button type="button" class="pn-area" data-nav-home="home">Guest Area</button>' +
     '<button type="button" id="nav-invitation">Invitation</button>' +
     PRIVNAV.map(([st, label]) =>
     '<button type="button" data-nav="' + st + '"' + (name === st ? ' aria-current="true"' : '') + '>' + label + '</button>').join('') +
-    '<span class="pn-exit"><button type="button" id="pn-home">Website</button><button type="button" id="save-exit">Save &amp; exit</button><button type="button" id="log-out">Log out</button></span>';
+    '<span class="pn-exit"><button type="button" id="pn-home">Website</button><button type="button" id="pn-save">Save</button><button type="button" id="log-out">Log out</button></span>';
+  nav.querySelector('.pn-area').addEventListener('click', () => show(idx('home')));
   nav.querySelector('#pn-home').addEventListener('click', () => {
     saveDraft(); location.href = '../'; // progress saved; the personal link reopens the journey
   });
@@ -342,9 +350,12 @@ function renderPrivnav() {
     setInvitationState('open', 'privnav-invitation', { force: true });
   });
   nav.querySelectorAll('[data-nav]').forEach((b) => b.addEventListener('click', () => show(idx(b.getAttribute('data-nav')))));
-  nav.querySelector('#save-exit').addEventListener('click', () => {
-    saveDraft();
-    location.href = '../'; // progress is saved; the personal link reopens the journey
+  nav.querySelector('#pn-save').addEventListener('click', (e) => {
+    saveDraft();                       // SAVE only: stay here, stay signed in
+    const b = e.currentTarget; const t = b.textContent;
+    b.textContent = 'Saved'; b.disabled = true;
+    setTimeout(() => { b.textContent = t; b.disabled = false; }, 1600);
+    announce('Your journey has been saved. You are still signed in.');
   });
   nav.querySelector('#log-out').addEventListener('click', () => {
     saveDraft(); setAuthOut(true); // journey stays saved; code or link signs back in
@@ -859,6 +870,14 @@ function renderTravel() {
  * FULL SERVICE (owner §13-18): the guest sees service, route, inclusions and
  * price, then simply adds it. No operational questionnaire — Guest Relations
  * completes timing/flight details personally from the Journey context. */
+function scrollToRoom() {
+  if (!urlRoom) return;
+  const card = document.querySelector('[data-acc="' + urlRoom + '"]');
+  if (!card) return;
+  card.scrollIntoView({ block: 'center' });
+  card.classList.add('acc-hilite');
+  setTimeout(() => card.classList.remove('acc-hilite'), 2600);
+}
 function selectedTransfer(id) { return (S.transfers || []).find((s) => s.transferId === id); }
 function renderTransfers() {
   const groups = [...new Set(TRANSFERS.map((t) => t.group))];
@@ -996,14 +1015,16 @@ function renderEach() {
     '<label><input type="radio" name="sev-' + g.guestId + '" value="yes"' + (g.severe ? ' checked' : '') + '/><span class="yes">Yes, severe</span></label>' +
     '<label><input type="radio" name="sev-' + g.guestId + '" value="no"' + (!g.severe ? ' checked' : '') + '/><span class="no">Standard care</span></label></div></div></div>' +
     '<div class="cols2">' + ef(g, 'dislikes', 'Food dislikes or preferences') + '</div>' +
-    '<div class="label" style="margin:22px 0 4px">A little about you</div>' +
+    '<div class="label" style="margin:26px 0 6px">A little about you</div>' +
     '<div class="cols2">' +
-    ef(g, 'favFood', 'Favourite food') + ef(g, 'favDrink', 'Favourite drink') +
-    selEf(g, 'coffeeTea', 'Coffee or tea?', ['', 'Coffee', 'Tea', 'Both']) +
-    selEf(g, 'sweetSavoury', 'Sweet or savoury?', ['', 'Sweet', 'Savoury', 'Both']) +
-    ef(g, 'favColour', 'Favourite colour') + ef(g, 'favFlower', 'Favourite flower') +
-    ef(g, 'favFilm', 'A book or film you love') + ef(g, 'favSong', 'A song you never skip') +
+    ef(g, 'favFood', 'What\u2019s your favourite food?') + ef(g, 'favDrink', 'What\u2019s your favourite drink?') +
+    ef(g, 'coffeeHow', 'How do you like your coffee?') + ef(g, 'teaLove', 'What tea do you love?') +
+    ef(g, 'favSnack', 'What\u2019s your favourite snack?') + ef(g, 'favColour', 'What\u2019s your favourite colour?') +
+    ef(g, 'favFlower', 'What flowers do you love?') + ef(g, 'bookLove', 'What\u2019s a book you love?') +
+    ef(g, 'favFilm', 'What\u2019s a film you love?') + ef(g, 'favSong', 'What\u2019s a song you never skip?') +
     '</div>' +
+    '<div class="field q-deep"><label>What always makes you feel at home?</label><textarea data-ef="feelAtHome">' + esc(g.feelAtHome) + '</textarea></div>' +
+    '<div class="field q-deep"><label>After a long day, what do you love to find waiting for you?</label><textarea data-ef="longDayWaiting">' + esc(g.longDayWaiting) + '</textarea></div>' +
     '<p class="note">These little preferences help Guest Relations shape quiet surprises. Nothing is ever displayed back.</p>' +
     '</details>').join('');
   box.querySelectorAll('.guest-fold').forEach((block, i) => {
@@ -1319,6 +1340,8 @@ async function init() {
     } catch (e) { /* offline/failed lookup: guest can still use the code field */ }
   }
   if (S.invitation && !isAuthOut()) {
+    if (urlRoom) { show(idx('stay'), false); setTimeout(scrollToRoom, 350); } // public CTA: straight to the room, no re-auth
+    else
     show(idx('home'), false); // the private area is home — never a repeated code gate
     if (S.submitted) document.getElementById('received-when').textContent =
       'Submitted ' + new Date(S.registration_submitted_at).toLocaleString('en-GB', { dateStyle: 'long', timeStyle: 'short' }) + ' · status: UNDER REVIEW';

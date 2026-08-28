@@ -69,7 +69,7 @@ function card(a) {
 
     reserved
       ? ''
-      : '<div class="rm-foot"><a class="rm-cta" href="register/">Request this room in your Guest Area</a></div>',
+      : '<div class="rm-foot"><a class="rm-cta" href="register/?room=' + a.id + '">Request this room in your Guest Area</a></div>',
     '</div></article>',
   ].filter(Boolean).join('\n');
 }

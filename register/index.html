@@ -363,7 +363,11 @@ body.pv-lock { overflow: hidden; }
 .acc-avail { border-top-color: var(--gold-line); }
 
 /* guest-area badge */
-.pn-here { font-size: 10px; letter-spacing: .26em; text-transform: uppercase; color: var(--ivory); background: var(--ink-s); padding: 7px 12px; align-self: center; }
+/* the internal Guest Area item is a normal dashboard link — it NEVER carries an
+ * active/filled state; exactly one subsection button is active at a time. */
+.pn-area { font-weight: 500; }
+.q-deep textarea { min-height: 72px; }
+.acc-hilite { outline: 2px solid var(--cherry-photo); outline-offset: 4px; transition: outline-color .4s; }
 
 /* profile photo + passport */
 .gf-ava { display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; overflow: hidden; margin-right: 12px; border: 1px solid var(--gold-line); background: rgba(255,255,255,.5); vertical-align: middle; }
