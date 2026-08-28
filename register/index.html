@@ -49,6 +49,7 @@ header.top .mark .dot { color: var(--cherry-photo); }
 header.top nav { display: flex; gap: 22px; font-size: 11px; letter-spacing: .18em; text-transform: uppercase; }
 header.top nav a { text-decoration: none; border-bottom: 1px solid transparent; padding-bottom: 2px; }
 header.top nav a:hover { border-color: var(--cherry); }
+header.top nav a.here { color: var(--cherry); border-bottom-color: var(--cherry); cursor: default; }
 
 .wrap { max-width: 780px; margin: 0 auto; padding: 40px 6vw 140px; }
 .eyebrow { font-size: 12px; letter-spacing: .24em; text-transform: uppercase; color: var(--cherry); margin-bottom: 18px; }
@@ -290,6 +291,15 @@ body.pv-lock { overflow: hidden; }
 .lb img.lb-img { max-width: 100%; max-height: 84vh; width: auto; height: auto; display: block; box-shadow: 0 30px 80px rgba(0,0,0,.5); justify-self: center; }
 .lb .lb-close { position: absolute; top: 22px; right: 22px; background: none; border: 1px solid rgba(242,236,225,.4); color: var(--ivory); font: inherit; font-size: 11px; letter-spacing: .2em; text-transform: uppercase; padding: 10px 16px; cursor: pointer; }
 .lb .lb-count { position: absolute; bottom: 22px; left: 50%; transform: translateX(-50%); color: var(--ivory); font-size: 12px; letter-spacing: .2em; }
+/* invisible left/right tap-zones — navigate photos without a visible arrow control */
+.lb .lb-nav { position: absolute; top: 66px; bottom: 66px; width: 40%; z-index: 2; background: none; border: none; padding: 0; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.lb .lb-prev { left: 0; } .lb .lb-next { right: 0; }
+@media (hover: hover) { .lb .lb-prev:hover { background: linear-gradient(90deg, rgba(23,21,19,.28), transparent); } .lb .lb-next:hover { background: linear-gradient(270deg, rgba(23,21,19,.28), transparent); } }
+.lb .lb-dots { position: absolute; bottom: 48px; left: 50%; transform: translateX(-50%); display: flex; gap: 9px; z-index: 3; }
+.lb .lb-dots[hidden] { display: none; }
+.lb .lb-dot { width: 7px; height: 7px; border-radius: 50%; border: none; padding: 0; background: rgba(242,236,225,.34); cursor: pointer; transition: background .25s, transform .25s; }
+.lb .lb-dot[aria-current="true"] { background: var(--ivory); transform: scale(1.25); }
+.lb .lb-nav[hidden] { display: none; }
 
 
 /* clickable room figure */
@@ -381,6 +391,20 @@ html[data-inv="closed"] #invitation { display: none; pointer-events: none; visib
 .inv-card .inv-note { font-size: 13.5px; max-width: 34ch; margin: 0 auto; }
 .inv-card .inv-cta { margin-top: 28px; }
 body.inv-lock { overflow: hidden; }
+/* dismissible-popup affordances on the invitation */
+.inv-x { position: absolute; top: 16px; right: 16px; z-index: 6; width: 42px; height: 42px; border-radius: 50%; border: 1px solid rgba(242,236,225,.5); background: rgba(33,31,28,.5); color: var(--ivory); font-size: 15px; line-height: 1; cursor: pointer; display: grid; place-items: center; -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); transition: background .2s, transform .2s; }
+.inv-x:hover { background: rgba(33,31,28,.82); transform: scale(1.06); }
+html[data-inv="closed"] .inv-x { display: none; }
+.inv-web { display: block; width: max-content; margin: 16px auto 0; font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--rose); text-decoration: none; border-bottom: 1px solid var(--line); padding: 4px 0; }
+.inv-web:hover { color: var(--cherry); border-color: var(--cherry); }
+/* box-lid opening: the photo panel lifts away like a lid, the card settles into the Guest Area behind */
+html.inv-anim-open #invitation { perspective: 1400px; animation: invBoxFade .72s ease forwards; }
+html.inv-anim-open #invitation .inv-photo { transform-origin: top center; animation: invLidLift .66s cubic-bezier(.5,.05,.5,1) forwards; }
+html.inv-anim-open #invitation .inv-side { animation: invSideSink .66s ease forwards; }
+@keyframes invLidLift { 0% { transform: rotateX(0) translateY(0); opacity: 1; } 55% { opacity: 1; } 100% { transform: rotateX(-118deg) translateY(-16%); opacity: 0; } }
+@keyframes invSideSink { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(1.05); opacity: 0; } }
+@keyframes invBoxFade { 0%, 68% { opacity: 1; } 100% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { html.inv-anim-open #invitation, html.inv-anim-open #invitation .inv-photo, html.inv-anim-open #invitation .inv-side { animation: none !important; } }
 /* Mobile: the card may be TALLER than the viewport (personalised names,
  * return link). The overlay itself scrolls; nothing is ever cut off. */
 @media (max-width: 860px) {
@@ -402,6 +426,7 @@ body.inv-lock { overflow: hidden; }
 
 <!-- OPENING INVITATION (§7) -->
 <div id="invitation" role="dialog" aria-modal="true" aria-label="Your invitation">
+<button type="button" class="inv-x" id="inv-x" aria-label="Close invitation">✕</button>
 <div class="inv-photo" role="img" aria-label="The courtyard pool of Souphattra Heritage Vientiane from above"></div>
 <div class="inv-side">
 <div class="inv-card">
@@ -414,6 +439,7 @@ body.inv-lock { overflow: hidden; }
 <p class="inv-note">Your journey, stay and wedding experience have been prepared for you.</p>
 <button type="button" class="btn inv-cta">Open your invitation</button>
 <button type="button" class="inv-return" id="inv-return" hidden>Return to my journey</button>
+<a class="inv-web" id="inv-web" href="../">Visit the wedding website</a>
 </div>
 </div>
 </div>
@@ -421,7 +447,7 @@ body.inv-lock { overflow: hidden; }
 <header class="top">
 <a class="mark serif" href="../" aria-label="Back to the See You In Laos website" style="text-decoration:none">see you in laos<span class="dot">.</span></a>
 <nav aria-label="Site">
-<a href="../#weekend">Journey</a><a href="../#places">Stay</a><a href="../#dresscode">Wedding</a><a href="../#travel">Travel</a><a href="#" aria-current="page">Guest Area</a>
+<a href="../#weekend">Journey</a><a href="../#places">Stay</a><a href="../#dresscode">Wedding</a><a href="../#travel">Travel</a><a aria-current="page" class="here">Guest Area</a>
 </nav>
 </header>
 
@@ -571,7 +597,10 @@ body.inv-lock { overflow: hidden; }
 
 <div class="lb" id="lightbox" hidden inert="" role="dialog" aria-modal="true" aria-label="Room gallery">
 <button type="button" class="lb-close">Close</button>
+<button type="button" class="lb-nav lb-prev" aria-label="Previous photo"></button>
+<button type="button" class="lb-nav lb-next" aria-label="Next photo"></button>
 <img class="lb-img" src="" alt=""/>
+<div class="lb-dots" role="tablist" aria-label="Photos"></div>
 <div class="lb-count" aria-live="polite"></div>
 </div>
 

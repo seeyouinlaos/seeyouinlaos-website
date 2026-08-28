@@ -205,6 +205,14 @@ section { padding: 110px 6vw; position: relative; }
 .rm-lb .rm-lb-img { max-width: 100%; max-height: 84vh; width: auto; height: auto; display: block; box-shadow: 0 30px 80px rgba(0,0,0,.5); }
 .rm-lb .rm-lb-close { position: absolute; top: 22px; right: 22px; background: none; border: 1px solid rgba(242,236,225,.4); color: var(--ivory); font: inherit; font-size: 11px; letter-spacing: .2em; text-transform: uppercase; padding: 10px 16px; cursor: pointer; }
 .rm-lb .rm-lb-count { position: absolute; bottom: 22px; left: 50%; transform: translateX(-50%); color: var(--ivory); font-size: 12px; letter-spacing: .2em; }
+.rm-lb .rm-lb-nav { position: absolute; top: 66px; bottom: 66px; width: 40%; z-index: 2; background: none; border: none; padding: 0; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.rm-lb .rm-lb-prev { left: 0; } .rm-lb .rm-lb-next { right: 0; }
+.rm-lb .rm-lb-nav[hidden] { display: none; }
+@media (hover: hover) { .rm-lb .rm-lb-prev:hover { background: linear-gradient(90deg, rgba(23,21,19,.28), transparent); } .rm-lb .rm-lb-next:hover { background: linear-gradient(270deg, rgba(23,21,19,.28), transparent); } }
+.rm-lb .rm-lb-dots { position: absolute; bottom: 48px; left: 50%; transform: translateX(-50%); display: flex; gap: 9px; z-index: 3; }
+.rm-lb .rm-lb-dots[hidden] { display: none; }
+.rm-lb .rm-lb-dot { width: 7px; height: 7px; border-radius: 50%; border: none; padding: 0; background: rgba(242,236,225,.34); cursor: pointer; transition: background .25s, transform .25s; }
+.rm-lb .rm-lb-dot[aria-current="true"] { background: var(--ivory); transform: scale(1.25); }
 
 
 /* inline swipe room gallery (primary interaction) */
@@ -737,19 +745,39 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
 <p class="rm-note rv">Your second hotel night is hosted by Haruthai &amp; Suthep. Room rates and requests live in your private Guest Area. This is a registration request. Guest Relations will confirm your arrangements separately.</p>
 <div class="rm-lb" id="rm-lightbox" hidden role="dialog" aria-modal="true" aria-label="Room gallery">
 <button type="button" class="rm-lb-close">Close</button>
+<button type="button" class="rm-lb-nav rm-lb-prev" aria-label="Previous photo"></button>
+<button type="button" class="rm-lb-nav rm-lb-next" aria-label="Next photo"></button>
 <img class="rm-lb-img" src="" alt=""/>
+<div class="rm-lb-dots" role="tablist" aria-label="Photos"></div>
 <div class="rm-lb-count" aria-live="polite"></div>
 </div>
 <script>
 (function () {
   var lb = document.getElementById("rm-lightbox");
   var imgs = [], idx = 0, nm = "", trigger = null, touchX = null;
+  var dotsEl = lb.querySelector(".rm-lb-dots"), prevBtn = lb.querySelector(".rm-lb-prev"), nextBtn = lb.querySelector(".rm-lb-next");
+  function buildDots() {
+    var multi = imgs.length > 1;
+    if (dotsEl) dotsEl.hidden = !multi;
+    if (prevBtn) prevBtn.hidden = !multi;
+    if (nextBtn) nextBtn.hidden = !multi;
+    if (!dotsEl) return;
+    dotsEl.innerHTML = "";
+    if (!multi) return;
+    imgs.forEach(function (_, i) {
+      var d = document.createElement("button");
+      d.type = "button"; d.className = "rm-lb-dot"; d.setAttribute("aria-label", "Photo " + (i + 1));
+      d.addEventListener("click", function () { idx = i; render(); });
+      dotsEl.appendChild(d);
+    });
+  }
   function render() {
     lb.querySelector(".rm-lb-img").src = imgs[idx];
     lb.querySelector(".rm-lb-img").alt = nm + " · photo " + (idx + 1);
     lb.querySelector(".rm-lb-count").textContent = (idx + 1) + " / " + imgs.length;
+    if (dotsEl) [].forEach.call(dotsEl.children, function (d, i) { d.setAttribute("aria-current", i === idx ? "true" : "false"); });
   }
-  function open(list, name, from) { if (!list || !list.length) return; imgs = list; idx = 0; nm = name; trigger = from; render(); lb.hidden = false; document.body.style.overflow = "hidden"; lb.querySelector(".rm-lb-close").focus(); }
+  function open(list, name, from) { if (!list || !list.length) return; imgs = list; idx = 0; nm = name; trigger = from; buildDots(); render(); lb.hidden = false; document.body.style.overflow = "hidden"; lb.querySelector(".rm-lb-close").focus(); }
   function close() { lb.hidden = true; document.body.style.overflow = ""; if (trigger) trigger.focus(); }
   function step(d) { if (!imgs.length) { close(); return; } idx = (idx + d + imgs.length) % imgs.length; render(); }
   document.querySelectorAll(".rm-gal").forEach(function (gal) {
@@ -776,6 +804,8 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
     addEventListener("pointerup", function () { if (down) { down = null; track.classList.remove("drag"); var p = pos(); track.scrollTo({ left: p * track.clientWidth, behavior: "smooth" }); } });
   });
   lb.querySelector(".rm-lb-close").addEventListener("click", close);
+  if (prevBtn) prevBtn.addEventListener("click", function () { step(-1); });
+  if (nextBtn) nextBtn.addEventListener("click", function () { step(1); });
   lb.addEventListener("click", function (e) { if (e.target === lb) close(); });
   lb.addEventListener("touchstart", function (e) { touchX = e.changedTouches[0].clientX; }, { passive: true });
   lb.addEventListener("touchend", function (e) {
@@ -932,6 +962,7 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
 <div class="pvr"><img alt="Souphattra Presidential" src="assets/images/rooms/souphattra-presidential-1.jpg" width="800" height="533" loading="lazy" decoding="async"/><div class="pvr-b"><h4>Souphattra Presidential</h4><p>118 sq.m. · two bedrooms · co-living space</p><span class="pvr-s gold">Reserved</span></div></div>
 </div>
 <p>Room choice and availability live in your private Guest Area. Nothing to book, nothing to pay at check-in.</p>
+<a class="rm-cta" href="register/" style="margin-top:4px">Open your Guest Area</a>
 <div class="pv-meta">27 February – 1 March 2027 · Vientiane, Laos<br/>Dress on arrival · Elegant Resort Wear</div>
 </article>
 <article aria-label="The alms giving, in Vientiane" aria-modal="true" class="pv" id="pv-alms" inert="" role="dialog">

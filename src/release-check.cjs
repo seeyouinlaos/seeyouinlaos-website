@@ -217,8 +217,13 @@ gate('P6', 'LINE/WhatsApp QR owner rule (originals only, no invented LINE ID)',
    !qrHashes && 'official QR assets missing or altered (hash mismatch vs owner originals)'].filter(Boolean).join(' · ')
   || 'owner-original LINE + WhatsApp QR verified by hash; zero written LINE IDs; generated QR removed');
 
-/* P7 — Dress Code imagery real (24 owner images) and ZERO visible gallery
- * arrow/expand controls on any surface (owner rule 2026-08-27). */
+/* P7 — Dress Code imagery real (24 owner images) and ZERO *visible* gallery
+ * arrow/expand controls on any surface (owner rule 2026-08-27). Reaching photos
+ * 2..n inside the opened lightbox is REQUIRED and delivered by invisible
+ * tap-zones + a dot indicator + swipe — no visible arrow glyph or expand icon
+ * (owner decision 2026-08-28). The forbidden set therefore keeps the visible
+ * expand controls and arrow glyphs, but no longer bans the invisible lightbox
+ * tap-zones; a positive check confirms the dot navigation is present. */
 const dressRefs = [...indexHtml.matchAll(/assets\/images\/dress\/([a-z]+-0[1-6]\.jpg)/g)].map((m) => m[1]);
 const dressUnique = [...new Set(dressRefs)];
 const dressMissing = dressUnique.filter((f) => !fs.existsSync(path.join(ROOT, 'assets/images/dress', f)));
@@ -227,16 +232,20 @@ const dressGroups = ['resort', 'tradition', 'vow', 'dinner']
 const dressOk = dressUnique.length === 24 && dressMissing.length === 0 && dressGroups.every((n) => n === 6)
   && !/dg-slot|DRESS_ALMS_/.test(indexHtml);
 const standalone = fs.existsSync(path.join(ROOT, 'build/standalone.html')) ? read('build/standalone.html') : '';
-const arrowPattern = /rm-expand|acc-expand|rm-gnav|acc-gnav|rm-lb-prev|rm-lb-next|class="lb-prev|class="lb-next|&#8599;|&#8592;|&#8594;/;
+// forbidden: visible expand controls on thumbnails + any visible arrow glyph (entity or literal ↗)
+const arrowPattern = /rm-expand|acc-expand|rm-gnav|acc-gnav|&#8599;|&#8592;|&#8594;|↗/;
 const arrowSurfaces = [['index.html', indexHtml], ['register/index.html', regHtml], ['register/app.mjs', appJs],
   ['src/build-rooms.cjs', read('src/build-rooms.cjs')]].filter(([, s]) => arrowPattern.test(s)).map(([n]) => n);
-gate('P7', 'Dress Code imagery real (24) and zero gallery arrow controls',
-  dressOk && arrowSurfaces.length === 0,
+// required: invisible in-lightbox navigation (dot indicator) present on both surfaces
+const navOk = /rm-lb-dots/.test(indexHtml) && /class="lb-dots"/.test(regHtml);
+gate('P7', 'Dress Code imagery real (24), no visible arrows, in-lightbox tap navigation present',
+  dressOk && arrowSurfaces.length === 0 && navOk,
   [!dressOk && 'dress imagery incomplete: ' + dressUnique.length + ' refs, groups ' + dressGroups.join('/') +
      (dressMissing.length ? ', missing files: ' + dressMissing.join(', ') : ''),
-   arrowSurfaces.length && 'arrow/expand controls still present in: ' + arrowSurfaces.join(', ')]
+   arrowSurfaces.length && 'visible arrow/expand controls present in: ' + arrowSurfaces.join(', '),
+   !navOk && 'in-lightbox dot navigation missing on a surface']
     .filter(Boolean).join(' · ')
-  || '24 owner dress images across 4 groups; no expand/prev/next controls on any gallery surface');
+  || '24 owner dress images across 4 groups; no visible arrow/expand icon; invisible in-lightbox tap-zone + dots navigation present');
 
 let failed = 0;
 for (const r of results) {

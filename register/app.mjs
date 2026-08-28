@@ -143,6 +143,7 @@ const INV = {
   version: 0,
   userOpened: false,
   initialized: false,
+  opening: false,
 };
 function openedKey() { return SEEN_KEY + (urlToken || (S.invitation ? S.invitation.token : 'first')); }
 function wasOpenedPersisted() { try { return !!localStorage.getItem(openedKey()); } catch (e) { return false; } }
@@ -178,18 +179,36 @@ function setInvitationState(to, caller, opts = {}) {
 if (INV.state === 'closed') { overlay.setAttribute('aria-hidden', 'true'); overlay.setAttribute('inert', ''); }
 else { document.body.classList.add('inv-lock'); }
 
-document.querySelector('.inv-cta').addEventListener('click', () => {
-  INV.userOpened = true;             // invariant flag FIRST — wins over any pending init
-  persistOpened();
-  setInvitationState('closed', 'cta-click');
+function focusActiveHeading() {
   const h = document.querySelector('.step.active h1, .step.active h2');
   if (h) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); }
-});
+}
+/** The single close path: reveals the Guest Area with an animated "box-lid"
+ *  open, unless the guest prefers reduced motion. userOpened/persist happen
+ *  first so the state-machine invariant (no auto-reopen) always holds. */
+function openIntoGuestArea(caller) {
+  INV.userOpened = true;             // invariant flag FIRST — wins over any pending init
+  persistOpened();
+  const reduce = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce || INV.opening || INV.state !== 'open') {
+    setInvitationState('closed', caller); focusActiveHeading(); return;
+  }
+  INV.opening = true;
+  document.documentElement.classList.add('inv-anim-open');
+  setTimeout(() => {
+    document.documentElement.classList.remove('inv-anim-open');
+    INV.opening = false;
+    setInvitationState('closed', caller);
+    focusActiveHeading();
+  }, 700);
+}
+document.querySelector('.inv-cta').addEventListener('click', () => openIntoGuestArea('cta-click'));
+const invX = document.getElementById('inv-x');
+if (invX) invX.addEventListener('click', () => openIntoGuestArea('inv-x'));
 const invReturn = document.getElementById('inv-return');
-if (invReturn) invReturn.addEventListener('click', () => {
-  INV.userOpened = true; persistOpened();
-  setInvitationState('closed', 'inv-return');
-});
+if (invReturn) invReturn.addEventListener('click', () => openIntoGuestArea('inv-return'));
+const invWeb = document.getElementById('inv-web');
+if (invWeb) invWeb.addEventListener('click', () => { try { saveDraft(); } catch (e) { /* draft optional at this stage */ } });
 document.getElementById('reopen-invitation').addEventListener('click', (e) => {
   e.preventDefault();
   setInvitationState('open', 'reopen-link', { force: true }); // explicit user action only
@@ -635,15 +654,32 @@ function renderStaySelected() {
 /* ---------------- room gallery lightbox (prev/next/count/close/keys) ------ */
 const lightbox = document.getElementById('lightbox');
 const LB = { images: [], index: 0, name: '', trigger: null };
+const lbDots = lightbox && lightbox.querySelector('.lb-dots');
+const lbPrev = lightbox && lightbox.querySelector('.lb-prev');
+const lbNext = lightbox && lightbox.querySelector('.lb-next');
+function lbBuildDots() {
+  if (!lbDots) return;
+  const multi = LB.images.length > 1;
+  lbDots.hidden = !multi;
+  if (lbPrev) lbPrev.hidden = !multi;
+  if (lbNext) lbNext.hidden = !multi;
+  lbDots.innerHTML = multi ? LB.images.map((_, i) =>
+    '<button type="button" class="lb-dot" data-i="' + i + '" aria-label="Photo ' + (i + 1) + '"></button>').join('') : '';
+  if (multi) lbDots.querySelectorAll('.lb-dot').forEach((d) =>
+    d.addEventListener('click', () => { LB.index = parseInt(d.getAttribute('data-i'), 10) || 0; lbRender(); }));
+}
 function lbRender() {
   lightbox.querySelector('.lb-img').src = roomImg(LB.images[LB.index]);
   lightbox.querySelector('.lb-img').alt = LB.name + ' · photo ' + (LB.index + 1);
   lightbox.querySelector('.lb-count').textContent = (LB.index + 1) + ' / ' + LB.images.length;
+  if (lbDots) lbDots.querySelectorAll('.lb-dot').forEach((d, i) =>
+    d.setAttribute('aria-current', i === LB.index ? 'true' : 'false'));
 }
 function openLightbox(a, index) {
   if (!lightbox || !(a.images || []).length) return; // invariant: never open without images
   LB.images = a.images; LB.index = index || 0; LB.name = a.name;
   LB.trigger = document.activeElement;
+  lbBuildDots();
   lbRender();
   lightbox.hidden = false; lightbox.removeAttribute('inert');
   document.body.classList.add('pv-lock');
@@ -658,6 +694,15 @@ function lbStep(d) { if (!LB.images.length) { closeLightbox(); return; } LB.inde
 if (lightbox) {
   lightbox.querySelector('.lb-close').addEventListener('click', closeLightbox);
   lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
+  if (lbPrev) lbPrev.addEventListener('click', () => lbStep(-1));
+  if (lbNext) lbNext.addEventListener('click', () => lbStep(1));
+  let lbTouchX = null;
+  lightbox.addEventListener('touchstart', (e) => { lbTouchX = e.changedTouches[0].clientX; }, { passive: true });
+  lightbox.addEventListener('touchend', (e) => {
+    if (lbTouchX === null) return;
+    const dx = e.changedTouches[0].clientX - lbTouchX; lbTouchX = null;
+    if (Math.abs(dx) > 40) lbStep(dx < 0 ? 1 : -1);
+  }, { passive: true });
   addEventListener('keydown', (e) => {
     if (lightbox.hidden) return;
     if (e.key === 'Escape') { e.stopPropagation(); closeLightbox(); }
