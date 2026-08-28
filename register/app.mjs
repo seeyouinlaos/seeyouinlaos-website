@@ -631,7 +631,7 @@ function renderStay() {
       '<div class="acc-head"><h3>' + esc(a.name) + '</h3>' +
       (bookable ? roomPriceHtml(a) : '<div class="acc-price"><span class="per">Reserved</span></div>') + '</div>' +
       '<div class="acc-meta">' + esc(a.stay) + ' · ' + a.nights + ' nights</div>' +
-      (a.kind !== 'airbnb' ? '<div class="acc-hosted">Second night complimentary · hosted by Haruthai &amp; Suthep</div>' : '') +
+      (a.kind !== 'airbnb' ? '<div class="acc-hosted">Second night complimentary · hosted by Haruthai&nbsp;&amp;&nbsp;Suthep</div>' : '') +
       '<p class="acc-blurb">' + esc(a.blurb) + '</p>' +
       roomSpecs(a, bookable
         ? (selected ? 'Requested · Guest Relations will confirm'
@@ -693,7 +693,7 @@ function renderStaySelected() {
       ? '<div class="row"><span class="l">' + occ.length + ' guest' + (occ.length > 1 ? 's' : '') + ' · one ' + esc(acc.capacityUnit.toLowerCase()) + '</span><span class="r">Arranged separately · coordinated by Guest Relations</span></div>'
       : '<div class="row"><span class="l">' + occ.length + ' guest' + (occ.length > 1 ? 's' : '') + ' · one ' + esc(acc.capacityUnit.toLowerCase()) + '</span><span class="r">' + money(contributionPerGuest(acc)) + ' per guest · complete stay</span></div>' +
         '<div class="row total"><span class="l serif-it">Your party contribution</span><span class="r">' + money(partyTotal(acc, occ)) + '</span></div>' +
-        '<div class="row"><span class="l">Second night</span><span class="r">Complimentary · hosted by Haruthai &amp; Suthep</span></div>') +
+        '<div class="row"><span class="l">Second night</span><span class="r">Complimentary · hosted by Haruthai&nbsp;&amp;&nbsp;Suthep</span></div>') +
     '</div>' +
     '<p class="note" style="margin-top:12px">' + esc(COPY.requestNote) + '</p>';
 }
@@ -1134,7 +1134,7 @@ function renderCost() {
   rows += row('Wedding Ceremony', 'USD 0 · included');
   rows += row('Sunset cocktails, cake reception &amp; Wedding Dinner', 'USD 0 · included');
   rows += row('Two-hour beverage package', 'USD 0 · included');
-  if (acc && !neutral) rows += row('<span class="serif-it">' + esc(acc.name) + '</span> · night two', 'USD 0 · hosted by Haruthai &amp; Suthep');
+  if (acc && !neutral) rows += row('<span class="serif-it">' + esc(acc.name) + '</span> · night two', 'USD 0 · hosted by Haruthai&nbsp;&amp;&nbsp;Suthep');
   // 1 MARCH — departure
   rows += day('Monday · 1 March');
   rows += row('Hosted breakfast', 'USD 0 · included');
@@ -1190,7 +1190,7 @@ function renderReview() {
       : [['Guests', occ.length + ' · ' + money(contributionPerGuest(acc)) + ' per guest'],
          ['Contribution', occ.map((id) => { const g = S.guests.find((x) => x.guestId === id); return esc(g ? g.preferredName : id) + ' ' + money(contributionPerGuest(acc)); }).join(' · ')],
          ['Total', money(partyTotal(acc, occ))],
-         ['Second night', 'Complimentary · hosted by Haruthai & Suthep']]),
+         ['Second night', 'Complimentary · hosted by Haruthai&nbsp;&amp;&nbsp;Suthep']]),
   ] : [['Requested', 'No stay selected yet'], ['Action', 'Please choose your room under My Stay before sending']]);
   const trv = S.arrival.shared !== false
     ? [['Together', esc([S.arrival.date, S.arrival.time, S.arrival.ref].filter(Boolean).join(' · ') || '—') + (S.arrival.pickupRequested ? ' · pickup REQUESTED' : '')]]

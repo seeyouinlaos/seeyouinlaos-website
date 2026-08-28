@@ -399,12 +399,8 @@ html[data-inv="closed"] #invitation { display: none; pointer-events: none; visib
  * rides the panel when it swings open. */
 .bx-plaque { position: absolute; left: 100%; top: 50%; transform: translate(-50%, -50%); width: min(86vw, 420px); z-index: 5; cursor: pointer; }
 .inv-card { position: relative; width: 100%; max-height: 86svh; overflow-y: auto; background: var(--ivory); color: var(--ink); padding: clamp(28px, 4.6vmin, 52px); text-align: center; background-image: radial-gradient(rgba(168,131,125,.06) 1px, transparent 1px); background-size: 5px 5px; border: 1px solid rgba(33,31,28,.07); box-shadow: -6px 18px 40px rgba(33,31,28,.16), 26px 34px 70px rgba(33,31,28,.28); }
-/* corner rivets, like the acrylic plaque */
-.bx-plaque::before, .bx-plaque::after { content: ''; position: absolute; left: 15px; right: 15px; height: 9px; z-index: 6; pointer-events: none;
-  background: radial-gradient(circle at 4.5px 4.5px, rgba(33,31,28,.16) 2.8px, rgba(255,255,255,.55) 2.8px 4px, transparent 4.6px) left center / 9px 9px no-repeat,
-              radial-gradient(circle at 4.5px 4.5px, rgba(33,31,28,.16) 2.8px, rgba(255,255,255,.55) 2.8px 4px, transparent 4.6px) right center / 9px 9px no-repeat; }
-.bx-plaque::before { top: 13px; }
-.bx-plaque::after { bottom: 13px; }
+/* the plaque is clean 350+ gsm watercolor paper — NO corner dots, screws,
+ * rivets or fasteners of any kind (owner hard rule, 2026-08-28) */
 .inv-card .inv-mono { font-family: 'PP Editorial Old', serif; font-size: 15px; letter-spacing: .3em; text-transform: uppercase; color: var(--cherry); }
 .inv-card h1 { font-size: clamp(28px, 4.4vmin, 42px); margin: 16px 0 8px; }
 .inv-card .inv-sub { font-size: 13px; letter-spacing: .06em; }
@@ -497,7 +493,7 @@ html.inv-anim-open .bx-right { animation: bxRight 2.05s cubic-bezier(.45,.05,.45
 <div class="inv-card">
 <div class="inv-mono">H&amp;S</div>
 <h1>See You<br/>In Laos</h1>
-<div class="inv-sub">A private invitation from Haruthai &amp; Suthep</div>
+<div class="inv-sub">A private invitation from Haruthai&nbsp;&amp;&nbsp;Suthep</div>
 <div id="inv-for" hidden></div>
 <div class="inv-meta">Vientiane<br/>27 February – 1 March 2027</div>
 <p class="inv-note">Your journey, stay and wedding experience have been prepared for you.</p>

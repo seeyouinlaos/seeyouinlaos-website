@@ -32,7 +32,7 @@ export const PUBLICATION = {
 };
 
 export const WEDDING = {
-  couple: 'Haruthai & Suthep',
+  couple: 'Haruthai & Suthep',
   city: 'Vientiane, Laos',
   weddingDate: 'Sunday, 28 February 2027',
   stayWindow: '27 February – 1 March 2027',
@@ -295,10 +295,11 @@ export const STATUS = {
 export const COPY = {
   priceLabel: 'Your contribution per guest for the complete wedding stay',
   priceNote: 'The amount shown is per guest for the complete two-night wedding stay — never a nightly room rate.',
-  hostedNight: 'Your second hotel night is hosted by Haruthai & Suthep.',
+  /*   keeps "Haruthai & Suthep" unbreakable on every viewport (owner hard rule) */
+  hostedNight: 'Your second hotel night is hosted by Haruthai & Suthep.',
   payment: 'No deposit is required. After Guest Relations confirms your arrangements, you will receive an invoice with bank transfer or PayPal instructions. Payment is due within seven days.',
   requestNote: 'This is a registration request. Guest Relations will confirm your arrangements separately.',
-  sharedHome: 'Souphattra Heritage Vientiane is held for the people we love. Everyone we invite stays under one roof: shared mornings, shared arrivals, the whole rhythm of the weekend in one quiet place. You simply choose the room where you wake up; the second night is hosted by Haruthai & Suthep.',
+  sharedHome: 'Souphattra Heritage Vientiane is held for the people we love. Everyone we invite stays under one roof: shared mornings, shared arrivals, the whole rhythm of the weekend in one quiet place. You simply choose the room where you wake up; the second night is hosted by Haruthai & Suthep.',
 };
 
 /* ---------------- Guest List — PRODUCTION LOOKUP (token-only) -------------
