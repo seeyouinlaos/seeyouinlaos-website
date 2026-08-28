@@ -183,9 +183,36 @@ function focusActiveHeading() {
   const h = document.querySelector('.step.active h1, .step.active h2');
   if (h) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); }
 }
-/** The single close path: reveals the Guest Area with an animated "box-lid"
- *  open, unless the guest prefers reduced motion. userOpened/persist happen
- *  first so the state-machine invariant (no auto-reopen) always holds. */
+/** Build the gatefold: two leaves, each a clone of the invitation clipped to
+ *  its half, that swing open on their outer hinges. Cloning captures the real
+ *  #invitation layout (id-based) via computed cssText so the halves look
+ *  identical to what the guest sees. */
+function buildGatefold() {
+  const host = document.createElement('div');
+  host.id = 'inv-gatefold';
+  const baseCss = getComputedStyle(overlay).cssText;
+  ['left', 'right'].forEach((side) => {
+    const leaf = document.createElement('div');
+    leaf.className = 'inv-leaf ' + side;
+    const clone = overlay.cloneNode(true);
+    clone.removeAttribute('id');
+    clone.querySelectorAll('[id]').forEach((n) => n.removeAttribute('id'));
+    clone.setAttribute('aria-hidden', 'true');
+    clone.classList.add('inv-surface');
+    clone.style.cssText = baseCss;      // reproduce #invitation's id-based layout
+    clone.style.position = 'absolute';
+    clone.style.inset = '0';
+    clone.style.margin = '0';
+    leaf.appendChild(clone);
+    host.appendChild(leaf);
+  });
+  document.body.appendChild(host);
+  return host;
+}
+/** The single close path: the invitation splits down the centre and both halves
+ *  swing open like a book, revealing the Guest Area behind — unless the guest
+ *  prefers reduced motion. userOpened/persist happen first so the state-machine
+ *  invariant (no auto-reopen) always holds. */
 function openIntoGuestArea(caller) {
   INV.userOpened = true;             // invariant flag FIRST — wins over any pending init
   persistOpened();
@@ -194,13 +221,10 @@ function openIntoGuestArea(caller) {
     setInvitationState('closed', caller); focusActiveHeading(); return;
   }
   INV.opening = true;
-  document.documentElement.classList.add('inv-anim-open');
-  setTimeout(() => {
-    document.documentElement.classList.remove('inv-anim-open');
-    INV.opening = false;
-    setInvitationState('closed', caller);
-    focusActiveHeading();
-  }, 700);
+  const host = buildGatefold();          // snapshot the invitation while it is still visible
+  setInvitationState('closed', caller);   // reveal the Guest Area behind the swinging leaves
+  focusActiveHeading();
+  setTimeout(() => { host.remove(); INV.opening = false; }, 1000);
 }
 document.querySelector('.inv-cta').addEventListener('click', () => openIntoGuestArea('cta-click'));
 const invX = document.getElementById('inv-x');

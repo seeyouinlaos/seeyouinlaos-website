@@ -397,14 +397,21 @@ body.inv-lock { overflow: hidden; }
 html[data-inv="closed"] .inv-x { display: none; }
 .inv-web { display: block; width: max-content; margin: 16px auto 0; font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--rose); text-decoration: none; border-bottom: 1px solid var(--line); padding: 4px 0; }
 .inv-web:hover { color: var(--cherry); border-color: var(--cherry); }
-/* box-lid opening: the photo panel lifts away like a lid, the card settles into the Guest Area behind */
-html.inv-anim-open #invitation { perspective: 1400px; animation: invBoxFade .72s ease forwards; }
-html.inv-anim-open #invitation .inv-photo { transform-origin: top center; animation: invLidLift .66s cubic-bezier(.5,.05,.5,1) forwards; }
-html.inv-anim-open #invitation .inv-side { animation: invSideSink .66s ease forwards; }
-@keyframes invLidLift { 0% { transform: rotateX(0) translateY(0); opacity: 1; } 55% { opacity: 1; } 100% { transform: rotateX(-118deg) translateY(-16%); opacity: 0; } }
-@keyframes invSideSink { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(1.05); opacity: 0; } }
-@keyframes invBoxFade { 0%, 68% { opacity: 1; } 100% { opacity: 0; } }
-@media (prefers-reduced-motion: reduce) { html.inv-anim-open #invitation, html.inv-anim-open #invitation .inv-photo, html.inv-anim-open #invitation .inv-side { animation: none !important; } }
+/* gatefold opening: the invitation splits down the centre and both halves swing
+   open like a book / double door, revealing the Guest Area behind */
+#inv-gatefold { position: fixed; inset: 0; z-index: 110; perspective: 2200px; pointer-events: none; animation: gateHostFade .95s ease forwards; }
+#inv-gatefold .inv-leaf { position: absolute; inset: 0; overflow: hidden; transform-style: preserve-3d; will-change: transform; }
+#inv-gatefold .inv-leaf .inv-surface { position: absolute; inset: 0; margin: 0; }
+#inv-gatefold .inv-leaf::after { content: ''; position: absolute; top: 0; bottom: 0; width: 60px; opacity: 0; animation: gateShade .95s ease forwards; }
+#inv-gatefold .inv-leaf.left { clip-path: inset(0 50% 0 0); transform-origin: left center; animation: gateLeft .95s cubic-bezier(.52,.02,.32,1) forwards; }
+#inv-gatefold .inv-leaf.right { clip-path: inset(0 0 0 50%); transform-origin: right center; animation: gateRight .95s cubic-bezier(.52,.02,.32,1) forwards; }
+#inv-gatefold .inv-leaf.left::after { right: 0; background: linear-gradient(90deg, transparent, rgba(23,21,19,.32)); }
+#inv-gatefold .inv-leaf.right::after { left: 0; background: linear-gradient(270deg, transparent, rgba(23,21,19,.32)); }
+@keyframes gateLeft { 0% { transform: rotateY(0); } 100% { transform: rotateY(-118deg); } }
+@keyframes gateRight { 0% { transform: rotateY(0); } 100% { transform: rotateY(118deg); } }
+@keyframes gateShade { 0% { opacity: 0; } 60% { opacity: 1; } 100% { opacity: 1; } }
+@keyframes gateHostFade { 0%, 82% { opacity: 1; } 100% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { #inv-gatefold { display: none !important; } }
 /* Mobile: the card may be TALLER than the viewport (personalised names,
  * return link). The overlay itself scrolls; nothing is ever cut off. */
 @media (max-width: 860px) {
@@ -430,7 +437,6 @@ html.inv-anim-open #invitation .inv-side { animation: invSideSink .66s ease forw
 <div class="inv-photo" role="img" aria-label="The courtyard pool of Souphattra Heritage Vientiane from above"></div>
 <div class="inv-side">
 <div class="inv-card">
-<svg class="inv-motif" aria-hidden="true" viewBox="0 0 400 400" fill="none"><g stroke="var(--gold-line)" stroke-width="0.6"><circle cx="200" cy="200" r="56" fill="var(--gold)" stroke="none" opacity=".16"/><circle cx="200" cy="200" r="86" stroke-dasharray="1 7"/><circle cx="200" cy="200" r="118" stroke-dasharray="1 8"/><circle cx="200" cy="200" r="150" stroke-dasharray="1 9"/><circle cx="200" cy="200" r="182" stroke-dasharray="1 10"/></g><circle cx="262" cy="140" r="2" fill="var(--gold-soft)"/><circle cx="128" cy="252" r="1.5" fill="var(--gold-soft)"/></svg>
 <div class="inv-mono">H&amp;S</div>
 <h1>See You<br/>In Laos</h1>
 <div class="inv-sub">A private invitation from Haruthai &amp; Suthep</div>
