@@ -183,54 +183,69 @@ function focusActiveHeading() {
   const h = document.querySelector('.step.active h1, .step.active h2');
   if (h) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); }
 }
-/** Build the gatefold: two leaves, each a clone of the invitation clipped to
- *  its half, that swing open on their outer hinges. Cloning captures the real
- *  #invitation layout (id-based) via computed cssText so the halves look
- *  identical to what the guest sees. */
-function buildGatefold() {
-  const host = document.createElement('div');
-  host.id = 'inv-gatefold';
-  const baseCss = getComputedStyle(overlay).cssText;
-  ['left', 'right'].forEach((side) => {
-    const leaf = document.createElement('div');
-    leaf.className = 'inv-leaf ' + side;
-    const clone = overlay.cloneNode(true);
-    clone.removeAttribute('id');
-    clone.querySelectorAll('[id]').forEach((n) => n.removeAttribute('id'));
-    clone.setAttribute('aria-hidden', 'true');
-    clone.classList.add('inv-surface');
-    clone.style.cssText = baseCss;      // reproduce #invitation's id-based layout
-    clone.style.position = 'absolute';
-    clone.style.inset = '0';
-    clone.style.margin = '0';
-    leaf.appendChild(clone);
-    host.appendChild(leaf);
-  });
-  document.body.appendChild(host);
-  return host;
-}
-/** The single close path: the invitation splits down the centre and both halves
- *  swing open like a book, revealing the Guest Area behind — unless the guest
- *  prefers reduced motion. userOpened/persist happen first so the state-machine
- *  invariant (no auto-reopen) always holds. */
+/** The single close path — the physical box mechanism: the guest pulls the
+ *  plaque (glued to the LEFT panel, free right half is the handle), the LEFT
+ *  panel swings open first carrying the plaque, the right panel follows, the
+ *  box unfolds onto the Guest Area behind. The overlay's REAL leaves animate;
+ *  the state machine only closes after the box has opened. userOpened/persist
+ *  happen first so the no-auto-reopen invariant always holds. */
 function openIntoGuestArea(caller) {
-  INV.userOpened = true;             // invariant flag FIRST — wins over any pending init
+  if (INV.opening) return;             // one pull; ignore re-entrant clicks mid-swing
+  INV.userOpened = true;               // invariant flag FIRST — wins over any pending init
   persistOpened();
   const reduce = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (reduce || INV.opening || INV.state !== 'open') {
+  if (reduce || INV.state !== 'open') {
     setInvitationState('closed', caller); focusActiveHeading(); return;
   }
   INV.opening = true;
-  const host = buildGatefold();          // snapshot the invitation while it is still visible
-  setInvitationState('closed', caller);   // reveal the Guest Area behind the swinging leaves
-  focusActiveHeading();
-  setTimeout(() => { host.remove(); INV.opening = false; }, 2000);
+  document.documentElement.classList.add('inv-anim-open');
+  setTimeout(() => {
+    setInvitationState('closed', caller);   // hide the overlay before resetting the leaves
+    document.documentElement.classList.remove('inv-anim-open');
+    INV.opening = false;
+    focusActiveHeading();
+  }, 2600);
 }
-document.querySelector('.inv-cta').addEventListener('click', () => openIntoGuestArea('cta-click'));
+/* Dismissal (✕ / Return to my journey): an escape hatch, never a replay of the
+ * opening ritual — the box animation is reserved for a VERIFIED open (§14). */
+function dismissInvitation(caller) {
+  if (INV.opening) return;
+  INV.userOpened = true; persistOpened();
+  setInvitationState('closed', caller);
+  focusActiveHeading();
+}
+/* OPEN YOUR INVITATION — the code on the plaque is verified through the
+ * existing secure lookup (client-side decryption; a wrong code resolves to
+ * null, no code list ever ships). Only a verified code pulls the plaque and
+ * opens the box; a returning authenticated guest (prefilled/untouched code)
+ * opens without retyping. */
+const codeInput = document.getElementById('inv-code-input');
+const codeErr = document.getElementById('inv-code-err');
+async function verifyAndOpen() {
+  if (INV.opening) return;
+  const raw = (codeInput ? codeInput.value : '').trim().toLowerCase();
+  if (S.invitation && !isAuthOut() && (raw === '' || raw === S.invitation.token)) {
+    if (codeErr) codeErr.hidden = true;
+    openIntoGuestArea('cta-open'); return;
+  }
+  const inv = await lookupInvitation(raw);
+  if (!inv) { if (codeErr) codeErr.hidden = false; return; }
+  if (codeErr) codeErr.hidden = true;
+  setAuthOut(false);              // the code is the key: it creates the private session
+  adoptInvitation(inv);
+  show(idx('home'), false);       // the Journey is what the opening box reveals
+  announce('Invitation found. ' + inv.partyName + ' — welcome to your private journey.');
+  openIntoGuestArea('cta-open-verified');
+}
+document.querySelector('.inv-cta').addEventListener('click', verifyAndOpen);
+if (codeInput) {
+  codeInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); verifyAndOpen(); } });
+  codeInput.addEventListener('input', () => { if (codeErr) codeErr.hidden = true; });
+}
 const invX = document.getElementById('inv-x');
-if (invX) invX.addEventListener('click', () => openIntoGuestArea('inv-x'));
+if (invX) invX.addEventListener('click', () => dismissInvitation('inv-x'));
 const invReturn = document.getElementById('inv-return');
-if (invReturn) invReturn.addEventListener('click', () => openIntoGuestArea('inv-return'));
+if (invReturn) invReturn.addEventListener('click', () => dismissInvitation('inv-return'));
 const invWeb = document.getElementById('inv-web');
 if (invWeb) invWeb.addEventListener('click', () => { try { saveDraft(); } catch (e) { /* draft optional at this stage */ } });
 document.getElementById('reopen-invitation').addEventListener('click', (e) => {
@@ -263,12 +278,20 @@ async function doFind() {
 function personalizeInvitation() {
   const el = document.getElementById('inv-for');
   if (!el) return;
+  const codeField = document.getElementById('inv-code-input');
   if (S.invitation && !isAuthOut()) {
+    /* partyName is the AUTHORITATIVE invitation display name from the guest
+     * record — never reconstructed from guest first names (owner rule §2). */
+    const name = S.invitation.partyName;
     el.innerHTML = '<span class="inv-for-label">A private invitation for</span>' +
-      '<span class="inv-for-names">' + esc(S.invitation.guests.map((g) => g.preferredName).join(' & ')) + '</span>';
+      '<span class="inv-for-names">' + esc(name) + '</span>';
+    /* fixed personalisation zone: only the name scales, the plaque never moves —
+     * one line preferred, two lines maximum (owner rule §3) */
+    el.setAttribute('data-fit', name.length <= 16 ? 'short' : name.length <= 26 ? 'mid' : name.length <= 38 ? 'long' : 'max');
     el.hidden = false;
     const back = document.getElementById('inv-return');
     if (back) back.hidden = false;
+    if (codeField && !codeField.value) codeField.value = S.invitation.token; // the personal link carries the code
   } else {
     el.hidden = true;
     const back = document.getElementById('inv-return');

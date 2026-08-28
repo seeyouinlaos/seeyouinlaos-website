@@ -265,7 +265,7 @@ body.pv-lock { overflow: hidden; }
 .inv-card .inv-sub { animation-delay: .5s; } .inv-card .inv-meta { animation-delay: .6s; }
 .inv-card .inv-note { animation-delay: .7s; } .inv-card .inv-cta { animation-delay: .82s; }
 @keyframes invReveal { from { opacity: 0; transform: translateY(26px) scale(.985); } to { opacity: 1; transform: none; } }
-#invitation .inv-photo { animation: invPhoto 1.6s ease backwards; }
+.bx-leaf { animation: invPhoto 1.2s ease backwards; }
 @keyframes invPhoto { from { opacity: 0; } to { opacity: 1; } }
 .acc-grid .acc-card, .home-grid .home-card { animation: rise .55s ease backwards; }
 .acc-grid .acc-card:nth-child(2), .home-grid .home-card:nth-child(2) { animation-delay: .07s; }
@@ -280,7 +280,7 @@ body.pv-lock { overflow: hidden; }
 @keyframes pvIn { from { transform: translateX(28px); opacity: 0; } to { transform: none; opacity: 1; } }
 
 @media (prefers-reduced-motion: reduce) {
-  .inv-card, .inv-card > *, #invitation .inv-photo, .acc-grid .acc-card, .home-grid .home-card, .trf-form, .pv { animation: none !important; }
+  .inv-card, .inv-card > *, .bx-leaf, .acc-grid .acc-card, .home-grid .home-card, .trf-form, .pv { animation: none !important; }
   #summary { transition: none; }
 }
 
@@ -379,49 +379,70 @@ button.btn.sm { padding: 10px 16px; font-size: 11px; min-height: 40px; }
 #summary .sum-label { font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: var(--cherry-photo); white-space: nowrap; }
 #summary .sum-line { opacity: .92; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-/* invitation overlay (§7) */
-#invitation { position: fixed; inset: 0; z-index: 100; display: grid; grid-template-columns: 1.1fr 1fr; background: var(--ink-s); overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+/* invitation overlay (§7) — THE CLOSED PRODUCTION BOX.
+ * Two ivory panels meet at the vertical centre seam; the 8×8 plaque bridges the
+ * seam, glued to the LEFT panel only — its free right half is the opener.
+ * Pulling it swings the LEFT panel open first (plaque riding on it), then the
+ * box unfolds. Mechanism is binding (owner, 2026-08-28). */
+#invitation { position: fixed; inset: 0; z-index: 100; background: transparent; perspective: 1900px; }
 html[data-inv="closed"] #invitation { display: none; pointer-events: none; visibility: hidden; }
-#invitation .inv-photo { background: url('../assets/images/souphattra/heritage-courtyard-aerial.jpg') center/cover no-repeat; }
-#invitation .inv-side { display: grid; place-items: center; padding: 6vmin; background: rgba(33,31,28,.96); }
-.inv-card { background: var(--ivory); color: var(--ink); max-width: 460px; width: 100%; padding: clamp(34px, 5vmin, 60px); text-align: center; box-shadow: 0 30px 80px rgba(0,0,0,.45); background-image: radial-gradient(rgba(168,131,125,.06) 1px, transparent 1px); background-size: 5px 5px; }
+/* leaves do NOT clip: the plaque's free right half must overhang the seam.
+ * The art SVGs clip themselves via their own viewport. */
+.bx-leaf { position: absolute; top: 0; bottom: 0; width: 50%; will-change: transform; background: var(--ivory); background-image: radial-gradient(rgba(168,131,125,.05) 1px, transparent 1px); background-size: 5px 5px; }
+.bx-left { left: 0; transform-origin: left center; z-index: 2; box-shadow: inset -1px 0 0 rgba(33,31,28,.14); }
+.bx-right { right: 0; transform-origin: right center; z-index: 1; box-shadow: inset 1px 0 0 rgba(33,31,28,.14); }
+.bx-art { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.bx-caption { position: absolute; left: 8%; bottom: 6%; font-size: 12px; letter-spacing: .3em; text-transform: uppercase; color: var(--gold); line-height: 1.9; padding-left: 14px; border-left: 2px solid var(--gold); }
+.bx-caption span { display: block; font-size: 10px; letter-spacing: .2em; opacity: .75; margin-top: 6px; }
+/* the plaque: bridges the seam — left half over the left panel (glued), right
+ * half overhanging the right panel (free). Lives INSIDE the left leaf so it
+ * rides the panel when it swings open. */
+.bx-plaque { position: absolute; left: 100%; top: 50%; transform: translate(-50%, -50%); width: min(86vw, 420px); z-index: 5; cursor: pointer; }
+.inv-card { position: relative; width: 100%; max-height: 86svh; overflow-y: auto; background: var(--ivory); color: var(--ink); padding: clamp(28px, 4.6vmin, 52px); text-align: center; background-image: radial-gradient(rgba(168,131,125,.06) 1px, transparent 1px); background-size: 5px 5px; border: 1px solid rgba(33,31,28,.07); box-shadow: -6px 18px 40px rgba(33,31,28,.16), 26px 34px 70px rgba(33,31,28,.28); }
+/* corner rivets, like the acrylic plaque */
+.bx-plaque::before, .bx-plaque::after { content: ''; position: absolute; left: 15px; right: 15px; height: 9px; z-index: 6; pointer-events: none;
+  background: radial-gradient(circle at 4.5px 4.5px, rgba(33,31,28,.16) 2.8px, rgba(255,255,255,.55) 2.8px 4px, transparent 4.6px) left center / 9px 9px no-repeat,
+              radial-gradient(circle at 4.5px 4.5px, rgba(33,31,28,.16) 2.8px, rgba(255,255,255,.55) 2.8px 4px, transparent 4.6px) right center / 9px 9px no-repeat; }
+.bx-plaque::before { top: 13px; }
+.bx-plaque::after { bottom: 13px; }
 .inv-card .inv-mono { font-family: 'PP Editorial Old', serif; font-size: 15px; letter-spacing: .3em; text-transform: uppercase; color: var(--cherry); }
-.inv-card h1 { font-size: clamp(30px, 4.6vmin, 44px); margin: 18px 0 8px; }
+.inv-card h1 { font-size: clamp(28px, 4.4vmin, 42px); margin: 16px 0 8px; }
 .inv-card .inv-sub { font-size: 13px; letter-spacing: .06em; }
-.inv-card .inv-meta { margin: 22px 0; font-size: 12px; letter-spacing: .2em; text-transform: uppercase; color: var(--rose); line-height: 2.1; }
+.inv-card .inv-meta { margin: 20px 0; font-size: 12px; letter-spacing: .2em; text-transform: uppercase; color: var(--rose); line-height: 2.1; }
 .inv-card .inv-note { font-size: 13.5px; max-width: 34ch; margin: 0 auto; }
-.inv-card .inv-cta { margin-top: 28px; }
+.inv-card .inv-cta { margin-top: 22px; }
+/* invitation code — part of the plaque itself, same editorial language: a
+ * hairline rule, centred letter-spaced type. Deliberately NOT a login form. */
+.inv-code { margin-top: 22px; }
+.inv-code-label { display: block; font-size: 10px; letter-spacing: .26em; text-transform: uppercase; color: var(--rose); margin-bottom: 4px; }
+.inv-code-input { display: block; width: min(100%, 21ch); margin: 0 auto; text-align: center; font: inherit; font-size: 16px; letter-spacing: .3em; color: var(--ink); background: transparent; border: none; border-bottom: 1px solid rgba(33,31,28,.35); border-radius: 0; padding: 5px 2px 7px; outline: none; -webkit-appearance: none; appearance: none; caret-color: var(--cherry); }
+.inv-code-input:focus { border-bottom-color: var(--cherry); }
+.inv-code-input::placeholder { color: rgba(128,90,82,.5); letter-spacing: .18em; }
+.inv-code-input:-webkit-autofill, .inv-code-input:-webkit-autofill:focus { -webkit-box-shadow: 0 0 0 40px var(--ivory) inset; -webkit-text-fill-color: var(--ink); transition: background-color 99999s; }
+.inv-code-err { font-size: 12px; line-height: 1.55; color: var(--cherry); max-width: 34ch; margin: 9px auto 0; }
+.inv-code-err[hidden] { display: none; }
+/* fixed personalisation zone: the plaque composition never moves — only the
+ * name scales (one line preferred, two lines maximum, never a third). */
+#inv-for .inv-for-names { line-height: 1.25; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+#inv-for[data-fit="mid"] .inv-for-names { font-size: 19px; }
+#inv-for[data-fit="long"] .inv-for-names { font-size: 17px; }
+#inv-for[data-fit="max"] .inv-for-names { font-size: 15px; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 body.inv-lock { overflow: hidden; }
 /* dismissible-popup affordances on the invitation */
-.inv-x { position: absolute; top: 16px; right: 16px; z-index: 6; width: 42px; height: 42px; border-radius: 50%; border: 1px solid rgba(242,236,225,.5); background: rgba(33,31,28,.5); color: var(--ivory); font-size: 15px; line-height: 1; cursor: pointer; display: grid; place-items: center; -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); transition: background .2s, transform .2s; }
-.inv-x:hover { background: rgba(33,31,28,.82); transform: scale(1.06); }
+.inv-x { position: absolute; top: 16px; right: 16px; z-index: 7; width: 42px; height: 42px; border-radius: 50%; border: 1px solid rgba(33,31,28,.3); background: rgba(242,236,225,.65); color: var(--ink); font-size: 15px; line-height: 1; cursor: pointer; display: grid; place-items: center; -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); transition: background .2s, transform .2s; }
+.inv-x:hover { background: rgba(242,236,225,.95); transform: scale(1.06); }
 html[data-inv="closed"] .inv-x { display: none; }
-.inv-web { display: block; width: max-content; margin: 16px auto 0; font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--rose); text-decoration: none; border-bottom: 1px solid var(--line); padding: 4px 0; }
+.inv-web { display: block; width: max-content; margin: 14px auto 0; font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--rose); text-decoration: none; border-bottom: 1px solid var(--line); padding: 4px 0; }
 .inv-web:hover { color: var(--cherry); border-color: var(--cherry); }
-/* gatefold opening: the invitation splits down the centre and both halves swing
-   open like a book / double door, revealing the Guest Area behind */
-#inv-gatefold { position: fixed; inset: 0; z-index: 110; perspective: 2200px; pointer-events: none; animation: gateHostFade 1.9s ease forwards; }
-#inv-gatefold .inv-leaf { position: absolute; inset: 0; overflow: hidden; transform-style: preserve-3d; will-change: transform; }
-#inv-gatefold .inv-leaf .inv-surface { position: absolute; inset: 0; margin: 0; }
-#inv-gatefold .inv-surface, #inv-gatefold .inv-surface * { animation: none !important; }  /* freeze cloned content; only the leaves rotate */
-#inv-gatefold .inv-leaf::after { content: ''; position: absolute; top: 0; bottom: 0; width: 60px; opacity: 0; animation: gateShade 1.9s ease forwards; }
-#inv-gatefold .inv-leaf.left { clip-path: inset(0 50% 0 0); transform-origin: left center; animation: gateLeft 1.9s cubic-bezier(.42,0,.58,1) forwards; }
-#inv-gatefold .inv-leaf.right { clip-path: inset(0 0 0 50%); transform-origin: right center; animation: gateRight 1.9s cubic-bezier(.42,0,.58,1) forwards; }
-#inv-gatefold .inv-leaf.left::after { right: 0; background: linear-gradient(90deg, transparent, rgba(23,21,19,.32)); }
-#inv-gatefold .inv-leaf.right::after { left: 0; background: linear-gradient(270deg, transparent, rgba(23,21,19,.32)); }
-@keyframes gateLeft { 0% { transform: rotateY(0); } 100% { transform: rotateY(-118deg); } }
-@keyframes gateRight { 0% { transform: rotateY(0); } 100% { transform: rotateY(118deg); } }
-@keyframes gateShade { 0% { opacity: 0; } 60% { opacity: 1; } 100% { opacity: 1; } }
-@keyframes gateHostFade { 0%, 90% { opacity: 1; } 100% { opacity: 0; } }
-@media (prefers-reduced-motion: reduce) { #inv-gatefold { display: none !important; } }
-/* Mobile: the card may be TALLER than the viewport (personalised names,
- * return link). The overlay itself scrolls; nothing is ever cut off. */
-@media (max-width: 860px) {
-  #invitation { grid-template-columns: 1fr; grid-template-rows: min(32svh, 260px) auto; }
-  #invitation .inv-photo { min-height: 180px; }
-  #invitation .inv-side { display: block; padding: 26px 5vw calc(48px + env(safe-area-inset-bottom)); }
-  .inv-card { margin: 0 auto; }
-}
+/* OPENING — exactly the physical sequence: the pull on the plaque's free right
+ * half swings the LEFT panel open first (plaque riding, its overhang lifting
+ * off the right panel), the right panel follows, the box unfolds. */
+html.inv-anim-open #invitation { pointer-events: none; }
+html.inv-anim-open .bx-left { animation: bxLeft 2.5s cubic-bezier(.5,.04,.42,1) forwards; }
+html.inv-anim-open .bx-right { animation: bxRight 2.05s cubic-bezier(.45,.05,.45,1) .45s forwards; }
+@keyframes bxLeft { 0% { transform: rotateY(0); opacity: 1; } 78% { opacity: 1; } 100% { transform: rotateY(-104deg); opacity: 0; } }
+@keyframes bxRight { 0% { transform: rotateY(0); opacity: 1; } 78% { opacity: 1; } 100% { transform: rotateY(102deg); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { html.inv-anim-open .bx-left, html.inv-anim-open .bx-right { animation: none !important; } }
 
 @media (prefers-reduced-motion: reduce) {
   .step.active, .party-tile, .party-tie { animation: none !important; }
@@ -433,11 +454,46 @@ html[data-inv="closed"] .inv-x { display: none; }
 <body>
 <div id="live" class="sr-only" role="status" aria-live="polite"></div>
 
-<!-- OPENING INVITATION (§7) -->
+<!-- OPENING INVITATION (§7) — the closed production box. Two ivory panels meet
+     at the centre seam; the plaque bridges the seam, glued to the LEFT panel
+     only, and IS the opener (owner mechanism, 2026-08-28). -->
 <div id="invitation" role="dialog" aria-modal="true" aria-label="Your invitation">
 <button type="button" class="inv-x" id="inv-x" aria-label="Close invitation">✕</button>
-<div class="inv-photo" role="img" aria-label="The courtyard pool of Souphattra Heritage Vientiane from above"></div>
-<div class="inv-side">
+<div class="bx-leaf bx-right" aria-hidden="true">
+<svg class="bx-art" viewBox="0 0 500 800" fill="none" preserveAspectRatio="xMidYMid slice">
+<defs><pattern id="bxh" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(48)"><line x1="0" y1="0" x2="0" y2="7" stroke="var(--gold-line)" stroke-width="1"/></pattern></defs>
+<g stroke="var(--gold-line)" stroke-width="0.8">
+<circle cx="235" cy="185" r="70" stroke-dasharray="2 8"/>
+<circle cx="235" cy="185" r="104" stroke-dasharray="2 9"/>
+<circle cx="235" cy="185" r="138" stroke-dasharray="2 10"/>
+<circle cx="235" cy="185" r="174" stroke-dasharray="2 11"/>
+<circle cx="235" cy="185" r="212" stroke-dasharray="2 12"/>
+</g>
+<path d="M-30 660 L120 330 Q140 300 165 335 L300 585 L360 470 L520 700 L-30 700 Z" fill="url(#bxh)" stroke="var(--gold-line)" stroke-width="0.9"/>
+<path d="M-30 640 C90 610 210 655 330 615 C410 590 470 630 520 612" stroke="var(--gold-line)" stroke-width="0.8"/>
+<circle cx="392" cy="120" r="2.4" fill="var(--gold-soft)"/>
+<circle cx="430" cy="248" r="1.7" fill="var(--gold-soft)"/>
+<circle cx="330" cy="60" r="1.5" fill="var(--gold-soft)"/>
+</svg>
+</div>
+<div class="bx-leaf bx-left">
+<svg class="bx-art" aria-hidden="true" viewBox="0 0 500 800" fill="none" preserveAspectRatio="xMidYMid slice">
+<g stroke="var(--gold-line)" stroke-width="0.8">
+<circle cx="300" cy="200" r="92" stroke-dasharray="2 8"/>
+<circle cx="300" cy="200" r="126" stroke-dasharray="2 9"/>
+<circle cx="300" cy="200" r="162" stroke-dasharray="2 10"/>
+<circle cx="300" cy="200" r="200" stroke-dasharray="2 11"/>
+<circle cx="300" cy="200" r="240" stroke-dasharray="2 12"/>
+</g>
+<circle cx="300" cy="200" r="64" fill="var(--gold)" opacity="0.92"/>
+<text x="300" y="206" text-anchor="middle" font-family="'PP Editorial Old', serif" font-size="20" fill="#F6F1E7">see you in laos<tspan fill="#7A2E33">.</tspan></text>
+<path d="M-30 620 L90 440 L170 530 L260 400 Q280 372 300 402 L420 610" stroke="var(--gold-line)" stroke-width="0.9"/>
+<path d="M-30 655 C110 625 240 668 380 630 C440 614 480 640 520 628" stroke="var(--gold-line)" stroke-width="0.8"/>
+<circle cx="128" cy="300" r="1.8" fill="var(--gold-soft)"/>
+<circle cx="90" cy="140" r="1.5" fill="var(--gold-soft)"/>
+</svg>
+<div class="bx-caption" aria-hidden="true">Beautiful things are<br/>about to happen<span>永远相信美好的事情即将发生</span></div>
+<div class="bx-plaque" id="bx-plaque">
 <div class="inv-card">
 <div class="inv-mono">H&amp;S</div>
 <h1>See You<br/>In Laos</h1>
@@ -445,9 +501,15 @@ html[data-inv="closed"] .inv-x { display: none; }
 <div id="inv-for" hidden></div>
 <div class="inv-meta">Vientiane<br/>27 February – 1 March 2027</div>
 <p class="inv-note">Your journey, stay and wedding experience have been prepared for you.</p>
+<div class="inv-code">
+<label class="inv-code-label" for="inv-code-input">Invitation code</label>
+<input class="inv-code-input" id="inv-code-input" type="text" inputmode="text" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" maxlength="24" placeholder="················" aria-describedby="inv-code-err"/>
+<p class="inv-code-err" id="inv-code-err" role="alert" hidden>We could not find that invitation code. Please use the private code from your invitation letter — or write to Guest Relations and we will help right away.</p>
+</div>
 <button type="button" class="btn inv-cta">Open your invitation</button>
 <button type="button" class="inv-return" id="inv-return" hidden>Return to my journey</button>
 <a class="inv-web" id="inv-web" href="../">Visit the wedding website</a>
+</div>
 </div>
 </div>
 </div>
