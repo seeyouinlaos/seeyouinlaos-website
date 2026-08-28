@@ -285,6 +285,19 @@ body.pv-lock { overflow: hidden; }
 }
 
 
+/* couple-name lockup: Haruthai & Suthep always stand alone on their own line */
+.hs { display: block; white-space: nowrap; }
+.inv-sub .hs { font-family: 'PP Editorial Old', serif; font-size: 17px; margin-top: 3px; }
+.acc-hosted span { display: block; }
+.acc-hosted .rh-b { font-size: 9.5px; letter-spacing: .26em; text-transform: uppercase; margin-top: 3px; opacity: .8; }
+.acc-hosted .hs { font-family: 'PP Editorial Old', serif; font-size: 15px; text-transform: none; letter-spacing: .04em; }
+.row .r .hs { font-size: inherit; }
+/* framed amenities on the room cards */
+.acc-amen { display: block; border: 1px solid var(--line); padding: 13px 15px 11px; }
+.acc-amen .amen-t { font-size: 10px; letter-spacing: .24em; text-transform: uppercase; color: var(--cherry); margin-bottom: 8px; }
+.acc-amen .amen-g { display: grid; grid-template-columns: 1fr 1fr; gap: 5px 14px; }
+.acc-amen .amen-g span { font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--rose); border: none; padding: 0; }
+.trf-incl { margin-top: 4px; color: var(--gold); }
 /* room gallery lightbox */
 .lb[hidden] { display: none !important; }
 .lb { position: fixed; inset: 0; z-index: 120; background: rgba(23,21,19,.93); display: grid; grid-template-columns: 1fr; align-items: center; justify-items: center; padding: 0 18px; animation: lbIn .3s ease; }
@@ -493,7 +506,7 @@ html.inv-anim-open .bx-right { animation: bxRight 2.05s cubic-bezier(.45,.05,.45
 <div class="inv-card">
 <div class="inv-mono">H&amp;S</div>
 <h1>See You<br/>In Laos</h1>
-<div class="inv-sub">A private invitation from Haruthai&nbsp;&amp;&nbsp;Suthep</div>
+<div class="inv-sub">A private invitation from<span class="hs">Haruthai&nbsp;&amp;&nbsp;Suthep</span></div>
 <div id="inv-for" hidden></div>
 <div class="inv-meta">Vientiane<br/>27 February – 1 March 2027</div>
 <p class="inv-note">Your journey, stay and wedding experience have been prepared for you.</p>
@@ -550,7 +563,7 @@ html.inv-anim-open .bx-right { animation: bxRight 2.05s cubic-bezier(.45,.05,.45
 </section>
 
 <!-- 2 · party (§10) -->
-<section class="step" data-step="party" aria-label="Your party">
+<section class="step" data-step="party" aria-label="Your guests">
 <div class="step-eyebrow">Your invitation</div>
 <h2>You come<br/>as you belong.</h2>
 <div id="party-box"></div>

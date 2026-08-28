@@ -37,7 +37,7 @@ function roomPriceHtml(a) {
   }
   const per = contributionPerGuest(a);
   return '<div class="acc-price"><span class="amt">' + showAmount(per) + '</span>' +
-    '<span class="per">per guest · complete stay</span></div>';
+    '<span class="per">first night · per guest</span></div>';
 }
 function guestAvailability(res, unitPlural) {
   if (!res) return '';
@@ -444,12 +444,12 @@ function renderParty() {
   if (!S.invitation) { show(idx('find')); return; }
   const lead = S.invitation.partyLead;
   box.innerHTML =
-    '<div class="party-frame" role="group" aria-label="Your invitation party">' +
+    '<div class="party-frame" role="group" aria-label="Your invitation">' +
     S.invitation.guests.map((g, i) =>
       '<div class="party-tile" style="animation-delay:' + (reduced ? 0 : i * 0.35) + 's">' +
       '<span class="party-init serif">' + esc(g.preferredName.slice(0, 1)) + '</span>' +
       '<span class="party-name">' + esc(g.fullName) + '</span>' +
-      (g.guestId === lead ? '<span class="party-lead">Party lead</span>' : '') +
+      (g.guestId === lead ? '<span class="party-lead">Lead guest</span>' : '') +
       '</div>').join('<span class="party-tie" aria-hidden="true"></span>') +
     '</div>' +
     '<p class="party-line serif-it">You belong to this invitation together.</p>' +
@@ -523,7 +523,7 @@ function modulePicker({ modules, field }) {
   let html = '';
   if (many) {
     html += '<div class="plans-toggle" role="radiogroup" aria-label="Shared or individual plans">' +
-      '<label><input type="radio" name="plans-' + field + '" value="same"' + (!differs ? ' checked' : '') + '/><span>One plan for our Party</span></label>' +
+      '<label><input type="radio" name="plans-' + field + '" value="same"' + (!differs ? ' checked' : '') + '/><span>One plan for all of us</span></label>' +
       '<label><input type="radio" name="plans-' + field + '" value="different"' + (differs ? ' checked' : '') + '/><span>We have different plans</span></label>' +
       '</div>';
   }
@@ -612,7 +612,7 @@ function roomSpecs(a, availRow) {
   return '<dl class="acc-specs">' + rows.map((r) =>
     '<div><dt>' + r[0] + '</dt><dd>' + esc(r[1]) + '</dd></div>').join('') + '</dl>' +
     ((a.amenities || []).length
-      ? '<div class="acc-amen">' + a.amenities.map((x) => '<span>' + esc(x) + '</span>').join('') + '</div>'
+      ? '<div class="acc-amen"><div class="amen-t">In the room</div><div class="amen-g">' + a.amenities.map((x) => '<span>' + esc(x) + '</span>').join('') + '</div></div>'
       : '');
 }
 
@@ -631,7 +631,7 @@ function renderStay() {
       '<div class="acc-head"><h3>' + esc(a.name) + '</h3>' +
       (bookable ? roomPriceHtml(a) : '<div class="acc-price"><span class="per">Reserved</span></div>') + '</div>' +
       '<div class="acc-meta">' + esc(a.stay) + ' · ' + a.nights + ' nights</div>' +
-      (a.kind !== 'airbnb' ? '<div class="acc-hosted">Second night complimentary · hosted by Haruthai&nbsp;&amp;&nbsp;Suthep</div>' : '') +
+      (a.kind !== 'airbnb' ? '<div class="acc-hosted"><span>Second night complimentary</span><span class="rh-b">Hosted by</span><span class="hs">Haruthai&nbsp;&amp;&nbsp;Suthep</span></div>' : '') +
       '<p class="acc-blurb">' + esc(a.blurb) + '</p>' +
       roomSpecs(a, bookable
         ? (selected ? 'Requested · Guest Relations will confirm'
@@ -653,7 +653,7 @@ function renderStay() {
     '<div class="field" style="margin-top:30px"><label>Bed preference</label><select id="stay-bed"><option' + sel('') + '>No preference</option><option' + sel('One large bed') + '>One large bed</option><option' + sel('Two beds') + '>Two beds</option></select></div>' +
     '<div class="field"><label for="stay-req">Special request</label><textarea id="stay-req">' + esc(S.stay.request) + '</textarea></div>' +
     '<div id="stay-selected"></div>' +
-    '<p class="note" style="margin-top:18px">' + esc(COPY.requestNote) + ' ' + esc(COPY.payment) + ' If your Party needs something different, Guest Relations arranges it personally.</p>';
+    '<p class="note" style="margin-top:18px">' + esc(COPY.requestNote) + ' ' + esc(COPY.payment) + ' If you need something different, Guest Relations arranges it personally.</p>';
   function sel(v) { return S.stay.bed === v ? ' selected' : ''; }
   box.querySelectorAll('[data-select]').forEach((b) => b.addEventListener('click', () => {
     S.stay.accommodationId = b.getAttribute('data-select');
@@ -663,7 +663,7 @@ function renderStay() {
     saveDraft(); renderStay(); renderSummary();
     const acc = currentAcc();
     const occ = S.stay.occupantGuestIds;
-    announce('Requested ' + acc.name + ' for your Party. ' + (acc.contributionPerGuest == null
+    announce('Requested ' + acc.name + ' for you. ' + (acc.contributionPerGuest == null
       ? 'This stay is arranged separately by Guest Relations. '
       : occ.length + ' guest' + (occ.length > 1 ? 's' : '') + ', ' + money(contributionPerGuest(acc)) + ' per guest, party contribution ' + money(partyTotal(acc, occ)) + '. ') + COPY.requestNote);
   }));
@@ -688,12 +688,12 @@ function renderStaySelected() {
   const neutral = acc.contributionPerGuest == null;
   el.innerHTML =
     '<div class="stay-sum" style="margin-top:30px" aria-live="polite">' +
-    '<div class="row"><span class="l serif-it">Requested for your Party</span><span class="r">' + esc(acc.name) + (S.stay.waitlist ? ' · WAITLISTED' : '') + '</span></div>' +
+    '<div class="row"><span class="l serif-it">Requested for you</span><span class="r">' + esc(acc.name) + (S.stay.waitlist ? ' · WAITLISTED' : '') + '</span></div>' +
     (neutral
       ? '<div class="row"><span class="l">' + occ.length + ' guest' + (occ.length > 1 ? 's' : '') + ' · one ' + esc(acc.capacityUnit.toLowerCase()) + '</span><span class="r">Arranged separately · coordinated by Guest Relations</span></div>'
       : '<div class="row"><span class="l">' + occ.length + ' guest' + (occ.length > 1 ? 's' : '') + ' · one ' + esc(acc.capacityUnit.toLowerCase()) + '</span><span class="r">' + money(contributionPerGuest(acc)) + ' per guest · complete stay</span></div>' +
         '<div class="row total"><span class="l serif-it">Your party contribution</span><span class="r">' + money(partyTotal(acc, occ)) + '</span></div>' +
-        '<div class="row"><span class="l">Second night</span><span class="r">Complimentary · hosted by Haruthai&nbsp;&amp;&nbsp;Suthep</span></div>') +
+        '<div class="row"><span class="l">Second night</span><span class="r">Complimentary · hosted by<span class="hs">Haruthai&nbsp;&amp;&nbsp;Suthep</span></span></div>') +
     '</div>' +
     '<p class="note" style="margin-top:12px">' + esc(COPY.requestNote) + '</p>';
 }
@@ -784,9 +784,9 @@ function openAccOverlay(id) {
     (a.occupancy ? '<div><dt>Guests</dt><dd>' + esc(a.occupancy) + '</dd></div>' : '') +
     (a.location ? '<div><dt>Where</dt><dd>' + esc(a.location) + '</dd></div>' : '') +
     (bookable
-      ? '<div><dt>Contribution</dt><dd>' + (a.contributionPerGuest == null ? 'Arranged separately' : showAmount(contributionPerGuest(a)) + ' per guest · complete two-night stay') + '</dd></div>' +
+      ? '<div><dt>Contribution</dt><dd>' + (a.contributionPerGuest == null ? 'Arranged separately' : showAmount(contributionPerGuest(a)) + ' per guest · first night') + '</dd></div>' +
         '<div><dt>Availability</dt><dd>' + esc(a.kind === 'airbnb' ? 'Arranged separately with Guest Relations' : guestAvailability(res)) + '</dd></div>' +
-        '<div><dt>Selection</dt><dd>One ' + esc(a.capacityUnit.toLowerCase()) + ' per Party</dd></div>'
+        '<div><dt>Selection</dt><dd>One ' + esc(a.capacityUnit === 'Party allocation' ? 'residence' : a.capacityUnit.toLowerCase()) + ' per invitation</dd></div>'
       : '') +
     '</dl>' +
     ((a.amenities || []).length
@@ -831,7 +831,7 @@ function renderTravel() {
   const shared = S.arrival.shared !== false;
   const trainy = S.guests.some((g) => g.journey.train);
   box.innerHTML =
-    (mixedTrain ? '<p class="note" style="margin-bottom:18px">Your Party travels differently — one of you is on the overnight train — so each of you has their own travel details below.</p>' : '') +
+    (mixedTrain ? '<p class="note" style="margin-bottom:18px">You are travelling differently — one of you is on the overnight train — so each of you has their own travel details below.</p>' : '') +
     (many && !mixedTrain ? '<div class="plans-toggle"><label><input type="radio" name="trv-shared" value="yes"' + (shared ? ' checked' : '') + '/><span>We travel together</span></label>' +
       '<label><input type="radio" name="trv-shared" value="no"' + (!shared ? ' checked' : '') + '/><span>We have different travel details</span></label></div>' : '') +
     (shared ? travelFields('shared', S.arrival, S.departure, trainy)
@@ -856,81 +856,48 @@ function renderTravel() {
   });
 }
 /* ---------------- transfer products (Owner price master) ----------------
- * Real chargeable products: the guest sees service, description and price
- * BEFORE adding, then gives only the operationally relevant details —
- * flight data for airport cars, train data for LCR station cars. */
+ * FULL SERVICE (owner §13-18): the guest sees service, route, inclusions and
+ * price, then simply adds it. No operational questionnaire — Guest Relations
+ * completes timing/flight details personally from the Journey context. */
 function selectedTransfer(id) { return (S.transfers || []).find((s) => s.transferId === id); }
 function renderTransfers() {
   const groups = [...new Set(TRANSFERS.map((t) => t.group))];
   return '<div class="trf" id="trf">' +
-    '<h3 class="trv-name" style="margin-top:40px">Private transfers</h3>' +
-    '<p class="note" style="margin-bottom:6px">Charged per vehicle journey, never per guest. Your selection is a request; Guest Relations confirms every car personally.</p>' +
+    '<h3 class="trv-name" style="margin-top:40px">Transfers</h3>' +
+    '<p class="note" style="margin-bottom:6px">Choose your service — everything else is arranged for you. Guest Relations confirms every journey personally; private cars are charged per vehicle, never per guest.</p>' +
     groups.map((grp) =>
       '<div class="label" style="margin:24px 0 4px">' + esc(grp) + '</div>' +
       TRANSFERS.filter((t) => t.group === grp).map((t) => {
         const sel = selectedTransfer(t.id);
-        const open = sel || (S._trfOpen === t.id);
-        const d = (sel && sel.details) || {};
-        const units = sel ? (sel.units || 1) : 1;
+        const free = !t.pricePerUnit;
         return '<article class="trf-card' + (sel ? ' sel' : '') + '" data-trf="' + t.id + '">' +
-          '<div class="trf-head"><div><h4>' + esc(t.name) + '</h4><p class="note">' + esc(t.blurb) + '</p></div>' +
-          '<div class="acc-price"><span class="amt">' + money(t.pricePerUnit) + '</span><span class="per">per unit</span></div></div>' +
+          '<div class="trf-head"><div><h4>' + esc(t.name) + '</h4><p class="note">' + esc(t.blurb) + '</p>' +
+          (t.included ? '<p class="note trf-incl">' + esc(t.included) + '</p>' : '') + '</div>' +
+          '<div class="acc-price">' + (free
+            ? '<span class="amt" style="font-size:15px;letter-spacing:.14em">COMPLIMENTARY</span>'
+            : '<span class="amt">' + money(t.pricePerUnit) + '</span><span class="per">per vehicle</span>') + '</div></div>' +
           '<div class="acc-actions">' +
-          '<button type="button" class="btn ghost sm" data-trf-view="' + t.id + '">' + (open ? 'Hide details' : 'View details') + '</button>' +
           (sel
             ? '<button type="button" class="btn sm" data-trf-remove="' + t.id + '">Remove from journey</button>'
             : '<button type="button" class="btn sm" data-trf-add="' + t.id + '">Add to journey</button>') +
           '</div>' +
-          (open ? trfDetails(t, d, units, !!sel) : '') +
-          (sel ? '<div class="acc-avail" style="border-top:none;padding-top:8px">REQUESTED · Guest Relations confirms</div>' : '') +
+          (sel ? '<div class="acc-avail" style="border-top:none;padding-top:8px">REQUESTED · Guest Relations confirms every detail with you personally</div>' : '') +
           '</article>';
       }).join('')).join('') +
     '</div>';
 }
-function trfDetails(t, d, units, isSel) {
-  const arr = t.direction === 'arrival';
-  const refLabel = t.fieldsFor === 'train' ? 'Train number' : 'Flight number';
-  const placeLabel = arr ? (t.fieldsFor === 'train' ? 'Departure from' : 'Departure from') : 'Departure to';
-  const locLabel = arr ? 'Pick-up location' : 'Drop-off location';
-  const tf = (k, label, v, type = 'text') =>
-    '<div class="field"><label>' + label + '</label><input type="' + type + '" data-tf="' + t.id + '|' + k + '" value="' + esc(v || '') + '"/></div>';
-  return '<div class="trf-form"><div class="cols2">' +
-    tf('date', arr ? 'Arrival date' : 'Drop-off date', d.date, 'date') +
-    tf('time', arr ? 'Arrival time' : 'Drop-off time', d.time, 'time') +
-    tf('ref', refLabel, d.ref) +
-    tf('place', placeLabel, d.place) +
-    tf('location', locLabel, d.location) +
-    '<div class="field"><label>Vehicles needed</label><input type="number" min="1" max="4" data-tf="' + t.id + '|units" value="' + units + '"/></div>' +
-    '</div>' +
-    (isSel ? '' : '<p class="note">Add the service to your journey to include it in your Journey Cost.</p>') +
-    '</div>';
-}
 function wireTransfers(box) {
-  box.querySelectorAll('[data-trf-view]').forEach((b) => b.addEventListener('click', () => {
-    const id = b.getAttribute('data-trf-view');
-    S._trfOpen = S._trfOpen === id ? null : id;
-    renderTravel();
-  }));
   box.querySelectorAll('[data-trf-add]').forEach((b) => b.addEventListener('click', () => {
     const id = b.getAttribute('data-trf-add');
     if (!selectedTransfer(id)) S.transfers.push({ transferId: id, units: 1, details: {} });
-    S._trfOpen = id;
     saveDraft(); renderTravel(); renderSummary();
     const t = TRANSFERS.find((x) => x.id === id);
-    announce(t.name + ' added to your journey: ' + money(t.pricePerUnit) + ' per unit, REQUESTED. Please add your travel details.');
+    announce(t.name + ' added to your journey' + (t.pricePerUnit ? ': ' + money(t.pricePerUnit) + ' per vehicle' : ' — complimentary') + ', REQUESTED. Guest Relations arranges the details with you personally.');
   }));
   box.querySelectorAll('[data-trf-remove]').forEach((b) => b.addEventListener('click', () => {
     const id = b.getAttribute('data-trf-remove');
     S.transfers = (S.transfers || []).filter((s) => s.transferId !== id);
-    if (S._trfOpen === id) S._trfOpen = null;
     saveDraft(); renderTravel(); renderSummary();
-  }));
-  box.querySelectorAll('[data-tf]').forEach((el) => el.addEventListener('input', () => {
-    const [id, key] = el.getAttribute('data-tf').split('|');
-    const sel = selectedTransfer(id) || (S.transfers.push({ transferId: id, units: 1, details: {} }), selectedTransfer(id));
-    if (key === 'units') sel.units = Math.max(1, parseInt(el.value, 10) || 1);
-    else (sel.details ||= {})[key] = el.value;
-    saveDraft(); renderSummary();
   }));
 }
 
@@ -983,7 +950,7 @@ function renderSpa() {
       '<div class="field"><label>Treatment</label><select data-sf="type">' + ['Massage', 'Spa treatment', 'No preference · please recommend'].map((o) => '<option' + (w.type === o ? ' selected' : '') + '>' + o + '</option>').join('') + '</select></div>' +
       '<div class="field"><label>Preferred day</label><input type="date" data-sf="day" value="' + esc(w.day || '') + '"/></div>' +
       '<div class="field"><label>Time range</label><select data-sf="time">' + ['Morning', 'Afternoon', 'Evening', 'Flexible'].map((o) => '<option' + ((w.time || 'Flexible') === o ? ' selected' : '') + '>' + o + '</option>').join('') + '</select></div>' +
-      '<div class="field"><label>Appointment</label><select data-sf="mode">' + ['Individual', 'Shared with my Party'].map((o) => '<option' + (w.mode === o ? ' selected' : '') + '>' + o + '</option>').join('') + '</select></div>' +
+      '<div class="field"><label>Appointment</label><select data-sf="mode">' + ['Individual', 'Together'].map((o) => '<option' + (w.mode === o ? ' selected' : '') + '>' + o + '</option>').join('') + '</select></div>' +
       '</div><div class="field"><label>Wellness notes</label><textarea data-sf="notes">' + esc(w.notes || '') + '</textarea></div></div></div>';
   }).join('') + '<p class="note">Spa and massage selections are coordination requests, confirmed by Guest Relations.</p>';
   box.querySelectorAll('.guest-block').forEach((block, i) => {
@@ -1132,9 +1099,9 @@ function renderCost() {
   rows += row('Hosted breakfast', 'USD 0 · included');
   rows += row('Alms Giving Ceremony', 'USD 0 · included');
   rows += row('Wedding Ceremony', 'USD 0 · included');
-  rows += row('Sunset cocktails, cake reception &amp; Wedding Dinner', 'USD 0 · included');
+  rows += row('Sunset drinks, cake reception &amp; Wedding Dinner', 'USD 0 · included');
   rows += row('Two-hour beverage package', 'USD 0 · included');
-  if (acc && !neutral) rows += row('<span class="serif-it">' + esc(acc.name) + '</span> · night two', 'USD 0 · hosted by Haruthai&nbsp;&amp;&nbsp;Suthep');
+  if (acc && !neutral) rows += row('<span class="serif-it">' + esc(acc.name) + '</span> · night two', 'USD 0 · hosted by<span class="hs">Haruthai&nbsp;&amp;&nbsp;Suthep</span>');
   // 1 MARCH — departure
   rows += day('Monday · 1 March');
   rows += row('Hosted breakfast', 'USD 0 · included');
@@ -1165,7 +1132,7 @@ function renderReview() {
   const eventLine = (g) => EVENTS.filter((e) => g.events[e.id]).map((e) => e.label).join(' · ') || 'None';
   let html = '';
   html += '<p class="home-hello" style="margin-bottom:20px">' + esc(S.invitation.partyName) + ' · Vientiane · February 2027</p>';
-  html += sec('Your Party', idx('party'), [
+  html += sec('Your Guests', idx('party'), [
     ['Party', esc(S.invitation.partyName)],
     ['Members', S.invitation.guests.map((g) => esc(g.fullName)).join(' · ')],
     ['Party lead', esc((S.invitation.guests.find((g) => g.guestId === S.invitation.partyLead) || {}).fullName || '—')],
@@ -1190,7 +1157,7 @@ function renderReview() {
       : [['Guests', occ.length + ' · ' + money(contributionPerGuest(acc)) + ' per guest'],
          ['Contribution', occ.map((id) => { const g = S.guests.find((x) => x.guestId === id); return esc(g ? g.preferredName : id) + ' ' + money(contributionPerGuest(acc)); }).join(' · ')],
          ['Total', money(partyTotal(acc, occ))],
-         ['Second night', 'Complimentary · hosted by Haruthai&nbsp;&amp;&nbsp;Suthep']]),
+         ['Second night', 'Complimentary · hosted by<span class="hs">Haruthai&nbsp;&amp;&nbsp;Suthep</span>']]),
   ] : [['Requested', 'No stay selected yet'], ['Action', 'Please choose your room under My Stay before sending']]);
   const trv = S.arrival.shared !== false
     ? [['Together', esc([S.arrival.date, S.arrival.time, S.arrival.ref].filter(Boolean).join(' · ') || '—') + (S.arrival.pickupRequested ? ' · pickup REQUESTED' : '')]]

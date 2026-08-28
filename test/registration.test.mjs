@@ -125,8 +125,9 @@ test('live Journey Cost: stay + train + transfers from one calculation path', ()
   assert.equal(journeyTotal(null, [], TRAIN, 0, TRANSFERS, []), 0);
 });
 
-test('airport transfers carry flight fields; LCR transfers carry train fields', () => {
+test('airport transfers carry flight fields; LCR transfers carry train fields; shuttle is complimentary', () => {
   for (const t of TRANSFERS) {
+    if (t.id === 'shuttle-shared') { assert.equal(t.pricePerUnit, 0); continue; } // shared shuttle: no charge, no questionnaire
     if (t.group === 'Airport') assert.equal(t.fieldsFor, 'flight');
     else assert.equal(t.fieldsFor, 'train');
   }
@@ -423,7 +424,7 @@ test('stay occupants outside the Party are rejected', () => {
   const inv = lookupInvitation('demo-amara');
   const reg = baseReg(inv);
   reg.stay.occupantGuestIds = ['g1', 'g99'];
-  assert.ok(validateRegistration(reg, ctx(inv)).some((e) => e.includes('not in Party')));
+  assert.ok(validateRegistration(reg, ctx(inv)).some((e) => e.includes('not in invitation')));
 });
 
 test('a registration without a stay is rejected (no digital no-room flow)', () => {
@@ -440,13 +441,13 @@ test('train is a confirmed USD 88 product inside the journey total', () => {
   assert.equal(journeyTotal(null, [], TRAIN, 2, TRANSFERS, []), 176);
 });
 
-test('a transfer request needs its travel date; unknown services are rejected', () => {
+test('a transfer request needs NO questionnaire (full service); unknown services are rejected', () => {
   const inv = lookupInvitation('demo-amara');
   const reg = baseReg(inv);
   reg.transfers = [{ transferId: 'apt-pickup-jaguar', units: 1, details: {} }];
-  assert.ok(validateRegistration(reg, ctx(inv)).some((e) => e.includes('travel date')));
-  reg.transfers = [{ transferId: 'apt-pickup-jaguar', units: 1, details: { date: '2027-02-27' } }];
-  assert.deepEqual(validateRegistration(reg, ctx(inv)), []);
+  assert.deepEqual(validateRegistration(reg, ctx(inv)), []); // Guest Relations completes details personally
+  reg.transfers = [{ transferId: 'shuttle-shared', units: 1, details: {} }];
+  assert.deepEqual(validateRegistration(reg, ctx(inv)), []); // complimentary shared shuttle bookable as-is
   reg.transfers = [{ transferId: 'ghost-service', units: 1, details: { date: '2027-02-27' } }];
   assert.ok(validateRegistration(reg, ctx(inv)).some((e) => e.includes('unknown transfer service')));
 });
@@ -489,7 +490,7 @@ test('notification carries party, per-guest data, charges, statuses', () => {
   reg.trainNote = 'Light sleeper, lower deck please';
   const text = buildNotification(reg, ctx(inv));
   assert.ok(text.includes('SEE YOU IN LAOS — NEW GUEST REGISTRATION'));
-  assert.ok(text.includes('Party: Amara & Theo'));
+  assert.ok(text.includes('Name: Amara & Theo'));
   assert.ok(text.includes('Overnight Train (seat requested)'));
   // dedicated OVERNIGHT TRAIN section, separate from flight/arrival info
   assert.ok(text.includes('OVERNIGHT TRAIN'));

@@ -233,7 +233,7 @@ export function validateRegistration(reg, ctx) {
     if (!guestIds.has(g.guestId)) errors.push('unrecognised guest: ' + g.guestId);
   }
   if ((reg.guests || []).length !== invitation.guests.length) {
-    errors.push('registration must cover every invited Guest of the Party');
+    errors.push('registration must cover every invited Guest of the invitation');
   }
   // per-guest contact for active guests
   for (const g of reg.guests || []) {
@@ -253,7 +253,7 @@ export function validateRegistration(reg, ctx) {
   // stay: required (a Party without a stay is handled personally by Guest
   // Relations, never as a digital flow); party-scope, one room
   if (!(reg.stay && reg.stay.accommodationId)) {
-    errors.push('please select a stay for your Party — Guest Relations will help personally if you need something different');
+    errors.push('please select a stay — Guest Relations will help personally if you need something different');
   }
   if (reg.stay && reg.stay.accommodationId) {
     const acc = accommodations.find((a) => a.id === reg.stay.accommodationId);
@@ -263,23 +263,22 @@ export function validateRegistration(reg, ctx) {
     } else {
       const occ = reg.stay.occupantGuestIds || [];
       if (!occ.length) errors.push('stay request needs at least one occupying Guest');
-      for (const id of occ) if (!guestIds.has(id)) errors.push('stay occupant not in Party: ' + id);
+      for (const id of occ) if (!guestIds.has(id)) errors.push('stay occupant not in invitation: ' + id);
       const charges = partyCharges(acc, occ);
       const total = charges.reduce((s, c) => s + c.amount, 0);
       if (total !== contributionPerGuest(acc) * occ.length) errors.push('party total must equal sum of individual contributions');
-      if (reg.stay.rooms && reg.stay.rooms !== 1) errors.push('a Party requests exactly one room / allocation');
+      if (reg.stay.rooms && reg.stay.rooms !== 1) errors.push('one invitation requests exactly one room / allocation');
     }
   }
-  // transfers: known service, sane units, and the date the vehicle is needed
+  // transfers: known service and sane units — details stay with Guest Relations
   for (const s of reg.transfers || []) {
     const t = (ctx.transfers || []).find((x) => x.id === s.transferId);
     if (!t) { errors.push('unknown transfer service: ' + s.transferId); continue; }
     if (s.units !== undefined && (!Number.isInteger(s.units) || s.units < 1)) {
       errors.push(t.name + ': units must be a positive whole number');
     }
-    if (!(s.details && s.details.date)) {
-      errors.push(t.name + ' needs a ' + (t.direction === 'arrival' ? 'travel date' : 'departure date'));
-    }
+    // full service: no travel-date questionnaire — Guest Relations completes
+    // the operational details personally from the Journey context (owner §13).
   }
   // pickup needs sufficient arrival data
   const arr = reg.arrival || {};
@@ -301,10 +300,10 @@ export function buildNotification(reg, ctx) {
   const out = [];
   out.push('SEE YOU IN LAOS — NEW GUEST REGISTRATION');
   out.push('');
-  out.push('GUEST PARTY');
-  out.push(L('Party:', invitation.partyName));
+  out.push('INVITATION');
+  out.push(L('Name:', invitation.partyName));
   out.push(L('Invitation:', invitation.invitationId));
-  out.push(L('Party Lead:', (invitation.guests.find((g) => g.guestId === invitation.partyLead) || {}).fullName));
+  out.push(L('Lead Guest:', (invitation.guests.find((g) => g.guestId === invitation.partyLead) || {}).fullName));
   out.push('');
   const acc = reg.stay && reg.stay.accommodationId
     ? accommodations.find((a) => a.id === reg.stay.accommodationId) : null;

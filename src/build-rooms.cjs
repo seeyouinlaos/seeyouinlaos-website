@@ -55,7 +55,7 @@ function card(a) {
     a.badge ? '<div class="rm-badge">' + esc(a.badge) + '</div>' : '',
     '<div class="rm-head"><h3>' + esc(a.name) + '</h3></div>',
     '<div class="rm-meta">' + esc(a.stay) + ' · ' + a.nights + ' nights</div>',
-    a.kind !== 'airbnb' && !reserved ? '<div class="rm-hosted">Second night complimentary · hosted by Haruthai&nbsp;&amp;&nbsp;Suthep</div>' : '',
+    a.kind !== 'airbnb' && !reserved ? '<div class="rm-hosted"><span>Second night complimentary</span><span class="rh-b">Hosted by</span><span class="hs">Haruthai&nbsp;&amp;&nbsp;Suthep</span></div>' : '',
     '<p class="rm-blurb">' + esc(a.blurb) + '</p>',
     '<dl class="rm-specs">' + specs.concat([['Availability', reserved
         ? 'Reserved for the wedding couple\u2019s family'
@@ -64,7 +64,7 @@ function card(a) {
           : a.capacityTotal + (a.capacityTotal === 1 ? ' room' : ' rooms') + ' allocated']])
       .map((r) => '<div><dt>' + r[0] + '</dt><dd>' + esc(r[1]) + '</dd></div>').join('') + '</dl>',
     amen.length
-      ? '<div class="rm-amen">' + amen.map((x) => '<span>' + esc(x) + '</span>').join('') + '</div>'
+      ? '<div class="rm-amen"><div class="amen-t">In the room</div><div class="amen-g">' + amen.map((x) => '<span>' + esc(x) + '</span>').join('') + '</div></div>'
       : '',
 
     reserved
