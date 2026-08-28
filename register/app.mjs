@@ -224,7 +224,7 @@ function openIntoGuestArea(caller) {
   const host = buildGatefold();          // snapshot the invitation while it is still visible
   setInvitationState('closed', caller);   // reveal the Guest Area behind the swinging leaves
   focusActiveHeading();
-  setTimeout(() => { host.remove(); INV.opening = false; }, 1000);
+  setTimeout(() => { host.remove(); INV.opening = false; }, 2000);
 }
 document.querySelector('.inv-cta').addEventListener('click', () => openIntoGuestArea('cta-click'));
 const invX = document.getElementById('inv-x');
