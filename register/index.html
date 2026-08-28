@@ -35,7 +35,8 @@
   --line: rgba(168,131,125,.35);
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: 'Hanken Grotesk', sans-serif; font-weight: 300; background: var(--ivory); color: var(--ink); font-size: 17px; line-height: 1.6; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }  /* iOS Safari: never auto-inflate text */
+body { font-family: 'Hanken Grotesk', sans-serif; font-weight: 300; background: var(--ivory); color: var(--ink); font-size: 17px; line-height: 1.6; overflow-x: hidden; }
 a { color: inherit; }
 a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, summary:focus-visible { outline: 2px solid var(--cherry-photo); outline-offset: 3px; border-radius: 1px; }
 .serif { font-family: 'PP Editorial Old', serif; }
@@ -46,7 +47,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 header.top { padding: 40px 6vw 0; display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap; }
 header.top .mark { font-family: 'PP Editorial Old', serif; font-size: 26px; }
 header.top .mark .dot { color: var(--cherry-photo); }
-header.top nav { display: flex; gap: 22px; font-size: 11px; letter-spacing: .18em; text-transform: uppercase; }
+header.top nav { display: flex; flex-wrap: wrap; gap: 10px 22px; font-size: 11px; letter-spacing: .18em; text-transform: uppercase; }
 header.top nav a { text-decoration: none; border-bottom: 1px solid transparent; padding-bottom: 2px; }
 header.top nav a:hover { border-color: var(--cherry); }
 header.top nav a.here { color: var(--cherry); border-bottom-color: var(--cherry); cursor: default; }
