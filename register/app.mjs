@@ -154,6 +154,7 @@ function renderStep(i) {
   if (name === 'home') renderHome();
   if (name === 'party') renderParty();
   if (name === 'journey') renderJourney();
+  if (name === 'travel') renderTravelStep();
   if (name === 'events') renderEvents();
   if (name === 'stay') renderStay();
   if (name === 'spa') renderSpa();
@@ -361,7 +362,7 @@ function adoptInvitation(inv) {
 
 /* ---------------- MY JOURNEY · private member area ---------------- */
 const PRIVNAV = [
-  ['home', 'My Journey'], ['journey', 'My Travel'], ['stay', 'My Stay'],
+  ['home', 'My Journey'], ['journey', 'My Travel'], ['travel', 'My Transfers'], ['stay', 'My Stay'],
   ['events', 'My Wedding'], ['each', 'My Profile'], ['cost', 'My Contribution'],
 ];
 function renderPrivnav() {
@@ -526,13 +527,19 @@ function renderJourney() {
     field: 'journey',
   }) + (anyTrain ? trainDetailBlock() : '') +
     bangkokStayBlock() +
-    renderTravel() +
     postWeddingBlock();
   wireModulePicker(box, 'journey');
   wireTrainDetails(box);
-  wireTransfers(box);
   wireBangkokStay(box);
   wirePostWedding(box);
+}
+
+/* MY TRANSFERS (owner final nav): its own subsection, same single transfer
+ * source of truth — the contextual arrival block simply renders here. */
+function renderTravelStep() {
+  const box = document.getElementById('travel-box');
+  box.innerHTML = renderTravel();
+  wireTransfers(box);
 }
 
 /* §2-3 · the Bangkok stay: curated choice, guest chosen dates, quiet pending
@@ -609,7 +616,7 @@ function trainDetailBlock() {
       BERTH_PREFS.map((o) => '<option' + ((g.berth || 'No preference') === o ? ' selected' : '') + '>' + o + '</option>').join('') + '</select></div>').join('') +
     '<p class="note">We will do our best to arrange your preferred berth. Final allocation depends on railway availability.</p>' +
     '<div class="field"><label>Anything that matters for the train journey (mobility, luggage, comfort)</label><textarea id="train-note">' + esc(S.trainNote || '') + '</textarea></div>' +
-    '<p class="note">You arrive at <strong>Nong Khai Railway Station</strong>; your onward journey to Vientiane is chosen below under your arrival. Route reference: <a href="' + TRAIN_REFERENCE + '" rel="noopener" target="_blank">State Railway of Thailand</a> — for reading only, no booking needed.</p>' +
+    '<p class="note">You arrive at <strong>Nong Khai Railway Station</strong>; your onward journey to Vientiane is chosen under My Transfers. Route reference: <a href="' + TRAIN_REFERENCE + '" rel="noopener" target="_blank">State Railway of Thailand</a> — for reading only, no booking needed.</p>' +
     '</div>';
 }
 function wireTrainDetails(box) {
@@ -1315,7 +1322,7 @@ function renderReview() {
   const trv = S.arrival.shared !== false
     ? [['Together', esc([S.arrival.date, S.arrival.time, S.arrival.ref].filter(Boolean).join(' · ') || '—') + (S.arrival.pickupRequested ? ' · pickup REQUESTED' : '')]]
     : S.guests.map((g) => { const a = S.arrivalByGuest[g.guestId] || {}; return [esc(g.preferredName), esc([a.date, a.time, a.ref].filter(Boolean).join(' · ') || '—') + (a.pickupRequested ? ' · pickup REQUESTED' : '')]; });
-  html += sec('Arrival & Departure', idx('journey'), trv.concat([
+  html += sec('Arrival & Departure', idx('travel'), trv.concat([
     ['Departure', esc([S.departure.date, S.departure.time].filter(Boolean).join(' · ') || '—') + (S.departure.transferRequested ? ' · transfer REQUESTED' : '')],
   ]));
   if (S.bangkokStay && S.bangkokStay.property) {
@@ -1328,7 +1335,7 @@ function renderReview() {
   }
   if (S.postWedding && S.postWedding.joined) html += sec('The Post Wedding Journey', idx('journey'),
     POST_WEDDING.map((c) => [esc(c.type), esc(c.label) + ' · ' + esc(c.when) + ' · ' + (c.contribution != null ? money(c.contribution) : 'contribution follows with Guest Relations')]));
-  html += sec('Your Transfers', idx('journey'), (S.transfers || []).length
+  html += sec('Your Transfers', idx('travel'), (S.transfers || []).length
     ? S.transfers.map((s) => {
         const t = TRANSFERS.find((x) => x.id === s.transferId) || {};
         const d = s.details || {};
