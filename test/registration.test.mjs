@@ -170,8 +170,8 @@ test('the 2BR Airbnb is a complimentary limited-availability option, never price
     'assets/images/airbnb/airbnb-03.jpg',
   ]);
   assert.match(b.referenceUrl, /airbnb\.com\/rooms\/23930245/);
-  assert.match(b.blurb, /complimentary/i);          // generosity must be visible (owner §16)
-  assert.match(b.blurb, /limited availability/i);    // scarcity must be honest (owner §17)
+  assert.equal(b.status, 'Complimentary · limited availability'); // prominent status (owner §18)
+  assert.match(b.blurb, /limited number of guests/i);             // §20 final description, no redundant status repeat
   const banned = /USD 0|fully hosted|nothing to book|guest rate/i;
   assert.ok(!banned.test(JSON.stringify(b)), 'the residence is never priced or over-promised');
   assert.equal(partyTotal(b, ['g1', 'g2']), 0); // internal neutral total, never displayed as USD 0

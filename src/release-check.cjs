@@ -100,7 +100,7 @@ const airbnbSeg = dataSrc.slice(dataSrc.indexOf("id: 'airbnb-2br'"));
 const airbnbOk = airbnbSeg.length > 10
   && /contributionPerGuest: null/.test(airbnbSeg)
   && /capacityUnit: 'Party allocation'/.test(airbnbSeg)
-  && /complimentary/i.test(airbnbSeg) && /limited availability/i.test(airbnbSeg)
+  && /status: 'Complimentary · limited availability'/.test(airbnbSeg)
   && !/USD\s*\d|per night|guest rate/i.test(airbnbSeg); // owner 2026-08-28: complimentary + limited, never priced
 const bookingValueLeak = /123\.8/.test(dataSrc) || /123\.8/.test(appJs) || /123\.8/.test(indexHtml);
 const matrixOk = ['contributionPerGuest: 145', 'contributionPerGuest: 155', 'contributionPerGuest: 170',

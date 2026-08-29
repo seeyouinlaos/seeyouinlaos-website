@@ -162,6 +162,7 @@ export const ACCOMMODATIONS = [
     stay: STAY_WINDOW, nights: 2,
     contributionPerGuest: 290, selectable: false,
     reservedNote: 'Reserved',
+    reservedFor: 'Reserved for the bride and groom',
     capacityTotal: 1, capacityUnit: 'Room', selectionScope: 'PARTY',
     size: '84 sq.m.', bed: '1 King bed', occupancy: '2 adults · 2 children',
     location: 'Pool and garden views · one suite only',
@@ -177,11 +178,12 @@ export const ACCOMMODATIONS = [
     stay: STAY_WINDOW, nights: 2,
     contributionPerGuest: 750, selectable: false,
     reservedNote: 'Reserved',
+    reservedFor: 'Reserved for the wedding couple\u2019s family',
     capacityTotal: 1, capacityUnit: 'Room', selectionScope: 'PARTY',
     size: '118 sq.m.', bed: 'Two bedrooms · king and twin', occupancy: '4 adults · 2 children',
     location: 'One unit only',
-    blurb: 'The largest suite of the house: two bedrooms, private bathrooms and a co-living space under a high ceiling.',
-    amenities: ['Two bedrooms', 'Private bathrooms', 'Separate living area', 'Co-living space', 'Pantry', 'Dining table', 'High ceiling'],
+    blurb: 'The largest suite of the house: two bedrooms, private bathrooms and a shared living space under a high ceiling.',
+    amenities: ['Two bedrooms', 'Private bathrooms', 'Separate living area', 'Shared living space', 'Pantry', 'Dining table', 'High ceiling'],
     images: [RM + 'souphattra-presidential-1.jpg', RM + 'souphattra-presidential-2.jpg', RM + 'souphattra-presidential-3.jpg'],
   },
   {
@@ -201,7 +203,8 @@ export const ACCOMMODATIONS = [
     capacityTotal: 1, capacityUnit: 'Party allocation', selectionScope: 'PARTY',
     size: 'Private residence', bed: 'Sleeps up to 4', occupancy: 'Up to 4 adults',
     location: 'Downtown Vientiane · 300 m to the Mekong Night Market · 800 m to Wat Sisaket',
-    blurb: 'A warm, private residence in downtown Vientiane, decorated with natural materials, wood furniture and Lao bamboo handicraft. Secured for the wedding nights for up to four adults. A complimentary option with limited availability; Guest Relations coordinates every detail with you personally.',
+    status: 'Complimentary · limited availability',
+    blurb: 'A warm private residence in central Vientiane, secured for the wedding stay and hosted for a limited number of guests. Guest Relations coordinates the arrangements personally.',
     amenities: ['Wi-Fi', 'Air conditioning', 'Hot water', 'Washer & laundry area', 'Refrigerator', 'Kettle & kitchenette', 'Hair dryer', 'Free parking'],
     images: ['assets/images/airbnb/airbnb-01.jpg', 'assets/images/airbnb/airbnb-02.jpg', 'assets/images/airbnb/airbnb-03.jpg']
   },
@@ -240,24 +243,24 @@ export const TRAIN = {
  * `fields`: airport products collect flight data, LCR products collect
  * train data — never both. */
 export const TRANSFERS = [
-  { id: 'shuttle-shared', group: 'Complimentary Shuttle', name: 'Complimentary Shared Shuttle',
+  { id: 'shuttle-shared', group: 'Shared Shuttle', name: 'Complimentary Shared Shuttle',
     pricePerUnit: 0, direction: 'arrival', fieldsFor: 'flight',
     included: 'Private vehicle and driver · met personally · luggage handled',
     included: 'Shared ride with fellow guests · luggage handled · Guest Relations confirms your slot personally',
     blurb: 'Between Wattay International Airport / Vientiane railway station and Souphattra Heritage on arrival day — departing approximately every 40 minutes, 14:00–18:00.' },
-  { id: 'apt-pickup-jaguar', group: 'Airport', name: 'Airport Pick-up by Jaguar',
+  { id: 'apt-pickup-jaguar', group: 'Airport', name: 'Airport Pickup by Jaguar',
     pricePerUnit: 25, direction: 'arrival', fieldsFor: 'flight',
     included: 'Private vehicle and driver · met personally · luggage handled',
     blurb: 'From Wattay International Airport to Souphattra Heritage, met in the arrivals hall.' },
-  { id: 'apt-dropoff-jaguar', group: 'Airport', name: 'Airport Drop-off by Jaguar',
+  { id: 'apt-dropoff-jaguar', group: 'Airport', name: 'Airport Drop Off by Jaguar',
     pricePerUnit: 25, direction: 'departure', fieldsFor: 'flight',
     included: 'Private vehicle and driver · met personally · luggage handled',
     blurb: 'From Souphattra Heritage to Wattay International Airport, timed to your flight.' },
-  { id: 'apt-pickup-merc', group: 'Airport', name: 'Airport Pick-up by Mercedes-Benz',
+  { id: 'apt-pickup-merc', group: 'Airport', name: 'Airport Pickup by Mercedes-Benz',
     pricePerUnit: 40, direction: 'arrival', fieldsFor: 'flight',
     included: 'Private vehicle and driver · met personally · luggage handled',
     blurb: 'From Wattay International Airport to Souphattra Heritage, met in the arrivals hall.' },
-  { id: 'apt-dropoff-merc', group: 'Airport', name: 'Airport Drop-off by Mercedes-Benz',
+  { id: 'apt-dropoff-merc', group: 'Airport', name: 'Airport Drop Off by Mercedes-Benz',
     pricePerUnit: 40, direction: 'departure', fieldsFor: 'flight',
     included: 'Private vehicle and driver · met personally · luggage handled',
     blurb: 'From Souphattra Heritage to Wattay International Airport, timed to your flight.' },
@@ -292,7 +295,7 @@ export const PACKAGE_INCLUSIONS = [
   { id: 'ceremony', label: 'Wedding Ceremony', event: 'ceremony' },
   { id: 'cake', label: 'Cake Reception and Social Hour', event: 'dinner' },
   { id: 'dinner', label: 'Wedding Dinner', event: 'dinner' },
-  { id: 'beverage', label: 'Two-hour beverage package — water, soft drinks, fruit juice, red or white wine', event: 'dinner' },
+  { id: 'beverage', label: 'Two hour beverage package — water, soft drinks, fruit juice, red or white wine', event: 'dinner' },
   { id: 'gr', label: 'Guest Relations assistance throughout' },
   { id: 'experiences', label: 'Selected cultural and hospitality experiences from your personal itinerary' },
 ];
@@ -306,13 +309,14 @@ export const STATUS = {
 };
 
 export const COPY = {
-  priceLabel: 'Your contribution per guest for the first night',
-  priceNote: 'The amount shown is per guest for the first night. Your second night is complimentary, and breakfast is included on both mornings.',
+  priceLabel: 'Your stay',
+  priceNote: 'For rooms at Souphattra Heritage Vientiane, the amount shown is your total contribution per guest for the confirmed two night stay: the first night is your guest contribution; the second night is hosted by',
+  priceNote2: 'Breakfast is included on both mornings. A limited number of complimentary alternative stays are also available.',
   /*   keeps "Haruthai & Suthep" unbreakable on every viewport (owner hard rule) */
   hostedNight: 'Your second hotel night is complimentary — part of the hospitality of your hosts.',
-  payment: 'No deposit is required. After Guest Relations confirms your arrangements, you will receive an invoice with bank transfer or PayPal instructions. Payment is due within seven days.',
+  payment: 'No deposit is required. Once confirmed, you will receive your invoice with bank transfer or PayPal instructions. Payment is due within seven days.',
   requestNote: 'This is a registration request. Guest Relations will confirm your arrangements separately.',
-  sharedHome: 'Souphattra Heritage Vientiane is held for the people we love. Everyone we invite stays under one roof: shared mornings, shared arrivals, the whole rhythm of the weekend in one quiet place. You choose the room where you wake up: the first night at the guest rate, the second night complimentary \u2014 hosted for you.',
+  sharedHome: 'Souphattra Heritage Vientiane is held for the people we love and sits at the heart of the wedding stay: shared mornings, shared arrivals, and the whole rhythm of the weekend centred around one quiet place. You choose the stay that feels right for you.',
 };
 
 /* ---------------- Guest List — PRODUCTION LOOKUP (token-only) -------------

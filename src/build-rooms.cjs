@@ -58,15 +58,15 @@ function card(a) {
     a.kind === 'airbnb'
       ? '<div class="rm-hosted"><span>Complimentary stay</span><span>Limited availability</span><span class="rh-b">Personally coordinated by Guest Relations</span></div>'
       : !reserved
-        ? '<div class="rm-hosted"><span>First night · guest rate</span><span>Second night · complimentary</span><span class="rh-b">Hosted by</span><span class="hs">Haruthai&nbsp;&amp;&nbsp;Suthep</span><span>Breakfast included</span></div>'
+        ? '<div class="rm-hosted"><span>First night · guest contribution</span><span class="rh-b">Second night · hosted by</span><span class="hs">Haruthai&nbsp;&amp;&nbsp;Suthep</span><span>Breakfast included</span></div>'
         : '',
     '<p class="rm-blurb">' + esc(a.blurb) + '</p>',
     '<dl class="rm-specs">' + specs.concat([['Availability', reserved
-        ? 'Reserved for the wedding couple\u2019s family'
+        ? (a.reservedFor || 'Reserved')
         : a.kind === 'airbnb'
           ? 'Limited availability · personally coordinated by Guest Relations'
           : a.capacityTotal + (a.capacityTotal === 1 ? ' room' : ' rooms') + ' allocated']])
-      .map((r) => '<div><dt>' + r[0] + '</dt><dd>' + esc(r[1]) + '</dd></div>').join('') + '</dl>',
+      .map((r) => '<div' + (r[0] === 'Availability' ? ' class="spec-wide"' : '') + '><dt>' + r[0] + '</dt><dd>' + esc(r[1]) + '</dd></div>').join('') + '</dl>',
     amen.length
       ? '<div class="rm-amen">' + amen.map((x) => '<span>' + esc(x) + '</span>').join('') + '</div>'
       : '',

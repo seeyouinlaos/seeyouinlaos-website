@@ -37,7 +37,7 @@ function roomPriceHtml(a) {
   }
   const per = contributionPerGuest(a);
   return '<div class="acc-price"><span class="amt">' + showAmount(per) + '</span>' +
-    '<span class="per">first night · per guest</span></div>';
+    '<span class="per">total contribution · per guest</span></div>';
 }
 function guestAvailability(res, unitPlural) {
   if (!res) return '';
@@ -408,7 +408,7 @@ function renderHome() {
     '<p class="note">' + esc(COPY.sharedHome) + '</p>' +
     '<div class="home-grid">' +
     card('stay', 'My Stay', acc ? esc(acc.name) : 'Choose your room',
-      acc ? (acc.contributionPerGuest == null ? 'Complimentary · coordinated by Guest Relations' : showAmount(contributionPerGuest(acc)) + ' per guest · party ' + money(partyTotal(acc, occ))) : 'Souphattra Heritage Vientiane, our shared home',
+      acc ? (acc.contributionPerGuest == null ? 'Complimentary · coordinated by Guest Relations' : showAmount(contributionPerGuest(acc)) + ' per guest · total ' + money(partyTotal(acc, occ))) : 'Souphattra Heritage Vientiane, our shared home',
       acc ? (S.stay.waitlist ? 'WAITLISTED' : 'REQUESTED') : 'OPEN',
       acc ? (acc.images || [])[0] : null) +
     card('journey', 'My Travel', riders.length ? 'Overnight Sleeper Train' : 'Your way to Laos',
@@ -621,7 +621,7 @@ function roomSpecs(a, availRow) {
   if (availRow) rows.push(['Availability', availRow]);
   if (!rows.length) return '';
   return '<dl class="acc-specs">' + rows.map((r) =>
-    '<div><dt>' + r[0] + '</dt><dd>' + esc(r[1]) + '</dd></div>').join('') + '</dl>' +
+    '<div' + (r[0] === 'Availability' ? ' class="spec-wide"' : '') + '><dt>' + r[0] + '</dt><dd>' + esc(r[1]) + '</dd></div>').join('') + '</dl>' +
     ((a.amenities || []).length
       ? '<div class="acc-amen">' + a.amenities.map((x) => '<span>' + esc(x) + '</span>').join('') + '</div>'
       : '');
@@ -644,13 +644,15 @@ function renderStay() {
       '<div class="acc-meta">' + esc(a.stay) + ' · ' + a.nights + ' nights</div>' +
       (a.kind === 'airbnb'
         ? '<div class="acc-hosted"><span>Complimentary stay</span><span>Limited availability</span><span class="rh-b">Personally coordinated by Guest Relations</span></div>'
-        : '<div class="acc-hosted"><span>First night · guest rate</span><span>Second night · complimentary</span><span class="rh-b">Hosted by</span><span class="hs">Haruthai&nbsp;&amp;&nbsp;Suthep</span><span>Breakfast included</span></div>') +
+        : bookable
+          ? '<div class="acc-hosted"><span>First night · guest contribution</span><span class="rh-b">Second night · hosted by</span><span class="hs">Haruthai&nbsp;&amp;&nbsp;Suthep</span><span>Breakfast included</span></div>'
+          : '') +
       '<p class="acc-blurb">' + esc(a.blurb) + '</p>' +
       roomSpecs(a, bookable
         ? (selected ? 'Requested · Guest Relations will confirm'
            : a.kind === 'airbnb' ? 'Limited availability · personally coordinated by Guest Relations'
            : guestAvailability(res))
-        : 'Reserved') +
+        : (a.reservedFor || 'Reserved')) +
       '<div class="acc-actions">' +
       '<button type="button" class="btn ghost sm" data-view="' + a.id + '">View details</button>' +
       (!bookable ? ''
@@ -661,12 +663,12 @@ function renderStay() {
   }).join('');
   box.innerHTML =
     '<p class="note" style="margin-bottom:22px">' + esc(COPY.sharedHome) + '</p>' +
-    '<div class="price-note"><div class="label">' + esc(COPY.priceLabel) + '</div><p class="note">' + esc(COPY.priceNote) + ' ' + esc(COPY.hostedNight) + '</p></div>' +
+    '<div class="price-note"><div class="label">' + esc(COPY.priceLabel) + '</div><p class="note">' + esc(COPY.priceNote) + '<span class="hs">Haruthai&nbsp;&amp;&nbsp;Suthep</span></p><p class="note">' + esc(COPY.priceNote2) + '</p></div>' +
     '<div class="acc-grid">' + cards + '</div>' +
     '<div class="field" style="margin-top:30px"><label>Bed preference</label><select id="stay-bed"><option' + sel('') + '>No preference</option><option' + sel('One large bed') + '>One large bed</option><option' + sel('Two beds') + '>Two beds</option></select></div>' +
     '<div class="field"><label for="stay-req">Special request</label><textarea id="stay-req">' + esc(S.stay.request) + '</textarea></div>' +
     '<div id="stay-selected"></div>' +
-    '<p class="note" style="margin-top:18px">' + esc(COPY.requestNote) + ' ' + esc(COPY.payment) + ' If you need something different, Guest Relations arranges it personally.</p>';
+    '<p class="note" style="margin-top:18px">' + esc(COPY.requestNote) + ' ' + esc(COPY.payment) + ' If you need something different, Guest Relations will arrange it personally.</p>';
   function sel(v) { return S.stay.bed === v ? ' selected' : ''; }
   box.querySelectorAll('[data-select]').forEach((b) => b.addEventListener('click', () => {
     S.stay.accommodationId = b.getAttribute('data-select');
@@ -678,7 +680,7 @@ function renderStay() {
     const occ = S.stay.occupantGuestIds;
     announce('Requested ' + acc.name + ' for you. ' + (acc.contributionPerGuest == null
       ? 'This stay is complimentary and limited; Guest Relations coordinates it personally. '
-      : occ.length + ' guest' + (occ.length > 1 ? 's' : '') + ', ' + money(contributionPerGuest(acc)) + ' per guest, party contribution ' + money(partyTotal(acc, occ)) + '. ') + COPY.requestNote);
+      : occ.length + ' guest' + (occ.length > 1 ? 's' : '') + ', ' + money(contributionPerGuest(acc)) + ' per guest, total contribution ' + money(partyTotal(acc, occ)) + '. ') + COPY.requestNote);
   }));
   renderStaySelected();
   box.querySelectorAll('[data-waitlist]').forEach((b) => b.addEventListener('click', () => {
@@ -703,12 +705,11 @@ function renderStaySelected() {
     '<div class="stay-sum" style="margin-top:30px" aria-live="polite">' +
     '<div class="row"><span class="l serif-it">Requested for you</span><span class="r">' + esc(acc.name) + (S.stay.waitlist ? ' · WAITLISTED' : '') + '</span></div>' +
     (neutral
-      ? '<div class="row"><span class="l">' + occ.length + ' guest' + (occ.length > 1 ? 's' : '') + ' · one ' + esc(acc.capacityUnit.toLowerCase()) + '</span><span class="r">Arranged separately · coordinated by Guest Relations</span></div>'
-      : '<div class="row"><span class="l">' + occ.length + ' guest' + (occ.length > 1 ? 's' : '') + ' · one ' + esc(acc.capacityUnit.toLowerCase()) + '</span><span class="r">' + money(contributionPerGuest(acc)) + ' per guest · complete stay</span></div>' +
-        '<div class="row total"><span class="l serif-it">Your party contribution</span><span class="r">' + money(partyTotal(acc, occ)) + '</span></div>' +
-        '<div class="row"><span class="l">Second night</span><span class="r">Complimentary · hosted by<span class="hs">Haruthai&nbsp;&amp;&nbsp;Suthep</span></span></div>') +
-    '</div>' +
-    '<p class="note" style="margin-top:12px">' + esc(COPY.requestNote) + '</p>';
+      ? '<div class="row"><span class="l">' + occ.length + ' guest' + (occ.length > 1 ? 's' : '') + ' · one ' + esc(acc.capacityUnit.toLowerCase()) + '</span><span class="r">Complimentary · coordinated by Guest Relations</span></div>'
+      : '<div class="row"><span class="l">' + occ.length + ' guest' + (occ.length > 1 ? 's' : '') + ' · one ' + esc(acc.capacityUnit.toLowerCase()) + '</span><span class="r">' + money(contributionPerGuest(acc)) + ' · total contribution per guest</span></div>' +
+        '<div class="row total"><span class="l serif-it">Total contribution</span><span class="r">' + money(partyTotal(acc, occ)) + '</span></div>' +
+        '<div class="row"><span class="l">Second night</span><span class="r">Hosted by<span class="hs">Haruthai&nbsp;&amp;&nbsp;Suthep</span></span></div>') +
+    '</div>';
 }
 
 /* ---------------- room gallery lightbox (prev/next/count/close/keys) ------ */
@@ -798,7 +799,7 @@ function openAccOverlay(id) {
     (a.occupancy ? '<div><dt>Guests</dt><dd>' + esc(a.occupancy) + '</dd></div>' : '') +
     (a.location ? '<div><dt>Where</dt><dd>' + esc(a.location) + '</dd></div>' : '') +
     (bookable
-      ? '<div><dt>Contribution</dt><dd>' + (a.contributionPerGuest == null ? 'Complimentary · personally coordinated' : showAmount(contributionPerGuest(a)) + ' per guest · first night') + '</dd></div>' +
+      ? '<div><dt>Contribution</dt><dd>' + (a.contributionPerGuest == null ? 'Complimentary · personally coordinated' : showAmount(contributionPerGuest(a)) + ' · total contribution per guest') + '</dd></div>' +
         '<div><dt>Availability</dt><dd>' + esc(a.kind === 'airbnb' ? 'Limited availability · personally coordinated by Guest Relations' : guestAvailability(res)) + '</dd></div>' +
         '<div><dt>Selection</dt><dd>One ' + esc(a.capacityUnit === 'Party allocation' ? 'residence' : a.capacityUnit.toLowerCase()) + ' per invitation</dd></div>'
       : '') +
@@ -844,30 +845,17 @@ function renderTravel() {
   if (mixedTrain) { S.arrival.shared = false; S.departure.shared = false; }
   const shared = S.arrival.shared !== false;
   const trainy = S.guests.some((g) => g.journey.train);
+  /* FULL SERVICE (owner §8-12): no operational questionnaire. The guest sees
+   * the journey and chooses services; Guest Relations coordinates every
+   * arrival, departure and pickup detail personally. The underlying travel
+   * data structures remain for Guest Relations — they are simply never a
+   * guest-facing form. */
   box.innerHTML =
-    (mixedTrain ? '<p class="note" style="margin-bottom:18px">You are travelling differently — one of you is on the overnight train — so each of you has their own travel details below.</p>' : '') +
-    (many && !mixedTrain ? '<div class="plans-toggle"><label><input type="radio" name="trv-shared" value="yes"' + (shared ? ' checked' : '') + '/><span>We travel together</span></label>' +
-      '<label><input type="radio" name="trv-shared" value="no"' + (!shared ? ' checked' : '') + '/><span>We have different travel details</span></label></div>' : '') +
-    (shared ? travelFields('shared', S.arrival, S.departure, trainy)
-            : S.guests.map((g) => '<h3 class="trv-name">' + esc(g.preferredName) + '</h3>' +
-                travelFields(g.guestId, S.arrivalByGuest[g.guestId] || {}, S.departureByGuest[g.guestId] || {}, g.journey.train)).join('')) +
+    (trainy ? '<p class="note" style="margin-bottom:14px">The Overnight Sleeper Train from Bangkok to Nong Khai is part of your journey — a central experience on the way to the wedding. Guest Relations coordinates your timings personally.</p>' : '') +
+    '<p class="note" style="margin-bottom:6px">Your arrival and departure are coordinated personally by Guest Relations — nothing to organise here. If a detail is ever needed, they will simply ask you.</p>' +
     renderTransfers() +
     '<p class="note" style="margin-top:18px">Pickup and transfers are requests — statuses move from REQUESTED to UNDER REVIEW to CONFIRMED as Guest Relations coordinates them.</p>';
   wireTransfers(box);
-  if (many) box.querySelectorAll('input[name="trv-shared"]').forEach((el) => el.addEventListener('change', () => {
-    S.arrival.shared = el.value === 'yes'; S.departure.shared = el.value === 'yes'; saveDraft(); renderTravel();
-  }));
-  box.querySelectorAll('[data-trv]').forEach((el) => {
-    el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'input', () => {
-      const [scope, section, key] = el.getAttribute('data-trv').split('|');
-      const target = scope === 'shared'
-        ? (section === 'a' ? S.arrival : S.departure)
-        : ((section === 'a' ? S.arrivalByGuest : S.departureByGuest)[scope] ||= {});
-      target[key] = el.type === 'radio' ? el.value === 'yes' : el.value;
-      if (el.type === 'radio' && !el.checked) return;
-      saveDraft(); renderSummary();
-    });
-  });
 }
 /* ---------------- transfer products (Owner price master) ----------------
  * FULL SERVICE (owner §13-18): the guest sees service, route, inclusions and
@@ -893,11 +881,10 @@ function renderTransfers() {
         const sel = selectedTransfer(t.id);
         const free = !t.pricePerUnit;
         return '<article class="trf-card' + (sel ? ' sel' : '') + '" data-trf="' + t.id + '">' +
-          '<div class="trf-head"><div><h4>' + esc(t.name) + '</h4><p class="note">' + esc(t.blurb) + '</p>' +
-          (t.included ? '<p class="note trf-incl">' + esc(t.included) + '</p>' : '') + '</div>' +
-          '<div class="acc-price">' + (free
-            ? '<span class="amt" style="font-size:15px;letter-spacing:.14em">COMPLIMENTARY</span>'
-            : '<span class="amt">' + money(t.pricePerUnit) + '</span><span class="per">per vehicle</span>') + '</div></div>' +
+          '<h4>' + esc(t.name) + '</h4>' +
+          (free ? '' : '<div class="trf-price">' + money(t.pricePerUnit) + ' · per vehicle</div>') +
+          '<p class="note">' + esc(t.blurb) + '</p>' +
+          (t.included ? '<p class="note trf-incl">' + esc(t.included) + '</p>' : '') +
           '<div class="acc-actions">' +
           (sel
             ? '<button type="button" class="btn sm" data-trf-remove="' + t.id + '">Remove from journey</button>'
@@ -1008,7 +995,7 @@ function renderEach() {
     '<input type="file" accept="image/*,.pdf" hidden data-pass-input="' + g.guestId + '"/></div></div>' +
     '<div class="cols2">' +
     ef(g, 'email', 'Email', 'email') + /* Telephone removed from the guest-facing profile (master data keeps it) */
-    '<div class="field"><label>Dietary preference</label><select data-ef="diet">' + ['No restrictions', 'Vegetarian', 'Vegan', 'Pescatarian', 'Gluten-free', 'Lactose-free', 'Other'].map((o) => '<option' + (g.diet === o ? ' selected' : '') + '>' + o + '</option>').join('') + '</select></div>' +
+    '<div class="field"><label>Dietary preference</label><select data-ef="diet">' + ['No restrictions', 'Vegetarian', 'Vegan', 'Pescatarian', 'Gluten free', 'Lactose free', 'Other'].map((o) => '<option' + (g.diet === o ? ' selected' : '') + '>' + o + '</option>').join('') + '</select></div>' +
     '<div class="field"><label>Any food allergies?</label><div class="join">' +
     '<label><input type="radio" name="alg-' + g.guestId + '" value="yes"' + (g.allergy === 'yes' ? ' checked' : '') + '/><span class="yes">Yes</span></label>' +
     '<label><input type="radio" name="alg-' + g.guestId + '" value="no"' + (g.allergy !== 'yes' ? ' checked' : '') + '/><span class="no">No</span></label></div></div>' +
@@ -1017,7 +1004,7 @@ function renderEach() {
     '<div class="field"><label>Severe / needs special handling?</label><div class="join">' +
     '<label><input type="radio" name="sev-' + g.guestId + '" value="yes"' + (g.severe ? ' checked' : '') + '/><span class="yes">Yes, severe</span></label>' +
     '<label><input type="radio" name="sev-' + g.guestId + '" value="no"' + (!g.severe ? ' checked' : '') + '/><span class="no">Standard care</span></label></div></div></div>' +
-    '<div class="cols2">' + ef(g, 'dislikes', 'Food dislikes or preferences') + '</div>' +
+    '<div class="cols2">' + ef(g, 'dislikes', 'Foods you dislike') + '</div>' +
     '<div class="label" style="margin:26px 0 6px">A little about you</div>' +
     '<div class="cols2">' +
     ef(g, 'favFood', 'What\u2019s your favourite food?') + ef(g, 'favDrink', 'What\u2019s your favourite drink?') +
@@ -1124,7 +1111,7 @@ function renderCost() {
   rows += row('Alms Giving Ceremony', 'USD 0 · included');
   rows += row('Wedding Ceremony', 'USD 0 · included');
   rows += row('Sunset drinks, cake reception &amp; Wedding Dinner', 'USD 0 · included');
-  rows += row('Two-hour beverage package', 'USD 0 · included');
+  rows += row('Two hour beverage package', 'USD 0 · included');
   if (acc && !neutral) rows += row('<span class="serif-it">' + esc(acc.name) + '</span> · night two', 'USD 0 · hosted by<span class="hs">Haruthai&nbsp;&amp;&nbsp;Suthep</span>');
   // 1 MARCH — departure
   rows += day('Monday · 1 March');
@@ -1200,7 +1187,7 @@ function renderReview() {
     : [['Requested', 'None']]);
   const jcRiders = S.guests.filter((g) => g.journey.train).length;
   const jcRows = [];
-  if (acc) jcRows.push(['Stay', esc(acc.name) + ' · ' + (acc.contributionPerGuest == null ? 'complimentary' : money(partyTotal(acc, occ)))]);
+  if (acc) jcRows.push(['Stay', esc(acc.name) + ' · ' + (acc.contributionPerGuest == null ? 'complimentary · limited' : money(partyTotal(acc, occ)))]);
   if (jcRiders) jcRows.push(['Train', jcRiders + ' × ' + money(TRAIN.contributionPerGuest) + ' = ' + money(trainContribution(TRAIN, jcRiders) || 0)]);
   if ((S.transfers || []).length) jcRows.push(['Transfers', money(transfersTotal(TRANSFERS, S.transfers))]);
   jcRows.push(['Total journey cost', money(journeyTotal(acc, occ, TRAIN, jcRiders, TRANSFERS, S.transfers))]);
