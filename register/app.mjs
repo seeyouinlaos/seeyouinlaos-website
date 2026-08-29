@@ -520,8 +520,9 @@ function wireTrainDetails(box) {
 /* ---------------- step 4 · events ---------------- */
 function renderEvents() {
   const box = document.getElementById('events-box');
+  S.guests.forEach((g) => { g.events.ceremony = true; }); // mandatory programme moment — normalise older drafts
   box.innerHTML = modulePicker({
-    modules: EVENTS.map((e) => ({ id: e.id, label: e.label, when: e.when + ' · ' + e.venue, blurb: e.blurb })),
+    modules: EVENTS.map((e) => ({ id: e.id, label: e.label, when: e.when + ' · ' + e.venue, blurb: e.blurb, locked: e.id === 'ceremony' })),
     field: 'events',
   });
   wireModulePicker(box, 'events');
@@ -546,8 +547,8 @@ function modulePicker({ modules, field }) {
       return '<div class="join-row">' +
         (g ? '<span class="join-who">' + esc(g.preferredName) + '</span>' : '') +
         '<div class="join" role="radiogroup" aria-label="' + esc(m.label) + (g ? ' for ' + esc(g.preferredName) : '') + '">' +
-        '<label><input type="radio" name="' + nm + '" value="yes"' + (joined && !m.disabled ? ' checked' : '') + (m.disabled ? ' disabled' : '') + '/><span class="yes">I’m joining</span></label>' +
-        '<label><input type="radio" name="' + nm + '" value="no"' + (!joined || m.disabled ? ' checked' : '') + '/><span class="no">Not joining</span></label>' +
+        '<label><input type="radio" name="' + nm + '" value="yes"' + ((m.locked || (joined && !m.disabled)) ? ' checked' : '') + ((m.disabled || m.locked) ? ' disabled' : '') + (m.locked ? ' aria-disabled="true"' : '') + '/><span class="yes' + (m.locked ? ' locked-yes' : '') + '">I’m joining</span></label>' +
+        '<label><input type="radio" name="' + nm + '" value="no"' + ((!m.locked && (!joined || m.disabled)) ? ' checked' : '') + (m.locked ? ' disabled aria-disabled="true"' : '') + '/><span class="no">Not joining</span></label>' +
         (m.waitlist ? '<label><input type="radio" name="' + nm + '" value="waitlist"/><span class="no">Join the waitlist</span></label>' : '') +
         '</div></div>';
     }).join('');
@@ -564,6 +565,7 @@ function wireModulePicker(box, field) {
   }));
   box.querySelectorAll('input[name^="mod-"]').forEach((el) => el.addEventListener('change', () => {
     const [, f, modId, who] = el.name.match(/^mod-([a-z]+)-([a-z-]+)-(.+)$/);
+    if (f === 'events' && modId === 'ceremony') return; // mandatory — locked in the UI and here
     const join = el.value === 'yes';
     const wl = el.value === 'waitlist';
     const apply = (g) => { g[f][modId] = join || wl; if (wl) g[f][modId + 'Waitlist'] = true; };
@@ -663,7 +665,7 @@ function renderStay() {
   }).join('');
   box.innerHTML =
     '<p class="note" style="margin-bottom:22px">' + esc(COPY.sharedHome) + '</p>' +
-    '<div class="price-note"><div class="label">' + esc(COPY.priceLabel) + '</div><p class="note">' + esc(COPY.priceNote) + '<span class="hs">Haruthai&nbsp;&amp;&nbsp;Suthep</span></p><p class="note">' + esc(COPY.priceNote2) + '</p></div>' +
+    '<div class="price-note"><div class="label">' + esc(COPY.priceLabel) + '</div><p class="note">' + esc(COPY.priceNote + ' Haruthai\u00A0&\u00A0Suthep.') + '</p><p class="note">' + esc(COPY.priceNote2) + '</p></div>' +
     '<div class="acc-grid">' + cards + '</div>' +
     '<div class="field" style="margin-top:30px"><label>Bed preference</label><select id="stay-bed"><option' + sel('') + '>No preference</option><option' + sel('One large bed') + '>One large bed</option><option' + sel('Two beds') + '>Two beds</option></select></div>' +
     '<div class="field"><label for="stay-req">Special request</label><textarea id="stay-req">' + esc(S.stay.request) + '</textarea></div>' +
@@ -995,6 +997,9 @@ function renderEach() {
     '<input type="file" accept="image/*,.pdf" hidden data-pass-input="' + g.guestId + '"/></div></div>' +
     '<div class="cols2">' +
     ef(g, 'email', 'Email', 'email') + /* Telephone removed from the guest-facing profile (master data keeps it) */
+    '</div>' +
+    '<div class="label" style="margin:26px 0 2px">Food, dietary &amp; safety</div>' +
+    '<div class="cols2">' +
     '<div class="field"><label>Dietary preference</label><select data-ef="diet">' + ['No restrictions', 'Vegetarian', 'Vegan', 'Pescatarian', 'Gluten free', 'Lactose free', 'Other'].map((o) => '<option' + (g.diet === o ? ' selected' : '') + '>' + o + '</option>').join('') + '</select></div>' +
     '<div class="field"><label>Any food allergies?</label><div class="join">' +
     '<label><input type="radio" name="alg-' + g.guestId + '" value="yes"' + (g.allergy === 'yes' ? ' checked' : '') + '/><span class="yes">Yes</span></label>' +
@@ -1005,7 +1010,8 @@ function renderEach() {
     '<label><input type="radio" name="sev-' + g.guestId + '" value="yes"' + (g.severe ? ' checked' : '') + '/><span class="yes">Yes, severe</span></label>' +
     '<label><input type="radio" name="sev-' + g.guestId + '" value="no"' + (!g.severe ? ' checked' : '') + '/><span class="no">Standard care</span></label></div></div></div>' +
     '<div class="cols2">' + ef(g, 'dislikes', 'Foods you dislike') + '</div>' +
-    '<div class="label" style="margin:26px 0 6px">A little about you</div>' +
+    '<div class="grp-end" aria-hidden="true"></div>' +
+    '<div class="label" style="margin:0 0 6px">A little about you</div>' +
     '<div class="cols2">' +
     ef(g, 'favFood', 'What\u2019s your favourite food?') + ef(g, 'favDrink', 'What\u2019s your favourite drink?') +
     ef(g, 'coffeeHow', 'How do you like your coffee?') + ef(g, 'teaLove', 'What tea do you love?') +
@@ -1125,7 +1131,7 @@ function renderCost() {
   box.innerHTML =
     '<p class="note" style="margin-bottom:18px">Everything below is part of your journey. Lines at USD 0 are included or hosted; your contribution is only what carries an amount.</p>' +
     '<div class="stay-sum fol" aria-live="polite">' + rows + '</div>' +
-    '<p class="note" style="margin-top:16px">' + esc(COPY.priceNote) + '</p>' +
+    '<p class="note" style="margin-top:16px">' + esc(COPY.priceNote + ' Haruthai\u00A0&\u00A0Suthep.') + '</p>' +
     '<p class="note">' + esc(COPY.payment) + ' One person may settle the invoice for everyone travelling with them.</p>';
 }
 

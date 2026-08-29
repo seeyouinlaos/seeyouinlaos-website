@@ -94,6 +94,8 @@ input:focus, select:focus, textarea:focus { border-bottom-color: var(--cherry); 
 .join input:checked + span.yes { background: var(--cherry); border-color: var(--cherry); color: var(--ivory); }
 .join input:checked + span.no { background: var(--ink-s); border-color: var(--ink-s); color: var(--ivory); }
 .join input:disabled + span { opacity: .35; cursor: not-allowed; }
+.join input:disabled:checked + span.locked-yes { opacity: 1; cursor: default; background: var(--cherry); border-color: var(--cherry); color: var(--ivory); }
+.grp-end { border-top: 1px solid var(--line); margin: 34px 0 30px; }
 .join input:focus-visible + span { outline: 2px solid var(--cherry-photo); outline-offset: 2px; }
 
 .mod { border-top: 1px solid var(--line); padding: 24px 0; }
