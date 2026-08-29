@@ -59,13 +59,13 @@ export const JOURNEY_MODULES = [
 
 export const EVENTS = [
   { id: 'alms', label: 'Alms Giving', when: 'Sunday, 28 February 2027',
-    venue: 'Souphattra Heritage Vientiane',
+    venue: 'Souphattra Heritage Vientiane', dress: 'Lao Traditional Dress', dressGroup: 'tradition',
     blurb: 'A quiet Buddhist ritual to open the wedding day at first light. Monks walk in procession; rice is offered; nothing is hurried.',
     templeNote: 'The participating temple will be announced with your itinerary.' },
   { id: 'ceremony', label: 'Wedding Ceremony', when: 'Sunday, 28 February 2027',
-    venue: 'Souphattra Heritage Vientiane', blurb: 'The vows, in front of everyone who matters.' },
+    venue: 'Souphattra Heritage Vientiane', dress: 'Black Tie', dressGroup: 'vow', blurb: 'The vows, in front of everyone who matters.' },
   { id: 'dinner', label: 'Wedding Dinner & Reception', when: 'Sunday, 28 February 2027',
-    venue: 'Souphattra Heritage Vientiane', blurb: 'Sunset drinks beside the pool, then dinner in the courtyard garden. Food, music and celebration.' },
+    venue: 'Souphattra Heritage Vientiane', dress: 'Black Tie', dressGroup: 'dinner', blurb: 'Sunset drinks beside the pool, then dinner in the courtyard garden. Food, music and celebration.' },
 ];
 
 /* ---------------- accommodation resources ----------------

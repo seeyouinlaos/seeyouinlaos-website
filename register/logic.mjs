@@ -270,6 +270,14 @@ export function validateRegistration(reg, ctx) {
       if (reg.stay.rooms && reg.stay.rooms !== 1) errors.push('one invitation requests exactly one room / allocation');
     }
   }
+  // dress code: each wedding moment with required attire needs its own explicit
+  // guest acknowledgement before that participation is complete (owner §21).
+  const acks = reg.dressAck || {};
+  for (const ev of (ctx.events || [])) {
+    if (!ev.dress) continue;
+    const joined = (reg.guests || []).some((g) => g.attending !== false && g.events && g.events[ev.id]);
+    if (joined && !acks[ev.id]) errors.push('please confirm the dress code for the ' + ev.label);
+  }
   // transfers: known service and sane units — details stay with Guest Relations
   for (const s of reg.transfers || []) {
     const t = (ctx.transfers || []).find((x) => x.id === s.transferId);

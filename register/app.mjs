@@ -74,6 +74,7 @@ function freshState() {
     departure: { shared: true, transferRequested: false },
     departureByGuest: {},
     additionalGuestRequest: '',
+    dressAck: { alms: false, ceremony: false, dinner: false }, // per-event dress code acknowledgement (§21)
     transfers: [],           // [{ transferId, units, details:{date,time,ref,place,location} }]
     trainNote: '',
     notes: '',
@@ -520,9 +521,10 @@ function wireTrainDetails(box) {
 /* ---------------- step 4 · events ---------------- */
 function renderEvents() {
   const box = document.getElementById('events-box');
+  S.dressAck ||= { alms: false, ceremony: false, dinner: false }; // older drafts predate the acknowledgement
   S.guests.forEach((g) => { g.events.ceremony = true; }); // mandatory programme moment — normalise older drafts
   box.innerHTML = modulePicker({
-    modules: EVENTS.map((e) => ({ id: e.id, label: e.label, when: e.when + ' · ' + e.venue, blurb: e.blurb, locked: e.id === 'ceremony' })),
+    modules: EVENTS.map((e) => ({ id: e.id, label: e.label, when: e.when + ' · ' + e.venue, blurb: e.blurb, locked: e.id === 'ceremony', dress: e.dress, dressGroup: e.dressGroup })),
     field: 'events',
   });
   wireModulePicker(box, 'events');
@@ -554,12 +556,29 @@ function modulePicker({ modules, field }) {
     }).join('');
     return '<div class="mod" data-mod="' + m.id + '">' +
       '<div class="mod-head"><div><div class="when">' + esc(m.when) + '</div><h3>' + esc(m.label) + '</h3><p>' + esc(m.blurb) + '</p>' + (m.id === 'train' ? '<div class="train-gal">' + ['train-01','train-04','train-03'].map((f, ti) => '<img src="../assets/images/train/' + f + '.jpg" alt="First Class Sleeper aboard Special Express No. 25 · view ' + (ti + 1) + '" loading="lazy" decoding="async"/>').join('') + '</div>' : '') +
+      (m.dress ? (function () {
+        const anyJoin = m.locked || S.guests.some((x) => x[field][m.id]);
+        const ok = !!(S.dressAck && S.dressAck[m.id]);
+        return '<div class="dress-req">' +
+          '<div class="label">Dress code</div>' +
+          '<div class="dress-name serif">' + esc(m.dress) + '</div>' +
+          '<div class="dress-gal">' + [1, 2, 3].map((i) => '<img src="../assets/images/dress/' + m.dressGroup + '-0' + i + '.jpg" alt="' + esc(m.dress) + ' dress reference ' + i + '" loading="lazy" decoding="async"/>').join('') + '</div>' +
+          '<p class="note">The dress code is part of this moment and applies to all guests attending. Please make sure you are comfortable following it before confirming your attendance. Guests who are not dressed in accordance with the required attire may not be able to join the event.</p>' +
+          (anyJoin ? '<label class="ack-row' + (ok ? ' ok' : '') + '"><input type="checkbox" data-ack="' + m.id + '"' + (ok ? ' checked' : '') + '/><span>I have read and understand the dress code</span></label>' : '') +
+          '</div>';
+      })() : '') +
       (m.disabled ? '<p class="cap-full">Fully allocated</p>' : '') + '</div>' +
       '<div class="join-col">' + rows + '</div></div></div>';
   }).join('');
   return html;
 }
 function wireModulePicker(box, field) {
+  box.querySelectorAll('[data-ack]').forEach((el) => el.addEventListener('change', () => {
+    S.dressAck ||= {};
+    S.dressAck[el.getAttribute('data-ack')] = el.checked;   // never preselected; the guest confirms actively
+    el.closest('.ack-row').classList.toggle('ok', el.checked);
+    saveDraft(); renderSummary();
+  }));
   box.querySelectorAll('input[name^="plans-"]').forEach((el) => el.addEventListener('change', () => {
     S.partyPlans = el.value; saveDraft(); renderStep(cur);
   }));
@@ -572,7 +591,7 @@ function wireModulePicker(box, field) {
     if (who === 'party') S.guests.forEach(apply);
     else { const g = S.guests.find((x) => x.guestId === who); if (g) apply(g); }
     saveDraft(); renderSummary();
-    if (f === 'journey' && modId === 'train') renderStep(cur);
+    if ((f === 'journey' && modId === 'train') || f === 'events') renderStep(cur);
   }));
 }
 
@@ -1150,9 +1169,9 @@ function renderReview() {
   let html = '';
   html += '<p class="home-hello" style="margin-bottom:20px">' + esc(S.invitation.partyName) + ' · Vientiane · February 2027</p>';
   html += sec('Your Guests', idx('party'), [
-    ['Party', esc(S.invitation.partyName)],
+    ['Invitation', esc(S.invitation.partyName)],
     ['Members', S.invitation.guests.map((g) => esc(g.fullName)).join(' · ')],
-    ['Party lead', esc((S.invitation.guests.find((g) => g.guestId === S.invitation.partyLead) || {}).fullName || '—')],
+    ['Lead guest', esc((S.invitation.guests.find((g) => g.guestId === S.invitation.partyLead) || {}).fullName || '—')],
   ]);
   html += sec('Your Journey', idx('journey'), S.guests.map((g) => [esc(g.preferredName), esc(journeyLine(g))]));
   const riders = S.guests.filter((g) => g.journey.train);
@@ -1162,7 +1181,14 @@ function renderReview() {
     ['Arrival', 'Nong Khai Railway Station'],
     ['Onward transfer', trainOnwardLine()],
   ].concat(S.trainNote ? [['Note', esc(S.trainNote)]] : []) : [['Joined', 'Not joined']]);
-  html += sec('Your Events', idx('events'), S.guests.map((g) => [esc(g.preferredName), esc(eventLine(g))]));
+  html += sec('The wedding days', idx('events'), EVENTS.map((e) => {
+    const joiners = S.guests.filter((g) => g.attending !== false && g.events[e.id]);
+    if (!joiners.length) return [esc(e.label), 'Not joining'];
+    const who = joiners.length === S.guests.length ? 'Joining' : 'Joining · ' + joiners.map((g) => esc(g.preferredName)).join(' & ');
+    const ack = S.dressAck && S.dressAck[e.id];
+    const dress = e.dress ? (ack ? ' · Dress code understood' : ' · <span class="ack-missing">Dress code not yet confirmed — please confirm under My Wedding</span>') : '';
+    return [esc(e.label), who + dress];
+  }));
   if (acc) html += '<div class="rv-room">' + roomFigure(acc) +
     '<div class="rv-room-b"><div class="label">Your room</div><h3>' + esc(acc.name) + '</h3>' +
     '<p class="note">' + esc([acc.size, acc.bed, acc.occupancy].filter(Boolean).join(' · ')) + '</p></div></div>';
@@ -1220,7 +1246,7 @@ function currentRegistration() {
   return {
     guests, stay: currentAcc() ? { ...S.stay } : { accommodationId: null },
     arrival: { ...S.arrival, point: S.guests.some((g) => g.journey.train) ? 'Nong Khai Railway Station' : (S.arrival.point || WEDDING.airport) },
-    departure: S.departure, transfers: S.transfers, additionalGuestRequest: S.additionalGuestRequest,
+    departure: S.departure, transfers: S.transfers, dressAck: { ...(S.dressAck || {}) }, additionalGuestRequest: S.additionalGuestRequest,
     trainNote: S.trainNote, notes: S.notes, registration_submitted_at: S.registration_submitted_at,
   };
 }
@@ -1230,7 +1256,7 @@ function trySubmit() {
     errEl.textContent = 'Please confirm the information is accurate first.'; errEl.classList.add('show'); return false;
   }
   const errors = validateRegistration(currentRegistration(), {
-    invitation: S.invitation, accommodations: ACCOMMODATIONS, trainCapacity: TRAIN.capacityTotal, transfers: TRANSFERS,
+    invitation: S.invitation, accommodations: ACCOMMODATIONS, trainCapacity: TRAIN.capacityTotal, transfers: TRANSFERS, events: EVENTS,
   });
   if (errors.length) { errEl.textContent = errors.join(' · '); errEl.classList.add('show'); return false; }
   errEl.classList.remove('show');

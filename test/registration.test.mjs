@@ -9,6 +9,7 @@ import {
   validateRegistration, buildNotification, nextInvitationState,
 } from '../register/logic.mjs';
 import { ACCOMMODATIONS, SELECTABLE_ACCOMMODATIONS, TRAIN, TRANSFERS, DEMO_MODE } from '../register/data.mjs';
+import { EVENTS } from '../register/data.mjs';
 import { tokenId, encryptInvitation, lookupByToken } from '../register/crypto.mjs';
 import { FIXTURE_INVITATIONS, lookupInvitation } from './fixtures.mjs';
 
@@ -384,10 +385,26 @@ function baseReg(inv) {
     stay: { accommodationId: 'the-heritage', occupantGuestIds: inv.guests.map((g) => g.guestId), rooms: 1 },
     arrival: { mode: 'flight', date: '2027-02-27', time: '11:30', point: 'Wattay International Airport (VTE)', ref: 'TG570', pickupRequested: true },
     departure: { date: '2027-03-01', point: 'Wattay International Airport (VTE)', transferRequested: true },
+    dressAck: { alms: true, ceremony: true, dinner: true }, // per-event acknowledgement (§21)
     registration_submitted_at: '2027-01-01T10:00:00Z',
   };
 }
-const ctx = (inv) => ({ invitation: inv, accommodations: ACCOMMODATIONS, trainCapacity: TRAIN.capacityTotal, train: TRAIN, transfers: TRANSFERS });
+const ctx = (inv) => ({ invitation: inv, accommodations: ACCOMMODATIONS, trainCapacity: TRAIN.capacityTotal, train: TRAIN, transfers: TRANSFERS, events: EVENTS });
+
+test('each wedding moment needs its OWN dress code acknowledgement (§21)', () => {
+  const inv = lookupInvitation('demo-amara');
+  const reg = baseReg(inv);
+  reg.dressAck = { alms: true, ceremony: true, dinner: false };
+  assert.ok(validateRegistration(reg, ctx(inv)).some((e) => e.includes('dress code for the Wedding Dinner')));
+  reg.dressAck = { alms: false, ceremony: true, dinner: true };
+  assert.ok(validateRegistration(reg, ctx(inv)).some((e) => e.includes('dress code for the Alms Giving')));
+  // NOT JOINING an optional moment needs no acknowledgement for it
+  reg.guests.forEach((g) => { g.events.alms = false; });
+  assert.ok(!validateRegistration(reg, ctx(inv)).some((e) => e.includes('Alms')));
+  // the mandatory ceremony still needs its own explicit acknowledgement
+  reg.dressAck = { alms: true, ceremony: false, dinner: true };
+  assert.ok(validateRegistration(reg, ctx(inv)).some((e) => e.includes('dress code for the Wedding Ceremony')));
+});
 
 test('valid couple registration passes', () => {
   const inv = lookupInvitation('demo-amara');
