@@ -8,7 +8,7 @@ import {
   inventorySnapshot, partyAllocation, isLocked,
   validateRegistration, buildNotification, nextInvitationState,
 } from '../register/logic.mjs';
-import { ACCOMMODATIONS, SELECTABLE_ACCOMMODATIONS, TRAIN, TRANSFERS, DEMO_MODE } from '../register/data.mjs';
+import { ACCOMMODATIONS, SELECTABLE_ACCOMMODATIONS, TRAIN, TRANSFERS, DEMO_MODE, BANGKOK_STAYS, POST_WEDDING } from '../register/data.mjs';
 import { EVENTS } from '../register/data.mjs';
 import { tokenId, encryptInvitation, lookupByToken } from '../register/crypto.mjs';
 import { FIXTURE_INVITATIONS, lookupInvitation } from './fixtures.mjs';
@@ -625,4 +625,55 @@ test('per-guest charges: one charge record per occupying guest', () => {
   const charges = partyCharges(byId('noble-courtyard'), ['g1', 'g2']);
   assert.equal(charges.length, 2);
   assert.deepEqual(charges.map((c) => c.amount), [240, 240]);
+});
+
+
+/* ---------------- journey extension · currency · safety (cumulative instruction) ---------------- */
+
+test('displayMoney: USD is the master and the fallback — never a fabricated rate', async () => {
+  const { displayMoney } = await import('../register/logic.mjs');
+  assert.equal(displayMoney(656, 'USD', { EUR: 0.9, THB: 35 }), 'USD 656');
+  assert.equal(displayMoney(656, 'EUR', null), 'USD 656');
+  assert.equal(displayMoney(656, 'EUR', {}), 'USD 656');
+  assert.equal(displayMoney(100, 'EUR', { EUR: 0.9, THB: 35 }), 'EUR 90.00');
+  assert.equal(displayMoney(100, 'THB', { EUR: 0.9, THB: 35.4 }), 'THB 3,540');
+});
+
+test('nongkhai-vte transfer: owner set contribution USD 20, arrival direction', () => {
+  const t = TRANSFERS.find((x) => x.id === 'nongkhai-vte');
+  assert.ok(t, 'Nong Khai onward transfer exists');
+  assert.equal(t.pricePerUnit, 20);
+  assert.equal(t.direction, 'arrival');
+});
+
+test('allergy declared without kitchen detail blocks completion (§30)', () => {
+  const inv = lookupInvitation('demo-amara');
+  const reg = baseReg(inv);
+  reg.guests[0].allergy = 'yes';
+  reg.guests[0].allergyDetail = '';
+  assert.ok(validateRegistration(reg, ctx(inv)).some((e) => /allergy under My Profile/.test(e)));
+  reg.guests[0].allergyDetail = 'Peanuts — strictly no traces';
+  assert.ok(!validateRegistration(reg, ctx(inv)).some((e) => /allergy under My Profile/.test(e)));
+});
+
+test('post wedding architecture: no invented contributions, no China vehicle', () => {
+  assert.equal(POST_WEDDING.length, 5);
+  for (const c of POST_WEDDING) assert.equal(c.contribution, null);
+  const flat = JSON.stringify(POST_WEDDING).toLowerCase();
+  assert.ok(!flat.includes('car'), 'no vehicle assumption in China (§14)');
+  assert.equal(BANGKOK_STAYS.length, 2);
+  assert.ok(BANGKOK_STAYS.every((h) => !('contributionPerGuest' in h) && !('price' in h)));
+});
+
+test('registration payload accepts bangkokStay and postWedding without new errors', () => {
+  const inv = lookupInvitation('demo-amara');
+  const reg = baseReg(inv);
+  reg.bangkokStay = { property: 'mandarin-oriental', from: '2027-02-24', to: '2027-02-26' };
+  reg.postWedding = { joined: true };
+  assert.deepEqual(validateRegistration(reg, ctx(inv)), []);
+});
+
+test('event naming: Wedding Dinner without Reception (§25)', () => {
+  const dinner = EVENTS.find((e) => e.id === 'dinner');
+  assert.equal(dinner.label, 'Wedding Dinner');
 });

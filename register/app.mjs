@@ -7,10 +7,10 @@
  */
 import {
   WEDDING, CONTACTS, JOURNEY_MODULES, EVENTS, ACCOMMODATIONS, SELECTABLE_ACCOMMODATIONS, TRAIN,
-  TRANSFERS, PACKAGE_INCLUSIONS, COPY, DEMO_MODE, PUBLICATION, TRAIN_REFERENCE, BERTH_PREFS, lookupInvitation,
+  TRANSFERS, PACKAGE_INCLUSIONS, COPY, DEMO_MODE, PUBLICATION, TRAIN_REFERENCE, BERTH_PREFS, BANGKOK_STAYS, POST_WEDDING, lookupInvitation,
 } from './data.mjs';
 import {
-  contributionPerGuest, partyCharges, partyTotal, money,
+  contributionPerGuest, partyCharges, partyTotal, money as usdMoney, displayMoney,
   trainContribution, transfersTotal, journeyTotal,
   createInventory, remaining, availabilityLabel, requestAllocation,
   validateRegistration, buildNotification, nextInvitationState,
@@ -29,6 +29,39 @@ function setAuthOut(v) { try { if (v) localStorage.setItem(AUTH_OUT_KEY, '1'); e
 
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const RATES_LIVE = PUBLICATION.rates === 'APPROVED';
+/* Display currency (§18): USD is the Source of Truth. EUR/THB are indicative
+ * display conversions from a live rate (frankfurter.app, ECB). The choice
+ * persists across the Guest Area; without a usable rate we fall back to USD. */
+const CURRENCIES = ['USD', 'EUR', 'THB'];
+let DISPLAY_CUR = (() => { try { const c = localStorage.getItem('siyl.display.currency'); return CURRENCIES.includes(c) ? c : 'USD'; } catch (e) { return 'USD'; } })();
+let FX = (() => { try { return JSON.parse(localStorage.getItem('siyl.fx.v1')) || null; } catch (e) { return null; } })();
+function money(n) { return displayMoney(n, DISPLAY_CUR, FX); }
+function fxStamp() {
+  if (DISPLAY_CUR === 'USD') return '';
+  if (!FX || !FX[DISPLAY_CUR]) return 'Live rate unavailable · shown in USD';
+  const d = new Date(FX.ts);
+  return 'Indicative exchange rate · updated ' + d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) + ', ' + ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2);
+}
+async function loadRates() {
+  if (FX && FX.ts && Date.now() - FX.ts < 6 * 3600 * 1000) return; // cached and fresh enough
+  try {
+    const r = await fetch('https://api.frankfurter.dev/v1/latest?base=USD&symbols=EUR,THB');
+    if (!r.ok) return;
+    const j = await r.json();
+    if (j && j.rates && j.rates.EUR && j.rates.THB) {
+      FX = { EUR: j.rates.EUR, THB: j.rates.THB, ts: Date.now() };
+      try { localStorage.setItem('siyl.fx.v1', JSON.stringify(FX)); } catch (e) { /* private mode */ }
+      renderSummary(); if (typeof cur === 'number') renderStep(cur, false);
+    }
+  } catch (e) { /* offline: cached FX or USD fallback — never a fabricated rate */ }
+}
+function setCurrency(c) {
+  if (!CURRENCIES.includes(c)) return;
+  DISPLAY_CUR = c;
+  try { localStorage.setItem('siyl.display.currency', c); } catch (e) { /* session only */ }
+  renderStep(cur, false); renderSummary();
+}
+loadRates();
 const showAmount = (n) => RATES_LIVE ? money(n) : 'Details to follow';
 /** Guest price line shown BEFORE any request — per guest, never per night. */
 function roomPriceHtml(a) {
@@ -75,6 +108,8 @@ function freshState() {
     departureByGuest: {},
     additionalGuestRequest: '',
     dressAck: { alms: false, ceremony: false, dinner: false }, // per-event dress code acknowledgement (§21)
+    bangkokStay: { property: null, from: '', to: '' },          // optional Bangkok stay (§2-3): property + guest chosen dates
+    postWedding: { joined: false },                             // optional Post Wedding Journey opt in (§16)
     transfers: [],           // [{ transferId, units, details:{date,time,ref,place,location} }]
     trainNote: '',
     notes: '',
@@ -121,7 +156,6 @@ function renderStep(i) {
   if (name === 'journey') renderJourney();
   if (name === 'events') renderEvents();
   if (name === 'stay') renderStay();
-  if (name === 'travel') renderTravel();
   if (name === 'spa') renderSpa();
   if (name === 'each') renderEach();
   if (name === 'cost') renderCost();
@@ -326,7 +360,7 @@ function adoptInvitation(inv) {
 
 /* ---------------- MY JOURNEY · private member area ---------------- */
 const PRIVNAV = [
-  ['home', 'My Journey'], ['journey', 'My Travel'], ['travel', 'My Transfers'], ['stay', 'My Stay'],
+  ['home', 'My Journey'], ['journey', 'My Travel'], ['stay', 'My Stay'],
   ['events', 'My Wedding'], ['each', 'My Profile'], ['cost', 'My Contribution'],
 ];
 function renderPrivnav() {
@@ -417,7 +451,7 @@ function renderHome() {
       ((S.transfers || []).length ? ' · ' + S.transfers.length + ' transfer' + (S.transfers.length > 1 ? 's' : '') + ' · ' + money(trf) : ''),
       (riders.length || (S.transfers || []).length) ? 'REQUESTED' : null) +
     card('events', 'My Wedding', 'The wedding days',
-      'Sunday, 28 February 2027 · Souphattra Heritage · dress code to be confirmed',
+      'Sunday, 28 February 2027 · Souphattra Heritage · Black Tie',
       anyEvents ? 'REGISTERED' : 'OPEN') +
     card('each', 'My Profile', detailsMissing ? detailsMissing + ' detail' + (detailsMissing > 1 ? 's' : '') + ' still needed' : 'Personal details',
       'Contact, dietary needs and the small preferences that shape your stay',
@@ -489,10 +523,79 @@ function renderJourney() {
       { id: 'independent', label: 'Arriving independently in Vientiane', when: 'Your own way', blurb: 'Fly or travel on your own schedule; we meet you there.' },
     ],
     field: 'journey',
-  }) + (anyTrain ? trainDetailBlock() : '');
+  }) + (anyTrain ? trainDetailBlock() : '') +
+    bangkokStayBlock() +
+    renderTravel() +
+    postWeddingBlock();
   wireModulePicker(box, 'journey');
   wireTrainDetails(box);
+  wireTransfers(box);
+  wireBangkokStay(box);
+  wirePostWedding(box);
 }
+
+/* §2-3 · the Bangkok stay: curated choice, guest chosen dates, quiet pending
+ * contribution — never an invented price. */
+function bangkokStayBlock() {
+  if (!S.guests.some((g) => g.journey.bangkok)) return '';
+  S.bangkokStay ||= { property: null, from: '', to: '' };
+  const b = S.bangkokStay;
+  return '<div class="guest-block" id="bkk-stay"><h3>Your Bangkok stay</h3>' +
+    '<p class="note">Choose where you would like to wake up in Bangkok and the dates that suit you. Room options and your contribution follow with Guest Relations once your dates are confirmed.</p>' +
+    BANGKOK_STAYS.map((h) => '<article class="trf-card' + (b.property === h.id ? ' sel' : '') + '">' +
+      '<div class="label">' + esc(h.role) + '</div><h4>' + esc(h.name) + '</h4>' +
+      '<div class="trf-price">Contribution follows with Guest Relations</div>' +
+      '<div class="acc-actions">' + (b.property === h.id
+        ? '<button type="button" class="btn sm" data-bkk-rm="' + h.id + '">Remove from journey</button>'
+        : '<button type="button" class="btn sm" data-bkk="' + h.id + '">Request this stay</button>') + '</div>' +
+      (b.property === h.id ? '<div class="cols2" style="margin-top:12px">' +
+        '<div class="field"><label>Arrival in Bangkok</label><input type="date" data-bkk-date="from" value="' + esc(b.from) + '"/></div>' +
+        '<div class="field"><label>Onward to the wedding</label><input type="date" data-bkk-date="to" value="' + esc(b.to) + '"/></div></div>' +
+        '<div class="acc-avail" style="border-top:none;padding-top:8px">REQUESTED · Guest Relations confirms rooms and contribution personally</div>' : '') +
+      '</article>').join('') + '</div>';
+}
+function wireBangkokStay(box) {
+  box.querySelectorAll('[data-bkk]').forEach((btn) => btn.addEventListener('click', () => {
+    S.bangkokStay = { ...(S.bangkokStay || {}), property: btn.getAttribute('data-bkk') };
+    saveDraft(); renderStep(cur, false); renderSummary();
+  }));
+  box.querySelectorAll('[data-bkk-rm]').forEach((btn) => btn.addEventListener('click', () => {
+    S.bangkokStay = { property: null, from: '', to: '' };
+    saveDraft(); renderStep(cur, false); renderSummary();
+  }));
+  box.querySelectorAll('[data-bkk-date]').forEach((el) => el.addEventListener('change', () => {
+    S.bangkokStay[el.getAttribute('data-bkk-date')] = el.value; saveDraft();
+  }));
+}
+
+/* §10-16 · the optional Post Wedding Journey: a real opt in whose components
+ * flow into travel, contribution and review. Missing operational data renders
+ * as a quiet pending state, never as an invention. */
+function postWeddingBlock() {
+  S.postWedding ||= { joined: false };
+  const joined = !!S.postWedding.joined;
+  return '<div class="guest-block" id="post-wedding"><h3>The Post Wedding Journey</h3>' +
+    '<div class="label" style="margin:4px 0 8px">Vientiane → Kunming → Lijiang → Bangkok · 1 – 6 March 2027</div>' +
+    '<p class="note">' + HSLOCK + 'continue to Kunming and Lijiang after the wedding. If you would like to join the onward journey, we will prepare it with you.</p>' +
+    '<div class="join" role="radiogroup" aria-label="Post Wedding Journey">' +
+    '<label><input type="radio" name="pw-join" value="yes"' + (joined ? ' checked' : '') + '/><span class="yes">We would love to join</span></label>' +
+    '<label><input type="radio" name="pw-join" value="no"' + (!joined ? ' checked' : '') + '/><span class="no">Not this time</span></label></div>' +
+    (joined ? POST_WEDDING.map((c) => '<article class="trf-card sel">' +
+      '<div class="label">' + esc(c.type) + ' · ' + esc(c.when) + '</div>' +
+      '<h4>' + esc(c.label) + '</h4>' +
+      (c.sub ? '<p class="note">' + esc(c.sub) + '</p>' : '') +
+      '<div class="trf-price">' + (c.contribution != null ? money(c.contribution) : 'Contribution follows with Guest Relations') + '</div>' +
+      '<div class="acc-avail" style="border-top:none;padding-top:6px">REQUESTED · Guest Relations confirms every detail personally</div>' +
+      '</article>').join('') : '') +
+    '</div>';
+}
+function wirePostWedding(box) {
+  box.querySelectorAll('input[name="pw-join"]').forEach((el) => el.addEventListener('change', () => {
+    S.postWedding = { joined: el.value === 'yes' && el.checked };
+    saveDraft(); renderStep(cur, false); renderSummary();
+  }));
+}
+const HSLOCK = '<span class="hs">Haruthai&nbsp;&amp;&nbsp;Suthep</span>';
 
 function trainDetailBlock() {
   const riders = S.guests.filter((g) => g.journey.train);
@@ -505,7 +608,7 @@ function trainDetailBlock() {
       BERTH_PREFS.map((o) => '<option' + ((g.berth || 'No preference') === o ? ' selected' : '') + '>' + o + '</option>').join('') + '</select></div>').join('') +
     '<p class="note">We will do our best to arrange your preferred berth. Final allocation depends on railway availability.</p>' +
     '<div class="field"><label>Anything that matters for the train journey (mobility, luggage, comfort)</label><textarea id="train-note">' + esc(S.trainNote || '') + '</textarea></div>' +
-    '<p class="note">You arrive at <strong>Nong Khai Railway Station</strong>; onward coordination to Vientiane is asked under Arrival &amp; Transfers. Route reference: <a href="' + TRAIN_REFERENCE + '" rel="noopener" target="_blank">State Railway of Thailand</a> — for reading only, no booking needed.</p>' +
+    '<p class="note">You arrive at <strong>Nong Khai Railway Station</strong>; your onward journey to Vientiane is chosen below under your arrival. Route reference: <a href="' + TRAIN_REFERENCE + '" rel="noopener" target="_blank">State Railway of Thailand</a> — for reading only, no booking needed.</p>' +
     '</div>';
 }
 function wireTrainDetails(box) {
@@ -591,7 +694,7 @@ function wireModulePicker(box, field) {
     if (who === 'party') S.guests.forEach(apply);
     else { const g = S.guests.find((x) => x.guestId === who); if (g) apply(g); }
     saveDraft(); renderSummary();
-    if ((f === 'journey' && modId === 'train') || f === 'events') renderStep(cur);
+    if ((f === 'journey' && (modId === 'train' || modId === 'bangkok')) || f === 'events') renderStep(cur);
   }));
 }
 
@@ -679,7 +782,7 @@ function renderStay() {
       (!bookable ? ''
         : full
           ? '<button type="button" class="btn sm" data-waitlist="' + a.id + '">Join the waitlist</button>'
-          : '<button type="button" class="btn sm" data-select="' + a.id + '">' + (selected ? 'Selected' : 'Request this room') + '</button>') +
+          : '<button type="button" class="btn sm" data-select="' + a.id + '">' + (selected ? 'Selected' : (a.contributionPerGuest == null ? 'Request this stay' : 'Request this room')) + '</button>') +
       '</div></article>';
   }).join('');
   box.innerHTML =
@@ -859,24 +962,22 @@ addEventListener('keydown', (e) => {
 
 /* ---------------- step 6 · arrival & transfers (§15) ---------------- */
 function renderTravel() {
-  const box = document.getElementById('travel-box');
   const many = S.guests.length > 1;
   const trainFlags = S.guests.map((g) => !!g.journey.train);
   const mixedTrain = many && trainFlags.some(Boolean) && !trainFlags.every(Boolean);
   if (mixedTrain) { S.arrival.shared = false; S.departure.shared = false; }
-  const shared = S.arrival.shared !== false;
   const trainy = S.guests.some((g) => g.journey.train);
   /* FULL SERVICE (owner §8-12): no operational questionnaire. The guest sees
    * the journey and chooses services; Guest Relations coordinates every
    * arrival, departure and pickup detail personally. The underlying travel
    * data structures remain for Guest Relations — they are simply never a
    * guest-facing form. */
-  box.innerHTML =
-    (trainy ? '<p class="note" style="margin-bottom:14px">The Overnight Sleeper Train from Bangkok to Nong Khai is part of your journey — a central experience on the way to the wedding. Guest Relations coordinates your timings personally.</p>' : '') +
+  return '<div class="guest-block" id="arrival-transfers">' +
+    '<h3>How would you like us to arrange your arrival?</h3>' +
     '<p class="note" style="margin-bottom:6px">Your arrival and departure are coordinated personally by Guest Relations — nothing to organise here. If a detail is ever needed, they will simply ask you.</p>' +
-    renderTransfers() +
-    '<p class="note" style="margin-top:18px">Pickup and transfers are requests — statuses move from REQUESTED to UNDER REVIEW to CONFIRMED as Guest Relations coordinates them.</p>';
-  wireTransfers(box);
+    (trainy ? '<p class="note" style="margin-bottom:6px">You arrive with the Night Train at Nong Khai Railway Station — the onward journey to Souphattra Heritage is shown first.</p>' : '') +
+    renderTransfers(trainy) +
+    '<p class="note" style="margin-top:18px">Pickup and transfers are requests — statuses move from REQUESTED to UNDER REVIEW to CONFIRMED as Guest Relations coordinates them.</p></div>';
 }
 /* ---------------- transfer products (Owner price master) ----------------
  * FULL SERVICE (owner §13-18): the guest sees service, route, inclusions and
@@ -891,43 +992,49 @@ function scrollToRoom() {
   setTimeout(() => card.classList.remove('acc-hilite'), 2600);
 }
 function selectedTransfer(id) { return (S.transfers || []).find((s) => s.transferId === id); }
-function renderTransfers() {
-  const groups = [...new Set(TRANSFERS.map((t) => t.group))];
+function renderTransfers(trainy) {
+  const primaryIds = trainy ? ['nongkhai-vte', 'shuttle-shared'] : ['shuttle-shared'];
+  const isPrimary = (t) => primaryIds.includes(t.id) || (!trainy && t.group === 'Airport');
+  const card = (t) => {
+    const sel = selectedTransfer(t.id);
+    const free = !t.pricePerUnit;
+    return '<article class="trf-card' + (sel ? ' sel' : '') + '" data-trf="' + t.id + '">' +
+      '<div class="label">' + esc(t.group) + '</div>' +
+      '<h4>' + esc(t.name) + '</h4>' +
+      (free ? '' : '<div class="trf-price">' + money(t.pricePerUnit) + ' · per vehicle</div>') +
+      '<p class="note">' + esc(t.blurb) + '</p>' +
+      (t.included ? '<p class="note trf-incl">' + esc(t.included) + '</p>' : '') +
+      '<div class="acc-actions">' +
+      (sel
+        ? '<button type="button" class="btn sm" data-trf-remove="' + t.id + '">Remove from journey</button>'
+        : '<button type="button" class="btn sm" data-trf-add="' + t.id + '">Add to journey</button>') +
+      '</div>' +
+      (sel ? '<div class="acc-avail" style="border-top:none;padding-top:8px">REQUESTED · Guest Relations confirms every detail with you personally</div>' : '') +
+      '</article>';
+  };
+  // contextual order (§8): the train guest sees the Nong Khai arrival first
+  const primary = primaryIds.map((id) => TRANSFERS.find((t) => t.id === id)).filter(Boolean)
+    .concat(TRANSFERS.filter((t) => isPrimary(t) && !primaryIds.includes(t.id)));
+  const secondary = TRANSFERS.filter((t) => !isPrimary(t));
+  const moreOpen = secondary.some((t) => selectedTransfer(t.id));
   return '<div class="trf" id="trf">' +
-    '<h3 class="trv-name" style="margin-top:40px">Transfers</h3>' +
     '<p class="note" style="margin-bottom:6px">Choose your service — everything else is arranged for you. Guest Relations confirms every journey personally; private cars are charged per vehicle, never per guest.</p>' +
-    groups.map((grp) =>
-      '<div class="label" style="margin:24px 0 4px">' + esc(grp) + '</div>' +
-      TRANSFERS.filter((t) => t.group === grp).map((t) => {
-        const sel = selectedTransfer(t.id);
-        const free = !t.pricePerUnit;
-        return '<article class="trf-card' + (sel ? ' sel' : '') + '" data-trf="' + t.id + '">' +
-          '<h4>' + esc(t.name) + '</h4>' +
-          (free ? '' : '<div class="trf-price">' + money(t.pricePerUnit) + ' · per vehicle</div>') +
-          '<p class="note">' + esc(t.blurb) + '</p>' +
-          (t.included ? '<p class="note trf-incl">' + esc(t.included) + '</p>' : '') +
-          '<div class="acc-actions">' +
-          (sel
-            ? '<button type="button" class="btn sm" data-trf-remove="' + t.id + '">Remove from journey</button>'
-            : '<button type="button" class="btn sm" data-trf-add="' + t.id + '">Add to journey</button>') +
-          '</div>' +
-          (sel ? '<div class="acc-avail" style="border-top:none;padding-top:8px">REQUESTED · Guest Relations confirms every detail with you personally</div>' : '') +
-          '</article>';
-      }).join('')).join('') +
+    primary.map(card).join('') +
+    (secondary.length ? '<details class="trf-more"' + (moreOpen ? ' open' : '') + '><summary>Need something different?</summary>' + secondary.map(card).join('') + '</details>' : '') +
     '</div>';
 }
 function wireTransfers(box) {
   box.querySelectorAll('[data-trf-add]').forEach((b) => b.addEventListener('click', () => {
     const id = b.getAttribute('data-trf-add');
     if (!selectedTransfer(id)) S.transfers.push({ transferId: id, units: 1, details: {} });
-    saveDraft(); renderTravel(); renderSummary();
+    saveDraft(); renderStep(cur); renderSummary();
     const t = TRANSFERS.find((x) => x.id === id);
     announce(t.name + ' added to your journey' + (t.pricePerUnit ? ': ' + money(t.pricePerUnit) + ' per vehicle' : ' — complimentary') + ', REQUESTED. Guest Relations arranges the details with you personally.');
   }));
   box.querySelectorAll('[data-trf-remove]').forEach((b) => b.addEventListener('click', () => {
     const id = b.getAttribute('data-trf-remove');
     S.transfers = (S.transfers || []).filter((s) => s.transferId !== id);
-    saveDraft(); renderTravel(); renderSummary();
+    saveDraft(); renderStep(cur); renderSummary();
   }));
 }
 
@@ -1012,7 +1119,7 @@ function renderEach() {
     '<div class="gf-passport"><div class="label">Passport · identity page</div>' +
     (g.passport
       ? '<p class="note">' + esc(g.passport.name) + ' · selected</p><p class="note gold-note">Held on this device only — the secure transfer to Guest Relations activates with the private document vault.</p><button type="button" class="btn ghost sm" data-pass-rm="' + g.guestId + '">Remove</button>'
-      : '<p class="note">One photo or scan of the passport identity page is all we need.</p><button type="button" class="btn ghost sm" data-pass="' + g.guestId + '">Select passport file</button>') +
+      : '<p class="note">One photo or scan of the passport identity page is all we need. Used only where required for travel arrangements coordinated by Guest Relations.</p><button type="button" class="btn ghost sm" data-pass="' + g.guestId + '">Select passport file</button>') +
     '<input type="file" accept="image/*,.pdf" hidden data-pass-input="' + g.guestId + '"/></div></div>' +
     '<div class="cols2">' +
     ef(g, 'email', 'Email', 'email') + /* Telephone removed from the guest-facing profile (master data keeps it) */
@@ -1109,47 +1216,50 @@ function renderCost() {
   const occ = acc ? S.stay.occupantGuestIds : [];
   const riders = S.guests.filter((g) => g.journey.train);
   const tc = trainContribution(TRAIN, riders.length) || 0;
-  const trf = transfersTotal(TRANSFERS, S.transfers);
   const total = journeyTotal(acc, occ, TRAIN, riders.length, TRANSFERS, S.transfers);
   const neutral = acc && acc.contributionPerGuest == null;
   const row = (l, r, cls) => '<div class="row' + (cls ? ' ' + cls : '') + '"><span class="l">' + l + '</span><span class="r">' + r + '</span></div>';
-  const day = (t) => '<div class="row fol-day"><span class="l serif-it">' + t + '</span><span class="r"></span></div>';
+  const head = (t) => '<div class="row fol-day"><span class="l serif-it">' + t + '</span><span class="r"></span></div>';
+  /* §19: the contribution summary lists only what carries an amount or is a
+   * pending request. Everything hosted appears in its own list — without
+   * amounts, never as a USD 0 line. */
   let rows = '';
-  // 27 FEBRUARY — arrival
-  rows += day('Saturday · 27 February');
-  rows += row('Personal airport welcome &amp; arrival coordination', 'USD 0 · included');
-  for (const s of S.transfers || []) {
-    const t = TRANSFERS.find((x) => x.id === s.transferId);
-    if (t && t.direction === 'arrival') rows += row(esc(t.name) + ' · ' + (s.units || 1) + ' unit' + ((s.units || 1) > 1 ? 's' : ''), money(t.pricePerUnit * (s.units || 1)));
-  }
+  rows += head('Your contribution');
   if (riders.length) rows += row('Overnight Sleeper Train · Bangkok → Nong Khai · ' + riders.length + ' × ' + money(TRAIN.contributionPerGuest), money(tc));
   if (!acc) {
     rows += row('<span class="serif-it">Accommodation</span>', 'Not selected yet · choose under My Stay');
+  } else if (neutral) {
+    rows += row('<span class="serif-it">' + esc(acc.name) + '</span>', 'Complimentary · limited availability');
   } else {
-    rows += row('<span class="serif-it">' + esc(acc.name) + '</span> · ' + esc(acc.size || '') + ' · night one',
-      neutral ? 'Complimentary' : partyCharges(acc, occ).map((c) => { const g = S.guests.find((x) => x.guestId === c.guestId); return esc(g ? g.preferredName : c.guestId) + ' ' + money(c.amount); }).join(' · '));
-    rows += row('Welcome drink', 'USD 0 · included');
+    rows += row('<span class="serif-it">' + esc(acc.name) + '</span> · night one',
+      partyCharges(acc, occ).map((c) => { const g = S.guests.find((x) => x.guestId === c.guestId); return esc(g ? g.preferredName : c.guestId) + ' ' + money(c.amount); }).join(' · '));
   }
-  // 28 FEBRUARY — the wedding day
-  rows += day('Sunday · 28 February');
-  rows += row('Hosted breakfast', 'USD 0 · included');
-  rows += row('Alms Giving Ceremony', 'USD 0 · included');
-  rows += row('Wedding Ceremony', 'USD 0 · included');
-  rows += row('Sunset drinks, cake reception &amp; Wedding Dinner', 'USD 0 · included');
-  rows += row('Two hour beverage package', 'USD 0 · included');
-  if (acc && !neutral) rows += row('<span class="serif-it">' + esc(acc.name) + '</span> · night two', 'USD 0 · hosted by<span class="hs">Haruthai&nbsp;&amp;&nbsp;Suthep</span>');
-  // 1 MARCH — departure
-  rows += day('Monday · 1 March');
-  rows += row('Hosted breakfast', 'USD 0 · included');
-  rows += row('Departure coordination within the wedding programme', 'USD 0 · included');
-  for (const s of S.transfers || []) {
-    const t = TRANSFERS.find((x) => x.id === s.transferId);
-    if (t && t.direction === 'departure') rows += row(esc(t.name) + ' · ' + (s.units || 1) + ' unit' + ((s.units || 1) > 1 ? 's' : ''), money(t.pricePerUnit * (s.units || 1)));
+  for (const sl of S.transfers || []) {
+    const t = TRANSFERS.find((x) => x.id === sl.transferId);
+    if (t && t.pricePerUnit) rows += row(esc(t.name) + ' · ' + (sl.units || 1) + ' vehicle' + ((sl.units || 1) > 1 ? 's' : ''), money(t.pricePerUnit * (sl.units || 1)));
   }
-  rows += '<div class="row total"><span class="l serif-it">Total guest contribution</span><span class="r js-total">' + money(total) + '</span></div>';
+  if (S.bangkokStay && S.bangkokStay.property) {
+    const h = BANGKOK_STAYS.find((x) => x.id === S.bangkokStay.property);
+    if (h) rows += row('Bangkok stay · <span class="serif-it">' + esc(h.name) + '</span>', 'Contribution follows with Guest Relations');
+  }
+  if (S.postWedding && S.postWedding.joined) rows += row('The Post Wedding Journey · Vientiane → Kunming → Lijiang → Bangkok', 'Contribution follows with Guest Relations');
+  rows += '<div class="row total"><span class="l serif-it">Total contribution</span><span class="r js-total">' + money(total) + '</span></div>';
+  rows += head('Hosted for you');
+  const hosted = [];
+  hosted.push('Personal airport welcome and arrival coordination');
+  hosted.push('Welcome drink on arrival');
+  hosted.push('Hosted breakfast on every morning of your stay');
+  hosted.push('Alms Giving Ceremony');
+  hosted.push('Vow Ceremony');
+  hosted.push('Sunset drinks, cake reception and the Wedding Dinner');
+  hosted.push('Two hour beverage package');
+  if (acc && !neutral) hosted.push('<span class="serif-it">' + esc(acc.name) + '</span> · night two · hosted by<span class="hs">Haruthai&nbsp;&amp;&nbsp;Suthep</span>');
+  hosted.push('Departure coordination within the wedding programme');
+  rows += hosted.map((h) => row(h, '')).join('');
   box.innerHTML =
-    '<p class="note" style="margin-bottom:18px">Everything below is part of your journey. Lines at USD 0 are included or hosted; your contribution is only what carries an amount.</p>' +
+    '<p class="note" style="margin-bottom:18px">Your contribution covers only the lines that carry an amount. Everything else on the wedding days is hosted for you.</p>' +
     '<div class="stay-sum fol" aria-live="polite">' + rows + '</div>' +
+    (fxStamp() ? '<p class="note" style="margin-top:12px">' + fxStamp() + ' · Amounts are shown for orientation; the master currency remains USD.</p>' : '') +
     '<p class="note" style="margin-top:16px">' + esc(COPY.priceNote + ' Haruthai\u00A0&\u00A0Suthep.') + '</p>' +
     '<p class="note">' + esc(COPY.payment) + ' One person may settle the invoice for everyone travelling with them.</p>';
 }
@@ -1205,10 +1315,20 @@ function renderReview() {
   const trv = S.arrival.shared !== false
     ? [['Together', esc([S.arrival.date, S.arrival.time, S.arrival.ref].filter(Boolean).join(' · ') || '—') + (S.arrival.pickupRequested ? ' · pickup REQUESTED' : '')]]
     : S.guests.map((g) => { const a = S.arrivalByGuest[g.guestId] || {}; return [esc(g.preferredName), esc([a.date, a.time, a.ref].filter(Boolean).join(' · ') || '—') + (a.pickupRequested ? ' · pickup REQUESTED' : '')]; });
-  html += sec('Arrival & Departure', idx('travel'), trv.concat([
+  html += sec('Arrival & Departure', idx('journey'), trv.concat([
     ['Departure', esc([S.departure.date, S.departure.time].filter(Boolean).join(' · ') || '—') + (S.departure.transferRequested ? ' · transfer REQUESTED' : '')],
   ]));
-  html += sec('Your Transfers', idx('travel'), (S.transfers || []).length
+  if (S.bangkokStay && S.bangkokStay.property) {
+    const bh = BANGKOK_STAYS.find((x) => x.id === S.bangkokStay.property);
+    if (bh) html += sec('Your Bangkok Stay', idx('journey'), [
+      ['Requested', esc(bh.name)],
+      ['Dates', esc([S.bangkokStay.from, S.bangkokStay.to].filter(Boolean).join(' → ') || 'To be chosen with Guest Relations')],
+      ['Contribution', 'Follows with Guest Relations'],
+    ]);
+  }
+  if (S.postWedding && S.postWedding.joined) html += sec('The Post Wedding Journey', idx('journey'),
+    POST_WEDDING.map((c) => [esc(c.type), esc(c.label) + ' · ' + esc(c.when) + ' · ' + (c.contribution != null ? money(c.contribution) : 'contribution follows with Guest Relations')]));
+  html += sec('Your Transfers', idx('journey'), (S.transfers || []).length
     ? S.transfers.map((s) => {
         const t = TRANSFERS.find((x) => x.id === s.transferId) || {};
         const d = s.details || {};
@@ -1222,11 +1342,24 @@ function renderReview() {
   if (acc) jcRows.push(['Stay', esc(acc.name) + ' · ' + (acc.contributionPerGuest == null ? 'complimentary · limited' : money(partyTotal(acc, occ)))]);
   if (jcRiders) jcRows.push(['Train', jcRiders + ' × ' + money(TRAIN.contributionPerGuest) + ' = ' + money(trainContribution(TRAIN, jcRiders) || 0)]);
   if ((S.transfers || []).length) jcRows.push(['Transfers', money(transfersTotal(TRANSFERS, S.transfers))]);
-  jcRows.push(['Total journey cost', money(journeyTotal(acc, occ, TRAIN, jcRiders, TRANSFERS, S.transfers))]);
-  html += sec('Your Journey Cost', idx('cost'), jcRows);
-  html += sec('Each of You', idx('each'), S.guests.map((g) => [esc(g.preferredName),
-    esc(g.diet) + (g.allergy === 'yes' ? ' · allergy: ' + esc(g.allergyDetail || 'yes') + (g.severe ? ' (severe)' : '') : '') +
-    (g.spa && g.spa.requested ? ' · spa REQUESTED' : '')]));
+  if (S.bangkokStay && S.bangkokStay.property) {
+    const bh = BANGKOK_STAYS.find((x) => x.id === S.bangkokStay.property);
+    if (bh) jcRows.push(['Bangkok stay', esc(bh.name) + ' · contribution follows with Guest Relations']);
+  }
+  if (S.postWedding && S.postWedding.joined) jcRows.push(['Post Wedding Journey', 'Joined · contribution follows with Guest Relations']);
+  jcRows.push(['Total contribution', money(journeyTotal(acc, occ, TRAIN, jcRiders, TRANSFERS, S.transfers))]);
+  html += sec('Your Contribution', idx('cost'), jcRows);
+  html += sec('Each of You', idx('each'), S.guests.map((g) => {
+    const hasAllergy = g.allergy === 'yes';
+    const detail = (g.allergyDetail || '').trim();
+    const parts = [];
+    if (!(hasAllergy && g.diet === 'No restrictions')) parts.push(esc(g.diet));
+    if (hasAllergy) parts.push(detail
+      ? 'Allergy — ' + esc(detail) + (g.severe ? ' (severe)' : '')
+      : '<span class="ack-missing">Allergy noted — please add the detail for the kitchens under My Profile</span>');
+    if (g.spa && g.spa.requested) parts.push('spa REQUESTED');
+    return [esc(g.preferredName), parts.join(' · ')];
+  }));
   if (S.additionalGuestRequest) html += sec('Additional guest request', idx('party'), [['Request', esc(S.additionalGuestRequest) + ' — subject to Guest Relations approval']]);
   html += '<label class="confirm-row"><input type="checkbox" id="confirm-accurate"/><span>We confirm this information is accurate. We understand this registration is a request and that Guest Relations confirms all arrangements separately.</span></label>';
   html += '<p class="err" id="review-err"></p>';
@@ -1236,9 +1369,11 @@ function renderReview() {
 
 /* ---------------- step 11/12 · send + received (§29, §30) ---------------- */
 function trainOnwardLine() {
-  if (S.arrival.shared !== false) return S.arrival.pickupRequested ? 'Requested · Guest Relations confirms' : 'Not requested';
-  const anyReq = S.guests.filter((g) => g.journey.train).some((g) => (S.arrivalByGuest[g.guestId] || {}).pickupRequested);
-  return anyReq ? 'Requested · Guest Relations confirms' : 'Not requested';
+  // §9: derived from the transfer selection itself — never a second data store.
+  const onward = (S.transfers || []).map((x) => TRANSFERS.find((t) => t.id === x.transferId))
+    .find((t) => t && (t.id === 'nongkhai-vte' || t.id === 'shuttle-shared'));
+  if (onward) return esc(onward.name) + ' · REQUESTED';
+  return 'Own arrangement — Guest Relations can assist under My Travel';
 }
 function currentRegistration() {
   // photos stay on this device; passports never leave it (document vault pending)
@@ -1246,7 +1381,10 @@ function currentRegistration() {
   return {
     guests, stay: currentAcc() ? { ...S.stay } : { accommodationId: null },
     arrival: { ...S.arrival, point: S.guests.some((g) => g.journey.train) ? 'Nong Khai Railway Station' : (S.arrival.point || WEDDING.airport) },
-    departure: S.departure, transfers: S.transfers, dressAck: { ...(S.dressAck || {}) }, additionalGuestRequest: S.additionalGuestRequest,
+    departure: S.departure, transfers: S.transfers, dressAck: { ...(S.dressAck || {}) },
+    bangkokStay: { ...(S.bangkokStay || { property: null, from: '', to: '' }) },
+    postWedding: { ...(S.postWedding || { joined: false }) },
+    additionalGuestRequest: S.additionalGuestRequest,
     trainNote: S.trainNote, notes: S.notes, registration_submitted_at: S.registration_submitted_at,
   };
 }
@@ -1320,14 +1458,22 @@ function renderSummary() {
   if (!S.invitation) { el.hidden = true; return; }
   el.hidden = false;
   const acc = currentAcc();
-  const bits = [];
-  bits.push('<strong>' + esc(S.invitation.partyName) + '</strong>');
   const trainCount = S.guests.filter((g) => g.journey.train).length;
-  if (trainCount) bits.push(trainCount + ' train seat' + (trainCount > 1 ? 's' : '') + ' · REQUESTED');
-  if (acc) bits.push(esc(acc.name) + (RATES_LIVE && acc.contributionPerGuest != null ? ' · ' + money(partyTotal(acc, S.stay.occupantGuestIds)) : '') + (S.stay.waitlist ? ' · WAITLISTED' : ' · REQUESTED'));
-  if ((S.transfers || []).length) bits.push(S.transfers.length + ' transfer' + (S.transfers.length > 1 ? 's' : '') + ' · ' + money(transfersTotal(TRANSFERS, S.transfers)) + ' · REQUESTED');
-  if (S.arrival.pickupRequested) bits.push('pickup REQUESTED');
-  el.querySelector('.sum-line').innerHTML = bits.join(' &nbsp;·&nbsp; ');
+  const sel = [];
+  if (trainCount) sel.push(trainCount + ' train seat' + (trainCount > 1 ? 's' : '') + ' · REQUESTED');
+  if (acc) sel.push(esc(acc.name) + (S.stay.waitlist ? ' · WAITLISTED' : ' · REQUESTED'));
+  if ((S.transfers || []).length) sel.push(S.transfers.length + ' transfer' + (S.transfers.length > 1 ? 's' : ''));
+  if (S.bangkokStay && S.bangkokStay.property) sel.push('Bangkok stay · REQUESTED');
+  if (S.postWedding && S.postWedding.joined) sel.push('Post Wedding Journey · REQUESTED');
+  const total = journeyTotal(acc, acc ? S.stay.occupantGuestIds : [], TRAIN, trainCount, TRANSFERS, S.transfers);
+  el.innerHTML =
+    '<div class="sum-a"><span class="sum-label">Your journey</span>' +
+    '<span class="sum-line"><strong>' + esc(S.invitation.partyName) + '</strong>' + (sel.length ? ' · ' + sel.join(' · ') : '') + '</span></div>' +
+    '<div class="sum-b"><span class="sum-label">Total contribution</span><span class="sum-amt">' + money(total) + '</span>' +
+    '<span class="sum-cur" role="group" aria-label="Display currency">' +
+    CURRENCIES.map((c) => '<button type="button" class="cur-btn' + (c === DISPLAY_CUR ? ' on' : '') + '" data-cur="' + c + '">' + c + '</button>').join('') +
+    '</span>' + (fxStamp() ? '<span class="sum-fx">' + fxStamp() + '</span>' : '') + '</div>';
+  el.querySelectorAll('[data-cur]').forEach((b) => b.addEventListener('click', () => setCurrency(b.getAttribute('data-cur'))));
 }
 
 /* ---------------- navigation ---------------- */

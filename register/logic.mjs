@@ -58,6 +58,16 @@ export function money(n) {
   return 'USD ' + (Number.isInteger(n) ? String(n) : n.toFixed(2));
 }
 
+/** Display-only conversion. USD is the master currency; EUR/THB render from a
+ *  live indicative rate. Without a usable rate we fall back to USD — never to
+ *  a fabricated value. */
+export function displayMoney(usd, currency, rates) {
+  if (currency === 'USD' || !rates || !rates[currency]) return money(usd);
+  const v = usd * rates[currency];
+  if (currency === 'THB') return 'THB ' + Math.round(v).toLocaleString('en-US');
+  return 'EUR ' + v.toFixed(2);
+}
+
 /* ============ inventory + allocation (§25) ============ */
 
 export const ALLOC = {
@@ -268,6 +278,13 @@ export function validateRegistration(reg, ctx) {
       const total = charges.reduce((s, c) => s + c.amount, 0);
       if (total !== contributionPerGuest(acc) * occ.length) errors.push('party total must equal sum of individual contributions');
       if (reg.stay.rooms && reg.stay.rooms !== 1) errors.push('one invitation requests exactly one room / allocation');
+    }
+  }
+  // allergy safety (§30): a declared allergy without kitchen detail is not a
+  // submittable safety record — the guest is sent back to My Profile.
+  for (const g of reg.guests || []) {
+    if (g.attending !== false && g.allergy === 'yes' && !(g.allergyDetail && g.allergyDetail.trim())) {
+      errors.push('please tell the kitchens about ' + (g.preferredName || 'each guest') + '\u2019s allergy under My Profile');
     }
   }
   // dress code: each wedding moment with required attire needs its own explicit

@@ -345,6 +345,11 @@ body.pv-lock { overflow: hidden; }
 #privnav button[aria-current="true"]::after { right: 0; }
 #privnav .pn-exit button { border: 1px solid var(--line); padding: 8px 14px; }
 #privnav .pn-exit button::after { display: none; }
+.trf-more { margin-top: 22px; border-top: 1px solid var(--line); }
+.trf-more summary { cursor: pointer; list-style: none; padding: 14px 0; font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--rose); }
+.trf-more summary::-webkit-details-marker { display: none; }
+.trf-more summary::after { content: ' +'; color: var(--cherry); }
+.trf-more[open] summary::after { content: ' \2212'; }
 #privnav .pn-exit button:hover { border-color: var(--cherry); }
 
 /* Guest Relations contact card (LINE QR; WhatsApp pending an approved number) */
@@ -402,9 +407,16 @@ button.btn.ghost { background: none; color: var(--ink); border-color: rgba(33,31
 button.btn.ghost:hover { border-color: var(--cherry); color: var(--cherry); background: none; }
 button.btn.sm { padding: 10px 16px; font-size: 11px; min-height: 40px; }
 
-#summary { position: fixed; left: 0; right: 0; bottom: 0; background: var(--ink-s); color: var(--ivory); padding: 12px 6vw; font-size: 12.5px; letter-spacing: .03em; z-index: 40; display: flex; gap: 14px; align-items: baseline; }
-#summary .sum-label { font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: var(--cherry-photo); white-space: nowrap; }
-#summary .sum-line { opacity: .92; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#summary { position: fixed; left: 0; right: 0; bottom: 0; background: var(--ink-s); color: var(--ivory); padding: 10px 6vw 12px; font-size: 12.5px; letter-spacing: .03em; z-index: 40; display: flex; flex-direction: column; gap: 3px; border-top: 1px solid rgba(201,164,92,.45); }
+#summary .sum-label { font-size: 9.5px; letter-spacing: .22em; text-transform: uppercase; color: var(--cherry-photo); white-space: nowrap; }
+#summary .sum-a, #summary .sum-b { display: flex; gap: 12px; align-items: baseline; min-width: 0; }
+#summary .sum-line { opacity: .92; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; }
+#summary .sum-amt { font-family: 'Cormorant Garamond', serif; font-size: 20px; line-height: 1.1; letter-spacing: .02em; }
+#summary .sum-cur { display: inline-flex; gap: 2px; margin-left: auto; }
+#summary .cur-btn { background: none; border: 1px solid rgba(255,255,255,.22); color: var(--ivory); opacity: .65; font: inherit; font-size: 10px; letter-spacing: .12em; padding: 2px 7px; cursor: pointer; min-height: 24px; }
+#summary .cur-btn.on { opacity: 1; border-color: rgba(201,164,92,.75); color: #e8cf9a; }
+#summary .sum-fx { flex-basis: 100%; font-size: 10px; opacity: .6; letter-spacing: .06em; }
+#summary .sum-b { flex-wrap: wrap; }
 
 /* invitation overlay (§7) — THE CLOSED PRODUCTION BOX.
  * Two ivory panels meet at the vertical centre seam; the 8×8 plaque bridges the
@@ -614,13 +626,6 @@ html.inv-anim-open .bx-right { animation: bxRight 2.05s cubic-bezier(.45,.05,.45
 </section>
 
 <!-- 6 · travel (§15) -->
-<section class="step" data-step="travel" aria-label="Arrival and transfers">
-<div class="step-eyebrow">Arrival &amp; transfers</div>
-<h2>Getting you<br/>here and home.</h2>
-<div id="travel-box"></div>
-<div class="stepnav"><button class="btn ghost" data-prev>Back</button><button class="btn" data-next>Continue</button></div>
-</section>
-
 <!-- 7 · spa (§16) -->
 <section class="step" data-step="spa" aria-label="Spa and wellness">
 <div class="step-eyebrow">Spa &amp; wellness</div>
@@ -678,7 +683,7 @@ html.inv-anim-open .bx-right { animation: bxRight 2.05s cubic-bezier(.45,.05,.45
 </section>
 </main>
 
-<div id="summary" hidden aria-live="polite"><span class="sum-label">Your journey</span><span class="sum-line"></span></div>
+<div id="summary" hidden aria-live="polite"></div>
 
 <!-- room detail overlay (§22) -->
 <div class="pv-backdrop" id="acc-backdrop" hidden></div>

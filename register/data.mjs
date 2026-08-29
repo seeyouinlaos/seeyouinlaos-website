@@ -64,7 +64,7 @@ export const EVENTS = [
     templeNote: 'The participating temple will be announced with your itinerary.' },
   { id: 'ceremony', label: 'Wedding Ceremony', when: 'Sunday, 28 February 2027',
     venue: 'Souphattra Heritage Vientiane', dress: 'Black Tie', dressGroup: 'vow', blurb: 'The vows, in front of everyone who matters.' },
-  { id: 'dinner', label: 'Wedding Dinner & Reception', when: 'Sunday, 28 February 2027',
+  { id: 'dinner', label: 'Wedding Dinner', when: 'Sunday, 28 February 2027',
     venue: 'Souphattra Heritage Vientiane', dress: 'Black Tie', dressGroup: 'dinner', blurb: 'Sunset drinks beside the pool, then dinner in the courtyard garden. Food, music and celebration.' },
 ];
 
@@ -140,7 +140,7 @@ export const ACCOMMODATIONS = [
     capacityTotal: 1, capacityUnit: 'Room', selectionScope: 'PARTY',
     size: '63 sq.m.', bed: '1 King bed', occupancy: '2 adults · 1 child',
     location: 'Ground floor · central greenery · one suite only',
-    blurb: 'A 63 square metre retreat made for two: a King bed, two bathrooms and shower rooms for Her and His comfort, a separate living area with Smart TV and sofa for afternoon tea, and a private balcony over the garden and the pool.',
+    blurb: 'A 63 square metre retreat with a King bed, two bathrooms, a separate living area and a private balcony overlooking the garden and pool.',
     amenities: ['Bathrobe', 'Bathtub', 'Coffee & tea making facilities', 'Hair dryer', 'Mini bar', 'Nespresso machine', 'Safe deposit box', 'Shower', 'Slippers', 'Smart TV', 'Wardrobe', 'WiFi access'],
     images: [RM + 'noble-courtyard-1.jpg', RM + 'noble-courtyard-2.jpg', RM + 'noble-courtyard-3.jpg'],
   },
@@ -264,6 +264,10 @@ export const TRANSFERS = [
     pricePerUnit: 40, direction: 'departure', fieldsFor: 'flight',
     included: 'Private vehicle and driver · met personally · luggage handled',
     blurb: 'From Souphattra Heritage to Wattay International Airport, timed to your flight.' },
+  { id: 'nongkhai-vte', group: 'Nong Khai Railway Station', name: 'Nong Khai Station to Souphattra Heritage',
+    pricePerUnit: 20, direction: 'arrival', fieldsFor: 'train',
+    included: 'Private vehicle and driver · met at your carriage exit · luggage handled',
+    blurb: 'From Nong Khai Railway Station onward to Souphattra Heritage Vientiane after your Night Train arrival.' },
   { id: 'lcr-pickup-jaguar', group: 'LCR Railway Station', name: 'LCR Station to Hotel by Jaguar',
     pricePerUnit: 40, direction: 'arrival', fieldsFor: 'train',
     included: 'Private vehicle and driver · met personally · luggage handled',
@@ -280,6 +284,23 @@ export const TRANSFERS = [
     pricePerUnit: 60, direction: 'departure', fieldsFor: 'train',
     included: 'Private vehicle and driver · met personally · luggage handled',
     blurb: 'From Souphattra Heritage to Vientiane railway station, timed to your train.' },
+];
+
+/* ---------------- journey extension architecture (owner instruction) --------
+ * One authoritative source for the optional journey stays and the Post Wedding
+ * Journey. Contribution values are NULL wherever no authoritative amount
+ * exists yet — the UI renders a quiet pending state, never an invented price. */
+export const BANGKOK_STAYS = [
+  { id: 'mandarin-oriental', name: 'Mandarin Oriental Bangkok', role: 'Primary' },
+  { id: 'salil-riverside', name: 'The Salil Riverside Bangkok', role: 'Alternative' },
+];
+
+export const POST_WEDDING = [
+  { id: 'vte-kmg', type: 'Transportation', label: 'Vientiane → Kunming', when: '1 March 2027', sub: 'By rail', contribution: null },
+  { id: 'kunming-stay', type: 'Stay', label: 'Wanxiang Yueju Designer Homestay', when: '1 – 4 March 2027', sub: 'Kunming Railway Station MixC Branch', contribution: null },
+  { id: 'kmg-ljg', type: 'Transportation', label: 'Kunming → Lijiang', when: '4 March 2027', sub: 'By rail', contribution: null },
+  { id: 'lijiang-stay', type: 'Stay', label: 'Luye Baisha · Rizhao Jinshan', when: '4 – 6 March 2027', sub: 'Lijiang', contribution: null },
+  { id: 'ljg-bkk', type: 'Flight', label: 'Lijiang → Bangkok', when: '6 March 2027', sub: 'Return flight', contribution: null },
 ];
 
 /* ---------------- package (§23) ---------------- */
