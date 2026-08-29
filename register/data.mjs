@@ -78,7 +78,7 @@ export const EVENTS = [
 const HERITAGE_AMENITIES = [
   'Bathrobe', 'Bathtub', 'Coffee & tea facilities', 'Hair dryer', 'Mini bar',
   'Nespresso machine', 'Safe deposit box', 'Shower', 'Slippers', 'Smart TV',
-  'Wardrobe', 'Wi-Fi',
+  'Wardrobe', 'WiFi',
 ];
 const STAY_WINDOW = '27 February – 1 March 2027';
 const RM = 'assets/images/rooms/';
@@ -129,7 +129,7 @@ export const ACCOMMODATIONS = [
     size: '49 sq.m.', bed: '1 King bed', occupancy: '2 adults · 1 child sharing bedding',
     location: 'Garden and pool views',
     blurb: 'A larger heritage room, with a private balcony over the garden and the pool.',
-    amenities: ['Private balcony', 'Garden and pool views', 'Nespresso machine', 'Coffee & tea facilities', 'Mini bar', 'Smart TV', 'Wi-Fi', 'Bathroom amenities'],
+    amenities: ['Private balcony', 'Garden and pool views', 'Nespresso machine', 'Coffee & tea facilities', 'Mini bar', 'Smart TV', 'WiFi', 'Bathroom amenities'],
     images: [RM + 'heritage-grand-premier-1.jpg', RM + 'heritage-grand-premier-2.jpg', RM + 'heritage-grand-premier-3.jpg'],
   },
   {
@@ -141,7 +141,7 @@ export const ACCOMMODATIONS = [
     size: '63 sq.m.', bed: '1 King bed', occupancy: '2 adults · 1 child',
     location: 'Ground floor · central greenery · one suite only',
     blurb: 'A 63 square metre retreat made for two: a King bed, two bathrooms and shower rooms for Her and His comfort, a separate living area with Smart TV and sofa for afternoon tea, and a private balcony over the garden and the pool.',
-    amenities: ['Bathrobe', 'Bathtub', 'Coffee & tea making facilities', 'Hair dryer', 'Mini bar', 'Nespresso machine', 'Safe deposit box', 'Shower', 'Slippers', 'Smart TV', 'Wardrobe', 'Wi-Fi access'],
+    amenities: ['Bathrobe', 'Bathtub', 'Coffee & tea making facilities', 'Hair dryer', 'Mini bar', 'Nespresso machine', 'Safe deposit box', 'Shower', 'Slippers', 'Smart TV', 'Wardrobe', 'WiFi access'],
     images: [RM + 'noble-courtyard-1.jpg', RM + 'noble-courtyard-2.jpg', RM + 'noble-courtyard-3.jpg'],
   },
   {
@@ -153,7 +153,7 @@ export const ACCOMMODATIONS = [
     size: '66–75 sq.m.', bed: '1 King bed', occupancy: '2 adults · 1 child',
     location: 'Private balcony',
     blurb: 'French colonial and Laotian design: a living room under a high ceiling, and a slower kind of morning.',
-    amenities: ['Living room', 'High ceiling', 'Pantry', 'Private balcony', 'Smart TV', 'Mini bar', 'Wi-Fi'],
+    amenities: ['Living room', 'High ceiling', 'Pantry', 'Private balcony', 'Smart TV', 'Mini bar', 'WiFi'],
     images: [RM + 'grand-majestic-suite-1.jpg', RM + 'grand-majestic-suite-2.jpg', RM + 'grand-majestic-suite-3.jpg'],
   },
   {
@@ -167,7 +167,7 @@ export const ACCOMMODATIONS = [
     size: '84 sq.m.', bed: '1 King bed', occupancy: '2 adults · 2 children',
     location: 'Pool and garden views · one suite only',
     blurb: 'The house suite: a separate living area, pantry and bar, and a long balcony over the pool.',
-    amenities: ['Separate living area', 'Pantry', 'Bar', 'Large balcony', 'Pool and garden views', 'High ceilings', 'Nespresso machine', 'Coffee & tea facilities', 'Mini bar', 'Wi-Fi'],
+    amenities: ['Separate living area', 'Pantry', 'Bar', 'Large balcony', 'Pool and garden views', 'High ceilings', 'Nespresso machine', 'Coffee & tea facilities', 'Mini bar', 'WiFi'],
     images: [RM + 'souphattra-majestic-suite-1.jpg', RM + 'souphattra-majestic-suite-2.jpg', RM + 'souphattra-majestic-suite-3.jpg'],
   },
   {
@@ -178,7 +178,6 @@ export const ACCOMMODATIONS = [
     stay: STAY_WINDOW, nights: 2,
     contributionPerGuest: 750, selectable: false,
     reservedNote: 'Reserved',
-    reservedFor: 'Reserved for the wedding couple\u2019s family',
     capacityTotal: 1, capacityUnit: 'Room', selectionScope: 'PARTY',
     size: '118 sq.m.', bed: 'Two bedrooms · king and twin', occupancy: '4 adults · 2 children',
     location: 'One unit only',
@@ -195,8 +194,9 @@ export const ACCOMMODATIONS = [
      * no inclusions: everything is ARRANGED SEPARATELY by Guest Relations.
      * contributionPerGuest: null = no guest-facing amount exists.
      * The internal booking value stays internal. NOT part of the 26 rooms. */
-    id: 'airbnb-2br', name: 'Airbnb Residence',
-    kind: 'airbnb', property: 'Airbnb · Vientiane',
+    id: 'airbnb-2br', name: 'Private Residence',
+    badge: 'Alternative stay',
+    kind: 'airbnb', property: 'Alternative Stay · Vientiane',
     referenceUrl: 'https://www.airbnb.com/rooms/23930245?adults=4&check_in=2027-02-27&check_out=2027-03-01',
     stay: STAY_WINDOW, nights: 2,
     contributionPerGuest: null, selectable: true,
@@ -205,7 +205,7 @@ export const ACCOMMODATIONS = [
     location: 'Downtown Vientiane · 300 m to the Mekong Night Market · 800 m to Wat Sisaket',
     status: 'Complimentary · limited availability',
     blurb: 'A warm private residence in central Vientiane, secured for the wedding stay and hosted for a limited number of guests. Guest Relations coordinates the arrangements personally.',
-    amenities: ['Wi-Fi', 'Air conditioning', 'Hot water', 'Washer & laundry area', 'Refrigerator', 'Kettle & kitchenette', 'Hair dryer', 'Free parking'],
+    amenities: ['WiFi', 'Air conditioning', 'Hot water', 'Washer & laundry area', 'Refrigerator', 'Kettle & kitchenette', 'Hair dryer', 'Free parking'],
     images: ['assets/images/airbnb/airbnb-01.jpg', 'assets/images/airbnb/airbnb-02.jpg', 'assets/images/airbnb/airbnb-03.jpg']
   },
 ];
@@ -314,9 +314,9 @@ export const COPY = {
   priceNote2: 'Breakfast is included on both mornings. A limited number of complimentary alternative stays are also available.',
   /*   keeps "Haruthai & Suthep" unbreakable on every viewport (owner hard rule) */
   hostedNight: 'Your second hotel night is complimentary — part of the hospitality of your hosts.',
-  payment: 'No deposit is required. Once confirmed, you will receive your invoice with bank transfer or PayPal instructions. Payment is due within seven days.',
+  payment: 'No deposit is required. Once your arrangements are confirmed, you will receive an invoice with bank transfer or PayPal instructions. Payment is due within seven days.',
   requestNote: 'This is a registration request. Guest Relations will confirm your arrangements separately.',
-  sharedHome: 'Souphattra Heritage Vientiane is held for the people we love and sits at the heart of the wedding stay: shared mornings, shared arrivals, and the whole rhythm of the weekend centred around one quiet place. You choose the stay that feels right for you.',
+  sharedHome: 'Souphattra Heritage Vientiane sits at the heart of our wedding stay: shared mornings, shared arrivals, and the rhythm of the weekend centred around one quiet place. Choose the stay that feels right for you.',
 };
 
 /* ---------------- Guest List — PRODUCTION LOOKUP (token-only) -------------

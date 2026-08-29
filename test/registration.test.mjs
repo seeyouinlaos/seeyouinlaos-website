@@ -159,8 +159,8 @@ test('the 2BR Airbnb is a complimentary limited-availability option, never price
   const b = ACCOMMODATIONS.find((a) => a.id === 'airbnb-2br');
   assert.equal(b.kind, 'airbnb');
   assert.equal(b.contributionPerGuest, null); // NO guest-facing amount exists
-  assert.equal(b.badge, undefined);           // no COMPLIMENTARY / hosted claim
-  assert.equal(b.property, 'Airbnb · Vientiane');
+  assert.equal(b.badge, 'Alternative stay');  // §G differentiated hierarchy label
+  assert.equal(b.property, 'Alternative Stay · Vientiane'); // §G differentiated hierarchy
   assert.equal(b.occupancy, 'Up to 4 adults');
   assert.equal(b.stay, '27 February – 1 March 2027');
   assert.equal(b.imageSlots, undefined); // real photos delivered 2026-08-26 replace the slots
@@ -271,7 +271,7 @@ test('the active accommodation master is complete (final matrix, no villa)', () 
   assert.deepEqual(names, [
     'The Heritage', 'Heritage Executive', 'Heritage Grand Premier',
     'Noble Courtyard Suite', 'Grand Majestic Suite', 'Souphattra Majestic Suite',
-    'Souphattra Presidential', 'Airbnb Residence',
+    'Souphattra Presidential', 'Private Residence', // §G: differentiated alternative-stay identity
   ]);
   assert.ok(!names.some((n) => /Cozy Villa|4BR/i.test(n)), 'the cancelled 4BR villa never returns');
   assert.ok(!names.some((n) => /Heritage Exclusive/i.test(n)), 'it is Heritage Executive, never Exclusive');

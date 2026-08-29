@@ -295,6 +295,8 @@ body.pv-lock { overflow: hidden; }
 .acc-hosted .hs { font-family: 'PP Editorial Old', serif; font-size: 15px; text-transform: none; letter-spacing: .04em; }
 .row .r .hs { font-size: inherit; }
 /* MY STAY amenities: the previously approved chip presentation (restored) */
+.train-gal { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 12px 0 4px; }
+.train-gal img { width: 100%; height: auto; aspect-ratio: 3/4; object-fit: cover; display: block; }
 .trf-incl { margin-top: 4px; color: var(--gold); }
 /* room gallery lightbox */
 .lb[hidden] { display: none !important; }
@@ -354,7 +356,7 @@ body.pv-lock { overflow: hidden; }
 .acc-track img { object-position: center; transform: none; flex: 0 0 100%; width: 100%; height: auto; aspect-ratio: 3/2; object-fit: cover; scroll-snap-align: start; user-select: none; }
 .acc-gal::after { content: ''; position: absolute; inset: 62% 0 0 0; background: linear-gradient(180deg, transparent, rgba(33,31,28,.42)); pointer-events: none; }
 .acc-avstat { position: absolute; left: 14px; bottom: 11px; z-index: 2; color: var(--ivory); font-size: 10.5px; letter-spacing: .22em; text-transform: uppercase; text-shadow: 0 1px 14px rgba(33,31,28,.6); pointer-events: none; }
-.acc-gcount { position: absolute; right: 14px; bottom: 11px; z-index: 2; color: var(--ivory); font-size: 10px; letter-spacing: .18em; text-shadow: 0 1px 12px rgba(33,31,28,.65); }
+.acc-gcount { position: absolute; right: 14px; top: 11px; z-index: 2; color: var(--ivory); font-size: 10px; letter-spacing: .18em; text-shadow: 0 1px 12px rgba(33,31,28,.65); }
 .acc-slots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 10px; aspect-ratio: 3/1.1; background: repeating-linear-gradient(45deg, rgba(168,134,59,.05), rgba(168,134,59,.05) 6px, transparent 6px, transparent 14px); border-bottom: 1px solid var(--line); }
 .acc-slot { display: grid; place-items: center; border: 1px dashed var(--gold-line); color: var(--gold); font-size: 10px; letter-spacing: .2em; }
 .acc-card.reserved .acc-avail { color: var(--gold); }

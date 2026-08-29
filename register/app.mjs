@@ -484,7 +484,7 @@ function renderJourney() {
     title: null,
     modules: [
       { id: 'bangkok', label: 'The Bangkok Journey', when: 'Before the wedding', blurb: 'The shared days in Bangkok before travelling on to Laos.' },
-      { id: 'train', label: 'The Overnight Train', when: 'Bangkok → Nong Khai · ' + money(TRAIN.contributionPerGuest) + ' per guest · ' + trainLabel, blurb: 'The sleeper train north through the night — one of the defining transitions of the Bangkok Journey. ' + money(TRAIN.contributionPerGuest) + ' per participating guest; only guests who join are charged. Eight seats, allocated per Guest in registration order.', disabled: trainFull, waitlist: trainFull },
+      { id: 'train', label: 'The Overnight Train', when: 'Bangkok → Nong Khai · ' + money(TRAIN.contributionPerGuest) + ' per guest · ' + trainLabel, blurb: 'Special Express No. 25 · Bangkok to Nong Khai · departs Krung Thep Aphiwat Central Terminal 20:25, arrives Nong Khai 06:45 · 10 hours 20 minutes · First Class Sleeper. Travel overnight in a private First Class cabin, waking in Nong Khai before continuing together to Vientiane. Guest Relations coordinates the journey and ticket arrangements. ' + money(TRAIN.contributionPerGuest) + ' per participating guest; only guests who join are charged. Eight seats, allocated per Guest in registration order.', disabled: trainFull, waitlist: trainFull },
       { id: 'independent', label: 'Arriving independently in Vientiane', when: 'Your own way', blurb: 'Fly or travel on your own schedule; we meet you there.' },
     ],
     field: 'journey',
@@ -552,7 +552,7 @@ function modulePicker({ modules, field }) {
         '</div></div>';
     }).join('');
     return '<div class="mod" data-mod="' + m.id + '">' +
-      '<div class="mod-head"><div><div class="when">' + esc(m.when) + '</div><h3>' + esc(m.label) + '</h3><p>' + esc(m.blurb) + '</p>' +
+      '<div class="mod-head"><div><div class="when">' + esc(m.when) + '</div><h3>' + esc(m.label) + '</h3><p>' + esc(m.blurb) + '</p>' + (m.id === 'train' ? '<div class="train-gal">' + ['train-01','train-04','train-03'].map((f, ti) => '<img src="../assets/images/train/' + f + '.jpg" alt="First Class Sleeper aboard Special Express No. 25 · view ' + (ti + 1) + '" loading="lazy" decoding="async"/>').join('') + '</div>' : '') +
       (m.disabled ? '<p class="cap-full">Fully allocated</p>' : '') + '</div>' +
       '<div class="join-col">' + rows + '</div></div></div>';
   }).join('');
@@ -708,7 +708,7 @@ function renderStaySelected() {
       ? '<div class="row"><span class="l">' + occ.length + ' guest' + (occ.length > 1 ? 's' : '') + ' · one ' + esc(acc.capacityUnit.toLowerCase()) + '</span><span class="r">Complimentary · coordinated by Guest Relations</span></div>'
       : '<div class="row"><span class="l">' + occ.length + ' guest' + (occ.length > 1 ? 's' : '') + ' · one ' + esc(acc.capacityUnit.toLowerCase()) + '</span><span class="r">' + money(contributionPerGuest(acc)) + ' · total contribution per guest</span></div>' +
         '<div class="row total"><span class="l serif-it">Total contribution</span><span class="r">' + money(partyTotal(acc, occ)) + '</span></div>' +
-        '<div class="row"><span class="l">Second night</span><span class="r">Hosted by<span class="hs">Haruthai&nbsp;&amp;&nbsp;Suthep</span></span></div>') +
+        '<div class="row"><span class="l">Second night</span><span class="r">Complimentary · hosted by<span class="hs">Haruthai&nbsp;&amp;&nbsp;Suthep</span></span></div>') +
     '</div>';
 }
 

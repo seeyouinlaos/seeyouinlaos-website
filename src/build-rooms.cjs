@@ -169,6 +169,8 @@ async function main() {
    * availability". Exact counts stay inside the engine / Guest Relations. */
   const html = [
     '<p class="rm-intro rv">' + esc(COPY.sharedHome) + '</p>',
+    '<p class="rm-intro rv">For rooms at Souphattra Heritage Vientiane, your contribution covers the first night. The second night is hosted by<span class="hs">Haruthai&nbsp;&amp;&nbsp;Suthep</span></p>',
+    '<p class="rm-intro rv">A limited number of complimentary private residence stays are also available.</p>',
     '<div class="rm-grid">',
     ACCOMMODATIONS.map((a) => card(a)).join('\n'),
     '</div>',
