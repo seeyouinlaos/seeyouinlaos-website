@@ -117,7 +117,10 @@ function freshState() {
     registration_submitted_at: null,
   };
 }
-function saveDraft() { try { localStorage.setItem(DRAFT_KEY, JSON.stringify(S)); } catch (e) { /* private mode */ } }
+function saveDraft() {
+  try { localStorage.setItem(DRAFT_KEY, JSON.stringify(S)); } catch (e) { /* private mode */ }
+  if (typeof updateNextState === 'function') updateNextState(); // item 8: live re-validation
+}
 function loadDraft() { try { return JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null'); } catch (e) { return null; } }
 function loadInventory() {
   try {
@@ -131,15 +134,12 @@ function saveInventory() { try { localStorage.setItem(INV_KEY, JSON.stringify(in
 
 /* ---------------- step controller ---------------- */
 const stepEls = [...document.querySelectorAll('.step')];
-const progress = document.getElementById('progress');
-stepEls.forEach(() => progress.appendChild(document.createElement('span')));
 let cur = 0;
 
 function show(i, focusHeading = true) {
   stepEls[cur].classList.remove('active');
   cur = i;
   stepEls[cur].classList.add('active');
-  [...progress.children].forEach((el, k) => el.classList.toggle('on', k <= cur));
   window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' });
   const h = stepEls[cur].querySelector('h1, h2');
   if (h && focusHeading) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); }
@@ -161,6 +161,7 @@ function renderStep(i) {
   if (name === 'cost') renderCost();
   if (name === 'review') renderReview();
   if (name === 'send') renderSend();
+  if (typeof updateNextState === 'function') updateNextState(); // item 8
 }
 
 /* ---------------- invitation overlay state machine (§7) ----------------
@@ -341,7 +342,7 @@ function adoptInvitation(inv) {
     S.invitation = { invitationId: inv.invitationId, token: inv.token, partyName: inv.partyName, partyLead: inv.partyLead, guests: inv.guests, unresolvedMapping: !!inv.unresolvedMapping };
     S.guests = inv.guests.map((g) => ({
       guestId: g.guestId, fullName: g.fullName, preferredName: g.preferredName,
-      attending: true, email: '', phone: '',
+      attending: true, email: '', phone: '', dob: '',
       journey: { bangkok: false, train: false, independent: true },
       events: { alms: true, ceremony: true, dinner: true },
       diet: 'No restrictions', allergy: 'no', allergyDetail: '', severe: false,
@@ -372,12 +373,12 @@ function renderPrivnav() {
   /* level-2 rule (owner): exactly ONE active subsection. "Guest Area" stays
    * available as the dashboard/home link but NEVER carries an active state —
    * the active marker belongs to the one current subsection button. */
-  nav.innerHTML = '<button type="button" class="pn-area" data-nav-home="home">Guest Area</button>' +
-    '<button type="button" id="nav-invitation">Invitation</button>' +
-    PRIVNAV.map(([st, label]) =>
+  /* item 11: the guest is already inside the Guest Area — the personal
+   * navigation starts directly with MY JOURNEY; INVITATION lives with the
+   * utilities (Website · Save · Log out), never inside the booking steps. */
+  nav.innerHTML = PRIVNAV.map(([st, label]) =>
     '<button type="button" data-nav="' + st + '"' + (name === st ? ' aria-current="true"' : '') + '>' + label + '</button>').join('') +
-    '<span class="pn-exit"><button type="button" id="pn-home">Website</button><button type="button" id="pn-save">Save</button><button type="button" id="log-out">Log out</button></span>';
-  nav.querySelector('.pn-area').addEventListener('click', () => show(idx('home')));
+    '<span class="pn-exit"><button type="button" id="nav-invitation">Invitation</button><button type="button" id="pn-home">Website</button><button type="button" id="pn-save">Save</button><button type="button" id="log-out">Log out</button></span>';
   nav.querySelector('#pn-home').addEventListener('click', () => {
     saveDraft(); location.href = '../'; // progress saved; the personal link reopens the journey
   });
@@ -629,16 +630,17 @@ function renderEvents() {
   box.innerHTML = modulePicker({
     modules: EVENTS.map((e) => ({ id: e.id, label: e.label, when: e.when + ' · ' + e.venue, blurb: e.blurb, locked: e.id === 'ceremony', dress: e.dress, dressGroup: e.dressGroup })),
     field: 'events',
+    sharedOnly: true, // one shared Wedding Programme per invitation (item 6)
   });
   wireModulePicker(box, 'events');
 }
 
 /** Party-level module picker with per-guest split (“WE HAVE DIFFERENT PLANS”). */
-function modulePicker({ modules, field }) {
-  const differs = S.partyPlans === 'different';
+function modulePicker({ modules, field, sharedOnly }) {
+  const differs = !sharedOnly && S.partyPlans === 'different';
   const many = S.guests.length > 1;
   let html = '';
-  if (many) {
+  if (many && !sharedOnly) {
     html += '<div class="plans-toggle" role="radiogroup" aria-label="Shared or individual plans">' +
       '<label><input type="radio" name="plans-' + field + '" value="same"' + (!differs ? ' checked' : '') + '/><span>One plan for all of us</span></label>' +
       '<label><input type="radio" name="plans-' + field + '" value="different"' + (differs ? ' checked' : '') + '/><span>We have different plans</span></label>' +
@@ -667,7 +669,7 @@ function modulePicker({ modules, field }) {
           '<div class="dress-name serif">' + esc(m.dress) + '</div>' +
           '<div class="dress-gal">' + [1, 2, 3].map((i) => '<img src="../assets/images/dress/' + m.dressGroup + '-0' + i + '.jpg" alt="' + esc(m.dress) + ' dress reference ' + i + '" loading="lazy" decoding="async"/>').join('') + '</div>' +
           '<p class="note">The dress code is part of this moment and applies to all guests attending. Please make sure you are comfortable following it before confirming your attendance. Guests who are not dressed in accordance with the required attire may not be able to join the event.</p>' +
-          (anyJoin ? '<label class="ack-row' + (ok ? ' ok' : '') + '"><input type="checkbox" data-ack="' + m.id + '"' + (ok ? ' checked' : '') + '/><span>I have read and understand the dress code</span></label>' : '') +
+          (anyJoin ? '<label class="ack-row' + (ok ? ' ok' : '') + '"><input type="checkbox" data-ack="' + m.id + '"' + (ok ? ' checked' : '') + '/><span>I have read and understand the dress code<small class="ack-i18n">Ich habe den Dresscode gelesen und verstanden \u00B7 \u0E09\u0E31\u0E19\u0E44\u0E14\u0E49\u0E2D\u0E48\u0E32\u0E19\u0E41\u0E25\u0E30\u0E40\u0E02\u0E49\u0E32\u0E43\u0E08\u0E02\u0E49\u0E2D\u0E01\u0E33\u0E2B\u0E19\u0E14\u0E01\u0E32\u0E23\u0E41\u0E15\u0E48\u0E07\u0E01\u0E32\u0E22\u0E41\u0E25\u0E49\u0E27</small></span></label>' : '') +
           '</div>';
       })() : '') +
       (m.disabled ? '<p class="cap-full">Fully allocated</p>' : '') + '</div>' +
@@ -1122,22 +1124,21 @@ function renderEach() {
       : '<p class="note">One photo or scan of the passport identity page is all we need. Used only where required for travel arrangements coordinated by Guest Relations.</p><button type="button" class="btn ghost sm" data-pass="' + g.guestId + '">Select passport file</button>') +
     '<input type="file" accept="image/*,.pdf" hidden data-pass-input="' + g.guestId + '"/></div></div>' +
     '<div class="cols2">' +
-    ef(g, 'email', 'Email', 'email') + /* Telephone removed from the guest-facing profile (master data keeps it) */
+    ef(g, 'email', 'Email', 'email') +
+    '<div class="field"><label>Phone number \u00B7 with country code</label><input type="tel" inputmode="tel" autocomplete="tel" placeholder="+49 160 1234567" data-ef="phone" value="' + esc(g.phone || '') + '"/></div>' +
     '</div>' +
-    '<div class="label" style="margin:26px 0 2px">Food, dietary &amp; safety</div>' +
+    '<div class="cols2">' +
+    '<div class="field"><label>Date of birth</label><input type="date" autocomplete="bday" data-ef="dob" value="' + esc(g.dob || '') + '"/></div>' +
+    '</div>' +
+    '<div class="label" style="margin:26px 0 2px">Food, dietary &amp; allergies</div>' +
     '<div class="cols2">' +
     '<div class="field"><label>Dietary preference</label><select data-ef="diet">' + ['No restrictions', 'Vegetarian', 'Vegan', 'Pescatarian', 'Gluten free', 'Lactose free', 'Other'].map((o) => '<option' + (g.diet === o ? ' selected' : '') + '>' + o + '</option>').join('') + '</select></div>' +
     '<div class="field"><label>Any food allergies?</label><div class="join">' +
     '<label><input type="radio" name="alg-' + g.guestId + '" value="yes"' + (g.allergy === 'yes' ? ' checked' : '') + '/><span class="yes">Yes</span></label>' +
     '<label><input type="radio" name="alg-' + g.guestId + '" value="no"' + (g.allergy !== 'yes' ? ' checked' : '') + '/><span class="no">No</span></label></div></div>' +
     '</div>' +
-    '<div class="cond' + (g.allergy === 'yes' ? ' show' : '') + '" data-alg><div class="field"><label>Exactly what should the kitchens know?</label><textarea data-ef="allergyDetail">' + esc(g.allergyDetail) + '</textarea></div>' +
-    '<div class="field"><label>Severe / needs special handling?</label><div class="join">' +
-    '<label><input type="radio" name="sev-' + g.guestId + '" value="yes"' + (g.severe ? ' checked' : '') + '/><span class="yes">Yes, severe</span></label>' +
-    '<label><input type="radio" name="sev-' + g.guestId + '" value="no"' + (!g.severe ? ' checked' : '') + '/><span class="no">Standard care</span></label></div></div></div>' +
-    '<div class="cols2">' + ef(g, 'dislikes', 'Foods you dislike') + '</div>' +
-    '<div class="grp-end" aria-hidden="true"></div>' +
-    '<div class="label" style="margin:0 0 6px">A little about you</div>' +
+    '<div class="cond' + (g.allergy === 'yes' ? ' show' : '') + '" data-alg><div class="field"><label>Exactly what should the kitchens know?</label><textarea data-ef="allergyDetail">' + esc(g.allergyDetail) + '</textarea></div></div>' +
+    '<div class="label" style="margin:26px 0 6px">A little about you</div>' +
     '<div class="cols2">' +
     ef(g, 'favFood', 'What\u2019s your favourite food?') + ef(g, 'favDrink', 'What\u2019s your favourite drink?') +
     ef(g, 'coffeeHow', 'How do you like your coffee?') + ef(g, 'teaLove', 'What tea do you love?') +
@@ -1159,7 +1160,6 @@ function renderEach() {
       block.querySelector('[data-alg]').classList.toggle('show', g.allergy === 'yes');
       saveDraft();
     }));
-    block.querySelectorAll('input[name^="sev-"]').forEach((el) => el.addEventListener('change', () => { g.severe = el.value === 'yes' && el.checked; saveDraft(); }));
   });
   // profile photo: downscaled, stored locally with the draft
   box.querySelectorAll('[data-photo]').forEach((b) => b.addEventListener('click', () =>
@@ -1355,8 +1355,10 @@ function renderReview() {
     const parts = [];
     if (!(hasAllergy && g.diet === 'No restrictions')) parts.push(esc(g.diet));
     if (hasAllergy) parts.push(detail
-      ? 'Allergy — ' + esc(detail) + (g.severe ? ' (severe)' : '')
+      ? 'Allergy — ' + esc(detail)
       : '<span class="ack-missing">Allergy noted — please add the detail for the kitchens under My Profile</span>');
+    if (g.phone) parts.push('Phone ' + esc(g.phone));
+    if (g.dob) parts.push('Born ' + esc(g.dob));
     if (g.spa && g.spa.requested) parts.push('spa REQUESTED');
     return [esc(g.preferredName), parts.join(' · ')];
   }));
@@ -1476,9 +1478,36 @@ function renderSummary() {
   el.querySelectorAll('[data-cur]').forEach((b) => b.addEventListener('click', () => setCurrency(b.getAttribute('data-cur'))));
 }
 
-/* ---------------- navigation ---------------- */
+/* ---------------- navigation + global step validation (item 8) ------------
+ * CONTINUE stays visible but functionally disabled until every required item
+ * of the current step is valid. Optional fields never block; conditional
+ * requirements apply only when triggered. */
+function stepValid(name) {
+  if (!S.invitation) return true;
+  if (name === 'events') {
+    for (const e of EVENTS) {
+      if (!e.dress) continue;
+      const joined = e.id === 'ceremony' || S.guests.some((g) => g.events && g.events[e.id]);
+      if (joined && !(S.dressAck && S.dressAck[e.id])) return false; // ack required only when joining
+    }
+    return true;
+  }
+  if (name === 'stay') return !!currentAcc() || !!S.stay.waitlist;
+  if (name === 'each') {
+    return S.guests.every((g) =>
+      (g.email || '').trim().includes('@') &&
+      (g.allergy !== 'yes' || (g.allergyDetail || '').trim()));
+  }
+  return true; // steps without hard requirements never block
+}
+function updateNextState() {
+  const step = stepEls[cur]; if (!step) return;
+  const btn = step.querySelector('[data-next]');
+  if (btn) btn.disabled = !stepValid(step.dataset.step);
+}
 document.querySelectorAll('[data-next]').forEach((b) => b.addEventListener('click', () => {
   const name = stepEls[cur].dataset.step;
+  if (!stepValid(name)) return; // real gate — no bypass via focus/enter
   if (name === 'welcome' && S.invitation && !isAuthOut()) { show(idx('home')); return; }
   if (name === 'review') { if (!trySubmit()) return; renderSend(); }
   show(Math.min(cur + 1, stepEls.length - 1));

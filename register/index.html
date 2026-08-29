@@ -350,6 +350,8 @@ body.pv-lock { overflow: hidden; }
 .trf-more summary::-webkit-details-marker { display: none; }
 .trf-more summary::after { content: ' +'; color: var(--cherry); }
 .trf-more[open] summary::after { content: ' \2212'; }
+.ack-row .ack-i18n { display: block; font-size: 10.5px; letter-spacing: .04em; opacity: .68; margin-top: 3px; line-height: 1.5; }
+.btn[disabled] { opacity: .4; cursor: not-allowed; pointer-events: none; }
 #privnav .pn-exit button:hover { border-color: var(--cherry); }
 
 /* Guest Relations contact card (LINE QR; WhatsApp pending an approved number) */
@@ -541,7 +543,6 @@ html.inv-anim-open .bx-right { animation: bxRight 2.05s cubic-bezier(.45,.05,.45
 <p class="inv-code-err" id="inv-code-err" role="alert" hidden>We could not find that invitation code. Please use the private code from your invitation letter — or write to Guest Relations and we will help right away.</p>
 </div>
 <button type="button" class="btn inv-cta">Open your invitation</button>
-<button type="button" class="inv-return" id="inv-return" hidden>Return to my journey</button>
 <a class="inv-web" id="inv-web" href="../">Visit the wedding website</a>
 </div>
 </div>
@@ -558,7 +559,6 @@ html.inv-anim-open .bx-right { animation: bxRight 2.05s cubic-bezier(.45,.05,.45
 <nav id="privnav" hidden aria-label="Your private journey"></nav>
 
 <main class="wrap">
-<div class="progress" id="progress" aria-hidden="true"></div>
 
 <!-- welcome -->
 <section class="step active" data-step="welcome" aria-label="Welcome">
@@ -612,7 +612,6 @@ html.inv-anim-open .bx-right { animation: bxRight 2.05s cubic-bezier(.45,.05,.45
 <section class="step" data-step="events" aria-label="Your events">
 <div class="step-eyebrow">The wedding days</div>
 <h2>What you are<br/>there for.</h2>
-<p class="note" style="margin-bottom:22px">Join as much or as little as suits you — the dinner alone is a complete answer.</p>
 <div id="events-box"></div>
 <div class="stepnav"><button class="btn ghost" data-prev>Back</button><button class="btn" data-next>Continue</button></div>
 </section>
