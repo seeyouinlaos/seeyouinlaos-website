@@ -378,11 +378,14 @@ body.pv-lock { overflow: hidden; }
 .route-map svg { display: block; width: 100%; height: auto; }
 .jmap-sec { padding: 90px 0 70px; }
 .jmap-sec .inner { padding: 0 6vw; }
-.jmap-canvas { width: 100%; height: clamp(420px, 68vh, 620px); margin-top: 44px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--ivory); filter: grayscale(.55) sepia(.14) saturate(.75) contrast(.94); }
+.jmap-canvas { width: 100%; height: clamp(460px, 66vh, 620px); margin-top: 44px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--ivory); filter: sepia(.16) saturate(.9) contrast(.96); }
+@media (max-width: 640px) { .jmap-canvas { height: 76vh; min-height: 520px; } }
 .jmap-cap { padding: 12px 6vw 0; font-size: 11px; letter-spacing: .1em; color: var(--rose); }
 .jm-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--cherry); border: 2px solid #F2ECE1; box-shadow: 0 0 0 1px rgba(116,7,14,.55); }
 .jm-dot.mid { background: var(--ink-s); box-shadow: 0 0 0 1px rgba(33,31,28,.45); }
-.jm-label { background: none; border: none; box-shadow: none; font-family: 'Hanken Grotesk', sans-serif; font-size: 10.5px; letter-spacing: .18em; text-transform: uppercase; color: var(--ink); text-shadow: 0 1px 6px rgba(242,236,225,.9), 0 0 2px rgba(242,236,225,.9); white-space: nowrap; }
+.jm-label { background: none; border: none; box-shadow: none; font-family: 'Hanken Grotesk', sans-serif; font-size: 12.5px; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--ink); text-shadow: 0 0 3px #F2ECE1, 0 0 6px #F2ECE1, 0 0 12px #F2ECE1, 0 1px 2px #F2ECE1; white-space: nowrap; }
+.jm-label::before { display: none; }
+@media (max-width: 640px) { .jm-label { font-size: 12px; letter-spacing: .12em; } }
 .leaflet-popup-content-wrapper { background: var(--ivory); color: var(--ink); border-radius: 0; border: 1px solid var(--line); box-shadow: 0 10px 30px rgba(33,31,28,.18); }
 .leaflet-popup-content { margin: 12px 16px; font-family: 'Hanken Grotesk', sans-serif; font-size: 12.5px; line-height: 1.55; }
 .leaflet-popup-content .jm-city { font-family: 'PP Editorial Old', serif; font-size: 17px; display: block; margin-bottom: 2px; }
@@ -1115,24 +1118,40 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
   var map = null;
   function init() {
     if (map) return;
-    map = L.map(el, { scrollWheelZoom: false, zoomControl: true, attributionControl: true });
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-      maxZoom: 12,
+    map = L.map(el, { scrollWheelZoom: false, zoomControl: true, attributionControl: true, zoomSnap: 0.25, zoomDelta: 0.5 });
+    /* English/Latin-only real basemap: Esri World Light Gray Canvas.
+     * The reference layer carries restrained English labels only. */
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+      attribution: 'Tiles &copy; Esri &mdash; Esri, HERE, Garmin, FAO, NOAA', maxZoom: 12,
+    }).addTo(map);
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}', {
+      maxZoom: 12, opacity: .55,
     }).addTo(map);
     SEGS.forEach(function (sg) {
       L.polyline([STOPS[sg.a].ll, STOPS[sg.b].ll], STYLE[sg.kind]).addTo(map);
     });
+    /* Deliberate per-city placement so no H&S label collides with another
+     * and no route line runs through destination text. */
+    var LBL = {
+      'Bangkok':   { dir: 'right',  off: [14, 4] },
+      'Nong Khai': { dir: 'right',  off: [14, 7] },
+      'Vientiane': { dir: 'left',   off: [-14, -7] },
+      'Kunming':   { dir: 'right',  off: [14, 0] },
+      'Lijiang':   { dir: 'left',   off: [-14, 0] },
+    };
     STOPS.forEach(function (st) {
+      var pl = LBL[st.n];
       var m = L.marker(st.ll, { icon: L.divIcon({ className: 'jm-dot' + (st.mid ? ' mid' : ''), iconSize: [12, 12] }) }).addTo(map);
-      m.bindTooltip(st.n, { permanent: true, direction: st.n === 'Vientiane' ? 'right' : 'top', offset: [st.n === 'Vientiane' ? 12 : 0, st.n === 'Vientiane' ? 0 : -6], className: 'jm-label' });
+      m.bindTooltip(st.n, { permanent: true, direction: pl.dir, offset: pl.off, className: 'jm-label' });
       m.bindPopup('<span class="jm-city">' + st.n + '</span><span class="jm-meta">' + st.d + ' \u00B7 ' + st.t + '</span>');
     });
     fit();
     window.addEventListener('resize', function () { map.invalidateSize(); fit(); });
   }
   function fit() {
-    map.fitBounds(L.latLngBounds(STOPS.map(function (s) { return s.ll; })), { padding: [46, 46] });
+    var mobile = window.innerWidth < 640;
+    map.fitBounds(L.latLngBounds(STOPS.map(function (s) { return s.ll; })),
+      { padding: mobile ? [30, 26] : [64, 64] });
   }
   if ('IntersectionObserver' in window) {
     new IntersectionObserver(function (es, io) {

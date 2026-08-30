@@ -657,20 +657,32 @@ function mountGuestMap() {
     flight: { color: '#74070E', weight: 1.6, opacity: .8, dashArray: '3 8' },
     journey: { color: '#2B2823', weight: 1.8, opacity: .7, dashArray: '1 6' },
   };
-  GMAP = L.map(el, { scrollWheelZoom: false, attributionControl: true });
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    maxZoom: 12,
+  GMAP = L.map(el, { scrollWheelZoom: false, attributionControl: true, zoomSnap: 0.25, zoomDelta: 0.5 });
+  /* English/Latin-only real basemap (Esri World Light Gray + English reference). */
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+    attribution: 'Tiles &copy; Esri &mdash; Esri, HERE, Garmin, FAO, NOAA', maxZoom: 12,
+  }).addTo(GMAP);
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}', {
+    maxZoom: 12, opacity: .5,
   }).addTo(GMAP);
   for (let i = 1; i < stops.length; i++) {
     L.polyline([CITY_LL[stops[i - 1].n], CITY_LL[stops[i].n]], SEG_STYLE[stops[i].seg || 'journey']).addTo(GMAP);
   }
+  const LBL = {
+    Bangkok: { dir: 'right', off: [13, 4] },
+    'Nong Khai': { dir: 'bottom', off: [0, 11] },
+    Vientiane: { dir: 'left', off: [-13, -7] },
+    Kunming: { dir: 'right', off: [13, 0] },
+    Lijiang: { dir: 'left', off: [-13, 0] },
+  };
   stops.forEach((st, i) => {
+    const pl = LBL[st.n];
     const m = L.marker(CITY_LL[st.n], { icon: L.divIcon({ className: 'jm-dot' + (st.mid ? ' mid' : ''), iconSize: [11, 11] }) }).addTo(GMAP);
-    if (!(i === stops.length - 1 && st.n === 'Bangkok')) m.bindTooltip(st.n, { permanent: true, direction: 'top', offset: [0, -6], className: 'jm-label' });
+    if (!(i === stops.length - 1 && st.n === 'Bangkok')) m.bindTooltip(st.n, { permanent: true, direction: pl.dir, offset: pl.off, className: 'jm-label' });
     m.bindPopup('<span class="jm-city">' + esc(st.n) + '</span><span class="jm-meta">' + esc(st.s) + '</span>');
   });
-  GMAP.fitBounds(L.latLngBounds(stops.map((st) => CITY_LL[st.n])), { padding: [34, 34] });
+  GMAP.fitBounds(L.latLngBounds(stops.map((st) => CITY_LL[st.n])),
+    { padding: window.innerWidth < 640 ? [26, 22] : [44, 44] });
 }
 /* The real map when the library is available; the schematic SVG only as an
  * offline fallback (standalone build). */
