@@ -478,10 +478,10 @@ test('the Guest Relations record carries transfers with units, price and status'
   const text = buildNotification(reg, ctx(inv));
   assert.ok(text.includes('TRANSFERS'));
   assert.ok(text.includes('Service: LCR Station to Hotel by Mercedes-Benz'));
-  assert.ok(text.includes('Units: 2 × USD 60'));
+  assert.ok(text.includes('Units: 2 unit(s) × USD 60'));
   assert.ok(text.includes('Train Number: C82'));
   assert.ok(text.includes('Transfers Total: USD 120'));
-  assert.ok(text.includes('TOTAL: USD 430')); // stay 310 + transfers 120
+  assert.ok(text.includes('TOTAL CONTRIBUTION: USD 430')); // stay 310 + transfers 120
 });
 
 test('a Party may request exactly one room', () => {
@@ -515,7 +515,7 @@ test('notification carries party, per-guest data, charges, statuses', () => {
   assert.ok(text.includes('OVERNIGHT TRAIN'));
   assert.ok(text.includes('Train Requested: YES — 1 seat(s)'));
   assert.ok(text.includes('Amara Demo (Sleeper berth · lower)'));
-  assert.ok(text.includes('Nong Khai Arrival: Nong Khai Railway Station'));
+  assert.ok(text.includes('Nong Khai Arrival: 27 FEB 2027 · Nong Khai Railway Station'));
   assert.ok(text.includes('Special Requirement: Light sleeper, lower deck please'));
   assert.ok(text.includes('Property: Souphattra Heritage Vientiane'));
   assert.ok(text.includes('Room Category: Heritage Executive'));
@@ -524,7 +524,7 @@ test('notification carries party, per-guest data, charges, statuses', () => {
   assert.ok(text.includes('Stay Total: USD 310 (2 guests)'));
   assert.ok(text.includes('JOURNEY COST'));
   assert.ok(text.includes('Train: 1 × USD 88 = USD 88'));
-  assert.ok(text.includes('TOTAL: USD 398'));
+  assert.ok(text.includes('TOTAL CONTRIBUTION: USD 398'));
   assert.ok(text.includes('Second Night: Complimentary / Hosted by Haruthai & Suthep'));
   assert.ok(text.includes('Status: REQUESTED / UNDER REVIEW'));
   // privacy: no internal figures

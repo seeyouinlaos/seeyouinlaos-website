@@ -16,13 +16,31 @@
 const GR_EMAIL = 'guest.relation.seeyouinlaos@gmail.com';
 const MAX_BODY = 64 * 1024; // 64 KB — structured registrations are small
 
+const ALLOWED_ORIGINS = [
+  'https://seeyouinlaos.github.io',
+  'https://seeyouinlaos-website.suthep-hrg.workers.dev',
+];
+function corsHeaders(request) {
+  const origin = request.headers.get('Origin') || '';
+  if (!ALLOWED_ORIGINS.includes(origin)) return {};
+  return {
+    'access-control-allow-origin': origin,
+    'access-control-allow-methods': 'POST, OPTIONS',
+    'access-control-allow-headers': 'content-type',
+    'access-control-max-age': '7200',
+  };
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
     if (url.pathname === '/api/register') {
+      if (request.method === 'OPTIONS') {
+        return new Response(null, { status: 204, headers: corsHeaders(request) });
+      }
       if (request.method !== 'POST') {
-        return json({ ok: false, error: 'method not allowed' }, 405);
+        return json({ ok: false, error: 'method not allowed' }, 405, corsHeaders(request));
       }
       return handleRegister(request, env);
     }
@@ -46,20 +64,29 @@ async function handleRegister(request, env) {
   }
 
   const submittedAt = (registration && registration.registration_submitted_at) || new Date().toISOString();
+  // stable registration identifier: one durable record per invitation —
+  // a normal repeat submission/retry OVERWRITES the same key (no accidental
+  // duplicates); the previous state is kept alongside as a bounded history.
+  const regKey = 'reg:' + invitationId;
   let stored = false;
   let mailed = false;
 
-  // 1) durable record when a KV binding is configured (owner step: create the
-  //    namespace and add `REG_KV` to wrangler.jsonc — see docs/RELEASE-GATES.md)
+  // 1) DURABLE PERSISTENCE FIRST (HSW-001-ED-FER-001 §1). Without a stored
+  //    record the endpoint reports failure and the client falls back to the
+  //    clearly-labelled emergency channel — success is never simulated.
   if (env.REG_KV) {
     try {
-      await env.REG_KV.put(
-        'reg:' + invitationId + ':' + submittedAt,
-        JSON.stringify({ invitationId, submittedAt, registration, text }),
-        { metadata: { invitationId, submittedAt } }
-      );
+      const record = JSON.stringify({ invitationId, submittedAt, registration, text });
+      const prev = await env.REG_KV.get(regKey);
+      await env.REG_KV.put(regKey, record, { metadata: { invitationId, submittedAt } });
+      if (prev && prev !== record) {
+        await env.REG_KV.put(regKey + ':prev:' + submittedAt, prev, {
+          metadata: { invitationId, supersededBy: submittedAt },
+          expirationTtl: 60 * 60 * 24 * 90,
+        });
+      }
       stored = true;
-    } catch (e) { /* fall through */ }
+    } catch (e) { /* persistence failed — reported honestly below */ }
   }
 
   // 2) forward the structured record to Guest Relations
@@ -77,15 +104,17 @@ async function handleRegister(request, env) {
     mailed = r.ok;
   } catch (e) { /* fall through */ }
 
-  if (!stored && !mailed) {
-    // nothing durable happened — tell the client so it falls back to mailto
-    return json({ ok: false, error: 'submission channels unavailable' }, 503);
+  // §1.5: only durable persistence counts as digital submission success.
+  // A mailed-but-not-stored state is NOT success; notification failure on a
+  // stored record does not destroy the registration.
+  if (!stored) {
+    return json({ ok: false, error: 'registration could not be stored', mailed }, 503, corsHeaders(request));
   }
-  return json({ ok: true, status: 'UNDER_REVIEW', stored, mailed, submittedAt }, 202);
+  return json({ ok: true, status: 'UNDER_REVIEW', stored, mailed, submittedAt }, 202, corsHeaders(request));
 }
 
-function json(obj, status) {
+function json(obj, status, extra) {
   return new Response(JSON.stringify(obj), {
-    status, headers: { 'content-type': 'application/json' },
+    status, headers: { 'content-type': 'application/json', ...(extra || {}) },
   });
 }

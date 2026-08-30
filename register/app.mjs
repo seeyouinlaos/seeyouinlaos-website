@@ -550,7 +550,7 @@ function renderHome() {
     '</div>' +
     '<div class="home-next"><div class="label">' + (S.submitted ? 'Status' : 'Next step') + '</div>' +
     (S.submitted
-      ? 'Your registration is with Guest Relations. Khun Ket and Khun Paddy personally review every detail, usually within 4–8 hours. Your private area stays open; no action needed.'
+      ? 'Your registration is with Guest Relations. Khun Ket and Khun Paddy personally review every detail. Your private area stays open while they prepare your arrangements; no action is needed from you.'
       : (!acc ? 'Choose where you wake up: your room at Souphattra Heritage Vientiane.'
         : detailsMissing ? 'A few personal details are still open so the table can be set around you.'
         : 'Everything is in place. Review your journey and send it to Guest Relations.')) +
@@ -839,7 +839,7 @@ function postWeddingBlock() {
       '</article>';
   const onwardBlock = () =>
     '<article class="trf-card"><div class="when">06 MAR 2027 · after Lijiang</div><h4>Your onward journey</h4>' +
-    '<p class="note">You may return to Bangkok, continue elsewhere, or arrange your own onward travel — every answer is a complete answer.</p>' +
+    '<p class="note">Return to Bangkok with us, continue elsewhere, or make your own plans.</p>' +
     '<div class="join" role="radiogroup" aria-label="Your onward journey">' +
     '<label><input type="radio" name="pw-onward" value="return"' + (onward === 'return' ? ' checked' : '') + '/><span class="yes">Return to Bangkok with us</span></label>' +
     '<label><input type="radio" name="pw-onward" value="own"' + (onward === 'own' ? ' checked' : '') + '/><span class="no">I\u2019ll arrange my own onward travel</span></label>' +
@@ -856,7 +856,7 @@ function postWeddingBlock() {
     '</article>';
   return '<div class="guest-block" id="post-wedding"><div class="cch-label">Post-Wedding Journey · Optional · After the wedding</div><h3>The Post Wedding Journey</h3>' +
     '<div class="label" style="margin:4px 0 8px">Vientiane → Kunming → Lijiang → your onward journey · 1 – 6 March 2027</div>' +
-    '<p class="note">' + HSLOCK + 'continue to Kunming and Lijiang after the wedding. If you would like to join the onward journey, we will prepare it with you.</p>' +
+    '<p class="note">' + HSLOCK + 'continue to Kunming and Lijiang after the wedding. If you would like to join part of the onward journey, we will prepare it with you. You may return to Bangkok with us, continue elsewhere, or make your own plans \u2014 every answer is a complete answer.</p>' +
     '<div class="join" role="radiogroup" aria-label="Post Wedding Journey">' +
     '<label><input type="radio" name="pw-join" value="yes"' + (joined ? ' checked' : '') + '/><span class="yes">We would love to join</span></label>' +
     '<label><input type="radio" name="pw-join" value="no"' + (!joined ? ' checked' : '') + '/><span class="no">Not this time</span></label></div>' +
@@ -974,7 +974,7 @@ function modulePicker({ modules, field, sharedOnly }) {
           '<div class="label">Dress code</div>' +
           '<div class="dress-name serif">' + esc(m.dress) + '</div>' +
           '<div class="dress-gal">' + [1, 2, 3].map((i) => '<img src="../assets/images/dress/' + m.dressGroup + '-0' + i + '.jpg" alt="' + esc(m.dress) + ' dress reference ' + i + '" loading="lazy" decoding="async"/>').join('') + '</div>' +
-          '<p class="note">The dress code is part of this moment and applies to all guests attending. Please make sure you are comfortable following it before confirming your attendance. Guests who are not dressed in accordance with the required attire may not be able to join the event.</p>' +
+          '<p class="note">The dress code is part of this moment and applies to everyone attending. Please make sure you are comfortable following it before confirming your attendance. If you are unsure about anything, Guest Relations will be happy to help you prepare.</p>' +
           (anyJoin ? '<label class="ack-row' + (ok ? ' ok' : '') + '"><input type="checkbox" data-ack="' + m.id + '"' + (ok ? ' checked' : '') + '/><span>I have read and understand the dress code<small class="ack-i18n">Ich habe den Dresscode gelesen und verstanden \u00B7 \u0E09\u0E31\u0E19\u0E44\u0E14\u0E49\u0E2D\u0E48\u0E32\u0E19\u0E41\u0E25\u0E30\u0E40\u0E02\u0E49\u0E32\u0E43\u0E08\u0E02\u0E49\u0E2D\u0E01\u0E33\u0E2B\u0E19\u0E14\u0E01\u0E32\u0E23\u0E41\u0E15\u0E48\u0E07\u0E01\u0E32\u0E22\u0E41\u0E25\u0E49\u0E27</small></span></label>' : '') +
           '</div>';
       })() : '') +
@@ -1870,7 +1870,7 @@ function trySubmit() {
   return true;
 }
 function renderSend() {
-  const text = buildNotification(currentRegistration(), { invitation: S.invitation, accommodations: ACCOMMODATIONS, transfers: TRANSFERS, train: TRAIN });
+  const text = buildNotification(currentRegistration(), { invitation: S.invitation, accommodations: ACCOMMODATIONS, transfers: TRANSFERS, train: TRAIN, postWedding: POST_WEDDING });
   document.getElementById('send-out').textContent = text;
 }
 document.getElementById('send-mail').addEventListener('click', async () => {
@@ -1878,9 +1878,12 @@ document.getElementById('send-mail').addEventListener('click', async () => {
   if (PUBLICATION.submit === 'endpoint') {
     try {
       const r = await fetch(PUBLICATION.submitUrl, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ registration: currentRegistration(), invitationId: S.invitation.invitationId, text }) });
-      if (r.ok) { showReceived(); return; }
-    } catch (e) { /* fall through to mailto */ }
+      if (r.ok) { S.submitVia = 'server'; showReceived(); return; }   // durably stored server-side
+    } catch (e) { /* endpoint unreachable — emergency channel below */ }
   }
+  /* FER-001 §1.8/1.9: mailto is explicit EMERGENCY RECOVERY, never presented
+   * as successful digital submission — the received screen says so. */
+  S.submitVia = 'mail';
   location.href = 'mailto:' + CONTACTS.email + '?subject=' + encodeURIComponent('Guest Registration — ' + S.invitation.partyName) + '&body=' + encodeURIComponent(text);
   showReceived();
 });
@@ -1889,6 +1892,7 @@ document.getElementById('copy-out').addEventListener('click', () => {
   navigator.clipboard.writeText(document.getElementById('send-out').textContent).then(() => {
     btn.textContent = 'Copied'; setTimeout(() => { btn.textContent = 'Copy for LINE'; }, 2200);
   }).catch(() => { /* text remains selectable */ });
+  S.submitVia = S.submitVia === 'server' ? 'server' : 'mail';
   showReceived();
 });
 function journeyStatusLadder() {
@@ -1903,6 +1907,12 @@ function journeyStatusLadder() {
     (s ? '<span class="s">' + s + '</span>' : '') + '</li>').join('') + '</ol>';
 }
 function showReceived() {
+  const via = document.getElementById('received-via');
+  if (via) {
+    via.innerHTML = S.submitVia === 'server'
+      ? '<span class="acc-avail" style="border:none;padding:0">Received and stored — your registration is safely with us.</span>'
+      : '<span class="ack-missing">Sent via the email backup channel — please make sure the email left your mail app. Guest Relations confirms receipt personally.</span>';
+  }
   const rs = document.getElementById('received-summary');
   if (rs) {
     const open = [];
@@ -1925,7 +1935,7 @@ function showReceived() {
     'Submitted ' + new Date(S.registration_submitted_at).toLocaleString('en-GB', { dateStyle: 'long', timeStyle: 'short' }) + ' · status: UNDER REVIEW';
   const st = document.getElementById('received-status');
   if (st) st.innerHTML = journeyStatusLadder() +
-    '<p class="note" style="margin-top:16px">From here, everything is in our hands. Khun Ket and Khun Paddy review your travel information, confirm your accommodation, coordinate your transfers and prepare your personal journey — usually within <strong>4–8 hours</strong>. Your private area stays open the whole time.</p>' +
+    '<p class="note" style="margin-top:16px">From here, everything is in our hands. Khun Ket and Khun Paddy review your travel information, confirm your accommodation, coordinate your transfers and prepare your personal journey. Your private area stays open the whole time; no action is needed from you.</p>' +
     grCardHtml();
   show(idx('received'));
 }

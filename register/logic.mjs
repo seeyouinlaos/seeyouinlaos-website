@@ -352,6 +352,10 @@ export function buildNotification(reg, ctx) {
     const j = g.journey || {}, e = g.events || {};
     out.push(L('  Journey:', [j.bangkok && 'Bangkok Journey', j.train && 'Overnight Train (seat requested)', j.independent && 'Independent arrival'].filter(Boolean).join('; ')));
     out.push(L('  Events:', ['alms', 'ceremony', 'dinner'].filter((k) => e[k]).join('; ')));
+    out.push(L('  Dress Codes Acknowledged:', ['alms', 'ceremony', 'dinner'].filter((k) => e[k]).map((k) => k + ': ' + ((reg.dressAck || {})[k] ? 'YES' : 'NO')).join('; ')));
+    out.push(L('  Email:', g.email));
+    out.push(L('  Phone:', g.phone));
+    out.push(L('  Date of Birth:', g.dob));
     out.push(L('  Dietary:', g.diet));
     out.push(L('  Allergies:', g.allergy === 'yes' ? (g.allergyDetail || 'YES') + (g.severe ? ' — SEVERE' : '') : 'None declared'));
     out.push(L('  Spa:', g.spa && g.spa.requested ? [g.spa.type, g.spa.day, g.spa.time].filter(Boolean).join(' · ') : 'Not requested'));
@@ -385,6 +389,8 @@ export function buildNotification(reg, ctx) {
     }
     out.push(L('Stay:', acc.stay));
     if (acc.kind !== 'airbnb') out.push('Second Night: Complimentary / Hosted by Haruthai & Suthep');
+    out.push(L('Bed Preference:', (reg.stay || {}).bed));
+    out.push(L('Special Request:', (reg.stay || {}).request));
     out.push('Status: REQUESTED / UNDER REVIEW');
   }
   out.push('');
@@ -397,10 +403,37 @@ export function buildNotification(reg, ctx) {
       return (meta.fullName || g.guestId) + (g.berth ? ' (' + g.berth + ')' : '');
     }).join('; ')));
     out.push(L('Special Requirement:', reg.trainNote));
-    out.push('Nong Khai Arrival: Nong Khai Railway Station');
-    out.push(L('Onward Transfer Requested:', (reg.arrival || {}).mode === 'Overnight train' && (reg.arrival || {}).pickup !== undefined
-      ? ((reg.arrival || {}).pickup ? 'YES' : 'NO')
-      : ((reg.arrival || {}).pickupRequested ? 'YES' : 'NO')));
+    out.push('Travel Date: 26 FEB 2027 · 20:25 → 06:45 (+1) · First Class Sleeper');
+    out.push('Nong Khai Arrival: 27 FEB 2027 · Nong Khai Railway Station');
+    const onward = selectedTransfers.map((s) => transferCatalog.find((x) => x.id === s.transferId))
+      .find((t) => t && t.id === 'nongkhai-vte');
+    out.push(L('Onward Transfer:', onward
+      ? 'Nong Khai → Vientiane · ' + trainGuests.length + ' × ' + money(onward.pricePerUnit) + ' — REQUESTED'
+      : 'Own arrangement / Guest Relations to assist'));
+  }
+  out.push('');
+  out.push('PRE-WEDDING BANGKOK STAY');
+  if (reg.bangkokStay && reg.bangkokStay.property) {
+    out.push('Requested: Elegant 6BR Sathorn Penthouse — dates confirmed personally by Guest Relations (known 21/22 FEB decision)');
+    out.push('Status: REQUESTED / UNDER REVIEW');
+  } else {
+    out.push('Requested: NO');
+  }
+  out.push('');
+  out.push('POST-WEDDING JOURNEY');
+  if (reg.postWedding && reg.postWedding.joined) {
+    out.push('Joined: YES');
+    out.push('01 MAR 2027 · Vientiane → Kunming · FLIGHT China Eastern — GR arranges');
+    out.push('01–04 MAR · Wanxiang Yueju Designer Homestay, Kunming — GR arranges');
+    out.push('04 MAR 2027 · Kunming → Lijiang · FIRST CLASS TRAIN · ' +
+      Math.max((reg.guests || []).filter((g) => g.attending !== false).length, 1) + ' × ' + money(145) + ' — REQUESTED');
+    out.push('04–06 MAR · Luye Baisha · Rizhao Jinshan, Lijiang — GR arranges');
+    out.push(L('Onward Journey (06 MAR):', reg.postWedding.onward === 'return' ? 'RETURN TO BANGKOK WITH US — GR arranges'
+      : reg.postWedding.onward === 'own' ? 'OWN ARRANGEMENT (complete answer)'
+      : reg.postWedding.onward === 'gr' ? 'GUEST RELATIONS SUPPORT REQUESTED'
+      : 'OPEN — to finalize with Guest Relations'));
+  } else {
+    out.push('Joined: NO');
   }
   out.push('');
   out.push('TRANSFERS');
@@ -410,7 +443,9 @@ export function buildNotification(reg, ctx) {
     for (const s of selectedTransfers) {
       const t = transferCatalog.find((x) => x.id === s.transferId) || {};
       out.push(L('Service:', t.name || s.transferId));
-      out.push(L('  Units:', (s.units || 1) + ' × ' + money(t.pricePerUnit || 0)));
+      out.push(L('  Units:', (t.perGuest
+        ? Math.max((reg.guests || []).filter((g) => g.journey && g.journey.train).length, 1) + ' guest(s)'
+        : (s.units || 1) + ' unit(s)') + ' × ' + money(t.pricePerUnit || 0)));
       const d = s.details || {};
       out.push(L('  Date / Time:', [d.date, d.time].filter(Boolean).join(' ')));
       out.push(L('  ' + (t.fieldsFor === 'train' ? 'Train Number:' : 'Flight Number:'), d.ref));
@@ -418,7 +453,7 @@ export function buildNotification(reg, ctx) {
       out.push(L('  ' + (t.direction === 'arrival' ? 'Pick-up Location:' : 'Drop-off Location:'), d.location));
       out.push('  Status: REQUESTED / UNDER REVIEW');
     }
-    out.push(L('Transfers Total:', money(transfersTotal(transferCatalog, selectedTransfers))));
+    out.push(L('Transfers Total:', money(transfersTotal(transferCatalog, selectedTransfers, (reg.guests || []).filter((g) => g.journey && g.journey.train).length))));
   }
   out.push('');
   out.push('JOURNEY COST');
@@ -427,27 +462,35 @@ export function buildNotification(reg, ctx) {
   const trainSum = trainRiders ? (trainContribution(train, trainRiders) || 0) : 0;
   if (acc) out.push(L('Stay:', acc.contributionPerGuest == null ? 'Arranged separately' : money(partyTotal(acc, occ))));
   if (trainRiders) out.push(L('Train:', trainRiders + ' × ' + money((train || {}).contributionPerGuest || 0) + ' = ' + money(trainSum)));
-  if (selectedTransfers.length) out.push(L('Transfers:', money(transfersTotal(transferCatalog, selectedTransfers))));
-  out.push(L('TOTAL:', money(journeyTotal(acc, occ, train, trainRiders, transferCatalog, selectedTransfers))));
+  if (selectedTransfers.length) out.push(L('Transfers:', money(transfersTotal(transferCatalog, selectedTransfers, trainRiders))));
+  if (reg.postWedding && reg.postWedding.joined) out.push(L('Post-Wedding (China train):', money(postWeddingTotal(ctx.postWedding || [], true, (reg.guests || []).filter((g) => g.attending !== false).length))));
+  {
+    const attendees = Math.max((reg.guests || []).filter((g) => g.attending !== false).length, 1);
+    const pw = (reg.postWedding && reg.postWedding.joined) ? postWeddingTotal(ctx.postWedding || [], true, attendees) : 0;
+    out.push(L('TOTAL CONTRIBUTION:', money(journeyTotal(acc, occ, train, trainRiders, transferCatalog, selectedTransfers, trainRiders) + pw)));
+  }
   out.push('');
-  out.push('ARRIVAL');
-  const a = reg.arrival || {};
-  out.push(L('Mode:', a.mode));
-  out.push(L('Date / Time:', [a.date, a.time].filter(Boolean).join(' ')));
-  out.push(L('Point:', a.point));
-  out.push(L('Reference:', a.ref || a.detail));
-  out.push(L('Origin:', a.origin));
-  out.push(L('Pickup:', a.pickupRequested ? 'REQUESTED' : 'not needed'));
+  out.push('HOSTED FOR THE GUESTS (never charged)');
+  out.push('Second hotel night · breakfast both mornings · Alms Giving · Vow Ceremony · Sunset Drinks & Wedding Dinner · beverage package · arrival/departure coordination');
   out.push('');
-  out.push('DEPARTURE');
-  const d = reg.departure || {};
-  out.push(L('Date / Time:', [d.date, d.time].filter(Boolean).join(' ')));
-  out.push(L('Point:', d.point));
-  out.push(L('Reference:', d.ref));
-  out.push(L('Transfer:', d.transferRequested ? 'REQUESTED' : 'not needed'));
+  out.push('TO FINALIZE WITH GUEST RELATIONS');
+  const openItems = [];
+  if (reg.bangkokStay && reg.bangkokStay.property) openItems.push('Sathorn Penthouse dates (21/22 FEB owner decision)');
+  if (reg.postWedding && reg.postWedding.joined) {
+    openItems.push('VTE→Kunming flight · Kunming stay · Lijiang stay arrangements');
+    if (reg.postWedding.onward !== 'own') openItems.push('Onward journey 06 MAR');
+  } else if (!selectedTransfers.some((s) => { const t = transferCatalog.find((x) => x.id === s.transferId); return t && t.direction === 'departure'; })) {
+    openItems.push('Departure — follows the guests\u2019 onward itinerary');
+  }
+  out.push(openItems.length ? openItems.join('; ') : 'none');
+  out.push('');
+  out.push(L('Arrival Point:', (reg.arrival || {}).point));
   out.push('');
   out.push(L('ADDITIONAL GUEST REQUEST:', reg.additionalGuestRequest ? reg.additionalGuestRequest : 'none'));
   out.push(L('NOTES:', reg.notes));
+  out.push('');
+  out.push(L('REGISTRATION ID:', 'reg:' + invitation.invitationId));
+  out.push(L('SUBMITTED AT:', reg.registration_submitted_at));
   out.push(L('SUBMITTED:', reg.registration_submitted_at));
   return out.join('\n');
 }

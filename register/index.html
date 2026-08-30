@@ -387,6 +387,14 @@ body.pv-lock { overflow: hidden; }
 .tj-opt .acc-actions { margin-top: auto; }
 .ack-row .ack-i18n { display: block; font-size: 10.5px; letter-spacing: .04em; opacity: .68; margin-top: 3px; line-height: 1.5; }
 .btn[disabled] { opacity: .4; cursor: not-allowed; pointer-events: none; }
+
+.lang-sw { display: inline-flex; gap: 2px; margin-left: 14px; vertical-align: middle; }
+.lang-sw button { background: none; border: 1px solid var(--line); color: inherit; font: inherit; font-size: 9.5px; letter-spacing: .14em; padding: 3px 7px; cursor: pointer; opacity: .6; min-height: 24px; }
+.lang-sw button.on { opacity: 1; border-color: var(--cherry); color: var(--cherry); }
+:lang(th) body, :lang(th) .note, :lang(th) p { line-break: normal; }
+:lang(ja) { word-break: normal; overflow-wrap: anywhere; }
+:lang(th) .btn, :lang(ja) .btn { letter-spacing: .06em; }
+
 .cch-label { font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: var(--cherry); margin: 4px 0 10px; }
 .rv-cch { margin: 34px 0 8px; padding-top: 18px; border-top: 1px solid var(--gold-line); }
 .rv-cch-main { color: var(--ink); font-size: 11px; }
@@ -625,6 +633,7 @@ html.inv-anim-open .bx-right { animation: bxRight 2.05s cubic-bezier(.45,.05,.45
 </div>
 
 <header class="top">
+<span class="lang-sw" style="position:absolute;top:14px;right:6vw;z-index:50" role="group" aria-label="Language"><button type="button" data-lang-btn="en">EN</button><button type="button" data-lang-btn="de">DE</button><button type="button" data-lang-btn="th">TH</button><button type="button" data-lang-btn="ja">JA</button></span>
 <a class="mark serif" href="../" id="site-mark" aria-label="Back to the See You In Laos website" style="text-decoration:none">see you in laos<span class="dot">.</span></a>
 <nav aria-label="Site" id="sitenav">
 <a href="../#weekend">Journey</a><a href="../#places">Stay</a><a href="../#dresscode">Wedding</a><a href="../#travel">Travel</a><a aria-current="page" class="here">Guest Area</a>
@@ -752,6 +761,7 @@ html.inv-anim-open .bx-right { animation: bxRight 2.05s cubic-bezier(.45,.05,.45
 <div class="step-eyebrow">Registration received</div>
 <h2>Thank you.</h2>
 <p class="lead">Your registration has been received. Guest Relations will review your selections, availability and personal requirements, and you will be contacted with confirmations or any additional information.</p>
+<p class="note" id="received-via" style="margin-top:14px"></p>
 <p class="note" id="received-when" style="margin-top:20px"></p>
 <div id="received-summary" style="margin-top:26px"></div>
 <div id="received-status" style="margin-top:26px"></div>
@@ -777,6 +787,7 @@ html.inv-anim-open .bx-right { animation: bxRight 2.05s cubic-bezier(.45,.05,.45
 <div class="lb-count" aria-live="polite"></div>
 </div>
 
+<script src="../assets/i18n/siyl-i18n.js"></script>
 <script type="module" src="./app.mjs"></script>
 </body>
 </html>

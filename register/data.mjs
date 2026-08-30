@@ -28,7 +28,9 @@ export const PUBLICATION = {
   rates: 'APPROVED',
   inventoryDisplay: 'REQUEST',
   submit: 'endpoint',
-  submitUrl: '/api/register',
+  /* Absolute Worker URL: guests on BOTH production surfaces (Worker and
+   * GitHub Pages) submit into the same durable store (FER-001 §1.10). */
+  submitUrl: 'https://seeyouinlaos-website.suthep-hrg.workers.dev/api/register',
 };
 
 export const WEDDING = {
@@ -325,8 +327,9 @@ export const POST_WEDDING = [
   { id: 'kmg-ljg', type: 'Train', label: 'Kunming → Lijiang', date: '04 MAR 2027', when: '4 March 2027', sub: 'First Class Train · First Class only', contribution: 145, perGuest: true },
   { id: 'lijiang-stay', type: 'Stay', label: 'Luye Baisha · Rizhao Jinshan', date: '04 – 06 MAR 2027', when: '4 – 6 March 2027',
     sub: 'Lijiang · Snow Mountain Viewing Room',
-    contribution: null,
-    images: ['../assets/images/journey/lijiang-01.jpg', '../assets/images/journey/lijiang-02.jpg', '../assets/images/journey/lijiang-03.jpg'] },
+    contribution: null },
+    /* Lijiang imagery removed (FER-001 §5A): the available saved photos carry a
+     * third-party watermark — text-led card until owner-clean originals exist. */
   /* Final onward journey is a CHOICE, never a mandatory booking (v1.0 §8):
    * coordinated return (China Eastern, 06 Mar · project Actual USD 154, not
    * guest-payable), own arrangement, or Guest Relations support. */

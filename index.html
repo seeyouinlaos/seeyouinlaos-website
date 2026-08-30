@@ -376,6 +376,14 @@ body.pv-lock { overflow: hidden; }
 .od-row:last-child { border-bottom: none; }
 .route-map { margin-top: 20px; padding: 16px 10px 6px; border: 1px solid var(--line); background: rgba(255,255,255,.32); }
 .route-map svg { display: block; width: 100%; height: auto; }
+
+.lang-sw { display: inline-flex; gap: 2px; margin-left: 14px; vertical-align: middle; }
+.lang-sw button { background: none; border: 1px solid var(--line); color: inherit; font: inherit; font-size: 9.5px; letter-spacing: .14em; padding: 3px 7px; cursor: pointer; opacity: .6; min-height: 24px; }
+.lang-sw button.on { opacity: 1; border-color: var(--cherry); color: var(--cherry); }
+:lang(th) body, :lang(th) .note, :lang(th) p { line-break: normal; }
+:lang(ja) { word-break: normal; overflow-wrap: anywhere; }
+:lang(th) .btn, :lang(ja) .btn { letter-spacing: .06em; }
+
 .jmap-sec { padding: 90px 0 70px; }
 .jmap-sec .inner { padding: 0 6vw; }
 .jmap-canvas { width: 100%; height: clamp(460px, 66vh, 620px); margin-top: 44px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--ivory); filter: sepia(.16) saturate(.9) contrast(.96); }
@@ -500,7 +508,7 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
 </style>
 </head>
 <body>
-<button aria-controls="menuOverlay" aria-expanded="false" class="menu-btn" id="menuBtn">Menu</button>
+<span class="lang-sw" style="position:fixed;top:18px;right:110px;z-index:60;background:var(--ivory);padding:2px" role="group" aria-label="Language"><button type="button" data-lang-btn="en">EN</button><button type="button" data-lang-btn="de">DE</button><button type="button" data-lang-btn="th">TH</button><button type="button" data-lang-btn="ja">JA</button></span><button aria-controls="menuOverlay" aria-expanded="false" class="menu-btn" id="menuBtn">Menu</button>
 <button aria-label="Back to the top" class="top-btn" id="topBtn">↑ Top</button>
 <!-- MENU OVERLAY -->
 <div aria-hidden="true" class="menu-overlay" id="menuOverlay">
@@ -1089,6 +1097,7 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
 <p>Timing and your table arrive in your Guest Area closer to the day.</p>
 <div class="pv-meta">Sunday, 28 February 2027 · Souphattra Heritage Vientiane<br/>Dress · Black Tie</div>
 </article>
+<script src="assets/i18n/siyl-i18n.js"></script>
 <script src="assets/vendor/leaflet/leaflet.js"></script>
 <script>
 (function () {

@@ -13,5 +13,11 @@
     "binding": "ASSETS"
   },
 
+  // Durable registration store (HSW-001-ED-FER-001 §1): every successful
+  // digital submission is persisted here BEFORE the guest sees RECEIVED.
+  "kv_namespaces": [
+    { "binding": "REG_KV", "id": "090270d0da434a8b8f49933cb604beb3" }
+  ],
+
   "observability": { "enabled": true }
 }
