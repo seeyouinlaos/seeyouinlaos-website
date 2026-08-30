@@ -7,7 +7,7 @@
  */
 import {
   WEDDING, CONTACTS, JOURNEY_MODULES, EVENTS, ACCOMMODATIONS, SELECTABLE_ACCOMMODATIONS, TRAIN,
-  TRANSFERS, PACKAGE_INCLUSIONS, COPY, DEMO_MODE, PUBLICATION, TRAIN_REFERENCE, BERTH_PREFS, BANGKOK_STAYS, POST_WEDDING, lookupInvitation,
+  TRANSFERS, PACKAGE_INCLUSIONS, COPY, DEMO_MODE, PUBLICATION, TRAIN_REFERENCE, BERTH_PREFS, BANGKOK_STAYS, POST_WEDDING, RETURN_STAY, lookupInvitation,
 } from './data.mjs';
 import {
   contributionPerGuest, partyCharges, partyTotal, money as usdMoney, displayMoney,
@@ -38,12 +38,48 @@ function bkkNights() {
   return d > 0 ? d : 0;
 }
 function bkkTotal() {
-  const b = S.bangkokStay || {};
-  if (!b.property) return 0;
-  const h = BANGKOK_STAYS.find((x) => x.id === b.property);
-  if (!h || !h.nightly) return 0;
-  const n = bkkNights();
-  return n ? h.nightly * n : 0;
+  // The Pre-Wedding Bangkok stay has no defined guest contribution —
+  // Guest Relations confirms the arrangement (never a project Actual).
+  return 0;
+}
+/** The definitive dated guest itinerary — derived from stored selections,
+ *  ordered by date, one source (v1.2 §3). Also what Guest Relations reads. */
+function itinerarySteps() {
+  const acc = currentAcc();
+  const riders = S.guests.filter((g) => g.journey.train);
+  const anyBkk = S.guests.some((g) => g.journey.bangkok);
+  const arr = (S.transfers || []).map((x) => TRANSFERS.find((t) => t.id === x.transferId)).find((t) => t && t.direction === 'arrival');
+  const steps = [];
+  if (anyBkk) {
+    const bh = S.bangkokStay && S.bangkokStay.property ? BANGKOK_STAYS.find((x) => x.id === S.bangkokStay.property) : null;
+    steps.push(bh
+      ? { d: bh.dateNote, t: bh.name + ' · Bangkok', s: 'Pre-Wedding stay · REQUESTED' }
+      : { d: 'Before the wedding', t: 'The Bangkok Journey', s: 'Shared days in Bangkok · Pre-Wedding' });
+  }
+  if (riders.length) {
+    steps.push({ d: TRAIN.date, t: 'Bangkok → Nong Khai', s: 'Overnight Train · Special Express No. 25 · ' + TRAIN.times + ' · First Class Sleeper · ' + riders.length + ' seat' + (riders.length > 1 ? 's' : '') + ' · REQUESTED' });
+    steps.push({ d: '27 FEB 2027', t: 'Nong Khai → Vientiane', s: arr ? arr.name + ' · REQUESTED' : 'Own arrangement — Guest Relations can assist' });
+  } else {
+    steps.push({ d: 'Before the wedding', t: 'Arriving independently in Vientiane', s: 'Fly or travel on your own schedule; we meet you there' });
+  }
+  steps.push(acc
+    ? { d: acc.stay + ' · ' + acc.nights + ' nights', t: acc.name + ' · Vientiane', s: S.stay.waitlist ? 'WAITLISTED' : 'REQUESTED' }
+    : { d: '27 FEB – 01 MAR 2027', t: 'Your wedding stay · Vientiane', s: 'Choose under My Stay' });
+  steps.push({ d: '28 FEB 2027', t: 'The Wedding · Main Event', s: 'Alms Giving · Vow Ceremony · Wedding Dinner · Souphattra Heritage Vientiane', main: true });
+  if (S.postWedding && S.postWedding.joined) {
+    for (const c of POST_WEDDING.filter((x) => !x.onward)) {
+      steps.push({ d: c.date, t: c.label, s: (c.type === 'Train' ? 'First Class Train' : c.type) + (c.sub ? ' · ' + c.sub : '') + (c.contribution != null ? '' : ' · Guest Relations confirms') });
+    }
+    const ow = S.postWedding.onward;
+    steps.push({ d: '06 MAR 2027', t: 'Your onward journey', s: ow === 'return' ? 'Return to Bangkok with us · Guest Relations confirms' : ow === 'own' ? 'Arranged independently' : ow === 'gr' ? 'Guest Relations support requested' : 'Choose under My Travel' });
+  } else {
+    steps.push({ d: '01 MAR 2027', t: 'Departure', s: 'Coordinated within the wedding programme' });
+  }
+  return steps;
+}
+function itineraryHtml() {
+  return '<div class="itin">' + itinerarySteps().map((st) =>
+    '<div class="it-row' + (st.main ? ' it-main' : '') + '"><span class="it-d">' + esc(st.d) + '</span><div class="it-b"><span class="it-t">' + esc(st.t) + '</span><span class="it-s">' + esc(st.s) + '</span></div></div>').join('') + '</div>';
 }
 const gal3 = (imgs, alt) => imgs && imgs.length
   ? '<div class="train-gal">' + imgs.slice(0, 3).map((src, i) => '<img src="' + src + '" alt="' + esc(alt) + ' · view ' + (i + 1) + '" loading="lazy" decoding="async"/>').join('') + '</div>'
@@ -128,7 +164,7 @@ function freshState() {
     additionalGuestRequest: '',
     dressAck: { alms: false, ceremony: false, dinner: false }, // per-event dress code acknowledgement (§21)
     bangkokStay: { property: null, from: '', to: '' },          // optional Bangkok stay (§2-3): property + guest chosen dates
-    postWedding: { joined: false },                             // optional Post Wedding Journey opt in (§16)
+    postWedding: { joined: false, onward: '' },                 // optional Post Wedding Journey + onward choice (own | gr | return)
     transfers: [],           // [{ transferId, units, details:{date,time,ref,place,location} }]
     trainNote: '',
     notes: '',
@@ -477,6 +513,8 @@ function renderHome() {
   box.innerHTML =
     '<p class="home-hello">' + esc(S.invitation.partyName) + ' · Vientiane · February 2027</p>' +
     '<p class="note">' + esc(COPY.sharedHome) + '</p>' +
+    '<div class="cch-label" style="margin:26px 0 6px">Your journey, in order</div>' +
+    itineraryHtml() +
     '<div class="home-grid">' +
     card('stay', 'My Stay', acc ? esc(acc.name) : 'Choose your room',
       acc ? (acc.contributionPerGuest == null ? 'Complimentary · coordinated by Guest Relations' : showAmount(contributionPerGuest(acc)) + ' per guest · total ' + money(partyTotal(acc, occ))) : 'Souphattra Heritage Vientiane, our shared home',
@@ -567,6 +605,7 @@ function renderJourney() {
   wireBangkokStay(box);
   wirePostWedding(box);
   wireTransfers(box);
+  armTickets(box);
 }
 
 /* §Travel-choice: ONE journey decision, TWO alternatives, ONE selection.
@@ -582,9 +621,10 @@ function travelChoiceBlock(trainLabel, trainFull) {
     const who = g ? '\u00A0· for ' + esc(g.preferredName) : '';
     if (opt === 'train') {
       return '<article class="tj-opt' + (sel ? ' sel' : '') + '" data-opt="train">' +
-        '<div class="when">Bangkok → Nong Khai → Vientiane · ' + money(TRAIN.contributionPerGuest) + ' per guest · ' + esc(trainLabel) + '</div>' +
+        '<div class="when">' + esc(TRAIN.date) + ' · ' + esc(TRAIN.times) + ' · Bangkok → Nong Khai → Vientiane · ' + money(TRAIN.contributionPerGuest) + ' per guest · ' + esc(trainLabel) + '</div>' +
         '<h4>The Overnight Train</h4>' +
         '<p class="note">Special Express No. 25 · departs Krung Thep Aphiwat Central Terminal 20:25, arrives Nong Khai 06:45 · 10 hours 20 minutes · First Class Sleeper. Guest Relations coordinates the journey and ticket arrangements; only guests who join are charged.</p>' +
+        (sel ? ticketSvg(['Bangkok', 'Nong Khai', 'Vientiane'], 'train') : '') +
         '<div class="train-gal">' + ['train-01', 'train-04', 'train-03'].map((f, ti) => '<img src="../assets/images/train/' + f + '.jpg" alt="First Class Sleeper aboard Special Express No. 25 · view ' + (ti + 1) + '" loading="lazy" decoding="async"/>').join('') + '</div>' +
         '<div class="acc-actions"><button type="button" class="btn sm' + (sel ? '' : ' ghost') + '" data-choice="train" data-who="' + (g ? g.guestId : 'party') + '" aria-pressed="' + sel + '">' +
         (sel ? 'Joining the train' + who : (trainFull ? 'Join the waitlist' + who : 'I\u2019m joining' + who)) + '</button></div>' +
@@ -743,25 +783,18 @@ function bangkokStayBlock() {
   if (!S.guests.some((g) => g.journey.bangkok)) return '';
   S.bangkokStay ||= { property: null, from: '', to: '' };
   const b = S.bangkokStay;
-  return '<div class="guest-block" id="bkk-stay"><h3>Your Bangkok stay</h3>' +
-    '<p class="note">The journey stays at the Siam Kempinski; choose the dates that suit you and Guest Relations confirms your room personally.</p>' +
+  return '<div class="guest-block" id="bkk-stay"><div class="cch-label">Pre-Wedding Journey · Optional · Before the wedding</div><h3>Your Bangkok stay</h3>' +
     BANGKOK_STAYS.map((h) => {
       const sel = b.property === h.id;
-      const n = sel ? bkkNights() : 0;
       return '<article class="trf-card' + (sel ? ' sel' : '') + '">' +
-      '<div class="label">' + esc(h.role) + ' · Bangkok</div><h4>' + esc(h.name) + '</h4>' +
-      gal3(h.images, h.name) +
-      '<p class="note">' + esc(h.room) + '</p>' +
-      '<div class="trf-price">' + money(h.nightly) + ' per night' +
-        (n ? ' · ' + n + ' night' + (n > 1 ? 's' : '') + ' · ' + money(h.nightly * n)
-           : ' · the journey stay: ' + h.nights + ' nights · ' + money(h.total)) + '</div>' +
+      '<div class="when">' + esc(h.dateNote) + '</div>' +
+      '<h4>' + esc(h.name) + '</h4>' +
+      '<p class="note">The shared Pre-Wedding home in Bangkok. Guest Relations confirms the dates and your arrangement personally.</p>' +
+      '<div class="trf-price">Guest Relations will confirm the arrangement</div>' +
       '<div class="acc-actions">' + (sel
         ? '<button type="button" class="btn sm" data-bkk-rm="' + h.id + '">Remove from journey</button>'
         : '<button type="button" class="btn sm" data-bkk="' + h.id + '">Request this stay</button>') + '</div>' +
-      (sel ? '<div class="cols2" style="margin-top:12px">' +
-        '<div class="field"><label>Arrival in Bangkok</label><input type="date" data-bkk-date="from" value="' + esc(b.from) + '"/></div>' +
-        '<div class="field"><label>Onward to the wedding</label><input type="date" data-bkk-date="to" value="' + esc(b.to) + '"/></div></div>' +
-        '<div class="acc-avail" style="border-top:none;padding-top:8px">REQUESTED · Guest Relations confirms your room personally</div>' : '') +
+      (sel ? '<div class="acc-avail" style="border-top:none;padding-top:8px">REQUESTED · Guest Relations confirms dates and rooms personally</div>' : '') +
       '</article>'; }).join('') + '</div>';
 }
 function wireBangkokStay(box) {
@@ -773,42 +806,93 @@ function wireBangkokStay(box) {
     S.bangkokStay = { property: null, from: '', to: '' };
     saveDraft(); renderStep(cur, false); renderSummary();
   }));
-  box.querySelectorAll('[data-bkk-date]').forEach((el) => el.addEventListener('change', () => {
-    S.bangkokStay[el.getAttribute('data-bkk-date')] = el.value;
-    saveDraft(); renderStep(cur, false); renderSummary();
-  }));
+
 }
 
 /* §10-16 · the optional Post Wedding Journey: a real opt in whose components
  * flow into travel, contribution and review. Missing operational data renders
  * as a quiet pending state, never as an invention. */
 function postWeddingBlock() {
-  S.postWedding ||= { joined: false };
+  S.postWedding ||= { joined: false, onward: '' };
   const joined = !!S.postWedding.joined;
-  return '<div class="guest-block" id="post-wedding"><h3>The Post Wedding Journey</h3>' +
-    '<div class="label" style="margin:4px 0 8px">Vientiane → Kunming → Lijiang → Bangkok · 1 – 6 March 2027</div>' +
+  const onward = S.postWedding.onward || '';
+  const compCard = (c) => '<article class="trf-card sel">' +
+      '<div class="when">' + esc(c.date) + (c.sub && /China Eastern|First Class/.test(c.sub) ? ' · ' + esc(c.type) : '') + '</div>' +
+      '<h4>' + esc(c.label) + '</h4>' +
+      (c.type === 'Flight' ? ticketSvg([c.label.split(' → ')[0], c.label.split(' → ')[1]], 'flight') :
+       c.type === 'Train' ? ticketSvg([c.label.split(' → ')[0], c.label.split(' → ')[1]], 'train') : '') +
+      gal3(c.images, c.label) +
+      (c.sub ? '<p class="note">' + esc(c.sub) + '</p>' : '') +
+      '<div class="trf-price">' + (c.contribution != null
+        ? money(c.contribution) + ' per guest'
+        : 'Guest Relations will confirm the arrangement') + '</div>' +
+      '<div class="acc-avail" style="border-top:none;padding-top:6px">REQUESTED · Guest Relations confirms every detail personally</div>' +
+      '</article>';
+  const onwardBlock = () =>
+    '<article class="trf-card"><div class="when">06 MAR 2027 · after Lijiang</div><h4>Your onward journey</h4>' +
+    '<p class="note">You may return to Bangkok, continue elsewhere, or arrange your own onward travel — every answer is a complete answer.</p>' +
+    '<div class="join" role="radiogroup" aria-label="Your onward journey">' +
+    '<label><input type="radio" name="pw-onward" value="return"' + (onward === 'return' ? ' checked' : '') + '/><span class="yes">Return to Bangkok with us</span></label>' +
+    '<label><input type="radio" name="pw-onward" value="own"' + (onward === 'own' ? ' checked' : '') + '/><span class="no">I\u2019ll arrange my own onward travel</span></label>' +
+    '<label><input type="radio" name="pw-onward" value="gr"' + (onward === 'gr' ? ' checked' : '') + '/><span class="no">Request Guest Relations support</span></label></div>' +
+    (onward === 'return'
+      ? '<div class="onward-return"><div class="when">06 MAR 2027 · Flight · China Eastern Airlines</div>' + ticketSvg(['Lijiang', 'Bangkok'], 'flight') +
+        '<p class="note">' + esc(RETURN_STAY.name) + ' · ' + esc(RETURN_STAY.room) + '</p>' + gal3(RETURN_STAY.images, RETURN_STAY.name) +
+        '<div class="trf-price">Guest Relations will confirm the arrangement</div></div>'
+      : onward === 'own'
+        ? '<p class="note">Perfect — travel on your own schedule; Guest Relations is there if anything changes.</p>'
+        : onward === 'gr'
+          ? '<div class="trf-price">Guest Relations will confirm the arrangement</div>'
+          : '') +
+    '</article>';
+  return '<div class="guest-block" id="post-wedding"><div class="cch-label">Post-Wedding Journey · Optional · After the wedding</div><h3>The Post Wedding Journey</h3>' +
+    '<div class="label" style="margin:4px 0 8px">Vientiane → Kunming → Lijiang → your onward journey · 1 – 6 March 2027</div>' +
     '<p class="note">' + HSLOCK + 'continue to Kunming and Lijiang after the wedding. If you would like to join the onward journey, we will prepare it with you.</p>' +
     '<div class="join" role="radiogroup" aria-label="Post Wedding Journey">' +
     '<label><input type="radio" name="pw-join" value="yes"' + (joined ? ' checked' : '') + '/><span class="yes">We would love to join</span></label>' +
     '<label><input type="radio" name="pw-join" value="no"' + (!joined ? ' checked' : '') + '/><span class="no">Not this time</span></label></div>' +
-    (joined ? POST_WEDDING.map((c) => '<article class="trf-card sel">' +
-      '<div class="label">' + esc(c.type) + ' · ' + esc(c.when) + '</div>' +
-      '<h4>' + esc(c.label) + '</h4>' +
-      gal3(c.images, c.label) +
-      (c.sub ? '<p class="note">' + esc(c.sub) + '</p>' : '') +
-      '<div class="trf-price">' + (c.contribution != null
-        ? (c.perGuest ? money(c.contribution) + ' per guest'
-           : money(c.nightly) + ' per night · ' + c.nights + ' nights · ' + money(c.contribution))
-        : (c.priceNote ? esc(c.priceNote) : 'Contribution follows with Guest Relations')) + '</div>' +
-      '<div class="acc-avail" style="border-top:none;padding-top:6px">REQUESTED · Guest Relations confirms every detail personally</div>' +
-      '</article>').join('') : '') +
+    (joined ? POST_WEDDING.filter((c) => !c.onward).map(compCard).join('') + onwardBlock() : '') +
     '</div>';
 }
 function wirePostWedding(box) {
   box.querySelectorAll('input[name="pw-join"]').forEach((el) => el.addEventListener('change', () => {
-    S.postWedding = { joined: el.value === 'yes' && el.checked };
+    S.postWedding = { ...(S.postWedding || {}), joined: el.value === 'yes' && el.checked };
     saveDraft(); renderStep(cur, false); renderSummary();
   }));
+  box.querySelectorAll('input[name="pw-onward"]').forEach((el) => el.addEventListener('change', () => {
+    if (el.checked) { S.postWedding.onward = el.value; saveDraft(); renderStep(cur, false); renderSummary(); }
+  }));
+}
+/* Animated schematic journey ticket (v1.0 §16): the route line draws once on
+ * viewport entry, a restrained vehicle glyph follows; honest schematic, no
+ * fake live tracking. prefers-reduced-motion renders the completed state. */
+function ticketSvg(stops, mode) {
+  const W = 320, y = 26, pad = 30, span = (W - pad * 2) / (stops.length - 1);
+  const line = '<line class="tk-line" x1="' + pad + '" y1="' + y + '" x2="' + (W - pad) + '" y2="' + y + '" stroke="#74070E" stroke-width="1.4"' + (mode === 'flight' ? ' stroke-dasharray="3 6"' : '') + '/>';
+  const dots = stops.map((n, k) => {
+    const x = pad + span * k;
+    return '<circle cx="' + x + '" cy="' + y + '" r="3.4" fill="' + (k === stops.length - 1 ? '#74070E' : '#2B2823') + '"/>' +
+      '<text x="' + x + '" y="' + (y + 20) + '" text-anchor="' + (k === 0 ? 'start' : k === stops.length - 1 ? 'end' : 'middle') + '"' + (k === 0 ? ' dx="-14"' : k === stops.length - 1 ? ' dx="14"' : '') + ' class="tk-lbl">' + esc(n) + '</text>';
+  }).join('');
+  const glyph = mode === 'flight'
+    ? '<path class="tk-glyph" d="M0,0 L12,4 L0,8 L3,4 Z" fill="#74070E"/>'
+    : '<rect class="tk-glyph" x="0" y="0" width="14" height="8" rx="1.5" fill="#2B2823"/>';
+  return '<div class="jticket" data-ticket><svg viewBox="0 0 ' + W + ' 56" aria-hidden="true">' + line +
+    '<g class="tk-mover" style="--tk-x:' + (pad - 6) + 'px; --tk-y:' + (y - 4) + 'px" data-dist="' + (W - pad * 2) + '">' + glyph + '</g>' + dots + '</svg></div>';
+}
+function armTickets(box) {
+  const els = box.querySelectorAll('[data-ticket]:not(.run)');
+  if (!els.length) return;
+  const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const run = (el) => {
+    el.classList.add('run');
+    if (reduced) { el.classList.add('done'); return; }
+    const mover = el.querySelector('.tk-mover');
+    if (mover) mover.style.setProperty('--tk-dist', mover.getAttribute('data-dist') + 'px');
+  };
+  if (!('IntersectionObserver' in window)) { els.forEach(run); return; }
+  const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { run(e.target); io.unobserve(e.target); } }), { threshold: 0.4 });
+  els.forEach((el) => io.observe(el));
 }
 const HSLOCK = '<span class="hs">Haruthai&nbsp;&amp;&nbsp;Suthep</span>';
 
@@ -1021,14 +1105,26 @@ function renderStay() {
           : '<button type="button" class="btn sm" data-select="' + a.id + '">' + (selected ? 'Selected' : (a.contributionPerGuest == null ? 'Request this stay' : 'Request this room')) + '</button>') +
       '</div></article>';
   }).join('');
+  const anyBkkStay = S.guests.some((g) => g.journey.bangkok);
+  const preStay = anyBkkStay
+    ? '<div class="cch-label">Pre-Wedding Journey · Optional · Before the wedding</div>' +
+      '<div class="itin"><div class="it-row"><span class="it-d">' + esc(BANGKOK_STAYS[0].dateNote) + '</span><div class="it-b"><span class="it-t">' + esc(BANGKOK_STAYS[0].name) + ' · Bangkok</span><span class="it-s">' + ((S.bangkokStay || {}).property ? 'REQUESTED · Guest Relations confirms dates and rooms personally' : 'Request under My Travel') + '</span></div></div></div>'
+    : '';
+  const postStay = (S.postWedding && S.postWedding.joined)
+    ? '<div class="cch-label" style="margin-top:34px">Post-Wedding Journey · Optional · After the wedding</div>' +
+      '<div class="itin">' + POST_WEDDING.filter((c) => c.type === 'Stay').map((c) =>
+        '<div class="it-row"><span class="it-d">' + esc(c.date) + '</span><div class="it-b"><span class="it-t">' + esc(c.label) + '</span><span class="it-s">' + esc(c.sub) + ' · Guest Relations confirms the arrangement</span></div></div>').join('') + '</div>'
+    : '';
   box.innerHTML =
     '<p class="note" style="margin-bottom:22px">' + esc(COPY.sharedHome) + '</p>' +
+    preStay +
+    '<div class="cch-label" style="margin-top:' + (preStay ? '34px' : '0') + '">The Wedding · Main Event · Vientiane · 27 FEB – 01 MAR 2027</div>' +
     '<div class="price-note"><div class="label">' + esc(COPY.priceLabel) + '</div><p class="note">' + esc(COPY.priceNote + ' Haruthai\u00A0&\u00A0Suthep.') + '</p><p class="note">' + esc(COPY.priceNote2) + '</p></div>' +
     compareBlock() +
     '<div class="acc-grid">' + cards + '</div>' +
     '<div class="field" style="margin-top:30px"><label>Bed preference</label><select id="stay-bed"><option' + sel('') + '>No preference</option><option' + sel('One large bed') + '>One large bed</option><option' + sel('Two beds') + '>Two beds</option></select></div>' +
     '<div class="field"><label for="stay-req">Special request</label><textarea id="stay-req">' + esc(S.stay.request) + '</textarea></div>' +
-    '<div id="stay-selected"></div>' +
+    '<div id="stay-selected"></div>' + postStay +
     '<p class="note" style="margin-top:18px">' + esc(COPY.requestNote) + ' ' + esc(COPY.payment) + ' If you need something different, Guest Relations will arrange it personally.</p>';
   function sel(v) { return S.stay.bed === v ? ' selected' : ''; }
   box.querySelectorAll('[data-select]').forEach((b) => b.addEventListener('click', () => {
@@ -1487,65 +1583,89 @@ function renderCost() {
   const tc = trainContribution(TRAIN, riders.length) || 0;
   const total = journeyTotal(acc, occ, TRAIN, riders.length, TRANSFERS, S.transfers) + pwTotal() + bkkTotal();
   const neutral = acc && acc.contributionPerGuest == null;
-  const row = (l, r, cls) => '<div class="row' + (cls ? ' ' + cls : '') + '"><span class="l">' + l + '</span><span class="r">' + r + '</span></div>';
-  const head = (t) => '<div class="row fol-day"><span class="l serif-it">' + t + '</span><span class="r"></span></div>';
-  /* §19: the contribution summary lists only what carries an amount or is a
-   * pending request. Everything hosted appears in its own list — without
-   * amounts, never as a USD 0 line. */
-  let rows = '';
-  rows += head('Your contribution');
-  if (riders.length) rows += row('Overnight Sleeper Train · Bangkok → Nong Khai · ' + riders.length + ' × ' + money(TRAIN.contributionPerGuest), money(tc));
-  if (!acc) {
-    rows += row('<span class="serif-it">Accommodation</span>', 'Not selected yet · choose under My Stay');
-  } else if (neutral) {
-    rows += row('<span class="serif-it">' + esc(acc.name) + '</span>', 'Complimentary · limited availability');
-  } else {
-    rows += row('<span class="serif-it">' + esc(acc.name) + '</span> · night one',
-      partyCharges(acc, occ).map((c) => { const g = S.guests.find((x) => x.guestId === c.guestId); return esc(g ? g.preferredName : c.guestId) + ' ' + money(c.amount); }).join(' · '));
+  /* v1.3 typography roles: date · product/route · amount — chapter headers
+   * separate PRE-WEDDING / THE WEDDING / POST-WEDDING; no boxes per line. */
+  const line = (d, l, r) => '<div class="crow">' + (d ? '<span class="cdate">' + d + '</span>' : '') +
+    '<div class="cbody"><span class="cprod">' + l + '</span><span class="camt">' + r + '</span></div></div>';
+  const chapter = (no, t, sub, main) => '<div class="cch' + (main ? ' cch-main' : '') + '"><span class="cch-no">' + no + '</span><div><div class="cch-t">' + t + '</div><div class="cch-s">' + sub + '</div></div></div>';
+  let html = '<p class="note" style="margin-bottom:20px">Your contribution reads as your journey: what you pay, when it happens. Everything else is hosted for you.</p>';
+  const open = []; // TO FINALIZE WITH GUEST RELATIONS
+
+  // 01 · PRE-WEDDING JOURNEY
+  let pre = '';
+  if (S.bangkokStay && S.bangkokStay.property) {
+    const bh = BANGKOK_STAYS.find((x) => x.id === S.bangkokStay.property);
+    if (bh) open.push([esc(bh.dateNote), esc(bh.name) + ' · Bangkok']);
   }
+  if (riders.length) pre += line(esc(TRAIN.date), 'Bangkok → Nong Khai · Overnight Sleeper Train', riders.length + ' × ' + money(TRAIN.contributionPerGuest) + ' · ' + money(tc));
   for (const sl of S.transfers || []) {
     const t = TRANSFERS.find((x) => x.id === sl.transferId);
     if (!t || !t.pricePerUnit) continue;
     if (t.perGuest) {
       const n = Math.max(riders.length, 1);
-      rows += row(esc(t.name) + ' · ' + n + ' × ' + money(t.pricePerUnit), money(t.pricePerUnit * n));
+      pre += line(esc(t.date || ''), esc(t.name) + ' · Coordinated Transfer', n + ' × ' + money(t.pricePerUnit) + ' · ' + money(t.pricePerUnit * n));
     } else {
-      rows += row(esc(t.name) + ' · ' + (sl.units || 1) + ' vehicle' + ((sl.units || 1) > 1 ? 's' : ''), money(t.pricePerUnit * (sl.units || 1)));
+      pre += line(esc(t.date || ''), esc(t.name), (sl.units || 1) + ' × ' + money(t.pricePerUnit) + ' · ' + money(t.pricePerUnit * (sl.units || 1)));
     }
   }
-  if (S.bangkokStay && S.bangkokStay.property) {
-    const h = BANGKOK_STAYS.find((x) => x.id === S.bangkokStay.property);
-    const n = bkkNights();
-    if (h) rows += row('Bangkok stay · <span class="serif-it">' + esc(h.name) + '</span> · ' + esc(h.room),
-      n ? n + ' × ' + money(h.nightly) + ' · ' + money(h.nightly * n) : money(h.nightly) + ' per night · choose your dates under My Travel');
+  if (pre) html += chapter('01', 'Pre-Wedding Journey', 'Optional · Before the wedding') + pre;
+
+  // 02 · THE WEDDING (main)
+  let wed = '';
+  if (!acc) {
+    wed += line('27 FEB – 01 MAR 2027', 'Your wedding stay · Vientiane', 'Not selected yet · choose under My Stay');
+  } else if (neutral) {
+    wed += line(esc(acc.stay), esc(acc.name) + ' · Vientiane', 'Complimentary · limited availability');
+  } else {
+    wed += line(esc(acc.stay) + ' · ' + acc.nights + ' nights',
+      esc(acc.name) + ' · Vientiane',
+      partyCharges(acc, occ).map((c) => { const g = S.guests.find((x) => x.guestId === c.guestId); return esc(g ? g.preferredName : c.guestId) + ' ' + money(c.amount); }).join(' · '));
   }
+  html += chapter('02', 'The Wedding', 'Main Event · Vientiane', true) + wed;
+
+  // 03 · POST-WEDDING JOURNEY
   if (S.postWedding && S.postWedding.joined) {
+    let post = '';
     const n = attendingCount();
     for (const c of POST_WEDDING) {
-      if (c.contribution == null) continue;
-      rows += c.perGuest
-        ? row('Post Wedding Journey · ' + esc(c.label) + ' · ' + esc(c.sub), n + ' × ' + money(c.contribution) + ' · ' + money(c.contribution * n))
-        : row('Post Wedding Journey · ' + esc(c.label), c.nights + ' × ' + money(c.nightly) + ' · ' + money(c.contribution));
+      if (c.onward) continue;
+      if (c.contribution != null) {
+        post += c.perGuest
+          ? line(esc(c.date), esc(c.label) + ' · ' + esc(c.type === 'Train' ? 'First Class Train' : c.type), n + ' × ' + money(c.contribution) + ' · ' + money(c.contribution * n))
+          : line(esc(c.date), esc(c.label), money(c.contribution));
+      } else {
+        open.push([esc(c.date), esc(c.label) + ' · ' + esc(c.type)]);
+      }
     }
-    rows += row('Post Wedding Journey · Lijiang → Bangkok flight', 'Contribution follows with Guest Relations');
+    const ow = S.postWedding.onward;
+    if (ow === 'return' || ow === 'gr' || !ow) open.push(['06 MAR 2027', 'Your onward journey' + (ow === 'return' ? ' · Return to Bangkok with us' : ow === 'gr' ? ' · Guest Relations support' : ' · choose under My Travel')]);
+    html += chapter('03', 'Post-Wedding Journey', 'Optional · After the wedding') + (post || line('', 'No guest-payable Post-Wedding items', ''));
   }
-  rows += '<div class="row total"><span class="l serif-it">Total contribution</span><span class="r js-total">' + money(total) + '</span></div>';
-  rows += head('Hosted for you');
-  const hosted = [];
-  hosted.push('Personal airport welcome and arrival coordination');
-  hosted.push('Welcome drink on arrival');
-  hosted.push('Breakfast on both mornings');
-  hosted.push('Alms Giving');
-  hosted.push('Vow Ceremony');
-  hosted.push('Sunset Drinks &amp; Wedding Dinner');
-  hosted.push('Two hour beverage package');
-  if (acc && !neutral) hosted.push('<span class="serif-it">' + esc(acc.name) + '</span> · night two · hosted by<span class="hs">Haruthai&nbsp;&amp;&nbsp;Suthep</span>');
+
+  html += '<div class="ctotal"><span class="l">Total contribution</span><span class="r js-total">' + money(total) + '</span></div>';
+
+  // HOSTED FOR YOU — benefits, never invoice rows
+  html += '<div class="cch cch-hosted"><div><div class="cch-t">Hosted for you</div><div class="cch-s">The Wedding · 27 FEB – 01 MAR 2027 · with the love of<span class="hs">Haruthai&nbsp;&amp;&nbsp;Suthep</span></div></div></div>';
+  const hosted = [
+    'Personal airport welcome and arrival coordination',
+    'Welcome drink on arrival',
+    'Breakfast on both mornings',
+    'Alms Giving',
+    'Vow Ceremony',
+    'Sunset Drinks &amp; Wedding Dinner',
+    'Two hour beverage package',
+  ];
+  if (acc && !neutral) hosted.push(esc(acc.name) + ' · night two · hosted');
   hosted.push('Departure coordination within the wedding programme');
-  rows += hosted.map((h) => row(h, '')).join('');
-  box.innerHTML =
-    '<p class="note" style="margin-bottom:18px">Your contribution covers only the lines that carry an amount. Everything else on the wedding days is hosted for you.</p>' +
-    '<div class="stay-sum fol" aria-live="polite">' + rows + '</div>' +
-    (fxStamp() ? '<p class="note" style="margin-top:12px">' + fxStamp() + ' · Amounts are shown for orientation; the master currency remains USD.</p>' : '') +
+  html += '<div class="chosted">' + hosted.map((h) => '<span>' + h + '</span>').join('') + '</div>';
+
+  if (open.length) {
+    html += '<div class="cch"><div><div class="cch-t">To finalize with Guest Relations</div><div class="cch-s">Genuinely open arrangements · nothing here is charged</div></div></div>';
+    html += open.map((o) => line(o[0], o[1], 'Guest Relations will confirm the arrangement')).join('');
+  }
+
+  box.innerHTML = html +
+    (fxStamp() ? '<p class="note" style="margin-top:14px">' + fxStamp() + ' · Amounts are shown for orientation; the master currency remains USD.</p>' : '') +
     '<p class="note" style="margin-top:16px">' + esc(COPY.priceNote + ' Haruthai\u00A0&\u00A0Suthep.') + '</p>' +
     '<p class="note">' + esc(COPY.payment) + ' One person may settle the invoice for everyone travelling with them.</p>';
 }
@@ -1569,6 +1689,7 @@ function renderReview() {
     ['Members', S.invitation.guests.map((g) => esc(g.fullName)).join(' · ')],
     ['Lead guest', esc((S.invitation.guests.find((g) => g.guestId === S.invitation.partyLead) || {}).fullName || '—')],
   ]);
+  html += '<div class="cch-label rv-cch">Pre-Wedding Journey · Optional · Before the wedding</div>';
   {
     const jRiders = S.guests.filter((g) => g.journey.train);
     const anyBkk = S.guests.some((g) => g.journey.bangkok);
@@ -1584,11 +1705,13 @@ function renderReview() {
   }
   const riders = S.guests.filter((g) => g.journey.train);
   html += sec('Overnight Train', idx('journey'), riders.length ? [
+    ['Date', esc(TRAIN.date) + ' · ' + esc(TRAIN.times) + ' · First Class Sleeper'],
     ['Joined', riders.map((g) => esc(g.preferredName) + (g.berth ? ' · ' + esc(g.berth) : '')).join('<br/>')],
     ['Seats requested', String(riders.length) + ' · REQUESTED'],
-    ['Arrival', 'Nong Khai Railway Station'],
+    ['Arrival', '27 FEB 2027 · Nong Khai Railway Station'],
     ['Onward transfer', trainOnwardLine()],
   ].concat(S.trainNote ? [['Note', esc(S.trainNote)]] : []) : [['Joined', 'Not joined']]);
+  html += '<div class="cch-label rv-cch rv-cch-main">The Wedding · Main Event · Vientiane · 28 FEB 2027</div>';
   html += sec('The wedding days', idx('events'), EVENTS.map((e) => {
     const joiners = S.guests.filter((g) => g.attending !== false && g.events[e.id]);
     if (!joiners.length) return [esc(e.label), 'Not joining'];
@@ -1601,7 +1724,8 @@ function renderReview() {
     '<div class="rv-room-b"><div class="label">Your room</div><h3>' + esc(acc.name) + '</h3>' +
     '<p class="note">' + esc([acc.size, acc.bed, acc.occupancy].filter(Boolean).join(' · ')) + '</p></div></div>';
   html += sec('Your Stay', idx('stay'), acc ? [
-    ['Requested', esc(acc.name) + ' · ' + esc(acc.stay)],
+    ['Dates', esc(acc.stay) + ' · ' + acc.nights + ' nights'],
+    ['Requested', esc(acc.name) + ' · Vientiane'],
     ['Status', S.stay.waitlist ? 'WAITLISTED' : 'REQUESTED · UNDER REVIEW'],
     ...(acc.contributionPerGuest == null
       ? [['Guests', String(occ.length)], ['Contribution', 'Complimentary · coordinated by Guest Relations']]
@@ -1619,16 +1743,22 @@ function renderReview() {
   if (S.bangkokStay && S.bangkokStay.property) {
     const bh = BANGKOK_STAYS.find((x) => x.id === S.bangkokStay.property);
     if (bh) html += sec('Your Bangkok Stay', idx('journey'), [
-      ['Requested', esc(bh.name) + ' · ' + esc(bh.room)],
-      ['Dates', esc([S.bangkokStay.from, S.bangkokStay.to].filter(Boolean).join(' → ') || 'To be chosen under My Travel')],
-      ['Contribution', bkkNights() ? bkkNights() + ' night' + (bkkNights() > 1 ? 's' : '') + ' × ' + money(bh.nightly) + ' = ' + money(bkkTotal()) : money(bh.nightly) + ' per night · dates to be chosen'],
+      ['Dates', esc(bh.dateNote)],
+      ['Requested', esc(bh.name) + ' · Bangkok'],
+      ['Arrangement', 'Guest Relations will confirm the arrangement'],
     ]);
   }
-  if (S.postWedding && S.postWedding.joined) html += sec('The Post Wedding Journey', idx('journey'),
-    POST_WEDDING.map((c) => [esc(c.type), esc(c.label) + ' · ' + esc(c.when) + ' · ' +
+  if (S.postWedding && S.postWedding.joined) html += '<div class="cch-label rv-cch">Post-Wedding Journey · Optional · After the wedding</div>' +
+    sec('The Post Wedding Journey', idx('journey'),
+    POST_WEDDING.filter((c) => !c.onward).map((c) => [esc(c.date), esc(c.label) + ' · ' + esc(c.type) + (c.sub ? ' · ' + esc(c.sub) : '') + ' · ' +
       (c.contribution != null
-        ? (c.perGuest ? money(c.contribution) + ' per guest' : c.nights + ' nights · ' + money(c.contribution))
-        : (c.priceNote ? esc(c.priceNote) : 'contribution follows with Guest Relations'))]));
+        ? (c.perGuest ? money(c.contribution) + ' per guest' : money(c.contribution))
+        : 'Guest Relations will confirm the arrangement')])
+    .concat([['06 MAR 2027', 'Your onward journey · ' + ({
+      return: 'Return to Bangkok with us · Guest Relations will confirm the arrangement',
+      own: 'Arranged independently — a complete answer',
+      gr: 'Guest Relations support requested',
+    }[S.postWedding.onward] || 'To finalize with Guest Relations')]]));
   html += sec('Your Transfers', idx('journey'), (S.transfers || []).length
     ? S.transfers.map((s) => {
         const t = TRANSFERS.find((x) => x.id === s.transferId) || {};
@@ -1642,13 +1772,13 @@ function renderReview() {
   const jcRiders = S.guests.filter((g) => g.journey.train).length;
   const jcRows = [];
   if (acc) jcRows.push(['Stay', esc(acc.name) + ' · ' + (acc.contributionPerGuest == null ? 'complimentary · limited' : money(partyTotal(acc, occ)))]);
-  if (jcRiders) jcRows.push(['Train', jcRiders + ' × ' + money(TRAIN.contributionPerGuest) + ' = ' + money(trainContribution(TRAIN, jcRiders) || 0)]);
+  if (jcRiders) jcRows.push(['Train', esc(TRAIN.date) + ' · ' + jcRiders + ' × ' + money(TRAIN.contributionPerGuest) + ' = ' + money(trainContribution(TRAIN, jcRiders) || 0)]);
   if ((S.transfers || []).length) jcRows.push(['Transfers', money(transfersTotal(TRANSFERS, S.transfers, jcRiders))]);
   if (S.bangkokStay && S.bangkokStay.property) {
     const bh = BANGKOK_STAYS.find((x) => x.id === S.bangkokStay.property);
-    if (bh) jcRows.push(['Bangkok stay', esc(bh.name) + (bkkNights() ? ' · ' + money(bkkTotal()) : ' · dates to be chosen')]);
+    if (bh) jcRows.push(['Bangkok stay', esc(bh.name) + ' · Guest Relations will confirm the arrangement']);
   }
-  if (S.postWedding && S.postWedding.joined) jcRows.push(['Post Wedding Journey', 'China train · First Class only, Kunming and Lijiang stays · ' + money(pwTotal()) + ' · flight follows with Guest Relations']);
+  if (S.postWedding && S.postWedding.joined) jcRows.push(['Post Wedding Journey', '04 MAR 2027 · Kunming → Lijiang · First Class Train · ' + money(pwTotal())]);
   jcRows.push(['Total contribution', money(journeyTotal(acc, occ, TRAIN, jcRiders, TRANSFERS, S.transfers) + pwTotal() + bkkTotal())]);
   html += sec('Your Contribution', idx('cost'), jcRows);
   html += sec('Each of You', idx('each'), S.guests.map((g) => {
@@ -1744,6 +1874,22 @@ function journeyStatusLadder() {
     (s ? '<span class="s">' + s + '</span>' : '') + '</li>').join('') + '</ol>';
 }
 function showReceived() {
+  const rs = document.getElementById('received-summary');
+  if (rs) {
+    const open = [];
+    if (S.bangkokStay && S.bangkokStay.property) open.push(BANGKOK_STAYS[0].name + ' · dates confirmed personally');
+    if (S.postWedding && S.postWedding.joined) {
+      POST_WEDDING.filter((c) => !c.onward && c.contribution == null).forEach((c) => open.push(c.date + ' · ' + c.label + ' · ' + c.type));
+      const ow = S.postWedding.onward;
+      if (ow !== 'own') open.push('06 MAR 2027 · Your onward journey' + (ow === 'return' ? ' · return to Bangkok' : ow === 'gr' ? ' · Guest Relations support' : ''));
+    }
+    rs.innerHTML =
+      '<div class="cch-label">Your journey is with Guest Relations</div>' +
+      itineraryHtml() +
+      '<div class="cch-label" style="margin-top:26px">We\u2019re taking care of</div>' +
+      '<p class="note">Every REQUESTED selection above — seats, rooms, transfers and the wedding days — is now personally coordinated by Khun Ket and Khun Paddy. Statuses move from REQUESTED to UNDER REVIEW to CONFIRMED; nothing is booked until Guest Relations confirms it with you.</p>' +
+      (open.length ? '<div class="cch-label" style="margin-top:22px">To finalize with Guest Relations</div><p class="note">' + open.map(esc).join('<br/>') + '</p>' : '');
+  }
   document.getElementById('received-when').textContent =
     'Submitted ' + new Date(S.registration_submitted_at).toLocaleString('en-GB', { dateStyle: 'long', timeStyle: 'short' }) + ' · status: UNDER REVIEW';
   const st = document.getElementById('received-status');

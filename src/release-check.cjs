@@ -69,7 +69,7 @@ gate(4, 'Production submission endpoint active',
 const legacyTerms = /avani|manda de laos|river sun|luang prabang|LPQ\b|8booking|mekhong escape|mekong escapes|cruise/i;
 const legacyInIndex = legacyTerms.test(indexHtml);
 const legacyInRegister = legacyTerms.test(regHtml) || legacyTerms.test(appJs) || legacyTerms.test(data);
-const journeyExcluded = /^journey$/m.test(assetsignore);
+const journeyExcluded = /^\/?journey$/m.test(assetsignore); // root-scoped '/journey' keeps owner hotel images under assets/images/journey deployable
 const legacyFiles = ['assets/images/cards/card-manda.jpg', 'assets/images/preview/pv-manda-1.jpg']
   .filter((f) => fs.existsSync(path.join(ROOT, f)));
 gate(5, 'Legacy content excluded from active release',

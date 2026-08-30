@@ -231,6 +231,7 @@ export const BERTH_PREFS = ['No preference', 'Sleeper berth · lower', 'Sleeper 
 
 export const TRAIN = {
   id: 'train', name: 'Overnight train · Bangkok → Nong Khai',
+  date: '26 FEB 2027', times: '20:25 → 06:45 (+1)',
   capacityTotal: 8, capacityUnit: 'Guest seat', selectionScope: 'GUEST',
   /* CONFIRMED guest price (Owner, 2026-08-25): USD 88 per participating
    * guest. Charged only for guests who join the train. */
@@ -265,6 +266,7 @@ export const TRANSFERS = [
     included: 'Private vehicle and driver · met personally · luggage handled',
     blurb: 'From Souphattra Heritage to Wattay International Airport, timed to your flight.' },
   { id: 'nongkhai-vte', group: 'Nong Khai Railway Station', name: 'Nong Khai Station to Souphattra Heritage',
+    date: '27 FEB 2027',
     pricePerUnit: 55, perGuest: true, direction: 'arrival', fieldsFor: 'train',
     included: 'Private vehicle and driver · met at your carriage exit · luggage handled',
     blurb: 'From Nong Khai Railway Station onward to Souphattra Heritage Vientiane after your Night Train arrival.' },
@@ -291,24 +293,44 @@ export const TRANSFERS = [
  * Journey. Contribution values are NULL wherever no authoritative amount
  * exists yet — the UI renders a quiet pending state, never an invented price. */
 export const BANGKOK_STAYS = [
-  { id: 'siam-kempinski', name: 'Siam Kempinski Hotel Bangkok', role: 'The journey hotel',
-    room: 'Deluxe Balcony Room with King Bed',
-    nightly: 623.20, nights: 3, total: 1869.60,
-    images: ['../assets/images/journey/kempinski-01.jpg', '../assets/images/journey/kempinski-02.jpg', '../assets/images/journey/kempinski-03.jpg'] },
+  /* Pre-Wedding Bangkok stay (HSW-001 v1.1): the Sathorn Penthouse. The
+   * check-in date carries a known Master conflict (21 vs 22 Feb) — dates are
+   * confirmed personally by Guest Relations, never fabricated (v1.2 §4). */
+  { id: 'sathorn-penthouse', name: 'Elegant 6BR Sathorn Penthouse', role: 'Pre-Wedding stay · Bangkok',
+    dateNote: 'Until 24 FEB 2027 · check-in confirmed personally by Guest Relations',
+    contribution: null },
 ];
 
+/* Final/return Bangkok stay context (v1.1): only where a guest chooses the
+ * coordinated return — Guest Relations confirms the arrangement. */
+export const RETURN_STAY = {
+  id: 'siam-kempinski', name: 'Siam Kempinski Hotel Bangkok',
+  room: 'Deluxe Balcony Room with King Bed',
+  images: ['../assets/images/journey/kempinski-01.jpg', '../assets/images/journey/kempinski-02.jpg', '../assets/images/journey/kempinski-03.jpg'],
+};
+
 export const POST_WEDDING = [
-  { id: 'vte-kmg', type: 'Transportation', label: 'Vientiane → Kunming', when: '1 March 2027', sub: 'By rail · First Class only', contribution: 145, perGuest: true },
-  { id: 'kunming-stay', type: 'Stay', label: 'Wanxiang Yueju Designer Homestay', when: '1 – 4 March 2027',
+  /* VTE→KMG is a FLIGHT (China Eastern). Project Actual USD 138.40 per
+   * applicable traveller is NOT a guest contribution — Guest Relations
+   * confirms the arrangement. (HSW-001 v1.2 §8) */
+  { id: 'vte-kmg', type: 'Flight', label: 'Vientiane → Kunming', date: '01 MAR 2027', when: '1 March 2027', sub: 'China Eastern Airlines', contribution: null },
+  /* Stay project costs are internal Actuals, never guest contributions
+   * unless explicitly guest-payable (HSW-001 v1.3 §1/§7). */
+  { id: 'kunming-stay', type: 'Stay', label: 'Wanxiang Yueju Designer Homestay', date: '01 – 04 MAR 2027', when: '1 – 4 March 2027',
     sub: 'Kunming Railway Station MixC Branch · Solarium Bath Suite or Smart Family Room',
-    nightly: 42.55, nights: 4, contribution: 170.20,
+    contribution: null,
     images: ['../assets/images/journey/kunming-01.jpg', '../assets/images/journey/kunming-02.jpg', '../assets/images/journey/kunming-03.jpg'] },
-  { id: 'kmg-ljg', type: 'Transportation', label: 'Kunming → Lijiang', when: '4 March 2027', sub: 'By rail · First Class only', contribution: null, priceNote: 'Within the China train contribution' },
-  { id: 'lijiang-stay', type: 'Stay', label: 'Luye Baisha · Rizhao Jinshan', when: '4 – 6 March 2027',
+  /* USD 145 per guest · FIRST CLASS ONLY belongs to THIS train
+   * (Owner-final override — supersedes older USD 85/84.22 values). */
+  { id: 'kmg-ljg', type: 'Train', label: 'Kunming → Lijiang', date: '04 MAR 2027', when: '4 March 2027', sub: 'First Class Train · First Class only', contribution: 145, perGuest: true },
+  { id: 'lijiang-stay', type: 'Stay', label: 'Luye Baisha · Rizhao Jinshan', date: '04 – 06 MAR 2027', when: '4 – 6 March 2027',
     sub: 'Lijiang · Snow Mountain Viewing Room',
-    nightly: 267.38, nights: 2, contribution: 534.76,
+    contribution: null,
     images: ['../assets/images/journey/lijiang-01.jpg', '../assets/images/journey/lijiang-02.jpg', '../assets/images/journey/lijiang-03.jpg'] },
-  { id: 'ljg-bkk', type: 'Flight', label: 'Lijiang → Bangkok', when: '6 March 2027', sub: 'Return flight', contribution: null },
+  /* Final onward journey is a CHOICE, never a mandatory booking (v1.0 §8):
+   * coordinated return (China Eastern, 06 Mar · project Actual USD 154, not
+   * guest-payable), own arrangement, or Guest Relations support. */
+  { id: 'ljg-bkk', type: 'Flight', label: 'Lijiang → Bangkok', date: '06 MAR 2027', when: '6 March 2027', sub: 'China Eastern Airlines · where applicable', contribution: null, onward: true },
 ];
 
 /* ---------------- package (§23) ---------------- */

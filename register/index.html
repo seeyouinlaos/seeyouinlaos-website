@@ -387,6 +387,46 @@ body.pv-lock { overflow: hidden; }
 .tj-opt .acc-actions { margin-top: auto; }
 .ack-row .ack-i18n { display: block; font-size: 10.5px; letter-spacing: .04em; opacity: .68; margin-top: 3px; line-height: 1.5; }
 .btn[disabled] { opacity: .4; cursor: not-allowed; pointer-events: none; }
+.cch-label { font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: var(--cherry); margin: 4px 0 10px; }
+.rv-cch { margin: 34px 0 8px; padding-top: 18px; border-top: 1px solid var(--gold-line); }
+.rv-cch-main { color: var(--ink); font-size: 11px; }
+.cch { display: flex; gap: 14px; align-items: baseline; margin: 34px 0 10px; padding-top: 18px; border-top: 1px solid var(--gold-line); }
+.cch:first-of-type { margin-top: 18px; }
+.cch-no { font-family: 'Cormorant Garamond', serif; font-size: 22px; color: var(--rose); }
+.cch-t { font-family: 'Cormorant Garamond', serif; font-size: 21px; line-height: 1.2; }
+.cch-main .cch-t { font-size: 26px; color: var(--cherry); }
+.cch-s { font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--rose); margin-top: 2px; }
+.crow { padding: 10px 0; border-bottom: 1px solid var(--line); }
+.crow .cdate { display: block; font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--cherry); margin-bottom: 2px; }
+.crow .cbody { display: flex; justify-content: space-between; gap: 14px; align-items: baseline; flex-wrap: wrap; }
+.crow .cprod { font-size: 14px; color: var(--ink); min-width: 0; }
+.crow .camt { font-size: 13.5px; color: var(--ink); white-space: nowrap; margin-left: auto; }
+.ctotal { display: flex; justify-content: space-between; align-items: baseline; gap: 14px; margin: 30px 0 6px; padding: 16px 0; border-top: 1px solid var(--gold-line); border-bottom: 1px solid var(--gold-line); }
+.ctotal .l { font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: var(--cherry); }
+.ctotal .r { font-family: 'Cormorant Garamond', serif; font-size: 26px; }
+.chosted { display: flex; flex-direction: column; gap: 7px; font-size: 13px; opacity: .88; }
+.itin { border-left: 1px solid var(--gold-line); padding-left: 18px; margin: 6px 0 26px; display: flex; flex-direction: column; gap: 14px; }
+.it-row { position: relative; }
+.it-row::before { content: ''; position: absolute; left: -21.5px; top: 5px; width: 7px; height: 7px; border-radius: 50%; background: var(--rose); }
+.it-row.it-main::before { background: var(--cherry); width: 9px; height: 9px; left: -22.5px; }
+.it-d { display: block; font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--cherry); }
+.it-t { display: block; font-size: 14.5px; color: var(--ink); margin-top: 1px; }
+.it-row.it-main .it-t { font-family: 'Cormorant Garamond', serif; font-size: 18px; color: var(--cherry); }
+.it-s { display: block; font-size: 12px; color: var(--rose); margin-top: 1px; }
+.jticket { margin: 10px 0 4px; }
+.jticket svg { display: block; width: 100%; max-width: 340px; height: auto; }
+.jticket .tk-line { stroke-dashoffset: 0; }
+.jticket:not(.done):not(.run) .tk-mover { opacity: 0; }
+.jticket .tk-mover { transform: translate(var(--tk-x, 0), var(--tk-y, 0)); }
+.jticket.run .tk-mover { animation: tkmove 2.6s ease-in-out forwards; }
+.jticket.done .tk-mover { transform: translate(calc(var(--tk-x, 0px) + var(--tk-dist, 0px)), var(--tk-y, 0)); opacity: 1; }
+@keyframes tkmove { from { transform: translate(var(--tk-x, 0), var(--tk-y, 0)); opacity: 1; } to { transform: translate(calc(var(--tk-x, 0px) + var(--tk-dist, 240px)), var(--tk-y, 0)); opacity: 1; } }
+.tk-lbl { font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase; fill: var(--ink); }
+.onward-return { margin-top: 12px; border-top: 1px solid var(--line); padding-top: 12px; }
+@media (max-width: 430px) {
+  .crow .camt { white-space: normal; }
+  .cch-main .cch-t { font-size: 23px; }
+}
 #privnav .pn-exit button:hover { border-color: var(--cherry); }
 
 /* Guest Relations contact card (LINE QR; WhatsApp pending an approved number) */
@@ -713,6 +753,7 @@ html.inv-anim-open .bx-right { animation: bxRight 2.05s cubic-bezier(.45,.05,.45
 <h2>Thank you.</h2>
 <p class="lead">Your registration has been received. Guest Relations will review your selections, availability and personal requirements, and you will be contacted with confirmations or any additional information.</p>
 <p class="note" id="received-when" style="margin-top:20px"></p>
+<div id="received-summary" style="margin-top:26px"></div>
 <div id="received-status" style="margin-top:26px"></div>
 <div class="stepnav"><span></span><button class="btn" id="return-journey">Return to your journey</button></div>
 </section>

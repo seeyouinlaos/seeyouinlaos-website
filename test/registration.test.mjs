@@ -660,15 +660,20 @@ test('allergy declared without kitchen detail blocks completion (§30)', () => {
 
 test('post wedding architecture: canonical China train price, rest pending, no China vehicle', () => {
   assert.equal(POST_WEDDING.length, 5);
-  const cn = POST_WEDDING.find((c) => c.id === 'vte-kmg');
-  assert.equal(cn.contribution, 145);                       // China train · owner final override
+  // HSW-001 v1.2 §8: VTE→KMG is a FLIGHT (China Eastern), never rail;
+  // USD 145 First Class belongs to Kunming → Lijiang.
+  const fl = POST_WEDDING.find((c) => c.id === 'vte-kmg');
+  assert.equal(fl.type, 'Flight');
+  assert.ok(/China Eastern/.test(fl.sub));
+  assert.equal(fl.contribution, null);                      // project Actual is not a guest contribution
+  const cn = POST_WEDDING.find((c) => c.id === 'kmg-ljg');
+  assert.equal(cn.type, 'Train');
+  assert.equal(cn.contribution, 145);                       // Owner-final First Class value
   assert.equal(cn.perGuest, true);
-  assert.ok(/First Class only/.test(cn.sub));               // only class presented
-  const km = POST_WEDDING.find((c) => c.id === 'kunming-stay');
-  assert.equal(km.contribution, 170.20); assert.equal(km.nightly, 42.55); assert.equal(km.nights, 4);
-  const lj = POST_WEDDING.find((c) => c.id === 'lijiang-stay');
-  assert.equal(lj.contribution, 534.76); assert.equal(lj.nightly, 267.38); assert.equal(lj.nights, 2);
-  for (const c of POST_WEDDING) if (['vte-kmg', 'kunming-stay', 'lijiang-stay'].includes(c.id) === false) assert.equal(c.contribution, null);
+  assert.ok(/First Class/.test(cn.sub));
+  // stay project costs never surface as guest contributions (v1.3 §7)
+  for (const c of POST_WEDDING) if (c.id !== 'kmg-ljg') assert.equal(c.contribution, null);
+  for (const c of POST_WEDDING) assert.ok(c.date, c.id + ' carries its canonical date');
   const flat = JSON.stringify(POST_WEDDING).toLowerCase();
   assert.ok(!flat.includes('car'), 'no vehicle assumption in China (§14)');
   assert.equal(BANGKOK_STAYS.length, 1); // the real journey hotel (Siam Kempinski)
@@ -688,19 +693,16 @@ test('event naming: Wedding Dinner without Reception (§25)', () => {
 });
 
 
-test('post wedding total: per-guest train × guests plus room-total stays, zero when not joined', async () => {
+test('post wedding total: only guest-payable First Class train × guests', async () => {
   const { postWeddingTotal } = await import('../register/logic.mjs');
-  // 2 × USD 145 China train + USD 170.20 Kunming + USD 534.76 Lijiang
-  assert.ok(Math.abs(postWeddingTotal(POST_WEDDING, true, 2) - 994.96) < 0.005);
+  assert.equal(postWeddingTotal(POST_WEDDING, true, 2), 290);   // 2 × USD 145 · nothing else is guest-payable
   assert.equal(postWeddingTotal(POST_WEDDING, false, 2), 0);
 });
 
-test('Bangkok journey hotel: real Master cost, canonical single source', () => {
+test('Pre-Wedding Bangkok stay: Sathorn Penthouse, GR-confirmed dates, no invented contribution', () => {
   assert.equal(BANGKOK_STAYS.length, 1);
   const h = BANGKOK_STAYS[0];
-  assert.equal(h.id, 'siam-kempinski');
-  assert.equal(h.nightly, 623.20);
-  assert.equal(h.nights, 3);
-  assert.equal(h.total, 1869.60);
-  assert.ok(/Deluxe Balcony Room/.test(h.room));
+  assert.equal(h.id, 'sathorn-penthouse');
+  assert.equal(h.contribution, null);
+  assert.ok(/Guest Relations/.test(h.dateNote)); // known 21-vs-22 FEB Master conflict routed to GR
 });
