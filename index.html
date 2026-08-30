@@ -17,7 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500&amp;display=swap" rel="stylesheet"/>
-<link rel="preload" as="image" href="assets/images/hero/img-hero.webp" type="image/webp" fetchpriority="high"/>
+<link rel="preload" as="image" href="assets/images/hero/hero-journey.webp" type="image/webp" fetchpriority="high"/>
 <link rel="stylesheet" href="assets/vendor/leaflet/leaflet.css"/>
 <style>
 @font-face { font-family: 'PP Editorial Old'; src: url('assets/fonts/PPEditorialOld-Regular.otf') format('opentype'); font-weight: 400; font-display: swap; }
@@ -80,7 +80,17 @@ section { padding: 110px 6vw; position: relative; }
 
 /* ---------- HERO ---------- */
 .hero { position: relative; height: 100vh; height: 100dvh; min-height: 640px; overflow: hidden; color: var(--ivory); padding: 0; }
-.hero .bg { position: absolute; inset: -12% 0 0 0; background: url('assets/images/hero/img-hero.jpg') center 55% / cover no-repeat; background-image: image-set(url('assets/images/hero/img-hero.webp') type('image/webp'), url('assets/images/hero/img-hero.jpg') type('image/jpeg')); will-change: transform; }
+.hero .bg { position: absolute; inset: -12% 0 0 0; will-change: transform; }
+.hero .bg-img { position: absolute; inset: 0; background-position: center 55%; background-size: cover; background-repeat: no-repeat; opacity: 0; transition: opacity 1.9s ease; }
+.hero .bg-img.on { opacity: 1; }
+.hero .bg-img.b1 { background-image: url('assets/images/hero/hero-journey.jpg'); background-image: image-set(url('assets/images/hero/hero-journey.webp') type('image/webp'), url('assets/images/hero/hero-journey.jpg') type('image/jpeg')); }
+.hero .bg-img.b2 { background-position: center 42%; filter: brightness(.94); background-image: url('assets/images/hero/hero-arrival.jpg'); background-image: image-set(url('assets/images/hero/hero-arrival.webp') type('image/webp'), url('assets/images/hero/hero-arrival.jpg') type('image/jpeg')); }
+.hero .bg-img.b3 { filter: brightness(.58) saturate(.94); background-image: url('assets/images/hero/hero-editorial.jpg'); background-image: image-set(url('assets/images/hero/hero-editorial.webp') type('image/webp'), url('assets/images/hero/hero-editorial.jpg') type('image/jpeg')); }
+@media (prefers-reduced-motion: no-preference) {
+  .hero .bg-img.on { animation: heroDrift 11s ease-out forwards; }
+}
+@keyframes heroDrift { from { transform: scale(1); } to { transform: scale(1.035); } }
+.hero .bg-img.off { transform: scale(1.035); }
 .hero::after { content:''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(33,31,28,.42) 0%, rgba(33,31,28,.08) 40%, rgba(33,31,28,.18) 72%, rgba(33,31,28,.5) 100%); z-index: 1; }
 .hero > *:not(.bg) { position: absolute; z-index: 2; }
 .hero .badge { top: 104px; left: 50%; transform: translateX(-50%); width: 92%; max-width: 640px; text-align: center; font-size: 12.5px; letter-spacing: .16em; text-transform: uppercase; line-height: 1.7; }
@@ -164,6 +174,14 @@ section { padding: 110px 6vw; position: relative; }
 .rooms { position: relative; overflow: hidden; }
 .rooms .mtn-motif { opacity: .5; }
 .places .mtn-motif { opacity: .14; }
+/* ambient star/ring motion — restrained, subordinate to content */
+@media (prefers-reduced-motion: no-preference) {
+  .mtn-motif .mtn-ring { transform-box: fill-box; transform-origin: center; animation: mtnSpin 150s linear infinite; }
+  .mtn-motif .mtn-ring2 { transform-box: fill-box; transform-origin: center; animation: mtnSpin 220s linear infinite reverse; }
+  .mtn-motif .mtn-moon { animation: mtnGlow 12s ease-in-out infinite alternate; }
+}
+@keyframes mtnSpin { to { transform: rotate(360deg); } }
+@keyframes mtnGlow { from { opacity: .16; } to { opacity: .28; } }
 .rooms .rm-grid, .rooms .rm-intro, .rooms h2, .rooms .eyebrow { position: relative; z-index: 1; }
 
 .places { position: relative; overflow: hidden; }
@@ -380,6 +398,20 @@ body.pv-lock { overflow: hidden; }
 .od-row:last-child { border-bottom: none; }
 .route-map { margin-top: 20px; padding: 16px 10px 6px; border: 1px solid var(--line); background: rgba(255,255,255,.32); }
 .route-map svg { display: block; width: 100%; height: auto; }
+/* progressive journey: Bangkok -> rail -> Nong Khai -> Mekong -> Vientiane.
+ * Runs once on viewport entry; without motion the complete graphic is the
+ * resting state (animations exist only under .rm-go + no-preference). */
+@media (prefers-reduced-motion: no-preference) {
+  .route-map.rm-go .rm-l1 { stroke-dasharray: 290; animation: rmDraw 1s ease-out both; }
+  .route-map.rm-go .rm-ticks { animation: rmFade .8s ease-out .35s both; }
+  .route-map.rm-go .rm-c2 { animation: rmFade .5s ease-out .95s both; }
+  .route-map.rm-go .rm-l2 { animation: rmReveal .9s ease-out 1.15s both; }
+  .route-map.rm-go .rm-w { animation: rmFade .8s ease-out 1.55s both; }
+  .route-map.rm-go .rm-c3 { animation: rmFade .6s ease-out 1.9s both; }
+}
+@keyframes rmDraw { from { stroke-dashoffset: 290; } to { stroke-dashoffset: 0; } }
+@keyframes rmFade { from { opacity: 0; } }
+@keyframes rmReveal { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
 
 .lang-sw { display: inline-flex; gap: 2px; margin-left: 14px; vertical-align: middle; }
 .lang-sw button { background: none; border: 1px solid var(--line); color: inherit; font: inherit; font-size: 9.5px; letter-spacing: .14em; padding: 3px 7px; cursor: pointer; opacity: .6; min-height: 24px; }
@@ -544,7 +576,7 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
 </div>
 <!-- HERO -->
 <header class="hero" id="top">
-<div class="bg"></div>
+<div class="bg" aria-hidden="true"><div class="bg-img b1 on"></div><div class="bg-img b2"></div><div class="bg-img b3"></div></div>
 <div class="badge" data-hero="">Sunday, 28 February 2027 · Vientiane, Laos</div>
 <div class="logo" data-hero="">see you in laos<span class="dot">.</span></div>
 <h1 class="statement split-h">Travel first. Wedding second.<br/>Memory always.</h1>
@@ -609,17 +641,17 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
 <text x="185" y="30" text-anchor="middle" fill="var(--ink)" style="font-size:11px;letter-spacing:.22em;text-transform:uppercase">Special Express No. 25</text>
 <text x="185" y="48" text-anchor="middle" fill="var(--ink)" opacity=".62" style="font-size:9.5px;letter-spacing:.14em;text-transform:uppercase">10 hours 20 minutes · First Class Sleeper</text>
 <text x="445" y="66" text-anchor="middle" fill="var(--cherry)" style="font-family:'PP Editorial Old',serif;font-style:italic;font-size:13px;letter-spacing:.04em">across the Mekong</text>
-<line x1="40" y1="88" x2="330" y2="88" stroke="var(--ink)" stroke-width="1.4"/>
-<g stroke="var(--ink)" stroke-width="1" opacity=".4">
+<line class="rm-l1" x1="40" y1="88" x2="330" y2="88" stroke="var(--ink)" stroke-width="1.4"/>
+<g class="rm-ticks" stroke="var(--ink)" stroke-width="1" opacity=".4">
 <line x1="76" y1="84" x2="76" y2="92"/><line x1="112" y1="84" x2="112" y2="92"/><line x1="148" y1="84" x2="148" y2="92"/><line x1="184" y1="84" x2="184" y2="92"/><line x1="220" y1="84" x2="220" y2="92"/><line x1="256" y1="84" x2="256" y2="92"/><line x1="292" y1="84" x2="292" y2="92"/>
 </g>
-<line x1="330" y1="88" x2="560" y2="88" stroke="var(--cherry)" stroke-width="1.2" stroke-dasharray="2 6"/>
-<path d="M420,100 q8,-6 16,0 q8,6 16,0" stroke="var(--cherry)" stroke-width="1" opacity=".65"/>
-<path d="M428,108 q8,-6 16,0 q8,6 16,0" stroke="var(--cherry)" stroke-width="1" opacity=".4"/>
+<line class="rm-l2" x1="330" y1="88" x2="560" y2="88" stroke="var(--cherry)" stroke-width="1.2" stroke-dasharray="2 6"/>
+<path class="rm-w" d="M420,100 q8,-6 16,0 q8,6 16,0" stroke="var(--cherry)" stroke-width="1" opacity=".65"/>
+<path class="rm-w" d="M428,108 q8,-6 16,0 q8,6 16,0" stroke="var(--cherry)" stroke-width="1" opacity=".4"/>
 <circle cx="40" cy="88" r="4" fill="var(--ink)"/>
-<circle cx="330" cy="88" r="4" fill="var(--ink)"/>
-<circle cx="560" cy="88" r="5" fill="var(--cherry)"/>
-<circle cx="560" cy="88" r="9.5" stroke="var(--cherry)" stroke-width="1" opacity=".5"/>
+<circle class="rm-c2" cx="330" cy="88" r="4" fill="var(--ink)"/>
+<circle class="rm-c3" cx="560" cy="88" r="5" fill="var(--cherry)"/>
+<circle class="rm-c3" cx="560" cy="88" r="9.5" stroke="var(--cherry)" stroke-width="1" opacity=".5"/>
 <text x="36" y="120" fill="var(--ink)" style="font-size:11px;letter-spacing:.2em;text-transform:uppercase">Bangkok</text>
 <text x="36" y="136" fill="var(--ink)" opacity=".6" style="font-size:9px;letter-spacing:.1em">20:25 · Krung Thep Aphiwat</text>
 <text x="330" y="120" text-anchor="middle" fill="var(--ink)" style="font-size:11px;letter-spacing:.2em;text-transform:uppercase">Nong Khai</text>
@@ -721,7 +753,7 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
 </button>
 </div>
 </div>
-<svg class="mtn-motif" aria-hidden="true" viewBox="0 0 1200 260" fill="none" preserveAspectRatio="xMidYMax meet"><g stroke="var(--gold-line)" stroke-width="0.7" fill="none"><path d="M0 220 L180 120 L290 190 L430 70 L560 200 L700 110 L850 210 L1000 130 L1200 220"/><path d="M0 240 L180 150 L290 210 L430 105 L560 222 L700 145 L850 230 L1000 162 L1200 240" stroke-dasharray="1 6"/><path d="M0 200 C150 170 260 240 420 150 C560 72 680 235 830 160 C960 96 1080 210 1200 178" opacity=".7"/><path d="M60 250 C220 215 380 250 540 228 C740 200 920 252 1200 226" stroke-dasharray="1 8"/></g><circle cx="985" cy="70" r="34" fill="var(--gold)" opacity=".2"/><circle cx="985" cy="70" r="52" stroke="var(--gold-line)" stroke-width="0.7" stroke-dasharray="1 7"/><circle cx="985" cy="70" r="70" stroke="var(--gold-line)" stroke-width="0.7" stroke-dasharray="1 9"/></svg>
+<svg class="mtn-motif" aria-hidden="true" viewBox="0 0 1200 260" fill="none" preserveAspectRatio="xMidYMax meet"><g stroke="var(--gold-line)" stroke-width="0.7" fill="none"><path d="M0 220 L180 120 L290 190 L430 70 L560 200 L700 110 L850 210 L1000 130 L1200 220"/><path d="M0 240 L180 150 L290 210 L430 105 L560 222 L700 145 L850 230 L1000 162 L1200 240" stroke-dasharray="1 6"/><path d="M0 200 C150 170 260 240 420 150 C560 72 680 235 830 160 C960 96 1080 210 1200 178" opacity=".7"/><path d="M60 250 C220 215 380 250 540 228 C740 200 920 252 1200 226" stroke-dasharray="1 8"/></g><circle class="mtn-moon" cx="985" cy="70" r="34" fill="var(--gold)" opacity=".2"/><circle class="mtn-ring" cx="985" cy="70" r="52" stroke="var(--gold-line)" stroke-width="0.7" stroke-dasharray="1 7"/><circle class="mtn-ring2" cx="985" cy="70" r="70" stroke="var(--gold-line)" stroke-width="0.7" stroke-dasharray="1 9"/></svg>
 </section>
 <div class="wave" style="background: var(--ink-s)"><svg preserveaspectratio="none" viewbox="0 0 1440 90"><path d="M0,90 L0,50 C220,20 460,72 720,42 C980,15 1220,65 1440,35 L1440,90 Z" fill="#F2ECE1"></path></svg></div>
 <!-- ACCOMMODATION -->
@@ -914,7 +946,7 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
 </script>
 <!-- ROOMS:END -->
 </div>
-<svg class="mtn-motif" aria-hidden="true" viewBox="0 0 1200 260" fill="none" preserveAspectRatio="xMidYMax meet"><g stroke="var(--gold-line)" stroke-width="0.7" fill="none"><path d="M0 220 L180 120 L290 190 L430 70 L560 200 L700 110 L850 210 L1000 130 L1200 220"/><path d="M0 240 L180 150 L290 210 L430 105 L560 222 L700 145 L850 230 L1000 162 L1200 240" stroke-dasharray="1 6"/><path d="M0 200 C150 170 260 240 420 150 C560 72 680 235 830 160 C960 96 1080 210 1200 178" opacity=".7"/><path d="M60 250 C220 215 380 250 540 228 C740 200 920 252 1200 226" stroke-dasharray="1 8"/></g><circle cx="985" cy="70" r="34" fill="var(--gold)" opacity=".2"/><circle cx="985" cy="70" r="52" stroke="var(--gold-line)" stroke-width="0.7" stroke-dasharray="1 7"/><circle cx="985" cy="70" r="70" stroke="var(--gold-line)" stroke-width="0.7" stroke-dasharray="1 9"/></svg>
+<svg class="mtn-motif" aria-hidden="true" viewBox="0 0 1200 260" fill="none" preserveAspectRatio="xMidYMax meet"><g stroke="var(--gold-line)" stroke-width="0.7" fill="none"><path d="M0 220 L180 120 L290 190 L430 70 L560 200 L700 110 L850 210 L1000 130 L1200 220"/><path d="M0 240 L180 150 L290 210 L430 105 L560 222 L700 145 L850 230 L1000 162 L1200 240" stroke-dasharray="1 6"/><path d="M0 200 C150 170 260 240 420 150 C560 72 680 235 830 160 C960 96 1080 210 1200 178" opacity=".7"/><path d="M60 250 C220 215 380 250 540 228 C740 200 920 252 1200 226" stroke-dasharray="1 8"/></g><circle class="mtn-moon" cx="985" cy="70" r="34" fill="var(--gold)" opacity=".2"/><circle class="mtn-ring" cx="985" cy="70" r="52" stroke="var(--gold-line)" stroke-width="0.7" stroke-dasharray="1 7"/><circle class="mtn-ring2" cx="985" cy="70" r="70" stroke="var(--gold-line)" stroke-width="0.7" stroke-dasharray="1 9"/></svg>
 </section>
 <!-- DRESS GUIDE -->
 <section class="dressguide" id="dresscode" style="padding-top: 70px">
@@ -1194,6 +1226,33 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
     if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
   }), { rootMargin: '0px 0px -16% 0px' });
   document.querySelectorAll('.rv').forEach(el => io.observe(el));
+
+  /* HERO three-image rotation — crossfade only, no controls; reduced motion
+   * keeps the first image as a complete stable visual state. */
+  const heroLayers = Array.from(document.querySelectorAll('.hero .bg-img'));
+  if (heroLayers.length > 1 && !reduced) {
+    heroLayers.forEach(el => {
+      const m = getComputedStyle(el).backgroundImage.match(/url\("?([^")]+)"?\)/);
+      if (m) { const im = new Image(); im.src = m[1]; }
+    });
+    let hi = 0;
+    setInterval(() => {
+      const cur = heroLayers[hi];
+      cur.classList.remove('on'); cur.classList.add('off');
+      setTimeout(() => cur.classList.remove('off'), 2100);
+      hi = (hi + 1) % heroLayers.length;
+      heroLayers[hi].classList.add('on');
+    }, 9000);
+  }
+
+  /* Special Express No. 25 — progressive journey, once, on viewport entry */
+  const rmap = document.querySelector('.route-map');
+  if (rmap && !reduced) {
+    const rio = new IntersectionObserver(es => es.forEach(e => {
+      if (e.isIntersecting) { rmap.classList.add('rm-go'); rio.disconnect(); }
+    }), { threshold: .35 });
+    rio.observe(rmap);
+  }
 
   /* MENU */
   const btn = document.getElementById('menuBtn');
