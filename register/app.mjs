@@ -367,8 +367,16 @@ const PRIVNAV = [
 function renderPrivnav() {
   const nav = document.getElementById('privnav');
   if (!nav) return;
-  if (!S.invitation || isAuthOut()) { nav.hidden = true; return; }
+  const siteNav = document.getElementById('sitenav');
+  if (!S.invitation || isAuthOut()) {
+    nav.hidden = true;
+    if (siteNav) siteNav.hidden = false;
+    return;
+  }
   nav.hidden = false;
+  // inside the Guest Area the personal navigation is the only navigation —
+  // the logo carries the way home to MY JOURNEY.
+  if (siteNav) siteNav.hidden = true;
   const name = stepEls[cur].dataset.step;
   /* level-2 rule (owner): exactly ONE active subsection. "Guest Area" stays
    * available as the dashboard/home link but NEVER carries an active state —
@@ -379,6 +387,14 @@ function renderPrivnav() {
   nav.innerHTML = PRIVNAV.map(([st, label]) =>
     '<button type="button" data-nav="' + st + '"' + (name === st ? ' aria-current="true"' : '') + '>' + label + '</button>').join('') +
     '<span class="pn-exit"><button type="button" id="nav-invitation">Invitation</button><button type="button" id="pn-home">Website</button><button type="button" id="pn-save">Save</button><button type="button" id="log-out">Log out</button></span>';
+  const mark = document.getElementById('site-mark');
+  if (mark && !mark.dataset.wired) {
+    mark.dataset.wired = '1';
+    mark.addEventListener('click', (e) => {
+      if (!S.invitation || isAuthOut()) return;   // signed out: the logo leads to the website
+      e.preventDefault(); saveDraft(); show(idx('home'));
+    });
+  }
   nav.querySelector('#pn-home').addEventListener('click', () => {
     saveDraft(); location.href = '../'; // progress saved; the personal link reopens the journey
   });
@@ -516,7 +532,7 @@ function renderJourney() {
   const trainLabel = guestAvailability(trainRes, 'seats');
   const trainFull = remaining(trainRes) <= 0;
   const anyTrain = S.guests.some((g) => g.journey.train);
-  box.innerHTML = '<p class="note" style="margin-bottom:22px">The road to the wedding: Bangkok · the overnight train · Nong Khai · Vientiane · the wedding days.</p>' + modulePicker({
+  box.innerHTML = '<p class="note" style="margin-bottom:22px">The road to the wedding: Bangkok · the overnight train · Nong Khai · Vientiane · the wedding days.</p>' + journeyRouteCard() + modulePicker({
     title: null,
     modules: [
       { id: 'bangkok', label: 'The Bangkok Journey', when: 'Before the wedding', blurb: 'The shared days in Bangkok before travelling on to Laos.' },
@@ -533,6 +549,39 @@ function renderJourney() {
   wireBangkokStay(box);
   wirePostWedding(box);
   wireTransfers(box);
+}
+
+/* A quiet orientation map of the journey the guest has actually chosen —
+ * derived from the same selections, never an interactive map application. */
+function journeyRouteCard() {
+  const anyBkk = S.guests.some((g) => g.journey.bangkok);
+  const anyTrain = S.guests.some((g) => g.journey.train);
+  const arr = (S.transfers || []).map((x) => TRANSFERS.find((t) => t.id === x.transferId)).find((t) => t && t.direction === 'arrival');
+  const stops = [];
+  if (anyBkk) stops.push({ t: 'Bangkok', s: 'before the wedding' });
+  if (anyTrain) {
+    if (!anyBkk) stops.push({ t: 'Bangkok', s: 'Krung Thep Aphiwat · 20:25' });
+    stops.push({ t: 'Nong Khai', s: 'by night train · 06:45' });
+  }
+  stops.push({ t: 'Vientiane', s: arr ? 'met on arrival' : 'the wedding', end: true });
+  if (stops.length < 2) return '';
+  const W = 600, pad = 78, span = (W - pad * 2) / (stops.length - 1);
+  const seg = stops.map((st, i) => {
+    if (i === 0) return '';
+    const x1 = pad + span * (i - 1), x2 = pad + span * i;
+    const dashed = st.end && anyTrain; // the border crossing reads as a soft transition
+    return '<line x1="' + x1 + '" y1="46" x2="' + x2 + '" y2="46" stroke="var(--' + (dashed ? 'cherry' : 'ink') + ')" stroke-width="' + (dashed ? 1.1 : 1.3) + '"' + (dashed ? ' stroke-dasharray="2 6"' : '') + '/>';
+  }).join('');
+  const dots = stops.map((st, i) => {
+    const x = pad + span * i;
+    return '<circle cx="' + x + '" cy="46" r="' + (st.end ? 4.5 : 3.5) + '" fill="var(--' + (st.end ? 'cherry' : 'ink') + ')"/>' +
+      (st.end ? '<circle cx="' + x + '" cy="46" r="9" stroke="var(--cherry)" stroke-width="1" opacity=".45" fill="none"/>' : '') +
+      '<text x="' + x + '" y="72" text-anchor="middle" fill="var(--' + (st.end ? 'cherry' : 'ink') + ')" style="font-size:11px;letter-spacing:.2em;text-transform:uppercase">' + esc(st.t) + '</text>' +
+      '<text x="' + x + '" y="88" text-anchor="middle" fill="var(--ink)" opacity=".58" style="font-size:9px;letter-spacing:.08em">' + esc(st.s) + '</text>';
+  }).join('');
+  return '<div class="journey-route" role="img" aria-label="Your route: ' + stops.map((x) => x.t).join(' to ') + '">' +
+    '<div class="label">Your route</div>' +
+    '<svg viewBox="0 0 ' + W + ' 100" fill="none" aria-hidden="true">' + seg + dots + '</svg></div>';
 }
 
 /* §2-3 · the Bangkok stay: curated choice, guest chosen dates, quiet pending
@@ -747,6 +796,15 @@ function wireCardGalleries(box) {
     addEventListener('pointerup', () => { if (down) { down = null; track.classList.remove('drag'); track.scrollTo({ left: pos() * track.clientWidth, behavior: 'smooth' }); } });
   });
 }
+/** The compact first glance: availability plus the few facts that decide a
+ *  room. Everything else waits behind View details. */
+function roomEssentials(a, availRow) {
+  const rows = [['Size', a.size], ['Bed', a.bed], ['Guests', a.occupancy]].filter((r) => r[1]);
+  return '<dl class="acc-specs acc-essentials">' +
+    rows.map((r) => '<div><dt>' + r[0] + '</dt><dd>' + esc(r[1]) + '</dd></div>').join('') +
+    (availRow ? '<div class="spec-wide"><dt>Availability</dt><dd>' + esc(availRow) + '</dd></div>' : '') +
+    '</dl>';
+}
 function roomSpecs(a, availRow) {
   const rows = [['Size', a.size], ['Bed', a.bed], ['Guests', a.occupancy], ['Where', a.location]]
     .filter((r) => r[1]);
@@ -760,6 +818,8 @@ function roomSpecs(a, availRow) {
 }
 
 /* ---------------- step 5 · stay (§18–§23) ---------------- */
+let openId = null;   // only the room the guest actively opens shows its detail
+let CMP = [];        // rooms picked for the side by side comparison
 function renderStay() {
   const box = document.getElementById('stay-box');
   const cards = ACCOMMODATIONS.map((a) => {
@@ -779,14 +839,18 @@ function renderStay() {
         : bookable
           ? '<div class="acc-hosted"><span>First night · guest contribution</span><span class="rh-b">Second night · hosted by</span><span class="hs">Haruthai&nbsp;&amp;&nbsp;Suthep</span><span>Breakfast included</span></div>'
           : '') +
-      '<p class="acc-blurb">' + esc(a.blurb) + '</p>' +
-      roomSpecs(a, bookable
+      roomEssentials(a, bookable
         ? (selected ? 'Requested · Guest Relations will confirm'
            : a.kind === 'airbnb' ? 'Limited availability · personally coordinated by Guest Relations'
            : guestAvailability(res))
         : (a.reservedFor || 'Reserved')) +
+      '<div class="acc-detail"' + (openId === a.id ? '' : ' hidden') + '>' +
+        '<p class="acc-blurb">' + esc(a.blurb) + '</p>' +
+        roomSpecs(a, null) +
+      '</div>' +
       '<div class="acc-actions">' +
-      '<button type="button" class="btn ghost sm" data-view="' + a.id + '">View details</button>' +
+      '<button type="button" class="btn ghost sm" data-toggle="' + a.id + '">' + (openId === a.id ? 'Hide details' : 'View details') + '</button>' +
+      '<label class="acc-cmp"><input type="checkbox" data-cmp="' + a.id + '"' + (CMP.includes(a.id) ? ' checked' : '') + '/><span>Compare</span></label>' +
       (!bookable ? ''
         : full
           ? '<button type="button" class="btn sm" data-waitlist="' + a.id + '">Join the waitlist</button>'
@@ -796,6 +860,7 @@ function renderStay() {
   box.innerHTML =
     '<p class="note" style="margin-bottom:22px">' + esc(COPY.sharedHome) + '</p>' +
     '<div class="price-note"><div class="label">' + esc(COPY.priceLabel) + '</div><p class="note">' + esc(COPY.priceNote + ' Haruthai\u00A0&\u00A0Suthep.') + '</p><p class="note">' + esc(COPY.priceNote2) + '</p></div>' +
+    compareBlock() +
     '<div class="acc-grid">' + cards + '</div>' +
     '<div class="field" style="margin-top:30px"><label>Bed preference</label><select id="stay-bed"><option' + sel('') + '>No preference</option><option' + sel('One large bed') + '>One large bed</option><option' + sel('Two beds') + '>Two beds</option></select></div>' +
     '<div class="field"><label for="stay-req">Special request</label><textarea id="stay-req">' + esc(S.stay.request) + '</textarea></div>' +
@@ -819,10 +884,44 @@ function renderStay() {
     S.stay.accommodationId = b.getAttribute('data-waitlist'); S.stay.waitlist = true;
     saveDraft(); renderStay(); renderSummary();
   }));
-  box.querySelectorAll('button[data-view]').forEach((b) => b.addEventListener('click', () => openAccOverlay(b.getAttribute('data-view'))));
+  box.querySelectorAll('[data-toggle]').forEach((b) => b.addEventListener('click', () => {
+    const id = b.getAttribute('data-toggle');
+    openId = openId === id ? null : id;   // never more than one room open at a time
+    renderStay();
+    const card = box.querySelector('[data-acc="' + id + '"]');
+    if (card && openId === id) card.scrollIntoView({ block: 'nearest' });
+  }));
+  box.querySelectorAll('[data-cmp]').forEach((el) => el.addEventListener('change', () => {
+    const id = el.getAttribute('data-cmp');
+    CMP = el.checked ? [...CMP.filter((x) => x !== id), id].slice(-3) : CMP.filter((x) => x !== id);
+    renderStay();
+  }));
   wireCardGalleries(box);
   const bed = box.querySelector('#stay-bed'); bed.addEventListener('change', () => { S.stay.bed = bed.value === 'No preference' ? '' : bed.value; saveDraft(); });
   box.querySelector('#stay-req').addEventListener('input', (e) => { S.stay.request = e.target.value; saveDraft(); });
+}
+
+/** Side by side comparison of the rooms the guest ticked — the deciding
+ *  figures only, scrollable on a phone. */
+function compareBlock() {
+  const rooms = CMP.map((id) => ACCOMMODATIONS.find((a) => a.id === id)).filter(Boolean);
+  if (rooms.length < 2) return '';
+  const rows = [
+    ['Contribution', (a) => (a.contributionPerGuest == null ? 'Complimentary · limited' : money(a.contributionPerGuest) + ' per guest')],
+    ['Size', (a) => a.size || '—'],
+    ['Bed', (a) => a.bed || '—'],
+    ['Guests', (a) => a.occupancy || '—'],
+    ['Where', (a) => a.location || a.property || '—'],
+    ['Availability', (a) => (a.selectable === false ? (a.reservedFor || 'Reserved')
+      : a.kind === 'airbnb' ? 'Limited availability'
+      : guestAvailability(inventory[a.id]))],
+  ];
+  return '<div class="acc-compare"><div class="label">Compare rooms</div>' +
+    '<div class="cmp-scroll"><table><thead><tr><th></th>' +
+    rooms.map((a) => '<th>' + esc(a.name) + '</th>').join('') + '</tr></thead><tbody>' +
+    rows.map(([l, f]) => '<tr><th scope="row">' + l + '</th>' +
+      rooms.map((a) => '<td>' + esc(f(a)) + '</td>').join('') + '</tr>').join('') +
+    '</tbody></table></div></div>';
 }
 
 /** Selected-room financial confirmation (one calculation path: logic.mjs). */
