@@ -549,11 +549,69 @@ function renderJourney() {
   wireBangkokStay(box);
   wirePostWedding(box);
   wireTransfers(box);
+  mountGuestMap();
 }
 
-/* A quiet orientation map of the journey the guest has actually chosen —
- * derived from the same selections, never an interactive map application. */
+/* Verified real-world coordinates for the journey cities (never by eye). */
+const CITY_LL = {
+  Bangkok: [13.7563, 100.5018],
+  'Nong Khai': [17.8783, 102.7413],
+  Vientiane: [17.9757, 102.6331],
+  Kunming: [24.8801, 102.8329],
+  Lijiang: [26.8550, 100.2278],
+};
+/** The guest's own stops, derived from the SAME stored selections MY TRAVEL
+ *  uses — never a second source of truth. */
+function guestStops() {
+  const anyBkk = S.guests.some((g) => g.journey.bangkok);
+  const anyTrain = S.guests.some((g) => g.journey.train);
+  const stops = [];
+  if (anyBkk || anyTrain) stops.push({ n: 'Bangkok', s: anyTrain ? 'Krung Thep Aphiwat · 20:25' : 'before the wedding' });
+  if (anyTrain) stops.push({ n: 'Nong Khai', s: 'by night train · 06:45', mid: true, seg: 'train' });
+  stops.push({ n: 'Vientiane', s: 'the wedding · 28 February 2027', seg: anyTrain ? 'ground' : 'journey' });
+  if (S.postWedding && S.postWedding.joined) {
+    stops.push({ n: 'Kunming', s: '1 March 2027', mid: true, seg: 'flight' });
+    stops.push({ n: 'Lijiang', s: '4 – 6 March 2027', mid: true, seg: 'journey' });
+    stops.push({ n: 'Bangkok', s: 'return · 6 March 2027', seg: 'flight' });
+  }
+  return stops;
+}
+let GMAP = null;
+/** Real-basemap guest map (OpenStreetMap data via CARTO light tiles). */
+function mountGuestMap() {
+  const el = document.getElementById('gmap');
+  if (!el || !window.L) return;
+  if (GMAP) { try { GMAP.remove(); } catch (e) { /* already detached */ } GMAP = null; }
+  const stops = guestStops();
+  if (stops.length < 2) return;
+  const SEG_STYLE = {
+    train: { color: '#2B2823', weight: 2.2, opacity: .85 },
+    ground: { color: '#805A52', weight: 2, opacity: .85 },
+    flight: { color: '#74070E', weight: 1.6, opacity: .8, dashArray: '3 8' },
+    journey: { color: '#2B2823', weight: 1.8, opacity: .7, dashArray: '1 6' },
+  };
+  GMAP = L.map(el, { scrollWheelZoom: false, attributionControl: true });
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    maxZoom: 12,
+  }).addTo(GMAP);
+  for (let i = 1; i < stops.length; i++) {
+    L.polyline([CITY_LL[stops[i - 1].n], CITY_LL[stops[i].n]], SEG_STYLE[stops[i].seg || 'journey']).addTo(GMAP);
+  }
+  stops.forEach((st, i) => {
+    const m = L.marker(CITY_LL[st.n], { icon: L.divIcon({ className: 'jm-dot' + (st.mid ? ' mid' : ''), iconSize: [11, 11] }) }).addTo(GMAP);
+    if (!(i === stops.length - 1 && st.n === 'Bangkok')) m.bindTooltip(st.n, { permanent: true, direction: 'top', offset: [0, -6], className: 'jm-label' });
+    m.bindPopup('<span class="jm-city">' + esc(st.n) + '</span><span class="jm-meta">' + esc(st.s) + '</span>');
+  });
+  GMAP.fitBounds(L.latLngBounds(stops.map((st) => CITY_LL[st.n])), { padding: [34, 34] });
+}
+/* The real map when the library is available; the schematic SVG only as an
+ * offline fallback (standalone build). */
 function journeyRouteCard() {
+  if (window.L) {
+    if (guestStops().length < 2) return '';
+    return '<div class="journey-route"><div class="label">Your route</div><div class="jr-map" id="gmap" role="region" aria-label="Your journey on the map"></div></div>';
+  }
   const anyBkk = S.guests.some((g) => g.journey.bangkok);
   const anyTrain = S.guests.some((g) => g.journey.train);
   const arr = (S.transfers || []).map((x) => TRANSFERS.find((t) => t.id === x.transferId)).find((t) => t && t.direction === 'arrival');

@@ -18,6 +18,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500&amp;display=swap" rel="stylesheet"/>
 <link rel="preload" as="image" href="assets/images/hero/img-hero.webp" type="image/webp" fetchpriority="high"/>
+<link rel="stylesheet" href="assets/vendor/leaflet/leaflet.css"/>
 <style>
 @font-face { font-family: 'PP Editorial Old'; src: url('assets/fonts/PPEditorialOld-Regular.otf') format('opentype'); font-weight: 400; font-display: swap; }
 @font-face { font-family: 'PP Editorial Old'; src: url('assets/fonts/PPEditorialOld-Ultralight.otf') format('opentype'); font-weight: 200; font-display: swap; }
@@ -375,6 +376,20 @@ body.pv-lock { overflow: hidden; }
 .od-row:last-child { border-bottom: none; }
 .route-map { margin-top: 20px; padding: 16px 10px 6px; border: 1px solid var(--line); background: rgba(255,255,255,.32); }
 .route-map svg { display: block; width: 100%; height: auto; }
+.jmap-sec { padding: 90px 0 70px; }
+.jmap-sec .inner { padding: 0 6vw; }
+.jmap-canvas { width: 100%; height: clamp(420px, 68vh, 620px); margin-top: 44px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--ivory); filter: grayscale(.55) sepia(.14) saturate(.75) contrast(.94); }
+.jmap-cap { padding: 12px 6vw 0; font-size: 11px; letter-spacing: .1em; color: var(--rose); }
+.jm-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--cherry); border: 2px solid #F2ECE1; box-shadow: 0 0 0 1px rgba(116,7,14,.55); }
+.jm-dot.mid { background: var(--ink-s); box-shadow: 0 0 0 1px rgba(33,31,28,.45); }
+.jm-label { background: none; border: none; box-shadow: none; font-family: 'Hanken Grotesk', sans-serif; font-size: 10.5px; letter-spacing: .18em; text-transform: uppercase; color: var(--ink); text-shadow: 0 1px 6px rgba(242,236,225,.9), 0 0 2px rgba(242,236,225,.9); white-space: nowrap; }
+.leaflet-popup-content-wrapper { background: var(--ivory); color: var(--ink); border-radius: 0; border: 1px solid var(--line); box-shadow: 0 10px 30px rgba(33,31,28,.18); }
+.leaflet-popup-content { margin: 12px 16px; font-family: 'Hanken Grotesk', sans-serif; font-size: 12.5px; line-height: 1.55; }
+.leaflet-popup-content .jm-city { font-family: 'PP Editorial Old', serif; font-size: 17px; display: block; margin-bottom: 2px; }
+.leaflet-popup-content .jm-meta { color: var(--rose); font-size: 10px; letter-spacing: .16em; text-transform: uppercase; }
+.leaflet-popup-tip { background: var(--ivory); border: 1px solid var(--line); }
+.leaflet-container { font-family: 'Hanken Grotesk', sans-serif; }
+.leaflet-control-attribution { background: rgba(242,236,225,.85) !important; color: var(--rose); font-size: 9px; }
 .od-row.key .od-what { color: var(--cherry); }
 .od-time { font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: var(--rose); white-space: nowrap; }
 .od-what { font-family: 'PP Editorial Old', serif; font-weight: 400; font-size: clamp(18px, 1.7vw, 22px); line-height: 1.28; }
@@ -912,6 +927,15 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
 <div class="j-note rv">Only your private pickup times and meeting points arrive later in <a href="#portal">your Guest Area</a>.</div>
 </div>
 </section>
+<!-- JOURNEY MAP -->
+<section class="jmap-sec" id="journeymap">
+<div class="inner">
+<div class="eyebrow rv">The Journey Map</div>
+<h2 class="h-big split-h">Six stops,<br/>one journey.</h2>
+</div>
+<div class="jmap-canvas" id="jmap-canvas" role="region" aria-label="Journey map: Bangkok, Nong Khai, Vientiane, Kunming, Lijiang and back to Bangkok"></div>
+<div class="jmap-cap">Connections are drawn as schematic journey lines over the real map · Bangkok → Nong Khai by overnight train · Vientiane → Kunming and Lijiang → Bangkok by flight</div>
+</section>
 <!-- PRACTICAL -->
 <section class="practical" id="travel">
 <div class="inner">
@@ -1062,6 +1086,61 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
 <p>Timing and your table arrive in your Guest Area closer to the day.</p>
 <div class="pv-meta">Sunday, 28 February 2027 · Souphattra Heritage Vientiane<br/>Dress · Black Tie</div>
 </article>
+<script src="assets/vendor/leaflet/leaflet.js"></script>
+<script>
+(function () {
+  var el = document.getElementById('jmap-canvas');
+  if (!el || !window.L) return;
+  /* Verified real-world coordinates — never positioned by eye. */
+  var STOPS = [
+    { n: 'Bangkok',   ll: [13.7563, 100.5018], d: '23 February 2027', t: 'The journey begins' },
+    { n: 'Nong Khai', ll: [17.8783, 102.7413], d: '24 February 2027', t: 'Overnight Train from Bangkok', mid: true },
+    { n: 'Vientiane', ll: [17.9757, 102.6331], d: '25 February 2027', t: 'Across the border · the wedding' },
+    { n: 'Kunming',   ll: [24.8801, 102.8329], d: '1 March 2027', t: 'Flight from Vientiane', mid: true },
+    { n: 'Lijiang',   ll: [26.8550, 100.2278], d: '4 March 2027', t: 'Onward from Kunming', mid: true },
+  ];
+  var SEGS = [
+    { a: 0, b: 1, kind: 'train' },   // Bangkok -> Nong Khai · Overnight Train
+    { a: 1, b: 2, kind: 'ground' },  // Nong Khai -> Vientiane · border transfer
+    { a: 2, b: 3, kind: 'flight' },  // Vientiane -> Kunming · flight
+    { a: 3, b: 4, kind: 'journey' }, // Kunming -> Lijiang
+    { a: 4, b: 0, kind: 'flight' },  // Lijiang -> Bangkok · flight
+  ];
+  var STYLE = {
+    train:   { color: '#2B2823', weight: 2.2, opacity: .85 },
+    ground:  { color: '#805A52', weight: 2, opacity: .85 },
+    flight:  { color: '#74070E', weight: 1.6, opacity: .8, dashArray: '3 8' },
+    journey: { color: '#2B2823', weight: 1.8, opacity: .7, dashArray: '1 6' },
+  };
+  var map = null;
+  function init() {
+    if (map) return;
+    map = L.map(el, { scrollWheelZoom: false, zoomControl: true, attributionControl: true });
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      maxZoom: 12,
+    }).addTo(map);
+    SEGS.forEach(function (sg) {
+      L.polyline([STOPS[sg.a].ll, STOPS[sg.b].ll], STYLE[sg.kind]).addTo(map);
+    });
+    STOPS.forEach(function (st) {
+      var m = L.marker(st.ll, { icon: L.divIcon({ className: 'jm-dot' + (st.mid ? ' mid' : ''), iconSize: [12, 12] }) }).addTo(map);
+      m.bindTooltip(st.n, { permanent: true, direction: st.n === 'Vientiane' ? 'right' : 'top', offset: [st.n === 'Vientiane' ? 12 : 0, st.n === 'Vientiane' ? 0 : -6], className: 'jm-label' });
+      m.bindPopup('<span class="jm-city">' + st.n + '</span><span class="jm-meta">' + st.d + ' \u00B7 ' + st.t + '</span>');
+    });
+    fit();
+    window.addEventListener('resize', function () { map.invalidateSize(); fit(); });
+  }
+  function fit() {
+    map.fitBounds(L.latLngBounds(STOPS.map(function (s) { return s.ll; })), { padding: [46, 46] });
+  }
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(function (es, io) {
+      if (es.some(function (e) { return e.isIntersecting; })) { io.disconnect(); init(); }
+    }, { rootMargin: '400px' }).observe(el);
+  } else { init(); }
+})();
+</script>
 <script src="assets/vendor/gsap.min.js"></script>
 <script src="assets/vendor/ScrollTrigger.min.js"></script>
 <script src="assets/vendor/SplitText.min.js"></script>

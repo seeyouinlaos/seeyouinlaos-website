@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500&amp;display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="../assets/vendor/leaflet/leaflet.css"/>
 <script>
 /* Synchronous invitation-state boot: decided before first paint. Loading and
    open share one stable visual (the invitation itself); closed never paints. */
@@ -187,6 +188,16 @@ input:focus, select:focus, textarea:focus { border-bottom-color: var(--cherry); 
 .journey-route { margin: 26px 0 4px; border: 1px solid var(--line); background: rgba(255,255,255,.32); padding: 14px 12px 6px; }
 .journey-route .label { padding-left: 6px; margin-bottom: 2px; }
 .journey-route svg { display: block; width: 100%; height: auto; }
+.jr-map { height: clamp(280px, 42vh, 380px); margin-top: 8px; filter: grayscale(.55) sepia(.14) saturate(.75) contrast(.94); background: var(--ivory); }
+.jm-dot { width: 11px; height: 11px; border-radius: 50%; background: var(--cherry); border: 2px solid #F2ECE1; box-shadow: 0 0 0 1px rgba(116,7,14,.55); }
+.jm-dot.mid { background: var(--ink-s); box-shadow: 0 0 0 1px rgba(33,31,28,.45); }
+.jm-label { background: none; border: none; box-shadow: none; font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--ink); text-shadow: 0 1px 6px rgba(242,236,225,.9), 0 0 2px rgba(242,236,225,.9); white-space: nowrap; }
+.leaflet-popup-content-wrapper { background: var(--ivory); color: var(--ink); border-radius: 0; border: 1px solid var(--line); }
+.leaflet-popup-content { margin: 11px 14px; font-size: 12px; line-height: 1.5; }
+.leaflet-popup-content .jm-city { font-family: 'Cormorant Garamond', serif; font-size: 16px; display: block; }
+.leaflet-popup-content .jm-meta { color: var(--rose); font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase; }
+.leaflet-popup-tip { background: var(--ivory); border: 1px solid var(--line); }
+.leaflet-control-attribution { background: rgba(242,236,225,.85) !important; color: var(--rose); font-size: 9px; }
 
 /* overlay */
 .pv-backdrop { position: fixed; inset: 0; background: rgba(33,31,28,.55); z-index: 80; }
@@ -718,6 +729,7 @@ html.inv-anim-open .bx-right { animation: bxRight 2.05s cubic-bezier(.45,.05,.45
 <div class="lb-count" aria-live="polite"></div>
 </div>
 
+<script src="../assets/vendor/leaflet/leaflet.js"></script>
 <script type="module" src="./app.mjs"></script>
 </body>
 </html>
