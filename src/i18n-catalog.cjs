@@ -11,6 +11,10 @@ function extract(file) {
   let s = fs.readFileSync(path.join(ROOT, file), 'utf8');
   s = s.replace(/<script[\s\S]*?<\/script>/g, ' ').replace(/<style[\s\S]*?<\/style>/g, ' ');
   const out = new Set();
+  for (const m of s.matchAll(/(?:aria-label|placeholder|title)="([^"]+)"/g)) {
+    let t = m[1].replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim();
+    if (t.length >= 2 && !WHITELIST.test(t) && /[A-Za-z]{2}/.test(t)) out.add(t);
+  }
   for (const m of s.matchAll(/>([^<>]+)</g)) {
     let t = m[1].replace(/&amp;/g, '&').replace(/&nbsp;/g, ' ').replace(/&quot;/g, '"').replace(/&#39;|&rsquo;/g, '’').replace(/&middot;/g, '·').replace(/\s+/g, ' ').trim();
     if (t.length < 2 || WHITELIST.test(t) || !/[A-Za-z]{2}/.test(t)) continue;

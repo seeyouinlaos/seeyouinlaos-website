@@ -375,7 +375,16 @@ document.getElementById('find-btn').addEventListener('click', doFind);
 findInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); doFind(); } });
 
 async function doFind() {
-  const inv = await lookupInvitation(findInput.value);
+  /* §16: an invalid code and a temporary technical failure are DIFFERENT
+   * interaction states — the guest must never mistake one for the other. */
+  let inv = null;
+  try {
+    inv = await lookupInvitation(findInput.value);
+  } catch (e) {
+    findErr.textContent = 'Something did not load correctly just now — this is on our side, not your code. Please try again in a moment; if it continues, Guest Relations will help right away.';
+    findErr.classList.add('show');
+    return;
+  }
   if (!inv) {
     findErr.textContent = 'We could not find that invitation code. Please use the private code from your invitation letter — or write to Guest Relations and we will help right away.';
     findErr.classList.add('show');

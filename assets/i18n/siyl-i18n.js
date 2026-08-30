@@ -977,11 +977,66 @@
   E("04:30 PM", "16:30 Uhr", "16:30 น.", "16:30");
   E("07:30 PM", "19:30 Uhr", "19:30 น.", "19:30");
 
+  /* ---- §8 complete semantic units (register step headings + sentences) ---- */
+  E("Your private journey.", "Eure private Reise.", "การเดินทางส่วนตัวของคุณ", "あなただけの旅。");
+  E("The table is set around you.", "Der Tisch ist um euch herum gedeckt.", "โต๊ะถูกจัดเตรียมไว้รอบตัวคุณ", "食卓は、あなたを囲むように。");
+  E("Your journey, at a glance.", "Eure Reise auf einen Blick.", "การเดินทางของคุณโดยสรุป", "旅を、ひと目で。");
+  E("To Guest Relations.", "An Guest Relations.", "ส่งถึงฝ่ายดูแลแขก", "ゲストリレーションズへ。");
+  E("Who are we welcoming?", "Wen dürfen wir willkommen heißen?", "เราจะได้ต้อนรับใครบ้าง", "どなたをお迎えするのでしょう？");
+  E("Which roads bring you to us?", "Welche Wege führen euch zu uns?", "เส้นทางใดจะพาคุณมาหาเรา", "どの道があなたを届けてくれますか？");
+  E("Getting you here and home.", "Ankommen und heimkehren.", "รับส่งคุณทั้งไปและกลับ", "行きも帰りも、安心して。");
+  E("A slower hour, if you like.", "Eine langsamere Stunde, wenn ihr mögt.", "ชั่วโมงที่ช้าลง หากคุณต้องการ", "お望みなら、ゆったりとした時間を。");
+  E("What you are there for.", "Wofür ihr da seid.", "สิ่งที่คุณมาเพื่อร่วม", "あなたが楽しみに来たもの。");
+  E("Where you wake up.", "Wo ihr aufwacht.", "ที่ที่คุณจะตื่นนอน", "目覚める場所。");
+  E("You come as you belong.", "Ihr kommt, wie ihr dazugehört.", "คุณมาอย่างที่คุณเป็นส่วนหนึ่ง", "そのままのあなたで、家族の一員。");
+  E("Beautiful things are about to happen", "Etwas Schönes ist im Begriff zu geschehen", "สิ่งงดงามกำลังจะเกิดขึ้น", "美しいことが、はじまろうとしています");
+  E("Clear, and kept simple.", "Klar und einfach gehalten.", "ชัดเจนและเรียบง่าย", "明快に、シンプルに。");
+  E("Everything you send is a registration request — Khun Ket and Khun Paddy confirm each arrangement with you personally.",
+    "Alles, was ihr sendet, ist eine Registrierungsanfrage — Khun Ket und Khun Paddy bestätigen jedes Arrangement persönlich mit euch.",
+    "ทุกอย่างที่คุณส่งคือคำขอลงทะเบียน คุณเกตุและคุณแพดดี้จะยืนยันทุกการจัดเตรียมกับคุณเป็นการส่วนตัว",
+    "お送りいただく内容はすべて登録リクエストです。ひとつひとつの手配は、クン・ケットとクン・パディが直接ご確認します。");
+
+  /* ---- §12 accessibility strings ---- */
+  E("Accommodation details", "Details zur Unterkunft", "รายละเอียดที่พัก", "宿泊の詳細");
+  E("Back to the See You In Laos website", "Zurück zur See-You-In-Laos-Webseite", "กลับสู่เว็บไซต์ See You In Laos", "See You In Laosのサイトへ戻る");
+  E("Back to the top", "Zurück nach oben", "กลับขึ้นด้านบน", "ページ上部へ戻る");
+  E("Close invitation", "Einladung schließen", "ปิดบัตรเชิญ", "招待状を閉じる");
+  E("Language", "Sprache", "ภาษา", "言語");
+  E("Next photo", "Nächstes Foto", "ภาพถัดไป", "次の写真");
+  E("Previous photo", "Vorheriges Foto", "ภาพก่อนหน้า", "前の写真");
+  E("Photos", "Fotos", "ภาพถ่าย", "写真");
+  E("Room gallery", "Zimmergalerie", "แกลเลอรีห้องพัก", "客室ギャラリー");
+  E("Site", "Webseite", "เว็บไซต์", "サイト");
+  E("Spa and wellness", "Spa und Wellness", "สปาและเวลเนส", "スパ＆ウェルネス");
+  E("Send your registration", "Eure Registrierung senden", "ส่งการลงทะเบียนของคุณ", "登録を送信");
+  E("Your events", "Eure Momente", "กิจกรรมของคุณ", "ご参加のセレモニー");
+  E("Your guests", "Eure Gäste", "แขกของคุณ", "ゲストの皆さま");
+  E("Your journey, reviewed", "Eure Reise im Überblick", "การเดินทางของคุณโดยละเอียด", "旅の最終確認");
+  E("Your stay, Souphattra Heritage Vientiane", "Euer Aufenthalt, Souphattra Heritage Vientiane", "ที่พักของคุณ สุพัตรา เฮอริเทจ เวียงจันทน์", "ご滞在：スパッタラ・ヘリテージ");
+  E("The alms giving, in Vientiane", "Die Almosengabe in Vientiane", "พิธีตักบาตรในเวียงจันทน์", "ビエンチャンでの托鉢の儀");
+  E("The vow ceremony at Souphattra Heritage Vientiane", "Das Eheversprechen im Souphattra Heritage Vientiane", "พิธีกล่าวคำสัญญาที่สุพัตรา เฮอริเทจ", "スパッタラ・ヘリテージでの誓いの式");
+  E("The wedding dinner at Souphattra Heritage Vientiane", "Das Hochzeitsdinner im Souphattra Heritage Vientiane", "งานเลี้ยงมงคลสมรสที่สุพัตรา เฮอริเทจ", "スパッタラ・ヘリテージでのウェディングディナー");
+  E("Journey map: Bangkok, Nong Khai, Vientiane, Kunming, Lijiang and back to Bangkok", "Reisekarte: Bangkok, Nong Khai, Vientiane, Kunming, Lijiang und zurück nach Bangkok", "แผนที่การเดินทาง กรุงเทพฯ หนองคาย เวียงจันทน์ คุนหมิง ลี่เจียง และกลับกรุงเทพฯ", "旅の地図：バンコク、ノーンカーイ、ビエンチャン、昆明、麗江、そしてバンコクへ");
+  E("Route map: Bangkok to Nong Khai overnight by Special Express No. 25, then across the Mekong to Vientiane", "Routenkarte: Bangkok nach Nong Khai über Nacht mit Special Express No. 25, dann über den Mekong nach Vientiane", "แผนที่เส้นทาง กรุงเทพฯ สู่หนองคายโดยรถด่วนพิเศษขบวนที่ 25 แล้วข้ามแม่น้ำโขงสู่เวียงจันทน์", "ルート図：特急25号で夜行にてノーンカーイへ、メコンを越えビエンチャンへ");
+
+  E("Something did not load correctly just now — this is on our side, not your code. Please try again in a moment; if it continues, Guest Relations will help right away.",
+    "Gerade hat etwas nicht richtig geladen — das liegt an uns, nicht an eurem Code. Bitte versucht es gleich noch einmal; falls es bestehen bleibt, hilft Guest Relations sofort.",
+    "มีบางอย่างโหลดไม่สำเร็จ ซึ่งเป็นที่ระบบของเรา ไม่ใช่รหัสของคุณ โปรดลองอีกครั้งในอีกสักครู่ หากยังไม่ได้ ฝ่ายดูแลแขกพร้อมช่วยทันที",
+    "ただいま読み込みに問題が発生しました——コードではなく、こちら側の問題です。少し置いてもう一度お試しください。続く場合はゲストリレーションズがすぐお手伝いします。");
+
   /* pattern rules for short composed nodes (statuses etc.) */
   var RXP = [
     { re: /^(\d+) of (\d+) available$/, f: { de: function (m) { return m[1] + ' von ' + m[2] + ' verfügbar'; }, th: function (m) { return 'ว่าง ' + m[1] + ' จาก ' + m[2]; }, ja: function (m) { return m[2] + '室中' + m[1] + '室空きあり'; } } },
     { re: /^(\d+) of (\d+) seats remaining$/, f: { de: function (m) { return m[1] + ' von ' + m[2] + ' Plätzen frei'; }, th: function (m) { return 'เหลือที่นั่ง ' + m[1] + ' จาก ' + m[2]; }, ja: function (m) { return m[2] + '席中' + m[1] + '席空き'; } } },
   ];
+  RXP.push({ re: /^(Black Tie|Elegant Resort Wear|Lao Traditional Dress) dress reference (\d+), open larger$/, f: {
+    de: function (m) { return ({'Black Tie':'Black Tie','Elegant Resort Wear':'Elegante Resort-Garderobe','Lao Traditional Dress':'Traditionelle laotische Kleidung'})[m[1]] + ' — Referenz ' + m[2] + ', größer öffnen'; },
+    th: function (m) { return 'ภาพตัวอย่างการแต่งกาย ' + m[2] + ' — แตะเพื่อดูภาพใหญ่'; },
+    ja: function (m) { return '装いの参考写真 ' + m[2] + '——タップで拡大'; } } });
+  RXP.push({ re: /^(.+) photos — swipe, or press Enter for a larger view$/, f: {
+    de: function (m) { return m[1] + ' — Fotos: wischen oder Enter für die große Ansicht'; },
+    th: function (m) { return 'ภาพ ' + m[1] + ' — ปัดดู หรือกด Enter เพื่อดูภาพใหญ่'; },
+    ja: function (m) { return m[1] + 'の写真——スワイプ、またはEnterで拡大表示'; } } });
   RXP.push({ re: /^([\d–-]+) sq\.m\.$/, f: { de: function (m) { return m[1] + ' m²'; }, th: function (m) { return m[1] + ' ตร.ม.'; }, ja: function (m) { return m[1] + '㎡'; } } });
   RXP.push({ re: /^(\d+) adults?(?: · (\d+) child(?:ren)?(?: sharing bedding)?)?$/, f: { de: function (m) { return m[1] + ' Erw.' + (m[2] ? ' · ' + m[2] + ' Kind' : ''); }, th: function (m) { return 'ผู้ใหญ่ ' + m[1] + (m[2] ? ' · เด็ก ' + m[2] : ''); }, ja: function (m) { return '大人' + m[1] + '名' + (m[2] ? '・子ども' + m[2] + '名' : ''); } } });
   RXP.push({ re: /^Up to (\d+) adults?(?: · (\d+) child(?:ren)?)?$/, f: { de: function (m) { return 'Bis zu ' + m[1] + ' Erw.' + (m[2] ? ' · ' + m[2] + ' Kind' : ''); }, th: function (m) { return 'สูงสุดผู้ใหญ่ ' + m[1] + (m[2] ? ' · เด็ก ' + m[2] : ''); }, ja: function (m) { return '最大大人' + m[1] + '名' + (m[2] ? '・子ども' + m[2] + '名' : ''); } } });
@@ -1007,7 +1062,7 @@
   function inCatalog(t) { return window.SIYL_CATALOG && window.SIYL_CATALOG.indexOf(t) > -1; }
   var headOriginals = new Map(); // split heading element -> original innerHTML
 
-  var HEAD_SEL = '.split-h, .h-big, .ask';
+  var HEAD_SEL = '.split-h, .h-big, .ask, main.wrap section.step h2, main.wrap section.step .step-eyebrow';
   function translateHeadings() {
     document.querySelectorAll(HEAD_SEL).forEach(function (el) {
       if (!headOriginals.has(el)) headOriginals.set(el, el.innerHTML);
@@ -1020,7 +1075,15 @@
         var d2 = document.createElement('div'); d2.innerHTML = h; return d2.textContent.trim();
       }) : [text.trim()];
       var idx = LI[lang];
-      var mapped = lines.map(function (ln) { return D[ln] ? D[ln][idx] : ln; });
+      // §8: COMPLETE semantic unit first — the full phrase owns the translation;
+      // per-line mapping is only the legacy fallback for line-pair headings.
+      var full = lines.join(' ').replace(/\s+/g, ' ').trim();
+      var mapped;
+      if (D[full]) {
+        mapped = [D[full][idx]]; // locale renders as one unit, wraps naturally
+      } else {
+        mapped = lines.map(function (ln) { return D[ln] ? D[ln][idx] : ln; });
+      }
       if (mapped.join('') !== lines.join('')) {
         el.innerHTML = mapped.map(function (t) {
           return '<span style="display:inline-block">' + t.replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</span>';
@@ -1082,23 +1145,51 @@
     originals = new Map();
   }
 
+  /* §12: accessibility strings are localized from the same dictionary. */
+  var ATTRS = ['aria-label', 'placeholder', 'title'];
+  var attrOriginals = new Map(); // el -> {attr: original}
+  function translateAttrs(root) {
+    var idx = LI[lang];
+    ATTRS.forEach(function (attr) {
+      (root.querySelectorAll ? root : document).querySelectorAll('[' + attr.replace(':', '\\:') + ']').forEach(function (el) {
+        var store = attrOriginals.get(el) || {};
+        var orig = store[attr] != null ? store[attr] : el.getAttribute(attr);
+        var key = orig.replace(/\u00A0/g, ' ').replace(/\s+/g, ' ').trim();
+        var val = null;
+        if (D[key]) { val = D[key][idx]; }
+        else { for (var r = 0; r < RXP.length; r++) { var mm = key.match(RXP[r].re); if (mm) { val = RXP[r].f[lang](mm); break; } } }
+        if (val != null) {
+          if (store[attr] == null) { store[attr] = orig; attrOriginals.set(el, store); }
+          el.setAttribute(attr, val);
+        }
+      });
+    });
+  }
+  function restoreAttrs() {
+    attrOriginals.forEach(function (store, el) {
+      if (!el.isConnected) return;
+      for (var attr in store) el.setAttribute(attr, store[attr]);
+    });
+    attrOriginals = new Map();
+  }
   function apply() {
     document.documentElement.lang = lang;
-    if (lang === 'en') { restoreAll(); restoreHeadings(); return; }
+    if (lang === 'en') { restoreAll(); restoreHeadings(); restoreAttrs(); return; }
     translateHeadings();
     walk(document.body);
+    translateAttrs(document);
   }
 
   var pending = null;
   var mo = new MutationObserver(function () {
     if (lang === 'en') return;
     if (pending) return;
-    pending = requestAnimationFrame(function () { pending = null; walk(document.body); });
+    pending = requestAnimationFrame(function () { pending = null; walk(document.body); translateAttrs(document); });
   });
 
   function setLang(l) {
     if (LANGS.indexOf(l) < 0 || l === lang) return;
-    restoreAll(); restoreHeadings();
+    restoreAll(); restoreHeadings(); restoreAttrs();
     lang = l;
     try { localStorage.setItem(KEY, l); } catch (e) {}
     apply();

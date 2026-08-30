@@ -261,6 +261,8 @@ gate('P7', 'Dress Code imagery real (24), no visible arrows, in-lightbox tap nav
   const patternOK = [
     /^[\d–-]+ sq\.m\.$/, /^\d+ of \d+ (available|seats remaining)$/, /^\d+ (rooms?|seats?) allocated$/,
     /^(Up to )?\d+ adults?( · \d+ child(ren)?( sharing bedding)?)?$/, /^\d+ details? still needed$/,
+    /^(Black Tie|Elegant Resort Wear|Lao Traditional Dress) dress reference \d+, open larger$/,
+    /^.+ photos — swipe, or press Enter for a larger view$/,
   ];
   const missing = catalog.filter((t) => {
     if (dict.indexOf(JSON.stringify(t).slice(1, -1)) > -1) return false; // dict-covered (escaped form)

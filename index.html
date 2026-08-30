@@ -54,7 +54,11 @@ section { padding: 110px 6vw; position: relative; }
 .wave svg { display: block; width: 100%; height: 100%; }
 
 /* ---------- FIXED CHROME ---------- */
-.menu-btn { position: fixed; top: 40px; right: 44px; z-index: 61; max-width: 46vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; background: none; border: 1px solid transparent; color: var(--ivory); font-family: 'Hanken Grotesk', sans-serif; font-weight: 300; font-size: 12px; letter-spacing: .24em; text-transform: uppercase; padding: 12px 20px; cursor: pointer; transition: background .35s, color .35s, border-color .35s; }
+.top-utility { position: fixed; top: 26px; right: 44px; z-index: 62; display: flex; align-items: center; gap: 10px; }
+.top-utility .lang-sw { background: rgba(43,40,35,.55); padding: 3px; backdrop-filter: blur(4px); }
+.top-utility .lang-sw button { color: var(--ivory); border-color: rgba(242,236,225,.3); }
+.top-utility .lang-sw button.on { color: #e8cf9a; border-color: rgba(201,164,92,.8); }
+.menu-btn { position: static; max-width: 40vw; overflow: hidden; white-space: nowrap; background: none; border: 1px solid transparent; color: var(--ivory); font-family: 'Hanken Grotesk', sans-serif; font-weight: 300; font-size: 12px; letter-spacing: .24em; text-transform: uppercase; padding: 12px 20px; cursor: pointer; transition: background .35s, color .35s, border-color .35s; }
 .menu-btn.solid { background: var(--ink-s); color: var(--ivory); border-color: rgba(242,236,225,.25); }
 .menu-btn:hover { border-color: var(--cherry-photo); }
 .top-btn { position: fixed; bottom: 36px; right: 44px; z-index: 45; background: var(--ink-s); border: 1px solid rgba(242,236,225,.25); color: var(--ivory); font-family: 'Hanken Grotesk', sans-serif; font-weight: 300; font-size: 11px; letter-spacing: .22em; text-transform: uppercase; padding: 12px 18px; cursor: pointer; opacity: 0; pointer-events: none; transform: translateY(10px); transition: opacity .4s, transform .4s, border-color .3s; }
@@ -445,7 +449,7 @@ body.pv-lock { overflow: hidden; }
 .steps li::before { content: counter(st, decimal-leading-zero); font-family: 'PP Editorial Old', serif; font-weight: 200; font-size: 38px; color: var(--rose); }
 .steps h3 { font-family: 'PP Editorial Old', serif; font-weight: 400; font-size: 22px; margin-bottom: 6px; }
 .steps p { font-size: 15.5px; max-width: 560px; }
-.mail-link { color: inherit; text-decoration: none; border-bottom: 1px solid var(--cherry); padding-bottom: 1px; transition: color .3s; }
+.mail-link { color: inherit; text-decoration: none; border-bottom: 1px solid var(--cherry); padding-bottom: 1px; transition: color .3s; overflow-wrap: anywhere; }
 .mail-link:hover { color: var(--cherry); }
 
 /* ---------- FOOTER ---------- */
@@ -499,8 +503,8 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
   .stop.small .im { width: 100%; }
   .hero .badge { top: 82px; font-size: 10.5px; letter-spacing: .12em; }
   .hero .logo { font-size: 26px; }
-  .menu-btn { top: 16px; right: 12px; font-size: 10.5px; letter-spacing: .14em; padding: 9px 12px; }
-  .lang-sw { top: 14px !important; left: 10px !important; }
+  .top-utility { top: 12px; right: 10px; gap: 6px; }
+  .menu-btn { font-size: 10.5px; letter-spacing: .14em; padding: 9px 12px; }
   .lang-sw button { padding: 3px 6px !important; font-size: 9px !important; }
   .menu-overlay { padding: 0 7vw; justify-content: flex-start; padding-top: 84px; overflow-y: auto; }
   .menu-overlay a.m-link { font-size: clamp(23px, 6.6vw, 30px); gap: 12px; line-height: 1.3; width: 100%; }
@@ -514,7 +518,7 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
 </style>
 </head>
 <body>
-<span class="lang-sw" style="position:fixed;top:18px;left:14px;z-index:62;background:var(--ivory);padding:2px" role="group" aria-label="Language"><button type="button" data-lang-btn="en">EN</button><button type="button" data-lang-btn="de">DE</button><button type="button" data-lang-btn="th">TH</button><button type="button" data-lang-btn="ja">JA</button></span><button aria-controls="menuOverlay" aria-expanded="false" class="menu-btn" id="menuBtn">Menu</button>
+<div class="top-utility"><span class="lang-sw" role="group" aria-label="Language"><button type="button" data-lang-btn="en">EN</button><button type="button" data-lang-btn="de">DE</button><button type="button" data-lang-btn="th">TH</button><button type="button" data-lang-btn="ja">JA</button></span><button aria-controls="menuOverlay" aria-expanded="false" class="menu-btn" id="menuBtn">Menu</button></div>
 <button aria-label="Back to the top" class="top-btn" id="topBtn">↑ Top</button>
 <!-- MENU OVERLAY -->
 <div aria-hidden="true" class="menu-overlay" id="menuOverlay">
@@ -1103,8 +1107,8 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
 <p>Timing and your table arrive in your Guest Area closer to the day.</p>
 <div class="pv-meta">Sunday, 28 February 2027 · Souphattra Heritage Vientiane<br/>Dress · Black Tie</div>
 </article>
-<script src="assets/i18n/catalog.js?v=P0L"></script>
-<script src="assets/i18n/siyl-i18n.js?v=P0L"></script>
+<script src="assets/i18n/catalog.js?v=ML1"></script>
+<script src="assets/i18n/siyl-i18n.js?v=ML1"></script>
 <script src="assets/vendor/leaflet/leaflet.js"></script>
 <script>
 (function () {
