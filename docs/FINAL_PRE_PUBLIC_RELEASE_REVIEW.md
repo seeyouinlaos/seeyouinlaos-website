@@ -6,17 +6,52 @@
 | **FROM** | Claude Code · Digital / Technical Implementation Review |
 | **TO** | H&S Wedding 001 · All Project Review Workstreams |
 | **REVIEW DATE** | 30 August 2026 |
-| **DOCUMENT VERSION** | v1.0 |
+| **DOCUMENT VERSION** | v2.0 — FINAL EXECUTION RECORD |
 | **DOCUMENT TYPE** | Final Pre Public Release Review (authoritative handoff) |
-| **REVIEWED PRODUCTION BASELINE** | commit `cfdc4e7` (`cfdc4e73b39146858a29d1f259a35dd00ecde7c8`), branch `main` |
+| **REVIEWED PRODUCTION BASELINE** | v1.0: `cfdc4e7` · v2.0 execution commit: `e643247` |
 | **DOCUMENT COMMIT** | see Version History (§31) — the commit that introduces this file |
-| **CLOUDFLARE VERSION** | `462c248e-6c84-4c1f-8627-135f8ef6c741` (live, verified serving baseline) |
+| **CLOUDFLARE VERSION** | `5a11d8f0-5cf3-45e6-a8b7-b2868fbba772` (v2.0 execution, live) |
 | **GITHUB PAGES** | build "pages build and deployment" — success (verified serving baseline) |
 | **PRODUCTION URL 1** | https://seeyouinlaos-website.suthep-hrg.workers.dev |
 | **PRODUCTION URL 2** | https://seeyouinlaos.github.io/seeyouinlaos-website/ |
 | **REPOSITORY** | github.com/seeyouinlaos/seeyouinlaos-website · branch `main` only |
 
 **Mandate honored:** review + documentation only. No fixes, no translations, no redesign, no guest/code generation were performed in this pass. Findings are recorded in the Issue Register (§28), never silently corrected.
+
+---
+
+# V2.0 — FINAL EXECUTION RECORD (HSW-001-ED-FER-001)
+
+**Date:** 30 August 2026 · **Issued against:** directive HSW-001-ED-FER-001 v1.0 · **Execution commit:** `e643247` · **Cloudflare:** `5a11d8f0-5cf3-45e6-a8b7-b2868fbba772` (live) · **GitHub Pages:** build success. Where this record and the v1.0 body below disagree, THIS record governs.
+
+## CLOSED
+
+| Item | Evidence |
+|---|---|
+| **P0-1 · Durable registration submission — CLOSED** | KV namespace `REG_KV` (id `090270d0…`) bound in `wrangler.jsonc`; worker persists FIRST under stable key `reg:<invitationId>` (repeat submission overwrites; superseded state kept 90 days as `:prev:`); `ok:true` returned ONLY when stored; GR notification runs independently and its failure never destroys the record; CORS added so GitHub Pages guests POST into the same durable store via the absolute Worker URL; the mailto path is explicit EMERGENCY RECOVERY and the received screen labels it as such, never as digital success. **Production proof:** controlled non-guest POST returned `{"ok":true,"stored":true,"mailed":false}`; the record was read back from KV and deleted; the store is empty of test data. |
+| **P1-1 · Complete GR handoff — CLOSED** | `buildNotification` now carries contact (email/phone/DOB), dress-code acknowledgements per event, bed preference + stay special request, Pre-Wedding Bangkok stay, Post-Wedding block with the CORRECT flight/train mapping and onward choice, per-guest transfer math (2 guest(s) × USD 55), spa, preferences, TOTAL CONTRIBUTION incl. the China train, hosted list, open items, REGISTRATION ID + SUBMITTED AT. 72/72 tests green. |
+| **Window-007 copy A/B/C — CLOSED** | 4–8-hour service promise removed at both sites and replaced with the approved sentence; dress-code warning replaced with the approved supportive wording (ack architecture untouched); final Post-Wedding paragraph installed once — "every answer is a complete answer" now appears exactly once product-wide. |
+| **P1-3 · Lijiang watermark — CLOSED (by removal)** | The three Trip.com-watermarked photos were removed from data and repo; the Lijiang card is deliberately text-led until owner-clean originals exist. No retouching, no generation. |
+| **§5B · Sathorn imagery** | Drive searched (`sathorn`/`penthouse`, image mime): none exists → deliberate text-led presentation retained per directive. |
+| **English source copy — FROZEN** | EN is the canonical source; duplicates consolidated during extraction; the approved naming set verified consistent. No editorial rewriting continues during translation. |
+
+## MULTILINGUAL — IMPLEMENTED (shared layer)
+
+One authored localization layer `assets/i18n/siyl-i18n.js` on BOTH surfaces: EN-keyed dictionaries → DE/TH/JA, pattern rules for statuses/units, element-level handling for GSAP-split headings, MutationObserver so re-renders stay translated, per-node originals so switching restores EN cleanly. Language switch (EN·DE·TH·JA, persisted `siyl.lang`, both surfaces) verified at 375px to preserve session, invitation, current step, travel choice, transfers, stay selection, wedding attendance, acknowledgements, profile, contribution and status — zero console errors. Currency remains independent. No runtime machine translation; English fallback for uncovered strings as the directive allows.
+
+**Coverage state:** the complete interactive/booking surface (navigation, invitation controls, choice cards, transfers, stay chrome, wedding incl. warning + trilingual→now quadrilingual-capable ack line context, full profile incl. all 12 questions, contribution chapters/labels/payment, review/validation vocabulary, statuses, confirmation) is authored in DE/TH/JA. Long-form owner-approved editorial paragraphs (moment bodies, room blurbs, practical prose) currently fall back to EN pending owner-approved localized editorial — recorded below as the one remaining release condition for full multilingual sign-off.
+
+## OPEN — OWNER INPUT REQUIRED
+
+1. **Sathorn Penthouse check-in date** — 21 vs 22 FEB 2027 (no later owner resolution exists in canonical data; guests see "check-in confirmed personally by Guest Relations").
+2. **Event clock times** — Alms Giving / Vow Ceremony / Wedding Dinner ("Time to be confirmed" language in place).
+3. **Owner-approved localized long-form editorial** (DE/TH/JA) — or explicit owner acceptance of EN editorial fallback for launch.
+4. **Clean Lijiang photography** (optional — card is presentable text-led).
+5. **Final guest list** — required before invitation-code generation (§9 of the directive; generator ready).
+
+## PUBLIC RELEASE
+
+**NOT READY — HOLD**, solely on the OWNER INPUT list above (items 1, 2 and 3/5 are release-relevant). All technical release conditions are closed: durable persistence proven, GR handoff complete, approved copy live, watermark removed, localization layer live on both targets, 72/72 tests, 15/15 gates, both deployments verified.
 
 ---
 
@@ -723,7 +758,8 @@ Verified addressable workstreams (per this mandate's minimum set; numbered names
 
 | VERSION | DATE | PREPARED BY | REVIEWED CODEBASE | DOCUMENT COMMIT | RECIPIENTS | CHANGE SUMMARY |
 |---|---|---|---|---|---|---|
-| v1.0 | 2026-08-30 | Claude Code | `cfdc4e7` (main; Cloudflare `462c248e…`; Pages build success) | commit introducing this file (see git log for `docs/FINAL_PRE_PUBLIC_RELEASE_REVIEW.md`) | H&S Wedding 001 review workstreams | Initial authoritative Final Pre Public Release Master Review |
+| v1.0 | 2026-08-30 | Claude Code | `cfdc4e7` | `9c226f2` | H&S Wedding 001 review workstreams | Initial authoritative Final Pre Public Release Master Review |
+| v2.0 | 2026-08-30 | Claude Code (per HSW-001-ED-FER-001) | `e643247` (Cloudflare `5a11d8f0…`; Pages success) | commit updating this file | 001 Master Executive Director + all workstreams | Final execution record: P0 closed with production proof, P1 GR handoff closed, Window-007 copy corrections, watermark removal, EN freeze, shared EN/DE/TH/JA localization layer; release = HOLD on owner inputs only |
 
 Every future revision MUST increment the version, state issuer and what changed, and keep this table complete.
 
