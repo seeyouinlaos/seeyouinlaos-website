@@ -291,15 +291,23 @@ export const TRANSFERS = [
  * Journey. Contribution values are NULL wherever no authoritative amount
  * exists yet — the UI renders a quiet pending state, never an invented price. */
 export const BANGKOK_STAYS = [
-  { id: 'mandarin-oriental', name: 'Mandarin Oriental Bangkok', role: 'Primary' },
-  { id: 'salil-riverside', name: 'The Salil Riverside Bangkok', role: 'Alternative' },
+  { id: 'siam-kempinski', name: 'Siam Kempinski Hotel Bangkok', role: 'The journey hotel',
+    room: 'Deluxe Balcony Room with King Bed',
+    nightly: 623.20, nights: 3, total: 1869.60,
+    images: ['../assets/images/journey/kempinski-01.jpg', '../assets/images/journey/kempinski-02.jpg', '../assets/images/journey/kempinski-03.jpg'] },
 ];
 
 export const POST_WEDDING = [
-  { id: 'vte-kmg', type: 'Transportation', label: 'Vientiane → Kunming', when: '1 March 2027', sub: 'By rail · First Class only', contribution: 145 },
-  { id: 'kunming-stay', type: 'Stay', label: 'Wanxiang Yueju Designer Homestay', when: '1 – 4 March 2027', sub: 'Kunming Railway Station MixC Branch', contribution: null },
+  { id: 'vte-kmg', type: 'Transportation', label: 'Vientiane → Kunming', when: '1 March 2027', sub: 'By rail · First Class only', contribution: 145, perGuest: true },
+  { id: 'kunming-stay', type: 'Stay', label: 'Wanxiang Yueju Designer Homestay', when: '1 – 4 March 2027',
+    sub: 'Kunming Railway Station MixC Branch · Solarium Bath Suite or Smart Family Room',
+    nightly: 42.55, nights: 4, contribution: 170.20,
+    images: ['../assets/images/journey/kunming-01.jpg', '../assets/images/journey/kunming-02.jpg', '../assets/images/journey/kunming-03.jpg'] },
   { id: 'kmg-ljg', type: 'Transportation', label: 'Kunming → Lijiang', when: '4 March 2027', sub: 'By rail · First Class only', contribution: null, priceNote: 'Within the China train contribution' },
-  { id: 'lijiang-stay', type: 'Stay', label: 'Luye Baisha · Rizhao Jinshan', when: '4 – 6 March 2027', sub: 'Lijiang', contribution: null },
+  { id: 'lijiang-stay', type: 'Stay', label: 'Luye Baisha · Rizhao Jinshan', when: '4 – 6 March 2027',
+    sub: 'Lijiang · Snow Mountain Viewing Room',
+    nightly: 267.38, nights: 2, contribution: 534.76,
+    images: ['../assets/images/journey/lijiang-01.jpg', '../assets/images/journey/lijiang-02.jpg', '../assets/images/journey/lijiang-03.jpg'] },
   { id: 'ljg-bkk', type: 'Flight', label: 'Lijiang → Bangkok', when: '6 March 2027', sub: 'Return flight', contribution: null },
 ];
 

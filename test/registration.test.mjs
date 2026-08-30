@@ -661,13 +661,17 @@ test('allergy declared without kitchen detail blocks completion (§30)', () => {
 test('post wedding architecture: canonical China train price, rest pending, no China vehicle', () => {
   assert.equal(POST_WEDDING.length, 5);
   const cn = POST_WEDDING.find((c) => c.id === 'vte-kmg');
-  assert.equal(cn.contribution, 145);                       // China train · owner final
+  assert.equal(cn.contribution, 145);                       // China train · owner final override
+  assert.equal(cn.perGuest, true);
   assert.ok(/First Class only/.test(cn.sub));               // only class presented
-  for (const c of POST_WEDDING) if (c.id !== 'vte-kmg') assert.equal(c.contribution, null);
+  const km = POST_WEDDING.find((c) => c.id === 'kunming-stay');
+  assert.equal(km.contribution, 170.20); assert.equal(km.nightly, 42.55); assert.equal(km.nights, 4);
+  const lj = POST_WEDDING.find((c) => c.id === 'lijiang-stay');
+  assert.equal(lj.contribution, 534.76); assert.equal(lj.nightly, 267.38); assert.equal(lj.nights, 2);
+  for (const c of POST_WEDDING) if (['vte-kmg', 'kunming-stay', 'lijiang-stay'].includes(c.id) === false) assert.equal(c.contribution, null);
   const flat = JSON.stringify(POST_WEDDING).toLowerCase();
   assert.ok(!flat.includes('car'), 'no vehicle assumption in China (§14)');
-  assert.equal(BANGKOK_STAYS.length, 2);
-  assert.ok(BANGKOK_STAYS.every((h) => !('contributionPerGuest' in h) && !('price' in h)));
+  assert.equal(BANGKOK_STAYS.length, 1); // the real journey hotel (Siam Kempinski)
 });
 
 test('registration payload accepts bangkokStay and postWedding without new errors', () => {
@@ -684,8 +688,19 @@ test('event naming: Wedding Dinner without Reception (§25)', () => {
 });
 
 
-test('post wedding total: canonical value × guests, zero when not joined', async () => {
+test('post wedding total: per-guest train × guests plus room-total stays, zero when not joined', async () => {
   const { postWeddingTotal } = await import('../register/logic.mjs');
-  assert.equal(postWeddingTotal(POST_WEDDING, true, 2), 290);  // 2 × USD 145
+  // 2 × USD 145 China train + USD 170.20 Kunming + USD 534.76 Lijiang
+  assert.ok(Math.abs(postWeddingTotal(POST_WEDDING, true, 2) - 994.96) < 0.005);
   assert.equal(postWeddingTotal(POST_WEDDING, false, 2), 0);
+});
+
+test('Bangkok journey hotel: real Master cost, canonical single source', () => {
+  assert.equal(BANGKOK_STAYS.length, 1);
+  const h = BANGKOK_STAYS[0];
+  assert.equal(h.id, 'siam-kempinski');
+  assert.equal(h.nightly, 623.20);
+  assert.equal(h.nights, 3);
+  assert.equal(h.total, 1869.60);
+  assert.ok(/Deluxe Balcony Room/.test(h.room));
 });

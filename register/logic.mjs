@@ -59,7 +59,8 @@ export function journeyTotal(accommodation, occupantGuestIds, train, riderCount,
 /** Post Wedding Journey contribution: canonical component values × guests. */
 export function postWeddingTotal(components, joined, guestCount) {
   if (!joined) return 0;
-  return (components || []).reduce((a, c) => a + (c.contribution || 0), 0) * Math.max(guestCount || 0, 1);
+  const g = Math.max(guestCount || 0, 1);
+  return (components || []).reduce((a, c) => a + (c.contribution || 0) * (c.perGuest ? g : 1), 0);
 }
 
 export function money(n) {
