@@ -154,7 +154,6 @@ function renderStep(i) {
   if (name === 'home') renderHome();
   if (name === 'party') renderParty();
   if (name === 'journey') renderJourney();
-  if (name === 'travel') renderTravelStep();
   if (name === 'events') renderEvents();
   if (name === 'stay') renderStay();
   if (name === 'spa') renderSpa();
@@ -362,7 +361,7 @@ function adoptInvitation(inv) {
 
 /* ---------------- MY JOURNEY · private member area ---------------- */
 const PRIVNAV = [
-  ['home', 'My Journey'], ['journey', 'My Travel'], ['travel', 'My Transfers'], ['stay', 'My Stay'],
+  ['home', 'My Journey'], ['journey', 'My Travel'], ['stay', 'My Stay'],
   ['events', 'My Wedding'], ['each', 'My Profile'], ['cost', 'My Contribution'],
 ];
 function renderPrivnav() {
@@ -453,7 +452,7 @@ function renderHome() {
       ((S.transfers || []).length ? ' · ' + S.transfers.length + ' transfer' + (S.transfers.length > 1 ? 's' : '') + ' · ' + money(trf) : ''),
       (riders.length || (S.transfers || []).length) ? 'REQUESTED' : null) +
     card('events', 'My Wedding', 'The wedding days',
-      'Sunday, 28 February 2027 · Souphattra Heritage · Black Tie',
+      'Sunday, 28 February 2027 · Souphattra Heritage Vientiane',
       anyEvents ? 'REGISTERED' : 'OPEN') +
     card('each', 'My Profile', detailsMissing ? detailsMissing + ' detail' + (detailsMissing > 1 ? 's' : '') + ' still needed' : 'Personal details',
       'Contact, dietary needs and the small preferences that shape your stay',
@@ -527,18 +526,12 @@ function renderJourney() {
     field: 'journey',
   }) + (anyTrain ? trainDetailBlock() : '') +
     bangkokStayBlock() +
+    renderTravel() +
     postWeddingBlock();
   wireModulePicker(box, 'journey');
   wireTrainDetails(box);
   wireBangkokStay(box);
   wirePostWedding(box);
-}
-
-/* MY TRANSFERS (owner final nav): its own subsection, same single transfer
- * source of truth — the contextual arrival block simply renders here. */
-function renderTravelStep() {
-  const box = document.getElementById('travel-box');
-  box.innerHTML = renderTravel();
   wireTransfers(box);
 }
 
@@ -616,7 +609,7 @@ function trainDetailBlock() {
       BERTH_PREFS.map((o) => '<option' + ((g.berth || 'No preference') === o ? ' selected' : '') + '>' + o + '</option>').join('') + '</select></div>').join('') +
     '<p class="note">We will do our best to arrange your preferred berth. Final allocation depends on railway availability.</p>' +
     '<div class="field"><label>Anything that matters for the train journey (mobility, luggage, comfort)</label><textarea id="train-note">' + esc(S.trainNote || '') + '</textarea></div>' +
-    '<p class="note">You arrive at <strong>Nong Khai Railway Station</strong>; your onward journey to Vientiane is chosen under My Transfers. Route reference: <a href="' + TRAIN_REFERENCE + '" rel="noopener" target="_blank">State Railway of Thailand</a> — for reading only, no booking needed.</p>' +
+    '<p class="note">You arrive at <strong>Nong Khai Railway Station</strong>; your onward journey to Vientiane is chosen below under your arrival. Route reference: <a href="' + TRAIN_REFERENCE + '" rel="noopener" target="_blank">State Railway of Thailand</a> — for reading only, no booking needed.</p>' +
     '</div>';
 }
 function wireTrainDetails(box) {
@@ -699,11 +692,17 @@ function wireModulePicker(box, field) {
     if (f === 'events' && modId === 'ceremony') return; // mandatory — locked in the UI and here
     const join = el.value === 'yes';
     const wl = el.value === 'waitlist';
-    const apply = (g) => { g[f][modId] = join || wl; if (wl) g[f][modId + 'Waitlist'] = true; };
+    const apply = (g) => {
+      g[f][modId] = join || wl; if (wl) g[f][modId + 'Waitlist'] = true;
+      // §3 one journey truth: the overnight train and an independent arrival
+      // describe the same segment — selecting one clears the other.
+      if (f === 'journey' && modId === 'train' && (join || wl)) g.journey.independent = false;
+      if (f === 'journey' && modId === 'independent' && join) g.journey.train = false;
+    };
     if (who === 'party') S.guests.forEach(apply);
     else { const g = S.guests.find((x) => x.guestId === who); if (g) apply(g); }
     saveDraft(); renderSummary();
-    if ((f === 'journey' && (modId === 'train' || modId === 'bangkok')) || f === 'events') renderStep(cur);
+    if (f === 'journey' || f === 'events') renderStep(cur);
   }));
 }
 
@@ -1255,10 +1254,10 @@ function renderCost() {
   const hosted = [];
   hosted.push('Personal airport welcome and arrival coordination');
   hosted.push('Welcome drink on arrival');
-  hosted.push('Hosted breakfast on every morning of your stay');
-  hosted.push('Alms Giving Ceremony');
+  hosted.push('Breakfast on both mornings');
+  hosted.push('Alms Giving');
   hosted.push('Vow Ceremony');
-  hosted.push('Sunset drinks, cake reception and the Wedding Dinner');
+  hosted.push('Sunset Drinks &amp; Wedding Dinner');
   hosted.push('Two hour beverage package');
   if (acc && !neutral) hosted.push('<span class="serif-it">' + esc(acc.name) + '</span> · night two · hosted by<span class="hs">Haruthai&nbsp;&amp;&nbsp;Suthep</span>');
   hosted.push('Departure coordination within the wedding programme');
@@ -1280,8 +1279,8 @@ function renderReview() {
     '<div class="rv-sec"><div class="rv-head"><span class="t">' + t + '</span><button type="button" class="edit" data-goto="' + step + '">Edit</button></div><dl>' +
     rows.map((r) => '<div><dt>' + r[0] + '</dt><dd>' + r[1] + '</dd></div>').join('') + '</dl></div>';
   const journeyLine = (g) => [
-    g.journey.bangkok && 'Bangkok Journey', g.journey.train && 'Overnight Train — seat REQUESTED',
-    g.journey.independent && 'Independent arrival'].filter(Boolean).join(' · ') || '—';
+    g.journey.bangkok && 'Bangkok Journey', g.journey.train && 'Overnight Train · seat REQUESTED',
+    !g.journey.train && g.journey.independent && 'Independent arrival'].filter(Boolean).join(' · ') || '—';
   const eventLine = (g) => EVENTS.filter((e) => g.events[e.id]).map((e) => e.label).join(' · ') || 'None';
   let html = '';
   html += '<p class="home-hello" style="margin-bottom:20px">' + esc(S.invitation.partyName) + ' · Vientiane · February 2027</p>';
@@ -1290,7 +1289,19 @@ function renderReview() {
     ['Members', S.invitation.guests.map((g) => esc(g.fullName)).join(' · ')],
     ['Lead guest', esc((S.invitation.guests.find((g) => g.guestId === S.invitation.partyLead) || {}).fullName || '—')],
   ]);
-  html += sec('Your Journey', idx('journey'), S.guests.map((g) => [esc(g.preferredName), esc(journeyLine(g))]));
+  {
+    const jRiders = S.guests.filter((g) => g.journey.train);
+    const anyBkk = S.guests.some((g) => g.journey.bangkok);
+    const bkkSel = S.bangkokStay && S.bangkokStay.property ? BANGKOK_STAYS.find((x) => x.id === S.bangkokStay.property) : null;
+    const arrSel = (S.transfers || []).map((x) => TRANSFERS.find((t) => t.id === x.transferId)).filter((t) => t && t.direction === 'arrival');
+    html += sec('Your Journey', idx('journey'), [
+      ['Before the wedding', anyBkk ? 'Bangkok Journey' + (bkkSel ? ' · ' + esc(bkkSel.name) + ' · REQUESTED' : '') : 'Straight to the wedding'],
+      ['Journey to Vientiane', jRiders.length
+        ? 'Overnight Train · ' + jRiders.length + ' seat' + (jRiders.length > 1 ? 's' : '') + (jRiders.length < S.guests.length ? ' · ' + jRiders.map((g) => esc(g.preferredName)).join(' & ') : '') + ' · REQUESTED'
+        : 'Own arrangement — Guest Relations can assist'],
+      ['Arrival in Vientiane', arrSel.length ? arrSel.map((t) => esc(t.name)).join(' · ') + ' · REQUESTED' : 'Own arrangement — Guest Relations can assist'],
+    ]);
+  }
   const riders = S.guests.filter((g) => g.journey.train);
   html += sec('Overnight Train', idx('journey'), riders.length ? [
     ['Joined', riders.map((g) => esc(g.preferredName) + (g.berth ? ' · ' + esc(g.berth) : '')).join('<br/>')],
@@ -1322,7 +1333,7 @@ function renderReview() {
   const trv = S.arrival.shared !== false
     ? [['Together', esc([S.arrival.date, S.arrival.time, S.arrival.ref].filter(Boolean).join(' · ') || '—') + (S.arrival.pickupRequested ? ' · pickup REQUESTED' : '')]]
     : S.guests.map((g) => { const a = S.arrivalByGuest[g.guestId] || {}; return [esc(g.preferredName), esc([a.date, a.time, a.ref].filter(Boolean).join(' · ') || '—') + (a.pickupRequested ? ' · pickup REQUESTED' : '')]; });
-  html += sec('Arrival & Departure', idx('travel'), trv.concat([
+  html += sec('Arrival & Departure', idx('journey'), trv.concat([
     ['Departure', esc([S.departure.date, S.departure.time].filter(Boolean).join(' · ') || '—') + (S.departure.transferRequested ? ' · transfer REQUESTED' : '')],
   ]));
   if (S.bangkokStay && S.bangkokStay.property) {
@@ -1335,7 +1346,7 @@ function renderReview() {
   }
   if (S.postWedding && S.postWedding.joined) html += sec('The Post Wedding Journey', idx('journey'),
     POST_WEDDING.map((c) => [esc(c.type), esc(c.label) + ' · ' + esc(c.when) + ' · ' + (c.contribution != null ? money(c.contribution) : 'contribution follows with Guest Relations')]));
-  html += sec('Your Transfers', idx('travel'), (S.transfers || []).length
+  html += sec('Your Transfers', idx('journey'), (S.transfers || []).length
     ? S.transfers.map((s) => {
         const t = TRANSFERS.find((x) => x.id === s.transferId) || {};
         const d = s.details || {};
@@ -1357,13 +1368,11 @@ function renderReview() {
   jcRows.push(['Total contribution', money(journeyTotal(acc, occ, TRAIN, jcRiders, TRANSFERS, S.transfers))]);
   html += sec('Your Contribution', idx('cost'), jcRows);
   html += sec('Each of You', idx('each'), S.guests.map((g) => {
-    const hasAllergy = g.allergy === 'yes';
     const detail = (g.allergyDetail || '').trim();
-    const parts = [];
-    if (!(hasAllergy && g.diet === 'No restrictions')) parts.push(esc(g.diet));
-    if (hasAllergy) parts.push(detail
-      ? 'Allergy — ' + esc(detail)
-      : '<span class="ack-missing">Allergy noted — please add the detail for the kitchens under My Profile</span>');
+    const parts = ['Dietary preference · ' + esc(g.diet)];
+    parts.push(g.allergy === 'yes'
+      ? (detail ? 'Allergy · ' + esc(detail) : '<span class="ack-missing">Allergy · please add the detail for the kitchens under My Profile</span>')
+      : 'Allergy · None reported');
     if (g.phone) parts.push('Phone ' + esc(g.phone));
     if (g.dob) parts.push('Born ' + esc(g.dob));
     if (g.spa && g.spa.requested) parts.push('spa REQUESTED');

@@ -403,7 +403,7 @@ test('each wedding moment needs its OWN dress code acknowledgement (§21)', () =
   assert.ok(!validateRegistration(reg, ctx(inv)).some((e) => e.includes('Alms')));
   // the mandatory ceremony still needs its own explicit acknowledgement
   reg.dressAck = { alms: true, ceremony: false, dinner: true };
-  assert.ok(validateRegistration(reg, ctx(inv)).some((e) => e.includes('dress code for the Wedding Ceremony')));
+  assert.ok(validateRegistration(reg, ctx(inv)).some((e) => e.includes('dress code for the Vow Ceremony')));
 });
 
 test('valid couple registration passes', () => {
