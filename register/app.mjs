@@ -31,6 +31,9 @@ const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const RATES_LIVE = PUBLICATION.rates === 'APPROVED';
 const attendingCount = () => S.guests.filter((g) => g.attending !== false).length;
 const pwTotal = () => postWeddingTotal(POST_WEDDING, S.postWedding && S.postWedding.joined, attendingCount());
+function departureSelections() {
+  return (S.transfers || []).map((x) => TRANSFERS.find((t) => t.id === x.transferId)).filter((t) => t && t.direction === 'departure');
+}
 function bkkNights() {
   const b = S.bangkokStay || {};
   if (!(b.from && b.to)) return 0;
@@ -57,8 +60,11 @@ function itinerarySteps() {
       : { d: 'Before the wedding', t: 'The Bangkok Journey', s: 'Shared days in Bangkok · Pre-Wedding' });
   }
   if (riders.length) {
-    steps.push({ d: TRAIN.date, t: 'Bangkok → Nong Khai', s: 'Overnight Train · Special Express No. 25 · ' + TRAIN.times + ' · First Class Sleeper · ' + riders.length + ' seat' + (riders.length > 1 ? 's' : '') + ' · REQUESTED' });
-    steps.push({ d: '27 FEB 2027', t: 'Nong Khai → Vientiane', s: arr ? arr.name + ' · REQUESTED' : 'Own arrangement — Guest Relations can assist' });
+    steps.push({ d: TRAIN.date + ' · 20:25', t: 'Bangkok → Nong Khai', s: 'Overnight Train · Special Express No. 25 · First Class Sleeper · ' + riders.length + ' seat' + (riders.length > 1 ? 's' : '') + ' · REQUESTED' });
+    steps.push({ d: '27 FEB 2027 · 06:45', t: 'Arrive Nong Khai', s: 'Nong Khai Railway Station' });
+    steps.push({ d: '27 FEB 2027', t: 'Nong Khai → Vientiane', s: arr
+      ? 'Coordinated Ground Transfer · ' + money(55) + ' per guest · Guest Relations confirms the exact pickup details · REQUESTED'
+      : 'Own arrangement — Guest Relations can assist' });
   } else {
     steps.push({ d: 'Before the wedding', t: 'Arriving independently in Vientiane', s: 'Fly or travel on your own schedule; we meet you there' });
   }
@@ -73,7 +79,10 @@ function itinerarySteps() {
     const ow = S.postWedding.onward;
     steps.push({ d: '06 MAR 2027', t: 'Your onward journey', s: ow === 'return' ? 'Return to Bangkok with us · Guest Relations confirms' : ow === 'own' ? 'Arranged independently' : ow === 'gr' ? 'Guest Relations support requested' : 'Choose under My Travel' });
   } else {
-    steps.push({ d: '01 MAR 2027', t: 'Departure', s: 'Coordinated within the wedding programme' });
+    const dep = departureSelections();
+    steps.push({ d: '01 MAR 2027', t: 'Your departure', s: dep.length
+      ? dep.map((t) => t.name).join(' · ') + ' · REQUESTED'
+      : 'Follows your onward itinerary · to finalize with Guest Relations' });
   }
   return steps;
 }
@@ -1360,15 +1369,22 @@ function scrollToRoom() {
 }
 function selectedTransfer(id) { return (S.transfers || []).find((s) => s.transferId === id); }
 function renderTransfers(trainy) {
-  const primaryIds = trainy ? ['nongkhai-vte', 'shuttle-shared'] : ['shuttle-shared'];
+  const riders = S.guests.filter((g) => g.journey.train).length;
+  /* v1.5: the shared airport/station shuttle is a DIFFERENT arrival product —
+   * it never appears inside an overnight-train journey. */
+  const pool = TRANSFERS.filter((t) => !(trainy && t.id === 'shuttle-shared'));
+  const arrivals = pool.filter((t) => t.direction === 'arrival');
+  const departures = pool.filter((t) => t.direction === 'departure');
+  const primaryIds = trainy ? ['nongkhai-vte'] : ['shuttle-shared'];
   const isPrimary = (t) => primaryIds.includes(t.id) || (!trainy && t.group === 'Airport');
   const card = (t) => {
     const sel = selectedTransfer(t.id);
     const free = !t.pricePerUnit;
     return '<article class="trf-card' + (sel ? ' sel' : '') + '" data-trf="' + t.id + '">' +
+      (t.date ? '<div class="when">' + esc(t.date) + '</div>' : '') +
       '<div class="label">' + esc(t.group) + '</div>' +
       '<h4>' + esc(t.name) + '</h4>' +
-      (free ? '' : '<div class="trf-price">' + money(t.pricePerUnit) + (t.perGuest ? ' · per guest' : ' · per vehicle') + '</div>') +
+      (free ? '' : '<div class="trf-price">' + money(t.pricePerUnit) + (t.perGuest ? ' per guest' + (riders > 1 ? ' · total ' + money(t.pricePerUnit * riders) : '') : ' · per vehicle') + '</div>') +
       '<p class="note">' + esc(t.blurb) + '</p>' +
       (t.included ? '<p class="note trf-incl">' + esc(t.included) + '</p>' : '') +
       '<div class="acc-actions">' +
@@ -1380,14 +1396,23 @@ function renderTransfers(trainy) {
       '</article>';
   };
   // contextual order (§8): the train guest sees the Nong Khai arrival first
-  const primary = primaryIds.map((id) => TRANSFERS.find((t) => t.id === id)).filter(Boolean)
-    .concat(TRANSFERS.filter((t) => isPrimary(t) && !primaryIds.includes(t.id)));
-  const secondary = TRANSFERS.filter((t) => !isPrimary(t));
+  const primary = primaryIds.map((id) => arrivals.find((t) => t.id === id)).filter(Boolean)
+    .concat(arrivals.filter((t) => isPrimary(t) && !primaryIds.includes(t.id)));
+  const secondary = arrivals.filter((t) => !isPrimary(t));
   const moreOpen = secondary.some((t) => selectedTransfer(t.id));
+  const depSel = departures.some((t) => selectedTransfer(t.id));
   return '<div class="trf" id="trf">' +
+    (trainy ? '<div class="when" style="margin-bottom:8px">27 FEB 2027 · 06:45 · Arrival Nong Khai</div>' : '') +
     '<p class="note" style="margin-bottom:6px">Choose your service — everything else is arranged for you. Guest Relations confirms every journey personally; private cars are charged per vehicle, never per guest.</p>' +
     primary.map(card).join('') +
     (secondary.length ? '<details class="trf-more"' + (moreOpen ? ' open' : '') + '><summary>Need something different?</summary>' + secondary.map(card).join('') + '</details>' : '') +
+    '</div>' +
+    /* v1.5: departure is its own decision, following the actual onward itinerary */
+    '<div class="trf" id="trf-dep" style="margin-top:30px">' +
+    '<h3>Your departure</h3>' +
+    '<p class="note" style="margin-bottom:6px">Departure follows your actual onward itinerary' + (depSel ? '.' : ' — until then it stays with Guest Relations.') + '</p>' +
+    (depSel ? '' : '<div class="acc-avail" style="border-top:none;padding:2px 0 10px">To finalize with Guest Relations</div>') +
+    '<details class="trf-more"' + (depSel ? ' open' : '') + '><summary>Departure services</summary>' + departures.map(card).join('') + '</details>' +
     '</div>';
 }
 function wireTransfers(box) {
@@ -1640,6 +1665,8 @@ function renderCost() {
     const ow = S.postWedding.onward;
     if (ow === 'return' || ow === 'gr' || !ow) open.push(['06 MAR 2027', 'Your onward journey' + (ow === 'return' ? ' · Return to Bangkok with us' : ow === 'gr' ? ' · Guest Relations support' : ' · choose under My Travel')]);
     html += chapter('03', 'Post-Wedding Journey', 'Optional · After the wedding') + (post || line('', 'No guest-payable Post-Wedding items', ''));
+  } else if (!departureSelections().length) {
+    open.push(['01 MAR 2027', 'Your departure · follows your onward itinerary']);
   }
 
   html += '<div class="ctotal"><span class="l">Total contribution</span><span class="r js-total">' + money(total) + '</span></div>';
@@ -1738,7 +1765,9 @@ function renderReview() {
     ? [['Together', esc([S.arrival.date, S.arrival.time, S.arrival.ref].filter(Boolean).join(' · ') || '—') + (S.arrival.pickupRequested ? ' · pickup REQUESTED' : '')]]
     : S.guests.map((g) => { const a = S.arrivalByGuest[g.guestId] || {}; return [esc(g.preferredName), esc([a.date, a.time, a.ref].filter(Boolean).join(' · ') || '—') + (a.pickupRequested ? ' · pickup REQUESTED' : '')]; });
   html += sec('Arrival & Departure', idx('journey'), trv.concat([
-    ['Departure', esc([S.departure.date, S.departure.time].filter(Boolean).join(' · ') || '—') + (S.departure.transferRequested ? ' · transfer REQUESTED' : '')],
+    ['Departure', departureSelections().length
+      ? departureSelections().map((t) => esc(t.name)).join(' · ') + ' · REQUESTED'
+      : 'Follows your onward itinerary · to finalize with Guest Relations'],
   ]));
   if (S.bangkokStay && S.bangkokStay.property) {
     const bh = BANGKOK_STAYS.find((x) => x.id === S.bangkokStay.property);
@@ -1882,6 +1911,8 @@ function showReceived() {
       POST_WEDDING.filter((c) => !c.onward && c.contribution == null).forEach((c) => open.push(c.date + ' · ' + c.label + ' · ' + c.type));
       const ow = S.postWedding.onward;
       if (ow !== 'own') open.push('06 MAR 2027 · Your onward journey' + (ow === 'return' ? ' · return to Bangkok' : ow === 'gr' ? ' · Guest Relations support' : ''));
+    } else if (!departureSelections().length) {
+      open.push('01 MAR 2027 · Your departure · follows your onward itinerary');
     }
     rs.innerHTML =
       '<div class="cch-label">Your journey is with Guest Relations</div>' +
