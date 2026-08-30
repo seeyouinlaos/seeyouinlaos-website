@@ -351,7 +351,7 @@ export function buildNotification(reg, ctx) {
     out.push(L('  Attendance:', g.attending === false ? 'NOT ATTENDING' : 'ATTENDING'));
     const j = g.journey || {}, e = g.events || {};
     out.push(L('  Journey:', [j.bangkok && 'Bangkok Journey', j.train && 'Overnight Train (seat requested)', j.independent && 'Independent arrival'].filter(Boolean).join('; ')));
-    out.push(L('  Events:', ['alms', 'ceremony', 'dinner'].filter((k) => e[k]).join('; ')));
+    out.push(L('  Events:', ['alms', 'ceremony', 'dinner'].filter((k) => e[k]).join('; ') + ' (Alms 05:00 AM · Vow 04:30 PM · Dinner 07:30 PM)'));
     out.push(L('  Dress Codes Acknowledged:', ['alms', 'ceremony', 'dinner'].filter((k) => e[k]).map((k) => k + ': ' + ((reg.dressAck || {})[k] ? 'YES' : 'NO')).join('; ')));
     out.push(L('  Email:', g.email));
     out.push(L('  Phone:', g.phone));
@@ -414,8 +414,12 @@ export function buildNotification(reg, ctx) {
   out.push('');
   out.push('PRE-WEDDING BANGKOK STAY');
   if (reg.bangkokStay && reg.bangkokStay.property) {
-    out.push('Requested: Elegant 6BR Sathorn Penthouse — dates confirmed personally by Guest Relations (known 21/22 FEB decision)');
-    out.push('Status: REQUESTED / UNDER REVIEW');
+    const nAtt = Math.max((reg.guests || []).filter((g) => g.attending !== false).length, 1);
+    out.push('Requested: Elegant 6BR Sathorn Penthouse · 21–24 FEB 2027 · 3 nights (OWNER DECISION CLOSED)');
+    out.push('Arrival 21 FEB: personal pickup by Haruthai — HOSTED');
+    out.push('Contribution 21–22 FEB (first night): ' + nAtt + ' × ' + money(368.90 / nAtt) + ' = ' + money(368.90));
+    out.push('22–24 FEB: HOSTED by Haruthai & Suthep');
+    out.push('Status: ARRANGED WITH GUEST RELATIONS');
   } else {
     out.push('Requested: NO');
   }
@@ -467,7 +471,9 @@ export function buildNotification(reg, ctx) {
   {
     const attendees = Math.max((reg.guests || []).filter((g) => g.attending !== false).length, 1);
     const pw = (reg.postWedding && reg.postWedding.joined) ? postWeddingTotal(ctx.postWedding || [], true, attendees) : 0;
-    out.push(L('TOTAL CONTRIBUTION:', money(journeyTotal(acc, occ, train, trainRiders, transferCatalog, selectedTransfers, trainRiders) + pw)));
+    const bkk = (reg.bangkokStay && reg.bangkokStay.property) ? 368.90 : 0;
+    if (bkk) out.push(L('Bangkok first night:', money(bkk)));
+    out.push(L('TOTAL CONTRIBUTION:', money(journeyTotal(acc, occ, train, trainRiders, transferCatalog, selectedTransfers, trainRiders) + pw + bkk)));
   }
   out.push('');
   out.push('HOSTED FOR THE GUESTS (never charged)');
@@ -475,7 +481,6 @@ export function buildNotification(reg, ctx) {
   out.push('');
   out.push('TO FINALIZE WITH GUEST RELATIONS');
   const openItems = [];
-  if (reg.bangkokStay && reg.bangkokStay.property) openItems.push('Sathorn Penthouse dates (21/22 FEB owner decision)');
   if (reg.postWedding && reg.postWedding.joined) {
     openItems.push('VTE→Kunming flight · Kunming stay · Lijiang stay arrangements');
     if (reg.postWedding.onward !== 'own') openItems.push('Onward journey 06 MAR');

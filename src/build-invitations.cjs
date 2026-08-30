@@ -27,6 +27,21 @@ async function main() {
   const { tokenId, encryptInvitation } = await import('../register/crypto.mjs');
   const list = JSON.parse(fs.readFileSync(LIST, 'utf8'));
 
+  /* DYNAMIC GUEST MASTER (HSW-001 Owner Final Inputs §4):
+   * party.status: ACTIVE (default) | CANCELLED | REVOKED — non-ACTIVE parties
+   *   are excluded from the deployed bundle (their code stops resolving);
+   *   their token stays in the register for audit, and no other invitation
+   *   changes (tokens are reused, so links/codes remain stable).
+   * guest.status: ACTIVE (default) | CANCELLED | NO_SHOW (extensible) — the
+   *   guest ships in the payload with the status; the client treats
+   *   non-ACTIVE guests as not attending by default while history and party
+   *   identity stay intact. Adding a party/guest = edit the private list and
+   *   re-run this builder (idempotent; new parties get fresh tokens). */
+  const activeParties = list.filter((p) => (p.status || 'ACTIVE') === 'ACTIVE');
+  const skipped = list.length - activeParties.length;
+  if (skipped) console.log('excluded (CANCELLED/REVOKED parties):', skipped);
+
+
   // token register: reuse existing tokens, create missing ones
   const tokens = {};
   if (fs.existsSync(TOKENS)) {
@@ -39,19 +54,24 @@ async function main() {
   const newToken = () => [...crypto.randomBytes(16)].map((b) => ALPHABET[b % ALPHABET.length]).join('');
 
   const records = [];
-  const csv = ['invitationId,partyName,token,link'];
+  const csv = ['invitationId,partyName,token,link,status'];
   for (const inv of list) {
+    // token continuity for EVERY party (audit + possible reissue) — stable
+    // codes/links unless that specific invitation is revoked.
     const token = tokens[inv.invitationId] || newToken();
     tokens[inv.invitationId] = token;
+    const status = inv.status || 'ACTIVE';
+    csv.push([inv.invitationId, JSON.stringify(inv.partyName), token, '/register/?invite=' + token, status].join(','));
+    if (status !== 'ACTIVE') continue; // revoked/cancelled: code stops resolving, nothing else changes
     const salt = crypto.randomBytes(16).toString('hex');
     const iv = crypto.randomBytes(12).toString('hex');
     const payload = {
       invitationId: inv.invitationId, partyName: inv.partyName,
-      partyLead: inv.partyLead, guests: inv.guests,
+      partyLead: inv.partyLead,
+      guests: inv.guests.map((g) => ({ ...g, ...(g.status && g.status !== 'ACTIVE' ? { status: g.status } : {}) })),
       ...(inv.unresolvedMapping ? { unresolvedMapping: true } : {}),
     };
     records.push({ id: await tokenId(token), salt, iv, ct: await encryptInvitation(token, salt, iv, payload) });
-    csv.push([inv.invitationId, JSON.stringify(inv.partyName), token, '/register/?invite=' + token].join(','));
   }
   // shuffle records so file order reveals nothing about the list order
   records.sort((a, b) => a.id.localeCompare(b.id));

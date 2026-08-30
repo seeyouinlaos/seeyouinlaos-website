@@ -6,7 +6,7 @@
 | **FROM** | Claude Code · Digital / Technical Implementation Review |
 | **TO** | H&S Wedding 001 · All Project Review Workstreams |
 | **REVIEW DATE** | 30 August 2026 |
-| **DOCUMENT VERSION** | v2.0 — FINAL EXECUTION RECORD |
+| **DOCUMENT VERSION** | v2.1 — OWNER FINAL INPUTS APPLIED |
 | **DOCUMENT TYPE** | Final Pre Public Release Review (authoritative handoff) |
 | **REVIEWED PRODUCTION BASELINE** | v1.0: `cfdc4e7` · v2.0 execution commit: `e643247` |
 | **DOCUMENT COMMIT** | see Version History (§31) — the commit that introduces this file |
@@ -17,6 +17,24 @@
 | **REPOSITORY** | github.com/seeyouinlaos/seeyouinlaos-website · branch `main` only |
 
 **Mandate honored:** review + documentation only. No fixes, no translations, no redesign, no guest/code generation were performed in this pass. Findings are recorded in the Issue Register (§28), never silently corrected.
+
+---
+
+# V2.1 — OWNER FINAL INPUTS APPLIED (30 AUG 2026)
+
+**Sathorn Penthouse — CLOSED.** 21–24 FEB 2027 · 3 nights · check-in 21 FEB (22 FEB obsolete). Guests contribute the FIRST NIGHT only; authoritative actual = Airbnb checkout capture USD 1,106.71 for 3 nights → owner formula first night = 1,106.71 ÷ 3 = USD 368.90 (party) → USD 184.45 per guest for two. Nights 22–24 FEB hosted by Haruthai & Suthep. Displayed with this split in My Travel, MY JOURNEY chain, Contribution (charged exactly once), Review and GR handoff. Arrival 21 FEB = "Personal pickup by Haruthai · HOSTED". (Note: the source capture shows booking dates 4–7 Mar 2027 — the owner-fixed guest dates 21–24 FEB govern; the capture is the financial actual only.)
+
+**Event times — CLOSED.** Alms Giving 05:00 AM · Vow Ceremony 04:30 PM · Wedding Dinner 07:30 PM — one canonical value in `EVENTS[].time`, rendered on the public Moments/Weekend rows, MY WEDDING, MY JOURNEY chain, Review and the GR notification. No "time to be confirmed" remains for these three.
+
+**Editorial localization — APPROVED & COMPLETED.** The owner-approved long-form editorial set (moments bodies, stay/practical prose, participation, post-wedding paragraph, payment, penthouse copy, status vocabulary HOSTED/ARRANGED/…) is authored in DE/TH/JA in the shared layer. EN remains frozen source + fallback.
+
+**Dynamic Guest Master — IMPLEMENTED.** `party.status` ACTIVE|CANCELLED|REVOKED (non-ACTIVE excluded from the deployed bundle; token retained for audit; all other invitations untouched) and `guest.status` ACTIVE|CANCELLED|NO_SHOW (ships in the payload; client defaults non-ACTIVE guests to not attending while identity/history persist; contribution always derives from current participation). Adding/updating = edit private list → re-run idempotent builder (existing tokens stable, new parties get fresh codes). Initial production list imported: **17 parties · 34 guests · 17 stable invitation codes** (regenerated bundle, 0 plaintext leaks).
+
+**UX addendum — IMPLEMENTED.** MY JOURNEY (and Review) open with the connected chronological chain incl. status chips (HOSTED · ARRANGED · ARRANGED WITH GUEST RELATIONS · YOUR CHOICE · TO FINALIZE WITH GUEST RELATIONS); choosing the train auto-includes the coordinated Nong Khai transfer (arranged, never an unanswered question; removable under "Need something different?").
+
+**New Drive assets.** 004 - Dresscode: tradition set fully refreshed (6 owner images) + resort 01/02/04/05 superseded — production dress imagery updated on both surfaces; vow/dinner unchanged (no newer material). Sathorn Penthouse: 3 owner photos integrated. **Announcement: no announcement-identifiable material exists anywhere in the Drive** (extensive search documented) — nothing was invented. Lijiang: unchanged, text-led (OPTIONAL OWNER FOLLOW-UP — NOT RELEASE BLOCKING).
+
+**PUBLIC RELEASE: READY** — every previously open owner input is closed or explicitly non-blocking; durable persistence proven (v2.0); multilingual EN/DE/TH/JA live; guest list + codes production-ready.
 
 ---
 
@@ -760,6 +778,7 @@ Verified addressable workstreams (per this mandate's minimum set; numbered names
 |---|---|---|---|---|---|---|
 | v1.0 | 2026-08-30 | Claude Code | `cfdc4e7` | `9c226f2` | H&S Wedding 001 review workstreams | Initial authoritative Final Pre Public Release Master Review |
 | v2.0 | 2026-08-30 | Claude Code (per HSW-001-ED-FER-001) | `e643247` (Cloudflare `5a11d8f0…`; Pages success) | commit updating this file | 001 Master Executive Director + all workstreams | Final execution record: P0 closed with production proof, P1 GR handoff closed, Window-007 copy corrections, watermark removal, EN freeze, shared EN/DE/TH/JA localization layer; release = HOLD on owner inputs only |
+| v2.1 | 2026-08-30 | Claude Code (Owner Final Inputs + UX addendum) | see commit of this file | this commit | 001 + all workstreams | Penthouse date+first-night contribution closed (368.90/184.45), event times closed (05:00 AM/04:30 PM/07:30 PM), editorial DE/TH/JA completed, dynamic guest-status architecture + 17-party production bundle, new dresscode/penthouse imagery, journey chain UX; PUBLIC RELEASE: READY |
 
 Every future revision MUST increment the version, state issuer and what changed, and keep this table complete.
 

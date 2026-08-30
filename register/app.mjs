@@ -41,9 +41,12 @@ function bkkNights() {
   return d > 0 ? d : 0;
 }
 function bkkTotal() {
-  // The Pre-Wedding Bangkok stay has no defined guest contribution —
-  // Guest Relations confirms the arrangement (never a project Actual).
-  return 0;
+  // Penthouse: guests contribute ONLY the first night (owner decision closed);
+  // party total = canonical firstNight, charged exactly once.
+  const b = S.bangkokStay || {};
+  if (!b.property) return 0;
+  const h = BANGKOK_STAYS.find((x) => x.id === b.property);
+  return (h && h.firstNight) || 0;
 }
 /** The definitive dated guest itinerary — derived from stored selections,
  *  ordered by date, one source (v1.2 §3). Also what Guest Relations reads. */
@@ -53,42 +56,49 @@ function itinerarySteps() {
   const anyBkk = S.guests.some((g) => g.journey.bangkok);
   const arr = (S.transfers || []).map((x) => TRANSFERS.find((t) => t.id === x.transferId)).find((t) => t && t.direction === 'arrival');
   const steps = [];
+  const bh0 = BANGKOK_STAYS[0];
   if (anyBkk) {
-    const bh = S.bangkokStay && S.bangkokStay.property ? BANGKOK_STAYS.find((x) => x.id === S.bangkokStay.property) : null;
-    steps.push(bh
-      ? { d: bh.dateNote, t: bh.name + ' · Bangkok', s: 'Pre-Wedding stay · REQUESTED' }
-      : { d: 'Before the wedding', t: 'The Bangkok Journey', s: 'Shared days in Bangkok · Pre-Wedding' });
+    const joinedStay = S.bangkokStay && S.bangkokStay.property;
+    steps.push({ d: bh0.arrival.date, t: 'Bangkok arrival', s: bh0.arrival.note, st: 'HOSTED' });
+    steps.push(joinedStay
+      ? { d: bh0.dates + ' · ' + bh0.nights + ' nights', t: bh0.name,
+          s: bh0.contributionNight + ' · your contribution · ' + money(bh0.firstNight / Math.max(attendingCount(), 1)) + ' per guest — ' + bh0.hostedNights + ' · hosted by Haruthai & Suthep', st: 'ARRANGED' }
+      : { d: bh0.dates, t: bh0.name, s: 'Join under My Travel', st: 'YOUR CHOICE' });
   }
   if (riders.length) {
-    steps.push({ d: TRAIN.date + ' · 20:25', t: 'Bangkok → Nong Khai', s: 'Overnight Train · Special Express No. 25 · First Class Sleeper · ' + riders.length + ' seat' + (riders.length > 1 ? 's' : '') + ' · REQUESTED' });
+    steps.push({ d: TRAIN.date + ' · 20:25', t: 'Bangkok → Nong Khai', st: 'ARRANGED', s: 'First Class Overnight Train · Special Express No. 25 · ' + riders.length + ' seat' + (riders.length > 1 ? 's' : '') + ' · REQUESTED' });
     steps.push({ d: '27 FEB 2027 · 06:45', t: 'Arrive Nong Khai', s: 'Nong Khai Railway Station' });
     steps.push({ d: '27 FEB 2027', t: 'Nong Khai → Vientiane', s: arr
-      ? 'Coordinated Ground Transfer · ' + money(55) + ' per guest · Guest Relations confirms the exact pickup details · REQUESTED'
-      : 'Own arrangement — Guest Relations can assist' });
+      ? 'Coordinated transfer · ' + money(55) + ' per guest'
+      : 'Own arrangement — Guest Relations can assist', st: arr ? 'ARRANGED WITH GUEST RELATIONS' : 'YOUR CHOICE' });
   } else {
-    steps.push({ d: 'Before the wedding', t: 'Arriving independently in Vientiane', s: 'Fly or travel on your own schedule; we meet you there' });
+    steps.push({ d: 'Before the wedding', t: 'Arriving independently in Vientiane', s: 'Fly or travel on your own schedule; we meet you there', st: 'YOUR CHOICE' });
   }
   steps.push(acc
-    ? { d: acc.stay + ' · ' + acc.nights + ' nights', t: acc.name + ' · Vientiane', s: S.stay.waitlist ? 'WAITLISTED' : 'REQUESTED' }
-    : { d: '27 FEB – 01 MAR 2027', t: 'Your wedding stay · Vientiane', s: 'Choose under My Stay' });
-  steps.push({ d: '28 FEB 2027', t: 'The Wedding · Main Event', s: 'Alms Giving · Vow Ceremony · Wedding Dinner · Souphattra Heritage Vientiane', main: true });
+    ? { d: acc.stay + ' · ' + acc.nights + ' nights', t: acc.name + ' · Vientiane', s: 'First night · your contribution — second night · hosted', st: S.stay.waitlist ? 'WAITLISTED' : 'ARRANGED WITH GUEST RELATIONS' }
+    : { d: '27 FEB – 01 MAR 2027', t: 'Your wedding stay · Vientiane', s: 'Choose under My Stay', st: 'YOUR CHOICE' });
+  steps.push({ d: '28 FEB 2027', t: 'The Wedding · Main Event', s: 'Alms Giving 05:00 AM · Vow Ceremony 04:30 PM · Wedding Dinner 07:30 PM · Souphattra Heritage Vientiane', main: true });
   if (S.postWedding && S.postWedding.joined) {
     for (const c of POST_WEDDING.filter((x) => !x.onward)) {
       steps.push({ d: c.date, t: c.label, s: (c.type === 'Train' ? 'First Class Train' : c.type) + (c.sub ? ' · ' + c.sub : '') + (c.contribution != null ? '' : ' · Guest Relations confirms') });
     }
     const ow = S.postWedding.onward;
-    steps.push({ d: '06 MAR 2027', t: 'Your onward journey', s: ow === 'return' ? 'Return to Bangkok with us · Guest Relations confirms' : ow === 'own' ? 'Arranged independently' : ow === 'gr' ? 'Guest Relations support requested' : 'Choose under My Travel' });
+    steps.push({ d: '06 MAR 2027', t: 'Your onward journey',
+      s: ow === 'return' ? 'Return to Bangkok with us' : ow === 'own' ? 'Arranged independently' : ow === 'gr' ? 'Guest Relations support requested' : 'Choose under My Travel',
+      st: ow === 'return' || ow === 'gr' ? 'TO FINALIZE WITH GUEST RELATIONS' : ow === 'own' ? 'ARRANGED' : 'YOUR CHOICE' });
   } else {
     const dep = departureSelections();
     steps.push({ d: '01 MAR 2027', t: 'Your departure', s: dep.length
-      ? dep.map((t) => t.name).join(' · ') + ' · REQUESTED'
-      : 'Follows your onward itinerary · to finalize with Guest Relations' });
+      ? dep.map((t) => t.name).join(' · ')
+      : 'Follows your onward itinerary', st: dep.length ? 'ARRANGED WITH GUEST RELATIONS' : 'TO FINALIZE WITH GUEST RELATIONS' });
   }
   return steps;
 }
 function itineraryHtml() {
   return '<div class="itin">' + itinerarySteps().map((st) =>
-    '<div class="it-row' + (st.main ? ' it-main' : '') + '"><span class="it-d">' + esc(st.d) + '</span><div class="it-b"><span class="it-t">' + esc(st.t) + '</span><span class="it-s">' + esc(st.s) + '</span></div></div>').join('') + '</div>';
+    '<div class="it-row' + (st.main ? ' it-main' : '') + '"><span class="it-d">' + esc(st.d) + '</span><div class="it-b"><span class="it-t">' + esc(st.t) +
+    (st.st ? '<span class="it-chip' + (st.st === 'HOSTED' ? ' hosted' : /CHOICE|FINALIZE|WAITLIST/.test(st.st) ? ' open' : '') + '">' + esc(st.st) + '</span>' : '') +
+    '</span><span class="it-s">' + esc(st.s) + '</span></div></div>').join('') + '</div>';
 }
 const gal3 = (imgs, alt) => imgs && imgs.length
   ? '<div class="train-gal">' + imgs.slice(0, 3).map((src, i) => '<img src="' + src + '" alt="' + esc(alt) + ' · view ' + (i + 1) + '" loading="lazy" decoding="async"/>').join('') + '</div>'
@@ -406,7 +416,9 @@ function adoptInvitation(inv) {
     S.invitation = { invitationId: inv.invitationId, token: inv.token, partyName: inv.partyName, partyLead: inv.partyLead, guests: inv.guests, unresolvedMapping: !!inv.unresolvedMapping };
     S.guests = inv.guests.map((g) => ({
       guestId: g.guestId, fullName: g.fullName, preferredName: g.preferredName,
-      attending: true, email: '', phone: '', dob: '',
+      status: g.status || 'ACTIVE',
+      attending: g.status && g.status !== 'ACTIVE' ? false : true, // CANCELLED/NO_SHOW join nothing by default
+      email: '', phone: '', dob: '',
       journey: { bangkok: false, train: false, independent: true },
       events: { alms: true, ceremony: true, dinner: true },
       diet: 'No restrictions', allergy: 'no', allergyDetail: '', severe: false,
@@ -669,6 +681,9 @@ function wireTravelChoice(box) {
     };
     if (who === 'party') S.guests.forEach(apply);
     else { const g = S.guests.find((x) => x.guestId === who); if (g) apply(g); }
+    if (toTrain && !selectedTransfer('nongkhai-vte')) {
+      S.transfers.push({ transferId: 'nongkhai-vte', units: 1, details: {} }); // arranged, never an unanswered question
+    }
     // §6: without the train there is no Nong Khai arrival — its coordinated
     // transfer leaves the journey with it, so nothing charges silently.
     if (!S.guests.some((g) => g.journey.train)) {
@@ -792,18 +807,20 @@ function bangkokStayBlock() {
   if (!S.guests.some((g) => g.journey.bangkok)) return '';
   S.bangkokStay ||= { property: null, from: '', to: '' };
   const b = S.bangkokStay;
+  const n = Math.max(attendingCount(), 1);
   return '<div class="guest-block" id="bkk-stay"><div class="cch-label">Pre-Wedding Journey · Optional · Before the wedding</div><h3>Your Bangkok stay</h3>' +
     BANGKOK_STAYS.map((h) => {
       const sel = b.property === h.id;
       return '<article class="trf-card' + (sel ? ' sel' : '') + '">' +
-      '<div class="when">' + esc(h.dateNote) + '</div>' +
+      '<div class="when">' + esc(h.dates) + ' · ' + h.nights + ' nights · Bangkok</div>' +
       '<h4>' + esc(h.name) + '</h4>' +
-      '<p class="note">The shared Pre-Wedding home in Bangkok. Guest Relations confirms the dates and your arrangement personally.</p>' +
-      '<div class="trf-price">Guest Relations will confirm the arrangement</div>' +
+      gal3(h.images, h.name) +
+      '<p class="note">The shared Pre-Wedding home in Bangkok — ' + esc(h.arrival.note) + ' on ' + esc(h.arrival.date) + '.</p>' +
+      '<div class="trf-price">' + esc(h.contributionNight) + ' · your contribution · ' + money(h.firstNight / n) + ' per guest<br/>' + esc(h.hostedNights) + ' · hosted by<span class="hs">Haruthai&nbsp;&amp;&nbsp;Suthep</span></div>' +
       '<div class="acc-actions">' + (sel
         ? '<button type="button" class="btn sm" data-bkk-rm="' + h.id + '">Remove from journey</button>'
         : '<button type="button" class="btn sm" data-bkk="' + h.id + '">Request this stay</button>') + '</div>' +
-      (sel ? '<div class="acc-avail" style="border-top:none;padding-top:8px">REQUESTED · Guest Relations confirms dates and rooms personally</div>' : '') +
+      (sel ? '<div class="acc-avail" style="border-top:none;padding-top:8px">ARRANGED WITH GUEST RELATIONS · your room in the penthouse follows personally</div>' : '') +
       '</article>'; }).join('') + '</div>';
 }
 function wireBangkokStay(box) {
@@ -934,7 +951,7 @@ function renderEvents() {
   S.dressAck ||= { alms: false, ceremony: false, dinner: false }; // older drafts predate the acknowledgement
   S.guests.forEach((g) => { g.events.ceremony = true; }); // mandatory programme moment — normalise older drafts
   box.innerHTML = modulePicker({
-    modules: EVENTS.map((e) => ({ id: e.id, label: e.label, when: e.when + ' · ' + e.venue, blurb: e.blurb, locked: e.id === 'ceremony', dress: e.dress, dressGroup: e.dressGroup })),
+    modules: EVENTS.map((e) => ({ id: e.id, label: e.label, when: e.when + (e.time ? ' · ' + e.time : '') + ' · ' + e.venue, blurb: e.blurb, locked: e.id === 'ceremony', dress: e.dress, dressGroup: e.dressGroup })),
     field: 'events',
     sharedOnly: true, // one shared Wedding Programme per invitation (item 6)
   });
@@ -1392,7 +1409,7 @@ function renderTransfers(trainy) {
         ? '<button type="button" class="btn sm" data-trf-remove="' + t.id + '">Remove from journey</button>'
         : '<button type="button" class="btn sm" data-trf-add="' + t.id + '">Add to journey</button>') +
       '</div>' +
-      (sel ? '<div class="acc-avail" style="border-top:none;padding-top:8px">REQUESTED · Guest Relations confirms every detail with you personally</div>' : '') +
+      (sel ? '<div class="acc-avail" style="border-top:none;padding-top:8px">' + (t.id === 'nongkhai-vte' ? 'ARRANGED WITH GUEST RELATIONS · pickup follows your train arrival' : 'REQUESTED · Guest Relations confirms every detail with you personally') + '</div>' : '') +
       '</article>';
   };
   // contextual order (§8): the train guest sees the Nong Khai arrival first
@@ -1620,7 +1637,13 @@ function renderCost() {
   let pre = '';
   if (S.bangkokStay && S.bangkokStay.property) {
     const bh = BANGKOK_STAYS.find((x) => x.id === S.bangkokStay.property);
-    if (bh) open.push([esc(bh.dateNote), esc(bh.name) + ' · Bangkok']);
+    const n = Math.max(attendingCount(), 1);
+    if (bh && bh.firstNight) {
+      pre += line(esc(bh.contributionNight) + ' 2027 · first night of ' + bh.nights,
+        esc(bh.name) + ' · Bangkok',
+        n + ' × ' + money(bh.firstNight / n) + ' · ' + money(bh.firstNight));
+      pre += line(esc(bh.hostedNights) + ' 2027', esc(bh.name) + ' · nights two and three', 'Hosted by Haruthai & Suthep');
+    }
   }
   if (riders.length) pre += line(esc(TRAIN.date), 'Bangkok → Nong Khai · Overnight Sleeper Train', riders.length + ' × ' + money(TRAIN.contributionPerGuest) + ' · ' + money(tc));
   for (const sl of S.transfers || []) {
@@ -1711,6 +1734,7 @@ function renderReview() {
   const eventLine = (g) => EVENTS.filter((e) => g.events[e.id]).map((e) => e.label).join(' · ') || 'None';
   let html = '';
   html += '<p class="home-hello" style="margin-bottom:20px">' + esc(S.invitation.partyName) + ' · Vientiane · February 2027</p>';
+  html += '<div class="cch-label">Your journey, in order</div>' + itineraryHtml();
   html += sec('Your Guests', idx('party'), [
     ['Invitation', esc(S.invitation.partyName)],
     ['Members', S.invitation.guests.map((g) => esc(g.fullName)).join(' · ')],
@@ -1745,7 +1769,7 @@ function renderReview() {
     const who = joiners.length === S.guests.length ? 'Joining' : 'Joining · ' + joiners.map((g) => esc(g.preferredName)).join(' & ');
     const ack = S.dressAck && S.dressAck[e.id];
     const dress = e.dress ? (ack ? ' · Dress code understood' : ' · <span class="ack-missing">Dress code not yet confirmed — please confirm under My Wedding</span>') : '';
-    return [esc(e.label), who + dress];
+    return [esc(e.label) + (e.time ? ' · ' + esc(e.time) : ''), who + dress];
   }));
   if (acc) html += '<div class="rv-room">' + roomFigure(acc) +
     '<div class="rv-room-b"><div class="label">Your room</div><h3>' + esc(acc.name) + '</h3>' +
@@ -1772,9 +1796,11 @@ function renderReview() {
   if (S.bangkokStay && S.bangkokStay.property) {
     const bh = BANGKOK_STAYS.find((x) => x.id === S.bangkokStay.property);
     if (bh) html += sec('Your Bangkok Stay', idx('journey'), [
-      ['Dates', esc(bh.dateNote)],
+      ['Dates', esc(bh.dates) + ' · ' + bh.nights + ' nights'],
+      ['Arrival', esc(bh.arrival.date) + ' · ' + esc(bh.arrival.note) + ' · HOSTED'],
       ['Requested', esc(bh.name) + ' · Bangkok'],
-      ['Arrangement', 'Guest Relations will confirm the arrangement'],
+      ['Contribution', esc(bh.contributionNight) + ' · ' + money(bh.firstNight / Math.max(attendingCount(), 1)) + ' per guest · total ' + money(bh.firstNight)],
+      ['Hosted', esc(bh.hostedNights) + ' · by Haruthai & Suthep'],
     ]);
   }
   if (S.postWedding && S.postWedding.joined) html += '<div class="cch-label rv-cch">Post-Wedding Journey · Optional · After the wedding</div>' +
@@ -1805,7 +1831,7 @@ function renderReview() {
   if ((S.transfers || []).length) jcRows.push(['Transfers', money(transfersTotal(TRANSFERS, S.transfers, jcRiders))]);
   if (S.bangkokStay && S.bangkokStay.property) {
     const bh = BANGKOK_STAYS.find((x) => x.id === S.bangkokStay.property);
-    if (bh) jcRows.push(['Bangkok stay', esc(bh.name) + ' · Guest Relations will confirm the arrangement']);
+    if (bh) jcRows.push(['Bangkok stay', esc(bh.contributionNight) + ' · ' + esc(bh.name) + ' · ' + money(bkkTotal())]);
   }
   if (S.postWedding && S.postWedding.joined) jcRows.push(['Post Wedding Journey', '04 MAR 2027 · Kunming → Lijiang · First Class Train · ' + money(pwTotal())]);
   jcRows.push(['Total contribution', money(journeyTotal(acc, occ, TRAIN, jcRiders, TRANSFERS, S.transfers) + pwTotal() + bkkTotal())]);

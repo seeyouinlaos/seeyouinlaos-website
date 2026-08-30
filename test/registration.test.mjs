@@ -699,10 +699,23 @@ test('post wedding total: only guest-payable First Class train × guests', async
   assert.equal(postWeddingTotal(POST_WEDDING, false, 2), 0);
 });
 
-test('Pre-Wedding Bangkok stay: Sathorn Penthouse, GR-confirmed dates, no invented contribution', () => {
+test('Pre-Wedding Bangkok stay: owner decision closed — 21–24 FEB, first night contribution only', () => {
   assert.equal(BANGKOK_STAYS.length, 1);
   const h = BANGKOK_STAYS[0];
   assert.equal(h.id, 'sathorn-penthouse');
-  assert.equal(h.contribution, null);
-  assert.ok(/Guest Relations/.test(h.dateNote)); // known 21-vs-22 FEB Master conflict routed to GR
+  assert.equal(h.dates, '21–24 FEB 2027');
+  assert.equal(h.nights, 3);
+  // first night = authoritative 3-night actual 1,106.71 ÷ 3 (owner formula)
+  assert.ok(Math.abs(h.firstNight - 368.90) < 0.005);
+  assert.ok(Math.abs(h.firstNight / 2 - 184.45) < 0.005); // per guest for two
+  assert.equal(h.hostedNights, '22–24 FEB'); // hosted by the couple
+  assert.equal(h.arrival.date, '21 FEB 2027');
+  assert.ok(/Haruthai/.test(h.arrival.note)); // personal pickup · HOSTED
+});
+
+test('event times are the canonical owner values', () => {
+  const t = Object.fromEntries(EVENTS.map((e) => [e.id, e.time]));
+  assert.equal(t.alms, '05:00 AM');
+  assert.equal(t.ceremony, '04:30 PM');
+  assert.equal(t.dinner, '07:30 PM');
 });

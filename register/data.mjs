@@ -60,13 +60,13 @@ export const JOURNEY_MODULES = [
 ];
 
 export const EVENTS = [
-  { id: 'alms', label: 'Alms Giving', when: 'Sunday, 28 February 2027',
+  { id: 'alms', label: 'Alms Giving', when: 'Sunday, 28 February 2027', time: '05:00 AM',
     venue: 'Souphattra Heritage Vientiane', dress: 'Lao Traditional Dress', dressGroup: 'tradition',
     blurb: 'A quiet Buddhist ritual to open the wedding day at first light. Monks walk in procession; rice is offered; nothing is hurried.',
     templeNote: 'The participating temple will be announced with your itinerary.' },
-  { id: 'ceremony', label: 'Vow Ceremony', when: 'Sunday, 28 February 2027',
+  { id: 'ceremony', label: 'Vow Ceremony', when: 'Sunday, 28 February 2027', time: '04:30 PM',
     venue: 'Souphattra Heritage Vientiane', dress: 'Black Tie', dressGroup: 'vow', blurb: 'The vows, in front of everyone who matters.' },
-  { id: 'dinner', label: 'Wedding Dinner', when: 'Sunday, 28 February 2027',
+  { id: 'dinner', label: 'Wedding Dinner', when: 'Sunday, 28 February 2027', time: '07:30 PM',
     venue: 'Souphattra Heritage Vientiane', dress: 'Black Tie', dressGroup: 'dinner', blurb: 'Sunset drinks beside the pool, then dinner in the courtyard garden. Food, music and celebration.' },
 ];
 
@@ -298,9 +298,20 @@ export const BANGKOK_STAYS = [
   /* Pre-Wedding Bangkok stay (HSW-001 v1.1): the Sathorn Penthouse. The
    * check-in date carries a known Master conflict (21 vs 22 Feb) — dates are
    * confirmed personally by Guest Relations, never fabricated (v1.2 §4). */
+  /* OWNER DECISION CLOSED (2026-08-30): 21–24 FEB 2027 · 3 nights.
+   * Guests contribute ONLY to the first night (21→22); nights two and three
+   * are hosted by Haruthai & Suthep. firstNight = authoritative actual for
+   * night one (party total); per-guest = firstNight / attending guests. */
   { id: 'sathorn-penthouse', name: 'Elegant 6BR Sathorn Penthouse', role: 'Pre-Wedding stay · Bangkok',
-    dateNote: 'Until 24 FEB 2027 · check-in confirmed personally by Guest Relations',
-    contribution: null },
+    dates: '21–24 FEB 2027', nights: 3,
+    contributionNight: '21–22 FEB', hostedNights: '22–24 FEB',
+    arrival: { date: '21 FEB 2027', note: 'Personal pickup by Haruthai', hosted: true },
+    /* Authoritative project actual (Airbnb checkout capture, USD only):
+     * 3 nights × 406.26 − 112.07 long-stay discount = TOTAL 1,106.71.
+     * Owner formula: FIRST NIGHT = actual total ÷ 3 = 368.90 (party total);
+     * per-guest = firstNight / attending guests (2 → 184.45 each). */
+    firstNight: 368.90,
+    images: ['../assets/images/journey/penthouse-01.jpg', '../assets/images/journey/penthouse-02.jpg', '../assets/images/journey/penthouse-03.jpg'] },
 ];
 
 /* Final/return Bangkok stay context (v1.1): only where a guest chooses the
