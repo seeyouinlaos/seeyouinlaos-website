@@ -248,6 +248,30 @@ gate('P7', 'Dress Code imagery real (24), no visible arrows, in-lightbox tap nav
     .filter(Boolean).join(' · ')
   || '24 owner dress images across 4 groups; no visible arrow/expand icon; invisible in-lightbox tap-zone + dots navigation present');
 
+
+/* GATE L1 — localization completeness (HSW-001 P0 §8/§20).
+ * The catalog is regenerated from the ACTUAL page sources on every run, so a
+ * newly added English string fails the release until it is translated. */
+{
+  const { execSync } = require('child_process');
+  execSync('node ' + path.join(__dirname, 'i18n-catalog.cjs'), { stdio: 'pipe' });
+  const catSrc = fs.readFileSync(path.join(ROOT, 'assets/i18n/catalog.js'), 'utf8');
+  const catalog = JSON.parse(catSrc.slice(catSrc.indexOf('['), catSrc.lastIndexOf(']') + 1));
+  const dict = fs.readFileSync(path.join(ROOT, 'assets/i18n/siyl-i18n.js'), 'utf8');
+  const patternOK = [
+    /^[\d–-]+ sq\.m\.$/, /^\d+ of \d+ (available|seats remaining)$/, /^\d+ (rooms?|seats?) allocated$/,
+    /^(Up to )?\d+ adults?( · \d+ child(ren)?( sharing bedding)?)?$/, /^\d+ details? still needed$/,
+  ];
+  const missing = catalog.filter((t) => {
+    if (dict.indexOf(JSON.stringify(t).slice(1, -1)) > -1) return false; // dict-covered (escaped form)
+    if (dict.indexOf('E("' + t) > -1) return false;
+    return !patternOK.some((r) => r.test(t));
+  });
+  gate('L1', 'Localization completeness (catalog-driven, fail-closed)',
+    missing.length === 0,
+    missing.length ? missing.length + ' required strings lack DE/TH/JA coverage: ' + missing.slice(0, 6).map((x) => JSON.stringify(x.slice(0, 40))).join(', ') : catalog.length + ' required strings covered by dictionary or localization patterns');
+}
+
 let failed = 0;
 for (const r of results) {
   if (!r.ok) failed++;
