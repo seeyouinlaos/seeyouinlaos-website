@@ -375,7 +375,7 @@ export const STATUS = {
 
 export const COPY = {
   priceLabel: 'Your stay',
-  priceNote: 'For rooms at Souphattra Heritage Vientiane, the amount shown is your total contribution per guest for the confirmed two-night stay: the first night is your guest contribution; the second night is hosted by',
+  priceNote: 'For rooms at Souphattra Heritage Vientiane, the amount shown is your contribution per guest for the complete wedding stay: the first night is your guest contribution; the second night is complimentary — hosted by',
   priceNote2: 'Breakfast is included on both mornings. A limited number of complimentary alternative stays are also available.',
   /*   keeps "Haruthai & Suthep" unbreakable on every viewport (owner hard rule) */
   hostedNight: 'Your second hotel night is complimentary — part of the hospitality of your hosts.',

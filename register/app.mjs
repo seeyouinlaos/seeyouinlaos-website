@@ -66,10 +66,10 @@ function itinerarySteps() {
       : { d: bh0.dates, t: bh0.name, s: 'Join under My Travel', st: 'YOUR CHOICE' });
   }
   if (riders.length) {
-    steps.push({ d: TRAIN.date + ' · 20:25', t: 'Bangkok → Nong Khai', st: 'ARRANGED', s: 'First Class Overnight Train · Special Express No. 25 · ' + riders.length + ' seat' + (riders.length > 1 ? 's' : '') + ' · REQUESTED' });
+    steps.push({ d: TRAIN.date + ' · 20:25', t: 'Bangkok → Nong Khai', st: 'ARRANGED', s: 'SRT Special Express 25 · First Class Sleeper · Krung Thep Aphiwat → Nong Khai · 10h20 · ' + money(TRAIN.contributionPerGuest) + ' per guest · ' + riders.length + ' guest' + (riders.length > 1 ? 's' : '') + ' = ' + money((trainContribution(TRAIN, riders.length) || 0)) + ' · REQUESTED' });
     steps.push({ d: '27 FEB 2027 · 06:45', t: 'Arrive Nong Khai', s: 'Nong Khai Railway Station' });
     steps.push({ d: '27 FEB 2027', t: 'Nong Khai → Vientiane', s: arr
-      ? 'Coordinated transfer · ' + money(55) + ' per guest'
+      ? 'Coordinated ground and border transfer · ' + money(55) + ' per guest · ' + riders.length + ' guest' + (riders.length > 1 ? 's' : '') + ' = ' + money(55 * riders.length) + ' · Guest Relations confirms the exact pickup details after train arrival'
       : 'Own arrangement — Guest Relations can assist', st: arr ? 'ARRANGED WITH GUEST RELATIONS' : 'YOUR CHOICE' });
   } else {
     steps.push({ d: 'Before the wedding', t: 'Arriving independently in Vientiane', s: 'Fly or travel on your own schedule; we meet you there', st: 'YOUR CHOICE' });
@@ -1134,7 +1134,7 @@ function renderStay() {
   const anyBkkStay = S.guests.some((g) => g.journey.bangkok);
   const preStay = anyBkkStay
     ? '<div class="cch-label">Pre-Wedding Journey · Optional · Before the wedding</div>' +
-      '<div class="itin"><div class="it-row"><span class="it-d">' + esc(BANGKOK_STAYS[0].dateNote) + '</span><div class="it-b"><span class="it-t">' + esc(BANGKOK_STAYS[0].name) + ' · Bangkok</span><span class="it-s">' + ((S.bangkokStay || {}).property ? 'REQUESTED · Guest Relations confirms dates and rooms personally' : 'Request under My Travel') + '</span></div></div></div>'
+      '<div class="itin"><div class="it-row"><span class="it-d">' + esc(BANGKOK_STAYS[0].dates) + ' · ' + BANGKOK_STAYS[0].nights + ' nights</span><div class="it-b"><span class="it-t">' + esc(BANGKOK_STAYS[0].name) + ' · Bangkok</span><span class="it-s">' + ((S.bangkokStay || {}).property ? esc(BANGKOK_STAYS[0].contributionNight) + ' · your contribution — ' + esc(BANGKOK_STAYS[0].hostedNights) + ' · hosted by Haruthai & Suthep' : 'Join under My Travel') + '</span></div></div></div>'
     : '';
   const postStay = (S.postWedding && S.postWedding.joined)
     ? '<div class="cch-label" style="margin-top:34px">Post-Wedding Journey · Optional · After the wedding</div>' +

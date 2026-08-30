@@ -6,7 +6,7 @@
 | **FROM** | Claude Code · Digital / Technical Implementation Review |
 | **TO** | H&S Wedding 001 · All Project Review Workstreams |
 | **REVIEW DATE** | 30 August 2026 |
-| **DOCUMENT VERSION** | v2.1 — OWNER FINAL INPUTS APPLIED |
+| **DOCUMENT VERSION** | v2.2 — 001 FINAL CONSOLIDATED CORRECTION |
 | **DOCUMENT TYPE** | Final Pre Public Release Review (authoritative handoff) |
 | **REVIEWED PRODUCTION BASELINE** | v1.0: `cfdc4e7` · v2.0 execution commit: `e643247` |
 | **DOCUMENT COMMIT** | see Version History (§31) — the commit that introduces this file |
@@ -17,6 +17,17 @@
 | **REPOSITORY** | github.com/seeyouinlaos/seeyouinlaos-website · branch `main` only |
 
 **Mandate honored:** review + documentation only. No fixes, no translations, no redesign, no guest/code generation were performed in this pass. Findings are recorded in the Issue Register (§28), never silently corrected.
+
+---
+
+# V2.2 — 001 FINAL CONSOLIDATED CORRECTION (30 AUG 2026)
+
+Reconciliation of every binding requirement against the LIVE guest experience (directive: no blind COMPLETE). Changes in this pass:
+- **Multilingual coverage made real (§B):** rendered TH sweeps across MY JOURNEY / MY TRAVEL / MY STAY / MY CONTRIBUTION found the concrete English remnants; ~200 additional authored entries (transfer catalog names+blurbs, home cards, plans toggle, GR card, room blurbs+amenities+locations, weekend/practical/places/steps/portal/dress-guide bodies, composed labels) plus capture-group patterns (availability, seats, occupancy, details-needed). Final sweep state: MY JOURNEY / MY TRAVEL / MY CONTRIBUTION show zero significant English text nodes in TH; MY STAY retains only proper names (rooms/brands, by rule). Public editorial spine translated.
+- **§F residue removed:** the obsolete "Until 24 FEB · confirmed by GR" wording had one surviving render site in MY STAY (would show "undefined") — replaced with the closed 21–24 FEB · 3 nights split presentation.
+- **§D chain deepened:** train step now carries SRT Special Express 25 · Krung Thep Aphiwat → Nong Khai · 10h20 · USD 88 per guest · 2 guests = USD 176; transfer step carries 2 guests = USD 110 + the approved pickup wording. Totals visibly traceable (§G): 368.90 + 176 + 110 + wedding stay + optional post-wedding.
+- **§H wording:** stay note now reads "your contribution per guest for the complete wedding stay … second night is complimentary — hosted by Haruthai & Suthep". Frozen room values unchanged and gate-protected.
+- All previously closed items (v2.0/v2.1) re-verified unchanged. 73/73 tests · 15/15 gates.
 
 ---
 
@@ -778,6 +789,7 @@ Verified addressable workstreams (per this mandate's minimum set; numbered names
 |---|---|---|---|---|---|---|
 | v1.0 | 2026-08-30 | Claude Code | `cfdc4e7` | `9c226f2` | H&S Wedding 001 review workstreams | Initial authoritative Final Pre Public Release Master Review |
 | v2.0 | 2026-08-30 | Claude Code (per HSW-001-ED-FER-001) | `e643247` (Cloudflare `5a11d8f0…`; Pages success) | commit updating this file | 001 Master Executive Director + all workstreams | Final execution record: P0 closed with production proof, P1 GR handoff closed, Window-007 copy corrections, watermark removal, EN freeze, shared EN/DE/TH/JA localization layer; release = HOLD on owner inputs only |
+| v2.2 | 2026-08-30 | Claude Code (001 Final Consolidated Correction) | this commit | this commit | 001 + all workstreams | Real multilingual coverage (rendered-sweep driven, ~200 entries + patterns), §F residue fix, chain maths, §H stay wording; PUBLIC RELEASE: READY |
 | v2.1 | 2026-08-30 | Claude Code (Owner Final Inputs + UX addendum) | see commit of this file | this commit | 001 + all workstreams | Penthouse date+first-night contribution closed (368.90/184.45), event times closed (05:00 AM/04:30 PM/07:30 PM), editorial DE/TH/JA completed, dynamic guest-status architecture + 17-party production bundle, new dresscode/penthouse imagery, journey chain UX; PUBLIC RELEASE: READY |
 
 Every future revision MUST increment the version, state issuer and what changed, and keep this table complete.
