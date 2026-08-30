@@ -22,5 +22,5 @@ package-lock.json
 seeyouinlaos-website
 _asset_originals
 assets/images/incoming
-journey
+/journey
 build
