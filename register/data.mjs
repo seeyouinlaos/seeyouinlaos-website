@@ -265,7 +265,7 @@ export const TRANSFERS = [
     included: 'Private vehicle and driver · met personally · luggage handled',
     blurb: 'From Souphattra Heritage to Wattay International Airport, timed to your flight.' },
   { id: 'nongkhai-vte', group: 'Nong Khai Railway Station', name: 'Nong Khai Station to Souphattra Heritage',
-    pricePerUnit: 20, direction: 'arrival', fieldsFor: 'train',
+    pricePerUnit: 55, perGuest: true, direction: 'arrival', fieldsFor: 'train',
     included: 'Private vehicle and driver · met at your carriage exit · luggage handled',
     blurb: 'From Nong Khai Railway Station onward to Souphattra Heritage Vientiane after your Night Train arrival.' },
   { id: 'lcr-pickup-jaguar', group: 'LCR Railway Station', name: 'LCR Station to Hotel by Jaguar',
@@ -296,9 +296,9 @@ export const BANGKOK_STAYS = [
 ];
 
 export const POST_WEDDING = [
-  { id: 'vte-kmg', type: 'Transportation', label: 'Vientiane → Kunming', when: '1 March 2027', sub: 'By rail', contribution: null },
+  { id: 'vte-kmg', type: 'Transportation', label: 'Vientiane → Kunming', when: '1 March 2027', sub: 'By rail · First Class only', contribution: 145 },
   { id: 'kunming-stay', type: 'Stay', label: 'Wanxiang Yueju Designer Homestay', when: '1 – 4 March 2027', sub: 'Kunming Railway Station MixC Branch', contribution: null },
-  { id: 'kmg-ljg', type: 'Transportation', label: 'Kunming → Lijiang', when: '4 March 2027', sub: 'By rail', contribution: null },
+  { id: 'kmg-ljg', type: 'Transportation', label: 'Kunming → Lijiang', when: '4 March 2027', sub: 'By rail · First Class only', contribution: null, priceNote: 'Within the China train contribution' },
   { id: 'lijiang-stay', type: 'Stay', label: 'Luye Baisha · Rizhao Jinshan', when: '4 – 6 March 2027', sub: 'Lijiang', contribution: null },
   { id: 'ljg-bkk', type: 'Flight', label: 'Lijiang → Bangkok', when: '6 March 2027', sub: 'Return flight', contribution: null },
 ];

@@ -11,7 +11,7 @@ import {
 } from './data.mjs';
 import {
   contributionPerGuest, partyCharges, partyTotal, money as usdMoney, displayMoney,
-  trainContribution, transfersTotal, journeyTotal,
+  trainContribution, transfersTotal, journeyTotal, postWeddingTotal,
   createInventory, remaining, availabilityLabel, requestAllocation,
   validateRegistration, buildNotification, nextInvitationState,
 } from './logic.mjs';
@@ -29,6 +29,8 @@ function setAuthOut(v) { try { if (v) localStorage.setItem(AUTH_OUT_KEY, '1'); e
 
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const RATES_LIVE = PUBLICATION.rates === 'APPROVED';
+const attendingCount = () => S.guests.filter((g) => g.attending !== false).length;
+const pwTotal = () => postWeddingTotal(POST_WEDDING, S.postWedding && S.postWedding.joined, attendingCount());
 /* Display currency (§18): USD is the Source of Truth. EUR/THB are indicative
  * display conversions from a live rate (frankfurter.app, ECB). The choice
  * persists across the Guest Area; without a usable rate we fall back to USD. */
@@ -445,8 +447,8 @@ function renderHome() {
   const anyEvents = S.guests.some((g) => Object.values(g.events || {}).some(Boolean));
   const detailsMissing = S.guests.filter((g) => g.attending !== false && !(g.email || g.phone)).length;
   const tc = trainContribution(TRAIN, riders.length) || 0;
-  const trf = transfersTotal(TRANSFERS, S.transfers);
-  const total = journeyTotal(acc, occ, TRAIN, riders.length, TRANSFERS, S.transfers);
+  const trf = transfersTotal(TRANSFERS, S.transfers, riders.length);
+  const total = journeyTotal(acc, occ, TRAIN, riders.length, TRANSFERS, S.transfers) + pwTotal();
   const card = (step, label, main, sub, status, image) =>
     '<button type="button" class="home-card" data-jump="' + step + '">' +
     (image ? '<span class="hc-img"><img src="' + roomImg(image) + '" alt="" width="1200" height="800" loading="lazy" decoding="async"/></span>' : '') +
@@ -536,20 +538,85 @@ function renderJourney() {
     title: null,
     modules: [
       { id: 'bangkok', label: 'The Bangkok Journey', when: 'Before the wedding', blurb: 'The shared days in Bangkok before travelling on to Laos.' },
-      { id: 'train', label: 'The Overnight Train', when: 'Bangkok → Nong Khai · ' + money(TRAIN.contributionPerGuest) + ' per guest · ' + trainLabel, blurb: 'Special Express No. 25 · Bangkok to Nong Khai · departs Krung Thep Aphiwat Central Terminal 20:25, arrives Nong Khai 06:45 · 10 hours 20 minutes · First Class Sleeper. Travel overnight in a private First Class cabin, waking in Nong Khai before continuing together to Vientiane. Guest Relations coordinates the journey and ticket arrangements. ' + money(TRAIN.contributionPerGuest) + ' per participating guest; only guests who join are charged. Eight seats, allocated per Guest in registration order.', disabled: trainFull, waitlist: trainFull },
-      { id: 'independent', label: 'Arriving independently in Vientiane', when: 'Your own way', blurb: 'Fly or travel on your own schedule; we meet you there.' },
     ],
     field: 'journey',
-  }) + (anyTrain ? trainDetailBlock() : '') +
+  }) + travelChoiceBlock(trainLabel, trainFull) + (anyTrain ? trainDetailBlock() : '') +
     bangkokStayBlock() +
     renderTravel() +
     postWeddingBlock();
   wireModulePicker(box, 'journey');
+  wireTravelChoice(box);
   wireTrainDetails(box);
   wireBangkokStay(box);
   wirePostWedding(box);
   wireTransfers(box);
   mountGuestMap();
+}
+
+/* §Travel-choice: ONE journey decision, TWO alternatives, ONE selection.
+ * The overnight train and an independent arrival answer the same question —
+ * they are never two separate yes/no questionnaires. Same stored fields
+ * (journey.train / journey.independent), strictly mutually exclusive. */
+function travelChoiceBlock(trainLabel, trainFull) {
+  const many = S.guests.length > 1;
+  const differs = S.partyPlans === 'different' && many;
+  const optionCard = (opt, g) => {
+    const onTrain = g ? !!g.journey.train : S.guests.every((x) => x.journey.train);
+    const sel = opt === 'train' ? onTrain : !onTrain;
+    const who = g ? '\u00A0· for ' + esc(g.preferredName) : '';
+    if (opt === 'train') {
+      return '<article class="tj-opt' + (sel ? ' sel' : '') + '" data-opt="train">' +
+        '<div class="when">Bangkok → Nong Khai → Vientiane · ' + money(TRAIN.contributionPerGuest) + ' per guest · ' + esc(trainLabel) + '</div>' +
+        '<h4>The Overnight Train</h4>' +
+        '<p class="note">Special Express No. 25 · departs Krung Thep Aphiwat Central Terminal 20:25, arrives Nong Khai 06:45 · 10 hours 20 minutes · First Class Sleeper. Guest Relations coordinates the journey and ticket arrangements; only guests who join are charged.</p>' +
+        '<div class="train-gal">' + ['train-01', 'train-04', 'train-03'].map((f, ti) => '<img src="../assets/images/train/' + f + '.jpg" alt="First Class Sleeper aboard Special Express No. 25 · view ' + (ti + 1) + '" loading="lazy" decoding="async"/>').join('') + '</div>' +
+        '<div class="acc-actions"><button type="button" class="btn sm' + (sel ? '' : ' ghost') + '" data-choice="train" data-who="' + (g ? g.guestId : 'party') + '" aria-pressed="' + sel + '">' +
+        (sel ? 'Joining the train' + who : (trainFull ? 'Join the waitlist' + who : 'I\u2019m joining' + who)) + '</button></div>' +
+        (sel ? '<div class="acc-avail" style="border-top:none;padding-top:8px">REQUESTED · Guest Relations confirms your seats personally</div>' : '') +
+        '</article>';
+    }
+    return '<article class="tj-opt' + (sel ? ' sel' : '') + '" data-opt="own">' +
+      '<div class="when">Your own way</div>' +
+      '<h4>Arriving independently in Vientiane</h4>' +
+      '<p class="note">Fly or travel on your own schedule; we meet you there.</p>' +
+      '<div class="acc-actions"><button type="button" class="btn sm' + (sel ? '' : ' ghost') + '" data-choice="own" data-who="' + (g ? g.guestId : 'party') + '" aria-pressed="' + sel + '">' +
+      (sel ? 'Arriving independently' + who : 'I\u2019ll arrive independently' + who) + '</button></div>' +
+      '</article>';
+  };
+  const pair = (g) => '<div class="tj-pair" role="radiogroup" aria-label="How would you like to travel to Vientiane' + (g ? ' — ' + esc(g.preferredName) : '') + '?">' + optionCard('train', g) + optionCard('own', g) + '</div>';
+  return '<div class="mod tj-choice"><div class="mod-head"><div>' +
+    '<div class="when">Journey to Vientiane · one decision, two ways</div>' +
+    '<h3>How would you like to travel to Vientiane?</h3>' +
+    '<p>Choose the way that suits you — selecting one quietly sets the other aside.</p>' +
+    '</div></div>' +
+    (differs ? S.guests.map((g) => pair(g)).join('') : pair(null)) +
+    '</div>';
+}
+function wireTravelChoice(box) {
+  box.querySelectorAll('[data-choice]').forEach((b) => b.addEventListener('click', () => {
+    const toTrain = b.getAttribute('data-choice') === 'train';
+    const who = b.getAttribute('data-who');
+    const trainFull = remaining(inventory.train) <= 0;
+    const apply = (g) => {
+      g.journey.train = toTrain;               // one effective choice —
+      g.journey.independent = !toTrain;        // never both, never neither
+      if (toTrain && trainFull) g.journey.trainWaitlist = true;
+    };
+    if (who === 'party') S.guests.forEach(apply);
+    else { const g = S.guests.find((x) => x.guestId === who); if (g) apply(g); }
+    // §6: without the train there is no Nong Khai arrival — its coordinated
+    // transfer leaves the journey with it, so nothing charges silently.
+    if (!S.guests.some((g) => g.journey.train)) {
+      S.transfers = (S.transfers || []).filter((x) => {
+        const t = TRANSFERS.find((y) => y.id === x.transferId);
+        return !(t && t.fieldsFor === 'train');
+      });
+    }
+    saveDraft(); renderStep(cur); renderSummary();
+    announce(toTrain
+      ? 'The Overnight Train is part of your journey — ' + money(TRAIN.contributionPerGuest) + ' per participating guest, REQUESTED.'
+      : 'You are arriving independently in Vientiane; Guest Relations meets you there.');
+  }));
 }
 
 /* Verified real-world coordinates for the journey cities (never by eye). */
@@ -692,7 +759,7 @@ function postWeddingBlock() {
       '<div class="label">' + esc(c.type) + ' · ' + esc(c.when) + '</div>' +
       '<h4>' + esc(c.label) + '</h4>' +
       (c.sub ? '<p class="note">' + esc(c.sub) + '</p>' : '') +
-      '<div class="trf-price">' + (c.contribution != null ? money(c.contribution) : 'Contribution follows with Guest Relations') + '</div>' +
+      '<div class="trf-price">' + (c.contribution != null ? money(c.contribution) + ' per guest' : (c.priceNote ? esc(c.priceNote) : 'Contribution follows with Guest Relations')) + '</div>' +
       '<div class="acc-avail" style="border-top:none;padding-top:6px">REQUESTED · Guest Relations confirms every detail personally</div>' +
       '</article>').join('') : '') +
     '</div>';
@@ -1166,7 +1233,7 @@ function renderTransfers(trainy) {
     return '<article class="trf-card' + (sel ? ' sel' : '') + '" data-trf="' + t.id + '">' +
       '<div class="label">' + esc(t.group) + '</div>' +
       '<h4>' + esc(t.name) + '</h4>' +
-      (free ? '' : '<div class="trf-price">' + money(t.pricePerUnit) + ' · per vehicle</div>') +
+      (free ? '' : '<div class="trf-price">' + money(t.pricePerUnit) + (t.perGuest ? ' · per guest' : ' · per vehicle') + '</div>') +
       '<p class="note">' + esc(t.blurb) + '</p>' +
       (t.included ? '<p class="note trf-incl">' + esc(t.included) + '</p>' : '') +
       '<div class="acc-actions">' +
@@ -1194,7 +1261,7 @@ function wireTransfers(box) {
     if (!selectedTransfer(id)) S.transfers.push({ transferId: id, units: 1, details: {} });
     saveDraft(); renderStep(cur); renderSummary();
     const t = TRANSFERS.find((x) => x.id === id);
-    announce(t.name + ' added to your journey' + (t.pricePerUnit ? ': ' + money(t.pricePerUnit) + ' per vehicle' : ' — complimentary') + ', REQUESTED. Guest Relations arranges the details with you personally.');
+    announce(t.name + ' added to your journey' + (t.pricePerUnit ? ': ' + money(t.pricePerUnit) + (t.perGuest ? ' per guest' : ' per vehicle') : ' — complimentary') + ', REQUESTED. Guest Relations arranges the details with you personally.');
   }));
   box.querySelectorAll('[data-trf-remove]').forEach((b) => b.addEventListener('click', () => {
     const id = b.getAttribute('data-trf-remove');
@@ -1379,7 +1446,7 @@ function renderCost() {
   const occ = acc ? S.stay.occupantGuestIds : [];
   const riders = S.guests.filter((g) => g.journey.train);
   const tc = trainContribution(TRAIN, riders.length) || 0;
-  const total = journeyTotal(acc, occ, TRAIN, riders.length, TRANSFERS, S.transfers);
+  const total = journeyTotal(acc, occ, TRAIN, riders.length, TRANSFERS, S.transfers) + pwTotal();
   const neutral = acc && acc.contributionPerGuest == null;
   const row = (l, r, cls) => '<div class="row' + (cls ? ' ' + cls : '') + '"><span class="l">' + l + '</span><span class="r">' + r + '</span></div>';
   const head = (t) => '<div class="row fol-day"><span class="l serif-it">' + t + '</span><span class="r"></span></div>';
@@ -1399,13 +1466,25 @@ function renderCost() {
   }
   for (const sl of S.transfers || []) {
     const t = TRANSFERS.find((x) => x.id === sl.transferId);
-    if (t && t.pricePerUnit) rows += row(esc(t.name) + ' · ' + (sl.units || 1) + ' vehicle' + ((sl.units || 1) > 1 ? 's' : ''), money(t.pricePerUnit * (sl.units || 1)));
+    if (!t || !t.pricePerUnit) continue;
+    if (t.perGuest) {
+      const n = Math.max(riders.length, 1);
+      rows += row(esc(t.name) + ' · ' + n + ' × ' + money(t.pricePerUnit), money(t.pricePerUnit * n));
+    } else {
+      rows += row(esc(t.name) + ' · ' + (sl.units || 1) + ' vehicle' + ((sl.units || 1) > 1 ? 's' : ''), money(t.pricePerUnit * (sl.units || 1)));
+    }
   }
   if (S.bangkokStay && S.bangkokStay.property) {
     const h = BANGKOK_STAYS.find((x) => x.id === S.bangkokStay.property);
     if (h) rows += row('Bangkok stay · <span class="serif-it">' + esc(h.name) + '</span>', 'Contribution follows with Guest Relations');
   }
-  if (S.postWedding && S.postWedding.joined) rows += row('The Post Wedding Journey · Vientiane → Kunming → Lijiang → Bangkok', 'Contribution follows with Guest Relations');
+  if (S.postWedding && S.postWedding.joined) {
+    const n = attendingCount();
+    for (const c of POST_WEDDING) {
+      if (c.contribution != null) rows += row('Post Wedding Journey · ' + esc(c.label) + ' · ' + esc(c.sub), n + ' × ' + money(c.contribution) + ' · ' + money(c.contribution * n));
+    }
+    rows += row('Post Wedding Journey · stays and flight', 'Contribution follows with Guest Relations');
+  }
   rows += '<div class="row total"><span class="l serif-it">Total contribution</span><span class="r js-total">' + money(total) + '</span></div>';
   rows += head('Hosted for you');
   const hosted = [];
@@ -1507,8 +1586,9 @@ function renderReview() {
     ? S.transfers.map((s) => {
         const t = TRANSFERS.find((x) => x.id === s.transferId) || {};
         const d = s.details || {};
+        const n = t.perGuest ? Math.max(S.guests.filter((g) => g.journey.train).length, 1) : (s.units || 1);
         return [esc(t.name || s.transferId),
-          (s.units || 1) + ' unit' + ((s.units || 1) > 1 ? 's' : '') + ' × ' + money(t.pricePerUnit || 0) + ' = ' + money((t.pricePerUnit || 0) * (s.units || 1)) +
+          n + (t.perGuest ? ' guest' + (n > 1 ? 's' : '') : ' unit' + (n > 1 ? 's' : '')) + ' × ' + money(t.pricePerUnit || 0) + ' = ' + money((t.pricePerUnit || 0) * n) +
           ' · ' + esc([d.date, d.time, d.ref].filter(Boolean).join(' · ') || 'details open') + ' · REQUESTED'];
       })
     : [['Requested', 'None']]);
@@ -1516,13 +1596,13 @@ function renderReview() {
   const jcRows = [];
   if (acc) jcRows.push(['Stay', esc(acc.name) + ' · ' + (acc.contributionPerGuest == null ? 'complimentary · limited' : money(partyTotal(acc, occ)))]);
   if (jcRiders) jcRows.push(['Train', jcRiders + ' × ' + money(TRAIN.contributionPerGuest) + ' = ' + money(trainContribution(TRAIN, jcRiders) || 0)]);
-  if ((S.transfers || []).length) jcRows.push(['Transfers', money(transfersTotal(TRANSFERS, S.transfers))]);
+  if ((S.transfers || []).length) jcRows.push(['Transfers', money(transfersTotal(TRANSFERS, S.transfers, jcRiders))]);
   if (S.bangkokStay && S.bangkokStay.property) {
     const bh = BANGKOK_STAYS.find((x) => x.id === S.bangkokStay.property);
     if (bh) jcRows.push(['Bangkok stay', esc(bh.name) + ' · contribution follows with Guest Relations']);
   }
-  if (S.postWedding && S.postWedding.joined) jcRows.push(['Post Wedding Journey', 'Joined · contribution follows with Guest Relations']);
-  jcRows.push(['Total contribution', money(journeyTotal(acc, occ, TRAIN, jcRiders, TRANSFERS, S.transfers))]);
+  if (S.postWedding && S.postWedding.joined) jcRows.push(['Post Wedding Journey', 'China train · First Class only · ' + money(pwTotal()) + ' · stays and flight follow with Guest Relations']);
+  jcRows.push(['Total contribution', money(journeyTotal(acc, occ, TRAIN, jcRiders, TRANSFERS, S.transfers) + pwTotal())]);
   html += sec('Your Contribution', idx('cost'), jcRows);
   html += sec('Each of You', idx('each'), S.guests.map((g) => {
     const detail = (g.allergyDetail || '').trim();
@@ -1640,7 +1720,7 @@ function renderSummary() {
   if ((S.transfers || []).length) sel.push(S.transfers.length + ' transfer' + (S.transfers.length > 1 ? 's' : ''));
   if (S.bangkokStay && S.bangkokStay.property) sel.push('Bangkok stay · REQUESTED');
   if (S.postWedding && S.postWedding.joined) sel.push('Post Wedding Journey · REQUESTED');
-  const total = journeyTotal(acc, acc ? S.stay.occupantGuestIds : [], TRAIN, trainCount, TRANSFERS, S.transfers);
+  const total = journeyTotal(acc, acc ? S.stay.occupantGuestIds : [], TRAIN, trainCount, TRANSFERS, S.transfers) + pwTotal();
   el.innerHTML =
     '<div class="sum-a"><span class="sum-label">Your journey</span>' +
     '<span class="sum-line"><strong>' + esc(S.invitation.partyName) + '</strong>' + (sel.length ? ' · ' + sel.join(' · ') : '') + '</span></div>' +

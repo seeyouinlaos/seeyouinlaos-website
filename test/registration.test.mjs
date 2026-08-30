@@ -639,11 +639,13 @@ test('displayMoney: USD is the master and the fallback — never a fabricated ra
   assert.equal(displayMoney(100, 'THB', { EUR: 0.9, THB: 35.4 }), 'THB 3,540');
 });
 
-test('nongkhai-vte transfer: owner set contribution USD 20, arrival direction', () => {
+test('nongkhai-vte transfer: USD 55 per guest, arrival direction (owner final)', () => {
   const t = TRANSFERS.find((x) => x.id === 'nongkhai-vte');
   assert.ok(t, 'Nong Khai onward transfer exists');
-  assert.equal(t.pricePerUnit, 20);
+  assert.equal(t.pricePerUnit, 55);
+  assert.equal(t.perGuest, true);
   assert.equal(t.direction, 'arrival');
+  assert.equal(transfersTotal(TRANSFERS, [{ transferId: 'nongkhai-vte', units: 1 }], 2), 110); // 2 guests × USD 55
 });
 
 test('allergy declared without kitchen detail blocks completion (§30)', () => {
@@ -656,9 +658,12 @@ test('allergy declared without kitchen detail blocks completion (§30)', () => {
   assert.ok(!validateRegistration(reg, ctx(inv)).some((e) => /allergy under My Profile/.test(e)));
 });
 
-test('post wedding architecture: no invented contributions, no China vehicle', () => {
+test('post wedding architecture: canonical China train price, rest pending, no China vehicle', () => {
   assert.equal(POST_WEDDING.length, 5);
-  for (const c of POST_WEDDING) assert.equal(c.contribution, null);
+  const cn = POST_WEDDING.find((c) => c.id === 'vte-kmg');
+  assert.equal(cn.contribution, 145);                       // China train · owner final
+  assert.ok(/First Class only/.test(cn.sub));               // only class presented
+  for (const c of POST_WEDDING) if (c.id !== 'vte-kmg') assert.equal(c.contribution, null);
   const flat = JSON.stringify(POST_WEDDING).toLowerCase();
   assert.ok(!flat.includes('car'), 'no vehicle assumption in China (§14)');
   assert.equal(BANGKOK_STAYS.length, 2);
@@ -676,4 +681,11 @@ test('registration payload accepts bangkokStay and postWedding without new error
 test('event naming: Wedding Dinner without Reception (§25)', () => {
   const dinner = EVENTS.find((e) => e.id === 'dinner');
   assert.equal(dinner.label, 'Wedding Dinner');
+});
+
+
+test('post wedding total: canonical value × guests, zero when not joined', async () => {
+  const { postWeddingTotal } = await import('../register/logic.mjs');
+  assert.equal(postWeddingTotal(POST_WEDDING, true, 2), 290);  // 2 × USD 145
+  assert.equal(postWeddingTotal(POST_WEDDING, false, 2), 0);
 });

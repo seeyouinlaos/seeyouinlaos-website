@@ -38,11 +38,13 @@ export function trainContribution(train, riderCount) {
 
 /** Transfer total: Σ pricePerUnit × selected units (never guest-multiplied).
  *  `selected` is [{ transferId, units }]; `catalog` is data.TRANSFERS. */
-export function transfersTotal(catalog, selected) {
+export function transfersTotal(catalog, selected, riderCount) {
   let sum = 0;
   for (const s of selected || []) {
     const t = (catalog || []).find((x) => x.id === s.transferId);
-    if (t) sum += t.pricePerUnit * (s.units || 1);
+    if (!t) continue;
+    // per-guest transfers charge each participating guest (canonical value × count)
+    sum += t.perGuest ? t.pricePerUnit * Math.max(riderCount || 0, 1) : t.pricePerUnit * (s.units || 1);
   }
   return sum;
 }
@@ -51,7 +53,13 @@ export function transfersTotal(catalog, selected) {
 export function journeyTotal(accommodation, occupantGuestIds, train, riderCount, transferCatalog, selectedTransfers) {
   return partyTotal(accommodation, occupantGuestIds)
     + (trainContribution(train, riderCount) || 0)
-    + transfersTotal(transferCatalog, selectedTransfers);
+    + transfersTotal(transferCatalog, selectedTransfers, riderCount);
+}
+
+/** Post Wedding Journey contribution: canonical component values × guests. */
+export function postWeddingTotal(components, joined, guestCount) {
+  if (!joined) return 0;
+  return (components || []).reduce((a, c) => a + (c.contribution || 0), 0) * Math.max(guestCount || 0, 1);
 }
 
 export function money(n) {
