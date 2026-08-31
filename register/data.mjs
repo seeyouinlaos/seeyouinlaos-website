@@ -67,7 +67,7 @@ export const EVENTS = [
   { id: 'ceremony', label: 'Vow Ceremony', when: 'Sunday, 28 February 2027', time: '04:30 PM',
     venue: 'Souphattra Heritage Vientiane', dress: 'Black Tie', dressGroup: 'vow', blurb: 'The vows, in front of everyone who matters.' },
   { id: 'dinner', label: 'Wedding Dinner', when: 'Sunday, 28 February 2027', time: '07:30 PM',
-    venue: 'Souphattra Vientiane Hotel', dress: 'Black Tie', dressGroup: 'dinner', blurb: 'Sunset drinks beside the pool, then dinner in the courtyard garden. Food, music and celebration.' },
+    venue: 'Souphattra Vientiane Hotel', dress: 'Black Tie', dressGroup: 'dinner', blurb: 'Sunset drinks beside the pool, then dinner in the courtyard garden.' },
 ];
 
 /* ---------------- accommodation resources ----------------
@@ -192,8 +192,8 @@ export const ACCOMMODATIONS = [
      * ACTIVE two-bedroom Airbnb residence, 27.02.–01.03.2027, up to four
      * adults. The previous four-bedroom listing was cancelled by the
      * landlord and stays retired (governance: D-20). NO commercial terms
-     * are approved for guests — no price, no hosted/complimentary status,
-     * no inclusions: everything is ARRANGED SEPARATELY by Guest Relations.
+     * are approved for guests — no guest-facing price; the guest-facing
+     * status is Complimentary/limited and Guest Relations arranges the rest.
      * contributionPerGuest: null = no guest-facing amount exists.
      * The internal booking value stays internal. NOT part of the 26 rooms. */
     id: 'airbnb-2br', name: 'Private Residence',
@@ -248,7 +248,6 @@ export const TRAIN = {
 export const TRANSFERS = [
   { id: 'shuttle-shared', group: 'Shared Shuttle', name: 'Complimentary Shared Shuttle',
     pricePerUnit: 0, direction: 'arrival', fieldsFor: 'flight',
-    included: 'Private vehicle and driver · met personally · luggage handled',
     included: 'Shared ride with fellow guests · luggage handled · Guest Relations confirms your slot personally',
     blurb: 'Between Wattay International Airport / Vientiane railway station and Souphattra Heritage on arrival day. Guest Relations confirms your pickup time personally.' },
   { id: 'apt-pickup-jaguar', group: 'Airport', name: 'Airport Pickup by Jaguar',
@@ -375,7 +374,7 @@ export const STATUS = {
 
 export const COPY = {
   priceLabel: 'Your stay',
-  priceNote: 'For rooms at Souphattra Heritage Vientiane, the amount shown is your contribution per guest for the complete wedding stay: the first night is your guest contribution; the second night is complimentary — hosted by',
+  priceNote: 'For rooms at Souphattra Heritage Vientiane, the amount shown is your total contribution per guest for the two-night wedding stay: the first night is your guest contribution; the second night is hosted by',
   priceNote2: 'Breakfast is included on both mornings. A limited number of complimentary alternative stays are also available.',
   /*   keeps "Haruthai & Suthep" unbreakable on every viewport (owner hard rule) */
   hostedNight: 'Your second hotel night is complimentary — part of the hospitality of your hosts.',

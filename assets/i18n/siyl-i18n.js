@@ -39,7 +39,7 @@
   E("Close", "Schließen", "ปิด", "閉じる");
   E("Guest Relations will confirm the arrangement", "Guest Relations bestätigt die Abstimmung persönlich", "ฝ่ายดูแลแขกจะยืนยันการจัดเตรียมให้", "ゲストリレーションズが手配を確定します");
   E("To finalize with Guest Relations", "Mit Guest Relations abzustimmen", "รอสรุปกับฝ่ายดูแลแขก", "ゲストリレーションズと最終調整");
-  E("Total contribution", "Gesamtbeitrag", "ยอดร่วมสมทบทั้งหมด", "ご負担額合計");
+  E("Total contribution", "Gesamtbeitrag", "ส่วนร่วมทั้งหมด", "費用の合計");
   E("Hosted for you", "Für euch übernommen", "ของขวัญจากเจ้าภาพ", "おもてなしとしてご招待");
   E("Your journey", "Eure Reise", "การเดินทางของคุณ", "旅の概要");
   E("Your route", "Eure Route", "เส้นทางของคุณ", "ルート");
@@ -60,7 +60,7 @@
   E("Guest Area", "Gästebereich", "ส่วนสำหรับแขก", "ゲストエリア");
   E("MENU", "MENÜ", "เมนู", "メニュー");
   E("TOP", "NACH OBEN", "กลับด้านบน", "トップへ");
-  E("join the journey", "Teil der Reise werden", "ร่วมเดินทางไปกับเรา", "旅に参加する");
+  E("join the journey", "Teil der Reise werden", "ร่วมเดินทางไปกับเรา", "旅のはじまりへ");
 
   /* ---- public sections ---- */
   E("The Moments", "Die Momente", "ช่วงเวลาสำคัญ", "セレモニー");
@@ -102,13 +102,16 @@
   E("if you like.", "wenn ihr mögt.", "หากคุณต้องการ", "お好みで。");
   E("Thank you.", "Danke.", "ขอบคุณ", "ありがとうございます。");
   E("Registration received", "Registrierung eingegangen", "ได้รับการลงทะเบียนแล้ว", "ご登録を受け付けました");
-  E("Your journey is with Guest Relations", "Eure Reise liegt bei Guest Relations", "การเดินทางของคุณอยู่ในมือฝ่ายดูแลแขก", "旅の手配はゲストリレーションズへ");
+  E("Your journey is with Guest Relations", "Khun Ket und Khun Paddy kümmern sich jetzt persönlich um eure Reise", "คุณเกตุและคุณแพดดี้กำลังดูแลเส้นทางของคุณเป็นการส่วนตัว", "クン・ケットとクン・パディが、旅の準備を直接お引き受けしています");
   E("We’re taking care of", "Darum kümmern wir uns", "เราดูแลให้ทั้งหมดนี้", "私たちにお任せください");
   E("Return to your journey", "Zurück zu eurer Reise", "กลับไปที่การเดินทางของคุณ", "旅の画面に戻る");
 
   /* ---- MY TRAVEL ---- */
   E("How would you like to travel to Vientiane?", "Wie möchtet ihr nach Vientiane reisen?", "คุณอยากเดินทางไปเวียงจันทน์อย่างไร", "ビエンチャンへはどのように向かいますか？");
-  E("Choose the way that suits you — selecting one quietly sets the other aside.", "Wählt den Weg, der zu euch passt — die Wahl des einen legt den anderen still beiseite.", "เลือกแบบที่เหมาะกับคุณ เมื่อเลือกอย่างหนึ่ง อีกอย่างจะถูกพักไว้ให้เอง", "ご都合に合う方をお選びください。一方を選ぶと、もう一方は自然に外れます。");
+  E("Choose the way that suits you.",
+    "Wählt den Weg, der zu euch passt.",
+    "เลือกวิธีที่เหมาะกับคุณ",
+    "ご自身に合う行き方をお選びください。")
   E("The Overnight Train", "Der Nachtzug", "รถไฟตู้นอน", "夜行列車");
   E("The Bangkok Journey", "Die Bangkok-Reise", "ทริปกรุงเทพฯ", "バンコクの旅");
   E("Arriving independently in Vientiane", "Eigenständige Anreise nach Vientiane", "เดินทางมาเวียงจันทน์ด้วยตัวเอง", "ご自身でビエンチャンへ");
@@ -144,7 +147,7 @@
   E("Guests", "Gäste", "ผู้เข้าพัก", "定員");
   E("Where", "Lage", "ทำเล", "所在地");
   E("Availability", "Verfügbarkeit", "ห้องว่าง", "空き状況");
-  E("Contribution", "Beitrag", "ยอดร่วมสมทบ", "ご負担額");
+  E("Contribution", "Beitrag", "ส่วนร่วม", "ご負担分");
   E("Your stay", "Euer Aufenthalt", "ที่พักของคุณ", "ご滞在");
   E("Bed preference", "Bettwunsch", "รูปแบบเตียงที่ต้องการ", "ベッドの希望");
   E("Special request", "Besonderer Wunsch", "คำขอพิเศษ", "特別なご要望");
@@ -156,7 +159,10 @@
   E("Private Residence", "Private Residenz", "เรสซิเดนซ์ส่วนตัว", "プライベートレジデンス");
 
   /* ---- MY WEDDING ---- */
-  E("Join the moments that feel right for you. We simply want you there in the way that works best for you.", "Seid bei den Momenten dabei, die sich für euch richtig anfühlen. Wir wünschen uns euch einfach so dabei, wie es für euch am besten passt.", "ร่วมเฉพาะช่วงเวลาที่ใช่สำหรับคุณ เราแค่อยากให้คุณอยู่ตรงนั้นในแบบที่เหมาะกับคุณที่สุด", "心地よいと感じる時間にご参加ください。あなたに合ったかたちで、そこにいてくださることが何よりの願いです。");
+  E("The Vow Ceremony is the shared heart of the wedding day. Around it, choose the additional moments that feel right for you.",
+    "Das Eheversprechen ist das gemeinsame Herz des Hochzeitstags. Darum herum wählt ihr die Momente, die sich für euch richtig anfühlen.",
+    "พิธีกล่าวคำสัญญาคือหัวใจที่ทุกคนแบ่งปันร่วมกันของวันแต่งงาน ส่วนช่วงเวลาอื่น เลือกร่วมได้ตามที่เหมาะกับคุณ",
+    "誓いのセレモニーは、結婚式の日にみなで分かち合う中心です。そのまわりの時間は、ご自身に合うものをお選びください。")
   E("Dress code", "Dresscode", "การแต่งกาย", "ドレスコード");
   E("The dress code is part of this moment and applies to everyone attending. Please make sure you are comfortable following it before confirming your attendance. If you are unsure about anything, Guest Relations will be happy to help you prepare.", "Der Dresscode gehört zu diesem Moment und gilt für alle Anwesenden. Bitte vergewissert euch, dass ihr euch damit wohlfühlt, bevor ihr eure Teilnahme bestätigt. Bei Fragen hilft euch Guest Relations gern bei der Vorbereitung.", "การแต่งกายเป็นส่วนหนึ่งของช่วงเวลานี้และใช้กับผู้ร่วมงานทุกท่าน โปรดแน่ใจว่าคุณสะดวกใจก่อนยืนยันเข้าร่วม หากไม่แน่ใจสิ่งใด ฝ่ายดูแลแขกยินดีช่วยเตรียมตัวให้", "ドレスコードはこのひとときの一部であり、ご参列の皆さまにお願いしています。ご出席の確定前に、無理なくお召しいただけるかご確認ください。ご不明な点は、ゲストリレーションズが喜んでお手伝いします。");
   E("I have read and understand the dress code", "Ich habe den Dresscode gelesen und verstanden", "ฉันได้อ่านและเข้าใจข้อกำหนดการแต่งกายแล้ว", "ドレスコードを読み、理解しました");
@@ -191,9 +197,13 @@
   E("Remove", "Entfernen", "นำออก", "削除");
 
   /* ---- MY CONTRIBUTION ---- */
-  E("Your contribution reads as your journey: what you pay, when it happens. Everything else is hosted for you.", "Euer Beitrag liest sich wie eure Reise: was ihr zahlt und wann es stattfindet. Alles andere ist für euch übernommen.", "ยอดร่วมสมทบของคุณอ่านได้เหมือนเส้นทางเดินทาง สิ่งที่คุณจ่ายและช่วงเวลาที่เกิดขึ้น ส่วนที่เหลือเจ้าภาพดูแลให้ทั้งหมด", "ご負担額は旅の行程そのもの。お支払いいただく内容と、その日程です。それ以外はすべて、おもてなしとしてご用意しています。");
+  E("Your contribution reads as your journey: what you contribute, and where it belongs. Everything else is hosted for you.",
+    "Euer Beitrag liest sich wie eure Reise: was ihr beitragt und wohin es gehört. Alles andere ist für euch übernommen.",
+    "ส่วนร่วมของคุณอ่านได้เหมือนเส้นทางของคุณ สิ่งที่คุณร่วมสมทบ และเป็นของช่วงใดของการเดินทาง ส่วนที่เหลือเจ้าภาพดูแลให้ทั้งหมด",
+    "費用のご案内は、旅の行程そのものです。何をご一緒に担っていただくか、そしてそれが旅のどこに属するか。それ以外はすべて、おもてなしとしてご用意しています。")
   E("Pre-Wedding Journey", "Reise vor der Hochzeit", "การเดินทางก่อนวันงาน", "ウェディング前の旅");
-  E("The Wedding", "Die Hochzeit", "งานแต่งงาน", "ウェディング");
+  E("The Wedding", "Die Hochzeit", "งานแต่งงาน", "結婚式");
+  E("The Journey", "Die Reise", "เส้นทาง", "旅");
   E("Post-Wedding Journey", "Reise nach der Hochzeit", "การเดินทางหลังวันงาน", "ウェディング後の旅");
   E("Optional · Before the wedding", "Optional · Vor der Hochzeit", "ทางเลือก · ก่อนวันงาน", "任意・挙式前");
   E("Main Event · Vientiane", "Hauptereignis · Vientiane", "งานหลัก · เวียงจันทน์", "メインイベント・ビエンチャン");
@@ -244,14 +254,10 @@
     "Das Souphattra Heritage Vientiane ist das Herz unseres Hochzeitsaufenthalts: gemeinsame Morgen, gemeinsame Ankünfte und der Rhythmus des Wochenendes um einen stillen Ort. Wählt den Aufenthalt, der sich für euch richtig anfühlt.",
     "สุพัตรา เฮอริเทจ เวียงจันทน์ คือหัวใจของการพักในงานแต่งของเรา เช้าที่แบ่งปันกัน การมาถึงพร้อมกัน และจังหวะของสุดสัปดาห์ที่หมุนรอบสถานที่อันเงียบสงบแห่งเดียว เลือกที่พักที่ใช่สำหรับคุณ",
     "スパッタラ・ヘリテージ・ビエンチャンは、この結婚式の滞在の中心。共に迎える朝、共にたどり着く時間、静かなひとつの場所を巡る週末のリズム。あなたに合う滞在をお選びください。");
-  E("For rooms at Souphattra Heritage Vientiane, the amount shown is your total contribution per guest for the confirmed two-night stay: the first night is your guest contribution; the second night is hosted by",
-    "Für Zimmer im Souphattra Heritage Vientiane ist der angezeigte Betrag euer Gesamtbeitrag pro Gast für den bestätigten Aufenthalt von zwei Nächten: Die erste Nacht ist euer Gastbeitrag; die zweite Nacht übernehmen",
-    "สำหรับห้องพักที่สุพัตรา เฮอริเทจ เวียงจันทน์ จำนวนที่แสดงคือยอดร่วมสมทบต่อท่านสำหรับการพักสองคืนที่ยืนยันแล้ว คืนแรกคือส่วนร่วมของคุณ ส่วนคืนที่สองเป็นของขวัญจาก",
-    "スパッタラ・ヘリテージの客室について、表示額は確定2泊分のお一人あたりのご負担額です。1泊目はゲストのご負担、2泊目はご招待——");
-  E("Breakfast is included on both mornings. A limited number of complimentary alternative stays are also available.",
-    "Frühstück ist an beiden Morgen inklusive. Eine begrenzte Zahl kostenfreier Alternativ-Unterkünfte ist ebenfalls verfügbar.",
-    "รวมอาหารเช้าทั้งสองวัน และยังมีที่พักทางเลือกแบบไม่มีค่าใช้จ่ายจำนวนจำกัด",
-    "両日の朝食付き。数に限りのある無料のオルタナティブステイもご用意しています。");
+  E("For rooms at Souphattra Heritage Vientiane, the amount shown is your total contribution per guest for the two-night wedding stay: the first night is your guest contribution; the second night is hosted by Haruthai & Suthep.",
+    "Für die Zimmer im Souphattra Heritage Vientiane ist der angezeigte Betrag euer gesamter Beitrag pro Gast für die zwei Nächte des Hochzeitsaufenthalts: Die erste Nacht ist euer Gastbeitrag, die zweite Nacht ist übernommen von Haruthai & Suthep.",
+    "สำหรับห้องพักที่สุพัตรา เฮอริเทจ เวียงจันทน์ จำนวนที่แสดงคือส่วนร่วมทั้งหมดต่อท่านสำหรับการพักสองคืนของช่วงงานแต่ง คืนแรกคือส่วนร่วมของคุณ ส่วนคืนที่สองหฤทัยและสุเทพดูแลให้",
+    "スパッタラ・ヘリテージの客室について、表示額は2泊のウェディングステイに対するお一人あたりのご負担の全額です。1泊目はゲストのご負担、2泊目はハルタイ＆ステープがおもてなしいたします。")
   E("The shared days in Bangkok before travelling on to Laos.",
     "Die gemeinsamen Tage in Bangkok, bevor es weiter nach Laos geht.",
     "วันเวลาที่ใช้ร่วมกันในกรุงเทพฯ ก่อนเดินทางต่อไปยังลาว",
@@ -264,10 +270,10 @@
     "Das Versprechen — vor allen, die zählen.",
     "คำสัญญา ต่อหน้าทุกคนที่สำคัญ",
     "大切な人みんなの前で交わす、誓い。");
-  E("Sunset drinks beside the pool, then dinner in the courtyard garden. Food, music and celebration.",
-    "Drinks am Pool zum Sonnenuntergang, dann Dinner im Hofgarten. Essen, Musik und Feiern.",
-    "จิบเครื่องดื่มริมสระยามเย็น แล้วต่อด้วยมื้อค่ำในสวน อาหาร ดนตรี และการเฉลิมฉลอง",
-    "夕暮れのプールサイドで乾杯、そして中庭でのディナー。料理と音楽とお祝いのひととき。");
+  E("Sunset drinks beside the pool, then dinner in the courtyard garden.",
+    "Drinks am Pool zum Sonnenuntergang, dann Dinner im Hofgarten.",
+    "จิบเครื่องดื่มริมสระยามอาทิตย์อัสดง แล้วต่อด้วยมื้อค่ำในสวนลานบ้าน",
+    "夕暮れ、プールサイドでの乾杯。続いて中庭でのディナー。")
   E("The shared Pre-Wedding home in Bangkok — Personal pickup by Haruthai on 21 FEB 2027.",
     "Das gemeinsame Pre-Wedding-Zuhause in Bangkok — persönliche Abholung durch Haruthai am 21 FEB 2027.",
     "บ้านพักก่อนวันงานที่ใช้ร่วมกันในกรุงเทพฯ — หรุทัยไปรับด้วยตัวเองวันที่ 21 ก.พ. 2027",
@@ -420,7 +426,7 @@
   E("Members", "Mitglieder", "สมาชิก", "メンバー");
   E("Lead guest", "Hauptgast", "แขกหลัก", "代表ゲスト");
   E("Overnight Train", "Nachtzug", "รถไฟตู้นอน", "夜行列車");
-  E("Your Contribution", "Euer Beitrag", "ยอดร่วมสมทบของคุณ", "ご負担額");
+  E("Your Contribution", "Euer Beitrag", "ส่วนร่วมของคุณ", "ご負担分");
   E("Your Stay", "Euer Aufenthalt", "ที่พักของคุณ", "ご滞在");
   E("Your Transfers", "Eure Transfers", "การรับส่งของคุณ", "送迎");
   E("Your Bangkok Stay", "Euer Bangkok-Aufenthalt", "ที่พักในกรุงเทพฯ ของคุณ", "バンコクでのご滞在");
@@ -454,10 +460,10 @@
     "จากนี้ไปทุกอย่างอยู่ในมือเรา คุณเกตุและคุณแพดดี้ตรวจข้อมูลการเดินทาง ยืนยันที่พัก ประสานการรับส่ง และเตรียมการเดินทางส่วนตัวของคุณ พื้นที่ส่วนตัวเปิดอยู่ตลอด คุณไม่ต้องทำอะไรเพิ่ม",
     "ここから先はすべてお任せください。クン・ケットとクン・パディが旅の情報を確認し、宿泊を確定し、送迎を調整し、あなたの旅を整えます。プライベートエリアは常に開いたまま——ご対応は不要です。");
   E("We’re taking care of", "Darum kümmern wir uns", "เราดูแลให้ทั้งหมดนี้", "私たちが承ります");
-  E("Every REQUESTED selection above — seats, rooms, transfers and the wedding days — is now personally coordinated by Khun Ket and Khun Paddy. Statuses move from REQUESTED to UNDER REVIEW to CONFIRMED; nothing is booked until Guest Relations confirms it with you.",
-    "Jede oben ANGEFRAGTE Auswahl — Plätze, Zimmer, Transfers und die Hochzeitstage — wird jetzt persönlich von Khun Ket und Khun Paddy koordiniert. Der Status wandert von ANGEFRAGT über IN PRÜFUNG zu BESTÄTIGT; nichts ist gebucht, bis Guest Relations es mit euch bestätigt.",
-    "ทุกรายการที่ส่งคำขอด้านบน ทั้งที่นั่ง ห้องพัก การรับส่ง และวันงานแต่ง คุณเกตุและคุณแพดดี้จะประสานงานด้วยตนเอง สถานะจะเปลี่ยนจาก ส่งคำขอแล้ว เป็น กำลังตรวจสอบ และ ยืนยันแล้ว จะยังไม่มีการจองจนกว่าฝ่ายดูแลแขกยืนยันกับคุณ",
-    "上記のリクエスト——お席、お部屋、送迎、婚礼の日々——は、クン・ケットとクン・パディが直接調整します。ステータスはリクエスト済み→確認中→確定と進み、ゲストリレーションズの確定までは予約は成立しません。");
+  E("Your selections are now with Guest Relations. Nothing is booked until Khun Ket and Khun Paddy confirm your arrangements with you personally.",
+    "Eure Auswahl liegt jetzt bei Guest Relations. Nichts ist gebucht, bevor Khun Ket und Khun Paddy eure Arrangements persönlich mit euch bestätigt haben.",
+    "สิ่งที่คุณเลือกอยู่กับฝ่ายดูแลแขกแล้ว จะยังไม่มีการจองใดจนกว่าคุณเกตุและคุณแพดดี้จะยืนยันการเตรียมการกับคุณเป็นการส่วนตัว",
+    "ご選択の内容は、いまゲストリレーションズのもとにあります。クン・ケットとクン・パディがご本人と直接ご確認するまで、何も確定・予約はされません。")
 
   /* ---- public website full coverage ---- */
   E("Sunday, 28 February 2027 · Vientiane, Laos", "Sonntag, 28. Februar 2027 · Vientiane, Laos", "วันอาทิตย์ที่ 28 กุมภาพันธ์ 2027 · เวียงจันทน์ ลาว", "2027年2月28日（日）・ラオス、ビエンチャン");
@@ -480,10 +486,10 @@
     "Am späten Nachmittag wird der Innenhof still, gerahmt von Heritage-Architektur und dem Garten.",
     "ยามบ่ายแก่ ลานบ้านค่อย ๆ สงบลง โอบล้อมด้วยสถาปัตยกรรมมรดกและสวน",
     "午後遅く、中庭は静けさに包まれる。ヘリテージ建築と庭に囲まれて。");
-  E("Sunset drinks beside the pool, then dinner in the courtyard garden. Lao food, music and celebration.",
-    "Drinks am Pool zum Sonnenuntergang, dann Dinner im Hofgarten. Laotisches Essen, Musik und Feiern.",
-    "จิบเครื่องดื่มริมสระยามอาทิตย์ตก แล้วต่อด้วยมื้อค่ำในสวน อาหารลาว ดนตรี และการเฉลิมฉลอง",
-    "夕暮れのプールサイドで乾杯し、中庭でディナーを。ラオス料理と音楽と祝祭。");
+  E("Sunset drinks beside the pool, then dinner in the courtyard garden. Lao food and a long, quiet evening.",
+    "Drinks am Pool zum Sonnenuntergang, dann Dinner im Hofgarten. Laotisches Essen und ein langer, ruhiger Abend.",
+    "จิบเครื่องดื่มริมสระยามเย็น แล้วต่อด้วยมื้อค่ำในสวน อาหารลาวและค่ำคืนอันสงบงดงาม",
+    "夕暮れのプールサイドで乾杯し、中庭でディナーを。ラオス料理とともに、穏やかな夜を。")
   E("One complete glance at the weekend, from the moment you land to the last slow goodbye. A table is always set. The key moments of the wedding journey are arranged for you, with Guest Relations coordinating the transfers connected to your plans.",
     "Das ganze Wochenende auf einen Blick — von der Landung bis zum letzten langsamen Abschied. Ein Tisch ist immer gedeckt. Die Schlüsselmomente der Hochzeitsreise sind für euch arrangiert; Guest Relations koordiniert die Transfers zu euren Plänen.",
     "สุดสัปดาห์ทั้งหมดในหนึ่งสายตา ตั้งแต่วินาทีที่คุณลงเครื่องจนถึงคำอำลาช้า ๆ ครั้งสุดท้าย โต๊ะอาหารพร้อมเสมอ ช่วงเวลาสำคัญของการเดินทางถูกจัดเตรียมไว้ให้ โดยฝ่ายดูแลแขกประสานการรับส่งตามแผนของคุณ",
@@ -513,12 +519,17 @@
     "Die Einreisebestimmungen hängen von eurem Pass ab; Guest Relations teilt euch vor der Reise die passenden Hinweise mit, und unser Team empfängt euch an der Einreise. Währung · Lao Kip (LAK).",
     "ข้อกำหนดการเข้าเมืองขึ้นกับหนังสือเดินทางของคุณ ฝ่ายดูแลแขกจะแจ้งแนวทางก่อนเดินทาง และทีมของเรารอรับที่ด่านตรวจคนเข้าเมือง สกุลเงิน · กีบลาว (LAK)",
     "入国要件はパスポートにより異なります。ご出発前にゲストリレーションズがご案内し、入国審査では私たちのチームがお迎えします。通貨・ラオスキープ（LAK）。");
-  E("Before you travel, write to", "Schreibt vor der Reise an", "ก่อนเดินทาง เขียนถึง", "ご出発前にご連絡を：");
-  E("or message us on LINE or WhatsApp — scan the codes in your Guest Area. Your Guest Relations contacts are Khun Ket and Khun Paddy.",
-    "oder schreibt uns über LINE oder WhatsApp — scannt die Codes in eurem Gästebereich. Eure Ansprechpartner bei Guest Relations sind Khun Ket und Khun Paddy.",
-    "หรือส่งข้อความทาง LINE หรือ WhatsApp สแกนโค้ดในส่วนสำหรับแขก ผู้ดูแลของคุณคือคุณเกตุและคุณแพดดี้",
-    "またはLINE・WhatsAppでどうぞ——コードはゲストエリアに。担当はクン・ケットとクン・パディです。");
-  E("continue to Kunming and Lijiang after the wedding. Guests who would like to join part of the onward journey are warmly welcome to speak with Guest Relations.",
+  E("Before you travel, Khun Ket and Khun Paddy are here for anything you may need.",
+    "Vor eurer Reise sind Khun Ket und Khun Paddy persönlich für euch da, wenn ihr etwas braucht.",
+    "ก่อนออกเดินทาง หากมีอะไรที่อยากให้เราช่วย คุณเกตุและคุณแพดดี้พร้อมดูแลคุณเสมอ",
+    "ご出発前に何かございましたら、クン・ケットとクン・パディが直接お手伝いいたします。");
+  E("Write to:", "Schreibt uns:", "อีเมล:", "メール：");
+  E("Or reach us on LINE using the original QR code below.",
+    "Oder erreicht uns über LINE mit dem Original-QR-Code unten.",
+    "หรือติดต่อเราทาง LINE ผ่านคิวอาร์โค้ดต้นฉบับด้านล่าง",
+    "LINEは、下のオリジナルQRコードからご連絡いただけます。");
+  E("Original LINE QR code", "Original-QR-Code für LINE", "คิวอาร์โค้ด LINE ต้นฉบับ", "LINEのオリジナルQRコード");
+    E("continue to Kunming and Lijiang after the wedding. Guests who would like to join part of the onward journey are warmly welcome to speak with Guest Relations.",
     "reisen nach der Hochzeit weiter nach Kunming und Lijiang. Gäste, die einen Teil der Weiterreise mitgehen möchten, sind herzlich eingeladen, mit Guest Relations zu sprechen.",
     "เดินทางต่อไปคุนหมิงและลี่เจียงหลังงานแต่ง แขกที่อยากร่วมเส้นทางบางช่วง ยินดีพูดคุยกับฝ่ายดูแลแขกได้เสมอ",
     "は挙式後、昆明と麗江へ旅を続けます。行程の一部にご一緒したい方は、ぜひゲストリレーションズへ。");
@@ -834,17 +845,16 @@
   E("· First Class Sleeper from Krung Thep Aphiwat Central Terminal, waking in Nong Khai at 06:45", "· First Class Sleeper ab Krung Thep Aphiwat Central Terminal — Aufwachen in Nong Khai um 06:45", "· ตู้นอนชั้นหนึ่งจากสถานีกลางกรุงเทพอภิวัฒน์ ตื่นที่หนองคาย 06:45", "・クルンテープ・アピワット中央駅発ファーストクラス寝台、6:45にノーンカーイで目覚める");
   E("· Special Express No. 25 · Bangkok → Nong Khai", "· Special Express No. 25 · Bangkok → Nong Khai", "· รถด่วนพิเศษขบวนที่ 25 · กรุงเทพฯ → หนองคาย", "・特急25号・バンコク→ノーンカーイ");
   E("· a quiet Buddhist ritual to open the day", "· ein stilles buddhistisches Ritual zur Eröffnung des Tages", "· พิธีพุทธอันเงียบงามเพื่อเปิดวัน", "・一日を開く静かな仏教の儀式");
-  E("· drinks by the pool, then Lao food, music and celebration in the courtyard garden", "· Drinks am Pool, dann laotisches Essen, Musik und Feiern im Hofgarten", "· เครื่องดื่มริมสระ ต่อด้วยอาหารลาว ดนตรี และการเฉลิมฉลองในสวน", "・プールサイドで乾杯、続いて中庭でラオス料理と音楽と祝祭");
+  E("· drinks by the pool, then dinner in the courtyard garden",
+    "· Drinks am Pool, dann Dinner im Hofgarten",
+    "· เครื่องดื่มริมสระ ต่อด้วยมื้อค่ำในสวน",
+    "・プールサイドで乾杯、続いて中庭でディナー")
   E("· the vows, in front of everyone who matters", "· das Versprechen, vor allen, die zählen", "· คำสัญญา ต่อหน้าทุกคนที่สำคัญ", "・大切な人みんなの前での誓い");
   E("· via Bangkok and Nong Khai · met and transferred", "· über Bangkok und Nong Khai · empfangen und transferiert", "· ผ่านกรุงเทพฯ และหนองคาย · มีคนรอรับและส่งต่อ", "・バンコクとノーンカーイ経由・お出迎えと送迎付き");
   E("· LINE & WhatsApp QR in your Guest Area", "· LINE- & WhatsApp-QR im Gästebereich", "· QR ของ LINE และ WhatsApp ในส่วนสำหรับแขก", "・LINE/WhatsAppのQRはゲストエリアに");
   E("By overnight sleeper train — Special Express No. 25 — to Nong Khai, then across the border · route reference:", "Mit dem Nachtzug — Special Express No. 25 — nach Nong Khai, dann über die Grenze · Streckenreferenz:", "โดยรถไฟตู้นอน รถด่วนพิเศษขบวนที่ 25 สู่หนองคาย แล้วข้ามพรมแดน · อ้างอิงเส้นทาง:", "夜行寝台・特急25号でノーンカーイへ、そして国境越え・路線参照：");
   E("(for reading only — Guest Relations arranges the tickets)", "(nur zum Nachlesen — Guest Relations besorgt die Tickets)", "(สำหรับอ่านเท่านั้น ฝ่ายดูแลแขกจัดการตั๋วให้)", "（ご参考まで——切符はゲストリレーションズが手配します）");
   E("State Railway of Thailand", "Staatsbahn von Thailand", "การรถไฟแห่งประเทศไทย", "タイ国鉄");
-  E("or message us on LINE or WhatsApp — scan the codes in your Guest Area. Your Guest Relations team looks after you personally, from arrival to the last transfer.",
-    "oder schreibt uns über LINE oder WhatsApp — scannt die Codes im Gästebereich. Euer Guest-Relations-Team kümmert sich persönlich um euch, von der Ankunft bis zum letzten Transfer.",
-    "หรือส่งข้อความทาง LINE หรือ WhatsApp สแกนโค้ดในส่วนสำหรับแขก ทีมดูแลแขกดูแลคุณเป็นการส่วนตัว ตั้งแต่มาถึงจนถึงการรับส่งครั้งสุดท้าย",
-    "またはLINE・WhatsAppでご連絡を——コードはゲストエリアに。到着から最後の送迎まで、ゲストリレーションズが直接おもてなしします。");
   E("or LINE and WhatsApp via the codes in your Guest Area.", "oder LINE und WhatsApp über die Codes im Gästebereich.", "หรือ LINE และ WhatsApp ผ่านโค้ดในส่วนสำหรับแขก", "またはゲストエリアのコードからLINE・WhatsAppで。");
   E("“what can I expect?”", "„Was erwartet mich?“", "“ฉันจะได้พบอะไร?”", "「何が待っている？」");
   E("“what happens next?”", "„Was passiert als Nächstes?“", "“ต่อไปจะเป็นอย่างไร?”", "「次はどうなる？」");
@@ -1175,7 +1185,7 @@
   }
 
   /* §12: accessibility strings are localized from the same dictionary. */
-  var ATTRS = ['aria-label', 'placeholder', 'title'];
+  var ATTRS = ['aria-label', 'placeholder', 'title', 'alt'];
   var attrOriginals = new Map(); // el -> {attr: original}
   function translateAttrs(root) {
     var idx = LI[lang];

@@ -673,7 +673,7 @@ function travelChoiceBlock(trainLabel, trainFull) {
   return '<div class="mod tj-choice"><div class="mod-head"><div>' +
     '<div class="when">Journey to Vientiane · one decision, two ways</div>' +
     '<h3>How would you like to travel to Vientiane?</h3>' +
-    '<p>Choose the way that suits you — selecting one quietly sets the other aside.</p>' +
+    '<p>Choose the way that suits you.</p>' +
     '</div></div>' +
     (differs ? S.guests.map((g) => pair(g)).join('') : pair(null)) +
     '</div>';
@@ -1639,7 +1639,7 @@ function renderCost() {
   const line = (d, l, r) => '<div class="crow">' + (d ? '<span class="cdate">' + d + '</span>' : '') +
     '<div class="cbody"><span class="cprod">' + l + '</span><span class="camt">' + r + '</span></div></div>';
   const chapter = (no, t, sub, main) => '<div class="cch' + (main ? ' cch-main' : '') + '"><span class="cch-no">' + no + '</span><div><div class="cch-t">' + t + '</div><div class="cch-s">' + sub + '</div></div></div>';
-  let html = '<p class="note" style="margin-bottom:20px">Your contribution reads as your journey: what you pay, when it happens. Everything else is hosted for you.</p>';
+  let html = '<p class="note" style="margin-bottom:20px">Your contribution reads as your journey: what you contribute, and where it belongs. Everything else is hosted for you.</p>';
   const open = []; // TO FINALIZE WITH GUEST RELATIONS
 
   // 01 · PRE-WEDDING JOURNEY
@@ -1963,7 +1963,7 @@ function showReceived() {
       '<div class="cch-label">Your journey is with Guest Relations</div>' +
       itineraryHtml() +
       '<div class="cch-label" style="margin-top:26px">We\u2019re taking care of</div>' +
-      '<p class="note">Every REQUESTED selection above — seats, rooms, transfers and the wedding days — is now personally coordinated by Khun Ket and Khun Paddy. Statuses move from REQUESTED to UNDER REVIEW to CONFIRMED; nothing is booked until Guest Relations confirms it with you.</p>' +
+      '<p class="note">Your selections are now with Guest Relations. Nothing is booked until Khun Ket and Khun Paddy confirm your arrangements with you personally.</p>' +
       (open.length ? '<div class="cch-label" style="margin-top:22px">To finalize with Guest Relations</div><p class="note">' + open.map(esc).join('<br/>') + '</p>' : '');
   }
   document.getElementById('received-when').textContent =

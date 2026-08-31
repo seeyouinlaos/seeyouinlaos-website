@@ -6,15 +6,31 @@
 | **FROM** | Claude Code · Digital / Technical Implementation Review |
 | **TO** | H&S Wedding 001 · All Project Review Workstreams |
 | **REVIEW DATE** | 30 August 2026 |
-| **DOCUMENT VERSION** | v2.2 — 001 FINAL CONSOLIDATED CORRECTION |
+| **DOCUMENT VERSION** | v3.0 — RE-BASELINED TO `7b6e114` (31 August 2026) |
 | **DOCUMENT TYPE** | Final Pre Public Release Review (authoritative handoff) |
-| **REVIEWED PRODUCTION BASELINE** | v1.0: `cfdc4e7` · v2.0 execution commit: `e643247` |
+| **REVIEWED PRODUCTION BASELINE** | current: `7b6e114` + final correction pass · historical: v1.0 `cfdc4e7`, v2.0 `e643247` |
 | **DOCUMENT COMMIT** | see Version History (§31) — the commit that introduces this file |
 | **CLOUDFLARE VERSION** | `5a11d8f0-5cf3-45e6-a8b7-b2868fbba772` (v2.0 execution, live) |
 | **GITHUB PAGES** | build "pages build and deployment" — success (verified serving baseline) |
 | **PRODUCTION URL 1** | https://seeyouinlaos-website.suthep-hrg.workers.dev |
 | **PRODUCTION URL 2** | https://seeyouinlaos.github.io/seeyouinlaos-website/ |
 | **REPOSITORY** | github.com/seeyouinlaos/seeyouinlaos-website · branch `main` only |
+
+> **RE-BASELINE NOTICE — v3.0 (31 August 2026, binding).** This document is
+> re-baselined to production commit `7b6e114` plus the 001 Final Consolidated
+> Release Correction pass. Every finding recorded below that predates this
+> baseline is **HISTORICAL** and must not be read as a current release
+> blocker. Explicitly **CLOSED / SUPERSEDED** as of this baseline:
+> Submission P0 (persistence-first `/api/register` + REG_KV live and frozen) ·
+> Penthouse dates (21–24 FEB 2027, first night 368.90 party / 184.45 per
+> guest) · event times (Alms 05:00 · Vow 16:30 · Dinner 19:30, final) ·
+> Lijiang watermark · Penthouse imagery · multilingual implementation
+> (catalog-driven fail-closed i18n live in EN/DE/TH/JA) · Mekong
+> cruise/Mekhong Escape (NOT an active event — owner override; Gate 5
+> enforces) · legacy nine-item public menu (superseded by the six-item
+> navigation master + CTA). Current open items live exclusively in the 001
+> release track: 007 Copy Master document delivery and owner identity
+> decisions A–G.
 
 **Mandate honored:** review + documentation only. No fixes, no translations, no redesign, no guest/code generation were performed in this pass. Findings are recorded in the Issue Register (§28), never silently corrected.
 
