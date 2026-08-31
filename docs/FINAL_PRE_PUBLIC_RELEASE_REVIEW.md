@@ -6,7 +6,7 @@
 | **FROM** | Claude Code · Digital / Technical Implementation Review |
 | **TO** | H&S Wedding 001 · All Project Review Workstreams |
 | **REVIEW DATE** | 30 August 2026 |
-| **DOCUMENT VERSION** | v3.0 — RE-BASELINED TO `7b6e114` (31 August 2026) |
+| **DOCUMENT VERSION** | v3.1 — RELEASE VERDICT READY · production `8d95ee4` (31 August 2026) |
 | **DOCUMENT TYPE** | Final Pre Public Release Review (authoritative handoff) |
 | **REVIEWED PRODUCTION BASELINE** | current: `7b6e114` + final correction pass · historical: v1.0 `cfdc4e7`, v2.0 `e643247` |
 | **DOCUMENT COMMIT** | see Version History (§31) — the commit that introduces this file |
@@ -28,9 +28,14 @@
 > (catalog-driven fail-closed i18n live in EN/DE/TH/JA) · Mekong
 > cruise/Mekhong Escape (NOT an active event — owner override; Gate 5
 > enforces) · legacy nine-item public menu (superseded by the six-item
-> navigation master + CTA). Current open items live exclusively in the 001
-> release track: 007 Copy Master document delivery and owner identity
-> decisions A–G.
+> navigation master + CTA). 001 FINAL RELEASE VERDICT
+> (31 August 2026): **PUBLIC RELEASE READY** at production `8d95ee4`
+> (Cloudflare `d2bfd177`). The 007 Copy Master v1.0 is owner-approved and
+> was executed through 007's twelve P1 deviations against `7b6e114`,
+> implemented in `8d95ee4`; its absence as a separate file in the
+> implementation channel is, per 001, not a release blocker. The only items
+> remaining open are the owner identity decisions A–G — these are separate
+> owner data decisions and are NOT release blockers.
 
 **Mandate honored:** review + documentation only. No fixes, no translations, no redesign, no guest/code generation were performed in this pass. Findings are recorded in the Issue Register (§28), never silently corrected.
 
