@@ -60,6 +60,11 @@ section { padding: 110px 6vw; position: relative; }
 .top-utility .lang-sw button.on { color: #e8cf9a; border-color: rgba(201,164,92,.8); }
 .menu-btn { position: static; max-width: 40vw; overflow: hidden; white-space: nowrap; background: none; border: 1px solid transparent; color: var(--ivory); font-family: 'Hanken Grotesk', sans-serif; font-weight: 300; font-size: 12px; letter-spacing: .24em; text-transform: uppercase; padding: 12px 20px; cursor: pointer; transition: background .35s, color .35s, border-color .35s; }
 .menu-btn.solid { background: var(--ink-s); color: var(--ivory); border-color: rgba(242,236,225,.25); }
+/* 002: CLOSE is a secondary utility, not a primary CTA — while the menu is
+ * open the control turns quiet (no box), stays a full tap target. */
+.menu-btn[aria-expanded="true"], .menu-btn.solid[aria-expanded="true"] { background: none; border-color: transparent; color: var(--rose); }
+.menu-overlay .m-cta .t { color: var(--cherry-photo); }
+.menu-overlay .m-cta .n { color: var(--cherry-photo); }
 .menu-btn:hover { border-color: var(--cherry-photo); }
 .top-btn { position: fixed; bottom: 36px; right: 44px; z-index: 45; background: var(--ink-s); border: 1px solid rgba(242,236,225,.25); color: var(--ivory); font-family: 'Hanken Grotesk', sans-serif; font-weight: 300; font-size: 11px; letter-spacing: .22em; text-transform: uppercase; padding: 12px 18px; cursor: pointer; opacity: 0; pointer-events: none; transform: translateY(10px); transition: opacity .4s, transform .4s, border-color .3s; }
 .top-btn.show { opacity: 1; pointer-events: auto; transform: none; }
@@ -556,17 +561,13 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
 <div aria-hidden="true" class="menu-overlay" id="menuOverlay">
 <div class="m-mark">see you in laos<span class="dot">.</span></div>
 <div>
-<div class="m-eyebrow">Explore the journey</div>
 <nav>
-<a class="m-link" href="#story"><span class="n">01</span><span class="t">The Story</span></a>
-<a class="m-link" href="#weekend"><span class="n">02</span><span class="t">The Moments</span></a>
-<a class="m-link" href="#places"><span class="n">03</span><span class="t">The Places</span></a>
-<a class="m-link" href="#rooms"><span class="n">04</span><span class="t">Where You Sleep</span></a>
-<a class="m-link" href="#dresscode"><span class="n">05</span><span class="t">The Dress Guide</span></a>
-<a class="m-link" href="#journey"><span class="n">06</span><span class="t">The Weekend, in Order</span></a>
-<a class="m-link" href="#travel"><span class="n">07</span><span class="t">Before You Travel</span></a>
-<a class="m-link" href="#portal"><span class="n">08</span><span class="t">Your Guest Area</span></a>
-<a class="m-link" href="register/"><span class="n">09</span><span class="t">Join the Journey</span></a>
+<a class="m-link" href="#weekend"><span class="n">01</span><span class="t">Journey</span></a>
+<a class="m-link" href="#rooms"><span class="n">02</span><span class="t">Stay</span></a>
+<a class="m-link" href="#journey"><span class="n">03</span><span class="t">Wedding</span></a>
+<a class="m-link" href="#travel"><span class="n">04</span><span class="t">Travel</span></a>
+<a class="m-link" href="#portal"><span class="n">05</span><span class="t">Guest Area</span></a>
+<a class="m-link m-cta" href="register/"><span class="n">→</span><span class="t">Join the Journey</span></a>
 </nav>
 </div>
 <div class="m-foot">
@@ -1140,8 +1141,8 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
 <p>Timing and your table arrive in your Guest Area closer to the day.</p>
 <div class="pv-meta">Sunday, 28 February 2027 · Souphattra Heritage Vientiane<br/>Dress · Black Tie</div>
 </article>
-<script src="assets/i18n/catalog.js?v=ML3"></script>
-<script src="assets/i18n/siyl-i18n.js?v=ML3"></script>
+<script src="assets/i18n/catalog.js?v=ML4"></script>
+<script src="assets/i18n/siyl-i18n.js?v=ML4"></script>
 <script src="assets/vendor/leaflet/leaflet.js"></script>
 <script>
 (function () {

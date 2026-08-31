@@ -53,10 +53,10 @@
   E("My Contribution", "Mein Beitrag", "ส่วนร่วมของฉัน", "費用のご案内");
 
   /* ---- public navigation / chrome ---- */
-  E("Journey", "Die Reise", "การเดินทาง", "旅");
-  E("Stay", "Übernachten", "ที่พัก", "滞在");
-  E("Wedding", "Hochzeit", "งานแต่งงาน", "挙式");
-  E("Travel", "Anreise", "ข้อมูลเดินทาง", "交通案内");
+  E("Journey", "Die Reise", "เส้นทาง", "旅");
+  E("Stay", "Aufenthalt", "ที่พัก", "滞在");
+  E("Wedding", "Die Hochzeit", "งานแต่งงาน", "結婚式");
+  E("Travel", "Anreise", "การเดินทาง", "アクセス");
   E("Guest Area", "Gästebereich", "ส่วนสำหรับแขก", "ゲストエリア");
   E("MENU", "MENÜ", "เมนู", "メニュー");
   E("TOP", "NACH OBEN", "กลับด้านบน", "トップへ");
