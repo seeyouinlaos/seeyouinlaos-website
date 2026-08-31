@@ -71,24 +71,8 @@
   E("Next Steps", "Die nächsten Schritte", "ขั้นตอนถัดไป", "次のステップ");
   E("Your Guest Area", "Euer Gästebereich", "ส่วนสำหรับแขกของคุณ", "ゲストエリア");
   E("The Pre Wedding Journey", "Die Reise vor der Hochzeit", "การเดินทางก่อนวันงาน", "ウェディング前の旅");
-  E("Private Sunset Cruise & Welcome Dinner",
-    "Private Sunset Cruise & Welcome Dinner",
-    "ล่องเรือชมอาทิตย์อัสดงส่วนตัว และดินเนอร์ต้อนรับ",
-    "プライベート・サンセットクルーズ＆ウェルカムディナー");
-  E("Saturday, 27 February 2027", "Samstag, 27. Februar 2027", "วันเสาร์ที่ 27 กุมภาพันธ์ 2027", "2027年2月27日（土）");
-  E("Mekhong Escape, Vientiane", "Mekhong Escape, Vientiane", "เมคง เอสเคป เวียงจันทน์", "メコン・エスケープ（ビエンチャン）");
   E("Souphattra Vientiane Hotel", "Souphattra Vientiane Hotel", "โรงแรมสุพัตรา เวียงจันทน์", "スパッタラ・ビエンチャン・ホテル");
-  E("A private cruise on the Mekong as the sun goes down, and the welcome dinner on board — the evening the whole journey gathers in Vientiane.",
-    "Eine private Fahrt auf dem Mekong, während die Sonne versinkt — und das Welcome Dinner an Bord. Der Abend, an dem die ganze Reise in Vientiane zusammenkommt.",
-    "ล่องเรือส่วนตัวบนแม่น้ำโขงยามตะวันลับฟ้า พร้อมดินเนอร์ต้อนรับบนเรือ ค่ำคืนที่ทุกเส้นทางมาบรรจบกันที่เวียงจันทน์",
-    "夕日が沈むメコン川をプライベートクルーズで——ウェルカムディナーは船上で。旅のすべてがビエンチャンに集う夜です。");
-  E("At sunset", "Bei Sonnenuntergang", "ยามอาทิตย์อัสดง", "日暮れどき");
-  E("· Mekhong Escape, Vientiane", "· Mekhong Escape, Vientiane", "· เมคง เอสเคป เวียงจันทน์", "· メコン・エスケープ（ビエンチャン）");
   E("· Souphattra Vientiane Hotel", "· Souphattra Vientiane Hotel", "· โรงแรมสุพัตรา เวียงจันทน์", "· スパッタラ・ビエンチャン・ホテル");
-  E("a private cruise on the Mekong as the sun goes down, and the welcome dinner on board",
-    "eine private Fahrt auf dem Mekong, während die Sonne versinkt — und das Welcome Dinner an Bord",
-    "ล่องเรือส่วนตัวบนแม่น้ำโขงยามตะวันลับฟ้า พร้อมดินเนอร์ต้อนรับบนเรือ",
-    "夕日が沈むメコン川をプライベートクルーズで——ウェルカムディナーは船上で");
   E("The Alms Giving", "Das Morgenritual", "พิธีตักบาตร", "托鉢の儀");
   E("The Vow Ceremony", "Das Eheversprechen", "พิธีกล่าวคำสัญญา", "誓いの式");
   E("The Wedding Dinner", "Das Hochzeitsdinner", "งานเลี้ยงฉลองมงคลสมรส", "ウェディングディナー");
