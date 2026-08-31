@@ -60,6 +60,9 @@ export const JOURNEY_MODULES = [
 ];
 
 export const EVENTS = [
+  { id: 'welcome', label: 'Private Sunset Cruise & Welcome Dinner', when: 'Saturday, 27 February 2027', time: 'At sunset',
+    venue: 'Mekhong Escape, Vientiane',
+    blurb: 'A private cruise on the Mekong as the sun goes down, and the welcome dinner on board — the evening the whole journey gathers in Vientiane.' },
   { id: 'alms', label: 'Alms Giving', when: 'Sunday, 28 February 2027', time: '05:00 AM',
     venue: 'Souphattra Heritage Vientiane', dress: 'Lao Traditional Dress', dressGroup: 'tradition',
     blurb: 'A quiet Buddhist ritual to open the wedding day at first light. Monks walk in procession; rice is offered; nothing is hurried.',
@@ -67,7 +70,7 @@ export const EVENTS = [
   { id: 'ceremony', label: 'Vow Ceremony', when: 'Sunday, 28 February 2027', time: '04:30 PM',
     venue: 'Souphattra Heritage Vientiane', dress: 'Black Tie', dressGroup: 'vow', blurb: 'The vows, in front of everyone who matters.' },
   { id: 'dinner', label: 'Wedding Dinner', when: 'Sunday, 28 February 2027', time: '07:30 PM',
-    venue: 'Souphattra Heritage Vientiane', dress: 'Black Tie', dressGroup: 'dinner', blurb: 'Sunset drinks beside the pool, then dinner in the courtyard garden. Food, music and celebration.' },
+    venue: 'Souphattra Vientiane Hotel', dress: 'Black Tie', dressGroup: 'dinner', blurb: 'Sunset drinks beside the pool, then dinner in the courtyard garden. Food, music and celebration.' },
 ];
 
 /* ---------------- accommodation resources ----------------
