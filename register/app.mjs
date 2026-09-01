@@ -1727,6 +1727,39 @@ function renderCost() {
     (fxStamp() ? '<p class="note" style="margin-top:14px">' + fxStamp() + ' · Amounts are shown for orientation; the master currency remains USD.</p>' : '') +
     '<p class="note" style="margin-top:16px">' + esc(COPY.priceNote + ' Haruthai\u00A0&\u00A0Suthep.') + '</p>' +
     '<p class="note">' + esc(COPY.payment) + ' One person may settle the invoice for everyone travelling with them.</p>';
+
+  /* progressive disclosure (mobile): each cost chapter collapses to its
+   * header; the grand totals and hosted rows stay visible. Desktop keeps
+   * everything open — CSS gates the collapsed state to small screens. */
+  (function () {
+    const kids = Array.from(box.children);
+    let sec = null;
+    kids.forEach((el) => {
+      if (el.classList && el.classList.contains('cch')) {
+        sec = document.createElement('div');
+        sec.className = 'csec closed';
+        box.insertBefore(sec, el);
+        el.setAttribute('role', 'button');
+        el.setAttribute('tabindex', '0');
+        el.setAttribute('aria-expanded', 'false');
+        el.setAttribute('aria-label', 'Show details');
+        const mySec = sec;
+        const toggle = () => {
+          const closed = mySec.classList.toggle('closed');
+          el.setAttribute('aria-expanded', String(!closed));
+          el.setAttribute('aria-label', closed ? 'Show details' : 'Hide details');
+        };
+        el.addEventListener('click', toggle);
+        el.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } });
+        sec.appendChild(el);
+      } else if (sec && el.classList && (el.classList.contains('c-item') || el.classList.contains('citem') || el.tagName === 'DIV')) {
+        if (el.classList.contains('ctotal') || el.classList.contains('c-grand')) { sec = null; return; }
+        sec.appendChild(el);
+      } else {
+        sec = null;
+      }
+    });
+  })();
 }
 
 /* ---------------- step 10 · review (§28) ---------------- */
