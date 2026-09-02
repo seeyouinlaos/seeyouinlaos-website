@@ -94,7 +94,7 @@
   E("Close", "Schließen", "ปิด", "閉じる");
   E("Guest Relations will confirm the arrangement", "Guest Relations bestätigt die Abstimmung persönlich", "ฝ่ายดูแลแขกจะยืนยันการจัดเตรียมให้", "ゲストリレーションズが手配を確定します");
   E("To finalize with Guest Relations", "Mit Guest Relations abzustimmen", "รอสรุปกับฝ่ายดูแลแขก", "ゲストリレーションズと最終調整");
-  E("Total contribution", "Gesamtkosten für euch", "ส่วนร่วมทั้งหมด", "費用の合計");
+  E("Total costs", "Gesamtkosten für euch", "ค่าใช้จ่ายทั้งหมด", "費用の合計");
   E("Hosted for you", "Von Haruthai & Suthep für euch übernommen", "เจ้าภาพดูแลให้", "おもてなしとしてご招待");
   E("Your journey", "Eure Reise", "การเดินทางของคุณ", "旅の概要");
   E("Your route", "Eure Route", "เส้นทางของคุณ", "ルート");
@@ -252,11 +252,10 @@
   E("Remove", "Entfernen", "นำออก", "削除");
 
   /* ---- MY CONTRIBUTION ---- */
-  E("Your contribution reads as your journey: what you contribute, and where it belongs. Everything else is hosted for you.",
+  E("Here you can see which costs you cover yourself and what Haruthai & Suthep are hosting for you.",
     "Hier seht ihr auf einen Blick, welche Kosten ihr selbst übernehmt und was Haruthai & Suthep für euch übernehmen.",
-    "ส่วนร่วมของคุณอ่านได้เหมือนเส้นทางของคุณ สิ่งที่คุณร่วมสมทบ และเป็นของช่วงใดของการเดินทาง ส่วนที่เหลือเจ้าภาพดูแลให้ทั้งหมด",
-    "費用のご案内は、旅の行程そのものです。何をご一緒に担っていただくか、そしてそれが旅のどこに属するか。それ以外はすべて、おもてなしとしてご用意しています。")
-  E("Pre-Wedding Journey", "Reise vor der Hochzeit", "การเดินทางก่อนวันงาน", "ウェディング前の旅");
+    "ที่นี่คุณเห็นได้ทันทีว่าค่าใช้จ่ายใดคุณดูแลเอง และส่วนใดหฤทัยและสุเทพดูแลให้",
+    "ご自身でご負担いただく費用と、ハルタイ＆ステープがおもてなしする部分を、ここでひと目でご覧いただけます。")
   E("The Wedding", "Die Hochzeit", "งานแต่งงาน", "結婚式");
   E("The Journey", "Die Reise", "เส้นทาง", "旅");
   E("Post-Wedding Journey", "Reise nach der Hochzeit", "การเดินทางหลังวันงาน", "ウェディング後の旅");
