@@ -401,12 +401,10 @@ body.pv-lock { overflow: hidden; }
 .cch { display: flex; gap: 14px; align-items: baseline; margin: 34px 0 10px; padding-top: 18px; border-top: 1px solid var(--gold-line); }
 /* progressive disclosure: on small screens each cost chapter collapses to
  * its header; totals stay visible. Desktop always shows everything. */
-@media (max-width: 640px) {
-  .csec .cch { cursor: pointer; position: relative; padding-right: 26px; }
-  .csec .cch::after { content: '\25BE'; position: absolute; right: 4px; top: 50%; transform: translateY(-30%); color: var(--gold, #b39b6d); font-size: 13px; transition: transform .3s; }
-  .csec:not(.closed) .cch::after { transform: translateY(-30%) rotate(180deg); }
-  .csec.closed > :not(.cch) { display: none; }
-}
+.csec .cch { cursor: pointer; position: relative; padding-right: 26px; }
+.csec .cch::after { content: '\25BE'; position: absolute; right: 4px; top: 50%; transform: translateY(-30%); color: var(--gold, #b39b6d); font-size: 13px; transition: transform .3s; }
+.csec:not(.closed) .cch::after { transform: translateY(-30%) rotate(180deg); }
+.csec.closed > :not(.cch) { display: none; }
 .cch:first-of-type { margin-top: 18px; }
 .cch-no { font-family: 'Cormorant Garamond', serif; font-size: 22px; color: var(--rose); }
 .cch-t { font-family: 'Cormorant Garamond', serif; font-size: 21px; line-height: 1.2; }
@@ -722,8 +720,8 @@ html.inv-anim-open .bx-right { animation: bxRight 2.05s cubic-bezier(.45,.05,.45
 
 <!-- 6 · travel (§15) -->
 <!-- 7 · spa (§16) -->
-<section class="step" data-step="spa" aria-label="Spa and wellness">
-<div class="step-eyebrow">Spa &amp; wellness</div>
+<section class="step" data-step="spa" aria-label="Experiences">
+<div class="step-eyebrow">Experiences</div>
 <h2>A slower hour,<br/>if you like.</h2>
 <div id="spa-box"></div>
 <div class="stepnav"><button class="btn ghost" data-prev>Back</button><button class="btn" data-next>Continue</button></div>
@@ -739,8 +737,8 @@ html.inv-anim-open .bx-right { animation: bxRight 2.05s cubic-bezier(.45,.05,.45
 </section>
 
 <!-- 9 · cost -->
-<section class="step" data-step="cost" aria-label="Your contribution">
-<div class="step-eyebrow">Your contribution</div>
+<section class="step" data-step="cost" aria-label="Your costs">
+<div class="step-eyebrow">Your costs</div>
 <h2>Clear, and<br/>kept simple.</h2>
 <div id="cost-box"></div>
 <div class="stepnav"><button class="btn ghost" data-prev>Back</button><button class="btn" data-next>Review</button></div>
@@ -798,8 +796,8 @@ html.inv-anim-open .bx-right { animation: bxRight 2.05s cubic-bezier(.45,.05,.45
 <div class="lb-count" aria-live="polite"></div>
 </div>
 
-<script src="../assets/i18n/catalog.js?v=ML7"></script>
-<script src="../assets/i18n/siyl-i18n.js?v=ML7"></script>
+<script src="../assets/i18n/catalog.js?v=ML8"></script>
+<script src="../assets/i18n/siyl-i18n.js?v=ML8"></script>
 <script type="module" src="./app.mjs"></script>
 </body>
 </html>

@@ -339,6 +339,14 @@ export function buildNotification(reg, ctx) {
   out.push(L('Invitation:', invitation.invitationId));
   out.push(L('Lead Guest:', (invitation.guests.find((g) => g.guestId === invitation.partyLead) || {}).fullName));
   out.push('');
+  if (reg.scope) {
+    const parts = [reg.scope.bangkok && 'Bangkok', 'Laos/Wedding', reg.scope.china && 'China'].filter(Boolean).join(' + ');
+    out.push(L('Journey Scope:', parts));
+  }
+  if (reg.stay && reg.stay.mode === 'own') out.push('Stay: OWN ACCOMMODATION — no arrangement needed');
+  if (reg.stay && reg.stay.mode === 'oneNight') out.push('Stay: ONE NIGHT 28 FEB - 01 MAR · ' + ((reg.stay.oneNight || {}).category || 'category open') + ' · PRICE TO FINALIZE WITH GUEST RELATIONS');
+  if (reg.experiences && reg.experiences.length) out.push(L('Experiences requested:', reg.experiences.map((e) => e.name + ' (' + e.status + ')').join('; ')));
+  out.push('');
   const acc = reg.stay && reg.stay.accommodationId
     ? accommodations.find((a) => a.id === reg.stay.accommodationId) : null;
   const occ = acc ? (reg.stay.occupantGuestIds || []) : [];
