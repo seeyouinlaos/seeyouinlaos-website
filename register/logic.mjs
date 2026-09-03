@@ -479,12 +479,12 @@ export function buildNotification(reg, ctx) {
   if (acc) out.push(L('Stay:', acc.contributionPerGuest == null ? 'Arranged separately' : money(partyTotal(acc, occ))));
   if (trainRiders) out.push(L('Train:', trainRiders + ' × ' + money((train || {}).contributionPerGuest || 0) + ' = ' + money(trainSum)));
   if (selectedTransfers.length) out.push(L('Transfers:', money(transfersTotal(transferCatalog, selectedTransfers, trainRiders))));
-  const kmgOwn = reg.travel && reg.travel.kmgLjg === 'own';
-  if (reg.postWedding && reg.postWedding.joined && !kmgOwn) out.push(L('Post-Wedding (China train):', money(postWeddingTotal(ctx.postWedding || [], true, (reg.guests || []).filter((g) => g.attending !== false).length))));
-  if (kmgOwn) out.push(L('Kunming → Lijiang:', 'OWN ARRANGEMENT · USD 0'));
+  const kmgReq = reg.travel && reg.travel.kmgLjg === 'with';
+  if (reg.postWedding && reg.postWedding.joined && kmgReq) out.push(L('Post-Wedding (China train):', money(postWeddingTotal(ctx.postWedding || [], true, (reg.guests || []).filter((g) => g.attending !== false).length))));
+  if (reg.postWedding && reg.postWedding.joined && !kmgReq) out.push(L('Kunming → Lijiang:', 'NOT REQUESTED · USD 0'));
   {
     const attendees = Math.max((reg.guests || []).filter((g) => g.attending !== false).length, 1);
-    const pw = (reg.postWedding && reg.postWedding.joined && !(reg.travel && reg.travel.kmgLjg === 'own')) ? postWeddingTotal(ctx.postWedding || [], true, attendees) : 0;
+    const pw = (reg.postWedding && reg.postWedding.joined && reg.travel && reg.travel.kmgLjg === 'with') ? postWeddingTotal(ctx.postWedding || [], true, attendees) : 0;
     const b = reg.bangkokStay || {};
     const act = (reg.scope && reg.scope.bangkok) && (b.withUs || b.property);
     const nights = (b.from && b.to) ? Math.max(1, Math.round((new Date(b.to) - new Date(b.from)) / 86400000)) : 4;

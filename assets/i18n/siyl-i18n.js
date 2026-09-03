@@ -311,6 +311,8 @@
   E("paid night", "bezahlte Nacht", "คืนที่ชำระ", "有料泊");
   E("paid nights", "bezahlte Nächte", "คืนที่ชำระ", "有料泊");
   E("the second wedding night · hosted by Haruthai & Suthep", "die zweite Hochzeitsnacht · übernommen von Haruthai & Suthep", "คืนที่สองของงานแต่งงาน · ฮารุไทและสุเทพดูแลให้", "結婚式の2泊目・ハルタイ＆ステープがご招待");
+  E("Request this journey", "Diese Reise anfragen", "ขอจองการเดินทางนี้", "この旅程をリクエスト");
+  E("Remove from journey", "Aus der Reise entfernen", "นำออกจากเส้นทาง", "旅程から外す");
   E("Show details", "Details anzeigen", "ดูรายละเอียด", "詳細を見る");
   E("Hide details", "Details schließen", "ซ่อนรายละเอียด", "詳細を閉じる");
   E("Continue", "Weiter", "ดำเนินการต่อ", "次へ");
