@@ -8,13 +8,13 @@
 import {
   WEDDING, CONTACTS, JOURNEY_MODULES, EVENTS, ACCOMMODATIONS, SELECTABLE_ACCOMMODATIONS, TRAIN,
   TRANSFERS, PACKAGE_INCLUSIONS, COPY, DEMO_MODE, PUBLICATION, TRAIN_REFERENCE, BERTH_PREFS, BANGKOK_STAYS, BANGKOK_STAY, POST_WEDDING, RETURN_STAY, lookupInvitation,
-} from './data.mjs?v=UK2';
+} from './data.mjs?v=UK3';
 import {
   contributionPerGuest, partyCharges, partyTotal, money as usdMoney, displayMoney,
   trainContribution, transfersTotal, journeyTotal, postWeddingTotal,
   createInventory, remaining, availabilityLabel, requestAllocation,
   validateRegistration, buildNotification, nextInvitationState,
-} from './logic.mjs?v=UK2';
+} from './logic.mjs?v=UK3';
 
 /* ---------------- persistent state ---------------- */
 const DRAFT_KEY = 'siyl.reg.draft.v2';
@@ -105,7 +105,7 @@ function itinerarySteps() {
     steps.push({ d: bh0.arrival.date, t: 'Bangkok arrival', s: bh0.arrival.note, st: 'HOSTED' });
     steps.push(joinedStay
       ? { d: (S.bangkokStay.from && S.bangkokStay.to ? esc(S.bangkokStay.from) + ' → ' + esc(S.bangkokStay.to) : BANGKOK_STAY.window) + ' · ' + bkkNights() + ' nights', t: 'Bangkok Stay · currently ' + bh0.name,
-          s: money(BANGKOK_STAY.ratePerGuestNight) + ' per guest / night · ' + bkkTravellers() + ' guests · total ' + money(bkkTotal()), st: 'ARRANGED WITH GUEST RELATIONS' }
+          s: money(BANGKOK_STAY.ratePerGuestNight) + ' per guest / night · ' + bkkTravellers() + ' guests · total ' + money(bkkTotal()), st: 'BOOKED' }
       : { d: bh0.dates, t: bh0.name, s: 'Choose your Bangkok stay in My Journey', st: 'YOUR CHOICE' });
   }
   if (riders.length) {
@@ -120,10 +120,10 @@ function itinerarySteps() {
   steps.push(acc
     ? { d: (S.stay.mode === 'oneNight' ? '28 FEB – 01 MAR 2027 · 1 night' : acc.stay + ' · ' + acc.nights + ' nights'), t: acc.name + ' · Vientiane', s: (S.stay.mode === 'oneNight' ? 'One night · your costs · breakfast included' : 'First night · your contribution — second night · hosted'), st: S.stay.waitlist ? 'WAITLISTED' : 'ARRANGED WITH GUEST RELATIONS' }
     : { d: '27 FEB – 01 MAR 2027', t: 'Your wedding stay · Vientiane', s: 'Choose under My Stay', st: 'YOUR CHOICE' });
-  steps.push({ d: '28 FEB 2027 · 09:00 AM', t: 'The Temple Ceremony', s: 'Wat Ong Teu Temple, Vientiane', main: true });
-  steps.push({ d: 'After the return', t: 'Coffee & Cake', s: 'Souphattra Heritage Vientiane', main: true });
-  steps.push({ d: '28 FEB 2027 · 04:30 PM', t: 'The Vow Ceremony', s: 'Souphattra Heritage Vientiane', main: true });
-  steps.push({ d: '28 FEB 2027 · 07:30 PM', t: 'The Wedding Dinner', s: 'Souphattra Vientiane Hotel', main: true });
+  steps.push({ d: '28 FEB 2027 · 09:00 AM', t: 'The Temple Ceremony', s: 'Wat Ong Teu Temple, Vientiane', st: 'COMPLIMENTARY', main: true });
+  steps.push({ d: 'After the return', t: 'Coffee & Cake', s: 'Souphattra Heritage Vientiane', st: 'COMPLIMENTARY', main: true });
+  steps.push({ d: '28 FEB 2027 · 04:30 PM', t: 'The Vow Ceremony', s: 'Souphattra Heritage Vientiane', st: 'COMPLIMENTARY', main: true });
+  steps.push({ d: '28 FEB 2027 · 07:30 PM', t: 'The Wedding Dinner', s: 'Souphattra Vientiane Hotel', st: 'COMPLIMENTARY', main: true });
   if (S.postWedding && S.postWedding.joined) {
     for (const c of POST_WEDDING.filter((x) => !x.onward)) {
       steps.push({ d: c.date, t: c.label, s: (c.type === 'Train' ? 'First Class Train' : c.type) + (c.sub ? ' · ' + c.sub : '') + (c.contribution != null ? '' : ' · Guest Relations confirms') });
@@ -968,7 +968,7 @@ function postWeddingBlock() {
       '<div class="trf-price">' + (c.contribution != null
         ? money(c.contribution) + ' per guest'
         : 'Guest Relations will confirm the arrangement') + '</div>' +
-      '<div class="acc-avail" style="border-top:none;padding-top:6px">REQUESTED · Guest Relations confirms every detail personally</div>' +
+      '<div class="acc-avail" style="border-top:none;padding-top:6px">BOOKED</div>' +
       '</article>';
   const onwardBlock = () =>
     '<article class="trf-card"><div class="when">06 MAR 2027 · after Lijiang</div><h4>Your onward journey</h4>' +
@@ -2378,7 +2378,7 @@ function renderScopeBlock() {
       (imgs && imgs.length ? '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:2px 0 6px">' +
         imgs.slice(0, 3).map((im, ix) => '<img src="' + im + '" alt="' + label + ' — view ' + (ix + 1) + '" loading="lazy" decoding="async" style="width:100%;height:84px;object-fit:cover;display:block"/>').join('') + '</div>' : '') +
       (withDetail ? '<div class="trf-price">' + withDetail + '</div>' : '') +
-      (requested ? '<div class="acc-avail" style="margin-top:6px">REQUESTED · Guest Relations confirms every detail personally</div>' : '') +
+      (requested ? '<div class="acc-avail" style="margin-top:6px">BOOKED</div>' : '') +
       '<div style="display:flex;gap:14px;margin-top:16px;margin-bottom:6px;flex-wrap:wrap">' +
       (requested
         ? '<button type="button" class="btn sm ghost" data-tj-req="' + name + '" data-tj-val="off">Remove from journey</button>'
@@ -2393,12 +2393,14 @@ function renderScopeBlock() {
     '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0 6px">' +
     c.imgs.slice(0, 3).map((im, ix) => '<img src="' + im + '" alt="' + esc(c.name) + ' — view ' + (ix + 1) + '" loading="lazy" decoding="async" style="width:100%;height:74px;object-fit:cover;display:block"/>').join('') + '</div>' +
     (c.sub ? '<p class="note" style="margin:0 0 6px">' + esc(c.sub) + '</p>' : '') +
+    '<div class="acc-avail" style="margin:0 0 6px">Breakfast included</div>' +
     '<div class="trf-price">' + esc(c.name) + '<br/>' + esc(c.dates) + ' · ' + c.nights + ' ' + (c.nights === 1 ? 'night' : 'nights') + ' · ' + c.trav + ' ' + (c.trav === 1 ? 'traveller' : 'travellers') +
     (c.rate != null ? '<br/>Your costs · ' + money(c.rate) + ' per person / night · ' + c.nights + ' nights × ' + c.trav + ' guests<br/><strong>Total · ' + money(c.rate * c.nights * c.trav) + '</strong>' : (c.costLine ? '<br/>' + c.costLine : '')) +
     '</div>' + (c.after || '') + '</div>';
   box.insertAdjacentHTML('afterbegin',
     '<div class="guest-block" id="scope-block">' +
     '<div class="cch-label">Your journey · choose the parts you are joining</div>' +
+    '<p class="note" style="margin:6px 0 2px">Everything is shown in the order you travel. <strong>Hosted</strong> — Haruthai &amp; Suthep are taking care of this for you. <strong>Booked</strong> — you have selected and booked this through your journey. <strong>Your choice</strong> — you arrange this part yourself.</p>' +
     '<p class="note">Choosing a destination sets nothing in stone and costs nothing — it only opens the right choices for you.</p>' +
     row('bangkok', 'Bangkok', 'The shared days in Bangkok before travelling on to Laos.', false) +
     row('laos', 'Laos · The Wedding', 'Vientiane, the wedding days and everything around them.', false) +
@@ -2432,7 +2434,7 @@ function renderScopeBlock() {
         '<div class="field" style="margin-top:8px"><label>Your arrival details for Guest Relations (flight/train, booked by you)</label><textarea id="bkk-arrival" rows="2">' + esc(b.arrivalInfo || '') + '</textarea></div>';
     }
     inner += bkkReq
-      ? '<div class="acc-avail" style="margin-top:6px">REQUESTED · Guest Relations confirms every detail personally</div><div style="display:flex;gap:14px;margin-top:16px;margin-bottom:10px"><button type="button" class="btn sm ghost" id="bkk-req-off">Remove from journey</button></div>'
+      ? '<div class="acc-avail" style="margin-top:6px">BOOKED</div><div style="display:flex;gap:14px;margin-top:16px;margin-bottom:10px"><button type="button" class="btn sm ghost" id="bkk-req-off">Remove from journey</button></div>'
       : '<div style="display:flex;gap:14px;margin-top:16px;margin-bottom:10px"><button type="button" class="btn sm" id="bkk-req-on">Request this stay</button></div>';
     box.querySelector('#scope-block .mod[data-scope="bangkok"]').insertAdjacentHTML('afterend', '<div id="bkk-journey">' + inner + '</div>');
     const bOn = box.querySelector('#bkk-req-on'), bOff = box.querySelector('#bkk-req-off');
@@ -2470,7 +2472,7 @@ function renderScopeBlock() {
         'Overnight · Special Express No. 25 · reserved First Class Sleeper berth<br/>' +
         '25 FEB 2027 · 06:45 · Nong Khai arrival<br/>' +
         '25 FEB 2027 · Nong Khai → Vientiane · van transfer &amp; luggage handling · included<br/>' +
-        money(TRAIN.contributionPerGuest) + ' PER GUEST · package · × ' + (ridersN || attendingCount()) + ' guests<br/>' +
+        'Train · USD 55 per guest · Van Pickup &amp; Luggage Service · USD 20 per guest<br/>' + money(TRAIN.contributionPerGuest) + ' PER GUEST · package · × ' + (ridersN || attendingCount()) + ' guests<br/>' +
         '<strong>Transport total · ' + money(TRAIN.contributionPerGuest * (ridersN || attendingCount())) + '</strong>',
         'Own arrangement noted — USD 0. Fly or travel on your own schedule; we meet you in Vientiane.',
         ['../assets/images/train/train-01.jpg', '../assets/images/train/train-04.jpg', '../assets/images/train/train-03.jpg']) +
@@ -2488,10 +2490,11 @@ function renderScopeBlock() {
       const stayLine = cinDe + ' – 01.03.2027 · ' + laosNights() + ' ' + (laosNights() === 1 ? 'night' : 'nights') + ' · Vientiane';
       const keyLine = 'Check-in ' + cinEn + ' · Check-out 01 MAR 2027 · ' + laosNights() + ' ' + (laosNights() === 1 ? 'night' : 'nights');
       const laosOcc = S.guests.filter((g) => g.attending !== false).map((g) => g.guestId);
-      const rooms = ACCOMMODATIONS.filter((a) => a.selectable !== false);
+      const rooms = ACCOMMODATIONS;
       const roomCards = rooms.map((a) => {
-        const res = inventory[a.id];
-        const full = remaining(res) <= 0;
+        const bookable = a.selectable !== false;
+        const res = bookable ? inventory[a.id] : null;
+        const full = bookable ? remaining(res) <= 0 : false;
         const selRoom = S.stay.accommodationId === a.id && !S.stay.waitlist;
         const det = S._laosDet === a.id;
         const priced = a.contributionPerGuest != null;
@@ -2500,20 +2503,23 @@ function renderScopeBlock() {
           '<div class="cch-label" style="margin-top:2px">Souphattra Heritage Vientiane</div>' +
           '<h4 style="margin:4px 0 6px">' + esc(a.name) + '</h4>' +
           '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:6px 0">' +
-          (a.images || []).slice(0, 3).map((im, ix) => '<img src="' + roomImg(im) + '" alt="' + esc(a.name) + ' — view ' + (ix + 1) + '" loading="lazy" decoding="async" style="width:100%;height:84px;object-fit:cover;display:block"/>').join('') + '</div>' +
+          (a.images || []).slice(0, 3).map((im, ix) => '<img src="' + roomImg(im) + '" alt="' + esc(a.name) + ' — view ' + (ix + 1) + '" data-lb-acc="' + a.id + '" data-lb-ix="' + ix + '" loading="lazy" decoding="async" style="width:100%;height:84px;object-fit:cover;display:block;cursor:zoom-in"/>').join('') + '</div>' +
           '<p class="note" style="margin:0 0 4px">' + keyLine + '</p>' +
-          '<div class="acc-avail">' + (selRoom ? 'REQUESTED · Guest Relations will confirm' : esc(guestAvailability(res))) + '</div>' +
+          '<div class="acc-avail">' + (!bookable ? esc(a.reservedFor || 'Reserved') + ' · Unavailable' : selRoom ? 'BOOKED' : esc(guestAvailability(res))) + '</div>' +
+          '<div class="acc-avail" style="border-top:none;padding-top:4px">Breakfast included</div>' +
           (priced
             ? '<div class="trf-price" style="margin-top:8px">' + money(contributionPerGuest(a)) + ' per guest / paid night · ' + laosOcc.length + ' ' + (laosOcc.length === 1 ? 'guest' : 'guests') + ' × ' + laosPaidNights() + ' paid ' + (laosPaidNights() === 1 ? 'night' : 'nights') +
               (oneN ? '<br/>1 night · same category rate · breakfast included' : '<br/>' + laosPaidNights() + ' paid ' + (laosPaidNights() === 1 ? 'night' : 'nights') + ' · your costs — the second wedding night · hosted by Haruthai &amp; Suthep') +
               '<br/><strong>Room total · ' + money(partyTotal(a, laosOcc) * laosPaidNights()) + '</strong></div>'
             : '<div class="trf-price" style="margin-top:8px">Complimentary stay · limited · personally coordinated by Guest Relations</div>') +
-          (det ? '<div style="margin-top:8px"><p class="note">' + esc(a.blurb) + '</p></div>' : '') +
+          (det ? '<div style="margin-top:8px"><p class="note">' + esc(a.blurb) + '</p>' + roomSpecs(a, null) + '</div>' : '') +
           '<div style="display:flex;gap:14px;margin-top:16px;margin-bottom:6px;flex-wrap:wrap">' +
           '<button type="button" class="btn sm ghost" data-laos-det="' + a.id + '">' + (det ? 'Hide details' : 'More details') + '</button>' +
-          (full && !selRoom
+          (!bookable
+            ? '<span class="acc-avail" style="border:none;padding:0">Reserved</span>'
+            : full && !selRoom
             ? '<button type="button" class="btn sm" data-laos-wait="' + a.id + '">Join the waitlist</button>'
-            : '<button type="button" class="btn sm" data-laos-select="' + a.id + '"' + (selRoom ? ' disabled' : '') + '>' + (selRoom ? 'REQUESTED' : 'Request this room') + '</button>') +
+            : '<button type="button" class="btn sm" data-laos-select="' + a.id + '"' + (selRoom ? ' disabled' : '') + '>' + (selRoom ? 'BOOKED' : 'Request this room') + '</button>') +
           '</div></article>';
       }).join('');
       const selIdx = Math.max(0, rooms.findIndex((a) => a.id === S.stay.accommodationId));
@@ -2537,6 +2543,10 @@ function renderScopeBlock() {
       S.stay.accommodationId = b.getAttribute('data-laos-wait'); S.stay.waitlist = true; S.stay.own = false;
       S.stay.occupantGuestIds = S.guests.filter((g) => g.attending !== false).map((g) => g.guestId);
       saveDraft(); renderStep(cur); renderSummary();
+    }));
+    box.querySelectorAll('[data-lb-acc]').forEach((im) => im.addEventListener('click', () => {
+      const a = ACCOMMODATIONS.find((x) => x.id === im.getAttribute('data-lb-acc'));
+      if (a) openLightbox(a, parseInt(im.getAttribute('data-lb-ix'), 10) || 0);
     }));
     box.querySelectorAll('[data-laos-det]').forEach((b) => b.addEventListener('click', () => {
       const id = b.getAttribute('data-laos-det');
@@ -2570,7 +2580,7 @@ function renderScopeBlock() {
         '<article class="tj-opt' + (req ? ' sel' : '') + '" style="display:block">' +
         stayModule({ name: c.label, sub: c.sub, dates: c.date, nights: c.nightsCount, trav: trav, rate: c.ratePerGuestNight, imgs: c.images || [],
           after: (req
-            ? '<div class="acc-avail" style="border-top:none;padding-top:6px">REQUESTED · Guest Relations confirms every detail personally</div><div style="display:flex;gap:14px;margin-top:16px;margin-bottom:6px"><button type="button" class="btn sm ghost" data-cn-stay="' + key + '" data-cn-val="off">Remove from journey</button></div>'
+            ? '<div class="acc-avail" style="border-top:none;padding-top:6px">BOOKED</div><div style="display:flex;gap:14px;margin-top:16px;margin-bottom:6px"><button type="button" class="btn sm ghost" data-cn-stay="' + key + '" data-cn-val="off">Remove from journey</button></div>'
             : '<div style="display:flex;gap:14px;margin-top:16px;margin-bottom:6px"><button type="button" class="btn sm" data-cn-stay="' + key + '" data-cn-val="with">Request this stay</button></div>') }) +
         '</article>';
     };
