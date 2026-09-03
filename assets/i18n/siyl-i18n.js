@@ -361,6 +361,12 @@
   E(" — Haruthai & Suthep are taking care of this for you. ", " — Haruthai & Suthep übernehmen das für euch. ", " — ฮารุไทและสุเทพดูแลส่วนนี้ให้คุณ ", " — ハルタイ＆ステープがご用意します。");
   E(" — you have selected and booked this through your journey. ", " — ihr habt das über eure Reise ausgewählt und gebucht. ", " — คุณเลือกและจองส่วนนี้ผ่านเส้นทางของคุณแล้ว ", " — 旅程から選択・予約済みです。");
   E(" — you arrange this part yourself.", " — diesen Teil organisiert ihr selbst.", " — ส่วนนี้คุณจัดการเอง", " — この部分はご自身で手配します。");
+  E("View all rooms", "Alle Zimmer ansehen", "ดูห้องพักทั้งหมด", "すべてのお部屋を見る");
+  E("Choose this room", "Dieses Zimmer wählen", "เลือกห้องนี้", "このお部屋を選ぶ");
+  E("← Back to My Journey", "← Zurück zu Meiner Reise", "← กลับสู่เส้นทางของฉัน", "← 旅のしおりへ戻る");
+  E("Your wedding stay", "Euer Hochzeitsaufenthalt", "ที่พักช่วงงานแต่งงานของคุณ", "ウェディングステイ");
+  E("BOOKED · your current room", "GEBUCHT · euer aktuelles Zimmer", "จองแล้ว · ห้องปัจจุบันของคุณ", "予約済み・現在のお部屋");
+  E("ACTION NEEDED", "AKTION NÖTIG", "ต้องดำเนินการ", "要選択");
   E("Show details", "Details anzeigen", "ดูรายละเอียด", "詳細を見る");
   E("Hide details", "Details schließen", "ซ่อนรายละเอียด", "詳細を閉じる");
   E("Continue", "Weiter", "ดำเนินการต่อ", "次へ");
