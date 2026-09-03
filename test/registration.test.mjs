@@ -97,10 +97,10 @@ test('no room-per-night pricing exists anywhere in the model', () => {
   }
 });
 
-test('Night Train is USD 88 per participating guest — only riders are charged', () => {
-  assert.equal(TRAIN.contributionPerGuest, 88);
-  assert.equal(trainContribution(TRAIN, 1), 88);
-  assert.equal(trainContribution(TRAIN, 2), 176);
+test('Night Train is USD 75 per participating guest package — only riders are charged', () => {
+  assert.equal(TRAIN.contributionPerGuest, 75);
+  assert.equal(trainContribution(TRAIN, 1), 75);
+  assert.equal(trainContribution(TRAIN, 2), 150);
   assert.equal(trainContribution(TRAIN, 0), 0);
 });
 
@@ -112,17 +112,17 @@ test('transfer price master: per unit, never per guest', () => {
   assert.equal(price('apt-dropoff-merc'), 40);
   assert.equal(price('lcr-pickup-jaguar'), 40);
   assert.equal(price('lcr-dropoff-jaguar'), 40);
-  assert.equal(price('lcr-pickup-merc'), 60);
-  assert.equal(price('lcr-dropoff-merc'), 60);
+  assert.equal(price('lcr-pickup-merc'), 55);
+  assert.equal(price('lcr-dropoff-merc'), 55);
   assert.equal(transfersTotal(TRANSFERS, [{ transferId: 'apt-pickup-jaguar', units: 1 }]), 25);
-  assert.equal(transfersTotal(TRANSFERS, [{ transferId: 'lcr-pickup-merc', units: 2 }]), 120);
+  assert.equal(transfersTotal(TRANSFERS, [{ transferId: 'lcr-pickup-merc', units: 2 }]), 110);
 });
 
 test('live Journey Cost: stay + train + transfers from one calculation path', () => {
-  // Heritage Executive couple 310 + 2×88 train + 1 Jaguar pickup 25 = 511
+  // Heritage Executive couple 310 + 2×75 train package + 1 Jaguar pickup 25 = 485
   const total = journeyTotal(byId('the-heritage'), ['g1', 'g2'], TRAIN, 2, TRANSFERS,
     [{ transferId: 'apt-pickup-jaguar', units: 1 }]);
-  assert.equal(total, 511);
+  assert.equal(total, 485);
   assert.equal(journeyTotal(null, [], TRAIN, 0, TRANSFERS, []), 0);
 });
 
@@ -453,11 +453,11 @@ test('a registration without a stay is rejected (no digital no-room flow)', () =
   assert.ok(validateRegistration(reg, ctx(inv)).some((e) => e.includes('please select a stay')));
 });
 
-test('train is a confirmed USD 88 product inside the journey total', () => {
-  assert.equal(trainContribution(TRAIN, 2), 176);
+test('train is a confirmed USD 75 package inside the journey total', () => {
+  assert.equal(trainContribution(TRAIN, 2), 150);
   const acc = ACCOMMODATIONS.find((a) => a.id === 'the-heritage');
-  assert.equal(journeyTotal(acc, ['g1', 'g2'], TRAIN, 2, TRANSFERS, []), 310 + 176);
-  assert.equal(journeyTotal(null, [], TRAIN, 2, TRANSFERS, []), 176);
+  assert.equal(journeyTotal(acc, ['g1', 'g2'], TRAIN, 2, TRANSFERS, []), 310 + 150);
+  assert.equal(journeyTotal(null, [], TRAIN, 2, TRANSFERS, []), 150);
 });
 
 test('a transfer request needs NO questionnaire (full service); unknown services are rejected', () => {
@@ -478,10 +478,10 @@ test('the Guest Relations record carries transfers with units, price and status'
   const text = buildNotification(reg, ctx(inv));
   assert.ok(text.includes('TRANSFERS'));
   assert.ok(text.includes('Service: LCR Station to Hotel by Mercedes-Benz'));
-  assert.ok(text.includes('Units: 2 unit(s) × USD 60'));
+  assert.ok(text.includes('Units: 2 unit(s) × USD 55'));
   assert.ok(text.includes('Train Number: C82'));
-  assert.ok(text.includes('Transfers Total: USD 120'));
-  assert.ok(text.includes('TOTAL CONTRIBUTION: USD 430')); // stay 310 + transfers 120
+  assert.ok(text.includes('Transfers Total: USD 110'));
+  assert.ok(text.includes('TOTAL CONTRIBUTION: USD 420')); // stay 310 + transfers 120
 });
 
 test('a Party may request exactly one room', () => {
@@ -523,8 +523,8 @@ test('notification carries party, per-guest data, charges, statuses', () => {
   assert.ok(text.includes('Guest Contribution: USD 155 each'));
   assert.ok(text.includes('Stay Total: USD 310 (2 guests)'));
   assert.ok(text.includes('JOURNEY COST'));
-  assert.ok(text.includes('Train: 1 × USD 88 = USD 88'));
-  assert.ok(text.includes('TOTAL CONTRIBUTION: USD 398'));
+  assert.ok(text.includes('Train: 1 × USD 75 = USD 75'));
+  assert.ok(text.includes('TOTAL CONTRIBUTION: USD 385'));
   assert.ok(text.includes('Second Night: Complimentary / Hosted by Haruthai & Suthep'));
   assert.ok(text.includes('Status: REQUESTED / UNDER REVIEW'));
   // privacy: no internal figures
@@ -639,13 +639,12 @@ test('displayMoney: USD is the master and the fallback — never a fabricated ra
   assert.equal(displayMoney(100, 'THB', { EUR: 0.9, THB: 35.4 }), 'THB 3,540');
 });
 
-test('nongkhai-vte transfer: USD 55 per guest, arrival direction (owner final)', () => {
+test('nongkhai-vte van/luggage is included in the USD 75 train package (owner final 03 Sep)', () => {
   const t = TRANSFERS.find((x) => x.id === 'nongkhai-vte');
-  assert.ok(t, 'Nong Khai onward transfer exists');
-  assert.equal(t.pricePerUnit, 55);
-  assert.equal(t.perGuest, true);
+  assert.equal(t.pricePerUnit, 0);            // included — never charged separately
   assert.equal(t.direction, 'arrival');
-  assert.equal(transfersTotal(TRANSFERS, [{ transferId: 'nongkhai-vte', units: 1 }], 2), 110); // 2 guests × USD 55
+  assert.ok(t.perGuest);
+  assert.equal(transfersTotal(TRANSFERS, [{ transferId: 'nongkhai-vte', units: 1 }], 2), 0); // 2 guests, USD 0
 });
 
 test('allergy declared without kitchen detail blocks completion (§30)', () => {

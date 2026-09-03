@@ -238,9 +238,12 @@ export const TRAIN = {
   id: 'train', name: 'Overnight train · Bangkok → Nong Khai',
   date: '26 FEB 2027', times: '20:25 → 06:45 (+1)',
   capacityTotal: 8, capacityUnit: 'Guest seat', selectionScope: 'GUEST',
-  /* CONFIRMED guest price (Owner, 2026-08-25): USD 88 per participating
-   * guest. Charged only for guests who join the train. */
-  contributionPerGuest: 88,
+  /* OWNER FINAL (03 SEP 2026, Booking Engine P0): USD 75 per participating
+   * guest as ONE package — USD 55 train (First Class Sleeper) + USD 20 Van
+   * Pickup & Luggage Service from Nong Khai to the hotel. Guests on the
+   * train never book a separate Nong Khai arrival transfer. */
+  contributionPerGuest: 75,
+  packageNote: 'Train USD 55 · Van Pickup & Luggage Service after arrival USD 20 — USD 75 per guest, everything to the hotel included.',
 };
 
 /* ---------------- transfer products (Owner price master, 2026-08-25) -------
@@ -269,11 +272,13 @@ export const TRANSFERS = [
     pricePerUnit: 40, direction: 'departure', fieldsFor: 'flight',
     included: 'Private vehicle and driver · met personally · luggage handled',
     blurb: 'From Souphattra Heritage to Wattay International Airport, timed to your flight.' },
-  { id: 'nongkhai-vte', group: 'Nong Khai Railway Station', name: 'Nong Khai Station to Souphattra Heritage',
+  { id: 'nongkhai-vte', group: 'Nong Khai Railway Station', name: 'Van Pickup & Luggage Service · Nong Khai to Souphattra Heritage',
     date: '27 FEB 2027',
-    pricePerUnit: 55, perGuest: true, direction: 'arrival', fieldsFor: 'train',
-    included: 'Private vehicle and driver · met at your carriage exit · luggage handled',
-    blurb: 'Coordinated transfer after your train arrival — Guest Relations confirms the exact pickup details personally.' },
+    /* OWNER FINAL (03 SEP 2026): included in the USD 75 Special Express
+     * package — never charged separately, never offered as an extra. */
+    pricePerUnit: 0, perGuest: true, direction: 'arrival', fieldsFor: 'train',
+    included: 'Included in your Special Express package · met at your carriage exit · luggage handled',
+    blurb: 'Your van pickup and luggage service after the train arrival are already part of the USD 75 package — Guest Relations confirms the exact pickup details personally.' },
   { id: 'lcr-pickup-jaguar', group: 'LCR Railway Station', name: 'LCR Station to Hotel by Jaguar',
     pricePerUnit: 40, direction: 'arrival', fieldsFor: 'train',
     included: 'Private vehicle and driver · met personally · luggage handled',
@@ -283,11 +288,11 @@ export const TRANSFERS = [
     included: 'Private vehicle and driver · met personally · luggage handled',
     blurb: 'From Souphattra Heritage to Vientiane railway station, timed to your train.' },
   { id: 'lcr-pickup-merc', group: 'LCR Railway Station', name: 'LCR Station to Hotel by Mercedes-Benz',
-    pricePerUnit: 60, direction: 'arrival', fieldsFor: 'train',
+    pricePerUnit: 55, direction: 'arrival', fieldsFor: 'train',
     included: 'Private vehicle and driver · met personally · luggage handled',
     blurb: 'From Vientiane railway station to Souphattra Heritage, met at your carriage exit.' },
   { id: 'lcr-dropoff-merc', group: 'LCR Railway Station', name: 'Hotel to LCR Station by Mercedes-Benz',
-    pricePerUnit: 60, direction: 'departure', fieldsFor: 'train',
+    pricePerUnit: 55, direction: 'departure', fieldsFor: 'train',
     included: 'Private vehicle and driver · met personally · luggage handled',
     blurb: 'From Souphattra Heritage to Vientiane railway station, timed to your train.' },
 ];

@@ -7,7 +7,7 @@
 /* ============ journey cost (Final Owner room matrix) ============
  * ONE calculation path. Rooms are priced PER GUEST (contributionPerGuest ×
  * occupying guests, for the complete two-night stay); the train per
- * participating guest (USD 88); transfers per unit. Every surface (cards,
+ * participating guest (USD 75 package: 55 train + 20 van/luggage); transfers per unit. Every surface (cards,
  * selection state, live Journey Cost, review, submission, dashboard, Guest
  * Relations record) reads these functions — never its own arithmetic. No
  * per-room or per-night amount exists anywhere in guest-facing logic. */

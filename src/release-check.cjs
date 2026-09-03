@@ -199,13 +199,13 @@ gate('P5', 'Lightbox overlays: hidden wins, no empty-gallery navigation',
 /* P4 — wording + product guards */
 const exclusiveHit = /Heritage Exclusive/i.test(indexHtml) || /Heritage Exclusive/i.test(appJs) || /Heritage Exclusive/i.test(data) || /Heritage Exclusive/i.test(regHtml);
 const noRoomHit = /No room needed/i.test(appJs) || /No room needed/i.test(regHtml);
-const train88 = /contributionPerGuest: 88/.test(data);
+const train88 = /contributionPerGuest: 75/.test(data);
 gate('P4', 'Wording and product guards',
   !exclusiveHit && !noRoomHit && train88,
   [exclusiveHit && "'Heritage Exclusive' found — the category is Heritage Executive",
    noRoomHit && "'No room needed' option must not exist",
-   !train88 && 'Night Train must be USD 88 per guest'].filter(Boolean).join(' · ')
-  || "no 'Heritage Exclusive', no 'No room needed', train fixed at USD 88 per guest");
+   !train88 && 'Night Train must be USD 75 per guest (55 train + 20 van/luggage package)'].filter(Boolean).join(' · ')
+  || "no 'Heritage Exclusive', no 'No room needed', train fixed at USD 75 per guest package");
 
 /* P6 — LINE/QR owner rule (2026-08-26): no invented LINE ID, no line.me
  * destination, no generated QR. Only the owner's original QR assets. */
