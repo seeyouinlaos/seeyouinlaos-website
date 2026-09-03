@@ -8,13 +8,13 @@
 import {
   WEDDING, CONTACTS, JOURNEY_MODULES, EVENTS, ACCOMMODATIONS, SELECTABLE_ACCOMMODATIONS, TRAIN,
   TRANSFERS, PACKAGE_INCLUSIONS, COPY, DEMO_MODE, PUBLICATION, TRAIN_REFERENCE, BERTH_PREFS, BANGKOK_STAYS, BANGKOK_STAY, POST_WEDDING, RETURN_STAY, lookupInvitation,
-} from './data.mjs?v=UJ2';
+} from './data.mjs?v=UJ3';
 import {
   contributionPerGuest, partyCharges, partyTotal, money as usdMoney, displayMoney,
   trainContribution, transfersTotal, journeyTotal, postWeddingTotal,
   createInventory, remaining, availabilityLabel, requestAllocation,
   validateRegistration, buildNotification, nextInvitationState,
-} from './logic.mjs?v=UJ2';
+} from './logic.mjs?v=UJ3';
 
 /* ---------------- persistent state ---------------- */
 const DRAFT_KEY = 'siyl.reg.draft.v2';
@@ -30,7 +30,8 @@ function setAuthOut(v) { try { if (v) localStorage.setItem(AUTH_OUT_KEY, '1'); e
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const RATES_LIVE = PUBLICATION.rates === 'APPROVED';
 const attendingCount = () => S.guests.filter((g) => g.attending !== false).length;
-const pwTotal = () => postWeddingTotal(POST_WEDDING, S.postWedding && S.postWedding.joined, attendingCount());
+const pwTotal = () => (S.travel && S.travel.kmgLjg === 'own') ? 0
+  : postWeddingTotal(POST_WEDDING, S.postWedding && S.postWedding.joined, attendingCount());
 function departureSelections() {
   return (S.transfers || []).map((x) => TRANSFERS.find((t) => t.id === x.transferId)).filter((t) => t && t.direction === 'departure');
 }
@@ -258,7 +259,7 @@ function freshState() {
     bangkokStay: { property: null, from: '', to: '' },          // optional Bangkok stay (§2-3): property + guest chosen dates
     postWedding: { joined: false, onward: '' },                 // optional Post Wedding Journey + onward choice (own | gr | return)
     transfers: [],           // [{ transferId, units, details:{date,time,ref,place,location} }]
-    scope: { bangkok: false, laos: true, china: false },   // V2 journey scope
+    scope: { bangkok: false, laos: false, china: false },  // V2 journey scope — §21: every destination starts NOT THIS TIME
     experiences: [],         // V2 requested experiences
     v2: 1,
     v21: 1,
@@ -2015,6 +2016,8 @@ function currentRegistration() {
     bangkokStay: bangkokStayActive() ? { ...(S.bangkokStay) } : { property: null, from: '', to: '' },
     payment: S.payment || null,
     china: { ...(S.china || {}) },
+    travel: { ...(S.travel || {}) },
+    chinaRequested: { ...(S.chinaRequested || {}) },
     scope: { ...(S.scope || {}) },
     postWedding: { ...(S.postWedding || { joined: false }) },
     additionalGuestRequest: S.additionalGuestRequest,
@@ -2240,6 +2243,21 @@ function renderScopeBlock() {
           '</div></div>') +
       '</div></div>';
   };
+  S.travel ||= { vteKmg: null, kmgLjg: 'with' };
+  /* ONE repeated transport pattern (§9): TRAVEL WITH US / ARRANGE MY OWN
+   * TRAVEL between every destination block — same visual system as the
+   * stay selectors, no invented schedules or prices. */
+  const travelChoice = (name, label, mode, withDetail, ownDetail) => {
+    const o = (id, txt, blurb) => '<label class="tj-opt' + (mode === id ? ' sel' : '') + '" style="display:block;cursor:pointer"><input type="radio" name="' + name + '" value="' + id + '"' + (mode === id ? ' checked' : '') + ' style="position:absolute;opacity:0"/><h4 style="margin:0 0 4px">' + txt + '</h4><p class="note" style="margin:0">' + blurb + '</p></label>';
+    return '<div class="cch-label" style="margin-top:14px">' + label + '</div>' +
+      '<div class="tj-pair" role="radiogroup" aria-label="' + label + '">' +
+      o('with', 'Travel with us', 'Join the arranged journey — details and any costs follow immediately.') +
+      o('own', 'Arrange my own travel', 'You travel independently — USD 0 through Guest Relations.') +
+      '</div>' +
+      (mode === 'with' && withDetail ? '<div class="trf-price" style="margin-top:8px">' + withDetail + '</div>' : '') +
+      (mode === 'own' ? '<p class="note">' + (ownDetail || 'Own arrangement noted — USD 0. Share your arrival details with Guest Relations.') + '</p>' : '') +
+      (mode == null ? '<p class="note">Please choose so your total costs are complete.</p>' : '');
+  };
   /* ONE identical stay component for Bangkok · Vientiane · Kunming · Lijiang
    * (owner unified-journey order §1/§2/§14): 3 unique property images,
    * property line, dates · nights · travellers, per-person rate, subtotal. */
@@ -2256,7 +2274,7 @@ function renderScopeBlock() {
     '<div class="cch-label">Your journey · choose the parts you are joining</div>' +
     '<p class="note">Choosing a destination sets nothing in stone and costs nothing — it only opens the right choices for you.</p>' +
     row('bangkok', 'Bangkok', 'The shared days in Bangkok before travelling on to Laos.', false) +
-    row('laos', 'Laos · The Wedding', 'Vientiane, the wedding days and everything around them.', true) +
+    row('laos', 'Laos · The Wedding', 'Vientiane, the wedding days and everything around them.', false) +
     row('china', 'China · Onward Journey', 'Kunming and Lijiang after the wedding — join a part of the onward journey.', false) +
     '</div>');
   if (sc.bangkok) {
@@ -2310,20 +2328,33 @@ function renderScopeBlock() {
     if (tsel) tsel.addEventListener('change', () => { S.bangkokStay.travellers = parseInt(tsel.value, 10); saveDraft(); renderStep(cur); renderSummary(); });
     if (mode === 'with') wireBangkokStay(box.querySelector('#bkk-journey'));
   }
-  {
-    /* §5: Laos uses the SAME component — participation is fixed (the wedding),
-     * the choice is the stay duration; departure 01 MAR 2027 is fixed. */
+  if (sc.laos) {
+    /* §4: Laos enters through the same destination pattern; the stay choice
+     * is the duration (no own-stay for the wedding); departure 01 MAR fixed. */
     const lm = S.stay.mode === 'oneNight' ? 'oneNight' : (S.stay.mode ? 'standard' : 'standard');
     const lopt = (id, label, blurb) =>
       '<label class="tj-opt' + (lm === id ? ' sel' : '') + '" style="display:block;cursor:pointer"><input type="radio" name="laos-stay-len" value="' + id + '"' + (lm === id ? ' checked' : '') + ' style="position:absolute;opacity:0"/>' +
       '<h4 style="margin:0 0 4px">' + label + '</h4><p class="note" style="margin:0">' + blurb + '</p></label>';
     const lacc = currentAcc();
+    const ridersN = S.guests.filter((g) => g.journey.train).length;
+    const indepAll = S.guests.filter((g) => g.attending !== false).every((g) => g.journey.independent);
+    const bvMode = ridersN ? 'with' : (indepAll ? 'own' : null);
     let lx = '<div class="cch-label" style="margin-top:18px">Laos · Vientiane</div>' +
       '<div class="when" style="margin:2px 0 8px">27 FEB – 01 MAR 2027 · The Wedding · departure 01 MAR 2027 fixed</div>' +
+      travelChoice('tj-bkk-vte', 'Your journey to Laos', bvMode,
+        'Special Express No. 25 · First Class Sleeper · 26 FEB 20:25 → Nong Khai 06:45<br/>' + money(TRAIN.contributionPerGuest) + ' per guest package (train + van pickup &amp; luggage) · ' + (ridersN || attendingCount()) + ' guests = <strong>' + money(TRAIN.contributionPerGuest * (ridersN || attendingCount())) + '</strong>',
+        'Own arrangement noted — USD 0. Fly or travel on your own schedule; we meet you in Vientiane.') +
       '<div class="cch-label" style="margin-top:10px">Your wedding stay · Souphattra Heritage Vientiane</div>' +
       '<div class="tj-pair" role="radiogroup" aria-label="Your wedding stay">' +
-      lopt('standard', 'Two nights', '27 FEB → 01 MAR 2027 · first night your costs, second night hosted by us · breakfast both mornings.') +
-      lopt('oneNight', 'One night', '28 FEB → 01 MAR 2027 · same approved category amount · breakfast included.') +
+      lopt('standard', 'Stay with us · Two nights', '27 FEB → 01 MAR 2027 · first night your costs, second night hosted by us · breakfast both mornings.') +
+      lopt('oneNight', 'Stay with us · One night', '28 FEB → 01 MAR 2027 · same approved category amount · breakfast included.') +
+      '</div>' +
+      '<div class="cch-label" style="margin-top:14px">The wedding programme · 28 FEB 2027</div>' +
+      '<div class="itin">' +
+      '<div class="it-row"><span class="it-d">09:00 AM</span><div class="it-b"><span class="it-t">The Temple Ceremony</span><span class="it-s">Wat Ong Teu Temple, Vientiane</span></div></div>' +
+      '<div class="it-row"><span class="it-d">After the return</span><div class="it-b"><span class="it-t">Coffee &amp; Cake</span><span class="it-s">Souphattra Heritage Vientiane</span></div></div>' +
+      '<div class="it-row"><span class="it-d">04:30 PM</span><div class="it-b"><span class="it-t">The Vow Ceremony</span><span class="it-s">Souphattra Heritage Vientiane</span></div></div>' +
+      '<div class="it-row"><span class="it-d">07:30 PM</span><div class="it-b"><span class="it-t">The Wedding Dinner</span><span class="it-s">Souphattra Vientiane Hotel</span></div></div>' +
       '</div>';
     lx += lacc
       ? stayModule({ name: lacc.name + ' · Souphattra Heritage Vientiane', sub: null,
@@ -2340,6 +2371,12 @@ function renderScopeBlock() {
     }));
     const rc = box.querySelector('#laos-room-cta');
     if (rc) rc.addEventListener('click', () => show(idx('stay')));
+    box.querySelectorAll('input[name="tj-bkk-vte"]').forEach((el) => el.addEventListener('change', () => {
+      S.guests.forEach((g) => { if (g.attending === false) return;
+        if (el.value === 'with') { g.journey.train = true; g.journey.independent = false; }
+        else { g.journey.train = false; g.journey.independent = true; } });
+      saveDraft(); renderStep(cur); renderSummary();
+    }));
   }
   if (sc.china) {
     const CH = Object.fromEntries(POST_WEDDING.map((c) => [c.id, c]));
@@ -2362,11 +2399,17 @@ function renderScopeBlock() {
     const leg = (d, t, sub) => '<div class="crow"><span class="cdate">' + d + '</span><div class="cbody"><span class="cprod">' + t + '</span><span class="camt">' + sub + '</span></div></div>';
     const k = CH['kunming-stay'], l = CH['lijiang-stay'], tr = CH['kmg-ljg'];
     let cn = '<div class="cch-label" style="margin-top:16px">China Journey</div>' +
-      leg('01 MAR 2027', 'Vientiane → Kunming · Flight', 'China Eastern · arranged with Guest Relations') +
+      '<div class="when" style="margin:2px 0 4px">01 MAR 2027 · Vientiane → Kunming · Flight</div>' +
+      travelChoice('tj-vte-kmg', 'Your journey to China', S.travel.vteKmg,
+        'China Eastern · 01 MAR 2027 · arranged with Guest Relations — every detail confirmed personally.',
+        'Own arrangement noted — USD 0. Share your flight details with Guest Relations.') +
       '<div class="cch-label" style="margin-top:12px">China · Kunming</div>' +
       '<div class="when">' + esc(k.date) + ' · 3 nights · dates fixed</div>' +
       stayChoice('kunming', 'Your stay in Kunming', k) +
-      leg('04 MAR 2027', 'Kunming → Lijiang · First Class Train', money(tr.contribution) + ' per guest · ' + trav + ' guests = ' + money(tr.contribution * trav)) +
+      '<div class="when" style="margin:14px 0 4px">04 MAR 2027 · Kunming → Lijiang · First Class Train</div>' +
+      travelChoice('tj-kmg-ljg', 'Kunming → Lijiang', S.travel.kmgLjg,
+        'First Class Train · 04 MAR 2027 · ' + money(tr.contribution) + ' per guest · ' + trav + ' guests = <strong>' + money(tr.contribution * trav) + '</strong>',
+        'Own arrangement noted — USD 0 for this leg.') +
       '<div class="cch-label" style="margin-top:12px">China · Lijiang</div>' +
       '<div class="when">' + esc(l.date) + ' · 2 nights · dates fixed</div>' +
       stayChoice('lijiang', 'Your stay in Lijiang', l) +
@@ -2376,6 +2419,11 @@ function renderScopeBlock() {
       const key = el.name.replace('cn-', '');
       S.china[key] = el.value;
       if (el.value !== 'with' && S.chinaRequested) S.chinaRequested[key] = false;
+      saveDraft(); renderStep(cur); renderSummary();
+    }));
+    box.querySelectorAll('input[name="tj-vte-kmg"], input[name="tj-kmg-ljg"]').forEach((el) => el.addEventListener('change', () => {
+      S.travel ||= {};
+      S.travel[el.name === 'tj-vte-kmg' ? 'vteKmg' : 'kmgLjg'] = el.value;
       saveDraft(); renderStep(cur); renderSummary();
     }));
     box.querySelectorAll('[data-cn-req]').forEach((b) => b.addEventListener('click', () => {
