@@ -8,13 +8,13 @@
 import {
   WEDDING, CONTACTS, JOURNEY_MODULES, EVENTS, ACCOMMODATIONS, SELECTABLE_ACCOMMODATIONS, TRAIN,
   TRANSFERS, PACKAGE_INCLUSIONS, COPY, DEMO_MODE, PUBLICATION, TRAIN_REFERENCE, BERTH_PREFS, BANGKOK_STAYS, BANGKOK_STAY, POST_WEDDING, RETURN_STAY, lookupInvitation,
-} from './data.mjs?v=UK1';
+} from './data.mjs?v=UK2';
 import {
   contributionPerGuest, partyCharges, partyTotal, money as usdMoney, displayMoney,
   trainContribution, transfersTotal, journeyTotal, postWeddingTotal,
   createInventory, remaining, availabilityLabel, requestAllocation,
   validateRegistration, buildNotification, nextInvitationState,
-} from './logic.mjs?v=UK1';
+} from './logic.mjs?v=UK2';
 
 /* ---------------- persistent state ---------------- */
 const DRAFT_KEY = 'siyl.reg.draft.v2';
@@ -1733,6 +1733,97 @@ function currentAcc() {
   return S.stay.accommodationId && S.stay.accommodationId !== 'none'
     ? ACCOMMODATIONS.find((a) => a.id === S.stay.accommodationId) : null;
 }
+function coverageModel() {
+  const sc = S.scope || {};
+  const stays = [], trans = [], gaps = [];
+  const riders = S.guests.filter((g) => g.journey.train).length;
+  const indepAll = S.guests.filter((g) => g.attending !== false).every((g) => g.journey.independent);
+  if (sc.bangkok) {
+    const ok = !!(S.bangkokStay && (S.bangkokStay.withUs || S.bangkokStay.property));
+    stays.push({ label: 'Bangkok', ok });
+    if (!ok) gaps.push({ t: 'Bangkok stay', s: 'Request the Bangkok stay in My Journey.', cta: 'journey' });
+  }
+  if (sc.laos) {
+    const ok = !!currentAcc();
+    stays.push({ label: 'Vientiane', ok, sub: 'Wedding Stay' });
+    if (!ok) gaps.push({ t: 'Vientiane', s: 'Choose your Wedding Stay.', cta: 'journey' });
+    const tok = riders > 0 || indepAll;
+    trans.push({ label: 'Bangkok → Vientiane', ok: tok, sub: riders > 0 ? 'Special Express No. 25 package' : 'Travelling independently' });
+    if (!tok) gaps.push({ t: 'Journey to Vientiane', s: 'Request the overnight package or tell us you travel independently.', cta: 'journey' });
+  }
+  if (sc.china) {
+    for (const [key, label] of [['kunming', 'Kunming'], ['lijiang', 'Lijiang']]) {
+      const ok = S.china && S.china[key] === 'with';
+      stays.push({ label, ok });
+      if (!ok) gaps.push({ t: label + ' stay', s: 'Request the ' + label + ' stay in My Journey.', cta: 'journey' });
+    }
+    const fOk = S.travel && S.travel.vteKmg === 'with';
+    trans.push({ label: 'Vientiane → Kunming', ok: fOk, sub: 'Being arranged by Khun Ket & Khun Paddy' });
+    if (!fOk) gaps.push({ t: 'Vientiane → Kunming', s: 'Request the flight arrangement in My Journey.', cta: 'journey' });
+    const tOk = S.travel && S.travel.kmgLjg === 'with';
+    trans.push({ label: 'Kunming → Lijiang', ok: tOk, sub: 'First Class Train' });
+    if (!tOk) gaps.push({ t: 'Kunming → Lijiang', s: 'Request the First Class Train in My Journey.', cta: 'journey' });
+    const oOk = !!(S.postWedding && S.postWedding.onward);
+    trans.push({ label: 'Lijiang → Bangkok / onward', ok: oOk });
+    if (!oOk) gaps.push({ t: 'Onward from Lijiang', s: 'Tell us how your journey continues after Lijiang.', cta: 'journey' });
+  }
+  /* §4: the two external journey edges */
+  const arrOk = !sc.bangkok || !!(S.bangkokStay && (S.bangkokStay.arrivalInfo || '').trim());
+  if (sc.bangkok && !arrOk) gaps.push({ t: 'Arrival to Bangkok', s: 'We still need your arrival details.', cta: 'arrival' });
+  const depOk = !!(S.departureInfo || '').trim();
+  if (!depOk) gaps.push({ t: 'Departure from Bangkok', s: 'We still need your final departure / flight-home details.', cta: 'departure' });
+  return { stays, trans, gaps,
+    staysOk: stays.length > 0 && stays.every((x) => x.ok),
+    transOk: trans.length > 0 && trans.every((x) => x.ok) };
+}
+function coverageHtml() {
+  const m = coverageModel();
+  const tile = (ok, title, list, footer) =>
+    '<div class="tj-opt' + (ok ? ' sel' : '') + '" style="display:block' + (ok ? ';border-color:#4b7a4f' : '') + '">' +
+    '<div class="when" style="' + (ok ? 'color:#4b7a4f' : '') + '">' + (ok ? '✓ ' : '○ ') + title + '</div>' +
+    '<p class="note" style="margin:6px 0 0">' + list.map((x) => (x.ok ? '✓ ' : '○ ') + esc(x.label) + (x.sub ? ' · ' + esc(x.sub) : '')).join('<br/>') + '</p>' +
+    (footer ? '<p class="note" style="margin:8px 0 0;' + (ok ? 'color:#4b7a4f' : '') + '">' + footer + '</p>' : '') + '</div>';
+  let html = '<div class="cch-label">Your journey at a glance</div>' +
+    '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin:10px 0 14px">';
+  if (m.stays.length) html += tile(m.staysOk, m.staysOk ? 'All nights covered' : (m.stays.filter((x) => !x.ok).length + (m.stays.filter((x) => !x.ok).length === 1 ? ' stay still needed' : ' stays still needed')), m.stays, m.staysOk ? 'No accommodation gaps' : null);
+  if (m.trans.length) html += tile(m.transOk, m.transOk ? 'All transfers covered' : 'Transfer decisions open', m.trans, m.transOk ? 'No transfer gaps' : null);
+  html += '</div>';
+  /* §12 dynamic open items */
+  html += '<div class="cch-label" style="margin-top:6px">' + (m.gaps.length === 0 ? '✓ Your journey is complete'
+    : m.gaps.length === 1 ? '1 thing still needed' : m.gaps.length + ' things still needed') + '</div>';
+  m.gaps.forEach((g, i) => {
+    html += '<div class="tj-opt" style="display:block;margin-top:8px"><div class="when">' + String(i + 1).padStart(2, '0') + ' · ' + esc(g.t) + '</div>' +
+      '<p class="note" style="margin:4px 0 8px">' + esc(g.s) + '</p>' +
+      (g.cta === 'departure'
+        ? '<div class="field" style="margin-top:0;max-width:420px"><label>Your departure details (flight home, booked by you)</label><textarea id="dep-info" rows="2">' + esc(S.departureInfo || '') + '</textarea></div>'
+        : '<button type="button" class="btn sm" data-cov-cta="' + g.cta + '">' + (g.cta === 'arrival' ? 'Add arrival details' : 'Open My Journey') + '</button>') +
+      '</div>';
+  });
+  return html + '<div style="height:10px"></div>';
+}
+function journeyStripHtml() {
+  const m = coverageModel();
+  const sc = S.scope || {};
+  const rows = [];
+  const arrOk = !sc.bangkok || !!(S.bangkokStay && (S.bangkokStay.arrivalInfo || '').trim());
+  if (sc.bangkok) rows.push({ ok: arrOk, d: '21 FEB', t: 'Bangkok', s: arrOk ? 'Arrival details received' : 'Arrival details needed' });
+  m.stays.forEach((x) => rows.push({ ok: x.ok, d: x.label === 'Bangkok' ? '21 – 24 FEB' : x.label === 'Vientiane' ? '25 FEB – 01 MAR' : x.label === 'Kunming' ? '01 – 04 MAR' : '04 – 06 MAR', t: x.label, s: x.ok ? 'Stay covered' : 'Stay still needed' }));
+  m.trans.forEach((x) => rows.push({ ok: x.ok, d: '', t: x.label, s: (x.ok ? 'Covered' : 'Decision needed') + (x.sub ? ' · ' + x.sub : '') }));
+  const depOk = !!(S.departureInfo || '').trim();
+  rows.push({ ok: depOk, d: '', t: 'Departure', s: depOk ? 'Details received' : 'Details needed' });
+  return '<div class="itin" style="margin:4px 0 10px">' + rows.map((r) =>
+    '<div class="it-row"><span class="it-d">' + (r.ok ? '✓' : '○') + (r.d ? ' ' + r.d : '') + '</span><div class="it-b"><span class="it-t">' + esc(r.t) + '</span><span class="it-s"' + (r.ok ? ' style="color:#4b7a4f"' : '') + '>' + esc(r.s) + '</span></div></div>').join('') + '</div>';
+}
+function wireCoverage(box) {
+  box.querySelectorAll('[data-cov-cta]').forEach((b) => b.addEventListener('click', () => {
+    const kind = b.getAttribute('data-cov-cta');
+    show(idx('home'));
+    if (kind === 'arrival') setTimeout(() => { const a = document.getElementById('bkk-arrival'); if (a) { a.scrollIntoView({ block: 'center' }); a.focus(); } }, 200);
+  }));
+  const d = box.querySelector('#dep-info');
+  if (d) d.addEventListener('input', () => { S.departureInfo = d.value; saveDraft(); renderSummary(); });
+  if (d) d.addEventListener('change', () => { renderStep(cur); });
+}
 function renderCost() {
   const box = document.getElementById('cost-box');
   const acc = currentAcc();
@@ -1746,7 +1837,9 @@ function renderCost() {
   const line = (d, l, r) => '<div class="crow">' + (d ? '<span class="cdate">' + d + '</span>' : '') +
     '<div class="cbody"><span class="cprod">' + l + '</span><span class="camt">' + r + '</span></div></div>';
   const chapter = (no, t, sub, main) => '<div class="cch' + (main ? ' cch-main' : '') + '"><span class="cch-no">' + no + '</span><div><div class="cch-t">' + t + '</div><div class="cch-s">' + sub + '</div></div></div>';
-  let html = '<p class="note" style="margin-bottom:20px">Here you can see which costs you cover yourself and what Haruthai & Suthep are hosting for you.</p>';
+  let html = coverageHtml() + journeyStripHtml() +
+    '<div class="cch-label" style="margin-top:20px">Your costs</div>' +
+    '<p class="note" style="margin-bottom:20px">Here you can see which costs you cover yourself and what Haruthai & Suthep are hosting for you.</p>';
   const open = []; // TO FINALIZE WITH GUEST RELATIONS
 
   // 01 · PRE-WEDDING JOURNEY
@@ -1887,6 +1980,7 @@ function renderCost() {
   }));
   const pr = document.getElementById('plan-review');
   if (pr) pr.addEventListener('click', () => { saveDraft(); show(idx('review')); });
+  wireCoverage(box);
 }
 
 /* ---------------- step 10 · review (§28) ---------------- */
@@ -2044,6 +2138,7 @@ function currentRegistration() {
     payment: S.payment || null,
     china: { ...(S.china || {}) },
     travel: { ...(S.travel || {}) },
+    departureInfo: S.departureInfo || '',
     chinaRequested: { ...(S.chinaRequested || {}) },
     scope: { ...(S.scope || {}) },
     postWedding: { ...(S.postWedding || { joined: false }) },
@@ -2156,6 +2251,8 @@ function renderSummary() {
   if ((S.transfers || []).length) sel.push(S.transfers.length + ' transfer' + (S.transfers.length > 1 ? 's' : ''));
   if (bangkokStayActive()) sel.push('Bangkok stay · REQUESTED');
   if (S.postWedding && S.postWedding.joined) sel.push('Post Wedding Journey · REQUESTED');
+  const covGaps = coverageModel().gaps.length;
+  sel.push(covGaps === 0 ? '✓ Journey complete' : covGaps === 1 ? '1 thing still needed' : covGaps + ' things still needed');
   const total = (function(){ const G = laosGate(acc, trainCount, S.transfers); return journeyTotal(G.acc, acc ? S.stay.occupantGuestIds : [], TRAIN, G.riders, TRANSFERS, G.transfers) + laosExtraTotal(G.acc, acc ? S.stay.occupantGuestIds : []); })() + pwTotal() + bkkTotal() + cnStaysTotal();
   el.innerHTML =
     '<div class="sum-a"><span class="sum-label">Your journey</span>' +
@@ -2494,8 +2591,17 @@ function renderScopeBlock() {
       '<div class="cch-label" style="margin-top:12px">China · Lijiang</div>' +
       '<div class="when">' + esc(l.date) + ' · 2 nights · dates fixed</div>' +
       stayChoice('lijiang', 'Your stay in Lijiang', l) +
-      leg('06 MAR 2027', 'Lijiang → Bangkok / onward', 'Your choice — return with us, continue elsewhere or your own plans');
+      leg('06 MAR 2027', 'Lijiang → Bangkok / onward', 'Your choice — return with us, continue elsewhere or your own plans') +
+      '<div style="display:flex;gap:14px;margin-top:10px;flex-wrap:wrap">' +
+      [['return', 'Return with us'], ['own', 'My own plans'], ['gr', 'Guest Relations support']].map(([v, l]) =>
+        '<button type="button" class="btn sm' + ((S.postWedding && S.postWedding.onward) === v ? '' : ' ghost') + '" data-onward="' + v + '">' + ((S.postWedding && S.postWedding.onward) === v ? '✓ ' : '') + l + '</button>').join('') +
+      '</div>';
     box.querySelector('#scope-block .mod[data-scope="china"]').insertAdjacentHTML('afterend', '<div id="china-journey">' + cn + '</div>');
+    box.querySelectorAll('[data-onward]').forEach((b) => b.addEventListener('click', () => {
+      S.postWedding = S.postWedding || { joined: true, onward: '' };
+      S.postWedding.onward = b.getAttribute('data-onward');
+      saveDraft(); renderStep(cur); renderSummary();
+    }));
     box.querySelectorAll('[data-cn-stay]').forEach((b) => b.addEventListener('click', () => {
       const key = b.getAttribute('data-cn-stay');
       S.china[key] = b.getAttribute('data-cn-val') === 'with' ? 'with' : null;
