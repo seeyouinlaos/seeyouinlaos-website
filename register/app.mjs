@@ -8,13 +8,13 @@
 import {
   WEDDING, CONTACTS, JOURNEY_MODULES, EVENTS, ACCOMMODATIONS, SELECTABLE_ACCOMMODATIONS, TRAIN,
   TRANSFERS, PACKAGE_INCLUSIONS, COPY, DEMO_MODE, PUBLICATION, TRAIN_REFERENCE, BERTH_PREFS, BANGKOK_STAYS, BANGKOK_STAY, POST_WEDDING, RETURN_STAY, lookupInvitation,
-} from './data.mjs?v=UK3';
+} from './data.mjs?v=UK4';
 import {
   contributionPerGuest, partyCharges, partyTotal, money as usdMoney, displayMoney,
   trainContribution, transfersTotal, journeyTotal, postWeddingTotal,
   createInventory, remaining, availabilityLabel, requestAllocation,
   validateRegistration, buildNotification, nextInvitationState,
-} from './logic.mjs?v=UK3';
+} from './logic.mjs?v=UK4';
 
 /* ---------------- persistent state ---------------- */
 const DRAFT_KEY = 'siyl.reg.draft.v2';
@@ -113,12 +113,12 @@ function itinerarySteps() {
     steps.push({ d: '25 FEB 2027 · 06:45', t: 'Arrive Nong Khai', s: 'Nong Khai Railway Station' });
     steps.push({ d: '25 FEB 2027', t: 'Nong Khai → Vientiane', s: arr
       ? 'Coordinated ground and border transfer · ' + money(55) + ' per guest · ' + riders.length + ' guest' + (riders.length > 1 ? 's' : '') + ' = ' + money(55 * riders.length) + ' · Guest Relations confirms the exact pickup details after train arrival'
-      : 'Own arrangement — Guest Relations can assist', st: arr ? 'ARRANGED WITH GUEST RELATIONS' : 'YOUR CHOICE' });
+      : 'Own arrangement — Guest Relations can assist', st: arr ? 'BOOKED' : 'YOUR CHOICE' });
   } else {
     steps.push({ d: 'Before the wedding', t: 'Arriving independently in Vientiane', s: 'Fly or travel on your own schedule; we meet you there', st: 'YOUR CHOICE' });
   }
   steps.push(acc
-    ? { d: (S.stay.mode === 'oneNight' ? '28 FEB – 01 MAR 2027 · 1 night' : acc.stay + ' · ' + acc.nights + ' nights'), t: acc.name + ' · Vientiane', s: (S.stay.mode === 'oneNight' ? 'One night · your costs · breakfast included' : 'First night · your contribution — second night · hosted'), st: S.stay.waitlist ? 'WAITLISTED' : 'ARRANGED WITH GUEST RELATIONS' }
+    ? { d: (S.stay.mode === 'oneNight' ? '28 FEB – 01 MAR 2027 · 1 night' : acc.stay + ' · ' + acc.nights + ' nights'), t: acc.name + ' · Vientiane', s: (S.stay.mode === 'oneNight' ? 'One night · your costs · breakfast included' : 'First night · your contribution — second night · hosted'), st: S.stay.waitlist ? 'WAITLISTED' : 'BOOKED' }
     : { d: '27 FEB – 01 MAR 2027', t: 'Your wedding stay · Vientiane', s: 'Choose under My Stay', st: 'YOUR CHOICE' });
   steps.push({ d: '28 FEB 2027 · 09:00 AM', t: 'The Temple Ceremony', s: 'Wat Ong Teu Temple, Vientiane', st: 'COMPLIMENTARY', main: true });
   steps.push({ d: 'After the return', t: 'Coffee & Cake', s: 'Souphattra Heritage Vientiane', st: 'COMPLIMENTARY', main: true });
@@ -136,7 +136,7 @@ function itinerarySteps() {
     const dep = departureSelections();
     steps.push({ d: '01 MAR 2027', t: 'Your departure', s: dep.length
       ? dep.map((t) => t.name).join(' · ')
-      : 'Follows your onward itinerary', st: dep.length ? 'ARRANGED WITH GUEST RELATIONS' : 'TO FINALIZE WITH GUEST RELATIONS' });
+      : 'Follows your onward itinerary', st: dep.length ? 'BOOKED' : 'YOUR CHOICE' });
   }
   return steps;
 }
@@ -936,7 +936,7 @@ function bangkokStayBlock() {
       '<div class="acc-actions">' + (sel
         ? '<button type="button" class="btn sm" data-bkk-rm="' + h.id + '">Remove from journey</button>'
         : '<button type="button" class="btn sm" data-bkk="' + h.id + '">Request this stay</button>') + '</div>' +
-      (sel ? '<div class="acc-avail" style="border-top:none;padding-top:8px">ARRANGED WITH GUEST RELATIONS · your room in the penthouse follows personally</div>' : '') +
+      (sel ? '<div class="acc-avail" style="border-top:none;padding-top:8px">BOOKED · your room in the penthouse follows personally</div>' : '') +
       '</article>'; }).join('') + '</div>';
 }
 function wireBangkokStay(box) {
@@ -1525,7 +1525,7 @@ function renderTransfers(trainy) {
         ? '<button type="button" class="btn sm" data-trf-remove="' + t.id + '">Remove from journey</button>'
         : '<button type="button" class="btn sm" data-trf-add="' + t.id + '">Add to journey</button>') +
       '</div>' +
-      (sel ? '<div class="acc-avail" style="border-top:none;padding-top:8px">' + (t.id === 'nongkhai-vte' ? 'ARRANGED WITH GUEST RELATIONS · pickup follows your train arrival' : 'REQUESTED · Guest Relations confirms every detail with you personally') + '</div>' : '') +
+      (sel ? '<div class="acc-avail" style="border-top:none;padding-top:8px">' + (t.id === 'nongkhai-vte' ? 'BOOKED · pickup follows your train arrival' : 'REQUESTED · Guest Relations confirms every detail with you personally') + '</div>' : '') +
       '</article>';
   };
   // contextual order (§8): the train guest sees the Nong Khai arrival first
