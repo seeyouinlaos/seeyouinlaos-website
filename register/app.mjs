@@ -2247,8 +2247,10 @@ function renderScopeBlock() {
     let inner = '<div class="cch-label" style="margin-top:18px">Thailand · Bangkok</div>' +
       '<div class="when" style="margin:2px 0 8px">' + BANGKOK_STAY.window + ' · ' + bkkNights() + ' nights · Bangkok, Thailand</div>' +
       '<svg viewBox="0 0 320 26" aria-hidden="true" style="width:100%;max-width:340px;height:26px;display:block;margin:0 0 10px"><line x1="8" y1="13" x2="200" y2="13" stroke="var(--ink)" stroke-width="1.2"/><line x1="200" y1="13" x2="312" y2="13" stroke="var(--cherry)" stroke-width="1" stroke-dasharray="2 5"/><circle cx="8" cy="13" r="3.5" fill="var(--ink)"/><circle cx="312" cy="13" r="3.5" fill="var(--cherry)"/><text x="8" y="7" style="font-size:8px;letter-spacing:.14em" fill="var(--ink)">BANGKOK</text><text x="278" y="7" style="font-size:8px;letter-spacing:.14em" fill="var(--cherry)">VIENTIANE</text></svg>' +
-      '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:0 0 12px">' +
-      [1, 2, 3, 4].map((k) => '<img src="../assets/images/journey/penthouse-0' + k + '.jpg" alt="Bangkok Stay — impression ' + k + '" loading="lazy" decoding="async" style="width:100%;height:74px;object-fit:cover;display:block"/>').join('') + '</div>' +
+      /* Destination visual row: reserved for the four approved BANGKOK
+       * destination images (city/atmosphere). No such owner set exists in
+       * Drive yet — row stays absent rather than showing accommodation or
+       * substitute imagery (owner image-hierarchy correction, 03 Sep). */
       '<div class="field" style="max-width:220px"><label>Travellers</label><select id="bkk-trav">' +
       S.guests.map((g, ix) => '<option value="' + (ix + 1) + '"' + (trav === ix + 1 ? ' selected' : '') + '>' + (ix + 1) + ' ' + (ix ? 'adults' : 'adult') + '</option>').join('') + '</select></div>' +
       '<div class="cch-label" style="margin-top:14px">Your stay in Bangkok</div>' +
@@ -2257,7 +2259,7 @@ function renderScopeBlock() {
       opt('own', 'Arrange my own stay', 'Bangkok stays part of your journey — no hotel costs through us.') +
       '</div>';
     if (mode === 'with') {
-      inner += bangkokStayBlock() +
+      inner += '<p class="note" style="margin:6px 0 0">6 rooms available · limited availability</p>' + bangkokStayBlock() +
         '<div class="cols2" style="margin-top:8px"><div class="field"><label>Check-in</label><input type="date" id="bkk-from" value="' + esc(b.from || '2027-02-21') + '"/></div>' +
         '<div class="field"><label>Check-out</label><input type="date" id="bkk-to" value="' + esc(b.to || '2027-02-25') + '"/></div></div>' +
         '<div class="trf-price" style="margin-top:10px">' + esc(BANGKOK_STAYS[0].name) + '<br/>' + (b.from && b.to ? esc(b.from) + ' → ' + esc(b.to) : BANGKOK_STAY.window) + ' · ' + bkkNights() + ' nights · ' + bkkTravellers() + ' travellers<br/>Your costs · ' + money(BANGKOK_STAY.ratePerGuestNight) + ' per person / night · ' + bkkNights() + ' nights × ' + bkkTravellers() + ' guests<br/><strong>Total · ' + money(bkkTotal()) + '</strong></div>' +

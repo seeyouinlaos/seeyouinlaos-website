@@ -200,6 +200,7 @@
   E("Your choice — return with us, continue elsewhere or your own plans · under My Travel", "Eure Wahl — mit uns zurück, anderswo weiter oder eigene Pläne · unter Mein Reiseweg", "เลือกได้ตามใจ กลับกับเรา เดินทางต่อที่อื่น หรือแผนของคุณเอง · ที่ การเดินทางของฉัน", "お好きに——一緒に戻る、別の地へ、ご自身の計画・「旅の手配」で");
   E("Guest Relations confirms this stay and its details personally — nothing is added to your costs here.", "Guest Relations bestätigt diese Unterkunft und ihre Details persönlich — zu euren Kosten kommt hier nichts hinzu.", "ฝ่ายดูแลแขกยืนยันที่พักนี้และรายละเอียดกับคุณเป็นการส่วนตัว โดยไม่มีการเพิ่มในค่าใช้จ่ายของคุณที่นี่", "この滞在と詳細はゲストリレーションズが直接ご確認します——ここで費用に加算されるものはありません。");
   E("This destination stays part of your journey — no accommodation through us, USD 0.", "Das Ziel bleibt Teil eurer Reise — keine Unterkunft über uns, USD 0.", "จุดหมายนี้ยังเป็นส่วนหนึ่งของเส้นทาง โดยไม่มีที่พักผ่านเรา USD 0", "この目的地は旅の一部のまま——こちらを通じた宿泊はなし、USD 0です。");
+  E("6 rooms available · limited availability", "6 Zimmer verfügbar · begrenzte Verfügbarkeit", "มีห้องว่าง 6 ห้อง · จำนวนจำกัด", "残り6室・数に限りがあります");
   E("Show details", "Details anzeigen", "ดูรายละเอียด", "詳細を見る");
   E("Hide details", "Details schließen", "ซ่อนรายละเอียด", "詳細を閉じる");
   E("Continue", "Weiter", "ดำเนินการต่อ", "次へ");
