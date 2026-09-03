@@ -188,6 +188,18 @@
   E("Your arrival details for Guest Relations (flight/train, booked by you)", "Eure Ankunftsdaten für Guest Relations (Flug/Zug, von euch gebucht)", "รายละเอียดการเดินทางถึงสำหรับฝ่ายดูแลแขก (เที่ยวบิน/รถไฟที่คุณจองเอง)", "ゲストリレーションズ用のご到着情報（ご自身で手配の便・列車）");
   E("1 adult", "1 Erwachsene(r)", "ผู้ใหญ่ 1 คน", "大人1名");
   E("2 adults", "2 Erwachsene", "ผู้ใหญ่ 2 คน", "大人2名");
+  E("China Journey", "China-Reise", "เส้นทางประเทศจีน", "中国の旅");
+  E("China · Kunming", "China · Kunming", "จีน · คุนหมิง", "中国・昆明");
+  E("China · Lijiang", "China · Lijiang", "จีน · ลี่เจียง", "中国・麗江");
+  E("Your stay in Kunming", "Eure Unterkunft in Kunming", "ที่พักของคุณในคุนหมิง", "昆明でのご滞在");
+  E("Your stay in Lijiang", "Eure Unterkunft in Lijiang", "ที่พักของคุณในลี่เจียง", "麗江でのご滞在");
+  E("Vientiane → Kunming · Flight", "Vientiane → Kunming · Flug", "เวียงจันทน์ → คุนหมิง · เที่ยวบิน", "ビエンチャン→昆明・フライト");
+  E("China Eastern · arranged with Guest Relations", "China Eastern · mit Guest Relations arrangiert", "ไชน่าอีสเทิร์น · จัดเตรียมกับฝ่ายดูแลแขก", "中国東方航空・ゲストリレーションズが手配");
+  E("Kunming → Lijiang · First Class Train", "Kunming → Lijiang · First-Class-Zug", "คุนหมิง → ลี่เจียง · รถไฟชั้นหนึ่ง", "昆明→麗江・一等列車");
+  E("Lijiang → Bangkok / onward", "Lijiang → Bangkok / Weiterreise", "ลี่เจียง → กรุงเทพฯ / เดินทางต่อ", "麗江→バンコク／その先へ");
+  E("Your choice — return with us, continue elsewhere or your own plans · under My Travel", "Eure Wahl — mit uns zurück, anderswo weiter oder eigene Pläne · unter Mein Reiseweg", "เลือกได้ตามใจ กลับกับเรา เดินทางต่อที่อื่น หรือแผนของคุณเอง · ที่ การเดินทางของฉัน", "お好きに——一緒に戻る、別の地へ、ご自身の計画・「旅の手配」で");
+  E("Guest Relations confirms this stay and its details personally — nothing is added to your costs here.", "Guest Relations bestätigt diese Unterkunft und ihre Details persönlich — zu euren Kosten kommt hier nichts hinzu.", "ฝ่ายดูแลแขกยืนยันที่พักนี้และรายละเอียดกับคุณเป็นการส่วนตัว โดยไม่มีการเพิ่มในค่าใช้จ่ายของคุณที่นี่", "この滞在と詳細はゲストリレーションズが直接ご確認します——ここで費用に加算されるものはありません。");
+  E("This destination stays part of your journey — no accommodation through us, USD 0.", "Das Ziel bleibt Teil eurer Reise — keine Unterkunft über uns, USD 0.", "จุดหมายนี้ยังเป็นส่วนหนึ่งของเส้นทาง โดยไม่มีที่พักผ่านเรา USD 0", "この目的地は旅の一部のまま——こちらを通じた宿泊はなし、USD 0です。");
   E("Show details", "Details anzeigen", "ดูรายละเอียด", "詳細を見る");
   E("Hide details", "Details schließen", "ซ่อนรายละเอียด", "詳細を閉じる");
   E("Continue", "Weiter", "ดำเนินการต่อ", "次へ");

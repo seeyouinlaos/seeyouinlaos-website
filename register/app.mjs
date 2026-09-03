@@ -193,6 +193,7 @@ if (!S.v2) {
 }
 S.scope ||= { bangkok: false, laos: true, china: false };
 S.experiences ||= [];
+S.china ||= { kunming: null, lijiang: null };
 /* §10 v2.1 normalization: a ghost Bangkok selection (scope off, stay set)
  * loses its ACTIVE consequence exactly once; eligibility data survives. */
 if (!S.v22) {
@@ -252,6 +253,7 @@ function freshState() {
     v21: 1,
     v22: 1,
     payment: null,            // 'full' | 'installments' (P0 payment preference)
+    china: { kunming: null, lijiang: null },  // China stay decisions (with|own)
     trainNote: '',
     notes: '',
     submitted: false,
@@ -2000,6 +2002,8 @@ function currentRegistration() {
     departure: S.departure, transfers: S.transfers, dressAck: { ...(S.dressAck || {}) },
     bangkokStay: bangkokStayActive() ? { ...(S.bangkokStay) } : { property: null, from: '', to: '' },
     payment: S.payment || null,
+    china: { ...(S.china || {}) },
+    scope: { ...(S.scope || {}) },
     postWedding: { ...(S.postWedding || { joined: false }) },
     additionalGuestRequest: S.additionalGuestRequest,
     trainNote: S.trainNote, notes: S.notes, registration_submitted_at: S.registration_submitted_at,
@@ -2277,6 +2281,40 @@ function renderScopeBlock() {
     const tsel = box.querySelector('#bkk-trav');
     if (tsel) tsel.addEventListener('change', () => { S.bangkokStay.travellers = parseInt(tsel.value, 10); saveDraft(); renderStep(cur); renderSummary(); });
     if (mode === 'with') wireBangkokStay(box.querySelector('#bkk-journey'));
+  }
+  if (sc.china) {
+    const CH = Object.fromEntries(POST_WEDDING.map((c) => [c.id, c]));
+    const trav = bkkTravellers();
+    const stayChoice = (key, label) => {
+      const m = S.china[key];
+      const o = (id, txt, blurb) => '<label class="tj-opt' + (m === id ? ' sel' : '') + '" style="display:block;cursor:pointer"><input type="radio" name="cn-' + key + '" value="' + id + '"' + (m === id ? ' checked' : '') + ' style="position:absolute;opacity:0"/><h4 style="margin:0 0 4px">' + txt + '</h4><p class="note" style="margin:0">' + blurb + '</p></label>';
+      return '<div class="cch-label" style="margin-top:10px">' + label + '</div>' +
+        '<div class="tj-pair" role="radiogroup" aria-label="' + label + '">' +
+        o('with', 'Stay with us', 'Guest Relations confirms this stay and its details personally — nothing is added to your costs here.') +
+        o('own', 'Arrange my own stay', 'This destination stays part of your journey — no accommodation through us, USD 0.') +
+        '</div>';
+    };
+    const leg = (d, t, sub) => '<div class="crow"><span class="cdate">' + d + '</span><div class="cbody"><span class="cprod">' + t + '</span><span class="camt">' + sub + '</span></div></div>';
+    const k = CH['kunming-stay'], l = CH['lijiang-stay'], tr = CH['kmg-ljg'];
+    let cn = '<div class="cch-label" style="margin-top:16px">China Journey</div>' +
+      leg('01 MAR 2027', 'Vientiane → Kunming · Flight', 'China Eastern · arranged with Guest Relations') +
+      '<div class="cch-label" style="margin-top:12px">China · Kunming</div>' +
+      '<div class="when">' + esc(k.date) + ' · ' + esc(k.label) + '</div>' +
+      '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0 4px">' +
+      (k.images || []).map((im, ix) => '<img src="' + im + '" alt="' + esc(k.label) + ' — impression ' + (ix + 1) + '" loading="lazy" decoding="async" style="width:100%;height:74px;object-fit:cover;display:block"/>').join('') + '</div>' +
+      '<p class="note">' + esc(k.sub) + '</p>' +
+      stayChoice('kunming', 'Your stay in Kunming') +
+      leg('04 MAR 2027', 'Kunming → Lijiang · First Class Train', money(tr.contribution) + ' per guest · ' + trav + ' guests = ' + money(tr.contribution * trav)) +
+      '<div class="cch-label" style="margin-top:12px">China · Lijiang</div>' +
+      '<div class="when">' + esc(l.date) + ' · ' + esc(l.label) + '</div>' +
+      '<p class="note">' + esc(l.sub) + '</p>' +
+      stayChoice('lijiang', 'Your stay in Lijiang') +
+      leg('06 MAR 2027', 'Lijiang → Bangkok / onward', 'Your choice — return with us, continue elsewhere or your own plans · under My Travel');
+    box.querySelector('#scope-block .mod[data-scope="china"]').insertAdjacentHTML('afterend', '<div id="china-journey">' + cn + '</div>');
+    box.querySelectorAll('#china-journey input[name^="cn-"]').forEach((el) => el.addEventListener('change', () => {
+      S.china[el.name.replace('cn-', '')] = el.value;
+      saveDraft(); renderStep(cur); renderSummary();
+    }));
   }
   box.querySelectorAll('#scope-block input[name^="scope-"]').forEach((el) =>
     el.addEventListener('change', () => {

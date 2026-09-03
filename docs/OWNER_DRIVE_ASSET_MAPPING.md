@@ -33,3 +33,10 @@ to use these folders; sources are documented here for accountability.
 | Temple morning imagery | alms/timeline owner set | USED |
 | Penthouse (Peggy & Steffie) | Elegant 6BR Sathon Penthouse | USED |
 | LINE QR | owner original | USED (untouched) |
+
+## China Journey (03 Sep pass)
+| Surface | Source (Drive) | Production path | Status |
+|---|---|---|---|
+| Kunming · Wanxiang Yueju strip ×3 | previously accepted owner set | assets/images/journey/kunming-01..03.jpg | USED |
+| Lijiang · Luye Baisha imagery | Drive folder "Luye Baisha · Rizhao Jinshan" (_001.._005) | — | NOT USED — files carry a Trip.com watermark (OTA imagery; banned by order §10 and FER §5A). Lijiang stays text-led until owner-clean originals exist. |
+| Kunming Drive folder _001.._004 | Drive "Wanxiang Yueju…" | — | NOT NEWLY BOUND — same OTA-screenshot family; the already-accepted kunming set covers the module. |
