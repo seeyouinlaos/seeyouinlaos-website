@@ -359,7 +359,7 @@ export function buildNotification(reg, ctx) {
     out.push(L('  Attendance:', g.attending === false ? 'NOT ATTENDING' : 'ATTENDING'));
     const j = g.journey || {}, e = g.events || {};
     out.push(L('  Journey:', [j.bangkok && 'Bangkok Journey', j.train && 'Overnight Train (seat requested)', j.independent && 'Independent arrival'].filter(Boolean).join('; ')));
-    out.push(L('  Events:', ['welcome', 'temple', 'coffee', 'ceremony', 'dinner'].filter((k) => e[k]).join('; ') + ' (Welcome Dinner 27 FEB 06:15 PM · Alms 09:00 AM · Coffee & Cake 12:00 · Vow 04:30 PM · Dinner 06:15 PM)'));
+    out.push(L('  Events:', ['temple', 'coffee', 'ceremony', 'dinner'].filter((k) => e[k]).join('; ') + ' (Temple 09:00 AM · Coffee & Cake after the return · Vow 04:30 PM · Dinner 07:30 PM)'));
     out.push(L('  Dress Codes Acknowledged:', ['temple', 'ceremony', 'dinner'].filter((k) => e[k]).map((k) => k + ': ' + ((reg.dressAck || {})[k] ? 'YES' : 'NO')).join('; ')));
     out.push(L('  Email:', g.email));
     out.push(L('  Phone:', g.phone));

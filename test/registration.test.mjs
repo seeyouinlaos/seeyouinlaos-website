@@ -397,7 +397,7 @@ test('each wedding moment needs its OWN dress code acknowledgement (§21)', () =
   reg.dressAck = { temple: true, ceremony: true, dinner: false };
   assert.ok(validateRegistration(reg, ctx(inv)).some((e) => e.includes('dress code for the Wedding Dinner')));
   reg.dressAck = { temple: false, ceremony: true, dinner: true };
-  assert.ok(validateRegistration(reg, ctx(inv)).some((e) => e.includes('dress code for the Alms Giving')));
+  assert.ok(validateRegistration(reg, ctx(inv)).some((e) => e.includes('dress code for the Temple Ceremony')));
   // NOT JOINING an optional moment needs no acknowledgement for it
   reg.guests.forEach((g) => { g.events.temple = false; });
   assert.ok(!validateRegistration(reg, ctx(inv)).some((e) => e.includes('Temple')));
@@ -715,8 +715,7 @@ test('Pre-Wedding Bangkok stay: owner decision closed — 21–24 FEB, first nig
 
 test('event times are the canonical owner values', () => {
   const t = Object.fromEntries(EVENTS.map((e) => [e.id, e.time]));
-  assert.equal(t.temple, '09:00 – 10:00 AM');
+  assert.equal(t.temple, '09:00 AM – approx. 12:00 PM');
   assert.equal(t.ceremony, '04:30 PM');
-  assert.equal(t.dinner, '06:15 PM');
-  assert.equal(t.welcome, '06:15 PM');
+  assert.equal(t.dinner, '07:30 PM');
 });

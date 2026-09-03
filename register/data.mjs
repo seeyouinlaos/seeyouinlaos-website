@@ -60,20 +60,17 @@ export const JOURNEY_MODULES = [
 ];
 
 export const EVENTS = [
-  { id: 'welcome', label: 'Welcome Dinner', when: 'Saturday, 27 February 2027', time: '06:15 PM',
-    venue: 'Lao Derm, Vientiane',
-    blurb: 'The evening the journey gathers: dinner together at Lao Derm, with an optional stroll to the Night Market afterwards.' },
-  { id: 'temple', label: 'Alms Giving', when: 'Sunday, 28 February 2027', time: '09:00 – 10:00 AM',
+  { id: 'temple', label: 'Temple Ceremony', when: 'Sunday, 28 February 2027', time: '09:00 AM – approx. 12:00 PM',
     venue: 'Wat Ong Teu Temple, Vientiane', dress: 'Lao Traditional Dress', dressGroup: 'tradition',
     mapUrl: 'https://maps.app.goo.gl/Leuzp4wNBhb9bR9m9?g_st=ic',
-    blurb: 'The wedding day begins at Wat Ong Teu: a short walk from the Heritage, alms offered in the morning light, nothing hurried.' },
-  { id: 'coffee', label: 'Coffee & Cake', when: 'Sunday, 28 February 2027', time: '12:00 – 4:15 PM',
-    venue: 'Le Café · Secret Garden',
-    blurb: 'Long, easy hours in the Secret Garden — coffee, cake and time together before the vows.' },
+    blurb: 'The wedding day begins at the temple: a Buddhist morning ceremony, unhurried and full of meaning. Afterwards we return together to the hotel.' },
+  { id: 'coffee', label: 'Coffee & Cake', when: 'Sunday, 28 February 2027', time: 'After the return from the temple',
+    venue: 'Souphattra Heritage Vientiane',
+    blurb: 'A relaxed hour together after the temple — coffee, cake and time to breathe before the vows.' },
   { id: 'ceremony', label: 'Vow Ceremony', when: 'Sunday, 28 February 2027', time: '04:30 PM',
     venue: 'Souphattra Heritage Vientiane', dress: 'Black Tie', dressGroup: 'vow', blurb: 'The vows, in front of everyone who matters.' },
-  { id: 'dinner', label: 'Wedding Dinner', when: 'Sunday, 28 February 2027', time: '06:15 PM',
-    venue: 'Souphattra Heritage Vientiane', dress: 'Black Tie', dressGroup: 'dinner', blurb: 'Sunset drinks beside the pool, then dinner in the courtyard garden.' },
+  { id: 'dinner', label: 'Wedding Dinner', when: 'Sunday, 28 February 2027', time: '07:30 PM',
+    venue: 'Souphattra Vientiane Hotel', dress: 'Black Tie', dressGroup: 'dinner', blurb: 'Sunset drinks beside the pool, then dinner in the courtyard garden.' },
 ];
 
 /* ---------------- accommodation resources ----------------
@@ -228,7 +225,7 @@ export const SELECTABLE_ACCOMMODATIONS = ACCOMMODATIONS.filter((a) => a.selectab
  * six numbered, easily replaceable slots (DRESS_ALMS_01..06). */
 export const DRESS_CODE = {
   arrival: { label: 'Arrival & Stay', dress: 'Elegant Resort Wear' },
-  alms: { label: 'Alms Giving', dress: 'Lao Traditional Dress' },
+  alms: { label: 'Temple Ceremony', dress: 'Lao Traditional Dress' },
   ceremony: { label: 'Vow Ceremony', dress: 'Black Tie' },
   dinner: { label: 'Wedding Dinner', dress: 'Black Tie' },
 };
@@ -361,7 +358,7 @@ export const PACKAGE_INCLUSIONS = [
   { id: 'luggage', label: 'Luggage and arrival coordination' },
   { id: 'transfers', label: 'Confirmed transfers within the wedding programme' },
   { id: 'welcome-drink', label: 'Welcome drink' },
-  { id: 'temple', label: 'Alms Giving at Wat Ong Teu', event: 'temple' },
+  { id: 'temple', label: 'Temple Ceremony', event: 'temple' },
   { id: 'coffee', label: 'Coffee & Cake', event: 'coffee' },
   { id: 'ceremony', label: 'Vow Ceremony', event: 'ceremony' },
   { id: 'cake', label: 'Cake Reception and Social Hour', event: 'dinner' },
