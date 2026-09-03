@@ -83,7 +83,7 @@ function itinerarySteps() {
   steps.push(acc
     ? { d: acc.stay + ' · ' + acc.nights + ' nights', t: acc.name + ' · Vientiane', s: 'First night · your contribution — second night · hosted', st: S.stay.waitlist ? 'WAITLISTED' : 'ARRANGED WITH GUEST RELATIONS' }
     : { d: '27 FEB – 01 MAR 2027', t: 'Your wedding stay · Vientiane', s: 'Choose under My Stay', st: 'YOUR CHOICE' });
-  steps.push({ d: '28 FEB 2027', t: 'The Wedding · Main Event', s: 'Temple Ceremony 09:00 AM · Vow Ceremony 04:30 PM · Wedding Dinner 07:30 PM · Souphattra Heritage Vientiane', main: true });
+  steps.push({ d: '28 FEB 2027', t: 'The Wedding · Main Event', s: 'Alms Giving 09:00 AM · Vow Ceremony 04:30 PM · Wedding Dinner 07:30 PM · Souphattra Heritage Vientiane', main: true });
   if (S.postWedding && S.postWedding.joined) {
     for (const c of POST_WEDDING.filter((x) => !x.onward)) {
       steps.push({ d: c.date, t: c.label, s: (c.type === 'Train' ? 'First Class Train' : c.type) + (c.sub ? ' · ' + c.sub : '') + (c.contribution != null ? '' : ' · Guest Relations confirms') });
@@ -1778,8 +1778,9 @@ function renderCost() {
     'Personal airport welcome and arrival coordination',
     'Welcome drink on arrival',
     'Breakfast on both mornings',
-    'Temple Ceremony',
-    'Coffee & Cake',
+    'Alms Giving at Wat Ong Teu',
+    'Coffee & Cake in the Secret Garden',
+    'Pool Social Hour',
     'Vow Ceremony',
     'Sunset Drinks &amp; Wedding Dinner',
     'Two hour beverage package',
@@ -2248,7 +2249,7 @@ function renderWeddingPresets() {
     '<div class="cch-label">How would you like to be part of the wedding day?</div>' +
     '<p class="note">The Vow Ceremony is the shared heart of the wedding day. Around it, choose the additional moments that feel right for you.</p>' +
     '<div class="tj-pair" role="radiogroup" aria-label="Wedding participation">' +
-    opt('full', 'The full wedding day', 'Temple Ceremony, Coffee & Cake, Vow Ceremony and Wedding Dinner.') +
+    opt('full', 'The full wedding day', 'Alms Giving, Coffee & Cake, Vow Ceremony and Wedding Dinner.') +
     opt('dinner', 'Wedding Dinner only', 'Join us in the evening at Souphattra Vientiane Hotel.') +
     opt('custom', 'Choose individual moments', 'Select the moments below, one by one.') +
     '</div></div>');
