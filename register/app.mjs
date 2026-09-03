@@ -249,6 +249,7 @@ function freshState() {
     v2: 1,
     v21: 1,
     v22: 1,
+    payment: null,            // 'full' | 'installments' (P0 payment preference)
     trainNote: '',
     notes: '',
     submitted: false,
@@ -510,9 +511,9 @@ function adoptInvitation(inv) {
 
 /* ---------------- MY JOURNEY · private member area ---------------- */
 const PRIVNAV = [
-  ['home', 'My Journey'], ['events', 'My Wedding'], ['stay', 'My Stay'],
+  ['home', 'My Journey'], ['events', 'The Wedding'], ['stay', 'My Stay'],
   ['journey', 'My Travel'], ['spa', 'Experiences'], ['each', 'My Details'],
-  ['cost', 'My Costs'], ['review', 'Review'],
+  ['cost', 'My Plan'],
 ];
 function renderPrivnav() {
   const nav = document.getElementById('privnav');
@@ -625,7 +626,7 @@ function renderHome() {
     card('each', 'My Profile', detailsMissing ? detailsMissing + ' detail' + (detailsMissing > 1 ? 's' : '') + ' still needed' : 'Personal details',
       'Contact, dietary needs and the small preferences that shape your stay',
       detailsMissing ? 'OPEN' : 'COMPLETE') +
-    card('cost', 'My Costs', money(total),
+    card('cost', 'My Plan', money(total),
       (acc ? (acc.contributionPerGuest == null ? 'Stay complimentary · limited' : 'Stay ' + money(partyTotal(acc, occ))) : 'No stay selected yet') +
       (riders.length ? ' · train ' + money(tc) : '') +
       ((S.transfers || []).length ? ' · transfers ' + money(trf) : ''),
@@ -1733,17 +1734,14 @@ function renderCost() {
   if (pre) html += chapter('01', 'Pre-Wedding Journey', 'Optional · Before the wedding') + pre;
 
   // 02 · THE WEDDING (main)
+  const oneNight = S.stay.mode === 'oneNight';
   let wed = '';
-  if (S.stay.mode === 'own') {
-    wed += line('27 FEB – 01 MAR 2027', 'Your wedding stay · Vientiane', 'Own accommodation · no arrangement needed');
-  } else if (S.stay.mode === 'oneNight') {
-    wed += line('28 FEB – 01 MAR 2027 · 1 night', 'Your wedding stay · Vientiane', 'Price to be finalized with Guest Relations');
-  } else if (!acc) {
+  if (!acc) {
     wed += line('27 FEB – 01 MAR 2027', 'Your wedding stay · Vientiane', 'Not selected yet · choose under My Stay');
   } else if (neutral) {
     wed += line(esc(acc.stay), esc(acc.name) + ' · Vientiane', 'Complimentary · limited availability');
   } else {
-    wed += line(esc(acc.stay) + ' · ' + acc.nights + ' nights',
+    wed += line(oneNight ? '28 FEB – 01 MAR 2027 · 1 night' : esc(acc.stay) + ' · ' + acc.nights + ' nights',
       esc(acc.name) + ' · Vientiane',
       partyCharges(acc, occ).map((c) => { const g = S.guests.find((x) => x.guestId === c.guestId); return esc(g ? g.preferredName : c.guestId) + ' ' + money(c.amount); }).join(' · '));
   }
@@ -1784,13 +1782,10 @@ function renderCost() {
     'Sunset Drinks &amp; Wedding Dinner',
     'Two hour beverage package',
   ];
-  if (acc && !neutral) hosted.push(esc(acc.name) + ' · night two · hosted');
+  if (acc && !neutral && !oneNight) hosted.push(esc(acc.name) + ' · night two · hosted');
   hosted.push('Departure coordination within the wedding programme');
   html += '<div class="chosted">' + hosted.map((h) => '<span>' + h + '</span>').join('') + '</div>';
 
-  if (S.stay.mode === 'oneNight' && S.stay.oneNight && S.stay.oneNight.category) {
-    open.push(['28 FEB – 01 MAR 2027 · 1 night', 'One-night wedding stay · ' + S.stay.oneNight.category + ' · Price to be finalized with Guest Relations']);
-  }
   if (open.length) {
     html += '<div class="cch"><div><div class="cch-t">To finalize with Guest Relations</div><div class="cch-s">Genuinely open arrangements · nothing here is charged</div></div></div>';
     html += open.map((o) => line(o[0], o[1], 'Guest Relations will confirm the arrangement')).join('');
@@ -1799,10 +1794,20 @@ function renderCost() {
   if (total === 0) {
     html += '<p class="note" style="margin-top:10px">No paid optional arrangements selected through Guest Relations.</p>';
   }
+  if (total > 0) {
+    const pm = S.payment;
+    html += '<div class="cch"><div><div class="cch-t">Payment preference</div><div class="cch-s">How would you like to settle your costs?</div></div></div>' +
+      '<div class="tj-pair" role="radiogroup" aria-label="Payment preference" id="pay-pref">' +
+      '<label class="tj-opt' + (pm === 'full' ? ' sel' : '') + '" style="display:block;cursor:pointer"><input type="radio" name="pay-pref" value="full"' + (pm === 'full' ? ' checked' : '') + ' style="position:absolute;opacity:0"/><h4 style="margin:0 0 4px">Pay in full</h4><p class="note" style="margin:0">One payment once your arrangements are confirmed.</p></label>' +
+      '<label class="tj-opt' + (pm === 'installments' ? ' sel' : '') + '" style="display:block;cursor:pointer"><input type="radio" name="pay-pref" value="installments"' + (pm === 'installments' ? ' checked' : '') + ' style="position:absolute;opacity:0"/><h4 style="margin:0 0 4px">Pay in installments</h4><p class="note" style="margin:0">Khun Ket and Khun Paddy will coordinate the payment schedule with you personally.</p></label>' +
+      '</div>';
+  }
+  html += '<div class="stepnav" style="margin-top:22px"><button type="button" class="btn" id="plan-review">Review my plan & submit</button></div>';
   box.innerHTML = html +
     (fxStamp() ? '<p class="note" style="margin-top:14px">' + fxStamp() + ' · Amounts are shown for orientation; the master currency remains USD.</p>' : '') +
-    (S.stay.mode === 'own' || S.stay.mode === 'oneNight' ? '' :
-      '<p class="note" style="margin-top:16px">' + esc(COPY.priceNote + ' Haruthai\u00A0&\u00A0Suthep.') + '</p>') +
+    (S.stay.mode === 'oneNight'
+      ? '<p class="note" style="margin-top:16px">Your one-night wedding stay: 28 FEB – 01 MAR 2027, breakfast included. The amount shown is the approved amount for your room category.</p>'
+      : '<p class="note" style="margin-top:16px">' + esc(COPY.priceNote + ' Haruthai\u00A0&\u00A0Suthep.') + '</p>') +
     '<p class="note">' + esc(COPY.payment) + ' One person may settle the invoice for everyone travelling with them.</p>';
 
   /* progressive disclosure (mobile): each cost chapter collapses to its
@@ -1837,6 +1842,12 @@ function renderCost() {
       }
     });
   })();
+  const pp = document.getElementById('pay-pref');
+  if (pp) pp.querySelectorAll('input[name="pay-pref"]').forEach((el) => el.addEventListener('change', () => {
+    S.payment = el.value; saveDraft(); renderStep(cur);
+  }));
+  const pr = document.getElementById('plan-review');
+  if (pr) pr.addEventListener('click', () => { saveDraft(); show(idx('review')); });
 }
 
 /* ---------------- step 10 · review (§28) ---------------- */
@@ -1887,7 +1898,7 @@ function renderReview() {
     if (!joiners.length) return [esc(e.label), 'Not joining'];
     const who = joiners.length === S.guests.length ? 'Joining' : 'Joining · ' + joiners.map((g) => esc(g.preferredName)).join(' & ');
     const ack = S.dressAck && S.dressAck[e.id];
-    const dress = e.dress ? (ack ? ' · Dress code understood' : ' · <span class="ack-missing">Dress code not yet confirmed — please confirm under My Wedding</span>') : '';
+    const dress = e.dress ? (ack ? ' · Dress code understood' : ' · <span class="ack-missing">Dress code not yet confirmed — please confirm under The Wedding</span>') : '';
     return [esc(e.label) + (e.time ? ' · ' + esc(e.time) : ''), who + dress];
   }));
   if (acc) html += '<div class="rv-room">' + roomFigure(acc) +
@@ -1989,6 +2000,7 @@ function currentRegistration() {
     arrival: { ...S.arrival, point: S.guests.some((g) => g.journey.train) ? 'Nong Khai Railway Station' : (S.arrival.point || WEDDING.airport) },
     departure: S.departure, transfers: S.transfers, dressAck: { ...(S.dressAck || {}) },
     bangkokStay: bangkokStayActive() ? { ...(S.bangkokStay) } : { property: null, from: '', to: '' },
+    payment: S.payment || null,
     postWedding: { ...(S.postWedding || { joined: false }) },
     additionalGuestRequest: S.additionalGuestRequest,
     trainNote: S.trainNote, notes: S.notes, registration_submitted_at: S.registration_submitted_at,
@@ -2124,11 +2136,7 @@ function stepValid(name) {
     }
     return true;
   }
-  if (name === 'stay') {
-    if (S.stay.mode === 'own') return true;
-    if (S.stay.mode === 'oneNight') return !!(S.stay.oneNight && S.stay.oneNight.category);
-    return !!currentAcc() || !!S.stay.waitlist;
-  }
+  if (name === 'stay') return !!currentAcc() || !!S.stay.waitlist; // one- and two-night both select a room
   if (name === 'each') {
     return S.guests.every((g) =>
       (g.email || '').trim().includes('@') &&
@@ -2265,40 +2273,21 @@ function renderStayMode() {
   const wrap = document.createElement('div'); wrap.id = 'stay-standard';
   while (box.firstChild) wrap.appendChild(box.firstChild);
   box.appendChild(wrap);
-  const dOnly = dinnerOnly();
-  const mode = S.stay.mode || null;
-  if (mode === 'oneNight' && !dOnly) { S.stay.mode = null; saveDraft(); }
-  const opt = (id, label, blurb, extra) =>
+  if (S.stay.mode === 'own') { S.stay.mode = null; saveDraft(); } // own accommodation removed (owner §8)
+  const mode = S.stay.mode || 'standard';
+  S.stay.mode = mode;
+  const opt = (id, label, blurb) =>
     '<label class="tj-opt' + (mode === id ? ' sel' : '') + '" style="display:block;cursor:pointer"><input type="radio" name="stay-mode" value="' + id + '"' + (mode === id ? ' checked' : '') + ' style="position:absolute;opacity:0"/>' +
-    '<h4 style="margin:0 0 4px">' + label + '</h4><p class="note" style="margin:0">' + blurb + '</p>' + (extra || '') + '</label>';
-  let opts = opt('standard', 'The wedding stay', '27 FEB – 01 MAR 2027 · 2 nights · the second night is hosted by Haruthai & Suthep.');
-  if (dOnly) opts += opt('oneNight', 'One night around the Wedding Dinner', '28 FEB – 01 MAR 2027 · 1 night · Price to be finalized with Guest Relations.');
-  opts += opt('own', 'Own accommodation', 'You stay on your own arrangement — nothing is needed from us, and nothing is charged.');
+    '<h4 style="margin:0 0 4px">' + label + '</h4><p class="note" style="margin:0">' + blurb + '</p></label>';
   box.insertAdjacentHTML('afterbegin',
-    '<div class="guest-block" id="stay-mode"><div class="cch-label">Your stay · how would you like to sleep?</div>' +
-    '<div class="tj-pair" role="radiogroup" aria-label="Stay arrangement">' + opts + '</div></div>');
-  wrap.hidden = mode !== 'standard' && mode !== null ? true : false;
-  if (mode === 'own' || mode === 'oneNight') wrap.hidden = true;
-  if (mode === 'oneNight') {
-    const cats = SELECTABLE_ACCOMMODATIONS.filter((a) => a.kind !== 'airbnb').map((a) => a.name);
-    const sel = (S.stay.oneNight || {}).category || '';
-    box.querySelector('#stay-mode').insertAdjacentHTML('beforeend',
-      '<div class="field" style="margin-top:12px"><label>Room category for your night</label>' +
-      '<select id="onenight-cat"><option value="">Please choose</option>' + cats.map((c) => '<option' + (sel === c ? ' selected' : '') + '>' + c + '</option>').join('') + '</select></div>' +
-      '<p class="note">Price to be finalized with Guest Relations — nothing is added to your costs until Khun Ket or Khun Paddy confirms it personally with you.</p>');
-    box.querySelector('#onenight-cat').addEventListener('change', (e) => {
-      S.stay.oneNight = { category: e.target.value || null };
-      saveDraft(); renderSummary(); if (typeof updateNextState === 'function') updateNextState();
-    });
-  }
-  if (mode === 'own') {
-    box.querySelector('#stay-mode').insertAdjacentHTML('beforeend',
-      '<p class="note" style="margin-top:12px">Own accommodation · no arrangement needed. If plans change, this choice can be changed at any time.</p>');
-  }
+    '<div class="guest-block" id="stay-mode"><div class="cch-label">Your wedding stay · one or two nights?</div>' +
+    '<div class="tj-pair" role="radiogroup" aria-label="Stay duration">' +
+    opt('standard', 'Two nights', '27 FEB – 01 MAR 2027 · 2 nights · the second night is hosted by Haruthai & Suthep. Breakfast is included on both mornings.') +
+    opt('oneNight', 'One night', '28 FEB – 01 MAR 2027 · 1 night · breakfast is included.') +
+    '</div><p class="note" style="margin-top:10px">Both choices offer the same room categories below.</p></div>');
   box.querySelectorAll('input[name="stay-mode"]').forEach((el) => el.addEventListener('change', () => {
     S.stay.mode = el.value;
-    if (el.value !== 'standard' && S.stay.accommodationId) S.stay.accommodationId = null;
-    if (el.value !== 'oneNight') S.stay.oneNight = null;
+    S.stay.oneNight = null; // legacy TO-FINALIZE model retired: same category amount applies
     saveDraft(); renderStep(cur); renderSummary();
   }));
 }
@@ -2306,15 +2295,21 @@ function renderStayMode() {
 /* Experiences: curated from EXISTING project content only (order §19/20).
  * Recommendations carry no booking state and no cost until requested. */
 const EXPERIENCES_CATALOG = [
-  { id: 'vte-thatluang', scope: 'laos', cat: 'Things to do', name: 'Pha That Luang', where: 'Vientiane' },
-  { id: 'vte-nightmarket', scope: 'laos', cat: 'Things to do', name: 'Vientiane Night Market', where: 'Vientiane' },
-  { id: 'vte-lepadaek', scope: 'laos', cat: 'Dining', name: 'Le Padaek', where: 'Vientiane' },
-  { id: 'vte-3merchants', scope: 'laos', cat: 'Dining', name: '3 Merchants Restaurant', where: 'Vientiane' },
-  { id: 'vte-sona', scope: 'laos', cat: 'Dining', name: 'Sona Cafe and Bar', where: 'Vientiane' },
-  { id: 'bkk-thongsmith', scope: 'bangkok', cat: 'Dining', name: 'Thong Smith', where: 'Bangkok' },
-  { id: 'bkk-madeleine', scope: 'bangkok', cat: 'Dining', name: 'Cafe Madeleine', where: 'Bangkok' },
-  { id: 'bkk-letsrelax', scope: 'bangkok', cat: 'Wellness', name: "Let's Relax", where: 'Bangkok' },
-  { id: 'bkk-iconsiam', scope: 'bangkok', cat: 'Things to do', name: 'ICONSIAM', where: 'Bangkok' },
+  { id: 'vte-thatluang', scope: 'laos', cat: 'Things to do', name: 'Pha That Luang', where: 'Vientiane', meta: '1–2 hours · relaxed' },
+  { id: 'vte-nightmarket', scope: 'laos', cat: 'Things to do', name: 'Vientiane Night Market', where: 'Vientiane', meta: '1–2 hours · relaxed' },
+  { id: 'vte-lepadaek', scope: 'laos', cat: 'Dining', name: 'Le Padaek', where: 'Vientiane', meta: '2 hours · smart casual' },
+  { id: 'vte-3merchants', scope: 'laos', cat: 'Dining', name: '3 Merchants Restaurant', where: 'Vientiane', meta: '2 hours · smart casual',
+    img: 'assets/images/experiences/vte-3merchants.jpg', blurb: 'A refined Vientiane dining room we love — calm, contemporary and generous.' },
+  { id: 'vte-sona', scope: 'laos', cat: 'Dining', name: 'Sona Cafe and Bar', where: 'Vientiane', meta: '1–2 hours · relaxed',
+    img: 'assets/images/experiences/vte-sona.jpg', blurb: 'Coffee by day, easy drinks by evening — a favourite pause in the city.' },
+  { id: 'vte-kaogee', scope: 'laos', cat: 'Dining', name: 'Kaogee Le Triomphe', where: 'Vientiane', meta: '1 hour · relaxed',
+    img: 'assets/images/experiences/vte-kaogee.jpg', blurb: 'The classic Vientiane café moment — kaogee baguettes and good coffee near the Patuxay.' },
+  { id: 'vte-oathhouse', scope: 'laos', cat: 'Dining', name: 'Oath House', where: 'Vientiane', meta: 'evening · smart casual',
+    img: 'assets/images/experiences/vte-oathhouse.jpg', blurb: 'An intimate evening bar — considered drinks in a beautiful room.' },
+  { id: 'bkk-thongsmith', scope: 'bangkok', cat: 'Dining', name: 'Thong Smith', where: 'Bangkok', meta: '1–2 hours · relaxed' },
+  { id: 'bkk-madeleine', scope: 'bangkok', cat: 'Dining', name: 'Cafe Madeleine', where: 'Bangkok', meta: '1 hour · relaxed' },
+  { id: 'bkk-letsrelax', scope: 'bangkok', cat: 'Wellness', name: "Let's Relax", where: 'Bangkok', meta: '1–2 hours' },
+  { id: 'bkk-iconsiam', scope: 'bangkok', cat: 'Things to do', name: 'ICONSIAM', where: 'Bangkok', meta: '2+ hours · relaxed' },
 ];
 function renderExperiencesArea() {
   const box = document.getElementById('spa-box');
@@ -2329,12 +2324,22 @@ function renderExperiencesArea() {
     html += '<div class="cch-label" style="margin-top:16px">' + c + '</div>';
     html += list.map((x) => {
       const r = req(x.id);
-      return '<div class="mod" data-exp="' + x.id + '"><div class="mod-head"><div>' +
-        '<div class="when">' + x.where + '</div><h3>' + x.name + '</h3></div>' +
-        '<div class="join-col">' + (r
-          ? '<span class="chip">REQUESTED</span> <button type="button" class="btn sm ghost" data-exp-rm="' + x.id + '">Withdraw request</button>'
-          : '<button type="button" class="btn sm" data-exp-add="' + x.id + '">Ask Guest Relations</button>') +
-        '</div></div></div>';
+      const openD = (S._expOpen === x.id);
+      return '<div class="mod exp-card" data-exp="' + x.id + '">' +
+        (x.img ? '<div class="exp-im"><img src="' + x.img + '" alt="' + esc(x.name) + '" loading="lazy" decoding="async" style="width:100%;height:180px;object-fit:cover;display:block"/></div>' : '') +
+        '<div class="mod-head"><div>' +
+        '<div class="when">' + x.where + ' · ' + x.cat + (x.meta ? ' · ' + x.meta : '') + '</div><h3>' + x.name + '</h3>' +
+        (r ? '<span class="chip">REQUESTED</span>' : '') + '</div>' +
+        '<div class="join-col"><button type="button" class="btn sm" data-exp-view="' + x.id + '" aria-expanded="' + openD + '">' + (openD ? 'Close' : 'View experience') + '</button></div>' +
+        '</div>' +
+        (openD ? '<div class="exp-detail" style="padding:6px 0 12px">' +
+          (x.img ? '<img src="' + x.img + '" alt="' + esc(x.name) + '" loading="lazy" decoding="async" style="width:100%;max-height:320px;object-fit:cover;display:block;margin-bottom:10px"/>' : '') +
+          (x.blurb ? '<p class="note">' + esc(x.blurb) + '</p>' : '') +
+          '<p class="note">' + x.where + ' · ' + x.cat + (x.meta ? ' · ' + x.meta : '') + '</p>' +
+          (r ? '<button type="button" class="btn sm ghost" data-exp-rm="' + x.id + '">Withdraw request</button>'
+             : '<button type="button" class="btn sm ghost" data-exp-add="' + x.id + '">Ask Khun Ket & Khun Paddy to arrange this</button>') +
+          '</div>' : '') +
+        '</div>';
     }).join('');
   }
   html += '<div class="cch-label" style="margin-top:22px">Wellness at the hotel</div><div id="spa-inner"></div>';
@@ -2344,6 +2349,11 @@ function renderExperiencesArea() {
   inner.id = 'spa-box-inner';
   const orig = document.getElementById.bind(document);
   renderSpaInto(inner);
+  box.querySelectorAll('[data-exp-view]').forEach((b) => b.addEventListener('click', () => {
+    const id = b.getAttribute('data-exp-view');
+    S._expOpen = (S._expOpen === id) ? null : id;
+    renderStep(cur);
+  }));
   box.querySelectorAll('[data-exp-add]').forEach((b) => b.addEventListener('click', () => {
     const x = EXPERIENCES_CATALOG.find((e) => e.id === b.getAttribute('data-exp-add'));
     S.experiences.push({ id: x.id, name: x.name, where: x.where, status: 'REQUESTED' });

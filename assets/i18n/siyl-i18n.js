@@ -130,6 +130,33 @@
     "· eine buddhistische Morgenzeremonie bis etwa zwölf Uhr ·",
     "· พิธีเช้าแบบพุทธจนถึงราวเที่ยง ·",
     "・正午ごろまでの朝の仏教儀式・");
+  E("My Plan", "Mein Reiseplan", "แผนการเดินทางของฉัน", "旅のプラン");
+  E("Your wedding stay · one or two nights?", "Euer Hochzeitsaufenthalt · eine oder zwei Nächte?", "การพักช่วงงานแต่ง · หนึ่งหรือสองคืน?", "ウェディングステイ——1泊または2泊？");
+  E("Two nights", "Zwei Nächte", "สองคืน", "2泊");
+  E("One night", "Eine Nacht", "หนึ่งคืน", "1泊");
+  E("27 FEB – 01 MAR 2027 · 2 nights · the second night is hosted by Haruthai & Suthep. Breakfast is included on both mornings.",
+    "27. FEB – 01. MÄRZ 2027 · 2 Nächte · die zweite Nacht übernehmen Haruthai & Suthep für euch. Frühstück ist an beiden Morgen inklusive.",
+    "27 ก.พ. – 01 มี.ค. 2027 · 2 คืน · คืนที่สองหฤทัยและสุเทพดูแลให้ อาหารเช้ารวมทั้งสองวัน",
+    "2027年2月27日–3月1日・2泊・2泊目はハルタイ＆ステープのおもてなし。朝食は両朝付きです。");
+  E("28 FEB – 01 MAR 2027 · 1 night · breakfast is included.",
+    "28. FEB – 01. MÄRZ 2027 · 1 Nacht · Frühstück inklusive.",
+    "28 ก.พ. – 01 มี.ค. 2027 · 1 คืน · รวมอาหารเช้า",
+    "2027年2月28日–3月1日・1泊・朝食付き。");
+  E("Both choices offer the same room categories below.", "Beide Optionen bieten dieselben Zimmerkategorien unten.", "ทั้งสองแบบเลือกได้จากประเภทห้องเดียวกันด้านล่าง", "どちらを選んでも、下記の同じお部屋カテゴリーからお選びいただけます。");
+  E("Your one-night wedding stay: 28 FEB – 01 MAR 2027, breakfast included. The amount shown is the approved amount for your room category.",
+    "Euer Hochzeitsaufenthalt mit einer Nacht: 28. FEB – 01. MÄRZ 2027, Frühstück inklusive. Der angezeigte Betrag ist der freigegebene Betrag eurer Zimmerkategorie.",
+    "การพักหนึ่งคืนของคุณ 28 ก.พ. – 01 มี.ค. 2027 รวมอาหารเช้า จำนวนที่แสดงคือยอดที่กำหนดไว้สำหรับประเภทห้องของคุณ",
+    "1泊のウェディングステイ：2027年2月28日–3月1日、朝食付き。表示額はお部屋カテゴリーの承認済み金額です。");
+  E("Payment preference", "Zahlungswunsch", "รูปแบบการชำระ", "お支払い方法のご希望");
+  E("How would you like to settle your costs?", "Wie möchtet ihr eure Kosten begleichen?", "คุณต้องการชำระค่าใช้จ่ายแบบใด", "費用のお支払いは、どのようになさいますか？");
+  E("Pay in full", "In einer Zahlung", "ชำระเต็มจำนวน", "一括で支払う");
+  E("One payment once your arrangements are confirmed.", "Eine Zahlung, sobald eure Arrangements bestätigt sind.", "ชำระครั้งเดียวเมื่อการเตรียมการได้รับการยืนยัน", "手配確定後に、一度でお支払いいただきます。");
+  E("Pay in installments", "In Teilzahlungen bezahlen", "แบ่งชำระเป็นงวด", "分割で支払う");
+  E("Khun Ket and Khun Paddy will coordinate the payment schedule with you personally.",
+    "Khun Ket und Khun Paddy stimmen den Zahlungsplan persönlich mit euch ab.",
+    "คุณเกตุและคุณแพดดี้จะประสานแผนการชำระกับคุณเป็นการส่วนตัว",
+    "お支払いのスケジュールは、クン・ケットとクン・パディが直接ご相談のうえ決めさせていただきます。");
+  E("Review my plan & submit", "Meinen Reiseplan prüfen & senden", "ตรวจแผนการเดินทางและส่ง", "旅のプランを確認して送信");
   E("Show details", "Details anzeigen", "ดูรายละเอียด", "詳細を見る");
   E("Hide details", "Details schließen", "ซ่อนรายละเอียด", "詳細を閉じる");
   E("Continue", "Weiter", "ดำเนินการต่อ", "次へ");
@@ -551,7 +578,7 @@
   E("Seats requested", "Angefragte Plätze", "ที่นั่งที่ขอ", "リクエスト席数");
   E("Onward transfer", "Weitertransfer", "การเดินทางต่อ", "その後の送迎");
   E("Dress code understood", "Dresscode verstanden", "เข้าใจการแต่งกายแล้ว", "ドレスコード確認済み");
-  E("Dress code not yet confirmed — please confirm under My Wedding", "Dresscode noch nicht bestätigt — bitte unter „Mein Hochzeitsprogramm“ bestätigen", "ยังไม่ได้ยืนยันการแต่งกาย โปรดยืนยันที่ กำหนดการงานแต่ง", "ドレスコード未確認——「当日の流れ」でご確認ください");
+  E("Dress code not yet confirmed — please confirm under The Wedding", "Dresscode noch nicht bestätigt — bitte unter „Die Hochzeit“ bestätigen", "ยังไม่ได้ยืนยันการแต่งกาย โปรดยืนยันที่ งานแต่งงาน", "ドレスコード未確認——「結婚式」でご確認ください");
   E("Allergy · None reported", "Allergie · keine gemeldet", "ภูมิแพ้ · ไม่มีรายงาน", "アレルギー・報告なし");
   E("Allergy · please add the detail for the kitchens under My Details", "Allergie · bitte das Detail für die Küchen unter „Meine Angaben“ ergänzen", "ภูมิแพ้ · โปรดเพิ่มรายละเอียดสำหรับครัวได้ที่ ข้อมูลของฉัน", "アレルギー・厨房のために「ゲスト情報」で詳細をご記入ください");
   E("Please confirm the information is accurate first.", "Bitte bestätigt zuerst, dass die Angaben korrekt sind.", "โปรดยืนยันความถูกต้องของข้อมูลก่อน", "まず情報が正確であることをご確認ください。");

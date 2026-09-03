@@ -346,6 +346,7 @@ export function buildNotification(reg, ctx) {
   if (reg.stay && reg.stay.mode === 'own') out.push('Stay: OWN ACCOMMODATION — no arrangement needed');
   if (reg.stay && reg.stay.mode === 'oneNight') out.push('Stay: ONE NIGHT 28 FEB - 01 MAR · ' + ((reg.stay.oneNight || {}).category || 'category open') + ' · PRICE TO FINALIZE WITH GUEST RELATIONS');
   if (reg.experiences && reg.experiences.length) out.push(L('Experiences requested:', reg.experiences.map((e) => e.name + ' (' + e.status + ')').join('; ')));
+  if (reg.payment) out.push(L('Payment preference:', reg.payment === 'installments' ? 'PAY IN INSTALLMENTS — schedule coordinated personally by Khun Ket and Khun Paddy' : 'PAY IN FULL'));
   out.push('');
   const acc = reg.stay && reg.stay.accommodationId
     ? accommodations.find((a) => a.id === reg.stay.accommodationId) : null;
