@@ -309,8 +309,12 @@ export const BANGKOK_STAYS = [
    * Guests contribute ONLY to the first night (21→22); nights two and three
    * are hosted by Haruthai & Suthep. firstNight = authoritative actual for
    * night one (party total); per-guest = firstNight / attending guests. */
-  { id: 'sathorn-penthouse', parties: ['INV-002'], name: 'Elegant 6BR Sathorn Penthouse', role: 'Pre-Wedding stay · Bangkok',
-    dates: '21–24 FEB 2027', nights: 3,
+  /* OWNER FINAL (03 SEP 2026, Bangkok Journey Module): the commercial
+   * booking object is the provider-independent BANGKOK STAY at USD 150 per
+   * person per night (see BANGKOK_STAY below). The penthouse remains the
+   * editorial "current accommodation" and may later change to a hotel. */
+  { id: 'sathorn-penthouse', name: 'Elegant 6BR Sathorn Penthouse', role: 'Current accommodation · Sathorn, Bangkok',
+    dates: '21.02.2027 – 25.02.2027', nights: 4,
     contributionNight: '21–22 FEB', hostedNights: '22–24 FEB',
     arrival: { date: '21 FEB 2027', note: 'Personal pickup by Haruthai', hosted: true },
     /* Authoritative project actual (Airbnb checkout capture, USD only):
@@ -320,6 +324,14 @@ export const BANGKOK_STAYS = [
     firstNight: 368.90,
     images: ['../assets/images/journey/penthouse-01.jpg', '../assets/images/journey/penthouse-02.jpg', '../assets/images/journey/penthouse-03.jpg'] },
 ];
+
+/* Provider-independent Bangkok Stay booking product (owner final):
+ * USD 150 × guests × nights; default window 21.02–25.02.2027 · 4 nights. */
+export const BANGKOK_STAY = {
+  window: '21.02.2027 – 25.02.2027',
+  defaultFrom: '2027-02-21', defaultTo: '2027-02-25', defaultNights: 4,
+  ratePerGuestNight: 150,
+};
 
 /* Final/return Bangkok stay context (v1.1): only where a guest chooses the
  * coordinated return — Guest Relations confirms the arrangement. */

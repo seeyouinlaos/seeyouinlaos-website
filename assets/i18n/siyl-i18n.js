@@ -182,6 +182,12 @@
   E("Check-in", "Check-in", "เช็คอิน", "チェックイン");
   E("Check-out", "Check-out", "เช็คเอาท์", "チェックアウト");
   E("Your Bangkok stay · choose Stay with us or your own arrangement under My Journey", "Eure Bangkok-Unterkunft · unter Meine Reise „Bei uns wohnen“ oder eigene Organisation wählen", "ที่พักกรุงเทพฯ ของคุณ · เลือก พักกับเรา หรือจัดเอง ได้ที่ เส้นทางของฉัน", "バンコクのご滞在——「旅のしおり」で「私たちと同じ滞在に」またはご自身での手配をお選びください");
+  E("Thailand · Bangkok", "Thailand · Bangkok", "ไทย · กรุงเทพฯ", "タイ・バンコク");
+  E("Travellers", "Reisende", "จำนวนผู้เดินทาง", "ご旅行人数");
+  E("Bangkok Stay · Bangkok, Thailand", "Bangkok Stay · Bangkok, Thailand", "ที่พักกรุงเทพฯ · กรุงเทพฯ ประเทศไทย", "バンコク・ステイ（タイ・バンコク）");
+  E("Your arrival details for Guest Relations (flight/train, booked by you)", "Eure Ankunftsdaten für Guest Relations (Flug/Zug, von euch gebucht)", "รายละเอียดการเดินทางถึงสำหรับฝ่ายดูแลแขก (เที่ยวบิน/รถไฟที่คุณจองเอง)", "ゲストリレーションズ用のご到着情報（ご自身で手配の便・列車）");
+  E("1 adult", "1 Erwachsene(r)", "ผู้ใหญ่ 1 คน", "大人1名");
+  E("2 adults", "2 Erwachsene", "ผู้ใหญ่ 2 คน", "大人2名");
   E("Show details", "Details anzeigen", "ดูรายละเอียด", "詳細を見る");
   E("Hide details", "Details schließen", "ซ่อนรายละเอียด", "詳細を閉じる");
   E("Continue", "Weiter", "ดำเนินการต่อ", "次へ");

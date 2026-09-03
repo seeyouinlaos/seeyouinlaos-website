@@ -1,3 +1,4 @@
+import * as ctxData from '../register/data.mjs';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
@@ -698,18 +699,17 @@ test('post wedding total: only guest-payable First Class train × guests', async
   assert.equal(postWeddingTotal(POST_WEDDING, false, 2), 0);
 });
 
-test('Pre-Wedding Bangkok stay: owner decision closed — 21–24 FEB, first night contribution only', () => {
-  assert.equal(BANGKOK_STAYS.length, 1);
+test('Bangkok Stay is the provider-independent USD 150 pp/night product (owner final 03 Sep)', () => {
+  const { BANGKOK_STAY } = ctxData;
+  assert.equal(BANGKOK_STAY.ratePerGuestNight, 150);
+  assert.equal(BANGKOK_STAY.window, '21.02.2027 – 25.02.2027');
+  assert.equal(BANGKOK_STAY.defaultNights, 4);
+  // default example: 2 guests × 4 nights × 150 = 1,200
+  assert.equal(BANGKOK_STAY.ratePerGuestNight * 2 * 4, 1200);
   const h = BANGKOK_STAYS[0];
-  assert.equal(h.id, 'sathorn-penthouse');
-  assert.equal(h.dates, '21–24 FEB 2027');
-  assert.equal(h.nights, 3);
-  // first night = authoritative 3-night actual 1,106.71 ÷ 3 (owner formula)
-  assert.ok(Math.abs(h.firstNight - 368.90) < 0.005);
-  assert.ok(Math.abs(h.firstNight / 2 - 184.45) < 0.005); // per guest for two
-  assert.equal(h.hostedNights, '22–24 FEB'); // hosted by the couple
+  assert.equal(h.id, 'sathorn-penthouse'); // editorial current accommodation only
   assert.equal(h.arrival.date, '21 FEB 2027');
-  assert.ok(/Haruthai/.test(h.arrival.note)); // personal pickup · HOSTED
+  assert.ok(/Haruthai/.test(h.arrival.note)); // personal pickup · HOSTED (frozen)
 });
 
 test('event times are the canonical owner values', () => {
