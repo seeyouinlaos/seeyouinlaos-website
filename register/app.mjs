@@ -8,13 +8,13 @@
 import {
   WEDDING, CONTACTS, JOURNEY_MODULES, EVENTS, ACCOMMODATIONS, SELECTABLE_ACCOMMODATIONS, TRAIN,
   TRANSFERS, PACKAGE_INCLUSIONS, COPY, DEMO_MODE, PUBLICATION, TRAIN_REFERENCE, BERTH_PREFS, BANGKOK_STAYS, BANGKOK_STAY, POST_WEDDING, RETURN_STAY, lookupInvitation,
-} from './data.mjs?v=UK5';
+} from './data.mjs?v=UK6';
 import {
   contributionPerGuest, partyCharges, partyTotal, money as usdMoney, displayMoney,
   trainContribution, transfersTotal, journeyTotal, postWeddingTotal,
   createInventory, remaining, availabilityLabel, requestAllocation,
   validateRegistration, buildNotification, nextInvitationState,
-} from './logic.mjs?v=UK5';
+} from './logic.mjs?v=UK6';
 
 /* ---------------- persistent state ---------------- */
 const DRAFT_KEY = 'siyl.reg.draft.v2';
@@ -2350,6 +2350,7 @@ init();
 
 function renderScopeBlock() {
   S.scope ||= { bangkok: false, laos: true, china: false };
+  S.scope.laos = true; // §28: the wedding is always part of the journey
   S.experiences ||= [];
   const box = document.getElementById('home-box');
   if (!box || document.getElementById('scope-block')) return;
@@ -2403,7 +2404,7 @@ function renderScopeBlock() {
     '<p class="note" style="margin:6px 0 2px">Everything is shown in the order you travel. <strong>Hosted</strong> — Haruthai &amp; Suthep are taking care of this for you. <strong>Booked</strong> — you have selected and booked this through your journey. <strong>Your choice</strong> — you arrange this part yourself.</p>' +
     '<p class="note">Choosing a destination sets nothing in stone and costs nothing — it only opens the right choices for you.</p>' +
     row('bangkok', 'Bangkok', 'The shared days in Bangkok before travelling on to Laos.', false) +
-    row('laos', 'Laos · The Wedding', 'Vientiane, the wedding days and everything around them.', false) +
+    row('laos', 'Laos · The Wedding', 'Vientiane, the wedding days and everything around them.', true) +
     row('china', 'China · Onward Journey', 'Kunming and Lijiang after the wedding — join a part of the onward journey.', false) +
     '</div>');
   if (sc.bangkok) {
@@ -2464,9 +2465,7 @@ function renderScopeBlock() {
     const ridersN = S.guests.filter((g) => g.journey.train).length;
     const indepAll = S.guests.filter((g) => g.attending !== false).every((g) => g.journey.independent);
     const bvMode = ridersN ? 'with' : (indepAll ? 'own' : null);
-    let lx = '<div class="cch-label" style="margin-top:18px">Laos · Vientiane</div>' +
-      '<div class="when" style="margin:2px 0 8px">27 FEB – 01 MAR 2027 · The Wedding · departure 01 MAR 2027 fixed</div>' +
-      travelChoice('tj-bkk-vte', 'Your journey to Vientiane · 24 – 25 FEB 2027', bvMode,
+    const transitHtml = travelChoice('tj-bkk-vte', 'Your journey to Vientiane · 24 – 25 FEB 2027 · Overnight', bvMode,
         'Bangkok → Nong Khai → Vientiane · overnight package<br/>' +
         '24 FEB 2027 · 20:25 · Bangkok departure · Krung Thep Aphiwat<br/>' +
         'Overnight · Special Express No. 25 · reserved First Class Sleeper berth<br/>' +
@@ -2475,7 +2474,11 @@ function renderScopeBlock() {
         'Train · USD 55 per guest · Van Pickup &amp; Luggage Service · USD 20 per guest<br/>' + money(TRAIN.contributionPerGuest) + ' PER GUEST · package · × ' + (ridersN || attendingCount()) + ' guests<br/>' +
         '<strong>Transport total · ' + money(TRAIN.contributionPerGuest * (ridersN || attendingCount())) + '</strong>',
         'Own arrangement noted — USD 0. Fly or travel on your own schedule; we meet you in Vientiane.',
-        ['../assets/images/train/train-01.jpg', '../assets/images/train/train-04.jpg', '../assets/images/train/train-03.jpg']) +
+        ['../assets/images/train/train-01.jpg', '../assets/images/train/train-04.jpg', '../assets/images/train/train-03.jpg']);
+    const anchorEl = box.querySelector('#bkk-journey') || box.querySelector('#scope-block .mod[data-scope="bangkok"]');
+    anchorEl.insertAdjacentHTML('afterend', '<div id="transit-bkk-vte">' + transitHtml + '</div>');
+    let lx = '<div class="cch-label" style="margin-top:18px">Laos · Vientiane</div>' +
+      '<div class="when" style="margin:2px 0 8px">27 FEB – 01 MAR 2027 · The Wedding · departure 01 MAR 2027 fixed</div>' +
       '<div class="cch-label" style="margin-top:10px">Your stay in Vientiane · Souphattra Heritage Vientiane</div>' +
       (
       '<div class="cols2" style="margin-top:8px"><div class="field"><label>Check-in</label><select id="laos-cin">' +
@@ -2603,7 +2606,7 @@ function renderScopeBlock() {
       stayChoice('kunming', 'Your stay in Kunming', k) +
       '<div class="when" style="margin:14px 0 4px">04 MAR 2027 · Kunming → Lijiang · First Class Train</div>' +
       travelChoice('tj-kmg-ljg', 'Kunming → Lijiang', S.travel.kmgLjg,
-        'First Class Train · 04 MAR 2027 · ' + money(tr.contribution) + ' per guest · ' + trav + ' guests = <strong>' + money(tr.contribution * trav) + '</strong>',
+        'FIRST CLASS · 04 MAR 2027 · ' + money(tr.contribution) + ' per guest · ' + trav + ' guests = <strong>' + money(tr.contribution * trav) + '</strong>',
         'Own arrangement noted — USD 0 for this leg.') +
       '<div class="cch-label" style="margin-top:12px">China · Lijiang</div>' +
       '<div class="when">' + esc(l.date) + ' · 2 nights · dates fixed</div>' +
@@ -2635,6 +2638,11 @@ function renderScopeBlock() {
     el.addEventListener('change', () => {
       const key = el.name.replace('scope-', '');
       setScope(key, el.value === 'yes');
+      if (key === 'bangkok' && el.value !== 'yes') {
+        S.bangkokStay = { property: null, from: '', to: '', own: false, withUs: false, travellers: (S.bangkokStay || {}).travellers, arrivalInfo: '' };
+        S.guests.forEach((g) => { g.journey.bangkok = false; });
+        saveDraft();
+      }
       if (key === 'china' && el.value !== 'yes') {
         S.china = { kunming: null, lijiang: null };
         S.chinaRequested = {};

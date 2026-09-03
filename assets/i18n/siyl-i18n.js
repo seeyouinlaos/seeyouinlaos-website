@@ -367,6 +367,7 @@
   E("Your wedding stay", "Euer Hochzeitsaufenthalt", "ที่พักช่วงงานแต่งงานของคุณ", "ウェディングステイ");
   E("BOOKED · your current room", "GEBUCHT · euer aktuelles Zimmer", "จองแล้ว · ห้องปัจจุบันของคุณ", "予約済み・現在のお部屋");
   E("ACTION NEEDED", "AKTION NÖTIG", "ต้องดำเนินการ", "要選択");
+  E("Your journey to Vientiane · 24 – 25 FEB 2027 · Overnight", "Eure Reise nach Vientiane · 24. – 25. FEB 2027 · über Nacht", "การเดินทางสู่เวียงจันทน์ · 24 – 25 ก.พ. 2027 · ค้างคืน", "ビエンチャンへの旅・2027年2月24–25日・夜行");
   E("Show details", "Details anzeigen", "ดูรายละเอียด", "詳細を見る");
   E("Hide details", "Details schließen", "ซ่อนรายละเอียด", "詳細を閉じる");
   E("Continue", "Weiter", "ดำเนินการต่อ", "次へ");
