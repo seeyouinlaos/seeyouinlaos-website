@@ -162,8 +162,11 @@ gate('P2', 'Availability truthful, engine-derived, designed into the gallery',
 /* P3 — image + venue corrections (owner): alms at Souphattra Heritage with
  * TWO distinct images (couple on the timeline, procession on the card); no
  * bedroom image in the vow/dinner gallery. */
-const almsStop = indexHtml.slice(indexHtml.indexOf('<h3>The Alms Giving</h3>') - 600, indexHtml.indexOf('<h3>The Alms Giving</h3>') + 600);
-const almsCoupleFirst = almsStop.includes('tl-alms.jpg') && almsStop.includes('Souphattra Heritage Vientiane');
+/* 001 FINAL MASTER UPDATE (03 SEP 2026): the active morning event is the
+ * Temple Ceremony at Wat Ong Teu (09:00). The owner imagery stays; the gate
+ * now protects the NEW programme presentation. */
+const almsStop = indexHtml.slice(indexHtml.indexOf('<h3>The Temple Ceremony</h3>') - 600, indexHtml.indexOf('<h3>The Temple Ceremony</h3>') + 700);
+const almsCoupleFirst = almsStop.includes('tl-alms.jpg') && almsStop.includes('Wat Ong Teu Temple, Vientiane');
 const almsCardIdx = indexHtml.indexOf('data-panel="pv-alms"');
 const almsCard = indexHtml.slice(almsCardIdx, almsCardIdx + 600);
 const almsCardProcession = almsCard.includes('alms-procession.jpg');

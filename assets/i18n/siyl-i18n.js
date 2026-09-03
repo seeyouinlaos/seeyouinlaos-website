@@ -75,6 +75,61 @@
   E("Cafe Madeleine", "Cafe Madeleine", "Cafe Madeleine", "カフェ・マドレーヌ");
   E("Let's Relax", "Let's Relax", "Let's Relax", "レッツリラックス");
   E("ICONSIAM", "ICONSIAM", "ไอคอนสยาม", "アイコンサイアム");
+  E("Temple Ceremony", "Tempelzeremonie", "พิธีที่วัด", "寺院での儀式");
+  E("The Temple Ceremony", "Die Tempelzeremonie", "พิธีที่วัด", "寺院での儀式");
+  E("Coffee & Cake", "Kaffee & Kuchen", "กาแฟและเค้ก", "コーヒー＆ケーキ");
+  E("09:00 AM", "09:00 Uhr", "09:00 น.", "9:00");
+  E("09:00 AM – approx. 12:00 PM", "09:00 – ca. 12:00 Uhr", "09:00 – ประมาณ 12:00 น.", "9:00〜正午ごろ");
+  E("After the return", "Nach der Rückkehr", "หลังเดินทางกลับ", "帰着後");
+  E("After the return from the temple", "Nach der Rückkehr vom Tempel", "หลังกลับจากวัด", "寺院から戻ったあと");
+  E("In the morning", "Am Morgen", "ยามเช้า", "朝");
+  E("Open in Google Maps", "In Google Maps öffnen", "เปิดใน Google Maps", "Google Mapsで開く");
+  E("Wat Ong Teu Temple, Vientiane", "Wat Ong Teu Tempel, Vientiane", "วัดองค์ตื้อ เวียงจันทน์", "ワット・オンテウ寺院（ビエンチャン）");
+  E("· Wat Ong Teu Temple, Vientiane", "· Wat Ong Teu Tempel, Vientiane", "· วัดองค์ตื้อ เวียงจันทน์", "・ワット・オンテウ寺院（ビエンチャン）");
+  E("Sunday, 28 Feb · 09:00 AM", "Sonntag, 28. Feb · 09:00 Uhr", "อาทิตย์ 28 ก.พ. · 09:00 น.", "2月28日（日）9:00");
+  E("Sunday, 28 February 2027 · in the morning", "Sonntag, 28. Februar 2027 · am Morgen", "อาทิตย์ 28 กุมภาพันธ์ 2027 · ยามเช้า", "2027年2月28日（日）朝");
+  E("The wedding day begins at the temple: a Buddhist morning ceremony, unhurried and full of meaning. By midday we return together for coffee & cake.",
+    "Der Hochzeitstag beginnt im Tempel: eine buddhistische Morgenzeremonie, ohne Eile und voller Bedeutung. Gegen Mittag kehren wir gemeinsam zurück zu Kaffee & Kuchen.",
+    "วันแต่งงานเริ่มต้นที่วัด พิธีเช้าแบบพุทธ อย่างไม่เร่งรีบและเปี่ยมความหมาย ราวเที่ยงเรากลับมาพร้อมกันเพื่อกาแฟและเค้ก",
+    "結婚式の一日は寺院から始まります。急がず、意味に満ちた朝の仏教儀式。正午ごろ、みなで戻ってコーヒー＆ケーキを。");
+  E("The wedding day begins at Wat Ong Teu Temple: a Buddhist morning ceremony from nine, unhurried and full of meaning.",
+    "Der Hochzeitstag beginnt im Wat Ong Teu Tempel: eine buddhistische Morgenzeremonie ab neun Uhr, ohne Eile und voller Bedeutung.",
+    "วันแต่งงานเริ่มต้นที่วัดองค์ตื้อ พิธีเช้าแบบพุทธตั้งแต่เก้าโมง อย่างไม่เร่งรีบและเปี่ยมความหมาย",
+    "結婚式の一日はワット・オンテウ寺院から。9時からの朝の仏教儀式は、急がず、意味に満ちています。");
+  E("The wedding day begins at Wat Ong Teu Temple in Vientiane: a Buddhist morning ceremony from nine until around midday, unhurried and full of meaning. Afterwards we return together to the hotel for coffee & cake before the vows.",
+    "Der Hochzeitstag beginnt im Wat Ong Teu Tempel in Vientiane: eine buddhistische Morgenzeremonie von neun bis etwa zwölf Uhr, ohne Eile und voller Bedeutung. Danach kehren wir gemeinsam ins Hotel zurück — zu Kaffee & Kuchen vor dem Eheversprechen.",
+    "วันแต่งงานเริ่มต้นที่วัดองค์ตื้อ เวียงจันทน์ พิธีเช้าแบบพุทธตั้งแต่เก้าโมงถึงราวเที่ยง อย่างไม่เร่งรีบและเปี่ยมความหมาย จากนั้นเรากลับโรงแรมพร้อมกัน เพื่อกาแฟและเค้กก่อนพิธีกล่าวคำสัญญา",
+    "結婚式の一日は、ビエンチャンのワット・オンテウ寺院から始まります。9時から正午ごろまでの朝の仏教儀式——急がず、意味に満ちた時間です。その後みなでホテルへ戻り、誓いの前にコーヒー＆ケーキを。");
+  E("A relaxed hour together after the temple — coffee, cake and time to breathe before the vows.",
+    "Eine entspannte Stunde nach dem Tempel — Kaffee, Kuchen und Zeit zum Durchatmen vor dem Eheversprechen.",
+    "ช่วงเวลาสบาย ๆ หลังจากวัด กาแฟ เค้ก และเวลาหายใจก่อนพิธีกล่าวคำสัญญา",
+    "寺院のあとのくつろぎのひととき——コーヒーとケーキ、誓いの前に息をつく時間。");
+  E("back from the temple — coffee, cake and time to breathe before the vows",
+    "zurück vom Tempel — Kaffee, Kuchen und Zeit zum Durchatmen vor dem Eheversprechen",
+    "กลับจากวัด กาแฟ เค้ก และเวลาหายใจก่อนพิธีกล่าวคำสัญญา",
+    "寺院から戻って——コーヒーとケーキ、誓いの前のひととき");
+  E("Temple Ceremony, Coffee & Cake, Vow Ceremony and Wedding Dinner.",
+    "Tempelzeremonie, Kaffee & Kuchen, Eheversprechen und Hochzeitsdinner.",
+    "พิธีที่วัด กาแฟและเค้ก พิธีกล่าวคำสัญญา และงานเลี้ยงมงคลสมรส",
+    "寺院での儀式、コーヒー＆ケーキ、誓いのセレモニー、ウェディングディナー。");
+  E("Temple mornings, the river at dusk, and the warmth of Lao hospitality.",
+    "Tempelmorgen, der Fluss in der Dämmerung und die Wärme laotischer Gastfreundschaft.",
+    "เช้าที่วัด แม่น้ำยามพลบค่ำ และไมตรีอันอบอุ่นแบบลาว",
+    "寺院の朝、夕暮れの川、そしてラオスの温かなもてなし。");
+  E("Wat Ong Teu Temple, Vientiane · Dress · Lao Traditional Dress",
+    "Wat Ong Teu Tempel, Vientiane · Dress · Lao Traditional Dress",
+    "วัดองค์ตื้อ เวียงจันทน์ · การแต่งกาย · ชุดประจำชาติลาว",
+    "ワット・オンテウ寺院（ビエンチャン）・ドレスコード・ラオスの伝統衣装");
+  E("Temple Ceremony · in the morning", "Tempelzeremonie · am Morgen", "พิธีที่วัด · ยามเช้า", "寺院での儀式・朝");
+  E("The temple ceremony, in Vientiane", "Die Tempelzeremonie in Vientiane", "พิธีที่วัด เวียงจันทน์", "ビエンチャンでの寺院の儀式");
+  E("· Your exact timing arrives in your Guest Area closer to the day.",
+    "· Euer genauer Zeitplan erreicht euch näher am Tag in eurem Gästebereich.",
+    "· กำหนดเวลาที่แน่นอนจะถึงคุณในส่วนสำหรับแขกเมื่อใกล้วันงาน",
+    "・正確なお時間は、当日が近づきましたらゲストエリアにお届けします。");
+  E("· a Buddhist morning ceremony until around midday ·",
+    "· eine buddhistische Morgenzeremonie bis etwa zwölf Uhr ·",
+    "· พิธีเช้าแบบพุทธจนถึงราวเที่ยง ·",
+    "・正午ごろまでの朝の仏教儀式・");
   E("Show details", "Details anzeigen", "ดูรายละเอียด", "詳細を見る");
   E("Hide details", "Details schließen", "ซ่อนรายละเอียด", "詳細を閉じる");
   E("Continue", "Weiter", "ดำเนินการต่อ", "次へ");

@@ -6,7 +6,7 @@
 | **FROM** | Claude Code · Digital / Technical Implementation Review |
 | **TO** | H&S Wedding 001 · All Project Review Workstreams |
 | **REVIEW DATE** | 30 August 2026 |
-| **DOCUMENT VERSION** | v3.1 — RELEASE VERDICT READY · production `8d95ee4` (31 August 2026) |
+| **DOCUMENT VERSION** | v3.2 — FINAL MASTER UPDATE (03 Sep 2026): wedding-day programme is Temple Ceremony (Wat Ong Teu, 09:00–approx. 12:00, owner map link) → return → Coffee & Cake → Vow Ceremony 16:30 (Heritage) → Wedding Dinner 19:30 (Souphattra Vientiane Hotel); 05:00 Alms Giving is HISTORICAL. Souphattra Proposal 1 = Haruthai (26-room/52-night two-night buyout basis), Proposal 2 = Suthep (split commercial component) — one internal H&S arrangement, one shared guest-facing 26-room inventory for the 2-night and 1-night stay options; 29 Feb 2027 in hotel documents is a document error (valid end date 01 Mar 2027); minibar inclusion owner-confirmed. |
 | **DOCUMENT TYPE** | Final Pre Public Release Review (authoritative handoff) |
 | **REVIEWED PRODUCTION BASELINE** | current: `7b6e114` + final correction pass · historical: v1.0 `cfdc4e7`, v2.0 `e643247` |
 | **DOCUMENT COMMIT** | see Version History (§31) — the commit that introduces this file |

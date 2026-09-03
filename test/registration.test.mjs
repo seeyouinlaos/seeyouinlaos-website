@@ -379,13 +379,13 @@ function baseReg(inv) {
       guestId: g.guestId, preferredName: g.preferredName,
       email: g.preferredName.toLowerCase() + '@example.com', phone: '',
       journey: { bangkok: false, train: false, independent: true },
-      events: { alms: true, ceremony: true, dinner: true },
+      events: { temple: true, coffee: true, ceremony: true, dinner: true },
       diet: 'No restrictions', allergy: 'no',
     })),
     stay: { accommodationId: 'the-heritage', occupantGuestIds: inv.guests.map((g) => g.guestId), rooms: 1 },
     arrival: { mode: 'flight', date: '2027-02-27', time: '11:30', point: 'Wattay International Airport (VTE)', ref: 'TG570', pickupRequested: true },
     departure: { date: '2027-03-01', point: 'Wattay International Airport (VTE)', transferRequested: true },
-    dressAck: { alms: true, ceremony: true, dinner: true }, // per-event acknowledgement (§21)
+    dressAck: { temple: true, ceremony: true, dinner: true }, // per-event acknowledgement (§21)
     registration_submitted_at: '2027-01-01T10:00:00Z',
   };
 }
@@ -394,15 +394,15 @@ const ctx = (inv) => ({ invitation: inv, accommodations: ACCOMMODATIONS, trainCa
 test('each wedding moment needs its OWN dress code acknowledgement (§21)', () => {
   const inv = lookupInvitation('demo-amara');
   const reg = baseReg(inv);
-  reg.dressAck = { alms: true, ceremony: true, dinner: false };
+  reg.dressAck = { temple: true, ceremony: true, dinner: false };
   assert.ok(validateRegistration(reg, ctx(inv)).some((e) => e.includes('dress code for the Wedding Dinner')));
-  reg.dressAck = { alms: false, ceremony: true, dinner: true };
-  assert.ok(validateRegistration(reg, ctx(inv)).some((e) => e.includes('dress code for the Alms Giving')));
+  reg.dressAck = { temple: false, ceremony: true, dinner: true };
+  assert.ok(validateRegistration(reg, ctx(inv)).some((e) => e.includes('dress code for the Temple Ceremony')));
   // NOT JOINING an optional moment needs no acknowledgement for it
-  reg.guests.forEach((g) => { g.events.alms = false; });
-  assert.ok(!validateRegistration(reg, ctx(inv)).some((e) => e.includes('Alms')));
+  reg.guests.forEach((g) => { g.events.temple = false; });
+  assert.ok(!validateRegistration(reg, ctx(inv)).some((e) => e.includes('Temple')));
   // the mandatory ceremony still needs its own explicit acknowledgement
-  reg.dressAck = { alms: true, ceremony: false, dinner: true };
+  reg.dressAck = { temple: true, ceremony: false, dinner: true };
   assert.ok(validateRegistration(reg, ctx(inv)).some((e) => e.includes('dress code for the Vow Ceremony')));
 });
 
@@ -421,7 +421,7 @@ test('each active Guest needs own contact data', () => {
 test('dinner-only selective attendance is valid', () => {
   const inv = lookupInvitation('demo-lin');
   const reg = baseReg(inv);
-  reg.guests[0].events = { alms: false, ceremony: false, dinner: true };
+  reg.guests[0].events = { temple: false, coffee: false, ceremony: false, dinner: true };
   assert.deepEqual(validateRegistration(reg, ctx(inv)), []);
 });
 
@@ -715,7 +715,7 @@ test('Pre-Wedding Bangkok stay: owner decision closed — 21–24 FEB, first nig
 
 test('event times are the canonical owner values', () => {
   const t = Object.fromEntries(EVENTS.map((e) => [e.id, e.time]));
-  assert.equal(t.alms, '05:00 AM');
+  assert.equal(t.temple, '09:00 AM – approx. 12:00 PM');
   assert.equal(t.ceremony, '04:30 PM');
   assert.equal(t.dinner, '07:30 PM');
 });

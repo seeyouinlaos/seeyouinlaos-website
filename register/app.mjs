@@ -83,7 +83,7 @@ function itinerarySteps() {
   steps.push(acc
     ? { d: acc.stay + ' · ' + acc.nights + ' nights', t: acc.name + ' · Vientiane', s: 'First night · your contribution — second night · hosted', st: S.stay.waitlist ? 'WAITLISTED' : 'ARRANGED WITH GUEST RELATIONS' }
     : { d: '27 FEB – 01 MAR 2027', t: 'Your wedding stay · Vientiane', s: 'Choose under My Stay', st: 'YOUR CHOICE' });
-  steps.push({ d: '28 FEB 2027', t: 'The Wedding · Main Event', s: 'Alms Giving 05:00 AM · Vow Ceremony 04:30 PM · Wedding Dinner 07:30 PM · Souphattra Heritage Vientiane', main: true });
+  steps.push({ d: '28 FEB 2027', t: 'The Wedding · Main Event', s: 'Temple Ceremony 09:00 AM · Vow Ceremony 04:30 PM · Wedding Dinner 07:30 PM · Souphattra Heritage Vientiane', main: true });
   if (S.postWedding && S.postWedding.joined) {
     for (const c of POST_WEDDING.filter((x) => !x.onward)) {
       steps.push({ d: c.date, t: c.label, s: (c.type === 'Train' ? 'First Class Train' : c.type) + (c.sub ? ' · ' + c.sub : '') + (c.contribution != null ? '' : ' · Guest Relations confirms') });
@@ -193,6 +193,15 @@ S.scope ||= { bangkok: false, laos: true, china: false };
 S.experiences ||= [];
 /* §10 v2.1 normalization: a ghost Bangkok selection (scope off, stay set)
  * loses its ACTIVE consequence exactly once; eligibility data survives. */
+if (!S.v22) {
+  S.guests && S.guests.forEach((g) => {
+    const ev = g.events || {};
+    if ('alms' in ev && !('temple' in ev)) { ev.temple = !!ev.alms; ev.coffee = !!ev.alms; delete ev.alms; g.events = ev; }
+  });
+  if (S.dressAck && ('alms' in S.dressAck) && !('temple' in S.dressAck)) { S.dressAck.temple = !!S.dressAck.alms; delete S.dressAck.alms; }
+  S.v22 = 1;
+  try { localStorage.setItem(DRAFT_KEY, JSON.stringify(S)); } catch (e) { /* private mode */ }
+}
 if (!S.v21) {
   if (S.scope && !S.scope.bangkok && S.bangkokStay && S.bangkokStay.property) {
     S.bangkokStay = { property: null, from: '', to: '' };
@@ -203,7 +212,7 @@ if (!S.v21) {
 function dinnerOnly() {
   return S.guests.length > 0 && S.guests.every((g) => {
     const ev = g.events || {};
-    return ev.dinner && !ev.alms && !ev.ceremony;
+    return ev.dinner && !ev.temple && !ev.coffee && !ev.ceremony && !ev.alms;
   });
 }
 function setScope(key, val) {
@@ -231,13 +240,15 @@ function freshState() {
     departure: { shared: true, transferRequested: false },
     departureByGuest: {},
     additionalGuestRequest: '',
-    dressAck: { alms: false, ceremony: false, dinner: false }, // per-event dress code acknowledgement (§21)
+    dressAck: { temple: false, ceremony: false, dinner: false }, // per-event dress code acknowledgement (§21)
     bangkokStay: { property: null, from: '', to: '' },          // optional Bangkok stay (§2-3): property + guest chosen dates
     postWedding: { joined: false, onward: '' },                 // optional Post Wedding Journey + onward choice (own | gr | return)
     transfers: [],           // [{ transferId, units, details:{date,time,ref,place,location} }]
     scope: { bangkok: false, laos: true, china: false },   // V2 journey scope
     experiences: [],         // V2 requested experiences
     v2: 1,
+    v21: 1,
+    v22: 1,
     trainNote: '',
     notes: '',
     submitted: false,
@@ -482,7 +493,7 @@ function adoptInvitation(inv) {
       attending: g.status && g.status !== 'ACTIVE' ? false : true, // CANCELLED/NO_SHOW join nothing by default
       email: '', phone: '', dob: '',
       journey: { bangkok: false, train: false, independent: true },
-      events: { alms: true, ceremony: true, dinner: true },
+      events: { temple: true, coffee: true, ceremony: true, dinner: true },
       diet: 'No restrictions', allergy: 'no', allergyDetail: '', severe: false,
       berth: '', spa: { requested: false },
       favFood: '', favDrink: '', coffeeHow: '', teaLove: '', favSnack: '',
@@ -1011,17 +1022,18 @@ function wireTrainDetails(box) {
 /* ---------------- step 4 · events ---------------- */
 function renderEvents() {
   const box = document.getElementById('events-box');
-  S.dressAck ||= { alms: false, ceremony: false, dinner: false }; // older drafts predate the acknowledgement
+  S.dressAck ||= { temple: false, ceremony: false, dinner: false }; // older drafts predate the acknowledgement
   box.innerHTML = modulePicker({
     modules: EVENTS.map((e) => ({ id: e.id, label: e.label, when: e.when + (e.time ? ' · ' + e.time : '') + ' · ' + e.venue, blurb: e.blurb, locked: false, dress: e.dress, dressGroup: e.dressGroup })),
     field: 'events',
     sharedOnly: true, // one shared Wedding Programme per invitation (item 6)
+    mapUrls: Object.fromEntries(EVENTS.filter((e) => e.mapUrl).map((e) => [e.id, e.mapUrl])),
   });
   wireModulePicker(box, 'events');
 }
 
 /** Party-level module picker with per-guest split (“WE HAVE DIFFERENT PLANS”). */
-function modulePicker({ modules, field, sharedOnly }) {
+function modulePicker({ modules, field, sharedOnly, mapUrls }) {
   const differs = !sharedOnly && S.partyPlans === 'different';
   const many = S.guests.length > 1;
   let html = '';
@@ -1045,7 +1057,7 @@ function modulePicker({ modules, field, sharedOnly }) {
         '</div></div>';
     }).join('');
     return '<div class="mod" data-mod="' + m.id + '">' +
-      '<div class="mod-head"><div><div class="when">' + esc(m.when) + '</div><h3>' + esc(m.label) + '</h3><p>' + esc(m.blurb) + '</p>' + (m.id === 'train' ? '<div class="train-gal">' + ['train-01','train-04','train-03'].map((f, ti) => '<img src="../assets/images/train/' + f + '.jpg" alt="First Class Sleeper aboard Special Express No. 25 · view ' + (ti + 1) + '" loading="lazy" decoding="async"/>').join('') + '</div>' : '') +
+      '<div class="mod-head"><div><div class="when">' + esc(m.when) + '</div><h3>' + esc(m.label) + '</h3><p>' + esc(m.blurb) + '</p>' + (mapUrls && mapUrls[m.id] ? '<a class="btn sm ghost" style="margin-top:8px;display:inline-block" href="' + mapUrls[m.id] + '" target="_blank" rel="noopener">Open in Google Maps</a>' : '') + (m.id === 'train' ? '<div class="train-gal">' + ['train-01','train-04','train-03'].map((f, ti) => '<img src="../assets/images/train/' + f + '.jpg" alt="First Class Sleeper aboard Special Express No. 25 · view ' + (ti + 1) + '" loading="lazy" decoding="async"/>').join('') + '</div>' : '') +
       (m.dress ? (function () {
         const anyJoin = m.locked || S.guests.some((x) => x[field][m.id]);
         const ok = !!(S.dressAck && S.dressAck[m.id]);
@@ -1766,7 +1778,8 @@ function renderCost() {
     'Personal airport welcome and arrival coordination',
     'Welcome drink on arrival',
     'Breakfast on both mornings',
-    'Alms Giving',
+    'Temple Ceremony',
+    'Coffee & Cake',
     'Vow Ceremony',
     'Sunset Drinks &amp; Wedding Dinner',
     'Two hour beverage package',
@@ -2224,9 +2237,9 @@ function renderWeddingPresets() {
   const box = document.getElementById('events-box');
   if (!box || document.getElementById('wed-presets')) return;
   const ev0 = S.guests[0] ? (S.guests[0].events || {}) : {};
-  const allSame = (v) => S.guests.every((g) => ['alms', 'ceremony', 'dinner'].every((k) => !!(g.events || {})[k] === !!v[k]));
-  const mode = allSame({ alms: true, ceremony: true, dinner: true }) ? 'full'
-    : allSame({ alms: false, ceremony: false, dinner: true }) ? 'dinner' : 'custom';
+  const allSame = (v) => S.guests.every((g) => ['temple', 'coffee', 'ceremony', 'dinner'].every((k) => !!(g.events || {})[k] === !!v[k]));
+  const mode = allSame({ temple: true, coffee: true, ceremony: true, dinner: true }) ? 'full'
+    : allSame({ temple: false, coffee: false, ceremony: false, dinner: true }) ? 'dinner' : 'custom';
   const opt = (id, label, blurb) =>
     '<label class="tj-opt' + (mode === id ? ' sel' : '') + '" style="display:block;cursor:pointer"><input type="radio" name="wed-preset" value="' + id + '"' + (mode === id ? ' checked' : '') + ' style="position:absolute;opacity:0"/>' +
     '<h4 style="margin:0 0 4px">' + label + '</h4><p class="note" style="margin:0">' + blurb + '</p></label>';
@@ -2235,13 +2248,13 @@ function renderWeddingPresets() {
     '<div class="cch-label">How would you like to be part of the wedding day?</div>' +
     '<p class="note">The Vow Ceremony is the shared heart of the wedding day. Around it, choose the additional moments that feel right for you.</p>' +
     '<div class="tj-pair" role="radiogroup" aria-label="Wedding participation">' +
-    opt('full', 'The full wedding day', 'Alms Giving, Vow Ceremony and Wedding Dinner.') +
+    opt('full', 'The full wedding day', 'Temple Ceremony, Coffee & Cake, Vow Ceremony and Wedding Dinner.') +
     opt('dinner', 'Wedding Dinner only', 'Join us in the evening at Souphattra Vientiane Hotel.') +
     opt('custom', 'Choose individual moments', 'Select the moments below, one by one.') +
     '</div></div>');
   box.querySelectorAll('input[name="wed-preset"]').forEach((el) => el.addEventListener('change', () => {
-    if (el.value === 'full') S.guests.forEach((g) => { g.events = { alms: true, ceremony: true, dinner: true }; });
-    if (el.value === 'dinner') S.guests.forEach((g) => { g.events = { alms: false, ceremony: false, dinner: true }; });
+    if (el.value === 'full') S.guests.forEach((g) => { g.events = { temple: true, coffee: true, ceremony: true, dinner: true }; });
+    if (el.value === 'dinner') S.guests.forEach((g) => { g.events = { temple: false, coffee: false, ceremony: false, dinner: true }; });
     saveDraft(); renderStep(cur); renderSummary();
   }));
 }
