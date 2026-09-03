@@ -8,13 +8,13 @@
 import {
   WEDDING, CONTACTS, JOURNEY_MODULES, EVENTS, ACCOMMODATIONS, SELECTABLE_ACCOMMODATIONS, TRAIN,
   TRANSFERS, PACKAGE_INCLUSIONS, COPY, DEMO_MODE, PUBLICATION, TRAIN_REFERENCE, BERTH_PREFS, BANGKOK_STAYS, BANGKOK_STAY, POST_WEDDING, RETURN_STAY, lookupInvitation,
-} from './data.mjs?v=UJ4';
+} from './data.mjs?v=UJ5';
 import {
   contributionPerGuest, partyCharges, partyTotal, money as usdMoney, displayMoney,
   trainContribution, transfersTotal, journeyTotal, postWeddingTotal,
   createInventory, remaining, availabilityLabel, requestAllocation,
   validateRegistration, buildNotification, nextInvitationState,
-} from './logic.mjs?v=UJ4';
+} from './logic.mjs?v=UJ5';
 
 /* ---------------- persistent state ---------------- */
 const DRAFT_KEY = 'siyl.reg.draft.v2';
@@ -2376,14 +2376,45 @@ function renderScopeBlock() {
       '<div class="it-row"><span class="it-d">04:30 PM</span><div class="it-b"><span class="it-t">The Vow Ceremony</span><span class="it-s">Souphattra Heritage Vientiane</span></div></div>' +
       '<div class="it-row"><span class="it-d">07:30 PM</span><div class="it-b"><span class="it-t">The Wedding Dinner</span><span class="it-s">Souphattra Vientiane Hotel</span></div></div>' +
       '</div>';
-    lx += lown ? '<p class="note">Own arrangement noted — nothing is charged for a Vientiane stay.</p>' : lacc
-      ? stayModule({ name: lacc.name + ' · Souphattra Heritage Vientiane', sub: null,
-          dates: S.stay.mode === 'oneNight' ? '28 FEB → 01 MAR 2027' : '27 FEB → 01 MAR 2027',
-          nights: S.stay.mode === 'oneNight' ? 1 : 2, trav: (S.stay.occupantGuestIds || []).length || attendingCount(),
-          rate: null, imgs: (lacc.images || []).map(roomImg),
-          costLine: lacc.contributionPerGuest == null ? 'Complimentary · limited' : 'Your costs · ' + money(partyTotal(lacc, S.stay.occupantGuestIds || [])) + (S.stay.mode === 'oneNight' ? ' · one night' : ' · first night — second night hosted'),
-          after: '<button type="button" class="btn sm ghost" id="laos-room-cta" style="margin-top:8px">Change your room</button>' })
-      : '<p class="note">Choose your room to complete this stay.</p><button type="button" class="btn sm" id="laos-room-cta" style="margin-top:4px">Choose your room</button>';
+    if (lown) {
+      lx += '<p class="note">Own arrangement noted — nothing is charged for a Vientiane stay.</p>';
+    } else {
+      const oneN = S.stay.mode === 'oneNight';
+      const stayLine = (oneN ? '28.02.2027 – 01.03.2027 · 1 night' : '27.02.2027 – 01.03.2027 · 2 nights') + ' · Vientiane';
+      const keyLine = oneN ? 'Check-in 28 FEB 2027 · Check-out 01 MAR 2027 · 1 night' : 'Check-in 27 FEB 2027 · Check-out 01 MAR 2027 · 2 nights';
+      const laosOcc = S.guests.filter((g) => g.attending !== false).map((g) => g.guestId);
+      const rooms = ACCOMMODATIONS.filter((a) => a.selectable !== false);
+      const roomCards = rooms.map((a) => {
+        const res = inventory[a.id];
+        const full = remaining(res) <= 0;
+        const selRoom = S.stay.accommodationId === a.id && !S.stay.waitlist;
+        const det = S._laosDet === a.id;
+        const priced = a.contributionPerGuest != null;
+        return '<article class="tj-opt' + (selRoom ? ' sel' : '') + '" style="scroll-snap-align:center;flex:0 0 100%;max-width:100%;box-sizing:border-box">' +
+          '<div class="when">' + stayLine + '</div>' +
+          '<div class="cch-label" style="margin-top:2px">Souphattra Heritage Vientiane</div>' +
+          '<h4 style="margin:4px 0 6px">' + esc(a.name) + '</h4>' +
+          '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:6px 0">' +
+          (a.images || []).slice(0, 3).map((im, ix) => '<img src="' + roomImg(im) + '" alt="' + esc(a.name) + ' — view ' + (ix + 1) + '" loading="lazy" decoding="async" style="width:100%;height:84px;object-fit:cover;display:block"/>').join('') + '</div>' +
+          '<p class="note" style="margin:0 0 4px">' + keyLine + '</p>' +
+          '<div class="acc-avail">' + (selRoom ? 'REQUESTED · Guest Relations will confirm' : esc(guestAvailability(res))) + '</div>' +
+          (priced
+            ? '<div class="trf-price" style="margin-top:8px">' + money(contributionPerGuest(a)) + ' per guest · complete stay · ' + laosOcc.length + ' ' + (laosOcc.length === 1 ? 'guest' : 'guests') +
+              (oneN ? '<br/>1 night · same approved category amount · breakfast included' : '<br/>First night · your costs — second night · hosted by Haruthai &amp; Suthep') +
+              '<br/><strong>Room total · ' + money(partyTotal(a, laosOcc)) + '</strong></div>'
+            : '<div class="trf-price" style="margin-top:8px">Complimentary stay · limited · personally coordinated by Guest Relations</div>') +
+          (det ? '<div style="margin-top:8px"><p class="note">' + esc(a.blurb) + '</p></div>' : '') +
+          '<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">' +
+          '<button type="button" class="btn sm ghost" data-laos-det="' + a.id + '">' + (det ? 'Hide details' : 'More details') + '</button>' +
+          (full && !selRoom
+            ? '<button type="button" class="btn sm" data-laos-wait="' + a.id + '">Join the waitlist</button>'
+            : '<button type="button" class="btn sm" data-laos-select="' + a.id + '"' + (selRoom ? ' disabled' : '') + '>' + (selRoom ? 'REQUESTED' : 'Request this room') + '</button>') +
+          '</div></article>';
+      }).join('');
+      const selIdx = Math.max(0, rooms.findIndex((a) => a.id === S.stay.accommodationId));
+      lx += '<div id="laos-rooms" style="display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;margin-top:8px" data-selidx="' + selIdx + '">' + roomCards + '</div>' +
+        '<div class="when" id="laos-count" style="text-align:center;margin-top:6px">' + String(selIdx + 1).padStart(2, '0') + ' / ' + String(rooms.length).padStart(2, '0') + '</div>';
+    }
     box.querySelector('#scope-block .mod[data-scope="laos"]').insertAdjacentHTML('afterend', '<div id="laos-journey">' + lx + '</div>');
     box.querySelectorAll('input[name="laos-stay-sel"]').forEach((el) => el.addEventListener('change', () => {
       if (el.value === 'own') { S.stay.own = true; S.stay.accommodationId = null; }
@@ -2395,8 +2426,33 @@ function renderScopeBlock() {
       S.stay.mode = cinSel.value === 'oneNight' ? 'oneNight' : 'standard';
       saveDraft(); renderStep(cur); renderSummary();
     });
-    const rc = box.querySelector('#laos-room-cta');
-    if (rc) rc.addEventListener('click', () => show(idx('stay')));
+    box.querySelectorAll('[data-laos-select]').forEach((b) => b.addEventListener('click', () => {
+      S.stay.accommodationId = b.getAttribute('data-laos-select');
+      S.stay.rooms = 1; S.stay.waitlist = false; S.stay.own = false;
+      S.stay.occupantGuestIds = S.guests.filter((g) => g.attending !== false).map((g) => g.guestId);
+      saveDraft(); renderStep(cur); renderSummary();
+    }));
+    box.querySelectorAll('[data-laos-wait]').forEach((b) => b.addEventListener('click', () => {
+      S.stay.accommodationId = b.getAttribute('data-laos-wait'); S.stay.waitlist = true; S.stay.own = false;
+      S.stay.occupantGuestIds = S.guests.filter((g) => g.attending !== false).map((g) => g.guestId);
+      saveDraft(); renderStep(cur); renderSummary();
+    }));
+    box.querySelectorAll('[data-laos-det]').forEach((b) => b.addEventListener('click', () => {
+      const id = b.getAttribute('data-laos-det');
+      S._laosDet = (S._laosDet === id) ? null : id;
+      renderStep(cur);
+    }));
+    const lrEl = box.querySelector('#laos-rooms');
+    if (lrEl) {
+      const si = parseInt(lrEl.getAttribute('data-selidx'), 10) || 0;
+      if (si > 0) requestAnimationFrame(() => { lrEl.scrollLeft = si * lrEl.clientWidth; });
+      const cnt = box.querySelector('#laos-count');
+      const n = lrEl.children.length;
+      lrEl.addEventListener('scroll', () => {
+        const i = Math.min(n - 1, Math.max(0, Math.round(lrEl.scrollLeft / Math.max(1, lrEl.clientWidth))));
+        if (cnt) cnt.textContent = String(i + 1).padStart(2, '0') + ' / ' + String(n).padStart(2, '0');
+      }, { passive: true });
+    }
     box.querySelectorAll('input[name="tj-bkk-vte"]').forEach((el) => el.addEventListener('change', () => {
       S.guests.forEach((g) => { if (g.attending === false) return;
         if (el.value === 'with') { g.journey.train = true; g.journey.independent = false; }

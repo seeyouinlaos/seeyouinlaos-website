@@ -289,6 +289,18 @@
   E("2 nights · first night your costs, second night hosted by us · breakfast both mornings. Nights are calculated automatically.", "2 Nächte · erste Nacht eure Kosten, zweite Nacht von uns übernommen · Frühstück an beiden Morgen. Die Nächte werden automatisch berechnet.", "2 คืน · คืนแรกเป็นค่าใช้จ่ายของคุณ คืนที่สองเราดูแลให้ · อาหารเช้าทั้งสองวัน จำนวนคืนคำนวณให้อัตโนมัติ", "2泊・1泊目はご負担、2泊目は私たちがご招待・朝食は両日付き。宿泊数は自動計算されます。");
   E("1 night · same approved category amount · breakfast included. Nights are calculated automatically.", "1 Nacht · gleicher freigegebener Kategoriebetrag · Frühstück inklusive. Die Nächte werden automatisch berechnet.", "1 คืน · ราคาเท่ากับหมวดห้องที่อนุมัติ · รวมอาหารเช้า จำนวนคืนคำนวณให้อัตโนมัติ", "1泊・承認済みカテゴリーと同額・朝食付き。宿泊数は自動計算されます。");
   E("Own arrangement noted — nothing is charged for a Vientiane stay.", "Eigene Organisation vermerkt — für einen Aufenthalt in Vientiane wird nichts berechnet.", "บันทึกว่าจัดการเอง — ไม่มีค่าใช้จ่ายสำหรับที่พักในเวียงจันทน์", "ご自身での手配として承りました——ビエンチャンの宿泊費はかかりません。");
+  E("27.02.2027 – 01.03.2027 · 2 nights · Vientiane", "27.02.2027 – 01.03.2027 · 2 Nächte · Vientiane", "27.02.2027 – 01.03.2027 · 2 คืน · เวียงจันทน์", "2027年2月27日–3月1日・2泊・ビエンチャン");
+  E("28.02.2027 – 01.03.2027 · 1 night · Vientiane", "28.02.2027 – 01.03.2027 · 1 Nacht · Vientiane", "28.02.2027 – 01.03.2027 · 1 คืน · เวียงจันทน์", "2027年2月28日–3月1日・1泊・ビエンチャン");
+  E("Check-in 27 FEB 2027 · Check-out 01 MAR 2027 · 2 nights", "Check-in 27. FEB 2027 · Check-out 01. MÄR 2027 · 2 Nächte", "เช็คอิน 27 ก.พ. 2027 · เช็คเอาท์ 1 มี.ค. 2027 · 2 คืน", "チェックイン2027年2月27日・チェックアウト3月1日・2泊");
+  E("Check-in 28 FEB 2027 · Check-out 01 MAR 2027 · 1 night", "Check-in 28. FEB 2027 · Check-out 01. MÄR 2027 · 1 Nacht", "เช็คอิน 28 ก.พ. 2027 · เช็คเอาท์ 1 มี.ค. 2027 · 1 คืน", "チェックイン2027年2月28日・チェックアウト3月1日・1泊");
+  E("More details", "Mehr Details", "รายละเอียดเพิ่มเติม", "詳しく見る");
+  E("REQUESTED · Guest Relations will confirm", "ANGEFRAGT · Guest Relations bestätigt", "ส่งคำขอแล้ว · ฝ่ายดูแลแขกจะยืนยัน", "リクエスト済み・ゲストリレーションズが確認します");
+  E("complete stay", "kompletter Aufenthalt", "ตลอดการเข้าพัก", "滞在全体");
+  E("Room total", "Zimmer gesamt", "รวมค่าห้อง", "客室合計");
+  E("First night · your costs — second night · hosted by Haruthai & Suthep", "Erste Nacht · eure Kosten — zweite Nacht · übernommen von Haruthai & Suthep", "คืนแรก · ค่าใช้จ่ายของคุณ — คืนที่สอง · ฮารุไทและสุเทพดูแลให้", "1泊目・ご負担——2泊目・ハルタイ＆ステープがご招待");
+  E("1 night · same approved category amount · breakfast included", "1 Nacht · gleicher freigegebener Kategoriebetrag · Frühstück inklusive", "1 คืน · ราคาเท่ากับหมวดห้องที่อนุมัติ · รวมอาหารเช้า", "1泊・承認済みカテゴリーと同額・朝食付き");
+  E("Complimentary stay · limited · personally coordinated by Guest Relations", "Kostenfreier Aufenthalt · begrenzt · persönlich koordiniert von Guest Relations", "เข้าพักโดยไม่มีค่าใช้จ่าย · จำนวนจำกัด · ฝ่ายดูแลแขกประสานงานให้เป็นการส่วนตัว", "無料滞在・数量限定・ゲストリレーションズが個別に調整します");
+  E("Souphattra Heritage Vientiane", "Souphattra Heritage Vientiane", "สุพัตรา เฮอริเทจ เวียงจันทน์", "スパッタラ・ヘリテージ・ビエンチャン");
   E("Show details", "Details anzeigen", "ดูรายละเอียด", "詳細を見る");
   E("Hide details", "Details schließen", "ซ่อนรายละเอียด", "詳細を閉じる");
   E("Continue", "Weiter", "ดำเนินการต่อ", "次へ");
