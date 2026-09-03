@@ -8,13 +8,13 @@
 import {
   WEDDING, CONTACTS, JOURNEY_MODULES, EVENTS, ACCOMMODATIONS, SELECTABLE_ACCOMMODATIONS, TRAIN,
   TRANSFERS, PACKAGE_INCLUSIONS, COPY, DEMO_MODE, PUBLICATION, TRAIN_REFERENCE, BERTH_PREFS, BANGKOK_STAYS, BANGKOK_STAY, POST_WEDDING, RETURN_STAY, lookupInvitation,
-} from './data.mjs?v=UJ9';
+} from './data.mjs?v=UK1';
 import {
   contributionPerGuest, partyCharges, partyTotal, money as usdMoney, displayMoney,
   trainContribution, transfersTotal, journeyTotal, postWeddingTotal,
   createInventory, remaining, availabilityLabel, requestAllocation,
   validateRegistration, buildNotification, nextInvitationState,
-} from './logic.mjs?v=UJ9';
+} from './logic.mjs?v=UK1';
 
 /* ---------------- persistent state ---------------- */
 const DRAFT_KEY = 'siyl.reg.draft.v2';
@@ -2282,7 +2282,7 @@ function renderScopeBlock() {
         imgs.slice(0, 3).map((im, ix) => '<img src="' + im + '" alt="' + label + ' — view ' + (ix + 1) + '" loading="lazy" decoding="async" style="width:100%;height:84px;object-fit:cover;display:block"/>').join('') + '</div>' : '') +
       (withDetail ? '<div class="trf-price">' + withDetail + '</div>' : '') +
       (requested ? '<div class="acc-avail" style="margin-top:6px">REQUESTED · Guest Relations confirms every detail personally</div>' : '') +
-      '<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">' +
+      '<div style="display:flex;gap:14px;margin-top:16px;margin-bottom:6px;flex-wrap:wrap">' +
       (requested
         ? '<button type="button" class="btn sm ghost" data-tj-req="' + name + '" data-tj-val="off">Remove from journey</button>'
         : '<button type="button" class="btn sm" data-tj-req="' + name + '" data-tj-val="with">Request this journey</button>') +
@@ -2335,8 +2335,8 @@ function renderScopeBlock() {
         '<div class="field" style="margin-top:8px"><label>Your arrival details for Guest Relations (flight/train, booked by you)</label><textarea id="bkk-arrival" rows="2">' + esc(b.arrivalInfo || '') + '</textarea></div>';
     }
     inner += bkkReq
-      ? '<div class="acc-avail" style="margin-top:6px">REQUESTED · Guest Relations confirms every detail personally</div><div style="display:flex;gap:8px;margin-top:8px"><button type="button" class="btn sm ghost" id="bkk-req-off">Remove from journey</button></div>'
-      : '<div style="display:flex;gap:8px;margin-top:8px"><button type="button" class="btn sm" id="bkk-req-on">Request this stay</button></div>';
+      ? '<div class="acc-avail" style="margin-top:6px">REQUESTED · Guest Relations confirms every detail personally</div><div style="display:flex;gap:14px;margin-top:16px;margin-bottom:10px"><button type="button" class="btn sm ghost" id="bkk-req-off">Remove from journey</button></div>'
+      : '<div style="display:flex;gap:14px;margin-top:16px;margin-bottom:10px"><button type="button" class="btn sm" id="bkk-req-on">Request this stay</button></div>';
     box.querySelector('#scope-block .mod[data-scope="bangkok"]').insertAdjacentHTML('afterend', '<div id="bkk-journey">' + inner + '</div>');
     const bOn = box.querySelector('#bkk-req-on'), bOff = box.querySelector('#bkk-req-off');
     if (bOn) bOn.addEventListener('click', () => {
@@ -2412,7 +2412,7 @@ function renderScopeBlock() {
               '<br/><strong>Room total · ' + money(partyTotal(a, laosOcc) * laosPaidNights()) + '</strong></div>'
             : '<div class="trf-price" style="margin-top:8px">Complimentary stay · limited · personally coordinated by Guest Relations</div>') +
           (det ? '<div style="margin-top:8px"><p class="note">' + esc(a.blurb) + '</p></div>' : '') +
-          '<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">' +
+          '<div style="display:flex;gap:14px;margin-top:16px;margin-bottom:6px;flex-wrap:wrap">' +
           '<button type="button" class="btn sm ghost" data-laos-det="' + a.id + '">' + (det ? 'Hide details' : 'More details') + '</button>' +
           (full && !selRoom
             ? '<button type="button" class="btn sm" data-laos-wait="' + a.id + '">Join the waitlist</button>'
@@ -2473,8 +2473,8 @@ function renderScopeBlock() {
         '<article class="tj-opt' + (req ? ' sel' : '') + '" style="display:block">' +
         stayModule({ name: c.label, sub: c.sub, dates: c.date, nights: c.nightsCount, trav: trav, rate: c.ratePerGuestNight, imgs: c.images || [],
           after: (req
-            ? '<div class="acc-avail" style="border-top:none;padding-top:6px">REQUESTED · Guest Relations confirms every detail personally</div><div style="display:flex;gap:8px;margin-top:8px"><button type="button" class="btn sm ghost" data-cn-stay="' + key + '" data-cn-val="off">Remove from journey</button></div>'
-            : '<div style="display:flex;gap:8px;margin-top:8px"><button type="button" class="btn sm" data-cn-stay="' + key + '" data-cn-val="with">Request this stay</button></div>') }) +
+            ? '<div class="acc-avail" style="border-top:none;padding-top:6px">REQUESTED · Guest Relations confirms every detail personally</div><div style="display:flex;gap:14px;margin-top:16px;margin-bottom:6px"><button type="button" class="btn sm ghost" data-cn-stay="' + key + '" data-cn-val="off">Remove from journey</button></div>'
+            : '<div style="display:flex;gap:14px;margin-top:16px;margin-bottom:6px"><button type="button" class="btn sm" data-cn-stay="' + key + '" data-cn-val="with">Request this stay</button></div>') }) +
         '</article>';
     };
     const leg = (d, t, sub) => '<div class="crow"><span class="cdate">' + d + '</span><div class="cbody"><span class="cprod">' + t + '</span><span class="camt">' + sub + '</span></div></div>';
