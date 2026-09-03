@@ -81,7 +81,7 @@ function itinerarySteps() {
     steps.push({ d: 'Before the wedding', t: 'Arriving independently in Vientiane', s: 'Fly or travel on your own schedule; we meet you there', st: 'YOUR CHOICE' });
   }
   steps.push(acc
-    ? { d: acc.stay + ' · ' + acc.nights + ' nights', t: acc.name + ' · Vientiane', s: 'First night · your contribution — second night · hosted', st: S.stay.waitlist ? 'WAITLISTED' : 'ARRANGED WITH GUEST RELATIONS' }
+    ? { d: (S.stay.mode === 'oneNight' ? '28 FEB – 01 MAR 2027 · 1 night' : acc.stay + ' · ' + acc.nights + ' nights'), t: acc.name + ' · Vientiane', s: (S.stay.mode === 'oneNight' ? 'One night · your costs · breakfast included' : 'First night · your contribution — second night · hosted'), st: S.stay.waitlist ? 'WAITLISTED' : 'ARRANGED WITH GUEST RELATIONS' }
     : { d: '27 FEB – 01 MAR 2027', t: 'Your wedding stay · Vientiane', s: 'Choose under My Stay', st: 'YOUR CHOICE' });
   steps.push({ d: '28 FEB 2027', t: 'The Wedding · Main Event', s: 'Temple Ceremony 09:00 AM · Vow Ceremony 04:30 PM · Wedding Dinner 07:30 PM · Souphattra Heritage Vientiane', main: true });
   if (S.postWedding && S.postWedding.joined) {
@@ -2299,13 +2299,13 @@ const EXPERIENCES_CATALOG = [
   { id: 'vte-nightmarket', scope: 'laos', cat: 'Things to do', name: 'Vientiane Night Market', where: 'Vientiane', meta: '1–2 hours · relaxed' },
   { id: 'vte-lepadaek', scope: 'laos', cat: 'Dining', name: 'Le Padaek', where: 'Vientiane', meta: '2 hours · smart casual' },
   { id: 'vte-3merchants', scope: 'laos', cat: 'Dining', name: '3 Merchants Restaurant', where: 'Vientiane', meta: '2 hours · smart casual',
-    img: 'assets/images/experiences/vte-3merchants.jpg', blurb: 'A refined Vientiane dining room we love — calm, contemporary and generous.' },
+    img: '../assets/images/experiences/vte-3merchants.jpg', blurb: 'A refined Vientiane dining room we love — calm, contemporary and generous.' },
   { id: 'vte-sona', scope: 'laos', cat: 'Dining', name: 'Sona Cafe and Bar', where: 'Vientiane', meta: '1–2 hours · relaxed',
-    img: 'assets/images/experiences/vte-sona.jpg', blurb: 'Coffee by day, easy drinks by evening — a favourite pause in the city.' },
+    img: '../assets/images/experiences/vte-sona.jpg', blurb: 'Coffee by day, easy drinks by evening — a favourite pause in the city.' },
   { id: 'vte-kaogee', scope: 'laos', cat: 'Dining', name: 'Kaogee Le Triomphe', where: 'Vientiane', meta: '1 hour · relaxed',
-    img: 'assets/images/experiences/vte-kaogee.jpg', blurb: 'The classic Vientiane café moment — kaogee baguettes and good coffee near the Patuxay.' },
+    img: '../assets/images/experiences/vte-kaogee.jpg', blurb: 'The classic Vientiane café moment — kaogee baguettes and good coffee near the Patuxay.' },
   { id: 'vte-oathhouse', scope: 'laos', cat: 'Dining', name: 'Oath House', where: 'Vientiane', meta: 'evening · smart casual',
-    img: 'assets/images/experiences/vte-oathhouse.jpg', blurb: 'An intimate evening bar — considered drinks in a beautiful room.' },
+    img: '../assets/images/experiences/vte-oathhouse.jpg', blurb: 'An intimate evening bar — considered drinks in a beautiful room.' },
   { id: 'bkk-thongsmith', scope: 'bangkok', cat: 'Dining', name: 'Thong Smith', where: 'Bangkok', meta: '1–2 hours · relaxed' },
   { id: 'bkk-madeleine', scope: 'bangkok', cat: 'Dining', name: 'Cafe Madeleine', where: 'Bangkok', meta: '1 hour · relaxed' },
   { id: 'bkk-letsrelax', scope: 'bangkok', cat: 'Wellness', name: "Let's Relax", where: 'Bangkok', meta: '1–2 hours' },

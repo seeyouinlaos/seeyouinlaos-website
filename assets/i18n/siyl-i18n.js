@@ -157,6 +157,21 @@
     "คุณเกตุและคุณแพดดี้จะประสานแผนการชำระกับคุณเป็นการส่วนตัว",
     "お支払いのスケジュールは、クン・ケットとクン・パディが直接ご相談のうえ決めさせていただきます。");
   E("Review my plan & submit", "Meinen Reiseplan prüfen & senden", "ตรวจแผนการเดินทางและส่ง", "旅のプランを確認して送信");
+  E("View experience", "Erlebnis ansehen", "ดูประสบการณ์", "体験を見る");
+  E("Ask Khun Ket & Khun Paddy to arrange this", "Khun Ket & Khun Paddy bitten, das zu arrangieren", "ให้คุณเกตุและคุณแพดดี้จัดให้", "クン・ケット＆クン・パディに手配を頼む");
+  E("Kaogee Le Triomphe", "Kaogee Le Triomphe", "เกาจี เลอ ทริออมฟ์", "カオジー・ル・トリオンフ");
+  E("Oath House", "Oath House", "โอธเฮาส์", "オースハウス");
+  E("1–2 hours · relaxed", "1–2 Stunden · entspannt", "1–2 ชั่วโมง · สบาย ๆ", "1〜2時間・リラックス");
+  E("2 hours · smart casual", "2 Stunden · Smart Casual", "2 ชั่วโมง · สมาร์ทแคชชวล", "2時間・スマートカジュアル");
+  E("1 hour · relaxed", "1 Stunde · entspannt", "1 ชั่วโมง · สบาย ๆ", "1時間・リラックス");
+  E("evening · smart casual", "abends · Smart Casual", "ยามค่ำ · สมาร์ทแคชชวล", "夜・スマートカジュアル");
+  E("1–2 hours", "1–2 Stunden", "1–2 ชั่วโมง", "1〜2時間");
+  E("2+ hours · relaxed", "2+ Stunden · entspannt", "2 ชั่วโมงขึ้นไป · สบาย ๆ", "2時間以上・リラックス");
+  E("A refined Vientiane dining room we love — calm, contemporary and generous.", "Ein feiner Vientiane-Speisesaal, den wir lieben — ruhig, zeitgemäß und großzügig.", "ห้องอาหารเวียงจันทน์ที่เรารัก สงบ ร่วมสมัย และใจกว้าง", "私たちの愛するビエンチャンのダイニング——静かで現代的、そして寛やか。");
+  E("Coffee by day, easy drinks by evening — a favourite pause in the city.", "Tagsüber Kaffee, abends unkomplizierte Drinks — eine Lieblingspause in der Stadt.", "กาแฟยามกลางวัน เครื่องดื่มสบาย ๆ ยามเย็น จุดพักโปรดกลางเมือง", "昼はコーヒー、夕べは気軽な一杯——街のお気に入りのひと休み。");
+  E("The classic Vientiane café moment — kaogee baguettes and good coffee near the Patuxay.", "Der klassische Vientiane-Café-Moment — Kaogee-Baguettes und guter Kaffee nahe dem Patuxay.", "โมเมนต์คาเฟ่คลาสสิกของเวียงจันทน์ ขนมปังเข้าจี่กับกาแฟดี ๆ ใกล้ประตูชัย", "ビエンチャンの定番カフェ時間——パトゥーサイ近くでカオジーとおいしいコーヒーを。");
+  E("An intimate evening bar — considered drinks in a beautiful room.", "Eine intime Abendbar — durchdachte Drinks in einem schönen Raum.", "บาร์ยามค่ำอันเป็นส่วนตัว เครื่องดื่มพิถีพิถันในห้องงดงาม", "親密な夜のバー——美しい空間で丁寧な一杯を。");
+  E("One night · your costs · breakfast included", "Eine Nacht · eure Kosten · Frühstück inklusive", "หนึ่งคืน · ค่าใช้จ่ายของคุณ · รวมอาหารเช้า", "1泊・ご負担の費用・朝食付き");
   E("Show details", "Details anzeigen", "ดูรายละเอียด", "詳細を見る");
   E("Hide details", "Details schließen", "ซ่อนรายละเอียด", "詳細を閉じる");
   E("Continue", "Weiter", "ดำเนินการต่อ", "次へ");
