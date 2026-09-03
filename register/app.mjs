@@ -2256,12 +2256,12 @@ function renderScopeBlock() {
       inner += bangkokStayBlock() +
         '<div class="cols2" style="margin-top:8px"><div class="field"><label>Check-in</label><input type="date" id="bkk-from" value="' + esc(b.from || '2027-02-21') + '"/></div>' +
         '<div class="field"><label>Check-out</label><input type="date" id="bkk-to" value="' + esc(b.to || '2027-02-25') + '"/></div></div>' +
-        '<p class="note" style="margin-top:8px">' + money(BANGKOK_STAY.ratePerGuestNight) + ' per person / night · ' + bkkTravellers() + ' × ' + bkkNights() + ' nights · <strong>total ' + money(bkkTotal()) + '</strong> — flows straight into My Plan.</p>' +
+        '<div class="trf-price" style="margin-top:10px">' + esc(BANGKOK_STAYS[0].name) + '<br/>' + (b.from && b.to ? esc(b.from) + ' → ' + esc(b.to) : BANGKOK_STAY.window) + ' · ' + bkkNights() + ' nights · ' + bkkTravellers() + ' travellers<br/>Your costs · ' + money(BANGKOK_STAY.ratePerGuestNight) + ' per person / night · ' + bkkNights() + ' nights × ' + bkkTravellers() + ' guests<br/><strong>Total · ' + money(bkkTotal()) + '</strong></div>' +
         '<div class="field" style="margin-top:8px"><label>Your arrival details for Guest Relations (flight/train, booked by you)</label><textarea id="bkk-arrival" rows="2">' + esc(b.arrivalInfo || '') + '</textarea></div>';
     }
     if (mode === 'own') inner += '<p class="note">Own arrangement noted — nothing is charged for a Bangkok stay.</p>';
     if (mode === null) inner += '<p class="note">Please choose so your total costs are complete.</p>';
-    box.querySelector('#scope-block').insertAdjacentHTML('beforeend', '<div id="bkk-journey">' + inner + '</div>');
+    box.querySelector('#scope-block .mod[data-scope="bangkok"]').insertAdjacentHTML('afterend', '<div id="bkk-journey">' + inner + '</div>');
     box.querySelectorAll('input[name="bkk-stay-mode"]').forEach((el) => el.addEventListener('change', () => {
       if (el.value === 'own') { S.bangkokStay = { property: null, from: '', to: '', own: true, withUs: false }; }
       else {
