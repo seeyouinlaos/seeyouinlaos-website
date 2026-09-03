@@ -8,13 +8,13 @@
 import {
   WEDDING, CONTACTS, JOURNEY_MODULES, EVENTS, ACCOMMODATIONS, SELECTABLE_ACCOMMODATIONS, TRAIN,
   TRANSFERS, PACKAGE_INCLUSIONS, COPY, DEMO_MODE, PUBLICATION, TRAIN_REFERENCE, BERTH_PREFS, BANGKOK_STAYS, BANGKOK_STAY, POST_WEDDING, RETURN_STAY, lookupInvitation,
-} from './data.mjs?v=UL1';
+} from './data.mjs?v=UL2';
 import {
   contributionPerGuest, partyCharges, partyTotal, money as usdMoney, displayMoney,
   trainContribution, transfersTotal, journeyTotal, postWeddingTotal,
   createInventory, remaining, availabilityLabel, requestAllocation,
   validateRegistration, buildNotification, nextInvitationState,
-} from './logic.mjs?v=UL1';
+} from './logic.mjs?v=UL2';
 
 /* ---------------- persistent state ---------------- */
 const DRAFT_KEY = 'siyl.reg.draft.v2';
@@ -938,8 +938,8 @@ function bangkokStayBlock() {
       '<p class="note">The shared Pre-Wedding home in Bangkok — ' + esc(h.arrival.note) + ' on ' + esc(h.arrival.date) + '.</p>' +
       '<div class="trf-price">' + money(BANGKOK_STAY.ratePerGuestNight) + ' per person / night · ' + bkkTravellers() + ' guests × ' + bkkNights() + ' nights · ' + money(BANGKOK_STAY.ratePerGuestNight * bkkTravellers() * bkkNights()) + '</div>' +
       '<div class="acc-actions">' + (sel
-        ? '<button type="button" class="btn sm" data-bkk-rm="' + h.id + '">Remove from journey</button>'
-        : '<button type="button" class="btn sm" data-bkk="' + h.id + '">Request this stay</button>') + '</div>' +
+        ? '<button type="button" class="btn sm" data-bkk-rm="' + h.id + '">Remove</button>'
+        : '<button type="button" class="btn sm" data-bkk="' + h.id + '">Book this stay</button>') + '</div>' +
       (sel ? '<div class="acc-avail" style="border-top:none;padding-top:8px">BOOKED · your room in the penthouse follows personally</div>' : '') +
       '</article>'; }).join('') + '</div>';
 }
@@ -1526,7 +1526,7 @@ function renderTransfers(trainy) {
       (t.included ? '<p class="note trf-incl">' + esc(t.included) + '</p>' : '') +
       '<div class="acc-actions">' +
       (sel
-        ? '<button type="button" class="btn sm" data-trf-remove="' + t.id + '">Remove from journey</button>'
+        ? '<button type="button" class="btn sm" data-trf-remove="' + t.id + '">Remove</button>'
         : '<button type="button" class="btn sm" data-trf-add="' + t.id + '">Add to journey</button>') +
       '</div>' +
       (sel ? '<div class="acc-avail" style="border-top:none;padding-top:8px">' + (t.id === 'nongkhai-vte' ? 'BOOKED · pickup follows your train arrival' : 'REQUESTED · Guest Relations confirms every detail with you personally') + '</div>' : '') +
@@ -2405,7 +2405,7 @@ function renderScopeBlock() {
       (requested ? '<div class="acc-avail" style="margin-top:6px">BOOKED</div>' : '') +
       '<div style="display:flex;gap:14px;margin-top:16px;margin-bottom:6px;flex-wrap:wrap">' +
       (requested
-        ? '<button type="button" class="btn sm ghost" data-tj-req="' + name + '" data-tj-val="off">Remove from journey</button>'
+        ? '<button type="button" class="btn sm ghost" data-tj-req="' + name + '" data-tj-val="off">Remove</button>'
         : '<button type="button" class="btn sm" data-tj-req="' + name + '" data-tj-val="with">Book this journey</button>') +
       '</div></article>';
   };
@@ -2450,19 +2450,19 @@ function renderScopeBlock() {
       S.guests.map((g, ix) => '<option value="' + (ix + 1) + '"' + (trav === ix + 1 ? ' selected' : '') + '>' + (ix + 1) + ' ' + (ix ? 'adults' : 'adult') + '</option>').join('') + '</select></div>' +
       '<div class="cch-label" style="margin-top:14px">Your stay in Bangkok</div>';
     if (mode === 'with') {
-      inner += '<p class="note" style="margin:6px 0 0">6 rooms available · limited availability</p>' + bangkokStayBlock() +
+      inner += '<p class="note" style="margin:6px 0 0">6 rooms available · limited availability</p>' +
         '<div class="cols2" style="margin-top:8px"><div class="field"><label>Check-in · earlier arrival welcome</label><input type="date" id="bkk-from" max="2027-02-23" value="' + esc(b.from || '2027-02-21') + '"/></div>' +
         '<div class="field"><label>Check-out · fixed</label><input type="date" id="bkk-to" value="2027-02-24" disabled/></div></div>' +
         '<p class="note" style="margin:4px 0 0">Check-out 24 FEB 2027 is fixed — that evening the night train leaves for Vientiane. Nights are calculated automatically.</p>' +
-        stayModule({ name: BANGKOK_STAYS[0].name, sub: null, dates: (b.from ? esc(b.from) + ' → 2027-02-24' : BANGKOK_STAY.window), nights: bkkNights(), trav: bkkTravellers(), rate: BANGKOK_STAY.ratePerGuestNight, imgs: [] }).replace('<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0 6px"></div>', '') +
+        stayModule({ name: BANGKOK_STAYS[0].name, sub: 'Bangkok, Thailand', dates: (b.from ? esc(b.from) + ' → 2027-02-24' : BANGKOK_STAY.window), nights: bkkNights(), trav: bkkTravellers(), rate: BANGKOK_STAY.ratePerGuestNight, imgs: (BANGKOK_STAYS[0].images || []).slice(0, 3) }) +
         '<div class="field" style="margin-top:8px"><label>Your arrival details for Guest Relations (flight/train, booked by you)</label><textarea id="bkk-arrival" rows="2">' + esc(b.arrivalInfo || '') + '</textarea></div>';
     }
     const ridersN = S.guests.filter((g) => g.journey.train).length;
     const indepAll = S.guests.filter((g) => g.attending !== false).every((g) => g.journey.independent);
     const bvMode = ridersN ? 'with' : (indepAll ? 'own' : null);
     inner += bkkReq
-      ? '<div class="acc-avail" style="margin-top:6px">BOOKED</div><div style="display:flex;gap:14px;margin-top:16px;margin-bottom:10px"><button type="button" class="btn sm ghost" id="bkk-req-off">Remove from journey</button></div>'
-      : '<div style="display:flex;gap:14px;margin-top:16px;margin-bottom:10px"><button type="button" class="btn sm" id="bkk-req-on">Request this stay</button></div>';
+      ? '<div class="acc-avail" style="margin-top:6px">BOOKED</div><div style="display:flex;gap:14px;margin-top:16px;margin-bottom:10px"><button type="button" class="btn sm ghost" id="bkk-req-off">Remove</button></div>'
+      : '<div style="display:flex;gap:14px;margin-top:16px;margin-bottom:10px"><button type="button" class="btn sm" id="bkk-req-on">Book this stay</button></div>';
     inner += '<div id="transit-bkk-vte" style="margin-top:18px">' +
       '<div class="cch-label">Overnight · Bangkok → Vientiane</div>' +
       travelChoice('tj-bkk-vte', 'Your overnight journey · 24 – 25 FEB 2027 · 1 night', bvMode,
@@ -2549,7 +2549,7 @@ function renderScopeBlock() {
             ? '<button type="button" class="btn sm" data-laos-wait="' + a.id + '">Join the waitlist</button>'
             : selRoom
             ? '<button type="button" class="btn sm ghost" data-view-rooms="1">View all rooms</button>'
-            : '<button type="button" class="btn sm" data-laos-select="' + a.id + '">Choose this room</button>') +
+            : '<button type="button" class="btn sm" data-laos-select="' + a.id + '">Book this room</button>') +
           '</div></article>';
       }).join('');
       const selIdx = Math.max(0, rooms.findIndex((a) => a.id === S.stay.accommodationId));
@@ -2615,8 +2615,8 @@ function renderScopeBlock() {
         '<article class="tj-opt' + (req ? ' sel' : '') + '" style="display:block">' +
         stayModule({ name: c.label, sub: c.sub, dates: c.date, nights: c.nightsCount, trav: trav, rate: c.ratePerGuestNight, imgs: c.images || [],
           after: (req
-            ? '<div class="acc-avail" style="border-top:none;padding-top:6px">BOOKED</div><div style="display:flex;gap:14px;margin-top:16px;margin-bottom:6px"><button type="button" class="btn sm ghost" data-cn-stay="' + key + '" data-cn-val="off">Remove from journey</button></div>'
-            : '<div style="display:flex;gap:14px;margin-top:16px;margin-bottom:6px"><button type="button" class="btn sm" data-cn-stay="' + key + '" data-cn-val="with">Request this stay</button></div>') }) +
+            ? '<div class="acc-avail" style="border-top:none;padding-top:6px">BOOKED</div><div style="display:flex;gap:14px;margin-top:16px;margin-bottom:6px"><button type="button" class="btn sm ghost" data-cn-stay="' + key + '" data-cn-val="off">Remove</button></div>'
+            : '<div style="display:flex;gap:14px;margin-top:16px;margin-bottom:6px"><button type="button" class="btn sm" data-cn-stay="' + key + '" data-cn-val="with">Book this stay</button></div>') }) +
         '</article>';
     };
     const leg = (d, t, sub) => '<div class="crow"><span class="cdate">' + d + '</span><div class="cbody"><span class="cprod">' + t + '</span><span class="camt">' + sub + '</span></div></div>';

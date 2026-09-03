@@ -392,6 +392,10 @@
   E("28 FEB 2027 · from 12:00 · Souphattra Heritage Vientiane · COMPLIMENTARY", "28. FEB 2027 · ab 12:00 Uhr · Souphattra Heritage Vientiane · INKLUSIVE", "28 ก.พ. 2027 · ตั้งแต่ 12:00 น. · สุพัตรา เฮอริเทจ เวียงจันทน์ · ไม่มีค่าใช้จ่าย", "2027年2月28日 12:00より・スパッタラ・ヘリテージ・無料ご招待");
   E("28 FEB 2027 · 04:30 PM · Souphattra Heritage Vientiane · COMPLIMENTARY", "28. FEB 2027 · 16:30 Uhr · Souphattra Heritage Vientiane · INKLUSIVE", "28 ก.พ. 2027 · 16:30 น. · สุพัตรา เฮอริเทจ เวียงจันทน์ · ไม่มีค่าใช้จ่าย", "2027年2月28日 16:30・スパッタラ・ヘリテージ・無料ご招待");
   E("28 FEB 2027 · 07:30 PM · Souphattra Vientiane Hotel · COMPLIMENTARY", "28. FEB 2027 · 19:30 Uhr · Souphattra Vientiane Hotel · INKLUSIVE", "28 ก.พ. 2027 · 19:30 น. · โรงแรมสุพัตรา เวียงจันทน์ · ไม่มีค่าใช้จ่าย", "2027年2月28日 19:30・スパッタラ・ビエンチャン・ホテル・無料ご招待");
+  E("Book this stay", "Diesen Aufenthalt buchen", "จองที่พักนี้", "この滞在を予約");
+  E("Book this room", "Dieses Zimmer buchen", "จองห้องนี้", "このお部屋を予約");
+  E("Remove", "Entfernen", "นำออก", "取り消す");
+  E("Bangkok, Thailand", "Bangkok, Thailand", "กรุงเทพฯ ประเทศไทย", "タイ・バンコク");
   E("Show details", "Details anzeigen", "ดูรายละเอียด", "詳細を見る");
   E("Hide details", "Details schließen", "ซ่อนรายละเอียด", "詳細を閉じる");
   E("Continue", "Weiter", "ดำเนินการต่อ", "次へ");
