@@ -381,6 +381,9 @@
   E("The wedding · are you joining?", "Die Hochzeit · seid ihr dabei?", "งานแต่งงาน · คุณเข้าร่วมไหม", "結婚式・ご参加されますか");
   E("I have read and agree to the wedding information above.", "Ich habe die Informationen zur Hochzeit gelesen und bin damit einverstanden.", "ฉันได้อ่านและยอมรับข้อมูลเกี่ยวกับงานแต่งงานข้างต้น", "上記の結婚式に関する情報を読み、同意します。");
   E("Please confirm the wedding information above before submitting.", "Bitte bestätigt die Informationen zur Hochzeit, bevor ihr absendet.", "กรุณายืนยันข้อมูลงานแต่งงานข้างต้นก่อนส่ง", "送信の前に、上記の結婚式に関する情報のご確認をお願いします。");
+  E("Book this journey", "Diese Reise buchen", "จองการเดินทางนี้", "この旅程を予約");
+  E("Overnight · Bangkok → Vientiane", "Über Nacht · Bangkok → Vientiane", "ค้างคืน · กรุงเทพฯ → เวียงจันทน์", "夜行・バンコク→ビエンチャン");
+  E("Your overnight journey · 24 – 25 FEB 2027 · 1 night", "Eure Nachtreise · 24. – 25. FEB 2027 · 1 Nacht", "การเดินทางค้างคืนของคุณ · 24 – 25 ก.พ. 2027 · 1 คืน", "夜行の旅・2027年2月24–25日・1泊");
   E("Show details", "Details anzeigen", "ดูรายละเอียด", "詳細を見る");
   E("Hide details", "Details schließen", "ซ่อนรายละเอียด", "詳細を閉じる");
   E("Continue", "Weiter", "ดำเนินการต่อ", "次へ");
