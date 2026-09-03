@@ -309,7 +309,7 @@ export const BANGKOK_STAYS = [
    * Guests contribute ONLY to the first night (21→22); nights two and three
    * are hosted by Haruthai & Suthep. firstNight = authoritative actual for
    * night one (party total); per-guest = firstNight / attending guests. */
-  { id: 'sathorn-penthouse', name: 'Elegant 6BR Sathorn Penthouse', role: 'Pre-Wedding stay · Bangkok',
+  { id: 'sathorn-penthouse', parties: ['INV-002'], name: 'Elegant 6BR Sathorn Penthouse', role: 'Pre-Wedding stay · Bangkok',
     dates: '21–24 FEB 2027', nights: 3,
     contributionNight: '21–22 FEB', hostedNights: '22–24 FEB',
     arrival: { date: '21 FEB 2027', note: 'Personal pickup by Haruthai', hosted: true },

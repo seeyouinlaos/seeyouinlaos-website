@@ -172,6 +172,16 @@
   E("The classic Vientiane café moment — kaogee baguettes and good coffee near the Patuxay.", "Der klassische Vientiane-Café-Moment — Kaogee-Baguettes und guter Kaffee nahe dem Patuxay.", "โมเมนต์คาเฟ่คลาสสิกของเวียงจันทน์ ขนมปังเข้าจี่กับกาแฟดี ๆ ใกล้ประตูชัย", "ビエンチャンの定番カフェ時間——パトゥーサイ近くでカオジーとおいしいコーヒーを。");
   E("An intimate evening bar — considered drinks in a beautiful room.", "Eine intime Abendbar — durchdachte Drinks in einem schönen Raum.", "บาร์ยามค่ำอันเป็นส่วนตัว เครื่องดื่มพิถีพิถันในห้องงดงาม", "親密な夜のバー——美しい空間で丁寧な一杯を。");
   E("One night · your costs · breakfast included", "Eine Nacht · eure Kosten · Frühstück inklusive", "หนึ่งคืน · ค่าใช้จ่ายของคุณ · รวมอาหารเช้า", "1泊・ご負担の費用・朝食付き");
+  E("Your stay in Bangkok", "Eure Unterkunft in Bangkok", "ที่พักของคุณในกรุงเทพฯ", "バンコクでのご滞在");
+  E("Stay with us", "Bei uns wohnen", "พักกับเรา", "私たちと同じ滞在に");
+  E("Choose the arranged Bangkok stay — dates and your costs follow immediately.", "Wählt den arrangierten Bangkok-Aufenthalt — Daten und eure Kosten folgen sofort.", "เลือกที่พักกรุงเทพฯ ที่จัดเตรียมไว้ วันที่และค่าใช้จ่ายของคุณตามมาทันที", "手配済みのバンコク滞在を選ぶと、日程と費用がすぐに反映されます。");
+  E("Arrange my own stay", "Eigene Unterkunft organisieren", "จัดที่พักเอง", "自分で滞在を手配する");
+  E("Bangkok stays part of your journey — no hotel costs through us.", "Bangkok bleibt Teil eurer Reise — keine Hotelkosten über uns.", "กรุงเทพฯ ยังเป็นส่วนหนึ่งของเส้นทาง โดยไม่มีค่าโรงแรมผ่านเรา", "バンコクは旅の一部のまま——こちらを通じた宿泊費はかかりません。");
+  E("Own arrangement noted — nothing is charged for a Bangkok stay.", "Eigene Organisation notiert — für eine Bangkok-Unterkunft wird nichts berechnet.", "บันทึกการจัดการเองแล้ว ไม่มีค่าใช้จ่ายที่พักกรุงเทพฯ", "ご自身での手配として承りました——バンコク滞在の費用はかかりません。");
+  E("Please choose so your total costs are complete.", "Bitte wählt, damit eure Gesamtkosten vollständig sind.", "โปรดเลือกเพื่อให้ค่าใช้จ่ายรวมของคุณครบถ้วน", "合計費用が確定するよう、お選びください。");
+  E("Check-in", "Check-in", "เช็คอิน", "チェックイン");
+  E("Check-out", "Check-out", "เช็คเอาท์", "チェックアウト");
+  E("Your Bangkok stay · choose Stay with us or your own arrangement under My Journey", "Eure Bangkok-Unterkunft · unter Meine Reise „Bei uns wohnen“ oder eigene Organisation wählen", "ที่พักกรุงเทพฯ ของคุณ · เลือก พักกับเรา หรือจัดเอง ได้ที่ เส้นทางของฉัน", "バンコクのご滞在——「旅のしおり」で「私たちと同じ滞在に」またはご自身での手配をお選びください");
   E("Show details", "Details anzeigen", "ดูรายละเอียด", "詳細を見る");
   E("Hide details", "Details schließen", "ซ่อนรายละเอียด", "詳細を閉じる");
   E("Continue", "Weiter", "ดำเนินการต่อ", "次へ");

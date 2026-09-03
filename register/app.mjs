@@ -884,7 +884,7 @@ function bangkokStayBlock() {
   const b = S.bangkokStay;
   const n = Math.max(attendingCount(), 1);
   return '<div class="guest-block" id="bkk-stay"><div class="cch-label">Pre-Wedding Journey · Optional · Before the wedding</div><h3>Your Bangkok stay</h3>' +
-    BANGKOK_STAYS.map((h) => {
+    BANGKOK_STAYS.filter((h) => !h.parties || (S.invitation && h.parties.includes(S.invitation.invitationId))).map((h) => {
       const sel = b.property === h.id;
       return '<article class="trf-card' + (sel ? ' sel' : '') + '">' +
       '<div class="when">' + esc(h.dates) + ' · ' + h.nights + ' nights · Bangkok</div>' +
@@ -1786,6 +1786,9 @@ function renderCost() {
   hosted.push('Departure coordination within the wedding programme');
   html += '<div class="chosted">' + hosted.map((h) => '<span>' + h + '</span>').join('') + '</div>';
 
+  if (S.scope && S.scope.bangkok && S.bangkokStay && !S.bangkokStay.own && !S.bangkokStay.property) {
+    open.push(['21–24 FEB 2027', 'Your Bangkok stay · choose Stay with us or your own arrangement under My Journey']);
+  }
   if (open.length) {
     html += '<div class="cch"><div><div class="cch-t">To finalize with Guest Relations</div><div class="cch-s">Genuinely open arrangements · nothing here is charged</div></div></div>';
     html += open.map((o) => line(o[0], o[1], 'Guest Relations will confirm the arrangement')).join('');
@@ -2233,7 +2236,39 @@ function renderScopeBlock() {
     row('laos', 'Laos · The Wedding', 'Vientiane, the wedding days and everything around them.', true) +
     row('china', 'China · Onward Journey', 'Kunming and Lijiang after the wedding — join a part of the onward journey.', false) +
     '</div>');
-  box.querySelectorAll('#scope-block input[type="radio"]').forEach((el) =>
+  if (sc.bangkok) {
+    S.bangkokStay ||= { property: null, from: '', to: '' };
+    const b = S.bangkokStay;
+    const mode = (b.property || b.withUs) ? 'with' : (b.own ? 'own' : null);
+    const opt = (id, label, blurb) =>
+      '<label class="tj-opt' + (mode === id ? ' sel' : '') + '" style="display:block;cursor:pointer"><input type="radio" name="bkk-stay-mode" value="' + id + '"' + (mode === id ? ' checked' : '') + ' style="position:absolute;opacity:0"/>' +
+      '<h4 style="margin:0 0 4px">' + label + '</h4><p class="note" style="margin:0">' + blurb + '</p></label>';
+    let inner = '<div class="cch-label" style="margin-top:14px">Your stay in Bangkok</div>' +
+      '<div class="tj-pair" role="radiogroup" aria-label="Your stay in Bangkok">' +
+      opt('with', 'Stay with us', 'Choose the arranged Bangkok stay — dates and your costs follow immediately.') +
+      opt('own', 'Arrange my own stay', 'Bangkok stays part of your journey — no hotel costs through us.') +
+      '</div>';
+    if (mode === 'with') {
+      inner += bangkokStayBlock() +
+        '<div class="cols2" style="margin-top:8px"><div class="field"><label>Check-in</label><input type="date" id="bkk-from" value="' + esc(b.from || '2027-02-21') + '"/></div>' +
+        '<div class="field"><label>Check-out</label><input type="date" id="bkk-to" value="' + esc(b.to || '2027-02-24') + '"/></div></div>';
+    }
+    if (mode === 'own') inner += '<p class="note">Own arrangement noted — nothing is charged for a Bangkok stay.</p>';
+    if (mode === null) inner += '<p class="note">Please choose so your total costs are complete.</p>';
+    box.querySelector('#scope-block').insertAdjacentHTML('beforeend', '<div id="bkk-journey">' + inner + '</div>');
+    box.querySelectorAll('input[name="bkk-stay-mode"]').forEach((el) => el.addEventListener('change', () => {
+      if (el.value === 'own') { S.bangkokStay = { property: null, from: '', to: '', own: true, withUs: false }; }
+      else {
+        S.bangkokStay.own = false; S.bangkokStay.withUs = true;
+        if (!S.bangkokStay.from) { S.bangkokStay.from = '2027-02-21'; S.bangkokStay.to = '2027-02-24'; }
+      }
+      saveDraft(); renderStep(cur); renderSummary();
+    }));
+    const wireDate = (id, key) => { const el = box.querySelector('#' + id); if (el) el.addEventListener('change', () => { S.bangkokStay[key] = el.value; saveDraft(); }); };
+    wireDate('bkk-from', 'from'); wireDate('bkk-to', 'to');
+    if (mode === 'with') wireBangkokStay(box.querySelector('#bkk-journey'));
+  }
+  box.querySelectorAll('#scope-block input[name^="scope-"]').forEach((el) =>
     el.addEventListener('change', () => {
       const key = el.name.replace('scope-', '');
       setScope(key, el.value === 'yes');
@@ -2403,10 +2438,8 @@ function applyTravelScope() {
   S.postWedding.joined = !!S.scope.china;
   const bkkMod = jb.querySelector('.mod[data-mod="bangkok"]');
   if (bkkMod) bkkMod.remove();
-  if (!S.scope.bangkok) {
-    const bkk = jb.querySelector('#bkk-stay');
-    if (bkk) bkk.remove();
-  }
+  const bkk = jb.querySelector('#bkk-stay');
+  if (bkk) bkk.remove(); // primary home is My Journey (owner flow)
   const pw = jb.querySelector('#post-wedding');
   if (pw) {
     if (!S.scope.china) { pw.remove(); }
