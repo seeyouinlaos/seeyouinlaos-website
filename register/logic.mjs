@@ -499,7 +499,9 @@ export function buildNotification(reg, ctx) {
     const cnL = cnAct && reg.china.lijiang === 'with' ? 63 * 2 * trav : 0;
     if (cnK) out.push(L('Kunming stay:', money(cnK)));
     if (cnL) out.push(L('Lijiang stay:', money(cnL)));
-    out.push(L('TOTAL CONTRIBUTION:', money(journeyTotal(acc, occ, train, trainRiders, transferCatalog, selectedTransfers, trainRiders) + pw + bkk + cnK + cnL)));
+    const lOn = !(reg.scope && reg.scope.laos === false);
+    const lAcc = lOn && !(reg.stay && reg.stay.own) ? acc : null;
+    out.push(L('TOTAL CONTRIBUTION:', money(journeyTotal(lAcc, occ, train, lOn ? trainRiders : 0, transferCatalog, lOn ? selectedTransfers : [], lOn ? trainRiders : 0) + pw + bkk + cnK + cnL)));
   }
   out.push('');
   out.push('HOSTED FOR THE GUESTS (never charged)');

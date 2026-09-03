@@ -236,7 +236,7 @@ export const BERTH_PREFS = ['No preference', 'Sleeper berth · lower', 'Sleeper 
 
 export const TRAIN = {
   id: 'train', name: 'Overnight train · Bangkok → Nong Khai',
-  date: '26 FEB 2027', times: '20:25 → 06:45 (+1)',
+  date: '24 FEB 2027', times: '20:25 → 06:45 (+1)',
   capacityTotal: 8, capacityUnit: 'Guest seat', selectionScope: 'GUEST',
   /* OWNER FINAL (03 SEP 2026, Booking Engine P0): USD 75 per participating
    * guest as ONE package — USD 55 train (First Class Sleeper) + USD 20 Van
@@ -314,7 +314,7 @@ export const BANGKOK_STAYS = [
    * person per night (see BANGKOK_STAY below). The penthouse remains the
    * editorial "current accommodation" and may later change to a hotel. */
   { id: 'sathorn-penthouse', name: 'Elegant 6BR Sathorn Penthouse', role: 'Current accommodation · Sathorn, Bangkok',
-    dates: '21.02.2027 – 25.02.2027', nights: 4,
+    dates: '21.02.2027 – 24.02.2027', nights: 3,
     contributionNight: '21–22 FEB', hostedNights: '22–24 FEB',
     arrival: { date: '21 FEB 2027', note: 'Personal pickup by Haruthai', hosted: true },
     /* Authoritative project actual (Airbnb checkout capture, USD only):
@@ -328,8 +328,8 @@ export const BANGKOK_STAYS = [
 /* Provider-independent Bangkok Stay booking product (owner final):
  * USD 150 × guests × nights; default window 21.02–25.02.2027 · 4 nights. */
 export const BANGKOK_STAY = {
-  window: '21.02.2027 – 25.02.2027',
-  defaultFrom: '2027-02-21', defaultTo: '2027-02-25', defaultNights: 4,
+  window: '21.02.2027 – 24.02.2027',
+  defaultFrom: '2027-02-21', defaultTo: '2027-02-24', defaultNights: 3,
   /* OWNER FINAL PRICE (03 SEP 2026): USD 60 pp/night (owner, 03 Sep late) — supersedes 90, 150,
    * 184.45/368.90 and all historical Bangkok guest pricing. */
   ratePerGuestNight: 60,
