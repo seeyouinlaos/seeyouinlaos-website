@@ -8,13 +8,13 @@
 import {
   WEDDING, CONTACTS, JOURNEY_MODULES, EVENTS, ACCOMMODATIONS, SELECTABLE_ACCOMMODATIONS, TRAIN,
   TRANSFERS, PACKAGE_INCLUSIONS, COPY, DEMO_MODE, PUBLICATION, TRAIN_REFERENCE, BERTH_PREFS, BANGKOK_STAYS, BANGKOK_STAY, POST_WEDDING, RETURN_STAY, lookupInvitation,
-} from './data.mjs?v=UK9';
+} from './data.mjs?v=UL1';
 import {
   contributionPerGuest, partyCharges, partyTotal, money as usdMoney, displayMoney,
   trainContribution, transfersTotal, journeyTotal, postWeddingTotal,
   createInventory, remaining, availabilityLabel, requestAllocation,
   validateRegistration, buildNotification, nextInvitationState,
-} from './logic.mjs?v=UK9';
+} from './logic.mjs?v=UL1';
 
 /* ---------------- persistent state ---------------- */
 const DRAFT_KEY = 'siyl.reg.draft.v2';
@@ -335,7 +335,11 @@ function renderStep(i) {
   if (name === 'home') { renderHome(); renderScopeBlock(); }
   if (name === 'party') renderParty();
   if (name === 'journey') { renderJourney(); applyTravelScope(); }
-  if (name === 'events') { renderEvents(); renderWeddingPresets(); }
+  if (name === 'events') {
+    const eb = document.getElementById('events-box');
+    if (eb) { eb.innerHTML = ''; const w = document.getElementById('wed-presets'); if (w) w.remove(); }
+    renderWeddingPresets();
+  }
   if (name === 'stay') { renderStay(); renderStayMode(); }
   if (name === 'spa') renderExperiencesArea();
   if (name === 'each') renderEach();
@@ -2691,20 +2695,33 @@ function renderWeddingPresets() {
    * code + ONE required acknowledgement (semantic state, локale-free). */
   S.dressAck ||= {}; S.dressAck.coffee ||= false;
   const EVJ = [
-    ['temple', 'The Temple Ceremony', '09:00 AM – approx. 12:00 PM · Wat Ong Teu Temple, Vientiane', 'Lao Traditional Dress'],
-    ['coffee', 'Coffee & Cake', 'After the return · Souphattra Heritage Vientiane', 'Black Tie'],
-    ['ceremony', 'The Vow Ceremony', '04:30 PM · Souphattra Heritage Vientiane', 'Black Tie'],
-    ['dinner', 'The Wedding Dinner', '07:30 PM · Souphattra Vientiane Hotel', 'Black Tie'],
+    ['temple', 'The Temple Ceremony', '28 FEB 2027 · 09:00 AM – approx. 12:00 PM · Wat Ong Teu Temple, Vientiane', 'Lao Traditional Dress',
+      ['tradition-01', 'tradition-02', 'tradition-03'],
+      'A Buddhist morning ceremony at Wat Ong Teu — unhurried and full of meaning.',
+      'https://maps.app.goo.gl/Leuzp4wNBhb9bR9m9?g_st=ic'],
+    ['coffee', 'Coffee & Cake', '28 FEB 2027 · from 12:00 · Souphattra Heritage Vientiane', 'Black Tie',
+      ['../souphattra/heritage-courtyard-aerial', '../souphattra/heritage-courtyard-pool', 'dinner-04'],
+      'Back at the courtyard: coffee, cake and a slow midday together.', null],
+    ['ceremony', 'The Vow Ceremony', '28 FEB 2027 · 04:30 PM · Souphattra Heritage Vientiane', 'Black Tie',
+      ['vow-01', 'vow-02', 'vow-03'],
+      'Stillness, presence, and the vow made public in front of the people who matter most.', null],
+    ['dinner', 'The Wedding Dinner', '28 FEB 2027 · 07:30 PM · Souphattra Vientiane Hotel', 'Black Tie',
+      ['dinner-01', 'dinner-02', 'dinner-03'],
+      'Sunset drinks, then dinner in the courtyard garden — a long, unhurried evening together.', null],
   ];
   const evState = (k) => {
     const att = S.guests.filter((g) => g.attending !== false);
     const on = att.filter((g) => (g.events || {})[k]).length;
     return on === 0 ? (S._evDecided && S._evDecided[k] ? 'no' : 'undecided') : 'yes';
   };
-  const html = EVJ.map(([k, name, meta, dress]) => {
+  const html = EVJ.map(([k, name, meta, dress, imgs, desc, maps]) => {
     const st = evState(k);
     const ack = !!S.dressAck[k];
     return '<div class="mod" data-evj="' + k + '"><div class="when">' + meta + ' · COMPLIMENTARY</div><h3>' + name + '</h3>' +
+      '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0 8px">' +
+      imgs.map((f, ix) => '<img src="../assets/images/dress/' + f + '.jpg" alt="' + name + ' — view ' + (ix + 1) + '" data-ev-lb="' + k + '" data-ev-ix="' + ix + '" loading="lazy" decoding="async" style="width:100%;height:96px;object-fit:cover;display:block;cursor:zoom-in"/>').join('') + '</div>' +
+      '<p class="note" style="margin:0 0 8px">' + desc + '</p>' +
+      (maps ? '<a class="btn sm ghost" style="display:inline-block;margin-bottom:8px" href="' + maps + '" target="_blank" rel="noopener">Open in Google Maps</a>' : '') +
       '<div style="display:flex;gap:14px;margin-top:10px;flex-wrap:wrap">' +
       '<button type="button" class="btn sm' + (st === 'yes' ? '' : ' ghost') + '" data-evj-set="' + k + ':yes">' + (st === 'yes' ? '✓ ' : '') + 'I am joining</button>' +
       '<button type="button" class="btn sm' + (st === 'no' ? '' : ' ghost') + '" data-evj-set="' + k + ':no">' + (st === 'no' ? '✓ ' : '') + 'Not joining</button></div>' +
@@ -2716,6 +2733,11 @@ function renderWeddingPresets() {
       '</div>';
   }).join('');
   box.insertAdjacentHTML('afterbegin', '<div class="guest-block" id="wed-presets"><div class="cch-label">The wedding · are you joining?</div>' + html + '</div>');
+  box.querySelectorAll('[data-ev-lb]').forEach((im) => im.addEventListener('click', () => {
+    const k = im.getAttribute('data-ev-lb');
+    const ev = EVJ.find((x) => x[0] === k);
+    openLightbox({ name: ev[1], images: ev[4].map((f) => '../assets/images/dress/' + f + '.jpg') }, parseInt(im.getAttribute('data-ev-ix'), 10) || 0);
+  }));
   box.querySelectorAll('[data-evj-set]').forEach((b) => b.addEventListener('click', () => {
     const [k, v] = b.getAttribute('data-evj-set').split(':');
     S.guests.forEach((g) => { if (g.attending === false) return; g.events = g.events || {}; g.events[k] = v === 'yes'; });

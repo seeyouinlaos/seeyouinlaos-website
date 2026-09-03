@@ -384,6 +384,14 @@
   E("Book this journey", "Diese Reise buchen", "จองการเดินทางนี้", "この旅程を予約");
   E("Overnight · Bangkok → Vientiane", "Über Nacht · Bangkok → Vientiane", "ค้างคืน · กรุงเทพฯ → เวียงจันทน์", "夜行・バンコク→ビエンチャン");
   E("Your overnight journey · 24 – 25 FEB 2027 · 1 night", "Eure Nachtreise · 24. – 25. FEB 2027 · 1 Nacht", "การเดินทางค้างคืนของคุณ · 24 – 25 ก.พ. 2027 · 1 คืน", "夜行の旅・2027年2月24–25日・1泊");
+  E("A Buddhist morning ceremony at Wat Ong Teu — unhurried and full of meaning.", "Eine buddhistische Morgenzeremonie im Wat Ong Teu — entspannt und voller Bedeutung.", "พิธีเช้าแบบพุทธที่วัดองค์ตื้อ เรียบง่ายและเปี่ยมความหมาย", "ワット・オントゥーでの仏教の朝の儀式——ゆったりと、意味に満ちて。");
+  E("Back at the courtyard: coffee, cake and a slow midday together.", "Zurück im Innenhof: Kaffee, Kuchen und ein entspannter Mittag zusammen.", "กลับสู่ลานบ้าน กาแฟ เค้ก และช่วงกลางวันที่ผ่อนคลายด้วยกัน", "中庭に戻って——コーヒーとケーキ、ゆったりした昼のひととき。");
+  E("Stillness, presence, and the vow made public in front of the people who matter most.", "Stille, Gegenwart und das Versprechen vor den Menschen, die am meisten zählen.", "ความสงบ การอยู่ตรงนั้น และคำสัญญาต่อหน้าคนที่สำคัญที่สุด", "静けさの中で、大切な人々の前で交わされる誓い。");
+  E("Sunset drinks, then dinner in the courtyard garden — a long, unhurried evening together.", "Drinks zum Sonnenuntergang, dann Dinner im Gartenhof — ein langer, entspannter Abend zusammen.", "เครื่องดื่มยามอาทิตย์ตก แล้วดินเนอร์ในสวนลานบ้าน ค่ำคืนยาวๆ ที่ผ่อนคลายด้วยกัน", "夕暮れのドリンク、そして中庭でのディナー——長くゆったりとした夜を共に。");
+  E("28 FEB 2027 · 09:00 AM – approx. 12:00 PM · Wat Ong Teu Temple, Vientiane · COMPLIMENTARY", "28. FEB 2027 · 09:00 – ca. 12:00 Uhr · Wat Ong Teu Tempel, Vientiane · INKLUSIVE", "28 ก.พ. 2027 · 09:00 – ประมาณ 12:00 น. · วัดองค์ตื้อ เวียงจันทน์ · ไม่มีค่าใช้จ่าย", "2027年2月28日 9:00–約12:00・ワット・オントゥー寺院・無料ご招待");
+  E("28 FEB 2027 · from 12:00 · Souphattra Heritage Vientiane · COMPLIMENTARY", "28. FEB 2027 · ab 12:00 Uhr · Souphattra Heritage Vientiane · INKLUSIVE", "28 ก.พ. 2027 · ตั้งแต่ 12:00 น. · สุพัตรา เฮอริเทจ เวียงจันทน์ · ไม่มีค่าใช้จ่าย", "2027年2月28日 12:00より・スパッタラ・ヘリテージ・無料ご招待");
+  E("28 FEB 2027 · 04:30 PM · Souphattra Heritage Vientiane · COMPLIMENTARY", "28. FEB 2027 · 16:30 Uhr · Souphattra Heritage Vientiane · INKLUSIVE", "28 ก.พ. 2027 · 16:30 น. · สุพัตรา เฮอริเทจ เวียงจันทน์ · ไม่มีค่าใช้จ่าย", "2027年2月28日 16:30・スパッタラ・ヘリテージ・無料ご招待");
+  E("28 FEB 2027 · 07:30 PM · Souphattra Vientiane Hotel · COMPLIMENTARY", "28. FEB 2027 · 19:30 Uhr · Souphattra Vientiane Hotel · INKLUSIVE", "28 ก.พ. 2027 · 19:30 น. · โรงแรมสุพัตรา เวียงจันทน์ · ไม่มีค่าใช้จ่าย", "2027年2月28日 19:30・スパッタラ・ビエンチャン・ホテル・無料ご招待");
   E("Show details", "Details anzeigen", "ดูรายละเอียด", "詳細を見る");
   E("Hide details", "Details schließen", "ซ่อนรายละเอียด", "詳細を閉じる");
   E("Continue", "Weiter", "ดำเนินการต่อ", "次へ");
