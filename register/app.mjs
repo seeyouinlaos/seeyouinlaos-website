@@ -8,13 +8,13 @@
 import {
   WEDDING, CONTACTS, JOURNEY_MODULES, EVENTS, ACCOMMODATIONS, SELECTABLE_ACCOMMODATIONS, TRAIN,
   TRANSFERS, PACKAGE_INCLUSIONS, COPY, DEMO_MODE, PUBLICATION, TRAIN_REFERENCE, BERTH_PREFS, BANGKOK_STAYS, BANGKOK_STAY, POST_WEDDING, RETURN_STAY, lookupInvitation,
-} from './data.mjs';
+} from './data.mjs?v=UJ2';
 import {
   contributionPerGuest, partyCharges, partyTotal, money as usdMoney, displayMoney,
   trainContribution, transfersTotal, journeyTotal, postWeddingTotal,
   createInventory, remaining, availabilityLabel, requestAllocation,
   validateRegistration, buildNotification, nextInvitationState,
-} from './logic.mjs';
+} from './logic.mjs?v=UJ2';
 
 /* ---------------- persistent state ---------------- */
 const DRAFT_KEY = 'siyl.reg.draft.v2';
@@ -526,8 +526,7 @@ function adoptInvitation(inv) {
 
 /* ---------------- MY JOURNEY · private member area ---------------- */
 const PRIVNAV = [
-  ['home', 'My Journey'], ['events', 'The Wedding'], ['stay', 'My Stay'],
-  ['journey', 'My Travel'], ['spa', 'Experiences'], ['each', 'My Details'],
+  ['home', 'My Journey'], ['events', 'The Wedding'], ['spa', 'Experiences'], ['each', 'My Details'],
   ['cost', 'My Plan'],
 ];
 function renderPrivnav() {
@@ -2353,7 +2352,10 @@ function renderScopeBlock() {
         o('with', 'Stay with us', 'Choose the arranged stay — the confirmed rate and your costs follow immediately.') +
         o('own', 'Arrange my own stay', 'This destination stays part of your journey — no accommodation through us, USD 0.') +
         '</div>' +
-        (m === 'with' ? stayModule({ name: c.label, sub: c.sub, dates: c.date, nights: c.nightsCount, trav: trav, rate: c.ratePerGuestNight, imgs: c.images || [] }) : '') +
+        (m === 'with' ? stayModule({ name: c.label, sub: c.sub, dates: c.date, nights: c.nightsCount, trav: trav, rate: c.ratePerGuestNight, imgs: c.images || [],
+          after: (S.chinaRequested && S.chinaRequested[key])
+            ? '<div class="acc-avail" style="border-top:none;padding-top:6px">REQUESTED · Guest Relations confirms every detail personally</div>'
+            : '<button type="button" class="btn sm" data-cn-req="' + key + '" style="margin-top:8px">Request this stay</button>' }) : '') +
         (m === 'own' ? '<p class="note">Own arrangement noted — nothing is charged for this stay.</p>' : '') +
         (m == null ? '<p class="note">Please choose so your total costs are complete.</p>' : '');
     };
@@ -2371,7 +2373,14 @@ function renderScopeBlock() {
       leg('06 MAR 2027', 'Lijiang → Bangkok / onward', 'Your choice — return with us, continue elsewhere or your own plans');
     box.querySelector('#scope-block .mod[data-scope="china"]').insertAdjacentHTML('afterend', '<div id="china-journey">' + cn + '</div>');
     box.querySelectorAll('#china-journey input[name^="cn-"]').forEach((el) => el.addEventListener('change', () => {
-      S.china[el.name.replace('cn-', '')] = el.value;
+      const key = el.name.replace('cn-', '');
+      S.china[key] = el.value;
+      if (el.value !== 'with' && S.chinaRequested) S.chinaRequested[key] = false;
+      saveDraft(); renderStep(cur); renderSummary();
+    }));
+    box.querySelectorAll('[data-cn-req]').forEach((b) => b.addEventListener('click', () => {
+      S.chinaRequested ||= {};
+      S.chinaRequested[b.getAttribute('data-cn-req')] = true;
       saveDraft(); renderStep(cur); renderSummary();
     }));
   }
@@ -2459,11 +2468,22 @@ function renderExperiencesArea() {
   const items = EXPERIENCES_CATALOG.filter((x) => x.scope === 'laos' || (S.scope && S.scope[x.scope]));
   const req = (id) => (S.experiences || []).find((e) => e.id === id);
   const cats = ['Dining', 'Things to do', 'Wellness'];
+  /* §K: the guest must see WHEN an experience belongs in the journey —
+   * destination groups with their confirmed date windows and day numbers
+   * (Day 1 = 21 FEB 2027 Bangkok arrival window). No invented per-card
+   * times: restaurants and visits are free-time choices inside a window. */
+  const groups = [
+    ['bangkok', 'Bangkok · 21 – 25 FEB 2027 · Day 1 – 5'],
+    ['laos', 'Vientiane · 27 FEB – 01 MAR 2027 · Day 7 – 9 · the wedding days'],
+  ];
   let html = '<p class="note" style="margin-bottom:18px">A few places we love, around the parts of the journey you are joining. A recommendation is not a booking — nothing is arranged and nothing is charged until you ask us and Guest Relations confirms it with you.</p>';
+  for (const [gscope, gtitle] of groups) {
+    const gItems = items.filter((x) => x.scope === gscope);
+    if (!gItems.length) continue;
+    html += '<div class="cch-label" style="margin-top:20px">' + gtitle + '</div>';
   for (const c of cats) {
-    const list = items.filter((x) => x.cat === c);
+    const list = gItems.filter((x) => x.cat === c);
     if (!list.length) continue;
-    html += '<div class="cch-label" style="margin-top:16px">' + c + '</div>';
     html += list.map((x) => {
       const r = req(x.id);
       const openD = (S._expOpen === x.id);
@@ -2484,13 +2504,9 @@ function renderExperiencesArea() {
         '</div>';
     }).join('');
   }
-  html += '<div class="cch-label" style="margin-top:22px">Wellness at the hotel</div><div id="spa-inner"></div>';
+  }
+  /* Wellness at the hotel removed from the Experience architecture (§M). */
   box.innerHTML = html;
-  const inner = document.getElementById('spa-inner');
-  const keep = box; // renderSpa writes into spa-box; give it the inner node instead
-  inner.id = 'spa-box-inner';
-  const orig = document.getElementById.bind(document);
-  renderSpaInto(inner);
   box.querySelectorAll('[data-exp-view]').forEach((b) => b.addEventListener('click', () => {
     const id = b.getAttribute('data-exp-view');
     S._expOpen = (S._expOpen === id) ? null : id;

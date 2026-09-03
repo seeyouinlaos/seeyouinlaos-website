@@ -218,6 +218,13 @@
   E("Complimentary · limited", "Kostenfrei · begrenzt", "ไม่มีค่าใช้จ่าย · จำนวนจำกัด", "無料・数量限定");
   E("Kunming stay", "Aufenthalt Kunming", "ที่พักคุนหมิง", "昆明の滞在");
   E("Lijiang stay", "Aufenthalt Lijiang", "ที่พักลี่เจียง", "麗江の滞在");
+  E("Saturday, 27 Feb · Arrival Day", "Samstag, 27. Feb · Ankunftstag", "เสาร์ 27 ก.พ. · วันเดินทางมาถึง", "2月27日（土）・到着日");
+  E("Arrival & Welcome", "Ankunft & Willkommen", "การมาถึงและการต้อนรับ", "ご到着とウェルカム");
+  E("Vientiane receives us: across the Mekong, into the city, and home to one quiet courtyard. Check-in at Souphattra Heritage Vientiane, then the first unhurried evening — everyone arriving, the weekend beginning.", "Vientiane empfängt uns: über den Mekong, in die Stadt und heim in einen stillen Innenhof. Check-in im Souphattra Heritage Vientiane, dann der erste entspannte Abend — alle kommen an, das Wochenende beginnt.", "เวียงจันทน์ต้อนรับเรา ข้ามแม่น้ำโขงเข้าสู่ตัวเมือง สู่ลานบ้านอันเงียบสงบ เช็คอินที่สุพัตรา เฮอริเทจ เวียงจันทน์ แล้วค่ำคืนแรกอันผ่อนคลาย ทุกคนทยอยมาถึง สุดสัปดาห์เริ่มต้นขึ้น", "ビエンチャンが私たちを迎えます。メコン川を渡り、街へ、静かな中庭のある我が家へ。スパッタラ・ヘリテージ・ビエンチャンにチェックインし、最初のゆったりした夜——みんなが到着し、週末が始まります。");
+  E("Vientiane · Souphattra Heritage Vientiane", "Vientiane · Souphattra Heritage Vientiane", "เวียงจันทน์ · สุพัตรา เฮอริเทจ เวียงจันทน์", "ビエンチャン・スパッタラ・ヘリテージ・ビエンチャン");
+  E("Sunday, 28 Feb · 09:00 AM · The Wedding Day", "Sonntag, 28. Feb · 09:00 Uhr · Der Hochzeitstag", "อาทิตย์ 28 ก.พ. · 09:00 น. · วันแต่งงาน", "2月28日（日）午前9時・結婚式当日");
+  E("Bangkok · 21 – 25 FEB 2027 · Day 1 – 5", "Bangkok · 21. – 25. FEB 2027 · Tag 1 – 5", "กรุงเทพฯ · 21 – 25 ก.พ. 2027 · วันที่ 1 – 5", "バンコク・2027年2月21–25日・1〜5日目");
+  E("Vientiane · 27 FEB – 01 MAR 2027 · Day 7 – 9 · the wedding days", "Vientiane · 27. FEB – 01. MÄR 2027 · Tag 7 – 9 · die Hochzeitstage", "เวียงจันทน์ · 27 ก.พ. – 1 มี.ค. 2027 · วันที่ 7 – 9 · วันงานแต่งงาน", "ビエンチャン・2027年2月27日–3月1日・7〜9日目・結婚式の日々");
   E("Show details", "Details anzeigen", "ดูรายละเอียด", "詳細を見る");
   E("Hide details", "Details schließen", "ซ่อนรายละเอียด", "詳細を閉じる");
   E("Continue", "Weiter", "ดำเนินการต่อ", "次へ");
