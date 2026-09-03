@@ -8,13 +8,13 @@
 import {
   WEDDING, CONTACTS, JOURNEY_MODULES, EVENTS, ACCOMMODATIONS, SELECTABLE_ACCOMMODATIONS, TRAIN,
   TRANSFERS, PACKAGE_INCLUSIONS, COPY, DEMO_MODE, PUBLICATION, TRAIN_REFERENCE, BERTH_PREFS, BANGKOK_STAYS, BANGKOK_STAY, POST_WEDDING, RETURN_STAY, lookupInvitation,
-} from './data.mjs?v=UK7';
+} from './data.mjs?v=UK8';
 import {
   contributionPerGuest, partyCharges, partyTotal, money as usdMoney, displayMoney,
   trainContribution, transfersTotal, journeyTotal, postWeddingTotal,
   createInventory, remaining, availabilityLabel, requestAllocation,
   validateRegistration, buildNotification, nextInvitationState,
-} from './logic.mjs?v=UK7';
+} from './logic.mjs?v=UK8';
 
 /* ---------------- persistent state ---------------- */
 const DRAFT_KEY = 'siyl.reg.draft.v2';
@@ -1929,6 +1929,14 @@ function renderCost() {
   if (total > 0) {
     html += '<div class="cch"><div><div class="cch-t">Payment</div><div class="cch-s">After your journey has been reviewed, you will receive the payment details for the costs shown in your plan.</div></div></div>';
   }
+  const wc = S.weddingConsent || {};
+  html += '<div class="cch" style="margin-top:26px"><div><div class="cch-t">Before you submit</div></div></div>' +
+    '<p class="note" style="margin:8px 0 4px"><strong>Photo & video</strong> — Our wedding will be photographed and filmed. By joining us, you agree that photographs and videos in which you appear may be shared by Haruthai & Suthep in connection with our wedding, including our wedding-related social media and personal wedding memories.</p>' +
+    '<p class="note" style="margin:8px 0 4px"><strong>Dress code</strong> — You confirm that you have read the dress code for the parts of the wedding you are joining and will respect it.</p>' +
+    '<p class="note" style="margin:8px 0 4px"><strong>Personal responsibility</strong> — Please take care of your personal belongings. You remain responsible for damage you intentionally cause or for which you are personally responsible.</p>' +
+    '<p class="note" style="margin:8px 0 10px"><strong>Your information</strong> — You confirm that the travel, contact, dietary, allergy and other information you provide is correct to the best of your knowledge.</p>' +
+    '<label class="confirm-row"><input type="checkbox" id="wed-consent"' + (wc.accepted ? ' checked' : '') + '/><span>I have read and agree to the wedding information above.</span></label>' +
+    '<p class="note" id="consent-hint" style="margin:6px 0 0"' + (wc.accepted ? ' hidden' : '') + '>Please confirm the wedding information above before submitting.</p>';
   html += '<div class="stepnav" style="margin-top:22px"><button type="button" class="btn" id="plan-review">Review my plan & submit</button></div>';
   box.innerHTML = html +
     (fxStamp() ? '<p class="note" style="margin-top:14px">' + fxStamp() + ' · Amounts are shown for orientation; the master currency remains USD.</p>' : '') +
@@ -1973,8 +1981,23 @@ function renderCost() {
   if (pp) pp.querySelectorAll('input[name="pay-pref"]').forEach((el) => el.addEventListener('change', () => {
     S.payment = el.value; saveDraft(); renderStep(cur);
   }));
+  const wcb = document.getElementById('wed-consent');
+  if (wcb) wcb.addEventListener('change', () => {
+    S.weddingConsent = wcb.checked
+      ? { accepted: true, version: '2026-09-04-v1', acceptedAt: new Date().toISOString() }
+      : { accepted: false, version: '2026-09-04-v1', acceptedAt: null };
+    saveDraft();
+    const h = document.getElementById('consent-hint'); if (h) h.hidden = wcb.checked;
+  });
   const pr = document.getElementById('plan-review');
-  if (pr) pr.addEventListener('click', () => { saveDraft(); show(idx('review')); });
+  if (pr) pr.addEventListener('click', () => {
+    if (!(S.weddingConsent && S.weddingConsent.accepted)) {
+      const h = document.getElementById('consent-hint');
+      if (h) { h.hidden = false; h.scrollIntoView({ block: 'center' }); }
+      return;
+    }
+    saveDraft(); show(idx('review'));
+  });
   wireCoverage(box);
 }
 
@@ -2134,6 +2157,8 @@ function currentRegistration() {
     china: { ...(S.china || {}) },
     travel: { ...(S.travel || {}) },
     departureInfo: S.departureInfo || '',
+    weddingConsent: { ...(S.weddingConsent || { accepted: false }) },
+    dressAck: { ...(S.dressAck || {}) },
     chinaRequested: { ...(S.chinaRequested || {}) },
     scope: { ...(S.scope || {}) },
     postWedding: { ...(S.postWedding || { joined: false }) },
@@ -2659,21 +2684,45 @@ function renderWeddingPresets() {
   const allSame = (v) => S.guests.every((g) => ['temple', 'coffee', 'ceremony', 'dinner'].every((k) => !!(g.events || {})[k] === !!v[k]));
   const mode = allSame({ temple: true, coffee: true, ceremony: true, dinner: true }) ? 'full'
     : allSame({ temple: false, coffee: false, ceremony: false, dinner: true }) ? 'dinner' : 'custom';
-  const opt = (id, label, blurb) =>
-    '<label class="tj-opt' + (mode === id ? ' sel' : '') + '" style="display:block;cursor:pointer"><input type="radio" name="wed-preset" value="' + id + '"' + (mode === id ? ' checked' : '') + ' style="position:absolute;opacity:0"/>' +
-    '<h4 style="margin:0 0 4px">' + label + '</h4><p class="note" style="margin:0">' + blurb + '</p></label>';
-  box.insertAdjacentHTML('afterbegin',
-    '<div class="guest-block" id="wed-presets">' +
-    '<div class="cch-label">How would you like to be part of the wedding day?</div>' +
-    '<p class="note">The Vow Ceremony is the shared heart of the wedding day. Around it, choose the additional moments that feel right for you.</p>' +
-    '<div class="tj-pair" role="radiogroup" aria-label="Wedding participation">' +
-    opt('full', 'The full wedding day', 'Temple Ceremony, Coffee & Cake, Vow Ceremony and Wedding Dinner.') +
-    opt('dinner', 'Wedding Dinner only', 'Join us in the evening at Souphattra Vientiane Hotel.') +
-    opt('custom', 'Choose individual moments', 'Select the moments below, one by one.') +
-    '</div></div>');
-  box.querySelectorAll('input[name="wed-preset"]').forEach((el) => el.addEventListener('change', () => {
-    if (el.value === 'full') S.guests.forEach((g) => { g.events = { temple: true, coffee: true, ceremony: true, dinner: true }; });
-    if (el.value === 'dinner') S.guests.forEach((g) => { g.events = { temple: false, coffee: false, ceremony: false, dinner: true }; });
+  /* ONE shared event-participation component (owner completion pass §9-§17):
+   * participation JOINING / NOT JOINING per event; joining reveals the dress
+   * code + ONE required acknowledgement (semantic state, локale-free). */
+  S.dressAck ||= {}; S.dressAck.coffee ||= false;
+  const EVJ = [
+    ['temple', 'The Temple Ceremony', '09:00 AM – approx. 12:00 PM · Wat Ong Teu Temple, Vientiane', 'Lao Traditional Dress'],
+    ['coffee', 'Coffee & Cake', 'After the return · Souphattra Heritage Vientiane', 'Black Tie'],
+    ['ceremony', 'The Vow Ceremony', '04:30 PM · Souphattra Heritage Vientiane', 'Black Tie'],
+    ['dinner', 'The Wedding Dinner', '07:30 PM · Souphattra Vientiane Hotel', 'Black Tie'],
+  ];
+  const evState = (k) => {
+    const att = S.guests.filter((g) => g.attending !== false);
+    const on = att.filter((g) => (g.events || {})[k]).length;
+    return on === 0 ? (S._evDecided && S._evDecided[k] ? 'no' : 'undecided') : 'yes';
+  };
+  const html = EVJ.map(([k, name, meta, dress]) => {
+    const st = evState(k);
+    const ack = !!S.dressAck[k];
+    return '<div class="mod" data-evj="' + k + '"><div class="when">' + meta + ' · COMPLIMENTARY</div><h3>' + name + '</h3>' +
+      '<div style="display:flex;gap:14px;margin-top:10px;flex-wrap:wrap">' +
+      '<button type="button" class="btn sm' + (st === 'yes' ? '' : ' ghost') + '" data-evj-set="' + k + ':yes">' + (st === 'yes' ? '✓ ' : '') + 'I am joining</button>' +
+      '<button type="button" class="btn sm' + (st === 'no' ? '' : ' ghost') + '" data-evj-set="' + k + ':no">' + (st === 'no' ? '✓ ' : '') + 'Not joining</button></div>' +
+      (st === 'yes'
+        ? '<p class="note" style="margin:10px 0 4px"><strong>Dress code · ' + dress + '</strong></p>' +
+          '<label class="confirm-row" style="margin-top:4px"><input type="checkbox" data-evj-ack="' + k + '"' + (ack ? ' checked' : '') + '/><span>I have read and understand the dress code</span></label>' +
+          (ack ? '' : '<p class="note" style="margin:4px 0 0">Dress code — action needed</p>')
+        : '') +
+      '</div>';
+  }).join('');
+  box.insertAdjacentHTML('afterbegin', '<div class="guest-block" id="wed-presets"><div class="cch-label">The wedding · are you joining?</div>' + html + '</div>');
+  box.querySelectorAll('[data-evj-set]').forEach((b) => b.addEventListener('click', () => {
+    const [k, v] = b.getAttribute('data-evj-set').split(':');
+    S.guests.forEach((g) => { if (g.attending === false) return; g.events = g.events || {}; g.events[k] = v === 'yes'; });
+    S._evDecided = S._evDecided || {}; S._evDecided[k] = true;
+    if (v === 'no') S.dressAck[k] = false;
+    saveDraft(); renderStep(cur); renderSummary();
+  }));
+  box.querySelectorAll('[data-evj-ack]').forEach((el) => el.addEventListener('change', () => {
+    S.dressAck[el.getAttribute('data-evj-ack')] = el.checked;
     saveDraft(); renderStep(cur); renderSummary();
   }));
 }

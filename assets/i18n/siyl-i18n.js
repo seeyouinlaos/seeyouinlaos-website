@@ -373,6 +373,14 @@
   E("Still needed from you", "Noch von euch benötigt", "ยังต้องการข้อมูลจากคุณ", "ご入力をお願いします");
   E("Open details · nothing here is charged", "Offene Angaben · hier wird nichts berechnet", "รายละเอียดที่ยังเปิดอยู่ · ไม่มีการคิดค่าใช้จ่ายที่นี่", "未入力の項目・ここでは費用は発生しません");
   E("Your choice · details welcome", "Eure Wahl · Details willkommen", "คุณเลือกเอง · แจ้งรายละเอียดได้", "ご自身で・詳細をお知らせください");
+  E("Before you submit", "Bevor ihr absendet", "ก่อนส่งข้อมูล", "送信の前に");
+  E("I am joining", "Ich bin dabei", "ฉันเข้าร่วม", "参加します");
+  E("Not joining", "Nicht dabei", "ไม่เข้าร่วม", "参加しません");
+  E("I have read and understand the dress code", "Ich habe den Dresscode gelesen und verstanden", "ฉันได้อ่านและเข้าใจกฎการแต่งกายแล้ว", "ドレスコードを読み、理解しました");
+  E("Dress code — action needed", "Dresscode — Bestätigung nötig", "กฎการแต่งกาย — ต้องยืนยัน", "ドレスコード——確認が必要です");
+  E("The wedding · are you joining?", "Die Hochzeit · seid ihr dabei?", "งานแต่งงาน · คุณเข้าร่วมไหม", "結婚式・ご参加されますか");
+  E("I have read and agree to the wedding information above.", "Ich habe die Informationen zur Hochzeit gelesen und bin damit einverstanden.", "ฉันได้อ่านและยอมรับข้อมูลเกี่ยวกับงานแต่งงานข้างต้น", "上記の結婚式に関する情報を読み、同意します。");
+  E("Please confirm the wedding information above before submitting.", "Bitte bestätigt die Informationen zur Hochzeit, bevor ihr absendet.", "กรุณายืนยันข้อมูลงานแต่งงานข้างต้นก่อนส่ง", "送信の前に、上記の結婚式に関する情報のご確認をお願いします。");
   E("Show details", "Details anzeigen", "ดูรายละเอียด", "詳細を見る");
   E("Hide details", "Details schließen", "ซ่อนรายละเอียด", "詳細を閉じる");
   E("Continue", "Weiter", "ดำเนินการต่อ", "次へ");
