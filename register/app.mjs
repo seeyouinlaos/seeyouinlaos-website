@@ -8,13 +8,13 @@
 import {
   WEDDING, CONTACTS, JOURNEY_MODULES, EVENTS, ACCOMMODATIONS, SELECTABLE_ACCOMMODATIONS, TRAIN,
   TRANSFERS, PACKAGE_INCLUSIONS, COPY, DEMO_MODE, PUBLICATION, TRAIN_REFERENCE, BERTH_PREFS, BANGKOK_STAYS, BANGKOK_STAY, POST_WEDDING, RETURN_STAY, lookupInvitation,
-} from './data.mjs?v=UK6';
+} from './data.mjs?v=UK7';
 import {
   contributionPerGuest, partyCharges, partyTotal, money as usdMoney, displayMoney,
   trainContribution, transfersTotal, journeyTotal, postWeddingTotal,
   createInventory, remaining, availabilityLabel, requestAllocation,
   validateRegistration, buildNotification, nextInvitationState,
-} from './logic.mjs?v=UK6';
+} from './logic.mjs?v=UK7';
 
 /* ---------------- persistent state ---------------- */
 const DRAFT_KEY = 'siyl.reg.draft.v2';
@@ -131,7 +131,7 @@ function itinerarySteps() {
     const ow = S.postWedding.onward;
     steps.push({ d: '06 MAR 2027', t: 'Your onward journey',
       s: ow === 'return' ? 'Return to Bangkok with us' : ow === 'own' ? 'Arranged independently' : ow === 'gr' ? 'Guest Relations support requested' : 'Choose in My Journey',
-      st: ow === 'return' || ow === 'gr' ? 'TO FINALIZE WITH GUEST RELATIONS' : ow === 'own' ? 'ARRANGED' : 'YOUR CHOICE' });
+      st: ow === 'return' || ow === 'gr' ? 'BOOKED' : ow === 'own' ? 'YOUR CHOICE' : 'YOUR CHOICE' });
   } else {
     const dep = departureSelections();
     steps.push({ d: '01 MAR 2027', t: 'Your departure', s: dep.length
@@ -1544,7 +1544,7 @@ function renderTransfers(trainy) {
     '<div class="trf" id="trf-dep" style="margin-top:30px">' +
     '<h3>Your departure</h3>' +
     '<p class="note" style="margin-bottom:6px">Departure follows your actual onward itinerary' + (depSel ? '.' : ' — until then it stays with Guest Relations.') + '</p>' +
-    (depSel ? '' : '<div class="acc-avail" style="border-top:none;padding:2px 0 10px">To finalize with Guest Relations</div>') +
+    (depSel ? '' : '<div class="acc-avail" style="border-top:none;padding:2px 0 10px">Your choice · details welcome</div>') +
     '<details class="trf-more"' + (depSel ? ' open' : '') + '><summary>Departure services</summary>' + departures.map(card).join('') + '</details>' +
     '</div>';
 }
@@ -1919,7 +1919,7 @@ function renderCost() {
     open.push(['21–24 FEB 2027', 'Your Bangkok stay · choose Stay with us or your own arrangement under My Journey']);
   }
   if (open.length) {
-    html += '<div class="cch"><div><div class="cch-t">To finalize with Guest Relations</div><div class="cch-s">Genuinely open arrangements · nothing here is charged</div></div></div>';
+    html += '<div class="cch"><div><div class="cch-t">Still needed from you</div><div class="cch-s">Open details · nothing here is charged</div></div></div>';
     html += open.map((o) => line(o[0], o[1], 'Guest Relations will confirm the arrangement')).join('');
   }
 
@@ -1927,12 +1927,7 @@ function renderCost() {
     html += '<p class="note" style="margin-top:10px">No paid optional arrangements selected through Guest Relations.</p>';
   }
   if (total > 0) {
-    const pm = S.payment;
-    html += '<div class="cch"><div><div class="cch-t">Payment preference</div><div class="cch-s">How would you like to settle your costs?</div></div></div>' +
-      '<div class="tj-pair" role="radiogroup" aria-label="Payment preference" id="pay-pref">' +
-      '<label class="tj-opt' + (pm === 'full' ? ' sel' : '') + '" style="display:block;cursor:pointer"><input type="radio" name="pay-pref" value="full"' + (pm === 'full' ? ' checked' : '') + ' style="position:absolute;opacity:0"/><h4 style="margin:0 0 4px">Pay in full</h4><p class="note" style="margin:0">One payment once your arrangements are confirmed.</p></label>' +
-      '<label class="tj-opt' + (pm === 'installments' ? ' sel' : '') + '" style="display:block;cursor:pointer"><input type="radio" name="pay-pref" value="installments"' + (pm === 'installments' ? ' checked' : '') + ' style="position:absolute;opacity:0"/><h4 style="margin:0 0 4px">Pay in installments</h4><p class="note" style="margin:0">Khun Ket and Khun Paddy will coordinate the payment schedule with you personally.</p></label>' +
-      '</div>';
+    html += '<div class="cch"><div><div class="cch-t">Payment</div><div class="cch-s">After your journey has been reviewed, you will receive the payment details for the costs shown in your plan.</div></div></div>';
   }
   html += '<div class="stepnav" style="margin-top:22px"><button type="button" class="btn" id="plan-review">Review my plan & submit</button></div>';
   box.innerHTML = html +
@@ -2075,7 +2070,7 @@ function renderReview() {
       return: 'Return to Bangkok with us · Guest Relations will confirm the arrangement',
       own: 'Arranged independently — a complete answer',
       gr: 'Guest Relations support requested',
-    }[S.postWedding.onward] || 'To finalize with Guest Relations')]]));
+    }[S.postWedding.onward] || 'Your choice')]]));
   html += sec('Your Transfers', idx('journey'), (S.transfers || []).length
     ? S.transfers.map((s) => {
         const t = TRANSFERS.find((x) => x.id === s.transferId) || {};
@@ -2226,7 +2221,7 @@ function showReceived() {
       itineraryHtml() +
       '<div class="cch-label" style="margin-top:26px">We\u2019re taking care of</div>' +
       '<p class="note">Your selections are now with Guest Relations. Nothing is booked until Khun Ket and Khun Paddy confirm your arrangements with you personally.</p>' +
-      (open.length ? '<div class="cch-label" style="margin-top:22px">To finalize with Guest Relations</div><p class="note">' + open.map(esc).join('<br/>') + '</p>' : '');
+      (open.length ? '<div class="cch-label" style="margin-top:22px">Still needed from you</div><p class="note">' + open.map(esc).join('<br/>') + '</p>' : '');
   }
   document.getElementById('received-when').textContent =
     'Submitted ' + new Date(S.registration_submitted_at).toLocaleString('en-GB', { dateStyle: 'long', timeStyle: 'short' }) + ' · status: UNDER REVIEW';
@@ -2350,7 +2345,6 @@ init();
 
 function renderScopeBlock() {
   S.scope ||= { bangkok: false, laos: true, china: false };
-  S.scope.laos = true; // §28: the wedding is always part of the journey
   S.experiences ||= [];
   const box = document.getElementById('home-box');
   if (!box || document.getElementById('scope-block')) return;
@@ -2404,7 +2398,7 @@ function renderScopeBlock() {
     '<p class="note" style="margin:6px 0 2px">Everything is shown in the order you travel. <strong>Hosted</strong> — Haruthai &amp; Suthep are taking care of this for you. <strong>Booked</strong> — you have selected and booked this through your journey. <strong>Your choice</strong> — you arrange this part yourself.</p>' +
     '<p class="note">Choosing a destination sets nothing in stone and costs nothing — it only opens the right choices for you.</p>' +
     row('bangkok', 'Bangkok', 'The shared days in Bangkok before travelling on to Laos.', false) +
-    row('laos', 'Laos · The Wedding', 'Vientiane, the wedding days and everything around them.', true) +
+    row('laos', 'Laos · The Wedding', 'Vientiane, the wedding days and everything around them.', false) +
     row('china', 'China · Onward Journey', 'Kunming and Lijiang after the wedding — join a part of the onward journey.', false) +
     '</div>');
   if (sc.bangkok) {
@@ -2638,6 +2632,11 @@ function renderScopeBlock() {
     el.addEventListener('change', () => {
       const key = el.name.replace('scope-', '');
       setScope(key, el.value === 'yes');
+      if (key === 'laos' && el.value !== 'yes') {
+        S.guests.forEach((g) => { g.journey.train = false; g.journey.independent = false; });
+        S.stay.accommodationId = null; S.stay.waitlist = false; S.stay.mode = 'standard'; S.stay.checkIn = '2027-02-27';
+        saveDraft();
+      }
       if (key === 'bangkok' && el.value !== 'yes') {
         S.bangkokStay = { property: null, from: '', to: '', own: false, withUs: false, travellers: (S.bangkokStay || {}).travellers, arrivalInfo: '' };
         S.guests.forEach((g) => { g.journey.bangkok = false; });

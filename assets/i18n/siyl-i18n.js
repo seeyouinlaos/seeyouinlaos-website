@@ -368,6 +368,11 @@
   E("BOOKED · your current room", "GEBUCHT · euer aktuelles Zimmer", "จองแล้ว · ห้องปัจจุบันของคุณ", "予約済み・現在のお部屋");
   E("ACTION NEEDED", "AKTION NÖTIG", "ต้องดำเนินการ", "要選択");
   E("Your journey to Vientiane · 24 – 25 FEB 2027 · Overnight", "Eure Reise nach Vientiane · 24. – 25. FEB 2027 · über Nacht", "การเดินทางสู่เวียงจันทน์ · 24 – 25 ก.พ. 2027 · ค้างคืน", "ビエンチャンへの旅・2027年2月24–25日・夜行");
+  E("Payment", "Zahlung", "การชำระเงิน", "お支払い");
+  E("After your journey has been reviewed, you will receive the payment details for the costs shown in your plan.", "Sobald eure Reise geprüft wurde, erhaltet ihr die Zahlungsdetails für die in eurem Plan gezeigten Kosten.", "หลังจากตรวจสอบเส้นทางของคุณแล้ว คุณจะได้รับรายละเอียดการชำระเงินสำหรับค่าใช้จ่ายในแผนของคุณ", "旅程の確認後、プランに表示された費用のお支払い詳細をお送りします。");
+  E("Still needed from you", "Noch von euch benötigt", "ยังต้องการข้อมูลจากคุณ", "ご入力をお願いします");
+  E("Open details · nothing here is charged", "Offene Angaben · hier wird nichts berechnet", "รายละเอียดที่ยังเปิดอยู่ · ไม่มีการคิดค่าใช้จ่ายที่นี่", "未入力の項目・ここでは費用は発生しません");
+  E("Your choice · details welcome", "Eure Wahl · Details willkommen", "คุณเลือกเอง · แจ้งรายละเอียดได้", "ご自身で・詳細をお知らせください");
   E("Show details", "Details anzeigen", "ดูรายละเอียด", "詳細を見る");
   E("Hide details", "Details schließen", "ซ่อนรายละเอียด", "詳細を閉じる");
   E("Continue", "Weiter", "ดำเนินการต่อ", "次へ");
