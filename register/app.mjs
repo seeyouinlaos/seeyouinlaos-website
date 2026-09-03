@@ -8,13 +8,13 @@
 import {
   WEDDING, CONTACTS, JOURNEY_MODULES, EVENTS, ACCOMMODATIONS, SELECTABLE_ACCOMMODATIONS, TRAIN,
   TRANSFERS, PACKAGE_INCLUSIONS, COPY, DEMO_MODE, PUBLICATION, TRAIN_REFERENCE, BERTH_PREFS, BANGKOK_STAYS, BANGKOK_STAY, POST_WEDDING, RETURN_STAY, lookupInvitation,
-} from './data.mjs?v=UJ7';
+} from './data.mjs?v=UJ8';
 import {
   contributionPerGuest, partyCharges, partyTotal, money as usdMoney, displayMoney,
   trainContribution, transfersTotal, journeyTotal, postWeddingTotal,
   createInventory, remaining, availabilityLabel, requestAllocation,
   validateRegistration, buildNotification, nextInvitationState,
-} from './logic.mjs?v=UJ7';
+} from './logic.mjs?v=UJ8';
 
 /* ---------------- persistent state ---------------- */
 const DRAFT_KEY = 'siyl.reg.draft.v2';
@@ -2515,7 +2515,7 @@ function renderScopeBlock() {
       if (key === 'china' && el.value !== 'yes') {
         S.china = { kunming: null, lijiang: null };
         S.chinaRequested = {};
-        if (S.travel) { S.travel.vteKmg = null; S.travel.kmgLjg = 'with'; }
+        if (S.travel) { S.travel.vteKmg = null; S.travel.kmgLjg = null; }
         saveDraft();
       }
       renderStep(cur); renderSummary();
