@@ -352,6 +352,9 @@ export const POST_WEDDING = [
    * unless explicitly guest-payable (HSW-001 v1.3 §1/§7). */
   { id: 'kunming-stay', type: 'Stay', label: 'Wanxiang Yueju Designer Homestay', date: '01 – 04 MAR 2027', when: '1 – 4 March 2027',
     sub: 'Kunming Railway Station MixC Branch · Solarium Bath Suite or Smart Family Room',
+    /* OWNER FINAL (03 SEP, unified journey order §7): directly bookable —
+     * confirmed rate from the H&S Operations Master budget sheet. */
+    ratePerGuestNight: 27, nightsCount: 3,
     contribution: null,
     images: ['../assets/images/journey/kunming-01.jpg', '../assets/images/journey/kunming-02.jpg', '../assets/images/journey/kunming-03.jpg'] },
   /* USD 145 per guest · FIRST CLASS ONLY belongs to THIS train
@@ -359,7 +362,8 @@ export const POST_WEDDING = [
   { id: 'kmg-ljg', type: 'Train', label: 'Kunming → Lijiang', date: '04 MAR 2027', when: '4 March 2027', sub: 'First Class Train · First Class only', contribution: 145, perGuest: true },
   { id: 'lijiang-stay', type: 'Stay', label: 'Luye Baisha · Rizhao Jinshan', date: '04 – 06 MAR 2027', when: '4 – 6 March 2027',
     sub: 'Lijiang · Snow Mountain Viewing Room',
-    contribution: null },
+    ratePerGuestNight: 63, nightsCount: 2, contribution: null,
+    images: ['../assets/images/journey/lijiang-01.jpg', '../assets/images/journey/lijiang-02.jpg', '../assets/images/journey/lijiang-03.jpg'] },
     /* Lijiang imagery removed (FER-001 §5A): the available saved photos carry a
      * third-party watermark — text-led card until owner-clean originals exist. */
   /* Final onward journey is a CHOICE, never a mandatory booking (v1.0 §8):

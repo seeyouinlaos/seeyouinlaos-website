@@ -50,6 +50,17 @@ function bkkTravellers() {
   const n = parseInt((S.bangkokStay || {}).travellers, 10);
   return n > 0 ? n : Math.max(attendingCount(), 1);
 }
+/* §7/§9 unified-journey order: China stays are directly bookable at the
+ * confirmed rates from the H&S Operations Master budget (Kunming 27 /
+ * Lijiang 63 per person per night). Payable only with china scope + the
+ * explicit Stay-with-us selection — same single-truth rule as Bangkok. */
+function cnStayTotal(key) {
+  if (!(S.scope && S.scope.china) || !S.china || S.china[key] !== 'with') return 0;
+  const c = POST_WEDDING.find((x) => x.id === key + '-stay');
+  if (!c || c.ratePerGuestNight == null) return 0;
+  return c.ratePerGuestNight * bkkTravellers() * c.nightsCount;
+}
+function cnStaysTotal() { return cnStayTotal('kunming') + cnStayTotal('lijiang'); }
 function bkkTotal() {
   /* OWNER FINAL: provider-independent Bangkok Stay — USD 150 per person per
    * night x travellers x nights. Only when Bangkok scope + Stay with us. */
@@ -71,7 +82,7 @@ function itinerarySteps() {
     steps.push(joinedStay
       ? { d: (S.bangkokStay.from && S.bangkokStay.to ? esc(S.bangkokStay.from) + ' → ' + esc(S.bangkokStay.to) : BANGKOK_STAY.window) + ' · ' + bkkNights() + ' nights', t: 'Bangkok Stay · currently ' + bh0.name,
           s: money(BANGKOK_STAY.ratePerGuestNight) + ' per guest / night · ' + bkkTravellers() + ' guests · total ' + money(bkkTotal()), st: 'ARRANGED WITH GUEST RELATIONS' }
-      : { d: bh0.dates, t: bh0.name, s: 'Join under My Travel', st: 'YOUR CHOICE' });
+      : { d: bh0.dates, t: bh0.name, s: 'Choose your Bangkok stay in My Journey', st: 'YOUR CHOICE' });
   }
   if (riders.length) {
     steps.push({ d: TRAIN.date + ' · 20:25', t: 'Bangkok → Nong Khai', st: 'ARRANGED', s: 'SRT Special Express 25 · First Class Sleeper · Krung Thep Aphiwat → Nong Khai · 10h20 · ' + money(TRAIN.contributionPerGuest) + ' per guest · ' + riders.length + ' guest' + (riders.length > 1 ? 's' : '') + ' = ' + money((trainContribution(TRAIN, riders.length) || 0)) + ' · REQUESTED' });
@@ -92,7 +103,7 @@ function itinerarySteps() {
     }
     const ow = S.postWedding.onward;
     steps.push({ d: '06 MAR 2027', t: 'Your onward journey',
-      s: ow === 'return' ? 'Return to Bangkok with us' : ow === 'own' ? 'Arranged independently' : ow === 'gr' ? 'Guest Relations support requested' : 'Choose under My Travel',
+      s: ow === 'return' ? 'Return to Bangkok with us' : ow === 'own' ? 'Arranged independently' : ow === 'gr' ? 'Guest Relations support requested' : 'Choose in My Journey',
       st: ow === 'return' || ow === 'gr' ? 'TO FINALIZE WITH GUEST RELATIONS' : ow === 'own' ? 'ARRANGED' : 'YOUR CHOICE' });
   } else {
     const dep = departureSelections();
@@ -601,7 +612,7 @@ function renderHome() {
   const detailsMissing = S.guests.filter((g) => g.attending !== false && !(g.email || g.phone)).length;
   const tc = trainContribution(TRAIN, riders.length) || 0;
   const trf = transfersTotal(TRANSFERS, S.transfers, riders.length);
-  const total = journeyTotal(acc, occ, TRAIN, riders.length, TRANSFERS, S.transfers) + pwTotal() + bkkTotal();
+  const total = journeyTotal(acc, occ, TRAIN, riders.length, TRANSFERS, S.transfers) + pwTotal() + bkkTotal() + cnStaysTotal();
   const card = (step, label, main, sub, status, image) =>
     '<button type="button" class="home-card" data-jump="' + step + '">' +
     (image ? '<span class="hc-img"><img src="' + roomImg(image) + '" alt="" width="1200" height="800" loading="lazy" decoding="async"/></span>' : '') +
@@ -1213,7 +1224,7 @@ function renderStay() {
   const anyBkkStay = S.guests.some((g) => g.journey.bangkok);
   const preStay = anyBkkStay
     ? '<div class="cch-label">Pre-Wedding Journey · Optional · Before the wedding</div>' +
-      '<div class="itin"><div class="it-row"><span class="it-d">' + esc(BANGKOK_STAYS[0].dates) + ' · ' + BANGKOK_STAYS[0].nights + ' nights</span><div class="it-b"><span class="it-t">' + esc(BANGKOK_STAYS[0].name) + ' · Bangkok</span><span class="it-s">' + (bangkokStayActive() ? esc(BANGKOK_STAYS[0].contributionNight) + ' · your contribution — ' + esc(BANGKOK_STAYS[0].hostedNights) + ' · hosted by Haruthai & Suthep' : 'Join under My Travel') + '</span></div></div></div>'
+      '<div class="itin"><div class="it-row"><span class="it-d">' + esc(BANGKOK_STAYS[0].dates) + ' · ' + BANGKOK_STAYS[0].nights + ' nights</span><div class="it-b"><span class="it-t">' + esc(BANGKOK_STAYS[0].name) + ' · Bangkok</span><span class="it-s">' + (bangkokStayActive() ? esc(BANGKOK_STAYS[0].contributionNight) + ' · your contribution — ' + esc(BANGKOK_STAYS[0].hostedNights) + ' · hosted by Haruthai & Suthep' : 'Choose your Bangkok stay in My Journey') + '</span></div></div></div>'
     : '';
   const postStay = (S.postWedding && S.postWedding.joined)
     ? '<div class="cch-label" style="margin-top:34px">Post-Wedding Journey · Optional · After the wedding</div>' +
@@ -1702,7 +1713,7 @@ function renderCost() {
   const occ = acc ? S.stay.occupantGuestIds : [];
   const riders = S.guests.filter((g) => g.journey.train);
   const tc = trainContribution(TRAIN, riders.length) || 0;
-  const total = journeyTotal(acc, occ, TRAIN, riders.length, TRANSFERS, S.transfers) + pwTotal() + bkkTotal();
+  const total = journeyTotal(acc, occ, TRAIN, riders.length, TRANSFERS, S.transfers) + pwTotal() + bkkTotal() + cnStaysTotal();
   const neutral = acc && acc.contributionPerGuest == null;
   /* v1.3 typography roles: date · product/route · amount — chapter headers
    * separate PRE-WEDDING / THE WEDDING / POST-WEDDING; no boxes per line. */
@@ -1761,7 +1772,7 @@ function renderCost() {
       }
     }
     const ow = S.postWedding.onward;
-    if (ow === 'return' || ow === 'gr' || !ow) open.push(['06 MAR 2027', 'Your onward journey' + (ow === 'return' ? ' · Return to Bangkok with us' : ow === 'gr' ? ' · Guest Relations support' : ' · choose under My Travel')]);
+    if (ow === 'return' || ow === 'gr' || !ow) open.push(['06 MAR 2027', 'Your onward journey' + (ow === 'return' ? ' · Return to Bangkok with us' : ow === 'gr' ? ' · Guest Relations support' : ' · choose in My Journey')]);
     html += chapter('03', 'Post-Wedding Journey', 'Optional · After the wedding') + (post || line('', 'No guest-payable Post-Wedding items', ''));
   } else if (!departureSelections().length) {
     open.push(['01 MAR 2027', 'Your departure · follows your onward itinerary']);
@@ -1965,7 +1976,9 @@ function renderReview() {
     if (bh) jcRows.push(['Bangkok stay', esc(bh.contributionNight) + ' · ' + esc(bh.name) + ' · ' + money(bkkTotal())]);
   }
   if (S.postWedding && S.postWedding.joined) jcRows.push(['Post Wedding Journey', '04 MAR 2027 · Kunming → Lijiang · First Class Train · ' + money(pwTotal())]);
-  jcRows.push(['Total costs', money(journeyTotal(acc, occ, TRAIN, jcRiders, TRANSFERS, S.transfers) + pwTotal() + bkkTotal())]);
+  if (cnStayTotal('kunming')) jcRows.push(['Kunming stay', '01 – 04 MAR 2027 · Wanxiang Yueju Designer Homestay · ' + money(cnStayTotal('kunming'))]);
+  if (cnStayTotal('lijiang')) jcRows.push(['Lijiang stay', '04 – 06 MAR 2027 · Luye Baisha · Rizhao Jinshan · ' + money(cnStayTotal('lijiang'))]);
+  jcRows.push(['Total costs', money(journeyTotal(acc, occ, TRAIN, jcRiders, TRANSFERS, S.transfers) + pwTotal() + bkkTotal() + cnStaysTotal())]);
   html += sec('Your Contribution', idx('cost'), jcRows);
   html += sec('Each of You', idx('each'), S.guests.map((g) => {
     const detail = (g.allergyDetail || '').trim();
@@ -1991,7 +2004,7 @@ function trainOnwardLine() {
   const onward = (S.transfers || []).map((x) => TRANSFERS.find((t) => t.id === x.transferId))
     .find((t) => t && (t.id === 'nongkhai-vte' || t.id === 'shuttle-shared'));
   if (onward) return esc(onward.name) + ' · REQUESTED';
-  return 'Own arrangement — Guest Relations can assist under My Travel';
+  return 'Own arrangement — Guest Relations can assist';
 }
 function currentRegistration() {
   // photos stay on this device; passports never leave it (document vault pending)
@@ -2114,7 +2127,7 @@ function renderSummary() {
   if ((S.transfers || []).length) sel.push(S.transfers.length + ' transfer' + (S.transfers.length > 1 ? 's' : ''));
   if (bangkokStayActive()) sel.push('Bangkok stay · REQUESTED');
   if (S.postWedding && S.postWedding.joined) sel.push('Post Wedding Journey · REQUESTED');
-  const total = journeyTotal(acc, acc ? S.stay.occupantGuestIds : [], TRAIN, trainCount, TRANSFERS, S.transfers) + pwTotal() + bkkTotal();
+  const total = journeyTotal(acc, acc ? S.stay.occupantGuestIds : [], TRAIN, trainCount, TRANSFERS, S.transfers) + pwTotal() + bkkTotal() + cnStaysTotal();
   el.innerHTML =
     '<div class="sum-a"><span class="sum-label">Your journey</span>' +
     '<span class="sum-line"><strong>' + esc(S.invitation.partyName) + '</strong>' + (sel.length ? ' · ' + sel.join(' · ') : '') + '</span></div>' +
@@ -2228,6 +2241,17 @@ function renderScopeBlock() {
           '</div></div>') +
       '</div></div>';
   };
+  /* ONE identical stay component for Bangkok · Vientiane · Kunming · Lijiang
+   * (owner unified-journey order §1/§2/§14): 3 unique property images,
+   * property line, dates · nights · travellers, per-person rate, subtotal. */
+  const stayModule = (c) =>
+    '<div class="stay-mod">' +
+    '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0 6px">' +
+    c.imgs.slice(0, 3).map((im, ix) => '<img src="' + im + '" alt="' + esc(c.name) + ' — view ' + (ix + 1) + '" loading="lazy" decoding="async" style="width:100%;height:74px;object-fit:cover;display:block"/>').join('') + '</div>' +
+    (c.sub ? '<p class="note" style="margin:0 0 6px">' + esc(c.sub) + '</p>' : '') +
+    '<div class="trf-price">' + esc(c.name) + '<br/>' + esc(c.dates) + ' · ' + c.nights + ' ' + (c.nights === 1 ? 'night' : 'nights') + ' · ' + c.trav + ' ' + (c.trav === 1 ? 'traveller' : 'travellers') +
+    (c.rate != null ? '<br/>Your costs · ' + money(c.rate) + ' per person / night · ' + c.nights + ' nights × ' + c.trav + ' guests<br/><strong>Total · ' + money(c.rate * c.nights * c.trav) + '</strong>' : (c.costLine ? '<br/>' + c.costLine : '')) +
+    '</div>' + (c.after || '') + '</div>';
   box.insertAdjacentHTML('afterbegin',
     '<div class="guest-block" id="scope-block">' +
     '<div class="cch-label">Your journey · choose the parts you are joining</div>' +
@@ -2239,6 +2263,8 @@ function renderScopeBlock() {
   if (sc.bangkok) {
     S.bangkokStay ||= { property: null, from: '', to: '' };
     const b = S.bangkokStay;
+    /* §4: departure is the fixed travel day to Laos — check-out locked. */
+    if ((b.withUs || b.property) && b.to !== '2027-02-25') { b.to = '2027-02-25'; saveDraft(); }
     const mode = (b.property || b.withUs) ? 'with' : (b.own ? 'own' : null);
     const opt = (id, label, blurb) =>
       '<label class="tj-opt' + (mode === id ? ' sel' : '') + '" style="display:block;cursor:pointer"><input type="radio" name="bkk-stay-mode" value="' + id + '"' + (mode === id ? ' checked' : '') + ' style="position:absolute;opacity:0"/>' +
@@ -2260,9 +2286,10 @@ function renderScopeBlock() {
       '</div>';
     if (mode === 'with') {
       inner += '<p class="note" style="margin:6px 0 0">6 rooms available · limited availability</p>' + bangkokStayBlock() +
-        '<div class="cols2" style="margin-top:8px"><div class="field"><label>Check-in</label><input type="date" id="bkk-from" value="' + esc(b.from || '2027-02-21') + '"/></div>' +
-        '<div class="field"><label>Check-out</label><input type="date" id="bkk-to" value="' + esc(b.to || '2027-02-25') + '"/></div></div>' +
-        '<div class="trf-price" style="margin-top:10px">' + esc(BANGKOK_STAYS[0].name) + '<br/>' + (b.from && b.to ? esc(b.from) + ' → ' + esc(b.to) : BANGKOK_STAY.window) + ' · ' + bkkNights() + ' nights · ' + bkkTravellers() + ' travellers<br/>Your costs · ' + money(BANGKOK_STAY.ratePerGuestNight) + ' per person / night · ' + bkkNights() + ' nights × ' + bkkTravellers() + ' guests<br/><strong>Total · ' + money(bkkTotal()) + '</strong></div>' +
+        '<div class="cols2" style="margin-top:8px"><div class="field"><label>Check-in · earlier arrival welcome</label><input type="date" id="bkk-from" max="2027-02-24" value="' + esc(b.from || '2027-02-21') + '"/></div>' +
+        '<div class="field"><label>Check-out · fixed</label><input type="date" id="bkk-to" value="2027-02-25" disabled/></div></div>' +
+        '<p class="note" style="margin:4px 0 0">Check-out 25 FEB 2027 is fixed — the day we all travel on to Vientiane together. Nights are calculated automatically.</p>' +
+        stayModule({ name: BANGKOK_STAYS[0].name, sub: null, dates: (b.from ? esc(b.from) + ' → 2027-02-25' : BANGKOK_STAY.window), nights: bkkNights(), trav: bkkTravellers(), rate: BANGKOK_STAY.ratePerGuestNight, imgs: [] }).replace('<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0 6px"></div>', '') +
         '<div class="field" style="margin-top:8px"><label>Your arrival details for Guest Relations (flight/train, booked by you)</label><textarea id="bkk-arrival" rows="2">' + esc(b.arrivalInfo || '') + '</textarea></div>';
     }
     if (mode === 'own') inner += '<p class="note">Own arrangement noted — nothing is charged for a Bangkok stay.</p>';
@@ -2277,41 +2304,71 @@ function renderScopeBlock() {
       saveDraft(); renderStep(cur); renderSummary();
     }));
     const wireDate = (id, key) => { const el = box.querySelector('#' + id); if (el) el.addEventListener('change', () => { S.bangkokStay[key] = el.value; saveDraft(); renderStep(cur); renderSummary(); }); };
-    wireDate('bkk-from', 'from'); wireDate('bkk-to', 'to');
+    wireDate('bkk-from', 'from');
     const arrEl = box.querySelector('#bkk-arrival');
     if (arrEl) arrEl.addEventListener('input', () => { S.bangkokStay.arrivalInfo = arrEl.value; saveDraft(); });
     const tsel = box.querySelector('#bkk-trav');
     if (tsel) tsel.addEventListener('change', () => { S.bangkokStay.travellers = parseInt(tsel.value, 10); saveDraft(); renderStep(cur); renderSummary(); });
     if (mode === 'with') wireBangkokStay(box.querySelector('#bkk-journey'));
   }
+  {
+    /* §5: Laos uses the SAME component — participation is fixed (the wedding),
+     * the choice is the stay duration; departure 01 MAR 2027 is fixed. */
+    const lm = S.stay.mode === 'oneNight' ? 'oneNight' : (S.stay.mode ? 'standard' : 'standard');
+    const lopt = (id, label, blurb) =>
+      '<label class="tj-opt' + (lm === id ? ' sel' : '') + '" style="display:block;cursor:pointer"><input type="radio" name="laos-stay-len" value="' + id + '"' + (lm === id ? ' checked' : '') + ' style="position:absolute;opacity:0"/>' +
+      '<h4 style="margin:0 0 4px">' + label + '</h4><p class="note" style="margin:0">' + blurb + '</p></label>';
+    const lacc = currentAcc();
+    let lx = '<div class="cch-label" style="margin-top:18px">Laos · Vientiane</div>' +
+      '<div class="when" style="margin:2px 0 8px">27 FEB – 01 MAR 2027 · The Wedding · departure 01 MAR 2027 fixed</div>' +
+      '<div class="cch-label" style="margin-top:10px">Your wedding stay · Souphattra Heritage Vientiane</div>' +
+      '<div class="tj-pair" role="radiogroup" aria-label="Your wedding stay">' +
+      lopt('standard', 'Two nights', '27 FEB → 01 MAR 2027 · first night your costs, second night hosted by us · breakfast both mornings.') +
+      lopt('oneNight', 'One night', '28 FEB → 01 MAR 2027 · same approved category amount · breakfast included.') +
+      '</div>';
+    lx += lacc
+      ? stayModule({ name: lacc.name + ' · Souphattra Heritage Vientiane', sub: null,
+          dates: S.stay.mode === 'oneNight' ? '28 FEB → 01 MAR 2027' : '27 FEB → 01 MAR 2027',
+          nights: S.stay.mode === 'oneNight' ? 1 : 2, trav: (S.stay.occupantGuestIds || []).length || attendingCount(),
+          rate: null, imgs: (lacc.images || []).map(roomImg),
+          costLine: lacc.contributionPerGuest == null ? 'Complimentary · limited' : 'Your costs · ' + money(partyTotal(lacc, S.stay.occupantGuestIds || [])) + (S.stay.mode === 'oneNight' ? ' · one night' : ' · first night — second night hosted'),
+          after: '<button type="button" class="btn sm ghost" id="laos-room-cta" style="margin-top:8px">Change your room</button>' })
+      : '<p class="note">Choose your room to complete this stay.</p><button type="button" class="btn sm" id="laos-room-cta" style="margin-top:4px">Choose your room</button>';
+    box.querySelector('#scope-block .mod[data-scope="laos"]').insertAdjacentHTML('afterend', '<div id="laos-journey">' + lx + '</div>');
+    box.querySelectorAll('input[name="laos-stay-len"]').forEach((el) => el.addEventListener('change', () => {
+      S.stay.mode = el.value === 'oneNight' ? 'oneNight' : 'standard';
+      saveDraft(); renderStep(cur); renderSummary();
+    }));
+    const rc = box.querySelector('#laos-room-cta');
+    if (rc) rc.addEventListener('click', () => show(idx('stay')));
+  }
   if (sc.china) {
     const CH = Object.fromEntries(POST_WEDDING.map((c) => [c.id, c]));
     const trav = bkkTravellers();
-    const stayChoice = (key, label) => {
+    const stayChoice = (key, label, c) => {
       const m = S.china[key];
       const o = (id, txt, blurb) => '<label class="tj-opt' + (m === id ? ' sel' : '') + '" style="display:block;cursor:pointer"><input type="radio" name="cn-' + key + '" value="' + id + '"' + (m === id ? ' checked' : '') + ' style="position:absolute;opacity:0"/><h4 style="margin:0 0 4px">' + txt + '</h4><p class="note" style="margin:0">' + blurb + '</p></label>';
       return '<div class="cch-label" style="margin-top:10px">' + label + '</div>' +
         '<div class="tj-pair" role="radiogroup" aria-label="' + label + '">' +
-        o('with', 'Stay with us', 'Guest Relations confirms this stay and its details personally — nothing is added to your costs here.') +
+        o('with', 'Stay with us', 'Choose the arranged stay — the confirmed rate and your costs follow immediately.') +
         o('own', 'Arrange my own stay', 'This destination stays part of your journey — no accommodation through us, USD 0.') +
-        '</div>';
+        '</div>' +
+        (m === 'with' ? stayModule({ name: c.label, sub: c.sub, dates: c.date, nights: c.nightsCount, trav: trav, rate: c.ratePerGuestNight, imgs: c.images || [] }) : '') +
+        (m === 'own' ? '<p class="note">Own arrangement noted — nothing is charged for this stay.</p>' : '') +
+        (m == null ? '<p class="note">Please choose so your total costs are complete.</p>' : '');
     };
     const leg = (d, t, sub) => '<div class="crow"><span class="cdate">' + d + '</span><div class="cbody"><span class="cprod">' + t + '</span><span class="camt">' + sub + '</span></div></div>';
     const k = CH['kunming-stay'], l = CH['lijiang-stay'], tr = CH['kmg-ljg'];
     let cn = '<div class="cch-label" style="margin-top:16px">China Journey</div>' +
       leg('01 MAR 2027', 'Vientiane → Kunming · Flight', 'China Eastern · arranged with Guest Relations') +
       '<div class="cch-label" style="margin-top:12px">China · Kunming</div>' +
-      '<div class="when">' + esc(k.date) + ' · ' + esc(k.label) + '</div>' +
-      '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0 4px">' +
-      (k.images || []).map((im, ix) => '<img src="' + im + '" alt="' + esc(k.label) + ' — impression ' + (ix + 1) + '" loading="lazy" decoding="async" style="width:100%;height:74px;object-fit:cover;display:block"/>').join('') + '</div>' +
-      '<p class="note">' + esc(k.sub) + '</p>' +
-      stayChoice('kunming', 'Your stay in Kunming') +
+      '<div class="when">' + esc(k.date) + ' · 3 nights · dates fixed</div>' +
+      stayChoice('kunming', 'Your stay in Kunming', k) +
       leg('04 MAR 2027', 'Kunming → Lijiang · First Class Train', money(tr.contribution) + ' per guest · ' + trav + ' guests = ' + money(tr.contribution * trav)) +
       '<div class="cch-label" style="margin-top:12px">China · Lijiang</div>' +
-      '<div class="when">' + esc(l.date) + ' · ' + esc(l.label) + '</div>' +
-      '<p class="note">' + esc(l.sub) + '</p>' +
-      stayChoice('lijiang', 'Your stay in Lijiang') +
-      leg('06 MAR 2027', 'Lijiang → Bangkok / onward', 'Your choice — return with us, continue elsewhere or your own plans · under My Travel');
+      '<div class="when">' + esc(l.date) + ' · 2 nights · dates fixed</div>' +
+      stayChoice('lijiang', 'Your stay in Lijiang', l) +
+      leg('06 MAR 2027', 'Lijiang → Bangkok / onward', 'Your choice — return with us, continue elsewhere or your own plans');
     box.querySelector('#scope-block .mod[data-scope="china"]').insertAdjacentHTML('afterend', '<div id="china-journey">' + cn + '</div>');
     box.querySelectorAll('#china-journey input[name^="cn-"]').forEach((el) => el.addEventListener('change', () => {
       S.china[el.name.replace('cn-', '')] = el.value;

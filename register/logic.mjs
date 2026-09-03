@@ -348,7 +348,7 @@ export function buildNotification(reg, ctx) {
   if (reg.experiences && reg.experiences.length) out.push(L('Experiences requested:', reg.experiences.map((e) => e.name + ' (' + e.status + ')').join('; ')));
   if (reg.payment) out.push(L('Payment preference:', reg.payment === 'installments' ? 'PAY IN INSTALLMENTS — schedule coordinated personally by Khun Ket and Khun Paddy' : 'PAY IN FULL'));
   if (reg.scope && reg.scope.china && reg.china) {
-    out.push(L('China stays:', 'Kunming ' + (reg.china.kunming === 'own' ? 'OWN ARRANGEMENT' : reg.china.kunming === 'with' ? 'WITH US (GR confirms details)' : 'OPEN') + ' · Lijiang ' + (reg.china.lijiang === 'own' ? 'OWN ARRANGEMENT' : reg.china.lijiang === 'with' ? 'WITH US (GR confirms details)' : 'OPEN')));
+    out.push(L('China stays:', 'Kunming ' + (reg.china.kunming === 'own' ? 'OWN ARRANGEMENT' : reg.china.kunming === 'with' ? 'WITH US · USD 27 pp/night × 3 nights' : 'OPEN') + ' · Lijiang ' + (reg.china.lijiang === 'own' ? 'OWN ARRANGEMENT' : reg.china.lijiang === 'with' ? 'WITH US · USD 63 pp/night × 2 nights' : 'OPEN')));
   }
   out.push('');
   const acc = reg.stay && reg.stay.accommodationId
@@ -488,8 +488,16 @@ export function buildNotification(reg, ctx) {
     const nights = (b.from && b.to) ? Math.max(1, Math.round((new Date(b.to) - new Date(b.from)) / 86400000)) : 4;
     const trav = b.travellers > 0 ? b.travellers : Math.max((reg.guests || []).filter((g) => g.attending !== false).length, 1);
     const bkk = act ? 60 * trav * nights : 0;
-    if (bkk) out.push(L('Bangkok first night:', money(bkk)));
-    out.push(L('TOTAL CONTRIBUTION:', money(journeyTotal(acc, occ, train, trainRiders, transferCatalog, selectedTransfers, trainRiders) + pw + bkk)));
+    if (bkk) out.push(L('Bangkok stay:', money(bkk)));
+    /* China stays: confirmed Operations-Master rates (Kunming 27 × 3 nights,
+     * Lijiang 63 × 2 nights, per person) — payable only with china scope +
+     * explicit Stay-with-us selection (unified-journey order §7/§9). */
+    const cnAct = reg.scope && reg.scope.china && reg.china;
+    const cnK = cnAct && reg.china.kunming === 'with' ? 27 * 3 * trav : 0;
+    const cnL = cnAct && reg.china.lijiang === 'with' ? 63 * 2 * trav : 0;
+    if (cnK) out.push(L('Kunming stay:', money(cnK)));
+    if (cnL) out.push(L('Lijiang stay:', money(cnL)));
+    out.push(L('TOTAL CONTRIBUTION:', money(journeyTotal(acc, occ, train, trainRiders, transferCatalog, selectedTransfers, trainRiders) + pw + bkk + cnK + cnL)));
   }
   out.push('');
   out.push('HOSTED FOR THE GUESTS (never charged)');

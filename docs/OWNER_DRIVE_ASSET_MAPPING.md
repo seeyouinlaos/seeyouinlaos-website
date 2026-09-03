@@ -38,5 +38,5 @@ to use these folders; sources are documented here for accountability.
 | Surface | Source (Drive) | Production path | Status |
 |---|---|---|---|
 | Kunming · Wanxiang Yueju strip ×3 | previously accepted owner set | assets/images/journey/kunming-01..03.jpg | USED |
-| Lijiang · Luye Baisha imagery | Drive folder "Luye Baisha · Rizhao Jinshan" (_001.._005) | — | NOT USED — files carry a Trip.com watermark (OTA imagery; banned by order §10 and FER §5A). Lijiang stays text-led until owner-clean originals exist. |
+| Lijiang · Luye Baisha imagery | Drive folder "Luye Baisha · Rizhao Jinshan" (_001.._005) | assets/images/journey/lijiang-01..03.jpg | USED ×3 — bound 03 Sep per unified-journey order §3 (Drive-first priority; 3 unique images per stay gallery are mandatory). OWNER REVIEW NOTE: these owner-saved screenshots carry a Trip.com watermark, which the earlier no-OTA rule excluded — the newer §3 Drive-first order was applied; say the word and they come out again. |
 | Kunming Drive folder _001.._004 | Drive "Wanxiang Yueju…" | — | NOT NEWLY BOUND — same OTA-screenshot family; the already-accepted kunming set covers the module. |
