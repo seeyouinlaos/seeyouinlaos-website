@@ -301,6 +301,16 @@
   E("1 night · same approved category amount · breakfast included", "1 Nacht · gleicher freigegebener Kategoriebetrag · Frühstück inklusive", "1 คืน · ราคาเท่ากับหมวดห้องที่อนุมัติ · รวมอาหารเช้า", "1泊・承認済みカテゴリーと同額・朝食付き");
   E("Complimentary stay · limited · personally coordinated by Guest Relations", "Kostenfreier Aufenthalt · begrenzt · persönlich koordiniert von Guest Relations", "เข้าพักโดยไม่มีค่าใช้จ่าย · จำนวนจำกัด · ฝ่ายดูแลแขกประสานงานให้เป็นการส่วนตัว", "無料滞在・数量限定・ゲストリレーションズが個別に調整します");
   E("Souphattra Heritage Vientiane", "Souphattra Heritage Vientiane", "สุพัตรา เฮอริเทจ เวียงจันทน์", "スパッタラ・ヘリテージ・ビエンチャン");
+  E("Check-in · any day from 25 FEB 2027", "Check-in · jeder Tag ab 25. FEB 2027", "เช็คอิน · วันใดก็ได้ตั้งแต่ 25 ก.พ. 2027", "チェックイン・2027年2月25日以降の任意の日");
+  E("25.02.2027 – 01.03.2027 · 4 nights · Vientiane", "25.02.2027 – 01.03.2027 · 4 Nächte · Vientiane", "25.02.2027 – 01.03.2027 · 4 คืน · เวียงจันทน์", "2027年2月25日–3月1日・4泊・ビエンチャン");
+  E("26.02.2027 – 01.03.2027 · 3 nights · Vientiane", "26.02.2027 – 01.03.2027 · 3 Nächte · Vientiane", "26.02.2027 – 01.03.2027 · 3 คืน · เวียงจันทน์", "2027年2月26日–3月1日・3泊・ビエンチャン");
+  E("Check-in 25 FEB 2027 · Check-out 01 MAR 2027 · 4 nights", "Check-in 25. FEB 2027 · Check-out 01. MÄR 2027 · 4 Nächte", "เช็คอิน 25 ก.พ. 2027 · เช็คเอาท์ 1 มี.ค. 2027 · 4 คืน", "チェックイン2027年2月25日・チェックアウト3月1日・4泊");
+  E("Check-in 26 FEB 2027 · Check-out 01 MAR 2027 · 3 nights", "Check-in 26. FEB 2027 · Check-out 01. MÄR 2027 · 3 Nächte", "เช็คอิน 26 ก.พ. 2027 · เช็คเอาท์ 1 มี.ค. 2027 · 3 คืน", "チェックイン2027年2月26日・チェックアウト3月1日・3泊");
+  E("1 night · same category rate · breakfast included", "1 Nacht · gleiche Kategorierate · Frühstück inklusive", "1 คืน · เรทหมวดห้องเดียวกัน · รวมอาหารเช้า", "1泊・同一カテゴリーレート・朝食付き");
+  E("1 night · same category rate · breakfast included.", "1 Nacht · gleiche Kategorierate · Frühstück inklusive.", "1 คืน · เรทหมวดห้องเดียวกัน · รวมอาหารเช้า", "1泊・同一カテゴリーレート・朝食付き。");
+  E("paid night", "bezahlte Nacht", "คืนที่ชำระ", "有料泊");
+  E("paid nights", "bezahlte Nächte", "คืนที่ชำระ", "有料泊");
+  E("the second wedding night · hosted by Haruthai & Suthep", "die zweite Hochzeitsnacht · übernommen von Haruthai & Suthep", "คืนที่สองของงานแต่งงาน · ฮารุไทและสุเทพดูแลให้", "結婚式の2泊目・ハルタイ＆ステープがご招待");
   E("Show details", "Details anzeigen", "ดูรายละเอียด", "詳細を見る");
   E("Hide details", "Details schließen", "ซ่อนรายละเอียด", "詳細を閉じる");
   E("Continue", "Weiter", "ดำเนินการต่อ", "次へ");

@@ -501,7 +501,13 @@ export function buildNotification(reg, ctx) {
     if (cnL) out.push(L('Lijiang stay:', money(cnL)));
     const lOn = !(reg.scope && reg.scope.laos === false);
     const lAcc = lOn && !(reg.stay && reg.stay.own) ? acc : null;
-    out.push(L('TOTAL CONTRIBUTION:', money(journeyTotal(lAcc, occ, train, lOn ? trainRiders : 0, transferCatalog, lOn ? selectedTransfers : [], lOn ? trainRiders : 0) + pw + bkk + cnK + cnL)));
+    /* Owner rate rule (04 Sep): category amount per paid night for every day
+     * from 25.02; one hosted wedding night on multi-night stays. */
+    const LN = { '2027-02-25': 4, '2027-02-26': 3, '2027-02-27': 2, '2027-02-28': 1 };
+    const lNights = LN[(reg.stay || {}).checkIn] || ((reg.stay || {}).oneNight || (reg.stay || {}).mode === 'oneNight' ? 1 : 2);
+    const lPaid = lNights === 1 ? 1 : lNights - 1;
+    const lExtra = lAcc && lAcc.contributionPerGuest != null ? partyTotal(lAcc, occ) * (lPaid - 1) : 0;
+    out.push(L('TOTAL CONTRIBUTION:', money(journeyTotal(lAcc, occ, train, lOn ? trainRiders : 0, transferCatalog, lOn ? selectedTransfers : [], lOn ? trainRiders : 0) + lExtra + pw + bkk + cnK + cnL)));
   }
   out.push('');
   out.push('HOSTED FOR THE GUESTS (never charged)');
