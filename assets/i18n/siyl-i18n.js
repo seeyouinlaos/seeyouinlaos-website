@@ -404,6 +404,16 @@
   E("Party total", "Gesamt für euch", "รวมทั้งหมดของคุณ", "お二人の合計");
   E("Total contribution", "Gesamtkosten für euch", "รวมค่าใช้จ่ายของคุณ", "ご負担合計");
   E("Your arrival details (flight/train, booked by you)", "Eure Ankunftsdetails (Flug/Zug, von euch gebucht)", "รายละเอียดการมาถึงของคุณ (เที่ยวบิน/รถไฟ ที่คุณจองเอง)", "ご到着の詳細（ご自身で予約の便・列車）");
+  E("Experience · Bangkok", "Erlebnis · Bangkok", "ประสบการณ์ · กรุงเทพฯ", "体験・バンコク");
+  E("Whispering Cafe", "Whispering Cafe", "Whispering Cafe", "Whispering Cafe");
+  E("A quiet garden escape outside the city, surrounded by trees, natural light and the relaxed atmosphere of Whispering Land.", "Ein stilles Garten-Refugium vor der Stadt — umgeben von Bäumen, natürlichem Licht und der entspannten Atmosphäre von Whispering Land.", "ที่หลบพักอันเงียบสงบในสวนนอกเมือง ล้อมรอบด้วยต้นไม้ แสงธรรมชาติ และบรรยากาศผ่อนคลายของ Whispering Land", "街の外の静かな庭園の隠れ家——木々と自然光、Whispering Landのくつろいだ空気に包まれて。");
+  E("Sam Phran · Nakhon Pathom", "Sam Phran · Nakhon Pathom", "สามพราน · นครปฐม", "サームプラーン・ナコーンパトム");
+  E("Homemade food, bakery and coffee in a garden setting shaped around nature.", "Hausgemachtes Essen, Bäckerei und Kaffee in einem Garten, der um die Natur herum gestaltet ist.", "อาหารโฮมเมด เบเกอรี่ และกาแฟ ในสวนที่ออกแบบให้กลมกลืนกับธรรมชาติ", "自然に寄り添う庭で味わう、自家製の料理とベーカリー、コーヒー。");
+  E("Whispering Cafe — garden dining amid the trees of Whispering Land", "Whispering Cafe — Gartenessen zwischen den Bäumen von Whispering Land", "Whispering Cafe — มื้ออาหารในสวนท่ามกลางต้นไม้ของ Whispering Land", "Whispering Cafe——Whispering Landの木々に囲まれたガーデンダイニング");
+  E("Whispering Cafe — natural light and country-house warmth", "Whispering Cafe — natürliches Licht und Landhaus-Wärme", "Whispering Cafe — แสงธรรมชาติและความอบอุ่นแบบบ้านชนบท", "Whispering Cafe——自然光とカントリーハウスの温もり");
+  E("Whispering Cafe — homemade food, bakery and coffee in the garden", "Whispering Cafe — Hausgemachtes, Bäckerei und Kaffee im Garten", "Whispering Cafe — อาหารโฮมเมด เบเกอรี่ และกาแฟในสวน", "Whispering Cafe——庭で楽しむ自家製料理とベーカリー、コーヒー");
+  E("day escape · relaxed", "Tagesausflug · entspannt", "หนีเที่ยวหนึ่งวัน · ผ่อนคลาย", "日帰りの休息・リラックス");
+  E("A quiet garden escape outside the city, surrounded by trees, natural light and the relaxed atmosphere of Whispering Land. Homemade food, bakery and coffee in a garden setting shaped around nature.", "Ein stilles Garten-Refugium vor der Stadt — Bäume, natürliches Licht und die entspannte Atmosphäre von Whispering Land. Hausgemachtes Essen, Bäckerei und Kaffee in einem Garten, der um die Natur herum gestaltet ist.", "ที่หลบพักอันเงียบสงบในสวนนอกเมือง ท่ามกลางต้นไม้ แสงธรรมชาติ และบรรยากาศผ่อนคลายของ Whispering Land อาหารโฮมเมด เบเกอรี่ และกาแฟในสวนที่ออกแบบให้กลมกลืนกับธรรมชาติ", "街の外の静かな庭園の隠れ家——木々と自然光、Whispering Landのくつろいだ空気。自然に寄り添う庭で自家製の料理とベーカリー、コーヒーを。");
   E("Show details", "Details anzeigen", "ดูรายละเอียด", "詳細を見る");
   E("Hide details", "Details schließen", "ซ่อนรายละเอียด", "詳細を閉じる");
   E("Continue", "Weiter", "ดำเนินการต่อ", "次へ");

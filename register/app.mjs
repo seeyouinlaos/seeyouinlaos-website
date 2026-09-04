@@ -8,13 +8,13 @@
 import {
   WEDDING, CONTACTS, JOURNEY_MODULES, EVENTS, ACCOMMODATIONS, SELECTABLE_ACCOMMODATIONS, TRAIN,
   TRANSFERS, PACKAGE_INCLUSIONS, COPY, DEMO_MODE, PUBLICATION, TRAIN_REFERENCE, BERTH_PREFS, BANGKOK_STAYS, BANGKOK_STAY, POST_WEDDING, RETURN_STAY, lookupInvitation,
-} from './data.mjs?v=UL5';
+} from './data.mjs?v=UL6';
 import {
   contributionPerGuest, partyCharges, partyTotal, money as usdMoney, displayMoney,
   trainContribution, transfersTotal, journeyTotal, postWeddingTotal,
   createInventory, remaining, availabilityLabel, requestAllocation,
   validateRegistration, buildNotification, nextInvitationState,
-} from './logic.mjs?v=UL5';
+} from './logic.mjs?v=UL6';
 
 /* ---------------- persistent state ---------------- */
 const DRAFT_KEY = 'siyl.reg.draft.v2';
@@ -2836,6 +2836,10 @@ const EXPERIENCES_CATALOG = [
     img: '../assets/images/experiences/vte-kaogee.jpg', blurb: 'The classic Vientiane café moment — kaogee baguettes and good coffee near the Patuxay.' },
   { id: 'vte-oathhouse', scope: 'laos', cat: 'Dining', name: 'Oath House', where: 'Vientiane', meta: 'evening · smart casual',
     img: '../assets/images/experiences/vte-oathhouse.jpg', blurb: 'An intimate evening bar — considered drinks in a beautiful room.' },
+  { id: 'bkk-whispering', scope: 'bangkok', cat: 'Dining', name: 'Whispering Cafe', where: 'Sam Phran · Nakhon Pathom', meta: 'day escape · relaxed',
+    img: '../assets/images/experiences/whispering-01.jpg',
+    gallery: ['../assets/images/experiences/whispering-01.jpg', '../assets/images/experiences/whispering-02.jpg', '../assets/images/experiences/whispering-03.jpg'],
+    blurb: 'A quiet garden escape outside the city, surrounded by trees, natural light and the relaxed atmosphere of Whispering Land. Homemade food, bakery and coffee in a garden setting shaped around nature.' },
   { id: 'bkk-thongsmith', scope: 'bangkok', cat: 'Dining', name: 'Thong Smith', where: 'Bangkok', meta: '1–2 hours · relaxed' },
   { id: 'bkk-madeleine', scope: 'bangkok', cat: 'Dining', name: 'Cafe Madeleine', where: 'Bangkok', meta: '1 hour · relaxed' },
   { id: 'bkk-letsrelax', scope: 'bangkok', cat: 'Wellness', name: "Let's Relax", where: 'Bangkok', meta: '1–2 hours' },
@@ -2874,7 +2878,8 @@ function renderExperiencesArea() {
         '<div class="join-col"><button type="button" class="btn sm" data-exp-view="' + x.id + '" aria-expanded="' + openD + '">' + (openD ? 'Close' : 'View experience') + '</button></div>' +
         '</div>' +
         (openD ? '<div class="exp-detail" style="padding:6px 0 12px">' +
-          (x.img ? '<img src="' + x.img + '" alt="' + esc(x.name) + '" loading="lazy" decoding="async" style="width:100%;max-height:320px;object-fit:cover;display:block;margin-bottom:10px"/>' : '') +
+          (x.gallery ? '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px">' + x.gallery.map((gi, gx) => '<img src="' + gi + '" alt="' + esc(x.name) + ' — view ' + (gx + 1) + '" loading="lazy" decoding="async" style="width:100%;height:120px;object-fit:cover;display:block"/>').join('') + '</div>'
+            : x.img ? '<img src="' + x.img + '" alt="' + esc(x.name) + '" loading="lazy" decoding="async" style="width:100%;max-height:320px;object-fit:cover;display:block;margin-bottom:10px"/>' : '') +
           (x.blurb ? '<p class="note">' + esc(x.blurb) + '</p>' : '') +
           '<p class="note">' + x.where + ' · ' + x.cat + (x.meta ? ' · ' + x.meta : '') + '</p>' +
           (r ? '<button type="button" class="btn sm ghost" data-exp-rm="' + x.id + '">Withdraw request</button>'
