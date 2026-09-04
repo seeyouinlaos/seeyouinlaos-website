@@ -396,6 +396,12 @@
   E("Book this room", "Dieses Zimmer buchen", "จองห้องนี้", "このお部屋を予約");
   E("Remove", "Entfernen", "นำออก", "取り消す");
   E("Bangkok, Thailand", "Bangkok, Thailand", "กรุงเทพฯ ประเทศไทย", "タイ・バンコク");
+  E("Bangkok Stay", "Bangkok-Aufenthalt", "ที่พักกรุงเทพฯ", "バンコクの滞在");
+  E("Overnight Journey", "Nachtreise", "การเดินทางค้างคืน", "夜行の旅");
+  E("24 FEB 2027 → 25 FEB 2027 · 1 night · Bangkok → Vientiane", "24. FEB 2027 → 25. FEB 2027 · 1 Nacht · Bangkok → Vientiane", "24 ก.พ. 2027 → 25 ก.พ. 2027 · 1 คืน · กรุงเทพฯ → เวียงจันทน์", "2027年2月24日→25日・1泊・バンコク→ビエンチャン");
+  E("Special Express No. 25 · First Class Sleeper", "Special Express Nr. 25 · First-Class-Schlafwagen", "ด่วนพิเศษขบวน 25 · ตู้นอนชั้นหนึ่ง", "特急25号・ファーストクラス寝台");
+  E("per person / night", "pro Person / Nacht", "ต่อท่าน / คืน", "お一人・1泊あたり");
+  E("Party total", "Gesamt für euch", "รวมทั้งหมดของคุณ", "お二人の合計");
   E("Show details", "Details anzeigen", "ดูรายละเอียด", "詳細を見る");
   E("Hide details", "Details schließen", "ซ่อนรายละเอียด", "詳細を閉じる");
   E("Continue", "Weiter", "ดำเนินการต่อ", "次へ");

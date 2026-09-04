@@ -8,13 +8,13 @@
 import {
   WEDDING, CONTACTS, JOURNEY_MODULES, EVENTS, ACCOMMODATIONS, SELECTABLE_ACCOMMODATIONS, TRAIN,
   TRANSFERS, PACKAGE_INCLUSIONS, COPY, DEMO_MODE, PUBLICATION, TRAIN_REFERENCE, BERTH_PREFS, BANGKOK_STAYS, BANGKOK_STAY, POST_WEDDING, RETURN_STAY, lookupInvitation,
-} from './data.mjs?v=UL3';
+} from './data.mjs?v=UL4';
 import {
   contributionPerGuest, partyCharges, partyTotal, money as usdMoney, displayMoney,
   trainContribution, transfersTotal, journeyTotal, postWeddingTotal,
   createInventory, remaining, availabilityLabel, requestAllocation,
   validateRegistration, buildNotification, nextInvitationState,
-} from './logic.mjs?v=UL3';
+} from './logic.mjs?v=UL4';
 
 /* ---------------- persistent state ---------------- */
 const DRAFT_KEY = 'siyl.reg.draft.v2';
@@ -2396,11 +2396,13 @@ function renderScopeBlock() {
    * TRAVEL between every destination block — same visual system as the
    * stay selectors, no invented schedules or prices. */
   S._tjDet ||= {};
-  const travelChoice = (name, label, mode, withDetail, ownDetail, imgs, moreDetail) => {
+  const travelChoice = (name, label, mode, withDetail, ownDetail, imgs, moreDetail, eyebrow, title) => {
     const requested = mode === 'with';
     const detOpen = !!S._tjDet[name];
-    return '<div class="cch-label" style="margin-top:14px">' + label + '</div>' +
-      '<article class="tj-opt' + (requested ? ' sel' : '') + '" style="display:block">' +
+    return '<article class="tj-opt' + (requested ? ' sel' : '') + '" style="display:block;margin-top:14px">' +
+      '<div class="when">' + label + '</div>' +
+      (eyebrow ? '<div class="cch-label" style="margin-top:4px">' + eyebrow + '</div>' : '') +
+      (title ? '<h4 style="margin:2px 0 8px">' + title + '</h4>' : '') +
       (imgs && imgs.length ? '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:2px 0 6px">' +
         imgs.slice(0, 3).map((im, ix) => '<img src="' + im + '" alt="' + label + ' — view ' + (ix + 1) + '" loading="lazy" decoding="async" style="width:100%;height:84px;object-fit:cover;display:block"/>').join('') + '</div>' : '') +
       (withDetail ? '<div class="trf-price">' + withDetail + '</div>' : '') +
@@ -2454,23 +2456,31 @@ function renderScopeBlock() {
       S.guests.map((g, ix) => '<option value="' + (ix + 1) + '"' + (trav === ix + 1 ? ' selected' : '') + '>' + (ix + 1) + ' ' + (ix ? 'adults' : 'adult') + '</option>').join('') + '</select></div>' +
       '<div class="cch-label" style="margin-top:14px">Your stay in Bangkok</div>';
     if (mode === 'with') {
-      inner += '<p class="note" style="margin:6px 0 0">6 rooms available · limited availability</p>' +
-        '<div class="cols2" style="margin-top:8px"><div class="field"><label>Check-in · earlier arrival welcome</label><input type="date" id="bkk-from" max="2027-02-23" value="' + esc(b.from || '2027-02-21') + '"/></div>' +
+      inner += '<div class="cols2" style="margin-top:8px"><div class="field"><label>Check-in · earlier arrival welcome</label><input type="date" id="bkk-from" max="2027-02-23" value="' + esc(b.from || '2027-02-21') + '"/></div>' +
         '<div class="field"><label>Check-out · fixed</label><input type="date" id="bkk-to" value="2027-02-24" disabled/></div></div>' +
         '<p class="note" style="margin:4px 0 0">Check-out 24 FEB 2027 is fixed — that evening the night train leaves for Vientiane. Nights are calculated automatically.</p>' +
-        stayModule({ name: BANGKOK_STAYS[0].name, sub: 'Bangkok, Thailand', dates: (b.from ? esc(b.from) + ' → 2027-02-24' : BANGKOK_STAY.window), nights: bkkNights(), trav: bkkTravellers(), rate: BANGKOK_STAY.ratePerGuestNight, imgs: (BANGKOK_STAYS[0].images || []).slice(0, 3) }) +
-        '<div class="field" style="margin-top:8px"><label>Your arrival details for Guest Relations (flight/train, booked by you)</label><textarea id="bkk-arrival" rows="2">' + esc(b.arrivalInfo || '') + '</textarea></div>';
+        '<article class="tj-opt' + (bkkReq ? ' sel' : '') + '" style="display:block;margin-top:12px">' +
+        '<div class="when">' + (b.from ? esc(b.from) + ' → 2027-02-24' : BANGKOK_STAY.window) + ' · ' + bkkNights() + ' ' + (bkkNights() === 1 ? 'night' : 'nights') + ' · Bangkok</div>' +
+        '<div class="cch-label" style="margin-top:4px">Bangkok Stay</div>' +
+        '<h4 style="margin:2px 0 8px">' + esc(BANGKOK_STAYS[0].name) + '</h4>' +
+        '<p class="note" style="margin:0 0 6px">Bangkok, Thailand · 6 rooms available · limited availability</p>' +
+        '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:6px 0">' +
+        (BANGKOK_STAYS[0].images || []).slice(0, 3).map((im, ix) => '<img src="' + im + '" alt="' + esc(BANGKOK_STAYS[0].name) + ' — view ' + (ix + 1) + '" loading="lazy" decoding="async" style="width:100%;height:96px;object-fit:cover;display:block"/>').join('') + '</div>' +
+        '<div class="acc-avail" style="margin:0 0 6px">Breakfast included</div>' +
+        '<div class="trf-price">' + money(BANGKOK_STAY.ratePerGuestNight) + ' per person / night<br/>' + bkkNights() + ' nights × ' + bkkTravellers() + ' guests<br/><strong>Party total · ' + money(BANGKOK_STAY.ratePerGuestNight * bkkNights() * bkkTravellers()) + '</strong></div>' +
+        (bkkReq
+          ? '<div class="acc-avail" style="margin-top:8px">BOOKED</div><div style="display:flex;gap:14px;margin-top:12px"><button type="button" class="btn sm ghost" id="bkk-req-off">Remove</button></div>'
+          : '<div style="display:flex;gap:14px;margin-top:12px"><button type="button" class="btn sm" id="bkk-req-on">Book this stay</button></div>') +
+        '</article>' +
+        '<div class="field" style="margin-top:10px"><label>Your arrival details for Guest Relations (flight/train, booked by you)</label><textarea id="bkk-arrival" rows="2">' + esc(b.arrivalInfo || '') + '</textarea></div>';
     }
     const ridersN = S.guests.filter((g) => g.journey.train).length;
     const indepAll = S.guests.filter((g) => g.attending !== false).every((g) => g.journey.independent);
     const bvMode = ridersN ? 'with' : (indepAll ? 'own' : null);
-    inner += bkkReq
-      ? '<div class="acc-avail" style="margin-top:6px">BOOKED</div><div style="display:flex;gap:14px;margin-top:16px;margin-bottom:10px"><button type="button" class="btn sm ghost" id="bkk-req-off">Remove</button></div>'
-      : '<div style="display:flex;gap:14px;margin-top:16px;margin-bottom:10px"><button type="button" class="btn sm" id="bkk-req-on">Book this stay</button></div>';
-    inner += '<div id="transit-bkk-vte" style="margin-top:18px">' +
-      '<div class="cch-label">Overnight · Bangkok → Vientiane</div>' +
-      travelChoice('tj-bkk-vte', 'Your overnight journey · 24 – 25 FEB 2027 · 1 night', bvMode,
-        'Special Express No. 25 · First Class Sleeper<br/>Bangkok → Nong Khai → Vientiane · overnight package<br/>' +
+
+    inner += '<div id="transit-bkk-vte" style="margin-top:6px">' +
+      travelChoice('tj-bkk-vte', '24 FEB 2027 → 25 FEB 2027 · 1 night · Bangkok → Vientiane', bvMode,
+        'Bangkok → Nong Khai → Vientiane · overnight package<br/>' +
         money(TRAIN.contributionPerGuest) + ' PER GUEST · package · × ' + (ridersN || attendingCount()) + ' guests<br/>' +
         '<strong>Transport total · ' + money(TRAIN.contributionPerGuest * (ridersN || attendingCount())) + '</strong>',
         'Own arrangement noted — USD 0. Fly or travel on your own schedule; we meet you in Vientiane.',
@@ -2478,7 +2488,8 @@ function renderScopeBlock() {
         '24 FEB 2027 · 20:25 · Bangkok departure · Krung Thep Aphiwat<br/>' +
         '25 FEB 2027 · 06:45 · Nong Khai arrival<br/>' +
         '25 FEB 2027 · Nong Khai → Vientiane · van transfer &amp; luggage handling · included<br/>' +
-        'Train · USD 55 per guest · Van Pickup &amp; Luggage Service · USD 20 per guest') +
+        'Train · USD 55 per guest · Van Pickup &amp; Luggage Service · USD 20 per guest',
+        'Overnight Journey', 'Special Express No. 25 · First Class Sleeper') +
       '</div>';
     box.querySelector('#scope-block .mod[data-scope="bangkok"]').insertAdjacentHTML('afterend', '<div id="bkk-journey">' + inner + '</div>');
     const bOn = box.querySelector('#bkk-req-on'), bOff = box.querySelector('#bkk-req-off');
