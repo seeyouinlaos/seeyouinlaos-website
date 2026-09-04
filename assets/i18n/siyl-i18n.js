@@ -477,6 +477,17 @@
   E("The Alms Giving", "Die Almosengabe", "การตักบาตร", "托鉢");
   E("28 FEB 2027 · First light · Vientiane · COMPLIMENTARY", "28. FEB 2027 · Erstes Licht · Vientiane · INKLUSIVE", "28 ก.พ. 2027 · รุ่งอรุณ · เวียงจันทน์ · ไม่มีค่าใช้จ่าย", "2027年2月28日・夜明け・ビエンチャン・無料ご招待");
   E("The wedding day begins with the quiet Lao morning ritual of giving alms.", "Der Hochzeitstag beginnt mit dem stillen laotischen Morgenritual der Almosengabe.", "วันแต่งงานเริ่มต้นด้วยพิธีตักบาตรยามเช้าอันเงียบสงบแบบลาว", "結婚式の一日は、静かなラオスの朝の托鉢の儀式から始まります。");
+  E("Your Journey", "Eure Reise", "เส้นทางของคุณ", "旅のしおり");
+  E("Stays & Travel", "Aufenthalte & Reise", "ที่พักและการเดินทาง", "滞在と移動");
+  E("Your Plan", "Euer Reiseplan", "แผนการเดินทางของคุณ", "旅のプラン");
+  E("Vientiane · The Wedding", "Vientiane · Die Hochzeit", "เวียงจันทน์ · งานแต่งงาน", "ビエンチャン・結婚式");
+  E("The reason for this journey — the wedding days in Vientiane.", "Der Grund dieser Reise — die Hochzeitstage in Vientiane.", "เหตุผลของการเดินทางครั้งนี้ วันแห่งงานแต่งงานในเวียงจันทน์", "この旅の理由——ビエンチャンでの結婚式の日々。");
+  E("Part of your journey", "Teil eurer Reise", "ส่วนหนึ่งของเส้นทางของคุณ", "旅の一部");
+  E("Choose the parts of the journey you are joining under Your Journey first — your stays and travel will appear here.", "Wählt zuerst unter „Eure Reise“, welche Teile ihr mitreist — eure Aufenthalte und Verbindungen erscheinen dann hier.", "เลือกช่วงการเดินทางที่คุณเข้าร่วมที่ เส้นทางของคุณ ก่อน ที่พักและการเดินทางจะแสดงที่นี่", "まず「旅のしおり」で参加する区間をお選びください——滞在と移動はここに表示されます。");
+  E("The wedding programme opens once Vientiane · The Wedding is part of your journey — choose it under Your Journey.", "Das Hochzeitsprogramm öffnet sich, sobald Vientiane · Die Hochzeit Teil eurer Reise ist — wählt es unter „Eure Reise“.", "กำหนดการงานแต่งงานจะเปิดเมื่อ เวียงจันทน์ · งานแต่งงาน เป็นส่วนหนึ่งของเส้นทางของคุณ เลือกได้ที่ เส้นทางของคุณ", "ビエンチャン・結婚式が旅の一部になると、結婚式プログラムが開きます——「旅のしおり」でお選びください。");
+  E("View summary", "Übersicht anzeigen", "ดูสรุป", "概要を見る");
+  E("Close", "Schließen", "ปิด", "閉じる");
+  E("Currency", "Währung", "สกุลเงิน", "通貨");
   E("Show details", "Details anzeigen", "ดูรายละเอียด", "詳細を見る");
   E("Hide details", "Details schließen", "ซ่อนรายละเอียด", "詳細を閉じる");
   E("Continue", "Weiter", "ดำเนินการต่อ", "次へ");
