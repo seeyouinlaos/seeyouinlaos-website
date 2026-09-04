@@ -402,6 +402,8 @@
   E("Special Express No. 25 · First Class Sleeper", "Special Express Nr. 25 · First-Class-Schlafwagen", "ด่วนพิเศษขบวน 25 · ตู้นอนชั้นหนึ่ง", "特急25号・ファーストクラス寝台");
   E("per person / night", "pro Person / Nacht", "ต่อท่าน / คืน", "お一人・1泊あたり");
   E("Party total", "Gesamt für euch", "รวมทั้งหมดของคุณ", "お二人の合計");
+  E("Total contribution", "Gesamtkosten für euch", "รวมค่าใช้จ่ายของคุณ", "ご負担合計");
+  E("Your arrival details (flight/train, booked by you)", "Eure Ankunftsdetails (Flug/Zug, von euch gebucht)", "รายละเอียดการมาถึงของคุณ (เที่ยวบิน/รถไฟ ที่คุณจองเอง)", "ご到着の詳細（ご自身で予約の便・列車）");
   E("Show details", "Details anzeigen", "ดูรายละเอียด", "詳細を見る");
   E("Hide details", "Details schließen", "ซ่อนรายละเอียด", "詳細を閉じる");
   E("Continue", "Weiter", "ดำเนินการต่อ", "次へ");

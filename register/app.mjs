@@ -8,13 +8,13 @@
 import {
   WEDDING, CONTACTS, JOURNEY_MODULES, EVENTS, ACCOMMODATIONS, SELECTABLE_ACCOMMODATIONS, TRAIN,
   TRANSFERS, PACKAGE_INCLUSIONS, COPY, DEMO_MODE, PUBLICATION, TRAIN_REFERENCE, BERTH_PREFS, BANGKOK_STAYS, BANGKOK_STAY, POST_WEDDING, RETURN_STAY, lookupInvitation,
-} from './data.mjs?v=UL4';
+} from './data.mjs?v=UL5';
 import {
   contributionPerGuest, partyCharges, partyTotal, money as usdMoney, displayMoney,
   trainContribution, transfersTotal, journeyTotal, postWeddingTotal,
   createInventory, remaining, availabilityLabel, requestAllocation,
   validateRegistration, buildNotification, nextInvitationState,
-} from './logic.mjs?v=UL4';
+} from './logic.mjs?v=UL5';
 
 /* ---------------- persistent state ---------------- */
 const DRAFT_KEY = 'siyl.reg.draft.v2';
@@ -1800,7 +1800,9 @@ function coverageHtml() {
       '<p class="note" style="margin:4px 0 8px">' + esc(g.s) + '</p>' +
       (g.cta === 'departure'
         ? '<div class="field" style="margin-top:0;max-width:420px"><label>Your departure details (flight home, booked by you)</label><textarea id="dep-info" rows="2">' + esc(S.departureInfo || '') + '</textarea></div>'
-        : '<button type="button" class="btn sm" data-cov-cta="' + g.cta + '">' + (g.cta === 'arrival' ? 'Add arrival details' : 'Open My Journey') + '</button>') +
+        : g.cta === 'arrival'
+        ? '<div class="field" style="margin-top:0;max-width:420px"><label>Your arrival details (flight/train, booked by you)</label><textarea id="arr-info" rows="2">' + esc((S.bangkokStay || {}).arrivalInfo || '') + '</textarea></div>'
+        : '<button type="button" class="btn sm" data-cov-cta="' + g.cta + '">Open My Journey</button>') +
       '</div>';
   });
   return html + '<div style="height:10px"></div>';
@@ -1824,6 +1826,9 @@ function wireCoverage(box) {
     show(idx('home'));
     if (kind === 'arrival') setTimeout(() => { const a = document.getElementById('bkk-arrival'); if (a) { a.scrollIntoView({ block: 'center' }); a.focus(); } }, 200);
   }));
+  const a = box.querySelector('#arr-info');
+  if (a) a.addEventListener('input', () => { S.bangkokStay = S.bangkokStay || {}; S.bangkokStay.arrivalInfo = a.value; saveDraft(); renderSummary(); });
+  if (a) a.addEventListener('change', () => { renderStep(cur); });
   const d = box.querySelector('#dep-info');
   if (d) d.addEventListener('input', () => { S.departureInfo = d.value; saveDraft(); renderSummary(); });
   if (d) d.addEventListener('change', () => { renderStep(cur); });
@@ -2396,7 +2401,9 @@ function renderScopeBlock() {
    * TRAVEL between every destination block — same visual system as the
    * stay selectors, no invented schedules or prices. */
   S._tjDet ||= {};
+  const TJ_IMGS = {};
   const travelChoice = (name, label, mode, withDetail, ownDetail, imgs, moreDetail, eyebrow, title) => {
+    if (imgs && imgs.length) TJ_IMGS[name] = { name: title || label, images: imgs.slice(0, 3) };
     const requested = mode === 'with';
     const detOpen = !!S._tjDet[name];
     return '<article class="tj-opt' + (requested ? ' sel' : '') + '" style="display:block;margin-top:14px">' +
@@ -2404,7 +2411,7 @@ function renderScopeBlock() {
       (eyebrow ? '<div class="cch-label" style="margin-top:4px">' + eyebrow + '</div>' : '') +
       (title ? '<h4 style="margin:2px 0 8px">' + title + '</h4>' : '') +
       (imgs && imgs.length ? '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:2px 0 6px">' +
-        imgs.slice(0, 3).map((im, ix) => '<img src="' + im + '" alt="' + label + ' — view ' + (ix + 1) + '" loading="lazy" decoding="async" style="width:100%;height:84px;object-fit:cover;display:block"/>').join('') + '</div>' : '') +
+        imgs.slice(0, 3).map((im, ix) => '<img src="' + im + '" alt="' + label + ' — view ' + (ix + 1) + '" data-tj-lb="' + name + '" data-tj-lbix="' + ix + '" loading="lazy" decoding="async" style="width:100%;height:84px;object-fit:cover;display:block;cursor:zoom-in"/>').join('') + '</div>' : '') +
       (withDetail ? '<div class="trf-price">' + withDetail + '</div>' : '') +
       (moreDetail && detOpen ? '<div class="trf-price" style="margin-top:8px;border-top:none">' + moreDetail + '</div>' : '') +
       (requested ? '<div class="acc-avail" style="margin-top:6px">BOOKED</div>' : '') +
@@ -2467,12 +2474,16 @@ function renderScopeBlock() {
         '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:6px 0">' +
         (BANGKOK_STAYS[0].images || []).slice(0, 3).map((im, ix) => '<img src="' + im + '" alt="' + esc(BANGKOK_STAYS[0].name) + ' — view ' + (ix + 1) + '" loading="lazy" decoding="async" style="width:100%;height:96px;object-fit:cover;display:block"/>').join('') + '</div>' +
         '<div class="acc-avail" style="margin:0 0 6px">Breakfast included</div>' +
-        '<div class="trf-price">' + money(BANGKOK_STAY.ratePerGuestNight) + ' per person / night<br/>' + bkkNights() + ' nights × ' + bkkTravellers() + ' guests<br/><strong>Party total · ' + money(BANGKOK_STAY.ratePerGuestNight * bkkNights() * bkkTravellers()) + '</strong></div>' +
+        '<div class="trf-price">' + money(BANGKOK_STAY.ratePerGuestNight) + ' per person / night<br/>' + bkkNights() + ' nights × ' + bkkTravellers() + ' guests<br/><strong>Total contribution · ' + money(BANGKOK_STAY.ratePerGuestNight * bkkNights() * bkkTravellers()) + '</strong></div>' +
+        (bkkReq ? '<div class="acc-avail" style="margin-top:8px">BOOKED</div>' : '') +
+        (S._bkkDet ? '<div style="margin-top:8px"><p class="note">' + esc(BANGKOK_STAYS[0].blurb || '') + '</p></div>' : '') +
+        '<div style="display:flex;gap:14px;margin-top:12px;flex-wrap:wrap">' +
+        '<button type="button" class="btn sm ghost" id="bkk-det">' + (S._bkkDet ? 'Hide details' : 'More details') + '</button>' +
         (bkkReq
-          ? '<div class="acc-avail" style="margin-top:8px">BOOKED</div><div style="display:flex;gap:14px;margin-top:12px"><button type="button" class="btn sm ghost" id="bkk-req-off">Remove</button></div>'
-          : '<div style="display:flex;gap:14px;margin-top:12px"><button type="button" class="btn sm" id="bkk-req-on">Book this stay</button></div>') +
-        '</article>' +
-        '<div class="field" style="margin-top:10px"><label>Your arrival details for Guest Relations (flight/train, booked by you)</label><textarea id="bkk-arrival" rows="2">' + esc(b.arrivalInfo || '') + '</textarea></div>';
+          ? '<button type="button" class="btn sm ghost" id="bkk-req-off">Remove</button>'
+          : '<button type="button" class="btn sm" id="bkk-req-on">Book this stay</button>') +
+        '</div>' +
+        '</article>';
     }
     const ridersN = S.guests.filter((g) => g.journey.train).length;
     const indepAll = S.guests.filter((g) => g.attending !== false).every((g) => g.journey.independent);
@@ -2492,6 +2503,8 @@ function renderScopeBlock() {
         'Overnight Journey', 'Special Express No. 25 · First Class Sleeper') +
       '</div>';
     box.querySelector('#scope-block .mod[data-scope="bangkok"]').insertAdjacentHTML('afterend', '<div id="bkk-journey">' + inner + '</div>');
+    const bDet = box.querySelector('#bkk-det');
+    if (bDet) bDet.addEventListener('click', () => { S._bkkDet = !S._bkkDet; renderStep(cur); });
     const bOn = box.querySelector('#bkk-req-on'), bOff = box.querySelector('#bkk-req-off');
     if (bOn) bOn.addEventListener('click', () => {
       S.bangkokStay.own = false; S.bangkokStay.withUs = true;
@@ -2504,8 +2517,6 @@ function renderScopeBlock() {
     });
     const wireDate = (id, key) => { const el = box.querySelector('#' + id); if (el) el.addEventListener('change', () => { S.bangkokStay[key] = el.value; saveDraft(); renderStep(cur); renderSummary(); }); };
     wireDate('bkk-from', 'from');
-    const arrEl = box.querySelector('#bkk-arrival');
-    if (arrEl) arrEl.addEventListener('input', () => { S.bangkokStay.arrivalInfo = arrEl.value; saveDraft(); });
     const tsel = box.querySelector('#bkk-trav');
     if (tsel) tsel.addEventListener('change', () => { S.bangkokStay.travellers = parseInt(tsel.value, 10); saveDraft(); renderStep(cur); renderSummary(); });
     if (mode === 'with') wireBangkokStay(box.querySelector('#bkk-journey'));
@@ -2613,6 +2624,10 @@ function renderScopeBlock() {
         if (cnt) cnt.textContent = String(i + 1).padStart(2, '0') + ' / ' + String(n).padStart(2, '0');
       }, { passive: true });
     }
+    box.querySelectorAll('[data-tj-lb]').forEach((im) => im.addEventListener('click', () => {
+      const rec = TJ_IMGS[im.getAttribute('data-tj-lb')];
+      if (rec) openLightbox(rec, parseInt(im.getAttribute('data-tj-lbix'), 10) || 0);
+    }));
     box.querySelectorAll('[data-tj-det]').forEach((btn) => btn.addEventListener('click', () => {
       const k = btn.getAttribute('data-tj-det');
       S._tjDet[k] = !S._tjDet[k];
