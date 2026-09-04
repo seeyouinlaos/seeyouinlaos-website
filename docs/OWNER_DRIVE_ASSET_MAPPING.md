@@ -59,3 +59,20 @@ to use these folders; sources are documented here for accountability.
 | ICONSIAM | folder "Iconsiam" IMG_3498 (inspected: riverfront night aerial) | bkk-iconsiam-01.jpg | USED lead |
 | Curvy.Dining | folder "Curvy.Dining" IMG_3512 (inspected: sculptural white pavilion) | bkk-curvy-01.jpg | USED lead |
 | Dior Cafe / LV Cafe / weitere IMG_3482-3542 | folders "Dior Cafe", "LV Cafe" + remaining files | — | PENDING CURATION (nicht per Dateiname gemappt; naechster Pass) |
+
+## Vientiane city folder (17Yvh83Qs-SVs5JiCE9nDsgH0toFcBncr) — Sep 2026, all visually inspected
+| Drive file | Inspected content | Web derivative | Used for |
+|---|---|---|---|
+| Vientiane-cover-image.jpg | Patuxai at twilight, fountain reflection (matches Drive description) | assets/images/journey/dest-vientiane.jpg | THE JOURNEY · Vientiane destination tile (replaces hero-arrival.jpg hotel gate) |
+| Vientiane-Titelbild.jpg | Owner Pentax K-3 II (Apr 2018): view from Patuxai top over fountain park / Lane Xang | assets/images/experiences/vte-patuxai-02.jpg | Patuxai gallery, second image (the view from the terraces) |
+| patuxai-vientiane.webp | Patuxai daytime, palms + white benches | assets/images/experiences/vte-patuxai-01.jpg | Patuxai featured card |
+| vientiane-goldener-tempel.webp | Pha That Luang golden stupa, lawn + blue sky | assets/images/experiences/vte-thatluang-01.jpg | Pha That Luang featured card (canonical entry enriched, no duplicate) |
+| nachtmarkt-vientiane.webp | Night market red tents from above, Mekong dusk behind | assets/images/experiences/vte-nightmarket-01.jpg | Vientiane Night Market featured card (canonical entry enriched, no duplicate) |
+| sonnenuntergang-mekong-vientiane.webp | Mekong promenade at sunset, people gathered | assets/images/experiences/vte-mekong-01.jpg | Night Market gallery, second image (Mekong waterfront moment) |
+| wat-si-saket-vientiane.webp | Wat Si Saket ordination hall + cloister | assets/images/experiences/vte-sisaket-01.jpg | Wat Si Saket card |
+| wat-si-muang.webp | Wat Si Muang, gold-red façade, forecourt | assets/images/experiences/vte-simuang-01.jpg | Wat Si Muang card |
+| museum-vientiane.webp | Ha Phrakeo through the garden | assets/images/experiences/vte-haphrakeo-01.jpg | Ha Phrakeo Museum card |
+| praesidentenpalast-vientiane.webp | Presidential Palace behind gilded fence, visitor looking in | assets/images/experiences/vte-palace-01.jpg | Presidential Palace card |
+| stupa-vientiane.webp | That Dam black stupa in roundabout | assets/images/experiences/vte-thatdam-01.jpg | That Dam card |
+| buddhapark-vientiane.webp | Buddha Park reclining Buddha, meadow | assets/images/experiences/vte-buddhapark-01.jpg | Buddha Park (day escape) card |
+| IMGP6105/6118/6130/6144/6147/6167/6180, Vientiane-April-2018-1018 | NOT downloaded this pass (named webp/cover set covered every landmark) | — | PENDING CURATION |
