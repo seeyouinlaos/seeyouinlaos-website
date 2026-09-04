@@ -8,13 +8,13 @@
 import {
   WEDDING, CONTACTS, JOURNEY_MODULES, EVENTS, ACCOMMODATIONS, SELECTABLE_ACCOMMODATIONS, TRAIN,
   TRANSFERS, PACKAGE_INCLUSIONS, COPY, DEMO_MODE, PUBLICATION, TRAIN_REFERENCE, BERTH_PREFS, BANGKOK_STAYS, BANGKOK_STAY, POST_WEDDING, RETURN_STAY, lookupInvitation,
-} from './data.mjs?v=UL2';
+} from './data.mjs?v=UL3';
 import {
   contributionPerGuest, partyCharges, partyTotal, money as usdMoney, displayMoney,
   trainContribution, transfersTotal, journeyTotal, postWeddingTotal,
   createInventory, remaining, availabilityLabel, requestAllocation,
   validateRegistration, buildNotification, nextInvitationState,
-} from './logic.mjs?v=UL2';
+} from './logic.mjs?v=UL3';
 
 /* ---------------- persistent state ---------------- */
 const DRAFT_KEY = 'siyl.reg.draft.v2';
@@ -2395,15 +2395,19 @@ function renderScopeBlock() {
   /* ONE repeated transport pattern (§9): TRAVEL WITH US / ARRANGE MY OWN
    * TRAVEL between every destination block — same visual system as the
    * stay selectors, no invented schedules or prices. */
-  const travelChoice = (name, label, mode, withDetail, ownDetail, imgs) => {
+  S._tjDet ||= {};
+  const travelChoice = (name, label, mode, withDetail, ownDetail, imgs, moreDetail) => {
     const requested = mode === 'with';
+    const detOpen = !!S._tjDet[name];
     return '<div class="cch-label" style="margin-top:14px">' + label + '</div>' +
       '<article class="tj-opt' + (requested ? ' sel' : '') + '" style="display:block">' +
       (imgs && imgs.length ? '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:2px 0 6px">' +
         imgs.slice(0, 3).map((im, ix) => '<img src="' + im + '" alt="' + label + ' — view ' + (ix + 1) + '" loading="lazy" decoding="async" style="width:100%;height:84px;object-fit:cover;display:block"/>').join('') + '</div>' : '') +
       (withDetail ? '<div class="trf-price">' + withDetail + '</div>' : '') +
+      (moreDetail && detOpen ? '<div class="trf-price" style="margin-top:8px;border-top:none">' + moreDetail + '</div>' : '') +
       (requested ? '<div class="acc-avail" style="margin-top:6px">BOOKED</div>' : '') +
       '<div style="display:flex;gap:14px;margin-top:16px;margin-bottom:6px;flex-wrap:wrap">' +
+      (moreDetail ? '<button type="button" class="btn sm ghost" data-tj-det="' + name + '">' + (detOpen ? 'Hide details' : 'More details') + '</button>' : '') +
       (requested
         ? '<button type="button" class="btn sm ghost" data-tj-req="' + name + '" data-tj-val="off">Remove</button>'
         : '<button type="button" class="btn sm" data-tj-req="' + name + '" data-tj-val="with">Book this journey</button>') +
@@ -2466,16 +2470,15 @@ function renderScopeBlock() {
     inner += '<div id="transit-bkk-vte" style="margin-top:18px">' +
       '<div class="cch-label">Overnight · Bangkok → Vientiane</div>' +
       travelChoice('tj-bkk-vte', 'Your overnight journey · 24 – 25 FEB 2027 · 1 night', bvMode,
-        'Bangkok → Nong Khai → Vientiane · overnight package<br/>' +
-        '24 FEB 2027 · 20:25 · Bangkok departure · Krung Thep Aphiwat<br/>' +
-        'Overnight · Special Express No. 25 · reserved First Class Sleeper berth<br/>' +
-        '25 FEB 2027 · 06:45 · Nong Khai arrival<br/>' +
-        '25 FEB 2027 · Nong Khai → Vientiane · van transfer &amp; luggage handling · included<br/>' +
-        'Train · USD 55 per guest · Van Pickup &amp; Luggage Service · USD 20 per guest<br/>' +
+        'Special Express No. 25 · First Class Sleeper<br/>Bangkok → Nong Khai → Vientiane · overnight package<br/>' +
         money(TRAIN.contributionPerGuest) + ' PER GUEST · package · × ' + (ridersN || attendingCount()) + ' guests<br/>' +
         '<strong>Transport total · ' + money(TRAIN.contributionPerGuest * (ridersN || attendingCount())) + '</strong>',
         'Own arrangement noted — USD 0. Fly or travel on your own schedule; we meet you in Vientiane.',
-        ['../assets/images/train/train-01.jpg', '../assets/images/train/train-04.jpg', '../assets/images/train/train-03.jpg']) +
+        ['../assets/images/train/train-01.jpg', '../assets/images/train/train-04.jpg', '../assets/images/train/train-03.jpg'],
+        '24 FEB 2027 · 20:25 · Bangkok departure · Krung Thep Aphiwat<br/>' +
+        '25 FEB 2027 · 06:45 · Nong Khai arrival<br/>' +
+        '25 FEB 2027 · Nong Khai → Vientiane · van transfer &amp; luggage handling · included<br/>' +
+        'Train · USD 55 per guest · Van Pickup &amp; Luggage Service · USD 20 per guest') +
       '</div>';
     box.querySelector('#scope-block .mod[data-scope="bangkok"]').insertAdjacentHTML('afterend', '<div id="bkk-journey">' + inner + '</div>');
     const bOn = box.querySelector('#bkk-req-on'), bOff = box.querySelector('#bkk-req-off');
@@ -2599,6 +2602,11 @@ function renderScopeBlock() {
         if (cnt) cnt.textContent = String(i + 1).padStart(2, '0') + ' / ' + String(n).padStart(2, '0');
       }, { passive: true });
     }
+    box.querySelectorAll('[data-tj-det]').forEach((btn) => btn.addEventListener('click', () => {
+      const k = btn.getAttribute('data-tj-det');
+      S._tjDet[k] = !S._tjDet[k];
+      renderStep(cur);
+    }));
     box.querySelectorAll('[data-tj-req="tj-bkk-vte"]').forEach((btn) => btn.addEventListener('click', () => {
       const on = btn.getAttribute('data-tj-val') === 'with';
       S.guests.forEach((g) => { if (g.attending === false) return;

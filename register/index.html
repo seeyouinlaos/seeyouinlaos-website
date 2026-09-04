@@ -93,6 +93,13 @@ input[type=date] { padding-left: 2px; padding-right: 2px; }
 input[type=date]::-webkit-date-and-time-value { text-align: center; }
 input[type=date]::-webkit-datetime-edit { text-align: center; width: 100%; }
 input[type=date]:disabled, select:disabled { opacity: 1; color: var(--ink); -webkit-text-fill-color: var(--ink); }
+/* Unified product-frame rhythm: every stay/room/journey card shares one shell. */
+#scope-block article.tj-opt { padding: 16px 16px 18px; box-sizing: border-box; width: 100%; }
+#scope-block article.tj-opt .when { margin: 0 0 8px; }
+#scope-block article.tj-opt h4 { margin: 2px 0 8px; }
+#scope-block .trf-price { margin-top: 10px; }
+#scope-block .acc-avail { margin-top: 8px; }
+
 
 textarea { min-height: 84px; resize: vertical; }
 input:focus, select:focus, textarea:focus { border-bottom-color: var(--cherry); }
@@ -808,8 +815,8 @@ html.inv-anim-open .bx-right { animation: bxRight 2.05s cubic-bezier(.45,.05,.45
 <div class="lb-count" aria-live="polite"></div>
 </div>
 
-<script src="../assets/i18n/catalog.js?v=UL2"></script>
-<script src="../assets/i18n/siyl-i18n.js?v=UL2"></script>
-<script type="module" src="./app.mjs?v=UL2"></script>
+<script src="../assets/i18n/catalog.js?v=UL3"></script>
+<script src="../assets/i18n/siyl-i18n.js?v=UL3"></script>
+<script type="module" src="./app.mjs?v=UL3"></script>
 </body>
 </html>
