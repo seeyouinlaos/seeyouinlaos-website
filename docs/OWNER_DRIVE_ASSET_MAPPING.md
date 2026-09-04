@@ -47,3 +47,5 @@ to use these folders; sources are documented here for accountability.
 | Kunming → Lijiang First Class train | Drive search: no owner-original China-rail asset exists (SRT train images are Thailand-specific and not used here) | — | NO AUTHORITATIVE ASSET FOUND — segment stays text-led |
 
 | Whispering Cafe · Whispering Land | Owner Drive folder 1-VbMyD1NenCR9aClWC--rNwo9dgLsdkl (WhisperingBKKLiving06 (Fassade, LEAD), WhisperingBKKLiving040 (Interieur), WhisperingCafe027 (Bakery, Support) — Food-Rule 04 Sep: Lead nie Food, min. 2 von 3 Architektur/Garten/Interieur) | assets/images/experiences/whispering-01..03.jpg | USED ×3 — public Experience block + Guest Area Bangkok experience (04 Sep) |
+
+| Kunming Cherry Blossoms | Owner Drive folder 1Vj0BX05MaQTDS1CrOChRYYWzyzCciZFb (589877577 LEAD roofscape+canopy, 589902725 temple eaves, 602440631 tile-frame; 589925013 branch/sky in reserve) | assets/images/experiences/kmg-blossom-01..03.jpg | USED x3 — landscape-led per owner hierarchy (04 Sep) |

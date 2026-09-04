@@ -8,13 +8,13 @@
 import {
   WEDDING, CONTACTS, JOURNEY_MODULES, EVENTS, ACCOMMODATIONS, SELECTABLE_ACCOMMODATIONS, TRAIN,
   TRANSFERS, PACKAGE_INCLUSIONS, COPY, DEMO_MODE, PUBLICATION, TRAIN_REFERENCE, BERTH_PREFS, BANGKOK_STAYS, BANGKOK_STAY, POST_WEDDING, RETURN_STAY, lookupInvitation,
-} from './data.mjs?v=UL8';
+} from './data.mjs?v=UL9';
 import {
   contributionPerGuest, partyCharges, partyTotal, money as usdMoney, displayMoney,
   trainContribution, transfersTotal, journeyTotal, postWeddingTotal,
   createInventory, remaining, availabilityLabel, requestAllocation,
   validateRegistration, buildNotification, nextInvitationState,
-} from './logic.mjs?v=UL8';
+} from './logic.mjs?v=UL9';
 
 /* ---------------- persistent state ---------------- */
 const DRAFT_KEY = 'siyl.reg.draft.v2';
@@ -2844,6 +2844,18 @@ const EXPERIENCES_CATALOG = [
   { id: 'bkk-letsrelax', chapter: 'bkk', day: '24 FEB 2027', time: '15:00 – 16:00', name: "Let's Relax Spa", where: 'Bangkok', cats: 'Wellness · Spa', teaser: 'A quiet hour of Thai wellness before the journey continues.' },
   { id: 'bkk-madeleine', chapter: 'bkk', day: '24 FEB 2027', time: '16:30 – 17:30', name: 'Cafe Madeleine', where: 'Four Seasons Hotel Bangkok', cats: 'French Pâtisserie · Café', teaser: 'Refined hotel pâtisserie — French pastry in the Four Seasons\' calm.' },
   { id: 'bkk-tangjaiyang', chapter: 'bkk', day: '24 FEB 2027', time: '17:30 – 18:30', name: 'Tang Jai Yang', where: 'Bangkok', cats: 'Chinese · Cantonese · Charcoal BBQ', teaser: 'Cantonese charcoal barbecue — smoke, lacquer and generations of craft.' },
+  { id: 'cn-blossom', chapter: 'china', featured: true, day: 'Seasonal', time: 'Spring', name: 'Kunming Cherry Blossoms', where: 'Kunming · Yunnan', cats: 'Nature · Garden · Seasonal · Photography',
+    img: '../assets/images/experiences/kmg-blossom-01.jpg',
+    gallery: ['../assets/images/experiences/kmg-blossom-01.jpg', '../assets/images/experiences/kmg-blossom-02.jpg', '../assets/images/experiences/kmg-blossom-03.jpg'],
+    teaser: "In spring, Kunming's gardens shift into layers of pink blossom, water, stone paths and traditional architecture.",
+    detail: [
+      'The most atmospheric locations bring together Yunnan cherry blossoms and flowering begonia with streams, small cascades, white walls, dark tiled roofs and planted walkways — less a single attraction than a seasonal landscape that changes with light, weather and the stage of bloom.',
+      "Seasonal note — Kunming's main cherry blossom season usually builds from mid-March into April. Our early-March visit may fall before peak bloom, so actual flowering conditions will depend on the season.",
+      'Yuantongshan (Wuhua District) — the classic Kunming blossom garden: Yunnan cherry, weeping begonia and a dense pink canopy in an established city park.',
+      'Kunming suburban park (Xishan District) — a broader, quieter garden landscape for more spacious, immersive flower viewing.',
+      'Best light — mornings 09:00–11:00 and late afternoons 16:00–18:00; midday light is harsh for photography. Perspectives worth seeking: hanging branches, water and blossom layers, stone-path depth, white-wall framing, backlit petals.',
+      'Good to know — bloom timing varies by year and weather; spring temperatures shift and Yunnan sun can be strong; allow two to three unhurried hours; please leave branches and planting untouched.',
+    ] },
   { id: 'vte-pvo', chapter: 'laos', day: '25 FEB 2027', time: '09:00 – 10:00', name: 'PVO Vietnamese Food', where: 'Vientiane', cats: 'Vietnamese · Lao-Vietnamese · Breakfast', teaser: 'The Vientiane breakfast institution — baguettes, broth and morning light.' },
   { id: 'vte-thatluang', chapter: 'laos', day: '25 FEB 2027', time: '10:20 – 11:00', name: 'Pha That Luang', where: 'Vientiane', cats: 'Heritage · Architecture · Vientiane', teaser: 'The golden stupa — Laos\' national symbol, radiant in the morning.' },
   { id: 'vte-riversun', chapter: 'laos', day: '25 FEB 2027', time: '12:00 – 13:00', name: 'River Sun Camping', where: 'Vientiane', cats: 'Riverside · Landscape · Dining', teaser: 'Lao and Thai barbecue at the water\'s edge — riverside landscape and slow midday.' },
@@ -2877,6 +2889,7 @@ function renderExperiencesArea() {
         (x.gallery ? '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px">' + x.gallery.map((gi, gx) => '<img src="' + gi + '" alt="' + esc(x.name) + ' — view ' + (gx + 1) + '" loading="lazy" decoding="async" style="width:100%;height:120px;object-fit:cover;display:block"/>').join('') + '</div>'
           : x.img ? '<img src="' + x.img + '" alt="' + esc(x.name) + '" loading="lazy" decoding="async" style="width:100%;max-height:320px;object-fit:cover;display:block;margin-bottom:10px"/>' : '') +
         '<p class="note">' + esc(x.teaser) + '</p>' +
+        (x.detail ? x.detail.map((d) => '<p class="note" style="margin-top:8px">' + esc(d) + '</p>').join('') : '') +
         '</div>' : '') +
       '</div>';
   };
