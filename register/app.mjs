@@ -8,13 +8,13 @@
 import {
   WEDDING, CONTACTS, JOURNEY_MODULES, EVENTS, ACCOMMODATIONS, SELECTABLE_ACCOMMODATIONS, TRAIN,
   TRANSFERS, PACKAGE_INCLUSIONS, COPY, DEMO_MODE, PUBLICATION, TRAIN_REFERENCE, BERTH_PREFS, BANGKOK_STAYS, BANGKOK_STAY, POST_WEDDING, RETURN_STAY, lookupInvitation,
-} from './data.mjs?v=UN2';
+} from './data.mjs?v=UN3';
 import {
   contributionPerGuest, partyCharges, partyTotal, money as usdMoney, displayMoney,
   trainContribution, transfersTotal, journeyTotal, postWeddingTotal,
   createInventory, remaining, availabilityLabel, requestAllocation,
   validateRegistration, buildNotification, nextInvitationState,
-} from './logic.mjs?v=UN2';
+} from './logic.mjs?v=UN3';
 
 /* ---------------- persistent state ---------------- */
 const DRAFT_KEY = 'siyl.reg.draft.v2';
@@ -2820,12 +2820,17 @@ function renderWeddingPresets() {
     const on = att.filter((g) => (g.events || {})[k]).length;
     return on === 0 ? (S._evDecided && S._evDecided[k] ? 'no' : 'undecided') : 'yes';
   };
+  /* editorial image rhythm (§05): key moment = full gallery · supporting =
+   * one image · documentary = two · typographic = none. */
+  const RHYTHM = { temple: 3, dinner: 3, alms: 2, coffee: 1, ceremony: 0 };
   const html = EVJ.map(([k, name, meta, dress, imgs, desc, maps]) => {
     const st = evState(k);
     const ack = !!S.dressAck[k];
+    const nImg = RHYTHM[k] != null ? RHYTHM[k] : 3;
+    const use = imgs.slice(0, nImg);
     return '<div class="mod" data-evj="' + k + '"><div class="when">' + meta + ' · COMPLIMENTARY</div><h3>' + name + '</h3>' +
-      '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0 8px">' +
-      imgs.map((f, ix) => '<img src="../assets/images/dress/' + f + '.jpg" alt="' + name + ' — view ' + (ix + 1) + '" data-ev-lb="' + k + '" data-ev-ix="' + ix + '" loading="lazy" decoding="async" style="width:100%;height:96px;object-fit:cover;display:block;cursor:zoom-in"/>').join('') + '</div>' +
+      (use.length ? '<div style="display:grid;grid-template-columns:repeat(' + use.length + ',1fr);gap:6px;margin:10px 0 8px">' +
+      use.map((f, ix) => '<img src="../assets/images/dress/' + f + '.jpg" alt="' + name + ' — view ' + (ix + 1) + '" data-ev-lb="' + k + '" data-ev-ix="' + ix + '" loading="lazy" decoding="async" style="width:100%;height:' + (use.length === 1 ? '150' : '96') + 'px;object-fit:cover;display:block;cursor:zoom-in"/>').join('') + '</div>' : '') +
       '<p class="note" style="margin:0 0 8px">' + desc + '</p>' +
       (maps ? '<a class="btn sm ghost" style="display:inline-block;margin-bottom:8px" href="' + maps + '" target="_blank" rel="noopener">Open in Google Maps</a>' : '') +
       '<div style="display:flex;gap:14px;margin-top:10px;flex-wrap:wrap">' +

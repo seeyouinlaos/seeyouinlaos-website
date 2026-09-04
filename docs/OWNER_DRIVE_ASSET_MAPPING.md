@@ -51,3 +51,11 @@ to use these folders; sources are documented here for accountability.
 | Kunming Cherry Blossoms | Owner Drive folder 1Vj0BX05MaQTDS1CrOChRYYWzyzCciZFb (589877577 LEAD roofscape+canopy, 589902725 temple eaves, 602440631 tile-frame; 589925013 branch/sky in reserve) | assets/images/experiences/kmg-blossom-01..03.jpg | USED x3 — landscape-led per owner hierarchy (04 Sep) |
 
 | Our Journey hero destinations | Bangkok: Drive "6 Bangkok_5X7.jpg" (langraphart owner poster, downscaled 1400px) · Vientiane: owner hero-arrival.jpg · Kunming: kmg-blossom-01 (owner Drive) · Lijiang: left-crop of owner-saved lijiang-03 (mountain view, watermark cropped out) | assets/images/journey/dest-bangkok.jpg, hero/hero-arrival.jpg, experiences/kmg-blossom-01.jpg, journey/dest-lijiang.jpg | USED — 2x2 destination grid replaces the Laos/pool stack (04 Sep) |
+
+## Drive refresh 04 Sep (evening) — new owner experience folders
+
+| Louis Vuitton Visionary Journeys | Drive folder "Louis Vuitton Visionary Journeys" IMG_3544 (inspected: exhibition archive wall + library trunk; press watermark top-cropped) | bkk-lv-01.jpg | USED lead |
+| Dib Bangkok | folder "Dib Bangkok" IMG_3504 (inspected: white museum stair architecture) | bkk-dib-01.jpg | USED lead |
+| ICONSIAM | folder "Iconsiam" IMG_3498 (inspected: riverfront night aerial) | bkk-iconsiam-01.jpg | USED lead |
+| Curvy.Dining | folder "Curvy.Dining" IMG_3512 (inspected: sculptural white pavilion) | bkk-curvy-01.jpg | USED lead |
+| Dior Cafe / LV Cafe / weitere IMG_3482-3542 | folders "Dior Cafe", "LV Cafe" + remaining files | — | PENDING CURATION (nicht per Dateiname gemappt; naechster Pass) |

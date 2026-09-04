@@ -3,10 +3,10 @@
  * Paths are site-root-relative; the register page prefixes '../'. */
 window.SIYL_EXP = [
   /* THAILAND · BANGKOK · 22–24 FEB 2027 */
-  { id: 'bkk-curvy', chapter: 'bkk', day: '22 FEB 2027', name: 'Curvy.Dining', where: 'Bangkok', cats: 'Dining · Design', teaser: 'A design-led Bangkok dining room where Thai flavours meet modern European form.' },
+  { id: 'bkk-curvy', chapter: 'bkk', day: '22 FEB 2027', name: 'Curvy.Dining', where: 'Bangkok', cats: 'Dining · Design', img: 'assets/images/experiences/bkk-curvy-01.jpg', teaser: 'A design-led Bangkok dining room where Thai flavours meet modern European form.' },
   { id: 'bkk-diorlv', chapter: 'bkk', day: '22 FEB 2027', name: 'Dior · Café LV', where: 'Bangkok', cats: 'Fashion · Design · Café', teaser: 'A luxury design café stop — couture interiors, French pastry and contemporary calm.' },
-  { id: 'bkk-lvvisionary', chapter: 'bkk', featured: true, day: '22 FEB 2027', name: 'Louis Vuitton Visionary Journeys', where: 'Bangkok', cats: 'Exhibition · Design · Fashion', teaser: 'The house opens its world: an exhibition of craft, travel and imagination staged as architecture.' },
-  { id: 'bkk-iconsiam', chapter: 'bkk', featured: true, day: '22 FEB 2027', name: 'ICONSIAM', where: 'Bangkok', cats: 'Riverfront · City · Design · Shopping', teaser: 'The riverfront landmark — architecture, design floors and the Chao Phraya at golden hour.' },
+  { id: 'bkk-lvvisionary', chapter: 'bkk', featured: true, day: '22 FEB 2027', name: 'Louis Vuitton Visionary Journeys', where: 'Bangkok', cats: 'Exhibition · Design · Fashion', img: 'assets/images/experiences/bkk-lv-01.jpg', teaser: 'The house opens its world: an exhibition of craft, travel and imagination staged as architecture.' },
+  { id: 'bkk-iconsiam', chapter: 'bkk', featured: true, day: '22 FEB 2027', name: 'ICONSIAM', where: 'Bangkok', cats: 'Riverfront · City · Design · Shopping', img: 'assets/images/experiences/bkk-iconsiam-01.jpg', teaser: 'The riverfront landmark — architecture, design floors and the Chao Phraya at golden hour.' },
   { id: 'bkk-phranakorn', chapter: 'bkk', day: '22 FEB 2027', name: 'Phra Nakhon', where: 'Bangkok', cats: 'Thai dining · Riverside', teaser: 'A Bangkok dining destination for contemporary Thai cooking.' },
   { id: 'bkk-socialclub', chapter: 'bkk', day: '22 FEB 2027', name: 'BKK Social Club', where: 'Bangkok', cats: 'Bar · Design · Evening', teaser: "One of the city's great bars — Buenos Aires glamour, considered drinks, late light." },
   { id: 'bkk-timespace', chapter: 'bkk', day: '23 FEB 2027', name: 'Time Space Cafe', where: 'Bangkok', cats: 'Café · Design', teaser: 'Coffee and bakery in a room built around light and pause.' },
@@ -15,7 +15,7 @@ window.SIYL_EXP = [
     img: 'assets/images/experiences/whispering-01.jpg',
     gallery: ['assets/images/experiences/whispering-01.jpg', 'assets/images/experiences/whispering-02.jpg', 'assets/images/experiences/whispering-03.jpg'],
     teaser: 'Whispering Land: Provence-inspired architecture with Scandinavian restraint — French-style doors, natural light, garden and mature planting, vintage furniture and calm, adaptable spaces.' },
-  { id: 'bkk-dib', chapter: 'bkk', featured: true, day: '23 FEB 2027', name: 'Dib Bangkok', where: 'Bangkok', cats: 'Art · Architecture · Design', teaser: "Bangkok's museum of contemporary art — bold architecture and public space by the expressway." },
+  { id: 'bkk-dib', chapter: 'bkk', featured: true, day: '23 FEB 2027', name: 'Dib Bangkok', where: 'Bangkok', cats: 'Art · Architecture · Design', img: 'assets/images/experiences/bkk-dib-01.jpg', teaser: "Bangkok's museum of contemporary art — bold architecture and public space by the expressway." },
   { id: 'bkk-emquartier', chapter: 'bkk', day: '23 FEB 2027', name: 'EmQuartier', where: 'Bangkok', cats: 'City · Design · Shopping', teaser: 'Sukhumvit’s design quarter — cascading gardens, galleries of shops and city energy.' },
   { id: 'bkk-commons', chapter: 'bkk', day: '23 FEB 2027', name: 'The Commons Thonglor', where: 'Bangkok', cats: 'Food · Design · Social', teaser: "Thonglor's vertical village — one evening, many kitchens, easy drinks in between." },
   { id: 'bkk-barus', chapter: 'bkk', day: '23 FEB 2027', name: 'Bar Us', where: 'Bangkok', cats: 'Bar · Evening · Design', maps: 'https://maps.app.goo.gl/2KLduE51ybg4qAqd9?g_st=ic', teaser: 'An intimate evening alternative — a small bar of precision and warmth.' },

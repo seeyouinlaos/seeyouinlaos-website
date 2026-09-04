@@ -498,6 +498,7 @@
   E("The epilogue of the wedding journey — optional days in Yunnan.", "Der Epilog der Hochzeitsreise — optionale Tage in Yunnan.", "บทส่งท้ายของการเดินทางแต่งงาน วันแห่งยูนนานที่เลือกได้", "結婚の旅のエピローグ——雲南での任意の日々。");
   E("China is not part of your journey yet — join it under The Journey.", "China ist noch nicht Teil eurer Reise — wählt es unter „Die Reise“.", "จีนยังไม่อยู่ในเส้นทางของคุณ เลือกได้ที่ การเดินทาง", "中国はまだ旅に含まれていません——「旅」でお選びください。");
   E("The wedding programme opens once Vientiane · The Wedding is part of your journey — choose it under The Journey.", "Das Hochzeitsprogramm öffnet sich, sobald Vientiane · Die Hochzeit Teil eurer Reise ist — wählt es unter „Die Reise“.", "กำหนดการงานแต่งงานจะเปิดเมื่อ เวียงจันทน์ · งานแต่งงาน เป็นส่วนหนึ่งของเส้นทางของคุณ เลือกได้ที่ การเดินทาง", "ビエンチャン・結婚式が旅の一部になると、結婚式プログラムが開きます——「旅」でお選びください。");
+  E("Vientiane · the wedding", "Vientiane · die Hochzeit", "เวียงจันทน์ · งานแต่งงาน", "ビエンチャン・結婚式");
   E("Show details", "Details anzeigen", "ดูรายละเอียด", "詳細を見る");
   E("Hide details", "Details schließen", "ซ่อนรายละเอียด", "詳細を閉じる");
   E("Continue", "Weiter", "ดำเนินการต่อ", "次へ");

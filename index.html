@@ -630,7 +630,13 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
 </div>
 <div style="display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:28px;align-items:start" class="jm-grid">
 <div class="rv">
-<svg viewBox="0 0 700 560" role="img" aria-label="Journey map: Bangkok north to Vientiane for the wedding, onward by air to Kunming and by rail to Lijiang" style="width:100%;height:auto;display:block">
+<div class="jm-strip" aria-hidden="true">
+<div class="jm-s"><span class="jm-dot"></span><span class="jm-city">Bangkok</span><span class="jm-date">21 – 24 FEB</span></div>
+<div class="jm-s"><span class="jm-dot jm-dot-w"></span><span class="jm-city jm-city-w">Vientiane · the wedding</span><span class="jm-date">27 FEB – 01 MAR</span></div>
+<div class="jm-s"><span class="jm-dot"></span><span class="jm-city">Kunming</span><span class="jm-date">01 – 04 MAR</span></div>
+<div class="jm-s"><span class="jm-dot"></span><span class="jm-city">Lijiang</span><span class="jm-date">04 – 06 MAR</span></div>
+</div>
+<svg class="jm-geo" viewBox="0 0 700 560" role="img" aria-label="Journey map: Bangkok north to Vientiane for the wedding, onward by air to Kunming and by rail to Lijiang" style="width:100%;height:auto;display:block">
 <rect x="0" y="0" width="700" height="560" fill="none"/>
 <g opacity=".16" stroke="var(--ink)" stroke-width="1">
 <line x1="0" y1="140" x2="700" y2="140"/><line x1="0" y1="280" x2="700" y2="280"/><line x1="0" y1="420" x2="700" y2="420"/>
@@ -673,22 +679,37 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
 <div><div class="when">04 – 06 MAR 2027</div><h3 style="margin:2px 0 4px">Lijiang</h3><p style="margin:0;font-size:14px;line-height:1.5;opacity:.72">Onward journey · optional</p></div>
 </div>
 <style>
+/* ONE responsive truth for the journey hero — mobile composed first. */
+.jm-strip{display:none}
 @media (max-width:820px){
-  .h-big{font-size:clamp(30px,8.6vw,44px) !important;line-height:1.08}
-  .head p.rv{font-size:12px !important}
-  /* small circular TOP control at the safe edge — never over content */
+  /* reserved header band: headline never runs under the fixed controls */
+  #ourjourney{padding:14px 0 28px !important}
+  #ourjourney .inner{padding-left:20px;padding-right:20px}
+  #ourjourney .head{padding-top:64px}
+  #ourjourney .h-big, #ourjourney .h-big *{font-size:clamp(26px,7.2vw,34px) !important;line-height:1.1 !important}
+  #ourjourney .head p.rv{font-size:11px !important;margin-top:6px !important}
+  /* geographic map is a desktop composition — mobile gets the compact route strip */
+  #ourjourney .jm-geo{display:none !important}
+  .jm-strip{display:block;border-left:1px solid var(--cherry);margin:14px 0 4px;padding-left:14px}
+  .jm-s{position:relative;padding:7px 0}
+  .jm-dot{position:absolute;left:-18px;top:13px;width:7px;height:7px;border-radius:50%;background:var(--ink)}
+  .jm-dot-w{background:var(--cherry);width:9px;height:9px;left:-19px}
+  .jm-city{display:block;font-size:12px;letter-spacing:.18em;text-transform:uppercase}
+  .jm-city-w{color:var(--cherry)}
+  .jm-date{display:block;font-size:10px;letter-spacing:.12em;opacity:.6}
+  /* compact 2x2 destination mosaic — orientation, not four heroes */
+  #ourjourney .jm-grid{display:block !important}
+  #ourjourney .jm-grid > div{width:100% !important;margin:0 0 10px}
+  #ourjourney .jm-grid > .rv[style*="grid"]{display:grid !important;grid-template-columns:1fr 1fr !important;gap:8px !important}
+  #ourjourney .jm-grid figure img{aspect-ratio:4/3;height:auto !important;max-height:118px;object-fit:cover}
+  #ourjourney .jm-grid figure figcaption{margin-top:3px !important;font-size:9px !important}
+  #jm-legs{margin-top:14px !important;gap:10px !important}
+  #jm-legs h3{font-size:17px !important;margin:2px 0 2px !important}
+  /* small circular TOP control, only after the hero (JS threshold) */
   .top-btn{right:12px !important;bottom:16px !important;left:auto !important;top:auto !important;
     width:42px !important;height:42px !important;padding:0 !important;border-radius:50% !important;
     font-size:0 !important;line-height:42px !important;opacity:.72;z-index:30;overflow:hidden}
   .top-btn::before{content:'↑';font-size:17px;display:block;line-height:42px}
-  /* compact editorial journey hero: concise map, 2x2 square mosaic, tight rhythm */
-  #ourjourney{padding:56px 0 36px !important}
-  #ourjourney .jm-grid{display:block !important}
-  #ourjourney .jm-grid > div{width:100% !important;margin:0 0 12px}
-  #ourjourney .jm-grid svg{max-height:236px;width:auto !important;max-width:100%;margin:0 auto;display:block}
-  #ourjourney .jm-grid figure img{aspect-ratio:1/1;height:auto !important}
-  #ourjourney .jm-grid figure figcaption{margin-top:3px !important}
-  #jm-legs{margin-top:16px !important;gap:12px !important}
 }
 </style>
 </div>
@@ -1269,9 +1290,9 @@ document.addEventListener('DOMContentLoaded', function () {
 <p>Timing and your table arrive in your Guest Area closer to the day.</p>
 <div class="pv-meta">Sunday, 28 February 2027 · Souphattra Heritage Vientiane<br/>Dress · Black Tie</div>
 </article>
-<script src="assets/i18n/catalog.js?v=UN2"></script>
-<script src="assets/experiences.js?v=UN2"></script>
-<script src="assets/i18n/siyl-i18n.js?v=UN2"></script>
+<script src="assets/i18n/catalog.js?v=UN3"></script>
+<script src="assets/experiences.js?v=UN3"></script>
+<script src="assets/i18n/siyl-i18n.js?v=UN3"></script>
 <script src="assets/vendor/leaflet/leaflet.js"></script>
 <script>
 (function () {
@@ -1452,7 +1473,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   addEventListener('scroll', () => {
     if (!menuOpen) btn.classList.toggle('solid', window.scrollY > innerHeight * .8);
-    topBtn.classList.toggle('show', window.scrollY > innerHeight * 1.5);
+    topBtn.classList.toggle('show', window.scrollY > innerHeight * (innerWidth <= 820 ? 2.4 : 1.5));
   }, { passive: true });
 
   /* PLACE PANELS (CSS-transition based — works with or without GSAP)
