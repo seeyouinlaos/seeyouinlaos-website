@@ -46,4 +46,4 @@ to use these folders; sources are documented here for accountability.
 | Vientiane → Kunming flight | Drive search: no owner-original flight/China Eastern asset exists | — | NO AUTHORITATIVE ASSET FOUND — segment stays text-led |
 | Kunming → Lijiang First Class train | Drive search: no owner-original China-rail asset exists (SRT train images are Thailand-specific and not used here) | — | NO AUTHORITATIVE ASSET FOUND — segment stays text-led |
 
-| Whispering Cafe · Whispering Land | Owner Drive folder 1-VbMyD1NenCR9aClWC--rNwo9dgLsdkl (WhisperingCafe040/0372/027) | assets/images/experiences/whispering-01..03.jpg | USED ×3 — public Experience block + Guest Area Bangkok experience (04 Sep) |
+| Whispering Cafe · Whispering Land | Owner Drive folder 1-VbMyD1NenCR9aClWC--rNwo9dgLsdkl (WhisperingBKKLiving06 (Fassade, LEAD), WhisperingBKKLiving040 (Interieur), WhisperingCafe027 (Bakery, Support) — Food-Rule 04 Sep: Lead nie Food, min. 2 von 3 Architektur/Garten/Interieur) | assets/images/experiences/whispering-01..03.jpg | USED ×3 — public Experience block + Guest Area Bangkok experience (04 Sep) |
