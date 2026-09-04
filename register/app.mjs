@@ -8,13 +8,13 @@
 import {
   WEDDING, CONTACTS, JOURNEY_MODULES, EVENTS, ACCOMMODATIONS, SELECTABLE_ACCOMMODATIONS, TRAIN,
   TRANSFERS, PACKAGE_INCLUSIONS, COPY, DEMO_MODE, PUBLICATION, TRAIN_REFERENCE, BERTH_PREFS, BANGKOK_STAYS, BANGKOK_STAY, POST_WEDDING, RETURN_STAY, lookupInvitation,
-} from './data.mjs?v=UM2';
+} from './data.mjs?v=UM3';
 import {
   contributionPerGuest, partyCharges, partyTotal, money as usdMoney, displayMoney,
   trainContribution, transfersTotal, journeyTotal, postWeddingTotal,
   createInventory, remaining, availabilityLabel, requestAllocation,
   validateRegistration, buildNotification, nextInvitationState,
-} from './logic.mjs?v=UM2';
+} from './logic.mjs?v=UM3';
 
 /* ---------------- persistent state ---------------- */
 const DRAFT_KEY = 'siyl.reg.draft.v2';
@@ -2824,46 +2824,9 @@ function renderStayMode() {
 
 /* Experiences: curated from EXISTING project content only (order §19/20).
  * Recommendations carry no booking state and no cost until requested. */
-const EXPERIENCES_CATALOG = [
-  /* Owner master-journey experience set (04 Sep) — informational only. */
-  { id: 'bkk-whispering', chapter: 'bkk', featured: true, day: '23 FEB 2027', time: '15:15 – 16:15', name: 'Whispering Cafe', where: 'Sam Phran · Nakhon Pathom', cats: 'Architecture · Garden · Landscape · Day escape',
-    img: '../assets/images/experiences/whispering-01.jpg',
-    gallery: ['../assets/images/experiences/whispering-01.jpg', '../assets/images/experiences/whispering-02.jpg', '../assets/images/experiences/whispering-03.jpg'],
-    teaser: 'Whispering Land: Provence-inspired architecture with Scandinavian restraint — French-style doors, natural light, garden and mature planting, vintage furniture and calm, adaptable spaces.' },
-  { id: 'bkk-curvy', chapter: 'bkk', day: '22 FEB 2027', time: '10:00 – 11:00', name: 'Curvy.Dining', where: 'Bangkok', cats: 'Thai · Modern European', teaser: 'A design-led Bangkok dining room where Thai flavours meet modern European form.' },
-  { id: 'bkk-diorlv', chapter: 'bkk', day: '22 FEB 2027', time: '13:15 – 14:15', name: 'Cafe Dior · LV Cafe', where: 'Bangkok', cats: 'French · Contemporary · Café · Desserts', teaser: 'A luxury design café stop — couture interiors, French pastry and contemporary calm.' },
-  { id: 'bkk-iconsiam', chapter: 'bkk', day: '22 FEB 2027', time: '16:30 – 18:30', name: 'ICONSIAM', where: 'Bangkok', cats: 'Riverfront · Design · Shopping · City', teaser: 'The riverfront landmark — architecture, design floors and the Chao Phraya at golden hour.' },
-  { id: 'bkk-phranakorn', chapter: 'bkk', day: '22 FEB 2027', time: '19:00 – 21:00', name: 'Phra Nakorn', where: 'Bangkok', cats: 'Thai · Contemporary Thai', teaser: 'A Bangkok dining destination for contemporary Thai cooking.' },
-  { id: 'bkk-socialclub', chapter: 'bkk', day: '22 FEB 2027', time: '21:10 – 22:10', name: 'BKK Social Club', where: 'Bangkok', cats: 'Bar · Design · Evening', teaser: 'One of the city\'s great bars — Buenos Aires glamour, considered drinks, late light.' },
-  { id: 'bkk-mooyoo', chapter: 'bkk', day: '23 FEB 2027', time: '11:45 – 12:45', name: 'Moo Yoo Rose House', where: 'Bangkok', cats: 'Italian Fusion · Thai · Café · Bakery & Desserts', teaser: 'A house of roses — a visual café where Italian fusion meets Thai sweetness.' },
-  { id: 'bkk-timespace', chapter: 'bkk', day: '23 FEB 2027', time: '13:15 – 14:15', name: 'Time Space Cafe', where: 'Bangkok', cats: 'Café · Coffee · Bakery & Desserts', teaser: 'Coffee and bakery in a room built around light and pause.' },
-  { id: 'bkk-dib', chapter: 'bkk', day: '23 FEB 2027', time: '17:15 – 18:15', name: 'Dib Bangkok', where: 'Bangkok', cats: 'Art · Design · Public space', teaser: 'Bangkok\'s museum of contemporary art — bold architecture and public space by the expressway.' },
-  { id: 'bkk-commons', chapter: 'bkk', day: '23 FEB 2027', time: '18:45 – 21:45', name: 'The Commons Thonglor', where: 'Bangkok', cats: 'International · Food hall · Café · Drinks', teaser: 'Thonglor\'s vertical village — one evening, many kitchens, easy drinks in between.' },
-  { id: 'bkk-thongsmith', chapter: 'bkk', day: '24 FEB 2027', time: '13:00 – 14:00', name: 'Thong Smith', where: 'Bangkok', cats: 'Thai · Boat Noodles', teaser: 'Siamese boat noodles, elevated — a Bangkok classic done beautifully.' },
-  { id: 'bkk-dusit', chapter: 'bkk', day: '24 FEB 2027', time: '13:00 – 16:00', name: 'Dusit Central Park', where: 'Bangkok', cats: 'City · Design · Lifestyle', teaser: 'The new green heart above Silom — architecture, park levels and city views.' },
-  { id: 'bkk-letsrelax', chapter: 'bkk', day: '24 FEB 2027', time: '15:00 – 16:00', name: "Let's Relax Spa", where: 'Bangkok', cats: 'Wellness · Spa', teaser: 'A quiet hour of Thai wellness before the journey continues.' },
-  { id: 'bkk-madeleine', chapter: 'bkk', day: '24 FEB 2027', time: '16:30 – 17:30', name: 'Cafe Madeleine', where: 'Four Seasons Hotel Bangkok', cats: 'French Pâtisserie · Café', teaser: 'Refined hotel pâtisserie — French pastry in the Four Seasons\' calm.' },
-  { id: 'bkk-tangjaiyang', chapter: 'bkk', day: '24 FEB 2027', time: '17:30 – 18:30', name: 'Tang Jai Yang', where: 'Bangkok', cats: 'Chinese · Cantonese · Charcoal BBQ', teaser: 'Cantonese charcoal barbecue — smoke, lacquer and generations of craft.' },
-  { id: 'cn-blossom', chapter: 'china', featured: true, day: 'Seasonal', time: 'Spring', name: 'Kunming Cherry Blossoms', where: 'Kunming · Yunnan', cats: 'Nature · Garden · Seasonal · Photography',
-    img: '../assets/images/experiences/kmg-blossom-01.jpg',
-    gallery: ['../assets/images/experiences/kmg-blossom-01.jpg', '../assets/images/experiences/kmg-blossom-02.jpg', '../assets/images/experiences/kmg-blossom-03.jpg'],
-    teaser: "In spring, Kunming's gardens shift into layers of pink blossom, water, stone paths and traditional architecture.",
-    detail: [
-      'The most atmospheric locations bring together Yunnan cherry blossoms and flowering begonia with streams, small cascades, white walls, dark tiled roofs and planted walkways — less a single attraction than a seasonal landscape that changes with light, weather and the stage of bloom.',
-      "Seasonal note — Kunming's main cherry blossom season usually builds from mid-March into April. Our early-March visit may fall before peak bloom, so actual flowering conditions will depend on the season.",
-      'Yuantongshan (Wuhua District) — the classic Kunming blossom garden: Yunnan cherry, weeping begonia and a dense pink canopy in an established city park.',
-      'Kunming suburban park (Xishan District) — a broader, quieter garden landscape for more spacious, immersive flower viewing.',
-      'Best light — mornings 09:00–11:00 and late afternoons 16:00–18:00; midday light is harsh for photography. Perspectives worth seeking: hanging branches, water and blossom layers, stone-path depth, white-wall framing, backlit petals.',
-      'Good to know — bloom timing varies by year and weather; spring temperatures shift and Yunnan sun can be strong; allow two to three unhurried hours; please leave branches and planting untouched.',
-    ] },
-  { id: 'vte-pvo', chapter: 'laos', day: '25 FEB 2027', time: '09:00 – 10:00', name: 'PVO Vietnamese Food', where: 'Vientiane', cats: 'Vietnamese · Lao-Vietnamese · Breakfast', teaser: 'The Vientiane breakfast institution — baguettes, broth and morning light.' },
-  { id: 'vte-thatluang', chapter: 'laos', day: '25 FEB 2027', time: '10:20 – 11:00', name: 'Pha That Luang', where: 'Vientiane', cats: 'Heritage · Architecture · Vientiane', teaser: 'The golden stupa — Laos\' national symbol, radiant in the morning.' },
-  { id: 'vte-riversun', chapter: 'laos', day: '25 FEB 2027', time: '12:00 – 13:00', name: 'River Sun Camping', where: 'Vientiane', cats: 'Riverside · Landscape · Dining', teaser: 'Lao and Thai barbecue at the water\'s edge — riverside landscape and slow midday.' },
-  { id: 'vte-3merchants', chapter: 'laos', day: '25 FEB 2027', time: '18:10 – 20:10', name: '3 Merchants Restaurant', where: 'Vientiane', cats: 'Indochinese · Southeast Asian · Asian Fusion',
-    img: '../assets/images/experiences/vte-3merchants.jpg', teaser: 'A refined Vientiane dining room we love — calm, contemporary and generous.' },
-  { id: 'vte-sona', chapter: 'laos', day: '25 FEB 2027', time: '20:30 – 21:30', name: 'Sona Cafe and Bar', where: 'Vientiane', cats: 'Café · Bar · Evening',
-    img: '../assets/images/experiences/vte-sona.jpg', teaser: 'An easy Vientiane evening — coffee turned to drinks as the city softens.' },
-];
+const EXPERIENCES_CATALOG = (window.SIYL_EXP || []).map((x) => ({ ...x,
+  img: x.img ? '../' + x.img : undefined,
+  gallery: x.gallery ? x.gallery.map((g) => '../' + g) : undefined }));
 function renderExperiencesArea() {
   const box = document.getElementById('spa-box');
   if (!box) return;
@@ -2890,6 +2853,7 @@ function renderExperiencesArea() {
           : x.img ? '<img src="' + x.img + '" alt="' + esc(x.name) + '" loading="lazy" decoding="async" style="width:100%;max-height:320px;object-fit:cover;display:block;margin-bottom:10px"/>' : '') +
         '<p class="note">' + esc(x.teaser) + '</p>' +
         (x.detail ? x.detail.map((d) => '<p class="note" style="margin-top:8px">' + esc(d) + '</p>').join('') : '') +
+        (x.maps ? '<a class="btn sm ghost" style="display:inline-block;margin-top:8px" href="' + x.maps + '" target="_blank" rel="noopener">Open in Google Maps</a>' : '') +
         '</div>' : '') +
       '</div>';
   };
@@ -2901,8 +2865,7 @@ function renderExperiencesArea() {
       '<h3 style="margin:2px 0 2px">' + city + '</h3>' +
       '<div class="when">' + dates + '</div></div>';
     if (!items.length) { html += '<p class="note" style="margin:8px 0 18px">Experiences for this chapter follow soon.</p>'; continue; }
-    const feat = items.find((x) => x.featured);
-    if (feat) html += card(feat, true);
+    items.filter((x) => x.featured).forEach((f) => { html += card(f, true); });
     html += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-top:14px">' +
       items.filter((x) => !x.featured).map((x) => card(x, false)).join('') + '</div>';
     html += '<div style="height:28px"></div>';
