@@ -474,13 +474,9 @@
   E("A modern city stop by the Patuxay.", "Ein moderner City-Stopp am Patuxay.", "จุดแวะสมัยใหม่ใกล้ประตูชัย", "パトゥーサイのそばのモダンな立ち寄りスポット。");
   E("An evening alternative — modern Lao cooking with deep roots.", "Eine Abend-Alternative — moderne Lao-Küche mit tiefen Wurzeln.", "ทางเลือกมื้อค่ำ อาหารลาวสมัยใหม่ที่หยั่งรากลึก", "夜のもう一つの選択——深い根を持つモダン・ラオ料理。");
   E("An evening alternative — classic Lao dining, warm and unhurried.", "Eine Abend-Alternative — klassisches Lao-Dinner, warm und entspannt.", "ทางเลือกมื้อค่ำ อาหารลาวคลาสสิก อบอุ่นและไม่เร่งรีบ", "夜のもう一つの選択——温かくゆったりした正統ラオ料理。");
-  E("Welcome Evening · Private Sunset Cruise & Welcome Dinner", "Welcome-Abend · Private Sunset Cruise & Welcome Dinner", "ค่ำคืนต้อนรับ · ล่องเรือชมอาทิตย์อัสดงส่วนตัวและมื้อค่ำต้อนรับ", "ウェルカムイブニング・プライベート・サンセットクルーズ＆ウェルカムディナー");
-  E("27 FEB 2027 · Vientiane · COMPLIMENTARY", "27. FEB 2027 · Vientiane · INKLUSIVE", "27 ก.พ. 2027 · เวียงจันทน์ · ไม่มีค่าใช้จ่าย", "2027年2月27日・ビエンチャン・無料ご招待");
-  E("The evening before the wedding: a private sunset cruise on the Mekong, then the welcome dinner together.", "Der Abend vor der Hochzeit: eine private Sunset Cruise auf dem Mekong, dann das gemeinsame Welcome Dinner.", "ค่ำคืนก่อนวันแต่งงาน ล่องเรือส่วนตัวชมอาทิตย์อัสดงบนแม่น้ำโขง แล้วร่วมมื้อค่ำต้อนรับด้วยกัน", "結婚式前夜——メコン川のプライベート・サンセットクルーズ、そして皆でのウェルカムディナー。");
   E("The Alms Giving", "Die Almosengabe", "การตักบาตร", "托鉢");
   E("28 FEB 2027 · First light · Vientiane · COMPLIMENTARY", "28. FEB 2027 · Erstes Licht · Vientiane · INKLUSIVE", "28 ก.พ. 2027 · รุ่งอรุณ · เวียงจันทน์ · ไม่มีค่าใช้จ่าย", "2027年2月28日・夜明け・ビエンチャン・無料ご招待");
   E("The wedding day begins with the quiet Lao morning ritual of giving alms.", "Der Hochzeitstag beginnt mit dem stillen laotischen Morgenritual der Almosengabe.", "วันแต่งงานเริ่มต้นด้วยพิธีตักบาตรยามเช้าอันเงียบสงบแบบลาว", "結婚式の一日は、静かなラオスの朝の托鉢の儀式から始まります。");
-  E("Vientiane · the evening before the wedding", "Vientiane · der Abend vor der Hochzeit", "เวียงจันทน์ · ค่ำคืนก่อนวันแต่งงาน", "ビエンチャン・結婚式前夜");
   E("Show details", "Details anzeigen", "ดูรายละเอียด", "詳細を見る");
   E("Hide details", "Details schließen", "ซ่อนรายละเอียด", "詳細を閉じる");
   E("Continue", "Weiter", "ดำเนินการต่อ", "次へ");

@@ -8,13 +8,13 @@
 import {
   WEDDING, CONTACTS, JOURNEY_MODULES, EVENTS, ACCOMMODATIONS, SELECTABLE_ACCOMMODATIONS, TRAIN,
   TRANSFERS, PACKAGE_INCLUSIONS, COPY, DEMO_MODE, PUBLICATION, TRAIN_REFERENCE, BERTH_PREFS, BANGKOK_STAYS, BANGKOK_STAY, POST_WEDDING, RETURN_STAY, lookupInvitation,
-} from './data.mjs?v=UM4';
+} from './data.mjs?v=UM5';
 import {
   contributionPerGuest, partyCharges, partyTotal, money as usdMoney, displayMoney,
   trainContribution, transfersTotal, journeyTotal, postWeddingTotal,
   createInventory, remaining, availabilityLabel, requestAllocation,
   validateRegistration, buildNotification, nextInvitationState,
-} from './logic.mjs?v=UM4';
+} from './logic.mjs?v=UM5';
 
 /* ---------------- persistent state ---------------- */
 const DRAFT_KEY = 'siyl.reg.draft.v2';
@@ -120,7 +120,6 @@ function itinerarySteps() {
   steps.push(acc
     ? { d: (S.stay.mode === 'oneNight' ? '28 FEB – 01 MAR 2027 · 1 night' : acc.stay + ' · ' + acc.nights + ' nights'), t: acc.name + ' · Vientiane', s: (S.stay.mode === 'oneNight' ? 'One night · your costs · breakfast included' : 'First night · your contribution — second night · hosted'), st: S.stay.waitlist ? 'WAITLISTED' : 'BOOKED' }
     : { d: '27 FEB – 01 MAR 2027', t: 'Your wedding stay · Vientiane', s: 'Choose under My Stay', st: 'YOUR CHOICE' });
-  steps.push({ d: '27 FEB 2027 · Evening', t: 'Welcome Evening · Private Sunset Cruise & Welcome Dinner', s: 'Vientiane · the evening before the wedding', st: 'COMPLIMENTARY', main: true });
   steps.push({ d: '28 FEB 2027 · First light', t: 'The Alms Giving', s: 'Vientiane', st: 'COMPLIMENTARY', main: true });
   steps.push({ d: '28 FEB 2027 · 09:00 AM', t: 'The Temple Ceremony', s: 'Wat Ong Teu Temple, Vientiane', st: 'COMPLIMENTARY', main: true });
   steps.push({ d: 'After the return', t: 'Coffee & Cake', s: 'Souphattra Heritage Vientiane', st: 'COMPLIMENTARY', main: true });
@@ -2748,9 +2747,6 @@ function renderWeddingPresets() {
    * code + ONE required acknowledgement (semantic state, локale-free). */
   S.dressAck ||= {}; S.dressAck.coffee ||= false; S.dressAck.alms ||= false;
   const EVJ = [
-    ['cruise', 'Welcome Evening · Private Sunset Cruise & Welcome Dinner', '27 FEB 2027 · Vientiane', null,
-      ['dinner-04', 'dinner-05', 'dinner-06'],
-      'The evening before the wedding: a private sunset cruise on the Mekong, then the welcome dinner together.', null],
     ['alms', 'The Alms Giving', '28 FEB 2027 · First light · Vientiane', 'Lao Traditional Dress',
       ['tradition-04', 'tradition-05', 'tradition-06'],
       'The wedding day begins with the quiet Lao morning ritual of giving alms.', null],
