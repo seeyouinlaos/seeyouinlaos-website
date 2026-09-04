@@ -429,7 +429,7 @@ export function buildNotification(reg, ctx) {
     const nAtt = Math.max((reg.guests || []).filter((g) => g.attending !== false).length, 1);
     out.push('Requested: Elegant 6BR Sathorn Penthouse · 21–24 FEB 2027 · 3 nights (OWNER DECISION CLOSED)');
     out.push('Arrival 21 FEB: personal pickup by Haruthai — HOSTED');
-    out.push('Bangkok Stay: ' + (reg.bangkokStay.travellers || nAtt) + ' guests × USD 90 per person/night — dates ' + (reg.bangkokStay.from || '21.02.2027') + ' → ' + (reg.bangkokStay.to || '25.02.2027') + (reg.bangkokStay.arrivalInfo ? ' — arrival: ' + reg.bangkokStay.arrivalInfo : ''));
+    out.push('Bangkok Stay: ' + (reg.bangkokStay.travellers || nAtt) + ' guests × USD 65 per person/night — dates ' + (reg.bangkokStay.from || '21.02.2027') + ' → ' + (reg.bangkokStay.to || '25.02.2027') + (reg.bangkokStay.arrivalInfo ? ' — arrival: ' + reg.bangkokStay.arrivalInfo : ''));
   if (reg.departureInfo) out.push('Final departure from Bangkok: ' + reg.departureInfo);
     out.push('22–24 FEB: HOSTED by Haruthai & Suthep');
     out.push('Status: ARRANGED WITH GUEST RELATIONS');
@@ -490,7 +490,7 @@ export function buildNotification(reg, ctx) {
     const act = (reg.scope && reg.scope.bangkok) && (b.withUs || b.property);
     const nights = (b.from && b.to) ? Math.max(1, Math.round((new Date(b.to) - new Date(b.from)) / 86400000)) : 4;
     const trav = b.travellers > 0 ? b.travellers : Math.max((reg.guests || []).filter((g) => g.attending !== false).length, 1);
-    const bkk = act ? 90 * trav * nights : 0;
+    const bkk = act ? 65 * trav * nights : 0;
     if (bkk) out.push(L('Bangkok stay:', money(bkk)));
     /* China stays: confirmed Operations-Master rates (Kunming 27 × 3 nights,
      * Lijiang 63 × 2 nights, per person) — payable only with china scope +

@@ -701,13 +701,13 @@ test('post wedding total: only guest-payable First Class train × guests', async
 
 test('Bangkok Stay is the provider-independent USD 150 pp/night product (owner final 03 Sep)', () => {
   const { BANGKOK_STAY } = ctxData;
-  assert.equal(BANGKOK_STAY.ratePerGuestNight, 90);
+  assert.equal(BANGKOK_STAY.ratePerGuestNight, 65);
   assert.equal(BANGKOK_STAY.window, '21.02.2027 – 24.02.2027');
   assert.equal(BANGKOK_STAY.defaultNights, 3);
   // owner rate 90 (coverage order §11) · standard 3 nights: 2×3=540
-  assert.equal(BANGKOK_STAY.ratePerGuestNight * 2 * 3, 540);
-  assert.equal(BANGKOK_STAY.ratePerGuestNight * 1 * 4, 360);
-  assert.equal(BANGKOK_STAY.ratePerGuestNight * 2 * 3, 540);
+  assert.equal(BANGKOK_STAY.ratePerGuestNight * 2 * 3, 390);
+  assert.equal(BANGKOK_STAY.ratePerGuestNight * 1 * 4, 260);
+  assert.equal(BANGKOK_STAY.ratePerGuestNight * 2 * 3, 390);
   const h = BANGKOK_STAYS[0];
   assert.equal(h.id, 'sathorn-penthouse'); // editorial current accommodation only
   assert.equal(h.arrival.date, '21 FEB 2027');

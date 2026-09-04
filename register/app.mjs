@@ -8,13 +8,13 @@
 import {
   WEDDING, CONTACTS, JOURNEY_MODULES, EVENTS, ACCOMMODATIONS, SELECTABLE_ACCOMMODATIONS, TRAIN,
   TRANSFERS, PACKAGE_INCLUSIONS, COPY, DEMO_MODE, PUBLICATION, TRAIN_REFERENCE, BERTH_PREFS, BANGKOK_STAYS, BANGKOK_STAY, POST_WEDDING, RETURN_STAY, lookupInvitation,
-} from './data.mjs?v=UM3';
+} from './data.mjs?v=UM4';
 import {
   contributionPerGuest, partyCharges, partyTotal, money as usdMoney, displayMoney,
   trainContribution, transfersTotal, journeyTotal, postWeddingTotal,
   createInventory, remaining, availabilityLabel, requestAllocation,
   validateRegistration, buildNotification, nextInvitationState,
-} from './logic.mjs?v=UM3';
+} from './logic.mjs?v=UM4';
 
 /* ---------------- persistent state ---------------- */
 const DRAFT_KEY = 'siyl.reg.draft.v2';
@@ -120,6 +120,8 @@ function itinerarySteps() {
   steps.push(acc
     ? { d: (S.stay.mode === 'oneNight' ? '28 FEB – 01 MAR 2027 · 1 night' : acc.stay + ' · ' + acc.nights + ' nights'), t: acc.name + ' · Vientiane', s: (S.stay.mode === 'oneNight' ? 'One night · your costs · breakfast included' : 'First night · your contribution — second night · hosted'), st: S.stay.waitlist ? 'WAITLISTED' : 'BOOKED' }
     : { d: '27 FEB – 01 MAR 2027', t: 'Your wedding stay · Vientiane', s: 'Choose under My Stay', st: 'YOUR CHOICE' });
+  steps.push({ d: '27 FEB 2027 · Evening', t: 'Welcome Evening · Private Sunset Cruise & Welcome Dinner', s: 'Vientiane · the evening before the wedding', st: 'COMPLIMENTARY', main: true });
+  steps.push({ d: '28 FEB 2027 · First light', t: 'The Alms Giving', s: 'Vientiane', st: 'COMPLIMENTARY', main: true });
   steps.push({ d: '28 FEB 2027 · 09:00 AM', t: 'The Temple Ceremony', s: 'Wat Ong Teu Temple, Vientiane', st: 'COMPLIMENTARY', main: true });
   steps.push({ d: 'After the return', t: 'Coffee & Cake', s: 'Souphattra Heritage Vientiane', st: 'COMPLIMENTARY', main: true });
   steps.push({ d: '28 FEB 2027 · 04:30 PM', t: 'The Vow Ceremony', s: 'Souphattra Heritage Vientiane', st: 'COMPLIMENTARY', main: true });
@@ -1737,6 +1739,12 @@ function currentAcc() {
   return S.stay.accommodationId && S.stay.accommodationId !== 'none'
     ? ACCOMMODATIONS.find((a) => a.id === S.stay.accommodationId) : null;
 }
+function fmtD(iso) {
+  if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return iso || '';
+  const M = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+  const [y, m, d] = iso.split('-');
+  return String(parseInt(d, 10)).padStart(2, '0') + ' ' + M[parseInt(m, 10) - 1] + ' ' + y;
+}
 function coverageModel() {
   const sc = S.scope || {};
   const stays = [], trans = [], gaps = [];
@@ -2467,7 +2475,7 @@ function renderScopeBlock() {
         '<div class="field"><label>Check-out · fixed</label><input type="date" id="bkk-to" value="2027-02-24" disabled/></div></div>' +
         '<p class="note" style="margin:4px 0 0">Check-out 24 FEB 2027 is fixed — that evening the night train leaves for Vientiane. Nights are calculated automatically.</p>' +
         '<article class="tj-opt' + (bkkReq ? ' sel' : '') + '" style="display:block;margin-top:12px">' +
-        '<div class="when">' + (b.from ? esc(b.from) + ' → 2027-02-24' : BANGKOK_STAY.window) + ' · ' + bkkNights() + ' ' + (bkkNights() === 1 ? 'night' : 'nights') + ' · Bangkok</div>' +
+        '<div class="when">' + (b.from ? fmtD(b.from) + ' → 24 FEB 2027' : BANGKOK_STAY.window) + ' · ' + bkkNights() + ' ' + (bkkNights() === 1 ? 'night' : 'nights') + ' · Bangkok</div>' +
         '<div class="cch-label" style="margin-top:4px">Bangkok Stay</div>' +
         '<h4 style="margin:2px 0 8px">' + esc(BANGKOK_STAYS[0].name) + '</h4>' +
         '<p class="note" style="margin:0 0 6px">Bangkok, Thailand · 6 rooms available · limited availability</p>' +
@@ -2476,7 +2484,18 @@ function renderScopeBlock() {
         '<div class="acc-avail" style="margin:0 0 6px">Breakfast included</div>' +
         '<div class="trf-price">' + money(BANGKOK_STAY.ratePerGuestNight) + ' per person / night<br/>' + bkkNights() + ' nights × ' + bkkTravellers() + ' guests<br/><strong>Total contribution · ' + money(BANGKOK_STAY.ratePerGuestNight * bkkNights() * bkkTravellers()) + '</strong></div>' +
         (bkkReq ? '<div class="acc-avail" style="margin-top:8px">BOOKED</div>' : '') +
-        (S._bkkDet ? '<div style="margin-top:8px"><p class="note">' + esc(BANGKOK_STAYS[0].blurb || '') + '</p></div>' : '') +
+        (S._bkkDet ? '<div style="margin-top:8px">' + [
+          'The Penthouse — a spacious private two-level penthouse in Sathorn for groups: six bedrooms, generous shared living areas and direct lift access to the residential floors. A calm Bangkok base in a residential part of Sathorn, close to restaurants, cafés and central Bangkok.',
+          'Rooms — 6 bedrooms · 5 bathrooms · up to 12 guests. Five King bedrooms and one Queen bedroom.',
+          'Living & work — fully equipped kitchen, fast Wi-Fi (710 Mbps per listing), dedicated workspace, large shared living areas, 65-inch Smart TVs, Harman Kardon sound system, books, Casiotone keyboard, air conditioning.',
+          'Kitchen — refrigerator, freezer, microwave, stove, oven, kettle, Nespresso machine, toaster, blender, rice cooker, cookware, tableware and wine glasses.',
+          'Access — self check-in via lockbox, private lift from parking to the residential floors, keycard-controlled floor access; the residence spans floors 4 and 5, with an Italian restaurant on floor 2 and a Pilates studio on floor 3.',
+          'Check-in from 15:00 · check-out before 11:00.',
+          'Location — Khet Sathon, Bangkok · the Sathorn / Suan Phlu / Yen Akat neighbourhood; Lumpini Park about 2 km away, the riverfront about 20 minutes by taxi per the host description.',
+          'Selected amenities — fast Wi-Fi, full kitchen, dedicated workspace, air conditioning, washing machine, private entrance, balcony/terrace, free on-site parking, elevator, self check-in, Smart TV, sound system.',
+          'For families — travel cot, high chair, children\'s books and toys, board games.',
+          'Safety — smoke and carbon monoxide detectors, fire extinguisher, first-aid kit; exterior security cameras as stated by the property listing.',
+        ].map((d) => '<p class="note" style="margin-top:8px">' + esc(d) + '</p>').join('') + '</div>' : '') +
         '<div style="display:flex;gap:14px;margin-top:12px;flex-wrap:wrap">' +
         '<button type="button" class="btn sm ghost" id="bkk-det">' + (S._bkkDet ? 'Hide details' : 'More details') + '</button>' +
         (bkkReq
@@ -2727,8 +2746,14 @@ function renderWeddingPresets() {
   /* ONE shared event-participation component (owner completion pass §9-§17):
    * participation JOINING / NOT JOINING per event; joining reveals the dress
    * code + ONE required acknowledgement (semantic state, локale-free). */
-  S.dressAck ||= {}; S.dressAck.coffee ||= false;
+  S.dressAck ||= {}; S.dressAck.coffee ||= false; S.dressAck.alms ||= false;
   const EVJ = [
+    ['cruise', 'Welcome Evening · Private Sunset Cruise & Welcome Dinner', '27 FEB 2027 · Vientiane', null,
+      ['dinner-04', 'dinner-05', 'dinner-06'],
+      'The evening before the wedding: a private sunset cruise on the Mekong, then the welcome dinner together.', null],
+    ['alms', 'The Alms Giving', '28 FEB 2027 · First light · Vientiane', 'Lao Traditional Dress',
+      ['tradition-04', 'tradition-05', 'tradition-06'],
+      'The wedding day begins with the quiet Lao morning ritual of giving alms.', null],
     ['temple', 'The Temple Ceremony', '28 FEB 2027 · 09:00 AM – approx. 12:00 PM · Wat Ong Teu Temple, Vientiane', 'Lao Traditional Dress',
       ['tradition-01', 'tradition-02', 'tradition-03'],
       'A Buddhist morning ceremony at Wat Ong Teu — unhurried and full of meaning.',
@@ -2759,7 +2784,7 @@ function renderWeddingPresets() {
       '<div style="display:flex;gap:14px;margin-top:10px;flex-wrap:wrap">' +
       '<button type="button" class="btn sm' + (st === 'yes' ? '' : ' ghost') + '" data-evj-set="' + k + ':yes">' + (st === 'yes' ? '✓ ' : '') + 'I am joining</button>' +
       '<button type="button" class="btn sm' + (st === 'no' ? '' : ' ghost') + '" data-evj-set="' + k + ':no">' + (st === 'no' ? '✓ ' : '') + 'Not joining</button></div>' +
-      (st === 'yes'
+      (st === 'yes' && dress
         ? '<p class="note" style="margin:10px 0 4px"><strong>Dress code · ' + dress + '</strong></p>' +
           '<label class="confirm-row" style="margin-top:4px"><input type="checkbox" data-evj-ack="' + k + '"' + (ack ? ' checked' : '') + '/><span>I have read and understand the dress code</span></label>' +
           (ack ? '' : '<p class="note" style="margin:4px 0 0">Dress code — action needed</p>')
