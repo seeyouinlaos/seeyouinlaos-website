@@ -488,6 +488,16 @@
   E("View summary", "Übersicht anzeigen", "ดูสรุป", "概要を見る");
   E("Close", "Schließen", "ปิด", "閉じる");
   E("Currency", "Währung", "สกุลเงิน", "通貨");
+  E("The Journey", "Die Reise", "การเดินทาง", "旅");
+  E("Before the Wedding", "Vor der Hochzeit", "ก่อนงานแต่งงาน", "結婚式の前に");
+  E("Places along the Journey", "Orte entlang der Reise", "สถานที่ตลอดเส้นทาง", "旅路の場所たち");
+  E("Arrive · stay together · Bangkok · depart for Vientiane. The shared days before the wedding — entirely optional.", "Ankommen · zusammen wohnen · Bangkok · Aufbruch nach Vientiane. Die gemeinsamen Tage vor der Hochzeit — ganz optional.", "มาถึง · พักด้วยกัน · กรุงเทพฯ · ออกเดินทางสู่เวียงจันทน์ วันเวลาร่วมกันก่อนงานแต่งงาน เลือกได้ตามใจ", "到着・共に滞在・バンコク・ビエンチャンへ出発。結婚式前の共に過ごす日々——すべて任意です。");
+  E("Bangkok is not part of your journey yet — join it under The Journey and your Bangkok stay and overnight train will appear here.", "Bangkok ist noch nicht Teil eurer Reise — wählt es unter „Die Reise“, dann erscheinen euer Bangkok-Aufenthalt und der Nachtzug hier.", "กรุงเทพฯ ยังไม่อยู่ในเส้นทางของคุณ เลือกได้ที่ การเดินทาง แล้วที่พักกรุงเทพฯ และรถไฟกลางคืนจะแสดงที่นี่", "バンコクはまだ旅に含まれていません——「旅」で選ぶと、バンコクの滞在と夜行列車がここに表示されます。");
+  E("Your Wedding Stay", "Euer Hochzeitsaufenthalt", "ที่พักช่วงงานแต่งงานของคุณ", "ウェディングステイ");
+  E("After the Wedding · Kunming & Lijiang", "Nach der Hochzeit · Kunming & Lijiang", "หลังงานแต่งงาน · คุนหมิงและลี่เจียง", "結婚式の後に・昆明と麗江");
+  E("The epilogue of the wedding journey — optional days in Yunnan.", "Der Epilog der Hochzeitsreise — optionale Tage in Yunnan.", "บทส่งท้ายของการเดินทางแต่งงาน วันแห่งยูนนานที่เลือกได้", "結婚の旅のエピローグ——雲南での任意の日々。");
+  E("China is not part of your journey yet — join it under The Journey.", "China ist noch nicht Teil eurer Reise — wählt es unter „Die Reise“.", "จีนยังไม่อยู่ในเส้นทางของคุณ เลือกได้ที่ การเดินทาง", "中国はまだ旅に含まれていません——「旅」でお選びください。");
+  E("The wedding programme opens once Vientiane · The Wedding is part of your journey — choose it under The Journey.", "Das Hochzeitsprogramm öffnet sich, sobald Vientiane · Die Hochzeit Teil eurer Reise ist — wählt es unter „Die Reise“.", "กำหนดการงานแต่งงานจะเปิดเมื่อ เวียงจันทน์ · งานแต่งงาน เป็นส่วนหนึ่งของเส้นทางของคุณ เลือกได้ที่ การเดินทาง", "ビエンチャン・結婚式が旅の一部になると、結婚式プログラムが開きます——「旅」でお選びください。");
   E("Show details", "Details anzeigen", "ดูรายละเอียด", "詳細を見る");
   E("Hide details", "Details schließen", "ซ่อนรายละเอียด", "詳細を閉じる");
   E("Continue", "Weiter", "ดำเนินการต่อ", "次へ");

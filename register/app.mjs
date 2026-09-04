@@ -8,13 +8,13 @@
 import {
   WEDDING, CONTACTS, JOURNEY_MODULES, EVENTS, ACCOMMODATIONS, SELECTABLE_ACCOMMODATIONS, TRAIN,
   TRANSFERS, PACKAGE_INCLUSIONS, COPY, DEMO_MODE, PUBLICATION, TRAIN_REFERENCE, BERTH_PREFS, BANGKOK_STAYS, BANGKOK_STAY, POST_WEDDING, RETURN_STAY, lookupInvitation,
-} from './data.mjs?v=UN1';
+} from './data.mjs?v=UN2';
 import {
   contributionPerGuest, partyCharges, partyTotal, money as usdMoney, displayMoney,
   trainContribution, transfersTotal, journeyTotal, postWeddingTotal,
   createInventory, remaining, availabilityLabel, requestAllocation,
   validateRegistration, buildNotification, nextInvitationState,
-} from './logic.mjs?v=UN1';
+} from './logic.mjs?v=UN2';
 
 /* ---------------- persistent state ---------------- */
 const DRAFT_KEY = 'siyl.reg.draft.v2';
@@ -120,11 +120,15 @@ function itinerarySteps() {
   steps.push(acc
     ? { d: (S.stay.mode === 'oneNight' ? '28 FEB – 01 MAR 2027 · 1 night' : acc.stay + ' · ' + acc.nights + ' nights'), t: acc.name + ' · Vientiane', s: (S.stay.mode === 'oneNight' ? 'One night · your costs · breakfast included' : 'First night · your contribution — second night · hosted'), st: S.stay.waitlist ? 'WAITLISTED' : 'BOOKED' }
     : { d: '27 FEB – 01 MAR 2027', t: 'Your wedding stay · Vientiane', s: 'Choose under My Stay', st: 'YOUR CHOICE' });
-  steps.push({ d: '28 FEB 2027 · First light', t: 'The Alms Giving', s: 'Vientiane', st: 'COMPLIMENTARY', main: true });
-  steps.push({ d: '28 FEB 2027 · 09:00 AM', t: 'The Temple Ceremony', s: 'Wat Ong Teu Temple, Vientiane', st: 'COMPLIMENTARY', main: true });
-  steps.push({ d: 'After the return', t: 'Coffee & Cake', s: 'Souphattra Heritage Vientiane', st: 'COMPLIMENTARY', main: true });
-  steps.push({ d: '28 FEB 2027 · 04:30 PM', t: 'The Vow Ceremony', s: 'Souphattra Heritage Vientiane', st: 'COMPLIMENTARY', main: true });
-  steps.push({ d: '28 FEB 2027 · 07:30 PM', t: 'The Wedding Dinner', s: 'Souphattra Vientiane Hotel', st: 'COMPLIMENTARY', main: true });
+  if (S.scope && S.scope.laos) {
+    /* personal plan mirrors actual participation — no wedding rows for guests
+     * who have not joined the Vientiane segment (§10). */
+    steps.push({ d: '28 FEB 2027 · First light', t: 'The Alms Giving', s: 'Vientiane', st: 'COMPLIMENTARY', main: true });
+    steps.push({ d: '28 FEB 2027 · 09:00 AM', t: 'The Temple Ceremony', s: 'Wat Ong Teu Temple, Vientiane', st: 'COMPLIMENTARY', main: true });
+    steps.push({ d: 'After the return', t: 'Coffee & Cake', s: 'Souphattra Heritage Vientiane', st: 'COMPLIMENTARY', main: true });
+    steps.push({ d: '28 FEB 2027 · 04:30 PM', t: 'The Vow Ceremony', s: 'Souphattra Heritage Vientiane', st: 'COMPLIMENTARY', main: true });
+    steps.push({ d: '28 FEB 2027 · 07:30 PM', t: 'The Wedding Dinner', s: 'Souphattra Vientiane Hotel', st: 'COMPLIMENTARY', main: true });
+  }
   if (S.postWedding && S.postWedding.joined) {
     for (const c of POST_WEDDING.filter((x) => !x.onward)) {
       steps.push({ d: c.date, t: c.label, s: (c.type === 'Train' ? 'First Class Train' : c.type) + (c.sub ? ' · ' + c.sub : '') + (c.contribution != null ? '' : ' · Guest Relations confirms') });
@@ -337,15 +341,37 @@ function renderStep(i) {
   if (name === 'party') renderParty();
   if (name === 'journey') {
     const jb = document.getElementById('journey-box');
-    if (jb) { jb.innerHTML = ''; renderScopeBlock('products', jb); }
-    const any = S.scope && (S.scope.bangkok || S.scope.laos || S.scope.china);
-    if (jb && !any) jb.innerHTML = '<p class="note">Choose the parts of the journey you are joining under Your Journey first — your stays and travel will appear here.</p>';
+    if (jb) {
+      jb.innerHTML = '<div class="cch-label">Before the Wedding</div>' +
+        '<p class="note" style="margin:6px 0 18px">Arrive · stay together · Bangkok · depart for Vientiane. The shared days before the wedding — entirely optional.</p>';
+      if (S.scope && S.scope.bangkok) {
+        const w = document.createElement('div'); jb.appendChild(w);
+        renderScopeBlock('products', w, 'bangkok');
+      } else {
+        jb.insertAdjacentHTML('beforeend', '<p class="note">Bangkok is not part of your journey yet — join it under The Journey and your Bangkok stay and overnight train will appear here.</p>');
+      }
+    }
   }
   if (name === 'events') {
     const eb = document.getElementById('events-box');
     if (eb) { eb.innerHTML = ''; const w = document.getElementById('wed-presets'); if (w) w.remove(); }
-    if (S.scope && S.scope.laos) renderWeddingPresets();
-    else if (eb) eb.innerHTML = '<p class="note">The wedding programme opens once Vientiane · The Wedding is part of your journey — choose it under Your Journey.</p>';
+    if (S.scope && S.scope.laos) {
+      renderWeddingPresets();
+      if (eb) {
+        eb.insertAdjacentHTML('beforeend', '<div class="cch-label" style="margin-top:44px">Your Wedding Stay</div>');
+        const lw = document.createElement('div'); eb.appendChild(lw);
+        renderScopeBlock('products', lw, 'laos');
+        eb.insertAdjacentHTML('beforeend', '<div class="cch-label" style="margin-top:44px">After the Wedding · Kunming &amp; Lijiang</div>' +
+          '<p class="note" style="margin:6px 0 14px">The epilogue of the wedding journey — optional days in Yunnan.</p>');
+        if (S.scope.china) {
+          const cw = document.createElement('div'); eb.appendChild(cw);
+          renderScopeBlock('products', cw, 'china');
+        } else {
+          eb.insertAdjacentHTML('beforeend', '<p class="note">China is not part of your journey yet — join it under The Journey.</p>');
+        }
+      }
+    }
+    else if (eb) eb.innerHTML = '<p class="note">The wedding programme opens once Vientiane · The Wedding is part of your journey — choose it under The Journey.</p>';
   }
   if (name === 'stay') { renderStay(); renderStayMode(); }
   if (name === 'spa') renderExperiencesArea();
@@ -564,8 +590,8 @@ function adoptInvitation(inv) {
 
 /* ---------------- MY JOURNEY · private member area ---------------- */
 const PRIVNAV = [
-  ['home', 'Your Journey'], ['events', 'The Wedding'], ['journey', 'Stays & Travel'],
-  ['cost', 'Your Plan'], ['spa', 'Experiences'], ['each', 'My Details'],
+  ['home', 'The Journey'], ['journey', 'Before the Wedding'], ['events', 'The Wedding'],
+  ['cost', 'Your Plan'], ['spa', 'Places along the Journey'], ['each', 'My Details'],
 ];
 function renderPrivnav() {
   const nav = document.getElementById('privnav');
@@ -2401,7 +2427,7 @@ init();
  * Guided configurator layers on top of the existing steps: scope first,
  * participation second, selection third, cost as consequence only. */
 
-function renderScopeBlock(mode, targetBox) {
+function renderScopeBlock(mode, targetBox, segFilter) {
   mode = mode || 'segments';
   S.scope ||= { bangkok: false, laos: true, china: false };
   S.experiences ||= [];
@@ -2412,7 +2438,7 @@ function renderScopeBlock(mode, targetBox) {
   const row = (key, label, blurb, fixed) => {
     const on = fixed || !!sc[key];
     if (productsMode) {
-      if (!on) return '';
+      if (!on || (segFilter && key !== segFilter)) return '';
       return '<div class="mod" data-scope="' + key + '" style="border:none;border-top:1px solid var(--line);padding-left:0;padding-right:0"><div class="mod-head"><div>' +
         '<div class="when">Part of your journey</div>' +
         '<h3>' + label + '</h3></div></div></div>';
@@ -2475,7 +2501,7 @@ function renderScopeBlock(mode, targetBox) {
     row('laos', 'Vientiane · The Wedding', 'The reason for this journey — the wedding days in Vientiane.', false) +
     row('china', 'China · Onward Journey', 'Kunming and Lijiang after the wedding — join a part of the onward journey.', false) +
     '</div>');
-  if (productsMode && sc.bangkok) {
+  if (productsMode && sc.bangkok && (!segFilter || segFilter === 'bangkok')) {
     S.bangkokStay ||= { property: null, from: '', to: '' };
     const b = S.bangkokStay;
     /* §4: departure is the fixed travel day to Laos — check-out locked. */
@@ -2564,7 +2590,7 @@ function renderScopeBlock(mode, targetBox) {
     if (tsel) tsel.addEventListener('change', () => { S.bangkokStay.travellers = parseInt(tsel.value, 10); saveDraft(); renderStep(cur); renderSummary(); });
     if (mode === 'with') wireBangkokStay(box.querySelector('#bkk-journey'));
   }
-  if (productsMode && sc.laos) {
+  if (productsMode && sc.laos && (!segFilter || segFilter === 'laos')) {
     /* §4: Laos enters through the same destination pattern; the stay choice
      * is the duration (no own-stay for the wedding); departure 01 MAR fixed. */
     const lown = false;
@@ -2668,7 +2694,7 @@ function renderScopeBlock(mode, targetBox) {
       }, { passive: true });
     }
   }
-  if (productsMode && sc.china) {
+  if (productsMode && sc.china && (!segFilter || segFilter === 'china')) {
     const CH = Object.fromEntries(POST_WEDDING.map((c) => [c.id, c]));
     const trav = bkkTravellers();
     const stayChoice = (key, label, c) => {
