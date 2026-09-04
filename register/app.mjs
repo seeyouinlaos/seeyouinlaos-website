@@ -8,13 +8,13 @@
 import {
   WEDDING, CONTACTS, JOURNEY_MODULES, EVENTS, ACCOMMODATIONS, SELECTABLE_ACCOMMODATIONS, TRAIN,
   TRANSFERS, PACKAGE_INCLUSIONS, COPY, DEMO_MODE, PUBLICATION, TRAIN_REFERENCE, BERTH_PREFS, BANGKOK_STAYS, BANGKOK_STAY, POST_WEDDING, RETURN_STAY, lookupInvitation,
-} from './data.mjs?v=UL7';
+} from './data.mjs?v=UL8';
 import {
   contributionPerGuest, partyCharges, partyTotal, money as usdMoney, displayMoney,
   trainContribution, transfersTotal, journeyTotal, postWeddingTotal,
   createInventory, remaining, availabilityLabel, requestAllocation,
   validateRegistration, buildNotification, nextInvitationState,
-} from './logic.mjs?v=UL7';
+} from './logic.mjs?v=UL8';
 
 /* ---------------- persistent state ---------------- */
 const DRAFT_KEY = 'siyl.reg.draft.v2';
@@ -2825,85 +2825,80 @@ function renderStayMode() {
 /* Experiences: curated from EXISTING project content only (order §19/20).
  * Recommendations carry no booking state and no cost until requested. */
 const EXPERIENCES_CATALOG = [
-  { id: 'vte-thatluang', scope: 'laos', cat: 'Things to do', name: 'Pha That Luang', where: 'Vientiane', meta: '1–2 hours · relaxed' },
-  { id: 'vte-nightmarket', scope: 'laos', cat: 'Things to do', name: 'Vientiane Night Market', where: 'Vientiane', meta: '1–2 hours · relaxed' },
-  { id: 'vte-lepadaek', scope: 'laos', cat: 'Dining', name: 'Le Padaek', where: 'Vientiane', meta: '2 hours · smart casual' },
-  { id: 'vte-3merchants', scope: 'laos', cat: 'Dining', name: '3 Merchants Restaurant', where: 'Vientiane', meta: '2 hours · smart casual',
-    img: '../assets/images/experiences/vte-3merchants.jpg', blurb: 'A refined Vientiane dining room we love — calm, contemporary and generous.' },
-  { id: 'vte-sona', scope: 'laos', cat: 'Dining', name: 'Sona Cafe and Bar', where: 'Vientiane', meta: '1–2 hours · relaxed',
-    img: '../assets/images/experiences/vte-sona.jpg', blurb: 'Coffee by day, easy drinks by evening — a favourite pause in the city.' },
-  { id: 'vte-kaogee', scope: 'laos', cat: 'Dining', name: 'Kaogee Le Triomphe', where: 'Vientiane', meta: '1 hour · relaxed',
-    img: '../assets/images/experiences/vte-kaogee.jpg', blurb: 'The classic Vientiane café moment — kaogee baguettes and good coffee near the Patuxay.' },
-  { id: 'vte-oathhouse', scope: 'laos', cat: 'Dining', name: 'Oath House', where: 'Vientiane', meta: 'evening · smart casual',
-    img: '../assets/images/experiences/vte-oathhouse.jpg', blurb: 'An intimate evening bar — considered drinks in a beautiful room.' },
-  { id: 'bkk-whispering', scope: 'bangkok', cat: 'Dining', name: 'Whispering Cafe', where: 'Sam Phran · Nakhon Pathom', meta: 'day escape · relaxed',
+  /* Owner master-journey experience set (04 Sep) — informational only. */
+  { id: 'bkk-whispering', chapter: 'bkk', featured: true, day: '23 FEB 2027', time: '15:15 – 16:15', name: 'Whispering Cafe', where: 'Sam Phran · Nakhon Pathom', cats: 'Architecture · Garden · Landscape · Day escape',
     img: '../assets/images/experiences/whispering-01.jpg',
     gallery: ['../assets/images/experiences/whispering-01.jpg', '../assets/images/experiences/whispering-02.jpg', '../assets/images/experiences/whispering-03.jpg'],
-    blurb: 'A quiet garden escape outside the city, surrounded by trees, natural light and the relaxed atmosphere of Whispering Land. Homemade food, bakery and coffee in a garden setting shaped around nature.' },
-  { id: 'bkk-thongsmith', scope: 'bangkok', cat: 'Dining', name: 'Thong Smith', where: 'Bangkok', meta: '1–2 hours · relaxed' },
-  { id: 'bkk-madeleine', scope: 'bangkok', cat: 'Dining', name: 'Cafe Madeleine', where: 'Bangkok', meta: '1 hour · relaxed' },
-  { id: 'bkk-letsrelax', scope: 'bangkok', cat: 'Wellness', name: "Let's Relax", where: 'Bangkok', meta: '1–2 hours' },
-  { id: 'bkk-iconsiam', scope: 'bangkok', cat: 'Things to do', name: 'ICONSIAM', where: 'Bangkok', meta: '2+ hours · relaxed' },
+    teaser: 'Whispering Land: Provence-inspired architecture with Scandinavian restraint — French-style doors, natural light, garden and mature planting, vintage furniture and calm, adaptable spaces.' },
+  { id: 'bkk-curvy', chapter: 'bkk', day: '22 FEB 2027', time: '10:00 – 11:00', name: 'Curvy.Dining', where: 'Bangkok', cats: 'Thai · Modern European', teaser: 'A design-led Bangkok dining room where Thai flavours meet modern European form.' },
+  { id: 'bkk-diorlv', chapter: 'bkk', day: '22 FEB 2027', time: '13:15 – 14:15', name: 'Cafe Dior · LV Cafe', where: 'Bangkok', cats: 'French · Contemporary · Café · Desserts', teaser: 'A luxury design café stop — couture interiors, French pastry and contemporary calm.' },
+  { id: 'bkk-iconsiam', chapter: 'bkk', day: '22 FEB 2027', time: '16:30 – 18:30', name: 'ICONSIAM', where: 'Bangkok', cats: 'Riverfront · Design · Shopping · City', teaser: 'The riverfront landmark — architecture, design floors and the Chao Phraya at golden hour.' },
+  { id: 'bkk-phranakorn', chapter: 'bkk', day: '22 FEB 2027', time: '19:00 – 21:00', name: 'Phra Nakorn', where: 'Bangkok', cats: 'Thai · Contemporary Thai', teaser: 'A Bangkok dining destination for contemporary Thai cooking.' },
+  { id: 'bkk-socialclub', chapter: 'bkk', day: '22 FEB 2027', time: '21:10 – 22:10', name: 'BKK Social Club', where: 'Bangkok', cats: 'Bar · Design · Evening', teaser: 'One of the city\'s great bars — Buenos Aires glamour, considered drinks, late light.' },
+  { id: 'bkk-mooyoo', chapter: 'bkk', day: '23 FEB 2027', time: '11:45 – 12:45', name: 'Moo Yoo Rose House', where: 'Bangkok', cats: 'Italian Fusion · Thai · Café · Bakery & Desserts', teaser: 'A house of roses — a visual café where Italian fusion meets Thai sweetness.' },
+  { id: 'bkk-timespace', chapter: 'bkk', day: '23 FEB 2027', time: '13:15 – 14:15', name: 'Time Space Cafe', where: 'Bangkok', cats: 'Café · Coffee · Bakery & Desserts', teaser: 'Coffee and bakery in a room built around light and pause.' },
+  { id: 'bkk-dib', chapter: 'bkk', day: '23 FEB 2027', time: '17:15 – 18:15', name: 'Dib Bangkok', where: 'Bangkok', cats: 'Art · Design · Public space', teaser: 'Bangkok\'s museum of contemporary art — bold architecture and public space by the expressway.' },
+  { id: 'bkk-commons', chapter: 'bkk', day: '23 FEB 2027', time: '18:45 – 21:45', name: 'The Commons Thonglor', where: 'Bangkok', cats: 'International · Food hall · Café · Drinks', teaser: 'Thonglor\'s vertical village — one evening, many kitchens, easy drinks in between.' },
+  { id: 'bkk-thongsmith', chapter: 'bkk', day: '24 FEB 2027', time: '13:00 – 14:00', name: 'Thong Smith', where: 'Bangkok', cats: 'Thai · Boat Noodles', teaser: 'Siamese boat noodles, elevated — a Bangkok classic done beautifully.' },
+  { id: 'bkk-dusit', chapter: 'bkk', day: '24 FEB 2027', time: '13:00 – 16:00', name: 'Dusit Central Park', where: 'Bangkok', cats: 'City · Design · Lifestyle', teaser: 'The new green heart above Silom — architecture, park levels and city views.' },
+  { id: 'bkk-letsrelax', chapter: 'bkk', day: '24 FEB 2027', time: '15:00 – 16:00', name: "Let's Relax Spa", where: 'Bangkok', cats: 'Wellness · Spa', teaser: 'A quiet hour of Thai wellness before the journey continues.' },
+  { id: 'bkk-madeleine', chapter: 'bkk', day: '24 FEB 2027', time: '16:30 – 17:30', name: 'Cafe Madeleine', where: 'Four Seasons Hotel Bangkok', cats: 'French Pâtisserie · Café', teaser: 'Refined hotel pâtisserie — French pastry in the Four Seasons\' calm.' },
+  { id: 'bkk-tangjaiyang', chapter: 'bkk', day: '24 FEB 2027', time: '17:30 – 18:30', name: 'Tang Jai Yang', where: 'Bangkok', cats: 'Chinese · Cantonese · Charcoal BBQ', teaser: 'Cantonese charcoal barbecue — smoke, lacquer and generations of craft.' },
+  { id: 'vte-pvo', chapter: 'laos', day: '25 FEB 2027', time: '09:00 – 10:00', name: 'PVO Vietnamese Food', where: 'Vientiane', cats: 'Vietnamese · Lao-Vietnamese · Breakfast', teaser: 'The Vientiane breakfast institution — baguettes, broth and morning light.' },
+  { id: 'vte-thatluang', chapter: 'laos', day: '25 FEB 2027', time: '10:20 – 11:00', name: 'Pha That Luang', where: 'Vientiane', cats: 'Heritage · Architecture · Vientiane', teaser: 'The golden stupa — Laos\' national symbol, radiant in the morning.' },
+  { id: 'vte-riversun', chapter: 'laos', day: '25 FEB 2027', time: '12:00 – 13:00', name: 'River Sun Camping', where: 'Vientiane', cats: 'Riverside · Landscape · Dining', teaser: 'Lao and Thai barbecue at the water\'s edge — riverside landscape and slow midday.' },
+  { id: 'vte-3merchants', chapter: 'laos', day: '25 FEB 2027', time: '18:10 – 20:10', name: '3 Merchants Restaurant', where: 'Vientiane', cats: 'Indochinese · Southeast Asian · Asian Fusion',
+    img: '../assets/images/experiences/vte-3merchants.jpg', teaser: 'A refined Vientiane dining room we love — calm, contemporary and generous.' },
+  { id: 'vte-sona', chapter: 'laos', day: '25 FEB 2027', time: '20:30 – 21:30', name: 'Sona Cafe and Bar', where: 'Vientiane', cats: 'Café · Bar · Evening',
+    img: '../assets/images/experiences/vte-sona.jpg', teaser: 'An easy Vientiane evening — coffee turned to drinks as the city softens.' },
 ];
 function renderExperiencesArea() {
   const box = document.getElementById('spa-box');
   if (!box) return;
-  const items = EXPERIENCES_CATALOG.filter((x) => x.scope === 'laos' || (S.scope && S.scope[x.scope]));
-  const req = (id) => (S.experiences || []).find((e) => e.id === id);
-  const cats = ['Dining', 'Things to do', 'Wellness'];
-  /* §K: the guest must see WHEN an experience belongs in the journey —
-   * destination groups with their confirmed date windows and day numbers
-   * (Day 1 = 21 FEB 2027 Bangkok arrival window). No invented per-card
-   * times: restaurants and visits are free-time choices inside a window. */
-  const groups = [
-    ['bangkok', 'Bangkok · 21 – 25 FEB 2027 · Day 1 – 5'],
-    ['laos', 'Vientiane · 27 FEB – 01 MAR 2027 · Day 7 – 9 · the wedding days'],
+  /* Editorial travel guide by destination chapter — informational only
+   * (owner master-journey order 04 Sep): no booking actions, no cost logic. */
+  const CH = [
+    ['bkk', 'Thailand', 'Bangkok', '22 – 24 FEB 2027', !!(S.scope && S.scope.bangkok)],
+    ['laos', 'Laos', 'Vientiane', '25 FEB 2027 onward', true],
+    ['china', 'China', 'Kunming · Lijiang', '01 – 06 MAR 2027', !!(S.scope && S.scope.china)],
   ];
-  let html = '<p class="note" style="margin-bottom:18px">A few places we love, around the parts of the journey you are joining. A recommendation is not a booking — nothing is arranged and nothing is charged until you ask us and Guest Relations confirms it with you.</p>';
-  for (const [gscope, gtitle] of groups) {
-    const gItems = items.filter((x) => x.scope === gscope);
-    if (!gItems.length) continue;
-    html += '<div class="cch-label" style="margin-top:20px">' + gtitle + '</div>';
-  for (const c of cats) {
-    const list = gItems.filter((x) => x.cat === c);
-    if (!list.length) continue;
-    html += list.map((x) => {
-      const r = req(x.id);
-      const openD = (S._expOpen === x.id);
-      return '<div class="mod exp-card" data-exp="' + x.id + '">' +
-        (x.img ? '<div class="exp-im"><img src="' + x.img + '" alt="' + esc(x.name) + '" loading="lazy" decoding="async" style="width:100%;height:180px;object-fit:cover;display:block"/></div>' : '') +
-        '<div class="mod-head"><div>' +
-        '<div class="when">' + x.where + ' · ' + x.cat + (x.meta ? ' · ' + x.meta : '') + '</div><h3>' + x.name + '</h3>' +
-        (r ? '<span class="chip">REQUESTED</span>' : '') + '</div>' +
-        '<div class="join-col"><button type="button" class="btn sm" data-exp-view="' + x.id + '" aria-expanded="' + openD + '">' + (openD ? 'Close' : 'View experience') + '</button></div>' +
-        '</div>' +
-        (openD ? '<div class="exp-detail" style="padding:6px 0 12px">' +
-          (x.gallery ? '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px">' + x.gallery.map((gi, gx) => '<img src="' + gi + '" alt="' + esc(x.name) + ' — view ' + (gx + 1) + '" loading="lazy" decoding="async" style="width:100%;height:120px;object-fit:cover;display:block"/>').join('') + '</div>'
-            : x.img ? '<img src="' + x.img + '" alt="' + esc(x.name) + '" loading="lazy" decoding="async" style="width:100%;max-height:320px;object-fit:cover;display:block;margin-bottom:10px"/>' : '') +
-          (x.blurb ? '<p class="note">' + esc(x.blurb) + '</p>' : '') +
-          '<p class="note">' + x.where + ' · ' + x.cat + (x.meta ? ' · ' + x.meta : '') + '</p>' +
-          (r ? '<button type="button" class="btn sm ghost" data-exp-rm="' + x.id + '">Withdraw request</button>'
-             : '<button type="button" class="btn sm ghost" data-exp-add="' + x.id + '">Ask Khun Ket & Khun Paddy to arrange this</button>') +
-          '</div>' : '') +
-        '</div>';
-    }).join('');
+  const card = (x, wide) => {
+    const openD = (S._expOpen === x.id);
+    return '<div class="mod exp-card" data-exp="' + x.id + '">' +
+      (x.img ? '<div class="exp-im"><img src="' + x.img + '" alt="' + esc(x.name) + '" loading="lazy" decoding="async" style="width:100%;height:' + (wide ? '260px' : '180px') + ';object-fit:cover;display:block"/></div>' : '') +
+      '<div class="mod-head"><div>' +
+      '<div class="when">' + esc(x.day) + ' · ' + esc(x.time) + ' · ' + esc(x.where) + '</div>' +
+      '<div class="cch-label" style="margin-top:2px">' + esc(x.cats) + '</div>' +
+      '<h3>' + esc(x.name) + '</h3>' +
+      '<p class="note" style="margin:4px 0 0">' + esc(x.teaser) + '</p></div>' +
+      '<div class="join-col"><button type="button" class="btn sm ghost" data-exp-view="' + x.id + '" aria-expanded="' + openD + '">' + (openD ? 'Hide details' : 'More details') + '</button></div>' +
+      '</div>' +
+      (openD ? '<div class="exp-detail" style="padding:6px 0 12px">' +
+        (x.gallery ? '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px">' + x.gallery.map((gi, gx) => '<img src="' + gi + '" alt="' + esc(x.name) + ' — view ' + (gx + 1) + '" loading="lazy" decoding="async" style="width:100%;height:120px;object-fit:cover;display:block"/>').join('') + '</div>'
+          : x.img ? '<img src="' + x.img + '" alt="' + esc(x.name) + '" loading="lazy" decoding="async" style="width:100%;max-height:320px;object-fit:cover;display:block;margin-bottom:10px"/>' : '') +
+        '<p class="note">' + esc(x.teaser) + '</p>' +
+        '</div>' : '') +
+      '</div>';
+  };
+  let html = '<p class="note" style="margin-bottom:26px">A travel guide through the parts of the journey you are joining — places and moments to discover. Nothing here is a booking.</p>';
+  for (const [key, country, city, dates, on] of CH) {
+    if (!on) continue;
+    const items = EXPERIENCES_CATALOG.filter((x) => x.chapter === key);
+    html += '<div style="margin:34px 0 6px"><div class="cch-label">' + country + '</div>' +
+      '<h3 style="margin:2px 0 2px">' + city + '</h3>' +
+      '<div class="when">' + dates + '</div></div>';
+    if (!items.length) { html += '<p class="note" style="margin:8px 0 18px">Experiences for this chapter follow soon.</p>'; continue; }
+    const feat = items.find((x) => x.featured);
+    if (feat) html += card(feat, true);
+    html += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-top:14px">' +
+      items.filter((x) => !x.featured).map((x) => card(x, false)).join('') + '</div>';
+    html += '<div style="height:28px"></div>';
   }
-  }
-  /* Wellness at the hotel removed from the Experience architecture (§M). */
   box.innerHTML = html;
   box.querySelectorAll('[data-exp-view]').forEach((b) => b.addEventListener('click', () => {
     const id = b.getAttribute('data-exp-view');
     S._expOpen = (S._expOpen === id) ? null : id;
     renderStep(cur);
-  }));
-  box.querySelectorAll('[data-exp-add]').forEach((b) => b.addEventListener('click', () => {
-    const x = EXPERIENCES_CATALOG.find((e) => e.id === b.getAttribute('data-exp-add'));
-    S.experiences.push({ id: x.id, name: x.name, where: x.where, status: 'REQUESTED' });
-    saveDraft(); renderStep(cur);
-  }));
-  box.querySelectorAll('[data-exp-rm]').forEach((b) => b.addEventListener('click', () => {
-    S.experiences = S.experiences.filter((e) => e.id !== b.getAttribute('data-exp-rm'));
-    saveDraft(); renderStep(cur);
   }));
 }
 function renderSpaInto(target) {

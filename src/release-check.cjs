@@ -68,7 +68,7 @@ gate(4, 'Production submission endpoint active',
 /* Gate 5 — legacy out of the active release */
 /* OWNER FINAL OVERRIDE (31 AUG 2026): the Mekong cruise / Mekhong Escape is
  * NOT an active wedding event — banned again alongside the LP era terms. */
-const legacyTerms = /avani|manda de laos|river sun|luang prabang|LPQ\b|8booking|mekhong escape|mekong escapes|cruise/i;
+const legacyTerms = /avani|manda de laos|river sun cruise|luang prabang|LPQ\b|8booking|mekhong escape|mekong escapes|cruise/i;
 const legacyInIndex = legacyTerms.test(indexHtml);
 const legacyInRegister = legacyTerms.test(regHtml) || legacyTerms.test(appJs) || legacyTerms.test(data);
 const journeyExcluded = /^\/?journey$/m.test(assetsignore); // root-scoped '/journey' keeps owner hotel images under assets/images/journey deployable
