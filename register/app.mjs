@@ -8,13 +8,13 @@
 import {
   WEDDING, CONTACTS, JOURNEY_MODULES, EVENTS, ACCOMMODATIONS, SELECTABLE_ACCOMMODATIONS, TRAIN,
   TRANSFERS, PACKAGE_INCLUSIONS, COPY, DEMO_MODE, PUBLICATION, TRAIN_REFERENCE, BERTH_PREFS, BANGKOK_STAYS, BANGKOK_STAY, POST_WEDDING, RETURN_STAY, lookupInvitation,
-} from './data.mjs?v=UM1';
+} from './data.mjs?v=UM2';
 import {
   contributionPerGuest, partyCharges, partyTotal, money as usdMoney, displayMoney,
   trainContribution, transfersTotal, journeyTotal, postWeddingTotal,
   createInventory, remaining, availabilityLabel, requestAllocation,
   validateRegistration, buildNotification, nextInvitationState,
-} from './logic.mjs?v=UM1';
+} from './logic.mjs?v=UM2';
 
 /* ---------------- persistent state ---------------- */
 const DRAFT_KEY = 'siyl.reg.draft.v2';
@@ -2624,21 +2624,6 @@ function renderScopeBlock() {
         if (cnt) cnt.textContent = String(i + 1).padStart(2, '0') + ' / ' + String(n).padStart(2, '0');
       }, { passive: true });
     }
-    box.querySelectorAll('[data-tj-lb]').forEach((im) => im.addEventListener('click', () => {
-      const rec = TJ_IMGS[im.getAttribute('data-tj-lb')];
-      if (rec) openLightbox(rec, parseInt(im.getAttribute('data-tj-lbix'), 10) || 0);
-    }));
-    box.querySelectorAll('[data-tj-det]').forEach((btn) => btn.addEventListener('click', () => {
-      const k = btn.getAttribute('data-tj-det');
-      S._tjDet[k] = !S._tjDet[k];
-      renderStep(cur);
-    }));
-    box.querySelectorAll('[data-tj-req="tj-bkk-vte"]').forEach((btn) => btn.addEventListener('click', () => {
-      const on = btn.getAttribute('data-tj-val') === 'with';
-      S.guests.forEach((g) => { if (g.attending === false) return;
-        g.journey.train = on; g.journey.independent = !on; });
-      saveDraft(); renderStep(cur); renderSummary();
-    }));
   }
   if (sc.china) {
     const CH = Object.fromEntries(POST_WEDDING.map((c) => [c.id, c]));
@@ -2686,13 +2671,28 @@ function renderScopeBlock() {
       S.china[key] = b.getAttribute('data-cn-val') === 'with' ? 'with' : null;
       saveDraft(); renderStep(cur); renderSummary();
     }));
-    box.querySelectorAll('[data-tj-req="tj-vte-kmg"], [data-tj-req="tj-kmg-ljg"]').forEach((btn) => btn.addEventListener('click', () => {
-      S.travel ||= {};
-      const key = btn.getAttribute('data-tj-req') === 'tj-vte-kmg' ? 'vteKmg' : 'kmgLjg';
-      S.travel[key] = btn.getAttribute('data-tj-val') === 'with' ? 'with' : null;
-      saveDraft(); renderStep(cur); renderSummary();
-    }));
   }
+  box.querySelectorAll('[data-tj-lb]').forEach((im) => im.addEventListener('click', () => {
+    const rec = TJ_IMGS[im.getAttribute('data-tj-lb')];
+    if (rec) openLightbox(rec, parseInt(im.getAttribute('data-tj-lbix'), 10) || 0);
+  }));
+  box.querySelectorAll('[data-tj-det]').forEach((btn) => btn.addEventListener('click', () => {
+    const k = btn.getAttribute('data-tj-det');
+    S._tjDet[k] = !S._tjDet[k];
+    renderStep(cur);
+  }));
+  box.querySelectorAll('[data-tj-req]').forEach((btn) => btn.addEventListener('click', () => {
+    const name = btn.getAttribute('data-tj-req');
+    const on = btn.getAttribute('data-tj-val') === 'with';
+    if (name === 'tj-bkk-vte') {
+      S.guests.forEach((g) => { if (g.attending === false) return;
+        g.journey.train = on; g.journey.independent = !on; });
+    } else {
+      S.travel ||= {};
+      S.travel[name === 'tj-vte-kmg' ? 'vteKmg' : 'kmgLjg'] = on ? 'with' : null;
+    }
+    saveDraft(); renderStep(cur); renderSummary();
+  }));
   box.querySelectorAll('#scope-block input[name^="scope-"]').forEach((el) =>
     el.addEventListener('change', () => {
       const key = el.name.replace('scope-', '');
