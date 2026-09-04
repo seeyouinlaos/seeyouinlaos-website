@@ -684,7 +684,7 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
 <div id="exp-render" class="rv"></div>
 </div>
 <script>
-(function () {
+document.addEventListener('DOMContentLoaded', function () {
   var T = window.SIYL_T || function (x) { return x; };
   var CH = [['bkk', 'Thailand', 'Bangkok', '22 – 24 FEB 2027'], ['laos', 'Laos', 'Vientiane', '25 FEB – 01 MAR 2027'], ['china', 'China', 'Kunming · Lijiang', '01 – 06 MAR 2027']];
   var box = document.getElementById('exp-render');
@@ -717,7 +717,7 @@ footer .fine { margin-top: 40px; font-size: 11px; letter-spacing: .2em; text-tra
       }).join('') + '</div>';
   });
   box.innerHTML = html;
-})();
+});
 </script>
 </section>
 <section class="timeline" id="weekend" style="padding-top: 0">
