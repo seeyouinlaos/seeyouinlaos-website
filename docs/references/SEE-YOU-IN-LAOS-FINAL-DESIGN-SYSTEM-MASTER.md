@@ -2,7 +2,7 @@
 ## FINAL DESIGN SYSTEM — MASTER
 
 DOCUMENT: SEE-YOU-IN-LAOS-FINAL-DESIGN-SYSTEM-MASTER.md
-VERSION: MASTER-01
+VERSION: MASTER-02
 DATE: 05 SEP 2026
 STATUS: AUTHORITATIVE CONSOLIDATED MASTER (per 001 consolidation of 05 SEP 2026)
 BASIS: REVIEW-01 + 001_FINAL_MASTER_CONSOLIDATION_2026-09-05 + accepted 002 foundation
@@ -266,7 +266,7 @@ srcset ladder 640/828/1080/1200/1920/2400 · hero practical frame 2880×1780 (mi
 | COSTS | Your Costs / per guest / Total Costs; one calculation layer; §21 rules |
 | SELECTED STATE | current value visible collapsed (e.g. “2 guests · USD 150 · BOOKED”); per-guest choices named by preferred name |
 | YOUR PLAN | chronological, date-grouped, only selected/relevant items, no dossier repetition |
-| LANGUAGE SWITCH | EN/DE/TH/JA full dictionary swap; ≥24px targets |
+| LANGUAGE SWITCH | EN/DE/TH/JA full dictionary swap; visible labels may remain typographically compact, but every interactive language control must provide a minimum 44×44px touch target / hit area on touch interfaces |
 | CTA | one primary per view; verbs of invitation; §21 microcopy |
 | PAGINATION/CAROUSEL | numbered counters; invisible tap zones + dots; empty-list guarded |
 | FOOTER/END STATE | quiet close: names · date · human contact; review/send inside the experience; no link farms |
@@ -281,4 +281,5 @@ NO CRUISE, anywhere, ever · active programme = the four events of §18 only · 
 - **OWNER** — resolve identity items A–G only where the affected records are required for the relevant release.
 - **Coffee & Cake end time** — remains unstated until an authoritative current source provides it.
 
-**MASTER-01 — CONSOLIDATION EXECUTED. SOLE SPECIFICATION FOR SUBSEQUENT PRODUCTION.**
+**MASTER-02 — CONSOLIDATION EXECUTED. SOLE SPECIFICATION FOR SUBSEQUENT PRODUCTION.**
+(MASTER-01 → MASTER-02: single integrity correction — §33 Language Switch interactive controls carry a minimum 44×44px touch target / hit area on touch interfaces; labels remain typographically compact inside the larger target. No other change.)
