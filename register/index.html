@@ -750,6 +750,90 @@ header.top .mark { white-space: nowrap; }
   header.top .lang-sw button { min-width: 28px; padding: 3px 4px; min-height: 40px; }
   .hd-plan { padding: 8px 10px; font-size: 10px; letter-spacing: .12em; min-height: 40px; }
 }
+
+/* ============ ONE SYSTEM: Aman-derived guest surfaces ============ */
+.am-sec { margin-top: 54px; }
+.am-sec > .cch-label { margin-bottom: 2px; }
+.am-sec > h2 { margin-bottom: 14px; }
+
+/* accommodation composition: large image -> quiet light panel -> action */
+.am-stay { margin-top: 26px; }
+.am-gal { position: relative; }
+.am-track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; cursor: zoom-in; }
+.am-track::-webkit-scrollbar { display: none; }
+.am-track.drag { cursor: grabbing; }
+.am-track img { flex: 0 0 100%; width: 100%; aspect-ratio: 3/2; object-fit: cover; scroll-snap-align: start; display: block; }
+.am-gcount { position: absolute; right: 12px; bottom: 12px; background: rgba(33,31,28,.62); color: var(--ivory); font-size: 10px; letter-spacing: .16em; padding: 4px 9px; }
+.am-ph { width: 100%; aspect-ratio: 3/2; background: var(--blush); }
+.am-panel { background: rgba(255,255,255,.5); border: 1px solid var(--line); border-top: 0; padding: 26px 22px 24px; }
+.am-panel .eyebrow { margin-bottom: 8px; }
+.am-panel h3 { font-weight: 200; font-size: 27px; line-height: 1.15; margin-bottom: 10px; }
+.am-blurb { max-width: 520px; }
+.am-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 2px 20px; margin: 16px 0 4px; }
+.am-facts div { border-top: 1px solid var(--line); padding: 9px 0; }
+.am-facts dt { font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--rose); }
+.am-facts dd { font-size: 15px; }
+.am-avail { font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--rose); margin: 14px 0 2px; }
+.am-price { font-family: 'PP Editorial Old', serif; font-size: 21px; margin-bottom: 6px; }
+.am-price .am-per { font-family: 'Hanken Grotesk', sans-serif; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--rose); }
+.am-stay.sel .am-panel { border-color: var(--cherry); }
+.am-foot { font-size: 13px; opacity: .8; max-width: 560px; }
+.am-req { margin-top: 30px; max-width: 460px; }
+.am-sum { margin-top: 26px; border-top: 1px solid var(--line); padding-top: 14px; }
+.am-sumrow { display: flex; justify-content: space-between; gap: 18px; border-bottom: 1px solid var(--line); padding: 11px 0; font-size: 14px; }
+.am-sumrow .l { color: var(--rose); }
+.am-sumrow.total { border-bottom: 0; padding-top: 16px; font-family: 'PP Editorial Old', serif; font-size: 19px; }
+.am-sumrow.total .l { color: var(--ink); }
+
+/* travel inside the journey */
+.tv-route { font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--rose); margin-bottom: 10px; }
+.tv-row { border-top: 1px solid var(--line); }
+.tv-row:last-child { border-bottom: 1px solid var(--line); }
+.tv-head { display: grid; grid-template-columns: 1fr auto auto; align-items: baseline; gap: 10px 14px; width: 100%; text-align: left; background: none; border: 0; padding: 18px 0 6px; font: inherit; color: inherit; cursor: pointer; }
+.tv-head.static { cursor: default; }
+.tv-t { grid-column: 1; font-family: 'PP Editorial Old', serif; font-weight: 200; font-size: 23px; line-height: 1.2; }
+.tv-m { grid-column: 1; grid-row: 2; font-size: 13px; color: var(--ink); opacity: .78; }
+.tv-s { grid-column: 2; grid-row: 1; font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--cherry); }
+.tv-x { grid-column: 3; grid-row: 1; font-size: 17px; opacity: .55; }
+.tv-f { font-size: 12px; letter-spacing: .1em; color: var(--rose); padding: 0 0 16px; }
+.tv-body { padding: 4px 0 20px; }
+.tv-off { opacity: .55; border-top: 1px solid var(--line); padding-top: 14px; }
+
+/* your plan / your costs — hairline itinerary grammar */
+.pl-j { font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: var(--rose); margin: 26px 0 2px; }
+.pl-row, .cs-row { display: flex; gap: 16px; align-items: baseline; border-top: 1px solid var(--line); padding: 15px 0; }
+.pl-row:last-of-type, .cs-row:last-of-type { border-bottom: 1px solid var(--line); }
+.pl-d { flex: 0 0 88px; font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--rose); }
+.pl-b { flex: 1; min-width: 0; }
+.pl-t { display: block; font-family: 'PP Editorial Old', serif; font-weight: 200; font-size: 21px; line-height: 1.2; }
+.cs-row .pl-t { font-family: 'Hanken Grotesk', sans-serif; font-size: 15px; }
+.pl-s { display: block; font-size: 12.5px; color: var(--ink); opacity: .72; margin-top: 3px; }
+.pl-st { flex: 0 0 auto; font-size: 9.5px; letter-spacing: .2em; text-transform: uppercase; color: var(--cherry); text-align: right; }
+.cs-a { flex: 0 0 auto; font-size: 14px; text-align: right; }
+.cs-total { display: flex; justify-content: space-between; align-items: baseline; padding: 20px 0 0; margin-top: 4px; }
+.cs-total .l { font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--rose); }
+.cs-total .r { font-family: 'PP Editorial Old', serif; font-size: 27px; }
+.t-act { background: none; border: 0; border-bottom: 1px solid var(--ink); padding: 8px 0 3px; margin-top: 8px; font: inherit; font-size: 11px; letter-spacing: .18em; text-transform: uppercase; cursor: pointer; color: inherit; min-height: 44px; }
+.hs-list { list-style: none; padding: 0; }
+.hs-list li { border-top: 1px solid var(--line); padding: 11px 0; font-size: 14px; }
+.hs-list li:last-child { border-bottom: 1px solid var(--line); }
+
+/* details, guest information — editorial folds, no dashboard cards */
+.dt-fold { border-top: 1px solid var(--line); }
+.dt-fold:last-of-type { border-bottom: 1px solid var(--line); }
+.dt-fold > summary { list-style: none; cursor: pointer; display: flex; align-items: baseline; gap: 14px; padding: 18px 0; }
+.dt-fold > summary::-webkit-details-marker { display: none; }
+.dt-fold .dt-n { font-size: 10px; letter-spacing: .2em; color: var(--rose); }
+.dt-fold .dt-name { font-family: 'PP Editorial Old', serif; font-weight: 200; font-size: 23px; }
+.dt-fold .dt-x { margin-left: auto; font-size: 17px; opacity: .5; }
+.dt-fold[open] .dt-x { opacity: .9; }
+.dt-body { padding: 2px 0 26px; }
+@media (max-width: 700px) {
+  .pl-row, .cs-row { flex-wrap: wrap; }
+  .pl-d { flex-basis: 100%; }
+  .pl-st, .cs-a { margin-left: auto; }
+  .am-panel { padding: 22px 18px 20px; }
+}
 </style>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -976,9 +1060,9 @@ header.top .mark { white-space: nowrap; }
 <div class="lb-count" aria-live="polite"></div>
 </div>
 
-<script src="../assets/i18n/catalog.js?v=W1"></script>
-<script src="../assets/experiences.js?v=W1"></script>
-<script src="../assets/i18n/siyl-i18n.js?v=W1"></script>
-<script type="module" src="./app.mjs?v=W1"></script>
+<script src="../assets/i18n/catalog.js?v=X1"></script>
+<script src="../assets/experiences.js?v=X1"></script>
+<script src="../assets/i18n/siyl-i18n.js?v=X1"></script>
+<script type="module" src="./app.mjs?v=X1"></script>
 </body>
 </html>
