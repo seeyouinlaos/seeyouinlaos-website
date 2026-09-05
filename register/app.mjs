@@ -8,13 +8,13 @@
 import {
   WEDDING, CONTACTS, JOURNEY_MODULES, EVENTS, ACCOMMODATIONS, SELECTABLE_ACCOMMODATIONS, TRAIN,
   TRANSFERS, PACKAGE_INCLUSIONS, COPY, DEMO_MODE, PUBLICATION, TRAIN_REFERENCE, BERTH_PREFS, BANGKOK_STAYS, BANGKOK_STAY, POST_WEDDING, RETURN_STAY, lookupInvitation,
-} from './data.mjs?v=UR1';
+} from './data.mjs?v=V1';
 import {
   contributionPerGuest, partyCharges, partyTotal, money as usdMoney, displayMoney,
   trainContribution, transfersTotal, journeyTotal, postWeddingTotal,
   createInventory, remaining, availabilityLabel, requestAllocation,
   validateRegistration, buildNotification, nextInvitationState,
-} from './logic.mjs?v=UR1';
+} from './logic.mjs?v=V1';
 
 /* ---------------- persistent state ---------------- */
 const DRAFT_KEY = 'siyl.reg.draft.v2';
@@ -109,7 +109,7 @@ function itinerarySteps() {
       : { d: bh0.dates, t: bh0.name, s: 'Choose your Bangkok stay in My Journey', st: 'YOUR CHOICE' });
   }
   if (riders.length) {
-    steps.push({ d: TRAIN.date + ' · 20:25', t: 'Bangkok → Nong Khai', st: 'ARRANGED', s: 'SRT Special Express 25 · First Class Sleeper · Krung Thep Aphiwat → Nong Khai · 10h20 · ' + money(TRAIN.contributionPerGuest) + ' per guest · ' + riders.length + ' guest' + (riders.length > 1 ? 's' : '') + ' = ' + money((trainContribution(TRAIN, riders.length) || 0)) + ' · REQUESTED' });
+    steps.push({ d: TRAIN.date + ' · 20:25', t: 'Bangkok → Nong Khai', st: 'BOOKED', s: 'SRT Special Express 25 · First Class Sleeper · Krung Thep Aphiwat → Nong Khai · 10h20 · ' + money(TRAIN.contributionPerGuest) + ' per guest · ' + riders.length + ' guest' + (riders.length > 1 ? 's' : '') + ' = ' + money((trainContribution(TRAIN, riders.length) || 0)) });
     steps.push({ d: '25 FEB 2027 · 06:45', t: 'Arrive Nong Khai', s: 'Nong Khai Railway Station' });
     steps.push({ d: '25 FEB 2027', t: 'Nong Khai → Vientiane', s: arr
       ? 'Coordinated ground and border transfer · ' + money(55) + ' per guest · ' + riders.length + ' guest' + (riders.length > 1 ? 's' : '') + ' = ' + money(55 * riders.length) + ' · Guest Relations confirms the exact pickup details after train arrival'
@@ -118,12 +118,11 @@ function itinerarySteps() {
     steps.push({ d: 'Before the wedding', t: 'Arriving independently in Vientiane', s: 'Fly or travel on your own schedule; we meet you there', st: 'YOUR CHOICE' });
   }
   steps.push(acc
-    ? { d: (S.stay.mode === 'oneNight' ? '28 FEB – 01 MAR 2027 · 1 night' : acc.stay + ' · ' + acc.nights + ' nights'), t: acc.name + ' · Vientiane', s: (S.stay.mode === 'oneNight' ? 'One night · your costs · breakfast included' : 'First night · your contribution — second night · hosted'), st: S.stay.waitlist ? 'WAITLISTED' : 'BOOKED' }
+    ? { d: (S.stay.mode === 'oneNight' ? '28 FEB – 01 MAR 2027 · 1 night' : acc.stay + ' · ' + acc.nights + ' nights'), t: acc.name + ' · Vientiane', s: (S.stay.mode === 'oneNight' ? 'One night · your costs · breakfast included' : 'First night · your costs — second night · hosted'), st: S.stay.waitlist ? 'WAITLISTED' : 'BOOKED' }
     : { d: '27 FEB – 01 MAR 2027', t: 'Your wedding stay · Vientiane', s: 'Choose under My Stay', st: 'YOUR CHOICE' });
   if (S.scope && S.scope.laos) {
     /* personal plan mirrors actual participation — no wedding rows for guests
      * who have not joined the Vientiane segment (§10). */
-    steps.push({ d: '28 FEB 2027 · 05:00', t: 'Sacred Morning Ritual', s: 'Souphattra Heritage Vientiane' + (almsParticipants().length ? ' · Personal offering · Reserved (' + almsParticipants().length + ' × ' + money(ALMS_OFFERING_PP) + ')' : ''), st: 'COMPLIMENTARY', main: true });
     steps.push({ d: '28 FEB 2027 · 09:00 AM', t: 'The Temple Ceremony', s: 'Wat Ong Teu Temple, Vientiane', st: 'COMPLIMENTARY', main: true });
     steps.push({ d: 'After the return', t: 'Coffee & Cake', s: 'Souphattra Heritage Vientiane', st: 'COMPLIMENTARY', main: true });
     steps.push({ d: '28 FEB 2027 · 16:30', t: 'The Vow Ceremony', s: 'Souphattra Heritage Vientiane', st: 'COMPLIMENTARY', main: true });
@@ -131,7 +130,7 @@ function itinerarySteps() {
   }
   if (S.postWedding && S.postWedding.joined) {
     for (const c of POST_WEDDING.filter((x) => !x.onward)) {
-      steps.push({ d: c.date, t: c.label, s: (c.type === 'Train' ? 'First Class Train' : c.type) + (c.sub ? ' · ' + c.sub : '') + (c.contribution != null ? '' : ' · Guest Relations confirms') });
+      steps.push({ d: c.date, t: c.label, s: (c.type === 'Train' ? 'First Class Train' : c.type) + (c.sub ? ' · ' + c.sub : '') + (c.contribution != null ? '' : '') });
     }
     const ow = S.postWedding.onward;
     steps.push({ d: '06 MAR 2027', t: 'Your onward journey',
@@ -195,7 +194,7 @@ function roomPriceHtml(a) {
   }
   const per = contributionPerGuest(a);
   return '<div class="acc-price"><span class="amt">' + showAmount(per) + '</span>' +
-    '<span class="per">total contribution · per guest</span></div>';
+    '<span class="per">total costs · per guest</span></div>';
 }
 function guestAvailability(res, unitPlural) {
   if (!res) return '';
@@ -242,7 +241,7 @@ S.china ||= { kunming: null, lijiang: null };
 if (!S.v22) {
   S.guests && S.guests.forEach((g) => {
     const ev = g.events || {};
-    if ('alms' in ev && !('temple' in ev)) { ev.temple = !!ev.alms; ev.coffee = !!ev.alms; delete ev.alms; g.events = ev; }
+    if ('alms' in ev) { if (!('temple' in ev)) { ev.temple = !!ev.alms; ev.coffee = !!ev.alms; } delete ev.alms; g.events = ev; } /* MASTER-02: alms retired */
   });
   if (S.dressAck && ('alms' in S.dressAck) && !('temple' in S.dressAck)) { S.dressAck.temple = !!S.dressAck.alms; delete S.dressAck.alms; }
   S.v22 = 1;
@@ -695,7 +694,6 @@ function segModules(k) {
     { key: 'note', label: 'Bangkok Days', sum: 'Stay & travel live in steps 02 · 03', render: (w) => { w.innerHTML = '<p class="note">Bangkok is part of your journey. Choose the shared penthouse under <strong>02 · Your Stay</strong> and the overnight train under <strong>03 · Your Travel</strong>.</p>'; } },
   ];
   if (k === 'vte') return [
-    { key: 'morning', label: 'Sacred Morning Ritual', sum: 'Alms Giving · Tak Bat' + (almsTotal() ? ' · ' + money(almsTotal()) : ''), status: evJoinState('alms'), render: (w) => renderWeddingPresets(w, ['alms']) },
     { key: 'temple', label: 'Temple Ceremony', sum: '28 FEB · 09:00 · Wat Ong Teu', status: evJoinState('temple'), render: (w) => renderWeddingPresets(w, ['temple']) },
     { key: 'coffee', label: 'Coffee & Cake', sum: 'After the temple', status: evJoinState('coffee'), render: (w) => renderWeddingPresets(w, ['coffee']) },
     { key: 'vow', label: 'Vow Ceremony', sum: '28 FEB · 16:30', status: evJoinState('ceremony'), render: (w) => renderWeddingPresets(w, ['ceremony']) },
@@ -836,7 +834,7 @@ function renderHome() {
   const occ = acc ? S.stay.occupantGuestIds : [];
   const riders = S.guests.filter((g) => g.journey.train);
   const detailsMissing = S.guests.filter((g) => g.attending !== false && !(g.email || g.phone)).length;
-  const total = (function(){ const G = laosGate(acc, riders.length, S.transfers); return journeyTotal(G.acc, occ, TRAIN, G.riders, TRANSFERS, G.transfers) + laosExtraTotal(G.acc, occ); })() + pwTotal() + bkkTotal() + cnStaysTotal() + almsTotal();
+  const total = (function(){ const G = laosGate(acc, riders.length, S.transfers); return journeyTotal(G.acc, occ, TRAIN, G.riders, TRANSFERS, G.transfers) + laosExtraTotal(G.acc, occ); })() + pwTotal() + bkkTotal() + cnStaysTotal() + almsTotal() + trainCabinUpcharge();
   S._seg ||= null;
   const segRow = (k) => {
     const d = SEG_DEF()[k];
@@ -853,14 +851,18 @@ function renderHome() {
   };
   box.innerHTML =
     '<p class="note" style="margin:0 0 4px">' + esc(S.invitation.partyName) + '</p>' +
-    '<p class="note" style="margin:0 0 18px">Your journey is ready. Open a chapter to see and shape it — everything else stays quietly out of the way.</p>' +
+    '<p class="note" style="margin:0 0 10px">Your journey is ready. Open a chapter to see and shape it — everything else stays quietly out of the way.</p>' +
+    /* journey geography with semantic textual fallback (MASTER-02 §14) */
+    '<p class="cch-label" style="margin:0 0 2px">Thailand → Laos → China</p>' +
+    '<p class="note" role="text" aria-label="Route: Bangkok, Nong Khai as transit, Vientiane, Kunming, Lijiang" style="margin:0 0 6px;letter-spacing:.14em;text-transform:uppercase;font-size:11px">Bangkok → Nong Khai → Vientiane → Kunming → Lijiang</p>' +
+    '<svg viewBox="0 0 340 26" aria-hidden="true" style="width:100%;max-width:360px;height:26px;display:block;margin:0 0 16px"><line x1="8" y1="13" x2="332" y2="13" stroke="var(--ink)" stroke-width="1" opacity=".3"/><circle cx="8" cy="13" r="3.5" fill="var(--ink)"/><circle cx="90" cy="13" r="2.5" fill="var(--ink)" opacity=".55"/><circle cx="168" cy="13" r="4.5" fill="var(--cherry)"/><circle cx="250" cy="13" r="3.5" fill="var(--ink)"/><circle cx="332" cy="13" r="3.5" fill="var(--ink)"/><text x="2" y="7" style="font-size:8px;letter-spacing:.12em" fill="var(--ink)">BKK</text><text x="78" y="7" style="font-size:7px;letter-spacing:.1em" fill="var(--ink)" opacity=".6">NONG KHAI</text><text x="158" y="7" style="font-size:8px;letter-spacing:.12em" fill="var(--cherry)">VTE</text><text x="240" y="7" style="font-size:8px;letter-spacing:.12em" fill="var(--ink)">KMG</text><text x="322" y="7" style="font-size:8px;letter-spacing:.12em" fill="var(--ink)">LJG</text></svg>' +
     '<div class="cv-mods">' + segRow('bkk') + segRow('vte') + segRow('china') + '</div>' +
     '<div style="margin-top:22px">' +
     '<button type="button" class="jd-row" data-jump="cost"><span class="jr-l">Your Plan</span><span class="jr-v">Your personal itinerary</span></button>' +
     '<button type="button" class="jd-row" data-jump="each"><span class="jr-l">My Details</span><span class="jr-v">' + (detailsMissing ? detailsMissing + ' still needed' : 'Complete') + '</span></button>' +
     '<button type="button" class="jd-row" data-jump="review" style="border-bottom:1px solid var(--line)"><span class="jr-l">' + (S.submitted ? 'Registration' : 'Review & Send') + '</span><span class="jr-v">' + (S.submitted ? 'With Guest Relations' : 'One quiet look, then send') + '</span></button>' +
     '</div>' +
-    '<div class="jd-total"><span class="jr-l">Total contribution</span><strong>' + money(total) + '</strong></div>' +
+    '<div class="jd-total"><span class="jr-l">Total Costs</span><strong>' + money(total) + '</strong></div>' +
     grCardHtml();
   const openSeg = S._seg;
   if (openSeg) {
@@ -945,7 +947,7 @@ function travelChoiceBlock(trainLabel, trainFull) {
         '<div class="train-gal">' + ['train-01', 'train-04', 'train-03'].map((f, ti) => '<img src="../assets/images/train/' + f + '.jpg" alt="First Class Sleeper aboard Special Express No. 25 · view ' + (ti + 1) + '" loading="lazy" decoding="async"/>').join('') + '</div>' +
         '<div class="acc-actions"><button type="button" class="btn sm' + (sel ? '' : ' ghost') + '" data-choice="train" data-who="' + (g ? g.guestId : 'party') + '" aria-pressed="' + sel + '">' +
         (sel ? 'Joining the train' + who : (trainFull ? 'Join the waitlist' + who : 'I\u2019m joining' + who)) + '</button></div>' +
-        (sel ? '<div class="acc-avail" style="border-top:none;padding-top:8px">REQUESTED · Guest Relations confirms your seats personally</div>' + (g ? '' : trainDetailBlock()) : '') +
+        (sel ? '<div class="acc-avail" style="border-top:none;padding-top:8px">BOOKED</div>' + (g ? '' : trainDetailBlock()) : '') +
         '</article>';
     }
     return '<article class="tj-opt' + (sel ? ' sel' : '') + '" data-opt="own">' +
@@ -990,7 +992,7 @@ function wireTravelChoice(box) {
     }
     saveDraft(); renderStep(cur); renderSummary();
     announce(toTrain
-      ? 'The Overnight Train is part of your journey — ' + money(TRAIN.contributionPerGuest) + ' per participating guest, REQUESTED.'
+      ? 'The Overnight Train is part of your journey — ' + money(TRAIN.contributionPerGuest) + ' per participating guest — BOOKED.'
       : 'You are arriving independently in Vientiane; Guest Relations meets you there.');
   }));
 }
@@ -1407,7 +1409,7 @@ function renderStay() {
       (a.kind === 'airbnb'
         ? '<div class="acc-hosted"><span>Complimentary stay</span><span>Limited availability</span><span class="rh-b">Personally coordinated by Guest Relations</span></div>'
         : bookable
-          ? '<div class="acc-hosted"><span>First night · guest contribution</span><span class="rh-b">Second night · hosted by</span><span class="hs">Haruthai&nbsp;&amp;&nbsp;Suthep</span><span>Breakfast included</span></div>'
+          ? '<div class="acc-hosted"><span>First night · your costs</span><span class="rh-b">Second night · hosted by</span><span class="hs">Haruthai&nbsp;&amp;&nbsp;Suthep</span><span>Breakfast included</span></div>'
           : '') +
       roomEssentials(a, bookable
         ? (selected ? 'BOOKED · your current room'
@@ -1673,7 +1675,7 @@ function renderTravel() {
     '<p class="note" style="margin-bottom:6px">Your arrival and departure are coordinated personally by Guest Relations — nothing to organise here. If a detail is ever needed, they will simply ask you.</p>' +
     (trainy ? '<p class="note" style="margin-bottom:6px">You arrive with the Night Train at Nong Khai Railway Station — the onward journey to Souphattra Heritage is shown first.</p>' : '') +
     renderTransfers(trainy) +
-    '<p class="note" style="margin-top:18px">Pickup and transfers are requests — statuses move from REQUESTED to UNDER REVIEW to CONFIRMED as Guest Relations coordinates them.</p></div>';
+    '<p class="note" style="margin-top:18px">Pickup and transfers are requests — your selections remain BOOKED through your journey.</p></div>';
 }
 /* ---------------- transfer products (Owner price master) ----------------
  * FULL SERVICE (owner §13-18): the guest sees service, route, inclusions and
@@ -1712,7 +1714,7 @@ function renderTransfers(trainy) {
         ? '<button type="button" class="btn sm" data-trf-remove="' + t.id + '">Remove</button>'
         : '<button type="button" class="btn sm" data-trf-add="' + t.id + '">Add to journey</button>') +
       '</div>' +
-      (sel ? '<div class="acc-avail" style="border-top:none;padding-top:8px">' + (t.id === 'nongkhai-vte' ? 'BOOKED · pickup follows your train arrival' : 'REQUESTED · Guest Relations confirms every detail with you personally') + '</div>' : '') +
+      (sel ? '<div class="acc-avail" style="border-top:none;padding-top:8px">' + (t.id === 'nongkhai-vte' ? 'BOOKED · pickup follows your train arrival' : 'BOOKED') + '</div>' : '') +
       '</article>';
   };
   // contextual order (§8): the train guest sees the Nong Khai arrival first
@@ -1741,7 +1743,7 @@ function wireTransfers(box) {
     if (!selectedTransfer(id)) S.transfers.push({ transferId: id, units: 1, details: {} });
     saveDraft(); renderStep(cur); renderSummary();
     const t = TRANSFERS.find((x) => x.id === id);
-    announce(t.name + ' added to your journey' + (t.pricePerUnit ? ': ' + money(t.pricePerUnit) + (t.perGuest ? ' per guest' : ' per vehicle') : ' — complimentary') + ', REQUESTED. Guest Relations arranges the details with you personally.');
+    announce(t.name + ' added to your journey' + (t.pricePerUnit ? ': ' + money(t.pricePerUnit) + (t.perGuest ? ' per guest' : ' per vehicle') : ' — complimentary') + '.');
   }));
   box.querySelectorAll('[data-trf-remove]').forEach((b) => b.addEventListener('click', () => {
     const id = b.getAttribute('data-trf-remove');
@@ -1999,7 +2001,7 @@ function renderCost() {
   const occ = acc ? S.stay.occupantGuestIds : [];
   const riders = S.guests.filter((g) => g.journey.train);
   const tc = trainContribution(TRAIN, riders.length) || 0;
-  const total = (function(){ const G = laosGate(acc, riders.length, S.transfers); return journeyTotal(G.acc, occ, TRAIN, G.riders, TRANSFERS, G.transfers) + laosExtraTotal(G.acc, occ); })() + pwTotal() + bkkTotal() + cnStaysTotal() + almsTotal();
+  const total = (function(){ const G = laosGate(acc, riders.length, S.transfers); return journeyTotal(G.acc, occ, TRAIN, G.riders, TRANSFERS, G.transfers) + laosExtraTotal(G.acc, occ); })() + pwTotal() + bkkTotal() + cnStaysTotal() + almsTotal() + trainCabinUpcharge();
   const neutral = acc && acc.contributionPerGuest == null;
   /* v1.3 typography roles: date · product/route · amount — chapter headers
    * separate PRE-WEDDING / THE WEDDING / POST-WEDDING; no boxes per line. */
@@ -2009,7 +2011,7 @@ function renderCost() {
   let html = coverageHtml() + journeyStripHtml() +
     '<div class="cch-label" style="margin-top:20px">Your costs</div>' +
     '<p class="note" style="margin-bottom:20px">Here you can see which costs you cover yourself and what Haruthai & Suthep are hosting for you.</p>';
-  const open = []; // TO FINALIZE WITH GUEST RELATIONS
+  const open = []; // open items
 
   // 01 · PRE-WEDDING JOURNEY
   let pre = '';
@@ -2183,7 +2185,7 @@ function renderReview() {
     '<div class="rv-sec"><div class="rv-head"><span class="t">' + t + '</span><button type="button" class="edit" data-goto="' + step + '">Edit</button></div><dl>' +
     rows.map((r) => '<div><dt>' + r[0] + '</dt><dd>' + r[1] + '</dd></div>').join('') + '</dl></div>';
   const journeyLine = (g) => [
-    g.journey.bangkok && 'Bangkok Journey', g.journey.train && 'Overnight Train · seat REQUESTED',
+    g.journey.bangkok && 'Bangkok Journey', g.journey.train && 'Overnight Train · BOOKED',
     !g.journey.train && g.journey.independent && 'Independent arrival'].filter(Boolean).join(' · ') || '—';
   const eventLine = (g) => EVENTS.filter((e) => g.events[e.id]).map((e) => e.label).join(' · ') || 'None';
   let html = '';
@@ -2203,16 +2205,16 @@ function renderReview() {
     html += sec('Your Journey', idx('journey'), [
       ['Before the wedding', anyBkk ? 'Bangkok Journey' + (bkkSel ? ' · ' + esc(bkkSel.name) + ' · BOOKED' : '') : 'Straight to the wedding'],
       ['Journey to Vientiane', jRiders.length
-        ? 'Overnight Train · ' + jRiders.length + ' seat' + (jRiders.length > 1 ? 's' : '') + (jRiders.length < S.guests.length ? ' · ' + jRiders.map((g) => esc(g.preferredName)).join(' & ') : '') + ' · REQUESTED'
+        ? 'Overnight Train · ' + jRiders.length + ' seat' + (jRiders.length > 1 ? 's' : '') + (jRiders.length < S.guests.length ? ' · ' + jRiders.map((g) => esc(g.preferredName)).join(' & ') : '') + ' · BOOKED'
         : 'Own arrangement — Guest Relations can assist'],
-      ['Arrival in Vientiane', arrSel.length ? arrSel.map((t) => esc(t.name)).join(' · ') + ' · REQUESTED' : 'Own arrangement — Guest Relations can assist'],
+      ['Arrival in Vientiane', arrSel.length ? arrSel.map((t) => esc(t.name)).join(' · ') + ' · BOOKED' : 'Own arrangement — Guest Relations can assist'],
     ]);
   }
   const riders = S.guests.filter((g) => g.journey.train);
   html += sec('Overnight Train', idx('journey'), riders.length ? [
     ['Date', esc(TRAIN.date) + ' · ' + esc(TRAIN.times) + ' · First Class Sleeper'],
     ['Joined', riders.map((g) => esc(g.preferredName) + (g.berth ? ' · ' + esc(g.berth) : '')).join('<br/>')],
-    ['Seats requested', String(riders.length) + ' · REQUESTED'],
+    ['Seats booked', String(riders.length) + ' · BOOKED'],
     ['Arrival', '27 FEB 2027 · Nong Khai Railway Station'],
     ['Onward transfer', trainOnwardLine()],
   ].concat(S.trainNote ? [['Note', esc(S.trainNote)]] : []) : [['Joined', 'Not joined']]);
@@ -2231,21 +2233,21 @@ function renderReview() {
   html += sec('Your Stay', idx('stay'), acc ? [
     ['Dates', esc(acc.stay) + ' · ' + acc.nights + ' nights'],
     ['Requested', esc(acc.name) + ' · Vientiane'],
-    ['Status', S.stay.waitlist ? 'WAITLISTED' : 'REQUESTED · UNDER REVIEW'],
+    ['Status', S.stay.waitlist ? 'WAITLISTED' : 'BOOKED'],
     ...(acc.contributionPerGuest == null
-      ? [['Guests', String(occ.length)], ['Contribution', 'Complimentary · coordinated by Guest Relations']]
+      ? [['Guests', String(occ.length)], ['Your Costs', 'Complimentary']]
       : [['Guests', occ.length + ' · ' + money(contributionPerGuest(acc)) + ' per guest'],
          ['Contribution', occ.map((id) => { const g = S.guests.find((x) => x.guestId === id); return esc(g ? g.preferredName : id) + ' ' + money(contributionPerGuest(acc)); }).join(' · ')],
          ['Total', money(partyTotal(acc, occ))],
          ['Second night', 'Complimentary · hosted by<span class="hs">Haruthai&nbsp;&amp;&nbsp;Suthep</span>']]),
   ] : [['Requested', 'No stay selected yet'], ['Action', 'Please choose your room under My Stay before sending']]);
   const trv = S.arrival.shared !== false
-    ? [['Together', esc([S.arrival.date, S.arrival.time, S.arrival.ref].filter(Boolean).join(' · ') || '—') + (S.arrival.pickupRequested ? ' · pickup REQUESTED' : '')]]
-    : S.guests.map((g) => { const a = S.arrivalByGuest[g.guestId] || {}; return [esc(g.preferredName), esc([a.date, a.time, a.ref].filter(Boolean).join(' · ') || '—') + (a.pickupRequested ? ' · pickup REQUESTED' : '')]; });
+    ? [['Together', esc([S.arrival.date, S.arrival.time, S.arrival.ref].filter(Boolean).join(' · ') || '—') + (S.arrival.pickupRequested ? ' · pickup BOOKED' : '')]]
+    : S.guests.map((g) => { const a = S.arrivalByGuest[g.guestId] || {}; return [esc(g.preferredName), esc([a.date, a.time, a.ref].filter(Boolean).join(' · ') || '—') + (a.pickupRequested ? ' · pickup BOOKED' : '')]; });
   html += sec('Arrival & Departure', idx('journey'), trv.concat([
     ['Departure', departureSelections().length
-      ? departureSelections().map((t) => esc(t.name)).join(' · ') + ' · REQUESTED'
-      : 'Follows your onward itinerary · to finalize with Guest Relations'],
+      ? departureSelections().map((t) => esc(t.name)).join(' · ') + ' · BOOKED'
+      : 'Follows your onward itinerary · OPEN'],
   ]));
   if (bangkokStayActive()) {
     const bh = BANGKOK_STAYS.find((x) => x.id === S.bangkokStay.property) || BANGKOK_STAYS[0];
@@ -2274,7 +2276,7 @@ function renderReview() {
         const n = t.perGuest ? Math.max(S.guests.filter((g) => g.journey.train).length, 1) : (s.units || 1);
         return [esc(t.name || s.transferId),
           n + (t.perGuest ? ' guest' + (n > 1 ? 's' : '') : ' unit' + (n > 1 ? 's' : '')) + ' × ' + money(t.pricePerUnit || 0) + ' = ' + money((t.pricePerUnit || 0) * n) +
-          ' · ' + esc([d.date, d.time, d.ref].filter(Boolean).join(' · ') || 'details open') + ' · REQUESTED'];
+          ' · ' + esc([d.date, d.time, d.ref].filter(Boolean).join(' · ') || 'details open') + ' · BOOKED'];
       })
     : [['Requested', 'None']]);
   const jcRiders = S.guests.filter((g) => g.journey.train).length;
@@ -2291,8 +2293,8 @@ function renderReview() {
   if (S.postWedding && S.postWedding.joined) jcRows.push(['Post Wedding Journey', '04 MAR 2027 · Kunming → Lijiang · First Class Train · ' + money(pwTotal())]);
   if (cnStayTotal('kunming')) jcRows.push(['Kunming stay', '01 – 04 MAR 2027 · Wanxiang Yueju Designer Homestay · ' + money(cnStayTotal('kunming'))]);
   if (cnStayTotal('lijiang')) jcRows.push(['Lijiang stay', '04 – 06 MAR 2027 · Luye Baisha · Rizhao Jinshan · ' + money(cnStayTotal('lijiang'))]);
-  jcRows.push(['Total costs', money((function(){ const G = laosGate(acc, jcRiders, S.transfers); return journeyTotal(G.acc, occ, TRAIN, G.riders, TRANSFERS, G.transfers) + laosExtraTotal(G.acc, occ); })() + pwTotal() + bkkTotal() + cnStaysTotal() + almsTotal())]);
-  html += sec('Your Contribution', idx('cost'), jcRows);
+  jcRows.push(['Total costs', money((function(){ const G = laosGate(acc, jcRiders, S.transfers); return journeyTotal(G.acc, occ, TRAIN, G.riders, TRANSFERS, G.transfers) + laosExtraTotal(G.acc, occ); })() + pwTotal() + bkkTotal() + cnStaysTotal() + almsTotal() + trainCabinUpcharge())]);
+  html += sec('Your Costs', idx('cost'), jcRows);
   html += sec('Each of You', idx('each'), S.guests.map((g) => {
     const detail = (g.allergyDetail || '').trim();
     const parts = ['Dietary preference · ' + esc(g.diet)];
@@ -2301,7 +2303,7 @@ function renderReview() {
       : 'Allergy · None reported');
     if (g.phone) parts.push('Phone ' + esc(g.phone));
     if (g.dob) parts.push('Born ' + esc(g.dob));
-    if (g.spa && g.spa.requested) parts.push('spa REQUESTED');
+    if (g.spa && g.spa.requested) parts.push('spa OPEN');
     return [esc(g.preferredName), parts.join(' · ')];
   }));
   if (S.additionalGuestRequest) html += sec('Additional guest request', idx('party'), [['Request', esc(S.additionalGuestRequest) + ' — subject to Guest Relations approval']]);
@@ -2316,7 +2318,7 @@ function trainOnwardLine() {
   // §9: derived from the transfer selection itself — never a second data store.
   const onward = (S.transfers || []).map((x) => TRANSFERS.find((t) => t.id === x.transferId))
     .find((t) => t && (t.id === 'nongkhai-vte' || t.id === 'shuttle-shared'));
-  if (onward) return esc(onward.name) + ' · REQUESTED';
+  if (onward) return esc(onward.name) + ' · BOOKED';
   return 'Own arrangement — Guest Relations can assist';
 }
 function currentRegistration() {
@@ -2436,23 +2438,26 @@ document.getElementById('return-journey').addEventListener('click', () => show(i
 function renderSummary() {
   const el = document.getElementById('summary');
   if (!S.invitation) { el.hidden = true; return; }
-  el.hidden = false;
   const acc = currentAcc();
   const trainCount = S.guests.filter((g) => g.journey.train).length;
   const sel = [];
-  if (trainCount) sel.push(trainCount + ' train seat' + (trainCount > 1 ? 's' : '') + ' · REQUESTED');
-  if (acc) sel.push(esc(acc.name) + (S.stay.waitlist ? ' · WAITLISTED' : ' · REQUESTED'));
+  if (trainCount) sel.push(trainCount + ' train seat' + (trainCount > 1 ? 's' : '') + ' · BOOKED');
+  if (acc) sel.push(esc(acc.name) + (S.stay.waitlist ? ' · WAITLISTED' : ' · BOOKED'));
   if ((S.transfers || []).length) sel.push(S.transfers.length + ' transfer' + (S.transfers.length > 1 ? 's' : ''));
-  if (bangkokStayActive()) sel.push('Bangkok stay · REQUESTED');
-  if (S.postWedding && S.postWedding.joined) sel.push('Post Wedding Journey · REQUESTED');
+  if (bangkokStayActive()) sel.push('Bangkok stay · BOOKED');
+  if (S.postWedding && S.postWedding.joined) sel.push('Post Wedding Journey · BOOKED');
   const covGaps = coverageModel().gaps.length;
   sel.push(covGaps === 0 ? '✓ Journey complete' : covGaps === 1 ? '1 thing still needed' : covGaps + ' things still needed');
-  const total = (function(){ const G = laosGate(acc, trainCount, S.transfers); return journeyTotal(G.acc, acc ? S.stay.occupantGuestIds : [], TRAIN, G.riders, TRANSFERS, G.transfers) + laosExtraTotal(G.acc, acc ? S.stay.occupantGuestIds : []); })() + pwTotal() + bkkTotal() + cnStaysTotal() + almsTotal();
+  const total = (function(){ const G = laosGate(acc, trainCount, S.transfers); return journeyTotal(G.acc, acc ? S.stay.occupantGuestIds : [], TRAIN, G.riders, TRANSFERS, G.transfers) + laosExtraTotal(G.acc, acc ? S.stay.occupantGuestIds : []); })() + pwTotal() + bkkTotal() + cnStaysTotal() + almsTotal() + trainCabinUpcharge();
+  /* editorial quiet: no persistent monetary total while nothing guest-paid
+   * is selected (MASTER-02) */
+  if (!total) { el.hidden = true; return; }
+  el.hidden = false;
   const open = !!S._sumOpen;
   el.classList.toggle('sum-open', open);
   el.innerHTML =
     '<div class="sum-compact" style="display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%">' +
-    '<span class="sum-label" style="white-space:nowrap">Your journey</span>' +
+    '<span class="sum-label" style="white-space:nowrap">Your Costs</span>' +
     '<span class="sum-amt" style="white-space:nowrap">' + money(total) + '</span>' +
     '<button type="button" class="btn sm ghost" id="sum-toggle" style="white-space:nowrap;color:inherit;border-color:rgba(255,255,255,.4)">' + (open ? 'Close' : 'View summary') + '</button>' +
     '</div>' +
@@ -2660,7 +2665,7 @@ function renderScopeBlock(mode, targetBox, segFilter, part) {
         '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:6px 0">' +
         (BANGKOK_STAYS[0].images || []).slice(0, 3).map((im, ix) => '<img src="' + im + '" alt="' + esc(BANGKOK_STAYS[0].name) + ' — view ' + (ix + 1) + '" loading="lazy" decoding="async" style="width:100%;height:96px;object-fit:cover;display:block"/>').join('') + '</div>' +
         '<div class="acc-avail" style="margin:0 0 6px">Breakfast included</div>' +
-        '<div class="trf-price">' + money(BANGKOK_STAY.ratePerGuestNight) + ' per person / night<br/>' + bkkNights() + ' nights × ' + bkkTravellers() + ' guests<br/><strong>Total contribution · ' + money(BANGKOK_STAY.ratePerGuestNight * bkkNights() * bkkTravellers()) + '</strong></div>' +
+        '<div class="trf-price">' + money(BANGKOK_STAY.ratePerGuestNight) + ' per person / night<br/>' + bkkNights() + ' nights × ' + bkkTravellers() + ' guests<br/><strong>Total Costs · ' + money(BANGKOK_STAY.ratePerGuestNight * bkkNights() * bkkTravellers()) + '</strong></div>' +
         (bkkReq ? '<div class="acc-avail" style="margin-top:8px">BOOKED</div>' : '') +
         (S._bkkDet ? '<div style="margin-top:8px">' + [
           'The Penthouse — a spacious private two-level penthouse in Sathorn for groups: six bedrooms, generous shared living areas and direct lift access to the residential floors. A calm Bangkok base in a residential part of Sathorn, close to restaurants, cafés and central Bangkok.',
@@ -2686,11 +2691,18 @@ function renderScopeBlock(mode, targetBox, segFilter, part) {
     const indepAll = S.guests.filter((g) => g.attending !== false).every((g) => g.journey.independent);
     const bvMode = ridersN ? 'with' : (indepAll ? 'own' : null);
 
+    const cabinPrivate = ridersN === 1 && S.trainCabin === 'private';
+    const trainBase = cabinPrivate ? 130 : TRAIN.contributionPerGuest * (ridersN || attendingCount());
     if (part !== 'stay') inner += '<div id="transit-bkk-vte" style="margin-top:6px">' +
       travelChoice('tj-bkk-vte', '24 FEB 2027 → 25 FEB 2027 · 1 night · Bangkok → Vientiane', bvMode,
         'Bangkok → Nong Khai → Vientiane · overnight package<br/>' +
-        money(TRAIN.contributionPerGuest) + ' PER GUEST · package · × ' + (ridersN || attendingCount()) + ' guests<br/>' +
-        '<strong>Transport total · ' + money(TRAIN.contributionPerGuest * (ridersN || attendingCount())) + '</strong>',
+        (ridersN === 1
+          ? (cabinPrivate ? 'Private cabin · USD 130 · 1 guest' : money(TRAIN.contributionPerGuest) + ' PER GUEST · one berth · 1 guest')
+          : money(TRAIN.contributionPerGuest) + ' PER GUEST · package · × ' + (ridersN || attendingCount()) + ' guests') + '<br/>' +
+        (ridersN === 1
+          ? '<span style="display:inline-flex;gap:10px;margin:4px 0"><button type="button" class="btn sm' + (!cabinPrivate ? '' : ' ghost') + '" data-cabin="berth">One berth · USD 75</button><button type="button" class="btn sm' + (cabinPrivate ? '' : ' ghost') + '" data-cabin="private">Private cabin · USD 130</button></span><br/>'
+          : '') +
+        '<strong>Transport total · ' + money(trainBase) + '</strong>',
         'Own arrangement noted — USD 0. Fly or travel on your own schedule; we meet you in Vientiane.',
         ['../assets/images/train/train-01.jpg', '../assets/images/train/train-04.jpg', '../assets/images/train/train-03.jpg'],
         '24 FEB 2027 · 20:25 · Bangkok departure · Krung Thep Aphiwat<br/>' +
@@ -2870,6 +2882,10 @@ function renderScopeBlock(mode, targetBox, segFilter, part) {
       saveDraft(); renderStep(cur); renderSummary();
     }));
   }
+  box.querySelectorAll('[data-cabin]').forEach((b) => b.addEventListener('click', () => {
+    S.trainCabin = b.getAttribute('data-cabin') === 'private' ? 'private' : 'berth';
+    saveDraft(); renderStep(cur); renderSummary();
+  }));
   box.querySelectorAll('[data-tj-lb]').forEach((im) => im.addEventListener('click', () => {
     const rec = TJ_IMGS[im.getAttribute('data-tj-lb')];
     if (rec) openLightbox(rec, parseInt(im.getAttribute('data-tj-lbix'), 10) || 0);
@@ -2921,52 +2937,18 @@ function renderScopeBlock(mode, targetBox, segFilter, part) {
  * individual. The reason it is not hosted is cultural/religious, never
  * commercial — in Lao Buddhist tradition the offering must come from the
  * person who presents it. */
-const ALMS_OFFERING_PP = 15;
-function almsParticipants() {
-  if (!(S.scope && S.scope.laos)) return [];
-  return S.guests.filter((g) => g.attending !== false && (g.events || {}).alms && g.almsOffering);
+/* MASTER-02 (406e140): Alms Giving is NOT an active wedding event. The offering
+ * product is retired; totals contribute zero and no UI renders it. */
+const ALMS_OFFERING_PP = 0;
+/* MASTER-02 train cost logic: 1 guest one berth USD 75 · 1 guest private cabin
+ * USD 130. The upcharge flows through the single calculation layer. */
+function trainCabinUpcharge() {
+  const riders = S.guests.filter((g) => g.journey && g.journey.train).length;
+  return (riders === 1 && S.trainCabin === 'private') ? 55 : 0;
 }
-function almsTotal() { return almsParticipants().length * ALMS_OFFERING_PP; }
-function almsOfferingHtml(st) {
-  if (st !== 'yes') return '';
-  const eligible = S.guests.map((g, i) => ({ g, i })).filter(({ g }) => g.attending !== false && (g.events || {}).alms);
-  const n = almsParticipants().length;
-  const det = !!S._almsDet;
-  return '<div style="border-top:1px solid rgba(33,31,28,.14);margin-top:14px;padding-top:12px">' +
-    '<p class="note" style="margin:0 0 10px"><strong>Ceremony</strong> — part of the wedding morning · complimentary.</p>' +
-    '<div class="cch-label">The Offering</div>' +
-    '<img src="../assets/images/alms/ritual-offering-basket.jpg" alt="The personal offering baskets, prepared for the morning" loading="lazy" decoding="async" style="width:100%;height:170px;object-fit:cover;display:block;margin:8px 0"/>' +
-    '<p class="note" style="margin:0 0 6px">For those who wish to take part in the alms-giving itself, we will prepare an individual offering for you in advance.</p>' +
-    '<p class="note" style="margin:0 0 6px"><strong>Offering contribution · USD 15 per participant</strong></p>' +
-    '<p class="note" style="margin:0 0 6px">In Lao Buddhist tradition, the offering is a personal act of giving and merit-making. For that reason, it should come from the person who presents it rather than from the hosts.</p>' +
-    '<p class="note" style="margin:0 0 6px">If tradition allowed us to cover this for you, we would gladly do so. Here, the personal contribution is part of the meaning of the ritual itself.</p>' +
-    '<p class="note" style="margin:0 0 10px">Please reserve your offering in advance so that we can prepare the correct number for the morning.</p>' +
-    eligible.map(({ g, i }) => {
-      const on = !!g.almsOffering;
-      return '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:7px 0;border-top:1px solid rgba(33,31,28,.08)">' +
-        '<strong style="flex:1;min-width:120px">' + esc(g.name || 'Guest ' + (i + 1)) + '</strong>' +
-        (on ? '<span class="cch-label">Offering reserved</span><button type="button" class="btn sm ghost" data-alms-off="' + i + '">Remove</button>'
-            : '<button type="button" class="btn sm" data-alms-on="' + i + '">Reserve your offering</button>') +
-        '</div>';
-    }).join('') +
-    (n ? '<p class="note" style="margin:8px 0 0"><strong>' + n + ' offering' + (n > 1 ? 's' : '') + ' · USD 15 × ' + n + ' = ' + money(almsTotal()) + '</strong></p>' : '') +
-    '<button type="button" class="btn sm ghost" data-alms-det style="margin-top:12px" aria-expanded="' + det + '">' + (det ? 'Hide details' : 'More details') + '</button>' +
-    (det ? '<div style="padding-top:10px">' +
-      '<p class="note" style="margin:0 0 6px">Tak Bat — also called Sai Bat — is the traditional Lao morning alms-giving. At dawn, monks leave their temples and walk silently in line with their alms bowls while people wait along the route and place sticky rice, fruit and small food into the bowls. It is a living religious tradition, not a staged attraction — a daily bond between the community and the monastic order.</p>' +
-      '<p class="note" style="margin:0 0 10px">Giving is understood as merit-making: the material gift carries the spiritual dimension of humility, respect and mindfulness with it.</p>' +
-      '<div class="cch-label">Respecting the ritual</div>' +
-      '<ul class="note" style="margin:6px 0 0;padding-left:18px">' +
-      '<li>Dress modestly.</li>' +
-      '<li>Remain quiet and arrive before the monks.</li>' +
-      '<li>Follow local guidance.</li>' +
-      '<li>Sit or kneel lower than the monks when presenting your offering.</li>' +
-      '<li>Never touch the monks — women should take particular care to avoid any physical contact.</li>' +
-      '<li>Do not block or follow the procession.</li>' +
-      '<li>No flash photography.</li>' +
-      '<li>Participate respectfully rather than treating the ritual as a photo opportunity.</li>' +
-      '</ul></div>' : '') +
-    '</div>';
-}
+function almsParticipants() { return []; }
+function almsTotal() { return 0; }
+function almsOfferingHtml() { return ''; } /* retired per MASTER-02 */
 function renderWeddingPresets(targetBox, onlyKeys) {
   const box = targetBox || document.getElementById('events-box');
   if (!box || box.querySelector('.wed-presets')) return;
@@ -2977,11 +2959,8 @@ function renderWeddingPresets(targetBox, onlyKeys) {
   /* ONE shared event-participation component (owner completion pass §9-§17):
    * participation JOINING / NOT JOINING per event; joining reveals the dress
    * code + ONE required acknowledgement (semantic state, локale-free). */
-  S.dressAck ||= {}; S.dressAck.coffee ||= false; S.dressAck.alms ||= false;
+  S.dressAck ||= {}; S.dressAck.coffee ||= false;
   const EVJ = [
-    ['alms', 'Sacred Morning Ritual', '28 FEB 2027 · 05:00 · Souphattra Heritage Vientiane', 'Lao Traditional Dress',
-      ['../alms/ritual-dawn-01', '../alms/ritual-offering-bowl'],
-      'The wedding day begins with the quiet Lao morning ritual of giving alms.', null],
     ['temple', 'The Temple Ceremony', '28 FEB 2027 · 09:00 AM – approx. 12:00 PM · Wat Ong Teu Temple, Vientiane', 'Lao Traditional Dress',
       ['tradition-01', 'tradition-02', 'tradition-03'],
       'A Buddhist morning ceremony at Wat Ong Teu — unhurried and full of meaning.',
@@ -3003,14 +2982,13 @@ function renderWeddingPresets(targetBox, onlyKeys) {
   };
   /* editorial image rhythm (§05): key moment = full gallery · supporting =
    * one image · documentary = two · typographic = none. */
-  const RHYTHM = { temple: 3, dinner: 3, alms: 2, coffee: 1, ceremony: 0 };
+  const RHYTHM = { temple: 3, dinner: 3, coffee: 1, ceremony: 0 };
   const html = EVJ.filter(([k]) => !onlyKeys || onlyKeys.includes(k)).map(([k, name, meta, dress, imgs, desc, maps]) => {
     const st = evState(k);
     const ack = !!S.dressAck[k];
     const nImg = RHYTHM[k] != null ? RHYTHM[k] : 3;
     const use = imgs.slice(0, nImg);
     return '<div class="mod" data-evj="' + k + '"><div class="when">' + meta + ' · COMPLIMENTARY</div><h3>' + name + '</h3>' +
-      (k === 'alms' ? '<div class="cch-label" style="margin-top:2px">Alms Giving · Tak Bat</div>' : '') +
       (use.length ? '<div style="display:grid;grid-template-columns:repeat(' + use.length + ',1fr);gap:6px;margin:10px 0 8px">' +
       use.map((f, ix) => '<img src="../assets/images/dress/' + f + '.jpg" alt="' + name + ' — view ' + (ix + 1) + '" data-ev-lb="' + k + '" data-ev-ix="' + ix + '" loading="lazy" decoding="async" style="width:100%;height:' + (use.length === 1 ? '150' : '96') + 'px;object-fit:cover;display:block;cursor:zoom-in"/>').join('') + '</div>' : '') +
       '<p class="note" style="margin:0 0 8px">' + desc + '</p>' +
@@ -3023,7 +3001,6 @@ function renderWeddingPresets(targetBox, onlyKeys) {
           '<label class="confirm-row" style="margin-top:4px"><input type="checkbox" data-evj-ack="' + k + '"' + (ack ? ' checked' : '') + '/><span>I have read and understand the dress code</span></label>' +
           (ack ? '' : '<p class="note" style="margin:4px 0 0">Dress code — action needed</p>')
         : '') +
-      (k === 'alms' ? almsOfferingHtml(st) : '') +
       '</div>';
   }).join('');
   box.insertAdjacentHTML('afterbegin', '<div class="guest-block wed-presets">' + (onlyKeys ? '' : '<div class="cch-label">The wedding · are you joining?</div>') + html + '</div>');
@@ -3037,26 +3014,12 @@ function renderWeddingPresets(targetBox, onlyKeys) {
     S.guests.forEach((g) => { if (g.attending === false) return; g.events = g.events || {}; g.events[k] = v === 'yes'; });
     S._evDecided = S._evDecided || {}; S._evDecided[k] = true;
     if (v === 'no') S.dressAck[k] = false;
-    /* leaving the morning withdraws every personal offering immediately */
-    if (k === 'alms' && v === 'no') S.guests.forEach((g) => { g.almsOffering = false; });
     saveDraft(); renderStep(cur); renderSummary();
   }));
   box.querySelectorAll('[data-evj-ack]').forEach((el) => el.addEventListener('change', () => {
     S.dressAck[el.getAttribute('data-evj-ack')] = el.checked;
     saveDraft(); renderStep(cur); renderSummary();
   }));
-  box.querySelectorAll('[data-alms-on]').forEach((b) => b.addEventListener('click', () => {
-    const i = parseInt(b.getAttribute('data-alms-on'), 10);
-    if (S.guests[i]) S.guests[i].almsOffering = true;
-    saveDraft(); renderStep(cur); renderSummary();
-  }));
-  box.querySelectorAll('[data-alms-off]').forEach((b) => b.addEventListener('click', () => {
-    const i = parseInt(b.getAttribute('data-alms-off'), 10);
-    if (S.guests[i]) S.guests[i].almsOffering = false;
-    saveDraft(); renderStep(cur); renderSummary();
-  }));
-  const ad = box.querySelector('[data-alms-det]');
-  if (ad) ad.addEventListener('click', () => { S._almsDet = !S._almsDet; renderStep(cur); });
 }
 
 function renderStayMode() {
@@ -3107,7 +3070,7 @@ function renderReviewScope() {
   box.insertAdjacentHTML('afterbegin',
     '<div class="guest-block" id="rv-scope"><div class="cch-label">Your journey</div>' +
     '<p class="note">' + parts.join(' · ') + '</p>' +
-    (exps.length ? '<div class="cch-label" style="margin-top:10px">Experiences requested</div><p class="note">' + exps.map((e) => e.name + ' · REQUESTED').join('<br/>') + '</p>' : '') +
+    (exps.length ? '<div class="cch-label" style="margin-top:10px">Experiences noted</div><p class="note">' + exps.map((e) => e.name).join('<br/>') + '</p>' : '') +
     '<button type="button" class="btn sm ghost" data-rv-edit="home">Edit</button></div>');
   box.querySelector('[data-rv-edit]').addEventListener('click', () => show(idx('home')));
 }

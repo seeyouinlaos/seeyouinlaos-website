@@ -332,7 +332,7 @@ export const BANGKOK_STAY = {
   defaultFrom: '2027-02-21', defaultTo: '2027-02-24', defaultNights: 3,
   /* OWNER FINAL PRICE (04 SEP 2026, coverage order §11): USD 90 pp/night — supersedes 60, 150,
    * 184.45/368.90 and all historical Bangkok guest pricing. */
-  ratePerGuestNight: 65, /* OWNER FINAL 04 Sep (screenshot order): 65 supersedes 90/60 */
+  ratePerGuestNight: 90, /* MASTER-02 (05 Sep, commit 406e140): USD 90 pp/night — supersedes 65 and all prior */
 };
 
 /* Final/return Bangkok stay context (v1.1): only where a guest chooses the

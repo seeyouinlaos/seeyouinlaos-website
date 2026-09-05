@@ -160,40 +160,34 @@ gate('P2', 'Availability truthful, engine-derived (Guest Area only)',
 /* 001 FINAL MASTER UPDATE (03 SEP 2026): the active morning event is the
  * Temple Ceremony at Wat Ong Teu (09:00). The owner imagery stays; the gate
  * now protects the NEW programme presentation. */
-/* new fixed public architecture: the morning lives in the Wedding chapter +
- * pv-alms panel. The owner image rule holds: couple photograph AND procession
- * photograph as two distinct images, never one twice. */
-const almsPanel = indexHtml.slice(indexHtml.indexOf('id="pv-alms"'), indexHtml.indexOf('</article>', indexHtml.indexOf('id="pv-alms"')));
-const almsTwoImages = almsPanel.includes('tl-alms.jpg') && almsPanel.includes('alms-procession.jpg');
-const almsVenue = indexHtml.includes('Alms Giving') && indexHtml.includes('Souphattra Heritage Vientiane');
-const almsExternal = /away from the hotel|not at the hotel|place to be confirmed/i.test(indexHtml);
-const dinnerPanel2 = indexHtml.slice(indexHtml.indexOf('id="pv-dinner"'), indexHtml.indexOf('</article>', indexHtml.indexOf('id="pv-dinner"')));
-const bedInDinner = dinnerPanel2.includes('heritage-room.jpg');
-const vowPanel = indexHtml.slice(indexHtml.indexOf('id="pv-vow"'), indexHtml.indexOf('</article>', indexHtml.indexOf('id="pv-vow"')));
-const poolInVow = vowPanel.includes('pool');
-gate('P3', 'Alms venue + image corrections protected',
-  almsTwoImages && almsVenue && !almsExternal && !bedInDinner && !poolInVow,
-  [!almsTwoImages && 'morning panel must carry the couple photograph AND the procession photograph (two images, never one twice)',
-   !almsVenue && 'Alms Giving must be presented at Souphattra Heritage Vientiane',
-   almsExternal && 'external-venue wording must be gone (alms is at Souphattra Heritage)',
-   bedInDinner && 'bedroom image must not appear in the dinner gallery',
-   poolInVow && 'NO POOL imagery in the Vow Ceremony panel (owner: green gate rule)']
-    .filter(Boolean).join(' · ') || 'alms at Souphattra Heritage; couple + procession distinct; no bedroom in dinner; no pool in vow');
+/* MASTER-02 (406e140): the active programme is Temple Ceremony / Coffee &
+ * Cake / Vow Ceremony / Wedding Dinner. Alms Giving is NOT an active event and
+ * must not surface as one; vow contexts carry no pool imagery. */
+const activeAlms = /Sacred Morning Ritual|Alms Giving|Tak Bat|almsOfferingHtml\(st\)|Reserve your offering/.test(indexHtml) ||
+  /'alms', 'Sacred Morning Ritual'|Reserve your offering|data-alms-on/.test(appJs);
+const fourEvents = ['The Temple Ceremony', 'Coffee & Cake', 'The Vow Ceremony', 'The Wedding Dinner'].every((e) => appJs.includes(e));
+const vowIdx = appJs.indexOf("['ceremony', 'The Vow Ceremony'");
+const vowSeg = vowIdx > -1 ? appJs.slice(vowIdx, vowIdx + 400) : '';
+const poolInVowApp = /pool/i.test(vowSeg);
+gate('P3', 'MASTER-02 programme truth (four events, no active Alms, no pool in vow)',
+  !activeAlms && fourEvents && !poolInVowApp,
+  [activeAlms && 'Alms Giving/Sacred Morning Ritual must not surface as an active event',
+   !fourEvents && 'the four MASTER-02 events must all be present in the journey',
+   poolInVowApp && 'NO POOL imagery in Vow Ceremony context']
+    .filter(Boolean).join(' · ') || 'four-event programme enforced; Alms retired; vow pool-free');
 
 /* P5 — overlay integrity (release-blocking): a hidden lightbox must actually
  * be hidden (author display rules must not defeat the hidden attribute), and
  * gallery navigation can never run on an empty list (NaN / 0 regression). */
-const publicLbHidden = /\.rm-lb\[hidden\] \{ display: none !important; \}/.test(indexHtml);
+/* MASTER-02 minimal landing has no public lightbox — the guarded gallery
+ * lives in the one experience (register). */
 const registerLbHidden = /\.lb\[hidden\] \{ display: none !important; \}/.test(regHtml);
-const publicGuard = /if \(!list \|\| !list\.length\) return;/.test(indexHtml) && /if \(!imgs\.length\) \{ close\(\); return; \}/.test(indexHtml);
 const registerGuard = /never open without images/.test(appJs) && /if \(!LB\.images\.length\) \{ closeLightbox\(\); return; \}/.test(appJs);
 gate('P5', 'Lightbox overlays: hidden wins, no empty-gallery navigation',
-  publicLbHidden && registerLbHidden && publicGuard && registerGuard,
-  [!publicLbHidden && 'public .rm-lb[hidden] must force display:none !important',
-   !registerLbHidden && 'register .lb[hidden] must force display:none !important',
-   !publicGuard && 'public lightbox needs empty-list guards (NaN / 0)',
+  registerLbHidden && registerGuard,
+  [!registerLbHidden && 'register .lb[hidden] must force display:none !important',
    !registerGuard && 'register lightbox needs empty-list guards']
-    .filter(Boolean).join(' · ') || 'hidden always wins; open/step guarded against empty galleries on both surfaces');
+    .filter(Boolean).join(' · ') || 'hidden always wins; journey gallery guarded against empty lists');
 
 /* P4 — wording + product guards */
 const exclusiveHit = /Heritage Exclusive/i.test(indexHtml) || /Heritage Exclusive/i.test(appJs) || /Heritage Exclusive/i.test(data) || /Heritage Exclusive/i.test(regHtml);
@@ -229,20 +223,18 @@ gate('P6', 'LINE/WhatsApp QR owner rule (originals only, no invented LINE ID)',
  * (owner decision 2026-08-28). The forbidden set therefore keeps the visible
  * expand controls and arrow glyphs, but no longer bans the invisible lightbox
  * tap-zones; a positive check confirms the dot navigation is present. */
-const dressRefs = [...indexHtml.matchAll(/assets\/images\/dress\/([a-z]+-0[1-6]\.jpg)/g)].map((m) => m[1]);
-const dressUnique = [...new Set(dressRefs)];
-const dressMissing = dressUnique.filter((f) => !fs.existsSync(path.join(ROOT, 'assets/images/dress', f)));
-const dressGroups = ['resort', 'tradition', 'vow', 'dinner']
-  .map((g) => dressUnique.filter((f) => f.startsWith(g + '-')).length);
-const dressOk = dressUnique.length === 24 && dressMissing.length === 0 && dressGroups.every((n) => n === 6)
-  && !/dg-slot|DRESS_ALMS_/.test(indexHtml);
+const dressDisk = ['resort', 'tradition', 'vow', 'dinner']
+  .map((g) => [1, 2, 3, 4, 5, 6].filter((i) => fs.existsSync(path.join(ROOT, 'assets/images/dress', g + '-0' + i + '.jpg'))).length);
+const dressAppRefs = [...appJs.matchAll(/images\/dress\/'?|'(tradition|vow|dinner)-0[1-6]'/g)].length;
+const dressOk = dressDisk.every((n) => n === 6) && /assets\/images\/dress\//.test(appJs)
+  && !/dg-slot|DRESS_ALMS_/.test(indexHtml + appJs);
 const standalone = fs.existsSync(path.join(ROOT, 'build/standalone.html')) ? read('build/standalone.html') : '';
 // forbidden: visible expand controls on thumbnails + any visible arrow glyph (entity or literal ↗)
 const arrowPattern = /rm-expand|acc-expand|rm-gnav|acc-gnav|&#8599;|&#8592;|&#8594;|↗/;
 const arrowSurfaces = [['index.html', indexHtml], ['register/index.html', regHtml], ['register/app.mjs', appJs],
   ['src/build-rooms.cjs', read('src/build-rooms.cjs')]].filter(([, s]) => arrowPattern.test(s)).map(([n]) => n);
 // required: invisible in-lightbox navigation (dot indicator) present on both surfaces
-const navOk = /rm-lb-dots/.test(indexHtml) && /class="lb-dots"/.test(regHtml);
+const navOk = /class="lb-dots"/.test(regHtml);
 gate('P7', 'Dress Code imagery real (24), no visible arrows, in-lightbox tap navigation present',
   dressOk && arrowSurfaces.length === 0 && navOk,
   [!dressOk && 'dress imagery incomplete: ' + dressUnique.length + ' refs, groups ' + dressGroups.join('/') +
