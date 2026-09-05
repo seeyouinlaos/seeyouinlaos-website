@@ -95,7 +95,7 @@ const dataSrc = data.slice(data.indexOf('export const ACCOMMODATIONS'), data.ind
 const roomNames = [...dataSrc.matchAll(/^\s*id: '[a-z0-9-]+', name: '([^']+)'/gm)].map((m) => m[1]);
 const roomImages = [...dataSrc.matchAll(/RM \+ '([a-z0-9-]+\.jpg)'/g)].map((m) => 'assets/images/rooms/' + m[1]);
 const missingImages = roomImages.filter((p) => !fs.existsSync(path.join(ROOT, p)));
-const missingCards = roomNames.filter((n) => !indexHtml.includes('<h3>' + n + '</h3>'));
+const missingCards = []; /* public room catalogue retired (owner final architecture order): rooms render only in the authenticated Guest Area */
 const noblePresent = /noble-courtyard/.test(dataSrc) && /contributionPerGuest: 240/.test(dataSrc);
 const oldVillaGone = !/Cozy Villa|4BR|id: 'villa'/.test(dataSrc);
 const airbnbSeg = dataSrc.slice(dataSrc.indexOf("id: 'airbnb-2br'"));
@@ -144,20 +144,15 @@ gate('P1', 'No accommodation prices on the public website',
 /* P2 — availability truthful and engine-derived: overlays state "N of N
  * available" only where N equals the authoritative allocation (no shared
  * real-time sync exists, so remaining == total at build time). */
-const avstats = [...roomsSection.matchAll(/class="rm-avstat"[^>]*>([^<]+)</g)].map((m) => m[1]);
-const expectOverlays = ['5 of 5 available', '13 of 13 available', '3 of 3 available', '1 of 1 available', '2 of 2 available', 'Reserved', 'Reserved', 'Complimentary · limited availability'];
-const overlaysOk = expectOverlays.every((t) => avstats.includes(t)) && avstats.length === 8;
-const availRows = (roomsSection.match(/<dt>Availability<\/dt>/g) || []).length;
-const staleRemaining = /rooms? remaining|Last room/i.test(roomsSection);
-gate('P2', 'Availability truthful, engine-derived, designed into the gallery',
-  overlaysOk && availRows === 8 && !staleRemaining,
-  !overlaysOk
-    ? 'gallery availability overlays wrong: ' + JSON.stringify(avstats)
-    : availRows !== 8
-      ? 'expected 8 Availability rows in the specification grids, found ' + availRows
-      : staleRemaining
-        ? 'live-remaining wording without a shared backend'
-        : 'all 8 galleries carry the engine-derived availability overlay; specification grids carry the allocation row');
+/* public room catalogue retired (owner final architecture order): availability
+ * renders only in the authenticated Guest Area, engine-derived. */
+const staleRemaining = /rooms? remaining|Last room/i.test(indexHtml);
+const engineAvail = /guestAvailability\(/.test(appJs);
+gate('P2', 'Availability truthful, engine-derived (Guest Area only)',
+  !staleRemaining && engineAvail,
+  staleRemaining ? 'live-remaining wording without a shared backend'
+    : !engineAvail ? 'Guest Area must derive availability from the engine (guestAvailability)'
+    : 'no public availability claims; Guest Area availability engine-derived');
 
 /* P3 — image + venue corrections (owner): alms at Souphattra Heritage with
  * TWO distinct images (couple on the timeline, procession on the card); no
@@ -165,21 +160,25 @@ gate('P2', 'Availability truthful, engine-derived, designed into the gallery',
 /* 001 FINAL MASTER UPDATE (03 SEP 2026): the active morning event is the
  * Temple Ceremony at Wat Ong Teu (09:00). The owner imagery stays; the gate
  * now protects the NEW programme presentation. */
-const almsStop = indexHtml.slice(indexHtml.indexOf('<h3>The Temple Ceremony</h3>') - 600, indexHtml.indexOf('<h3>The Temple Ceremony</h3>') + 700);
-const almsCoupleFirst = almsStop.includes('tl-alms.jpg') && almsStop.includes('Wat Ong Teu Temple, Vientiane');
-const almsCardIdx = indexHtml.indexOf('data-panel="pv-alms"');
-const almsCard = indexHtml.slice(almsCardIdx, almsCardIdx + 600);
-const almsCardProcession = almsCard.includes('alms-procession.jpg');
+/* new fixed public architecture: the morning lives in the Wedding chapter +
+ * pv-alms panel. The owner image rule holds: couple photograph AND procession
+ * photograph as two distinct images, never one twice. */
+const almsPanel = indexHtml.slice(indexHtml.indexOf('id="pv-alms"'), indexHtml.indexOf('</article>', indexHtml.indexOf('id="pv-alms"')));
+const almsTwoImages = almsPanel.includes('tl-alms.jpg') && almsPanel.includes('alms-procession.jpg');
+const almsVenue = indexHtml.includes('Alms Giving') && indexHtml.includes('Souphattra Heritage Vientiane');
 const almsExternal = /away from the hotel|not at the hotel|place to be confirmed/i.test(indexHtml);
-const dinnerPanel = indexHtml.slice(indexHtml.indexOf('id="pv-pool"'), indexHtml.indexOf('</article>', indexHtml.indexOf('id="pv-pool"')));
-const bedInDinner = dinnerPanel.includes('heritage-room.jpg');
+const dinnerPanel2 = indexHtml.slice(indexHtml.indexOf('id="pv-dinner"'), indexHtml.indexOf('</article>', indexHtml.indexOf('id="pv-dinner"')));
+const bedInDinner = dinnerPanel2.includes('heritage-room.jpg');
+const vowPanel = indexHtml.slice(indexHtml.indexOf('id="pv-vow"'), indexHtml.indexOf('</article>', indexHtml.indexOf('id="pv-vow"')));
+const poolInVow = vowPanel.includes('pool');
 gate('P3', 'Alms venue + image corrections protected',
-  almsCoupleFirst && almsCardProcession && !almsExternal && !bedInDinner,
-  [!almsCoupleFirst && 'alms timeline must use the couple photograph at Souphattra Heritage',
-   !almsCardProcession && 'alms places card must use the procession photograph (two images, never one twice)',
+  almsTwoImages && almsVenue && !almsExternal && !bedInDinner && !poolInVow,
+  [!almsTwoImages && 'morning panel must carry the couple photograph AND the procession photograph (two images, never one twice)',
+   !almsVenue && 'Alms Giving must be presented at Souphattra Heritage Vientiane',
    almsExternal && 'external-venue wording must be gone (alms is at Souphattra Heritage)',
-   bedInDinner && 'bedroom image must not appear in the vow/dinner gallery']
-    .filter(Boolean).join(' · ') || 'alms at Souphattra Heritage; couple + procession as two distinct images; no bedroom in the dinner gallery');
+   bedInDinner && 'bedroom image must not appear in the dinner gallery',
+   poolInVow && 'NO POOL imagery in the Vow Ceremony panel (owner: green gate rule)']
+    .filter(Boolean).join(' · ') || 'alms at Souphattra Heritage; couple + procession distinct; no bedroom in dinner; no pool in vow');
 
 /* P5 — overlay integrity (release-blocking): a hidden lightbox must actually
  * be hidden (author display rules must not defeat the hidden attribute), and

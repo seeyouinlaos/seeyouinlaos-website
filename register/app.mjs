@@ -8,13 +8,13 @@
 import {
   WEDDING, CONTACTS, JOURNEY_MODULES, EVENTS, ACCOMMODATIONS, SELECTABLE_ACCOMMODATIONS, TRAIN,
   TRANSFERS, PACKAGE_INCLUSIONS, COPY, DEMO_MODE, PUBLICATION, TRAIN_REFERENCE, BERTH_PREFS, BANGKOK_STAYS, BANGKOK_STAY, POST_WEDDING, RETURN_STAY, lookupInvitation,
-} from './data.mjs?v=UQ1';
+} from './data.mjs?v=UR1';
 import {
   contributionPerGuest, partyCharges, partyTotal, money as usdMoney, displayMoney,
   trainContribution, transfersTotal, journeyTotal, postWeddingTotal,
   createInventory, remaining, availabilityLabel, requestAllocation,
   validateRegistration, buildNotification, nextInvitationState,
-} from './logic.mjs?v=UQ1';
+} from './logic.mjs?v=UR1';
 
 /* ---------------- persistent state ---------------- */
 const DRAFT_KEY = 'siyl.reg.draft.v2';
@@ -123,11 +123,11 @@ function itinerarySteps() {
   if (S.scope && S.scope.laos) {
     /* personal plan mirrors actual participation — no wedding rows for guests
      * who have not joined the Vientiane segment (§10). */
-    steps.push({ d: '28 FEB 2027 · First light', t: 'Sacred Morning Ritual', s: 'Vientiane' + (almsParticipants().length ? ' · Personal offering · Reserved (' + almsParticipants().length + ' × ' + money(ALMS_OFFERING_PP) + ')' : ''), st: 'COMPLIMENTARY', main: true });
+    steps.push({ d: '28 FEB 2027 · 05:00', t: 'Sacred Morning Ritual', s: 'Souphattra Heritage Vientiane' + (almsParticipants().length ? ' · Personal offering · Reserved (' + almsParticipants().length + ' × ' + money(ALMS_OFFERING_PP) + ')' : ''), st: 'COMPLIMENTARY', main: true });
     steps.push({ d: '28 FEB 2027 · 09:00 AM', t: 'The Temple Ceremony', s: 'Wat Ong Teu Temple, Vientiane', st: 'COMPLIMENTARY', main: true });
     steps.push({ d: 'After the return', t: 'Coffee & Cake', s: 'Souphattra Heritage Vientiane', st: 'COMPLIMENTARY', main: true });
-    steps.push({ d: '28 FEB 2027 · 04:30 PM', t: 'The Vow Ceremony', s: 'Souphattra Heritage Vientiane', st: 'COMPLIMENTARY', main: true });
-    steps.push({ d: '28 FEB 2027 · 07:30 PM', t: 'The Wedding Dinner', s: 'Souphattra Vientiane Hotel', st: 'COMPLIMENTARY', main: true });
+    steps.push({ d: '28 FEB 2027 · 16:30', t: 'The Vow Ceremony', s: 'Souphattra Heritage Vientiane', st: 'COMPLIMENTARY', main: true });
+    steps.push({ d: '28 FEB 2027 · 19:30', t: 'The Wedding Dinner', s: 'Souphattra Vientiane Hotel', st: 'COMPLIMENTARY', main: true });
   }
   if (S.postWedding && S.postWedding.joined) {
     for (const c of POST_WEDDING.filter((x) => !x.onward)) {
@@ -339,9 +339,17 @@ function renderStep(i) {
   const name = stepEls[i].dataset.step;
   if (name === 'home') renderHome();
   if (name === 'party') renderParty();
-  if (name === 'journey') renderSegInto('bkk', document.getElementById('journey-box'));
+  if (name === 'journey') renderTravelStep(document.getElementById('journey-box'));
   if (name === 'events') renderSegInto('vte', document.getElementById('events-box'));
-  if (name === 'stay') { renderStay(); renderStayMode(); }
+  if (name === 'stay') {
+    renderStay(); renderStayMode();
+    const sb = document.getElementById('stay-box');
+    if (sb && S.scope && S.scope.bangkok && !sb.querySelector('#scope-block')) {
+      sb.insertAdjacentHTML('beforeend', '<div class="cch-label" style="margin-top:40px">Bangkok · Before the Wedding</div>');
+      const w = document.createElement('div'); sb.appendChild(w);
+      renderScopeBlock('products', w, 'bangkok', 'stay');
+    }
+  }
   if (name === 'spa') renderPlaces();
   if (name === 'each') renderEach();
   if (name === 'cost') renderCost();
@@ -558,8 +566,8 @@ function adoptInvitation(inv) {
 
 /* ---------------- MY JOURNEY · private member area ---------------- */
 const PRIVNAV = [
-  ['home', 'Journey'], ['events', 'Wedding'],
-  ['cost', 'Your Plan'], ['spa', 'Places'], ['each', 'My Details'],
+  ['home', '01 · Your Journey'], ['stay', '02 · Your Stay'], ['journey', '03 · Your Travel'],
+  ['each', '04 · Your Details'], ['cost', '05 · Your Plan'],
 ];
 function renderPrivnav() {
   const nav = document.getElementById('privnav');
@@ -684,9 +692,7 @@ function evJoinState(k) {
 }
 function segModules(k) {
   if (k === 'bkk') return [
-    { key: 'stay', label: 'Your Stay', sum: 'Elegant 6BR Sathorn Penthouse' + (bangkokStayActive() ? ' · ' + money(bkkTotal()) : ''), status: bangkokStayActive() ? 'BOOKED' : null, render: (w) => renderScopeBlock('products', w, 'bangkok', 'stay') },
-    { key: 'transit', label: 'Overnight Journey', sum: 'Special Express No. 25' + (S.guests.some((g) => g.journey.train) ? ' · ' + money(trainContribution(TRAIN, S.guests.filter((g) => g.journey.train).length) || 0) : ''), status: S.guests.some((g) => g.journey.train) ? 'BOOKED' : null, render: (w) => renderScopeBlock('products', w, 'bangkok', 'transit') },
-    { key: 'places', label: 'Places to Explore', sum: expForCity('bkk').length + ' places · Bangkok', render: (w) => { w.innerHTML = expRailHtml(expForCity('bkk')); wireExpRail(w); } },
+    { key: 'note', label: 'Bangkok Days', sum: 'Stay & travel live in steps 02 · 03', render: (w) => { w.innerHTML = '<p class="note">Bangkok is part of your journey. Choose the shared penthouse under <strong>02 · Your Stay</strong> and the overnight train under <strong>03 · Your Travel</strong>.</p>'; } },
   ];
   if (k === 'vte') return [
     { key: 'morning', label: 'Sacred Morning Ritual', sum: 'Alms Giving · Tak Bat' + (almsTotal() ? ' · ' + money(almsTotal()) : ''), status: evJoinState('alms'), render: (w) => renderWeddingPresets(w, ['alms']) },
@@ -694,15 +700,47 @@ function segModules(k) {
     { key: 'coffee', label: 'Coffee & Cake', sum: 'After the temple', status: evJoinState('coffee'), render: (w) => renderWeddingPresets(w, ['coffee']) },
     { key: 'vow', label: 'Vow Ceremony', sum: '28 FEB · 16:30', status: evJoinState('ceremony'), render: (w) => renderWeddingPresets(w, ['ceremony']) },
     { key: 'dinner', label: 'Wedding Dinner', sum: '28 FEB · 19:30', status: evJoinState('dinner'), render: (w) => renderWeddingPresets(w, ['dinner']) },
-    { key: 'wedstay', label: 'Your Stay', sum: (currentAcc() ? currentAcc().name : 'Souphattra Heritage Vientiane'), status: currentAcc() ? (S.stay.waitlist ? 'WAITLISTED' : 'BOOKED') : null, render: (w) => renderScopeBlock('products', w, 'laos') },
-    { key: 'places', label: 'Places in Vientiane', sum: expForCity('vte').length + ' places', render: (w) => { w.innerHTML = expRailHtml(expForCity('vte')); wireExpRail(w); } },
   ];
   return [
-    { key: 'kmgstay', label: 'Kunming · Your Stay', sum: 'Wanxiang Yueju · 01 – 04 MAR', status: (S.china && S.china.kunming === 'with') ? 'BOOKED' : null, render: (w) => renderScopeBlock('products', w, 'china', 'kmg') },
-    { key: 'kmgplaces', label: 'Kunming · Places', sum: 'Cherry Blossom · seasonal', render: (w) => { w.innerHTML = expRailHtml(expForCity('kmg')); wireExpRail(w); } },
-    { key: 'ljgstay', label: 'Lijiang · Your Stay', sum: 'Luye Baisha · 04 – 06 MAR', status: (S.china && S.china.lijiang === 'with') ? 'BOOKED' : null, render: (w) => renderScopeBlock('products', w, 'china', 'ljg') },
-    { key: 'ljgplaces', label: 'Lijiang · Places', sum: expForCity('ljg').length + ' places', render: (w) => { w.innerHTML = expRailHtml(expForCity('ljg')); wireExpRail(w); } },
+    { key: 'note', label: 'Kunming & Lijiang', sum: 'Stay & travel live in step 03', render: (w) => { w.innerHTML = '<p class="note">China is part of your journey. The flight, the First Class train and both stays are arranged under <strong>03 · Your Travel</strong>.</p>'; } },
   ];
+}
+/* ---- 03 · YOUR TRAVEL — travel choices as summary rows, scope-gated ---- */
+function renderTravelStep(box) {
+  if (!box) return;
+  S._mod ||= {};
+  const riders = S.guests.filter((g) => g.journey.train);
+  const rows = [];
+  if (S.scope && S.scope.bangkok) {
+    rows.push({ key: 'transit', label: 'Overnight Train & Transfer', sum: 'Special Express No. 25 · Bangkok → Nong Khai → Vientiane' + (riders.length ? ' · ' + riders.length + ' guests · ' + money(trainContribution(TRAIN, riders.length) || 0) : ''), status: riders.length ? 'BOOKED' : null, render: (w) => renderScopeBlock('products', w, 'bangkok', 'transit') });
+  } else {
+    rows.push({ key: 'transit-off', label: 'Overnight Train & Transfer', sum: 'Opens with Before the Wedding (step 01)', inactive: true });
+  }
+  if (S.scope && S.scope.china) {
+    rows.push({ key: 'china', label: 'China Journey', sum: 'Vientiane → Kunming → Lijiang · flight, First Class train & stays' + (cnStaysTotal() || pwTotal() ? ' · ' + money(cnStaysTotal() + pwTotal()) : ''), status: ((S.china && (S.china.kunming === 'with' || S.china.lijiang === 'with')) || pwTotal()) ? 'BOOKED' : null, render: (w) => renderScopeBlock('products', w, 'china') });
+  } else {
+    rows.push({ key: 'china-off', label: 'China Journey', sum: 'Opens with After the Wedding (step 01)', inactive: true });
+  }
+  box.innerHTML = '<div class="cv-mods">' + rows.map((m) => {
+    const open = S._mod.travel === m.key;
+    if (m.inactive) return '<div class="cv-mod"><div class="cm-head" style="cursor:default;opacity:.5;display:flex;align-items:center;gap:12px;padding:15px 2px"><span class="cm-title">' + m.label + '</span><span class="cm-sum">' + esc(m.sum) + '</span></div></div>';
+    return '<div class="cv-mod' + (open ? ' open' : '') + '">' +
+      '<button type="button" class="cm-head" data-tvl-t="' + m.key + '">' +
+      '<span class="cm-title">' + m.label + '</span>' +
+      '<span class="cm-sum">' + esc(m.sum || '') + '</span>' +
+      (m.status ? '<span class="cm-status on">' + m.status + '</span>' : '') +
+      '<span class="cm-chev" aria-hidden="true"></span></button>' +
+      (open ? '<div class="cm-body" data-tvl-body="' + m.key + '"></div>' : '') +
+      '</div>';
+  }).join('') + '</div>';
+  const openKey = S._mod.travel;
+  const m = rows.find((x) => x.key === openKey && !x.inactive);
+  if (m) { const w = box.querySelector('[data-tvl-body="' + openKey + '"]'); if (w) m.render(w); }
+  box.querySelectorAll('[data-tvl-t]').forEach((b) => b.addEventListener('click', () => {
+    const k = b.getAttribute('data-tvl-t');
+    S._mod.travel = (S._mod.travel === k) ? null : k;
+    renderStep(cur);
+  }));
 }
 function renderSegModules(k, box) {
   if (!box) return;
@@ -2006,7 +2044,7 @@ function renderCost() {
       partyCharges(acc, occ).map((c) => { const g = S.guests.find((x) => x.guestId === c.guestId); return esc(g ? g.preferredName : c.guestId) + ' ' + money(c.amount); }).join(' · '));
   }
   if (almsTotal()) {
-    wed += line('28 FEB 2027 · First light', 'Sacred Morning Ritual · Personal offerings',
+    wed += line('28 FEB 2027 · 05:00', 'Sacred Morning Ritual · Personal offerings',
       almsParticipants().map((g) => esc(g.preferredName || g.name || 'Guest')).join(' · ') + ' · ' + almsParticipants().length + ' × ' + money(ALMS_OFFERING_PP) + ' · ' + money(almsTotal()));
   }
   html += chapter('02', 'The Wedding', 'Main Event · Vientiane', true) + wed;
@@ -2941,7 +2979,7 @@ function renderWeddingPresets(targetBox, onlyKeys) {
    * code + ONE required acknowledgement (semantic state, локale-free). */
   S.dressAck ||= {}; S.dressAck.coffee ||= false; S.dressAck.alms ||= false;
   const EVJ = [
-    ['alms', 'Sacred Morning Ritual', '28 FEB 2027 · First light · Vientiane', 'Lao Traditional Dress',
+    ['alms', 'Sacred Morning Ritual', '28 FEB 2027 · 05:00 · Souphattra Heritage Vientiane', 'Lao Traditional Dress',
       ['../alms/ritual-dawn-01', '../alms/ritual-offering-bowl'],
       'The wedding day begins with the quiet Lao morning ritual of giving alms.', null],
     ['temple', 'The Temple Ceremony', '28 FEB 2027 · 09:00 AM – approx. 12:00 PM · Wat Ong Teu Temple, Vientiane', 'Lao Traditional Dress',
@@ -2951,10 +2989,10 @@ function renderWeddingPresets(targetBox, onlyKeys) {
     ['coffee', 'Coffee & Cake', '28 FEB 2027 · from 12:00 · Souphattra Heritage Vientiane', 'Black Tie',
       ['../souphattra/heritage-courtyard-aerial', '../souphattra/heritage-courtyard-pool', 'dinner-04'],
       'Back at the courtyard: coffee, cake and a slow midday together.', null],
-    ['ceremony', 'The Vow Ceremony', '28 FEB 2027 · 04:30 PM · Souphattra Heritage Vientiane', 'Black Tie',
+    ['ceremony', 'The Vow Ceremony', '28 FEB 2027 · 16:30 · Souphattra Heritage Vientiane', 'Black Tie',
       ['vow-01', 'vow-02', 'vow-03'],
       'Stillness, presence, and the vow made public in front of the people who matter most.', null],
-    ['dinner', 'The Wedding Dinner', '28 FEB 2027 · 07:30 PM · Souphattra Vientiane Hotel', 'Black Tie',
+    ['dinner', 'The Wedding Dinner', '28 FEB 2027 · 19:30 · Souphattra Vientiane Hotel', 'Black Tie',
       ['dinner-01', 'dinner-02', 'dinner-03'],
       'Sunset drinks, then dinner in the courtyard garden — a long, unhurried evening together.', null],
   ];
