@@ -76,3 +76,20 @@ to use these folders; sources are documented here for accountability.
 | stupa-vientiane.webp | That Dam black stupa in roundabout | assets/images/experiences/vte-thatdam-01.jpg | That Dam card |
 | buddhapark-vientiane.webp | Buddha Park reclining Buddha, meadow | assets/images/experiences/vte-buddhapark-01.jpg | Buddha Park (day escape) card |
 | IMGP6105/6118/6130/6144/6147/6167/6180, Vientiane-April-2018-1018 | NOT downloaded this pass (named webp/cover set covered every landmark) | — | PENDING CURATION |
+
+## Venue folders under 06_Design_Branding root (1CSJtMKw2XuQf8YwFyq9UkjFHAIdHoVcJ) — 05 Sep 2026, all visually inspected
+| Drive folder / file | Inspected content | Web derivative | Card |
+|---|---|---|---|
+| Bar BKK/Bar Us/SnapInsta…785758983 | Martini with olives on silver tray | bkk-barus-01.jpg | Bar Us |
+| Bar BKK/BKK Social Club/IMG_3560 | Art-deco bar room, arched brass panels, marble bar | bkk-social-01.jpg | BKK Social Club |
+| Restaurant BKK/Phra Nakhon/IMG_3550 | Riverfront garden pavilion, city towers behind | bkk-phranakorn-01.jpg | Phra Nakhon |
+| Restaurant BKK/IGNIV/IMG_3621 | IGNIV sweets buffet, glass jars + chocolate shards | bkk-igniv-01.jpg | IGNIV |
+| Restaurant BKK/Thong Smith/SnapInsta…786628851 | Boat-noodle bowls, lime squeeze | bkk-thongsmith-01.jpg | Thong Smith |
+| Restaurant BKK/Tang Jai Yang/IMG_3644 | Charcoal-roast pork on jade plate | bkk-tjy-01.jpg | Tang Jai Yang |
+| 002-Cafe-BKK/Dior Cafe/IMG_3523.webp | Gold-panelled Dior café salon, garden doors | bkk-dior-01.jpg | Dior · Café LV (lead) |
+| 002-Cafe-BKK/LV Cafe/IMG_3493 | LV café-shop shelf display, monogram chocolate | bkk-lv-cafe-01.jpg | Dior · Café LV (gallery) |
+| 002-Cafe-BKK/Time Space Cafe/SnapInsta…671229902 | White table over reflecting pond, palms | bkk-timespace-01.jpg | Time Space Cafe |
+| 002-Cafe-BKK/Moo Yoo Rose House/IMG_3566 | MOO YOO branded lake garden + white stair | bkk-mooyoo-01.jpg | Moo Yoo Rose House |
+| 002-Cafe-BKK/Cafe Madeleine/IMG_3626 | Pâtisserie counter, candy jars, green espresso bar | bkk-madeleine-01.jpg | Cafe Madeleine |
+| Restaurant,Cafe,Bar Vientiane/Lao Derm/IMG_3238 | Lao Derm branded sharing plate | vte-laoderm-01.jpg | Lao Derm |
+| Restaurant,Cafe,Bar Vientiane/Lacuna Vte/SnapInsta…656416850 | White courtyard, umbrellas, rattan chairs | vte-lacuna-01.jpg | Lacuna VTE |
