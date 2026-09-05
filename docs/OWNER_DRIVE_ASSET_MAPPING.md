@@ -105,3 +105,8 @@ to use these folders; sources are documented here for accountability.
 | DSC07717.jpeg | Couple kneeling with offerings — car bonnet dominates background | — | REJECTED (vehicle dominates) |
 | DSC07779.jpeg | Line of novice monks + kneeling guest in prayer | — | inspected, held in reserve (strong, unused to keep rhythm at 2 images) |
 | TIA_7755 / TIA_7792 / DSC07723 / DSC07777 | NOT downloaded this pass | — | PENDING CURATION |
+
+## Final rebuild image decisions (05 Sep 2026, 008 image rule active)
+- Rejected images removed from the repo and never re-referenced: dest-bangkok.jpg (illustration), dest-lijiang.jpg, bkk-lv-01.jpg (archive/typewriter), bkk-iconsiam-01.jpg (night aerial).
+- LV Visionary Journeys + ICONSIAM cards render typographically until 008 delivers WEB-READY replacements (no Drive original approved for web yet).
+- The three Claude-made derivatives (Wat Pho, Black Dragon Pool, ICONSIAM1 resize) were NOT committed — awaiting 008 WEB-READY production per the permanent image rule.
