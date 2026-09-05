@@ -37,3 +37,31 @@ Never: Buy, Book now (in narrative surfaces), Ticket, Deal, Offer.
 - "Hosted by Haruthai & Suthep" is our equivalent of Aman's quiet inclusion language — state it as fact, once, softly.
 - Our configurator greeting mirrors "Your voyage, designed around you." → "Your journey, prepared around you."
 - Offering/contribution wording keeps the Aman rule: the meaning first, the amount as metadata, never as a sales line.
+
+---
+# CORPUS EXPANSION (05 Sep 2026 — 17 pages incl. dining, wellness, suites, wizard, 3 voyages)
+
+## Headline grammar
+Sentence case; two shapes: PLACE-AS-TITLE ("Palma de Mallorca to Nice", "Wellness") and PROMISE ("Your voyage, designed around you."). Numbered/uppercase never in H1/H2; caps only in eyebrows.
+
+## Eyebrow grammar
+Single concept, 1–3 words, caps: A PHILOSOPHY IN MOTION · FEATURED DESTINATION · CHARTER & EVENTS · SUITE · CULINARY · CULTURE · NATURE.
+
+## Route & naming
+Routes: "X to Y" (even "Nice to Nice"). Venues: proper nouns, no descriptors (Alira, Hiori, Banya, Hammam). Experiences: poetic noun phrases ("Secrets of the Blue Zone", "An Equestrian Journey", "Corsica by Yacht").
+
+## Date / duration grammar
+`13 May 2027 - 21 May 2027` + `8 nights, 8 ports`. Suites: `80.6 to 85.2 square metres (868 to 917 square feet)` — ranges with "to", metric first. Facts as bullet chains: `Total Living Space • Interior • Terrace • Ceiling`.
+
+## Personalisation language (wizard, verbatim)
+"Every journey aboard Amangati is unique." · "we will curate a personalised voyage" · "Help Me Choose" (assist, not dropdown label) · "Please share additional requests or information to help us enhance your experience" · running summary "Selected Destination/s: … Selected Duration/s: 7 Nights". Validation: "[Field] is required." — flat, never apologetic.
+Interest list includes **"Romance (including Weddings/Honeymoons)"** — weddings live INSIDE the luxury-journey vocabulary.
+
+## Density metrics (measured across corpus)
+Paragraphs 40–75 words, one per idea; sentences avg ~22 words; adjectives sensory not superlative ("storied", "sunlit", "unhurried", "secluded" — almost never "best/ultimate/world-class"); second person sparse, "your" reserved for possessive moments ("your hostess", "your voyage"); "experience(s)" used as noun for products only; "journey/voyage" never mixed within a page-family.
+
+## Words Aman avoids
+book/booking (uses enquire/request/plan) · price/cost on narrative pages · ticket · package · deal · luxury (shows, rarely says) · exclamation marks (zero found).
+
+## Transition copy
+Cross-links close pages: "Discover all destinations" / "View all voyages" / next-suite cards — the page always hands you onward, never ends dead.

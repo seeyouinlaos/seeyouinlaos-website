@@ -82,3 +82,34 @@ A guided wizard, not a dashboard: H1 "Plan Your Voyage" → "**Your voyage, desi
 6. Exactly two persistent CTAs (self-serve + human).
 7. Destination romance separated from operational decision surfaces.
 8. Route map opens every journey product.
+
+---
+# EXPANSION — full-coverage pass (05 Sep 2026, second session)
+
+Total rendered pages now 17: Home · Voyages index · **3 voyages** (Palma–Nice 6n/7p · Nice–Nice 8n/8p · Málaga–Saint John's 13n/5p transatlantic) · Destinations index · **3 destinations** (Mediterranean · Caribbean · Atlantic Passage) · Experiences overview · On Shore · **Plan Your Voyage full flow (3 steps interacted)** · Accommodation index · **3 suite details** (Aman Suite · Grand Suite · Signature Suite) · Dining · Wellness. Mobile 390px verified on Home + voyage detail.
+
+## Voyage template vs content (3-voyage comparison)
+NEVER CHANGES: route-name H1 · fact line (`13 May 2027 - 21 May 2027 · 8 nights, 8 ports`) · route map top · one editorial H2 · Day N blocks with port H2 + one paragraph · Enquire/Plan CTAs · end cross-links.
+CHANGES BY VOYAGE: day count (7/9/14) · port H2s · experience-preview density (Palma ~7 · Nice–Nice 18 · **transatlantic 0** — sea-day voyages drop the shore layer entirely and lean on onboard/wellness content). Template = structure + fact grammar; content = ports, previews, imagery. Sea days prove the template tolerates missing layers without breaking.
+
+## Destination ontology (actual)
+REGION (Caribbean/Mediterranean/Atlantic Passage) → SUB-REGION (The French Riviera, The Leeward Islands…) → PORT (only inside voyage days) → VOYAGE (the sellable) → EXPERIENCE (attached to days, category-tagged). Regions/sub-regions carry zero voyage links and zero prices — pure desire layer. Mapping to SYL: COUNTRY≈region · CITY≈sub-region · Nong Khai≈port-level transit (never a top-level product) · our 3 chapters≈voyages · places≈experiences.
+
+## Experience unit (8 individual presentations recorded)
+Anatomy is always: CATEGORY (caps) → Title (poetic noun phrase: "Secrets of the Blue Zone", "A Classic Car Drive on the Côte d'Azur") → ONE sensory paragraph (~45–70 words, no price, no per-unit CTA) → the day carries a single quiet line "Enhance your voyage with optional Shore Experiences. Enquire…". Experiences are ITINERARY COMPONENTS + editorial inspiration, never catalogue items. Detail depth stays at one paragraph until human contact.
+
+## Suite detail pages (3 inspected)
+Anatomy: hero → H1 → intro → **"View floor plan +"** → fact list with bullets `Total Living Space • Interior • Terrace • Ceiling` (each metric+imperial) → `Enquire now` + `Plan your voyage` → Suite Features list → combinable-configuration section (Aman-Premier Two-Bedroom) → Amenities → gallery (14–15 images) → cross-links to the next suite categories. Overview page = 2–3-line cards; detail page = full dossier; shared inclusions live on the overview. Perfect 3-layer separation: OVERVIEW → CATEGORY DETAIL → SHARED INCLUSIONS.
+
+## Dining & Wellness pattern
+Named venues as H2 rows (Alira · Hiori · Akari · Aman Grill · Private Dining Room · In-Suite Dining · The Jazz Club / Aman Spa · Banya · Hammam · Fitness Studio · Yoga & Meditation Deck · Beauty Lounge) — each one image + one paragraph. Venue = proper name + single idea.
+
+## Plan Your Voyage — full interaction record
+- Step 1: **Select Destination/s** (8 checkboxes) + **Select Date/s** (2027 months) + **Select Duration/s** (3/4/7/8/8+ nights); every group has a "Help Me Choose" assist; inline validation ("Select Destination/s field is required.").
+- Step 2: **Select Port/s** — the port list is FILTERED by the chosen destination (French Riviera → Nice, Saint-Tropez, Cannes, Corsica ports…).
+- Step 3: **Areas of interest** (12 incl. "Romance (including Weddings/Honeymoons)") + required free-text request field.
+- A running summary stays under the form the whole time: `Selected Destination/s: French Riviera, Selected Date/s: May-2027, Selected Duration/s: 7 Nights, Selected Port/s: Nice, Saint-Tropez` — **current values never disappear while advancing**.
+- `< Previous` / `Next >` navigation; `Request a call` always adjacent; recaptcha before contact step. One decision family per screen; the guest never loses journey context.
+
+## Measured system (from aman.zip capture, see source-analysis-aman-archive.md)
+Root 14px · content max 1440px / shell 1600px / prose 680px · gutter 24.5px · section rhythm 65px · breakpoints 640/768/1024/1280 · hero next/image fill+cover, sizes 100vw, webp q90 (1440×887/1024×633/600×370 contract) · imagery ratios: golden 1.618:1 landscape, 1:1, ~4:5 portrait, 16:9 poster · type: H1 31.08 (24.1 mobile) Lyon / body 14/20.3 / eyebrow 10.1 caps tracking 2px · palette ink #313131, hairline #DAD9D7, sand family #FDF9F5–#C9C2AE · logo 150×64 → 120×40 condensed on scroll.
