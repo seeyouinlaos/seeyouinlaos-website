@@ -2045,10 +2045,6 @@ function renderCost() {
       esc(acc.name) + ' · Vientiane',
       partyCharges(acc, occ).map((c) => { const g = S.guests.find((x) => x.guestId === c.guestId); return esc(g ? g.preferredName : c.guestId) + ' ' + money(c.amount); }).join(' · '));
   }
-  if (almsTotal()) {
-    wed += line('28 FEB 2027 · 05:00', 'Sacred Morning Ritual · Personal offerings',
-      almsParticipants().map((g) => esc(g.preferredName || g.name || 'Guest')).join(' · ') + ' · ' + almsParticipants().length + ' × ' + money(ALMS_OFFERING_PP) + ' · ' + money(almsTotal()));
-  }
   html += chapter('02', 'The Wedding', 'Main Event · Vientiane', true) + wed;
 
   // 03 · POST-WEDDING JOURNEY
@@ -2289,7 +2285,6 @@ function renderReview() {
     const bh = BANGKOK_STAYS.find((x) => x.id === S.bangkokStay.property) || BANGKOK_STAYS[0];
     if (bh) jcRows.push(['Bangkok stay', esc(bh.contributionNight) + ' · ' + esc(bh.name) + ' · ' + money(bkkTotal())]);
   }
-  if (almsTotal()) jcRows.push(['Personal offerings · Sacred Morning Ritual', almsParticipants().length + ' × ' + money(ALMS_OFFERING_PP) + ' = ' + money(almsTotal())]);
   if (S.postWedding && S.postWedding.joined) jcRows.push(['Post Wedding Journey', '04 MAR 2027 · Kunming → Lijiang · First Class Train · ' + money(pwTotal())]);
   if (cnStayTotal('kunming')) jcRows.push(['Kunming stay', '01 – 04 MAR 2027 · Wanxiang Yueju Designer Homestay · ' + money(cnStayTotal('kunming'))]);
   if (cnStayTotal('lijiang')) jcRows.push(['Lijiang stay', '04 – 06 MAR 2027 · Luye Baisha · Rizhao Jinshan · ' + money(cnStayTotal('lijiang'))]);
@@ -2931,7 +2926,7 @@ function renderScopeBlock(mode, targetBox, segFilter, part) {
     }));
 }
 
-/* Sacred Morning Ritual — personal offering (owner order 05 Sep):
+/* Retired product stubs (MASTER-02):
  * the ceremony is part of the wedding programme; the USD 15 is solely the
  * contribution for the guest's personal Buddhist offering, reserved per
  * individual. The reason it is not hosted is cultural/religious, never
