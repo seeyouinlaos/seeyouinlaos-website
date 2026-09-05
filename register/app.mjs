@@ -8,13 +8,13 @@
 import {
   WEDDING, CONTACTS, JOURNEY_MODULES, EVENTS, ACCOMMODATIONS, SELECTABLE_ACCOMMODATIONS, TRAIN,
   TRANSFERS, PACKAGE_INCLUSIONS, COPY, DEMO_MODE, PUBLICATION, TRAIN_REFERENCE, BERTH_PREFS, BANGKOK_STAYS, BANGKOK_STAY, POST_WEDDING, RETURN_STAY, lookupInvitation,
-} from './data.mjs?v=V1';
+} from './data.mjs?v=W1';
 import {
   contributionPerGuest, partyCharges, partyTotal, money as usdMoney, displayMoney,
   trainContribution, transfersTotal, journeyTotal, postWeddingTotal,
   createInventory, remaining, availabilityLabel, requestAllocation,
   validateRegistration, buildNotification, nextInvitationState,
-} from './logic.mjs?v=V1';
+} from './logic.mjs?v=W1';
 
 /* ---------------- persistent state ---------------- */
 const DRAFT_KEY = 'siyl.reg.draft.v2';
@@ -568,44 +568,88 @@ const PRIVNAV = [
   ['home', '01 · Your Journey'], ['stay', '02 · Your Stay'], ['journey', '03 · Your Travel'],
   ['each', '04 · Your Details'], ['cost', '05 · Your Plan'],
 ];
+/* ---------------- Aman drawer navigation (Phase 2) ----------------
+ * The old step bar is gone. #privnav is a full-screen sliding drawer
+ * (menu left in the header, wordmark centre, plan right). Hierarchy:
+ * SEE YOU IN LAOS -> Thailand / Laos / China -> details / plan / utilities. */
+function setDrawer(open) {
+  const nav = document.getElementById('privnav');
+  const scrim = document.getElementById('dw-scrim');
+  const menu = document.getElementById('hd-menu');
+  document.body.classList.toggle('dw-open', open);
+  if (scrim) scrim.hidden = !open;
+  if (menu) menu.setAttribute('aria-expanded', String(open));
+  if (open && nav) { const c = nav.querySelector('.dw-close'); if (c) c.focus(); }
+  else if (menu && !menu.hidden) menu.focus();
+}
 function renderPrivnav() {
   const nav = document.getElementById('privnav');
   if (!nav) return;
   const siteNav = document.getElementById('sitenav');
+  const menuBtn = document.getElementById('hd-menu');
+  const planBtn = document.getElementById('hd-plan');
   if (!S.invitation || isAuthOut()) {
-    nav.hidden = true;
+    nav.hidden = true; setDrawer(false);
     if (siteNav) siteNav.hidden = false;
+    if (menuBtn) menuBtn.hidden = true;
+    if (planBtn) planBtn.hidden = true;
     return;
   }
   nav.hidden = false;
-  // inside the Guest Area the personal navigation is the only navigation —
-  // the logo carries the way home to MY JOURNEY.
   if (siteNav) siteNav.hidden = true;
+  if (menuBtn) menuBtn.hidden = false;
+  if (planBtn) planBtn.hidden = false;
   const name = stepEls[cur].dataset.step;
-  /* level-2 rule (owner): exactly ONE active subsection. "Guest Area" stays
-   * available as the dashboard/home link but NEVER carries an active state —
-   * the active marker belongs to the one current subsection button. */
-  /* item 11: the guest is already inside the Guest Area — the personal
-   * navigation starts directly with MY JOURNEY; INVITATION lives with the
-   * utilities (Website · Save · Log out), never inside the booking steps. */
-  nav.innerHTML = PRIVNAV.map(([st, label]) =>
-    '<button type="button" data-nav="' + st + '"' + (name === st ? ' aria-current="true"' : '') + '>' + label + '</button>').join('') +
+  const voyLink = (k) => {
+    const d = SEG_DEF()[k]; const v = VOY[k];
+    const here = name === 'home' && S._voy === k;
+    return '<button type="button" class="dw-sub" data-voy-nav="' + k + '"' + (here ? ' aria-current="true"' : '') + '>' +
+      v.country + ' — ' + d.name + '</button>';
+  };
+  nav.innerHTML =
+    '<div class="dw-head"><span class="dw-brand">see you in laos<span style="color:var(--cherry-photo)">.</span></span>' +
+    '<button type="button" class="dw-close" aria-label="Close menu">Close</button></div>' +
+    '<button type="button" data-nav="home"' + (name === 'home' && !S._voy ? ' aria-current="true"' : '') + '>Your Journey</button>' +
+    '<div class="dw-group">' + voyLink('bkk') + voyLink('vte') + voyLink('china') + '</div>' +
+    '<button type="button" data-nav="stay"' + (name === 'stay' ? ' aria-current="true"' : '') + '>Your Stay</button>' +
+    '<button type="button" data-nav="journey"' + (name === 'journey' ? ' aria-current="true"' : '') + '>Your Travel</button>' +
+    '<button type="button" data-nav="each"' + (name === 'each' ? ' aria-current="true"' : '') + '>Your Details</button>' +
+    '<button type="button" data-nav="cost"' + (name === 'cost' ? ' aria-current="true"' : '') + '>Your Plan</button>' +
     '<span class="pn-exit"><button type="button" id="nav-invitation">Invitation</button><button type="button" id="pn-home">Website</button><button type="button" id="pn-save">Save</button><button type="button" id="log-out">Log out</button></span>';
   const mark = document.getElementById('site-mark');
   if (mark && !mark.dataset.wired) {
     mark.dataset.wired = '1';
     mark.addEventListener('click', (e) => {
       if (!S.invitation || isAuthOut()) return;   // signed out: the logo leads to the website
-      e.preventDefault(); saveDraft(); show(idx('home'));
+      e.preventDefault(); saveDraft(); S._voy = null; setDrawer(false); show(idx('home'));
     });
   }
+  if (menuBtn && !menuBtn.dataset.wired) {
+    menuBtn.dataset.wired = '1';
+    menuBtn.addEventListener('click', () => setDrawer(true));
+    document.getElementById('dw-scrim').addEventListener('click', () => setDrawer(false));
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && document.body.classList.contains('dw-open')) setDrawer(false);
+    });
+  }
+  if (planBtn && !planBtn.dataset.wired) {
+    planBtn.dataset.wired = '1';
+    planBtn.addEventListener('click', () => { setDrawer(false); show(idx('cost')); });
+  }
+  nav.querySelector('.dw-close').addEventListener('click', () => setDrawer(false));
+  nav.querySelectorAll('[data-voy-nav]').forEach((b) => b.addEventListener('click', () => {
+    S._voy = b.getAttribute('data-voy-nav'); setDrawer(false); show(idx('home'));
+  }));
   nav.querySelector('#pn-home').addEventListener('click', () => {
     saveDraft(); location.href = '../'; // progress saved; the personal link reopens the journey
   });
   nav.querySelector('#nav-invitation').addEventListener('click', () => {
-    setInvitationState('open', 'privnav-invitation', { force: true });
+    setDrawer(false); setInvitationState('open', 'privnav-invitation', { force: true });
   });
-  nav.querySelectorAll('[data-nav]').forEach((b) => b.addEventListener('click', () => show(idx(b.getAttribute('data-nav')))));
+  nav.querySelectorAll('[data-nav]').forEach((b) => b.addEventListener('click', () => {
+    if (b.getAttribute('data-nav') === 'home') S._voy = null;
+    setDrawer(false); show(idx(b.getAttribute('data-nav')));
+  }));
   nav.querySelector('#pn-save').addEventListener('click', (e) => {
     saveDraft();                       // SAVE only: stay here, stay signed in
     const b = e.currentTarget; const t = b.textContent;
@@ -804,6 +848,157 @@ function renderPlaces() {
   wireExpRail(box);
 }
 
+/* ---------------- AMAN VOYAGE UX (Phase 2) ----------------
+ * Platform = see you in laos. Three journeys = THAILAND / LAOS / CHINA.
+ * Wedding = the peak inside the Laos journey. Real geographic maps (Leaflet/OSM),
+ * Aman voyage grammar: map -> eyebrow -> serif title -> dates -> duration/stops ->
+ * editorial intro -> itinerary hairline rows -> horizontal day-by-day (peeked) ->
+ * contextual experiences -> selections -> accommodation composition. */
+const VOY = {
+  bkk: {
+    country: 'Thailand', order: '01',
+    stops: [[13.7563, 100.5018, 'Bangkok', 'start'], [17.8783, 102.7413, 'Nong Khai', 'end']],
+    lede: 'Bangkok opens the journey: the shared penthouse days, then the overnight train north to Nong Khai and the crossing into Laos.',
+  },
+  vte: {
+    country: 'Laos', order: '02',
+    stops: [[17.8767, 102.7190, 'Friendship Bridge', 'start'], [17.9757, 102.6331, 'Vientiane', 'wedding']],
+    lede: 'Vientiane carries the heart of everything: the temple morning, coffee and cake, the vows and the wedding dinner — one day that the whole journey leans toward.',
+  },
+  china: {
+    country: 'China', order: '03',
+    stops: [[24.8801, 102.8329, 'Kunming', 'start'], [26.8721, 100.2299, 'Lijiang', 'end']],
+    lede: 'After the wedding the journey continues: Kunming, the First Class train through the mountains, and the old town of Lijiang.',
+  },
+};
+function voyItin(k) {
+  if (k === 'bkk') return [
+    ['21 – 24 FEB', 'Bangkok', 'Stay'],
+    [TRAIN.date, 'Bangkok → Nong Khai', 'Overnight train'],
+    ['', 'Nong Khai → Vientiane', 'Crossing to Laos'],
+  ];
+  if (k === 'vte') return [
+    ['27 FEB', 'Arrival · Vientiane', 'Hosted'],
+    ['28 FEB', 'The Wedding Day', 'Four events'],
+    ['01 MAR', 'Vientiane → Kunming', 'Onward'],
+  ];
+  return [
+    ['01 MAR', 'Vientiane → Kunming', 'Flight'],
+    ['01 – 04 MAR', 'Kunming', 'Stay'],
+    ['04 MAR', 'Kunming → Lijiang', 'First Class train'],
+    ['04 – 06 MAR', 'Lijiang', 'Stay'],
+    ['06 MAR', 'Lijiang → Bangkok', 'Onward'],
+  ];
+}
+function voyDays(k) {
+  const exp = (c) => expForCity(c);
+  if (k === 'bkk') return [
+    { day: '21 – 24 FEB', title: 'Bangkok', text: 'City days together before the wedding — the penthouse stay, the river, the markets.', exp: exp('bkk') },
+    { day: '24 FEB', title: 'The Overnight Train', text: TRAIN.times + ' — First Class Sleeper north to Nong Khai, van pickup and luggage service to the hotel included.', exp: [] },
+  ];
+  if (k === 'vte') return [
+    { day: '27 FEB', title: 'Vientiane', text: 'Arrival and the first quiet evening in the city on the Mekong.', exp: exp('vte') },
+    { day: '28 FEB · 09:00', title: 'Temple Ceremony', text: 'The morning ceremony at Wat Ong Teu.', exp: [] },
+    { day: '28 FEB · 12:00', title: 'Coffee & Cake', text: 'After the return from the temple — an easy afternoon together.', exp: [] },
+    { day: '28 FEB · 16:30', title: 'Vow Ceremony', text: 'The vows at the green gate.', exp: [] },
+    { day: '28 FEB · 19:30', title: 'Wedding Dinner', text: 'The evening that gathers everyone at one table.', exp: [] },
+  ];
+  return [
+    { day: '01 – 04 MAR', title: 'Kunming', text: 'The city of eternal spring — first days in Yunnan.', exp: exp('kmg') },
+    { day: '04 – 06 MAR', title: 'Lijiang', text: 'The old town beneath Jade Dragon Snow Mountain.', exp: exp('ljg') },
+  ];
+}
+function mountVoyMaps(root) {
+  const els = [...root.querySelectorAll('[data-voy-map]')];
+  if (!els.length) return;
+  if (typeof window.L === 'undefined') { setTimeout(() => mountVoyMaps(root), 350); return; }
+  els.forEach((el) => {
+    if (el._map) return;
+    const k = el.getAttribute('data-voy-map');
+    const mini = el.hasAttribute('data-voy-mini');
+    const stops = VOY[k].stops;
+    const m = window.L.map(el, {
+      zoomControl: !mini, scrollWheelZoom: false, dragging: !mini,
+      touchZoom: !mini, doubleClickZoom: !mini, boxZoom: false, keyboard: !mini,
+      tap: !mini, attributionControl: true,
+    });
+    el._map = m;
+    window.L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 12, attribution: '&copy; OpenStreetMap contributors',
+    }).addTo(m);
+    const line = stops.map((st) => [st[0], st[1]]);
+    window.L.polyline(line, { color: '#74070E', weight: 2, opacity: .85, dashArray: '1 6' }).addTo(m);
+    stops.forEach((st) => {
+      const wedding = st[3] === 'wedding';
+      const start = st[3] === 'start';
+      window.L.circleMarker([st[0], st[1]], {
+        radius: wedding ? 8 : 5.5,
+        color: wedding ? '#74070E' : '#211F1C',
+        weight: start ? 2 : 1.5,
+        fillColor: wedding ? '#74070E' : (start ? '#211F1C' : '#F2ECE1'),
+        fillOpacity: 1,
+      }).addTo(m).bindTooltip(st[2], {
+        permanent: !mini, direction: 'top', offset: [0, -8], className: 'vy-tip',
+      });
+    });
+    m.fitBounds(window.L.latLngBounds(line), { padding: mini ? [26, 26] : [46, 46] });
+  });
+}
+function voyMetaLine(k) {
+  const d = SEG_DEF()[k];
+  const nStops = VOY[k].stops.length;
+  const nDays = voyDays(k).length;
+  return d.when + ' · ' + nDays + (nDays === 1 ? ' chapter' : ' chapters') + ', ' + nStops + ' stops';
+}
+function renderVoyage(k, box) {
+  const d = SEG_DEF()[k];
+  const v = VOY[k];
+  const joined = segJoined(k);
+  document.getElementById('home-title').textContent = '';
+  box.innerHTML =
+    '<div class="vy-map" data-voy-map="' + k + '" role="img" aria-label="Route map: ' + v.stops.map((st) => st[2]).join(' to ') + '"></div>' +
+    '<div class="vy-intro">' +
+    '<p class="eyebrow">Journey ' + v.order + ' · ' + v.country + '</p>' +
+    '<h1 class="serif">' + d.name + '</h1>' +
+    '<p class="vy-dates">' + d.when + '</p>' +
+    '<p class="vy-meta">' + voyMetaLine(k).split(' · ').slice(1).join(' · ') + (joined ? ' · part of your journey' : '') + '</p>' +
+    '<p class="note vy-lede">' + v.lede + '</p>' +
+    '<button type="button" class="btn-full" data-jump="cost" style="max-width:340px;margin:0 auto">Your plan</button>' +
+    '</div>' +
+    '<section class="vy-sec" aria-label="Itinerary">' +
+    '<p class="cch-label">Itinerary</p>' +
+    voyItin(k).map((r) =>
+      '<div class="it-row"><span class="it-day">' + r[0] + '</span><span class="it-dest serif">' + r[1] + '</span><span class="it-note">' + r[2] + '</span></div>').join('') +
+    '</section>' +
+    '<section class="vy-sec" aria-label="Day by day">' +
+    '<p class="cch-label">Day by day</p>' +
+    '<div class="day-rail">' + voyDays(k).map((dy) => {
+      const img = dy.exp && dy.exp.length && dy.exp[0].img ? '../' + dy.exp[0].img : null;
+      return '<article class="day-card">' +
+        (img ? '<img src="' + img + '" alt="' + esc(dy.title) + '" loading="lazy" decoding="async"/>' : '<div class="ph-quiet" aria-hidden="true"></div>') +
+        '<span class="it-day">' + dy.day + '</span>' +
+        '<h3 class="serif">' + esc(dy.title) + '</h3>' +
+        '<p class="note">' + esc(dy.text) + '</p>' +
+        (dy.exp && dy.exp.length ? '<div class="day-exp"><p class="cch-label">Experiences here</p>' + expRailHtml(dy.exp.slice(0, 4)) + '</div>' : '') +
+        '</article>';
+    }).join('') + '</div>' +
+    '</section>' +
+    '<section class="vy-sec" aria-label="Your selections">' +
+    '<p class="cch-label">Your selections</p>' +
+    '<div id="vy-sel"></div>' +
+    '</section>' +
+    '<section class="vy-sec" aria-label="Stay and travel">' +
+    '<button type="button" class="btn-full" data-jump="stay">Accommodation &amp; availability</button>' +
+    '<button type="button" class="btn-full" data-jump="journey">Travel within this journey</button>' +
+    '</section>' +
+    '<p class="vy-back"><button type="button" class="btn sm ghost" id="vy-back">&larr; All journeys</button></p>';
+  renderSegInto(k, box.querySelector('#vy-sel'));
+  box.querySelectorAll('.day-exp').forEach((w) => wireExpRail(w));
+  box.querySelectorAll('[data-jump]').forEach((b) => b.addEventListener('click', () => show(idx(b.getAttribute('data-jump')))));
+  box.querySelector('#vy-back').addEventListener('click', () => { S._voy = null; renderStep(cur); window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' }); });
+  mountVoyMaps(box);
+}
+
 function grCardHtml() {
   return '<div class="gr-card">' +
     '<div><div class="label">Guest Relations</div>' +
@@ -825,56 +1020,49 @@ function grCardHtml() {
 function renderHome() {
   const box = document.getElementById('home-box');
   if (!S.invitation) { show(idx('find')); return; }
+  if (S._voy && VOY[S._voy]) { renderVoyage(S._voy, box); return; }
   const lead = S.invitation.guests.find((g) => g.guestId === S.invitation.partyLead) || S.invitation.guests[0];
   document.getElementById('home-title').innerHTML =
     'Welcome' + (S._returning ? ' back' : '') + ',<br/>' + esc(lead.preferredName) + '.';
-  /* AIDA overview: compact current-state summary rows; the guest opens one
-   * segment at a time. No huge list below. */
   const acc = currentAcc();
   const occ = acc ? S.stay.occupantGuestIds : [];
   const riders = S.guests.filter((g) => g.journey.train);
   const detailsMissing = S.guests.filter((g) => g.attending !== false && !(g.email || g.phone)).length;
   const total = (function(){ const G = laosGate(acc, riders.length, S.transfers); return journeyTotal(G.acc, occ, TRAIN, G.riders, TRANSFERS, G.transfers) + laosExtraTotal(G.acc, occ); })() + pwTotal() + bkkTotal() + cnStaysTotal() + almsTotal() + trainCabinUpcharge();
-  S._seg ||= null;
-  const segRow = (k) => {
+  /* Aman voyage index: three journey products, each MAP -> eyebrow -> title ->
+   * dates -> duration/stops -> actions. */
+  const prod = (k) => {
     const d = SEG_DEF()[k];
-    const open = S._seg === k;
+    const v = VOY[k];
     const joined = segJoined(k);
-    return '<div class="cv-mod seg' + (open ? ' open' : '') + (k === 'vte' ? ' wed' : '') + '">' +
-      '<button type="button" class="cm-head" data-seg-t="' + k + '">' +
-      '<span><span class="cm-title">' + d.name + '</span>' +
-      '<span class="cm-sub">' + d.city + ' · ' + d.when + '</span></span>' +
-      '<span class="cm-status' + (joined ? ' on' : '') + '">' + (joined ? 'Joining' : 'Not this time') + '</span>' +
-      '<span class="cm-chev" aria-hidden="true"></span></button>' +
-      (open ? '<div class="cm-body" data-seg-body="' + k + '"></div>' : '') +
-      '</div>';
+    return '<article class="vyp">' +
+      '<div class="vyp-map" data-voy-map="' + k + '" data-voy-mini role="img" aria-label="Route map: ' + v.stops.map((st) => st[2]).join(' to ') + '"></div>' +
+      '<p class="eyebrow">Journey ' + v.order + ' · ' + v.country + '</p>' +
+      '<h2 class="serif">' + d.name + '</h2>' +
+      '<p class="vy-meta">' + d.when + ' · ' + v.stops.length + ' stops' + (k === 'vte' ? ' · the wedding' : '') + '</p>' +
+      '<p class="note" style="max-width:560px">' + v.lede + '</p>' +
+      '<button type="button" class="btn-full' + (k === 'vte' ? ' dark' : '') + '" data-voy-open="' + k + '">View details</button>' +
+      '<p class="vy-meta" style="margin:12px 0 0">' + (joined ? 'Part of your journey' : 'Not this time — open to change') + '</p>' +
+      '</article>';
   };
   box.innerHTML =
     '<p class="note" style="margin:0 0 4px">' + esc(S.invitation.partyName) + '</p>' +
-    '<p class="note" style="margin:0 0 10px">Your journey is ready. Open a chapter to see and shape it — everything else stays quietly out of the way.</p>' +
-    /* journey geography with semantic textual fallback (MASTER-02 §14) */
-    '<p class="cch-label" style="margin:0 0 2px">Thailand → Laos → China</p>' +
-    '<p class="note" role="text" aria-label="Route: Bangkok, Nong Khai as transit, Vientiane, Kunming, Lijiang" style="margin:0 0 6px;letter-spacing:.14em;text-transform:uppercase;font-size:11px">Bangkok → Nong Khai → Vientiane → Kunming → Lijiang</p>' +
-    '<svg viewBox="0 0 340 26" aria-hidden="true" style="width:100%;max-width:360px;height:26px;display:block;margin:0 0 16px"><line x1="8" y1="13" x2="332" y2="13" stroke="var(--ink)" stroke-width="1" opacity=".3"/><circle cx="8" cy="13" r="3.5" fill="var(--ink)"/><circle cx="90" cy="13" r="2.5" fill="var(--ink)" opacity=".55"/><circle cx="168" cy="13" r="4.5" fill="var(--cherry)"/><circle cx="250" cy="13" r="3.5" fill="var(--ink)"/><circle cx="332" cy="13" r="3.5" fill="var(--ink)"/><text x="2" y="7" style="font-size:8px;letter-spacing:.12em" fill="var(--ink)">BKK</text><text x="78" y="7" style="font-size:7px;letter-spacing:.1em" fill="var(--ink)" opacity=".6">NONG KHAI</text><text x="158" y="7" style="font-size:8px;letter-spacing:.12em" fill="var(--cherry)">VTE</text><text x="240" y="7" style="font-size:8px;letter-spacing:.12em" fill="var(--ink)">KMG</text><text x="322" y="7" style="font-size:8px;letter-spacing:.12em" fill="var(--ink)">LJG</text></svg>' +
-    '<div class="cv-mods">' + segRow('bkk') + segRow('vte') + segRow('china') + '</div>' +
-    '<div style="margin-top:22px">' +
+    '<p class="note" style="margin:0 0 30px">One invitation, three journeys. The wedding carries the middle one.</p>' +
+    prod('bkk') + prod('vte') + prod('china') +
+    '<div style="margin-top:26px">' +
     '<button type="button" class="jd-row" data-jump="cost"><span class="jr-l">Your Plan</span><span class="jr-v">Your personal itinerary</span></button>' +
     '<button type="button" class="jd-row" data-jump="each"><span class="jr-l">My Details</span><span class="jr-v">' + (detailsMissing ? detailsMissing + ' still needed' : 'Complete') + '</span></button>' +
     '<button type="button" class="jd-row" data-jump="review" style="border-bottom:1px solid var(--line)"><span class="jr-l">' + (S.submitted ? 'Registration' : 'Review & Send') + '</span><span class="jr-v">' + (S.submitted ? 'With Guest Relations' : 'One quiet look, then send') + '</span></button>' +
     '</div>' +
     '<div class="jd-total"><span class="jr-l">Total Costs</span><strong>' + money(total) + '</strong></div>' +
     grCardHtml();
-  const openSeg = S._seg;
-  if (openSeg) {
-    const w = box.querySelector('[data-seg-body="' + openSeg + '"]');
-    if (w) renderSegInto(openSeg, w);
-  }
-  box.querySelectorAll('[data-seg-t]').forEach((b) => b.addEventListener('click', () => {
-    const k = b.getAttribute('data-seg-t');
-    S._seg = (S._seg === k) ? null : k;
+  box.querySelectorAll('[data-voy-open]').forEach((b) => b.addEventListener('click', () => {
+    S._voy = b.getAttribute('data-voy-open');
     renderStep(cur);
+    window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' });
   }));
   box.querySelectorAll('[data-jump]').forEach((b) => b.addEventListener('click', () => show(idx(b.getAttribute('data-jump')))));
+  mountVoyMaps(box);
 }
 
 /* ---------------- step 2 · party link (§10) ---------------- */

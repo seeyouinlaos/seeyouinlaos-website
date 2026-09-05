@@ -643,6 +643,15 @@
   E("prepared around you.", "für euch vorbereitet.", "ที่เตรียมไว้เพื่อคุณ", "あなたのために。");
   E("Thailand → Laos → China · 21 February – 6 March 2027. The complete journey — the days before, the wedding in Vientiane, and the quiet continuation — opens with the private code from your invitation.", "Thailand → Laos → China · 21. Februar – 6. März 2027. Die komplette Reise — die Tage davor, die Hochzeit in Vientiane und die stille Fortsetzung — öffnet sich mit dem privaten Code aus eurer Einladung.", "ไทย → ลาว → จีน · 21 กุมภาพันธ์ – 6 มีนาคม 2027 การเดินทางทั้งหมด ทั้งวันก่อนหน้า งานแต่งงานที่เวียงจันทน์ และบทต่ออันเงียบสงบ เปิดด้วยรหัสส่วนตัวจากบัตรเชิญของคุณ", "タイ → ラオス → 中国 · 2027年2月21日–3月6日。式までの日々、ビエンチャンでの結婚式、その後の静かな続き——旅のすべては、招待状のプライベートコードで開きます。");
   E("and Khun Ket & Khun Paddy will help right away.", "und Khun Ket & Khun Paddy helfen sofort weiter.", "แล้วคุณเก็ตและคุณแพดดี้จะช่วยเหลือทันที", "クン・ケットとクン・パディがすぐにお手伝いします。");
+  E("Your plan", "Dein Plan", "แผนของคุณ", "あなたのプラン");
+  E("Your selections", "Eure Auswahl", "ตัวเลือกของคุณ", "あなたの選択");
+  E("Day by day", "Tag für Tag", "วันต่อวัน", "日ごとの流れ");
+  E("Itinerary", "Reiseverlauf", "กำหนดการเดินทาง", "旅程");
+  E("All journeys", "Alle Reisen", "การเดินทางทั้งหมด", "すべての旅");
+  E("Experiences here", "Erlebnisse hier", "ประสบการณ์ที่นี่", "ここでの体験");
+  E("Accommodation & availability", "Unterkunft & Verfügbarkeit", "ที่พักและห้องว่าง", "宿泊と空室状況");
+  E("Travel within this journey", "Reisen innerhalb dieser Reise", "การเดินทางภายในทริปนี้", "この旅の中の移動");
+  E("Menu", "Menü", "เมนู", "メニュー");
   E("Show details", "Details anzeigen", "ดูรายละเอียด", "詳細を見る");
   E("Hide details", "Details schließen", "ซ่อนรายละเอียด", "詳細を閉じる");
   E("Continue", "Weiter", "ดำเนินการต่อ", "次へ");
