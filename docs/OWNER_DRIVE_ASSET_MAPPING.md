@@ -93,3 +93,15 @@ to use these folders; sources are documented here for accountability.
 | 002-Cafe-BKK/Cafe Madeleine/IMG_3626 | Pâtisserie counter, candy jars, green espresso bar | bkk-madeleine-01.jpg | Cafe Madeleine |
 | Restaurant,Cafe,Bar Vientiane/Lao Derm/IMG_3238 | Lao Derm branded sharing plate | vte-laoderm-01.jpg | Lao Derm |
 | Restaurant,Cafe,Bar Vientiane/Lacuna Vte/SnapInsta…656416850 | White courtyard, umbrellas, rattan chairs | vte-lacuna-01.jpg | Lacuna VTE |
+
+## Sacred Morning Ritual folder (1N-LCD10lVQrR6bqh9BxqRKsuhdYtO7Wl) — 05 Sep 2026
+| Drive file | Inspected content | Web derivative | Used for |
+|---|---|---|---|
+| TIA_7763.JPEG | Monks in line at dawn, string lights, saffron robes | assets/images/alms/ritual-dawn-01.jpg | Ceremony gallery (guest card + public panel) |
+| morning001.jpg | Alms bowl held with jasmine garland, close-up | assets/images/alms/ritual-offering-bowl.jpg | Ceremony gallery, second image |
+| a2cbb764…png | Branded "see you in laos" woven offering baskets, gold bows | assets/images/alms/ritual-offering-basket.jpg | The Offering block (guest area) |
+| Codex Image Sep 5 07_57_00.png | Rendered close-up of the same branded baskets | — | NOT USED (render duplicate; the a2cbb764 version is the stronger, more natural image) |
+| TIA_7801.jpeg | Novice handing blessing bag — AVANI+ hotel signage + van dominate | — | REJECTED (hotel branding/vehicles break the semantic rule) |
+| DSC07717.jpeg | Couple kneeling with offerings — car bonnet dominates background | — | REJECTED (vehicle dominates) |
+| DSC07779.jpeg | Line of novice monks + kneeling guest in prayer | — | inspected, held in reserve (strong, unused to keep rhythm at 2 images) |
+| TIA_7755 / TIA_7792 / DSC07723 / DSC07777 | NOT downloaded this pass | — | PENDING CURATION |

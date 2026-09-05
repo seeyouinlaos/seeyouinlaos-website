@@ -8,13 +8,13 @@
 import {
   WEDDING, CONTACTS, JOURNEY_MODULES, EVENTS, ACCOMMODATIONS, SELECTABLE_ACCOMMODATIONS, TRAIN,
   TRANSFERS, PACKAGE_INCLUSIONS, COPY, DEMO_MODE, PUBLICATION, TRAIN_REFERENCE, BERTH_PREFS, BANGKOK_STAYS, BANGKOK_STAY, POST_WEDDING, RETURN_STAY, lookupInvitation,
-} from './data.mjs?v=UN5';
+} from './data.mjs?v=UN6';
 import {
   contributionPerGuest, partyCharges, partyTotal, money as usdMoney, displayMoney,
   trainContribution, transfersTotal, journeyTotal, postWeddingTotal,
   createInventory, remaining, availabilityLabel, requestAllocation,
   validateRegistration, buildNotification, nextInvitationState,
-} from './logic.mjs?v=UN5';
+} from './logic.mjs?v=UN6';
 
 /* ---------------- persistent state ---------------- */
 const DRAFT_KEY = 'siyl.reg.draft.v2';
@@ -123,7 +123,7 @@ function itinerarySteps() {
   if (S.scope && S.scope.laos) {
     /* personal plan mirrors actual participation — no wedding rows for guests
      * who have not joined the Vientiane segment (§10). */
-    steps.push({ d: '28 FEB 2027 · First light', t: 'The Alms Giving', s: 'Vientiane', st: 'COMPLIMENTARY', main: true });
+    steps.push({ d: '28 FEB 2027 · First light', t: 'Sacred Morning Ritual', s: 'Vientiane' + (almsParticipants().length ? ' · Personal offering · Reserved (' + almsParticipants().length + ' × ' + money(ALMS_OFFERING_PP) + ')' : ''), st: 'COMPLIMENTARY', main: true });
     steps.push({ d: '28 FEB 2027 · 09:00 AM', t: 'The Temple Ceremony', s: 'Wat Ong Teu Temple, Vientiane', st: 'COMPLIMENTARY', main: true });
     steps.push({ d: 'After the return', t: 'Coffee & Cake', s: 'Souphattra Heritage Vientiane', st: 'COMPLIMENTARY', main: true });
     steps.push({ d: '28 FEB 2027 · 04:30 PM', t: 'The Vow Ceremony', s: 'Souphattra Heritage Vientiane', st: 'COMPLIMENTARY', main: true });
@@ -675,7 +675,7 @@ function renderHome() {
   const detailsMissing = S.guests.filter((g) => g.attending !== false && !(g.email || g.phone)).length;
   const tc = trainContribution(TRAIN, riders.length) || 0;
   const trf = transfersTotal(TRANSFERS, S.transfers, riders.length);
-  const total = (function(){ const G = laosGate(acc, riders.length, S.transfers); return journeyTotal(G.acc, occ, TRAIN, G.riders, TRANSFERS, G.transfers) + laosExtraTotal(G.acc, occ); })() + pwTotal() + bkkTotal() + cnStaysTotal();
+  const total = (function(){ const G = laosGate(acc, riders.length, S.transfers); return journeyTotal(G.acc, occ, TRAIN, G.riders, TRANSFERS, G.transfers) + laosExtraTotal(G.acc, occ); })() + pwTotal() + bkkTotal() + cnStaysTotal() + almsTotal();
   const card = (step, label, main, sub, status, image) =>
     '<button type="button" class="home-card" data-jump="' + step + '">' +
     (image ? '<span class="hc-img"><img src="' + roomImg(image) + '" alt="" width="1200" height="800" loading="lazy" decoding="async"/></span>' : '') +
@@ -1877,7 +1877,7 @@ function renderCost() {
   const occ = acc ? S.stay.occupantGuestIds : [];
   const riders = S.guests.filter((g) => g.journey.train);
   const tc = trainContribution(TRAIN, riders.length) || 0;
-  const total = (function(){ const G = laosGate(acc, riders.length, S.transfers); return journeyTotal(G.acc, occ, TRAIN, G.riders, TRANSFERS, G.transfers) + laosExtraTotal(G.acc, occ); })() + pwTotal() + bkkTotal() + cnStaysTotal();
+  const total = (function(){ const G = laosGate(acc, riders.length, S.transfers); return journeyTotal(G.acc, occ, TRAIN, G.riders, TRANSFERS, G.transfers) + laosExtraTotal(G.acc, occ); })() + pwTotal() + bkkTotal() + cnStaysTotal() + almsTotal();
   const neutral = acc && acc.contributionPerGuest == null;
   /* v1.3 typography roles: date · product/route · amount — chapter headers
    * separate PRE-WEDDING / THE WEDDING / POST-WEDDING; no boxes per line. */
@@ -2161,10 +2161,11 @@ function renderReview() {
     const bh = BANGKOK_STAYS.find((x) => x.id === S.bangkokStay.property) || BANGKOK_STAYS[0];
     if (bh) jcRows.push(['Bangkok stay', esc(bh.contributionNight) + ' · ' + esc(bh.name) + ' · ' + money(bkkTotal())]);
   }
+  if (almsTotal()) jcRows.push(['Personal offerings · Sacred Morning Ritual', almsParticipants().length + ' × ' + money(ALMS_OFFERING_PP) + ' = ' + money(almsTotal())]);
   if (S.postWedding && S.postWedding.joined) jcRows.push(['Post Wedding Journey', '04 MAR 2027 · Kunming → Lijiang · First Class Train · ' + money(pwTotal())]);
   if (cnStayTotal('kunming')) jcRows.push(['Kunming stay', '01 – 04 MAR 2027 · Wanxiang Yueju Designer Homestay · ' + money(cnStayTotal('kunming'))]);
   if (cnStayTotal('lijiang')) jcRows.push(['Lijiang stay', '04 – 06 MAR 2027 · Luye Baisha · Rizhao Jinshan · ' + money(cnStayTotal('lijiang'))]);
-  jcRows.push(['Total costs', money((function(){ const G = laosGate(acc, jcRiders, S.transfers); return journeyTotal(G.acc, occ, TRAIN, G.riders, TRANSFERS, G.transfers) + laosExtraTotal(G.acc, occ); })() + pwTotal() + bkkTotal() + cnStaysTotal())]);
+  jcRows.push(['Total costs', money((function(){ const G = laosGate(acc, jcRiders, S.transfers); return journeyTotal(G.acc, occ, TRAIN, G.riders, TRANSFERS, G.transfers) + laosExtraTotal(G.acc, occ); })() + pwTotal() + bkkTotal() + cnStaysTotal() + almsTotal())]);
   html += sec('Your Contribution', idx('cost'), jcRows);
   html += sec('Each of You', idx('each'), S.guests.map((g) => {
     const detail = (g.allergyDetail || '').trim();
@@ -2320,7 +2321,7 @@ function renderSummary() {
   if (S.postWedding && S.postWedding.joined) sel.push('Post Wedding Journey · REQUESTED');
   const covGaps = coverageModel().gaps.length;
   sel.push(covGaps === 0 ? '✓ Journey complete' : covGaps === 1 ? '1 thing still needed' : covGaps + ' things still needed');
-  const total = (function(){ const G = laosGate(acc, trainCount, S.transfers); return journeyTotal(G.acc, acc ? S.stay.occupantGuestIds : [], TRAIN, G.riders, TRANSFERS, G.transfers) + laosExtraTotal(G.acc, acc ? S.stay.occupantGuestIds : []); })() + pwTotal() + bkkTotal() + cnStaysTotal();
+  const total = (function(){ const G = laosGate(acc, trainCount, S.transfers); return journeyTotal(G.acc, acc ? S.stay.occupantGuestIds : [], TRAIN, G.riders, TRANSFERS, G.transfers) + laosExtraTotal(G.acc, acc ? S.stay.occupantGuestIds : []); })() + pwTotal() + bkkTotal() + cnStaysTotal() + almsTotal();
   const open = !!S._sumOpen;
   el.classList.toggle('sum-open', open);
   el.innerHTML =
@@ -2786,6 +2787,58 @@ function renderScopeBlock(mode, targetBox, segFilter) {
     }));
 }
 
+/* Sacred Morning Ritual — personal offering (owner order 05 Sep):
+ * the ceremony is part of the wedding programme; the USD 15 is solely the
+ * contribution for the guest's personal Buddhist offering, reserved per
+ * individual. The reason it is not hosted is cultural/religious, never
+ * commercial — in Lao Buddhist tradition the offering must come from the
+ * person who presents it. */
+const ALMS_OFFERING_PP = 15;
+function almsParticipants() {
+  if (!(S.scope && S.scope.laos)) return [];
+  return S.guests.filter((g) => g.attending !== false && (g.events || {}).alms && g.almsOffering);
+}
+function almsTotal() { return almsParticipants().length * ALMS_OFFERING_PP; }
+function almsOfferingHtml(st) {
+  if (st !== 'yes') return '';
+  const eligible = S.guests.map((g, i) => ({ g, i })).filter(({ g }) => g.attending !== false && (g.events || {}).alms);
+  const n = almsParticipants().length;
+  const det = !!S._almsDet;
+  return '<div style="border-top:1px solid rgba(33,31,28,.14);margin-top:14px;padding-top:12px">' +
+    '<p class="note" style="margin:0 0 10px"><strong>Ceremony</strong> — part of the wedding morning · complimentary.</p>' +
+    '<div class="cch-label">The Offering</div>' +
+    '<img src="../assets/images/alms/ritual-offering-basket.jpg" alt="The personal offering baskets, prepared for the morning" loading="lazy" decoding="async" style="width:100%;height:170px;object-fit:cover;display:block;margin:8px 0"/>' +
+    '<p class="note" style="margin:0 0 6px">For those who wish to take part in the alms-giving itself, we will prepare an individual offering for you in advance.</p>' +
+    '<p class="note" style="margin:0 0 6px"><strong>Offering contribution · USD 15 per participant</strong></p>' +
+    '<p class="note" style="margin:0 0 6px">In Lao Buddhist tradition, the offering is a personal act of giving and merit-making. For that reason, it should come from the person who presents it rather than from the hosts.</p>' +
+    '<p class="note" style="margin:0 0 6px">If tradition allowed us to cover this for you, we would gladly do so. Here, the personal contribution is part of the meaning of the ritual itself.</p>' +
+    '<p class="note" style="margin:0 0 10px">Please reserve your offering in advance so that we can prepare the correct number for the morning.</p>' +
+    eligible.map(({ g, i }) => {
+      const on = !!g.almsOffering;
+      return '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:7px 0;border-top:1px solid rgba(33,31,28,.08)">' +
+        '<strong style="flex:1;min-width:120px">' + esc(g.name || 'Guest ' + (i + 1)) + '</strong>' +
+        (on ? '<span class="cch-label">Offering reserved</span><button type="button" class="btn sm ghost" data-alms-off="' + i + '">Remove</button>'
+            : '<button type="button" class="btn sm" data-alms-on="' + i + '">Reserve your offering</button>') +
+        '</div>';
+    }).join('') +
+    (n ? '<p class="note" style="margin:8px 0 0"><strong>' + n + ' offering' + (n > 1 ? 's' : '') + ' · USD 15 × ' + n + ' = ' + money(almsTotal()) + '</strong></p>' : '') +
+    '<button type="button" class="btn sm ghost" data-alms-det style="margin-top:12px" aria-expanded="' + det + '">' + (det ? 'Hide details' : 'More details') + '</button>' +
+    (det ? '<div style="padding-top:10px">' +
+      '<p class="note" style="margin:0 0 6px">Tak Bat — also called Sai Bat — is the traditional Lao morning alms-giving. At dawn, monks leave their temples and walk silently in line with their alms bowls while people wait along the route and place sticky rice, fruit and small food into the bowls. It is a living religious tradition, not a staged attraction — a daily bond between the community and the monastic order.</p>' +
+      '<p class="note" style="margin:0 0 10px">Giving is understood as merit-making: the material gift carries the spiritual dimension of humility, respect and mindfulness with it.</p>' +
+      '<div class="cch-label">Respecting the ritual</div>' +
+      '<ul class="note" style="margin:6px 0 0;padding-left:18px">' +
+      '<li>Dress modestly.</li>' +
+      '<li>Remain quiet and arrive before the monks.</li>' +
+      '<li>Follow local guidance.</li>' +
+      '<li>Sit or kneel lower than the monks when presenting your offering.</li>' +
+      '<li>Never touch the monks — women should take particular care to avoid any physical contact.</li>' +
+      '<li>Do not block or follow the procession.</li>' +
+      '<li>No flash photography.</li>' +
+      '<li>Participate respectfully rather than treating the ritual as a photo opportunity.</li>' +
+      '</ul></div>' : '') +
+    '</div>';
+}
 function renderWeddingPresets() {
   const box = document.getElementById('events-box');
   if (!box || document.getElementById('wed-presets')) return;
@@ -2798,8 +2851,8 @@ function renderWeddingPresets() {
    * code + ONE required acknowledgement (semantic state, локale-free). */
   S.dressAck ||= {}; S.dressAck.coffee ||= false; S.dressAck.alms ||= false;
   const EVJ = [
-    ['alms', 'The Alms Giving', '28 FEB 2027 · First light · Vientiane', 'Lao Traditional Dress',
-      ['tradition-04', 'tradition-05', 'tradition-06'],
+    ['alms', 'Sacred Morning Ritual', '28 FEB 2027 · First light · Vientiane', 'Lao Traditional Dress',
+      ['../alms/ritual-dawn-01', '../alms/ritual-offering-bowl'],
       'The wedding day begins with the quiet Lao morning ritual of giving alms.', null],
     ['temple', 'The Temple Ceremony', '28 FEB 2027 · 09:00 AM – approx. 12:00 PM · Wat Ong Teu Temple, Vientiane', 'Lao Traditional Dress',
       ['tradition-01', 'tradition-02', 'tradition-03'],
@@ -2829,6 +2882,7 @@ function renderWeddingPresets() {
     const nImg = RHYTHM[k] != null ? RHYTHM[k] : 3;
     const use = imgs.slice(0, nImg);
     return '<div class="mod" data-evj="' + k + '"><div class="when">' + meta + ' · COMPLIMENTARY</div><h3>' + name + '</h3>' +
+      (k === 'alms' ? '<div class="cch-label" style="margin-top:2px">Alms Giving · Tak Bat</div>' : '') +
       (use.length ? '<div style="display:grid;grid-template-columns:repeat(' + use.length + ',1fr);gap:6px;margin:10px 0 8px">' +
       use.map((f, ix) => '<img src="../assets/images/dress/' + f + '.jpg" alt="' + name + ' — view ' + (ix + 1) + '" data-ev-lb="' + k + '" data-ev-ix="' + ix + '" loading="lazy" decoding="async" style="width:100%;height:' + (use.length === 1 ? '150' : '96') + 'px;object-fit:cover;display:block;cursor:zoom-in"/>').join('') + '</div>' : '') +
       '<p class="note" style="margin:0 0 8px">' + desc + '</p>' +
@@ -2841,6 +2895,7 @@ function renderWeddingPresets() {
           '<label class="confirm-row" style="margin-top:4px"><input type="checkbox" data-evj-ack="' + k + '"' + (ack ? ' checked' : '') + '/><span>I have read and understand the dress code</span></label>' +
           (ack ? '' : '<p class="note" style="margin:4px 0 0">Dress code — action needed</p>')
         : '') +
+      (k === 'alms' ? almsOfferingHtml(st) : '') +
       '</div>';
   }).join('');
   box.insertAdjacentHTML('afterbegin', '<div class="guest-block" id="wed-presets"><div class="cch-label">The wedding · are you joining?</div>' + html + '</div>');
@@ -2854,12 +2909,26 @@ function renderWeddingPresets() {
     S.guests.forEach((g) => { if (g.attending === false) return; g.events = g.events || {}; g.events[k] = v === 'yes'; });
     S._evDecided = S._evDecided || {}; S._evDecided[k] = true;
     if (v === 'no') S.dressAck[k] = false;
+    /* leaving the morning withdraws every personal offering immediately */
+    if (k === 'alms' && v === 'no') S.guests.forEach((g) => { g.almsOffering = false; });
     saveDraft(); renderStep(cur); renderSummary();
   }));
   box.querySelectorAll('[data-evj-ack]').forEach((el) => el.addEventListener('change', () => {
     S.dressAck[el.getAttribute('data-evj-ack')] = el.checked;
     saveDraft(); renderStep(cur); renderSummary();
   }));
+  box.querySelectorAll('[data-alms-on]').forEach((b) => b.addEventListener('click', () => {
+    const i = parseInt(b.getAttribute('data-alms-on'), 10);
+    if (S.guests[i]) S.guests[i].almsOffering = true;
+    saveDraft(); renderStep(cur); renderSummary();
+  }));
+  box.querySelectorAll('[data-alms-off]').forEach((b) => b.addEventListener('click', () => {
+    const i = parseInt(b.getAttribute('data-alms-off'), 10);
+    if (S.guests[i]) S.guests[i].almsOffering = false;
+    saveDraft(); renderStep(cur); renderSummary();
+  }));
+  const ad = box.querySelector('[data-alms-det]');
+  if (ad) ad.addEventListener('click', () => { S._almsDet = !S._almsDet; renderStep(cur); });
 }
 
 function renderStayMode() {
