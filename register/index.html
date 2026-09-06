@@ -1454,7 +1454,10 @@ body.dw-open #privnav { transform: none; visibility: visible; }
 .day-card img { width: 100%; aspect-ratio: 4/5; object-fit: cover; display: block; }
 
 
-.day-card .ph-quiet { width: 100%; aspect-ratio: 4/5; background: var(--blush); }
+.day-card .ph-quiet { width: 100%; aspect-ratio: 4/5; background: var(--blush); position: relative; }
+/* Owner placeholder standard: correct final geometry, obviously awaiting its
+ * photograph — never filled with an unrelated image. */
+.ph-quiet::after { content: 'Photography to follow'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: var(--rose); }
 
 
 .day-card .it-day { display: block; margin: 16px 0 4px; font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--rose); }
@@ -2240,9 +2243,9 @@ header.top .mark { white-space: nowrap; }
 <div class="lb-count" aria-live="polite"></div>
 </div>
 
-<script src="../assets/i18n/catalog.js?v=F2"></script>
-<script src="../assets/experiences.js?v=F2"></script>
-<script src="../assets/i18n/siyl-i18n.js?v=F2"></script>
-<script type="module" src="./app.mjs?v=F2"></script>
+<script src="../assets/i18n/catalog.js?v=G2"></script>
+<script src="../assets/experiences.js?v=G2"></script>
+<script src="../assets/i18n/siyl-i18n.js?v=G2"></script>
+<script type="module" src="./app.mjs?v=G2"></script>
 </body>
 </html>

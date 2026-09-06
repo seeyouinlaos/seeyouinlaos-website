@@ -8,13 +8,13 @@
 import {
   WEDDING, CONTACTS, JOURNEY_MODULES, EVENTS, ACCOMMODATIONS, SELECTABLE_ACCOMMODATIONS, TRAIN,
   TRANSFERS, PACKAGE_INCLUSIONS, COPY, DEMO_MODE, PUBLICATION, TRAIN_REFERENCE, BERTH_PREFS, BANGKOK_STAYS, BANGKOK_STAY, POST_WEDDING, RETURN_STAY, lookupInvitation,
-} from './data.mjs?v=F2';
+} from './data.mjs?v=G2';
 import {
   contributionPerGuest, partyCharges, partyTotal, money as usdMoney, displayMoney,
   trainContribution, transfersTotal, journeyTotal, postWeddingTotal,
   createInventory, remaining, availabilityLabel, requestAllocation,
   validateRegistration, buildNotification, nextInvitationState,
-} from './logic.mjs?v=F2';
+} from './logic.mjs?v=G2';
 
 /* ---------------- persistent state ---------------- */
 const DRAFT_KEY = 'siyl.reg.draft.v2';
@@ -927,7 +927,11 @@ function voyDays(k) {
   if (k === 'bkk') return [
     { day: '21 – 24 FEB', title: 'Bangkok', text: 'City days together before the wedding — the penthouse stay, the river, the markets.', exp: exp('bkk'),
       img: '../assets/images/city/001-bangkok-chao-phraya-skyline.jpg' },
-    { day: '24 FEB', title: 'The Overnight Train', text: TRAIN.times + ' — First Class Sleeper north to Nong Khai, van pickup and luggage service to the hotel included.', exp: [] },
+    /* Image: 005 - City - Nong Khai — the Friendship Bridge, the crossing this
+     * journey makes. The train itself awaits approved photography (006 holds
+     * booking screenshots and link files only). */
+    { day: '24 FEB', title: 'The Overnight Train', text: TRAIN.times + ' — First Class Sleeper north to Nong Khai, van pickup and luggage service over the Friendship Bridge to the hotel included.', exp: [],
+      img: '../assets/images/city/005-nong-khai-friendship-bridge.jpg' },
   ];
   if (k === 'vte') return [
     { day: '27 FEB', title: 'Vientiane', text: 'Arrival and the first quiet evening in the city on the Mekong.', exp: exp('vte'),

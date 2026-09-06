@@ -62,3 +62,22 @@ is used as a property image and no property photograph is used as a city hero.
 
 - **Temple Ceremony (Wat Ong Teu, 28 Feb 09:00)** — no ceremony photography exists
   in either supplied root. The surface stays image-light. Missing is better than wrong.
+
+## 06 SEP taxonomy alignment (owner renumbering — FROZEN)
+
+The library was renumbered by the owner. Frozen object sets: Hotels 020–025
+(Sathorn Penthouse, Souphattra Heritage, Airbnb Guest House Vientiane, Wanxiang
+Yueju, Luye Baisha, Siam Kempinski — exactly six, 022 keeps its exact name),
+Airports 030–035, Cities 001–005 (005 Nong Khai is new), Transport 006–010.
+Earlier source references "012 - Hotel - Souphattra Heritage Vientiane" now live
+under 021; the verified green-door and courtyard assignments are unchanged.
+
+| Production asset | Drive | Source folder | Source file | Verified subject | Used for | Status |
+|---|---|---|---|---|---|---|
+| city/005-nong-khai-friendship-bridge.jpg | B | 005 - City - Nong Khai | 517575839_…_n.jpg | Friendship Bridge at dusk over the Mekong | Special Train Journey crossing (Thailand day-by-day) | ACTIVE — new |
+
+Rejected in this pass: 006 transport folder currently holds a booking-system
+screenshot, .webloc link files and AI-styled renders — no usable verified train
+photograph, so the train product keeps the deliberate placeholder standard
+(correct geometry, "Photography to follow"). 007–010 transport folders and the
+Railway VIP Lounge / Afternoon Tea folders await their first verified imports.
