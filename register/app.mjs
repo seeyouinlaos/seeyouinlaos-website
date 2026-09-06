@@ -8,13 +8,13 @@
 import {
   WEDDING, CONTACTS, JOURNEY_MODULES, EVENTS, ACCOMMODATIONS, SELECTABLE_ACCOMMODATIONS, TRAIN,
   TRANSFERS, PACKAGE_INCLUSIONS, COPY, DEMO_MODE, PUBLICATION, TRAIN_REFERENCE, BERTH_PREFS, BANGKOK_STAYS, BANGKOK_STAY, POST_WEDDING, RETURN_STAY, lookupInvitation,
-} from './data.mjs?v=B2';
+} from './data.mjs?v=C2';
 import {
   contributionPerGuest, partyCharges, partyTotal, money as usdMoney, displayMoney,
   trainContribution, transfersTotal, journeyTotal, postWeddingTotal,
   createInventory, remaining, availabilityLabel, requestAllocation,
   validateRegistration, buildNotification, nextInvitationState,
-} from './logic.mjs?v=B2';
+} from './logic.mjs?v=C2';
 
 /* ---------------- persistent state ---------------- */
 const DRAFT_KEY = 'siyl.reg.draft.v2';
@@ -1097,6 +1097,12 @@ function renderPlanner() {
         const on = S.guests.some((g) => (g.events || {})[k]);
         return choice(label, sub, on, 'data-pl-ev="' + k + '"');
       }).join('') + '</div></section>' +
+      '<section class="am-sec"><p class="cch-label">Dress code</p>' +
+      '<p class="note" style="max-width:560px;margin-bottom:10px">' +
+      (['temple','ceremony','dinner'].every((k) => !S.guests.some((g) => (g.events || {})[k]) || (S.dressAck && S.dressAck[k]))
+        ? 'Dress codes confirmed for every event you are joining.'
+        : 'Each wedding event has its own dress code. Please open the event under the Laos journey and confirm it — your registration cannot be sent without this.') + '</p>' +
+      '<button type="button" class="btn-full" data-pl-wed="1">Open the wedding events</button></section>' +
       '<section class="am-sec"><p class="cch-label">Wellness</p>' +
       '<p class="note" style="max-width:560px;margin-bottom:10px">' + ((S.wellness || []).length ? (S.wellness.length + ' treatment' + (S.wellness.length > 1 ? 's' : '') + ' noted as interest. Marsilea Spa confirms every appointment directly.') : 'Marsilea Spa, on the fifth floor of the Souphattra Hotel Vientiane.') + '</p>' +
       '<button type="button" class="btn-full" data-pl-spa="1">Open Marsilea Spa</button></section>';
@@ -1169,6 +1175,10 @@ function renderPlanner() {
     S.guests.forEach((g) => { if (g.attending !== false) { g.events ||= {}; g.events[k] = !on; } });
     S._evDecided ||= {}; S._evDecided[k] = true;
     saveDraft(); renderStep(cur); renderSummary();
+  }));
+  box.querySelectorAll('[data-pl-wed]').forEach((b) => b.addEventListener('click', () => {
+    S._voy = 'vte'; S._voySec = null; S._dest = null; show(idx('home'));
+    setTimeout(() => { const t = document.getElementById('vy-sel'); if (t) t.scrollIntoView({ block: 'start' }); }, 400);
   }));
   box.querySelectorAll('[data-pl-spa]').forEach((b) => b.addEventListener('click', () => {
     S._voy = 'vte'; S._voySec = 'wellness'; S._dest = null; show(idx('home'));
