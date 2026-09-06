@@ -880,6 +880,55 @@ header.top .mark { white-space: nowrap; }
 .opt-ctl[disabled] { opacity: .4; cursor: not-allowed; }
 .am-contact { border-top: 1px solid var(--line); margin-top: 34px; padding-top: 20px; }
 .am-contact .note { margin-bottom: 10px; }
+
+/* ---- staged planner (Aman plan-your-voyage grammar) ---- */
+.stage-bar { display: flex; gap: 0; border-bottom: 1px solid var(--line); overflow-x: auto; scrollbar-width: none; margin-bottom: 6px; }
+.stage-bar::-webkit-scrollbar { display: none; }
+.stage { flex: 1 0 auto; background: none; border: 0; border-bottom: 2px solid transparent; padding: 14px 16px 12px; font: inherit; cursor: pointer; color: inherit; text-align: left; min-height: 52px; white-space: nowrap; }
+.stage .stage-n { display: block; font-size: 9.5px; letter-spacing: .2em; color: var(--rose); }
+.stage .stage-l { display: block; font-size: 12.5px; letter-spacing: .04em; margin-top: 3px; opacity: .6; }
+.stage.now { border-bottom-color: var(--ink); }
+.stage.now .stage-l { opacity: 1; font-family: 'PP Editorial Old', serif; font-size: 15px; }
+.stage.done .stage-l { opacity: .85; }
+.stage.done .stage-n::after { content: ' ·'; }
+.stage.next .stage-l { opacity: .45; }
+.ch-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 10px; }
+.ch { display: block; text-align: left; background: none; border: 1px solid var(--line); border-radius: 0; padding: 22px 20px; font: inherit; color: inherit; cursor: pointer; min-height: 96px; transition: border-color .3s, background .3s; }
+.ch:hover { border-color: var(--ink); }
+.ch.on { border-color: var(--ink); background: var(--panel); }
+.ch[disabled] { opacity: .4; cursor: not-allowed; }
+.ch .ch-t { display: block; font-family: 'PP Editorial Old', serif; font-weight: 200; font-size: 22px; line-height: 1.2; }
+.ch .ch-s { display: block; font-size: 12.5px; color: var(--rose); margin-top: 6px; }
+.ch.on .ch-s { color: var(--ink); opacity: .8; }
+.stage-nav { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--line); margin-top: 44px; padding-top: 18px; }
+
+/* ---- Aman property presentation inside destinations ---- */
+.am-prop { border-top: 1px solid var(--line); padding-top: 26px; margin-top: 34px; }
+.am-prop:first-of-type { border-top: 0; padding-top: 0; margin-top: 20px; }
+.am-prop .am-gal { margin-bottom: 18px; }
+.am-prop .am-track img { aspect-ratio: 4/5; }
+.am-propname { font-weight: 200; font-size: 28px; line-height: 1.14; margin: 6px 0 10px; }
+.am-prop .btn-full { margin-top: 14px; }
+.am-prop .t-act { display: block; margin-top: 12px; }
+.pl-row.disc { width: 100%; text-align: left; background: none; cursor: pointer; font: inherit; color: inherit; }
+.pl-row.disc:hover .pl-t { opacity: .6; }
+.sn-group { text-align: center; font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: var(--rose); margin: 22px 0 2px; }
+.day-card.feat { cursor: pointer; }
+.day-card.feat img { aspect-ratio: 3/4; }
+.day-card.feat .t-act { display: inline-block; margin-top: 10px; }
+
+/* ---- Aman four-column footer ---- */
+.ft { border-top: 1px solid var(--line); margin-top: 70px; padding: 46px 0 calc(30px + env(safe-area-inset-bottom)); }
+.ft-brand { text-align: center; font-family: 'PP Editorial Old', serif; font-size: 21px; margin-bottom: 34px; }
+.ft-brand .dot { color: var(--cherry-photo); }
+.ft-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 28px 24px; padding-bottom: 32px; border-bottom: 1px solid var(--line); }
+.ft-grid h4 { font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: var(--rose); margin-bottom: 12px; font-weight: 400; }
+.ft-grid button, .ft-grid a { display: block; width: 100%; text-align: left; background: none; border: 0; font: inherit; font-size: 13.5px; padding: 7px 0; cursor: pointer; color: inherit; text-decoration: none; min-height: 34px; }
+.ft-grid button:hover, .ft-grid a:hover { opacity: .6; }
+.ft-note { font-size: 12px; color: var(--rose); padding: 7px 0; }
+.rv-top { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; }
+.rv-top .t-act { min-height: 40px; padding-top: 4px; }
+.ft-legal { padding-top: 22px; font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--rose); display: flex; flex-wrap: wrap; gap: 6px 20px; }
 </style>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -956,6 +1005,8 @@ header.top .mark { white-space: nowrap; }
 <div class="dw-scrim" id="dw-scrim" hidden></div>
 <div class="sn-scrim" id="subnav-scrim" hidden></div>
 <nav class="sn" id="subnav" hidden role="dialog" aria-modal="true" aria-label="Section"></nav>
+<div class="sn-scrim" id="destnav-scrim" hidden></div>
+<nav class="sn" id="destnav" hidden role="dialog" aria-modal="true" aria-label="Destinations"></nav>
 <nav id="privnav" hidden aria-label="Your private journey"></nav>
 
 <main class="wrap">
@@ -1001,6 +1052,11 @@ header.top .mark { white-space: nowrap; }
 </section>
 
 <!-- 3 · journey (§13) -->
+<section class="step" data-step="plan" aria-label="Plan your journey">
+<h1 class="sr-only">Plan your journey</h1>
+<div id="plan-box"></div>
+</section>
+
 <section class="step" data-step="journey" aria-label="Your journey">
 <div class="step-eyebrow">Your journey</div>
 <h2>Which roads<br/>bring you to us?</h2>
@@ -1085,6 +1141,7 @@ header.top .mark { white-space: nowrap; }
 </section>
 </main>
 
+<footer id="siteFooter" hidden></footer>
 <div id="summary" hidden aria-live="polite"></div>
 
 <!-- room detail overlay (§22) -->
@@ -1108,9 +1165,9 @@ header.top .mark { white-space: nowrap; }
 <div class="lb-count" aria-live="polite"></div>
 </div>
 
-<script src="../assets/i18n/catalog.js?v=Y1"></script>
-<script src="../assets/experiences.js?v=Y1"></script>
-<script src="../assets/i18n/siyl-i18n.js?v=Y1"></script>
-<script type="module" src="./app.mjs?v=Y1"></script>
+<script src="../assets/i18n/catalog.js?v=Z1"></script>
+<script src="../assets/experiences.js?v=Z1"></script>
+<script src="../assets/i18n/siyl-i18n.js?v=Z1"></script>
+<script type="module" src="./app.mjs?v=Z1"></script>
 </body>
 </html>

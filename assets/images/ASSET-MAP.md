@@ -31,3 +31,17 @@ page context must all agree before an asset is used.
 - **Wedding Dinner** — no event folder exists in the library. No substitute used.
 - **Kunming / Lijiang city folders** — not yet imported in this pass; the China
   journey uses its approved accommodation and experience imagery only.
+
+## Added in the destination pass
+
+| Production asset | Drive folder | Verified subject | Used for |
+|---|---|---|---|
+| city/003-kunming-jinma-biji-archway.jpg | 003 - City - Kunming | Jinma Biji memorial archway | Kunming destination hero |
+| city/003-kunming-temple-cherry-blossom.jpg | 003 - City - Kunming | Temple eaves with cherry blossom | Kunming editorial |
+| city/004-lijiang-black-dragon-pool.jpg | 004 - City - Lijiang | Black Dragon Pool below Jade Dragon Snow Mountain | Lijiang destination hero |
+| city/004-lijiang-naxi-rooftops.jpg | 004 - City - Lijiang | Aerial Naxi rooftops under the snow mountain | Lijiang editorial |
+
+Property imagery stays property imagery: Bangkok stays use the penthouse and
+Kempinski photography, Vientiane stays use the Souphattra room photography,
+Kunming and Lijiang stays use their own homestay photography. No city photograph
+is used as a property image and no property photograph is used as a city hero.

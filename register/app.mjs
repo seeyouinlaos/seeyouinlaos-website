@@ -8,13 +8,13 @@
 import {
   WEDDING, CONTACTS, JOURNEY_MODULES, EVENTS, ACCOMMODATIONS, SELECTABLE_ACCOMMODATIONS, TRAIN,
   TRANSFERS, PACKAGE_INCLUSIONS, COPY, DEMO_MODE, PUBLICATION, TRAIN_REFERENCE, BERTH_PREFS, BANGKOK_STAYS, BANGKOK_STAY, POST_WEDDING, RETURN_STAY, lookupInvitation,
-} from './data.mjs?v=Y1';
+} from './data.mjs?v=Z1';
 import {
   contributionPerGuest, partyCharges, partyTotal, money as usdMoney, displayMoney,
   trainContribution, transfersTotal, journeyTotal, postWeddingTotal,
   createInventory, remaining, availabilityLabel, requestAllocation,
   validateRegistration, buildNotification, nextInvitationState,
-} from './logic.mjs?v=Y1';
+} from './logic.mjs?v=Z1';
 
 /* ---------------- persistent state ---------------- */
 const DRAFT_KEY = 'siyl.reg.draft.v2';
@@ -305,6 +305,8 @@ function freshState() {
 function saveDraft() {
   try { localStorage.setItem(DRAFT_KEY, JSON.stringify(S)); } catch (e) { /* private mode */ }
   renderSubnav();
+  renderDestnav();
+  renderFooter();
   if (typeof updateNextState === 'function') updateNextState(); // item 8: live re-validation
 }
 function loadDraft() { try { return JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null'); } catch (e) { return null; } }
@@ -339,6 +341,7 @@ function renderStep(i) {
   const name = stepEls[i].dataset.step;
   if (name === 'home') renderHome();
   if (name === 'party') renderParty();
+  if (name === 'plan') renderPlanner();
   if (name === 'journey') renderTravelStep(document.getElementById('journey-box'));
   if (name === 'events') renderSegInto('vte', document.getElementById('events-box'));
   /* Your Stay renders every journey's accommodation natively in the Aman
@@ -350,6 +353,8 @@ function renderStep(i) {
   if (name === 'review') { renderReview(); renderReviewScope(); }
   if (name === 'send') renderSend();
   renderSubnav();
+  renderDestnav();
+  renderFooter();
   if (typeof updateNextState === 'function') updateNextState(); // item 8
 }
 
@@ -607,6 +612,8 @@ function renderPrivnav() {
     '<button type="button" class="dw-close" aria-label="Close menu">Close</button></div>' +
     '<button type="button" data-nav="home"' + (name === 'home' && !S._voy ? ' aria-current="true"' : '') + '>Your Journey</button>' +
     '<div class="dw-group">' + voyLink('bkk') + voyLink('vte') + voyLink('china') + '</div>' +
+    '<button type="button" class="dw-sub" data-destnav="1">Destinations</button>' +
+    '<button type="button" data-nav="plan"' + (name === 'plan' ? ' aria-current="true"' : '') + '>Plan your journey</button>' +
     '<button type="button" data-nav="stay"' + (name === 'stay' ? ' aria-current="true"' : '') + '>Your Stay</button>' +
     '<button type="button" data-nav="journey"' + (name === 'journey' ? ' aria-current="true"' : '') + '>Your Travel</button>' +
     '<button type="button" data-nav="each"' + (name === 'each' ? ' aria-current="true"' : '') + '>Your Details</button>' +
@@ -630,9 +637,12 @@ function renderPrivnav() {
   }
   if (planBtn && !planBtn.dataset.wired) {
     planBtn.dataset.wired = '1';
-    planBtn.addEventListener('click', () => { setDrawer(false); show(idx('cost')); });
+    planBtn.addEventListener('click', () => { setDrawer(false); show(idx('plan')); });
   }
   nav.querySelector('.dw-close').addEventListener('click', () => setDrawer(false));
+  nav.querySelectorAll('[data-destnav]').forEach((b) => b.addEventListener('click', () => {
+    setDrawer(false); setDestnav(true);
+  }));
   nav.querySelectorAll('[data-voy-nav]').forEach((b) => b.addEventListener('click', () => {
     S._voy = b.getAttribute('data-voy-nav'); setDrawer(false); show(idx('home'));
   }));
@@ -643,7 +653,7 @@ function renderPrivnav() {
     setDrawer(false); setInvitationState('open', 'privnav-invitation', { force: true });
   });
   nav.querySelectorAll('[data-nav]').forEach((b) => b.addEventListener('click', () => {
-    if (b.getAttribute('data-nav') === 'home') S._voy = null;
+    if (b.getAttribute('data-nav') === 'home') { S._voy = null; S._dest = null; }
     setDrawer(false); show(idx(b.getAttribute('data-nav')));
   }));
   nav.querySelector('#pn-save').addEventListener('click', (e) => {
@@ -753,49 +763,61 @@ function renderTravelStep(box) {
    * editorial hierarchy, restrained fact lines, inline disclosure. */
   const groups = [
     { j: '01', country: 'Thailand', route: 'Bangkok → Nong Khai → Vientiane', on: !!sc.bangkok,
-      rows: [{ key: 'transit', title: 'The Overnight Train', meta: esc(TRAIN.date) + ' · ' + esc(TRAIN.times) + ' · First Class Sleeper',
-        status: riders.length ? 'BOOKED' : 'YOUR CHOICE',
-        fact: riders.length ? riders.length + ' guests · ' + money(trainContribution(TRAIN, riders.length) || 0) : money(TRAIN.contributionPerGuest) + ' per guest, package',
-        render: (w) => renderScopeBlock('products', w, 'bangkok', 'transit') }],
-      off: 'Opens when Thailand is part of your journey.' },
+      off: 'Opens when Thailand is part of your journey.',
+      html: (function () {
+        const on = riders.length > 0;
+        const cabin = S.trainCabin === 'private';
+        return '<div class="ch-grid">' +
+          choice('The overnight train', money(TRAIN.contributionPerGuest) + ' per guest · ' + esc(TRAIN.date) + ' · ' + esc(TRAIN.times), on, 'data-tv-train="1"') +
+          (on && riders.length === 1
+            ? choice('Private cabin', money(130) + ' single occupancy · ' + money(55) + ' upcharge', cabin, 'data-tv-cabin="1"')
+            : '') +
+          '</div>' +
+          '<p class="tv-f">' + esc(TRAIN.packageNote) + '</p>' +
+          (on ? '<p class="am-avail">BOOKED · ' + riders.length + ' guest' + (riders.length > 1 ? 's' : '') + ' · ' + money(trainContribution(TRAIN, riders.length) || 0) + '</p>'
+              : '<p class="am-avail">YOUR CHOICE · open</p>');
+      })() },
     { j: '02', country: 'Laos', route: 'Arrival · Vientiane · the wedding days', on: sc.laos !== false,
-      rows: [{ key: 'laos', title: 'Movements in Vientiane', meta: 'Arrival welcome and the transfers inside the wedding programme',
-        status: 'HOSTED', fact: 'Confirmed transfers within the wedding programme are hosted for you.', render: null }],
-      off: 'Opens when Laos is part of your journey.' },
+      off: 'Opens when Laos is part of your journey.',
+      html: '<p class="note" style="max-width:560px">The arrival welcome and every transfer inside the wedding programme are hosted for you. Nothing to choose here.</p>' +
+        '<p class="am-avail">HOSTED</p>' },
     { j: '03', country: 'China', route: 'Vientiane → Kunming → Lijiang', on: !!sc.china,
-      rows: [{ key: 'china', title: 'Flight, First Class train &amp; stays', meta: 'Vientiane → Kunming by air · Kunming → Lijiang by First Class train',
-        status: ((S.china && (S.china.kunming === 'with' || S.china.lijiang === 'with')) || pwTotal()) ? 'BOOKED' : 'YOUR CHOICE',
-        fact: (cnStaysTotal() || pwTotal()) ? money(cnStaysTotal() + pwTotal()) + ' · your costs' : money(145) + ' per guest for the First Class train',
-        render: (w) => renderScopeBlock('products', w, 'china') }],
-      off: 'Opens when China is part of your journey.' },
+      off: 'Opens when China is part of your journey.',
+      html: '<div class="ch-grid">' +
+        choice('Vientiane → Kunming', 'Flight · arranged for you', !!(S.travel && S.travel.vteKmg === 'with'), 'data-tv-t="vteKmg"') +
+        choice('Kunming → Lijiang', money(145) + ' per guest · First Class train', !!(S.travel && S.travel.kmgLjg === 'with'), 'data-tv-t="kmgLjg"') +
+        choice('Kunming stay', money(27) + ' per guest, per night · 01–04 MAR', !!(S.china && S.china.kunming === 'with'), 'data-tv-c="kunming"') +
+        choice('Lijiang stay', money(63) + ' per guest, per night · 04–06 MAR', !!(S.china && S.china.lijiang === 'with'), 'data-tv-c="lijiang"') +
+        '</div>' +
+        ((cnStaysTotal() || pwTotal()) ? '<p class="am-avail">BOOKED · ' + money(cnStaysTotal() + pwTotal()) + ' your costs</p>' : '<p class="am-avail">YOUR CHOICE · open</p>') },
   ];
   box.innerHTML = '<p class="note" style="max-width:560px;margin-bottom:6px">How you move, shown inside the journey it belongs to.</p>' +
     groups.map((g) =>
       '<section class="am-sec"><p class="cch-label">Journey ' + g.j + ' · ' + g.country + '</p>' +
       '<p class="tv-route">' + g.route + '</p>' +
-      (g.on ? g.rows.map((r) => {
-        const open = S._mod.travel === r.key;
-        return '<div class="tv-row' + (open ? ' open' : '') + '">' +
-          (r.render
-            ? '<button type="button" class="tv-head" data-tvl-t="' + r.key + '" aria-expanded="' + open + '">' +
-              '<span class="tv-t serif">' + r.title + '</span>' +
-              '<span class="tv-m">' + r.meta + '</span>' +
-              '<span class="tv-s">' + r.status + '</span>' +
-              '<span class="tv-x" aria-hidden="true">' + (open ? '&minus;' : '+') + '</span></button>'
-            : '<div class="tv-head static"><span class="tv-t serif">' + r.title + '</span>' +
-              '<span class="tv-m">' + r.meta + '</span><span class="tv-s">' + r.status + '</span></div>') +
-          '<p class="tv-f">' + r.fact + '</p>' +
-          (open && r.render ? '<div class="tv-body" data-tvl-body="' + r.key + '"></div>' : '') +
-          '</div>';
-      }).join('') : '<p class="note tv-off">' + g.off + '</p>') +
+      (g.on ? g.html : '<p class="note tv-off">' + g.off + '</p>') +
       '</section>').join('');
-  const openKey = S._mod.travel;
-  const row = groups.flatMap((g) => (g.on ? g.rows : [])).find((x) => x.key === openKey && x.render);
-  if (row) { const w = box.querySelector('[data-tvl-body="' + openKey + '"]'); if (w) row.render(w); }
-  box.querySelectorAll('[data-tvl-t]').forEach((b) => b.addEventListener('click', () => {
-    const k = b.getAttribute('data-tvl-t');
-    S._mod.travel = (S._mod.travel === k) ? null : k;
-    renderStep(cur);
+  box.querySelectorAll('[data-tv-train]').forEach((b) => b.addEventListener('click', () => {
+    const on = S.guests.some((g) => g.journey.train);
+    S.guests.forEach((g) => { if (g.attending !== false) g.journey.train = !on; });
+    saveDraft(); renderStep(cur); renderSummary();
+  }));
+  box.querySelectorAll('[data-tv-cabin]').forEach((b) => b.addEventListener('click', () => {
+    S.trainCabin = S.trainCabin === 'private' ? null : 'private';
+    saveDraft(); renderStep(cur); renderSummary();
+  }));
+  box.querySelectorAll('[data-tv-t]').forEach((b) => b.addEventListener('click', () => {
+    const k = b.getAttribute('data-tv-t');
+    S.travel ||= { vteKmg: null, kmgLjg: null };
+    S.travel[k] = S.travel[k] === 'with' ? null : 'with';
+    saveDraft(); renderStep(cur); renderSummary();
+  }));
+  box.querySelectorAll('[data-tv-c]').forEach((b) => b.addEventListener('click', () => {
+    const k = b.getAttribute('data-tv-c');
+    S.china ||= {};
+    S.china[k] = S.china[k] === 'with' ? null : 'with';
+    S.postWedding ||= {}; S.postWedding.joined = true;
+    saveDraft(); renderStep(cur); renderSummary();
   }));
 }
 function renderSegModules(k, box) {
@@ -973,6 +995,413 @@ function voyMetaLine(k) {
   const nDays = voyDays(k).length;
   return d.when + ' · ' + nDays + (nDays === 1 ? ' chapter' : ' chapters') + ', ' + nStops + ' stops';
 }
+/* ---------------- STAGED PLANNER (Aman "Plan your voyage" grammar) ----------
+ * Four stages with a top stage bar (current / completed / future), an editorial
+ * introduction per stage, large square outlined choices, quiet selected and
+ * disabled states, and forward/back actions. It drives the SAME engine: scope,
+ * guest events, stay selection, transport, details and persistence. Fixed facts
+ * (the wedding date, the itinerary) are shown as fixed, never as fake options. */
+const STAGES = [
+  ['journeys', 'Journey & Dates'],
+  ['staytravel', 'Stay & Travel'],
+  ['experiences', 'Experiences'],
+  ['details', 'Your Details'],
+];
+function stageIndex() { const i = STAGES.findIndex((x) => x[0] === (S._stage || 'journeys')); return i < 0 ? 0 : i; }
+function stageDone(key) {
+  if (key === 'journeys') return !!(S.scope && (S.scope.bangkok || S.scope.laos || S.scope.china));
+  if (key === 'staytravel') return !!currentAcc();
+  if (key === 'experiences') return S.guests.some((g) => Object.keys(g.events || {}).some((k) => g.events[k]));
+  if (key === 'details') return S.guests.filter((g) => g.attending !== false).every((g) => g.email || g.phone);
+  return false;
+}
+/* large square outlined choice — the one selection control across the product */
+function choice(label, sub, on, attr, disabled) {
+  return '<button type="button" class="ch' + (on ? ' on' : '') + '" ' + attr +
+    ' aria-pressed="' + (!!on) + '"' + (disabled ? ' disabled' : '') + '>' +
+    '<span class="ch-t serif">' + label + '</span>' +
+    (sub ? '<span class="ch-s">' + sub + '</span>' : '') + '</button>';
+}
+/* ---------------- Aman four-column footer ----------------
+ * Only real routes and real project data. No invented legal documents, no
+ * fabricated social URLs, no newsletter without a backend. Where a channel
+ * exists as a concept but no approved URL exists in the project sources, the
+ * position is held with an honest line instead of a false destination. */
+function renderFooter() {
+  const el = document.getElementById('siteFooter');
+  if (!el) return;
+  if (!S.invitation || isAuthOut()) { el.hidden = true; return; }
+  el.hidden = false;
+  const col = (title, rows) => '<div><h4>' + title + '</h4>' + rows.join('') + '</div>';
+  const nav = (label, act) => '<button type="button" data-ft="' + act + '">' + label + '</button>';
+  el.innerHTML = '<div class="ft">' +
+    '<p class="ft-brand">see you in laos<span class="dot">.</span></p>' +
+    '<div class="ft-grid">' +
+    col('Explore', [nav('Destinations', 'destnav'), nav('Journeys', 'voy:none'),
+      nav('Thailand', 'voy:bkk'), nav('Laos', 'voy:vte'), nav('China', 'voy:china'),
+      nav('Wedding', 'voy:vte:wedding'), nav('Wellness', 'voy:vte:wellness')]) +
+    col('Plan', [nav('Plan your journey', 'step:plan'), nav('Your stay', 'step:stay'),
+      nav('Your travel', 'step:journey'), nav('Your plan &amp; costs', 'step:cost'),
+      nav('Review &amp; send', 'step:review')]) +
+    col('See You In Laos', [nav('Your invitation', 'invitation'),
+      '<a href="../">The website</a>',
+      '<a href="mailto:' + CONTACTS.email + '">Guest Relations</a>',
+      (CONTACTS.whatsapp ? '<a href="https://wa.me/' + CONTACTS.whatsapp + '" rel="noopener" target="_blank">WhatsApp</a>' : ''),
+      '<p class="ft-note">LINE · scan the owner-original code in your Guest Relations card</p>']) +
+    col('Get inspired', [
+      '<p class="ft-note">Sunday, 28 February 2027 · Vientiane, Laos</p>',
+      '<p class="ft-note">Facebook, Instagram, LinkedIn and YouTube exist for this wedding, but no approved link is recorded in the project sources yet, so none is shown here.</p>']) +
+    '</div>' +
+    '<div class="ft-legal"><span>&copy; 2026 See You In Laos</span>' +
+    '<span>Haruthai &amp; Suthep</span>' +
+    '<span>Sunday, 28 February 2027 · Vientiane</span></div>' +
+    '</div>';
+  el.querySelectorAll('[data-ft]').forEach((b) => b.addEventListener('click', () => {
+    const v = b.getAttribute('data-ft').split(':');
+    if (v[0] === 'destnav') { setDestnav(true); return; }
+    if (v[0] === 'invitation') { setInvitationState('open', 'footer', { force: true }); return; }
+    if (v[0] === 'step') { S._voy = null; S._dest = null; show(idx(v[1])); return; }
+    if (v[0] === 'voy') {
+      S._dest = null;
+      S._voy = (v[1] === 'none') ? null : v[1];
+      S._voySec = v[2] || null;
+      show(idx('home'));
+    }
+    window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' });
+  }));
+}
+
+function renderPlanner() {
+  const box = document.getElementById('plan-box');
+  if (!box) return;
+  if (!S.invitation) { show(idx('find')); return; }
+  S._stage = S._stage || 'journeys';
+  const cur_ = S._stage;
+  const bar = '<nav class="stage-bar" aria-label="Planning stages">' + STAGES.map(([k, label], i) => {
+    const state = k === cur_ ? 'now' : (stageDone(k) ? 'done' : 'next');
+    return '<button type="button" class="stage ' + state + '" data-stage="' + k + '"' +
+      (k === cur_ ? ' aria-current="step"' : '') + '><span class="stage-n">' + String(i + 1).padStart(2, '0') + '</span>' +
+      '<span class="stage-l">' + label + '</span></button>';
+  }).join('') + '</nav>';
+  let body = '';
+  if (cur_ === 'journeys') {
+    const sc = S.scope || {};
+    body = '<div class="am-center"><p class="eyebrow">Stage one</p><h1 class="serif">Journey &amp; dates</h1>' +
+      '<p class="note am-lede">One invitation, three journeys. Choose the ones you are travelling. The wedding date is fixed; everything around it is yours to shape.</p></div>' +
+      '<section class="am-sec"><p class="cch-label">Your journeys</p><div class="ch-grid">' +
+      [['bkk', 'bangkok'], ['vte', 'laos'], ['china', 'china']].map(([k, key]) => {
+        const d = SEG_DEF()[k];
+        return choice(VOY[k].country, d.when + ' · ' + d.name, !!sc[key], 'data-scope-t="' + key + '"');
+      }).join('') + '</div></section>' +
+      '<section class="am-sec"><p class="cch-label">Fixed dates</p>' +
+      '<div class="pl-row"><span class="pl-d">28 FEB 2027</span><div class="pl-b"><span class="pl-t serif">The wedding day</span>' +
+      '<span class="pl-s">Vientiane · Temple Ceremony, Coffee &amp; Cake, Vow Ceremony, Wedding Dinner</span></div><span class="pl-st">FIXED</span></div>' +
+      '<div class="pl-row"><span class="pl-d">27 FEB – 01 MAR</span><div class="pl-b"><span class="pl-t serif">The wedding stay window</span>' +
+      '<span class="pl-s">Souphattra Heritage Vientiane</span></div><span class="pl-st">FIXED</span></div>' +
+      '</section>';
+  } else if (cur_ === 'staytravel') {
+    const sc = S.scope || {};
+    const acc = currentAcc();
+    const riders = S.guests.filter((g) => g.journey.train).length;
+    body = '<div class="am-center"><p class="eyebrow">Stage two</p><h1 class="serif">Stay &amp; travel</h1>' +
+      '<p class="note am-lede">Where you sleep on each journey, and how you move between them. Availability and eligibility come from the real allocation.</p></div>' +
+      '<section class="am-sec"><p class="cch-label">Your wedding stay</p><div class="ch-grid">' +
+      ACCOMMODATIONS.filter((a) => a.selectable !== false).map((a) => {
+        const res = inventory[a.id];
+        const full = remaining(res) <= 0;
+        return choice(a.name, (a.contributionPerGuest == null ? 'Complimentary · limited' : money(contributionPerGuest(a)) + ' per guest') + (full ? ' · waitlist' : ''),
+          S.stay.accommodationId === a.id, 'data-pl-acc="' + a.id + '"', false);
+      }).join('') + '</div>' +
+      (acc ? '<p class="am-avail">BOOKED · ' + esc(acc.name) + '</p>' : '<p class="am-avail">OPEN · no room chosen yet</p>') +
+      '</section>' +
+      (sc.bangkok ? '<section class="am-sec"><p class="cch-label">Bangkok</p><div class="ch-grid">' +
+        choice('The Bangkok stay', money(BANGKOK_STAY.ratePerGuestNight) + ' per guest, per night · ' + bkkNights() + ' nights', bangkokStayActive(), 'data-pl-bkk="1"') +
+        choice('The overnight train', money(TRAIN.contributionPerGuest) + ' per guest · ' + esc(TRAIN.date), riders > 0, 'data-pl-train="1"') +
+        '</div></section>' : '') +
+      (sc.china ? '<section class="am-sec"><p class="cch-label">China</p><div class="ch-grid">' +
+        choice('Kunming stay', money(27) + ' per guest, per night · 01–04 MAR', !!(S.china && S.china.kunming === 'with'), 'data-pl-cn="kunming"') +
+        choice('Lijiang stay', money(63) + ' per guest, per night · 04–06 MAR', !!(S.china && S.china.lijiang === 'with'), 'data-pl-cn="lijiang"') +
+        choice('Vientiane → Kunming', 'Flight · arranged for you', !!(S.travel && S.travel.vteKmg === 'with'), 'data-pl-tv="vteKmg"') +
+        choice('Kunming → Lijiang', money(145) + ' per guest · First Class train', !!(S.travel && S.travel.kmgLjg === 'with'), 'data-pl-tv="kmgLjg"') +
+        '</div></section>' : '');
+  } else if (cur_ === 'experiences') {
+    body = '<div class="am-center"><p class="eyebrow">Stage three</p><h1 class="serif">Experiences</h1>' +
+      '<p class="note am-lede">The four wedding events, and the wellness you would like us to pass on to Marsilea Spa. Everything else on your journeys is open to you without a decision here.</p></div>' +
+      '<section class="am-sec"><p class="cch-label">The wedding · 28 February 2027</p><div class="ch-grid">' +
+      [['temple', 'Temple Ceremony', '09:00 · Wat Ong Teu'], ['coffee', 'Coffee & Cake', 'After the return from the temple'],
+       ['ceremony', 'Vow Ceremony', '16:30 · the green gate'], ['dinner', 'Wedding Dinner', '19:30']].map(([k, label, sub]) => {
+        const on = S.guests.some((g) => (g.events || {})[k]);
+        return choice(label, sub, on, 'data-pl-ev="' + k + '"');
+      }).join('') + '</div></section>' +
+      '<section class="am-sec"><p class="cch-label">Wellness</p>' +
+      '<p class="note" style="max-width:560px;margin-bottom:10px">' + ((S.wellness || []).length ? (S.wellness.length + ' treatment' + (S.wellness.length > 1 ? 's' : '') + ' noted as interest. Marsilea Spa confirms every appointment directly.') : 'Marsilea Spa, on the fifth floor of the Souphattra Hotel Vientiane.') + '</p>' +
+      '<button type="button" class="btn-full" data-pl-spa="1">Open Marsilea Spa</button></section>';
+  } else {
+    const missing = S.guests.filter((g) => g.attending !== false && !(g.email || g.phone)).length;
+    body = '<div class="am-center"><p class="eyebrow">Stage four</p><h1 class="serif">Your details</h1>' +
+      '<p class="note am-lede">The few things Guest Relations needs from each of you, and then one quiet look at everything before you send it.</p></div>' +
+      '<section class="am-sec"><p class="cch-label">Guests</p>' +
+      S.guests.map((g) => '<div class="pl-row"><span class="pl-d">' + esc(g.preferredName) + '</span>' +
+        '<div class="pl-b"><span class="pl-t serif">' + esc(g.fullName) + '</span>' +
+        '<span class="pl-s">' + (g.email || g.phone ? esc([g.email, g.phone].filter(Boolean).join(' · ')) : 'Contact details still needed') + '</span></div>' +
+        '<span class="pl-st">' + (g.email || g.phone ? 'COMPLETE' : 'OPEN') + '</span></div>').join('') +
+      '<button type="button" class="btn-full" data-pl-step="each" style="margin-top:16px">' + (missing ? 'Complete your details' : 'Edit your details') + '</button>' +
+      '</section>' +
+      '<section class="am-sec"><p class="cch-label">Review</p>' +
+      '<p class="note" style="max-width:560px;margin-bottom:10px">Your plan, your costs and the confirmation you send to Guest Relations.</p>' +
+      '<button type="button" class="btn-full" data-pl-step="cost">Your plan &amp; costs</button>' +
+      '<button type="button" class="btn-full dark" data-pl-step="review">Review &amp; send</button>' +
+      '</section>';
+  }
+  const i = stageIndex();
+  const nav = '<div class="stage-nav">' +
+    (i > 0 ? '<button type="button" class="t-act" data-stage-go="' + STAGES[i - 1][0] + '">&larr; ' + STAGES[i - 1][1] + '</button>' : '<span></span>') +
+    (i < STAGES.length - 1 ? '<button type="button" class="t-act" data-stage-go="' + STAGES[i + 1][0] + '">' + STAGES[i + 1][1] + ' &rarr;</button>' : '<span></span>') +
+    '</div>';
+  box.innerHTML = bar + body + nav;
+  const go = (k) => { S._stage = k; saveDraft(); renderStep(cur); window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' }); };
+  box.querySelectorAll('[data-stage]').forEach((b) => b.addEventListener('click', () => go(b.getAttribute('data-stage'))));
+  box.querySelectorAll('[data-stage-go]').forEach((b) => b.addEventListener('click', () => go(b.getAttribute('data-stage-go'))));
+  box.querySelectorAll('[data-scope-t]').forEach((b) => b.addEventListener('click', () => {
+    const key = b.getAttribute('data-scope-t');
+    S.scope ||= { bangkok: false, laos: true, china: false };
+    S.scope[key] = !S.scope[key];
+    saveDraft(); renderStep(cur); renderSummary();
+  }));
+  box.querySelectorAll('[data-pl-acc]').forEach((b) => b.addEventListener('click', () => {
+    const id = b.getAttribute('data-pl-acc');
+    S.stay.accommodationId = (S.stay.accommodationId === id) ? null : id;
+    S.stay.rooms = 1; S.stay.waitlist = false;
+    S.stay.occupantGuestIds = S.guests.filter((g) => g.attending !== false).map((g) => g.guestId);
+    saveDraft(); renderStep(cur); renderSummary();
+  }));
+  box.querySelectorAll('[data-pl-bkk]').forEach((b) => b.addEventListener('click', () => {
+    S.bangkokStay ||= {};
+    S.bangkokStay.withUs = !bangkokStayActive();
+    if (!S.bangkokStay.withUs) S.bangkokStay.property = null;
+    saveDraft(); renderStep(cur); renderSummary();
+  }));
+  box.querySelectorAll('[data-pl-train]').forEach((b) => b.addEventListener('click', () => {
+    const on = S.guests.some((g) => g.journey.train);
+    S.guests.forEach((g) => { if (g.attending !== false) g.journey.train = !on; });
+    saveDraft(); renderStep(cur); renderSummary();
+  }));
+  box.querySelectorAll('[data-pl-cn]').forEach((b) => b.addEventListener('click', () => {
+    const k = b.getAttribute('data-pl-cn');
+    S.china ||= {};
+    S.china[k] = S.china[k] === 'with' ? null : 'with';
+    S.postWedding ||= {}; S.postWedding.joined = true;
+    saveDraft(); renderStep(cur); renderSummary();
+  }));
+  box.querySelectorAll('[data-pl-tv]').forEach((b) => b.addEventListener('click', () => {
+    const k = b.getAttribute('data-pl-tv');
+    S.travel ||= { vteKmg: null, kmgLjg: null };
+    S.travel[k] = S.travel[k] === 'with' ? null : 'with';
+    saveDraft(); renderStep(cur); renderSummary();
+  }));
+  box.querySelectorAll('[data-pl-ev]').forEach((b) => b.addEventListener('click', () => {
+    const k = b.getAttribute('data-pl-ev');
+    const on = S.guests.some((g) => (g.events || {})[k]);
+    S.guests.forEach((g) => { if (g.attending !== false) { g.events ||= {}; g.events[k] = !on; } });
+    S._evDecided ||= {}; S._evDecided[k] = true;
+    saveDraft(); renderStep(cur); renderSummary();
+  }));
+  box.querySelectorAll('[data-pl-spa]').forEach((b) => b.addEventListener('click', () => {
+    S._voy = 'vte'; S._voySec = 'wellness'; S._dest = null; show(idx('home'));
+  }));
+  box.querySelectorAll('[data-pl-step]').forEach((b) => b.addEventListener('click', () => show(idx(b.getAttribute('data-pl-step')))));
+}
+
+/* ---------------- DESTINATION -> PROPERTY MODEL ----------------
+ * Aman architecture, populated from the live project dataset:
+ *   PLATFORM -> JOURNEY (country) -> DESTINATION (city) -> STAY(S) -> detail.
+ * Stays are read from ACCOMMODATIONS / BANGKOK_STAYS / RETURN_STAY /
+ * POST_WEDDING, so a destination shows exactly the properties that exist —
+ * two in Bangkok, two in Vientiane, one each in Kunming and Lijiang. */
+function DEST() {
+  return {
+    bangkok: { journey: 'bkk', country: 'Thailand', city: 'Bangkok',
+      img: '../assets/images/city/001-bangkok-chao-phraya-skyline.jpg',
+      alt: 'Bangkok — the Chao Phraya river',
+      lede: 'The journey begins on the Chao Phraya. Shared city days before the wedding: the river, the temples, the markets, and the evening the overnight train leaves for the north.' },
+    vientiane: { journey: 'vte', country: 'Laos', city: 'Vientiane',
+      img: '../assets/images/city/002-vientiane-pha-that-luang.jpg',
+      alt: 'Vientiane — Pha That Luang',
+      lede: 'The quiet capital on the Mekong, and the place the whole journey leans toward. The temple morning, coffee and cake, the vows and the wedding dinner all happen here.' },
+    kunming: { journey: 'china', country: 'China', city: 'Kunming',
+      img: '../assets/images/city/003-kunming-jinma-biji-archway.jpg',
+      alt: 'Kunming — Jinma Biji memorial archway',
+      lede: 'The city of eternal spring. First days in Yunnan after the wedding, before the First Class train climbs north into the mountains.' },
+    lijiang: { journey: 'china', country: 'China', city: 'Lijiang',
+      img: '../assets/images/city/004-lijiang-black-dragon-pool.jpg',
+      alt: 'Lijiang — Black Dragon Pool below Jade Dragon Snow Mountain',
+      lede: 'The old town beneath Jade Dragon Snow Mountain: Naxi rooftops, cobbled lanes and water running through every street.' },
+  };
+}
+/* Every stay attached to its destination, straight from the dataset. */
+function staysFor(cityKey) {
+  const out = [];
+  if (cityKey === 'bangkok') {
+    const b = BANGKOK_STAYS[0];
+    out.push({ id: 'sathorn-penthouse', name: b.name, where: 'Sathorn, Bangkok',
+      text: 'The shared penthouse for the days before the wedding — one address for everyone, six bedrooms, the city below.',
+      images: (b.images || []).map((x) => x.replace('../', '')), dates: b.dates, nights: b.nights,
+      facts: [['Dates', b.dates], ['Nights', String(b.nights)], ['Per guest, per night', money(BANGKOK_STAY.ratePerGuestNight)]],
+      state: bangkokStayActive() ? 'BOOKED · your Bangkok stay' : 'YOUR CHOICE · open',
+      action: bangkokStayActive() ? 'Change this stay' : 'Select this stay', jump: 'journey' });
+    out.push({ id: 'siam-kempinski', name: RETURN_STAY.name, where: 'Pathum Wan, Bangkok',
+      text: 'The return address in Bangkok, ' + esc(RETURN_STAY.room) + ', for guests whose journey ends the coordinated way.',
+      images: (RETURN_STAY.images || []).map((x) => x.replace('../', '')),
+      facts: [['Room', RETURN_STAY.room], ['When', 'On the coordinated return']],
+      state: 'OPEN · Guest Relations confirms the arrangement', action: 'Discover more', jump: 'journey' });
+  }
+  if (cityKey === 'vientiane') {
+    ACCOMMODATIONS.filter((a) => a.selectable !== false && a.kind !== 'airbnb').slice(0, 3).forEach((a) => {
+      const res = inventory[a.id];
+      const selected = S.stay.accommodationId === a.id;
+      out.push({ id: a.id, name: a.name, where: a.property || 'Vientiane', text: a.blurb,
+        images: (a.images || []), acc: a,
+        facts: [['Size', a.size], ['Bed', a.bed], ['Guests', a.occupancy], ['Per guest', a.contributionPerGuest == null ? 'Complimentary' : money(contributionPerGuest(a))]],
+        state: selected ? 'BOOKED · your current room' : 'YOUR CHOICE · ' + guestAvailability(res),
+        action: selected ? 'View your stay' : 'Select this stay', jump: 'stay' });
+    });
+    const ab = ACCOMMODATIONS.find((a) => a.kind === 'airbnb');
+    if (ab) out.push({ id: ab.id, name: ab.name, where: ab.property || 'Vientiane', text: ab.blurb,
+      images: (ab.images || []), acc: ab,
+      facts: [['Size', ab.size], ['Guests', ab.occupancy]],
+      state: 'HOSTED · limited availability, coordinated by Guest Relations',
+      action: 'View this stay', jump: 'stay' });
+  }
+  if (cityKey === 'kunming' || cityKey === 'lijiang') {
+    const c = POST_WEDDING.find((x) => x.id === (cityKey === 'kunming' ? 'kunming-stay' : 'lijiang-stay'));
+    if (c) {
+      const on = S.china && S.china[cityKey] === 'with';
+      out.push({ id: c.id, name: c.label, where: cityKey === 'kunming' ? 'Kunming, Yunnan' : 'Lijiang, Yunnan',
+        text: c.sub || '', images: (c.images || []).map((x) => x.replace('../', '')),
+        facts: [['Dates', c.date], ['Nights', c.nightsCount ? String(c.nightsCount) : ''],
+                ['Per guest, per night', c.ratePerGuestNight ? money(c.ratePerGuestNight) : '']],
+        state: on ? 'BOOKED · arranged for you' : 'YOUR CHOICE · open',
+        action: on ? 'View your stay' : 'Select this stay', jump: 'journey' });
+    }
+  }
+  return out;
+}
+/* Aman property composition: large image -> location eyebrow -> serif name ->
+ * editorial description -> facts -> state -> outlined action -> Discover more. */
+function propertyHtml(st, cityKey) {
+  return '<article class="am-prop">' +
+    (st.images && st.images.length
+      ? '<div class="am-gal"><div class="am-track" tabindex="0" role="group" aria-label="' + esc(st.name) + ' photographs">' +
+        st.images.slice(0, 4).map((im, i) => '<img src="' + roomImg(im) + '" alt="' + esc(st.name) + ' · photograph ' + (i + 1) + '" loading="lazy" decoding="async" draggable="false"/>').join('') +
+        '</div>' + (st.images.length > 1 ? '<span class="am-gcount">1 / ' + Math.min(st.images.length, 4) + '</span>' : '') + '</div>'
+      : '<div class="am-ph" aria-hidden="true"></div>') +
+    '<p class="eyebrow">' + esc(st.where) + '</p>' +
+    '<h3 class="serif am-propname">' + esc(st.name) + '</h3>' +
+    (st.text ? '<p class="note am-blurb">' + esc(st.text) + '</p>' : '') +
+    (st.facts && st.facts.length ? '<dl class="am-facts">' + st.facts.filter((f) => f[1]).map((f) =>
+      '<div><dt>' + esc(f[0]) + '</dt><dd>' + esc(f[1]) + '</dd></div>').join('') + '</dl>' : '') +
+    '<p class="am-avail">' + esc(st.state) + '</p>' +
+    '<button type="button" class="btn-full" data-prop-act="' + st.jump + '">' + esc(st.action) + '</button>' +
+    '<button type="button" class="t-act" data-prop-more="' + cityKey + '">Discover more</button>' +
+    '</article>';
+}
+/* Destination page — Aman country/destination grammar. */
+function renderDestination(cityKey, box) {
+  const D = DEST()[cityKey];
+  if (!D) { S._dest = null; renderStep(cur); return; }
+  const stays = staysFor(cityKey);
+  const exps = expForCity(cityKey === 'bangkok' ? 'bkk' : cityKey === 'vientiane' ? 'vte' : cityKey === 'kunming' ? 'kmg' : 'ljg');
+  document.getElementById('home-title').textContent = '';
+  box.innerHTML =
+    '<div class="vy-secbar"><button type="button" id="dest-nav">' + D.country + ' &middot; ' + D.city + '</button></div>' +
+    '<div class="am-inset" style="margin-top:0"><img src="' + D.img + '" alt="' + esc(D.alt) + '" loading="lazy" decoding="async"/></div>' +
+    '<div class="am-center">' +
+    '<p class="eyebrow">' + D.country + '</p>' +
+    '<h1 class="serif">Discover ' + D.city + '</h1>' +
+    '<p class="note am-lede">' + esc(D.lede) + '</p>' +
+    '</div>' +
+    '<section class="am-sec"><p class="cch-label">Where you stay</p>' +
+    (stays.length ? stays.map((st) => propertyHtml(st, cityKey)).join('')
+      : '<p class="note">No stay is attached to this destination in the current data.</p>') +
+    '</section>' +
+    (exps.length ? '<section class="am-sec" data-rail><p class="cch-label">Experiences in ' + D.city + '</p>' +
+      expRailHtml(exps.slice(0, 6)) + '</section>' : '') +
+    /* Discover more — contextual, never a repeated empty CTA */
+    '<section class="am-sec"><p class="cch-label">Discover more</p>' +
+    discoverHtml(cityKey) + '</section>' +
+    '<p class="vy-back"><button type="button" class="btn sm ghost" id="dest-back">&larr; All destinations</button></p>';
+  box.querySelectorAll('[data-prop-act]').forEach((b) => b.addEventListener('click', () => show(idx(b.getAttribute('data-prop-act')))));
+  box.querySelectorAll('[data-prop-more]').forEach((b) => b.addEventListener('click', () => {
+    const t = box.querySelector('.am-sec:last-of-type'); if (t) t.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+  }));
+  box.querySelectorAll('[data-disc]').forEach((b) => b.addEventListener('click', () => {
+    const v = b.getAttribute('data-disc').split(':');
+    if (v[0] === 'dest') { S._dest = v[1]; S._voy = null; }
+    else if (v[0] === 'voy') { S._dest = null; S._voy = v[1]; S._voySec = v[2] || null; }
+    else if (v[0] === 'step') { S._dest = null; show(idx(v[1])); return; }
+    renderStep(cur); window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' });
+  }));
+  wireAmGalleries(box);
+  box.querySelectorAll('[data-rail]').forEach((w) => wireExpRail(w));
+  box.querySelector('#dest-back').addEventListener('click', () => { S._dest = null; renderStep(cur); window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' }); });
+  box.querySelector('#dest-nav').addEventListener('click', () => setDestnav(true));
+}
+/* Contextual Discover-more relationships — each destination points only at
+ * content that genuinely relates to it. */
+function discoverHtml(cityKey) {
+  const rows = {
+    bangkok: [['voy:bkk', 'The Thailand journey', 'Route, itinerary and the overnight train'],
+              ['dest:vientiane', 'Vientiane', 'Where the wedding happens'],
+              ['step:stay', 'Your stay', 'Availability and selection']],
+    vientiane: [['voy:vte', 'The Laos journey', 'Itinerary, day by day and the wedding'],
+                ['voy:vte:wellness', 'Marsilea Spa', 'Wellness on the fifth floor of the Souphattra'],
+                ['dest:kunming', 'Kunming', 'Where the journey continues']],
+    kunming: [['voy:china', 'The China journey', 'Flight, First Class train and both stays'],
+              ['dest:lijiang', 'Lijiang', 'The old town beneath the snow mountain'],
+              ['step:journey', 'Your travel', 'How you move between them']],
+    lijiang: [['voy:china', 'The China journey', 'Flight, First Class train and both stays'],
+              ['dest:kunming', 'Kunming', 'The city of eternal spring'],
+              ['step:cost', 'Your plan', 'Everything you have chosen so far']],
+  }[cityKey] || [];
+  return rows.map((r) => '<button type="button" class="pl-row disc" data-disc="' + r[0] + '">' +
+    '<div class="pl-b"><span class="pl-t serif">' + r[1] + '</span><span class="pl-s">' + r[2] + '</span></div>' +
+    '<span class="pl-st">Discover</span></button>').join('');
+}
+/* Destinations overlay — the Aman destinations interaction. */
+function setDestnav(open) {
+  const ov = document.getElementById('destnav');
+  const sc = document.getElementById('destnav-scrim');
+  if (!ov || !sc) return;
+  document.body.classList.toggle('sn-open', open);
+  sc.hidden = !open; ov.hidden = !open;
+  if (open) { const c = ov.querySelector('.sn-close'); if (c) c.focus(); }
+}
+function renderDestnav() {
+  const ov = document.getElementById('destnav');
+  if (!ov) return;
+  const D = DEST();
+  const groups = [['Thailand', ['bangkok']], ['Laos', ['vientiane']], ['China', ['kunming', 'lijiang']]];
+  ov.innerHTML =
+    '<div class="sn-top"><button type="button" class="sn-close" aria-label="Close">&times;</button></div>' +
+    '<p class="sn-ctx">Destinations</p><hr class="sn-line"/>' +
+    '<button type="button" class="sn-back" data-dest-close>Back</button>' +
+    groups.map(([country, cities]) =>
+      '<p class="sn-group">' + country + '</p>' +
+      cities.map((c) => '<button type="button" class="sn-row" data-dest="' + c + '"' +
+        (S._dest === c ? ' aria-current="true"' : '') + '>' + D[c].city + '</button>').join('')).join('');
+  ov.querySelector('.sn-close').addEventListener('click', () => setDestnav(false));
+  ov.querySelector('[data-dest-close]').addEventListener('click', () => setDestnav(false));
+  ov.querySelectorAll('[data-dest]').forEach((b) => b.addEventListener('click', () => {
+    S._dest = b.getAttribute('data-dest'); S._voy = null; setDestnav(false); show(idx('home'));
+    window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' });
+  }));
+  const sc = document.getElementById('destnav-scrim');
+  if (sc && !sc.dataset.wired) {
+    sc.dataset.wired = '1';
+    sc.addEventListener('click', () => setDestnav(false));
+  }
+}
+
 /* ---------------- WELLNESS · MARSILEA SPA (Journey 02 · Laos) ----------------
  * Content source of truth: Owner-supplied official Marsilea Spa & Wellness Menu
  * (5th floor, Souphattra Hotel Vientiane). Treatments, durations, prices,
@@ -1295,6 +1724,7 @@ function grCardHtml() {
 function renderHome() {
   const box = document.getElementById('home-box');
   if (!S.invitation) { show(idx('find')); return; }
+  if (S._dest) { renderDestination(S._dest, box); return; }
   if (S._voy && VOY[S._voy]) { renderVoyage(S._voy, box); return; }
   const lead = S.invitation.guests.find((g) => g.guestId === S.invitation.partyLead) || S.invitation.guests[0];
   document.getElementById('home-title').innerHTML =
@@ -1323,6 +1753,22 @@ function renderHome() {
   box.innerHTML =
     '<p class="note" style="margin:0 0 4px">' + esc(S.invitation.partyName) + '</p>' +
     '<p class="note" style="margin:0 0 30px">One invitation, three journeys. The wedding carries the middle one.</p>' +
+    /* Featured journeys — Aman rail: image-led tiles, controlled peeking,
+     * quiet metadata, serif titles, horizontal interaction. */
+    '<section class="am-sec" style="margin-top:26px" data-rail><p class="cch-label">Featured journeys</p>' +
+    '<div class="day-rail">' + ['bkk', 'vte', 'china'].map((kk) => {
+      const dd = SEG_DEF()[kk]; const vv = VOY[kk];
+      return '<article class="day-card feat" data-voy-open="' + kk + '" role="button" tabindex="0">' +
+        (vv.hero ? '<img src="' + vv.hero + '" alt="' + esc(vv.heroAlt || vv.country) + '" loading="lazy" decoding="async"/>' : '<div class="ph-quiet" aria-hidden="true"></div>') +
+        '<span class="it-day">Journey ' + vv.order + ' · ' + vv.country + '</span>' +
+        '<h3 class="serif">' + dd.name + '</h3>' +
+        '<p class="note">' + dd.when + ' · ' + vv.stops.length + ' stops</p>' +
+        '<span class="t-act">View journey</span>' +
+        '</article>';
+    }).join('') + '</div></section>' +
+    '<section class="am-sec"><p class="cch-label">Destinations</p>' +
+    '<p class="note" style="max-width:560px;margin-bottom:10px">Bangkok, Vientiane, Kunming and Lijiang — the four places this invitation moves through.</p>' +
+    '<button type="button" class="btn-full" id="open-destnav">All destinations</button></section>' +
     prod('bkk') + prod('vte') + prod('china') +
     '<div style="margin-top:26px">' +
     '<button type="button" class="jd-row" data-jump="cost"><span class="jr-l">Your Plan</span><span class="jr-v">Your personal itinerary</span></button>' +
@@ -1331,11 +1777,13 @@ function renderHome() {
     '</div>' +
     '<div class="jd-total"><span class="jr-l">Total Costs</span><strong>' + money(total) + '</strong></div>' +
     grCardHtml();
-  box.querySelectorAll('[data-voy-open]').forEach((b) => b.addEventListener('click', () => {
-    S._voy = b.getAttribute('data-voy-open');
-    renderStep(cur);
-    window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' });
-  }));
+  box.querySelectorAll('[data-voy-open]').forEach((b) => {
+    const open = () => { S._voy = b.getAttribute('data-voy-open'); S._dest = null; renderStep(cur); window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' }); };
+    b.addEventListener('click', open);
+    if (b.getAttribute('role') === 'button') b.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
+  });
+  const dn = box.querySelector('#open-destnav');
+  if (dn) dn.addEventListener('click', () => setDestnav(true));
   box.querySelectorAll('[data-jump]').forEach((b) => b.addEventListener('click', () => show(idx(b.getAttribute('data-jump')))));
   mountVoyMaps(box);
 }
@@ -2690,9 +3138,13 @@ function renderReview() {
   const box = document.getElementById('review-box');
   const acc = currentAcc();
   const occ = acc ? S.stay.occupantGuestIds : [];
+  /* Aman editorial review: hairline section label, hairline rows, quiet edit
+   * link. No legacy definition-list card. Same data, same edit targets. */
   const sec = (t, step, rows) =>
-    '<div class="rv-sec"><div class="rv-head"><span class="t">' + t + '</span><button type="button" class="edit" data-goto="' + step + '">Edit</button></div><dl>' +
-    rows.map((r) => '<div><dt>' + r[0] + '</dt><dd>' + r[1] + '</dd></div>').join('') + '</dl></div>';
+    '<section class="am-sec"><div class="rv-top"><p class="cch-label">' + t + '</p>' +
+    '<button type="button" class="t-act" data-goto="' + step + '">Edit</button></div>' +
+    rows.map((r) => '<div class="pl-row"><span class="pl-d">' + r[0] + '</span>' +
+      '<div class="pl-b"><span class="pl-t">' + r[1] + '</span></div></div>').join('') + '</section>';
   const journeyLine = (g) => [
     g.journey.bangkok && 'Bangkok Journey', g.journey.train && 'Overnight Train · BOOKED',
     !g.journey.train && g.journey.independent && 'Independent arrival'].filter(Boolean).join(' · ') || '—';
