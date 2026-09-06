@@ -112,6 +112,35 @@ footer a.mail-link { border-bottom: 1px solid var(--line); }
   .j-row .n { min-width: 100%; }
   .j-row .s { margin-left: auto; }
 }
+
+/* quiet editorial header (composition rebuilt) */
+header.top { padding: calc(8px + env(safe-area-inset-top)) var(--gutter) 8px; }
+.hd-enter { font-size: 10px; letter-spacing: .18em; text-transform: uppercase; border-bottom: 1px solid var(--ink); padding: 4px 0 3px; }
+.mark { font-size: 18px; }
+.dw-lang { margin-top: 26px; }
+.dw-lang .lang-sw button { min-height: 44px; min-width: 44px; }
+.rule { border: 0; border-top: 1px solid var(--line); margin: 0 0 30px; }
+.hero { margin-top: 0; }
+.hero .bg-img { height: 74vh; min-height: 460px; }
+.hero-cap { text-align: left; padding: 30px 0 0; }
+.hero-cap p { margin: 0 0 6px; max-width: 560px; }
+.hero-cap h1 { margin: 8px 0 12px; }
+.t-link { border-bottom-width: 1px; }
+.jrny { margin-top: 56px; }
+.jrny img { width: 100%; height: 62vh; min-height: 380px; object-fit: cover; display: block; }
+.jrny-cap { padding-top: 22px; }
+.jrny-cap h2 { font-size: clamp(28px, 6vw, 40px); font-weight: 200; margin: 4px 0 8px; }
+.jrny-cap p { max-width: 540px; font-size: 15px; opacity: .85; margin-bottom: 12px; }
+#invitation-entry { text-align: left; max-width: none; }
+.ent-t { font-size: clamp(26px, 5.4vw, 38px); font-weight: 200; margin: 6px 0 10px; }
+.ent-p { max-width: 540px; font-size: 15px; opacity: .85; margin-bottom: 18px; }
+.act { display: inline-block; border: 1px solid var(--ink); padding: 13px 30px; font-size: 11px; letter-spacing: .18em; text-transform: uppercase; }
+.act:hover { background: var(--ink); color: var(--ivory); }
+.ent-s { margin-top: 18px; font-size: 12.5px; opacity: .7; }
+footer { text-align: left; border-top: 0; margin-top: 70px; padding: 0 0 calc(40px + env(safe-area-inset-bottom)); }
+footer .ask { font-size: clamp(26px, 5.4vw, 38px); margin-bottom: 14px; }
+footer .fine { margin-top: 34px; text-align: left; }
+footer .fine .dot { color: var(--cherry-photo); }
 </style>
 </head>
 <body>
@@ -120,10 +149,7 @@ footer a.mail-link { border-bottom: 1px solid var(--line); }
 <header class="top">
 <div class="hd-zone"><button type="button" class="hd-menu" id="menuBtn" aria-haspopup="dialog" aria-expanded="false"><span class="burger" aria-hidden="true"><i></i><i></i><i></i></span><span>Menu</span></button></div>
 <a class="mark" href="#top">see you in laos<span class="dot">.</span></a>
-<div class="hd-zone hd-r">
-<span class="lang-sw" role="group" aria-label="Language"><button type="button" data-lang-btn="en">EN</button><button type="button" data-lang-btn="de">DE</button><button type="button" data-lang-btn="th">TH</button><button type="button" data-lang-btn="ja">JA</button></span>
-<a class="hd-cta" href="register/">Enter the Journey</a>
-</div>
+<div class="hd-zone hd-r"><a class="hd-enter" href="register/">Enter the Journey</a></div>
 </header>
 
 <div class="dw-scrim" id="dwScrim" hidden></div>
@@ -133,63 +159,67 @@ footer a.mail-link { border-bottom: 1px solid var(--line); }
 <a class="dw-link" href="#journeys">The three journeys</a>
 <a class="dw-link" href="#invitation-entry">Enter the Journey</a>
 <a class="dw-link" href="mailto:guest.relation.seeyouinlaos@gmail.com">Contact Guest Relations</a>
+<div class="dw-lang"><span class="lang-sw" role="group" aria-label="Language"><button type="button" data-lang-btn="en">EN</button><button type="button" data-lang-btn="de">DE</button><button type="button" data-lang-btn="th">TH</button><button type="button" data-lang-btn="ja">JA</button></span></div>
 <div class="dw-foot"><span>Sunday, 28 February 2027 · Vientiane</span><span>17°58′N — 102°38′E</span></div>
 </nav>
 
 <main id="top">
-<section class="hero wrap">
+<section class="hero">
 <div class="bg-img" role="img" aria-label="The journey along the Mekong"></div>
-<div class="hero-cap">
+<div class="wrap hero-cap">
 <p class="eyebrow">Sunday, 28 February 2027 · Vientiane, Laos</p>
 <h1>Travel first. Wedding second.<br/>Memory always.</h1>
 <p><span class="hs">Haruthai&nbsp;&amp;&nbsp;Suthep</span> are getting married, and you are invited on the journey.</p>
+<a class="t-link" href="#journeys">Discover the journey</a>
 </div>
 </section>
 
-<section class="blk wrap" id="journeys">
-<p class="eyebrow" style="margin-bottom:14px">One invitation · three journeys</p>
-<div class="j-row"><span class="n">Journey 01</span><span class="t serif">Thailand</span><span class="s">21 – 24 Feb · Bangkok, Nong Khai</span></div>
-<div class="j-row"><span class="n">Journey 02</span><span class="t serif">Laos</span><span class="s">27 Feb – 01 Mar · the wedding</span></div>
-<div class="j-row"><span class="n">Journey 03</span><span class="t serif">China</span><span class="s">01 – 06 Mar · Kunming, Lijiang</span></div>
-</section>
-
-<section class="blk wrap">
-<div class="split">
-<div class="copy">
-<p class="eyebrow">The wedding</p>
-<h2>One day in Vientiane that the whole journey leans toward.</h2>
-<p>The temple morning, coffee and cake, the vows and the wedding dinner. Everything around it — where you stay, how you travel, what you join — is prepared for you inside your invitation.</p>
-<a class="t-link" href="register/">Enter the Journey</a>
-</div>
-<picture><source srcset="assets/images/hero/hero-arrival.webp" type="image/webp"/><img src="assets/images/hero/hero-arrival.jpg" alt="Arrival in Vientiane" width="1200" height="1500" loading="lazy" decoding="async"/></picture>
-</div>
+<section class="blk" id="journeys">
+<div class="wrap"><p class="eyebrow">One invitation · three journeys</p></div>
+<article class="jrny">
+<img src="assets/images/city/001-bangkok-chao-phraya-skyline.jpg" alt="Bangkok — the Chao Phraya river" loading="lazy" decoding="async"/>
+<div class="wrap jrny-cap"><p class="eyebrow">Journey 01 · Thailand</p>
+<h2 class="serif">Bangkok</h2>
+<p>The shared city days before the wedding — the river, the temples, the night train waiting to go north.</p>
+<a class="t-link" href="register/">Discover Thailand</a></div>
+</article>
+<article class="jrny">
+<img src="assets/images/city/002-vientiane-pha-that-luang.jpg" alt="Vientiane — Pha That Luang" loading="lazy" decoding="async"/>
+<div class="wrap jrny-cap"><p class="eyebrow">Journey 02 · Laos</p>
+<h2 class="serif">Vientiane</h2>
+<p>The quiet capital on the Mekong, and the one day the whole journey leans toward.</p>
+<a class="t-link" href="register/">Discover Laos</a></div>
+</article>
+<article class="jrny">
+<img src="assets/images/city/004-lijiang-black-dragon-pool.jpg" alt="Lijiang — Black Dragon Pool" loading="lazy" decoding="async"/>
+<div class="wrap jrny-cap"><p class="eyebrow">Journey 03 · China</p>
+<h2 class="serif">Kunming &amp; Lijiang</h2>
+<p>After the wedding: the city of eternal spring, and the old town beneath Jade Dragon Snow Mountain.</p>
+<a class="t-link" href="register/">Discover China</a></div>
+</article>
 </section>
 
 <section class="blk wrap" id="invitation-entry">
-<div class="entry">
+<hr class="rule"/>
 <p class="eyebrow">Your Invitation</p>
-<h2>One journey,<br/>prepared around you.</h2>
-<p>Thailand → Laos → China · 21 February – 6 March 2027. The complete journey opens with the private code from your invitation.</p>
-<p class="route">Bangkok → Nong Khai → Vientiane → Kunming → Lijiang</p>
-<a class="btn-full" href="register/">Enter the Journey</a>
-<p style="margin-top:22px;font-size:12.5px;opacity:.75">Lost your code? Write to <a class="mail-link" href="mailto:guest.relation.seeyouinlaos@gmail.com">guest.relation.seeyouinlaos@gmail.com</a> and Khun Ket &amp; Khun Paddy will help right away.</p>
-</div>
+<h2 class="serif ent-t">One journey, prepared around you.</h2>
+<p class="ent-p">The complete journey — 21 February to 6 March 2027 — opens with the private code from your invitation.</p>
+<a class="act" href="register/">Enter the Journey</a>
+<p class="ent-s">Lost your code? Write to <a class="mail-link" href="mailto:guest.relation.seeyouinlaos@gmail.com">guest.relation.seeyouinlaos@gmail.com</a>.</p>
 </section>
 </main>
 
 <footer id="rsvp">
-<div class="ask serif">See you <em>in Laos?</em></div>
-<a class="btn-full" href="register/">Join the journey</a>
-<div class="mark-f">see you in laos<span class="dot">.</span></div>
-<div class="fine">
-<span class="hs">Haruthai&nbsp;&amp;&nbsp;Suthep</span>
-<span>Sunday, 28 February 2027 · Vientiane, Laos</span>
-<span><a class="mail-link" href="mailto:guest.relation.seeyouinlaos@gmail.com">guest.relation.seeyouinlaos@gmail.com</a></span>
+<div class="wrap">
+<hr class="rule"/>
+<p class="ask serif">See you <em>in Laos?</em></p>
+<a class="t-link" href="register/">Enter the Journey</a>
+<div class="fine"><span>see you in laos<span class="dot">.</span></span><span><span class="hs">Haruthai&nbsp;&amp;&nbsp;Suthep</span> · Sunday, 28 February 2027 · Vientiane</span><span><a class="mail-link" href="mailto:guest.relation.seeyouinlaos@gmail.com">guest.relation.seeyouinlaos@gmail.com</a></span></div>
 </div>
 </footer>
 
-<script src="assets/i18n/catalog.js?v=I2"></script>
-<script src="assets/i18n/siyl-i18n.js?v=I2"></script>
+<script src="assets/i18n/catalog.js?v=J2"></script>
+<script src="assets/i18n/siyl-i18n.js?v=J2"></script>
 <script>
 (function () {
   'use strict';

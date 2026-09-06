@@ -2011,6 +2011,13 @@ header.top .mark { white-space: nowrap; }
 .bag-qty button:hover { border-color: var(--ink); }
 .bag-qty b { font-family: 'PP Editorial Old', serif; font-size: 16px; font-weight: 400; }
 .cs-row.bag { align-items: flex-start; }
+
+/* quiet authenticated header (owner acceptance): no boxed control row */
+header.top .lang-sw button { border: 0; min-width: 30px; opacity: .45; }
+header.top .lang-sw button.on { opacity: 1; border: 0; border-bottom: 1px solid var(--ink); color: var(--ink); }
+.hd-plan { border: 0; border-bottom: 1px solid var(--ink); padding: 6px 0 3px; letter-spacing: .16em; }
+.hd-plan:hover { background: none; color: var(--rose); border-color: var(--rose); }
+@media (max-width: 700px) { header.top { padding-top: calc(8px + env(safe-area-inset-top)); padding-bottom: 8px; } header.top .mark { font-size: 17px; } }
 </style>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -2247,9 +2254,9 @@ header.top .mark { white-space: nowrap; }
 <div class="lb-count" aria-live="polite"></div>
 </div>
 
-<script src="../assets/i18n/catalog.js?v=I2"></script>
-<script src="../assets/experiences.js?v=I2"></script>
-<script src="../assets/i18n/siyl-i18n.js?v=I2"></script>
-<script type="module" src="./app.mjs?v=I2"></script>
+<script src="../assets/i18n/catalog.js?v=J2"></script>
+<script src="../assets/experiences.js?v=J2"></script>
+<script src="../assets/i18n/siyl-i18n.js?v=J2"></script>
+<script type="module" src="./app.mjs?v=J2"></script>
 </body>
 </html>
