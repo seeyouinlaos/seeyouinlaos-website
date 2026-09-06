@@ -81,3 +81,23 @@ screenshot, .webloc link files and AI-styled renders — no usable verified trai
 photograph, so the train product keeps the deliberate placeholder standard
 (correct geometry, "Photography to follow"). 007–010 transport folders and the
 Railway VIP Lounge / Afternoon Tea folders await their first verified imports.
+
+## 06 SEP final reconciliation (project root pass)
+
+Project root inspected: 00_Master_Control_Center (Sheet + change logs),
+01_Inspirations_Impressions (historical planning tree — excluded by firewall),
+02_Function_Operations_Timeline, 03_Finance_Budget_Receipts,
+04_Procurement_Vendors, 05_Exports, 06_Image_Branding_Assets (= the production
+image library already mapped), 07_Guest_Profile, 99_ARCHIVE (excluded), webpage,
+plus loose root files (personal PDFs — not production content).
+
+Source conflict recorded, asset NOT used:
+`000_Transport_Special_Express_No_25_Bangkok_Nong_Khai.jpg` (project root) is
+named as the train product but actually shows a mountainous river valley with a
+bridge (visually resembles northern Laos, not the Bangkok–Nong Khai line and not
+a train). Filename and visual content disagree, so it fails the four-way rule
+and the Special Express placeholder stays.
+
+All frozen object sets (Hotels 020–025, Airports 030–035, Cities 001–005,
+Transport 006–010), Packages A–F, the C642/USD 85 override and every active
+image mapping were re-verified against the root: no correction required.
