@@ -8,13 +8,13 @@
 import {
   WEDDING, CONTACTS, JOURNEY_MODULES, EVENTS, ACCOMMODATIONS, SELECTABLE_ACCOMMODATIONS, TRAIN,
   TRANSFERS, PACKAGE_INCLUSIONS, COPY, DEMO_MODE, PUBLICATION, TRAIN_REFERENCE, BERTH_PREFS, BANGKOK_STAYS, BANGKOK_STAY, POST_WEDDING, RETURN_STAY, lookupInvitation,
-} from './data.mjs?v=A2';
+} from './data.mjs?v=B2';
 import {
   contributionPerGuest, partyCharges, partyTotal, money as usdMoney, displayMoney,
   trainContribution, transfersTotal, journeyTotal, postWeddingTotal,
   createInventory, remaining, availabilityLabel, requestAllocation,
   validateRegistration, buildNotification, nextInvitationState,
-} from './logic.mjs?v=A2';
+} from './logic.mjs?v=B2';
 
 /* ---------------- persistent state ---------------- */
 const DRAFT_KEY = 'siyl.reg.draft.v2';
@@ -903,10 +903,14 @@ function voyDays(k) {
     { day: '28 FEB · 09:00', title: 'Temple Ceremony', text: 'The morning ceremony at Wat Ong Teu.', exp: [] },
     { day: '28 FEB · 12:00', title: 'Coffee & Cake', text: 'After the return from the temple — an easy afternoon together.', exp: [],
       img: '../assets/images/event/051-coffee-and-cake-patisserie.jpg' },
-    /* Vow Ceremony (green gate, never a pool) and Wedding Dinner have no approved
-     * event photography in the library yet — no substitute is used. */
-    { day: '28 FEB · 16:30', title: 'Vow Ceremony', text: 'The vows at the green gate.', exp: [] },
-    { day: '28 FEB · 19:30', title: 'Wedding Dinner', text: 'The evening that gathers everyone at one table.', exp: [] },
+    /* Vow Ceremony: the green door at Souphattra Heritage, verified in the owner
+     * library (folder 012). Green gate / green door, never a pool. */
+    { day: '28 FEB · 16:30', title: 'Vow Ceremony', text: 'The vows at the green gate.', exp: [],
+      img: '../assets/images/event/052-vow-ceremony-green-door.jpg' },
+    /* Wedding Dinner: the courtyard garden where the dinner is served, verified
+     * in the owner library (folder 012). The venue, honestly labelled as such. */
+    { day: '28 FEB · 19:30', title: 'Wedding Dinner', text: 'The evening that gathers everyone at one table, in the courtyard garden.', exp: [],
+      img: '../assets/images/event/053-wedding-dinner-courtyard-garden.jpg' },
   ];
   return [
     { day: '01 – 04 MAR', title: 'Kunming', text: 'The city of eternal spring — first days in Yunnan.', exp: exp('kmg') },

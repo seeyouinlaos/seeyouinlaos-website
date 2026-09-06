@@ -1,47 +1,64 @@
 # Semantic asset map — See You In Laos production imagery
 
-Source of truth: Owner image library
-https://drive.google.com/drive/folders/1CSJtMKw2XuQf8YwFyq9UkjFHAIdHoVcJ
+**Two owner sources were inspected before any assignment in this pass.**
 
-Rule: Aman controls HOW an image is presented. This library controls WHICH image
-belongs in a slot. Folder designation + filename + verified visual content +
+- Drive A — Master Control Center
+  `https://drive.google.com/drive/folders/1eT2eSEt2kB0ZHO2bGsfvJRTzeLqhRQnS`
+  Contains the H&S Wedding Operations Master spreadsheet and the 008 Drive change
+  logs. **No image folders.** It is a documents root, not an asset library.
+- Drive B — Image library
+  `https://drive.google.com/drive/folders/1CSJtMKw2XuQf8YwFyq9UkjFHAIdHoVcJ`
+  ~65 semantic folders: City, Hotel, Event, Experience, Transport, Restaurant,
+  Cafe, Bar, Mall, Airport, Dress Code, Branding, Reference, Historical, Review.
+
+Rule: **Aman controls how an image is presented. This library controls which image
+belongs in a slot.** Folder designation + filename + verified visual content +
 page context must all agree before an asset is used.
 
-| Production asset | Drive folder | Verified subject | Used for |
-|---|---|---|---|
-| city/001-bangkok-chao-phraya-skyline.jpg | 001 - City - Bangkok | Chao Phraya river, ICONSIAM skyline | Thailand journey / Bangkok destination |
-| city/001-bangkok-wat-pho-reflection.jpg | 001 - City - Bangkok | Wat Pho temple reflection | Bangkok destination, secondary |
-| city/002-vientiane-pha-that-luang.jpg | 002 - City - Vientiane | Pha That Luang golden stupa | Laos journey / Vientiane destination |
-| city/002-vientiane-patuxai-twilight.jpg | 002 - City - Vientiane | Patuxai at twilight | Vientiane destination, secondary |
-| city/002-vientiane-mekong-sunset.jpg | 002 - City - Vientiane | Mekong promenade at sunset | Vientiane editorial |
-| event/051-coffee-and-cake-patisserie.jpg | 051 - Event - Cake and Coffee | Cake stand, patisserie, desserts | Wedding event: Coffee & Cake |
-| event/051-coffee-and-cake-salon.jpg | 051 - Event - Cake and Coffee | Heritage salon / bar room where it is served | Coffee & Cake venue, secondary |
-| marsilea/*.jpg | Owner PDF: Marsilea-Spa-Menu.pdf | Official Marsilea Spa photography | Laos > Vientiane > Wellness > Marsilea Spa |
+## Active assignments
 
-## Deliberately NOT assigned
+| Production asset | Drive | Source folder | Source file | Verified subject | Used for | Status |
+|---|---|---|---|---|---|---|
+| city/001-bangkok-chao-phraya-skyline.jpg | B | 001 - City - Bangkok | 003_City_Bangkok_Chao_Phraya_River_ICONSIAM_Skyline.jpg | River and ICONSIAM skyline | Bangkok destination hero, Thailand day | ACTIVE |
+| city/001-bangkok-wat-pho-reflection.jpg | B | 001 - City - Bangkok | 000_City_Bangkok_Wat_Pho_Temple_Reflection.jpg | Wat Pho, reflection | Thailand journey hero | ACTIVE |
+| city/002-vientiane-pha-that-luang.jpg | B | 002 - City - Vientiane | 000_City_Vientiane_Pha_That_Luang_Golden_Stupa.webp | Golden stupa | Vientiane destination hero, Laos journey hero | ACTIVE |
+| city/002-vientiane-mekong-sunset.jpg | B | 002 - City - Vientiane | 017_City_Vientiane_Mekong_Promenade_Sunset.webp | Mekong promenade at sunset | Vientiane arrival day | ACTIVE |
+| city/002-vientiane-patuxai-twilight.jpg | B | 002 - City - Vientiane | 003_City_Vientiane_Patuxai_Twilight_Fountain.jpg | Patuxai at twilight | Vientiane editorial | ACTIVE |
+| city/003-kunming-jinma-biji-archway.jpg | B | 003 - City - Kunming | 000_City_Kunming_Jinma_Biji_Memorial_Archway_Day.jpeg | Jinma Biji archway | Kunming destination hero | ACTIVE |
+| city/003-kunming-temple-cherry-blossom.jpg | B | 003 - City - Kunming | 002_City_Kunming_Temple_Roofs_Cherry_Blossom.jpg | Temple roofs, cherry blossom | Kunming editorial | ACTIVE |
+| city/004-lijiang-black-dragon-pool.jpg | B | 004 - City - Lijiang | 000_City_Lijiang_Black_Dragon_Pool_Jade_Dragon_Snow_Mountain.jpg | Black Dragon Pool below the snow mountain | Lijiang destination hero | ACTIVE |
+| city/004-lijiang-naxi-rooftops.jpg | B | 004 - City - Lijiang | 002_City_Lijiang_Aerial_Naxi_Rooftops_Snow_Mountain.webp | Aerial Naxi rooftops | Lijiang editorial | ACTIVE |
+| event/051-coffee-and-cake-patisserie.jpg | B | 051 - Event - Cake and Coffee | Heritage_0354.jpg | Cake stand, patisserie, desserts | Wedding event: Coffee & Cake | ACTIVE |
+| event/051-coffee-and-cake-salon.jpg | B | 051 - Event - Cake and Coffee | Heritage_0180.jpg | Heritage salon where it is served | Coffee & Cake venue, secondary | ACTIVE |
+| event/052-vow-ceremony-green-door.jpg | B | 012 - Hotel - Souphattra Heritage Vientiane | DSC09069.webp | The green door, carved medallion, arched frame, leaf shadow. No pool. | Wedding event: Vow Ceremony | ACTIVE — new this pass |
+| event/053-wedding-dinner-courtyard-garden.jpg | B | 012 - Hotel - Souphattra Heritage Vientiane | Heritage_0605.jpg | Courtyard garden with fountain, where the dinner is served | Wedding event: Wedding Dinner (venue) | ACTIVE — new this pass |
+| marsilea/*.jpg (13 files) | Owner PDF | Marsilea-Spa-Menu.pdf | reception, treatment room, body massage, facial products, scrub, therapist, singing bowl, oils, Jurlique tray, sauna, therapist silhouette | Laos > Vientiane > Wellness > Marsilea Spa | ACTIVE |
 
-- **Temple Ceremony (folder 050)** — the folder currently contains alms-giving
-  photography (monks with alms bowls, street offerings, offering baskets) which
-  belongs to the retired Sacred Morning Ritual, plus AI-exported files. Per the
-  historical firewall and the semantic-image rule, none of it was assigned to the
-  Temple Ceremony. The section stays image-light until Wat Ong Teu ceremony
-  photography is supplied.
-- **Vow Ceremony** — no event folder exists in the library. Green gate / green door,
-  never a pool. No substitute used.
-- **Wedding Dinner** — no event folder exists in the library. No substitute used.
-- **Kunming / Lijiang city folders** — not yet imported in this pass; the China
-  journey uses its approved accommodation and experience imagery only.
-
-## Added in the destination pass
-
-| Production asset | Drive folder | Verified subject | Used for |
-|---|---|---|---|
-| city/003-kunming-jinma-biji-archway.jpg | 003 - City - Kunming | Jinma Biji memorial archway | Kunming destination hero |
-| city/003-kunming-temple-cherry-blossom.jpg | 003 - City - Kunming | Temple eaves with cherry blossom | Kunming editorial |
-| city/004-lijiang-black-dragon-pool.jpg | 004 - City - Lijiang | Black Dragon Pool below Jade Dragon Snow Mountain | Lijiang destination hero |
-| city/004-lijiang-naxi-rooftops.jpg | 004 - City - Lijiang | Aerial Naxi rooftops under the snow mountain | Lijiang editorial |
-
-Property imagery stays property imagery: Bangkok stays use the penthouse and
+Property imagery stays property imagery. Bangkok stays use the penthouse and
 Kempinski photography, Vientiane stays use the Souphattra room photography,
 Kunming and Lijiang stays use their own homestay photography. No city photograph
 is used as a property image and no property photograph is used as a city hero.
+
+## Destination → property model (from the live dataset)
+
+| Journey | Destination | Properties |
+|---|---|---|
+| 01 Thailand | Bangkok | Elegant 6BR Sathorn Penthouse · Siam Kempinski Hotel Bangkok |
+| 02 Laos | Vientiane | Souphattra Heritage Vientiane (room categories) · Private Residence (alternative stay) |
+| 03 China | Kunming | Wanxiang Yueju Designer Homestay |
+| 03 China | Lijiang | Luye Baisha · Rizhao Jinshan |
+
+## Deliberately NOT assigned
+
+| Candidate | Source | Reason |
+|---|---|---|
+| TIA_7755, TIA_7763, TIA_7801, DSC07717, DSC07723, DSC07777, DSC07779, morning001, a2cbb764 | B · 050 - Event - Temple Ceremony | WRONG EVENT / HISTORICAL — these depict alms giving (monks with alms bowls, street offerings, offering baskets), which belongs to the retired Sacred Morning Ritual. They are not Wat Ong Teu temple-ceremony photography and were not used despite the folder name. |
+| "Codex Image …" PNG files | B · 050 | SEMANTICALLY UNSAFE — AI-exported files, excluded by the no-AI-imagery rule. |
+| img_ cake, img_ dinner and cake cutting, img_ venue_capella bkk, img_ venue_ fs hotel bkk, img_ venue_regent phu quoc | Outside both supplied roots (2025 planning tree) | HISTORICAL — superseded venue and mood-board material from the earlier planning phase (Capella Bangkok, Four Seasons Bangkok, Regent Phu Quoc). Not the current Souphattra Vientiane wedding. |
+| Heritage_0640, Heritage_0631 (aerials with pool) | B · 012 | WRONG CONTEXT for the Vow Ceremony — the vow rule is green gate, never a pool. Retained as property material only. |
+| 330 - Historical - Luang Prabang, 331 - Historical - Lisbon, 332/333 Review folders | B | HISTORICAL / DUPLICATE / REVIEW — not current production content. |
+
+## Still genuinely missing
+
+- **Temple Ceremony (Wat Ong Teu, 28 Feb 09:00)** — no ceremony photography exists
+  in either supplied root. The surface stays image-light. Missing is better than wrong.
