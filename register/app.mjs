@@ -8,13 +8,13 @@
 import {
   WEDDING, CONTACTS, JOURNEY_MODULES, EVENTS, ACCOMMODATIONS, SELECTABLE_ACCOMMODATIONS, TRAIN,
   TRANSFERS, PACKAGE_INCLUSIONS, COPY, DEMO_MODE, PUBLICATION, TRAIN_REFERENCE, BERTH_PREFS, BANGKOK_STAYS, BANGKOK_STAY, POST_WEDDING, RETURN_STAY, lookupInvitation,
-} from './data.mjs?v=C2';
+} from './data.mjs?v=D2';
 import {
   contributionPerGuest, partyCharges, partyTotal, money as usdMoney, displayMoney,
   trainContribution, transfersTotal, journeyTotal, postWeddingTotal,
   createInventory, remaining, availabilityLabel, requestAllocation,
   validateRegistration, buildNotification, nextInvitationState,
-} from './logic.mjs?v=C2';
+} from './logic.mjs?v=D2';
 
 /* ---------------- persistent state ---------------- */
 const DRAFT_KEY = 'siyl.reg.draft.v2';
@@ -959,6 +959,82 @@ function voyMetaLine(k) {
   const nDays = voyDays(k).length;
   return d.when + ' · ' + nDays + (nDays === 1 ? ' chapter' : ' chapters') + ', ' + nStops + ' stops';
 }
+/* ---------------- JOURNEY COMMERCE: blocks, extras, journey bag ----------------
+ * The guest buys curated JOURNEY BLOCKS with a per-person package price; the
+ * detailed components stay inside the existing calculation engine. The Journey
+ * Bag is a PROJECTION of real booking state (scope, stay, train, china) — there
+ * is no second commerce state. No payment processing exists or is added. */
+const EXTRAS = [
+  /* Owner-supplied optional experience (this order): real product basis kept —
+   * USD 180 as an experience FOR TWO, not converted to per-person. */
+  { id: 'tea1872', name: 'Champagne Afternoon Tea at 1872', where: 'Aman Nai Lert Bangkok',
+    unit: 'For two guests', price: 180, per: 'unit',
+    text: 'An afternoon of champagne and patisserie at 1872, Aman Nai Lert Bangkok — an optional experience during the Bangkok days.' },
+];
+function extrasSel() { S.extras ||= {}; return S.extras; }
+function extrasTotal() {
+  const sel = extrasSel();
+  return EXTRAS.reduce((t, x) => t + (sel[x.id] ? sel[x.id] * x.price : 0), 0);
+}
+/* The five commercial blocks, priced from the live engine. price === null means
+ * the owner has not supplied the commercial basis yet — never invented. */
+function journeyBlocks() {
+  const n = attendingCount();
+  const acc = currentAcc();
+  const occ = acc ? S.stay.occupantGuestIds : [];
+  const riders = S.guests.filter((g) => g.journey.train).length;
+  return [
+    { id: 'bkk', no: '01', name: 'Bangkok', dates: '21 – 24 FEB 2027',
+      on: !!(S.scope && S.scope.bangkok && bangkokStayActive()),
+      variant: (BANGKOK_STAYS[0] || {}).name,
+      pp: BANGKOK_STAY.ratePerGuestNight * bkkNights(), qty: bkkTravellers() || n,
+      total: bkkTotal(),
+      included: ['Three nights in the shared penthouse', 'The Bangkok days together'] },
+    { id: 'train', no: '02', name: 'Special Train Journey', dates: '24 – 25 FEB 2027',
+      on: riders > 0,
+      variant: S.trainCabin === 'private' ? 'Private single cabin' : 'First Class Sleeper',
+      pp: TRAIN.contributionPerGuest + (S.trainCabin === 'private' && riders === 1 ? 55 : 0),
+      qty: riders || n,
+      total: (trainContribution(TRAIN, riders) || 0) + trainCabinUpcharge(),
+      included: ['Special Express No. 25, Bangkok → Nong Khai', 'First Class Sleeper', 'Van pickup & luggage service to the hotel', 'The crossing to Vientiane'] },
+    { id: 'prewed', no: '03', name: 'Pre-Wedding Vientiane', dates: '25 – 27 FEB 2027',
+      on: false, variant: null, pp: null, qty: n, total: null,
+      included: ['Awaiting the owner\u2019s commercial data for this block'] },
+    { id: 'wedding', no: '04', name: 'The Wedding', dates: '27 FEB – 01 MAR 2027',
+      on: !!acc,
+      variant: acc ? acc.name : null,
+      pp: acc ? (acc.contributionPerGuest == null ? 0 : contributionPerGuest(acc) * laosPaidNights()) : null,
+      qty: occ.length || n,
+      total: acc ? (partyTotal(acc, occ) + laosExtraTotal(acc, occ)) : null,
+      included: ['Temple Ceremony — Included', 'Coffee & Cake — Included', 'Vow Ceremony — Included', 'Wedding Dinner — Included', 'Second night hosted by Haruthai & Suthep', 'Breakfast, welcome and programme transfers'] },
+    { id: 'after', no: '05', name: 'After the Wedding', dates: '01 – 06 MAR 2027',
+      on: !!(S.scope && S.scope.china && (cnStaysTotal() || pwTotal())),
+      variant: 'Kunming & Lijiang stays · First Class train',
+      pp: 27 * 3 + 145 + 63 * 2, qty: n,
+      total: cnStaysTotal() + pwTotal(),
+      included: ['Vientiane → Kunming flight, arranged for you', 'Three nights Wanxiang Yueju, Kunming', 'First Class train Kunming → Lijiang', 'Two nights Luye Baisha, Lijiang'] },
+  ];
+}
+/* Just-added confirmation (Aman bag-popover grammar, our brand and wording). */
+function justAdded(name, detail, priceLine) {
+  let el = document.getElementById('just-added');
+  if (!el) {
+    el = document.createElement('div'); el.id = 'just-added';
+    document.body.appendChild(el);
+  }
+  el.innerHTML = '<div class="ja-panel" role="status">' +
+    '<p class="cch-label">Just added to your journey</p>' +
+    '<p class="ja-t serif">' + esc(name) + '</p>' +
+    (detail ? '<p class="ja-s">' + esc(detail) + '</p>' : '') +
+    (priceLine ? '<p class="ja-p">' + priceLine + '</p>' : '') +
+    '<button type="button" class="btn-full dark" data-ja-view>Review your journey</button>' +
+    '<button type="button" class="t-act" data-ja-close>Continue exploring</button></div>';
+  el.hidden = false;
+  el.querySelector('[data-ja-close]').addEventListener('click', () => { el.hidden = true; });
+  el.querySelector('[data-ja-view]').addEventListener('click', () => { el.hidden = true; show(idx('cost')); });
+  clearTimeout(el._t); el._t = setTimeout(() => { el.hidden = true; }, 7000);
+}
+
 /* ---------------- STAGED PLANNER (Aman "Plan your voyage" grammar) ----------
  * Four stages with a top stage bar (current / completed / future), an editorial
  * introduction per stage, large square outlined choices, quiet selected and
@@ -1097,6 +1173,18 @@ function renderPlanner() {
         const on = S.guests.some((g) => (g.events || {})[k]);
         return choice(label, sub, on, 'data-pl-ev="' + k + '"');
       }).join('') + '</div></section>' +
+      '<section class="am-sec"><p class="cch-label">Optional experiences</p>' +
+      EXTRAS.map((x) => {
+        const q = extrasSel()[x.id] || 0;
+        return '<article class="am-prop" style="margin-top:18px">' +
+          '<p class="eyebrow">' + esc(x.where) + '</p>' +
+          '<h3 class="serif am-propname" style="font-size:24px">' + esc(x.name) + '</h3>' +
+          '<p class="note am-blurb">' + esc(x.text) + '</p>' +
+          '<p class="am-price">' + money(x.price) + ' <span class="am-per">' + esc(x.unit) + '</span></p>' +
+          (q ? '<p class="am-avail">IN YOUR JOURNEY · quantity ' + q + '</p>' : '') +
+          '<button type="button" class="btn-full' + (q ? '' : ' dark') + '" data-ex-add="' + x.id + '">' + (q ? 'Add another' : 'Add to your journey') + '</button>' +
+          '</article>';
+      }).join('') + '</section>' +
       '<section class="am-sec"><p class="cch-label">Dress code</p>' +
       '<p class="note" style="max-width:560px;margin-bottom:10px">' +
       (['temple','ceremony','dinner'].every((k) => !S.guests.some((g) => (g.events || {})[k]) || (S.dressAck && S.dressAck[k]))
@@ -1142,6 +1230,7 @@ function renderPlanner() {
     const id = b.getAttribute('data-pl-acc');
     S.stay.accommodationId = (S.stay.accommodationId === id) ? null : id;
     S.stay.rooms = 1; S.stay.waitlist = false;
+    if (S.stay.accommodationId) { S.scope ||= { bangkok: false, laos: true, china: false }; S.scope.laos = true; }
     S.stay.occupantGuestIds = S.guests.filter((g) => g.attending !== false).map((g) => g.guestId);
     saveDraft(); renderStep(cur); renderSummary();
   }));
@@ -1175,6 +1264,14 @@ function renderPlanner() {
     S.guests.forEach((g) => { if (g.attending !== false) { g.events ||= {}; g.events[k] = !on; } });
     S._evDecided ||= {}; S._evDecided[k] = true;
     saveDraft(); renderStep(cur); renderSummary();
+  }));
+  box.querySelectorAll('[data-ex-add]').forEach((b) => b.addEventListener('click', () => {
+    const id = b.getAttribute('data-ex-add');
+    const x = EXTRAS.find((e) => e.id === id);
+    const sel = extrasSel();
+    sel[id] = (sel[id] || 0) + 1;
+    saveDraft(); renderStep(cur); renderSummary();
+    justAdded(x.name, x.where + ' · ' + x.unit, money(x.price) + ' · quantity ' + sel[id]);
   }));
   box.querySelectorAll('[data-pl-wed]').forEach((b) => b.addEventListener('click', () => {
     S._voy = 'vte'; S._voySec = null; S._dest = null; show(idx('home'));
@@ -1707,7 +1804,7 @@ function renderHome() {
   const occ = acc ? S.stay.occupantGuestIds : [];
   const riders = S.guests.filter((g) => g.journey.train);
   const detailsMissing = S.guests.filter((g) => g.attending !== false && !(g.email || g.phone)).length;
-  const total = (function(){ const G = laosGate(acc, riders.length, S.transfers); return journeyTotal(G.acc, occ, TRAIN, G.riders, TRANSFERS, G.transfers) + laosExtraTotal(G.acc, occ); })() + pwTotal() + bkkTotal() + cnStaysTotal() + almsTotal() + trainCabinUpcharge();
+  const total = (function(){ const G = laosGate(acc, riders.length, S.transfers); return journeyTotal(G.acc, occ, TRAIN, G.riders, TRANSFERS, G.transfers) + laosExtraTotal(G.acc, occ); })() + pwTotal() + bkkTotal() + cnStaysTotal() + almsTotal() + trainCabinUpcharge() + extrasTotal();
   /* Aman voyage index: three journey products, each MAP -> eyebrow -> title ->
    * dates -> duration/stops -> actions. */
   const prod = (k) => {
@@ -1960,10 +2057,15 @@ function renderStay() {
     S.stay.accommodationId = b.getAttribute('data-select');
     S.stay.rooms = 1;
     S.stay.waitlist = false;
+    S.scope ||= { bangkok: false, laos: true, china: false };
+    S.scope.laos = true; // choosing the wedding stay adds Laos back, as promised
+
     S.stay.occupantGuestIds = S.guests.filter((g) => g.attending !== false).map((g) => g.guestId);
     saveDraft(); renderStay(); renderSummary();
     const acc = currentAcc();
     const occ = S.stay.occupantGuestIds;
+    justAdded('The Wedding · ' + acc.name, '27 FEB – 01 MAR 2027 · ' + occ.length + ' guest' + (occ.length > 1 ? 's' : ''),
+      acc.contributionPerGuest == null ? 'HOSTED · limited availability' : money(contributionPerGuest(acc) * laosPaidNights()) + ' per person');
     announce('BOOKED · ' + acc.name + ' for you. ' + (acc.contributionPerGuest == null
       ? 'This stay is complimentary and limited; Guest Relations coordinates it personally. '
       : occ.length + ' guest' + (occ.length > 1 ? 's' : '') + ', ' + money(contributionPerGuest(acc)) + ' per guest, total costs ' + money(partyTotal(acc, occ)) + '. ') + COPY.requestNote);
@@ -2329,7 +2431,7 @@ function renderCost() {
   const occ = acc ? S.stay.occupantGuestIds : [];
   const riders = S.guests.filter((g) => g.journey.train);
   const tc = trainContribution(TRAIN, riders.length) || 0;
-  const total = (function(){ const G = laosGate(acc, riders.length, S.transfers); return journeyTotal(G.acc, occ, TRAIN, G.riders, TRANSFERS, G.transfers) + laosExtraTotal(G.acc, occ); })() + pwTotal() + bkkTotal() + cnStaysTotal() + almsTotal() + trainCabinUpcharge();
+  const total = (function(){ const G = laosGate(acc, riders.length, S.transfers); return journeyTotal(G.acc, occ, TRAIN, G.riders, TRANSFERS, G.transfers) + laosExtraTotal(G.acc, occ); })() + pwTotal() + bkkTotal() + cnStaysTotal() + almsTotal() + trainCabinUpcharge() + extrasTotal();
   const neutral = acc && acc.contributionPerGuest == null;
   const sc = S.scope || {};
   const oneNight = S.stay.mode === 'oneNight';
@@ -2396,38 +2498,42 @@ function renderCost() {
         '</div><span class="pl-st">OPEN</span></div>').join('') + '</section>';
   }
 
-  /* ---------- YOUR COSTS ---------- */
+  /* ---------- YOUR COSTS — the Journey Bag financial summary ---------- */
   html += '<section class="am-sec"><p class="cch-label">Your costs</p>' +
-    '<p class="note" style="max-width:560px;margin-bottom:14px">What you cover yourself, and what Haruthai &amp; Suthep are hosting for you.</p>';
+    '<p class="note" style="max-width:560px;margin-bottom:14px">Your journey, as curated blocks. Each block carries one package price per person; what it contains lives under Included.</p>';
   let rows = '';
-  if (bangkokStayActive()) {
-    rows += cost((S.bangkokStay.from && S.bangkokStay.to ? esc(S.bangkokStay.from) + ' → ' + esc(S.bangkokStay.to) : BANGKOK_STAY.window),
-      'Bangkok stay', bkkTravellers() + ' guests × ' + bkkNights() + ' nights × ' + money(BANGKOK_STAY.ratePerGuestNight), money(bkkTotal()));
-  }
-  if (riders.length) rows += cost(esc(TRAIN.date), 'Overnight train · Bangkok → Nong Khai', riders.length + ' guests × ' + money(TRAIN.contributionPerGuest) + ' package', money(tc));
+  journeyBlocks().forEach((b) => {
+    if (b.id === 'prewed') return; // no commercial basis yet — never shown as a price
+    if (!b.on) return;
+    const open = S._bagOpen === b.id;
+    rows += '<div class="cs-row bag"><span class="pl-d">' + b.no + '</span>' +
+      '<div class="pl-b"><span class="pl-t serif" style="font-family:\'PP Editorial Old\',serif;font-size:19px">' + esc(b.name) + '</span>' +
+      '<span class="pl-s">' + b.dates + (b.variant ? ' · ' + esc(b.variant) : '') + ' · ' + b.qty + ' guest' + (b.qty > 1 ? 's' : '') +
+      (b.pp ? ' · ' + money(b.pp) + ' per person' : (b.pp === 0 ? ' · HOSTED' : '')) + '</span>' +
+      '<button type="button" class="t-act" data-bag-inc="' + b.id + '" style="margin-top:4px;min-height:34px;padding-top:2px">' + (open ? 'Hide what\u2019s included' : 'What\u2019s included') + '</button>' +
+      (open ? '<div style="margin-top:8px">' + b.included.map((i) => '<span class="pl-s" style="display:block">' + i + '</span>').join('') + '</div>' : '') +
+      '</div><span class="cs-a">' + (b.total != null ? money(b.total) : '') + '</span></div>';
+  });
+  const exSel = extrasSel();
+  EXTRAS.forEach((x) => {
+    const q = exSel[x.id] || 0;
+    if (!q) return;
+    rows += '<div class="cs-row bag"><span class="pl-d">&nbsp;</span>' +
+      '<div class="pl-b"><span class="pl-t">' + esc(x.name) + '</span>' +
+      '<span class="pl-s">' + esc(x.where) + ' · ' + esc(x.unit) + '</span>' +
+      '<span class="bag-qty">Quantity <button type="button" data-ex-q="' + x.id + ':-1" aria-label="Fewer">&minus;</button><b>' + q + '</b><button type="button" data-ex-q="' + x.id + ':1" aria-label="More">+</button>' +
+      '<button type="button" class="t-act" data-ex-rm="' + x.id + '" style="margin-left:14px;min-height:34px;padding-top:0">Remove</button></span>' +
+      '</div><span class="cs-a">' + money(x.price * q) + '</span></div>';
+  });
   for (const sl of S.transfers || []) {
     const t = TRANSFERS.find((x) => x.id === sl.transferId);
     if (!t || !t.pricePerUnit) continue;
-    const n = t.perGuest ? Math.max(riders.length, 1) : (sl.units || 1);
-    rows += cost(esc(t.date || ''), esc(t.name), n + ' × ' + money(t.pricePerUnit), money(t.pricePerUnit * n));
+    const nT = t.perGuest ? Math.max(riders.length, 1) : (sl.units || 1);
+    rows += cost(esc(t.date || ''), esc(t.name), nT + ' × ' + money(t.pricePerUnit), money(t.pricePerUnit * nT));
   }
-  if (acc && !neutral) {
-    rows += cost(oneNight ? '28 FEB – 01 MAR' : esc(acc.stay), esc(acc.name) + ' · Vientiane',
-      partyCharges(acc, occ).map((c) => { const g = S.guests.find((x) => x.guestId === c.guestId); return esc(g ? g.preferredName : c.guestId) + ' ' + money(c.amount); }).join(' · '),
-      money(partyTotal(acc, occ)));
-  } else if (acc && neutral) {
-    rows += cost(esc(acc.stay), esc(acc.name) + ' · Vientiane', 'Complimentary · limited availability', 'HOSTED');
-  }
-  if (S.postWedding && S.postWedding.joined) {
-    const n = attendingCount();
-    for (const c of POST_WEDDING) {
-      if (c.onward || c.contribution == null) continue;
-      rows += cost(esc(c.date), esc(c.label), c.perGuest ? n + ' guests × ' + money(c.contribution) : '', money(c.perGuest ? c.contribution * n : c.contribution));
-    }
-  }
-  html += (rows || '<p class="note">Nothing chargeable is selected yet.</p>') +
+  html += (rows || '<p class="note">Nothing is in your journey yet. Add a journey block under Plan your journey.</p>') +
     '<div class="cs-total"><span class="l">Total Costs</span><span class="r js-total">' + money(total) + '</span></div>' +
-    (total > 0 ? '<p class="note am-foot">After your journey has been reviewed you will receive the payment details for the costs shown here.</p>' : '') +
+    (total > 0 ? '<p class="note am-foot">After your journey has been reviewed you will receive the payment details for the costs shown here. Nothing is paid on this website.</p>' : '') +
     '</section>';
 
   /* ---------- HOSTED FOR YOU ---------- */
@@ -2464,6 +2570,22 @@ function renderCost() {
       : '<p class="note" style="margin-top:16px">' + esc(COPY.priceNote + ' Haruthai\u00A0&\u00A0Suthep.') + '</p>') +
     '<p class="note">' + esc(COPY.payment) + ' One person may settle the invoice for everyone travelling with them.</p>';
 
+  box.querySelectorAll('[data-bag-inc]').forEach((b) => b.addEventListener('click', () => {
+    const k = b.getAttribute('data-bag-inc');
+    S._bagOpen = (S._bagOpen === k) ? null : k;
+    renderStep(cur);
+  }));
+  box.querySelectorAll('[data-ex-q]').forEach((b) => b.addEventListener('click', () => {
+    const v = b.getAttribute('data-ex-q').split(':');
+    const sel = extrasSel();
+    sel[v[0]] = Math.max(0, (sel[v[0]] || 0) + parseInt(v[1], 10));
+    if (!sel[v[0]]) delete sel[v[0]];
+    saveDraft(); renderStep(cur); renderSummary();
+  }));
+  box.querySelectorAll('[data-ex-rm]').forEach((b) => b.addEventListener('click', () => {
+    delete extrasSel()[b.getAttribute('data-ex-rm')];
+    saveDraft(); renderStep(cur); renderSummary();
+  }));
   const pp = document.getElementById('pay-pref');
   if (pp) pp.querySelectorAll('input[name="pay-pref"]').forEach((el) => el.addEventListener('change', () => {
     S.payment = el.value; saveDraft(); renderStep(cur);
@@ -2608,7 +2730,7 @@ function renderReview() {
   if (S.postWedding && S.postWedding.joined) jcRows.push(['Post Wedding Journey', '04 MAR 2027 · Kunming → Lijiang · First Class Train · ' + money(pwTotal())]);
   if (cnStayTotal('kunming')) jcRows.push(['Kunming stay', '01 – 04 MAR 2027 · Wanxiang Yueju Designer Homestay · ' + money(cnStayTotal('kunming'))]);
   if (cnStayTotal('lijiang')) jcRows.push(['Lijiang stay', '04 – 06 MAR 2027 · Luye Baisha · Rizhao Jinshan · ' + money(cnStayTotal('lijiang'))]);
-  jcRows.push(['Total costs', money((function(){ const G = laosGate(acc, jcRiders, S.transfers); return journeyTotal(G.acc, occ, TRAIN, G.riders, TRANSFERS, G.transfers) + laosExtraTotal(G.acc, occ); })() + pwTotal() + bkkTotal() + cnStaysTotal() + almsTotal() + trainCabinUpcharge())]);
+  jcRows.push(['Total costs', money((function(){ const G = laosGate(acc, jcRiders, S.transfers); return journeyTotal(G.acc, occ, TRAIN, G.riders, TRANSFERS, G.transfers) + laosExtraTotal(G.acc, occ); })() + pwTotal() + bkkTotal() + cnStaysTotal() + almsTotal() + trainCabinUpcharge() + extrasTotal())]);
   html += sec('Your Costs', idx('cost'), jcRows);
   html += sec('Each of You', idx('each'), S.guests.map((g) => {
     const detail = (g.allergyDetail || '').trim();
@@ -2763,7 +2885,7 @@ function renderSummary() {
   if (S.postWedding && S.postWedding.joined) sel.push('Post Wedding Journey · BOOKED');
   const covGaps = coverageModel().gaps.length;
   sel.push(covGaps === 0 ? '✓ Journey complete' : covGaps === 1 ? '1 thing still needed' : covGaps + ' things still needed');
-  const total = (function(){ const G = laosGate(acc, trainCount, S.transfers); return journeyTotal(G.acc, acc ? S.stay.occupantGuestIds : [], TRAIN, G.riders, TRANSFERS, G.transfers) + laosExtraTotal(G.acc, acc ? S.stay.occupantGuestIds : []); })() + pwTotal() + bkkTotal() + cnStaysTotal() + almsTotal() + trainCabinUpcharge();
+  const total = (function(){ const G = laosGate(acc, trainCount, S.transfers); return journeyTotal(G.acc, acc ? S.stay.occupantGuestIds : [], TRAIN, G.riders, TRANSFERS, G.transfers) + laosExtraTotal(G.acc, acc ? S.stay.occupantGuestIds : []); })() + pwTotal() + bkkTotal() + cnStaysTotal() + almsTotal() + trainCabinUpcharge() + extrasTotal();
   /* editorial quiet: no persistent monetary total while nothing guest-paid
    * is selected (MASTER-02) */
   if (!total) { el.hidden = true; return; }

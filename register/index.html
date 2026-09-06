@@ -1989,6 +1989,21 @@ header.top .mark { white-space: nowrap; }
   .btn-full { max-width: 340px; }
   .am-center .btn-full { margin-left: auto; margin-right: auto; }
 }
+
+/* ---- just-added confirmation (bag popover grammar, our system) ---- */
+#just-added { position: fixed; z-index: 90; top: calc(70px + env(safe-area-inset-top)); right: 16px; width: min(360px, calc(100vw - 32px)); }
+#just-added[hidden] { display: none; }
+.ja-panel { background: var(--panel); border: 1px solid var(--line); padding: 22px 20px; box-shadow: 0 12px 40px rgba(49,49,49,.12); }
+.ja-t { font-weight: 200; font-size: 22px; line-height: 1.2; margin: 6px 0 4px; }
+.ja-s { font-size: 12.5px; color: var(--rose); margin-bottom: 4px; }
+.ja-p { font-family: 'PP Editorial Old', serif; font-size: 17px; margin-bottom: 6px; }
+.ja-panel .btn-full { margin-top: 10px; }
+.ja-panel .t-act { display: block; margin-top: 10px; }
+.bag-qty { display: inline-flex; align-items: center; gap: 10px; margin-top: 8px; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--rose); }
+.bag-qty button { background: none; border: 1px solid var(--line); min-width: 34px; min-height: 34px; font-size: 15px; cursor: pointer; color: inherit; }
+.bag-qty button:hover { border-color: var(--ink); }
+.bag-qty b { font-family: 'PP Editorial Old', serif; font-size: 16px; font-weight: 400; }
+.cs-row.bag { align-items: flex-start; }
 </style>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -2225,9 +2240,9 @@ header.top .mark { white-space: nowrap; }
 <div class="lb-count" aria-live="polite"></div>
 </div>
 
-<script src="../assets/i18n/catalog.js?v=C2"></script>
-<script src="../assets/experiences.js?v=C2"></script>
-<script src="../assets/i18n/siyl-i18n.js?v=C2"></script>
-<script type="module" src="./app.mjs?v=C2"></script>
+<script src="../assets/i18n/catalog.js?v=D2"></script>
+<script src="../assets/experiences.js?v=D2"></script>
+<script src="../assets/i18n/siyl-i18n.js?v=D2"></script>
+<script type="module" src="./app.mjs?v=D2"></script>
 </body>
 </html>
