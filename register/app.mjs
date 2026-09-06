@@ -8,13 +8,13 @@
 import {
   WEDDING, CONTACTS, JOURNEY_MODULES, EVENTS, ACCOMMODATIONS, SELECTABLE_ACCOMMODATIONS, TRAIN,
   TRANSFERS, PACKAGE_INCLUSIONS, COPY, DEMO_MODE, PUBLICATION, TRAIN_REFERENCE, BERTH_PREFS, BANGKOK_STAYS, BANGKOK_STAY, POST_WEDDING, RETURN_STAY, lookupInvitation,
-} from './data.mjs?v=X1';
+} from './data.mjs?v=Y1';
 import {
   contributionPerGuest, partyCharges, partyTotal, money as usdMoney, displayMoney,
   trainContribution, transfersTotal, journeyTotal, postWeddingTotal,
   createInventory, remaining, availabilityLabel, requestAllocation,
   validateRegistration, buildNotification, nextInvitationState,
-} from './logic.mjs?v=X1';
+} from './logic.mjs?v=Y1';
 
 /* ---------------- persistent state ---------------- */
 const DRAFT_KEY = 'siyl.reg.draft.v2';
@@ -304,6 +304,7 @@ function freshState() {
 }
 function saveDraft() {
   try { localStorage.setItem(DRAFT_KEY, JSON.stringify(S)); } catch (e) { /* private mode */ }
+  renderSubnav();
   if (typeof updateNextState === 'function') updateNextState(); // item 8: live re-validation
 }
 function loadDraft() { try { return JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null'); } catch (e) { return null; } }
@@ -348,6 +349,7 @@ function renderStep(i) {
   if (name === 'cost') renderCost();
   if (name === 'review') { renderReview(); renderReviewScope(); }
   if (name === 'send') renderSend();
+  renderSubnav();
   if (typeof updateNextState === 'function') updateNextState(); // item 8
 }
 
@@ -871,11 +873,13 @@ const VOY = {
     country: 'Thailand', order: '01',
     stops: [[13.7563, 100.5018, 'Bangkok', 'start'], [17.8783, 102.7413, 'Nong Khai', 'end']],
     lede: 'Bangkok opens the journey: the shared penthouse days, then the overnight train north to Nong Khai and the crossing into Laos.',
+    hero: '../assets/images/city/001-bangkok-wat-pho-reflection.jpg', heroAlt: 'Bangkok — Wat Pho',
   },
   vte: {
     country: 'Laos', order: '02',
     stops: [[17.8767, 102.7190, 'Friendship Bridge', 'start'], [17.9757, 102.6331, 'Vientiane', 'wedding']],
     lede: 'Vientiane carries the heart of everything: the temple morning, coffee and cake, the vows and the wedding dinner — one day that the whole journey leans toward.',
+    hero: '../assets/images/city/002-vientiane-pha-that-luang.jpg', heroAlt: 'Vientiane — Pha That Luang',
   },
   china: {
     country: 'China', order: '03',
@@ -905,13 +909,20 @@ function voyItin(k) {
 function voyDays(k) {
   const exp = (c) => expForCity(c);
   if (k === 'bkk') return [
-    { day: '21 – 24 FEB', title: 'Bangkok', text: 'City days together before the wedding — the penthouse stay, the river, the markets.', exp: exp('bkk') },
+    { day: '21 – 24 FEB', title: 'Bangkok', text: 'City days together before the wedding — the penthouse stay, the river, the markets.', exp: exp('bkk'),
+      img: '../assets/images/city/001-bangkok-chao-phraya-skyline.jpg' },
     { day: '24 FEB', title: 'The Overnight Train', text: TRAIN.times + ' — First Class Sleeper north to Nong Khai, van pickup and luggage service to the hotel included.', exp: [] },
   ];
   if (k === 'vte') return [
-    { day: '27 FEB', title: 'Vientiane', text: 'Arrival and the first quiet evening in the city on the Mekong.', exp: exp('vte') },
+    { day: '27 FEB', title: 'Vientiane', text: 'Arrival and the first quiet evening in the city on the Mekong.', exp: exp('vte'),
+      img: '../assets/images/city/002-vientiane-mekong-sunset.jpg' },
+    /* Temple Ceremony: the library folder currently holds alms-giving photography
+     * from the retired Sacred Morning Ritual — deliberately not assigned here. */
     { day: '28 FEB · 09:00', title: 'Temple Ceremony', text: 'The morning ceremony at Wat Ong Teu.', exp: [] },
-    { day: '28 FEB · 12:00', title: 'Coffee & Cake', text: 'After the return from the temple — an easy afternoon together.', exp: [] },
+    { day: '28 FEB · 12:00', title: 'Coffee & Cake', text: 'After the return from the temple — an easy afternoon together.', exp: [],
+      img: '../assets/images/event/051-coffee-and-cake-patisserie.jpg' },
+    /* Vow Ceremony (green gate, never a pool) and Wedding Dinner have no approved
+     * event photography in the library yet — no substitute is used. */
     { day: '28 FEB · 16:30', title: 'Vow Ceremony', text: 'The vows at the green gate.', exp: [] },
     { day: '28 FEB · 19:30', title: 'Wedding Dinner', text: 'The evening that gathers everyone at one table.', exp: [] },
   ];
@@ -962,12 +973,204 @@ function voyMetaLine(k) {
   const nDays = voyDays(k).length;
   return d.when + ' · ' + nDays + (nDays === 1 ? ' chapter' : ' chapters') + ', ' + nStops + ' stops';
 }
+/* ---------------- WELLNESS · MARSILEA SPA (Journey 02 · Laos) ----------------
+ * Content source of truth: Owner-supplied official Marsilea Spa & Wellness Menu
+ * (5th floor, Souphattra Hotel Vientiane). Treatments, durations, prices,
+ * etiquette, opening hours and contact are transcribed from that document —
+ * nothing is invented. Presentation follows the Aman wellness grammar:
+ * large inset image, ivory whitespace, centered serif title, centered editorial
+ * description, outlined action, dark primary action; treatments disclose
+ * progressively as experiences, never as a price table. */
+const MARSILEA = {
+  name: 'Marsilea Spa',
+  where: '5th floor, Souphattra Hotel Vientiane',
+  address: 'Phonxay Village, Sikhodtabong District, Vientiane, Lao PDR',
+  hours: '10:00 – 20:00',
+  tel: '+856 20 22 227 812 / (0)21 71 3555',
+  web: 'www.souphattra.com',
+  maps: 'https://maps.app.goo.gl/MGt96YnmqVNnszvf7?g_st=ic',
+  lede: 'A sanctuary of luxurious tranquility, offering a harmonious blend of ancient Laotian healing traditions and modern spa therapies. It is a sanctuary for discerning individuals seeking authentic wellness experiences and a reconnection with their inner selves in a setting of refined elegance.',
+  hero: '../assets/images/marsilea/marsilea-reception.jpg',
+  categories: [
+    { key: 'body', title: 'Body Massage', img: '../assets/images/marsilea/marsilea-body-massage.jpg', items: [
+      { name: 'Marsilea Signature Massage', prices: [[70, 90], [85, 120]],
+        text: 'An exclusive blend of Southeast Asian healing traditions and refined Western techniques. The signature journey combines the graceful touch of traditional Lao massage with soothing herbal compresses, flowing Hawaiian-inspired techniques and invigorating Swedish movements to stimulate circulation, completed with a deeply calming scalp massage.' },
+      { name: 'Deep Tissue Massage', prices: [[65, 90], [80, 120]],
+        text: 'A therapeutic escape designed to release built-up tension and restore total balance. It helps improve circulation and prevent scar tissue buildup, and promotes mental well-being by lowering heart rate, reducing blood pressure and alleviating stress.' },
+      { name: 'Swedish Massage', prices: [[45, 60], [60, 90], [75, 120]],
+        text: 'A classic treatment designed to ease muscle tension and restore natural vitality. Designed with the sports enthusiast in mind, it loosens tight muscles and relieves aches associated with strenuous activity. Light or medium pressure is customised to your personal needs.' },
+      { name: 'Aromatherapy Oil Massage', prices: [[45, 60], [60, 90], [75, 120]],
+        text: 'A sensory journey that blends premium-grade essential oils with expert massage techniques for a deeply soothing yet invigorating experience. The natural aromas harmonise emotions, relieve stress, improve circulation and nourish the skin.' },
+      { name: 'Marsilea Traditional Lao Massage', prices: [[35, 60], [45, 90], [55, 120]],
+        text: 'An ancient practice that blends rhythmic pressure and stretching to renew energy flow. Performed without oils, this rhythmic therapy combines acupressure, stretching and deep tissue techniques to release tension, enhance circulation and restore the body\u2019s natural energy flow.' },
+    ] },
+    { key: 'facial', title: 'Facial Therapy', img: '../assets/images/marsilea/marsilea-facial-products.jpg', items: [
+      { name: 'Jurlique Deep Cleansing', prices: [[50, 60]],
+        text: 'A botanical treatment that deeply purifies and refreshes. Using natural botanical ingredients, it refreshes and balances the skin, leaving it clear, smooth and ready to absorb other skincare products more effectively.' },
+      { name: 'Jurlique Nutri-Define Luxe Contouring', prices: [[55, 60]],
+        text: 'A luxurious treatment that firms, lifts and redefines. It targets signs of aging, enhances skin firmness and elasticity, and helps contour and define facial features.' },
+    ] },
+    { key: 'bodytreat', title: 'Body Treatments', img: '../assets/images/marsilea/marsilea-body-scrub.jpg', items: [
+      { name: 'Himalayan Salt Detox Body Scrub', prices: [[40, 60]],
+        text: 'A mineral-rich ritual that purifies and invigorates from head to toe. Infused with the nourishing benefits of fresh rose petals and milk, it hydrates deeply, leaving the skin soft, radiant and rejuvenated.' },
+      { name: 'Cream Body Scrub', prices: [[40, 60]],
+        text: 'A rich, aromatic exfoliation customised with your choice of calming or energising botanicals: Ylang Ylang (calming and balancing), Jasmine (uplifting and sensual), Sandalwood (grounding and nourishing) or Orange (refreshing and energising).' },
+    ] },
+    { key: 'blissful', title: 'Blissful Moments', img: '../assets/images/marsilea/marsilea-blissful-moments.jpg', items: [
+      { name: 'Ayurvedic Head Massage', prices: [[30, 45]],
+        text: 'A holistic therapy that restores balance to the head, neck and shoulders. It relieves tension, enhances blood circulation and harmonises energy flow by stimulating key Marma points, and nourishes the scalp and hair with a special Ayurvedic oil blend.' },
+      { name: 'Relaxing Foot Massage', prices: [[30, 60], [40, 90]],
+        text: 'A nurturing ritual that begins with a nourishing milk and kaffir lime soak, followed by a gentle Himalayan salt scrub, and concludes with a soothing pressure-point foot massage to improve circulation and restore balance.' },
+      { name: 'Head, Neck & Shoulder Massage', prices: [[25, 30]],
+        text: 'A focused treatment designed to relieve deep-seated tension in the head, neck and shoulders through precise pressure techniques and gentle stretching. Ideal for easing discomfort caused by poor posture or accumulated stress.' },
+      { name: 'Traditional Foot Massage', prices: [[20, 30]],
+        text: 'An age-old technique stimulating vital pressure points on the soles of the feet, promoting full-body relaxation.' },
+    ] },
+    { key: 'packages', title: 'Radiant Total Care Packages', img: '../assets/images/marsilea/marsilea-singing-bowl-ritual.jpg', items: [
+      { name: 'Ultimate Glow Package', prices: [[60, 90], [70, 120]],
+        text: 'A seamless blend of exfoliation and massage for radiant skin and deep relaxation. Your choice of body scrub to exfoliate and soften the skin, followed by a relaxing massage to relieve tension and restore balance.' },
+      { name: 'Rest & Relax Package', prices: [[70, 120]],
+        text: 'A soothing facial treatment and massage to rejuvenate your skin, combined with a relaxing body massage to relieve tension.' },
+      { name: 'Radiance Renewal Package', prices: [[90, 180]],
+        text: 'A top-to-toe ritual of exfoliation, massage and advanced facial care: an exfoliating body scrub, a full-body massage and a Nutri-Define Luxe Contouring Facial.' },
+    ] },
+    { key: 'health', title: 'Health & Wellness', img: '../assets/images/marsilea/marsilea-sauna.jpg', items: [
+      { name: 'Steam and Sauna', prices: [[10, 60]],
+        text: 'A dual ritual of soothing steam and dry heat to purify, invigorate and renew. Warm, aromatic mist softens the skin, clears the senses and releases tension; the sauna\u2019s dry, therapeutic heat stimulates circulation, promotes detoxification and energises the body.' },
+    ] },
+  ],
+  etiquette: [
+    ['Arrival', 'We recommend that you check in at the spa reception at least 15 minutes prior to your first scheduled appointment. This allows us to have a discussion with you about your treatment expectations. Please understand that late arrivals will not receive an extension of scheduled treatments.'],
+    ['Advance Booking', 'We highly recommend booking your treatment in advance to ensure that your preferred time and service is available. This also applies to group classes.'],
+    ['Age Requirement', 'The minimum age requirement for access to the Spa is 15 and Fitness Center is 18. Children under 18 must be accompanied by a responsible adult when in the Spa, Gym, Swimming Pool, Steam & Sauna.'],
+    ['Cancellation', 'Please allow 4 hours\u2019 notice of cancellation to avoid a 50% charge, and 100% charge for no shows; for non-hotel guests, a credit card number is required at the time of booking.'],
+    ['Cellular Telephone', 'Noise pollution adds to our everyday stress. In order to ensure tranquility and relaxation, we request you to kindly turn off your cell phone.'],
+    ['Gratuity', 'The price includes only 10% government tax and 10% service charge. Personal gratuities are at your discretion.'],
+    ['Health Conditions', 'Please advise us of any health conditions, allergies, or injuries, which could affect your treatment when making your spa reservation.'],
+    ['No Smoking & Alcohol', 'To maintain a serene and healthy environment for all our guests, we kindly ask that you refrain from smoking or consuming alcohol within the spa premises.'],
+    ['Pregnancy', 'We have specially designed treatments for expectant mothers. Please allow our reception to guide you in selecting which treatments are most suitable for you during this special time.'],
+  ],
+};
+function marsileaSelected() { S.wellness ||= []; return S.wellness; }
+function renderWellness(box) {
+  const M = MARSILEA;
+  S._spaCat = S._spaCat || null;
+  S._spaItem = S._spaItem || null;
+  const sel = marsileaSelected();
+  const dur = (p) => p.map((x) => '<button type="button" class="opt-ctl' + (sel.indexOf(x[2]) >= 0 ? ' on' : '') + '" data-spa-pick="' + x[2] + '" aria-pressed="' + (sel.indexOf(x[2]) >= 0) + '">' +
+    x[1] + ' minutes<span class="opt-p">' + money(x[0]) + '</span></button>').join('');
+  box.innerHTML =
+    /* Aman wellness composition: inset image -> whitespace -> centered serif
+     * title -> centered editorial description -> outlined -> dark action */
+    '<div class="am-inset"><img src="' + M.hero + '" alt="Marsilea Spa reception, Souphattra Hotel Vientiane" loading="lazy" decoding="async"/></div>' +
+    '<div class="am-center">' +
+    '<p class="eyebrow">Wellness</p>' +
+    '<h1 class="serif">' + M.name + '</h1>' +
+    '<p class="note am-lede">' + esc(M.lede) + '</p>' +
+    '<p class="am-fact">' + esc(M.where) + ' · Open ' + esc(M.hours) + '</p>' +
+    '<a class="btn-full" href="' + M.maps + '" target="_blank" rel="noopener">View location</a>' +
+    '<button type="button" class="btn-full dark" data-spa-jump="treatments">Explore treatments</button>' +
+    '</div>' +
+    '<section class="am-sec" id="treatments"><p class="cch-label">Treatments</p>' +
+    M.categories.map((c) => {
+      const open = S._spaCat === c.key;
+      return '<div class="tv-row' + (open ? ' open' : '') + '">' +
+        '<button type="button" class="tv-head" data-spa-cat="' + c.key + '" aria-expanded="' + open + '">' +
+        '<span class="tv-t serif">' + c.title + '</span>' +
+        '<span class="tv-m">' + c.items.length + ' treatment' + (c.items.length > 1 ? 's' : '') + '</span>' +
+        '<span class="tv-x" aria-hidden="true">' + (open ? '&minus;' : '+') + '</span></button>' +
+        (open ? '<div class="tv-body">' +
+          '<div class="am-inset sm"><img src="' + c.img + '" alt="' + esc(c.title) + ' at Marsilea Spa" loading="lazy" decoding="async"/></div>' +
+          c.items.map((it, ix) => {
+            const id = c.key + ':' + ix;
+            const oi = S._spaItem === id;
+            const priced = it.prices.map((pr) => [pr[0], pr[1], c.key + ':' + ix + ':' + pr[1]]);
+            return '<article class="spa-item' + (oi ? ' open' : '') + '">' +
+              '<button type="button" class="spa-head" data-spa-item="' + id + '" aria-expanded="' + oi + '">' +
+              '<span class="spa-t serif">' + esc(it.name) + '</span>' +
+              '<span class="spa-p">' + priced.map((pr) => money(pr[0]) + ' · ' + pr[1] + ' min').join('<br/>') + '</span>' +
+              '</button>' +
+              (oi ? '<div class="spa-body"><p class="note">' + esc(it.text) + '</p>' +
+                '<p class="cch-label" style="margin-top:14px">Choose a duration</p>' +
+                '<div class="opt-row">' + dur(priced) + '</div>' +
+                '<p class="note am-foot">Marking a treatment records your interest only. Marsilea Spa confirms every appointment directly — nothing here is a booked time.</p></div>' : '') +
+              '</article>';
+          }).join('') + '</div>' : '') +
+        '</div>';
+    }).join('') + '</section>' +
+    (sel.length ? '<section class="am-sec"><p class="cch-label">Your wellness interest</p>' +
+      sel.map((id) => {
+        const parts = id.split(':');
+        const cat = M.categories.find((c) => c.key === parts[0]);
+        const it = cat && cat.items[parseInt(parts[1], 10)];
+        if (!it) return '';
+        const pr = it.prices.find((x) => String(x[1]) === parts[2]);
+        return '<div class="pl-row"><span class="pl-d">' + parts[2] + ' min</span>' +
+          '<div class="pl-b"><span class="pl-t serif">' + esc(it.name) + '</span>' +
+          '<span class="pl-s">' + esc(cat.title) + ' · ' + (pr ? money(pr[0]) : '') + ' · payable at the spa</span></div>' +
+          '<span class="pl-st">YOUR CHOICE</span></div>';
+      }).join('') +
+      '<p class="note am-foot">Guest Relations passes your interest to Marsilea Spa. Times are confirmed by the spa, not by this page, and spa treatments are not part of your journey costs.</p>' +
+      '</section>' : '') +
+    '<section class="am-sec"><p class="cch-label">Spa etiquette</p>' +
+    M.etiquette.map((e, i) => {
+      const open = S._spaEt === i;
+      return '<div class="tv-row' + (open ? ' open' : '') + '">' +
+        '<button type="button" class="tv-head" data-spa-et="' + i + '" aria-expanded="' + open + '">' +
+        '<span class="tv-t serif" style="font-size:19px">' + e[0] + '</span>' +
+        '<span class="tv-x" aria-hidden="true">' + (open ? '&minus;' : '+') + '</span></button>' +
+        (open ? '<div class="tv-body"><p class="note">' + esc(e[1]) + '</p></div>' : '') +
+        '</div>';
+    }).join('') +
+    '<div class="am-contact"><p class="cch-label">Marsilea Spa</p>' +
+    '<p class="note">' + esc(M.where) + '<br/>' + esc(M.address) + '</p>' +
+    '<p class="note">Opening hours ' + esc(M.hours) + '<br/>Tel ' + esc(M.tel) + '<br/>' + esc(M.web) + '</p>' +
+    '<a class="t-act" href="' + M.maps + '" target="_blank" rel="noopener">Open in maps</a></div>' +
+    '</section>';
+  box.querySelectorAll('[data-spa-cat]').forEach((b) => b.addEventListener('click', () => {
+    const k = b.getAttribute('data-spa-cat');
+    S._spaCat = (S._spaCat === k) ? null : k; S._spaItem = null; renderStep(cur);
+  }));
+  box.querySelectorAll('[data-spa-item]').forEach((b) => b.addEventListener('click', () => {
+    const k = b.getAttribute('data-spa-item');
+    S._spaItem = (S._spaItem === k) ? null : k; renderStep(cur);
+  }));
+  box.querySelectorAll('[data-spa-et]').forEach((b) => b.addEventListener('click', () => {
+    const i = parseInt(b.getAttribute('data-spa-et'), 10);
+    S._spaEt = (S._spaEt === i) ? null : i; renderStep(cur);
+  }));
+  box.querySelectorAll('[data-spa-pick]').forEach((b) => b.addEventListener('click', () => {
+    const id = b.getAttribute('data-spa-pick');
+    S.wellness ||= [];
+    const at = S.wellness.indexOf(id);
+    if (at >= 0) S.wellness.splice(at, 1); else S.wellness.push(id);
+    saveDraft(); renderStep(cur);
+  }));
+  box.querySelectorAll('[data-spa-jump]').forEach((b) => b.addEventListener('click', () => {
+    const t = document.getElementById('treatments'); if (t) t.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+  }));
+}
+
 function renderVoyage(k, box) {
   const d = SEG_DEF()[k];
   const v = VOY[k];
   const joined = segJoined(k);
   document.getElementById('home-title').textContent = '';
-  box.innerHTML =
+  const sec = S._voySec || 'overview';
+  const secBar = '<div class="vy-secbar"><button type="button" id="vy-subnav-open" aria-haspopup="dialog">' +
+    v.country + ' &middot; ' + (voySections(k).find((r) => r[0] === sec) || ['', 'Overview'])[1] + '</button></div>';
+  if (sec === 'wellness') {
+    box.innerHTML = secBar + '<div id="wellness-box"></div>' +
+      '<p class="vy-back"><button type="button" class="btn sm ghost" id="vy-back">&larr; ' + v.country + '</button></p>';
+    renderWellness(box.querySelector('#wellness-box'));
+    box.querySelector('#vy-back').addEventListener('click', () => { S._voySec = null; renderStep(cur); window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' }); });
+    box.querySelector('#vy-subnav-open').addEventListener('click', () => setSubnav(true));
+    return;
+  }
+  if (sec === 'stay') { show(idx('stay')); return; }
+  if (sec === 'travel') { show(idx('journey')); return; }
+  box.innerHTML = secBar +
+    (VOY[k].hero ? '<div class="am-inset" style="margin-top:0"><img src="' + VOY[k].hero + '" alt="' + esc(VOY[k].heroAlt || VOY[k].country) + '" loading="lazy" decoding="async"/></div>' : '') +
     '<div class="vy-map" data-voy-map="' + k + '" role="img" aria-label="Route map: ' + v.stops.map((st) => st[2]).join(' to ') + '"></div>' +
     '<div class="vy-intro">' +
     '<p class="eyebrow">Journey ' + v.order + ' · ' + v.country + '</p>' +
@@ -985,7 +1188,10 @@ function renderVoyage(k, box) {
     '<section class="vy-sec" aria-label="Day by day">' +
     '<p class="cch-label">Day by day</p>' +
     '<div class="day-rail">' + voyDays(k).map((dy) => {
-      const img = dy.exp && dy.exp.length && dy.exp[0].img ? '../' + dy.exp[0].img : null;
+      /* WHICH image: the owner's structured library decides, by folder + verified
+       * subject. Never a good-looking fallback. Days without a semantically
+       * correct approved asset stay image-light on purpose. */
+      const img = dy.img || null;
       return '<article class="day-card">' +
         (img ? '<img src="' + img + '" alt="' + esc(dy.title) + '" loading="lazy" decoding="async"/>' : '<div class="ph-quiet" aria-hidden="true"></div>') +
         '<span class="it-day">' + dy.day + '</span>' +
@@ -999,6 +1205,13 @@ function renderVoyage(k, box) {
     '<p class="cch-label">Your selections</p>' +
     '<div id="vy-sel"></div>' +
     '</section>' +
+    (k === 'vte' ? '<section class="vy-sec" aria-label="Wellness">' +
+      '<p class="cch-label">Wellness</p>' +
+      '<div class="am-inset"><img src="../assets/images/marsilea/marsilea-treatment-room.jpg" alt="Marsilea Spa treatment room" loading="lazy" decoding="async"/></div>' +
+      '<h3 class="serif" style="margin:18px 0 8px;font-weight:200;font-size:25px">Marsilea Spa</h3>' +
+      '<p class="note" style="max-width:560px">Ancient Laotian healing traditions and modern spa therapies, on the fifth floor of the Souphattra Hotel Vientiane.</p>' +
+      '<button type="button" class="btn-full" data-voysec="wellness">Discover Marsilea Spa</button>' +
+      '</section>' : '') +
     '<section class="vy-sec" aria-label="Stay and travel">' +
     '<button type="button" class="btn-full" data-jump="stay">Accommodation &amp; availability</button>' +
     '<button type="button" class="btn-full" data-jump="journey">Travel within this journey</button>' +
@@ -1007,8 +1220,58 @@ function renderVoyage(k, box) {
   renderSegInto(k, box.querySelector('#vy-sel'));
   box.querySelectorAll('.day-exp').forEach((w) => wireExpRail(w));
   box.querySelectorAll('[data-jump]').forEach((b) => b.addEventListener('click', () => show(idx(b.getAttribute('data-jump')))));
-  box.querySelector('#vy-back').addEventListener('click', () => { S._voy = null; renderStep(cur); window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' }); });
+  box.querySelector('#vy-back').addEventListener('click', () => { S._voy = null; S._voySec = null; renderStep(cur); window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' }); });
+  box.querySelectorAll('[data-voysec]').forEach((b) => b.addEventListener('click', () => {
+    S._voySec = b.getAttribute('data-voysec'); setSubnav(false); renderStep(cur);
+    window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' });
+  }));
+  const sn = box.querySelector('#vy-subnav-open');
+  if (sn) sn.addEventListener('click', () => setSubnav(true));
   mountVoyMaps(box);
+}
+/* ---- Aman contextual sub-navigation: close, centred context title, hairline,
+ * Back, large centred rows. Only sections that genuinely exist are listed. ---- */
+function voySections(k) {
+  const rows = [['overview', 'Overview'], ['itinerary', 'Itinerary'], ['stay', 'Accommodation'], ['experiences', 'Experiences']];
+  if (k === 'vte') { rows.push(['wellness', 'Wellness']); rows.push(['wedding', 'Wedding']); }
+  rows.push(['travel', 'Travel']);
+  return rows;
+}
+function setSubnav(open) {
+  const ov = document.getElementById('subnav');
+  const sc = document.getElementById('subnav-scrim');
+  if (!ov || !sc) return;
+  document.body.classList.toggle('sn-open', open);
+  sc.hidden = !open; ov.hidden = !open;
+  if (open) { const c = ov.querySelector('.sn-close'); if (c) c.focus(); }
+}
+function renderSubnav() {
+  const ov = document.getElementById('subnav');
+  if (!ov) return;
+  const k = S._voy;
+  if (!k || !VOY[k]) { setSubnav(false); ov.innerHTML = ''; return; }
+  const d = SEG_DEF()[k];
+  ov.innerHTML =
+    '<div class="sn-top"><button type="button" class="sn-close" aria-label="Close">&times;</button></div>' +
+    '<p class="sn-ctx">' + VOY[k].country + '</p>' +
+    '<hr class="sn-line"/>' +
+    '<button type="button" class="sn-back" data-voysec="overview">Back</button>' +
+    voySections(k).map(([id, label]) =>
+      '<button type="button" class="sn-row" data-voysec="' + id + '"' +
+      ((S._voySec || 'overview') === id ? ' aria-current="true"' : '') + '>' + label + '</button>').join('');
+  ov.querySelector('.sn-close').addEventListener('click', () => setSubnav(false));
+  ov.querySelectorAll('[data-voysec]').forEach((b) => b.addEventListener('click', () => {
+    S._voySec = b.getAttribute('data-voysec'); setSubnav(false); renderStep(cur);
+    window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' });
+  }));
+  const sc = document.getElementById('subnav-scrim');
+  if (sc && !sc.dataset.wired) {
+    sc.dataset.wired = '1';
+    sc.addEventListener('click', () => setSubnav(false));
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && document.body.classList.contains('sn-open')) setSubnav(false);
+    });
+  }
 }
 
 function grCardHtml() {

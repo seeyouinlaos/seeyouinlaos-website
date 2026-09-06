@@ -29,10 +29,16 @@
 @font-face { font-family: 'PP Editorial Old'; src: url('../assets/fonts/PPEditorialOld-Italic.otf') format('opentype'); font-weight: 400; font-style: italic; font-display: swap; }
 
 :root {
-  --gold: #A8863B; --gold-soft: #C2A56A; --gold-line: rgba(168,134,59,.45);
-  --ivory: #F2ECE1; --ink: #211F1C; --ink-s: #2B2823;
-  --blush: #EAD9D4; --rose: #805A52; --cherry: #74070E; --cherry-photo: #B33A3F;
-  --line: rgba(168,131,125,.35);
+  /* Palette authority: measured from the Aman reference implementation.
+   * Warm pale ivory ground, charcoal primary type, muted secondary type,
+   * extremely restrained neutral hairlines, dark charcoal primary action.
+   * The former cherry/burgundy interface accent is retired; the wordmark dot
+   * keeps a single approved brand mark. */
+  --ivory: #F3EEE7; --ink: #313131; --ink-s: #3A3A3A;
+  --blush: #E4E2DD; --rose: #7C7A75; --cherry: #4A4A4A; --cherry-photo: #8A5A55;
+  --line: #DAD9D7;
+  --gold: #7C7A75; --gold-soft: #A8A6A1; --gold-line: #DAD9D7;
+  --panel: #FAF7F2;
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }  /* iOS Safari: never auto-inflate text */
@@ -834,6 +840,46 @@ header.top .mark { white-space: nowrap; }
   .pl-st, .cs-a { margin-left: auto; }
   .am-panel { padding: 22px 18px 20px; }
 }
+
+/* ---- Aman contextual sub-navigation overlay ---- */
+.sn-scrim { position: fixed; inset: 0; z-index: 78; background: rgba(0,0,0,.35); }
+.sn-scrim[hidden] { display: none; }
+.sn { position: fixed; inset: 0; z-index: 79; background: var(--ivory); padding: calc(14px + env(safe-area-inset-top)) 6vw 40px; overflow-y: auto; }
+.sn[hidden] { display: none; }
+.sn-top { display: flex; }
+.sn-close { background: none; border: 0; font-size: 26px; line-height: 1; padding: 8px; min-width: 44px; min-height: 44px; cursor: pointer; color: inherit; }
+.sn-ctx { text-align: center; font-family: 'PP Editorial Old', serif; font-size: 14px; letter-spacing: .18em; text-transform: uppercase; margin: 8px 0 14px; }
+.sn-line { border: 0; border-top: 1px solid var(--line); margin: 0 0 4px; }
+.sn-back { display: block; width: 100%; text-align: left; background: none; border: 0; border-bottom: 1px solid var(--line); font: inherit; font-size: 15px; padding: 16px 0; cursor: pointer; color: inherit; min-height: 48px; }
+.sn-row { display: block; width: 100%; text-align: center; background: none; border: 0; border-bottom: 1px solid var(--line); font-size: 21px; letter-spacing: .01em; padding: 20px 0; cursor: pointer; color: inherit; min-height: 56px; }
+.sn-row[aria-current="true"] { font-family: 'PP Editorial Old', serif; }
+.vy-secbar { border-bottom: 1px solid var(--line); margin: 0 0 6px; }
+.vy-secbar button { width: 100%; background: none; border: 0; font: inherit; font-size: 11px; letter-spacing: .18em; text-transform: uppercase; padding: 14px 0; cursor: pointer; color: var(--rose); min-height: 46px; }
+.vy-secbar button::after { content: ' \203A'; }
+
+/* ---- Aman wellness composition ---- */
+.am-inset { margin: 20px 0 0; }
+.am-inset img { width: 100%; aspect-ratio: 3/2; object-fit: cover; display: block; }
+.am-inset.sm img { aspect-ratio: 16/9; }
+.am-center { text-align: center; padding: 44px 0 10px; max-width: 620px; margin: 0 auto; }
+.am-center .eyebrow { margin-bottom: 14px; }
+.am-center h1 { margin-bottom: 16px; }
+.am-lede { max-width: 560px; margin: 0 auto 18px; }
+.am-fact { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--rose); margin-bottom: 26px; }
+.am-center .btn-full { margin-top: 10px; }
+.spa-item { border-top: 1px solid var(--line); }
+.spa-head { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; width: 100%; text-align: left; background: none; border: 0; padding: 16px 0; font: inherit; color: inherit; cursor: pointer; min-height: 48px; }
+.spa-t { font-family: 'PP Editorial Old', serif; font-weight: 200; font-size: 21px; line-height: 1.2; }
+.spa-p { font-size: 11px; letter-spacing: .1em; color: var(--rose); text-align: right; white-space: nowrap; }
+.spa-body { padding: 0 0 20px; }
+.opt-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 8px; }
+.opt-ctl { background: none; border: 1px solid var(--line); border-radius: 0; padding: 16px 14px; font: inherit; font-size: 12px; letter-spacing: .1em; cursor: pointer; color: inherit; min-height: 56px; text-align: left; transition: border-color .3s, background .3s; }
+.opt-ctl:hover { border-color: var(--ink); }
+.opt-ctl.on { border-color: var(--ink); background: var(--panel); }
+.opt-ctl .opt-p { display: block; font-family: 'PP Editorial Old', serif; font-size: 17px; margin-top: 4px; }
+.opt-ctl[disabled] { opacity: .4; cursor: not-allowed; }
+.am-contact { border-top: 1px solid var(--line); margin-top: 34px; padding-top: 20px; }
+.am-contact .note { margin-bottom: 10px; }
 </style>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -908,6 +954,8 @@ header.top .mark { white-space: nowrap; }
 </header>
 
 <div class="dw-scrim" id="dw-scrim" hidden></div>
+<div class="sn-scrim" id="subnav-scrim" hidden></div>
+<nav class="sn" id="subnav" hidden role="dialog" aria-modal="true" aria-label="Section"></nav>
 <nav id="privnav" hidden aria-label="Your private journey"></nav>
 
 <main class="wrap">
@@ -1060,9 +1108,9 @@ header.top .mark { white-space: nowrap; }
 <div class="lb-count" aria-live="polite"></div>
 </div>
 
-<script src="../assets/i18n/catalog.js?v=X1"></script>
-<script src="../assets/experiences.js?v=X1"></script>
-<script src="../assets/i18n/siyl-i18n.js?v=X1"></script>
-<script type="module" src="./app.mjs?v=X1"></script>
+<script src="../assets/i18n/catalog.js?v=Y1"></script>
+<script src="../assets/experiences.js?v=Y1"></script>
+<script src="../assets/i18n/siyl-i18n.js?v=Y1"></script>
+<script type="module" src="./app.mjs?v=Y1"></script>
 </body>
 </html>

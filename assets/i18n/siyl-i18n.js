@@ -656,6 +656,18 @@
   E("The temple morning, coffee and cake, the vows and the wedding dinner. Everything around it — where you stay, how you travel, what you join — is prepared for you inside your invitation.", "Der Morgen im Tempel, Kaffee und Kuchen, das Eheversprechen und das Hochzeitsdinner. Alles darum herum \u2014 wo ihr wohnt, wie ihr reist, woran ihr teilnehmt \u2014 ist in eurer Einladung f\u00fcr euch vorbereitet.", "ช่วงเช้าที่วัด กาแฟและเค้ก พิธีสาบาน และงานเลี้ยงอาหารค่ำ ทุกสิ่งรอบ ๆ ทั้งที่พัก การเดินทาง และสิ่งที่คุณเข้าร่วม ถูกเตรียมไว้ในคำเชิญของคุณแล้ว", "寺院の朝、コーヒーとケーキ、誓いの儀式、そして披露宴。滞在先、移動、参加される内容まで、すべて招待状の中にご用意しています。");
   E("Thailand → Laos → China · 21 February – 6 March 2027. The complete journey opens with the private code from your invitation.", "Thailand \u2192 Laos \u2192 China \u00b7 21. Februar \u2013 6. M\u00e4rz 2027. Die vollst\u00e4ndige Reise \u00f6ffnet sich mit dem pers\u00f6nlichen Code aus eurer Einladung.", "ไทย \u2192 ลาว \u2192 จีน \u00b7 21 กุมภาพันธ์ – 6 มีนาคม 2027 การเดินทางทั้งหมดเปิดด้วยรหัสส่วนตัวจากคำเชิญของคุณ", "タイ \u2192 ラオス \u2192 中国 \u00b7 2027年2月21日〜3月6日。招待状のプライベートコードで旅の全体が開きます。");
   E("The journey along the Mekong", "Die Reise entlang des Mekong", "การเดินทางเลียบแม่น้ำโขง", "メコン川に沿った旅");
+  E("Section", "Bereich", "ส่วน", "セクション");
+  E("Wellness", "Wellness", "สุขภาพและความงาม", "ウェルネス");
+  E("Marsilea Spa", "Marsilea Spa", "มาร์ซิเลีย สปา", "マルシレア スパ");
+  E("Treatments", "Behandlungen", "ทรีตเมนต์", "トリートメント");
+  E("Spa etiquette", "Spa-Etikette", "มารยาทในสปา", "スパのご案内");
+  E("View location", "Ort ansehen", "ดูตำแหน่งที่ตั้ง", "場所を見る");
+  E("Explore treatments", "Behandlungen entdecken", "ดูทรีตเมนต์", "トリートメントを見る");
+  E("Choose a duration", "Dauer wählen", "เลือกระยะเวลา", "時間を選ぶ");
+  E("Your wellness interest", "Euer Wellness-Interesse", "ความสนใจด้านสุขภาพของคุณ", "ウェルネスのご希望");
+  E("Discover Marsilea Spa", "Marsilea Spa entdecken", "ค้นพบมาร์ซิเลีย สปา", "マルシレア スパを見る");
+  E("Overview", "Überblick", "ภาพรวม", "概要");
+  E("Back", "Zurück", "ย้อนกลับ", "戻る");
   E("Journey 01", "Reise 01", "การเดินทาง 01", "旅 01");
   E("Journey 02", "Reise 02", "การเดินทาง 02", "旅 02");
   E("Journey 03", "Reise 03", "การเดินทาง 03", "旅 03");
