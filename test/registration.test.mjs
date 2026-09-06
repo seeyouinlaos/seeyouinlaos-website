@@ -697,9 +697,18 @@ test('event naming: Wedding Dinner without Reception (§25)', () => {
 
 test('post wedding total: only guest-payable First Class train × guests', async () => {
   const { postWeddingTotal } = await import('../register/logic.mjs');
-  /* 06 SEP override: guest-payable per-guest components are MU9632 275 +
-   * C642 85 + return 200 = 560 pp → 1120 for two. */
+  /* 06 SEP final data pass: postWeddingTotal covers the per-guest TRAVEL
+   * components (MU9632 275 + C642 85 + return 200 = 560 pp → 1120 for two);
+   * the complete Package E adds the two stays — Kunming 150 pp fixed 3-night
+   * amount and the selected Lijiang fixed-window variant. Reference case:
+   * 2 guests, 70-pp Lijiang variant → 2 × (275+150+85+70+200) = 1560. */
   assert.equal(postWeddingTotal(POST_WEDDING, true, 2), 1120);
+  const kn = POST_WEDDING.find((c) => c.id === 'kunming-stay');
+  assert.equal(kn.ratePerGuestNight * kn.nightsCount, 150);   // Kunming fixed-stay pp
+  const lj = POST_WEDDING.find((c) => c.id === 'lijiang-stay');
+  const ljPP = Object.fromEntries(lj.variants);
+  assert.equal(ljPP['270° Snow Mountain Viewing'], 70);       // per person, whole window
+  assert.equal(1120 + 2 * (150 + ljPP['270° Snow Mountain Viewing']), 1560);
   assert.equal(postWeddingTotal(POST_WEDDING, false, 2), 0);
 });
 

@@ -8,13 +8,13 @@
 import {
   WEDDING, CONTACTS, JOURNEY_MODULES, EVENTS, ACCOMMODATIONS, SELECTABLE_ACCOMMODATIONS, TRAIN,
   TRANSFERS, PACKAGE_INCLUSIONS, COPY, DEMO_MODE, PUBLICATION, TRAIN_REFERENCE, BERTH_PREFS, BANGKOK_STAYS, BANGKOK_STAY, POST_WEDDING, RETURN_STAY, lookupInvitation,
-} from './data.mjs?v=E2';
+} from './data.mjs?v=F2';
 import {
   contributionPerGuest, partyCharges, partyTotal, money as usdMoney, displayMoney,
   trainContribution, transfersTotal, journeyTotal, postWeddingTotal,
   createInventory, remaining, availabilityLabel, requestAllocation,
   validateRegistration, buildNotification, nextInvitationState,
-} from './logic.mjs?v=E2';
+} from './logic.mjs?v=F2';
 
 /* ---------------- persistent state ---------------- */
 const DRAFT_KEY = 'siyl.reg.draft.v2';
@@ -67,8 +67,27 @@ function bkkTravellers() {
 function cnStayTotal(key) {
   if (!(S.scope && S.scope.china) || !S.china || S.china[key] !== 'with') return 0;
   const c = POST_WEDDING.find((x) => x.id === key + '-stay');
-  if (!c || c.ratePerGuestNight == null) return 0;
+  if (!c) return 0;
+  /* OWNER RESOLUTION (06 SEP, final data pass): the Lijiang room values are the
+   * approved PRICE PER PERSON for the complete fixed 04-06 MAR window — never
+   * multiplied by nights. Kunming stays 50 pp/night x 3. */
+  if (key === 'lijiang') return ljgVariant()[1] * bkkTravellers();
+  if (c.ratePerGuestNight == null) return 0;
   return c.ratePerGuestNight * bkkTravellers() * c.nightsCount;
+}
+/* Room-variant selection — the owner source requires the guest to CHOOSE the
+ * room in both China stays, even where all variants share one rate. */
+function kmgVariant() {
+  const c = POST_WEDDING.find((x) => x.id === 'kunming-stay');
+  const v = c.variants || [];
+  const i = Number.isInteger(S.kmgRoom) ? S.kmgRoom : 0;
+  return v[Math.min(i, v.length - 1)] || '';
+}
+function ljgVariant() {
+  const c = POST_WEDDING.find((x) => x.id === 'lijiang-stay');
+  const v = c.variants || [];
+  const i = Number.isInteger(S.ljgRoom) ? S.ljgRoom : 0;
+  return v[Math.min(i, v.length - 1)] || ['', 0];
 }
 function cnStaysTotal() { return cnStayTotal('kunming') + cnStayTotal('lijiang'); }
 /* §12: NOT THIS TIME removes the destination and every dependent payable.
@@ -885,8 +904,14 @@ function voyItin(k) {
     ['', 'Nong Khai → Vientiane', 'Crossing to Laos'],
   ];
   if (k === 'vte') return [
+    /* Editorial itinerary context (owner-approved 06 SEP): journey rows, NOT
+     * additional wedding programme events — the programme stays four events. */
     ['27 FEB', 'Arrival · Vientiane', 'Hosted'],
+    ['27 FEB', 'Guest Arrivals & Rehearsal', 'Itinerary'],
+    ['27 FEB', 'Welcome Dinner at Lao Derm', 'Itinerary'],
+    ['28 FEB', 'Bridal & Groom Party Lunch', 'Itinerary'],
     ['28 FEB', 'The Wedding Day', 'Four events'],
+    ['28 FEB · late', 'After-Party · Souphattra Heritage', 'Itinerary'],
     ['01 MAR', 'Vientiane → Kunming', 'Onward'],
   ];
   return [
@@ -1035,7 +1060,7 @@ function journeyBlocks() {
     /* Package E is a COMPONENT SUM by owner rule — no rounded package price. */
     { id: 'after', no: '05', name: 'After the Wedding', dates: '01 – 06 MAR 2027',
       on: !!(S.scope && S.scope.china && (cnStaysTotal() || pwTotal())),
-      variant: 'Kunming & Lijiang · Business Class flight and train',
+      variant: kmgVariant().split(' · ')[0] + ' · ' + ljgVariant()[0],
       pp: null, qty: n,
       total: cnStaysTotal() + pwTotal(),
       included: ['MU9632 Vientiane → Kunming · Business Class · USD 275 pp',
@@ -1205,7 +1230,16 @@ function renderPlanner() {
         choice('Vientiane → Kunming', 'MU9632 · Business Class · ' + money(275) + ' per guest', !!(S.travel && S.travel.vteKmg === 'with'), 'data-pl-tv="vteKmg"') +
         choice('Kunming → Lijiang', 'Train C642 · Business Class · ' + money(85) + ' per guest', !!(S.travel && S.travel.kmgLjg === 'with'), 'data-pl-tv="kmgLjg"') +
         choice('Bangkok after China', RETURN_STAY.name + ' · ' + money(RETURN_STAY.ratePerGuestNight * RETURN_STAY.nights) + ' per person, 2 nights', S.kempinski === 'with', 'data-pl-kf="1"') +
-        '</div></section>' : '');
+        '</div>' +
+        ((S.china && S.china.kunming === 'with') ? '<p class="cch-label" style="margin-top:26px">Your Kunming room · Wanxiang Yueju</p>' +
+          '<p class="note am-foot">Please choose your room — the rate is the same for every variant, the choice records your actual accommodation.</p>' +
+          '<div class="ch-grid">' + (POST_WEDDING.find((x) => x.id === 'kunming-stay').variants || []).map((v, i) =>
+            choice(v.split(' · ')[0], v.split(' · ').slice(1).join(' · '), (Number.isInteger(S.kmgRoom) ? S.kmgRoom : 0) === i, 'data-pl-kmgroom="' + i + '"')).join('') + '</div>' : '') +
+        ((S.china && S.china.lijiang === 'with') ? '<p class="cch-label" style="margin-top:26px">Your Lijiang room · Luye Baisha · Rizhao Jinshan</p>' +
+          '<p class="note am-foot">The amount is per person for the complete 04 – 06 MAR stay.</p>' +
+          '<div class="ch-grid">' + (POST_WEDDING.find((x) => x.id === 'lijiang-stay').variants || []).map((v, i) =>
+            choice(v[0], money(v[1]) + ' per person, 2-night stay', (Number.isInteger(S.ljgRoom) ? S.ljgRoom : 0) === i, 'data-pl-ljgroom="' + i + '"')).join('') + '</div>' : '') +
+        '</section>' : '');
   } else if (cur_ === 'experiences') {
     body = '<div class="am-center"><p class="eyebrow">Stage three</p><h1 class="serif">Experiences</h1>' +
       '<p class="note am-lede">The four wedding events, and the wellness you would like us to pass on to Marsilea Spa. Everything else on your journeys is open to you without a decision here.</p></div>' +
@@ -1309,6 +1343,14 @@ function renderPlanner() {
     saveDraft(); renderStep(cur); renderSummary();
     if (S.kempinski === 'with') justAdded('Bangkok after China · ' + RETURN_STAY.name, RETURN_STAY.dates + ' · breakfast included',
       money(RETURN_STAY.ratePerGuestNight * RETURN_STAY.nights) + ' per person');
+  }));
+  box.querySelectorAll('[data-pl-kmgroom]').forEach((b) => b.addEventListener('click', () => {
+    S.kmgRoom = parseInt(b.getAttribute('data-pl-kmgroom'), 10);
+    saveDraft(); renderStep(cur); renderSummary();
+  }));
+  box.querySelectorAll('[data-pl-ljgroom]').forEach((b) => b.addEventListener('click', () => {
+    S.ljgRoom = parseInt(b.getAttribute('data-pl-ljgroom'), 10);
+    saveDraft(); renderStep(cur); renderSummary();
   }));
   box.querySelectorAll('[data-pl-tv]').forEach((b) => b.addEventListener('click', () => {
     const k = b.getAttribute('data-pl-tv');
