@@ -8,13 +8,13 @@
 import {
   WEDDING, CONTACTS, JOURNEY_MODULES, EVENTS, ACCOMMODATIONS, SELECTABLE_ACCOMMODATIONS, TRAIN,
   TRANSFERS, PACKAGE_INCLUSIONS, COPY, DEMO_MODE, PUBLICATION, TRAIN_REFERENCE, BERTH_PREFS, BANGKOK_STAYS, BANGKOK_STAY, POST_WEDDING, RETURN_STAY, lookupInvitation,
-} from './data.mjs?v=D2';
+} from './data.mjs?v=E2';
 import {
   contributionPerGuest, partyCharges, partyTotal, money as usdMoney, displayMoney,
   trainContribution, transfersTotal, journeyTotal, postWeddingTotal,
   createInventory, remaining, availabilityLabel, requestAllocation,
   validateRegistration, buildNotification, nextInvitationState,
-} from './logic.mjs?v=D2';
+} from './logic.mjs?v=E2';
 
 /* ---------------- persistent state ---------------- */
 const DRAFT_KEY = 'siyl.reg.draft.v2';
@@ -30,8 +30,17 @@ function setAuthOut(v) { try { if (v) localStorage.setItem(AUTH_OUT_KEY, '1'); e
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const RATES_LIVE = PUBLICATION.rates === 'APPROVED';
 const attendingCount = () => S.guests.filter((g) => g.attending !== false).length;
-const pwTotal = () => (S.travel && S.travel.kmgLjg === 'with')
-  ? postWeddingTotal(POST_WEDDING, S.postWedding && S.postWedding.joined, attendingCount()) : 0;
+/* Package E travel components charge per ACTUAL selection (06 SEP order:
+ * component sum, no rounded package price): MU9632 275 · C642 85 · return 200. */
+const pwTotal = () => {
+  if (!(S.postWedding && S.postWedding.joined)) return 0;
+  const n = attendingCount();
+  let t = 0;
+  if (S.travel && S.travel.vteKmg === 'with') t += 275 * n;
+  if (S.travel && S.travel.kmgLjg === 'with') t += 85 * n;
+  if (S.postWedding.onward === 'return') t += 200 * n;
+  return t;
+};
 function departureSelections() {
   return (S.transfers || []).map((x) => TRANSFERS.find((t) => t.id === x.transferId)).filter((t) => t && t.direction === 'departure');
 }
@@ -744,10 +753,10 @@ function renderTravelStep(box) {
     { j: '03', country: 'China', route: 'Vientiane → Kunming → Lijiang', on: !!sc.china,
       off: 'Opens when China is part of your journey.',
       html: '<div class="ch-grid">' +
-        choice('Vientiane → Kunming', 'Flight · arranged for you', !!(S.travel && S.travel.vteKmg === 'with'), 'data-tv-t="vteKmg"') +
-        choice('Kunming → Lijiang', money(145) + ' per guest · First Class train', !!(S.travel && S.travel.kmgLjg === 'with'), 'data-tv-t="kmgLjg"') +
-        choice('Kunming stay', money(27) + ' per guest, per night · 01–04 MAR', !!(S.china && S.china.kunming === 'with'), 'data-tv-c="kunming"') +
-        choice('Lijiang stay', money(63) + ' per guest, per night · 04–06 MAR', !!(S.china && S.china.lijiang === 'with'), 'data-tv-c="lijiang"') +
+        choice('Vientiane → Kunming', 'MU9632 · Business Class · ' + money(275) + ' per guest', !!(S.travel && S.travel.vteKmg === 'with'), 'data-tv-t="vteKmg"') +
+        choice('Kunming → Lijiang', 'Train C642 · Business Class · ' + money(85) + ' per guest', !!(S.travel && S.travel.kmgLjg === 'with'), 'data-tv-t="kmgLjg"') +
+        choice('Kunming stay', money(50) + ' per guest, per night · 01–04 MAR', !!(S.china && S.china.kunming === 'with'), 'data-tv-c="kunming"') +
+        choice('Lijiang stay', 'Room variant from ' + money(70) + ' per person, 2 nights · 04–06 MAR', !!(S.china && S.china.lijiang === 'with'), 'data-tv-c="lijiang"') +
         '</div>' +
         ((cnStaysTotal() || pwTotal()) ? '<p class="am-avail">BOOKED · ' + money(cnStaysTotal() + pwTotal()) + ' your costs</p>' : '<p class="am-avail">YOUR CHOICE · open</p>') },
   ];
@@ -883,7 +892,7 @@ function voyItin(k) {
   return [
     ['01 MAR', 'Vientiane → Kunming', 'Flight'],
     ['01 – 04 MAR', 'Kunming', 'Stay'],
-    ['04 MAR', 'Kunming → Lijiang', 'First Class train'],
+    ['04 MAR', 'Kunming → Lijiang', 'Train C642 · Business Class'],
     ['04 – 06 MAR', 'Lijiang', 'Stay'],
     ['06 MAR', 'Lijiang → Bangkok', 'Onward'],
   ];
@@ -972,6 +981,19 @@ const EXTRAS = [
     text: 'An afternoon of champagne and patisserie at 1872, Aman Nai Lert Bangkok — an optional experience during the Bangkok days.' },
 ];
 function extrasSel() { S.extras ||= {}; return S.extras; }
+/* PACKAGE C · Pre-Wedding Vientiane 25–27 FEB · 2 nights FIXED (owner rule:
+ * the window never collapses to one night). Same approved room matrix as the
+ * wedding stay, independently selectable. Hosted guest house limited to 6. */
+function preWedAcc() { return S.prewedAcc ? ACCOMMODATIONS.find((a) => a.id === S.prewedAcc) : null; }
+function preWedTotal() {
+  const a = preWedAcc();
+  if (!a || a.contributionPerGuest == null) return 0;
+  return a.contributionPerGuest * attendingCount();
+}
+/* PACKAGE F · Bangkok after China · Siam Kempinski 06–08 MAR · 190 pp/night × 2. */
+function kempinskiTotal() {
+  return (S.kempinski === 'with') ? RETURN_STAY.ratePerGuestNight * RETURN_STAY.nights * attendingCount() : 0;
+}
 function extrasTotal() {
   const sel = extrasSel();
   return EXTRAS.reduce((t, x) => t + (sel[x.id] ? sel[x.id] * x.price : 0), 0);
@@ -998,8 +1020,11 @@ function journeyBlocks() {
       total: (trainContribution(TRAIN, riders) || 0) + trainCabinUpcharge(),
       included: ['Special Express No. 25, Bangkok → Nong Khai', 'First Class Sleeper', 'Van pickup & luggage service to the hotel', 'The crossing to Vientiane'] },
     { id: 'prewed', no: '03', name: 'Pre-Wedding Vientiane', dates: '25 – 27 FEB 2027',
-      on: false, variant: null, pp: null, qty: n, total: null,
-      included: ['Awaiting the owner\u2019s commercial data for this block'] },
+      on: !!preWedAcc(),
+      variant: preWedAcc() ? preWedAcc().name : null,
+      pp: preWedAcc() ? (preWedAcc().contributionPerGuest == null ? 0 : preWedAcc().contributionPerGuest) : null,
+      qty: n, total: preWedAcc() ? preWedTotal() : null,
+      included: ['Two nights at Souphattra Heritage Vientiane · 2-night window is fixed', 'The pre-wedding Vientiane days and their programme'] },
     { id: 'wedding', no: '04', name: 'The Wedding', dates: '27 FEB – 01 MAR 2027',
       on: !!acc,
       variant: acc ? acc.name : null,
@@ -1007,12 +1032,23 @@ function journeyBlocks() {
       qty: occ.length || n,
       total: acc ? (partyTotal(acc, occ) + laosExtraTotal(acc, occ)) : null,
       included: ['Temple Ceremony — Included', 'Coffee & Cake — Included', 'Vow Ceremony — Included', 'Wedding Dinner — Included', 'Second night hosted by Haruthai & Suthep', 'Breakfast, welcome and programme transfers'] },
+    /* Package E is a COMPONENT SUM by owner rule — no rounded package price. */
     { id: 'after', no: '05', name: 'After the Wedding', dates: '01 – 06 MAR 2027',
       on: !!(S.scope && S.scope.china && (cnStaysTotal() || pwTotal())),
-      variant: 'Kunming & Lijiang stays · First Class train',
-      pp: 27 * 3 + 145 + 63 * 2, qty: n,
+      variant: 'Kunming & Lijiang · Business Class flight and train',
+      pp: null, qty: n,
       total: cnStaysTotal() + pwTotal(),
-      included: ['Vientiane → Kunming flight, arranged for you', 'Three nights Wanxiang Yueju, Kunming', 'First Class train Kunming → Lijiang', 'Two nights Luye Baisha, Lijiang'] },
+      included: ['MU9632 Vientiane → Kunming · Business Class · USD 275 pp',
+        'Three nights Wanxiang Yueju, Kunming · USD 50 pp/night',
+        'Train C642 Kunming → Lijiang · Business Class · USD 85 pp',
+        'Two nights Luye Baisha · Rizhao Jinshan, Lijiang · room variant from USD 70 pp',
+        'MU5924 + MU741 Lijiang → Bangkok · Economy flexible · USD 200 pp'] },
+    { id: 'kempinski', no: '06', name: 'Bangkok after China', dates: RETURN_STAY.dates,
+      on: S.kempinski === 'with',
+      variant: RETURN_STAY.name + ' · ' + RETURN_STAY.room,
+      pp: RETURN_STAY.ratePerGuestNight * RETURN_STAY.nights, qty: n,
+      total: kempinskiTotal(),
+      included: ['Two nights, breakfast included', 'Balcony · non-smoking · complimentary minibar and Wi-Fi'] },
   ];
 }
 /* Just-added confirmation (Aman bag-popover grammar, our brand and wording). */
@@ -1158,11 +1194,17 @@ function renderPlanner() {
         choice('The Bangkok stay', money(BANGKOK_STAY.ratePerGuestNight) + ' per guest, per night · ' + bkkNights() + ' nights', bangkokStayActive(), 'data-pl-bkk="1"') +
         choice('The overnight train', money(TRAIN.contributionPerGuest) + ' per guest · ' + esc(TRAIN.date), riders > 0, 'data-pl-train="1"') +
         '</div></section>' : '') +
+      '<section class="am-sec"><p class="cch-label">Pre-wedding Vientiane · 25 – 27 FEB · 2 nights fixed</p><div class="ch-grid">' +
+      ACCOMMODATIONS.filter((a) => a.selectable !== false).map((a) =>
+        choice(a.name, a.contributionPerGuest == null ? 'Complimentary · limited' : money(a.contributionPerGuest) + ' per person, 2-night window',
+          S.prewedAcc === a.id, 'data-pl-pw="' + a.id + '"')).join('') + '</div>' +
+      '<p class="note am-foot">The two-night window is fixed even if you arrive for one night. Choosing nothing simply means arriving on 27 FEB.</p></section>' +
       (sc.china ? '<section class="am-sec"><p class="cch-label">China</p><div class="ch-grid">' +
-        choice('Kunming stay', money(27) + ' per guest, per night · 01–04 MAR', !!(S.china && S.china.kunming === 'with'), 'data-pl-cn="kunming"') +
-        choice('Lijiang stay', money(63) + ' per guest, per night · 04–06 MAR', !!(S.china && S.china.lijiang === 'with'), 'data-pl-cn="lijiang"') +
-        choice('Vientiane → Kunming', 'Flight · arranged for you', !!(S.travel && S.travel.vteKmg === 'with'), 'data-pl-tv="vteKmg"') +
-        choice('Kunming → Lijiang', money(145) + ' per guest · First Class train', !!(S.travel && S.travel.kmgLjg === 'with'), 'data-pl-tv="kmgLjg"') +
+        choice('Kunming stay', money(50) + ' per guest, per night · 01–04 MAR', !!(S.china && S.china.kunming === 'with'), 'data-pl-cn="kunming"') +
+        choice('Lijiang stay', 'Room variant from ' + money(70) + ' per person, 2 nights · 04–06 MAR', !!(S.china && S.china.lijiang === 'with'), 'data-pl-cn="lijiang"') +
+        choice('Vientiane → Kunming', 'MU9632 · Business Class · ' + money(275) + ' per guest', !!(S.travel && S.travel.vteKmg === 'with'), 'data-pl-tv="vteKmg"') +
+        choice('Kunming → Lijiang', 'Train C642 · Business Class · ' + money(85) + ' per guest', !!(S.travel && S.travel.kmgLjg === 'with'), 'data-pl-tv="kmgLjg"') +
+        choice('Bangkok after China', RETURN_STAY.name + ' · ' + money(RETURN_STAY.ratePerGuestNight * RETURN_STAY.nights) + ' per person, 2 nights', S.kempinski === 'with', 'data-pl-kf="1"') +
         '</div></section>' : '');
   } else if (cur_ === 'experiences') {
     body = '<div class="am-center"><p class="eyebrow">Stage three</p><h1 class="serif">Experiences</h1>' +
@@ -1251,6 +1293,22 @@ function renderPlanner() {
     S.china[k] = S.china[k] === 'with' ? null : 'with';
     S.postWedding ||= {}; S.postWedding.joined = true;
     saveDraft(); renderStep(cur); renderSummary();
+  }));
+  box.querySelectorAll('[data-pl-pw]').forEach((b) => b.addEventListener('click', () => {
+    const id = b.getAttribute('data-pl-pw');
+    S.prewedAcc = (S.prewedAcc === id) ? null : id;
+    saveDraft(); renderStep(cur); renderSummary();
+    if (S.prewedAcc) {
+      const a = ACCOMMODATIONS.find((x) => x.id === id);
+      justAdded('Pre-Wedding Vientiane · ' + a.name, '25 – 27 FEB 2027 · 2 nights fixed · ' + attendingCount() + ' guests',
+        a.contributionPerGuest == null ? 'HOSTED · limited to 6 guests' : money(a.contributionPerGuest) + ' per person');
+    }
+  }));
+  box.querySelectorAll('[data-pl-kf]').forEach((b) => b.addEventListener('click', () => {
+    S.kempinski = (S.kempinski === 'with') ? null : 'with';
+    saveDraft(); renderStep(cur); renderSummary();
+    if (S.kempinski === 'with') justAdded('Bangkok after China · ' + RETURN_STAY.name, RETURN_STAY.dates + ' · breakfast included',
+      money(RETURN_STAY.ratePerGuestNight * RETURN_STAY.nights) + ' per person');
   }));
   box.querySelectorAll('[data-pl-tv]').forEach((b) => b.addEventListener('click', () => {
     const k = b.getAttribute('data-pl-tv');
@@ -1804,7 +1862,7 @@ function renderHome() {
   const occ = acc ? S.stay.occupantGuestIds : [];
   const riders = S.guests.filter((g) => g.journey.train);
   const detailsMissing = S.guests.filter((g) => g.attending !== false && !(g.email || g.phone)).length;
-  const total = (function(){ const G = laosGate(acc, riders.length, S.transfers); return journeyTotal(G.acc, occ, TRAIN, G.riders, TRANSFERS, G.transfers) + laosExtraTotal(G.acc, occ); })() + pwTotal() + bkkTotal() + cnStaysTotal() + almsTotal() + trainCabinUpcharge() + extrasTotal();
+  const total = (function(){ const G = laosGate(acc, riders.length, S.transfers); return journeyTotal(G.acc, occ, TRAIN, G.riders, TRANSFERS, G.transfers) + laosExtraTotal(G.acc, occ); })() + pwTotal() + bkkTotal() + cnStaysTotal() + almsTotal() + trainCabinUpcharge() + extrasTotal() + preWedTotal() + kempinskiTotal();
   /* Aman voyage index: three journey products, each MAP -> eyebrow -> title ->
    * dates -> duration/stops -> actions. */
   const prod = (k) => {
@@ -2431,7 +2489,7 @@ function renderCost() {
   const occ = acc ? S.stay.occupantGuestIds : [];
   const riders = S.guests.filter((g) => g.journey.train);
   const tc = trainContribution(TRAIN, riders.length) || 0;
-  const total = (function(){ const G = laosGate(acc, riders.length, S.transfers); return journeyTotal(G.acc, occ, TRAIN, G.riders, TRANSFERS, G.transfers) + laosExtraTotal(G.acc, occ); })() + pwTotal() + bkkTotal() + cnStaysTotal() + almsTotal() + trainCabinUpcharge() + extrasTotal();
+  const total = (function(){ const G = laosGate(acc, riders.length, S.transfers); return journeyTotal(G.acc, occ, TRAIN, G.riders, TRANSFERS, G.transfers) + laosExtraTotal(G.acc, occ); })() + pwTotal() + bkkTotal() + cnStaysTotal() + almsTotal() + trainCabinUpcharge() + extrasTotal() + preWedTotal() + kempinskiTotal();
   const neutral = acc && acc.contributionPerGuest == null;
   const sc = S.scope || {};
   const oneNight = S.stay.mode === 'oneNight';
@@ -2479,7 +2537,7 @@ function renderCost() {
       const key = /kunming/i.test(c.id + ' ' + c.label) ? 'kunming' : 'lijiang';
       planRows += plan(esc(c.date), esc(c.label), esc(c.sub || ''), (S.china && S.china[key] === 'with') ? 'BOOKED' : 'YOUR CHOICE');
     });
-    planRows += plan('04 MAR', 'Kunming &rarr; Lijiang', 'First Class train', (S.travel && S.travel.kmgLjg === 'with') ? 'BOOKED' : 'YOUR CHOICE');
+    planRows += plan('04 MAR', 'Kunming &rarr; Lijiang', 'Train C642 · Business Class', (S.travel && S.travel.kmgLjg === 'with') ? 'BOOKED' : 'YOUR CHOICE');
     planRows += plan('06 MAR', 'Lijiang &rarr; onward', 'Your onward journey', (S.postWedding && S.postWedding.onward) ? 'BOOKED' : 'OPEN');
   }
   html += (planRows || '<p class="note">No journey is part of your plan yet.</p>') + '</section>';
@@ -2730,7 +2788,7 @@ function renderReview() {
   if (S.postWedding && S.postWedding.joined) jcRows.push(['Post Wedding Journey', '04 MAR 2027 · Kunming → Lijiang · First Class Train · ' + money(pwTotal())]);
   if (cnStayTotal('kunming')) jcRows.push(['Kunming stay', '01 – 04 MAR 2027 · Wanxiang Yueju Designer Homestay · ' + money(cnStayTotal('kunming'))]);
   if (cnStayTotal('lijiang')) jcRows.push(['Lijiang stay', '04 – 06 MAR 2027 · Luye Baisha · Rizhao Jinshan · ' + money(cnStayTotal('lijiang'))]);
-  jcRows.push(['Total costs', money((function(){ const G = laosGate(acc, jcRiders, S.transfers); return journeyTotal(G.acc, occ, TRAIN, G.riders, TRANSFERS, G.transfers) + laosExtraTotal(G.acc, occ); })() + pwTotal() + bkkTotal() + cnStaysTotal() + almsTotal() + trainCabinUpcharge() + extrasTotal())]);
+  jcRows.push(['Total costs', money((function(){ const G = laosGate(acc, jcRiders, S.transfers); return journeyTotal(G.acc, occ, TRAIN, G.riders, TRANSFERS, G.transfers) + laosExtraTotal(G.acc, occ); })() + pwTotal() + bkkTotal() + cnStaysTotal() + almsTotal() + trainCabinUpcharge() + extrasTotal() + preWedTotal() + kempinskiTotal())]);
   html += sec('Your Costs', idx('cost'), jcRows);
   html += sec('Each of You', idx('each'), S.guests.map((g) => {
     const detail = (g.allergyDetail || '').trim();
@@ -2885,7 +2943,7 @@ function renderSummary() {
   if (S.postWedding && S.postWedding.joined) sel.push('Post Wedding Journey · BOOKED');
   const covGaps = coverageModel().gaps.length;
   sel.push(covGaps === 0 ? '✓ Journey complete' : covGaps === 1 ? '1 thing still needed' : covGaps + ' things still needed');
-  const total = (function(){ const G = laosGate(acc, trainCount, S.transfers); return journeyTotal(G.acc, acc ? S.stay.occupantGuestIds : [], TRAIN, G.riders, TRANSFERS, G.transfers) + laosExtraTotal(G.acc, acc ? S.stay.occupantGuestIds : []); })() + pwTotal() + bkkTotal() + cnStaysTotal() + almsTotal() + trainCabinUpcharge() + extrasTotal();
+  const total = (function(){ const G = laosGate(acc, trainCount, S.transfers); return journeyTotal(G.acc, acc ? S.stay.occupantGuestIds : [], TRAIN, G.riders, TRANSFERS, G.transfers) + laosExtraTotal(G.acc, acc ? S.stay.occupantGuestIds : []); })() + pwTotal() + bkkTotal() + cnStaysTotal() + almsTotal() + trainCabinUpcharge() + extrasTotal() + preWedTotal() + kempinskiTotal();
   /* editorial quiet: no persistent monetary total while nothing guest-paid
    * is selected (MASTER-02) */
   if (!total) { el.hidden = true; return; }

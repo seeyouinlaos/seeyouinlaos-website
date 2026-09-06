@@ -339,7 +339,11 @@ export const BANGKOK_STAY = {
  * coordinated return — Guest Relations confirms the arrangement. */
 export const RETURN_STAY = {
   id: 'siam-kempinski', name: 'Siam Kempinski Hotel Bangkok',
-  room: 'Deluxe Balcony Room with King Bed',
+  room: 'Deluxe Balcony King Room Non Smoking',
+  /* PACKAGE F (06 SEP, Operations Master order): 06–08 MAR 2027 · 2 nights ·
+   * USD 190 pp/night → USD 380 pp · breakfast included · balcony, non-smoking,
+   * A/C, safe, coffee & tea, Wi-Fi, complimentary minibar · ~37–45 sqm. */
+  dates: '06 – 08 MAR 2027', nights: 2, ratePerGuestNight: 190,
   images: ['../assets/images/journey/kempinski-01.jpg', '../assets/images/journey/kempinski-02.jpg', '../assets/images/journey/kempinski-03.jpg'],
 };
 
@@ -347,29 +351,49 @@ export const POST_WEDDING = [
   /* VTE→KMG is a FLIGHT (China Eastern). Project Actual USD 138.40 per
    * applicable traveller is NOT a guest contribution — Guest Relations
    * confirms the arrangement. (HSW-001 v1.2 §8) */
-  { id: 'vte-kmg', type: 'Flight', label: 'Vientiane → Kunming', date: '01 MAR 2027', when: '1 March 2027', sub: 'China Eastern Airlines', contribution: null },
+  { id: 'vte-kmg', type: 'Flight', label: 'Vientiane → Kunming', date: '01 MAR 2027', when: '1 March 2027',
+    sub: 'China Eastern MU9632 · 14:00 → 16:40 · non-stop 1h40 · Business Class Standard',
+    /* OWNER OVERRIDE (06 SEP, Operations Master order): priced guest component. */
+    contribution: 275, perGuest: true },
   /* Stay project costs are internal Actuals, never guest contributions
    * unless explicitly guest-payable (HSW-001 v1.3 §1/§7). */
   { id: 'kunming-stay', type: 'Stay', label: 'Wanxiang Yueju Designer Homestay', date: '01 – 04 MAR 2027', when: '1 – 4 March 2027',
     sub: 'Kunming Railway Station MixC Branch · Solarium Bath Suite or Smart Family Room',
     /* OWNER FINAL (03 SEP, unified journey order §7): directly bookable —
      * confirmed rate from the H&S Operations Master budget sheet. */
-    ratePerGuestNight: 27, nightsCount: 3,
+    /* OWNER OVERRIDE (06 SEP): USD 50 pp/night — supersedes 27. */
+    ratePerGuestNight: 50, nightsCount: 3,
+    variants: ['Light French Suite · 68 sqm · queen · 2 adults',
+      'Milano Minimalist Loft Double Bed Room · 68 sqm · queen + sofa bed · 2 adults',
+      'Italian Style Suite · 68 sqm · queen + futon · 2 adults',
+      'Junting City-View Loft Double Bed Room · 68 sqm · queen · 2 adults'],
     contribution: null,
     images: ['../assets/images/journey/kunming-01.jpg', '../assets/images/journey/kunming-02.jpg', '../assets/images/journey/kunming-03.jpg'] },
-  /* USD 145 per guest · FIRST CLASS ONLY belongs to THIS train
-   * (Owner-final override — supersedes older USD 85/84.22 values). */
-  { id: 'kmg-ljg', type: 'Train', label: 'Kunming → Lijiang', date: '04 MAR 2027', when: '4 March 2027', sub: 'First Class Train · First Class only', contribution: 145, perGuest: true },
+  /* OWNER OVERRIDE (06 SEP, Operations Master order): Train C642 · 16:39 → 21:06 ·
+   * direct 4h27 · BUSINESS CLASS · USD 85 pp — supersedes C86, 10:15/13:44,
+   * USD 105 and USD 145. Priority ticketing; 1+1 seating, wireless charging,
+   * drinks/snacks and comfort amenities subject to availability. */
+  { id: 'kmg-ljg', type: 'Train', label: 'Kunming → Lijiang', date: '04 MAR 2027', when: '4 March 2027', sub: 'Train C642 · 16:39 → 21:06 · direct 4h27 · Business Class', contribution: 85, perGuest: true },
   { id: 'lijiang-stay', type: 'Stay', label: 'Luye Baisha · Rizhao Jinshan', date: '04 – 06 MAR 2027', when: '4 – 6 March 2027',
     sub: 'Lijiang · Snow Mountain Viewing Room',
-    ratePerGuestNight: 63, nightsCount: 2, contribution: null,
+    /* OWNER OVERRIDE (06 SEP): room variants carry per-person amounts for the
+     * fixed 2-night window (matrix semantics as Packages C/D). Default variant
+     * Snow Mountain Viewing Room USD 75 pp → 37.50 pp/night in engine terms. */
+    ratePerGuestNight: 37.5, nightsCount: 2, contribution: null,
+    variants: [['Snow Mountain Viewing Room', 75], ['270° Snow Mountain Viewing', 70],
+      ['270° Private Courtyard Snow Mountain View', 100],
+      ['270° Snow Mountain View Room Private Soup Pool', 105],
+      ['Snow Mountain Manor · Starry Sky', 120]],
     images: ['../assets/images/journey/lijiang-01.jpg', '../assets/images/journey/lijiang-02.jpg', '../assets/images/journey/lijiang-03.jpg'] },
     /* Lijiang imagery removed (FER-001 §5A): the available saved photos carry a
      * third-party watermark — text-led card until owner-clean originals exist. */
   /* Final onward journey is a CHOICE, never a mandatory booking (v1.0 §8):
    * coordinated return (China Eastern, 06 Mar · project Actual USD 154, not
    * guest-payable), own arrangement, or Guest Relations support. */
-  { id: 'ljg-bkk', type: 'Flight', label: 'Lijiang → Bangkok', date: '06 MAR 2027', when: '6 March 2027', sub: 'China Eastern Airlines · where applicable', contribution: null, onward: true },
+  { id: 'ljg-bkk', type: 'Flight', label: 'Lijiang → Bangkok', date: '06 MAR 2027', when: '6 March 2027',
+    sub: 'China Eastern MU5924 LJG → KMG 10:35 → 11:45 · transfer 1h30 · MU741 KMG → BKK 13:15 → 14:55 · 5h20 · Economy flexible',
+    /* OWNER OVERRIDE (06 SEP): priced guest component USD 200 pp. */
+    contribution: 200, perGuest: true, onward: true },
 ];
 
 /* ---------------- package (§23) ---------------- */

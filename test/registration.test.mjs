@@ -665,14 +665,16 @@ test('post wedding architecture: canonical China train price, rest pending, no C
   const fl = POST_WEDDING.find((c) => c.id === 'vte-kmg');
   assert.equal(fl.type, 'Flight');
   assert.ok(/China Eastern/.test(fl.sub));
-  assert.equal(fl.contribution, null);                      // project Actual is not a guest contribution
+  /* OWNER OVERRIDE (06 SEP, Operations Master order): both flights are priced
+   * guest components — MU9632 Business Class 275 pp, LJG→BKK 200 pp. */
+  assert.equal(fl.contribution, 275);
   const cn = POST_WEDDING.find((c) => c.id === 'kmg-ljg');
   assert.equal(cn.type, 'Train');
-  assert.equal(cn.contribution, 145);                       // Owner-final First Class value
+  assert.equal(cn.contribution, 85);                        // C642 Business Class (supersedes 145/105)
   assert.equal(cn.perGuest, true);
-  assert.ok(/First Class/.test(cn.sub));
-  // stay project costs never surface as guest contributions (v1.3 §7)
-  for (const c of POST_WEDDING) if (c.id !== 'kmg-ljg') assert.equal(c.contribution, null);
+  assert.ok(/Business Class/.test(cn.sub));
+  // stays never surface as flat contributions (they price per guest-night)
+  for (const c of POST_WEDDING) if (c.type === 'Stay') assert.equal(c.contribution, null);
   for (const c of POST_WEDDING) assert.ok(c.date, c.id + ' carries its canonical date');
   const flat = JSON.stringify(POST_WEDDING).toLowerCase();
   assert.ok(!flat.includes('car'), 'no vehicle assumption in China (§14)');
@@ -695,7 +697,9 @@ test('event naming: Wedding Dinner without Reception (§25)', () => {
 
 test('post wedding total: only guest-payable First Class train × guests', async () => {
   const { postWeddingTotal } = await import('../register/logic.mjs');
-  assert.equal(postWeddingTotal(POST_WEDDING, true, 2), 290);   // 2 × USD 145 · nothing else is guest-payable
+  /* 06 SEP override: guest-payable per-guest components are MU9632 275 +
+   * C642 85 + return 200 = 560 pp → 1120 for two. */
+  assert.equal(postWeddingTotal(POST_WEDDING, true, 2), 1120);
   assert.equal(postWeddingTotal(POST_WEDDING, false, 2), 0);
 });
 
