@@ -8,13 +8,13 @@
 import {
   WEDDING, CONTACTS, JOURNEY_MODULES, EVENTS, ACCOMMODATIONS, SELECTABLE_ACCOMMODATIONS, TRAIN,
   TRANSFERS, PACKAGE_INCLUSIONS, COPY, DEMO_MODE, PUBLICATION, TRAIN_REFERENCE, BERTH_PREFS, BANGKOK_STAYS, BANGKOK_STAY, POST_WEDDING, RETURN_STAY, lookupInvitation,
-} from './data.mjs?v=H2';
+} from './data.mjs?v=I2';
 import {
   contributionPerGuest, partyCharges, partyTotal, money as usdMoney, displayMoney,
   trainContribution, transfersTotal, journeyTotal, postWeddingTotal,
   createInventory, remaining, availabilityLabel, requestAllocation,
   validateRegistration, buildNotification, nextInvitationState,
-} from './logic.mjs?v=H2';
+} from './logic.mjs?v=I2';
 
 /* ---------------- persistent state ---------------- */
 const DRAFT_KEY = 'siyl.reg.draft.v2';
@@ -3134,7 +3134,8 @@ function renderWeddingPresets(targetBox, onlyKeys) {
       'A Buddhist morning ceremony at Wat Ong Teu — unhurried and full of meaning.',
       'https://maps.app.goo.gl/Leuzp4wNBhb9bR9m9?g_st=ic'],
     ['coffee', 'Coffee & Cake', '28 FEB 2027 · from 12:00 · Souphattra Heritage Vientiane', 'Black Tie',
-      ['../souphattra/heritage-courtyard-aerial', '../souphattra/heritage-courtyard-pool', 'dinner-04'],
+      /* Owner rule: a pool is never Coffee & Cake — verified 051 imagery instead. */
+      ['../../assets/images/event/051-coffee-and-cake-patisserie', '../../assets/images/event/051-coffee-and-cake-salon', 'dinner-04'],
       'Back at the courtyard: coffee, cake and a slow midday together.', null],
     ['ceremony', 'The Vow Ceremony', '28 FEB 2027 · 16:30 · Souphattra Heritage Vientiane', 'Black Tie',
       ['vow-01', 'vow-02', 'vow-03'],
