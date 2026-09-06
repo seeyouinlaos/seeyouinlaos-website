@@ -199,7 +199,11 @@ main, #regroot, body > .wrap { padding-bottom: 120px; }
 
  /* sticky summary must not cover expanded details */
 /* Guest-journey redesign (04 Sep): premium travel-dossier rhythm */
-#summary { padding: 10px 20px 12px; }
+/* quiet hairline strip on ivory — journey account, not app chrome */
+#summary { padding: 10px 20px 12px; background: var(--ivory); border-top: 1px solid var(--line); box-shadow: none; }
+#summary .sum-line { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--rose); }
+#summary .sum-amt { font-family: 'PP Editorial Old', serif; color: var(--ink); }
+#summary button, #summary .btn { background: none; border: 0; border-bottom: 1px solid var(--ink); color: var(--ink); font-size: 10.5px; letter-spacing: .18em; text-transform: uppercase; padding: 6px 0 3px; min-height: 40px; }
 
 
 #summary .sum-amt { font-size: 18px; }
@@ -2243,9 +2247,9 @@ header.top .mark { white-space: nowrap; }
 <div class="lb-count" aria-live="polite"></div>
 </div>
 
-<script src="../assets/i18n/catalog.js?v=G2"></script>
-<script src="../assets/experiences.js?v=G2"></script>
-<script src="../assets/i18n/siyl-i18n.js?v=G2"></script>
-<script type="module" src="./app.mjs?v=G2"></script>
+<script src="../assets/i18n/catalog.js?v=H2"></script>
+<script src="../assets/experiences.js?v=H2"></script>
+<script src="../assets/i18n/siyl-i18n.js?v=H2"></script>
+<script type="module" src="./app.mjs?v=H2"></script>
 </body>
 </html>
