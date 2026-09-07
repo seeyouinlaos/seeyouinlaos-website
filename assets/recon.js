@@ -18,12 +18,9 @@
   header.className = 'hd';
   header.innerHTML =
     '<div class="hd-row">' +
-      '<div class="hd-left"><button class="hd-cta" id="menu-open" aria-haspopup="dialog" aria-expanded="false"><span class="burger" aria-hidden="true"><i></i><i></i><i></i></span>Menu</button></div>' +
+      '<div class="hd-left"><button class="hd-cta" id="menu-open" aria-haspopup="dialog" aria-expanded="false"><span class="burger" aria-hidden="true"><i></i><i></i><i></i></span></button></div>' +
       '<a class="brand" href="index.html">see you in laos.<span class="dot">·</span></a>' +
-      '<div class="hd-right">' +
-        '<a class="hd-cta boxed ghosted" href="plan.html">Your Journey</a>' +
-        '<a class="hd-cta solid" href="register/">Enter the Journey</a>' +
-      '</div>' +
+      '<div class="hd-right"><a class="hd-cta" href="plan.html" aria-label="Your Journey" style="font-size:15px">◻</a></div>' +
     '</div>' +
     '';
   document.body.prepend(header);
@@ -97,7 +94,7 @@
       '<p class="ft-brand">see you in laos.</p>' +
       '<div class="ft-grid">' +
         '<div><h3>Explore</h3><a href="voyage.html">Journeys</a><a href="destination.html">Destinations</a><a href="experiences.html">Experiences</a><a href="accommodation.html">Accommodation</a></div>' +
-        '<div><h3>Plan</h3><a href="plan.html">Your Journey</a><a href="#">Enter the Journey — placeholder</a><a href="#">Enquiries — placeholder</a></div>' +
+        '<div><h3>Plan</h3><a href="plan.html">Your Journey</a><a href="#">Your Invitation — placeholder</a><a href="#">Enquiries — placeholder</a></div>' +
         '<div><h3>Company</h3><a href="#">About — placeholder</a><a href="#">Careers — placeholder</a><a href="#">Press — placeholder</a></div>' +
         '<div><h3>Get inspired</h3><p>Neutral newsletter invitation copy sits here in one short sentence.</p>' +
           '<form class="ft-news" onsubmit="return false"><input type="email" placeholder="Email address" aria-label="Email address"><button class="t-link" type="submit">Subscribe</button></form></div>' +
