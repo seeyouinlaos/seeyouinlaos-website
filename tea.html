@@ -60,11 +60,11 @@ function qr(){document.getElementById('qv').textContent=Q;document.getElementByI
 
 var ov=document.getElementById('ov');
 function invite(){ov.innerHTML='<p class="eyebrow">Your Invitation</p><h2>Enter your private invitation code.</h2><input type="text" autocomplete="one-time-code" aria-label="Invitation code"><button class="cta" style="margin-top:4px">Continue</button><p class="lost">Lost your code? <a href="mailto:guest.relation.seeyouinlaos@gmail.com">guest.relation.seeyouinlaos@gmail.com</a></p>';document.body.classList.add('show')}
-function added(){ov.innerHTML='<p class="eyebrow">Just added to your journey</p><div class="ja-row"><div class="ja-th"></div><div><p class="ja-n">Champagne Afternoon Tea at 1872</p><p class="ja-m">Quantity '+Q+' · USD '+(180*Q)+' · For two guests</p></div></div><button class="cta" style="margin-top:0">View Your Journey</button><p style="text-align:center;margin-top:16px"><a class="tlink" href="#" id="cont">Continue exploring</a></p>';document.body.classList.add('show');var c=document.getElementById('cont');if(c)c.addEventListener('click',function(e){e.preventDefault();document.body.classList.remove('show')})}
+function added(){SIYL_BAG.add({id:'tea1872',name:'Champagne Afternoon Tea at 1872',meta:'For two guests',price:180,unit:true,qty:Q,img:'assets/images/1872/tea-1.jpg'});ov.innerHTML='<p class="eyebrow">Just added to your journey</p><div class="ja-row"><div class="ja-th"></div><div><p class="ja-n">Champagne Afternoon Tea at 1872</p><p class="ja-m">Quantity '+Q+' · USD '+(180*Q)+' · For two guests</p></div></div><a class="cta" style="margin-top:0" href="your-journey.html">View Your Journey</a><p style="text-align:center;margin-top:16px"><a class="tlink" href="#" id="cont">Continue exploring</a></p>';document.body.classList.add('show');var c=document.getElementById('cont');if(c)c.addEventListener('click',function(e){e.preventDefault();document.body.classList.remove('show')})}
 qr();
 document.getElementById('qm').addEventListener('click',function(){if(Q>1){Q--;qr()}});
 document.getElementById('qp').addEventListener('click',function(){Q++;qr()});
 document.getElementById('add').addEventListener('click',invite);
 document.getElementById('scrim').addEventListener('click',function(){document.body.classList.remove('show')});
 if(st==='invite')invite();if(st==='added')added();
-</script></body></html>
+</script><script src="assets/bag.js"></script></body></html>

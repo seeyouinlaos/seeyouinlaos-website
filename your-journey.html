@@ -1,0 +1,47 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Your Journey · See You In Laos</title><style>
+@font-face{font-family:'PP Editorial Old';src:url('assets/fonts/PPEditorialOld-Ultralight.otf') format('opentype');font-weight:200;font-display:swap}
+*{margin:0;padding:0;box-sizing:border-box}body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;font-weight:300;font-size:14px;line-height:1.6}
+.hd{display:grid;grid-template-columns:44px 1fr 44px;align-items:center;padding:14px 20px}
+.hb{width:44px;height:44px;display:flex;flex-direction:column;justify-content:center;gap:5px;background:none;border:0}.hb i{display:block;width:20px;height:1.4px;background:#313131}
+.bd{font-family:'PP Editorial Old',serif;font-weight:200;font-size:19px;text-align:center}
+.bag{width:44px;height:44px;display:flex;align-items:center;justify-content:center;position:relative;color:#313131;text-decoration:none}
+.bb{position:absolute;top:4px;right:2px;min-width:16px;height:16px;background:#313131;color:#F3EEE7;font-size:9px;border-radius:0;display:none;align-items:center;justify-content:center;padding:0 4px}
+main{padding:30px 24px 80px;max-width:640px;margin:0 auto}
+h1{font-family:'PP Editorial Old',serif;font-weight:200;font-size:29px;margin-bottom:6px}
+.sub{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#7C7A75;margin-bottom:26px}
+.row{display:flex;gap:16px;border-top:1px solid #DAD9D7;padding:20px 0}
+.row:last-of-type{border-bottom:1px solid #DAD9D7}
+.th{width:74px;height:92px;background:#E7E3DB center/cover no-repeat;flex:0 0 auto}
+.nm{font-family:'PP Editorial Old',serif;font-weight:200;font-size:18px;line-height:1.3}
+.mt{font-size:11px;color:#7C7A75;margin-top:4px}
+.ln{font-family:'PP Editorial Old',serif;font-size:15px;margin-left:auto;white-space:nowrap}
+.q{display:inline-flex;align-items:center;gap:12px;margin-top:10px}
+.q button{width:34px;height:34px;border:1px solid #DAD9D7;background:#fff;cursor:pointer;font-size:15px}
+.rm{background:none;border:0;border-bottom:1px solid #313131;font:inherit;font-size:10px;letter-spacing:1.6px;text-transform:uppercase;margin-top:10px;cursor:pointer;padding:4px 0}
+.tot{display:flex;justify-content:space-between;align-items:baseline;padding:24px 0 6px}
+.tot .l{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#7C7A75}
+.tot .r{font-family:'PP Editorial Old',serif;font-size:27px}
+.cta{display:block;width:100%;background:#313131;color:#F3EEE7;border:0;padding:19px;font-size:11px;letter-spacing:2.2px;text-transform:uppercase;text-align:center;text-decoration:none;margin-top:20px}
+.empty{border-top:1px solid #DAD9D7;border-bottom:1px solid #DAD9D7;padding:40px 0;color:#7C7A75}
+.note{font-size:11.5px;color:#7C7A75;margin-top:16px}
+</style></head><body>
+<header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos.</div><a class="bag" href="your-journey.html" aria-label="Your Journey">◻<span class="bb" data-bag-badge></span></a></header>
+<main><h1>Your Journey</h1><p class="sub">Your selections · live costs · nothing is paid on this website</p>
+<div id="items"></div>
+<div class="tot"><span class="l">Your Costs</span><span class="r" id="tt">USD 0</span></div>
+<p class="note">Hosted wedding programme events are part of your journey without charge — they never appear as USD 0 line items.</p>
+<a class="cta" href="journeys.html">Continue exploring</a>
+</main>
+<script src="assets/bag.js"></script>
+<script>
+function render(){var b=SIYL_BAG.get(),el=document.getElementById('items');
+if(!b.length){el.innerHTML='<p class="empty">Nothing is in your journey yet. Everything you add appears here with its live total.</p>'}
+else{el.innerHTML=b.map(function(x){return '<div class="row"><div class="th"'+(x.img?' style="background-image:url('+x.img+')"':'')+'></div><div style="flex:1"><p class="nm">'+x.name+'</p><p class="mt">'+x.meta+'</p>'+(x.unit?'<div class="q"><button data-q="'+x.id+':-1">−</button><b style="font-family:\'PP Editorial Old\',serif">'+x.qty+'</b><button data-q="'+x.id+':1">+</button></div>':'')+'<br><button class="rm" data-rm="'+x.id+'">Remove</button></div><span class="ln">USD '+((x.price||0)*x.qty)+'</span></div>'}).join('')}
+document.getElementById('tt').textContent='USD '+SIYL_BAG.total().toLocaleString('en-US');
+el.querySelectorAll('[data-rm]').forEach(function(b){b.addEventListener('click',function(){SIYL_BAG.remove(b.getAttribute('data-rm'));render()})});
+el.querySelectorAll('[data-q]').forEach(function(b){b.addEventListener('click',function(){var v=b.getAttribute('data-q').split(':');SIYL_BAG.qty(v[0],parseInt(v[1],10));render()})});
+SIYL_BAG.badge()}
+render();
+var q=new URLSearchParams(location.search);
+if(q.get('seed')==='demo'){/* no demo seeding in production */}
+</script></body></html>
