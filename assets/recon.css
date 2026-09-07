@@ -219,3 +219,34 @@ body { font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; }
   .hd-row { grid-template-columns: auto 1fr auto; gap: 6px; }
   .brand { font-size: 16px; }
 }
+
+/* ============================================================================
+   DESKTOP EDITORIAL DISCIPLINE (>= 900px)
+   One ratio per component family, one axis per row, images sized with purpose.
+   The <=640px composition above is untouched.
+   ========================================================================== */
+@media (min-width: 900px) {
+  .section { margin: 104px auto; }
+  .hero { margin-top: 88px; }
+  .hero .ph { height: min(62vh, 560px); }
+
+  /* editorial pair — every split image shares the same ratio and axis */
+  .split { grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
+  .split .ph, .split .ph.r-32, .split .ph.r-45, .split .ph.r-golden { aspect-ratio: 4 / 3; height: auto; }
+  .split .copy { max-width: 460px; }
+
+  /* equal two-card row */
+  .duo { gap: 28px; }
+  .duo .ph, .duo .ph.r-32, .duo .ph.r-45 { aspect-ratio: 4 / 3; height: auto; }
+
+  /* equal three-card rail with next-card peek */
+  .rail { gap: 28px; }
+  .rail > * { flex: 0 0 360px; }
+  .rail-card .ph, .rail-card .ph.r-32, .rail-card .ph.r-45 { aspect-ratio: 3 / 2; height: auto; }
+
+  /* full-bleed transition images stay a transition, never a wall */
+  .section:not(.content) > .ph, .route-band .ph { height: min(56vh, 520px); aspect-ratio: auto; }
+
+  .centered { max-width: 720px; }
+  .ft { padding: 72px var(--gutter) 48px; }
+}

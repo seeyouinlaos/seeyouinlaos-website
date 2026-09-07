@@ -18,7 +18,30 @@
     ['your-journey.html', 'Your Journey'],
     ['review.html', 'Review & Send'],
   ];
+
+  /* Shared editorial footer — same navigation truth as the drawer, one system
+   * with the recon shell footer. No invented channels, no LINE ID. */
+  function foot() {
+    if (document.querySelector('.sfoot')) return;
+    var f = document.createElement('footer');
+    f.className = 'sfoot';
+    f.innerHTML =
+      '<div class="sfoot-in">' +
+        '<div><p class="sf-brand">see you in laos<span class="dot">.</span></p></div>' +
+        '<div><h4>Explore</h4>' +
+          '<a href="index.html">Home</a><a href="journeys.html">Journeys</a>' +
+          '<a href="marsilea.html">Marsilea Spa</a><a href="1872.html">1872 · Afternoon Tea</a></div>' +
+        '<div><h4>Plan</h4>' +
+          '<a href="your-journey.html">Your Journey</a><a href="review.html">Review &amp; Send</a></div>' +
+        '<div><h4>Guest Relations</h4>' +
+          '<a href="mailto:guest.relation.seeyouinlaos@gmail.com">guest.relation.seeyouinlaos@gmail.com</a></div>' +
+      '</div>' +
+      '<p class="sf-legal">Sunday, 28 February 2027 · Vientiane, Laos</p>';
+    document.body.appendChild(f);
+  }
+
   function init() {
+    foot();
     var btn = document.querySelector('.hb');
     if (!btn) return;
     var style = document.createElement('style');
