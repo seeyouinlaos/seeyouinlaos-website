@@ -6,7 +6,9 @@ exclude:
   - docs
   - src
   - test
-  - journey
+  # trailing slash is required: Jekyll 3 excludes by start_with?, so a bare
+  # "journey" entry also swallowed journeys.html (the shop page) on the mirror.
+  - journey/
   - node_modules
   - README.md
   - package.json
