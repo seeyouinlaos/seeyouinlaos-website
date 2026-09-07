@@ -101,3 +101,31 @@ and the Special Express placeholder stays.
 All frozen object sets (Hotels 020–025, Airports 030–035, Cities 001–005,
 Transport 006–010), Packages A–F, the C642/USD 85 override and every active
 image mapping were re-verified against the root: no correction required.
+
+## 07 SEP image coverage pass (full recursive Drive re-audit)
+
+Every folder and subfolder of the production library was listed, downloaded and
+opened (253 files). The complete per-entity manifest with FOUND / USED / NOT USED
+and the exact missing roles is `docs/IMAGE-ASSET-COVERAGE.md`. New production
+assets this pass (all visually verified before assignment):
+
+| Production asset | Source folder | Source file | Verified subject | Used for |
+|---|---|---|---|---|
+| transport/train-no25-srt-train.jpg | 006 | bangkok-special-express-no-25-night-train-editorial.webp | SRT train through greenery (owner-named for this product) | Special Express card hero, bag thumbnail |
+| transport/train-no25-first-class-cabin-1/2.jpg | 006 (owner import 29 Aug, commit 6eb30c9) | srt-sleeper-cabin.jpg, train-02.jpg | Real CNR First Class Sleeper cabin | Special Express gallery |
+| transport/train-no25-first-class-passenger-room.jpg | 006 | 005_…_First_Class_Passenger_Room.webp | First Class Passenger Room, Krung Thep Aphiwat | gallery |
+| transport/train-no25-krung-thep-aphiwat.jpg · -terminal-aerial.jpg · -station-hall.jpg | 006 | 006_…MASTER.jpg · 007_…Aerial.webp · images (1).jpeg | Departure terminal | gallery |
+| transport/van-transfer-1/2/3.jpg | 007 | IMG_3670/3671/3672.jpeg | Hotel Mercedes V 250 transfer | Special Express gallery (van leg) |
+| transport/mu9632-business-1/2/3.jpg | 008 | 20010304522011 · 2001030452184 · 20010304522093 (.webp, edge watermarks cropped) | China Eastern business cabin/seat | MU9632 card, gallery, bag |
+| transport/c642-*.jpg | 009 + 011 | IMG_3433/3439/3435/3434, 515968421, business7, 499753922 | CR green train, business cabin, lounge | C642 card, gallery, bag |
+| transport/mu5924-*.jpg | 010 | Review-7/8/25 (top watermark cropped), Kurzstrecke-Kabine, 37035165776 | China Eastern economy cabin | MU5924 card, gallery, bag |
+| rooms/heritage-executive-4.jpg | 021/002 | 0c20de08…-scaled.webp | Executive bedroom towards balcony | room gallery |
+| rooms/heritage-grand-premier-4…7.jpg | 021/003 | Heritage_1199/1192/1201/1205 | Grand Premier sitting corner, sofa, balcony | room gallery |
+| rooms/souphattra-majestic-suite-4/5.jpg | 021/006 | Heritage_1265/1266 | Majestic bedroom | room gallery |
+| rooms/souphattra-presidential-4…7.jpg | 021/007 | Heritage_1272/1296/1326/1368 | Presidential sitting corner, bathroom, sofa, tub | room gallery |
+| kempinski/room-bedroom-balcony · room-balcony-view · room-sitting-corner · room-bathroom.jpg | 025 | IMG_3453/3455/3456/3457.jpeg | Balcony room photography (category not sub-foldered) | Deluxe Balcony King gallery |
+| kempinski/lounge.jpg | 025 | kempinski_009.jpg | Lobby lounge | Kempinski gallery |
+| penthouse/exterior-street.jpg · exterior-golden-hour.jpg | 020 | 000 / 002 exterior | The house | Penthouse gallery |
+| airbnb/airbnb-04/05/06.jpg | 022 | 9988be88 · d3c3878c · 99eb7d96 (.avif) | Residence views | Private Residence gallery |
+
+Rejected in this pass (opened, not used): `ddebdfd6….png` (composited cabin render), `000_…Station_Model_Clean_Background.png` (render), `bc01_f01_factorydesign….webp` (CGI), `431402a2….png` (attendants), `…PlanespottersNet….jpg` (copyright banner), `yhr99….jpg` (Klook watermark), the five 007 website screenshots (carousel chrome), root `000_Transport_Special_Express_No_25_Bangkok_Nong_Khai.jpg` (mountain valley — still wrong).

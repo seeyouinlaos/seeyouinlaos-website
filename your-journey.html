@@ -4,8 +4,8 @@
 .hd{display:grid;grid-template-columns:44px 1fr 44px;align-items:center;padding:14px 20px}
 .hb{width:44px;height:44px;display:flex;flex-direction:column;justify-content:center;gap:5px;background:none;border:0}.hb i{display:block;width:20px;height:1.4px;background:#313131}
 .bd{font-family:'PP Editorial Old',serif;font-weight:200;font-size:19px;text-align:center}
-.bag{width:44px;height:44px;display:flex;align-items:center;justify-content:center;position:relative;color:#313131;text-decoration:none}
-.bb{position:absolute;top:4px;right:2px;min-width:16px;height:16px;background:#313131;color:#F3EEE7;font-size:9px;border-radius:0;display:none;align-items:center;justify-content:center;padding:0 4px}
+.bag{width:44px;height:44px;display:flex;align-items:center;justify-content:center;position:relative;color:#313131;text-decoration:none}.bag .bgi{display:block}
+.bb{position:absolute;top:5px;right:3px;min-width:15px;height:15px;padding:0 4px;background:#313131;color:#F3EEE7;font-size:9px;line-height:1;letter-spacing:0;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;display:none;align-items:center;justify-content:center;box-shadow:0 0 0 2px #F3EEE7;border-radius:1px}
 main{padding:30px 24px 80px;max-width:640px;margin:0 auto}
 h1{font-family:'PP Editorial Old',serif;font-weight:200;font-size:29px;margin-bottom:6px}
 .sub{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#7C7A75;margin-bottom:26px}
@@ -25,7 +25,7 @@ h1{font-family:'PP Editorial Old',serif;font-weight:200;font-size:29px;margin-bo
 .empty{border-top:1px solid #DAD9D7;border-bottom:1px solid #DAD9D7;padding:40px 0;color:#7C7A75}
 .note{font-size:11.5px;color:#7C7A75;margin-top:16px}
 </style></head><body>
-<header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos.</div><a class="bag" href="your-journey.html" aria-label="Your Journey">◻<span class="bb" data-bag-badge></span></a></header>
+<header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos.</div><a class="bag" href="your-journey.html" aria-label="Your Journey"><svg class="bgi" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.4 8.6h13.2l-.85 11.1a1.6 1.6 0 0 1-1.6 1.5H7.85a1.6 1.6 0 0 1-1.6-1.5z"/><path d="M8.7 8.6V7.2a3.3 3.3 0 0 1 6.6 0v1.4"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main><h1>Your Journey</h1><p class="sub">Your selections · live costs · nothing is paid on this website</p>
 <div id="items"></div>
 <div class="tot"><span class="l">Your Costs</span><span class="r" id="tt">USD 0</span></div>
@@ -38,7 +38,7 @@ h1{font-family:'PP Editorial Old',serif;font-weight:200;font-size:29px;margin-bo
 <script>
 function render(){var b=SIYL_BAG.get(),el=document.getElementById('items');
 if(!b.length){el.innerHTML='<p class="empty">Nothing is in your journey yet. Everything you add appears here with its live total.</p>'}
-else{el.innerHTML=b.map(function(x){return '<div class="row"><div class="th"'+(x.img?' style="background-image:url('+x.img+')"':'')+'></div><div style="flex:1"><p class="nm">'+x.name+'</p><p class="mt">'+x.meta+'</p>'+(x.unit?'<div class="q"><button data-q="'+x.id+':-1">−</button><b style="font-family:\'PP Editorial Old\',serif">'+x.qty+'</b><button data-q="'+x.id+':1">+</button></div>':'')+'<br><button class="rm" data-rm="'+x.id+'">Remove</button></div>'+(x.interest?'<span class="ln" style="font-family:\'Hanken Grotesk\',Helvetica,Arial,sans-serif;font-size:9px;letter-spacing:1.6px;text-transform:uppercase;color:#7C7A75">Interest · request</span>':'<span class="ln">USD '+((x.price||0)*x.qty)+'</span>')+'</div>'}).join('')}
+else{el.innerHTML=b.map(function(x){return '<div class="row"><div class="th"'+(SIYL_BAG.thumb(x)?' style="background-image:url('+SIYL_BAG.thumb(x)+')"':'')+'></div><div style="flex:1"><p class="nm">'+x.name+'</p><p class="mt">'+x.meta+'</p>'+(x.unit?'<div class="q"><button data-q="'+x.id+':-1">−</button><b style="font-family:\'PP Editorial Old\',serif">'+x.qty+'</b><button data-q="'+x.id+':1">+</button></div>':'')+'<br><button class="rm" data-rm="'+x.id+'">Remove</button></div>'+(x.interest?'<span class="ln" style="font-family:\'Hanken Grotesk\',Helvetica,Arial,sans-serif;font-size:9px;letter-spacing:1.6px;text-transform:uppercase;color:#7C7A75">Interest · request</span>':'<span class="ln">USD '+((x.price||0)*x.qty)+'</span>')+'</div>'}).join('')}
 document.getElementById('tt').textContent='USD '+SIYL_BAG.total().toLocaleString('en-US');
 el.querySelectorAll('[data-rm]').forEach(function(b){b.addEventListener('click',function(){SIYL_BAG.remove(b.getAttribute('data-rm'));render()})});
 el.querySelectorAll('[data-q]').forEach(function(b){b.addEventListener('click',function(){var v=b.getAttribute('data-q').split(':');SIYL_BAG.qty(v[0],parseInt(v[1],10));render()})});

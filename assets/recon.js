@@ -21,7 +21,7 @@
     '<div class="hd-row">' +
       '<div class="hd-left"><button class="hd-cta" id="menu-open" aria-haspopup="dialog" aria-expanded="false"><span class="burger" aria-hidden="true"><i></i><i></i><i></i></span></button></div>' +
       '<a class="brand" href="index.html">see you in laos.<span class="dot">·</span></a>' +
-      '<div class="hd-right"><a class="hd-cta" href="your-journey.html" aria-label="Your Journey" style="font-size:15px;position:relative">◻<span data-bag-badge style="position:absolute;top:2px;right:0;min-width:16px;height:16px;background:#313131;color:#F3EEE7;font-size:9px;display:none;align-items:center;justify-content:center;padding:0 4px"></span></a></div>' +
+      '<div class="hd-right"><a class="hd-cta bag" href="your-journey.html" aria-label="Your Journey"><svg class="bgi" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.4 8.6h13.2l-.85 11.1a1.6 1.6 0 0 1-1.6 1.5H7.85a1.6 1.6 0 0 1-1.6-1.5z"/><path d="M8.7 8.6V7.2a3.3 3.3 0 0 1 6.6 0v1.4"/></svg><span class="bb" data-bag-badge></span></a></div>' +
     '</div>' +
     '';
   document.body.prepend(header);

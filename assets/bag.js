@@ -12,6 +12,9 @@ remove:function(id){this.set(this.get().filter(function(x){return x.id!==id}))},
 qty:function(id,d){var b=this.get(),f=b.find(function(x){return x.id===id});
 if(f){f.qty=Math.max(1,f.qty+d);this.set(b)}},
 total:function(){return this.get().reduce(function(t,x){return t+(x.price||0)*x.qty},0)},
+/* display-only: thumbnails for bag lines persisted before the transport imagery existed */
+THUMBS:{train:'assets/images/transport/train-no25-srt-train.jpg',mu9632:'assets/images/transport/mu9632-business-1.jpg',c642:'assets/images/transport/c642-train-snow-mountain.jpg','return':'assets/images/transport/mu5924-economy-cabin-1.jpg'},
+thumb:function(x){return x.img||this.THUMBS[x.id]||''},
 badge:function(){var n=this.get().length,el=document.querySelector('[data-bag-badge]');
 if(el){el.textContent=n>0?n:'';el.style.display=n>0?'flex':'none'}}};
 document.addEventListener('DOMContentLoaded',function(){window.SIYL_BAG.badge()})})();

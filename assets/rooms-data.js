@@ -51,12 +51,12 @@
           amenities: HERITAGE_AMENITIES, price: 145 },
         { slug: 'heritage-executive', name: 'Heritage Executive', cat: 'Heritage Room',
           desc: 'French colonial rooms with a balcony over the garden, and the flexibility a family needs.',
-          gallery: [[RM + 'heritage-executive-1.jpg', 'The bedroom'], [RM + 'heritage-executive-2.jpg', 'Bedroom and balcony'], [RM + 'heritage-executive-3.jpg', 'The bathroom']],
+          gallery: [[RM + 'heritage-executive-1.jpg', 'The bedroom'], [RM + 'heritage-executive-2.jpg', 'Bedroom and balcony'], [RM + 'heritage-executive-3.jpg', 'The bathroom'], [RM + 'heritage-executive-4.jpg', 'Bedroom towards the balcony']],
           facts: [['Size', '37–44 sq.m.'], ['Bed', 'King or twin'], ['Occupancy', 'Up to 2 adults · 1 child'], ['Location', 'Garden views · interconnecting rooms where available']],
           amenities: HERITAGE_AMENITIES, price: 155 },
         { slug: 'heritage-grand-premier', name: 'Heritage Grand Premier', cat: 'Heritage Room',
           desc: 'A larger heritage room, with a private balcony over the garden and the pool.',
-          gallery: [[RM + 'heritage-grand-premier-1.jpg', 'The bedroom'], [RM + 'heritage-grand-premier-2.jpg', 'The sitting area'], [RM + 'heritage-grand-premier-3.jpg', 'Bedroom towards the balcony']],
+          gallery: [[RM + 'heritage-grand-premier-1.jpg', 'The bedroom'], [RM + 'heritage-grand-premier-2.jpg', 'The sitting area'], [RM + 'heritage-grand-premier-3.jpg', 'Bedroom towards the balcony'], [RM + 'heritage-grand-premier-4.jpg', 'The sitting corner'], [RM + 'heritage-grand-premier-5.jpg', 'Sofa detail'], [RM + 'heritage-grand-premier-6.jpg', 'The balcony daybed'], [RM + 'heritage-grand-premier-7.jpg', 'The balcony']],
           facts: [['Size', '49 sq.m.'], ['Bed', '1 King bed'], ['Occupancy', '2 adults · 1 child sharing bedding'], ['Location', 'Garden and pool views']],
           amenities: ['Private balcony', 'Garden and pool views', 'Nespresso machine', 'Coffee & tea facilities', 'Mini bar', 'Smart TV', 'WiFi', 'Bathroom amenities'], price: 170 },
         { slug: 'noble-courtyard', name: 'Noble Courtyard Suite', cat: 'Suite',
@@ -72,12 +72,12 @@
           price: 250, reserved: 'Reserved for family' },
         { slug: 'souphattra-majestic', name: 'Souphattra Majestic Suite', cat: 'Suite',
           desc: 'The house suite: a separate living area, pantry and bar, and a long balcony over the pool.',
-          gallery: [[RM + 'souphattra-majestic-suite-2.jpg', 'The living area'], [RM + 'souphattra-majestic-suite-3.jpg', 'The bathroom']],
+          gallery: [[RM + 'souphattra-majestic-suite-1.jpg', 'Bedroom towards the balcony'], [RM + 'souphattra-majestic-suite-2.jpg', 'The living area'], [RM + 'souphattra-majestic-suite-4.jpg', 'The bedroom'], [RM + 'souphattra-majestic-suite-3.jpg', 'The bathroom'], [RM + 'souphattra-majestic-suite-5.jpg', 'The bed']],
           facts: [['Size', '84 sq.m.'], ['Bed', '1 King bed'], ['Occupancy', '2 adults · 2 children'], ['Location', 'Pool and garden views · one suite only']],
           amenities: ['Separate living area', 'Pantry', 'Bar', 'Large balcony', 'Pool and garden views', 'High ceilings', 'Nespresso machine', 'Coffee & tea facilities', 'Mini bar', 'WiFi'], price: 290 },
         { slug: 'souphattra-presidential', name: 'Souphattra Presidential', cat: 'Suite',
           desc: 'The largest suite of the house: two bedrooms, private bathrooms and a shared living space under a high ceiling.',
-          gallery: [[RM + 'souphattra-presidential-1.jpg', 'The main bedroom'], [RM + 'souphattra-presidential-2.jpg', 'The second bedroom'], [RM + 'souphattra-presidential-3.jpg', 'The living space']],
+          gallery: [[RM + 'souphattra-presidential-1.jpg', 'The main bedroom'], [RM + 'souphattra-presidential-2.jpg', 'The second bedroom'], [RM + 'souphattra-presidential-3.jpg', 'The living space'], [RM + 'souphattra-presidential-4.jpg', 'The sitting corner'], [RM + 'souphattra-presidential-5.jpg', 'The bathroom'], [RM + 'souphattra-presidential-6.jpg', 'Sofa detail'], [RM + 'souphattra-presidential-7.jpg', 'The bathtub']],
           facts: [['Size', '118 sq.m.'], ['Bed', 'Two bedrooms · king and twin'], ['Occupancy', '4 adults · 2 children'], ['Location', 'One unit only']],
           amenities: ['Two bedrooms', 'Private bathrooms', 'Separate living area', 'Shared living space', 'Pantry', 'Dining table', 'High ceiling'],
           price: 750, reserved: 'Reserved for bride & groom' }
@@ -93,7 +93,7 @@
       rooms: [
         { slug: 'private-residence', name: 'Private Residence', cat: 'Alternative stay',
           desc: 'A warm private residence in central Vientiane, secured for the wedding stay and hosted for a limited number of guests. Guest Relations coordinates the arrangements personally.',
-          gallery: [['assets/images/airbnb/airbnb-01.jpg', 'Living and dining'], ['assets/images/airbnb/airbnb-02.jpg', 'The entry'], ['assets/images/airbnb/airbnb-03.jpg', 'The balcony']],
+          gallery: [['assets/images/airbnb/airbnb-01.jpg', 'Living and dining'], ['assets/images/airbnb/airbnb-02.jpg', 'The entry'], ['assets/images/airbnb/airbnb-03.jpg', 'The balcony'], ['assets/images/airbnb/airbnb-04.jpg', 'Towards the temple roofs'], ['assets/images/airbnb/airbnb-05.jpg', 'By the window'], ['assets/images/airbnb/airbnb-06.jpg', 'A corner of the living room']],
           facts: [['Type', 'Private residence'], ['Sleeps', 'Up to 4'], ['Occupancy', 'Up to 4 adults'], ['Location', 'Downtown Vientiane · 300 m to the Mekong Night Market · 800 m to Wat Sisaket']],
           amenities: ['WiFi', 'Air conditioning', 'Hot water', 'Washer & laundry area', 'Refrigerator', 'Kettle & kitchenette', 'Hair dryer', 'Free parking'],
           price: null, status: 'Complimentary · limited availability', interest: true }
@@ -118,7 +118,9 @@
             [PENT + 'bedroom-skyline.jpg', 'Bedroom towards the skyline'],
             [PENT + 'bedroom-courtyard.jpg', 'Bedroom towards the courtyard'],
             [PENT + 'study-nook.jpg', 'The study nook'],
-            [PENT + 'balcony-garden.jpg', 'The balcony']],
+            [PENT + 'balcony-garden.jpg', 'The balcony'],
+            [PENT + 'exterior-street.jpg', 'The house from the street'],
+            [PENT + 'exterior-golden-hour.jpg', 'The house at golden hour']],
           facts: [['Home', 'Six-bedroom penthouse'], ['Capacity', '12 adults'], ['Stay', '21 – 24 February 2027 · 3 nights'], ['Arrival', '21 February · personal pickup by Haruthai']],
           amenities: null, price: 270 }
       ]
@@ -188,16 +190,17 @@
       rooms: [
         { slug: 'deluxe-balcony-king', name: 'Deluxe Balcony King', cat: 'Deluxe room · non smoking',
           desc: 'Deluxe Balcony King Room Non Smoking — the coordinated return stay in Bangkok.',
-          /* The hotel photography below shows the property — the room category
-           * itself has no verified photography yet. */
+          /* Room photography from the owner's 025 hotel folder (IMG_3453/3455/3456/3457 —
+           * bedroom, balcony, sitting corner, bathroom) followed by the property. */
           gallery: [
+            [KEM + 'room-bedroom-balcony.jpg', 'The room towards the balcony'],
+            [KEM + 'room-balcony-view.jpg', 'The balcony'],
+            [KEM + 'room-sitting-corner.jpg', 'The sitting corner'],
+            [KEM + 'room-bathroom.jpg', 'The bathroom'],
             ['assets/images/journey/kempinski-01.jpg', 'The lagoon courtyard from above'],
             ['assets/images/journey/kempinski-03.jpg', 'The lobby'],
             [KEM + 'lobby-staircase.jpg', 'The grand staircase'],
-            [KEM + 'lobby-palms.jpg', 'The lobby palms'],
-            [KEM + 'facade-garden.jpg', 'The garden facade']],
-          galleryNote: 'Hotel photography — room photography to follow.',
-          roomPhotoPending: true,
+            [KEM + 'lounge.jpg', 'The lounge']],
           facts: [['Size', '~37–45 sqm'], ['Bed', 'King'], ['Room', 'Balcony · non smoking']],
           amenities: ['Balcony', 'Non smoking', 'Air conditioning', 'Safe', 'Coffee & tea', 'Wi-Fi', 'Complimentary minibar'],
           price: 380 }
