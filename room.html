@@ -4,15 +4,16 @@
 body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;font-weight:300;font-size:14px;line-height:1.6}
 .hd{display:grid;grid-template-columns:44px 1fr 44px;align-items:center;padding:calc(14px + env(safe-area-inset-top)) 20px 14px}
 .hb{width:44px;height:44px;display:flex;flex-direction:column;justify-content:center;gap:5px;background:none;border:0;cursor:pointer}.hb i{display:block;width:20px;height:1.4px;background:#313131}
-.bd{font-family:'PP Editorial Old',serif;font-weight:200;font-size:19px;text-align:center}
+.bd{font-family:'PP Editorial Old',serif;font-weight:200;font-size:19px;text-align:center}.bd .dot{color:#8A5A55}
 .bag{width:44px;height:44px;display:flex;align-items:center;justify-content:center;position:relative;color:#313131;text-decoration:none}.bag .bgi{display:block}
 .bb{position:absolute;top:5px;right:3px;min-width:15px;height:15px;padding:0 4px;background:#313131;color:#F3EEE7;font-size:9px;line-height:1;letter-spacing:0;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;display:none;align-items:center;justify-content:center;box-shadow:0 0 0 2px #F3EEE7;border-radius:1px}
 main{padding:0 0 70px;max-width:640px;margin:0 auto}
 .wrap{padding:0 24px}
 .ph{background:#E7E3DB center/cover no-repeat}
-.gal{position:relative;touch-action:pan-y}
-.gal .ph{width:100%;aspect-ratio:4/3;display:none}
-.gal .ph.on{display:block}
+.gal{position:relative}
+.trk{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;overscroll-behavior-x:contain}
+.trk::-webkit-scrollbar{display:none}
+.gal .ph{flex:0 0 100%;width:100%;aspect-ratio:4/3;scroll-snap-align:start;scroll-snap-stop:always}
 .gc{position:absolute;right:12px;bottom:12px;background:rgba(49,49,49,.55);color:#F3EEE7;font-size:10px;letter-spacing:1.6px;padding:4px 9px;z-index:2}
 .gl{position:absolute;left:12px;bottom:12px;right:110px;color:#F3EEE7;font-size:9.5px;letter-spacing:1.6px;text-transform:uppercase;text-shadow:0 1px 6px rgba(0,0,0,.5);z-index:2}
 .gn{position:absolute;top:50%;transform:translateY(-50%);background:none;border:0;font-size:24px;color:#F3EEE7;text-shadow:0 1px 6px rgba(0,0,0,.5);width:44px;height:44px;cursor:pointer;z-index:2}
@@ -27,22 +28,34 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:22px;margin:44
 .frow{display:flex;justify-content:space-between;gap:18px;border-bottom:1px solid #DAD9D7;padding:13px 2px}
 .frow .fl{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75;padding-top:2px;flex:0 0 auto}
 .frow .fv{text-align:right;font-size:13px}
-.amen{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid #DAD9D7;border-left:1px solid #DAD9D7}
-.amen span{border-bottom:1px solid #DAD9D7;border-right:1px solid #DAD9D7;padding:11px 12px;font-size:12px;color:#4A4A4A}
+.plane{background:#FFFFFF;margin-top:48px;padding:44px 32px 40px}
+.plane h2{margin:0 0 26px;text-align:center}
+.amen{list-style:none;margin:0;padding:0 0 0 6px}
+.amen li{position:relative;padding:0 0 0 30px;margin:0 0 20px;font-size:14px;line-height:1.7;color:#313131}
+.amen li::before{content:'';position:absolute;left:6px;top:.62em;width:6px;height:6px;border-radius:50%;background:#313131}
 .inc{border-top:1px solid #DAD9D7}
 .inc p{border-bottom:1px solid #DAD9D7;padding:13px 2px;font-size:12.5px;color:#4A4A4A;line-height:1.7}
 .ed{margin-top:46px}
 .ed .ph{width:100%;aspect-ratio:4/3}
 .ed .cap{font-size:9.5px;letter-spacing:2px;text-transform:uppercase;color:#7C7A75;margin:10px 24px 0}
 .ed .body{margin-top:16px}
-.oc{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:2px 24px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.others{margin-top:56px;padding-bottom:8px}
+.others h2{margin:0 24px 22px}
+.oc{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-left:24px;padding:2px 24px 6px;-webkit-overflow-scrolling:touch;scrollbar-width:none;overscroll-behavior-x:contain}
 .oc::-webkit-scrollbar{display:none}
-.occard{flex:0 0 76%;scroll-snap-align:start;text-decoration:none;color:#313131}
-.occard .ph{width:100%;aspect-ratio:4/3;margin-bottom:10px}
+.occard{flex:0 0 80%;scroll-snap-align:start;text-decoration:none;color:#313131;background:#FAF7F2;display:block}
+.occard .ph{width:100%;aspect-ratio:4/5}
+.occard .ot{padding:22px 20px 26px;text-align:center}
 .occard .oe{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#7C7A75}
-.occard .on{font-family:'PP Editorial Old',serif;font-weight:200;font-size:17px;line-height:1.3;margin:3px 0 2px}
-.occard .op{font-family:'PP Editorial Old',serif;font-size:13.5px}
-.occard .rsv{font-size:9px;letter-spacing:1.6px;text-transform:uppercase;color:#7C7A75}
+.occard .on{font-family:'PP Editorial Old',serif;font-weight:200;font-size:21px;line-height:1.25;margin:6px 0 10px}
+.occard .od{font-size:12.5px;line-height:1.7;color:#4A4A4A;margin:0 0 12px}
+.occard .op{font-family:'PP Editorial Old',serif;font-size:14px}
+.occard .rsv{font-size:9px;letter-spacing:1.6px;text-transform:uppercase;color:#7C7A75;display:block;margin-top:4px}
+.rnav{display:flex;align-items:center;gap:6px;padding:16px 24px 0}
+.rail{position:relative;flex:1;height:1px;background:#DAD9D7;margin-right:14px}
+.rail i{position:absolute;left:0;top:-1px;height:3px;background:#313131;width:40%;transition:transform .12s linear}
+.rnav .rc{font-family:'PP Editorial Old',serif;font-size:13px;letter-spacing:1px;margin-right:2px}
+.rnav button{background:none;border:0;width:36px;height:36px;font-size:20px;color:#313131;cursor:pointer;padding:0}
 .buy{background:#FCFAF6;margin-top:52px;padding:34px 26px 38px}
 .buy h2{margin:0 0 4px;font-size:24px}
 .buy .win{border-top:1px solid #DAD9D7;padding:18px 0 22px;margin-top:16px}
@@ -61,7 +74,7 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:22px;margin:44
 .backrow{text-align:center;margin-top:34px}
 .backrow a{font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:#313131;text-decoration:none;border-bottom:1px solid #313131;padding:8px 0 3px;display:inline-block;min-height:44px}
 </style></head><body>
-<header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos.</div><a class="bag" href="your-journey.html" aria-label="Your Journey"><svg class="bgi" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.4 8.6h13.2l-.85 11.1a1.6 1.6 0 0 1-1.6 1.5H7.85a1.6 1.6 0 0 1-1.6-1.5z"/><path d="M8.7 8.6V7.2a3.3 3.3 0 0 1 6.6 0v1.4"/></svg><span class="bb" data-bag-badge></span></a></header>
+<header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="your-journey.html" aria-label="Your Journey"><svg class="bgi" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.4 8.6h13.2l-.85 11.1a1.6 1.6 0 0 1-1.6 1.5H7.85a1.6 1.6 0 0 1-1.6-1.5z"/><path d="M8.7 8.6V7.2a3.3 3.3 0 0 1 6.6 0v1.4"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main id="m"></main>
 <script src="assets/bag.js"></script>
 <script src="assets/shop-menu.js"></script>
@@ -88,11 +101,12 @@ function priceLine(r) {
 var h = '';
 /* ---- room hero + real gallery (same concrete room, counter 1/N) ---- */
 if (room.gallery.length) {
-  h += '<div class="gal" id="gal">';
+  h += '<div class="gal" id="gal"><div class="trk" id="trk">';
   room.gallery.forEach(function (g, i) {
-    h += '<div class="ph' + (i === 0 ? ' on' : '') + '" style="background-image:url(' + g[0] + ')" role="img" aria-label="' + esc(room.name) + ' — ' + esc(g[1]) + '"></div>';
+    h += '<div class="ph" style="background-image:url(' + g[0] + ')" role="img" aria-label="' + esc(room.name) + ' — ' + esc(g[1]) + '"></div>';
   });
-  h += '<button class="gn gp" aria-label="Previous image">‹</button><button class="gn gx" aria-label="Next image">›</button>';
+  h += '</div>';
+  if (room.gallery.length > 1) h += '<button class="gn gp" aria-label="Previous image">‹</button><button class="gn gx" aria-label="Next image">›</button>';
   h += '<span class="gl" id="gl">' + esc(room.gallery[0][1]) + '</span>';
   h += '<span class="gc" id="gc">1 / ' + room.gallery.length + '</span></div>';
 } else {
@@ -112,19 +126,19 @@ if (room.facts.length) {
   h += '</div>';
 }
 if (room.roomPhotoPending) h += '<p class="note" style="margin-top:10px">Room photography to follow.</p>';
+h += '</div>';
+/* ---- amenities: Aman plane — single vertical bullet list on the light surface ---- */
 if (room.amenities && room.amenities.length) {
-  h += '<h2>Amenities</h2><div class="amen">';
-  room.amenities.forEach(function (a) { h += '<span>' + esc(a) + '</span>'; });
-  if (room.amenities.length % 2) h += '<span aria-hidden="true"></span>';
-  h += '</div>';
+  h += '<section class="plane"><h2>Amenities</h2><ul class="amen">';
+  room.amenities.forEach(function (a) { h += '<li>' + esc(a) + '</li>'; });
+  h += '</ul></section>';
 }
 /* ---- all stays include (separate from room amenities, proven only) ---- */
 if (stay.includes && stay.includes.length) {
-  h += '<h2>Your stay includes</h2><div class="inc">';
+  h += '<div class="wrap"><h2>Your stay includes</h2><div class="inc">';
   stay.includes.forEach(function (t) { h += '<p>' + t + '</p>'; });
-  h += '</div>';
+  h += '</div></div>';
 }
-h += '</div>';
 
 /* ---- editorial detail (real copy from data.mjs only) ---- */
 if (stayKey === 'souphattra') {
@@ -140,14 +154,17 @@ if (stayKey === 'souphattra') {
 /* ---- other rooms of the same stay: swipeable carousel with peek ---- */
 var others = stay.rooms.filter(function (r) { return r.slug !== room.slug; });
 if (others.length) {
-  h += '<h2 class="wrap">Other rooms at ' + esc(stay.name) + '</h2><div class="oc">';
+  h += '<section class="others"><h2>Other rooms at ' + esc(stay.name) + '</h2><div class="oc" id="oc">';
   others.forEach(function (r) {
     var img = r.gallery.length ? '<div class="ph" style="background-image:url(' + r.gallery[0][0] + ')"></div>' : '<div class="ph" style="display:flex;align-items:center;justify-content:center;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#7C7A75">Photography to follow</div>';
     h += '<a class="occard" href="room.html?stay=' + stayKey + '&room=' + r.slug + '">' + img +
-      '<p class="oe">' + esc(r.cat) + '</p><p class="on">' + esc(r.name) + '</p>' +
-      '<p>' + (r.reserved ? '<span class="op">USD ' + r.price + '</span> <span class="rsv">' + esc(r.reserved) + '</span>' : priceLine(r)) + '</p></a>';
+      '<div class="ot"><p class="oe">' + esc(r.cat) + '</p><p class="on">' + esc(r.name) + '</p>' +
+      '<p class="od">' + esc(r.desc) + '</p>' +
+      '<p>' + (r.reserved ? '<span class="op">USD ' + r.price + '</span> <span class="rsv">' + esc(r.reserved) + '</span>' : priceLine(r)) + '</p></div></a>';
   });
   h += '</div>';
+  if (others.length > 1) h += '<div class="rnav"><div class="rail" aria-hidden="true"><i id="rail"></i></div><span class="rc" id="rc">1 / ' + others.length + '</span><button type="button" id="op" aria-label="Previous room">‹</button><button type="button" id="ox" aria-label="Next room">›</button></div>';
+  h += '</section>';
 }
 
 /* ---- commerce: fixed-window per-person amounts → Add to Your Journey ---- */
@@ -172,32 +189,42 @@ h += '<p class="backrow"><a href="journeys.html">Back to Journeys</a></p>';
 document.getElementById('m').innerHTML = h;
 if (window.SIYL_BAG) SIYL_BAG.badge();
 
-/* gallery: arrows + swipe + counter */
-var phs = document.querySelectorAll('#gal .ph');
-if (phs.length) {
-  var gi = 0, gc = document.getElementById('gc'), gl = document.getElementById('gl');
-  function go(d) {
-    phs[gi].classList.remove('on');
-    gi = (gi + d + phs.length) % phs.length;
-    phs[gi].classList.add('on');
-    gc.textContent = (gi + 1) + ' / ' + phs.length;
-    gl.textContent = room.gallery[gi][1];
-  }
+/* gallery: a native scroll-snap track — the image follows the finger; arrows,
+ * keys, caption and 1/N all read the real scroll position */
+var trk = document.getElementById('trk');
+if (trk && room.gallery.length > 1) {
+  var gc = document.getElementById('gc'), gl = document.getElementById('gl'), gi = 0, raf = 0;
+  function idx() { return Math.max(0, Math.min(room.gallery.length - 1, Math.round(trk.scrollLeft / trk.clientWidth))); }
+  function sync() { raf = 0; var i = idx(); if (i === gi) return; gi = i; gc.textContent = (gi + 1) + ' / ' + room.gallery.length; gl.textContent = room.gallery[gi][1]; }
+  trk.addEventListener('scroll', function () { if (!raf) raf = requestAnimationFrame(sync); }, { passive: true });
+  function go(d) { var i = (idx() + d + room.gallery.length) % room.gallery.length; trk.scrollTo({ left: i * trk.clientWidth, behavior: 'smooth' }); }
   document.querySelector('.gp').addEventListener('click', function () { go(-1); });
   document.querySelector('.gx').addEventListener('click', function () { go(1); });
-  var tx = null;
-  var galEl = document.getElementById('gal');
-  galEl.addEventListener('touchstart', function (e) { tx = e.touches[0].clientX; }, { passive: true });
-  galEl.addEventListener('touchend', function (e) {
-    if (tx == null) return;
-    var dx = e.changedTouches[0].clientX - tx;
-    if (Math.abs(dx) > 40) go(dx < 0 ? 1 : -1);
-    tx = null;
-  }, { passive: true });
   document.addEventListener('keydown', function (e) {
     if (e.key === 'ArrowLeft') go(-1);
     if (e.key === 'ArrowRight') go(1);
   });
+}
+
+/* other rooms: the whole card (image + title + description) is the slide; the
+ * thin rail and the counter follow the real horizontal scroll position */
+var oc = document.getElementById('oc'), rail = document.getElementById('rail');
+if (oc && rail) {
+  var rc = document.getElementById('rc'), cards = oc.querySelectorAll('.occard'), oraf = 0;
+  function step() { var c = cards[0]; return c.offsetWidth + 14; }
+  function railSync() {
+    oraf = 0;
+    var max = oc.scrollWidth - oc.clientWidth, p = max > 0 ? oc.scrollLeft / max : 0;
+    var frac = Math.min(1, oc.clientWidth / oc.scrollWidth), track = rail.parentNode.clientWidth;
+    rail.style.width = Math.round(frac * track) + 'px';
+    rail.style.transform = 'translateX(' + Math.round(p * (track - frac * track)) + 'px)';
+    rc.textContent = (Math.min(cards.length, Math.round(oc.scrollLeft / step()) + 1)) + ' / ' + cards.length;
+  }
+  oc.addEventListener('scroll', function () { if (!oraf) oraf = requestAnimationFrame(railSync); }, { passive: true });
+  window.addEventListener('resize', railSync);
+  document.getElementById('op').addEventListener('click', function () { oc.scrollBy({ left: -step(), behavior: 'smooth' }); });
+  document.getElementById('ox').addEventListener('click', function () { oc.scrollBy({ left: step(), behavior: 'smooth' }); });
+  railSync();
 }
 
 /* adds are invitation-gated — identical mechanism to journeys.html */

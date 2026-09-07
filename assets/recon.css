@@ -210,7 +210,7 @@ footer { border-top: 1px solid var(--hairline); margin-top: var(--section); back
 @font-face { font-family: 'PP Editorial Old'; src: url('fonts/PPEditorialOld-Regular.otf') format('opentype'); font-weight: 400; font-display: swap; }
 h1, h2, h3, .t-display, .t-section, .t-sub, .brand, .drawer-nav > a, .drawer-nav > button { font-family: 'PP Editorial Old', Georgia, serif; font-weight: 200; }
 .brand { text-transform: none; letter-spacing: .5px; font-size: 21px; }
-.brand .dot { color: #8A5A55; }
+.brand .dot, .ft-brand .dot, .eyebrow .dot { color: #8A5A55; }
 body { font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; }
 .eyebrow, .t-meta, .t-link, .hd-cta, .factline, .anchor-rail a, .hd-sub a { font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; }
 @media (max-width: 640px) {

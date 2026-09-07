@@ -29,7 +29,7 @@
     var nav = document.createElement('nav');
     nav.className = 'siyl-nav';
     nav.setAttribute('aria-label', 'Menu');
-    nav.innerHTML = '<p class="ne">see you in laos.</p>' +
+    nav.innerHTML = '<p class="ne">see you in laos<span style="color:#8A5A55">.</span></p>' +
       LINKS.map(function (l) { return '<a href="' + l[0] + '">' + l[1] + '</a>'; }).join('') +
       '<button type="button" class="nx">Close</button>';
     document.body.append(scrim, nav);
