@@ -1451,6 +1451,17 @@
   E("Open your Guest Area", "Öffnet euren Gästebereich", "เปิดส่วนสำหรับแขกของคุณ", "ゲストエリアを開く");
   E("Menu", "Menü", "เมนู", "メニュー");
   E("Request availability", "Verfügbarkeit anfragen", "สอบถามห้องว่าง", "空室をリクエスト");
+  /* ---- open shop pass: journeys variants, Marsilea, Review & Send ---- */
+  E("Choose your suite", "Wählt eure Suite", "เลือกห้องสวีทของคุณ", "スイートを選ぶ");
+  E("Reserved for family", "Reserviert für die Familie", "สงวนไว้สำหรับครอบครัว", "ご家族のために予約済み");
+  E("Reserved for bride & groom", "Reserviert für Braut & Bräutigam", "สงวนไว้สำหรับบ่าวสาว", "新郎新婦のために予約済み");
+  E("Add to Your Journey", "Zu eurer Reise hinzufügen", "เพิ่มในเส้นทางของคุณ", "旅に追加する");
+  E("Enter your private invitation code.", "Gebt euren privaten Einladungscode ein.", "กรอกรหัสเชิญส่วนตัวของคุณ", "プライベートな招待コードをご入力ください。");
+  E("Interest · request", "Interesse · Anfrage", "ความสนใจ · คำขอ", "ご関心・リクエスト");
+  E("Mark your interest · choose a duration", "Euer Interesse vormerken · Dauer wählen", "บันทึกความสนใจ · เลือกระยะเวลา", "ご関心を記録・時間を選ぶ");
+  E("Send to Guest Relations", "An Guest Relations senden", "ส่งถึงฝ่ายดูแลแขก", "ゲストリレーションズへ送信");
+  E("Received and stored", "Empfangen und gespeichert", "ได้รับและบันทึกแล้ว", "受領・保存されました");
+  E("Hosted — part of your journey, never a charge.", "Übernommen — Teil eurer Reise, niemals eine Gebühr.", "เจ้าภาพดูแลให้ เป็นส่วนหนึ่งของเส้นทาง ไม่มีค่าใช้จ่าย", "おもてなしとして——旅の一部であり、料金は一切かかりません。");
   E("Request this room in your Guest Area", "Dieses Zimmer im Gästebereich anfragen", "ขอห้องนี้ในส่วนสำหรับแขก", "ゲストエリアでこの客室をリクエスト");
   E("choose your category", "wählt eure Kategorie", "เลือกประเภทห้องของคุณ", "カテゴリーを選ぶ");
   E("Room choice and availability live in your private Guest Area. Nothing to book, nothing to pay when you arrive.",

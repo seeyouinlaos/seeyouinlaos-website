@@ -2,7 +2,7 @@
 @font-face{font-family:'PP Editorial Old';src:url('assets/fonts/PPEditorialOld-Ultralight.otf') format('opentype');font-weight:200;font-display:swap}
 *{margin:0;padding:0;box-sizing:border-box}body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;font-weight:300;font-size:14px;line-height:1.6}
 .hd{display:grid;grid-template-columns:44px 1fr 44px;align-items:center;padding:14px 20px}
-.hb{width:44px;height:44px;display:flex;flex-direction:column;justify-content:center;gap:5px;background:none;border:0}.hb i{display:block;width:20px;height:1.4px;background:#313131}
+.hb{width:44px;height:44px;display:flex;flex-direction:column;justify-content:center;gap:5px;background:none;border:0;cursor:pointer}.hb i{display:block;width:20px;height:1.4px;background:#313131}
 .bd{font-family:'PP Editorial Old',serif;font-weight:200;font-size:19px;text-align:center}
 .bag{width:44px;height:44px;display:flex;align-items:center;justify-content:center;position:relative;color:#313131;text-decoration:none}
 .bb{position:absolute;top:4px;right:2px;min-width:16px;height:16px;background:#313131;color:#F3EEE7;font-size:9px;display:none;align-items:center;justify-content:center;padding:0 4px}
@@ -12,34 +12,96 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:22px;margin:40
 .win{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#7C7A75;margin-bottom:14px}
 .p{border-top:1px solid #DAD9D7;padding:20px 0}
 .p:last-of-type{border-bottom:1px solid #DAD9D7}
+.pimg{width:100%;aspect-ratio:3/2;background:#E7E3DB center/cover no-repeat;margin-bottom:14px}
 .pn{font-family:'PP Editorial Old',serif;font-weight:200;font-size:19px}
 .pm{font-size:11.5px;color:#7C7A75;margin:4px 0 2px}
 .pp{font-family:'PP Editorial Old',serif;font-size:15px;margin:6px 0 12px}
 .add{background:#313131;color:#F3EEE7;border:0;padding:13px 26px;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;min-height:44px}
 .host{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#7C7A75}
 .ok{font-size:10px;letter-spacing:1.6px;text-transform:uppercase;color:#7C7A75;margin-left:12px}
+.vl{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#7C7A75;margin:14px 0 8px}
+.vars{margin-bottom:4px}
+.var{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:none;border:1px solid #DAD9D7;border-bottom:0;padding:12px 14px;font:inherit;font-size:12.5px;color:#313131;cursor:pointer;min-height:44px}
+.vars .var:last-child{border-bottom:1px solid #DAD9D7}
+.var[aria-pressed="true"]{border:1px solid #313131;background:#FCFAF6}
+.var[aria-pressed="true"]+.var{border-top:0}
+.var .vp{margin-left:auto;font-family:'PP Editorial Old',serif;font-size:13.5px;white-space:nowrap}
+.var.rsv{color:#7C7A75;cursor:default;flex-wrap:wrap;row-gap:2px}
+.var.rsv .vr{flex-basis:100%;font-size:9px;letter-spacing:1.6px;text-transform:uppercase}
 </style></head><body>
 <header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos.</div><a class="bag" href="your-journey.html" aria-label="Your Journey">◻<span class="bb" data-bag-badge></span></a></header>
 <main><h1>Journeys</h1>
 <h2>Before the Wedding</h2><p class="win">21 – 27 February 2027</p>
-<div class="p"><p class="pn">Sathorn Penthouse Bangkok</p><p class="pm">21 – 24 February · 3 nights · capacity 12 adults</p><p class="pp">USD 270 per person</p><button class="add" data-add='{"id":"bkk-stay","name":"Sathorn Penthouse Bangkok","meta":"21 – 24 February 2027 · 3 nights","price":270}'>Add to Your Journey</button></div>
+<div class="p"><div class="pimg" style="background-image:url(assets/images/journey/penthouse-01.jpg)"></div><p class="pn">Sathorn Penthouse Bangkok</p><p class="pm">21 – 24 February · 3 nights · capacity 12 adults</p><p class="pp">USD 270 per person</p><button class="add" data-add='{"id":"bkk-stay","name":"Sathorn Penthouse Bangkok","meta":"21 – 24 February 2027 · 3 nights","price":270,"img":"assets/images/journey/penthouse-01.jpg"}'>Add to Your Journey</button></div>
 <div class="p"><p class="pn">Special Express No. 25</p><p class="pm">24 – 25 February · Bangkok → Nong Khai → Vientiane · First Class Sleeper, van and border logistics to Souphattra Heritage · breakfast and dinner included</p><p class="pp">USD 75 per person · private single cabin USD 130</p><button class="add" data-add='{"id":"train","name":"Special Express No. 25","meta":"24 – 25 February 2027 · First Class Sleeper","price":75}'>Add to Your Journey</button></div>
-<div class="p"><p class="pn">Pre-Wedding Vientiane · Souphattra Heritage</p><p class="pm">25 – 27 February · 2 nights fixed · room from the approved matrix</p><p class="pp">From USD 145 per person</p><button class="add" data-add='{"id":"prewed","name":"Pre-Wedding Vientiane · The Heritage","meta":"25 – 27 February 2027 · 2 nights fixed","price":145}'>Add to Your Journey</button></div>
+<div class="p" data-vprod="prewed"><div class="pimg" style="background-image:url(assets/images/souphattra/heritage-courtyard-front.jpg)"></div><p class="pn">Pre-Wedding Vientiane · Souphattra Heritage</p><p class="pm">25 – 27 February · 2 nights fixed · per-person amount for the fixed window</p>
+<p class="vl">Choose your room</p><div class="vars"></div>
+<p class="pp" data-vprice></p><button class="add" data-vadd>Add to Your Journey</button></div>
 <h2>The Wedding</h2><p class="win">27 February – 01 March 2027 · Vientiane</p>
-<div class="p"><p class="pn">Wedding Stay · Souphattra Heritage</p><p class="pm">27 February – 01 March · 2 nights fixed · room from the approved matrix</p><p class="pp">From USD 145 per person</p><button class="add" data-add='{"id":"wedstay","name":"Wedding Stay · The Heritage","meta":"27 February – 01 March 2027 · 2 nights fixed","price":145}'>Add to Your Journey</button></div>
+<div class="p" data-vprod="wedstay"><div class="pimg" style="background-image:url(assets/images/souphattra/heritage-arches-dusk.jpg)"></div><p class="pn">Wedding Stay · Souphattra Heritage</p><p class="pm">27 February – 01 March · 2 nights fixed · per-person amount for the fixed window</p>
+<p class="vl">Choose your room</p><div class="vars"></div>
+<p class="pp" data-vprice></p><button class="add" data-vadd>Add to Your Journey</button></div>
 <div class="p"><p class="pn">The Wedding Programme</p><p class="pm">Temple Ceremony · Coffee &amp; Cake · Vow Ceremony · Wedding Dinner</p><p class="host">Hosted — part of your journey, never a charge</p></div>
 <h2>After the Wedding</h2><p class="win">01 – 08 March 2027</p>
 <div class="p"><p class="pn">MU9632 · Vientiane → Kunming</p><p class="pm">01 March · 14:00 → 16:40 · non-stop · Business Class</p><p class="pp">USD 275 per person</p><button class="add" data-add='{"id":"mu9632","name":"MU9632 · Vientiane → Kunming","meta":"01 March 2027 · Business Class","price":275}'>Add to Your Journey</button></div>
-<div class="p"><p class="pn">Wanxiang Yueju · Kunming</p><p class="pm">01 – 04 March · 3 nights · choose one of four 68 sqm variants</p><p class="pp">USD 150 per person</p><button class="add" data-add='{"id":"kmg","name":"Wanxiang Yueju · Kunming","meta":"01 – 04 March 2027 · 3 nights","price":150}'>Add to Your Journey</button></div>
+<div class="p" data-vprod="kmg"><div class="pimg" style="background-image:url(assets/images/journey/kunming-01.jpg)"></div><p class="pn">Wanxiang Yueju · Kunming</p><p class="pm">01 – 04 March · 3 nights · four variants · 68 sqm each</p>
+<p class="vl">Choose your suite</p><div class="vars"></div>
+<p class="pp" data-vprice></p><button class="add" data-vadd>Add to Your Journey</button></div>
 <div class="p"><p class="pn">C642 · Kunming → Lijiang</p><p class="pm">04 March · 16:39 → 21:06 · direct · 4h27 · Business Class · 1+1 seating · Priority Ticketing: expedited ticketing and shorter wait times</p><p class="pp">USD 85 per person</p><button class="add" data-add='{"id":"c642","name":"C642 · Kunming → Lijiang","meta":"04 March 2027 · Business Class","price":85}'>Add to Your Journey</button></div>
-<div class="p"><p class="pn">Luye Baisha · Lijiang</p><p class="pm">04 – 06 March · 2 nights fixed · room variants USD 70 – 120 per person</p><p class="pp">From USD 70 per person</p><button class="add" data-add='{"id":"ljg","name":"Luye Baisha · 270° Snow Mountain Viewing","meta":"04 – 06 March 2027 · 2 nights fixed","price":70}'>Add to Your Journey</button></div>
+<div class="p" data-vprod="ljg"><div class="pimg" style="background-image:url(assets/images/journey/lijiang-01.jpg)"></div><p class="pn">Luye Baisha · Lijiang</p><p class="pm">04 – 06 March · 2 nights fixed · per-person amount for the fixed window</p>
+<p class="vl">Choose your room</p><div class="vars"></div>
+<p class="pp" data-vprice></p><button class="add" data-vadd>Add to Your Journey</button></div>
 <div class="p"><p class="pn">MU5924 + MU741 · Lijiang → Bangkok</p><p class="pm">06 March · 10:35 → 14:55 · via Kunming · Economy flexible</p><p class="pp">USD 200 per person</p><button class="add" data-add='{"id":"return","name":"MU5924 + MU741 · Lijiang → Bangkok","meta":"06 March 2027 · Economy flexible","price":200}'>Add to Your Journey</button></div>
-<div class="p"><p class="pn">Siam Kempinski Bangkok</p><p class="pm">06 – 08 March · Deluxe Balcony King Non Smoking · 2 nights · breakfast included</p><p class="pp">USD 380 per person</p><button class="add" data-add='{"id":"kempinski","name":"Siam Kempinski Bangkok","meta":"06 – 08 March 2027 · 2 nights · breakfast included","price":380}'>Add to Your Journey</button></div>
+<div class="p"><div class="pimg" style="background-image:url(assets/images/journey/kempinski-01.jpg)"></div><p class="pn">Siam Kempinski Bangkok</p><p class="pm">06 – 08 March · Deluxe Balcony King Non Smoking · 2 nights · breakfast included</p><p class="pp">USD 380 per person</p><button class="add" data-add='{"id":"kempinski","name":"Siam Kempinski Bangkok","meta":"06 – 08 March 2027 · 2 nights · breakfast included","price":380,"img":"assets/images/journey/kempinski-01.jpg"}'>Add to Your Journey</button></div>
 </main>
 <script src="assets/bag.js"></script>
-<script>document.querySelectorAll('[data-add]').forEach(function(b){b.addEventListener('click',function(){SIYL_BAG.add(JSON.parse(b.getAttribute('data-add')));b.insertAdjacentHTML('afterend','<span class="ok">Added</span>');b.nextElementSibling.previousElementSibling===b})});
+<script src="assets/shop-menu.js"></script>
+<script type="module" src="assets/invite.mjs"></script>
+<script>
+/* ---------------- variant products (one calculation source: the price on the
+ * bag item). Room amounts are fixed-window per-person values — never ×nights. */
+var SOUPHATTRA_ROOMS=[
+["The Heritage",145],
+["Heritage Executive",155],
+["Heritage Grand Premier",170],
+["Noble Courtyard Suite",240],
+["Grand Majestic Suite",250,"Reserved for family"],
+["Souphattra Majestic Suite",290],
+["Souphattra Presidential",750,"Reserved for bride & groom"]];
+var VPRODS={
+prewed:{name:"Pre-Wedding Vientiane · Souphattra Heritage",dates:"25 – 27 February 2027 · 2 nights fixed",img:"assets/images/souphattra/heritage-courtyard-front.jpg",vars:SOUPHATTRA_ROOMS},
+wedstay:{name:"Wedding Stay · Souphattra Heritage",dates:"27 February – 01 March 2027 · 2 nights fixed",img:"assets/images/souphattra/heritage-arches-dusk.jpg",vars:SOUPHATTRA_ROOMS},
+kmg:{name:"Wanxiang Yueju · Kunming",dates:"01 – 04 March 2027 · 3 nights",img:"assets/images/journey/kunming-01.jpg",vars:[
+["Light French Suite",150],["Milano Minimalist Loft",150],["Italian Style Suite",150],["Junting City-View Loft",150]]},
+ljg:{name:"Luye Baisha · Lijiang",dates:"04 – 06 March 2027 · 2 nights fixed",img:"assets/images/journey/lijiang-01.jpg",vars:[
+["Snow Mountain Viewing Room",75],["270° Snow Mountain Viewing",70],["270° Private Courtyard Snow Mountain View",100],["270° Snow Mountain View Room Private Soup Pool",105],["Snow Mountain Manor · Starry Sky",120]]}};
+var VSEL={prewed:0,wedstay:0,kmg:0,ljg:0};
+
+function vitem(k){var p=VPRODS[k],v=p.vars[VSEL[k]];
+return {id:k,name:p.name,meta:p.dates+" · "+v[0],price:v[1],img:p.img}}
+function vrender(k){var box=document.querySelector('[data-vprod="'+k+'"]'),p=VPRODS[k];
+box.querySelector('.vars').innerHTML=p.vars.map(function(v,i){
+if(v[2])return '<div class="var rsv"><span>'+v[0]+'</span><span class="vp">USD '+v[1]+'</span><span class="vr">'+v[2]+'</span></div>';
+return '<button type="button" class="var" data-vi="'+i+'" aria-pressed="'+(VSEL[k]===i)+'"><span>'+v[0]+'</span><span class="vp">USD '+v[1]+'</span></button>'}).join('');
+box.querySelector('[data-vprice]').textContent='USD '+p.vars[VSEL[k]][1]+' per person';
+box.querySelectorAll('[data-vi]').forEach(function(b){b.addEventListener('click',function(){
+VSEL[k]=parseInt(b.getAttribute('data-vi'),10);vrender(k);
+if(window.SIYL_BAG&&SIYL_BAG.has(k)){SIYL_BAG.put(vitem(k))}})})}
+Object.keys(VPRODS).forEach(vrender);
+
+/* ---------------- adds are invitation-gated (real engine validation) ------ */
+function gated(fn){if(window.SIYL_INVITE){SIYL_INVITE.require(fn)}
+else document.addEventListener('siyl:invite-ready',function(){SIYL_INVITE.require(fn)},{once:true})}
+function confirmAdd(btn){if(!btn.nextElementSibling||!btn.nextElementSibling.classList||!btn.nextElementSibling.classList.contains('ok')){btn.insertAdjacentHTML('afterend','<span class="ok">Added</span>')}}
+document.querySelectorAll('[data-add]').forEach(function(b){b.addEventListener('click',function(){
+gated(function(){SIYL_BAG.add(JSON.parse(b.getAttribute('data-add')));confirmAdd(b)})})});
+document.querySelectorAll('[data-vadd]').forEach(function(b){b.addEventListener('click',function(){
+var k=b.closest('[data-vprod]').getAttribute('data-vprod');
+gated(function(){SIYL_BAG.put(vitem(k));confirmAdd(b)})})});
 /* deep-link add (used by scripted acceptance capture and shareable links) */
 var qa=new URLSearchParams(location.search).get('autoadd');
-if(qa){qa.split(',').forEach(function(id){var b=document.querySelector('[data-add*=\'"id":"'+id+'"\']');if(b)b.click()});}
+if(qa){qa.split(',').forEach(function(id){
+var b=document.querySelector('[data-add*=\'"id":"'+id+'"\']')||document.querySelector('[data-vprod="'+id+'"] [data-vadd]');
+if(b)b.click()});}
 </script>
 </body></html>

@@ -29,14 +29,16 @@ h1{font-family:'PP Editorial Old',serif;font-weight:200;font-size:29px;margin-bo
 <main><h1>Your Journey</h1><p class="sub">Your selections · live costs · nothing is paid on this website</p>
 <div id="items"></div>
 <div class="tot"><span class="l">Your Costs</span><span class="r" id="tt">USD 0</span></div>
-<p class="note">Hosted wedding programme events are part of your journey without charge — they never appear as USD 0 line items.</p>
-<a class="cta" href="journeys.html">Continue exploring</a>
+<p class="note">Hosted wedding programme events are part of your journey without charge — they never appear as USD 0 line items. Spa interest lines carry no journey cost — the amount is payable at the spa.</p>
+<a class="cta" href="review.html">Review &amp; Send</a>
+<p style="text-align:center;margin-top:18px"><a href="journeys.html" style="font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:#313131;text-decoration:none;border-bottom:1px solid #313131;padding:8px 0 3px;display:inline-block;min-height:44px">Continue exploring</a></p>
 </main>
 <script src="assets/bag.js"></script>
+<script src="assets/shop-menu.js"></script>
 <script>
 function render(){var b=SIYL_BAG.get(),el=document.getElementById('items');
 if(!b.length){el.innerHTML='<p class="empty">Nothing is in your journey yet. Everything you add appears here with its live total.</p>'}
-else{el.innerHTML=b.map(function(x){return '<div class="row"><div class="th"'+(x.img?' style="background-image:url('+x.img+')"':'')+'></div><div style="flex:1"><p class="nm">'+x.name+'</p><p class="mt">'+x.meta+'</p>'+(x.unit?'<div class="q"><button data-q="'+x.id+':-1">−</button><b style="font-family:\'PP Editorial Old\',serif">'+x.qty+'</b><button data-q="'+x.id+':1">+</button></div>':'')+'<br><button class="rm" data-rm="'+x.id+'">Remove</button></div><span class="ln">USD '+((x.price||0)*x.qty)+'</span></div>'}).join('')}
+else{el.innerHTML=b.map(function(x){return '<div class="row"><div class="th"'+(x.img?' style="background-image:url('+x.img+')"':'')+'></div><div style="flex:1"><p class="nm">'+x.name+'</p><p class="mt">'+x.meta+'</p>'+(x.unit?'<div class="q"><button data-q="'+x.id+':-1">−</button><b style="font-family:\'PP Editorial Old\',serif">'+x.qty+'</b><button data-q="'+x.id+':1">+</button></div>':'')+'<br><button class="rm" data-rm="'+x.id+'">Remove</button></div>'+(x.interest?'<span class="ln" style="font-family:\'Hanken Grotesk\',Helvetica,Arial,sans-serif;font-size:9px;letter-spacing:1.6px;text-transform:uppercase;color:#7C7A75">Interest · request</span>':'<span class="ln">USD '+((x.price||0)*x.qty)+'</span>')+'</div>'}).join('')}
 document.getElementById('tt').textContent='USD '+SIYL_BAG.total().toLocaleString('en-US');
 el.querySelectorAll('[data-rm]').forEach(function(b){b.addEventListener('click',function(){SIYL_BAG.remove(b.getAttribute('data-rm'));render()})});
 el.querySelectorAll('[data-q]').forEach(function(b){b.addEventListener('click',function(){var v=b.getAttribute('data-q').split(':');SIYL_BAG.qty(v[0],parseInt(v[1],10));render()})});

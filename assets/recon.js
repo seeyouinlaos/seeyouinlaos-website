@@ -5,11 +5,12 @@
 
   var PAGES = [
     ['index.html', 'Home'],
-    ['voyage.html', 'Journeys'],
+    ['journeys.html', 'Journeys'],
     ['destination.html', 'Destinations'],
-    ['experiences.html', 'Experiences'],
-    ['accommodation.html', 'Accommodation'],
-    ['plan.html', 'Plan']
+    ['marsilea.html', 'Marsilea Spa'],
+    ['1872.html', '1872 · Afternoon Tea'],
+    ['your-journey.html', 'Your Journey'],
+    ['review.html', 'Review & Send']
   ];
   var here = location.pathname.split('/').pop() || 'index.html';
 
@@ -20,7 +21,7 @@
     '<div class="hd-row">' +
       '<div class="hd-left"><button class="hd-cta" id="menu-open" aria-haspopup="dialog" aria-expanded="false"><span class="burger" aria-hidden="true"><i></i><i></i><i></i></span></button></div>' +
       '<a class="brand" href="index.html">see you in laos.<span class="dot">·</span></a>' +
-      '<div class="hd-right"><a class="hd-cta" href="plan.html" aria-label="Your Journey" style="font-size:15px">◻</a></div>' +
+      '<div class="hd-right"><a class="hd-cta" href="your-journey.html" aria-label="Your Journey" style="font-size:15px;position:relative">◻<span data-bag-badge style="position:absolute;top:2px;right:0;min-width:16px;height:16px;background:#313131;color:#F3EEE7;font-size:9px;display:none;align-items:center;justify-content:center;padding:0 4px"></span></a></div>' +
     '</div>' +
     '';
   document.body.prepend(header);
@@ -47,28 +48,18 @@
     '</div>' +
     '<div class="drawer-grid">' +
       '<nav class="drawer-nav" aria-label="Primary">' +
-        '<a href="index.html">Destinations</a>' +
-        '<a href="voyage.html">Journeys</a>' +
-        '<div class="drawer-sub">' +
-          '<a href="voyage.html">Thailand — Before the Wedding</a>' +
-          '<a href="voyage.html">Laos — The Wedding</a>' +
-          '<a href="voyage.html">China — After the Wedding</a>' +
-          '<a href="voyage.html">All journeys</a>' +
-        '</div>' +
-        '<a href="destination.html">Destinations</a>' +
-        '<a href="experiences.html">Experiences</a>' +
-        '<a href="accommodation.html">Accommodation</a>' +
-        '<a href="plan.html">Your Journey</a>' +
+        PAGES.map(function (p) {
+          return '<a href="' + p[0] + '"' + (here === p[0] ? ' aria-current="page"' : '') + '>' + p[1] + '</a>';
+        }).join('') +
       '</nav>' +
       '<aside class="drawer-preview">' +
-        '<div class="ph r-32" data-ph="Photography to follow · preview 3:2"></div>' +
-        '<p class="eyebrow">Featured — placeholder</p>' +
-        '<h3>A neutral preview title</h3>' +
+        '<div class="ph r-32" style="background:url(assets/images/city/002-vientiane-patuxai-twilight.jpg) center/cover no-repeat"></div>' +
+        '<p class="eyebrow">Sunday, 28 February 2027</p>' +
+        '<h3>Vientiane, Laos</h3>' +
       '</aside>' +
     '</div>' +
     '<div class="drawer-foot">' +
-      '<a href="#">Parent brand — placeholder</a>' +
-      '<a href="#">Contact us — placeholder</a>' +
+      '<a href="mailto:guest.relation.seeyouinlaos@gmail.com">guest.relation.seeyouinlaos@gmail.com</a>' +
     '</div>';
   document.body.append(scrim, drawer);
 
@@ -93,15 +84,16 @@
     '<div class="ft">' +
       '<p class="ft-brand">see you in laos.</p>' +
       '<div class="ft-grid">' +
-        '<div><h3>Explore</h3><a href="voyage.html">Journeys</a><a href="destination.html">Destinations</a><a href="experiences.html">Experiences</a><a href="accommodation.html">Accommodation</a></div>' +
-        '<div><h3>Plan</h3><a href="plan.html">Your Journey</a><a href="#">Your Invitation — placeholder</a><a href="#">Enquiries — placeholder</a></div>' +
-        '<div><h3>Company</h3><a href="#">About — placeholder</a><a href="#">Careers — placeholder</a><a href="#">Press — placeholder</a></div>' +
-        '<div><h3>Get inspired</h3><p>Neutral newsletter invitation copy sits here in one short sentence.</p>' +
-          '<form class="ft-news" onsubmit="return false"><input type="email" placeholder="Email address" aria-label="Email address"><button class="t-link" type="submit">Subscribe</button></form></div>' +
+        '<div><h3>Explore</h3><a href="journeys.html">Journeys</a><a href="destination.html">Destinations</a><a href="marsilea.html">Marsilea Spa</a><a href="1872.html">1872 · Afternoon Tea</a></div>' +
+        '<div><h3>Plan</h3><a href="your-journey.html">Your Journey</a><a href="review.html">Review & Send</a></div>' +
+        '<div><h3>Guest Relations</h3><a href="mailto:guest.relation.seeyouinlaos@gmail.com">guest.relation.seeyouinlaos@gmail.com</a></div>' +
       '</div>' +
-      '<div class="ft-legal"><span>© Placeholder</span><a href="#">Privacy</a><a href="#">Terms</a><a href="#">Cookies</a><a href="#">Accessibility</a></div>' +
+      '<div class="ft-legal"><span>Sunday, 28 February 2027 · Vientiane, Laos</span></div>' +
     '</div>';
   document.body.append(footer);
+  var badgeScript = document.createElement('script');
+  badgeScript.src = 'assets/bag.js';
+  document.body.appendChild(badgeScript);
 
   /* ---------- rails: prev/next controls scroll by one slide ---------- */
   document.querySelectorAll('[data-rail]').forEach(function (wrap) {

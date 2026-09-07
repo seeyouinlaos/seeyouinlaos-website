@@ -33,7 +33,7 @@ hr{border:0;border-top:1px solid #DAD9D7;margin:0 0 22px}
 .ja-n{font-family:'PP Editorial Old',serif;font-weight:200;font-size:17px;line-height:1.3}
 .ja-m{font-size:11px;color:#7C7A75;margin-top:5px}
 </style></head><body>
-<header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos.</div><a class="bag" href="#journey" aria-label="Your Journey">◻</a></header>
+<header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos.</div><a class="bag" href="your-journey.html" aria-label="Your Journey" style="position:relative">◻<span style="position:absolute;top:4px;right:2px;min-width:16px;height:16px;background:#313131;color:#F3EEE7;font-size:9px;display:none;align-items:center;justify-content:center;padding:0 4px" data-bag-badge></span></a></header>
 <main>
 <div class="media" style="background:url(assets/images/1872/tea-2.jpg) center/cover no-repeat"></div>
 <section class="panel">
@@ -59,12 +59,18 @@ var q0=parseInt(new URLSearchParams(location.search).get('q')||'1',10);if(q0>0)Q
 function qr(){document.getElementById('qv').textContent=Q;document.getElementById('qt').textContent='USD '+(180*Q)}
 
 var ov=document.getElementById('ov');
-function invite(){ov.innerHTML='<p class="eyebrow">Your Invitation</p><h2>Enter your private invitation code.</h2><input type="text" autocomplete="one-time-code" aria-label="Invitation code"><button class="cta" style="margin-top:4px">Continue</button><p class="lost">Lost your code? <a href="mailto:guest.relation.seeyouinlaos@gmail.com">guest.relation.seeyouinlaos@gmail.com</a></p>';document.body.classList.add('show')}
+/* real invitation gate: validated against the engine (assets/invite.mjs) */
+function gated(fn){if(window.SIYL_INVITE){SIYL_INVITE.require(fn)}
+else document.addEventListener('siyl:invite-ready',function(){SIYL_INVITE.require(fn)},{once:true})}
+function invite(){gated(added)}
 function added(){SIYL_BAG.add({id:'tea1872',name:'Champagne Afternoon Tea at 1872',meta:'For two guests',price:180,unit:true,qty:Q,img:'assets/images/1872/tea-1.jpg'});ov.innerHTML='<p class="eyebrow">Just added to your journey</p><div class="ja-row"><div class="ja-th"></div><div><p class="ja-n">Champagne Afternoon Tea at 1872</p><p class="ja-m">Quantity '+Q+' · USD '+(180*Q)+' · For two guests</p></div></div><a class="cta" style="margin-top:0" href="your-journey.html">View Your Journey</a><p style="text-align:center;margin-top:16px"><a class="tlink" href="#" id="cont">Continue exploring</a></p>';document.body.classList.add('show');var c=document.getElementById('cont');if(c)c.addEventListener('click',function(e){e.preventDefault();document.body.classList.remove('show')})}
 qr();
 document.getElementById('qm').addEventListener('click',function(){if(Q>1){Q--;qr()}});
 document.getElementById('qp').addEventListener('click',function(){Q++;qr()});
 document.getElementById('add').addEventListener('click',invite);
 document.getElementById('scrim').addEventListener('click',function(){document.body.classList.remove('show')});
-if(st==='invite')invite();if(st==='added')added();
-</script><script src="assets/bag.js"></script></body></html>
+if(st==='invite'){document.addEventListener('siyl:invite-ready',function(){SIYL_INVITE.open()},{once:true})}
+if(st==='added')added();
+</script><script src="assets/bag.js"></script>
+<script src="assets/shop-menu.js"></script>
+<script type="module" src="assets/invite.mjs"></script></body></html>
