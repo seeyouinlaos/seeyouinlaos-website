@@ -8,13 +8,13 @@
 import {
   WEDDING, CONTACTS, JOURNEY_MODULES, EVENTS, ACCOMMODATIONS, SELECTABLE_ACCOMMODATIONS, TRAIN,
   TRANSFERS, PACKAGE_INCLUSIONS, COPY, DEMO_MODE, PUBLICATION, TRAIN_REFERENCE, BERTH_PREFS, BANGKOK_STAYS, BANGKOK_STAY, POST_WEDDING, RETURN_STAY, lookupInvitation,
-} from './data.mjs?v=K2';
+} from './data.mjs?v=L2';
 import {
   contributionPerGuest, partyCharges, partyTotal, money as usdMoney, displayMoney,
   trainContribution, transfersTotal, journeyTotal, postWeddingTotal,
   createInventory, remaining, availabilityLabel, requestAllocation,
   validateRegistration, buildNotification, nextInvitationState,
-} from './logic.mjs?v=K2';
+} from './logic.mjs?v=L2';
 
 /* ---------------- persistent state ---------------- */
 const DRAFT_KEY = 'siyl.reg.draft.v2';
@@ -354,6 +354,8 @@ function renderStep(i) {
  * reopen it — only the explicit reopen link (force). Every attempted stale or
  * invalid transition is ignored (and logged with ?debug=inv). */
 const overlay = document.getElementById('invitation');
+const urlGo = (new URLSearchParams(location.search).get('go') || '').trim().toLowerCase();
+if (urlGo === 'bkk' || urlGo === 'vte' || urlGo === 'china') { S._voy = urlGo; S._dest = null; }
 const urlToken = (new URLSearchParams(location.search).get('invite') || '').trim().toLowerCase();
 const urlRoom = (new URLSearchParams(location.search).get('room') || '').trim().toLowerCase();
 const INV_DEBUG = new URLSearchParams(location.search).has('debug');
@@ -578,10 +580,43 @@ function renderPrivnav() {
   const menuBtn = document.getElementById('hd-menu');
   const planBtn = document.getElementById('hd-plan');
   if (!S.invitation || isAuthOut()) {
-    nav.hidden = true; setDrawer(false);
-    if (siteNav) siteNav.hidden = false;
-    if (menuBtn) menuBtn.hidden = true;
+    /* ONE LEVEL: the same menu system serves unauthenticated browsing. */
+    nav.hidden = false;
+    if (siteNav) siteNav.hidden = true;
+    if (menuBtn) menuBtn.hidden = false;
     if (planBtn) planBtn.hidden = true;
+    const name0 = stepEls[cur].dataset.step;
+    nav.innerHTML =
+      '<div class="dw-head"><span class="dw-brand">see you in laos<span style="color:var(--cherry-photo)">.</span></span>' +
+      '<button type="button" class="dw-close" aria-label="Close menu">Close</button></div>' +
+      '<button type="button" data-nav="home"' + (name0 === 'home' && !S._voy && !S._dest ? ' aria-current="true"' : '') + '>Home</button>' +
+      '<button type="button" class="dw-sub" data-destnav="1">Destinations</button>' +
+      '<div class="dw-group">' + ['bkk', 'vte', 'china'].map((k) =>
+        '<button type="button" class="dw-sub" data-voy-nav="' + k + '">' + VOY[k].country + ' — ' + SEG_DEF()[k].name + '</button>').join('') + '</div>' +
+      '<button type="button" class="dw-sub" data-wellness-nav="1">Wellness — Marsilea Spa</button>' +
+      '<button type="button" data-nav="find">Enter the Journey</button>' +
+      '<span class="pn-exit"><button type="button" id="pn-home">Website</button></span>';
+    nav.querySelector('.dw-close').addEventListener('click', () => setDrawer(false));
+    nav.querySelectorAll('[data-destnav]').forEach((b) => b.addEventListener('click', () => { setDrawer(false); setDestnav(true); }));
+    nav.querySelectorAll('[data-voy-nav]').forEach((b) => b.addEventListener('click', () => {
+      S._voy = b.getAttribute('data-voy-nav'); S._dest = null; S._voySec = null; setDrawer(false); show(idx('home'));
+    }));
+    nav.querySelectorAll('[data-wellness-nav]').forEach((b) => b.addEventListener('click', () => {
+      S._voy = 'vte'; S._voySec = 'wellness'; S._dest = null; setDrawer(false); show(idx('home'));
+    }));
+    nav.querySelectorAll('[data-nav]').forEach((b) => b.addEventListener('click', () => {
+      if (b.getAttribute('data-nav') === 'home') { S._voy = null; S._dest = null; }
+      setDrawer(false); show(idx(b.getAttribute('data-nav')));
+    }));
+    nav.querySelector('#pn-home').addEventListener('click', () => { location.href = '../'; });
+    if (menuBtn && !menuBtn.dataset.wired) {
+      menuBtn.dataset.wired = '1';
+      menuBtn.addEventListener('click', () => setDrawer(true));
+      document.getElementById('dw-scrim').addEventListener('click', () => setDrawer(false));
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && document.body.classList.contains('dw-open')) setDrawer(false);
+      });
+    }
     return;
   }
   nav.hidden = false;
@@ -850,6 +885,7 @@ function renderSegInto(k, box) {
 }
 function wireSegJoin(box) {
   box.querySelectorAll('[data-seg-join]').forEach((b) => b.addEventListener('click', () => {
+    if (!S.invitation) { show(idx('find')); return; }
     S.scope[SEG_DEF()[b.getAttribute('data-seg-join')].scope] = true;
     saveDraft(); renderStep(cur); renderSummary();
   }));
@@ -1898,12 +1934,18 @@ function grCardHtml() {
 
 function renderHome() {
   const box = document.getElementById('home-box');
-  if (!S.invitation) { show(idx('find')); return; }
+  /* ONE LEVEL: unauthenticated visitors browse the same website; the
+   * invitation code only personalises it. No separate booking UI exists. */
   if (S._dest) { renderDestination(S._dest, box); return; }
   if (S._voy && VOY[S._voy]) { renderVoyage(S._voy, box); return; }
-  const lead = S.invitation.guests.find((g) => g.guestId === S.invitation.partyLead) || S.invitation.guests[0];
-  document.getElementById('home-title').innerHTML =
-    'Welcome' + (S._returning ? ' back' : '') + ',<br/>' + esc(lead.preferredName) + '.';
+  const authed = !!S.invitation;
+  if (authed) {
+    const lead = S.invitation.guests.find((g) => g.guestId === S.invitation.partyLead) || S.invitation.guests[0];
+    document.getElementById('home-title').innerHTML =
+      'Welcome' + (S._returning ? ' back' : '') + ',<br/>' + esc(lead.preferredName) + '.';
+  } else {
+    document.getElementById('home-title').innerHTML = 'One invitation,<br/>three journeys.';
+  }
   const acc = currentAcc();
   const occ = acc ? S.stay.occupantGuestIds : [];
   const riders = S.guests.filter((g) => g.journey.train);
@@ -1926,7 +1968,7 @@ function renderHome() {
       '</article>';
   };
   box.innerHTML =
-    '<p class="note" style="margin:0 0 4px">' + esc(S.invitation.partyName) + '</p>' +
+    (authed ? '<p class="note" style="margin:0 0 4px">' + esc(S.invitation.partyName) + '</p>' : '') +
     '<p class="note" style="margin:0 0 30px">One invitation, three journeys. The wedding carries the middle one.</p>' +
     /* Featured journeys — Aman rail: image-led tiles, controlled peeking,
      * quiet metadata, serif titles, horizontal interaction. */
@@ -1945,13 +1987,16 @@ function renderHome() {
     '<p class="note" style="max-width:560px;margin-bottom:10px">Bangkok, Vientiane, Kunming and Lijiang — the four places this invitation moves through.</p>' +
     '<button type="button" class="btn-full" id="open-destnav">All destinations</button></section>' +
     prod('bkk') + prod('vte') + prod('china') +
-    '<div style="margin-top:26px">' +
+    (!authed ? '' : '<div style="margin-top:26px">' +
     '<button type="button" class="jd-row" data-jump="cost"><span class="jr-l">Your Plan</span><span class="jr-v">Your personal itinerary</span></button>' +
     '<button type="button" class="jd-row" data-jump="each"><span class="jr-l">My Details</span><span class="jr-v">' + (detailsMissing ? detailsMissing + ' still needed' : 'Complete') + '</span></button>' +
     '<button type="button" class="jd-row" data-jump="review" style="border-bottom:1px solid var(--line)"><span class="jr-l">' + (S.submitted ? 'Registration' : 'Review & Send') + '</span><span class="jr-v">' + (S.submitted ? 'With Guest Relations' : 'One quiet look, then send') + '</span></button>' +
     '</div>' +
     '<div class="jd-total"><span class="jr-l">Total Costs</span><strong>' + money(total) + '</strong></div>' +
-    grCardHtml();
+    grCardHtml() + '</div>') +
+    (!authed ? '<section class="am-sec"><p class="cch-label">Your Invitation</p>' +
+      '<p class="note" style="max-width:540px;margin-bottom:12px">The complete journey opens with the private code from your invitation — availability, your selections and your costs.</p>' +
+      '<button type="button" class="t-act" data-jump="find">Enter the Journey</button></section>' : '');
   box.querySelectorAll('[data-voy-open]').forEach((b) => {
     const open = () => { S._voy = b.getAttribute('data-voy-open'); S._dest = null; renderStep(cur); window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' }); };
     b.addEventListener('click', open);
@@ -2158,6 +2203,7 @@ function renderStay() {
   box.innerHTML = html + '<p class="note am-foot" style="margin-top:28px">' + esc(COPY.requestNote) + ' ' + esc(COPY.payment) + '</p>';
 
   box.querySelectorAll('[data-select]').forEach((b) => b.addEventListener('click', () => {
+    if (!S.invitation) { show(idx('find')); return; }
     S.stay.accommodationId = b.getAttribute('data-select');
     S.stay.rooms = 1;
     S.stay.waitlist = false;
