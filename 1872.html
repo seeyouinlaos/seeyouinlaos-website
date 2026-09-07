@@ -1,0 +1,69 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>1872 · See You In Laos</title><style>
+@font-face{font-family:'PP Editorial Old';src:url('assets/fonts/PPEditorialOld-Ultralight.otf') format('opentype');font-weight:200;font-display:swap}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;font-weight:300;font-size:14px;line-height:1.6}
+.hd{display:grid;grid-template-columns:44px 1fr 44px;align-items:center;padding:calc(14px + env(safe-area-inset-top)) 20px 14px}
+.hb{width:44px;height:44px;display:flex;flex-direction:column;justify-content:center;gap:5px;background:none;border:0;cursor:pointer}.hb i{display:block;width:20px;height:1.4px;background:#313131}
+.bd{font-family:'PP Editorial Old',serif;font-weight:200;font-size:19px;text-align:center}
+.bag{width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:#313131;text-decoration:none;position:relative}
+main{padding:30px 24px 70px}
+.ph{background:linear-gradient(160deg,#E7E3DB,#D9D3C7);position:relative}
+.ph span{position:absolute;left:0;right:0;bottom:12px;text-align:center;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#7C7A75}
+.gal{position:relative}.gal .ph{width:100%;aspect-ratio:4/5;display:none}.gal .ph.on{display:block}
+.gc{position:absolute;right:12px;bottom:12px;background:rgba(49,49,49,.55);color:#F3EEE7;font-size:10px;letter-spacing:1.6px;padding:4px 9px;z-index:2}
+.gn{position:absolute;top:50%;transform:translateY(-50%);background:none;border:0;font-size:22px;color:#313131;width:44px;height:44px;cursor:pointer;z-index:2}
+.gp{left:-8px}.gx{right:-8px}
+.intro{text-align:center;padding:44px 10px 8px}
+h1{font-family:'PP Editorial Old',serif;font-weight:200;font-size:31px;line-height:1.25;margin-bottom:16px}
+.body{font-size:13.5px;line-height:1.8;color:#4A4A4A;max-width:30em;margin:0 auto 20px}
+.pend{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#7C7A75}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:52px}.duo .ph{aspect-ratio:4/5}
+.wide{margin-top:10px}.wide .ph{aspect-ratio:16/10}
+h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:25px;text-align:center;margin:34px 0 14px}
+.acc{margin-top:46px;border-top:1px solid #DAD9D7;border-bottom:1px solid #DAD9D7}
+.acc button{width:100%;display:flex;align-items:center;gap:14px;background:none;border:0;padding:19px 2px;font:inherit;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#313131;cursor:pointer;min-height:52px}
+.acc .x{font-size:17px}.acc .in{display:none;padding:0 2px 22px}.acc.open .in{display:block}
+.gift{background:#FCFAF6;margin-top:52px;padding:34px 26px 38px}
+.eyebrow{font-size:10px;letter-spacing:2.2px;text-transform:uppercase;color:#7C7A75;margin-bottom:12px}
+.gift h2{text-align:left;margin:0 0 12px;font-size:27px}
+.price{font-family:'PP Editorial Old',serif;font-size:17px}.per{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75;margin:2px 0 20px}
+.cta{display:block;width:100%;background:#313131;color:#F3EEE7;border:0;padding:19px;font-size:11px;letter-spacing:2.2px;text-transform:uppercase;cursor:pointer;min-height:52px;text-align:center;text-decoration:none}
+</style></head><body>
+<header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos.</div><a class="bag" href="tea.html" aria-label="Your Journey">◻</a></header>
+<main>
+<div class="gal" id="gal">
+<div class="ph on"><span>Photography to follow · 1 of 3</span></div>
+<div class="ph"><span>Photography to follow · 2 of 3</span></div>
+<div class="ph"><span>Photography to follow · 3 of 3</span></div>
+<button class="gn gp" aria-label="Previous">‹</button><button class="gn gx" aria-label="Next">›</button>
+<span class="gc" id="gc">1 / 3</span>
+</div>
+<section class="intro">
+<p class="eyebrow">Bangkok, Thailand</p>
+<h1>1872</h1>
+<p class="body pend">Editorial venue text to follow from the owner.</p>
+</section>
+<div class="duo"><div class="ph"><span>Photography to follow</span></div><div class="ph"><span>Photography to follow</span></div></div>
+<div class="wide"><div class="ph"><span>Photography to follow</span></div></div>
+<h2>Signature Afternoon Tea</h2>
+<p class="body pend" style="text-align:center">Editorial description to follow from the owner.</p>
+<div class="acc" id="acc"><button aria-expanded="false"><span class="x" id="ax">+</span>Operation Hours &amp; Information</button>
+<div class="in"><p class="body pend" style="margin:0">Operating information to follow from the owner.</p></div></div>
+<section class="gift">
+<p class="eyebrow">Gift Experience</p>
+<h2>Champagne Afternoon Tea at 1872</h2>
+<p class="price">USD 180</p><p class="per">For two guests</p>
+<a class="cta" href="tea.html">View the experience</a>
+</section>
+</main>
+<script>
+var g=0,phs=document.querySelectorAll('#gal .ph'),gc=document.getElementById('gc');
+function go(d){phs[g].classList.remove('on');g=(g+d+3)%3;phs[g].classList.add('on');gc.textContent=(g+1)+' / 3'}
+document.querySelector('.gp').addEventListener('click',function(){go(-1)});
+document.querySelector('.gx').addEventListener('click',function(){go(1)});
+var acc=document.getElementById('acc');
+acc.querySelector('button').addEventListener('click',function(){acc.classList.toggle('open');document.getElementById('ax').textContent=acc.classList.contains('open')?'−':'+';this.setAttribute('aria-expanded',acc.classList.contains('open'))});
+var q=new URLSearchParams(location.search);
+if(q.get('g')==='2')go(1);if(q.get('g')==='3'){go(1);go(1)}
+if(q.get('acc')==='open')acc.querySelector('button').click();
+</script></body></html>

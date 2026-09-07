@@ -18,6 +18,7 @@ h1{font-family:'PP Editorial Old',serif;font-weight:200;font-size:29px;line-heig
 .per{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75;margin-bottom:24px}
 hr{border:0;border-top:1px solid #DAD9D7;margin:0 0 22px}
 .tlink{display:inline-block;font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:#313131;text-decoration:none;border-bottom:1px solid #313131;padding:8px 0 3px;min-height:44px}
+.qb{width:44px;height:44px;border:1px solid #DAD9D7;background:#fff;font-size:17px;cursor:pointer}
 .cta{display:block;width:100%;margin-top:26px;background:#313131;color:#F3EEE7;border:0;padding:19px;font-size:11px;letter-spacing:2.2px;text-transform:uppercase;cursor:pointer;min-height:52px}
 .scrim{position:fixed;inset:0;background:rgba(30,30,30,.45);display:none;z-index:8}
 .ov{position:fixed;left:0;right:0;bottom:0;background:#FCFAF6;padding:34px 26px calc(38px + env(safe-area-inset-bottom));display:none;z-index:9}
@@ -42,17 +43,27 @@ hr{border:0;border-top:1px solid #DAD9D7;margin:0 0 22px}
 <p class="price">USD 180</p>
 <p class="per">For two guests</p>
 <hr>
-<a class="tlink" href="experiences.html">Discover more</a>
+<p class="eyebrow" style="margin-bottom:8px">Quantity</p>
+<div style="display:flex;align-items:center;gap:18px;margin-bottom:8px">
+<button class="qb" id="qm" aria-label="Fewer">−</button><span id="qv" style="font-family:'PP Editorial Old',serif;font-size:19px">1</span><button class="qb" id="qp" aria-label="More">+</button>
+<span id="qt" style="margin-left:auto;font-family:'PP Editorial Old',serif;font-size:15px">USD 180</span></div>
+<a class="tlink" href="1872.html">Discover 1872</a>
 <button class="cta" id="add">Add to Your Journey</button>
 </section>
 </main>
 <div class="scrim" id="scrim"></div>
 <div class="ov" id="ov"></div>
 <script>
-var st=new URLSearchParams(location.search).get('state');
+var Q=1;var st=new URLSearchParams(location.search).get('state');
+var q0=parseInt(new URLSearchParams(location.search).get('q')||'1',10);if(q0>0)Q=q0;
+function qr(){document.getElementById('qv').textContent=Q;document.getElementById('qt').textContent='USD '+(180*Q)}
+
 var ov=document.getElementById('ov');
 function invite(){ov.innerHTML='<p class="eyebrow">Your Invitation</p><h2>Enter your private invitation code.</h2><input type="text" autocomplete="one-time-code" aria-label="Invitation code"><button class="cta" style="margin-top:4px">Continue</button><p class="lost">Lost your code? <a href="mailto:guest.relation.seeyouinlaos@gmail.com">guest.relation.seeyouinlaos@gmail.com</a></p>';document.body.classList.add('show')}
-function added(){ov.innerHTML='<p class="eyebrow">Just added to your journey</p><div class="ja-row"><div class="ja-th"></div><div><p class="ja-n">Champagne Afternoon Tea at 1872</p><p class="ja-m">Quantity 1 · USD 180 · For two guests</p></div></div><button class="cta" style="margin-top:0">View Your Journey</button><p style="text-align:center;margin-top:16px"><a class="tlink" href="#" id="cont">Continue exploring</a></p>';document.body.classList.add('show');var c=document.getElementById('cont');if(c)c.addEventListener('click',function(e){e.preventDefault();document.body.classList.remove('show')})}
+function added(){ov.innerHTML='<p class="eyebrow">Just added to your journey</p><div class="ja-row"><div class="ja-th"></div><div><p class="ja-n">Champagne Afternoon Tea at 1872</p><p class="ja-m">Quantity '+Q+' · USD '+(180*Q)+' · For two guests</p></div></div><button class="cta" style="margin-top:0">View Your Journey</button><p style="text-align:center;margin-top:16px"><a class="tlink" href="#" id="cont">Continue exploring</a></p>';document.body.classList.add('show');var c=document.getElementById('cont');if(c)c.addEventListener('click',function(e){e.preventDefault();document.body.classList.remove('show')})}
+qr();
+document.getElementById('qm').addEventListener('click',function(){if(Q>1){Q--;qr()}});
+document.getElementById('qp').addEventListener('click',function(){Q++;qr()});
 document.getElementById('add').addEventListener('click',invite);
 document.getElementById('scrim').addEventListener('click',function(){document.body.classList.remove('show')});
 if(st==='invite')invite();if(st==='added')added();
