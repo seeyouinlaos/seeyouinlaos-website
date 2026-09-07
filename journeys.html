@@ -27,36 +27,48 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:22px;margin:40
 .vars .var:last-child{border-bottom:1px solid #DAD9D7}
 .var .vt{width:52px;height:40px;flex:0 0 auto;background:#E7E3DB center/cover no-repeat}
 .var .vp{margin-left:auto;font-family:'PP Editorial Old',serif;font-size:13.5px;white-space:nowrap}
+.var.on{background:#FCFAF6}
+.var .vsel{display:block;font-size:9px;letter-spacing:1.6px;text-transform:uppercase;color:#313131;margin-top:2px}
+.var .vt.none{background:#EFECE6;display:flex;align-items:center;justify-content:center}
+.var .vt.none::after{content:'—';font-size:11px;color:#B4AFA6}
+.dec{display:inline-block;background:none;border:0;border-bottom:1px solid #C9C4BA;font:inherit;font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75;padding:10px 0 3px;margin-top:14px;cursor:pointer;min-height:44px}
+.dec:hover{color:#313131;border-color:#313131}
+.p.declined{opacity:.62}
+.p.declined .pimg{filter:grayscale(1)}
+.decnote{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75;margin-top:12px}
+.jstat{font-size:12.5px;color:#7C7A75;margin:-14px 0 30px;line-height:1.7}
 .var .vgo{font-size:15px;color:#7C7A75;flex:0 0 auto}
 .var .vr{display:block;font-size:9px;letter-spacing:1.6px;text-transform:uppercase;color:#7C7A75;margin-top:1px}
 .vw{display:inline-block;margin-top:12px;font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:#313131;text-decoration:none;border-bottom:1px solid #313131;padding:8px 0 3px;min-height:44px}
 .st{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#7C7A75}
 </style><link rel="stylesheet" href="assets/desktop.css"></head><body>
-<header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="your-journey.html" aria-label="Your Journey"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4.7 10h16.6l-1.05 11.8a1.1 1.1 0 0 1-1.1 1H6.85a1.1 1.1 0 0 1-1.1-1z"/><path d="M7.6 10V7.9a2.4 2.4 0 0 1 4.8 0V10"/><path d="M13.6 10V7.9a2.4 2.4 0 0 1 4.8 0V10"/><path d="M5.3 14.4h15.4"/><rect x="11.7" y="13.1" width="2.6" height="2.6" rx=".3"/></svg><span class="bb" data-bag-badge></span></a></header>
+<header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="your-journey.html" aria-label="Your Journey"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main><h1>Journeys</h1>
+<p class="jstat" id="jstat"></p>
 <h2>Before the Wedding</h2><p class="win">21 – 27 February 2027</p>
-<div class="p"><div class="pimg" style="background-image:url(assets/images/journey/penthouse-01.jpg)"></div><p class="pn">Sathorn Penthouse Bangkok</p><p class="pm">21 – 24 February · 3 nights · capacity 12 adults</p><p class="pp">USD 270 per person</p><button class="add" data-add='{"id":"bkk-stay","name":"Sathorn Penthouse Bangkok","meta":"21 – 24 February 2027 · 3 nights","price":270,"img":"assets/images/journey/penthouse-01.jpg"}'>Add to Your Journey</button><br><a class="vw" href="room.html?stay=sathorn&amp;room=penthouse">View the penthouse</a></div>
-<div class="p"><div class="pgal" data-gal="[[&quot;assets/images/transport/train-no25-srt-train.jpg&quot;,&quot;State Railway of Thailand&quot;],[&quot;assets/images/transport/train-no25-first-class-cabin-1.jpg&quot;,&quot;First Class Sleeper cabin&quot;],[&quot;assets/images/transport/train-no25-first-class-cabin-2.jpg&quot;,&quot;First Class Sleeper cabin · by the window&quot;],[&quot;assets/images/transport/train-no25-first-class-passenger-room.jpg&quot;,&quot;First Class Passenger Room · Krung Thep Aphiwat&quot;],[&quot;assets/images/transport/train-no25-krung-thep-aphiwat.jpg&quot;,&quot;Krung Thep Aphiwat Central Terminal · departure 20:25&quot;],[&quot;assets/images/transport/train-no25-station-hall.jpg&quot;,&quot;The terminal hall&quot;],[&quot;assets/images/transport/train-no25-terminal-aerial.jpg&quot;,&quot;Krung Thep Aphiwat from above&quot;],[&quot;assets/images/transport/van-transfer-1.jpg&quot;,&quot;Van transfer · Nong Khai → Souphattra Heritage&quot;],[&quot;assets/images/transport/van-transfer-2.jpg&quot;,&quot;Van transfer · on board&quot;]]"></div><p class="pn">Special Express No. 25</p><p class="pm">24 – 25 February · Bangkok → Nong Khai → Vientiane · First Class Sleeper, van and border logistics to Souphattra Heritage · breakfast and dinner included</p><p class="pp">USD 75 per person · private single cabin USD 130</p><button class="add" data-add='{"id":"train","name":"Special Express No. 25","meta":"24 – 25 February 2027 · First Class Sleeper","price":75,"img":"assets/images/transport/train-no25-srt-train.jpg"}'>Add to Your Journey</button></div>
-<div class="p" data-vprod="prewed"><div class="pimg" style="background-image:url(assets/images/souphattra/heritage-courtyard-front.jpg)"></div><p class="pn">Pre-Wedding Vientiane · Souphattra Heritage</p><p class="pm">25 – 27 February · 2 nights fixed · per-person amount for the fixed window</p>
+<div class="p" id="j-bkk-stay"><div class="pimg" style="background-image:url(assets/images/journey/penthouse-01.jpg)"></div><p class="pn">Sathorn Penthouse Bangkok</p><p class="pm">21 – 24 February · 3 nights · capacity 12 adults</p><p class="pp">USD 270 per person</p><button class="add" data-add='{"id":"bkk-stay","name":"Sathorn Penthouse Bangkok","meta":"21 – 24 February 2027 · 3 nights","price":270,"img":"assets/images/journey/penthouse-01.jpg"}'>Add to Your Journey</button><br><a class="vw" href="room.html?stay=sathorn&amp;room=penthouse">View the penthouse</a></div>
+<div class="p" id="j-train"><div class="pgal" data-gal="[[&quot;assets/images/transport/train-no25-srt-train.jpg&quot;,&quot;State Railway of Thailand&quot;],[&quot;assets/images/transport/train-no25-first-class-cabin-1.jpg&quot;,&quot;First Class Sleeper cabin&quot;],[&quot;assets/images/transport/train-no25-first-class-cabin-2.jpg&quot;,&quot;First Class Sleeper cabin · by the window&quot;],[&quot;assets/images/transport/train-no25-first-class-passenger-room.jpg&quot;,&quot;First Class Passenger Room · Krung Thep Aphiwat&quot;],[&quot;assets/images/transport/train-no25-krung-thep-aphiwat.jpg&quot;,&quot;Krung Thep Aphiwat Central Terminal · departure 20:25&quot;],[&quot;assets/images/transport/train-no25-station-hall.jpg&quot;,&quot;The terminal hall&quot;],[&quot;assets/images/transport/train-no25-terminal-aerial.jpg&quot;,&quot;Krung Thep Aphiwat from above&quot;],[&quot;assets/images/transport/van-transfer-1.jpg&quot;,&quot;Van transfer · Nong Khai → Souphattra Heritage&quot;],[&quot;assets/images/transport/van-transfer-2.jpg&quot;,&quot;Van transfer · on board&quot;]]"></div><p class="pn">Special Express No. 25</p><p class="pm">24 – 25 February · Bangkok → Nong Khai → Vientiane · First Class Sleeper, van and border logistics to Souphattra Heritage · breakfast and dinner included</p><p class="pp">USD 75 per person · private single cabin USD 130</p><button class="add" data-add='{"id":"train","name":"Special Express No. 25","meta":"24 – 25 February 2027 · First Class Sleeper","price":75,"img":"assets/images/transport/train-no25-srt-train.jpg"}'>Add to Your Journey</button></div>
+<div class="p" id="j-prewed" data-vprod="prewed"><div class="pimg" style="background-image:url(assets/images/souphattra/heritage-courtyard-front.jpg)"></div><p class="pn">Pre-Wedding Vientiane · Souphattra Heritage</p><p class="pm">25 – 27 February · 2 nights fixed · per-person amount for the fixed window</p>
 <p class="vl">Rooms &amp; suites</p><div class="vars" data-rooms="souphattra"></div></div>
 <h2>The Wedding</h2><p class="win">27 February – 01 March 2027 · Vientiane</p>
-<div class="p" data-vprod="wedstay"><div class="pimg" style="background-image:url(assets/images/souphattra/heritage-arches-dusk.jpg)"></div><p class="pn">Wedding Stay · Souphattra Heritage</p><p class="pm">27 February – 01 March · 2 nights fixed · per-person amount for the fixed window</p>
+<div class="p" id="j-wedstay" data-vprod="wedstay"><div class="pimg" style="background-image:url(assets/images/souphattra/heritage-arches-dusk.jpg)"></div><p class="pn">Wedding Stay · Souphattra Heritage</p><p class="pm">27 February – 01 March · 2 nights fixed · per-person amount for the fixed window</p>
 <p class="vl">Rooms &amp; suites</p><div class="vars" data-rooms="souphattra"></div></div>
 <div class="p"><div class="pimg" style="background-image:url(assets/images/airbnb/airbnb-01.jpg)"></div><p class="pn">Private Residence</p><p class="pm">27 February – 01 March · Alternative stay · up to 4 adults · downtown Vientiane</p><p class="st">Complimentary · limited availability</p><a class="vw" href="room.html?stay=airbnb&amp;room=private-residence">View the residence</a></div>
 <div class="p"><p class="pn">The Wedding Programme</p><p class="pm">Temple Ceremony · Coffee &amp; Cake · Vow Ceremony · Wedding Dinner</p><p class="host">Hosted — part of your journey, never a charge</p></div>
 <h2>After the Wedding</h2><p class="win">01 – 08 March 2027</p>
-<div class="p"><div class="pgal" data-gal="[[&quot;assets/images/transport/mu9632-business-1.jpg&quot;,&quot;Business Class · China Eastern&quot;],[&quot;assets/images/transport/mu9632-business-2.jpg&quot;,&quot;Business Class · lie-flat&quot;],[&quot;assets/images/transport/mu9632-business-3.jpg&quot;,&quot;Business Class seat&quot;]]"></div><p class="pn">MU9632 · Vientiane → Kunming</p><p class="pm">01 March · 14:00 → 16:40 · non-stop · Business Class</p><p class="pp">USD 275 per person</p><button class="add" data-add='{"id":"mu9632","name":"MU9632 · Vientiane → Kunming","meta":"01 March 2027 · Business Class","price":275,"img":"assets/images/transport/mu9632-business-1.jpg"}'>Add to Your Journey</button></div>
-<div class="p" data-vprod="kmg"><div class="pimg" style="background-image:url(assets/images/journey/kunming-01.jpg)"></div><p class="pn">Wanxiang Yueju · Kunming</p><p class="pm">01 – 04 March · 3 nights · per-person amount for the fixed window</p>
+<div class="p" id="j-mu9632"><div class="pgal" data-gal="[[&quot;assets/images/transport/mu9632-business-1.jpg&quot;,&quot;Business Class · China Eastern&quot;],[&quot;assets/images/transport/mu9632-business-2.jpg&quot;,&quot;Business Class · lie-flat&quot;],[&quot;assets/images/transport/mu9632-business-3.jpg&quot;,&quot;Business Class seat&quot;]]"></div><p class="pn">MU9632 · Vientiane → Kunming</p><p class="pm">01 March · 14:00 → 16:40 · non-stop · Business Class</p><p class="pp">USD 275 per person</p><button class="add" data-add='{"id":"mu9632","name":"MU9632 · Vientiane → Kunming","meta":"01 March 2027 · Business Class","price":275,"img":"assets/images/transport/mu9632-business-1.jpg"}'>Add to Your Journey</button></div>
+<div class="p" id="j-kmg" data-vprod="kmg"><div class="pimg" style="background-image:url(assets/images/journey/kunming-01.jpg)"></div><p class="pn">Wanxiang Yueju · Kunming</p><p class="pm">01 – 04 March · 3 nights · per-person amount for the fixed window</p>
 <p class="vl">Suites &amp; lofts</p><div class="vars" data-rooms="kunming"></div></div>
-<div class="p"><div class="pgal" data-gal="[[&quot;assets/images/transport/c642-train-snow-mountain.jpg&quot;,&quot;C642 below Jade Dragon Snow Mountain&quot;],[&quot;assets/images/transport/c642-business-cabin-1.jpg&quot;,&quot;Business Class cabin&quot;],[&quot;assets/images/transport/c642-business-cabin-2.jpg&quot;,&quot;Business Class cabin&quot;],[&quot;assets/images/transport/c642-business-seat.jpg&quot;,&quot;Business Class seat · reclined&quot;],[&quot;assets/images/transport/c642-train-forest.jpg&quot;,&quot;The Kunming – Lijiang line&quot;],[&quot;assets/images/transport/c642-gorge-bridge.jpg&quot;,&quot;The line across the gorge&quot;],[&quot;assets/images/transport/c642-business-lounge-kunming.jpg&quot;,&quot;Business Class lounge · Kunming station&quot;]]"></div><p class="pn">C642 · Kunming → Lijiang</p><p class="pm">04 March · 16:39 → 21:06 · direct · 4h27 · Business Class · 1+1 seating · Priority Ticketing: expedited ticketing and shorter wait times</p><p class="pp">USD 85 per person</p><button class="add" data-add='{"id":"c642","name":"C642 · Kunming → Lijiang","meta":"04 March 2027 · Business Class","price":85,"img":"assets/images/transport/c642-train-snow-mountain.jpg"}'>Add to Your Journey</button></div>
-<div class="p" data-vprod="ljg"><div class="pimg" style="background-image:url(assets/images/journey/lijiang-01.jpg)"></div><p class="pn">Luye Baisha · Lijiang</p><p class="pm">04 – 06 March · 2 nights fixed · per-person amount for the fixed window</p>
+<div class="p" id="j-c642"><div class="pgal" data-gal="[[&quot;assets/images/transport/c642-train-snow-mountain.jpg&quot;,&quot;C642 below Jade Dragon Snow Mountain&quot;],[&quot;assets/images/transport/c642-business-cabin-1.jpg&quot;,&quot;Business Class cabin&quot;],[&quot;assets/images/transport/c642-business-cabin-2.jpg&quot;,&quot;Business Class cabin&quot;],[&quot;assets/images/transport/c642-business-seat.jpg&quot;,&quot;Business Class seat · reclined&quot;],[&quot;assets/images/transport/c642-train-forest.jpg&quot;,&quot;The Kunming – Lijiang line&quot;],[&quot;assets/images/transport/c642-gorge-bridge.jpg&quot;,&quot;The line across the gorge&quot;],[&quot;assets/images/transport/c642-business-lounge-kunming.jpg&quot;,&quot;Business Class lounge · Kunming station&quot;]]"></div><p class="pn">C642 · Kunming → Lijiang</p><p class="pm">04 March · 16:39 → 21:06 · direct · 4h27 · Business Class · 1+1 seating · Priority Ticketing: expedited ticketing and shorter wait times</p><p class="pp">USD 85 per person</p><button class="add" data-add='{"id":"c642","name":"C642 · Kunming → Lijiang","meta":"04 March 2027 · Business Class","price":85,"img":"assets/images/transport/c642-train-snow-mountain.jpg"}'>Add to Your Journey</button></div>
+<div class="p" id="j-ljg" data-vprod="ljg"><div class="pimg" style="background-image:url(assets/images/journey/lijiang-01.jpg)"></div><p class="pn">Luye Baisha · Lijiang</p><p class="pm">04 – 06 March · 2 nights fixed · per-person amount for the fixed window</p>
 <p class="vl">Rooms &amp; suites</p><div class="vars" data-rooms="lijiang"></div></div>
-<div class="p"><div class="pgal" data-gal="[[&quot;assets/images/transport/mu5924-economy-cabin-1.jpg&quot;,&quot;Economy Class · China Eastern&quot;],[&quot;assets/images/transport/mu5924-economy-cabin-2.jpg&quot;,&quot;Economy Class seats&quot;],[&quot;assets/images/transport/mu5924-economy-cabin-3.jpg&quot;,&quot;Economy Class cabin&quot;],[&quot;assets/images/transport/mu5924-economy-meal.jpg&quot;,&quot;On board&quot;],[&quot;assets/images/transport/mu5924-economy-ife.jpg&quot;,&quot;Seatback entertainment&quot;]]"></div><p class="pn">MU5924 + MU741 · Lijiang → Bangkok</p><p class="pm">06 March · 10:35 → 14:55 · via Kunming · Economy flexible</p><p class="pp">USD 200 per person</p><button class="add" data-add='{"id":"return","name":"MU5924 + MU741 · Lijiang → Bangkok","meta":"06 March 2027 · Economy flexible","price":200,"img":"assets/images/transport/mu5924-economy-cabin-1.jpg"}'>Add to Your Journey</button></div>
-<div class="p"><div class="pimg" style="background-image:url(assets/images/journey/kempinski-01.jpg)"></div><p class="pn">Siam Kempinski Bangkok</p><p class="pm">06 – 08 March · Deluxe Balcony King Non Smoking · 2 nights · breakfast included</p><p class="pp">USD 380 per person</p><button class="add" data-add='{"id":"kempinski","name":"Siam Kempinski Bangkok","meta":"06 – 08 March 2027 · 2 nights · breakfast included","price":380,"img":"assets/images/journey/kempinski-01.jpg"}'>Add to Your Journey</button><br><a class="vw" href="room.html?stay=kempinski&amp;room=deluxe-balcony-king">View the room</a></div>
+<div class="p" id="j-return"><div class="pgal" data-gal="[[&quot;assets/images/transport/mu5924-economy-cabin-1.jpg&quot;,&quot;Economy Class · China Eastern&quot;],[&quot;assets/images/transport/mu5924-economy-cabin-2.jpg&quot;,&quot;Economy Class seats&quot;],[&quot;assets/images/transport/mu5924-economy-cabin-3.jpg&quot;,&quot;Economy Class cabin&quot;],[&quot;assets/images/transport/mu5924-economy-meal.jpg&quot;,&quot;On board&quot;],[&quot;assets/images/transport/mu5924-economy-ife.jpg&quot;,&quot;Seatback entertainment&quot;]]"></div><p class="pn">MU5924 + MU741 · Lijiang → Bangkok</p><p class="pm">06 March · 10:35 → 14:55 · via Kunming · Economy flexible</p><p class="pp">USD 200 per person</p><button class="add" data-add='{"id":"return","name":"MU5924 + MU741 · Lijiang → Bangkok","meta":"06 March 2027 · Economy flexible","price":200,"img":"assets/images/transport/mu5924-economy-cabin-1.jpg"}'>Add to Your Journey</button></div>
+<div class="p" id="j-kempinski" data-vprod="kempinski"><div class="pimg" style="background-image:url(assets/images/journey/kempinski-01.jpg)"></div><p class="pn">Siam Kempinski Bangkok</p><p class="pm">06 – 08 March · 2 nights · breakfast included · USD 190 per person / night</p><p class="vl">Rooms &amp; suites</p><div class="vars" data-rooms="kempinski"></div></div>
 </main>
 <script src="assets/bag.js"></script>
 <script src="assets/shop-menu.js"></script>
 <script src="assets/rooms-data.js"></script>
+<script src="assets/journey.js"></script>
 <script type="module" src="assets/invite.mjs"></script>
 <script>
 /* ---------------- transport galleries: hero + swipe + arrows + 1/N (same grammar as room.html) */
@@ -88,10 +100,11 @@ var SOUPHATTRA_ROOMS=[
 var VPRODS={
 prewed:{name:"Pre-Wedding Vientiane · Souphattra Heritage",dates:"25 – 27 February 2027 · 2 nights fixed",img:"assets/images/souphattra/heritage-courtyard-front.jpg",vars:SOUPHATTRA_ROOMS},
 wedstay:{name:"Wedding Stay · Souphattra Heritage",dates:"27 February – 01 March 2027 · 2 nights fixed",img:"assets/images/souphattra/heritage-arches-dusk.jpg",vars:SOUPHATTRA_ROOMS},
+kempinski:{name:"Siam Kempinski Bangkok",dates:"06 – 08 March 2027 · 2 nights · breakfast included",img:"assets/images/journey/kempinski-01.jpg",vars:[["Deluxe Balcony King",380]]},
 kmg:{name:"Wanxiang Yueju · Kunming",dates:"01 – 04 March 2027 · 3 nights",img:"assets/images/journey/kunming-01.jpg",vars:[["Junting City-View Loft",150],["Milano Minimalist Loft",150],["Italian Style Suite",150],["Light French Suite",150]]},
 ljg:{name:"Luye Baisha · Lijiang",dates:"04 – 06 March 2027 · 2 nights fixed",img:"assets/images/journey/lijiang-01.jpg",vars:[
 ["Snow Mountain Manor Suite",120],["270° Snow Mountain View Room Private Soup Pool",105],["270° Private Courtyard Snow Mountain View",100],["Snow Mountain Viewing Room",75],["270° Snow Mountain Viewing",70]]}};
-var VSEL={prewed:0,wedstay:0,kmg:0,ljg:0};
+var VSEL={prewed:0,wedstay:0,kmg:0,ljg:0,kempinski:0};
 
 function vitem(k){var p=VPRODS[k],v=p.vars[VSEL[k]];
 return {id:k,name:p.name,meta:p.dates+" · "+v[0],price:v[1],img:p.img}}
@@ -99,14 +112,16 @@ return {id:k,name:p.name,meta:p.dates+" · "+v[0],price:v[1],img:p.img}}
 /* discover → view → select room → add: each row links into the room page
  * (Aman-grammar STAY/ROOM system, assets/rooms-data.js). The seven-row matrix
  * above stays the internal calculation logic for deep-link adds. */
-var VSTAY={prewed:'souphattra',wedstay:'souphattra',kmg:'kunming',ljg:'lijiang'};
+var VSTAY={prewed:'souphattra',wedstay:'souphattra',kmg:'kunming',ljg:'lijiang',kempinski:'kempinski'};
+/* which window does this room list belong to (prewed / wedstay / kmg / ljg / kempinski) */
+function boxWin(box){var p=box.closest('.p');return p?p.getAttribute('data-vprod'):null}
 document.querySelectorAll('[data-rooms]').forEach(function(box){
 var sk=box.getAttribute('data-rooms'),stay=window.SIYL_ROOMS[sk];
 box.innerHTML=stay.rooms.map(function(r){
 var img=r.gallery.length?r.gallery[0][0]:'';
 var right=r.price==null?'<span class="vr" style="margin:0">On request</span>':'<span class="vp">USD '+r.price+'</span>';
-return '<a class="var" href="room.html?stay='+sk+'&room='+r.slug+'">'+
-'<span class="vt"'+(img?' style="background-image:url('+img+')"':'')+'></span>'+
+return '<a class="var" data-room="'+r.slug+'" data-name="'+r.name.replace(/"/g,'&quot;')+'" href="room.html?stay='+sk+'&room='+r.slug+'">'+
+'<span class="vt'+(img?'':' none')+'"'+(img?' style="background-image:url('+img+')"':'')+'></span>'+
 '<span style="flex:1">'+r.name+(r.reserved?'<span class="vr">'+r.reserved+'</span>':'')+'</span>'+
 right+'<span class="vgo" aria-hidden="true">›</span></a>'}).join('')});
 
@@ -125,6 +140,49 @@ if(SIYL_BAG.has(it.id)){SIYL_BAG.remove(it.id);paintAdds();return}
 gated(function(){SIYL_BAG.add(it);paintAdds()})})});
 document.addEventListener('siyl:bag',paintAdds);paintAdds();
 if(SIYL_BAG.bar)SIYL_BAG.bar();
+
+/* ---------------- journey decisions: selected state, "not joining", context ----
+ * The bag stays the only calculation truth — this only shows what is answered. */
+function paintRooms(){
+document.querySelectorAll('[data-rooms]').forEach(function(box){
+var win=boxWin(box);if(!win)return;
+var line=SIYL_BAG.get().filter(function(x){return x.id===win})[0];
+box.querySelectorAll('.var').forEach(function(a){
+var name=a.getAttribute('data-name'),on=!!(line&&line.meta&&line.meta.indexOf(name)>=0);
+a.classList.toggle('on',on);
+var tag=a.querySelector('.vsel');
+if(on&&!tag){var s2=document.createElement('span');s2.className='vsel';s2.textContent='Selected · in your journey';
+a.querySelector('span[style*="flex:1"]').appendChild(s2)}
+if(!on&&tag)tag.remove()})})}
+
+function paintDecisions(){
+if(!window.SIYL_JOURNEY)return;
+SIYL_JOURNEY.SEGMENTS.forEach(function(seg){
+var el=document.getElementById(seg.anchor);if(!el)return;
+var st=SIYL_JOURNEY.state(seg);
+el.classList.toggle('declined',st==='declined');
+var btn=el.querySelector('.dec'),note=el.querySelector('.decnote');
+if(!btn){btn=document.createElement('button');btn.type='button';btn.className='dec';
+btn.addEventListener('click',function(){SIYL_JOURNEY.skip(seg.key,!SIYL_JOURNEY.isSkipped(seg.key));paintDecisions();paintStatus()});
+el.appendChild(btn)}
+if(!note){note=document.createElement('p');note.className='decnote';note.hidden=true;el.appendChild(note)}
+if(st==='selected'){btn.hidden=true;note.hidden=true}
+else if(st==='declined'){btn.hidden=false;btn.textContent='Change — I would like to join after all';
+note.hidden=false;note.textContent='Not joining this part of the journey'}
+else{btn.hidden=false;btn.textContent='I am not joining this part of the journey';note.hidden=true}})}
+
+function paintStatus(){
+var el=document.getElementById('jstat');
+if(el&&window.SIYL_JOURNEY)el.textContent=SIYL_JOURNEY.statusLine()}
+
+function paintAll(){paintRooms();paintDecisions();paintStatus()}
+document.addEventListener('siyl:bag',paintAll);paintAll();
+
+/* returning from a room keeps the guest exactly where they were */
+(function(){var h=location.hash;if(!h||h.length<2)return;
+var t=document.getElementById(h.slice(1));if(!t)return;
+setTimeout(function(){t.scrollIntoView({block:'start'});window.scrollBy(0,-90)},60);
+setTimeout(function(){t.scrollIntoView({block:'start'});window.scrollBy(0,-90)},420)})();
 /* deep-link add (used by scripted acceptance capture and shareable links);
  * for room products the default variant is added directly (matrix logic). */
 var qa=new URLSearchParams(location.search).get('autoadd');

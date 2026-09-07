@@ -19,6 +19,16 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:20px;margin:34
 .row:last-of-type{border-bottom:1px solid #DAD9D7}
 .th{width:58px;height:72px;background:#E7E3DB center/cover no-repeat;flex:0 0 auto}
 .nm{font-family:'PP Editorial Old',serif;font-weight:200;font-size:16.5px;line-height:1.35}
+.when{font-size:9.5px;letter-spacing:2px;text-transform:uppercase;color:#7C7A75}
+.cat{font-size:9.5px;letter-spacing:2px;text-transform:uppercase;color:#313131;margin:2px 0 3px}
+.cat .bk{display:inline-block;width:5px;height:5px;border-radius:50%;background:#8A5A55;margin-left:7px;vertical-align:middle}
+.basis{font-size:11px;color:#7C7A75;margin-top:5px;line-height:1.6}
+.gap{border:1px solid #DAD9D7;background:#FCFAF6;padding:22px 20px;margin:26px 0 4px}
+.gap h3{font-family:'PP Editorial Old',serif;font-weight:200;font-size:19px;margin-bottom:6px}
+.gap p{font-size:12px;color:#7C7A75;line-height:1.7;margin-bottom:12px}
+.grow{display:flex;gap:12px;align-items:baseline;border-top:1px solid #EAE7E0;padding:11px 0;font-size:12.5px}
+.grow .gw{font-size:9.5px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75;flex:0 0 108px}
+.grow a{margin-left:auto;font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#313131;text-decoration:none;border-bottom:1px solid #313131;padding-bottom:2px}
 .mt{font-size:11px;color:#7C7A75;margin-top:3px}
 .ln{font-family:'PP Editorial Old',serif;font-size:14.5px;margin-left:auto;white-space:nowrap}
 .int{font-size:9px;letter-spacing:1.6px;text-transform:uppercase;color:#7C7A75;margin-left:auto;white-space:nowrap}
@@ -34,7 +44,7 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:20px;margin:34
 .done h2{margin-top:0}
 .err{font-size:11.5px;color:#8A5A44;margin-top:12px;min-height:16px}
 </style><link rel="stylesheet" href="assets/desktop.css"></head><body>
-<header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="your-journey.html" aria-label="Your Journey"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4.7 10h16.6l-1.05 11.8a1.1 1.1 0 0 1-1.1 1H6.85a1.1 1.1 0 0 1-1.1-1z"/><path d="M7.6 10V7.9a2.4 2.4 0 0 1 4.8 0V10"/><path d="M13.6 10V7.9a2.4 2.4 0 0 1 4.8 0V10"/><path d="M5.3 14.4h15.4"/><rect x="11.7" y="13.1" width="2.6" height="2.6" rx=".3"/></svg><span class="bb" data-bag-badge></span></a></header>
+<header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="your-journey.html" aria-label="Your Journey"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main>
 <h1>Review &amp; Send</h1>
 <p class="sub">Your journey · nothing is paid on this website</p>
@@ -51,6 +61,7 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:20px;margin:34
 <div class="tot"><span class="l">Your Costs</span><span class="r" id="tt">USD 0</span></div>
 <p class="note">Spa interest lines carry no journey cost — Marsilea Spa confirms times directly and the amount is payable at the spa. No deposit is required on this website.</p>
 
+<div id="gaps"></div>
 <div id="sendbox">
 <button class="cta" id="send">Send to Guest Relations</button>
 <p class="err" id="err" role="alert" aria-live="polite"></p>
@@ -64,6 +75,7 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:20px;margin:34
 </main>
 <script src="assets/bag.js"></script>
 <script src="assets/shop-menu.js"></script>
+<script src="assets/journey.js"></script>
 <script type="module" src="assets/invite.mjs"></script>
 <script>
 var SUBMIT_URL='https://seeyouinlaos-website.suthep-hrg.workers.dev/api/register';
@@ -72,10 +84,28 @@ function render(){var b=SIYL_BAG.get(),el=document.getElementById('items');
 if(!b.length){el.innerHTML='<p class="empty">Nothing is in your journey yet. Everything you add appears here before sending.</p>';
 document.getElementById('send').disabled=true}
 else{document.getElementById('send').disabled=false;
-el.innerHTML=b.map(function(x){return '<div class="row"><div class="th"'+(SIYL_BAG.thumb(x)?' style="background-image:url('+SIYL_BAG.thumb(x)+')"':'')+'></div><div style="flex:1;display:flex;gap:12px"><div><p class="nm">'+esc(x.name)+'</p><p class="mt">'+esc(x.meta||'')+(x.qty>1?' · Quantity '+x.qty:'')+'</p></div>'+
+el.innerHTML=(window.SIYL_JOURNEY?SIYL_JOURNEY.sorted(b):b).map(function(x){
+var J=window.SIYL_JOURNEY,m=J?J.meta(x):{cat:'',basis:''},seg=J?J.SEGMENTS.filter(function(g){return g.ids.indexOf(x.id)>=0})[0]:null,when=J?J.when(x):'';
+var book=seg&&seg.bookend?'<span class="bk"></span>':'';
+return '<div class="row"><div class="th"'+(SIYL_BAG.thumb(x)?' style="background-image:url('+SIYL_BAG.thumb(x)+')"':'')+'></div><div style="flex:1;display:flex;gap:12px"><div>'+
+(when?'<p class="when">'+when+'</p>':'')+(m.cat?'<p class="cat">'+m.cat+book+'</p>':'')+
+'<p class="nm">'+esc(x.name)+'</p><p class="mt">'+esc(x.meta||'')+'</p>'+
+(m.basis?'<p class="basis">'+esc(m.basis)+'</p>':'')+
+(J&&J.quantityLine(x)?'<p class="basis" style="color:#313131">'+esc(J.quantityLine(x))+'</p>':'')+'</div>'+
 (x.interest?'<span class="int">Interest · request</span>':'<span class="ln">USD '+((x.price||0)*x.qty).toLocaleString('en-US')+'</span>')+'</div></div>'}).join('')}
 document.getElementById('tt').textContent='USD '+SIYL_BAG.total().toLocaleString('en-US');
+renderGaps();
 SIYL_BAG.badge()}
+
+/* Review never presents an unanswered journey as complete */
+function renderGaps(){
+var box=document.getElementById('gaps');if(!box||!window.SIYL_JOURNEY)return;
+var open=SIYL_JOURNEY.open();
+if(!open.length){box.innerHTML='';return}
+box.innerHTML='<div class="gap"><h3>Your journey is almost complete</h3>'+
+'<p>A decision is still needed for the stages below. Choose your stay or travel — or tell us that you are not joining that part of the journey. You can still send what you have.</p>'+
+open.map(function(s2){return '<div class="grow"><span class="gw">'+s2.when+'</span><span>'+s2.cat+' · '+s2.place+'</span><a href="journeys.html#'+s2.anchor+'">'+(s2.cat==='Accommodation'?'Choose your stay':'Choose your travel')+'</a></div>'}).join('')+'</div>'}
+document.addEventListener('siyl:bag',render);
 render();
 
 function buildText(auth){var b=SIYL_BAG.get();
@@ -87,6 +117,9 @@ var L=['SEE YOU IN LAOS — JOURNEY SELECTION','Invitation: '+auth.invitationId+
 '- Wedding Dinner · Sunday, 28 February 2027 · 07:30 PM','','SELECTIONS:'];
 b.forEach(function(x){L.push('- '+x.name+' · '+(x.meta||'')+(x.qty>1?' · Quantity '+x.qty:'')+
 (x.interest?' · INTEREST ONLY (no journey cost, payable at the spa)':' · USD '+((x.price||0)*x.qty)))});
+if(window.SIYL_JOURNEY){var op=SIYL_JOURNEY.open(),sk=SIYL_JOURNEY.SEGMENTS.filter(function(g){return SIYL_JOURNEY.state(g)==='declined'});
+if(sk.length){L.push('','NOT JOINING:');sk.forEach(function(g){L.push('- '+g.when+' · '+g.cat+' · '+g.place)})}
+if(op.length){L.push('','DECISION STILL OPEN:');op.forEach(function(g){L.push('- '+g.when+' · '+g.cat+' · '+g.place)})}}
 L.push('','YOUR COSTS: USD '+SIYL_BAG.total().toLocaleString('en-US'));
 L.push('Submitted via Review & Send · '+new Date().toISOString());
 return L.join('\n')}

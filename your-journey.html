@@ -14,6 +14,17 @@ h1{font-family:'PP Editorial Old',serif;font-weight:200;font-size:29px;margin-bo
 .th{width:74px;height:92px;background:#E7E3DB center/cover no-repeat;flex:0 0 auto}
 .nm{font-family:'PP Editorial Old',serif;font-weight:200;font-size:18px;line-height:1.3}
 .mt{font-size:11px;color:#7C7A75;margin-top:4px}
+.when{font-size:9.5px;letter-spacing:2px;text-transform:uppercase;color:#7C7A75}
+.cat{font-size:9.5px;letter-spacing:2px;text-transform:uppercase;color:#313131;margin:2px 0 4px}
+.cat .bk{display:inline-block;width:5px;height:5px;border-radius:50%;background:#8A5A55;margin-left:7px;vertical-align:middle}
+.basis{font-size:11px;color:#7C7A75;margin-top:6px;line-height:1.6}
+.qty{font-size:11px;color:#313131;margin-top:2px}
+.dlist{border-top:1px solid #DAD9D7;margin-top:26px;padding-top:18px}
+.dlist h3{font-family:'PP Editorial Old',serif;font-weight:200;font-size:18px;margin-bottom:4px}
+.dlist p.sub2{font-size:12px;color:#7C7A75;margin-bottom:12px;line-height:1.7}
+.drow{display:flex;gap:12px;align-items:baseline;border-bottom:1px solid #EAE7E0;padding:12px 0;font-size:12.5px}
+.drow .dw{font-size:9.5px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75;flex:0 0 108px}
+.drow a{margin-left:auto;font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#313131;text-decoration:none;border-bottom:1px solid #313131;padding-bottom:2px}
 .ln{font-family:'PP Editorial Old',serif;font-size:15px;margin-left:auto;white-space:nowrap}
 .q{display:inline-flex;align-items:center;gap:12px;margin-top:10px}
 .q button{width:34px;height:34px;border:1px solid #DAD9D7;background:#fff;cursor:pointer;font-size:15px}
@@ -25,24 +36,48 @@ h1{font-family:'PP Editorial Old',serif;font-weight:200;font-size:29px;margin-bo
 .empty{border-top:1px solid #DAD9D7;border-bottom:1px solid #DAD9D7;padding:40px 0;color:#7C7A75}
 .note{font-size:11.5px;color:#7C7A75;margin-top:16px}
 </style><link rel="stylesheet" href="assets/desktop.css"></head><body>
-<header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="your-journey.html" aria-label="Your Journey"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4.7 10h16.6l-1.05 11.8a1.1 1.1 0 0 1-1.1 1H6.85a1.1 1.1 0 0 1-1.1-1z"/><path d="M7.6 10V7.9a2.4 2.4 0 0 1 4.8 0V10"/><path d="M13.6 10V7.9a2.4 2.4 0 0 1 4.8 0V10"/><path d="M5.3 14.4h15.4"/><rect x="11.7" y="13.1" width="2.6" height="2.6" rx=".3"/></svg><span class="bb" data-bag-badge></span></a></header>
+<header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="your-journey.html" aria-label="Your Journey"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main><h1>Your Journey</h1><p class="sub">Your selections · live costs · nothing is paid on this website</p>
 <div id="items"></div>
 <div class="tot"><span class="l">Your Costs</span><span class="r" id="tt">USD 0</span></div>
 <p class="note">Hosted wedding programme events are part of your journey without charge — they never appear as USD 0 line items. Spa interest lines carry no journey cost — the amount is payable at the spa.</p>
+<div id="dec"></div>
 <a class="cta" href="review.html">Review &amp; Send</a>
 <p style="text-align:center;margin-top:18px"><a href="journeys.html" style="font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:#313131;text-decoration:none;border-bottom:1px solid #313131;padding:8px 0 3px;display:inline-block;min-height:44px">Continue exploring</a></p>
 </main>
 <script src="assets/bag.js"></script>
 <script src="assets/shop-menu.js"></script>
+<script src="assets/journey.js"></script>
 <script>
 function render(){var b=SIYL_BAG.get(),el=document.getElementById('items');
 if(!b.length){el.innerHTML='<p class="empty">Nothing is in your journey yet. Everything you add appears here with its live total.</p>'}
-else{el.innerHTML=b.map(function(x){return '<div class="row"><div class="th"'+(SIYL_BAG.thumb(x)?' style="background-image:url('+SIYL_BAG.thumb(x)+')"':'')+'></div><div style="flex:1"><p class="nm">'+x.name+'</p><p class="mt">'+x.meta+'</p>'+(x.unit?'<div class="q"><button data-q="'+x.id+':-1">−</button><b style="font-family:\'PP Editorial Old\',serif">'+x.qty+'</b><button data-q="'+x.id+':1">+</button></div>':'')+'<br><button class="rm" data-rm="'+x.id+'">Remove</button></div>'+(x.interest?'<span class="ln" style="font-family:\'Hanken Grotesk\',Helvetica,Arial,sans-serif;font-size:9px;letter-spacing:1.6px;text-transform:uppercase;color:#7C7A75">Interest · request</span>':'<span class="ln">USD '+((x.price||0)*x.qty)+'</span>')+'</div>'}).join('')}
+else{el.innerHTML=(window.SIYL_JOURNEY?SIYL_JOURNEY.sorted(b):b).map(function(x){
+var J=window.SIYL_JOURNEY,m=J?J.meta(x):{cat:'',basis:''},seg=J?J.SEGMENTS.filter(function(g){return g.ids.indexOf(x.id)>=0})[0]:null,when=J?J.when(x):'';
+var book=seg&&seg.bookend?'<span class="bk" title="Bangkok"></span>':'';
+return '<div class="row"><div class="th"'+(SIYL_BAG.thumb(x)?' style="background-image:url('+SIYL_BAG.thumb(x)+')"':'')+'></div><div style="flex:1">'+
+(when?'<p class="when">'+when+'</p>':'')+
+(m.cat?'<p class="cat">'+m.cat+book+'</p>':'')+
+'<p class="nm">'+x.name+'</p><p class="mt">'+x.meta+'</p>'+
+(m.basis?'<p class="basis">'+m.basis+'</p>':'')+
+(J&&J.quantityLine(x)?'<p class="qty">'+J.quantityLine(x)+'</p>':'')+
+(x.unit?'<div class="q"><button data-q="'+x.id+':-1">−</button><b style="font-family:\'PP Editorial Old\',serif">'+x.qty+'</b><button data-q="'+x.id+':1">+</button></div>':'')+
+'<br><button class="rm" data-rm="'+x.id+'">Remove</button></div>'+
+(x.interest?'<span class="ln" style="font-family:\'Hanken Grotesk\',Helvetica,Arial,sans-serif;font-size:9px;letter-spacing:1.6px;text-transform:uppercase;color:#7C7A75">Interest · request</span>':'<span class="ln">USD '+((x.price||0)*x.qty).toLocaleString('en-US')+'</span>')+'</div>'}).join('')}
 document.getElementById('tt').textContent='USD '+SIYL_BAG.total().toLocaleString('en-US');
 el.querySelectorAll('[data-rm]').forEach(function(b){b.addEventListener('click',function(){SIYL_BAG.remove(b.getAttribute('data-rm'));render()})});
 el.querySelectorAll('[data-q]').forEach(function(b){b.addEventListener('click',function(){var v=b.getAttribute('data-q').split(':');SIYL_BAG.qty(v[0],parseInt(v[1],10));render()})});
+renderDecisions();
 SIYL_BAG.badge()}
+
+/* quiet editorial completeness — decisions, never a progress meter */
+function renderDecisions(){
+var box=document.getElementById('dec');if(!box||!window.SIYL_JOURNEY)return;
+var open=SIYL_JOURNEY.open();
+if(!open.length){box.innerHTML=SIYL_BAG.get().length?'<div class="dlist"><h3>Your journey is complete</h3><p class="sub2">Every stage of the journey has an answer. Review &amp; Send shares it with Guest Relations.</p></div>':'';return}
+box.innerHTML='<div class="dlist"><h3>'+SIYL_JOURNEY.statusLine()+'</h3>'+
+'<p class="sub2">Choose how you would like to travel and stay for the remaining stages — or tell us that you are not joining that part of the journey.</p>'+
+open.map(function(s2){return '<div class="drow"><span class="dw">'+s2.when+'</span><span>'+s2.cat+' · '+s2.place+'</span><a href="journeys.html#'+s2.anchor+'">Decide</a></div>'}).join('')+'</div>'}
+document.addEventListener('siyl:bag',render);
 render();
 var q=new URLSearchParams(location.search);
 var rm=q.get('rm');if(rm){SIYL_BAG.remove(rm);render()}

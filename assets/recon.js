@@ -21,7 +21,7 @@
     '<div class="hd-row">' +
       '<div class="hd-left"><button class="hd-cta" id="menu-open" aria-haspopup="dialog" aria-expanded="false"><span class="burger" aria-hidden="true"><i></i><i></i><i></i></span></button></div>' +
       '<a class="brand" href="index.html">see you in laos<span class="dot">.</span></a>' +
-      '<div class="hd-right"><a class="hd-cta bag" href="your-journey.html" aria-label="Your Journey"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4.7 10h16.6l-1.05 11.8a1.1 1.1 0 0 1-1.1 1H6.85a1.1 1.1 0 0 1-1.1-1z"/><path d="M7.6 10V7.9a2.4 2.4 0 0 1 4.8 0V10"/><path d="M13.6 10V7.9a2.4 2.4 0 0 1 4.8 0V10"/><path d="M5.3 14.4h15.4"/><rect x="11.7" y="13.1" width="2.6" height="2.6" rx=".3"/></svg><span class="bb" data-bag-badge></span></a></div>' +
+      '<div class="hd-right"><a class="hd-cta bag" href="your-journey.html" aria-label="Your Journey"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></div>' +
     '</div>' +
     '';
   document.body.prepend(header);

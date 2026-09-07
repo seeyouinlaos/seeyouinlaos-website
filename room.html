@@ -78,11 +78,12 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:22px;margin:44
 .backrow{text-align:center;margin-top:34px}
 .backrow a{font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:#313131;text-decoration:none;border-bottom:1px solid #313131;padding:8px 0 3px;display:inline-block;min-height:44px}
 </style><link rel="stylesheet" href="assets/desktop.css"></head><body>
-<header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="your-journey.html" aria-label="Your Journey"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4.7 10h16.6l-1.05 11.8a1.1 1.1 0 0 1-1.1 1H6.85a1.1 1.1 0 0 1-1.1-1z"/><path d="M7.6 10V7.9a2.4 2.4 0 0 1 4.8 0V10"/><path d="M13.6 10V7.9a2.4 2.4 0 0 1 4.8 0V10"/><path d="M5.3 14.4h15.4"/><rect x="11.7" y="13.1" width="2.6" height="2.6" rx=".3"/></svg><span class="bb" data-bag-badge></span></a></header>
+<header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="your-journey.html" aria-label="Your Journey"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main id="m"></main>
 <script src="assets/bag.js"></script>
 <script src="assets/shop-menu.js"></script>
 <script src="assets/rooms-data.js"></script>
+<script src="assets/journey.js"></script>
 <script type="module" src="assets/invite.mjs"></script>
 <script>
 (function () {
@@ -172,7 +173,7 @@ if (others.length) {
 }
 
 /* ---- commerce: fixed-window per-person amounts → Add to Your Journey ---- */
-h += '<section class="buy"><h2>' + esc(room.name) + '</h2><p class="eyebrow" style="margin:0">' + esc(stay.place) + '</p>';
+h += '<section class="buy"><p class="eyebrow" style="margin:0 0 8px">Accommodation</p><h2>' + esc(room.name) + '</h2><p class="eyebrow" style="margin:0">' + esc(stay.place) + '</p>';
 stay.windows.forEach(function (w, wi) {
   h += '<div class="win"><p class="wl">' + esc(w.label) + '</p><p class="wd">' + esc(w.dates) + '</p><p class="wn">' + esc(w.nights) + '</p>';
   if (room.enquire) {
@@ -186,14 +187,14 @@ stay.windows.forEach(function (w, wi) {
     h += '<p class="price">' + esc(room.status) + '</p><p class="per">Guest Relations arranges the rest</p>';
     h += '<button class="cta" data-win="' + wi + '">Add to Your Journey</button><span class="swap" data-swap="' + wi + '" hidden></span>';
   } else {
-    h += '<p class="price">USD ' + room.price + '</p><p class="per">Per person · fixed window</p>';
+    h += '<p class="price">USD ' + room.price + '</p><p class="per">' + esc(basisFor(w)) + '</p>';
     h += '<button class="cta" data-win="' + wi + '">Add to Your Journey</button><span class="swap" data-swap="' + wi + '" hidden></span>';
     h += '<button type="button" class="chg" data-chg="' + wi + '" hidden>Change selection</button>';
   }
   h += '</div>';
 });
 h += '<p class="note">Per-person amount for the fixed window — never per night. Nothing is paid on this website.</p></section>';
-h += '<p class="backrow"><a href="journeys.html">Back to Journeys</a></p>';
+h += '<p class="backrow"><a href="journeys.html#j-' + stay.windows[0].id + '">Back to Journeys</a></p>';
 
 document.getElementById('m').innerHTML = h;
 if (window.SIYL_BAG) SIYL_BAG.badge();
@@ -241,6 +242,10 @@ function gated(fn) {
   if (window.SIYL_INVITE) SIYL_INVITE.require(fn);
   else document.addEventListener('siyl:invite-ready', function () { SIYL_INVITE.require(fn); }, { once: true });
 }
+function basisFor(w) {
+  var b = window.SIYL_JOURNEY && SIYL_JOURNEY.BASIS[w.id];
+  return b ? b.basis : 'Per person · fixed window';
+}
 function itemFor(w) {
   var img = room.gallery.length ? room.gallery[0][0] : w.bagImg;
   if (room.interest) return { id: w.id, name: w.bagName, meta: w.dates + ' · ' + (room.status || ''), interest: true, img: img };
@@ -285,8 +290,9 @@ document.querySelectorAll('[data-win]').forEach(function (b) {
 });
 document.querySelectorAll('[data-chg]').forEach(function (b) {
   b.addEventListener('click', function () {
-    var oc = document.getElementById('oc') || document.querySelector('.others');
-    if (oc) oc.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    /* the collection this room belongs to, with the current choice visible */
+    var w = stay.windows[parseInt(b.getAttribute('data-chg'), 10)];
+    location.href = 'journeys.html#j-' + w.id;
   });
 });
 document.addEventListener('siyl:bag', paint);
