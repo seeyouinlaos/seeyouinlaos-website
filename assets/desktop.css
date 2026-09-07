@@ -46,8 +46,20 @@
     aspect-ratio: 3 / 2;
     align-self: start;
   }
-  /* a stay with a long room collection keeps its photograph beside the list */
-  .p:has(.vars) > .pimg { position: sticky; top: 104px; }
+  /* a stay with a room collection uses the FEATURE composition instead of the
+   * pair: one bounded photograph, then the collection on the same centred axis */
+  .p:has(.vars) { display: block; }
+  .p:has(.vars) > .pimg {
+    max-width: 960px; margin: 0 auto 30px; aspect-ratio: 16 / 9; position: static;
+  }
+  .p:has(.vars) > .pn,
+  .p:has(.vars) > .pm,
+  .p:has(.vars) > .pp,
+  .p:has(.vars) > .host,
+  .p:has(.vars) > .vl,
+  .p:has(.vars) > .vw,
+  .p:has(.vars) > .st,
+  .p:has(.vars) > .vars { max-width: 960px; margin-left: auto; margin-right: auto; }
   .p > *:not(.pimg):not(.pgal) { grid-column: 2; }
   .p:not(:has(.pimg)):not(:has(.pgal)) { display: block; }
   .p > .pn { margin-top: -6px; font-size: 24px; }

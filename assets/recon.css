@@ -233,7 +233,7 @@ body { font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; }
   /* editorial pair — every split image shares the same ratio and axis */
   .split { grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
   .split .ph, .split .ph.r-32, .split .ph.r-45, .split .ph.r-golden { aspect-ratio: 4 / 3; height: auto; }
-  .split .copy { max-width: 520px; margin-inline: auto; }
+  .split .copy { max-width: 520px; }
 
   /* equal two-card row */
   .duo { gap: 28px; }
