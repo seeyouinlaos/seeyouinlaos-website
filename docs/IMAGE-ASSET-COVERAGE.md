@@ -166,3 +166,76 @@ PARTIAL
 MISSING
 - Luye Baisha · Snow Mountain Viewing Room (USD 75) — no photograph of this category anywhere in `024`; room stays "Photography to follow".
 - Temple Ceremony · Wat Ong Teu — no ceremony photograph (folder holds alms-giving and AI files only).
+
+---
+
+# INVENTORY RECONCILIATION — Accommodation_Details (07 Sep 2026, second pass)
+
+Source of record: the owner's native sheet `H&S_Wedding_Operations_Master →
+Accommodation_Details` (34 columns, read in full) for inventory, room facts,
+availability, status and amenities. **Owner-approved guest amounts remain the
+pricing authority** — the sheet's "Price per Person" column is the operational
+rate and was never copied into a selling price. Categories without an approved
+guest amount are shown as inventory with "Amount on request · Guest Relations"
+and cannot be added to a journey.
+
+## WANXIANG YUEJU · KUNMING (12 of 12 live)
+| Category | Website | Image | Guest price | Status |
+|---|---|---|---|---|
+| Junting City-View Loft | selectable | 6 · FOUND | USD 150 | live |
+| Milano Minimalist Loft | selectable | 6 · FOUND | USD 150 | live |
+| Italian Style Suite | selectable | 6 · FOUND | USD 150 | live |
+| Light French Suite | selectable | 6 · FOUND | USD 150 | live |
+| Left Bank French-Style King Room | inventory | 6 · FOUND | — | needs owner amount |
+| Penang Forest Nanyang-Style Deluxe Suite | inventory | 6 · FOUND | — | needs owner amount |
+| Family Suite | inventory | 6 · FOUND | — | needs owner amount |
+| Seine Evening Glow Loft Family Room | inventory | 6 · FOUND | — | needs owner amount |
+| Smart Family Room | inventory | 6 · FOUND | — | needs owner amount |
+| Solarium Bath Suite | inventory · RESERVED | 6 · FOUND | — | sheet: reserved for bride & groom |
+| Standard Single Room | inventory | 6 · FOUND | — | needs owner amount |
+| Mid-century Amber Suite | inventory | 6 · FOUND | — | needs owner amount |
+
+## LUYE BAISHA · LIJIANG (9 of 9 live)
+| Category | Website | Image | Guest price | Status |
+|---|---|---|---|---|
+| Snow Mountain Manor Suite | selectable | 3 · FOUND | USD 120 | live (was labelled "Manor · Starry Sky"; the sheet separates 005 Manor from 009 Starry Sky) |
+| 270° Snow Mountain View Room Private Soup Pool | selectable | 6 · FOUND | USD 105 | live |
+| 270° Private Courtyard Snow Mountain View | selectable | 5 · FOUND | USD 100 | live · sheet operational rate 105 |
+| Snow Mountain Viewing Room | selectable | 0 · MISSING | USD 75 | live · "Photography to follow" |
+| 270° Snow Mountain Viewing | selectable | 6 · FOUND | USD 70 | live · sheet operational rate 100 |
+| Luye Starry Sky Suite · Immersive View | inventory | 6 · FOUND | — | needs owner amount |
+| Boundless Floor-to-Ceiling Glass Sunlit Suite | inventory | 7 · FOUND | — | needs owner amount |
+| Snow Mountain Private Soup Viewing Suite | inventory | 8 · FOUND | — | needs owner amount |
+| 270° Snow Mountain View Suite | inventory · RESERVED | 8 · FOUND | — | sheet: reserved for bride & groom |
+
+## SOUPHATTRA HERITAGE VIENTIANE (7 of 7 live, premium first)
+| Category | Website | Image | Guest price | Status |
+|---|---|---|---|---|
+| Souphattra Presidential | RESERVED | 7 · FOUND | USD 750 | reserved for bride & groom |
+| Souphattra Majestic Suite | selectable | 5 · FOUND | USD 290 | live |
+| Grand Majestic Suite | RESERVED | 3 · FOUND | USD 250 | reserved for family |
+| Noble Courtyard Suite | selectable | 3 · FOUND | USD 240 | live |
+| Heritage Grand Premier | selectable | 7 · FOUND | USD 170 | live |
+| Heritage Executive | selectable | 4 · FOUND | USD 155 | live |
+| The Heritage | selectable | 3 · FOUND | USD 145 | live |
+
+Sathorn Penthouse (USD 270, 11 images) · Private Residence (complimentary, 6
+images) · Siam Kempinski Deluxe Balcony King (USD 380, 8 images) unchanged.
+
+## OWNER DECISION REQUIRED
+1. **Guest amount missing — 11 categories** (all real inventory, all photographed):
+   Kunming — Left Bank French-Style King Room · Penang Forest Nanyang-Style Deluxe
+   Suite · Family Suite · Seine Evening Glow Loft Family Room · Smart Family Room ·
+   Standard Single Room · Mid-century Amber Suite · Solarium Bath Suite (reserved);
+   Lijiang — Luye Starry Sky Suite · Boundless Floor-to-Ceiling Glass Sunlit Suite ·
+   Snow Mountain Private Soup Viewing Suite · 270° Snow Mountain View Suite (reserved).
+2. **Price conflicts between the live approved amounts and the sheet's operational
+   rate** (live amounts kept, nothing overwritten):
+   270° Snow Mountain Viewing — live USD 70 · sheet 100;
+   270° Private Courtyard Snow Mountain View — live USD 100 · sheet 105;
+   Special Express No. 25 — live USD 75 · sheet 90; C642 — live USD 85 · sheet 105.
+3. **Image genuinely missing:** Luye Baisha · Snow Mountain Viewing Room (USD 75) —
+   no category photography in Drive `024`; the row and the room page keep the clean
+   "Photography to follow" treatment.
+4. **Category attribution:** Siam Kempinski room photography (IMG_3453/3455/3456/3457)
+   is filed in the hotel folder, not under a "Deluxe Balcony King" subfolder.
