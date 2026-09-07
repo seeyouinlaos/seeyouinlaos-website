@@ -1,0 +1,244 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Rooms · See You In Laos</title><style>
+@font-face{font-family:'PP Editorial Old';src:url('assets/fonts/PPEditorialOld-Ultralight.otf') format('opentype');font-weight:200;font-display:swap}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;font-weight:300;font-size:14px;line-height:1.6}
+.hd{display:grid;grid-template-columns:44px 1fr 44px;align-items:center;padding:calc(14px + env(safe-area-inset-top)) 20px 14px}
+.hb{width:44px;height:44px;display:flex;flex-direction:column;justify-content:center;gap:5px;background:none;border:0;cursor:pointer}.hb i{display:block;width:20px;height:1.4px;background:#313131}
+.bd{font-family:'PP Editorial Old',serif;font-weight:200;font-size:19px;text-align:center}
+.bag{width:44px;height:44px;display:flex;align-items:center;justify-content:center;position:relative;color:#313131;text-decoration:none}
+.bb{position:absolute;top:4px;right:2px;min-width:16px;height:16px;background:#313131;color:#F3EEE7;font-size:9px;display:none;align-items:center;justify-content:center;padding:0 4px}
+main{padding:0 0 70px;max-width:640px;margin:0 auto}
+.wrap{padding:0 24px}
+.ph{background:#E7E3DB center/cover no-repeat}
+.gal{position:relative;touch-action:pan-y}
+.gal .ph{width:100%;aspect-ratio:4/3;display:none}
+.gal .ph.on{display:block}
+.gc{position:absolute;right:12px;bottom:12px;background:rgba(49,49,49,.55);color:#F3EEE7;font-size:10px;letter-spacing:1.6px;padding:4px 9px;z-index:2}
+.gl{position:absolute;left:12px;bottom:12px;right:110px;color:#F3EEE7;font-size:9.5px;letter-spacing:1.6px;text-transform:uppercase;text-shadow:0 1px 6px rgba(0,0,0,.5);z-index:2}
+.gn{position:absolute;top:50%;transform:translateY(-50%);background:none;border:0;font-size:24px;color:#F3EEE7;text-shadow:0 1px 6px rgba(0,0,0,.5);width:44px;height:44px;cursor:pointer;z-index:2}
+.gp{left:0}.gx{right:0}
+.pend{width:100%;aspect-ratio:4/3;background:#E7E3DB;display:flex;align-items:center;justify-content:center;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#7C7A75}
+.intro{text-align:center;padding:38px 24px 6px}
+.eyebrow{font-size:10px;letter-spacing:2.2px;text-transform:uppercase;color:#7C7A75;margin-bottom:12px}
+h1{font-family:'PP Editorial Old',serif;font-weight:200;font-size:29px;line-height:1.25;margin-bottom:14px}
+.body{font-size:13.5px;line-height:1.8;color:#4A4A4A;max-width:30em;margin:0 auto 8px}
+h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:22px;margin:44px 0 14px}
+.facts{border-top:1px solid #DAD9D7}
+.frow{display:flex;justify-content:space-between;gap:18px;border-bottom:1px solid #DAD9D7;padding:13px 2px}
+.frow .fl{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75;padding-top:2px;flex:0 0 auto}
+.frow .fv{text-align:right;font-size:13px}
+.amen{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid #DAD9D7;border-left:1px solid #DAD9D7}
+.amen span{border-bottom:1px solid #DAD9D7;border-right:1px solid #DAD9D7;padding:11px 12px;font-size:12px;color:#4A4A4A}
+.inc{border-top:1px solid #DAD9D7}
+.inc p{border-bottom:1px solid #DAD9D7;padding:13px 2px;font-size:12.5px;color:#4A4A4A;line-height:1.7}
+.ed{margin-top:46px}
+.ed .ph{width:100%;aspect-ratio:4/3}
+.ed .cap{font-size:9.5px;letter-spacing:2px;text-transform:uppercase;color:#7C7A75;margin:10px 24px 0}
+.ed .body{margin-top:16px}
+.oc{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:2px 24px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.oc::-webkit-scrollbar{display:none}
+.occard{flex:0 0 76%;scroll-snap-align:start;text-decoration:none;color:#313131}
+.occard .ph{width:100%;aspect-ratio:4/3;margin-bottom:10px}
+.occard .oe{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#7C7A75}
+.occard .on{font-family:'PP Editorial Old',serif;font-weight:200;font-size:17px;line-height:1.3;margin:3px 0 2px}
+.occard .op{font-family:'PP Editorial Old',serif;font-size:13.5px}
+.occard .rsv{font-size:9px;letter-spacing:1.6px;text-transform:uppercase;color:#7C7A75}
+.buy{background:#FCFAF6;margin-top:52px;padding:34px 26px 38px}
+.buy h2{margin:0 0 4px;font-size:24px}
+.buy .win{border-top:1px solid #DAD9D7;padding:18px 0 22px;margin-top:16px}
+.buy .win:first-of-type{margin-top:20px}
+.buy .wl{font-size:10px;letter-spacing:2.2px;text-transform:uppercase;color:#7C7A75}
+.buy .wd{font-family:'PP Editorial Old',serif;font-weight:200;font-size:17px;margin:5px 0 1px}
+.buy .wn{font-size:11px;color:#7C7A75;margin-bottom:10px}
+.buy .price{font-family:'PP Editorial Old',serif;font-size:16px}
+.buy .per{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75;margin:2px 0 16px}
+.cta{display:block;width:100%;background:#313131;color:#F3EEE7;border:0;padding:19px;font-size:11px;letter-spacing:2.2px;text-transform:uppercase;cursor:pointer;min-height:52px;text-align:center;text-decoration:none;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif}
+.ok{display:block;text-align:center;font-size:10px;letter-spacing:1.6px;text-transform:uppercase;color:#7C7A75;margin-top:12px}
+.ok[hidden]{display:none !important}
+.ok a{color:#313131}
+.rsvline{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#7C7A75;border:1px solid #DAD9D7;padding:17px;text-align:center}
+.note{font-size:11px;color:#7C7A75;margin-top:16px;line-height:1.7}
+.backrow{text-align:center;margin-top:34px}
+.backrow a{font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:#313131;text-decoration:none;border-bottom:1px solid #313131;padding:8px 0 3px;display:inline-block;min-height:44px}
+</style></head><body>
+<header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos.</div><a class="bag" href="your-journey.html" aria-label="Your Journey">◻<span class="bb" data-bag-badge></span></a></header>
+<main id="m"></main>
+<script src="assets/bag.js"></script>
+<script src="assets/shop-menu.js"></script>
+<script src="assets/rooms-data.js"></script>
+<script type="module" src="assets/invite.mjs"></script>
+<script>
+(function () {
+'use strict';
+var q = new URLSearchParams(location.search);
+var stayKey = q.get('stay'), roomSlug = q.get('room');
+var stay = window.SIYL_ROOMS[stayKey];
+if (!stay) { location.replace('journeys.html'); return; }
+var room = null;
+stay.rooms.forEach(function (r) { if (r.slug === roomSlug) room = r; });
+if (!room) room = stay.rooms[0];
+document.title = room.name + ' · ' + stay.name + ' · See You In Laos';
+
+function esc(s) { return String(s).replace(/</g, '&lt;'); }
+function priceLine(r) {
+  if (r.price == null) return '<span class="op">' + esc(r.status || '') + '</span>';
+  return '<span class="op">USD ' + r.price + '</span> <span class="oe">per person</span>';
+}
+
+var h = '';
+/* ---- room hero + real gallery (same concrete room, counter 1/N) ---- */
+if (room.gallery.length) {
+  h += '<div class="gal" id="gal">';
+  room.gallery.forEach(function (g, i) {
+    h += '<div class="ph' + (i === 0 ? ' on' : '') + '" style="background-image:url(' + g[0] + ')" role="img" aria-label="' + esc(room.name) + ' — ' + esc(g[1]) + '"></div>';
+  });
+  h += '<button class="gn gp" aria-label="Previous image">‹</button><button class="gn gx" aria-label="Next image">›</button>';
+  h += '<span class="gl" id="gl">' + esc(room.gallery[0][1]) + '</span>';
+  h += '<span class="gc" id="gc">1 / ' + room.gallery.length + '</span></div>';
+} else {
+  h += '<div class="pend">Photography to follow</div>';
+}
+h += '<section class="intro"><p class="eyebrow">' + esc(room.cat) + ' · ' + esc(stay.name) + '</p>';
+h += '<h1>' + esc(room.name) + '</h1>';
+h += '<p class="body">' + esc(room.desc) + '</p>';
+if (room.galleryNote) h += '<p class="eyebrow" style="margin-top:10px">' + esc(room.galleryNote) + '</p>';
+h += '</section>';
+
+/* ---- amenities: only facts from register/data.mjs ---- */
+h += '<div class="wrap">';
+if (room.facts.length) {
+  h += '<h2>The Room</h2><div class="facts">';
+  room.facts.forEach(function (f) { h += '<div class="frow"><span class="fl">' + esc(f[0]) + '</span><span class="fv">' + esc(f[1]) + '</span></div>'; });
+  h += '</div>';
+}
+if (room.roomPhotoPending) h += '<p class="note" style="margin-top:10px">Room photography to follow.</p>';
+if (room.amenities && room.amenities.length) {
+  h += '<h2>Amenities</h2><div class="amen">';
+  room.amenities.forEach(function (a) { h += '<span>' + esc(a) + '</span>'; });
+  if (room.amenities.length % 2) h += '<span aria-hidden="true"></span>';
+  h += '</div>';
+}
+/* ---- all stays include (separate from room amenities, proven only) ---- */
+if (stay.includes && stay.includes.length) {
+  h += '<h2>Your stay includes</h2><div class="inc">';
+  stay.includes.forEach(function (t) { h += '<p>' + t + '</p>'; });
+  h += '</div>';
+}
+h += '</div>';
+
+/* ---- editorial detail (real copy from data.mjs only) ---- */
+if (stayKey === 'souphattra') {
+  h += '<section class="ed"><div class="ph" style="background-image:url(assets/images/souphattra/heritage-courtyard-pool.jpg)" role="img" aria-label="Souphattra Heritage Vientiane — the courtyard and pool"></div>';
+  h += '<p class="cap">Souphattra Heritage Vientiane</p>';
+  h += '<p class="body wrap" style="display:block;text-align:center">Souphattra Heritage Vientiane sits at the heart of our wedding stay: shared mornings, shared arrivals, and the rhythm of the weekend centred around one quiet place. Choose the stay that feels right for you.</p></section>';
+} else if (room.gallery.length > 3) {
+  var edImg = room.gallery[room.gallery.length - 1];
+  h += '<section class="ed"><div class="ph" style="background-image:url(' + edImg[0] + ')" role="img" aria-label="' + esc(room.name) + ' — ' + esc(edImg[1]) + '"></div>';
+  h += '<p class="cap">' + esc(edImg[1]) + '</p></section>';
+}
+
+/* ---- other rooms of the same stay: swipeable carousel with peek ---- */
+var others = stay.rooms.filter(function (r) { return r.slug !== room.slug; });
+if (others.length) {
+  h += '<h2 class="wrap">Other rooms at ' + esc(stay.name) + '</h2><div class="oc">';
+  others.forEach(function (r) {
+    var img = r.gallery.length ? '<div class="ph" style="background-image:url(' + r.gallery[0][0] + ')"></div>' : '<div class="ph" style="display:flex;align-items:center;justify-content:center;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#7C7A75">Photography to follow</div>';
+    h += '<a class="occard" href="room.html?stay=' + stayKey + '&room=' + r.slug + '">' + img +
+      '<p class="oe">' + esc(r.cat) + '</p><p class="on">' + esc(r.name) + '</p>' +
+      '<p>' + (r.reserved ? '<span class="op">USD ' + r.price + '</span> <span class="rsv">' + esc(r.reserved) + '</span>' : priceLine(r)) + '</p></a>';
+  });
+  h += '</div>';
+}
+
+/* ---- commerce: fixed-window per-person amounts → Add to Your Journey ---- */
+h += '<section class="buy"><h2>' + esc(room.name) + '</h2><p class="eyebrow" style="margin:0">' + esc(stay.place) + '</p>';
+stay.windows.forEach(function (w, wi) {
+  h += '<div class="win"><p class="wl">' + esc(w.label) + '</p><p class="wd">' + esc(w.dates) + '</p><p class="wn">' + esc(w.nights) + '</p>';
+  if (room.reserved) {
+    h += '<p class="price">USD ' + room.price + '</p><p class="per">Per person · fixed window</p>';
+    h += '<p class="rsvline">' + esc(room.reserved) + '</p>';
+  } else if (room.interest) {
+    h += '<p class="price">' + esc(room.status) + '</p><p class="per">Guest Relations arranges the rest</p>';
+    h += '<button class="cta" data-win="' + wi + '">Add to Your Journey</button><span class="ok" data-ok="' + wi + '" hidden>Added — <a href="your-journey.html">Your Journey</a></span>';
+  } else {
+    h += '<p class="price">USD ' + room.price + '</p><p class="per">Per person · fixed window</p>';
+    h += '<button class="cta" data-win="' + wi + '">Add to Your Journey</button><span class="ok" data-ok="' + wi + '" hidden>Added — <a href="your-journey.html">Your Journey</a></span>';
+  }
+  h += '</div>';
+});
+h += '<p class="note">Per-person amount for the fixed window — never per night. Nothing is paid on this website.</p></section>';
+h += '<p class="backrow"><a href="journeys.html">Back to Journeys</a></p>';
+
+document.getElementById('m').innerHTML = h;
+if (window.SIYL_BAG) SIYL_BAG.badge();
+
+/* gallery: arrows + swipe + counter */
+var phs = document.querySelectorAll('#gal .ph');
+if (phs.length) {
+  var gi = 0, gc = document.getElementById('gc'), gl = document.getElementById('gl');
+  function go(d) {
+    phs[gi].classList.remove('on');
+    gi = (gi + d + phs.length) % phs.length;
+    phs[gi].classList.add('on');
+    gc.textContent = (gi + 1) + ' / ' + phs.length;
+    gl.textContent = room.gallery[gi][1];
+  }
+  document.querySelector('.gp').addEventListener('click', function () { go(-1); });
+  document.querySelector('.gx').addEventListener('click', function () { go(1); });
+  var tx = null;
+  var galEl = document.getElementById('gal');
+  galEl.addEventListener('touchstart', function (e) { tx = e.touches[0].clientX; }, { passive: true });
+  galEl.addEventListener('touchend', function (e) {
+    if (tx == null) return;
+    var dx = e.changedTouches[0].clientX - tx;
+    if (Math.abs(dx) > 40) go(dx < 0 ? 1 : -1);
+    tx = null;
+  }, { passive: true });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowLeft') go(-1);
+    if (e.key === 'ArrowRight') go(1);
+  });
+}
+
+/* adds are invitation-gated — identical mechanism to journeys.html */
+function gated(fn) {
+  if (window.SIYL_INVITE) SIYL_INVITE.require(fn);
+  else document.addEventListener('siyl:invite-ready', function () { SIYL_INVITE.require(fn); }, { once: true });
+}
+document.querySelectorAll('[data-win]').forEach(function (b) {
+  b.addEventListener('click', function () {
+    var w = stay.windows[parseInt(b.getAttribute('data-win'), 10)];
+    var img = room.gallery.length ? room.gallery[0][0] : w.bagImg;
+    var item;
+    if (room.interest) {
+      item = { id: w.id, name: w.bagName, meta: w.dates + ' · ' + (room.status || ''), interest: true, img: img };
+    } else {
+      item = { id: w.id, name: w.bagName, meta: w.dates + ' · ' + room.name, price: room.price, img: img };
+    }
+    gated(function () {
+      SIYL_BAG.put(item);
+      var ok = document.querySelector('[data-ok="' + b.getAttribute('data-win') + '"]');
+      if (ok) ok.hidden = false;
+    });
+  });
+});
+})();
+</script>
+</body></html>
+<script>
+if (new URLSearchParams(location.search).get('debug')) {
+  window.addEventListener('load', function () {
+    setTimeout(function () {
+      var out = ['innerW=' + innerWidth, 'docW=' + document.documentElement.scrollWidth, 'clientW=' + document.documentElement.clientWidth];
+      document.querySelectorAll('body *').forEach(function (el) {
+        var r = el.getBoundingClientRect();
+        if (r.right > document.documentElement.clientWidth + 1 && !el.closest('.oc')) {
+          out.push(el.tagName + '.' + String(el.className).slice(0, 30) + ' w=' + Math.round(r.width) + ' r=' + Math.round(r.right));
+        }
+      });
+      var d = document.createElement('pre'); d.id = 'dbg'; d.textContent = out.slice(0, 30).join('\n');
+      document.body.appendChild(d);
+    }, 500);
+  });
+}
+</script>
