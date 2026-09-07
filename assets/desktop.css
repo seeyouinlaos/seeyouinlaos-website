@@ -46,6 +46,8 @@
     aspect-ratio: 3 / 2;
     align-self: start;
   }
+  /* a stay with a long room collection keeps its photograph beside the list */
+  .p:has(.vars) > .pimg { position: sticky; top: 104px; }
   .p > *:not(.pimg):not(.pgal) { grid-column: 2; }
   .p:not(:has(.pimg)):not(:has(.pgal)) { display: block; }
   .p > .pn { margin-top: -6px; font-size: 24px; }
