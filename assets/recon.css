@@ -210,3 +210,9 @@ h1, h2, h3, .t-display, .t-section, .t-sub, .brand, .drawer-nav > a, .drawer-nav
 .brand .dot { color: #8A5A55; }
 body { font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; }
 .eyebrow, .t-meta, .t-link, .hd-cta, .factline, .anchor-rail a, .hd-sub a { font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; }
+@media (max-width: 640px) {
+  .hd-sub .crumb { display: none; }
+  .hd-cta.solid { padding: 9px 12px; font-size: 10px; }
+  .hd-row { grid-template-columns: auto 1fr auto; gap: 6px; }
+  .brand { font-size: 16px; }
+}
