@@ -65,8 +65,8 @@
   .p > .pn { margin-top: -6px; font-size: 24px; }
   .p > .pm { max-width: 46em; }
   .p > .vars, .p > .vl { max-width: none; }
-  .add, .cta { min-width: 300px; width: auto; }
-  .p .add { display: inline-block; }
+  .add, .cta { min-width: 320px; width: auto; }
+  .p .add, .p .vw, .p .ok { justify-self: start; }
 
   /* room rows inside a product keep one axis and one row height */
   .var { padding: 12px 14px; }
