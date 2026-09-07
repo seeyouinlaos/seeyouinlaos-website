@@ -63,7 +63,7 @@ h3, .t-sub { font-size: 19.6px; font-weight: 300; line-height: 1.4; }
 .hd-cta { font-family: Helvetica, Arial, sans-serif; font-size: 12px; letter-spacing: 1px; padding: 12px 0; min-height: 44px; display: inline-flex; align-items: center; gap: 10px; }
 .hd-cta.bag { width: 44px; height: 44px; padding: 0; justify-content: center; position: relative; color: var(--ink); }
 .hd-cta.bag .bgi { display: block; }
-.hd-cta.bag .bb { position: absolute; top: 5px; right: 3px; min-width: 15px; height: 15px; padding: 0 4px; background: var(--ink); color: var(--ivory); font-size: 9px; line-height: 1; letter-spacing: 0; display: none; align-items: center; justify-content: center; box-shadow: 0 0 0 2px var(--ivory); border-radius: 1px; }
+.hd-cta.bag .bb { position: absolute; top: 1px; right: 0; min-width: 14px; height: 14px; padding: 0 3px; background: var(--ink); color: var(--ivory); font-size: 9px; line-height: 1; letter-spacing: 0; display: none; align-items: center; justify-content: center; box-shadow: 0 0 0 2px var(--ivory); border-radius: 1px; }
 .hd-cta.boxed { border: 1px solid var(--hairline); background: #fff; padding: 11px 26px; transition: border-color .3s; }
 .hd-cta.boxed:hover { border-color: var(--ink); }
 .burger { display: inline-flex; flex-direction: column; gap: 4px; }
