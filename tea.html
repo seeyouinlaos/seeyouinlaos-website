@@ -1,0 +1,59 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Champagne Afternoon Tea at 1872 · See You In Laos</title><style>
+@font-face{font-family:'PP Editorial Old';src:url('assets/fonts/PPEditorialOld-Ultralight.otf') format('opentype');font-weight:200;font-display:swap}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;font-weight:300;font-size:14px;line-height:1.6}
+.hd{display:grid;grid-template-columns:44px 1fr 44px;align-items:center;padding:calc(14px + env(safe-area-inset-top)) 20px 14px}
+.hb{width:44px;height:44px;display:flex;flex-direction:column;justify-content:center;gap:5px;background:none;border:0;cursor:pointer}
+.hb i{display:block;width:20px;height:1.4px;background:#313131}
+.bd{font-family:'PP Editorial Old',serif;font-weight:200;font-size:19px;text-align:center;letter-spacing:.4px}
+.bag{width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-size:15px;text-decoration:none;color:#313131}
+main{padding:34px 24px 60px}
+.media{width:100%;aspect-ratio:4/5;background:linear-gradient(160deg,#E7E3DB,#D9D3C7);position:relative}
+.media span{position:absolute;left:0;right:0;bottom:14px;text-align:center;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#7C7A75}
+.panel{background:#FCFAF6;padding:34px 26px 38px}
+.eyebrow{font-size:10px;letter-spacing:2.2px;text-transform:uppercase;color:#7C7A75;margin-bottom:14px}
+h1{font-family:'PP Editorial Old',serif;font-weight:200;font-size:29px;line-height:1.28;margin-bottom:16px}
+.body{font-size:13.5px;line-height:1.75;color:#4A4A4A;margin-bottom:22px;max-width:34em}
+.price{font-family:'PP Editorial Old',serif;font-size:17px;margin-bottom:4px}
+.per{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75;margin-bottom:24px}
+hr{border:0;border-top:1px solid #DAD9D7;margin:0 0 22px}
+.tlink{display:inline-block;font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:#313131;text-decoration:none;border-bottom:1px solid #313131;padding:8px 0 3px;min-height:44px}
+.cta{display:block;width:100%;margin-top:26px;background:#313131;color:#F3EEE7;border:0;padding:19px;font-size:11px;letter-spacing:2.2px;text-transform:uppercase;cursor:pointer;min-height:52px}
+.scrim{position:fixed;inset:0;background:rgba(30,30,30,.45);display:none;z-index:8}
+.ov{position:fixed;left:0;right:0;bottom:0;background:#FCFAF6;padding:34px 26px calc(38px + env(safe-area-inset-bottom));display:none;z-index:9}
+.show .scrim,.show .ov{display:block}
+.ov .eyebrow{margin-bottom:10px}
+.ov h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:23px;margin-bottom:14px}
+.ov input{width:100%;border:1px solid #DAD9D7;background:#fff;padding:15px 14px;font:inherit;letter-spacing:2px;margin-bottom:16px}
+.ov .lost{font-size:11.5px;color:#7C7A75;margin-top:16px}
+.ov .lost a{color:#313131}
+.ja-row{display:flex;gap:16px;align-items:center;margin:14px 0 18px}
+.ja-th{width:74px;height:92px;background:linear-gradient(160deg,#E7E3DB,#D9D3C7);flex:0 0 auto}
+.ja-n{font-family:'PP Editorial Old',serif;font-weight:200;font-size:17px;line-height:1.3}
+.ja-m{font-size:11px;color:#7C7A75;margin-top:5px}
+</style></head><body>
+<header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos.</div><a class="bag" href="#journey" aria-label="Your Journey">◻</a></header>
+<main>
+<div class="media"><span>Photography to follow</span></div>
+<section class="panel">
+<p class="eyebrow">Gift Experience</p>
+<h1>Champagne Afternoon Tea at 1872</h1>
+<p class="body">An afternoon of champagne and patisserie at 1872, Aman Nai Lert Bangkok — an optional experience during the Bangkok days of the journey.</p>
+<p class="price">USD 180</p>
+<p class="per">For two guests</p>
+<hr>
+<a class="tlink" href="experiences.html">Discover more</a>
+<button class="cta" id="add">Add to Your Journey</button>
+</section>
+</main>
+<div class="scrim" id="scrim"></div>
+<div class="ov" id="ov"></div>
+<script>
+var st=new URLSearchParams(location.search).get('state');
+var ov=document.getElementById('ov');
+function invite(){ov.innerHTML='<p class="eyebrow">Your Invitation</p><h2>Enter your private invitation code.</h2><input type="text" autocomplete="one-time-code" aria-label="Invitation code"><button class="cta" style="margin-top:4px">Continue</button><p class="lost">Lost your code? <a href="mailto:guest.relation.seeyouinlaos@gmail.com">guest.relation.seeyouinlaos@gmail.com</a></p>';document.body.classList.add('show')}
+function added(){ov.innerHTML='<p class="eyebrow">Just added to your journey</p><div class="ja-row"><div class="ja-th"></div><div><p class="ja-n">Champagne Afternoon Tea at 1872</p><p class="ja-m">Quantity 1 · USD 180 · For two guests</p></div></div><button class="cta" style="margin-top:0">View Your Journey</button><p style="text-align:center;margin-top:16px"><a class="tlink" href="#" id="cont">Continue exploring</a></p>';document.body.classList.add('show');var c=document.getElementById('cont');if(c)c.addEventListener('click',function(e){e.preventDefault();document.body.classList.remove('show')})}
+document.getElementById('add').addEventListener('click',invite);
+document.getElementById('scrim').addEventListener('click',function(){document.body.classList.remove('show')});
+if(st==='invite')invite();if(st==='added')added();
+</script></body></html>

@@ -25,14 +25,7 @@
         '<a class="hd-cta solid" href="register/">Enter the Journey</a>' +
       '</div>' +
     '</div>' +
-    '<nav class="hd-sub" aria-label="Section">' +
-      '<div class="hd-sub-row">' +
-        '<a class="crumb" href="index.html">see you in laos.</a>' +
-        PAGES.map(function (p) {
-          return '<a href="' + p[0] + '"' + (p[0] === here ? ' class="on" aria-current="page"' : '') + '>' + p[1] + '</a>';
-        }).join('') +
-      '</div>' +
-    '</nav>';
+    '';
   document.body.prepend(header);
 
   /* sync content offset with the real header height (target ≈117px desktop) */
