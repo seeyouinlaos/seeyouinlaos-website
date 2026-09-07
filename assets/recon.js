@@ -22,7 +22,7 @@
       '<a class="brand" href="index.html">see you in laos.<span class="dot">·</span></a>' +
       '<div class="hd-right">' +
         '<a class="hd-cta boxed ghosted" href="plan.html">Your Journey</a>' +
-        '<a class="hd-cta solid" href="#contact">Enter the Journey</a>' +
+        '<a class="hd-cta solid" href="register/">Enter the Journey</a>' +
       '</div>' +
     '</div>' +
     '<nav class="hd-sub" aria-label="Section">' +

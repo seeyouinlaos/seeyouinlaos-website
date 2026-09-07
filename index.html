@@ -1,243 +1,98 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport"/>
-<title>See You In Laos · Haruthai &amp; Suthep · 28 February 2027 · Vientiane</title>
-<meta name="description" content="Haruthai &amp; Suthep are getting married on Sunday, 28 February 2027 in Vientiane, Laos. Three journeys — Thailand, Laos, China — open with the private code from your invitation."/>
-<meta name="theme-color" content="#F2ECE1"/>
-<meta property="og:type" content="website"/>
-<meta property="og:title" content="See You In Laos · Haruthai &amp; Suthep"/>
-<meta property="og:description" content="Sunday, 28 February 2027 · Vientiane, Laos. Three journeys, one invitation."/>
-<meta property="og:image" content="https://seeyouinlaos.github.io/seeyouinlaos-website/assets/images/hero/img-hero.jpg"/>
-<meta property="og:url" content="https://seeyouinlaos.github.io/seeyouinlaos-website/"/>
-<meta name="twitter:card" content="summary_large_image"/>
-<link href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23F2ECE1'/%3E%3Ccircle cx='16' cy='16' r='5' fill='%23B33A3F'/%3E%3C/svg%3E" rel="icon"/>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
-<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500&amp;display=swap" rel="stylesheet"/>
-<link rel="preload" as="image" href="assets/images/hero/hero-journey.webp" type="image/webp" fetchpriority="high"/>
-<style>
-@font-face { font-family: 'PP Editorial Old'; src: url('assets/fonts/PPEditorialOld-Regular.otf') format('opentype'); font-weight: 400; font-display: swap; }
-@font-face { font-family: 'PP Editorial Old'; src: url('assets/fonts/PPEditorialOld-Ultralight.otf') format('opentype'); font-weight: 200; font-display: swap; }
-@font-face { font-family: 'PP Editorial Old'; src: url('assets/fonts/PPEditorialOld-Italic.otf') format('opentype'); font-weight: 400; font-style: italic; font-display: swap; }
-
-:root {
-  /* Palette authority: measured from the Aman reference implementation. */
-  --ivory: #F3EEE7; --ink: #313131; --blush: #E4E2DD; --rose: #7C7A75;
-  --cherry: #4A4A4A; --cherry-photo: #8A5A55; --line: #DAD9D7; --panel: #FAF7F2;
-  --gutter: 5vw;
-}
-* { margin: 0; padding: 0; box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; scroll-behavior: smooth; }
-body { font-family: 'Hanken Grotesk', sans-serif; font-weight: 300; background: var(--ivory); color: var(--ink); font-size: 16px; line-height: 1.6; overflow-x: hidden; }
-a { color: inherit; text-decoration: none; }
-img { max-width: 100%; display: block; }
-button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
-:focus-visible { outline: 2px solid var(--cherry-photo); outline-offset: 3px; }
-.serif { font-family: 'PP Editorial Old', serif; font-weight: 200; }
-.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
-.eyebrow { font-size: 10.5px; letter-spacing: .22em; text-transform: uppercase; color: var(--rose); }
-
-/* header — the same discipline as the guest experience */
-header.top { position: sticky; top: 0; z-index: 60; background: var(--ivory); border-bottom: 1px solid var(--line); display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; padding: calc(10px + env(safe-area-inset-top)) var(--gutter) 10px; }
-.hd-zone { display: flex; align-items: center; gap: 14px; min-height: 44px; }
-.hd-r { justify-content: flex-end; }
-.hd-menu { display: inline-flex; align-items: center; gap: 9px; font-size: 12px; letter-spacing: .1em; min-height: 44px; min-width: 44px; }
-.burger { display: inline-flex; flex-direction: column; gap: 4px; }
-.burger i { display: block; width: 18px; height: 1.5px; background: var(--ink); }
-.mark { font-family: 'PP Editorial Old', serif; font-size: 22px; white-space: nowrap; }
-.mark .dot { color: var(--cherry-photo); }
-.hd-cta { border: 1px solid var(--ink); padding: 10px 18px; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; min-height: 44px; display: inline-flex; align-items: center; transition: background .3s, color .3s; }
-.hd-cta:hover { background: var(--ink); color: var(--ivory); }
-.lang-sw { display: inline-flex; gap: 2px; }
-.lang-sw button { border: 1px solid var(--line); font-size: 9.5px; letter-spacing: .14em; padding: 3px 7px; opacity: .6; min-height: 44px; min-width: 34px; }
-.lang-sw button.on { opacity: 1; border-color: var(--cherry); color: var(--cherry); }
-
-/* full-screen drawer */
-.dw-scrim { position: fixed; inset: 0; z-index: 70; background: rgba(0,0,0,.5); opacity: 0; transition: opacity .5s; }
-.dw-scrim[hidden] { display: none; }
-body.dw-open .dw-scrim { opacity: 1; }
-#drawer { position: fixed; inset: 0 auto 0 0; z-index: 71; width: min(760px, 100vw); background: var(--ivory); transform: translateX(-102%); transition: transform .55s cubic-bezier(.4,0,.2,1); overflow-y: auto; padding: calc(20px + env(safe-area-inset-top)) 7vw 40px; visibility: hidden; }
-body.dw-open #drawer { transform: none; visibility: visible; }
-.dw-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-.dw-close { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; min-height: 44px; min-width: 44px; }
-#drawer a.dw-link { display: block; border-bottom: 1px solid var(--line); font-family: 'PP Editorial Old', serif; font-weight: 200; font-size: 27px; line-height: 1.2; padding: 14px 0; }
-#drawer a.dw-link:hover { color: var(--cherry); }
-.dw-foot { display: flex; flex-wrap: wrap; gap: 6px 22px; margin-top: 34px; font-size: 10.5px; letter-spacing: .18em; text-transform: uppercase; opacity: .6; }
-
-/* editorial composition */
-.wrap { max-width: 1100px; margin: 0 auto; padding: 0 var(--gutter); }
-.hero { margin-top: 34px; }
-.hero .bg-img { width: 100%; height: min(72vh, 620px); background-size: cover; background-position: center; background-image: url('assets/images/hero/hero-journey.jpg'); background-image: image-set(url('assets/images/hero/hero-journey.webp') type('image/webp'), url('assets/images/hero/hero-journey.jpg') type('image/jpeg')); }
-.hero-cap { text-align: center; padding: 34px 0 0; }
-.hero-cap .eyebrow { margin-bottom: 12px; }
-.hero-cap h1 { font-family: 'PP Editorial Old', serif; font-weight: 200; font-size: clamp(30px, 6.4vw, 52px); line-height: 1.12; margin-bottom: 14px; }
-.hero-cap p { max-width: 520px; margin: 0 auto; font-size: 15px; opacity: .85; }
-.hs { white-space: nowrap; }
-section.blk { margin-top: 72px; }
-.split { display: grid; grid-template-columns: 1fr 1fr; gap: 46px; align-items: center; }
-.split .copy { max-width: 460px; }
-.split .copy .eyebrow { margin-bottom: 10px; }
-.split .copy h2 { font-family: 'PP Editorial Old', serif; font-weight: 200; font-size: clamp(24px, 4.2vw, 34px); line-height: 1.16; margin-bottom: 12px; }
-.split .copy p { font-size: 15px; opacity: .85; margin-bottom: 16px; }
-.split img { width: 100%; aspect-ratio: 4/5; object-fit: cover; }
-.t-link { display: inline-block; border-bottom: 1px solid var(--ink); padding: 8px 0 3px; font-size: 11px; letter-spacing: .18em; text-transform: uppercase; min-height: 44px; }
-.j-row { display: flex; align-items: baseline; gap: 18px; border-top: 1px solid var(--line); padding: 18px 0; }
-.j-row:last-of-type { border-bottom: 1px solid var(--line); }
-.j-row .n { font-size: 10px; letter-spacing: .2em; color: var(--rose); min-width: 74px; }
-.j-row .t { font-family: 'PP Editorial Old', serif; font-weight: 200; font-size: clamp(22px, 3.6vw, 28px); }
-.j-row .s { margin-left: auto; font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--rose); text-align: right; }
-.entry { text-align: center; max-width: 620px; margin: 0 auto; }
-.entry h2 { font-family: 'PP Editorial Old', serif; font-weight: 200; font-size: clamp(26px, 5vw, 40px); line-height: 1.14; margin: 12px 0 14px; }
-.entry p { font-size: 14.5px; opacity: .85; margin-bottom: 10px; }
-.entry .route { font-size: 10.5px; letter-spacing: .18em; text-transform: uppercase; opacity: .6; margin-bottom: 26px; }
-.btn-full { display: inline-block; border: 1px solid var(--ink); background: var(--ink); color: var(--ivory); padding: 15px 40px; font-size: 11.5px; letter-spacing: .18em; text-transform: uppercase; min-height: 48px; transition: opacity .3s; }
-.btn-full:hover { opacity: .88; }
-footer { margin-top: 84px; border-top: 1px solid var(--line); padding: 46px var(--gutter) calc(40px + env(safe-area-inset-bottom)); text-align: center; }
-footer .ask { font-family: 'PP Editorial Old', serif; font-weight: 200; font-size: clamp(26px, 5vw, 40px); margin-bottom: 20px; }
-footer .ask em { font-style: italic; }
-footer .mark-f { font-family: 'PP Editorial Old', serif; font-size: 20px; margin: 30px 0 12px; }
-footer .mark-f .dot { color: var(--cherry-photo); }
-footer .fine { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; opacity: .6; display: flex; flex-direction: column; gap: 5px; }
-footer a.mail-link { border-bottom: 1px solid var(--line); }
-@media (max-width: 760px) {
-  .split { grid-template-columns: 1fr; gap: 22px; }
-  .mark { font-size: 18px; }
-  .hd-menu span:last-child { display: none; }
-  .hd-cta { padding: 9px 12px; font-size: 10px; letter-spacing: .12em; }
-  .lang-sw button { min-width: 28px; padding: 3px 4px; }
-  section.blk { margin-top: 54px; }
-  .j-row { flex-wrap: wrap; }
-  .j-row .n { min-width: 100%; }
-  .j-row .s { margin-left: auto; }
-}
-
-/* quiet editorial header (composition rebuilt) */
-header.top { padding: calc(8px + env(safe-area-inset-top)) var(--gutter) 8px; }
-.hd-enter { font-size: 10px; letter-spacing: .18em; text-transform: uppercase; border-bottom: 1px solid var(--ink); padding: 4px 0 3px; }
-.mark { font-size: 18px; }
-.dw-lang { margin-top: 26px; }
-.dw-lang .lang-sw button { min-height: 44px; min-width: 44px; }
-.rule { border: 0; border-top: 1px solid var(--line); margin: 0 0 30px; }
-.hero { margin-top: 0; }
-.hero .bg-img { height: 74vh; min-height: 460px; }
-.hero-cap { text-align: left; padding: 30px 0 0; }
-.hero-cap p { margin: 0 0 6px; max-width: 560px; }
-.hero-cap h1 { margin: 8px 0 12px; }
-.t-link { border-bottom-width: 1px; }
-.jrny { margin-top: 56px; }
-.jrny img { width: 100%; height: 62vh; min-height: 380px; object-fit: cover; display: block; }
-.jrny-cap { padding-top: 22px; }
-.jrny-cap h2 { font-size: clamp(28px, 6vw, 40px); font-weight: 200; margin: 4px 0 8px; }
-.jrny-cap p { max-width: 540px; font-size: 15px; opacity: .85; margin-bottom: 12px; }
-#invitation-entry { text-align: left; max-width: none; }
-.ent-t { font-size: clamp(26px, 5.4vw, 38px); font-weight: 200; margin: 6px 0 10px; }
-.ent-p { max-width: 540px; font-size: 15px; opacity: .85; margin-bottom: 18px; }
-.act { display: inline-block; border: 1px solid var(--ink); padding: 13px 30px; font-size: 11px; letter-spacing: .18em; text-transform: uppercase; }
-.act:hover { background: var(--ink); color: var(--ivory); }
-.ent-s { margin-top: 18px; font-size: 12.5px; opacity: .7; }
-footer { text-align: left; border-top: 0; margin-top: 70px; padding: 0 0 calc(40px + env(safe-area-inset-bottom)); }
-footer .ask { font-size: clamp(26px, 5.4vw, 38px); margin-bottom: 14px; }
-footer .fine { margin-top: 34px; text-align: left; }
-footer .fine .dot { color: var(--cherry-photo); }
-</style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>See You In Laos</title>
+<link rel="stylesheet" href="assets/recon.css">
 </head>
 <body>
-<div id="live" class="sr-only" role="status" aria-live="polite"></div>
+<main>
+  <!-- 01 · full-width editorial hero -->
+  <section class="hero">
+    <div class="ph" data-ph="Photography to follow · hero media · full-bleed"></div>
+    <div class="hero-copy">
+      <p class="eyebrow">Sunday, 28 February 2027 · Vientiane, Laos</p>
+      <h1 class="t-display">One invitation, three journeys.</h1>
+    </div>
+  </section>
 
-<header class="top">
-<div class="hd-zone"><button type="button" class="hd-menu" id="menuBtn" aria-haspopup="dialog" aria-expanded="false"><span class="burger" aria-hidden="true"><i></i><i></i><i></i></span><span>Menu</span></button></div>
-<a class="mark" href="#top">see you in laos<span class="dot">.</span></a>
-<div class="hd-zone hd-r"><a class="hd-enter" href="register/">Enter the Journey</a></div>
-</header>
+  <!-- 02 · centered intro prose -->
+  <section class="section content">
+    <div class="centered">
+      <p class="eyebrow">Your Invitation</p>
+      <h2>One journey, prepared around you.</h2>
+      <p class="t-body" style="margin-left:auto;margin-right:auto">Thailand → Laos → China · 21 February – 6 March 2027. The complete journey opens with the private code from your invitation.</p>
+      <a class="t-link" href="voyage.html">Discover the journey</a>
+    </div>
+  </section>
 
-<div class="dw-scrim" id="dwScrim" hidden></div>
-<nav id="drawer" role="dialog" aria-modal="true" aria-label="Menu">
-<div class="dw-head"><span class="mark">see you in laos<span class="dot">.</span></span><button type="button" class="dw-close" id="dwClose">Close</button></div>
-<a class="dw-link" href="#top">Your Invitation</a>
-<a class="dw-link" href="#journeys">The three journeys</a>
-<a class="dw-link" href="#invitation-entry">Enter the Journey</a>
-<a class="dw-link" href="mailto:guest.relation.seeyouinlaos@gmail.com">Contact Guest Relations</a>
-<div class="dw-lang"><span class="lang-sw" role="group" aria-label="Language"><button type="button" data-lang-btn="en">EN</button><button type="button" data-lang-btn="de">DE</button><button type="button" data-lang-btn="th">TH</button><button type="button" data-lang-btn="ja">JA</button></span></div>
-<div class="dw-foot"><span>Sunday, 28 February 2027 · Vientiane</span><span>17°58′N — 102°38′E</span></div>
-</nav>
+  <!-- 03 · image/text split, image right -->
+  <section class="section content">
+    <div class="split">
+      <div class="copy">
+        <p class="eyebrow">Journey 01 · Thailand</p>
+        <h2>Bangkok</h2>
+        <p class="t-body">The shared city days before the wedding — the river, the temples, the night train waiting to go north.</p>
+        <a class="t-link" href="destination.html">Discover Thailand</a>
+      </div>
+      <div class="ph r-45" data-ph="Photography to follow · portrait 4:5"></div>
+    </div>
+  </section>
 
-<main id="top">
-<section class="hero">
-<div class="bg-img" role="img" aria-label="The journey along the Mekong"></div>
-<div class="wrap hero-cap">
-<p class="eyebrow">Sunday, 28 February 2027 · Vientiane, Laos</p>
-<h1>Travel first. Wedding second.<br/>Memory always.</h1>
-<p><span class="hs">Haruthai&nbsp;&amp;&nbsp;Suthep</span> are getting married, and you are invited on the journey.</p>
-<a class="t-link" href="#journeys">Discover the journey</a>
-</div>
-</section>
+  <!-- 04 · image/text split, reversed -->
+  <section class="section content">
+    <div class="split rev">
+      <div class="copy">
+        <p class="eyebrow">Journey 02 · Laos</p>
+        <h2>Vientiane</h2>
+        <p class="t-body">The quiet capital on the Mekong, and the one day the whole journey leans toward.</p>
+        <a class="t-link" href="experiences.html">Discover Laos</a>
+      </div>
+      <div class="ph r-32" data-ph="Photography to follow · landscape 3:2"></div>
+    </div>
+  </section>
 
-<section class="blk" id="journeys">
-<div class="wrap"><p class="eyebrow">One invitation · three journeys</p></div>
-<article class="jrny">
-<img src="assets/images/city/001-bangkok-chao-phraya-skyline.jpg" alt="Bangkok — the Chao Phraya river" loading="lazy" decoding="async"/>
-<div class="wrap jrny-cap"><p class="eyebrow">Journey 01 · Thailand</p>
-<h2 class="serif">Bangkok</h2>
-<p>The shared city days before the wedding — the river, the temples, the night train waiting to go north.</p>
-<a class="t-link" href="register/?go=bkk">Discover Thailand</a></div>
-</article>
-<article class="jrny">
-<img src="assets/images/city/002-vientiane-pha-that-luang.jpg" alt="Vientiane — Pha That Luang" loading="lazy" decoding="async"/>
-<div class="wrap jrny-cap"><p class="eyebrow">Journey 02 · Laos</p>
-<h2 class="serif">Vientiane</h2>
-<p>The quiet capital on the Mekong, and the one day the whole journey leans toward.</p>
-<a class="t-link" href="register/?go=vte">Discover Laos</a></div>
-</article>
-<article class="jrny">
-<img src="assets/images/city/004-lijiang-black-dragon-pool.jpg" alt="Lijiang — Black Dragon Pool" loading="lazy" decoding="async"/>
-<div class="wrap jrny-cap"><p class="eyebrow">Journey 03 · China</p>
-<h2 class="serif">Kunming &amp; Lijiang</h2>
-<p>After the wedding: the city of eternal spring, and the old town beneath Jade Dragon Snow Mountain.</p>
-<a class="t-link" href="register/?go=china">Discover China</a></div>
-</article>
-</section>
+  <!-- 05 · two images side-by-side -->
+  <section class="section content">
+    <div class="duo">
+      <figure><div class="ph r-45" data-ph="Photography to follow · duo left 4:5"></div></figure>
+      <figure><div class="ph r-45" data-ph="Photography to follow · duo right 4:5"></div></figure>
+    </div>
+  </section>
 
-<section class="blk wrap" id="invitation-entry">
-<hr class="rule"/>
-<p class="eyebrow">Your Invitation</p>
-<h2 class="serif ent-t">One journey, prepared around you.</h2>
-<p class="ent-p">The complete journey — 21 February to 6 March 2027 — opens with the private code from your invitation.</p>
-<a class="act" href="register/">Enter the Journey</a>
-<p class="ent-s">Lost your code? Write to <a class="mail-link" href="mailto:guest.relation.seeyouinlaos@gmail.com">guest.relation.seeyouinlaos@gmail.com</a>.</p>
-</section>
+  <!-- 06 · full-width golden-ratio band -->
+  <section class="section">
+    <div class="ph r-golden" data-ph="Photography to follow · band 1.618:1"></div>
+  </section>
+
+  <!-- 07 · rail / carousel of products -->
+  <section class="section content" data-rail>
+    <p class="eyebrow" style="margin-bottom:6px">One invitation · three journeys</p>
+    <h2 style="margin-bottom:26px">Featured journeys</h2>
+    <div class="rail">
+      <article class="rail-card"><div class="ph r-32" data-ph="Photography to follow · card 3:2"></div><p class="eyebrow">Journeys</p><h3>Bangkok</h3><p class="t-small">21 February – 6 March 2027.</p><a class="t-link" href="voyage.html">Discover more</a></article>
+      <article class="rail-card"><div class="ph r-32" data-ph="Photography to follow · card 3:2"></div><p class="eyebrow">Journeys</p><h3>Vientiane</h3><p class="t-small">21 February – 6 March 2027.</p><a class="t-link" href="voyage.html">Discover more</a></article>
+      <article class="rail-card"><div class="ph r-32" data-ph="Photography to follow · card 3:2"></div><p class="eyebrow">Journeys</p><h3>Kunming & Lijiang</h3><p class="t-small">21 February – 6 March 2027.</p><a class="t-link" href="voyage.html">Discover more</a></article>
+      <article class="rail-card"><div class="ph r-32" data-ph="Photography to follow · card 3:2"></div><p class="eyebrow">Journeys</p><h3>The Wedding</h3><p class="t-small">21 February – 6 March 2027.</p><a class="t-link" href="voyage.html">Discover more</a></article>
+    </div>
+    <div class="rail-ctl">
+      <button data-rail-btn="prev" aria-label="Previous">←</button>
+      <button data-rail-btn="next" aria-label="Next">→</button>
+    </div>
+  </section>
+
+  <!-- 08 · quiet closing invitation -->
+  <section class="section content">
+    <hr class="hairline" style="margin-bottom:44px">
+    <div class="centered">
+      <p class="eyebrow">Your Invitation</p>
+      <h2>See you in Laos?</h2>
+      <a class="t-link" href="plan.html">Plan your journey</a>
+    </div>
+  </section>
 </main>
-
-<footer id="rsvp">
-<div class="wrap">
-<hr class="rule"/>
-<div class="fine"><span>see you in laos<span class="dot">.</span></span><span><span class="hs">Haruthai&nbsp;&amp;&nbsp;Suthep</span> · Sunday, 28 February 2027 · Vientiane</span><span><a class="mail-link" href="mailto:guest.relation.seeyouinlaos@gmail.com">guest.relation.seeyouinlaos@gmail.com</a></span></div>
-</div>
-</footer>
-
-<script src="assets/i18n/catalog.js?v=M2"></script>
-<script src="assets/i18n/siyl-i18n.js?v=M2"></script>
-<script>
-(function () {
-  'use strict';
-  var body = document.body, scrim = document.getElementById('dwScrim'),
-      btn = document.getElementById('menuBtn'), close = document.getElementById('dwClose'),
-      drawer = document.getElementById('drawer');
-  function setDrawer(open) {
-    body.classList.toggle('dw-open', open);
-    scrim.hidden = !open;
-    btn.setAttribute('aria-expanded', String(open));
-    (open ? close : btn).focus();
-  }
-  btn.addEventListener('click', function () { setDrawer(true); });
-  close.addEventListener('click', function () { setDrawer(false); });
-  scrim.addEventListener('click', function () { setDrawer(false); });
-  drawer.addEventListener('click', function (e) { if (e.target.classList.contains('dw-link')) setDrawer(false); });
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && body.classList.contains('dw-open')) setDrawer(false);
-  });
-})();
-</script>
+<script src="assets/recon.js"></script>
 </body>
 </html>
