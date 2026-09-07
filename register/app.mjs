@@ -8,13 +8,13 @@
 import {
   WEDDING, CONTACTS, JOURNEY_MODULES, EVENTS, ACCOMMODATIONS, SELECTABLE_ACCOMMODATIONS, TRAIN,
   TRANSFERS, PACKAGE_INCLUSIONS, COPY, DEMO_MODE, PUBLICATION, TRAIN_REFERENCE, BERTH_PREFS, BANGKOK_STAYS, BANGKOK_STAY, POST_WEDDING, RETURN_STAY, lookupInvitation,
-} from './data.mjs?v=L2';
+} from './data.mjs?v=M2';
 import {
   contributionPerGuest, partyCharges, partyTotal, money as usdMoney, displayMoney,
   trainContribution, transfersTotal, journeyTotal, postWeddingTotal,
   createInventory, remaining, availabilityLabel, requestAllocation,
   validateRegistration, buildNotification, nextInvitationState,
-} from './logic.mjs?v=L2';
+} from './logic.mjs?v=M2';
 
 /* ---------------- persistent state ---------------- */
 const DRAFT_KEY = 'siyl.reg.draft.v2';
@@ -641,6 +641,8 @@ function renderPrivnav() {
     '<button type="button" data-nav="journey"' + (name === 'journey' ? ' aria-current="true"' : '') + '>Your Travel</button>' +
     '<button type="button" data-nav="each"' + (name === 'each' ? ' aria-current="true"' : '') + '>Your Details</button>' +
     '<button type="button" data-nav="cost"' + (name === 'cost' ? ' aria-current="true"' : '') + '>Your Plan</button>' +
+    '<div class="dw-lang" role="group" aria-label="Language">' + ['en','de','th','ja'].map((l) =>
+      '<button type="button" data-lang-btn="' + l + '">' + l.toUpperCase() + '</button>').join('') + '</div>' +
     '<span class="pn-exit"><button type="button" id="nav-invitation">Invitation</button><button type="button" id="pn-home">Website</button><button type="button" id="pn-save">Save</button><button type="button" id="log-out">Log out</button></span>';
   const mark = document.getElementById('site-mark');
   if (mark && !mark.dataset.wired) {
@@ -660,7 +662,7 @@ function renderPrivnav() {
   }
   if (planBtn && !planBtn.dataset.wired) {
     planBtn.dataset.wired = '1';
-    planBtn.addEventListener('click', () => { setDrawer(false); show(idx('plan')); });
+    planBtn.textContent = 'Journey'; planBtn.addEventListener('click', () => { setDrawer(false); show(idx('cost')); });
   }
   nav.querySelector('.dw-close').addEventListener('click', () => setDrawer(false));
   nav.querySelectorAll('[data-destnav]').forEach((b) => b.addEventListener('click', () => {

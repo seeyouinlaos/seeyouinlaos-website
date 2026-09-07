@@ -2018,6 +2018,17 @@ header.top .lang-sw button.on { opacity: 1; border: 0; border-bottom: 1px solid 
 .hd-plan { border: 0; border-bottom: 1px solid var(--ink); padding: 6px 0 3px; letter-spacing: .16em; }
 .hd-plan:hover { background: none; color: var(--rose); border-color: var(--rose); }
 @media (max-width: 700px) { header.top { padding-top: calc(8px + env(safe-area-inset-top)); padding-bottom: 8px; } header.top .mark { font-size: 17px; } }
+
+/* FINAL RESET step 1: quiet Aman header — hamburger · brand · one utility.
+ * Rejected components removed from view: header language row, header Your Plan,
+ * persistent dark costs bar. Language moves into the menu; the bag opens
+ * intentionally from the one utility. */
+header.top .lang-sw { display: none; }
+#summary { display: none !important; }
+.hd-plan { display: inline-flex; border: 0; border-bottom: 0; font-size: 10.5px; letter-spacing: .18em; padding: 6px 0; }
+#privnav .dw-lang { margin-top: 30px; display: flex; gap: 2px; }
+#privnav .dw-lang button { border: 1px solid var(--line); background: none; font: inherit; font-size: 10px; letter-spacing: .14em; padding: 8px 12px; min-height: 44px; min-width: 44px; cursor: pointer; color: inherit; opacity: .6; }
+#privnav .dw-lang button.on { opacity: 1; border-color: var(--ink); }
 </style>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -2254,9 +2265,9 @@ header.top .lang-sw button.on { opacity: 1; border: 0; border-bottom: 1px solid 
 <div class="lb-count" aria-live="polite"></div>
 </div>
 
-<script src="../assets/i18n/catalog.js?v=L2"></script>
-<script src="../assets/experiences.js?v=L2"></script>
-<script src="../assets/i18n/siyl-i18n.js?v=L2"></script>
-<script type="module" src="./app.mjs?v=L2"></script>
+<script src="../assets/i18n/catalog.js?v=M2"></script>
+<script src="../assets/experiences.js?v=M2"></script>
+<script src="../assets/i18n/siyl-i18n.js?v=M2"></script>
+<script type="module" src="./app.mjs?v=M2"></script>
 </body>
 </html>
