@@ -688,6 +688,7 @@
   E("Plan", "Planen", "วางแผน", "計画");
   E("Get inspired", "Inspiration", "แรงบันดาลใจ", "インスピレーション");
   E("Edit", "Bearbeiten", "แก้ไข", "編集");
+  E("The courtyard at dusk", "Der Innenhof in der Dämmerung", "ลานบ้านยามพลบค่ำ", "夕暮れの中庭");
   E("Section", "Bereich", "ส่วน", "セクション");
   E("Wellness", "Wellness", "สุขภาพและความงาม", "ウェルネス");
   E("Marsilea Spa", "Marsilea Spa", "มาร์ซิเลีย สปา", "マルシレア スパ");
