@@ -37,5 +37,9 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:22px;margin:40
 <div class="p"><p class="pn">Siam Kempinski Bangkok</p><p class="pm">06 – 08 March · Deluxe Balcony King Non Smoking · 2 nights · breakfast included</p><p class="pp">USD 380 per person</p><button class="add" data-add='{"id":"kempinski","name":"Siam Kempinski Bangkok","meta":"06 – 08 March 2027 · 2 nights · breakfast included","price":380}'>Add to Your Journey</button></div>
 </main>
 <script src="assets/bag.js"></script>
-<script>document.querySelectorAll('[data-add]').forEach(function(b){b.addEventListener('click',function(){SIYL_BAG.add(JSON.parse(b.getAttribute('data-add')));b.insertAdjacentHTML('afterend','<span class="ok">Added</span>');b.nextElementSibling.previousElementSibling===b})});</script>
+<script>document.querySelectorAll('[data-add]').forEach(function(b){b.addEventListener('click',function(){SIYL_BAG.add(JSON.parse(b.getAttribute('data-add')));b.insertAdjacentHTML('afterend','<span class="ok">Added</span>');b.nextElementSibling.previousElementSibling===b})});
+/* deep-link add (used by scripted acceptance capture and shareable links) */
+var qa=new URLSearchParams(location.search).get('autoadd');
+if(qa){qa.split(',').forEach(function(id){var b=document.querySelector('[data-add*=\'"id":"'+id+'"\']');if(b)b.click()});}
+</script>
 </body></html>

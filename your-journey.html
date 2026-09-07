@@ -43,5 +43,5 @@ el.querySelectorAll('[data-q]').forEach(function(b){b.addEventListener('click',f
 SIYL_BAG.badge()}
 render();
 var q=new URLSearchParams(location.search);
-if(q.get('seed')==='demo'){/* no demo seeding in production */}
+var rm=q.get('rm');if(rm){SIYL_BAG.remove(rm);render()}
 </script></body></html>
