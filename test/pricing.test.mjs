@@ -119,6 +119,8 @@ test('Cost Saving Experience is the hosted Vientiane core, composed of existing 
   assert.equal(line.complimentary, true);
   assert.equal(line.interest, false, 'a hosted booking, not a spa interest');
   assert.equal(total([{ ...line, qty: 2 }]), 0, 'never adds to Your Costs');
+  /* a hosted line never also reads "Amount on request" — the price IS known */
+  assert.equal(P.lineBasis(line), '');
 });
 
 test('D · the Wedding Stay is ONE payable item, never two complimentary rows', () => {

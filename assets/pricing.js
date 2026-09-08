@@ -196,6 +196,9 @@
       var f = FLAT[x.id];
       if (f) return f.basis;
       if (x.interest) return 'Interest · confirmed and payable at the spa';
+      /* a hosted line carries its own COMPLIMENTARY note — it must never also
+       * read "Amount on request", which would suggest the price is unknown */
+      if (x.complimentary) return '';
       var at = locate(x.id);
       if (at && x.room) {
         var q = this.quote(at.win.id, x.room);
