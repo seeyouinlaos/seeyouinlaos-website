@@ -312,3 +312,11 @@ every guest surface. Deterministic coverage: `test/pricing.test.mjs`.
 - **Temple Ceremony**: SELF-PAY on every surface — Buddhist giving is made
   personally by each guest. Coffee & Cake, Vow Ceremony and Wedding Dinner
   stay HOSTED.
+
+- **Homepage · destination 02 Vientiane** → `city/002-vientiane-street-morning.jpg`
+  (owner-supplied 08 Sep: a Vientiane street, LaoViet Bank, temple wall).
+- **Homepage · featured journey "After the Wedding"** →
+  `city/004-lijiang-snow-mountain-rooftops.jpg` (owner-supplied 08 Sep: Jade
+  Dragon Snow Mountain over the Lijiang rooftops).
+- Snow Mountain Viewing Room: still no room photograph supplied — the two
+  photographs above are a street and a mountain, not a hotel room. Placeholder stays.
