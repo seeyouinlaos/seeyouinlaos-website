@@ -184,8 +184,11 @@ if(!on&&tag)tag.remove();
 /* ---- live availability from the shared ledger ---- */
 var av=a.querySelector('.vav');
 if(St&&St.ready()&&St.tracked(win,slug)){
-  if(!av){av=document.createElement('span');av.className='vav';host.appendChild(av)}
   var txt=St.label(win,slug,qty),gone=!St.fits(win,slug,qty)&&!on;
+  /* the row already carries its own "Reserved for …" line — never say it twice */
+  if(a.querySelector('.vr')&&/^Reserved/.test(txt))txt='';
+  if(!txt){if(av)av.remove();a.classList.toggle('gone',gone);return}
+  if(!av){av=document.createElement('span');av.className='vav';host.appendChild(av)}
   av.textContent=txt;
   av.classList.toggle('low',St.scarce(win,slug)||St.soldOut(win,slug));
   a.classList.toggle('gone',gone);
