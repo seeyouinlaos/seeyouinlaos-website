@@ -347,7 +347,10 @@
           rate: 105 },
         { slug: 'snow-mountain-viewing', name: 'Snow Mountain Viewing Room', cat: 'Snow mountain room',
           desc: 'Snow Mountain Viewing Room — 50 sq.m., 1 king bed (2m wide), 1 adult. Floor 2nd floor.',
-          gallery: [],
+          /* the Owner-designated photograph for this room (08 Sep 2026): Jade
+           * Dragon Snow Mountain over the Baisha rooftops. Canonical — used for
+           * this room only, everywhere the room appears. */
+          gallery: [[LJG + 'snow-mountain-viewing-1.jpg', 'Jade Dragon Snow Mountain over the rooftops']],
           facts: [['Size', '50 sq.m.'], ['Bed', '1 King Bed (2m wide)'], ['Occupancy', '1 Adult'], ['Location', 'Floor 2nd floor']],
           amenities: ['Air conditioning', 'Air purifier', 'Audio equipment', 'Balcony', 'Bathrobe', 'Bathtub or shower', 'Butler service', 'Coffee maker / teapot', 'Electric kettle', 'Fireplace', 'Free Wi-Fi', 'Heating', 'Iron and ironing board', 'Minibar', 'Private hot springs', 'Projector', 'Safe in room', 'Slippers', 'Smart door lock', 'Smart room controls', 'Smart toilet', 'Sofa', 'Terrace'],
           rate: 75 },

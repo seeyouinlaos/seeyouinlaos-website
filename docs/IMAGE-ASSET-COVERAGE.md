@@ -320,3 +320,10 @@ every guest surface. Deterministic coverage: `test/pricing.test.mjs`.
   Dragon Snow Mountain over the Lijiang rooftops).
 - Snow Mountain Viewing Room: still no room photograph supplied — the two
   photographs above are a street and a mountain, not a hotel room. Placeholder stays.
+
+- **Snow Mountain Viewing Room — RESOLVED 08 Sep 2026 (evening):** the Owner
+  designated the Jade Dragon Snow Mountain photograph for this room. It lives as
+  `lijiang/snow-mountain-viewing-1.jpg`, is used for this room only (list, detail,
+  selected state, Journey Bag, Review & Send), and is no longer used on the
+  homepage — the "After the Wedding" slide returned to `004-lijiang-naxi-rooftops.jpg`.
+  No placeholder remains anywhere in the Lijiang collection.

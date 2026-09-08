@@ -172,3 +172,15 @@ test('Temple Ceremony is self-pay on Review & Send, the other three hosted, neve
   assert.equal((src.match(/<span class="eh">Hosted<\/span>/g) || []).length, 3);
   assert.doesNotMatch(src, /USD/, 'no amount anywhere in the programme block');
 });
+
+test('Snow Mountain Viewing Room carries its own canonical photograph, used nowhere else', () => {
+  const room = R.lijiang.rooms.find((r) => r.slug === 'snow-mountain-viewing');
+  assert.equal(room.gallery.length, 1);
+  assert.equal(room.gallery[0][0], 'assets/images/lijiang/snow-mountain-viewing-1.jpg');
+  const everyOther = Object.values(R).flatMap((s) => s.rooms).filter((r) => r !== room).flatMap((r) => r.gallery.map((g) => g[0]));
+  assert.ok(!everyOther.includes(room.gallery[0][0]), 'not borrowed by another room');
+  for (const f of ['index.html', 'destination.html', 'accommodation.html', 'experiences.html', 'voyage.html']) {
+    assert.doesNotMatch(readFileSync(join(ROOT, f), 'utf8'), /snow-mountain-viewing-1|snow-mountain-rooftops/, f + ' uses the room photograph as scenery');
+  }
+  assert.equal(P.items('ljg', 'snow-mountain-viewing')[0].img, room.gallery[0][0], 'the bag line carries the same image');
+});
