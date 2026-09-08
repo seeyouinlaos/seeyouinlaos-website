@@ -95,7 +95,7 @@ return '<div class="row"><div class="th"'+(SIYL_BAG.thumb(x)?' style="background
 '<p class="nm">'+esc(x.name)+'</p><p class="mt">'+esc(x.meta||'')+'</p>'+
 (m.basis?'<p class="basis">'+esc(m.basis)+'</p>':'')+
 (J&&J.quantityLine(x)?'<p class="basis" style="color:#313131">'+esc(J.quantityLine(x))+'</p>':'')+
-(x.hostedNote?'<p class="basis" style="color:#8A5A55;text-transform:uppercase;letter-spacing:1.6px;font-size:9.5px">'+esc(x.hostedNote)+'</p>':'')+
+(x.hostedNote?'<p class="basis" style="color:#313131;text-transform:uppercase;letter-spacing:1.6px;font-size:9.5px">'+esc(x.hostedNote)+'</p>':'')+
 (x.breakfast?'<p class="basis" style="text-transform:uppercase;letter-spacing:1.6px;font-size:9.5px">'+esc(x.breakfast)+'</p>':'')+'</div>'+
 (x.hosted?'<span class="int">Complimentary</span>':
  (x.interest?'<span class="int">Interest · request</span>':'<span class="ln">USD '+((x.price||0)*x.qty).toLocaleString('en-US')+'</span>'))+'</div></div>'}).join('')}
