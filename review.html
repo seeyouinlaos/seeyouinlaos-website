@@ -107,6 +107,7 @@ return '<div class="row"><a class="th" href="'+href+'" aria-label="Open '+esc(x.
 (m.basis?'<p class="basis">'+esc(m.basis)+'</p>':'')+
 (J&&J.quantityLine(x)?'<p class="basis" style="color:#313131">'+esc(J.quantityLine(x))+'</p>':'')+
 (x.note?'<p class="basis" style="color:#313131;text-transform:uppercase;letter-spacing:1.6px;font-size:9.5px">'+esc(x.note)+(x.noteBy?'<br><span style="color:#7C7A75">'+esc(x.noteBy)+'</span>':'')+'</p>':'')+
+(x.complimentary?'<p class="basis" style="color:#313131;text-transform:uppercase;letter-spacing:1.6px;font-size:9.5px">Complimentary<br><span style="color:#7C7A75">Hosted — USD 0 payable by you</span></p>':'')+
 (x.breakfast?'<p class="basis" style="text-transform:uppercase;letter-spacing:1.6px;font-size:9.5px">'+esc(x.breakfast)+'</p>':'')+'</div>'+
 (x.interest?'<span class="int">Interest · request</span>':'<span class="ln">USD '+((x.price||0)*x.qty).toLocaleString('en-US')+'</span>')+'</div></div>'}).join('')}
 document.getElementById('tt').textContent='USD '+SIYL_BAG.total().toLocaleString('en-US');

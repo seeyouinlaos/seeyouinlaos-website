@@ -36,6 +36,9 @@ h1{font-family:'PP Editorial Old',serif;font-weight:200;font-size:29px;margin-bo
 .hostln{font-size:9.5px;letter-spacing:1.6px;text-transform:uppercase;color:#313131;margin-top:8px;line-height:1.8}
 .hostln span{display:block;color:#7C7A75;letter-spacing:1.6px}
 .ln.free{font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;font-size:9.5px;letter-spacing:1.6px;text-transform:uppercase;color:#7C7A75}
+.modes{display:flex;gap:30px;flex-wrap:wrap;margin:4px 0 14px}
+.selfl{font-size:11.5px;color:#7C7A75;line-height:1.8;margin-top:10px}
+.selfl b{font-weight:400;color:#313131}
 a.th,a.nm{text-decoration:none;color:inherit;display:block}
 a.nm:hover,a.th:hover{opacity:.7}
 .tot{display:flex;justify-content:space-between;align-items:baseline;padding:24px 0 6px}
@@ -70,9 +73,9 @@ body.fx-open .fxs,body.fx-open .fxo{display:block}
 <div id="dec"></div>
 <div class="fxs" id="fxs"></div>
 <div class="fxo" id="fxo" role="dialog" aria-modal="true" aria-labelledby="fxt" hidden>
-<p class="ie">Full Experience</p>
+<p class="ie" id="fxe">Full Experience</p>
 <h2 id="fxt">Complete the remaining journey.</h2>
-<p>Complete the remaining journey with the highest available eligible selection at each stage. You can still change individual choices afterwards.</p>
+<p id="fxp">Complete the remaining journey with the highest available eligible selection at each stage. You can still change individual choices afterwards.</p>
 <div class="row2"><button type="button" class="cancel" id="fxc">Cancel</button><button type="button" class="go" id="fxg">Add Full Experience</button></div>
 </div>
 <a class="cta" href="review.html">Review &amp; Send</a>
@@ -104,7 +107,9 @@ var P=window.SIYL_PRICE,win=P?P.windowOf(x.id):x.id;
 var canChange=P&&P.hasVariants(x.id);
 var amount = x.interest
   ? '<span class="ln free">Interest · request</span>'
-  : '<span class="ln">USD '+((x.price||0)*x.qty).toLocaleString('en-US')+'</span>';
+  : (x.complimentary
+     ? '<span class="ln">USD 0</span>'
+     : '<span class="ln">USD '+((x.price||0)*x.qty).toLocaleString('en-US')+'</span>');
 var href=detailHref(x);
 return '<div class="row"><a class="th" href="'+href+'" aria-label="Open '+x.name.replace(/"/g,'&quot;')+'"'+(SIYL_BAG.thumb(x)?' style="background-image:url('+SIYL_BAG.thumb(x)+')"':'')+'></a><div style="flex:1">'+
 (when?'<p class="when">'+when+'</p>':'')+
@@ -113,6 +118,7 @@ return '<div class="row"><a class="th" href="'+href+'" aria-label="Open '+x.name
 (m.basis?'<p class="basis">'+m.basis+'</p>':'')+
 (J&&J.quantityLine(x)?'<p class="qty">'+J.quantityLine(x)+'</p>':'')+
 (x.note?'<p class="hostln">'+x.note+(x.noteBy?'<span>'+x.noteBy+'</span>':'')+'</p>':'')+
+(x.complimentary?'<p class="hostln">Complimentary<span>Hosted — USD 0 payable by you</span></p>':'')+
 (x.breakfast?'<p class="bf">'+x.breakfast+'</p>':'')+
 (x.unit?'<div class="q"><button data-q="'+x.id+':-1">−</button><b style="font-family:\'PP Editorial Old\',serif">'+x.qty+'</b><button data-q="'+x.id+':1">+</button></div>':'')+
 '<div class="acts">'+
@@ -130,29 +136,68 @@ SIYL_BAG.badge()}
 /* quiet editorial completeness — decisions, never a progress meter */
 function renderDecisions(){
 var box=document.getElementById('dec');if(!box||!window.SIYL_JOURNEY)return;
-var open=SIYL_JOURNEY.open();
-if(!open.length){box.innerHTML=SIYL_BAG.get().length?'<div class="dlist ok"><h3><span class="ck" aria-hidden="true"></span>Your journey is complete</h3><p class="sub2">Every stage of the journey has an answer. Review &amp; Send shares it with Guest Relations.</p></div>':'';return}
-box.innerHTML='<div class="dlist"><h3>'+SIYL_JOURNEY.statusLine()+'</h3>'+
-'<p class="sub2">Choose how you would like to travel and stay for the remaining stages — or tell us that you are not joining that part of the journey.</p>'+
-'<p class="fxnote">Or let the journey complete itself: every open stage takes the highest available eligible option, and you can still change any of them.</p>'+
-'<button type="button" class="fx" id="fxb">Full Experience</button>'+
-open.map(function(s2){return '<div class="drow"><span class="dw">'+s2.when+'</span><span>'+s2.cat+' · '+s2.place+'</span><a href="journeys.html#'+s2.anchor+'">Decide</a></div>'}).join('')+'</div>';
-var b=document.getElementById('fxb');if(b)b.addEventListener('click',function(){fxOpen(true)})}
+var open=SIYL_JOURNEY.open(), self=SIYL_JOURNEY.selfArranged(), any=SIYL_BAG.get().length;
+var modes='<div class="modes"><button type="button" class="fx" id="fxb">Full Experience</button>'+
+          '<button type="button" class="fx" id="csb">Cost Saving Experience</button></div>';
+var selfList=self.length?'<p class="selfl"><b>'+self.length+(self.length===1?' stage is':' stages are')+' self-arranged:</b> '+
+  self.map(function(s2){return s2.when+' · '+s2.place}).join(' · ')+'.</p>':'';
+if(!open.length&&any){
+  /* DECISIONS COMPLETE is not the same as a fully supported JOURNEY */
+  var whole=!self.length;
+  box.innerHTML='<div class="dlist'+(whole?' ok':'')+'"><h3>'+(whole?'<span class="ck" aria-hidden="true"></span>Your journey is complete':'Your decisions are complete')+'</h3>'+
+    '<p class="sub2">'+(whole
+      ? 'Every stage of the journey has an answer and each one is booked with us. Review &amp; Send shares it with Guest Relations.'
+      : 'Every stage has an answer, and the stages below you are arranging yourself. Review &amp; Send shares the rest with Guest Relations.')+'</p>'+
+    selfList+
+    '<p class="fxnote">You can still change how the journey is composed:</p>'+modes+'</div>';
+} else if(!open.length){ box.innerHTML=''; }
+else {
+  box.innerHTML='<div class="dlist"><h3>'+SIYL_JOURNEY.statusLine()+'</h3>'+
+  '<p class="sub2">Choose how you would like to travel and stay for the remaining stages — or tell us that you are not joining that part of the journey.</p>'+
+  '<p class="fxnote">Or let the journey complete itself:</p>'+modes+selfList+
+  open.map(function(s2){return '<div class="drow"><span class="dw">'+s2.when+'</span><span>'+s2.cat+' · '+s2.place+'</span><a href="journeys.html#'+s2.anchor+'">Decide</a></div>'}).join('')+'</div>';
+}
+var b=document.getElementById('fxb');if(b)b.addEventListener('click',function(){fxOpen('full')});
+var c=document.getElementById('csb');if(c)c.addEventListener('click',function(){fxOpen('cost')})}
 
 /* ---- FULL EXPERIENCE: one confirmation, then the open stages are filled from
  * the single pricing source. Existing selections and declines are untouched. */
-function fxOpen(on){var o=document.getElementById('fxo');o.hidden=!on;document.body.classList.toggle('fx-open',on);if(on)document.getElementById('fxg').focus()}
+var FXMODE='full';
+function fxOpen(mode){
+var o=document.getElementById('fxo');
+if(!mode){o.hidden=true;document.body.classList.remove('fx-open');return}
+FXMODE=mode;
+var cost=mode==='cost';
+document.getElementById('fxe').textContent=cost?'Cost Saving Experience':'Full Experience';
+document.getElementById('fxt').textContent=cost?'The hosted Vientiane days only.':'Complete the remaining journey.';
+document.getElementById('fxp').textContent=cost
+ ? 'The complimentary private residence in Vientiane for the wedding window, and the wedding programme — hosted, USD 0 payable by you. Every other stage becomes self-arranged: you organise and fund your own travel to and from Vientiane, and Guest Relations support applies during the Vientiane wedding stay only.'
+ : 'Complete the remaining journey with the highest available eligible selection at each stage. You can still change individual choices afterwards.';
+document.getElementById('fxg').textContent=cost?'Choose Cost Saving':'Add Full Experience';
+o.hidden=false;document.body.classList.add('fx-open');document.getElementById('fxg').focus()}
 function gated(fn){if(window.SIYL_INVITE){SIYL_INVITE.require(fn)}else document.addEventListener('siyl:invite-ready',function(){SIYL_INVITE.require(fn)},{once:true})}
-document.getElementById('fxs').addEventListener('click',function(){fxOpen(false)});
-document.getElementById('fxc').addEventListener('click',function(){fxOpen(false)});
-document.addEventListener('keydown',function(e){if(e.key==='Escape')fxOpen(false)});
+document.getElementById('fxs').addEventListener('click',function(){fxOpen(null)});
+document.getElementById('fxc').addEventListener('click',function(){fxOpen(null)});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')fxOpen(null)});
 document.getElementById('fxg').addEventListener('click',function(){
-fxOpen(false);
+var mode=FXMODE;fxOpen(null);
 gated(function(){
-  SIYL_JOURNEY.fullExperience().forEach(function(it){
-    /* never overwrite a line the guest already holds for that window */
-    if(!SIYL_PRICE.ids(it.id).some(function(id){return SIYL_BAG.has(id)})) SIYL_BAG.put(it);
-  });
+  if(mode==='cost'){
+    var plan=SIYL_JOURNEY.costSaving();
+    SIYL_JOURNEY.SEGMENTS.forEach(function(s2){
+      if(plan.selfArranged.indexOf(s2.key)>=0){
+        s2.ids.forEach(function(id){SIYL_BAG.remove(id)});
+        SIYL_JOURNEY.skip(s2.key,true);
+      }else{SIYL_JOURNEY.skip(s2.key,false)}
+    });
+    SIYL_PRICE.ids('wedstay').forEach(function(id){SIYL_BAG.remove(id)});
+    plan.add.forEach(function(it){SIYL_BAG.put(it)});
+  }else{
+    SIYL_JOURNEY.fullExperience().forEach(function(it){
+      /* never overwrite a line the guest already holds for that window */
+      if(!SIYL_PRICE.ids(it.id).some(function(id){return SIYL_BAG.has(id)})) SIYL_BAG.put(it);
+    });
+  }
   render();
   var d=document.getElementById('dec');if(d)d.scrollIntoView({behavior:'smooth',block:'center'});
 });

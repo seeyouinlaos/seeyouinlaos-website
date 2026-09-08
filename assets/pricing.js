@@ -73,7 +73,10 @@
       if (!at) return null;
       var room = roomOf(at.stay, slug) || at.stay.rooms[0];
       var nights = at.win.n || 1;
-      var pay = at.win.pay || nights;          /* nights the guest contributes */
+      /* a FIXED window: the room amount already covers the whole window and is
+       * never multiplied. Otherwise the guest contributes `pay` of the nights. */
+      var fixed = !!at.win.fixed;
+      var pay = fixed ? 1 : (at.win.pay || nights);
       var rate = room && room.rate != null ? room.rate : null;
       var q = {
         cat: 'Accommodation',
@@ -86,19 +89,21 @@
         nights: nights,
         pay: pay,
         rate: rate,
+        fixed: fixed,
         breakfast: at.stay.breakfast || '',
         note: at.win.note || '',
         noteBy: at.win.noteBy || '',
         total: rate == null ? null : rate * pay
       };
-      q.nightly = rate == null ? '' : money(rate) + ' per person / night';
+      q.nightly = rate == null || fixed ? '' : money(rate) + ' per person / night';
       q.nightsLine = nights + (nights === 1 ? ' night' : ' nights');
       if (rate == null) {
         q.basis = 'Amount on request · Guest Relations';
-      } else if (pay < nights) {
-        /* the working wording from before the two-row model, with the amount */
+      } else if (fixed && q.note) {
         q.basis = money(q.total) + ' per person · fixed two-night window · ' +
                   'first night your contribution, second night complimentary';
+      } else if (fixed) {
+        q.basis = money(q.total) + ' per person · fixed two-night stay';
       } else {
         q.basis = q.nightly + ' · ' + q.nightsLine + ' · ' + money(q.total) + ' per person';
       }
@@ -116,13 +121,16 @@
       var img = room && room.gallery && room.gallery.length ? room.gallery[0][0] : at.win.bagImg;
       var q = this.quote(at.win.id, room.slug);
       if (room.interest || q.total == null) {
+        var complimentary = at.key === 'airbnb';
         return [{ id: at.win.id, name: at.win.bagName, meta: at.win.dates + ' · ' + (room.status || room.name),
-                  interest: true, stay: at.key, room: room.slug, img: img }];
+                  interest: !complimentary, complimentary: complimentary,
+                  price: complimentary ? 0 : undefined,
+                  stay: at.key, room: room.slug, img: img }];
       }
       return [{
         id: at.win.id, name: at.win.bagName, meta: at.win.dates + ' · ' + room.name,
         price: q.total, stay: at.key, room: room.slug,
-        rate: q.rate, nights: q.nights, pay: q.pay,
+        rate: q.rate, nights: q.nights, pay: q.pay, fixed: q.fixed,
         note: q.note, noteBy: q.noteBy,
         breakfast: q.breakfast, img: img
       }];
@@ -167,10 +175,11 @@
       var f = FLAT[x.id];
       if (f) return f.basis;
       if (x.interest) return 'Interest · confirmed and payable at the spa';
-      if (x.rate != null && x.pay && x.nights && x.pay < x.nights) {
+      if (x.fixed && x.note) {
         return money(x.price) + ' per person · fixed two-night window · ' +
                'first night your contribution, second night complimentary';
       }
+      if (x.fixed) return money(x.price) + ' per person · fixed two-night stay';
       if (x.rate != null && x.nights) {
         return money(x.rate) + ' per person / night · ' + x.nights + (x.nights === 1 ? ' night' : ' nights') +
                ' · ' + money(x.price) + ' per person';

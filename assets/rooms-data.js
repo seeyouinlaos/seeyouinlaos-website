@@ -41,14 +41,16 @@
       place: 'Vientiane, Laos',
       breakfast: 'Breakfast included',
       windows: [
-        { id: 'prewed', label: 'Pre-Wedding Vientiane', dates: '25 – 27 February 2027', nights: '2 nights', n: 2,
+        /* Owner rule: the Souphattra matrix IS the complete per-person amount for
+         * the fixed two-night window. `fixed` forbids any × nights arithmetic. */
+        { id: 'prewed', label: 'Pre-Wedding Vientiane', dates: '25 – 27 February 2027', nights: '2 nights', n: 2, fixed: true,
           bagName: 'Pre-Wedding Vientiane · Souphattra Heritage', bagImg: 'assets/images/souphattra/heritage-courtyard-front.jpg' },
         /* ONE Wedding Stay selection for the fixed two-night window: the first
          * night is the guest's contribution, the second night is complimentary
          * and hosted by the Bride & Groom. `pay` is how many of the `n` nights
          * the guest actually contributes — the note is context, never a second
          * line item and never a USD 0 row. */
-        { id: 'wedstay', label: 'Wedding Stay', dates: '27 February – 01 March 2027', nights: '2 nights', n: 2, pay: 1,
+        { id: 'wedstay', label: 'Wedding Stay', dates: '27 February – 01 March 2027', nights: '2 nights', n: 2, fixed: true,
           note: 'Second night complimentary', noteBy: 'Hosted by Bride & Groom',
           bagName: 'Wedding Stay · Souphattra Heritage', bagImg: 'assets/images/souphattra/heritage-arches-dusk.jpg' }
       ],

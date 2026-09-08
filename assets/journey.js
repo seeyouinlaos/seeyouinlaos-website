@@ -115,8 +115,11 @@
      * Existing selections and explicit "not joining" decisions are left alone;
      * each open stage takes the most expensive option the guest may select. */
     fullExperience: function () {
-      var P = window.SIYL_PRICE, out = [];
+      var P = window.SIYL_PRICE, out = [], self = this;
       if (!P) return out;
+      /* choosing the full journey lifts every "self-arranged" decision — it is
+       * an explicit mode choice — but never replaces a real selection. */
+      SEG.forEach(function (seg) { if (self.isSkipped(seg.key)) self.skip(seg.key, false); });
       this.open().forEach(function (seg) {
         var id = seg.ids[0];
         if (P.FLAT[id]) { P.items(id).forEach(function (it) { out.push(it); }); return; }
@@ -124,6 +127,24 @@
         if (room) P.items(id, room.slug).forEach(function (it) { out.push(it); });
       });
       return out;
+    },
+
+    /* COST SAVING EXPERIENCE — the hosted Vientiane core only: the
+     * complimentary private residence for the wedding window, plus the wedding
+     * programme. Every other stage becomes an explicit self-arranged decision.
+     * Composed from existing approved products; nothing is invented. */
+    costSaving: function () {
+      var P = window.SIYL_PRICE;
+      return {
+        add: P ? P.items('airbnb-2br', 'private-residence') : [],
+        selfArranged: SEG.filter(function (s) { return s.key !== 'wedstay'; }).map(function (s) { return s.key; })
+      };
+    },
+
+    /* stages the guest has said they are arranging themselves */
+    selfArranged: function () {
+      var self = this;
+      return SEG.filter(function (s) { return self.state(s) === 'declined'; });
     },
 
     /* quiet editorial status line — never a progress meter */
