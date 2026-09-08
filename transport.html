@@ -1,0 +1,259 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Transport · See You In Laos</title><style>
+@font-face{font-family:'PP Editorial Old';src:url('assets/fonts/PPEditorialOld-Ultralight.otf') format('opentype');font-weight:200;font-display:swap}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;font-weight:300;font-size:14px;line-height:1.6}
+.hd{display:grid;grid-template-columns:44px 1fr 44px;align-items:center;padding:calc(14px + env(safe-area-inset-top)) 20px 14px}
+.hb{width:44px;height:44px;display:flex;flex-direction:column;justify-content:center;gap:5px;background:none;border:0;cursor:pointer}.hb i{display:block;width:20px;height:1.4px;background:#313131}
+.bd{font-family:'PP Editorial Old',serif;font-weight:200;font-size:19px;text-align:center}.bd .dot{color:#8A5A55}
+.bag{width:44px;height:44px;display:flex;align-items:center;justify-content:center;position:relative;color:#313131;text-decoration:none}.bag .bgi{display:block}
+.bb{position:absolute;top:1px;right:0;min-width:14px;height:14px;padding:0 3px;background:#313131;color:#F3EEE7;font-size:8.5px;line-height:1;letter-spacing:0;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;display:none;align-items:center;justify-content:center;box-shadow:0 0 0 2px #F3EEE7;border-radius:1px}
+main{padding:0 0 70px;max-width:640px;margin:0 auto}
+.wrap{padding:0 24px}
+.ph{background:#E7E3DB center/cover no-repeat}
+.gal{position:relative}
+.trk{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;overscroll-behavior-x:contain}
+.trk::-webkit-scrollbar{display:none}
+.gal .ph{flex:0 0 100%;width:100%;aspect-ratio:4/3;scroll-snap-align:start;scroll-snap-stop:always}
+.gc{position:absolute;right:12px;bottom:12px;background:rgba(49,49,49,.55);color:#F3EEE7;font-size:10px;letter-spacing:1.6px;padding:4px 9px;z-index:2}
+.gl{position:absolute;left:12px;bottom:12px;right:110px;color:#F3EEE7;font-size:9.5px;letter-spacing:1.6px;text-transform:uppercase;text-shadow:0 1px 6px rgba(0,0,0,.5);z-index:2}
+.gn{position:absolute;top:50%;transform:translateY(-50%);background:none;border:0;font-size:24px;color:#F3EEE7;text-shadow:0 1px 6px rgba(0,0,0,.5);width:44px;height:44px;cursor:pointer;z-index:2}
+.gp{left:0}.gx{right:0}
+.pend{width:100%;aspect-ratio:4/3;background:#E7E3DB;display:flex;align-items:center;justify-content:center;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#7C7A75}
+.intro{text-align:center;padding:38px 24px 6px}
+.eyebrow{font-size:10px;letter-spacing:2.2px;text-transform:uppercase;color:#7C7A75;margin-bottom:12px}
+h1{font-family:'PP Editorial Old',serif;font-weight:200;font-size:29px;line-height:1.25;margin-bottom:14px}
+.body{font-size:13.5px;line-height:1.8;color:#4A4A4A;max-width:30em;margin:0 auto 8px}
+h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:22px;margin:44px 0 14px}
+.facts{border-top:1px solid #DAD9D7}
+.frow{display:flex;justify-content:space-between;gap:18px;border-bottom:1px solid #DAD9D7;padding:13px 2px}
+.frow .fl{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75;padding-top:2px;flex:0 0 auto}
+.frow .fv{text-align:right;font-size:13px}
+.plane{background:#FFFFFF;margin-top:48px;padding:44px 32px 40px}
+.plane h2{margin:0 0 26px;text-align:center}
+.amen{list-style:none;margin:0;padding:0 0 0 6px}
+.amen li{position:relative;padding:0 0 0 30px;margin:0 0 20px;font-size:14px;line-height:1.7;color:#313131}
+.amen li::before{content:'';position:absolute;left:6px;top:.62em;width:6px;height:6px;border-radius:50%;background:#313131}
+.inc{border-top:1px solid #DAD9D7}
+.inc p{border-bottom:1px solid #DAD9D7;padding:13px 2px;font-size:12.5px;color:#4A4A4A;line-height:1.7}
+.ed{margin-top:46px}
+.ed .ph{width:100%;aspect-ratio:4/3}
+.ed .cap{font-size:9.5px;letter-spacing:2px;text-transform:uppercase;color:#7C7A75;margin:10px 24px 0}
+.ed .body{margin-top:16px}
+.others{margin-top:56px;padding-bottom:8px}
+.others h2{margin:0 24px 22px}
+.oc{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-left:24px;padding:2px 24px 6px;-webkit-overflow-scrolling:touch;scrollbar-width:none;overscroll-behavior-x:contain}
+.oc::-webkit-scrollbar{display:none}
+.occard{flex:0 0 80%;scroll-snap-align:start;text-decoration:none;color:#313131;background:#FAF7F2;display:block}
+.occard .ph{width:100%;aspect-ratio:4/5}
+.occard .ot{padding:22px 20px 26px;text-align:center}
+.occard .oe{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#7C7A75}
+.occard .on{font-family:'PP Editorial Old',serif;font-weight:200;font-size:21px;line-height:1.25;margin:6px 0 10px}
+.occard .od{font-size:12.5px;line-height:1.7;color:#4A4A4A;margin:0 0 12px}
+.occard .op{font-family:'PP Editorial Old',serif;font-size:14px}
+.occard .rsv{font-size:9px;letter-spacing:1.6px;text-transform:uppercase;color:#7C7A75;display:block;margin-top:4px}
+.rnav{display:flex;align-items:center;gap:6px;padding:16px 24px 0}
+.rail{position:relative;flex:1;height:1px;background:#DAD9D7;margin-right:14px}
+.rail i{position:absolute;left:0;top:-1px;height:3px;background:#313131;width:40%;transition:transform .12s linear}
+.rnav .rc{font-family:'PP Editorial Old',serif;font-size:13px;letter-spacing:1px;margin-right:2px}
+.rnav button{background:none;border:0;width:36px;height:36px;font-size:20px;color:#313131;cursor:pointer;padding:0}
+.buy{background:#FCFAF6;margin-top:52px;padding:34px 26px 38px}
+.buy h2{margin:0 0 4px;font-size:24px}
+.buy .win{border-top:1px solid #DAD9D7;padding:18px 0 22px;margin-top:16px}
+.buy .win:first-of-type{margin-top:20px}
+.buy .wl{font-size:10px;letter-spacing:2.2px;text-transform:uppercase;color:#7C7A75}
+.buy .wd{font-family:'PP Editorial Old',serif;font-weight:200;font-size:17px;margin:5px 0 1px}
+.buy .wn{font-size:11px;color:#7C7A75;margin-bottom:10px}
+.buy .price{font-family:'PP Editorial Old',serif;font-size:16px}
+.buy .pu{font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75}
+.bf{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75;margin:8px 0 0}
+.hn2{font-size:9.5px;letter-spacing:1.6px;text-transform:uppercase;color:#313131;margin:10px 0 0;line-height:1.9}
+.hn2 span{display:block;color:#7C7A75}
+.per{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75;margin:2px 0 7px}
+.nn{font-size:11px;color:#7C7A75;line-height:1.7;margin:0 0 2px}
+.body.story{margin-top:14px}
+.grp{display:grid;grid-template-columns:1fr;gap:30px}
+.gcol h3{font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;font-weight:400;font-size:10px;letter-spacing:2.2px;text-transform:uppercase;color:#7C7A75;margin:0 0 12px}
+.gcol .amen{margin:0}
+.gcol .amen li{margin-bottom:10px}
+.nn:last-of-type{margin-bottom:16px}
+.cta{display:block;width:100%;background:#313131;color:#F3EEE7;border:0;padding:19px;font-size:11px;letter-spacing:2.2px;text-transform:uppercase;cursor:pointer;min-height:52px;text-align:center;text-decoration:none;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif}
+.ok{display:block;text-align:center;font-size:10px;letter-spacing:1.6px;text-transform:uppercase;color:#7C7A75;margin-top:12px}
+.ok[hidden]{display:none !important}
+.ok a{color:#313131}
+.cta.sel{background:#FCFAF6;color:#313131;border:1px solid #313131}
+.chg{display:block;width:100%;background:none;border:0;border-bottom:1px solid #313131;font:inherit;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#313131;padding:12px 0 4px;margin:14px auto 0;cursor:pointer;min-height:44px;width:auto}
+.enq{font-size:11.5px;color:#7C7A75;line-height:1.7;border:1px solid #DAD9D7;padding:16px;text-align:center}
+.swap{font-size:11px;color:#7C7A75;margin-top:10px;line-height:1.6}
+[hidden]{display:none!important}
+.rsvline{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#7C7A75;border:1px solid #DAD9D7;padding:17px;text-align:center}
+.note{font-size:11px;color:#7C7A75;margin-top:16px;line-height:1.7}
+.backrow{text-align:center;margin-top:34px}
+.backrow a{font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:#313131;text-decoration:none;border-bottom:1px solid #313131;padding:8px 0 3px;display:inline-block;min-height:44px}
+
+.tsec{margin-top:46px}
+.tsec h2{margin:0 0 14px}
+.tnote{font-size:12.5px;color:#7C7A75;line-height:1.8;margin-top:12px}
+</style><link rel="stylesheet" href="assets/desktop.css"><link rel="stylesheet" href="assets/aman.css"></head><body>
+<header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="your-journey.html" aria-label="Your Journey"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
+<main id="m"></main>
+<script src="assets/bag.js"></script>
+<script src="assets/shop-menu.js"></script>
+<script src="assets/aman.js"></script>
+<script src="assets/rooms-data.js"></script>
+<script src="assets/pricing.js"></script>
+<script src="assets/transport-data.js"></script>
+<script src="assets/journey.js"></script>
+<script type="module" src="assets/invite.mjs"></script>
+<script>
+/* ============================================================================
+   TRANSPORT DETAIL — the same shell, the same frame and the same editorial
+   grammar as a room page. Every fact comes from assets/transport-data.js and
+   every amount from assets/pricing.js. Nothing is computed or invented here.
+   ========================================================================== */
+(function () {
+  var id = new URLSearchParams(location.search).get('id') || 'train';
+  var T = window.SIYL_TRANSPORT[id];
+  if (!T) { location.replace('journeys.html'); return; }
+  var P = window.SIYL_PRICE, F = P.FLAT[id];
+  document.title = T.name + ' · See You In Laos';
+  function esc(s) { return String(s).replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
+
+  var h = '';
+
+  /* ---- the photographs, one scroll-snap track with a live counter ---- */
+  h += '<div class="gal" id="gal"><div class="trk" id="trk">';
+  T.gallery.forEach(function (g) {
+    h += '<div class="ph" style="background-image:url(' + g[0] + ')" role="img" aria-label="' +
+         esc(T.name) + ' — ' + esc(g[1]) + '"></div>';
+  });
+  h += '</div>';
+  if (T.gallery.length > 1) h += '<button class="gn gp" aria-label="Previous image">&lsaquo;</button><button class="gn gx" aria-label="Next image">&rsaquo;</button>';
+  h += '<span class="gl" id="gl">' + esc(T.gallery[0][1]) + '</span>';
+  h += '<span class="gc" id="gc">1 / ' + T.gallery.length + '</span></div>';
+
+  /* ---- THE JOURNEY ---- */
+  h += '<section class="intro"><p class="eyebrow">' + esc(T.cat) + ' · ' + esc(T.operator) + '</p>';
+  h += '<h1>' + esc(T.name) + '</h1>';
+  h += '<p class="body">' + esc(T.dates) + ' · ' + esc(T.place) + '</p>';
+  h += '<p class="body story">' + esc(T.story) + '</p></section>';
+
+  h += '<div class="wrap tsec"><h2>The journey</h2><div class="facts">';
+  T.facts.forEach(function (f) {
+    h += '<div class="frow"><span class="fl">' + esc(f[0]) + '</span><span class="fv">' + esc(f[1]) + '</span></div>';
+  });
+  h += '</div></div>';
+
+  /* ---- YOUR CABIN / SEAT · COMFORT · DINING · BAGGAGE · SERVICE ---- */
+  h += '<section class="plane"><h2>What the journey gives you</h2><div class="grp">';
+  T.groups.forEach(function (g) {
+    h += '<div class="gcol"><h3>' + esc(g[0]) + '</h3><ul class="amen">';
+    g[1].forEach(function (a) { h += '<li>' + esc(a) + '</li>'; });
+    h += '</ul></div>';
+  });
+  h += '</div></section>';
+
+  /* ---- WHAT'S INCLUDED / WHAT IS NOT ---- */
+  h += '<div class="wrap tsec"><h2>What is included</h2><div class="inc">';
+  T.included.forEach(function (t) { h += '<p>' + esc(t) + '</p>'; });
+  h += '</div>';
+  if (T.excluded && T.excluded.length) {
+    h += '<h2>What you arrange yourself</h2><div class="inc">';
+    T.excluded.forEach(function (t) { h += '<p>' + esc(t) + '</p>'; });
+    h += '</div>';
+  }
+  h += '</div>';
+
+  /* ---- ARRIVAL & TRANSFER ---- */
+  if (T.transfer && T.transfer.length) {
+    h += '<div class="wrap tsec"><h2>Arrival &amp; transfer</h2><div class="inc">';
+    T.transfer.forEach(function (t) { h += '<p>' + esc(t) + '</p>'; });
+    h += '</div></div>';
+  }
+
+  /* ---- GOOD TO KNOW ---- */
+  if (T.good && T.good.length) {
+    h += '<div class="wrap tsec"><h2>Good to know</h2><div class="inc">';
+    T.good.forEach(function (t) { h += '<p>' + esc(t) + '</p>'; });
+    h += '</div></div>';
+  }
+
+  /* ---- the other three legs ---- */
+  var others = window.SIYL_TRANSPORT_ORDER.filter(function (k) { return k !== id; });
+  h += '<section class="others"><h2>The other legs of the journey</h2><div class="oc" id="oc">';
+  others.forEach(function (k) {
+    var o = window.SIYL_TRANSPORT[k], f = P.FLAT[k];
+    h += '<a class="occard" href="transport.html?id=' + k + '">' +
+      '<div class="ph" style="background-image:url(' + o.gallery[0][0] + ')"></div>' +
+      '<div class="ot"><p class="oe">' + esc(o.dates) + '</p><p class="on">' + esc(o.name) + '</p>' +
+      '<p class="od">' + esc(o.place) + '</p>' +
+      '<p><span class="op">' + P.money(f.price) + '</span> <span class="oe">per person</span></p></div></a>';
+  });
+  h += '</div>';
+  h += '<div class="rnav"><div class="rail" aria-hidden="true"><i id="rail"></i></div><span class="rc" id="rc">1 / ' + others.length + '</span><button type="button" id="op" aria-label="Previous">&lsaquo;</button><button type="button" id="ox" aria-label="Next">&rsaquo;</button></div>';
+  h += '</section>';
+
+  /* ---- the one decision, priced by assets/pricing.js and nothing else ---- */
+  h += '<section class="buy"><p class="eyebrow" style="margin:0 0 8px">' + esc(T.cat) + '</p>';
+  h += '<h2>' + esc(T.name) + '</h2><p class="eyebrow" style="margin:0">' + esc(T.place) + '</p>';
+  h += '<div class="win"><p class="wl">' + esc(T.cat) + '</p><p class="wd">' + esc(T.dates) + '</p>';
+  h += '<p class="price">' + P.money(F.price) + ' <span class="pu">per person</span></p>';
+  h += '<p class="per">' + esc(F.basis) + '</p>';
+  h += '<button class="cta" id="add">Add to Your Journey</button>';
+  h += '<p class="ok" id="ok" hidden>In your journey · <a href="your-journey.html">View</a></p></div>';
+  h += '<p class="note">Amounts are per person and are never charged on this website — Guest Relations confirms every arrangement with you.</p></section>';
+  h += '<p class="backrow"><a href="journeys.html#' + T.anchor + '">Back to Journeys</a></p>';
+
+  document.getElementById('m').innerHTML = h;
+  if (window.SIYL_BAG) SIYL_BAG.badge();
+
+  /* gallery: the caption and the counter follow the real scroll position */
+  var trk = document.getElementById('trk');
+  if (trk && T.gallery.length > 1) {
+    var gc = document.getElementById('gc'), gl = document.getElementById('gl'), gi = 0, raf = 0;
+    function idx() { return Math.max(0, Math.min(T.gallery.length - 1, Math.round(trk.scrollLeft / trk.clientWidth))); }
+    function sync() { raf = 0; var k = idx(); if (k === gi) return; gi = k; gl.textContent = T.gallery[k][1]; gc.textContent = (k + 1) + ' / ' + T.gallery.length; }
+    trk.addEventListener('scroll', function () { if (!raf) raf = requestAnimationFrame(sync); }, { passive: true });
+    function go(d) { var k = (idx() + d + T.gallery.length) % T.gallery.length; trk.scrollTo({ left: k * trk.clientWidth, behavior: 'smooth' }); }
+    document.querySelector('.gp').addEventListener('click', function () { go(-1); });
+    document.querySelector('.gx').addEventListener('click', function () { go(1); });
+  }
+
+  /* the other-legs rail: same behaviour as the room page */
+  var oc = document.getElementById('oc'), rail = document.getElementById('rail'), rc = document.getElementById('rc');
+  if (oc && rail) {
+    var card = oc.querySelector('.occard');
+    function paint() {
+      var step = card.offsetWidth + 14;
+      var k = Math.max(0, Math.min(others.length - 1, Math.round(oc.scrollLeft / step)));
+      rail.style.width = (100 / others.length) + '%';
+      rail.style.transform = 'translateX(' + (k * 100) + '%)';
+      rc.textContent = (k + 1) + ' / ' + others.length;
+    }
+    oc.addEventListener('scroll', paint, { passive: true });
+    document.getElementById('op').addEventListener('click', function () { oc.scrollBy({ left: -(card.offsetWidth + 14), behavior: 'smooth' }); });
+    document.getElementById('ox').addEventListener('click', function () { oc.scrollBy({ left: card.offsetWidth + 14, behavior: 'smooth' }); });
+    paint();
+  }
+
+  /* ADD / REMOVE — the same gate and the same bag as every other surface */
+  function gated(fn) {
+    if (window.SIYL_INVITE) { SIYL_INVITE.require(fn); }
+    else document.addEventListener('siyl:invite-ready', function () { SIYL_INVITE.require(fn); }, { once: true });
+  }
+  var btn = document.getElementById('add'), ok = document.getElementById('ok');
+  function paintAdd() {
+    var has = SIYL_BAG.has(id);
+    btn.textContent = has ? 'Remove from Your Journey' : 'Add to Your Journey';
+    btn.classList.toggle('sel', has);
+    ok.hidden = !has;
+  }
+  btn.addEventListener('click', function () {
+    if (SIYL_BAG.has(id)) { SIYL_BAG.remove(id); paintAdd(); return; }
+    gated(function () { P.items(id).forEach(function (it) { SIYL_BAG.put(it); }); paintAdd(); });
+  });
+  document.addEventListener('siyl:bag', paintAdd);
+  paintAdd();
+  if (SIYL_BAG.bar) SIYL_BAG.bar();
+})();
+</script>
+</body></html>

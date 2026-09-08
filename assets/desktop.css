@@ -80,7 +80,7 @@
 
   /* alignment is achieved with axes, never with centring: nothing on a desktop
      page is centred except a button's own label */
-  .intro, .ot, .backrow, .ok, .rsvline, .enq, .lede, .ed .cap,
+  .intro, .ot, .backrow, .ok, .rsvline, .enq, .lede, .ed .cap, .plane h2,
   main > p[style*="text-align:center"] { text-align: left !important; }
   .chg { margin-left: 0; margin-right: auto; }
   .backrow { text-align: left; }
@@ -104,6 +104,10 @@
   .plane h2 { margin-bottom: 30px; }
   .amen { max-width: 34em; margin: 0; padding-left: 6px; }
   .amen li { margin-bottom: 20px; }
+  /* grouped amenities: columns INSIDE the frame, never a new outer edge */
+  .grp { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--d-col); row-gap: 44px; }
+  .grp .amen { max-width: none; }
+  .grp .amen li { margin-bottom: 12px; }
 
   .inc p { padding: 15px 2px; }
   .ed { margin-top: var(--d-rhythm); }

@@ -86,6 +86,7 @@ body.fx-open .fxs,body.fx-open .fxo{display:block}
 <script src="assets/aman.js"></script>
 <script src="assets/rooms-data.js"></script>
 <script src="assets/pricing.js"></script>
+<script src="assets/transport-data.js"></script>
 <script src="assets/journey.js"></script>
 <script type="module" src="assets/invite.mjs"></script>
 <script>
@@ -95,6 +96,8 @@ function detailHref(x){
 if(x.stay&&x.room)return 'room.html?stay='+x.stay+'&room='+x.room;
 if(x.id==='1872')return '1872.html';
 if(x.interest&&x.id!=='airbnb-2br')return 'marsilea.html';
+/* a transport line opens its own product page, exactly as a room line does */
+if(window.SIYL_TRANSPORT&&window.SIYL_TRANSPORT[x.id])return 'transport.html?id='+x.id;
 var P=window.SIYL_PRICE,at=P&&P.locate(x.id);
 if(at&&x.room)return 'room.html?stay='+at.key+'&room='+x.room;
 return 'journeys.html#j-'+(P?P.windowOf(x.id):x.id)}
@@ -172,7 +175,7 @@ document.getElementById('fxe').textContent=cost?'Cost Saving Experience':'Full E
 document.getElementById('fxt').textContent=cost?'The hosted Vientiane days only.':'Complete the remaining journey.';
 document.getElementById('fxp').textContent=cost
  ? 'The complimentary private residence in Vientiane for the wedding window, and the wedding programme — hosted, USD 0 payable by you. Every other stage becomes self-arranged: you organise and fund your own travel to and from Vientiane, and Guest Relations support applies during the Vientiane wedding stay only.'
- : 'Complete the remaining journey with the highest available eligible selection at each stage. You can still change individual choices afterwards.';
+ : 'All ten stages of the journey, each with the highest room, cabin or seat you may select. This replaces the choices you have made so far, including a complimentary alternative stay — you can still change any individual stage afterwards.';
 document.getElementById('fxg').textContent=cost?'Choose Cost Saving':'Add Full Experience';
 o.hidden=false;document.body.classList.add('fx-open');document.getElementById('fxg').focus()}
 function gated(fn){if(window.SIYL_INVITE){SIYL_INVITE.require(fn)}else document.addEventListener('siyl:invite-ready',function(){SIYL_INVITE.require(fn)},{once:true})}
@@ -193,10 +196,12 @@ gated(function(){
     SIYL_PRICE.ids('wedstay').forEach(function(id){SIYL_BAG.remove(id)});
     plan.add.forEach(function(it){SIYL_BAG.put(it)});
   }else{
-    SIYL_JOURNEY.fullExperience().forEach(function(it){
-      /* never overwrite a line the guest already holds for that window */
-      if(!SIYL_PRICE.ids(it.id).some(function(id){return SIYL_BAG.has(id)})) SIYL_BAG.put(it);
-    });
+    /* Full Experience is a mode: the canonical premium configuration replaces
+     * whatever the ten stages held, so there is only ever ONE Full Experience
+     * total. Lines that are not stages are left exactly as they are. */
+    var plan=SIYL_JOURNEY.fullExperience();
+    plan.remove.forEach(function(id){SIYL_BAG.remove(id)});
+    plan.add.forEach(function(it){SIYL_BAG.put(it)});
   }
   render();
   var d=document.getElementById('dec');if(d)d.scrollIntoView({behavior:'smooth',block:'center'});

@@ -70,6 +70,11 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:22px;margin:44
 .hn2 span{display:block;color:#7C7A75}
 .per{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75;margin:2px 0 7px}
 .nn{font-size:11px;color:#7C7A75;line-height:1.7;margin:0 0 2px}
+.body.story{margin-top:14px}
+.grp{display:grid;grid-template-columns:1fr;gap:30px}
+.gcol h3{font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;font-weight:400;font-size:10px;letter-spacing:2.2px;text-transform:uppercase;color:#7C7A75;margin:0 0 12px}
+.gcol .amen{margin:0}
+.gcol .amen li{margin-bottom:10px}
 .nn:last-of-type{margin-bottom:16px}
 .cta{display:block;width:100%;background:#313131;color:#F3EEE7;border:0;padding:19px;font-size:11px;letter-spacing:2.2px;text-transform:uppercase;cursor:pointer;min-height:52px;text-align:center;text-decoration:none;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif}
 .ok{display:block;text-align:center;font-size:10px;letter-spacing:1.6px;text-transform:uppercase;color:#7C7A75;margin-top:12px}
@@ -144,6 +149,8 @@ if (room.gallery.length) {
 h += '<section class="intro"><p class="eyebrow">' + esc(room.cat) + ' · ' + esc(stay.name) + '</p>';
 h += '<h1>' + esc(room.name) + '</h1>';
 h += '<p class="body">' + esc(room.desc) + '</p>';
+/* the room's own paragraph — what the guest is actually buying */
+if (room.story) h += '<p class="body story">' + esc(room.story) + '</p>';
 if (room.galleryNote) h += '<p class="eyebrow" style="margin-top:10px">' + esc(room.galleryNote) + '</p>';
 h += '</section>';
 
@@ -156,15 +163,25 @@ if (room.facts.length) {
 }
 if (room.roomPhotoPending) h += '<p class="note" style="margin-top:10px">Room photography to follow.</p>';
 h += '</div>';
-/* ---- amenities: Aman plane — single vertical bullet list on the light surface ---- */
-if (room.amenities && room.amenities.length) {
-  h += '<section class="plane"><h2>Amenities</h2><ul class="amen">';
+/* ---- what the room gives you: named groups on the light surface, never a wall
+ *      of text. `groups` is the source amenity list for THIS room, edited into
+ *      a few short groups; a room without groups keeps the plain list. ---- */
+if (room.groups && room.groups.length) {
+  h += '<section class="plane"><h2>Comfort &amp; amenities</h2><div class="grp">';
+  room.groups.forEach(function (g) {
+    h += '<div class="gcol"><h3>' + esc(g[0]) + '</h3><ul class="amen">';
+    g[1].forEach(function (a) { h += '<li>' + esc(a) + '</li>'; });
+    h += '</ul></div>';
+  });
+  h += '</div></section>';
+} else if (room.amenities && room.amenities.length) {
+  h += '<section class="plane"><h2>Comfort &amp; amenities</h2><ul class="amen">';
   room.amenities.forEach(function (a) { h += '<li>' + esc(a) + '</li>'; });
   h += '</ul></section>';
 }
 /* ---- all stays include (separate from room amenities, proven only) ---- */
 if (stay.includes && stay.includes.length) {
-  h += '<div class="wrap"><h2>Your stay includes</h2><div class="inc">';
+  h += '<div class="wrap"><h2>What is included</h2><div class="inc">';
   stay.includes.forEach(function (t) { h += '<p>' + t + '</p>'; });
   h += '</div></div>';
 }

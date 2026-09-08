@@ -13,6 +13,7 @@ const sandbox = { window: {}, document: { addEventListener() {} }, localStorage:
 sandbox.window.document = sandbox.document;
 new Function('window', 'document', readFileSync(join(ROOT, 'assets/rooms-data.js'), 'utf8'))(sandbox.window, sandbox.document);
 new Function('window', 'document', readFileSync(join(ROOT, 'assets/pricing.js'), 'utf8'))(sandbox.window, sandbox.document);
+new Function('window', 'document', readFileSync(join(ROOT, 'assets/transport-data.js'), 'utf8'))(sandbox.window, sandbox.document);
 const P = sandbox.window.SIYL_PRICE;
 const R = sandbox.window.SIYL_ROOMS;
 
@@ -20,23 +21,27 @@ const R = sandbox.window.SIYL_ROOMS;
 const total = (lines, qty = 1) => lines.reduce((t, x) => t + (x.price || 0) * (x.qty || qty), 0);
 const pick = (win, slug, qty = 1) => P.items(win, slug).map((x) => ({ ...x, qty }));
 
-test('A · one guest, Sathorn Penthouse only → USD 135', () => {
+/* SOURCE 08 September 2026 — Accommodation_Details, Package A · Penthouse:
+ *   "Price per Person" 85.00 · "Price Per Room per NIght" 340.00 · 3 nights
+ *   (21 – 24 February 2027). 85 = 340 ÷ 4 pax, per person PER NIGHT. */
+test('A · one guest, Sathorn Penthouse only → USD 255', () => {
   const q = P.quote('bkk-stay', 'penthouse');
-  assert.equal(q.rate, 45);
+  assert.equal(q.rate, 85);
   assert.equal(q.nights, 3);
-  assert.equal(q.total, 135);
-  assert.equal(total(pick('bkk-stay', 'penthouse')), 135);
-  assert.match(q.basis, /USD 135 total per person · 3 nights · USD 45 per person \/ night × 3 nights/);
+  assert.equal(q.pay, 3);
+  assert.equal(q.total, 255);
+  assert.equal(total(pick('bkk-stay', 'penthouse')), 255);
+  assert.match(q.basis, /USD 255 total per person · 3 nights · USD 85 per person \/ night × 3 nights/);
   assert.equal(q.breakfast, 'Breakfast not included · self-pay');
 });
 
-test('B · one guest, Sathorn + Special Express No. 25 → USD 210', () => {
+test('B · one guest, Sathorn + Special Express No. 25 → USD 330', () => {
   const bag = [...pick('bkk-stay', 'penthouse'), { ...P.FLAT.train, price: 75, qty: 1 }];
-  assert.equal(total(bag), 210);
+  assert.equal(total(bag), 330);
 });
 
-test('C · two guests, Sathorn Penthouse only → USD 270', () => {
-  assert.equal(total(pick('bkk-stay', 'penthouse', 2)), 270);
+test('C · two guests, Sathorn Penthouse only → USD 510', () => {
+  assert.equal(total(pick('bkk-stay', 'penthouse', 2)), 510);
 });
 
 /* SOURCE-VERIFIED 08 September 2026 — H&S_Wedding_Operations_Master:
@@ -92,7 +97,7 @@ test('Vientiane · the guest is told exactly which nights an amount buys', () =>
 });
 
 test('every stay multiplies its rate by its payable nights — one rule, no exception', () => {
-  assert.equal(P.quote('bkk-stay', 'penthouse').total, 45 * 3);
+  assert.equal(P.quote('bkk-stay', 'penthouse').total, 85 * 3);
   assert.equal(P.quote('prewed', 'heritage').total, 145 * 2);
   assert.equal(P.quote('wedstay', 'heritage').total, 145 * 1);
   assert.equal(P.quote('kmg', 'left-bank').total, 87 * 3);
@@ -237,9 +242,9 @@ test('Full Experience lines come from the single pricing source, transport inclu
   const all = ['bkk-stay', 'train', 'prewed', 'wedstay', 'mu9632', 'kmg', 'c642', 'ljg', 'return', 'kempinski']
     .flatMap((w) => P.FLAT[w] ? P.items(w) : P.items(w, P.premium(w).slug));
   assert.equal(all.length, 10, 'ten stages, ten lines');
-  /* Full Experience from empty: pre-wedding is now two payable nights */
-  assert.equal(total(all), 135 + 75 + 580 + 290 + 275 + 261 + 85 + 420 + 200 + 380);
-  assert.equal(total(all), 2701);
+  /* Full Experience from empty, at the current canonical rates */
+  assert.equal(total(all), 255 + 75 + 580 + 290 + 275 + 261 + 85 + 420 + 200 + 380);
+  assert.equal(total(all), 2821);
 });
 
 test('Temple Ceremony is self-pay on Review & Send, the other three hosted, never a USD line', () => {
@@ -261,4 +266,144 @@ test('Snow Mountain Viewing Room carries its own canonical photograph, used nowh
     assert.doesNotMatch(readFileSync(join(ROOT, f), 'utf8'), /snow-mountain-viewing-1|snow-mountain-rooftops/, f + ' uses the room photograph as scenery');
   }
   assert.equal(P.items('ljg', 'snow-mountain-viewing')[0].img, room.gallery[0][0], 'the bag line carries the same image');
+});
+
+
+/* ==========================================================================
+   FULL EXPERIENCE IS ONE MODE — the same canonical configuration whatever the
+   guest arrived from, and the Cost Saving residence never survives it.
+   ========================================================================== */
+test('Full Experience is ONE canonical configuration, from any starting point', () => {
+  const canonical = ['bkk-stay', 'train', 'prewed', 'wedstay', 'mu9632', 'kmg', 'c642', 'ljg', 'return', 'kempinski']
+    .flatMap((w) => (P.FLAT[w] ? P.items(w) : P.items(w, P.premium(w).slug)));
+  assert.equal(canonical.length, 10);
+  assert.equal(total(canonical), 2821);
+  /* stage 04 is the Souphattra Majestic Suite at one payable night — never the
+     complimentary residence that answers the same stage under Cost Saving */
+  const wed = canonical.find((x) => x.id === 'wedstay');
+  assert.ok(wed, 'the wedding stage is answered by a Souphattra room');
+  assert.equal(wed.price, 290);
+  assert.equal(wed.room, 'souphattra-majestic');
+  assert.ok(!canonical.some((x) => x.id === 'airbnb-2br'), 'no complimentary residence in Full Experience');
+  /* and no reserved inventory anywhere in it */
+  for (const w of ['prewed', 'wedstay', 'kmg', 'ljg']) assert.ok(!P.premium(w).reserved);
+});
+
+test('the ten canonical Full Experience amounts', () => {
+  const expect = { 'bkk-stay': 255, train: 75, prewed: 580, wedstay: 290, mu9632: 275,
+                   kmg: 261, c642: 85, ljg: 420, 'return': 200, kempinski: 380 };
+  let sum = 0;
+  for (const [w, amount] of Object.entries(expect)) {
+    const line = P.FLAT[w] ? P.items(w)[0] : P.items(w, P.premium(w).slug)[0];
+    assert.equal(line.price, amount, w);
+    sum += amount;
+  }
+  assert.equal(sum, 2821);
+});
+
+/* ==========================================================================
+   TRANSPORT SOURCE DEPTH — every leg is described, and nothing is invented.
+   ========================================================================== */
+test('all four transport products carry the guest-facing sections', () => {
+  const T = sandbox.window.SIYL_TRANSPORT;
+  const order = sandbox.window.SIYL_TRANSPORT_ORDER;
+  assert.deepEqual(order, ['train', 'mu9632', 'c642', 'return']);
+  for (const k of order) {
+    const t = T[k];
+    assert.ok(t.story && t.story.length > 80, k + ' has its own paragraph');
+    assert.ok(t.facts.length >= 6, k + ' states the journey');
+    assert.ok(t.groups.length >= 4, k + ' describes cabin/seat, comfort and service');
+    assert.ok(t.included.length >= 3, k + ' says what is included');
+    assert.ok(t.excluded.length >= 1, k + ' says what the guest arranges');
+    assert.ok(t.transfer.length >= 2, k + ' says how the guest arrives and moves on');
+    assert.ok(t.good.length >= 1, k + ' has a good-to-know');
+    assert.ok(t.gallery.length >= 3, k + ' has verified photography');
+    assert.ok(P.FLAT[k], k + ' is priced by the single calculation source');
+  }
+});
+
+test('transport copy never invents, and never resurrects a superseded service', () => {
+  const src = readFileSync(join(ROOT, 'assets/transport-data.js'), 'utf8');
+  /* Owner overrides are production authority: the stale sheet values are gone */
+  for (const stale of ['C86', 'MU9646', 'USD 105', 'USD 90']) {
+    assert.ok(!src.includes(stale), 'transport copy still shows ' + stale);
+  }
+  /* internal procurement never reaches a guest surface */
+  assert.doesNotMatch(src, /\$92|USD 92|\$3 |USD 3 per/, 'van/border procurement cost leaked');
+  /* nothing invented on the night train */
+  const train = sandbox.window.SIYL_TRANSPORT.train;
+  const flat = JSON.stringify(train);
+  for (const invented of ['Wi-Fi', 'WiFi', 'lounge', 'Lounge', 'chauffeur']) {
+    assert.ok(!flat.includes(invented), 'the night train claims ' + invented);
+  }
+  /* and no lounge or chauffeur promised on either flight */
+  for (const k of ['mu9632', 'return']) {
+    const f = JSON.stringify(sandbox.window.SIYL_TRANSPORT[k]);
+    assert.ok(!/lounge|chauffeur|priority boarding/i.test(f), k + ' promises an unsourced service');
+  }
+});
+
+test('the Owner-overridden transport facts are the ones on the page', () => {
+  const T = sandbox.window.SIYL_TRANSPORT;
+  assert.match(JSON.stringify(T.c642.facts), /C642/);
+  assert.match(JSON.stringify(T.c642.facts), /16:39/);
+  assert.match(JSON.stringify(T.c642.facts), /21:06/);
+  assert.match(JSON.stringify(T.c642.facts), /4 hours 27 minutes/);
+  assert.equal(P.FLAT.c642.price, 85);
+  assert.match(JSON.stringify(T.mu9632.facts), /MU9632/);
+  assert.match(JSON.stringify(T.mu9632.facts), /14:00/);
+  assert.match(JSON.stringify(T.mu9632.facts), /16:40/);
+  assert.equal(P.FLAT.mu9632.price, 275);
+  assert.equal(P.FLAT.train.price, 75);
+  assert.equal(P.FLAT['return'].price, 200);
+});
+
+/* ==========================================================================
+   ACCOMMODATION SOURCE DEPTH
+   ========================================================================== */
+test('every room carries its own paragraph — no two rooms read the same', () => {
+  const stories = [];
+  for (const k of Object.keys(R)) {
+    for (const room of R[k].rooms) {
+      assert.ok(room.story && room.story.length > 60, k + '/' + room.slug + ' has no story');
+      stories.push(room.story);
+    }
+  }
+  assert.equal(new Set(stories).size, stories.length, 'a room paragraph is repeated');
+});
+
+test('Sathorn, Souphattra and Kempinski carry grouped, source-backed amenities', () => {
+  const sath = R.sathorn.rooms[0];
+  assert.equal(sath.rate, 85);
+  assert.ok(sath.groups.length >= 6, 'the penthouse is grouped, not a wall of text');
+  const flat = JSON.stringify(sath.groups);
+  for (const fact of ['710 Mbps', 'Nespresso', 'Harman Kardon', 'Casiotone', 'Washing machine',
+                      'High chair', 'Travel crib', 'keybox', 'Free parking', 'Smart TVs']) {
+    assert.ok(flat.includes(fact), 'the penthouse is missing ' + fact);
+  }
+  assert.match(JSON.stringify(sath.facts), /162 sq\.m\./);
+
+  for (const room of R.souphattra.rooms) {
+    assert.ok(room.groups.length === 5, room.slug + ' is not grouped');
+    assert.ok(room.facts.length >= 5, room.slug + ' has too few facts');
+  }
+  /* the categories must not read identically */
+  assert.match(JSON.stringify(R.souphattra.rooms.find((r) => r.slug === 'noble-courtyard').groups), /Two bathrooms/);
+  assert.match(JSON.stringify(R.souphattra.rooms.find((r) => r.slug === 'heritage-grand-premier').groups), /Afternoon tea/);
+  assert.match(JSON.stringify(R.souphattra.rooms.find((r) => r.slug === 'heritage-executive').groups), /Connecting door/);
+
+  const kem = R.kempinski.rooms[0];
+  assert.match(JSON.stringify(kem.facts), /45 sq\.m\./);
+  assert.ok(!JSON.stringify(kem.facts).includes('37'), 'the Deluxe Twin size is not this room');
+  assert.match(JSON.stringify(kem.groups), /Royal Wing/);
+  assert.match(JSON.stringify(kem.groups), /marble bathroom/i);
+});
+
+test('every stay says what is included and what the guest arranges', () => {
+  for (const k of Object.keys(R)) {
+    assert.ok(R[k].includes && R[k].includes.length >= 4, k + ' has no inclusions');
+  }
+  assert.match(R.sathorn.includes.join(' '), /Breakfast is NOT included/);
+  assert.match(R.kempinski.includes.join(' '), /Breakfast included/);
+  assert.match(R.souphattra.includes.join(' '), /no night between 25 February and 1 March is left uncovered/);
 });

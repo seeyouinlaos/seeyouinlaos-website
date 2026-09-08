@@ -65,7 +65,7 @@
       return { cat: '', basis: '', unit: 'guest' };
     },
 
-    /* "USD 45 per person × 2 guests" / "1 experience · for two guests" */
+    /* "USD 85 per person × 2 guests" / "1 experience · for two guests" */
     quantityLine: function (x) {
       var m = this.meta(x), q = x.qty || 1;
       if (x.interest) return '';
@@ -111,22 +111,32 @@
       var self = this;
       return SEG.filter(function (s) { return self.state(s) === 'open'; });
     },
-    /* FULL EXPERIENCE — the lines that would complete every stage still open.
-     * Existing selections and explicit "not joining" decisions are left alone;
-     * each open stage takes the most expensive option the guest may select. */
+    /* FULL EXPERIENCE — a MODE, not a gap-filler.
+     * Confirming it produces THE canonical premium configuration of all ten
+     * stages, whatever the guest arrived from: empty, Cost Saving, a partly
+     * decided journey or an all-self-arranged one. There is exactly one Full
+     * Experience total. Every stage id the mode controls is cleared first — the
+     * complimentary private residence that answers the wedding stage under Cost
+     * Saving included — and every "not joining" decision is lifted.
+     * Lines that are not stages (1872, a spa interest) are never touched. */
     fullExperience: function () {
       var P = window.SIYL_PRICE, out = [], self = this;
-      if (!P) return out;
-      /* choosing the full journey lifts every "self-arranged" decision — it is
-       * an explicit mode choice — but never replaces a real selection. */
+      if (!P) return { remove: [], add: [] };
       SEG.forEach(function (seg) { if (self.isSkipped(seg.key)) self.skip(seg.key, false); });
-      this.open().forEach(function (seg) {
+      SEG.forEach(function (seg) {
         var id = seg.ids[0];
         if (P.FLAT[id]) { P.items(id).forEach(function (it) { out.push(it); }); return; }
         var room = P.premium(id);
         if (room) P.items(id, room.slug).forEach(function (it) { out.push(it); });
       });
-      return out;
+      return {
+        /* every id any stage can be answered by, alternatives included */
+        remove: SEG.reduce(function (a, seg) {
+          seg.ids.forEach(function (id) { P.ids(id).forEach(function (x) { if (a.indexOf(x) < 0) a.push(x); }); });
+          return a;
+        }, []),
+        add: out
+      };
     },
 
     /* COST SAVING EXPERIENCE — the hosted Vientiane core only: the

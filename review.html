@@ -81,6 +81,7 @@ a.th{display:block}
 <script src="assets/aman.js"></script>
 <script src="assets/rooms-data.js"></script>
 <script src="assets/pricing.js"></script>
+<script src="assets/transport-data.js"></script>
 <script src="assets/journey.js"></script>
 <script type="module" src="assets/invite.mjs"></script>
 <script>
@@ -90,6 +91,7 @@ function detailHref(x){
 if(x.stay&&x.room)return 'room.html?stay='+x.stay+'&room='+x.room;
 if(x.id==='1872')return '1872.html';
 if(x.interest&&x.id!=='airbnb-2br')return 'marsilea.html';
+if(window.SIYL_TRANSPORT&&window.SIYL_TRANSPORT[x.id])return 'transport.html?id='+x.id;
 var P=window.SIYL_PRICE,at=P&&P.locate(x.id);
 if(at&&x.room)return 'room.html?stay='+at.key+'&room='+x.room;
 return 'journeys.html#j-'+(P?P.windowOf(x.id):x.id)}
