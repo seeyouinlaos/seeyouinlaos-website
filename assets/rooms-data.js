@@ -124,9 +124,11 @@
       rooms: [
         { slug: 'penthouse', name: 'Sathorn Penthouse', cat: 'Whole home · six bedrooms',
           desc: 'The shared days in Bangkok before travelling on to Laos — one penthouse for the whole party, capacity 12 adults.',
+          /* eleven UNIQUE photographs from Drive 020 (000–010). The former slide 2
+           * was the same living-room frame as slide 1 at a smaller size; it is
+           * replaced by the elevated exterior (Drive 001), which was missing. */
           gallery: [
-            ['assets/images/journey/penthouse-01.jpg', 'The double-height living room at dusk'],
-            [PENT + 'living-double-height.jpg', 'The living room by day'],
+            ['assets/images/journey/penthouse-01.jpg', 'The double-height living room'],
             [PENT + 'living-above.jpg', 'The living room from the mezzanine'],
             [PENT + 'lounge-corner.jpg', 'A lounge corner'],
             [PENT + 'bedroom-corner.jpg', 'Corner bedroom with skyline view'],
@@ -135,6 +137,7 @@
             [PENT + 'study-nook.jpg', 'The study nook'],
             [PENT + 'balcony-garden.jpg', 'The balcony'],
             [PENT + 'exterior-street.jpg', 'The house from the street'],
+            [PENT + 'exterior-elevated.jpg', 'The house from above'],
             [PENT + 'exterior-golden-hour.jpg', 'The house at golden hour']],
           facts: [['Home', 'Six-bedroom penthouse'], ['Capacity', '12 adults'], ['Stay', '21 – 24 February 2027 · 3 nights'], ['Arrival', '21 February · personal pickup by Haruthai']],
           amenities: null, rate: 45 }

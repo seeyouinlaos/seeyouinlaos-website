@@ -21,11 +21,18 @@
 
   /* per-person amounts for the legs that are not priced by night */
   var FLAT = {
-    'train':  { price: 75,  cat: 'Transportation',
+    'train':  { price: 75,  cat: 'Transportation', name: 'Special Express No. 25',
+                meta: '24 – 25 February 2027 · First Class Sleeper', img: 'assets/images/transport/train-no25-srt-train.jpg',
                 basis: 'USD 75 per person · package · First Class Sleeper, van and border logistics' },
-    'mu9632': { price: 275, cat: 'Transportation', basis: 'USD 275 per person · 1 seat · Business Class' },
-    'c642':   { price: 85,  cat: 'Transportation', basis: 'USD 85 per person · 1 seat · Business Class · 1+1 seating' },
-    'return': { price: 200, cat: 'Transportation', basis: 'USD 200 per person · 1 seat · Economy flexible · via Kunming' },
+    'mu9632': { price: 275, cat: 'Transportation', name: 'MU9632 · Vientiane → Kunming',
+                meta: '01 March 2027 · Business Class', img: 'assets/images/transport/mu9632-business-1.jpg',
+                basis: 'USD 275 per person · 1 seat · Business Class' },
+    'c642':   { price: 85,  cat: 'Transportation', name: 'C642 · Kunming → Lijiang',
+                meta: '04 March 2027 · Business Class', img: 'assets/images/transport/c642-train-snow-mountain.jpg',
+                basis: 'USD 85 per person · 1 seat · Business Class · 1+1 seating' },
+    'return': { price: 200, cat: 'Transportation', name: 'MU5924 + MU741 · Lijiang → Bangkok',
+                meta: '06 March 2027 · Economy flexible', img: 'assets/images/transport/mu5924-economy-cabin-1.jpg',
+                basis: 'USD 200 per person · 1 seat · Economy flexible · via Kunming' },
     '1872':   { price: 180, cat: 'Experience', unit: 'experience',
                 basis: 'USD 180 per experience · for two guests' }
   };
@@ -101,6 +108,8 @@
     /* the ONE bag line a selection produces. `put` replaces in place, so a
      * change never duplicates and a stay is never split across two rows. */
     items: function (windowId, slug) {
+      var f = FLAT[windowId];
+      if (f && f.name) return [{ id: windowId, name: f.name, meta: f.meta, price: f.price, img: f.img }];
       var at = locate(windowId);
       if (!at) return [];
       var room = roomOf(at.stay, slug) || at.stay.rooms[0];
@@ -127,6 +136,16 @@
       if (!at) return [windowId];
       if (at.win.id !== 'wedstay') return [at.win.id];
       return ['wedstay', 'wedstay-n1', 'wedstay-n2'];   /* legacy rows go too */
+    },
+
+    /* the most expensive room a guest may actually select — reserved
+     * inventory (Bride & Groom, family) is never eligible */
+    premium: function (windowId) {
+      var at = locate(windowId);
+      if (!at) return null;
+      var open = at.stay.rooms.filter(function (r) { return !r.reserved && r.rate != null && !r.interest; });
+      if (!open.length) return null;
+      return open.reduce(function (m, r) { return r.rate > m.rate ? r : m; }, open[0]);
     },
 
     /* does this product have a genuine alternative to change to? */

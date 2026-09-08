@@ -111,6 +111,21 @@
       var self = this;
       return SEG.filter(function (s) { return self.state(s) === 'open'; });
     },
+    /* FULL EXPERIENCE — the lines that would complete every stage still open.
+     * Existing selections and explicit "not joining" decisions are left alone;
+     * each open stage takes the most expensive option the guest may select. */
+    fullExperience: function () {
+      var P = window.SIYL_PRICE, out = [];
+      if (!P) return out;
+      this.open().forEach(function (seg) {
+        var id = seg.ids[0];
+        if (P.FLAT[id]) { P.items(id).forEach(function (it) { out.push(it); }); return; }
+        var room = P.premium(id);
+        if (room) P.items(id, room.slug).forEach(function (it) { out.push(it); });
+      });
+      return out;
+    },
+
     /* quiet editorial status line — never a progress meter */
     statusLine: function () {
       var n = this.open().length;

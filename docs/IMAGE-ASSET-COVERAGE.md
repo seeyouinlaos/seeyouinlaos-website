@@ -289,3 +289,26 @@ and cost the guest nothing; changing the room category updates both.
 
 Retired: the Special Express "private single cabin USD 130" option is gone from
 every guest surface. Deterministic coverage: `test/pricing.test.mjs`.
+
+---
+
+## Owner QA corrections — 08 September 2026 (evening)
+
+- **Sathorn Penthouse gallery**: slides 1 and 2 were the same frame (Drive
+  `003_Living_Room_Double_Height`, once at 2560 px as `journey/penthouse-01.jpg`
+  and once at 1600 px as `penthouse/living-double-height.jpg`). The 1600 px copy
+  is deleted; Drive `001_Building_Exterior_Elevated`, which had never been
+  fetched, takes its place as `penthouse/exterior-elevated.jpg`. Eleven unique
+  photographs, counter 1 / 11 – 11 / 11.
+- **Luye Baisha · Snow Mountain Viewing Room**: re-checked Drive `024` on
+  08 Sep — folders 001 (IMG_3795–3800, daytime) and 003 (six trip.com frames,
+  evening) are the same 270° Private Courtyard room, and no folder holds the
+  Viewing Room. No room photograph was supplied in the correction thread (the
+  one photograph supplied is the bride, now on the Temple Ceremony). The row
+  keeps a deliberate placeholder and says "Photography to follow" in words.
+- **Snow Mountain Manor Suite**: verified — its three frames are Drive `005`
+  (the owner's 005 and 009 folders share the same trip.com files, hence the
+  `starry-*` filenames). Correct room, no substitution.
+- **Temple Ceremony**: SELF-PAY on every surface — Buddhist giving is made
+  personally by each guest. Coffee & Cake, Vow Ceremony and Wedding Dinner
+  stay HOSTED.

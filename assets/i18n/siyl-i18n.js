@@ -682,6 +682,8 @@
   E("Your Details", "Eure Angaben", "ข้อมูลของคุณ", "あなたの情報");
   E("Where you stay", "Wo ihr wohnt", "ที่พักของคุณ", "ご滞在先");
   E("Discover more", "Mehr entdecken", "ค้นพบเพิ่มเติม", "もっと見る");
+  E("The temple in the morning, coffee and cake on the return, the vows at the green door and dinner in the courtyard garden. Coffee and cake, the vows and the dinner are hosted for every guest; Buddhist giving at the temple is personal.", "Der Tempel am Morgen, Kaffee und Kuchen nach der Rückkehr, das Trauversprechen an der grünen Tür und das Dinner im Innenhofgarten. Kaffee und Kuchen, die Trauung und das Dinner sind für jeden Gast ausgerichtet; die buddhistische Gabe im Tempel ist persönlich.", "วัดในตอนเช้า กาแฟและเค้กเมื่อกลับมา คำสาบานที่ประตูสีเขียว และมื้อค่ำในสวนลานบ้าน กาแฟและเค้ก พิธีสาบาน และมื้อค่ำจัดเตรียมให้แขกทุกท่าน ส่วนการทำบุญที่วัดเป็นเรื่องส่วนตัวของแต่ละท่าน", "朝は寺院へ、戻ってコーヒーとケーキ、緑の扉での誓い、そして中庭でのディナー。コーヒーとケーキ、誓い、ディナーはすべてのゲストのためにご用意しています。寺院でのお布施はご自身で。");
+  E("The wedding stay at Souphattra Heritage, and the day itself — from the temple morning to the last table.", "Der Hochzeitsaufenthalt im Souphattra Heritage und der Tag selbst — vom Tempelmorgen bis zum letzten Tisch.", "ที่พักช่วงงานแต่งที่ซูพัดตรา เฮอริเทจ และตัววันงานเอง — ตั้งแต่เช้าที่วัดจนถึงโต๊ะสุดท้าย", "スパッタラ・ヘリテージでの挙式滞在と、その日そのもの——朝の寺院から最後の一卓まで。");
 
   /* ---- homepage · the Aman-grammar destination and journey rails (08 Sep) ---- */
   E("Thailand, Laos and China — twelve days, prepared around you.", "Thailand, Laos und China — zwölf Tage, um euch herum vorbereitet.", "ไทย ลาว และจีน — สิบสองวันที่จัดเตรียมไว้รอบตัวคุณ", "タイ、ラオス、中国——あなたのために整えた十二日間。");

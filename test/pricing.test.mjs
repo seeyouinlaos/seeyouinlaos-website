@@ -133,3 +133,42 @@ test('rooms are merchandised highest rate first', () => {
     assert.deepEqual(rates, [...rates].sort((a, b) => b - a), k + ' is not premium-first');
   }
 });
+
+test('Sathorn gallery holds eleven distinct photographs, none repeated', () => {
+  const g = R.sathorn.rooms[0].gallery.map((x) => x[0]);
+  assert.equal(g.length, 11);
+  assert.equal(new Set(g).size, 11);
+  assert.ok(!g.includes('assets/images/penthouse/living-double-height.jpg'), 'the duplicate frame is gone');
+  assert.ok(g.includes('assets/images/penthouse/exterior-elevated.jpg'), 'the missing Drive 001 exterior is in');
+});
+
+test('Full Experience picks the premium ELIGIBLE room — never reserved inventory', () => {
+  assert.equal(P.premium('prewed').slug, 'souphattra-majestic');   /* Presidential (750) is Bride & Groom */
+  assert.equal(P.premium('wedstay').slug, 'souphattra-majestic');
+  assert.equal(P.premium('kmg').slug, 'left-bank');
+  assert.equal(P.premium('ljg').slug, 'starry-sky');
+  assert.equal(P.premium('kempinski').slug, 'deluxe-balcony-king');
+  for (const w of ['prewed', 'wedstay', 'kmg', 'ljg']) assert.ok(!P.premium(w).reserved);
+});
+
+test('Full Experience lines come from the single pricing source, transport included', () => {
+  const t = P.items('train')[0];
+  assert.equal(t.price, 75); assert.equal(t.name, 'Special Express No. 25');
+  assert.equal(P.items('mu9632')[0].price, 275);
+  assert.equal(P.items('c642')[0].price, 85);
+  assert.equal(P.items('return')[0].price, 200);
+  /* the complete premium journey for one guest, as the bag would sum it */
+  const all = ['bkk-stay', 'train', 'prewed', 'wedstay', 'mu9632', 'kmg', 'c642', 'ljg', 'return', 'kempinski']
+    .flatMap((w) => P.FLAT[w] ? P.items(w) : P.items(w, P.premium(w).slug));
+  assert.equal(all.length, 10, 'ten stages, ten lines');
+  assert.equal(total(all), 135 + 75 + 580 + 290 + 275 + 261 + 85 + 420 + 200 + 380);
+});
+
+test('Temple Ceremony is self-pay on Review & Send, the other three hosted, never a USD line', () => {
+  const page = readFileSync(join(ROOT, 'review.html'), 'utf8');
+  const src = page.slice(page.indexOf('<h2>The Wedding Programme</h2>'), page.indexOf('<h2>Your selections</h2>'));
+  assert.match(src, /Temple Ceremony[\s\S]{0,400}Self-pay/);
+  assert.doesNotMatch(src, /Temple Ceremony<\/p>[\s\S]{0,300}<span class="eh">Hosted/);
+  assert.equal((src.match(/<span class="eh">Hosted<\/span>/g) || []).length, 3);
+  assert.doesNotMatch(src, /USD/, 'no amount anywhere in the programme block');
+});

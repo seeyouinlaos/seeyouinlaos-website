@@ -14,6 +14,7 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:20px;margin:34
 .ev:last-of-type{border-bottom:1px solid #DAD9D7}
 .en{font-family:'PP Editorial Old',serif;font-weight:200;font-size:16.5px}
 .em{font-size:11px;color:#7C7A75;margin-top:3px}
+.eh.sp{color:#313131}
 .eh{margin-left:auto;font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75;white-space:nowrap}
 .row{display:flex;gap:14px;border-top:1px solid #DAD9D7;padding:16px 0}
 .row:last-of-type{border-bottom:1px solid #DAD9D7}
@@ -49,12 +50,12 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:20px;margin:34
 <h1>Review &amp; Send</h1>
 <p class="sub">Your journey · nothing is paid on this website</p>
 
-<h2>The Wedding Programme · Hosted</h2>
-<div class="ev"><div><p class="en">Temple Ceremony</p><p class="em">Sunday, 28 February 2027 · 09:00 AM – approx. 12:00 PM · Wat Ong Teu Temple, Vientiane</p></div><span class="eh">Hosted</span></div>
+<h2>The Wedding Programme</h2>
+<div class="ev"><div><p class="en">Temple Ceremony</p><p class="em">Sunday, 28 February 2027 · 09:00 AM – approx. 12:00 PM · Wat Ong Teu Temple, Vientiane</p><p class="em">Buddhist giving is made personally by each guest.</p></div><span class="eh sp">Self-pay</span></div>
 <div class="ev"><div><p class="en">Coffee &amp; Cake</p><p class="em">Sunday, 28 February 2027 · After the return from the temple · Souphattra Heritage Vientiane</p></div><span class="eh">Hosted</span></div>
 <div class="ev"><div><p class="en">Vow Ceremony</p><p class="em">Sunday, 28 February 2027 · 04:30 PM · Souphattra Heritage Vientiane</p></div><span class="eh">Hosted</span></div>
 <div class="ev"><div><p class="en">Wedding Dinner</p><p class="em">Sunday, 28 February 2027 · 07:30 PM · Souphattra Vientiane Hotel</p></div><span class="eh">Hosted</span></div>
-<p class="note">Hosted — part of your journey, never a charge.</p>
+<p class="note">Coffee &amp; Cake, the Vow Ceremony and Wedding Dinner are hosted. Buddhist giving at the Temple Ceremony is personal and self-pay.</p>
 
 <h2>Your selections</h2>
 <div id="items"></div>
@@ -115,11 +116,11 @@ render();
 
 function buildText(auth){var b=SIYL_BAG.get();
 var L=['SEE YOU IN LAOS — JOURNEY SELECTION','Invitation: '+auth.invitationId+(auth.partyName?' · '+auth.partyName:''),'',
-'WEDDING PROGRAMME (HOSTED — never a charge):',
-'- Temple Ceremony · Sunday, 28 February 2027 · 09:00 AM',
-'- Coffee & Cake · Sunday, 28 February 2027 · after the return from the temple',
-'- Vow Ceremony · Sunday, 28 February 2027 · 04:30 PM',
-'- Wedding Dinner · Sunday, 28 February 2027 · 07:30 PM','','SELECTIONS:'];
+'WEDDING PROGRAMME:',
+'- Temple Ceremony · Sunday, 28 February 2027 · 09:00 AM · SELF-PAY (Buddhist giving is made personally by each guest)',
+'- Coffee & Cake · Sunday, 28 February 2027 · after the return from the temple · HOSTED',
+'- Vow Ceremony · Sunday, 28 February 2027 · 04:30 PM · HOSTED',
+'- Wedding Dinner · Sunday, 28 February 2027 · 07:30 PM · HOSTED','','SELECTIONS:'];
 b.forEach(function(x){L.push('- '+x.name+' · '+(x.meta||'')+(x.qty>1?' · Quantity '+x.qty:'')+
 (x.rate!=null&&x.nights?' · USD '+x.rate+' per person / night · '+x.nights+(x.nights===1?' night':' nights'):'')+
 (x.note?' · '+x.note.toUpperCase()+(x.noteBy?' ('+x.noteBy+')':''):'')+
