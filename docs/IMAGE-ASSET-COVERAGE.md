@@ -262,3 +262,30 @@ State after this pass:
 
 Rule unchanged: **a correct placeholder beats a wrong real image.** No image is
 assigned from its filename alone.
+
+---
+
+## Commercial model — corrected 08 September 2026
+
+One calculation source: `assets/pricing.js`. Accommodation is priced from the
+approved `Accommodation_Details` row **"Price per Person"** — a per-person /
+per-night RATE — multiplied by the nights in the window. Nothing downstream
+recomputes an amount.
+
+| Product | Rate | Nights | Per person | Breakfast |
+|---|---|---|---|---|
+| Sathorn Penthouse Bangkok · 21–24 Feb | USD 45 pp/night | 3 | **USD 135** | not included, self-pay |
+| Special Express No. 25 · 24–25 Feb | — | — | **USD 75** (package) | breakfast & dinner on board |
+| Pre-Wedding Souphattra · 25–27 Feb | USD 145–750 pp/night | 2 | USD 290–1,500 | included |
+| **Wedding Stay · 27 Feb – 1 Mar** | room value shown | 2 (shown as two nights) | **COMPLIMENTARY** | included |
+| Wanxiang Yueju Kunming · 1–4 Mar | USD 49–87 pp/night | 3 | USD 147–261 | not included, self-pay |
+| Luye Baisha Lijiang · 4–6 Mar | USD 75–210 pp/night | 2 | USD 150–420 | included |
+| Siam Kempinski Bangkok · 6–8 Mar | USD 190 pp/night | 2 | **USD 380** | included |
+
+The Wedding Stay writes two visible nightly lines — `wedstay-n1` (27–28 Feb,
+"Hosted") and `wedstay-n2` (28 Feb – 1 Mar, "Wedding Night hosted by
+Valentine's Retreat"). Both carry the selected room's normal value for context
+and cost the guest nothing; changing the room category updates both.
+
+Retired: the Special Express "private single cabin USD 130" option is gone from
+every guest surface. Deterministic coverage: `test/pricing.test.mjs`.

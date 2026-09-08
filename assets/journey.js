@@ -21,8 +21,10 @@
       label: 'Special Express No. 25', ids: ['train'], anchor: 'j-train' },
     { key: 'prewed', when: '25 – 27 FEB', cat: 'Accommodation', place: 'Vientiane',
       label: 'Pre-Wedding Vientiane', ids: ['prewed'], anchor: 'j-prewed' },
+    /* the wedding stay is answered by the hosted pair, by a legacy single line,
+     * or by the alternative private residence */
     { key: 'wedstay', when: '27 FEB – 01 MAR', cat: 'Accommodation', place: 'Vientiane',
-      label: 'Wedding Stay', ids: ['wedstay', 'airbnb-2br'], anchor: 'j-wedstay' },
+      label: 'Wedding Stay', ids: ['wedstay-n1', 'wedstay-n2', 'wedstay', 'airbnb-2br'], anchor: 'j-wedstay' },
     { key: 'mu9632', when: '01 MAR', cat: 'Transportation', place: 'Vientiane → Kunming',
       label: 'MU9632', ids: ['mu9632'], anchor: 'j-mu9632' },
     { key: 'kmg', when: '01 – 04 MAR', cat: 'Accommodation', place: 'Kunming',
@@ -37,22 +39,9 @@
       label: 'Siam Kempinski Bangkok', ids: ['kempinski'], anchor: 'j-kempinski', bookend: 'close' }
   ];
 
-  /* Price basis per product — the approved commercial model in words, never a
-   * second calculation. `unit` names what one line covers. */
-  var BASIS = {
-    'bkk-stay': { cat: 'Accommodation', basis: 'USD 90 per person / night · 3 nights', unit: 'guest' },
-    'train': { cat: 'Transportation', basis: 'Per person · package · private single cabin USD 130', unit: 'guest' },
-    'prewed': { cat: 'Accommodation', basis: 'Per person · fixed 2-night window', unit: 'guest' },
-    'wedstay': { cat: 'Accommodation', basis: 'Per person · fixed 2-night window · first night your contribution, second night hosted', unit: 'guest' },
-    'airbnb-2br': { cat: 'Accommodation', basis: 'Complimentary · limited availability', unit: 'guest' },
-    'mu9632': { cat: 'Transportation', basis: 'Per person · 1 seat · Business Class', unit: 'guest' },
-    'kmg': { cat: 'Accommodation', basis: 'Per person · fixed 3-night stay', unit: 'guest' },
-    'c642': { cat: 'Transportation', basis: 'Per person · 1 seat · Business Class · 1+1 seating', unit: 'guest' },
-    'ljg': { cat: 'Accommodation', basis: 'Per person · fixed 2-night window', unit: 'guest' },
-    'return': { cat: 'Transportation', basis: 'Per person · 1 seat · Economy flexible · via Kunming', unit: 'guest' },
-    'kempinski': { cat: 'Accommodation', basis: 'USD 190 per person / night · 2 nights · breakfast included', unit: 'guest' },
-    '1872': { cat: 'Experience', basis: 'Per experience · for two guests', unit: 'experience', when: '21 – 24 FEB', at: 0.5 }
-  };
+  /* Chronological position of the two hosted wedding nights (they sit inside
+   * the wedstay stage, in order). Everything else follows SEG. */
+  var AT = { 'wedstay-n1': 3.0, 'wedstay-n2': 3.1, '1872': 0.5 };
 
   function skipped() {
     try { return JSON.parse(localStorage.getItem(SKIP) || '[]'); } catch (e) { return []; }
@@ -64,20 +53,26 @@
 
   window.SIYL_JOURNEY = {
     SEGMENTS: SEG,
-    BASIS: BASIS,
 
-    /* display metadata for a bag line — category eyebrow + price basis */
+    /* display metadata for a bag line — category eyebrow + price basis.
+     * The wording comes from SIYL_PRICE: one calculation, one vocabulary. */
     meta: function (x) {
-      var b = BASIS[x.id];
-      if (b) return b;
-      if (x.interest) return { cat: 'Wellness', basis: 'Interest · confirmed and payable at the spa', unit: 'treatment' };
+      var P = window.SIYL_PRICE;
+      if (x.interest && x.id !== 'airbnb-2br') return { cat: 'Wellness', basis: 'Interest · confirmed and payable at the spa', unit: 'treatment' };
+      if (!P) return { cat: '', basis: '', unit: 'guest' };
+      var f = P.FLAT[x.id];
+      if (f) return { cat: f.cat, basis: f.basis, unit: f.unit || 'guest' };
+      var at = P.locate(x.id);
+      if (at) return { cat: 'Accommodation', basis: P.lineBasis(x), unit: 'guest' };
       return { cat: '', basis: '', unit: 'guest' };
     },
 
-    /* "USD 275 per person × 2 guests" / "1 experience · for two guests" */
+    /* "USD 45 per person × 2 guests" / "1 experience · for two guests" */
     quantityLine: function (x) {
       var m = this.meta(x), q = x.qty || 1;
-      if (x.interest || x.price == null) return '';
+      if (x.interest) return '';
+      if (x.hosted) return 'Complimentary · ' + q + (q === 1 ? ' guest' : ' guests');
+      if (x.price == null) return '';
       if (m.unit === 'experience') {
         return q + (q === 1 ? ' experience · for two guests' : ' experiences · for ' + (q * 2) + ' guests');
       }
@@ -86,15 +81,15 @@
 
     /* the bag reads like an itinerary: chronological position of a line */
     when: function (x) {
+      var P = window.SIYL_PRICE, at = P && P.locate(x.id);
+      if (at && at.night) return at.night.when;
       var seg = SEG.filter(function (s) { return s.ids.indexOf(x.id) >= 0; })[0];
       if (seg) return seg.when;
-      var b = BASIS[x.id];
-      return (b && b.when) || '';
+      return x.id === '1872' ? '21 – 24 FEB' : '';
     },
     order: function (x) {
+      if (AT[x.id] != null) return AT[x.id];
       for (var i = 0; i < SEG.length; i++) if (SEG[i].ids.indexOf(x.id) >= 0) return i;
-      var b = BASIS[x.id];
-      if (b && typeof b.at === 'number') return b.at;
       return 99;
     },
     sorted: function (list) {

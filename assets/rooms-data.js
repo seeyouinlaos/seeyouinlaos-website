@@ -4,9 +4,10 @@
  * Facts (size, bed, occupancy, location, amenities, blurbs) come from
  * register/data.mjs — nothing is invented here. Per-person amounts are the
  * approved fixed-window values already live on journeys.html:
- *   Souphattra matrix 145/155/170/240/250/290/750 per window (C 25–27 Feb,
- *   D 27 Feb – 01 Mar, independent) · Kunming 4 × 150 · Lijiang 70/75/100/105/120
- *   · Sathorn 270 · Kempinski 380. Hosted is HOSTED, never USD 0.
+ *   Every room carries `rate` — the Owner-approved per-person / per-night
+ *   amount from the current Accommodation_Details ("Price per Person"). The
+ *   per-person total for a window is rate × nights and is computed in exactly
+ *   one place, assets/pricing.js. Hosted is HOSTED, never USD 0.
  *
  * Merchandising order (Owner rule 07 Sep 2026): comparable paid options are
  * presented HIGHEST PRICE FIRST, entry option last; categories without an
@@ -38,14 +39,24 @@
     souphattra: {
       name: 'Souphattra Heritage Vientiane',
       place: 'Vientiane, Laos',
+      breakfast: 'Breakfast included',
       windows: [
-        { id: 'prewed', label: 'Pre-Wedding Vientiane', dates: '25 – 27 February 2027', nights: '2 nights fixed',
+        { id: 'prewed', label: 'Pre-Wedding Vientiane', dates: '25 – 27 February 2027', nights: '2 nights', n: 2,
           bagName: 'Pre-Wedding Vientiane · Souphattra Heritage', bagImg: 'assets/images/souphattra/heritage-courtyard-front.jpg' },
-        { id: 'wedstay', label: 'Wedding Stay', dates: '27 February – 01 March 2027', nights: '2 nights fixed',
-          bagName: 'Wedding Stay · Souphattra Heritage', bagImg: 'assets/images/souphattra/heritage-arches-dusk.jpg' }
+        /* The wedding stay is hosted: the guest keeps the room category and its
+         * normal value, and pays nothing for either night. Both nights are shown
+         * separately so the hospitality is visible, never as a USD 0 line. */
+        { id: 'wedstay', label: 'Wedding Stay', dates: '27 February – 01 March 2027', nights: '2 nights', n: 2,
+          bagName: 'Wedding Stay · Souphattra Heritage', bagImg: 'assets/images/souphattra/heritage-arches-dusk.jpg',
+          hosted: [
+            { id: 'wedstay-n1', dates: '27 – 28 February 2027', when: '27 – 28 FEB',
+              note: 'Hosted', bagName: 'Wedding Stay · Souphattra Heritage · night one' },
+            { id: 'wedstay-n2', dates: '28 February – 1 March 2027', when: '28 FEB – 1 MAR',
+              note: "Wedding Night hosted by Valentine's Retreat", bagName: 'Wedding Stay · Souphattra Heritage · wedding night' }
+          ] }
       ],
       includes: [
-        'Wedding stay (27 February – 1 March): the amount is your total contribution per guest for the two nights — the first night is your contribution, the second night is hosted by ' + HS + '.',
+        'Wedding stay (27 February – 1 March): both nights are hosted — the first by ' + HS + ', the wedding night by Valentine\'s Retreat. You keep the room category you choose and neither night is a charge.',
         'Breakfast is included on both mornings.',
         'A limited number of complimentary alternative stays are also available.'
       ],
@@ -55,45 +66,45 @@
           gallery: [[RM + 'souphattra-presidential-1.jpg', 'The main bedroom'], [RM + 'souphattra-presidential-2.jpg', 'The second bedroom'], [RM + 'souphattra-presidential-3.jpg', 'The living space'], [RM + 'souphattra-presidential-4.jpg', 'The sitting corner'], [RM + 'souphattra-presidential-5.jpg', 'The bathroom'], [RM + 'souphattra-presidential-6.jpg', 'Sofa detail'], [RM + 'souphattra-presidential-7.jpg', 'The bathtub']],
           facts: [['Size', '118 sq.m.'], ['Bed', 'Two bedrooms · king and twin'], ['Occupancy', '4 adults · 2 children'], ['Location', 'One unit only']],
           amenities: ['Two bedrooms', 'Private bathrooms', 'Separate living area', 'Shared living space', 'Pantry', 'Dining table', 'High ceiling'],
-          price: 750, reserved: 'Reserved for bride & groom' },
+          rate: 750, reserved: 'Reserved for bride & groom' },
         { slug: 'souphattra-majestic', name: 'Souphattra Majestic Suite', cat: 'Suite',
           desc: 'The house suite: a separate living area, pantry and bar, and a long balcony over the pool.',
           gallery: [[RM + 'souphattra-majestic-suite-1.jpg', 'Bedroom towards the balcony'], [RM + 'souphattra-majestic-suite-2.jpg', 'The living area'], [RM + 'souphattra-majestic-suite-4.jpg', 'The bedroom'], [RM + 'souphattra-majestic-suite-3.jpg', 'The bathroom'], [RM + 'souphattra-majestic-suite-5.jpg', 'The bed']],
           facts: [['Size', '84 sq.m.'], ['Bed', '1 King bed'], ['Occupancy', '2 adults · 2 children'], ['Location', 'Pool and garden views · one suite only']],
-          amenities: ['Separate living area', 'Pantry', 'Bar', 'Large balcony', 'Pool and garden views', 'High ceilings', 'Nespresso machine', 'Coffee & tea facilities', 'Mini bar', 'WiFi'], price: 290 },
+          amenities: ['Separate living area', 'Pantry', 'Bar', 'Large balcony', 'Pool and garden views', 'High ceilings', 'Nespresso machine', 'Coffee & tea facilities', 'Mini bar', 'WiFi'], rate: 290 },
         { slug: 'grand-majestic', name: 'Grand Majestic Suite', cat: 'Suite',
           desc: 'French colonial and Laotian design: a living room under a high ceiling, and a slower kind of morning.',
           gallery: [[RM + 'grand-majestic-suite-1.jpg', 'The bedroom'], [RM + 'grand-majestic-suite-2.jpg', 'The bathroom'], [RM + 'grand-majestic-suite-3.jpg', 'Living and dining']],
           facts: [['Size', '66–75 sq.m.'], ['Bed', '1 King bed'], ['Occupancy', '2 adults · 1 child'], ['Location', 'Private balcony']],
           amenities: ['Living room', 'High ceiling', 'Pantry', 'Private balcony', 'Smart TV', 'Mini bar', 'WiFi'],
-          price: 250, reserved: 'Reserved for family' },
+          rate: 250, reserved: 'Reserved for family' },
         { slug: 'noble-courtyard', name: 'Noble Courtyard Suite', cat: 'Suite',
           desc: 'A 63 square metre retreat with a King bed, two bathrooms, a separate living area and a private balcony overlooking the garden and pool.',
           gallery: [[RM + 'noble-courtyard-1.jpg', 'The bedroom'], [RM + 'noble-courtyard-2.jpg', 'Bedroom and desk'], [RM + 'noble-courtyard-3.jpg', 'The living area']],
           facts: [['Size', '63 sq.m.'], ['Bed', '1 King bed'], ['Occupancy', '2 adults · 1 child'], ['Location', 'Ground floor · central greenery · one suite only']],
-          amenities: ['Bathrobe', 'Bathtub', 'Coffee & tea making facilities', 'Hair dryer', 'Mini bar', 'Nespresso machine', 'Safe deposit box', 'Shower', 'Slippers', 'Smart TV', 'Wardrobe', 'WiFi access'], price: 240 },
+          amenities: ['Bathrobe', 'Bathtub', 'Coffee & tea making facilities', 'Hair dryer', 'Mini bar', 'Nespresso machine', 'Safe deposit box', 'Shower', 'Slippers', 'Smart TV', 'Wardrobe', 'WiFi access'], rate: 240 },
         { slug: 'heritage-grand-premier', name: 'Heritage Grand Premier', cat: 'Heritage Room',
           desc: 'A larger heritage room, with a private balcony over the garden and the pool.',
           gallery: [[RM + 'heritage-grand-premier-1.jpg', 'The bedroom'], [RM + 'heritage-grand-premier-2.jpg', 'The sitting area'], [RM + 'heritage-grand-premier-3.jpg', 'Bedroom towards the balcony'], [RM + 'heritage-grand-premier-4.jpg', 'The sitting corner'], [RM + 'heritage-grand-premier-5.jpg', 'Sofa detail'], [RM + 'heritage-grand-premier-6.jpg', 'The balcony daybed'], [RM + 'heritage-grand-premier-7.jpg', 'The balcony']],
           facts: [['Size', '49 sq.m.'], ['Bed', '1 King bed'], ['Occupancy', '2 adults · 1 child sharing bedding'], ['Location', 'Garden and pool views']],
-          amenities: ['Private balcony', 'Garden and pool views', 'Nespresso machine', 'Coffee & tea facilities', 'Mini bar', 'Smart TV', 'WiFi', 'Bathroom amenities'], price: 170 },
+          amenities: ['Private balcony', 'Garden and pool views', 'Nespresso machine', 'Coffee & tea facilities', 'Mini bar', 'Smart TV', 'WiFi', 'Bathroom amenities'], rate: 170 },
         { slug: 'heritage-executive', name: 'Heritage Executive', cat: 'Heritage Room',
           desc: 'French colonial rooms with a balcony over the garden, and the flexibility a family needs.',
           gallery: [[RM + 'heritage-executive-1.jpg', 'The bedroom'], [RM + 'heritage-executive-2.jpg', 'Bedroom and balcony'], [RM + 'heritage-executive-3.jpg', 'The bathroom'], [RM + 'heritage-executive-4.jpg', 'Bedroom towards the balcony']],
           facts: [['Size', '37–44 sq.m.'], ['Bed', 'King or twin'], ['Occupancy', 'Up to 2 adults · 1 child'], ['Location', 'Garden views · interconnecting rooms where available']],
-          amenities: HERITAGE_AMENITIES, price: 155 },
+          amenities: HERITAGE_AMENITIES, rate: 155 },
         { slug: 'heritage', name: 'The Heritage', cat: 'Heritage Room',
           desc: 'Colonial French elegance in 31 square metres, with a private balcony over the garden.',
           gallery: [[RM + 'the-heritage-1.jpg', 'Dressing corridor and wardrobe'], [RM + 'the-heritage-2.jpg', 'The bedroom'], [RM + 'the-heritage-3.jpg', 'The bathroom']],
           facts: [['Size', '31 sq.m.'], ['Bed', '1 King bed'], ['Occupancy', '2 adults · 1 child'], ['Location', '1st–3rd floor']],
-          amenities: HERITAGE_AMENITIES, price: 145 }
+          amenities: HERITAGE_AMENITIES, rate: 145 }
       ]
     },
 
     airbnb: {
       name: 'Alternative Stay · Vientiane',
       place: 'Vientiane, Laos',
-      windows: [{ id: 'airbnb-2br', label: 'Wedding Stay', dates: '27 February – 01 March 2027', nights: '2 nights',
+      windows: [{ id: 'airbnb-2br', label: 'Wedding Stay', dates: '27 February – 01 March 2027', nights: '2 nights', n: 2,
         bagName: 'Private Residence · Vientiane', bagImg: 'assets/images/airbnb/airbnb-01.jpg' }],
       includes: null,
       rooms: [
@@ -109,7 +120,8 @@
     sathorn: {
       name: 'Sathorn Penthouse Bangkok',
       place: 'Sathorn, Bangkok',
-      windows: [{ id: 'bkk-stay', label: 'Before the Wedding', dates: '21 – 24 February 2027', nights: '3 nights',
+      breakfast: 'Breakfast not included · self-pay',
+      windows: [{ id: 'bkk-stay', label: 'Before the Wedding', dates: '21 – 24 February 2027', nights: '3 nights', n: 3,
         bagName: 'Sathorn Penthouse Bangkok', bagImg: 'assets/images/journey/penthouse-01.jpg' }],
       includes: ['Arrival 21 February 2027: personal pickup by Haruthai — hosted.'],
       rooms: [
@@ -128,20 +140,21 @@
             [PENT + 'exterior-street.jpg', 'The house from the street'],
             [PENT + 'exterior-golden-hour.jpg', 'The house at golden hour']],
           facts: [['Home', 'Six-bedroom penthouse'], ['Capacity', '12 adults'], ['Stay', '21 – 24 February 2027 · 3 nights'], ['Arrival', '21 February · personal pickup by Haruthai']],
-          amenities: null, price: 270 }
+          amenities: null, rate: 45 }
       ]
     },
 
     kunming: {
       name: 'Wanxiang Yueju · Kunming',
       place: 'Kunming Railway Station MixC Branch',
-      windows: [{ id: 'kmg', label: 'After the Wedding', dates: '01 – 04 March 2027', nights: '3 nights',
+      breakfast: 'Breakfast not included · self-pay',
+      windows: [{ id: 'kmg', label: 'After the Wedding', dates: '01 – 04 March 2027', nights: '3 nights', n: 3,
         bagName: 'Wanxiang Yueju · Kunming', bagImg: 'assets/images/journey/kunming-01.jpg' }],
       includes: null,
-      /* All twelve operational categories from Accommodation_Details. Four carry
-       * the Owner-approved guest amount (USD 150 for the fixed window); the
-       * remaining eight are real inventory without an Owner selling price and
-       * are shown as inventory only — never with an invented amount. */
+      /* All twelve operational categories from Accommodation_Details, each with
+       * the Owner-approved per-person / per-night rate ("Price per Person").
+       * The per-person total is rate × nights and is produced only by
+       * assets/pricing.js — never stored twice. */
       rooms: [
         { slug: 'junting', name: 'Junting City-View Loft', cat: 'Designer loft · 68 sqm',
           desc: 'Junting City-View Loft — 68 sq.m., 1 queen bed (1.8m wide), 2 adults. Floor 14th floor.',
@@ -154,7 +167,7 @@
           [KMG + 'junting-6.jpg', 'The room']],
           facts: [['Size', '68 sq.m.'], ['Bed', '1 Queen Bed (1.8m wide)'], ['Occupancy', '2 Adults'], ['Location', 'Floor 14th floor']],
           amenities: ['Air conditioning', 'Balcony', 'Butler service', 'Clothes dryer', 'Coffee maker / teapot', 'Dining table', 'Electric blanket', 'Electric kettle', 'Free bottled water', 'Free Wi-Fi', 'Hair dryer', 'Heating', 'Iron and ironing board', 'Microwave', 'Minibar', 'Refrigerator', 'Shower', 'Slippers', 'Smart door lock', 'Smart toilet', 'Sofa', 'TV', 'Wardrobe', 'Washing machine'],
-          price: 150 },
+          rate: 51 },
         { slug: 'milano', name: 'Milano Minimalist Loft', cat: 'Designer loft · 68 sqm',
           desc: 'Milano Minimalist Loft — 68 sq.m., 1 queen bed (1.8m wide), 2 adults. Floor 14th floor.',
           gallery: [
@@ -166,7 +179,7 @@
           [KMG + 'milano-6.jpg', 'The room']],
           facts: [['Size', '68 sq.m.'], ['Bed', '1 Queen Bed (1.8m wide)'], ['Occupancy', '2 Adults'], ['Location', 'Floor 14th floor']],
           amenities: ['Air conditioning', 'Balcony', 'Butler service', 'Dining table', 'Electric blanket', 'Electric kettle', 'Free bottled water', 'Free Wi-Fi', 'Hair dryer', 'Heating', 'Iron and ironing board', 'Microwave', 'Minibar', 'Refrigerator', 'Shower', 'Slippers', 'Smart door lock', 'Sofa', 'TV', 'Wardrobe', 'Washing machine'],
-          price: 150 },
+          rate: 50 },
         { slug: 'italian', name: 'Italian Style Suite', cat: 'Designer suite · 68 sqm',
           desc: 'Italian Style Suite — 68 sq.m., 1 queen bed (1.8m wide), 2 adults. Floor 14th floor.',
           gallery: [
@@ -178,7 +191,7 @@
           [KMG + 'italian-6.jpg', 'The room']],
           facts: [['Size', '68 sq.m.'], ['Bed', '1 Queen Bed (1.8m wide)'], ['Occupancy', '2 Adults'], ['Location', 'Floor 14th floor']],
           amenities: ['Air conditioning', 'Audio equipment', 'Balcony', 'Butler service', 'Coffee maker / teapot', 'Dining table', 'Electric blanket', 'Electric fan', 'Electric kettle', 'Free bottled water', 'Free Wi-Fi', 'Hair dryer', 'Heating', 'Iron and ironing board', 'Microwave', 'Minibar', 'Refrigerator', 'Shower', 'Slippers', 'Smart door lock', 'Smart room controls', 'Smart toilet', 'Sofa', 'TV', 'Wardrobe', 'Washing machine'],
-          price: 150 },
+          rate: 50 },
         { slug: 'light-french', name: 'Light French Suite', cat: 'Designer suite · 68 sqm',
           desc: 'Light French Suite — 68 sq.m., 1 queen bed (1.8m wide), 1 adult. Floor 14th floor.',
           gallery: [
@@ -190,7 +203,7 @@
           [KMG + 'light-french-6.jpg', 'The room']],
           facts: [['Size', '68 sq.m.'], ['Bed', '1 Queen Bed (1.8m wide)'], ['Occupancy', '1 Adult'], ['Location', 'Floor 14th floor']],
           amenities: ['Air conditioning', 'Audio equipment', 'Balcony', 'Butler service', 'Clothes dryer', 'Dining table', 'Electric blanket', 'Electric kettle', 'Free bottled water', 'Free Wi-Fi', 'Hair dryer', 'Heating', 'Iron and ironing board', 'Microwave', 'Minibar', 'Range hood', 'Refrigerator', 'Shower', 'Slippers', 'Smart door lock', 'Smart room controls', 'Smart toilet', 'Sofa', 'TV', 'Wardrobe', 'Washing machine'],
-          price: 150 },
+          rate: 49 },
         { slug: 'left-bank', name: 'Left Bank French-Style King Room', cat: 'Designer room · 68 sqm',
           desc: 'Left Bank French-Style King Room — 68 sq.m., 1 queen bed (1.8m wide), 4 adults. Floor 14.',
           gallery: [
@@ -202,7 +215,7 @@
           [KMG + 'leftbank-6.jpg', 'Living and dining']],
           facts: [['Size', '68 sq.m.'], ['Bed', '1 Queen Bed (1.8m wide)'], ['Occupancy', '4 Adults'], ['Location', 'Floor 14']],
           amenities: ['Air conditioning', 'Balcony', 'Butler service', 'Dining table', 'Electric blanket', 'Electric fan', 'Electric kettle', 'Free bottled water', 'Free Wi-Fi', 'Hair dryer', 'Heating', 'Iron and ironing board', 'Microwave', 'Minibar', 'Projector', 'Range hood', 'Refrigerator', 'Shower', 'Slippers', 'Smart door lock', 'Smart toilet', 'Sofa', 'TV', 'Wardrobe', 'Washing machine'],
-          price: null, enquire: true, status: 'Amount on request · Guest Relations' },
+          rate: 87 },
         { slug: 'penang', name: 'Penang Forest Nanyang-Style Deluxe Suite', cat: 'Designer suite · 136 sqm',
           desc: 'Penang Forest Nanyang-Style Deluxe Suite — 136 sq.m., 1 king bed (2m wide) and 1 queen bed (1.8m wide), 4 adults. Floor 16.',
           gallery: [
@@ -214,7 +227,7 @@
           [KMG + 'penang-6.jpg', 'The entrance hall']],
           facts: [['Size', '136 sq.m.'], ['Bed', '1 king bed (2m wide) and 1 queen bed (1.8m wide)'], ['Occupancy', '4 Adults'], ['Location', 'Floor 16']],
           amenities: ['Air conditioning', 'Balcony', 'Butler service', 'Dining table', 'Electric blanket', 'Electric kettle', 'Free bottled water', 'Free Wi-Fi', 'Heating', 'Iron and ironing board', 'Microwave', 'Minibar', 'Shower', 'Slippers', 'Smart door lock', 'Sofa', 'Wardrobe', 'Washing machine'],
-          price: null, enquire: true, status: 'Amount on request · Guest Relations' },
+          rate: 79 },
         { slug: 'family-suite', name: 'Family Suite', cat: 'Designer suite · 68 sqm',
           desc: 'Family Suite — 68 sq.m., 1 queen bed (1.8m wide) and 1 double bed (1.5m wide), 2 adults. Floor 15-22.',
           gallery: [
@@ -226,7 +239,7 @@
           [KMG + 'familysuite-6.jpg', 'The bedroom']],
           facts: [['Size', '68 sq.m.'], ['Bed', '1 queen bed (1.8m wide) and 1 double bed (1.5m wide)'], ['Occupancy', '2 Adults'], ['Location', 'Floor 15-22']],
           amenities: ['Air conditioning', 'Audio equipment', 'Balcony', 'Butler service', 'Dining table', 'Electric blanket', 'Electric kettle', 'Free bottled water', 'Free Wi-Fi', 'Hair dryer', 'Heating', 'Iron and ironing board', 'Microwave', 'Minibar', 'Refrigerator', 'Shower', 'Slippers', 'Smart door lock', 'Smart room controls', 'Smart toilet', 'Sofa', 'Wardrobe', 'Washing machine'],
-          price: null, enquire: true, status: 'Amount on request · Guest Relations' },
+          rate: 66 },
         { slug: 'seine', name: 'Seine Evening Glow Loft Family Room', cat: 'Designer loft · 68–70 sqm',
           desc: 'Seine Evening Glow Loft Family Room — 68–70 sq.m., 1 queen bed (1.8m wide) and 1 double bed (1.5m wide), 4 adults. Floor 12.',
           gallery: [
@@ -238,7 +251,7 @@
           [KMG + 'seine-6.jpg', 'Living room and bed']],
           facts: [['Size', '68–70 sq.m.'], ['Bed', '1 queen bed (1.8m wide) and 1 double bed (1.5m wide)'], ['Occupancy', '4 Adults'], ['Location', 'Floor 12']],
           amenities: ['Air conditioning', 'Audio equipment', 'Balcony', 'Butler service', 'Clothes dryer', 'Dining table', 'Electric blanket', 'Electric kettle', 'Free bottled water', 'Free Wi-Fi', 'Hair dryer', 'Heating', 'Iron and ironing board', 'Microwave', 'Minibar', 'Projector', 'Range hood', 'Refrigerator', 'Shower', 'Slippers', 'Smart door lock', 'Smart room controls', 'Smart toilet', 'Sofa', 'Wardrobe', 'Washing machine'],
-          price: null, enquire: true, status: 'Amount on request · Guest Relations' },
+          rate: 66 },
         { slug: 'smart-family', name: 'Smart Family Room', cat: 'Designer room · 68 sqm',
           desc: 'Smart Family Room — 68 sq.m., 1 queen bed (1.8m wide), 2 adults. Floor 9-24.',
           gallery: [
@@ -250,7 +263,7 @@
           [KMG + 'smartfamily-6.jpg', 'Wardrobe and laundry']],
           facts: [['Size', '68 sq.m.'], ['Bed', '1 Queen Bed (1.8m wide)'], ['Occupancy', '2 Adults'], ['Location', 'Floor 9-24']],
           amenities: ['Air conditioning', 'Audio equipment', 'Balcony', 'Butler service', 'Clothes dryer', 'Dining table', 'Electric blanket', 'Electric kettle', 'Free bottled water', 'Free Wi-Fi', 'Hair dryer', 'Heating', 'Iron and ironing board', 'Microwave', 'Minibar', 'Refrigerator', 'Shower', 'Slippers', 'Smart door lock', 'Smart toilet', 'Sofa', 'TV', 'Wardrobe', 'Washing machine'],
-          price: null, enquire: true, status: 'Amount on request · Guest Relations' },
+          rate: 55 },
         { slug: 'solarium', name: 'Solarium Bath Suite', cat: 'Designer suite · 68 sqm',
           desc: 'Solarium Bath Suite — 68 sq.m., 1 queen bed (1.8m wide), 2 adults. Floor 14.',
           gallery: [
@@ -262,7 +275,7 @@
           [KMG + 'solarium-6.jpg', 'The lounge']],
           facts: [['Size', '68 sq.m.'], ['Bed', '1 Queen Bed (1.8m wide)'], ['Occupancy', '2 Adults'], ['Location', 'Floor 14']],
           amenities: ['Air conditioning', 'Audio equipment', 'Balcony', 'Bathtub', 'Butler service', 'Clothes dryer', 'Dining table', 'Electric blanket', 'Electric kettle', 'Free bottled water', 'Free Wi-Fi', 'Hair dryer', 'Heating', 'Iron and ironing board', 'Microwave', 'Minibar', 'Refrigerator', 'Shower', 'Slippers', 'Smart door lock', 'Smart room controls', 'Smart toilet', 'Sofa', 'TV', 'Wardrobe', 'Washing machine'],
-          price: null, enquire: true, status: 'Amount on request · Guest Relations', reserved: 'Reserved for bride & groom' },
+          rate: 54, reserved: 'Reserved for bride & groom' },
         { slug: 'standard-single', name: 'Standard Single Room', cat: 'Designer room · 68 sqm',
           desc: 'Standard Single Room — 68 sq.m., 1 queen bed (1.8m wide), 2 adults. Floor 16.',
           gallery: [
@@ -274,7 +287,7 @@
           [KMG + 'standardsingle-6.jpg', 'The window at dusk']],
           facts: [['Size', '68 sq.m.'], ['Bed', '1 Queen Bed (1.8m wide)'], ['Occupancy', '2 Adults'], ['Location', 'Floor 16']],
           amenities: ['Air conditioning', 'Balcony', 'Butler service', 'Dining table', 'Electric blanket', 'Electric kettle', 'Free bottled water', 'Free Wi-Fi', 'Hair dryer', 'Heating', 'Iron and ironing board', 'Microwave', 'Minibar', 'Refrigerator', 'Shower', 'Slippers', 'Smart door lock', 'Smart toilet', 'Sofa', 'TV', 'Wardrobe', 'Washing machine'],
-          price: null, enquire: true, status: 'Amount on request · Guest Relations' },
+          rate: 53 },
         { slug: 'mid-century', name: 'Mid-century Amber Suite', cat: 'Designer suite · 68 sqm',
           desc: 'Mid-century Amber Suite — 68 sq.m., 1 queen bed (1.8m wide), 2 adults. Floor 12.',
           gallery: [
@@ -286,18 +299,19 @@
           [KMG + 'midcentury-6.jpg', 'The bedroom']],
           facts: [['Size', '68 sq.m.'], ['Bed', '1 Queen Bed (1.8m wide)'], ['Occupancy', '2 Adults'], ['Location', 'Floor 12']],
           amenities: ['Air conditioning', 'Air purifier', 'Audio equipment', 'Balcony', 'Butler service', 'Dining table', 'Electric blanket', 'Electric kettle', 'Free bottled water', 'Free Wi-Fi', 'Hair dryer', 'Heating', 'Iron and ironing board', 'Microwave', 'Minibar', 'Projector', 'Range hood', 'Refrigerator', 'Shower', 'Slippers', 'Smart door lock', 'Smart room controls', 'Smart toilet', 'Sofa', 'Wardrobe', 'Washing machine'],
-          price: null, enquire: true, status: 'Amount on request · Guest Relations' },
+          rate: 51 },
       ]
     },
 
     lijiang: {
       name: 'Luye Baisha · Lijiang',
       place: 'Baisha, Lijiang · Rizhao Jinshan',
-      windows: [{ id: 'ljg', label: 'After the Wedding', dates: '04 – 06 March 2027', nights: '2 nights fixed',
+      breakfast: 'Breakfast included',
+      windows: [{ id: 'ljg', label: 'After the Wedding', dates: '04 – 06 March 2027', nights: '2 nights', n: 2,
         bagName: 'Luye Baisha · Lijiang', bagImg: 'assets/images/journey/lijiang-01.jpg' }],
       includes: null,
-      /* All nine operational categories. Five carry Owner-approved guest amounts;
-       * four are inventory awaiting an Owner selling price. */
+      /* All nine operational categories with the Owner-approved per-person /
+       * per-night rate from Accommodation_Details. */
       rooms: [
         { slug: 'manor-suite', name: 'Snow Mountain Manor Suite', cat: 'Snow mountain suite',
           desc: 'Snow Mountain Manor Suite — 70 sq.m., 1 king bed (2m wide), 2 adults. Floor 1st floor.',
@@ -307,7 +321,7 @@
           [LJG + 'starry-3.jpg', 'The bedroom towards the terrace']],
           facts: [['Size', '70 sq.m.'], ['Bed', '1 King Bed (2m wide)'], ['Occupancy', '2 Adults'], ['Location', 'Floor 1st floor']],
           amenities: ['Air conditioning', 'Air purifier', 'Audio equipment', 'Balcony', 'Bathrobe', 'Bathtub or shower', 'Butler service', 'Coffee maker / teapot', 'Electric kettle', 'Fireplace', 'Free Wi-Fi', 'Garden / yard', 'Hair dryer', 'Heating', 'Iron and ironing board', 'Minibar', 'Private hot springs / soup pool', 'Projector', 'Refrigerator', 'Safe in room', 'Slippers', 'Smart door lock', 'Smart room controls', 'Smart toilet', 'Sofa', 'Terrace'],
-          price: 120 },
+          rate: 120 },
         { slug: 'soup-pool-270', name: '270° Snow Mountain View Room Private Soup Pool', cat: 'Snow mountain room',
           desc: '270° Snow Mountain View Room Private Soup Pool — 55 sq.m., 1 king bed (2m wide), 2 adults. Floor 2nd floor.',
           gallery: [
@@ -319,7 +333,7 @@
           [LJG + 'souppool-6.jpg', 'The room in the evening']],
           facts: [['Size', '55 sq.m.'], ['Bed', '1 King Bed (2m wide)'], ['Occupancy', '2 Adults'], ['Location', 'Floor 2nd floor']],
           amenities: ['Air conditioning', 'Air purifier', 'Audio equipment', 'Bathrobe', 'Bathtub or shower', 'Butler service', 'Coffee maker / teapot', 'Electric kettle', 'Fireplace', 'Free Wi-Fi', 'Hair dryer', 'Heating', 'Iron and ironing board', 'Minibar', 'Private hot springs / soup pool', 'Projector', 'Refrigerator', 'Safe in room', 'Slippers', 'Smart door lock', 'Smart room controls', 'Smart toilet', 'Sofa'],
-          price: 105 },
+          rate: 105 },
         { slug: 'private-courtyard-270', name: '270° Private Courtyard Snow Mountain View', cat: 'Snow mountain room',
           desc: '270° Private Courtyard Snow Mountain View — 55 sq.m., 1 king bed (2m wide), 2 adults. Floor 1st floor.',
           gallery: [
@@ -330,13 +344,13 @@
           [LJG + 'courtyard-5.jpg', 'The bathroom']],
           facts: [['Size', '55 sq.m.'], ['Bed', '1 King Bed (2m wide)'], ['Occupancy', '2 Adults'], ['Location', 'Floor 1st floor']],
           amenities: ['Air conditioning', 'Air purifier', 'Audio equipment', 'Bathrobe', 'Bathtub or shower', 'Butler service', 'Coffee maker / teapot', 'Electric kettle', 'Fireplace', 'Free Wi-Fi', 'Heating', 'Iron and ironing board', 'Minibar', 'Private courtyard', 'Private hot springs', 'Projector', 'Safe in room', 'Slippers', 'Smart door lock', 'Smart room controls', 'Smart toilet', 'Sofa'],
-          price: 100 },
+          rate: 105 },
         { slug: 'snow-mountain-viewing', name: 'Snow Mountain Viewing Room', cat: 'Snow mountain room',
           desc: 'Snow Mountain Viewing Room — 50 sq.m., 1 king bed (2m wide), 1 adult. Floor 2nd floor.',
           gallery: [],
           facts: [['Size', '50 sq.m.'], ['Bed', '1 King Bed (2m wide)'], ['Occupancy', '1 Adult'], ['Location', 'Floor 2nd floor']],
           amenities: ['Air conditioning', 'Air purifier', 'Audio equipment', 'Balcony', 'Bathrobe', 'Bathtub or shower', 'Butler service', 'Coffee maker / teapot', 'Electric kettle', 'Fireplace', 'Free Wi-Fi', 'Heating', 'Iron and ironing board', 'Minibar', 'Private hot springs', 'Projector', 'Safe in room', 'Slippers', 'Smart door lock', 'Smart room controls', 'Smart toilet', 'Sofa', 'Terrace'],
-          price: 75 },
+          rate: 75 },
         { slug: 'viewing-270', name: '270° Snow Mountain Viewing', cat: 'Snow mountain room',
           desc: '270° Snow Mountain Viewing — 55 sq.m., 1 king bed (2m wide), 2 adults. Floor 2nd – 3rd floor.',
           gallery: [
@@ -348,7 +362,7 @@
           [LJG + 'view270-6.jpg', 'The bathroom']],
           facts: [['Size', '55 sq.m.'], ['Bed', '1 King Bed (2m wide)'], ['Occupancy', '2 Adults'], ['Location', 'Floor 2nd – 3rd floor']],
           amenities: ['Air conditioning', 'Air purifier', 'Audio equipment', 'Bathrobe', 'Bathtub or shower', 'Butler service', 'Coffee maker / teapot', 'Electric kettle', 'Fireplace', 'Free Wi-Fi', 'Hair dryer', 'Heating', 'Iron and ironing board', 'Minibar', 'Private hot springs', 'Projector', 'Refrigerator', 'Safe in room', 'Slippers', 'Smart door lock', 'Smart room controls', 'Smart toilet', 'Sofa'],
-          price: 70 },
+          rate: 100 },
         { slug: 'starry-sky', name: 'Luye Starry Sky Suite · Immersive View', cat: 'Snow mountain suite',
           desc: 'Luye Starry Sky Suite · Immersive View — 88 sq.m., 1 king bed (3.1m wide), 2 adults. Floor 3rd floor.',
           gallery: [
@@ -360,7 +374,7 @@
           [LJG + 'starry-4.jpg', 'The bathroom']],
           facts: [['Size', '88 sq.m.'], ['Bed', '1 King Bed (3.1m wide)'], ['Occupancy', '2 Adults'], ['Location', 'Floor 3rd floor']],
           amenities: ['Air conditioning', 'Air purifier', 'Audio equipment', 'Bathrobe', 'Bathtub or shower', 'Butler service', 'Coffee maker / teapot', 'Electric kettle', 'Fireplace', 'Free Wi-Fi', 'Heating', 'Iron and ironing board', 'Minibar', 'Projector', 'Safe in room', 'Slippers', 'Smart door lock', 'Smart room controls', 'Smart toilet', 'Sofa'],
-          price: null, enquire: true, status: 'Amount on request · Guest Relations' },
+          rate: 210 },
         { slug: 'boundless', name: 'Boundless Floor-to-Ceiling Glass Sunlit Suite', cat: 'Snow mountain suite',
           desc: 'Boundless Floor-to-Ceiling Glass Sunlit Suite — 88 sq.m., 1 king bed (3.1m wide), 2 adults. Floor 3rd floor.',
           gallery: [
@@ -373,7 +387,7 @@
           [LJG + 'boundless-7.jpg', 'The terrace']],
           facts: [['Size', '88 sq.m.'], ['Bed', '1 King Bed (3.1m wide)'], ['Occupancy', '2 Adults'], ['Location', 'Floor 3rd floor']],
           amenities: ['Air conditioning', 'Air purifier', 'Audio equipment', 'Bathrobe', 'Bathtub or shower', 'Butler service', 'Coffee maker / teapot', 'Electric kettle', 'Fireplace', 'Free Wi-Fi', 'Heating', 'Iron and ironing board', 'Minibar', 'Private hot springs / soup pool', 'Projector', 'Safe in room', 'Slippers', 'Smart door lock', 'Smart room controls', 'Smart toilet', 'Sofa'],
-          price: null, enquire: true, status: 'Amount on request · Guest Relations' },
+          rate: 170 },
         { slug: 'private-soup-view', name: 'Snow Mountain Private Soup Viewing Suite', cat: 'Snow mountain suite',
           desc: 'Snow Mountain Private Soup Viewing Suite — 88 sq.m., 1 king bed (2m wide), 2 adults. Floor 2nd floor.',
           gallery: [
@@ -387,7 +401,7 @@
           [LJG + 'soupview-8.jpg', 'The terrace']],
           facts: [['Size', '88 sq.m.'], ['Bed', '1 King Bed (2m wide)'], ['Occupancy', '2 Adults'], ['Location', 'Floor 2nd floor']],
           amenities: ['Air conditioning', 'Air purifier', 'Audio equipment', 'Bathrobe', 'Bathtub or shower', 'Butler service', 'Coffee maker / teapot', 'Electric kettle', 'Fireplace', 'Free Wi-Fi', 'Heating', 'Iron and ironing board', 'Minibar', 'Private hot springs / soup pool', 'Projector', 'Safe in room', 'Slippers', 'Smart door lock', 'Smart room controls', 'Smart toilet', 'Sofa'],
-          price: null, enquire: true, status: 'Amount on request · Guest Relations' },
+          rate: 125 },
         { slug: 'view-suite-270', name: '270° Snow Mountain View Suite', cat: 'Snow mountain suite',
           desc: '270° Snow Mountain View Suite — 70 sq.m., 1 king bed (2m wide), 2 adults. Floor 3rd floor.',
           gallery: [
@@ -401,14 +415,15 @@
           [LJG + 'suite270-8.jpg', 'The fireplace and the peak']],
           facts: [['Size', '70 sq.m.'], ['Bed', '1 King Bed (2m wide)'], ['Occupancy', '2 Adults'], ['Location', 'Floor 3rd floor']],
           amenities: ['Air conditioning', 'Air purifier', 'Audio equipment', 'Balcony', 'Bathrobe', 'Bathtub or shower', 'Butler service', 'Coffee maker / teapot', 'Electric kettle', 'Fireplace', 'Free Wi-Fi', 'Hair dryer', 'Heating', 'Iron and ironing board', 'Minibar', 'Private hot springs / soup pool', 'Projector', 'Refrigerator', 'Safe in room', 'Slippers', 'Smart door lock', 'Smart room controls', 'Smart toilet', 'Sofa', 'Terrace'],
-          price: null, enquire: true, status: 'Amount on request · Guest Relations', reserved: 'Reserved for bride & groom' },
+          rate: 120, reserved: 'Reserved for bride & groom' },
       ]
     },
 
     kempinski: {
       name: 'Siam Kempinski Bangkok',
       place: 'Bangkok, Thailand',
-      windows: [{ id: 'kempinski', label: 'The Return', dates: '06 – 08 March 2027', nights: '2 nights · breakfast included',
+      breakfast: 'Breakfast included',
+      windows: [{ id: 'kempinski', label: 'The Return', dates: '06 – 08 March 2027', nights: '2 nights', n: 2,
         bagName: 'Siam Kempinski Bangkok', bagImg: 'assets/images/journey/kempinski-01.jpg' }],
       includes: ['Breakfast included on both mornings.'],
       rooms: [
@@ -427,8 +442,18 @@
             [KEM + 'lounge.jpg', 'The lounge']],
           facts: [['Size', '~37–45 sqm'], ['Bed', 'King'], ['Room', 'Balcony · non smoking']],
           amenities: ['Balcony', 'Non smoking', 'Air conditioning', 'Safe', 'Coffee & tea', 'Wi-Fi', 'Complimentary minibar'],
-          price: 380 }
+          rate: 190 }
       ]
     }
   };
+
+  /* Merchandising (Owner rule, 07 Sep 2026): comparable paid options are
+   * presented HIGHEST FIRST. Sorted here so the order can never drift out of
+   * step with the rates. Rooms without a rate follow, reserved rooms keep
+   * their place in the list but are never selectable. */
+  Object.keys(window.SIYL_ROOMS).forEach(function (k) {
+    window.SIYL_ROOMS[k].rooms.sort(function (a, b) {
+      return (b.rate == null ? -1 : b.rate) - (a.rate == null ? -1 : a.rate);
+    });
+  });
 })();

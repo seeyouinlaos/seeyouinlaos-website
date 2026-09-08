@@ -64,7 +64,11 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:22px;margin:44
 .buy .wd{font-family:'PP Editorial Old',serif;font-weight:200;font-size:17px;margin:5px 0 1px}
 .buy .wn{font-size:11px;color:#7C7A75;margin-bottom:10px}
 .buy .price{font-family:'PP Editorial Old',serif;font-size:16px}
-.buy .per{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75;margin:2px 0 16px}
+.buy .pu{font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75}
+.bf{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75;margin:8px 0 0}
+.hn{display:flex;gap:12px;justify-content:space-between;border-top:1px solid #EAE7E0;padding:9px 0;font-size:11.5px;color:#4A4A4A}
+.hn span:last-child{font-size:9.5px;letter-spacing:1.6px;text-transform:uppercase;color:#7C7A75;text-align:right}
+.per{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75;margin:2px 0 16px}
 .cta{display:block;width:100%;background:#313131;color:#F3EEE7;border:0;padding:19px;font-size:11px;letter-spacing:2.2px;text-transform:uppercase;cursor:pointer;min-height:52px;text-align:center;text-decoration:none;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif}
 .ok{display:block;text-align:center;font-size:10px;letter-spacing:1.6px;text-transform:uppercase;color:#7C7A75;margin-top:12px}
 .ok[hidden]{display:none !important}
@@ -73,6 +77,7 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:22px;margin:44
 .chg{display:block;width:100%;background:none;border:0;border-bottom:1px solid #313131;font:inherit;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#313131;padding:12px 0 4px;margin:14px auto 0;cursor:pointer;min-height:44px;width:auto}
 .enq{font-size:11.5px;color:#7C7A75;line-height:1.7;border:1px solid #DAD9D7;padding:16px;text-align:center}
 .swap{font-size:11px;color:#7C7A75;margin-top:10px;line-height:1.6}
+[hidden]{display:none!important}
 .rsvline{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#7C7A75;border:1px solid #DAD9D7;padding:17px;text-align:center}
 .note{font-size:11px;color:#7C7A75;margin-top:16px;line-height:1.7}
 .backrow{text-align:center;margin-top:34px}
@@ -84,6 +89,7 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:22px;margin:44
 <script src="assets/shop-menu.js"></script>
 <script src="assets/aman.js"></script>
 <script src="assets/rooms-data.js"></script>
+<script src="assets/pricing.js"></script>
 <script src="assets/journey.js"></script>
 <script type="module" src="assets/invite.mjs"></script>
 <script>
@@ -99,9 +105,13 @@ if (!room) room = stay.rooms[0];
 document.title = room.name + ' · ' + stay.name + ' · See You In Laos';
 
 function esc(s) { return String(s).replace(/</g, '&lt;'); }
+/* every amount on this page comes from SIYL_PRICE — nothing is computed here */
+var P = window.SIYL_PRICE;
+var W0 = stay.windows[0];
 function priceLine(r) {
-  if (r.price == null) return '<span class="rsv">' + esc(r.status || '') + '</span>';
-  return '<span class="op">USD ' + r.price + '</span> <span class="oe">per person</span>';
+  if (r.rate == null) return '<span class="rsv">' + esc(r.status || 'Amount on request · Guest Relations') + '</span>';
+  if (W0.hosted) return '<span class="op">Complimentary</span> <span class="oe">room value USD ' + r.rate + ' per person / night</span>';
+  return '<span class="op">USD ' + r.rate + '</span> <span class="oe">per person / night</span>';
 }
 
 var h = '';
@@ -166,7 +176,7 @@ if (others.length) {
     h += '<a class="occard" href="room.html?stay=' + stayKey + '&room=' + r.slug + '">' + img +
       '<div class="ot"><p class="oe">' + esc(r.cat) + '</p><p class="on">' + esc(r.name) + '</p>' +
       '<p class="od">' + esc(r.desc) + '</p>' +
-      '<p>' + (r.reserved ? '<span class="op">USD ' + r.price + '</span> <span class="rsv">' + esc(r.reserved) + '</span>' : priceLine(r)) + '</p></div></a>';
+      '<p>' + (r.reserved ? '<span class="op">USD ' + r.rate + '</span> <span class="oe">per person / night</span> <span class="rsv">' + esc(r.reserved) + '</span>' : priceLine(r)) + '</p></div></a>';
   });
   h += '</div>';
   if (others.length > 1) h += '<div class="rnav"><div class="rail" aria-hidden="true"><i id="rail"></i></div><span class="rc" id="rc">1 / ' + others.length + '</span><button type="button" id="op" aria-label="Previous room">‹</button><button type="button" id="ox" aria-label="Next room">›</button></div>';
@@ -176,25 +186,41 @@ if (others.length) {
 /* ---- commerce: fixed-window per-person amounts → Add to Your Journey ---- */
 h += '<section class="buy"><p class="eyebrow" style="margin:0 0 8px">Accommodation</p><h2>' + esc(room.name) + '</h2><p class="eyebrow" style="margin:0">' + esc(stay.place) + '</p>';
 stay.windows.forEach(function (w, wi) {
+  var q = P.quote(w.hosted ? w.hosted[0].id : w.id, room.slug);
   h += '<div class="win"><p class="wl">' + esc(w.label) + '</p><p class="wd">' + esc(w.dates) + '</p><p class="wn">' + esc(w.nights) + '</p>';
-  if (room.enquire) {
-    /* real inventory without an Owner-approved guest amount — never an invented price */
-    h += '<p class="price">' + esc(room.status) + '</p><p class="per">Guest Relations confirms the amount</p>';
-    h += '<p class="enq">This room is part of the house but not yet released with an amount. Guest Relations will confirm it for you.</p>';
-  } else if (room.reserved) {
-    h += '<p class="price">' + (room.price == null ? esc(room.status || '') : 'USD ' + room.price) + '</p><p class="per">Per person · fixed window</p>';
-    h += '<p class="rsvline">' + esc(room.reserved) + '</p>';
-  } else if (room.interest) {
+  if (room.interest) {
     h += '<p class="price">' + esc(room.status) + '</p><p class="per">Guest Relations arranges the rest</p>';
-    h += '<button class="cta" data-win="' + wi + '">Add to Your Journey</button><span class="swap" data-swap="' + wi + '" hidden></span>';
+    h += '<button class="cta" data-win="' + wi + '">Add to Your Journey</button>';
+  } else if (room.rate == null) {
+    /* real inventory without an approved guest amount — never an invented price */
+    h += '<p class="price">Amount on request</p><p class="per">Guest Relations confirms the amount</p>';
+    h += '<p class="enq">This room is part of the house but not yet released with an amount. Guest Relations will confirm it for you.</p>';
+  } else if (w.hosted) {
+    /* the wedding stay: the room keeps its value, the guest pays nothing */
+    h += '<p class="price">Complimentary</p><p class="per">Room value USD ' + room.rate + ' per person / night</p>';
+    w.hosted.forEach(function (n) {
+      h += '<p class="hn"><span>' + esc(n.dates) + '</span><span>' + esc(n.note) + '</span></p>';
+    });
+    if (stay.breakfast) h += '<p class="bf">' + esc(stay.breakfast) + '</p>';
+    if (room.reserved) h += '<p class="rsvline">' + esc(room.reserved) + '</p>';
+    else {
+      h += '<button class="cta" data-win="' + wi + '">Add to Your Journey</button><span class="swap" data-swap="' + wi + '" hidden></span>';
+      if (P.hasVariants(w.id)) h += '<button type="button" class="chg" data-chg="' + wi + '" hidden>Change selection</button>';
+    }
+  } else if (room.reserved) {
+    h += '<p class="price">USD ' + room.rate + '</p><p class="per">Per person / night · ' + esc(q.nightsLine) + ' · USD ' + q.total + ' per person</p>';
+    if (stay.breakfast) h += '<p class="bf">' + esc(stay.breakfast) + '</p>';
+    h += '<p class="rsvline">' + esc(room.reserved) + '</p>';
   } else {
-    h += '<p class="price">USD ' + room.price + '</p><p class="per">' + esc(basisFor(w)) + '</p>';
+    h += '<p class="price">USD ' + room.rate + ' <span class="pu">per person / night</span></p>';
+    h += '<p class="per">' + esc(q.nightsLine) + ' · USD ' + q.total + ' per person</p>';
+    if (stay.breakfast) h += '<p class="bf">' + esc(stay.breakfast) + '</p>';
     h += '<button class="cta" data-win="' + wi + '">Add to Your Journey</button><span class="swap" data-swap="' + wi + '" hidden></span>';
-    h += '<button type="button" class="chg" data-chg="' + wi + '" hidden>Change selection</button>';
+    if (P.hasVariants(w.id)) h += '<button type="button" class="chg" data-chg="' + wi + '" hidden>Change selection</button>';
   }
   h += '</div>';
 });
-h += '<p class="note">Per-person amount for the fixed window — never per night. Nothing is paid on this website.</p></section>';
+h += '<p class="note">Amounts are per person for the whole window and are never charged on this website — Guest Relations confirms every arrangement with you.</p></section>';
 h += '<p class="backrow"><a href="journeys.html#j-' + stay.windows[0].id + '">Back to Journeys</a></p>';
 
 document.getElementById('m').innerHTML = h;
@@ -243,22 +269,15 @@ function gated(fn) {
   if (window.SIYL_INVITE) SIYL_INVITE.require(fn);
   else document.addEventListener('siyl:invite-ready', function () { SIYL_INVITE.require(fn); }, { once: true });
 }
-function basisFor(w) {
-  var b = window.SIYL_JOURNEY && SIYL_JOURNEY.BASIS[w.id];
-  return b ? b.basis : 'Per person · fixed window';
-}
-function itemFor(w) {
-  var img = room.gallery.length ? room.gallery[0][0] : w.bagImg;
-  if (room.interest) return { id: w.id, name: w.bagName, meta: w.dates + ' · ' + (room.status || ''), interest: true, img: img };
-  return { id: w.id, name: w.bagName, meta: w.dates + ' · ' + room.name, price: room.price, img: img };
-}
 /* the product surface reads and writes the same bag state as Your Journey */
 function mine(w) {
-  var line = SIYL_BAG.get().filter(function (x) { return x.id === w.id; })[0];
+  var ids = P.ids(w.id);
+  var line = SIYL_BAG.get().filter(function (x) { return ids.indexOf(x.id) >= 0; })[0];
   return line && line.meta && line.meta.indexOf(room.name) >= 0 ? line : null;
 }
 function held(w) {
-  return SIYL_BAG.get().filter(function (x) { return x.id === w.id; })[0] || null;
+  var ids = P.ids(w.id);
+  return SIYL_BAG.get().filter(function (x) { return ids.indexOf(x.id) >= 0; })[0] || null;
 }
 function paint() {
   document.querySelectorAll('[data-win]').forEach(function (b) {
@@ -285,15 +304,20 @@ function paint() {
 document.querySelectorAll('[data-win]').forEach(function (b) {
   b.addEventListener('click', function () {
     var w = stay.windows[parseInt(b.getAttribute('data-win'), 10)];
-    if (mine(w)) { SIYL_BAG.remove(w.id); paint(); return; }
-    gated(function () { SIYL_BAG.put(itemFor(w)); paint(); });
+    if (mine(w)) { P.ids(w.id).forEach(function (id) { SIYL_BAG.remove(id); }); paint(); return; }
+    gated(function () {
+      /* a selection replaces every id this window writes — never a duplicate */
+      P.ids(w.id).forEach(function (id) { SIYL_BAG.remove(id); });
+      P.items(w.id, room.slug).forEach(function (it) { SIYL_BAG.put(it); });
+      paint();
+    });
   });
 });
 document.querySelectorAll('[data-chg]').forEach(function (b) {
   b.addEventListener('click', function () {
     /* the collection this room belongs to, with the current choice visible */
     var w = stay.windows[parseInt(b.getAttribute('data-chg'), 10)];
-    location.href = 'journeys.html#j-' + w.id;
+    location.href = 'journeys.html?change=' + w.id + '#j-' + w.id;
   });
 });
 document.addEventListener('siyl:bag', paint);

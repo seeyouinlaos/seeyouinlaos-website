@@ -76,6 +76,8 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:20px;margin:34
 <script src="assets/bag.js"></script>
 <script src="assets/shop-menu.js"></script>
 <script src="assets/aman.js"></script>
+<script src="assets/rooms-data.js"></script>
+<script src="assets/pricing.js"></script>
 <script src="assets/journey.js"></script>
 <script type="module" src="assets/invite.mjs"></script>
 <script>
@@ -92,8 +94,11 @@ return '<div class="row"><div class="th"'+(SIYL_BAG.thumb(x)?' style="background
 (when?'<p class="when">'+when+'</p>':'')+(m.cat?'<p class="cat">'+m.cat+book+'</p>':'')+
 '<p class="nm">'+esc(x.name)+'</p><p class="mt">'+esc(x.meta||'')+'</p>'+
 (m.basis?'<p class="basis">'+esc(m.basis)+'</p>':'')+
-(J&&J.quantityLine(x)?'<p class="basis" style="color:#313131">'+esc(J.quantityLine(x))+'</p>':'')+'</div>'+
-(x.interest?'<span class="int">Interest · request</span>':'<span class="ln">USD '+((x.price||0)*x.qty).toLocaleString('en-US')+'</span>')+'</div></div>'}).join('')}
+(J&&J.quantityLine(x)?'<p class="basis" style="color:#313131">'+esc(J.quantityLine(x))+'</p>':'')+
+(x.hostedNote?'<p class="basis" style="color:#8A5A55;text-transform:uppercase;letter-spacing:1.6px;font-size:9.5px">'+esc(x.hostedNote)+'</p>':'')+
+(x.breakfast?'<p class="basis" style="text-transform:uppercase;letter-spacing:1.6px;font-size:9.5px">'+esc(x.breakfast)+'</p>':'')+'</div>'+
+(x.hosted?'<span class="int">Complimentary</span>':
+ (x.interest?'<span class="int">Interest · request</span>':'<span class="ln">USD '+((x.price||0)*x.qty).toLocaleString('en-US')+'</span>'))+'</div></div>'}).join('')}
 document.getElementById('tt').textContent='USD '+SIYL_BAG.total().toLocaleString('en-US');
 renderGaps();
 SIYL_BAG.badge()}
@@ -117,7 +122,9 @@ var L=['SEE YOU IN LAOS — JOURNEY SELECTION','Invitation: '+auth.invitationId+
 '- Vow Ceremony · Sunday, 28 February 2027 · 04:30 PM',
 '- Wedding Dinner · Sunday, 28 February 2027 · 07:30 PM','','SELECTIONS:'];
 b.forEach(function(x){L.push('- '+x.name+' · '+(x.meta||'')+(x.qty>1?' · Quantity '+x.qty:'')+
-(x.interest?' · INTEREST ONLY (no journey cost, payable at the spa)':' · USD '+((x.price||0)*x.qty)))});
+(x.rate!=null&&x.nights?' · USD '+x.rate+' per person / night × '+x.nights+(x.nights===1?' night':' nights'):'')+
+(x.hosted?' · COMPLIMENTARY — '+(x.hostedNote||'hosted'):
+ (x.interest?' · INTEREST ONLY (no journey cost, payable at the spa)':' · USD '+((x.price||0)*x.qty))))});
 if(window.SIYL_JOURNEY){var op=SIYL_JOURNEY.open(),sk=SIYL_JOURNEY.SEGMENTS.filter(function(g){return SIYL_JOURNEY.state(g)==='declined'});
 if(sk.length){L.push('','NOT JOINING:');sk.forEach(function(g){L.push('- '+g.when+' · '+g.cat+' · '+g.place)})}
 if(op.length){L.push('','DECISION STILL OPEN:');op.forEach(function(g){L.push('- '+g.when+' · '+g.cat+' · '+g.place)})}}
