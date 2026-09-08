@@ -1,6 +1,6 @@
 {
   // Cloudflare Worker for the See You In Laos wedding website.
-  // Static assets only — no backend API, no KV, no cron, no secrets.
+  // Static assets, the registration endpoint and the shared inventory ledger.
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "seeyouinlaos-website",
   "main": "src/worker.js",
@@ -17,6 +17,17 @@
   // digital submission is persisted here BEFORE the guest sees RECEIVED.
   "kv_namespaces": [
     { "binding": "REG_KV", "id": "090270d0da434a8b8f49933cb604beb3" }
+  ],
+
+  // THE SHARED INVENTORY LEDGER. One Durable Object instance holds the stock of
+  // every room category in every window. Cloudflare routes every request for
+  // the id "ledger" to the same actor and runs them one at a time, which is
+  // what makes a reservation atomic across guests, browsers and deployments.
+  "durable_objects": {
+    "bindings": [{ "name": "INVENTORY", "class_name": "Inventory" }]
+  },
+  "migrations": [
+    { "tag": "v1", "new_sqlite_classes": ["Inventory"] }
   ],
 
   "observability": { "enabled": true }

@@ -168,13 +168,20 @@
     },
 
     /* the most expensive room a guest may actually select — reserved
-     * inventory (Bride & Groom, family) is never eligible */
-    premium: function (windowId) {
+     * inventory (Bride & Groom, family) is never eligible.
+     * `available` is an optional predicate (slug) → boolean: when the shared
+     * ledger says a category is gone, the choice falls to the next best one
+     * that is still there rather than to a room nobody can have. */
+    premium: function (windowId, available) {
       var at = locate(windowId);
       if (!at) return null;
       var open = at.stay.rooms.filter(function (r) { return !r.reserved && r.rate != null && !r.interest; });
       if (!open.length) return null;
-      return open.reduce(function (m, r) { return r.rate > m.rate ? r : m; }, open[0]);
+      var free = typeof available === 'function'
+        ? open.filter(function (r) { return available(r.slug); })
+        : open;
+      if (!free.length) return null;      /* the whole stage is sold out */
+      return free.reduce(function (m, r) { return r.rate > m.rate ? r : m; }, free[0]);
     },
 
     /* does this product have a genuine alternative to change to? */

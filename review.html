@@ -46,6 +46,13 @@ a.th{display:block}
 .done{background:#FCFAF6;padding:30px 26px;margin-top:26px}
 .done h2{margin-top:0}
 .err{font-size:11.5px;color:#8A5A44;margin-top:12px;min-height:16px}
+.soldbox{border:1px solid #C9A9A0;background:#FBF4F2;padding:20px 20px 16px;margin:20px 0 0}
+.soldbox h3{font-family:'PP Editorial Old',serif;font-weight:200;font-size:18px;margin-bottom:6px}
+.soldbox p{font-size:12px;color:#7C7A75;line-height:1.7;margin-bottom:10px}
+.soldrow{display:flex;gap:12px;align-items:baseline;border-top:1px solid #EADFDB;padding:10px 0;font-size:12.5px}
+.soldrow b{font-weight:400}
+.soldrow span.r{margin-left:auto;font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#8A5A55;white-space:nowrap}
+.soldbox a{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#313131;text-decoration:none;border-bottom:1px solid #313131;padding-bottom:2px;display:inline-block;margin-top:6px}
 </style><link rel="stylesheet" href="assets/desktop.css"><link rel="stylesheet" href="assets/aman.css"></head><body>
 <header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="your-journey.html" aria-label="Your Journey"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main>
@@ -65,6 +72,7 @@ a.th{display:block}
 <p class="note">Spa interest lines carry no journey cost — Marsilea Spa confirms times directly and the amount is payable at the spa. No deposit is required on this website.</p>
 
 <div id="gaps"></div>
+<div id="soldout"></div>
 <div id="sendbox">
 <button class="cta" id="send">Send to Guest Relations</button>
 <p class="err" id="err" role="alert" aria-live="polite"></p>
@@ -81,6 +89,7 @@ a.th{display:block}
 <script src="assets/aman.js"></script>
 <script src="assets/rooms-data.js"></script>
 <script src="assets/pricing.js"></script>
+<script src="assets/inventory.js"></script>
 <script src="assets/transport-data.js"></script>
 <script src="assets/journey.js"></script>
 <script type="module" src="assets/invite.mjs"></script>
@@ -153,16 +162,46 @@ gated(async function(auth){
 var btn=document.getElementById('send'),err=document.getElementById('err');
 btn.disabled=true;err.textContent='';
 var text=buildText(auth);
+
+/* ---- ROOMS FIRST. The shared ledger decides, atomically, whether these
+ * exact rooms are still available and holds them for this invitation before a
+ * single byte of the registration is written. Two guests sending in the same
+ * moment are serialised by the ledger: one is allocated, the other is told
+ * here, by category, what has just gone. Nothing is allocated by this page. */
+var hold={ok:true,unreachable:true};
+if(window.SIYL_STOCK){hold=await SIYL_STOCK.reserve()}
+document.getElementById('soldout').innerHTML='';
+if(!hold.ok&&!hold.unreachable){
+  var rows=(hold.conflicts||[]).map(function(c){
+    return '<div class="soldrow"><b>'+c.name+'</b><span class="r">'+
+      (c.remaining>0?('only '+c.remaining+' left'):(c.heldFor?('reserved for '+c.heldFor):'sold out'))+'</span></div>'}).join('');
+  document.getElementById('soldout').innerHTML=
+    '<div class="soldbox"><h3>One of your rooms has just been taken</h3>'+
+    '<p>Your journey was not sent, and nothing has been changed. Another guest confirmed the same category while you were deciding. Choose another room for the stage below and send again — everything else you have chosen stays exactly as it is.</p>'+
+    rows+'<a href="journeys.html">Choose another room</a></div>';
+  document.getElementById('soldout').scrollIntoView({behavior:'smooth',block:'center'});
+  btn.disabled=false;
+  if(window.SIYL_STOCK)SIYL_STOCK.load(true);
+  return;
+}
+
 var registration={channel:'journey-shop',selections:SIYL_BAG.get(),totalUsd:SIYL_BAG.total(),
+inventory:hold.unreachable?'UNCONFIRMED — ledger unreachable, Guest Relations to confirm rooms':'CONFIRMED',
+roomsHeld:hold.reserved||null,
 registration_submitted_at:new Date().toISOString()};
 try{
 var r=await fetch(SUBMIT_URL,{method:'POST',headers:{'content-type':'application/json'},
 body:JSON.stringify({registration:registration,invitationId:auth.invitationId,text:text})});
 if(r.ok){document.getElementById('sendbox').hidden=true;
 var d=document.getElementById('donebox');d.hidden=false;
-document.getElementById('donemsg').textContent='Your journey selection is safely with us. Guest Relations confirms your arrangements personally — nothing is paid on this website.';
+document.getElementById('donemsg').textContent=hold.unreachable
+ ? 'Your journey selection is safely with us. Guest Relations will confirm room availability and your arrangements personally — nothing is paid on this website.'
+ : 'Your journey selection is safely with us and your rooms are held in your name. Guest Relations confirms your arrangements personally — nothing is paid on this website.';
 d.scrollIntoView({behavior:'smooth',block:'center'});return}
 }catch(e){/* endpoint unreachable — emergency channel below */}
+/* the rooms were held for a submission that did not happen: give them back
+ * immediately rather than leave them locked against every other guest */
+if(!hold.unreachable&&window.SIYL_STOCK){try{await SIYL_STOCK.release()}catch(e2){}}
 btn.disabled=false;
 err.innerHTML='Your selection could not be stored right now. Please try again in a moment, or use the email backup channel: <a href="mailto:guest.relation.seeyouinlaos@gmail.com?subject='+encodeURIComponent('Journey Selection — '+(auth.partyName||auth.invitationId))+'&body='+encodeURIComponent(text)+'" style="color:#313131">send via email</a>.'})});
 </script>

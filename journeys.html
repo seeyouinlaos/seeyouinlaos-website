@@ -33,6 +33,12 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:22px;margin:40
 .var .vt{width:52px;height:40px;flex:0 0 auto;background:#E7E3DB center/cover no-repeat}
 .var .vp{margin-left:auto;font-family:'PP Editorial Old',serif;font-size:13.5px;white-space:nowrap}
 .var.on{background:#FCFAF6}
+.var .vav{display:block;font-size:9px;letter-spacing:1.6px;text-transform:uppercase;color:#7C7A75;margin-top:2px}
+.var .vav.low{color:#8A5A55}
+.var.gone{opacity:.5;cursor:default}
+.var.gone .vp{text-decoration:line-through}
+.var.gone .vgo{visibility:hidden}
+.avnote{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75;margin:0 0 8px}
 .var .vsel{display:block;font-size:9px;letter-spacing:1.6px;text-transform:uppercase;color:#313131;margin-top:2px}
 .var .vt.none{background:#F6F3EE;border:1px solid #DAD9D7;display:flex;align-items:center;justify-content:center}
 .var .vt.none::after{content:'';width:10px;height:10px;border:1px solid #C9C4BA;border-radius:50%}
@@ -75,6 +81,7 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:22px;margin:40
 <script src="assets/aman.js"></script>
 <script src="assets/rooms-data.js"></script>
 <script src="assets/pricing.js"></script>
+<script src="assets/inventory.js"></script>
 <script src="assets/journey.js"></script>
 <script type="module" src="assets/invite.mjs"></script>
 <script>
@@ -160,16 +167,31 @@ if(SIYL_BAG.bar)SIYL_BAG.bar();
 /* ---------------- journey decisions: selected state, "not joining", context ----
  * The bag stays the only calculation truth — this only shows what is answered. */
 function paintRooms(){
+var St=window.SIYL_STOCK;
 document.querySelectorAll('[data-rooms]').forEach(function(box){
 var win=boxWin(box);if(!win)return;
 var ids=P.ids(win),line=SIYL_BAG.get().filter(function(x){return ids.indexOf(x.id)>=0})[0];
+var qty=(line&&line.qty)||1;
 box.querySelectorAll('.var').forEach(function(a){
 var name=a.getAttribute('data-name'),on=!!(line&&line.meta&&line.meta.indexOf(name)>=0);
+var slug=a.getAttribute('data-room');
 a.classList.toggle('on',on);
+var host=a.querySelector('span[style*="flex:1"]');
 var tag=a.querySelector('.vsel');
 if(on&&!tag){var s2=document.createElement('span');s2.className='vsel';s2.textContent='Selected · in your journey';
-a.querySelector('span[style*="flex:1"]').appendChild(s2)}
-if(!on&&tag)tag.remove()})})}
+host.appendChild(s2)}
+if(!on&&tag)tag.remove();
+/* ---- live availability from the shared ledger ---- */
+var av=a.querySelector('.vav');
+if(St&&St.ready()&&St.tracked(win,slug)){
+  if(!av){av=document.createElement('span');av.className='vav';host.appendChild(av)}
+  var txt=St.label(win,slug,qty),gone=!St.fits(win,slug,qty)&&!on;
+  av.textContent=txt;
+  av.classList.toggle('low',St.scarce(win,slug)||St.soldOut(win,slug));
+  a.classList.toggle('gone',gone);
+  if(gone){a.setAttribute('aria-disabled','true')}else{a.removeAttribute('aria-disabled')}
+}else if(av){av.remove();a.classList.remove('gone')}
+})})}
 
 function paintDecisions(){
 if(!window.SIYL_JOURNEY)return;
@@ -192,7 +214,13 @@ var el=document.getElementById('jstat');
 if(el&&window.SIYL_JOURNEY)el.textContent=SIYL_JOURNEY.statusLine()}
 
 function paintAll(){paintRooms();paintDecisions();paintStatus()}
-document.addEventListener('siyl:bag',paintAll);paintAll();
+document.addEventListener('siyl:bag',paintAll);
+document.addEventListener('siyl:stock',paintAll);
+paintAll();
+/* a room that is gone must not open as if it could still be chosen */
+document.addEventListener('click',function(e){
+var a=e.target.closest&&e.target.closest('.var.gone');
+if(a){e.preventDefault();e.stopPropagation()}},true);
 
 /* returning from a room keeps the guest exactly where they were */
 (function(){var h=location.hash;if(!h||h.length<2)return;
@@ -212,7 +240,7 @@ gated(function(){
 document.querySelectorAll('[data-pick]').forEach(function(a){
 a.addEventListener('click',function(e){
   e.preventDefault();
-  if(a.classList.contains('rsvd'))return;
+  if(a.classList.contains('rsvd')||a.classList.contains('gone'))return;
   select(a.getAttribute('data-win'), a.getAttribute('data-stay'), a.getAttribute('data-room'), true);
 });
 });

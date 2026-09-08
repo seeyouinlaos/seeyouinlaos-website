@@ -123,11 +123,28 @@
       var P = window.SIYL_PRICE, out = [], self = this;
       if (!P) return { remove: [], add: [] };
       SEG.forEach(function (seg) { if (self.isSkipped(seg.key)) self.skip(seg.key, false); });
+      /* how many guests this journey is for — the same number the bag carries */
+      var qty = 1;
+      if (window.SIYL_BAG) {
+        SIYL_BAG.get().forEach(function (x) { if (x.qty > qty) qty = x.qty; });
+      }
+      /* the premium choice is the highest room that is still THERE: the shared
+       * ledger decides, so Full Experience can never select a sold-out room */
+      var free = function (win) {
+        return function (slug) {
+          var St = window.SIYL_STOCK;
+          if (!St || !St.ready()) return true;      /* ledger unread — do not block */
+          return St.fits(win, slug, qty);
+        };
+      };
+      this.soldOutStages = [];
       SEG.forEach(function (seg) {
         var id = seg.ids[0];
         if (P.FLAT[id]) { P.items(id).forEach(function (it) { out.push(it); }); return; }
-        var room = P.premium(id);
-        if (room) P.items(id, room.slug).forEach(function (it) { out.push(it); });
+        var room = P.premium(id, free(id));
+        if (room) { P.items(id, room.slug).forEach(function (it) { out.push(it); }); return; }
+        /* nothing left in this stage at all — say so rather than pretend */
+        self.soldOutStages.push(seg);
       });
       return {
         /* every id any stage can be answered by, alternatives included */

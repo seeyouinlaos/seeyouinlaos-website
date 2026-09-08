@@ -38,6 +38,36 @@ gate(2, 'Inventory display decision recorded',
   true,
   invExact ? "EXACT counts shown publicly — requires final allocation sign-off." : "REQUEST mode (UI states the authoritative wedding allocation; live remaining counts stay internal). OK for release.");
 
+/* Gate 2b — SHARED INVENTORY: one server-side ledger, atomic reservation,
+   no client-side allocation, and stock that comes from the seed and nowhere
+   else. This is what makes a public availability claim honest. */
+{
+  const seed = read('src/inventory-seed.js');
+  const ledger = read('src/inventory.js');
+  const worker = read('src/worker.js');
+  const client = read('assets/inventory.js');
+  const wrangler = read('wrangler.jsonc');
+  const inv = [];
+  if (!/durable_objects/.test(wrangler) || !/"class_name":\s*"Inventory"/.test(wrangler)) inv.push('no Durable Object binding');
+  if (!/new_sqlite_classes/.test(wrangler)) inv.push('no Durable Object migration');
+  if (!/idFromName\('ledger'\)/.test(worker)) inv.push('the Worker does not route to ONE ledger');
+  if (!/blockConcurrencyWhile/.test(ledger)) inv.push('reservation is not serialised');
+  if (!/status:\s*409|\}, 409\)/.test(ledger)) inv.push('sold out does not answer 409');
+  /* the client must never decide an allocation for itself */
+  if (/capacity\s*[:=]\s*\d/.test(client)) inv.push('assets/inventory.js carries its own capacity numbers');
+  const keys = (seed.match(/^\s*'[a-z0-9-]+\/[a-z0-9-]+':/gm) || []).length;
+  if (keys < 30) inv.push('inventory seed covers only ' + keys + ' categories');
+  const rv = read('review.html');
+  const reserveFirst = rv.indexOf('SIYL_STOCK.reserve()') > 0 && rv.indexOf('SIYL_STOCK.reserve()') < rv.indexOf('fetch(SUBMIT_URL');
+  if (!reserveFirst) inv.push('Review & Send does not reserve BEFORE it submits');
+  gate('2b', 'Shared inventory, atomic reservation, no client-side allocation',
+    inv.length === 0,
+    inv.length ? inv.join(' · ')
+      : 'one Durable Object ledger ("ledger") serialises every reservation; ' + keys +
+        ' stock-controlled categories seeded from Accommodation_Details; sold out answers 409; ' +
+        'Review & Send holds the rooms before it stores the registration; the client holds no capacity of its own.');
+}
+
 /* Gate 3 — production lookup: encrypted bundle, no demo data, no plaintext PII */
 const demoHits = [];
 if (/DEMO_MODE\s*=\s*true/.test(data)) demoHits.push('DEMO_MODE=true');

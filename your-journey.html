@@ -38,7 +38,12 @@ h1{font-family:'PP Editorial Old',serif;font-weight:200;font-size:29px;margin-bo
 .ln.free{font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;font-size:9.5px;letter-spacing:1.6px;text-transform:uppercase;color:#7C7A75}
 .modes{display:flex;gap:30px;flex-wrap:wrap;margin:4px 0 14px}
 .selfl{font-size:11.5px;color:#7C7A75;line-height:1.8;margin-top:10px}
+.avline{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75;margin-top:6px}
+.avline.low{color:#8A5A55}
+.heldbox{border-top:1px solid #DAD9D7;margin-top:24px;padding-top:16px;font-size:12px;color:#7C7A75;line-height:1.8}
+.heldbox b{font-weight:400;color:#313131}
 .selfl b{font-weight:400;color:#313131}
+.selfl.low b{color:#8A5A55}
 a.th,a.nm{text-decoration:none;color:inherit;display:block}
 a.nm:hover,a.th:hover{opacity:.7}
 .tot{display:flex;justify-content:space-between;align-items:baseline;padding:24px 0 6px}
@@ -71,6 +76,7 @@ body.fx-open .fxs,body.fx-open .fxo{display:block}
 <div class="tot"><span class="l">Your Costs</span><span class="r" id="tt">USD 0</span></div>
 <p class="note">Vientiane is two consecutive stays and no night is left uncovered. The Pre-Wedding Stay covers 25 &rarr; 26 and 26 &rarr; 27 February, both nights your contribution. The Wedding Stay covers 27 &rarr; 28 February and 28 February &rarr; 01 March as ONE selection: the first night is your contribution and the second night is complimentary, hosted by the Bride &amp; Groom. Hosted wedding programme events are part of your journey without charge — they never appear as USD 0 line items. Spa interest lines carry no journey cost — the amount is payable at the spa.</p>
 <div id="dec"></div>
+<div id="held"></div>
 <div class="fxs" id="fxs"></div>
 <div class="fxo" id="fxo" role="dialog" aria-modal="true" aria-labelledby="fxt" hidden>
 <p class="ie" id="fxe">Full Experience</p>
@@ -86,6 +92,7 @@ body.fx-open .fxs,body.fx-open .fxo{display:block}
 <script src="assets/aman.js"></script>
 <script src="assets/rooms-data.js"></script>
 <script src="assets/pricing.js"></script>
+<script src="assets/inventory.js"></script>
 <script src="assets/transport-data.js"></script>
 <script src="assets/journey.js"></script>
 <script type="module" src="assets/invite.mjs"></script>
@@ -123,6 +130,10 @@ return '<div class="row"><a class="th" href="'+href+'" aria-label="Open '+x.name
 (x.note?'<p class="hostln">'+x.note+(x.noteBy?'<span>'+x.noteBy+'</span>':'')+'</p>':'')+
 (x.complimentary?'<p class="hostln">Complimentary<span>Hosted — USD 0 payable by you</span></p>':'')+
 (x.breakfast?'<p class="bf">'+x.breakfast+'</p>':'')+
+(function(){var St=window.SIYL_STOCK,w2=P?P.windowOf(x.id):x.id;
+ if(!St||!St.ready()||!x.room||!St.tracked(w2,x.room))return '';
+ var t=St.label(w2,x.room,x.qty||1);
+ return t?'<p class="avline'+((St.scarce(w2,x.room)||St.soldOut(w2,x.room))?' low':'')+'">'+t+'</p>':''})()+
 (x.unit?'<div class="q"><button data-q="'+x.id+':-1">−</button><b style="font-family:\'PP Editorial Old\',serif">'+x.qty+'</b><button data-q="'+x.id+':1">+</button></div>':'')+
 '<div class="acts">'+
 (canChange?'<a class="ch" href="journeys.html?change='+win+'#j-'+win+'">Change</a>':'')+
@@ -144,6 +155,11 @@ var modes='<div class="modes"><button type="button" class="fx" id="fxb">Full Exp
           '<button type="button" class="fx" id="csb">Cost Saving Experience</button></div>';
 var selfList=self.length?'<p class="selfl"><b>'+self.length+(self.length===1?' stage is':' stages are')+' self-arranged:</b> '+
   self.map(function(s2){return s2.when+' · '+s2.place}).join(' · ')+'.</p>':'';
+/* Full Experience found a stage with nothing left — never silently skip it */
+var gone=(SIYL_JOURNEY.soldOutStages||[]);
+if(gone.length)selfList+='<p class="selfl low"><b>'+gone.length+(gone.length===1?' stage has':' stages have')+
+  ' no rooms left:</b> '+gone.map(function(s2){return s2.when+' · '+s2.place}).join(' · ')+
+  '. Guest Relations will find an arrangement with you.</p>';
 if(!open.length&&any){
   /* DECISIONS COMPLETE is not the same as a fully supported JOURNEY */
   var whole=!self.length;
@@ -207,8 +223,27 @@ gated(function(){
   var d=document.getElementById('dec');if(d)d.scrollIntoView({behavior:'smooth',block:'center'});
 });
 });
-document.addEventListener('siyl:bag',render);
+/* ---- the rooms this invitation actually holds in the shared ledger ----
+ * An allocation is written when the journey is SENT. If the guest then changes
+ * a room, the ledger still holds the old one: say so plainly and tell them the
+ * next send updates it. If they empty the journey, give the rooms back. */
+function paintHeld(){
+var box=document.getElementById('held');if(!box||!window.SIYL_STOCK)return;
+SIYL_STOCK.mine().then(function(a){
+  if(!a||!a.lines||!a.lines.length){box.innerHTML='';return}
+  var bag=SIYL_BAG.get();
+  if(!bag.length){SIYL_STOCK.release();box.innerHTML='';return}
+  var now=SIYL_STOCK.linesFromBag().map(function(l){return l.win+'/'+l.slug}).sort().join(',');
+  var held=a.lines.map(function(l){return l.key}).sort().join(',');
+  var names=a.lines.map(function(l){var i=SIYL_STOCK.all()&&SIYL_STOCK.all()[l.key];return (i?i.name:l.key)+' × '+l.units}).join(' · ');
+  box.innerHTML='<div class="heldbox"><b>Rooms held for you:</b> '+names+'.'+
+    (now===held?'' : ' Your journey has changed since then — sending it again updates what is held in your name.')+'</div>';
+});}
+
+document.addEventListener('siyl:bag',function(){render();paintHeld()});
+document.addEventListener('siyl:stock',render);
 render();
+paintHeld();
 var q=new URLSearchParams(location.search);
 var rm=q.get('rm');if(rm){SIYL_BAG.remove(rm);render()}
 </script></body></html>

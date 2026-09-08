@@ -10,6 +10,12 @@
  * storage nor forwarding succeeds it returns 503 and the client falls back
  * to the mailto channel — a registration is never silently lost.
  *
+ * Plus the SHARED INVENTORY routes — /api/inventory[/reserve|/release|/mine].
+ * They are proxied to ONE Durable Object instance ("ledger") so that every
+ * guest, in every browser and on either deployment, reads and writes the same
+ * stock, and a reservation is decided by a single-threaded actor rather than
+ * by whoever happens to submit first.
+ *
  * No payment collection, no railway/hotel booking APIs, no guest directory.
  */
 
@@ -25,15 +31,34 @@ function corsHeaders(request) {
   if (!ALLOWED_ORIGINS.includes(origin)) return {};
   return {
     'access-control-allow-origin': origin,
-    'access-control-allow-methods': 'POST, OPTIONS',
+    'access-control-allow-methods': 'GET, POST, OPTIONS',
     'access-control-allow-headers': 'content-type',
     'access-control-max-age': '7200',
   };
 }
 
+/* The GitHub Pages mirror has no backend of its own: it calls these routes on
+ * the Worker origin, so the two deployments share ONE ledger. */
+export { Inventory } from './inventory.js';
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+
+    if (url.pathname === '/api/inventory' || url.pathname.startsWith('/api/inventory/')) {
+      if (request.method === 'OPTIONS') {
+        return new Response(null, { status: 204, headers: corsHeaders(request) });
+      }
+      if (!env.INVENTORY) {
+        return json({ ok: false, error: 'inventory unavailable' }, 503, corsHeaders(request));
+      }
+      /* one id, one actor, one truth — every request lands on the same object */
+      const stub = env.INVENTORY.get(env.INVENTORY.idFromName('ledger'));
+      const res = await stub.fetch(request);
+      const out = new Response(res.body, res);
+      for (const [k, v] of Object.entries(corsHeaders(request))) out.headers.set(k, v);
+      return out;
+    }
 
     if (url.pathname === '/api/register') {
       if (request.method === 'OPTIONS') {

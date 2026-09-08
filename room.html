@@ -70,6 +70,9 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:22px;margin:44
 .hn2 span{display:block;color:#7C7A75}
 .per{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75;margin:2px 0 7px}
 .nn{font-size:11px;color:#7C7A75;line-height:1.7;margin:0 0 2px}
+.av{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75;margin:10px 0 0}
+.av.low{color:#8A5A55}
+.cta[disabled]{opacity:.45;cursor:default}
 .body.story{margin-top:14px}
 .grp{display:grid;grid-template-columns:1fr;gap:30px}
 .gcol h3{font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;font-weight:400;font-size:10px;letter-spacing:2.2px;text-transform:uppercase;color:#7C7A75;margin:0 0 12px}
@@ -97,6 +100,7 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:22px;margin:44
 <script src="assets/aman.js"></script>
 <script src="assets/rooms-data.js"></script>
 <script src="assets/pricing.js"></script>
+<script src="assets/inventory.js"></script>
 <script src="assets/journey.js"></script>
 <script type="module" src="assets/invite.mjs"></script>
 <script>
@@ -206,7 +210,8 @@ if (others.length) {
     h += '<a class="occard" href="room.html?stay=' + stayKey + '&room=' + r.slug + '">' + img +
       '<div class="ot"><p class="oe">' + esc(r.cat) + '</p><p class="on">' + esc(r.name) + '</p>' +
       '<p class="od">' + esc(r.desc) + '</p>' +
-      '<p>' + (r.reserved ? '<span class="op">USD ' + (P.quote(W0.id, r.slug).total) + '</span> <span class="oe">per person</span> <span class="rsv">' + esc(r.reserved) + '</span>' : priceLine(r)) + '</p></div></a>';
+      '<p>' + (r.reserved ? '<span class="op">USD ' + (P.quote(W0.id, r.slug).total) + '</span> <span class="oe">per person</span> <span class="rsv">' + esc(r.reserved) + '</span>' : priceLine(r)) + '</p>' +
+      '<p class="oe" data-oav="' + r.slug + '"></p></div></a>';
   });
   h += '</div>';
   if (others.length > 1) h += '<div class="rnav"><div class="rail" aria-hidden="true"><i id="rail"></i></div><span class="rc" id="rc">1 / ' + others.length + '</span><button type="button" id="op" aria-label="Previous room">‹</button><button type="button" id="ox" aria-label="Next room">›</button></div>';
@@ -235,7 +240,8 @@ stay.windows.forEach(function (w, wi) {
     h += amountBlock(q);
     if (q.note) h += '<p class="hn2">' + esc(q.note) + '<span>' + esc(q.noteBy) + '</span></p>';
     if (stay.breakfast) h += '<p class="bf">' + esc(stay.breakfast) + '</p>';
-    h += '<button class="cta" data-win="' + wi + '">Add to Your Journey</button><span class="swap" data-swap="' + wi + '" hidden></span>';
+    h += '<p class="av" data-av="' + w.id + '" hidden></p>';
+    h += '<button class="cta" data-win="' + wi + '" data-avwin="' + w.id + '">Add to Your Journey</button><span class="swap" data-swap="' + wi + '" hidden></span>';
     if (P.hasVariants(w.id)) h += '<button type="button" class="chg" data-chg="' + wi + '" hidden>Change selection</button>';
   }
   h += '</div>';
@@ -300,6 +306,12 @@ function held(w) {
   return SIYL_BAG.get().filter(function (x) { return ids.indexOf(x.id) >= 0; })[0] || null;
 }
 function paint() {
+  /* the sibling cards carry the same live counts as the page they open */
+  var St0 = window.SIYL_STOCK;
+  document.querySelectorAll('[data-oav]').forEach(function (el) {
+    var slug = el.getAttribute('data-oav');
+    el.textContent = (St0 && St0.ready() && St0.tracked(W0.id, slug)) ? St0.label(W0.id, slug, 1) : '';
+  });
   document.querySelectorAll('[data-win]').forEach(function (b) {
     var wi = parseInt(b.getAttribute('data-win'), 10), w = stay.windows[wi];
     var swap = document.querySelector('[data-swap="' + wi + '"]');
@@ -319,6 +331,18 @@ function paint() {
         else swap.hidden = true;
       }
     }
+    /* ---- what the shared ledger says about THIS room, right now ---- */
+    var St = window.SIYL_STOCK;
+    var av = document.querySelector('[data-av="' + w.id + '"]');
+    if (av && St && St.ready() && St.tracked(w.id, room.slug)) {
+      var qty = (line && line.qty) || 1;
+      av.hidden = false;
+      av.textContent = St.label(w.id, room.slug, qty);
+      av.classList.toggle('low', St.scarce(w.id, room.slug) || St.soldOut(w.id, room.slug));
+      var gone = !line && !St.fits(w.id, room.slug, qty);
+      b.disabled = gone;
+      if (gone) b.textContent = St.soldOut(w.id, room.slug) ? 'Sold out' : 'Not enough rooms left';
+    } else if (av) { av.hidden = true; b.disabled = false; }
   });
 }
 document.querySelectorAll('[data-win]').forEach(function (b) {
@@ -341,6 +365,7 @@ document.querySelectorAll('[data-chg]').forEach(function (b) {
   });
 });
 document.addEventListener('siyl:bag', paint);
+document.addEventListener('siyl:stock', paint);
 paint();
 if (window.SIYL_BAG.bar) SIYL_BAG.bar();
 })();
