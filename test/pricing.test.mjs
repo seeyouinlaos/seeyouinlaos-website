@@ -39,27 +39,43 @@ test('C · two guests, Sathorn Penthouse only → USD 270', () => {
   assert.equal(total(pick('bkk-stay', 'penthouse', 2)), 270);
 });
 
-test('D · both wedding nights are hosted and add nothing to Your Costs', () => {
+test('D · the Wedding Stay is ONE payable item, never two complimentary rows', () => {
   const bag = pick('wedstay', 'heritage');
-  assert.equal(bag.length, 2, 'two visible nightly rows');
-  assert.deepEqual(bag.map((x) => x.id), ['wedstay-n1', 'wedstay-n2']);
-  assert.equal(bag[0].hostedNote, 'Hosted');
-  assert.equal(bag[1].hostedNote, "Wedding Night hosted by Valentine's Retreat");
-  assert.ok(bag.every((x) => x.hosted === true && x.price === 0));
-  assert.equal(total(bag), 0);
-  assert.equal(total(bag, 2), 0);
-  /* the room value stays visible */
-  assert.ok(bag.every((x) => x.rate === 145));
-  assert.match(P.lineBasis(bag[0]), /Room value USD 145 per person \/ night · your cost complimentary/);
+  assert.equal(bag.length, 1, 'exactly one Wedding Stay line');
+  assert.deepEqual(bag.map((x) => x.id), ['wedstay']);
+  assert.equal(bag[0].price, 145, 'the restored per-person amount for the fixed window');
+  assert.equal(bag[0].nights, 2);
+  assert.equal(bag[0].pay, 1);
+  assert.equal(bag[0].note, 'Second night complimentary');
+  assert.equal(bag[0].noteBy, 'Hosted by Bride & Groom');
+  assert.equal(bag[0].hosted, undefined, 'no hosted flag, no USD 0 row');
+  assert.equal(total(bag), 145);
+  assert.equal(total(pick('wedstay', 'heritage', 2)), 290, 'two guests contribute one night each');
+  assert.match(P.lineBasis(bag[0]), /USD 145 per person · fixed two-night window · first night your contribution, second night complimentary/);
+  const q = P.quote('wedstay', 'heritage');
+  assert.doesNotMatch(q.basis, /^Complimentary/);
+  assert.equal(q.breakfast, 'Breakfast included');
 });
 
-test('E · changing the Souphattra category keeps both nights complimentary', () => {
+test('E · changing the Souphattra category replaces the one Wedding Stay item', () => {
   const before = pick('wedstay', 'heritage');
   const after = pick('wedstay', 'noble-courtyard');
-  assert.equal(total(before), 0);
-  assert.equal(total(after), 0);
-  assert.ok(after.every((x) => x.rate === 240), 'the displayed room value follows the new category');
-  assert.deepEqual(after.map((x) => x.id), before.map((x) => x.id), 'same two ids — replaced, never duplicated');
+  assert.equal(before.length, 1);
+  assert.equal(after.length, 1);
+  assert.equal(total(before), 145);
+  assert.equal(total(after), 240, 'the payable amount follows the new category');
+  assert.deepEqual(after.map((x) => x.id), before.map((x) => x.id), 'same id — replaced, never duplicated');
+});
+
+test('the retired two-row wedding model is gone from the data and the code', () => {
+  assert.equal(P.locate('wedstay').win.hosted, undefined);
+  for (const f of ['assets/rooms-data.js', 'assets/journey.js', 'your-journey.html',
+                   'review.html', 'room.html', 'journeys.html']) {
+    const src = readFileSync(join(ROOT, f), 'utf8');
+    assert.doesNotMatch(src, /Valentine/i, f + ' still names the retired host');
+  }
+  /* Remove still clears anything an old bag saved under the two-row model */
+  assert.deepEqual(P.ids('wedstay'), ['wedstay', 'wedstay-n1', 'wedstay-n2']);
 });
 
 test('F · changing a paid Kunming / Lijiang variant replaces, never duplicates', () => {
@@ -88,13 +104,13 @@ test('G · Special Express No. 25 is USD 75 per person and carries no cabin upgr
 });
 
 test('every accommodation window states rate, nights, total and breakfast', () => {
-  const expect = { 'bkk-stay': 3, prewed: 2, kmg: 3, ljg: 2, kempinski: 2 };
+  const expect = { 'bkk-stay': 3, prewed: 2, wedstay: 2, kmg: 3, ljg: 2, kempinski: 2 };
   for (const [win, nights] of Object.entries(expect)) {
     const at = P.locate(win);
     const room = at.stay.rooms.find((r) => r.rate != null);
     const q = P.quote(win, room.slug);
     assert.equal(q.nights, nights, win + ' nights');
-    assert.equal(q.total, q.rate * nights, win + ' total = rate × nights');
+    assert.equal(q.total, q.rate * (q.pay || nights), win + ' total = rate × payable nights');
     assert.ok(q.breakfast, win + ' breakfast status');
     assert.ok(q.nightly.includes('per person / night'));
   }

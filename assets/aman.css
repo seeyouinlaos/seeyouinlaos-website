@@ -288,3 +288,78 @@ input:focus-visible, .siyl-inv input:focus { outline: 1px solid var(--a-ink); ou
 @media (min-width: 1600px) {
   .aslide { flex: 0 0 380px; }
 }
+
+/* ============================================================================
+   JOURNEY ITEMS — action separation and the responsive grid.
+   The Journey Bag row is the same object at every width: media · content ·
+   amount, on one grid, with CHANGE and REMOVE as two clearly separate text
+   actions. Loaded after desktop.css, so this is the last word.
+   ========================================================================== */
+
+/* CHANGE and REMOVE are two independent actions, never one control.
+   The rule is drawn under the words while the target stays 44 px tall. */
+#items .acts { display: flex; align-items: center; gap: 34px; margin-top: 14px; flex-wrap: wrap; }
+#items .acts .ch, #items .acts .rm {
+  display: inline-block; border: 0; background: none; cursor: pointer;
+  font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif;
+  font-size: 10px; letter-spacing: 1.8px; text-transform: uppercase;
+  line-height: 18px; padding: 13px 0; min-height: 44px; min-width: 60px;
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat; background-size: 100% 1px; background-position: 0 33px;
+  text-decoration: none; transition: color .3s;
+}
+#items .acts .ch { color: var(--a-ink); }
+#items .acts .rm { color: var(--a-mute); }
+#items .acts .rm:hover { color: var(--a-ink); }
+
+/* ---- the row: one grid, three columns, at every width ---- */
+#items .row {
+  display: grid;
+  grid-template-columns: 74px minmax(0, 1fr) auto;
+  column-gap: 16px; align-items: start;
+  border-top: 1px solid var(--a-line); padding: 20px 0;
+}
+#items .row > .th { width: 74px; height: 92px; margin: 0; }
+#items .row > div:not(.th) { grid-column: 2; min-width: 0; }
+#items .row > .ln, #items .row > .int { grid-column: 3; margin-left: 0; text-align: right; white-space: nowrap; }
+/* review.html nests content and amount in one flex wrapper — keep it aligned */
+#items .row > div[style*="display:flex"] { display: grid !important; grid-template-columns: minmax(0, 1fr) auto; column-gap: 16px; }
+
+/* tablet — the extra width goes to the photograph and to breathing room,
+   never to a wider gap between the item and its amount */
+@media (min-width: 600px) {
+  #items .row { grid-template-columns: 104px minmax(0, 1fr) 132px; column-gap: 28px; padding: 26px 0; }
+  #items .row > .th { width: 104px; height: 130px; }
+  #items .acts { gap: 40px; }
+}
+@media (min-width: 900px) {
+  #items .row { grid-template-columns: 112px minmax(0, 1fr) 150px; column-gap: 34px; padding: 30px 0; }
+  #items .row > .th { width: 112px !important; height: 140px !important; }
+}
+
+/* ---- room / variant rows: one grid so a long name never bends the price ---- */
+.vars .var {
+  display: grid !important;
+  grid-template-columns: 52px minmax(0, 1fr) auto 14px;
+  column-gap: 12px; align-items: center; min-height: 62px;
+}
+.vars .var > span:nth-child(2) { min-width: 0; }
+.vars .var .vt { width: 52px; height: 40px; }
+.vars .var .vp { margin-left: 0; text-align: right; white-space: nowrap; }
+.vars .var .vgo { text-align: right; }
+@media (min-width: 600px) {
+  .vars .var { grid-template-columns: 76px minmax(0, 1fr) auto 14px; column-gap: 18px; min-height: 76px; padding: 14px 16px; }
+  .vars .var .vt { width: 76px; height: 56px; }
+}
+@media (min-width: 900px) {
+  .vars .var { grid-template-columns: 88px minmax(0, 1fr) auto 14px; column-gap: 22px; min-height: 84px; }
+  .vars .var .vt { width: 88px !important; height: 62px !important; }
+}
+
+/* tablet: the shop shell keeps an editorial measure instead of a 640 px column
+   floating in the middle of a 768 px screen */
+@media (min-width: 600px) and (max-width: 899px) {
+  body:has(#items) main, body:has(.vars) main { max-width: 680px !important; padding-left: 34px !important; padding-right: 34px !important; }
+  .p { padding: 30px 0; }
+  .buy { padding: 34px 30px 36px; }
+}

@@ -21,10 +21,9 @@
       label: 'Special Express No. 25', ids: ['train'], anchor: 'j-train' },
     { key: 'prewed', when: '25 – 27 FEB', cat: 'Accommodation', place: 'Vientiane',
       label: 'Pre-Wedding Vientiane', ids: ['prewed'], anchor: 'j-prewed' },
-    /* the wedding stay is answered by the hosted pair, by a legacy single line,
-     * or by the alternative private residence */
+    /* ONE wedding stay selection, or the alternative private residence */
     { key: 'wedstay', when: '27 FEB – 01 MAR', cat: 'Accommodation', place: 'Vientiane',
-      label: 'Wedding Stay', ids: ['wedstay-n1', 'wedstay-n2', 'wedstay', 'airbnb-2br'], anchor: 'j-wedstay' },
+      label: 'Wedding Stay', ids: ['wedstay', 'airbnb-2br'], anchor: 'j-wedstay' },
     { key: 'mu9632', when: '01 MAR', cat: 'Transportation', place: 'Vientiane → Kunming',
       label: 'MU9632', ids: ['mu9632'], anchor: 'j-mu9632' },
     { key: 'kmg', when: '01 – 04 MAR', cat: 'Accommodation', place: 'Kunming',
@@ -39,9 +38,8 @@
       label: 'Siam Kempinski Bangkok', ids: ['kempinski'], anchor: 'j-kempinski', bookend: 'close' }
   ];
 
-  /* Chronological position of the two hosted wedding nights (they sit inside
-   * the wedstay stage, in order). Everything else follows SEG. */
-  var AT = { 'wedstay-n1': 3.0, 'wedstay-n2': 3.1, '1872': 0.5 };
+  /* Chronological position of a line that is not itself a stage. */
+  var AT = { '1872': 0.5 };
 
   function skipped() {
     try { return JSON.parse(localStorage.getItem(SKIP) || '[]'); } catch (e) { return []; }
@@ -71,7 +69,6 @@
     quantityLine: function (x) {
       var m = this.meta(x), q = x.qty || 1;
       if (x.interest) return '';
-      if (x.hosted) return 'Complimentary · ' + q + (q === 1 ? ' guest' : ' guests');
       if (x.price == null) return '';
       if (m.unit === 'experience') {
         return q + (q === 1 ? ' experience · for two guests' : ' experiences · for ' + (q * 2) + ' guests');
@@ -81,8 +78,6 @@
 
     /* the bag reads like an itinerary: chronological position of a line */
     when: function (x) {
-      var P = window.SIYL_PRICE, at = P && P.locate(x.id);
-      if (at && at.night) return at.night.when;
       var seg = SEG.filter(function (s) { return s.ids.indexOf(x.id) >= 0; })[0];
       if (seg) return seg.when;
       return x.id === '1872' ? '21 – 24 FEB' : '';

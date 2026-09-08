@@ -54,7 +54,7 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:22px;margin:40
 <div class="p" id="j-prewed" data-vprod="prewed"><div class="pimg" style="background-image:url(assets/images/souphattra/heritage-courtyard-front.jpg)"></div><p class="pn">Pre-Wedding Vientiane · Souphattra Heritage</p><p class="pm">25 – 27 February · 2 nights · breakfast included</p><p class="pb" data-from="prewed"></p>
 <p class="vl">Rooms &amp; suites</p><div class="vars" data-rooms="souphattra"></div></div>
 <h2>The Wedding</h2><p class="win">27 February – 01 March 2027 · Vientiane</p>
-<div class="p" id="j-wedstay" data-vprod="wedstay"><div class="pimg" style="background-image:url(assets/images/souphattra/heritage-arches-dusk.jpg)"></div><p class="pn">Wedding Stay · Souphattra Heritage</p><p class="pm">27 February – 01 March · 2 nights · breakfast included</p><p class="pb">Both wedding nights are hosted — complimentary</p>
+<div class="p" id="j-wedstay" data-vprod="wedstay"><div class="pimg" style="background-image:url(assets/images/souphattra/heritage-arches-dusk.jpg)"></div><p class="pn">Wedding Stay · Souphattra Heritage</p><p class="pm">27 February – 01 March · 2 nights · breakfast included</p><p class="pb" data-from="wedstay"></p>
 <p class="vl">Rooms &amp; suites</p><div class="vars" data-rooms="souphattra"></div></div>
 <div class="p"><div class="pimg" style="background-image:url(assets/images/airbnb/airbnb-01.jpg)"></div><p class="pn">Private Residence</p><p class="pm">27 February – 01 March · Alternative stay · up to 4 adults · downtown Vientiane</p><p class="st">Complimentary · limited availability</p><a class="vw" href="room.html?stay=airbnb&amp;room=private-residence">View the residence</a></div>
 <div class="p"><p class="pn">The Wedding Programme</p><p class="pm">Temple Ceremony · Coffee &amp; Cake · Vow Ceremony · Wedding Dinner</p><p class="host">Hosted — part of your journey, never a charge</p></div>
@@ -111,9 +111,11 @@ box.innerHTML=stay.rooms.map(function(r){
 var img=r.gallery.length?r.gallery[0][0]:'';
 var q=P.quote(win, r.slug);
 var right, sub='';
-if(q&&q.hosted!==undefined&&r.rate!=null){
-  if(win==='wedstay'){right='<span class="vp">Complimentary</span>';sub='Room value USD '+r.rate+' per person / night';}
-  else{right='<span class="vp">USD '+(r.rate*(q.nights||1))+'</span>';sub='USD '+r.rate+' per person / night · '+q.nightsLine;}
+if(q&&r.rate!=null){
+  right='<span class="vp">USD '+q.total+'</span>';
+  sub = q.pay < q.nights
+    ? 'USD '+r.rate+' per person / night · fixed two-night window · second night complimentary'
+    : 'USD '+r.rate+' per person / night · '+q.nightsLine;
 }else{right='<span class="vr" style="margin:0">On request</span>'}
 var href = changing ? '#' : 'room.html?stay='+sk+'&room='+r.slug;
 return '<a class="var'+(r.reserved?' rsvd':'')+'" data-room="'+r.slug+'" data-win="'+win+'" data-stay="'+sk+'"'+
@@ -130,7 +132,9 @@ var q0=P.quote(win, stay.rooms[0].slug);
 var open=stay.rooms.filter(function(r){return !r.reserved && r.rate!=null});
 if(!open.length||!q0)return;
 var low=open.reduce(function(m,r){return Math.min(m,r.rate)},1e9);
-el.textContent='From USD '+low+' per person / night · '+q0.nightsLine+' · from USD '+(low*q0.nights)+' per person';
+el.textContent = q0.pay < q0.nights
+  ? 'From USD '+(low*q0.pay)+' per person for the fixed two-night window · second night complimentary'
+  : 'From USD '+low+' per person / night · '+q0.nightsLine+' · from USD '+(low*q0.nights)+' per person';
 });
 /* ---------------- adds are invitation-gated (real engine validation) ------ */
 function gated(fn){if(window.SIYL_INVITE){SIYL_INVITE.require(fn)}

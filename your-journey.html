@@ -33,7 +33,8 @@ h1{font-family:'PP Editorial Old',serif;font-weight:200;font-size:29px;margin-bo
 .rm{border-bottom-color:#C9C4BA;color:#7C7A75}
 .rm:hover{color:#313131;border-bottom-color:#313131}
 .bf{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75;margin-top:6px}
-.hostln{font-size:9.5px;letter-spacing:1.6px;text-transform:uppercase;color:#313131;margin-top:4px}
+.hostln{font-size:9.5px;letter-spacing:1.6px;text-transform:uppercase;color:#313131;margin-top:8px;line-height:1.8}
+.hostln span{display:block;color:#7C7A75;letter-spacing:1.6px}
 .ln.free{font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;font-size:9.5px;letter-spacing:1.6px;text-transform:uppercase;color:#7C7A75}
 .tot{display:flex;justify-content:space-between;align-items:baseline;padding:24px 0 6px}
 .tot .l{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#7C7A75}
@@ -46,7 +47,7 @@ h1{font-family:'PP Editorial Old',serif;font-weight:200;font-size:29px;margin-bo
 <main><h1>Your Journey</h1><p class="sub">Your selections · live costs · nothing is paid on this website</p>
 <div id="items"></div>
 <div class="tot"><span class="l">Your Costs</span><span class="r" id="tt">USD 0</span></div>
-<p class="note">The two wedding nights are hosted: the room keeps its value and your cost stays complimentary. Hosted wedding programme events are part of your journey without charge — they never appear as USD 0 line items. Spa interest lines carry no journey cost — the amount is payable at the spa.</p>
+<p class="note">The wedding stay is one selection for the fixed two-night window: the first night is your contribution and the second night is complimentary, hosted by the Bride &amp; Groom. Hosted wedding programme events are part of your journey without charge — they never appear as USD 0 line items. Spa interest lines carry no journey cost — the amount is payable at the spa.</p>
 <div id="dec"></div>
 <a class="cta" href="review.html">Review &amp; Send</a>
 <p style="text-align:center;margin-top:18px"><a href="journeys.html" style="font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:#313131;text-decoration:none;border-bottom:1px solid #313131;padding:8px 0 3px;display:inline-block;min-height:44px">Continue exploring</a></p>
@@ -65,18 +66,16 @@ var J=window.SIYL_JOURNEY,m=J?J.meta(x):{cat:'',basis:''},seg=J?J.SEGMENTS.filte
 var book=seg&&seg.bookend?'<span class="bk" title="Bangkok"></span>':'';
 var P=window.SIYL_PRICE,win=P?P.windowOf(x.id):x.id;
 var canChange=P&&P.hasVariants(x.id);
-var amount = x.hosted
-  ? '<span class="ln free">Complimentary</span>'
-  : (x.interest
-     ? '<span class="ln free">Interest · request</span>'
-     : '<span class="ln">USD '+((x.price||0)*x.qty).toLocaleString('en-US')+'</span>');
+var amount = x.interest
+  ? '<span class="ln free">Interest · request</span>'
+  : '<span class="ln">USD '+((x.price||0)*x.qty).toLocaleString('en-US')+'</span>';
 return '<div class="row"><div class="th"'+(SIYL_BAG.thumb(x)?' style="background-image:url('+SIYL_BAG.thumb(x)+')"':'')+'></div><div style="flex:1">'+
 (when?'<p class="when">'+when+'</p>':'')+
 (m.cat?'<p class="cat">'+m.cat+book+'</p>':'')+
 '<p class="nm">'+x.name+'</p><p class="mt">'+x.meta+'</p>'+
 (m.basis?'<p class="basis">'+m.basis+'</p>':'')+
 (J&&J.quantityLine(x)?'<p class="qty">'+J.quantityLine(x)+'</p>':'')+
-(x.hostedNote?'<p class="hostln">'+x.hostedNote+'</p>':'')+
+(x.note?'<p class="hostln">'+x.note+(x.noteBy?'<span>'+x.noteBy+'</span>':'')+'</p>':'')+
 (x.breakfast?'<p class="bf">'+x.breakfast+'</p>':'')+
 (x.unit?'<div class="q"><button data-q="'+x.id+':-1">−</button><b style="font-family:\'PP Editorial Old\',serif">'+x.qty+'</b><button data-q="'+x.id+':1">+</button></div>':'')+
 '<div class="acts">'+

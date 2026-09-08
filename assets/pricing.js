@@ -11,8 +11,10 @@
        total per person = rate × nights
    Transport is priced per person for the leg (a package, not a nightly rate).
 
-   The Wedding Stay (27 February – 1 March) is HOSTED: the guest keeps the room
-   category and sees its normal value, and pays nothing for either night.
+   The Wedding Stay (27 February – 1 March) is ONE selection for the fixed
+   two-night window: the guest contributes the first night, the second night is
+   complimentary and hosted by the Bride & Groom. That is a note inside the one
+   item — never a second line and never a USD 0 row.
    ========================================================================== */
 (function () {
   'use strict';
@@ -30,19 +32,16 @@
 
   function money(n) { return 'USD ' + Number(n).toLocaleString('en-US'); }
 
-  /* which stay and which window an id belongs to (hosted night ids included) */
+  /* which stay and which window an id belongs to. LEGACY holds the two ids the
+   * retired two-row wedding model wrote, so an old bag can still be migrated. */
+  var LEGACY = { 'wedstay-n1': 'wedstay', 'wedstay-n2': 'wedstay' };
   function locate(windowId) {
+    var id = LEGACY[windowId] || windowId;
     var R = window.SIYL_ROOMS || {};
     for (var k in R) {
       var s = R[k];
       for (var i = 0; i < s.windows.length; i++) {
-        var w = s.windows[i];
-        if (w.id === windowId) return { key: k, stay: s, win: w, night: null };
-        if (w.hosted) {
-          for (var j = 0; j < w.hosted.length; j++) {
-            if (w.hosted[j].id === windowId) return { key: k, stay: s, win: w, night: w.hosted[j] };
-          }
-        }
+        if (s.windows[i].id === id) return { key: k, stay: s, win: s.windows[i] };
       }
     }
     return null;
@@ -66,8 +65,8 @@
       var at = locate(windowId);
       if (!at) return null;
       var room = roomOf(at.stay, slug) || at.stay.rooms[0];
-      var hosted = !!at.night;
-      var nights = hosted ? 1 : (at.win.n || 1);
+      var nights = at.win.n || 1;
+      var pay = at.win.pay || nights;          /* nights the guest contributes */
       var rate = room && room.rate != null ? room.rate : null;
       var q = {
         cat: 'Accommodation',
@@ -76,46 +75,36 @@
         stayName: at.stay.name,
         roomName: room ? room.name : '',
         roomSlug: room ? room.slug : '',
-        dates: at.night ? at.night.dates : at.win.dates,
-        when: at.night ? at.night.when : null,
+        dates: at.win.dates,
         nights: nights,
+        pay: pay,
         rate: rate,
         breakfast: at.stay.breakfast || '',
-        hosted: hosted,
-        hostedNote: at.night ? at.night.note : '',
-        total: hosted ? 0 : (rate == null ? null : rate * nights)
+        note: at.win.note || '',
+        noteBy: at.win.noteBy || '',
+        total: rate == null ? null : rate * pay
       };
       q.nightly = rate == null ? '' : money(rate) + ' per person / night';
       q.nightsLine = nights + (nights === 1 ? ' night' : ' nights');
       if (rate == null) {
         q.basis = 'Amount on request · Guest Relations';
-      } else if (hosted) {
-        /* the value is shown so the hospitality is understood — never charged */
-        q.basis = 'Room value ' + q.nightly + ' · your cost complimentary';
+      } else if (pay < nights) {
+        /* the working wording from before the two-row model, with the amount */
+        q.basis = money(q.total) + ' per person · fixed two-night window · ' +
+                  'first night your contribution, second night complimentary';
       } else {
         q.basis = q.nightly + ' · ' + q.nightsLine + ' · ' + money(q.total) + ' per person';
       }
       return q;
     },
 
-    /* the bag line(s) a selection produces — one for a paid window, two for the
-     * hosted wedding stay. `put` replaces in place, so a change never duplicates. */
+    /* the ONE bag line a selection produces. `put` replaces in place, so a
+     * change never duplicates and a stay is never split across two rows. */
     items: function (windowId, slug) {
       var at = locate(windowId);
       if (!at) return [];
       var room = roomOf(at.stay, slug) || at.stay.rooms[0];
       var img = room && room.gallery && room.gallery.length ? room.gallery[0][0] : at.win.bagImg;
-      if (at.win.hosted) {
-        return at.win.hosted.map(function (n) {
-          var q = this.quote(n.id, room.slug);
-          return {
-            id: n.id, name: n.bagName, meta: n.dates + ' · ' + room.name,
-            price: 0, hosted: true, hostedNote: n.note,
-            stay: at.key, room: room.slug, rate: q.rate, nights: 1,
-            breakfast: at.stay.breakfast || '', img: img
-          };
-        }, this);
-      }
       var q = this.quote(at.win.id, room.slug);
       if (room.interest || q.total == null) {
         return [{ id: at.win.id, name: at.win.bagName, meta: at.win.dates + ' · ' + (room.status || room.name),
@@ -124,7 +113,9 @@
       return [{
         id: at.win.id, name: at.win.bagName, meta: at.win.dates + ' · ' + room.name,
         price: q.total, stay: at.key, room: room.slug,
-        rate: q.rate, nights: q.nights, breakfast: q.breakfast, img: img
+        rate: q.rate, nights: q.nights, pay: q.pay,
+        note: q.note, noteBy: q.noteBy,
+        breakfast: q.breakfast, img: img
       }];
     },
 
@@ -134,8 +125,8 @@
     ids: function (windowId) {
       var at = locate(windowId);
       if (!at) return [windowId];
-      if (!at.win.hosted) return [at.win.id];
-      return at.win.hosted.map(function (n) { return n.id; }).concat([at.win.id]);
+      if (at.win.id !== 'wedstay') return [at.win.id];
+      return ['wedstay', 'wedstay-n1', 'wedstay-n2'];   /* legacy rows go too */
     },
 
     /* does this product have a genuine alternative to change to? */
@@ -157,8 +148,9 @@
       var f = FLAT[x.id];
       if (f) return f.basis;
       if (x.interest) return 'Interest · confirmed and payable at the spa';
-      if (x.hosted) {
-        return (x.rate != null ? 'Room value ' + money(x.rate) + ' per person / night · ' : '') + 'your cost complimentary';
+      if (x.rate != null && x.pay && x.nights && x.pay < x.nights) {
+        return money(x.price) + ' per person · fixed two-night window · ' +
+               'first night your contribution, second night complimentary';
       }
       if (x.rate != null && x.nights) {
         return money(x.rate) + ' per person / night · ' + x.nights + (x.nights === 1 ? ' night' : ' nights') +
@@ -167,4 +159,20 @@
       return x.price != null ? money(x.price) + ' per person' : '';
     }
   };
+
+  /* ---- migration -------------------------------------------------------
+   * A bag saved while the retired two-row wedding model was live holds
+   * wedstay-n1 / wedstay-n2. Collapse it to the ONE Wedding Stay line for the
+   * same room, so nobody is left with two complimentary rows. */
+  (function collapseLegacyWeddingStay() {
+    var B = window.SIYL_BAG;
+    if (!B || !window.SIYL_ROOMS) return;
+    var bag = B.get();
+    var legacy = bag.filter(function (x) { return x.id === 'wedstay-n1' || x.id === 'wedstay-n2'; });
+    if (!legacy.length) return;
+    var slug = legacy[0].room, qty = legacy[0].qty || 1;
+    var kept = bag.filter(function (x) { return x.id !== 'wedstay-n1' && x.id !== 'wedstay-n2' && x.id !== 'wedstay'; });
+    window.SIYL_PRICE.items('wedstay', slug).forEach(function (it) { it.qty = qty; kept.push(it); });
+    B.set(kept);
+  })();
 })();

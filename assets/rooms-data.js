@@ -43,20 +43,17 @@
       windows: [
         { id: 'prewed', label: 'Pre-Wedding Vientiane', dates: '25 – 27 February 2027', nights: '2 nights', n: 2,
           bagName: 'Pre-Wedding Vientiane · Souphattra Heritage', bagImg: 'assets/images/souphattra/heritage-courtyard-front.jpg' },
-        /* The wedding stay is hosted: the guest keeps the room category and its
-         * normal value, and pays nothing for either night. Both nights are shown
-         * separately so the hospitality is visible, never as a USD 0 line. */
-        { id: 'wedstay', label: 'Wedding Stay', dates: '27 February – 01 March 2027', nights: '2 nights', n: 2,
-          bagName: 'Wedding Stay · Souphattra Heritage', bagImg: 'assets/images/souphattra/heritage-arches-dusk.jpg',
-          hosted: [
-            { id: 'wedstay-n1', dates: '27 – 28 February 2027', when: '27 – 28 FEB',
-              note: 'Hosted', bagName: 'Wedding Stay · Souphattra Heritage · night one' },
-            { id: 'wedstay-n2', dates: '28 February – 1 March 2027', when: '28 FEB – 1 MAR',
-              note: "Wedding Night hosted by Valentine's Retreat", bagName: 'Wedding Stay · Souphattra Heritage · wedding night' }
-          ] }
+        /* ONE Wedding Stay selection for the fixed two-night window: the first
+         * night is the guest's contribution, the second night is complimentary
+         * and hosted by the Bride & Groom. `pay` is how many of the `n` nights
+         * the guest actually contributes — the note is context, never a second
+         * line item and never a USD 0 row. */
+        { id: 'wedstay', label: 'Wedding Stay', dates: '27 February – 01 March 2027', nights: '2 nights', n: 2, pay: 1,
+          note: 'Second night complimentary', noteBy: 'Hosted by Bride & Groom',
+          bagName: 'Wedding Stay · Souphattra Heritage', bagImg: 'assets/images/souphattra/heritage-arches-dusk.jpg' }
       ],
       includes: [
-        'Wedding stay (27 February – 1 March): both nights are hosted — the first by ' + HS + ', the wedding night by Valentine\'s Retreat. You keep the room category you choose and neither night is a charge.',
+        'Wedding stay (27 February – 1 March): the amount is your total contribution per guest for the two nights — the first night is your contribution, the second night is complimentary, hosted by the Bride & Groom, ' + HS + '.',
         'Breakfast is included on both mornings.',
         'A limited number of complimentary alternative stays are also available.'
       ],

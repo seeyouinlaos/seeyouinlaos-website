@@ -66,8 +66,8 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:22px;margin:44
 .buy .price{font-family:'PP Editorial Old',serif;font-size:16px}
 .buy .pu{font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75}
 .bf{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75;margin:8px 0 0}
-.hn{display:flex;gap:12px;justify-content:space-between;border-top:1px solid #EAE7E0;padding:9px 0;font-size:11.5px;color:#4A4A4A}
-.hn span:last-child{font-size:9.5px;letter-spacing:1.6px;text-transform:uppercase;color:#7C7A75;text-align:right}
+.hn2{font-size:9.5px;letter-spacing:1.6px;text-transform:uppercase;color:#313131;margin:10px 0 0;line-height:1.9}
+.hn2 span{display:block;color:#7C7A75}
 .per{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75;margin:2px 0 16px}
 .cta{display:block;width:100%;background:#313131;color:#F3EEE7;border:0;padding:19px;font-size:11px;letter-spacing:2.2px;text-transform:uppercase;cursor:pointer;min-height:52px;text-align:center;text-decoration:none;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif}
 .ok{display:block;text-align:center;font-size:10px;letter-spacing:1.6px;text-transform:uppercase;color:#7C7A75;margin-top:12px}
@@ -110,7 +110,6 @@ var P = window.SIYL_PRICE;
 var W0 = stay.windows[0];
 function priceLine(r) {
   if (r.rate == null) return '<span class="rsv">' + esc(r.status || 'Amount on request · Guest Relations') + '</span>';
-  if (W0.hosted) return '<span class="op">Complimentary</span> <span class="oe">room value USD ' + r.rate + ' per person / night</span>';
   return '<span class="op">USD ' + r.rate + '</span> <span class="oe">per person / night</span>';
 }
 
@@ -186,7 +185,7 @@ if (others.length) {
 /* ---- commerce: fixed-window per-person amounts → Add to Your Journey ---- */
 h += '<section class="buy"><p class="eyebrow" style="margin:0 0 8px">Accommodation</p><h2>' + esc(room.name) + '</h2><p class="eyebrow" style="margin:0">' + esc(stay.place) + '</p>';
 stay.windows.forEach(function (w, wi) {
-  var q = P.quote(w.hosted ? w.hosted[0].id : w.id, room.slug);
+  var q = P.quote(w.id, room.slug);
   h += '<div class="win"><p class="wl">' + esc(w.label) + '</p><p class="wd">' + esc(w.dates) + '</p><p class="wn">' + esc(w.nights) + '</p>';
   if (room.interest) {
     h += '<p class="price">' + esc(room.status) + '</p><p class="per">Guest Relations arranges the rest</p>';
@@ -195,22 +194,19 @@ stay.windows.forEach(function (w, wi) {
     /* real inventory without an approved guest amount — never an invented price */
     h += '<p class="price">Amount on request</p><p class="per">Guest Relations confirms the amount</p>';
     h += '<p class="enq">This room is part of the house but not yet released with an amount. Guest Relations will confirm it for you.</p>';
-  } else if (w.hosted) {
-    /* the wedding stay: the room keeps its value, the guest pays nothing */
-    h += '<p class="price">Complimentary</p><p class="per">Room value USD ' + room.rate + ' per person / night</p>';
-    w.hosted.forEach(function (n) {
-      h += '<p class="hn"><span>' + esc(n.dates) + '</span><span>' + esc(n.note) + '</span></p>';
-    });
-    if (stay.breakfast) h += '<p class="bf">' + esc(stay.breakfast) + '</p>';
-    if (room.reserved) h += '<p class="rsvline">' + esc(room.reserved) + '</p>';
-    else {
-      h += '<button class="cta" data-win="' + wi + '">Add to Your Journey</button><span class="swap" data-swap="' + wi + '" hidden></span>';
-      if (P.hasVariants(w.id)) h += '<button type="button" class="chg" data-chg="' + wi + '" hidden>Change selection</button>';
-    }
   } else if (room.reserved) {
     h += '<p class="price">USD ' + room.rate + '</p><p class="per">Per person / night · ' + esc(q.nightsLine) + ' · USD ' + q.total + ' per person</p>';
     if (stay.breakfast) h += '<p class="bf">' + esc(stay.breakfast) + '</p>';
     h += '<p class="rsvline">' + esc(room.reserved) + '</p>';
+  } else if (q.pay < q.nights) {
+    /* one selection for the fixed window: the guest contributes the first
+     * night, the second is complimentary — a note, never a second item */
+    h += '<p class="price">USD ' + q.total + ' <span class="pu">per person</span></p>';
+    h += '<p class="per">Fixed two-night window · USD ' + room.rate + ' per person / night</p>';
+    h += '<p class="hn2">' + esc(q.note) + '<span>' + esc(q.noteBy) + '</span></p>';
+    if (stay.breakfast) h += '<p class="bf">' + esc(stay.breakfast) + '</p>';
+    h += '<button class="cta" data-win="' + wi + '">Add to Your Journey</button><span class="swap" data-swap="' + wi + '" hidden></span>';
+    if (P.hasVariants(w.id)) h += '<button type="button" class="chg" data-chg="' + wi + '" hidden>Change selection</button>';
   } else {
     h += '<p class="price">USD ' + room.rate + ' <span class="pu">per person / night</span></p>';
     h += '<p class="per">' + esc(q.nightsLine) + ' · USD ' + q.total + ' per person</p>';
