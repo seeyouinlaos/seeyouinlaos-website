@@ -327,3 +327,28 @@ every guest surface. Deterministic coverage: `test/pricing.test.mjs`.
   selected state, Journey Bag, Review & Send), and is no longer used on the
   homepage — the "After the Wedding" slide returned to `004-lijiang-naxi-rooftops.jpg`.
   No placeholder remains anywhere in the Lijiang collection.
+
+---
+
+## Production closeout — Sheet → website data audit, 08 September 2026 (night)
+
+Workbook re-exported at closeout. Every guest-facing selectable item compared
+row by row (name, size, bed, occupancy, floor, nights, rate, reserved status,
+breakfast): **all 31 accommodation categories match `Accommodation_Details`**
+and `Budget_Room - Rate` (Souphattra "Guest sees on webpage per person"
+145 / 155 / 170 / 240 / 250 / 290 / 750 = per person per night). Differences
+found were typographic only (37–44 vs 37-44 sq.m.).
+
+Explicit Owner overrides preserved over the Sheet (newer instruction wins):
+
+| Item | Sheet | Production (canonical) | Override |
+|---|---|---|---|
+| Special Express No. 25 | USD 90 pp | **USD 75 pp package** | Owner order 08 Sep §02 (USD 130 cabin retired) |
+| **C642 Kunming → Lijiang** | USD 105 pp | **USD 85 pp** | Owner order 08 Sep §26/§27 "C642 Business USD 85 pp" — the newest explicit statement; one value in pricing.js FLAT, consumed by the product card, Add, Full Experience, Your Journey, Your Costs, Review & Send and the submitted text |
+| Sathorn Penthouse | Overview tab USD 90 pp/night (stale) · Accommodation_Details USD 45 | **USD 45 pp/night · 135 pp** | Owner order 08 Sep §01 = Accommodation_Details |
+| VTE → KMG flight | Overview text names MU9646 15:50–18:25 | **MU9632 · USD 275 pp** | Owner order 08 Sep §26 names MU9632; the Sheet's times belong to MU9646 and are not applied |
+
+The public shop reads pricing only from `assets/pricing.js` + `assets/rooms-data.js`.
+`register/**` is consulted for the encrypted invitation lookup only
+(`assets/invite.mjs` → `register/crypto.mjs`, `register/invitations.enc.json`);
+no commercial value crosses that boundary.

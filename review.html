@@ -19,6 +19,8 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:20px;margin:34
 .row{display:flex;gap:14px;border-top:1px solid #DAD9D7;padding:16px 0}
 .row:last-of-type{border-bottom:1px solid #DAD9D7}
 .th{width:58px;height:72px;background:#E7E3DB center/cover no-repeat;flex:0 0 auto}
+.nm{text-decoration:none;color:inherit;display:block}
+a.th{display:block}
 .nm{font-family:'PP Editorial Old',serif;font-weight:200;font-size:16.5px;line-height:1.35}
 .when{font-size:9.5px;letter-spacing:2px;text-transform:uppercase;color:#7C7A75}
 .cat{font-size:9.5px;letter-spacing:2px;text-transform:uppercase;color:#313131;margin:2px 0 3px}
@@ -84,6 +86,13 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:20px;margin:34
 <script>
 var SUBMIT_URL='https://seeyouinlaos-website.suthep-hrg.workers.dev/api/register';
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')}
+function detailHref(x){
+if(x.stay&&x.room)return 'room.html?stay='+x.stay+'&room='+x.room;
+if(x.id==='1872')return '1872.html';
+if(x.interest&&x.id!=='airbnb-2br')return 'marsilea.html';
+var P=window.SIYL_PRICE,at=P&&P.locate(x.id);
+if(at&&x.room)return 'room.html?stay='+at.key+'&room='+x.room;
+return 'journeys.html#j-'+(P?P.windowOf(x.id):x.id)}
 function render(){var b=SIYL_BAG.get(),el=document.getElementById('items');
 if(!b.length){el.innerHTML='<p class="empty">Nothing is in your journey yet. Everything you add appears here before sending.</p>';
 document.getElementById('send').disabled=true}
@@ -91,9 +100,10 @@ else{document.getElementById('send').disabled=false;
 el.innerHTML=(window.SIYL_JOURNEY?SIYL_JOURNEY.sorted(b):b).map(function(x){
 var J=window.SIYL_JOURNEY,m=J?J.meta(x):{cat:'',basis:''},seg=J?J.SEGMENTS.filter(function(g){return g.ids.indexOf(x.id)>=0})[0]:null,when=J?J.when(x):'';
 var book=seg&&seg.bookend?'<span class="bk"></span>':'';
-return '<div class="row"><div class="th"'+(SIYL_BAG.thumb(x)?' style="background-image:url('+SIYL_BAG.thumb(x)+')"':'')+'></div><div style="flex:1;display:flex;gap:12px"><div>'+
+var href=detailHref(x);
+return '<div class="row"><a class="th" href="'+href+'" aria-label="Open '+esc(x.name)+'"'+(SIYL_BAG.thumb(x)?' style="background-image:url('+SIYL_BAG.thumb(x)+')"':'')+'></a><div style="flex:1;display:flex;gap:12px"><div>'+
 (when?'<p class="when">'+when+'</p>':'')+(m.cat?'<p class="cat">'+m.cat+book+'</p>':'')+
-'<p class="nm">'+esc(x.name)+'</p><p class="mt">'+esc(x.meta||'')+'</p>'+
+'<a class="nm" href="'+href+'">'+esc(x.name)+'</a><p class="mt">'+esc(x.meta||'')+'</p>'+
 (m.basis?'<p class="basis">'+esc(m.basis)+'</p>':'')+
 (J&&J.quantityLine(x)?'<p class="basis" style="color:#313131">'+esc(J.quantityLine(x))+'</p>':'')+
 (x.note?'<p class="basis" style="color:#313131;text-transform:uppercase;letter-spacing:1.6px;font-size:9.5px">'+esc(x.note)+(x.noteBy?'<br><span style="color:#7C7A75">'+esc(x.noteBy)+'</span>':'')+'</p>':'')+
