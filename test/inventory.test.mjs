@@ -114,6 +114,82 @@ test('Review & Send holds the rooms BEFORE it stores the registration', () => {
   assert.match(rv, /SIYL_STOCK\.release\(\)/, 'a failed submission must give the rooms back');
 });
 
+test('the guest-facing residence capacity matches the ledger: SIX guests', () => {
+  const sandbox = { window: {}, document: { addEventListener() {} } };
+  sandbox.window.document = sandbox.document;
+  new Function('window', 'document', readFileSync(join(ROOT, 'assets/rooms-data.js'), 'utf8'))(sandbox.window, sandbox.document);
+  const res = sandbox.window.SIYL_ROOMS.airbnb.rooms.find((r) => r.slug === 'private-residence');
+  assert.equal(SEED['airbnb-2br/private-residence'].capacity, 6, 'the ledger holds six');
+  assert.match(JSON.stringify(res.facts), /Up to 6 guests/, 'the room page must say six');
+  assert.match(res.story, /six guests/);
+  assert.match(res.status, /up to 6 guests/);
+  assert.ok(!/[Uu]p to 4/.test(JSON.stringify(res)), 'the retired capacity of four is still shown');
+  for (const f of ['journeys.html', 'accommodation.html']) {
+    const src = readFileSync(join(ROOT, f), 'utf8');
+    const block = src.slice(Math.max(0, src.indexOf('Private Residence') - 400), src.indexOf('Private Residence') + 600);
+    assert.ok(!/up to (4|four) adults/i.test(block), f + ' still advertises four');
+  }
+});
+
+test('the Owner-approved Full Experience rooms all have stock behind them', () => {
+  const sandbox = { window: {}, document: { addEventListener() {} } };
+  sandbox.window.document = sandbox.document;
+  new Function('window', 'document', readFileSync(join(ROOT, 'assets/rooms-data.js'), 'utf8'))(sandbox.window, sandbox.document);
+  const FE = sandbox.window.SIYL_FULL_EXPERIENCE;
+  assert.deepEqual(FE, { 'bkk-stay': 'penthouse', prewed: 'heritage-grand-premier',
+    wedstay: 'heritage-grand-premier', kmg: 'italian', ljg: 'viewing-270',
+    kempinski: 'deluxe-balcony-king' });
+  for (const [win, slug] of Object.entries(FE)) {
+    const key = `${win}/${slug}`;
+    assert.ok(SEED[key], key + ' is not stock-controlled');
+    assert.ok(sellable(key) > 0, key + ' has no sellable stock');
+    assert.ok(!SEED[key].heldFor, key + ' is reserved inventory and cannot be a Full Experience default');
+  }
+});
+
+test('transport stays UNCAPPED in this pass — no guessed seat counts', () => {
+  for (const key of ['train', 'mu9632', 'c642', 'return']) {
+    assert.ok(!SEED[key], key + ' must not be stock-controlled yet');
+    assert.ok(!Object.keys(SEED).some((k) => k.startsWith(key + '/')), key + ' has a seeded seat count');
+  }
+  const seedSrc = readFileSync(join(ROOT, 'src/inventory-seed.js'), 'utf8');
+  for (const t of ['MU9632', 'MU5924', 'C642', 'Special Express']) {
+    assert.ok(!seedSrc.includes(t), 'the seed carries a transport capacity for ' + t);
+  }
+});
+
+test('the mode actions are three different weights, and all are 44 px targets', () => {
+  const yj = readFileSync(join(ROOT, 'your-journey.html'), 'utf8');
+  /* FULL EXPERIENCE — a bordered block, not a text link */
+  assert.match(yj, /class="fxcta" id="fxb"/, 'Full Experience must be the primary block');
+  assert.match(yj, /\.fxcta\{[^}]*border:1px solid #313131/, 'the primary action must be a bordered block');
+  assert.match(yj, /\.fxcta\{[^}]*min-height:66px/, 'the primary action must be a real block target');
+  assert.match(yj, /The complete journey/, 'the primary action must say what it does');
+  /* COST SAVING — the quiet alternative */
+  assert.match(yj, /class="fxalt" id="csb"/, 'Cost Saving must be the quiet alternative');
+  assert.match(yj, /\.fxalt\{[^}]*min-height:44px/, 'the alternative must still be a 44 px target');
+  assert.ok(!/\.fxalt\{[^}]*border:1px solid/.test(yj), 'the alternative must not compete with the primary');
+  /* REVIEW & SEND — the solid dark submission, a third thing again */
+  assert.match(yj, /\.cta\{[^}]*background:#313131/, 'Review & Send stays the solid dark action');
+  /* nothing bright, nothing rounded */
+  assert.ok(!/\.fxcta\{[^}]*border-radius/.test(yj));
+  assert.ok(!/\.fxcta\{[^}]*gradient\(to/.test(yj));
+});
+
+test('a photograph and the words after it are separated by a real token', () => {
+  const css = readFileSync(join(ROOT, 'assets/aman.css'), 'utf8');
+  assert.match(css, /--a-gap-media:\s*96px/, 'the media gap token must exist');
+  assert.match(css, /\.a-hero \+ \.a-sec[\s\S]{0,140}margin-top: var\(--a-gap-media\)/,
+    'the section after the hero must open on the media gap');
+  /* and the shorthand that silently deleted the desktop rhythm is gone */
+  assert.ok(!/\.a-lede \{ max-width: 1180px; margin: 0 auto;/.test(css),
+    'the margin shorthand still wipes the vertical rhythm at 900 px');
+  for (const sel of ['.a-lede', '.a-pair', '.a-duo', '.a-close']) {
+    const re = new RegExp('\\' + sel + ' \\{[^}]*margin: 0 auto');
+    assert.ok(!re.test(css), sel + ' still resets its vertical rhythm with a shorthand');
+  }
+});
+
 test('Full Experience falls back to the next available room', () => {
   const sandbox = { window: {}, document: { addEventListener() {} }, localStorage: null };
   sandbox.window.document = sandbox.document;
@@ -121,15 +197,14 @@ test('Full Experience falls back to the next available room', () => {
   new Function('window', 'document', readFileSync(join(ROOT, 'assets/pricing.js'), 'utf8'))(sandbox.window, sandbox.document);
   const P = sandbox.window.SIYL_PRICE;
   /* with everything available the premium choice is unchanged */
-  assert.equal(P.premium('prewed').slug, 'souphattra-majestic');
-  /* the single Majestic Suite is gone → the next best ELIGIBLE room */
-  assert.equal(P.premium('prewed', (s) => s !== 'souphattra-majestic').slug, 'noble-courtyard');
-  /* and again → Heritage Grand Premier */
-  assert.equal(P.premium('prewed', (s) => !['souphattra-majestic', 'noble-courtyard'].includes(s)).slug, 'heritage-grand-premier');
+  assert.equal(P.approved('prewed').slug, 'heritage-grand-premier');
+  /* the approved room is gone → the nearest ELIGIBLE and AVAILABLE one */
+  assert.equal(P.approved('prewed', (s) => s !== 'heritage-grand-premier').slug, 'heritage-executive');
+  /* and again → The Heritage, still the nearest rate rather than the dearest */
+  assert.equal(P.approved('prewed', (s) => !['heritage-grand-premier', 'heritage-executive'].includes(s)).slug, 'heritage');
   /* reserved inventory is still never chosen, however empty the house gets */
-  const last = P.premium('prewed', (s) => s === 'heritage');
-  assert.equal(last.slug, 'heritage');
-  assert.equal(P.premium('prewed', () => false), null, 'a stage with nothing left returns nothing');
+  assert.equal(P.approved('prewed', (s) => s === 'grand-majestic'), null);
+  assert.equal(P.approved('prewed', () => false), null, 'a stage with nothing left returns nothing');
   /* Full Experience must record that stage rather than skip it silently */
   const j = readFileSync(join(ROOT, 'assets/journey.js'), 'utf8');
   assert.match(j, /soldOutStages/);

@@ -59,6 +59,38 @@
     return a;
   }
 
+  /* ==========================================================================
+     THE OWNER-APPROVED FULL EXPERIENCE.
+
+     Full Experience is not "the most expensive room in every house". It is the
+     configuration the Owner selected and reviewed on 09 September 2026: one
+     named room per accommodation stage, plus the four transport products.
+
+       21 – 24 FEB  Sathorn Penthouse                    85 × 3 = 255
+       24 – 25 FEB  Special Express No. 25                       75
+       25 – 27 FEB  Heritage Grand Premier              170 × 2 = 340
+       27 FEB – 01 MAR  Heritage Grand Premier          170 × 1 = 170
+       01 MAR       MU9632 Business                             275
+       01 – 04 MAR  Italian Style Suite                  50 × 3 = 150
+       04 MAR       C642 Business                                85
+       04 – 06 MAR  270° Snow Mountain Viewing Room     100 × 2 = 200
+       06 MAR       MU5924 + MU741 Economy flexible             200
+       06 – 08 MAR  Deluxe Balcony King                 190 × 2 = 380
+                                                       = USD 2,130
+
+     The total is NEVER written down. It is the sum of whatever the engine
+     actually selects, so that when the shared ledger says a preferred room is
+     gone the substitute — and the new total — are both real.
+     ======================================================================== */
+  window.SIYL_FULL_EXPERIENCE = {
+    'bkk-stay':  'penthouse',
+    prewed:      'heritage-grand-premier',
+    wedstay:     'heritage-grand-premier',
+    kmg:         'italian',
+    ljg:         'viewing-270',
+    kempinski:   'deluxe-balcony-king'
+  };
+
   window.SIYL_ROOMS = {
     souphattra: {
       name: 'Souphattra Heritage Vientiane',
@@ -168,18 +200,18 @@
         bagName: 'Private Residence · Vientiane', bagImg: 'assets/images/airbnb/airbnb-01.jpg' }],
       includes: [
         'Two nights, 27 → 28 February and 28 February → 1 March, for the wedding window.',
-        'Complimentary — USD 0 payable by you. Limited availability.',
+        'Complimentary — USD 0 payable by you. Up to six guests in total, and the ledger holds the places live.',
         'Guest Relations coordinates the keys, the arrival and the return personally.',
         'Breakfast, meals and transport in Vientiane are your own.'
       ],
       rooms: [
         { slug: 'private-residence', name: 'Private Residence', cat: 'Alternative stay',
-          desc: 'A warm private residence in central Vientiane, secured for the wedding stay and hosted for a limited number of guests. Guest Relations coordinates the arrangements personally.',
+          desc: 'A warm two-bedroom residence in central Vientiane, secured for the wedding stay and hosted for up to six guests. Guest Relations coordinates the arrangements personally.',
           gallery: [['assets/images/airbnb/airbnb-01.jpg', 'Living and dining'], ['assets/images/airbnb/airbnb-02.jpg', 'The entry'], ['assets/images/airbnb/airbnb-03.jpg', 'The balcony'], ['assets/images/airbnb/airbnb-04.jpg', 'Towards the temple roofs'], ['assets/images/airbnb/airbnb-05.jpg', 'By the window'], ['assets/images/airbnb/airbnb-06.jpg', 'A corner of the living room']],
-          facts: [['Type', 'Private residence'], ['Sleeps', 'Up to 4'], ['Occupancy', 'Up to 4 adults'], ['Location', 'Downtown Vientiane · 300 m to the Mekong Night Market · 800 m to Wat Sisaket']],
-          story: 'A two-bedroom residence in downtown Vientiane, three hundred metres from the Mekong night market and eight hundred from Wat Sisaket. It is offered complimentary for the wedding window to a limited number of guests, and Guest Relations arranges the keys, the arrival and everything around it personally.',
+          facts: [['Type', 'Private residence'], ['Bedrooms', 'Two bedrooms'], ['Occupancy', 'Up to 6 guests'], ['Location', 'Downtown Vientiane · 300 m to the Mekong Night Market · 800 m to Wat Sisaket']],
+          story: 'A two-bedroom residence in downtown Vientiane, three hundred metres from the Mekong night market and eight hundred from Wat Sisaket. It is offered complimentary for the wedding window to up to six guests, and Guest Relations arranges the keys, the arrival and everything around it personally.',
           amenities: ['WiFi', 'Air conditioning', 'Hot water', 'Washer & laundry area', 'Refrigerator', 'Kettle & kitchenette', 'Hair dryer', 'Free parking'],
-          price: null, status: 'Complimentary · limited availability', interest: true }
+          price: null, status: 'Complimentary · up to 6 guests', interest: true }
       ]
     },
 

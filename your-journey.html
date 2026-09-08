@@ -28,7 +28,7 @@ h1{font-family:'PP Editorial Old',serif;font-weight:200;font-size:29px;margin-bo
 .ln{font-family:'PP Editorial Old',serif;font-size:15px;margin-left:auto;white-space:nowrap}
 .q{display:inline-flex;align-items:center;gap:12px;margin-top:10px}
 .q button{width:34px;height:34px;border:1px solid #DAD9D7;background:#fff;cursor:pointer;font-size:15px}
-.acts{display:flex;gap:20px;align-items:center;margin-top:12px;flex-wrap:wrap}
+.acts{display:flex;gap:20px;align-items:center;margin-top:18px;flex-wrap:wrap}
 .rm,.ch{background:none;border:0;border-bottom:1px solid #313131;font:inherit;font-size:10px;letter-spacing:1.6px;text-transform:uppercase;cursor:pointer;padding:8px 0 3px;min-height:44px;color:#313131;text-decoration:none;display:inline-block}
 .rm{border-bottom-color:#C9C4BA;color:#7C7A75}
 .rm:hover{color:#313131;border-bottom-color:#313131}
@@ -38,7 +38,7 @@ h1{font-family:'PP Editorial Old',serif;font-weight:200;font-size:29px;margin-bo
 .ln.free{font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;font-size:9.5px;letter-spacing:1.6px;text-transform:uppercase;color:#7C7A75}
 .modes{display:flex;gap:30px;flex-wrap:wrap;margin:4px 0 14px}
 .selfl{font-size:11.5px;color:#7C7A75;line-height:1.8;margin-top:10px}
-.avline{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75;margin-top:6px}
+.avline{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75;margin:14px 0 0;line-height:1.6}
 .avline.low{color:#8A5A55}
 .heldbox{border-top:1px solid #DAD9D7;margin-top:24px;padding-top:16px;font-size:12px;color:#7C7A75;line-height:1.8}
 .heldbox b{font-weight:400;color:#313131}
@@ -56,8 +56,19 @@ a.nm:hover,a.th:hover{opacity:.7}
 .dlist.ok h3{display:flex;align-items:center;gap:10px}
 .dlist.ok h3 .ck{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;border:1px solid #6B7F63;flex:0 0 auto}
 .dlist.ok h3 .ck::before{content:'';width:8px;height:4px;border-left:1.2px solid #6B7F63;border-bottom:1.2px solid #6B7F63;transform:translateY(-1px) rotate(-45deg)}
-/* the one-tap completion — a quiet secondary action beneath the open decisions */
-.fx{display:inline-block;background:none;border:0;cursor:pointer;font:inherit;font-size:10px;letter-spacing:2.2px;text-transform:uppercase;color:#313131;padding:13px 0;min-height:44px;line-height:18px;background-image:linear-gradient(currentColor,currentColor);background-repeat:no-repeat;background-size:100% 1px;background-position:0 33px;margin:6px 0 4px}
+/* THE MODE ACTIONS — three different jobs, three different weights.
+   FULL EXPERIENCE   the primary way to compose a journey: a bordered block
+   COST SAVING       the quiet alternative: an underlined text action
+   REVIEW & SEND     the final submission: the solid dark block further down
+   Nothing bright, nothing rounded, nothing that reads as e-commerce. */
+.modes{display:block;margin:10px 0 4px}
+.fxcta{display:block;width:100%;max-width:440px;background:#FCFAF6;border:1px solid #313131;color:#313131;cursor:pointer;font:inherit;text-align:left;padding:19px 22px 17px;min-height:66px;transition:background .3s,color .3s}
+.fxcta:hover,.fxcta:focus-visible{background:#313131;color:#F3EEE7}
+.fxcta .fxl{display:block;font-size:11px;letter-spacing:2.4px;text-transform:uppercase;line-height:1.2}
+.fxcta .fxs{display:block;font-size:11.5px;letter-spacing:.2px;text-transform:none;color:#7C7A75;margin-top:7px;line-height:1.5}
+.fxcta:hover .fxs,.fxcta:focus-visible .fxs{color:#CFC7BA}
+.fxalt{display:inline-block;background:none;border:0;cursor:pointer;font:inherit;font-size:10px;letter-spacing:2.2px;text-transform:uppercase;color:#7C7A75;padding:13px 0;min-height:44px;line-height:18px;background-image:linear-gradient(currentColor,currentColor);background-repeat:no-repeat;background-size:100% 1px;background-position:0 33px;margin-top:16px}
+.fxalt:hover{color:#313131}
 .fxnote{font-size:11.5px;color:#7C7A75;line-height:1.7;margin-bottom:6px}
 .fxs{position:fixed;inset:0;background:rgba(30,30,30,.45);display:none;z-index:80}
 .fxo{position:fixed;left:0;right:0;bottom:0;background:#FCFAF6;padding:34px 26px calc(38px + env(safe-area-inset-bottom));display:none;z-index:81;max-width:640px;margin:0 auto}
@@ -151,8 +162,11 @@ SIYL_BAG.badge()}
 function renderDecisions(){
 var box=document.getElementById('dec');if(!box||!window.SIYL_JOURNEY)return;
 var open=SIYL_JOURNEY.open(), self=SIYL_JOURNEY.selfArranged(), any=SIYL_BAG.get().length;
-var modes='<div class="modes"><button type="button" class="fx" id="fxb">Full Experience</button>'+
-          '<button type="button" class="fx" id="csb">Cost Saving Experience</button></div>';
+var modes='<div class="modes">'+
+  '<button type="button" class="fxcta" id="fxb">'+
+    '<span class="fxl">Full Experience</span>'+
+    '<span class="fxs">The complete journey — all ten stages, chosen for you</span></button>'+
+  '<button type="button" class="fxalt" id="csb">Cost Saving Experience</button></div>';
 var selfList=self.length?'<p class="selfl"><b>'+self.length+(self.length===1?' stage is':' stages are')+' self-arranged:</b> '+
   self.map(function(s2){return s2.when+' · '+s2.place}).join(' · ')+'.</p>':'';
 /* Full Experience found a stage with nothing left — never silently skip it */

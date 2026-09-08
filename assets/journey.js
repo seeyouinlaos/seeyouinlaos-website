@@ -128,8 +128,8 @@
       if (window.SIYL_BAG) {
         SIYL_BAG.get().forEach(function (x) { if (x.qty > qty) qty = x.qty; });
       }
-      /* the premium choice is the highest room that is still THERE: the shared
-       * ledger decides, so Full Experience can never select a sold-out room */
+      /* the approved choice, and only if it is still THERE: the shared ledger
+       * decides, so Full Experience can never select a sold-out room */
       var free = function (win) {
         return function (slug) {
           var St = window.SIYL_STOCK;
@@ -141,7 +141,7 @@
       SEG.forEach(function (seg) {
         var id = seg.ids[0];
         if (P.FLAT[id]) { P.items(id).forEach(function (it) { out.push(it); }); return; }
-        var room = P.premium(id, free(id));
+        var room = P.approved(id, free(id));
         if (room) { P.items(id, room.slug).forEach(function (it) { out.push(it); }); return; }
         /* nothing left in this stage at all — say so rather than pretend */
         self.soldOutStages.push(seg);

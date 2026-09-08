@@ -17,6 +17,12 @@
   /* THE CONTENT FRAME — the outer boundary every desktop composition shares */
   --a-frame: 1180px;
   --a-col: 40px;
+  /* THE EDITORIAL SECTION GAP.
+     --a-rhythm is the distance between two text sections. --a-gap-media is the
+     larger, deliberate distance AFTER a photograph, so a hero or a transition
+     band visibly ends before the next section begins. A caption-tight
+     relationship is never what an editorial page wants here. */
+  --a-gap-media: 96px;
 }
 
 /* ---------------------------------------------------------------- header
@@ -274,11 +280,11 @@ a.am { display: block; text-decoration: none; }
   .a-hero .am { height: min(74vh, 660px); }
   .a-hero h1 { font-size: 46px; }
   .a-hero .ah { left: var(--a-gut); bottom: 54px; max-width: 900px; }
-  .a-lede { max-width: 1180px; margin: 0 auto; padding: 0 var(--a-gut); }
+  .a-lede { max-width: 1180px; margin-left: auto; margin-right: auto; padding: 0 var(--a-gut); }
   .a-lede > div { max-width: 560px; }
   .a-lede h2 { font-size: 34px; }
   .a-pair {
-    max-width: 1180px; margin: 0 auto; display: grid;
+    max-width: 1180px; margin-left: auto; margin-right: auto; display: grid;
     grid-template-columns: 1fr 1fr; align-items: center; column-gap: 0;
   }
   .a-pair .am { width: 88%; aspect-ratio: 3 / 4; margin-left: auto; }
@@ -287,9 +293,9 @@ a.am { display: block; text-decoration: none; }
   .a-pair.rev .ac { padding: 0 76px 0 0; }
   .a-pair h2 { font-size: 32px; }
   .a-band { height: min(46vh, 420px); }
-  .a-duo { max-width: 1000px; margin: 0 auto; gap: 40px; }
+  .a-duo { max-width: 1000px; margin-left: auto; margin-right: auto; gap: 40px; }
   .a-duo .am { aspect-ratio: 4 / 3; }
-  .a-close { max-width: 1180px; margin: 0 auto; }
+  .a-close { max-width: 1180px; margin-left: auto; margin-right: auto; }
   .a-close h2 { font-size: 32px; }
 }
 
@@ -299,12 +305,12 @@ a.am { display: block; text-decoration: none; }
 @media (min-width: 600px) and (max-width: 767px) {
   :root { --a-gut: 34px; --a-rhythm: 110px; }
   .a-hero h1 { font-size: 38px; }
-  .a-lede { max-width: 620px; margin: 0 auto; }
-  .a-pair { max-width: 640px; margin: 0 auto; }
+  .a-lede { max-width: 620px; margin-left: auto; margin-right: auto; }
+  .a-pair { max-width: 640px; margin-left: auto; margin-right: auto; }
   .a-pair .am { aspect-ratio: 3 / 2; }
-  .a-duo { max-width: 640px; margin: 0 auto; gap: 20px; }
+  .a-duo { max-width: 640px; margin-left: auto; margin-right: auto; gap: 20px; }
   .a-duo .am { aspect-ratio: 4 / 3; }
-  .a-close, .slist { max-width: 640px; margin: 0 auto; }
+  .a-close, .slist { max-width: 640px; margin-left: auto; margin-right: auto; }
   .a-band { height: 360px; }
 }
 
@@ -318,7 +324,10 @@ a.am { display: block; text-decoration: none; }
 
 /* CHANGE and REMOVE are two independent actions, never one control.
    The rule is drawn under the words while the target stays 44 px tall. */
-#items .acts { display: flex; align-items: center; gap: 34px; margin-top: 14px; flex-wrap: wrap; }
+#items .acts { display: flex; align-items: center; gap: 34px; margin-top: 18px; flex-wrap: wrap; }
+/* availability sits after the inclusions and before the actions, with its own
+   air on both sides — one typography rule and one spacing rule, every width */
+#items .avline { margin: 14px 0 0; }
 #items .acts .ch, #items .acts .rm {
   display: inline-block; border: 0; background: none; cursor: pointer;
   font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif;
@@ -411,9 +420,9 @@ a.am { display: block; text-decoration: none; }
    Below 768 px nothing here applies — the approved 390 px composition, in
    which the hero and the transition band are deliberately full-bleed, stands.
    ========================================================================== */
-@media (min-width: 768px) { :root { --a-gut: 44px; --a-rhythm: 118px; --a-col: 44px; } }
-@media (min-width: 900px) { :root { --a-gut: 64px; --a-rhythm: 150px; --a-col: 64px; } }
-@media (min-width: 1600px) { :root { --a-frame: 1280px; } }
+@media (min-width: 768px) { :root { --a-gut: 44px; --a-rhythm: 118px; --a-col: 44px; --a-gap-media: 128px; } }
+@media (min-width: 900px) { :root { --a-gut: 64px; --a-rhythm: 150px; --a-col: 64px; --a-gap-media: 150px; } }
+@media (min-width: 1600px) { :root { --a-frame: 1280px; --a-gap-media: 168px; } }
 
 @media (min-width: 768px) {
   /* the frame itself — one declaration, every composition */
@@ -486,3 +495,14 @@ a.am { display: block; text-decoration: none; }
 @media (min-width: 768px) {
   body:has(#items) main, body:has(.vars) main { max-width: var(--a-frame) !important; }
 }
+
+
+/* ============================================================================
+   IMAGE → SECTION. A photograph and the words that follow it are two different
+   things, and the page must say so. Every section that follows the hero or a
+   transition band opens on --a-gap-media rather than on the ordinary rhythm,
+   at every width including the phone. Nothing here touches the image itself.
+   ========================================================================== */
+.a-hero + .a-sec,
+.a-sec.tight + .a-sec,
+.a-sec:has(> .a-band) + .a-sec { margin-top: var(--a-gap-media); }

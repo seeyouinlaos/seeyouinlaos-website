@@ -184,6 +184,36 @@
       return free.reduce(function (m, r) { return r.rate > m.rate ? r : m; }, free[0]);
     },
 
+    /* THE FULL EXPERIENCE CHOICE for one accommodation stage.
+     * The Owner's approved room comes first. If the shared ledger says it is
+     * gone, the choice falls to the nearest ELIGIBLE and AVAILABLE category by
+     * rate — the closest to what was approved, and the gentler of two equals —
+     * never to whatever happens to be most expensive, and never to reserved
+     * inventory. `available` is the ledger's predicate; without it every
+     * eligible room counts as available and the approved room always wins. */
+    approved: function (windowId, available) {
+      var at = locate(windowId);
+      if (!at) return null;
+      var wish = (window.SIYL_FULL_EXPERIENCE || {})[windowId];
+      var open = at.stay.rooms.filter(function (r) { return !r.reserved && r.rate != null && !r.interest; });
+      if (!open.length) return null;
+      var free = typeof available === 'function'
+        ? open.filter(function (r) { return available(r.slug); })
+        : open;
+      if (!free.length) return null;                 /* the stage is sold out */
+      var first = null;
+      open.forEach(function (r) { if (r.slug === wish) first = r; });
+      if (!first) return this.premium(windowId, available);   /* no approved room here */
+      for (var i = 0; i < free.length; i++) if (free[i].slug === wish) return free[i];
+      /* the approved room is gone — the nearest rate, cheaper side first */
+      return free.reduce(function (best, r) {
+        var db = Math.abs(best.rate - first.rate), dr = Math.abs(r.rate - first.rate);
+        if (dr < db) return r;
+        if (dr === db) return r.rate < best.rate ? r : best;
+        return best;
+      }, free[0]);
+    },
+
     /* does this product have a genuine alternative to change to? */
     hasVariants: function (windowId) {
       var at = locate(windowId);

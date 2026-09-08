@@ -244,9 +244,11 @@ test('Full Experience lines come from the single pricing source, transport inclu
   const all = ['bkk-stay', 'train', 'prewed', 'wedstay', 'mu9632', 'kmg', 'c642', 'ljg', 'return', 'kempinski']
     .flatMap((w) => P.FLAT[w] ? P.items(w) : P.items(w, P.premium(w).slug));
   assert.equal(all.length, 10, 'ten stages, ten lines');
-  /* Full Experience from empty, at the current canonical rates */
+  /* the premium-max sum still exists as arithmetic; it is simply no longer
+     what Full Experience selects */
   assert.equal(total(all), 255 + 75 + 580 + 290 + 275 + 261 + 85 + 420 + 200 + 380);
   assert.equal(total(all), 2821);
+  assert.notEqual(total(all), 2130);
 });
 
 test('Temple Ceremony is self-pay on Review & Send, the other three hosted, never a USD line', () => {
@@ -275,32 +277,89 @@ test('Snow Mountain Viewing Room carries its own canonical photograph, used nowh
    FULL EXPERIENCE IS ONE MODE — the same canonical configuration whatever the
    guest arrived from, and the Cost Saving residence never survives it.
    ========================================================================== */
+const STAGES = ['bkk-stay', 'train', 'prewed', 'wedstay', 'mu9632', 'kmg', 'c642', 'ljg', 'return', 'kempinski'];
+const fullExperience = (available) =>
+  STAGES.flatMap((w) => (P.FLAT[w] ? P.items(w) : P.items(w, P.approved(w, available && available(w)).slug)));
+
 test('Full Experience is ONE canonical configuration, from any starting point', () => {
-  const canonical = ['bkk-stay', 'train', 'prewed', 'wedstay', 'mu9632', 'kmg', 'c642', 'ljg', 'return', 'kempinski']
-    .flatMap((w) => (P.FLAT[w] ? P.items(w) : P.items(w, P.premium(w).slug)));
+  const canonical = fullExperience();
   assert.equal(canonical.length, 10);
-  assert.equal(total(canonical), 2821);
-  /* stage 04 is the Souphattra Majestic Suite at one payable night — never the
+  assert.equal(total(canonical), 2130);
+  /* stage 04 is a Souphattra room at one payable night — never the
      complimentary residence that answers the same stage under Cost Saving */
   const wed = canonical.find((x) => x.id === 'wedstay');
   assert.ok(wed, 'the wedding stage is answered by a Souphattra room');
-  assert.equal(wed.price, 290);
-  assert.equal(wed.room, 'souphattra-majestic');
+  assert.equal(wed.price, 170);
+  assert.equal(wed.room, 'heritage-grand-premier');
   assert.ok(!canonical.some((x) => x.id === 'airbnb-2br'), 'no complimentary residence in Full Experience');
   /* and no reserved inventory anywhere in it */
-  for (const w of ['prewed', 'wedstay', 'kmg', 'ljg']) assert.ok(!P.premium(w).reserved);
+  for (const w of ['prewed', 'wedstay', 'kmg', 'ljg']) assert.ok(!P.approved(w).reserved);
 });
 
-test('the ten canonical Full Experience amounts', () => {
-  const expect = { 'bkk-stay': 255, train: 75, prewed: 580, wedstay: 290, mu9632: 275,
-                   kmg: 261, c642: 85, ljg: 420, 'return': 200, kempinski: 380 };
+/* OWNER-APPROVED 09 September 2026. Full Experience is a named configuration,
+   not "the most expensive room in every house". */
+test('the ten Owner-approved Full Experience selections sum to USD 2,130', () => {
+  const expect = {
+    'bkk-stay':  { room: 'penthouse',              rate: 85,  pay: 3, amount: 255 },
+    train:       {                                             amount: 75 },
+    prewed:      { room: 'heritage-grand-premier', rate: 170, pay: 2, amount: 340 },
+    wedstay:     { room: 'heritage-grand-premier', rate: 170, pay: 1, amount: 170 },
+    mu9632:      {                                             amount: 275 },
+    kmg:         { room: 'italian',                rate: 50,  pay: 3, amount: 150 },
+    c642:        {                                             amount: 85 },
+    ljg:         { room: 'viewing-270',            rate: 100, pay: 2, amount: 200 },
+    'return':    {                                             amount: 200 },
+    kempinski:   { room: 'deluxe-balcony-king',    rate: 190, pay: 2, amount: 380 }
+  };
   let sum = 0;
-  for (const [w, amount] of Object.entries(expect)) {
-    const line = P.FLAT[w] ? P.items(w)[0] : P.items(w, P.premium(w).slug)[0];
-    assert.equal(line.price, amount, w);
-    sum += amount;
+  for (const [w, e] of Object.entries(expect)) {
+    if (P.FLAT[w]) { assert.equal(P.items(w)[0].price, e.amount, w); sum += e.amount; continue; }
+    const chosen = P.approved(w);
+    assert.equal(chosen.slug, e.room, w + ' must select the Owner-approved room');
+    const q = P.quote(w, chosen.slug);
+    assert.equal(q.rate, e.rate, w + ' rate');
+    assert.equal(q.pay, e.pay, w + ' payable nights');
+    assert.equal(q.total, e.amount, w + ' amount');
+    sum += e.amount;
   }
-  assert.equal(sum, 2821);
+  assert.equal(sum, 2130);
+  /* 255 + 75 + 340 + 170 + 275 + 150 + 85 + 200 + 200 + 380 */
+  assert.equal(255 + 75 + 340 + 170 + 275 + 150 + 85 + 200 + 200 + 380, 2130);
+  /* the superseded premium-max configuration is NOT what the mode produces */
+  assert.notEqual(sum, 2821);
+});
+
+test('the total is never hard-coded: a sold-out room changes it', () => {
+  /* Heritage Grand Premier gone in the PRE-WEDDING window only */
+  const gone = (win) => (win === 'prewed' ? (slug) => slug !== 'heritage-grand-premier' : null);
+  const lines = fullExperience(gone);
+  assert.equal(lines.length, 10, 'still ten stages');
+  const pre = lines.find((x) => x.id === 'prewed');
+  assert.notEqual(pre.room, 'heritage-grand-premier', 'the sold-out room must not be selected');
+  assert.equal(pre.room, 'heritage-executive', 'the nearest available approved option');
+  assert.equal(pre.price, 310);
+  /* the two Vientiane windows are independent stock — the wedding stay keeps
+     the approved room because it is a different window */
+  const wed = lines.find((x) => x.id === 'wedstay');
+  assert.equal(wed.room, 'heritage-grand-premier');
+  assert.equal(wed.price, 170);
+  assert.equal(total(lines), 2130 - 340 + 310);
+  assert.equal(total(lines), 2100);
+  assert.notEqual(total(lines), 2130, 'the canonical total must not survive a substitution');
+});
+
+test('the approved room is preferred, and the fallback is the nearest, not the dearest', () => {
+  assert.equal(P.approved('prewed').slug, 'heritage-grand-premier');
+  assert.equal(P.approved('prewed', (s) => s !== 'heritage-grand-premier').slug, 'heritage-executive');
+  assert.equal(P.approved('kmg').slug, 'italian');
+  assert.equal(P.approved('kmg', (s) => s !== 'italian').slug, 'milano');
+  assert.equal(P.approved('ljg').slug, 'viewing-270');
+  assert.equal(P.approved('ljg', (s) => s !== 'viewing-270').slug, 'soup-pool-270');
+  /* it never reaches for the most expensive suite just because it is there */
+  assert.notEqual(P.approved('prewed', (s) => s !== 'heritage-grand-premier').slug, 'souphattra-majestic');
+  /* reserved inventory is never eligible, however empty the house gets */
+  assert.equal(P.approved('prewed', (s) => s === 'grand-majestic'), null);
+  assert.equal(P.approved('prewed', () => false), null, 'a stage with nothing left returns nothing');
 });
 
 /* ==========================================================================
