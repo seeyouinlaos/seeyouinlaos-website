@@ -241,8 +241,7 @@
         [T + 'c642-business-cabin-2.jpg', 'Business Class cabin'],
         [T + 'c642-business-seat.jpg', 'Business Class seat · reclined'],
         [T + 'c642-train-forest.jpg', 'The Kunming – Lijiang line'],
-        [T + 'c642-gorge-bridge.jpg', 'The line across the gorge'],
-        [T + 'c642-business-lounge-kunming.jpg', 'Kunming station']
+        [T + 'c642-gorge-bridge.jpg', 'The line across the gorge']
       ]
     },
 

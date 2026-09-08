@@ -338,11 +338,14 @@ test('transport copy never invents, and never resurrects a superseded service', 
   for (const invented of ['Wi-Fi', 'WiFi', 'lounge', 'Lounge', 'chauffeur']) {
     assert.ok(!flat.includes(invented), 'the night train claims ' + invented);
   }
-  /* and no lounge or chauffeur promised on either flight */
-  for (const k of ['mu9632', 'return']) {
+  /* and no lounge or chauffeur promised on any leg — in words OR in a
+     photograph. A lounge picture is a promise the source does not make. */
+  for (const k of ['train', 'mu9632', 'c642', 'return']) {
     const f = JSON.stringify(sandbox.window.SIYL_TRANSPORT[k]);
     assert.ok(!/lounge|chauffeur|priority boarding/i.test(f), k + ' promises an unsourced service');
   }
+  const pages = readFileSync(join(ROOT, 'journeys.html'), 'utf8');
+  assert.ok(!pages.includes('c642-business-lounge-kunming'), 'the lounge photograph is still on Journeys');
 });
 
 test('the Owner-overridden transport facts are the ones on the page', () => {
