@@ -174,6 +174,11 @@ test('the mode actions are three different weights, and all are 44 px targets', 
   /* nothing bright, nothing rounded */
   assert.ok(!/\.fxcta\{[^}]*border-radius/.test(yj));
   assert.ok(!/\.fxcta\{[^}]*gradient\(to/.test(yj));
+  /* the CTA's own classes must not collide with the confirmation overlay:
+     .fxs is the fixed scrim and .fxo is the dialogue */
+  assert.match(yj, /class="fxsub"/, 'the CTA sub-line must not reuse the scrim class');
+  assert.ok(!/\.fxcta \.fxs\{/.test(yj), '.fxs is the overlay scrim, not a CTA part');
+  assert.ok(!/class="fxs"[^>]*>The complete/.test(yj));
 });
 
 test('a photograph and the words after it are separated by a real token', () => {

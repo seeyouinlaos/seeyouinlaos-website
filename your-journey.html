@@ -65,8 +65,8 @@ a.nm:hover,a.th:hover{opacity:.7}
 .fxcta{display:block;width:100%;max-width:440px;background:#FCFAF6;border:1px solid #313131;color:#313131;cursor:pointer;font:inherit;text-align:left;padding:19px 22px 17px;min-height:66px;transition:background .3s,color .3s}
 .fxcta:hover,.fxcta:focus-visible{background:#313131;color:#F3EEE7}
 .fxcta .fxl{display:block;font-size:11px;letter-spacing:2.4px;text-transform:uppercase;line-height:1.2}
-.fxcta .fxs{display:block;font-size:11.5px;letter-spacing:.2px;text-transform:none;color:#7C7A75;margin-top:7px;line-height:1.5}
-.fxcta:hover .fxs,.fxcta:focus-visible .fxs{color:#CFC7BA}
+.fxcta .fxsub{display:block;font-size:11.5px;letter-spacing:.2px;text-transform:none;color:#7C7A75;margin-top:7px;line-height:1.5}
+.fxcta:hover .fxsub,.fxcta:focus-visible .fxsub{color:#CFC7BA}
 .fxalt{display:inline-block;background:none;border:0;cursor:pointer;font:inherit;font-size:10px;letter-spacing:2.2px;text-transform:uppercase;color:#7C7A75;padding:13px 0;min-height:44px;line-height:18px;background-image:linear-gradient(currentColor,currentColor);background-repeat:no-repeat;background-size:100% 1px;background-position:0 33px;margin-top:16px}
 .fxalt:hover{color:#313131}
 .fxnote{font-size:11.5px;color:#7C7A75;line-height:1.7;margin-bottom:6px}
@@ -165,7 +165,7 @@ var open=SIYL_JOURNEY.open(), self=SIYL_JOURNEY.selfArranged(), any=SIYL_BAG.get
 var modes='<div class="modes">'+
   '<button type="button" class="fxcta" id="fxb">'+
     '<span class="fxl">Full Experience</span>'+
-    '<span class="fxs">The complete journey — all ten stages, chosen for you</span></button>'+
+    '<span class="fxsub">The complete journey — all ten stages, chosen for you</span></button>'+
   '<button type="button" class="fxalt" id="csb">Cost Saving Experience</button></div>';
 var selfList=self.length?'<p class="selfl"><b>'+self.length+(self.length===1?' stage is':' stages are')+' self-arranged:</b> '+
   self.map(function(s2){return s2.when+' · '+s2.place}).join(' · ')+'.</p>':'';
