@@ -3,6 +3,7 @@
 .git
 src
 test
+docs
 dist
 build
 node_modules
