@@ -4,81 +4,136 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<title>See You In Laos · Accommodation Presentation</title>
+<title>Stays · See You In Laos</title>
 <link rel="stylesheet" href="assets/recon.css">
+<link rel="stylesheet" href="assets/aman.css">
+<style>
+/* the night-by-night list: hairline rows, no cards, no chrome */
+.slist { padding: 0 var(--a-gut); max-width: 1180px; margin: 0 auto; }
+.slist a { display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 14px;
+  border-top: 1px solid var(--a-line); padding: 20px 0 18px; text-decoration: none; color: var(--a-ink); }
+.slist a:last-child { border-bottom: 1px solid var(--a-line); }
+.slist .sn { font-family: 'PP Editorial Old', Georgia, serif; font-weight: 200; font-size: 19px; line-height: 1.3; }
+.slist .sw { font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--a-mute); white-space: nowrap; }
+.slist .sc { grid-column: 1 / -1; font-size: 12.5px; color: #4A4A4A; margin-top: 4px; }
+@media (min-width: 900px) { .slist .sn { font-size: 23px; } .slist a { padding: 28px 0 24px; } }
+</style>
 </head>
 <body>
 <main>
-  <!-- accommodation overview: opener + suite list + shared inclusions + detail pattern -->
-  <section class="hero">
-    <div class="ph" data-ph="Photography to follow"></div>
-    <div class="hero-copy">
-      <p class="eyebrow">Accommodation</p>
-      <h1 class="t-display">Rooms introduced in one calm line</h1>
+
+  <section class="a-hero">
+    <div class="am" style="background-image:url(assets/images/souphattra/heritage-courtyard-front.jpg)" role="img" aria-label="The courtyard front of Souphattra Heritage, Vientiane"></div>
+    <div class="ah">
+      <p class="a-eyebrow">Stays</p>
+      <h1>Six places<br>along one journey.</h1>
     </div>
   </section>
 
-  <section class="section content">
-    <div class="centered">
-      <p class="eyebrow">Overview</p>
-      <h2>Every room described as a place, not a product</h2>
-      <p class="t-body" style="margin-left:auto;margin-right:auto">Neutral placeholder prose. Suites follow as hairline-separated rows, each with facts and a floor-plan link.</p>
+  <section class="a-sec a-lede">
+    <div>
+      <p class="a-eyebrow">21 February – 8 March 2027</p>
+      <h2>Each stay is a place first, and a decision second.</h2>
+      <p>Six houses carry the journey from Bangkok to Vientiane, on to Kunming and Lijiang, and back to Bangkok. Every room is shown with its own photography and its own facts; the choice is always yours, and it is always reversible.</p>
+      <a class="a-link" href="journeys.html">See the stays in your journey</a>
     </div>
   </section>
 
-  <!-- suite rows: hairline top, media + copy + fact bullets -->
-  <section class="section content">
-    <article class="suite">
-      <div class="ph r-32" data-ph="Photography to follow"></div>
-      <div class="copy">
-        <p class="eyebrow">Category one</p>
-        <h2>Neutral suite name one</h2>
-        <p class="t-body">One neutral paragraph on light, view and materials.</p>
-        <p class="facts">Total 00 sqm · Interior 00 sqm · Terrace 00 sqm · Sleeps 2</p>
-        <a class="t-link" href="#detail">View this suite</a>
-      </div>
-    </article>
-    <article class="suite">
-      <div class="ph r-32" data-ph="Photography to follow"></div>
-      <div class="copy">
-        <p class="eyebrow">Category two</p>
-        <h2>Neutral suite name two</h2>
-        <p class="t-body">One neutral paragraph, identical structure, different scene.</p>
-        <p class="facts">Total 00 sqm · Interior 00 sqm · Terrace 00 sqm · Sleeps 3</p>
-        <a class="t-link" href="#detail">View this suite</a>
-      </div>
-    </article>
-  </section>
-
-  <!-- shared inclusions: three columns of hairline list items -->
-  <section class="section content">
-    <p class="eyebrow" style="margin-bottom:22px">All rooms include</p>
-    <div class="include">
-      <div><h3>Comfort</h3><ul><li>Neutral inclusion item</li><li>Neutral inclusion item</li><li>Neutral inclusion item</li></ul></div>
-      <div><h3>Service</h3><ul><li>Neutral inclusion item</li><li>Neutral inclusion item</li><li>Neutral inclusion item</li></ul></div>
-      <div><h3>Detail</h3><ul><li>Neutral inclusion item</li><li>Neutral inclusion item</li><li>Neutral inclusion item</li></ul></div>
+  <section class="a-sec acar" aria-label="The six stays">
+    <div class="a-head">
+      <p class="a-eyebrow">The houses</p>
+      <h2>Where you sleep on this journey.</h2>
+    </div>
+    <div class="atrk">
+      <article class="aslide">
+        <div class="am" style="background-image:url(assets/images/penthouse/exterior-golden-hour.jpg)" role="img" aria-label="The Sathorn Penthouse building at golden hour, Bangkok"></div>
+        <div class="ac">
+          <p class="an">Bangkok · 21 – 24 February</p>
+          <h3>Sathorn Penthouse</h3>
+          <p>A whole home in Sathorn — six bedrooms, a double-height living room and a garden balcony, for up to twelve adults.</p>
+          <a class="a-more" href="room.html?stay=sathorn&amp;room=penthouse">Discover more</a>
+        </div>
+      </article>
+      <article class="aslide">
+        <div class="am" style="background-image:url(assets/images/souphattra/heritage-courtyard-pool.jpg)" role="img" aria-label="The pool courtyard at Souphattra Heritage, Vientiane"></div>
+        <div class="ac">
+          <p class="an">Vientiane · 25 February – 1 March</p>
+          <h3>Souphattra Heritage</h3>
+          <p>The heritage house at the centre of the wedding weekend — seven room and suite categories around one courtyard.</p>
+          <a class="a-more" href="journeys.html#j-prewed">Discover more</a>
+        </div>
+      </article>
+      <article class="aslide">
+        <div class="am" style="background-image:url(assets/images/airbnb/airbnb-01.jpg)" role="img" aria-label="The living room of the private residence in downtown Vientiane"></div>
+        <div class="ac">
+          <p class="an">Vientiane · 27 February – 1 March</p>
+          <h3>Private Residence</h3>
+          <p>An alternative stay in downtown Vientiane for up to four adults — complimentary, with limited availability.</p>
+          <a class="a-more" href="room.html?stay=airbnb&amp;room=private-residence">Discover more</a>
+        </div>
+      </article>
+      <article class="aslide">
+        <div class="am" style="background-image:url(assets/images/journey/kunming-01.jpg)" role="img" aria-label="A designer loft interior at Wanxiang Yueju, Kunming"></div>
+        <div class="ac">
+          <p class="an">Kunming · 1 – 4 March</p>
+          <h3>Wanxiang Yueju</h3>
+          <p>Designer lofts and suites in the city of eternal spring — twelve categories, each one a different room.</p>
+          <a class="a-more" href="journeys.html#j-kmg">Discover more</a>
+        </div>
+      </article>
+      <article class="aslide">
+        <div class="am" style="background-image:url(assets/images/journey/lijiang-01.jpg)" role="img" aria-label="A room at Luye Baisha looking out to the Lijiang valley"></div>
+        <div class="ac">
+          <p class="an">Lijiang · 4 – 6 March</p>
+          <h3>Luye Baisha</h3>
+          <p>Below Jade Dragon Snow Mountain in Baisha — courtyards, mountain views and nine room categories.</p>
+          <a class="a-more" href="journeys.html#j-ljg">Discover more</a>
+        </div>
+      </article>
+      <article class="aslide">
+        <div class="am" style="background-image:url(assets/images/kempinski/facade-garden.jpg)" role="img" aria-label="The garden facade of Siam Kempinski Bangkok"></div>
+        <div class="ac">
+          <p class="an">Bangkok · 6 – 8 March</p>
+          <h3>Siam Kempinski</h3>
+          <p>Two closing nights in a garden hotel behind Siam Paragon, breakfast included.</p>
+          <a class="a-more" href="journeys.html#j-kempinski">Discover more</a>
+        </div>
+      </article>
+    </div>
+    <div class="arow">
+      <div class="arail" aria-hidden="true"><i></i></div>
+      <div class="anav"><button type="button" data-a="prev" aria-label="Previous stay"></button><button type="button" data-a="next" aria-label="Next stay"></button></div>
     </div>
   </section>
 
-  <!-- suite detail pattern: gallery duo + prose + discreet decision -->
-  <section class="section content" id="detail">
-    <hr class="hairline" style="margin-bottom:44px">
-    <div class="duo" style="margin-bottom:44px">
-      <div class="ph r-45" data-ph="Photography to follow"></div>
-      <div class="ph r-45" data-ph="Photography to follow"></div>
-    </div>
-    <div class="split">
-      <div class="copy">
-        <p class="eyebrow">Suite detail</p>
-        <h2>The chosen suite, told fully</h2>
-        <p class="t-body">Two neutral sentences, then the decision block: quiet, factual, last.</p>
-        <p class="facts">Dates 00–00 · 3 nights · 000 per guest, per night</p>
-        <a class="t-link" href="plan.html">Select this stay</a>
-      </div>
-      <div class="ph r-11" data-ph="Photography to follow"></div>
+  <section class="a-sec tight">
+    <div class="a-band" style="background-image:url(assets/images/souphattra/heritage-courtyard-aerial.jpg)" role="img" aria-label="Souphattra Heritage from above"></div>
+  </section>
+
+  <section class="a-sec">
+    <div class="a-lede" style="margin-bottom:34px"><div>
+      <p class="a-eyebrow">Night by night</p>
+      <h2>The journey, in order.</h2>
+    </div></div>
+    <div class="slist">
+      <a href="room.html?stay=sathorn&amp;room=penthouse"><span class="sn">Sathorn Penthouse</span><span class="sw">21 – 24 Feb</span><span class="sc">Bangkok · 3 nights · up to 12 adults</span></a>
+      <a href="journeys.html#j-prewed"><span class="sn">Souphattra Heritage · Pre-Wedding</span><span class="sw">25 – 27 Feb</span><span class="sc">Vientiane · 2 nights, a fixed window</span></a>
+      <a href="journeys.html#j-wedstay"><span class="sn">Souphattra Heritage · Wedding Stay</span><span class="sw">27 Feb – 1 Mar</span><span class="sc">Vientiane · 2 nights, a fixed window · a private residence is offered as an alternative</span></a>
+      <a href="journeys.html#j-kmg"><span class="sn">Wanxiang Yueju</span><span class="sw">1 – 4 Mar</span><span class="sc">Kunming · 3 nights</span></a>
+      <a href="journeys.html#j-ljg"><span class="sn">Luye Baisha</span><span class="sw">4 – 6 Mar</span><span class="sc">Lijiang · 2 nights, a fixed window</span></a>
+      <a href="journeys.html#j-kempinski"><span class="sn">Siam Kempinski</span><span class="sw">6 – 8 Mar</span><span class="sc">Bangkok · 2 nights · breakfast included</span></a>
     </div>
   </section>
+
+  <section class="a-sec a-close">
+    <hr>
+    <p class="a-eyebrow">Your Invitation</p>
+    <h2>Choose the rooms that are yours.</h2>
+    <a class="a-cta" href="journeys.html">Plan your journey</a>
+  </section>
+
 </main>
 <script src="assets/recon.js"></script>
+<script src="assets/aman.js"></script>
 </body>
 </html>

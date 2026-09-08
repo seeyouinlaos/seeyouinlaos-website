@@ -1,0 +1,284 @@
+/* ============================================================================
+   SEE YOU IN LAOS — the shared Aman-grammar layer.
+   Loaded by EVERY page (editorial shell and shop shell) so the site is ONE
+   visual website: one header, one full-screen menu, one horizontal carousel,
+   one footer. Original implementation; geometry follows the owner-supplied
+   mobile references. 390 px is the primary composition, desktop adapts.
+   ========================================================================== */
+:root {
+  --a-ground: #F3EEE7;
+  --a-ink: #313131;
+  --a-mute: #7C7A75;
+  --a-line: #DAD9D7;
+  --a-panel: #FAF7F2;
+  --a-red: #8A5A55;
+  --a-gut: 22px;
+  --a-rhythm: 76px;
+}
+
+/* ---------------------------------------------------------------- header
+   One header everywhere: hamburger · centred wordmark · quiet bag.
+   Generous vertical breathing room, 44×44 targets, no toolbar, no clutter. */
+header.hd {
+  position: sticky; top: 0; z-index: 60;
+  background: var(--a-ground);
+  padding: 26px var(--a-gut) 22px;
+}
+header.hd .bd, header.hd .brand { letter-spacing: .3px; }
+header.hd .hd-row { padding: 0 !important; }
+header.hd::after {
+  content: ''; display: block; position: absolute; left: var(--a-gut); right: var(--a-gut);
+  bottom: 0; height: 1px; background: var(--a-line); opacity: .8;
+}
+header.hd { border-bottom: 0 !important; }
+
+/* ------------------------------------------------------------ full-screen menu
+   Single column · large breathing room · hairline rows · chevron where a
+   submenu exists. No two-column mega-menu, no dashboard nav, no language bar. */
+.a-scrim { position: fixed; inset: 0; background: rgba(30,30,30,.28); z-index: 88; opacity: 0; pointer-events: none; transition: opacity .45s; }
+.a-menu {
+  position: fixed; inset: 0; z-index: 89; background: var(--a-ground);
+  overflow-y: auto; -webkit-overflow-scrolling: touch;
+  opacity: 0; visibility: hidden; transform: translateY(-10px);
+  transition: opacity .5s cubic-bezier(.4,0,.2,1), transform .5s cubic-bezier(.4,0,.2,1), visibility .5s;
+}
+body.a-open { overflow: hidden; }
+body.a-open .a-menu { opacity: 1; visibility: visible; transform: none; }
+body.a-open .a-scrim { opacity: 1; pointer-events: auto; }
+.a-mhd { display: flex; align-items: center; justify-content: space-between; padding: 26px var(--a-gut) 22px; }
+.a-mhd .a-brand { font-family: 'PP Editorial Old', Georgia, serif; font-weight: 200; font-size: 19px; letter-spacing: .3px; color: var(--a-ink); text-decoration: none; }
+.a-mhd .a-brand .dot { color: var(--a-red); }
+.a-mx { background: none; border: 0; cursor: pointer; min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: flex-end; font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 10px; letter-spacing: 2.2px; text-transform: uppercase; color: var(--a-mute); }
+.a-mnav { padding: 18px var(--a-gut) 0; }
+.a-mrow { display: flex; align-items: center; border-top: 1px solid var(--a-line); }
+.a-mrow:last-of-type { border-bottom: 1px solid var(--a-line); }
+.a-mrow > a {
+  flex: 1; display: flex; align-items: center; min-height: 62px;
+  font-family: 'PP Editorial Old', Georgia, serif; font-weight: 200; font-size: 23px;
+  letter-spacing: .3px; color: var(--a-ink); text-decoration: none;
+}
+.a-mrow > a[aria-current] { color: var(--a-mute); }
+.a-ch { background: none; border: 0; cursor: pointer; width: 44px; min-height: 44px; color: var(--a-mute); font-size: 16px; line-height: 1; display: flex; align-items: center; justify-content: flex-end; transition: transform .35s, color .3s; }
+.a-ch[aria-expanded="true"] { transform: rotate(90deg); color: var(--a-ink); }
+.a-msub { display: none; padding: 2px 0 20px 2px; }
+.a-msub.on { display: block; }
+.a-msub a {
+  display: flex; align-items: center; min-height: 40px; text-decoration: none;
+  font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 11px;
+  letter-spacing: 1.9px; text-transform: uppercase; color: var(--a-mute);
+}
+.a-msub a:hover { color: var(--a-ink); }
+.a-mfoot { padding: 40px var(--a-gut) 60px; }
+.a-mfoot p { font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 10px; letter-spacing: 2.2px; text-transform: uppercase; color: var(--a-mute); margin-bottom: 10px; }
+.a-mfoot a { display: block; font-size: 12.5px; color: var(--a-ink); text-decoration: none; line-height: 2.2; min-height: 30px; }
+
+/* one eyebrow, one underlined link — for every surface */
+.a-eyebrow {
+  font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 10px;
+  letter-spacing: 2.2px; text-transform: uppercase; color: var(--a-mute); line-height: 1.6;
+}
+/* the rule sits directly under the words (a 44 px target keeps its own padding,
+   so the line is drawn as a background, never as the bottom of a tall box) */
+.a-link, .a-more, .aslide .a-more {
+  display: inline-block; font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif;
+  font-size: 10px; letter-spacing: 2.2px; text-transform: uppercase; color: var(--a-ink);
+  text-decoration: none; border: 0; line-height: 18px; padding: 13px 0; min-height: 44px;
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat; background-size: 100% 1px; background-position: 0 33px;
+  transition: opacity .3s;
+}
+.a-link:hover, .a-more:hover { opacity: .55; }
+
+/* ------------------------------------------------------------------ carousel
+   ONE horizontal grammar for every discovery rail on the site.
+   · image + title + copy travel as ONE slide
+   · the neighbouring slide always peeks into the viewport
+   · the ACTIVE slide is full colour; every other slide carries a pale veil
+   · a thin position indicator below, active segment moving with the snap
+   No dots, no pagination numbers, no generic scrollbar. */
+.acar { position: relative; }
+.acar .a-head { padding: 0 var(--a-gut); margin-bottom: 22px; }
+.acar .a-eyebrow { margin-bottom: 12px; }
+.acar .a-head h2 { font-family: 'PP Editorial Old', Georgia, serif; font-weight: 200; font-size: 26px; line-height: 1.25; letter-spacing: .3px; margin: 0; }
+.acar .a-head p { font-size: 13px; line-height: 1.8; color: #4A4A4A; max-width: 30em; margin-top: 12px; }
+
+.atrk {
+  display: flex; gap: 14px;
+  overflow-x: auto; scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain;
+  scrollbar-width: none; padding: 0 var(--a-gut); scroll-padding-left: var(--a-gut);
+}
+.atrk::-webkit-scrollbar { display: none; }
+.atrk:focus-visible { outline: 1px solid var(--a-ink); outline-offset: 6px; }
+.aslide { flex: 0 0 79%; scroll-snap-align: start; scroll-snap-stop: always; }
+.aslide .am { position: relative; width: 100%; aspect-ratio: 3 / 4; background: #E7E3DB center/cover no-repeat; overflow: hidden; }
+/* the pale veil — an actual white plane over the inactive photograph, not a
+   subtle opacity change */
+.aslide .am::after {
+  content: ''; position: absolute; inset: 0; background: #F6F2EC;
+  opacity: .74; transition: opacity .55s cubic-bezier(.4,0,.2,1);
+}
+.aslide.on .am::after { opacity: 0; }
+.aslide .ac { padding: 18px 2px 0; transition: opacity .55s; }
+.aslide:not(.on) .ac { opacity: .42; }
+.aslide .an { font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 10px; letter-spacing: 2.2px; text-transform: uppercase; color: var(--a-mute); }
+.aslide h3 { font-family: 'PP Editorial Old', Georgia, serif; font-weight: 200; font-size: 24px; line-height: 1.25; letter-spacing: .3px; margin: 9px 0 8px; }
+.aslide p { font-size: 12.5px; line-height: 1.8; color: #4A4A4A; margin-bottom: 14px; }
+
+/* position indicator — pale track, darker active segment, moves with the snap */
+.arow { display: flex; align-items: center; gap: 16px; margin: 26px var(--a-gut) 0; }
+.arail { position: relative; flex: 1; height: 1px; background: var(--a-line); }
+.arail i { position: absolute; top: -1px; left: 0; height: 3px; background: var(--a-ink); transition: transform .5s cubic-bezier(.4,0,.2,1), width .4s; }
+.anav { display: flex; gap: 2px; }
+.anav button { position: relative; background: none; border: 0; cursor: pointer; width: 40px; height: 44px; color: var(--a-mute); transition: color .3s, opacity .3s; }
+.anav button::before {
+  content: ''; position: absolute; left: 50%; top: 50%; width: 7px; height: 7px;
+  border-left: 1px solid currentColor; border-bottom: 1px solid currentColor;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+.anav button[data-a="next"]::before { transform: translate(-30%, -50%) rotate(-135deg); }
+.anav button:hover { color: var(--a-ink); }
+.anav button[disabled] { opacity: .3; cursor: default; }
+
+/* ------------------------------------------------------------------- footer */
+.sfoot { border-top: 1px solid var(--a-line); margin-top: 96px; background: #FCFAF6; }
+.sfoot-in { max-width: 1180px; margin: 0 auto; padding: 54px var(--a-gut) 44px; display: grid; grid-template-columns: 1fr; gap: 30px; }
+.sfoot .sf-brand { font-family: 'PP Editorial Old', Georgia, serif; font-weight: 200; font-size: 21px; letter-spacing: .5px; color: var(--a-ink); }
+.sfoot .sf-brand .dot { color: var(--a-red); }
+.sfoot h4 { font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-weight: 400; font-size: 10px; letter-spacing: 2.2px; text-transform: uppercase; color: var(--a-mute); margin: 0 0 14px; }
+.sfoot a, .sfoot p { display: block; font-size: 12.5px; line-height: 2; color: #4A4A4A; text-decoration: none; }
+.sfoot a:hover { color: var(--a-ink); }
+.sfoot .sf-legal { max-width: 1180px; margin: 0 auto; padding: 0 var(--a-gut) 40px; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--a-mute); }
+
+/* --------------------------------------------------------------- desktop
+   The desktop counterpart of the same system — never a stretched mobile. */
+@media (min-width: 900px) {
+  :root { --a-gut: 64px; --a-rhythm: 150px; }
+  header.hd { padding: 30px var(--a-gut) 26px; }
+  .a-mhd { padding: 30px var(--a-gut) 26px; }
+  .a-mnav { max-width: 760px; margin: 0 auto; padding-top: 40px; }
+  .a-mrow > a { min-height: 78px; font-size: 32px; }
+  .a-mfoot { max-width: 760px; margin: 0 auto; }
+
+  .acar .a-head { max-width: 1180px; margin: 0 auto 34px; padding: 0 var(--a-gut); }
+  .acar .a-head h2 { font-size: 32px; }
+  .atrk { gap: 32px; max-width: 1180px; margin: 0 auto; padding: 0 var(--a-gut); scroll-padding-left: var(--a-gut); }
+  .aslide { flex: 0 0 340px; }
+  .aslide .am { aspect-ratio: 3 / 4; }
+  .aslide h3 { font-size: 25px; }
+  .arow { max-width: 1180px; margin: 34px auto 0; padding: 0 var(--a-gut); }
+  .sfoot-in { grid-template-columns: 1.5fr 1fr 1fr 1.4fr; gap: 48px; align-items: start; padding: 66px var(--a-gut) 50px; }
+  .sfoot .sf-legal { padding: 0 var(--a-gut) 48px; }
+}
+@media (min-width: 1600px) {
+  .acar .a-head, .atrk, .arow { max-width: 1280px; }
+}
+
+/* ============================================================================
+   EDITORIAL PRIMITIVES — the composition vocabulary of the whole site.
+   Rhythm comes from alternating these, never from repeating one of them:
+   HERO · LEDE (text pause) · PAIR (asymmetric image + copy) · BAND (transition)
+   · CAROUSEL (horizontal discovery) · DUO (two supporting photographs) ·
+   CLOSE (one wide dark action).
+   ========================================================================== */
+.a-sec { margin: var(--a-rhythm) 0; }
+.a-sec.tight { margin: calc(var(--a-rhythm) * .6) 0; }
+
+/* HERO — the photograph establishes place first; the words stay quiet */
+.a-hero { position: relative; }
+.a-hero .am { width: 100%; height: min(76vh, 620px); background: #E7E3DB center/cover no-repeat; }
+.a-hero .ah {
+  position: absolute; left: var(--a-gut); right: var(--a-gut); bottom: 34px; color: #FBF8F3;
+  text-shadow: 0 1px 20px rgba(0,0,0,.45);
+}
+.a-hero .ah .a-eyebrow { color: #F6F1E9; opacity: 1; margin-bottom: 12px; }
+.a-hero h1 {
+  font-family: 'PP Editorial Old', Georgia, serif; font-weight: 200; font-size: 30px;
+  line-height: 1.22; letter-spacing: .3px; max-width: 14em;
+}
+.a-hero .am::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 62%;
+  background: linear-gradient(to top, rgba(18,16,14,.62) 0%, rgba(18,16,14,.34) 42%, rgba(18,16,14,0) 100%);
+}
+.a-hero .am { position: relative; }
+
+/* LEDE — a text-led pause: no image, no button, one underlined link */
+.a-lede { padding: 0 var(--a-gut); max-width: 640px; }
+.a-lede .a-eyebrow { margin-bottom: 16px; }
+.a-lede h2 { font-family: 'PP Editorial Old', Georgia, serif; font-weight: 200; font-size: 27px; line-height: 1.28; letter-spacing: .3px; margin-bottom: 18px; }
+.a-lede p { font-size: 13.5px; line-height: 1.9; color: #4A4A4A; margin-bottom: 22px; max-width: 30em; }
+
+/* PAIR — one photograph, one short column of copy. Asymmetric on desktop. */
+.a-pair { padding: 0 var(--a-gut); }
+.a-pair .am { width: 100%; aspect-ratio: 4 / 5; background: #E7E3DB center/cover no-repeat; }
+.a-pair .ac { padding-top: 22px; }
+.a-pair .a-eyebrow { margin-bottom: 12px; }
+.a-pair h2 { font-family: 'PP Editorial Old', Georgia, serif; font-weight: 200; font-size: 26px; line-height: 1.28; letter-spacing: .3px; margin-bottom: 14px; }
+.a-pair p { font-size: 13px; line-height: 1.85; color: #4A4A4A; margin-bottom: 18px; max-width: 30em; }
+
+/* BAND — a transition, never a wall */
+.a-band { width: 100%; height: 300px; background: #E7E3DB center/cover no-repeat; }
+
+/* DUO — two supporting photographs, deliberately smaller than the anchors */
+.a-duo { padding: 0 var(--a-gut); display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.a-duo .am { width: 100%; aspect-ratio: 4 / 5; background: #E7E3DB center/cover no-repeat; }
+.a-duo .cap { grid-column: 1 / -1; font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--a-mute); }
+
+/* LINK / ACTION — understated underline for discovery, one wide dark action
+   where a real decision is asked for */
+.a-cta {
+  display: block; width: 100%; max-width: 420px; text-align: center; background: var(--a-ink);
+  color: #F3EEE7; text-decoration: none; padding: 20px; font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif;
+  font-size: 10.5px; letter-spacing: 2.4px; text-transform: uppercase; min-height: 56px;
+}
+.a-close { padding: 0 var(--a-gut); }
+.a-close hr { border: 0; border-top: 1px solid var(--a-line); margin-bottom: 44px; }
+.a-close .a-eyebrow { margin-bottom: 14px; }
+.a-close h2 { font-family: 'PP Editorial Old', Georgia, serif; font-weight: 200; font-size: 27px; line-height: 1.28; margin-bottom: 26px; }
+
+/* a photograph we do not have yet — quiet, never a borrowed picture */
+.am.todo { background: #EFECE6; position: relative; border: 1px solid var(--a-line); }
+.a-pair .am.todo { aspect-ratio: 3 / 2; }
+.am.todo::before { content: 'Photography to follow'; position: absolute; inset: auto 0 14px 0; text-align: center; font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: #B4AFA6; }
+
+@media (min-width: 900px) {
+  .a-hero .am { height: min(74vh, 660px); }
+  .a-hero h1 { font-size: 46px; }
+  .a-hero .ah { left: var(--a-gut); bottom: 54px; max-width: 900px; }
+  .a-lede { max-width: 1180px; margin: 0 auto; padding: 0 var(--a-gut); }
+  .a-lede > div { max-width: 560px; }
+  .a-lede h2 { font-size: 34px; }
+  .a-pair {
+    max-width: 1180px; margin: 0 auto; display: grid;
+    grid-template-columns: 1fr 1fr; align-items: center; column-gap: 0;
+  }
+  .a-pair .am { width: 88%; aspect-ratio: 3 / 4; margin-left: auto; }
+  .a-pair .ac { padding: 0 0 0 76px; max-width: 380px; }
+  .a-pair.rev .am { margin-left: 0; margin-right: auto; order: 2; }
+  .a-pair.rev .ac { padding: 0 76px 0 0; }
+  .a-pair h2 { font-size: 32px; }
+  .a-band { height: min(46vh, 420px); }
+  .a-duo { max-width: 1000px; margin: 0 auto; gap: 40px; }
+  .a-duo .am { aspect-ratio: 4 / 3; }
+  .a-close { max-width: 1180px; margin: 0 auto; }
+  .a-close h2 { font-size: 32px; }
+}
+
+/* --------------------------------------------------------------- tablet
+   600–899 px keeps the mobile grammar but stops the photography from filling
+   the screen: a wider gutter, a shorter slide, calmer image proportions. */
+@media (min-width: 600px) and (max-width: 899px) {
+  :root { --a-gut: 34px; --a-rhythm: 110px; }
+  .a-hero h1 { font-size: 38px; }
+  .a-lede { max-width: 620px; margin: 0 auto; }
+  .aslide { flex: 0 0 56%; }
+  .a-pair { max-width: 640px; margin: 0 auto; }
+  .a-pair .am { aspect-ratio: 3 / 2; }
+  .a-duo { max-width: 640px; margin: 0 auto; gap: 20px; }
+  .a-duo .am { aspect-ratio: 4 / 3; }
+  .a-close, .slist { max-width: 640px; margin: 0 auto; }
+  .a-band { height: 360px; }
+}
+@media (min-width: 1600px) {
+  .aslide { flex: 0 0 380px; }
+}

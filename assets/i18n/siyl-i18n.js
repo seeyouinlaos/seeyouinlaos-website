@@ -682,6 +682,33 @@
   E("Your Details", "Eure Angaben", "ข้อมูลของคุณ", "あなたの情報");
   E("Where you stay", "Wo ihr wohnt", "ที่พักของคุณ", "ご滞在先");
   E("Discover more", "Mehr entdecken", "ค้นพบเพิ่มเติม", "もっと見る");
+
+  /* ---- homepage · the Aman-grammar destination and journey rails (08 Sep) ---- */
+  E("Thailand, Laos and China — twelve days, prepared around you.", "Thailand, Laos und China — zwölf Tage, um euch herum vorbereitet.", "ไทย ลาว และจีน — สิบสองวันที่จัดเตรียมไว้รอบตัวคุณ", "タイ、ラオス、中国——あなたのために整えた十二日間。");
+  E("21 February – 6 March 2027. Bangkok before the wedding, Vientiane for the wedding days, Kunming and Lijiang after. The complete journey opens with the private code from your invitation.", "21. Februar – 6. März 2027. Bangkok vor der Hochzeit, Vientiane für die Hochzeitstage, Kunming und Lijiang danach. Die vollständige Reise öffnet sich mit dem persönlichen Code aus eurer Einladung.", "21 กุมภาพันธ์ – 6 มีนาคม 2027 กรุงเทพฯ ก่อนงานแต่ง เวียงจันทน์ในวันงาน คุนหมิงและลี่เจียงหลังจากนั้น การเดินทางทั้งหมดเปิดด้วยรหัสส่วนตัวจากคำเชิญของคุณ", "2027年2月21日〜3月6日。挙式前はバンコク、挙式の日々はビエンチャン、その後は昆明と麗江へ。旅の全体は、招待状のプライベートコードで開きます。");
+  E("Three countries, one continuous journey.", "Drei Länder, eine durchgehende Reise.", "สามประเทศ หนึ่งการเดินทางต่อเนื่อง", "三つの国、ひと続きの旅。");
+  E("Each chapter has its own city, its own days and its own light.", "Jedes Kapitel hat seine eigene Stadt, seine eigenen Tage und sein eigenes Licht.", "แต่ละบทมีเมืองของตัวเอง วันเวลาของตัวเอง และแสงของตัวเอง", "それぞれの章に、その街、その日々、そしてその光があります。");
+  E("The shared city days before the wedding — the river, the temples, and the night train waiting to go north.", "Die gemeinsamen Stadttage vor der Hochzeit — der Fluss, die Tempel und der Nachtzug, der nach Norden wartet.", "วันเวลาในเมืองร่วมกันก่อนงานแต่ง — สายน้ำ วัดวาอาราม และรถไฟกลางคืนที่รอมุ่งขึ้นเหนือ", "挙式前、みんなで過ごす街の日々——川、寺院、そして北へ向かう夜行列車。");
+  E("The quiet capital on the Mekong — golden stupas, a French avenue, and the one day the whole journey leans toward.", "Die stille Hauptstadt am Mekong — goldene Stupas, eine französische Allee und der eine Tag, auf den die ganze Reise zuläuft.", "เมืองหลวงอันเงียบสงบริมแม่น้ำโขง — เจดีย์ทอง ถนนแบบฝรั่งเศส และวันเดียวที่การเดินทางทั้งหมดมุ่งไปหา", "メコン川のほとりの静かな首都——金色の仏塔、フランス風の並木道、そして旅のすべてが向かうあの一日。");
+  E("The temple in the morning, coffee and cake on the return, the vows at the green door and dinner in the courtyard garden. Hosted for every guest — part of the wedding programme, never a charge.", "Der Tempel am Morgen, Kaffee und Kuchen nach der Rückkehr, das Trauversprechen an der grünen Tür und das Dinner im Innenhofgarten. Für jeden Gast ausgerichtet — Teil des Hochzeitsprogramms, niemals eine Rechnung.", "วัดในตอนเช้า กาแฟและเค้กเมื่อกลับมา คำสาบานที่ประตูสีเขียว และมื้อค่ำในสวนลานบ้าน จัดเตรียมให้แขกทุกท่าน — เป็นส่วนหนึ่งของงานแต่ง ไม่มีค่าใช้จ่าย", "朝は寺院へ、戻ってコーヒーとケーキ、緑の扉での誓い、そして中庭でのディナー。すべてのゲストのためにご用意しています——挙式プログラムの一部で、ご負担はありません。");
+  E("Every stage of the journey is chosen by you, one decision at a time.", "Jede Etappe der Reise wählt ihr selbst — eine Entscheidung nach der anderen.", "ทุกช่วงของการเดินทางคุณเป็นผู้เลือกเอง ทีละการตัดสินใจ", "旅のどの行程も、ひとつずつご自身で選んでいただきます。");
+  E("Three Bangkok days at the Sathorn Penthouse, then the night train north to Vientiane.", "Drei Bangkok-Tage im Sathorn Penthouse, dann der Nachtzug nach Norden nach Vientiane.", "สามวันในกรุงเทพฯ ที่สาทร เพนต์เฮาส์ แล้วขึ้นรถไฟกลางคืนขึ้นเหนือสู่เวียงจันทน์", "サトーン・ペントハウスでのバンコク三日間、そして夜行列車で北のビエンチャンへ。");
+  E("The wedding stay at Souphattra Heritage, and the day itself — hosted from the temple morning to the last table.", "Der Hochzeitsaufenthalt im Souphattra Heritage und der Tag selbst — vom Tempelmorgen bis zum letzten Tisch ausgerichtet.", "ที่พักช่วงงานแต่งที่ซูพัดตรา เฮอริเทจ และตัววันงานเอง — จัดเตรียมให้ตั้งแต่เช้าที่วัดจนถึงโต๊ะสุดท้าย", "スパッタラ・ヘリテージでの挙式滞在と、その日そのもの——朝の寺院から最後の一卓まで、すべてご用意しています。");
+  E("21 – 27 February 2027", "21. – 27. Februar 2027", "21 – 27 กุมภาพันธ์ 2027", "2027年2月21日〜27日");
+  E("1 – 8 March 2027", "1. – 8. März 2027", "1 – 8 มีนาคม 2027", "2027年3月1日〜8日");
+  E("Previous destination", "Vorheriges Reiseziel", "จุดหมายก่อนหน้า", "前の旅先");
+  E("Next destination", "Nächstes Reiseziel", "จุดหมายถัดไป", "次の旅先");
+  E("Previous journey", "Vorherige Reise", "การเดินทางก่อนหน้า", "前の旅");
+  E("Next journey", "Nächste Reise", "การเดินทางถัดไป", "次の旅");
+  E("The courtyard at Souphattra Heritage, Vientiane, at dusk", "Der Innenhof des Souphattra Heritage in Vientiane in der Dämmerung", "ลานภายในซูพัดตรา เฮอริเทจ เวียงจันทน์ ยามพลบค่ำ", "夕暮れのビエンチャン、スパッタラ・ヘリテージの中庭");
+  E("The Chao Phraya river and the Bangkok skyline", "Der Chao-Phraya-Fluss und die Skyline von Bangkok", "แม่น้ำเจ้าพระยาและเส้นขอบฟ้ากรุงเทพฯ", "チャオプラヤー川とバンコクのスカイライン");
+  E("Patuxai and the fountain park in Vientiane at twilight", "Patuxai und der Brunnenpark in Vientiane in der Dämmerung", "ปะตูไซและสวนน้ำพุในเวียงจันทน์ยามพลบค่ำ", "夕暮れのビエンチャン、パトゥーサイと噴水公園");
+  E("The Golden Horse and Jade Rooster archways in Kunming", "Die Torbögen von Goldenem Pferd und Jade-Hahn in Kunming", "ซุ้มประตูม้าทองและไก่หยกในคุนหมิง", "昆明の金馬・碧鶏坊");
+  E("The green gateway at Souphattra Heritage, Vientiane", "Das grüne Tor im Souphattra Heritage, Vientiane", "ซุ้มประตูสีเขียวที่ซูพัดตรา เฮอริเทจ เวียงจันทน์", "ビエンチャン、スパッタラ・ヘリテージの緑の門");
+  E("The green door where the vows are spoken", "Die grüne Tür, an der die Trauversprechen gegeben werden", "ประตูสีเขียวที่กล่าวคำสาบาน", "誓いの言葉を交わす緑の扉");
+  E("Naxi rooftops in Lijiang below the snow mountain", "Naxi-Dächer in Lijiang unterhalb des Schneebergs", "หลังคาบ้านนาซีในลี่เจียงใต้ภูเขาหิมะ", "雪山のふもと、麗江のナシ族の屋根");
+  E("The Mekong promenade in Vientiane at sunset", "Die Mekong-Promenade in Vientiane bei Sonnenuntergang", "ทางเดินริมแม่น้ำโขงในเวียงจันทน์ยามพระอาทิตย์ตก", "夕暮れのビエンチャン、メコン川沿いの遊歩道");
+  E("The Thai–Lao Friendship Bridge at Nong Khai", "Die thailändisch-laotische Freundschaftsbrücke bei Nong Khai", "สะพานมิตรภาพไทย–ลาว ที่หนองคาย", "ノーンカーイのタイ・ラオス友好橋");
   E("Featured journeys", "Ausgewählte Reisen", "การเดินทางแนะนำ", "注目の旅");
   E("All destinations", "Alle Reiseziele", "จุดหมายทั้งหมด", "すべての旅先");
   E("Explore", "Entdecken", "สำรวจ", "見る");

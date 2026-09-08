@@ -239,3 +239,26 @@ images) · Siam Kempinski Deluxe Balcony King (USD 380, 8 images) unchanged.
    "Photography to follow" treatment.
 4. **Category attribution:** Siam Kempinski room photography (IMG_3453/3455/3456/3457)
    is filed in the hotel folder, not under a "Deluxe Balcony King" subfolder.
+
+---
+
+## Image semantics — corrections of 08 September 2026
+
+Every geographic label on the public website was re-checked against the actual
+visual content of the file (folder → filename → **opened image** → entity).
+State after this pass:
+
+| Slot | Image | Note |
+|---|---|---|
+| Homepage · destination 01 Bangkok | `city/001-bangkok-chao-phraya-skyline.jpg` | real Bangkok |
+| Homepage · destination 02 Vientiane | `city/002-vientiane-patuxai-twilight.jpg` | real Vientiane city (was the green gate — corrected) |
+| Homepage · destination 03 China | `city/003-kunming-jinma-biji-archway.jpg` | real Kunming |
+| Homepage / voyage · **The Wedding** | `event/052-ceremony-green-gateway.jpg` + `event/052-vow-ceremony-green-door.jpg` | the green gate / green door is the wedding visual (was the fountain — corrected). No pool anywhere. |
+| Voyage · Wedding Dinner | `event/053-wedding-dinner-courtyard-garden.jpg` | the courtyard garden where dinner is served — used ONLY under that heading, never as the wedding visual |
+| Voyage · Temple Ceremony | *(none)* | clean "Photography to follow" placeholder — no borrowed image |
+| Destinations · Vientiane | `002-vientiane-pha-that-luang.jpg`, `002-vientiane-lane-xang.jpg` | real Vientiane |
+| Destinations · China | `004-lijiang-naxi-rooftops.jpg`, `004-lijiang-black-dragon-pool.jpg` | real Lijiang |
+| Stays index | penthouse · souphattra · airbnb · kunming · lijiang · kempinski own folders | one house, one photograph from its own folder |
+
+Rule unchanged: **a correct placeholder beats a wrong real image.** No image is
+assigned from its filename alone.

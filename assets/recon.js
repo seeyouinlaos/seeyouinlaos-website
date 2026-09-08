@@ -1,20 +1,10 @@
-/* Shared shell (header · drawer · footer) + interaction grammar.
-   Original implementation — neutral placeholder content only. */
+/* Shared editorial shell (header · footer) + interaction grammar.
+   The full-screen menu and the horizontal carousel are shared with the shop
+   surfaces and live in assets/aman.js — ONE visual website. */
 (function () {
   'use strict';
 
-  var PAGES = [
-    ['index.html', 'Home'],
-    ['journeys.html', 'Journeys'],
-    ['destination.html', 'Destinations'],
-    ['marsilea.html', 'Marsilea Spa'],
-    ['1872.html', '1872 · Afternoon Tea'],
-    ['your-journey.html', 'Your Journey'],
-    ['review.html', 'Review & Send']
-  ];
-  var here = location.pathname.split('/').pop() || 'index.html';
-
-  /* ---------- header (fixed · ivory · 3 zones · secondary band) ---------- */
+  /* ---------- header (sticky · ivory · hamburger · wordmark · bag) ---------- */
   var header = document.createElement('header');
   header.className = 'hd';
   header.innerHTML =
@@ -33,63 +23,27 @@
   window.addEventListener('resize', syncHeader);
   syncHeader();
 
-  /* ---------- drawer (full-screen scrim · sliding panel · nav + contextual preview) ---------- */
-  var scrim = document.createElement('div');
-  scrim.className = 'drawer-scrim';
-  var drawer = document.createElement('div');
-  drawer.className = 'drawer';
-  drawer.setAttribute('role', 'dialog');
-  drawer.setAttribute('aria-modal', 'true');
-  drawer.setAttribute('aria-label', 'Menu');
-  drawer.innerHTML =
-    '<div class="drawer-head">' +
-      '<span class="eyebrow">see you in laos<span class="dot">.</span></span>' +
-      '<button class="hd-cta" id="menu-close">Close</button>' +
-    '</div>' +
-    '<div class="drawer-grid">' +
-      '<nav class="drawer-nav" aria-label="Primary">' +
-        PAGES.map(function (p) {
-          return '<a href="' + p[0] + '"' + (here === p[0] ? ' aria-current="page"' : '') + '>' + p[1] + '</a>';
-        }).join('') +
-      '</nav>' +
-      '<aside class="drawer-preview">' +
-        '<div class="ph r-32" style="background:url(assets/images/city/002-vientiane-patuxai-twilight.jpg) center/cover no-repeat"></div>' +
-        '<p class="eyebrow">Sunday, 28 February 2027</p>' +
-        '<h3>Vientiane, Laos</h3>' +
-      '</aside>' +
-    '</div>' +
-    '<div class="drawer-foot">' +
-      '<a href="mailto:guest.relation.seeyouinlaos@gmail.com">guest.relation.seeyouinlaos@gmail.com</a>' +
-    '</div>';
-  document.body.append(scrim, drawer);
+  /* the full-screen menu itself lives in assets/aman.js — ONE menu for the
+     whole website. This shell only supplies the hamburger it binds to. */
 
-  var openBtn = header.querySelector('#menu-open');
-  function setDrawer(open) {
-    document.body.classList.toggle('drawer-open', open);
-    openBtn.setAttribute('aria-expanded', String(open));
-    if (open) drawer.querySelector('#menu-close').focus();
-    else openBtn.focus();
-  }
-  openBtn.addEventListener('click', function () { setDrawer(true); });
-  drawer.querySelector('#menu-close').addEventListener('click', function () { setDrawer(false); });
-  scrim.addEventListener('click', function () { setDrawer(false); });
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && document.body.classList.contains('drawer-open')) setDrawer(false);
-  });
-
-  /* ---------- footer (brand · columns · newsletter · legal) ---------- */
+  /* ---------- footer: the shared editorial footer, one system with the shop --- */
   var footer = document.createElement('footer');
+  footer.className = 'sfoot';
   footer.id = 'contact';
   footer.innerHTML =
-    '<div class="ft">' +
-      '<p class="ft-brand">see you in laos<span class="dot">.</span></p>' +
-      '<div class="ft-grid">' +
-        '<div><h3>Explore</h3><a href="journeys.html">Journeys</a><a href="destination.html">Destinations</a><a href="marsilea.html">Marsilea Spa</a><a href="1872.html">1872 · Afternoon Tea</a></div>' +
-        '<div><h3>Plan</h3><a href="your-journey.html">Your Journey</a><a href="review.html">Review & Send</a></div>' +
-        '<div><h3>Guest Relations</h3><a href="mailto:guest.relation.seeyouinlaos@gmail.com">guest.relation.seeyouinlaos@gmail.com</a></div>' +
-      '</div>' +
-      '<div class="ft-legal"><span>Sunday, 28 February 2027 · Vientiane, Laos</span></div>' +
-    '</div>';
+    '<div class="sfoot-in">' +
+      '<div><p class="sf-brand">see you in laos<span class="dot">.</span></p></div>' +
+      '<div><h4>Discover</h4>' +
+        '<a href="destination.html">Destinations</a><a href="journeys.html">Journeys</a>' +
+        '<a href="accommodation.html">Stays</a><a href="experiences.html">Experiences</a></div>' +
+      '<div><h4>The Wedding</h4>' +
+        '<a href="voyage.html">The wedding days</a><a href="marsilea.html">Wellness</a>' +
+        '<a href="1872.html">1872 · Afternoon Tea</a></div>' +
+      '<div><h4>Guest Relations</h4>' +
+        '<a href="your-journey.html">Your Journey</a>' +
+        '<a href="mailto:guest.relation.seeyouinlaos@gmail.com">guest.relation.seeyouinlaos@gmail.com</a></div>' +
+    '</div>' +
+    '<p class="sf-legal">Sunday, 28 February 2027 · Vientiane, Laos</p>';
   document.body.append(footer);
   var badgeScript = document.createElement('script');
   badgeScript.src = 'assets/bag.js';
