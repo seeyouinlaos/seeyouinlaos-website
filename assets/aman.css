@@ -170,9 +170,7 @@ input:focus-visible, .siyl-inv input:focus { outline: 1px solid var(--a-ink); ou
 
   .acar .a-head { max-width: 1180px; margin: 0 auto 34px; padding: 0 var(--a-gut); }
   .acar .a-head h2 { font-size: 32px; }
-  .atrk { gap: 32px; max-width: 1180px; margin: 0 auto; padding: 0 var(--a-gut); scroll-padding-left: var(--a-gut); }
-  .aslide { flex: 0 0 340px; }
-  .aslide .am { aspect-ratio: 3 / 4; }
+  .atrk { gap: 32px; max-width: 1180px; margin: 0 auto; padding-left: var(--a-gut); scroll-padding-left: var(--a-gut); }
   .aslide h3 { font-size: 25px; }
   .arow { max-width: 1180px; margin: 34px auto 0; padding: 0 var(--a-gut); }
   .sfoot-in { grid-template-columns: 1.5fr 1fr 1fr 1.4fr; gap: 48px; align-items: start; padding: 66px var(--a-gut) 50px; }
@@ -180,6 +178,32 @@ input:focus-visible, .siyl-inv input:focus { outline: 1px solid var(--a-ink); ou
 }
 @media (min-width: 1600px) {
   .acar .a-head, .atrk, .arow { max-width: 1280px; }
+}
+
+/* ---- wide screens: the SAME carousel, enlarged — one dominant active card,
+   the neighbours partially in view and clickable, arrows and track live.
+   Never three equal columns. ---- */
+@media (min-width: 768px) {
+  :root { --a-slide: 68vw; }
+  .atrk {
+    scroll-snap-type: x mandatory; user-select: none; -webkit-user-select: none; cursor: grab;
+    padding-right: calc(50% - var(--a-slide) / 2);
+  }
+  .aslide { flex: 0 0 var(--a-slide); scroll-snap-align: center; }
+  .aslide .am { aspect-ratio: 4 / 3; }
+  .aslide .am::after { opacity: .3; }          /* a veil, not a white panel */
+  .aslide:not(.on) .ac { opacity: .5; }
+  .aslide:not(.on), .aslide:not(.on) .am { cursor: pointer; }
+  .aslide.on .am[href] { cursor: pointer; }
+}
+@media (min-width: 1024px) { :root { --a-slide: 560px; } }
+@media (min-width: 1280px) { :root { --a-slide: 640px; } }
+@media (min-width: 1600px) { :root { --a-slide: 700px; } }
+a.am { display: block; text-decoration: none; }
+.arail { cursor: pointer; padding: 14px 0; background-clip: content-box; box-sizing: content-box; height: 1px; }
+.arail i { top: 13px; }
+@media (prefers-reduced-motion: reduce) {
+  .aslide .am::after, .aslide .ac, .arail i { transition: none; }
 }
 
 /* ============================================================================
@@ -287,9 +311,7 @@ input:focus-visible, .siyl-inv input:focus { outline: 1px solid var(--a-ink); ou
   .a-close, .slist { max-width: 640px; margin: 0 auto; }
   .a-band { height: 360px; }
 }
-@media (min-width: 1600px) {
-  .aslide { flex: 0 0 380px; }
-}
+
 
 /* ============================================================================
    JOURNEY ITEMS — action separation and the responsive grid.

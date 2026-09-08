@@ -130,49 +130,75 @@
     var slides = Array.prototype.slice.call(car.querySelectorAll('.aslide'));
     if (!trk || slides.length < 2) { if (slides[0]) slides[0].classList.add('on'); return; }
     var bar = car.querySelector('.arail i');
+    var rail = car.querySelector('.arail');
     var prev = car.querySelector('[data-a="prev"]');
     var next = car.querySelector('[data-a="next"]');
     var i = -1, tick = 0;
+    var calm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     if (bar) bar.style.width = (100 / slides.length) + '%';
     trk.setAttribute('tabindex', '0');
     trk.setAttribute('role', 'group');
     trk.setAttribute('aria-label', 'Use the arrow keys to move between slides');
+    if (rail) { rail.setAttribute('role', 'button'); rail.setAttribute('tabindex', '0'); rail.setAttribute('aria-label', 'Carousel position'); }
 
-    function step() {
-      var a = slides[0].getBoundingClientRect();
-      var b = slides[1] ? slides[1].getBoundingClientRect() : a;
-      return Math.round(b.left - a.left) || Math.round(a.width);
+    /* the scrollLeft at which slide k rests on its snap point — start-aligned on
+     * the phone, centred on wide screens; the ends are clamped by the browser
+     * exactly as they are here */
+    function pos(k) {
+      var s = slides[k], cs = getComputedStyle(s), left = s.offsetLeft - trk.offsetLeft, x;
+      if (cs.scrollSnapAlign === 'center') x = left - (trk.clientWidth - s.offsetWidth) / 2;
+      else x = left - (parseFloat(getComputedStyle(trk).scrollPaddingLeft) || 0);
+      return Math.max(0, Math.min(trk.scrollWidth - trk.clientWidth, Math.round(x)));
     }
     function index() {
-      var max = trk.scrollWidth - trk.clientWidth;
-      if (max <= 0) return 0;
-      if (trk.scrollLeft >= max - 2) return slides.length - 1;   /* the end always lands on the last */
-      return Math.max(0, Math.min(slides.length - 1, Math.round(trk.scrollLeft / step())));
+      var best = 0, d = Infinity, x = trk.scrollLeft;
+      for (var k = 0; k < slides.length; k++) { var dd = Math.abs(pos(k) - x); if (dd < d) { d = dd; best = k; } }
+      return best;
     }
     function paint() {
       var n = index();
       if (n === i) return;
       i = n;
-      slides.forEach(function (s, k) {
-        s.classList.toggle('on', k === n);
-        s.setAttribute('aria-hidden', 'false');
-      });
+      slides.forEach(function (s, k) { s.classList.toggle('on', k === n); });
       if (bar) bar.style.transform = 'translateX(' + (n * 100) + '%)';
       if (prev) prev.disabled = n === 0;
       if (next) next.disabled = n === slides.length - 1;
+    }
+    function go(k) {
+      k = Math.max(0, Math.min(slides.length - 1, k));
+      trk.scrollTo({ left: pos(k), behavior: calm ? 'auto' : 'smooth' });
     }
     trk.addEventListener('scroll', function () {
       if (tick) return;
       tick = requestAnimationFrame(function () { tick = 0; paint(); });
     }, { passive: true });
-    function go(d) { trk.scrollBy({ left: d * step(), behavior: 'smooth' }); }
-    if (prev) prev.addEventListener('click', function () { go(-1); });
-    if (next) next.addEventListener('click', function () { go(1); });
+    if (prev) prev.addEventListener('click', function () { go(index() - 1); });
+    if (next) next.addEventListener('click', function () { go(index() + 1); });
     trk.addEventListener('keydown', function (e) {
-      if (e.key === 'ArrowRight') { e.preventDefault(); go(1); }
-      if (e.key === 'ArrowLeft') { e.preventDefault(); go(-1); }
+      if (e.key === 'ArrowRight') { e.preventDefault(); go(index() + 1); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); go(index() - 1); }
     });
+    /* a neighbour brings itself into the active position; the active
+     * photograph is a real link and opens its page */
+    slides.forEach(function (s, k) {
+      s.addEventListener('click', function (e) {
+        if (k === index()) return;
+        e.preventDefault();
+        go(k);
+      });
+    });
+    /* the track is a control, not a decoration: click or key to jump */
+    if (rail) {
+      rail.addEventListener('click', function (e) {
+        var r = rail.getBoundingClientRect();
+        go(Math.floor(((e.clientX - r.left) / r.width) * slides.length));
+      });
+      rail.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowRight') { e.preventDefault(); go(index() + 1); }
+        if (e.key === 'ArrowLeft') { e.preventDefault(); go(index() - 1); }
+      });
+    }
     window.addEventListener('resize', function () { i = -1; paint(); });
     paint();
   }
