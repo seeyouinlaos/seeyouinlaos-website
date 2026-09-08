@@ -255,7 +255,7 @@ State after this pass:
 | Homepage · destination 03 China | `city/003-kunming-jinma-biji-archway.jpg` | real Kunming |
 | Homepage / voyage · **The Wedding** | `event/052-ceremony-green-gateway.jpg` + `event/052-vow-ceremony-green-door.jpg` | the green gate / green door is the wedding visual (was the fountain — corrected). No pool anywhere. |
 | Voyage · Wedding Dinner | `event/053-wedding-dinner-courtyard-garden.jpg` | the courtyard garden where dinner is served — used ONLY under that heading, never as the wedding visual |
-| Voyage · Temple Ceremony | *(none)* | clean "Photography to follow" placeholder — no borrowed image |
+| Voyage · Temple Ceremony | `event/052-temple-ceremony-bride.jpg` | owner-supplied 08 Sep 2026 (the bride, black and white) — replaces the placeholder |
 | Destinations · Vientiane | `002-vientiane-pha-that-luang.jpg`, `002-vientiane-lane-xang.jpg` | real Vientiane |
 | Destinations · China | `004-lijiang-naxi-rooftops.jpg`, `004-lijiang-black-dragon-pool.jpg` | real Lijiang |
 | Stays index | penthouse · souphattra · airbnb · kunming · lijiang · kempinski own folders | one house, one photograph from its own folder |
