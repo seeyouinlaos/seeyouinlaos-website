@@ -7,14 +7,19 @@
    Nothing downstream multiplies, rounds or re-derives an amount.
 
    Accommodation is priced from the Owner's approved Accommodation_Details:
-   a per-person / per-night RATE and the number of NIGHTS in the window.
-       total per person = rate × nights
+   a per-person / per-night RATE and the number of PAYABLE nights in the window.
+       total per person = rate × payable nights
+   `n` is how many nights the window covers; `pay` is how many of them the guest
+   contributes. They differ in exactly one place — the Wedding Stay.
    Transport is priced per person for the leg (a package, not a nightly rate).
 
-   The Wedding Stay (27 February – 1 March) is ONE selection for the fixed
-   two-night window: the guest contributes the first night, the second night is
-   complimentary and hosted by the Bride & Groom. That is a note inside the one
-   item — never a second line and never a USD 0 row.
+   VIENTIANE, verified against the source on 08 September 2026:
+     PRE-WEDDING STAY  25 – 27 FEB      n 2 · pay 2 → rate × 2   (both nights)
+     WEDDING STAY      27 FEB – 01 MAR  n 2 · pay 1 → rate × 1   (second night
+                                        complimentary, hosted by Bride & Groom)
+   The two windows run back to back: 27 February is the transition day and no
+   night is uncovered. The Wedding Stay stays ONE selection — the complimentary
+   night is a note inside that item, never a second line and never a USD 0 row.
    ========================================================================== */
 (function () {
   'use strict';
@@ -38,6 +43,15 @@
   };
 
   function money(n) { return 'USD ' + Number(n).toLocaleString('en-US'); }
+
+  /* "Includes both nights: 25 → 26 February + 26 → 27 February" — the exact
+   * nights an amount buys, so "two-night stay" can never be read as one night. */
+  function nightsCovered(q) {
+    if (!q.nightsList || !q.nightsList.length) return '';
+    var all = q.nightsList.join(' + ');
+    if (q.hosted > 0) return 'Both nights: ' + all;
+    return (q.nightsList.length === 2 ? 'Includes both nights: ' : 'Includes: ') + all;
+  }
 
   /* which stay and which window an id belongs to. LEGACY holds the two ids the
    * retired two-row wedding model wrote, so an old bag can still be migrated. */
@@ -73,10 +87,9 @@
       if (!at) return null;
       var room = roomOf(at.stay, slug) || at.stay.rooms[0];
       var nights = at.win.n || 1;
-      /* a FIXED window: the room amount already covers the whole window and is
-       * never multiplied. Otherwise the guest contributes `pay` of the nights. */
-      var fixed = !!at.win.fixed;
-      var pay = fixed ? 1 : (at.win.pay || nights);
+      /* `pay` is how many of the window's nights the guest contributes. It is
+       * only ever smaller than `nights` where a night is hosted. */
+      var pay = at.win.pay || nights;
       var rate = room && room.rate != null ? room.rate : null;
       var q = {
         cat: 'Accommodation',
@@ -88,24 +101,31 @@
         dates: at.win.dates,
         nights: nights,
         pay: pay,
+        hosted: nights - pay,
         rate: rate,
-        fixed: fixed,
+        windowFixed: at.win.window === 'fixed',
+        nightsList: at.win.nightsList || null,
         breakfast: at.stay.breakfast || '',
         note: at.win.note || '',
         noteBy: at.win.noteBy || '',
         total: rate == null ? null : rate * pay
       };
-      q.nightly = rate == null || fixed ? '' : money(rate) + ' per person / night';
+      q.nightly = rate == null ? '' : money(rate) + ' per person / night';
       q.nightsLine = nights + (nights === 1 ? ' night' : ' nights');
+      /* the unmistakable presentation: the amount, what it covers, and the
+       * exact nights it covers — never the bare words "two-night stay" */
+      q.amount = q.total == null ? '' : money(q.total);
+      q.totalLine = 'Total per person · ' + q.nightsLine;
+      q.nightsCovered = nightsCovered(q);
+      q.contribution = q.hosted > 0
+        ? 'First night your contribution at ' + q.nightly + ' · second night complimentary'
+        : (rate == null ? '' : q.nightly + ' × ' + q.nightsLine);
       if (rate == null) {
         q.basis = 'Amount on request · Guest Relations';
-      } else if (fixed && q.note) {
-        q.basis = money(q.total) + ' per person · fixed two-night window · ' +
-                  'first night your contribution, second night complimentary';
-      } else if (fixed) {
-        q.basis = money(q.total) + ' per person · fixed two-night stay';
       } else {
-        q.basis = q.nightly + ' · ' + q.nightsLine + ' · ' + money(q.total) + ' per person';
+        q.basis = q.amount + ' total per person · ' + q.nightsLine +
+                  (q.nightsCovered ? ' · ' + q.nightsCovered : '') +
+                  (q.contribution ? ' · ' + q.contribution : '');
       }
       return q;
     },
@@ -130,7 +150,8 @@
       return [{
         id: at.win.id, name: at.win.bagName, meta: at.win.dates + ' · ' + room.name,
         price: q.total, stay: at.key, room: room.slug,
-        rate: q.rate, nights: q.nights, pay: q.pay, fixed: q.fixed,
+        rate: q.rate, nights: q.nights, pay: q.pay,
+        nightsList: q.nightsList, windowFixed: q.windowFixed,
         note: q.note, noteBy: q.noteBy,
         breakfast: q.breakfast, img: img
       }];
@@ -175,11 +196,11 @@
       var f = FLAT[x.id];
       if (f) return f.basis;
       if (x.interest) return 'Interest · confirmed and payable at the spa';
-      if (x.fixed && x.note) {
-        return money(x.price) + ' per person · fixed two-night window · ' +
-               'first night your contribution, second night complimentary';
+      var at = locate(x.id);
+      if (at && x.room) {
+        var q = this.quote(at.win.id, x.room);
+        if (q && q.basis) return q.basis;
       }
-      if (x.fixed) return money(x.price) + ' per person · fixed two-night stay';
       if (x.rate != null && x.nights) {
         return money(x.rate) + ' per person / night · ' + x.nights + (x.nights === 1 ? ' night' : ' nights') +
                ' · ' + money(x.price) + ' per person';
@@ -187,6 +208,27 @@
       return x.price != null ? money(x.price) + ' per person' : '';
     }
   };
+
+  /* ---- repricing -------------------------------------------------------
+   * A bag saved before the Vientiane price basis was verified against the
+   * source holds the pre-wedding window at one night instead of two. Every
+   * accommodation line is re-quoted from the data above, so a returning guest
+   * never carries a stale amount into Review & Send. */
+  (function repriceAccommodation() {
+    var B = window.SIYL_BAG;
+    if (!B || !window.SIYL_ROOMS) return;
+    var bag = B.get(), changed = false;
+    var next = bag.map(function (x) {
+      if (!x.stay || !x.room || x.interest || x.complimentary) return x;
+      var fresh = window.SIYL_PRICE.items(x.id, x.room)[0];
+      if (!fresh || fresh.price == null) return x;
+      if (x.price === fresh.price && x.pay === fresh.pay && x.name === fresh.name && !('fixed' in x)) return x;
+      changed = true;
+      fresh.qty = x.qty || 1;           /* the guest's own choice is preserved */
+      return fresh;                     /* name, meta, amount and basis are re-derived */
+    });
+    if (changed) B.set(next);
+  })();
 
   /* ---- migration -------------------------------------------------------
    * A bag saved while the retired two-row wedding model was live holds

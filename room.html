@@ -68,7 +68,9 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:22px;margin:44
 .bf{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75;margin:8px 0 0}
 .hn2{font-size:9.5px;letter-spacing:1.6px;text-transform:uppercase;color:#313131;margin:10px 0 0;line-height:1.9}
 .hn2 span{display:block;color:#7C7A75}
-.per{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75;margin:2px 0 16px}
+.per{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75;margin:2px 0 7px}
+.nn{font-size:11px;color:#7C7A75;line-height:1.7;margin:0 0 2px}
+.nn:last-of-type{margin-bottom:16px}
 .cta{display:block;width:100%;background:#313131;color:#F3EEE7;border:0;padding:19px;font-size:11px;letter-spacing:2.2px;text-transform:uppercase;cursor:pointer;min-height:52px;text-align:center;text-decoration:none;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif}
 .ok{display:block;text-align:center;font-size:10px;letter-spacing:1.6px;text-transform:uppercase;color:#7C7A75;margin-top:12px}
 .ok[hidden]{display:none !important}
@@ -111,8 +113,18 @@ var W0 = stay.windows[0];
 function priceLine(r) {
   if (r.rate == null) return '<span class="rsv">' + esc(r.status || 'Amount on request · Guest Relations') + '</span>';
   var qq = P.quote(W0.id, r.slug);
-  if (qq && qq.fixed) return '<span class="op">USD ' + qq.total + '</span> <span class="oe">per person · fixed two-night stay</span>';
+  if (qq && qq.total != null) return '<span class="op">' + qq.amount + '</span> <span class="oe">' + esc(qq.totalLine.toLowerCase()) + '</span>';
   return '<span class="op">USD ' + r.rate + '</span> <span class="oe">per person / night</span>';
+}
+
+/* the amount, what it covers, and the nights it covers — one block, every
+ * window, so "2 nights" can never be mistaken for one */
+function amountBlock(q) {
+  var b = '<p class="price">' + q.amount + ' <span class="pu">total per person</span></p>';
+  b += '<p class="per">' + esc(q.totalLine) + ' · ' + esc(q.dates) + '</p>';
+  if (q.nightsCovered) b += '<p class="nn">' + esc(q.nightsCovered) + '</p>';
+  if (q.contribution) b += '<p class="nn">' + esc(q.contribution) + '</p>';
+  return b;
 }
 
 var h = '';
@@ -197,27 +209,21 @@ stay.windows.forEach(function (w, wi) {
     h += '<p class="price">Amount on request</p><p class="per">Guest Relations confirms the amount</p>';
     h += '<p class="enq">This room is part of the house but not yet released with an amount. Guest Relations will confirm it for you.</p>';
   } else if (room.reserved) {
-    h += '<p class="price">USD ' + q.total + '</p><p class="per">' + (q.fixed ? 'Per person · fixed two-night stay' : 'Per person / night ' + esc(room.rate) + ' · ' + esc(q.nightsLine)) + '</p>';
+    h += amountBlock(q);
     if (stay.breakfast) h += '<p class="bf">' + esc(stay.breakfast) + '</p>';
     h += '<p class="rsvline">' + esc(room.reserved) + '</p>';
-  } else if (q.fixed) {
-    /* the amount IS the whole window — it is never multiplied by the nights */
-    h += '<p class="price">USD ' + q.total + ' <span class="pu">per person</span></p>';
-    h += '<p class="per">Per person · fixed two-night stay · ' + esc(w.dates) + '</p>';
-    if (q.note) h += '<p class="hn2">' + esc(q.note) + '<span>' + esc(q.noteBy) + '</span></p>';
-    if (stay.breakfast) h += '<p class="bf">' + esc(stay.breakfast) + '</p>';
-    h += '<button class="cta" data-win="' + wi + '">Add to Your Journey</button><span class="swap" data-swap="' + wi + '" hidden></span>';
-    if (P.hasVariants(w.id)) h += '<button type="button" class="chg" data-chg="' + wi + '" hidden>Change selection</button>';
   } else {
-    h += '<p class="price">USD ' + room.rate + ' <span class="pu">per person / night</span></p>';
-    h += '<p class="per">' + esc(q.nightsLine) + ' · USD ' + q.total + ' per person</p>';
+    /* ONE presentation for every window: the amount, exactly what it covers,
+     * and the exact nights it covers. The nights are never left implicit. */
+    h += amountBlock(q);
+    if (q.note) h += '<p class="hn2">' + esc(q.note) + '<span>' + esc(q.noteBy) + '</span></p>';
     if (stay.breakfast) h += '<p class="bf">' + esc(stay.breakfast) + '</p>';
     h += '<button class="cta" data-win="' + wi + '">Add to Your Journey</button><span class="swap" data-swap="' + wi + '" hidden></span>';
     if (P.hasVariants(w.id)) h += '<button type="button" class="chg" data-chg="' + wi + '" hidden>Change selection</button>';
   }
   h += '</div>';
 });
-h += '<p class="note">Amounts are per person for the whole window and are never charged on this website — Guest Relations confirms every arrangement with you.</p></section>';
+h += '<p class="note">Amounts are the total per person for the nights shown and are never charged on this website — Guest Relations confirms every arrangement with you.</p></section>';
 h += '<p class="backrow"><a href="journeys.html#j-' + stay.windows[0].id + '">Back to Journeys</a></p>';
 
 document.getElementById('m').innerHTML = h;

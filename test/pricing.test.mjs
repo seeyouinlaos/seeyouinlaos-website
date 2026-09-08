@@ -26,7 +26,7 @@ test('A · one guest, Sathorn Penthouse only → USD 135', () => {
   assert.equal(q.nights, 3);
   assert.equal(q.total, 135);
   assert.equal(total(pick('bkk-stay', 'penthouse')), 135);
-  assert.match(q.basis, /USD 45 per person \/ night · 3 nights · USD 135 per person/);
+  assert.match(q.basis, /USD 135 total per person · 3 nights · USD 45 per person \/ night × 3 nights/);
   assert.equal(q.breakfast, 'Breakfast not included · self-pay');
 });
 
@@ -39,42 +39,73 @@ test('C · two guests, Sathorn Penthouse only → USD 270', () => {
   assert.equal(total(pick('bkk-stay', 'penthouse', 2)), 270);
 });
 
-test('Souphattra windows are FIXED — the matrix amount is never multiplied by nights', () => {
-  const expect = { heritage: 145, 'heritage-executive': 155, 'heritage-grand-premier': 170,
-                   'noble-courtyard': 240, 'grand-majestic': 250, 'souphattra-majestic': 290,
-                   'souphattra-presidential': 750 };
-  const forbidden = new Set([290, 310, 340, 480, 500, 580, 1500]);
-  for (const [slug, amount] of Object.entries(expect)) {
-    for (const win of ['prewed', 'wedstay']) {
-      const q = P.quote(win, slug);
-      assert.equal(q.total, amount, `${win}/${slug} must be the fixed-window amount`);
-      assert.equal(q.fixed, true);
-      assert.doesNotMatch(q.basis, /per person \/ night/, `${win}/${slug} must not say per night`);
-      assert.equal(total(pick(win, slug)), amount);
-      /* the ×2 values may only ever appear where they ARE the fixed amount */
-      if (forbidden.has(q.total)) assert.equal(q.total, amount);
-    }
+/* SOURCE-VERIFIED 08 September 2026 — H&S_Wedding_Operations_Master:
+ *   Accommodation_Details  "Price per Person" 145 · "Price Per Room per NIght" 290
+ *                          "Number of Night"  "2+2 (25.02.-27.02. + 27.02.-01.03.)"
+ *   Budget_Room - Rate     E "Our Selling Rate / Room / Night" 290 · H 145
+ *   Budget_Finance         rows 25-30 guest revenue for 27-28.02 only;
+ *                          row 32 28.02-01.03 carried by the host
+ * → 145 is per person PER NIGHT. Pre-Wedding pays both nights (290 for The
+ *   Heritage); the Wedding Stay pays the first night only (145). */
+test('Vientiane · the matrix is a per-person / per-night rate, not a window total', () => {
+  const rate = { heritage: 145, 'heritage-executive': 155, 'heritage-grand-premier': 170,
+                 'noble-courtyard': 240, 'grand-majestic': 250, 'souphattra-majestic': 290,
+                 'souphattra-presidential': 750 };
+  for (const [slug, r] of Object.entries(rate)) {
+    const pre = P.quote('prewed', slug);
+    assert.equal(pre.rate, r, `${slug} rate`);
+    assert.equal(pre.nights, 2);
+    assert.equal(pre.pay, 2, 'the pre-wedding window has no hosted night');
+    assert.equal(pre.total, r * 2, `prewed/${slug} = rate × 2 nights`);
+    assert.equal(total(pick('prewed', slug)), r * 2);
+
+    const wed = P.quote('wedstay', slug);
+    assert.equal(wed.nights, 2);
+    assert.equal(wed.pay, 1, 'the second wedding night is hosted');
+    assert.equal(wed.hosted, 1);
+    assert.equal(wed.total, r, `wedstay/${slug} = one payable night`);
+    assert.equal(total(pick('wedstay', slug)), r);
   }
-  assert.equal(P.quote('prewed', 'souphattra-majestic').total, 290, 'never 580');
-  assert.match(P.quote('prewed', 'heritage').basis, /USD 145 per person · fixed two-night stay/);
-  assert.match(P.quote('wedstay', 'heritage').basis, /fixed two-night window · first night your contribution, second night complimentary/);
+  assert.equal(P.quote('prewed', 'heritage').total, 290);
+  assert.equal(P.quote('prewed', 'souphattra-majestic').total, 580);
+  assert.equal(P.quote('wedstay', 'souphattra-majestic').total, 290);
 });
 
-test('the nightly stays still multiply — the fixed rule is Souphattra-only', () => {
+test('Vientiane · the guest is told exactly which nights an amount buys', () => {
+  const pre = P.quote('prewed', 'heritage');
+  assert.equal(pre.amount, 'USD 290');
+  assert.equal(pre.totalLine, 'Total per person · 2 nights');
+  assert.equal(pre.nightsCovered, 'Includes both nights: 25 → 26 February + 26 → 27 February');
+  assert.match(pre.basis, /USD 290 total per person/);
+  assert.doesNotMatch(pre.basis, /complimentary/, 'the hosted night is the wedding stay only');
+
+  const wed = P.quote('wedstay', 'heritage');
+  assert.equal(wed.amount, 'USD 145');
+  assert.equal(wed.nightsCovered, 'Both nights: 27 → 28 February + 28 February → 01 March');
+  assert.match(wed.basis, /First night your contribution at USD 145 per person \/ night · second night complimentary/);
+
+  /* no night between 25 February and 1 March is uncovered, and 27 February is
+   * the transition day shared by the two windows */
+  assert.equal(P.locate('prewed').win.nightsList.length + P.locate('wedstay').win.nightsList.length, 4);
+  assert.match(P.locate('prewed').win.nightsList[1], /26 → 27 February/);
+  assert.match(P.locate('wedstay').win.nightsList[0], /27 → 28 February/);
+});
+
+test('every stay multiplies its rate by its payable nights — one rule, no exception', () => {
   assert.equal(P.quote('bkk-stay', 'penthouse').total, 45 * 3);
+  assert.equal(P.quote('prewed', 'heritage').total, 145 * 2);
+  assert.equal(P.quote('wedstay', 'heritage').total, 145 * 1);
   assert.equal(P.quote('kmg', 'left-bank').total, 87 * 3);
   assert.equal(P.quote('ljg', 'starry-sky').total, 210 * 2);
   assert.equal(P.quote('kempinski', 'deluxe-balcony-king').total, 190 * 2);
 });
 
-test("the Owner's screenshot case: the total falls by exactly USD 290", () => {
-  const bag = (pre) => [...pick('prewed', 'souphattra-majestic'), ...pick('wedstay', 'souphattra-majestic'), ...pick('kmg', 'left-bank')]
-    .map((x) => (x.id === 'prewed' ? { ...x, price: pre } : x));
-  const stale = total(bag(580));            /* what production showed */
-  const fixedNow = total(bag(P.quote('prewed', 'souphattra-majestic').total));
-  assert.equal(stale, 1131);
-  assert.equal(fixedNow, 841);
-  assert.equal(stale - fixedNow, 290);
+test('the words "fixed two-night stay" are gone from every guest surface', () => {
+  for (const f of ['assets/pricing.js', 'assets/rooms-data.js', 'journeys.html',
+                   'your-journey.html', 'review.html', 'room.html', 'accommodation.html']) {
+    const src = readFileSync(join(ROOT, f), 'utf8');
+    assert.doesNotMatch(src, /fixed two-night stay/, f + ' still uses the ambiguous wording');
+  }
 });
 
 test('Cost Saving Experience is the hosted Vientiane core, composed of existing products', () => {
@@ -89,15 +120,14 @@ test('D · the Wedding Stay is ONE payable item, never two complimentary rows', 
   const bag = pick('wedstay', 'heritage');
   assert.equal(bag.length, 1, 'exactly one Wedding Stay line');
   assert.deepEqual(bag.map((x) => x.id), ['wedstay']);
-  assert.equal(bag[0].price, 145, 'the fixed-window amount');
+  assert.equal(bag[0].price, 145, 'one payable night of the two-night window');
   assert.equal(bag[0].nights, 2);
-  assert.equal(bag[0].fixed, true);
+  assert.equal(bag[0].pay, 1);
   assert.equal(bag[0].note, 'Second night complimentary');
   assert.equal(bag[0].noteBy, 'Hosted by Bride & Groom');
-  assert.equal(bag[0].hosted, undefined, 'no hosted flag, no USD 0 row');
   assert.equal(total(bag), 145);
-  assert.equal(total(pick('wedstay', 'heritage', 2)), 290, 'two guests at the fixed 145 each');
-  assert.match(P.lineBasis(bag[0]), /USD 145 per person · fixed two-night window · first night your contribution, second night complimentary/);
+  assert.equal(total(pick('wedstay', 'heritage', 2)), 290, 'two guests at 145 each');
+  assert.match(P.lineBasis(bag[0]), /USD 145 total per person · 2 nights · Both nights: 27 → 28 February \+ 28 February → 01 March/);
   const q = P.quote('wedstay', 'heritage');
   assert.doesNotMatch(q.basis, /^Complimentary/);
   assert.equal(q.breakfast, 'Breakfast included');
@@ -114,7 +144,6 @@ test('E · changing the Souphattra category replaces the one Wedding Stay item',
 });
 
 test('the retired two-row wedding model is gone from the data and the code', () => {
-  assert.equal(P.locate('wedstay').win.hosted, undefined);
   for (const f of ['assets/rooms-data.js', 'assets/journey.js', 'your-journey.html',
                    'review.html', 'room.html', 'journeys.html']) {
     const src = readFileSync(join(ROOT, f), 'utf8');
@@ -156,14 +185,9 @@ test('every accommodation window states rate, nights, total and breakfast', () =
     const room = at.stay.rooms.find((r) => r.rate != null);
     const q = P.quote(win, room.slug);
     assert.equal(q.nights, nights, win + ' nights');
-    if (q.fixed) {
-      assert.equal(q.total, q.rate, win + ' fixed window: the amount IS the total');
-      assert.equal(q.nightly, '', win + ' must not advertise a nightly rate');
-      assert.match(q.basis, /fixed two-night/, win + ' basis');
-    } else {
-      assert.equal(q.total, q.rate * (q.pay || nights), win + ' total = rate × nights');
-      assert.ok(q.nightly.includes('per person / night'));
-    }
+    assert.equal(q.total, q.rate * q.pay, win + ' total = rate × payable nights');
+    assert.ok(q.nightly.includes('per person / night'), win + ' states its nightly rate');
+    assert.match(q.basis, /total per person · \d+ nights?/, win + ' basis');
     assert.ok(q.breakfast, win + ' breakfast status');
   }
 });
@@ -213,7 +237,9 @@ test('Full Experience lines come from the single pricing source, transport inclu
   const all = ['bkk-stay', 'train', 'prewed', 'wedstay', 'mu9632', 'kmg', 'c642', 'ljg', 'return', 'kempinski']
     .flatMap((w) => P.FLAT[w] ? P.items(w) : P.items(w, P.premium(w).slug));
   assert.equal(all.length, 10, 'ten stages, ten lines');
-  assert.equal(total(all), 135 + 75 + 290 + 290 + 275 + 261 + 85 + 420 + 200 + 380);
+  /* Full Experience from empty: pre-wedding is now two payable nights */
+  assert.equal(total(all), 135 + 75 + 580 + 290 + 275 + 261 + 85 + 420 + 200 + 380);
+  assert.equal(total(all), 2701);
 });
 
 test('Temple Ceremony is self-pay on Review & Send, the other three hosted, never a USD line', () => {

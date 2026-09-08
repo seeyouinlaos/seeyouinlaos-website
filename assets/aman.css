@@ -14,6 +14,9 @@
   --a-red: #8A5A55;
   --a-gut: 22px;
   --a-rhythm: 76px;
+  /* THE CONTENT FRAME — the outer boundary every desktop composition shares */
+  --a-frame: 1180px;
+  --a-col: 40px;
 }
 
 /* ---------------------------------------------------------------- header
@@ -181,24 +184,18 @@ input:focus-visible, .siyl-inv input:focus { outline: 1px solid var(--a-ink); ou
 }
 
 /* ---- wide screens: the SAME carousel, enlarged — one dominant active card,
-   the neighbours partially in view and clickable, arrows and track live.
-   Never three equal columns. ---- */
+   the neighbour partially in view and clickable, arrows and track live.
+   Never three equal columns. The slide is a PROPORTION of the content frame,
+   so the rail keeps the page's outer edges at every width. ---- */
 @media (min-width: 768px) {
-  :root { --a-slide: 68vw; }
-  .atrk {
-    scroll-snap-type: x mandatory; user-select: none; -webkit-user-select: none; cursor: grab;
-    padding-right: calc(50% - var(--a-slide) / 2);
-  }
-  .aslide { flex: 0 0 var(--a-slide); scroll-snap-align: center; }
+  .atrk { scroll-snap-type: x mandatory; user-select: none; -webkit-user-select: none; cursor: grab; }
+  .aslide { flex: 0 0 62%; scroll-snap-align: start; }
   .aslide .am { aspect-ratio: 4 / 3; }
   .aslide .am::after { opacity: .3; }          /* a veil, not a white panel */
   .aslide:not(.on) .ac { opacity: .5; }
   .aslide:not(.on), .aslide:not(.on) .am { cursor: pointer; }
   .aslide.on .am[href] { cursor: pointer; }
 }
-@media (min-width: 1024px) { :root { --a-slide: 560px; } }
-@media (min-width: 1280px) { :root { --a-slide: 640px; } }
-@media (min-width: 1600px) { :root { --a-slide: 700px; } }
 a.am { display: block; text-decoration: none; }
 .arail { cursor: pointer; padding: 14px 0; background-clip: content-box; box-sizing: content-box; height: 1px; }
 .arail i { top: 13px; }
@@ -299,7 +296,7 @@ a.am { display: block; text-decoration: none; }
 /* --------------------------------------------------------------- tablet
    600–899 px keeps the mobile grammar but stops the photography from filling
    the screen: a wider gutter, a shorter slide, calmer image proportions. */
-@media (min-width: 600px) and (max-width: 899px) {
+@media (min-width: 600px) and (max-width: 767px) {
   :root { --a-gut: 34px; --a-rhythm: 110px; }
   .a-hero h1 { font-size: 38px; }
   .a-lede { max-width: 620px; margin: 0 auto; }
@@ -347,16 +344,21 @@ a.am { display: block; text-decoration: none; }
 #items .row > .ln, #items .row > .int { grid-column: 3; margin-left: 0; text-align: right; white-space: nowrap; }
 /* review.html nests content and amount in one flex wrapper — keep it aligned */
 #items .row > div[style*="display:flex"] { display: grid !important; grid-template-columns: minmax(0, 1fr) auto; column-gap: 16px; }
+/* …and then there is no third column to reserve, so the amount finishes on the
+   row's own right edge instead of stopping short of it */
+#items .row:not(:has(> .ln)):not(:has(> .int)) { grid-template-columns: 74px minmax(0, 1fr); }
 
 /* tablet — the extra width goes to the photograph and to breathing room,
    never to a wider gap between the item and its amount */
 @media (min-width: 600px) {
   #items .row { grid-template-columns: 104px minmax(0, 1fr) 132px; column-gap: 28px; padding: 26px 0; }
+  #items .row:not(:has(> .ln)):not(:has(> .int)) { grid-template-columns: 104px minmax(0, 1fr); }
   #items .row > .th { width: 104px; height: 130px; }
   #items .acts { gap: 40px; }
 }
 @media (min-width: 900px) {
   #items .row { grid-template-columns: 112px minmax(0, 1fr) 150px; column-gap: 34px; padding: 30px 0; }
+  #items .row:not(:has(> .ln)):not(:has(> .int)) { grid-template-columns: 112px minmax(0, 1fr); }
   #items .row > .th { width: 112px !important; height: 140px !important; }
 }
 
@@ -381,8 +383,106 @@ a.am { display: block; text-decoration: none; }
 
 /* tablet: the shop shell keeps an editorial measure instead of a 640 px column
    floating in the middle of a 768 px screen */
-@media (min-width: 600px) and (max-width: 899px) {
+@media (min-width: 600px) and (max-width: 767px) {
   body:has(#items) main, body:has(.vars) main { max-width: 680px !important; padding-left: 34px !important; padding-right: 34px !important; }
   .p { padding: 30px 0; }
   .buy { padding: 34px 30px 36px; }
+}
+
+
+/* ============================================================================
+   THE DESKTOP CONTENT FRAME — the last word for every surface.
+
+   From 768 px upward the whole website composes inside ONE frame. Every
+   section — hero, editorial, destination, journey, stay, wedding, experience,
+   transport, room collection, card, text block, price block and divider —
+   aligns to the same left and right content edges, and a vertical line traced
+   down either edge of any page stays where it is from top to bottom.
+
+       VIEWPORT
+           whitespace
+           ┌──────────── CONTENT FRAME ────────────┐
+           │ content                               │
+           └───────────────────────────────────────┘
+           whitespace
+
+   HARD RULE: no content photograph runs edge to edge across the viewport. A
+   photograph may fill the width OF THE FRAME. It may never fill the screen.
+   Below 768 px nothing here applies — the approved 390 px composition, in
+   which the hero and the transition band are deliberately full-bleed, stands.
+   ========================================================================== */
+@media (min-width: 768px) { :root { --a-gut: 44px; --a-rhythm: 118px; --a-col: 44px; } }
+@media (min-width: 900px) { :root { --a-gut: 64px; --a-rhythm: 150px; --a-col: 64px; } }
+@media (min-width: 1600px) { :root { --a-frame: 1280px; } }
+
+@media (min-width: 768px) {
+  /* the frame itself — one declaration, every composition */
+  .a-hero, .a-lede, .a-pair, .a-duo, .a-close, .a-sec.tight,
+  .acar .a-head, .acar .arow {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: var(--a-frame);
+    margin-left: auto; margin-right: auto;
+    padding-left: var(--a-gut); padding-right: var(--a-gut);
+  }
+
+  /* HERO — bounded photography with visible whitespace around it */
+  .a-hero .am { width: 100%; height: min(68vh, 600px); }
+  .a-hero .ah { left: calc(var(--a-gut) + 38px); right: calc(var(--a-gut) + 38px); bottom: 44px; max-width: 780px; }
+  .a-hero h1 { font-size: 42px; }
+
+  /* BAND — a transition inside the frame, never a viewport-wide strip */
+  .a-band { height: min(40vh, 380px); }
+
+  /* PAIR — image and copy on the frame's own two axes, no floating percentages */
+  .a-pair {
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: var(--a-col); align-items: center;
+  }
+  .a-pair .am { width: 100%; margin: 0; aspect-ratio: 4 / 5; }
+  .a-pair .ac { padding: 0; max-width: 34em; }
+  .a-pair.rev .am { order: 2; margin: 0; }
+  .a-pair.rev .ac { padding: 0; order: 1; }
+
+  /* DUO — two supporting photographs across the same frame */
+  .a-duo { display: grid; grid-template-columns: 1fr 1fr; column-gap: var(--a-col); }
+  .a-duo .am { aspect-ratio: 4 / 3; }
+
+  /* MEASURE — reading columns start on the frame's LEFT edge; alignment is
+     never achieved by re-centring a narrower column inside a wider one */
+  .a-lede > div { max-width: 34em; }
+  .a-close h2 { max-width: 15em; }
+
+  /* CAROUSEL — the rail is bounded by the frame: the scrollport begins and ends
+     on the very same content edges as the hero above it, the active slide rests
+     on the left edge, and its neighbour peeks in and is clipped by the right
+     edge. The rail never opens an outer edge of its own. */
+  .acar .atrk {
+    width: calc(100% - 2 * var(--a-gut));
+    max-width: calc(var(--a-frame) - 2 * var(--a-gut));
+    margin-left: auto; margin-right: auto;
+    padding-left: 0; padding-right: 0;
+    scroll-padding-left: 0;
+    gap: var(--a-col);
+  }
+  .acar .a-head h2 { font-size: 30px; }
+
+  /* the header sits on the frame's edges too — the hairline under it is the
+     first thing that would betray a second, wider grid */
+  header.hd { padding-left: max(var(--a-gut), calc((100% - var(--a-frame) + 2 * var(--a-gut)) / 2));
+              padding-right: max(var(--a-gut), calc((100% - var(--a-frame) + 2 * var(--a-gut)) / 2)); }
+  header.hd::after { left: max(var(--a-gut), calc((100% - var(--a-frame) + 2 * var(--a-gut)) / 2));
+                     right: max(var(--a-gut), calc((100% - var(--a-frame) + 2 * var(--a-gut)) / 2)); }
+  .a-mhd { padding-left: max(var(--a-gut), calc((100% - var(--a-frame) + 2 * var(--a-gut)) / 2));
+           padding-right: max(var(--a-gut), calc((100% - var(--a-frame) + 2 * var(--a-gut)) / 2)); }
+  /* the hero opens with air above it, never flush against the hairline */
+  .a-hero { margin-top: 30px; }
+
+  /* the shared footer sits on the same edges */
+  .sfoot-in, .sfoot .sf-legal { max-width: var(--a-frame); padding-left: var(--a-gut); padding-right: var(--a-gut); }
+}
+
+/* the shop shell's own tablet composition is replaced by the frame at 768 */
+@media (min-width: 768px) {
+  body:has(#items) main, body:has(.vars) main { max-width: var(--a-frame) !important; }
 }

@@ -40,23 +40,46 @@
       name: 'Souphattra Heritage Vientiane',
       place: 'Vientiane, Laos',
       breakfast: 'Breakfast included',
+      /* SOURCE OF THE SOUPHATTRA PRICE BASIS — verified 08 September 2026 against
+       * H&S_Wedding_Operations_Master:
+       *   Accommodation_Details, row "Price Per Room per NIght" = 290 and row
+       *   "Price per Person" = 145 for The Heritage → 145 is the PER PERSON,
+       *   PER NIGHT share of the room rate (the same construction as the
+       *   Sathorn Penthouse, 180 per room / night ÷ 4 = 45 per person / night).
+       *   Accommodation_Details, row "Number of Night" = "2+2
+       *   (25.02.–27.02. + 27.02.–01.03.2027)" → two consecutive two-night
+       *   windows, no uncovered night on 27 February.
+       *   Budget_Room - Rate, column E "Our Selling Rate / Room / Night" = 290,
+       *   column H "Guest See this on webpage to book per person" = 145.
+       *   Budget_Finance rows 25–30 book the guest revenue for the ONE night
+       *   27–28.02 at the per-room rate; row 32 ("All Categories Rooms",
+       *   28.02–01.03, 26 rooms × USD 150) is carried by the host — that is
+       *   the complimentary second wedding-stay night.
+       * Therefore: `n` nights in the window, `pay` of them payable by the guest.
+       *   PRE-WEDDING  25 – 27 FEB      2 nights, both payable  → rate × 2
+       *   WEDDING STAY 27 FEB – 01 MAR  2 nights, first payable → rate × 1
+       * `window: 'fixed'` records the Owner's duration rule (Overview_Hotel_
+       * Restaurant, Day 05-02 / Day 07: "2 tage fix" — a shorter stay changes
+       * nothing). It is a DURATION rule and never an arithmetic shortcut. */
       windows: [
-        /* Owner rule: the Souphattra matrix IS the complete per-person amount for
-         * the fixed two-night window. `fixed` forbids any × nights arithmetic. */
-        { id: 'prewed', label: 'Pre-Wedding Vientiane', dates: '25 – 27 February 2027', nights: '2 nights', n: 2, fixed: true,
-          bagName: 'Pre-Wedding Vientiane · Souphattra Heritage', bagImg: 'assets/images/souphattra/heritage-courtyard-front.jpg' },
-        /* ONE Wedding Stay selection for the fixed two-night window: the first
-         * night is the guest's contribution, the second night is complimentary
-         * and hosted by the Bride & Groom. `pay` is how many of the `n` nights
-         * the guest actually contributes — the note is context, never a second
-         * line item and never a USD 0 row. */
-        { id: 'wedstay', label: 'Wedding Stay', dates: '27 February – 01 March 2027', nights: '2 nights', n: 2, fixed: true,
+        { id: 'prewed', label: 'Pre-Wedding Stay', dates: '25 – 27 February 2027', nights: '2 nights', n: 2, pay: 2,
+          window: 'fixed', nightsList: ['25 → 26 February', '26 → 27 February'],
+          bagName: 'Pre-Wedding Stay · Souphattra Heritage', bagImg: 'assets/images/souphattra/heritage-courtyard-front.jpg' },
+        /* ONE Wedding Stay selection for the two-night window: the first night is
+         * the guest's contribution, the second night is complimentary and hosted
+         * by the Bride & Groom. The note is context, never a second line item
+         * and never a USD 0 row. */
+        { id: 'wedstay', label: 'Wedding Stay', dates: '27 February – 01 March 2027', nights: '2 nights', n: 2, pay: 1,
+          window: 'fixed', nightsList: ['27 → 28 February', '28 February → 01 March'],
           note: 'Second night complimentary', noteBy: 'Hosted by Bride & Groom',
           bagName: 'Wedding Stay · Souphattra Heritage', bagImg: 'assets/images/souphattra/heritage-arches-dusk.jpg' }
       ],
       includes: [
-        'Wedding stay (27 February – 1 March): the amount is your total contribution per guest for the two nights — the first night is your contribution, the second night is complimentary, hosted by the Bride & Groom, ' + HS + '.',
-        'Breakfast is included on both mornings.',
+        'Pre-Wedding Stay (25 – 27 February): two nights, 25 → 26 and 26 → 27 February. Both nights are your contribution.',
+        'Wedding Stay (27 February – 1 March): two nights, 27 → 28 February and 28 February → 1 March. The first night is your contribution; the second night is complimentary, hosted by the Bride & Groom, ' + HS + '.',
+        'The two stays run back to back — 27 February is the transition day, and no night between 25 February and 1 March is left uncovered.',
+        'Each window is a fixed two-night window: arriving late or leaving early does not change the amount.',
+        'Breakfast is included on every morning.',
         'A limited number of complimentary alternative stays are also available.'
       ],
       rooms: [
