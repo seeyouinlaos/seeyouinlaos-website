@@ -303,7 +303,6 @@ a.am { display: block; text-decoration: none; }
   :root { --a-gut: 34px; --a-rhythm: 110px; }
   .a-hero h1 { font-size: 38px; }
   .a-lede { max-width: 620px; margin: 0 auto; }
-  .aslide { flex: 0 0 56%; }
   .a-pair { max-width: 640px; margin: 0 auto; }
   .a-pair .am { aspect-ratio: 3 / 2; }
   .a-duo { max-width: 640px; margin: 0 auto; gap: 20px; }
