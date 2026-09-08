@@ -72,6 +72,12 @@ body.a-open .a-scrim { opacity: 1; pointer-events: auto; }
 .a-mfoot p { font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 10px; letter-spacing: 2.2px; text-transform: uppercase; color: var(--a-mute); margin-bottom: 10px; }
 .a-mfoot a { display: block; font-size: 12.5px; color: var(--a-ink); text-decoration: none; line-height: 2.2; min-height: 30px; }
 
+/* keyboard focus stays visible but restrained — one hairline, never a system
+   ring in a colour the site does not own */
+:focus-visible { outline: 1px solid var(--a-ink); outline-offset: 2px; }
+.a-menu a:focus-visible, .a-menu button:focus-visible { outline-offset: 4px; }
+input:focus-visible, .siyl-inv input:focus { outline: 1px solid var(--a-ink); outline-offset: 0; border-color: var(--a-ink); }
+
 /* one eyebrow, one underlined link — for every surface */
 .a-eyebrow {
   font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 10px;
