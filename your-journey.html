@@ -71,15 +71,15 @@ a.nm:hover,a.th:hover{opacity:.7}
 .fxalt:hover{color:#313131}
 .fxnote{font-size:11.5px;color:#7C7A75;line-height:1.7;margin-bottom:6px}
 .fxs{position:fixed;inset:0;background:rgba(30,30,30,.45);display:none;z-index:80}
-.fxo{position:fixed;left:0;right:0;bottom:0;background:#FCFAF6;padding:34px 26px calc(38px + env(safe-area-inset-bottom));display:none;z-index:81;max-width:640px;margin:0 auto}
+.fxo{position:fixed;left:0;right:0;bottom:0;background:#FCFAF6;padding:30px 26px calc(34px + env(safe-area-inset-bottom));display:none;z-index:81;max-width:640px;margin:0 auto;max-height:94dvh;max-height:94vh;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
 body.fx-open .fxs,body.fx-open .fxo{display:block}
 .fxo .ie{font-size:10px;letter-spacing:2.2px;text-transform:uppercase;color:#7C7A75;margin-bottom:10px}
-.fxo h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:23px;margin-bottom:14px}
-.fxo p{font-size:13px;line-height:1.75;color:#4A4A4A;margin-bottom:22px}
+.fxo h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:23px;margin-bottom:12px}
+.fxo p{font-size:13px;line-height:1.7;color:#4A4A4A;margin-bottom:16px}
 .fxo .row2{display:flex;gap:28px;align-items:center;justify-content:flex-end}
 .fxo .cancel{background:none;border:0;font:inherit;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#7C7A75;cursor:pointer;min-height:44px;padding:12px 0}
 .fxo .go{background:#313131;color:#F3EEE7;border:0;padding:17px 26px;font:inherit;font-size:10.5px;letter-spacing:2.2px;text-transform:uppercase;cursor:pointer;min-height:52px}
-@media (min-width:900px){.fxo{left:50%;right:auto;bottom:auto;top:50%;transform:translate(-50%,-50%);width:520px;padding:40px 44px}}
+@media (min-width:900px){.fxo{left:50%;right:auto;bottom:auto;top:50%;transform:translate(-50%,-50%);width:520px;padding:40px 44px;max-height:88vh}}
 /* ---- THE COST SAVING SELECTOR ------------------------------------------
    Two choices, not two buttons. The guest moves between them horizontally —
    swipe, trackpad, arrows or the keyboard — and the card resting on the snap
@@ -92,16 +92,16 @@ body.fx-open .fxs,body.fx-open .fxo{display:block}
 .csel .atrk{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scrollbar-width:none;padding:2px 0 4px;scroll-padding-left:0}
 .csel .atrk::-webkit-scrollbar{display:none}
 .csel .aslide{flex:0 0 84%;scroll-snap-align:start;scroll-snap-stop:always}
-.cscard{border:1px solid #DAD9D7;background:#FFFDF9;padding:22px 20px 20px;height:100%;transition:border-color .3s,opacity .35s}
+.cscard{border:1px solid #DAD9D7;background:#FFFDF9;padding:20px 18px 18px;height:100%;transition:border-color .3s,opacity .35s}
 .csel .aslide:not(.on) .cscard{opacity:.5}
 .csel .aslide.on .cscard{border-color:#313131}
 .cscard .cse{font-size:9.5px;letter-spacing:2.2px;text-transform:uppercase;color:#7C7A75}
-.cscard h3{font-family:'PP Editorial Old',serif;font-weight:200;font-size:22px;line-height:1.25;margin:8px 0 2px}
+.cscard h3{font-family:'PP Editorial Old',serif;font-weight:200;font-size:21px;line-height:1.25;margin:7px 0 2px}
 .cscard .csw{font-size:11.5px;color:#7C7A75;margin-bottom:14px}
 .cscard .csa{font-family:'PP Editorial Old',serif;font-size:24px;line-height:1.1}
 .cscard .csan{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75;margin:4px 0 14px}
 .cscard ul{list-style:none;margin:0 0 12px;padding:0}
-.cscard li{position:relative;padding-left:16px;font-size:12px;line-height:1.65;color:#4A4A4A;margin-bottom:7px}
+.cscard li{position:relative;padding-left:16px;font-size:11.5px;line-height:1.6;color:#4A4A4A;margin-bottom:6px}
 .cscard li::before{content:'';position:absolute;left:2px;top:.62em;width:4px;height:4px;border-radius:50%;background:#C9C4BA}
 .cscard .csav{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75;margin-top:12px}
 .cscard .csav.low{color:#8A5A55}

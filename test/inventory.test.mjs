@@ -335,6 +335,9 @@ test('J/K · changing a confirmed Cost Saving stay is atomic and never loses the
   assert.ok(!/function alertRoom\(c\)\{[\s\S]{0,200}getElementById\('dec'\)/.test(yj),
     'the refusal notice must not be written into the panel that gets re-rendered');
   assert.match(yj, /you still hold the stay you had/);
+  /* the decision panel must be reachable in full on a phone */
+  assert.match(yj, /\.fxo\{[^}]*overflow-y:auto/, 'the overlay must scroll when it is taller than the screen');
+  assert.match(yj, /\.fxo\{[^}]*max-height:94vh/);
   const client = readFileSync(join(ROOT, 'assets/inventory.js'), 'utf8');
   assert.match(client, /reserveLines: function/);
   /* the ledger itself replaces an invitation's own allocation in one turn */
