@@ -60,11 +60,11 @@ a.th{display:block}
 <p class="sub">Your journey · nothing is paid on this website</p>
 
 <h2>The Wedding Programme</h2>
-<div class="ev"><div><p class="en">Temple Ceremony</p><p class="em">Sunday, 28 February 2027 · 09:00 AM – approx. 12:00 PM · Wat Ong Teu Temple, Vientiane</p><p class="em">Buddhist giving is made personally by each guest.</p></div><span class="eh sp">Self-pay</span></div>
+<div class="ev"><div><p class="en">Temple Ceremony</p><p class="em">Sunday, 28 February 2027 · 08:00 – 12:00 · Wat Ong Teu Temple, Vientiane</p><p class="em">Optional participation. The morning alms-giving, Tak Bat, is part of the ceremony and carries no charge. The Sangkhathan Temple Offering is a separate, optional personal offering.</p><p class="em" id="tempstate"></p></div><span class="eh sp" id="tempeh">Optional</span></div>
 <div class="ev"><div><p class="en">Coffee &amp; Cake</p><p class="em">Sunday, 28 February 2027 · After the return from the temple · Souphattra Heritage Vientiane</p></div><span class="eh">Hosted</span></div>
 <div class="ev"><div><p class="en">Vow Ceremony</p><p class="em">Sunday, 28 February 2027 · 04:30 PM · Souphattra Heritage Vientiane</p></div><span class="eh">Hosted</span></div>
 <div class="ev"><div><p class="en">Wedding Dinner</p><p class="em">Sunday, 28 February 2027 · 07:30 PM · Souphattra Vientiane Hotel</p></div><span class="eh">Hosted</span></div>
-<p class="note">Coffee &amp; Cake, the Vow Ceremony and Wedding Dinner are hosted. Buddhist giving at the Temple Ceremony is personal and self-pay.</p>
+<p class="note">Coffee &amp; Cake, the Vow Ceremony and Wedding Dinner are hosted. The Temple Ceremony is optional and the morning alms-giving carries no charge; only the Sangkhathan Temple Offering is a personal cost, and only if you choose it.</p>
 
 <h2>Your selections</h2>
 <div id="items"></div>
@@ -89,6 +89,7 @@ a.th{display:block}
 <script src="assets/aman.js"></script>
 <script src="assets/rooms-data.js"></script>
 <script src="assets/pricing.js"></script>
+<script src="assets/temple.js"></script>
 <script src="assets/inventory.js"></script>
 <script src="assets/transport-data.js"></script>
 <script src="assets/journey.js"></script>
@@ -96,6 +97,15 @@ a.th{display:block}
 <script>
 var SUBMIT_URL='https://seeyouinlaos-website.suthep-hrg.workers.dev/api/register';
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')}
+/* the operational preparation state: attendance and offerings, never merged */
+function paintTemple(){
+if(!window.SIYL_TEMPLE)return;
+var o=SIYL_TEMPLE.operational();
+var el=document.getElementById('tempstate'),eh=document.getElementById('tempeh');
+if(el)el.textContent='Your decision: '+o.temple+
+  (o.attending?(o.offerings?' · Sangkhathan offering selected: '+o.offerings+' × USD 15 = USD '+o.offeringsUsd:' · no Sangkhathan offering'):'');
+if(eh)eh.textContent=o.attending?'Attending':(SIYL_TEMPLE.attendance()==='no'?'Not attending':'Optional')}
+
 function detailHref(x){
 if(x.stay&&x.room)return 'room.html?stay='+x.stay+'&room='+x.room;
 if(x.id==='1872')return '1872.html';
@@ -134,7 +144,9 @@ if(!open.length){box.innerHTML='';return}
 box.innerHTML='<div class="gap"><h3>Your journey is almost complete</h3>'+
 '<p>A decision is still needed for the stages below. Choose your stay or travel — or tell us that you are not joining that part of the journey. You can still send what you have.</p>'+
 open.map(function(s2){return '<div class="grow"><span class="gw">'+s2.when+'</span><span>'+s2.cat+' · '+s2.place+'</span><a href="journeys.html#'+s2.anchor+'">'+(s2.cat==='Accommodation'?'Choose your stay':'Choose your travel')+'</a></div>'}).join('')+'</div>'}
-document.addEventListener('siyl:bag',render);
+document.addEventListener('siyl:bag',function(){render();paintTemple()});
+document.addEventListener('siyl:temple',paintTemple);
+paintTemple();
 render();
 
 function buildText(auth){var b=SIYL_BAG.get();
@@ -151,6 +163,15 @@ b.forEach(function(x){L.push('- '+x.name+' · '+(x.meta||'')+(x.qty>1?' · Quant
 if(window.SIYL_JOURNEY){var op=SIYL_JOURNEY.open(),sk=SIYL_JOURNEY.SEGMENTS.filter(function(g){return SIYL_JOURNEY.state(g)==='declined'});
 if(sk.length){L.push('','NOT JOINING:');sk.forEach(function(g){L.push('- '+g.when+' · '+g.cat+' · '+g.place)})}
 if(op.length){L.push('','DECISION STILL OPEN:');op.forEach(function(g){L.push('- '+g.when+' · '+g.cat+' · '+g.place)})}}
+/* THE OPERATIONAL PREPARATION LIST — attendance and offerings are two
+ * different fields and are never derived from one another. */
+if(window.SIYL_TEMPLE){var t=SIYL_TEMPLE.operational();
+L.push('','BUDDHIST MORNING:');
+L.push('- Temple Ceremony (08:00-12:00, Wat Ong Teu): '+t.temple+(auth&&auth.partyName?' - '+auth.partyName:''));
+if(t.attending){
+  L.push('- Morning alms-giving (Tak Bat): included in the ceremony, no charge');
+  L.push('- Sangkhathan Temple Offering to prepare: '+t.offerings+(t.offerings?' (USD '+t.offeringsUsd+')':''));
+}else{L.push('- Sangkhathan Temple Offering to prepare: 0')}}
 L.push('','YOUR COSTS: USD '+SIYL_BAG.total().toLocaleString('en-US'));
 L.push('Submitted via Review & Send · '+new Date().toISOString());
 return L.join('\n')}
@@ -187,6 +208,7 @@ if(!hold.ok&&!hold.unreachable){
 }
 
 var registration={channel:'journey-shop',selections:SIYL_BAG.get(),totalUsd:SIYL_BAG.total(),
+templeCeremony:window.SIYL_TEMPLE?SIYL_TEMPLE.operational():null,
 inventory:hold.unreachable?'UNCONFIRMED — ledger unreachable, Guest Relations to confirm rooms':'CONFIRMED',
 roomsHeld:hold.reserved||null,
 registration_submitted_at:new Date().toISOString()};

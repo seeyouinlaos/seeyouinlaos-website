@@ -206,6 +206,33 @@ gate('P3', 'MASTER-02 programme truth (four events, no active Alms, no pool in v
    poolInVowApp && 'NO POOL imagery in Vow Ceremony context']
     .filter(Boolean).join(' · ') || 'four-event programme enforced; Alms retired; vow pool-free');
 
+/* P8 — THE PUBLIC WEDDING PAGE (owner decision, 09 Sep 2026): exactly four
+   top-level events; the Buddhist morning lives INSIDE the Temple Ceremony and
+   never as a fifth event; the alms-giving of food is never a priced product;
+   only the Sangkhathan carries USD 15; no pool-side dinner narrative; the
+   retired bride photograph and the fountain are gone. */
+{
+  const vy = read('voyage.html');
+  const bad = [];
+  const h2 = (vy.match(/<h2>([^<]+)<\/h2>/g) || []).map((t) => t.replace(/<\/?h2>/g, ''));
+  for (const e of ['Temple Ceremony', 'Coffee &amp; Cake', 'Vow Ceremony', 'Wedding Dinner']) {
+    if (!h2.includes(e)) bad.push('missing event: ' + e);
+  }
+  if (!/id="temple"[\s\S]{0,4000}id="takbat"[\s\S]{0,4000}id="sangkhathan"/.test(vy))
+    bad.push('the Buddhist morning must sit inside the Temple Ceremony, in order');
+  if (/Alms Giving/i.test(vy)) bad.push('"Alms Giving" must not surface as an event name');
+  if (/USD 15[^<]{0,60}(alms|Tak Bat)/i.test(vy)) bad.push('the alms-giving of food must never carry a price');
+  if (/pool/i.test(vy)) bad.push('no pool narrative on the wedding page');
+  if (/052-temple-ceremony-bride/.test(vy)) bad.push('the retired bride photograph is still on the page');
+  if (/053-wedding-dinner-courtyard-garden/.test(vy)) bad.push('the fountain photograph is still the wedding dinner image');
+  if (!/data-att="yes"[\s\S]{0,400}data-att="no"/.test(vy)) bad.push('attendance must be an explicit two-way decision');
+  gate('P8', 'Wedding programme truth: four events, Buddhist morning inside the Temple Ceremony',
+    bad.length === 0,
+    bad.length ? bad.join(' · ')
+      : 'four events; Tak Bat and Sangkhathan sit inside the Temple Ceremony; alms-giving unpriced; ' +
+        'only the Sangkhathan is USD 15; no pool narrative; retired bride and fountain images removed');
+}
+
 /* P5 — overlay integrity (release-blocking): a hidden lightbox must actually
  * be hidden (author display rules must not defeat the hidden attribute), and
  * gallery navigation can never run on an empty list (NaN / 0 regression). */

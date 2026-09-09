@@ -41,6 +41,11 @@ h1{font-family:'PP Editorial Old',serif;font-weight:200;font-size:29px;margin-bo
 .avline{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75;margin:14px 0 0;line-height:1.6}
 .avline.low{color:#8A5A55}
 .heldbox{border-top:1px solid #DAD9D7;margin-top:24px;padding-top:16px;font-size:12px;color:#7C7A75;line-height:1.8}
+.tmpl{border-top:1px solid #DAD9D7;margin-top:24px;padding-top:18px}
+.tmpl h3{font-family:'PP Editorial Old',serif;font-weight:200;font-size:18px;margin-bottom:4px}
+.tmpl p{font-size:12px;color:#7C7A75;line-height:1.8;margin-bottom:8px}
+.tmpl b{font-weight:400;color:#313131}
+.tmpl a{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#313131;text-decoration:none;border-bottom:1px solid #313131;padding-bottom:2px;display:inline-block;margin-top:4px}
 .heldbox b{font-weight:400;color:#313131}
 .selfl b{font-weight:400;color:#313131}
 .selfl.low b{color:#8A5A55}
@@ -131,6 +136,7 @@ body.fx-open .fxs,body.fx-open .fxo{display:block}
 <div class="tot"><span class="l">Your Costs</span><span class="r" id="tt">USD 0</span></div>
 <p class="note">Vientiane is two consecutive stays and no night is left uncovered. The Pre-Wedding Stay covers 25 &rarr; 26 and 26 &rarr; 27 February, both nights your contribution. The Wedding Stay covers 27 &rarr; 28 February and 28 February &rarr; 01 March as ONE selection: the first night is your contribution and the second night is complimentary, hosted by the Bride &amp; Groom. Hosted wedding programme events are part of your journey without charge — they never appear as USD 0 line items. Spa interest lines carry no journey cost — the amount is payable at the spa.</p>
 <div id="csnote"></div>
+<div id="temple"></div>
 <div id="dec"></div>
 <div id="held"></div>
 <div class="fxs" id="fxs"></div>
@@ -149,6 +155,7 @@ body.fx-open .fxs,body.fx-open .fxo{display:block}
 <script src="assets/aman.js"></script>
 <script src="assets/rooms-data.js"></script>
 <script src="assets/pricing.js"></script>
+<script src="assets/temple.js"></script>
 <script src="assets/inventory.js"></script>
 <script src="assets/transport-data.js"></script>
 <script src="assets/journey.js"></script>
@@ -373,6 +380,24 @@ var b=document.getElementById('csnote');if(b)b.innerHTML=''});
  * An allocation is written when the journey is SENT. If the guest then changes
  * a room, the ledger still holds the old one: say so plainly and tell them the
  * next send updates it. If they empty the journey, give the rooms back. */
+/* the Buddhist morning: attendance is a decision, not a purchase, and it is
+ * shown apart from the offering it may or may not carry */
+function paintTemple(){
+var box=document.getElementById('temple');if(!box||!window.SIYL_TEMPLE)return;
+var o=SIYL_TEMPLE.operational();
+var h='<div class="tmpl"><h3>The Buddhist morning</h3>';
+h+='<p><b>Temple Ceremony · '+o.temple+'</b>'+(o.attending?' · 08:00 – 12:00 · Wat Ong Teu, Vientiane':'')+'</p>';
+if(o.attending){
+  h+='<p>The morning alms-giving, Tak Bat, is part of the ceremony — no charge.</p>';
+  h+=o.offerings
+    ? '<p><b>Sangkhathan Temple Offering · '+o.offerings+(o.offerings===1?' offering':' offerings')+'</b> · USD '+o.offeringsUsd+', shown in your journey below.</p>'
+    : '<p>No Sangkhathan offering selected.</p>';
+}else if(SIYL_TEMPLE.attendance()==='no'){
+  h+='<p>No hosted programme is assigned to you for this part of the morning.</p>';
+}
+h+='<a href="voyage.html#temple-decision">'+(SIYL_TEMPLE.decided()?'Change this decision':'Tell us your decision')+'</a></div>';
+box.innerHTML=h}
+
 function paintHeld(){
 var box=document.getElementById('held');if(!box||!window.SIYL_STOCK)return;
 SIYL_STOCK.mine().then(function(a){
@@ -386,10 +411,12 @@ SIYL_STOCK.mine().then(function(a){
     (now===held?'' : ' Your journey has changed since then — sending it again updates what is held in your name.')+'</div>';
 });}
 
-document.addEventListener('siyl:bag',function(){render();paintHeld()});
+document.addEventListener('siyl:bag',function(){render();paintHeld();paintTemple()});
+document.addEventListener('siyl:temple',paintTemple);
 document.addEventListener('siyl:stock',render);
 render();
 paintHeld();
+paintTemple();
 var q=new URLSearchParams(location.search);
 var rm=q.get('rm');if(rm){SIYL_BAG.remove(rm);render()}
 </script></body></html>

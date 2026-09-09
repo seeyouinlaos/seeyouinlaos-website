@@ -39,7 +39,16 @@
                 meta: '06 March 2027 · Economy flexible', img: 'assets/images/transport/mu5924-economy-cabin-1.jpg',
                 basis: 'USD 200 per person · 1 seat · Economy flexible · via Kunming' },
     '1872':   { price: 180, cat: 'Experience', unit: 'experience',
-                basis: 'USD 180 per experience · for two guests' }
+                basis: 'USD 180 per experience · for two guests' },
+    /* The Sangkhathan is NOT an admission, a ticket or a hosted wedding cost.
+     * It is the guest's own offering, prepared by the hosts and presented by
+     * the guest personally. It is priced per guest and it never touches the
+     * room inventory ledger — no bed, no capacity, no allocation. */
+    'sangkhathan': { price: 15, cat: 'Wedding programme',
+                name: 'Sangkhathan Temple Offering',
+                meta: 'Sunday, 28 February 2027 · Temple Ceremony',
+                img: 'assets/images/temple/sangkhathan-prepared-offerings.jpg',
+                basis: 'USD 15 per guest · a personal offering, prepared for you and presented by you' }
   };
 
   function money(n) { return 'USD ' + Number(n).toLocaleString('en-US'); }

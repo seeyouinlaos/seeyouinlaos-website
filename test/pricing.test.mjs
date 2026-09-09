@@ -251,13 +251,22 @@ test('Full Experience lines come from the single pricing source, transport inclu
   assert.notEqual(total(all), 2130);
 });
 
-test('Temple Ceremony is self-pay on Review & Send, the other three hosted, never a USD line', () => {
+test('Review & Send: the Temple Ceremony is optional, the other three hosted', () => {
   const page = readFileSync(join(ROOT, 'review.html'), 'utf8');
   const src = page.slice(page.indexOf('<h2>The Wedding Programme</h2>'), page.indexOf('<h2>Your selections</h2>'));
-  assert.match(src, /Temple Ceremony[\s\S]{0,400}Self-pay/);
+  /* attendance, not a charge — and the two rituals stay apart */
+  assert.match(src, /Temple Ceremony[\s\S]{0,600}Optional participation/);
+  assert.match(src, /morning alms-giving, Tak Bat, is part of the ceremony and carries no charge/);
+  assert.match(src, /Sangkhathan Temple Offering is a separate, optional personal offering/);
   assert.doesNotMatch(src, /Temple Ceremony<\/p>[\s\S]{0,300}<span class="eh">Hosted/);
   assert.equal((src.match(/<span class="eh">Hosted<\/span>/g) || []).length, 3);
   assert.doesNotMatch(src, /USD/, 'no amount anywhere in the programme block');
+  /* the operational preparation list is derivable from the submitted record */
+  assert.match(page, /BUDDHIST MORNING:/);
+  assert.match(page, /Sangkhathan Temple Offering to prepare/);
+  assert.match(page, /templeCeremony:window\.SIYL_TEMPLE\?SIYL_TEMPLE\.operational\(\):null/);
+  /* attendance and offering quantity are two different fields */
+  assert.match(page, /Morning alms-giving \(Tak Bat\): included in the ceremony, no charge/);
 });
 
 test('Snow Mountain Viewing Room carries its own canonical photograph, used nowhere else', () => {
@@ -470,4 +479,80 @@ test('every stay says what is included and what the guest arranges', () => {
   assert.match(R.sathorn.includes.join(' '), /Breakfast is NOT included/);
   assert.match(R.kempinski.includes.join(' '), /Breakfast included/);
   assert.match(R.souphattra.includes.join(' '), /no night between 25 February and 1 March is left uncovered/);
+});
+
+/* ==========================================================================
+   THE BUDDHIST MORNING — attendance and the offering are two different things.
+   ========================================================================== */
+test('the Sangkhathan is a per-guest offering, not an admission', () => {
+  const f = P.FLAT.sangkhathan;
+  assert.ok(f, 'the offering must be priced by the single calculation source');
+  assert.equal(f.price, 15);
+  assert.equal(f.cat, 'Wedding programme');
+  assert.match(f.basis, /per guest/);
+  assert.match(f.basis, /prepared for you and presented by you/);
+  for (const word of ['admission', 'entrance', 'ticket', 'service charge', 'fee']) {
+    assert.ok(!f.basis.toLowerCase().includes(word), 'the offering reads as a ' + word);
+  }
+  const line = P.items('sangkhathan')[0];
+  assert.equal(line.id, 'sangkhathan');
+  assert.equal(line.price, 15);
+  assert.equal(total([{ ...line, qty: 1 }]), 15);
+  assert.equal(total([{ ...line, qty: 2 }]), 30, 'two guests, two offerings');
+  /* it is NOT a room: it carries no stay and no room slug, so it can never
+     reach the accommodation ledger */
+  assert.equal(line.stay, undefined);
+  assert.equal(line.room, undefined);
+});
+
+test('Full Experience stays USD 2,130; one offering makes the journey 2,145', () => {
+  const canonical = STAGES.flatMap((w) => (P.FLAT[w] ? P.items(w) : P.items(w, P.approved(w).slug)));
+  assert.equal(total(canonical), 2130, 'the canonical base is unchanged');
+  const withOffering = [...canonical, { ...P.items('sangkhathan')[0], qty: 1 }];
+  assert.equal(withOffering.length, 11, 'the offering is an addition, not a stage');
+  assert.equal(total(withOffering), 2145);
+  /* the canonical configuration itself is never redefined */
+  assert.equal(total(canonical), 2130);
+  const two = [...canonical, { ...P.items('sangkhathan')[0], qty: 2 }];
+  assert.equal(total(two), 2160);
+});
+
+test('the wedding page: four events, the Buddhist morning inside the ceremony', () => {
+  const vy = readFileSync(join(ROOT, 'voyage.html'), 'utf8');
+  const h2 = [...vy.matchAll(/<h2>([^<]+)<\/h2>/g)].map((m) => m[1]);
+  for (const e of ['Temple Ceremony', 'Coffee &amp; Cake', 'Vow Ceremony', 'Wedding Dinner']) {
+    assert.ok(h2.includes(e), 'missing event ' + e);
+  }
+  /* the order of the story: place → food-giving → personal offering */
+  const iT = vy.indexOf('id="temple"'), iB = vy.indexOf('id="takbat"'), iS = vy.indexOf('id="sangkhathan"');
+  assert.ok(iT > 0 && iT < iB && iB < iS, 'the Buddhist morning must run ceremony → Tak Bat → Sangkhathan');
+  /* Alms Giving is never a fifth event, and the food offering is never priced */
+  assert.ok(!/Alms Giving/i.test(vy));
+  assert.ok(!/<h2>Morning Alms-Giving<\/h2>[\s\S]{0,900}USD/.test(vy), 'the alms-giving must carry no price');
+  assert.match(vy, /Part of the Temple Ceremony · no charge/);
+  /* only the Sangkhathan is USD 15 */
+  assert.match(vy, /Optional · USD 15 per guest/);
+  /* attendance is an explicit two-way decision */
+  assert.match(vy, /data-att="yes"[\s\S]{0,400}data-att="no"/);
+  assert.match(vy, /08:00 – 12:00 · Wat Ong Teu, Vientiane/);
+});
+
+test('the retired imagery and the pool-side dinner narrative are gone', () => {
+  const vy = readFileSync(join(ROOT, 'voyage.html'), 'utf8');
+  assert.ok(!/052-temple-ceremony-bride/.test(vy), 'the black-and-white bride photograph is still there');
+  assert.ok(!/053-wedding-dinner-courtyard-garden/.test(vy), 'the fountain photograph is still there');
+  assert.ok(!/pool/i.test(vy), 'a pool narrative survives on the wedding page');
+  assert.ok(!/Sunset drinks/.test(vy));
+  /* and the retired bride frame is not quietly moved to another event */
+  for (const f of ['index.html', 'journeys.html', 'accommodation.html', 'destination.html', 'experiences.html']) {
+    const src = readFileSync(join(ROOT, f), 'utf8');
+    assert.ok(!/052-temple-ceremony-bride/.test(src), f + ' reuses the retired photograph');
+  }
+  /* the vow keeps the green door, and it has no pool */
+  assert.match(vy, /052-vow-ceremony-green-door\.jpg/);
+  const vow = vy.slice(vy.indexOf('id="vows"'), vy.indexOf('id="vows"') + 700);
+  assert.ok(!/pool/i.test(vow));
+  /* the new wedding-dinner imagery is in place */
+  assert.match(vy, /053-wedding-dinner-garden-terrace\.jpg/);
+  assert.match(vy, /053-wedding-dinner-sharing-menu\.jpg/);
 });

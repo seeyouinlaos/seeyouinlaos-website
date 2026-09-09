@@ -7,6 +7,29 @@
 <title>The Wedding · See You In Laos</title>
 <link rel="stylesheet" href="assets/recon.css">
 <link rel="stylesheet" href="assets/aman.css">
+<style>
+/* THE TEMPLE DECISION — two answers, then, only for those who are coming,
+   one optional offering. Same editorial grammar as the rest of the site:
+   hairlines, tracked capitals, one dark action, nothing that reads as retail. */
+.tdec{box-sizing:border-box;width:100%;max-width:var(--a-frame);margin:0 auto;padding:0 var(--a-gut)}
+.tdec .tin{border-top:1px solid var(--a-line);padding-top:26px;max-width:640px}
+.tdec h3{font-family:'PP Editorial Old',Georgia,serif;font-weight:200;font-size:24px;line-height:1.25;margin:0 0 10px}
+.tdec p{font-size:13px;line-height:1.8;color:#4A4A4A;margin-bottom:18px;max-width:34em}
+.tdec .tq{font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;font-size:10px;letter-spacing:2.2px;text-transform:uppercase;color:var(--a-mute);margin-bottom:14px}
+.tbtns{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:8px}
+.tbtn{display:block;background:#FCFAF6;border:1px solid var(--a-ink);color:var(--a-ink);cursor:pointer;font:inherit;font-size:10.5px;letter-spacing:2.2px;text-transform:uppercase;padding:18px 24px;min-height:56px;transition:background .3s,color .3s}
+.tbtn:hover,.tbtn:focus-visible{background:var(--a-ink);color:#F3EEE7}
+.tbtn.on{background:var(--a-ink);color:#F3EEE7}
+.tbtn.quiet{background:none;border:0;color:var(--a-mute);padding:13px 0;min-height:44px;line-height:18px;background-image:linear-gradient(currentColor,currentColor);background-repeat:no-repeat;background-size:100% 1px;background-position:0 33px}
+.tbtn.quiet:hover{background:none;color:var(--a-ink);background-image:linear-gradient(currentColor,currentColor);background-repeat:no-repeat;background-size:100% 1px;background-position:0 33px}
+.tstate{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--a-mute);margin:14px 0 0;line-height:1.9}
+.tstate b{font-weight:400;color:var(--a-ink)}
+.toff{border-top:1px solid var(--a-line);margin-top:26px;padding-top:24px}
+.tqty{display:inline-flex;align-items:center;gap:14px;margin:0 0 16px}
+.tqty button{width:44px;height:44px;border:1px solid var(--a-line);background:#fff;cursor:pointer;font-size:15px;color:var(--a-ink)}
+.tqty b{font-family:'PP Editorial Old',Georgia,serif;font-weight:200;font-size:19px;min-width:24px;text-align:center}
+.tnote{font-size:11.5px;color:var(--a-mute);line-height:1.8;margin-top:14px;max-width:34em}
+</style>
 </head>
 <body>
 <main>
@@ -28,15 +51,52 @@
     </div>
   </section>
 
-  <!-- 01 · TEMPLE CEREMONY -->
+  <!-- 01 · TEMPLE CEREMONY — the Buddhist morning, in three moments:
+       the ceremony, the alms-giving of food, and the personal offering. -->
   <section class="a-sec a-pair" id="temple">
-    <div class="am" style="background-image:url(assets/images/event/052-temple-ceremony-bride.jpg);background-position:center 30%" role="img" aria-label="The bride on the way to the temple ceremony"></div>
+    <div class="am" style="background-image:url(assets/images/temple/temple-ceremony-morning.jpg)" role="img" aria-label="Novice monks with their alms bowls in the morning, and a guest kneeling in greeting"></div>
     <div class="ac">
-      <p class="a-eyebrow">09:00 · Wat Ong Teu, Vientiane</p>
+      <p class="a-eyebrow">08:00 – 12:00 · Wat Ong Teu, Vientiane</p>
       <h2>Temple Ceremony</h2>
-      <p>The wedding day begins at the temple: a Buddhist morning ceremony, unhurried and full of meaning. Afterwards we return together to the hotel. Dress: Lao traditional dress.</p>
-      <p class="a-eyebrow" style="margin-top:14px">Self-pay · Buddhist giving is made personally by each guest</p>
+      <p>The wedding day begins at the temple. A Buddhist morning ceremony, unhurried, with time to take part in the giving that opens the day. Afterwards we return together to the hotel. Dress: Lao traditional dress.</p>
+      <p>Coming to the temple is your own decision, and we would like to know it in advance — so that the morning is prepared for the guests who are there.</p>
+      <a class="a-link" href="#temple-decision">Tell us your decision</a>
     </div>
+  </section>
+
+  <!-- 01a · MORNING ALMS-GIVING — part of the ceremony, never a product -->
+  <section class="a-sec a-pair rev" id="takbat">
+    <div class="am" style="background-image:url(assets/images/temple/takbat-giving-into-bowl.jpg)" role="img" aria-label="A guest kneeling to place food in a monk's alms bowl during the morning offering"></div>
+    <div class="ac">
+      <p class="a-eyebrow">Part of the morning · Tak Bat / Sai Bat</p>
+      <h2>Morning Alms-Giving</h2>
+      <p>A traditional morning offering of food to Buddhist monks — a personal act of generosity, and one of the oldest ways a day begins in Laos. Every guest who comes to the temple takes part; there is nothing to arrange and nothing to pay.</p>
+      <p class="a-eyebrow" style="margin-top:14px">Part of the Temple Ceremony · no charge</p>
+    </div>
+  </section>
+
+  <section class="a-sec a-duo" aria-label="The morning alms-giving">
+    <div class="am" style="background-image:url(assets/images/temple/takbat-novices-with-bowls.jpg)" role="img" aria-label="Novice monks waiting with their alms bowls"></div>
+    <div class="am" style="background-image:url(assets/images/temple/temple-alms-bowl-garland.jpg)" role="img" aria-label="An alms bowl held with a jasmine garland"></div>
+    <p class="cap">The morning alms-giving · Tak Bat</p>
+  </section>
+
+  <!-- 01b · SANGKHATHAN — the optional personal offering -->
+  <section class="a-sec a-pair" id="sangkhathan">
+    <div class="am" style="background-image:url(assets/images/temple/sangkhathan-prepared-offerings.jpg)" role="img" aria-label="Prepared Sangkhathan offerings in woven baskets, tied with ribbon"></div>
+    <div class="ac">
+      <p class="a-eyebrow">Optional · USD 15 per guest</p>
+      <h2>Sangkhathan Temple Offering</h2>
+      <p>A personal offering of useful everyday items, prepared for presentation to the monks as part of the Buddhist tradition of giving. It is separate from the morning alms-giving of food.</p>
+      <p>We will prepare the offering for you. In keeping with the personal meaning of the ritual, each participating guest contributes to and presents their own offering personally.</p>
+      <p class="a-eyebrow" style="margin-top:14px">Prepared offering<br>Daily-use amenities, personal-care items and other appropriate everyday necessities for the monastic community.</p>
+      <a class="a-link" href="#temple-decision">Choose at the temple decision</a>
+    </div>
+  </section>
+
+  <!-- 01c · THE DECISION — attendance first, the offering only for attendees -->
+  <section class="a-sec" id="temple-decision">
+    <div class="tdec" id="tdec"></div>
   </section>
 
   <!-- 02 · COFFEE & CAKE -->
@@ -61,11 +121,12 @@
 
   <!-- 04 · WEDDING DINNER -->
   <section class="a-sec a-pair rev" id="dinner">
-    <div class="am" style="background-image:url(assets/images/event/053-wedding-dinner-courtyard-garden.jpg)" role="img" aria-label="The courtyard garden at Souphattra Heritage, where the wedding dinner is held"></div>
+    <div class="am" style="background-image:url(assets/images/event/053-wedding-dinner-garden-terrace.jpg)" role="img" aria-label="The courtyard garden at Souphattra Heritage, set with seating under the trees"></div>
     <div class="ac">
       <p class="a-eyebrow">19:30 · The courtyard garden</p>
       <h2>Wedding Dinner</h2>
-      <p>Sunset drinks beside the pool, then dinner in the courtyard garden — the last and longest part of the day. Dress: black tie.</p>
+      <p>An evening gathering in the courtyard garden, bringing the wedding day to its final and longest chapter — a Chinese sharing menu at the table, and the night to follow. Dress: black tie.</p>
+      <a class="a-link" href="#dinner-table">See the table</a>
     </div>
   </section>
 
@@ -82,6 +143,10 @@
     </div>
   </section>
 
+  <section class="a-sec tight" id="dinner-table" aria-label="The wedding dinner table">
+    <div class="a-band" style="background-image:url(assets/images/event/053-wedding-dinner-sharing-menu.jpg)" role="img" aria-label="The Chinese sharing menu served at the wedding dinner"></div>
+  </section>
+
   <section class="a-sec a-close">
     <hr>
     <p class="a-eyebrow">Your Invitation</p>
@@ -90,7 +155,97 @@
   </section>
 
 </main>
+<script src="assets/bag.js"></script>
+<script src="assets/rooms-data.js"></script>
+<script src="assets/pricing.js"></script>
+<script src="assets/temple.js"></script>
+<script src="assets/journey.js"></script>
+<script type="module" src="assets/invite.mjs"></script>
 <script src="assets/recon.js"></script>
 <script src="assets/aman.js"></script>
+<script>
+/* ============================================================================
+   THE TEMPLE DECISION.
+   Attendance first — it costs nothing and consumes nothing. Only a guest who
+   is attending is offered the Sangkhathan, and changing to "not attending"
+   removes it so that no offering is prepared for someone who will not be
+   there. Coming back to "attending" never restores it silently.
+   ========================================================================== */
+(function () {
+  var T = window.SIYL_TEMPLE, P = window.SIYL_PRICE, box = document.getElementById('tdec');
+  if (!T || !P || !box) return;
+  function gated(fn) {
+    if (window.SIYL_INVITE) { SIYL_INVITE.require(fn); }
+    else document.addEventListener('siyl:invite-ready', function () { SIYL_INVITE.require(fn); }, { once: true });
+  }
+  function money(n) { return P.money(n); }
+
+  function render() {
+    var a = T.attendance(), n = T.offerings();
+    var h = '<div class="tin">';
+    h += '<p class="tq">The Buddhist morning · your decision</p>';
+    h += '<h3>Will you come to the temple?</h3>';
+    h += '<p>The Temple Ceremony runs from 08:00 to 12:00 at Wat Ong Teu. Everyone who comes takes part in the morning alms-giving. Telling us now simply lets the morning be prepared for the guests who are there.</p>';
+    h += '<div class="tbtns">' +
+         '<button type="button" class="tbtn' + (a === 'yes' ? ' on' : '') + '" data-att="yes">Attend the Temple Ceremony</button>' +
+         '<button type="button" class="tbtn' + (a === 'no' ? ' on' : '') + '" data-att="no">I will not attend</button>' +
+         '</div>';
+
+    if (a === 'yes') {
+      h += '<p class="tstate"><b>Attending</b> · you take part in the morning alms-giving, Tak Bat</p>';
+      h += '<div class="toff">';
+      h += '<p class="tq">Optional · USD 15 per guest</p>';
+      h += '<h3>Sangkhathan Temple Offering</h3>';
+      h += '<p>A personal offering of useful everyday items, prepared for you and presented by you. It is separate from the food offered at the alms-giving, and it is entirely your choice.</p>';
+      if (n > 0) {
+        h += '<div class="tqty"><button type="button" data-q="-1" aria-label="One offering fewer">&minus;</button>' +
+             '<b>' + n + '</b>' +
+             '<button type="button" data-q="1" aria-label="One offering more">+</button></div>';
+        h += '<p class="tstate"><b>' + n + (n === 1 ? ' offering' : ' offerings') + '</b> · ' + money(n * 15) + ' in your journey</p>';
+        h += '<div class="tbtns" style="margin-top:14px"><button type="button" class="tbtn quiet" data-off="0">Remove the offering</button></div>';
+      } else {
+        h += '<div class="tbtns">' +
+             '<button type="button" class="tbtn" data-off="1">Add my offering · USD 15</button>' +
+             '</div><button type="button" class="tbtn quiet" data-off="none">Continue without an offering</button>';
+      }
+      h += '<p class="tnote">Generosity, taking part and the intention behind it are what the offering is about. Nothing here is charged on this website — Guest Relations confirms every arrangement with you.</p>';
+      h += '</div>';
+    } else if (a === 'no') {
+      h += '<p class="tstate"><b>Not attending</b> · no hosted programme is assigned to you for this part of the morning</p>';
+    } else {
+      h += '<p class="tstate">No decision yet</p>';
+    }
+    h += '</div>';
+    box.innerHTML = h;
+
+    box.querySelectorAll('[data-att]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var v = b.getAttribute('data-att');
+        if (v === 'no') { T.setAttendance('no'); render(); return; }
+        gated(function () { T.setAttendance('yes'); render(); });
+      });
+    });
+    box.querySelectorAll('[data-off]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var v = b.getAttribute('data-off');
+        if (v === '0' || v === 'none') { if (v === '0') T.removeOffering(); render(); return; }
+        gated(function () { T.addOffering(1); render(); });
+      });
+    });
+    box.querySelectorAll('[data-q]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var d = parseInt(b.getAttribute('data-q'), 10);
+        var next = T.offerings() + d;
+        if (next < 1) { T.removeOffering(); } else { T.addOffering(next); }
+        render();
+      });
+    });
+  }
+
+  document.addEventListener('siyl:bag', render);
+  render();
+  if (window.SIYL_BAG && SIYL_BAG.bar) SIYL_BAG.bar();
+})();
+</script>
 </body>
 </html>
