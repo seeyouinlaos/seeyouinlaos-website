@@ -205,9 +205,52 @@ test('CHANGE is offered only where a genuine alternative exists', () => {
   assert.equal(P.hasVariants('ljg'), true);
   assert.equal(P.hasVariants('wedstay'), true);
   assert.equal(P.hasVariants('train'), false);
-  assert.equal(P.hasVariants('bkk-stay'), false);
+  assert.equal(P.hasVariants('bkk-stay'), true);   /* three Bangkok addresses */
   assert.equal(P.hasVariants('kempinski'), false);
-  assert.equal(P.hasVariants('mu9632'), false);
+  assert.equal(P.hasVariants('mu9646'), false);
+});
+
+test('Bangkok offers three approved addresses, one window, one active choice', () => {
+  const rooms = R.sathorn.rooms;
+  assert.equal(rooms.length, 3);
+  assert.deepEqual(rooms.map((r) => r.slug),
+    ['penthouse', 'u-sathorn-superior-garden', 'shama-king-studio-balcony']);
+  /* the Owner's rates, and the three-night guest price each one produces */
+  const want = { penthouse: [85, 255], 'u-sathorn-superior-garden': [64, 192],
+                 'shama-king-studio-balcony': [40, 120] };
+  rooms.forEach((r) => {
+    const [rate, total] = want[r.slug];
+    assert.equal(r.rate, rate, r.slug + ' rate');
+    const item = P.items('bkk-stay', r.slug)[0];
+    assert.equal(item.price, total, r.slug + ' three-night guest price');
+    /* the journey line names the property the guest chose, not the window */
+    assert.equal(item.name, r.property, r.slug + ' bag name');
+  });
+  /* breakfast is a property truth, not a window truth */
+  assert.match(P.items('bkk-stay', 'penthouse')[0].breakfast, /not included/);
+  assert.match(P.items('bkk-stay', 'u-sathorn-superior-garden')[0].breakfast, /included/);
+  assert.match(P.items('bkk-stay', 'shama-king-studio-balcony')[0].breakfast, /included/);
+  /* the penthouse stays the approved default, so the Full Experience is unmoved */
+  assert.equal(sandbox.window.SIYL_FULL_EXPERIENCE['bkk-stay'], 'penthouse');
+  /* and no photograph is borrowed from another property */
+  assert.deepEqual(rooms[1].gallery, []);
+  assert.deepEqual(rooms[2].gallery, []);
+});
+
+test('the two new Bangkok addresses carry their own shared inventory', async () => {
+  const { SEED } = await import('../src/inventory-seed.js');
+  assert.equal(SEED['bkk-stay/u-sathorn-superior-garden'].capacity, 38);
+  assert.equal(SEED['bkk-stay/shama-king-studio-balcony'].capacity, 27);
+  ['u-sathorn-superior-garden', 'shama-king-studio-balcony'].forEach((k) => {
+    assert.equal(SEED['bkk-stay/' + k].unit, 'room');
+    assert.equal(SEED['bkk-stay/' + k].occupancy, 2);
+  });
+});
+
+test('a journey chosen before the override keeps its place', () => {
+  const bag = readFileSync(join(ROOT, 'assets/bag.js'), 'utf8');
+  assert.match(bag, /c642:\{id:'c86'/);
+  assert.match(bag, /mu9632:\{id:'mu9646'/);
 });
 
 test('rooms are merchandised highest rate first', () => {
@@ -237,11 +280,11 @@ test('Full Experience picks the premium ELIGIBLE room — never reserved invento
 test('Full Experience lines come from the single pricing source, transport included', () => {
   const t = P.items('train')[0];
   assert.equal(t.price, 75); assert.equal(t.name, 'Special Express No. 25');
-  assert.equal(P.items('mu9632')[0].price, 275);
-  assert.equal(P.items('c642')[0].price, 85);
+  assert.equal(P.items('mu9646')[0].price, 275);
+  assert.equal(P.items('c86')[0].price, 85);
   assert.equal(P.items('return')[0].price, 200);
   /* the complete premium journey for one guest, as the bag would sum it */
-  const all = ['bkk-stay', 'train', 'prewed', 'wedstay', 'mu9632', 'kmg', 'c642', 'ljg', 'return', 'kempinski']
+  const all = ['bkk-stay', 'train', 'prewed', 'wedstay', 'mu9646', 'kmg', 'c86', 'ljg', 'return', 'kempinski']
     .flatMap((w) => P.FLAT[w] ? P.items(w) : P.items(w, P.premium(w).slug));
   assert.equal(all.length, 10, 'ten stages, ten lines');
   /* the premium-max sum still exists as arithmetic; it is simply no longer
@@ -290,11 +333,11 @@ test('THE WEDDING sits at 28 FEB in the chronology — the Sangkhathan is never 
   const journey = readFileSync(join(ROOT, 'assets/journey.js'), 'utf8');
   assert.match(journey, /var AT = \{ '1872': 0\.5, 'sangkhathan': 3\.5 \}/);
   assert.match(journey, /'sangkhathan': '28 FEB'/);
-  /* 3.5 lands between the Wedding Stay (index 3) and MU9632 (index 4) */
+  /* 3.5 lands between the Wedding Stay (index 3) and MU9646 (index 4) */
   const seg = journey.slice(journey.indexOf('var SEG = ['), journey.indexOf('/* Chronological position'));
   const keys = [...seg.matchAll(/\{ key: '([a-z0-9-]+)'/g)].map((m) => m[1]);
   assert.equal(keys[3], 'wedstay');
-  assert.equal(keys[4], 'mu9632');
+  assert.equal(keys[4], 'mu9646');
 });
 
 test('the Sangkhathan is decided per named guest, and never restored silently', () => {
@@ -581,7 +624,7 @@ test('Snow Mountain Viewing Room carries its own canonical photograph, used nowh
    FULL EXPERIENCE IS ONE MODE — the same canonical configuration whatever the
    guest arrived from, and the Cost Saving residence never survives it.
    ========================================================================== */
-const STAGES = ['bkk-stay', 'train', 'prewed', 'wedstay', 'mu9632', 'kmg', 'c642', 'ljg', 'return', 'kempinski'];
+const STAGES = ['bkk-stay', 'train', 'prewed', 'wedstay', 'mu9646', 'kmg', 'c86', 'ljg', 'return', 'kempinski'];
 const fullExperience = (available) =>
   STAGES.flatMap((w) => (P.FLAT[w] ? P.items(w) : P.items(w, P.approved(w, available && available(w)).slug)));
 
@@ -608,9 +651,9 @@ test('the ten Owner-approved Full Experience selections sum to USD 2,130', () =>
     train:       {                                             amount: 75 },
     prewed:      { room: 'heritage-grand-premier', rate: 170, pay: 2, amount: 340 },
     wedstay:     { room: 'heritage-grand-premier', rate: 170, pay: 1, amount: 170 },
-    mu9632:      {                                             amount: 275 },
+    mu9646:      {                                             amount: 275 },
     kmg:         { room: 'italian',                rate: 50,  pay: 3, amount: 150 },
-    c642:        {                                             amount: 85 },
+    c86:        {                                             amount: 85 },
     ljg:         { room: 'viewing-270',            rate: 100, pay: 2, amount: 200 },
     'return':    {                                             amount: 200 },
     kempinski:   { room: 'deluxe-balcony-king',    rate: 190, pay: 2, amount: 380 }
@@ -672,7 +715,7 @@ test('the approved room is preferred, and the fallback is the nearest, not the d
 test('all four transport products carry the guest-facing sections', () => {
   const T = sandbox.window.SIYL_TRANSPORT;
   const order = sandbox.window.SIYL_TRANSPORT_ORDER;
-  assert.deepEqual(order, ['train', 'mu9632', 'c642', 'return']);
+  assert.deepEqual(order, ['train', 'mu9646', 'c86', 'return']);
   for (const k of order) {
     const t = T[k];
     assert.ok(t.story && t.story.length > 80, k + ' has its own paragraph');
@@ -690,8 +733,10 @@ test('all four transport products carry the guest-facing sections', () => {
 test('transport copy never invents, and never resurrects a superseded service', () => {
   const src = readFileSync(join(ROOT, 'assets/transport-data.js'), 'utf8');
   /* Owner overrides are production authority: the stale sheet values are gone */
-  for (const stale of ['C86', 'MU9646', 'USD 105', 'USD 90']) {
-    assert.ok(!src.includes(stale), 'transport copy still shows ' + stale);
+  /* C86 and MU9646 are the ACTIVE products by explicit Owner override of
+   * 09 Sep 2026; the services they replaced must not survive as journey truth */
+  for (const retired of ['C642', 'MU9632', 'USD 105', 'USD 90']) {
+    assert.ok(!src.includes(retired), 'transport copy still shows the retired ' + retired);
   }
   /* internal procurement never reaches a guest surface */
   assert.doesNotMatch(src, /\$92|USD 92|\$3 |USD 3 per/, 'van/border procurement cost leaked');
@@ -703,25 +748,26 @@ test('transport copy never invents, and never resurrects a superseded service', 
   }
   /* and no lounge or chauffeur promised on any leg — in words OR in a
      photograph. A lounge picture is a promise the source does not make. */
-  for (const k of ['train', 'mu9632', 'c642', 'return']) {
+  for (const k of ['train', 'mu9646', 'c86', 'return']) {
     const f = JSON.stringify(sandbox.window.SIYL_TRANSPORT[k]);
     assert.ok(!/lounge|chauffeur|priority boarding/i.test(f), k + ' promises an unsourced service');
   }
   const pages = readFileSync(join(ROOT, 'journeys.html'), 'utf8');
-  assert.ok(!pages.includes('c642-business-lounge-kunming'), 'the lounge photograph is still on Journeys');
+  assert.ok(!pages.includes('c86-business-lounge-kunming'), 'the lounge photograph is still on Journeys');
 });
 
 test('the Owner-overridden transport facts are the ones on the page', () => {
   const T = sandbox.window.SIYL_TRANSPORT;
-  assert.match(JSON.stringify(T.c642.facts), /C642/);
-  assert.match(JSON.stringify(T.c642.facts), /16:39/);
-  assert.match(JSON.stringify(T.c642.facts), /21:06/);
-  assert.match(JSON.stringify(T.c642.facts), /4 hours 27 minutes/);
-  assert.equal(P.FLAT.c642.price, 85);
-  assert.match(JSON.stringify(T.mu9632.facts), /MU9632/);
-  assert.match(JSON.stringify(T.mu9632.facts), /14:00/);
-  assert.match(JSON.stringify(T.mu9632.facts), /16:40/);
-  assert.equal(P.FLAT.mu9632.price, 275);
+  assert.match(JSON.stringify(T.c86.facts), /C86/);
+  assert.match(JSON.stringify(T.c86.facts), /10:15/);
+  assert.match(JSON.stringify(T.c86.facts), /13:44/);
+  assert.match(JSON.stringify(T.c86.facts), /3 hours 29 minutes/);
+  assert.equal(P.FLAT.c86.price, 85);
+  assert.match(JSON.stringify(T.mu9646.facts), /MU9646/);
+  /* the retired flight's departure and arrival are NOT carried across */
+  assert.doesNotMatch(JSON.stringify(T.mu9646.facts), /14:00|16:40/);
+  assert.match(JSON.stringify(T.mu9646.facts), /Confirmed with your ticket/);
+  assert.equal(P.FLAT.mu9646.price, 275);
   assert.equal(P.FLAT.train.price, 75);
   assert.equal(P.FLAT['return'].price, 200);
 });

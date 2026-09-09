@@ -18,6 +18,14 @@ THUMBS:{train:'assets/images/transport/train-no25-srt-train.jpg',mu9632:'assets/
 thumb:function(x){return x.img||this.THUMBS[x.id]||''},
 badge:function(){var n=this.get().length,el=document.querySelector('[data-bag-badge]');
 if(el){el.textContent=n>0?n:'';el.style.display=n>0?'flex':'none'}}};
+/* RETIRED PRODUCTS. C86 replaces C642 and MU9646 replaces MU9632 by Owner
+ * order; the class and the amount are unchanged. A journey chosen before the
+ * change keeps its place — the line is renamed, never dropped. */
+(function(){var M={c642:{id:'c86',name:'C86 · Kunming → Lijiang'},
+                   mu9632:{id:'mu9646',name:'MU9646 · Vientiane → Kunming'}};
+var b=window.SIYL_BAG.get(),hit=false;
+b.forEach(function(x){var m=M[x.id];if(m){x.id=m.id;x.name=m.name;hit=true}});
+if(hit)window.SIYL_BAG.set(b)})();
 document.addEventListener('DOMContentLoaded',function(){window.SIYL_BAG.badge()})})();
 
 /* One engine, one total: the sticky Journey bar, the header badge, Your Journey,

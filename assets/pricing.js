@@ -29,10 +29,10 @@
     'train':  { price: 75,  cat: 'Transportation', name: 'Special Express No. 25',
                 meta: '24 – 25 February 2027 · First Class Sleeper', img: 'assets/images/transport/train-no25-srt-train.jpg',
                 basis: 'USD 75 per person · package · First Class Sleeper, van and border logistics' },
-    'mu9632': { price: 275, cat: 'Transportation', name: 'MU9632 · Vientiane → Kunming',
+    'mu9646': { price: 275, cat: 'Transportation', name: 'MU9646 · Vientiane → Kunming',
                 meta: '01 March 2027 · Business Class', img: 'assets/images/transport/mu9632-business-1.jpg',
                 basis: 'USD 275 per person · 1 seat · Business Class' },
-    'c642':   { price: 85,  cat: 'Transportation', name: 'C642 · Kunming → Lijiang',
+    'c86':    { price: 85,  cat: 'Transportation', name: 'C86 · Kunming → Lijiang',
                 meta: '04 March 2027 · Business Class', img: 'assets/images/transport/c642-train-snow-mountain.jpg',
                 basis: 'USD 85 per person · 1 seat · Business Class · 1+1 seating' },
     'return': { price: 200, cat: 'Transportation', name: 'MU5924 + MU741 · Lijiang → Bangkok',
@@ -114,7 +114,7 @@
         rate: rate,
         windowFixed: at.win.window === 'fixed',
         nightsList: at.win.nightsList || null,
-        breakfast: at.stay.breakfast || '',
+        breakfast: (room && room.breakfast) || at.stay.breakfast || '',
         note: at.win.note || '',
         noteBy: at.win.noteBy || '',
         total: rate == null ? null : rate * pay
@@ -148,16 +148,19 @@
       if (!at) return [];
       var room = roomOf(at.stay, slug) || at.stay.rooms[0];
       var img = room && room.gallery && room.gallery.length ? room.gallery[0][0] : at.win.bagImg;
+      /* where a window offers whole properties rather than room categories,
+       * the journey line carries the property the guest actually chose */
+      var bagName = (room && room.property) || at.win.bagName;
       var q = this.quote(at.win.id, room.slug);
       if (room.interest || q.total == null) {
         var complimentary = at.key === 'airbnb';
-        return [{ id: at.win.id, name: at.win.bagName, meta: at.win.dates + ' · ' + (room.status || room.name),
+        return [{ id: at.win.id, name: bagName, meta: at.win.dates + ' · ' + (room.status || room.name),
                   interest: !complimentary, complimentary: complimentary,
                   price: complimentary ? 0 : undefined,
                   stay: at.key, room: room.slug, img: img }];
       }
       return [{
-        id: at.win.id, name: at.win.bagName, meta: at.win.dates + ' · ' + room.name,
+        id: at.win.id, name: bagName, meta: at.win.dates + ' · ' + room.name,
         price: q.total, stay: at.key, room: room.slug,
         rate: q.rate, nights: q.nights, pay: q.pay,
         nightsList: q.nightsList, windowFixed: q.windowFixed,

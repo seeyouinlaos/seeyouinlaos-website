@@ -31,8 +31,15 @@
 
 export const SEED = {
   /* ---------------------------------------------------------- Bangkok, before */
+  /* Three approved Bangkok addresses share the window; a guest holds one of
+   * them. The penthouse is a whole home and is counted in guests; the two
+   * hotels are counted in rooms of two, as every other hotel here is. */
   'bkk-stay/penthouse':
     { unit: 'guest', capacity: 12, held: 0, name: 'Sathorn Penthouse', stay: 'Sathorn Penthouse Bangkok' },
+  'bkk-stay/u-sathorn-superior-garden':
+    { unit: 'room', capacity: 38, occupancy: 2, held: 0, name: 'Superior Room With Garden View', stay: 'U Sathorn Bangkok' },
+  'bkk-stay/shama-king-studio-balcony':
+    { unit: 'room', capacity: 27, occupancy: 2, held: 0, name: 'King Studio With Balcony', stay: 'Shama Yen-Akat Bangkok' },
 
   /* ------------------------------------------ Vientiane · Pre-Wedding Stay */
   'prewed/heritage':                 { unit: 'room', capacity: 5,  occupancy: 2, held: 0, name: 'The Heritage' },

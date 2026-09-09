@@ -215,9 +215,13 @@
       ]
     },
 
+    /* BANGKOK · BEFORE THE WEDDING — three approved properties in one window.
+     * Exactly one can be active at a time, the way a room category is chosen
+     * inside any other stay. Each carries its own property name, its own
+     * address and its own breakfast truth. */
     sathorn: {
-      name: 'Sathorn Penthouse Bangkok',
-      place: 'Sathorn, Bangkok',
+      name: 'Bangkok · Before the Wedding',
+      place: 'Bangkok',
       breakfast: 'Breakfast not included · self-pay',
       windows: [{ id: 'bkk-stay', label: 'Before the Wedding', dates: '21 – 24 February 2027', nights: '3 nights', n: 3,
         bagName: 'Sathorn Penthouse Bangkok', bagImg: 'assets/images/journey/penthouse-01.jpg' }],
@@ -256,7 +260,39 @@
             ['Laundry & care', ['Washing machine and drying rack', 'Iron and ironing board', 'Clothes hangers and blackout blinds', 'Hair dryer, shampoo, shower gel and hot water', 'Towels, bed linen and a safe']],
             ['Family', ['Travel crib', 'High chair', 'Corner protectors', 'Children’s books and toys']],
             ['Access & safety', ['Private entrance and private elevator with security system', 'Self check-in by keybox', 'Free parking on the premises', 'Smoke and carbon-monoxide alarms', 'Fire extinguisher and first-aid kit']]],
-          amenities: null, rate: 85 }
+          amenities: null, rate: 85,
+          property: 'Sathorn Penthouse Bangkok', place: 'Sathorn, Bangkok',
+          breakfast: 'Breakfast not included · self-pay', role: 'Preferred' },
+
+        /* 026 — U Sathorn Bangkok. Photography is still to come from the
+         * owner's folder; the product is complete without it, and a wrong
+         * photograph would be worse than none. */
+        { slug: 'u-sathorn-superior-garden', name: 'Superior Room With Garden View',
+          cat: 'U Sathorn Bangkok · hotel room',
+          property: 'U Sathorn Bangkok', place: 'Sathorn, Bangkok',
+          breakfast: 'Breakfast included',
+          desc: 'A garden-view room for two in a colonial-style hotel with a courtyard pool, a spa and a proper restaurant.',
+          gallery: [],
+          facts: [['Size', '32 sq.m.'], ['Occupancy', '2 adults'], ['Outlook', 'Garden view'],
+            ['Stay', '21 – 24 February 2027 · 3 nights'], ['Breakfast', 'Included']],
+          story: 'A room of thirty-two square metres looking onto the garden, in a hotel built around a courtyard and a pool. Breakfast is included, the spa and the gym are on site, and the restaurants and the bar mean an evening never has to leave the building.',
+          groups: [['The room', ['32 sq.m. · 2 adults', 'Garden view', 'Non-smoking', 'Private bathroom', 'Air conditioning', 'Free Wi-Fi']],
+            ['The hotel', ['Outdoor swimming pool', 'Spa', 'Gym', 'Restaurants', 'Bar', 'Garden', 'Concierge', 'Room service']]],
+          amenities: null, rate: 64, roomRate: 128 },
+
+        /* Shama Yen-Akat Bangkok. Photography likewise still to come. */
+        { slug: 'shama-king-studio-balcony', name: 'King Studio With Balcony',
+          cat: 'Shama Yen-Akat Bangkok · serviced studio',
+          property: 'Shama Yen-Akat Bangkok', place: 'Yen Akat, Bangkok',
+          breakfast: 'Breakfast included',
+          desc: 'A serviced studio for two with its own balcony, a dining area and a kitchen corner of your own.',
+          gallery: [],
+          facts: [['Size', '36 sq.m.'], ['Occupancy', '2 adults'], ['Outlook', 'Balcony and terrace'],
+            ['Stay', '21 – 24 February 2027 · 3 nights'], ['Breakfast', 'Included']],
+          story: 'Thirty-six square metres with a balcony and a dining area — a studio to live in rather than a room to sleep in. Breakfast is included, the pool is indoors, and there is a café, a garden and a laundry room downstairs.',
+          groups: [['The studio', ['36 sq.m. · 2 adults', 'Balcony and terrace', 'Window', 'Non-smoking', 'Dining area', 'Private bathroom', 'Air conditioning', 'Free Wi-Fi']],
+            ['The building', ['Indoor swimming pool', 'Gym', 'Restaurant', 'Café', 'Garden', 'Laundry room', 'Coworking and business facilities', 'Concierge']]],
+          amenities: null, rate: 40, roomRate: 80 }
       ]
     },
 

@@ -24,12 +24,12 @@
     /* ONE wedding stay selection, or the alternative private residence */
     { key: 'wedstay', when: '27 FEB – 01 MAR', cat: 'Accommodation', place: 'Vientiane',
       label: 'Wedding Stay', ids: ['wedstay', 'airbnb-2br'], anchor: 'j-wedstay' },
-    { key: 'mu9632', when: '01 MAR', cat: 'Transportation', place: 'Vientiane → Kunming',
-      label: 'MU9632', ids: ['mu9632'], anchor: 'j-mu9632' },
+    { key: 'mu9646', when: '01 MAR', cat: 'Transportation', place: 'Vientiane → Kunming',
+      label: 'MU9646', ids: ['mu9646'], anchor: 'j-mu9646' },
     { key: 'kmg', when: '01 – 04 MAR', cat: 'Accommodation', place: 'Kunming',
       label: 'Wanxiang Yueju', ids: ['kmg'], anchor: 'j-kmg' },
-    { key: 'c642', when: '04 MAR', cat: 'Transportation', place: 'Kunming → Lijiang',
-      label: 'C642', ids: ['c642'], anchor: 'j-c642' },
+    { key: 'c86', when: '04 MAR', cat: 'Transportation', place: 'Kunming → Lijiang',
+      label: 'C86', ids: ['c86'], anchor: 'j-c86' },
     { key: 'ljg', when: '04 – 06 MAR', cat: 'Accommodation', place: 'Lijiang',
       label: 'Luye Baisha', ids: ['ljg'], anchor: 'j-ljg' },
     { key: 'return', when: '06 MAR', cat: 'Transportation', place: 'Lijiang → Bangkok',
@@ -41,7 +41,7 @@
   /* Chronological position of a line that is not itself a stage.
    * THE WEDDING happens on Sunday, 28 February 2027 — inside the Wedding Stay
    * (27 FEB – 01 MAR) and before the flight to Kunming. A wedding line
-   * therefore sorts between wedstay (3) and mu9632 (4); it is never appended
+   * therefore sorts between wedstay (3) and mu9646 (4); it is never appended
    * to the end of the journey because it happens to have been added last. */
   var AT = { '1872': 0.5, 'sangkhathan': 3.5 };
   var AT_WHEN = { '1872': '21 – 24 FEB', 'sangkhathan': '28 FEB' };

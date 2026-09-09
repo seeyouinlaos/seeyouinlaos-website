@@ -110,24 +110,23 @@
     },
 
     /* ---------------------------------------------------------------- 05 */
-    mu9632: {
-      id: 'mu9632',
+    mu9646: {
+      id: 'mu9646',
       cat: 'Transportation',
       operator: 'China Eastern Airlines',
-      name: 'MU9632 · Vientiane → Kunming',
+      name: 'MU9646 · Vientiane → Kunming',
       place: 'Vientiane → Kunming',
       dates: '01 March 2027',
-      anchor: 'j-mu9632',
+      anchor: 'j-mu9646',
       story: 'The wedding days end and the journey turns north. One non-stop ' +
-        'afternoon flight out of Vientiane, in Business Class, and by the ' +
-        'evening the party is in Kunming — the city that calls itself eternal ' +
-        'spring, and means it.',
+        'flight out of Vientiane, in Business Class, and the party arrives in ' +
+        'Kunming — the city that calls itself eternal spring, and means it.',
       facts: [
-        ['Flight', 'MU9632 · China Eastern Airlines'],
+        ['Flight', 'MU9646 · China Eastern Airlines'],
         ['Route', 'Vientiane (VTE) → Kunming (KMG)'],
         ['Date', '01 March 2027'],
-        ['Departure', '14:00 · Vientiane'],
-        ['Arrival', '16:40 · Kunming'],
+        ['Departure', 'Confirmed with your ticket'],
+        ['Arrival', 'Confirmed with your ticket'],
         ['Routing', 'Non-stop'],
         ['Class', 'Business Class · 1 seat per guest']
       ],
@@ -173,25 +172,26 @@
     },
 
     /* ---------------------------------------------------------------- 07 */
-    c642: {
-      id: 'c642',
+    c86: {
+      id: 'c86',
       cat: 'Transportation',
       operator: 'China Railway',
-      name: 'C642 · Kunming → Lijiang',
+      name: 'C86 · Kunming → Lijiang',
       place: 'Kunming → Lijiang',
       dates: '04 March 2027',
-      anchor: 'j-c642',
+      anchor: 'j-c86',
       story: 'Five hundred and twenty-seven kilometres of Yunnan in one ' +
-        'afternoon: out of Kunming at half past four, across the gorges, and ' +
-        'into Lijiang after dark. Business Class here is a 1 + 1 carriage — a ' +
-        'single seat on each side of the aisle, so nobody sits beside anyone.',
+        'morning: out of Kunming at a quarter past ten, across the gorges, and ' +
+        'into Lijiang in the early afternoon. Business Class here is a 1 + 1 ' +
+        'carriage — a single seat on each side of the aisle, so nobody sits ' +
+        'beside anyone.',
       facts: [
-        ['Service', 'C642 · high-speed train'],
+        ['Service', 'C86 · high-speed train'],
         ['Route', 'Kunming Railway Station → Lijiang Railway Station'],
         ['Date', '04 March 2027'],
-        ['Departure', '16:39 · Kunming'],
-        ['Arrival', '21:06 · Lijiang'],
-        ['Routing', 'Direct · 4 hours 27 minutes'],
+        ['Departure', '10:15 · Kunming'],
+        ['Arrival', '13:44 · Lijiang'],
+        ['Routing', 'Direct · 3 hours 29 minutes'],
         ['Distance', 'About 527 kilometres'],
         ['Class', 'Business Class · 1 + 1 seating']
       ],
@@ -236,7 +236,7 @@
         'The train number, times and fare shown here are the Owner’s confirmed production arrangement for the party.'
       ],
       gallery: [
-        [T + 'c642-train-snow-mountain.jpg', 'C642 below Jade Dragon Snow Mountain'],
+        [T + 'c642-train-snow-mountain.jpg', 'Below Jade Dragon Snow Mountain'],
         [T + 'c642-business-cabin-1.jpg', 'Business Class cabin'],
         [T + 'c642-business-cabin-2.jpg', 'Business Class cabin'],
         [T + 'c642-business-seat.jpg', 'Business Class seat · reclined'],
@@ -310,5 +310,5 @@
     }
   };
 
-  window.SIYL_TRANSPORT_ORDER = ['train', 'mu9632', 'c642', 'return'];
+  window.SIYL_TRANSPORT_ORDER = ['train', 'mu9646', 'c86', 'return'];
 })();
