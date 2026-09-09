@@ -30,57 +30,116 @@
     try { document.dispatchEvent(new CustomEvent('siyl:bag')); } catch (e) {}
   }
 
-  window.SIYL_TEMPLE = {
+  /* the named party, or a single anonymous stand-in before authentication */
+  function people() {
+    var G = window.SIYL_GUEST, list = G ? G.guests() : [];
+    if (!list.length) return [{ guestId: 'self', fullName: '', preferredName: 'You' }];
+    /* one name for one person across the whole website: if the guest has
+     * corrected what we call them, the temple list says the corrected name */
+    return list.map(function (g) {
+      return { guestId: g.guestId, fullName: G.value(g.guestId, 'fullName') || g.fullName,
+               preferredName: G.value(g.guestId, 'preferredName') || g.preferredName || g.fullName };
+    });
+  }
+  function nameOf(id) {
+    var p = people().filter(function (g) { return g.guestId === id; })[0];
+    return p ? (p.preferredName || p.fullName || 'You') : 'You';
+  }
+
+  var T = window.SIYL_TEMPLE = {
     ID: 'sangkhathan',
+    people: people,
+    nameOf: nameOf,
 
-    /* 'yes' - 'no' - null (not yet decided) */
-    attendance: function () { var v = read().attend; return v === 'yes' || v === 'no' ? v : null; },
-    decided: function () { return this.attendance() !== null; },
-    attending: function () { return this.attendance() === 'yes'; },
+    /* ---- PER NAMED GUEST. The party-wide reading is derived, never stored. */
+    attendanceOf: function (id) {
+      var v = (read().by || {})[id];
+      return v && (v.attend === 'yes' || v.attend === 'no') ? v.attend : null;
+    },
+    attendingOf: function (id) { return this.attendanceOf(id) === 'yes'; },
+    offeringOf: function (id) { return !!((read().by || {})[id] || {}).offering; },
 
-    setAttendance: function (v) {
+    setAttendance: function (id, v) {
       var st = read();
-      st.attend = (v === 'yes' || v === 'no') ? v : null;
-      st.at = new Date().toISOString();
-      /* A guest who is not attending must never have an offering prepared for
-       * them. The line is removed rather than parked, and coming back to
-       * ATTEND does NOT quietly restore it - the guest chooses again. */
-      if (st.attend !== 'yes' && window.SIYL_BAG) SIYL_BAG.remove('sangkhathan');
+      st.by = st.by || {};
+      st.by[id] = st.by[id] || {};
+      st.by[id].attend = (v === 'yes' || v === 'no') ? v : null;
+      st.by[id].at = new Date().toISOString();
+      /* Not attending: this person's offering goes, and returning to attending
+       * never silently restores it — they are asked again. */
+      if (st.by[id].attend !== 'yes') delete st.by[id].offering;
       write(st);
+      sync();
+    },
+    setOffering: function (id, on) {
+      var st = read();
+      st.by = st.by || {};
+      st.by[id] = st.by[id] || {};
+      if (!on) delete st.by[id].offering;
+      else if (st.by[id].attend === 'yes') st.by[id].offering = { at: new Date().toISOString() };
+      write(st);
+      sync();
     },
 
-    /* the offering: a normal bag line, never an admission */
-    offerings: function () {
-      if (!window.SIYL_BAG) return 0;
-      var l = SIYL_BAG.get().filter(function (x) { return x.id === 'sangkhathan'; })[0];
-      return l ? (l.qty || 1) : 0;
+    /* ---- derived party view --------------------------------------------- */
+    attendees: function () {
+      var self = this;
+      return people().filter(function (g) { return self.attendingOf(g.guestId); });
     },
-    hasOffering: function () { return this.offerings() > 0; },
-    addOffering: function (qty) {
-      if (!this.attending() || !window.SIYL_PRICE || !window.SIYL_BAG) return false;
-      SIYL_PRICE.items('sangkhathan').forEach(function (it) {
-        it.qty = Math.max(1, parseInt(qty, 10) || 1);
-        SIYL_BAG.put(it);
-      });
-      return true;
+    decidedAll: function () {
+      var self = this;
+      return people().every(function (g) { return self.attendanceOf(g.guestId) !== null; });
     },
-    removeOffering: function () { if (window.SIYL_BAG) SIYL_BAG.remove('sangkhathan'); },
+    anyAttending: function () { return this.attendees().length > 0; },
+    offeringGuests: function () {
+      var self = this;
+      return people().filter(function (g) { return self.attendingOf(g.guestId) && self.offeringOf(g.guestId); });
+    },
+    offerings: function () { return this.offeringGuests().length; },
 
-    /* what Guest Relations needs to prepare, in one line */
+    /* the bag carries ONE line whose quantity is derived from the named
+     * decisions — never a counter the guest nudges on its own */
+    sync: function () { sync(); },
+
+    /* what Guest Relations needs to prepare */
     operational: function () {
-      var a = this.attendance(), n = this.offerings();
+      var self = this;
+      var rows = people().map(function (g) {
+        var a = self.attendanceOf(g.guestId);
+        return {
+          guestId: g.guestId,
+          name: g.preferredName || g.fullName || 'You',
+          temple: a === 'yes' ? 'Attending' : a === 'no' ? 'Not attending' : 'No decision yet',
+          attending: a === 'yes',
+          sangkhathan: self.offeringOf(g.guestId)
+        };
+      });
+      var n = this.offerings();
       return {
-        temple: a === 'yes' ? 'Attending' : a === 'no' ? 'Not attending' : 'No decision yet',
-        attending: a === 'yes',
+        guests: rows,
+        attending: rows.filter(function (r) { return r.attending; }).length,
+        notAttending: rows.filter(function (r) { return r.temple === 'Not attending'; }).length,
+        undecided: rows.filter(function (r) { return r.temple === 'No decision yet'; }).length,
         offerings: n,
-        offeringsUsd: n * 15
+        offeringsUsd: n * 15,
+        offeringNames: this.offeringGuests().map(function (g) { return g.preferredName || g.fullName; })
       };
     }
   };
 
+  /* the ONE bag line, quantity = the number of named guests who chose it */
+  function sync() {
+    if (!window.SIYL_BAG || !window.SIYL_PRICE) return;
+    var n = T.offerings();
+    if (!n) { if (SIYL_BAG.has('sangkhathan')) SIYL_BAG.remove('sangkhathan'); return; }
+    var line = SIYL_PRICE.items('sangkhathan')[0];
+    line.qty = n;
+    line.guests = T.offeringGuests().map(function (g) { return g.guestId; });
+    var cur = SIYL_BAG.get().filter(function (x) { return x.id === 'sangkhathan'; })[0];
+    if (!cur || cur.qty !== n) SIYL_BAG.put(line);
+  }
+
   /* an offering can never outlive the decision that allowed it */
-  document.addEventListener('siyl:bag', function () {
-    var T = window.SIYL_TEMPLE;
-    if (T && !T.attending() && window.SIYL_BAG && SIYL_BAG.has('sangkhathan')) SIYL_BAG.remove('sangkhathan');
-  });
+  document.addEventListener('siyl:guest', sync);
+  sync();
 })();

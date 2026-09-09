@@ -1,0 +1,150 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>You & your party · See You In Laos</title><style>
+@font-face{font-family:'PP Editorial Old';src:url('assets/fonts/PPEditorialOld-Ultralight.otf') format('opentype');font-weight:200;font-display:swap}
+*{margin:0;padding:0;box-sizing:border-box}body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;font-weight:300;font-size:14px;line-height:1.6}
+.hd{display:grid;grid-template-columns:44px 1fr 44px;align-items:center;padding:14px 20px}
+.hb{width:44px;height:44px;display:flex;flex-direction:column;justify-content:center;gap:5px;background:none;border:0;cursor:pointer}.hb i{display:block;width:20px;height:1.4px;background:#313131}
+.bd{font-family:'PP Editorial Old',serif;font-weight:200;font-size:19px;text-align:center}.bd .dot{color:#8A5A55}
+.bag{width:44px;height:44px;display:flex;align-items:center;justify-content:center;position:relative;color:#313131;text-decoration:none}.bag .bgi{display:block}
+.bb{position:absolute;top:1px;right:0;min-width:14px;height:14px;padding:0 3px;background:#313131;color:#F3EEE7;font-size:8.5px;line-height:1;letter-spacing:0;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;display:none;align-items:center;justify-content:center;box-shadow:0 0 0 2px #F3EEE7;border-radius:1px}
+main{padding:30px 24px 80px;max-width:640px;margin:0 auto}
+h1{font-family:'PP Editorial Old',serif;font-weight:200;font-size:29px;margin-bottom:6px}
+.sub{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#7C7A75;margin-bottom:26px}
+h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:20px;margin:34px 0 10px}
+.note{font-size:11.5px;color:#7C7A75;margin-top:14px;max-width:36em;line-height:1.8}
+.tlink{display:inline-block;font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:#313131;text-decoration:none;border-bottom:1px solid #313131;padding:8px 0 3px;min-height:44px}
+.blk{border-top:1px solid #DAD9D7;padding-top:22px;margin-top:32px}
+.blabel{font-size:9.5px;letter-spacing:2.2px;text-transform:uppercase;color:#7C7A75;margin-bottom:6px}
+.blk h2{margin:0 0 8px}
+.body{font-size:13px;line-height:1.85;color:#4A4A4A;max-width:34em}
+.gcard{border-top:1px solid #EDEBE7;padding:20px 0 4px}
+.gname{font-family:'PP Editorial Old',serif;font-weight:200;font-size:21px;line-height:1.25;margin-bottom:2px}
+.fld{margin-top:16px}
+.fld label{display:block;font-size:9.5px;letter-spacing:2px;text-transform:uppercase;color:#7C7A75;margin-bottom:6px}
+.fld input,.fld textarea{width:100%;background:#FCFAF6;border:1px solid #DAD9D7;padding:13px 14px;font:inherit;font-size:14px;color:#313131;min-height:48px}
+.fld textarea{min-height:76px;resize:vertical;line-height:1.7}
+.fld input:focus,.fld textarea:focus{outline:0;border-color:#313131}
+.src{font-size:10px;letter-spacing:1.6px;text-transform:uppercase;color:#7C7A75;margin-top:6px}
+.src b{font-weight:400;color:#313131}
+.hist{font-size:11px;color:#7C7A75;line-height:1.7;margin-top:6px}
+.q{margin-top:26px}
+.qn{font-size:9.5px;letter-spacing:2px;color:#7C7A75}
+.qq{font-family:'PP Editorial Old',serif;font-weight:200;font-size:19px;line-height:1.3;margin:4px 0 4px}
+.qh{font-size:12px;color:#7C7A75;line-height:1.7;margin-bottom:10px}
+.qw{font-size:11px;color:#7C7A75;line-height:1.7;margin-top:8px;font-style:normal;border-left:1px solid #DAD9D7;padding-left:12px}
+.none{display:inline-flex;align-items:center;gap:10px;margin-top:10px;font-size:12.5px;color:#4A4A4A;cursor:pointer;min-height:44px}
+.none input{width:18px;height:18px;accent-color:#313131}
+.tabs{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 4px}
+.tab{background:none;border:1px solid #DAD9D7;color:#7C7A75;cursor:pointer;font:inherit;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:14px 16px;min-height:46px}
+.tab.on{border-color:#313131;color:#313131}
+.saved{font-size:9.5px;letter-spacing:2px;text-transform:uppercase;color:#7C7A75;margin-top:10px;min-height:14px}
+.gate{border:1px solid #DAD9D7;background:#FCFAF6;padding:24px 20px;margin-top:26px}
+.gate h3{font-family:'PP Editorial Old',serif;font-weight:200;font-size:19px;margin-bottom:8px}
+.gbtn{background:#313131;color:#F3EEE7;border:0;padding:17px 22px;font:inherit;font-size:10.5px;letter-spacing:2.2px;text-transform:uppercase;cursor:pointer;min-height:50px;margin-top:8px}
+</style><link rel="stylesheet" href="assets/desktop.css"><link rel="stylesheet" href="assets/aman.css"></head><body>
+<header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="your-journey.html" aria-label="Your Journey"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
+<main>
+<h1>You &amp; your party</h1>
+<p class="sub">Who is travelling · how we look after you</p>
+<p class="note" style="margin-top:0">Everything here belongs to your invitation. What the invitation already knows is shown as it is; anything you correct is kept as your correction, beside the original, so nothing is ever overwritten silently.</p>
+<div id="page"></div>
+</main>
+<script src="assets/bag.js"></script>
+<script src="assets/shop-menu.js"></script>
+<script src="assets/aman.js"></script>
+<script src="assets/guest.js"></script>
+<script src="assets/temple.js"></script>
+<script type="module" src="assets/invite.mjs"></script>
+<script>
+(function(){
+var G=window.SIYL_GUEST,page=document.getElementById('page');
+if(!G||!page)return;
+var who=null;
+function esc(t){return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function gated(fn){if(window.SIYL_INVITE){SIYL_INVITE.require(fn)}
+else document.addEventListener('siyl:invite-ready',function(){SIYL_INVITE.require(fn)},{once:true})}
+function when(iso){try{return new Date(iso).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}catch(e){return ''}}
+
+/* ---- YOU & YOUR PARTY: source, submitted, history — three layers, shown --- */
+function nameField(id,field,label){
+var v=G.value(id,field),src=G.source(id,field),ed=G.edited(id,field);
+var h='<div class="fld"><label for="f-'+esc(id)+'-'+field+'">'+label+'</label>'+
+  '<input id="f-'+esc(id)+'-'+field+'" type="text" value="'+esc(v)+'" data-g="'+esc(id)+'" data-f="'+field+'" autocomplete="off">';
+h+='<p class="src">From your invitation · <b>'+esc(src||'not given')+'</b>'+(ed?' · corrected by you':'')+'</p>';
+var hist=(G.rec(id).history||[]).filter(function(x){return x.field===field});
+if(hist.length)h+='<p class="hist">'+hist.map(function(x){return 'Changed from &ldquo;'+esc(x.from||'—')+'&rdquo; to &ldquo;'+esc(x.to)+'&rdquo; on '+when(x.at)}).join('<br>')+'</p>';
+return h+'</div>'}
+
+function partyBlock(p){
+var h='<section class="blk"><p class="blabel">Invitation '+esc(p.invitationId)+'</p>'+
+  '<h2>'+esc(p.partyName||'Your party')+'</h2>'+
+  '<p class="body">'+(p.guests.length===1?'You travel alone on this invitation.':p.guests.length+' named guests travel on this invitation. Each one is looked after by name.')+'</p>';
+p.guests.forEach(function(g){
+  h+='<div class="gcard"><p class="gname">'+esc(G.value(g.guestId,'preferredName')||g.fullName)+'</p>'+
+     nameField(g.guestId,'fullName','Full name')+
+     nameField(g.guestId,'preferredName','What we should call you')+
+     '</div>'});
+h+='<div class="gcard"><p class="gname">How we reach your party</p>'+
+   '<p class="body">One reliable email address and one telephone number for the whole party is all we need.</p>'+
+   '<div class="fld"><label for="p-email">Email</label><input id="p-email" type="email" inputmode="email" value="'+esc(G.partyField('email'))+'" data-p="email" autocomplete="email"></div>'+
+   '<div class="fld"><label for="p-phone">Telephone</label><input id="p-phone" type="tel" inputmode="tel" value="'+esc(G.partyField('phone'))+'" data-p="phone" autocomplete="tel"></div>'+
+   '<p class="src">Used by Guest Relations only, for your arrangements.</p></div>';
+return h+'<p class="saved" id="saved1"></p></section>'}
+
+/* ---- ABOUT YOU: seven hospitality questions and one operational field ----- */
+function profileBlock(p){
+var id=who||p.guests[0].guestId;
+var h='<section class="blk"><p class="blabel">About you</p><h2>Seven questions, and one more</h2>'+
+  '<p class="body">Every answer is optional, and every answer is a kindness to the people preparing your journey. Nothing here changes a price.</p>';
+if(p.guests.length>1){
+  h+='<div class="tabs">'+p.guests.map(function(g){
+    var n=G.profileAnswered(g.guestId);
+    return '<button type="button" class="tab'+(g.guestId===id?' on':'')+'" data-who="'+esc(g.guestId)+'">'+
+      esc(G.value(g.guestId,'preferredName')||g.fullName)+(n?' · '+n+' of 8':'')+'</button>'}).join('')+'</div>'}
+G.PROFILE.forEach(function(q){
+  var v=G.profile(id,q.key);
+  h+='<div class="q"><p class="qn">'+q.n+'</p><p class="qq">'+q.q+'</p><p class="qh">'+q.hint+'</p>'+
+     '<textarea data-q="'+q.key+'" data-g="'+esc(id)+'" placeholder="Optional">'+esc(v==='NONE'?'':v)+'</textarea>'+
+     (q.none?'<label class="none"><input type="checkbox" data-none="'+q.key+'" data-g="'+esc(id)+'"'+(v==='NONE'?' checked':'')+'><span>'+q.none+'</span></label>':'')+
+     '<p class="qw">'+q.why+'</p></div>'});
+var a=G.ACCESS,av=G.profile(id,a.key);
+h+='<div class="q"><p class="qn">08</p><p class="qq">'+a.q+'</p><p class="qh">'+a.hint+'</p>'+
+   '<textarea data-q="'+a.key+'" data-g="'+esc(id)+'" placeholder="Optional">'+esc(av)+'</textarea>'+
+   '<p class="qw">'+a.why+'</p></div>';
+return h+'<p class="saved" id="saved2"></p></section>'}
+
+function render(){
+var p=G.party();
+if(!p){
+  page.innerHTML='<div class="gate"><h3>Open your invitation</h3>'+
+    '<p class="body">Your party, your names and your answers all live inside your invitation. Open it once and everything on this page is yours.</p>'+
+    '<button type="button" class="gbtn" id="open">Open my invitation</button></div>';
+  document.getElementById('open').addEventListener('click',function(){gated(render)});
+  return}
+page.innerHTML=partyBlock(p)+profileBlock(p)+
+  '<section class="blk"><p class="blabel">The wedding day</p><h2>Dress code</h2>'+
+  '<p class="body">Three codes across the journey: Lao traditional dress in blue for the temple, black tie from the return until the end of dinner, resort wear for the travelling days.</p>'+
+  '<p style="margin-top:14px"><a class="tlink" href="dress.html">Open the dress code</a></p>'+
+  '<p class="src" style="margin-top:14px">'+(G.dressAck()?'Acknowledged · '+when(G.dressAck().at):'Not yet acknowledged')+'</p></section>'+
+  '<p style="margin-top:30px"><a class="tlink" href="review.html">Back to Review &amp; Send</a></p>';
+
+function mark(el){var s=document.getElementById(el);if(!s)return;s.textContent='Saved';setTimeout(function(){s.textContent=''},1600)}
+page.querySelectorAll('input[data-f]').forEach(function(i){
+  i.addEventListener('change',function(){G.set(i.getAttribute('data-g'),i.getAttribute('data-f'),i.value.trim());mark('saved1')})});
+page.querySelectorAll('input[data-p]').forEach(function(i){
+  i.addEventListener('change',function(){G.setPartyField(i.getAttribute('data-p'),i.value.trim());mark('saved1')})});
+page.querySelectorAll('textarea[data-q]').forEach(function(t){
+  t.addEventListener('change',function(){G.setProfile(t.getAttribute('data-g'),t.getAttribute('data-q'),t.value.trim());mark('saved2')})});
+page.querySelectorAll('input[data-none]').forEach(function(c){
+  c.addEventListener('change',function(){
+    var k=c.getAttribute('data-none'),g=c.getAttribute('data-g');
+    G.setProfile(g,k,c.checked?'NONE':'');
+    var t=page.querySelector('textarea[data-q="'+k+'"]');if(t&&c.checked)t.value='';
+    mark('saved2')})});
+page.querySelectorAll('[data-who]').forEach(function(b){
+  b.addEventListener('click',function(){who=b.getAttribute('data-who');render()})});
+}
+render();
+if(window.SIYL_BAG&&SIYL_BAG.bar)SIYL_BAG.bar();
+})();
+</script>
+</body></html>

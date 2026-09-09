@@ -29,6 +29,12 @@
 .tqty button{width:44px;height:44px;border:1px solid var(--a-line);background:#fff;cursor:pointer;font-size:15px;color:var(--a-ink)}
 .tqty b{font-family:'PP Editorial Old',Georgia,serif;font-weight:200;font-size:19px;min-width:24px;text-align:center}
 .tnote{font-size:11.5px;color:var(--a-mute);line-height:1.8;margin-top:14px;max-width:34em}
+.tp{border-top:1px solid var(--a-line);margin-top:26px;padding-top:22px}
+.tp:first-of-type{margin-top:20px}
+.tname{font-family:'PP Editorial Old',Georgia,serif;font-weight:200;font-size:21px;line-height:1.25;color:var(--a-ink);margin:0 0 14px}
+.tsang{font-size:13px;line-height:1.8;color:#4A4A4A;margin-bottom:16px;max-width:34em}
+.ttot{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--a-mute);border-top:1px solid var(--a-line);margin-top:26px;padding-top:20px;line-height:1.9}
+.ttot b{font-weight:400;color:var(--a-ink)}
 </style>
 </head>
 <body>
@@ -158,6 +164,7 @@
 <script src="assets/bag.js"></script>
 <script src="assets/rooms-data.js"></script>
 <script src="assets/pricing.js"></script>
+<script src="assets/guest.js"></script>
 <script src="assets/temple.js"></script>
 <script src="assets/journey.js"></script>
 <script type="module" src="assets/invite.mjs"></script>
@@ -165,84 +172,104 @@
 <script src="assets/aman.js"></script>
 <script>
 /* ============================================================================
-   THE TEMPLE DECISION.
-   Attendance first — it costs nothing and consumes nothing. Only a guest who
-   is attending is offered the Sangkhathan, and changing to "not attending"
-   removes it so that no offering is prepared for someone who will not be
-   there. Coming back to "attending" never restores it silently.
+   THE TEMPLE DECISION — ONE DECISION PER NAMED GUEST.
+   Attendance first: it costs nothing and consumes nothing. Only a guest who is
+   attending is offered the Sangkhathan, and changing that person to "not
+   attending" removes THEIR offering — coming back to attending never restores
+   it silently. The quantity in the Journey Bag is derived from the names that
+   chose it; there is no counter to nudge, because an offering belongs to a
+   person, not to a number.
    ========================================================================== */
 (function () {
-  var T = window.SIYL_TEMPLE, P = window.SIYL_PRICE, box = document.getElementById('tdec');
+  var T = window.SIYL_TEMPLE, P = window.SIYL_PRICE, G = window.SIYL_GUEST;
+  var box = document.getElementById('tdec');
   if (!T || !P || !box) return;
   function gated(fn) {
     if (window.SIYL_INVITE) { SIYL_INVITE.require(fn); }
     else document.addEventListener('siyl:invite-ready', function () { SIYL_INVITE.require(fn); }, { once: true });
   }
-  function money(n) { return P.money(n); }
+  function esc(t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 
-  function render() {
-    var a = T.attendance(), n = T.offerings();
-    var h = '<div class="tin">';
-    h += '<p class="tq">The Buddhist morning · your decision</p>';
-    h += '<h3>Will you come to the temple?</h3>';
-    h += '<p>The Temple Ceremony runs from 08:00 to 12:00 at Wat Ong Teu. Everyone who comes takes part in the morning alms-giving. Telling us now simply lets the morning be prepared for the guests who are there.</p>';
+  var LEDE = 'The Temple Ceremony runs from 08:00 to 12:00 at Wat Ong Teu. Everyone who comes takes part in the morning alms-giving. Telling us now simply lets the morning be prepared for the guests who are there.';
+
+  function person(g) {
+    var id = g.guestId, a = T.attendanceOf(id), off = T.offeringOf(id);
+    var name = esc(g.preferredName || g.fullName || 'You');
+    var h = '<div class="tp" data-g="' + esc(id) + '">';
+    h += '<p class="tname">' + name + '</p>';
     h += '<div class="tbtns">' +
-         '<button type="button" class="tbtn' + (a === 'yes' ? ' on' : '') + '" data-att="yes">Attend the Temple Ceremony</button>' +
-         '<button type="button" class="tbtn' + (a === 'no' ? ' on' : '') + '" data-att="no">I will not attend</button>' +
+         '<button type="button" class="tbtn' + (a === 'yes' ? ' on' : '') + '" data-att="yes">Attending</button>' +
+         '<button type="button" class="tbtn' + (a === 'no' ? ' on' : '') + '" data-att="no">Not attending</button>' +
          '</div>';
-
     if (a === 'yes') {
-      h += '<p class="tstate"><b>Attending</b> · you take part in the morning alms-giving, Tak Bat</p>';
+      h += '<p class="tstate"><b>Attending</b> · takes part in the morning alms-giving, Tak Bat</p>';
       h += '<div class="toff">';
       h += '<p class="tq">Optional · USD 15 per guest</p>';
-      h += '<h3>Sangkhathan Temple Offering</h3>';
-      h += '<p>A personal offering of useful everyday items, prepared for you and presented by you. It is separate from the food offered at the alms-giving, and it is entirely your choice.</p>';
-      if (n > 0) {
-        h += '<div class="tqty"><button type="button" data-q="-1" aria-label="One offering fewer">&minus;</button>' +
-             '<b>' + n + '</b>' +
-             '<button type="button" data-q="1" aria-label="One offering more">+</button></div>';
-        h += '<p class="tstate"><b>' + n + (n === 1 ? ' offering' : ' offerings') + '</b> · ' + money(n * 15) + ' in your journey</p>';
-        h += '<div class="tbtns" style="margin-top:14px"><button type="button" class="tbtn quiet" data-off="0">Remove the offering</button></div>';
+      h += '<p class="tsang">Sangkhathan Temple Offering — a personal offering of useful everyday items, prepared for ' + name + ' and presented by ' + name + '.</p>';
+      if (off) {
+        h += '<p class="tstate"><b>Selected</b> · ' + P.money(15) + ' in your journey</p>';
+        h += '<button type="button" class="tbtn quiet" data-off="0">Remove ' + name + '&rsquo;s offering</button>';
       } else {
-        h += '<div class="tbtns">' +
-             '<button type="button" class="tbtn" data-off="1">Add my offering · USD 15</button>' +
-             '</div><button type="button" class="tbtn quiet" data-off="none">Continue without an offering</button>';
+        h += '<div class="tbtns"><button type="button" class="tbtn" data-off="1">Add an offering for ' + name + ' · USD 15</button></div>';
+        h += '<p class="tstate">Not selected</p>';
       }
-      h += '<p class="tnote">Generosity, taking part and the intention behind it are what the offering is about. Nothing here is charged on this website — Guest Relations confirms every arrangement with you.</p>';
       h += '</div>';
     } else if (a === 'no') {
-      h += '<p class="tstate"><b>Not attending</b> · no hosted programme is assigned to you for this part of the morning</p>';
+      h += '<p class="tstate"><b>Not attending</b> · no hosted programme is assigned for this part of the morning</p>';
     } else {
       h += '<p class="tstate">No decision yet</p>';
     }
+    return h + '</div>';
+  }
+
+  function render() {
+    var h = '<div class="tin">';
+    h += '<p class="tq">The Buddhist morning · your decision</p>';
+    h += '<h3>Who is coming to the temple?</h3>';
+    h += '<p>' + LEDE + '</p>';
+
+    var party = G ? G.party() : null;
+    if (!party) {
+      h += '<div class="tbtns"><button type="button" class="tbtn" data-open="1">Open your invitation to answer</button></div>';
+      h += '<p class="tnote">Each guest in your party answers for themselves, by name — so we open your invitation first.</p>';
+      h += '</div>';
+      box.innerHTML = h;
+      box.querySelectorAll('[data-open]').forEach(function (b) {
+        b.addEventListener('click', function () { gated(render); });
+      });
+      return;
+    }
+
+    party.guests.forEach(function (g) { h += person(g); });
+
+    var n = T.offerings();
+    if (n > 0) {
+      h += '<p class="ttot"><b>' + n + (n === 1 ? ' offering' : ' offerings') + '</b> · ' +
+           esc(T.offeringGuests().map(function (g) { return g.preferredName || g.fullName; }).join(' · ')) +
+           ' · ' + P.money(n * 15) + ' in your journey</p>';
+    }
+    h += '<p class="tnote">Generosity, taking part and the intention behind it are what the offering is about. Nothing here is charged on this website — Guest Relations confirms every arrangement with you.</p>';
     h += '</div>';
     box.innerHTML = h;
 
-    box.querySelectorAll('[data-att]').forEach(function (b) {
-      b.addEventListener('click', function () {
-        var v = b.getAttribute('data-att');
-        if (v === 'no') { T.setAttendance('no'); render(); return; }
-        gated(function () { T.setAttendance('yes'); render(); });
+    box.querySelectorAll('.tp').forEach(function (row) {
+      var id = row.getAttribute('data-g');
+      row.querySelectorAll('[data-att]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          T.setAttendance(id, b.getAttribute('data-att'));
+          render();
+        });
       });
-    });
-    box.querySelectorAll('[data-off]').forEach(function (b) {
-      b.addEventListener('click', function () {
-        var v = b.getAttribute('data-off');
-        if (v === '0' || v === 'none') { if (v === '0') T.removeOffering(); render(); return; }
-        gated(function () { T.addOffering(1); render(); });
-      });
-    });
-    box.querySelectorAll('[data-q]').forEach(function (b) {
-      b.addEventListener('click', function () {
-        var d = parseInt(b.getAttribute('data-q'), 10);
-        var next = T.offerings() + d;
-        if (next < 1) { T.removeOffering(); } else { T.addOffering(next); }
-        render();
+      row.querySelectorAll('[data-off]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          T.setOffering(id, b.getAttribute('data-off') === '1');
+          render();
+        });
       });
     });
   }
 
-  document.addEventListener('siyl:bag', render);
+  document.addEventListener('siyl:guest', render);
   render();
   if (window.SIYL_BAG && SIYL_BAG.bar) SIYL_BAG.bar();
 })();

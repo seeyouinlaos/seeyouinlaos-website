@@ -4,7 +4,7 @@
  * Run: npm test */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
@@ -253,20 +253,98 @@ test('Full Experience lines come from the single pricing source, transport inclu
 
 test('Review & Send: the Temple Ceremony is optional, the other three hosted', () => {
   const page = readFileSync(join(ROOT, 'review.html'), 'utf8');
-  const src = page.slice(page.indexOf('<h2>The Wedding Programme</h2>'), page.indexOf('<h2>Your selections</h2>'));
-  /* attendance, not a charge — and the two rituals stay apart */
-  assert.match(src, /Temple Ceremony[\s\S]{0,600}Optional participation/);
-  assert.match(src, /morning alms-giving, Tak Bat, is part of the ceremony and carries no charge/);
-  assert.match(src, /Sangkhathan Temple Offering is a separate, optional personal offering/);
-  assert.doesNotMatch(src, /Temple Ceremony<\/p>[\s\S]{0,300}<span class="eh">Hosted/);
-  assert.equal((src.match(/<span class="eh">Hosted<\/span>/g) || []).length, 3);
-  assert.doesNotMatch(src, /USD/, 'no amount anywhere in the programme block');
-  /* the operational preparation list is derivable from the submitted record */
-  assert.match(page, /BUDDHIST MORNING:/);
-  assert.match(page, /Sangkhathan Temple Offering to prepare/);
+  const journey = readFileSync(join(ROOT, 'assets/journey.js'), 'utf8');
+  /* THE WEDDING is one programme, defined in ONE place and read by every
+   * surface — Review & Send no longer keeps its own copy of the day. */
+  const prog = journey.slice(journey.indexOf('var WEDDING = ['), journey.indexOf('function skipped()'));
+  ['Temple Ceremony', 'Sangkhathan Temple Offering', 'Coffee & Cake', 'Vow Ceremony', 'Wedding Dinner']
+    .forEach((t) => assert.ok(prog.includes(t), t + ' missing from the wedding programme'));
+  assert.equal((prog.match(/Hosted — no charge/g) || []).length, 3, 'exactly three hosted parts');
+  assert.match(prog, /Includes the morning alms-giving, Tak Bat\. Optional participation — no charge\./);
+  assert.match(prog, /Optional · USD 15 per guest/);
+  /* the Temple Ceremony is never labelled Hosted, and only the Sangkhathan
+   * carries an amount anywhere in the programme */
+  assert.doesNotMatch(prog, /'temple'[\s\S]{0,240}Hosted — no charge/);
+  assert.equal((prog.match(/USD/g) || []).length, 1, 'one amount only in the programme');
+  /* the block renders in Review & Send from that single source */
+  assert.match(page, /J\.WEDDING\.forEach/);
+  assert.match(page, /w\.key==='temple'\?'Optional':'Hosted'/);
+  /* the operational preparation list is per named guest, and attendance and
+   * offering stay two different fields */
+  assert.match(page, /BUDDHIST MORNING \(per named guest\):/);
+  assert.match(page, /Sangkhathan offerings to prepare/);
   assert.match(page, /templeCeremony:window\.SIYL_TEMPLE\?SIYL_TEMPLE\.operational\(\):null/);
-  /* attendance and offering quantity are two different fields */
-  assert.match(page, /Morning alms-giving \(Tak Bat\): included in the ceremony, no charge/);
+  assert.match(page, /Morning alms-giving \(Tak Bat\): included in the ceremony for everyone attending, no charge/);
+});
+
+test('THE WEDDING sits at 28 FEB in the chronology — the Sangkhathan is never last', () => {
+  const journey = readFileSync(join(ROOT, 'assets/journey.js'), 'utf8');
+  assert.match(journey, /var AT = \{ '1872': 0\.5, 'sangkhathan': 3\.5 \}/);
+  assert.match(journey, /'sangkhathan': '28 FEB'/);
+  /* 3.5 lands between the Wedding Stay (index 3) and MU9632 (index 4) */
+  const seg = journey.slice(journey.indexOf('var SEG = ['), journey.indexOf('/* Chronological position'));
+  const keys = [...seg.matchAll(/\{ key: '([a-z0-9-]+)'/g)].map((m) => m[1]);
+  assert.equal(keys[3], 'wedstay');
+  assert.equal(keys[4], 'mu9632');
+});
+
+test('the Sangkhathan is decided per named guest, and never restored silently', () => {
+  const t = readFileSync(join(ROOT, 'assets/temple.js'), 'utf8');
+  /* per-person state, keyed by the guestId the invitation resolved */
+  ['attendanceOf', 'attendingOf', 'offeringOf', 'setAttendance', 'setOffering', 'offeringGuests']
+    .forEach((fn) => assert.ok(t.includes(fn + ':') || t.includes(fn + ' ='), fn + ' missing'));
+  /* not attending removes THIS person's offering */
+  assert.match(t, /if \(st\.by\[id\]\.attend !== 'yes'\) delete st\.by\[id\]\.offering;/);
+  /* an offering can only ever be set for someone who is attending */
+  assert.match(t, /else if \(st\.by\[id\]\.attend === 'yes'\) st\.by\[id\]\.offering =/);
+  /* the bag quantity is DERIVED from the named decisions — no counter */
+  assert.match(t, /var n = T\.offerings\(\);/);
+  const page = readFileSync(join(ROOT, 'voyage.html'), 'utf8');
+  assert.doesNotMatch(page, /data-q=/, 'a quantity stepper survives on the wedding page');
+  assert.match(page, /T\.setOffering\(id, b\.getAttribute\('data-off'\) === '1'\)/);
+});
+
+test('Review & Send is five editorial blocks, each with its own way back', () => {
+  const page = readFileSync(join(ROOT, 'review.html'), 'utf8');
+  ['01', '02', '03', '04', '05'].forEach((n) =>
+    assert.ok(page.includes('<span class="bno">' + n + '</span>'), 'block ' + n + ' missing'));
+  ['you.html', 'voyage.html#temple-decision', 'your-journey.html', 'dress.html']
+    .forEach((href) => assert.ok(page.includes('href="' + href + '"'), href + ' has no edit route'));
+  /* RECEIVED is not CONFIRMED, and a sent journey stays editable */
+  assert.match(page, /Received &mdash; not yet confirmed/);
+  assert.match(page, /Confirmed<\/b> is something only Guest Relations can tell you/);
+  assert.match(page, /Change my journey and send again/);
+  /* the party reads by name, never as a headcount */
+  assert.match(page, /p\.guests\.forEach/);
+  assert.equal(page.includes('YOUR COSTS'), true);
+  assert.doesNotMatch(page, /Contribution|Beitrag|Eigenanteil/);
+});
+
+test('the dress code carries three codes and 18 owner references, acknowledged by nobody but the guest', () => {
+  const page = readFileSync(join(ROOT, 'dress.html'), 'utf8');
+  assert.match(page, /Lao Traditional Dress · Blue/);
+  assert.match(page, /<h2>Black Tie<\/h2>/);
+  assert.match(page, /<h2>Resort Wear<\/h2>/);
+  const imgs = [...page.matchAll(/assets\/images\/dress\/([a-z0-9-]+)\.jpg/g)].map((m) => m[1]);
+  assert.equal(imgs.length, 18);
+  assert.equal(new Set(imgs).size, 18, 'no reference is used twice');
+  imgs.forEach((f) => assert.ok(existsSync(join(ROOT, 'assets/images/dress/' + f + '.jpg')), f + ' missing on disk'));
+  /* the acknowledgement is never pre-ticked */
+  assert.match(page, /<input type="checkbox" id="ack">/);
+  assert.doesNotMatch(page, /id="ack" checked|checked id="ack"/);
+});
+
+test('ABOUT YOU is exactly seven questions and one operational field', () => {
+  const g = readFileSync(join(ROOT, 'assets/guest.js'), 'utf8');
+  const block = g.slice(g.indexOf('var PROFILE = ['), g.indexOf('var ACCESS ='));
+  const keys = [...block.matchAll(/\{ key: '([a-z]+)'/g)].map((m) => m[1]);
+  assert.deepEqual(keys, ['dietary', 'drink', 'coffeetea', 'treat', 'comfort', 'avoid', 'anything']);
+  assert.match(g, /var ACCESS = \{ key: 'access'/);
+  /* three layers, and a correction never destroys the invitation's own value */
+  assert.match(g, /r\.history\.push\(\{ field: field, from: from, to: v, at: new Date\(\)\.toISOString\(\) \}\)/);
+  const page = readFileSync(join(ROOT, 'you.html'), 'utf8');
+  assert.match(page, /From your invitation/);
+  assert.match(page, /G\.PROFILE\.forEach/);
 });
 
 test('Snow Mountain Viewing Room carries its own canonical photograph, used nowhere else', () => {

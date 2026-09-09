@@ -34,9 +34,18 @@ const AUTH = {
     } catch (e) { return null; }
   },
   set(inv) {
+    /* The named party travels with the session. Wave 1 needs per-person state
+     * — attendance, the Sangkhathan, seats, the profile — and per-person state
+     * is impossible without the names the invitation already resolved.
+     * SOURCE ONLY: exactly what the encrypted bundle carries today
+     * (guestId, fullName, preferredName). No new personal data is shipped. */
     localStorage.setItem(KEY, JSON.stringify({
       invitationId: inv.invitationId,
       partyName: inv.partyName || '',
+      partyLead: inv.partyLead || '',
+      guests: (inv.guests || [])
+        .filter((g) => (g.status || 'ACTIVE') === 'ACTIVE')
+        .map((g) => ({ guestId: g.guestId, fullName: g.fullName, preferredName: g.preferredName || g.fullName })),
       at: new Date().toISOString(),
     }));
   },

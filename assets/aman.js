@@ -81,6 +81,8 @@
       '<div class="a-mfoot">' +
         '<p>Guest Relations</p>' +
         '<a href="mailto:guest.relation.seeyouinlaos@gmail.com">guest.relation.seeyouinlaos@gmail.com</a>' +
+        '<a href="you.html">You &amp; your party</a>' +
+        '<a href="dress.html">Dress code</a>' +
         '<a href="review.html">Review &amp; Send</a>' +
       '</div>';
     document.body.append(scrim, menu);

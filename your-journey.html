@@ -41,6 +41,16 @@ h1{font-family:'PP Editorial Old',serif;font-weight:200;font-size:29px;margin-bo
 .avline{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75;margin:14px 0 0;line-height:1.6}
 .avline.low{color:#8A5A55}
 .heldbox{border-top:1px solid #DAD9D7;margin-top:24px;padding-top:16px;font-size:12px;color:#7C7A75;line-height:1.8}
+.wedth{width:72px;height:96px;background-size:cover;background-position:center;flex:none;filter:saturate(.9)}
+.wprog{margin-top:12px;border-top:1px solid #EDEBE7}
+.wp{border-bottom:1px solid #EDEBE7;padding:12px 0}
+.wpt{font-family:'PP Editorial Old',serif;font-weight:200;font-size:16px;line-height:1.3}
+.wpt a{color:#313131;text-decoration:none;border-bottom:1px solid #DAD9D7}
+.wpm{font-size:9.5px;letter-spacing:1.6px;text-transform:uppercase;color:#7C7A75;margin-top:5px}
+.wps{font-size:12px;color:#7C7A75;line-height:1.8;margin-top:5px}
+.wps b{font-weight:400;color:#313131}
+.wpeople{margin-top:14px}
+.wpl{font-size:9.5px;letter-spacing:2px;text-transform:uppercase;color:#313131;margin-bottom:4px}
 .tmpl{border-top:1px solid #DAD9D7;margin-top:24px;padding-top:18px}
 .tmpl h3{font-family:'PP Editorial Old',serif;font-weight:200;font-size:18px;margin-bottom:4px}
 .tmpl p{font-size:12px;color:#7C7A75;line-height:1.8;margin-bottom:8px}
@@ -136,7 +146,6 @@ body.fx-open .fxs,body.fx-open .fxo{display:block}
 <div class="tot"><span class="l">Your Costs</span><span class="r" id="tt">USD 0</span></div>
 <p class="note">Vientiane is two consecutive stays and no night is left uncovered. The Pre-Wedding Stay covers 25 &rarr; 26 and 26 &rarr; 27 February, both nights your contribution. The Wedding Stay covers 27 &rarr; 28 February and 28 February &rarr; 01 March as ONE selection: the first night is your contribution and the second night is complimentary, hosted by the Bride &amp; Groom. Hosted wedding programme events are part of your journey without charge — they never appear as USD 0 line items. Spa interest lines carry no journey cost — the amount is payable at the spa.</p>
 <div id="csnote"></div>
-<div id="temple"></div>
 <div id="dec"></div>
 <div id="held"></div>
 <div class="fxs" id="fxs"></div>
@@ -155,6 +164,7 @@ body.fx-open .fxs,body.fx-open .fxo{display:block}
 <script src="assets/aman.js"></script>
 <script src="assets/rooms-data.js"></script>
 <script src="assets/pricing.js"></script>
+<script src="assets/guest.js"></script>
 <script src="assets/temple.js"></script>
 <script src="assets/inventory.js"></script>
 <script src="assets/transport-data.js"></script>
@@ -172,9 +182,60 @@ if(window.SIYL_TRANSPORT&&window.SIYL_TRANSPORT[x.id])return 'transport.html?id=
 var P=window.SIYL_PRICE,at=P&&P.locate(x.id);
 if(at&&x.room)return 'room.html?stay='+at.key+'&room='+x.room;
 return 'journeys.html#j-'+(P?P.windowOf(x.id):x.id)}
+/* ---------------------------------------------------------------- THE WEDDING
+ * The reason for the journey reads as ONE programme, in the order the day runs,
+ * sitting at its own place in the chronology — Sunday 28 February, inside the
+ * Wedding Stay and before the flight to Kunming. Hosted parts say HOSTED; they
+ * are never listed as a USD 0 purchase, and they add nothing to the badge,
+ * because a hosted ceremony is not a line item. Only a real amount appears. */
+function weddingBlock(){
+var J=window.SIYL_JOURNEY,T=window.SIYL_TEMPLE;
+if(!J)return '';
+var op=T?T.operational():null;
+var usd=SIYL_BAG.get().filter(function(x){return J.isWedding(x)})
+  .reduce(function(n,x){return n+(x.price||0)*(x.qty||1)},0);
+var h='<div class="row wedrow"><div class="wedth" aria-hidden="true" style="background-image:url(assets/images/event/052-ceremony-green-gateway.jpg)"></div><div style="flex:1">';
+h+='<p class="when">28 FEB</p><p class="cat">The Wedding</p>';
+h+='<a class="nm" href="voyage.html">The Wedding · Sunday, 28 February 2027</a>';
+h+='<p class="mt">Vientiane, Laos · one day, four parts</p>';
+h+='<div class="wprog">';
+J.WEDDING.forEach(function(w){
+  if(w.key==='sangkhathan'){
+    var names=op?op.offeringNames:[];
+    h+='<div class="wp"><p class="wpt"><a href="'+w.anchor+'">'+w.title+'</a></p>'+
+       '<p class="wpm">'+w.when+' · '+w.place+'</p>'+
+       (names.length
+         ? '<p class="wps"><b>'+names.join(' · ')+'</b> · '+(names.length===1?'one offering':names.length+' offerings')+' · USD '+(names.length*15)+'</p>'
+         : '<p class="wps">Not selected</p>')+
+       '</div>';
+    return}
+  h+='<div class="wp"><p class="wpt"><a href="'+w.anchor+'">'+w.title+'</a></p>'+
+     '<p class="wpm">'+w.when+' · '+w.place+'</p>'+
+     '<p class="wps">'+w.note+'</p></div>'});
+h+='</div>';
+if(op&&op.guests.length){
+  h+='<div class="wpeople"><p class="wpl">Temple Ceremony · who is coming</p>';
+  op.guests.forEach(function(g){
+    h+='<p class="wps"><b>'+g.name+'</b> · '+g.temple+
+       (g.attending?(g.sangkhathan?' · Sangkhathan selected':' · Sangkhathan not selected'):'')+'</p>'});
+  h+='</div>'}
+h+='<div class="acts"><a class="ch" href="voyage.html#temple-decision">'+
+   ((op&&op.undecided===0&&op.guests.length)?'Change these decisions':'Tell us your decisions')+'</a></div>';
+h+='</div>'+(usd>0?'<span class="ln">USD '+usd.toLocaleString('en-US')+'</span>':'<span class="ln free">Hosted</span>')+'</div>';
+return h}
+
 function render(){var b=SIYL_BAG.get(),el=document.getElementById('items');
 if(!b.length){el.innerHTML='<p class="empty">Nothing is in your journey yet. Everything you add appears here with its live total.</p>'}
-else{el.innerHTML=(window.SIYL_JOURNEY?SIYL_JOURNEY.sorted(b):b).map(function(x){
+else{el.innerHTML=(function(){
+var J=window.SIYL_JOURNEY,list=(J?J.sorted(b):b),out='',done=false;
+list.forEach(function(x){
+  var o=J?J.order(x):99;
+  if(J&&!done&&o>=3.5){out+=weddingBlock();done=true}
+  if(J&&J.isWedding(x))return;          /* a wedding line lives inside the block */
+  out+=rowHtml(x)});
+if(J&&!done)out+=weddingBlock();
+return out})()}
+function rowHtml(x){
 var J=window.SIYL_JOURNEY,m=J?J.meta(x):{cat:'',basis:''},seg=J?J.SEGMENTS.filter(function(g){return g.ids.indexOf(x.id)>=0})[0]:null,when=J?J.when(x):'';
 var book=seg&&seg.bookend?'<span class="bk" title="Bangkok"></span>':'';
 var P=window.SIYL_PRICE,win=P?P.windowOf(x.id):x.id;
@@ -202,7 +263,7 @@ return '<div class="row"><a class="th" href="'+href+'" aria-label="Open '+x.name
 '<div class="acts">'+
 (canChange?'<a class="ch" href="journeys.html?change='+win+'#j-'+win+'">Change</a>':'')+
 '<button class="rm" data-rm="'+win+'">Remove</button></div></div>'+
-amount+'</div>'}).join('')}
+amount+'</div>'}
 document.getElementById('tt').textContent='USD '+SIYL_BAG.total().toLocaleString('en-US');
 el.querySelectorAll('[data-rm]').forEach(function(b){b.addEventListener('click',function(){
 var w=b.getAttribute('data-rm'),ids=window.SIYL_PRICE?SIYL_PRICE.ids(w):[w];
@@ -380,23 +441,6 @@ var b=document.getElementById('csnote');if(b)b.innerHTML=''});
  * An allocation is written when the journey is SENT. If the guest then changes
  * a room, the ledger still holds the old one: say so plainly and tell them the
  * next send updates it. If they empty the journey, give the rooms back. */
-/* the Buddhist morning: attendance is a decision, not a purchase, and it is
- * shown apart from the offering it may or may not carry */
-function paintTemple(){
-var box=document.getElementById('temple');if(!box||!window.SIYL_TEMPLE)return;
-var o=SIYL_TEMPLE.operational();
-var h='<div class="tmpl"><h3>The Buddhist morning</h3>';
-h+='<p><b>Temple Ceremony · '+o.temple+'</b>'+(o.attending?' · 08:00 – 12:00 · Wat Ong Teu, Vientiane':'')+'</p>';
-if(o.attending){
-  h+='<p>The morning alms-giving, Tak Bat, is part of the ceremony — no charge.</p>';
-  h+=o.offerings
-    ? '<p><b>Sangkhathan Temple Offering · '+o.offerings+(o.offerings===1?' offering':' offerings')+'</b> · USD '+o.offeringsUsd+', shown in your journey below.</p>'
-    : '<p>No Sangkhathan offering selected.</p>';
-}else if(SIYL_TEMPLE.attendance()==='no'){
-  h+='<p>No hosted programme is assigned to you for this part of the morning.</p>';
-}
-h+='<a href="voyage.html#temple-decision">'+(SIYL_TEMPLE.decided()?'Change this decision':'Tell us your decision')+'</a></div>';
-box.innerHTML=h}
 
 function paintHeld(){
 var box=document.getElementById('held');if(!box||!window.SIYL_STOCK)return;
@@ -411,12 +455,12 @@ SIYL_STOCK.mine().then(function(a){
     (now===held?'' : ' Your journey has changed since then — sending it again updates what is held in your name.')+'</div>';
 });}
 
-document.addEventListener('siyl:bag',function(){render();paintHeld();paintTemple()});
-document.addEventListener('siyl:temple',paintTemple);
+document.addEventListener('siyl:bag',function(){render();paintHeld()});
+document.addEventListener('siyl:temple',render);
+document.addEventListener('siyl:guest',render);
 document.addEventListener('siyl:stock',render);
 render();
 paintHeld();
-paintTemple();
 var q=new URLSearchParams(location.search);
 var rm=q.get('rm');if(rm){SIYL_BAG.remove(rm);render()}
 </script></body></html>

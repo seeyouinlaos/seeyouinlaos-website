@@ -53,34 +53,59 @@ a.th{display:block}
 .soldrow b{font-weight:400}
 .soldrow span.r{margin-left:auto;font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#8A5A55;white-space:nowrap}
 .soldbox a{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#313131;text-decoration:none;border-bottom:1px solid #313131;padding-bottom:2px;display:inline-block;margin-top:6px}
+/* FIVE EDITORIAL BLOCKS — each one says what it holds and how to change it */
+.blk{border-top:1px solid #DAD9D7;padding-top:20px;margin-top:32px}
+.bhd{display:flex;align-items:baseline;gap:14px}
+.bno{font-size:9.5px;letter-spacing:2.2px;color:#7C7A75}
+.blk h2{margin:0 0 2px;flex:1}
+.bedit{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#313131;text-decoration:none;border-bottom:1px solid #313131;padding:8px 0 3px;white-space:nowrap;min-height:44px;display:inline-flex;align-items:flex-end}
+.bsub{font-size:11px;color:#7C7A75;line-height:1.7;margin:6px 0 12px;max-width:36em}
+.pline{display:flex;gap:12px;align-items:baseline;border-top:1px solid #EDEBE7;padding:12px 0;font-size:12.5px;line-height:1.7}
+.pline b{font-weight:400;color:#313131}
+.pline .r{margin-left:auto;font-size:9.5px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75;white-space:nowrap;text-align:right}
+.pline .r.open{color:#8A5A55}
+.pn{font-family:'PP Editorial Old',serif;font-weight:200;font-size:16.5px;line-height:1.3}
+.pm{font-size:10px;letter-spacing:1.6px;text-transform:uppercase;color:#7C7A75;margin-top:4px}
+.ps{font-size:12.5px;color:#7C7A75;line-height:1.75;margin-top:5px}
+.ps b{font-weight:400;color:#313131}
+.wev{border-top:1px solid #EDEBE7;padding:13px 0}
 </style><link rel="stylesheet" href="assets/desktop.css"><link rel="stylesheet" href="assets/aman.css"></head><body>
 <header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="your-journey.html" aria-label="Your Journey"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main>
 <h1>Review &amp; Send</h1>
 <p class="sub">Your journey · nothing is paid on this website</p>
 
-<h2>The Wedding Programme</h2>
-<div class="ev"><div><p class="en">Temple Ceremony</p><p class="em">Sunday, 28 February 2027 · 08:00 – 12:00 · Wat Ong Teu Temple, Vientiane</p><p class="em">Optional participation. The morning alms-giving, Tak Bat, is part of the ceremony and carries no charge. The Sangkhathan Temple Offering is a separate, optional personal offering.</p><p class="em" id="tempstate"></p></div><span class="eh sp" id="tempeh">Optional</span></div>
-<div class="ev"><div><p class="en">Coffee &amp; Cake</p><p class="em">Sunday, 28 February 2027 · After the return from the temple · Souphattra Heritage Vientiane</p></div><span class="eh">Hosted</span></div>
-<div class="ev"><div><p class="en">Vow Ceremony</p><p class="em">Sunday, 28 February 2027 · 04:30 PM · Souphattra Heritage Vientiane</p></div><span class="eh">Hosted</span></div>
-<div class="ev"><div><p class="en">Wedding Dinner</p><p class="em">Sunday, 28 February 2027 · 07:30 PM · Souphattra Vientiane Hotel</p></div><span class="eh">Hosted</span></div>
-<p class="note">Coffee &amp; Cake, the Vow Ceremony and Wedding Dinner are hosted. The Temple Ceremony is optional and the morning alms-giving carries no charge; only the Sangkhathan Temple Offering is a personal cost, and only if you choose it.</p>
+<div id="b1" class="blk"></div>
+<div id="b2" class="blk"></div>
 
-<h2>Your selections</h2>
+<section class="blk" id="b3">
+<div class="bhd"><span class="bno">03</span><h2>Your journey</h2><a class="bedit" href="your-journey.html">Edit</a></div>
+<p class="bsub">Every stay, every leg and every experience you have chosen, in the order the journey happens.</p>
 <div id="items"></div>
+</section>
+
+<div id="b4" class="blk"></div>
+
+<section class="blk" id="b5">
+<div class="bhd"><span class="bno">05</span><h2>Your costs</h2><a class="bedit" href="your-journey.html">Edit</a></div>
+<p class="bsub">One calculation for the whole website. Nothing is paid here, and no deposit is asked for.</p>
 <div class="tot"><span class="l">Your Costs</span><span class="r" id="tt">USD 0</span></div>
 <p class="note">Spa interest lines carry no journey cost — Marsilea Spa confirms times directly and the amount is payable at the spa. No deposit is required on this website.</p>
+</section>
 
 <div id="gaps"></div>
 <div id="soldout"></div>
 <div id="sendbox">
 <button class="cta" id="send">Send to Guest Relations</button>
 <p class="err" id="err" role="alert" aria-live="polite"></p>
-<p class="note">Sending shares your selection with Guest Relations for personal confirmation. It is a request — never a payment.</p>
+<p class="note">Sending shares your journey with Guest Relations so a person can look at it. It is a request, never a payment, and it is not a confirmation — Guest Relations confirms every arrangement with you personally.</p>
 </div>
 <div id="donebox" hidden class="done">
-<h2>Received and stored</h2>
+<h2>Received &mdash; not yet confirmed</h2>
 <p class="note" id="donemsg" style="margin-top:6px"></p>
+<p class="note"><b style="color:#313131;font-weight:400">Received</b> means your journey is safely with Guest Relations and a person will read it. <b style="color:#313131;font-weight:400">Confirmed</b> is something only Guest Relations can tell you, once each arrangement is held with the hotels, the railway and the airlines. Until you hear from them, nothing in your journey is final.</p>
+<p class="note">You can keep changing anything here. Change it, send it again, and the newer version replaces the earlier one — you never lose your place, and you are never counted twice.</p>
+<button class="cta" id="again" style="background:none;color:#313131;border:1px solid #313131">Change my journey and send again</button>
 <a class="tlink" href="journeys.html" style="margin-top:14px">Continue exploring</a>
 </div>
 </main>
@@ -89,6 +114,7 @@ a.th{display:block}
 <script src="assets/aman.js"></script>
 <script src="assets/rooms-data.js"></script>
 <script src="assets/pricing.js"></script>
+<script src="assets/guest.js"></script>
 <script src="assets/temple.js"></script>
 <script src="assets/inventory.js"></script>
 <script src="assets/transport-data.js"></script>
@@ -97,14 +123,82 @@ a.th{display:block}
 <script>
 var SUBMIT_URL='https://seeyouinlaos-website.suthep-hrg.workers.dev/api/register';
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')}
-/* the operational preparation state: attendance and offerings, never merged */
-function paintTemple(){
-if(!window.SIYL_TEMPLE)return;
-var o=SIYL_TEMPLE.operational();
-var el=document.getElementById('tempstate'),eh=document.getElementById('tempeh');
-if(el)el.textContent='Your decision: '+o.temple+
-  (o.attending?(o.offerings?' · Sangkhathan offering selected: '+o.offerings+' × USD 15 = USD '+o.offeringsUsd:' · no Sangkhathan offering'):'');
-if(eh)eh.textContent=o.attending?'Attending':(SIYL_TEMPLE.attendance()==='no'?'Not attending':'Optional')}
+function when(iso){try{return new Date(iso).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}catch(e){return ''}}
+
+/* ---------------------------------------------------------- BLOCK 01
+ * YOU & YOUR PARTY — by name. A party of four reads as four people, never as
+ * "4 guests". What the invitation gave and what the guest corrected are both
+ * shown, because a correction that hides the original is not a correction. */
+function paintParty(){
+var G=window.SIYL_GUEST,box=document.getElementById('b1');if(!box)return;
+var p=G?G.party():null;
+var h='<div class="bhd"><span class="bno">01</span><h2>You &amp; your party</h2>'+
+  '<a class="bedit" href="you.html">Edit</a></div>';
+if(!p){box.innerHTML=h+'<p class="bsub">Open your invitation and your party appears here by name.</p>';return}
+h+='<p class="bsub">Invitation '+esc(p.invitationId)+(p.partyName?' · '+esc(p.partyName):'')+'</p>';
+p.guests.forEach(function(g){
+  var full=G.value(g.guestId,'fullName'),pref=G.value(g.guestId,'preferredName');
+  h+='<div class="pline"><div><p class="pn">'+esc(pref||full)+'</p>'+
+     '<p class="ps">'+esc(full)+(G.edited(g.guestId,'fullName')?' · corrected by you':'')+'</p></div>'+
+     '<span class="r">Named guest</span></div>'});
+var em=G.partyField('email'),ph=G.partyField('phone');
+h+='<div class="pline"><div><p class="ps"><b>How we reach you</b></p>'+
+   '<p class="ps">'+(em||ph?esc([em,ph].filter(Boolean).join(' · ')):'No email or telephone given yet')+'</p></div>'+
+   '<span class="r'+(em||ph?'':' open')+'">'+(em||ph?'Given':'Still open')+'</span></div>';
+box.innerHTML=h}
+
+/* ---------------------------------------------------------- BLOCK 02
+ * THE WEDDING — one programme, in the order the day runs. Hosted parts say
+ * HOSTED; only the Sangkhathan carries an amount, and it carries a name. */
+function paintWedding(){
+var box=document.getElementById('b2'),J=window.SIYL_JOURNEY,T=window.SIYL_TEMPLE;
+if(!box||!J)return;
+var op=T?T.operational():null;
+var h='<div class="bhd"><span class="bno">02</span><h2>The Wedding</h2>'+
+  '<a class="bedit" href="voyage.html#temple-decision">Edit</a></div>'+
+  '<p class="bsub">Sunday, 28 February 2027 · Vientiane. Coffee &amp; Cake, the Vow Ceremony and the Wedding Dinner are hosted. The Temple Ceremony is optional, the morning alms-giving carries no charge, and only the Sangkhathan Temple Offering is a personal cost — and only for the guests who choose it.</p>';
+J.WEDDING.forEach(function(w){
+  if(w.key==='sangkhathan'){
+    var names=op?op.offeringNames:[];
+    h+='<div class="wev"><div style="display:flex;gap:12px;align-items:baseline">'+
+       '<div><p class="pn">'+w.title+'</p><p class="pm">'+w.when+' · '+w.place+'</p></div>'+
+       '<span class="r" style="margin-left:auto;font-size:9.5px;letter-spacing:1.8px;text-transform:uppercase;color:'+(names.length?'#313131':'#7C7A75')+';white-space:nowrap">'+
+       (names.length?'USD '+(names.length*15):'Not selected')+'</span></div>'+
+       (names.length?'<p class="ps">Prepared for <b>'+esc(names.join(' · '))+'</b> · USD 15 each</p>':'')+
+       '</div>';
+    return}
+  h+='<div class="wev"><div style="display:flex;gap:12px;align-items:baseline">'+
+     '<div><p class="pn">'+w.title+'</p><p class="pm">'+w.when+' · '+w.place+'</p></div>'+
+     '<span class="r" style="margin-left:auto;font-size:9.5px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75;white-space:nowrap">'+
+     (w.key==='temple'?'Optional':'Hosted')+'</span></div></div>'});
+if(op&&op.guests.length){
+  h+='<p class="bsub" style="margin-top:18px">Temple Ceremony · who is coming</p>';
+  op.guests.forEach(function(g){
+    h+='<div class="pline"><div><p class="ps"><b>'+esc(g.name)+'</b></p>'+
+       '<p class="ps">'+g.temple+(g.attending?(g.sangkhathan?' · Sangkhathan selected · USD 15':' · Sangkhathan not selected'):'')+'</p></div>'+
+       '<span class="r'+(g.temple==='No decision yet'?' open':'')+'">'+(g.temple==='No decision yet'?'Still open':g.temple)+'</span></div>'})}
+box.innerHTML=h}
+
+/* ---------------------------------------------------------- BLOCK 04
+ * ABOUT YOU — what the people preparing the journey have been told, by name,
+ * and the dress code acknowledgement, which is never ticked for anyone. */
+function paintAbout(){
+var G=window.SIYL_GUEST,box=document.getElementById('b4');if(!box)return;
+var p=G?G.party():null;
+var h='<div class="bhd"><span class="bno">04</span><h2>About you</h2>'+
+  '<a class="bedit" href="you.html">Edit</a></div>'+
+  '<p class="bsub">Seven questions of hospitality and one operational field, per named guest. Every answer is optional, and none of them changes a price.</p>';
+if(!p){box.innerHTML=h;return}
+p.guests.forEach(function(g){
+  var n=G.profileAnswered(g.guestId);
+  h+='<div class="pline"><div><p class="ps"><b>'+esc(G.value(g.guestId,'preferredName')||g.fullName)+'</b></p>'+
+     '<p class="ps">'+(n?n+' of 8 answered':'Nothing shared yet')+'</p></div>'+
+     '<span class="r'+(n?'':' open')+'">'+(n?'Shared':'Optional')+'</span></div>'});
+var a=G.dressAck();
+h+='<div class="pline"><div><p class="ps"><b>Dress code</b></p>'+
+   '<p class="ps">'+(a?'Acknowledged on '+when(a.at):'Lao traditional dress in blue for the temple; black tie from the return until the end of dinner; resort wear for the travelling days.')+'</p></div>'+
+   '<a class="bedit" href="dress.html">'+(a?'Review':'Open')+'</a></div>';
+box.innerHTML=h}
 
 function detailHref(x){
 if(x.stay&&x.room)return 'room.html?stay='+x.stay+'&room='+x.room;
@@ -118,7 +212,11 @@ function render(){var b=SIYL_BAG.get(),el=document.getElementById('items');
 if(!b.length){el.innerHTML='<p class="empty">Nothing is in your journey yet. Everything you add appears here before sending.</p>';
 document.getElementById('send').disabled=true}
 else{document.getElementById('send').disabled=false;
-el.innerHTML=(window.SIYL_JOURNEY?SIYL_JOURNEY.sorted(b):b).map(function(x){
+/* THE WEDDING is block 02 and is never itemised twice: a wedding line is
+ * shown there, by name, and its amount is in Your Costs like every other. */
+el.innerHTML=(window.SIYL_JOURNEY?SIYL_JOURNEY.sorted(b):b)
+.filter(function(x){return !(window.SIYL_JOURNEY&&SIYL_JOURNEY.isWedding(x))})
+.map(function(x){
 var J=window.SIYL_JOURNEY,m=J?J.meta(x):{cat:'',basis:''},seg=J?J.SEGMENTS.filter(function(g){return g.ids.indexOf(x.id)>=0})[0]:null,when=J?J.when(x):'';
 var book=seg&&seg.bookend?'<span class="bk"></span>':'';
 var href=detailHref(x);
@@ -144,19 +242,26 @@ if(!open.length){box.innerHTML='';return}
 box.innerHTML='<div class="gap"><h3>Your journey is almost complete</h3>'+
 '<p>A decision is still needed for the stages below. Choose your stay or travel — or tell us that you are not joining that part of the journey. You can still send what you have.</p>'+
 open.map(function(s2){return '<div class="grow"><span class="gw">'+s2.when+'</span><span>'+s2.cat+' · '+s2.place+'</span><a href="journeys.html#'+s2.anchor+'">'+(s2.cat==='Accommodation'?'Choose your stay':'Choose your travel')+'</a></div>'}).join('')+'</div>'}
-document.addEventListener('siyl:bag',function(){render();paintTemple()});
-document.addEventListener('siyl:temple',paintTemple);
-paintTemple();
+function paintBlocks(){paintParty();paintWedding();paintAbout()}
+document.addEventListener('siyl:bag',function(){render();paintBlocks()});
+document.addEventListener('siyl:temple',paintBlocks);
+document.addEventListener('siyl:guest',paintBlocks);
+document.addEventListener('siyl:invite-ready',paintBlocks);
+paintBlocks();
 render();
 
 function buildText(auth){var b=SIYL_BAG.get();
 var L=['SEE YOU IN LAOS — JOURNEY SELECTION','Invitation: '+auth.invitationId+(auth.partyName?' · '+auth.partyName:''),'',
-'WEDDING PROGRAMME:',
-'- Temple Ceremony · Sunday, 28 February 2027 · 09:00 AM · SELF-PAY (Buddhist giving is made personally by each guest)',
-'- Coffee & Cake · Sunday, 28 February 2027 · after the return from the temple · HOSTED',
-'- Vow Ceremony · Sunday, 28 February 2027 · 04:30 PM · HOSTED',
-'- Wedding Dinner · Sunday, 28 February 2027 · 07:30 PM · HOSTED','','SELECTIONS:'];
-b.forEach(function(x){L.push('- '+x.name+' · '+(x.meta||'')+(x.qty>1?' · Quantity '+x.qty:'')+
+'WEDDING PROGRAMME (Sunday, 28 February 2027 · Vientiane):'];
+/* ONE source for the day — the same programme the guest read on the website */
+if(window.SIYL_JOURNEY){SIYL_JOURNEY.WEDDING.forEach(function(w){
+L.push('- '+w.title+' · '+w.when+' · '+w.place+' · '+w.note.toUpperCase())})}
+L.push('','SELECTIONS (in the order the journey happens):');
+/* the wedding lines are reported under BUDDHIST MORNING, by name, and are
+ * never listed twice — the amount is still inside YOUR COSTS */
+(window.SIYL_JOURNEY?SIYL_JOURNEY.sorted(b):b)
+.filter(function(x){return !(window.SIYL_JOURNEY&&SIYL_JOURNEY.isWedding(x))})
+.forEach(function(x){L.push('- '+x.name+' · '+(x.meta||'')+(x.qty>1?' · Quantity '+x.qty:'')+
 (x.rate!=null&&x.nights?' · USD '+x.rate+' per person / night · '+x.nights+(x.nights===1?' night':' nights'):'')+
 (x.note?' · '+x.note.toUpperCase()+(x.noteBy?' ('+x.noteBy+')':''):'')+
 (x.interest?' · INTEREST ONLY (no journey cost, payable at the spa)':' · USD '+((x.price||0)*x.qty)))});
@@ -166,12 +271,27 @@ if(op.length){L.push('','DECISION STILL OPEN:');op.forEach(function(g){L.push('-
 /* THE OPERATIONAL PREPARATION LIST — attendance and offerings are two
  * different fields and are never derived from one another. */
 if(window.SIYL_TEMPLE){var t=SIYL_TEMPLE.operational();
-L.push('','BUDDHIST MORNING:');
-L.push('- Temple Ceremony (08:00-12:00, Wat Ong Teu): '+t.temple+(auth&&auth.partyName?' - '+auth.partyName:''));
-if(t.attending){
-  L.push('- Morning alms-giving (Tak Bat): included in the ceremony, no charge');
-  L.push('- Sangkhathan Temple Offering to prepare: '+t.offerings+(t.offerings?' (USD '+t.offeringsUsd+')':''));
-}else{L.push('- Sangkhathan Temple Offering to prepare: 0')}}
+L.push('','BUDDHIST MORNING (per named guest):');
+t.guests.forEach(function(g){
+  L.push('- '+g.name+': Temple Ceremony '+g.temple.toUpperCase()+
+    (g.attending?(g.sangkhathan?' · SANGKHATHAN TO PREPARE (USD 15)':' · no Sangkhathan'):''))});
+L.push('- Morning alms-giving (Tak Bat): included in the ceremony for everyone attending, no charge');
+L.push('- Sangkhathan offerings to prepare: '+t.offerings+(t.offerings?' (USD '+t.offeringsUsd+') for '+t.offeringNames.join(', '):''))}
+/* WHO IS TRAVELLING, and what each of them told us. Names first: a party of
+ * four is four people to look after, never a headcount. */
+if(window.SIYL_GUEST){var gr=SIYL_GUEST.operational();
+if(gr){
+  L.push('','PARTY:');
+  L.push('- Contact: '+(gr.contact.email||'no email given')+' · '+(gr.contact.phone||'no telephone given'));
+  L.push('- Dress code: '+(gr.dress?('acknowledged '+gr.dress.at+' (text version '+gr.dress.textVersion+')'):'NOT ACKNOWLEDGED'));
+  gr.guests.forEach(function(g){
+    var nm=(g.submitted.preferredName||g.source.preferredName||g.source.fullName);
+    L.push('','- '+nm.toUpperCase()+' ('+(g.submitted.fullName||g.source.fullName)+')');
+    if(g.submitted.fullName&&g.submitted.fullName!==g.source.fullName)
+      L.push('  · name corrected by the guest, invitation had: '+g.source.fullName);
+    SIYL_GUEST.PROFILE.concat([SIYL_GUEST.ACCESS]).forEach(function(q){
+      var v=g.profile[q.key];
+      if(v)L.push('  · '+q.q+': '+(v==='NONE'?'Nothing to note':v))})})}}
 L.push('','YOUR COSTS: USD '+SIYL_BAG.total().toLocaleString('en-US'));
 L.push('Submitted via Review & Send · '+new Date().toISOString());
 return L.join('\n')}
@@ -209,6 +329,7 @@ if(!hold.ok&&!hold.unreachable){
 
 var registration={channel:'journey-shop',selections:SIYL_BAG.get(),totalUsd:SIYL_BAG.total(),
 templeCeremony:window.SIYL_TEMPLE?SIYL_TEMPLE.operational():null,
+guestRecord:window.SIYL_GUEST?SIYL_GUEST.operational():null,
 inventory:hold.unreachable?'UNCONFIRMED — ledger unreachable, Guest Relations to confirm rooms':'CONFIRMED',
 roomsHeld:hold.reserved||null,
 registration_submitted_at:new Date().toISOString()};
@@ -218,9 +339,21 @@ body:JSON.stringify({registration:registration,invitationId:auth.invitationId,te
 if(r.ok){document.getElementById('sendbox').hidden=true;
 var d=document.getElementById('donebox');d.hidden=false;
 document.getElementById('donemsg').textContent=hold.unreachable
- ? 'Your journey selection is safely with us. Guest Relations will confirm room availability and your arrangements personally — nothing is paid on this website.'
- : 'Your journey selection is safely with us and your rooms are held in your name. Guest Relations confirms your arrangements personally — nothing is paid on this website.';
-d.scrollIntoView({behavior:'smooth',block:'center'});return}
+ ? 'Your journey has been received. The room ledger could not be reached, so no room is held yet — Guest Relations checks availability and comes back to you personally. Nothing is paid on this website.'
+ : 'Your journey has been received and your rooms are held in your name while Guest Relations works through it. Holding a room is not the same as a confirmed booking — that comes from Guest Relations, personally. Nothing is paid on this website.';
+d.scrollIntoView({behavior:'smooth',block:'center'});
+/* A sent journey is never a locked journey. Everything on this website stays
+ * editable; sending again replaces the earlier version under the same
+ * invitation, and the ledger swaps the held rooms atomically. */
+var ag=document.getElementById('again');
+if(ag&&!ag.dataset.wired){ag.dataset.wired='1';
+ag.addEventListener('click',function(){
+  document.getElementById('sendbox').hidden=false;
+  document.getElementById('send').disabled=!SIYL_BAG.get().length;
+  document.getElementById('send').textContent='Send my updated journey';
+  d.hidden=true;
+  document.getElementById('sendbox').scrollIntoView({behavior:'smooth',block:'center'})})}
+return}
 }catch(e){/* endpoint unreachable — emergency channel below */}
 /* the rooms were held for a submission that did not happen: give them back
  * immediately rather than leave them locked against every other guest */

@@ -38,8 +38,35 @@
       label: 'Siam Kempinski Bangkok', ids: ['kempinski'], anchor: 'j-kempinski', bookend: 'close' }
   ];
 
-  /* Chronological position of a line that is not itself a stage. */
-  var AT = { '1872': 0.5 };
+  /* Chronological position of a line that is not itself a stage.
+   * THE WEDDING happens on Sunday, 28 February 2027 — inside the Wedding Stay
+   * (27 FEB – 01 MAR) and before the flight to Kunming. A wedding line
+   * therefore sorts between wedstay (3) and mu9632 (4); it is never appended
+   * to the end of the journey because it happens to have been added last. */
+  var AT = { '1872': 0.5, 'sangkhathan': 3.5 };
+  var AT_WHEN = { '1872': '21 – 24 FEB', 'sangkhathan': '28 FEB' };
+
+  /* the wedding programme, in the order the day itself runs. Only items that
+   * exist as products carry an id; the day is described, not invented. */
+  var WEDDING = [
+    { key: 'temple', title: 'Temple Ceremony', when: '08:00 – 12:00',
+      place: 'Wat Ong Teu, Vientiane',
+      note: 'Includes the morning alms-giving, Tak Bat. Optional participation — no charge.',
+      anchor: 'voyage.html#temple' },
+    { key: 'sangkhathan', title: 'Sangkhathan Temple Offering', when: 'Within the Temple Ceremony',
+      place: 'Wat Ong Teu, Vientiane', id: 'sangkhathan',
+      note: 'Optional · USD 15 per guest · a personal offering.',
+      anchor: 'voyage.html#sangkhathan' },
+    { key: 'coffee', title: 'Coffee & Cake', when: 'Afternoon',
+      place: 'Souphattra Heritage, Vientiane',
+      note: 'Hosted — no charge.', anchor: 'voyage.html#coffee' },
+    { key: 'vows', title: 'Vow Ceremony', when: 'Late afternoon',
+      place: 'The green gateway, Souphattra Heritage',
+      note: 'Hosted — no charge.', anchor: 'voyage.html#vows' },
+    { key: 'dinner', title: 'Wedding Dinner', when: 'Evening',
+      place: 'Souphattra Heritage, Vientiane',
+      note: 'Hosted — no charge.', anchor: 'voyage.html#dinner' }
+  ];
 
   function skipped() {
     try { return JSON.parse(localStorage.getItem(SKIP) || '[]'); } catch (e) { return []; }
@@ -80,7 +107,14 @@
     when: function (x) {
       var seg = SEG.filter(function (s) { return s.ids.indexOf(x.id) >= 0; })[0];
       if (seg) return seg.when;
-      return x.id === '1872' ? '21 – 24 FEB' : '';
+      return AT_WHEN[x.id] || '';
+    },
+
+    /* THE WEDDING is one programme, not a scatter of lines */
+    WEDDING: WEDDING,
+    isWedding: function (x) {
+      var m = this.meta(x);
+      return m.cat === 'Wedding programme';
     },
     order: function (x) {
       if (AT[x.id] != null) return AT[x.id];
