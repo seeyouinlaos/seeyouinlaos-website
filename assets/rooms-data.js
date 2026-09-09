@@ -262,17 +262,25 @@
             ['Access & safety', ['Private entrance and private elevator with security system', 'Self check-in by keybox', 'Free parking on the premises', 'Smoke and carbon-monoxide alarms', 'Fire extinguisher and first-aid kit']]],
           amenities: null, rate: 85,
           property: 'Sathorn Penthouse Bangkok', place: 'Sathorn, Bangkok',
+          card: 'Elegant 6BR Sathon Penthouse',
           breakfast: 'Breakfast not included · self-pay', role: 'Preferred' },
 
-        /* 026 — U Sathorn Bangkok. Photography is still to come from the
-         * owner's folder; the product is complete without it, and a wrong
-         * photograph would be worse than none. */
+        /* 026 — U Sathorn Bangkok. Five photographs from the owner's folder,
+         * inspected before assignment: the hero is the one frame that carries
+         * the room AND the garden it is named for. IMG_3861 is left out — the
+         * television's screensaver dominates it. Source mapping is in
+         * docs/SOURCE-MAP-BANGKOK.md. */
         { slug: 'u-sathorn-superior-garden', name: 'Superior Room With Garden View',
           cat: 'U Sathorn Bangkok · hotel room',
           property: 'U Sathorn Bangkok', place: 'Sathorn, Bangkok',
           breakfast: 'Breakfast included',
           desc: 'A garden-view room for two in a colonial-style hotel with a courtyard pool, a spa and a proper restaurant.',
-          gallery: [],
+          gallery: [
+            ['assets/images/usathorn/superior-garden-bed-terrace.jpg', 'The room and its garden terrace'],
+            ['assets/images/usathorn/superior-garden-bed-mirror.jpg', 'Towards the terrace doors'],
+            ['assets/images/usathorn/superior-garden-desk-lawn.jpg', 'The desk and the lawn beyond'],
+            ['assets/images/usathorn/terrace-frangipani.jpg', 'The terrace, under the frangipani'],
+            ['assets/images/usathorn/superior-garden-depth.jpg', 'The length of the room']],
           facts: [['Size', '32 sq.m.'], ['Occupancy', '2 adults'], ['Outlook', 'Garden view'],
             ['Stay', '21 – 24 February 2027 · 3 nights'], ['Breakfast', 'Included']],
           story: 'A room of thirty-two square metres looking onto the garden, in a hotel built around a courtyard and a pool. Breakfast is included, the spa and the gym are on site, and the restaurants and the bar mean an evening never has to leave the building.',
@@ -280,13 +288,22 @@
             ['The hotel', ['Outdoor swimming pool', 'Spa', 'Gym', 'Restaurants', 'Bar', 'Garden', 'Concierge', 'Room service']]],
           amenities: null, rate: 64, roomRate: 128 },
 
-        /* Shama Yen-Akat Bangkok. Photography likewise still to come. */
+        /* 027 — Shama Yen-Akat Bangkok. Six photographs from the owner's
+         * folder, inspected before assignment: the hero is the frame that holds
+         * the bed, the dining table and the balcony doors together, because
+         * that is the studio. Source mapping in docs/SOURCE-MAP-BANGKOK.md. */
         { slug: 'shama-king-studio-balcony', name: 'King Studio With Balcony',
           cat: 'Shama Yen-Akat Bangkok · serviced studio',
           property: 'Shama Yen-Akat Bangkok', place: 'Yen Akat, Bangkok',
           breakfast: 'Breakfast included',
           desc: 'A serviced studio for two with its own balcony, a dining area and a kitchen corner of your own.',
-          gallery: [],
+          gallery: [
+            ['assets/images/shama/king-studio-balcony.jpg', 'The studio, from the entrance'],
+            ['assets/images/shama/king-studio-balcony-doors.jpg', 'The balcony doors'],
+            ['assets/images/shama/king-studio-dining.jpg', 'The dining corner'],
+            ['assets/images/shama/king-studio-entry-vanity.jpg', 'The entry and the vanity'],
+            ['assets/images/shama/king-studio-bathroom.jpg', 'The bathroom'],
+            ['assets/images/shama/king-studio-shower-dressing.jpg', 'The shower and the dressing corner']],
           facts: [['Size', '36 sq.m.'], ['Occupancy', '2 adults'], ['Outlook', 'Balcony and terrace'],
             ['Stay', '21 – 24 February 2027 · 3 nights'], ['Breakfast', 'Included']],
           story: 'Thirty-six square metres with a balcony and a dining area — a studio to live in rather than a room to sleep in. Breakfast is included, the pool is indoors, and there is a café, a garden and a laundry room downstairs.',

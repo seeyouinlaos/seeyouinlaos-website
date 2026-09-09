@@ -119,16 +119,20 @@
       dates: '01 March 2027',
       anchor: 'j-mu9646',
       story: 'The wedding days end and the journey turns north. One non-stop ' +
-        'flight out of Vientiane, in Business Class, and the party arrives in ' +
-        'Kunming — the city that calls itself eternal spring, and means it.',
+        'flight out of Vientiane at ten to four, an hour and thirty-five ' +
+        'minutes in the air, and the party is in Kunming before dinner — the ' +
+        'city that calls itself eternal spring, and means it. Business Class ' +
+        'is the arrangement we hold; an Economy Flexible fare is offered ' +
+        'beside it for anyone who would rather spend the difference elsewhere.',
       facts: [
         ['Flight', 'MU9646 · China Eastern Airlines'],
         ['Route', 'Vientiane (VTE) → Kunming (KMG)'],
         ['Date', '01 March 2027'],
-        ['Departure', 'Confirmed with your ticket'],
-        ['Arrival', 'Confirmed with your ticket'],
-        ['Routing', 'Non-stop'],
-        ['Class', 'Business Class · 1 seat per guest']
+        ['Departure', '15:50 · Vientiane (VTE) Terminal 1'],
+        ['Arrival', '18:25 · Kunming (KMG)'],
+        ['Routing', 'Non-stop · 1 hour 35 minutes'],
+        ['Aircraft', 'Boeing 738 narrowbody'],
+        ['Class', 'Business Class, or Economy Flexible']
       ],
       groups: [
         ['Your seat', [

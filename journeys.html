@@ -52,12 +52,46 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:22px;margin:40
 .var .vr{display:block;font-size:9px;letter-spacing:1.6px;text-transform:uppercase;color:#7C7A75;margin-top:1px}
 .vw{display:inline-block;margin-top:12px;font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:#313131;text-decoration:none;border-bottom:1px solid #313131;padding:8px 0 3px;min-height:44px}
 .st{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#7C7A75}
+/* ---- the Bangkok address selector: one property at a time, swipeable ---- */
+.psel{margin-top:10px}
+.psel-car{position:relative}
+.psel .atrk{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scroll-padding-left:0;padding-bottom:4px}
+.psel .atrk::-webkit-scrollbar{display:none}
+.pcard{flex:0 0 84%;max-width:340px;scroll-snap-align:start;border:1px solid #DAD9D7;background:#FCFAF6;padding:0 0 20px;transition:opacity .35s,border-color .35s;opacity:.45}
+.pcard.on{opacity:1;border-color:#313131}
+.pcard.picked{border-color:#313131}
+.pcimg{display:block;width:100%;aspect-ratio:4/3;background:#E7E3DB center/cover no-repeat}
+.pceyebrow{font-size:9px;letter-spacing:2.2px;text-transform:uppercase;color:#7C7A75;margin:16px 18px 6px}
+.pcname{font-family:'PP Editorial Old',serif;font-weight:200;font-size:21px;line-height:1.2;margin:0 18px 4px}
+.pcroom{font-size:12.5px;color:#4A4A4A;margin:0 18px 8px}
+.pcfacts{font-size:10px;letter-spacing:1.6px;text-transform:uppercase;color:#7C7A75;margin:0 18px 12px;line-height:1.8}
+.pcprice{font-family:'PP Editorial Old',serif;font-size:22px;margin:0 18px 2px}
+.pcprice span{font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;font-size:10px;letter-spacing:1.6px;text-transform:uppercase;color:#7C7A75;display:block;margin-top:4px}
+.pcrate{font-size:10px;letter-spacing:1.6px;text-transform:uppercase;color:#7C7A75;margin:0 18px 14px}
+.pcgo{display:block;width:calc(100% - 36px);margin:0 18px;background:#313131;color:#F3EEE7;border:0;padding:16px;font:inherit;font-size:10px;letter-spacing:2.2px;text-transform:uppercase;cursor:pointer;min-height:48px}
+.pcgo.on{background:none;color:#313131;border:1px solid #313131}
+.pcview{display:inline-block;margin:12px 18px 0;font-size:9.5px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75;text-decoration:none;border-bottom:1px solid #C9C4BA;padding:10px 0 3px;min-height:44px}
+.psel .arow{display:flex;align-items:center;gap:16px;margin:14px 0 0}
+.psel .arail{position:relative;flex:1;height:1px;background:#DAD9D7;cursor:pointer;padding:14px 0;background-clip:content-box;box-sizing:content-box}
+.psel .arail i{position:absolute;top:13px;left:0;height:3px;background:#313131;transition:transform .45s cubic-bezier(.4,0,.2,1),width .3s}
+.psel .anav{display:flex;gap:2px}
+.psel .anav button{position:relative;background:none;border:0;cursor:pointer;width:44px;height:44px;color:#7C7A75}
+.psel .anav button::before{content:'';position:absolute;left:50%;top:50%;width:7px;height:7px;border-left:1px solid currentColor;border-bottom:1px solid currentColor;transform:translate(-50%,-50%) rotate(45deg)}
+.psel .anav button[data-a="next"]::before{transform:translate(-30%,-50%) rotate(-135deg)}
+.psel .anav button[disabled]{opacity:.3;cursor:default}
+.pselhint{font-size:9.5px;letter-spacing:2.2px;text-transform:uppercase;color:#7C7A75;margin-top:6px}
+/* ---- the fare selector ---- */
+.vcls{width:100%;text-align:left;background:#FCFAF6;cursor:pointer;font:inherit}
+.vcls.picked{border-color:#313131}
+.vcn{display:block;font-family:'PP Editorial Old',serif;font-weight:200;font-size:17px;line-height:1.3}
+.vcs{font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75;margin-left:12px;white-space:nowrap}
+@media (min-width:768px){.pcard{flex:0 0 320px}.pselhint{display:none}}
 </style><link rel="stylesheet" href="assets/desktop.css"><link rel="stylesheet" href="assets/aman.css"></head><body>
 <header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="your-journey.html" aria-label="Your Journey"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main><h1>Journeys</h1>
 <p class="jstat" id="jstat"></p>
 <h2>Before the Wedding</h2><p class="win">21 – 27 February 2027</p>
-<div class="p" id="j-bkk-stay" data-vprod="bkk-stay"><div class="pimg" style="background-image:url(assets/images/penthouse/exterior-golden-hour.jpg)"></div><p class="pw"><b>21 – 24 Feb</b> · Accommodation · Bangkok</p><p class="pn">Bangkok · Before the Wedding</p><p class="pm">21 – 24 February 2027 · 3 nights: 21 &rarr; 22, 22 &rarr; 23 and 23 &rarr; 24 February · three approved addresses, one of them yours</p><p class="pb" data-from="bkk-stay"></p><p class="vl">Where you stay in Bangkok</p><div class="vars" data-rooms="sathorn"></div></div>
+<div class="p" id="j-bkk-stay" data-vprod="bkk-stay"><div class="pimg" style="background-image:url(assets/images/penthouse/exterior-golden-hour.jpg)"></div><p class="pw"><b>21 – 24 Feb</b> · Accommodation · Bangkok</p><p class="pn">Bangkok · Before the Wedding</p><p class="pm">21 – 24 February 2027 · 3 nights: 21 &rarr; 22, 22 &rarr; 23 and 23 &rarr; 24 February · three approved addresses, one of them yours</p><p class="pb" data-from="bkk-stay"></p><p class="vl">Where you stay in Bangkok</p><div class="psel" data-select="sathorn" data-win="bkk-stay"></div></div>
 <div class="p" id="j-train"><div class="pgal" data-gal="[[&quot;assets/images/transport/train-no25-srt-train.jpg&quot;,&quot;State Railway of Thailand&quot;],[&quot;assets/images/transport/train-no25-first-class-cabin-1.jpg&quot;,&quot;First Class Sleeper cabin&quot;],[&quot;assets/images/transport/train-no25-first-class-cabin-2.jpg&quot;,&quot;First Class Sleeper cabin · by the window&quot;],[&quot;assets/images/transport/train-no25-first-class-passenger-room.jpg&quot;,&quot;First Class Passenger Room · Krung Thep Aphiwat&quot;],[&quot;assets/images/transport/train-no25-krung-thep-aphiwat.jpg&quot;,&quot;Krung Thep Aphiwat Central Terminal · departure 20:25&quot;],[&quot;assets/images/transport/train-no25-station-hall.jpg&quot;,&quot;The terminal hall&quot;],[&quot;assets/images/transport/train-no25-terminal-aerial.jpg&quot;,&quot;Krung Thep Aphiwat from above&quot;],[&quot;assets/images/transport/van-transfer-1.jpg&quot;,&quot;Van transfer · Nong Khai → Souphattra Heritage&quot;],[&quot;assets/images/transport/van-transfer-2.jpg&quot;,&quot;Van transfer · on board&quot;]]"></div></a><p class="pw"><b>24 – 25 Feb</b> · Transportation · Bangkok &rarr; Vientiane</p><p class="pn">Special Express No. 25</p><p class="pm">24 – 25 February · Bangkok → Nong Khai → Vientiane · First Class Sleeper, van and border logistics to Souphattra Heritage · breakfast and dinner included</p><p class="pp">USD 75 per person</p><p class="pb">Per person · package · First Class Sleeper</p><button class="add" data-add='{"id":"train","name":"Special Express No. 25","meta":"24 – 25 February 2027 · First Class Sleeper","price":75,"img":"assets/images/transport/train-no25-srt-train.jpg"}'>Add to Your Journey</button><br><a class="vw" href="transport.html?id=train">View the night train</a></div>
 <div class="p" id="j-prewed" data-vprod="prewed"><div class="pimg" style="background-image:url(assets/images/souphattra/heritage-courtyard-front.jpg)"></div><p class="pw"><b>25 – 27 Feb</b> · Accommodation · Vientiane</p><p class="pn">Pre-Wedding Stay · Souphattra Heritage</p><p class="pm">25 – 27 February 2027 · 2 nights: 25 &rarr; 26 and 26 &rarr; 27 February · a fixed two-night window · breakfast included</p><p class="pb" data-from="prewed"></p>
 <p class="vl">Rooms &amp; suites</p><div class="vars" data-rooms="souphattra"></div></div>
@@ -67,10 +101,10 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:22px;margin:40
 <div class="p"><div class="pimg" style="background-image:url(assets/images/airbnb/airbnb-01.jpg)"></div><p class="pw"><b>27 Feb – 01 Mar</b> · Accommodation · Vientiane</p><p class="pn">Private Residence</p><p class="pm">27 February – 01 March 2027 · 2 nights: 27 &rarr; 28 February and 28 February &rarr; 01 March · alternative stay · up to 6 guests · downtown Vientiane</p><p class="st">Complimentary · up to 6 guests</p><a class="vw" href="room.html?stay=airbnb&amp;room=private-residence">View the residence</a></div>
 <div class="p"><p class="pw"><b>28 Feb</b> · The Wedding · Vientiane</p><p class="pn">The Wedding Programme</p><p class="pm">Temple Ceremony · Coffee &amp; Cake · Vow Ceremony · Wedding Dinner</p><p class="host">Coffee &amp; Cake, Vow Ceremony and Wedding Dinner hosted · Buddhist giving at the temple self-pay</p></div>
 <h2>After the Wedding</h2><p class="win">01 – 08 March 2027</p>
-<div class="p" id="j-mu9646"><div class="pgal" data-gal="[[&quot;assets/images/transport/mu9632-business-1.jpg&quot;,&quot;Business Class · China Eastern&quot;],[&quot;assets/images/transport/mu9632-business-2.jpg&quot;,&quot;Business Class · lie-flat&quot;],[&quot;assets/images/transport/mu9632-business-3.jpg&quot;,&quot;Business Class seat&quot;]]"></div></a><p class="pw"><b>01 Mar</b> · Transportation · Vientiane &rarr; Kunming</p><p class="pn">MU9646 · Vientiane → Kunming</p><p class="pm">01 March · non-stop · Business Class</p><p class="pp">USD 275 per person</p><button class="add" data-add='{"id":"mu9632","name":"MU9646 · Vientiane → Kunming","meta":"01 March 2027 · Business Class","price":275,"img":"assets/images/transport/mu9632-business-1.jpg"}'>Add to Your Journey</button><br><a class="vw" href="transport.html?id=mu9646">View the flight</a></div>
+<div class="p" id="j-mu9646" data-vclass="mu9646"><div class="pgal" data-gal="[[&quot;assets/images/transport/mu9632-business-1.jpg&quot;,&quot;Business Class · China Eastern&quot;],[&quot;assets/images/transport/mu9632-business-2.jpg&quot;,&quot;Business Class · lie-flat&quot;],[&quot;assets/images/transport/mu9632-business-3.jpg&quot;,&quot;Business Class seat&quot;]]"></div><p class="pw"><b>01 Mar</b> · Transportation · Vientiane &rarr; Kunming</p><p class="pn">MU9646 · Vientiane → Kunming</p><p class="pm">01 March · 15:50 → 18:25 · non-stop · 1h35 · China Eastern Airlines</p><p class="pb" data-fromclass="mu9646"></p><p class="vl">How would you like to fly?</p><div class="vars" data-classes="mu9646"></div><a class="vw" href="transport.html?id=mu9646">View the flight</a></div>
 <div class="p" id="j-kmg" data-vprod="kmg"><div class="pimg" style="background-image:url(assets/images/journey/kunming-01.jpg)"></div><p class="pw"><b>01 – 04 Mar</b> · Accommodation · Kunming</p><p class="pn">Wanxiang Yueju · Kunming</p><p class="pm">01 – 04 March · 3 nights · breakfast not included, self-pay</p><p class="pb" data-from="kmg"></p>
 <p class="vl">Suites &amp; lofts</p><div class="vars" data-rooms="kunming"></div></div>
-<div class="p" id="j-c86"><div class="pgal" data-gal="[[&quot;assets/images/transport/c642-train-snow-mountain.jpg&quot;,&quot;Below Jade Dragon Snow Mountain&quot;],[&quot;assets/images/transport/c642-business-cabin-1.jpg&quot;,&quot;Business Class cabin&quot;],[&quot;assets/images/transport/c642-business-cabin-2.jpg&quot;,&quot;Business Class cabin&quot;],[&quot;assets/images/transport/c642-business-seat.jpg&quot;,&quot;Business Class seat · reclined&quot;],[&quot;assets/images/transport/c642-train-forest.jpg&quot;,&quot;The Kunming – Lijiang line&quot;],[&quot;assets/images/transport/c642-gorge-bridge.jpg&quot;,&quot;The line across the gorge&quot;]]"></div></a><p class="pw"><b>04 Mar</b> · Transportation · Kunming &rarr; Lijiang</p><p class="pn">C86 · Kunming → Lijiang</p><p class="pm">04 March · 10:15 → 13:44 · direct · 3h29 · Business Class · 1+1 seating · Priority Ticketing: expedited ticketing and shorter wait times</p><p class="pp">USD 85 per person</p><button class="add" data-add='{"id":"c642","name":"C86 · Kunming → Lijiang","meta":"04 March 2027 · Business Class","price":85,"img":"assets/images/transport/c642-train-snow-mountain.jpg"}'>Add to Your Journey</button><br><a class="vw" href="transport.html?id=c86">View the train</a></div>
+<div class="p" id="j-c86"><div class="pgal" data-gal="[[&quot;assets/images/transport/c642-train-snow-mountain.jpg&quot;,&quot;Below Jade Dragon Snow Mountain&quot;],[&quot;assets/images/transport/c642-business-cabin-1.jpg&quot;,&quot;Business Class cabin&quot;],[&quot;assets/images/transport/c642-business-cabin-2.jpg&quot;,&quot;Business Class cabin&quot;],[&quot;assets/images/transport/c642-business-seat.jpg&quot;,&quot;Business Class seat · reclined&quot;],[&quot;assets/images/transport/c642-train-forest.jpg&quot;,&quot;The Kunming – Lijiang line&quot;],[&quot;assets/images/transport/c642-gorge-bridge.jpg&quot;,&quot;The line across the gorge&quot;]]"></div></a><p class="pw"><b>04 Mar</b> · Transportation · Kunming &rarr; Lijiang</p><p class="pn">C86 · Kunming → Lijiang</p><p class="pm">04 March · 10:15 → 13:44 · direct · 3h29 · Business Class · 1+1 seating · Priority Ticketing: expedited ticketing and shorter wait times</p><p class="pp">USD 85 per person</p><button class="add" data-add='{"id":"c86","name":"C86 · Kunming → Lijiang","meta":"04 March 2027 · Business Class","price":85,"img":"assets/images/transport/c642-train-snow-mountain.jpg"}'>Add to Your Journey</button><br><a class="vw" href="transport.html?id=c86">View the train</a></div>
 <div class="p" id="j-ljg" data-vprod="ljg"><div class="pimg" style="background-image:url(assets/images/journey/lijiang-01.jpg)"></div><p class="pw"><b>04 – 06 Mar</b> · Accommodation · Lijiang</p><p class="pn">Luye Baisha · Lijiang</p><p class="pm">04 – 06 March · 2 nights · breakfast included</p><p class="pb" data-from="ljg"></p>
 <p class="vl">Rooms &amp; suites</p><div class="vars" data-rooms="lijiang"></div></div>
 <div class="p" id="j-return"><div class="pgal" data-gal="[[&quot;assets/images/transport/mu5924-economy-cabin-1.jpg&quot;,&quot;Economy Class · China Eastern&quot;],[&quot;assets/images/transport/mu5924-economy-cabin-2.jpg&quot;,&quot;Economy Class seats&quot;],[&quot;assets/images/transport/mu5924-economy-cabin-3.jpg&quot;,&quot;Economy Class cabin&quot;],[&quot;assets/images/transport/mu5924-economy-meal.jpg&quot;,&quot;On board&quot;],[&quot;assets/images/transport/mu5924-economy-ife.jpg&quot;,&quot;Seatback entertainment&quot;]]"></div></a><p class="pw"><b>06 Mar</b> · Transportation · Lijiang &rarr; Bangkok</p><p class="pn">MU5924 + MU741 · Lijiang → Bangkok</p><p class="pm">06 March · 10:35 → 14:55 · via Kunming · Economy flexible</p><p class="pp">USD 200 per person</p><button class="add" data-add='{"id":"return","name":"MU5924 + MU741 · Lijiang → Bangkok","meta":"06 March 2027 · Economy flexible","price":200,"img":"assets/images/transport/mu5924-economy-cabin-1.jpg"}'>Add to Your Journey</button><br><a class="vw" href="transport.html?id=return">View the return flights</a></div>
@@ -134,6 +168,77 @@ return '<a class="var'+(r.reserved?' rsvd':'')+'" data-room="'+r.slug+'" data-wi
 '<span style="flex:1">'+r.name+(r.reserved?'<span class="vr">'+r.reserved+'</span>':'')+
 (sub?'<span class="vn">'+sub+'</span>':'')+'</span>'+
 right+'<span class="vgo" aria-hidden="true">›</span></a>'}).join('')});
+
+/* ------------------------------------------------------ THE BANGKOK CHOICE
+ * Three whole properties, not three rows in a table. One dominant address at a
+ * time, the neighbours visible at the edge, chosen by swiping — the interaction
+ * the Cost Saving selector already proved. The PROPERTY leads; the room
+ * category is what you get inside it. */
+document.querySelectorAll('.psel[data-select]').forEach(function(box){
+var sk=box.getAttribute('data-select'),win=box.getAttribute('data-win');
+var stay=window.SIYL_ROOMS[sk];
+function paint(){
+  var chosen=(window.SIYL_BAG?SIYL_BAG.get().filter(function(x){return x.id===win})[0]:null);
+  var pick=chosen?chosen.room:null;
+  box.innerHTML='<div class="acar psel-car"><div class="atrk">'+stay.rooms.map(function(r){
+    var q=P.quote(win,r.slug),img=r.gallery.length?r.gallery[0][0]:'';
+    var on=pick===r.slug;
+    return '<div class="aslide pcard'+(on?' picked':'')+'" data-room="'+r.slug+'">'+
+      '<span class="pcimg"'+(img?' style="background-image:url('+img+')"':'')+' aria-hidden="true"></span>'+
+      '<p class="pceyebrow">'+(r.role?r.role:'Alternative')+'</p>'+
+      '<h3 class="pcname">'+(r.property||stay.name)+'</h3>'+
+      '<p class="pcroom">'+(r.card||r.name)+'</p>'+
+      '<p class="pcfacts">'+r.facts.slice(0,2).map(function(f){return f[1]}).join(' · ')+' · '+
+        (r.breakfast||stay.breakfast)+'</p>'+
+      '<p class="pcprice">'+P.money(q.total)+' <span>total per person · '+q.nightsLine+'</span></p>'+
+      '<p class="pcrate">'+P.money(r.rate)+' per person / night</p>'+
+      '<button type="button" class="pcgo'+(on?' on':'')+'" data-choose="'+r.slug+'">'+
+        (on?'Selected':'Choose this address')+'</button>'+
+      '<a class="pcview" href="room.html?stay='+sk+'&room='+r.slug+'">See the rooms</a>'+
+      '</div>'}).join('')+'</div>'+
+    '<div class="arow"><div class="arail"><i></i></div><div class="anav">'+
+    '<button type="button" data-a="prev" aria-label="Previous address"></button>'+
+    '<button type="button" data-a="next" aria-label="Next address"></button></div></div></div>'+
+    '<p class="pselhint">Swipe to see the other two addresses</p>';
+  if(window.SIYL_AMAN) SIYL_AMAN.wire(box.querySelector('.acar'));
+  box.querySelectorAll('[data-choose]').forEach(function(b){
+    b.addEventListener('click',function(e){
+      e.preventDefault(); e.stopPropagation();
+      select(win, sk, b.getAttribute('data-choose'), false);
+    })});
+}
+document.addEventListener('siyl:bag',paint);
+paint()});
+
+/* ------------------------------------------------------- HOW WOULD YOU FLY
+ * One flight, two approved fares. Exactly one is ever active. */
+document.querySelectorAll('.vars[data-classes]').forEach(function(box){
+var id=box.getAttribute('data-classes');
+function paint(){
+  var line=(window.SIYL_BAG?SIYL_BAG.get().filter(function(x){return x.id===id})[0]:null);
+  var cur=line?(line.cls||'business'):null;
+  box.innerHTML=P.classesOf(id).map(function(c){
+    var on=cur===c.slug;
+    return '<button type="button" class="var vcls'+(on?' picked':'')+'" data-cls="'+c.slug+'">'+
+      '<span style="flex:1"><span class="vcn">'+c.short+'</span>'+
+      '<span class="vn">'+c.notes.join(' · ')+'</span></span>'+
+      '<span class="vp">'+P.money(c.price)+'</span>'+
+      '<span class="vcs">'+(on?'Selected':(c.preferred?'Preferred':'Save '+P.money(275-c.price)+' pp'))+'</span>'+
+      '</button>'}).join('');
+  box.querySelectorAll('[data-cls]').forEach(function(b){
+    b.addEventListener('click',function(){
+      P.items(id,b.getAttribute('data-cls')).forEach(function(it){SIYL_BAG.put(it)});
+      paint()})});
+}
+document.addEventListener('siyl:bag',paint);
+paint()});
+
+document.querySelectorAll('.pb[data-fromclass]').forEach(function(el){
+var id=el.getAttribute('data-fromclass'),cs=P.classesOf(id);
+if(!cs.length)return;
+var lo=Math.min.apply(null,cs.map(function(c){return c.price}));
+var hi=Math.max.apply(null,cs.map(function(c){return c.price}));
+el.textContent='From '+P.money(lo)+' per person · Business '+P.money(hi)+' per person'});
 
 /* "from" line on each accommodation card — the lowest available per-person total */
 document.querySelectorAll('.pb[data-from]').forEach(function(el){

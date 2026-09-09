@@ -207,7 +207,7 @@ test('CHANGE is offered only where a genuine alternative exists', () => {
   assert.equal(P.hasVariants('train'), false);
   assert.equal(P.hasVariants('bkk-stay'), true);   /* three Bangkok addresses */
   assert.equal(P.hasVariants('kempinski'), false);
-  assert.equal(P.hasVariants('mu9646'), false);
+  assert.equal(P.hasVariants('mu9646'), true);    /* two approved fares */
 });
 
 test('Bangkok offers three approved addresses, one window, one active choice', () => {
@@ -232,9 +232,21 @@ test('Bangkok offers three approved addresses, one window, one active choice', (
   assert.match(P.items('bkk-stay', 'shama-king-studio-balcony')[0].breakfast, /included/);
   /* the penthouse stays the approved default, so the Full Experience is unmoved */
   assert.equal(sandbox.window.SIYL_FULL_EXPERIENCE['bkk-stay'], 'penthouse');
-  /* and no photograph is borrowed from another property */
-  assert.deepEqual(rooms[1].gallery, []);
-  assert.deepEqual(rooms[2].gallery, []);
+  /* each property shows its OWN photographs, and nothing is borrowed */
+  assert.equal(rooms[1].gallery.length, 5);
+  assert.equal(rooms[2].gallery.length, 6);
+  rooms[1].gallery.forEach(([f]) => {
+    assert.match(f, /^assets\/images\/usathorn\//, 'U Sathorn borrowed ' + f);
+    assert.ok(existsSync(join(ROOT, f)), f + ' missing on disk');
+  });
+  rooms[2].gallery.forEach(([f]) => {
+    assert.match(f, /^assets\/images\/shama\//, 'Shama borrowed ' + f);
+    assert.ok(existsSync(join(ROOT, f)), f + ' missing on disk');
+  });
+  /* and the placeholder is gone from the live Bangkok surfaces */
+  const j = readFileSync(join(ROOT, 'journeys.html'), 'utf8');
+  const bkk = j.slice(j.indexOf('id="j-bkk-stay"'), j.indexOf('id="j-train"'));
+  assert.doesNotMatch(bkk, /Photography to follow/);
 });
 
 test('the two new Bangkok addresses carry their own shared inventory', async () => {
@@ -251,6 +263,29 @@ test('a journey chosen before the override keeps its place', () => {
   const bag = readFileSync(join(ROOT, 'assets/bag.js'), 'utf8');
   assert.match(bag, /c642:\{id:'c86'/);
   assert.match(bag, /mu9632:\{id:'mu9646'/);
+});
+
+test('the six approved Full Experience compositions come out of component pricing', () => {
+  /* nothing is hard-coded: each total is the same ten components with two of
+   * them swapped, exactly as the Owner listed them */
+  const BASE = ['train', 'prewed', 'wedstay', 'kmg', 'c86', 'ljg', 'return', 'kempinski'];
+  const base = 75 + 340 + 170 + 150 + 85 + 200 + 200 + 380;   /* 1,600 */
+  const bkk = { penthouse: 255, 'u-sathorn-superior-garden': 192, 'shama-king-studio-balcony': 120 };
+  const fly = { business: 275, 'economy-flexible': 155 };
+  const want = {
+    'penthouse|business': 2130, 'u-sathorn-superior-garden|business': 2067,
+    'shama-king-studio-balcony|business': 1995, 'penthouse|economy-flexible': 2010,
+    'u-sathorn-superior-garden|economy-flexible': 1947,
+    'shama-king-studio-balcony|economy-flexible': 1875,
+  };
+  Object.keys(bkk).forEach((room) => Object.keys(fly).forEach((cls) => {
+    const total = base + P.items('bkk-stay', room)[0].price + P.items('mu9646', cls)[0].price;
+    assert.equal(total, want[room + '|' + cls], room + ' + ' + cls);
+  }));
+  /* and the base really is the sum of the untouched eight */
+  assert.equal(BASE.length, 8);
+  /* the Sangkhathan is the only thing that moves a total after that */
+  assert.equal(P.FLAT.sangkhathan.price, 15);
 });
 
 test('rooms are merchandised highest rate first', () => {
@@ -766,8 +801,18 @@ test('the Owner-overridden transport facts are the ones on the page', () => {
   assert.match(JSON.stringify(T.mu9646.facts), /MU9646/);
   /* the retired flight's departure and arrival are NOT carried across */
   assert.doesNotMatch(JSON.stringify(T.mu9646.facts), /14:00|16:40/);
-  assert.match(JSON.stringify(T.mu9646.facts), /Confirmed with your ticket/);
+  assert.match(JSON.stringify(T.mu9646.facts), /15:50/);
+  assert.match(JSON.stringify(T.mu9646.facts), /18:25/);
+  assert.match(JSON.stringify(T.mu9646.facts), /1 hour 35 minutes/);
+  assert.doesNotMatch(JSON.stringify(T.mu9646.facts), /Confirmed with your ticket/);
   assert.equal(P.FLAT.mu9646.price, 275);
+  /* two approved fares, exactly one active, sharing the product's id */
+  const cls = P.classesOf('mu9646');
+  assert.equal(cls.length, 2);
+  assert.equal(P.items('mu9646')[0].price, 275);
+  assert.equal(P.items('mu9646')[0].cls, 'business');
+  assert.equal(P.items('mu9646', 'economy-flexible')[0].price, 155);
+  assert.equal(P.items('mu9646', 'economy-flexible')[0].id, 'mu9646');
   assert.equal(P.FLAT.train.price, 75);
   assert.equal(P.FLAT['return'].price, 200);
 });

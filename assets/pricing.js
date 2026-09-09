@@ -25,6 +25,27 @@
   'use strict';
 
   /* per-person amounts for the legs that are not priced by night */
+  /* ---------------------------------------------------------------- CLASSES
+   * One flight, two approved fares. Business is the preferred default and the
+   * one the Full Experience selects; Economy Flexible is the alternative, and
+   * it saves the guest exactly the difference between the two. */
+  var CLASSES = {
+    'mu9646': [
+      { slug: 'business', name: 'MU9646 · Vientiane → Kunming', short: 'Business Class',
+        meta: '01 March 2027 · Business Class', price: 275, preferred: true,
+        img: 'assets/images/transport/mu9632-business-1.jpg',
+        basis: 'USD 275 per person · Business Class',
+        notes: ['1 seat per guest', 'Checked baggage included', 'Meal service on board'] },
+      { slug: 'economy-flexible', name: 'MU9646 · Vientiane → Kunming', short: 'Economy Flexible',
+        meta: '01 March 2027 · Economy Flexible', price: 155,
+        img: 'assets/images/transport/mu9632-business-1.jpg',
+        basis: 'USD 155 per person · Economy Class, flexible fare',
+        notes: ['1 piece of free checked baggage', 'No meals',
+                'Conditional ticket refund before departure',
+                'Free rescheduling before departure'] }
+    ]
+  };
+
   var FLAT = {
     'train':  { price: 75,  cat: 'Transportation', name: 'Special Express No. 25',
                 meta: '24 – 25 February 2027 · First Class Sleeper', img: 'assets/images/transport/train-no25-srt-train.jpg',
@@ -141,7 +162,21 @@
 
     /* the ONE bag line a selection produces. `put` replaces in place, so a
      * change never duplicates and a stay is never split across two rows. */
+    /* A flat product may be sold in more than one class. Exactly one class is
+     * ever active, so the classes share the product's id: choosing the second
+     * replaces the first in the journey, the way a room category does. */
+    CLASSES: CLASSES,
+    classesOf: function (id) { return CLASSES[id] || []; },
+    classOf: function (id, slug) {
+      var list = CLASSES[id] || [];
+      return list.filter(function (c) { return c.slug === slug; })[0] ||
+             list.filter(function (c) { return c.preferred; })[0] || list[0] || null;
+    },
+
     items: function (windowId, slug) {
+      var c = CLASSES[windowId] ? this.classOf(windowId, slug) : null;
+      if (c) return [{ id: windowId, name: c.name, meta: c.meta, price: c.price,
+                       img: c.img, cls: c.slug }];
       var f = FLAT[windowId];
       if (f && f.name) return [{ id: windowId, name: f.name, meta: f.meta, price: f.price, img: f.img }];
       var at = locate(windowId);
@@ -243,6 +278,7 @@
 
     /* does this product have a genuine alternative to change to? */
     hasVariants: function (windowId) {
+      if ((CLASSES[windowId] || []).length > 1) return true;
       var at = locate(windowId);
       if (!at) return false;
       var sel = at.stay.rooms.filter(function (r) { return !r.reserved; });
