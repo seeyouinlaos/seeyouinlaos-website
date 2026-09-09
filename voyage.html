@@ -44,7 +44,9 @@
 .tsum{border-top:1px solid var(--a-line);margin-top:30px;padding-top:20px}
 .tsl{font-size:12.5px;line-height:1.85;color:var(--a-mute);margin-bottom:6px;max-width:34em}
 .tsl b{font-weight:400;color:var(--a-ink)}
-.tlk{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--a-ink);text-decoration:none;border-bottom:1px solid var(--a-ink);padding-bottom:3px}
+.tlk{display:inline-block;line-height:20px;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--a-ink);text-decoration:none;border-bottom:1px solid var(--a-ink);padding:10px 0 3px;min-height:44px;box-sizing:content-box}
+.tdress{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--a-mute);margin-top:22px;margin-bottom:0;line-height:1.9}
+.tdress b{font-weight:400;color:var(--a-ink)}
 </style>
 </head>
 <body>
@@ -99,8 +101,12 @@
     <p class="cap">The morning alms-giving · Tak Bat</p>
   </section>
 
-  <!-- 01b · SANGKHATHAN — the optional personal offering -->
-  <section class="a-sec a-pair" id="sangkhathan">
+  <!-- 01b/01c · SANGKHATHAN — one anchored region: what it is, then who
+       chooses it. #sangkhathan lands on the explanation with the decision
+       directly beneath it, so a guest arriving from the Journey Bag never
+       has to go looking for the choice. -->
+  <div id="sangkhathan">
+  <section class="a-sec a-pair" id="sangkhathan-about">
     <div class="am" style="background-image:url(assets/images/temple/sangkhathan-prepared-offerings.jpg)" role="img" aria-label="Prepared Sangkhathan offerings in woven baskets, tied with ribbon"></div>
     <div class="ac">
       <p class="a-eyebrow">Optional · USD 15 per guest</p>
@@ -108,7 +114,7 @@
       <p>A personal offering of useful everyday items for the monastic community, presented by you. It is <b>not</b> the morning alms-giving: Tak Bat is the food offered during the ceremony and carries no charge, while the Sangkhathan is a separate, optional offering that you may choose to have prepared in your name.</p>
       <p>We will prepare the offering for you. In keeping with the personal meaning of the ritual, each participating guest contributes to and presents their own offering personally.</p>
       <p class="a-eyebrow" style="margin-top:14px">Prepared offering<br>Daily-use amenities, personal-care items and other appropriate everyday necessities for the monastic community.</p>
-      <a class="a-link" href="#temple-decision">Choose at the temple decision</a>
+      <a class="a-cta" href="#temple-decision" style="margin-top:6px">Choose for each guest</a>
     </div>
   </section>
 
@@ -116,6 +122,7 @@
   <section class="a-sec" id="temple-decision">
     <div class="tdec" id="tdec"></div>
   </section>
+  </div>
 
   <!-- 02 · COFFEE & CAKE -->
   <section class="a-sec a-pair rev" id="coffee">
@@ -295,7 +302,10 @@
       : '<p class="tsl"><b>Sangkhathan Temple Offering</b> · none selected · USD 15 per guest if you choose one</p>';
     h += '</div>';
     h += '<p class="tnote">Generosity, taking part and the intention behind it are what the offering is about. Nothing here is charged on this website — Guest Relations confirms every arrangement with you.</p>';
-    h += '<p style="margin-top:18px"><a class="tlk" href="dress.html#traditional">What to wear at the temple · Blue Lao Traditional Dress</a></p>';
+    /* the dress code is stated as plain type, and only the action is underlined:
+     * no rule may ever run through the word BLUE */
+    h += '<p class="tdress">What to wear at the temple · <b>Blue Lao Traditional Dress</b></p>';
+    h += '<p><a class="tlk" href="dress.html#traditional">View dress code</a></p>';
     h += '</div>';
     box.innerHTML = h;
 

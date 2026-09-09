@@ -15,7 +15,7 @@
     ['Your journey',    'your-journey.html', 'journey'],
     ['The Wedding',     'voyage.html', 'wedding'],
     ['Dress code',      'dress.html', 'dress'],
-    ['About you',       'you.html', null],
+    ['About you',       'about-you.html', null],
     ['Review & Send',   'review.html', null]
   ];
 

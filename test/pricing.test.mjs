@@ -383,7 +383,8 @@ test('Review & Send is five editorial blocks, each with its own way back', () =>
   const page = readFileSync(join(ROOT, 'review.html'), 'utf8');
   ['01', '02', '03', '04', '05'].forEach((n) =>
     assert.ok(page.includes('<span class="bno">' + n + '</span>'), 'block ' + n + ' missing'));
-  ['you.html', 'voyage.html#temple-decision', 'your-journey.html', 'dress.html', 'invitation.html']
+  ['you.html#you', 'voyage.html#temple-decision', 'your-journey.html',
+   'dress.html#acknowledge', 'invitation.html', 'about-you.html#about-you']
     .forEach((href) => assert.ok(page.includes('href="' + href + '"'), href + ' has no edit route'));
   /* the approved architecture: YOU · YOUR JOURNEY · THE WEDDING ·
    * DOCUMENTS & PRIVACY · YOUR COSTS — About you lives inside YOU */
@@ -397,8 +398,10 @@ test('Review & Send is five editorial blocks, each with its own way back', () =>
   [['b1', '<h2>You</h2>'], ['b2', '<h2>Your journey</h2>'], ['b3', '<h2>The Wedding</h2>'],
    ['b4', '<h2>Documents &amp; privacy</h2>'], ['b5', '<h2>Your costs</h2>']]
     .forEach(([id, heading]) => assert.ok(page.includes(heading), id + ' does not carry ' + heading));
-  /* ABOUT YOU belongs inside YOU, and is not a block of its own */
-  assert.match(page, /Hospitality profile/);
+  /* ABOUT YOU is summarised inside YOU and edited on its own page — it is
+   * never one of the five blocks */
+  assert.match(page, /<h2 style="font-size:17px">About you<\/h2>/);
+  assert.match(page, /href="about-you.html#about-you">Edit/);
   assert.doesNotMatch(body, /<h2>About you<\/h2>/);
   /* RECEIVED is not CONFIRMED, and a sent journey stays editable */
   assert.match(page, /Received &mdash; not yet confirmed/);
@@ -432,9 +435,68 @@ test('ABOUT YOU is exactly seven questions and one operational field', () => {
   assert.match(g, /var ACCESS = \{ key: 'access'/);
   /* three layers, and a correction never destroys the invitation's own value */
   assert.match(g, /r\.history\.push\(\{ field: field, from: from, to: v, at: new Date\(\)\.toISOString\(\) \}\)/);
-  const page = readFileSync(join(ROOT, 'you.html'), 'utf8');
-  assert.match(page, /From your invitation/);
-  assert.match(page, /G\.PROFILE\.forEach/);
+  /* ABOUT YOU is its own step and its own page — never buried under contact
+   * details, and the preparation rail names exactly what the page presents. */
+  const about = readFileSync(join(ROOT, 'about-you.html'), 'utf8');
+  assert.match(about, /<h1>About you<\/h1>/);
+  assert.match(about, /G\.PROFILE\.forEach/);
+  assert.match(about, /Operational · not hospitality/);
+  assert.match(about, /Continue to Review &amp; Send/);
+  assert.match(about, /Continue without answering/);
+  const prep = readFileSync(join(ROOT, 'assets/prep.js'), 'utf8');
+  assert.match(prep, /\['About you',\s+'about-you.html'/);
+  /* identity and contact stay on their own page, with their own anchors */
+  const you = readFileSync(join(ROOT, 'you.html'), 'utf8');
+  assert.match(you, /From your invitation/);
+  assert.doesNotMatch(you, /G\.PROFILE\.forEach/, 'the questionnaire is still buried in you.html');
+  assert.match(you, /id="you"/);
+  assert.match(you, /id="contact"/);
+});
+
+test('every underlined title leads somewhere, and the Sangkhathan carries its own action', () => {
+  ['your-journey.html', 'review.html'].forEach((f) => {
+    const page = readFileSync(join(ROOT, f), 'utf8');
+    assert.ok(page.includes("'<p class=\"wpa\"><a href=\"'+w.anchor+'\">'+(names.length?'View offering':'View &amp; choose')+'</a></p>'"), f);
+    /* a 44px target even when the type stays editorially small */
+    assert.match(page, /\.wpa a\{[^}]*min-height:44px/, f);
+  });
+  /* the anchor exists, and it spans the explanation AND the decision */
+  const voyage = readFileSync(join(ROOT, 'voyage.html'), 'utf8');
+  const region = voyage.slice(voyage.indexOf('<div id="sangkhathan">'), voyage.indexOf('<!-- 02 · COFFEE'));
+  assert.ok(region.includes('id="sangkhathan-about"'), 'the explanation is outside the anchored region');
+  assert.ok(region.includes('id="temple-decision"'), 'the decision is outside the anchored region');
+  /* and nothing routes the offering to the journeys page */
+  assert.doesNotMatch(readFileSync(join(ROOT, 'assets/journey.js'), 'utf8'),
+    /anchor: 'journeys.html[^']*'[^}]*sangkhathan/);
+});
+
+test('an editorially small title is still a thumb-sized target', () => {
+  [['your-journey.html', ['.nm{', '.wpt a{', '.wpa a{', '.wpd a{']],
+   ['review.html', ['.nm{', '.wpa a{', '.wpd a{', '.grow a{']]].forEach(([f, rules]) => {
+    const page = readFileSync(join(ROOT, f), 'utf8');
+    rules.forEach((r) => {
+      const i = page.indexOf(r);
+      assert.ok(i > 0, f + ' has no rule ' + r);
+      const decl = page.slice(i, page.indexOf('}', i));
+      assert.ok(/min-height:44px/.test(decl), f + ' ' + r + ' is not a 44px target: ' + decl);
+    });
+  });
+});
+
+test('no rule is ever drawn through the word BLUE', () => {
+  const voyage = readFileSync(join(ROOT, 'voyage.html'), 'utf8');
+  /* the dress code is plain type; only the action carries a border */
+  assert.match(voyage, /<p class="tdress">What to wear at the temple · <b>Blue Lao Traditional Dress<\/b><\/p>/);
+  assert.doesNotMatch(voyage, /class="tlk"[^>]*>[^<]*Blue Lao Traditional/);
+  /* and every bordered link is inline-block, so a wrapped line is never crossed */
+  ['voyage.html', 'dress.html', 'review.html'].forEach((f) => {
+    const css = readFileSync(join(ROOT, f), 'utf8');
+    const rules = css.match(/\.(tlk|dmr a|grow a)\{[^}]*\}/g) || [];
+    assert.ok(rules.length, f + ' has no bordered link rules to check');
+    rules.forEach((r) => {
+      if (/border-bottom/.test(r)) assert.ok(/display:inline-block/.test(r), f + ': ' + r);
+    });
+  });
 });
 
 test('Snow Mountain Viewing Room carries its own canonical photograph, used nowhere else', () => {

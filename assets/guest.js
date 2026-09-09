@@ -184,17 +184,24 @@
           note: 'Confirm who is travelling on this invitation' });
         if (!chosen) need.push({ key: 'journey', label: 'Your journey', href: 'journeys.html',
           note: 'Choose your travel and your stays' });
-        if (!wedding) need.push({ key: 'wedding', label: 'Wedding participation', href: 'voyage.html#temple-decision',
-          note: (T && T.undecided().length)
-            ? T.undecided().map(function (g) { return g.preferredName || g.fullName; }).join(' · ') + ' — still to answer'
-            : 'One answer per named guest' });
-        if (!dress) need.push({ key: 'dress', label: 'Dress code', href: 'dress.html',
+        if (!wedding) {
+          /* land on the exact task that is open: when only the offering is
+           * unanswered, the Temple attendance screen is the wrong place */
+          var attendanceOpen = T && T.people().some(function (g) { return T.attendanceOf(g.guestId) === null; });
+          need.push({ key: 'wedding', label: 'Wedding participation',
+            href: attendanceOpen ? 'voyage.html#temple-decision' : 'voyage.html#sangkhathan',
+            note: (T && T.undecided().length)
+              ? T.undecided().map(function (g) { return g.preferredName || g.fullName; }).join(' · ') +
+                (attendanceOpen ? ' — still to answer' : ' — Sangkhathan still to answer')
+              : 'One answer per named guest' });
+        }
+        if (!dress) need.push({ key: 'dress', label: 'Dress code', href: 'dress.html#acknowledge',
           note: 'Review required before sending' });
-        if (!contact) need.push({ key: 'contact', label: 'How we reach you', href: 'you.html',
+        if (!contact) need.push({ key: 'contact', label: 'How we reach you', href: 'you.html#contact',
           note: 'One email address or telephone number' });
       }
       var optional = [
-        { key: 'profile', label: 'About you', href: 'you.html', done: !!(p && p.guests.some(function (g) {
+        { key: 'profile', label: 'About you', href: 'about-you.html#about-you', done: !!(p && p.guests.some(function (g) {
             return G.profileAnswered(g.guestId) > 0; })), note: 'Optional — and welcome at any time' },
         { key: 'documents', label: 'Documents & privacy', href: 'review.html#b4', done: false,
           note: 'Can be added later' }

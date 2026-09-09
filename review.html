@@ -19,9 +19,8 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:20px;margin:34
 .row{display:flex;gap:14px;border-top:1px solid #DAD9D7;padding:16px 0}
 .row:last-of-type{border-bottom:1px solid #DAD9D7}
 .th{width:58px;height:72px;background:#E7E3DB center/cover no-repeat;flex:0 0 auto}
-.nm{text-decoration:none;color:inherit;display:block}
 a.th{display:block}
-.nm{font-family:'PP Editorial Old',serif;font-weight:200;font-size:16.5px;line-height:1.35}
+.nm{font-family:'PP Editorial Old',serif;font-weight:200;font-size:16.5px;line-height:1.35;text-decoration:none;color:inherit;display:inline-block;padding:11px 0;min-height:44px;box-sizing:border-box}
 .when{font-size:9.5px;letter-spacing:2px;text-transform:uppercase;color:#7C7A75}
 .cat{font-size:9.5px;letter-spacing:2px;text-transform:uppercase;color:#313131;margin:2px 0 3px}
 .cat .bk{display:inline-block;width:5px;height:5px;border-radius:50%;background:#8A5A55;margin-left:7px;vertical-align:middle}
@@ -35,8 +34,10 @@ a.th{display:block}
 .grow .gdone{margin-left:auto;color:#7C7A75;font-size:12px}
 .wcost{border-top:1px solid #EDEBE7;border-bottom:1px solid #EDEBE7;padding:14px 0;margin:6px 0 10px}
 .wpd{font-size:9.5px;letter-spacing:1.6px;text-transform:uppercase;color:#7C7A75;margin-top:7px}
-.wpd a{color:#313131;text-decoration:none;border-bottom:1px solid #313131;padding-bottom:2px;margin-left:8px}
-.grow a{margin-left:auto;font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#313131;text-decoration:none;border-bottom:1px solid #313131;padding-bottom:2px}
+.wpd a{display:inline-block;color:#313131;text-decoration:none;border-bottom:1px solid #313131;padding:8px 0 3px;margin-left:8px;min-height:44px;line-height:20px}
+.wpa{margin-top:8px}
+.wpa a{display:inline-block;font-size:9.5px;letter-spacing:1.8px;text-transform:uppercase;color:#313131;text-decoration:none;border-bottom:1px solid #313131;padding:10px 0 4px;min-height:44px;line-height:20px}
+.grow a{display:inline-block;line-height:20px;padding:10px 0 3px;min-height:44px;margin-left:auto;font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#313131;text-decoration:none;border-bottom:1px solid #313131;padding-bottom:2px}
 .mt{font-size:11px;color:#7C7A75;margin-top:3px}
 .ln{font-family:'PP Editorial Old',serif;font-size:14.5px;margin-left:auto;white-space:nowrap}
 .int{font-size:9px;letter-spacing:1.6px;text-transform:uppercase;color:#7C7A75;margin-left:auto;white-space:nowrap}
@@ -143,11 +144,11 @@ function paintYou(){
 var G=window.SIYL_GUEST,box=document.getElementById('b1');if(!box)return;
 var p=G?G.party():null;
 var h='<div class="bhd"><span class="bno">01</span><h2>You</h2>'+
-  '<a class="bedit" href="you.html">Edit</a></div>';
+  '<a class="bedit" href="you.html#you">Edit</a></div>';
 if(!p){box.innerHTML=h+'<p class="bsub">Open your invitation and your party appears here by name.</p>'+
   '<p style="margin-top:10px"><a class="tlink" href="invitation.html">Open your invitation</a></p>';return}
 h+='<p class="bsub">Invitation '+esc(p.invitationId)+(p.partyName?' · '+esc(p.partyName):'')+
-   ' · you are making decisions for '+esc(p.guests.map(function(g){return G.value(g.guestId,'preferredName')||g.fullName}).join(' &amp; '))+'.</p>';
+   ' · you are making decisions for '+p.guests.map(function(g){return esc(G.value(g.guestId,'preferredName')||g.fullName)}).join(' &amp; ')+'.</p>';
 h+='<p class="bsub" style="margin-top:16px">Personal details</p>';
 p.guests.forEach(function(g){
   var full=G.value(g.guestId,'fullName'),pref=G.value(g.guestId,'preferredName');
@@ -157,7 +158,8 @@ p.guests.forEach(function(g){
 var em=G.partyField('email'),ph=G.partyField('phone');
 h+=row('How we reach you',(em||ph)?esc([em,ph].filter(Boolean).join(' · ')):'No email or telephone given yet',
        (em||ph)?'Given':'Required',!(em||ph));
-h+='<p class="bsub" style="margin-top:22px">Hospitality profile</p>'+
+h+='<div class="bhd" style="margin-top:22px"><span class="bno">&nbsp;</span><h2 style="font-size:17px">About you</h2>'+
+   '<a class="bedit" href="about-you.html#about-you">Edit</a></div>'+
    '<p class="bsub">Seven questions of hospitality and one operational field, per named guest. Every answer is optional, none of them changes a price, and any of them may be added later.</p>';
 p.guests.forEach(function(g){
   var n=G.profileAnswered(g.guestId);
@@ -195,6 +197,7 @@ J.WEDDING.forEach(function(w){
        '<span class="r" style="margin-left:auto;font-size:9.5px;letter-spacing:1.8px;text-transform:uppercase;white-space:nowrap;color:'+(open?'#8A5A55':(names.length?'#313131':'#7C7A75'))+'">'+
        (names.length?'USD '+(names.length*15):(open?'Not decided':'Not selected'))+'</span></div>'+
        (names.length?'<p class="ps">Prepared for <b>'+esc(names.join(' · '))+'</b> · USD 15 each</p>':'')+
+       '<p class="wpa"><a href="'+w.anchor+'">'+(names.length?'View offering':'View &amp; choose')+'</a></p>'+
        '</div>';
     return}
   h+='<div class="wev"><div style="display:flex;gap:12px;align-items:baseline">'+
@@ -217,7 +220,7 @@ h+='<p class="bsub" style="margin-top:22px">Dress code</p>'+
    '<p class="ps"><b>Coffee &amp; Cake · Vow Ceremony · Wedding Dinner</b> · Black Tie</p>'+
    '<p class="ps"><b>The travelling days</b> · Resort Wear</p></div>'+
    '<span class="r'+(a?'':' open')+'">'+(a?'Reviewed · '+when(a.at):'Not yet reviewed')+'</span></div>'+
-   '<p style="margin-top:10px"><a class="tlink" href="dress.html">Review dress code</a></p>';
+   '<p style="margin-top:10px"><a class="tlink" href="dress.html#acknowledge">Review dress code</a></p>';
 /* seats exist as a shape, and are honestly empty */
 h+='<div class="pline"><div><p class="ps"><b>Seating</b></p>'+
    '<p class="ps">Ceremony and dinner seating is arranged by Guest Relations and is not open yet.</p></div>'+

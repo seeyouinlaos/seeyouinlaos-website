@@ -39,13 +39,14 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:20px;margin:34
 .saved{font-size:9.5px;letter-spacing:2px;text-transform:uppercase;color:#7C7A75;margin-top:10px;min-height:14px}
 .gate{border:1px solid #DAD9D7;background:#FCFAF6;padding:24px 20px;margin-top:26px}
 .gate h3{font-family:'PP Editorial Old',serif;font-weight:200;font-size:19px;margin-bottom:8px}
+.cta2{display:inline-block;background:#313131;color:#F3EEE7;padding:17px 24px;font-size:10.5px;letter-spacing:2.2px;text-transform:uppercase;text-decoration:none;min-height:50px;line-height:18px}
 .gbtn{background:#313131;color:#F3EEE7;border:0;padding:17px 22px;font:inherit;font-size:10.5px;letter-spacing:2.2px;text-transform:uppercase;cursor:pointer;min-height:50px;margin-top:8px}
 </style><link rel="stylesheet" href="assets/desktop.css"><link rel="stylesheet" href="assets/aman.css"></head><body>
 <header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="your-journey.html" aria-label="Your Journey"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main>
 <h1>You &amp; your party</h1>
-<p class="sub">Who is travelling · how we look after you</p>
-<p class="note" style="margin-top:0">Everything here belongs to your invitation. What the invitation already knows is shown as it is; anything you correct is kept as your correction, beside the original, so nothing is ever overwritten silently.</p>
+<p class="sub">Names and contact · not the hospitality questions</p>
+<p class="note" style="margin-top:0">Who is travelling on this invitation, and how Guest Relations reaches you. What the invitation already knows is shown as it is; anything you correct is kept beside the original, so nothing is ever overwritten silently. The hospitality questions live on their own page, <a href="about-you.html" style="color:#313131">About you</a>.</p>
 <div id="page"></div>
 </main>
 <script src="assets/bag.js"></script>
@@ -76,7 +77,7 @@ if(hist.length)h+='<p class="hist">'+hist.map(function(x){return 'Changed from &
 return h+'</div>'}
 
 function partyBlock(p){
-var h='<section class="blk"><p class="blabel">Invitation '+esc(p.invitationId)+'</p>'+
+var h='<section class="blk" id="you"><p class="blabel">Invitation '+esc(p.invitationId)+'</p>'+
   '<h2>'+esc(p.partyName||'Your party')+'</h2>'+
   '<p class="body">'+(p.guests.length===1?'You travel alone on this invitation.':p.guests.length+' named guests travel on this invitation. Each one is looked after by name.')+'</p>';
 p.guests.forEach(function(g){
@@ -84,34 +85,14 @@ p.guests.forEach(function(g){
      nameField(g.guestId,'fullName','Full name')+
      nameField(g.guestId,'preferredName','What we should call you')+
      '</div>'});
-h+='<div class="gcard"><p class="gname">How we reach your party</p>'+
+h+='<div class="gcard" id="contact"><p class="gname">How we reach your party</p>'+
    '<p class="body">One reliable email address and one telephone number for the whole party is all we need.</p>'+
    '<div class="fld"><label for="p-email">Email</label><input id="p-email" type="email" inputmode="email" value="'+esc(G.partyField('email'))+'" data-p="email" autocomplete="email"></div>'+
    '<div class="fld"><label for="p-phone">Telephone</label><input id="p-phone" type="tel" inputmode="tel" value="'+esc(G.partyField('phone'))+'" data-p="phone" autocomplete="tel"></div>'+
    '<p class="src">Used by Guest Relations only, for your arrangements.</p></div>';
 return h+'<p class="saved" id="saved1"></p></section>'}
 
-/* ---- ABOUT YOU: seven hospitality questions and one operational field ----- */
-function profileBlock(p){
-var id=who||p.guests[0].guestId;
-var h='<section class="blk"><p class="blabel">About you</p><h2>Seven questions, and one more</h2>'+
-  '<p class="body">Every answer is optional, and every answer is a kindness to the people preparing your journey. Nothing here changes a price.</p>';
-if(p.guests.length>1){
-  h+='<div class="tabs">'+p.guests.map(function(g){
-    var n=G.profileAnswered(g.guestId);
-    return '<button type="button" class="tab'+(g.guestId===id?' on':'')+'" data-who="'+esc(g.guestId)+'">'+
-      esc(G.value(g.guestId,'preferredName')||g.fullName)+(n?' · '+n+' of 8':'')+'</button>'}).join('')+'</div>'}
-G.PROFILE.forEach(function(q){
-  var v=G.profile(id,q.key);
-  h+='<div class="q"><p class="qn">'+q.n+'</p><p class="qq">'+q.q+'</p><p class="qh">'+q.hint+'</p>'+
-     '<textarea data-q="'+q.key+'" data-g="'+esc(id)+'" placeholder="Optional">'+esc(v==='NONE'?'':v)+'</textarea>'+
-     (q.none?'<label class="none"><input type="checkbox" data-none="'+q.key+'" data-g="'+esc(id)+'"'+(v==='NONE'?' checked':'')+'><span>'+q.none+'</span></label>':'')+
-     '<p class="qw">'+q.why+'</p></div>'});
-var a=G.ACCESS,av=G.profile(id,a.key);
-h+='<div class="q"><p class="qn">08</p><p class="qq">'+a.q+'</p><p class="qh">'+a.hint+'</p>'+
-   '<textarea data-q="'+a.key+'" data-g="'+esc(id)+'" placeholder="Optional">'+esc(av)+'</textarea>'+
-   '<p class="qw">'+a.why+'</p></div>';
-return h+'<p class="saved" id="saved2"></p></section>'}
+/* ABOUT YOU has its own page and its own step — it is never buried here. */
 
 function render(){
 var p=G.party();
@@ -121,12 +102,11 @@ if(!p){
     '<button type="button" class="gbtn" id="open">Open my invitation</button></div>';
   document.getElementById('open').addEventListener('click',function(){gated(render)});
   return}
-page.innerHTML=partyBlock(p)+profileBlock(p)+
-  '<section class="blk"><p class="blabel">The wedding day</p><h2>Dress code</h2>'+
-  '<p class="body">Three codes across the journey: Lao traditional dress in blue for the temple, black tie from the return until the end of dinner, resort wear for the travelling days.</p>'+
-  '<p style="margin-top:14px"><a class="tlink" href="dress.html">Open the dress code</a></p>'+
-  '<p class="src" style="margin-top:14px">'+(G.dressAck()?'Acknowledged · '+when(G.dressAck().at):'Not yet acknowledged')+'</p></section>'+
-  '<p style="margin-top:30px"><a class="tlink" href="review.html">Back to Review &amp; Send</a></p>';
+page.innerHTML=partyBlock(p)+
+  '<section class="blk"><p class="blabel">Step 5 of 6</p><h2>About you</h2>'+
+  '<p class="body">A few things that help us look after you personally — seven questions of hospitality and one operational field, per named guest. Every answer is optional.</p>'+
+  '<p style="margin-top:16px"><a class="cta2" href="about-you.html">Continue to About you</a></p></section>'+
+  '<p style="margin-top:26px"><a class="tlink" href="review.html">Back to Review &amp; Send</a></p>';
 
 function mark(el){var s=document.getElementById(el);if(!s)return;s.textContent='Saved';setTimeout(function(){s.textContent=''},1600)}
 page.querySelectorAll('input[data-f]').forEach(function(i){
