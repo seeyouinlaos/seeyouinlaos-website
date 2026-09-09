@@ -39,14 +39,17 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:20px;margin:34
 .saved{font-size:9.5px;letter-spacing:2px;text-transform:uppercase;color:#7C7A75;margin-top:10px;min-height:14px}
 .gate{border:1px solid #DAD9D7;background:#FCFAF6;padding:24px 20px;margin-top:26px}
 .gate h3{font-family:'PP Editorial Old',serif;font-weight:200;font-size:19px;margin-bottom:8px}
-.cta2{display:inline-block;background:#313131;color:#F3EEE7;padding:17px 24px;font-size:10.5px;letter-spacing:2.2px;text-transform:uppercase;text-decoration:none;min-height:50px;line-height:18px}
+.req{font-size:9.5px;letter-spacing:2.2px;text-transform:uppercase;color:#8A5A55;margin-bottom:6px}
+.nav{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:34px;border-top:1px solid #DAD9D7;padding-top:22px}
+.nav .back{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#7C7A75;text-decoration:none;border-bottom:1px solid #C9C4BA;padding:11px 0 3px;min-height:44px;display:inline-block;line-height:20px}
+.nav .go{margin-left:auto;background:#313131;color:#F3EEE7;text-decoration:none;padding:17px 24px;font-size:10.5px;letter-spacing:2.2px;text-transform:uppercase;min-height:50px;display:inline-flex;align-items:center}
 .gbtn{background:#313131;color:#F3EEE7;border:0;padding:17px 22px;font:inherit;font-size:10.5px;letter-spacing:2.2px;text-transform:uppercase;cursor:pointer;min-height:50px;margin-top:8px}
 </style><link rel="stylesheet" href="assets/desktop.css"><link rel="stylesheet" href="assets/aman.css"></head><body>
 <header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="your-journey.html" aria-label="Your Journey"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main>
-<h1>You &amp; your party</h1>
-<p class="sub">Names and contact · not the hospitality questions</p>
-<p class="note" style="margin-top:0">Who is travelling on this invitation, and how Guest Relations reaches you. What the invitation already knows is shown as it is; anything you correct is kept beside the original, so nothing is ever overwritten silently. The hospitality questions live on their own page, <a href="about-you.html" style="color:#313131">About you</a>.</p>
+<h1>You</h1>
+<p class="sub">Step 1 of 6 · your names and how we reach you</p>
+<p class="note" style="margin-top:0">Who is travelling on this invitation, and how Guest Relations reaches you. What the invitation already knows is shown as it is; anything you correct is kept beside the original, so nothing is ever overwritten silently. The hospitality questions come later, at step 5.</p>
 <div id="page"></div>
 </main>
 <script src="assets/bag.js"></script>
@@ -85,8 +88,8 @@ p.guests.forEach(function(g){
      nameField(g.guestId,'fullName','Full name')+
      nameField(g.guestId,'preferredName','What we should call you')+
      '</div>'});
-h+='<div class="gcard" id="contact"><p class="gname">How we reach your party</p>'+
-   '<p class="body">One reliable email address and one telephone number for the whole party is all we need.</p>'+
+h+='<div class="gcard" id="contact"><p class="req">Required</p><p class="gname">How we reach your party</p>'+
+   '<p class="body">One reliable email address or telephone number for the whole party is all we need. Everything else on this website is optional.</p>'+
    '<div class="fld"><label for="p-email">Email</label><input id="p-email" type="email" inputmode="email" value="'+esc(G.partyField('email'))+'" data-p="email" autocomplete="email"></div>'+
    '<div class="fld"><label for="p-phone">Telephone</label><input id="p-phone" type="tel" inputmode="tel" value="'+esc(G.partyField('phone'))+'" data-p="phone" autocomplete="tel"></div>'+
    '<p class="src">Used by Guest Relations only, for your arrangements.</p></div>';
@@ -103,10 +106,8 @@ if(!p){
   document.getElementById('open').addEventListener('click',function(){gated(render)});
   return}
 page.innerHTML=partyBlock(p)+
-  '<section class="blk"><p class="blabel">Step 5 of 6</p><h2>About you</h2>'+
-  '<p class="body">A few things that help us look after you personally — seven questions of hospitality and one operational field, per named guest. Every answer is optional.</p>'+
-  '<p style="margin-top:16px"><a class="cta2" href="about-you.html">Continue to About you</a></p></section>'+
-  '<p style="margin-top:26px"><a class="tlink" href="review.html">Back to Review &amp; Send</a></p>';
+  '<div class="nav"><a class="back" href="invitation.html">Back</a>'+
+  '<a class="go" href="your-journey.html">Save &amp; continue</a></div>';
 
 function mark(el){var s=document.getElementById(el);if(!s)return;s.textContent='Saved';setTimeout(function(){s.textContent=''},1600)}
 page.querySelectorAll('input[data-f]').forEach(function(i){

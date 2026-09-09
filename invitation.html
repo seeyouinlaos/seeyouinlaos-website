@@ -70,11 +70,12 @@ else document.addEventListener('siyl:invite-ready',function(){SIYL_INVITE.requir
 function when(iso){try{return new Date(iso).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}catch(e){return ''}}
 
 var STEPS=[
+ ['You','you.html','Your names as we hold them, and one way to reach you.','Required'],
  ['Your journey','your-journey.html','Your travel and your stays, from Bangkok to Vientiane and home again.','Required'],
- ['The Wedding','voyage.html#temple-decision','Who joins the Temple Ceremony, and the optional Sangkhathan offering — one answer per named guest.','Required'],
- ['Dress code','dress.html','Three codes across the journey. A short review is required before you send.','Required'],
- ['About you','you.html','Seven questions of hospitality and one operational field. Every answer optional.','Optional'],
- ['Review &amp; Send','review.html','Everything in one place. Sending is a request — never a payment, and never a confirmation.','Required']
+ ['The Wedding','voyage.html#temple-decision','Who joins each part of the day, and the dress code — one answer per named guest.','Required'],
+ ['Documents &amp; privacy','documents.html','Passport and flight document, and your choice about photographs. All optional now.','Optional'],
+ ['About you','about-you.html','Seven questions of hospitality and one operational field. Every answer optional.','Optional'],
+ ['Review &amp; Send','review.html','Everything you entered, in one place. Sending is a request — never a payment, and never a confirmation.','Required']
 ];
 
 function render(){
@@ -119,11 +120,11 @@ h+='</section>';
 
 h+='<button type="button" class="cta" id="go">'+(seen?'Continue to your journey':'This is right — continue')+'</button>';
 h+='<p class="ok" id="okline">'+(seen?'Your party was confirmed on '+when(seen.at):'Confirming this simply tells us you have seen who travels on this invitation.')+'</p>';
-h+='<p style="margin-top:18px"><a class="tlink" href="you.html">Something here is not right</a></p>';
+h+='<p style="margin-top:18px"><a class="tlink" href="you.html#you">Something here is not right</a></p>';
 page.innerHTML=h;
 document.getElementById('go').addEventListener('click',function(){
   G.setIdentityReviewed(true);
-  location.href='your-journey.html'});
+  location.href='you.html'});
 }
 document.addEventListener('siyl:guest',function(){/* names may change on you.html */});
 render();

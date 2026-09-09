@@ -165,49 +165,94 @@
       write(st);
     },
 
-    /* ---- WHAT IS STILL MISSING BEFORE THE JOURNEY CAN BE SENT ------------
-     * Required steps are the ones another person cannot answer for the guest
-     * later: who they are, who is coming to the wedding, and what to wear.
-     * Everything else may follow at any time and never blocks a submission. */
-    readiness: function () {
-      var T = window.SIYL_TEMPLE, B = window.SIYL_BAG;
-      var p = this.party();
+    /* ---- THE SIX STEPS, AND WHAT EACH ONE ACTUALLY HOLDS -----------------
+     * Every step has a purpose, a real interaction, a visible state and one
+     * next action. Four states, said in words and never by colour alone:
+     *   Completed · Action needed · Optional · not completed · In progress
+     * REQUIRED means nobody else can answer it for the guest afterwards.
+     * OPTIONAL never blocks a submission. */
+    STEP_DEFS: [
+      { key: 'you', n: '01', label: 'You', href: 'you.html', required: true },
+      { key: 'journey', n: '02', label: 'Your journey', href: 'your-journey.html', required: true },
+      { key: 'wedding', n: '03', label: 'The Wedding', href: 'voyage.html', required: true },
+      { key: 'documents', n: '04', label: 'Documents & privacy', href: 'documents.html', required: false },
+      { key: 'about', n: '05', label: 'About you', href: 'about-you.html', required: false },
+      { key: 'review', n: '06', label: 'Review & Send', href: 'review.html', required: true }
+    ],
+
+    steps: function () {
+      var self = this, T = window.SIYL_TEMPLE, B = window.SIYL_BAG, D = window.SIYL_DOCS;
+      var p = this.party(), guests = p ? p.guests : [];
       var contact = !!(this.partyField('email') || this.partyField('phone'));
-      var identity = !!this.identityReviewed();
-      var wedding = !!(T && T.decidedAll());
-      var dress = !!this.dressAck();
       var chosen = !!(B && B.get().length);
-      var need = [];
-      if (!p) need.push({ key: 'invitation', label: 'Open your invitation', href: 'invitation.html' });
-      else {
-        if (!identity) need.push({ key: 'identity', label: 'Your party', href: 'invitation.html',
-          note: 'Confirm who is travelling on this invitation' });
-        if (!chosen) need.push({ key: 'journey', label: 'Your journey', href: 'journeys.html',
-          note: 'Choose your travel and your stays' });
-        if (!wedding) {
-          /* land on the exact task that is open: when only the offering is
-           * unanswered, the Temple attendance screen is the wrong place */
-          var attendanceOpen = T && T.people().some(function (g) { return T.attendanceOf(g.guestId) === null; });
-          need.push({ key: 'wedding', label: 'Wedding participation',
-            href: attendanceOpen ? 'voyage.html#temple-decision' : 'voyage.html#sangkhathan',
-            note: (T && T.undecided().length)
-              ? T.undecided().map(function (g) { return g.preferredName || g.fullName; }).join(' · ') +
-                (attendanceOpen ? ' — still to answer' : ' — Sangkhathan still to answer')
-              : 'One answer per named guest' });
-        }
-        if (!dress) need.push({ key: 'dress', label: 'Dress code', href: 'dress.html#acknowledge',
-          note: 'Review required before sending' });
-        if (!contact) need.push({ key: 'contact', label: 'How we reach you', href: 'you.html#contact',
-          note: 'One email address or telephone number' });
+      var weddingDecided = !!(T && T.decidedAll());
+      var dress = !!this.dressAck();
+      var answered = guests.filter(function (g) { return self.profileAnswered(g.guestId) > 0; }).length;
+      var docsIn = 0, docsTotal = guests.length * 2, consentDone = 0;
+      if (D) guests.forEach(function (g) {
+        D.forGuest(g.guestId).forEach(function (d) { if (d.state !== 'Not provided') docsIn++; });
+        if (D.consentDecided(g.guestId)) consentDone++;
+      });
+
+      function state(done, started, required) {
+        if (done) return 'Completed';
+        if (required) return started ? 'In progress' : 'Action needed';
+        return started ? 'In progress' : 'Optional · not completed';
       }
-      var optional = [
-        { key: 'profile', label: 'About you', href: 'about-you.html#about-you', done: !!(p && p.guests.some(function (g) {
-            return G.profileAnswered(g.guestId) > 0; })), note: 'Optional — and welcome at any time' },
-        { key: 'documents', label: 'Documents & privacy', href: 'review.html#b4', done: false,
-          note: 'Can be added later' }
-      ];
-      return { ok: need.length === 0, need: need, optional: optional,
-               steps: { identity: identity, journey: chosen, wedding: wedding, dress: dress, contact: contact } };
+
+      var out = [];
+      out.push({ key: 'you', n: '01', label: 'You', href: 'you.html', required: true,
+        state: state(contact, guests.length > 0, true),
+        note: contact ? 'Names and one way to reach you' : 'One email address or telephone number is still needed',
+        action: contact ? 'Review' : 'Add your contact', deep: 'you.html#contact' });
+      out.push({ key: 'journey', n: '02', label: 'Your journey', href: 'your-journey.html', required: true,
+        state: state(chosen, false, true),
+        note: chosen ? (B.get().length + ' selections') : 'Choose your travel and your stays',
+        action: chosen ? 'Review' : 'Choose your journey', deep: chosen ? 'your-journey.html' : 'journeys.html' });
+      var wOpen = (T && T.undecided().length)
+        ? T.undecided().map(function (g) { return g.preferredName || g.fullName; }).join(' · ') + ' — still to answer'
+        : (!dress ? 'Dress code review still needed' : 'Participation and dress code');
+      var attendanceOpen = T && T.people().some(function (g) { return T.attendanceOf(g.guestId) === null; });
+      out.push({ key: 'wedding', n: '03', label: 'The Wedding', href: 'voyage.html', required: true,
+        state: state(weddingDecided && dress, weddingDecided || dress, true),
+        note: wOpen,
+        action: !weddingDecided ? 'Answer for each guest' : (!dress ? 'Review dress code' : 'Review'),
+        deep: !weddingDecided ? (attendanceOpen ? 'voyage.html#temple-decision' : 'voyage.html#sangkhathan')
+                              : (!dress ? 'dress.html#acknowledge' : 'voyage.html#temple-decision') });
+      out.push({ key: 'documents', n: '04', label: 'Documents & privacy', href: 'documents.html', required: false,
+        state: docsIn === 0 && consentDone === 0 ? 'Optional · not completed'
+             : (docsIn === docsTotal && consentDone === guests.length ? 'Completed' : 'In progress'),
+        note: docsIn ? (docsIn + ' of ' + docsTotal + ' documents received · the rest can be added later')
+                     : 'Optional documents can be added later',
+        action: docsIn ? 'Review' : 'Add documents', deep: 'documents.html' });
+      out.push({ key: 'about', n: '05', label: 'About you', href: 'about-you.html', required: false,
+        state: answered === 0 ? 'Optional · not completed'
+             : (answered === guests.length ? 'Completed' : 'In progress'),
+        note: answered ? (answered + ' of ' + guests.length + (guests.length === 1 ? ' guest has' : ' guests have') + ' shared something')
+                       : 'Optional — and welcome at any time',
+        action: answered ? 'Review' : 'Answer the questions', deep: 'about-you.html#about-you' });
+      var ready = contact && chosen && weddingDecided && dress;
+      out.push({ key: 'review', n: '06', label: 'Review & Send', href: 'review.html', required: true,
+        state: ready ? 'Completed' : 'Action needed',
+        note: ready ? 'Everything required is here' : 'Available after the required information is complete',
+        action: 'Open', deep: 'review.html' });
+      return out;
+    },
+
+    stepState: function (key) {
+      var s = this.steps().filter(function (x) { return x.key === key; })[0];
+      return s ? s.state : '';
+    },
+
+    readiness: function () {
+      var p = this.party();
+      if (!p) return { ok: false, need: [{ key: 'invitation', label: 'Open your invitation', href: 'invitation.html' }],
+                       optional: [], steps: [] };
+      var steps = this.steps();
+      var need = steps.filter(function (s) { return s.required && s.key !== 'review' && s.state !== 'Completed'; })
+        .map(function (s) { return { key: s.key, label: s.label, href: s.deep, note: s.note, action: s.action }; });
+      return { ok: need.length === 0, need: need, steps: steps,
+               optional: steps.filter(function (s) { return !s.required; }) };
     },
 
     /* ---- what Guest Relations receives ---------------------------------- */

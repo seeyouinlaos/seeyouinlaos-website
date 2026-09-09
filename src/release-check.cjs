@@ -225,7 +225,10 @@ gate('P3', 'MASTER-02 programme truth (four events, no active Alms, no pool in v
   if (/pool/i.test(vy)) bad.push('no pool narrative on the wedding page');
   if (/052-temple-ceremony-bride/.test(vy)) bad.push('the retired bride photograph is still on the page');
   if (/053-wedding-dinner-courtyard-garden/.test(vy)) bad.push('the fountain photograph is still the wedding dinner image');
-  if (!/data-att="yes"[\s\S]{0,400}data-att="no"/.test(vy)) bad.push('attendance must be an explicit two-way decision');
+  /* participation is an explicit two-way decision for EVERY active event —
+   * never a default, and never a single button that only says yes */
+  if (!/data-ev="yes"[\s\S]{0,400}data-ev="no"/.test(vy)) bad.push('participation must be an explicit two-way decision');
+  if (!/data-off="yes"[\s\S]{0,600}data-off="no"/.test(vy)) bad.push('the Sangkhathan must offer both answers');
   gate('P8', 'Wedding programme truth: four events, Buddhist morning inside the Temple Ceremony',
     bad.length === 0,
     bad.length ? bad.join(' · ')

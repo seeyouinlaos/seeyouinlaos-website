@@ -44,6 +44,13 @@
 .tsum{border-top:1px solid var(--a-line);margin-top:30px;padding-top:20px}
 .tsl{font-size:12.5px;line-height:1.85;color:var(--a-mute);margin-bottom:6px;max-width:34em}
 .tsl b{font-weight:400;color:var(--a-ink)}
+.nb{white-space:nowrap}
+.tev{border-top:1px solid var(--a-line);margin-top:22px;padding-top:18px}
+.tevn{font-family:'PP Editorial Old',Georgia,serif;font-weight:200;font-size:20px;line-height:1.25;margin-bottom:4px}
+.tevm{font-size:9.5px;letter-spacing:1.8px;text-transform:uppercase;color:var(--a-mute);margin-bottom:14px;line-height:1.8}
+.tnav{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:32px;border-top:1px solid var(--a-line);padding-top:22px}
+.tback{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--a-mute);text-decoration:none;border-bottom:1px solid #C9C4BA;padding:11px 0 3px;min-height:44px;display:inline-block;line-height:20px}
+.tgo{margin-left:auto;background:var(--a-ink);color:#F3EEE7;text-decoration:none;padding:17px 24px;font-size:10.5px;letter-spacing:2.2px;text-transform:uppercase;min-height:50px;display:inline-flex;align-items:center}
 .tlk{display:inline-block;line-height:20px;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--a-ink);text-decoration:none;border-bottom:1px solid var(--a-ink);padding:10px 0 3px;min-height:44px;box-sizing:content-box}
 .tdress{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--a-mute);margin-top:22px;margin-bottom:0;line-height:1.9}
 .tdress b{font-weight:400;color:var(--a-ink)}
@@ -223,55 +230,79 @@
   function esc(t) { return String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 
   function lede() {
-    var h = '<p class="tq">The Buddhist morning · your decision</p>';
-    h += '<h3>Temple Ceremony</h3>';
-    h += '<p class="twhen">Sunday, 28 February 2027 · 08:00 – 12:00 · Wat Ong Teu, Vientiane</p>';
-    h += '<p>The wedding day begins at the temple with a Buddhist morning ceremony. It is unhurried, it is optional, and afterwards everyone returns together to the hotel.</p>';
-    /* TAK BAT — explained before anyone is asked to answer anything */
-    h += '<div class="tinfo"><p class="tq">Morning Alms-Giving · Tak Bat</p>';
-    h += '<p>Guests attending the Temple Ceremony are invited to take part in the traditional morning alms-giving, Tak Bat. This is the moment in which food is respectfully offered to Buddhist monks.</p>';
-    h += '<p>It is part of the Temple Ceremony. <b>There is no separate charge for Tak Bat.</b></p></div>';
+    var h = '<p class="tq">The wedding day · your participation</p>';
+    h += '<h3>Sunday, 28 February 2027</h3>';
+    h += '<p class="twhen">Vientiane, Laos · four events · all complimentary</p>';
+    h += '<p>The whole of the day is hosted by <span class="nb">Haruthai &amp; Suthep</span>. Nothing here is charged, and the only choice that ever carries an amount is the optional Sangkhathan offering inside the Temple Ceremony.</p>';
+    h += '<p>Each named guest answers each part of the day for themselves, so that every table, every car and every morning is prepared for the people who are actually there.</p>';
     return h;
   }
 
-  function person(g) {
-    var id = g.guestId, a = T.attendanceOf(id), off = T.offeringOf_(id);
-    var name = esc(g.preferredName || g.fullName || 'You');
-    var h = '<div class="tp" data-g="' + esc(id) + '">';
-    h += '<p class="tfor">For ' + name + '</p>';
-    h += '<p class="tname">Will ' + name + ' join the Temple Ceremony?</p>';
+  var DRESS = {
+    temple: ['Blue Lao Traditional Dress', 'dress.html#traditional'],
+    coffee: ['Black Tie', 'dress.html#blacktie'],
+    vows: ['Black Tie', 'dress.html#blacktie'],
+    dinner: ['Black Tie', 'dress.html#blacktie']
+  };
+
+  function eventRow(id, name, e) {
+    var v = T.eventOf(id, e.key);
+    var d = DRESS[e.key];
+    var h = '<div class="tev" data-e="' + e.key + '">';
+    h += '<p class="tevn">' + e.label + '</p>';
+    h += '<p class="tevm">' + e.when + ' · ' + e.place + ' · Complimentary</p>';
     h += '<div class="tbtns">' +
-         '<button type="button" class="tbtn' + (a === 'yes' ? ' on' : '') + '" data-att="yes">Attending</button>' +
-         '<button type="button" class="tbtn' + (a === 'no' ? ' on' : '') + '" data-att="no">Not attending</button>' +
+         '<button type="button" class="tbtn' + (v === 'yes' ? ' on' : '') + '" data-ev="yes">I am joining</button>' +
+         '<button type="button" class="tbtn' + (v === 'no' ? ' on' : '') + '" data-ev="no">Not joining</button>' +
          '</div>';
-    if (a === 'yes') {
-      h += '<p class="tstate"><b>Attending</b> · ' + name + ' is invited to take part in the morning alms-giving, Tak Bat · no charge</p>';
-      /* THE ONE OPTIONAL PERSONAL ADDITION */
-      h += '<div class="toff">';
-      h += '<p class="tq">A personal temple offering</p>';
-      h += '<h4>Sangkhathan</h4>';
-      h += '<p>If you would like, we can prepare a Sangkhathan offering in ' + name + '&rsquo;s name. It contains useful everyday items for the monastic community and is prepared for ' + name + ' to present personally during the temple visit.</p>';
-      h += '<p class="tnot">This is not the alms-giving, and it is not a temple fee. Tak Bat is part of the ceremony and free; the Sangkhathan is a separate, optional offering, and nobody needs one in order to attend.</p>';
-      h += '<p class="tprice">Optional · USD 15 for ' + name + '</p>';
-      if (off === 'yes') {
-        h += '<p class="tstate"><b>Selected</b> · ' + P.money(15) + ' in your journey</p>';
-        h += '<button type="button" class="tbtn quiet" data-off="clear">Change this — ' + name + ' without an offering</button>';
-      } else if (off === 'no') {
-        h += '<p class="tstate"><b>Continuing without an offering</b> · nothing is prepared and nothing is charged</p>';
-        h += '<button type="button" class="tbtn quiet" data-off="yes">Change this — add ' + name + '&rsquo;s offering · USD 15</button>';
-      } else {
-        h += '<div class="tbtns">' +
-             '<button type="button" class="tbtn" data-off="yes">Add ' + name + '&rsquo;s offering · USD 15</button>' +
-             '<button type="button" class="tbtn" data-off="no">Continue without an offering</button>' +
-             '</div>';
-        h += '<p class="tstate open">Not decided</p>';
-      }
-      h += '</div>';
-    } else if (a === 'no') {
-      h += '<p class="tstate"><b>Not attending</b> · no hosted programme is assigned to ' + name + ' for this part of the morning</p>';
+    h += '<p class="tstate' + (v === null ? ' open' : '') + '">' +
+         (v === 'yes' ? '<b>Joining</b>' : v === 'no' ? '<b>Not joining</b>' : 'Not decided') + '</p>';
+    h += '<p class="tdress">Dress · <b>' + d[0] + '</b></p>';
+    h += '<p><a class="tlk" href="' + d[1] + '">View dress code</a></p>';
+
+    /* the temple carries the two things that belong only to it */
+    if (e.key === 'temple' && v === 'yes') {
+      h += '<div class="tinfo"><p class="tq">Morning Alms-Giving · Tak Bat</p>' +
+           '<p>' + name + ' is invited to take part in the traditional morning alms-giving, Tak Bat — the moment in which food is respectfully offered to Buddhist monks. It is part of the Temple Ceremony, and <b>there is no separate charge for Tak Bat</b>.</p></div>';
+      h += sangkhathan(id, name);
+    }
+    return h + '</div>';
+  }
+
+  function sangkhathan(id, name) {
+    var off = T.offeringOf_(id);
+    var h = '<div class="toff">';
+    h += '<p class="tq">A personal temple offering</p>';
+    h += '<h4>Sangkhathan</h4>';
+    h += '<p>If you would like, we can prepare a Sangkhathan offering in ' + name + '&rsquo;s name. It contains useful everyday items for the monastic community and is prepared for ' + name + ' to present personally during the temple visit.</p>';
+    h += '<p class="tnot">This is not the alms-giving, and it is not a temple fee. Tak Bat is part of the ceremony and free; the Sangkhathan is a separate, optional offering, and nobody needs one in order to attend.</p>';
+    h += '<p class="tprice">Optional · USD 15 for ' + name + '</p>';
+    if (off === 'yes') {
+      h += '<p class="tstate"><b>Selected</b> · ' + P.money(15) + ' in your journey</p>';
+      h += '<button type="button" class="tbtn quiet" data-off="clear">Change this — ' + name + ' without an offering</button>';
+    } else if (off === 'no') {
+      h += '<p class="tstate"><b>Continuing without an offering</b> · nothing is prepared and nothing is charged</p>';
+      h += '<button type="button" class="tbtn quiet" data-off="yes">Change this — add ' + name + '&rsquo;s offering · USD 15</button>';
     } else {
+      h += '<div class="tbtns">' +
+           '<button type="button" class="tbtn" data-off="yes">Add ' + name + '&rsquo;s offering · USD 15</button>' +
+           '<button type="button" class="tbtn" data-off="no">Continue without an offering</button>' +
+           '</div>';
       h += '<p class="tstate open">Not decided</p>';
     }
+    return h + '</div>';
+  }
+
+  function person(g) {
+    var id = g.guestId;
+    var name = esc(g.preferredName || g.fullName || 'You');
+    var open = T.openFor(id);
+    var h = '<div class="tp" data-g="' + esc(id) + '">';
+    h += '<p class="tfor">For ' + name + '</p>';
+    h += '<p class="tname">Which parts of the day will ' + name + ' join?</p>';
+    h += '<p class="tstate' + (open.length ? ' open' : '') + '">' +
+         (open.length ? open.length + ' still to answer · ' + esc(open.join(' · ')) : '<b>All answered</b>') + '</p>';
+    T.EVENTS.forEach(function (e) { h += eventRow(id, name, e); });
     return h + '</div>';
   }
 
@@ -290,38 +321,39 @@
       return;
     }
 
-    h += '<p class="tq" style="margin-top:34px">Who is coming to the temple?</p>';
+    h += '<p class="tq" style="margin-top:34px">Who is joining which part of the day?</p>';
     party.guests.forEach(function (g) { h += person(g); });
 
     var n = T.offerings();
-    h += '<div class="tsum"><p class="tq">The morning, in costs</p>';
-    h += '<p class="tsl"><b>Temple Ceremony</b> · optional · no charge</p>';
-    h += '<p class="tsl"><b>Morning alms-giving, Tak Bat</b> · part of the ceremony · no separate charge</p>';
+    h += '<div class="tsum"><p class="tq">The wedding day, in costs</p>';
+    h += '<p class="tsl"><b>Hosted by <span class="nb">Haruthai &amp; Suthep</span></b> · Temple Ceremony · Coffee &amp; Cake · Vow Ceremony · Wedding Dinner — all complimentary</p>';
+    h += '<p class="tsl"><b>No separate charge</b> · Morning alms-giving, Tak Bat — part of the Temple Ceremony</p>';
     h += n > 0
-      ? '<p class="tsl"><b>Sangkhathan Temple Offering</b> · ' + esc(T.offeringGuests().map(function (g) { return g.preferredName || g.fullName; }).join(' · ')) + ' · ' + P.money(n * 15) + ' in your journey</p>'
-      : '<p class="tsl"><b>Sangkhathan Temple Offering</b> · none selected · USD 15 per guest if you choose one</p>';
+      ? '<p class="tsl"><b>Your optional personal addition</b> · Sangkhathan Temple Offering · ' + esc(T.offeringGuests().map(function (g) { return g.preferredName || g.fullName; }).join(' · ')) + ' · ' + P.money(n * 15) + ' in your journey</p>'
+      : '<p class="tsl"><b>Your optional personal addition</b> · Sangkhathan Temple Offering · none selected · USD 15 per guest if you choose one</p>';
     h += '</div>';
     h += '<p class="tnote">Generosity, taking part and the intention behind it are what the offering is about. Nothing here is charged on this website — Guest Relations confirms every arrangement with you.</p>';
-    /* the dress code is stated as plain type, and only the action is underlined:
-     * no rule may ever run through the word BLUE */
-    h += '<p class="tdress">What to wear at the temple · <b>Blue Lao Traditional Dress</b></p>';
-    h += '<p><a class="tlk" href="dress.html#traditional">View dress code</a></p>';
+    h += '<div class="tnav"><a class="tback" href="your-journey.html">Back</a>' +
+         '<a class="tgo" href="dress.html">Save &amp; continue · the dress code</a></div>';
     h += '</div>';
     box.innerHTML = h;
 
     box.querySelectorAll('.tp').forEach(function (row) {
       var id = row.getAttribute('data-g');
-      row.querySelectorAll('[data-att]').forEach(function (b) {
-        b.addEventListener('click', function () {
-          T.setAttendance(id, b.getAttribute('data-att'));
-          render();
+      row.querySelectorAll('.tev').forEach(function (ev) {
+        var key = ev.getAttribute('data-e');
+        ev.querySelectorAll('[data-ev]').forEach(function (b) {
+          b.addEventListener('click', function () {
+            T.setEvent(id, key, b.getAttribute('data-ev'));
+            render();
+          });
         });
-      });
-      row.querySelectorAll('[data-off]').forEach(function (b) {
-        b.addEventListener('click', function () {
-          var v = b.getAttribute('data-off');
-          T.setOffering(id, v === 'clear' ? null : v);
-          render();
+        ev.querySelectorAll('[data-off]').forEach(function (b) {
+          b.addEventListener('click', function () {
+            var v = b.getAttribute('data-off');
+            T.setOffering(id, v === 'clear' ? null : v);
+            render();
+          });
         });
       });
     });

@@ -60,6 +60,24 @@ export default {
       return out;
     }
 
+    /* GUEST DOCUMENTS. Write-only, authenticated by the invitation the client
+     * already holds. Bytes never touch the repository, the browser's storage or
+     * any public URL: they go straight to the private object store bound as
+     * DOCS. When that binding is absent the endpoint says so honestly (503) and
+     * the guest surface keeps the document as NOT PROVIDED — it never claims a
+     * receipt that did not happen. There is deliberately NO public read route.
+     * Owner decision still required: the storage bucket and the retention
+     * period. Both are configuration, not code. */
+    if (url.pathname === '/api/document') {
+      if (request.method === 'OPTIONS') {
+        return new Response(null, { status: 204, headers: corsHeaders(request) });
+      }
+      if (request.method !== 'POST') {
+        return json({ ok: false, error: 'method not allowed' }, 405, corsHeaders(request));
+      }
+      return handleDocument(request, env);
+    }
+
     if (url.pathname === '/api/register') {
       if (request.method === 'OPTIONS') {
         return new Response(null, { status: 204, headers: corsHeaders(request) });
@@ -73,6 +91,52 @@ export default {
     return env.ASSETS.fetch(request);
   },
 };
+
+const MAX_DOC = 12 * 1024 * 1024; // 12 MB — a passport photograph, not a film
+const DOC_TYPES = ['image/jpeg', 'image/png', 'image/heic', 'image/heif', 'image/webp', 'application/pdf'];
+
+async function handleDocument(request, env) {
+  const invitationId = request.headers.get('x-invitation') || '';
+  const guestId = request.headers.get('x-guest') || '';
+  const kind = request.headers.get('x-kind') || '';
+  const filename = (request.headers.get('x-filename') || 'document').slice(0, 120);
+  const type = request.headers.get('content-type') || '';
+
+  if (!/^INV-[A-Za-z0-9_-]{1,32}$/.test(invitationId) || !/^[A-Za-z0-9_-]{1,32}$/.test(guestId)) {
+    return json({ ok: false, error: 'invalid invitation or guest' }, 400, corsHeaders(request));
+  }
+  if (kind !== 'passport' && kind !== 'flight') {
+    return json({ ok: false, error: 'unknown document kind' }, 400, corsHeaders(request));
+  }
+  if (!DOC_TYPES.includes(type.split(';')[0].trim())) {
+    return json({ ok: false, error: 'unsupported file type' }, 415, corsHeaders(request));
+  }
+  if (!env.DOCS) {
+    // No store, no receipt. The guest is told the truth by the client.
+    return json({ ok: false, error: 'document storage is not enabled yet', enabled: false }, 503, corsHeaders(request));
+  }
+
+  const bytes = await request.arrayBuffer();
+  if (!bytes.byteLength) return json({ ok: false, error: 'empty file' }, 400, corsHeaders(request));
+  if (bytes.byteLength > MAX_DOC) return json({ ok: false, error: 'file too large' }, 413, corsHeaders(request));
+
+  const digest = [...new Uint8Array(await crypto.subtle.digest('SHA-256', bytes))]
+    .map((b) => b.toString(16).padStart(2, '0')).join('');
+  const receivedAt = new Date().toISOString();
+  const key = `doc/${invitationId}/${guestId}/${kind}/${receivedAt}-${digest.slice(0, 12)}`;
+
+  try {
+    await env.DOCS.put(key, bytes, {
+      httpMetadata: { contentType: type },
+      customMetadata: { invitationId, guestId, kind, filename, receivedAt, sha256: digest },
+    });
+  } catch (e) {
+    return json({ ok: false, error: 'document could not be stored' }, 503, corsHeaders(request));
+  }
+  // RECEIVED means received. Never reviewed, verified or approved.
+  return json({ ok: true, status: 'RECEIVED', key, sha256: digest, receivedAt, bytes: bytes.byteLength },
+    201, corsHeaders(request));
+}
 
 async function handleRegister(request, env) {
   let body;

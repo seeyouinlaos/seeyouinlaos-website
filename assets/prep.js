@@ -10,18 +10,17 @@
 (function () {
   'use strict';
 
+  /* The six steps of the registration, in the order the guest walks them.
+   * The invitation itself is the way in, not a numbered step. */
   var STEPS = [
-    ['Your invitation', 'invitation.html', 'identity'],
-    ['Your journey',    'your-journey.html', 'journey'],
-    ['The Wedding',     'voyage.html', 'wedding'],
-    ['Dress code',      'dress.html', 'dress'],
-    ['About you',       'about-you.html', null],
-    ['Review & Send',   'review.html', null]
+    ['You',                 'you.html',          'you'],
+    ['Your journey',        'your-journey.html', 'journey'],
+    ['The Wedding',         'voyage.html',       'wedding'],
+    ['Documents & privacy', 'documents.html',    'documents'],
+    ['About you',           'about-you.html',    'about'],
+    ['Review & Send',       'review.html',       'review']
   ];
 
-  /* Cloudflare serves these pages at a clean path (/review, not /review.html)
-   * while the Pages mirror serves the file name. The rail must appear on both,
-   * so the basename is compared with and without the extension. */
   var here = (location.pathname.split('/').pop() || 'index.html').toLowerCase().replace(/\.html$/, '');
   var i = STEPS.map(function (s) { return s[1].replace(/\.html$/, ''); }).indexOf(here || 'index');
   if (i < 0) return;
@@ -37,20 +36,21 @@
     '.prep-a a{width:44px;height:44px;margin:-13px 0;display:flex;align-items:center;justify-content:center;color:#7C7A75;text-decoration:none;font-size:15px}' +
     '.prep-a a:hover{color:#313131}' +
     '.prep-a a[aria-disabled="true"]{opacity:.28;pointer-events:none}' +
-    '.prep-d{display:inline-block;width:5px;height:5px;border-radius:50%;background:#8A5A55;margin-left:8px;vertical-align:middle}' +
+    '.prep-s{font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75;white-space:nowrap;border-left:1px solid #DAD9D7;padding-left:12px;display:none}' +
+    '@media (min-width:600px){.prep-s{display:inline}}' +
     '@media (min-width:768px){.prep-in{max-width:var(--a-frame);padding-left:var(--a-gut);padding-right:var(--a-gut)}}';
   document.head.appendChild(css);
 
   function build() {
-    var G = window.SIYL_GUEST, r = G && G.party() ? G.readiness() : null;
-    var open = r && r.steps && STEPS[i][2] && r.steps[STEPS[i][2]] === false;
+    var G = window.SIYL_GUEST;
+    var state = (G && G.party() && STEPS[i][2]) ? G.stepState(STEPS[i][2]) : '';
     var el = document.createElement('nav');
     el.className = 'prep';
-    el.setAttribute('aria-label', 'Preparation');
+    el.setAttribute('aria-label', 'Registration');
     el.innerHTML = '<div class="prep-in">' +
-      '<span class="prep-l">Preparation</span>' +
-      '<span class="prep-n">' + (i + 1) + ' of ' + STEPS.length + ' · ' + STEPS[i][0] +
-        (open ? '<span class="prep-d" title="Still to complete"></span>' : '') + '</span>' +
+      '<span class="prep-l">Registration</span>' +
+      '<span class="prep-n">' + (i + 1) + ' of ' + STEPS.length + ' · ' + STEPS[i][0] + '</span>' +
+      (state ? '<span class="prep-s">' + state + '</span>' : '') +
       '<span class="prep-a">' +
         '<a href="' + (i > 0 ? STEPS[i - 1][1] : '#') + '"' + (i > 0 ? '' : ' aria-disabled="true"') +
           ' aria-label="' + (i > 0 ? STEPS[i - 1][0] : 'No previous step') + '">&lsaquo;</a>' +
@@ -70,6 +70,7 @@
   }
   document.addEventListener('siyl:guest', paint);
   document.addEventListener('siyl:temple', paint);
+  document.addEventListener('siyl:docs', paint);
   document.addEventListener('siyl:bag', paint);
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', paint);
   else paint();

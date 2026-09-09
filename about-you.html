@@ -31,7 +31,9 @@ textarea:focus{outline:0;border-color:#313131}
 .opl{font-size:9.5px;letter-spacing:2.2px;text-transform:uppercase;color:#7C7A75;margin:16px 0 0}
 .saved{font-size:9.5px;letter-spacing:2px;text-transform:uppercase;color:#7C7A75;margin-top:12px;min-height:14px}
 .cta{display:block;width:100%;background:#313131;color:#F3EEE7;border:0;padding:19px;font-size:11px;letter-spacing:2.2px;text-transform:uppercase;text-align:center;text-decoration:none;margin-top:30px;cursor:pointer;min-height:52px;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif}
-.skip{display:inline-block;margin-top:14px;font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:#7C7A75;text-decoration:none;border-bottom:1px solid #C9C4BA;padding:8px 0 3px;min-height:44px}
+.nav{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:34px;border-top:1px solid #DAD9D7;padding-top:22px}
+.nav .back,.nav .skipl{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#7C7A75;text-decoration:none;border-bottom:1px solid #C9C4BA;padding:11px 0 3px;min-height:44px;display:inline-block;line-height:20px}
+.nav .go{margin-left:auto;background:#313131;color:#F3EEE7;text-decoration:none;padding:17px 24px;font-size:10.5px;letter-spacing:2.2px;text-transform:uppercase;min-height:50px;display:inline-flex;align-items:center}
 .gate{border:1px solid #DAD9D7;background:#FCFAF6;padding:24px 20px;margin-top:26px}
 .gate h3{font-family:'PP Editorial Old',serif;font-weight:200;font-size:19px;margin-bottom:8px}
 .gbtn{background:#313131;color:#F3EEE7;border:0;padding:17px 22px;font:inherit;font-size:10.5px;letter-spacing:2.2px;text-transform:uppercase;cursor:pointer;min-height:50px;margin-top:8px}
@@ -39,7 +41,7 @@ textarea:focus{outline:0;border-color:#313131}
 <header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="your-journey.html" aria-label="Your Journey"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main id="about-you">
 <h1>About you</h1>
-<p class="sub">Step 5 of 6 · optional, and welcome at any time</p>
+<p class="sub">Step 5 of 6 · optional · every answer welcome at any time</p>
 <p class="lede">A few things that help us look after you personally.</p>
 <div id="page"></div>
 </main>
@@ -77,6 +79,7 @@ if(!p){
 var id=who||p.guests[0].guestId;
 var h='';
 if(p.guests.length>1){
+  h+='<p class="forwho" style="margin-top:6px">Who are you answering for?</p>';
   h+='<div class="tabs">'+p.guests.map(function(g){
     var n=G.profileAnswered(g.guestId);
     return '<button type="button" class="tab'+(g.guestId===id?' on':'')+'" data-who="'+esc(g.guestId)+'">'+
@@ -93,12 +96,13 @@ G.PROFILE.forEach(function(q){
 var a=G.ACCESS,av=G.profile(id,a.key);
 h+='<div class="opsec"><p class="opl">Operational · not hospitality</p>'+
    '<div class="q" style="border-top:0"><p class="qq">'+a.q+'</p><p class="qh">'+a.hint+'</p>'+
-   '<textarea data-q="'+a.key+'" data-g="'+esc(id)+'" placeholder="Optional" aria-label="'+esc(a.q)+'">'+esc(av)+'</textarea>'+
+   '<textarea data-q="'+a.key+'" data-g="'+esc(id)+'" placeholder="Optional" aria-label="'+esc(a.q)+'">'+esc(av==='NONE'?'':av)+'</textarea>'+
+   '<label class="none"><input type="checkbox" data-none="'+a.key+'" data-g="'+esc(id)+'"'+(av==='NONE'?' checked':'')+'><span>Nothing to note</span></label>'+
    '<p class="qw">'+a.why+'</p></div></div>';
 h+='<p class="saved" id="saved"></p>';
-h+='<a class="cta" href="review.html">Continue to Review &amp; Send</a>';
-h+='<p><a class="skip" href="review.html">Continue without answering</a></p>';
-h+='<p style="margin-top:22px"><a class="tlink" href="you.html">You &amp; your party · names and contact</a></p>';
+h+='<div class="nav"><a class="back" href="documents.html">Back</a>'+
+   '<a class="skipl" href="review.html">Skip for now</a>'+
+   '<a class="go" href="review.html">Save &amp; continue</a></div>';
 page.innerHTML=h;
 
 function mark(){

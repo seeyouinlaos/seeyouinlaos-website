@@ -57,15 +57,15 @@
       place: 'Wat Ong Teu, Vientiane', id: 'sangkhathan',
       note: 'Optional · USD 15 per guest · a personal offering.',
       anchor: 'voyage.html#sangkhathan' },
-    { key: 'coffee', title: 'Coffee & Cake', when: 'Afternoon',
-      place: 'Souphattra Heritage, Vientiane',
-      note: 'Hosted — no charge.', anchor: 'voyage.html#coffee' },
-    { key: 'vows', title: 'Vow Ceremony', when: 'Late afternoon',
-      place: 'The green gateway, Souphattra Heritage',
-      note: 'Hosted — no charge.', anchor: 'voyage.html#vows' },
-    { key: 'dinner', title: 'Wedding Dinner', when: 'Evening',
-      place: 'Souphattra Heritage, Vientiane',
-      note: 'Hosted — no charge.', anchor: 'voyage.html#dinner' }
+    { key: 'coffee', title: 'Coffee & Cake', when: 'From 12:00',
+      place: 'Souphattra Heritage Vientiane',
+      note: 'Complimentary — hosted by Haruthai & Suthep.', anchor: 'voyage.html#coffee' },
+    { key: 'vows', title: 'Vow Ceremony', when: '16:30',
+      place: 'Souphattra Heritage Vientiane',
+      note: 'Complimentary — hosted by Haruthai & Suthep.', anchor: 'voyage.html#vows' },
+    { key: 'dinner', title: 'Wedding Dinner', when: '19:30',
+      place: 'Souphattra Vientiane Hotel',
+      note: 'Complimentary — hosted by Haruthai & Suthep.', anchor: 'voyage.html#dinner' }
   ];
 
   function skipped() {

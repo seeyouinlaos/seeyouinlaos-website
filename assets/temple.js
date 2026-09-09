@@ -52,10 +52,44 @@
     return p ? (p.preferredName || p.fullName || 'You') : 'You';
   }
 
+  /* THE ACTIVE WEDDING PROGRAMME — 28 February 2027, and nothing else.
+   * Four events, all complimentary, hosted by Haruthai & Suthep. Each named
+   * guest answers each one: joining, not joining, or not yet decided. */
+  var EVENTS = [
+    { key: 'temple', label: 'Temple Ceremony', when: '08:00 – 12:00',
+      place: 'Wat Ong Teu, Vientiane' },
+    { key: 'coffee', label: 'Coffee & Cake', when: 'From 12:00',
+      place: 'Souphattra Heritage Vientiane' },
+    { key: 'vows', label: 'Vow Ceremony', when: '16:30',
+      place: 'Souphattra Heritage Vientiane' },
+    { key: 'dinner', label: 'Wedding Dinner', when: '19:30',
+      place: 'Souphattra Vientiane Hotel' }
+  ];
+
   var T = window.SIYL_TEMPLE = {
     ID: 'sangkhathan',
+    EVENTS: EVENTS,
     people: people,
     nameOf: nameOf,
+
+    /* ---- participation, per named guest, per active event --------------- */
+    eventOf: function (id, key) {
+      if (key === 'temple') return this.attendanceOf(id);
+      var v = ((read().by || {})[id] || {}).events || {};
+      return v[key] === 'yes' || v[key] === 'no' ? v[key] : null;
+    },
+    joining: function (id, key) { return this.eventOf(id, key) === 'yes'; },
+    setEvent: function (id, key, v) {
+      if (key === 'temple') return this.setAttendance(id, v);
+      var st = read();
+      st.by = st.by || {};
+      st.by[id] = st.by[id] || {};
+      st.by[id].events = st.by[id].events || {};
+      if (v === 'yes' || v === 'no') st.by[id].events[key] = v;
+      else delete st.by[id].events[key];
+      st.by[id].at = new Date().toISOString();
+      write(st);
+    },
 
     /* ---- PER NAMED GUEST. The party-wide reading is derived, never stored. */
     attendanceOf: function (id) {
@@ -106,20 +140,23 @@
     },
     /* every named guest has answered attendance, and every attending guest has
      * answered the Sangkhathan. Silence is never read as an answer. */
+    /* every named guest has answered every active event, and every guest
+     * coming to the temple has answered the Sangkhathan. Silence is never
+     * read as an answer. */
+    openFor: function (id) {
+      var self = this;
+      var missing = EVENTS.filter(function (e) { return self.eventOf(id, e.key) === null; })
+        .map(function (e) { return e.label; });
+      if (self.attendingOf(id) && !self.offeringDecidedOf(id)) missing.push('Sangkhathan');
+      return missing;
+    },
     decidedAll: function () {
       var self = this;
-      return people().every(function (g) {
-        if (self.attendanceOf(g.guestId) === null) return false;
-        if (self.attendingOf(g.guestId) && !self.offeringDecidedOf(g.guestId)) return false;
-        return true;
-      });
+      return people().every(function (g) { return self.openFor(g.guestId).length === 0; });
     },
     undecided: function () {
       var self = this;
-      return people().filter(function (g) {
-        return self.attendanceOf(g.guestId) === null ||
-               (self.attendingOf(g.guestId) && !self.offeringDecidedOf(g.guestId));
-      });
+      return people().filter(function (g) { return self.openFor(g.guestId).length > 0; });
     },
     anyAttending: function () { return this.attendees().length > 0; },
     offeringGuests: function () {
@@ -137,9 +174,16 @@
       var self = this;
       var rows = people().map(function (g) {
         var a = self.attendanceOf(g.guestId), o = self.offeringOf_(g.guestId);
+        var events = {};
+        EVENTS.forEach(function (e) {
+          var v = self.eventOf(g.guestId, e.key);
+          events[e.key] = v === 'yes' ? 'Joining' : v === 'no' ? 'Not joining' : 'Not decided';
+        });
         return {
           guestId: g.guestId,
           name: g.preferredName || g.fullName || 'You',
+          events: events,
+          open: self.openFor(g.guestId),
           temple: a === 'yes' ? 'Attending' : a === 'no' ? 'Not attending' : 'Not decided',
           attending: a === 'yes',
           sangkhathan: o === 'yes',
