@@ -31,6 +31,11 @@ a.th{display:block}
 .gap p{font-size:12px;color:#7C7A75;line-height:1.7;margin-bottom:12px}
 .grow{display:flex;gap:12px;align-items:baseline;border-top:1px solid #EAE7E0;padding:11px 0;font-size:12.5px}
 .grow .gw{font-size:9.5px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75;flex:0 0 108px}
+.grow .gw.open{color:#8A5A55}
+.grow .gdone{margin-left:auto;color:#7C7A75;font-size:12px}
+.wcost{border-top:1px solid #EDEBE7;border-bottom:1px solid #EDEBE7;padding:14px 0;margin:6px 0 10px}
+.wpd{font-size:9.5px;letter-spacing:1.6px;text-transform:uppercase;color:#7C7A75;margin-top:7px}
+.wpd a{color:#313131;text-decoration:none;border-bottom:1px solid #313131;padding-bottom:2px;margin-left:8px}
 .grow a{margin-left:auto;font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#313131;text-decoration:none;border-bottom:1px solid #313131;padding-bottom:2px}
 .mt{font-size:11px;color:#7C7A75;margin-top:3px}
 .ln{font-family:'PP Editorial Old',serif;font-size:14.5px;margin-left:auto;white-space:nowrap}
@@ -41,6 +46,7 @@ a.th{display:block}
 .note{font-size:11.5px;color:#7C7A75;margin-top:14px;max-width:36em}
 .cta{display:block;width:100%;background:#313131;color:#F3EEE7;border:0;padding:19px;font-size:11px;letter-spacing:2.2px;text-transform:uppercase;text-align:center;text-decoration:none;margin-top:24px;cursor:pointer;min-height:52px;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif}
 .cta[disabled]{opacity:.55;cursor:default}
+.cta.off{background:none;color:#7C7A75;border:1px solid #C9C4BA}
 .tlink{display:inline-block;font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:#313131;text-decoration:none;border-bottom:1px solid #313131;padding:8px 0 3px;min-height:44px}
 .empty{border-top:1px solid #DAD9D7;border-bottom:1px solid #DAD9D7;padding:36px 0;color:#7C7A75}
 .done{background:#FCFAF6;padding:30px 26px;margin-top:26px}
@@ -76,14 +82,14 @@ a.th{display:block}
 <p class="sub">Your journey · nothing is paid on this website</p>
 
 <div id="b1" class="blk"></div>
-<div id="b2" class="blk"></div>
 
-<section class="blk" id="b3">
-<div class="bhd"><span class="bno">03</span><h2>Your journey</h2><a class="bedit" href="your-journey.html">Edit</a></div>
-<p class="bsub">Every stay, every leg and every experience you have chosen, in the order the journey happens.</p>
+<section class="blk" id="b2">
+<div class="bhd"><span class="bno">02</span><h2>Your journey</h2><a class="bedit" href="your-journey.html">Edit</a></div>
+<p class="bsub">Your travel, your stays and your experiences, in the order the journey happens.</p>
 <div id="items"></div>
 </section>
 
+<div id="b3" class="blk"></div>
 <div id="b4" class="blk"></div>
 
 <section class="blk" id="b5">
@@ -95,6 +101,7 @@ a.th{display:block}
 
 <div id="gaps"></div>
 <div id="soldout"></div>
+<div id="ready"></div>
 <div id="sendbox">
 <button class="cta" id="send">Send to Guest Relations</button>
 <p class="err" id="err" role="alert" aria-live="polite"></p>
@@ -115,6 +122,7 @@ a.th{display:block}
 <script src="assets/rooms-data.js"></script>
 <script src="assets/pricing.js"></script>
 <script src="assets/guest.js"></script>
+<script src="assets/prep.js"></script>
 <script src="assets/temple.js"></script>
 <script src="assets/inventory.js"></script>
 <script src="assets/transport-data.js"></script>
@@ -124,80 +132,111 @@ a.th{display:block}
 var SUBMIT_URL='https://seeyouinlaos-website.suthep-hrg.workers.dev/api/register';
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')}
 function when(iso){try{return new Date(iso).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}catch(e){return ''}}
+function row(label,value,right,open){
+return '<div class="pline"><div><p class="ps"><b>'+label+'</b></p>'+(value?'<p class="ps">'+value+'</p>':'')+'</div>'+
+  (right?'<span class="r'+(open?' open':'')+'">'+right+'</span>':'')+'</div>'}
 
-/* ---------------------------------------------------------- BLOCK 01
- * YOU & YOUR PARTY — by name. A party of four reads as four people, never as
- * "4 guests". What the invitation gave and what the guest corrected are both
- * shown, because a correction that hides the original is not a correction. */
-function paintParty(){
+/* ---------------------------------------------------------------- BLOCK 01
+ * YOU — who is on this invitation, how we reach you, and what each named
+ * person has told us. A party of four reads as four people, never as a count. */
+function paintYou(){
 var G=window.SIYL_GUEST,box=document.getElementById('b1');if(!box)return;
 var p=G?G.party():null;
-var h='<div class="bhd"><span class="bno">01</span><h2>You &amp; your party</h2>'+
+var h='<div class="bhd"><span class="bno">01</span><h2>You</h2>'+
   '<a class="bedit" href="you.html">Edit</a></div>';
-if(!p){box.innerHTML=h+'<p class="bsub">Open your invitation and your party appears here by name.</p>';return}
-h+='<p class="bsub">Invitation '+esc(p.invitationId)+(p.partyName?' · '+esc(p.partyName):'')+'</p>';
+if(!p){box.innerHTML=h+'<p class="bsub">Open your invitation and your party appears here by name.</p>'+
+  '<p style="margin-top:10px"><a class="tlink" href="invitation.html">Open your invitation</a></p>';return}
+h+='<p class="bsub">Invitation '+esc(p.invitationId)+(p.partyName?' · '+esc(p.partyName):'')+
+   ' · you are making decisions for '+esc(p.guests.map(function(g){return G.value(g.guestId,'preferredName')||g.fullName}).join(' &amp; '))+'.</p>';
+h+='<p class="bsub" style="margin-top:16px">Personal details</p>';
 p.guests.forEach(function(g){
   var full=G.value(g.guestId,'fullName'),pref=G.value(g.guestId,'preferredName');
   h+='<div class="pline"><div><p class="pn">'+esc(pref||full)+'</p>'+
      '<p class="ps">'+esc(full)+(G.edited(g.guestId,'fullName')?' · corrected by you':'')+'</p></div>'+
      '<span class="r">Named guest</span></div>'});
 var em=G.partyField('email'),ph=G.partyField('phone');
-h+='<div class="pline"><div><p class="ps"><b>How we reach you</b></p>'+
-   '<p class="ps">'+(em||ph?esc([em,ph].filter(Boolean).join(' · ')):'No email or telephone given yet')+'</p></div>'+
-   '<span class="r'+(em||ph?'':' open')+'">'+(em||ph?'Given':'Still open')+'</span></div>';
+h+=row('How we reach you',(em||ph)?esc([em,ph].filter(Boolean).join(' · ')):'No email or telephone given yet',
+       (em||ph)?'Given':'Required',!(em||ph));
+h+='<p class="bsub" style="margin-top:22px">Hospitality profile</p>'+
+   '<p class="bsub">Seven questions of hospitality and one operational field, per named guest. Every answer is optional, none of them changes a price, and any of them may be added later.</p>';
+p.guests.forEach(function(g){
+  var n=G.profileAnswered(g.guestId);
+  h+=row('For '+esc(G.value(g.guestId,'preferredName')||g.fullName),
+         n?n+' of 8 answered':'Nothing shared yet',n?'Shared':'Optional',false)});
 box.innerHTML=h}
 
-/* ---------------------------------------------------------- BLOCK 02
- * THE WEDDING — one programme, in the order the day runs. Hosted parts say
- * HOSTED; only the Sangkhathan carries an amount, and it carries a name. */
+/* ---------------------------------------------------------------- BLOCK 03
+ * THE WEDDING — the programme, what is hosted, what carries no charge, and
+ * the one optional personal addition. Tak Bat and the Sangkhathan are never
+ * confused for one another. */
 function paintWedding(){
-var box=document.getElementById('b2'),J=window.SIYL_JOURNEY,T=window.SIYL_TEMPLE;
+var box=document.getElementById('b3'),J=window.SIYL_JOURNEY,T=window.SIYL_TEMPLE,G=window.SIYL_GUEST;
 if(!box||!J)return;
 var op=T?T.operational():null;
-var h='<div class="bhd"><span class="bno">02</span><h2>The Wedding</h2>'+
+var DRESS={temple:['Blue Lao Traditional Dress','dress.html#traditional'],
+           coffee:['Black Tie','dress.html#blacktie'],
+           vows:['Black Tie','dress.html#blacktie'],
+           dinner:['Black Tie','dress.html#blacktie']};
+var h='<div class="bhd"><span class="bno">03</span><h2>The Wedding</h2>'+
   '<a class="bedit" href="voyage.html#temple-decision">Edit</a></div>'+
-  '<p class="bsub">Sunday, 28 February 2027 · Vientiane. Coffee &amp; Cake, the Vow Ceremony and the Wedding Dinner are hosted. The Temple Ceremony is optional, the morning alms-giving carries no charge, and only the Sangkhathan Temple Offering is a personal cost — and only for the guests who choose it.</p>';
+  '<p class="bsub">Sunday, 28 February 2027 · Vientiane.</p>';
+/* the cost model, said once, in words */
+h+='<div class="wcost">'+
+   '<p class="ps"><b>Hosted by the couple</b> · Coffee &amp; Cake · Vow Ceremony · Wedding Dinner</p>'+
+   '<p class="ps"><b>No separate charge</b> · Temple Ceremony · Morning alms-giving, Tak Bat — the food respectfully offered to the monks during the ceremony</p>'+
+   '<p class="ps"><b>Your optional personal addition</b> · Sangkhathan Temple Offering · USD 15 per selected guest — a separate personal offering, never the alms-giving and never a temple fee</p></div>';
 J.WEDDING.forEach(function(w){
+  var d=DRESS[w.key];
   if(w.key==='sangkhathan'){
     var names=op?op.offeringNames:[];
+    var open=op&&op.sangkhathanUndecided>0;
     h+='<div class="wev"><div style="display:flex;gap:12px;align-items:baseline">'+
        '<div><p class="pn">'+w.title+'</p><p class="pm">'+w.when+' · '+w.place+'</p></div>'+
-       '<span class="r" style="margin-left:auto;font-size:9.5px;letter-spacing:1.8px;text-transform:uppercase;color:'+(names.length?'#313131':'#7C7A75')+';white-space:nowrap">'+
-       (names.length?'USD '+(names.length*15):'Not selected')+'</span></div>'+
+       '<span class="r" style="margin-left:auto;font-size:9.5px;letter-spacing:1.8px;text-transform:uppercase;white-space:nowrap;color:'+(open?'#8A5A55':(names.length?'#313131':'#7C7A75'))+'">'+
+       (names.length?'USD '+(names.length*15):(open?'Not decided':'Not selected'))+'</span></div>'+
        (names.length?'<p class="ps">Prepared for <b>'+esc(names.join(' · '))+'</b> · USD 15 each</p>':'')+
        '</div>';
     return}
   h+='<div class="wev"><div style="display:flex;gap:12px;align-items:baseline">'+
      '<div><p class="pn">'+w.title+'</p><p class="pm">'+w.when+' · '+w.place+'</p></div>'+
      '<span class="r" style="margin-left:auto;font-size:9.5px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75;white-space:nowrap">'+
-     (w.key==='temple'?'Optional':'Hosted')+'</span></div></div>'});
+     (w.key==='temple'?'Optional':'Hosted')+'</span></div>'+
+     (d?'<p class="wpd">Dress · '+d[0]+' <a href="'+d[1]+'">View dress code</a></p>':'')+'</div>'});
 if(op&&op.guests.length){
-  h+='<p class="bsub" style="margin-top:18px">Temple Ceremony · who is coming</p>';
+  h+='<p class="bsub" style="margin-top:20px">Participation · one answer per named guest</p>';
   op.guests.forEach(function(g){
-    h+='<div class="pline"><div><p class="ps"><b>'+esc(g.name)+'</b></p>'+
-       '<p class="ps">'+g.temple+(g.attending?(g.sangkhathan?' · Sangkhathan selected · USD 15':' · Sangkhathan not selected'):'')+'</p></div>'+
-       '<span class="r'+(g.temple==='No decision yet'?' open':'')+'">'+(g.temple==='No decision yet'?'Still open':g.temple)+'</span></div>'})}
+    var open=g.temple==='Not decided'||g.sangkhathanState==='Not decided';
+    h+=row('For '+esc(g.name),
+           'Temple Ceremony: '+g.temple+(g.attending?' · Sangkhathan: '+g.sangkhathanState:''),
+           open?'Still to answer':g.temple,open)})}
+/* the dress code, as a real status and not a hyperlink in a footer */
+var a=G?G.dressAck():null;
+h+='<p class="bsub" style="margin-top:22px">Dress code</p>'+
+   '<div class="pline"><div>'+
+   '<p class="ps"><b>Temple Ceremony</b> · Blue Lao Traditional Dress</p>'+
+   '<p class="ps"><b>Coffee &amp; Cake · Vow Ceremony · Wedding Dinner</b> · Black Tie</p>'+
+   '<p class="ps"><b>The travelling days</b> · Resort Wear</p></div>'+
+   '<span class="r'+(a?'':' open')+'">'+(a?'Reviewed · '+when(a.at):'Not yet reviewed')+'</span></div>'+
+   '<p style="margin-top:10px"><a class="tlink" href="dress.html">Review dress code</a></p>';
+/* seats exist as a shape, and are honestly empty */
+h+='<div class="pline"><div><p class="ps"><b>Seating</b></p>'+
+   '<p class="ps">Ceremony and dinner seating is arranged by Guest Relations and is not open yet.</p></div>'+
+   '<span class="r">Not open yet</span></div>';
 box.innerHTML=h}
 
-/* ---------------------------------------------------------- BLOCK 04
- * ABOUT YOU — what the people preparing the journey have been told, by name,
- * and the dress code acknowledgement, which is never ticked for anyone. */
-function paintAbout(){
-var G=window.SIYL_GUEST,box=document.getElementById('b4');if(!box)return;
-var p=G?G.party():null;
-var h='<div class="bhd"><span class="bno">04</span><h2>About you</h2>'+
-  '<a class="bedit" href="you.html">Edit</a></div>'+
-  '<p class="bsub">Seven questions of hospitality and one operational field, per named guest. Every answer is optional, and none of them changes a price.</p>';
-if(!p){box.innerHTML=h;return}
-p.guests.forEach(function(g){
-  var n=G.profileAnswered(g.guestId);
-  h+='<div class="pline"><div><p class="ps"><b>'+esc(G.value(g.guestId,'preferredName')||g.fullName)+'</b></p>'+
-     '<p class="ps">'+(n?n+' of 8 answered':'Nothing shared yet')+'</p></div>'+
-     '<span class="r'+(n?'':' open')+'">'+(n?'Shared':'Optional')+'</span></div>'});
-var a=G.dressAck();
-h+='<div class="pline"><div><p class="ps"><b>Dress code</b></p>'+
-   '<p class="ps">'+(a?'Acknowledged on '+when(a.at):'Lao traditional dress in blue for the temple; black tie from the return until the end of dinner; resort wear for the travelling days.')+'</p></div>'+
-   '<a class="bedit" href="dress.html">'+(a?'Review':'Open')+'</a></div>';
+/* ---------------------------------------------------------------- BLOCK 04
+ * DOCUMENTS & PRIVACY — the block exists because the journey has this shape.
+ * Nothing here pretends to work: no document is uploaded, stored or held by
+ * this website today, and no consent wording is invented. */
+function paintDocs(){
+var box=document.getElementById('b4');if(!box)return;
+var h='<div class="bhd"><span class="bno">04</span><h2>Documents &amp; privacy</h2></div>'+
+  '<p class="bsub">Guest Relations will need a little paperwork before you travel. None of it is collected on this website yet, and none of it is required to send your journey.</p>';
+h+=row('Passport','Not provided yet','Later',false);
+h+=row('Flight information','Not provided yet','Later',false);
+h+=row('Photography &amp; filming','A photographer and a videographer are with us on the wedding day.','Later',false);
+h+=row('Publication consent','You will be asked separately, in writing, before anything is published.','Later',false);
+h+='<p class="note">Secure document upload will become available later, on authenticated storage. Nothing you send today carries a passport, a ticket or any file — and no document is stored in this browser.</p>';
 box.innerHTML=h}
 
 function detailHref(x){
@@ -209,9 +248,8 @@ var P=window.SIYL_PRICE,at=P&&P.locate(x.id);
 if(at&&x.room)return 'room.html?stay='+at.key+'&room='+x.room;
 return 'journeys.html#j-'+(P?P.windowOf(x.id):x.id)}
 function render(){var b=SIYL_BAG.get(),el=document.getElementById('items');
-if(!b.length){el.innerHTML='<p class="empty">Nothing is in your journey yet. Everything you add appears here before sending.</p>';
-document.getElementById('send').disabled=true}
-else{document.getElementById('send').disabled=false;
+if(!b.length){el.innerHTML='<p class="empty">Nothing is in your journey yet. Everything you add appears here before sending.</p>'}
+else{
 /* THE WEDDING is block 02 and is never itemised twice: a wedding line is
  * shown there, by name, and its amount is in Your Costs like every other. */
 el.innerHTML=(window.SIYL_JOURNEY?SIYL_JOURNEY.sorted(b):b)
@@ -232,6 +270,7 @@ return '<div class="row"><a class="th" href="'+href+'" aria-label="Open '+esc(x.
 (x.interest?'<span class="int">Interest · request</span>':'<span class="ln">USD '+((x.price||0)*x.qty).toLocaleString('en-US')+'</span>')+'</div></div>'}).join('')}
 document.getElementById('tt').textContent='USD '+SIYL_BAG.total().toLocaleString('en-US');
 renderGaps();
+paintReady();
 SIYL_BAG.badge()}
 
 /* Review never presents an unanswered journey as complete */
@@ -242,7 +281,71 @@ if(!open.length){box.innerHTML='';return}
 box.innerHTML='<div class="gap"><h3>Your journey is almost complete</h3>'+
 '<p>A decision is still needed for the stages below. Choose your stay or travel — or tell us that you are not joining that part of the journey. You can still send what you have.</p>'+
 open.map(function(s2){return '<div class="grow"><span class="gw">'+s2.when+'</span><span>'+s2.cat+' · '+s2.place+'</span><a href="journeys.html#'+s2.anchor+'">'+(s2.cat==='Accommodation'?'Choose your stay':'Choose your travel')+'</a></div>'}).join('')+'</div>'}
-function paintBlocks(){paintParty();paintWedding();paintAbout()}
+/* ---- BEFORE YOU SEND ---------------------------------------------------
+ * Required means a person cannot answer it for the guest afterwards: who they
+ * are, who is coming to the wedding, what to wear, and how to reach them.
+ * Everything else may follow at any time and never blocks a submission. */
+function paintReady(){
+var box=document.getElementById('ready'),G=window.SIYL_GUEST,btn=document.getElementById('send');
+if(!box||!btn)return;
+if(!G||!G.party()){
+  box.innerHTML='<div class="gap"><h3>Open your invitation</h3>'+
+    '<p>Your journey is sent under your invitation, so we open it first.</p>'+
+    '<div class="grow"><span class="gw open">Required</span><span>Your invitation</span><a href="invitation.html">Open</a></div></div>';
+  btn.disabled=false;btn.classList.add('off');btn.setAttribute('aria-describedby','ready');
+  btn.textContent='Send to Guest Relations — not ready yet';return}
+var r=G.readiness();
+var LBL={identity:'Your party',journey:'Your journey',wedding:'Wedding participation',dress:'Dress code',contact:'How we reach you'};
+var ORDER=['identity','journey','wedding','dress','contact'];
+var h='<div class="gap"><h3>'+(r.ok?'Everything we need is here':'Before you send')+'</h3>'+
+  '<p>'+(r.ok
+    ? 'Your journey can be sent. Anything still marked optional below can follow at any time — it never delays your journey.'
+    : 'A few things are still needed before your journey can go to Guest Relations. Everything marked optional can follow later.')+'</p>';
+var ACT={identity:'Open your invitation',journey:'Choose your journey',
+         wedding:'Answer for each guest',dress:'Review dress code',contact:'Add your contact'};
+ORDER.forEach(function(k){
+  var done=r.steps[k],miss=r.need.filter(function(n){return n.key===k})[0];
+  h+='<div class="grow"><span class="gw'+(done?'':' open')+'">'+(done?'Done':'Still to do')+'</span>'+
+     '<span>'+LBL[k]+(miss&&miss.note?' · '+miss.note:'')+'</span>'+
+     (done?'<span class="gdone">&#10003;</span>':'<a href="'+miss.href+'">'+ACT[k]+'</a>')+'</div>'});
+r.optional.forEach(function(o){
+  h+='<div class="grow"><span class="gw">Optional</span><span>'+o.label+' · '+o.note+'</span>'+
+     (o.done?'<span class="gdone">&#10003;</span>':'<a href="'+o.href+'">Add</a>')+'</div>'});
+h+='</div>';
+box.innerHTML=h;
+/* The button is visibly unavailable until the required steps are done — but it
+ * is never a dead control: pressing it says exactly what is missing and takes
+ * the guest there. A silent failure would be worse than no button at all. */
+var ready=r.ok&&!!SIYL_BAG.get().length;
+/* not `disabled`: a disabled control cannot say why it is disabled, and a
+ * guest who presses SEND deserves an answer rather than silence. It reads as
+ * unavailable, it is described by the list above it, and it explains itself. */
+btn.disabled=false;
+btn.removeAttribute('aria-disabled');
+btn.setAttribute('aria-describedby','ready');
+btn.classList.toggle('off',!ready);
+btn.textContent=ready?'Send to Guest Relations':'Send to Guest Relations — not ready yet';
+}
+
+/* what to say when a guest presses SEND too early */
+function blockSend(){
+var G=window.SIYL_GUEST,err=document.getElementById('err');
+var r=G&&G.party()?G.readiness():{need:[{key:'invitation',label:'Open your invitation',href:'invitation.html'}]};
+var first=(r.need||[])[0];
+var MSG={invitation:'Please open your invitation before sending your journey.',
+         identity:'Please confirm who is travelling on this invitation before sending.',
+         journey:'Please choose your travel and your stays before sending your journey.',
+         wedding:'Please answer the wedding participation for each named guest before sending.',
+         dress:'Please review the dress code before sending your journey.',
+         contact:'Please leave one email address or telephone number before sending.'};
+var ACT={dress:'Review dress code',invitation:'Open my invitation',identity:'Open my invitation',
+         journey:'Choose your journey',wedding:'Answer for each guest',contact:'Add your contact'};
+var msg=first?MSG[first.key]:'A few steps above are still needed before your journey can be sent.';
+err.innerHTML=msg+(first?' <a href="'+first.href+'" style="color:#313131">'+ACT[first.key]+'</a>':'');
+var box=document.getElementById('ready');
+if(box)box.scrollIntoView({behavior:'smooth',block:'center'});
+}
+function paintBlocks(){paintYou();paintWedding();paintDocs();paintReady()}
 document.addEventListener('siyl:bag',function(){render();paintBlocks()});
 document.addEventListener('siyl:temple',paintBlocks);
 document.addEventListener('siyl:guest',paintBlocks);
@@ -293,6 +396,7 @@ if(gr){
       var v=g.profile[q.key];
       if(v)L.push('  · '+q.q+': '+(v==='NONE'?'Nothing to note':v))})})}}
 L.push('','YOUR COSTS: USD '+SIYL_BAG.total().toLocaleString('en-US'));
+L.push('Note: Tak Bat (morning alms-giving) is part of the Temple Ceremony and carries no charge. The Sangkhathan is a separate optional personal offering.');
 L.push('Submitted via Review & Send · '+new Date().toISOString());
 return L.join('\n')}
 
@@ -300,6 +404,8 @@ function gated(fn){if(window.SIYL_INVITE){SIYL_INVITE.require(fn)}
 else document.addEventListener('siyl:invite-ready',function(){SIYL_INVITE.require(fn)},{once:true})}
 
 document.getElementById('send').addEventListener('click',function(){
+var G=window.SIYL_GUEST;
+if(!SIYL_BAG.get().length||!G||!G.party()||!G.readiness().ok){blockSend();return}
 gated(async function(auth){
 var btn=document.getElementById('send'),err=document.getElementById('err');
 btn.disabled=true;err.textContent='';
@@ -349,9 +455,8 @@ var ag=document.getElementById('again');
 if(ag&&!ag.dataset.wired){ag.dataset.wired='1';
 ag.addEventListener('click',function(){
   document.getElementById('sendbox').hidden=false;
-  document.getElementById('send').disabled=!SIYL_BAG.get().length;
-  document.getElementById('send').textContent='Send my updated journey';
   d.hidden=true;
+  paintReady();
   document.getElementById('sendbox').scrollIntoView({behavior:'smooth',block:'center'})})}
 return}
 }catch(e){/* endpoint unreachable — emergency channel below */}

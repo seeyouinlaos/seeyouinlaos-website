@@ -50,6 +50,13 @@ h1{font-family:'PP Editorial Old',serif;font-weight:200;font-size:29px;margin-bo
 .wps{font-size:12px;color:#7C7A75;line-height:1.8;margin-top:5px}
 .wps b{font-weight:400;color:#313131}
 .wpeople{margin-top:14px}
+.who{color:#7C7A75;margin-left:8px;letter-spacing:1.6px}
+.who::before{content:'· '}
+.wcost{border-top:1px solid #EDEBE7;margin-top:14px;padding-top:12px}
+.wps.open{color:#8A5A55}
+.wps.open b{color:#8A5A55}
+.wpd{font-size:9.5px;letter-spacing:1.6px;text-transform:uppercase;color:#7C7A75;margin-top:6px}
+.wpd a{color:#313131;text-decoration:none;border-bottom:1px solid #313131;padding-bottom:2px;margin-left:8px}
 .wpl{font-size:9.5px;letter-spacing:2px;text-transform:uppercase;color:#313131;margin-bottom:4px}
 .tmpl{border-top:1px solid #DAD9D7;margin-top:24px;padding-top:18px}
 .tmpl h3{font-family:'PP Editorial Old',serif;font-weight:200;font-size:18px;margin-bottom:4px}
@@ -165,6 +172,7 @@ body.fx-open .fxs,body.fx-open .fxo{display:block}
 <script src="assets/rooms-data.js"></script>
 <script src="assets/pricing.js"></script>
 <script src="assets/guest.js"></script>
+<script src="assets/prep.js"></script>
 <script src="assets/temple.js"></script>
 <script src="assets/inventory.js"></script>
 <script src="assets/transport-data.js"></script>
@@ -182,6 +190,14 @@ if(window.SIYL_TRANSPORT&&window.SIYL_TRANSPORT[x.id])return 'transport.html?id=
 var P=window.SIYL_PRICE,at=P&&P.locate(x.id);
 if(at&&x.room)return 'room.html?stay='+at.key+'&room='+x.room;
 return 'journeys.html#j-'+(P?P.windowOf(x.id):x.id)}
+/* Whose decision is this? A shared arrangement says so; a personal one carries
+ * the name of the person it belongs to. The guest never has to guess. */
+function whoLabel(){
+var G=window.SIYL_GUEST,p=G?G.party():null;
+if(!p||!p.guests.length)return '';
+return '<span class="who">'+(p.guests.length>1?'For your party'
+  :'For '+(G.value(p.guests[0].guestId,'preferredName')||p.guests[0].fullName))+'</span>'}
+
 /* ---------------------------------------------------------------- THE WEDDING
  * The reason for the journey reads as ONE programme, in the order the day runs,
  * sitting at its own place in the chronology — Sunday 28 February, inside the
@@ -194,33 +210,47 @@ if(!J)return '';
 var op=T?T.operational():null;
 var usd=SIYL_BAG.get().filter(function(x){return J.isWedding(x)})
   .reduce(function(n,x){return n+(x.price||0)*(x.qty||1)},0);
+var DRESS={temple:['Blue Lao Traditional Dress','dress.html#traditional'],
+           coffee:['Black Tie','dress.html#blacktie'],
+           vows:['Black Tie','dress.html#blacktie'],
+           dinner:['Black Tie','dress.html#blacktie']};
 var h='<div class="row wedrow"><div class="wedth" aria-hidden="true" style="background-image:url(assets/images/event/052-ceremony-green-gateway.jpg)"></div><div style="flex:1">';
 h+='<p class="when">28 FEB</p><p class="cat">The Wedding</p>';
 h+='<a class="nm" href="voyage.html">The Wedding · Sunday, 28 February 2027</a>';
 h+='<p class="mt">Vientiane, Laos · one day, four parts</p>';
 h+='<div class="wprog">';
 J.WEDDING.forEach(function(w){
+  var d=DRESS[w.key];
   if(w.key==='sangkhathan'){
     var names=op?op.offeringNames:[];
+    var open=op&&op.sangkhathanUndecided>0;
     h+='<div class="wp"><p class="wpt"><a href="'+w.anchor+'">'+w.title+'</a></p>'+
        '<p class="wpm">'+w.when+' · '+w.place+'</p>'+
        (names.length
          ? '<p class="wps"><b>'+names.join(' · ')+'</b> · '+(names.length===1?'one offering':names.length+' offerings')+' · USD '+(names.length*15)+'</p>'
-         : '<p class="wps">Not selected</p>')+
+         : '<p class="wps'+(open?' open':'')+'">'+(open?'Not decided':'Not selected')+'</p>')+
        '</div>';
     return}
   h+='<div class="wp"><p class="wpt"><a href="'+w.anchor+'">'+w.title+'</a></p>'+
      '<p class="wpm">'+w.when+' · '+w.place+'</p>'+
-     '<p class="wps">'+w.note+'</p></div>'});
+     '<p class="wps">'+w.note+'</p>'+
+     (d?'<p class="wpd">Dress · '+d[0]+' <a href="'+d[1]+'">View dress code</a></p>':'')+
+     '</div>'});
 h+='</div>';
+/* WHY ONE WEDDING ELEMENT CHANGES YOUR COSTS AND THE OTHERS DO NOT */
+h+='<div class="wcost"><p class="wpl">The wedding day, in costs</p>'+
+   '<p class="wps"><b>Hosted by the couple</b> · Coffee &amp; Cake · Vow Ceremony · Wedding Dinner</p>'+
+   '<p class="wps"><b>No separate charge</b> · Temple Ceremony · Morning alms-giving, Tak Bat</p>'+
+   '<p class="wps"><b>Your optional personal addition</b> · Sangkhathan Temple Offering · USD 15 per selected guest</p></div>';
 if(op&&op.guests.length){
   h+='<div class="wpeople"><p class="wpl">Temple Ceremony · who is coming</p>';
   op.guests.forEach(function(g){
-    h+='<p class="wps"><b>'+g.name+'</b> · '+g.temple+
-       (g.attending?(g.sangkhathan?' · Sangkhathan selected':' · Sangkhathan not selected'):'')+'</p>'});
+    var open=g.temple==='Not decided'||g.sangkhathanState==='Not decided';
+    h+='<p class="wps'+(open?' open':'')+'"><b>For '+g.name+'</b> · '+g.temple+
+       (g.attending?' · Sangkhathan: '+g.sangkhathanState:'')+'</p>'});
   h+='</div>'}
 h+='<div class="acts"><a class="ch" href="voyage.html#temple-decision">'+
-   ((op&&op.undecided===0&&op.guests.length)?'Change these decisions':'Tell us your decisions')+'</a></div>';
+   ((op&&op.undecided===0&&op.sangkhathanUndecided===0&&op.guests.length)?'Change these decisions':'Tell us your decisions')+'</a></div>';
 h+='</div>'+(usd>0?'<span class="ln">USD '+usd.toLocaleString('en-US')+'</span>':'<span class="ln free">Hosted</span>')+'</div>';
 return h}
 
@@ -248,7 +278,7 @@ var amount = x.interest
 var href=detailHref(x);
 return '<div class="row"><a class="th" href="'+href+'" aria-label="Open '+x.name.replace(/"/g,'&quot;')+'"'+(SIYL_BAG.thumb(x)?' style="background-image:url('+SIYL_BAG.thumb(x)+')"':'')+'></a><div style="flex:1">'+
 (when?'<p class="when">'+when+'</p>':'')+
-(m.cat?'<p class="cat">'+m.cat+book+'</p>':'')+
+(m.cat?'<p class="cat">'+m.cat+book+whoLabel()+'</p>':'')+
 '<a class="nm" href="'+href+'">'+x.name+'</a><p class="mt">'+x.meta+'</p>'+
 (m.basis?'<p class="basis">'+m.basis+'</p>':'')+
 (J&&J.quantityLine(x)?'<p class="qty">'+J.quantityLine(x)+'</p>':'')+

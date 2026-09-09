@@ -154,6 +154,55 @@
       write(st);
     },
 
+    /* ---- the invitation briefing ---------------------------------------- */
+    /* A guest who has never seen who is invited, and for whom they are
+     * deciding, has not been briefed — and an unbriefed guest cannot send a
+     * journey on behalf of other named people. */
+    identityReviewed: function () { var st = read(); return st.identity || null; },
+    setIdentityReviewed: function (on) {
+      var st = read();
+      st.identity = on ? { at: new Date().toISOString() } : null;
+      write(st);
+    },
+
+    /* ---- WHAT IS STILL MISSING BEFORE THE JOURNEY CAN BE SENT ------------
+     * Required steps are the ones another person cannot answer for the guest
+     * later: who they are, who is coming to the wedding, and what to wear.
+     * Everything else may follow at any time and never blocks a submission. */
+    readiness: function () {
+      var T = window.SIYL_TEMPLE, B = window.SIYL_BAG;
+      var p = this.party();
+      var contact = !!(this.partyField('email') || this.partyField('phone'));
+      var identity = !!this.identityReviewed();
+      var wedding = !!(T && T.decidedAll());
+      var dress = !!this.dressAck();
+      var chosen = !!(B && B.get().length);
+      var need = [];
+      if (!p) need.push({ key: 'invitation', label: 'Open your invitation', href: 'invitation.html' });
+      else {
+        if (!identity) need.push({ key: 'identity', label: 'Your party', href: 'invitation.html',
+          note: 'Confirm who is travelling on this invitation' });
+        if (!chosen) need.push({ key: 'journey', label: 'Your journey', href: 'journeys.html',
+          note: 'Choose your travel and your stays' });
+        if (!wedding) need.push({ key: 'wedding', label: 'Wedding participation', href: 'voyage.html#temple-decision',
+          note: (T && T.undecided().length)
+            ? T.undecided().map(function (g) { return g.preferredName || g.fullName; }).join(' · ') + ' — still to answer'
+            : 'One answer per named guest' });
+        if (!dress) need.push({ key: 'dress', label: 'Dress code', href: 'dress.html',
+          note: 'Review required before sending' });
+        if (!contact) need.push({ key: 'contact', label: 'How we reach you', href: 'you.html',
+          note: 'One email address or telephone number' });
+      }
+      var optional = [
+        { key: 'profile', label: 'About you', href: 'you.html', done: !!(p && p.guests.some(function (g) {
+            return G.profileAnswered(g.guestId) > 0; })), note: 'Optional — and welcome at any time' },
+        { key: 'documents', label: 'Documents & privacy', href: 'review.html#b4', done: false,
+          note: 'Can be added later' }
+      ];
+      return { ok: need.length === 0, need: need, optional: optional,
+               steps: { identity: identity, journey: chosen, wedding: wedding, dress: dress, contact: contact } };
+    },
+
     /* ---- what Guest Relations receives ---------------------------------- */
     operational: function () {
       var self = this, p = this.party();

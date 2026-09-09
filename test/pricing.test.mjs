@@ -290,26 +290,116 @@ test('THE WEDDING sits at 28 FEB in the chronology — the Sangkhathan is never 
 
 test('the Sangkhathan is decided per named guest, and never restored silently', () => {
   const t = readFileSync(join(ROOT, 'assets/temple.js'), 'utf8');
-  /* per-person state, keyed by the guestId the invitation resolved */
-  ['attendanceOf', 'attendingOf', 'offeringOf', 'setAttendance', 'setOffering', 'offeringGuests']
-    .forEach((fn) => assert.ok(t.includes(fn + ':') || t.includes(fn + ' ='), fn + ' missing'));
-  /* not attending removes THIS person's offering */
-  assert.match(t, /if \(st\.by\[id\]\.attend !== 'yes'\) delete st\.by\[id\]\.offering;/);
+  ['attendanceOf', 'attendingOf', 'offeringOf', 'offeringOf_', 'offeringDecidedOf',
+   'setAttendance', 'setOffering', 'offeringGuests', 'undecided']
+    .forEach((fn) => assert.ok(t.includes(fn + ':'), fn + ' missing'));
+  /* not attending clears THIS person's offering decision, both shapes */
+  assert.match(t, /if \(st\.by\[id\]\.attend !== 'yes'\) \{ delete st\.by\[id\]\.off; delete st\.by\[id\]\.offering; \}/);
   /* an offering can only ever be set for someone who is attending */
-  assert.match(t, /else if \(st\.by\[id\]\.attend === 'yes'\) st\.by\[id\]\.offering =/);
+  assert.match(t, /if \(st\.by\[id\]\.attend !== 'yes'\) delete st\.by\[id\]\.off;\s*\n\s*else if \(v === 'yes' \|\| v === 'no'\) st\.by\[id\]\.off = v;/);
   /* the bag quantity is DERIVED from the named decisions — no counter */
   assert.match(t, /var n = T\.offerings\(\);/);
   const page = readFileSync(join(ROOT, 'voyage.html'), 'utf8');
   assert.doesNotMatch(page, /data-q=/, 'a quantity stepper survives on the wedding page');
-  assert.match(page, /T\.setOffering\(id, b\.getAttribute\('data-off'\) === '1'\)/);
+  assert.match(page, /T\.setOffering\(id, v === 'clear' \? null : v\)/);
+});
+
+test('three states, never two: NOT DECIDED is not NOT ATTENDING', () => {
+  const t = readFileSync(join(ROOT, 'assets/temple.js'), 'utf8');
+  /* decidedAll needs an attendance answer AND, for attendees, an offering answer */
+  assert.match(t, /if \(self\.attendanceOf\(g\.guestId\) === null\) return false;/);
+  assert.match(t, /if \(self\.attendingOf\(g\.guestId\) && !self\.offeringDecidedOf\(g\.guestId\)\) return false;/);
+  assert.match(t, /sangkhathanState: a !== 'yes' \? 'Not applicable'/);
+  const page = readFileSync(join(ROOT, 'voyage.html'), 'utf8');
+  /* the guest is offered BOTH answers, so silence is never read as a refusal */
+  assert.match(page, /data-off="yes">Add /);
+  assert.match(page, /data-off="no">Continue without an offering/);
+  assert.match(page, /class="tstate open">Not decided/);
+});
+
+test('Tak Bat is explained before anyone is asked, and is never the Sangkhathan', () => {
+  const page = readFileSync(join(ROOT, 'voyage.html'), 'utf8');
+  const dec = page.slice(page.indexOf('function lede()'), page.indexOf('function render()'));
+  /* the explanation comes first: lede() runs before any attendance control */
+  assert.ok(dec.indexOf('Morning Alms-Giving · Tak Bat') < dec.indexOf('data-att="yes"'));
+  assert.match(dec, /Guests attending the Temple Ceremony are invited to take part in the traditional morning alms-giving, Tak Bat/);
+  assert.match(dec, /There is no separate charge for Tak Bat/);
+  assert.doesNotMatch(dec, /Everyone who comes takes part/);
+  /* and the two rituals are never merged */
+  assert.match(dec, /This is not the alms-giving, and it is not a temple fee/);
+  const review = readFileSync(join(ROOT, 'review.html'), 'utf8');
+  assert.match(review, /never the alms-giving and never a temple fee/);
+});
+
+test('the wedding cost model is stated in words on both surfaces', () => {
+  ['your-journey.html', 'review.html'].forEach((f) => {
+    const page = readFileSync(join(ROOT, f), 'utf8');
+    assert.match(page, /Hosted by the couple/, f);
+    assert.match(page, /No separate charge/, f);
+    assert.match(page, /Your optional personal addition/, f);
+  });
+});
+
+test('SEND is unavailable until the required steps are done — and never fails silently', () => {
+  const page = readFileSync(join(ROOT, 'review.html'), 'utf8');
+  assert.match(page, /if\(!SIYL_BAG\.get\(\)\.length\|\|!G\|\|!G\.party\(\)\|\|!G\.readiness\(\)\.ok\)\{blockSend\(\);return\}/);
+  assert.match(page, /Please review the dress code before sending your journey/);
+  assert.match(page, /Send to Guest Relations — not ready yet/);
+  const g = readFileSync(join(ROOT, 'assets/guest.js'), 'utf8');
+  /* required vs optional: optional never blocks */
+  const r = g.slice(g.indexOf('readiness: function'), g.indexOf('/* ---- what Guest Relations receives'));
+  ['identity', 'journey', 'wedding', 'dress', 'contact'].forEach((k) =>
+    assert.ok(r.includes("key: '" + k + "'"), k + ' is not a required step'));
+  ['profile', 'documents'].forEach((k) => assert.ok(r.includes("key: '" + k + "'"), k + ' is not listed as optional'));
+  assert.match(r, /optional: optional/);
+});
+
+test('the invitation briefing tells the guest who is invited and who they decide for', () => {
+  const page = readFileSync(join(ROOT, 'invitation.html'), 'utf8');
+  assert.match(page, /You are invited to join <span class="nb">Haruthai &amp; Suthep<\/span>/);
+  assert.match(page, /Your party/);
+  assert.match(page, /You are making decisions for/);
+  assert.match(page, /setIdentityReviewed\(true\)/);
+  /* and it is step one of the preparation, not a page nobody can find */
+  const prep = readFileSync(join(ROOT, 'assets/prep.js'), 'utf8');
+  assert.match(prep, /\['Your invitation', 'invitation.html'/);
+  ['your-journey.html', 'voyage.html', 'dress.html', 'you.html', 'review.html', 'invitation.html']
+    .forEach((f) => assert.ok(readFileSync(join(ROOT, f), 'utf8').includes('assets/prep.js'), f + ' has no preparation rail'));
+});
+
+test('Review & Send carries DOCUMENTS & PRIVACY, and promises no vault it does not have', () => {
+  const page = readFileSync(join(ROOT, 'review.html'), 'utf8');
+  assert.match(page, /<h2>Documents &amp; privacy<\/h2>/);
+  ['Passport', 'Flight information', 'Photography &amp; filming', 'Publication consent']
+    .forEach((k) => assert.ok(page.includes(k), k + ' missing from Documents & privacy'));
+  assert.match(page, /Not provided yet/);
+  assert.match(page, /Secure document upload will become available later/);
+  assert.match(page, /no document is stored in this browser/);
+  /* no upload control exists anywhere on the page */
+  assert.doesNotMatch(page, /type="file"/);
 });
 
 test('Review & Send is five editorial blocks, each with its own way back', () => {
   const page = readFileSync(join(ROOT, 'review.html'), 'utf8');
   ['01', '02', '03', '04', '05'].forEach((n) =>
     assert.ok(page.includes('<span class="bno">' + n + '</span>'), 'block ' + n + ' missing'));
-  ['you.html', 'voyage.html#temple-decision', 'your-journey.html', 'dress.html']
+  ['you.html', 'voyage.html#temple-decision', 'your-journey.html', 'dress.html', 'invitation.html']
     .forEach((href) => assert.ok(page.includes('href="' + href + '"'), href + ' has no edit route'));
+  /* the approved architecture: YOU · YOUR JOURNEY · THE WEDDING ·
+   * DOCUMENTS & PRIVACY · YOUR COSTS — About you lives inside YOU */
+  const body = page.slice(page.indexOf('<main>'), page.indexOf('</main>'));
+  let at = -1;
+  ['b1', 'b2', 'b3', 'b4', 'b5'].forEach((id) => {
+    const i = body.indexOf('id="' + id + '"');
+    assert.ok(i > at, id + ' is out of order in the page');
+    at = i;
+  });
+  [['b1', '<h2>You</h2>'], ['b2', '<h2>Your journey</h2>'], ['b3', '<h2>The Wedding</h2>'],
+   ['b4', '<h2>Documents &amp; privacy</h2>'], ['b5', '<h2>Your costs</h2>']]
+    .forEach(([id, heading]) => assert.ok(page.includes(heading), id + ' does not carry ' + heading));
+  /* ABOUT YOU belongs inside YOU, and is not a block of its own */
+  assert.match(page, /Hospitality profile/);
+  assert.doesNotMatch(body, /<h2>About you<\/h2>/);
   /* RECEIVED is not CONFIRMED, and a sent journey stays editable */
   assert.match(page, /Received &mdash; not yet confirmed/);
   assert.match(page, /Confirmed<\/b> is something only Guest Relations can tell you/);

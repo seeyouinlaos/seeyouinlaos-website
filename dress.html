@@ -21,12 +21,18 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:20px;margin:34
 .dgal::-webkit-scrollbar{display:none}
 .dgal img{flex:0 0 68%;max-width:280px;aspect-ratio:3/4;object-fit:cover;scroll-snap-align:start;background:#E7E3DB;display:block}
 .dcap{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75;margin-top:10px}
+.dmap{border-top:1px solid #DAD9D7;margin-top:22px}
+.dmr{display:flex;gap:14px;align-items:baseline;border-bottom:1px solid #EDEBE7;padding:13px 0}
+.dme{font-size:12.5px;color:#313131}
+.dmr a{margin-left:auto;font-size:9.5px;letter-spacing:1.8px;text-transform:uppercase;color:#313131;text-decoration:none;border-bottom:1px solid #313131;padding-bottom:2px;white-space:nowrap}
 .dack{border:1px solid #DAD9D7;background:#FCFAF6;padding:22px 20px;margin-top:34px}
 .dack h3{font-family:'PP Editorial Old',serif;font-weight:200;font-size:19px;margin-bottom:8px}
 .ackrow{display:flex;gap:12px;align-items:flex-start;cursor:pointer;padding:8px 0;min-height:44px}
 .ackrow input{width:20px;height:20px;margin-top:2px;flex:none;accent-color:#313131}
 .ackrow span{font-size:13px;line-height:1.7;color:#313131}
 .ackstate{font-size:9.5px;letter-spacing:2px;text-transform:uppercase;color:#7C7A75;margin-top:8px}
+.ackstate.open{color:#8A5A55}
+.dreq{font-size:9.5px;letter-spacing:2.2px;text-transform:uppercase;color:#8A5A55;margin-bottom:8px}
 @media (min-width:768px){.dgal{margin-left:0;margin-right:0;padding-left:0;padding-right:0}.dgal img{flex:0 0 200px}}
 </style><link rel="stylesheet" href="assets/desktop.css"><link rel="stylesheet" href="assets/aman.css"></head><body>
 <header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="your-journey.html" aria-label="Your Journey"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
@@ -34,6 +40,13 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:20px;margin:34
 <h1>Dress Code</h1>
 <p class="sub">Three codes · one wedding day · twelve days of travel</p>
 <p class="note" style="margin-top:0">The wedding day carries two dress codes, and the travelling days carry a third. The references below are photographs, not rules: they show the register, not a uniform. Nothing is bought or hired through this website.</p>
+<div class="dmap">
+  <div class="dmr"><span class="dme">Temple Ceremony</span><a href="#traditional">Blue Lao Traditional Dress</a></div>
+  <div class="dmr"><span class="dme">Coffee &amp; Cake</span><a href="#blacktie">Black Tie</a></div>
+  <div class="dmr"><span class="dme">Vow Ceremony</span><a href="#blacktie">Black Tie</a></div>
+  <div class="dmr"><span class="dme">Wedding Dinner</span><a href="#blacktie">Black Tie</a></div>
+  <div class="dmr"><span class="dme">The travelling days</span><a href="#resort">Resort Wear</a></div>
+</div>
 
 <section class="dcode" id="traditional">
   <p class="dlabel">Sunday, 28 February 2027 · Morning</p>
@@ -63,17 +76,19 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:20px;margin:34
 </section>
 
 <div class="dack">
+  <p class="dreq">Required before sending</p>
   <h3>Before you send your journey</h3>
-  <p class="note" style="margin-top:0">One acknowledgement covers the whole wedding journey. It is never ticked for you.</p>
+  <p class="note" style="margin-top:0">One acknowledgement covers the whole wedding journey, for everyone on your invitation. It is never ticked for you, and your journey cannot be sent until it is.</p>
   <label class="ackrow"><input type="checkbox" id="ack"><span id="acktext"></span></label>
-  <p class="ackstate" id="ackstate">Not acknowledged</p>
+  <p class="ackstate" id="ackstate">Not yet reviewed</p>
 </div>
-<p style="margin-top:26px"><a class="tlink" href="review.html">Back to Review &amp; Send</a></p>
+<p style="margin-top:26px"><a class="tlink" href="review.html" id="back">Back to Review &amp; Send</a></p>
 </main>
 <script src="assets/bag.js"></script>
 <script src="assets/shop-menu.js"></script>
 <script src="assets/aman.js"></script>
 <script src="assets/guest.js"></script>
+<script src="assets/prep.js"></script>
 <script type="module" src="assets/invite.mjs"></script>
 <script>
 /* THE ACKNOWLEDGEMENT. Unchecked until the guest checks it, stored with the
@@ -83,7 +98,10 @@ var G=window.SIYL_GUEST,box=document.getElementById('ack'),st=document.getElemen
 document.getElementById('acktext').textContent=G?G.DRESS_TEXT:'';
 if(!G)return;
 function paint(){var a=G.dressAck();box.checked=!!a;
-st.textContent=a?('Acknowledged · '+new Date(a.at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})):'Not acknowledged'}
+st.className='ackstate'+(a?'':' open');
+st.textContent=a?('Reviewed · '+new Date(a.at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})):'Not yet reviewed';
+var b=document.getElementById('back');
+if(b)b.textContent=a?'Back to Review & Send':'Back to Review & Send without acknowledging'}
 box.addEventListener('change',function(){G.setDressAck(box.checked);paint()});
 document.addEventListener('siyl:guest',paint);
 paint();

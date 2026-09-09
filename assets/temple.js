@@ -13,8 +13,14 @@
                   it is deliberately absent from the room ledger: an offering
                   is not a bed and has no capacity.
 
-   Tak Bat — the morning alms-giving of food — is part of the ceremony for
-   everyone who attends. It is never a product and never has a price.
+   Tak Bat — the morning alms-giving, in which food is respectfully offered to
+   Buddhist monks — is part of the Temple Ceremony. Guests attending are INVITED
+   to take part. It is never a product and never has a price, and it is never
+   the same thing as the Sangkhathan: nobody may leave this website believing
+   they paid USD 15 for the alms-giving.
+
+   Three states per person, never two: NOT DECIDED is not NOT ATTENDING, and a
+   guest who has not answered the Sangkhathan has not declined it.
    ========================================================================== */
 (function () {
   'use strict';
@@ -57,7 +63,15 @@
       return v && (v.attend === 'yes' || v.attend === 'no') ? v.attend : null;
     },
     attendingOf: function (id) { return this.attendanceOf(id) === 'yes'; },
-    offeringOf: function (id) { return !!((read().by || {})[id] || {}).offering; },
+    offeringOf: function (id) { return this.offeringOf_(id) === 'yes'; },
+    /* 'yes' selected · 'no' continued without one · null not decided */
+    offeringOf_: function (id) {
+      var v = (read().by || {})[id] || {};
+      if (v.off === 'yes' || v.off === 'no') return v.off;
+      if (v.offering) return 'yes';          /* record written before tri-state */
+      return null;
+    },
+    offeringDecidedOf: function (id) { return this.offeringOf_(id) !== null; },
 
     setAttendance: function (id, v) {
       var st = read();
@@ -65,18 +79,22 @@
       st.by[id] = st.by[id] || {};
       st.by[id].attend = (v === 'yes' || v === 'no') ? v : null;
       st.by[id].at = new Date().toISOString();
-      /* Not attending: this person's offering goes, and returning to attending
-       * never silently restores it — they are asked again. */
-      if (st.by[id].attend !== 'yes') delete st.by[id].offering;
+      /* Not attending: this person's offering decision goes with it, and
+       * returning to attending never silently restores it — they are asked
+       * again, from NOT DECIDED. */
+      if (st.by[id].attend !== 'yes') { delete st.by[id].off; delete st.by[id].offering; }
       write(st);
       sync();
     },
-    setOffering: function (id, on) {
+    /* v: 'yes' | 'no' | null */
+    setOffering: function (id, v) {
       var st = read();
       st.by = st.by || {};
       st.by[id] = st.by[id] || {};
-      if (!on) delete st.by[id].offering;
-      else if (st.by[id].attend === 'yes') st.by[id].offering = { at: new Date().toISOString() };
+      delete st.by[id].offering;
+      if (st.by[id].attend !== 'yes') delete st.by[id].off;
+      else if (v === 'yes' || v === 'no') st.by[id].off = v;
+      else delete st.by[id].off;
       write(st);
       sync();
     },
@@ -86,9 +104,22 @@
       var self = this;
       return people().filter(function (g) { return self.attendingOf(g.guestId); });
     },
+    /* every named guest has answered attendance, and every attending guest has
+     * answered the Sangkhathan. Silence is never read as an answer. */
     decidedAll: function () {
       var self = this;
-      return people().every(function (g) { return self.attendanceOf(g.guestId) !== null; });
+      return people().every(function (g) {
+        if (self.attendanceOf(g.guestId) === null) return false;
+        if (self.attendingOf(g.guestId) && !self.offeringDecidedOf(g.guestId)) return false;
+        return true;
+      });
+    },
+    undecided: function () {
+      var self = this;
+      return people().filter(function (g) {
+        return self.attendanceOf(g.guestId) === null ||
+               (self.attendingOf(g.guestId) && !self.offeringDecidedOf(g.guestId));
+      });
     },
     anyAttending: function () { return this.attendees().length > 0; },
     offeringGuests: function () {
@@ -105,13 +136,15 @@
     operational: function () {
       var self = this;
       var rows = people().map(function (g) {
-        var a = self.attendanceOf(g.guestId);
+        var a = self.attendanceOf(g.guestId), o = self.offeringOf_(g.guestId);
         return {
           guestId: g.guestId,
           name: g.preferredName || g.fullName || 'You',
-          temple: a === 'yes' ? 'Attending' : a === 'no' ? 'Not attending' : 'No decision yet',
+          temple: a === 'yes' ? 'Attending' : a === 'no' ? 'Not attending' : 'Not decided',
           attending: a === 'yes',
-          sangkhathan: self.offeringOf(g.guestId)
+          sangkhathan: o === 'yes',
+          sangkhathanState: a !== 'yes' ? 'Not applicable'
+            : o === 'yes' ? 'Selected' : o === 'no' ? 'Continuing without an offering' : 'Not decided'
         };
       });
       var n = this.offerings();
@@ -119,7 +152,8 @@
         guests: rows,
         attending: rows.filter(function (r) { return r.attending; }).length,
         notAttending: rows.filter(function (r) { return r.temple === 'Not attending'; }).length,
-        undecided: rows.filter(function (r) { return r.temple === 'No decision yet'; }).length,
+        undecided: rows.filter(function (r) { return r.temple === 'Not decided'; }).length,
+        sangkhathanUndecided: rows.filter(function (r) { return r.sangkhathanState === 'Not decided'; }).length,
         offerings: n,
         offeringsUsd: n * 15,
         offeringNames: this.offeringGuests().map(function (g) { return g.preferredName || g.fullName; })
