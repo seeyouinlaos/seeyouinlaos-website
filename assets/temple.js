@@ -208,6 +208,12 @@
   /* the ONE bag line, quantity = the number of named guests who chose it */
   function sync() {
     if (!window.SIYL_BAG || !window.SIYL_PRICE) return;
+    /* When the party is not resolved — no invitation open, or a session that
+     * predates the names — we do not know who chose anything. Silence is not a
+     * cancellation: leave the journey exactly as the guest left it and wait
+     * for the names to come back. */
+    var G = window.SIYL_GUEST;
+    if (G && !G.party()) return;
     var n = T.offerings();
     if (!n) { if (SIYL_BAG.has('sangkhathan')) SIYL_BAG.remove('sangkhathan'); return; }
     var line = SIYL_PRICE.items('sangkhathan')[0];

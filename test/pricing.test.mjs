@@ -379,6 +379,10 @@ test('a session stored without names is not an open invitation', () => {
   const g = readFileSync(join(ROOT, 'assets/guest.js'), 'utf8');
   assert.match(g, /if \(!a \|\| !Array\.isArray\(a\.guests\) \|\| !a\.guests\.length\) return null;/);
   assert.match(g, /stale: function/);
+  /* and an unresolved party never edits the journey: a stale session must not
+   * quietly drop a line the guest already chose */
+  const t = readFileSync(join(ROOT, 'assets/temple.js'), 'utf8');
+  assert.match(t, /if \(G && !G\.party\(\)\) return;/);
   const inv = readFileSync(join(ROOT, 'assets/invite.mjs'), 'utf8');
   assert.match(inv, /hasNames\(\) \{/);
   assert.match(inv, /if \(a && AUTH\.hasNames\(\)\) \{ fn\(a\); return; \}/);
@@ -387,6 +391,10 @@ test('a session stored without names is not an open invitation', () => {
     const page = readFileSync(join(ROOT, f), 'utf8');
     assert.match(page, /if\(!p\|\|!p\.guests\.length\)\{/, f + ' can still crash on an empty party');
     assert.match(page, /Open your invitation once more/, f + ' does not explain a stale session');
+    /* recovery copy stays short, and never exposes how the thing is built */
+    assert.match(page, /We&rsquo;ve updated your private journey so every choice can now be shown by name\./, f);
+    [/older build/i, /stored session/i, /payload/i, /guest array/i, /migration/i]
+      .forEach((bad) => assert.doesNotMatch(page, bad, f + ' leaks an implementation concept'));
   });
   const voyage = readFileSync(join(ROOT, 'voyage.html'), 'utf8');
   assert.match(voyage, /if \(!party \|\| !party\.guests\.length\) \{/);
