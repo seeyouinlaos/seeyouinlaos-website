@@ -32,7 +32,9 @@ function corsHeaders(request) {
   return {
     'access-control-allow-origin': origin,
     'access-control-allow-methods': 'GET, POST, OPTIONS',
-    'access-control-allow-headers': 'content-type',
+    /* the document endpoint authenticates with the invitation the client
+     * already holds, so those headers must survive the preflight */
+    'access-control-allow-headers': 'content-type, x-invitation, x-guest, x-kind, x-filename',
     'access-control-max-age': '7200',
   };
 }
