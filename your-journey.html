@@ -80,6 +80,50 @@ body.fx-open .fxs,body.fx-open .fxo{display:block}
 .fxo .cancel{background:none;border:0;font:inherit;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#7C7A75;cursor:pointer;min-height:44px;padding:12px 0}
 .fxo .go{background:#313131;color:#F3EEE7;border:0;padding:17px 26px;font:inherit;font-size:10.5px;letter-spacing:2.2px;text-transform:uppercase;cursor:pointer;min-height:52px}
 @media (min-width:900px){.fxo{left:50%;right:auto;bottom:auto;top:50%;transform:translate(-50%,-50%);width:520px;padding:40px 44px}}
+/* ---- THE COST SAVING SELECTOR ------------------------------------------
+   Two choices, not two buttons. The guest moves between them horizontally —
+   swipe, trackpad, arrows or the keyboard — and the card resting on the snap
+   point IS the choice. One confirmation applies it. Built on the accepted
+   carousel grammar (.acar/.atrk/.aslide/.arail) so it behaves like every other
+   rail on the site. */
+.fxo.wide{max-width:none}
+@media (min-width:900px){.fxo.wide{width:860px;padding:40px 0 44px}}
+.csel{position:relative;margin:4px 0 0}
+.csel .atrk{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scrollbar-width:none;padding:2px 0 4px;scroll-padding-left:0}
+.csel .atrk::-webkit-scrollbar{display:none}
+.csel .aslide{flex:0 0 84%;scroll-snap-align:start;scroll-snap-stop:always}
+.cscard{border:1px solid #DAD9D7;background:#FFFDF9;padding:22px 20px 20px;height:100%;transition:border-color .3s,opacity .35s}
+.csel .aslide:not(.on) .cscard{opacity:.5}
+.csel .aslide.on .cscard{border-color:#313131}
+.cscard .cse{font-size:9.5px;letter-spacing:2.2px;text-transform:uppercase;color:#7C7A75}
+.cscard h3{font-family:'PP Editorial Old',serif;font-weight:200;font-size:22px;line-height:1.25;margin:8px 0 2px}
+.cscard .csw{font-size:11.5px;color:#7C7A75;margin-bottom:14px}
+.cscard .csa{font-family:'PP Editorial Old',serif;font-size:24px;line-height:1.1}
+.cscard .csan{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75;margin:4px 0 14px}
+.cscard ul{list-style:none;margin:0 0 12px;padding:0}
+.cscard li{position:relative;padding-left:16px;font-size:12px;line-height:1.65;color:#4A4A4A;margin-bottom:7px}
+.cscard li::before{content:'';position:absolute;left:2px;top:.62em;width:4px;height:4px;border-radius:50%;background:#C9C4BA}
+.cscard .csav{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75;margin-top:12px}
+.cscard .csav.low{color:#8A5A55}
+.cscard.gone{opacity:.55}
+.cscard.gone h3,.cscard.gone .csa{color:#7C7A75}
+.csel .arow{display:flex;align-items:center;gap:16px;margin:16px 0 0}
+.csel .arail{position:relative;flex:1;height:1px;background:#DAD9D7;cursor:pointer;padding:14px 0;background-clip:content-box;box-sizing:content-box}
+.csel .arail i{position:absolute;top:13px;left:0;height:3px;background:#313131;transition:transform .45s cubic-bezier(.4,0,.2,1),width .3s}
+.csel .anav{display:flex;gap:2px}
+.csel .anav button{position:relative;background:none;border:0;cursor:pointer;width:44px;height:44px;color:#7C7A75}
+.csel .anav button::before{content:'';position:absolute;left:50%;top:50%;width:7px;height:7px;border-left:1px solid currentColor;border-bottom:1px solid currentColor;transform:translate(-50%,-50%) rotate(45deg)}
+.csel .anav button[data-a="next"]::before{transform:translate(-30%,-50%) rotate(-135deg)}
+.csel .anav button:hover{color:#313131}
+.csel .anav button[disabled]{opacity:.3;cursor:default}
+.cshint{font-size:9.5px;letter-spacing:2.2px;text-transform:uppercase;color:#7C7A75;margin:2px 0 10px}
+.csnone{border:1px solid #C9A9A0;background:#FBF4F2;padding:18px 18px 14px;font-size:12.5px;color:#4A4A4A;line-height:1.7;margin-top:4px}
+.fxo .go[disabled]{opacity:.45;cursor:default}
+@media (min-width:900px){
+  .csel .atrk,.csel .arow,.cshint,.fxo.wide .ie,.fxo.wide h2,.fxo.wide #fxp,.fxo.wide .row2,.fxo.wide .csnone{padding-left:44px;padding-right:44px}
+  .csel .aslide{flex:0 0 46%}
+  .cscard{padding:26px 24px 24px}
+}
 </style><link rel="stylesheet" href="assets/desktop.css"><link rel="stylesheet" href="assets/aman.css"></head><body>
 <header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="your-journey.html" aria-label="Your Journey"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main><h1>Your Journey</h1><p class="sub">Your selections · live costs · nothing is paid on this website</p>
@@ -93,6 +137,7 @@ body.fx-open .fxs,body.fx-open .fxo{display:block}
 <p class="ie" id="fxe">Full Experience</p>
 <h2 id="fxt">Complete the remaining journey.</h2>
 <p id="fxp">Complete the remaining journey with the highest available eligible selection at each stage. You can still change individual choices afterwards.</p>
+<div id="csel"></div>
 <div class="row2"><button type="button" class="cancel" id="fxc">Cancel</button><button type="button" class="go" id="fxg">Add Full Experience</button></div>
 </div>
 <a class="cta" href="review.html">Review &amp; Send</a>
@@ -139,7 +184,7 @@ return '<div class="row"><a class="th" href="'+href+'" aria-label="Open '+x.name
 (m.basis?'<p class="basis">'+m.basis+'</p>':'')+
 (J&&J.quantityLine(x)?'<p class="qty">'+J.quantityLine(x)+'</p>':'')+
 (x.note?'<p class="hostln">'+x.note+(x.noteBy?'<span>'+x.noteBy+'</span>':'')+'</p>':'')+
-(x.complimentary?'<p class="hostln">Complimentary<span>Hosted — USD 0 payable by you</span></p>':'')+
+(x.complimentary?'<p class="hostln">Complimentary<span>Hosted — USD 0 payable by you</span><span>Independent stay · no individual Guest Relations support</span></p>':'')+
 (x.breakfast?'<p class="bf">'+x.breakfast+'</p>':'')+
 (function(){var St=window.SIYL_STOCK,w2=P?P.windowOf(x.id):x.id;
  if(!St||!St.ready()||!x.room||!St.tracked(w2,x.room))return '';
@@ -181,6 +226,9 @@ if(!open.length&&any){
     '<p class="sub2">'+(whole
       ? 'Every stage of the journey has an answer and each one is booked with us. Review &amp; Send shares it with Guest Relations.'
       : 'Every stage has an answer, and the stages below you are arranging yourself. Review &amp; Send shares the rest with Guest Relations.')+'</p>'+
+    (SIYL_BAG.has('airbnb-2br')
+      ? '<p class="selfl">The private residence is an independent stay: the wedding programme is yours as it stands, and arrival, departure, transfers and personal logistics are arranged by you. It carries no individual Guest Relations travel or accommodation support.</p>'
+      : '')+
     selfList+
     '<p class="fxnote">You can still change how the journey is composed:</p>'+modes+'</div>';
 } else if(!open.length){ box.innerHTML=''; }
@@ -195,35 +243,103 @@ var c=document.getElementById('csb');if(c)c.addEventListener('click',function(){
 
 /* ---- FULL EXPERIENCE: one confirmation, then the open stages are filled from
  * the single pricing source. Existing selections and declines are untouched. */
-var FXMODE='full';
+var FXMODE='full',CSOPTS=[],CSPICK=0;
+
+/* ---- the two Cost Saving choices, as one horizontal decision object ----
+ * The card resting on the snap point IS the choice. Swiping commits nothing;
+ * the single confirmation below applies whichever card is active. */
+function csHtml(opts){
+var cards=opts.map(function(o){
+  var St=window.SIYL_STOCK,av='';
+  if(o.stock&&St&&St.ready()){av=St.label(o.stock.win,o.stock.slug,csGuests())}
+  return '<article class="aslide"><div class="cscard'+(o.available?'':' gone')+'">'+
+    '<p class="cse">'+o.eyebrow+'</p>'+
+    '<h3>'+o.name+'</h3>'+
+    '<p class="csw">'+o.stayName+' · '+o.dates+'</p>'+
+    '<p class="csa">'+o.amount+'</p>'+
+    '<p class="csan">'+o.amountNote+'</p>'+
+    '<ul>'+o.service.map(function(l){return '<li>'+l+'</li>'}).join('')+'</ul>'+
+    (av?'<p class="csav'+(/Sold out|Only|Reserved/.test(av)?' low':'')+'">'+av+'</p>':'')+
+    '</div></article>'}).join('');
+return '<p class="cshint">Swipe to compare</p>'+
+  '<div class="csel acar" id="cscar"><div class="atrk">'+cards+'</div>'+
+  '<div class="arow"><div class="arail" aria-hidden="true"><i></i></div>'+
+  '<div class="anav"><button type="button" data-a="prev" aria-label="Previous option"></button>'+
+  '<button type="button" data-a="next" aria-label="Next option"></button></div></div></div>'}
+
+function csGuests(){var n=1;SIYL_BAG.get().forEach(function(x){if(x.qty>n)n=x.qty});return n}
+
+function csBuild(){
+var box=document.getElementById('csel');
+CSOPTS=SIYL_JOURNEY.costSavingOptions(csGuests());
+var usable=CSOPTS.filter(function(o){return o.available});
+if(!usable.length){
+  box.innerHTML='<div class="csnone">Neither Cost Saving stay is available for your party at the moment — the hotel categories are taken and the residence is full. Guest Relations will find an arrangement with you, or you can compose the journey stage by stage.</div>';
+  document.getElementById('fxg').disabled=true;
+  return}
+document.getElementById('fxg').disabled=false;
+box.innerHTML=csHtml(CSOPTS);
+/* start on the first option that can actually be taken */
+CSPICK=CSOPTS.indexOf(usable[0]);
+var car=document.getElementById('cscar');
+if(window.SIYL_AMAN)SIYL_AMAN.wire(car);
+car.addEventListener('a:active',function(e){csPick(e.detail.index)});
+if(CSPICK>0){var nx=car.querySelector('[data-a="next"]');if(nx)nx.click()}
+csPick(CSPICK)}
+
+function csPick(i){
+CSPICK=i;
+var o=CSOPTS[i],g=document.getElementById('fxg');
+if(!o)return;
+g.disabled=!o.available;
+g.textContent=o.available?'Use this Cost Saving option':'Not available';
+document.getElementById('fxp').textContent=o.note+' Every other stage of the journey becomes self-arranged: you organise and fund your own travel to and from Vientiane.'}
+
 function fxOpen(mode){
 var o=document.getElementById('fxo');
-if(!mode){o.hidden=true;document.body.classList.remove('fx-open');return}
+if(!mode){o.hidden=true;o.classList.remove('wide');document.body.classList.remove('fx-open');
+  document.getElementById('csel').innerHTML='';return}
 FXMODE=mode;
 var cost=mode==='cost';
+o.classList.toggle('wide',cost);
 document.getElementById('fxe').textContent=cost?'Cost Saving Experience':'Full Experience';
-document.getElementById('fxt').textContent=cost?'The hosted Vientiane days only.':'Complete the remaining journey.';
-document.getElementById('fxp').textContent=cost
- ? 'The complimentary private residence in Vientiane for the wedding window, and the wedding programme — hosted, USD 0 payable by you. Every other stage becomes self-arranged: you organise and fund your own travel to and from Vientiane, and Guest Relations support applies during the Vientiane wedding stay only.'
- : 'All ten stages of the journey, each with the highest room, cabin or seat you may select. This replaces the choices you have made so far, including a complimentary alternative stay — you can still change any individual stage afterwards.';
-document.getElementById('fxg').textContent=cost?'Choose Cost Saving':'Add Full Experience';
+document.getElementById('fxt').textContent=cost?'Two ways to stay for the wedding.':'Complete the remaining journey.';
+document.getElementById('fxg').disabled=false;
+document.getElementById('csel').innerHTML='';
+if(cost){csBuild()}
+else{document.getElementById('fxp').textContent='All ten stages of the journey, each with the room, cabin or seat approved for the complete journey. This replaces the choices you have made so far, including a Cost Saving stay — you can still change any individual stage afterwards.';
+  document.getElementById('fxg').textContent='Add Full Experience'}
 o.hidden=false;document.body.classList.add('fx-open');document.getElementById('fxg').focus()}
 function gated(fn){if(window.SIYL_INVITE){SIYL_INVITE.require(fn)}else document.addEventListener('siyl:invite-ready',function(){SIYL_INVITE.require(fn)},{once:true})}
 document.getElementById('fxs').addEventListener('click',function(){fxOpen(null)});
 document.getElementById('fxc').addEventListener('click',function(){fxOpen(null)});
 document.addEventListener('keydown',function(e){if(e.key==='Escape')fxOpen(null)});
 document.getElementById('fxg').addEventListener('click',function(){
-var mode=FXMODE;fxOpen(null);
-gated(function(){
+var mode=FXMODE,pick=CSOPTS[CSPICK];
+if(mode==='cost'&&(!pick||!pick.available))return;
+fxOpen(null);
+gated(async function(){
   if(mode==='cost'){
-    var plan=SIYL_JOURNEY.costSaving();
+    var plan=SIYL_JOURNEY.costSavingPlan(pick);
+    /* If this invitation already holds rooms in the shared ledger, the change
+     * is verified and replaced there FIRST. The ledger swaps an invitation's
+     * own allocation inside one atomic turn, so the previous room is released
+     * only once the replacement is secured — and if the new choice has gone,
+     * nothing is touched and the guest keeps what they had. */
+    if(window.SIYL_STOCK){
+      var held=await SIYL_STOCK.mine();
+      if(held&&held.lines&&held.lines.length){
+        var res=await SIYL_STOCK.reserveLines(plan.add.map(function(it){
+          return {win:SIYL_PRICE.windowOf(it.id),slug:it.room||'',qty:it.qty||csGuests()}}));
+        if(!res.ok&&!res.unreachable){
+          var c=(res.conflicts||[])[0];
+          alertRoom(c);return}
+      }
+    }
+    plan.remove.forEach(function(id){SIYL_BAG.remove(id)});
     SIYL_JOURNEY.SEGMENTS.forEach(function(s2){
-      if(plan.selfArranged.indexOf(s2.key)>=0){
-        s2.ids.forEach(function(id){SIYL_BAG.remove(id)});
-        SIYL_JOURNEY.skip(s2.key,true);
-      }else{SIYL_JOURNEY.skip(s2.key,false)}
+      SIYL_JOURNEY.skip(s2.key,plan.selfArranged.indexOf(s2.key)>=0);
     });
-    SIYL_PRICE.ids('wedstay').forEach(function(id){SIYL_BAG.remove(id)});
     plan.add.forEach(function(it){SIYL_BAG.put(it)});
   }else{
     /* Full Experience is a mode: the canonical premium configuration replaces
@@ -237,6 +353,18 @@ gated(function(){
   var d=document.getElementById('dec');if(d)d.scrollIntoView({behavior:'smooth',block:'center'});
 });
 });
+
+/* a change that the ledger refused: say which room, and change nothing */
+function alertRoom(c){
+var box=document.getElementById('dec');
+if(!box)return;
+var n=document.createElement('div');
+n.className='csnone';
+n.textContent=(c?c.name:'That stay')+' is no longer available — your journey has not been changed. '+
+  'Open Cost Saving again to choose the other option.';
+box.prepend(n);
+box.scrollIntoView({behavior:'smooth',block:'center'});
+setTimeout(function(){n.remove()},12000)}
 /* ---- the rooms this invitation actually holds in the shared ledger ----
  * An allocation is written when the journey is SENT. If the guest then changes
  * a room, the ledger still holds the old one: say so plainly and tell them the

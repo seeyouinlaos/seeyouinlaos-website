@@ -156,14 +156,100 @@
       };
     },
 
-    /* COST SAVING EXPERIENCE — the hosted Vientiane core only: the
-     * complimentary private residence for the wedding window, plus the wedding
-     * programme. Every other stage becomes an explicit self-arranged decision.
-     * Composed from existing approved products; nothing is invented. */
-    costSaving: function () {
-      var P = window.SIYL_PRICE;
+    /* ======================================================================
+       COST SAVING EXPERIENCE — the reduced journey, with TWO ways to spend
+       the wedding window in Vientiane and nothing else changed between them:
+
+         A · HOTEL          the lowest-priced eligible and AVAILABLE Souphattra
+                            category for 27 FEB – 01 MAR. A normal hotel stay
+                            inside the wedding programme, with Guest Relations
+                            support during the Vientiane wedding stay.
+         B · RESIDENCE      the complimentary private residence, USD 0, up to
+                            six guests. An independent stay: the wedding
+                            programme is included, everything around it is not.
+
+       Both mean the same reduced journey — every other stage is self-arranged.
+       Neither is a second Full Experience. The ledger decides availability;
+       nothing here invents capacity, and swiping between the two commits
+       nothing.
+       ====================================================================== */
+    costSavingOptions: function (qty) {
+      var P = window.SIYL_PRICE, St = window.SIYL_STOCK;
+      var guests = Math.max(1, parseInt(qty, 10) || 1);
+      var ready = !!(St && St.ready());
+      var free = function (win) {
+        return function (slug) { return ready ? St.fits(win, slug, guests) : true; };
+      };
+      var out = [];
+
+      /* A · the cheapest hotel room that is genuinely there */
+      var room = P ? P.cheapest('wedstay', free('wedstay')) : null;
+      var hotel = {
+        key: 'hotel',
+        eyebrow: 'Cost Saving · Hotel',
+        available: !!room,
+        room: room,
+        stayName: 'Souphattra Heritage Vientiane',
+        dates: '27 February – 01 March 2027',
+        note: 'A hotel stay inside the wedding programme, with Guest Relations support during the Vientiane Wedding Stay.',
+        service: [
+          'Two nights: 27 → 28 February and 28 February → 01 March',
+          'First night your contribution · second night complimentary, hosted by the Bride & Groom',
+          'Breakfast included',
+          'Guest Relations support during the Vientiane Wedding Stay'
+        ]
+      };
+      if (room) {
+        var q = P.quote('wedstay', room.slug);
+        hotel.name = room.name;
+        hotel.amount = P.money(q.total);
+        hotel.amountNote = 'per person · 2 nights';
+        hotel.items = P.items('wedstay', room.slug);
+        hotel.stock = ready ? { win: 'wedstay', slug: room.slug } : null;
+      } else {
+        hotel.name = 'No room available';
+        hotel.amount = 'Sold out';
+        hotel.amountNote = 'every eligible category is taken';
+        hotel.items = [];
+      }
+      out.push(hotel);
+
+      /* B · the complimentary residence, if the party still fits */
+      var fits = ready ? St.fits('airbnb-2br', 'private-residence', guests) : true;
+      out.push({
+        key: 'residence',
+        eyebrow: 'Cost Saving · Complimentary',
+        available: fits,
+        name: 'Private Residence',
+        stayName: 'Downtown Vientiane',
+        dates: '27 February – 01 March 2027',
+        amount: 'Complimentary',
+        amountNote: fits ? 'USD 0 payable · up to 6 guests' : 'not enough places for your party',
+        items: P ? P.items('airbnb-2br', 'private-residence') : [],
+        stock: ready ? { win: 'airbnb-2br', slug: 'private-residence' } : null,
+        note: 'An independent stay. The wedding programme is yours as it stands; everything around it you arrange yourself.',
+        service: [
+          'Two nights: 27 → 28 February and 28 February → 01 March',
+          'Wedding programme participation included as it stands',
+          'Arrival, departure and transfers arranged by you',
+          'No individual Guest Relations travel or accommodation support'
+        ]
+      });
+      return out;
+    },
+
+    /* the journey Cost Saving produces once an option is chosen */
+    costSavingPlan: function (option) {
       return {
-        add: P ? P.items('airbnb-2br', 'private-residence') : [],
+        add: (option && option.items) || [],
+        remove: SEG.reduce(function (a, s) {
+          s.ids.forEach(function (id) {
+            (window.SIYL_PRICE ? window.SIYL_PRICE.ids(id) : [id]).forEach(function (x) {
+              if (a.indexOf(x) < 0) a.push(x);
+            });
+          });
+          return a;
+        }, []),
         selfArranged: SEG.filter(function (s) { return s.key !== 'wedstay'; }).map(function (s) { return s.key; })
       };
     },

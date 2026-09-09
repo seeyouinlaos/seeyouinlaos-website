@@ -113,6 +113,28 @@
       }).filter(function (l) { return l.slug; });
     },
 
+    /* ask the ledger to hold EXACTLY these lines for this invitation. The
+     * ledger replaces an invitation's own allocation inside one atomic turn,
+     * so this is also how a confirmed stay is CHANGED: the previous room is
+     * released only once the replacement is secured, and a refusal leaves the
+     * guest holding exactly what they had. */
+    reserveLines: function (lines) {
+      var inv = invitationId();
+      if (!inv) return Promise.resolve({ ok: false, unreachable: true, reason: 'no invitation' });
+      return fetch(API + '/reserve', {
+        method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ invitationId: inv, lines: lines || [] })
+      }).then(function (r) {
+        return r.json().then(function (d) { return { status: r.status, d: d }; });
+      }).then(function (res) {
+        if (res.d && res.d.items) { items = res.d.items; announce(); }
+        if (res.d && res.d.ok) return { ok: true, reserved: res.d.reserved };
+        return { ok: false, conflicts: (res.d && res.d.conflicts) || [] };
+      }).catch(function (e) {
+        return { ok: false, unreachable: true, reason: String(e && e.message || e) };
+      });
+    },
+
     reserve: function () {
       var inv = invitationId();
       if (!inv) return Promise.resolve({ ok: false, unreachable: true, reason: 'no invitation' });

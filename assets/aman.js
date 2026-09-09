@@ -164,6 +164,9 @@
       if (bar) bar.style.transform = 'translateX(' + (n * 100) + '%)';
       if (prev) prev.disabled = n === 0;
       if (next) next.disabled = n === slides.length - 1;
+      /* a rail that IS a decision tells its page which card is active */
+      car.dataset.active = String(n);
+      try { car.dispatchEvent(new CustomEvent('a:active', { detail: { index: n }, bubbles: true })); } catch (e) {}
     }
     function go(k) {
       k = Math.max(0, Math.min(slides.length - 1, k));
@@ -202,6 +205,11 @@
     window.addEventListener('resize', function () { i = -1; paint(); });
     paint();
   }
+
+  /* the same carousel behaviour is available to a rail built after load —
+     the Cost Saving selector is created when the guest opens it, and gets the
+     accepted swipe, snap, keyboard and position rail from this one function. */
+  window.SIYL_AMAN = { wire: wire };
 
   function init() {
     buildMenu();

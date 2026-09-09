@@ -116,6 +116,7 @@ return '<div class="row"><a class="th" href="'+href+'" aria-label="Open '+esc(x.
 (when?'<p class="when">'+when+'</p>':'')+(m.cat?'<p class="cat">'+m.cat+book+'</p>':'')+
 '<a class="nm" href="'+href+'">'+esc(x.name)+'</a><p class="mt">'+esc(x.meta||'')+'</p>'+
 (m.basis?'<p class="basis">'+esc(m.basis)+'</p>':'')+
+(x.complimentary?'<p class="basis">Complimentary · USD 0 payable. An independent stay: the wedding programme is included as it stands; arrival, departure and transfers are arranged by you, with no individual Guest Relations travel or accommodation support.</p>':'')+
 (J&&J.quantityLine(x)?'<p class="basis" style="color:#313131">'+esc(J.quantityLine(x))+'</p>':'')+
 (x.note?'<p class="basis" style="color:#313131;text-transform:uppercase;letter-spacing:1.6px;font-size:9.5px">'+esc(x.note)+(x.noteBy?'<br><span style="color:#7C7A75">'+esc(x.noteBy)+'</span>':'')+'</p>':'')+
 (x.complimentary?'<p class="basis" style="color:#313131;text-transform:uppercase;letter-spacing:1.6px;font-size:9.5px">Complimentary<br><span style="color:#7C7A75">Hosted — USD 0 payable by you</span></p>':'')+

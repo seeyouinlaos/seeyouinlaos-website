@@ -214,6 +214,21 @@
       }, free[0]);
     },
 
+    /* THE LOWEST-COST ELIGIBLE ROOM a guest may actually take — the mirror of
+     * approved(): same eligibility rules, same ledger predicate, opposite end
+     * of the price list. Reserved inventory is never eligible, and a sold-out
+     * category is simply skipped. */
+    cheapest: function (windowId, available) {
+      var at = locate(windowId);
+      if (!at) return null;
+      var open = at.stay.rooms.filter(function (r) { return !r.reserved && r.rate != null && !r.interest; });
+      var free = typeof available === 'function'
+        ? open.filter(function (r) { return available(r.slug); })
+        : open;
+      if (!free.length) return null;
+      return free.reduce(function (m, r) { return r.rate < m.rate ? r : m; }, free[0]);
+    },
+
     /* does this product have a genuine alternative to change to? */
     hasVariants: function (windowId) {
       var at = locate(windowId);

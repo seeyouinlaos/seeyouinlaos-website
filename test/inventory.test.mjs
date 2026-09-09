@@ -214,3 +214,145 @@ test('Full Experience falls back to the next available room', () => {
   const j = readFileSync(join(ROOT, 'assets/journey.js'), 'utf8');
   assert.match(j, /soldOutStages/);
 });
+
+
+/* ==========================================================================
+   COST SAVING IS A MODE WITH TWO STAYS — a decision object, not two buttons.
+   ========================================================================== */
+const shop = () => {
+  const sandbox = { window: {}, document: { addEventListener() {}, dispatchEvent() {} },
+                    localStorage: { getItem: () => null, setItem() {} } };
+  sandbox.window.document = sandbox.document;
+  sandbox.window.localStorage = sandbox.localStorage;
+  for (const f of ['assets/rooms-data.js', 'assets/pricing.js', 'assets/journey.js']) {
+    new Function('window', 'document', 'localStorage', readFileSync(join(ROOT, f), 'utf8'))
+      (sandbox.window, sandbox.document, sandbox.localStorage);
+  }
+  return sandbox.window;
+};
+
+test('A · Cost Saving exposes exactly TWO choices', () => {
+  const w = shop();
+  const opts = w.SIYL_JOURNEY.costSavingOptions(2);
+  assert.equal(opts.length, 2);
+  assert.deepEqual(opts.map((o) => o.key), ['hotel', 'residence']);
+  for (const o of opts) {
+    assert.ok(o.name && o.amount && o.amountNote, o.key + ' is incomplete');
+    assert.ok(Array.isArray(o.service) && o.service.length >= 3, o.key + ' has no service model');
+  }
+});
+
+test('B/C · the hotel choice is the lowest-priced eligible room — The Heritage, USD 145', () => {
+  const w = shop();
+  const [hotel] = w.SIYL_JOURNEY.costSavingOptions(2);
+  assert.equal(hotel.room.slug, 'heritage');
+  assert.equal(hotel.amount, 'USD 145');
+  assert.equal(hotel.items.length, 1);
+  assert.equal(hotel.items[0].id, 'wedstay');
+  assert.equal(hotel.items[0].price, 145);
+  /* it is the WEDDING STAY window: one payable night, the second hosted */
+  assert.equal(hotel.items[0].pay, 1);
+  assert.equal(hotel.items[0].nights, 2);
+  assert.match(hotel.service.join(' '), /second night complimentary/i);
+  assert.match(hotel.service.join(' '), /Guest Relations support during the Vientiane Wedding Stay/);
+});
+
+test('D · when The Heritage is sold out the next-cheapest available room is used', () => {
+  const w = shop();
+  const P = w.SIYL_PRICE;
+  assert.equal(P.cheapest('wedstay').slug, 'heritage');
+  assert.equal(P.cheapest('wedstay', (s) => s !== 'heritage').slug, 'heritage-executive');
+  assert.equal(P.quote('wedstay', 'heritage-executive').total, 155);
+  assert.equal(P.cheapest('wedstay', (s) => !['heritage', 'heritage-executive'].includes(s)).slug, 'heritage-grand-premier');
+});
+
+test('E · reserved Family / Bride & Groom rooms never become the Cost Saving hotel', () => {
+  const w = shop();
+  const P = w.SIYL_PRICE;
+  assert.equal(P.cheapest('wedstay', (s) => ['grand-majestic', 'souphattra-presidential'].includes(s)), null);
+  /* and they are held out in the ledger too, so the predicate never sees them free */
+  assert.equal(sellable('wedstay/grand-majestic'), 0);
+  assert.equal(sellable('wedstay/souphattra-presidential'), 0);
+});
+
+test('F · the complimentary residence: USD 0, six guests, no individual support', () => {
+  const w = shop();
+  const [, res] = w.SIYL_JOURNEY.costSavingOptions(2);
+  assert.equal(res.amount, 'Complimentary', 'COMPLIMENTARY is the dominant value, not USD 0');
+  assert.match(res.amountNote, /USD 0 payable/);
+  assert.match(res.amountNote, /up to 6 guests/);
+  assert.equal(res.items[0].price, 0);
+  assert.equal(res.items[0].complimentary, true);
+  const svc = res.service.join(' ');
+  assert.match(svc, /No individual Guest Relations travel or accommodation support/);
+  assert.match(svc, /Arrival, departure and transfers arranged by you/);
+  assert.match(svc, /Wedding programme participation included/);
+  /* the retired, misleading sentence is gone from every surface */
+  for (const f of ['your-journey.html', 'review.html']) {
+    const src = readFileSync(join(ROOT, f), 'utf8');
+    assert.ok(!/Guest Relations support applies during the Vientiane wedding stay only/.test(src),
+      f + ' still implies hotel-style service for the complimentary residence');
+    assert.match(src, /no individual Guest Relations/i, f + ' must state the distinction');
+  }
+  assert.equal(SEED['airbnb-2br/private-residence'].capacity, 6);
+});
+
+test('G · a party of seven cannot take the residence', () => {
+  assert.equal(unitsFor('airbnb-2br/private-residence', 7), 7);
+  assert.ok(unitsFor('airbnb-2br/private-residence', 7) > sellable('airbnb-2br/private-residence'));
+  assert.ok(unitsFor('airbnb-2br/private-residence', 6) <= sellable('airbnb-2br/private-residence'));
+});
+
+test('H/I · swiping commits nothing; only the confirmation reaches the ledger', () => {
+  const yj = readFileSync(join(ROOT, 'your-journey.html'), 'utf8');
+  /* the selector is built from the accepted carousel grammar */
+  assert.match(yj, /class="csel acar" id="cscar"/);
+  assert.match(yj, /SIYL_AMAN\.wire\(car\)/, 'the selector must use the accepted rail behaviour');
+  assert.match(yj, /a:active/, 'the active card must drive the choice');
+  assert.match(yj, /Swipe to compare/);
+  /* csPick only changes local state and the button label */
+  const pick = yj.slice(yj.indexOf('function csPick('), yj.indexOf('function fxOpen('));
+  assert.ok(!/reserve|release|SIYL_BAG\.(put|add|remove)/.test(pick),
+    'moving between the two cards must not touch the bag or the ledger');
+  /* exactly ONE confirmation action */
+  assert.equal((yj.match(/id="fxg"/g) || []).length, 1);
+  assert.match(yj, /Use this Cost Saving option/);
+});
+
+test('J/K · changing a confirmed Cost Saving stay is atomic and never loses the old room', () => {
+  const yj = readFileSync(join(ROOT, 'your-journey.html'), 'utf8');
+  const handler = yj.slice(yj.indexOf("document.getElementById('fxg').addEventListener"));
+  /* the ledger is asked FIRST, and the bag is only rewritten if it said yes */
+  const askedAt = handler.indexOf('SIYL_STOCK.reserveLines');
+  const wroteAt = handler.indexOf('plan.remove.forEach');
+  assert.ok(askedAt > 0 && askedAt < wroteAt, 'the replacement must be secured before anything is removed');
+  assert.match(handler, /if\(!res\.ok&&!res\.unreachable\)/, 'a refusal must stop the change');
+  assert.match(handler, /alertRoom\(c\);return/, 'a refusal must change nothing');
+  const client = readFileSync(join(ROOT, 'assets/inventory.js'), 'utf8');
+  assert.match(client, /reserveLines: function/);
+  /* the ledger itself replaces an invitation's own allocation in one turn */
+  const ledger = readFileSync(join(ROOT, 'src/inventory.js'), 'utf8');
+  assert.match(ledger, /snapshot\(invitationId\)/, 'a re-reservation must exclude the invitation itself');
+  assert.match(ledger, /blockConcurrencyWhile/);
+});
+
+test('L · with both choices gone, Cost Saving cannot be confirmed', () => {
+  const yj = readFileSync(join(ROOT, 'your-journey.html'), 'utf8');
+  assert.match(yj, /if\(!usable\.length\)/, 'the no-option state must exist');
+  assert.match(yj, /Neither Cost Saving stay is available/);
+  assert.match(yj, /getElementById\('fxg'\)\.disabled=true/);
+});
+
+test('M/N · Cost Saving → Full removes whichever stay was taken, and 2,130 stands', () => {
+  const w = shop();
+  const P = w.SIYL_PRICE;
+  const plan = w.SIYL_JOURNEY.fullExperience();
+  /* both Cost Saving answers to the wedding stage are cleared by the mode */
+  assert.ok(plan.remove.includes('wedstay'), 'the hotel stay must be cleared');
+  assert.ok(plan.remove.includes('airbnb-2br'), 'the residence must be cleared');
+  const wed = plan.add.find((x) => x.id === 'wedstay');
+  assert.equal(wed.room, 'heritage-grand-premier');
+  assert.equal(wed.price, 170);
+  assert.ok(!plan.add.some((x) => x.id === 'airbnb-2br'));
+  assert.equal(plan.add.reduce((t, x) => t + (x.price || 0), 0), 2130);
+});
