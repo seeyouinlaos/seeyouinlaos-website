@@ -328,6 +328,13 @@ test('J/K · changing a confirmed Cost Saving stay is atomic and never loses the
   assert.ok(askedAt > 0 && askedAt < wroteAt, 'the replacement must be secured before anything is removed');
   assert.match(handler, /if\(!res\.ok&&!res\.unreachable\)/, 'a refusal must stop the change');
   assert.match(handler, /alertRoom\(c\);return/, 'a refusal must change nothing');
+  /* and the guest must actually SEE why: the notice cannot live inside the
+     decisions panel, which render() rewrites on every bag and stock event */
+  assert.match(yj, /<div id="csnote"><\/div>/, 'the refusal notice needs its own block');
+  assert.match(yj, /getElementById\('csnote'\)/);
+  assert.ok(!/function alertRoom\(c\)\{[\s\S]{0,200}getElementById\('dec'\)/.test(yj),
+    'the refusal notice must not be written into the panel that gets re-rendered');
+  assert.match(yj, /you still hold the stay you had/);
   const client = readFileSync(join(ROOT, 'assets/inventory.js'), 'utf8');
   assert.match(client, /reserveLines: function/);
   /* the ledger itself replaces an invitation's own allocation in one turn */

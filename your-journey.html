@@ -130,6 +130,7 @@ body.fx-open .fxs,body.fx-open .fxo{display:block}
 <div id="items"></div>
 <div class="tot"><span class="l">Your Costs</span><span class="r" id="tt">USD 0</span></div>
 <p class="note">Vientiane is two consecutive stays and no night is left uncovered. The Pre-Wedding Stay covers 25 &rarr; 26 and 26 &rarr; 27 February, both nights your contribution. The Wedding Stay covers 27 &rarr; 28 February and 28 February &rarr; 01 March as ONE selection: the first night is your contribution and the second night is complimentary, hosted by the Bride &amp; Groom. Hosted wedding programme events are part of your journey without charge — they never appear as USD 0 line items. Spa interest lines carry no journey cost — the amount is payable at the spa.</p>
+<div id="csnote"></div>
 <div id="dec"></div>
 <div id="held"></div>
 <div class="fxs" id="fxs"></div>
@@ -354,17 +355,20 @@ gated(async function(){
 });
 });
 
-/* a change that the ledger refused: say which room, and change nothing */
+/* A change the ledger refused. It lives in its own block, not inside the
+ * decisions panel, because render() rewrites that panel on every bag and stock
+ * event and would wipe the very message the guest needs to read. */
 function alertRoom(c){
-var box=document.getElementById('dec');
+var box=document.getElementById('csnote');
 if(!box)return;
-var n=document.createElement('div');
-n.className='csnone';
-n.textContent=(c?c.name:'That stay')+' is no longer available — your journey has not been changed. '+
-  'Open Cost Saving again to choose the other option.';
-box.prepend(n);
-box.scrollIntoView({behavior:'smooth',block:'center'});
-setTimeout(function(){n.remove()},12000)}
+box.innerHTML='<div class="csnone">'+
+  (c?c.name:'That stay')+' is no longer available, so your journey has not been changed — '+
+  'you still hold the stay you had. Open Cost Saving again to take the other option.'+
+  '</div>';
+box.scrollIntoView({behavior:'smooth',block:'center'})}
+/* the notice clears itself the moment the guest changes anything */
+document.addEventListener('siyl:bag',function(){
+var b=document.getElementById('csnote');if(b)b.innerHTML=''});
 /* ---- the rooms this invitation actually holds in the shared ledger ----
  * An allocation is written when the journey is SENT. If the guest then changes
  * a room, the ledger still holds the old one: say so plainly and tell them the
