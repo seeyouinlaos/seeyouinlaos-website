@@ -19,8 +19,11 @@
     ['Review & Send',   'review.html', null]
   ];
 
-  var here = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
-  var i = STEPS.map(function (s) { return s[1]; }).indexOf(here);
+  /* Cloudflare serves these pages at a clean path (/review, not /review.html)
+   * while the Pages mirror serves the file name. The rail must appear on both,
+   * so the basename is compared with and without the extension. */
+  var here = (location.pathname.split('/').pop() || 'index.html').toLowerCase().replace(/\.html$/, '');
+  var i = STEPS.map(function (s) { return s[1].replace(/\.html$/, ''); }).indexOf(here || 'index');
   if (i < 0) return;
 
   var css = document.createElement('style');

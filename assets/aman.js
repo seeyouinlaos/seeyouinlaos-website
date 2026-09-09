@@ -46,7 +46,8 @@
     ['Your Journey', 'your-journey.html', null]
   ];
 
-  var here = location.pathname.split('/').pop() || 'index.html';
+  /* clean paths on one deployment, file names on the other — same page */
+  var here = (location.pathname.split('/').pop() || 'index.html').replace(/\.html$/, '') + '.html';
 
   function buildMenu() {
     if (document.querySelector('.a-menu')) return;

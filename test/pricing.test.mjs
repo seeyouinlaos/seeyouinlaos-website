@@ -363,6 +363,9 @@ test('the invitation briefing tells the guest who is invited and who they decide
   /* and it is step one of the preparation, not a page nobody can find */
   const prep = readFileSync(join(ROOT, 'assets/prep.js'), 'utf8');
   assert.match(prep, /\['Your invitation', 'invitation.html'/);
+  /* Cloudflare serves /review, the Pages mirror serves /review.html — the rail
+   * has to recognise the page on BOTH deployments */
+  assert.match(prep, /replace\(\/\\\.html\$\/, ''\)/);
   ['your-journey.html', 'voyage.html', 'dress.html', 'you.html', 'review.html', 'invitation.html']
     .forEach((f) => assert.ok(readFileSync(join(ROOT, f), 'utf8').includes('assets/prep.js'), f + ' has no preparation rail'));
 });
