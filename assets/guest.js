@@ -68,9 +68,18 @@
     /* ---- the party, from the invitation and nowhere else ---------------- */
     party: function () {
       var a = auth();
-      if (!a) return null;
+      /* No names, no party. A session stored before the named party travelled
+       * with the invitation cannot answer a single per-person question, so it
+       * is treated as not open — the surface shows its gate and the guest
+       * enters the code once, instead of meeting a blank page. */
+      if (!a || !Array.isArray(a.guests) || !a.guests.length) return null;
       return { invitationId: a.invitationId, partyName: a.partyName || '',
-               partyLead: a.partyLead || '', guests: a.guests || [] };
+               partyLead: a.partyLead || '', guests: a.guests };
+    },
+    /* the invitation is open, but from before the names were carried */
+    stale: function () {
+      var a = auth();
+      return !!(a && a.invitationId) && !(Array.isArray(a.guests) && a.guests.length);
     },
     guests: function () { var p = this.party(); return p ? p.guests : []; },
     isParty: function () { return this.guests().length > 1; },

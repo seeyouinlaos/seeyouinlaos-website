@@ -372,6 +372,27 @@ test('SEND is unavailable until the required steps are done — and never fails 
   assert.match(r, /s\.required && s\.key !== 'review' && s\.state !== 'Completed'/);
 });
 
+test('a session stored without names is not an open invitation', () => {
+  /* An invitation opened by an older build carries no guest names. Every
+   * per-person surface is impossible in that state, so it must show its gate
+   * and ask for the code once — never a blank page. */
+  const g = readFileSync(join(ROOT, 'assets/guest.js'), 'utf8');
+  assert.match(g, /if \(!a \|\| !Array\.isArray\(a\.guests\) \|\| !a\.guests\.length\) return null;/);
+  assert.match(g, /stale: function/);
+  const inv = readFileSync(join(ROOT, 'assets/invite.mjs'), 'utf8');
+  assert.match(inv, /hasNames\(\) \{/);
+  assert.match(inv, /if \(a && AUTH\.hasNames\(\)\) \{ fn\(a\); return; \}/);
+  /* and no surface may index into an empty party */
+  ['about-you.html', 'documents.html', 'you.html', 'invitation.html'].forEach((f) => {
+    const page = readFileSync(join(ROOT, f), 'utf8');
+    assert.match(page, /if\(!p\|\|!p\.guests\.length\)\{/, f + ' can still crash on an empty party');
+    assert.match(page, /Open your invitation once more/, f + ' does not explain a stale session');
+  });
+  const voyage = readFileSync(join(ROOT, 'voyage.html'), 'utf8');
+  assert.match(voyage, /if \(!party \|\| !party\.guests\.length\) \{/);
+  assert.match(voyage, /Open your invitation once more/);
+});
+
 test('the invitation briefing tells the guest who is invited and who they decide for', () => {
   const page = readFileSync(join(ROOT, 'invitation.html'), 'utf8');
   assert.match(page, /You are invited to join <span class="nb">Haruthai &amp; Suthep<\/span>/);

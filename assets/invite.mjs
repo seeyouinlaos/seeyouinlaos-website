@@ -33,6 +33,14 @@ const AUTH = {
       return v && v.invitationId ? v : null;
     } catch (e) { return null; }
   },
+  /* A session opened before the named party travelled with it carries an
+   * invitation but no names. Every per-person surface — the wedding, the
+   * documents, the profile — is impossible in that state, so it counts as
+   * NOT authenticated and the guest is asked for the code once more. */
+  hasNames() {
+    const v = this.get();
+    return !!(v && Array.isArray(v.guests) && v.guests.length);
+  },
   set(inv) {
     /* The named party travels with the session. Wave 1 needs per-person state
      * — attendance, the Sangkhathan, seats, the profile — and per-person state
@@ -137,10 +145,12 @@ window.SIYL_AUTH = AUTH;
 window.SIYL_INVITE = {
   require(fn) {
     const a = AUTH.get();
-    if (a) { fn(a); return; }
+    if (a && AUTH.hasNames()) { fn(a); return; }
     pending = fn;
     open();
   },
+  /* true when a stored session predates the named party */
+  stale() { return !!AUTH.get() && !AUTH.hasNames(); },
   open,
   close,
 };

@@ -117,9 +117,11 @@ return '<div class="consent" data-c="'+esc(id)+'">'+
 
 function render(){
 var p=G.party();
-if(!p){
-  page.innerHTML='<div class="gate"><h3>Open your invitation</h3>'+
-    '<p class="body">Documents belong to the people named on your invitation, so we open it first.</p>'+
+if(!p||!p.guests.length){
+  page.innerHTML='<div class="gate"><h3>'+(G.stale()?'Open your invitation once more':'Open your invitation')+'</h3>'+
+    '<p class="body">'+(G.stale()
+      ? 'Your invitation is open, but it was opened before we started carrying your names with it. Enter your private code once more and your documents are held by name — nothing you have already chosen is lost.'
+      : 'Documents belong to the people named on your invitation, so we open it first.')+'</p>'+
     '<button type="button" class="gbtn" id="open">Open my invitation</button></div>';
   document.getElementById('open').addEventListener('click',function(){gated(render)});
   return}

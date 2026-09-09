@@ -80,13 +80,15 @@ var STEPS=[
 
 function render(){
 var p=G.party();
-if(!p){
+if(!p||!p.guests.length){
   page.innerHTML='<div class="ihero" style="background-image:url(assets/images/event/052-ceremony-green-gateway.jpg)" role="img" aria-label="The green gateway at Souphattra Heritage, Vientiane"></div>'+
     '<p class="ieyebrow">Sunday, 28 February 2027 · Vientiane, Laos</p>'+
     '<h1>Your invitation</h1>'+
     '<p class="ilede">Open your invitation and we can show you who is travelling with you, and what there is to arrange.</p>'+
-    '<div class="gate"><h3>Open your invitation</h3>'+
-    '<p class="ibody" style="margin-top:0">Your invitation carries your names. Everything on this website — your journey, the wedding day, your preferences — belongs to it.</p>'+
+    '<div class="gate"><h3>'+(G.stale()?'Open your invitation once more':'Open your invitation')+'</h3>'+
+    '<p class="ibody" style="margin-top:0">'+(G.stale()
+      ? 'Your invitation is open, but it was opened before we started carrying your names with it. Enter your private code once more and your party appears by name — nothing you have already chosen is lost.'
+      : 'Your invitation carries your names. Everything on this website — your journey, the wedding day, your preferences — belongs to it.')+'</p>'+
     '<button type="button" class="gbtn" id="open">Open my invitation</button></div>';
   document.getElementById('open').addEventListener('click',function(){gated(render)});
   return}

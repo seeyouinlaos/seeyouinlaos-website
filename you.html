@@ -99,9 +99,11 @@ return h+'<p class="saved" id="saved1"></p></section>'}
 
 function render(){
 var p=G.party();
-if(!p){
-  page.innerHTML='<div class="gate"><h3>Open your invitation</h3>'+
-    '<p class="body">Your party, your names and your answers all live inside your invitation. Open it once and everything on this page is yours.</p>'+
+if(!p||!p.guests.length){
+  page.innerHTML='<div class="gate"><h3>'+(G.stale()?'Open your invitation once more':'Open your invitation')+'</h3>'+
+    '<p class="body">'+(G.stale()
+      ? 'Your invitation is open, but it was opened before we started carrying your names with it. Enter your private code once more — nothing you have already chosen is lost.'
+      : 'Your party, your names and your answers all live inside your invitation. Open it once and everything on this page is yours.')+'</p>'+
     '<button type="button" class="gbtn" id="open">Open my invitation</button></div>';
   document.getElementById('open').addEventListener('click',function(){gated(render)});
   return}
