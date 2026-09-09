@@ -809,6 +809,10 @@ test('the Owner-overridden transport facts are the ones on the page', () => {
   /* two approved fares, exactly one active, sharing the product's id */
   const cls = P.classesOf('mu9646');
   assert.equal(cls.length, 2);
+  /* the baggage allowance is the source's, on both fares and in both places */
+  assert.ok(cls[0].notes.includes('2 pieces of checked baggage'), 'Business baggage allowance');
+  assert.ok(cls[1].notes.includes('1 piece of free checked baggage'), 'Economy baggage allowance');
+  assert.match(JSON.stringify(T.mu9646.groups), /Two pieces of checked baggage/);
   assert.equal(P.items('mu9646')[0].price, 275);
   assert.equal(P.items('mu9646')[0].cls, 'business');
   assert.equal(P.items('mu9646', 'economy-flexible')[0].price, 155);

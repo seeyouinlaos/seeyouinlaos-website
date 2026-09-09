@@ -35,7 +35,7 @@
         meta: '01 March 2027 · Business Class', price: 275, preferred: true,
         img: 'assets/images/transport/mu9632-business-1.jpg',
         basis: 'USD 275 per person · Business Class',
-        notes: ['1 seat per guest', 'Checked baggage included', 'Meal service on board'] },
+        notes: ['1 seat per guest', '2 pieces of checked baggage', 'Meal service on board'] },
       { slug: 'economy-flexible', name: 'MU9646 · Vientiane → Kunming', short: 'Economy Flexible',
         meta: '01 March 2027 · Economy Flexible', price: 155,
         img: 'assets/images/transport/mu9632-business-1.jpg',
