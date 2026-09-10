@@ -76,7 +76,7 @@ a.th{display:block}
 .ps{font-size:12.5px;color:#7C7A75;line-height:1.75;margin-top:5px}
 .ps b{font-weight:400;color:#313131}
 .wev{border-top:1px solid #EDEBE7;padding:13px 0}
-</style><link rel="stylesheet" href="assets/desktop.css"><link rel="stylesheet" href="assets/aman.css"></head><body>
+</style><link rel="stylesheet" href="assets/desktop.css"><link rel="stylesheet" href="assets/aman.css"><link rel="stylesheet" href="assets/prep.css"></head><body>
 <header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="your-journey.html" aria-label="Your Journey"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main>
 <h1>Review &amp; Send</h1>
@@ -124,7 +124,7 @@ a.th{display:block}
 <script src="assets/pricing.js"></script>
 <script src="assets/guest.js"></script>
 <script src="assets/docs.js"></script>
-<script src="assets/prep.js"></script>
+<script src="assets/prep-shell.js"></script>
 <script src="assets/temple.js"></script>
 <script src="assets/inventory.js"></script>
 <script src="assets/transport-data.js"></script>
@@ -183,10 +183,10 @@ function paintWedding(){
 var box=document.getElementById('b3'),J=window.SIYL_JOURNEY,T=window.SIYL_TEMPLE,G=window.SIYL_GUEST;
 if(!box||!J)return;
 var op=T?T.operational():null;
-var DRESS={temple:['Blue Lao Traditional Dress','dress.html#traditional'],
-           coffee:['Black Tie','dress.html#blacktie'],
-           vows:['Black Tie','dress.html#blacktie'],
-           dinner:['Black Tie','dress.html#blacktie']};
+var DRESS={temple:['Blue Lao Traditional Dress','wedding-preparation.html#dress-code'],
+           coffee:['Black Tie','wedding-preparation.html#dress-code'],
+           vows:['Black Tie','wedding-preparation.html#dress-code'],
+           dinner:['Black Tie','wedding-preparation.html#dress-code']};
 var h='<div class="bhd"><span class="bno">03</span><h2>The Wedding</h2>'+
   '<a class="bedit" href="voyage.html#temple-decision">Edit</a></div>'+
   '<p class="bsub">Sunday, 28 February 2027 · Vientiane · four events, all complimentary.</p>';
@@ -221,7 +221,7 @@ h+='<p class="bsub" style="margin-top:22px">Dress code · for your whole party</
    '<p class="ps"><b>Coffee &amp; Cake · Vow Ceremony · Wedding Dinner</b> · Black Tie</p>'+
    '<p class="ps"><b>The travelling days</b> · Resort Wear</p></div>'+
    '<span class="r'+(a?'':' open')+'">'+(a?'Reviewed · '+when(a.at):'Not yet reviewed')+'</span></div>'+
-   '<p style="margin-top:10px"><a class="tlink" href="dress.html#acknowledge">Review dress code</a></p>';
+   '<p style="margin-top:10px"><a class="tlink" href="wedding-preparation.html#ack">Review dress code</a></p>';
 box.innerHTML=h}
 
 /* ---------------------------------------------------------------- BLOCK 04
@@ -346,7 +346,7 @@ var ACT={invitation:'Open my invitation',you:'Add your contact',
 /* when the wedding step is open only because of the dress code, say that */
 if(first&&first.key==='wedding'&&window.SIYL_TEMPLE&&SIYL_TEMPLE.decidedAll()&&!G.dressAck()){
   MSG.wedding='Please review the dress code before sending your journey.';
-  first=Object.assign({},first,{href:'dress.html#acknowledge',action:'Review dress code'})}
+  first=Object.assign({},first,{href:'wedding-preparation.html#ack',action:'Review dress code'})}
 var msg=first?(MSG[first.key]||('Please complete '+first.label.toLowerCase()+' before sending your journey.'))
              :'A few steps above are still needed before your journey can be sent.';
 err.innerHTML=msg+(first?' <a href="'+first.href+'" style="color:#313131">'+(first.action||ACT[first.key]||'Go there now')+'</a>':'');

@@ -41,7 +41,7 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:20px;margin:34
 .gbtn{background:#313131;color:#F3EEE7;border:0;padding:17px 22px;font:inherit;font-size:10.5px;letter-spacing:2.2px;text-transform:uppercase;cursor:pointer;min-height:50px;margin-top:8px}
 .ok{font-size:9.5px;letter-spacing:2px;text-transform:uppercase;color:#7C7A75;margin-top:12px}
 @media (min-width:768px){.ihero{margin-left:0;margin-right:0;aspect-ratio:16/7}}
-</style><link rel="stylesheet" href="assets/desktop.css"><link rel="stylesheet" href="assets/aman.css"></head><body>
+</style><link rel="stylesheet" href="assets/desktop.css"><link rel="stylesheet" href="assets/aman.css"><link rel="stylesheet" href="assets/prep.css"></head><body>
 <header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="your-journey.html" aria-label="Your Journey"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main>
 <div id="page"></div>
@@ -51,7 +51,7 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:20px;margin:34
 <script src="assets/aman.js"></script>
 <script src="assets/guest.js"></script>
 <script src="assets/temple.js"></script>
-<script src="assets/prep.js"></script>
+<script src="assets/prep-shell.js"></script>
 <script type="module" src="assets/invite.mjs"></script>
 <script>
 /* ============================================================================
@@ -67,14 +67,14 @@ if(!G||!page)return;
 function esc(t){return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
 function gated(fn){if(window.SIYL_INVITE){SIYL_INVITE.require(fn)}
 else document.addEventListener('siyl:invite-ready',function(){SIYL_INVITE.require(fn)},{once:true})}
-function when(iso){try{return new Date(iso).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}catch(e){return ''}}
+function when(iso){var d=new Date(iso);return isNaN(d)?'':d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}
 
 var STEPS=[
  ['You','you.html','Your names as we hold them, and one way to reach you.','Required'],
  ['Your journey','your-journey.html','Your travel and your stays, from Bangkok to Vientiane and home again.','Required'],
- ['The Wedding','voyage.html#temple-decision','Who joins each part of the day, and the dress code — one answer per named guest.','Required'],
- ['Documents &amp; privacy','documents.html','Passport and flight document, and your choice about photographs. All optional now.','Optional'],
- ['About you','about-you.html','Seven questions of hospitality and one operational field. Every answer optional.','Optional'],
+ ['The Wedding','wedding.html','Who joins each part of the day — one answer per named guest.','Required'],
+ ['The Wedding Preparation','wedding-preparation.html','The dress code, understood and confirmed once — and your seats when seating opens.','Required'],
+ ['About you','about-you.html','Seven questions of hospitality, one operational field, and your travel documents when you have them. Every answer optional.','Optional'],
  ['Review &amp; Send','review.html','Everything you entered, in one place. Sending is a request — never a payment, and never a confirmation.','Required']
 ];
 
@@ -121,12 +121,14 @@ STEPS.forEach(function(s,i){
 h+='</section>';
 
 h+='<button type="button" class="cta" id="go">'+(seen?'Continue to your journey':'This is right — continue')+'</button>';
-h+='<p class="ok" id="okline">'+(seen?'Your party was confirmed on '+when(seen.at):'Confirming this simply tells us you have seen who travels on this invitation.')+'</p>';
+var on=seen&&when(seen.at);
+h+='<p class="ok" id="okline">'+(on?'Your party was confirmed on '+on
+  :'Confirming this simply tells us you have seen who travels on this invitation.')+'</p>';
 h+='<p style="margin-top:18px"><a class="tlink" href="you.html#you">Something here is not right</a></p>';
 page.innerHTML=h;
 document.getElementById('go').addEventListener('click',function(){
   G.setIdentityReviewed(true);
-  location.href='you.html'});
+  location.href='your-journey.html'});
 }
 document.addEventListener('siyl:guest',function(){/* names may change on you.html */});
 render();

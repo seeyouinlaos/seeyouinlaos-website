@@ -150,7 +150,7 @@ body.fx-open .fxs,body.fx-open .fxo{display:block}
   .csel .aslide{flex:0 0 46%}
   .cscard{padding:26px 24px 24px}
 }
-</style><link rel="stylesheet" href="assets/desktop.css"><link rel="stylesheet" href="assets/aman.css"></head><body>
+</style><link rel="stylesheet" href="assets/desktop.css"><link rel="stylesheet" href="assets/aman.css"><link rel="stylesheet" href="assets/prep.css"></head><body>
 <header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="your-journey.html" aria-label="Your Journey"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main><h1>Your Journey</h1><p class="sub">Your selections · live costs · nothing is paid on this website</p>
 <div id="items"></div>
@@ -176,7 +176,7 @@ body.fx-open .fxs,body.fx-open .fxo{display:block}
 <script src="assets/rooms-data.js"></script>
 <script src="assets/pricing.js"></script>
 <script src="assets/guest.js"></script>
-<script src="assets/prep.js"></script>
+<script src="assets/prep-shell.js"></script>
 <script src="assets/temple.js"></script>
 <script src="assets/inventory.js"></script>
 <script src="assets/transport-data.js"></script>
@@ -214,10 +214,10 @@ if(!J)return '';
 var op=T?T.operational():null;
 var usd=SIYL_BAG.get().filter(function(x){return J.isWedding(x)})
   .reduce(function(n,x){return n+(x.price||0)*(x.qty||1)},0);
-var DRESS={temple:['Blue Lao Traditional Dress','dress.html#traditional'],
-           coffee:['Black Tie','dress.html#blacktie'],
-           vows:['Black Tie','dress.html#blacktie'],
-           dinner:['Black Tie','dress.html#blacktie']};
+var DRESS={temple:['Blue Lao Traditional Dress','wedding-preparation.html#dress-code'],
+           coffee:['Black Tie','wedding-preparation.html#dress-code'],
+           vows:['Black Tie','wedding-preparation.html#dress-code'],
+           dinner:['Black Tie','wedding-preparation.html#dress-code']};
 var h='<div class="row wedrow"><div class="wedth" aria-hidden="true" style="background-image:url(assets/images/event/052-ceremony-green-gateway.jpg)"></div><div style="flex:1">';
 h+='<p class="when">28 FEB</p><p class="cat">The Wedding</p>';
 h+='<a class="nm" href="voyage.html">The Wedding · Sunday, 28 February 2027</a>';

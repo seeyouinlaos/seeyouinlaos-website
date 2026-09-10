@@ -1,0 +1,342 @@
+/* ============================================================================
+   SEE YOU IN LAOS — THE PREPARATION DESIGN SYSTEM.
+
+   ONE source for the private journey. Every Preparation surface uses these
+   tokens and these three controls; no feature brings its own card, its own
+   button, its own type size or its own spacing ever again.
+
+   TYPOGRAPHY — two families, six roles, nothing else.
+     .t-d1  page title            PP Editorial Old
+     .t-h1  card / property title PP Editorial Old
+     .t-h2  section               PP Editorial Old
+     .t-b1  body                  Hanken Grotesk
+     .t-b2  secondary             Hanken Grotesk
+     .t-l1  label · meta · status Hanken Grotesk, tracked caps
+
+   CONTROLS — three families, nothing else.
+     .p-act    PRIMARY ACTION      one per natural completion point
+     .p-link   SECONDARY ACTION    quiet, 44px target
+     .p-sel    SELECTION CONTROL   unselected · selected · unavailable
+
+   Luxury here is hierarchy, space and proportion — never a new treatment.
+   ========================================================================== */
+
+:root {
+  /* ink */
+  --p-ink:    #313131;
+  --p-mute:   #7C7A75;
+  --p-line:   #DAD9D7;
+  --p-hair:   #EDEBE7;
+  --p-paper:  #F3EEE7;
+  --p-card:   #FCFAF6;
+  --p-accent: #8A5A55;
+
+  /* space — the only steps that exist */
+  --s1: 4px;  --s2: 8px;  --s3: 12px; --s4: 16px;
+  --s5: 24px; --s6: 32px; --s7: 48px; --s8: 64px; --s9: 96px;
+
+  /* type */
+  --f-ed: 'PP Editorial Old', Georgia, serif;
+  --f-ui: 'Hanken Grotesk', Helvetica, Arial, sans-serif;
+
+  /* frame */
+  --p-frame: 1180px;
+  --p-gut:   24px;
+  --p-read:  34em;   /* reading measure */
+  --p-wide:  44em;   /* wide measure    */
+
+  /* controls */
+  --p-act-h: 52px;
+  --p-tap:   44px;
+}
+@media (min-width: 768px)  { :root { --p-gut: 40px; } }
+@media (min-width: 1280px) { :root { --p-gut: 56px; --p-frame: 1280px; } }
+
+/* ------------------------------------------------------------------ type */
+.t-d1 { font-family: var(--f-ed); font-weight: 200; font-size: 32px; line-height: 1.12; letter-spacing: -.01em; color: var(--p-ink); }
+.t-h1 { font-family: var(--f-ed); font-weight: 200; font-size: 23px; line-height: 1.22; color: var(--p-ink); }
+.t-h2 { font-family: var(--f-ed); font-weight: 200; font-size: 19px; line-height: 1.30; color: var(--p-ink); }
+.t-b1 { font-family: var(--f-ui); font-weight: 300; font-size: 14px; line-height: 1.75; color: #4A4A4A; }
+.t-b2 { font-family: var(--f-ui); font-weight: 300; font-size: 12.5px; line-height: 1.75; color: var(--p-mute); }
+.t-l1 { font-family: var(--f-ui); font-weight: 400; font-size: 10px; line-height: 2.0; letter-spacing: 2.2px; text-transform: uppercase; color: var(--p-mute); }
+.t-l1.on   { color: var(--p-ink); }
+.t-l1.open { color: var(--p-accent); }
+.t-b1 b, .t-b2 b, .t-l1 b { font-weight: 400; color: var(--p-ink); }
+@media (min-width: 768px) {
+  .t-d1 { font-size: 40px; }
+  .t-h1 { font-size: 25px; }
+  .t-h2 { font-size: 20px; }
+  .t-b1 { font-size: 15px; }
+}
+.measure  { max-width: var(--p-read); }
+.measure-w{ max-width: var(--p-wide); }
+.nb { white-space: nowrap; }
+
+/* ---------------------------------------------------------------- layout */
+body.prep { background: var(--p-paper); color: var(--p-ink); font-family: var(--f-ui); font-weight: 300; }
+.prep-page {
+  box-sizing: border-box; width: 100%; max-width: var(--p-frame);
+  margin: 0 auto; padding: var(--s7) var(--p-gut) var(--s9);
+}
+.prep-head { margin-bottom: var(--s7); }
+.prep-head .t-l1 { margin-bottom: var(--s2); }
+.prep-head .t-d1 { margin-bottom: var(--s3); }
+.prep-sec { margin-top: var(--s8); }
+.prep-sec > .t-l1 { margin-bottom: var(--s2); }
+.prep-sec > .t-h2 { margin-bottom: var(--s4); }
+.prep-sec > .t-b1 { margin-bottom: var(--s4); }
+.rule { border: 0; border-top: 1px solid var(--p-line); margin: var(--s7) 0 0; }
+
+/* ------------------------------------------------------------------ card */
+.p-card {
+  box-sizing: border-box; background: var(--p-card);
+  border: 1px solid var(--p-line); padding: var(--s5);
+}
+.p-card + .p-card { margin-top: var(--s4); }
+.p-card > * + * { margin-top: var(--s3); }
+.p-card > .t-l1 + .t-h1 { margin-top: var(--s1); }
+.p-card.on { border-color: var(--p-ink); }
+.p-card.flat { background: none; border: 0; border-top: 1px solid var(--p-hair); padding: var(--s5) 0; }
+@media (min-width: 768px) { .p-card { padding: var(--s6); } }
+
+/* ------------------------------------------------------------- 1 PRIMARY */
+.p-act {
+  display: inline-flex; align-items: center; justify-content: center;
+  box-sizing: border-box; min-height: var(--p-act-h); width: 100%;
+  padding: var(--s4) var(--s5); border: 1px solid var(--p-ink); background: var(--p-ink);
+  color: var(--p-paper); font-family: var(--f-ui); font-size: 10.5px; font-weight: 400;
+  letter-spacing: 2.2px; text-transform: uppercase; text-decoration: none;
+  cursor: pointer; transition: background .25s, color .25s;
+}
+.p-act:hover, .p-act:focus-visible { background: #1F1F1F; }
+.p-act.quiet { background: none; color: var(--p-ink); }
+.p-act.quiet:hover { background: var(--p-ink); color: var(--p-paper); }
+.p-act.off { background: none; color: var(--p-mute); border-color: #C9C4BA; }
+@media (min-width: 600px) { .p-act { width: auto; min-width: 280px; } }
+
+/* ----------------------------------------------------------- 2 SECONDARY */
+.p-link {
+  display: inline-flex; align-items: flex-end; box-sizing: border-box;
+  min-height: var(--p-tap); padding: var(--s3) 0 var(--s1);
+  font-family: var(--f-ui); font-size: 10px; font-weight: 400; line-height: 20px;
+  letter-spacing: 2px; text-transform: uppercase; color: var(--p-ink);
+  text-decoration: none; border-bottom: 1px solid var(--p-ink); background: none;
+  border-left: 0; border-right: 0; border-top: 0; cursor: pointer;
+}
+.p-link:hover { opacity: .6; }
+.p-link.mute { color: var(--p-mute); border-bottom-color: #C9C4BA; }
+
+/* ----------------------------------------------------------- 3 SELECTION */
+.p-sel {
+  display: flex; align-items: center; gap: var(--s3); box-sizing: border-box;
+  width: 100%; min-height: 48px; padding: var(--s3) var(--s4);
+  background: var(--p-card); border: 1px solid var(--p-line); color: var(--p-ink);
+  font-family: var(--f-ui); font-size: 10.5px; font-weight: 400;
+  letter-spacing: 2px; text-transform: uppercase; text-align: left;
+  cursor: pointer; transition: border-color .2s, background .2s;
+}
+.p-sel:hover { border-color: var(--p-ink); }
+.p-sel[aria-pressed="true"], .p-sel.on { background: var(--p-ink); border-color: var(--p-ink); color: var(--p-paper); }
+.p-sel[disabled], .p-sel.gone { opacity: .45; cursor: default; }
+.p-sel .p-sel-r { margin-left: auto; font-family: var(--f-ed); font-size: 15px; letter-spacing: 0; text-transform: none; }
+.p-sel[aria-pressed="true"] .p-sel-r { color: var(--p-paper); }
+.p-selrow { display: flex; flex-wrap: wrap; gap: var(--s3); }
+.p-selrow > .p-sel { width: auto; flex: 1 1 auto; min-width: 160px; justify-content: center; }
+
+/* ----------------------------------------------------------------- field */
+.p-field { margin-top: var(--s5); }
+.p-field > label, .p-field > .t-l1 { display: block; margin-bottom: var(--s2); }
+.p-field input, .p-field textarea {
+  box-sizing: border-box; width: 100%; background: #fff; border: 1px solid var(--p-line);
+  padding: var(--s3) var(--s4); font-family: var(--f-ui); font-size: 15px; font-weight: 300;
+  line-height: 1.7; color: var(--p-ink); min-height: 48px;
+}
+.p-field textarea { min-height: 88px; resize: vertical; }
+.p-field input:focus, .p-field textarea:focus { outline: 0; border-color: var(--p-ink); }
+.p-check { display: flex; gap: var(--s3); align-items: flex-start; min-height: var(--p-tap); padding: var(--s2) 0; cursor: pointer; }
+.p-check input { width: 20px; height: 20px; margin-top: 3px; flex: none; accent-color: var(--p-ink); }
+
+/* ------------------------------------------------------------- key/value */
+.p-kv { display: flex; gap: var(--s4); align-items: baseline; border-top: 1px solid var(--p-hair); padding: var(--s4) 0; }
+.p-kv:first-child { border-top: 0; }
+.p-kv > div { flex: 1; min-width: 0; }
+.p-kv > .t-l1 { margin-left: auto; white-space: nowrap; text-align: right; }
+
+/* --------------------------------------------------------- product grids
+   Responsive means CHANGE THE LAYOUT — never squeeze the desktop columns.
+   A fare or variant column never falls below 340px; below that breakpoint
+   the structure becomes a stack. */
+.p-product { display: block; }
+.p-product > .p-media { display: block; width: 100%; aspect-ratio: 3/2; background: #E7E3DB center/cover no-repeat; }
+.p-product > .p-body { padding-top: var(--s5); }
+.p-choices { margin-top: var(--s5); display: grid; gap: var(--s3); }
+@media (min-width: 900px) {
+  .p-product { display: grid; grid-template-columns: minmax(0, 1fr) 380px; column-gap: var(--s7); align-items: start; }
+  .p-product > .p-media { grid-column: 1; aspect-ratio: 3/2; }
+  .p-product > .p-body  { grid-column: 1; padding-top: var(--s5); }
+  .p-product > .p-choices { grid-column: 2; grid-row: 1 / span 3; margin-top: 0; }
+}
+@media (min-width: 1280px) { .p-product { grid-template-columns: minmax(0, 1fr) 420px; } }
+
+/* the swipe rail, for choices that are whole products */
+.p-rail { display: flex; gap: var(--s4); overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; padding-bottom: var(--s1); }
+.p-rail::-webkit-scrollbar { display: none; }
+.p-rail > * { flex: 0 0 84%; max-width: 340px; scroll-snap-align: start; }
+@media (min-width: 768px) { .p-rail > * { flex: 0 0 320px; } }
+
+/* ------------------------------------------------------------- disclosure */
+.p-more { margin-top: var(--s3); }
+.p-drawer-scrim { position: fixed; inset: 0; background: rgba(30,28,26,.42); opacity: 0; pointer-events: none; transition: opacity .3s; z-index: 80; }
+.p-drawer {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 81; background: var(--p-paper);
+  max-height: 88vh; overflow-y: auto; transform: translateY(100%); transition: transform .35s cubic-bezier(.4,0,.2,1);
+  box-shadow: 0 -8px 40px rgba(30,28,26,.14);
+}
+body.p-drawer-open .p-drawer-scrim { opacity: 1; pointer-events: auto; }
+body.p-drawer-open .p-drawer { transform: translateY(0); }
+.p-drawer-in { box-sizing: border-box; max-width: 720px; margin: 0 auto; padding: var(--s6) var(--p-gut) var(--s8); }
+.p-drawer-x { position: sticky; top: 0; display: flex; justify-content: flex-end; background: var(--p-paper); padding-top: var(--s2); }
+@media (min-width: 900px) {
+  .p-drawer { left: auto; top: 0; bottom: 0; width: 520px; max-height: none; transform: translateX(100%); }
+  body.p-drawer-open .p-drawer { transform: translateX(0); }
+  .p-drawer-in { padding-top: var(--s7); }
+}
+
+/* ============================================================ THE SHELL */
+.prep-bar { position: sticky; top: 0; z-index: 60; background: var(--p-paper); border-bottom: 1px solid var(--p-line); }
+.prep-bar-in { box-sizing: border-box; max-width: var(--p-frame); margin: 0 auto; padding: var(--s4) var(--p-gut); display: flex; align-items: flex-start; gap: var(--s4); }
+.prep-bar-l { min-width: 0; flex: 1; }
+.prep-eyebrow { font-family: var(--f-ui); font-size: 9px; font-weight: 400; letter-spacing: 2.4px; text-transform: uppercase; color: var(--p-mute); }
+.prep-step { font-family: var(--f-ed); font-weight: 200; font-size: 17px; line-height: 1.25; color: var(--p-ink); margin-top: 3px; }
+.prep-step b { font-weight: 200; color: var(--p-mute); margin-right: var(--s2); font-size: 14px; letter-spacing: .04em; }
+.prep-who { font-family: var(--f-ui); font-size: 11.5px; line-height: 1.6; color: var(--p-mute); margin-top: var(--s2); }
+.prep-who b { font-weight: 400; color: var(--p-ink); }
+.prep-who button { font: inherit; font-size: 10px; letter-spacing: 1.8px; text-transform: uppercase; color: var(--p-ink); background: none; border: 0; border-bottom: 1px solid var(--p-ink); padding: 0 0 2px; margin-left: var(--s2); cursor: pointer; }
+.prep-bar-r { flex: none; }
+.prep-all { font-family: var(--f-ui); font-size: 9.5px; letter-spacing: 1.8px; text-transform: uppercase; color: var(--p-mute); background: none; border: 1px solid var(--p-line); padding: var(--s3) var(--s3); min-height: var(--p-tap); cursor: pointer; white-space: nowrap; }
+.prep-all:hover { border-color: var(--p-ink); color: var(--p-ink); }
+@media (min-width: 768px) {
+  .prep-bar-in { align-items: center; }
+  .prep-step { font-size: 19px; }
+  .prep-who { margin-top: var(--s1); }
+}
+
+/* the steps layer */
+.prep-steps { border-top: 1px solid var(--p-line); background: var(--p-card); display: none; }
+.prep-steps.on { display: block; }
+.prep-steps-in { box-sizing: border-box; max-width: var(--p-frame); margin: 0 auto; padding: var(--s4) var(--p-gut) var(--s5); }
+.prep-srow { display: flex; align-items: baseline; gap: var(--s4); border-top: 1px solid var(--p-hair); padding: var(--s3) 0; text-decoration: none; min-height: var(--p-tap); }
+.prep-srow:first-of-type { border-top: 0; }
+.prep-srow .n { font-family: var(--f-ui); font-size: 10px; letter-spacing: 2px; color: var(--p-mute); flex: none; width: 26px; }
+.prep-srow .l { font-family: var(--f-ed); font-weight: 200; font-size: 17px; color: var(--p-ink); flex: 1; }
+.prep-srow .s { font-family: var(--f-ui); font-size: 9.5px; letter-spacing: 1.8px; text-transform: uppercase; color: var(--p-mute); white-space: nowrap; }
+.prep-srow .s.open { color: var(--p-accent); }
+.prep-srow[aria-current="step"] .l { border-bottom: 1px solid var(--p-ink); }
+.prep-srow.locked { opacity: .45; pointer-events: none; }
+
+/* the foot: one primary continuation, one quiet way back */
+.prep-foot { border-top: 1px solid var(--p-line); margin-top: var(--s8); padding-top: var(--s5); display: flex; flex-wrap: wrap; gap: var(--s4); align-items: center; }
+.prep-foot .p-act { order: 2; }
+.prep-foot .p-link { order: 1; }
+@media (min-width: 600px) { .prep-foot .p-act { order: 1; margin-left: auto; } .prep-foot .p-link { order: 0; } }
+
+/* the gate, before an invitation is open */
+.prep-gate { box-sizing: border-box; max-width: 620px; margin: var(--s8) auto; padding: 0 var(--p-gut); }
+
+/* ============================================================================
+   LEGACY NORMALISATION — while the six surfaces are recomposed (step D), the
+   pages that still carry their own markup are pulled onto the system's type,
+   spacing and controls. This is not a second design system: it maps the old
+   class names onto the tokens above so the private journey reads as one thing.
+   Everything here disappears as each surface is rebuilt on .t-* and .p-*.
+   ========================================================================== */
+body.prep main { box-sizing: border-box; width: 100%; max-width: var(--p-frame) !important; margin: 0 auto !important; padding: var(--s7) var(--p-gut) var(--s9) !important; }
+body.prep h1 { font-family: var(--f-ed); font-weight: 200; font-size: 32px; line-height: 1.12; letter-spacing: -.01em; margin: 0 0 var(--s3); }
+body.prep h2 { font-family: var(--f-ed); font-weight: 200; font-size: 19px; line-height: 1.3; }
+body.prep h3 { font-family: var(--f-ed); font-weight: 200; font-size: 19px; line-height: 1.3; }
+body.prep .sub { font-family: var(--f-ui); font-size: 10px; font-weight: 400; line-height: 2; letter-spacing: 2.2px; text-transform: uppercase; color: var(--p-mute); margin-bottom: var(--s7); }
+body.prep .note, body.prep .body, body.prep .bsub { font-family: var(--f-ui); font-size: 12.5px; font-weight: 300; line-height: 1.75; color: var(--p-mute); max-width: var(--p-wide); }
+body.prep .lede { font-family: var(--f-ui); font-size: 15px; font-weight: 300; line-height: 1.75; color: #4A4A4A; max-width: var(--p-read); }
+
+/* one primary action, one secondary action — whatever they used to be called */
+body.prep .cta, body.prep .gbtn, body.prep .cta2, body.prep .dcta, body.prep .nav .go, body.prep .fxcta {
+  display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box;
+  min-height: var(--p-act-h); width: 100%; padding: var(--s4) var(--s5);
+  background: var(--p-ink); color: var(--p-paper); border: 1px solid var(--p-ink);
+  font-family: var(--f-ui); font-size: 10.5px; font-weight: 400; letter-spacing: 2.2px;
+  text-transform: uppercase; text-decoration: none; text-align: center; cursor: pointer;
+}
+body.prep .cta.off, body.prep .dcta.off { background: none; color: var(--p-mute); border-color: #C9C4BA; }
+@media (min-width: 600px) { body.prep .cta, body.prep .gbtn, body.prep .cta2, body.prep .dcta, body.prep .nav .go, body.prep .fxcta { width: auto; min-width: 280px; } }
+body.prep .tlink, body.prep .bedit, body.prep .skip, body.prep .skipl, body.prep .nav .back, body.prep .chg, body.prep .vw, body.prep .ch {
+  display: inline-flex; align-items: flex-end; box-sizing: border-box; min-height: var(--p-tap);
+  padding: var(--s3) 0 var(--s1); font-family: var(--f-ui); font-size: 10px; font-weight: 400;
+  line-height: 20px; letter-spacing: 2px; text-transform: uppercase; color: var(--p-ink);
+  text-decoration: none; border: 0; border-bottom: 1px solid var(--p-ink); background: none; cursor: pointer;
+}
+body.prep .nav .back, body.prep .skip, body.prep .skipl { color: var(--p-mute); border-bottom-color: #C9C4BA; }
+
+/* selection controls, wherever they came from */
+body.prep .tab, body.prep .dbtn {
+  font-family: var(--f-ui); font-size: 10.5px; font-weight: 400; letter-spacing: 2px;
+  text-transform: uppercase; min-height: 48px; padding: var(--s3) var(--s4);
+  border: 1px solid var(--p-line); background: var(--p-card); color: var(--p-ink); cursor: pointer;
+}
+body.prep .tab.on { border-color: var(--p-ink); background: var(--p-ink); color: var(--p-paper); }
+body.prep .p-sel[aria-pressed="true"], body.prep .p-sel.on {
+  background: var(--p-ink); border-color: var(--p-ink); color: var(--p-paper);
+}
+
+/* cards and rows share one rhythm */
+body.prep .gap, body.prep .gate, body.prep .dack, body.prep .consent, body.prep .done, body.prep .soldbox, body.prep .heldbox {
+  background: var(--p-card); border: 1px solid var(--p-line); padding: var(--s5); margin-top: var(--s5);
+}
+body.prep .row, body.prep .pline, body.prep .grow, body.prep .drow, body.prep .gcard, body.prep .q, body.prep .wev {
+  border-top: 1px solid var(--p-hair);
+}
+body.prep .blk { border-top: 1px solid var(--p-line); padding-top: var(--s5); margin-top: var(--s8); }
+body.prep .tot { display: flex; justify-content: space-between; align-items: baseline; padding: var(--s5) 0 var(--s2); border-top: 1px solid var(--p-line); }
+body.prep .tot .l { font-family: var(--f-ui); font-size: 10px; letter-spacing: 2.2px; text-transform: uppercase; color: var(--p-mute); }
+body.prep .tot .r { font-family: var(--f-ed); font-weight: 200; font-size: 27px; }
+body.prep .qq, body.prep .gname, body.prep .pn, body.prep .nm, body.prep .dv, body.prep .iname { font-family: var(--f-ed); font-weight: 200; }
+body.prep .t-l1, body.prep .cat, body.prep .when, body.prep .blabel, body.prep .bno, body.prep .qn, body.prep .forwho, body.prep .dl, body.prep .opl, body.prep .src, body.prep .ipr, body.prep .stepr, body.prep .ieyebrow, body.prep .dreq, body.prep .req {
+  font-family: var(--f-ui); font-size: 10px; font-weight: 400; line-height: 2; letter-spacing: 2.2px; text-transform: uppercase;
+}
+
+/* the type scale wins everywhere, including the controls a browser styles
+   for itself, and no legacy page keeps a size of its own */
+body.prep input, body.prep textarea, body.prep select, body.prep button {
+  font-family: var(--f-ui); font-size: 15px; font-weight: 300;
+}
+body.prep main p, body.prep main li, body.prep main span, body.prep main div, body.prep main label { font-family: var(--f-ui); }
+body.prep .qh, body.prep .qw, body.prep .mt, body.prep .basis, body.prep .ps, body.prep .hint,
+body.prep .dh, body.prep .ipf, body.prep .stepd, body.prep .ibody, body.prep .saved, body.prep .dmeta,
+body.prep .cstate, body.prep .ackstate, body.prep .hist, body.prep .selfl, body.prep .sub2, body.prep .qty, body.prep .bf {
+  font-size: 12.5px; line-height: 1.75;
+}
+body.prep .qq, body.prep .dv, body.prep .stept, body.prep .gname, body.prep .ipn { font-size: 19px; line-height: 1.3; }
+body.prep .lede, body.prep .ilede { font-size: 15px; line-height: 1.75; }
+body.prep main a:not(.cta):not(.gbtn):not(.cta2):not(.dcta):not(.go):not(.p-act) { color: var(--p-ink); }
+body.prep .p-act { color: var(--p-paper); }
+body.prep .p-act.quiet, body.prep .p-act.off { color: var(--p-ink); }
+/* an inline link inside a sentence is the one accepted small target; give it
+   a real one anyway wherever it stands alone */
+body.prep .note a, body.prep .body a, body.prep .ps a { display: inline-block; padding: 4px 0; }
+
+/* a decision row wraps rather than pushing its action off the screen */
+body.prep .grow { flex-wrap: wrap; }
+body.prep .grow > span:not(.gw) { flex: 1 1 100%; }
+body.prep .grow a, body.prep .grow .gdone { margin-left: 0; }
+@media (min-width: 420px) {
+  body.prep .grow > span:not(.gw) { flex: 1 1 auto; }
+  body.prep .grow a, body.prep .grow .gdone { margin-left: auto; }
+}
+
+/* A list is not a landscape: on a wide screen the reading column stays a
+   column, on the frame's left axis, and never stretches to 1280px. */
+@media (min-width: 900px) {
+  body.prep .blk, body.prep #items, body.prep .tot, body.prep #ready, body.prep #sendbox,
+  body.prep .done, body.prep #gaps, body.prep #dec, body.prep #held, body.prep #csnote,
+  body.prep #page > .blk, body.prep .prep-foot { max-width: 860px; }
+  body.prep .prep-head, body.prep .prep-sec { max-width: 860px; }
+}

@@ -227,8 +227,12 @@ gate('P3', 'MASTER-02 programme truth (four events, no active Alms, no pool in v
   if (/053-wedding-dinner-courtyard-garden/.test(vy)) bad.push('the fountain photograph is still the wedding dinner image');
   /* participation is an explicit two-way decision for EVERY active event —
    * never a default, and never a single button that only says yes */
-  if (!/data-ev="yes"[\s\S]{0,400}data-ev="no"/.test(vy)) bad.push('participation must be an explicit two-way decision');
-  if (!/data-off="yes"[\s\S]{0,600}data-off="no"/.test(vy)) bad.push('the Sangkhathan must offer both answers');
+  /* The DECISION now lives in the private journey (step 03), not on the public
+   * editorial page. Both answers must be offered there, for every event. */
+  const wd = read('wedding.html');
+  if (!/data-ev="yes"[\s\S]{0,400}data-ev="no"/.test(wd)) bad.push('participation must be an explicit two-way decision');
+  if (!/data-off="yes"[\s\S]{0,600}data-off="no"/.test(wd)) bad.push('the Sangkhathan must offer both answers');
+  if (/id="tdec"/.test(vy)) bad.push('the decision module must not live on the public wedding page');
   gate('P8', 'Wedding programme truth: four events, Buddhist morning inside the Temple Ceremony',
     bad.length === 0,
     bad.length ? bad.join(' · ')

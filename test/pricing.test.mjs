@@ -288,6 +288,39 @@ test('the six approved Full Experience compositions come out of component pricin
   assert.equal(P.FLAT.sangkhathan.price, 15);
 });
 
+test('the private journey has one shell, one design system and a hard boundary', () => {
+  const sys = readFileSync(join(ROOT, 'assets/prep.css'), 'utf8');
+  /* two families, six roles, three controls — nothing else */
+  ['.t-d1', '.t-h1', '.t-h2', '.t-b1', '.t-b2', '.t-l1'].forEach((r) =>
+    assert.ok(sys.includes(r + ' {'), r + ' is missing from the type scale'));
+  ['.p-act {', '.p-link {', '.p-sel {'].forEach((r) =>
+    assert.ok(sys.includes(r), r + ' is missing from the control system'));
+  const fams = [...new Set((sys.match(/font-family:[^;]+/g) || []).map((f) => f.trim()))];
+  assert.deepEqual(fams.sort(), ['font-family: var(--f-ed)', 'font-family: var(--f-ui)'],
+    'a third font entered the system: ' + fams.join(' | '));
+  /* the fare/variant column never falls below 340px — it changes structure */
+  assert.match(sys, /grid-template-columns: minmax\(0, 1fr\) 380px/);
+  assert.match(sys, /grid-template-columns: minmax\(0, 1fr\) 420px/);
+  /* every control is a real target */
+  assert.match(sys, /--p-act-h: 52px/);
+  assert.match(sys, /--p-tap:\s+44px/);
+
+  const shell = readFileSync(join(ROOT, 'assets/prep-shell.js'), 'utf8');
+  /* the boundary: no 01–06 before an invitation is open */
+  assert.match(shell, /if \(!p\) \{[\s\S]{0,400}Open your invitation to begin/);
+  /* the code opens the invitation; the person then says who they are */
+  assert.match(shell, /Who are you\?/);
+  assert.match(shell, /Who are you continuing as\?/);
+  assert.match(shell, /partyId: p\.invitationId, guestId: guestId/);
+  /* an identity never leaks across invitations */
+  assert.match(shell, /if \(!w \|\| w\.partyId !== p\.invitationId\) return null;/);
+  /* semantic states only — no score, no percentage, no progress bar */
+  assert.ok(!/%|progress|score/i.test(shell.slice(shell.indexOf('function status'), shell.indexOf('/* ----------------------------------------------------------------- shell'))));
+  /* one disclosure contract, and ESC closes it */
+  assert.match(shell, /e\.key === 'Escape'/);
+  assert.match(shell, /aria-modal', 'true'/);
+});
+
 test('rooms are merchandised highest rate first', () => {
   for (const k of Object.keys(R)) {
     const rates = R[k].rooms.map((r) => (r.rate == null ? -1 : r.rate));
@@ -386,9 +419,12 @@ test('the Sangkhathan is decided per named guest, and never restored silently', 
   assert.match(t, /if \(st\.by\[id\]\.attend !== 'yes'\) delete st\.by\[id\]\.off;\s*\n\s*else if \(v === 'yes' \|\| v === 'no'\) st\.by\[id\]\.off = v;/);
   /* the bag quantity is DERIVED from the named decisions — no counter */
   assert.match(t, /var n = T\.offerings\(\);/);
-  const page = readFileSync(join(ROOT, 'voyage.html'), 'utf8');
-  assert.doesNotMatch(page, /data-q=/, 'a quantity stepper survives on the wedding page');
-  assert.match(page, /T\.setOffering\(id, v === 'clear' \? null : v\)/);
+  const page = readFileSync(join(ROOT, 'wedding.html'), 'utf8');
+  assert.doesNotMatch(page, /data-q=/, 'a quantity stepper survives on the wedding step');
+  assert.match(page, /T\.setOffering\(id,b\.getAttribute\('data-off'\)\)/);
+  /* and the public editorial page no longer owns the decision */
+  const pub = readFileSync(join(ROOT, 'voyage.html'), 'utf8');
+  assert.doesNotMatch(pub, /id="tdec"/, 'the decision module is still on the public page');
 });
 
 test('three states, never two: NOT DECIDED is not NOT ATTENDING', () => {
@@ -397,29 +433,27 @@ test('three states, never two: NOT DECIDED is not NOT ATTENDING', () => {
   assert.match(t, /EVENTS\.filter\(function \(e\) \{ return self\.eventOf\(id, e\.key\) === null; \}\)/);
   assert.match(t, /if \(self\.attendingOf\(id\) && !self\.offeringDecidedOf\(id\)\) missing\.push\('Sangkhathan'\);/);
   assert.match(t, /sangkhathanState: a !== 'yes' \? 'Not applicable'/);
-  const page = readFileSync(join(ROOT, 'voyage.html'), 'utf8');
+  const page = readFileSync(join(ROOT, 'wedding.html'), 'utf8');
   /* the guest is offered BOTH answers, so silence is never read as a refusal */
-  assert.match(page, /data-off="yes">Add /);
-  assert.match(page, /data-off="no">Continue without an offering/);
-  assert.match(page, /class="tstate open">Not decided/);
+  assert.match(page, /data-off="yes">We would like to give/);
+  assert.match(page, /data-off="no">Continue without/);
+  assert.match(page, /Not decided/);
   /* and every active event carries both answers, for every named guest */
-  assert.match(page, /data-ev="yes">I am joining/);
-  assert.match(page, /data-ev="no">Not joining/);
+  assert.match(page, /data-ev="yes">Attending/);
+  assert.match(page, /data-ev="no">Not attending/);
 });
 
 test('Tak Bat is explained before anyone is asked, and is never the Sangkhathan', () => {
-  const page = readFileSync(join(ROOT, 'voyage.html'), 'utf8');
-  const dec = page.slice(page.indexOf('function lede()'), page.indexOf('function render()'));
-  /* Tak Bat is explained inside the Temple row, before the Sangkhathan is
-   * ever offered — the guest reads what it is before choosing anything */
-  assert.ok(dec.indexOf('Morning Alms-Giving · Tak Bat') < dec.indexOf('A personal temple offering'));
-  assert.match(dec, /invited to take part in the traditional morning alms-giving, Tak Bat/);
-  assert.match(dec, /there is no separate charge for Tak Bat/i);
-  assert.doesNotMatch(dec, /Everyone who comes takes part/);
-  /* the wedding page still states the alms-giving in full, in its own section */
-  assert.match(page, /Guests attending the Temple Ceremony are invited to take part in the traditional morning alms-giving, Tak Bat/);
-  /* and the two rituals are never merged */
-  assert.match(dec, /This is not the alms-giving, and it is not a temple fee/);
+  const page = readFileSync(join(ROOT, 'wedding.html'), 'utf8');
+  /* the explanation travels with the Temple row and opens in the shell's own
+   * detail layer — the guest is never thrown back to the public website */
+  assert.match(page, /invited to take part in the traditional morning alms-giving, Tak Bat/);
+  assert.match(page, /no separate charge for Tak Bat/);
+  assert.doesNotMatch(page, /Everyone who comes takes part/);
+  assert.match(page, /It is <b>not<\/b> the alms-giving/);
+  assert.match(page, /data-more="takbat"/);
+  assert.match(page, /data-more="sang"/);
+  assert.match(page, /P\.drawer\(/, 'the detail layer must be the shell drawer');
   const review = readFileSync(join(ROOT, 'review.html'), 'utf8');
   assert.match(review, /never the alms-giving and never a temple fee/);
 });
@@ -474,9 +508,10 @@ test('a session stored without names is not an open invitation', () => {
     [/older build/i, /stored session/i, /payload/i, /guest array/i, /migration/i]
       .forEach((bad) => assert.doesNotMatch(page, bad, f + ' leaks an implementation concept'));
   });
-  const voyage = readFileSync(join(ROOT, 'voyage.html'), 'utf8');
-  assert.match(voyage, /if \(!party \|\| !party\.guests\.length\) \{/);
-  assert.match(voyage, /Open your invitation once more/);
+  /* the private wedding step refuses to render a per-person decision without
+   * the names, exactly like every other Preparation surface */
+  const wed = readFileSync(join(ROOT, 'wedding.html'), 'utf8');
+  assert.match(wed, /if\(!P\.ready\(\)\)\{/);
 });
 
 test('the invitation briefing tells the guest who is invited and who they decide for', () => {
@@ -486,16 +521,20 @@ test('the invitation briefing tells the guest who is invited and who they decide
   assert.match(page, /You are making decisions for/);
   assert.match(page, /setIdentityReviewed\(true\)/);
   /* and it is step one of the preparation, not a page nobody can find */
-  const prep = readFileSync(join(ROOT, 'assets/prep.js'), 'utf8');
-  assert.match(prep, /\['You',\s+'you.html'/);
-  assert.match(prep, /\['Documents & privacy', 'documents.html'/);
-  assert.match(page, /location.href='you.html'/, 'the invitation must lead into step 01');
+  const prep = readFileSync(join(ROOT, 'assets/prep-shell.js'), 'utf8');
+  ['invitation.html', 'your-journey.html', 'wedding.html',
+   'wedding-preparation.html', 'about-you.html', 'review.html']
+    .forEach((f) => assert.ok(prep.includes("file: '" + f + "'"), f + ' is not one of the six steps'));
+  assert.equal((prep.match(/\{ n: '0\d'/g) || []).length, 6, 'there is no seventh step');
   /* Cloudflare serves /review, the Pages mirror serves /review.html — the rail
    * has to recognise the page on BOTH deployments */
   assert.match(prep, /replace\(\/\\\.html\$\/, ''\)/);
-  ['your-journey.html', 'voyage.html', 'dress.html', 'you.html', 'review.html', 'invitation.html',
-   'about-you.html', 'documents.html']
-    .forEach((f) => assert.ok(readFileSync(join(ROOT, f), 'utf8').includes('assets/prep.js'), f + ' has no preparation rail'));
+  ['invitation.html', 'your-journey.html', 'wedding.html', 'wedding-preparation.html',
+   'about-you.html', 'review.html']
+    .forEach((f) => assert.ok(readFileSync(join(ROOT, f), 'utf8').includes('assets/prep-shell.js'), f + ' is outside the shell'));
+  /* the public editorial pages stay outside the private journey */
+  ['voyage.html', 'journeys.html', 'index.html']
+    .forEach((f) => assert.ok(!readFileSync(join(ROOT, f), 'utf8').includes('assets/prep-shell.js'), f + ' must not carry the shell'));
 });
 
 test('Review & Send carries DOCUMENTS & PRIVACY, and promises no vault it does not have', () => {
@@ -522,7 +561,7 @@ test('Review & Send is five editorial blocks, each with its own way back', () =>
   ['01', '02', '03', '04', '05'].forEach((n) =>
     assert.ok(page.includes('<span class="bno">' + n + '</span>'), 'block ' + n + ' missing'));
   ['you.html#you', 'voyage.html#temple-decision', 'your-journey.html',
-   'dress.html#acknowledge', 'invitation.html', 'about-you.html#about-you']
+   'wedding-preparation.html#ack', 'invitation.html', 'about-you.html#about-you']
     .forEach((href) => assert.ok(page.includes('href="' + href + '"'), href + ' has no edit route'));
   /* the approved architecture: YOU · YOUR JOURNEY · THE WEDDING ·
    * DOCUMENTS & PRIVACY · YOUR COSTS — About you lives inside YOU */
@@ -624,22 +663,16 @@ test('an editorially small title is still a thumb-sized target', () => {
 });
 
 test('no rule is ever drawn through the word BLUE', () => {
-  const voyage = readFileSync(join(ROOT, 'voyage.html'), 'utf8');
-  /* the dress code is plain type; only the action carries a border */
-  /* the dress code travels with each event as plain type; only the action
-   * carries a rule, so nothing is ever drawn through the word BLUE */
-  assert.match(voyage, /h \+= '<p class="tdress">Dress · <b>' \+ d\[0\] \+ '<\/b><\/p>';/);
-  assert.match(voyage, /temple: \['Blue Lao Traditional Dress', 'dress.html#traditional'\]/);
-  assert.doesNotMatch(voyage, /class="tlk"[^>]*>[^<]*Blue Lao Traditional/);
-  /* and every bordered link is inline-block, so a wrapped line is never crossed */
-  ['voyage.html', 'dress.html', 'review.html'].forEach((f) => {
-    const css = readFileSync(join(ROOT, f), 'utf8');
-    const rules = css.match(/\.(tlk|dmr a|grow a)\{[^}]*\}/g) || [];
-    assert.ok(rules.length, f + ' has no bordered link rules to check');
-    rules.forEach((r) => {
-      if (/border-bottom/.test(r)) assert.ok(/display:inline-block/.test(r), f + ': ' + r);
-    });
-  });
+  const wed = readFileSync(join(ROOT, 'wedding.html'), 'utf8');
+  /* in the decision module the dress code is plain type, never a link label */
+  assert.match(wed, /temple:'Blue Lao Traditional Dress'/);
+  assert.match(wed, /Dress · '\+DRESS\[e\.key\]\+'/);
+  /* and in the design system every secondary action is inline-flex, so a rule
+   * can never be drawn through a wrapped line of type */
+  const sys = readFileSync(join(ROOT, 'assets/prep.css'), 'utf8');
+  const link = sys.slice(sys.indexOf('.p-link {'), sys.indexOf('.p-link:hover'));
+  assert.match(link, /display: inline-flex/);
+  assert.match(link, /border-bottom: 1px solid/);
 });
 
 test('Snow Mountain Viewing Room carries its own canonical photograph, used nowhere else', () => {
@@ -922,9 +955,10 @@ test('the wedding page: four events, the Buddhist morning inside the ceremony', 
   assert.match(vy, /Part of the Temple Ceremony · no charge/);
   /* only the Sangkhathan is USD 15 */
   assert.match(vy, /Optional · USD 15 per guest/);
-  /* attendance is an explicit two-way decision */
-  assert.match(vy, /data-ev="yes"[\s\S]{0,400}data-ev="no"/);
   assert.match(vy, /08:00 – 12:00 · Wat Ong Teu, Vientiane/);
+  /* attendance is an explicit two-way decision — in the private journey */
+  const wd = readFileSync(join(ROOT, 'wedding.html'), 'utf8');
+  assert.match(wd, /data-ev="yes"[\s\S]{0,400}data-ev="no"/);
 });
 
 test('the retired imagery and the pool-side dinner narrative are gone', () => {
