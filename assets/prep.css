@@ -358,16 +358,22 @@ body.prep .grow a, body.prep .grow .gdone { margin-left: 0; }
 .p-list li:first-child { border-top: 0; }
 
 .p-stay { display: flex; flex-direction: column; padding: 0 0 var(--s5); opacity: .45; transition: opacity .35s, border-color .35s; }
-.p-stay.on, .acar .aslide.on.p-stay { opacity: 1; }
+.p-stay.on, .acar .aslide.on.p-stay, .p-stay.p-chosen, .acar .aslide.p-chosen { opacity: 1; }
+.p-stay.p-chosen { border-color: var(--p-ink); }
 .p-stay > * { margin: 0 var(--s5); }
 .p-stay > * + * { margin-top: var(--s3); }
 .p-stay-img { display: block; width: 100%; margin: 0 !important; aspect-ratio: 4/3; background: #E7E3DB center/cover no-repeat; }
 .p-stay > .t-l1 { margin-top: var(--s5); }
 .p-stay .p-act { margin-top: var(--s4); width: calc(100% - 2 * var(--s5)); min-width: 0; }
 /* a veiled neighbour keeps a quiet action — never a grey slab */
-.p-stay:not(.on) .p-act { background: none; color: var(--p-ink); border-color: var(--p-line); }
+.p-stay:not(.on):not(.p-chosen) .p-act { background: none; color: var(--p-ink); border-color: var(--p-line); }
 .p-stay .p-link { margin-top: var(--s1); }
 .p-rail-car .atrk { scroll-padding-left: 0; }
+/* the last address can also come to the left edge, so the card beside it is a
+   deliberate preview and never a card cut through the middle of its name */
+.p-rail-car .atrk::after { content: ''; flex: 0 0 16%; }
+@media (min-width: 768px) { .p-rail-car .atrk::after { flex: 0 0 calc(100% - 320px); } }
+@media (min-width: 900px) { .p-rail-car .atrk::after { flex: 0 0 calc(100% - 340px); } }
 .p-rail-car .arow { display: flex; align-items: center; gap: var(--s4); margin-top: var(--s4); }
 .p-rail-car .arail { position: relative; flex: 1; height: 1px; background: var(--p-line); cursor: pointer; padding: 14px 0; background-clip: content-box; box-sizing: content-box; }
 .p-rail-car .arail i { position: absolute; top: 13px; left: 0; height: 3px; background: var(--p-ink); transition: transform .45s cubic-bezier(.4,0,.2,1), width .3s; }
@@ -384,4 +390,56 @@ body.prep .grow a, body.prep .grow .gdone { margin-left: 0; }
 @media (min-width: 900px) {
   .p-stay { flex: 0 0 340px; }
   .p-product > .p-media { aspect-ratio: 4/3; }
+}
+
+/* ============================================================================
+   THE SYSTEM WINS.
+   The legacy map above is element-scoped, which makes it more specific than the
+   system's own classes — so a .t-h1 inside it was being reset to a legacy size
+   and a .p-price was losing its family. Two classes beat one class and two
+   elements, so the roles are restated here, last and highest, and a component
+   built on the system can never be overruled by the compatibility layer.
+   This block dies with the legacy map, in step D.
+   ========================================================================== */
+body.prep .t-d1 { font-family: var(--f-ed); font-size: 32px; line-height: 1.12; }
+body.prep .t-h1 { font-family: var(--f-ed); font-size: 23px; line-height: 1.22; }
+body.prep .t-h2 { font-family: var(--f-ed); font-size: 19px; line-height: 1.30; }
+body.prep .t-b1 { font-family: var(--f-ui); font-size: 14px; line-height: 1.75; color: #4A4A4A; }
+body.prep .t-b2 { font-family: var(--f-ui); font-size: 12.5px; line-height: 1.75; color: var(--p-mute); }
+body.prep .t-l1 { font-family: var(--f-ui); font-size: 10px; line-height: 2.0; letter-spacing: 2.2px; text-transform: uppercase; color: var(--p-mute); }
+body.prep .t-l1.on { color: var(--p-ink); }
+body.prep .t-l1.open { color: var(--p-accent); }
+body.prep .p-price { font-family: var(--f-ed); font-size: 26px; line-height: 1.1; color: var(--p-ink); }
+body.prep .p-price span { font-family: var(--f-ui); font-size: 10px; letter-spacing: 2.2px; }
+body.prep .p-time { font-family: var(--f-ed); font-size: 22px; line-height: 1.2; color: var(--p-ink); }
+body.prep .p-time span { font-family: var(--f-ui); font-size: 10px; letter-spacing: 2px; }
+body.prep .p-list li { font-family: var(--f-ui); font-size: 12.5px; line-height: 1.75; }
+@media (min-width: 768px) {
+  body.prep .t-d1 { font-size: 40px; }
+  body.prep .t-h1 { font-size: 25px; }
+  body.prep .t-h2 { font-size: 20px; }
+  body.prep .t-b1 { font-size: 15px; }
+}
+
+/* the card's inset is structural padding, which no child rule can undo */
+.p-stay { padding: 0 var(--s5) var(--s5); }
+.p-stay > * { margin: 0; }
+.p-stay > * + * { margin-top: var(--s3); }
+.p-stay-img { margin: 0 calc(-1 * var(--s5)) !important; width: calc(100% + 2 * var(--s5)); }
+.p-stay > .t-l1 { margin-top: var(--s5); }
+.p-stay .p-act { width: 100%; margin-top: var(--s4); }
+.p-stay .p-link { margin-top: var(--s1); }
+
+/* a preview must stay legible: veiled, not erased */
+.p-stay { opacity: .62; }
+
+/* the rail's controls are real controls */
+.p-rail-car .anav button { color: var(--p-ink); opacity: .55; }
+.p-rail-car .anav button:hover { opacity: 1; }
+.p-rail-car .anav button::before { width: 9px; height: 9px; border-width: 1.5px; }
+
+/* one column for the whole private journey */
+@media (min-width: 900px) {
+  body.prep main > h1, body.prep main > .sub, body.prep main > p, body.prep main > hr,
+  body.prep main > h2, body.prep .prep-head, body.prep .prep-sec { max-width: 860px; }
 }

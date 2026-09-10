@@ -231,7 +231,7 @@ function paint(){
   box.innerHTML='<div class="acar p-rail-car"><div class="atrk p-rail">'+stay.rooms.map(function(r){
     var q=P.quote(win,r.slug),img=r.gallery.length?r.gallery[0][0]:'';
     var on=pick===r.slug;
-    return '<article class="aslide p-card p-stay'+(on?' on':'')+'">'+
+    return '<article class="aslide p-card p-stay'+(on?' p-chosen':'')+'" data-slug="'+r.slug+'">'+
       '<span class="p-stay-img"'+(img?' style="background-image:url('+img+')"':'')+' role="img" aria-label="'+
         (r.property||stay.name).replace(/"/g,'&quot;')+'"></span>'+
       '<p class="t-l1'+(r.role?' on':'')+'">'+(r.role?r.role:'Alternative')+'</p>'+
@@ -247,6 +247,10 @@ function paint(){
     '<button type="button" data-a="prev" aria-label="Previous address"></button>'+
     '<button type="button" data-a="next" aria-label="Next address"></button></div></div></div>';
   if(window.SIYL_AMAN)SIYL_AMAN.wire(box.querySelector('.acar'));
+  /* the chosen address comes into focus by itself — a selection the guest
+   * cannot see is a selection they will make twice */
+  var chosen=box.querySelector('.p-chosen'),trk=box.querySelector('.atrk');
+  if(chosen&&trk)trk.scrollTo({left:chosen.offsetLeft-trk.offsetLeft,behavior:'auto'});
   box.querySelectorAll('[data-choose]').forEach(function(b){
     b.addEventListener('click',function(){
       P.ids(win).forEach(function(id){SIYL_BAG.remove(id)});
