@@ -152,7 +152,21 @@ body.fx-open .fxs,body.fx-open .fxo{display:block}
 }
 </style><link rel="stylesheet" href="assets/desktop.css"><link rel="stylesheet" href="assets/aman.css"><link rel="stylesheet" href="assets/prep.css"></head><body>
 <header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="your-journey.html" aria-label="Your Journey"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
-<main><h1>Your Journey</h1><p class="sub">Your selections · live costs · nothing is paid on this website</p>
+<main><h1>Your Journey</h1><p class="sub">For your party · nothing is paid on this website</p>
+
+<section class="prep-sec" id="choices">
+  <p class="t-l1">For your party</p>
+  <h2 class="t-h2">Where you stay in Bangkok</h2>
+  <p class="t-b1 measure">21 – 24 February 2027 · three nights · three approved addresses, one of them yours. Everything on this page belongs to the whole party.</p>
+  <div id="bkksel"></div>
+
+  <h2 class="t-h2" style="margin-top:var(--s8)">How would you like to fly?</h2>
+  <p class="t-b1 measure">Vientiane to Kunming, on the afternoon of 01 March. One flight, two approved fares — exactly one of them is ever active.</p>
+  <div id="flysel"></div>
+</section>
+
+<hr class="rule">
+<h2 class="t-h2" style="margin-top:var(--s7)">Your selections</h2>
 <div id="items"></div>
 <div class="tot"><span class="l">Your Costs</span><span class="r" id="tt">USD 0</span></div>
 <p class="note">Vientiane is two consecutive stays and no night is left uncovered. The Pre-Wedding Stay covers 25 &rarr; 26 and 26 &rarr; 27 February, both nights your contribution. The Wedding Stay covers 27 &rarr; 28 February and 28 February &rarr; 01 March as ONE selection: the first night is your contribution and the second night is complimentary, hosted by the Bride &amp; Groom. Hosted wedding programme events are part of your journey without charge — they never appear as USD 0 line items. Spa interest lines carry no journey cost — the amount is payable at the spa.</p>
@@ -194,6 +208,85 @@ if(window.SIYL_TRANSPORT&&window.SIYL_TRANSPORT[x.id])return 'transport.html?id=
 var P=window.SIYL_PRICE,at=P&&P.locate(x.id);
 if(at&&x.room)return 'room.html?stay='+at.key+'&room='+x.room;
 return 'journeys.html#j-'+(P?P.windowOf(x.id):x.id)}
+/* ============================================================= THE PRODUCTS
+ * Two real products rendered through the frozen grammar, to prove the system
+ * carries the exact kind of content that failed before it existed.
+ *
+ * THE STAY CARD shows only what a decision needs: the property, what you get
+ * inside it, the dates, the one inclusion that changes the choice, the price
+ * and the action. Square metres, bed counts and amenities live behind
+ * VIEW DETAILS, where they belong.
+ *
+ * THE FARE COLUMN never becomes a strip. At 900 it is 380px, at 1280 it is
+ * 420px, and below 900 the layout changes rather than narrowing: the fares
+ * become two full-width surfaces under the route.
+ * ------------------------------------------------------------------------ */
+function bkkSelector(){
+var box=document.getElementById('bkksel'),P=window.SIYL_PRICE;
+if(!box||!P||!window.SIYL_ROOMS)return;
+var stay=SIYL_ROOMS.sathorn,win='bkk-stay';
+function paint(){
+  var line=SIYL_BAG.get().filter(function(x){return x.id===win})[0];
+  var pick=line?line.room:null;
+  box.innerHTML='<div class="acar p-rail-car"><div class="atrk p-rail">'+stay.rooms.map(function(r){
+    var q=P.quote(win,r.slug),img=r.gallery.length?r.gallery[0][0]:'';
+    var on=pick===r.slug;
+    return '<article class="aslide p-card p-stay'+(on?' on':'')+'">'+
+      '<span class="p-stay-img"'+(img?' style="background-image:url('+img+')"':'')+' role="img" aria-label="'+
+        (r.property||stay.name).replace(/"/g,'&quot;')+'"></span>'+
+      '<p class="t-l1'+(r.role?' on':'')+'">'+(r.role?r.role:'Alternative')+'</p>'+
+      '<h3 class="t-h1">'+(r.property||stay.name)+'</h3>'+
+      '<p class="t-b2">'+(r.card||r.name)+'</p>'+
+      '<p class="t-b2">21 – 24 February · 3 nights<br>'+(r.breakfast||stay.breakfast)+'</p>'+
+      '<p class="p-price">'+P.money(q.total)+'<span class="t-l1">total per person</span></p>'+
+      '<button type="button" class="p-act'+(on?' quiet':'')+'" data-choose="'+r.slug+'">'+
+        (on?'Selected':'Select this stay')+'</button>'+
+      '<p><a class="p-link mute" href="room.html?stay=sathorn&room='+r.slug+'">View details</a></p>'+
+      '</article>'}).join('')+'</div>'+
+    '<div class="arow"><div class="arail"><i></i></div><div class="anav">'+
+    '<button type="button" data-a="prev" aria-label="Previous address"></button>'+
+    '<button type="button" data-a="next" aria-label="Next address"></button></div></div></div>';
+  if(window.SIYL_AMAN)SIYL_AMAN.wire(box.querySelector('.acar'));
+  box.querySelectorAll('[data-choose]').forEach(function(b){
+    b.addEventListener('click',function(){
+      P.ids(win).forEach(function(id){SIYL_BAG.remove(id)});
+      P.items(win,b.getAttribute('data-choose')).forEach(function(it){SIYL_BAG.put(it)});
+    })});
+}
+document.addEventListener('siyl:bag',paint);paint()}
+
+function flySelector(){
+var box=document.getElementById('flysel'),P=window.SIYL_PRICE;
+if(!box||!P||!P.classesOf)return;
+function paint(){
+  var line=SIYL_BAG.get().filter(function(x){return x.id==='mu9646'})[0];
+  var cur=line?(line.cls||'business'):null;
+  box.innerHTML='<div class="p-product">'+
+    '<span class="p-media" style="background-image:url(assets/images/transport/mu9632-business-1.jpg)" role="img" aria-label="Business Class · China Eastern"></span>'+
+    '<div class="p-body">'+
+      '<p class="t-l1">01 March 2027 · China Eastern Airlines · MU9646</p>'+
+      '<h3 class="t-h1">Vientiane &rarr; Kunming</h3>'+
+      '<p class="p-time">15:50 <span>VTE · Terminal 1</span></p>'+
+      '<p class="p-time">18:25 <span>KMG</span></p>'+
+      '<p class="t-b2">1h 35m · non-stop · Boeing 738</p>'+
+    '</div>'+
+    '<div class="p-choices">'+P.classesOf('mu9646').map(function(c){
+      var on=cur===c.slug;
+      return '<article class="p-card p-fare'+(on?' on':'')+'">'+
+        '<p class="t-l1'+(c.preferred?' on':'')+'">'+(c.preferred?'Preferred':'Save '+P.money(275-c.price)+' per person')+'</p>'+
+        '<h4 class="t-h1">'+c.short+'</h4>'+
+        '<p class="p-price">'+P.money(c.price)+'<span class="t-l1">per person</span></p>'+
+        '<ul class="p-list">'+c.notes.map(function(n){return '<li class="t-b2">'+n+'</li>'}).join('')+'</ul>'+
+        '<button type="button" class="p-act'+(on?' quiet':'')+'" data-cls="'+c.slug+'">'+
+          (on?'Selected':'Choose this fare')+'</button>'+
+        '</article>'}).join('')+'</div>'+
+    '</div>';
+  box.querySelectorAll('[data-cls]').forEach(function(b){
+    b.addEventListener('click',function(){
+      P.items('mu9646',b.getAttribute('data-cls')).forEach(function(it){SIYL_BAG.put(it)})})});
+}
+document.addEventListener('siyl:bag',paint);paint()}
+
 /* Whose decision is this? A shared arrangement says so; a personal one carries
  * the name of the person it belongs to. The guest never has to guess. */
 function whoLabel(){
@@ -498,6 +591,8 @@ document.addEventListener('siyl:guest',render);
 document.addEventListener('siyl:stock',render);
 render();
 paintHeld();
+bkkSelector();
+flySelector();
 var q=new URLSearchParams(location.search);
 var rm=q.get('rm');if(rm){SIYL_BAG.remove(rm);render()}
 </script></body></html>

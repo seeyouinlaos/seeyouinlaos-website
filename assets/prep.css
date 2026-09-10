@@ -206,19 +206,23 @@ body.p-drawer-open .p-drawer { transform: translateY(0); }
 .prep-bar { position: sticky; top: 0; z-index: 60; background: var(--p-paper); border-bottom: 1px solid var(--p-line); }
 .prep-bar-in { box-sizing: border-box; max-width: var(--p-frame); margin: 0 auto; padding: var(--s4) var(--p-gut); display: flex; align-items: flex-start; gap: var(--s4); }
 .prep-bar-l { min-width: 0; flex: 1; }
-.prep-eyebrow { font-family: var(--f-ui); font-size: 9px; font-weight: 400; letter-spacing: 2.4px; text-transform: uppercase; color: var(--p-mute); }
-.prep-step { font-family: var(--f-ed); font-weight: 200; font-size: 17px; line-height: 1.25; color: var(--p-ink); margin-top: 3px; }
+/* Perceptual order in the bar: the STEP first, the party and person second,
+   the context and the secondary control quietly behind both. */
+.prep-eyebrow { font-family: var(--f-ui); font-size: 8.5px; font-weight: 400; letter-spacing: 1.8px; text-transform: uppercase; color: #9A968F; white-space: nowrap; }
+.prep-step { font-family: var(--f-ed); font-weight: 200; font-size: 21px; line-height: 1.2; color: var(--p-ink); margin-top: 2px; }
 .prep-step b { font-weight: 200; color: var(--p-mute); margin-right: var(--s2); font-size: 14px; letter-spacing: .04em; }
 .prep-who { font-family: var(--f-ui); font-size: 11.5px; line-height: 1.6; color: var(--p-mute); margin-top: var(--s2); }
 .prep-who b { font-weight: 400; color: var(--p-ink); }
 .prep-who button { font: inherit; font-size: 10px; letter-spacing: 1.8px; text-transform: uppercase; color: var(--p-ink); background: none; border: 0; border-bottom: 1px solid var(--p-ink); padding: 0 0 2px; margin-left: var(--s2); cursor: pointer; }
 .prep-bar-r { flex: none; }
-.prep-all { font-family: var(--f-ui); font-size: 9.5px; letter-spacing: 1.8px; text-transform: uppercase; color: var(--p-mute); background: none; border: 1px solid var(--p-line); padding: var(--s3) var(--s3); min-height: var(--p-tap); cursor: pointer; white-space: nowrap; }
+.prep-all { font-family: var(--f-ui); font-size: 8.5px; letter-spacing: 1.6px; text-transform: uppercase; color: var(--p-mute); background: none; border: 0; border-bottom: 1px solid var(--p-line); padding: var(--s3) 0 var(--s1); min-height: var(--p-tap); cursor: pointer; white-space: nowrap; }
 .prep-all:hover { border-color: var(--p-ink); color: var(--p-ink); }
 @media (min-width: 768px) {
   .prep-bar-in { align-items: center; }
-  .prep-step { font-size: 19px; }
+  .prep-step { font-size: 23px; }
   .prep-who { margin-top: var(--s1); }
+  .prep-all { font-size: 9.5px; letter-spacing: 1.8px; border: 1px solid var(--p-line); padding: var(--s3) var(--s4); }
+  .prep-all:hover { border-color: var(--p-ink); }
 }
 
 /* the steps layer */
@@ -339,4 +343,45 @@ body.prep .grow a, body.prep .grow .gdone { margin-left: 0; }
   body.prep .done, body.prep #gaps, body.prep #dec, body.prep #held, body.prep #csnote,
   body.prep #page > .blk, body.prep .prep-foot { max-width: 860px; }
   body.prep .prep-head, body.prep .prep-sec { max-width: 860px; }
+}
+
+/* ---------------------------------------------------- the two product forms
+   Both are built only from the tokens above. A stay card carries six things
+   and hides the rest behind VIEW DETAILS; a fare card carries five and never
+   becomes a strip. */
+.p-price { font-family: var(--f-ed); font-weight: 200; font-size: 26px; line-height: 1.1; color: var(--p-ink); }
+.p-price span { display: block; margin-top: var(--s2); }
+.p-time { font-family: var(--f-ed); font-weight: 200; font-size: 22px; line-height: 1.2; color: var(--p-ink); }
+.p-time span { font-family: var(--f-ui); font-size: 10px; font-weight: 400; letter-spacing: 2px; text-transform: uppercase; color: var(--p-mute); margin-left: var(--s3); }
+.p-list { list-style: none; margin: 0; padding: 0; }
+.p-list li { padding: var(--s2) 0; border-top: 1px solid var(--p-hair); }
+.p-list li:first-child { border-top: 0; }
+
+.p-stay { display: flex; flex-direction: column; padding: 0 0 var(--s5); opacity: .45; transition: opacity .35s, border-color .35s; }
+.p-stay.on, .acar .aslide.on.p-stay { opacity: 1; }
+.p-stay > * { margin: 0 var(--s5); }
+.p-stay > * + * { margin-top: var(--s3); }
+.p-stay-img { display: block; width: 100%; margin: 0 !important; aspect-ratio: 4/3; background: #E7E3DB center/cover no-repeat; }
+.p-stay > .t-l1 { margin-top: var(--s5); }
+.p-stay .p-act { margin-top: var(--s4); width: calc(100% - 2 * var(--s5)); min-width: 0; }
+/* a veiled neighbour keeps a quiet action — never a grey slab */
+.p-stay:not(.on) .p-act { background: none; color: var(--p-ink); border-color: var(--p-line); }
+.p-stay .p-link { margin-top: var(--s1); }
+.p-rail-car .atrk { scroll-padding-left: 0; }
+.p-rail-car .arow { display: flex; align-items: center; gap: var(--s4); margin-top: var(--s4); }
+.p-rail-car .arail { position: relative; flex: 1; height: 1px; background: var(--p-line); cursor: pointer; padding: 14px 0; background-clip: content-box; box-sizing: content-box; }
+.p-rail-car .arail i { position: absolute; top: 13px; left: 0; height: 3px; background: var(--p-ink); transition: transform .45s cubic-bezier(.4,0,.2,1), width .3s; }
+.p-rail-car .anav { display: flex; gap: 2px; }
+.p-rail-car .anav button { position: relative; background: none; border: 0; cursor: pointer; width: var(--p-tap); height: var(--p-tap); color: var(--p-mute); }
+.p-rail-car .anav button::before { content: ''; position: absolute; left: 50%; top: 50%; width: 7px; height: 7px; border-left: 1px solid currentColor; border-bottom: 1px solid currentColor; transform: translate(-50%,-50%) rotate(45deg); }
+.p-rail-car .anav button[data-a="next"]::before { transform: translate(-30%,-50%) rotate(-135deg); }
+.p-rail-car .anav button[disabled] { opacity: .3; cursor: default; }
+
+.p-fare > * + * { margin-top: var(--s3); }
+.p-fare .p-act { margin-top: var(--s4); width: 100%; min-width: 0; }
+.p-fare.on { border-color: var(--p-ink); }
+
+@media (min-width: 900px) {
+  .p-stay { flex: 0 0 340px; }
+  .p-product > .p-media { aspect-ratio: 4/3; }
 }
