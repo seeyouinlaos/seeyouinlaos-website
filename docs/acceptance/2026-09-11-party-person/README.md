@@ -19,3 +19,8 @@ Result: `results.json` — 39 checks, all PASS, no page errors, no horizontal ov
 ## Visual inspection notes
 - Full-page captures paint the sticky shell bar and the fixed journey bar at the scroll offset (a screenshot artefact of `position: sticky/fixed`, present in every earlier acceptance set); the element crops (`-ack-`, `-you-`, `-wedding-`) show the same states unobstructed.
 - At 390 the bar wraps "Continuing as / Peggy SWITCH" onto two lines, as accepted in A+B.
+
+## Live origins (after 91afeb7)
+- Cloudflare `https://seeyouinlaos-website.suthep-hrg.workers.dev` · Worker version cd855b6b-7366-47a8-aed1-068576cc8a28 · walk 39/39 · `results-live-cloudflare.json` · frames `90-cf-*`
+- GitHub Pages `https://seeyouinlaos.github.io/seeyouinlaos-website` · build of 91afeb7 · walk 39/39 · `results-live-github-pages.json` · frames `91-gh-*`
+- Byte parity: guest.js · prep-shell.js · prep.css · invite.mjs · temple.js · docs.js · the six step pages — identical to HEAD on both origins.
