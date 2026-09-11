@@ -262,6 +262,26 @@ gate('P3', 'MASTER-02 programme truth (four events, no active Alms, no pool in v
     bad.length === 0, bad.length ? bad.join(' · ') : 'SCOPE registry · activeGuestId / subjectGuestId · dress + consent per guest, first person · ANSWERING FOR said in words');
 }
 
+/* P10 — D · RECOMPOSED SURFACES. The six steps live in the shell and the
+   design system only; the compatibility layer is gone; no page brings its own
+   rules beyond the shared site chrome; the public desktop layer stays public. */
+{
+  const sys = read('assets/prep.css'), bad = [];
+  if (/LEGACY NORMALISATION|THE SYSTEM WINS/.test(sys)) bad.push('the compatibility layer is still in prep.css');
+  if ((sys.match(/body\.prep [.#]/g) || []).length) bad.push('element-scoped legacy overrides remain');
+  for (const f of ['invitation.html', 'your-journey.html', 'wedding.html', 'wedding-preparation.html', 'about-you.html', 'review.html']) {
+    const page = read(f);
+    if (!page.includes('assets/prep-shell.js') || !page.includes('assets/prep.css')) bad.push(f + ' is outside the shell or the system');
+    if (page.includes('assets/desktop.css') || page.includes('assets/prep.js')) bad.push(f + ' loads a legacy layer');
+    const local = page.slice(page.indexOf('<style>') + 7, page.indexOf('</style>'));
+    const sels = [...local.matchAll(/(^|\})\s*([^{}]+)\{/g)].map((m) => m[2].trim()).filter((x) => !x.startsWith('@font-face'));
+    const extra = sels.filter((s) => !/^(\*|body|\.hd|\.hb|\.hb i|\.bd|\.bd \.dot|\.bag|\.bag \.bgi|\.bb)$/.test(s));
+    if (extra.length) bad.push(f + ' keeps page-local rules: ' + extra.slice(0, 3).join(', '));
+  }
+  gate('P10', 'Recomposed surfaces (D): one shell, one system, no compatibility layer',
+    bad.length === 0, bad.length ? bad.join(' · ') : 'six surfaces on .t-*/.p-* only; legacy map deleted; page-local CSS is the shared chrome alone');
+}
+
 /* P5 — overlay integrity (release-blocking): a hidden lightbox must actually
  * be hidden (author display rules must not defeat the hidden attribute), and
  * gallery navigation can never run on an empty list (NaN / 0 regression). */

@@ -1,188 +1,38 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Your Journey · See You In Laos</title><style>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Your Journey · See You In Laos</title>
+<style>
 @font-face{font-family:'PP Editorial Old';src:url('assets/fonts/PPEditorialOld-Ultralight.otf') format('opentype');font-weight:200;font-display:swap}
-*{margin:0;padding:0;box-sizing:border-box}body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;font-weight:300;font-size:14px;line-height:1.6}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;font-weight:300;font-size:14px;line-height:1.6}
 .hd{display:grid;grid-template-columns:44px 1fr 44px;align-items:center;padding:14px 20px}
-.hb{width:44px;height:44px;display:flex;flex-direction:column;justify-content:center;gap:5px;background:none;border:0}.hb i{display:block;width:20px;height:1.4px;background:#313131}
+.hb{width:44px;height:44px;display:flex;flex-direction:column;justify-content:center;gap:5px;background:none;border:0;cursor:pointer}.hb i{display:block;width:20px;height:1.4px;background:#313131}
 .bd{font-family:'PP Editorial Old',serif;font-weight:200;font-size:19px;text-align:center}.bd .dot{color:#8A5A55}
 .bag{width:44px;height:44px;display:flex;align-items:center;justify-content:center;position:relative;color:#313131;text-decoration:none}.bag .bgi{display:block}
-.bb{position:absolute;top:1px;right:0;min-width:14px;height:14px;padding:0 3px;background:#313131;color:#F3EEE7;font-size:8.5px;line-height:1;letter-spacing:0;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;display:none;align-items:center;justify-content:center;box-shadow:0 0 0 2px #F3EEE7;border-radius:1px}
-main{padding:30px 24px 80px;max-width:640px;margin:0 auto}
-h1{font-family:'PP Editorial Old',serif;font-weight:200;font-size:29px;margin-bottom:6px}
-.sub{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#7C7A75;margin-bottom:26px}
-.row{display:flex;gap:16px;border-top:1px solid #DAD9D7;padding:20px 0}
-.row:last-of-type{border-bottom:1px solid #DAD9D7}
-.th{width:74px;height:92px;background:#E7E3DB center/cover no-repeat;flex:0 0 auto}
-/* 44px thumb target on a small editorial title */
-.nm{font-family:'PP Editorial Old',serif;font-weight:200;font-size:18px;line-height:1.3;display:inline-block;padding:7px 0;min-height:44px;box-sizing:border-box}
-.mt{font-size:11px;color:#7C7A75;margin-top:4px}
-.when{font-size:9.5px;letter-spacing:2px;text-transform:uppercase;color:#7C7A75}
-.cat{font-size:9.5px;letter-spacing:2px;text-transform:uppercase;color:#313131;margin:2px 0 4px}
-.cat .bk{display:inline-block;width:5px;height:5px;border-radius:50%;background:#8A5A55;margin-left:7px;vertical-align:middle}
-.basis{font-size:11px;color:#7C7A75;margin-top:6px;line-height:1.6}
-.qty{font-size:11px;color:#313131;margin-top:2px}
-.dlist{border-top:1px solid #DAD9D7;margin-top:26px;padding-top:18px}
-.dlist h3{font-family:'PP Editorial Old',serif;font-weight:200;font-size:18px;margin-bottom:4px}
-.dlist p.sub2{font-size:12px;color:#7C7A75;margin-bottom:12px;line-height:1.7}
-.drow{display:flex;gap:12px;align-items:baseline;border-bottom:1px solid #EAE7E0;padding:12px 0;font-size:12.5px}
-.drow .dw{font-size:9.5px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75;flex:0 0 108px}
-.drow a{margin-left:auto;font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#313131;text-decoration:none;border-bottom:1px solid #313131;padding-bottom:2px}
-.ln{font-family:'PP Editorial Old',serif;font-size:15px;margin-left:auto;white-space:nowrap}
-.q{display:inline-flex;align-items:center;gap:12px;margin-top:10px}
-.q button{width:34px;height:34px;border:1px solid #DAD9D7;background:#fff;cursor:pointer;font-size:15px}
-.acts{display:flex;gap:20px;align-items:center;margin-top:18px;flex-wrap:wrap}
-.rm,.ch{background:none;border:0;border-bottom:1px solid #313131;font:inherit;font-size:10px;letter-spacing:1.6px;text-transform:uppercase;cursor:pointer;padding:8px 0 3px;min-height:44px;color:#313131;text-decoration:none;display:inline-block}
-.rm{border-bottom-color:#C9C4BA;color:#7C7A75}
-.rm:hover{color:#313131;border-bottom-color:#313131}
-.bf{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75;margin-top:6px}
-.hostln{font-size:9.5px;letter-spacing:1.6px;text-transform:uppercase;color:#313131;margin-top:8px;line-height:1.8}
-.hostln span{display:block;color:#7C7A75;letter-spacing:1.6px}
-.ln.free{font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;font-size:9.5px;letter-spacing:1.6px;text-transform:uppercase;color:#7C7A75}
-.modes{display:flex;gap:30px;flex-wrap:wrap;margin:4px 0 14px}
-.selfl{font-size:11.5px;color:#7C7A75;line-height:1.8;margin-top:10px}
-.avline{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75;margin:14px 0 0;line-height:1.6}
-.avline.low{color:#8A5A55}
-.heldbox{border-top:1px solid #DAD9D7;margin-top:24px;padding-top:16px;font-size:12px;color:#7C7A75;line-height:1.8}
-.wedth{width:72px;height:96px;background-size:cover;background-position:center;flex:none;filter:saturate(.9)}
-.wprog{margin-top:12px;border-top:1px solid #EDEBE7}
-.wp{border-bottom:1px solid #EDEBE7;padding:12px 0}
-.wpt{font-family:'PP Editorial Old',serif;font-weight:200;font-size:16px;line-height:1.3}
-.wpt a{display:inline-block;color:#313131;text-decoration:none;border-bottom:1px solid #DAD9D7;padding:8px 0 7px;min-height:44px;box-sizing:border-box}
-.wpm{font-size:9.5px;letter-spacing:1.6px;text-transform:uppercase;color:#7C7A75;margin-top:5px}
-.wps{font-size:12px;color:#7C7A75;line-height:1.8;margin-top:5px}
-.wps b{font-weight:400;color:#313131}
-.wpeople{margin-top:14px}
-.who{color:#7C7A75;margin-left:8px;letter-spacing:1.6px}
-.who::before{content:'· '}
-.wcost{border-top:1px solid #EDEBE7;margin-top:14px;padding-top:12px}
-.wps.open{color:#8A5A55}
-.wps.open b{color:#8A5A55}
-.wpd{font-size:9.5px;letter-spacing:1.6px;text-transform:uppercase;color:#7C7A75;margin-top:6px}
-.wpd a{display:inline-block;color:#313131;text-decoration:none;border-bottom:1px solid #313131;padding:8px 0 3px;margin-left:8px;min-height:44px;line-height:20px}
-.wpa{margin-top:8px}
-.wpa a{display:inline-block;font-size:9.5px;letter-spacing:1.8px;text-transform:uppercase;color:#313131;text-decoration:none;border-bottom:1px solid #313131;padding:10px 0 4px;min-height:44px;line-height:20px}
-
-.wpl{font-size:9.5px;letter-spacing:2px;text-transform:uppercase;color:#313131;margin-bottom:4px}
-.tmpl{border-top:1px solid #DAD9D7;margin-top:24px;padding-top:18px}
-.tmpl h3{font-family:'PP Editorial Old',serif;font-weight:200;font-size:18px;margin-bottom:4px}
-.tmpl p{font-size:12px;color:#7C7A75;line-height:1.8;margin-bottom:8px}
-.tmpl b{font-weight:400;color:#313131}
-.tmpl a{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#313131;text-decoration:none;border-bottom:1px solid #313131;padding-bottom:2px;display:inline-block;margin-top:4px}
-.heldbox b{font-weight:400;color:#313131}
-.selfl b{font-weight:400;color:#313131}
-.selfl.low b{color:#8A5A55}
-a.th,a.nm{text-decoration:none;color:inherit;display:block}
-a.nm:hover,a.th:hover{opacity:.7}
-.tot{display:flex;justify-content:space-between;align-items:baseline;padding:24px 0 6px}
-.tot .l{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#7C7A75}
-.tot .r{font-family:'PP Editorial Old',serif;font-size:27px}
-.cta{display:block;width:100%;background:#313131;color:#F3EEE7;border:0;padding:19px;font-size:11px;letter-spacing:2.2px;text-transform:uppercase;text-align:center;text-decoration:none;margin-top:20px}
-.empty{border-top:1px solid #DAD9D7;border-bottom:1px solid #DAD9D7;padding:40px 0;color:#7C7A75}
-.note{font-size:11.5px;color:#7C7A75;margin-top:16px}
-/* completion — a small, muted natural green, an editorial confirmation not an alert */
-.dlist.ok h3{display:flex;align-items:center;gap:10px}
-.dlist.ok h3 .ck{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;border:1px solid #6B7F63;flex:0 0 auto}
-.dlist.ok h3 .ck::before{content:'';width:8px;height:4px;border-left:1.2px solid #6B7F63;border-bottom:1.2px solid #6B7F63;transform:translateY(-1px) rotate(-45deg)}
-/* THE MODE ACTIONS — three different jobs, three different weights.
-   FULL EXPERIENCE   the primary way to compose a journey: a bordered block
-   COST SAVING       the quiet alternative: an underlined text action
-   REVIEW & SEND     the final submission: the solid dark block further down
-   Nothing bright, nothing rounded, nothing that reads as e-commerce. */
-.modes{display:block;margin:10px 0 4px}
-.fxcta{display:block;width:100%;max-width:440px;background:#FCFAF6;border:1px solid #313131;color:#313131;cursor:pointer;font:inherit;text-align:left;padding:19px 22px 17px;min-height:66px;transition:background .3s,color .3s}
-.fxcta:hover,.fxcta:focus-visible{background:#313131;color:#F3EEE7}
-.fxcta .fxl{display:block;font-size:11px;letter-spacing:2.4px;text-transform:uppercase;line-height:1.2}
-.fxcta .fxsub{display:block;font-size:11.5px;letter-spacing:.2px;text-transform:none;color:#7C7A75;margin-top:7px;line-height:1.5}
-.fxcta:hover .fxsub,.fxcta:focus-visible .fxsub{color:#CFC7BA}
-.fxalt{display:inline-block;background:none;border:0;cursor:pointer;font:inherit;font-size:10px;letter-spacing:2.2px;text-transform:uppercase;color:#7C7A75;padding:13px 0;min-height:44px;line-height:18px;background-image:linear-gradient(currentColor,currentColor);background-repeat:no-repeat;background-size:100% 1px;background-position:0 33px;margin-top:16px}
-.fxalt:hover{color:#313131}
-.fxnote{font-size:11.5px;color:#7C7A75;line-height:1.7;margin-bottom:6px}
-.fxs{position:fixed;inset:0;background:rgba(30,30,30,.45);display:none;z-index:80}
-.fxo{position:fixed;left:0;right:0;bottom:0;background:#FCFAF6;padding:30px 26px calc(34px + env(safe-area-inset-bottom));display:none;z-index:81;max-width:640px;margin:0 auto;max-height:94dvh;max-height:94vh;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
-body.fx-open .fxs,body.fx-open .fxo{display:block}
-.fxo .ie{font-size:10px;letter-spacing:2.2px;text-transform:uppercase;color:#7C7A75;margin-bottom:10px}
-.fxo h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:23px;margin-bottom:12px}
-.fxo p{font-size:13px;line-height:1.7;color:#4A4A4A;margin-bottom:16px}
-.fxo .row2{display:flex;gap:28px;align-items:center;justify-content:flex-end}
-.fxo .cancel{background:none;border:0;font:inherit;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#7C7A75;cursor:pointer;min-height:44px;padding:12px 0}
-.fxo .go{background:#313131;color:#F3EEE7;border:0;padding:17px 26px;font:inherit;font-size:10.5px;letter-spacing:2.2px;text-transform:uppercase;cursor:pointer;min-height:52px}
-@media (min-width:900px){.fxo{left:50%;right:auto;bottom:auto;top:50%;transform:translate(-50%,-50%);width:520px;padding:40px 44px;max-height:88vh}}
-/* ---- THE COST SAVING SELECTOR ------------------------------------------
-   Two choices, not two buttons. The guest moves between them horizontally —
-   swipe, trackpad, arrows or the keyboard — and the card resting on the snap
-   point IS the choice. One confirmation applies it. Built on the accepted
-   carousel grammar (.acar/.atrk/.aslide/.arail) so it behaves like every other
-   rail on the site. */
-.fxo.wide{max-width:none}
-@media (min-width:900px){.fxo.wide{width:860px;padding:40px 0 44px}}
-.csel{position:relative;margin:4px 0 0}
-.csel .atrk{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scrollbar-width:none;padding:2px 0 4px;scroll-padding-left:0}
-.csel .atrk::-webkit-scrollbar{display:none}
-.csel .aslide{flex:0 0 84%;scroll-snap-align:start;scroll-snap-stop:always}
-.cscard{border:1px solid #DAD9D7;background:#FFFDF9;padding:20px 18px 18px;height:100%;transition:border-color .3s,opacity .35s}
-.csel .aslide:not(.on) .cscard{opacity:.5}
-.csel .aslide.on .cscard{border-color:#313131}
-.cscard .cse{font-size:9.5px;letter-spacing:2.2px;text-transform:uppercase;color:#7C7A75}
-.cscard h3{font-family:'PP Editorial Old',serif;font-weight:200;font-size:21px;line-height:1.25;margin:7px 0 2px}
-.cscard .csw{font-size:11.5px;color:#7C7A75;margin-bottom:14px}
-.cscard .csa{font-family:'PP Editorial Old',serif;font-size:24px;line-height:1.1}
-.cscard .csan{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75;margin:4px 0 14px}
-.cscard ul{list-style:none;margin:0 0 12px;padding:0}
-.cscard li{position:relative;padding-left:16px;font-size:11.5px;line-height:1.6;color:#4A4A4A;margin-bottom:6px}
-.cscard li::before{content:'';position:absolute;left:2px;top:.62em;width:4px;height:4px;border-radius:50%;background:#C9C4BA}
-.cscard .csav{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75;margin-top:12px}
-.cscard .csav.low{color:#8A5A55}
-.cscard.gone{opacity:.55}
-.cscard.gone h3,.cscard.gone .csa{color:#7C7A75}
-.csel .arow{display:flex;align-items:center;gap:16px;margin:16px 0 0}
-.csel .arail{position:relative;flex:1;height:1px;background:#DAD9D7;cursor:pointer;padding:14px 0;background-clip:content-box;box-sizing:content-box}
-.csel .arail i{position:absolute;top:13px;left:0;height:3px;background:#313131;transition:transform .45s cubic-bezier(.4,0,.2,1),width .3s}
-.csel .anav{display:flex;gap:2px}
-.csel .anav button{position:relative;background:none;border:0;cursor:pointer;width:44px;height:44px;color:#7C7A75}
-.csel .anav button::before{content:'';position:absolute;left:50%;top:50%;width:7px;height:7px;border-left:1px solid currentColor;border-bottom:1px solid currentColor;transform:translate(-50%,-50%) rotate(45deg)}
-.csel .anav button[data-a="next"]::before{transform:translate(-30%,-50%) rotate(-135deg)}
-.csel .anav button:hover{color:#313131}
-.csel .anav button[disabled]{opacity:.3;cursor:default}
-.cshint{font-size:9.5px;letter-spacing:2.2px;text-transform:uppercase;color:#7C7A75;margin:2px 0 10px}
-.csnone{border:1px solid #C9A9A0;background:#FBF4F2;padding:18px 18px 14px;font-size:12.5px;color:#4A4A4A;line-height:1.7;margin-top:4px}
-.fxo .go[disabled]{opacity:.45;cursor:default}
-@media (min-width:900px){
-  .csel .atrk,.csel .arow,.cshint,.fxo.wide .ie,.fxo.wide h2,.fxo.wide #fxp,.fxo.wide .row2,.fxo.wide .csnone{padding-left:44px;padding-right:44px}
-  .csel .aslide{flex:0 0 46%}
-  .cscard{padding:26px 24px 24px}
-}
-</style><link rel="stylesheet" href="assets/desktop.css"><link rel="stylesheet" href="assets/aman.css"><link rel="stylesheet" href="assets/prep.css"></head><body>
+.bb{position:absolute;top:1px;right:0;min-width:14px;height:14px;padding:0 3px;background:#313131;color:#F3EEE7;font-size:8.5px;line-height:1;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;display:none;align-items:center;justify-content:center;box-shadow:0 0 0 2px #F3EEE7;border-radius:1px}
+</style>
+<link rel="stylesheet" href="assets/aman.css"><link rel="stylesheet" href="assets/prep.css"></head><body>
 <header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="your-journey.html" aria-label="Your Journey"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
-<main><h1>Your Journey</h1><p class="sub" id="ysub">For your party · nothing is paid on this website</p>
-
-<section class="prep-sec" id="choices">
+<main class="prep-page" id="your-journey">
+<div class="prep-head">
   <p class="t-l1" data-party-label>For your party</p>
-  <h2 class="t-h2">Where you stay in Bangkok</h2>
-  <p class="t-b1 measure">21 – 24 February 2027 · three nights · three approved addresses, one of them yours. Everything on this page belongs to the whole party.</p>
-  <div id="bkksel"></div>
-
-  <h2 class="t-h2" style="margin-top:var(--s8)">How would you like to fly?</h2>
-  <p class="t-b1 measure">Vientiane to Kunming, on the afternoon of 01 March. One flight, two approved fares — exactly one of them is ever active.</p>
-  <div id="flysel"></div>
-</section>
-
-<hr class="rule">
-<h2 class="t-h2" style="margin-top:var(--s7)">Your selections</h2>
-<div id="items"></div>
-<div class="tot"><span class="l">Your Costs</span><span class="r" id="tt">USD 0</span></div>
-<p class="note">Vientiane is two consecutive stays and no night is left uncovered. The Pre-Wedding Stay covers 25 &rarr; 26 and 26 &rarr; 27 February, both nights your contribution. The Wedding Stay covers 27 &rarr; 28 February and 28 February &rarr; 01 March as ONE selection: the first night is your contribution and the second night is complimentary, hosted by the Bride &amp; Groom. Hosted wedding programme events are part of your journey without charge — they never appear as USD 0 line items. Spa interest lines carry no journey cost — the amount is payable at the spa.</p>
-<div id="csnote"></div>
-<div id="dec"></div>
-<div id="held"></div>
-<div class="fxs" id="fxs"></div>
-<div class="fxo" id="fxo" role="dialog" aria-modal="true" aria-labelledby="fxt" hidden>
-<p class="ie" id="fxe">Full Experience</p>
-<h2 id="fxt">Complete the remaining journey.</h2>
-<p id="fxp">Complete the remaining journey with the highest available eligible selection at each stage. You can still change individual choices afterwards.</p>
-<div id="csel"></div>
-<div class="row2"><button type="button" class="cancel" id="fxc">Cancel</button><button type="button" class="go" id="fxg">Add Full Experience</button></div>
+  <h1 class="t-d1">Your Journey</h1>
+  <p class="t-b1 measure">How your party travels and where you stay — from Bangkok to Vientiane, on to Yunnan and home again, in the order it happens. Every choice on this page belongs to the whole party, and nothing is paid on this website.</p>
 </div>
-<a class="cta" href="review.html">Review &amp; Send</a>
-<p style="text-align:center;margin-top:18px"><a href="journeys.html" style="font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:#313131;text-decoration:none;border-bottom:1px solid #313131;padding:8px 0 3px;display:inline-block;min-height:44px">Continue exploring</a></p>
+<div id="dec" class="prep-col"></div>
+<div class="prep-col"><div id="csnote"></div></div>
+<section class="prep-sec" id="chrono" aria-label="Your journey, in order"></section>
+<section class="prep-sec" id="extras" hidden>
+  <p class="t-l1" data-party-label>For your party</p>
+  <h2 class="t-h2">Also in your journey</h2>
+  <div id="extra-lines"></div>
+</section>
+<section class="prep-sec" id="costs">
+  <p class="t-l1" data-party-label>For your party</p>
+  <h2 class="t-h2">Your costs</h2>
+  <div class="p-total"><span class="t-l1">Your Costs</span><b id="tt">USD 0</b></div>
+  <p class="t-b2 measure-w">Vientiane is two consecutive stays and no night is left uncovered. The Pre-Wedding Stay covers 25 &rarr; 26 and 26 &rarr; 27 February, both nights your contribution. The Wedding Stay covers 27 &rarr; 28 February and 28 February &rarr; 01 March as ONE selection: the first night is your contribution and the second night is complimentary, hosted by the Bride &amp; Groom. Hosted wedding programme events are part of your journey without charge. A spa interest carries no journey cost — the amount is payable at the spa.</p>
+  <div id="held"></div>
+</section>
+<div id="foot"></div>
 </main>
 <script src="assets/bag.js"></script>
 <script src="assets/shop-menu.js"></script>
@@ -197,306 +47,301 @@ body.fx-open .fxs,body.fx-open .fxo{display:block}
 <script src="assets/journey.js"></script>
 <script type="module" src="assets/invite.mjs"></script>
 <script>
-/* every line opens the surface it came from — the room page for a room, the
- * product on Journeys for transport, the experience page for 1872 / Marsilea */
+/* ============================================================================
+   02 · YOUR JOURNEY — the shared journey of the party, in true chronology.
+   Ten stages from Bangkok to Bangkok, THE WEDDING at its own place inside the
+   Wedding Stay, every product in the one card grammar, one amount for the
+   whole website. Nothing here is per person: what Peggy changes, Steffie sees.
+   ========================================================================== */
+function esc(t){return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function gated(fn){if(window.SIYL_INVITE){SIYL_INVITE.require(fn)}
+else document.addEventListener('siyl:invite-ready',function(){SIYL_INVITE.require(fn)},{once:true})}
+var P=window.SIYL_PRICE,J=window.SIYL_JOURNEY,SH=window.SIYL_PREP;
+function pad(n){return (n<10?'0':'')+n}
+function money(n){return 'USD '+Number(n).toLocaleString('en-US')}
+function partyLabel(){var G=window.SIYL_GUEST,p=G?G.party():null;
+  return p?(p.guests.length>1?G.partyLabel():G.labelFor(p.guests[0].guestId)):'For your party'}
+function ownerLabels(){var lab=partyLabel();
+  document.querySelectorAll('[data-party-label]').forEach(function(el){el.textContent=lab})}
+document.addEventListener('siyl:guest',ownerLabels);document.addEventListener('siyl:who',ownerLabels);
+document.addEventListener('siyl:invite-ready',ownerLabels);document.addEventListener('siyl:auth',ownerLabels);ownerLabels();
+
+/* every line opens the surface it came from */
 function detailHref(x){
 if(x.stay&&x.room)return 'room.html?stay='+x.stay+'&room='+x.room;
 if(x.id==='1872')return '1872.html';
 if(x.interest&&x.id!=='airbnb-2br')return 'marsilea.html';
-/* a transport line opens its own product page, exactly as a room line does */
 if(window.SIYL_TRANSPORT&&window.SIYL_TRANSPORT[x.id])return 'transport.html?id='+x.id;
-var P=window.SIYL_PRICE,at=P&&P.locate(x.id);
+var at=P&&P.locate(x.id);
 if(at&&x.room)return 'room.html?stay='+at.key+'&room='+x.room;
 return 'journeys.html#j-'+(P?P.windowOf(x.id):x.id)}
-/* ============================================================= THE PRODUCTS
- * Two real products rendered through the frozen grammar, to prove the system
- * carries the exact kind of content that failed before it existed.
- *
- * THE STAY CARD shows only what a decision needs: the property, what you get
- * inside it, the dates, the one inclusion that changes the choice, the price
- * and the action. Square metres, bed counts and amenities live behind
- * VIEW DETAILS, where they belong.
- *
- * THE FARE COLUMN never becomes a strip. At 900 it is 380px, at 1280 it is
- * 420px, and below 900 the layout changes rather than narrowing: the fares
- * become two full-width surfaces under the route.
+function lineOf(seg){return SIYL_BAG.get().filter(function(x){return seg.ids.indexOf(x.id)>=0})[0]||null}
+function guests(){var n=1;SIYL_BAG.get().forEach(function(x){if(x.qty>n)n=x.qty});return n}
+function stockLine(x){var St=window.SIYL_STOCK,w=P?P.windowOf(x.id):x.id;
+  if(!St||!St.ready()||!x.room||!St.tracked(w,x.room))return '';
+  var t=St.label(w,x.room,x.qty||1);
+  return t?'<p class="t-l1'+((St.scarce(w,x.room)||St.soldOut(w,x.room))?' open':'')+'">'+esc(t)+'</p>':''}
+
+/* ============================================================== THE PRODUCTS
+ * THE STAY CARD carries six things — image · status · property · room ·
+ * dates · the one inclusion that decides it · price — then one action and
+ * VIEW DETAILS. THE TRANSPORT CARD carries route · date · times · duration ·
+ * service · class · three or four decision-critical benefits · price · action
+ * · VIEW DETAILS. Everything else is behind the details.
  * ------------------------------------------------------------------------ */
-function bkkSelector(){
-var box=document.getElementById('bkksel'),P=window.SIYL_PRICE;
-if(!box||!P||!window.SIYL_ROOMS)return;
-var stay=SIYL_ROOMS.sathorn,win='bkk-stay';
-function paint(){
-  var line=SIYL_BAG.get().filter(function(x){return x.id===win})[0];
-  var pick=line?line.room:null;
-  box.innerHTML='<div class="acar p-rail-car"><div class="atrk p-rail">'+stay.rooms.map(function(r){
-    var q=P.quote(win,r.slug),img=r.gallery.length?r.gallery[0][0]:'';
-    var on=pick===r.slug;
+var TC={
+ train:{img:'assets/images/transport/train-no25-srt-train.jpg',op:'State Railway of Thailand',route:'Bangkok &rarr; Nong Khai &rarr; Vientiane',date:'24 – 25 February 2027',
+   dep:['20:25','Krung Thep Aphiwat'],arr:['06:25','Nong Khai · next morning'],dur:'About 10 hours on board',cls:'First Class Sleeper · private cabin',
+   ben:['A private, lockable cabin with two berths','Van and border logistics on to Vientiane, included','One package, the whole party travels together','Bedding, air conditioning and power at the berth'],basis:'per person · package'},
+ c86:{img:'assets/images/transport/c642-train-snow-mountain.jpg',op:'China Railway · C86',route:'Kunming &rarr; Lijiang',date:'04 March 2027',
+   dep:['10:15','Kunming'],arr:['13:44','Lijiang'],dur:'3h 29m · direct',cls:'Business Class · 1 + 1 seating',
+   ben:['1 + 1 seating — one seat each side of the aisle','Snacks and drinks served at the seat','Priority ticketing','Power and wireless charging at the seat'],basis:'per person'},
+ 'return':{img:'assets/images/transport/mu5924-economy-cabin-1.jpg',op:'China Eastern Airlines · MU5924 + MU741',route:'Lijiang &rarr; Kunming &rarr; Bangkok',date:'06 March 2027',
+   dep:['10:35','Lijiang (LJG)'],arr:['14:55','Bangkok (BKK)'],dur:'5h 20m door to door · 1h 30m in Kunming',cls:'Economy flexible',
+   ben:['One seat per guest on both legs','Two pieces of checked baggage, through to Bangkok','Free rescheduling before departure','Conditional refund before departure'],basis:'per person'}
+};
+function transportCard(seg,line){
+  var t=TC[seg.key],f=P.FLAT[seg.key],sel=!!line,q=line?line.qty:guests();
+  return '<div class="p-sum'+(sel?' on':'')+'">'+
+    '<span class="p-sum-img" style="background-image:url('+t.img+')" role="img" aria-label="'+esc(f.name)+'"></span>'+
+    '<div class="p-sum-body">'+
+      '<p class="t-l1'+(sel?' on':'')+'">'+(sel?'Selected for your journey':'Transportation · '+t.op)+'</p>'+
+      '<h3 class="t-h1">'+esc(f.name)+'</h3>'+
+      '<p class="t-b2">'+t.date+' · '+t.route+'</p>'+
+      '<p class="p-time">'+t.dep[0]+' <span>'+t.dep[1]+'</span></p>'+
+      '<p class="p-time">'+t.arr[0]+' <span>'+t.arr[1]+'</span></p>'+
+      '<p class="t-b2">'+t.dur+' · '+t.cls+'</p>'+
+      '<ul class="p-list">'+t.ben.map(function(b){return '<li class="t-b2">'+b+'</li>'}).join('')+'</ul>'+
+      '<p class="p-price">'+money(f.price)+'<span class="t-l1">'+t.basis+(sel&&q>1?' × '+q+' guests · '+money(f.price*q):'')+'</span></p>'+
+      '<div class="p-actions">'+
+        '<button type="button" class="p-act'+(sel?' quiet':'')+'" data-choose-flat="'+seg.key+'">'+(sel?'Selected':'Select this travel')+'</button>'+
+        '<a class="p-link mute" href="transport.html?id='+seg.key+'">View details</a>'+
+        (sel?'<button type="button" class="p-link mute" data-rm="'+seg.key+'">Remove</button>':'<button type="button" class="p-link mute" data-skip="'+seg.key+'">Not joining this stage</button>')+
+      '</div></div></div>'}
+
+function staySummary(seg,x){
+  var q=x.qty||1,incl=x.complimentary?'Complimentary · an independent stay, arranged around the wedding programme by you'
+    :(x.note?x.note+(x.noteBy?' · '+x.noteBy:''):(x.breakfast||''));
+  var basis=x.complimentary?'USD 0 payable · up to 6 guests'
+    :(x.rate!=null&&x.nights?money(x.rate)+' per person / night · '+x.nights+(x.nights===1?' night':' nights')+(q>1?' × '+q+' guests · '+money((x.price||0)*q):''):'per person');
+  return '<div class="p-sum on">'+
+    '<span class="p-sum-img"'+(x.img?' style="background-image:url('+x.img+')"':'')+' role="img" aria-label="'+esc(x.name)+'"></span>'+
+    '<div class="p-sum-body">'+
+      '<p class="t-l1 on">Selected for your journey</p>'+
+      '<h3 class="t-h1">'+esc(x.name)+'</h3>'+
+      '<p class="t-b2">'+esc(x.meta||'')+'</p>'+
+      (incl?'<p class="t-b2"><b>'+esc(incl)+'</b></p>':'')+
+      (x.breakfast&&x.note?'<p class="t-b2">'+esc(x.breakfast)+'</p>':'')+
+      stockLine(x)+
+      '<p class="p-price">'+(x.complimentary?'Complimentary':money((x.price||0)))+'<span class="t-l1">'+basis+'</span></p>'+
+      '<div class="p-actions">'+
+        '<a class="p-act quiet" href="journeys.html?change='+seg.key+'#'+seg.anchor+'">Change this stay</a>'+
+        '<a class="p-link mute" href="'+detailHref(x)+'">View details</a>'+
+        '<button type="button" class="p-link mute" data-rm="'+seg.key+'">Remove</button>'+
+      '</div></div></div>'}
+
+function openStage(seg,declined){
+  var isStay=seg.cat==='Accommodation';
+  if(declined)return '<div class="p-card"><p class="t-l1">Not joining · arranged by you</p><h3 class="t-h1">'+esc(seg.label)+'</h3>'+
+    '<p class="t-b2 measure">You are arranging this stage yourself. Nothing is held or charged for it.</p>'+
+    '<div class="p-actions"><button type="button" class="p-link" data-unskip="'+seg.key+'">Reconsider this stage</button></div></div>';
+  return '<div class="p-card"><p class="t-l1 open">Decision needed</p><h3 class="t-h1">'+esc(seg.label)+'</h3>'+
+    '<p class="t-b2 measure">'+(isStay?'Choose the room category for your party, or tell us you are not joining this stage.':'Choose your travel for this stage, or tell us you are not joining it.')+'</p>'+
+    '<div class="p-actions"><a class="p-act" href="journeys.html#'+seg.anchor+'">'+(isStay?'Choose your stay':'Choose your travel')+'</a>'+
+    '<button type="button" class="p-link mute" data-skip="'+seg.key+'">Not joining this stage</button></div></div>'}
+
+/* THE BANGKOK ADDRESSES — three, one of them yours, on the accepted rail */
+function bkkHtml(){
+  var stay=window.SIYL_ROOMS&&SIYL_ROOMS.sathorn,win='bkk-stay';if(!stay)return '';
+  var line=lineOf({ids:[win]}),pick=line?line.room:null;
+  return '<div id="bkksel"><div class="acar p-rail-car"><div class="atrk p-rail">'+stay.rooms.map(function(r){
+    var q=P.quote(win,r.slug),img=r.gallery.length?r.gallery[0][0]:'',on=pick===r.slug;
     return '<article class="aslide p-card p-stay'+(on?' p-chosen':'')+'" data-slug="'+r.slug+'">'+
-      '<span class="p-stay-img"'+(img?' style="background-image:url('+img+')"':'')+' role="img" aria-label="'+
-        (r.property||stay.name).replace(/"/g,'&quot;')+'"></span>'+
-      '<p class="t-l1'+(r.role?' on':'')+'">'+(r.role?r.role:'Alternative')+'</p>'+
-      '<h3 class="t-h1">'+(r.property||stay.name)+'</h3>'+
-      '<p class="t-b2">'+(r.card||r.name)+'</p>'+
-      '<p class="t-b2">21 – 24 February · 3 nights<br>'+(r.breakfast||stay.breakfast)+'</p>'+
+      '<span class="p-stay-img"'+(img?' style="background-image:url('+img+')"':'')+' role="img" aria-label="'+esc(r.property||stay.name)+'"></span>'+
+      '<p class="t-l1'+(on?' on':(r.role?' on':''))+'">'+(on?'Selected for your journey':(r.role?r.role:'Alternative'))+'</p>'+
+      '<h3 class="t-h1">'+esc(r.property||stay.name)+'</h3>'+
+      '<p class="t-b2">'+esc(r.card||r.name)+'</p>'+
+      '<p class="t-b2">21 – 24 February · 3 nights<br>'+esc(r.breakfast||stay.breakfast)+'</p>'+
       '<p class="p-price">'+P.money(q.total)+'<span class="t-l1">total per person</span></p>'+
-      '<button type="button" class="p-act'+(on?' quiet':'')+'" data-choose="'+r.slug+'">'+
-        (on?'Selected':'Select this stay')+'</button>'+
+      '<button type="button" class="p-act'+(on?' quiet':'')+'" data-choose="'+r.slug+'">'+(on?'Selected':'Select this stay')+'</button>'+
       '<p><a class="p-link mute" href="room.html?stay=sathorn&room='+r.slug+'">View details</a></p>'+
       '</article>'}).join('')+'</div>'+
     '<div class="arow"><div class="arail"><i></i></div><div class="anav">'+
     '<button type="button" data-a="prev" aria-label="Previous address"></button>'+
-    '<button type="button" data-a="next" aria-label="Next address"></button></div></div></div>';
-  if(window.SIYL_AMAN)SIYL_AMAN.wire(box.querySelector('.acar'));
-  /* the chosen address comes into focus by itself — a selection the guest
-   * cannot see is a selection they will make twice */
-  var chosen=box.querySelector('.p-chosen'),trk=box.querySelector('.atrk');
-  if(chosen&&trk)trk.scrollTo({left:chosen.offsetLeft-trk.offsetLeft,behavior:'auto'});
-  box.querySelectorAll('[data-choose]').forEach(function(b){
-    b.addEventListener('click',function(){
-      P.ids(win).forEach(function(id){SIYL_BAG.remove(id)});
-      P.items(win,b.getAttribute('data-choose')).forEach(function(it){SIYL_BAG.put(it)});
-    })});
-}
-document.addEventListener('siyl:bag',paint);paint()}
+    '<button type="button" data-a="next" aria-label="Next address"></button></div></div></div>'+
+    '<div class="p-actions">'+(line?'<button type="button" class="p-link mute" data-rm="bkk-stay">Remove this stay</button>'
+      :'<button type="button" class="p-link mute" data-skip="bkk-stay">Not joining this stage</button>')+'</div></div>'}
 
-function flySelector(){
-var box=document.getElementById('flysel'),P=window.SIYL_PRICE;
-if(!box||!P||!P.classesOf)return;
-function paint(){
-  var line=SIYL_BAG.get().filter(function(x){return x.id==='mu9646'})[0];
-  var cur=line?(line.cls||'business'):null;
-  box.innerHTML='<div class="p-product">'+
+/* MU9646 — one flight, two approved fares; the fare column never becomes a strip */
+function flyHtml(){
+  if(!P.classesOf)return '';
+  var line=lineOf({ids:['mu9646']}),cur=line?(line.cls||'business'):null;
+  return '<div id="flysel"><div class="p-product">'+
     '<span class="p-media" style="background-image:url(assets/images/transport/mu9632-business-1.jpg)" role="img" aria-label="Business Class · China Eastern"></span>'+
     '<div class="p-body">'+
-      '<p class="t-l1">01 March 2027 · China Eastern Airlines · MU9646</p>'+
-      '<h3 class="t-h1">Vientiane &rarr; Kunming</h3>'+
+      '<p class="t-l1">Transportation · China Eastern Airlines</p>'+
+      '<h3 class="t-h1">MU9646 · Vientiane &rarr; Kunming</h3>'+
+      '<p class="t-b2">01 March 2027 · non-stop</p>'+
       '<p class="p-time">15:50 <span>VTE · Terminal 1</span></p>'+
       '<p class="p-time">18:25 <span>KMG</span></p>'+
       '<p class="t-b2">1h 35m · non-stop · Boeing 738</p>'+
+      '<div class="p-actions"><a class="p-link mute" href="transport.html?id=mu9646">View details</a>'+
+        (line?'<button type="button" class="p-link mute" data-rm="mu9646">Remove</button>':'<button type="button" class="p-link mute" data-skip="mu9646">Not joining this stage</button>')+'</div>'+
     '</div>'+
     '<div class="p-choices">'+P.classesOf('mu9646').map(function(c){
       var on=cur===c.slug;
       return '<article class="p-card p-fare'+(on?' on':'')+'">'+
-        '<p class="t-l1'+(c.preferred?' on':'')+'">'+(c.preferred?'Preferred':'Save '+P.money(275-c.price)+' per person')+'</p>'+
+        '<p class="t-l1'+(on||c.preferred?' on':'')+'">'+(on?'Selected for your journey':(c.preferred?'Preferred':'Save '+P.money(275-c.price)+' per person'))+'</p>'+
         '<h4 class="t-h1">'+c.short+'</h4>'+
         '<p class="p-price">'+P.money(c.price)+'<span class="t-l1">per person</span></p>'+
         '<ul class="p-list">'+c.notes.map(function(n){return '<li class="t-b2">'+n+'</li>'}).join('')+'</ul>'+
-        '<button type="button" class="p-act'+(on?' quiet':'')+'" data-cls="'+c.slug+'">'+
-          (on?'Selected':'Choose this fare')+'</button>'+
+        '<button type="button" class="p-act'+(on?' quiet':'')+'" data-cls="'+c.slug+'">'+(on?'Selected':'Select this fare')+'</button>'+
         '</article>'}).join('')+'</div>'+
-    '</div>';
-  box.querySelectorAll('[data-cls]').forEach(function(b){
-    b.addEventListener('click',function(){
-      P.items('mu9646',b.getAttribute('data-cls')).forEach(function(it){SIYL_BAG.put(it)})})});
-}
-document.addEventListener('siyl:bag',paint);paint()}
+    '</div></div>'}
 
-/* Whose decision is this? A shared arrangement says so; a personal one carries
- * the name of the person it belongs to. The guest never has to guess. */
-function whoLabel(){
-var G=window.SIYL_GUEST,p=G?G.party():null;
-if(!p||!p.guests.length)return '';
-var e=function(t){return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')};
-return '<span class="who">'+e(p.guests.length>1?G.partyLabel():G.labelFor(p.guests[0].guestId))+'</span>'}
-/* C · every shared surface names the party it belongs to */
-function ownerLabels(){
-var G=window.SIYL_GUEST,p=G?G.party():null,lab=p?(p.guests.length>1?G.partyLabel():G.labelFor(p.guests[0].guestId)):'For your party';
-var s=document.getElementById('ysub');if(s)s.textContent=lab+' · nothing is paid on this website';
-document.querySelectorAll('[data-party-label]').forEach(function(el){el.textContent=lab})}
-document.addEventListener('siyl:guest',ownerLabels);document.addEventListener('siyl:who',ownerLabels);
-document.addEventListener('siyl:invite-ready',ownerLabels);ownerLabels();
+/* THE WEDDING — compact, at its place in the chronology. The decisions live
+ * in step 03; this block says where they stand and takes the guest there. */
+function weddingHtml(){
+  var T=window.SIYL_TEMPLE,G=window.SIYL_GUEST,op=T?T.operational():null;
+  var usd=SIYL_BAG.get().filter(function(x){return J.isWedding(x)}).reduce(function(n,x){return n+(x.price||0)*(x.qty||1)},0);
+  var allDone=op&&op.guests.length&&op.undecided===0&&op.sangkhathanUndecided===0&&T.decidedAll();
+  var h='<section class="p-stage" id="s-wedding"><div class="p-stage-h"><p class="t-l1">28 FEB</p><h3 class="t-h2">The Wedding · Vientiane</h3><p class="t-b2">Sunday, 28 February 2027</p></div>'+
+    '<div class="p-card">'+
+    '<p class="t-l1">'+(usd>0?'Hosted · your personal addition '+money(usd):'Hosted')+'</p>'+
+    '<h3 class="t-h1">One day, four parts</h3>'+
+    '<ul class="p-list">'+T.EVENTS.map(function(e){return '<li class="t-b2"><b>'+e.label+'</b> · '+e.when+' · '+e.place+'</li>'}).join('')+'</ul>'+
+    '<p class="t-b2 measure-w">Hosted by Haruthai &amp; Suthep. No separate charge for the morning alms-giving inside the Temple Ceremony. Your optional personal addition, the Sangkhathan, is USD 15 per selected guest.</p>';
+  if(op&&op.guests.length){
+    h+='<div class="p-group">';
+    op.guests.forEach(function(g){
+      var missing=T.openFor(g.guestId),open=missing.length>0;
+      h+='<div class="p-kv"><div><p class="t-b1"><b>'+esc(G?G.labelFor(g.guestId):g.name)+'</b></p><p class="t-b2">Wedding decisions'+(g.sangkhathan?' · Sangkhathan selected':'')+'</p></div>'+
+         '<p class="t-l1'+(open?' open':' on')+'">'+(open?missing.length+' to answer':'Complete')+'</p></div>'});
+    h+='</div>'}
+  h+='<div class="p-actions">'+(allDone
+      ?'<a class="p-link mute" href="wedding.html">Review wedding details</a>'
+      :'<a class="p-link" href="wedding.html">Complete wedding decisions</a>')+'</div>';
+  return h+'</div></section>'}
 
-/* ---------------------------------------------------------------- THE WEDDING
- * The reason for the journey reads as ONE programme, in the order the day runs,
- * sitting at its own place in the chronology — Sunday 28 February, inside the
- * Wedding Stay and before the flight to Kunming. Hosted parts say HOSTED; they
- * are never listed as a USD 0 purchase, and they add nothing to the badge,
- * because a hosted ceremony is not a line item. Only a real amount appears. */
-function weddingBlock(){
-var J=window.SIYL_JOURNEY,T=window.SIYL_TEMPLE;
-if(!J)return '';
-var op=T?T.operational():null;
-var usd=SIYL_BAG.get().filter(function(x){return J.isWedding(x)})
-  .reduce(function(n,x){return n+(x.price||0)*(x.qty||1)},0);
-var DRESS={temple:['Blue Lao Traditional Dress','wedding-preparation.html#dress-code'],
-           coffee:['Black Tie','wedding-preparation.html#dress-code'],
-           vows:['Black Tie','wedding-preparation.html#dress-code'],
-           dinner:['Black Tie','wedding-preparation.html#dress-code']};
-var h='<div class="row wedrow"><div class="wedth" aria-hidden="true" style="background-image:url(assets/images/event/052-ceremony-green-gateway.jpg)"></div><div style="flex:1">';
-h+='<p class="when">28 FEB</p><p class="cat">The Wedding</p>';
-h+='<a class="nm" href="voyage.html">The Wedding · Sunday, 28 February 2027</a>';
-h+='<p class="mt">Vientiane, Laos · one day, four parts</p>';
-h+='<div class="wprog">';
-J.WEDDING.forEach(function(w){
-  var d=DRESS[w.key];
-  if(w.key==='sangkhathan'){
-    var names=op?op.offeringNames:[];
-    var open=op&&op.sangkhathanUndecided>0;
-    h+='<div class="wp"><p class="wpt"><a href="'+w.anchor+'">'+w.title+'</a></p>'+
-       '<p class="wpm">'+w.when+' · '+w.place+'</p>'+
-       (names.length
-         ? '<p class="wps"><b>'+names.join(' · ')+'</b> · '+(names.length===1?'one offering':names.length+' offerings')+' · USD '+(names.length*15)+'</p>'
-         : '<p class="wps'+(open?' open':'')+'">'+(open?'Not decided':'Not selected')+'</p>')+
-       /* an underlined title that leads nowhere is a broken promise: the
-        * offering always carries its own action, straight to the choice */
-       '<p class="wpa"><a href="'+w.anchor+'">'+(names.length?'View offering':'View &amp; choose')+'</a></p>'+
-       '</div>';
-    return}
-  h+='<div class="wp"><p class="wpt"><a href="'+w.anchor+'">'+w.title+'</a></p>'+
-     '<p class="wpm">'+w.when+' · '+w.place+'</p>'+
-     '<p class="wps">'+w.note+'</p>'+
-     (d?'<p class="wpd">Dress · '+d[0]+' <a href="'+d[1]+'">View dress code</a></p>':'')+
-     '</div>'});
-h+='</div>';
-/* WHY ONE WEDDING ELEMENT CHANGES YOUR COSTS AND THE OTHERS DO NOT */
-h+='<div class="wcost"><p class="wpl">The wedding day, in costs</p>'+
-   '<p class="wps"><b>Hosted by Haruthai &amp; Suthep</b> · Temple Ceremony · Coffee &amp; Cake · Vow Ceremony · Wedding Dinner — all complimentary</p>'+
-   '<p class="wps"><b>No separate charge</b> · Morning alms-giving, Tak Bat — part of the Temple Ceremony</p>'+
-   '<p class="wps"><b>Your optional personal addition</b> · Sangkhathan Temple Offering · USD 15 per selected guest</p></div>';
-if(op&&op.guests.length){
-  h+='<div class="wpeople"><p class="wpl">Temple Ceremony · who is coming</p>';
-  op.guests.forEach(function(g){
-    var open=g.temple==='Not decided'||g.sangkhathanState==='Not decided';
-    h+='<p class="wps'+(open?' open':'')+'"><b>For '+g.name+'</b> · '+g.temple+
-       (g.attending?' · Sangkhathan: '+g.sangkhathanState:'')+'</p>'});
-  h+='</div>'}
-h+='<div class="acts"><a class="ch" href="voyage.html#temple-decision">'+
-   ((op&&op.undecided===0&&op.sangkhathanUndecided===0&&op.guests.length)?'Change these decisions':'Tell us your decisions')+'</a></div>';
-h+='</div>'+(usd>0?'<span class="ln">USD '+usd.toLocaleString('en-US')+'</span>':'<span class="ln free">Hosted</span>')+'</div>';
-return h}
+function stageHtml(seg,i){
+  var st=J.state(seg),line=lineOf(seg);
+  var h='<section class="p-stage" id="s-'+seg.key+'"><div class="p-stage-h"><p class="t-l1">'+pad(i+1)+' · '+seg.when+'</p>'+
+    '<h3 class="t-h2">'+esc(seg.place)+'</h3><p class="t-b2">'+esc(seg.cat)+'</p></div>';
+  if(seg.key==='bkk-stay')h+=bkkHtml();
+  else if(seg.key==='mu9646')h+=flyHtml();
+  else if(TC[seg.key])h+=transportCard(seg,line);
+  else h+=line?staySummary(seg,line):openStage(seg,st==='declined');
+  return h+'</section>'}
 
-function render(){var b=SIYL_BAG.get(),el=document.getElementById('items');
-if(!b.length){el.innerHTML='<p class="empty">Nothing is in your journey yet. Everything you add appears here with its live total.</p>'}
-else{el.innerHTML=(function(){
-var J=window.SIYL_JOURNEY,list=(J?J.sorted(b):b),out='',done=false;
-list.forEach(function(x){
-  var o=J?J.order(x):99;
-  if(J&&!done&&o>=3.5){out+=weddingBlock();done=true}
-  if(J&&J.isWedding(x))return;          /* a wedding line lives inside the block */
-  out+=rowHtml(x)});
-if(J&&!done)out+=weddingBlock();
-return out})()}
-function rowHtml(x){
-var J=window.SIYL_JOURNEY,m=J?J.meta(x):{cat:'',basis:''},seg=J?J.SEGMENTS.filter(function(g){return g.ids.indexOf(x.id)>=0})[0]:null,when=J?J.when(x):'';
-var book=seg&&seg.bookend?'<span class="bk" title="Bangkok"></span>':'';
-var P=window.SIYL_PRICE,win=P?P.windowOf(x.id):x.id;
-var canChange=P&&P.hasVariants(x.id);
-var amount = x.interest
-  ? '<span class="ln free">Interest · request</span>'
-  : (x.complimentary
-     ? '<span class="ln">USD 0</span>'
-     : '<span class="ln">USD '+((x.price||0)*x.qty).toLocaleString('en-US')+'</span>');
-var href=detailHref(x);
-return '<div class="row"><a class="th" href="'+href+'" aria-label="Open '+x.name.replace(/"/g,'&quot;')+'"'+(SIYL_BAG.thumb(x)?' style="background-image:url('+SIYL_BAG.thumb(x)+')"':'')+'></a><div style="flex:1">'+
-(when?'<p class="when">'+when+'</p>':'')+
-(m.cat?'<p class="cat">'+m.cat+book+whoLabel()+'</p>':'')+
-'<a class="nm" href="'+href+'">'+x.name+'</a><p class="mt">'+x.meta+'</p>'+
-(m.basis?'<p class="basis">'+m.basis+'</p>':'')+
-(J&&J.quantityLine(x)?'<p class="qty">'+J.quantityLine(x)+'</p>':'')+
-(x.note?'<p class="hostln">'+x.note+(x.noteBy?'<span>'+x.noteBy+'</span>':'')+'</p>':'')+
-(x.complimentary?'<p class="hostln">Complimentary<span>Hosted — USD 0 payable by you</span><span>Independent stay · no individual Guest Relations support</span></p>':'')+
-(x.breakfast?'<p class="bf">'+x.breakfast+'</p>':'')+
-(function(){var St=window.SIYL_STOCK,w2=P?P.windowOf(x.id):x.id;
- if(!St||!St.ready()||!x.room||!St.tracked(w2,x.room))return '';
- var t=St.label(w2,x.room,x.qty||1);
- return t?'<p class="avline'+((St.scarce(w2,x.room)||St.soldOut(w2,x.room))?' low':'')+'">'+t+'</p>':''})()+
-(x.unit?'<div class="q"><button data-q="'+x.id+':-1">−</button><b style="font-family:\'PP Editorial Old\',serif">'+x.qty+'</b><button data-q="'+x.id+':1">+</button></div>':'')+
-'<div class="acts">'+
-(canChange?'<a class="ch" href="journeys.html?change='+win+'#j-'+win+'">Change</a>':'')+
-'<button class="rm" data-rm="'+win+'">Remove</button></div></div>'+
-amount+'</div>'}
-document.getElementById('tt').textContent='USD '+SIYL_BAG.total().toLocaleString('en-US');
-el.querySelectorAll('[data-rm]').forEach(function(b){b.addEventListener('click',function(){
-var w=b.getAttribute('data-rm'),ids=window.SIYL_PRICE?SIYL_PRICE.ids(w):[w];
-ids.forEach(function(id){SIYL_BAG.remove(id)});render()})});
-el.querySelectorAll('[data-q]').forEach(function(b){b.addEventListener('click',function(){var v=b.getAttribute('data-q').split(':');SIYL_BAG.qty(v[0],parseInt(v[1],10));render()})});
-renderDecisions();
-SIYL_BAG.badge()}
+function extraLine(x){
+  var m=J.meta(x),q=x.qty||1,href=detailHref(x),exp=m.unit==='experience';
+  return '<div class="p-line"><a class="p-line-img" href="'+href+'" aria-label="Open '+esc(x.name)+'"'+(SIYL_BAG.thumb(x)?' style="background-image:url('+SIYL_BAG.thumb(x)+')"':'')+'></a>'+
+    '<div class="p-line-body"><p class="t-l1">'+(J.when(x)||'')+(m.cat?' · '+m.cat:'')+'</p>'+
+    '<h3 class="t-h2"><a href="'+href+'">'+esc(x.name)+'</a></h3><p class="t-b2">'+esc(x.meta||'')+'</p>'+
+    (m.basis?'<p class="t-b2">'+esc(m.basis)+'</p>':'')+
+    (exp?'<div class="p-qty"><button type="button" class="p-sel" data-q="'+x.id+':-1" aria-label="One fewer">&minus;</button><b>'+q+'</b><button type="button" class="p-sel" data-q="'+x.id+':1" aria-label="One more">+</button></div>':'')+
+    '<div class="p-actions"><button type="button" class="p-link mute" data-rm="'+(P?P.windowOf(x.id):x.id)+'">Remove</button></div></div>'+
+    (x.interest?'<p class="p-line-amt"><span class="t-l1">Interest · request</span></p>':'<p class="p-line-amt">'+money((x.price||0)*q)+'</p>')+'</div>'}
+
+function render(){
+  var b=SIYL_BAG.get(),box=document.getElementById('chrono'),h='';
+  J.SEGMENTS.forEach(function(seg,i){h+=stageHtml(seg,i);if(seg.key==='wedstay')h+=weddingHtml()});
+  box.innerHTML=h;
+  /* items that are not stages, and not the wedding */
+  var extras=b.filter(function(x){return J.order(x)===99||x.id==='1872'}).filter(function(x){return !J.isWedding(x)});
+  var ex=document.getElementById('extras');ex.hidden=!extras.length;
+  document.getElementById('extra-lines').innerHTML=extras.map(extraLine).join('');
+  document.getElementById('tt').textContent=money(SIYL_BAG.total());
+  wire();renderDecisions();SIYL_BAG.badge();
+  if(SH)SH.foot(document.getElementById('foot'))}
+
+function wire(){
+  var box=document.getElementById('bkksel');
+  if(box&&window.SIYL_AMAN){SIYL_AMAN.wire(box.querySelector('.acar'));
+    var chosen=box.querySelector('.p-chosen'),trk=box.querySelector('.atrk');
+    if(chosen&&trk)trk.scrollTo({left:chosen.offsetLeft-trk.offsetLeft,behavior:'auto'})}
+  document.querySelectorAll('[data-choose]').forEach(function(bt){bt.addEventListener('click',function(){
+    P.ids('bkk-stay').forEach(function(id){SIYL_BAG.remove(id)});
+    P.items('bkk-stay',bt.getAttribute('data-choose')).forEach(function(it){SIYL_BAG.put(it)})})});
+  document.querySelectorAll('[data-cls]').forEach(function(bt){bt.addEventListener('click',function(){
+    P.items('mu9646',bt.getAttribute('data-cls')).forEach(function(it){SIYL_BAG.put(it)})})});
+  document.querySelectorAll('[data-choose-flat]').forEach(function(bt){bt.addEventListener('click',function(){
+    var id=bt.getAttribute('data-choose-flat');if(SIYL_BAG.has(id))return;
+    J.skip(id,false);
+    P.items(id).forEach(function(it){it.qty=guests();SIYL_BAG.put(it)})})});
+  document.querySelectorAll('[data-rm]').forEach(function(bt){bt.addEventListener('click',function(){
+    var w=bt.getAttribute('data-rm'),ids=P?P.ids(w):[w];ids.forEach(function(id){SIYL_BAG.remove(id)})})});
+  document.querySelectorAll('[data-skip]').forEach(function(bt){bt.addEventListener('click',function(){J.skip(bt.getAttribute('data-skip'),true)})});
+  document.querySelectorAll('[data-unskip]').forEach(function(bt){bt.addEventListener('click',function(){J.skip(bt.getAttribute('data-unskip'),false)})});
+  document.querySelectorAll('[data-q]').forEach(function(bt){bt.addEventListener('click',function(){var v=bt.getAttribute('data-q').split(':');SIYL_BAG.qty(v[0],parseInt(v[1],10))})})}
 
 /* quiet editorial completeness — decisions, never a progress meter */
 function renderDecisions(){
-var box=document.getElementById('dec');if(!box||!window.SIYL_JOURNEY)return;
-var open=SIYL_JOURNEY.open(), self=SIYL_JOURNEY.selfArranged(), any=SIYL_BAG.get().length;
-var modes='<div class="modes">'+
-  '<button type="button" class="fxcta" id="fxb">'+
-    '<span class="fxl">Full Experience</span>'+
-    '<span class="fxsub">The complete journey — all ten stages, chosen for you</span></button>'+
-  '<button type="button" class="fxalt" id="csb">Cost Saving Experience</button></div>';
-var selfList=self.length?'<p class="selfl"><b>'+self.length+(self.length===1?' stage is':' stages are')+' self-arranged:</b> '+
+var box=document.getElementById('dec');if(!box)return;
+var open=J.open(),self=J.selfArranged(),any=SIYL_BAG.get().length;
+var modes='<div class="p-modes">'+
+  '<button type="button" class="p-act quiet" id="fxb">Full Experience<span>The complete journey — all ten stages, chosen for you</span></button>'+
+  '<button type="button" class="p-link" id="csb">Cost Saving Experience</button></div>';
+var selfList=self.length?'<p class="t-b2 measure-w"><b>'+self.length+(self.length===1?' stage is':' stages are')+' self-arranged:</b> '+
   self.map(function(s2){return s2.when+' · '+s2.place}).join(' · ')+'.</p>':'';
-/* Full Experience found a stage with nothing left — never silently skip it */
-var gone=(SIYL_JOURNEY.soldOutStages||[]);
-if(gone.length)selfList+='<p class="selfl low"><b>'+gone.length+(gone.length===1?' stage has':' stages have')+
-  ' no rooms left:</b> '+gone.map(function(s2){return s2.when+' · '+s2.place}).join(' · ')+
-  '. Guest Relations will find an arrangement with you.</p>';
+var gone=(J.soldOutStages||[]);
+if(gone.length)selfList+='<p class="t-b2 measure-w"><b>'+gone.length+(gone.length===1?' stage has':' stages have')+' no rooms left:</b> '+
+  gone.map(function(s2){return s2.when+' · '+s2.place}).join(' · ')+'. Guest Relations will find an arrangement with you.</p>';
 if(!open.length&&any){
-  /* DECISIONS COMPLETE is not the same as a fully supported JOURNEY */
   var whole=!self.length;
-  box.innerHTML='<div class="dlist'+(whole?' ok':'')+'"><h3>'+(whole?'<span class="ck" aria-hidden="true"></span>Your journey is complete':'Your decisions are complete')+'</h3>'+
-    '<p class="sub2">'+(whole
-      ? 'Every stage of the journey has an answer and each one is booked with us. Review &amp; Send shares it with Guest Relations.'
-      : 'Every stage has an answer, and the stages below you are arranging yourself. Review &amp; Send shares the rest with Guest Relations.')+'</p>'+
-    (SIYL_BAG.has('airbnb-2br')
-      ? '<p class="selfl">The private residence is an independent stay: the wedding programme is yours as it stands, and arrival, departure, transfers and personal logistics are arranged by you. It carries no individual Guest Relations travel or accommodation support.</p>'
-      : '')+
-    selfList+
-    '<p class="fxnote">You can still change how the journey is composed:</p>'+modes+'</div>';
-} else if(!open.length){ box.innerHTML=''; }
-else {
-  box.innerHTML='<div class="dlist"><h3>'+SIYL_JOURNEY.statusLine()+'</h3>'+
-  '<p class="sub2">Choose how you would like to travel and stay for the remaining stages — or tell us that you are not joining that part of the journey.</p>'+
-  '<p class="fxnote">Or let the journey complete itself:</p>'+modes+selfList+
-  open.map(function(s2){return '<div class="drow"><span class="dw">'+s2.when+'</span><span>'+s2.cat+' · '+s2.place+'</span><a href="journeys.html#'+s2.anchor+'">Decide</a></div>'}).join('')+'</div>';
-}
-var b=document.getElementById('fxb');if(b)b.addEventListener('click',function(){fxOpen('full')});
-var c=document.getElementById('csb');if(c)c.addEventListener('click',function(){fxOpen('cost')})}
+  box.innerHTML='<div class="p-card"><p class="t-l1 on">'+(whole?'Your journey is complete':'Your decisions are complete')+'</p>'+
+    '<h2 class="t-h1">'+(whole?'Every stage has an answer':'Every stage has an answer')+'</h2>'+
+    '<p class="t-b2 measure-w">'+(whole
+      ? 'Each stage is booked with us. Review &amp; Send shares your journey with Guest Relations.'
+      : 'The stages below you are arranging yourself. Review &amp; Send shares the rest with Guest Relations.')+'</p>'+
+    (SIYL_BAG.has('airbnb-2br')?'<p class="t-b2 measure-w">The private residence is an independent stay: the wedding programme is yours as it stands, and arrival, departure, transfers and personal logistics are arranged by you. It carries no individual Guest Relations travel or accommodation support.</p>':'')+
+    selfList+'<p class="t-b2">You can still change how the journey is composed:</p>'+modes+'</div>';
+}else if(!open.length){box.innerHTML='';}
+else{
+  box.innerHTML='<div class="p-card"><p class="t-l1 open">'+esc(J.statusLine())+'</p>'+
+    '<h2 class="t-h1">Compose your journey</h2>'+
+    '<p class="t-b2 measure-w">Choose how you would like to travel and stay at each stage below — or let the journey complete itself, and change any stage afterwards.</p>'+
+    modes+selfList+'</div>'}
+var fb=document.getElementById('fxb');if(fb)fb.addEventListener('click',function(){fxOpen('full')});
+var cb=document.getElementById('csb');if(cb)cb.addEventListener('click',function(){fxOpen('cost')})}
 
-/* ---- FULL EXPERIENCE: one confirmation, then the open stages are filled from
- * the single pricing source. Existing selections and declines are untouched. */
+/* ---- FULL EXPERIENCE / COST SAVING: one confirmation, inside the shell's own
+ * detail layer. Swiping between the two Cost Saving cards commits nothing. */
 var FXMODE='full',CSOPTS=[],CSPICK=0;
-
-/* ---- the two Cost Saving choices, as one horizontal decision object ----
- * The card resting on the snap point IS the choice. Swiping commits nothing;
- * the single confirmation below applies whichever card is active. */
 function csHtml(opts){
 var cards=opts.map(function(o){
   var St=window.SIYL_STOCK,av='';
   if(o.stock&&St&&St.ready()){av=St.label(o.stock.win,o.stock.slug,csGuests())}
-  return '<article class="aslide"><div class="cscard'+(o.available?'':' gone')+'">'+
-    '<p class="cse">'+o.eyebrow+'</p>'+
-    '<h3>'+o.name+'</h3>'+
-    '<p class="csw">'+o.stayName+' · '+o.dates+'</p>'+
-    '<p class="csa">'+o.amount+'</p>'+
-    '<p class="csan">'+o.amountNote+'</p>'+
-    '<ul>'+o.service.map(function(l){return '<li>'+l+'</li>'}).join('')+'</ul>'+
-    (av?'<p class="csav'+(/Sold out|Only|Reserved/.test(av)?' low':'')+'">'+av+'</p>':'')+
+  return '<article class="aslide"><div class="p-card p-fare'+(o.available?'':' gone')+'" style="height:100%">'+
+    '<p class="t-l1">'+esc(o.eyebrow)+'</p>'+
+    '<h3 class="t-h1">'+esc(o.name)+'</h3>'+
+    '<p class="t-b2">'+esc(o.stayName)+' · '+esc(o.dates)+'</p>'+
+    '<p class="p-price">'+esc(o.amount)+'<span class="t-l1">'+esc(o.amountNote)+'</span></p>'+
+    '<ul class="p-list">'+o.service.map(function(l){return '<li class="t-b2">'+esc(l)+'</li>'}).join('')+'</ul>'+
+    (av?'<p class="t-l1'+(/Sold out|Only|Reserved/.test(av)?' open':'')+'">'+esc(av)+'</p>':'')+
     '</div></article>'}).join('');
-return '<p class="cshint">Swipe to compare</p>'+
-  '<div class="csel acar" id="cscar"><div class="atrk">'+cards+'</div>'+
-  '<div class="arow"><div class="arail" aria-hidden="true"><i></i></div>'+
+return '<p class="t-l1">Swipe to compare</p>'+
+  '<div class="csel acar" id="cscar"><div class="atrk p-rail">'+cards+'</div>'+
+  '<div class="arow p-rail-car"><div class="arail" aria-hidden="true"><i></i></div>'+
   '<div class="anav"><button type="button" data-a="prev" aria-label="Previous option"></button>'+
   '<button type="button" data-a="next" aria-label="Next option"></button></div></div></div>'}
-
-function csGuests(){var n=1;SIYL_BAG.get().forEach(function(x){if(x.qty>n)n=x.qty});return n}
-
+function csGuests(){return guests()}
 function csBuild(){
 var box=document.getElementById('csel');
-CSOPTS=SIYL_JOURNEY.costSavingOptions(csGuests());
+CSOPTS=J.costSavingOptions(csGuests());
 var usable=CSOPTS.filter(function(o){return o.available});
 if(!usable.length){
-  box.innerHTML='<div class="csnone">Neither Cost Saving stay is available for your party at the moment — the hotel categories are taken and the residence is full. Guest Relations will find an arrangement with you, or you can compose the journey stage by stage.</div>';
+  box.innerHTML='<div class="p-card"><p class="t-l1 open">Not available</p><p class="t-b1 measure">Neither Cost Saving stay is available for your party at the moment — the hotel categories are taken and the residence is full. Guest Relations will find an arrangement with you, or you can compose the journey stage by stage.</p></div>';
   document.getElementById('fxg').disabled=true;
   return}
 document.getElementById('fxg').disabled=false;
 box.innerHTML=csHtml(CSOPTS);
-/* start on the first option that can actually be taken */
 CSPICK=CSOPTS.indexOf(usable[0]);
 var car=document.getElementById('cscar');
 if(window.SIYL_AMAN)SIYL_AMAN.wire(car);
 car.addEventListener('a:active',function(e){csPick(e.detail.index)});
 if(CSPICK>0){var nx=car.querySelector('[data-a="next"]');if(nx)nx.click()}
 csPick(CSPICK)}
-
 function csPick(i){
 CSPICK=i;
 var o=CSOPTS[i],g=document.getElementById('fxg');
@@ -504,33 +349,29 @@ if(!o)return;
 g.disabled=!o.available;
 g.textContent=o.available?'Use this Cost Saving option':'Not available';
 document.getElementById('fxp').textContent=o.note+' Every other stage of the journey becomes self-arranged: you organise and fund your own travel to and from Vientiane.'}
-
 function fxOpen(mode){
-var o=document.getElementById('fxo');
-if(!mode){o.hidden=true;o.classList.remove('wide');document.body.classList.remove('fx-open');
-  document.getElementById('csel').innerHTML='';return}
+if(!mode){if(SH)SH.closeDrawer();return}
 FXMODE=mode;
 var cost=mode==='cost';
-o.classList.toggle('wide',cost);
-document.getElementById('fxe').textContent=cost?'Cost Saving Experience':'Full Experience';
-document.getElementById('fxt').textContent=cost?'Two ways to stay for the wedding.':'Complete the remaining journey.';
-document.getElementById('fxg').disabled=false;
-document.getElementById('csel').innerHTML='';
-if(cost){csBuild()}
-else{document.getElementById('fxp').textContent='All ten stages of the journey, each with the room, cabin or seat approved for the complete journey. This replaces the choices you have made so far, including a Cost Saving stay — you can still change any individual stage afterwards.';
-  document.getElementById('fxg').textContent='Add Full Experience'}
-o.hidden=false;document.body.classList.add('fx-open');document.getElementById('fxg').focus()}
-function gated(fn){if(window.SIYL_INVITE){SIYL_INVITE.require(fn)}else document.addEventListener('siyl:invite-ready',function(){SIYL_INVITE.require(fn)},{once:true})}
-document.getElementById('fxs').addEventListener('click',function(){fxOpen(null)});
-document.getElementById('fxc').addEventListener('click',function(){fxOpen(null)});
-document.addEventListener('keydown',function(e){if(e.key==='Escape')fxOpen(null)});
-document.getElementById('fxg').addEventListener('click',function(){
+var h='<p class="t-l1">'+(cost?'Cost Saving Experience':'Full Experience')+'</p>'+
+  '<h2 class="t-h1" style="margin-top:8px">'+(cost?'Two ways to stay for the wedding.':'Complete the remaining journey.')+'</h2>'+
+  '<p class="t-b1 measure" id="fxp" style="margin-top:12px">'+(cost?'':'All ten stages of the journey, each with the room, cabin or seat approved for the complete journey. This replaces the choices you have made so far, including a Cost Saving stay — you can still change any individual stage afterwards.')+'</p>'+
+  '<div id="csel" style="margin-top:16px"></div>'+
+  '<div class="p-actions" style="display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;margin-top:24px"><button type="button" class="p-link mute" id="fxc">Cancel</button>'+
+  '<button type="button" class="p-act" id="fxg">'+(cost?'Use this Cost Saving option':'Add Full Experience')+'</button></div>';
+if(!SH)return;
+SH.drawer(h,function(){
+  document.getElementById('fxc').addEventListener('click',function(){fxOpen(null)});
+  if(cost)csBuild();
+  document.getElementById('fxg').addEventListener('click',fxConfirm);
+  var g=document.getElementById('fxg');if(g)g.focus()})}
+async function fxConfirm(){
 var mode=FXMODE,pick=CSOPTS[CSPICK];
 if(mode==='cost'&&(!pick||!pick.available))return;
 fxOpen(null);
 gated(async function(){
   if(mode==='cost'){
-    var plan=SIYL_JOURNEY.costSavingPlan(pick);
+    var plan=J.costSavingPlan(pick);
     /* If this invitation already holds rooms in the shared ledger, the change
      * is verified and replaced there FIRST. The ledger swaps an invitation's
      * own allocation inside one atomic turn, so the previous room is released
@@ -540,29 +381,23 @@ gated(async function(){
       var held=await SIYL_STOCK.mine();
       if(held&&held.lines&&held.lines.length){
         var res=await SIYL_STOCK.reserveLines(plan.add.map(function(it){
-          return {win:SIYL_PRICE.windowOf(it.id),slug:it.room||'',qty:it.qty||csGuests()}}));
+          return {win:P.windowOf(it.id),slug:it.room||'',qty:it.qty||csGuests()}}));
         if(!res.ok&&!res.unreachable){
           var c=(res.conflicts||[])[0];
           alertRoom(c);return}
       }
     }
     plan.remove.forEach(function(id){SIYL_BAG.remove(id)});
-    SIYL_JOURNEY.SEGMENTS.forEach(function(s2){
-      SIYL_JOURNEY.skip(s2.key,plan.selfArranged.indexOf(s2.key)>=0);
-    });
+    J.SEGMENTS.forEach(function(s2){J.skip(s2.key,plan.selfArranged.indexOf(s2.key)>=0)});
     plan.add.forEach(function(it){SIYL_BAG.put(it)});
   }else{
-    /* Full Experience is a mode: the canonical premium configuration replaces
-     * whatever the ten stages held, so there is only ever ONE Full Experience
-     * total. Lines that are not stages are left exactly as they are. */
-    var plan=SIYL_JOURNEY.fullExperience();
-    plan.remove.forEach(function(id){SIYL_BAG.remove(id)});
-    plan.add.forEach(function(it){SIYL_BAG.put(it)});
+    var plan2=J.fullExperience();
+    plan2.remove.forEach(function(id){SIYL_BAG.remove(id)});
+    plan2.add.forEach(function(it){SIYL_BAG.put(it)});
   }
   render();
   var d=document.getElementById('dec');if(d)d.scrollIntoView({behavior:'smooth',block:'center'});
-});
-});
+})}
 
 /* A change the ledger refused. It lives in its own block, not inside the
  * decisions panel, because render() rewrites that panel on every bag and stock
@@ -570,19 +405,13 @@ gated(async function(){
 function alertRoom(c){
 var box=document.getElementById('csnote');
 if(!box)return;
-box.innerHTML='<div class="csnone">'+
-  (c?c.name:'That stay')+' is no longer available, so your journey has not been changed — '+
-  'you still hold the stay you had. Open Cost Saving again to take the other option.'+
-  '</div>';
+box.innerHTML='<div class="p-card" style="margin-top:var(--s5)"><p class="t-l1 open">Not changed</p><p class="t-b1 measure">'+
+  (c?esc(c.name):'That stay')+' is no longer available, so your journey has not been changed — '+
+  'you still hold the stay you had. Open Cost Saving again to take the other option.</p></div>';
 box.scrollIntoView({behavior:'smooth',block:'center'})}
-/* the notice clears itself the moment the guest changes anything */
-document.addEventListener('siyl:bag',function(){
-var b=document.getElementById('csnote');if(b)b.innerHTML=''});
-/* ---- the rooms this invitation actually holds in the shared ledger ----
- * An allocation is written when the journey is SENT. If the guest then changes
- * a room, the ledger still holds the old one: say so plainly and tell them the
- * next send updates it. If they empty the journey, give the rooms back. */
+document.addEventListener('siyl:bag',function(){var b=document.getElementById('csnote');if(b)b.innerHTML=''});
 
+/* the rooms this invitation actually holds in the shared ledger */
 function paintHeld(){
 var box=document.getElementById('held');if(!box||!window.SIYL_STOCK)return;
 SIYL_STOCK.mine().then(function(a){
@@ -592,18 +421,19 @@ SIYL_STOCK.mine().then(function(a){
   var now=SIYL_STOCK.linesFromBag().map(function(l){return l.win+'/'+l.slug}).sort().join(',');
   var held=a.lines.map(function(l){return l.key}).sort().join(',');
   var names=a.lines.map(function(l){var i=SIYL_STOCK.all()&&SIYL_STOCK.all()[l.key];return (i?i.name:l.key)+' × '+l.units}).join(' · ');
-  box.innerHTML='<div class="heldbox"><b>Rooms held for you:</b> '+names+'.'+
-    (now===held?'' : ' Your journey has changed since then — sending it again updates what is held in your name.')+'</div>';
+  box.innerHTML='<p class="t-b2 measure-w" style="margin-top:var(--s4)"><b>Rooms held for you:</b> '+esc(names)+'.'+
+    (now===held?'':' Your journey has changed since then — sending it again updates what is held in your name.')+'</p>';
 });}
 
 document.addEventListener('siyl:bag',function(){render();paintHeld()});
 document.addEventListener('siyl:temple',render);
 document.addEventListener('siyl:guest',render);
+document.addEventListener('siyl:who',render);
 document.addEventListener('siyl:stock',render);
 render();
 paintHeld();
-bkkSelector();
-flySelector();
 var q=new URLSearchParams(location.search);
-var rm=q.get('rm');if(rm){SIYL_BAG.remove(rm);render()}
-</script></body></html>
+var rm=q.get('rm');if(rm){SIYL_BAG.remove(rm)}
+if(window.SIYL_BAG&&SIYL_BAG.bar)SIYL_BAG.bar();
+</script>
+</body></html>

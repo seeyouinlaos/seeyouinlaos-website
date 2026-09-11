@@ -13,13 +13,13 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="your-journey.html" aria-label="Your Journey"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main class="prep-page" id="wedding-preparation">
 <div class="prep-head">
-  <p class="t-l1">Sunday, 28 February 2027</p>
+  <p class="t-l1">Sunday, 28 February 2027 · and the travelling days</p>
   <h1 class="t-d1">Wedding Preparation</h1>
-  <p class="t-b1 measure">Two things to prepare for the wedding day: what to wear, and where you will sit. The dress code is understood once, here, and confirmed once.</p>
+  <p class="t-b1 measure">Two things to prepare for the wedding day: what to wear, and where you will sit. The dress code is understood once, here, and confirmed once — by each of you, in your own name.</p>
 </div>
 
 <section class="prep-sec" id="dress-code">
-  <p class="t-l1">A · Required before sending</p>
+  <p class="t-l1">01 · Required before sending</p>
   <h2 class="t-h2">Dress code</h2>
   <p class="t-b1 measure">The wedding day carries two codes, and the travelling days carry a third. The photographs are references, not rules: they show the register, not a uniform. Nothing is bought or hired through this website.</p>
 
@@ -51,7 +51,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 </section>
 
 <section class="prep-sec" id="seats">
-  <p class="t-l1">B · Not open yet</p>
+  <p class="t-l1">02 · Your seats</p>
   <h2 class="t-h2">Your seats</h2>
   <p class="t-b1 measure">Your ceremony seat and your dinner seat will appear here when seating opens. Guest Relations arranges the tables and the rows, and you will be told the moment you can choose.</p>
   <div class="p-card" style="margin-top:16px">
@@ -102,7 +102,7 @@ function render(){
           '<label class="p-check"><input type="checkbox" data-ack="'+esc(id)+'"'+(a?' checked':'')+'>'+
           '<span class="t-b1" style="color:#313131">'+esc(G.DRESS_TEXT)+'</span></label>'
         : '<p class="t-b1 measure">'+name+' acknowledges the dress code in '+name+'&rsquo;s own name — it cannot be ticked for '+name+'. '+
-          (a?'It has been reviewed.':'Switch to '+name+' to acknowledge it.')+'</p>'+
+          (a?'It has been reviewed.':'')+'</p>'+
           (a?'':'<p class="p-more"><button type="button" class="p-link" data-switch="'+esc(id)+'">Switch to '+name+'</button></p>'))+
       '</div>';
   });
@@ -115,6 +115,7 @@ function render(){
 }
 document.addEventListener('siyl:who',render);
 document.addEventListener('siyl:guest',render);
+document.addEventListener('siyl:auth',render);
 render();
 if(window.SIYL_BAG&&SIYL_BAG.bar)SIYL_BAG.bar();
 })();

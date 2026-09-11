@@ -235,10 +235,10 @@
     if (party() && !active()) setTimeout(function () { chooseIdentity(false); }, 260);
     /* an exact-task deep link may say whom the guest is answering for — it
      * is explicit, validated, and gone again on the next page */
-    var m = /[?&]for=([A-Za-z0-9_-]+)/.exec(location.search);
-    if (m && G() && active()) G().setSubject(m[1]);
     document.addEventListener('siyl:who', paint);
     document.addEventListener('siyl:subject', paint);
+    var m = /[?&]for=([A-Za-z0-9_-]+)/.exec(location.search);
+    if (m && G() && active()) G().setSubject(m[1]);
     document.addEventListener('siyl:guest', paint);
     document.addEventListener('siyl:temple', paint);
     document.addEventListener('siyl:bag', paint);

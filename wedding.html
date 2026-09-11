@@ -15,7 +15,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <div class="prep-head">
   <p class="t-l1">Sunday, 28 February 2027 · Vientiane</p>
   <h1 class="t-d1">The Wedding</h1>
-  <p class="t-b1 measure">Four events, all complimentary and hosted by <span class="nb">Haruthai &amp; Suthep</span>. Each named guest answers each part of the day for themselves, so every table, every car and every morning is prepared for the people who are actually there.</p>
+  <p class="t-b1 measure">One day, four parts, all hosted by <span class="nb">Haruthai &amp; Suthep</span>. Each named guest answers each part for themselves, so every table, every car and every morning is prepared for the people who are actually there.</p>
 </div>
 <div id="page"></div>
 <div id="foot"></div>
@@ -32,10 +32,10 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script type="module" src="assets/invite.mjs"></script>
 <script>
 /* ============================================================================
-   03 · THE WEDDING — a decision module inside the private journey.
-   Not the public editorial page: the cultural background lives one tap away
-   in the shell's own detail layer, and closing it returns the guest to the
-   exact decision they were making.
+   03 · THE WEDDING — a private decision module, not the public editorial page.
+   The day in its order; under each part, one answer per named guest. The
+   cultural background lives one tap away in the shell's own detail layer, and
+   closing it returns the guest to the exact decision they were making.
    ========================================================================== */
 (function(){
 var P=window.SIYL_PREP,T=window.SIYL_TEMPLE,PR=window.SIYL_PRICE,G=window.SIYL_GUEST;
@@ -44,42 +44,35 @@ if(!P||!T||!page)return;
 function esc(t){return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 function gated(fn){if(window.SIYL_INVITE){SIYL_INVITE.require(fn)}
 else document.addEventListener('siyl:invite-ready',function(){SIYL_INVITE.require(fn)},{once:true})}
-
 var DRESS={temple:'Blue Lao Traditional Dress',coffee:'Black Tie',vows:'Black Tie',dinner:'Black Tie'};
 
 var TAKBAT='<p class="t-l1">Part of the Temple Ceremony</p>'+
  '<h2 class="t-h1" style="margin-top:8px">Morning Alms-Giving · Tak Bat</h2>'+
  '<p class="t-b1 measure" style="margin-top:12px">Guests attending the Temple Ceremony are invited to take part in the traditional morning alms-giving, Tak Bat. This is the moment in which food is respectfully offered to Buddhist monks — one of the oldest ways a day begins in Laos.</p>'+
  '<p class="t-b1 measure" style="margin-top:12px">It is part of the Temple Ceremony, and there is <b>no separate charge for Tak Bat</b>. Nothing is arranged and nothing is paid: you simply take part.</p>';
-
 var SANG='<p class="t-l1">Optional · within the Temple Ceremony</p>'+
  '<h2 class="t-h1" style="margin-top:8px">Sangkhathan · a personal offering</h2>'+
  '<p class="t-b1 measure" style="margin-top:12px">A Sangkhathan is a personal offering of useful everyday items for the monastic community, prepared in your name and presented by you.</p>'+
  '<p class="t-b1 measure" style="margin-top:12px">It is <b>not</b> the alms-giving. Tak Bat is the food offered during the ceremony and carries no charge; the Sangkhathan is separate, optional, and nobody needs one in order to attend. The USD 15 prepares your own offering — it is not an entrance, not a temple fee and not a wedding extra.</p>';
 
-function event(g,name,e){
-  var v=T.eventOf(g.guestId,e.key);
-  return '<div class="p-card flat" data-e="'+e.key+'">'+
-    '<p class="t-l1">'+e.when+' · '+e.place+' · Complimentary</p>'+
-    '<h3 class="t-h1">'+e.label+'</h3>'+
-    '<p class="t-b2">Dress · '+DRESS[e.key]+'</p>'+
+/* one answer row per named guest, under each part of the day */
+function personRow(g,e,me){
+  var id=g.guestId,mine=me.guestId===id,name=esc(G.nameOf(id)),v=T.eventOf(id,e.key);
+  return '<div class="p-card flat" data-g="'+esc(id)+'" data-e="'+e.key+'">'+
+    '<p class="t-l1'+(mine?' on':'')+'">'+esc(G.labelFor(id))+(mine?' · you':' · answering for '+name)+'</p>'+
     '<div class="p-selrow">'+
       '<button type="button" class="p-sel" aria-pressed="'+(v==='yes')+'" data-ev="yes">Attending</button>'+
       '<button type="button" class="p-sel" aria-pressed="'+(v==='no')+'" data-ev="no">Not attending</button>'+
     '</div>'+
-    '<p class="t-l1'+(v===null?' open':' on')+'">'+(v==='yes'?'Attending':v==='no'?'Not attending':'Not decided')+'</p>'+
-    (e.key==='temple'&&v==='yes'?takbat(g,name):'')+
-    '</div>';
-}
-function takbat(g,name){
+    (v===null?'<p class="t-l1 open">Not decided</p>':'')+
+    (e.key==='temple'&&v==='yes'?sangRow(g,name):'')+
+    '</div>'}
+/* the personal giving decision, only for someone who is attending — the
+ * eligibility model belongs to a later stage; the state is preserved as is */
+function sangRow(g,name){
   var off=T.offeringOf_(g.guestId);
   return '<div class="p-card" style="margin-top:16px">'+
-    '<p class="t-l1">Included · no charge</p>'+
-    '<h4 class="t-h2">Morning alms-giving · Tak Bat</h4>'+
-    '<p class="t-b2 measure">'+name+' is invited to take part in the alms-giving inside the ceremony. Nothing to arrange, nothing to pay.</p>'+
-    '<p class="p-more"><button type="button" class="p-link" data-more="takbat">More about Tak Bat</button></p>'+
-    '<hr class="rule" style="margin-top:24px">'+
-    '<p class="t-l1" style="margin-top:24px">Optional · USD 15 for '+name+'</p>'+
+    '<p class="t-l1">Optional · USD 15 for '+name+'</p>'+
     '<h4 class="t-h2">Sangkhathan · a personal offering</h4>'+
     '<p class="t-b2 measure">Prepared in '+name+'&rsquo;s name, and presented by '+name+'. Separate from the alms-giving.</p>'+
     '<p class="p-more"><button type="button" class="p-link" data-more="sang">More about Sangkhathan</button></p>'+
@@ -87,10 +80,8 @@ function takbat(g,name){
       '<button type="button" class="p-sel" aria-pressed="'+(off==='yes')+'" data-off="yes">We would like to give</button>'+
       '<button type="button" class="p-sel" aria-pressed="'+(off==='no')+'" data-off="no">Continue without</button>'+
     '</div>'+
-    '<p class="t-l1'+(off===null?' open':' on')+'">'+
-      (off==='yes'?'Selected · '+PR.money(15)+' in your journey':off==='no'?'Continuing without an offering':'Not decided')+'</p>'+
-    '</div>';
-}
+    (off===null?'<p class="t-l1 open">Not decided</p>':off==='yes'?'<p class="t-l1 on">'+PR.money(15)+' in your journey</p>':'')+
+    '</div>'}
 
 function render(){
   if(!P.ready()){
@@ -101,46 +92,43 @@ function render(){
     var b=document.getElementById('open'); if(b)b.addEventListener('click',function(){gated(render)});
     return;
   }
-  var p=P.party(),me=P.active();
+  var p=P.party(),me=P.active(),others=p.guests.filter(function(g){return g.guestId!==me.guestId});
   var h='';
-  p.guests.forEach(function(g){
-    var name=esc(G.value(g.guestId,'preferredName')||g.fullName);
-    var mine=me&&me.guestId===g.guestId;
-    var open=T.openFor(g.guestId);
-    /* C · every personal block says whose it is. When the answers below are
-     * not the active person's, the surface says so in words, and offers the
-     * one other thing that is not answering-for: switching identity. */
-    h+='<section class="prep-sec" data-g="'+esc(g.guestId)+'">'+
-       '<p class="t-l1'+(mine?' on':'')+'">'+esc(G.labelFor(g.guestId))+(mine?' · you':'')+'</p>'+
-       '<h2 class="t-h2">'+name+'</h2>'+
-       (mine?'':'<div class="p-for"><span class="t-l1">Answering for</span><b>'+name+'</b>'+
-         '<span class="t-b2">You are continuing as '+esc(P.activeName())+'. These answers are kept in '+name+'&rsquo;s name and say that you gave them.</span>'+
-         '<button type="button" class="p-link mute" data-switch="'+esc(g.guestId)+'">Switch to '+name+'</button></div>')+
-       '<p class="t-l1'+(open.length?' open':' on')+'">'+
-         (open.length?open.length+' still to answer':'All answered')+'</p>'+
-       T.EVENTS.map(function(e){return event(g,name,e)}).join('')+
-       '</section>';
-  });
+  /* the interaction boundary: whose answers these are */
+  if(others.length){
+    h+='<div class="p-for"><span class="t-l1">Answering for</span><b>'+esc(others.map(function(g){return G.nameOf(g.guestId)}).join(' & '))+'</b>'+
+       '<span class="t-b2">You are continuing as '+esc(G.nameOf(me.guestId))+'. Answers you give for '+esc(others.map(function(g){return G.nameOf(g.guestId)}).join(' and '))+' are kept in '+(others.length===1?esc(G.nameOf(others[0].guestId))+'&rsquo;s name':'their own names')+' and say that you gave them.</span>'+
+       others.map(function(g){return '<button type="button" class="p-link mute" data-switch="'+esc(g.guestId)+'">Switch to '+esc(G.nameOf(g.guestId))+'</button>'}).join('')+'</div>'}
+  /* the day, in its order */
+  T.EVENTS.forEach(function(e,i){
+    h+='<section class="prep-sec" id="ev-'+e.key+'">'+
+       '<p class="t-l1">0'+(i+1)+' · '+e.when+' · '+esc(e.place)+'</p>'+
+       '<h2 class="t-h2">'+e.label+'</h2>'+
+       '<p class="t-b2">'+(e.key==='temple'?'Optional participation · ':'Hosted · ')+'Dress · '+DRESS[e.key]+'</p>'+
+       (e.key==='temple'
+         ?'<p class="t-b1 measure">The Buddhist morning at Wat Ong Teu. Guests attending are invited to take part in the traditional morning alms-giving, Tak Bat — food respectfully offered to the monks, with no separate charge.</p>'+
+          '<p class="p-more"><button type="button" class="p-link" data-more="takbat">More about Tak Bat</button></p>'
+         :'')+
+       p.guests.map(function(g){return personRow(g,e,me)}).join('')+
+       '</section>'});
   page.innerHTML=h;
 
   page.querySelectorAll('[data-switch]').forEach(function(b){
     b.addEventListener('click',function(){P.setActive(b.getAttribute('data-switch'))})});
-  page.querySelectorAll('[data-g]').forEach(function(sec){
-    var id=sec.getAttribute('data-g');
-    sec.querySelectorAll('[data-e]').forEach(function(card){
-      var key=card.getAttribute('data-e');
-      card.querySelectorAll('[data-ev]').forEach(function(b){
-        b.addEventListener('click',function(){T.setEvent(id,key,b.getAttribute('data-ev'));render()})});
-      card.querySelectorAll('[data-off]').forEach(function(b){
-        b.addEventListener('click',function(){T.setOffering(id,b.getAttribute('data-off'));render()})});
-      card.querySelectorAll('[data-more]').forEach(function(b){
-        b.addEventListener('click',function(){P.drawer(b.getAttribute('data-more')==='takbat'?TAKBAT:SANG)})});
-    });
+  page.querySelectorAll('[data-g]').forEach(function(card){
+    var id=card.getAttribute('data-g'),key=card.getAttribute('data-e');
+    card.querySelectorAll('[data-ev]').forEach(function(b){
+      b.addEventListener('click',function(){T.setEvent(id,key,b.getAttribute('data-ev'));render()})});
+    card.querySelectorAll('[data-off]').forEach(function(b){
+      b.addEventListener('click',function(){T.setOffering(id,b.getAttribute('data-off'));render()})});
   });
+  page.querySelectorAll('[data-more]').forEach(function(b){
+    b.addEventListener('click',function(){P.drawer(b.getAttribute('data-more')==='takbat'?TAKBAT:SANG)})});
   P.foot(document.getElementById('foot'));
 }
 document.addEventListener('siyl:who',render);
 document.addEventListener('siyl:guest',render);
+document.addEventListener('siyl:auth',render);
 render();
 if(window.SIYL_BAG&&SIYL_BAG.bar)SIYL_BAG.bar();
 })();

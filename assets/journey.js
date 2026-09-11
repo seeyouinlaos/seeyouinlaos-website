@@ -86,7 +86,12 @@
       if (x.interest && x.id !== 'airbnb-2br') return { cat: 'Wellness', basis: 'Interest · confirmed and payable at the spa', unit: 'treatment' };
       if (!P) return { cat: '', basis: '', unit: 'guest' };
       var f = P.FLAT[x.id];
-      if (f) return { cat: f.cat, basis: f.basis, unit: f.unit || 'guest' };
+      if (f) {
+        /* a product with approved classes states the basis of the class the
+         * guest actually chose — never the preferred class's */
+        var c = x.cls && P.classOf ? P.classOf(x.id, x.cls) : null;
+        return { cat: f.cat, basis: (c && c.basis) || f.basis, unit: f.unit || 'guest' };
+      }
       var at = P.locate(x.id);
       if (at) return { cat: 'Accommodation', basis: P.lineBasis(x), unit: 'guest' };
       return { cat: '', basis: '', unit: 'guest' };
