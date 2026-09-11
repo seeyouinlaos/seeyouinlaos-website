@@ -439,5 +439,31 @@ body.p-drawer-open .p-drawer { transform: translateY(0); }
 .p-modes .p-act.quiet span { display: block; font-size: 11.5px; letter-spacing: .2px; text-transform: none; color: var(--p-mute); font-weight: 300; margin-top: var(--s1); }
 .p-modes .p-act.quiet:hover span { color: #CFC7BA; }
 
+/* G · the seat map: drawn from configuration, states in words and marks,
+   the palette of the system — no airline colours */
+.p-seatwrap { overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: var(--s2); }
+.p-seatwrap::-webkit-scrollbar { display: none; }
+.p-seatmap { display: block; width: 100%; height: auto; max-width: 620px; }
+.p-seatwrap.wide .p-seatmap { max-width: none; }
+.p-seatmap .seat[role="button"] { cursor: pointer; }
+.p-seatmap .seat[role="button"]:hover rect, .p-seatmap .seat[role="button"]:focus-visible rect { fill: #EDEBE7; }
+.p-seatmap .seat-yours[role="button"]:hover rect, .p-seatmap .seat-yours[role="button"]:focus-visible rect { fill: #1F1F1F; }
+.p-seatmap .seat:focus { outline: 0; }
+.p-seathint { margin-top: var(--s2); }
+.p-seatlegend { list-style: none; margin: var(--s3) 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--s2) var(--s4); }
+.p-seatlegend li { display: inline-flex; align-items: center; gap: var(--s2); margin: 0; }
+.p-seatlegend span { display: inline-block; width: 14px; height: 14px; border-radius: 2px; border: 1px solid #C9C4BA; background: var(--p-card); }
+.p-seatlegend .seat-yours { background: var(--p-ink); border-color: var(--p-ink); }
+.p-seatlegend .seat-party { border: 1.8px solid var(--p-ink); position: relative; }
+.p-seatlegend .seat-party::after { content: ''; position: absolute; left: 3px; top: 3px; width: 5px; height: 5px; border-radius: 50%; border: 1.2px solid var(--p-ink); }
+.p-seatlegend .seat-yours { position: relative; }
+.p-seatlegend .seat-yours::after { content: ''; position: absolute; left: 3px; top: 3px; width: 6px; height: 3px; border-left: 1.6px solid var(--p-paper); border-bottom: 1.6px solid var(--p-paper); transform: rotate(-45deg); }
+.p-seatlegend .seat-family { background: var(--p-hair); border: 1px dashed var(--p-mute); }
+.p-seatlegend .seat-taken { background: var(--p-line); }
+/* F · the personal wedding card: a card, not a ticket */
+.p-wcard { margin-top: var(--s4); }
+.p-wcard .t-d1 { font-size: 28px; }
+.p-wcard .p-kv { padding: var(--s3) 0; }
+
 /* a quiet saved confirmation */
 .p-saved { min-height: 20px; }

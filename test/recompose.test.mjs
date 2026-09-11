@@ -148,7 +148,8 @@ test('the dress code is understood once, in step 04, and acknowledged per guest 
   }
   /* seating: not open, nothing invented */
   assert.match(wp, /Not open yet/);
-  assert.doesNotMatch(wp, /seat-map|data-seat|<svg[^>]*seat/i);
+  /* G · the seat map is drawn from server configuration; the page itself carries no geometry */
+  assert.doesNotMatch(wp, /seatId:\s*'[CD]-|rows:\s*\[\s*\{|'C-[LR]-\d+-\d+'|'D-[LR]-\d+'/);
 });
 
 test('Review introduces no new selection control for an existing concept', () => {

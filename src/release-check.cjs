@@ -257,7 +257,6 @@ gate('P3', 'MASTER-02 programme truth (four events, no active Alms, no pool in v
   if (!/prep-for/.test(sh) || !/Answering for/.test(sh)) bad.push('the shell must say ANSWERING FOR in words');
   if (!/data-switch/.test(wd)) bad.push('step 03 must offer SWITCH beside another guest\'s answers');
   if (!/mayConsent/.test(d)) bad.push('publication consent must be first person only');
-  if (/givingEligibility/.test(g + sh + wd + wp + rv)) bad.push('givingEligibility belongs to E and must not be modelled yet');
   gate('P9', 'Party / person state separation (C): scoped state, explicit subject, personal acknowledgements',
     bad.length === 0, bad.length ? bad.join(' · ') : 'SCOPE registry · activeGuestId / subjectGuestId · dress + consent per guest, first person · ANSWERING FOR said in words');
 }
@@ -280,6 +279,36 @@ gate('P3', 'MASTER-02 programme truth (four events, no active Alms, no pool in v
   }
   gate('P10', 'Recomposed surfaces (D): one shell, one system, no compatibility layer',
     bad.length === 0, bad.length ? bad.join(' · ') : 'six surfaces on .t-*/.p-* only; legacy map deleted; page-local CSS is the shared chrome alone');
+}
+
+/* P11 — E/F/G. Eligibility is explicit and never inferred; the confirmation
+   is a protected server act the client cannot perform; the seating ledger
+   ships no geometry of its own and the Guest Relations token never reaches
+   an asset. */
+{
+  const bad = [];
+  const t = read('assets/temple.js'), inv = read('assets/invite.mjs');
+  if (!/[ap]\.givingEligibility === 'PAIR' \|\| [ap]\.givingEligibility === 'NONE'/.test(read('assets/guest.js'))) bad.push('eligibility must be explicit invitation metadata');
+  if (/length === 2|length == 2/.test(t)) bad.push('eligibility must not be inferred from party size');
+  if (!/if \(!this\.pairCan\(\)\) return false;/.test(t)) bad.push('the couple decision must be refused unless the pair can take part');
+  if (!/givingEligibility/.test(inv)) bad.push('the invitation must carry eligibility to the client');
+  const w = read('src/worker.js');
+  if (!/grAuthorised\(request, env\)/.test(w) || !/x-gr-token/.test(w)) bad.push('the Guest Relations gate is missing');
+  if (!/headers\.delete\('x-gr-verified'\)/.test(w)) bad.push('a client could claim the gate');
+  if (!/'\/api\/confirm'/.test(w) || !/'\/api\/status'/.test(w)) bad.push('the confirmation and status routes are missing');
+  for (const f of fs.readdirSync(path.join(ROOT, 'assets')).filter((x) => x.endsWith('.js') || x.endsWith('.mjs'))) {
+    const s = read('assets/' + f);
+    if (/x-gr-token|GR_TOKEN|api\/confirm|api\/seating\/(config|state|assign|plan)/.test(s)) bad.push('assets/' + f + ' touches the Guest Relations gate');
+  }
+  const gitignore = read('.gitignore');
+  if (!/src\/\*\.private\.txt/.test(gitignore)) bad.push('the token file is not ignored by git');
+  if (fs.existsSync(path.join(ROOT, 'src/gr-token.private.txt')) && /gr-token/.test(read('.assetsignore') + '') === false && !/^src$/m.test(read('.assetsignore'))) bad.push('the token file could be served');
+  for (const f of ['src/seating.js', 'assets/seating.js', 'wedding-preparation.html', 'src/worker.js']) {
+    if (/seatId:\s*'[CD]-[LR]-\d|'C-[LR]-\d+-\d+'|'D-[LR]-\d+'/.test(read(f))) bad.push(f + ' carries production geometry');
+  }
+  if (!/new_sqlite_classes": \["Seating"\]/.test(read('wrangler.jsonc'))) bad.push('the seating object is not migrated');
+  gate('P11', 'E/F/G: explicit eligibility, protected confirmation, geometry-free seating ledger',
+    bad.length === 0, bad.length ? bad.join(' · ') : 'PAIR/NONE/unresolved only · GR token gate with constant-time compare · no geometry in code · token never in assets or git');
 }
 
 /* P5 — overlay integrity (release-blocking): a hidden lightbox must actually

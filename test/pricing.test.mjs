@@ -411,15 +411,18 @@ test('THE WEDDING sits at 28 FEB in the chronology — the Sangkhathan is never 
   assert.equal(keys[4], 'mu9646');
 });
 
-test('the Sangkhathan is decided per named guest, and never restored silently', () => {
+test('the Sangkhathan is one couple decision for an eligible pair, and never restored silently', () => {
   const t = readFileSync(join(ROOT, 'assets/temple.js'), 'utf8');
   ['attendanceOf', 'attendingOf', 'offeringOf', 'offeringOf_', 'offeringDecidedOf',
-   'setAttendance', 'setOffering', 'offeringGuests', 'undecided']
+   'setAttendance', 'setOffering', 'offeringGuests', 'undecided', 'eligibility', 'pairCan', 'pairDecision']
     .forEach((fn) => assert.ok(t.includes(fn + ':'), fn + ' missing'));
-  /* not attending clears THIS person's offering decision, both shapes */
-  assert.match(t, /if \(st\.by\[id\]\.attend !== 'yes'\) \{ delete st\.by\[id\]\.off; delete st\.by\[id\]\.offering; \}/);
-  /* an offering can only ever be set for someone who is attending */
-  assert.match(t, /if \(st\.by\[id\]\.attend !== 'yes'\) delete st\.by\[id\]\.off;\s*\n\s*else if \(v === 'yes' \|\| v === 'no'\) st\.by\[id\]\.off = v;/);
+  /* E · not attending removes the couple decision, and it is never restored */
+  assert.match(t, /if \(st\.by\[id\]\.attend !== 'yes'\) delete st\.pair;/);
+  /* the decision can only be made while the pair can take part */
+  assert.match(t, /if \(!this\.pairCan\(\)\) return false;/);
+  /* eligibility is explicit source truth, never derived */
+  assert.match(t, /p\.givingEligibility === 'PAIR' \|\| p\.givingEligibility === 'NONE'/);
+  assert.doesNotMatch(t, /guests\(\)\.length === 2|people\(\)\.length === 2/, 'eligibility must not be inferred from party size');
   /* the bag quantity is DERIVED from the named decisions — no counter */
   assert.match(t, /var n = T\.offerings\(\);/);
   const page = readFileSync(join(ROOT, 'wedding.html'), 'utf8');
@@ -437,9 +440,9 @@ test('three states, never two: NOT DECIDED is not NOT ATTENDING', () => {
   assert.match(t, /if \(self\.attendingOf\(id\) && !self\.offeringDecidedOf\(id\)\) missing\.push\('Sangkhathan'\);/);
   assert.match(t, /sangkhathanState: a !== 'yes' \? 'Not applicable'/);
   const page = readFileSync(join(ROOT, 'wedding.html'), 'utf8');
-  /* the guest is offered BOTH answers, so silence is never read as a refusal */
-  assert.match(page, /data-off="yes">We would like to give/);
-  assert.match(page, /data-off="no">Continue without/);
+  /* the pair is offered BOTH answers, so silence is never read as a refusal */
+  assert.match(page, /data-off="yes">We would like to take part/);
+  assert.match(page, /data-off="no">Continue without Sangkhathan/);
   assert.match(page, /Not decided/);
   /* and every active event carries both answers, for every named guest */
   assert.match(page, /data-ev="yes">Attending/);

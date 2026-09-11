@@ -54,6 +54,8 @@ const AUTH = {
       guests: (inv.guests || [])
         .filter((g) => (g.status || 'ACTIVE') === 'ACTIVE')
         .map((g) => ({ guestId: g.guestId, fullName: g.fullName, preferredName: g.preferredName || g.fullName })),
+      /* E · explicit eligibility only; anything else is unresolved (null) */
+      givingEligibility: inv.givingEligibility === 'PAIR' || inv.givingEligibility === 'NONE' ? inv.givingEligibility : null,
       at: new Date().toISOString(),
     }));
   },

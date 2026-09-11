@@ -1,0 +1,186 @@
+{
+  "origin": "http://127.0.0.1:8787",
+  "at": "2026-09-11T12:12:41.088Z",
+  "results": [
+    {
+      "id": "E0 production eligibility",
+      "ok": true,
+      "detail": "INV-002 ships UNRESOLVED (no inferred PAIR): null"
+    },
+    {
+      "id": "E1 unresolved: restrained, no price, no action",
+      "ok": true,
+      "detail": "Sangkhathan · personal givingThis part of the Temple Ceremony is prepared for couples.Guest Relations will let you know if there is anything to arrange for your"
+    },
+    {
+      "id": "E1 unresolved never blocks",
+      "ok": true,
+      "detail": "no decision demanded"
+    },
+    {
+      "id": "E1 review unresolved",
+      "ok": true,
+      "detail": "Review states the truth without a status word, a price or a link"
+    },
+    {
+      "id": "E2 PAIR copy",
+      "ok": true,
+      "detail": "Sangkhathan · personal givingThis part of the Temple Ceremony is prepared for couples.If you choose to take part, a personal Sangkhathan offering will be prepared for each of you to present yourselves"
+    },
+    {
+      "id": "E2 one couple decision",
+      "ok": true,
+      "detail": "both answers offered once, for the pair"
+    },
+    {
+      "id": "E2 both take part, USD 30",
+      "ok": true,
+      "detail": "pair.by=G001 · line qty 2 × USD 15"
+    },
+    {
+      "id": "E2 never Peggy yes / Steffie no",
+      "ok": true,
+      "detail": "no per-person offering field is written"
+    },
+    {
+      "id": "E2 costs",
+      "ok": true,
+      "detail": "journey wedding block: 28 FEBThe Wedding · VientianeSunday, 28 February 2027Hosted · your personal addition USD 30One day, four partsTemple Cer"
+    },
+    {
+      "id": "E2 review Selected",
+      "ok": true,
+      "detail": "both named guests, one decision"
+    },
+    {
+      "id": "E2 dependency",
+      "ok": true,
+      "detail": "decision removed, line gone, no action"
+    },
+    {
+      "id": "E2 not restored silently",
+      "ok": true,
+      "detail": "asked again from Not decided"
+    },
+    {
+      "id": "E3 NONE copy",
+      "ok": true,
+      "detail": "Sangkhathan · personal givingThis part of the Temple Ceremony is prepared for couples.There is nothing you need to arrange for your invitati"
+    },
+    {
+      "id": "E3 review Not eligible",
+      "ok": true,
+      "detail": "Review: Not eligible"
+    },
+    {
+      "id": "G1 not open yet",
+      "ok": true,
+      "detail": "per named guest, no chairs, no geometry"
+    },
+    {
+      "id": "G2 open: two maps, per named guest",
+      "ok": true,
+      "detail": "ceremony and dinner drawn from the fixture"
+    },
+    {
+      "id": "G2 geometry from configuration",
+      "ok": true,
+      "detail": "40 + 40, family 6 + 6, Bride & Groom outside"
+    },
+    {
+      "id": "G2 no invented centre block, aisle present",
+      "ok": true,
+      "detail": "rows face the ceremony, one long table"
+    },
+    {
+      "id": "G2 seat belongs to Peggy",
+      "ok": true,
+      "detail": "C-L-2-1 and D-L-8 held for G001"
+    },
+    {
+      "id": "G2 taken is not selectable",
+      "ok": true,
+      "detail": "C-L-2-3 (another invitation) has no button"
+    },
+    {
+      "id": "G2 family is not selectable",
+      "ok": true,
+      "detail": "C-L-1-1 is FAMILY"
+    },
+    {
+      "id": "G2 change is atomic",
+      "ok": true,
+      "detail": "C-R-3-2 held, C-L-2-1 released"
+    },
+    {
+      "id": "G3 choosing for Steffie",
+      "ok": true,
+      "detail": "the boundary is said"
+    },
+    {
+      "id": "G3 Steffie's chair is hers",
+      "ok": true,
+      "detail": "C-R-3-3 for Steffie, C-R-3-2 still Peggy's"
+    },
+    {
+      "id": "G3 targets",
+      "ok": true,
+      "detail": "chairs ≥24px at 390, controls ≥44: []"
+    },
+    {
+      "id": "G4 review seats by name",
+      "ok": true,
+      "detail": "ceremony and dinner seats per named guest"
+    },
+    {
+      "id": "G5 frozen",
+      "ok": true,
+      "detail": "authoritative view, no self-change"
+    },
+    {
+      "id": "F0 production: not sent",
+      "ok": true,
+      "detail": "no state block, send available"
+    },
+    {
+      "id": "F1 received",
+      "ok": true,
+      "detail": "Journey receivedGuest Relations has your journeyReceived on 11 Sept 2026. A person will read it. Received is not confirmed: Guest Relations confirms every arran"
+    },
+    {
+      "id": "F1 shell says received",
+      "ok": true,
+      "detail": "step 06 state"
+    },
+    {
+      "id": "F2 confirmed",
+      "ok": true,
+      "detail": "party confirmation + one card per named guest, send withdrawn"
+    },
+    {
+      "id": "F2 cards are personal",
+      "ok": true,
+      "detail": "each card from its own guest's state, seats only when authoritative"
+    },
+    {
+      "id": "F2 no ticket imitation",
+      "ok": true,
+      "detail": "no barcode, no QR, no scan"
+    },
+    {
+      "id": "F2 targets",
+      "ok": true,
+      "detail": "tap targets: []"
+    },
+    {
+      "id": "X no page errors",
+      "ok": true,
+      "detail": "none"
+    },
+    {
+      "id": "X no horizontal overflow",
+      "ok": true,
+      "detail": "every frame, every width"
+    }
+  ]
+}

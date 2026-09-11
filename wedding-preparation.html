@@ -51,12 +51,14 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 </section>
 
 <section class="prep-sec" id="seats">
-  <p class="t-l1">02 · Your seats</p>
+  <p class="t-l1" id="seats-eyebrow">02 · Your seats</p>
   <h2 class="t-h2">Your seats</h2>
-  <p class="t-b1 measure">Your ceremony seat and your dinner seat will appear here when seating opens. Guest Relations arranges the tables and the rows, and you will be told the moment you can choose.</p>
+  <p class="t-b1 measure" id="seats-lede">Your ceremony seat and your dinner seat will appear here when seating opens. Guest Relations arranges the tables and the rows, and you will be told the moment you can choose.</p>
+  <div id="seatbox">
   <div class="p-card" style="margin-top:16px">
     <div class="p-kv"><div><p class="t-b1"><b>Ceremony seat</b></p><p class="t-b2">Wat Ong Teu · 28 February</p></div><p class="t-l1">Not open yet</p></div>
     <div class="p-kv"><div><p class="t-b1"><b>Dinner seat</b></p><p class="t-b2">Souphattra Vientiane Hotel · 19:30</p></div><p class="t-l1">Not open yet</p></div>
+  </div>
   </div>
 </section>
 
@@ -67,6 +69,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/aman.js"></script>
 <script src="assets/guest.js"></script>
 <script src="assets/temple.js"></script>
+<script src="assets/seating.js"></script>
 <script src="assets/prep-shell.js"></script>
 <script type="module" src="assets/invite.mjs"></script>
 <script>
@@ -117,7 +120,70 @@ document.addEventListener('siyl:who',render);
 document.addEventListener('siyl:guest',render);
 document.addEventListener('siyl:auth',render);
 render();
-if(window.SIYL_BAG&&SIYL_BAG.bar)SIYL_BAG.bar();
 })();
+
+/* ============================================================================
+   G · YOUR SEATS. The floor plan is the server's configuration, never a plan
+   of this page. Until Guest Relations has opened seating the guest sees NOT
+   OPEN YET; when open, each named guest chooses their own chair — or the
+   person continuing chooses for another, and the surface says so; when frozen,
+   the authoritative allocation is shown and cannot be self-changed.
+   ========================================================================== */
+(function(){
+var S=window.SIYL_SEATS,P=window.SIYL_PREP,G=window.SIYL_GUEST,seatbox=document.getElementById('seatbox');
+if(!S||!P||!G||!seatbox)return;
+function esc(t){return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+var subject=null;   /* whose chair is being chosen — defaults to the person continuing */
+var EV=[['ceremony','Ceremony seat','Wat Ong Teu · 28 February · rows facing the ceremony'],['dinner','Dinner seat','Souphattra Vientiane Hotel · 19:30 · one long table']];
+function label(ev,id){var sid=S.seatOf(ev,id);return sid?sid:null}
+function paintSeats(){
+  if(!P.ready()||!S.ready())return;
+  var p=P.party(),me=P.active(),v=S.view();
+  var any=S.configured('ceremony')||S.configured('dinner');
+  var eyebrow=document.getElementById('seats-eyebrow'),lede=document.getElementById('seats-lede');
+  /* NOT OPEN: the state as it is, plus any allocation Guest Relations already made */
+  if(!S.open()||!any){
+    eyebrow.textContent='02 · Your seats';
+    lede.textContent='Your ceremony seat and your dinner seat will appear here when seating opens. Guest Relations arranges the tables and the rows, and you will be told the moment you can choose.';
+    var h='<div class="p-card" style="margin-top:16px">';
+    p.guests.forEach(function(g){
+      h+='<div class="p-kv"><div><p class="t-l1'+(me.guestId===g.guestId?' on':'')+'">'+esc(G.labelFor(g.guestId))+(me.guestId===g.guestId?' · you':'')+'</p></div></div>';
+      EV.forEach(function(e){var sid=label(e[0],g.guestId);
+        h+='<div class="p-kv"><div><p class="t-b1"><b>'+e[1]+'</b></p><p class="t-b2">'+e[2]+'</p></div><p class="t-l1'+(sid?' on':'')+'">'+(sid?esc(sid):'Not open yet')+'</p></div>'})});
+    seatbox.innerHTML=h+'</div>';return}
+  var id=(subject&&p.guests.some(function(g){return g.guestId===subject}))?subject:me.guestId;
+  var forOther=id!==me.guestId,name=esc(G.nameOf(id)),others=p.guests.filter(function(g){return g.guestId!==id});
+  var words={subjectName:forOther?G.nameOf(id):null,partyName:others.length===1?G.nameOf(others[0].guestId):(others.length?'Your party':null),frozen:S.frozen()};
+  eyebrow.textContent=S.frozen()?'02 · Your seats · seating is closed':'02 · Your seats · seating is open';
+  lede.textContent=S.frozen()?'Seating has been closed. Your seats are shown as Guest Relations holds them; to change one, write to Guest Relations.':'Choose a chair for each of you. A chair is held the moment you choose it, and you can change it while seating stays open.';
+  var h='';
+  if(p.guests.length>1){
+    h+='<p class="t-l1" style="margin-top:var(--s4)">'+(S.frozen()?'Seats for':'Choosing a seat for')+'</p><div class="p-selrow">'+p.guests.map(function(g){
+      return '<button type="button" class="p-sel" aria-pressed="'+(g.guestId===id)+'" data-seat-who="'+esc(g.guestId)+'">'+esc(G.nameOf(g.guestId))+(g.guestId===me.guestId?' · you':'')+'</button>'}).join('')+'</div>';
+    if(forOther)h+='<div class="p-for" style="margin-top:var(--s4)"><span class="t-l1">Choosing for</span><b>'+name+'</b><span class="t-b2">You are continuing as '+esc(G.nameOf(me.guestId))+'. The chair is held in '+name+'&rsquo;s name.</span></div>'}
+  EV.forEach(function(e){
+    var ev=e[0],sid=label(ev,id),ok=S.configured(ev);
+    h+='<div class="p-card" style="margin-top:var(--s4)" data-seatmap="'+ev+'"><p class="t-l1'+(sid?' on':' open')+'">'+(sid?(S.frozen()?'Held for ':'Held in ')+name+(S.frozen()?'':'&rsquo;s name')+' · '+esc(S.describe(sid))+' <span style="color:var(--p-mute)">'+esc(sid)+'</span>':(S.frozen()?'No seat allocated':'Not chosen yet'))+'</p>'+
+      '<h3 class="t-h1">'+e[1]+'</h3><p class="t-b2">'+e[2]+'</p>'+
+      (ok?'<div class="p-seatbox" data-ev="'+ev+'" style="margin-top:var(--s4)"></div>':'<p class="t-b2 measure" style="margin-top:var(--s3)">The plan for this part of the day has not been opened yet.</p>')+
+      (sid&&!S.frozen()?'<div class="p-actions"><button type="button" class="p-link mute" data-seat-release="'+ev+'">Give this chair back</button></div>':'')+
+      '</div>'});
+  seatbox.innerHTML=h;
+  EV.forEach(function(e){var ev=e[0],box=seatbox.querySelector('[data-ev="'+ev+'"]');if(!box)return;
+    S.render(box,ev,{guestId:id,selectable:!S.frozen(),subjectName:words.subjectName,partyName:words.partyName,frozen:words.frozen,onSelect:function(seatId){
+      S.select(ev,seatId,id).then(function(d){
+        if(d&&d.ok)return;
+        var card=seatbox.querySelector('[data-seatmap="'+ev+'"] .t-l1');
+        if(card)card.textContent=d&&d.error==='taken'?'That chair has just been taken — choose another':(d&&d.error==='seating is frozen'?'Seating is closed':'The chair could not be held — please try again');
+      })}})});
+  seatbox.querySelectorAll('[data-seat-who]').forEach(function(b){b.addEventListener('click',function(){subject=b.getAttribute('data-seat-who');paintSeats()})});
+  seatbox.querySelectorAll('[data-seat-release]').forEach(function(b){b.addEventListener('click',function(){S.release(b.getAttribute('data-seat-release'),id)})});
+}
+document.addEventListener('siyl:seats',paintSeats);
+document.addEventListener('siyl:who',function(){subject=null;paintSeats()});
+document.addEventListener('siyl:auth',function(){S.load(true)});
+if(P&&P.party())S.load();
+})();
+if(window.SIYL_BAG&&SIYL_BAG.bar)SIYL_BAG.bar();
 </script>
 </body></html>

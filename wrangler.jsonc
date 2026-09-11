@@ -24,10 +24,18 @@
   // the id "ledger" to the same actor and runs them one at a time, which is
   // what makes a reservation atomic across guests, browsers and deployments.
   "durable_objects": {
-    "bindings": [{ "name": "INVENTORY", "class_name": "Inventory" }]
+    "bindings": [
+      { "name": "INVENTORY", "class_name": "Inventory" },
+      /* THE SEATING LEDGER (G): two independent chair inventories, ceremony
+         and dinner, in ONE actor — a seat belongs to a named guest, holding a
+         new chair always precedes releasing the old one. No geometry is coded;
+         Guest Relations configures it through the protected route. */
+      { "name": "SEATING", "class_name": "Seating" }
+    ]
   },
   "migrations": [
-    { "tag": "v1", "new_sqlite_classes": ["Inventory"] }
+    { "tag": "v1", "new_sqlite_classes": ["Inventory"] },
+    { "tag": "v2", "new_sqlite_classes": ["Seating"] }
   ],
 
   "observability": { "enabled": true }
