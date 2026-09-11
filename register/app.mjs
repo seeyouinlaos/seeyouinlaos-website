@@ -810,7 +810,7 @@ function renderTravelStep(box) {
       off: 'Opens when China is part of your journey.',
       html: '<div class="ch-grid">' +
         choice('Vientiane → Kunming', 'MU9632 · Business Class · ' + money(275) + ' per guest', !!(S.travel && S.travel.vteKmg === 'with'), 'data-tv-t="vteKmg"') +
-        choice('Kunming → Lijiang', 'Train C642 · Business Class · ' + money(85) + ' per guest', !!(S.travel && S.travel.kmgLjg === 'with'), 'data-tv-t="kmgLjg"') +
+        choice('Kunming → Lijiang', 'Train C86 · Business Class · ' + money(85) + ' per guest', !!(S.travel && S.travel.kmgLjg === 'with'), 'data-tv-t="kmgLjg"') +
         choice('Kunming stay', money(50) + ' per guest, per night · 01–04 MAR', !!(S.china && S.china.kunming === 'with'), 'data-tv-c="kunming"') +
         choice('Lijiang stay', 'Room variant from ' + money(70) + ' per person, 2 nights · 04–06 MAR', !!(S.china && S.china.lijiang === 'with'), 'data-tv-c="lijiang"') +
         '</div>' +
@@ -955,7 +955,7 @@ function voyItin(k) {
   return [
     ['01 MAR', 'Vientiane → Kunming', 'Flight'],
     ['01 – 04 MAR', 'Kunming', 'Stay'],
-    ['04 MAR', 'Kunming → Lijiang', 'Train C642 · Business Class'],
+    ['04 MAR', 'Kunming → Lijiang', 'Train C86 · Business Class'],
     ['04 – 06 MAR', 'Lijiang', 'Stay'],
     ['06 MAR', 'Lijiang → Bangkok', 'Onward'],
   ];
@@ -1107,7 +1107,7 @@ function journeyBlocks() {
       total: cnStaysTotal() + pwTotal(),
       included: ['MU9632 Vientiane → Kunming · Business Class · USD 275 pp',
         'Three nights Wanxiang Yueju, Kunming · USD 50 pp/night',
-        'Train C642 Kunming → Lijiang · Business Class · USD 85 pp',
+        'Train C86 Kunming → Lijiang · Business Class · USD 85 pp',
         'Two nights Luye Baisha · Rizhao Jinshan, Lijiang · room variant from USD 70 pp',
         'MU5924 + MU741 Lijiang → Bangkok · Economy flexible · USD 200 pp'] },
     { id: 'kempinski', no: '06', name: 'Bangkok after China', dates: RETURN_STAY.dates,
@@ -1270,7 +1270,7 @@ function renderPlanner() {
         choice('Kunming stay', money(50) + ' per guest, per night · 01–04 MAR', !!(S.china && S.china.kunming === 'with'), 'data-pl-cn="kunming"') +
         choice('Lijiang stay', 'Room variant from ' + money(70) + ' per person, 2 nights · 04–06 MAR', !!(S.china && S.china.lijiang === 'with'), 'data-pl-cn="lijiang"') +
         choice('Vientiane → Kunming', 'MU9632 · Business Class · ' + money(275) + ' per guest', !!(S.travel && S.travel.vteKmg === 'with'), 'data-pl-tv="vteKmg"') +
-        choice('Kunming → Lijiang', 'Train C642 · Business Class · ' + money(85) + ' per guest', !!(S.travel && S.travel.kmgLjg === 'with'), 'data-pl-tv="kmgLjg"') +
+        choice('Kunming → Lijiang', 'Train C86 · Business Class · ' + money(85) + ' per guest', !!(S.travel && S.travel.kmgLjg === 'with'), 'data-pl-tv="kmgLjg"') +
         choice('Bangkok after China', RETURN_STAY.name + ' · ' + money(RETURN_STAY.ratePerGuestNight * RETURN_STAY.nights) + ' per person, 2 nights', S.kempinski === 'with', 'data-pl-kf="1"') +
         '</div>' +
         ((S.china && S.china.kunming === 'with') ? '<p class="cch-label" style="margin-top:26px">Your Kunming room · Wanxiang Yueju</p>' +
@@ -2631,7 +2631,7 @@ function renderCost() {
       const key = /kunming/i.test(c.id + ' ' + c.label) ? 'kunming' : 'lijiang';
       planRows += plan(esc(c.date), esc(c.label), esc(c.sub || ''), (S.china && S.china[key] === 'with') ? 'BOOKED' : 'YOUR CHOICE');
     });
-    planRows += plan('04 MAR', 'Kunming &rarr; Lijiang', 'Train C642 · Business Class', (S.travel && S.travel.kmgLjg === 'with') ? 'BOOKED' : 'YOUR CHOICE');
+    planRows += plan('04 MAR', 'Kunming &rarr; Lijiang', 'Train C86 · Business Class', (S.travel && S.travel.kmgLjg === 'with') ? 'BOOKED' : 'YOUR CHOICE');
     planRows += plan('06 MAR', 'Lijiang &rarr; onward', 'Your onward journey', (S.postWedding && S.postWedding.onward) ? 'BOOKED' : 'OPEN');
   }
   html += (planRows || '<p class="note">No journey is part of your plan yet.</p>') + '</section>';

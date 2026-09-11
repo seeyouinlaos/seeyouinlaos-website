@@ -20,7 +20,8 @@
 
    Tak Bat — the morning alms-giving, in which food is respectfully offered to
    Buddhist monks — is part of the Temple Ceremony. Guests attending are INVITED
-   to take part. It is never a product and never has a price, and it is never
+   to take part. It is SELF-PAY (arranged by each guest on the morning; no
+   amount is set here), never a cart product, never a fifth event, and never
    the same thing as the Sangkhathan: nobody may leave this website believing
    they paid USD 15 for the alms-giving.
 

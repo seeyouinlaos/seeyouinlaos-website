@@ -36,7 +36,7 @@
         'evening. It is the one night of the journey that is also the journey.',
       facts: [
         ['Service', 'Special Express No. 25 · State Railway of Thailand'],
-        ['Route', 'Krung Thep Aphiwat → Nong Khai, then onward to Vientiane'],
+        ['Route', 'Bangkok (Krung Thep Aphiwat) → Nong Khai, then onward to Vientiane by road'],
         ['Departure', '24 February 2027 · 20:25 · Krung Thep Aphiwat Central Terminal'],
         ['Arrival', '25 February 2027 · 06:25 · Nong Khai'],
         ['On board', 'Approximately 10 hours'],
@@ -54,16 +54,15 @@
           'Air conditioning with individual control',
           'Reading lights',
           'Foldable table and mirror',
-          'In-suite washbasin in some cabins',
+          'In-suite washbasin in every cabin',
           'Power and USB outlets']],
         ['Sleep', [
           'Bedding and pillows',
           'Clean linen',
-          'Towels',
+          'Blankets',
           'The berth is made up for you by the attendant']],
         ['Bathrooms', [
           'Shared western-style toilets, just outside the cabins',
-          'Shared washbasin facilities nearby',
           'A shared hot-water shower in the CNR First Class carriage']],
         ['Dining', [
           'Meals ordered from the cabin and brought to you by the train staff',
@@ -232,7 +231,7 @@
       ],
       transfer: [
         'Kunming Railway Station is in Guandu District; guests make their own way there from the hotel.',
-        'The train arrives at Lijiang Railway Station at 21:06; the road on to Baisha is arranged by each guest.',
+        'The train arrives at Lijiang Railway Station at 13:44; the road on to Baisha is arranged by each guest.',
         'Seating arrangements can vary by train set.'
       ],
       good: [

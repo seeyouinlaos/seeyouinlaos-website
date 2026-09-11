@@ -184,9 +184,10 @@ if (room.groups && room.groups.length) {
   h += '</ul></section>';
 }
 /* ---- all stays include (separate from room amenities, proven only) ---- */
-if (stay.includes && stay.includes.length) {
+var inc = (room.includes && room.includes.length) ? room.includes : stay.includes;   /* a room speaks for itself first */
+if (inc && inc.length) {
   h += '<div class="wrap"><h2>What is included</h2><div class="inc">';
-  stay.includes.forEach(function (t) { h += '<p>' + t + '</p>'; });
+  inc.forEach(function (t) { h += '<p>' + t + '</p>'; });
   h += '</div></div>';
 }
 
@@ -232,14 +233,14 @@ stay.windows.forEach(function (w, wi) {
     h += '<p class="enq">This room is part of the house but not yet released with an amount. Guest Relations will confirm it for you.</p>';
   } else if (room.reserved) {
     h += amountBlock(q);
-    if (stay.breakfast) h += '<p class="bf">' + esc(stay.breakfast) + '</p>';
+    if ((room.breakfast || stay.breakfast)) h += '<p class="bf">' + esc((room.breakfast || stay.breakfast)) + '</p>';
     h += '<p class="rsvline">' + esc(room.reserved) + '</p>';
   } else {
     /* ONE presentation for every window: the amount, exactly what it covers,
      * and the exact nights it covers. The nights are never left implicit. */
     h += amountBlock(q);
     if (q.note) h += '<p class="hn2">' + esc(q.note) + '<span>' + esc(q.noteBy) + '</span></p>';
-    if (stay.breakfast) h += '<p class="bf">' + esc(stay.breakfast) + '</p>';
+    if ((room.breakfast || stay.breakfast)) h += '<p class="bf">' + esc((room.breakfast || stay.breakfast)) + '</p>';
     h += '<p class="av" data-av="' + w.id + '" hidden></p>';
     h += '<button class="cta" data-win="' + wi + '" data-avwin="' + w.id + '">Add to Your Journey</button><span class="swap" data-swap="' + wi + '" hidden></span>';
     if (P.hasVariants(w.id)) h += '<button type="button" class="chg" data-chg="' + wi + '" hidden>Change selection</button>';

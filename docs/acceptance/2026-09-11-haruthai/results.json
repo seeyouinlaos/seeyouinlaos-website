@@ -1,0 +1,127 @@
+{
+  "origin": "http://127.0.0.1:8787",
+  "at": "2026-09-11T17:34:36.476Z",
+  "results": [
+    {
+      "id": "H1 dinner placeholder, no lounge chairs",
+      "ok": true,
+      "detail": "placeholder present · retired images absent"
+    },
+    {
+      "id": "H1 stay shown as a room",
+      "ok": true,
+      "detail": "heritage-room band · \"See the table\" gone"
+    },
+    {
+      "id": "H1 Tak Bat self-pay, no amount",
+      "ok": true,
+      "detail": "Tak Bat section: self-pay, no amount · the USD 15 carries the Sangkhathan name"
+    },
+    {
+      "id": "H1 placeholder has a real box",
+      "ok": true,
+      "detail": "{\"w\":544,\"h\":680}"
+    },
+    {
+      "id": "H3 Tak Bat drawer self-pay",
+      "ok": true,
+      "detail": "drawer: CLOSE PART OF THE TEMPLE CEREMONY Morning Alms-Giving · Tak Bat Guests attending the Temple Ceremony are invited to take part in the traditional morning alms-gi"
+    },
+    {
+      "id": "H3 wedding page no retired phrase",
+      "ok": true,
+      "detail": "wedding.html body"
+    },
+    {
+      "id": "H3 review self-pay",
+      "ok": true,
+      "detail": "review.html body"
+    },
+    {
+      "id": "H3 your-journey self-pay",
+      "ok": true,
+      "detail": "your-journey.html body"
+    },
+    {
+      "id": "H4 rails @390",
+      "ok": true,
+      "detail": "17 images · ratios 0.75 · fit cover · widths 245"
+    },
+    {
+      "id": "H4 rails @834",
+      "ok": true,
+      "detail": "17 images · ratios 0.75 · fit cover · widths 320"
+    },
+    {
+      "id": "H4 rails @1440",
+      "ok": true,
+      "detail": "17 images · ratios 0.75 · fit cover · widths 320"
+    },
+    {
+      "id": "H4 rails @1920",
+      "ok": true,
+      "detail": "17 images · ratios 0.75 · fit cover · widths 320"
+    },
+    {
+      "id": "H5 dress.html 17 references, none retired",
+      "ok": true,
+      "detail": "public dress page"
+    },
+    {
+      "id": "H6 C86 13:44",
+      "ok": true,
+      "detail": "c86 page reads 10:15 → 13:44, USD 85, no C642"
+    },
+    {
+      "id": "H7 train truth",
+      "ok": true,
+      "detail": "route · every cabin · blankets"
+    },
+    {
+      "id": "H8 penthouse inclusions",
+      "ok": true,
+      "detail": "Three nights, 21 → 22, 22 → 23 and 23 → 24 February, in one house for the whole party. Arrival 21 February 2027: personal pickup by Haruthai — hosted. Self check-in by keybox, private entrance and private elevator. Free "
+    },
+    {
+      "id": "H8 u-sathorn-superior-garden inclusions",
+      "ok": true,
+      "detail": "Three nights, 21 → 22, 22 → 23 and 23 → 24 February — one room per couple. Arrival 21 February 2027: personal pickup by Haruthai — hosted. Check-in at the lobby. Breakfast included."
+    },
+    {
+      "id": "H8 u-sathorn-superior-garden room facts",
+      "ok": true,
+      "detail": "sq.m · 2 adults · breakfast included · no penthouse copy in the room's own section"
+    },
+    {
+      "id": "H8 u-sathorn-superior-garden room amounts",
+      "ok": true,
+      "detail": "USD 64 pp/night · USD 192 pp total · the amount block says Breakfast included"
+    },
+    {
+      "id": "H8 u-sathorn-superior-garden stage card",
+      "ok": true,
+      "detail": "SELECTED FOR YOUR JOURNEY U Sathorn Bangkok Superior Room With Garden View 21 – 24 February · 3 nights Breakfast included USD 192 TOTAL PER PERSON SELECTED VIEW DETAILS"
+    },
+    {
+      "id": "H8 shama-king-studio-balcony inclusions",
+      "ok": true,
+      "detail": "Three nights, 21 → 22, 22 → 23 and 23 → 24 February — one studio per couple. Arrival 21 February 2027: personal pickup by Haruthai — hosted. Check-in at the lobby. Breakfast included."
+    },
+    {
+      "id": "H8 shama-king-studio-balcony room facts",
+      "ok": true,
+      "detail": "sq.m · 2 adults · breakfast included · no penthouse copy in the room's own section"
+    },
+    {
+      "id": "H8 shama-king-studio-balcony room amounts",
+      "ok": true,
+      "detail": "USD 40 pp/night · USD 120 pp total · the amount block says Breakfast included"
+    },
+    {
+      "id": "H8 shama-king-studio-balcony stage card",
+      "ok": true,
+      "detail": "SELECTED FOR YOUR JOURNEY Shama Yen-Akat Bangkok King Studio With Balcony 21 – 24 February · 3 nights Breakfast included USD 120 TOTAL PER PERSON SELECTED VIEW DETAILS"
+    }
+  ],
+  "errors": []
+}

@@ -151,7 +151,7 @@ var DRESS={temple:['Blue Lao Traditional Dress','wedding-preparation.html#dress-
            coffee:['Black Tie','wedding-preparation.html#dress-code'],
            vows:['Black Tie','wedding-preparation.html#dress-code'],
            dinner:['Black Tie','wedding-preparation.html#dress-code']};
-var h='<p class="t-b2 measure-w">Sunday, 28 February 2027 · Vientiane · four events. Hosted by Haruthai &amp; Suthep. No separate charge for the morning alms-giving. Your optional personal addition, the Sangkhathan, is USD 15 per selected guest — never the alms-giving and never a temple fee.</p>';
+var h='<p class="t-b2 measure-w">Sunday, 28 February 2027 · Vientiane · four events. Hosted by Haruthai &amp; Suthep. The morning alms-giving, Tak Bat, is self-pay. Your optional personal addition, the Sangkhathan, is USD 15 per selected guest — never the alms-giving and never a temple fee.</p>';
 var meW=G?G.active():null;
 if(op&&op.guests.length){
   op.guests.forEach(function(g){
@@ -394,7 +394,7 @@ t.guests.forEach(function(g){
   (SIYL_TEMPLE.EVENTS||[]).forEach(function(e){L.push('  · '+e.label+': '+g.events[e.key].toUpperCase())});
   L.push('  · Sangkhathan: '+(g.sangkhathan?'TO PREPARE (USD 15)':g.sangkhathanState.toUpperCase()))});
 L.push('- Sangkhathan eligibility (invitation): '+t.sangkhathanEligibility+' · couple decision: '+String(t.sangkhathanPair).toUpperCase());
-L.push('- Morning alms-giving (Tak Bat): part of the Temple Ceremony for everyone joining it, no charge');
+L.push('- Morning alms-giving (Tak Bat): part of the Temple Ceremony for everyone joining it, self-pay (no amount set)');
 L.push('- Sangkhathan offerings to prepare: '+t.offerings+(t.offerings?' (USD '+t.offeringsUsd+') for '+t.offeringNames.join(', '):''))}
 if(window.SIYL_DOCS){var d=SIYL_DOCS.operational();
 if(d){L.push('','DOCUMENTS & PRIVACY (received only — nothing here is reviewed or verified):');
@@ -424,7 +424,7 @@ if(gr){
       var v=g.profile[q.key];
       if(v)L.push('  · '+q.q+': '+(v==='NONE'?'Nothing to note':v))})})}}
 L.push('','YOUR COSTS: USD '+SIYL_BAG.total().toLocaleString('en-US'));
-L.push('Note: Tak Bat (morning alms-giving) is part of the Temple Ceremony and carries no charge. The Sangkhathan is a separate optional personal offering.');
+L.push('Note: Tak Bat (morning alms-giving) is part of the Temple Ceremony and is self-pay. The Sangkhathan is a separate optional personal offering.');
 L.push('Submitted via Review & Send · '+new Date().toISOString());
 return L.join('\n')}
 

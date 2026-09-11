@@ -140,7 +140,8 @@ test('the dress code is understood once, in step 04, and acknowledged per guest 
   const wp = read('wedding-preparation.html');
   assert.match(wp, /setDressAck\(c\.getAttribute\('data-ack'\)/);
   assert.match(wp, /p\.guests\.forEach\(function\(g\)\{/);
-  assert.equal((wp.match(/assets\/images\/dress\//g) || []).length, 18);
+  assert.equal((wp.match(/assets\/images\/dress\//g) || []).length, 17);
+  assert.doesNotMatch(wp, /resort-01\.jpg/, 'the crossed-out beach photograph is gone');
   for (const f of ['invitation.html', 'your-journey.html', 'wedding.html', 'about-you.html', 'review.html']) {
     const page = read(f);
     assert.doesNotMatch(page, /data-ack=|setDressAck\(/, f + ' carries a dress acknowledgement outside step 04');

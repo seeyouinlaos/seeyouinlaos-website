@@ -225,13 +225,11 @@
       breakfast: 'Breakfast not included · self-pay',
       windows: [{ id: 'bkk-stay', label: 'Before the Wedding', dates: '21 – 24 February 2027', nights: '3 nights', n: 3,
         bagName: 'Sathorn Penthouse Bangkok', bagImg: 'assets/images/journey/penthouse-01.jpg' }],
+      /* the three Bangkok addresses each say what THEY include (room.includes);
+       * the group carries only what is true for every one of them */
       includes: [
-        'Three nights, 21 → 22, 22 → 23 and 23 → 24 February, in one house for the whole party.',
-        'Arrival 21 February 2027: personal pickup by Haruthai — hosted.',
-        'Self check-in by keybox, private entrance and private elevator.',
-        'Free parking on the premises.',
-        'Breakfast is NOT included — a breakfast place near the house is suggested and is self-pay.',
-        'Meals cooked in the house, groceries and anything bought in Bangkok are your own.'
+        'Three nights, 21 → 22, 22 → 23 and 23 → 24 February.',
+        'Arrival 21 February 2027: personal pickup by Haruthai — hosted.'
       ],
       rooms: [
         { slug: 'penthouse', name: 'Sathorn Penthouse', cat: 'Whole home · six bedrooms',
@@ -261,6 +259,14 @@
             ['Family', ['Travel crib', 'High chair', 'Corner protectors', 'Children’s books and toys']],
             ['Access & safety', ['Private entrance and private elevator with security system', 'Self check-in by keybox', 'Free parking on the premises', 'Smoke and carbon-monoxide alarms', 'Fire extinguisher and first-aid kit']]],
           amenities: null, rate: 85,
+          includes: [
+            'Three nights, 21 → 22, 22 → 23 and 23 → 24 February, in one house for the whole party.',
+            'Arrival 21 February 2027: personal pickup by Haruthai — hosted.',
+            'Self check-in by keybox, private entrance and private elevator.',
+            'Free parking on the premises.',
+            'Breakfast is NOT included — a breakfast place near the house is suggested and is self-pay.',
+            'Meals cooked in the house, groceries and anything bought in Bangkok are your own.'
+          ],
           property: 'Sathorn Penthouse Bangkok', place: 'Sathorn, Bangkok',
           card: 'Elegant 6BR Sathon Penthouse',
           breakfast: 'Breakfast not included · self-pay', role: 'Preferred' },
@@ -286,7 +292,13 @@
           story: 'A room of thirty-two square metres looking onto the garden, in a hotel built around a courtyard and a pool. Breakfast is included, the spa and the gym are on site, and the restaurants and the bar mean an evening never has to leave the building.',
           groups: [['The room', ['32 sq.m. · 2 adults', 'Garden view', 'Non-smoking', 'Private bathroom', 'Air conditioning', 'Free Wi-Fi']],
             ['The hotel', ['Outdoor swimming pool', 'Spa', 'Gym', 'Restaurants', 'Bar', 'Garden', 'Concierge', 'Room service']]],
-          amenities: null, rate: 64, roomRate: 128 },
+          amenities: null, rate: 64, roomRate: 128,
+          includes: [
+            'Three nights, 21 → 22, 22 → 23 and 23 → 24 February — one room per couple.',
+            'Arrival 21 February 2027: personal pickup by Haruthai — hosted.',
+            'Check-in at the lobby.',
+            'Breakfast included.'
+          ] },
 
         /* 027 — Shama Yen-Akat Bangkok. Six photographs from the owner's
          * folder, inspected before assignment: the hero is the frame that holds
@@ -309,7 +321,13 @@
           story: 'Thirty-six square metres with a balcony and a dining area — a studio to live in rather than a room to sleep in. Breakfast is included, the pool is indoors, and there is a café, a garden and a laundry room downstairs.',
           groups: [['The studio', ['36 sq.m. · 2 adults', 'Balcony and terrace', 'Window', 'Non-smoking', 'Dining area', 'Private bathroom', 'Air conditioning', 'Free Wi-Fi']],
             ['The building', ['Indoor swimming pool', 'Gym', 'Restaurant', 'Café', 'Garden', 'Laundry room', 'Coworking and business facilities', 'Concierge']]],
-          amenities: null, rate: 40, roomRate: 80 }
+          amenities: null, rate: 40, roomRate: 80,
+          includes: [
+            'Three nights, 21 → 22, 22 → 23 and 23 → 24 February — one studio per couple.',
+            'Arrival 21 February 2027: personal pickup by Haruthai — hosted.',
+            'Check-in at the lobby.',
+            'Breakfast included.'
+          ] }
       ]
     },
 

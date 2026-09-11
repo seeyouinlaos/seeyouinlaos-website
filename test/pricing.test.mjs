@@ -379,7 +379,7 @@ test('Review & Send: the Temple Ceremony is optional, the other three hosted', (
   assert.match(prog, /when: 'From 12:00'/);
   assert.match(prog, /when: '16:30'/);
   assert.match(prog, /when: '19:30'/);
-  assert.match(prog, /Includes the morning alms-giving, Tak Bat\. Optional participation — no charge\./);
+  assert.match(prog, /Includes the morning alms-giving, Tak Bat\. Optional participation — self-pay\./);
   assert.match(prog, /Optional · USD 15 per guest/);
   /* the Temple Ceremony is never labelled Hosted, and only the Sangkhathan
    * carries an amount anywhere in the programme */
@@ -397,7 +397,7 @@ test('Review & Send: the Temple Ceremony is optional, the other three hosted', (
   assert.match(page, /Sangkhathan offerings to prepare/);
   assert.match(page, /DOCUMENTS & PRIVACY \(received only — nothing here is reviewed or verified\):/);
   assert.match(page, /templeCeremony:window\.SIYL_TEMPLE\?SIYL_TEMPLE\.operational\(\):null/);
-  assert.match(page, /Morning alms-giving \(Tak Bat\): part of the Temple Ceremony for everyone joining it, no charge/);
+  assert.match(page, /Morning alms-giving \(Tak Bat\): part of the Temple Ceremony for everyone joining it, self-pay \(no amount set\)/);
 });
 
 test('THE WEDDING sits at 28 FEB in the chronology — the Sangkhathan is never last', () => {
@@ -454,7 +454,8 @@ test('Tak Bat is explained before anyone is asked, and is never the Sangkhathan'
   /* the explanation travels with the Temple row and opens in the shell's own
    * detail layer — the guest is never thrown back to the public website */
   assert.match(page, /invited to take part in the traditional morning alms-giving, Tak Bat/);
-  assert.match(page, /no separate charge for Tak Bat/);
+  assert.match(page, /it is <b>self-pay<\/b>/);
+  assert.doesNotMatch(page, /no separate charge for Tak Bat|nothing is paid/);
   assert.doesNotMatch(page, /Everyone who comes takes part/);
   assert.match(page, /It is <b>not<\/b> the alms-giving/);
   assert.match(page, /data-more="takbat"/);
@@ -468,7 +469,8 @@ test('the wedding cost model is stated in words on both surfaces', () => {
   ['your-journey.html', 'review.html'].forEach((f) => {
     const page = readFileSync(join(ROOT, f), 'utf8');
     assert.match(page, /Hosted by Haruthai &amp; Suthep/, f);
-    assert.match(page, /No separate charge/, f);
+    assert.match(page, /Tak Bat, is self-pay/, f);
+    assert.doesNotMatch(page, /No separate charge/, f);
     assert.match(page, /Your optional personal addition/, f);
   });
 });
@@ -602,8 +604,9 @@ test('the dress code carries three codes and 18 owner references, acknowledged b
   assert.match(page, /<h2>Black Tie<\/h2>/);
   assert.match(page, /<h2>Resort Wear<\/h2>/);
   const imgs = [...page.matchAll(/assets\/images\/dress\/([a-z0-9-]+)\.jpg/g)].map((m) => m[1]);
-  assert.equal(imgs.length, 18);
-  assert.equal(new Set(imgs).size, 18, 'no reference is used twice');
+  assert.equal(imgs.length, 17, 'the crossed-out beach photograph is gone');
+  assert.equal(new Set(imgs).size, 17, 'no reference is used twice');
+  assert.ok(!imgs.includes('resort-01'), 'the retired photograph is never reused');
   imgs.forEach((f) => assert.ok(existsSync(join(ROOT, 'assets/images/dress/' + f + '.jpg')), f + ' missing on disk'));
   /* the acknowledgement is never pre-ticked */
   assert.match(page, /<input type="checkbox" id="ack">/);
@@ -918,9 +921,27 @@ test('Sathorn, Souphattra and Kempinski carry grouped, source-backed amenities',
 
 test('every stay says what is included and what the guest arranges', () => {
   for (const k of Object.keys(R)) {
-    assert.ok(R[k].includes && R[k].includes.length >= 4, k + ' has no inclusions');
+    assert.ok(R[k].includes && R[k].includes.length >= 2, k + ' has no inclusions');
   }
-  assert.match(R.sathorn.includes.join(' '), /Breakfast is NOT included/);
+  /* Bangkok: three addresses, three truths — the penthouse keeps its house copy on the penthouse;
+     U Sathorn and Shama say ONE ROOM PER COUPLE, CHECK-IN AT THE LOBBY, BREAKFAST INCLUDED, and nothing borrowed */
+  const byId = Object.fromEntries(R.sathorn.rooms.map(r => [r.slug, r]));
+  const pent = byId['penthouse'].includes.join(' ');
+  assert.match(pent, /Breakfast is NOT included/); assert.match(pent, /keybox/); assert.match(pent, /one house for the whole party/);
+  for (const id of ['u-sathorn-superior-garden', 'shama-king-studio-balcony']) {
+    const t = byId[id].includes.join(' ');
+    assert.match(t, /Breakfast included\./, id); assert.match(t, /Check-in at the lobby\./, id); assert.match(t, /per couple/, id);
+    assert.doesNotMatch(t, /keybox|private entrance|private elevator|whole party|NOT included|groceries|Meals cooked|parking/, id + ' carries penthouse copy');
+  }
+  const grp = R.sathorn.includes.join(' ');
+  assert.doesNotMatch(grp, /keybox|private entrance|elevator|whole party|Breakfast|groceries/, 'the group must not speak for the penthouse');
+  const rh = readFileSync(join(ROOT, "room.html"), "utf8");
+  assert.match(rh, /room\.includes && room\.includes\.length\) \? room\.includes : stay\.includes/, 'a room speaks for itself first');
+  assert.doesNotMatch(rh, /(?<![.\w])stay\.breakfast(?! ?\))/, 'the amount block never borrows the group breakfast line');
+  assert.match(rh, /room\.breakfast \|\| stay\.breakfast/, 'breakfast is the room\'s own fact');
+  assert.equal(byId['u-sathorn-superior-garden'].breakfast, 'Breakfast included');
+  assert.equal(byId['shama-king-studio-balcony'].breakfast, 'Breakfast included');
+  assert.match(byId['penthouse'].breakfast, /not included/);
   assert.match(R.kempinski.includes.join(' '), /Breakfast included/);
   assert.match(R.souphattra.includes.join(' '), /no night between 25 February and 1 March is left uncovered/);
 });
@@ -973,7 +994,8 @@ test('the wedding page: four events, the Buddhist morning inside the ceremony', 
   /* Alms Giving is never a fifth event, and the food offering is never priced */
   assert.ok(!/Alms Giving/i.test(vy));
   assert.ok(!/<h2>Morning Alms-Giving<\/h2>[\s\S]{0,900}USD/.test(vy), 'the alms-giving must carry no price');
-  assert.match(vy, /Part of the Temple Ceremony · no charge/);
+  assert.match(vy, /Part of the Temple Ceremony · self-pay/);
+  assert.doesNotMatch(vy, /USD \d+[^<]{0,40}(alms|Tak Bat)|Tak Bat[^<]{0,60}USD \d+/, 'no amount is ever invented for Tak Bat');
   /* only the Sangkhathan is USD 15 */
   assert.match(vy, /Optional · USD 15 per guest/);
   assert.match(vy, /08:00 – 12:00 · Wat Ong Teu, Vientiane/);
@@ -998,6 +1020,8 @@ test('the retired imagery and the pool-side dinner narrative are gone', () => {
   const vow = vy.slice(vy.indexOf('id="vows"'), vy.indexOf('id="vows"') + 700);
   assert.ok(!/pool/i.test(vow));
   /* the new wedding-dinner imagery is in place */
-  assert.match(vy, /053-wedding-dinner-garden-terrace\.jpg/);
-  assert.match(vy, /053-wedding-dinner-sharing-menu\.jpg/);
+  /* the lounge chairs and the dim-sum are gone: the dinner is a clean placeholder until a long-table photograph exists, and the stay is shown as a room */
+  assert.doesNotMatch(vy, /053-wedding-dinner-garden-terrace|053-wedding-dinner-sharing-menu/);
+  assert.match(vy, /am-placeholder/);
+  assert.match(vy, /souphattra\/heritage-room\.jpg/);
 });
