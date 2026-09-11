@@ -24,7 +24,7 @@
 :root {
   /* ink */
   --p-ink:    #313131;
-  --p-mute:   #7C7A75;
+  --p-mute:   #6B6964;   /* final run 11 SEP 2026: 4.75:1 on ivory (was var(--p-mute) = 3.7:1) */
   --p-line:   #DAD9D7;
   --p-hair:   #EDEBE7;
   --p-paper:  #F3EEE7;
@@ -217,7 +217,7 @@ body.p-drawer-open .p-drawer { transform: translateY(0); }
 .prep-bar-l { min-width: 0; flex: 1; }
 /* Perceptual order in the bar: the STEP first, the party and person second,
    the context and the secondary control quietly behind both. */
-.prep-eyebrow { font-family: var(--f-ui); font-size: 8.5px; font-weight: 400; letter-spacing: 1.8px; text-transform: uppercase; color: #9A968F; white-space: nowrap; }
+.prep-eyebrow { font-family: var(--f-ui); font-size: 10px; font-weight: 400; letter-spacing: 1.8px; text-transform: uppercase; color: var(--p-mute); white-space: nowrap; }   /* final run: 10px, AA colour (was 8.5px #9A968F) */
 .prep-step { font-family: var(--f-ed); font-weight: 200; font-size: 21px; line-height: 1.2; color: var(--p-ink); margin-top: 2px; }
 .prep-step b { font-weight: 200; color: var(--p-mute); margin-right: var(--s2); font-size: 14px; letter-spacing: .04em; }
 .prep-who { font-family: var(--f-ui); font-size: 11.5px; line-height: 1.6; color: var(--p-mute); margin-top: var(--s2); }

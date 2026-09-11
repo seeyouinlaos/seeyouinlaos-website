@@ -38,7 +38,7 @@ var css=document.createElement('style');
 css.textContent='.jbar{position:fixed;left:0;right:0;bottom:0;z-index:55;background:#FCFAF6;border-top:1px solid #DAD9D7;padding:12px 20px calc(12px + env(safe-area-inset-bottom));display:none}'+
 '.jbar.on{display:block}body.jbar-on{padding-bottom:78px}'+
 '.jb-in{max-width:640px;margin:0 auto;display:flex;align-items:baseline;gap:12px}'+
-'.jb-l{font-size:10px;letter-spacing:2.2px;text-transform:uppercase;color:#7C7A75}'+
+'.jb-l{font-size:10px;letter-spacing:2.2px;text-transform:uppercase;color:#6B6964}'+
 '.jb-t{font-family:"PP Editorial Old",serif;font-size:19px;margin-left:auto}'+
 '.jb-a{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#313131;text-decoration:none;border-bottom:1px solid #313131;padding:6px 0 3px;margin-left:16px}';
 document.head.appendChild(css);

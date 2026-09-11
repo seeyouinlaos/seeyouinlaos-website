@@ -25,3 +25,9 @@ _asset_originals
 assets/images/incoming
 /journey
 build
+# the superseded registration engine (its entry redirects to invitation.html in the Worker)
+register/index.html
+register/app.mjs
+register/data.mjs
+register/logic.mjs
+register-landing.html

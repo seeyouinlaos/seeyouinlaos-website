@@ -137,6 +137,18 @@ export default {
       return handleRegister(request, env);
     }
 
+    /* HISTORICAL FIREWALL (final pre-release run, 11 SEP 2026): the invitation
+     * letters link to /register/?invite=…, the entry of the superseded
+     * registration engine. That engine (register/index.html, app.mjs, data.mjs,
+     * logic.mjs) carries retired truth and is no longer served (.assetsignore);
+     * its entry redirects into the accepted product. The two files the accepted
+     * product loads from that directory — crypto.mjs and the encrypted
+     * invitation bundle — pass through untouched. */
+    if (url.pathname === '/register' || url.pathname.startsWith('/register/')) {
+      const keep = /^\/register\/(crypto\.mjs|invitations\.enc\.json)$/.test(url.pathname);
+      if (!keep) return Response.redirect(url.origin + '/invitation.html', 302);
+    }
+
     return env.ASSETS.fetch(request);
   },
 };

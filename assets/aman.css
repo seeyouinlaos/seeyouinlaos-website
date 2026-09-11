@@ -8,7 +8,7 @@
 :root {
   --a-ground: #F3EEE7;
   --a-ink: #313131;
-  --a-mute: #7C7A75;
+  --a-mute: #6B6964;   /* final run 11 SEP 2026: 4.75:1 on ivory (was var(--a-mute) = 3.7:1) */
   --a-line: #DAD9D7;
   --a-panel: #FAF7F2;
   --a-red: #8A5A55;

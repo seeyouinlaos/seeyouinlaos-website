@@ -1,0 +1,92 @@
+[
+  {
+    "id": "a11y index.html",
+    "ok": true,
+    "detail": "unlabeled 0 · low contrast 0 · imgs without alt 0 · role=img without label 0 · lang en · focus visible 12/12 · small 0"
+  },
+  {
+    "id": "a11y voyage.html",
+    "ok": true,
+    "detail": "unlabeled 0 · low contrast 0 · imgs without alt 0 · role=img without label 0 · lang en · focus visible 12/12 · small 0"
+  },
+  {
+    "id": "a11y journeys.html",
+    "ok": true,
+    "detail": "unlabeled 0 · low contrast 0 · imgs without alt 0 · role=img without label 0 · lang en · focus visible 12/12 · small 0"
+  },
+  {
+    "id": "a11y invitation.html",
+    "ok": true,
+    "detail": "unlabeled 0 · low contrast 0 · imgs without alt 0 · role=img without label 0 · lang en · focus visible 12/12 · small 0"
+  },
+  {
+    "id": "a11y menu layer",
+    "ok": true,
+    "detail": "label \"Menu\" · aria-expanded false→true · ESC closes true · focus returns true"
+  },
+  {
+    "id": "a11y code field labelled",
+    "ok": true,
+    "detail": "code input: \"Invitation code\""
+  },
+  {
+    "id": "a11y code submits on Enter",
+    "ok": true,
+    "detail": "keyboard submission of the code"
+  },
+  {
+    "id": "a11y who-are-you layer",
+    "ok": true,
+    "detail": "{\"role\":\"dialog\",\"modal\":\"true\",\"label\":null,\"focusInside\":true}"
+  },
+  {
+    "id": "a11y your-journey.html",
+    "ok": true,
+    "detail": "unlabeled 0 · low contrast 0 · small 0 · checkboxes 0/0 · focus visible 12/12"
+  },
+  {
+    "id": "a11y wedding.html",
+    "ok": true,
+    "detail": "unlabeled 0 · low contrast 0 · small 0 · checkboxes 0/0 · focus visible 12/12"
+  },
+  {
+    "id": "a11y wedding-preparation.html",
+    "ok": true,
+    "detail": "unlabeled 0 · low contrast 0 · small 0 · checkboxes 1/1 · focus visible 12/12"
+  },
+  {
+    "id": "a11y about-you.html",
+    "ok": true,
+    "detail": "unlabeled 0 · low contrast 0 · small 0 · checkboxes 2/2 · focus visible 12/12"
+  },
+  {
+    "id": "a11y review.html",
+    "ok": true,
+    "detail": "unlabeled 0 · low contrast 0 · small 0 · checkboxes 0/0 · focus visible 12/12"
+  },
+  {
+    "id": "a11y switch layer",
+    "ok": true,
+    "detail": "focus moves in true · ESC closes true · focus returns to Switch true"
+  },
+  {
+    "id": "a11y ownership in words",
+    "ok": true,
+    "detail": "shell says who is continuing and who is answered for"
+  },
+  {
+    "id": "a11y selection semantics",
+    "ok": true,
+    "detail": "8 selectors · aria-pressed on 0 · text states on 8"
+  },
+  {
+    "id": "a11y text resize",
+    "ok": true,
+    "detail": "no horizontal overflow at 200% root font size on review"
+  },
+  {
+    "id": "a11y reduced motion",
+    "ok": true,
+    "detail": "animated rules 16 · reduced-motion blocks 1"
+  }
+]
