@@ -1,0 +1,201 @@
+{
+  "origin": "https://seeyouinlaos-website.suthep-hrg.workers.dev",
+  "at": "2026-09-11T07:42:46.271Z",
+  "results": [
+    {
+      "id": "01 invitation answers the five questions",
+      "ok": true,
+      "detail": "whose · who · shared · personal · next"
+    },
+    {
+      "id": "01 no data-model language",
+      "ok": true,
+      "detail": "no technical vocabulary on the surface"
+    },
+    {
+      "id": "01 targets",
+      "ok": true,
+      "detail": "tap targets ≥44: []"
+    },
+    {
+      "id": "02 chronology",
+      "ok": true,
+      "detail": "stages in order: 01 · 21 – 24 FEB | 02 · 24 – 25 FEB | 03 · 25 – 27 FEB | 04 · 27 FEB – 01 MAR | 28 FEB | 05 · 01 MAR | 06 · 01 – 04 MAR | 07 · 04 MAR | 08 · 04 – 06 MAR | 09 · 06 MAR | 10 · 06 – 08 MAR"
+    },
+    {
+      "id": "02 bangkok sathorn",
+      "ok": true,
+      "detail": "one Bangkok line: Sathorn Penthouse Bangkok · penthouse"
+    },
+    {
+      "id": "02 bangkok u-sathorn",
+      "ok": true,
+      "detail": "one Bangkok line: U Sathorn Bangkok · u-sathorn-superior-garden"
+    },
+    {
+      "id": "02 bangkok shama",
+      "ok": true,
+      "detail": "one Bangkok line: Shama Yen-Akat Bangkok · shama-king-studio-balcony"
+    },
+    {
+      "id": "02 mu9646 business",
+      "ok": true,
+      "detail": "one fare line · 01 March 2027 · Business Class · USD 275"
+    },
+    {
+      "id": "02 mu9646 economy",
+      "ok": true,
+      "detail": "replaced, not duplicated · USD 155"
+    },
+    {
+      "id": "02 c86",
+      "ok": true,
+      "detail": "C86 · USD 85 · 10:15 → 13:44 · direct · 1+1"
+    },
+    {
+      "id": "02 wedding compact",
+      "ok": true,
+      "detail": "four parts, per-person status, one action, no controls"
+    },
+    {
+      "id": "02 targets",
+      "ok": true,
+      "detail": "tap targets ≥44: []"
+    },
+    {
+      "id": "02 party label once per product",
+      "ok": true,
+      "detail": "the shell and the head carry the party; stages are not re-labelled per person"
+    },
+    {
+      "id": "03 private module",
+      "ok": true,
+      "detail": "day in order, ownership at every control, band at the boundary"
+    },
+    {
+      "id": "03 four events",
+      "ok": true,
+      "detail": "exactly four event sections"
+    },
+    {
+      "id": "03 not the public page",
+      "ok": true,
+      "detail": "no editorial gallery, no public navigation"
+    },
+    {
+      "id": "03 answering for Steffie",
+      "ok": true,
+      "detail": "Steffie's Coffee & Cake answered, signed by Peggy"
+    },
+    {
+      "id": "03 targets",
+      "ok": true,
+      "detail": "tap targets ≥44: []"
+    },
+    {
+      "id": "04 dress per guest",
+      "ok": true,
+      "detail": "Peggy acknowledged in her own name; Steffie's card without a checkbox"
+    },
+    {
+      "id": "04 seating not open",
+      "ok": true,
+      "detail": "no chairs, no geometry, no seat IDs"
+    },
+    {
+      "id": "04 switch",
+      "ok": true,
+      "detail": "the checkbox followed the identity"
+    },
+    {
+      "id": "05 four areas",
+      "ok": true,
+      "detail": "profile · comfort · documents · privacy, for Peggy"
+    },
+    {
+      "id": "05 not a form product",
+      "ok": true,
+      "detail": "four editorial sections, eight fields"
+    },
+    {
+      "id": "05 privacy is first person",
+      "ok": true,
+      "detail": "Peggy may answer her own publication choice"
+    },
+    {
+      "id": "05 answering for Steffie",
+      "ok": true,
+      "detail": "profile may be answered for; consent may not"
+    },
+    {
+      "id": "05 record ownership",
+      "ok": true,
+      "detail": "Steffie's answer signed by Peggy; Peggy's own untouched"
+    },
+    {
+      "id": "05 targets",
+      "ok": true,
+      "detail": "tap targets ≥44: []"
+    },
+    {
+      "id": "06 hierarchy",
+      "ok": true,
+      "detail": "five blocks in order"
+    },
+    {
+      "id": "06 shared once",
+      "ok": true,
+      "detail": "one line per shared selection, labelled for the party"
+    },
+    {
+      "id": "06 personal by name",
+      "ok": true,
+      "detail": "wedding and dress code per named guest"
+    },
+    {
+      "id": "06 no new controls",
+      "ok": true,
+      "detail": "no selection control for an existing concept"
+    },
+    {
+      "id": "06 no re-explanation",
+      "ok": true,
+      "detail": "no cultural background, no dress gallery"
+    },
+    {
+      "id": "06 costs once",
+      "ok": true,
+      "detail": "one amount: USD 360"
+    },
+    {
+      "id": "06 targets",
+      "ok": true,
+      "detail": "tap targets ≥44: []"
+    },
+    {
+      "id": "07 semantic states",
+      "ok": true,
+      "detail": "01Your InvitationOpen02Your JourneyCurrent03The WeddingOpen04Wedding PreparationOpen05About YouComplete06Review & SendOpen"
+    },
+    {
+      "id": "08 switch drawer",
+      "ok": true,
+      "detail": "unambiguous switch"
+    },
+    {
+      "id": "09 two families",
+      "ok": true,
+      "detail": "families in use: Hanken Grotesk | PP Editorial Old"
+    },
+    {
+      "id": "10 no page errors",
+      "ok": true,
+      "detail": "none"
+    },
+    {
+      "id": "11 no horizontal overflow",
+      "ok": true,
+      "detail": "every frame at every width"
+    }
+  ]
+}
