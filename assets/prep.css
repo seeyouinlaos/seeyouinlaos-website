@@ -74,6 +74,12 @@
 
 /* ---------------------------------------------------------------- layout */
 body.prep { background: var(--p-paper); color: var(--p-ink); font-family: var(--f-ui); font-weight: 300; }
+/* a browser styles its own controls; the system's family wins everywhere */
+body.prep button, body.prep input, body.prep textarea, body.prep select { font-family: var(--f-ui); }
+/* an inline link inside a sentence keeps its place in the line and still
+   gets a real target: the hit area grows, the layout does not */
+.t-b1 a, .t-b2 a { display: inline-block; color: var(--p-ink); padding: 11px 0; margin: -11px 0; }
+.p-line-body .t-h2 a { display: inline-block; padding: 10px 0; margin: -10px 0; }
 .prep-page {
   box-sizing: border-box; width: 100%; max-width: var(--p-frame);
   margin: 0 auto; padding: var(--s7) var(--p-gut) var(--s9);
@@ -96,7 +102,7 @@ body.prep { background: var(--p-paper); color: var(--p-ink); font-family: var(--
 .p-card > * + * { margin-top: var(--s3); }
 .p-card > .t-l1 + .t-h1 { margin-top: var(--s1); }
 .p-card.on { border-color: var(--p-ink); }
-.p-card.flat { background: none; border: 0; border-top: 1px solid var(--p-hair); padding: var(--s5) 0; }
+.p-card.flat { background: none; border: 0; border-top: 1px solid var(--p-hair); padding: var(--s4) 0; }
 @media (min-width: 768px) { .p-card { padding: var(--s6); } }
 
 /* ------------------------------------------------------------- 1 PRIMARY */
@@ -213,7 +219,7 @@ body.p-drawer-open .p-drawer { transform: translateY(0); }
 .prep-step b { font-weight: 200; color: var(--p-mute); margin-right: var(--s2); font-size: 14px; letter-spacing: .04em; }
 .prep-who { font-family: var(--f-ui); font-size: 11.5px; line-height: 1.6; color: var(--p-mute); margin-top: var(--s2); }
 .prep-who b { font-weight: 400; color: var(--p-ink); }
-.prep-who button { font: inherit; font-size: 10px; letter-spacing: 1.8px; text-transform: uppercase; color: var(--p-ink); background: none; border: 0; border-bottom: 1px solid var(--p-ink); padding: 0 0 2px; margin-left: var(--s2); cursor: pointer; }
+.prep-who button { display: inline-flex; align-items: flex-end; box-sizing: border-box; min-height: var(--p-tap); font: inherit; font-size: 10px; letter-spacing: 1.8px; text-transform: uppercase; color: var(--p-ink); background: none; border: 0; border-bottom: 1px solid var(--p-ink); padding: 0 0 2px; margin: calc(-1 * var(--s3)) 0 calc(-1 * var(--s3)) var(--s2); cursor: pointer; vertical-align: baseline; }
 .prep-bar-r { flex: none; }
 /* C · ANSWERING FOR — said in words, at reading size, on its own line.
    Not a colour, not a tab state: a guest who is completing something for
@@ -221,7 +227,7 @@ body.p-drawer-open .p-drawer { transform: translateY(0); }
 .prep-for { display: inline-flex; flex-wrap: wrap; align-items: baseline; gap: 0 var(--s3); margin-top: var(--s3); padding: var(--s2) var(--s3); border: 1px solid var(--p-ink); background: var(--p-card); font-family: var(--f-ui); font-size: 12.5px; line-height: 1.6; color: var(--p-ink); max-width: 100%; }
 .prep-for-l { font-size: 9.5px; letter-spacing: 2px; text-transform: uppercase; color: var(--p-mute); }
 .prep-for b { font-family: var(--f-ed); font-weight: 200; font-size: 18px; line-height: 1.2; }
-.prep-for button { font: inherit; font-size: 10px; letter-spacing: 1.8px; text-transform: uppercase; color: var(--p-ink); background: none; border: 0; border-bottom: 1px solid var(--p-ink); padding: 0 0 2px; cursor: pointer; min-height: 32px; }
+.prep-for button { display: inline-flex; align-items: flex-end; box-sizing: border-box; font: inherit; font-size: 10px; letter-spacing: 1.8px; text-transform: uppercase; color: var(--p-ink); background: none; border: 0; border-bottom: 1px solid var(--p-ink); padding: 0 0 2px; cursor: pointer; min-height: var(--p-tap); margin: calc(-1 * var(--s2)) 0; }
 /* the same statement inside a page section, above the item it governs */
 .p-for { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 var(--s3); margin: 0 0 var(--s4); padding: var(--s3) var(--s4); border: 1px solid var(--p-ink); background: var(--p-card); font-family: var(--f-ui); font-size: 12.5px; line-height: 1.6; color: var(--p-ink); }
 .p-for .t-l1 { line-height: 1.6; }
@@ -264,104 +270,6 @@ body.p-drawer-open .p-drawer { transform: translateY(0); }
 /* the gate, before an invitation is open */
 .prep-gate { box-sizing: border-box; max-width: 620px; margin: var(--s8) auto; padding: 0 var(--p-gut); }
 
-/* ============================================================================
-   LEGACY NORMALISATION — while the six surfaces are recomposed (step D), the
-   pages that still carry their own markup are pulled onto the system's type,
-   spacing and controls. This is not a second design system: it maps the old
-   class names onto the tokens above so the private journey reads as one thing.
-   Everything here disappears as each surface is rebuilt on .t-* and .p-*.
-   ========================================================================== */
-body.prep main { box-sizing: border-box; width: 100%; max-width: var(--p-frame) !important; margin: 0 auto !important; padding: var(--s7) var(--p-gut) var(--s9) !important; }
-body.prep h1 { font-family: var(--f-ed); font-weight: 200; font-size: 32px; line-height: 1.12; letter-spacing: -.01em; margin: 0 0 var(--s3); }
-body.prep h2 { font-family: var(--f-ed); font-weight: 200; font-size: 19px; line-height: 1.3; }
-body.prep h3 { font-family: var(--f-ed); font-weight: 200; font-size: 19px; line-height: 1.3; }
-body.prep .sub { font-family: var(--f-ui); font-size: 10px; font-weight: 400; line-height: 2; letter-spacing: 2.2px; text-transform: uppercase; color: var(--p-mute); margin-bottom: var(--s7); }
-body.prep .note, body.prep .body, body.prep .bsub { font-family: var(--f-ui); font-size: 12.5px; font-weight: 300; line-height: 1.75; color: var(--p-mute); max-width: var(--p-wide); }
-body.prep .lede { font-family: var(--f-ui); font-size: 15px; font-weight: 300; line-height: 1.75; color: #4A4A4A; max-width: var(--p-read); }
-
-/* one primary action, one secondary action — whatever they used to be called */
-body.prep .cta, body.prep .gbtn, body.prep .cta2, body.prep .dcta, body.prep .nav .go, body.prep .fxcta {
-  display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box;
-  min-height: var(--p-act-h); width: 100%; padding: var(--s4) var(--s5);
-  background: var(--p-ink); color: var(--p-paper); border: 1px solid var(--p-ink);
-  font-family: var(--f-ui); font-size: 10.5px; font-weight: 400; letter-spacing: 2.2px;
-  text-transform: uppercase; text-decoration: none; text-align: center; cursor: pointer;
-}
-body.prep .cta.off, body.prep .dcta.off { background: none; color: var(--p-mute); border-color: #C9C4BA; }
-@media (min-width: 600px) { body.prep .cta, body.prep .gbtn, body.prep .cta2, body.prep .dcta, body.prep .nav .go, body.prep .fxcta { width: auto; min-width: 280px; } }
-body.prep .tlink, body.prep .bedit, body.prep .skip, body.prep .skipl, body.prep .nav .back, body.prep .chg, body.prep .vw, body.prep .ch {
-  display: inline-flex; align-items: flex-end; box-sizing: border-box; min-height: var(--p-tap);
-  padding: var(--s3) 0 var(--s1); font-family: var(--f-ui); font-size: 10px; font-weight: 400;
-  line-height: 20px; letter-spacing: 2px; text-transform: uppercase; color: var(--p-ink);
-  text-decoration: none; border: 0; border-bottom: 1px solid var(--p-ink); background: none; cursor: pointer;
-}
-body.prep .nav .back, body.prep .skip, body.prep .skipl { color: var(--p-mute); border-bottom-color: #C9C4BA; }
-
-/* selection controls, wherever they came from */
-body.prep .tab, body.prep .dbtn {
-  font-family: var(--f-ui); font-size: 10.5px; font-weight: 400; letter-spacing: 2px;
-  text-transform: uppercase; min-height: 48px; padding: var(--s3) var(--s4);
-  border: 1px solid var(--p-line); background: var(--p-card); color: var(--p-ink); cursor: pointer;
-}
-body.prep .tab.on { border-color: var(--p-ink); background: var(--p-ink); color: var(--p-paper); }
-body.prep .p-sel[aria-pressed="true"], body.prep .p-sel.on {
-  background: var(--p-ink); border-color: var(--p-ink); color: var(--p-paper);
-}
-
-/* cards and rows share one rhythm */
-body.prep .gap, body.prep .gate, body.prep .dack, body.prep .consent, body.prep .done, body.prep .soldbox, body.prep .heldbox {
-  background: var(--p-card); border: 1px solid var(--p-line); padding: var(--s5); margin-top: var(--s5);
-}
-body.prep .row, body.prep .pline, body.prep .grow, body.prep .drow, body.prep .gcard, body.prep .q, body.prep .wev {
-  border-top: 1px solid var(--p-hair);
-}
-body.prep .blk { border-top: 1px solid var(--p-line); padding-top: var(--s5); margin-top: var(--s8); }
-body.prep .tot { display: flex; justify-content: space-between; align-items: baseline; padding: var(--s5) 0 var(--s2); border-top: 1px solid var(--p-line); }
-body.prep .tot .l { font-family: var(--f-ui); font-size: 10px; letter-spacing: 2.2px; text-transform: uppercase; color: var(--p-mute); }
-body.prep .tot .r { font-family: var(--f-ed); font-weight: 200; font-size: 27px; }
-body.prep .qq, body.prep .gname, body.prep .pn, body.prep .nm, body.prep .dv, body.prep .iname { font-family: var(--f-ed); font-weight: 200; }
-body.prep .t-l1, body.prep .cat, body.prep .when, body.prep .blabel, body.prep .bno, body.prep .qn, body.prep .forwho, body.prep .dl, body.prep .opl, body.prep .src, body.prep .ipr, body.prep .stepr, body.prep .ieyebrow, body.prep .dreq, body.prep .req {
-  font-family: var(--f-ui); font-size: 10px; font-weight: 400; line-height: 2; letter-spacing: 2.2px; text-transform: uppercase;
-}
-
-/* the type scale wins everywhere, including the controls a browser styles
-   for itself, and no legacy page keeps a size of its own */
-body.prep input, body.prep textarea, body.prep select, body.prep button {
-  font-family: var(--f-ui); font-size: 15px; font-weight: 300;
-}
-body.prep main p, body.prep main li, body.prep main span, body.prep main div, body.prep main label { font-family: var(--f-ui); }
-body.prep .qh, body.prep .qw, body.prep .mt, body.prep .basis, body.prep .ps, body.prep .hint,
-body.prep .dh, body.prep .ipf, body.prep .stepd, body.prep .ibody, body.prep .saved, body.prep .dmeta,
-body.prep .cstate, body.prep .ackstate, body.prep .hist, body.prep .selfl, body.prep .sub2, body.prep .qty, body.prep .bf {
-  font-size: 12.5px; line-height: 1.75;
-}
-body.prep .qq, body.prep .dv, body.prep .stept, body.prep .gname, body.prep .ipn { font-size: 19px; line-height: 1.3; }
-body.prep .lede, body.prep .ilede { font-size: 15px; line-height: 1.75; }
-body.prep main a:not(.cta):not(.gbtn):not(.cta2):not(.dcta):not(.go):not(.p-act) { color: var(--p-ink); }
-body.prep .p-act { color: var(--p-paper); }
-body.prep .p-act.quiet, body.prep .p-act.off { color: var(--p-ink); }
-/* an inline link inside a sentence is the one accepted small target; give it
-   a real one anyway wherever it stands alone */
-body.prep .note a, body.prep .body a, body.prep .ps a { display: inline-block; padding: 4px 0; }
-
-/* a decision row wraps rather than pushing its action off the screen */
-body.prep .grow { flex-wrap: wrap; }
-body.prep .grow > span:not(.gw) { flex: 1 1 100%; }
-body.prep .grow a, body.prep .grow .gdone { margin-left: 0; }
-@media (min-width: 420px) {
-  body.prep .grow > span:not(.gw) { flex: 1 1 auto; }
-  body.prep .grow a, body.prep .grow .gdone { margin-left: auto; }
-}
-
-/* A list is not a landscape: on a wide screen the reading column stays a
-   column, on the frame's left axis, and never stretches to 1280px. */
-@media (min-width: 900px) {
-  body.prep .blk, body.prep #items, body.prep .tot, body.prep #ready, body.prep #sendbox,
-  body.prep .done, body.prep #gaps, body.prep #dec, body.prep #held, body.prep #csnote,
-  body.prep #page > .blk, body.prep .prep-foot { max-width: 860px; }
-  body.prep .prep-head, body.prep .prep-sec { max-width: 860px; }
-}
-
 /* ---------------------------------------------------- the two product forms
    Both are built only from the tokens above. A stay card carries six things
    and hides the rest behind VIEW DETAILS; a fare card carries five and never
@@ -374,16 +282,30 @@ body.prep .grow a, body.prep .grow .gdone { margin-left: 0; }
 .p-list li { padding: var(--s2) 0; border-top: 1px solid var(--p-hair); }
 .p-list li:first-child { border-top: 0; }
 
-.p-stay { display: flex; flex-direction: column; padding: 0 0 var(--s5); opacity: .45; transition: opacity .35s, border-color .35s; }
+/* THE STAY CARD in a rail. Two states that are never the same thing:
+   .on        the card in visual focus (the rail brings it forward)
+   .p-chosen  the stay that is SELECTED for the journey (dark border)
+   A neighbour is veiled, not erased, and keeps a quiet action. The inset is
+   structural padding on the card, which no child rule can undo. */
+.p-stay { display: flex; flex-direction: column; padding: 0 var(--s5) var(--s5); opacity: .62; transition: opacity .35s, border-color .35s; }
 .p-stay.on, .acar .aslide.on.p-stay, .p-stay.p-chosen, .acar .aslide.p-chosen { opacity: 1; }
 .p-stay.p-chosen { border-color: var(--p-ink); }
-.p-stay > * { margin: 0 var(--s5); }
+.p-stay > * { margin: 0; }
 .p-stay > * + * { margin-top: var(--s3); }
-.p-stay-img { display: block; width: 100%; margin: 0 !important; aspect-ratio: 4/3; background: #E7E3DB center/cover no-repeat; }
+.p-stay-img { display: block; width: calc(100% + 2 * var(--s5)); margin: 0 calc(-1 * var(--s5)); aspect-ratio: 4/3; background: #E7E3DB center/cover no-repeat; }
 .p-stay > .t-l1 { margin-top: var(--s5); }
-.p-stay .p-act { margin-top: var(--s4); width: calc(100% - 2 * var(--s5)); min-width: 0; }
-/* a veiled neighbour keeps a quiet action — never a grey slab */
+.p-stay .p-act { margin-top: var(--s4); width: 100%; min-width: 0; }
 .p-stay:not(.on):not(.p-chosen) .p-act { background: none; color: var(--p-ink); border-color: var(--p-line); }
+/* the rail is borrowed from the public carousel, whose element rules
+   (.aslide h3, .aslide p) would otherwise resize the system's roles */
+.aslide.p-stay h3.t-h1 { font-family: var(--f-ed); font-weight: 200; font-size: 23px; line-height: 1.22; letter-spacing: 0; margin: var(--s1) 0 0; }
+.aslide.p-stay p { font-family: var(--f-ui); margin: var(--s3) 0 0; color: var(--p-mute); }
+.aslide.p-stay p.t-b2 { font-size: 12.5px; line-height: 1.75; }
+.aslide.p-stay p.t-l1 { font-size: 10px; line-height: 2; letter-spacing: 2.2px; text-transform: uppercase; }
+.aslide.p-stay p.t-l1.on { color: var(--p-ink); }
+.aslide.p-stay p.p-price { font-family: var(--f-ed); font-weight: 200; font-size: 26px; line-height: 1.1; color: var(--p-ink); margin-top: var(--s4); }
+.aslide.p-stay p.p-price span { font-family: var(--f-ui); font-size: 10px; letter-spacing: 2.2px; margin-top: var(--s2); color: var(--p-mute); }
+@media (min-width: 768px) { .aslide.p-stay h3.t-h1 { font-size: 25px; } }
 .p-stay .p-link { margin-top: var(--s1); }
 .p-rail-car .atrk { scroll-padding-left: 0; }
 /* the last address can also come to the left edge, so the card beside it is a
@@ -395,8 +317,9 @@ body.prep .grow a, body.prep .grow .gdone { margin-left: 0; }
 .p-rail-car .arail { position: relative; flex: 1; height: 1px; background: var(--p-line); cursor: pointer; padding: 14px 0; background-clip: content-box; box-sizing: content-box; }
 .p-rail-car .arail i { position: absolute; top: 13px; left: 0; height: 3px; background: var(--p-ink); transition: transform .45s cubic-bezier(.4,0,.2,1), width .3s; }
 .p-rail-car .anav { display: flex; gap: 2px; }
-.p-rail-car .anav button { position: relative; background: none; border: 0; cursor: pointer; width: var(--p-tap); height: var(--p-tap); color: var(--p-mute); }
-.p-rail-car .anav button::before { content: ''; position: absolute; left: 50%; top: 50%; width: 7px; height: 7px; border-left: 1px solid currentColor; border-bottom: 1px solid currentColor; transform: translate(-50%,-50%) rotate(45deg); }
+.p-rail-car .anav button { position: relative; background: none; border: 0; cursor: pointer; width: var(--p-tap); height: var(--p-tap); color: var(--p-ink); opacity: .55; }
+.p-rail-car .anav button:hover { opacity: 1; }
+.p-rail-car .anav button::before { content: ''; position: absolute; left: 50%; top: 50%; width: 9px; height: 9px; border-left: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: translate(-50%,-50%) rotate(45deg); }
 .p-rail-car .anav button[data-a="next"]::before { transform: translate(-30%,-50%) rotate(-135deg); }
 .p-rail-car .anav button[disabled] { opacity: .3; cursor: default; }
 
@@ -409,54 +332,112 @@ body.prep .grow a, body.prep .grow .gdone { margin-left: 0; }
   .p-product > .p-media { aspect-ratio: 4/3; }
 }
 
-/* ============================================================================
-   THE SYSTEM WINS.
-   The legacy map above is element-scoped, which makes it more specific than the
-   system's own classes — so a .t-h1 inside it was being reset to a legacy size
-   and a .p-price was losing its family. Two classes beat one class and two
-   elements, so the roles are restated here, last and highest, and a component
-   built on the system can never be overruled by the compatibility layer.
-   This block dies with the legacy map, in step D.
-   ========================================================================== */
-body.prep .t-d1 { font-family: var(--f-ed); font-size: 32px; line-height: 1.12; }
-body.prep .t-h1 { font-family: var(--f-ed); font-size: 23px; line-height: 1.22; }
-body.prep .t-h2 { font-family: var(--f-ed); font-size: 19px; line-height: 1.30; }
-body.prep .t-b1 { font-family: var(--f-ui); font-size: 14px; line-height: 1.75; color: #4A4A4A; }
-body.prep .t-b2 { font-family: var(--f-ui); font-size: 12.5px; line-height: 1.75; color: var(--p-mute); }
-body.prep .t-l1 { font-family: var(--f-ui); font-size: 10px; line-height: 2.0; letter-spacing: 2.2px; text-transform: uppercase; color: var(--p-mute); }
-body.prep .t-l1.on { color: var(--p-ink); }
-body.prep .t-l1.open { color: var(--p-accent); }
-body.prep .p-price { font-family: var(--f-ed); font-size: 26px; line-height: 1.1; color: var(--p-ink); }
-body.prep .p-price span { font-family: var(--f-ui); font-size: 10px; letter-spacing: 2.2px; }
-body.prep .p-time { font-family: var(--f-ed); font-size: 22px; line-height: 1.2; color: var(--p-ink); }
-body.prep .p-time span { font-family: var(--f-ui); font-size: 10px; letter-spacing: 2px; }
-body.prep .p-list li { font-family: var(--f-ui); font-size: 12.5px; line-height: 1.75; }
-@media (min-width: 768px) {
-  body.prep .t-d1 { font-size: 40px; }
-  body.prep .t-h1 { font-size: 25px; }
-  body.prep .t-h2 { font-size: 20px; }
-  body.prep .t-b1 { font-size: 15px; }
-}
 
-/* the card's inset is structural padding, which no child rule can undo */
-.p-stay { padding: 0 var(--s5) var(--s5); }
-.p-stay > * { margin: 0; }
-.p-stay > * + * { margin-top: var(--s3); }
-.p-stay-img { margin: 0 calc(-1 * var(--s5)) !important; width: calc(100% + 2 * var(--s5)); }
-.p-stay > .t-l1 { margin-top: var(--s5); }
-.p-stay .p-act { width: 100%; margin-top: var(--s4); }
-.p-stay .p-link { margin-top: var(--s1); }
-
-/* a preview must stay legible: veiled, not erased */
-.p-stay { opacity: .62; }
-
-/* the rail's controls are real controls */
-.p-rail-car .anav button { color: var(--p-ink); opacity: .55; }
-.p-rail-car .anav button:hover { opacity: 1; }
-.p-rail-car .anav button::before { width: 9px; height: 9px; border-width: 1.5px; }
-
-/* one column for the whole private journey */
+/* ------------------------------------------------------------ one column
+   The private journey reads on one axis: 860px for everything that is read,
+   and the frame for a product structure that genuinely needs the width
+   (.prep-sec.wide) — never a different content width per step. */
 @media (min-width: 900px) {
-  body.prep main > h1, body.prep main > .sub, body.prep main > p, body.prep main > hr,
-  body.prep main > h2, body.prep .prep-head, body.prep .prep-sec { max-width: 860px; }
+  .prep-head, .prep-sec, .prep-foot, .prep-gate, .p-block, .p-for, .prep-col { max-width: 860px; }
 }
+
+/* ============================================================ D · SURFACES
+   The components the six recomposed surfaces are built from. Every one is a
+   composition of the tokens and the three controls above — nothing here
+   introduces a fourth control, a seventh type role or a new colour. */
+
+/* the field, extended: a question, a hint, an answer, a reason */
+.p-field > .t-h2 { margin-bottom: var(--s1); }
+.p-field > .t-b2 { margin-bottom: var(--s3); }
+.p-field input::placeholder, .p-field textarea::placeholder { color: #A8A49C; }
+.p-field > label.p-check { display: flex; margin: var(--s2) 0 0; }
+.p-field .p-check input { width: 20px; height: 20px; min-height: 0; padding: 0; margin-top: 3px; }
+.p-field .p-why { margin-top: var(--s2); padding-left: var(--s3); border-left: 1px solid var(--p-line); }
+.p-check span { font-family: var(--f-ui); font-size: 13px; line-height: 1.7; color: var(--p-ink); }
+.p-check input[disabled] + span { color: var(--p-mute); }
+
+/* the chronology: a stage has a moment, a category, a place, then its product */
+.p-stage { border-top: 1px solid var(--p-line); padding: var(--s6) 0 var(--s7); }
+.p-stage:first-of-type { border-top: 0; padding-top: 0; }
+.p-stage-h { margin-bottom: var(--s4); }
+.p-stage-h .t-l1 { margin-bottom: var(--s1); }
+.p-stage-h .t-h2 { margin: 0; }
+.p-stage-h .t-b2 { margin-top: var(--s1); }
+.p-stage .p-actions { display: flex; flex-wrap: wrap; gap: var(--s3) var(--s5); align-items: center; margin-top: var(--s4); }
+@media (min-width: 900px) {
+  .p-stage-h { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 var(--s4); }
+  .p-stage-h .t-l1 { margin: 0; }
+  .p-stage-h .t-b2 { margin: 0; }
+}
+
+/* the product summary: what has been selected, in the card grammar, with its
+   photograph beside the facts on a wide screen and above them on a phone */
+.p-sum { box-sizing: border-box; display: grid; grid-template-columns: 1fr; background: var(--p-card); border: 1px solid var(--p-line); overflow: hidden; }
+.p-sum.on { border-color: var(--p-ink); }
+.p-sum-img { display: block; aspect-ratio: 3/2; background: #E7E3DB center/cover no-repeat; }
+.p-sum-body { padding: var(--s5); min-width: 0; }
+.p-sum-body > * + * { margin-top: var(--s3); }
+.p-sum-body > .t-l1 + .t-h1 { margin-top: var(--s1); }
+.p-sum-body .p-price { margin-top: var(--s4); }
+.p-sum-body .p-actions { display: flex; flex-wrap: wrap; gap: var(--s3) var(--s5); align-items: center; margin-top: var(--s4); }
+.p-sum-body .p-actions .p-act { width: 100%; min-width: 0; }
+@media (min-width: 768px) {
+  .p-sum { grid-template-columns: 280px minmax(0, 1fr); }
+  .p-sum-img { aspect-ratio: auto; min-height: 100%; }
+  .p-sum-body { padding: var(--s6); }
+  .p-sum-body .p-actions .p-act { width: auto; min-width: 240px; }
+}
+
+/* a line: one item of the journey read as a row — Review, and the items that
+   are not stages. A small photograph, the facts, the amount at the right. */
+.p-line { display: flex; gap: var(--s4); align-items: flex-start; border-top: 1px solid var(--p-hair); padding: var(--s4) 0; }
+.p-line:first-child { border-top: 0; }
+.p-line-img { flex: none; width: 72px; aspect-ratio: 4/5; background: #E7E3DB center/cover no-repeat; }
+.p-line-body { flex: 1; min-width: 0; }
+.p-line-body > * + * { margin-top: var(--s1); }
+.p-line-body .p-actions { display: flex; flex-wrap: wrap; gap: var(--s2) var(--s5); margin-top: var(--s2); }
+.p-line-amt { flex: none; margin-left: auto; text-align: right; font-family: var(--f-ed); font-weight: 200; font-size: 17px; line-height: 1.3; color: var(--p-ink); white-space: nowrap; }
+.p-line-amt .t-l1 { display: block; text-align: right; }
+.p-line-body .t-h2 a { color: inherit; text-decoration: none; }
+.p-line-body .t-h2 a:hover { opacity: .6; }
+/* a stepper is a selection control, twice */
+.p-qty { display: inline-flex; align-items: center; gap: var(--s3); margin-top: var(--s2); }
+.p-qty .p-sel { width: var(--p-tap); min-width: var(--p-tap); min-height: var(--p-tap); padding: 0; justify-content: center; }
+.p-qty b { font-family: var(--f-ed); font-weight: 200; font-size: 19px; min-width: 20px; text-align: center; }
+
+/* a review block: number, title, one way back */
+.p-block { border-top: 1px solid var(--p-line); margin-top: var(--s8); padding-top: var(--s5); }
+.p-block:first-of-type { border-top: 0; margin-top: 0; padding-top: 0; }
+.p-block-h { display: flex; align-items: baseline; gap: var(--s3); margin-bottom: var(--s3); }
+.p-block-h .bno { font-family: var(--f-ui); font-size: 10px; letter-spacing: 2.2px; color: var(--p-mute); flex: none; }
+.p-block-h h2 { font-family: var(--f-ed); font-weight: 200; font-size: 23px; line-height: 1.22; color: var(--p-ink); margin: 0; flex: 1; }
+.p-block-h .p-link { margin-left: auto; }
+.p-block > .t-b2 { margin-bottom: var(--s3); }
+.p-block .p-group { margin-top: var(--s5); }
+.p-block .p-group > .t-l1 { margin-bottom: var(--s1); }
+.p-kv .t-b2 { margin-top: 2px; }
+.p-kv > .p-link { margin-left: auto; }
+.p-kv .p-actions { display: flex; flex-wrap: wrap; gap: var(--s2) var(--s4); margin-top: var(--s1); }
+
+/* the total: one amount for the whole website */
+.p-total { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s4); border-top: 1px solid var(--p-line); padding: var(--s5) 0 var(--s2); margin-top: var(--s6); }
+.p-total .t-l1 { margin: 0; }
+.p-total b { font-family: var(--f-ed); font-weight: 200; font-size: 27px; line-height: 1.1; color: var(--p-ink); }
+
+/* a hero photograph at the head of a surface */
+.p-media { display: block; width: 100%; aspect-ratio: 3/2; background: #E7E3DB center/cover no-repeat; }
+.prep-head .p-media { margin: 0 calc(-1 * var(--p-gut)) var(--s6); width: calc(100% + 2 * var(--p-gut)); }
+@media (min-width: 768px) { .prep-head .p-media { margin: 0 0 var(--s6); width: 100%; aspect-ratio: 16/7; } }
+
+/* a list of the six steps, on the invitation */
+.p-steps .p-kv > .t-l1 { flex: none; }
+.p-steps .p-kv .n { font-family: var(--f-ui); font-size: 10px; letter-spacing: 2px; color: var(--p-mute); flex: none; width: 28px; }
+
+/* a mode is a bordered block: the primary way to compose a journey */
+.p-modes { display: flex; flex-wrap: wrap; gap: var(--s4) var(--s6); align-items: center; margin-top: var(--s4); }
+.p-modes .p-act.quiet { text-align: left; flex-direction: column; align-items: flex-start; line-height: 1.4; min-height: 66px; padding: var(--s4) var(--s5); }
+.p-modes .p-act.quiet span { display: block; font-size: 11.5px; letter-spacing: .2px; text-transform: none; color: var(--p-mute); font-weight: 300; margin-top: var(--s1); }
+.p-modes .p-act.quiet:hover span { color: #CFC7BA; }
+
+/* a quiet saved confirmation */
+.p-saved { min-height: 20px; }

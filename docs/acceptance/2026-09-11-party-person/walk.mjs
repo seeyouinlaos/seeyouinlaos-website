@@ -80,11 +80,11 @@ const who1 = await ls('siyl.who');
 note('02 active = Peggy', who1 && who1.guestId === P.guestId && who1.partyId === 'INV-002', 'siyl.who = ' + JSON.stringify(who1));
 note('02 bar', /Continuing as Peggy/.test(await bar()) && /Peggy & Steffie/.test(await bar()), 'bar: ' + await bar());
 for (const w of WIDTHS) { await go('invitation.html', w); await shot('03-invitation-peggy', w); }
-note('03 invitation says who continues', /You are continuing as/.test(await text('main')) && /Peggy/.test(await text('.ifor')), 'step 01 ownership block present');
+note('03 invitation says who continues', /You are continuing as Peggy/.test(await text('main')) && /You are making decisions for/.test(await text('main')), 'step 01 ownership block present');
 
 /* ---------------------------------------------------------------- 3 · PARTY STATE · step 02 */
 await go('your-journey.html', 390);
-note('04 journey label', /For your party · Peggy & Steffie/.test(await text('#ysub')), '#ysub: ' + (await text('#ysub')).trim());
+note('04 journey label', /For your party · Peggy & Steffie/.test(await text('.prep-head [data-party-label]')), 'label: ' + (await text('.prep-head [data-party-label]')).trim());
 /* Peggy picks Shama for the party — the real selection control */
 await page.locator('#bkksel [data-choose="shama-king-studio-balcony"]').click();
 await page.waitForTimeout(400);
@@ -95,7 +95,7 @@ note('04 party state written', Array.isArray(bagP), 'bag lines as Peggy: ' + (ba
 
 /* ---------------------------------------------------------------- 4 · PERSONAL STATE · step 05 as Peggy */
 await go('about-you.html', 390);
-note('05 subject defaults to active', /Answering for Peggy · you/.test(await text('#page')) && !/prep-for/.test(await page.content().then((c) => c.slice(c.indexOf('prep-bar'), c.indexOf('prep-bar') + 3000))),
+note('05 subject defaults to active', /For Peggy · you/.test(await text('.prep-head')) && !/Answering for/.test(await bar()),
   'about you opens answering for Peggy herself');
 await page.fill('textarea[data-q="drink"]', 'Riesling');
 await page.locator('textarea[data-q="drink"]').blur();
@@ -103,7 +103,7 @@ await page.waitForTimeout(250);
 await shot('05-about-peggy-self', 390);
 
 /* ---------------------------------------------------------------- 5 · ANSWERING FOR Steffie */
-await page.click('.tab[data-who="' + S.guestId + '"]');
+await page.click('.p-sel[data-who="' + S.guestId + '"]');
 await page.waitForTimeout(400);
 const barFor = await bar();
 note('06 ANSWERING FOR in the shell', /Answering for/.test(barFor) && /Steffie/.test(barFor) && /Continuing as Peggy/.test(barFor), 'bar: ' + barFor);
@@ -123,15 +123,15 @@ note('06 signed', stR.history.every((h) => h.by === P.guestId), 'Steffie history
 note('06 subject not persisted', (await ls('siyl.who')).subjectGuestId === undefined, 'siyl.who carries no subject');
 /* a fresh page without the deep link answers for Peggy again */
 await go('about-you.html', 390);
-note('06 fresh page = yourself', /Answering for Peggy · you/.test(await text('#page')), 'no silent carry-over of the subject');
+note('06 fresh page = yourself', /For Peggy · you/.test(await text('.prep-head')) && !/Answering for/.test(await bar()), 'no silent carry-over of the subject');
 
 /* ---------------------------------------------------------------- 6 · step 03 as Peggy */
 await go('wedding.html', 390);
-await page.click('[data-g="' + P.guestId + '"] [data-e="temple"] [data-ev="yes"]');
+await page.click('[data-g="' + P.guestId + '"][data-e="temple"] [data-ev="yes"]');
 await page.waitForTimeout(250);
-const secS = await text('[data-g="' + S.guestId + '"]');
-note('07 wedding ownership', /For Peggy · you/.test(await text('[data-g="' + P.guestId + '"]')) && /For Steffie/.test(secS) && /Answering for/.test(secS) && /continuing as Peggy/.test(secS),
-  'FOR PEGGY · you / FOR STEFFIE · answering for band');
+const secS = await text('[data-g="' + S.guestId + '"][data-e="temple"]'), band = await text('.p-for');
+note('07 wedding ownership', /For Peggy · you/.test(await text('[data-g="' + P.guestId + '"][data-e="temple"]')) && /For Steffie · answering for Steffie/.test(secS) && /Answering for/.test(band) && /continuing as Peggy/.test(band),
+  'FOR PEGGY · you / FOR STEFFIE · answering for, band at the boundary');
 for (const w of WIDTHS) { await go('wedding.html', w); await shot('07-wedding-peggy', w); }
 
 /* ---------------------------------------------------------------- 7 · step 04 · dress is personal */
@@ -185,12 +185,12 @@ await go('your-journey.html', 390);
 const bagS = await ls('siyl.bag');
 note('11 party state shared', JSON.stringify(bagS) === JSON.stringify(bagP), 'Steffie sees the same journey Peggy chose');
 await go('about-you.html', 390);
-note('11 Steffie answers for herself', /Answering for Steffie · you/.test(await text('#page')) && (await page.inputValue('textarea[data-q="dietary"]')) === 'No shellfish' && (await page.inputValue('textarea[data-q="drink"]')) === '',
+note('11 Steffie answers for herself', /For Steffie · you/.test(await text('.prep-head')) && (await page.inputValue('textarea[data-q="dietary"]')) === 'No shellfish' && (await page.inputValue('textarea[data-q="drink"]')) === '',
   'her dietary answer (written for her by Peggy) is there; Peggy\'s drink is not');
 for (const w of WIDTHS) { await go('about-you.html', w); await shot('11-about-steffie-self', w); }
 await go('wedding.html', 390);
-const secP = await text('[data-g="' + P.guestId + '"]');
-note('11 wedding flips', /For Steffie · you/.test(await text('[data-g="' + S.guestId + '"]')) && /Answering for/.test(secP) && /continuing as Steffie/.test(secP), 'FOR STEFFIE · you / FOR PEGGY · answering for');
+const secP = await text('[data-g="' + P.guestId + '"][data-e="temple"]'), band2 = await text('.p-for');
+note('11 wedding flips', /For Steffie · you/.test(await text('[data-g="' + S.guestId + '"][data-e="temple"]')) && /For Peggy · answering for Peggy/.test(secP) && /continuing as Steffie/.test(band2), 'FOR STEFFIE · you / FOR PEGGY · answering for');
 for (const w of WIDTHS) { await go('wedding.html', w); await shot('11-wedding-steffie', w); }
 for (const w of WIDTHS) { await go('review.html', w); await shot('11-review-steffie', w);
   await page.locator('#b3').screenshot({ path: path.join(OUT, '11-review-steffie-wedding-' + w + '.png') }); }

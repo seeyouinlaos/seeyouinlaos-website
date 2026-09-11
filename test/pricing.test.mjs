@@ -619,13 +619,17 @@ test('ABOUT YOU is exactly seven questions and one operational field', () => {
   /* ABOUT YOU is its own step and its own page — never buried under contact
    * details, and the preparation rail names exactly what the page presents. */
   const about = readFileSync(join(ROOT, 'about-you.html'), 'utf8');
-  assert.match(about, /<h1>About you<\/h1>/);
+  assert.match(about, /<h1 class="t-d1">About you<\/h1>/);
   assert.match(about, /G\.PROFILE\.forEach/);
   assert.match(about, /Operational · not hospitality/);
   assert.match(about, /Who are you answering for\?/);
-  assert.match(about, /class="go" href="review.html">Save &amp; continue/);
-  assert.match(about, /class="skipl" href="review.html">Skip for now/);
-  assert.match(about, /class="back" href="documents.html">Back/);
+  /* D · four editorial areas on one surface, documents INSIDE step 05, and
+   * the shell's one continuation instead of a page-local nav */
+  ['Hospitality profile', 'Accessibility &amp; comfort', 'Travel documents', 'Photographs and film']
+    .forEach((h) => assert.ok(about.includes(h), 'ABOUT YOU lacks the area ' + h));
+  assert.match(about, /D\.KINDS\.map/, 'documents must live inside step 05');
+  assert.match(about, /P\.foot\(/, 'the continuation is the shell foot');
+  assert.doesNotMatch(about, /href="documents\.html"/, 'documents are not a separate step');
   const prep = readFileSync(join(ROOT, 'assets/prep.js'), 'utf8');
   assert.match(prep, /\['About you',\s+'about-you.html'/);
   /* identity and contact stay on their own page, with their own anchors */
@@ -637,12 +641,17 @@ test('ABOUT YOU is exactly seven questions and one operational field', () => {
 });
 
 test('every underlined title leads somewhere, and the Sangkhathan carries its own action', () => {
-  ['your-journey.html', 'review.html'].forEach((f) => {
-    const page = readFileSync(join(ROOT, f), 'utf8');
-    assert.match(page, /View offering':'View &amp; choose/, f);
-    /* a 44px target even when the type stays editorially small */
-    assert.match(page, /\.wpa a\{[^}]*min-height:44px/, f);
-  });
+  const review = readFileSync(join(ROOT, 'review.html'), 'utf8');
+  assert.match(review, /View offering':'View &amp; choose/);
+  assert.match(review, /href="wedding\.html#ev-temple"/, 'the offering action leads to its primary home, step 03');
+  /* the journey keeps the wedding compact and sends the guest to step 03 */
+  const journey = readFileSync(join(ROOT, 'your-journey.html'), 'utf8');
+  assert.match(journey, /Complete wedding decisions/);
+  assert.match(journey, /Review wedding details/);
+  assert.doesNotMatch(journey, /data-ev=|data-off=|data-ack=/, 'no wedding control on the journey');
+  /* every secondary action is the system's 44px target */
+  const sys = readFileSync(join(ROOT, 'assets/prep.css'), 'utf8');
+  assert.match(sys.slice(sys.indexOf('.p-link {'), sys.indexOf('.p-link:hover')), /min-height: var\(--p-tap\)/);
   /* the anchor exists, and it spans the explanation AND the decision */
   const voyage = readFileSync(join(ROOT, 'voyage.html'), 'utf8');
   const region = voyage.slice(voyage.indexOf('<div id="sangkhathan">'), voyage.indexOf('<!-- 02 · COFFEE'));
@@ -654,15 +663,20 @@ test('every underlined title leads somewhere, and the Sangkhathan carries its ow
 });
 
 test('an editorially small title is still a thumb-sized target', () => {
-  [['your-journey.html', ['.nm{', '.wpt a{', '.wpa a{', '.wpd a{']],
-   ['review.html', ['.nm{', '.wpa a{', '.wpd a{', '.grow a{']]].forEach(([f, rules]) => {
+  /* D · no page carries a rule of its own any more: every link and control on
+   * the six surfaces is one of the three system controls, and each of those
+   * is a real target */
+  const sys = readFileSync(join(ROOT, 'assets/prep.css'), 'utf8');
+  const link = sys.slice(sys.indexOf('.p-link {'), sys.indexOf('.p-link:hover'));
+  const sel = sys.slice(sys.indexOf('.p-sel {'), sys.indexOf('.p-sel:hover'));
+  assert.match(link, /min-height: var\(--p-tap\)/);
+  assert.match(sel, /min-height: var\(--p-tap\)|min-height: 48px/);
+  assert.match(sys, /--p-act-h: 52px/);
+  ['invitation.html', 'your-journey.html', 'wedding.html', 'wedding-preparation.html', 'about-you.html', 'review.html'].forEach((f) => {
     const page = readFileSync(join(ROOT, f), 'utf8');
-    rules.forEach((r) => {
-      const i = page.indexOf(r);
-      assert.ok(i > 0, f + ' has no rule ' + r);
-      const decl = page.slice(i, page.indexOf('}', i));
-      assert.ok(/min-height:44px/.test(decl), f + ' ' + r + ' is not a 44px target: ' + decl);
-    });
+    const local = page.slice(page.indexOf('<style>'), page.indexOf('</style>'));
+    assert.ok(!/min-height:44px/.test(local), f + ' still carries a page-local target rule');
+    assert.ok(!/assets\/desktop\.css/.test(page), f + ' still loads the public desktop layer');
   });
 });
 

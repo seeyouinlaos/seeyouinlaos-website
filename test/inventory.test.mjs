@@ -160,25 +160,27 @@ test('transport stays UNCAPPED in this pass — no guessed seat counts', () => {
 
 test('the mode actions are three different weights, and all are 44 px targets', () => {
   const yj = readFileSync(join(ROOT, 'your-journey.html'), 'utf8');
-  /* FULL EXPERIENCE — a bordered block, not a text link */
-  assert.match(yj, /class="fxcta" id="fxb"/, 'Full Experience must be the primary block');
-  assert.match(yj, /\.fxcta\{[^}]*border:1px solid #313131/, 'the primary action must be a bordered block');
-  assert.match(yj, /\.fxcta\{[^}]*min-height:66px/, 'the primary action must be a real block target');
+  const sys = readFileSync(join(ROOT, 'assets/prep.css'), 'utf8');
+  /* FULL EXPERIENCE — the bordered block (the system's quiet primary action) */
+  assert.match(yj, /class="p-act quiet" id="fxb"/, 'Full Experience must be the primary block');
   assert.match(yj, /The complete journey/, 'the primary action must say what it does');
-  /* COST SAVING — the quiet alternative */
-  assert.match(yj, /class="fxalt" id="csb"/, 'Cost Saving must be the quiet alternative');
-  assert.match(yj, /\.fxalt\{[^}]*min-height:44px/, 'the alternative must still be a 44 px target');
-  assert.ok(!/\.fxalt\{[^}]*border:1px solid/.test(yj), 'the alternative must not compete with the primary');
-  /* REVIEW & SEND — the solid dark submission, a third thing again */
-  assert.match(yj, /\.cta\{[^}]*background:#313131/, 'Review & Send stays the solid dark action');
+  const quiet = sys.slice(sys.indexOf('.p-act.quiet {'), sys.indexOf('}', sys.indexOf('.p-act.quiet {')));
+  assert.match(quiet, /background: none; color: var\(--p-ink\)/, 'the quiet primary is a bordered block');
+  assert.match(sys, /--p-act-h: 52px/, 'every primary action is a real block target');
+  /* COST SAVING — the quiet alternative: an underlined secondary action */
+  assert.match(yj, /class="p-link" id="csb"/, 'Cost Saving must be the quiet alternative');
+  const link = sys.slice(sys.indexOf('.p-link {'), sys.indexOf('.p-link:hover'));
+  assert.match(link, /min-height: var\(--p-tap\)/, 'the alternative must still be a 44 px target');
+  assert.match(sys, /--p-tap:\s+44px/);
+  assert.ok(!/border: 1px solid/.test(link.replace(/border-bottom: 1px solid[^;]*;/, '')), 'the alternative must not compete with the primary');
+  /* the continuation — the solid primary action, a third thing again */
+  const act = sys.slice(sys.indexOf('.p-act {'), sys.indexOf('.p-act:hover'));
+  assert.match(act, /background: var\(--p-ink\)/, 'the primary continuation stays the solid dark action');
   /* nothing bright, nothing rounded */
-  assert.ok(!/\.fxcta\{[^}]*border-radius/.test(yj));
-  assert.ok(!/\.fxcta\{[^}]*gradient\(to/.test(yj));
-  /* the CTA's own classes must not collide with the confirmation overlay:
-     .fxs is the fixed scrim and .fxo is the dialogue */
-  assert.match(yj, /class="fxsub"/, 'the CTA sub-line must not reuse the scrim class');
-  assert.ok(!/\.fxcta \.fxs\{/.test(yj), '.fxs is the overlay scrim, not a CTA part');
-  assert.ok(!/class="fxs"[^>]*>The complete/.test(yj));
+  assert.ok(!/border-radius/.test(act) && !/gradient\(/.test(act));
+  /* the confirmation lives in the shell's one detail layer, never a second overlay */
+  assert.match(yj, /SH\.drawer\(h,/, 'the mode confirmation must use the shell drawer');
+  assert.ok(!/class="fxo"/.test(yj) && !/class="fxs"/.test(yj), 'no page-local overlay survives');
 });
 
 test('a photograph and the words after it are separated by a real token', () => {
@@ -335,9 +337,12 @@ test('J/K · changing a confirmed Cost Saving stay is atomic and never loses the
   assert.ok(!/function alertRoom\(c\)\{[\s\S]{0,200}getElementById\('dec'\)/.test(yj),
     'the refusal notice must not be written into the panel that gets re-rendered');
   assert.match(yj, /you still hold the stay you had/);
-  /* the decision panel must be reachable in full on a phone */
-  assert.match(yj, /\.fxo\{[^}]*overflow-y:auto/, 'the overlay must scroll when it is taller than the screen');
-  assert.match(yj, /\.fxo\{[^}]*max-height:94vh/);
+  /* the decision panel must be reachable in full on a phone — it is the
+   * shell's own drawer, which scrolls and never exceeds the screen */
+  const sys = readFileSync(join(ROOT, 'assets/prep.css'), 'utf8');
+  const drawer = sys.slice(sys.indexOf('.p-drawer {'), sys.indexOf('}', sys.indexOf('.p-drawer {')));
+  assert.match(drawer, /overflow-y: auto/, 'the overlay must scroll when it is taller than the screen');
+  assert.match(drawer, /max-height: 88vh/);
   const client = readFileSync(join(ROOT, 'assets/inventory.js'), 'utf8');
   assert.match(client, /reserveLines: function/);
   /* the ledger itself replaces an invitation's own allocation in one turn */

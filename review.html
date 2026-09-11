@@ -1,122 +1,70 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Review &amp; Send · See You In Laos</title><style>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Review &amp; Send · See You In Laos</title>
+<style>
 @font-face{font-family:'PP Editorial Old';src:url('assets/fonts/PPEditorialOld-Ultralight.otf') format('opentype');font-weight:200;font-display:swap}
-*{margin:0;padding:0;box-sizing:border-box}body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;font-weight:300;font-size:14px;line-height:1.6}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;font-weight:300;font-size:14px;line-height:1.6}
 .hd{display:grid;grid-template-columns:44px 1fr 44px;align-items:center;padding:14px 20px}
 .hb{width:44px;height:44px;display:flex;flex-direction:column;justify-content:center;gap:5px;background:none;border:0;cursor:pointer}.hb i{display:block;width:20px;height:1.4px;background:#313131}
 .bd{font-family:'PP Editorial Old',serif;font-weight:200;font-size:19px;text-align:center}.bd .dot{color:#8A5A55}
 .bag{width:44px;height:44px;display:flex;align-items:center;justify-content:center;position:relative;color:#313131;text-decoration:none}.bag .bgi{display:block}
-.bb{position:absolute;top:1px;right:0;min-width:14px;height:14px;padding:0 3px;background:#313131;color:#F3EEE7;font-size:8.5px;line-height:1;letter-spacing:0;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;display:none;align-items:center;justify-content:center;box-shadow:0 0 0 2px #F3EEE7;border-radius:1px}
-main{padding:30px 24px 80px;max-width:640px;margin:0 auto}
-h1{font-family:'PP Editorial Old',serif;font-weight:200;font-size:29px;margin-bottom:6px}
-.sub{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#7C7A75;margin-bottom:26px}
-h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:20px;margin:34px 0 10px}
-.ev{display:flex;gap:14px;align-items:baseline;border-top:1px solid #DAD9D7;padding:14px 0}
-.ev:last-of-type{border-bottom:1px solid #DAD9D7}
-.en{font-family:'PP Editorial Old',serif;font-weight:200;font-size:16.5px}
-.em{font-size:11px;color:#7C7A75;margin-top:3px}
-.eh.sp{color:#313131}
-.eh{margin-left:auto;font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75;white-space:nowrap}
-.row{display:flex;gap:14px;border-top:1px solid #DAD9D7;padding:16px 0}
-.row:last-of-type{border-bottom:1px solid #DAD9D7}
-.th{width:58px;height:72px;background:#E7E3DB center/cover no-repeat;flex:0 0 auto}
-a.th{display:block}
-.nm{font-family:'PP Editorial Old',serif;font-weight:200;font-size:16.5px;line-height:1.35;text-decoration:none;color:inherit;display:inline-block;padding:11px 0;min-height:44px;box-sizing:border-box}
-.when{font-size:9.5px;letter-spacing:2px;text-transform:uppercase;color:#7C7A75}
-.cat{font-size:9.5px;letter-spacing:2px;text-transform:uppercase;color:#313131;margin:2px 0 3px}
-.cat .bk{display:inline-block;width:5px;height:5px;border-radius:50%;background:#8A5A55;margin-left:7px;vertical-align:middle}
-.basis{font-size:11px;color:#7C7A75;margin-top:5px;line-height:1.6}
-.gap{border:1px solid #DAD9D7;background:#FCFAF6;padding:22px 20px;margin:26px 0 4px}
-.gap h3{font-family:'PP Editorial Old',serif;font-weight:200;font-size:19px;margin-bottom:6px}
-.gap p{font-size:12px;color:#7C7A75;line-height:1.7;margin-bottom:12px}
-.grow{display:flex;gap:12px;align-items:baseline;border-top:1px solid #EAE7E0;padding:11px 0;font-size:12.5px}
-.grow .gw{font-size:9.5px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75;flex:0 0 108px}
-.grow .gw.open{color:#8A5A55}
-.grow .gdone{margin-left:auto;color:#7C7A75;font-size:12px}
-.wcost{border-top:1px solid #EDEBE7;border-bottom:1px solid #EDEBE7;padding:14px 0;margin:6px 0 10px}
-.wpd{font-size:9.5px;letter-spacing:1.6px;text-transform:uppercase;color:#7C7A75;margin-top:7px}
-.wpd a{display:inline-block;color:#313131;text-decoration:none;border-bottom:1px solid #313131;padding:8px 0 3px;margin-left:8px;min-height:44px;line-height:20px}
-.wpa{margin-top:8px}
-.wpa a{display:inline-block;font-size:9.5px;letter-spacing:1.8px;text-transform:uppercase;color:#313131;text-decoration:none;border-bottom:1px solid #313131;padding:10px 0 4px;min-height:44px;line-height:20px}
-.grow a{display:inline-block;line-height:20px;padding:10px 0 3px;min-height:44px;margin-left:auto;font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#313131;text-decoration:none;border-bottom:1px solid #313131;padding-bottom:2px}
-.mt{font-size:11px;color:#7C7A75;margin-top:3px}
-.ln{font-family:'PP Editorial Old',serif;font-size:14.5px;margin-left:auto;white-space:nowrap}
-.int{font-size:9px;letter-spacing:1.6px;text-transform:uppercase;color:#7C7A75;margin-left:auto;white-space:nowrap}
-.tot{display:flex;justify-content:space-between;align-items:baseline;padding:24px 0 6px}
-.tot .l{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#7C7A75}
-.tot .r{font-family:'PP Editorial Old',serif;font-size:27px}
-.note{font-size:11.5px;color:#7C7A75;margin-top:14px;max-width:36em}
-.cta{display:block;width:100%;background:#313131;color:#F3EEE7;border:0;padding:19px;font-size:11px;letter-spacing:2.2px;text-transform:uppercase;text-align:center;text-decoration:none;margin-top:24px;cursor:pointer;min-height:52px;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif}
-.cta[disabled]{opacity:.55;cursor:default}
-.cta.off{background:none;color:#7C7A75;border:1px solid #C9C4BA}
-.tlink{display:inline-block;font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:#313131;text-decoration:none;border-bottom:1px solid #313131;padding:8px 0 3px;min-height:44px}
-.empty{border-top:1px solid #DAD9D7;border-bottom:1px solid #DAD9D7;padding:36px 0;color:#7C7A75}
-.done{background:#FCFAF6;padding:30px 26px;margin-top:26px}
-.done h2{margin-top:0}
-.err{font-size:11.5px;color:#8A5A44;margin-top:12px;min-height:16px}
-.soldbox{border:1px solid #C9A9A0;background:#FBF4F2;padding:20px 20px 16px;margin:20px 0 0}
-.soldbox h3{font-family:'PP Editorial Old',serif;font-weight:200;font-size:18px;margin-bottom:6px}
-.soldbox p{font-size:12px;color:#7C7A75;line-height:1.7;margin-bottom:10px}
-.soldrow{display:flex;gap:12px;align-items:baseline;border-top:1px solid #EADFDB;padding:10px 0;font-size:12.5px}
-.soldrow b{font-weight:400}
-.soldrow span.r{margin-left:auto;font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#8A5A55;white-space:nowrap}
-.soldbox a{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#313131;text-decoration:none;border-bottom:1px solid #313131;padding-bottom:2px;display:inline-block;margin-top:6px}
-/* FIVE EDITORIAL BLOCKS — each one says what it holds and how to change it */
-.blk{border-top:1px solid #DAD9D7;padding-top:20px;margin-top:32px}
-.bhd{display:flex;align-items:baseline;gap:14px}
-.bno{font-size:9.5px;letter-spacing:2.2px;color:#7C7A75}
-.blk h2{margin:0 0 2px;flex:1}
-.bedit{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#313131;text-decoration:none;border-bottom:1px solid #313131;padding:8px 0 3px;white-space:nowrap;min-height:44px;display:inline-flex;align-items:flex-end}
-.bsub{font-size:11px;color:#7C7A75;line-height:1.7;margin:6px 0 12px;max-width:36em}
-.pline{display:flex;gap:12px;align-items:baseline;border-top:1px solid #EDEBE7;padding:12px 0;font-size:12.5px;line-height:1.7}
-.pline b{font-weight:400;color:#313131}
-.pline .r{margin-left:auto;font-size:9.5px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75;white-space:nowrap;text-align:right}
-.pline .r.open{color:#8A5A55}
-.pn{font-family:'PP Editorial Old',serif;font-weight:200;font-size:16.5px;line-height:1.3}
-.pm{font-size:10px;letter-spacing:1.6px;text-transform:uppercase;color:#7C7A75;margin-top:4px}
-.ps{font-size:12.5px;color:#7C7A75;line-height:1.75;margin-top:5px}
-.ps b{font-weight:400;color:#313131}
-.wev{border-top:1px solid #EDEBE7;padding:13px 0}
-</style><link rel="stylesheet" href="assets/desktop.css"><link rel="stylesheet" href="assets/aman.css"><link rel="stylesheet" href="assets/prep.css"></head><body>
+.bb{position:absolute;top:1px;right:0;min-width:14px;height:14px;padding:0 3px;background:#313131;color:#F3EEE7;font-size:8.5px;line-height:1;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;display:none;align-items:center;justify-content:center;box-shadow:0 0 0 2px #F3EEE7;border-radius:1px}
+</style>
+<link rel="stylesheet" href="assets/aman.css"><link rel="stylesheet" href="assets/prep.css"></head><body>
 <header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="your-journey.html" aria-label="Your Journey"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main>
-<h1>Review &amp; Send</h1>
-<p class="sub">Your journey · nothing is paid on this website</p>
+<div class="prep-page" id="review">
+<div class="prep-head">
+  <p class="t-l1" id="rv-own">Your journey · nothing is paid on this website</p>
+  <h1 class="t-d1">Review &amp; Send</h1>
+  <p class="t-b1 measure">Everything you have told us, in one place. Nothing here is new: it is what your party chose together and what each of you answered by name. Sending shares it with Guest Relations — a request, never a payment, never a confirmation.</p>
+</div>
 
-<div id="b1" class="blk"></div>
+<section class="p-block" id="b1">
+<div class="p-block-h"><span class="bno">01</span><h2>You</h2><a class="p-link mute" href="you.html#you">Edit</a></div>
+<div id="b1c"></div>
+</section>
 
-<section class="blk" id="b2">
-<div class="bhd"><span class="bno">02</span><h2>Your journey</h2><a class="bedit" href="your-journey.html">Edit</a></div>
-<p class="bsub" id="b2who">For your party</p>
-<p class="bsub">Your travel, your stays and your experiences, in the order the journey happens.</p>
+<section class="p-block" id="b2">
+<div class="p-block-h"><span class="bno">02</span><h2>Your journey</h2><a class="p-link mute" href="your-journey.html">Edit</a></div>
+<p class="t-l1" id="b2who">For your party</p>
+<p class="t-b2 measure-w">Your travel, your stays and your experiences, in the order the journey happens — shared once, for everyone on the invitation.</p>
 <div id="items"></div>
 </section>
 
-<div id="b3" class="blk"></div>
-<div id="b4" class="blk"></div>
+<section class="p-block" id="b3">
+<div class="p-block-h"><span class="bno">03</span><h2>The Wedding</h2><a class="p-link mute" href="voyage.html#temple-decision">Edit</a></div>
+<div id="b3c"></div>
+</section>
+<section class="p-block" id="b4">
+<div class="p-block-h"><span class="bno">04</span><h2>Documents &amp; privacy</h2><a class="p-link mute" href="documents.html">Edit</a></div>
+<div id="b4c"></div>
+</section>
 
-<section class="blk" id="b5">
-<div class="bhd"><span class="bno">05</span><h2>Your costs</h2><a class="bedit" href="your-journey.html">Edit</a></div>
-<p class="bsub" id="b5who">For your party</p>
-<p class="bsub">One calculation for the whole website. Nothing is paid here, and no deposit is asked for.</p>
-<div class="tot"><span class="l">Your Costs</span><span class="r" id="tt">USD 0</span></div>
-<p class="note">Spa interest lines carry no journey cost — Marsilea Spa confirms times directly and the amount is payable at the spa. No deposit is required on this website.</p>
+<section class="p-block" id="b5">
+<div class="p-block-h"><span class="bno">05</span><h2>Your costs</h2><a class="p-link mute" href="your-journey.html">Edit</a></div>
+<p class="t-l1" id="b5who">For your party</p>
+<p class="t-b2 measure-w">One calculation for the whole website, and one amount for the whole party. Nothing is paid here, and no deposit is asked for.</p>
+<div class="p-total"><span class="t-l1">Total for your party</span><b id="tt">USD 0</b></div>
+<p class="t-b2 measure-w">Spa interest lines carry no journey cost — Marsilea Spa confirms times directly and the amount is payable at the spa.</p>
 </section>
 
 <div id="gaps"></div>
 <div id="soldout"></div>
 <div id="ready"></div>
-<div id="sendbox">
-<button class="cta" id="send">Send to Guest Relations</button>
-<p class="err" id="err" role="alert" aria-live="polite"></p>
-<p class="note">Sending shares your journey with Guest Relations so a person can look at it. It is a request, never a payment, and it is not a confirmation — Guest Relations confirms every arrangement with you personally.</p>
+<div id="sendbox" class="prep-sec">
+<button type="button" class="p-act" id="send">Send to Guest Relations</button>
+<p class="t-b2" id="err" role="alert" aria-live="polite" style="margin-top:var(--s3)"></p>
+<p class="t-b2 measure-w" style="margin-top:var(--s3)">Sending shares your journey with Guest Relations so a person can look at it. It is a request, never a payment, and it is not a confirmation — Guest Relations confirms every arrangement with you personally.</p>
 </div>
-<div id="donebox" hidden class="done">
-<h2>Received &mdash; not yet confirmed</h2>
-<p class="note" id="donemsg" style="margin-top:6px"></p>
-<p class="note"><b style="color:#313131;font-weight:400">Received</b> means your journey is safely with Guest Relations and a person will read it. <b style="color:#313131;font-weight:400">Confirmed</b> is something only Guest Relations can tell you, once each arrangement is held with the hotels, the railway and the airlines. Until you hear from them, nothing in your journey is final.</p>
-<p class="note">You can keep changing anything here. Change it, send it again, and the newer version replaces the earlier one — you never lose your place, and you are never counted twice.</p>
-<button class="cta" id="again" style="background:none;color:#313131;border:1px solid #313131">Change my journey and send again</button>
-<a class="tlink" href="journeys.html" style="margin-top:14px">Continue exploring</a>
+<div id="donebox" hidden class="p-card prep-sec">
+<p class="t-l1 on">Journey received</p>
+<h2 class="t-h1">Received &mdash; not yet confirmed</h2>
+<p class="t-b1 measure" id="donemsg"></p>
+<p class="t-b2 measure-w"><b>Received</b> means your journey is safely with Guest Relations and a person will read it. <b>Confirmed</b> is something only Guest Relations can tell you, once each arrangement is held with the hotels, the railway and the airlines. Until you hear from them, nothing in your journey is final.</p>
+<p class="t-b2 measure-w">You can keep changing anything here. Change it, send it again, and the newer version replaces the earlier one — you never lose your place, and you are never counted twice.</p>
+<div class="p-actions" style="display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;margin-top:var(--s4)"><button type="button" class="p-act quiet" id="again">Change my journey and send again</button><a class="p-link mute" href="journeys.html">Continue exploring</a></div>
+</div>
+<div id="foot"></div>
 </div>
 </main>
 <script src="assets/bag.js"></script>
@@ -133,139 +81,127 @@ a.th{display:block}
 <script src="assets/journey.js"></script>
 <script type="module" src="assets/invite.mjs"></script>
 <script>
+/* ============================================================================
+   06 · REVIEW & SEND — one final truth surface. No new concept, no new
+   decision, no new explanation: what the party chose, what each guest
+   answered, the state of documents and privacy, one amount. Every block has
+   one way back to the concept's primary home.
+   ========================================================================== */
 var SUBMIT_URL='https://seeyouinlaos-website.suthep-hrg.workers.dev/api/register';
-function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')}
+function esc(t){return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 function when(iso){try{return new Date(iso).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}catch(e){return ''}}
 function row(label,value,right,open){
-return '<div class="pline"><div><p class="ps"><b>'+label+'</b></p>'+(value?'<p class="ps">'+value+'</p>':'')+'</div>'+
-  (right?'<span class="r'+(open?' open':'')+'">'+right+'</span>':'')+'</div>'}
+return '<div class="p-kv"><div><p class="t-b1"><b>'+label+'</b></p>'+(value?'<p class="t-b2">'+value+'</p>':'')+'</div>'+
+  (right?'<p class="t-l1'+(open?' open':'')+'">'+right+'</p>':'')+'</div>'}
 
 /* ---------------------------------------------------------------- BLOCK 01
- * YOU — the actual record, by name: what the invitation holds, how we reach
- * you, and every answer each guest has actually given. This block describes
- * nothing: if a question was not answered it says so, per person. */
+ * YOU — by name: who continues, how we reach the party, and every answer each
+ * guest has actually given. If a question was not answered it says so. */
 function paintYou(){
-var G=window.SIYL_GUEST,box=document.getElementById('b1');if(!box)return;
+var G=window.SIYL_GUEST,box=document.getElementById('b1c');if(!box)return;
 var p=G?G.party():null;
-var h='<div class="bhd"><span class="bno">01</span><h2>You</h2>'+
-  '<a class="bedit" href="you.html#you">Edit</a></div>';
-if(!p){box.innerHTML=h+'<p class="bsub">Open your invitation and your party appears here by name.</p>'+
-  '<p style="margin-top:10px"><a class="tlink" href="invitation.html">Open your invitation</a></p>';return}
+var h='';
+if(!p){box.innerHTML=h+'<p class="t-b2">Open your invitation and your party appears here by name.</p>'+
+  '<p style="margin-top:10px"><a class="p-link" href="invitation.html">Open your invitation</a></p>';return}
 var me=G.active();
-h+='<p class="bsub">Invitation '+esc(p.invitationId)+' · '+esc(G.partyLabel())+
-   (me?' · continuing as '+esc(G.nameOf(me.guestId)):'')+'.</p>';
-/* C · the two kinds of state, said once where the truth is reviewed */
-var b2=document.getElementById('b2who');if(b2)b2.textContent=G.partyLabel()+' · shared by everyone on the invitation';
+h+='<p class="t-b2 measure-w">Invitation '+esc(p.invitationId)+(me?' · continuing as '+esc(G.nameOf(me.guestId)):'')+'.</p>';
+var b2=document.getElementById('b2who');if(b2)b2.textContent=G.partyLabel();
 var b5=document.getElementById('b5who');if(b5)b5.textContent=G.partyLabel();
-h+='<p class="bsub" style="margin-top:16px">Personal details</p>';
+var own=document.getElementById('rv-own');if(own)own.textContent=G.partyLabel()+' · nothing is paid on this website';
+h+='<div class="p-group"><p class="t-l1">Personal details</p>';
 p.guests.forEach(function(g){
   var full=G.value(g.guestId,'fullName'),pref=G.value(g.guestId,'preferredName');
-  h+='<div class="pline"><div><p class="pn">'+esc(pref||full)+'</p>'+
-     '<p class="ps">'+esc(full)+(G.edited(g.guestId,'fullName')?' · corrected by you':'')+'</p></div>'+
-     '<span class="r">Named guest</span></div>'});
+  h+='<div class="p-kv"><div><p class="t-b1"><b>'+esc(pref||full)+'</b></p>'+
+     '<p class="t-b2">'+esc(full)+(G.edited(g.guestId,'fullName')?' · corrected by you':'')+'</p></div>'+
+     '<p class="t-l1">Named guest</p></div>'});
 var em=G.partyField('email'),ph=G.partyField('phone');
 h+=row('How we reach you',(em||ph)?esc([em,ph].filter(Boolean).join(' · ')):'No email or telephone given yet',
        (em||ph)?'Given':'Action needed',!(em||ph));
-
+h+='</div>';
 /* ABOUT YOU — the answers themselves, never a description of the questions */
-h+='<div class="bhd" style="margin-top:22px"><span class="bno">&nbsp;</span><h2 style="font-size:17px">About you</h2>'+
-   '<a class="bedit" href="about-you.html#about-you">Edit</a></div>';
+h+='<div class="p-group"><div class="p-block-h" style="margin-top:var(--s3)"><span class="bno">&nbsp;</span><h2 style="font-size:17px">About you</h2>'+
+   '<a class="p-link mute" href="about-you.html#about-you">Edit</a></div>';
 p.guests.forEach(function(g){
   var id=g.guestId,name=esc(G.nameOf(id));
   var n=G.profileAnswered(id),mine=me&&me.guestId===id;
-  h+='<p class="bsub" style="margin-top:16px">'+esc(G.labelFor(id))+(mine?' · you':'')+
-     ' <a href="about-you.html?for='+esc(id)+'#about-you" style="color:#313131;margin-left:8px">'+(mine?'Edit':'Answer for '+name)+'</a></p>';
-  if(!n){h+='<div class="pline"><div><p class="ps">Not completed yet</p></div><span class="r">Optional</span></div>';return}
+  h+='<div class="p-kv"><div><p class="t-l1'+(mine?' on':'')+'">'+esc(G.labelFor(id))+(mine?' · you':'')+'</p>'+
+     (n?'':'<p class="t-b2">Nothing shared yet · optional</p>')+'</div>'+
+     (mine?'':'<a class="p-link mute" href="about-you.html?for='+esc(id)+'#about-you">Answer for '+name+'</a>')+'</div>';
   G.PROFILE.concat([G.ACCESS]).forEach(function(q){
     var v=G.profile(id,q.key);
-    h+='<div class="pline"><div><p class="ps"><b>'+q.q+'</b></p>'+
-       '<p class="ps">'+(v==='NONE'?'Nothing to note':(v?esc(v):'&mdash;'))+'</p></div></div>'});
+    if(!v)return;
+    h+='<div class="p-kv"><div><p class="t-b1"><b>'+q.q+'</b></p>'+
+       '<p class="t-b2">'+(v==='NONE'?'Nothing to note':esc(v))+'</p></div></div>'});
 });
+h+='</div>';
 box.innerHTML=h}
 
 /* ---------------------------------------------------------------- BLOCK 03
- * THE WEDDING — the four active events, what each named guest answered, the
- * one optional personal addition, the dress code, and seating as it really is. */
+ * THE WEDDING — what each named guest answered, the one optional personal
+ * addition, the dress code as a state per guest, and seating as it really is. */
 function paintWedding(){
-var box=document.getElementById('b3'),J=window.SIYL_JOURNEY,T=window.SIYL_TEMPLE,G=window.SIYL_GUEST;
+var box=document.getElementById('b3c'),J=window.SIYL_JOURNEY,T=window.SIYL_TEMPLE,G=window.SIYL_GUEST;
 if(!box||!J)return;
 var op=T?T.operational():null;
 var DRESS={temple:['Blue Lao Traditional Dress','wedding-preparation.html#dress-code'],
            coffee:['Black Tie','wedding-preparation.html#dress-code'],
            vows:['Black Tie','wedding-preparation.html#dress-code'],
            dinner:['Black Tie','wedding-preparation.html#dress-code']};
-var h='<div class="bhd"><span class="bno">03</span><h2>The Wedding</h2>'+
-  '<a class="bedit" href="voyage.html#temple-decision">Edit</a></div>'+
-  '<p class="bsub">Sunday, 28 February 2027 · Vientiane · four events, all complimentary.</p>';
-h+='<div class="wcost">'+
-   '<p class="ps"><b>Hosted by Haruthai &amp; Suthep</b> · Temple Ceremony · Coffee &amp; Cake · Vow Ceremony · Wedding Dinner</p>'+
-   '<p class="ps"><b>No separate charge</b> · Morning alms-giving, Tak Bat — the food respectfully offered to the monks during the Temple Ceremony</p>'+
-   '<p class="ps"><b>Your optional personal addition</b> · Sangkhathan Temple Offering · USD 15 per selected guest — a separate personal offering, never the alms-giving and never a temple fee</p></div>';
-/* participation, per named guest, per event */
+var h='<p class="t-b2 measure-w">Sunday, 28 February 2027 · Vientiane · four events. Hosted by Haruthai &amp; Suthep. No separate charge for the morning alms-giving. Your optional personal addition, the Sangkhathan, is USD 15 per selected guest — never the alms-giving and never a temple fee.</p>';
+var meW=G?G.active():null;
 if(op&&op.guests.length){
-  var meW=G?G.active():null;
   op.guests.forEach(function(g){
     var mineW=meW&&meW.guestId===g.guestId;
-    h+='<p class="bsub" style="margin-top:20px">'+esc(G?G.labelFor(g.guestId):g.name)+(mineW?' · you':'')+
+    h+='<div class="p-group"><p class="t-l1'+(mineW?' on':'')+'">'+esc(G?G.labelFor(g.guestId):g.name)+(mineW?' · you':'')+
        (g.answeredBy&&g.answeredBy!==g.guestId?' · answered by '+esc(G.nameOf(g.answeredBy)):'')+'</p>';
     (T.EVENTS||[]).forEach(function(e){
       var st=g.events[e.key],open=st==='Not decided',d=DRESS[e.key];
-      h+='<div class="pline"><div><p class="ps"><b>'+e.label+'</b></p>'+
-         '<p class="pm">'+e.when+' · '+e.place+'</p>'+
-         (d?'<p class="wpd">Dress · '+d[0]+' <a href="'+d[1]+'">View dress code</a></p>':'')+
-         '</div><span class="r'+(open?' open':'')+'">'+st+'</span></div>'});
-    h+='<div class="pline"><div><p class="ps"><b>Sangkhathan Temple Offering</b></p>'+
-       '<p class="ps">'+(g.sangkhathan?'USD 15 · prepared in '+esc(g.name)+'&rsquo;s name':
+      h+='<div class="p-kv"><div><p class="t-b1"><b>'+e.label+'</b></p>'+
+         '<p class="t-b2">'+e.when+' · '+e.place+(d?' · Dress · '+d[0]:'')+'</p>'+
+         '</div><p class="t-l1'+(open?' open':'')+'">'+st+'</p></div>'});
+    h+='<div class="p-kv"><div><p class="t-b1"><b>Sangkhathan Temple Offering</b></p>'+
+       '<p class="t-b2">'+(g.sangkhathan?'USD 15 · prepared in '+esc(g.name)+'&rsquo;s name':
          g.sangkhathanState==='Not applicable'?'Only for guests joining the Temple Ceremony':g.sangkhathanState)+'</p>'+
-       '<p class="wpa"><a href="voyage.html#sangkhathan">'+(g.sangkhathan?'View offering':'View &amp; choose')+'</a></p></div>'+
-       '<span class="r'+(g.sangkhathanState==='Not decided'?' open':'')+'">'+
-       (g.sangkhathan?'USD 15':g.sangkhathanState)+'</span></div>';
-    h+='<div class="pline"><div><p class="ps"><b>Seating</b></p>'+
-       '<p class="ps">Ceremony seat and dinner seat are arranged by Guest Relations. Seating is not open yet.</p></div>'+
-       '<span class="r">Not open yet</span></div>'})}
-/* the dress code, as a state and not a description — C · one state PER
- * NAMED GUEST, acknowledged by nobody but that person */
-h+='<p class="bsub" style="margin-top:22px">Dress code · acknowledged by each named guest</p>'+
-   '<div class="pline"><div>'+
-   '<p class="ps"><b>Temple Ceremony</b> · Blue Lao Traditional Dress</p>'+
-   '<p class="ps"><b>Coffee &amp; Cake · Vow Ceremony · Wedding Dinner</b> · Black Tie</p>'+
-   '<p class="ps"><b>The travelling days</b> · Resort Wear</p></div></div>';
+       '<div class="p-actions"><a class="p-link mute" href="wedding.html#ev-temple">'+(g.sangkhathan?'View offering':'View &amp; choose')+'</a></div></div>'+
+       '<p class="t-l1'+(g.sangkhathanState==='Not decided'?' open':'')+'">'+(g.sangkhathan?'USD 15':g.sangkhathanState)+'</p></div>';
+    h+='<div class="p-kv"><div><p class="t-b1"><b>Seating</b></p>'+
+       '<p class="t-b2">Ceremony seat and dinner seat are arranged by Guest Relations. Seating is not open yet.</p></div>'+
+       '<p class="t-l1">Not open yet</p></div></div>'})}
+/* the dress code as a state — one per named guest, acknowledged by nobody but that person */
+h+='<div class="p-group"><p class="t-l1">Dress code · acknowledged by each named guest</p>';
 if(G&&G.party()){G.party().guests.forEach(function(g){
   var a=G.dressAck(g.guestId),mineD=meW&&meW.guestId===g.guestId;
-  h+='<div class="pline"><div><p class="ps"><b>'+esc(G.labelFor(g.guestId))+(mineD?' · you':'')+'</b></p>'+
-     '<p class="ps">'+(a?'Reviewed in '+esc(G.nameOf(g.guestId))+'&rsquo;s own name':(mineD?'Not yet reviewed':'Not yet reviewed · '+esc(G.nameOf(g.guestId))+' acknowledges this in person'))+'</p></div>'+
-     '<span class="r'+(a?'':' open')+'">'+(a?'Reviewed · '+when(a.at):'Review required')+'</span></div>'})}
-h+='<p style="margin-top:10px"><a class="tlink" href="wedding-preparation.html#ack">Review dress code</a></p>';
+  h+='<div class="p-kv"><div><p class="t-b1"><b>'+esc(G.labelFor(g.guestId))+(mineD?' · you':'')+'</b></p>'+
+     '<p class="t-b2">'+(a?'Reviewed in '+esc(G.nameOf(g.guestId))+'&rsquo;s own name':(mineD?'Not yet reviewed':'Not yet reviewed · '+esc(G.nameOf(g.guestId))+' acknowledges this in person'))+'</p></div>'+
+     '<p class="t-l1'+(a?'':' open')+'">'+(a?'Reviewed · '+when(a.at):'Review required')+'</p></div>'})}
+h+='<div class="p-actions" style="margin-top:var(--s3)"><a class="p-link mute" href="wedding-preparation.html#ack">Review dress code</a></div></div>';
 box.innerHTML=h}
 
 /* ---------------------------------------------------------------- BLOCK 04
  * DOCUMENTS & PRIVACY — the real state of every document, per named guest,
  * and each guest's own answer about publication. RECEIVED means received. */
 function paintDocs(){
-var box=document.getElementById('b4'),G=window.SIYL_GUEST,D=window.SIYL_DOCS;
+var box=document.getElementById('b4c'),G=window.SIYL_GUEST,D=window.SIYL_DOCS;
 if(!box)return;
-var h='<div class="bhd"><span class="bno">04</span><h2>Documents &amp; privacy</h2>'+
-  '<a class="bedit" href="documents.html">Edit</a></div>'+
-  '<p class="bsub">All optional for sending. Your documents are used only to help us coordinate your journey, and access is limited to the team members who need them for your travel arrangements.</p>';
+var h='<p class="t-b2 measure-w">All optional for sending. Your documents are used only to help us coordinate your journey, and access is limited to the team members who need them for your travel arrangements.</p>';
 var p=G?G.party():null;
 if(!p||!D){box.innerHTML=h;return}
+var meD=G.active();
 p.guests.forEach(function(g){
-  var id=g.guestId,name=esc(G.nameOf(id)),meD=G.active(),mineDoc=meD&&meD.guestId===id;
-  h+='<p class="bsub" style="margin-top:18px">'+esc(G.labelFor(id))+(mineDoc?' · you':'')+'</p>';
+  var id=g.guestId,name=esc(G.nameOf(id)),mineDoc=meD&&meD.guestId===id;
+  h+='<div class="p-group"><div class="p-kv"><div><p class="t-l1'+(mineDoc?' on':'')+'">'+esc(G.labelFor(id))+(mineDoc?' · you':'')+'</p></div>'+
+     '<a class="p-link mute" href="about-you.html?for='+esc(id)+'#about-you">Edit</a></div>';
   D.forGuest(id).forEach(function(d){
     var got=d.state!=='Not provided';
-    h+='<div class="pline"><div><p class="ps"><b>'+d.label+'</b></p>'+
-       '<p class="ps">'+(got?esc(d.filename)+' · received '+when(d.receivedAt)+' · not reviewed yet'
-                           :'Not provided · add later')+'</p></div>'+
-       '<span class="r">'+d.state+'</span></div>'});
+    h+='<div class="p-kv"><div><p class="t-b1"><b>'+d.label+'</b></p>'+
+       '<p class="t-b2">'+(got?esc(d.filename)+' · received '+when(d.receivedAt)+' · not reviewed yet':'Not added yet · can be added later')+'</p></div>'+
+       '<p class="t-l1'+(got?' on':'')+'">'+(got?d.state:'Not added yet')+'</p></div>'});
   var c=D.consent(id),decided=D.consentDecided(id);
-  h+='<div class="pline"><div><p class="ps"><b>Publication of photographs</b></p>'+
-     '<p class="ps">'+(decided?(c?'Given on '+when(c.at)+' · wording version '+esc(c.textVersion)
-                                 :'Declined · nothing about the wedding changes')
-                              :'Not answered · optional')+'</p></div>'+
-     '<span class="r">'+(decided?(c?'Given':'Declined'):'Not answered')+'</span></div>'});
-h+='<p class="note">A photographer and a videographer are with us on the wedding day — that is a notice, not a consent. Publication is a separate, optional choice, and it can be withdrawn at any time by writing to <a href="mailto:guest.relation.seeyouinlaos@gmail.com?subject=Publication%20consent" style="color:#313131">Guest Relations</a>. The wording is provisional and will be finalised with legal review; every answer is kept with its date and its version.</p>';
-h+='<p class="note">Secure document upload runs on authenticated storage — no document byte is kept in this browser, in the repository, or behind any public link.</p>';
+  h+='<div class="p-kv"><div><p class="t-b1"><b>Publication of photographs</b></p>'+
+     '<p class="t-b2">'+(decided?(c?'Given on '+when(c.at)+' · wording version '+esc(c.textVersion):'Declined · nothing about the wedding changes'):'Not answered · optional')+'</p></div>'+
+     '<p class="t-l1'+(decided?' on':'')+'">'+(decided?(c?'Given':'Declined'):'Not answered')+'</p></div></div>'});
+h+='<p class="t-b2 measure-w" style="margin-top:var(--s4)">A photographer and a videographer are with us on the wedding day — that is a notice, not a consent. Publication is a separate, optional choice, and it can be withdrawn at any time by writing to <a href="mailto:guest.relation.seeyouinlaos@gmail.com?subject=Publication%20consent" style="color:#313131">Guest Relations</a>. The wording is provisional and will be finalised with legal review; every answer is kept with its date and its version.</p>';
+h+='<p class="t-b2 measure-w">Documents travel straight to our private store — no document byte is kept in this browser or behind any public link.</p>';
 box.innerHTML=h}
 
 function detailHref(x){
@@ -277,67 +213,58 @@ var P=window.SIYL_PRICE,at=P&&P.locate(x.id);
 if(at&&x.room)return 'room.html?stay='+at.key+'&room='+x.room;
 return 'journeys.html#j-'+(P?P.windowOf(x.id):x.id)}
 function render(){var b=SIYL_BAG.get(),el=document.getElementById('items');
-if(!b.length){el.innerHTML='<p class="empty">Nothing is in your journey yet. Everything you add appears here before sending.</p>'}
+if(!b.length){el.innerHTML='<p class="t-b2">Nothing is in your journey yet. Everything you add appears here before sending.</p>'}
 else{
-/* THE WEDDING is block 02 and is never itemised twice: a wedding line is
+/* THE WEDDING is block 03 and is never itemised twice: a wedding line is
  * shown there, by name, and its amount is in Your Costs like every other. */
 el.innerHTML=(window.SIYL_JOURNEY?SIYL_JOURNEY.sorted(b):b)
 .filter(function(x){return !(window.SIYL_JOURNEY&&SIYL_JOURNEY.isWedding(x))})
 .map(function(x){
-var J=window.SIYL_JOURNEY,m=J?J.meta(x):{cat:'',basis:''},seg=J?J.SEGMENTS.filter(function(g){return g.ids.indexOf(x.id)>=0})[0]:null,when=J?J.when(x):'';
-var book=seg&&seg.bookend?'<span class="bk"></span>':'';
-var href=detailHref(x);
-return '<div class="row"><a class="th" href="'+href+'" aria-label="Open '+esc(x.name)+'"'+(SIYL_BAG.thumb(x)?' style="background-image:url('+SIYL_BAG.thumb(x)+')"':'')+'></a><div style="flex:1;display:flex;gap:12px"><div>'+
-(when?'<p class="when">'+when+'</p>':'')+(m.cat?'<p class="cat">'+m.cat+book+'</p>':'')+
-'<a class="nm" href="'+href+'">'+esc(x.name)+'</a><p class="mt">'+esc(x.meta||'')+'</p>'+
-(m.basis?'<p class="basis">'+esc(m.basis)+'</p>':'')+
-(x.complimentary?'<p class="basis">Complimentary · USD 0 payable. An independent stay: the wedding programme is included as it stands; arrival, departure and transfers are arranged by you, with no individual Guest Relations travel or accommodation support.</p>':'')+
-(J&&J.quantityLine(x)?'<p class="basis" style="color:#313131">'+esc(J.quantityLine(x))+'</p>':'')+
-(x.note?'<p class="basis" style="color:#313131;text-transform:uppercase;letter-spacing:1.6px;font-size:9.5px">'+esc(x.note)+(x.noteBy?'<br><span style="color:#7C7A75">'+esc(x.noteBy)+'</span>':'')+'</p>':'')+
-(x.complimentary?'<p class="basis" style="color:#313131;text-transform:uppercase;letter-spacing:1.6px;font-size:9.5px">Complimentary<br><span style="color:#7C7A75">Hosted — USD 0 payable by you</span></p>':'')+
-(x.breakfast?'<p class="basis" style="text-transform:uppercase;letter-spacing:1.6px;font-size:9.5px">'+esc(x.breakfast)+'</p>':'')+'</div>'+
-(x.interest?'<span class="int">Interest · request</span>':'<span class="ln">USD '+((x.price||0)*x.qty).toLocaleString('en-US')+'</span>')+'</div></div>'}).join('')}
+var J=window.SIYL_JOURNEY,m=J?J.meta(x):{cat:'',basis:''},when2=J?J.when(x):'';
+var href=detailHref(x),q=x.qty||1;
+return '<div class="p-line"><a class="p-line-img" href="'+href+'" aria-label="Open '+esc(x.name)+'"'+(SIYL_BAG.thumb(x)?' style="background-image:url('+SIYL_BAG.thumb(x)+')"':'')+'></a>'+
+'<div class="p-line-body"><p class="t-l1">'+(when2?when2:'')+(m.cat?' · '+m.cat:'')+'</p>'+
+'<h3 class="t-h2"><a href="'+href+'">'+esc(x.name)+'</a></h3><p class="t-b2">'+esc(x.meta||'')+'</p>'+
+(x.complimentary?'<p class="t-b2">Complimentary · USD 0 payable. An independent stay: the wedding programme is included as it stands; arrival, departure and transfers are arranged by you, with no individual Guest Relations travel or accommodation support.</p>':'')+
+(J&&J.quantityLine(x)?'<p class="t-b2">'+esc(J.quantityLine(x))+'</p>':(m.basis?'<p class="t-b2">'+esc(m.basis)+'</p>':''))+
+(x.note?'<p class="t-l1 on">'+esc(x.note)+(x.noteBy?' · '+esc(x.noteBy):'')+'</p>':'')+
+(x.breakfast?'<p class="t-l1">'+esc(x.breakfast)+'</p>':'')+'</div>'+
+(x.interest?'<p class="p-line-amt"><span class="t-l1">Interest · request</span></p>':'<p class="p-line-amt">USD '+((x.price||0)*q).toLocaleString('en-US')+'</p>')+'</div>'}).join('')}
 document.getElementById('tt').textContent='USD '+SIYL_BAG.total().toLocaleString('en-US');
 renderGaps();
 paintReady();
 SIYL_BAG.badge()}
 
-/* Review never presents an unanswered journey as complete */
-function renderGaps(){
-var box=document.getElementById('gaps');if(!box||!window.SIYL_JOURNEY)return;
-var open=SIYL_JOURNEY.open();
-if(!open.length){box.innerHTML='';return}
-box.innerHTML='<div class="gap"><h3>Your journey is almost complete</h3>'+
-'<p>A decision is still needed for the stages below. Choose your stay or travel — or tell us that you are not joining that part of the journey. You can still send what you have.</p>'+
-open.map(function(s2){return '<div class="grow"><span class="gw">'+s2.when+'</span><span>'+s2.cat+' · '+s2.place+'</span><a href="journeys.html#'+s2.anchor+'">'+(s2.cat==='Accommodation'?'Choose your stay':'Choose your travel')+'</a></div>'}).join('')+'</div>'}
-/* ---- BEFORE YOU SEND ---------------------------------------------------
- * Required means a person cannot answer it for the guest afterwards: who they
- * are, who is coming to the wedding, what to wear, and how to reach them.
- * Everything else may follow at any time and never blocks a submission. */
+/* Review never presents an unanswered journey as complete — and it never
+ * becomes a task board: ONE card, only what is still open, one way there. */
+function renderGaps(){var box=document.getElementById('gaps');if(box)box.innerHTML=''}
+
+/* ---- BEFORE YOU SEND — required means a person cannot answer it for the
+ * guest afterwards. Everything else may follow and never blocks. */
 function paintReady(){
 var box=document.getElementById('ready'),G=window.SIYL_GUEST,btn=document.getElementById('send');
 if(!box||!btn)return;
 if(!G||!G.party()){
-  box.innerHTML='<div class="gap"><h3>Open your invitation</h3>'+
-    '<p>Your journey is sent under your invitation, so we open it first.</p>'+
-    '<div class="grow"><span class="gw open">Required</span><span>Your invitation</span><a href="invitation.html">Open</a></div></div>';
+  box.innerHTML='<div class="p-card prep-sec"><p class="t-l1 open">Required</p><h3 class="t-h1">Open your invitation</h3>'+
+    '<p class="t-b2 measure">Your journey is sent under your invitation, so we open it first.</p>'+
+    '<div class="p-kv"><div><p class="t-b1">Your invitation</p></div><a class="p-link" href="invitation.html">Open</a></div></div>';
   btn.disabled=false;btn.classList.add('off');btn.setAttribute('aria-describedby','ready');
   btn.textContent='Send to Guest Relations — not ready yet';return}
-var r=G.readiness();
-var h='<div class="gap"><h3>'+(r.ok?'Everything we need is here':'Before you send')+'</h3>'+
-  '<p>'+(r.ok
-    ? 'Your journey can be sent. Anything still marked optional below can follow at any time — it never delays your journey.'
-    : 'A few things are still needed before your journey can go to Guest Relations. Everything marked optional can follow later.')+'</p>';
-r.steps.forEach(function(st){
-  var done=st.state==='Completed';
-  h+='<div class="grow"><span class="gw'+(st.required&&!done?' open':'')+'">'+st.state+'</span>'+
-     '<span>'+st.n+' '+st.label+' · '+st.note+'</span>'+
-     (done?'<span class="gdone">&#10003;</span>':'<a href="'+st.deep+'">'+st.action+'</a>')+'</div>'});
-h+='</div>';
-box.innerHTML=h;
-/* The button is visibly unavailable until the required steps are done — but it
- * is never a dead control: pressing it says exactly what is missing and takes
- * the guest there. A silent failure would be worse than no button at all. */
+var r=G.readiness(),J=window.SIYL_JOURNEY,openStages=J?J.open():[];
+var rows=r.steps.filter(function(st){return st.key!=='review'&&st.state!=='Completed'});
+if(!rows.length&&!openStages.length){box.innerHTML='<div class="p-card prep-sec"><p class="t-l1 on">Everything we need is here</p><h3 class="t-h1">Your journey can be sent</h3>'+
+  '<p class="t-b2 measure-w">Anything optional can follow at any time — it never delays your journey.</p></div>'}
+else{
+  var h='<div class="p-card prep-sec"><p class="t-l1 open">Before you send</p><h3 class="t-h1">'+(r.ok?'Optional details can follow later':'A few things are still needed')+'</h3>'+
+    '<p class="t-b2 measure-w">'+(r.ok?'Your journey can be sent now. The items below are optional and welcome at any time.':'Required items cannot be answered for you afterwards; everything marked optional can follow later.')+'</p>';
+  rows.forEach(function(st){
+    var req=st.required;
+    var note=st.key==='journey'&&openStages.length?(openStages.length===1?'One stage still to decide':openStages.length+' stages still to decide'):st.note;
+    var deep=st.key==='journey'&&openStages.length?'your-journey.html#s-'+openStages[0].key:st.deep;
+    h+='<div class="p-kv"><div><p class="t-l1'+(req?' open':'')+'">'+(req?'Required':'Optional')+'</p>'+
+       '<p class="t-b1"><b>'+st.n+' '+st.label+'</b></p><p class="t-b2">'+esc(note)+'</p></div>'+
+       '<a class="p-link'+(req?'':' mute')+'" href="'+deep+'">'+st.action+'</a></div>'});
+  box.innerHTML=h+'</div>'}
 var ready=r.ok&&!!SIYL_BAG.get().length;
 btn.disabled=false;
 btn.removeAttribute('aria-disabled');
@@ -355,23 +282,24 @@ var MSG={invitation:'Please open your invitation before sending your journey.',
          you:'Please leave one email address or telephone number before sending.',
          journey:'Please choose your travel and your stays before sending your journey.',
          wedding:'Please answer the wedding participation for each named guest, and review the dress code, before sending.'};
-var ACT={invitation:'Open my invitation',you:'Add your contact',
-         journey:'Choose your journey',wedding:'Go there now'};
-/* when the wedding step is open only because of the dress code, say that */
+var ACT={invitation:'Open my invitation',you:'Add your contact',journey:'Choose your journey',wedding:'Go there now'};
 if(first&&first.key==='wedding'&&window.SIYL_TEMPLE&&SIYL_TEMPLE.decidedAll()&&!G.dressAckAll()){
   MSG.wedding='Please review the dress code before sending your journey — '+G.dressMissing().map(function(g){return G.nameOf(g.guestId)}).join(' and ')+' still to acknowledge, each in their own name.';
   first=Object.assign({},first,{href:'wedding-preparation.html#ack',action:'Review dress code'})}
 var msg=first?(MSG[first.key]||('Please complete '+first.label.toLowerCase()+' before sending your journey.'))
              :'A few steps above are still needed before your journey can be sent.';
-err.innerHTML=msg+(first?' <a href="'+first.href+'" style="color:#313131">'+(first.action||ACT[first.key]||'Go there now')+'</a>':'');
+err.innerHTML=msg+(first?' <a class="p-link" href="'+first.href+'" style="margin-left:8px">'+(first.action||ACT[first.key]||'Go there now')+'</a>':'');
 var box=document.getElementById('ready');
 if(box)box.scrollIntoView({behavior:'smooth',block:'center'});
 }
-function paintBlocks(){paintYou();paintWedding();paintDocs();paintReady()}
+function paintBlocks(){paintYou();paintWedding();paintDocs();paintReady();
+  if(window.SIYL_PREP)SIYL_PREP.foot(document.getElementById('foot'))}
 document.addEventListener('siyl:bag',function(){render();paintBlocks()});
 document.addEventListener('siyl:temple',paintBlocks);
 document.addEventListener('siyl:guest',paintBlocks);
+document.addEventListener('siyl:docs',paintBlocks);
 document.addEventListener('siyl:invite-ready',paintBlocks);
+document.addEventListener('siyl:auth',paintBlocks);
 document.addEventListener('siyl:who',paintBlocks);
 paintBlocks();
 render();
@@ -385,8 +313,6 @@ var L=['SEE YOU IN LAOS — JOURNEY SELECTION','Invitation: '+auth.invitationId+
 if(window.SIYL_JOURNEY){SIYL_JOURNEY.WEDDING.forEach(function(w){
 L.push('- '+w.title+' · '+w.when+' · '+w.place+' · '+w.note.toUpperCase())})}
 L.push('','SELECTIONS (in the order the journey happens):');
-/* the wedding lines are reported under BUDDHIST MORNING, by name, and are
- * never listed twice — the amount is still inside YOUR COSTS */
 (window.SIYL_JOURNEY?SIYL_JOURNEY.sorted(b):b)
 .filter(function(x){return !(window.SIYL_JOURNEY&&SIYL_JOURNEY.isWedding(x))})
 .forEach(function(x){L.push('- '+x.name+' · '+(x.meta||'')+(x.qty>1?' · Quantity '+x.qty:'')+
@@ -451,20 +377,18 @@ var text=buildText(auth);
 
 /* ---- ROOMS FIRST. The shared ledger decides, atomically, whether these
  * exact rooms are still available and holds them for this invitation before a
- * single byte of the registration is written. Two guests sending in the same
- * moment are serialised by the ledger: one is allocated, the other is told
- * here, by category, what has just gone. Nothing is allocated by this page. */
+ * single byte of the registration is written. */
 var hold={ok:true,unreachable:true};
 if(window.SIYL_STOCK){hold=await SIYL_STOCK.reserve()}
 document.getElementById('soldout').innerHTML='';
 if(!hold.ok&&!hold.unreachable){
   var rows=(hold.conflicts||[]).map(function(c){
-    return '<div class="soldrow"><b>'+c.name+'</b><span class="r">'+
-      (c.remaining>0?('only '+c.remaining+' left'):(c.heldFor?('reserved for '+c.heldFor):'sold out'))+'</span></div>'}).join('');
+    return '<div class="p-kv"><div><p class="t-b1"><b>'+esc(c.name)+'</b></p></div><p class="t-l1 open">'+
+      (c.remaining>0?('only '+c.remaining+' left'):(c.heldFor?('reserved for '+esc(c.heldFor)):'sold out'))+'</p></div>'}).join('');
   document.getElementById('soldout').innerHTML=
-    '<div class="soldbox"><h3>One of your rooms has just been taken</h3>'+
-    '<p>Your journey was not sent, and nothing has been changed. Another guest confirmed the same category while you were deciding. Choose another room for the stage below and send again — everything else you have chosen stays exactly as it is.</p>'+
-    rows+'<a href="journeys.html">Choose another room</a></div>';
+    '<div class="p-card prep-sec"><p class="t-l1 open">Not sent</p><h3 class="t-h1">One of your rooms has just been taken</h3>'+
+    '<p class="t-b2 measure-w">Your journey was not sent, and nothing has been changed. Another guest confirmed the same category while you were deciding. Choose another room for the stage below and send again — everything else you have chosen stays exactly as it is.</p>'+
+    rows+'<div class="p-actions" style="margin-top:var(--s3)"><a class="p-link" href="journeys.html">Choose another room</a></div></div>';
   document.getElementById('soldout').scrollIntoView({behavior:'smooth',block:'center'});
   btn.disabled=false;
   if(window.SIYL_STOCK)SIYL_STOCK.load(true);
@@ -487,9 +411,6 @@ document.getElementById('donemsg').textContent=hold.unreachable
  ? 'Your journey has been received. The room ledger could not be reached, so no room is held yet — Guest Relations checks availability and comes back to you personally. Nothing is paid on this website.'
  : 'Your journey has been received and your rooms are held in your name while Guest Relations works through it. Holding a room is not the same as a confirmed booking — that comes from Guest Relations, personally. Nothing is paid on this website.';
 d.scrollIntoView({behavior:'smooth',block:'center'});
-/* A sent journey is never a locked journey. Everything on this website stays
- * editable; sending again replaces the earlier version under the same
- * invitation, and the ledger swaps the held rooms atomically. */
 var ag=document.getElementById('again');
 if(ag&&!ag.dataset.wired){ag.dataset.wired='1';
 ag.addEventListener('click',function(){
@@ -499,10 +420,9 @@ ag.addEventListener('click',function(){
   document.getElementById('sendbox').scrollIntoView({behavior:'smooth',block:'center'})})}
 return}
 }catch(e){/* endpoint unreachable — emergency channel below */}
-/* the rooms were held for a submission that did not happen: give them back
- * immediately rather than leave them locked against every other guest */
 if(!hold.unreachable&&window.SIYL_STOCK){try{await SIYL_STOCK.release()}catch(e2){}}
 btn.disabled=false;
 err.innerHTML='Your selection could not be stored right now. Please try again in a moment, or use the email backup channel: <a href="mailto:guest.relation.seeyouinlaos@gmail.com?subject='+encodeURIComponent('Journey Selection — '+(auth.partyName||auth.invitationId))+'&body='+encodeURIComponent(text)+'" style="color:#313131">send via email</a>.'})});
+if(window.SIYL_BAG&&SIYL_BAG.bar)SIYL_BAG.bar();
 </script>
 </body></html>
