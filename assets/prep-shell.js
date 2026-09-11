@@ -247,6 +247,10 @@
     document.addEventListener('siyl:bag', paint);
     document.addEventListener('siyl:docs', paint);
     document.addEventListener('siyl:confirm', paint);
+    /* the journey's status (none / received / confirmed) is one truth on every
+     * step, not only on Review & Send: read it once the party is known */
+    if (window.SIYL_CONFIRM && party()) SIYL_CONFIRM.load();
+    document.addEventListener('siyl:auth', function () { if (window.SIYL_CONFIRM) SIYL_CONFIRM.load(true); });
     document.addEventListener('siyl:invite-ready', function () { paint(); if (party() && !active()) chooseIdentity(false); });
     /* the code has just opened the party on this very page: no reload, the
      * identity question follows the code immediately */

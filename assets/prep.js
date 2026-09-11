@@ -29,14 +29,14 @@
   css.textContent =
     '.prep{border-bottom:1px solid #DAD9D7;background:#F3EEE7}' +
     '.prep-in{max-width:640px;margin:0 auto;padding:13px 24px;display:flex;align-items:center;gap:12px}' +
-    '.prep-l{display:none;font-size:9px;letter-spacing:2.2px;text-transform:uppercase;color:#7C7A75;white-space:nowrap}' +
+    '.prep-l{display:none;font-size:9px;letter-spacing:2.2px;text-transform:uppercase;color:#6B6964;white-space:nowrap}' +
     '@media (min-width:480px){.prep-l{display:inline}}' +
     '.prep-n{font-size:9px;letter-spacing:2.2px;text-transform:uppercase;color:#313131;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}' +
     '.prep-a{margin-left:auto;display:flex;gap:2px;flex:none}' +
-    '.prep-a a{width:44px;height:44px;margin:-13px 0;display:flex;align-items:center;justify-content:center;color:#7C7A75;text-decoration:none;font-size:15px}' +
+    '.prep-a a{width:44px;height:44px;margin:-13px 0;display:flex;align-items:center;justify-content:center;color:#6B6964;text-decoration:none;font-size:15px}' +
     '.prep-a a:hover{color:#313131}' +
     '.prep-a a[aria-disabled="true"]{opacity:.28;pointer-events:none}' +
-    '.prep-s{font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:#7C7A75;white-space:nowrap;border-left:1px solid #DAD9D7;padding-left:12px;display:none}' +
+    '.prep-s{font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:#6B6964;white-space:nowrap;border-left:1px solid #DAD9D7;padding-left:12px;display:none}' +
     '@media (min-width:600px){.prep-s{display:inline}}' +
     '@media (min-width:768px){.prep-in{max-width:var(--a-frame);padding-left:var(--a-gut);padding-right:var(--a-gut)}}';
   document.head.appendChild(css);

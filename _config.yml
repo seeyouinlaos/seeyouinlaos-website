@@ -11,6 +11,14 @@ exclude:
   - journey/
   - node_modules
   - README.md
+  - SITE-REPORT.md
+  - dist/
+  # the superseded registration engine — never served; its entry is regenerated
+  # from register-landing.html as a redirect into invitation.html
+  - register/index.html
+  - register/app.mjs
+  - register/data.mjs
+  - register/logic.mjs
   - package.json
   - package-lock.json
   - wrangler.jsonc

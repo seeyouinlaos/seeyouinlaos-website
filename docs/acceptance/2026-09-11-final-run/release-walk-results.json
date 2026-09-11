@@ -1,0 +1,348 @@
+{
+  "origin": "http://127.0.0.1:8787",
+  "at": "2026-09-11T19:20:56.779Z",
+  "results": [
+    {
+      "id": "01 home fresh",
+      "ok": true,
+      "detail": "home renders with no session"
+    },
+    {
+      "id": "01 menu surfaces",
+      "ok": true,
+      "detail": "menu reaches destinations, journeys, stays, experiences, dining, wellness, the wedding, the private journey · missing:  · text ok: true"
+    },
+    {
+      "id": "01 public index.html",
+      "ok": true,
+      "detail": "index.html renders the current truth"
+    },
+    {
+      "id": "01 public destination.html",
+      "ok": true,
+      "detail": "destination.html renders the current truth"
+    },
+    {
+      "id": "01 public accommodation.html",
+      "ok": true,
+      "detail": "accommodation.html renders the current truth"
+    },
+    {
+      "id": "01 public experiences.html",
+      "ok": true,
+      "detail": "experiences.html renders the current truth"
+    },
+    {
+      "id": "01 public marsilea.html",
+      "ok": true,
+      "detail": "marsilea.html renders the current truth"
+    },
+    {
+      "id": "01 public 1872.html",
+      "ok": true,
+      "detail": "1872.html renders the current truth"
+    },
+    {
+      "id": "01 public voyage.html",
+      "ok": true,
+      "detail": "voyage.html renders the current truth"
+    },
+    {
+      "id": "01 public journeys.html",
+      "ok": true,
+      "detail": "journeys.html renders the current truth"
+    },
+    {
+      "id": "01 public invitation.html",
+      "ok": true,
+      "detail": "invitation.html renders the current truth"
+    },
+    {
+      "id": "02 wrong code fails safely",
+      "ok": true,
+      "detail": "no session, no names"
+    },
+    {
+      "id": "02 who are you",
+      "ok": true,
+      "detail": "the party opened; nobody chosen yet"
+    },
+    {
+      "id": "02 code not retained in the clear",
+      "ok": true,
+      "detail": "siyl.auth holds names, not the code; URL clean"
+    },
+    {
+      "id": "02 active is Peggy",
+      "ok": true,
+      "detail": "activeGuestId = Peggy, said in words"
+    },
+    {
+      "id": "02b you page",
+      "ok": true,
+      "detail": "both names, one party contact"
+    },
+    {
+      "id": "02b party contact shared",
+      "ok": true,
+      "detail": "email stored once for the party"
+    },
+    {
+      "id": "03 chronology",
+      "ok": true,
+      "detail": "01 · 21 – 24 FEB | 02 · 24 – 25 FEB | 03 · 25 – 27 FEB | 04 · 27 FEB – 01 MAR | 28 FEB | 05 · 01 MAR | 06 · 01 – 04 MAR | 07 · 04 MAR | 08 · 04 – 06 MAR | 09 · 06 MAR | 10 · 06 – 08 MAR"
+    },
+    {
+      "id": "03 bangkok replaced not duplicated",
+      "ok": true,
+      "detail": "one Bangkok line after two choices"
+    },
+    {
+      "id": "03 mu9646 one fare",
+      "ok": true,
+      "detail": "business after economy → one line USD 275"
+    },
+    {
+      "id": "03 mu9646 truth",
+      "ok": true,
+      "detail": "05 · 01 MAR Vientiane → Kunming Transportation TRANSPORTATION · CHINA EASTERN AIRLINES MU9646 · Vientiane → Kunming 01 March 2027 · non-stop 15:50 VTE · TERMINAL 1 18:25 KMG 1h 35m · non-stop · Boeing"
+    },
+    {
+      "id": "03 c86 truth",
+      "ok": true,
+      "detail": "07 · 04 MAR Kunming → Lijiang Transportation SELECTED FOR YOUR JOURNEY C86 · Kunming → Lijiang 04 March 2027 · Kunming → Lijiang 10:15 KUNMING 13:44 LIJIANG 3h 29m · direct · Business Class · 1 + 1 se"
+    },
+    {
+      "id": "03 train stage",
+      "ok": true,
+      "detail": "02 · 24 – 25 FEB Bangkok → Vientiane Transportation TRANSPORTATION · STATE RAILWAY OF THAILAND Special Express No. 25 24 – 25 February 2027 · Bangkok → Nong Kha"
+    },
+    {
+      "id": "04 four events",
+      "ok": true,
+      "detail": "exactly four"
+    },
+    {
+      "id": "04 temple truth",
+      "ok": true,
+      "detail": "date · time · place"
+    },
+    {
+      "id": "04 tak bat self-pay",
+      "ok": true,
+      "detail": "inside the ceremony, self-pay, unpriced"
+    },
+    {
+      "id": "04 peggy answers hers",
+      "ok": true,
+      "detail": "temple attend + coffee,vows,dinner · signed by Peggy"
+    },
+    {
+      "id": "04 proxy signed",
+      "ok": true,
+      "detail": "Steffie's answer written by Peggy and said so"
+    },
+    {
+      "id": "04 sangkhathan unresolved",
+      "ok": true,
+      "detail": "no decision offered, no amount, no purchase-like state: SANGKHATHAN · PERSONAL GIVING This part of the Temple Ceremony is prepared for couples. Guest Relations will let you kno"
+    },
+    {
+      "id": "04 no sangkhathan in bag",
+      "ok": true,
+      "detail": "nothing inferred into the journey"
+    },
+    {
+      "id": "05 dress mapping",
+      "ok": true,
+      "detail": "blue Lao traditional → temple · black tie → afternoon and evening · resort wear → travelling days"
+    },
+    {
+      "id": "05 rails",
+      "ok": true,
+      "detail": "17 references, resort-01 gone"
+    },
+    {
+      "id": "05 one acknowledgement per guest",
+      "ok": true,
+      "detail": "Peggy sees her own checkbox only"
+    },
+    {
+      "id": "05 dress personal",
+      "ok": true,
+      "detail": "Peggy acknowledged; Steffie untouched"
+    },
+    {
+      "id": "05 switch shows her checkbox",
+      "ok": true,
+      "detail": "after SWITCH only Steffie's acknowledgement is answerable"
+    },
+    {
+      "id": "05 steffie dress own name",
+      "ok": true,
+      "detail": "each acknowledgement signed by its own guest"
+    },
+    {
+      "id": "05 seating not open",
+      "ok": true,
+      "detail": "closed, per guest, no chairs, no seat ids"
+    },
+    {
+      "id": "06 four areas",
+      "ok": true,
+      "detail": "four editorial areas"
+    },
+    {
+      "id": "06 consent personal",
+      "ok": true,
+      "detail": "one unchecked affirmative consent for Peggy only"
+    },
+    {
+      "id": "06 peggy record",
+      "ok": true,
+      "detail": "profile in Peggy's record; consent stored for Peggy only"
+    },
+    {
+      "id": "06 deep link answering for",
+      "ok": true,
+      "detail": "subject = Steffie, her consent not answerable by Peggy"
+    },
+    {
+      "id": "06 proxy ownership",
+      "ok": true,
+      "detail": "Steffie's dietary signed by Peggy; Peggy's drink untouched"
+    },
+    {
+      "id": "06 switch ≠ answering for",
+      "ok": true,
+      "detail": "activeGuestId still Peggy after the deep link"
+    },
+    {
+      "id": "07 review hierarchy",
+      "ok": true,
+      "detail": "five blocks"
+    },
+    {
+      "id": "07 status only",
+      "ok": true,
+      "detail": "no controls, no gallery"
+    },
+    {
+      "id": "07 costs once, no checkout",
+      "ok": true,
+      "detail": "USD 480 · says nothing is paid here"
+    },
+    {
+      "id": "07 shared once",
+      "ok": true,
+      "detail": "3 lines = bag"
+    },
+    {
+      "id": "07 not sent",
+      "ok": true,
+      "detail": "send available, no state card"
+    },
+    {
+      "id": "07 send payload",
+      "ok": true,
+      "detail": "one party record with both guests, no code inside"
+    },
+    {
+      "id": "07 received",
+      "ok": true,
+      "detail": "received ≠ confirmed; a correction can still be sent (send stays available until Guest Relations confirms)"
+    },
+    {
+      "id": "07 shell received",
+      "ok": true,
+      "detail": "step 06 reads Received from another step · 01 Your Invitation OPEN 02 Your Journey CURRENT 03 The Wedding COMPLETE 04 Wedding Preparation COMPLETE 05 About You COMPLETE 06 Review & Send RECEIVED"
+    },
+    {
+      "id": "08 reload",
+      "ok": true,
+      "detail": "identity, record and status survive reload"
+    },
+    {
+      "id": "09 steffie own device",
+      "ok": true,
+      "detail": "active = Steffie"
+    },
+    {
+      "id": "09 steffie sees her checkbox",
+      "ok": true,
+      "detail": "only her own acknowledgement"
+    },
+    {
+      "id": "09 steffie dress personal",
+      "ok": true,
+      "detail": "signed by Steffie"
+    },
+    {
+      "id": "09 steffie consent hers",
+      "ok": true,
+      "detail": "her own consent, first person"
+    },
+    {
+      "id": "10 switch",
+      "ok": true,
+      "detail": "identity changed, answers unchanged, ownership intact"
+    },
+    {
+      "id": "10 costs not duplicated after switch",
+      "ok": true,
+      "detail": "one Bangkok line, one fare line"
+    },
+    {
+      "id": "10 review after switch",
+      "ok": true,
+      "detail": "same shared lines, same party"
+    },
+    {
+      "id": "11 confirmed",
+      "ok": true,
+      "detail": "party confirmation once + personal cards"
+    },
+    {
+      "id": "11 one card per guest",
+      "ok": true,
+      "detail": "two cards, named"
+    },
+    {
+      "id": "11 cards personal state",
+      "ok": true,
+      "detail": "cards read each guest's own state"
+    },
+    {
+      "id": "11 no ticket imitation",
+      "ok": true,
+      "detail": "no QR, no barcode, no seat shown while seating is closed"
+    },
+    {
+      "id": "11 steffie sees confirmed",
+      "ok": true,
+      "detail": "shared confirmation on her device"
+    },
+    {
+      "id": "12 stale session",
+      "ok": true,
+      "detail": "a session without names is not trusted; the guest is asked for the code again"
+    },
+    {
+      "id": "12 re-entry keeps record",
+      "ok": true,
+      "detail": "answers survive re-entry"
+    },
+    {
+      "id": "13 review deep links",
+      "ok": true,
+      "detail": "19 edit links resolve while signed in"
+    },
+    {
+      "id": "13 wedding deep link for",
+      "ok": true,
+      "detail": "subject via ?for="
+    }
+  ],
+  "errors": [],
+  "consoleErrors": []
+}

@@ -20,7 +20,7 @@
     ['Journeys', 'journeys.html', [
       ['Before the Wedding', 'journeys.html#j-bkk-stay'],
       ['The Wedding', 'journeys.html#j-wedstay'],
-      ['After the Wedding', 'journeys.html#j-mu9632']
+      ['After the Wedding', 'journeys.html#j-mu9646']
     ]],
     ['Stays', 'accommodation.html', [
       ['Sathorn Penthouse Bangkok', 'room.html?stay=sathorn&room=penthouse'],

@@ -1,0 +1,71 @@
+PASS 01 home fresh — home renders with no session
+PASS 01 menu surfaces — menu reaches destinations, journeys, stays, experiences, dining, wellness, the wedding, the private journey · missing:  · text ok: true
+PASS 01 public index.html — index.html renders the current truth
+PASS 01 public destination.html — destination.html renders the current truth
+PASS 01 public accommodation.html — accommodation.html renders the current truth
+PASS 01 public experiences.html — experiences.html renders the current truth
+PASS 01 public marsilea.html — marsilea.html renders the current truth
+PASS 01 public 1872.html — 1872.html renders the current truth
+PASS 01 public voyage.html — voyage.html renders the current truth
+PASS 01 public journeys.html — journeys.html renders the current truth
+PASS 01 public invitation.html — invitation.html renders the current truth
+PASS 02 wrong code fails safely — no session, no names
+PASS 02 who are you — the party opened; nobody chosen yet
+PASS 02 code not retained in the clear — siyl.auth holds names, not the code; URL clean
+PASS 02 active is Peggy — activeGuestId = Peggy, said in words
+PASS 02b you page — both names, one party contact
+PASS 02b party contact shared — email stored once for the party
+PASS 03 chronology — 01 · 21 – 24 FEB | 02 · 24 – 25 FEB | 03 · 25 – 27 FEB | 04 · 27 FEB – 01 MAR | 28 FEB | 05 · 01 MAR | 06 · 01 – 04 MAR | 07 · 04 MAR | 08 · 04 – 06 MAR | 09 · 06 MAR | 10 · 06 – 08 MAR
+PASS 03 bangkok replaced not duplicated — one Bangkok line after two choices
+PASS 03 mu9646 one fare — business after economy → one line USD 275
+PASS 03 mu9646 truth — 05 · 01 MAR Vientiane → Kunming Transportation TRANSPORTATION · CHINA EASTERN AIRLINES MU9646 · Vientiane → Kunming 01 March 2027 · non-stop 15:50 VTE · TERMINAL 1 18:25 KMG 1h 35m · non-stop · Boeing
+PASS 03 c86 truth — 07 · 04 MAR Kunming → Lijiang Transportation SELECTED FOR YOUR JOURNEY C86 · Kunming → Lijiang 04 March 2027 · Kunming → Lijiang 10:15 KUNMING 13:44 LIJIANG 3h 29m · direct · Business Class · 1 + 1 se
+PASS 03 train stage — 02 · 24 – 25 FEB Bangkok → Vientiane Transportation TRANSPORTATION · STATE RAILWAY OF THAILAND Special Express No. 25 24 – 25 February 2027 · Bangkok → Nong Kha
+PASS 04 four events — exactly four
+PASS 04 temple truth — date · time · place
+PASS 04 tak bat self-pay — inside the ceremony, self-pay, unpriced
+PASS 04 peggy answers hers — temple attend + coffee,vows,dinner · signed by Peggy
+PASS 04 proxy signed — Steffie's answer written by Peggy and said so
+PASS 04 sangkhathan unresolved — no decision offered, no amount, no purchase-like state: SANGKHATHAN · PERSONAL GIVING This part of the Temple Ceremony is prepared for couples. Guest Relations will let you kno
+PASS 04 no sangkhathan in bag — nothing inferred into the journey
+PASS 05 dress mapping — blue Lao traditional → temple · black tie → afternoon and evening · resort wear → travelling days
+PASS 05 rails — 17 references, resort-01 gone
+PASS 05 one acknowledgement per guest — Peggy sees her own checkbox only
+PASS 05 dress personal — Peggy acknowledged; Steffie untouched
+PASS 05 switch shows her checkbox — after SWITCH only Steffie's acknowledgement is answerable
+PASS 05 steffie dress own name — each acknowledgement signed by its own guest
+PASS 05 seating not open — closed, per guest, no chairs, no seat ids
+PASS 06 four areas — four editorial areas
+PASS 06 consent personal — one unchecked affirmative consent for Peggy only
+PASS 06 peggy record — profile in Peggy's record; consent stored for Peggy only
+PASS 06 deep link answering for — subject = Steffie, her consent not answerable by Peggy
+PASS 06 proxy ownership — Steffie's dietary signed by Peggy; Peggy's drink untouched
+PASS 06 switch ≠ answering for — activeGuestId still Peggy after the deep link
+PASS 07 review hierarchy — five blocks
+PASS 07 status only — no controls, no gallery
+PASS 07 costs once, no checkout — USD 480 · says nothing is paid here
+PASS 07 shared once — 3 lines = bag
+PASS 07 not sent — send available, no state card
+PASS 07 send payload — one party record with both guests, no code inside
+PASS 07 received — received ≠ confirmed; a correction can still be sent (send stays available until Guest Relations confirms)
+PASS 07 shell received — step 06 reads Received from another step · 01 Your Invitation OPEN 02 Your Journey CURRENT 03 The Wedding COMPLETE 04 Wedding Preparation COMPLETE 05 About You COMPLETE 06 Review & Send RECEIVED
+PASS 08 reload — identity, record and status survive reload
+PASS 09 steffie own device — active = Steffie
+PASS 09 steffie sees her checkbox — only her own acknowledgement
+PASS 09 steffie dress personal — signed by Steffie
+PASS 09 steffie consent hers — her own consent, first person
+PASS 10 switch — identity changed, answers unchanged, ownership intact
+PASS 10 costs not duplicated after switch — one Bangkok line, one fare line
+PASS 10 review after switch — same shared lines, same party
+PASS 11 confirmed — party confirmation once + personal cards
+PASS 11 one card per guest — two cards, named
+PASS 11 cards personal state — cards read each guest's own state
+PASS 11 no ticket imitation — no QR, no barcode, no seat shown while seating is closed
+PASS 11 steffie sees confirmed — shared confirmation on her device
+PASS 12 stale session — a session without names is not trusted; the guest is asked for the code again
+PASS 12 re-entry keeps record — answers survive re-entry
+PASS 13 review deep links — 19 edit links resolve while signed in
+PASS 13 wedding deep link for — subject via ?for=
+
+68/68 checks pass · page errors: 0 · console errors: 0
+DONE

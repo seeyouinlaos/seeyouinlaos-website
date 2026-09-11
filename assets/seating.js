@@ -96,17 +96,17 @@
         var selectable = (st === 'available' || st === 'yours') && opts.selectable;
         var label = (WORDS[st] || S.STATES[st]) + ' · ' + S.describe(s.seatId);
         var fill = st === 'yours' ? '#313131' : st === 'taken' ? '#DAD9D7' : st === 'family' ? '#EDEBE7' : '#FCFAF6';
-        var stroke = st === 'yours' || st === 'party' ? '#313131' : st === 'family' ? '#7C7A75' : '#C9C4BA';
+        var stroke = st === 'yours' || st === 'party' ? '#313131' : st === 'family' ? '#6B6964' : '#C9C4BA';
         var dash = st === 'family' ? ' stroke-dasharray="3 2"' : '';
-        var mark = st === 'family' ? '<text x="' + (x + seat / 2) + '" y="' + (y + seat / 2 + 3) + '" text-anchor="middle" font-size="9" fill="#7C7A75" font-family="Hanken Grotesk, Helvetica, Arial, sans-serif" letter-spacing="1">F</text>'
-                 : st === 'taken' ? '<circle cx="' + (x + seat / 2) + '" cy="' + (y + seat / 2) + '" r="2.2" fill="#7C7A75"/>'
+        var mark = st === 'family' ? '<text x="' + (x + seat / 2) + '" y="' + (y + seat / 2 + 3) + '" text-anchor="middle" font-size="9" fill="#6B6964" font-family="Hanken Grotesk, Helvetica, Arial, sans-serif" letter-spacing="1">F</text>'
+                 : st === 'taken' ? '<circle cx="' + (x + seat / 2) + '" cy="' + (y + seat / 2) + '" r="2.2" fill="#6B6964"/>'
                  : st === 'yours' ? '<path d="M' + (x + 8) + ' ' + (y + 13.5) + ' l4 4 l7 -8" fill="none" stroke="#F3EEE7" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>'
                  : st === 'party' ? '<circle cx="' + (x + seat / 2) + '" cy="' + (y + seat / 2) + '" r="3" fill="none" stroke="#313131" stroke-width="1.2"/>' : '';
         return '<g class="seat seat-' + st + '"' + (selectable ? ' role="button" tabindex="0" data-seat="' + esc(s.seatId) + '"' : ' aria-disabled="true"') +
           ' aria-label="' + esc(label) + '"><title>' + esc(label) + '</title>' +
           '<rect x="' + x + '" y="' + y + '" width="' + seat + '" height="' + seat + '" rx="3" fill="' + fill + '" stroke="' + stroke + '" stroke-width="' + (st === 'party' ? 1.8 : 1) + '"' + dash + '/>' + mark + '</g>';
       }
-      var T = 'font-family="Hanken Grotesk, Helvetica, Arial, sans-serif" font-size="9" letter-spacing="2" fill="#7C7A75"';
+      var T = 'font-family="Hanken Grotesk, Helvetica, Arial, sans-serif" font-size="9" letter-spacing="2" fill="#6B6964"';
 
       if (event === 'ceremony') {
         var rows = (v && v.ceremony && v.ceremony.rows) || [];

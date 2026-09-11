@@ -111,9 +111,21 @@ gate(5, 'Legacy content excluded from active release',
     .filter(Boolean).join(' · ') || 'clean (journey excluded, no legacy terms/files in active surfaces)');
 
 /* Release plumbing reminders (not numbered gates) */
-gate('R1', 'register/ route unblocked for deploy',
-  !/^register$/m.test(assetsignore),
-  /^register$/m.test(assetsignore) ? "'.assetsignore' still excludes register/ — remove the line at release." : 'register/ will deploy');
+/* R1 (final pre-release run, 11 SEP 2026): the superseded registration engine
+ * is NEVER served — its four files are excluded on both origins, its entry
+ * (the issued /register/?invite= link) redirects into the accepted product,
+ * and the two files the accepted product loads from register/ stay public. */
+const jekyll = read('_config.yml');
+const workerSrc = read('src/worker.js');
+const engineFiles = ['register/index.html', 'register/app.mjs', 'register/data.mjs', 'register/logic.mjs'];
+const engineHidden = engineFiles.every((f) => new RegExp('^' + f.replace('.', '\\.') + '$', 'm').test(assetsignore) && new RegExp('^\\s*-\\s*' + f.replace('.', '\\.') + '$', 'm').test(jekyll));
+const engineKept = !/^register\/crypto\.mjs$/m.test(assetsignore) && !/^register\/invitations\.enc\.json$/m.test(assetsignore) && !/^register\/?$/m.test(assetsignore);
+const engineRedirect = workerSrc.includes("url.pathname === '/register' || url.pathname.startsWith('/register/')") && workerSrc.includes('crypto\\.mjs|invitations\\.enc\\.json') && workerSrc.includes("'/invitation.html', 302)");
+const landing = fs.existsSync(path.join(ROOT, 'register-landing.html')) && /permalink: \/register\/index\.html/.test(read('register-landing.html'));
+gate('R1', 'Superseded registration engine never served; /register/ lands in the accepted product',
+  engineHidden && engineKept && engineRedirect && landing,
+  [!engineHidden && 'engine files not excluded on both origins', !engineKept && 'crypto.mjs / invitations.enc.json must stay public', !engineRedirect && 'Worker redirect for /register/ missing', !landing && 'Pages redirect stub missing'].filter(Boolean).join(' · ')
+  || 'index/app/data/logic excluded (.assetsignore + _config.yml) · Worker 302 /register/* → /invitation.html · crypto.mjs + bundle public · Pages stub in place');
 gate('R2', 'Guest Relations view stays private',
   /^src$/m.test(assetsignore),
   'src/ excluded from public assets — GR view needs authenticated hosting in production.');

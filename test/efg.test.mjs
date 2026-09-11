@@ -222,6 +222,34 @@ function ledger() {
   const storage = storageStub();
   return new Seating({ storage, blockConcurrencyWhile: (fn) => fn() });
 }
+test('historical firewall: /register/ lands in the accepted product, the bundle stays reachable', async () => {
+  const w = await worker();
+  const seen = [];
+  const env = { REG_KV: kv(), GR_TOKEN: 'secret-token-of-guest-relations', ASSETS: { fetch: (r) => { seen.push(new URL(r.url).pathname); return new Response('asset'); } } };
+  for (const p of ['/register/?invite=abc', '/register', '/register/index.html', '/register/app.mjs', '/register/data.mjs']) {
+    const r = await w.fetch(new Request('https://x' + p), env);
+    assert.equal(r.status, 302, p); assert.equal(new URL(r.headers.get('location')).pathname, '/invitation.html', p);
+  }
+  for (const p of ['/register/crypto.mjs', '/register/invitations.enc.json', '/invitation.html']) {
+    const r = await w.fetch(new Request('https://x' + p), env);
+    assert.equal(r.status, 200, p);
+  }
+  assert.deepEqual(seen, ['/register/crypto.mjs', '/register/invitations.enc.json', '/invitation.html']);
+  const ai = fs.readFileSync(new URL('../.assetsignore', import.meta.url), 'utf8');
+  const jk = fs.readFileSync(new URL('../_config.yml', import.meta.url), 'utf8');
+  for (const f of ['register/index.html', 'register/app.mjs', 'register/data.mjs', 'register/logic.mjs']) { assert.match(ai, new RegExp('^' + f.replace('.', '\\.') + '$', 'm')); assert.match(jk, new RegExp('- ' + f.replace('.', '\\.') + '$', 'm')); }
+  assert.doesNotMatch(ai, /^register\/crypto\.mjs$|^register\/invitations\.enc\.json$|^register$/m);
+});
+
+test('F · every preparation step reads the journey status, so the shell says Received / Confirmed everywhere', () => {
+  for (const f of ['invitation.html', 'your-journey.html', 'wedding.html', 'wedding-preparation.html', 'about-you.html', 'review.html']) {
+    const h = fs.readFileSync(new URL('../' + f, import.meta.url), 'utf8');
+    assert.ok(h.indexOf('assets/confirm.js') > -1 && h.indexOf('assets/confirm.js') < h.indexOf('assets/prep-shell.js'), f + ' loads confirm.js before the shell');
+  }
+  const shell = fs.readFileSync(new URL('../assets/prep-shell.js', import.meta.url), 'utf8');
+  assert.match(shell, /SIYL_CONFIRM && party\(\)\) SIYL_CONFIRM\.load\(\)/, 'the shell reads the status once the party is known');
+});
+
 const call = (l, op, body, opts = {}) => l.fetch(new Request('https://x/api/seating/' + op + (opts.q || ''), {
   method: body ? 'POST' : 'GET', headers: opts.gr ? { 'x-gr-verified': 'yes' } : {}, body: body ? JSON.stringify(body) : undefined,
 })).then(async (r) => ({ status: r.status, ...(await r.json()) }));

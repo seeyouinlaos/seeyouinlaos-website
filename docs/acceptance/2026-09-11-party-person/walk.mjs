@@ -19,7 +19,10 @@ import { fileURLToPath } from 'node:url';
 
 const ORIGIN = process.argv[2] || 'http://127.0.0.1:8787';
 const OUT = process.argv[3] || path.dirname(fileURLToPath(import.meta.url));
-const TOKEN = process.env.SIYL_TOKEN || 'vz4npnjgkqfv3t47';   /* INV-002 · Peggy & Steffie */
+/* the guest code is never written into the repository: SIYL_TOKEN, or the
+ * gitignored token register src/invitation-tokens.private.csv (INV-002). */
+const TOKEN = process.env.SIYL_TOKEN || (() => { try { const csv = fs.readFileSync(new URL('../../../src/invitation-tokens.private.csv', import.meta.url), 'utf8'); const row = csv.split(/\r?\n/).find((l) => /INV-002/.test(l)); const m = row && row.match(/[a-z0-9]{16}/); return m ? m[0] : ''; } catch (e) { return ''; } })();
+if (!TOKEN) { console.error('no guest code: set SIYL_TOKEN or provide src/invitation-tokens.private.csv'); process.exit(2); }   /* INV-002 · Peggy & Steffie */
 const WIDTHS = [390, 834, 1440, 1920];
 const PEGGY = 'g-peggy', STEFFIE = 'g-steffie';   /* resolved below from the real bundle */
 
