@@ -311,9 +311,12 @@ test('the private journey has one shell, one design system and a hard boundary',
   /* the code opens the invitation; the person then says who they are */
   assert.match(shell, /Who are you\?/);
   assert.match(shell, /Who are you continuing as\?/);
-  assert.match(shell, /partyId: p\.invitationId, guestId: guestId/);
+  /* C · the identity model lives in the guest record; the shell only asks it */
+  const model = readFileSync(join(ROOT, 'assets/guest.js'), 'utf8');
+  assert.match(model, /partyId: p\.invitationId, guestId: guestId/);
+  assert.match(shell, /function active\(\) \{ var g = G\(\); return g \? g\.active\(\) : null; \}/);
   /* an identity never leaks across invitations */
-  assert.match(shell, /if \(!w \|\| w\.partyId !== p\.invitationId\) return null;/);
+  assert.match(model, /if \(!w \|\| w\.partyId !== p\.invitationId\) return null;/);
   /* semantic states only — no score, no percentage, no progress bar */
   assert.ok(!/%|progress|score/i.test(shell.slice(shell.indexOf('function status'), shell.indexOf('/* ----------------------------------------------------------------- shell'))));
   /* one disclosure contract, and ESC closes it */
@@ -610,8 +613,9 @@ test('ABOUT YOU is exactly seven questions and one operational field', () => {
   const keys = [...block.matchAll(/\{ key: '([a-z]+)'/g)].map((m) => m[1]);
   assert.deepEqual(keys, ['dietary', 'drink', 'coffeetea', 'treat', 'comfort', 'avoid', 'anything']);
   assert.match(g, /var ACCESS = \{ key: 'access'/);
-  /* three layers, and a correction never destroys the invitation's own value */
-  assert.match(g, /r\.history\.push\(\{ field: field, from: from, to: v, at: new Date\(\)\.toISOString\(\) \}\)/);
+  /* three layers, and a correction never destroys the invitation's own value —
+   * and since C every entry is signed by the person who actually wrote it */
+  assert.match(g, /r\.history\.push\(\{ field: field, from: from, to: v, at: stamp\(\), by: /);
   /* ABOUT YOU is its own step and its own page — never buried under contact
    * details, and the preparation rail names exactly what the page presents. */
   const about = readFileSync(join(ROOT, 'about-you.html'), 'utf8');

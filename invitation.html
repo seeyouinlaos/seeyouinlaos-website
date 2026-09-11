@@ -108,9 +108,14 @@ p.guests.forEach(function(g){
   h+='<div class="iperson"><div><p class="ipn">'+esc(G.value(g.guestId,'preferredName')||g.fullName)+'</p>'+
      '<p class="ipf">'+esc(G.value(g.guestId,'fullName')||g.fullName)+'</p></div>'+
      '<span class="ipr">Named guest</span></div>'});
-h+='<div class="ifor"><p class="l">You are making decisions for</p><p class="v">'+forWhom+'</p>'+
+/* C · who is continuing, and what belongs to whom — said once, here */
+var me=G.active();
+h+='<div class="ifor"><p class="l">You are continuing as</p><p class="v">'+(me?esc(G.nameOf(me.guestId)):'&mdash;')+
+   (me&&p.guests.length>1?' <button type="button" class="tlink" id="switch" style="border:0;border-bottom:1px solid #313131;background:none;font:inherit;font-size:10.5px;letter-spacing:2px;text-transform:uppercase;margin-left:12px;cursor:pointer;min-height:44px">Switch</button>':'')+'</p>'+
+   (me?'':'<p>Choose your name above so your personal answers are kept in your own name.</p>')+
+   '<p class="l" style="margin-top:16px">You are making decisions for</p><p class="v">'+forWhom+'</p>'+
    '<p>'+(p.guests.length>1
-     ? 'Some answers belong to the whole party — one address, one telephone number, one journey. Others belong to one person: the Temple Ceremony, the Sangkhathan offering and the hospitality questions are answered by name, and every screen tells you whose answer it is.'
+     ? 'Some answers belong to the whole party — one address, one telephone number, one journey; they say <b style="font-weight:400;color:#313131">For your party</b>. Others belong to one person: the wedding day, the dress code, the hospitality questions and your documents are answered by name, say <b style="font-weight:400;color:#313131">For '+esc(me?G.nameOf(me.guestId):'you')+'</b>, and are never changed for you by someone else without saying so.'
      : 'Every answer on this invitation is yours alone.')+'</p></div>';
 h+='</section>';
 
@@ -129,7 +134,10 @@ page.innerHTML=h;
 document.getElementById('go').addEventListener('click',function(){
   G.setIdentityReviewed(true);
   location.href='your-journey.html'});
+var sw=document.getElementById('switch');
+if(sw&&window.SIYL_PREP)sw.addEventListener('click',function(){SIYL_PREP.chooseIdentity(true)});
 }
+document.addEventListener('siyl:who',render);
 document.addEventListener('siyl:guest',function(){/* names may change on you.html */});
 render();
 if(window.SIYL_BAG&&SIYL_BAG.bar)SIYL_BAG.bar();

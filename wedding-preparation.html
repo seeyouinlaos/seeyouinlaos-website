@@ -70,7 +70,9 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/prep-shell.js"></script>
 <script type="module" src="assets/invite.mjs"></script>
 <script>
-/* One acknowledgement, for the person who is continuing. Never pre-ticked,
+/* C · One acknowledgement PER NAMED GUEST, in the first person only. The
+   person continuing ticks their own; the other guest's card says, in words,
+   that it cannot be ticked for them and offers the switch. Never pre-ticked,
    never repeated on another surface. */
 (function(){
 var P=window.SIYL_PREP,G=window.SIYL_GUEST,box=document.getElementById('ack');
@@ -88,14 +90,27 @@ function render(){
     var b=document.getElementById('open'); if(b)b.addEventListener('click',function(){gated(render)});
     return;
   }
-  var a=G.dressAck(),me=P.active();
-  box.innerHTML='<div class="p-card'+(a?' on':'')+'" style="margin-top:24px">'+
-    '<p class="t-l1'+(a?' on':' open')+'">'+(a?'Reviewed · '+when(a.at):'Required before sending')+'</p>'+
-    '<h3 class="t-h1">Before you send your journey</h3>'+
-    '<p class="t-b1 measure">One acknowledgement, for '+esc(P.activeName())+'. It is never ticked for you.</p>'+
-    '<label class="p-check"><input type="checkbox" id="ackbox"'+(a?' checked':'')+'>'+
-    '<span class="t-b1" style="color:#313131">'+esc(G.DRESS_TEXT)+'</span></label></div>';
-  document.getElementById('ackbox').addEventListener('change',function(){G.setDressAck(this.checked);render()});
+  var p=P.party(),me=P.active(),h='';
+  p.guests.forEach(function(g){
+    var id=g.guestId,mine=me.guestId===id,a=G.dressAck(id),name=esc(G.nameOf(id));
+    h+='<div class="p-card'+(a?' on':'')+'" style="margin-top:24px" data-g="'+esc(id)+'">'+
+      '<p class="t-l1'+(mine?' on':'')+'">'+esc(G.labelFor(id))+(mine?' · you':'')+'</p>'+
+      '<h3 class="t-h1">'+(mine?'Before you send your journey':name+'&rsquo;s acknowledgement')+'</h3>'+
+      '<p class="t-l1'+(a?' on':' open')+'">'+(a?'Reviewed · '+when(a.at):'Not yet reviewed · required before sending')+'</p>'+
+      (mine
+        ? '<p class="t-b1 measure">One acknowledgement, for '+name+', in your own name. It is never ticked for you.</p>'+
+          '<label class="p-check"><input type="checkbox" data-ack="'+esc(id)+'"'+(a?' checked':'')+'>'+
+          '<span class="t-b1" style="color:#313131">'+esc(G.DRESS_TEXT)+'</span></label>'
+        : '<p class="t-b1 measure">'+name+' acknowledges the dress code in '+name+'&rsquo;s own name — it cannot be ticked for '+name+'. '+
+          (a?'It has been reviewed.':'Switch to '+name+' to acknowledge it.')+'</p>'+
+          (a?'':'<p class="p-more"><button type="button" class="p-link" data-switch="'+esc(id)+'">Switch to '+name+'</button></p>'))+
+      '</div>';
+  });
+  box.innerHTML=h;
+  box.querySelectorAll('[data-ack]').forEach(function(c){
+    c.addEventListener('change',function(){G.setDressAck(c.getAttribute('data-ack'),c.checked);render()})});
+  box.querySelectorAll('[data-switch]').forEach(function(b){
+    b.addEventListener('click',function(){P.setActive(b.getAttribute('data-switch'))})});
   P.foot(document.getElementById('foot'));
 }
 document.addEventListener('siyl:who',render);

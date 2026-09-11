@@ -99,16 +99,20 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:20px;margin:34
 var G=window.SIYL_GUEST,box=document.getElementById('ack'),st=document.getElementById('ackstate');
 document.getElementById('acktext').textContent=G?G.DRESS_TEXT:'';
 if(!G)return;
-function paint(){var a=G.dressAck();box.checked=!!a;
+/* C · the acknowledgement is personal: it is the active person's, in their
+   own name, and nobody's before WHO ARE YOU has been answered */
+function paint(){var me=G.active(),a=me?G.dressAck(me.guestId):null;box.checked=!!a;box.disabled=!me;
 st.className='ackstate'+(a?'':' open');
-st.textContent=a?('Reviewed · '+new Date(a.at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})):'Not yet reviewed';
+st.textContent=a?('Reviewed · '+new Date(a.at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})+' · for '+G.nameOf(me.guestId))
+  :(me?'Not yet reviewed · for '+G.nameOf(me.guestId):'Open your private journey and choose your name to acknowledge');
 var b=document.getElementById('back');
 if(b)b.textContent=a?'Back to Review & Send':'Back to Review & Send without acknowledging';
 /* the next step is always visible, and it says whether the review is done */
 var n=document.getElementById('next');
 if(n){n.classList.toggle('off',!a);
 n.textContent=a?'Continue to About you':'Acknowledge above, then continue to About you'}}
-box.addEventListener('change',function(){G.setDressAck(box.checked);paint()});
+box.addEventListener('change',function(){var me=G.active();if(me)G.setDressAck(me.guestId,box.checked);paint()});
+document.addEventListener('siyl:who',paint);
 document.addEventListener('siyl:guest',paint);
 paint();
 if(window.SIYL_BAG&&SIYL_BAG.bar)SIYL_BAG.bar();

@@ -1,0 +1,201 @@
+{
+  "origin": "http://127.0.0.1:8787",
+  "at": "2026-09-11T01:57:32.644Z",
+  "results": [
+    {
+      "id": "00 boundary",
+      "ok": true,
+      "detail": "before authentication there is no 01–06: \"Your private journeyOpen your invitation to begin\""
+    },
+    {
+      "id": "01 party",
+      "ok": true,
+      "detail": "the code opened the PARTY: Peggy & Steffie"
+    },
+    {
+      "id": "01 no identity yet",
+      "ok": true,
+      "detail": "activeGuestId is not set by the code"
+    },
+    {
+      "id": "02 who are you",
+      "ok": true,
+      "detail": "the question after the code: CloseYour invitation · INV-002Who are you?This invitation belongs to Peggy & Steffie. Choose your name so we can show yo"
+    },
+    {
+      "id": "02 active = Peggy",
+      "ok": true,
+      "detail": "siyl.who = {\"partyId\":\"INV-002\",\"guestId\":\"G001\",\"at\":\"2026-09-11T01:56:16.816Z\"}"
+    },
+    {
+      "id": "02 bar",
+      "ok": true,
+      "detail": "bar: Your private journey01 / 06Your InvitationPeggy & Steffie · Continuing as PeggySwitchView all steps"
+    },
+    {
+      "id": "03 invitation says who continues",
+      "ok": true,
+      "detail": "step 01 ownership block present"
+    },
+    {
+      "id": "04 journey label",
+      "ok": true,
+      "detail": "#ysub: For your party · Peggy & Steffie · nothing is paid on this website"
+    },
+    {
+      "id": "04 Peggy chose Shama",
+      "ok": true,
+      "detail": "chosen card: Shama Yen-Akat Bangkok"
+    },
+    {
+      "id": "04 party state written",
+      "ok": true,
+      "detail": "bag lines as Peggy: bkk-stay"
+    },
+    {
+      "id": "05 subject defaults to active",
+      "ok": true,
+      "detail": "about you opens answering for Peggy herself"
+    },
+    {
+      "id": "06 ANSWERING FOR in the shell",
+      "ok": true,
+      "detail": "bar: Your private journey05 / 06About YouPeggy & Steffie · Continuing as PeggySwitchAnswering forSteffieBack to yourselfView all steps"
+    },
+    {
+      "id": "06 ANSWERING FOR on the page",
+      "ok": true,
+      "detail": "page band: Answering forSteffieYou are continuing as Peggy. These answers are kept in Steffie’s name and say that you wrote them.Back to yourself"
+    },
+    {
+      "id": "06 record ownership",
+      "ok": true,
+      "detail": "Steffie.dietary=No shellfish · Peggy.dietary=— · Peggy.drink=Riesling"
+    },
+    {
+      "id": "06 signed",
+      "ok": true,
+      "detail": "Steffie history by: G001"
+    },
+    {
+      "id": "06 subject not persisted",
+      "ok": true,
+      "detail": "siyl.who carries no subject"
+    },
+    {
+      "id": "06 fresh page = yourself",
+      "ok": true,
+      "detail": "no silent carry-over of the subject"
+    },
+    {
+      "id": "07 wedding ownership",
+      "ok": true,
+      "detail": "FOR PEGGY · you / FOR STEFFIE · answering for band"
+    },
+    {
+      "id": "08 two acknowledgements",
+      "ok": true,
+      "detail": "2 acknowledgement cards, one per named guest"
+    },
+    {
+      "id": "08 Peggy ticks for Peggy only",
+      "ok": true,
+      "detail": "Peggy.dress.by=G001 · Steffie.dress=null"
+    },
+    {
+      "id": "08 Steffie card is hers",
+      "ok": true,
+      "detail": "no checkbox for Steffie while Peggy continues; switch offered"
+    },
+    {
+      "id": "09 review dress by name",
+      "ok": true,
+      "detail": "block 03 names each acknowledgement"
+    },
+    {
+      "id": "09 review party label",
+      "ok": true,
+      "detail": "blocks 02 and 05 say FOR YOUR PARTY · PEGGY & STEFFIE"
+    },
+    {
+      "id": "09 review you block",
+      "ok": true,
+      "detail": "block 01 says who continues and offers answering for"
+    },
+    {
+      "id": "10 switch drawer",
+      "ok": true,
+      "detail": "switch copy: CloseSwitch identityWho are you continuing as?This invitation belongs to Peggy & Steffie. Choose your name so we can show your personal details and decisions co"
+    },
+    {
+      "id": "10 active = Steffie",
+      "ok": true,
+      "detail": "bar: Your private journey04 / 06Wedding PreparationPeggy & Steffie · Continuing as SteffieSwitchView all steps"
+    },
+    {
+      "id": "10 Peggy untouched by the switch",
+      "ok": true,
+      "detail": "Peggy.drink=Riesling · Peggy.dress.by=G001"
+    },
+    {
+      "id": "10 Steffie now has her checkbox",
+      "ok": true,
+      "detail": "the checkbox followed the identity"
+    },
+    {
+      "id": "10 both acknowledged, each by themselves",
+      "ok": true,
+      "detail": "dress.by: Peggy=G001 Steffie=G002"
+    },
+    {
+      "id": "11 party state shared",
+      "ok": true,
+      "detail": "Steffie sees the same journey Peggy chose"
+    },
+    {
+      "id": "11 Steffie answers for herself",
+      "ok": true,
+      "detail": "her dietary answer (written for her by Peggy) is there; Peggy's drink is not"
+    },
+    {
+      "id": "11 wedding flips",
+      "ok": true,
+      "detail": "FOR STEFFIE · you / FOR PEGGY · answering for"
+    },
+    {
+      "id": "11 review both reviewed",
+      "ok": true,
+      "detail": "block 03: both acknowledgements reviewed"
+    },
+    {
+      "id": "12 semantic states",
+      "ok": true,
+      "detail": "view all steps: 01Your InvitationOpen02Your JourneyComplete03The WeddingOpen04Wedding PreparationComplete05About YouCurrent06Review & SendOpen"
+    },
+    {
+      "id": "13 identity from another invitation is dropped",
+      "ok": true,
+      "detail": "WHO ARE YOU asked again: CloseYour invitation · INV-002Who are you?This invitation belongs to Peggy & Ste"
+    },
+    {
+      "id": "13 nothing lost",
+      "ok": true,
+      "detail": "records and journey intact after recovery"
+    },
+    {
+      "id": "13 stale session gate",
+      "ok": true,
+      "detail": "no names → gate, no identity, no personal surface"
+    },
+    {
+      "id": "13 recovered",
+      "ok": true,
+      "detail": "names back, records back"
+    },
+    {
+      "id": "14 no horizontal overflow",
+      "ok": true,
+      "detail": "four surfaces × four widths"
+    }
+  ]
+}

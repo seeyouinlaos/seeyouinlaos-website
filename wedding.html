@@ -107,9 +107,15 @@ function render(){
     var name=esc(G.value(g.guestId,'preferredName')||g.fullName);
     var mine=me&&me.guestId===g.guestId;
     var open=T.openFor(g.guestId);
+    /* C · every personal block says whose it is. When the answers below are
+     * not the active person's, the surface says so in words, and offers the
+     * one other thing that is not answering-for: switching identity. */
     h+='<section class="prep-sec" data-g="'+esc(g.guestId)+'">'+
-       '<p class="t-l1">'+(mine?'Answering for you':'Answering for')+'</p>'+
+       '<p class="t-l1'+(mine?' on':'')+'">'+esc(G.labelFor(g.guestId))+(mine?' · you':'')+'</p>'+
        '<h2 class="t-h2">'+name+'</h2>'+
+       (mine?'':'<div class="p-for"><span class="t-l1">Answering for</span><b>'+name+'</b>'+
+         '<span class="t-b2">You are continuing as '+esc(P.activeName())+'. These answers are kept in '+name+'&rsquo;s name and say that you gave them.</span>'+
+         '<button type="button" class="p-link mute" data-switch="'+esc(g.guestId)+'">Switch to '+name+'</button></div>')+
        '<p class="t-l1'+(open.length?' open':' on')+'">'+
          (open.length?open.length+' still to answer':'All answered')+'</p>'+
        T.EVENTS.map(function(e){return event(g,name,e)}).join('')+
@@ -117,6 +123,8 @@ function render(){
   });
   page.innerHTML=h;
 
+  page.querySelectorAll('[data-switch]').forEach(function(b){
+    b.addEventListener('click',function(){P.setActive(b.getAttribute('data-switch'))})});
   page.querySelectorAll('[data-g]').forEach(function(sec){
     var id=sec.getAttribute('data-g');
     sec.querySelectorAll('[data-e]').forEach(function(card){

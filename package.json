@@ -13,7 +13,7 @@
     "build:rooms": "node src/build-rooms.cjs",
     "build:standalone": "node src/build-standalone.cjs",
     "edit": "node src/dev-editor-server.cjs",
-    "test": "node --test 'test/registration.test.mjs' 'test/pricing.test.mjs' 'test/inventory.test.mjs'",
+    "test": "node --test 'test/registration.test.mjs' 'test/pricing.test.mjs' 'test/inventory.test.mjs' 'test/party-person.test.mjs'",
     "deploy": "wrangler deploy",
     "release-check": "node src/release-check.cjs"
   },

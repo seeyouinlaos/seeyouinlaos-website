@@ -152,10 +152,10 @@ body.fx-open .fxs,body.fx-open .fxo{display:block}
 }
 </style><link rel="stylesheet" href="assets/desktop.css"><link rel="stylesheet" href="assets/aman.css"><link rel="stylesheet" href="assets/prep.css"></head><body>
 <header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="your-journey.html" aria-label="Your Journey"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
-<main><h1>Your Journey</h1><p class="sub">For your party · nothing is paid on this website</p>
+<main><h1>Your Journey</h1><p class="sub" id="ysub">For your party · nothing is paid on this website</p>
 
 <section class="prep-sec" id="choices">
-  <p class="t-l1">For your party</p>
+  <p class="t-l1" data-party-label>For your party</p>
   <h2 class="t-h2">Where you stay in Bangkok</h2>
   <p class="t-b1 measure">21 – 24 February 2027 · three nights · three approved addresses, one of them yours. Everything on this page belongs to the whole party.</p>
   <div id="bkksel"></div>
@@ -296,8 +296,15 @@ document.addEventListener('siyl:bag',paint);paint()}
 function whoLabel(){
 var G=window.SIYL_GUEST,p=G?G.party():null;
 if(!p||!p.guests.length)return '';
-return '<span class="who">'+(p.guests.length>1?'For your party'
-  :'For '+(G.value(p.guests[0].guestId,'preferredName')||p.guests[0].fullName))+'</span>'}
+var e=function(t){return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')};
+return '<span class="who">'+e(p.guests.length>1?G.partyLabel():G.labelFor(p.guests[0].guestId))+'</span>'}
+/* C · every shared surface names the party it belongs to */
+function ownerLabels(){
+var G=window.SIYL_GUEST,p=G?G.party():null,lab=p?(p.guests.length>1?G.partyLabel():G.labelFor(p.guests[0].guestId)):'For your party';
+var s=document.getElementById('ysub');if(s)s.textContent=lab+' · nothing is paid on this website';
+document.querySelectorAll('[data-party-label]').forEach(function(el){el.textContent=lab})}
+document.addEventListener('siyl:guest',ownerLabels);document.addEventListener('siyl:who',ownerLabels);
+document.addEventListener('siyl:invite-ready',ownerLabels);ownerLabels();
 
 /* ---------------------------------------------------------------- THE WEDDING
  * The reason for the journey reads as ONE programme, in the order the day runs,

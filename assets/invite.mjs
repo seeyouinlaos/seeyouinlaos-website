@@ -114,6 +114,8 @@ function build() {
       const inv = await lookupByToken(code, await loadRecords());
       if (inv) {
         AUTH.set(inv);
+        /* the PARTY is open — the shell now asks who is continuing */
+        try { document.dispatchEvent(new CustomEvent('siyl:auth')); } catch (e) {}
         err.textContent = '';
         input.value = '';
         close();

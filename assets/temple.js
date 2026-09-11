@@ -30,6 +30,12 @@
     try { return JSON.parse(localStorage.getItem(KEY) || 'null') || {}; }
     catch (e) { return {}; }
   }
+  /* the active person — who is actually answering, for themselves or for
+   * another named guest (C · ANSWERING FOR). Never the subject. */
+  function by() {
+    var G = window.SIYL_GUEST, w = G && G.who ? G.who() : null;
+    return w ? w.activeGuestId : null;
+  }
   function write(v) {
     localStorage.setItem(KEY, JSON.stringify(v));
     try { document.dispatchEvent(new CustomEvent('siyl:temple')); } catch (e) {}
@@ -88,6 +94,7 @@
       if (v === 'yes' || v === 'no') st.by[id].events[key] = v;
       else delete st.by[id].events[key];
       st.by[id].at = new Date().toISOString();
+      st.by[id].by = by();
       write(st);
     },
 
@@ -113,6 +120,7 @@
       st.by[id] = st.by[id] || {};
       st.by[id].attend = (v === 'yes' || v === 'no') ? v : null;
       st.by[id].at = new Date().toISOString();
+      st.by[id].by = by();
       /* Not attending: this person's offering decision goes with it, and
        * returning to attending never silently restores it — they are asked
        * again, from NOT DECIDED. */
@@ -129,6 +137,8 @@
       if (st.by[id].attend !== 'yes') delete st.by[id].off;
       else if (v === 'yes' || v === 'no') st.by[id].off = v;
       else delete st.by[id].off;
+      st.by[id].at = new Date().toISOString();
+      st.by[id].by = by();
       write(st);
       sync();
     },
@@ -182,6 +192,7 @@
         return {
           guestId: g.guestId,
           name: g.preferredName || g.fullName || 'You',
+          answeredBy: ((read().by || {})[g.guestId] || {}).by || null,
           events: events,
           open: self.openFor(g.guestId),
           temple: a === 'yes' ? 'Attending' : a === 'no' ? 'Not attending' : 'Not decided',

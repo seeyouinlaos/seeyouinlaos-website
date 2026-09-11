@@ -102,12 +102,14 @@ return h+'</div>'}
 
 function consentBlock(g){
 var id=g.guestId,c=(D.consentDecided(id)?(D.consent(id)?'Given':'Declined'):'Not answered');
-var given=!!D.consent(id);
+var given=!!D.consent(id),may=D.mayConsent(id),name=esc(G.nameOf(id));
 return '<div class="consent" data-c="'+esc(id)+'">'+
   '<h3>Photographs and film</h3>'+
+  /* C · consent is first person only — nobody gives it for someone else */
+  (may?'':'<p class="body" style="color:#313131"><b style="font-weight:400">'+name+' answers this in '+name+'&rsquo;s own name.</b> It cannot be given or declined for '+name+' — switch to '+name+' in your private journey to answer it.</p>')+
   '<p class="body">A photographer and a videographer are with us on the wedding day. This is how the day is remembered, and it happens whether or not you answer the question below.</p>'+
   '<p class="body" style="margin-top:12px"><b style="font-weight:400;color:#313131">Publication is a separate choice.</b> Saying no changes nothing about your place at the wedding.</p>'+
-  '<label class="ackrow"><input type="checkbox" data-consent="'+esc(id)+'"'+(given?' checked':'')+'>'+
+  '<label class="ackrow"><input type="checkbox" data-consent="'+esc(id)+'"'+(given?' checked':'')+(may?'':' disabled')+'>'+
   '<span>'+D.CONSENT_TEXT+'</span></label>'+
   '<p class="cstate">'+c+(D.consentDecided(id)?' · '+when((D.consent(id)||{}).at||new Date().toISOString()):'')+'</p>'+
   '<p class="body" style="margin-top:12px;font-size:12px">You can withdraw this at any time by writing to <a href="mailto:guest.relation.seeyouinlaos@gmail.com?subject=Publication%20consent" style="color:#313131">Guest Relations</a>. We keep the date and the wording of every answer, we stop using your images for anything new, and we remove what we still control. Anything already published elsewhere we ask to have taken down — we cannot promise a platform will comply.</p>'+
@@ -126,7 +128,8 @@ if(!p||!p.guests.length){
   return}
 var h='';
 p.guests.forEach(function(g){
-  h+='<section class="gcard"><p class="gname">'+esc(G.value(g.guestId,'preferredName')||g.fullName)+'</p>'+
+  var meG=G.active();
+  h+='<section class="gcard"><p class="gname">'+esc(G.labelFor(g.guestId))+(meG&&meG.guestId===g.guestId?' · you':'')+'</p>'+
      '<p class="body">Both are optional now and can be added at any time before you travel.</p>';
   D.KINDS.forEach(function(k){h+=docRow(g,k)});
   h+=consentBlock(g);
@@ -166,7 +169,7 @@ page.querySelectorAll('.drow').forEach(function(row){
 page.querySelectorAll('[data-consent]').forEach(function(c){
   c.addEventListener('change',function(){D.setConsent(c.getAttribute('data-consent'),c.checked);render()})});
 }
-document.addEventListener('siyl:guest',function(){});
+document.addEventListener('siyl:who',render);
 render();
 if(window.SIYL_BAG&&SIYL_BAG.bar)SIYL_BAG.bar();
 })();
