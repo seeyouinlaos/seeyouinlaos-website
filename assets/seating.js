@@ -9,7 +9,8 @@
 
    States, in words and never by colour alone:
      AVAILABLE · SELECTED BY YOU · YOUR PARTY · RESERVED — FAMILY · TAKEN
-   Bride & Groom are drawn as positions outside the guest inventory.
+   Bride & Groom are two fixed central positions at the dinner table — part of
+   the 50 people, never guest inventory, never selectable.
 
    Until Guest Relations has configured the geometry and opened seating, the
    guest sees SEATING NOT OPEN YET, and this file draws nothing.
@@ -73,9 +74,9 @@
     /* a chair, in words: the code stays the operational id */
     describe: function (seatId) {
       var m = /^C-([LR])-(\d+)-(\d+)$/.exec(seatId || '');
-      if (m) return (m[1] === 'L' ? 'Left' : 'Right') + ' side · row ' + m[2] + ' · chair ' + m[3];
-      var d = /^D-([LR])-(\d+)$/.exec(seatId || '');
-      if (d) return 'Long table · ' + (d[1] === 'L' ? 'left' : 'right') + ' side · place ' + d[2];
+      if (m) return (m[1] === 'L' ? 'Left' : 'Right') + ' side · row ' + Number(m[2]) + ' · chair ' + Number(m[3]);
+      var d = /^D-([TB])-(\d+)$/.exec(seatId || '');
+      if (d) return 'Long table · ' + (d[1] === 'T' ? 'top' : 'bottom') + ' side · place ' + Number(d[2]);
       return seatId || '';
     },
     /* the words for the two personal states, for the person being chosen for */
@@ -127,26 +128,34 @@
           R.forEach(function (s, j) { h += chair(s, pad + maxL * U + aisle + j * U, y); });
           h += '<text x="' + (pad + maxL * U + aisle / 2) + '" y="' + (y + seat / 2 + 3) + '" text-anchor="middle" ' + T + '>' + n + '</text>';
         });
-        h += '<text x="' + (pad + (maxL * U) / 2) + '" y="' + (H - 8) + '" text-anchor="middle" ' + T + '>LEFT</text>' +
-             '<text x="' + (pad + maxL * U + aisle + (maxR * U) / 2) + '" y="' + (H - 8) + '" text-anchor="middle" ' + T + '>RIGHT</text>';
+        var nL = rows.filter(function (r) { return r.side === 'L'; }).reduce(function (n, r) { return n + r.seats.length; }, 0);
+        var nR = rows.filter(function (r) { return r.side === 'R'; }).reduce(function (n, r) { return n + r.seats.length; }, 0);
+        h += '<text x="' + (pad + (maxL * U) / 2) + '" y="' + (H - 8) + '" text-anchor="middle" ' + T + '>LEFT · ' + nL + '</text>' +
+             '<text x="' + (pad + maxL * U + aisle + (maxR * U) / 2) + '" y="' + (H - 8) + '" text-anchor="middle" ' + T + '>RIGHT · ' + nR + '</text>';
         return h + '</svg>';
       }
 
-      /* the long table, seen from above: one side along the top, the other
-       * along the bottom, Bride & Groom at the centre of the table itself */
-      var sides = (v && v.dinner && v.dinner.sides) || { L: [], R: [] };
-      var n = Math.max(sides.L.length, sides.R.length, 1), pad2 = 16, top2 = 26;
-      var W2 = pad2 * 2 + n * U, tableH = 44, H2 = top2 + seat + G + tableH + G + seat + 26;
-      var h2 = '<svg class="p-seatmap p-seatmap-table" viewBox="0 0 ' + W2 + ' ' + H2 + '" style="min-width:' + Math.round(W2 * 28 / seat) + 'px" role="group" aria-label="Wedding dinner, one long table">';
-      sides.L.forEach(function (s, j) { h2 += chair(s, pad2 + j * U + (U - seat) / 2, top2); });
+      /* the long table, seen from above: TOP along the top, BOTTOM along the
+       * bottom, BRIDE and GROOM two fixed positions at the centre of the table
+       * itself — part of the 50 people, never guest inventory */
+      var sides = (v && v.dinner && v.dinner.sides) || { T: [], B: [] };
+      var top = sides.T || [], bottom = sides.B || [], fixed = (v && v.dinner && v.dinner.fixed) || ['BRIDE', 'GROOM'];
+      var n = Math.max(top.length, bottom.length, 1), pad2 = 16, top2 = 40;
+      var W2 = pad2 * 2 + n * U, tableH = 48, H2 = top2 + seat + G + tableH + G + seat + 44;
+      var total = top.length + bottom.length + fixed.length;
+      var h2 = '<svg class="p-seatmap p-seatmap-table" viewBox="0 0 ' + W2 + ' ' + H2 + '" style="min-width:' + Math.round(W2 * 28 / seat) + 'px" role="group" aria-label="Wedding dinner, one long table, ' + total + ' people">';
+      h2 += '<text x="' + pad2 + '" y="' + (top2 - 12) + '" ' + T + '>' + top.length + ' GUESTS · TOP</text>';
+      top.forEach(function (s, j) { h2 += chair(s, pad2 + j * U + (U - seat) / 2, top2); });
       var ty = top2 + seat + G;
       h2 += '<rect x="' + pad2 + '" y="' + ty + '" width="' + (n * U) + '" height="' + tableH + '" rx="4" fill="#F3EEE7" stroke="#313131" stroke-width="1"/>';
       var cx = pad2 + (n * U) / 2;
-      h2 += '<text x="' + (cx - 26) + '" y="' + (ty + tableH / 2 + 3) + '" text-anchor="middle" ' + T + '>BRIDE</text>' +
-            '<text x="' + (cx + 26) + '" y="' + (ty + tableH / 2 + 3) + '" text-anchor="middle" ' + T + '>GROOM</text>' +
-            '<line x1="' + cx + '" y1="' + (ty + 10) + '" x2="' + cx + '" y2="' + (ty + tableH - 10) + '" stroke="#DAD9D7"/>';
-      sides.R.forEach(function (s, j) { h2 += chair(s, pad2 + j * U + (U - seat) / 2, ty + tableH + G); });
-      h2 += '<text x="' + pad2 + '" y="' + (H2 - 8) + '" ' + T + '>ONE LONG TABLE · 20 + 20</text>';
+      h2 += '<g class="fixed" aria-label="' + fixed.join(' and ') + ', fixed central positions">' +
+            '<text x="' + (cx - 30) + '" y="' + (ty + tableH / 2 + 3) + '" text-anchor="middle" ' + T + '>' + esc(fixed[0] || '') + '</text>' +
+            '<text x="' + (cx + 30) + '" y="' + (ty + tableH / 2 + 3) + '" text-anchor="middle" ' + T + '>' + esc(fixed[1] || '') + '</text>' +
+            '<line x1="' + cx + '" y1="' + (ty + 10) + '" x2="' + cx + '" y2="' + (ty + tableH - 10) + '" stroke="#DAD9D7"/></g>';
+      bottom.forEach(function (s, j) { h2 += chair(s, pad2 + j * U + (U - seat) / 2, ty + tableH + G); });
+      h2 += '<text x="' + pad2 + '" y="' + (H2 - 24) + '" ' + T + '>' + bottom.length + ' GUESTS · BOTTOM</text>' +
+            '<text x="' + pad2 + '" y="' + (H2 - 8) + '" ' + T + '>ONE LONG TABLE · ' + total + ' PEOPLE · ' + (top.length + bottom.length) + ' GUEST SEATS + ' + fixed.join(' + ') + '</text>';
       return h2 + '</svg>';
     },
 

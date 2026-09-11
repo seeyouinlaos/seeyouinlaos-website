@@ -11,18 +11,18 @@
    atomic in the only safe order: hold the new chair first; only when that
    succeeded, release the old one.
 
-   NO GEOMETRY IS INVENTED HERE. The floor plan is configuration, uploaded by
-   Guest Relations through the protected route and validated against the
-   frozen source truth:
-     CEREMONY  40 guest seats · 20 left · 20 right · centre aisle ·
-               6 FAMILY reserved within the 40 · left 4 · right 2 · 34 selectable
-     DINNER    one long table · 40 guest positions · 20 each side ·
-               6 FAMILY reserved within the 40 · 34 selectable
-   Bride & Groom are positions outside the guest inventory and are drawn by the
-   client, never stored as seats. Row counts, chairs per row and the exact
-   FAMILY chair ids are NOT authoritative until Guest Relations configures
-   them: until then both inventories are unconfigured and the guest sees
-   SEATING NOT OPEN YET.
+   NO FAMILY CHAIR IS INVENTED HERE. The floor plan is configuration, uploaded
+   by Guest Relations through the protected route and validated against the
+   Owner's binding geometry (override of 2026-09-11):
+     CEREMONY  50 guest seats · LEFT 10 rows × 2 chairs = 20 · RIGHT 10 rows ×
+               3 chairs = 30 · centre aisle · the asymmetry is deliberate
+     DINNER    one long table · 50 people · TOP 24 guest seats · BOTTOM 24 guest
+               seats = 48 guest seats · BRIDE and GROOM two fixed central
+               positions, never guest inventory, never selectable
+   FAMILY chairs (six per event, conceptually) stay RESERVED · FAMILY when the
+   configuration marks them; their exact ids are unresolved and are never
+   assumed. Until Guest Relations configures and opens, both inventories are
+   unconfigured and the guest sees SEATING NOT OPEN YET.
 
    Global state: SEATING_OPEN (guests may choose) and SEATING_FROZEN (guests
    see their authoritative allocation and cannot self-change; Guest Relations
@@ -30,8 +30,14 @@
    ========================================================================== */
 
 export const RULES = {
-  ceremony: { perSide: 20, family: { L: 4, R: 2 }, id: /^C-[LR]-\d{1,2}-\d{1,2}$/ },
-  dinner:   { perSide: 20, family: 6,              id: /^D-[LR]-\d{1,2}$/ },
+  /* C-L-[ROW]-[SEAT] · C-R-[ROW]-[SEAT] · rows 01–10 · left seats 01–02 · right seats 01–03 */
+  ceremony: { rows: 10, perRow: { L: 2, R: 3 }, guestSeats: 50, id: /^C-([LR])-(0[1-9]|10)-(0[1-3])$/ },
+  /* D-T-01 … D-T-24 · D-B-01 … D-B-24 · BRIDE and GROOM fixed, outside the guest ids */
+  dinner:   { perSide: 24, guestSeats: 48, fixed: ['BRIDE', 'GROOM'], totalPeople: 50, id: /^D-([TB])-(0[1-9]|1[0-9]|2[0-4])$/ },
+};
+export const CAPACITY = {
+  ceremony: { guestSeats: 50, left: 20, right: 30 },
+  dinner: { guestSeats: 48, top: 24, bottom: 24, fixed: 2, totalPeople: 50 },
 };
 export const EVENTS = ['ceremony', 'dinner'];
 const MAX_PER_INVITATION = 6;   /* a party never holds more chairs than people it could have */
@@ -39,7 +45,7 @@ const HOLD = 'hold:';
 
 /* ---- the geometry contract ---------------------------------------------
  * ceremony: { rows: [ { side: 'L'|'R', row: n, seats: [ { seatId, family } ] } ] }
- * dinner:   { sides: { L: [ { seatId, family } ], R: [ ... ] } }
+ * dinner:   { sides: { T: [ { seatId, family } ], B: [ ... ] } }   BRIDE/GROOM fixed, not seats
  * Either event may be null (not configured). Returns { ok, errors, config }. */
 export function validateGeometry(input) {
   const errors = [];
@@ -50,29 +56,36 @@ export function validateGeometry(input) {
     const rows = Array.isArray(cfg.ceremony.rows) ? cfg.ceremony.rows : null;
     if (!rows) errors.push('ceremony.rows must be a list');
     else {
-      const count = { L: 0, R: 0 }, fam = { L: 0, R: 0 }, ids = new Set();
+      const count = { L: 0, R: 0 }, seen = { L: new Set(), R: new Set() }, ids = new Set();
       const norm = [];
       for (const r of rows) {
         const side = r.side === 'L' || r.side === 'R' ? r.side : null;
-        const row = Number.isInteger(r.row) && r.row > 0 ? r.row : null;
-        if (!side || !row || !Array.isArray(r.seats)) { errors.push('ceremony row malformed'); continue; }
+        const row = Number.isInteger(r.row) && r.row >= 1 && r.row <= RULES.ceremony.rows ? r.row : null;
+        if (!side || !row || !Array.isArray(r.seats)) { errors.push('ceremony row malformed (side L|R, row 1–10, seats)'); continue; }
+        if (seen[side].has(row)) errors.push('ceremony ' + side + ' row ' + row + ' appears twice');
+        seen[side].add(row);
+        const want = RULES.ceremony.perRow[side];
+        if (r.seats.length !== want) errors.push('ceremony ' + (side === 'L' ? 'left' : 'right') + ' row ' + row + ' must hold ' + want + ' chairs, has ' + r.seats.length);
         const seats = [];
         for (const s of r.seats) {
           const seatId = String(s && s.seatId || '');
-          if (!RULES.ceremony.id.test(seatId)) { errors.push('ceremony seat id ' + seatId + ' does not follow C-L-[ROW]-[SEAT]'); continue; }
-          if (!seatId.startsWith('C-' + side + '-' + row + '-')) errors.push('ceremony seat ' + seatId + ' is not in its own side/row');
+          const m = RULES.ceremony.id.exec(seatId);
+          if (!m) { errors.push('ceremony seat id ' + seatId + ' does not follow C-L-[ROW]-[SEAT] (rows 01–10, left 01–02, right 01–03)'); continue; }
+          if (m[1] !== side || Number(m[2]) !== row) errors.push('ceremony seat ' + seatId + ' is not in its own side/row');
+          if (Number(m[3]) > want) errors.push('ceremony seat ' + seatId + ' exceeds the chairs of its row');
           if (ids.has(seatId)) errors.push('duplicate seat ' + seatId);
           ids.add(seatId);
           count[side]++;
-          if (s.family) fam[side]++;
           seats.push({ seatId, family: !!s.family });
         }
         norm.push({ side, row, seats });
       }
-      if (count.L !== RULES.ceremony.perSide) errors.push('ceremony left must hold ' + RULES.ceremony.perSide + ' guest seats, has ' + count.L);
-      if (count.R !== RULES.ceremony.perSide) errors.push('ceremony right must hold ' + RULES.ceremony.perSide + ' guest seats, has ' + count.R);
-      if (fam.L !== RULES.ceremony.family.L) errors.push('ceremony left must reserve ' + RULES.ceremony.family.L + ' family seats, has ' + fam.L);
-      if (fam.R !== RULES.ceremony.family.R) errors.push('ceremony right must reserve ' + RULES.ceremony.family.R + ' family seats, has ' + fam.R);
+      if (seen.L.size !== RULES.ceremony.rows) errors.push('ceremony left must have ' + RULES.ceremony.rows + ' rows, has ' + seen.L.size);
+      if (seen.R.size !== RULES.ceremony.rows) errors.push('ceremony right must have ' + RULES.ceremony.rows + ' rows, has ' + seen.R.size);
+      if (count.L !== CAPACITY.ceremony.left) errors.push('ceremony left must hold ' + CAPACITY.ceremony.left + ' guest seats, has ' + count.L);
+      if (count.R !== CAPACITY.ceremony.right) errors.push('ceremony right must hold ' + CAPACITY.ceremony.right + ' guest seats, has ' + count.R);
+      if (count.L + count.R !== CAPACITY.ceremony.guestSeats && !errors.length) errors.push('ceremony must hold ' + CAPACITY.ceremony.guestSeats + ' guest seats');
+      /* FAMILY chairs: optional until the Owner supplies their ids — never required, never assumed */
       out.ceremony = { rows: norm.sort((a, b) => a.row - b.row || (a.side < b.side ? -1 : 1)) };
     }
   }
@@ -80,24 +93,24 @@ export function validateGeometry(input) {
   if (cfg.dinner) {
     const sides = cfg.dinner.sides || {};
     const ids = new Set();
-    let fam = 0;
-    const norm = { L: [], R: [] };
-    for (const side of ['L', 'R']) {
+    const norm = { T: [], B: [] };
+    for (const side of ['T', 'B']) {
       const list = Array.isArray(sides[side]) ? sides[side] : null;
-      if (!list) { errors.push('dinner.sides.' + side + ' must be a list'); continue; }
+      if (!list) { errors.push('dinner.sides.' + side + ' must be a list (T = top, B = bottom)'); continue; }
       for (const s of list) {
         const seatId = String(s && s.seatId || '');
-        if (!RULES.dinner.id.test(seatId)) { errors.push('dinner seat id ' + seatId + ' does not follow D-L-[POSITION]'); continue; }
-        if (!seatId.startsWith('D-' + side + '-')) errors.push('dinner seat ' + seatId + ' is not on its own side');
+        const m = RULES.dinner.id.exec(seatId);
+        if (!m) { errors.push('dinner seat id ' + seatId + ' does not follow D-T-[01–24] / D-B-[01–24]'); continue; }
+        if (m[1] !== side) errors.push('dinner seat ' + seatId + ' is not on its own side');
         if (ids.has(seatId)) errors.push('duplicate seat ' + seatId);
         ids.add(seatId);
-        if (s.family) fam++;
         norm[side].push({ seatId, family: !!s.family });
       }
-      if (norm[side].length !== RULES.dinner.perSide) errors.push('dinner side ' + side + ' must hold ' + RULES.dinner.perSide + ' guest positions, has ' + norm[side].length);
+      if (norm[side].length !== RULES.dinner.perSide) errors.push('dinner ' + (side === 'T' ? 'top' : 'bottom') + ' must hold ' + RULES.dinner.perSide + ' guest seats, has ' + norm[side].length);
     }
-    if (fam !== RULES.dinner.family) errors.push('dinner must reserve ' + RULES.dinner.family + ' family positions, has ' + fam);
-    out.dinner = { sides: norm };
+    if (sides.L || sides.R) errors.push('dinner sides are T (top) and B (bottom); the retired L/R model is not accepted');
+    /* BRIDE and GROOM are fixed central positions — metadata, never guest seats, never selectable */
+    out.dinner = { sides: norm, fixed: RULES.dinner.fixed.slice(), totalPeople: RULES.dinner.totalPeople };
   }
   return { ok: errors.length === 0, errors, config: out };
 }
@@ -111,7 +124,7 @@ export function seatsOf(config, event) {
   }
   const d = config && config.dinner;
   if (!d) return [];
-  return ['L', 'R'].flatMap((side) => d.sides[side].map((s, i) => ({ seatId: s.seatId, family: s.family, side, position: i + 1 })));
+  return ['T', 'B'].flatMap((side) => d.sides[side].map((s, i) => ({ seatId: s.seatId, family: s.family, side, position: i + 1 })));
 }
 
 export class Seating {
@@ -143,7 +156,7 @@ export class Seating {
   async view(invitationId) {
     const cfg = await this.config();
     const out = { ok: true, open: !!cfg.open, frozen: !!cfg.frozen, updatedAt: cfg.updatedAt || null,
-                  configured: { ceremony: !!cfg.ceremony, dinner: !!cfg.dinner }, mine: { ceremony: {}, dinner: {} } };
+                  configured: { ceremony: !!cfg.ceremony, dinner: !!cfg.dinner }, capacity: CAPACITY, mine: { ceremony: {}, dinner: {} } };
     for (const event of EVENTS) {
       const holds = await this.holds(event);
       const seats = seatsOf(cfg, event).map((s) => {
@@ -157,7 +170,7 @@ export class Seating {
       });
       out[event] = event === 'ceremony'
         ? (cfg.ceremony ? { rows: cfg.ceremony.rows.map((r) => ({ side: r.side, row: r.row, seats: r.seats.map((s) => seats.find((x) => x.seatId === s.seatId)) })) } : null)
-        : (cfg.dinner ? { sides: { L: seats.filter((s) => s.side === 'L'), R: seats.filter((s) => s.side === 'R') } } : null);
+        : (cfg.dinner ? { sides: { T: seats.filter((s) => s.side === 'T'), B: seats.filter((s) => s.side === 'B') }, fixed: RULES.dinner.fixed.slice(), totalPeople: RULES.dinner.totalPeople } : null);
     }
     return out;
   }
@@ -286,7 +299,7 @@ export class Seating {
     /* the operations output: every seat, its state, who holds it */
     if (op === 'plan') {
       const cfg = await this.config();
-      const out = { ok: true, open: !!cfg.open, frozen: !!cfg.frozen, updatedAt: cfg.updatedAt || null, events: {} };
+      const out = { ok: true, open: !!cfg.open, frozen: !!cfg.frozen, updatedAt: cfg.updatedAt || null, capacity: CAPACITY, events: {} };
       for (const event of EVENTS) {
         const holds = await this.holds(event);
         const seats = seatsOf(cfg, event).map((s) => {
@@ -296,7 +309,9 @@ export class Seating {
         out.events[event] = {
           configured: seats.length > 0,
           seats,
-          total: seats.length,
+          guestSeats: seats.length,
+          capacity: event === 'ceremony' ? { guestSeats: CAPACITY.ceremony.guestSeats, left: CAPACITY.ceremony.left, right: CAPACITY.ceremony.right }
+                                        : { guestSeats: CAPACITY.dinner.guestSeats, top: CAPACITY.dinner.top, bottom: CAPACITY.dinner.bottom, fixed: RULES.dinner.fixed.slice(), totalPeople: CAPACITY.dinner.totalPeople },
           family: seats.filter((s) => s.family).length,
           held: seats.filter((s) => s.state === 'held').length,
           allocated: seats.filter((s) => s.state === 'allocated').length,

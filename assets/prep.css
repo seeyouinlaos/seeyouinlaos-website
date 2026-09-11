@@ -339,6 +339,10 @@ body.p-drawer-open .p-drawer { transform: translateY(0); }
    (.prep-sec.wide) — never a different content width per step. */
 @media (min-width: 900px) {
   .prep-head, .prep-sec, .prep-foot, .prep-gate, .p-block, .p-for, .prep-col { max-width: 860px; }
+  /* a product structure that genuinely needs the width — the long table with
+     its 24 chairs a side — may use the frame; nothing else does */
+  .prep-sec.wide { max-width: none; }
+  .prep-sec.wide > .t-l1, .prep-sec.wide > .t-h2, .prep-sec.wide > .t-b1 { max-width: 860px; }
 }
 
 /* ============================================================ D · SURFACES
