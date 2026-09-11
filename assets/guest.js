@@ -109,7 +109,9 @@
        * enters the code once, instead of meeting a blank page. */
       if (!a || !Array.isArray(a.guests) || !a.guests.length) return null;
       return { invitationId: a.invitationId, partyName: a.partyName || '',
-               partyLead: a.partyLead || '', guests: a.guests };
+               partyLead: a.partyLead || '', guests: a.guests,
+               /* E · 'PAIR' | 'NONE' | null (unresolved) — never inferred */
+               givingEligibility: a.givingEligibility === 'PAIR' || a.givingEligibility === 'NONE' ? a.givingEligibility : null };
     },
     /* the invitation is open, but from before the names were carried */
     stale: function () {
@@ -426,9 +428,9 @@
             dress: r.dress || null,
             temple: T ? T.attendanceOf(g.guestId) : null,
             sangkhathan: T ? T.offeringOf(g.guestId) : false,
-            /* Wave 2 fills these; the shape exists so operations can plan */
-            ceremonySeat: r.ceremonySeat || null,
-            dinnerSeat: r.dinnerSeat || null,
+            /* G · the seats as the server ledger holds them, by name */
+            ceremonySeat: (window.SIYL_SEATS && SIYL_SEATS.ready()) ? SIYL_SEATS.seatOf('ceremony', g.guestId) : null,
+            dinnerSeat: (window.SIYL_SEATS && SIYL_SEATS.ready()) ? SIYL_SEATS.seatOf('dinner', g.guestId) : null,
             history: r.history || []
           };
         })

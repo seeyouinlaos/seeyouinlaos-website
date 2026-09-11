@@ -21,6 +21,7 @@ assets/images/incoming/
 # guest privacy: plaintext list + token register never enter git
 src/*.private.json
 src/*.private.csv
+src/*.private.txt
 
 # internal governance docs (contain budget/vendor figures) — never in the public repo
 docs/DECISION-REGISTER.md

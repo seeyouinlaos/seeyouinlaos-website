@@ -19,6 +19,8 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
   <p class="t-b1 measure">Everything you have told us, in one place. Nothing here is new: it is what your party chose together and what each of you answered by name. Sending shares it with Guest Relations — a request, never a payment, never a confirmation.</p>
 </div>
 
+<div id="journeystate" class="prep-col"></div>
+
 <section class="p-block" id="b1">
 <div class="p-block-h"><span class="bno">01</span><h2>You</h2><a class="p-link mute" href="you.html#you">Edit</a></div>
 <div id="b1c"></div>
@@ -74,6 +76,8 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/pricing.js"></script>
 <script src="assets/guest.js"></script>
 <script src="assets/docs.js"></script>
+<script src="assets/confirm.js"></script>
+<script src="assets/seating.js"></script>
 <script src="assets/prep-shell.js"></script>
 <script src="assets/temple.js"></script>
 <script src="assets/inventory.js"></script>
@@ -159,14 +163,25 @@ if(op&&op.guests.length){
       h+='<div class="p-kv"><div><p class="t-b1"><b>'+e.label+'</b></p>'+
          '<p class="t-b2">'+e.when+' · '+e.place+(d?' · Dress · '+d[0]:'')+'</p>'+
          '</div><p class="t-l1'+(open?' open':'')+'">'+st+'</p></div>'});
+    var sst=g.sangkhathanState,quiet=sst==='Not eligible'||sst==='Not available yet',silent=sst==='Not available yet';
     h+='<div class="p-kv"><div><p class="t-b1"><b>Sangkhathan Temple Offering</b></p>'+
-       '<p class="t-b2">'+(g.sangkhathan?'USD 15 · prepared in '+esc(g.name)+'&rsquo;s name':
-         g.sangkhathanState==='Not applicable'?'Only for guests joining the Temple Ceremony':g.sangkhathanState)+'</p>'+
-       '<div class="p-actions"><a class="p-link mute" href="wedding.html#ev-temple">'+(g.sangkhathan?'View offering':'View &amp; choose')+'</a></div></div>'+
-       '<p class="t-l1'+(g.sangkhathanState==='Not decided'?' open':'')+'">'+(g.sangkhathan?'USD 15':g.sangkhathanState)+'</p></div>';
-    h+='<div class="p-kv"><div><p class="t-b1"><b>Seating</b></p>'+
-       '<p class="t-b2">Ceremony seat and dinner seat are arranged by Guest Relations. Seating is not open yet.</p></div>'+
-       '<p class="t-l1">Not open yet</p></div></div>'})}
+       '<p class="t-b2">'+(g.sangkhathan?'A personal offering prepared in '+esc(g.name)+'&rsquo;s name':
+         sst==='Not applicable'?'Only for couples with everyone joining the Temple Ceremony':
+         sst==='Not eligible'?'Nothing to arrange for your invitation':
+         sst==='Not available yet'?'Guest Relations will let you know if there is anything to arrange':sst)+'</p>'+
+       (quiet?'':'<div class="p-actions"><a class="p-link mute" href="wedding.html#ev-temple">'+(g.sangkhathan?'View offering':'View &amp; choose')+'</a></div>')+'</div>'+
+       '<p class="t-l1'+(sst==='Decision required'?' open':(g.sangkhathan?' on':''))+'">'+(g.sangkhathan?'Selected':(silent?'':sst))+'</p></div>';
+    var Sx=window.SIYL_SEATS,cs=Sx?Sx.seatOf('ceremony',g.guestId):null,ds=Sx?Sx.seatOf('dinner',g.guestId):null,openS=Sx&&Sx.open();
+    h+='<div class="p-kv"><div><p class="t-b1"><b>Ceremony seat</b></p><p class="t-b2">'+(cs?esc(Sx.describe(cs))+' · held in '+esc(g.name)+'&rsquo;s name':(openS?'Not chosen yet':'Seating is not open yet'))+'</p></div>'+
+       '<p class="t-l1'+(cs?' on':(openS?' open':''))+'">'+(cs?esc(cs):(openS?'Choose':'Not open yet'))+'</p></div>'+
+       '<div class="p-kv"><div><p class="t-b1"><b>Dinner seat</b></p><p class="t-b2">'+(ds?esc(Sx.describe(ds))+' · held in '+esc(g.name)+'&rsquo;s name':(openS?'Not chosen yet':'Seating is not open yet'))+'</p></div>'+
+       '<p class="t-l1'+(ds?' on':(openS?' open':''))+'">'+(ds?esc(ds):(openS?'Choose':'Not open yet'))+'</p></div></div>'})}
+/* E · the couple decision, said once for the party */
+if(op&&op.sangkhathanEligibility==='PAIR'){
+  var pr=op.sangkhathanPair;
+  h+='<div class="p-group"><p class="t-l1">Sangkhathan · one decision for your party</p>'+
+     '<div class="p-kv"><div><p class="t-b1"><b>'+esc(G?G.partyNames():'')+'</b></p><p class="t-b2">'+(pr==='yes'?'Two personal offerings, USD 15 each, prepared for you to present yourselves':pr==='no'?'Continuing without Sangkhathan':pr==='Decision required'?'Both of you are attending the Temple Ceremony — one decision is still open':'Available once both of you have chosen to attend the Temple Ceremony')+'</p></div>'+
+     '<p class="t-l1'+(pr==='yes'?' on':(pr==='Decision required'?' open':''))+'">'+(pr==='yes'?'USD 30':pr==='no'?'Not selected':pr==='Decision required'?'Decision required':'Not applicable')+'</p></div></div>'}
 /* the dress code as a state — one per named guest, acknowledged by nobody but that person */
 h+='<div class="p-group"><p class="t-l1">Dress code · acknowledged by each named guest</p>';
 if(G&&G.party()){G.party().guests.forEach(function(g){
@@ -292,8 +307,56 @@ err.innerHTML=msg+(first?' <a class="p-link" href="'+first.href+'" style="margin
 var box=document.getElementById('ready');
 if(box)box.scrollIntoView({behavior:'smooth',block:'center'});
 }
-function paintBlocks(){paintYou();paintWedding();paintDocs();paintReady();
+/* ---------------------------------------------------------------- F · STATE
+ * JOURNEY RECEIVED after SEND; JOURNEY CONFIRMED only after Guest Relations'
+ * authoritative act on the server. Then: the party's confirmation, shared,
+ * and one personal wedding card per named guest — a card, not a ticket. */
+function paintState(){
+var box=document.getElementById('journeystate'),C=window.SIYL_CONFIRM,G=window.SIYL_GUEST,T=window.SIYL_TEMPLE,J=window.SIYL_JOURNEY,Sx=window.SIYL_SEATS;
+if(!box||!C||!G||!G.party()){if(box)box.innerHTML='';return}
+var st=C.state(),p=G.party(),send=document.getElementById('sendbox');
+if(st==='none'){box.innerHTML='';if(send)send.hidden=false;return}
+if(st==='received'){
+  box.innerHTML='<div class="p-card"><p class="t-l1 on">Journey received</p><h2 class="t-h1">Guest Relations has your journey</h2>'+
+    '<p class="t-b1 measure">Received on '+when(C.receivedAt())+'. A person will read it. Received is not confirmed: Guest Relations confirms every arrangement with you personally, and until then nothing in your journey is final. You can still change anything below and send it again.</p></div>';
+  if(send)send.hidden=false;return}
+/* CONFIRMED */
+if(send)send.hidden=true;
+var b=SIYL_BAG.get(),shared=(J?J.sorted(b):b).filter(function(x){return !(J&&J.isWedding(x))});
+var h='<div class="p-card"><p class="t-l1 on">Journey confirmed</p><h2 class="t-h1">Guest Relations has confirmed your journey</h2>'+
+  '<p class="t-b1 measure">Confirmed on '+when(C.confirmedAt())+'. To change anything now, write to <a href="mailto:guest.relation.seeyouinlaos@gmail.com?subject=Journey%20'+encodeURIComponent(p.invitationId)+'">Guest Relations</a>.</p></div>';
+h+='<section class="prep-sec"><p class="t-l1">A · Party journey confirmation</p><h2 class="t-h2">'+esc(G.partyLabel())+'</h2><div class="p-card">';
+if(!shared.length)h+='<p class="t-b2">No shared stay or travel in this journey.</p>';
+shared.forEach(function(x){h+='<div class="p-kv"><div><p class="t-l1">'+esc(J?J.when(x):'')+'</p><p class="t-b1"><b>'+esc(x.name)+'</b></p><p class="t-b2">'+esc(x.meta||'')+'</p></div><p class="t-l1 on">Confirmed</p></div>'});
+h+='<div class="p-kv"><div><p class="t-b1"><b>The Wedding</b></p><p class="t-b2">Sunday, 28 February 2027 · Vientiane · four parts, hosted by Haruthai &amp; Suthep</p></div><p class="t-l1 on">Confirmed</p></div>';
+h+='</div></section>';
+h+='<section class="prep-sec"><p class="t-l1">B · Personal wedding card</p><h2 class="t-h2">One card for each of you</h2>';
+var op=T?T.operational():null;
+p.guests.forEach(function(g){
+  var id=g.guestId,row=op?op.guests.filter(function(r){return r.guestId===id})[0]:null,a=G.dressAck(id);
+  var cs=Sx?Sx.seatOf('ceremony',id):null,ds=Sx?Sx.seatOf('dinner',id):null;
+  function ev(k){return row?row.events[k]:'Not decided'}
+  h+='<div class="p-card p-wcard"><p class="t-l1">'+esc(G.labelFor(id))+'</p><h3 class="t-d1">'+esc(G.nameOf(id))+'</h3><p class="t-b2">'+esc(G.value(id,'fullName')||g.fullName)+'</p>'+
+     '<p class="t-l1 on" style="margin-top:var(--s3)">28 February 2027 · Vientiane</p>'+
+     '<div class="p-kv"><div><p class="t-b1"><b>Temple Ceremony</b></p></div><p class="t-l1'+(ev('temple')==='Joining'?' on':'')+'">'+(ev('temple')==='Joining'?'Attending':ev('temple')==='Not joining'?'Not attending':'Not decided')+'</p></div>'+
+     (cs?'<div class="p-kv"><div><p class="t-b1"><b>Ceremony seat</b></p><p class="t-b2">'+esc(Sx.describe(cs))+'</p></div><p class="t-l1 on">'+esc(cs)+'</p></div>':'')+
+     (row&&row.sangkhathan?'<div class="p-kv"><div><p class="t-b1"><b>Sangkhathan</b></p><p class="t-b2">A personal offering, prepared in '+esc(G.nameOf(id))+'&rsquo;s name</p></div><p class="t-l1 on">Prepared</p></div>':'')+
+     '<div class="p-kv"><div><p class="t-b1"><b>Coffee &amp; Cake</b></p></div><p class="t-l1'+(ev('coffee')==='Joining'?' on':'')+'">'+ev('coffee')+'</p></div>'+
+     '<div class="p-kv"><div><p class="t-b1"><b>Vow Ceremony</b></p></div><p class="t-l1'+(ev('vows')==='Joining'?' on':'')+'">'+ev('vows')+'</p></div>'+
+     '<div class="p-kv"><div><p class="t-b1"><b>Wedding Dinner</b></p></div><p class="t-l1'+(ev('dinner')==='Joining'?' on':'')+'">'+ev('dinner')+'</p></div>'+
+     (ds?'<div class="p-kv"><div><p class="t-b1"><b>Dinner seat</b></p><p class="t-b2">'+esc(Sx.describe(ds))+'</p></div><p class="t-l1 on">'+esc(ds)+'</p></div>':'')+
+     '<div class="p-kv"><div><p class="t-b1"><b>Dress code</b></p></div><p class="t-l1'+(a?' on':'')+'">'+(a?'Reviewed':'Not yet reviewed')+'</p></div>'+
+     '</div>'});
+h+='</section>';
+box.innerHTML=h}
+
+function paintBlocks(){paintYou();paintWedding();paintDocs();paintReady();paintState();
   if(window.SIYL_PREP)SIYL_PREP.foot(document.getElementById('foot'))}
+document.addEventListener('siyl:confirm',paintBlocks);
+document.addEventListener('siyl:seats',paintBlocks);
+if(window.SIYL_CONFIRM)SIYL_CONFIRM.load();
+if(window.SIYL_SEATS)SIYL_SEATS.load();
+document.addEventListener('siyl:auth',function(){if(window.SIYL_CONFIRM)SIYL_CONFIRM.load(true);if(window.SIYL_SEATS)SIYL_SEATS.load(true)});
 document.addEventListener('siyl:bag',function(){render();paintBlocks()});
 document.addEventListener('siyl:temple',paintBlocks);
 document.addEventListener('siyl:guest',paintBlocks);
@@ -330,6 +393,7 @@ t.guests.forEach(function(g){
   L.push('- '+g.name.toUpperCase()+':');
   (SIYL_TEMPLE.EVENTS||[]).forEach(function(e){L.push('  · '+e.label+': '+g.events[e.key].toUpperCase())});
   L.push('  · Sangkhathan: '+(g.sangkhathan?'TO PREPARE (USD 15)':g.sangkhathanState.toUpperCase()))});
+L.push('- Sangkhathan eligibility (invitation): '+t.sangkhathanEligibility+' · couple decision: '+String(t.sangkhathanPair).toUpperCase());
 L.push('- Morning alms-giving (Tak Bat): part of the Temple Ceremony for everyone joining it, no charge');
 L.push('- Sangkhathan offerings to prepare: '+t.offerings+(t.offerings?' (USD '+t.offeringsUsd+') for '+t.offeringNames.join(', '):''))}
 if(window.SIYL_DOCS){var d=SIYL_DOCS.operational();
@@ -399,6 +463,7 @@ var registration={channel:'journey-shop',selections:SIYL_BAG.get(),totalUsd:SIYL
 templeCeremony:window.SIYL_TEMPLE?SIYL_TEMPLE.operational():null,
 guestRecord:window.SIYL_GUEST?SIYL_GUEST.operational():null,
 documents:window.SIYL_DOCS?SIYL_DOCS.operational():null,
+seats:window.SIYL_SEATS&&SIYL_SEATS.ready()?SIYL_SEATS.mine():null,
 inventory:hold.unreachable?'UNCONFIRMED — ledger unreachable, Guest Relations to confirm rooms':'CONFIRMED',
 roomsHeld:hold.reserved||null,
 registration_submitted_at:new Date().toISOString()};
@@ -406,6 +471,7 @@ try{
 var r=await fetch(SUBMIT_URL,{method:'POST',headers:{'content-type':'application/json'},
 body:JSON.stringify({registration:registration,invitationId:auth.invitationId,text:text})});
 if(r.ok){document.getElementById('sendbox').hidden=true;
+if(window.SIYL_CONFIRM)SIYL_CONFIRM.noteReceived(registration.registration_submitted_at);
 var d=document.getElementById('donebox');d.hidden=false;
 document.getElementById('donemsg').textContent=hold.unreachable
  ? 'Your journey has been received. The room ledger could not be reached, so no room is held yet — Guest Relations checks availability and comes back to you personally. Nothing is paid on this website.'

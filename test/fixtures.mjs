@@ -30,3 +30,31 @@ export function lookupInvitation(query) {
   }
   return null;
 }
+
+
+/* ==========================================================================
+   SEAT FIXTURE — TEST/FIXTURE ONLY. Never production geometry, never
+   uploaded, never exposed on the site. It exists so the ledger's validation,
+   the atomic hold/release and the renderer can be exercised. The row
+   arrangement here is deliberately arbitrary (6 · 6 · 4 · 4 per side) and
+   is NOT a proposal: the authoritative floor plan comes from the Owner
+   through Guest Relations and the protected configuration route.
+   Frozen totals it must satisfy: ceremony 20 + 20, family 4 left + 2 right;
+   dinner 20 + 20, family 6.
+   ========================================================================== */
+function ceremonyRows(side, sizes, familyInRow1) {
+  let row = 0;
+  return sizes.map((n) => {
+    row += 1;
+    return { side, row, seats: Array.from({ length: n }, (_, i) => ({ seatId: 'C-' + side + '-' + row + '-' + (i + 1), family: row === 1 && i < familyInRow1 })) };
+  });
+}
+export const SEAT_FIXTURE = {
+  ceremony: { rows: [...ceremonyRows('L', [6, 6, 4, 4], 4), ...ceremonyRows('R', [6, 6, 4, 4], 2)] },
+  dinner: {
+    sides: {
+      L: Array.from({ length: 20 }, (_, i) => ({ seatId: 'D-L-' + (i + 1), family: i < 3 })),
+      R: Array.from({ length: 20 }, (_, i) => ({ seatId: 'D-R-' + (i + 1), family: i < 3 })),
+    },
+  },
+};

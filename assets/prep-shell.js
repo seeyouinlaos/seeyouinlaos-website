@@ -71,7 +71,10 @@
       case 'about':
         if (!G || !p) return 'Optional';
         return p.guests.some(function (g) { return G.profileAnswered(g.guestId) > 0; }) ? 'Complete' : 'Optional';
-      case 'review':      return 'Open';
+      case 'review': {
+        var C = window.SIYL_CONFIRM;
+        return C && C.state() === 'confirmed' ? 'Confirmed' : C && C.state() === 'received' ? 'Received' : 'Open';
+      }
     }
     return '';
   }
@@ -243,6 +246,7 @@
     document.addEventListener('siyl:temple', paint);
     document.addEventListener('siyl:bag', paint);
     document.addEventListener('siyl:docs', paint);
+    document.addEventListener('siyl:confirm', paint);
     document.addEventListener('siyl:invite-ready', function () { paint(); if (party() && !active()) chooseIdentity(false); });
     /* the code has just opened the party on this very page: no reload, the
      * identity question follows the code immediately */

@@ -42,6 +42,21 @@ function corsHeaders(request) {
 /* The GitHub Pages mirror has no backend of its own: it calls these routes on
  * the Worker origin, so the two deployments share ONE ledger. */
 export { Inventory } from './inventory.js';
+export { Seating } from './seating.js';
+
+/* ---- the Guest Relations gate (F + G) ------------------------------------
+ * A secret set with `wrangler secret put GR_TOKEN`, compared in constant
+ * time. It never appears in client code; the guest cannot confirm a journey,
+ * open seating or allocate a chair. */
+function grAuthorised(request, env) {
+  const given = request.headers.get('x-gr-token') || '';
+  const secret = env.GR_TOKEN || '';
+  if (!secret || !given || given.length !== secret.length) return false;
+  let diff = 0;
+  for (let i = 0; i < secret.length; i++) diff |= given.charCodeAt(i) ^ secret.charCodeAt(i);
+  return diff === 0;
+}
+const GR_SEATING_OPS = ['config', 'state', 'assign', 'unassign', 'plan'];
 
 export default {
   async fetch(request, env) {
@@ -78,6 +93,38 @@ export default {
         return json({ ok: false, error: 'method not allowed' }, 405, corsHeaders(request));
       }
       return handleDocument(request, env);
+    }
+
+    /* THE JOURNEY'S STATUS (F): received / confirmed, read by the guest site */
+    if (url.pathname === '/api/status') {
+      if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders(request) });
+      return handleStatus(request, env);
+    }
+    /* THE CONFIRMATION (F): Guest Relations only, idempotent, never self-service */
+    if (url.pathname === '/api/confirm') {
+      if (request.method !== 'POST') return json({ ok: false, error: 'method not allowed' }, 405);
+      if (!env.GR_TOKEN) return json({ ok: false, error: 'confirmation is not enabled' }, 503);
+      if (!grAuthorised(request, env)) return json({ ok: false, error: 'unauthorised' }, 401);
+      return handleConfirm(request, env);
+    }
+    /* THE SEATING LEDGER (G): guests read and hold; Guest Relations configures */
+    if (url.pathname === '/api/seating' || url.pathname.startsWith('/api/seating/')) {
+      if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders(request) });
+      if (!env.SEATING) return json({ ok: false, error: 'seating unavailable' }, 503, corsHeaders(request));
+      const op = url.pathname.replace(/^\/api\/seating\/?/, '') || 'read';
+      const headers = new Headers(request.headers);
+      headers.delete('x-gr-verified');                     /* a client can never claim the gate */
+      if (GR_SEATING_OPS.includes(op)) {
+        if (!env.GR_TOKEN) return json({ ok: false, error: 'seating operations are not enabled' }, 503);
+        if (!grAuthorised(request, env)) return json({ ok: false, error: 'unauthorised' }, 401);
+        headers.set('x-gr-verified', 'yes');
+      }
+      const forwarded = new Request(request, { headers });
+      const stub = env.SEATING.get(env.SEATING.idFromName('seating'));
+      const res = await stub.fetch(forwarded);
+      const out = new Response(res.body, res);
+      for (const [k, v] of Object.entries(corsHeaders(request))) out.headers.set(k, v);
+      return out;
     }
 
     if (url.pathname === '/api/register') {
@@ -202,6 +249,55 @@ async function handleRegister(request, env) {
     return json({ ok: false, error: 'registration could not be stored', mailed }, 503, corsHeaders(request));
   }
   return json({ ok: true, status: 'UNDER_REVIEW', stored, mailed, submittedAt }, 202, corsHeaders(request));
+}
+
+/* ---- F · status and confirmation --------------------------------------- */
+const INV_RE = /^INV-[A-Za-z0-9_-]{1,32}$/;
+
+async function handleStatus(request, env) {
+  const url = new URL(request.url);
+  const invitationId = url.searchParams.get('invitation') || '';
+  if (!INV_RE.test(invitationId)) return json({ ok: false, error: 'invalid invitation' }, 400, corsHeaders(request));
+  if (!env.REG_KV) return json({ ok: true, received: false, confirmed: false, store: false }, 200, corsHeaders(request));
+  const reg = await env.REG_KV.getWithMetadata('reg:' + invitationId);
+  const conf = await env.REG_KV.get('conf:' + invitationId, 'json');
+  const received = !!(reg && reg.value);
+  const receivedAt = received ? ((reg.metadata && reg.metadata.submittedAt) || null) : null;
+  return json({
+    ok: true,
+    received, receivedAt,
+    confirmed: !!(conf && conf.confirmedAt),
+    confirmedAt: conf && conf.confirmedAt || null,
+  }, 200, corsHeaders(request));
+}
+
+async function handleConfirm(request, env) {
+  let body;
+  try { body = await request.json(); } catch (e) { return json({ ok: false, error: 'invalid JSON' }, 400); }
+  const invitationId = String(body && body.invitationId || '').trim();
+  const action = body && body.action === 'unconfirm' ? 'unconfirm' : 'confirm';
+  const actor = String(body && body.actor || 'guest-relations').slice(0, 80);
+  const note = String(body && body.note || '').slice(0, 400);
+  if (!INV_RE.test(invitationId)) return json({ ok: false, error: 'invalid invitation' }, 400);
+  if (!env.REG_KV) return json({ ok: false, error: 'store unavailable' }, 503);
+  const key = 'conf:' + invitationId;
+  const now = new Date().toISOString();
+  const current = (await env.REG_KV.get(key, 'json')) || { invitationId, confirmedAt: null, history: [] };
+  /* idempotent: confirming a confirmed journey changes nothing */
+  if (action === 'confirm' && current.confirmedAt) {
+    return json({ ok: true, invitationId, confirmedAt: current.confirmedAt, unchanged: true }, 200);
+  }
+  if (action === 'unconfirm' && !current.confirmedAt) {
+    return json({ ok: true, invitationId, confirmedAt: null, unchanged: true }, 200);
+  }
+  const next = {
+    invitationId,
+    confirmedAt: action === 'confirm' ? now : null,
+    actor, source: 'gr-endpoint', note,
+    history: (current.history || []).concat([{ action, at: now, actor, note }]).slice(-20),
+  };
+  await env.REG_KV.put(key, JSON.stringify(next), { metadata: { invitationId, confirmedAt: next.confirmedAt } });
+  return json({ ok: true, invitationId, confirmedAt: next.confirmedAt, actor, at: now }, 200);
 }
 
 function json(obj, status, extra) {

@@ -362,11 +362,12 @@ test('TEMPLE: Peggy may answer for Steffie, and the answer says Peggy wrote it',
   /* Steffie switches in and changes her own mind: her record, her signature */
   G.setActive(STEFFIE);
   T.setAttendance(STEFFIE, 'yes');
-  T.setOffering(STEFFIE, 'yes');
+  /* E · with the invitation's eligibility unresolved, no offering can be chosen */
+  assert.equal(T.setOffering(STEFFIE, 'yes'), false);
   assert.equal(json(w, 'siyl.temple').by[STEFFIE].by, STEFFIE);
   assert.equal(T.attendanceOf(PEGGY), 'yes', 'Peggy\'s answer is untouched');
   assert.equal(T.offeringOf(PEGGY), false);
-  assert.equal(T.offerings(), 1);
+  assert.equal(T.offerings(), 0);
 });
 
 /* ---- publication consent is personal and first person only ---- */
@@ -464,16 +465,16 @@ test('the three layers are still three: source is never written, submitted and h
   deq([h.field, h.from, h.to, h.by], ['fullName', 'Peggy Berger', 'Peggy Berger-Miedel', PEGGY]);
 });
 
-test('the Sangkhathan is still USD 15 per named participating guest, and nothing asks for eligibility', () => {
-  const w = page();
+test('the Sangkhathan is still USD 15 per named participating guest — one couple decision for an eligible pair', () => {
+  const w = page({ auth: { ...PARTY, givingEligibility: 'PAIR' } });
   const G = w.SIYL_GUEST, T = w.SIYL_TEMPLE;
   G.setActive(PEGGY);
-  T.setAttendance(PEGGY, 'yes'); T.setOffering(PEGGY, 'yes');
-  T.setAttendance(STEFFIE, 'yes'); T.setOffering(STEFFIE, 'yes');
+  T.setAttendance(PEGGY, 'yes'); T.setAttendance(STEFFIE, 'yes');
+  assert.equal(T.setOffering(PEGGY, 'yes'), true);
   const op = T.operational();
   assert.equal(op.offerings, 2);
   assert.equal(op.offeringsUsd, 30);
-  assert.equal(G.party().givingEligibility, undefined, 'E is not started');
+  assert.equal(G.party().givingEligibility, 'PAIR', 'eligibility is explicit invitation metadata');
 });
 
 test('the six steps are unchanged in number and order', () => {

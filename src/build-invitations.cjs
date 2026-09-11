@@ -70,6 +70,10 @@ async function main() {
       partyLead: inv.partyLead,
       guests: inv.guests.map((g) => ({ ...g, ...(g.status && g.status !== 'ACTIVE' ? { status: g.status } : {}) })),
       ...(inv.unresolvedMapping ? { unresolvedMapping: true } : {}),
+      /* E · SANGKHATHAN ELIGIBILITY — explicit invitation-level source truth,
+       * "PAIR" or "NONE". Never derived from party size, names or anything
+       * else: absent in the private list means UNRESOLVED and ships as such. */
+      ...(inv.givingEligibility === 'PAIR' || inv.givingEligibility === 'NONE' ? { givingEligibility: inv.givingEligibility } : {}),
     };
     records.push({ id: await tokenId(token), salt, iv, ct: await encryptInvitation(token, salt, iv, payload) });
   }

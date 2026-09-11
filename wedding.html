@@ -53,7 +53,7 @@ var TAKBAT='<p class="t-l1">Part of the Temple Ceremony</p>'+
 var SANG='<p class="t-l1">Optional · within the Temple Ceremony</p>'+
  '<h2 class="t-h1" style="margin-top:8px">Sangkhathan · a personal offering</h2>'+
  '<p class="t-b1 measure" style="margin-top:12px">A Sangkhathan is a personal offering of useful everyday items for the monastic community, prepared in your name and presented by you.</p>'+
- '<p class="t-b1 measure" style="margin-top:12px">It is <b>not</b> the alms-giving. Tak Bat is the food offered during the ceremony and carries no charge; the Sangkhathan is separate, optional, and nobody needs one in order to attend. The USD 15 prepares your own offering — it is not an entrance, not a temple fee and not a wedding extra.</p>';
+ '<p class="t-b1 measure" style="margin-top:12px">It is <b>not</b> the alms-giving. Tak Bat is the food offered during the ceremony and carries no charge; the Sangkhathan is separate, optional, and nobody needs one in order to attend. It is prepared for couples, as one decision for both: the USD 15 per person prepares your own offering — it is not an entrance, not a temple fee and not a wedding extra.</p>';
 
 /* one answer row per named guest, under each part of the day */
 function personRow(g,e,me){
@@ -65,23 +65,37 @@ function personRow(g,e,me){
       '<button type="button" class="p-sel" aria-pressed="'+(v==='no')+'" data-ev="no">Not attending</button>'+
     '</div>'+
     (v===null?'<p class="t-l1 open">Not decided</p>':'')+
-    (e.key==='temple'&&v==='yes'?sangRow(g,name):'')+
     '</div>'}
-/* the personal giving decision, only for someone who is attending — the
- * eligibility model belongs to a later stage; the state is preserved as is */
-function sangRow(g,name){
-  var off=T.offeringOf_(g.guestId);
-  return '<div class="p-card" style="margin-top:16px">'+
-    '<p class="t-l1">Optional · USD 15 for '+name+'</p>'+
-    '<h4 class="t-h2">Sangkhathan · a personal offering</h4>'+
-    '<p class="t-b2 measure">Prepared in '+name+'&rsquo;s name, and presented by '+name+'. Separate from the alms-giving.</p>'+
-    '<p class="p-more"><button type="button" class="p-link" data-more="sang">More about Sangkhathan</button></p>'+
-    '<div class="p-selrow" style="margin-top:16px">'+
-      '<button type="button" class="p-sel" aria-pressed="'+(off==='yes')+'" data-off="yes">We would like to give</button>'+
-      '<button type="button" class="p-sel" aria-pressed="'+(off==='no')+'" data-off="no">Continue without</button>'+
-    '</div>'+
-    (off===null?'<p class="t-l1 open">Not decided</p>':off==='yes'?'<p class="t-l1 on">'+PR.money(15)+' in your journey</p>':'')+
-    '</div>'}
+/* E · SANGKHATHAN — one couple decision, explicit eligibility, no guessing.
+ * PAIR: both named guests take part, or neither; available only while every
+ * named guest is attending the Temple Ceremony. NONE: nothing to arrange.
+ * Unresolved: a restrained line, no price, no action, no technical wording. */
+function sangSection(p,me){
+  var elig=T.eligibility(),names=p.guests.map(function(g){return esc(G.nameOf(g.guestId))});
+  var h='<div class="p-card" id="sangkhathan" style="margin-top:var(--s5)"><p class="t-l1">Sangkhathan · personal giving</p>'+
+    '<h3 class="t-h1">This part of the Temple Ceremony is prepared for couples.</h3>';
+  if(elig==='NONE'){
+    return h+'<p class="t-b1 measure">There is nothing you need to arrange for your invitation.</p>'+
+      '<p class="p-more"><button type="button" class="p-link mute" data-more="sang">More about Sangkhathan</button></p></div>'}
+  if(elig!=='PAIR'){
+    return h+'<p class="t-b1 measure">Guest Relations will let you know if there is anything to arrange for your invitation.</p>'+
+      '<p class="p-more"><button type="button" class="p-link mute" data-more="sang">More about Sangkhathan</button></p></div>'}
+  var can=T.pairCan(),off=T.pairDecision(),missing=p.guests.filter(function(g){return !T.attendingOf(g.guestId)});
+  h+='<p class="t-b1 measure">If you choose to take part, a personal Sangkhathan offering will be prepared for each of you to present yourselves.</p>';
+  h+='<div class="p-group">'+p.guests.map(function(g){return '<div class="p-kv"><div><p class="t-b1"><b>'+esc(G.nameOf(g.guestId))+'</b></p></div><p class="t-l1 on">'+PR.money(15)+'</p></div>'}).join('')+
+     '<div class="p-kv"><div><p class="t-l1">Total for your party</p></div><p class="t-l1 on">'+PR.money(15*p.guests.length)+'</p></div></div>';
+  h+='<p class="p-more"><button type="button" class="p-link" data-more="sang">More about Sangkhathan</button></p>';
+  if(can){
+    h+='<div class="p-selrow" style="margin-top:16px">'+
+      '<button type="button" class="p-sel" aria-pressed="'+(off==='yes')+'" data-off="yes">We would like to take part</button>'+
+      '<button type="button" class="p-sel" aria-pressed="'+(off==='no')+'" data-off="no">Continue without Sangkhathan</button>'+
+      '</div>'+
+      (off===null?'<p class="t-l1 open">Not decided · one decision for <span class="nb">'+names.join(' &amp; ')+'</span></p>'
+        :off==='yes'?'<p class="t-l1 on">Selected · '+PR.money(15*p.guests.length)+' for your party · <span class="nb">'+names.join(' &amp; ')+'</span></p>'
+        :'<p class="t-l1 on">Continuing without Sangkhathan</p>')}
+  else{
+    h+='<p class="t-b2 measure" style="margin-top:12px">The offering is prepared for '+names.join(' and ')+' together. It becomes available once '+(missing.length===1?esc(G.nameOf(missing[0].guestId))+' has':'both of you have')+' chosen to attend the Temple Ceremony.</p>'}
+  return h+'</div>'}
 
 function render(){
   if(!P.ready()){
@@ -110,6 +124,7 @@ function render(){
           '<p class="p-more"><button type="button" class="p-link" data-more="takbat">More about Tak Bat</button></p>'
          :'')+
        p.guests.map(function(g){return personRow(g,e,me)}).join('')+
+       (e.key==='temple'?sangSection(p,me):'')+
        '</section>'});
   page.innerHTML=h;
 
@@ -119,9 +134,10 @@ function render(){
     var id=card.getAttribute('data-g'),key=card.getAttribute('data-e');
     card.querySelectorAll('[data-ev]').forEach(function(b){
       b.addEventListener('click',function(){T.setEvent(id,key,b.getAttribute('data-ev'));render()})});
-    card.querySelectorAll('[data-off]').forEach(function(b){
-      b.addEventListener('click',function(){T.setOffering(id,b.getAttribute('data-off'));render()})});
   });
+  /* the couple decision is asked once, by the person continuing */
+  page.querySelectorAll('#sangkhathan [data-off]').forEach(function(b){
+    b.addEventListener('click',function(){var id=me.guestId;T.setOffering(id,b.getAttribute('data-off'));render()})});
   page.querySelectorAll('[data-more]').forEach(function(b){
     b.addEventListener('click',function(){P.drawer(b.getAttribute('data-more')==='takbat'?TAKBAT:SANG)})});
   P.foot(document.getElementById('foot'));
