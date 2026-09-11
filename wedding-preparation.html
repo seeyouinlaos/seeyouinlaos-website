@@ -141,6 +141,8 @@ function paintSeats(){
   var p=P.party(),me=P.active(),v=S.view();
   var any=S.configured('ceremony')||S.configured('dinner');
   var eyebrow=document.getElementById('seats-eyebrow'),lede=document.getElementById('seats-lede');
+  /* the long table needs the frame on a wide screen — only while it is drawn */
+  var sec=document.getElementById('seats');if(sec)sec.classList.toggle('wide',!!(S.open()&&any));
   /* NOT OPEN: the state as it is, plus any allocation Guest Relations already made */
   if(!S.open()||!any){
     eyebrow.textContent='02 · Your seats';

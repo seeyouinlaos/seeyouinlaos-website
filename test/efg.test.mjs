@@ -17,7 +17,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
-import { Seating, validateGeometry, seatsOf, RULES } from '../src/seating.js';
+import { Seating, validateGeometry, seatsOf, RULES, CAPACITY } from '../src/seating.js';
 import { SEAT_FIXTURE } from './fixtures.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -226,42 +226,64 @@ const call = (l, op, body, opts = {}) => l.fetch(new Request('https://x/api/seat
   method: body ? 'POST' : 'GET', headers: opts.gr ? { 'x-gr-verified': 'yes' } : {}, body: body ? JSON.stringify(body) : undefined,
 })).then(async (r) => ({ status: r.status, ...(await r.json()) }));
 
-test('G · the geometry contract enforces the frozen truth and refuses anything else', () => {
+test('G · the geometry contract enforces the Owner geometry and refuses the retired truth', () => {
   const ok = validateGeometry(SEAT_FIXTURE);
   assert.equal(ok.ok, true, ok.errors.join(' · '));
-  assert.equal(seatsOf(ok.config, 'ceremony').length, 40);
-  assert.equal(seatsOf(ok.config, 'ceremony').filter((s) => s.side === 'L').length, 20);
-  assert.equal(seatsOf(ok.config, 'ceremony').filter((s) => s.family && s.side === 'L').length, RULES.ceremony.family.L);
-  assert.equal(seatsOf(ok.config, 'ceremony').filter((s) => s.family && s.side === 'R').length, RULES.ceremony.family.R);
-  assert.equal(seatsOf(ok.config, 'dinner').length, 40);
-  assert.equal(seatsOf(ok.config, 'dinner').filter((s) => s.family).length, 6);
-  /* 39 seats, a third family chair on the right, a wrong id grammar, a duplicate */
-  const c = JSON.parse(JSON.stringify(SEAT_FIXTURE));
-  c.ceremony.rows[0].seats.pop();
-  assert.match(validateGeometry(c).errors.join(' '), /left must hold 20/);
-  const d = JSON.parse(JSON.stringify(SEAT_FIXTURE));
-  d.ceremony.rows.find((r) => r.side === 'R').seats[2].family = true;
-  assert.match(validateGeometry(d).errors.join(' '), /right must reserve 2/);
-  const e = JSON.parse(JSON.stringify(SEAT_FIXTURE));
-  e.dinner.sides.L[0].seatId = 'DL1';
-  assert.match(validateGeometry(e).errors.join(' '), /D-L-\[POSITION\]/);
-  const f = JSON.parse(JSON.stringify(SEAT_FIXTURE));
-  f.dinner.sides.R[1].seatId = f.dinner.sides.R[0].seatId;
-  assert.match(validateGeometry(f).errors.join(' '), /duplicate/);
-  /* 42 or 46 sellable seats can never be configured */
-  const g = JSON.parse(JSON.stringify(SEAT_FIXTURE));
-  g.dinner.sides.L.push({ seatId: 'D-L-21' }); g.dinner.sides.R.push({ seatId: 'D-R-21' });
-  assert.equal(validateGeometry(g).ok, false);
+  const c = seatsOf(ok.config, 'ceremony');
+  assert.equal(c.length, 50, 'ceremony capacity 50');
+  assert.equal(c.filter((s) => s.side === 'L').length, 20, 'left 20');
+  assert.equal(c.filter((s) => s.side === 'R').length, 30, 'right 30');
+  assert.equal(new Set(c.filter((s) => s.side === 'L').map((s) => s.row)).size, 10, '10 rows left');
+  assert.equal(new Set(c.filter((s) => s.side === 'R').map((s) => s.row)).size, 10, '10 rows right');
+  for (let r = 1; r <= 10; r++) {
+    assert.equal(c.filter((s) => s.side === 'L' && s.row === r).length, 2, 'left row ' + r + ' has 2 chairs');
+    assert.equal(c.filter((s) => s.side === 'R' && s.row === r).length, 3, 'right row ' + r + ' has 3 chairs');
+  }
+  assert.equal(new Set(c.map((s) => s.seatId)).size, 50, 'unique ids');
+  assert.ok(c.every((s) => RULES.ceremony.id.test(s.seatId)), 'C-L-[ROW]-[SEAT] / C-R-[ROW]-[SEAT], rows 01–10');
+  const d = seatsOf(ok.config, 'dinner');
+  assert.equal(d.length, 48, 'guest inventory 48');
+  assert.equal(d.filter((s) => s.side === 'T').length, 24, 'top 24');
+  assert.equal(d.filter((s) => s.side === 'B').length, 24, 'bottom 24');
+  assert.deepEqual(ok.config.dinner.fixed, ['BRIDE', 'GROOM'], 'Bride and Groom fixed');
+  assert.equal(ok.config.dinner.totalPeople, 50, 'represented total = 50 people');
+  assert.ok(d.every((s) => RULES.dinner.id.test(s.seatId)), 'D-T-01…24 / D-B-01…24');
+  assert.equal(CAPACITY.ceremony.guestSeats, 50); assert.equal(CAPACITY.dinner.guestSeats, 48); assert.equal(CAPACITY.dinner.totalPeople, 50);
+  /* FAMILY ids are optional configuration — a plan without any is valid */
+  const noFam = JSON.parse(JSON.stringify(SEAT_FIXTURE));
+  noFam.ceremony.rows.forEach((r) => r.seats.forEach((s) => { s.family = false; }));
+  noFam.dinner.sides.T.forEach((s) => { s.family = false; }); noFam.dinner.sides.B.forEach((s) => { s.family = false; });
+  assert.equal(validateGeometry(noFam).ok, true, 'family placement is never required');
+  /* the retired geometries are rejected */
+  const two = (n) => String(n).padStart(2, '0');
+  const old2020 = { ceremony: { rows: [...['L', 'R'].flatMap((side) => Array.from({ length: 5 }, (_, r) => ({ side, row: r + 1, seats: Array.from({ length: 4 }, (_, i) => ({ seatId: 'C-' + side + '-' + two(r + 1) + '-' + two(i + 1) })) })))] } };
+  assert.equal(validateGeometry(old2020).ok, false, 'a symmetrical 20/20 ceremony is rejected');
+  assert.match(validateGeometry(old2020).errors.join(' '), /left row 1 must hold 2 chairs|exceeds the chairs of its row|left must have 10 rows/);
+  const forty = JSON.parse(JSON.stringify(SEAT_FIXTURE)); forty.ceremony.rows = forty.ceremony.rows.filter((r) => !(r.side === 'R' && r.row > 7)).map((r) => (r.side === 'R' ? { ...r, seats: r.seats.slice(0, 3) } : r));
+  assert.equal(validateGeometry(forty).ok, false, 'a 40-seat ceremony is rejected');
+  const oldDinner = { dinner: { sides: { L: Array.from({ length: 20 }, (_, i) => ({ seatId: 'D-L-' + (i + 1) })), R: Array.from({ length: 20 }, (_, i) => ({ seatId: 'D-R-' + (i + 1) })) } } };
+  assert.equal(validateGeometry(oldDinner).ok, false, 'the retired 20/20 L/R dinner is rejected');
+  assert.match(validateGeometry(oldDinner).errors.join(' '), /retired L\/R model/);
+  const short = JSON.parse(JSON.stringify(SEAT_FIXTURE)); short.dinner.sides.T.pop();
+  assert.match(validateGeometry(short).errors.join(' '), /top must hold 24/);
+  const dup = JSON.parse(JSON.stringify(SEAT_FIXTURE)); dup.dinner.sides.B[1].seatId = dup.dinner.sides.B[0].seatId;
+  assert.match(validateGeometry(dup).errors.join(' '), /duplicate/);
+  const bad = JSON.parse(JSON.stringify(SEAT_FIXTURE)); bad.dinner.sides.T[0].seatId = 'D-T-1';
+  assert.match(validateGeometry(bad).errors.join(' '), /D-T-\[01–24\]/);
+  const extra = JSON.parse(JSON.stringify(SEAT_FIXTURE)); extra.dinner.sides.T.push({ seatId: 'D-T-25' });
+  assert.equal(validateGeometry(extra).ok, false, 'never 49, 50 or 52 selectable guest seats');
 });
 
 test('G · production ships no geometry: unconfigured, not open, NOT OPEN YET', async () => {
   const l = ledger();
   const v = await call(l, 'read', null, { q: '?invitation=INV-002' });
   assert.deepEqual([v.open, v.frozen, v.configured.ceremony, v.configured.dinner, v.ceremony, v.dinner], [false, false, false, false, null, null]);
-  const s = await call(l, 'select', { invitationId: 'INV-002', guestId: PEGGY, event: 'ceremony', seatId: 'C-L-1-1' });
+  const s = await call(l, 'select', { invitationId: 'INV-002', guestId: PEGGY, event: 'ceremony', seatId: 'C-L-01-01' });
   assert.equal(s.status, 423);
+  assert.deepEqual(JSON.parse(JSON.stringify(v.capacity)), { ceremony: { guestSeats: 50, left: 20, right: 30 }, dinner: { guestSeats: 48, top: 24, bottom: 24, fixed: 2, totalPeople: 50 } }, 'the capacity contract is the Owner geometry even before configuration');
   for (const f of ['assets/seating.js', 'src/seating.js', 'wedding-preparation.html', 'src/worker.js']) {
-    assert.doesNotMatch(src(f), /seatId:\s*'[CD]-[LR]-\d|'C-[LR]-\d+-\d+'|'D-[LR]-\d+'/, f + ' carries a floor plan of its own');
+    assert.doesNotMatch(src(f), /seatId:\s*'[CD]-[LRTB]-\d|'C-[LR]-\d+-\d+'|'D-[LRTB]-\d+'/, f + ' carries a floor plan of its own');
+    assert.doesNotMatch(src(f), /40 guest|20 \+ 20|34 selectable|perSide: 20/, f + ' still carries the retired 40-seat truth');
   }
   assert.match(src('wedding-preparation.html'), /Not open yet/);
   const fx = src('test/fixtures.mjs');
@@ -297,10 +319,15 @@ test('G · a seat belongs to a named guest; the new chair is held before the old
   r = await call(l, 'select', { invitationId: 'INV-002', guestId: PEGGY, event: 'ceremony', seatId: fam });
   assert.equal(r.status, 409);
   /* the two inventories are independent */
-  r = await call(l, 'select', { invitationId: 'INV-002', guestId: PEGGY, event: 'dinner', seatId: 'D-L-4' });
+  r = await call(l, 'select', { invitationId: 'INV-002', guestId: PEGGY, event: 'dinner', seatId: 'D-T-04' });
   assert.equal(r.ok, true);
   const mine = await call(l, 'mine', null, { q: '?invitation=INV-002' });
-  assert.deepEqual(JSON.parse(JSON.stringify(mine.mine)), { ceremony: { [PEGGY]: free[1] }, dinner: { [PEGGY]: 'D-L-4' } });
+  assert.deepEqual(JSON.parse(JSON.stringify(mine.mine)), { ceremony: { [PEGGY]: free[1] }, dinner: { [PEGGY]: 'D-T-04' } });
+  /* Bride and Groom are not guest ids: they can never be selected */
+  for (const id of ['BRIDE', 'GROOM', 'D-BRIDE', 'D-T-25']) {
+    const rr = await call(l, 'select', { invitationId: 'INV-002', guestId: STEFFIE, event: 'dinner', seatId: id });
+    assert.equal(rr.status, 404, id + ' is not a guest seat');
+  }
   /* frozen: the guest sees, cannot change; Guest Relations still can */
   await call(l, 'state', { frozen: true }, { gr: true });
   r = await call(l, 'select', { invitationId: 'INV-002', guestId: PEGGY, event: 'ceremony', seatId: free[2] });
@@ -308,31 +335,41 @@ test('G · a seat belongs to a named guest; the new chair is held before the old
   r = await call(l, 'assign', { invitationId: 'INV-002', guestId: STEFFIE, event: 'ceremony', seatId: free[3], actor: 'GR' }, { gr: true });
   assert.equal(r.ok, true); assert.equal(r.state, 'allocated');
   const plan = await call(l, 'plan', null, { gr: true });
-  assert.equal(plan.events.ceremony.total, 40);
+  assert.equal(plan.events.ceremony.guestSeats, 50);
+  assert.equal(plan.events.ceremony.capacity.left, 20); assert.equal(plan.events.ceremony.capacity.right, 30);
   assert.equal(plan.events.ceremony.family, 6);
   assert.equal(plan.events.ceremony.held, 1);
   assert.equal(plan.events.ceremony.allocated, 1);
-  assert.equal(plan.events.ceremony.available, 32);
+  assert.equal(plan.events.ceremony.available, 42);
   assert.equal(plan.events.ceremony.seats.find((s) => s.seatId === free[3]).guestId, STEFFIE);
+  /* operations output: GUEST SEATS · 48 and TOTAL PEOPLE · 50, Bride and Groom separate, never unassigned guests */
+  assert.equal(plan.events.dinner.guestSeats, 48);
+  assert.equal(plan.events.dinner.seats.length, 48);
+  assert.deepEqual(JSON.parse(JSON.stringify(plan.events.dinner.capacity)), { guestSeats: 48, top: 24, bottom: 24, fixed: ['BRIDE', 'GROOM'], totalPeople: 50 });
+  assert.ok(!plan.events.dinner.seats.some((s) => /BRIDE|GROOM/.test(s.seatId)));
 });
 
 test('G · the renderer draws only what it is given: rows facing the ceremony, one long table, states in marks', () => {
   const w = page({ ...PARTY, givingEligibility: 'PAIR' });
   const S = w.SIYL_SEATS;
   const cfg = validateGeometry(SEAT_FIXTURE).config;
-  const view = { ceremony: { rows: cfg.ceremony.rows.map((r) => ({ ...r, seats: r.seats.map((s, i) => ({ ...s, state: s.family ? 'family' : (i === 0 && r.row === 2 && r.side === 'L' ? 'yours' : 'available'), guestId: PEGGY })) })) },
-                 dinner: { sides: { L: cfg.dinner.sides.L.map((s, i) => ({ ...s, state: s.family ? 'family' : (i === 5 ? 'taken' : 'available') })), R: cfg.dinner.sides.R.map((s) => ({ ...s, state: s.family ? 'family' : 'available' })) } } };
+  const view = { ceremony: { rows: cfg.ceremony.rows.map((r) => ({ ...r, seats: r.seats.map((s, i) => ({ ...s, state: s.family ? 'family' : (i === 0 && r.row === 3 && r.side === 'L' ? 'yours' : 'available'), guestId: PEGGY })) })) },
+                 dinner: { sides: { T: cfg.dinner.sides.T.map((s, i) => ({ ...s, state: s.family ? 'family' : (i === 5 ? 'taken' : 'available') })), B: cfg.dinner.sides.B.map((s) => ({ ...s, state: s.family ? 'family' : 'available' })) }, fixed: ['BRIDE', 'GROOM'], totalPeople: 50 } };
   const c = S.svg('ceremony', view, { guestId: PEGGY, selectable: true });
-  assert.equal((c.match(/<g class="seat/g) || []).length, 40);
+  assert.equal((c.match(/<g class="seat/g) || []).length, 50, 'visual total 50');
   assert.equal((c.match(/seat-family/g) || []).length, 6);
   assert.equal((c.match(/seat-yours/g) || []).length, 1);
-  assert.equal((c.match(/role="button"/g) || []).length, 34, 'available and your own chair are selectable, family is not');
-  assert.match(c, />CEREMONY</); assert.match(c, />LEFT</); assert.match(c, />RIGHT</);
+  assert.equal((c.match(/role="button"/g) || []).length, 44, 'available and your own chair are selectable, family is not');
+  assert.match(c, />CEREMONY</); assert.match(c, />LEFT · 20</); assert.match(c, />RIGHT · 30</);
+  /* ten rows, numbered, the asymmetry kept: the right block is wider than the left */
+  for (let r = 1; r <= 10; r++) assert.match(c, new RegExp('>' + r + '</text>'));
   const d = S.svg('dinner', view, { guestId: STEFFIE, selectable: true });
-  assert.equal((d.match(/<g class="seat/g) || []).length, 40);
+  assert.equal((d.match(/<g class="seat/g) || []).length, 48, 'exactly 48 guest seat boxes');
   assert.equal((d.match(/seat-taken/g) || []).length, 1);
   assert.match(d, />BRIDE</); assert.match(d, />GROOM</);
-  assert.equal((d.match(/role="button"/g) || []).length, 33);
+  assert.match(d, />24 GUESTS · TOP</); assert.match(d, />24 GUESTS · BOTTOM</); assert.match(d, /50 PEOPLE/);
+  assert.ok(!/data-seat="(BRIDE|GROOM)"/.test(d), 'Bride and Groom are never selectable boxes');
+  assert.equal((d.match(/role="button"/g) || []).length, 41);
   /* nothing drawn without configuration */
   assert.equal((S.svg('ceremony', { ceremony: null }, {}).match(/<g class="seat/g) || []).length, 0);
   /* states are said in words, never colour alone */

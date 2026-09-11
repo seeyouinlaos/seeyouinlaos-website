@@ -304,9 +304,13 @@ gate('P3', 'MASTER-02 programme truth (four events, no active Alms, no pool in v
   if (!/src\/\*\.private\.txt/.test(gitignore)) bad.push('the token file is not ignored by git');
   if (fs.existsSync(path.join(ROOT, 'src/gr-token.private.txt')) && /gr-token/.test(read('.assetsignore') + '') === false && !/^src$/m.test(read('.assetsignore'))) bad.push('the token file could be served');
   for (const f of ['src/seating.js', 'assets/seating.js', 'wedding-preparation.html', 'src/worker.js']) {
-    if (/seatId:\s*'[CD]-[LR]-\d|'C-[LR]-\d+-\d+'|'D-[LR]-\d+'/.test(read(f))) bad.push(f + ' carries production geometry');
+    if (/seatId:\s*'[CD]-[LRTB]-\d|'C-[LR]-\d+-\d+'|'D-[LRTB]-\d+'/.test(read(f))) bad.push(f + ' carries production geometry');
   }
   if (!/new_sqlite_classes": \["Seating"\]/.test(read('wrangler.jsonc'))) bad.push('the seating object is not migrated');
+  /* the Owner override: 50 guest seats (20 + 30), 48 + BRIDE + GROOM = 50 people; the retired 40 / 20+20 truth must not be active */
+  const led = read('src/seating.js');
+  if (!/guestSeats: 50, left: 20, right: 30/.test(led) || !/guestSeats: 48, top: 24, bottom: 24, fixed: 2, totalPeople: 50/.test(led)) bad.push('the seating capacity contract is not the Owner geometry');
+  if (/perSide: 20|40 guest|20 \+ 20|34 selectable/.test(led + read('assets/seating.js'))) bad.push('retired 40-seat truth is still active');
   gate('P11', 'E/F/G: explicit eligibility, protected confirmation, geometry-free seating ledger',
     bad.length === 0, bad.length ? bad.join(' · ') : 'PAIR/NONE/unresolved only · GR token gate with constant-time compare · no geometry in code · token never in assets or git');
 }

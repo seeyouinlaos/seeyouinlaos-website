@@ -35,26 +35,24 @@ export function lookupInvitation(query) {
 /* ==========================================================================
    SEAT FIXTURE — TEST/FIXTURE ONLY. Never production geometry, never
    uploaded, never exposed on the site. It exists so the ledger's validation,
-   the atomic hold/release and the renderer can be exercised. The row
-   arrangement here is deliberately arbitrary (6 · 6 · 4 · 4 per side) and
-   is NOT a proposal: the authoritative floor plan comes from the Owner
-   through Guest Relations and the protected configuration route.
-   Frozen totals it must satisfy: ceremony 20 + 20, family 4 left + 2 right;
-   dinner 20 + 20, family 6.
+   the atomic hold/release and the renderer can be exercised. It follows the
+   Owner's binding geometry (ceremony LEFT 10 × 2 = 20, RIGHT 10 × 3 = 30;
+   dinner TOP 24 + BOTTOM 24, BRIDE and GROOM fixed) — the FAMILY flags below
+   are deliberately arbitrary and NOT a proposal: the exact FAMILY chair ids
+   come from the Owner through Guest Relations.
    ========================================================================== */
-function ceremonyRows(side, sizes, familyInRow1) {
-  let row = 0;
-  return sizes.map((n) => {
-    row += 1;
-    return { side, row, seats: Array.from({ length: n }, (_, i) => ({ seatId: 'C-' + side + '-' + row + '-' + (i + 1), family: row === 1 && i < familyInRow1 })) };
-  });
-}
+const two = (n) => String(n).padStart(2, '0');
 export const SEAT_FIXTURE = {
-  ceremony: { rows: [...ceremonyRows('L', [6, 6, 4, 4], 4), ...ceremonyRows('R', [6, 6, 4, 4], 2)] },
+  ceremony: {
+    rows: [
+      ...Array.from({ length: 10 }, (_, r) => ({ side: 'L', row: r + 1, seats: Array.from({ length: 2 }, (_, i) => ({ seatId: 'C-L-' + two(r + 1) + '-' + two(i + 1), family: r < 2 })) })),
+      ...Array.from({ length: 10 }, (_, r) => ({ side: 'R', row: r + 1, seats: Array.from({ length: 3 }, (_, i) => ({ seatId: 'C-R-' + two(r + 1) + '-' + two(i + 1), family: r === 0 && i < 2 })) })),
+    ],
+  },
   dinner: {
     sides: {
-      L: Array.from({ length: 20 }, (_, i) => ({ seatId: 'D-L-' + (i + 1), family: i < 3 })),
-      R: Array.from({ length: 20 }, (_, i) => ({ seatId: 'D-R-' + (i + 1), family: i < 3 })),
+      T: Array.from({ length: 24 }, (_, i) => ({ seatId: 'D-T-' + two(i + 1), family: i < 3 })),
+      B: Array.from({ length: 24 }, (_, i) => ({ seatId: 'D-B-' + two(i + 1), family: i < 3 })),
     },
   },
 };
