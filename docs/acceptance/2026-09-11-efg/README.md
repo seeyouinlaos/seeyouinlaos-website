@@ -1,5 +1,14 @@
 # E · F · G — rendered acceptance (2026-09-11)
 
+> **G CORRECTION (002, 2026-09-11) — applied at 835d939.** The seating truth used at e04bf4a
+> (40 guest seats, 20 + 20, 34 selectable, Bride & Groom outside the capacity) was RETIRED by
+> Owner override. The binding geometry is: CEREMONY 50 guest seats = LEFT 10 rows × 2 (20) +
+> RIGHT 10 rows × 3 (30), centre aisle; DINNER one long table, 50 people = TOP 24 + BOTTOM 24
+> (48 guest seats) + BRIDE + GROOM fixed central positions. Ids C-L-[ROW]-[SEAT] / C-R-[ROW]-[SEAT]
+> (rows 01–10) and D-T-01…24 / D-B-01…24. FAMILY chair ids remain unresolved (never invented).
+> Frames below were regenerated at 835d939; counts in the earlier text of this file that mention
+> 40 / 20 + 20 are historical only.
+
 Walk: `node docs/acceptance/2026-09-11-efg/walk.mjs [origin] [outdir]` — 36 checks, PASS locally,
 on Cloudflare and on GitHub Pages. Frames at 390 · 834 · 1440 · 1920.
 
@@ -25,7 +34,15 @@ legend without "Available"); the confirmed card's accent on open items (muted); 
 Not changed: the header badge (site chrome, accepted carryover); A/B labels for the confirmation
 (002 §S); the ceremony map left-anchored on the reading axis.
 
-## Live origins (after e04bf4a)
+## Live origins (after 835d939 — the G correction)
+- Cloudflare Worker version 1c9b691f-82bd-46fa-962a-bd9f69c4976a · seating read serves the capacity
+  contract {ceremony 50 = 20 + 30; dinner 48 = 24 + 24, fixed 2, totalPeople 50}, unconfigured, not
+  open · walk 37/37 · `results-live-cloudflare.json` · `90-cf-1440-ceremony-map-live-mock.png`,
+  `90-cf-1440-dinner-map-live-mock.png`
+- GitHub Pages built from 835d939 · walk 37/37 · `results-live-github-pages.json` · `91-gh-*`
+- Byte parity on both origins for the guest-facing files.
+
+## Live origins (historical, after e04bf4a)
 - Cloudflare Worker version 37692738-92a0-4176-bcd3-c25df2962a3c · seating object migrated (v2) ·
   GR_TOKEN set as a Worker secret · walk 36/36 · `results-live-cloudflare.json` · `90-cf-*`
 - GitHub Pages built from e04bf4a · walk 36/36 · `results-live-github-pages.json` · `91-gh-*`

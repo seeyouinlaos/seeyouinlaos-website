@@ -1,6 +1,6 @@
 {
   "origin": "https://seeyouinlaos.github.io/seeyouinlaos-website",
-  "at": "2026-09-11T12:26:04.498Z",
+  "at": "2026-09-11T13:39:03.918Z",
   "results": [
     {
       "id": "E0 production eligibility",
@@ -83,34 +83,39 @@
       "detail": "ceremony and dinner drawn from the fixture"
     },
     {
-      "id": "G2 geometry from configuration",
+      "id": "G2 Owner geometry from configuration",
       "ok": true,
-      "detail": "40 + 40, family 6 + 6, Bride & Groom outside"
+      "detail": "ceremony 50 (20 + 30), dinner 48 guest boxes + BRIDE + GROOM fixed, family 6 + 6 (fixture)"
     },
     {
-      "id": "G2 no invented centre block, aisle present",
+      "id": "G2 ten rows · 2 left · 3 right · aisle · 24 top · 24 bottom · 50 people",
       "ok": true,
-      "detail": "rows face the ceremony, one long table"
+      "detail": "labels read back from the drawings"
+    },
+    {
+      "id": "G2 no symmetry regression",
+      "ok": true,
+      "detail": "two chair columns left of the aisle, three right of it"
     },
     {
       "id": "G2 seat belongs to Peggy",
       "ok": true,
-      "detail": "C-L-2-1 and D-L-8 held for G001"
+      "detail": "C-L-04-01 and D-T-08 held for G001"
     },
     {
       "id": "G2 taken is not selectable",
       "ok": true,
-      "detail": "C-L-2-3 (another invitation) has no button"
+      "detail": "C-L-04-02 (another invitation) has no button"
     },
     {
       "id": "G2 family is not selectable",
       "ok": true,
-      "detail": "C-L-1-1 is FAMILY"
+      "detail": "C-L-01-01 is FAMILY (fixture)"
     },
     {
       "id": "G2 change is atomic",
       "ok": true,
-      "detail": "C-R-3-2 held, C-L-2-1 released"
+      "detail": "C-R-03-02 held, C-L-04-01 released"
     },
     {
       "id": "G3 choosing for Steffie",
@@ -120,7 +125,7 @@
     {
       "id": "G3 Steffie's chair is hers",
       "ok": true,
-      "detail": "C-R-3-3 for Steffie, C-R-3-2 still Peggy's"
+      "detail": "C-R-03-03 for Steffie, C-R-03-02 still Peggy's"
     },
     {
       "id": "G3 targets",
