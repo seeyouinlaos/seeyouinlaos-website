@@ -210,7 +210,7 @@ function weddingHtml(){
     '<p class="t-l1">'+(usd>0?'Hosted · your personal addition '+money(usd):'Hosted')+'</p>'+
     '<h3 class="t-h1">One day, four parts</h3>'+
     '<ul class="p-list">'+T.EVENTS.map(function(e){return '<li class="t-b2"><b>'+e.label+'</b> · '+e.when+' · '+e.place+'</li>'}).join('')+'</ul>'+
-    '<p class="t-b2 measure-w">Hosted by Haruthai &amp; Suthep. No separate charge for the morning alms-giving inside the Temple Ceremony. Your optional personal addition, the Sangkhathan, is USD 15 per selected guest.</p>';
+    '<p class="t-b2 measure-w">Hosted by Haruthai &amp; Suthep. The morning alms-giving inside the Temple Ceremony, Tak Bat, is self-pay. Your optional personal addition, the Sangkhathan, is USD 15 per selected guest.</p>';
   if(op&&op.guests.length){
     h+='<div class="p-group">';
     op.guests.forEach(function(g){

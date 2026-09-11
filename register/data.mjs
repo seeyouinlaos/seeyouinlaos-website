@@ -369,11 +369,11 @@ export const POST_WEDDING = [
       'Junting City-View Loft Double Bed Room · 68 sqm · queen · 2 adults'],
     contribution: null,
     images: ['../assets/images/journey/kunming-01.jpg', '../assets/images/journey/kunming-02.jpg', '../assets/images/journey/kunming-03.jpg'] },
-  /* OWNER OVERRIDE (06 SEP, Operations Master order): Train C642 · 16:39 → 21:06 ·
-   * direct 4h27 · BUSINESS CLASS · USD 85 pp — supersedes C86, 10:15/13:44,
-   * USD 105 and USD 145. Priority ticketing; 1+1 seating, wireless charging,
+  /* OWNER TRUTH (11 SEP, Haruthai correction pass): Train C86 · 10:15 → 13:44 ·
+   * direct 3h29 · BUSINESS CLASS · USD 85 pp. C642 (16:39 → 21:06) is retired
+   * and is never restored; USD 105 and USD 145 remain superseded. Priority ticketing; 1+1 seating, wireless charging,
    * drinks/snacks and comfort amenities subject to availability. */
-  { id: 'kmg-ljg', type: 'Train', label: 'Kunming → Lijiang', date: '04 MAR 2027', when: '4 March 2027', sub: 'Train C642 · 16:39 → 21:06 · direct 4h27 · Business Class', contribution: 85, perGuest: true },
+  { id: 'kmg-ljg', type: 'Train', label: 'Kunming → Lijiang', date: '04 MAR 2027', when: '4 March 2027', sub: 'Train C86 · 10:15 → 13:44 · direct 3h29 · Business Class', contribution: 85, perGuest: true },
   { id: 'lijiang-stay', type: 'Stay', label: 'Luye Baisha · Rizhao Jinshan', date: '04 – 06 MAR 2027', when: '4 – 6 March 2027',
     sub: 'Lijiang · Snow Mountain Viewing Room',
     /* OWNER OVERRIDE (06 SEP): room variants carry per-person amounts for the

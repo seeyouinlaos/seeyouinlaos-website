@@ -188,6 +188,9 @@ body.prep button, body.prep input, body.prep textarea, body.prep select { font-f
 .p-rail { display: flex; gap: var(--s4); overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; padding-bottom: var(--s1); }
 .p-rail::-webkit-scrollbar { display: none; }
 .p-rail > * { flex: 0 0 84%; max-width: 340px; scroll-snap-align: start; }
+/* a photograph keeps its own proportions: 3:4, covered, never stretched */
+.p-rail > img { display: block; width: 84%; height: auto; aspect-ratio: 3 / 4; object-fit: cover; object-position: center top; background: #E7E3DB; }
+@media (min-width: 768px) { .p-rail > img { width: 320px; } }
 @media (min-width: 768px) { .p-rail > * { flex: 0 0 320px; } }
 
 /* ------------------------------------------------------------- disclosure */

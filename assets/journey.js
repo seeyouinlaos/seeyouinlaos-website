@@ -51,7 +51,7 @@
   var WEDDING = [
     { key: 'temple', title: 'Temple Ceremony', when: '08:00 – 12:00',
       place: 'Wat Ong Teu, Vientiane',
-      note: 'Includes the morning alms-giving, Tak Bat. Optional participation — no charge.',
+      note: 'Includes the morning alms-giving, Tak Bat. Optional participation — self-pay.',
       anchor: 'voyage.html#temple' },
     { key: 'sangkhathan', title: 'Sangkhathan Temple Offering', when: 'Within the Temple Ceremony',
       place: 'Wat Ong Teu, Vientiane', id: 'sangkhathan',

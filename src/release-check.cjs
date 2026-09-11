@@ -362,10 +362,17 @@ gate('P6', 'LINE/WhatsApp QR owner rule (originals only, no invented LINE ID)',
  * (owner decision 2026-08-28). The forbidden set therefore keeps the visible
  * expand controls and arrow glyphs, but no longer bans the invisible lightbox
  * tap-zones; a positive check confirms the dot navigation is present. */
-const dressDisk = ['resort', 'tradition', 'vow', 'dinner']
-  .map((g) => [1, 2, 3, 4, 5, 6].filter((i) => fs.existsSync(path.join(ROOT, 'assets/images/dress', g + '-0' + i + '.jpg'))).length);
-const dressAppRefs = [...appJs.matchAll(/images\/dress\/'?|'(tradition|vow|dinner)-0[1-6]'/g)].length;
-const dressOk = dressDisk.every((n) => n === 6) && /assets\/images\/dress\//.test(appJs)
+/* Haruthai correction pass (11 SEP 2026): the owner crossed out resort-01 (a male
+ * beach photograph). No authoritative replacement exists, so the resort group is
+ * FIVE images (02–06) and the library is 23 owner images. resort-01 must not exist. */
+const DRESS_EXPECT = { resort: [2, 3, 4, 5, 6], tradition: [1, 2, 3, 4, 5, 6], vow: [1, 2, 3, 4, 5, 6], dinner: [1, 2, 3, 4, 5, 6] };
+const dressGroups = Object.keys(DRESS_EXPECT);
+const dressMissing = dressGroups.flatMap((g) => DRESS_EXPECT[g].map((i) => g + '-0' + i + '.jpg'))
+  .filter((f) => !fs.existsSync(path.join(ROOT, 'assets/images/dress', f)));
+const dressRetired = fs.existsSync(path.join(ROOT, 'assets/images/dress/resort-01.jpg'));
+const dressDisk = dressGroups.map((g) => DRESS_EXPECT[g].filter((i) => fs.existsSync(path.join(ROOT, 'assets/images/dress', g + '-0' + i + '.jpg'))).length);
+const dressUnique = dressGroups.flatMap((g) => DRESS_EXPECT[g].map((i) => g + '-0' + i));
+const dressOk = dressMissing.length === 0 && !dressRetired && /assets\/images\/dress\//.test(appJs)
   && !/dg-slot|DRESS_ALMS_/.test(indexHtml + appJs);
 const standalone = fs.existsSync(path.join(ROOT, 'build/standalone.html')) ? read('build/standalone.html') : '';
 // forbidden: visible expand controls on thumbnails + any visible arrow glyph (entity or literal ↗)
@@ -374,14 +381,14 @@ const arrowSurfaces = [['index.html', indexHtml], ['register/index.html', regHtm
   ['src/build-rooms.cjs', read('src/build-rooms.cjs')]].filter(([, s]) => arrowPattern.test(s)).map(([n]) => n);
 // required: invisible in-lightbox navigation (dot indicator) present on both surfaces
 const navOk = /class="lb-dots"/.test(regHtml);
-gate('P7', 'Dress Code imagery real (24), no visible arrows, in-lightbox tap navigation present',
+gate('P7', 'Dress Code imagery real (23 — resort-01 retired by the owner), no visible arrows, in-lightbox tap navigation present',
   dressOk && arrowSurfaces.length === 0 && navOk,
-  [!dressOk && 'dress imagery incomplete: ' + dressUnique.length + ' refs, groups ' + dressGroups.join('/') +
-     (dressMissing.length ? ', missing files: ' + dressMissing.join(', ') : ''),
+  [!dressOk && 'dress imagery incomplete: ' + dressUnique.length + ' expected, on disk ' + dressDisk.join('/') + ' (' + dressGroups.join('/') + ')' +
+     (dressMissing.length ? ', missing files: ' + dressMissing.join(', ') : '') + (dressRetired ? ', retired resort-01.jpg still present' : ''),
    arrowSurfaces.length && 'visible arrow/expand controls present in: ' + arrowSurfaces.join(', '),
    !navOk && 'in-lightbox dot navigation missing on a surface']
     .filter(Boolean).join(' · ')
-  || '24 owner dress images across 4 groups; no visible arrow/expand icon; invisible in-lightbox tap-zone + dots navigation present');
+  || '23 owner dress images across 4 groups (resort 02–06); no visible arrow/expand icon; invisible in-lightbox tap-zone + dots navigation present');
 
 
 /* GATE L1 — localization completeness (HSW-001 P0 §8/§20).

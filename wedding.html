@@ -49,11 +49,11 @@ var DRESS={temple:'Blue Lao Traditional Dress',coffee:'Black Tie',vows:'Black Ti
 var TAKBAT='<p class="t-l1">Part of the Temple Ceremony</p>'+
  '<h2 class="t-h1" style="margin-top:8px">Morning Alms-Giving · Tak Bat</h2>'+
  '<p class="t-b1 measure" style="margin-top:12px">Guests attending the Temple Ceremony are invited to take part in the traditional morning alms-giving, Tak Bat. This is the moment in which food is respectfully offered to Buddhist monks — one of the oldest ways a day begins in Laos.</p>'+
- '<p class="t-b1 measure" style="margin-top:12px">It is part of the Temple Ceremony, and there is <b>no separate charge for Tak Bat</b>. Nothing is arranged and nothing is paid: you simply take part.</p>';
+ '<p class="t-b1 measure" style="margin-top:12px">It is part of the Temple Ceremony, and it is <b>self-pay</b>: the small offering of food is arranged and paid for by each guest on the morning itself. No amount is set on this website, and it is not the Sangkhathan.</p>';
 var SANG='<p class="t-l1">Optional · within the Temple Ceremony</p>'+
  '<h2 class="t-h1" style="margin-top:8px">Sangkhathan · a personal offering</h2>'+
  '<p class="t-b1 measure" style="margin-top:12px">A Sangkhathan is a personal offering of useful everyday items for the monastic community, prepared in your name and presented by you.</p>'+
- '<p class="t-b1 measure" style="margin-top:12px">It is <b>not</b> the alms-giving. Tak Bat is the food offered during the ceremony and carries no charge; the Sangkhathan is separate, optional, and nobody needs one in order to attend. It is prepared for couples, as one decision for both: the USD 15 per person prepares your own offering — it is not an entrance, not a temple fee and not a wedding extra.</p>';
+ '<p class="t-b1 measure" style="margin-top:12px">It is <b>not</b> the alms-giving. Tak Bat is the food offered during the ceremony, arranged and paid for by each guest themselves (self-pay); the Sangkhathan is separate, optional, and nobody needs one in order to attend. It is prepared for couples, as one decision for both: the USD 15 per person prepares your own offering — it is not an entrance, not a temple fee and not a wedding extra.</p>';
 
 /* one answer row per named guest, under each part of the day */
 function personRow(g,e,me){
@@ -120,7 +120,7 @@ function render(){
        '<h2 class="t-h2">'+e.label+'</h2>'+
        '<p class="t-b2">'+(e.key==='temple'?'Optional participation · ':'Hosted · ')+'Dress · '+DRESS[e.key]+'</p>'+
        (e.key==='temple'
-         ?'<p class="t-b1 measure">The Buddhist morning at Wat Ong Teu. Guests attending are invited to take part in the traditional morning alms-giving, Tak Bat — food respectfully offered to the monks, with no separate charge.</p>'+
+         ?'<p class="t-b1 measure">The Buddhist morning at Wat Ong Teu. Guests attending are invited to take part in the traditional morning alms-giving, Tak Bat — food respectfully offered to the monks; self-pay, arranged by each guest on the morning.</p>'+
           '<p class="p-more"><button type="button" class="p-link" data-more="takbat">More about Tak Bat</button></p>'
          :'')+
        p.guests.map(function(g){return personRow(g,e,me)}).join('')+
