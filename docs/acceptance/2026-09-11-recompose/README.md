@@ -48,3 +48,13 @@ amounts and "× 1 guest" (pricing presentation, out of D's scope); Steffie's San
 - Cloudflare `https://seeyouinlaos-website.suthep-hrg.workers.dev` · Worker version 63b7c647-a08e-454c-b04e-76c3c50fd1b2 · walk 39/39 · `results-live-cloudflare.json` · frames `90-cf-*`
 - GitHub Pages `https://seeyouinlaos.github.io/seeyouinlaos-website` · build of 72aff66 · walk 39/39 · `results-live-github-pages.json` · frames `91-gh-*`
 - Byte parity: prep.css · prep-shell.js · journey.js · guest.js · the six step pages — identical to HEAD on both origins.
+
+## 002 acceptance · 2026-09-11
+D ACCEPTED by 002. Accepted production state: revision 72aff66 (docs 6cc1c58), Cloudflare Worker
+63b7c647-a08e-454c-b04e-76c3c50fd1b2, GitHub Pages built from 72aff66, byte parity on both origins,
+192/192 tests, all gates incl. P9/P10, D walk 39/39 on all three origins, C walk 39/39.
+Accepted carryovers (not defects, not to be silently changed): "× 1 guest" per-person lines from the
+existing shop/pricing behaviour; the limited .aslide.p-stay restatement against aman.css; the identical
+inline site chrome; legacy pages outside the six steps keep their styling and rail.
+A + B + C + D are frozen. E (Sangkhathan eligibility / givingEligibility), F (confirmation / personal
+wedding card) and G (graphical seating) are NOT AUTHORISED; no seat geometry.
