@@ -86,6 +86,7 @@ a.th{display:block}
 
 <section class="blk" id="b2">
 <div class="bhd"><span class="bno">02</span><h2>Your journey</h2><a class="bedit" href="your-journey.html">Edit</a></div>
+<p class="bsub" id="b2who">For your party</p>
 <p class="bsub">Your travel, your stays and your experiences, in the order the journey happens.</p>
 <div id="items"></div>
 </section>
@@ -95,6 +96,7 @@ a.th{display:block}
 
 <section class="blk" id="b5">
 <div class="bhd"><span class="bno">05</span><h2>Your costs</h2><a class="bedit" href="your-journey.html">Edit</a></div>
+<p class="bsub" id="b5who">For your party</p>
 <p class="bsub">One calculation for the whole website. Nothing is paid here, and no deposit is asked for.</p>
 <div class="tot"><span class="l">Your Costs</span><span class="r" id="tt">USD 0</span></div>
 <p class="note">Spa interest lines carry no journey cost — Marsilea Spa confirms times directly and the amount is payable at the spa. No deposit is required on this website.</p>
@@ -149,8 +151,12 @@ var h='<div class="bhd"><span class="bno">01</span><h2>You</h2>'+
   '<a class="bedit" href="you.html#you">Edit</a></div>';
 if(!p){box.innerHTML=h+'<p class="bsub">Open your invitation and your party appears here by name.</p>'+
   '<p style="margin-top:10px"><a class="tlink" href="invitation.html">Open your invitation</a></p>';return}
-h+='<p class="bsub">Invitation '+esc(p.invitationId)+(p.partyName?' · '+esc(p.partyName):'')+
-   ' · you are making decisions for '+p.guests.map(function(g){return esc(G.value(g.guestId,'preferredName')||g.fullName)}).join(' &amp; ')+'.</p>';
+var me=G.active();
+h+='<p class="bsub">Invitation '+esc(p.invitationId)+' · '+esc(G.partyLabel())+
+   (me?' · continuing as '+esc(G.nameOf(me.guestId)):'')+'.</p>';
+/* C · the two kinds of state, said once where the truth is reviewed */
+var b2=document.getElementById('b2who');if(b2)b2.textContent=G.partyLabel()+' · shared by everyone on the invitation';
+var b5=document.getElementById('b5who');if(b5)b5.textContent=G.partyLabel();
 h+='<p class="bsub" style="margin-top:16px">Personal details</p>';
 p.guests.forEach(function(g){
   var full=G.value(g.guestId,'fullName'),pref=G.value(g.guestId,'preferredName');
@@ -165,9 +171,10 @@ h+=row('How we reach you',(em||ph)?esc([em,ph].filter(Boolean).join(' · ')):'No
 h+='<div class="bhd" style="margin-top:22px"><span class="bno">&nbsp;</span><h2 style="font-size:17px">About you</h2>'+
    '<a class="bedit" href="about-you.html#about-you">Edit</a></div>';
 p.guests.forEach(function(g){
-  var id=g.guestId,name=esc(G.value(id,'preferredName')||g.fullName);
-  var n=G.profileAnswered(id);
-  h+='<p class="bsub" style="margin-top:16px">'+name+'</p>';
+  var id=g.guestId,name=esc(G.nameOf(id));
+  var n=G.profileAnswered(id),mine=me&&me.guestId===id;
+  h+='<p class="bsub" style="margin-top:16px">'+esc(G.labelFor(id))+(mine?' · you':'')+
+     ' <a href="about-you.html?for='+esc(id)+'#about-you" style="color:#313131;margin-left:8px">'+(mine?'Edit':'Answer for '+name)+'</a></p>';
   if(!n){h+='<div class="pline"><div><p class="ps">Not completed yet</p></div><span class="r">Optional</span></div>';return}
   G.PROFILE.concat([G.ACCESS]).forEach(function(q){
     var v=G.profile(id,q.key);
@@ -196,8 +203,11 @@ h+='<div class="wcost">'+
    '<p class="ps"><b>Your optional personal addition</b> · Sangkhathan Temple Offering · USD 15 per selected guest — a separate personal offering, never the alms-giving and never a temple fee</p></div>';
 /* participation, per named guest, per event */
 if(op&&op.guests.length){
+  var meW=G?G.active():null;
   op.guests.forEach(function(g){
-    h+='<p class="bsub" style="margin-top:20px">'+esc(g.name)+'</p>';
+    var mineW=meW&&meW.guestId===g.guestId;
+    h+='<p class="bsub" style="margin-top:20px">'+esc(G?G.labelFor(g.guestId):g.name)+(mineW?' · you':'')+
+       (g.answeredBy&&g.answeredBy!==g.guestId?' · answered by '+esc(G.nameOf(g.answeredBy)):'')+'</p>';
     (T.EVENTS||[]).forEach(function(e){
       var st=g.events[e.key],open=st==='Not decided',d=DRESS[e.key];
       h+='<div class="pline"><div><p class="ps"><b>'+e.label+'</b></p>'+
@@ -213,15 +223,19 @@ if(op&&op.guests.length){
     h+='<div class="pline"><div><p class="ps"><b>Seating</b></p>'+
        '<p class="ps">Ceremony seat and dinner seat are arranged by Guest Relations. Seating is not open yet.</p></div>'+
        '<span class="r">Not open yet</span></div>'})}
-/* the dress code, as a state and not a description */
-var a=G?G.dressAck():null;
-h+='<p class="bsub" style="margin-top:22px">Dress code · for your whole party</p>'+
+/* the dress code, as a state and not a description — C · one state PER
+ * NAMED GUEST, acknowledged by nobody but that person */
+h+='<p class="bsub" style="margin-top:22px">Dress code · acknowledged by each named guest</p>'+
    '<div class="pline"><div>'+
    '<p class="ps"><b>Temple Ceremony</b> · Blue Lao Traditional Dress</p>'+
    '<p class="ps"><b>Coffee &amp; Cake · Vow Ceremony · Wedding Dinner</b> · Black Tie</p>'+
-   '<p class="ps"><b>The travelling days</b> · Resort Wear</p></div>'+
-   '<span class="r'+(a?'':' open')+'">'+(a?'Reviewed · '+when(a.at):'Not yet reviewed')+'</span></div>'+
-   '<p style="margin-top:10px"><a class="tlink" href="wedding-preparation.html#ack">Review dress code</a></p>';
+   '<p class="ps"><b>The travelling days</b> · Resort Wear</p></div></div>';
+if(G&&G.party()){G.party().guests.forEach(function(g){
+  var a=G.dressAck(g.guestId),mineD=meW&&meW.guestId===g.guestId;
+  h+='<div class="pline"><div><p class="ps"><b>'+esc(G.labelFor(g.guestId))+(mineD?' · you':'')+'</b></p>'+
+     '<p class="ps">'+(a?'Reviewed in '+esc(G.nameOf(g.guestId))+'&rsquo;s own name':(mineD?'Not yet reviewed':'Not yet reviewed · '+esc(G.nameOf(g.guestId))+' acknowledges this in person'))+'</p></div>'+
+     '<span class="r'+(a?'':' open')+'">'+(a?'Reviewed · '+when(a.at):'Review required')+'</span></div>'})}
+h+='<p style="margin-top:10px"><a class="tlink" href="wedding-preparation.html#ack">Review dress code</a></p>';
 box.innerHTML=h}
 
 /* ---------------------------------------------------------------- BLOCK 04
@@ -236,8 +250,8 @@ var h='<div class="bhd"><span class="bno">04</span><h2>Documents &amp; privacy</
 var p=G?G.party():null;
 if(!p||!D){box.innerHTML=h;return}
 p.guests.forEach(function(g){
-  var id=g.guestId,name=esc(G.value(id,'preferredName')||g.fullName);
-  h+='<p class="bsub" style="margin-top:18px">'+name+'</p>';
+  var id=g.guestId,name=esc(G.nameOf(id)),meD=G.active(),mineDoc=meD&&meD.guestId===id;
+  h+='<p class="bsub" style="margin-top:18px">'+esc(G.labelFor(id))+(mineDoc?' · you':'')+'</p>';
   D.forGuest(id).forEach(function(d){
     var got=d.state!=='Not provided';
     h+='<div class="pline"><div><p class="ps"><b>'+d.label+'</b></p>'+
@@ -344,8 +358,8 @@ var MSG={invitation:'Please open your invitation before sending your journey.',
 var ACT={invitation:'Open my invitation',you:'Add your contact',
          journey:'Choose your journey',wedding:'Go there now'};
 /* when the wedding step is open only because of the dress code, say that */
-if(first&&first.key==='wedding'&&window.SIYL_TEMPLE&&SIYL_TEMPLE.decidedAll()&&!G.dressAck()){
-  MSG.wedding='Please review the dress code before sending your journey.';
+if(first&&first.key==='wedding'&&window.SIYL_TEMPLE&&SIYL_TEMPLE.decidedAll()&&!G.dressAckAll()){
+  MSG.wedding='Please review the dress code before sending your journey — '+G.dressMissing().map(function(g){return G.nameOf(g.guestId)}).join(' and ')+' still to acknowledge, each in their own name.';
   first=Object.assign({},first,{href:'wedding-preparation.html#ack',action:'Review dress code'})}
 var msg=first?(MSG[first.key]||('Please complete '+first.label.toLowerCase()+' before sending your journey.'))
              :'A few steps above are still needed before your journey can be sent.';
@@ -358,11 +372,14 @@ document.addEventListener('siyl:bag',function(){render();paintBlocks()});
 document.addEventListener('siyl:temple',paintBlocks);
 document.addEventListener('siyl:guest',paintBlocks);
 document.addEventListener('siyl:invite-ready',paintBlocks);
+document.addEventListener('siyl:who',paintBlocks);
 paintBlocks();
 render();
 
 function buildText(auth){var b=SIYL_BAG.get();
-var L=['SEE YOU IN LAOS — JOURNEY SELECTION','Invitation: '+auth.invitationId+(auth.partyName?' · '+auth.partyName:''),'',
+var whoS=window.SIYL_GUEST?SIYL_GUEST.who():null;
+var L=['SEE YOU IN LAOS — JOURNEY SELECTION','Invitation: '+auth.invitationId+(auth.partyName?' · '+auth.partyName:''),
+'Sent by: '+(whoS&&whoS.activeGuestId?SIYL_GUEST.nameOf(whoS.activeGuestId)+' ('+whoS.activeGuestId+')':'not identified'),'',
 'WEDDING PROGRAMME (Sunday, 28 February 2027 · Vientiane):'];
 /* ONE source for the day — the same programme the guest read on the website */
 if(window.SIYL_JOURNEY){SIYL_JOURNEY.WEDDING.forEach(function(w){
@@ -404,12 +421,15 @@ if(window.SIYL_GUEST){var gr=SIYL_GUEST.operational();
 if(gr){
   L.push('','PARTY:');
   L.push('- Contact: '+(gr.contact.email||'no email given')+' · '+(gr.contact.phone||'no telephone given'));
-  L.push('- Dress code: '+(gr.dress?('acknowledged '+gr.dress.at+' (text version '+gr.dress.textVersion+')'):'NOT ACKNOWLEDGED'));
+  L.push('- Dress code: '+(gr.dress.all?'acknowledged by every named guest':'NOT ACKNOWLEDGED by '+gr.dress.missing.map(function(id){return SIYL_GUEST.nameOf(id)}).join(', ')));
   gr.guests.forEach(function(g){
     var nm=(g.submitted.preferredName||g.source.preferredName||g.source.fullName);
     L.push('','- '+nm.toUpperCase()+' ('+(g.submitted.fullName||g.source.fullName)+')');
     if(g.submitted.fullName&&g.submitted.fullName!==g.source.fullName)
       L.push('  · name corrected by the guest, invitation had: '+g.source.fullName);
+    L.push('  · Dress code: '+(g.dress?'acknowledged '+g.dress.at+' (text version '+g.dress.textVersion+', by '+g.dress.by+')':'NOT ACKNOWLEDGED'));
+    (g.history||[]).filter(function(x){return x.by&&x.by!==g.guestId}).slice(-1).forEach(function(x){
+      L.push('  · some answers were completed for '+nm+' by '+SIYL_GUEST.nameOf(x.by))});
     SIYL_GUEST.PROFILE.concat([SIYL_GUEST.ACCESS]).forEach(function(q){
       var v=g.profile[q.key];
       if(v)L.push('  · '+q.q+': '+(v==='NONE'?'Nothing to note':v))})})}}

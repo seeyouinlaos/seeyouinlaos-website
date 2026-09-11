@@ -131,15 +131,23 @@
       var c = (read().consent || {})[guestId];
       return !!c && (c.given === true || c.given === false);
     },
+    /* C · a consent is a first-person statement: only the person who is
+     * continuing may give or decline their own. Nobody answers it for them. */
+    mayConsent: function (guestId) {
+      var G = window.SIYL_GUEST, a = G && G.active ? G.active() : null;
+      return !!(a && a.guestId === guestId);
+    },
     setConsent: function (guestId, given) {
+      if (!this.mayConsent(guestId)) return false;
       var st = read();
       st.consent = st.consent || {};
       st.consent[guestId] = { given: !!given, at: new Date().toISOString(),
-                              textVersion: this.CONSENT_VERSION, text: this.CONSENT_TEXT };
+                              textVersion: this.CONSENT_VERSION, text: this.CONSENT_TEXT, by: guestId };
       st.consentHistory = (st.consentHistory || []).concat([
-        { guestId: guestId, given: !!given, at: new Date().toISOString(), textVersion: this.CONSENT_VERSION }
+        { guestId: guestId, given: !!given, at: new Date().toISOString(), textVersion: this.CONSENT_VERSION, by: guestId }
       ]).slice(-50);
       write(st);
+      return true;
     },
     consentHistory: function () { return read().consentHistory || []; },
 

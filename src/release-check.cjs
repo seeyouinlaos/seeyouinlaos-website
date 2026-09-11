@@ -240,6 +240,28 @@ gate('P3', 'MASTER-02 programme truth (four events, no active Alms, no pool in v
         'only the Sangkhathan is USD 15; no pool narrative; retired bride and fountain images removed');
 }
 
+/* P9 — C · PARTY / PERSON STATE SEPARATION. The model classifies every piece
+   of state; the acknowledgements are personal and first person; the subject
+   is explicit; the shell says ANSWERING FOR in words; nothing asks for the
+   Sangkhathan eligibility (that is E). */
+{
+  const g = read('assets/guest.js'), sh = read('assets/prep-shell.js'), d = read('assets/docs.js');
+  const wp = read('wedding-preparation.html'), ab = read('about-you.html'), rv = read('review.html'), wd = read('wedding.html');
+  const bad = [];
+  if (!/SCOPE: \{\s*party:/.test(g) || !/personal: \[/.test(g)) bad.push('the guest record must classify state as party or personal');
+  if (!/setSubject: function/.test(g) || !/answeringFor: function/.test(g)) bad.push('the subject (ANSWERING FOR) must be explicit in the model');
+  if (!/mayAcknowledge/.test(g) || !/setDressAck: function \(id, on\)/.test(g)) bad.push('the dress acknowledgement must be per guest and first person');
+  if (/dressAck\(\)/.test(wp) || /dressAck\(\)/.test(rv)) bad.push('no Preparation surface may read a party-wide dress acknowledgement');
+  if (!/setDressAck\(c\.getAttribute\('data-ack'\)/.test(wp)) bad.push('step 04 must acknowledge by named guest');
+  if (!/G\.setSubject\(/.test(ab)) bad.push('step 05 must switch the subject explicitly, never a silent tab');
+  if (!/prep-for/.test(sh) || !/Answering for/.test(sh)) bad.push('the shell must say ANSWERING FOR in words');
+  if (!/data-switch/.test(wd)) bad.push('step 03 must offer SWITCH beside another guest\'s answers');
+  if (!/mayConsent/.test(d)) bad.push('publication consent must be first person only');
+  if (/givingEligibility/.test(g + sh + wd + wp + rv)) bad.push('givingEligibility belongs to E and must not be modelled yet');
+  gate('P9', 'Party / person state separation (C): scoped state, explicit subject, personal acknowledgements',
+    bad.length === 0, bad.length ? bad.join(' · ') : 'SCOPE registry · activeGuestId / subjectGuestId · dress + consent per guest, first person · ANSWERING FOR said in words');
+}
+
 /* P5 — overlay integrity (release-blocking): a hidden lightbox must actually
  * be hidden (author display rules must not defeat the hidden attribute), and
  * gallery navigation can never run on an empty list (NaN / 0 regression). */

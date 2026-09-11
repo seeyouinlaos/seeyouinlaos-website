@@ -7,11 +7,37 @@
      source{}     what the invitation resolved — read-only, always shown as
                   "from your invitation"
      submitted{}  what the guest has entered or corrected
-     history[]    { field, from, to, at } — every change, kept
+     history[]    { field, from, to, at, by } — every change, kept, and signed
 
    Per NAMED guest it also carries the decisions Wave 1 introduces: the temple,
    the Sangkhathan, the hospitality profile. Seats have their slot here and are
    filled by Wave 2; nothing invents them now.
+
+   C · PARTY / PERSON. Two kinds of state, never merged, and every key belongs
+   to exactly one of them (SCOPE below):
+
+     PARTY STATE     shared by everyone on the invitation — the journey, the
+                     costs, one contact, the invitation confirmed once.
+                     Guest-facing label:  FOR YOUR PARTY · PEGGY & STEFFIE
+     PERSONAL STATE  belongs to one named guest — names, profile, the temple,
+                     the dress-code acknowledgement, documents, consent, seats.
+                     Guest-facing label:  FOR PEGGY
+
+   And two kinds of person, never confused:
+
+     ACTIVE    activeGuestId — who is continuing. The code opens the PARTY;
+               the person then says who they are (WHO ARE YOU). Stored against
+               the invitation it was chosen on, so it never survives into
+               another party's session. SWITCH IDENTITY changes this and
+               touches nobody's data.
+     SUBJECT   subjectGuestId — whose personal item is being completed right
+               now. It defaults to the active person and is never persisted:
+               ANSWERING FOR is a deliberate act on one surface, and a new
+               page always starts with the guest answering for themselves.
+               Acknowledgements (dress code, consent) are first person only.
+
+   Every write is signed: history[] entries carry `by`, the active person who
+   actually wrote them, so a record completed for someone says so.
 
    Storage is the same localStorage draft the Journey Bag uses. Documents are
    NOT here: no document byte ever touches this file (Wave 3).
@@ -19,13 +45,22 @@
 (function () {
   'use strict';
   var KEY = 'siyl.guest';
+  var WHO = 'siyl.who';
+  /* the subject lives in memory only — see the header */
+  var subjectId = null;
 
   function auth() {
     try { return JSON.parse(localStorage.getItem('siyl.auth') || 'null'); } catch (e) { return null; }
   }
   function read() {
-    try { return JSON.parse(localStorage.getItem(KEY) || 'null') || {}; } catch (e) { return {}; }
+    var st;
+    try { st = JSON.parse(localStorage.getItem(KEY) || 'null') || {}; } catch (e) { st = {}; }
+    /* A party-wide dress acknowledgement from before C cannot be attributed
+     * to a person, so it counts for nobody — and it is not destroyed either. */
+    if (st.dress) { st.dressLegacy = st.dressLegacy || st.dress; delete st.dress; localStorage.setItem(KEY, JSON.stringify(st)); }
+    return st;
   }
+  function stamp() { return new Date().toISOString(); }
   function write(st) {
     localStorage.setItem(KEY, JSON.stringify(st));
     try { document.dispatchEvent(new CustomEvent('siyl:guest')); } catch (e) {}
@@ -87,6 +122,84 @@
       var g = this.guests().filter(function (x) { return x.guestId === id; })[0];
       return g ? (g.preferredName || g.fullName) : id;
     },
+    /* the name the guest actually goes by — their correction first */
+    nameOf: function (id) {
+      var g = this.guests().filter(function (x) { return x.guestId === id; })[0];
+      if (!g) return '';
+      return this.value(id, 'preferredName') || g.preferredName || g.fullName;
+    },
+    partyNames: function () {
+      var self = this, p = this.party(); if (!p) return '';
+      var n = p.guests.map(function (g) { return self.nameOf(g.guestId); });
+      return n.length > 1 ? n.slice(0, -1).join(', ') + ' & ' + n[n.length - 1] : (n[0] || p.partyName);
+    },
+
+    /* ---- WHAT BELONGS TO WHOM ------------------------------------------ */
+    SCOPE: {
+      party:    ['identity', 'contact', 'journey', 'costs'],
+      personal: ['names', 'profile', 'access', 'temple', 'events', 'sangkhathan',
+                 'dress', 'documents', 'consent', 'ceremonySeat', 'dinnerSeat']
+    },
+    scopeOf: function (key) {
+      if (this.SCOPE.party.indexOf(key) >= 0) return 'party';
+      if (this.SCOPE.personal.indexOf(key) >= 0) return 'personal';
+      return null;
+    },
+    /* guest-facing labels — never a data-model word */
+    partyLabel: function () { var p = this.party(); return p ? 'For your party · ' + this.partyNames() : ''; },
+    labelFor: function (id) { return 'For ' + this.nameOf(id); },
+
+    /* ---- WHO IS CONTINUING, AND WHO IS BEING ANSWERED FOR --------------- */
+    whoStored: function () {
+      try { return JSON.parse(localStorage.getItem(WHO) || 'null'); } catch (e) { return null; }
+    },
+    active: function () {
+      var p = this.party(); if (!p) return null;
+      var w = this.whoStored();
+      /* an identity only belongs to the invitation it was chosen on */
+      if (!w || w.partyId !== p.invitationId) return null;
+      return p.guests.filter(function (g) { return g.guestId === w.guestId; })[0] || null;
+    },
+    activeName: function () { var a = this.active(); return a ? this.nameOf(a.guestId) : ''; },
+    /* SWITCH IDENTITY — I am now continuing as another member of this
+     * invitation. Nobody's data moves. The subject resets to the new person. */
+    setActive: function (guestId) {
+      var p = this.party(); if (!p) return false;
+      if (!p.guests.some(function (g) { return g.guestId === guestId; })) return false;
+      localStorage.setItem(WHO, JSON.stringify({ partyId: p.invitationId, guestId: guestId, at: stamp() }));
+      subjectId = null;
+      try { document.dispatchEvent(new CustomEvent('siyl:who')); } catch (e) {}
+      return true;
+    },
+    subject: function () {
+      var a = this.active(); if (!a) return null;
+      if (!subjectId) return a;
+      return this.guests().filter(function (g) { return g.guestId === subjectId; })[0] || a;
+    },
+    subjectName: function () { var s = this.subject(); return s ? this.nameOf(s.guestId) : ''; },
+    /* ANSWERING FOR — I remain who I am and deliberately complete a permitted
+     * personal item for another named guest. null: back to myself. */
+    setSubject: function (guestId) {
+      var a = this.active(); if (!a) return false;
+      if (guestId == null || guestId === a.guestId) { subjectId = null; }
+      else {
+        if (!this.guests().some(function (g) { return g.guestId === guestId; })) return false;
+        subjectId = guestId;
+      }
+      try { document.dispatchEvent(new CustomEvent('siyl:subject')); } catch (e) {}
+      return true;
+    },
+    answeringFor: function () {
+      var a = this.active(), s = this.subject();
+      return !!(a && s && a.guestId !== s.guestId);
+    },
+    who: function () {
+      var p = this.party(); if (!p) return null;
+      var a = this.active(), s = this.subject();
+      return { partyId: p.invitationId, activeGuestId: a ? a.guestId : null, subjectGuestId: s ? s.guestId : null };
+    },
+    /* an acknowledgement is a first-person statement: only the person */
+    mayAcknowledge: function (id) { var a = this.active(); return !!(a && a.guestId === id); },
 
     /* ---- per-guest record ---------------------------------------------- */
     rec: function (id) {
@@ -121,7 +234,7 @@
       var from = r.submitted[field] != null ? r.submitted[field] : this.source(id, field);
       if (String(from) === String(v)) return;
       r.submitted[field] = v;
-      r.history.push({ field: field, from: from, to: v, at: new Date().toISOString() });
+      r.history.push({ field: field, from: from, to: v, at: stamp(), by: this.who() && this.who().activeGuestId });
       write(st);
     },
 
@@ -131,7 +244,11 @@
       var st = read();
       st.guests = st.guests || {};
       st.guests[id] = st.guests[id] || { submitted: {}, profile: {}, history: [] };
-      st.guests[id].profile[key] = v;
+      var r = st.guests[id], from = r.profile[key] || '';
+      if (from === (v || '')) return;
+      r.profile[key] = v;
+      r.history = r.history || [];
+      r.history.push({ field: 'profile.' + key, from: from, to: v, at: stamp(), by: this.who() && this.who().activeGuestId });
       write(st);
     },
     profileAnswered: function (id) {
@@ -149,18 +266,36 @@
       if (from === v) return;
       st.party[f] = v;
       st.history = st.history || [];
-      st.history.push({ field: 'party.' + f, from: from, to: v, at: new Date().toISOString() });
+      st.history.push({ field: 'party.' + f, from: from, to: v, at: stamp(), by: this.who() && this.who().activeGuestId });
       write(st);
     },
 
-    /* ---- the dress-code acknowledgement --------------------------------- */
+    /* ---- the dress-code acknowledgement — PERSONAL, first person only ---
+     * One per named guest, never ticked for anyone, never pre-ticked. Without
+     * a name it means the person who is continuing. */
     DRESS_TEXT: "I've reviewed the dress code and know what to prepare for the wedding journey.",
     DRESS_VERSION: '2026-09-09',
-    dressAck: function () { var st = read(); return st.dress || null; },
-    setDressAck: function (on) {
+    dressAck: function (id) {
+      if (!id) { var a = this.active(); if (!a) return null; id = a.guestId; }
       var st = read();
-      st.dress = on ? { acknowledged: true, at: new Date().toISOString(), textVersion: G.DRESS_VERSION } : null;
+      return ((st.guests || {})[id] || {}).dress || null;
+    },
+    setDressAck: function (id, on) {
+      if (!this.mayAcknowledge(id)) return false;
+      var st = read();
+      st.guests = st.guests || {};
+      st.guests[id] = st.guests[id] || { submitted: {}, profile: {}, history: [] };
+      st.guests[id].dress = on ? { acknowledged: true, at: stamp(), textVersion: G.DRESS_VERSION, by: id } : null;
       write(st);
+      return true;
+    },
+    dressAckAll: function () {
+      var self = this, g = this.guests();
+      return g.length > 0 && g.every(function (x) { return !!self.dressAck(x.guestId); });
+    },
+    dressMissing: function () {
+      var self = this;
+      return this.guests().filter(function (x) { return !self.dressAck(x.guestId); });
     },
 
     /* ---- the invitation briefing ---------------------------------------- */
@@ -170,7 +305,7 @@
     identityReviewed: function () { var st = read(); return st.identity || null; },
     setIdentityReviewed: function (on) {
       var st = read();
-      st.identity = on ? { at: new Date().toISOString() } : null;
+      st.identity = on ? { at: stamp(), by: this.who() && this.who().activeGuestId } : null;
       write(st);
     },
 
@@ -195,7 +330,8 @@
       var contact = !!(this.partyField('email') || this.partyField('phone'));
       var chosen = !!(B && B.get().length);
       var weddingDecided = !!(T && T.decidedAll());
-      var dress = !!this.dressAck();
+      var dress = this.dressAckAll();
+      var dressOpen = this.dressMissing().map(function (g) { return self.nameOf(g.guestId); });
       var answered = guests.filter(function (g) { return self.profileAnswered(g.guestId) > 0; }).length;
       var docsIn = 0, docsTotal = guests.length * 2, consentDone = 0;
       if (D) guests.forEach(function (g) {
@@ -220,14 +356,14 @@
         action: chosen ? 'Review' : 'Choose your journey', deep: chosen ? 'your-journey.html' : 'journeys.html' });
       var wOpen = (T && T.undecided().length)
         ? T.undecided().map(function (g) { return g.preferredName || g.fullName; }).join(' · ') + ' — still to answer'
-        : (!dress ? 'Dress code review still needed' : 'Participation and dress code');
+        : (!dress ? 'Dress code still to be acknowledged by ' + dressOpen.join(' · ') : 'Participation and dress code');
       var attendanceOpen = T && T.people().some(function (g) { return T.attendanceOf(g.guestId) === null; });
       out.push({ key: 'wedding', n: '03', label: 'The Wedding', href: 'voyage.html', required: true,
         state: state(weddingDecided && dress, weddingDecided || dress, true),
         note: wOpen,
         action: !weddingDecided ? 'Answer for each guest' : (!dress ? 'Review dress code' : 'Review'),
-        deep: !weddingDecided ? (attendanceOpen ? 'voyage.html#temple-decision' : 'voyage.html#sangkhathan')
-                              : (!dress ? 'dress.html#acknowledge' : 'voyage.html#temple-decision') });
+        deep: !weddingDecided ? 'wedding.html'
+                              : (!dress ? 'wedding-preparation.html#dress-code' : 'wedding.html') });
       out.push({ key: 'documents', n: '04', label: 'Documents & privacy', href: 'documents.html', required: false,
         state: docsIn === 0 && consentDone === 0 ? 'Optional · not completed'
              : (docsIn === docsTotal && consentDone === guests.length ? 'Completed' : 'In progress'),
@@ -268,19 +404,26 @@
     operational: function () {
       var self = this, p = this.party();
       if (!p) return null;
-      var T = window.SIYL_TEMPLE;
+      var T = window.SIYL_TEMPLE, w = this.who();
+      var acked = p.guests.filter(function (g) { return !!self.dressAck(g.guestId); }).map(function (g) { return g.guestId; });
       return {
         invitationId: p.invitationId,
         partyName: p.partyName,
+        /* who pressed SEND — the active person, never the subject */
+        submittedBy: w ? w.activeGuestId : null,
+        party: { label: this.partyLabel(), names: this.partyNames(), identityReviewed: this.identityReviewed() },
         contact: { email: this.partyField('email'), phone: this.partyField('phone') },
-        dress: this.dressAck(),
+        dress: { all: this.dressAckAll(), acknowledged: acked,
+                 missing: this.dressMissing().map(function (g) { return g.guestId; }) },
         guests: p.guests.map(function (g) {
           var r = self.rec(g.guestId);
           return {
             guestId: g.guestId,
+            name: self.nameOf(g.guestId),
             source: { fullName: g.fullName, preferredName: g.preferredName },
             submitted: r.submitted || {},
             profile: r.profile || {},
+            dress: r.dress || null,
             temple: T ? T.attendanceOf(g.guestId) : null,
             sangkhathan: T ? T.offeringOf(g.guestId) : false,
             /* Wave 2 fills these; the shape exists so operations can plan */

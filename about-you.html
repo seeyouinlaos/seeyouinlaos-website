@@ -61,9 +61,8 @@ textarea:focus{outline:0;border-color:#313131}
    and never a reason a journey cannot be sent.
    ========================================================================== */
 (function(){
-var G=window.SIYL_GUEST,page=document.getElementById('page');
+var G=window.SIYL_GUEST,P=window.SIYL_PREP,page=document.getElementById('page');
 if(!G||!page)return;
-var who=null;
 function esc(t){return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 function gated(fn){if(window.SIYL_INVITE){SIYL_INVITE.require(fn)}
 else document.addEventListener('siyl:invite-ready',function(){SIYL_INVITE.require(fn)},{once:true})}
@@ -78,15 +77,30 @@ if(!p||!p.guests.length){
     '<button type="button" class="gbtn" id="open">Open my invitation</button></div>';
   document.getElementById('open').addEventListener('click',function(){gated(render)});
   return}
-var id=who||p.guests[0].guestId;
+/* C · nothing personal is shown until the guest has said who they are —
+ * the shell asks; this page only offers the question again */
+var me=G.active();
+if(!me){
+  page.innerHTML='<div class="gate"><h3>Who are you?</h3>'+
+    '<p class="body">This invitation belongs to '+esc(G.partyNames())+'. Choose your name so we can show your personal details and decisions correctly.</p>'+
+    '<button type="button" class="gbtn" id="whoami">Choose your name</button></div>';
+  var wb=document.getElementById('whoami'); if(wb&&P)wb.addEventListener('click',function(){P.chooseIdentity(false)});
+  return}
+/* the SUBJECT: the active person, unless they deliberately answer for another */
+var id=G.subject().guestId,forOther=G.answeringFor();
 var h='';
 if(p.guests.length>1){
   h+='<p class="forwho" style="margin-top:6px">Who are you answering for?</p>';
   h+='<div class="tabs">'+p.guests.map(function(g){
     var n=G.profileAnswered(g.guestId);
-    return '<button type="button" class="tab'+(g.guestId===id?' on':'')+'" data-who="'+esc(g.guestId)+'">'+
-      esc(G.value(g.guestId,'preferredName')||g.fullName)+(n?' · '+n+' of 8':'')+'</button>'}).join('')+'</div>';
-  h+='<p class="forwho">Answering for '+esc(G.value(id,'preferredName')||G.value(id,'fullName'))+'</p>'}
+    return '<button type="button" class="tab'+(g.guestId===id?' on':'')+'" data-who="'+esc(g.guestId)+'" aria-pressed="'+(g.guestId===id)+'">'+
+      esc(G.nameOf(g.guestId))+(g.guestId===me.guestId?' · you':'')+(n?' · '+n+' of 8':'')+'</button>'}).join('')+'</div>';
+  if(forOther){
+    h+='<div class="p-for"><span class="t-l1">Answering for</span><b>'+esc(G.nameOf(id))+'</b>'+
+       '<span class="t-b2">You are continuing as '+esc(G.nameOf(me.guestId))+'. These answers are kept in '+esc(G.nameOf(id))+'&rsquo;s name and say that you wrote them.</span>'+
+       '<button type="button" class="p-link mute" data-self>Back to yourself</button></div>'}
+  else h+='<p class="forwho">Answering for '+esc(G.nameOf(id))+' · you</p>'}
+else h+='<p class="forwho">'+esc(G.labelFor(id))+' · you</p>';
 h+='<p class="body" style="margin-top:14px">Every answer is optional, and you can come back to this at any time. Nothing here changes a price, and leaving a question blank never means &ldquo;no&rdquo; — it simply means you have not told us.</p>';
 G.PROFILE.forEach(function(q){
   var v=G.profile(id,q.key);
@@ -112,7 +126,7 @@ var s=document.getElementById('saved');if(s){s.textContent='Saved';setTimeout(fu
 /* the name tabs carry the count, so they must not go stale while typing */
 page.querySelectorAll('.tab[data-who]').forEach(function(b){
   var gid=b.getAttribute('data-who'),n=G.profileAnswered(gid);
-  b.textContent=(G.value(gid,'preferredName')||G.value(gid,'fullName'))+(n?' · '+n+' of 8':'')})}
+  b.textContent=G.nameOf(gid)+(gid===me.guestId?' · you':'')+(n?' · '+n+' of 8':'')})}
 page.querySelectorAll('textarea[data-q]').forEach(function(t){
   t.addEventListener('change',function(){G.setProfile(t.getAttribute('data-g'),t.getAttribute('data-q'),t.value.trim());mark()})});
 page.querySelectorAll('input[data-none]').forEach(function(c){
@@ -122,8 +136,12 @@ page.querySelectorAll('input[data-none]').forEach(function(c){
     var t=page.querySelector('textarea[data-q="'+k+'"]');if(t&&c.checked)t.value='';
     mark()})});
 page.querySelectorAll('[data-who]').forEach(function(b){
-  b.addEventListener('click',function(){who=b.getAttribute('data-who');render()})});
+  b.addEventListener('click',function(){G.setSubject(b.getAttribute('data-who'))})});
+var selfb=page.querySelector('[data-self]');
+if(selfb)selfb.addEventListener('click',function(){G.setSubject(null)});
 }
+document.addEventListener('siyl:who',render);
+document.addEventListener('siyl:subject',render);
 render();
 if(window.SIYL_BAG&&SIYL_BAG.bar)SIYL_BAG.bar();
 })();

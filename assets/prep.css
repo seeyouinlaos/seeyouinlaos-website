@@ -215,6 +215,23 @@ body.p-drawer-open .p-drawer { transform: translateY(0); }
 .prep-who b { font-weight: 400; color: var(--p-ink); }
 .prep-who button { font: inherit; font-size: 10px; letter-spacing: 1.8px; text-transform: uppercase; color: var(--p-ink); background: none; border: 0; border-bottom: 1px solid var(--p-ink); padding: 0 0 2px; margin-left: var(--s2); cursor: pointer; }
 .prep-bar-r { flex: none; }
+/* C · ANSWERING FOR — said in words, at reading size, on its own line.
+   Not a colour, not a tab state: a guest who is completing something for
+   another named person is told so every time the bar repaints. */
+.prep-for { display: inline-flex; flex-wrap: wrap; align-items: baseline; gap: 0 var(--s3); margin-top: var(--s3); padding: var(--s2) var(--s3); border: 1px solid var(--p-ink); background: var(--p-card); font-family: var(--f-ui); font-size: 12.5px; line-height: 1.6; color: var(--p-ink); max-width: 100%; }
+.prep-for-l { font-size: 9.5px; letter-spacing: 2px; text-transform: uppercase; color: var(--p-mute); }
+.prep-for b { font-family: var(--f-ed); font-weight: 200; font-size: 18px; line-height: 1.2; }
+.prep-for button { font: inherit; font-size: 10px; letter-spacing: 1.8px; text-transform: uppercase; color: var(--p-ink); background: none; border: 0; border-bottom: 1px solid var(--p-ink); padding: 0 0 2px; cursor: pointer; min-height: 32px; }
+/* the same statement inside a page section, above the item it governs */
+.p-for { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 var(--s3); margin: 0 0 var(--s4); padding: var(--s3) var(--s4); border: 1px solid var(--p-ink); background: var(--p-card); font-family: var(--f-ui); font-size: 12.5px; line-height: 1.6; color: var(--p-ink); }
+.p-for .t-l1 { line-height: 1.6; }
+.p-for b { font-family: var(--f-ed); font-weight: 200; font-size: 18px; }
+.p-for .p-link { margin-left: auto; }
+/* ownership line at the head of every personal block: FOR PEGGY */
+.p-owner { display: flex; align-items: baseline; gap: var(--s3); flex-wrap: wrap; }
+.p-owner .t-l1 { margin: 0; }
+.p-owner .t-l1.mine { color: var(--p-ink); }
+
 .prep-all { font-family: var(--f-ui); font-size: 8.5px; letter-spacing: 1.6px; text-transform: uppercase; color: var(--p-mute); background: none; border: 0; border-bottom: 1px solid var(--p-line); padding: var(--s3) 0 var(--s1); min-height: var(--p-tap); cursor: pointer; white-space: nowrap; }
 .prep-all:hover { border-color: var(--p-ink); color: var(--p-ink); }
 @media (min-width: 768px) {
