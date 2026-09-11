@@ -43,3 +43,8 @@ chrome, unchanged since A+B); VIEW ALL STEPS geometry (A+B shell); the rail's fo
 unselected card at full strength with a solid action (A+B: visual focus ≠ selected); per-person
 amounts and "× 1 guest" (pricing presentation, out of D's scope); Steffie's Sangkhathan
 "Not applicable" before her Temple answer (temple.js semantics).
+
+## Live origins (after 72aff66)
+- Cloudflare `https://seeyouinlaos-website.suthep-hrg.workers.dev` · Worker version 63b7c647-a08e-454c-b04e-76c3c50fd1b2 · walk 39/39 · `results-live-cloudflare.json` · frames `90-cf-*`
+- GitHub Pages `https://seeyouinlaos.github.io/seeyouinlaos-website` · build of 72aff66 · walk 39/39 · `results-live-github-pages.json` · frames `91-gh-*`
+- Byte parity: prep.css · prep-shell.js · journey.js · guest.js · the six step pages — identical to HEAD on both origins.
