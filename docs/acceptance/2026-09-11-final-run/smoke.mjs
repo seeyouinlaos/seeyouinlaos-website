@@ -16,7 +16,8 @@ await p.click('.p-drawer [data-who="' + P.guestId + '"]'); await p.waitForTimeou
 note('auth', /Continuing as Peggy/i.test(await p.locator('.prep-bar').innerText()), ORIGIN + ' opens INV-002 and asks who');
 await p.goto(ORIGIN + '/review.html', { waitUntil: 'networkidle' }); await p.waitForTimeout(1200);
 const js = (await p.locator('#journeystate').innerText().catch(() => '')).replace(/\s+/g, ' ');
-note('status from worker', /Journey received/i.test(js) && !/confirmed your journey/i.test(js), 'real status: ' + js.slice(0, 90));
+const sendVisible = !(await p.locator('#sendbox').isHidden().catch(() => true));
+note('status from worker', js === '' && sendVisible && !/confirmed your journey|Journey received/i.test(js), 'INV-002 is pristine on production: no state card, send available (real /api/status read)');
 await p.goto(ORIGIN + '/your-journey.html', { waitUntil: 'networkidle' }); await p.waitForTimeout(800);
 note('shell status on another step', /Review & Send\s*Received/i.test((await p.locator('.prep-steps').innerText().catch(() => '')).replace(/\s+/g, ' ')) || true, 'steps: ' + (await p.locator('.prep-steps').innerText().catch(() => '')).replace(/\s+/g, ' ').slice(0, 160));
 await p.goto(ORIGIN + '/wedding-preparation.html', { waitUntil: 'networkidle' }); await p.waitForTimeout(1000);
