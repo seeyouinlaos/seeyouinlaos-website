@@ -206,7 +206,7 @@ await H.frames('about-you.html?for=' + S.guestId, 'S5-about-you-for-steffie', [3
 /* ================================================================ 7 · step 06 · review → send → received */
 await H.go('review.html', 390);
 const r6 = await H.text('main');
-note('07 review hierarchy', ['01You', '02Your journey', '03The Wedding', '04Documents & privacy', '05Your costs'].every((h) => r6.replace(/\s/g, '').includes(h.replace(/\s/g, ''))), 'five blocks');
+note('07 review hierarchy', ['You', 'Your journey', 'The Wedding', 'Documents & privacy', 'Your costs'].every((h) => r6.replace(/\s/g, '').includes(h.replace(/\s/g, ''))), 'five blocks');
 note('07 status only', !/assets\/images\/dress/.test(await page.content()) && (await page.locator('main [data-ev], main [data-off], main [data-choose], main textarea, main [data-consent], main [data-ack]').count()) === 0, 'no controls, no gallery');
 note('07 costs once, no checkout', (await page.locator('#tt').count()) === 1 && !/checkout|\bcart\b|pay now|proceed to pay/i.test(r6) && /nothing is paid|never charged|no payment/i.test(r6), await H.text('#tt') + ' · says nothing is paid here');
 const linesBefore = await page.locator('#items .p-line').count();
@@ -225,6 +225,15 @@ await H.go('your-journey.html', 390); await page.click('.prep-all').catch(() => 
 const stepsTxt = await H.text('.prep-steps');
 note('07 shell received', /Review & Send\s*Received/i.test(stepsTxt), 'step 06 reads Received from another step · ' + stepsTxt.slice(0, 200));
 await H.go('review.html', 390);
+
+/* a change after sending is said, and send stays available */
+await H.go('wedding.html', 390); await page.locator('[data-g="' + P.guestId + '"][data-e="coffee"] [data-ev="no"]').first().click(); await page.waitForTimeout(250);
+await H.go('review.html', 390);
+note('07b changed since sending', /Changed since you sent it/i.test(await H.text('#journeystate')) && !(await page.locator('#sendbox').isHidden()), 'the guest is told to send again');
+await H.crop('#journeystate', 'S7b-received-changed', 390);
+await H.go('wedding.html', 390); await page.locator('[data-g="' + P.guestId + '"][data-e="coffee"] [data-ev="yes"]').first().click(); await page.waitForTimeout(250);
+await H.go('review.html', 390);
+note('07b back in step, no notice', !/Changed since you sent it/i.test(await H.text('#journeystate')), 'restoring the sent answer clears the notice');
 
 /* reload / re-entry keeps state and ownership */
 await page.reload({ waitUntil: 'networkidle' }); await page.waitForTimeout(400);
@@ -264,13 +273,26 @@ const conf = await H.text('#journeystate');
 note('11 confirmed', /Journey confirmed/i.test(conf) && /A · Party journey confirmation/i.test(conf) && /B · Personal wedding card/i.test(conf) && (await page.locator('#sendbox').isHidden()), 'party confirmation once + personal cards');
 const cards = await page.locator('#journeystate .p-wcard').allInnerTexts();
 note('11 one card per guest', cards.length === 2 && /Peggy/.test(cards[0]) && /Steffie/.test(cards[1]), 'two cards, named');
-note('11 cards personal state', /Riesling|Acknowledged|Dress/.test(cards[0] + cards[1]) || true, 'cards read each guest\'s own state');
+note('11 cards personal state', /Temple Ceremony\s*Attending/i.test(cards[0]) && /Coffee & Cake\s*Joining/i.test(cards[0]) && /Dress code\s*Reviewed/i.test(cards[0]) && /Temple Ceremony\s*Attending/i.test(cards[1]) && /Dress code\s*Reviewed/i.test(cards[1]) && !/Not decided|Not yet reviewed/i.test(cards[0] + cards[1]), 'each card carries that guest\'s own sent state');
+const confA = await H.text('#journeystate');
+note('11 party block from the sent journey', /Shama Yen-Akat/i.test(confA) && /MU9646/.test(confA) && /C86/.test(confA) && !/No shared stay/i.test(confA) && !/Changed since confirmation/i.test(confA), 'block A lists the sent shared lines, nothing changed');
+/* a change made after confirmation is never shown as confirmed */
+await H.go('wedding.html', 390);
+note('11 shell says confirmed on a step', /Journey confirmed/i.test(await H.text('.prep-bar')) && /Changes here are not sent/i.test(await H.text('.prep-bar')), 'the bar on step 03 says the confirmed journey is not changed here');
+await page.locator('[data-g="' + P.guestId + '"][data-e="temple"] [data-ev="no"]').first().click(); await page.waitForTimeout(250);
+await H.go('review.html', 390);
+const confB = await H.text('#journeystate');
+const cardsB = await page.locator('#journeystate .p-wcard').allInnerTexts();
+note('11 change after confirmation not shown as confirmed', /Changed since confirmation · not sent/i.test(confB) && /Temple Ceremony\s*Attending/i.test(cardsB[0]) && !/Not attending/i.test(cardsB[0]), 'the notice appears; the card still shows what was confirmed');
+await H.frames('review.html', 'S9b-confirmed-changed', [390, 1440], [['#journeystate', 'S9b-confirmed-changed-block']]);
+await H.go('wedding.html', 390); await page.locator('[data-g="' + P.guestId + '"][data-e="temple"] [data-ev="yes"]').first().click(); await page.waitForTimeout(250);
 note('11 no ticket imitation', !/barcode|QR|scan|boarding|gate|seat \d|row \d/i.test(conf) && (await page.locator('#journeystate img, #journeystate svg, #journeystate canvas').count()) === 0 && !/C-[LR]-\d|D-[TB]-\d/.test(conf), 'no QR, no barcode, no seat shown while seating is closed');
 await H.frames('review.html', 'S9-confirmed', PRIMARY, [['#journeystate', 'S9-confirmed-block'], ['#journeystate .p-wcard', 'S9-card-peggy']]);
 /* Steffie's device sees the same party state */
 await H2.go('review.html', 390);
 const conf2 = await H2.text('#journeystate');
-note('11 steffie sees confirmed', /Journey confirmed/i.test(conf2) && (await page2.locator('#journeystate .p-wcard').count()) === 2, 'shared confirmation on her device');
+note('11 steffie sees confirmed honestly', /Journey confirmed/i.test(conf2) && /sent from another device/i.test(conf2) && (await page2.locator('#journeystate .p-wcard').count()) === 0 && !/No shared stay|Not decided/i.test(conf2), 'a device that never sent shows no invented cards');
+await H2.frames('review.html', 'S9c-confirmed-other-device', [390, 1440], [['#journeystate', 'S9c-confirmed-other-device-block']]);
 mock.status = null;
 
 /* ================================================================ 10 · stale session */

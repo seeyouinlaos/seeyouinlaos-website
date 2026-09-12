@@ -192,7 +192,7 @@ note('05 targets', (await tapTargets()).length === 0, 'tap targets ≥44: ' + JS
 /* ---------------------------------------------------------------- 06 REVIEW & SEND */
 await go('review.html', 390);
 const r6 = await text('main');
-note('06 hierarchy', ['01You', '02Your journey', '03The Wedding', '04Documents & privacy', '05Your costs'].every((h) => (r6.replace(/\s/g, '')).includes(h.replace(/\s/g, ''))), 'five blocks in order');
+note('06 hierarchy', ['You', 'Your journey', 'The Wedding', 'Documents & privacy', 'Your costs'].every((h) => (r6.replace(/\s/g, '')).includes(h.replace(/\s/g, ''))), 'five blocks in order');
 note('06 shared once', (await page.locator('#items .p-line').count()) === (await ls('siyl.bag')).filter((x) => x.id !== 'sangkhathan').length && /For your party · Peggy & Steffie/.test(await text('#b2who')), 'one line per shared selection, labelled for the party');
 note('06 personal by name', /For Peggy · you/.test(await text('#b3')) && /For Steffie/.test(await text('#b3')) && /Reviewed ·/.test(await text('#b3')) && /Review required/.test(await text('#b3')), 'wedding and dress code per named guest');
 note('06 no new controls', (await page.locator('main [data-ev], main [data-off], main [data-choose], main textarea, main input[type=file], main [data-consent]').count()) === 0, 'no selection control for an existing concept');

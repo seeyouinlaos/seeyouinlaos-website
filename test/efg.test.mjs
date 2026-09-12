@@ -204,7 +204,9 @@ test('F · the token never reaches the client, and the surface never confirms it
   assert.match(rv, /Journey received/); assert.match(rv, /Journey confirmed/);
   assert.match(rv, /A · Party journey confirmation/); assert.match(rv, /B · Personal wedding card/);
   assert.doesNotMatch(rv, /BOOKING CONFIRMED|RESERVATION CONFIRMED|PAYMENT COMPLETE|ORDER CONFIRMED|boarding|barcode|<svg[^>]*qr/i);
-  assert.match(rv, /p\.guests\.forEach\(function\(g\)\{\s*var id=g\.guestId,row=op/, 'one card per named guest, from that guest\'s own state');
+  assert.match(rv, /p\.guests\.forEach\(function\(g\)\{\s*var id=g\.guestId,row=\(snap\.guests/, 'one card per named guest, from the snapshot that was SENT — never the live draft');
+  assert.match(rv, /rememberSent\(registration\.registration_submitted_at\)/, 'the snapshot is taken at SEND');
+  assert.match(rv, /Changed since confirmation · not sent/); assert.match(rv, /sent from another device, so they are not shown here/);
 });
 
 /* ======================================================================== G */

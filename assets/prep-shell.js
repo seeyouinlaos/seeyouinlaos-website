@@ -37,6 +37,9 @@
 
   /* Cloudflare serves /review, the mirror serves /review.html — same page. */
   var here = (location.pathname.split('/').pop() || 'index.html').toLowerCase().replace(/\.html$/, '');
+  /* a page inside a step (you.html belongs to 01) says so on its <main data-step> */
+  var sub = document.querySelector('main[data-step]');
+  if (sub && sub.getAttribute('data-step')) here = STEPS.filter(function (s) { return s.key === sub.getAttribute('data-step'); }).map(function (s) { return s.file.replace(/\.html$/, ''); })[0] || here;
   var idx = STEPS.map(function (s) { return s.file.replace(/\.html$/, ''); }).indexOf(here);
   if (idx < 0) return;
   var STEP = STEPS[idx];
@@ -65,7 +68,7 @@
     if (key === STEP.key) return 'Current';
     switch (key) {
       case 'invitation':  return (G && G.identityReviewed()) ? 'Complete' : 'Open';
-      case 'journey':     return (B && B.get().length) ? 'Complete' : 'Open';
+      case 'journey':     return (B && B.get().length && !(window.SIYL_JOURNEY && SIYL_JOURNEY.open().length)) ? 'Complete' : 'Open';
       case 'wedding':     return (T && T.decidedAll()) ? 'Complete' : 'Open';
       case 'preparation': return (G && G.dressAckAll()) ? 'Complete' : 'Open';
       case 'about':
@@ -129,6 +132,12 @@
         (forOther ? '<p class="prep-for" role="status"><span class="prep-for-l">Answering for</span>' +
           '<b>' + esc(nameOf(sub)) + '</b>' +
           '<button type="button" data-self>Back to yourself</button></p>' : '') +
+        /* F · once Guest Relations has confirmed, a change made here is not a
+         * change of the confirmed journey — said on every step, in words */
+        ((window.SIYL_CONFIRM && SIYL_CONFIRM.state() === 'confirmed' && STEP.key !== 'review')
+          ? '<p class="prep-for" role="status"><span class="prep-for-l">Journey confirmed</span>' +
+            '<b>Changes here are not sent</b>' +
+            '<a href="mailto:guest.relation.seeyouinlaos@gmail.com?subject=Journey%20' + encodeURIComponent(p.invitationId) + '">Write to Guest Relations to change anything</a></p>' : '') +
       '</div>' +
       '<div class="prep-bar-r"><button type="button" class="prep-all" aria-expanded="false" aria-controls="prep-steps">View all steps</button></div>' +
       '</div>';

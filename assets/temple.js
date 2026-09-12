@@ -75,7 +75,7 @@
     { key: 'vows', label: 'Vow Ceremony', when: '16:30',
       place: 'Souphattra Heritage Vientiane' },
     { key: 'dinner', label: 'Wedding Dinner', when: '19:30',
-      place: 'Souphattra Vientiane Hotel' }
+      place: 'Souphattra Heritage Vientiane · courtyard garden' }
   ];
 
   var T = window.SIYL_TEMPLE = {

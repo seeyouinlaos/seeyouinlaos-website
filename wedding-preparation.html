@@ -28,7 +28,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
     <h3 class="t-h1">Blue Lao Traditional Dress</h3>
     <p class="t-b2">Temple Ceremony · 08:00 – 12:00 · Wat Ong Teu, Vientiane</p>
     <p class="t-b1 measure">The Buddhist morning is dressed in Lao tradition, in blue. Shoulders and knees are covered inside the temple, and shoes come off at the door. A sinh may be borrowed or made in Vientiane — Guest Relations helps anyone who would like that arranged.</p>
-    <div class="p-rail" aria-label="Lao traditional dress references"><img src="assets/images/dress/tradition-01.jpg" alt="Lao traditional dress — reference 1" loading="lazy" decoding="async"><img src="assets/images/dress/tradition-02.jpg" alt="Lao traditional dress — reference 2" loading="lazy" decoding="async"><img src="assets/images/dress/tradition-03.jpg" alt="Lao traditional dress — reference 3" loading="lazy" decoding="async"><img src="assets/images/dress/tradition-04.jpg" alt="Lao traditional dress — reference 4" loading="lazy" decoding="async"><img src="assets/images/dress/tradition-05.jpg" alt="Lao traditional dress — reference 5" loading="lazy" decoding="async"><img src="assets/images/dress/tradition-06.jpg" alt="Lao traditional dress — reference 6" loading="lazy" decoding="async"></div>
+    <div class="p-rail" aria-label="Lao traditional dress references"><img src="assets/images/dress/tradition-04.jpg" alt="Lao traditional dress — reference 4" loading="lazy" decoding="async"><img src="assets/images/dress/tradition-05.jpg" alt="Lao traditional dress — reference 5" loading="lazy" decoding="async"><img src="assets/images/dress/tradition-06.jpg" alt="Lao traditional dress — reference 6" loading="lazy" decoding="async"><img src="assets/images/dress/tradition-01.jpg" alt="Lao traditional dress — reference 1" loading="lazy" decoding="async"><img src="assets/images/dress/tradition-02.jpg" alt="Lao traditional dress — reference 2" loading="lazy" decoding="async"><img src="assets/images/dress/tradition-03.jpg" alt="Lao traditional dress — reference 3" loading="lazy" decoding="async"></div>
   </div>
 
   <div class="p-card">
@@ -57,7 +57,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
   <div id="seatbox">
   <div class="p-card" style="margin-top:16px">
     <div class="p-kv"><div><p class="t-b1"><b>Ceremony seat</b></p><p class="t-b2">Wat Ong Teu · 28 February</p></div><p class="t-l1">Not open yet</p></div>
-    <div class="p-kv"><div><p class="t-b1"><b>Dinner seat</b></p><p class="t-b2">Souphattra Vientiane Hotel · 19:30</p></div><p class="t-l1">Not open yet</p></div>
+    <div class="p-kv"><div><p class="t-b1"><b>Dinner seat</b></p><p class="t-b2">Souphattra Heritage Vientiane · 19:30</p></div><p class="t-l1">Not open yet</p></div>
   </div>
   </div>
 </section>
@@ -135,7 +135,7 @@ var S=window.SIYL_SEATS,P=window.SIYL_PREP,G=window.SIYL_GUEST,seatbox=document.
 if(!S||!P||!G||!seatbox)return;
 function esc(t){return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 var subject=null;   /* whose chair is being chosen — defaults to the person continuing */
-var EV=[['ceremony','Ceremony seat','Wat Ong Teu · 28 February · rows facing the ceremony'],['dinner','Dinner seat','Souphattra Vientiane Hotel · 19:30 · one long table']];
+var EV=[['ceremony','Ceremony seat','Wat Ong Teu · 28 February · rows facing the ceremony'],['dinner','Dinner seat','Souphattra Heritage Vientiane · 19:30 · one long table']];
 function label(ev,id){var sid=S.seatOf(ev,id);return sid?sid:null}
 function paintSeats(){
   if(!P.ready()||!S.ready())return;

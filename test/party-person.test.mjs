@@ -395,20 +395,23 @@ test('CONSENT: only the person may give or decline it', () => {
 
 function decideAll(T, id) { T.EVENTS.forEach((e) => T.setEvent(id, e.key, 'no')); }
 
-test('step 03 is not complete until every named guest has acknowledged the dress code', () => {
+test('step 04 is not complete until every named guest has acknowledged the dress code; step 03 is the participation', () => {
   const w = page();
   const G = w.SIYL_GUEST, T = w.SIYL_TEMPLE;
   G.setActive(PEGGY);
   decideAll(T, PEGGY); decideAll(T, STEFFIE);
   assert.equal(T.decidedAll(), true);
-  assert.equal(G.stepState('wedding'), 'In progress');
+  assert.equal(G.stepState('wedding'), 'Completed', 'participation answered for each named guest');
+  assert.equal(G.stepState('preparation'), 'Action needed');
   G.setDressAck(PEGGY, true);
-  assert.equal(G.stepState('wedding'), 'In progress', 'one of two');
-  const s = G.steps().filter((x) => x.key === 'wedding')[0];
+  assert.equal(G.stepState('preparation'), 'In progress', 'one of two');
+  const s = G.steps().filter((x) => x.key === 'preparation')[0];
   assert.match(s.note, /Steffie/);
+  assert.equal(s.deep, 'wedding-preparation.html#dress-code');
   G.setActive(STEFFIE);
   G.setDressAck(STEFFIE, true);
-  assert.equal(G.stepState('wedding'), 'Completed');
+  assert.equal(G.stepState('preparation'), 'Completed');
+  deq(G.steps().map((x) => x.n + ' ' + x.label), ['01 Your Invitation', '02 Your Journey', '03 The Wedding', '04 Wedding Preparation', '05 About You', '06 Review & Send']);
 });
 
 test('readiness: the party cannot send while one personal acknowledgement is missing', () => {
@@ -420,7 +423,7 @@ test('readiness: the party cannot send while one personal acknowledgement is mis
   decideAll(T, PEGGY); decideAll(T, STEFFIE);
   G.setDressAck(PEGGY, true);
   assert.equal(G.readiness().ok, false);
-  deq(G.readiness().need.map((n) => n.key), ['wedding']);
+  deq(G.readiness().need.map((n) => n.key), ['preparation']);
   G.setActive(STEFFIE);
   G.setDressAck(STEFFIE, true);
   assert.equal(G.readiness().ok, true);

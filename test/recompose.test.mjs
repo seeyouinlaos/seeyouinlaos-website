@@ -17,6 +17,17 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const read = (f) => readFileSync(join(ROOT, f), 'utf8');
 const SIX = ['invitation.html', 'your-journey.html', 'wedding.html', 'wedding-preparation.html', 'about-you.html', 'review.html'];
 
+test('final run: the dinner venue is Souphattra Heritage Vientiane; C86 carries no retired meal window', () => {
+  const T = readFileSync(new URL('../assets/temple.js', import.meta.url), 'utf8');
+  const J = readFileSync(new URL('../assets/journey.js', import.meta.url), 'utf8');
+  const D = readFileSync(new URL('../assets/transport-data.js', import.meta.url), 'utf8');
+  const WP = readFileSync(new URL('../wedding-preparation.html', import.meta.url), 'utf8');
+  for (const [n, s] of [['temple.js', T], ['journey.js', J], ['wedding-preparation.html', WP]]) assert.doesNotMatch(s, /Souphattra Vientiane Hotel/, n);
+  assert.match(T, /place: 'Souphattra Heritage Vientiane · courtyard garden'/);
+  assert.doesNotMatch(D, /hot meal|dinner window|17:30 – 19:00/i, 'C86 keeps only its own facts');
+  assert.match(D, /Departure from Vientiane is at 15:50 on 1 March/);
+});
+
 test('exactly six Preparation steps, and documents, dress and seating are not a seventh', () => {
   const shell = read('assets/prep-shell.js');
   const steps = [...shell.matchAll(/\{ n: '(\d\d)', key: '([a-z]+)',\s*label: '([^']+)',\s+file: '([^']+)'/g)];
@@ -160,7 +171,7 @@ test('Review introduces no new selection control for an existing concept', () =>
   assert.doesNotMatch(rv, /data-choose|data-cls|data-ev=|data-off=|data-ack=|data-consent|<textarea|type="file"/);
   /* the one action is SEND; everything else is an EDIT back to a primary home */
   assert.equal((rv.match(/class="p-act" id="send"/g) || []).length, 1);
-  ['you.html#you', 'your-journey.html', 'voyage.html#temple-decision', 'wedding-preparation.html#ack', 'about-you.html#about-you', 'documents.html']
+  ['you.html#you', 'your-journey.html', 'wedding.html', 'wedding-preparation.html#ack', 'about-you.html#about-you', 'about-you.html#documents']
     .forEach((href) => assert.ok(rv.includes('href="' + href + '"'), href));
 });
 

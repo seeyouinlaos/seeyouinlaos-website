@@ -1,6 +1,6 @@
 {
   "origin": "http://127.0.0.1:8787",
-  "at": "2026-09-11T19:20:56.779Z",
+  "at": "2026-09-12T07:54:16.416Z",
   "results": [
     {
       "id": "01 home fresh",
@@ -258,6 +258,16 @@
       "detail": "step 06 reads Received from another step · 01 Your Invitation OPEN 02 Your Journey CURRENT 03 The Wedding COMPLETE 04 Wedding Preparation COMPLETE 05 About You COMPLETE 06 Review & Send RECEIVED"
     },
     {
+      "id": "07b changed since sending",
+      "ok": true,
+      "detail": "the guest is told to send again"
+    },
+    {
+      "id": "07b back in step, no notice",
+      "ok": true,
+      "detail": "restoring the sent answer clears the notice"
+    },
+    {
       "id": "08 reload",
       "ok": true,
       "detail": "identity, record and status survive reload"
@@ -310,7 +320,22 @@
     {
       "id": "11 cards personal state",
       "ok": true,
-      "detail": "cards read each guest's own state"
+      "detail": "each card carries that guest's own sent state"
+    },
+    {
+      "id": "11 party block from the sent journey",
+      "ok": true,
+      "detail": "block A lists the sent shared lines, nothing changed"
+    },
+    {
+      "id": "11 shell says confirmed on a step",
+      "ok": true,
+      "detail": "the bar on step 03 says the confirmed journey is not changed here"
+    },
+    {
+      "id": "11 change after confirmation not shown as confirmed",
+      "ok": true,
+      "detail": "the notice appears; the card still shows what was confirmed"
     },
     {
       "id": "11 no ticket imitation",
@@ -318,9 +343,9 @@
       "detail": "no QR, no barcode, no seat shown while seating is closed"
     },
     {
-      "id": "11 steffie sees confirmed",
+      "id": "11 steffie sees confirmed honestly",
       "ok": true,
-      "detail": "shared confirmation on her device"
+      "detail": "a device that never sent shows no invented cards"
     },
     {
       "id": "12 stale session",

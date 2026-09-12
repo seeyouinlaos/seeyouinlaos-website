@@ -159,7 +159,7 @@
         'Anything purchased at the airport.'
       ],
       transfer: [
-        'Departure from Vientiane is in the early afternoon of 1 March, after the Wedding Stay ends.',
+        'Departure from Vientiane is at 15:50 on 1 March, after the Wedding Stay ends.',
         'Arrival in Kunming is the same afternoon, in time for the first night at Wanxiang Yueju.',
         'Transfers between the airports and the hotels are arranged by each guest.'
       ],
@@ -213,8 +213,6 @@
           'Slippers, blanket and eye mask, subject to availability']],
         ['Dining', [
           'Complimentary snacks and drinks served at the seat',
-          'A hot meal is served in the dinner window, 17:30 – 19:00, which this service runs through',
-          'Hot meals are Chinese dishes',
           'Availability follows the service on the day']],
         ['Priority Ticketing', [
           'Expedited ticketing and shorter wait times.']]
@@ -222,7 +220,6 @@
       included: [
         'One Business Class seat, Kunming to Lijiang, direct.',
         'Complimentary drinks and snacks at the seat.',
-        'The hot meal served in the dinner window on this service.',
         'Priority Ticketing: expedited ticketing and shorter wait times.'
       ],
       excluded: [

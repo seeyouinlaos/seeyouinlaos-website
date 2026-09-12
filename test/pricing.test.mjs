@@ -483,7 +483,7 @@ test('SEND is unavailable until the required steps are done — and never fails 
   const g = readFileSync(join(ROOT, 'assets/guest.js'), 'utf8');
   /* required vs optional: optional never blocks */
   const r = g.slice(g.indexOf('STEP_DEFS:'), g.indexOf('/* ---- what Guest Relations receives'));
-  ['you', 'journey', 'wedding', 'documents', 'about', 'review'].forEach((k) =>
+  ['you', 'journey', 'wedding', 'preparation', 'about', 'review'].forEach((k) =>
     assert.ok(r.includes("key: '" + k + "'"), k + ' is not one of the six steps'));
   /* the four states, in words — never colour alone */
   ['Completed', 'Action needed', 'Optional · not completed', 'In progress'].forEach((st) =>
@@ -507,7 +507,7 @@ test('a session stored without names is not an open invitation', () => {
   assert.match(inv, /hasNames\(\) \{/);
   assert.match(inv, /if \(a && AUTH\.hasNames\(\)\) \{ fn\(a\); return; \}/);
   /* and no surface may index into an empty party */
-  ['about-you.html', 'documents.html', 'you.html', 'invitation.html'].forEach((f) => {
+  ['about-you.html', 'you.html', 'invitation.html'].forEach((f) => {
     const page = readFileSync(join(ROOT, f), 'utf8');
     assert.match(page, /if\(!p\|\|!p\.guests\.length\)\{/, f + ' can still crash on an empty party');
     assert.match(page, /Open your invitation once more/, f + ' does not explain a stale session');
@@ -552,9 +552,10 @@ test('Review & Send carries DOCUMENTS & PRIVACY, and promises no vault it does n
   assert.match(page, /D\.forGuest\(id\)\.forEach/, 'document states are not read per named guest');
   assert.match(page, /no document byte is kept in this browser/);
   /* the real controls live on the step, not on the summary */
-  const docsPage = readFileSync(join(ROOT, 'documents.html'), 'utf8');
+  const docsPage = readFileSync(join(ROOT, 'about-you.html'), 'utf8');
   assert.match(docsPage, /<input type="file" accept="/);
-  assert.match(docsPage, /Add passport|k\.add/);
+  assert.match(docsPage, /id="documents"/, 'documents live inside step 05');
+  assert.match(readFileSync(join(ROOT, 'documents.html'), 'utf8'), /url=about-you\.html#documents/, 'the old documents page only forwards');
   const docs = readFileSync(join(ROOT, 'assets/docs.js'), 'utf8');
   ['Passport', 'Flight information'].forEach((k) => assert.ok(docs.includes(k), k + ' is not a document kind'));
   /* RECEIVED means received — the guest surface can never claim more */
@@ -566,14 +567,13 @@ test('Review & Send carries DOCUMENTS & PRIVACY, and promises no vault it does n
 
 test('Review & Send is five editorial blocks, each with its own way back', () => {
   const page = readFileSync(join(ROOT, 'review.html'), 'utf8');
-  ['01', '02', '03', '04', '05'].forEach((n) =>
-    assert.ok(page.includes('<span class="bno">' + n + '</span>'), 'block ' + n + ' missing'));
-  ['you.html#you', 'voyage.html#temple-decision', 'your-journey.html',
-   'wedding-preparation.html#ack', 'invitation.html', 'about-you.html#about-you']
+  assert.doesNotMatch(page, /<span class="bno">/, 'review blocks carry no numbering that competes with the six steps');
+  ['you.html#you', 'wedding.html', 'your-journey.html',
+   'wedding-preparation.html#ack', 'invitation.html', 'about-you.html#about-you', 'about-you.html#documents']
     .forEach((href) => assert.ok(page.includes('href="' + href + '"'), href + ' has no edit route'));
   /* the approved architecture: YOU · YOUR JOURNEY · THE WEDDING ·
    * DOCUMENTS & PRIVACY · YOUR COSTS — About you lives inside YOU */
-  const body = page.slice(page.indexOf('<main>'), page.indexOf('</main>'));
+  const body = page.slice(page.indexOf('<main'), page.indexOf('</main>'));
   let at = -1;
   ['b1', 'b2', 'b3', 'b4', 'b5'].forEach((id) => {
     const i = body.indexOf('id="' + id + '"');
@@ -589,7 +589,7 @@ test('Review & Send is five editorial blocks, each with its own way back', () =>
   assert.match(page, /href="about-you.html#about-you">Edit/);
   assert.doesNotMatch(body, /<h2>About you<\/h2>/);
   /* RECEIVED is not CONFIRMED, and a sent journey stays editable */
-  assert.match(page, /Received &mdash; not yet confirmed/);
+  assert.match(page, /Received is not confirmed/);
   assert.match(page, /Confirmed<\/b> is something only Guest Relations can tell you/);
   assert.match(page, /Change my journey and send again/);
   /* the party reads by name, never as a headcount */
@@ -608,8 +608,9 @@ test('the dress code carries three codes and 18 owner references, acknowledged b
   assert.equal(new Set(imgs).size, 17, 'no reference is used twice');
   assert.ok(!imgs.includes('resort-01'), 'the retired photograph is never reused');
   imgs.forEach((f) => assert.ok(existsSync(join(ROOT, 'assets/images/dress/' + f + '.jpg')), f + ' missing on disk'));
-  /* the acknowledgement is never pre-ticked */
-  assert.match(page, /<input type="checkbox" id="ack">/);
+  /* the public guide carries no acknowledgement of its own: that lives in step 04, once per guest */
+  assert.doesNotMatch(page, /<input type="checkbox"/);
+  assert.match(page, /href="wedding-preparation\.html#dress-code"/);
   assert.doesNotMatch(page, /id="ack" checked|checked id="ack"/);
 });
 
@@ -636,8 +637,7 @@ test('ABOUT YOU is exactly seven questions and one operational field', () => {
   assert.match(about, /D\.KINDS\.map/, 'documents must live inside step 05');
   assert.match(about, /P\.foot\(/, 'the continuation is the shell foot');
   assert.doesNotMatch(about, /href="documents\.html"/, 'documents are not a separate step');
-  const prep = readFileSync(join(ROOT, 'assets/prep.js'), 'utf8');
-  assert.match(prep, /\['About you',\s+'about-you.html'/);
+  assert.ok(!existsSync(join(ROOT, 'assets/prep.js')), 'the retired registration rail is deleted');
   /* identity and contact stay on their own page, with their own anchors */
   const you = readFileSync(join(ROOT, 'you.html'), 'utf8');
   assert.match(you, /From your invitation/);

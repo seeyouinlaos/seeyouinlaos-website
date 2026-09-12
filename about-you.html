@@ -23,7 +23,12 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/bag.js"></script>
 <script src="assets/shop-menu.js"></script>
 <script src="assets/aman.js"></script>
+<script src="assets/rooms-data.js"></script>
+<script src="assets/pricing.js"></script>
 <script src="assets/guest.js"></script>
+<script src="assets/temple.js"></script>
+<script src="assets/transport-data.js"></script>
+<script src="assets/journey.js"></script>
 <script src="assets/docs.js"></script>
 <script src="assets/confirm.js"></script>
 <script src="assets/prep-shell.js"></script>
@@ -106,7 +111,7 @@ h+='<section class="prep-sec"><p class="t-l1">02 · Operational · not hospitali
    field(id,G.ACCESS,'')+'</section>';
 
 /* 03 · TRAVEL DOCUMENTS */
-h+='<section class="prep-sec"><p class="t-l1">03 · Optional · can be added later</p><h2 class="t-h2">Travel documents</h2>'+
+h+='<section class="prep-sec" id="documents"><p class="t-l1">03 · Optional · can be added later</p><h2 class="t-h2">Travel documents</h2>'+
    '<p class="t-b1 measure">Two documents help us coordinate '+(forOther?name+'&rsquo;s':'your')+' journey. They are used only for your travel arrangements, and access is limited to the team members who need them.</p>';
 if(D){h+='<div class="p-card">'+D.KINDS.map(function(k){return docRow(id,k)}).join('')+'</div>'+
    '<p class="t-b2 measure-w" style="margin-top:var(--s3)">Received means it reached us — it has not been reviewed or verified yet. Nothing is kept on this device.</p>'}

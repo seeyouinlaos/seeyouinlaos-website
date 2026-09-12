@@ -341,13 +341,22 @@ gate('P5', 'Lightbox overlays: hidden wins, no empty-gallery navigation',
     .filter(Boolean).join(' · ') || 'hidden always wins; journey gallery guarded against empty lists');
 
 /* P4 — wording + product guards */
+/* final pre-release run (001 findings 2 + 3): the dinner venue is Souphattra Heritage Vientiane —
+ * "Souphattra Vientiane Hotel" does not exist (DECISION-REGISTER D-14); C86 (10:15 → 13:44) never
+ * carries the retired C642 dinner-window meal copy. Checked on every active guest surface. */
+const activeSurfaces = fs.readdirSync(ROOT).filter((f) => /\.html$/.test(f) && f !== 'register-landing.html').map((f) => read(f)).join('\n')
+  + fs.readdirSync(path.join(ROOT, 'assets')).filter((f) => /\.(js|mjs|css)$/.test(f)).map((f) => read('assets/' + f)).join('\n');
+const venueHit = /Souphattra Vientiane Hotel/.test(activeSurfaces);
+const mealHit = /hot meal|dinner window|17:30 – 19:00/i.test(activeSurfaces);
 const exclusiveHit = /Heritage Exclusive/i.test(indexHtml) || /Heritage Exclusive/i.test(appJs) || /Heritage Exclusive/i.test(data) || /Heritage Exclusive/i.test(regHtml);
 const noRoomHit = /No room needed/i.test(appJs) || /No room needed/i.test(regHtml);
 const train88 = /contributionPerGuest: 75/.test(data);
 gate('P4', 'Wording and product guards',
-  !exclusiveHit && !noRoomHit && train88,
+  !exclusiveHit && !noRoomHit && train88 && !venueHit && !mealHit,
   [exclusiveHit && "'Heritage Exclusive' found — the category is Heritage Executive",
    noRoomHit && "'No room needed' option must not exist",
+   venueHit && "'Souphattra Vientiane Hotel' found — the venue is Souphattra Heritage Vientiane (D-14)",
+   mealHit && 'C642-era dinner-window / hot-meal copy found on an active surface',
    !train88 && 'Night Train must be USD 75 per guest (55 train + 20 van/luggage package)'].filter(Boolean).join(' · ')
   || "no 'Heritage Exclusive', no 'No room needed', train fixed at USD 75 per guest package");
 
