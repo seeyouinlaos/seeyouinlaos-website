@@ -318,11 +318,11 @@
      * REQUIRED means nobody else can answer it for the guest afterwards.
      * OPTIONAL never blocks a submission. */
     STEP_DEFS: [
-      { key: 'you', n: '01', label: 'You', href: 'you.html', required: true },
-      { key: 'journey', n: '02', label: 'Your journey', href: 'your-journey.html', required: true },
-      { key: 'wedding', n: '03', label: 'The Wedding', href: 'voyage.html', required: true },
-      { key: 'documents', n: '04', label: 'Documents & privacy', href: 'documents.html', required: false },
-      { key: 'about', n: '05', label: 'About you', href: 'about-you.html', required: false },
+      { key: 'you', n: '01', label: 'Your Invitation', href: 'invitation.html', required: true },
+      { key: 'journey', n: '02', label: 'Your Journey', href: 'your-journey.html', required: true },
+      { key: 'wedding', n: '03', label: 'The Wedding', href: 'wedding.html', required: true },
+      { key: 'preparation', n: '04', label: 'Wedding Preparation', href: 'wedding-preparation.html', required: true },
+      { key: 'about', n: '05', label: 'About You', href: 'about-you.html', required: false },
       { key: 'review', n: '06', label: 'Review & Send', href: 'review.html', required: true }
     ],
 
@@ -348,36 +348,34 @@
       }
 
       var out = [];
-      out.push({ key: 'you', n: '01', label: 'You', href: 'you.html', required: true,
+      out.push({ key: 'you', n: '01', label: 'Your Invitation', href: 'invitation.html', required: true,
         state: state(contact, guests.length > 0, true),
         note: contact ? 'Names and one way to reach you' : 'One email address or telephone number is still needed',
         action: contact ? 'Review' : 'Add your contact', deep: 'you.html#contact' });
-      out.push({ key: 'journey', n: '02', label: 'Your journey', href: 'your-journey.html', required: true,
+      out.push({ key: 'journey', n: '02', label: 'Your Journey', href: 'your-journey.html', required: true,
         state: state(chosen, false, true),
         note: chosen ? (B.get().length + ' selections') : 'Choose your travel and your stays',
         action: chosen ? 'Review' : 'Choose your journey', deep: chosen ? 'your-journey.html' : 'journeys.html' });
       var wOpen = (T && T.undecided().length)
         ? T.undecided().map(function (g) { return g.preferredName || g.fullName; }).join(' · ') + ' — still to answer'
-        : (!dress ? 'Dress code still to be acknowledged by ' + dressOpen.join(' · ') : 'Participation and dress code');
-      var attendanceOpen = T && T.people().some(function (g) { return T.attendanceOf(g.guestId) === null; });
-      out.push({ key: 'wedding', n: '03', label: 'The Wedding', href: 'voyage.html', required: true,
-        state: state(weddingDecided && dress, weddingDecided || dress, true),
+        : 'Participation answered for each named guest';
+      out.push({ key: 'wedding', n: '03', label: 'The Wedding', href: 'wedding.html', required: true,
+        state: state(weddingDecided, !!(T && T.people().some(function (g) { return T.attendanceOf(g.guestId) !== null; })), true),
         note: wOpen,
-        action: !weddingDecided ? 'Answer for each guest' : (!dress ? 'Review dress code' : 'Review'),
-        deep: !weddingDecided ? 'wedding.html'
-                              : (!dress ? 'wedding-preparation.html#dress-code' : 'wedding.html') });
-      out.push({ key: 'documents', n: '04', label: 'Documents & privacy', href: 'documents.html', required: false,
-        state: docsIn === 0 && consentDone === 0 ? 'Optional · not completed'
-             : (docsIn === docsTotal && consentDone === guests.length ? 'Completed' : 'In progress'),
-        note: docsIn ? (docsIn + ' of ' + docsTotal + ' documents received · the rest can be added later')
-                     : 'Optional documents can be added later',
-        action: docsIn ? 'Review' : 'Add documents', deep: 'documents.html' });
-      out.push({ key: 'about', n: '05', label: 'About you', href: 'about-you.html', required: false,
-        state: answered === 0 ? 'Optional · not completed'
-             : (answered === guests.length ? 'Completed' : 'In progress'),
-        note: answered ? (answered + ' of ' + guests.length + (guests.length === 1 ? ' guest has' : ' guests have') + ' shared something')
-                       : 'Optional — and welcome at any time',
-        action: answered ? 'Review' : 'Answer the questions', deep: 'about-you.html#about-you' });
+        action: !weddingDecided ? 'Answer for each guest' : 'Review',
+        deep: 'wedding.html' });
+      out.push({ key: 'preparation', n: '04', label: 'Wedding Preparation', href: 'wedding-preparation.html', required: true,
+        state: state(dress, guests.length > dressOpen.length, true),
+        note: dress ? 'Dress code acknowledged by each of you' : 'Dress code still to be acknowledged by ' + dressOpen.join(' · '),
+        action: dress ? 'Review' : 'Review dress code',
+        deep: 'wedding-preparation.html#dress-code' });
+      var aboutStarted = answered > 0 || docsIn > 0 || consentDone > 0;
+      var aboutDone = answered === guests.length && docsIn === docsTotal && consentDone === guests.length;
+      out.push({ key: 'about', n: '05', label: 'About You', href: 'about-you.html', required: false,
+        state: !aboutStarted ? 'Optional · not completed' : (aboutDone ? 'Completed' : 'In progress'),
+        note: [answered ? (answered + ' of ' + guests.length + (guests.length === 1 ? ' guest has' : ' guests have') + ' shared something') : 'Optional — and welcome at any time',
+               docsIn ? (docsIn + ' of ' + docsTotal + ' documents received · the rest can be added later') : ''].filter(Boolean).join(' · '),
+        action: aboutStarted ? 'Review' : 'Answer the questions', deep: 'about-you.html#about-you' });
       var ready = contact && chosen && weddingDecided && dress;
       out.push({ key: 'review', n: '06', label: 'Review & Send', href: 'review.html', required: true,
         state: ready ? 'Completed' : 'Action needed',

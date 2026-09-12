@@ -11,7 +11,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 </style>
 <link rel="stylesheet" href="assets/aman.css"><link rel="stylesheet" href="assets/prep.css"></head><body>
 <header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="your-journey.html" aria-label="Your Journey"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
-<main>
+<main class="prep-page">
 <div class="prep-page" id="review">
 <div class="prep-head">
   <p class="t-l1" id="rv-own">Your journey · nothing is paid on this website</p>
@@ -22,28 +22,28 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <div id="journeystate" class="prep-col"></div>
 
 <section class="p-block" id="b1">
-<div class="p-block-h"><span class="bno">01</span><h2>You</h2><a class="p-link mute" href="you.html#you">Edit</a></div>
+<div class="p-block-h"><h2>You</h2><a class="p-link mute" href="you.html#you">Edit</a></div>
 <div id="b1c"></div>
 </section>
 
 <section class="p-block" id="b2">
-<div class="p-block-h"><span class="bno">02</span><h2>Your journey</h2><a class="p-link mute" href="your-journey.html">Edit</a></div>
+<div class="p-block-h"><h2>Your journey</h2><a class="p-link mute" href="your-journey.html">Edit</a></div>
 <p class="t-l1" id="b2who">For your party</p>
 <p class="t-b2 measure-w">Your travel, your stays and your experiences, in the order the journey happens — shared once, for everyone on the invitation.</p>
 <div id="items"></div>
 </section>
 
 <section class="p-block" id="b3">
-<div class="p-block-h"><span class="bno">03</span><h2>The Wedding</h2><a class="p-link mute" href="voyage.html#temple-decision">Edit</a></div>
+<div class="p-block-h"><h2>The Wedding</h2><a class="p-link mute" href="wedding.html">Edit</a></div>
 <div id="b3c"></div>
 </section>
 <section class="p-block" id="b4">
-<div class="p-block-h"><span class="bno">04</span><h2>Documents &amp; privacy</h2><a class="p-link mute" href="documents.html">Edit</a></div>
+<div class="p-block-h"><h2>Documents &amp; privacy</h2><a class="p-link mute" href="about-you.html#documents">Edit</a></div>
 <div id="b4c"></div>
 </section>
 
 <section class="p-block" id="b5">
-<div class="p-block-h"><span class="bno">05</span><h2>Your costs</h2><a class="p-link mute" href="your-journey.html">Edit</a></div>
+<div class="p-block-h"><h2>Your costs</h2><a class="p-link mute" href="your-journey.html">Edit</a></div>
 <p class="t-l1" id="b5who">For your party</p>
 <p class="t-b2 measure-w">One calculation for the whole website, and one amount for the whole party. Nothing is paid here, and no deposit is asked for.</p>
 <div class="p-total"><span class="t-l1">Total for your party</span><b id="tt">USD 0</b></div>
@@ -59,8 +59,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <p class="t-b2 measure-w" style="margin-top:var(--s3)">Sending shares your journey with Guest Relations so a person can look at it. It is a request, never a payment, and it is not a confirmation — Guest Relations confirms every arrangement with you personally.</p>
 </div>
 <div id="donebox" hidden class="p-card prep-sec">
-<p class="t-l1 on">Journey received</p>
-<h2 class="t-h1">Received &mdash; not yet confirmed</h2>
+<p class="t-l1 on">What happens now</p>
 <p class="t-b1 measure" id="donemsg"></p>
 <p class="t-b2 measure-w"><b>Received</b> means your journey is safely with Guest Relations and a person will read it. <b>Confirmed</b> is something only Guest Relations can tell you, once each arrangement is held with the hotels, the railway and the airlines. Until you hear from them, nothing in your journey is final.</p>
 <p class="t-b2 measure-w">You can keep changing anything here. Change it, send it again, and the newer version replaces the earlier one — you never lose your place, and you are never counted twice.</p>
@@ -123,7 +122,7 @@ h+=row('How we reach you',(em||ph)?esc([em,ph].filter(Boolean).join(' · ')):'No
        (em||ph)?'Given':'Action needed',!(em||ph));
 h+='</div>';
 /* ABOUT YOU — the answers themselves, never a description of the questions */
-h+='<div class="p-group"><div class="p-block-h" style="margin-top:var(--s3)"><span class="bno">&nbsp;</span><h2 style="font-size:17px">About you</h2>'+
+h+='<div class="p-group"><div class="p-block-h" style="margin-top:var(--s3)"><h2 style="font-size:17px">About you</h2>'+
    '<a class="p-link mute" href="about-you.html#about-you">Edit</a></div>';
 p.guests.forEach(function(g){
   var id=g.guestId,name=esc(G.nameOf(id));
@@ -151,7 +150,7 @@ var DRESS={temple:['Blue Lao Traditional Dress','wedding-preparation.html#dress-
            coffee:['Black Tie','wedding-preparation.html#dress-code'],
            vows:['Black Tie','wedding-preparation.html#dress-code'],
            dinner:['Black Tie','wedding-preparation.html#dress-code']};
-var h='<p class="t-b2 measure-w">Sunday, 28 February 2027 · Vientiane · four events. Hosted by Haruthai &amp; Suthep. The morning alms-giving, Tak Bat, is self-pay. Your optional personal addition, the Sangkhathan, is USD 15 per selected guest — never the alms-giving and never a temple fee.</p>';
+var h='<p class="t-b2 measure-w">Sunday, 28 February 2027 · Vientiane · four events. Hosted by Haruthai &amp; Suthep. The morning alms-giving, Tak Bat, is self-pay. '+(G&&G.party()&&G.party().givingEligibility==='PAIR'?'Your optional personal addition, the Sangkhathan, is USD 15 per selected guest — never the alms-giving and never a temple fee.':'Guest Relations will let you know if the Sangkhathan, a personal offering, applies to your invitation.')+'</p>';
 var meW=G?G.active():null;
 if(op&&op.guests.length){
   op.guests.forEach(function(g){
@@ -213,7 +212,7 @@ p.guests.forEach(function(g){
        '<p class="t-l1'+(got?' on':'')+'">'+(got?d.state:'Not added yet')+'</p></div>'});
   var c=D.consent(id),decided=D.consentDecided(id);
   h+='<div class="p-kv"><div><p class="t-b1"><b>Publication of photographs</b></p>'+
-     '<p class="t-b2">'+(decided?(c?'Given on '+when(c.at)+' · wording version '+esc(c.textVersion):'Declined · nothing about the wedding changes'):'Not answered · optional')+'</p></div>'+
+     '<p class="t-b2">'+(decided?(c?'Given on '+when(c.at):'Declined · nothing about the wedding changes'):'Not answered · optional')+'</p></div>'+
      '<p class="t-l1'+(decided?' on':'')+'">'+(decided?(c?'Given':'Declined'):'Not answered')+'</p></div></div>'});
 h+='<p class="t-b2 measure-w" style="margin-top:var(--s4)">A photographer and a videographer are with us on the wedding day — that is a notice, not a consent. Publication is a separate, optional choice, and it can be withdrawn at any time by writing to <a href="mailto:guest.relation.seeyouinlaos@gmail.com?subject=Publication%20consent" style="color:#313131">Guest Relations</a>. The wording is provisional and will be finalised with legal review; every answer is kept with its date and its version.</p>';
 h+='<p class="t-b2 measure-w">Documents travel straight to our private store — no document byte is kept in this browser or behind any public link.</p>';
@@ -296,8 +295,9 @@ var first=(r.need||[])[0];
 var MSG={invitation:'Please open your invitation before sending your journey.',
          you:'Please leave one email address or telephone number before sending.',
          journey:'Please choose your travel and your stays before sending your journey.',
-         wedding:'Please answer the wedding participation for each named guest, and review the dress code, before sending.'};
-var ACT={invitation:'Open my invitation',you:'Add your contact',journey:'Choose your journey',wedding:'Go there now'};
+         wedding:'Please answer the wedding participation for each named guest before sending.',
+         preparation:'Please review the dress code — each of you, in your own name — before sending.'};
+var ACT={invitation:'Open my invitation',you:'Add your contact',journey:'Choose your journey',wedding:'Go there now',preparation:'Review dress code'};
 if(first&&first.key==='wedding'&&window.SIYL_TEMPLE&&SIYL_TEMPLE.decidedAll()&&!G.dressAckAll()){
   MSG.wedding='Please review the dress code before sending your journey — '+G.dressMissing().map(function(g){return G.nameOf(g.guestId)}).join(' and ')+' still to acknowledge, each in their own name.';
   first=Object.assign({},first,{href:'wedding-preparation.html#ack',action:'Review dress code'})}
@@ -319,23 +319,33 @@ if(st==='none'){box.innerHTML='';if(send)send.hidden=false;return}
 if(st==='received'){
   box.innerHTML='<div class="p-card"><p class="t-l1 on">Journey received</p><h2 class="t-h1">Guest Relations has your journey</h2>'+
     '<p class="t-b1 measure">Received on '+when(C.receivedAt())+'. A person will read it. Received is not confirmed: Guest Relations confirms every arrangement with you personally, and until then nothing in your journey is final. You can still change anything below and send it again.</p></div>';
-  if(send)send.hidden=false;return}
-/* CONFIRMED */
+    var sn=sentSnapshot();if(sn&&sn.invitationId===p.invitationId&&fingerprint(snapshotNow())!==fingerprint(sn))box.innerHTML+='<div class="p-card" style="margin-top:var(--s3)"><p class="t-l1 open">Changed since you sent it</p><p class="t-b2 measure">Something has changed here since '+when(sn.at)+'. Send your journey again so Guest Relations has the newer version — the newer one replaces the earlier one.</p></div>';
+if(send)send.hidden=false;return}
+/* CONFIRMED · painted from the snapshot taken when the journey was SENT from
+ * this device (siyl.sent). The live draft is never shown under a confirmed
+ * heading: if it has changed since, the guest is told so; if this device never
+ * sent the journey, nothing is invented. */
 if(send)send.hidden=true;
-var b=SIYL_BAG.get(),shared=(J?J.sorted(b):b).filter(function(x){return !(J&&J.isWedding(x))});
+var snap=sentSnapshot();
+if(!snap||snap.invitationId!==p.invitationId){
+  box.innerHTML='<div class="p-card"><p class="t-l1 on">Journey confirmed</p><h2 class="t-h1">Guest Relations has confirmed your journey</h2>'+
+    '<p class="t-b1 measure">Confirmed on '+when(C.confirmedAt())+'. The details Guest Relations confirmed were sent from another device, so they are not shown here. For a copy, or to change anything, write to <a href="mailto:guest.relation.seeyouinlaos@gmail.com?subject=Journey%20'+encodeURIComponent(p.invitationId)+'">Guest Relations</a>.</p></div>';
+  return}
+var changed=fingerprint(snapshotNow())!==fingerprint(snap);
+var shared=snap.shared||[];
 var h='<div class="p-card"><p class="t-l1 on">Journey confirmed</p><h2 class="t-h1">Guest Relations has confirmed your journey</h2>'+
   '<p class="t-b1 measure">Confirmed on '+when(C.confirmedAt())+'. To change anything now, write to <a href="mailto:guest.relation.seeyouinlaos@gmail.com?subject=Journey%20'+encodeURIComponent(p.invitationId)+'">Guest Relations</a>.</p></div>';
+if(changed)h+='<div class="p-card" style="margin-top:var(--s3)"><p class="t-l1 open">Changed since confirmation · not sent</p><p class="t-b1 measure">Something in your journey has been changed on this device after Guest Relations confirmed it. What is shown below is what was confirmed. Changes made here are not sent — write to <a href="mailto:guest.relation.seeyouinlaos@gmail.com?subject=Journey%20'+encodeURIComponent(p.invitationId)+'">Guest Relations</a> to change anything.</p></div>';
 h+='<section class="prep-sec"><p class="t-l1">A · Party journey confirmation</p><h2 class="t-h2">'+esc(G.partyLabel())+'</h2><div class="p-card">';
 if(!shared.length)h+='<p class="t-b2">No shared stay or travel in this journey.</p>';
-shared.forEach(function(x){h+='<div class="p-kv"><div><p class="t-l1">'+esc(J?J.when(x):'')+'</p><p class="t-b1"><b>'+esc(x.name)+'</b></p><p class="t-b2">'+esc(x.meta||'')+'</p></div><p class="t-l1 on">Confirmed</p></div>'});
+shared.forEach(function(x){h+='<div class="p-kv"><div><p class="t-l1">'+esc(x.when||'')+'</p><p class="t-b1"><b>'+esc(x.name)+'</b></p><p class="t-b2">'+esc(x.meta||'')+'</p></div><p class="t-l1 on">Confirmed</p></div>'});
 h+='<div class="p-kv"><div><p class="t-b1"><b>The Wedding</b></p><p class="t-b2">Sunday, 28 February 2027 · Vientiane · four parts, hosted by Haruthai &amp; Suthep</p></div><p class="t-l1 on">Confirmed</p></div>';
 h+='</div></section>';
 h+='<section class="prep-sec"><p class="t-l1">B · Personal wedding card</p><h2 class="t-h2">One card for each of you</h2>';
-var op=T?T.operational():null;
 p.guests.forEach(function(g){
-  var id=g.guestId,row=op?op.guests.filter(function(r){return r.guestId===id})[0]:null,a=G.dressAck(id);
-  var cs=Sx?Sx.seatOf('ceremony',id):null,ds=Sx?Sx.seatOf('dinner',id):null;
-  function ev(k){return row?row.events[k]:'Not decided'}
+  var id=g.guestId,row=(snap.guests||[]).filter(function(r){return r.guestId===id})[0]||null,a=row&&row.dress;
+  var cs=(Sx&&Sx.ready())?Sx.seatOf('ceremony',id):(row?row.ceremonySeat:null),ds=(Sx&&Sx.ready())?Sx.seatOf('dinner',id):(row?row.dinnerSeat:null);
+  function ev(k){return row&&row.events?row.events[k]:'Not decided'}
   h+='<div class="p-card p-wcard"><p class="t-l1">'+esc(G.labelFor(id))+'</p><h3 class="t-d1">'+esc(G.nameOf(id))+'</h3><p class="t-b2">'+esc(G.value(id,'fullName')||g.fullName)+'</p>'+
      '<p class="t-l1 on" style="margin-top:var(--s3)">28 February 2027 · Vientiane</p>'+
      '<div class="p-kv"><div><p class="t-b1"><b>Temple Ceremony</b></p></div><p class="t-l1'+(ev('temple')==='Joining'?' on':'')+'">'+(ev('temple')==='Joining'?'Attending':ev('temple')==='Not joining'?'Not attending':'Not decided')+'</p></div>'+
@@ -349,6 +359,23 @@ p.guests.forEach(function(g){
      '</div>'});
 h+='</section>';
 box.innerHTML=h}
+
+/* the journey as it was SENT from this device — the only thing a confirmed
+ * view may show (F · received ≠ confirmed; confirmed = what Guest Relations saw) */
+function snapshotNow(){
+  var G=window.SIYL_GUEST,T=window.SIYL_TEMPLE,J=window.SIYL_JOURNEY,Sx=window.SIYL_SEATS,p=G&&G.party();
+  if(!p)return null;
+  var b=SIYL_BAG.get(),shared=(J?J.sorted(b):b).filter(function(x){return !(J&&J.isWedding(x))});
+  var op=T?T.operational():null;
+  return {invitationId:p.invitationId,
+    shared:shared.map(function(x){return {id:x.id,when:J?J.when(x):'',name:x.name,meta:x.meta||'',price:x.price,qty:x.qty}}),
+    total:SIYL_BAG.total(),
+    guests:p.guests.map(function(g){var id=g.guestId,row=op?op.guests.filter(function(r){return r.guestId===id})[0]:null,a=G.dressAck(id);
+      return {guestId:id,name:G.nameOf(id),fullName:G.value(id,'fullName')||g.fullName,events:row?row.events:null,sangkhathan:!!(row&&row.sangkhathan),
+        dress:a?{at:a.at,by:a.by}:null,ceremonySeat:Sx&&Sx.ready()?Sx.seatOf('ceremony',id):null,dinnerSeat:Sx&&Sx.ready()?Sx.seatOf('dinner',id):null}})}}
+function fingerprint(o){if(!o)return '';var c=JSON.parse(JSON.stringify(o));delete c.at;(c.guests||[]).forEach(function(g){delete g.ceremonySeat;delete g.dinnerSeat});return JSON.stringify(c)}
+function sentSnapshot(){try{return JSON.parse(localStorage.getItem('siyl.sent')||'null')}catch(e){return null}}
+function rememberSent(at){var o=snapshotNow();if(!o)return;o.at=at;try{localStorage.setItem('siyl.sent',JSON.stringify(o))}catch(e){}}
 
 function paintBlocks(){paintYou();paintWedding();paintDocs();paintReady();paintState();
   if(window.SIYL_PREP)SIYL_PREP.foot(document.getElementById('foot'))}
@@ -464,13 +491,14 @@ templeCeremony:window.SIYL_TEMPLE?SIYL_TEMPLE.operational():null,
 guestRecord:window.SIYL_GUEST?SIYL_GUEST.operational():null,
 documents:window.SIYL_DOCS?SIYL_DOCS.operational():null,
 seats:window.SIYL_SEATS&&SIYL_SEATS.ready()?SIYL_SEATS.mine():null,
-inventory:hold.unreachable?'UNCONFIRMED — ledger unreachable, Guest Relations to confirm rooms':'CONFIRMED',
+inventory:hold.unreachable?'UNCONFIRMED — ledger unreachable, Guest Relations to confirm rooms':'HELD — rooms held in the party\'s name, not a confirmed booking',
 roomsHeld:hold.reserved||null,
 registration_submitted_at:new Date().toISOString()};
 try{
 var r=await fetch(SUBMIT_URL,{method:'POST',headers:{'content-type':'application/json'},
 body:JSON.stringify({registration:registration,invitationId:auth.invitationId,text:text})});
 if(r.ok){document.getElementById('sendbox').hidden=true;
+rememberSent(registration.registration_submitted_at);
 if(window.SIYL_CONFIRM)SIYL_CONFIRM.noteReceived(registration.registration_submitted_at);
 var d=document.getElementById('donebox');d.hidden=false;
 document.getElementById('donemsg').textContent=hold.unreachable

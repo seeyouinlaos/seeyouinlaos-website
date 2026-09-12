@@ -225,6 +225,8 @@ const rec = await text('#journeystate');
 note('F1 received', /Journey received/.test(rec) && /Received is not confirmed/.test(rec) && !(await page.locator('#sendbox').first().isHidden()) && !/BOOKING CONFIRMED|ORDER/i.test(rec), rec.slice(0, 160));
 note('F1 shell says received', /Received/.test(await text('.prep-steps')) || true, 'step 06 state');
 await frames('review.html', 'mock-f-received', [['#journeystate', 'mock-f-received-card']]);
+/* the confirmed view shows what was SENT from this device: seed the snapshot a real SEND would have taken */
+await page.evaluate(async () => { if (window.SIYL_SEATS) await SIYL_SEATS.load(true); rememberSent('2026-09-11T10:00:00.000Z'); });
 mock.status = { received: true, receivedAt: '2026-09-11T10:00:00.000Z', confirmed: true, confirmedAt: '2026-09-12T09:30:00.000Z' };
 mock.seating = { open: true, frozen: true };
 await go('review.html', 390);

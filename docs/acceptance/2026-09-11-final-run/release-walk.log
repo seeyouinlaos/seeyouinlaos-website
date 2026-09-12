@@ -49,6 +49,8 @@ PASS 07 not sent — send available, no state card
 PASS 07 send payload — one party record with both guests, no code inside
 PASS 07 received — received ≠ confirmed; a correction can still be sent (send stays available until Guest Relations confirms)
 PASS 07 shell received — step 06 reads Received from another step · 01 Your Invitation OPEN 02 Your Journey CURRENT 03 The Wedding COMPLETE 04 Wedding Preparation COMPLETE 05 About You COMPLETE 06 Review & Send RECEIVED
+PASS 07b changed since sending — the guest is told to send again
+PASS 07b back in step, no notice — restoring the sent answer clears the notice
 PASS 08 reload — identity, record and status survive reload
 PASS 09 steffie own device — active = Steffie
 PASS 09 steffie sees her checkbox — only her own acknowledgement
@@ -59,13 +61,16 @@ PASS 10 costs not duplicated after switch — one Bangkok line, one fare line
 PASS 10 review after switch — same shared lines, same party
 PASS 11 confirmed — party confirmation once + personal cards
 PASS 11 one card per guest — two cards, named
-PASS 11 cards personal state — cards read each guest's own state
+PASS 11 cards personal state — each card carries that guest's own sent state
+PASS 11 party block from the sent journey — block A lists the sent shared lines, nothing changed
+PASS 11 shell says confirmed on a step — the bar on step 03 says the confirmed journey is not changed here
+PASS 11 change after confirmation not shown as confirmed — the notice appears; the card still shows what was confirmed
 PASS 11 no ticket imitation — no QR, no barcode, no seat shown while seating is closed
-PASS 11 steffie sees confirmed — shared confirmation on her device
+PASS 11 steffie sees confirmed honestly — a device that never sent shows no invented cards
 PASS 12 stale session — a session without names is not trusted; the guest is asked for the code again
 PASS 12 re-entry keeps record — answers survive re-entry
 PASS 13 review deep links — 19 edit links resolve while signed in
 PASS 13 wedding deep link for — subject via ?for=
 
-68/68 checks pass · page errors: 0 · console errors: 0
+73/73 checks pass · page errors: 0 · console errors: 0
 DONE

@@ -81,7 +81,8 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:22px;margin:40
 .psel .anav button[disabled]{opacity:.3;cursor:default}
 .pselhint{font-size:10px;letter-spacing:2.2px;text-transform:uppercase;color:#6B6964;margin-top:6px}
 /* ---- the fare selector ---- */
-.vcls{width:100%;text-align:left;background:#FCFAF6;cursor:pointer;font:inherit}
+/* the fare card has no thumbnail: the text takes the first column, the price and the badge sit right (overrides the 52/76/88px thumbnail column of .vars .var) */
+.vars .var.vcls{grid-template-columns:minmax(0,1fr) auto auto!important;column-gap:12px!important;width:100%;text-align:left;background:#FCFAF6;cursor:pointer;font:inherit}.vcls .vtx{min-width:0}.vcls .vp{margin-left:0}.vcls .vcs{white-space:normal;text-align:right}
 .vcls.picked{border-color:#313131}
 .vcn{display:block;font-family:'PP Editorial Old',serif;font-weight:200;font-size:17px;line-height:1.3}
 .vcs{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#6B6964;margin-left:12px;white-space:nowrap}
@@ -220,7 +221,7 @@ function paint(){
   box.innerHTML=P.classesOf(id).map(function(c){
     var on=cur===c.slug;
     return '<button type="button" class="var vcls'+(on?' picked':'')+'" data-cls="'+c.slug+'">'+
-      '<span style="flex:1"><span class="vcn">'+c.short+'</span>'+
+      '<span class="vtx"><span class="vcn">'+c.short+'</span>'+
       '<span class="vn">'+c.notes.join(' · ')+'</span></span>'+
       '<span class="vp">'+P.money(c.price)+'</span>'+
       '<span class="vcs">'+(on?'Selected':(c.preferred?'Preferred':'Save '+P.money(275-c.price)+' pp'))+'</span>'+

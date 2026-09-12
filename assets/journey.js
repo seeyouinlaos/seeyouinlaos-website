@@ -64,7 +64,7 @@
       place: 'Souphattra Heritage Vientiane',
       note: 'Complimentary — hosted by Haruthai & Suthep.', anchor: 'voyage.html#vows' },
     { key: 'dinner', title: 'Wedding Dinner', when: '19:30',
-      place: 'Souphattra Vientiane Hotel',
+      place: 'Souphattra Heritage Vientiane · courtyard garden',
       note: 'Complimentary — hosted by Haruthai & Suthep.', anchor: 'voyage.html#dinner' }
   ];
 
