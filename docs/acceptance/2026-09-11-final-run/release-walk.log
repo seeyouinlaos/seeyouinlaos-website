@@ -26,8 +26,9 @@ PASS 04 temple truth — date · time · place
 PASS 04 tak bat self-pay — inside the ceremony, self-pay, unpriced
 PASS 04 peggy answers hers — temple attend + coffee,vows,dinner · signed by Peggy
 PASS 04 proxy signed — Steffie's answer written by Peggy and said so
-PASS 04 sangkhathan unresolved — no decision offered, no amount, no purchase-like state: SANGKHATHAN · PERSONAL GIVING This part of the Temple Ceremony is prepared for couples. Guest Relations will let you kno
-PASS 04 no sangkhathan in bag — nothing inferred into the journey
+PASS 04 sangkhathan offered to the party — PAIR: one couple decision, USD 15 each, not decided: SANGKHATHAN · PERSONAL GIVING This part of the Temple Ceremony is prepared for couples. If you choose to take part, a pe
+PASS 04 no sangkhathan in bag — nothing inferred into the journey before the decision
+PASS 04 sangkhathan decided by the party — one decision for Peggy & Steffie, signed, nothing added: SANGKHATHAN · PERSONAL GIVING This part of the Temple Ceremony is prepared for c
 PASS 05 dress mapping — blue Lao traditional → temple · black tie → afternoon and evening · resort wear → travelling days
 PASS 05 rails — 17 references, resort-01 gone
 PASS 05 one acknowledgement per guest — Peggy sees her own checkbox only
@@ -73,7 +74,7 @@ PASS 11b superseded snapshot never shown as confirmed — Peggy's device shows t
 PASS 11b latest sender sees the confirmed journey — Steffie's device paints block A and both cards from the version Guest Relations holds
 PASS 12 stale session — a session without names is not trusted; the guest is asked for the code again
 PASS 12 re-entry keeps record — answers survive re-entry
-PASS 13 review deep links — 19 edit links resolve while signed in
+PASS 13 review deep links — 22 edit links resolve while signed in
 PASS 13 wedding deep link for — subject via ?for=
 
-77/77 checks pass · page errors: 0 · console errors: 0
+78/78 checks pass · page errors: 0 · console errors: 0

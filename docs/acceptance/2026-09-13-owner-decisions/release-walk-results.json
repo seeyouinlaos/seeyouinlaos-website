@@ -1,6 +1,6 @@
 {
   "origin": "http://127.0.0.1:8787",
-  "at": "2026-09-13T10:10:07.930Z",
+  "at": "2026-09-13T10:51:37.161Z",
   "results": [
     {
       "id": "01 home fresh",
@@ -143,14 +143,19 @@
       "detail": "Steffie's answer written by Peggy and said so"
     },
     {
-      "id": "04 sangkhathan unresolved",
+      "id": "04 sangkhathan offered to the party",
       "ok": true,
-      "detail": "no decision offered, no amount, no purchase-like state: SANGKHATHAN · PERSONAL GIVING This part of the Temple Ceremony is prepared for couples. Guest Relations will let you kno"
+      "detail": "PAIR: one couple decision, USD 15 each, not decided: SANGKHATHAN · PERSONAL GIVING This part of the Temple Ceremony is prepared for couples. If you choose to take part, a pe"
     },
     {
       "id": "04 no sangkhathan in bag",
       "ok": true,
-      "detail": "nothing inferred into the journey"
+      "detail": "nothing inferred into the journey before the decision"
+    },
+    {
+      "id": "04 sangkhathan decided by the party",
+      "ok": true,
+      "detail": "one decision for Peggy & Steffie, signed, nothing added: SANGKHATHAN · PERSONAL GIVING This part of the Temple Ceremony is prepared for c"
     },
     {
       "id": "05 dress mapping",
@@ -380,7 +385,7 @@
     {
       "id": "13 review deep links",
       "ok": true,
-      "detail": "19 edit links resolve while signed in"
+      "detail": "22 edit links resolve while signed in"
     },
     {
       "id": "13 wedding deep link for",

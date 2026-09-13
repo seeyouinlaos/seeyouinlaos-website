@@ -18,15 +18,17 @@ earlier conversation.
 > on production 10/10 and every chair given back (ledger 100 available, held 0) · booking rule
 > unchanged (authenticated party, OPEN, not FROZEN; no attendance prerequisite) · the **Wedding
 > Dinner carries the Owner's 10-image set** · DOCS upload stays DISABLED by decision ·
-> Sangkhathan unchanged, explained to the Owner in plain language.
-> Production: guest-facing source **`0b8ff2d`** (later commits docs-only) · the live Worker is
-> the **Cloudflare Workers Builds** version of HEAD (`314928b6` at 0b8ff2d; the Owner has made
+> **Sangkhathan offered to every active party (`72d9e15`)**: `givingEligibility = PAIR` on all
+> 26 ACTIVE invitations, INV-001 included; one optional party decision, only once every named
+> guest attends the temple, USD 15 per person — the accepted E behaviour, now live for everyone.
+> Production: guest-facing source **`72d9e15`** (later commits docs-only) · the live Worker is
+> the **Cloudflare Workers Builds** version of HEAD (`bf286abb` at 72d9e15; the Owner has made
 > that integration the release path for now — no competing manual deploys; wait, verify, prove
-> parity after each push) · Pages built from 0b8ff2d · **parity 61/61** · smoke 8/8 both origins ·
-> REG_KV 0 keys · INV-001 and INV-002 pristine.
-> Owner items: INV-002 rotation (Owner decision) · Sangkhathan `givingEligibility` (explanation
-> delivered; no change until the Owner decides) · DOCS (separate future decision) · deploy-path
-> clean-up (infrastructure follow-up).
+> parity after each push) · Pages built from 72d9e15 · **parity 61/61** · smoke 8/8 both origins ·
+> release walk 78/78 · REG_KV 0 keys · INV-001 and INV-002 pristine · seating OPEN, 100 chairs
+> available, held 0.
+> Owner items: INV-002 rotation (Owner decision) · DOCS (separate future privacy decision) ·
+> deploy-path clean-up (infrastructure follow-up). Nothing else is open.
 
 ## Secured state
 - Repository: `main` = **`ce462d7`** (the fix; the guest-facing source state) + one acceptance
@@ -40,7 +42,8 @@ earlier conversation.
   file changed) · **51/51 guest-facing files byte-identical** (local = Worker = Pages,
   `parity-ce462d7.txt`).
 - Verification at `ce462d7`, Owner machine: `npm test` **206/206** · `release-check` all gates
-  PASS · state table 8/8 · `release-walk.mjs` **77/77** (0 page errors, 0 console errors) ·
+  PASS · state table 8/8 · `release-walk.mjs` **77/77** (0 page errors, 0 console errors;
+  **78/78 since 72d9e15**, the party's Sangkhathan decision added) ·
   `a11y.mjs` **18/18** · regression C 39/39 · D 39/39 · E/F/G 37/37 · Haruthai 24/24 ·
   `smoke.mjs` **8/8 on both origins** · `crawl.mjs` 0 HTTP failures / 0 console errors on both
   origins.
@@ -80,10 +83,10 @@ failed). No subagent, no MCP, no claude-mem, one stream.
 ## Owner decisions pending (not release blockers)
 - **Rotate the INV-002 guest code** (in public git history 91afeb7…91c52ad; removed at 01a9671).
   Not performed — Owner decision.
-- Sangkhathan `givingEligibility` per invitation (plain-language explanation delivered 13 Sep) ·
-  DOCS store binding (DISABLED by decision; separate future privacy decision) · deploy-path
-  clean-up (Workers Builds is the release path for now). (FAMILY seat ids, fixed Bride/Groom
-  positions, seating opening, the couple's party and the Wedding Dinner photograph: closed 13 Sep.)
+- DOCS store binding (DISABLED by decision; separate future privacy decision) · deploy-path
+  clean-up (Workers Builds is the release path for now). (Sangkhathan PAIR for every active
+  party, FAMILY seat ids, fixed Bride/Groom positions, seating opening, the couple's party and
+  the Wedding Dinner photograph: all closed 13 Sep.)
 - Final release approval (ON HOLD by instruction).
 
 ## How to run the evidence scripts (local server `python3 -m http.server 8787` in the repo root)

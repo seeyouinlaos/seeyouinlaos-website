@@ -1,8 +1,8 @@
 # Owner decisions of 13 September 2026 — implementation record
 
-Applied to the accepted 002 system in two commits on `main` after the FINAL RUN's `ce462d7` /
-`eb1d165`: `7431761` (first decision set) and **`0b8ff2d`** (the final correction: fifty
-bookable dinner chairs, the couple as INV-001). One stream, no subagent, no MCP beyond the
+Applied to the accepted 002 system in three commits on `main` after the FINAL RUN's `ce462d7` /
+`eb1d165`: `7431761` (first decision set), `0b8ff2d` (fifty bookable dinner chairs, the couple
+as INV-001) and **`72d9e15`** (the Sangkhathan offered to every active party). One stream, no subagent, no MCP beyond the
 Owner's Google Drive folder read. The only accepted-stage element altered is the G dinner
 geometry, where the Owner's explicit decision supersedes the fixed Bride/Groom positions.
 
@@ -126,7 +126,25 @@ documents cannot be accepted yet. Enabling it is configuration, not code: create
 deliberately no read route — access is the Cloudflare dashboard / `wrangler r2`). It is a
 decision because it means storing guests' passport images.
 
+## 7 · Sangkhathan — offered to every active party (Owner decision, 13 Sep 2026, at 72d9e15)
+`givingEligibility = PAIR` on all 26 ACTIVE invitations in the private list, INV-001 included —
+no whitelist, no NONE, none unset (the single CANCELLED party, excluded from the bundle, stays
+unset). Bundle rebuilt, every token unchanged, INV-002 not rotated. The accepted E behaviour is
+untouched: the party makes one decision; it is optional; the buttons appear only once every
+named guest has chosen to attend the Temple Ceremony (until then the card states the price and
+that it "becomes available once … chosen to attend"); USD 15 per participating person, USD 30
+for a party of two. Because the decision is an open required item of step 03 for a PAIR party,
+a journey is sent only after the party has decided — the accepted rule, now live for everyone;
+the release walk therefore decides ("without") on both devices before sending. Guests who do
+not attend the temple are never asked.
+
 ## Verification
+At **72d9e15** (Sangkhathan PAIR): `npm test` 206/206 (pins PAIR on every active party) ·
+`release-check` all gates PASS · E/F/G walk 37/37 (E0 asserts production ships PAIR; the
+unresolved branch is injected) · release walk **78/78** · smoke 8/8 on both origins (offer
+shown, gated on attendance; seating OPEN, 100 chairs; no write) · **parity 61/61** local =
+Worker (`bf286abb`) = Pages (built 72d9e15) — `parity-72d9e15.txt`.
+
 At 7431761 (first set): `npm test` 206/206 · gates PASS · E/F/G 37/37 · release walk 77/77 ·
 a11y 18/18 · crawl clean on local/Worker/Pages · smoke 8/8 both origins · parity 61/61.
 
@@ -148,5 +166,5 @@ proven. Observed behaviour, recorded as an **infrastructure follow-up, not a blo
 7431761 (eight new binaries, one deletion) the Hamburg edge served the previous asset manifest
 for several minutes before propagating; after 0b8ff2d the new files were served on the first
 probe. Versions: `f63ff143` (7431761) · `88beab8e` (d6d77fd) · `97f05843` (95bdf7e) ·
-**`314928b6` (0b8ff2d)** · one more for each later docs-only push. The technical clean-up
+`314928b6` (0b8ff2d) · `7cdb5bd5` (84f1de7) · **`bf286abb` (72d9e15)** · one more for each later docs-only push. The technical clean-up
 (one deploy path) is deferred to a later, separate decision.

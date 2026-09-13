@@ -1,11 +1,11 @@
 {
   "origin": "http://127.0.0.1:8787",
-  "at": "2026-09-13T10:05:29.680Z",
+  "at": "2026-09-13T10:37:34.133Z",
   "results": [
     {
       "id": "E0 production eligibility",
       "ok": true,
-      "detail": "INV-002 ships UNRESOLVED (no inferred PAIR): null"
+      "detail": "INV-002 ships PAIR, explicitly (Owner decision 13 Sep 2026): \"PAIR\""
     },
     {
       "id": "E1 unresolved: restrained, no price, no action",
