@@ -1,7 +1,8 @@
 /* FINAL RUN · read-only production smoke on one origin: open the invitation with
    the real code, choose Peggy, read the real status from the Worker, confirm
    seating is OPEN at the binding geometry (Owner decision 13 Sep 2026) and the
-   Sangkhathan is withheld. Nothing is written. */
+   Sangkhathan is offered to the party (PAIR, Owner decision 13 Sep 2026) and
+   gated on attendance. Nothing is written. */
 import { chromium } from '/Users/thongantang/.npm-global/lib/node_modules/playwright/index.mjs';
 import fs from 'node:fs';
 const ORIGIN = process.argv[2];
@@ -34,7 +35,8 @@ const nofixed = (await p.locator('#seats svg.p-seatmap g.fixed').count()) === 0 
 note('seating open', /seating is open/i.test(seats) && maps === 2 && chairs === 100 && family === 0 && nofixed && !/Reserved · family/i.test(seats), 'production: ' + maps + ' plans · ' + chairs + ' chairs (50 + 50) · family chairs ' + family + ' · nothing fixed · ' + seats.slice(0, 60));
 await p.goto(ORIGIN + '/wedding.html', { waitUntil: 'networkidle' }); await p.waitForTimeout(600);
 const sang = (await p.locator('#sangkhathan').innerText()).replace(/\s+/g, ' ');
-note('sangkhathan withheld', (await p.locator('#sangkhathan [data-off]').count()) === 0 && !/USD 30/.test(sang), sang.slice(0, 100));
+/* PAIR on a fresh session: the price is said, the decision waits until every named guest has chosen to attend */
+note('sangkhathan offered, gated on attendance', (await p.locator('#sangkhathan [data-off]').count()) === 0 && /USD 15/.test(sang) && /becomes available once/i.test(sang) && !/Guest Relations will let you know/.test(sang), sang.slice(0, 120));
 await p.goto(ORIGIN + '/journeys.html', { waitUntil: 'networkidle' }); await p.waitForTimeout(800);
 note('inventory reachable', errs.filter((e) => /CORS|inventory/.test(e)).length === 0, 'no CORS/inventory errors on ' + ORIGIN);
 note('no writes', writes.length === 0, writes.join(', ') || 'only GET requests to /api');

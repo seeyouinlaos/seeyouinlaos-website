@@ -158,8 +158,16 @@ for (const e of evKeys) { await page.locator('[data-g="' + S.guestId + '"][data-
 T = await H.ls('siyl.temple');
 note('04 proxy signed', T.by[S.guestId].events[evKeys[1]] === 'yes' && T.by[S.guestId].by === P.guestId && /For Steffie · answering for Steffie/i.test(w3.replace(/\s+/g, ' ')) || /answering for Steffie/i.test(await H.text('main')), 'Steffie\'s answer written by Peggy and said so');
 const sang = await H.text('#sangkhathan');
-note('04 sangkhathan unresolved', !/data-off/.test(await page.locator('#sangkhathan').innerHTML().catch(() => '')) && !/USD 30/.test(sang) && (await page.locator('#sangkhathan [data-off]').count()) === 0, 'no decision offered, no amount, no purchase-like state: ' + sang.slice(0, 120));
-note('04 no sangkhathan in bag', !((await H.ls('siyl.bag')) || []).some((x) => x.id === 'sangkhathan'), 'nothing inferred into the journey');
+/* Owner decision 13 Sep 2026: every active invitation is PAIR — with both named
+   guests attending the temple, the party is offered ONE decision, USD 15 each,
+   and nothing is decided or added to the journey until it is made */
+note('04 sangkhathan offered to the party', (await page.locator('#sangkhathan [data-off="yes"]').count()) === 1 && (await page.locator('#sangkhathan [data-off="no"]').count()) === 1 && /USD 15/.test(sang) && /USD 30/.test(sang) && /Not decided/i.test(sang) && /one decision/i.test(sang), 'PAIR: one couple decision, USD 15 each, not decided: ' + sang.slice(0, 120));
+note('04 no sangkhathan in bag', !((await H.ls('siyl.bag')) || []).some((x) => x.id === 'sangkhathan'), 'nothing inferred into the journey before the decision');
+/* the party decides — voluntarily, and here: without. The decision is what
+   completes step 03 for an eligible pair; nothing enters the journey. */
+await page.click('#sangkhathan [data-off="no"]'); await page.waitForTimeout(400);
+const sangAfter = await H.text('#sangkhathan');
+note('04 sangkhathan decided by the party', /Continuing without Sangkhathan/i.test(sangAfter) && ((await H.ls('siyl.temple')).pair || {}).off === 'no' && !((await H.ls('siyl.bag')) || []).some((x) => x.id === 'sangkhathan'), 'one decision for Peggy & Steffie, signed, nothing added: ' + sangAfter.slice(0, 80));
 await H.frames('wedding.html', 'S3-wedding', PRIMARY, [['#sangkhathan', 'S3-sangkhathan']]);
 
 /* ================================================================ 5 · step 04 · dress + seats (personal) */
@@ -298,6 +306,8 @@ await H2.go('your-journey.html', 390); await page2.locator('#bkksel [data-choose
 await H2.go('you.html', 390); await page2.fill('#p-email', 'peggy.steffie@example.test'); await page2.locator('#p-email').dispatchEvent('change'); await page2.waitForTimeout(200);
 await H2.go('wedding.html', 390); const keys2 = await page2.evaluate(() => [...new Set([...document.querySelectorAll('[data-e]')].map((x) => x.getAttribute('data-e')))]);
 for (const g of [S.guestId, P.guestId]) for (const e of keys2) { await page2.locator('[data-g="' + g + '"][data-e="' + e + '"] [data-ev="yes"]').first().click().catch(() => {}); await page2.waitForTimeout(120); }
+/* the second device is a fresh journey of the same PAIR party: the couple decision is open here too, and this device decides it as well (without) */
+await page2.click('#sangkhathan [data-off="no"]').catch(() => {}); await page2.waitForTimeout(300);
 await H2.go('wedding-preparation.html', 390); await page2.locator('#ack [data-ack="' + S.guestId + '"]').check().catch(() => {}); await page2.waitForTimeout(200);
 await page2.click('.prep-bar [data-switch]'); await page2.waitForSelector('.p-drawer:not([hidden])'); await page2.click('.p-drawer [data-who="' + P.guestId + '"]'); await page2.waitForTimeout(300);
 await page2.locator('#ack [data-ack="' + P.guestId + '"]').check().catch(() => {}); await page2.waitForTimeout(200);
