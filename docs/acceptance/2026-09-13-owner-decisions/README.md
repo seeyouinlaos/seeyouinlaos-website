@@ -6,6 +6,18 @@ as INV-001) and **`72d9e15`** (the Sangkhathan offered to every active party). O
 Owner's Google Drive folder read. The only accepted-stage element altered is the G dinner
 geometry, where the Owner's explicit decision supersedes the fixed Bride/Groom positions.
 
+> **FINAL OWNER RELEASE APPROVAL — 002 · RELEASED · ACCEPTED (13 Sep 2026).** The production
+> state at main **`0029e12`** (guest-facing source `72d9e15`) is the authoritative released
+> version: one access code per invitation/party · INV-001 = Haruthai + Suthep · INV-002
+> unchanged · seating OPEN · ceremony 50 and dinner 50 ordinary bookable chairs, no fixed
+> Bride/Groom and no FAMILY-reserved seat · Sangkhathan PAIR for every ACTIVE invitation ·
+> Wedding Dinner authorised image set · DOCS upload disabled · the automatic Cloudflare
+> Workers Build as the current release path · local = Worker = GitHub Pages parity 61/61
+> proven · all final verification results accepted. No further review, audit, regression run,
+> redesign, deployment or code change belongs to this approval. **Future follow-ups only:**
+> possible INV-002 code rotation · DOCS privacy/storage architecture · Cloudflare
+> deployment-path clean-up.
+
 > **Final correction (0b8ff2d).** The first pass had kept the accepted G dinner of 24 + 24 guest
 > chairs plus BRIDE and GROOM as fixed central positions. The Owner ruled that nobody — the
 > couple included — has a technically preassigned seat. The dinner is now **TOP 25 + BOTTOM 25 =

@@ -5,6 +5,18 @@ This file, `README.md` beside it, `FINAL-REPORT.md` and the project memory
 state. A fresh session continues from these files and the repository HEAD — never from an
 earlier conversation.
 
+> **FINAL OWNER RELEASE APPROVAL — 002 · RELEASED · ACCEPTED (13 Sep 2026).** The production
+> state at main **`0029e12`** (guest-facing source `72d9e15`) is the authoritative released
+> version: one access code per invitation/party · INV-001 = Haruthai + Suthep · INV-002
+> unchanged · seating OPEN · ceremony 50 and dinner 50 ordinary bookable chairs, no fixed
+> Bride/Groom and no FAMILY-reserved seat · Sangkhathan PAIR for every ACTIVE invitation ·
+> Wedding Dinner authorised image set · DOCS upload disabled · the automatic Cloudflare
+> Workers Build as the current release path · local = Worker = GitHub Pages parity 61/61
+> proven · all final verification results accepted. No further review, audit, regression run,
+> redesign, deployment or code change belongs to this approval. **Future follow-ups only:**
+> possible INV-002 code rotation · DOCS privacy/storage architecture · Cloudflare
+> deployment-path clean-up.
+
 > **13 Sep 2026 · FINAL RUN COMPLETE. FINAL PRE-RELEASE GATE · PASS.** Read `FINAL-REPORT.md`.
 > Nothing from this run is outstanding. The Owner's final release approval stays ON HOLD by
 > instruction.

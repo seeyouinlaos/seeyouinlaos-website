@@ -1,5 +1,7 @@
 # Final automated pre-release test run — 11/12 September 2026
 
+**002 · RELEASED · ACCEPTED — Final Owner release approval 13 Sep 2026 at main `0029e12`** (guest-facing source `72d9e15`; parity 61/61). Future follow-ups only: INV-002 code rotation · DOCS privacy/storage architecture · Cloudflare deployment-path clean-up. See `HANDOFF.md`.
+
 Baseline: A–G accepted, Haruthai correction pass accepted (91c52ad). This run is the final quality gate before Owner release approval. **Run complete 13 Sep 2026 — FINAL PRE-RELEASE GATE · PASS** (`FINAL-REPORT.md`). Production: `main` at **`ce462d7`** (+ one docs-only acceptance commit) · Cloudflare Worker version **`854eba86-aee0-4b07-8f63-12b36cabd008`** · GitHub Pages built from **`ce462d7`** · **51/51** guest-facing files byte-identical (local = Worker = Pages, `parity-ce462d7.txt`). Final state: see `HANDOFF.md`. **Owner decisions applied 13 Sep 2026 at `7431761`, `0b8ff2d` and `72d9e15`** (seating OPEN, fifty bookable dinner chairs, nothing fixed for anyone, the couple as INV-001, Wedding Dinner image set, Sangkhathan PAIR for every active party): `docs/acceptance/2026-09-13-owner-decisions/README.md`; `smoke.mjs` asserts seating OPEN with 100 chairs and the Sangkhathan offer gated on attendance; `release-walk.mjs` is 78/78 (the party decides before sending).
 
 ## Harness (all in this directory)
