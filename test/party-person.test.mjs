@@ -418,8 +418,12 @@ test('readiness: the party cannot send while one personal acknowledgement is mis
   const w = page();
   const G = w.SIYL_GUEST, T = w.SIYL_TEMPLE, B = w.SIYL_BAG;
   G.setActive(PEGGY);
-  G.setPartyField('phone', '+49 170 0000000');
   B.put({ id: 'bkk-shama', name: 'Shama Yen-Akat', price: 300, qty: 1 });
+  decideAll(T, PEGGY); decideAll(T, STEFFIE); G.setDressAck(PEGGY, true); G.setActive(STEFFIE); G.setDressAck(STEFFIE, true); G.setActive(PEGGY);
+  assert.equal(G.readiness().ok, false, 'no contact yet');
+  deq(G.readiness().need.map((n) => n.key), ['you']);
+  G.setPartyField('phone', '+49 170 0000000');
+  G.setActive(STEFFIE); G.setDressAck(STEFFIE, false); G.setActive(PEGGY);
   decideAll(T, PEGGY); decideAll(T, STEFFIE);
   G.setDressAck(PEGGY, true);
   assert.equal(G.readiness().ok, false);

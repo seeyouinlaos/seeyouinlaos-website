@@ -1,6 +1,6 @@
 {
   "origin": "http://127.0.0.1:8787",
-  "at": "2026-09-12T07:54:16.416Z",
+  "at": "2026-09-12T13:31:54.675Z",
   "results": [
     {
       "id": "01 home fresh",
@@ -346,6 +346,26 @@
       "id": "11 steffie sees confirmed honestly",
       "ok": true,
       "detail": "a device that never sent shows no invented cards"
+    },
+    {
+      "id": "11b second device sends a later version",
+      "ok": true,
+      "detail": "2 registrations; server holds the latest stamp"
+    },
+    {
+      "id": "11b earlier device says a newer version exists",
+      "ok": true,
+      "detail": "received state on Peggy's device names the later send"
+    },
+    {
+      "id": "11b superseded snapshot never shown as confirmed",
+      "ok": true,
+      "detail": "Peggy's device shows the honest card, no block A, no cards"
+    },
+    {
+      "id": "11b latest sender sees the confirmed journey",
+      "ok": true,
+      "detail": "Steffie's device paints block A and both cards from the version Guest Relations holds"
     },
     {
       "id": "12 stale session",

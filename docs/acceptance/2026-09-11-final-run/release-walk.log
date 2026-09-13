@@ -67,10 +67,14 @@ PASS 11 shell says confirmed on a step — the bar on step 03 says the confirmed
 PASS 11 change after confirmation not shown as confirmed — the notice appears; the card still shows what was confirmed
 PASS 11 no ticket imitation — no QR, no barcode, no seat shown while seating is closed
 PASS 11 steffie sees confirmed honestly — a device that never sent shows no invented cards
+PASS 11b second device sends a later version — 2 registrations; server holds the latest stamp
+PASS 11b earlier device says a newer version exists — received state on Peggy's device names the later send
+PASS 11b superseded snapshot never shown as confirmed — Peggy's device shows the honest card, no block A, no cards
+PASS 11b latest sender sees the confirmed journey — Steffie's device paints block A and both cards from the version Guest Relations holds
 PASS 12 stale session — a session without names is not trusted; the guest is asked for the code again
 PASS 12 re-entry keeps record — answers survive re-entry
 PASS 13 review deep links — 19 edit links resolve while signed in
 PASS 13 wedding deep link for — subject via ?for=
 
-73/73 checks pass · page errors: 0 · console errors: 0
+77/77 checks pass · page errors: 0 · console errors: 0
 DONE

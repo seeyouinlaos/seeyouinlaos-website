@@ -474,3 +474,7 @@ body.p-drawer-open .p-drawer { transform: translateY(0); }
 
 /* a quiet saved confirmation */
 .p-saved { min-height: 20px; }
+
+/* F · once Guest Relations has confirmed, the draft sections on Review & Send are informational: no readiness card, no red 'action needed' */
+.journey-confirmed #ready { display: none; }
+.journey-confirmed .p-block .t-l1.open { color: var(--p-mute); }

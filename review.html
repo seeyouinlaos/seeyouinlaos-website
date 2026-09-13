@@ -11,8 +11,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 </style>
 <link rel="stylesheet" href="assets/aman.css"><link rel="stylesheet" href="assets/prep.css"></head><body>
 <header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="your-journey.html" aria-label="Your Journey"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
-<main class="prep-page">
-<div class="prep-page" id="review">
+<main class="prep-page" id="review">
 <div class="prep-head">
   <p class="t-l1" id="rv-own">Your journey · nothing is paid on this website</p>
   <h1 class="t-d1">Review &amp; Send</h1>
@@ -66,7 +65,6 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <div class="p-actions" style="display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;margin-top:var(--s4)"><button type="button" class="p-act quiet" id="again">Change my journey and send again</button><a class="p-link mute" href="journeys.html">Continue exploring</a></div>
 </div>
 <div id="foot"></div>
-</div>
 </main>
 <script src="assets/bag.js"></script>
 <script src="assets/shop-menu.js"></script>
@@ -315,11 +313,14 @@ function paintState(){
 var box=document.getElementById('journeystate'),C=window.SIYL_CONFIRM,G=window.SIYL_GUEST,T=window.SIYL_TEMPLE,J=window.SIYL_JOURNEY,Sx=window.SIYL_SEATS;
 if(!box||!C||!G||!G.party()){if(box)box.innerHTML='';return}
 var st=C.state(),p=G.party(),send=document.getElementById('sendbox');
+document.body.classList.toggle('journey-confirmed',st==='confirmed');
 if(st==='none'){box.innerHTML='';if(send)send.hidden=false;return}
 if(st==='received'){
   box.innerHTML='<div class="p-card"><p class="t-l1 on">Journey received</p><h2 class="t-h1">Guest Relations has your journey</h2>'+
     '<p class="t-b1 measure">Received on '+when(C.receivedAt())+'. A person will read it. Received is not confirmed: Guest Relations confirms every arrangement with you personally, and until then nothing in your journey is final. You can still change anything below and send it again.</p></div>';
-    var sn=sentSnapshot();if(sn&&sn.invitationId===p.invitationId&&fingerprint(snapshotNow())!==fingerprint(sn))box.innerHTML+='<div class="p-card" style="margin-top:var(--s3)"><p class="t-l1 open">Changed since you sent it</p><p class="t-b2 measure">Something has changed here since '+when(sn.at)+'. Send your journey again so Guest Relations has the newer version — the newer one replaces the earlier one.</p></div>';
+    var sn=sentSnapshot();
+  if(sn&&sn.invitationId===p.invitationId&&sn.at&&C.receivedAt()&&sn.at!==C.receivedAt())box.innerHTML+='<div class="p-card" style="margin-top:var(--s3)"><p class="t-l1 open">A newer version was sent from another device</p><p class="t-b2 measure">Guest Relations holds the journey sent on '+when(C.receivedAt())+' from another device, which replaced the one sent here on '+when(sn.at)+'. What you see below is this device\'s draft. Send again from here only if you want it to replace that newer version.</p></div>';
+  else if(sn&&sn.invitationId===p.invitationId&&fingerprint(snapshotNow())!==fingerprint(sn))box.innerHTML+='<div class="p-card" style="margin-top:var(--s3)"><p class="t-l1 open">Changed since you sent it</p><p class="t-b2 measure">Something has changed here since '+when(sn.at)+'. Send your journey again so Guest Relations has the newer version — the newer one replaces the earlier one.</p></div>';
 if(send)send.hidden=false;return}
 /* CONFIRMED · painted from the snapshot taken when the journey was SENT from
  * this device (siyl.sent). The live draft is never shown under a confirmed
@@ -327,9 +328,15 @@ if(send)send.hidden=false;return}
  * sent the journey, nothing is invented. */
 if(send)send.hidden=true;
 var snap=sentSnapshot();
-if(!snap||snap.invitationId!==p.invitationId){
+/* the snapshot counts only when it is the very version Guest Relations holds:
+ * the server keeps the submission stamp the client sent, and returns it as
+ * receivedAt — a later send from another device makes this one superseded */
+var current=!!(snap&&snap.invitationId===p.invitationId&&snap.at&&C.receivedAt()&&snap.at===C.receivedAt());
+if(!current){
+  var superseded=!!(snap&&snap.invitationId===p.invitationId);
   box.innerHTML='<div class="p-card"><p class="t-l1 on">Journey confirmed</p><h2 class="t-h1">Guest Relations has confirmed your journey</h2>'+
-    '<p class="t-b1 measure">Confirmed on '+when(C.confirmedAt())+'. The details Guest Relations confirmed were sent from another device, so they are not shown here. For a copy, or to change anything, write to <a href="mailto:guest.relation.seeyouinlaos@gmail.com?subject=Journey%20'+encodeURIComponent(p.invitationId)+'">Guest Relations</a>.</p></div>';
+    '<p class="t-b1 measure">Confirmed on '+when(C.confirmedAt())+'. The details Guest Relations confirmed were sent'+(superseded?' again':'')+' from another device'+(superseded?' after this one':'')+', so they are not shown here. For a copy, or to change anything, write to <a href="mailto:guest.relation.seeyouinlaos@gmail.com?subject=Journey%20'+encodeURIComponent(p.invitationId)+'">Guest Relations</a>.</p>'+
+    '<p class="t-b2 measure" style="margin-top:var(--s3)">The sections below show what this device holds — not what was confirmed.</p></div>';
   return}
 var changed=fingerprint(snapshotNow())!==fingerprint(snap);
 var shared=snap.shared||[];
@@ -372,7 +379,8 @@ function snapshotNow(){
     total:SIYL_BAG.total(),
     guests:p.guests.map(function(g){var id=g.guestId,row=op?op.guests.filter(function(r){return r.guestId===id})[0]:null,a=G.dressAck(id);
       return {guestId:id,name:G.nameOf(id),fullName:G.value(id,'fullName')||g.fullName,events:row?row.events:null,sangkhathan:!!(row&&row.sangkhathan),
-        dress:a?{at:a.at,by:a.by}:null,ceremonySeat:Sx&&Sx.ready()?Sx.seatOf('ceremony',id):null,dinnerSeat:Sx&&Sx.ready()?Sx.seatOf('dinner',id):null}})}}
+        dress:a?{at:a.at,by:a.by}:null,ceremonySeat:Sx&&Sx.ready()?Sx.seatOf('ceremony',id):null,dinnerSeat:Sx&&Sx.ready()?Sx.seatOf('dinner',id):null,
+        profile:(G.rec(id)||{}).profile||{},consent:(window.SIYL_DOCS&&SIYL_DOCS.consentDecided(id))?!!SIYL_DOCS.consent(id):null,documents:window.SIYL_DOCS?SIYL_DOCS.forGuest(id).map(function(d){return d.state}):[]}})}}
 function fingerprint(o){if(!o)return '';var c=JSON.parse(JSON.stringify(o));delete c.at;(c.guests||[]).forEach(function(g){delete g.ceremonySeat;delete g.dinnerSeat});return JSON.stringify(c)}
 function sentSnapshot(){try{return JSON.parse(localStorage.getItem('siyl.sent')||'null')}catch(e){return null}}
 function rememberSent(at){var o=snapshotNow();if(!o)return;o.at=at;try{localStorage.setItem('siyl.sent',JSON.stringify(o))}catch(e){}}
@@ -503,7 +511,7 @@ if(window.SIYL_CONFIRM)SIYL_CONFIRM.noteReceived(registration.registration_submi
 var d=document.getElementById('donebox');d.hidden=false;
 document.getElementById('donemsg').textContent=hold.unreachable
  ? 'Your journey has been received. The room ledger could not be reached, so no room is held yet — Guest Relations checks availability and comes back to you personally. Nothing is paid on this website.'
- : 'Your journey has been received and your rooms are held in your name while Guest Relations works through it. Holding a room is not the same as a confirmed booking — that comes from Guest Relations, personally. Nothing is paid on this website.';
+ : 'Your journey has been received, and your rooms are held in your name while Guest Relations works through it. A held room is not yet confirmed — Guest Relations confirms each arrangement with you personally. Nothing is paid on this website.';
 d.scrollIntoView({behavior:'smooth',block:'center'});
 var ag=document.getElementById('again');
 if(ag&&!ag.dataset.wired){ag.dataset.wired='1';
