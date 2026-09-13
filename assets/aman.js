@@ -34,7 +34,8 @@
       ['Bangkok', 'experiences.html#bkk'],
       ['Vientiane', 'experiences.html#laos'],
       ['Kunming &amp; Lijiang', 'experiences.html#china'],
-      ['1872 · Champagne Afternoon Tea', '1872.html']
+      ['1872 · Champagne Afternoon Tea', '1872.html'],
+      ['Sühring · Lunch in Bangkok', 'experience.html?id=bkk-suhring']
     ]],
     ['Wellness', 'marsilea.html', null],
     ['The Wedding', 'voyage.html', [

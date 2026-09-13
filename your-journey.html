@@ -71,6 +71,7 @@ document.addEventListener('siyl:invite-ready',ownerLabels);document.addEventList
 function detailHref(x){
 if(x.stay&&x.room)return 'room.html?stay='+x.stay+'&room='+x.room;
 if(x.id==='1872')return '1872.html';
+if(x.exp)return 'experience.html?id='+encodeURIComponent(x.exp);
 if(x.interest&&x.id!=='airbnb-2br')return 'marsilea.html';
 if(window.SIYL_TRANSPORT&&window.SIYL_TRANSPORT[x.id])return 'transport.html?id='+x.id;
 var at=P&&P.locate(x.id);
@@ -245,7 +246,7 @@ function extraLine(x){
     (m.basis?'<p class="t-b2">'+esc(m.basis)+'</p>':'')+
     (exp?'<div class="p-qty"><button type="button" class="p-sel" data-q="'+x.id+':-1" aria-label="One fewer">&minus;</button><b>'+q+'</b><button type="button" class="p-sel" data-q="'+x.id+':1" aria-label="One more">+</button></div>':'')+
     '<div class="p-actions"><button type="button" class="p-link mute" data-rm="'+(P?P.windowOf(x.id):x.id)+'">Remove</button></div></div>'+
-    (x.interest?'<p class="p-line-amt"><span class="t-l1">Interest · request</span></p>':'<p class="p-line-amt">'+money((x.price||0)*q)+'</p>')+'</div>'}
+    (x.interest?'<p class="p-line-amt"><span class="t-l1">Interest · request</span></p>':x.request?'<p class="p-line-amt"><span class="t-l1">Request · '+esc(x.priceNote||'')+'</span></p>':'<p class="p-line-amt">'+money((x.price||0)*q)+'</p>')+'</div>'}
 
 function render(){
   var b=SIYL_BAG.get(),box=document.getElementById('chrono'),h='';

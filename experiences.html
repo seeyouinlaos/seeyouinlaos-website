@@ -7,6 +7,24 @@
 <title>Experiences · See You In Laos</title>
 <link rel="stylesheet" href="assets/recon.css">
 <link rel="stylesheet" href="assets/aman.css">
+<style>
+/* category rails inside a city: one heading for the city, one quiet eyebrow per rail */
+.x-city { padding: 0 var(--a-gut); margin-bottom: 8px; }
+.x-city h2 { font-family: 'PP Editorial Old', Georgia, serif; font-weight: 200; font-size: 26px; line-height: 1.25; margin: 0; }
+.x-city p:not(.a-eyebrow) { font-size: 13px; line-height: 1.8; color: #4A4A4A; max-width: 30em; margin-top: 12px; }
+.x-city .a-eyebrow { margin-bottom: 12px; }
+.x-rail { margin-top: 44px; }
+.x-rail .x-rail-h { margin-bottom: 16px; }
+.x-rail .x-rail-h h3 { margin: 0; }
+.aslide .am.x-noimg { display: flex; align-items: flex-end; padding: 18px; background: #E7E3DB; }
+.aslide .am.x-noimg span { font-family: 'PP Editorial Old', Georgia, serif; font-weight: 200; font-size: 22px; line-height: 1.25; color: var(--a-ink); }
+@media (min-width: 900px) {
+  .x-city { max-width: 1180px; margin: 0 auto 8px; }
+  .x-city h2 { font-size: 32px; }
+  .x-rail { margin-top: 56px; }
+}
+@media (min-width: 1600px) { .x-city { max-width: 1280px; } }
+</style>
 </head>
 <body>
 <main>
@@ -23,38 +41,27 @@
     <div>
       <p class="a-eyebrow">Thailand · Laos · China</p>
       <h2>Everything we found worth going out of the way for.</h2>
-      <p>Temples, tables, cafés and one afternoon of cherry blossom — the places we would take you ourselves. Nothing here is booked and nothing here is charged: it is the shape of the free hours around the journey.</p>
+      <p>Temples, tables, cafés and one afternoon of cherry blossom — the places we would take you ourselves. Nothing here is booked and nothing here is charged: it is the shape of the free hours around the journey. One table, Sühring, can be asked for through your journey.</p>
     </div>
   </section>
 
-  <section class="a-sec acar" id="bkk" aria-label="Experiences in Bangkok">
-    <div class="a-head">
-      <p class="a-eyebrow">01 · Thailand</p>
-      <h2>Bangkok</h2>
-      <p>22 – 24 February 2027 · the city days before the train.</p>
-    </div>
-    <div class="atrk" data-exp="bkk"></div>
-    <div class="arow">
-      <div class="arail" aria-hidden="true"><i></i></div>
-      <div class="anav"><button type="button" data-a="prev" aria-label="Previous"></button><button type="button" data-a="next" aria-label="Next"></button></div>
-    </div>
+  <section class="a-sec" id="bkk" aria-label="Experiences in Bangkok">
+    <div class="a-head x-city"><p class="a-eyebrow">01 · Thailand</p><h2>Bangkok</h2><p>22 – 24 February 2027 · the city days before the train. Restaurants, cafés, one exhibition, one museum, the malls and the bars — as the hosts planned them, day by day.</p></div>
+    <div data-rails="bkk"></div>
+  </section>
+
+  <section class="a-sec" id="bkk-return" aria-label="Experiences in Bangkok on the return">
+    <div class="a-head x-city"><p class="a-eyebrow">01 · Thailand · the return</p><h2>Bangkok, 6 – 8 March</h2><p>Two last days at the Siam Kempinski before the flight home.</p></div>
+    <div data-rails="bkk-return"></div>
   </section>
 
   <section class="a-sec tight">
     <div class="a-band" style="background-image:url(assets/images/city/002-vientiane-lane-xang.jpg)" role="img" aria-label="Lane Xang Avenue, Vientiane"></div>
   </section>
 
-  <section class="a-sec acar" id="laos" aria-label="Experiences in Vientiane">
-    <div class="a-head">
-      <p class="a-eyebrow">02 · Laos</p>
-      <h2>Vientiane</h2>
-      <p>Gold and sacred, city and architecture, the Mekong in the evening.</p>
-    </div>
-    <div class="atrk" data-exp="laos"></div>
-    <div class="arow">
-      <div class="arail" aria-hidden="true"><i></i></div>
-      <div class="anav"><button type="button" data-a="prev" aria-label="Previous"></button><button type="button" data-a="next" aria-label="Next"></button></div>
-    </div>
+  <section class="a-sec" id="laos" aria-label="Experiences in Vientiane">
+    <div class="a-head x-city"><p class="a-eyebrow">02 · Laos</p><h2>Vientiane</h2><p>Gold and sacred, city and architecture, the Mekong in the evening — and the tables, cafés and bars of the days around the wedding.</p></div>
+    <div data-rails="laos"></div>
   </section>
 
   <section class="a-sec a-pair" id="china">
@@ -72,7 +79,7 @@
     <div class="ac">
       <p class="a-eyebrow">Gift Experience · Bangkok</p>
       <h2>Champagne Afternoon Tea at 1872</h2>
-      <p>One table, two guests, an afternoon that belongs to no schedule. The only experience on this journey you can add to your Journey Bag.</p>
+      <p>One table, two guests, an afternoon that belongs to no schedule. One of the two experiences on this journey you can add to your Journey Bag — the other is a table at Sühring.</p>
       <a class="a-link" href="1872.html">Discover 1872</a>
     </div>
   </section>
@@ -96,19 +103,52 @@
 
 </main>
 <script src="assets/experiences.js"></script>
+<script src="assets/experience-galleries.js"></script>
 <script>
-/* the experience rails come from the owner's canonical dataset — only entries
-   that carry a verified photograph are shown, and nothing here is for sale. */
+/* the discovery rails come from the owner's canonical dataset, one rail per
+   role of the Operations Master (lunch and dinner tables, cafés, experiences,
+   shopping and places, bars). Every card opens the place's own page with its
+   photographs; a card says how many there are. Nothing here is for sale. */
 (function () {
-  document.querySelectorAll('.atrk[data-exp]').forEach(function (trk) {
-    var c = trk.getAttribute('data-exp');
-    var list = (window.SIYL_EXP || []).filter(function (x) { return x.chapter === c && x.img; }).slice(0, 8);
-    trk.innerHTML = list.map(function (x) {
-      return '<article class="aslide">' +
-        '<div class="am" style="background-image:url(' + x.img + ')" role="img" aria-label="' +
-          x.name.replace(/"/g, '&quot;') + ', ' + x.where.replace(/"/g, '&quot;') + '"></div>' +
-        '<div class="ac"><p class="an">' + x.where + '</p><h3>' + x.name + '</h3>' +
-        '<p>' + (x.teaser || '') + '</p></div></article>';
+  var RAILS = [
+    ['Restaurants', ['breakfast', 'lunch', 'dinner']],
+    ['Cafés', ['cafe']],
+    ['Experiences', ['experience']],
+    ['Shopping & places', ['place']],
+    ['Bars', ['bar']]
+  ];
+  var LABEL = { breakfast: 'Breakfast', lunch: 'Lunch', dinner: 'Dinner', cafe: 'Café', experience: 'Experience', place: 'Shopping & places', bar: 'Bar' };
+  function esc(t) { return String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
+  function count(x) { var g = window.SIYL_EXP_GALLERY && SIYL_EXP_GALLERY[x.id]; return g ? g.images.length : (x.img ? 1 : 0); }
+  function card(x) {
+    var n = count(x), href = 'experience.html?id=' + encodeURIComponent(x.id);
+    var roles = (x.roles || []).map(function (r) { return LABEL[r] || r; }).join(' · ');
+    return '<article class="aslide" data-exp-id="' + esc(x.id) + '">' +
+      (x.img
+        ? '<a class="am" href="' + href + '" style="background-image:url(' + esc(x.img) + ')" role="img" aria-label="' + esc(x.name) + ', ' + esc(x.where) + (n > 1 ? ' — ' + n + ' photographs' : '') + '"></a>'
+        : '<a class="am x-noimg" href="' + href + '" aria-label="' + esc(x.name) + ', ' + esc(x.where) + '"><span>' + esc(x.name) + '</span></a>') +
+      '<div class="ac"><p class="an">' + esc(x.where) + (roles ? ' · ' + esc(roles) : '') + '</p><h3>' + esc(x.name) + '</h3>' +
+      '<p>' + esc(x.teaser || '') + '</p>' +
+      '<a class="a-more" href="' + href + '">' + (n > 1 ? n + ' photographs · Discover' : 'Discover') + '</a></div></article>';
+  }
+  function rail(title, list, key) {
+    return '<section class="acar x-rail" aria-label="' + esc(title) + '" data-rail="' + esc(key) + '">' +
+      '<div class="a-head x-rail-h"><h3 class="a-eyebrow">' + esc(title) + ' · ' + list.length + '</h3></div>' +
+      '<div class="atrk">' + list.map(card).join('') + '</div>' +
+      '<div class="arow"><div class="arail" aria-hidden="true"><i></i></div>' +
+      '<div class="anav"><button type="button" data-a="prev" aria-label="Previous"></button><button type="button" data-a="next" aria-label="Next"></button></div></div></section>';
+  }
+  document.querySelectorAll('[data-rails]').forEach(function (box) {
+    var key = box.getAttribute('data-rails'), all = (window.SIYL_EXP || []).filter(function (x) {
+      if (key === 'bkk') return x.chapter === 'bkk' && x.leg !== 'return';
+      if (key === 'bkk-return') return x.chapter === 'bkk' && x.leg === 'return';
+      return x.chapter === key;
+    });
+    var seen = {};
+    box.innerHTML = RAILS.map(function (r) {
+      var list = all.filter(function (x) { return (x.roles || []).some(function (k) { return r[1].indexOf(k) >= 0; }); });
+      if (!list.length) return '';
+      return rail(r[0], list, key + ':' + r[1][0]);
     }).join('');
   });
 })();

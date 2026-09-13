@@ -1,0 +1,76 @@
+# EXPERIENCE CONTENT — canonical inventory (13 Sep 2026)
+
+Reconciliation of the three sources for every Experience / Restaurant / Café / Bar /
+Mall / Place on the website: the Operations Master (`H&S_Wedding_Operations_Master`,
+sheets `Overview_Hotel_Restaurant` and `Experience, Restaurant, Cafe_Details`, read at
+cell level through the xlsx export, hyperlinks included), the numbered Drive venue
+folders (listed and every retrievable file opened on this machine), and the shipped
+dataset (`assets/experiences.js` + `assets/experience-galleries.js`, generated from
+`src/experience-galleries.json`). The machine-readable form of this table is
+`src/experience-inventory.json`; `test/experiences.test.mjs` fails when the website
+drifts from it.
+
+**Detail sheet status.** `Experience, Restaurant, Cafe_Details` holds ONE populated
+record: Sühring (FULL). Every other place is name + day + role from
+`Overview_Hotel_Restaurant` plus its Drive photographs (NONE) — the website shows only
+that, and never a description, price, opening hours, address or map the source does not
+carry. Vientiane's sights come from the Owner's Vientiane city portrait (`row: city`).
+
+**Discovery vs selectable.** Selectable = offered through the Journey selection. By
+Owner decision that is Sühring alone (plus the two pre-existing offers, the 1872
+Champagne Afternoon Tea and the Sangkhathan, which are not Experience places). The
+presence of a place in the Overview does not make it selectable; every other place is
+DISCOVERY.
+
+| Entity | City | Category (Overview column) | Overview source | Detail sheet | Drive folder | Source images | Images used | Discovery / Selectable | Price source | Opening-hours source | Map source | Missing source fields / notes |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Curvy.Dining (`bkk-curvy`) | Bangkok | Lunch / Brunch | Day 02 · 22.02.2027 | NONE | 121 - Cafe - Curvy.Dining Bangkok | 11 | 6 | DISCOVERY | — | — | — | no description / price / hours / address in the sheet; IMG_3513 is a 447 px thumbnail, excluded |
+| Sühring (`bkk-suhring`) | Bangkok | Lunch / Brunch | Experience, Restaurant, Cafe_Details · Suhring | FULL | 090 - Restaurant - Suhring | 13 | 9 | SELECTABLE (request) | Details sheet: USD 180 (unit not stated) | Details sheet (verbatim) | Details sheet | — |
+| Dior · Café LV (`bkk-diorlv`) | Bangkok | Cafe | Day 02 · 22.02.2027 | NONE | 122 - Cafe - Dior Bangkok + 124 - Cafe - LV Cafe Bangkok | 29 | 10 | DISCOVERY | — | — | — | no description / price / hours / address in the sheet; one card for two houses; two Dior WebP under 35 KB and two duplicate 619×825 copies excluded |
+| Louis Vuitton Visionary Journeys (`bkk-lvvisionary`) | Bangkok | Experience | Day 02 · 22.02.2027 | NONE | 172 - Experience - Louis Vuitton Visionary Journeys Bangkok | 16 | 8 | DISCOVERY | — | — | — | no description / price / hours / address in the sheet |
+| ICONSIAM (`bkk-iconsiam`) | Bangkok | Mall / Park / Other | Day 02 · 22.02.2027 | NONE | 222 - Mall - ICONSIAM Bangkok | 7 | 6 | DISCOVERY | — | — | — | no description / price / hours / address in the sheet; IMG_3496 (dusk aerial) not used — the night aerial was rejected on 05 Sep; one Google Doc "ICONSIAM" not used |
+| Phra Nakhon (`bkk-phranakorn`) | Bangkok | Dinner | Day 02 · 22.02.2027 | NONE | 081 - Restaurant - Phra Nakhon Bangkok + 088 - Restaurant - Phra Nakhon | 16 | 8 | DISCOVERY | — | — | — | no description / price / hours / address in the sheet; two folders for one place; IMG_3549 carries a Michelin badge overlay, excluded; one Google Doc "Phra Nakhon" in 081 not used |
+| BKK Social Club (`bkk-socialclub`) | Bangkok | Bar | Day 02 · 22.02.2027 | NONE | 150 - Bar - BKK Social Club Bangkok | 6 | 5 | DISCOVERY | — | — | — | no description / price / hours / address in the sheet |
+| Time Space Cafe (`bkk-timespace`) | Bangkok | Lunch / Brunch · Cafe | Day 03 · 23.02.2027 | NONE | 126 - Cafe - Time Space Cafe Bangkok | 13 | 7 | DISCOVERY | — | — | — | no description / price / hours / address in the sheet; three 7–8 MB files could not be fetched through the Drive connector (session expired twice) — not opened |
+| Moo Yoo Rose House (`bkk-mooyoo`) | Bangkok | Lunch / Brunch | Day 03 · 23.02.2027 | NONE | 125 - Cafe - Moo Yoo Rose House Bangkok | 11 | 6 | DISCOVERY | — | — | — | no description / price / hours / address in the sheet |
+| Whispering Cafe (`bkk-whispering`) | Sam Phran · Nakhon Pathom | Cafe | Day 03 · 23.02.2027 | NONE | 127 - Cafe - Whispering Cafe Bangkok | 7 | 5 | DISCOVERY | — | — | — | no description / price / hours / address in the sheet; five files are 670×1006 web copies |
+| Dib Bangkok (`bkk-dib`) | Bangkok | Experience | Day 03 · 23.02.2027 | NONE | 170 - Experience - Dib Bangkok | 19 | 8 | DISCOVERY | — | — | — | no description / price / hours / address in the sheet; 10 of the 19 files (001–010_Couple_Monk.jpeg) are the couple's alms-giving series, not Dib — misfiled, excluded |
+| EmQuartier (`bkk-emquartier`) | Bangkok | Mall / Park / Other | Day 03 · 23.02.2027 | NONE | 221 - Mall - EmQuartier Bangkok | 7 | 6 | DISCOVERY | — | — | — | no description / price / hours / address in the sheet |
+| The Commons Thonglor (`bkk-commons`) | Bangkok | Mall / Park / Other · Dinner | Day 03 · 23.02.2027 | NONE | 082 - Restaurant - The Commons Thonglor Bangkok | 10 | 5 | DISCOVERY | — | — | — | no description / price / hours / address in the sheet; nine of ten files are 630 px WebP |
+| Bar Us (`bkk-barus`) | Bangkok | Bar | Day 03 · 23.02.2027 | NONE | Bar BKK/Bar Us (earlier Drive path; no numbered folder) | 1 | 1 | DISCOVERY | — | — | dataset (Owner link) | no description / price / hours / address in the sheet; single Instagram frame, 05 Sep 2026 |
+| IGNIV (`bkk-igniv`) | Bangkok | Dinner · Bar | Day 03 · 23.02.2027 | NONE | 087 - Restaurant - IGNIV | 17 | 8 | DISCOVERY | — | — | dataset (Owner link) | no description / price / hours / address in the sheet; IMG_3605 (Michelin plaque) excluded |
+| Thong Smith (`bkk-thongsmith`) | Bangkok | Lunch / Brunch | Day 04 · 24.02.2027 | NONE | 083 - Restaurant - Thong Smith Bangkok + 089 - Restaurant - Thong Smith | 12 | 7 | DISCOVERY | — | — | — | no description / price / hours / address in the sheet; 4 AI renders in 083 (3 "Codex Image", 1 uuid png) excluded by the image rule; takeaway-bag WebP is the MASTER jpg twice |
+| Let's Relax (`bkk-letsrelax`) | Bangkok | Experience | Day 04 · 24.02.2027 | NONE | 171 - Experience - Lets Relax Bangkok | 6 | 5 | DISCOVERY | — | — | — | no description / price / hours / address in the sheet |
+| Dusit Central Park (`bkk-dusit`) | Bangkok | Mall / Park / Other | Day 04 · 24.02.2027 | NONE | 220 - Mall - Dusit Central Park Bangkok | 6 | 5 | DISCOVERY | — | — | — | no description / price / hours / address in the sheet; IMG_3625 (600×800 png) excluded |
+| Cafe Madeleine (`bkk-madeleine`) | Four Seasons Hotel Bangkok | Cafe | Day 04 · 24.02.2027 | NONE | 120 - Cafe - Cafe Madeleine Bangkok | 6 | 6 | DISCOVERY | — | — | — | no description / price / hours / address in the sheet |
+| Tang Jai Yang (`bkk-tangjaiyang`) | Bangkok | Dinner | Day 04 · 24.02.2027 | NONE | 090 - Restaurant - Tang Jai Yang | 5 | 4 | DISCOVERY | — | — | dataset (Owner link) | no description / price / hours / address in the sheet; folder number 090 is used twice in Drive (Suhring, Tang Jai Yang) |
+| Harudot (`bkk-harudot`) | Bangkok | Mall / Park / Other | Day 14 · 06.03.2027 | NONE | 123 - Cafe - Harudot Bangkok | 5 | 5 | DISCOVERY | — | — | — | no description / price / hours / address in the sheet; new on the website (Overview Day 14 · Mall / Park / Other) |
+| ALATi (`bkk-alati`) | Siam Kempinski Hotel Bangkok | Lunch / Brunch | Day 15 · 07.03.2027 | NONE | 080 - Restaurant - ALATi Kempinski Bangkok | 7 | 5 | DISCOVERY | — | — | — | no description / price / hours / address in the sheet; new on the website (Overview Day 15 lunch) |
+| Pha That Luang (`vte-thatluang`) | Vientiane | Experience | Day 05 · 25.02.2027 | NONE | 002 - City - Vientiane (city portrait) | 1 | 1 | DISCOVERY | — | — | dataset (Owner link) | no description / price / hours / address in the sheet |
+| Patuxai (`vte-patuxai`) | Vientiane | Experience | city | NONE | 002 - City - Vientiane (city portrait) | 2 | 2 | DISCOVERY | — | — | — | no description / price / hours / address in the sheet; city portrait set, curated 05 Sep 2026 |
+| Vientiane Night Market (`vte-nightmarket`) | Vientiane | Experience · Mall / Park / Other | Day 06 · 26.02.2027 | NONE | 002 - City - Vientiane (city portrait) | 2 | 2 | DISCOVERY | — | — | dataset (Owner link) | no description / price / hours / address in the sheet; city portrait set, curated 05 Sep 2026 |
+| Wat Si Saket (`vte-sisaket`) | Vientiane | Experience | city | NONE | 002 - City - Vientiane (city portrait) | 1 | 1 | DISCOVERY | — | — | — | no description / price / hours / address in the sheet |
+| Wat Si Muang (`vte-simuang`) | Vientiane | Experience | city | NONE | 002 - City - Vientiane (city portrait) | 1 | 1 | DISCOVERY | — | — | — | no description / price / hours / address in the sheet |
+| Ha Phrakeo Museum (`vte-haphrakeo`) | Vientiane | Experience | city | NONE | 002 - City - Vientiane (city portrait) | 1 | 1 | DISCOVERY | — | — | — | no description / price / hours / address in the sheet |
+| Presidential Palace (`vte-palace`) | Vientiane | Experience | city | NONE | 002 - City - Vientiane (city portrait) | 1 | 1 | DISCOVERY | — | — | — | no description / price / hours / address in the sheet |
+| That Dam (`vte-thatdam`) | Vientiane | Experience | city | NONE | 002 - City - Vientiane (city portrait) | 1 | 1 | DISCOVERY | — | — | — | no description / price / hours / address in the sheet |
+| Buddha Park (`vte-buddhapark`) | Xieng Khuan · Vientiane | Experience | city | NONE | 002 - City - Vientiane (city portrait) | 1 | 1 | DISCOVERY | — | — | — | no description / price / hours / address in the sheet |
+| PVO Vietnamese Food (`vte-pvo`) | Vientiane | Breakfast | Day 05 · 25.02.2027 | NONE | — no Drive folder | 0 | 0 | DISCOVERY | — | — | dataset (Owner link) | no description / price / hours / address in the sheet; no Drive folder, no photograph; name + day from the Overview only |
+| River Moon (`vte-rivermoon`) | Vientiane | Lunch / Brunch | Day 05 · 25.02.2027 | NONE | 086 - Restaurant - River Moon Vientiane | 11 | 6 | DISCOVERY | — | — | dataset (Owner link) | no description / price / hours / address in the sheet; venue watermark "River Moon" on every frame |
+| Parkson Supermarket Laos (`vte-parkson`) | Vientiane | Mall / Park / Other | Day 05 · 25.02.2027 | NONE | — no Drive folder | 0 | 0 | DISCOVERY | — | — | dataset (Owner link) | no description / price / hours / address in the sheet; no Drive folder, no photograph; name + day from the Overview only |
+| 3 Merchants Restaurant (`vte-3merchants`) | Vientiane | Dinner | Day 05 · 25.02.2027 | NONE | 084 - Restaurant - 3 Merchants Vientiane | 6 | 5 | DISCOVERY | — | — | dataset (Owner link) | no description / price / hours / address in the sheet |
+| Sona Cafe and Bar (`vte-sona`) | Vientiane | Cafe · Bar | Day 05 · 25.02.2027 | NONE | 151 - Bar - Sona Cafe and Bar Vientiane | 6 | 5 | DISCOVERY | — | — | dataset (Owner link) | no description / price / hours / address in the sheet |
+| Khop Chai Deu (`vte-khopchaideu`) | Vientiane | Lunch / Brunch | Day 06 · 26.02.2027 | NONE | — no Drive folder | 0 | 0 | DISCOVERY | — | — | dataset (Owner link) | no description / price / hours / address in the sheet; no Drive folder, no photograph; name + day from the Overview only |
+| Kaogee Le Triomphe (`vte-kaogee`) | Vientiane | Lunch / Brunch · Cafe | Day 06 · 26.02.2027 | NONE | 128 - Cafe - Kaogee Le Triomphe Vientiane | 6 | 5 | DISCOVERY | — | — | — | no description / price / hours / address in the sheet |
+| Lacuna VTE (`vte-lacuna`) | Vientiane | Cafe · Bar | Day 06 · 26.02.2027 | NONE | 129 - Cafe - Lacuna VTE Vientiane | 7 | 6 | DISCOVERY | — | — | dataset (Owner link) | no description / price / hours / address in the sheet |
+| KokKok Mega Mall Patuxay (`vte-kokkok`) | Vientiane | Mall / Park / Other | Day 06 · 26.02.2027 | NONE | 223 - Mall - KokKok Mega Mall Vientiane | 13 | 5 | DISCOVERY | — | — | dataset (Owner link) | no description / price / hours / address in the sheet; phone originals 2.7–5.9 MB |
+| Le Padaek (`vte-lepadaek`) | Vientiane | Dinner | Day 06 · 26.02.2027 | NONE | — no Drive folder | 0 | 0 | DISCOVERY | — | — | dataset (Owner link) | no description / price / hours / address in the sheet; no Drive folder, no photograph; name + day from the Overview only |
+| Lao Derm (`vte-laoderm`) | Vientiane | Dinner | Day 06 · 26.02.2027 · Day 07 Welcome Dinner | NONE | 085 - Restaurant - Lao Derm Vientiane | 21 | 8 | DISCOVERY | — | — | dataset (Owner link) | no description / price / hours / address in the sheet; also the Welcome Dinner venue (Overview Day 07); promotional captioned frames excluded |
+| Kunming Cherry Blossoms (`cn-blossom`) | Kunming · Yunnan | Experience | Day 09 – 10 · 01.–02.03.2027 | NONE | 003 - City - Kunming | 3 | 3 | DISCOVERY | — | — | — | no description / price / hours / address in the sheet; curated Sep 2026 |
+
+## Places in the Overview with no website entity (no Drive folder → nothing to show honestly)
+Molly's Vientiane (Day 05 breakfast) · Cam On Restaurant (Day 06 dinner) · Café Craft by CHANINTR, Siam Paragon, Petits Plats, Firefly Bar (Day 15) · Bangkok Experience / Dining / Bar (TBD) (Day 14) · every Kunming / Lijiang "(TBD)" cell and the Yuantongshan / Cuihu / Guandu / Baisha / Dayan names (Day 09 – 13) · hotel-internal items (Souphattra Pool Bar, Coffee & Cake, Kempinski Executive Lounge, train dining lounge, in-flight). They stay off the website until a photograph or a record exists — nothing invented.
+
+## Drive folders inspected (31) and what was excluded
+- 080 ALATi (8 files: 7 images + .DS_Store) · 081 + 088 Phra Nakhon (6 + 10; one Google Doc) · 082 The Commons (10) · 083 + 089 Thong Smith (12 images + 4 AI renders excluded) · 084 3 Merchants (6) · 085 Lao Derm (21) · 086 River Moon (11) · 087 IGNIV (17) · 090 Suhring (13) · 090 Tang Jai Yang (5) — **folder number 090 is used twice** · 120 Madeleine (6) · 121 Curvy (11) · 122 Dior (15) · 123 Harudot (5) · 124 LV Cafe (14) · 125 Moo Yoo (11) · 126 Time Space (13; three 7–8 MB files not retrievable through the connector) · 127 Whispering (7) · 128 Kaogee (6) · 129 Lacuna (7) · 150 BKK Social Club (6) · 151 Sona (6) · 170 Dib (19: 9 Dib + **10 misfiled `Couple_Monk` frames of the couple's alms-giving, excluded**) · 171 Let's Relax (6) · 172 LV Visionary Journeys (16) · 173 Spa (Marsilea — its own surface, not an Experience place) · 220 Dusit Central Park (6) · 221 EmQuartier (7) · 222 ICONSIAM (7 + one Google Doc) · 223 KokKok (13).
+- Opened: 302 files on this machine + 1 read inline (Curvy IMG_3513, 447 px) · not opened: 3 (Time Space, 7–8 MB each — the Drive connector's session expired on each attempt) · 4 renders and 2 sub-35 KB Dior thumbnails and 2 duplicate Dior copies and 1 duplicate Thong Smith bag WebP and 1 Michelin-badged Phra Nakhon frame and 1 Michelin-plaque IGNIV frame and 1 ICONSIAM dusk aerial (05 Sep rejection) and the 10 misfiled Dib frames were opened and deliberately not used.

@@ -1,0 +1,1253 @@
+[
+ {
+  "id": "bkk-curvy",
+  "name": "Curvy.Dining",
+  "city": "Bangkok",
+  "roles": [
+   "lunch"
+  ],
+  "overview": "Day 02 · 22.02.2027",
+  "sheet": "NONE",
+  "selectable": false,
+  "drive": "121 - Cafe - Curvy.Dining Bangkok",
+  "driveIds": [
+   "1oQAeRiFztpIdGM5ln0i5rhnYAmps4jnR"
+  ],
+  "sourceImages": 11,
+  "used": 6,
+  "primary": "assets/images/experiences/bkk-curvy-01.jpg",
+  "gallery": [
+   "assets/images/experiences/bkk-curvy-01.jpg",
+   "assets/images/experiences/bkk-curvy-02.jpg",
+   "assets/images/experiences/bkk-curvy-03.jpg",
+   "assets/images/experiences/bkk-curvy-04.jpg",
+   "assets/images/experiences/bkk-curvy-05.jpg",
+   "assets/images/experiences/bkk-curvy-06.jpg"
+  ],
+  "note": "IMG_3513 is a 447 px thumbnail, excluded",
+  "price": null,
+  "hours": null,
+  "maps": null,
+  "link": null
+ },
+ {
+  "id": "bkk-suhring",
+  "name": "Sühring",
+  "city": "Bangkok",
+  "roles": [
+   "lunch"
+  ],
+  "overview": "Experience, Restaurant, Cafe_Details · Suhring",
+  "sheet": "FULL",
+  "selectable": true,
+  "drive": "090 - Restaurant - Suhring",
+  "driveIds": [
+   "12BzWDhI4pN5reUWdsgbgMiD4tCWp5I4N"
+  ],
+  "sourceImages": 13,
+  "used": 9,
+  "primary": "assets/images/experiences/bkk-suhring-01.jpg",
+  "gallery": [
+   "assets/images/experiences/bkk-suhring-01.jpg",
+   "assets/images/experiences/bkk-suhring-02.jpg",
+   "assets/images/experiences/bkk-suhring-03.jpg",
+   "assets/images/experiences/bkk-suhring-04.jpg",
+   "assets/images/experiences/bkk-suhring-05.jpg",
+   "assets/images/experiences/bkk-suhring-06.jpg",
+   "assets/images/experiences/bkk-suhring-07.jpg",
+   "assets/images/experiences/bkk-suhring-08.jpg",
+   "assets/images/experiences/bkk-suhring-09.jpg"
+  ],
+  "note": "",
+  "price": "USD 180",
+  "hours": [
+   "Lunch",
+   "Thursday to Sunday",
+   "12:30 pm to 13:00 pm (last seating)",
+   "Closed on Monday and Tuesday"
+  ],
+  "maps": "https://maps.app.goo.gl/2b4whggW3YCnxN6u5?g_st=ic",
+  "link": "https://www.restaurantsuhring.com/menu.html"
+ },
+ {
+  "id": "bkk-diorlv",
+  "name": "Dior · Café LV",
+  "city": "Bangkok",
+  "roles": [
+   "cafe"
+  ],
+  "overview": "Day 02 · 22.02.2027",
+  "sheet": "NONE",
+  "selectable": false,
+  "drive": "122 - Cafe - Dior Bangkok + 124 - Cafe - LV Cafe Bangkok",
+  "driveIds": [
+   "1T8LtqEK358_5mdEC-y_Uu5HnZ8Jnyv4h",
+   "1oBn04Bq8QBQglAzOrtKFtxRtD_AYzweS"
+  ],
+  "sourceImages": 29,
+  "used": 10,
+  "primary": "assets/images/experiences/bkk-dior-01.jpg",
+  "gallery": [
+   "assets/images/experiences/bkk-dior-01.jpg",
+   "assets/images/experiences/bkk-dior-02.jpg",
+   "assets/images/experiences/bkk-dior-03.jpg",
+   "assets/images/experiences/bkk-dior-04.jpg",
+   "assets/images/experiences/bkk-dior-05.jpg",
+   "assets/images/experiences/bkk-dior-06.jpg",
+   "assets/images/experiences/bkk-dior-07.jpg",
+   "assets/images/experiences/bkk-dior-08.jpg",
+   "assets/images/experiences/bkk-dior-09.jpg",
+   "assets/images/experiences/bkk-dior-10.jpg"
+  ],
+  "note": "one card for two houses; two Dior WebP under 35 KB and two duplicate 619×825 copies excluded",
+  "price": null,
+  "hours": null,
+  "maps": null,
+  "link": null
+ },
+ {
+  "id": "bkk-lvvisionary",
+  "name": "Louis Vuitton Visionary Journeys",
+  "city": "Bangkok",
+  "roles": [
+   "experience"
+  ],
+  "overview": "Day 02 · 22.02.2027",
+  "sheet": "NONE",
+  "selectable": false,
+  "drive": "172 - Experience - Louis Vuitton Visionary Journeys Bangkok",
+  "driveIds": [
+   "1QKzxVzIPllXkUivIL6yWin-fDKehwEbd"
+  ],
+  "sourceImages": 16,
+  "used": 8,
+  "primary": "assets/images/experiences/bkk-lvvisionary-01.jpg",
+  "gallery": [
+   "assets/images/experiences/bkk-lvvisionary-01.jpg",
+   "assets/images/experiences/bkk-lvvisionary-02.jpg",
+   "assets/images/experiences/bkk-lvvisionary-03.jpg",
+   "assets/images/experiences/bkk-lvvisionary-04.jpg",
+   "assets/images/experiences/bkk-lvvisionary-05.jpg",
+   "assets/images/experiences/bkk-lvvisionary-06.jpg",
+   "assets/images/experiences/bkk-lvvisionary-07.jpg",
+   "assets/images/experiences/bkk-lvvisionary-08.jpg"
+  ],
+  "note": "",
+  "price": null,
+  "hours": null,
+  "maps": null,
+  "link": null
+ },
+ {
+  "id": "bkk-iconsiam",
+  "name": "ICONSIAM",
+  "city": "Bangkok",
+  "roles": [
+   "place"
+  ],
+  "overview": "Day 02 · 22.02.2027",
+  "sheet": "NONE",
+  "selectable": false,
+  "drive": "222 - Mall - ICONSIAM Bangkok",
+  "driveIds": [
+   "1IVKu15aTmQov07tjSuQwW1ay4JTeTvFJ"
+  ],
+  "sourceImages": 7,
+  "used": 6,
+  "primary": "assets/images/experiences/bkk-iconsiam-01.jpg",
+  "gallery": [
+   "assets/images/experiences/bkk-iconsiam-01.jpg",
+   "assets/images/experiences/bkk-iconsiam-02.jpg",
+   "assets/images/experiences/bkk-iconsiam-03.jpg",
+   "assets/images/experiences/bkk-iconsiam-04.jpg",
+   "assets/images/experiences/bkk-iconsiam-05.jpg",
+   "assets/images/experiences/bkk-iconsiam-06.jpg"
+  ],
+  "note": "IMG_3496 (dusk aerial) not used — the night aerial was rejected on 05 Sep; one Google Doc \"ICONSIAM\" not used",
+  "price": null,
+  "hours": null,
+  "maps": null,
+  "link": null
+ },
+ {
+  "id": "bkk-phranakorn",
+  "name": "Phra Nakhon",
+  "city": "Bangkok",
+  "roles": [
+   "dinner"
+  ],
+  "overview": "Day 02 · 22.02.2027",
+  "sheet": "NONE",
+  "selectable": false,
+  "drive": "081 - Restaurant - Phra Nakhon Bangkok + 088 - Restaurant - Phra Nakhon",
+  "driveIds": [
+   "1B55cVJYAKZwBpe3qY8ZHwB-YL8SV8hIU",
+   "1KR9jSayFoSFpF2MU5UFWmL1JMzQBLbcM"
+  ],
+  "sourceImages": 16,
+  "used": 8,
+  "primary": "assets/images/experiences/bkk-phranakorn-01.jpg",
+  "gallery": [
+   "assets/images/experiences/bkk-phranakorn-01.jpg",
+   "assets/images/experiences/bkk-phranakorn-02.jpg",
+   "assets/images/experiences/bkk-phranakorn-03.jpg",
+   "assets/images/experiences/bkk-phranakorn-04.jpg",
+   "assets/images/experiences/bkk-phranakorn-05.jpg",
+   "assets/images/experiences/bkk-phranakorn-06.jpg",
+   "assets/images/experiences/bkk-phranakorn-07.jpg",
+   "assets/images/experiences/bkk-phranakorn-08.jpg"
+  ],
+  "note": "two folders for one place; IMG_3549 carries a Michelin badge overlay, excluded; one Google Doc \"Phra Nakhon\" in 081 not used",
+  "price": null,
+  "hours": null,
+  "maps": null,
+  "link": null
+ },
+ {
+  "id": "bkk-socialclub",
+  "name": "BKK Social Club",
+  "city": "Bangkok",
+  "roles": [
+   "bar"
+  ],
+  "overview": "Day 02 · 22.02.2027",
+  "sheet": "NONE",
+  "selectable": false,
+  "drive": "150 - Bar - BKK Social Club Bangkok",
+  "driveIds": [
+   "1okcUolhoXPF4AFgvMyUtXl1KhA3PweG7"
+  ],
+  "sourceImages": 6,
+  "used": 5,
+  "primary": "assets/images/experiences/bkk-social-01.jpg",
+  "gallery": [
+   "assets/images/experiences/bkk-social-01.jpg",
+   "assets/images/experiences/bkk-social-02.jpg",
+   "assets/images/experiences/bkk-social-03.jpg",
+   "assets/images/experiences/bkk-social-04.jpg",
+   "assets/images/experiences/bkk-social-05.jpg"
+  ],
+  "note": "",
+  "price": null,
+  "hours": null,
+  "maps": null,
+  "link": null
+ },
+ {
+  "id": "bkk-timespace",
+  "name": "Time Space Cafe",
+  "city": "Bangkok",
+  "roles": [
+   "lunch",
+   "cafe"
+  ],
+  "overview": "Day 03 · 23.02.2027",
+  "sheet": "NONE",
+  "selectable": false,
+  "drive": "126 - Cafe - Time Space Cafe Bangkok",
+  "driveIds": [
+   "1CWga0shs9DwbiV6_CdaRglsJr1qoDsVk"
+  ],
+  "sourceImages": 13,
+  "used": 7,
+  "primary": "assets/images/experiences/bkk-timespace-01.jpg",
+  "gallery": [
+   "assets/images/experiences/bkk-timespace-01.jpg",
+   "assets/images/experiences/bkk-timespace-02.jpg",
+   "assets/images/experiences/bkk-timespace-03.jpg",
+   "assets/images/experiences/bkk-timespace-04.jpg",
+   "assets/images/experiences/bkk-timespace-05.jpg",
+   "assets/images/experiences/bkk-timespace-06.jpg",
+   "assets/images/experiences/bkk-timespace-07.jpg"
+  ],
+  "note": "three 7–8 MB files could not be fetched through the Drive connector (session expired twice) — not opened",
+  "price": null,
+  "hours": null,
+  "maps": null,
+  "link": null
+ },
+ {
+  "id": "bkk-mooyoo",
+  "name": "Moo Yoo Rose House",
+  "city": "Bangkok",
+  "roles": [
+   "lunch"
+  ],
+  "overview": "Day 03 · 23.02.2027",
+  "sheet": "NONE",
+  "selectable": false,
+  "drive": "125 - Cafe - Moo Yoo Rose House Bangkok",
+  "driveIds": [
+   "11o7gpVurZ77HD_oA7uwhkxgx29GXB5pj"
+  ],
+  "sourceImages": 11,
+  "used": 6,
+  "primary": "assets/images/experiences/bkk-mooyoo-01.jpg",
+  "gallery": [
+   "assets/images/experiences/bkk-mooyoo-01.jpg",
+   "assets/images/experiences/bkk-mooyoo-02.jpg",
+   "assets/images/experiences/bkk-mooyoo-03.jpg",
+   "assets/images/experiences/bkk-mooyoo-04.jpg",
+   "assets/images/experiences/bkk-mooyoo-05.jpg",
+   "assets/images/experiences/bkk-mooyoo-06.jpg"
+  ],
+  "note": "",
+  "price": null,
+  "hours": null,
+  "maps": null,
+  "link": null
+ },
+ {
+  "id": "bkk-whispering",
+  "name": "Whispering Cafe",
+  "city": "Sam Phran · Nakhon Pathom",
+  "roles": [
+   "cafe"
+  ],
+  "overview": "Day 03 · 23.02.2027",
+  "sheet": "NONE",
+  "selectable": false,
+  "drive": "127 - Cafe - Whispering Cafe Bangkok",
+  "driveIds": [
+   "1-VbMyD1NenCR9aClWC--rNwo9dgLsdkl"
+  ],
+  "sourceImages": 7,
+  "used": 5,
+  "primary": "assets/images/experiences/whispering-01.jpg",
+  "gallery": [
+   "assets/images/experiences/whispering-01.jpg",
+   "assets/images/experiences/whispering-02.jpg",
+   "assets/images/experiences/whispering-03.jpg",
+   "assets/images/experiences/whispering-04.jpg",
+   "assets/images/experiences/whispering-05.jpg"
+  ],
+  "note": "five files are 670×1006 web copies",
+  "price": null,
+  "hours": null,
+  "maps": null,
+  "link": null
+ },
+ {
+  "id": "bkk-dib",
+  "name": "Dib Bangkok",
+  "city": "Bangkok",
+  "roles": [
+   "experience"
+  ],
+  "overview": "Day 03 · 23.02.2027",
+  "sheet": "NONE",
+  "selectable": false,
+  "drive": "170 - Experience - Dib Bangkok",
+  "driveIds": [
+   "1iBWpXEzm22xjKIPqcCJHBpffFIljVvxf"
+  ],
+  "sourceImages": 19,
+  "used": 8,
+  "primary": "assets/images/experiences/bkk-dib-01.jpg",
+  "gallery": [
+   "assets/images/experiences/bkk-dib-01.jpg",
+   "assets/images/experiences/bkk-dib-02.jpg",
+   "assets/images/experiences/bkk-dib-03.jpg",
+   "assets/images/experiences/bkk-dib-04.jpg",
+   "assets/images/experiences/bkk-dib-05.jpg",
+   "assets/images/experiences/bkk-dib-06.jpg",
+   "assets/images/experiences/bkk-dib-07.jpg",
+   "assets/images/experiences/bkk-dib-08.jpg"
+  ],
+  "note": "10 of the 19 files (001–010_Couple_Monk.jpeg) are the couple's alms-giving series, not Dib — misfiled, excluded",
+  "price": null,
+  "hours": null,
+  "maps": null,
+  "link": null
+ },
+ {
+  "id": "bkk-emquartier",
+  "name": "EmQuartier",
+  "city": "Bangkok",
+  "roles": [
+   "place"
+  ],
+  "overview": "Day 03 · 23.02.2027",
+  "sheet": "NONE",
+  "selectable": false,
+  "drive": "221 - Mall - EmQuartier Bangkok",
+  "driveIds": [
+   "1vPtErvPheEGF6_f3y8nNVXV0EsBXleAG"
+  ],
+  "sourceImages": 7,
+  "used": 6,
+  "primary": "assets/images/experiences/bkk-emquartier-01.jpg",
+  "gallery": [
+   "assets/images/experiences/bkk-emquartier-01.jpg",
+   "assets/images/experiences/bkk-emquartier-02.jpg",
+   "assets/images/experiences/bkk-emquartier-03.jpg",
+   "assets/images/experiences/bkk-emquartier-04.jpg",
+   "assets/images/experiences/bkk-emquartier-05.jpg",
+   "assets/images/experiences/bkk-emquartier-06.jpg"
+  ],
+  "note": "",
+  "price": null,
+  "hours": null,
+  "maps": null,
+  "link": null
+ },
+ {
+  "id": "bkk-commons",
+  "name": "The Commons Thonglor",
+  "city": "Bangkok",
+  "roles": [
+   "place",
+   "dinner"
+  ],
+  "overview": "Day 03 · 23.02.2027",
+  "sheet": "NONE",
+  "selectable": false,
+  "drive": "082 - Restaurant - The Commons Thonglor Bangkok",
+  "driveIds": [
+   "1WI7kH1JtPP_OdP_iWx2osgz7qqiUd1mD"
+  ],
+  "sourceImages": 10,
+  "used": 5,
+  "primary": "assets/images/experiences/bkk-commons-01.jpg",
+  "gallery": [
+   "assets/images/experiences/bkk-commons-01.jpg",
+   "assets/images/experiences/bkk-commons-02.jpg",
+   "assets/images/experiences/bkk-commons-03.jpg",
+   "assets/images/experiences/bkk-commons-04.jpg",
+   "assets/images/experiences/bkk-commons-05.jpg"
+  ],
+  "note": "nine of ten files are 630 px WebP",
+  "price": null,
+  "hours": null,
+  "maps": null,
+  "link": null
+ },
+ {
+  "id": "bkk-barus",
+  "name": "Bar Us",
+  "city": "Bangkok",
+  "roles": [
+   "bar"
+  ],
+  "overview": "Day 03 · 23.02.2027",
+  "sheet": "NONE",
+  "selectable": false,
+  "drive": "Bar BKK/Bar Us (earlier Drive path; no numbered folder)",
+  "driveIds": [],
+  "sourceImages": 1,
+  "used": 1,
+  "primary": "assets/images/experiences/bkk-barus-01.jpg",
+  "gallery": [
+   "assets/images/experiences/bkk-barus-01.jpg"
+  ],
+  "note": "single Instagram frame, 05 Sep 2026",
+  "price": null,
+  "hours": null,
+  "maps": "https://maps.app.goo.gl/2KLduE51ybg4qAqd9?g_st=ic",
+  "link": null
+ },
+ {
+  "id": "bkk-igniv",
+  "name": "IGNIV",
+  "city": "Bangkok",
+  "roles": [
+   "dinner",
+   "bar"
+  ],
+  "overview": "Day 03 · 23.02.2027",
+  "sheet": "NONE",
+  "selectable": false,
+  "drive": "087 - Restaurant - IGNIV",
+  "driveIds": [
+   "14mtdPWa04TX8gXO7oHr0g_8dBsZFVkV4"
+  ],
+  "sourceImages": 17,
+  "used": 8,
+  "primary": "assets/images/experiences/bkk-igniv-01.jpg",
+  "gallery": [
+   "assets/images/experiences/bkk-igniv-01.jpg",
+   "assets/images/experiences/bkk-igniv-02.jpg",
+   "assets/images/experiences/bkk-igniv-03.jpg",
+   "assets/images/experiences/bkk-igniv-04.jpg",
+   "assets/images/experiences/bkk-igniv-05.jpg",
+   "assets/images/experiences/bkk-igniv-06.jpg",
+   "assets/images/experiences/bkk-igniv-07.jpg",
+   "assets/images/experiences/bkk-igniv-08.jpg"
+  ],
+  "note": "IMG_3605 (Michelin plaque) excluded",
+  "price": null,
+  "hours": null,
+  "maps": "https://maps.app.goo.gl/vkS23W4viFPRWkf78?g_st=ic",
+  "link": null
+ },
+ {
+  "id": "bkk-thongsmith",
+  "name": "Thong Smith",
+  "city": "Bangkok",
+  "roles": [
+   "lunch"
+  ],
+  "overview": "Day 04 · 24.02.2027",
+  "sheet": "NONE",
+  "selectable": false,
+  "drive": "083 - Restaurant - Thong Smith Bangkok + 089 - Restaurant - Thong Smith",
+  "driveIds": [
+   "1ZwzSEFFboxxTosgz-N2qUpQ1t-j8JXkl",
+   "1TQ86m75xxXNF8mF4XxGU86LuVyCYRK3K"
+  ],
+  "sourceImages": 12,
+  "used": 7,
+  "primary": "assets/images/experiences/bkk-thongsmith-01.jpg",
+  "gallery": [
+   "assets/images/experiences/bkk-thongsmith-01.jpg",
+   "assets/images/experiences/bkk-thongsmith-02.jpg",
+   "assets/images/experiences/bkk-thongsmith-03.jpg",
+   "assets/images/experiences/bkk-thongsmith-04.jpg",
+   "assets/images/experiences/bkk-thongsmith-05.jpg",
+   "assets/images/experiences/bkk-thongsmith-06.jpg",
+   "assets/images/experiences/bkk-thongsmith-07.jpg"
+  ],
+  "note": "4 AI renders in 083 (3 \"Codex Image\", 1 uuid png) excluded by the image rule; takeaway-bag WebP is the MASTER jpg twice",
+  "price": null,
+  "hours": null,
+  "maps": null,
+  "link": null
+ },
+ {
+  "id": "bkk-letsrelax",
+  "name": "Let's Relax",
+  "city": "Bangkok",
+  "roles": [
+   "experience"
+  ],
+  "overview": "Day 04 · 24.02.2027",
+  "sheet": "NONE",
+  "selectable": false,
+  "drive": "171 - Experience - Lets Relax Bangkok",
+  "driveIds": [
+   "1PFuNbcw1kN9mVhBnZf4gOU8fcKl3IICI"
+  ],
+  "sourceImages": 6,
+  "used": 5,
+  "primary": "assets/images/experiences/bkk-letsrelax-01.jpg",
+  "gallery": [
+   "assets/images/experiences/bkk-letsrelax-01.jpg",
+   "assets/images/experiences/bkk-letsrelax-02.jpg",
+   "assets/images/experiences/bkk-letsrelax-03.jpg",
+   "assets/images/experiences/bkk-letsrelax-04.jpg",
+   "assets/images/experiences/bkk-letsrelax-05.jpg"
+  ],
+  "note": "",
+  "price": null,
+  "hours": null,
+  "maps": null,
+  "link": null
+ },
+ {
+  "id": "bkk-dusit",
+  "name": "Dusit Central Park",
+  "city": "Bangkok",
+  "roles": [
+   "place"
+  ],
+  "overview": "Day 04 · 24.02.2027",
+  "sheet": "NONE",
+  "selectable": false,
+  "drive": "220 - Mall - Dusit Central Park Bangkok",
+  "driveIds": [
+   "1EuP1FzarJEWgqq1EQwsFmDX8RFuj4Yyl"
+  ],
+  "sourceImages": 6,
+  "used": 5,
+  "primary": "assets/images/experiences/bkk-dusit-01.jpg",
+  "gallery": [
+   "assets/images/experiences/bkk-dusit-01.jpg",
+   "assets/images/experiences/bkk-dusit-02.jpg",
+   "assets/images/experiences/bkk-dusit-03.jpg",
+   "assets/images/experiences/bkk-dusit-04.jpg",
+   "assets/images/experiences/bkk-dusit-05.jpg"
+  ],
+  "note": "IMG_3625 (600×800 png) excluded",
+  "price": null,
+  "hours": null,
+  "maps": null,
+  "link": null
+ },
+ {
+  "id": "bkk-madeleine",
+  "name": "Cafe Madeleine",
+  "city": "Four Seasons Hotel Bangkok",
+  "roles": [
+   "cafe"
+  ],
+  "overview": "Day 04 · 24.02.2027",
+  "sheet": "NONE",
+  "selectable": false,
+  "drive": "120 - Cafe - Cafe Madeleine Bangkok",
+  "driveIds": [
+   "1bzDBL08eokfpWg396goVP9rof2TkSyCo"
+  ],
+  "sourceImages": 6,
+  "used": 6,
+  "primary": "assets/images/experiences/bkk-madeleine-01.jpg",
+  "gallery": [
+   "assets/images/experiences/bkk-madeleine-01.jpg",
+   "assets/images/experiences/bkk-madeleine-02.jpg",
+   "assets/images/experiences/bkk-madeleine-03.jpg",
+   "assets/images/experiences/bkk-madeleine-04.jpg",
+   "assets/images/experiences/bkk-madeleine-05.jpg",
+   "assets/images/experiences/bkk-madeleine-06.jpg"
+  ],
+  "note": "",
+  "price": null,
+  "hours": null,
+  "maps": null,
+  "link": null
+ },
+ {
+  "id": "bkk-tangjaiyang",
+  "name": "Tang Jai Yang",
+  "city": "Bangkok",
+  "roles": [
+   "dinner"
+  ],
+  "overview": "Day 04 · 24.02.2027",
+  "sheet": "NONE",
+  "selectable": false,
+  "drive": "090 - Restaurant - Tang Jai Yang",
+  "driveIds": [
+   "1UwGn0EMMQHtR-ye1mixHsfdk8lo7kWuP"
+  ],
+  "sourceImages": 5,
+  "used": 4,
+  "primary": "assets/images/experiences/bkk-tjy-01.jpg",
+  "gallery": [
+   "assets/images/experiences/bkk-tjy-01.jpg",
+   "assets/images/experiences/bkk-tjy-02.jpg",
+   "assets/images/experiences/bkk-tjy-03.jpg",
+   "assets/images/experiences/bkk-tjy-04.jpg"
+  ],
+  "note": "folder number 090 is used twice in Drive (Suhring, Tang Jai Yang)",
+  "price": null,
+  "hours": null,
+  "maps": "https://maps.app.goo.gl/6otfQcm4bqsTuWZ16?g_st=ic",
+  "link": null
+ },
+ {
+  "id": "bkk-harudot",
+  "name": "Harudot",
+  "city": "Bangkok",
+  "roles": [
+   "place"
+  ],
+  "overview": "Day 14 · 06.03.2027",
+  "sheet": "NONE",
+  "selectable": false,
+  "drive": "123 - Cafe - Harudot Bangkok",
+  "driveIds": [
+   "1YeDCs42Lh6jTWVjYYXz4NYOmBzr2h1LH"
+  ],
+  "sourceImages": 5,
+  "used": 5,
+  "primary": "assets/images/experiences/bkk-harudot-01.jpg",
+  "gallery": [
+   "assets/images/experiences/bkk-harudot-01.jpg",
+   "assets/images/experiences/bkk-harudot-02.jpg",
+   "assets/images/experiences/bkk-harudot-03.jpg",
+   "assets/images/experiences/bkk-harudot-04.jpg",
+   "assets/images/experiences/bkk-harudot-05.jpg"
+  ],
+  "note": "new on the website (Overview Day 14 · Mall / Park / Other)",
+  "price": null,
+  "hours": null,
+  "maps": null,
+  "link": null
+ },
+ {
+  "id": "bkk-alati",
+  "name": "ALATi",
+  "city": "Siam Kempinski Hotel Bangkok",
+  "roles": [
+   "lunch"
+  ],
+  "overview": "Day 15 · 07.03.2027",
+  "sheet": "NONE",
+  "selectable": false,
+  "drive": "080 - Restaurant - ALATi Kempinski Bangkok",
+  "driveIds": [
+   "1ubARYdx6AIfRZIPYB-Vw841mEYMyQftY"
+  ],
+  "sourceImages": 7,
+  "used": 5,
+  "primary": "assets/images/experiences/bkk-alati-01.jpg",
+  "gallery": [
+   "assets/images/experiences/bkk-alati-01.jpg",
+   "assets/images/experiences/bkk-alati-02.jpg",
+   "assets/images/experiences/bkk-alati-03.jpg",
+   "assets/images/experiences/bkk-alati-04.jpg",
+   "assets/images/experiences/bkk-alati-05.jpg"
+  ],
+  "note": "new on the website (Overview Day 15 lunch)",
+  "price": null,
+  "hours": null,
+  "maps": null,
+  "link": null
+ },
+ {
+  "id": "vte-thatluang",
+  "name": "Pha That Luang",
+  "city": "Vientiane",
+  "roles": [
+   "experience"
+  ],
+  "overview": "Day 05 · 25.02.2027",
+  "sheet": "NONE",
+  "selectable": false,
+  "drive": "002 - City - Vientiane (city portrait)",
+  "driveIds": [],
+  "sourceImages": 1,
+  "used": 1,
+  "primary": "assets/images/experiences/vte-thatluang-01.jpg",
+  "gallery": [
+   "assets/images/experiences/vte-thatluang-01.jpg"
+  ],
+  "note": "",
+  "price": null,
+  "hours": null,
+  "maps": "https://maps.app.goo.gl/hehafVRBrdPt7L9Y6?g_st=ic",
+  "link": null
+ },
+ {
+  "id": "vte-patuxai",
+  "name": "Patuxai",
+  "city": "Vientiane",
+  "roles": [
+   "experience"
+  ],
+  "overview": "city",
+  "sheet": "NONE",
+  "selectable": false,
+  "drive": "002 - City - Vientiane (city portrait)",
+  "driveIds": [
+   "17Yvh83Qs-SVs5JiCE9nDsgH0toFcBncr"
+  ],
+  "sourceImages": 2,
+  "used": 2,
+  "primary": "assets/images/experiences/vte-patuxai-01.jpg",
+  "gallery": [
+   "assets/images/experiences/vte-patuxai-01.jpg",
+   "assets/images/experiences/vte-patuxai-02.jpg"
+  ],
+  "note": "city portrait set, curated 05 Sep 2026",
+  "price": null,
+  "hours": null,
+  "maps": null,
+  "link": null
+ },
+ {
+  "id": "vte-nightmarket",
+  "name": "Vientiane Night Market",
+  "city": "Vientiane",
+  "roles": [
+   "experience",
+   "place"
+  ],
+  "overview": "Day 06 · 26.02.2027",
+  "sheet": "NONE",
+  "selectable": false,
+  "drive": "002 - City - Vientiane (city portrait)",
+  "driveIds": [
+   "17Yvh83Qs-SVs5JiCE9nDsgH0toFcBncr"
+  ],
+  "sourceImages": 2,
+  "used": 2,
+  "primary": "assets/images/experiences/vte-nightmarket-01.jpg",
+  "gallery": [
+   "assets/images/experiences/vte-nightmarket-01.jpg",
+   "assets/images/experiences/vte-nightmarket-02.jpg"
+  ],
+  "note": "city portrait set, curated 05 Sep 2026",
+  "price": null,
+  "hours": null,
+  "maps": "https://maps.app.goo.gl/X2jTe6DyVCc7qd21A?g_st=ic",
+  "link": null
+ },
+ {
+  "id": "vte-sisaket",
+  "name": "Wat Si Saket",
+  "city": "Vientiane",
+  "roles": [
+   "experience"
+  ],
+  "overview": "city",
+  "sheet": "NONE",
+  "selectable": false,
+  "drive": "002 - City - Vientiane (city portrait)",
+  "driveIds": [],
+  "sourceImages": 1,
+  "used": 1,
+  "primary": "assets/images/experiences/vte-sisaket-01.jpg",
+  "gallery": [
+   "assets/images/experiences/vte-sisaket-01.jpg"
+  ],
+  "note": "",
+  "price": null,
+  "hours": null,
+  "maps": null,
+  "link": null
+ },
+ {
+  "id": "vte-simuang",
+  "name": "Wat Si Muang",
+  "city": "Vientiane",
+  "roles": [
+   "experience"
+  ],
+  "overview": "city",
+  "sheet": "NONE",
+  "selectable": false,
+  "drive": "002 - City - Vientiane (city portrait)",
+  "driveIds": [],
+  "sourceImages": 1,
+  "used": 1,
+  "primary": "assets/images/experiences/vte-simuang-01.jpg",
+  "gallery": [
+   "assets/images/experiences/vte-simuang-01.jpg"
+  ],
+  "note": "",
+  "price": null,
+  "hours": null,
+  "maps": null,
+  "link": null
+ },
+ {
+  "id": "vte-haphrakeo",
+  "name": "Ha Phrakeo Museum",
+  "city": "Vientiane",
+  "roles": [
+   "experience"
+  ],
+  "overview": "city",
+  "sheet": "NONE",
+  "selectable": false,
+  "drive": "002 - City - Vientiane (city portrait)",
+  "driveIds": [],
+  "sourceImages": 1,
+  "used": 1,
+  "primary": "assets/images/experiences/vte-haphrakeo-01.jpg",
+  "gallery": [
+   "assets/images/experiences/vte-haphrakeo-01.jpg"
+  ],
+  "note": "",
+  "price": null,
+  "hours": null,
+  "maps": null,
+  "link": null
+ },
+ {
+  "id": "vte-palace",
+  "name": "Presidential Palace",
+  "city": "Vientiane",
+  "roles": [
+   "experience"
+  ],
+  "overview": "city",
+  "sheet": "NONE",
+  "selectable": false,
+  "drive": "002 - City - Vientiane (city portrait)",
+  "driveIds": [],
+  "sourceImages": 1,
+  "used": 1,
+  "primary": "assets/images/experiences/vte-palace-01.jpg",
+  "gallery": [
+   "assets/images/experiences/vte-palace-01.jpg"
+  ],
+  "note": "",
+  "price": null,
+  "hours": null,
+  "maps": null,
+  "link": null
+ },
+ {
+  "id": "vte-thatdam",
+  "name": "That Dam",
+  "city": "Vientiane",
+  "roles": [
+   "experience"
+  ],
+  "overview": "city",
+  "sheet": "NONE",
+  "selectable": false,
+  "drive": "002 - City - Vientiane (city portrait)",
+  "driveIds": [],
+  "sourceImages": 1,
+  "used": 1,
+  "primary": "assets/images/experiences/vte-thatdam-01.jpg",
+  "gallery": [
+   "assets/images/experiences/vte-thatdam-01.jpg"
+  ],
+  "note": "",
+  "price": null,
+  "hours": null,
+  "maps": null,
+  "link": null
+ },
+ {
+  "id": "vte-buddhapark",
+  "name": "Buddha Park",
+  "city": "Xieng Khuan · Vientiane",
+  "roles": [
+   "experience"
+  ],
+  "overview": "city",
+  "sheet": "NONE",
+  "selectable": false,
+  "drive": "002 - City - Vientiane (city portrait)",
+  "driveIds": [],
+  "sourceImages": 1,
+  "used": 1,
+  "primary": "assets/images/experiences/vte-buddhapark-01.jpg",
+  "gallery": [
+   "assets/images/experiences/vte-buddhapark-01.jpg"
+  ],
+  "note": "",
+  "price": null,
+  "hours": null,
+  "maps": null,
+  "link": null
+ },
+ {
+  "id": "vte-pvo",
+  "name": "PVO Vietnamese Food",
+  "city": "Vientiane",
+  "roles": [
+   "breakfast"
+  ],
+  "overview": "Day 05 · 25.02.2027",
+  "sheet": "NONE",
+  "selectable": false,
+  "drive": "— no Drive folder",
+  "driveIds": [],
+  "sourceImages": 0,
+  "used": 0,
+  "primary": null,
+  "gallery": [],
+  "note": "name + day from the Overview only",
+  "price": null,
+  "hours": null,
+  "maps": "https://maps.app.goo.gl/EgPxLNAcBzgbDnsh9?g_st=ic",
+  "link": null
+ },
+ {
+  "id": "vte-rivermoon",
+  "name": "River Moon",
+  "city": "Vientiane",
+  "roles": [
+   "lunch"
+  ],
+  "overview": "Day 05 · 25.02.2027",
+  "sheet": "NONE",
+  "selectable": false,
+  "drive": "086 - Restaurant - River Moon Vientiane",
+  "driveIds": [
+   "1sE849cD0WWWdCS3hfM8JUl8YdZHT8602"
+  ],
+  "sourceImages": 11,
+  "used": 6,
+  "primary": "assets/images/experiences/vte-rivermoon-01.jpg",
+  "gallery": [
+   "assets/images/experiences/vte-rivermoon-01.jpg",
+   "assets/images/experiences/vte-rivermoon-02.jpg",
+   "assets/images/experiences/vte-rivermoon-03.jpg",
+   "assets/images/experiences/vte-rivermoon-04.jpg",
+   "assets/images/experiences/vte-rivermoon-05.jpg",
+   "assets/images/experiences/vte-rivermoon-06.jpg"
+  ],
+  "note": "venue watermark \"River Moon\" on every frame",
+  "price": null,
+  "hours": null,
+  "maps": "https://maps.app.goo.gl/NMbPP5kvLKurozJJ8?g_st=ic",
+  "link": null
+ },
+ {
+  "id": "vte-parkson",
+  "name": "Parkson Supermarket Laos",
+  "city": "Vientiane",
+  "roles": [
+   "place"
+  ],
+  "overview": "Day 05 · 25.02.2027",
+  "sheet": "NONE",
+  "selectable": false,
+  "drive": "— no Drive folder",
+  "driveIds": [],
+  "sourceImages": 0,
+  "used": 0,
+  "primary": null,
+  "gallery": [],
+  "note": "name + day from the Overview only",
+  "price": null,
+  "hours": null,
+  "maps": "https://maps.app.goo.gl/FoLWdYEkYXoxET3d7?g_st=ic",
+  "link": null
+ },
+ {
+  "id": "vte-3merchants",
+  "name": "3 Merchants Restaurant",
+  "city": "Vientiane",
+  "roles": [
+   "dinner"
+  ],
+  "overview": "Day 05 · 25.02.2027",
+  "sheet": "NONE",
+  "selectable": false,
+  "drive": "084 - Restaurant - 3 Merchants Vientiane",
+  "driveIds": [
+   "1S83scuK1HkkcQOs0Ee_oU7DVXgzIYpH1"
+  ],
+  "sourceImages": 6,
+  "used": 5,
+  "primary": "assets/images/experiences/vte-3merchants-01.jpg",
+  "gallery": [
+   "assets/images/experiences/vte-3merchants-01.jpg",
+   "assets/images/experiences/vte-3merchants-02.jpg",
+   "assets/images/experiences/vte-3merchants-03.jpg",
+   "assets/images/experiences/vte-3merchants-04.jpg",
+   "assets/images/experiences/vte-3merchants-05.jpg"
+  ],
+  "note": "",
+  "price": null,
+  "hours": null,
+  "maps": "https://maps.app.goo.gl/q3nJqc74P1hn6mkf6?g_st=ic",
+  "link": null
+ },
+ {
+  "id": "vte-sona",
+  "name": "Sona Cafe and Bar",
+  "city": "Vientiane",
+  "roles": [
+   "cafe",
+   "bar"
+  ],
+  "overview": "Day 05 · 25.02.2027",
+  "sheet": "NONE",
+  "selectable": false,
+  "drive": "151 - Bar - Sona Cafe and Bar Vientiane",
+  "driveIds": [
+   "1F0QdQQ76CbxD2SJwp0MCr2FsoG3_uwnp"
+  ],
+  "sourceImages": 6,
+  "used": 5,
+  "primary": "assets/images/experiences/vte-sona-01.jpg",
+  "gallery": [
+   "assets/images/experiences/vte-sona-01.jpg",
+   "assets/images/experiences/vte-sona-02.jpg",
+   "assets/images/experiences/vte-sona-03.jpg",
+   "assets/images/experiences/vte-sona-04.jpg",
+   "assets/images/experiences/vte-sona-05.jpg"
+  ],
+  "note": "",
+  "price": null,
+  "hours": null,
+  "maps": "https://maps.app.goo.gl/hDGyqmbPwYTEmvr89?g_st=ic",
+  "link": null
+ },
+ {
+  "id": "vte-khopchaideu",
+  "name": "Khop Chai Deu",
+  "city": "Vientiane",
+  "roles": [
+   "lunch"
+  ],
+  "overview": "Day 06 · 26.02.2027",
+  "sheet": "NONE",
+  "selectable": false,
+  "drive": "— no Drive folder",
+  "driveIds": [],
+  "sourceImages": 0,
+  "used": 0,
+  "primary": null,
+  "gallery": [],
+  "note": "name + day from the Overview only",
+  "price": null,
+  "hours": null,
+  "maps": "https://maps.app.goo.gl/kZtH2y38zMQHH8vc8?g_st=ic",
+  "link": null
+ },
+ {
+  "id": "vte-kaogee",
+  "name": "Kaogee Le Triomphe",
+  "city": "Vientiane",
+  "roles": [
+   "lunch",
+   "cafe"
+  ],
+  "overview": "Day 06 · 26.02.2027",
+  "sheet": "NONE",
+  "selectable": false,
+  "drive": "128 - Cafe - Kaogee Le Triomphe Vientiane",
+  "driveIds": [
+   "1riNV8y_gYMzIbY2VNQNjRoMLoT2aVW_J"
+  ],
+  "sourceImages": 6,
+  "used": 5,
+  "primary": "assets/images/experiences/vte-kaogee-01.jpg",
+  "gallery": [
+   "assets/images/experiences/vte-kaogee-01.jpg",
+   "assets/images/experiences/vte-kaogee-02.jpg",
+   "assets/images/experiences/vte-kaogee-03.jpg",
+   "assets/images/experiences/vte-kaogee-04.jpg",
+   "assets/images/experiences/vte-kaogee-05.jpg"
+  ],
+  "note": "",
+  "price": null,
+  "hours": null,
+  "maps": null,
+  "link": null
+ },
+ {
+  "id": "vte-lacuna",
+  "name": "Lacuna VTE",
+  "city": "Vientiane",
+  "roles": [
+   "cafe",
+   "bar"
+  ],
+  "overview": "Day 06 · 26.02.2027",
+  "sheet": "NONE",
+  "selectable": false,
+  "drive": "129 - Cafe - Lacuna VTE Vientiane",
+  "driveIds": [
+   "1rRyPggjLcDJ0bof4D6ksKEC0CDAMwn8I"
+  ],
+  "sourceImages": 7,
+  "used": 6,
+  "primary": "assets/images/experiences/vte-lacuna-01.jpg",
+  "gallery": [
+   "assets/images/experiences/vte-lacuna-01.jpg",
+   "assets/images/experiences/vte-lacuna-02.jpg",
+   "assets/images/experiences/vte-lacuna-03.jpg",
+   "assets/images/experiences/vte-lacuna-04.jpg",
+   "assets/images/experiences/vte-lacuna-05.jpg",
+   "assets/images/experiences/vte-lacuna-06.jpg"
+  ],
+  "note": "",
+  "price": null,
+  "hours": null,
+  "maps": "https://maps.app.goo.gl/tzMFhWFGAWjE2ALs8?g_st=ic",
+  "link": null
+ },
+ {
+  "id": "vte-kokkok",
+  "name": "KokKok Mega Mall Patuxay",
+  "city": "Vientiane",
+  "roles": [
+   "place"
+  ],
+  "overview": "Day 06 · 26.02.2027",
+  "sheet": "NONE",
+  "selectable": false,
+  "drive": "223 - Mall - KokKok Mega Mall Vientiane",
+  "driveIds": [
+   "1MBKutAoO_mEKrfQmoGWUrRtO7wqlM4XK"
+  ],
+  "sourceImages": 13,
+  "used": 5,
+  "primary": "assets/images/experiences/vte-kokkok-01.jpg",
+  "gallery": [
+   "assets/images/experiences/vte-kokkok-01.jpg",
+   "assets/images/experiences/vte-kokkok-02.jpg",
+   "assets/images/experiences/vte-kokkok-03.jpg",
+   "assets/images/experiences/vte-kokkok-04.jpg",
+   "assets/images/experiences/vte-kokkok-05.jpg"
+  ],
+  "note": "phone originals 2.7–5.9 MB",
+  "price": null,
+  "hours": null,
+  "maps": "https://maps.app.goo.gl/TKSjr5kc2P6vWvWSA?g_st=ic",
+  "link": null
+ },
+ {
+  "id": "vte-lepadaek",
+  "name": "Le Padaek",
+  "city": "Vientiane",
+  "roles": [
+   "dinner"
+  ],
+  "overview": "Day 06 · 26.02.2027",
+  "sheet": "NONE",
+  "selectable": false,
+  "drive": "— no Drive folder",
+  "driveIds": [],
+  "sourceImages": 0,
+  "used": 0,
+  "primary": null,
+  "gallery": [],
+  "note": "name + day from the Overview only",
+  "price": null,
+  "hours": null,
+  "maps": "https://maps.app.goo.gl/WD3gNtNm5AVaDrFU6?g_st=ic",
+  "link": null
+ },
+ {
+  "id": "vte-laoderm",
+  "name": "Lao Derm",
+  "city": "Vientiane",
+  "roles": [
+   "dinner"
+  ],
+  "overview": "Day 06 · 26.02.2027 · Day 07 Welcome Dinner",
+  "sheet": "NONE",
+  "selectable": false,
+  "drive": "085 - Restaurant - Lao Derm Vientiane",
+  "driveIds": [
+   "1p8h9R4LFHjeip6fobqyDVmocGcYDzJ7F"
+  ],
+  "sourceImages": 21,
+  "used": 8,
+  "primary": "assets/images/experiences/vte-laoderm-01.jpg",
+  "gallery": [
+   "assets/images/experiences/vte-laoderm-01.jpg",
+   "assets/images/experiences/vte-laoderm-02.jpg",
+   "assets/images/experiences/vte-laoderm-03.jpg",
+   "assets/images/experiences/vte-laoderm-04.jpg",
+   "assets/images/experiences/vte-laoderm-05.jpg",
+   "assets/images/experiences/vte-laoderm-06.jpg",
+   "assets/images/experiences/vte-laoderm-07.jpg",
+   "assets/images/experiences/vte-laoderm-08.jpg"
+  ],
+  "note": "also the Welcome Dinner venue (Overview Day 07); promotional captioned frames excluded",
+  "price": null,
+  "hours": null,
+  "maps": "https://maps.app.goo.gl/cSn9mzR38QdKGsk49?g_st=ic",
+  "link": null
+ },
+ {
+  "id": "cn-blossom",
+  "name": "Kunming Cherry Blossoms",
+  "city": "Kunming · Yunnan",
+  "roles": [
+   "experience"
+  ],
+  "overview": "Day 09 – 10 · 01.–02.03.2027",
+  "sheet": "NONE",
+  "selectable": false,
+  "drive": "003 - City - Kunming",
+  "driveIds": [
+   "1Vj0BX05MaQTDS1CrOChRYYWzyzCciZFb"
+  ],
+  "sourceImages": 3,
+  "used": 3,
+  "primary": "assets/images/experiences/kmg-blossom-01.jpg",
+  "gallery": [
+   "assets/images/experiences/kmg-blossom-01.jpg",
+   "assets/images/experiences/kmg-blossom-02.jpg",
+   "assets/images/experiences/kmg-blossom-03.jpg"
+  ],
+  "note": "curated Sep 2026",
+  "price": null,
+  "hours": null,
+  "maps": null,
+  "link": null
+ }
+]

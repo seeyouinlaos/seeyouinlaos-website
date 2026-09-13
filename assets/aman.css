@@ -506,3 +506,29 @@ a.am { display: block; text-decoration: none; }
 .a-hero + .a-sec,
 .a-sec.tight + .a-sec,
 .a-sec:has(> .a-band) + .a-sec { margin-top: var(--a-gap-media); }
+
+/* ---------------------------------------------------------------- place gallery
+   The photographs of ONE place (assets/gallery.js): the carousel grammar with
+   one photograph per slide, full width, a fixed frame per place, no veil.
+   A photograph of the other orientation is shown whole on the sand ground
+   rather than cropped to nothing. The thin position line and a quiet "3 / 8"
+   say where you are; the arrows appear where a pointer exists; the arrow
+   keys work everywhere. No autoplay. */
+.xgal .atrk { gap: 0; padding: 0; scroll-padding-left: 0; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; cursor: default; max-width: none; }
+.xgal .aslide, .xgal .aslide:not(.on) { flex: 0 0 100%; scroll-snap-align: start; scroll-snap-stop: always; cursor: default; }
+.xgal .aslide .am { aspect-ratio: var(--xg-ratio, 4 / 5); background: #E7E3DB; overflow: hidden; margin: 0; }
+.xgal .aslide .am::after { display: none; }
+.xgal .aslide .am img { width: 100%; height: 100%; object-fit: cover; object-position: var(--xg-pos, 50% 50%); display: block; }
+.xgal .aslide .am.fit img { object-fit: contain; }
+.xgal .arow { margin-top: 18px; }
+.xg-count { font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 10px; letter-spacing: 2.2px; color: var(--a-mute); white-space: nowrap; margin: 0; }
+.xgal .anav { display: none; }
+@media (hover: hover) and (pointer: fine) { .xgal .anav { display: flex; } }
+.xgal .atrk:focus-visible ~ .arow .anav { display: flex; }
+@media (min-width: 768px) {
+  .xgal .aslide, .xgal .aslide:not(.on) { flex: 0 0 100%; }
+  .xgal .aslide .am { aspect-ratio: auto; height: min(72vh, 680px); }
+  .xgal .aslide .am img { object-fit: contain; object-position: 50% 50%; }
+  .xgal .aslide:not(.on) .am { cursor: default; }
+}
+@media (prefers-reduced-motion: reduce) { .xgal .atrk { scroll-behavior: auto; } }

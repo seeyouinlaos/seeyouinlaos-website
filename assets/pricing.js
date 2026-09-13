@@ -296,6 +296,7 @@
       var f = FLAT[x.id];
       if (f) return f.basis;
       if (x.interest) return 'Interest · confirmed and payable at the spa';
+      if (x.request) return 'Request · ' + (x.priceNote || '') + ' as recorded by the hosts';
       /* a hosted line carries its own COMPLIMENTARY note — it must never also
        * read "Amount on request", which would suggest the price is unknown */
       if (x.complimentary) return '';
