@@ -15,10 +15,15 @@ earlier conversation.
 > (the FAMILY-ids dependency is closed; the couple/hosts book first through the same engine) ·
 > booking rule unchanged (authenticated party, OPEN, not FROZEN; no attendance prerequisite
 > exists) · the **Wedding Dinner carries the Owner's 10-image set** (all mapped, six placed on
-> voyage.html §04) · DOCS binding explained, not changed. Production: Worker version
-> **`21948251-e7b3-44b9-905c-417ba85599f9`** (wrangler, from 7431761) · Pages built from 7431761
-> · parity **61/61** · smoke 8/8 both origins · crawl clean both origins · REG_KV 0 keys ·
-> INV-002 pristine · seating plan 50 + 48 all available, held 0.
+> voyage.html §04) · DOCS binding explained, not changed. Production: guest-facing source state
+> **`7431761`** (later commits on `main` are docs-only). Worker: wrangler deploy
+> `21948251-e7b3-44b9-905c-417ba85599f9` from 7431761, then — because **Cloudflare Workers
+> Builds auto-deploys every push to `main`** — the live version is always that integration's
+> build of HEAD (`88beab8e-6b47-45bc-bb44-da30fb9a99a3` from d6d77fd, verified parity 61/61;
+> each later docs-only push yields a new version with identical guest files). Pages built from
+> 7431761 (the d6d77fd build was queued on GitHub's side at the time of writing; identical guest
+> files). Smoke 8/8 both origins · crawl clean both origins · REG_KV 0 keys · INV-002 pristine ·
+> seating plan 50 + 48 all available, held 0.
 > **Two Owner inputs remain:** (a) a party entry for the couple (and any host/VIP) in the private
 > guest list so they can book first — Owner data, not invented; (b) keep or disable the
 > **Cloudflare Workers Builds** git integration that auto-deploys on every push to `main`

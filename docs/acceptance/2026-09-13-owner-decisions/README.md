@@ -117,7 +117,9 @@ seeyouinlaos-website"), which deploys its own version ~60 s later (`8413ce31` fo
 `8f5c69e9` for eb1d165, `f63ff143` for 7431761). It is not the documented `wrangler deploy`
 path and the Owner did not mention it. After 7431761 the edge served the previous asset
 manifest for several minutes (new files 404, deleted file 200) until propagation completed; the
-final live version is the wrangler deploy `21948251` from 7431761 and every probe after
-08:44 UTC is correct. Owner decision: keep the git integration (then it is the release path and
-wrangler deploys are redundant) or disable it in the Cloudflare dashboard (then `wrangler deploy`
-is the only path, as documented). Until decided, verify parity after every push, as done here.
+wrangler deploy `21948251` from 7431761 was correct on every probe after 08:44 UTC; the
+acceptance push (d6d77fd, docs only) then produced the integration's version `88beab8e`, which
+was verified at parity 61/61 as well — and every later push to `main` will produce another.
+Owner decision: keep the git integration (then it is the release path and wrangler deploys are
+redundant) or disable it in the Cloudflare dashboard (then `wrangler deploy` is the only path, as
+documented). Until decided, verify parity after every push, as done here.
