@@ -56,7 +56,7 @@ note('no duplicate', (await p.evaluate(() => JSON.parse(localStorage.getItem('si
 await p.goto(O + '/your-journey', { waitUntil: 'networkidle' }); await p.waitForTimeout(1200);
 if (await p.locator('.p-drawer:not([hidden]) [data-who]').count()) { await p.locator('.p-drawer:not([hidden]) [data-who]').first().click(); await p.waitForTimeout(600); }
 const yj = await p.evaluate(() => ({ t: document.getElementById('extra-lines')?.innerText.replace(/\s+/g, ' ').trim(), total: document.getElementById('tt')?.textContent.trim() }));
-note('Your Journey lists the request, USD 180 × 2 = USD 360 in the total', /Sühring/.test(yj.t) && /USD 180 per person/.test(yj.t) && /Participating guests/.test(yj.t) && yj.total === 'USD 360', yj.total + ' · ' + yj.t.slice(0, 100));
+note('Your Journey lists the request, USD 180 × 2 = USD 360 in the total', /Sühring/.test(yj.t) && /USD 180 per person/.test(yj.t) && /Participating guests/i.test(yj.t) && yj.total === 'USD 360', yj.total + ' · ' + yj.t.slice(0, 100));
 await p.locator('#extras').scrollIntoViewIfNeeded().catch(() => {}); await shot('06-your-journey');
 await p.goto(O + '/review', { waitUntil: 'networkidle' }); await p.waitForTimeout(1500);
 const rv = await p.evaluate(() => ({ t: document.getElementById('items')?.innerText.replace(/\s+/g, ' ').trim(), total: document.getElementById('tt')?.textContent.trim() }));
