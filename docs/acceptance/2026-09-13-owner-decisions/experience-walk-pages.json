@@ -1,0 +1,370 @@
+{
+  "origin": "https://seeyouinlaos.github.io/seeyouinlaos-website",
+  "at": "2026-09-13T21:20:02.285Z",
+  "results": [
+    {
+      "id": "1 Bangkok · restaurant, café, experience, shopping, bar rails",
+      "ok": true,
+      "d": "[{\"key\":\"bkk:breakfast\",\"n\":9,\"title\":\"Restaurants\"},{\"key\":\"bkk:cafe\",\"n\":4,\"title\":\"Cafés\"},{\"key\":\"bkk:experience\",\"n\":3,\"title\":\"Experiences\"},{\"key\":\"bkk:place\",\"n\":4,\"title\":\"Shopping & places\"},{\"key\":\"bkk:bar\",\"n\":3,\"title\":\"Bars\"}]"
+    },
+    {
+      "id": "1 Bangkok return · one rail for the Kempinski days",
+      "ok": {
+        "key": "bkk-return:place",
+        "n": 1,
+        "title": "Shopping & places"
+      },
+      "d": "[{\"key\":\"bkk-return:breakfast\",\"n\":1,\"title\":\"Restaurants\"},{\"key\":\"bkk-return:place\",\"n\":1,\"title\":\"Shopping & places\"}]"
+    },
+    {
+      "id": "1 Vientiane · restaurants, cafés, bars, shopping and places, sights",
+      "ok": true,
+      "d": "[{\"key\":\"laos:breakfast\",\"n\":7,\"title\":\"Restaurants\"},{\"key\":\"laos:cafe\",\"n\":3,\"title\":\"Cafés\"},{\"key\":\"laos:experience\",\"n\":9,\"title\":\"Experiences\"},{\"key\":\"laos:place\",\"n\":3,\"title\":\"Shopping & places\"},{\"key\":\"laos:bar\",\"n\":2,\"title\":\"Bars\"}]"
+    },
+    {
+      "id": "1 Sühring appears in Bangkok restaurant discovery with its photograph count",
+      "ok": true,
+      "d": "{\"rail\":\"bkk:breakfast\",\"more\":\"9 photographs · Discover\",\"href\":\"experience.html?id=bkk-suhring\"}"
+    },
+    {
+      "id": "1 every card with several photographs says so",
+      "ok": true,
+      "d": "37 cards announce a gallery"
+    },
+    {
+      "id": "1 no horizontal page scroll at 390",
+      "ok": true,
+      "d": "scrollWidth ≤ clientWidth"
+    },
+    {
+      "id": "1 no page errors on the discovery page",
+      "ok": true,
+      "d": "clean"
+    },
+    {
+      "id": "2 Sühring · gallery count equals the inventory",
+      "ok": true,
+      "d": "9 frames, inventory 9"
+    },
+    {
+      "id": "2 Sühring · first frame eager with intrinsic size, the rest lazy, every frame with alt text",
+      "ok": true,
+      "d": "{\"eager\":false,\"w\":\"969\",\"h\":\"1446\",\"alt\":\"A table by the window, the villa garden and palms outside\",\"complete\":true}"
+    },
+    {
+      "id": "2 Sühring · region and controls named, position shown, no stretching",
+      "ok": true,
+      "d": "Photographs of Sühring — use the arrow keys to move between them · 1 / 9"
+    },
+    {
+      "id": "2 Sühring · moving the track one frame updates the active frame and the position",
+      "ok": true,
+      "d": "{\"i\":1,\"count\":\"2 / 9\"}"
+    },
+    {
+      "id": "2 Sühring · no autoplay: the frame stays where it was put",
+      "ok": true,
+      "d": "390 → 390"
+    },
+    {
+      "id": "2 Sühring · the page itself never scrolls sideways",
+      "ok": true,
+      "d": "scrollWidth ≤ clientWidth"
+    },
+    {
+      "id": "2 Sühring · no page errors",
+      "ok": true,
+      "d": "clean"
+    },
+    {
+      "id": "2 Sühring · desktop: arrows shown, arrow keys move, previous returns, frame height bounded",
+      "ok": true,
+      "d": "flex · 3 / 9 → 2 / 9"
+    },
+    {
+      "id": "2 Dib Bangkok · gallery count equals the inventory",
+      "ok": true,
+      "d": "8 frames, inventory 8"
+    },
+    {
+      "id": "2 Dib Bangkok · first frame eager with intrinsic size, the rest lazy, every frame with alt text",
+      "ok": true,
+      "d": "{\"eager\":false,\"w\":\"1200\",\"h\":\"900\",\"alt\":\"The museum courtyard at dusk, stone spheres on the terrace\",\"complete\":true}"
+    },
+    {
+      "id": "2 Dib Bangkok · region and controls named, position shown, no stretching",
+      "ok": true,
+      "d": "Photographs of Dib Bangkok — use the arrow keys to move between them · 1 / 8"
+    },
+    {
+      "id": "2 Dib Bangkok · moving the track one frame updates the active frame and the position",
+      "ok": true,
+      "d": "{\"i\":1,\"count\":\"2 / 8\"}"
+    },
+    {
+      "id": "2 Dib Bangkok · no autoplay: the frame stays where it was put",
+      "ok": true,
+      "d": "390 → 390"
+    },
+    {
+      "id": "2 Dib Bangkok · the page itself never scrolls sideways",
+      "ok": true,
+      "d": "scrollWidth ≤ clientWidth"
+    },
+    {
+      "id": "2 Dib Bangkok · no page errors",
+      "ok": true,
+      "d": "clean"
+    },
+    {
+      "id": "2 Dib Bangkok · desktop: arrows shown, arrow keys move, previous returns, frame height bounded",
+      "ok": true,
+      "d": "flex · 3 / 8 → 2 / 8"
+    },
+    {
+      "id": "2 Louis Vuitton Visionary Journeys · gallery count equals the inventory",
+      "ok": true,
+      "d": "8 frames, inventory 8"
+    },
+    {
+      "id": "2 Louis Vuitton Visionary Journeys · first frame eager with intrinsic size, the rest lazy, every frame with alt text",
+      "ok": true,
+      "d": "{\"eager\":false,\"w\":\"2000\",\"h\":\"2000\",\"alt\":\"The Louis Vuitton façade in Bangkok dressed with giant monogram flowers\",\"complete\":true}"
+    },
+    {
+      "id": "2 Louis Vuitton Visionary Journeys · region and controls named, position shown, no stretching",
+      "ok": true,
+      "d": "Photographs of Louis Vuitton Visionary Journeys — use the arrow keys to move between them · 1 / 8"
+    },
+    {
+      "id": "2 Louis Vuitton Visionary Journeys · moving the track one frame updates the active frame and the position",
+      "ok": true,
+      "d": "{\"i\":1,\"count\":\"2 / 8\"}"
+    },
+    {
+      "id": "2 Louis Vuitton Visionary Journeys · no autoplay: the frame stays where it was put",
+      "ok": true,
+      "d": "390 → 390"
+    },
+    {
+      "id": "2 Louis Vuitton Visionary Journeys · the page itself never scrolls sideways",
+      "ok": true,
+      "d": "scrollWidth ≤ clientWidth"
+    },
+    {
+      "id": "2 Louis Vuitton Visionary Journeys · no page errors",
+      "ok": true,
+      "d": "clean"
+    },
+    {
+      "id": "2 Louis Vuitton Visionary Journeys · desktop: arrows shown, arrow keys move, previous returns, frame height bounded",
+      "ok": true,
+      "d": "flex · 3 / 8 → 2 / 8"
+    },
+    {
+      "id": "2 Lao Derm · gallery count equals the inventory",
+      "ok": true,
+      "d": "8 frames, inventory 8"
+    },
+    {
+      "id": "2 Lao Derm · first frame eager with intrinsic size, the rest lazy, every frame with alt text",
+      "ok": true,
+      "d": "{\"eager\":false,\"w\":\"2000\",\"h\":\"2000\",\"alt\":\"A Lao Derm sharing plate of grilled meat, vegetables and jeow\",\"complete\":true}"
+    },
+    {
+      "id": "2 Lao Derm · region and controls named, position shown, no stretching",
+      "ok": true,
+      "d": "Photographs of Lao Derm — use the arrow keys to move between them · 1 / 8"
+    },
+    {
+      "id": "2 Lao Derm · moving the track one frame updates the active frame and the position",
+      "ok": true,
+      "d": "{\"i\":1,\"count\":\"2 / 8\"}"
+    },
+    {
+      "id": "2 Lao Derm · no autoplay: the frame stays where it was put",
+      "ok": true,
+      "d": "390 → 390"
+    },
+    {
+      "id": "2 Lao Derm · the page itself never scrolls sideways",
+      "ok": true,
+      "d": "scrollWidth ≤ clientWidth"
+    },
+    {
+      "id": "2 Lao Derm · no page errors",
+      "ok": true,
+      "d": "clean"
+    },
+    {
+      "id": "2 Lao Derm · desktop: arrows shown, arrow keys move, previous returns, frame height bounded",
+      "ok": true,
+      "d": "flex · 3 / 8 → 2 / 8"
+    },
+    {
+      "id": "3 Sühring · name, Bangkok, lunch, German fine dining intro",
+      "ok": true,
+      "d": "Bangkok · Lunch · Bangkok days"
+    },
+    {
+      "id": "3 Sühring · the five About sections of the source, first open",
+      "ok": true,
+      "d": "The philosophy · The founders · The foundation · The first mentor · Contemporary heritage"
+    },
+    {
+      "id": "3 Sühring · The first mentor opens on tap and carries grandmother Christa",
+      "ok": true,
+      "d": "Our grandmother Christa, herself a trained chef, was our fir"
+    },
+    {
+      "id": "3 Sühring · price USD 180 as recorded, without an invented unit",
+      "ok": true,
+      "d": "PRICE USD 180 The amount recorded by the hosts. The source does not state whether it is per guest or per menu, so it is shown as recorded and never multiplied here."
+    },
+    {
+      "id": "3 Sühring · opening hours verbatim",
+      "ok": true,
+      "d": "OPENING HOURS Lunch Thursday to Sunday 12:30 pm to 13:00 pm (last seating) Closed on Monday and Tuesday"
+    },
+    {
+      "id": "3 Sühring · map and website from the source",
+      "ok": true,
+      "d": "https://maps.app.goo.gl/2b4whggW3YCnxN6u5?g_st=ic https://www.restaurantsuhring.com/menu.html"
+    },
+    {
+      "id": "3 Sühring · the Journey action explains request, not reservation, and the untotalled amount",
+      "ok": true,
+      "d": "Add to your journey"
+    },
+    {
+      "id": "3 Sühring · adding without a session opens the invitation gate, nothing is added",
+      "ok": true,
+      "d": "gate true"
+    },
+    {
+      "id": "3 Sühring · after the code the request is in the bag as a REQUEST line without a price",
+      "ok": true,
+      "d": "[{\"id\":\"suhring\",\"name\":\"Sühring\",\"meta\":\"Lunch · German fine dining · Bangkok\",\"request\":true,\"priceNote\":\"USD 180\",\"exp\":\"bkk-suhring\",\"img\":\"assets/images/experiences/bkk-suhring-01.jpg\",\"qty\":1}]"
+    },
+    {
+      "id": "3 Sühring · the page shows IN YOUR JOURNEY, the Add action is gone, Remove offered",
+      "ok": true,
+      "d": "{\"cur\":\"In your journey\",\"add\":false,\"rm\":true}"
+    },
+    {
+      "id": "3 Sühring · reload keeps the current state",
+      "ok": true,
+      "d": "{\"cur\":\"In your journey\",\"add\":false}"
+    },
+    {
+      "id": "3 Sühring · duplicate selection impossible",
+      "ok": true,
+      "d": "1 line, qty 1"
+    },
+    {
+      "id": "3 Your Journey · Sühring listed as a request, opens its page, total untouched",
+      "ok": true,
+      "d": "USD 0 · BANGKOK DAYS · RestaurantSühringLunch · German fine dining · BangkokRequest · USD 180 as recorded by the hosts · a table"
+    },
+    {
+      "id": "3 Review & Send · the request line is shown by name, USD 180 as recorded, not in the total",
+      "ok": true,
+      "d": "USD 0 · BANGKOK DAYS · RestaurantSühringLunch · German fine dining · BangkokRequest · USD 180 as recorded by the hosts · a table asked for through G"
+    },
+    {
+      "id": "3 Sühring · Remove empties the line and returns the Add action",
+      "ok": true,
+      "d": "bag 0"
+    },
+    {
+      "id": "3 no page errors across the Sühring flow",
+      "ok": true,
+      "d": "clean"
+    },
+    {
+      "id": "4 320 /experiences.html · no sideways scroll, frame inside the viewport, photograph inside the frame",
+      "ok": true,
+      "d": "{\"none\":true}"
+    },
+    {
+      "id": "4 320 /experience.html?id=bkk-suhring · no sideways scroll, frame inside the viewport, photograph inside the frame",
+      "ok": true,
+      "d": "{\"w\":320,\"h\":400,\"inside\":true}"
+    },
+    {
+      "id": "4 320 /experience.html?id=bkk-dib · no sideways scroll, frame inside the viewport, photograph inside the frame",
+      "ok": true,
+      "d": "{\"w\":320,\"h\":213,\"inside\":true}"
+    },
+    {
+      "id": "4 320 · no page errors",
+      "ok": true,
+      "d": "clean"
+    },
+    {
+      "id": "4 375 /experiences.html · no sideways scroll, frame inside the viewport, photograph inside the frame",
+      "ok": true,
+      "d": "{\"none\":true}"
+    },
+    {
+      "id": "4 375 /experience.html?id=bkk-suhring · no sideways scroll, frame inside the viewport, photograph inside the frame",
+      "ok": true,
+      "d": "{\"w\":375,\"h\":469,\"inside\":true}"
+    },
+    {
+      "id": "4 375 /experience.html?id=bkk-dib · no sideways scroll, frame inside the viewport, photograph inside the frame",
+      "ok": true,
+      "d": "{\"w\":375,\"h\":250,\"inside\":true}"
+    },
+    {
+      "id": "4 375 · no page errors",
+      "ok": true,
+      "d": "clean"
+    },
+    {
+      "id": "4 430 /experiences.html · no sideways scroll, frame inside the viewport, photograph inside the frame",
+      "ok": true,
+      "d": "{\"none\":true}"
+    },
+    {
+      "id": "4 430 /experience.html?id=bkk-suhring · no sideways scroll, frame inside the viewport, photograph inside the frame",
+      "ok": true,
+      "d": "{\"w\":430,\"h\":538,\"inside\":true}"
+    },
+    {
+      "id": "4 430 /experience.html?id=bkk-dib · no sideways scroll, frame inside the viewport, photograph inside the frame",
+      "ok": true,
+      "d": "{\"w\":430,\"h\":287,\"inside\":true}"
+    },
+    {
+      "id": "4 430 · no page errors",
+      "ok": true,
+      "d": "clean"
+    },
+    {
+      "id": "4 834 /experiences.html · no sideways scroll, frame inside the viewport, photograph inside the frame",
+      "ok": true,
+      "d": "{\"none\":true}"
+    },
+    {
+      "id": "4 834 /experience.html?id=bkk-suhring · no sideways scroll, frame inside the viewport, photograph inside the frame",
+      "ok": true,
+      "d": "{\"w\":746,\"h\":648,\"inside\":true}"
+    },
+    {
+      "id": "4 834 /experience.html?id=bkk-dib · no sideways scroll, frame inside the viewport, photograph inside the frame",
+      "ok": true,
+      "d": "{\"w\":746,\"h\":648,\"inside\":true}"
+    },
+    {
+      "id": "4 834 · no page errors",
+      "ok": true,
+      "d": "clean"
+    },
+    {
+      "id": "5 reduced motion · the track moves without smooth scrolling",
+      "ok": true,
+      "d": "scroll-behavior auto"
+    }
+  ]
+}
