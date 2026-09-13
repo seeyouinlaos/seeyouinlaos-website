@@ -93,9 +93,9 @@
       "missingAnchors": []
     },
     {
-      "page": "dress.html",
+      "page": "wedding-preparation.html",
       "status": 200,
-      "title": "Dress Code · See You In Laos",
+      "title": "Wedding Preparation · See You In Laos",
       "brokenImgs": [],
       "missingAnchors": []
     },
@@ -121,23 +121,9 @@
       "missingAnchors": []
     },
     {
-      "page": "wedding-preparation.html",
-      "status": 200,
-      "title": "Wedding Preparation · See You In Laos",
-      "brokenImgs": [],
-      "missingAnchors": []
-    },
-    {
       "page": "tea.html",
       "status": 200,
       "title": "Champagne Afternoon Tea at 1872 · See You In Laos",
-      "brokenImgs": [],
-      "missingAnchors": []
-    },
-    {
-      "page": "documents.html",
-      "status": 200,
-      "title": "Documents & privacy · See You In Laos",
       "brokenImgs": [],
       "missingAnchors": []
     }
@@ -1407,118 +1393,6 @@
     {
       "page": "http://127.0.0.1:8787/journeys.html",
       "text": "Failed to load resource: net::ERR_FAILED"
-    },
-    {
-      "page": "http://127.0.0.1:8787/journeys.html",
-      "text": "Access to fetch at 'https://seeyouinlaos-website.suthep-hrg.workers.dev/api/inventory' from origin 'http://127.0.0.1:8787' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is p"
-    },
-    {
-      "page": "http://127.0.0.1:8787/journeys.html",
-      "text": "Failed to load resource: net::ERR_FAILED"
-    },
-    {
-      "page": "http://127.0.0.1:8787/journeys.html",
-      "text": "Access to fetch at 'https://seeyouinlaos-website.suthep-hrg.workers.dev/api/inventory' from origin 'http://127.0.0.1:8787' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is p"
-    },
-    {
-      "page": "http://127.0.0.1:8787/journeys.html",
-      "text": "Failed to load resource: net::ERR_FAILED"
-    },
-    {
-      "page": "http://127.0.0.1:8787/journeys.html",
-      "text": "Access to fetch at 'https://seeyouinlaos-website.suthep-hrg.workers.dev/api/inventory' from origin 'http://127.0.0.1:8787' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is p"
-    },
-    {
-      "page": "http://127.0.0.1:8787/journeys.html",
-      "text": "Failed to load resource: net::ERR_FAILED"
-    },
-    {
-      "page": "http://127.0.0.1:8787/journeys.html",
-      "text": "Access to fetch at 'https://seeyouinlaos-website.suthep-hrg.workers.dev/api/inventory' from origin 'http://127.0.0.1:8787' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is p"
-    },
-    {
-      "page": "http://127.0.0.1:8787/journeys.html",
-      "text": "Failed to load resource: net::ERR_FAILED"
-    },
-    {
-      "page": "http://127.0.0.1:8787/journeys.html",
-      "text": "Access to fetch at 'https://seeyouinlaos-website.suthep-hrg.workers.dev/api/inventory' from origin 'http://127.0.0.1:8787' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is p"
-    },
-    {
-      "page": "http://127.0.0.1:8787/journeys.html",
-      "text": "Failed to load resource: net::ERR_FAILED"
-    },
-    {
-      "page": "http://127.0.0.1:8787/journeys.html",
-      "text": "Access to fetch at 'https://seeyouinlaos-website.suthep-hrg.workers.dev/api/inventory' from origin 'http://127.0.0.1:8787' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is p"
-    },
-    {
-      "page": "http://127.0.0.1:8787/journeys.html",
-      "text": "Failed to load resource: net::ERR_FAILED"
-    },
-    {
-      "page": "http://127.0.0.1:8787/journeys.html",
-      "text": "Access to fetch at 'https://seeyouinlaos-website.suthep-hrg.workers.dev/api/inventory' from origin 'http://127.0.0.1:8787' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is p"
-    },
-    {
-      "page": "http://127.0.0.1:8787/journeys.html",
-      "text": "Failed to load resource: net::ERR_FAILED"
-    },
-    {
-      "page": "http://127.0.0.1:8787/journeys.html",
-      "text": "Access to fetch at 'https://seeyouinlaos-website.suthep-hrg.workers.dev/api/inventory' from origin 'http://127.0.0.1:8787' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is p"
-    },
-    {
-      "page": "http://127.0.0.1:8787/journeys.html",
-      "text": "Failed to load resource: net::ERR_FAILED"
-    },
-    {
-      "page": "http://127.0.0.1:8787/journeys.html",
-      "text": "Access to fetch at 'https://seeyouinlaos-website.suthep-hrg.workers.dev/api/inventory' from origin 'http://127.0.0.1:8787' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is p"
-    },
-    {
-      "page": "http://127.0.0.1:8787/journeys.html",
-      "text": "Failed to load resource: net::ERR_FAILED"
-    },
-    {
-      "page": "http://127.0.0.1:8787/journeys.html",
-      "text": "Access to fetch at 'https://seeyouinlaos-website.suthep-hrg.workers.dev/api/inventory' from origin 'http://127.0.0.1:8787' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is p"
-    },
-    {
-      "page": "http://127.0.0.1:8787/journeys.html",
-      "text": "Failed to load resource: net::ERR_FAILED"
-    },
-    {
-      "page": "http://127.0.0.1:8787/journeys.html",
-      "text": "Access to fetch at 'https://seeyouinlaos-website.suthep-hrg.workers.dev/api/inventory' from origin 'http://127.0.0.1:8787' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is p"
-    },
-    {
-      "page": "http://127.0.0.1:8787/journeys.html",
-      "text": "Failed to load resource: net::ERR_FAILED"
-    },
-    {
-      "page": "http://127.0.0.1:8787/journeys.html",
-      "text": "Access to fetch at 'https://seeyouinlaos-website.suthep-hrg.workers.dev/api/inventory' from origin 'http://127.0.0.1:8787' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is p"
-    },
-    {
-      "page": "http://127.0.0.1:8787/journeys.html",
-      "text": "Failed to load resource: net::ERR_FAILED"
-    },
-    {
-      "page": "http://127.0.0.1:8787/journeys.html",
-      "text": "Access to fetch at 'https://seeyouinlaos-website.suthep-hrg.workers.dev/api/inventory' from origin 'http://127.0.0.1:8787' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is p"
-    },
-    {
-      "page": "http://127.0.0.1:8787/journeys.html",
-      "text": "Failed to load resource: net::ERR_FAILED"
-    },
-    {
-      "page": "http://127.0.0.1:8787/journeys.html",
-      "text": "Access to fetch at 'https://seeyouinlaos-website.suthep-hrg.workers.dev/api/inventory' from origin 'http://127.0.0.1:8787' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is p"
-    },
-    {
-      "page": "http://127.0.0.1:8787/journeys.html",
-      "text": "Failed to load resource: net::ERR_FAILED"
     }
   ],
   "crossMissing": [
@@ -1531,8 +1405,13 @@
       "from": "review.html",
       "to": "wedding.html",
       "id": "ev-temple"
+    },
+    {
+      "from": "review.html",
+      "to": "about-you.html",
+      "id": "documents"
     }
   ],
-  "requestedCount": 169,
+  "requestedCount": 166,
   "resort01Requested": false
 }
