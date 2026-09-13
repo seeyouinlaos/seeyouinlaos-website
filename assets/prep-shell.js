@@ -68,7 +68,7 @@
     if (key === STEP.key) return 'Current';
     switch (key) {
       case 'invitation':  return (G && G.identityReviewed()) ? 'Complete' : 'Open';
-      case 'journey':     return (B && B.get().length && !(window.SIYL_JOURNEY && SIYL_JOURNEY.open().length)) ? 'Complete' : 'Open';
+      case 'journey':     return (B && B.get().length && window.SIYL_JOURNEY && !SIYL_JOURNEY.open().length) ? 'Complete' : 'Open';
       case 'wedding':     return (T && T.decidedAll()) ? 'Complete' : 'Open';
       case 'preparation': return (G && G.dressAckAll()) ? 'Complete' : 'Open';
       case 'about':
@@ -190,6 +190,8 @@
       '<button type="button" class="p-link mute" data-close>Close</button></div>' + html + '</div>';
     document.body.classList.add('p-drawer-open');
     drawer.querySelector('[data-close]').addEventListener('click', closeDrawer);
+    var hd = drawer.querySelector('h1, h2, h3, .t-h1, .t-h2');
+    drawer.setAttribute('aria-label', hd ? hd.textContent.trim() : 'Details');
     if (wire) wire(drawer);
     var f = drawer.querySelector('button, a[href], input, textarea');
     if (f) setTimeout(function () { f.focus(); }, 60);

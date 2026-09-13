@@ -37,7 +37,7 @@
   {
     "id": "a11y who-are-you layer",
     "ok": true,
-    "detail": "{\"role\":\"dialog\",\"modal\":\"true\",\"label\":null,\"focusInside\":true}"
+    "detail": "{\"role\":\"dialog\",\"modal\":\"true\",\"label\":\"Who are you?\",\"focusInside\":true}"
   },
   {
     "id": "a11y your-journey.html",

@@ -36,7 +36,7 @@ async function wire(page) {
     const url = new URL(route.request().url());
     const json = (status, body) => route.fulfill({ status, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(body) });
     if (url.pathname === '/api/status') return json(200, mock.status || { ok: true, received: false, receivedAt: null, confirmed: false, confirmedAt: null });
-    if (url.pathname === '/api/register') { if (route.request().method() !== 'POST') return json(405, { ok: false }); const b = JSON.parse(route.request().postData() || '{}'); mock.registered.push(b); mock.status = { ok: true, received: true, receivedAt: new Date().toISOString(), confirmed: false, confirmedAt: null }; return json(200, { ok: true, received: true, receivedAt: mock.status.receivedAt }); }
+    if (url.pathname === '/api/register') { if (route.request().method() !== 'POST') return json(405, { ok: false }); const b = JSON.parse(route.request().postData() || '{}'); mock.registered.push(b); const at = (b.registration && b.registration.registration_submitted_at) || new Date().toISOString(); mock.status = { ok: true, received: true, receivedAt: at, confirmed: false, confirmedAt: null }; return json(200, { ok: true, received: true, receivedAt: at }); }
     if (url.pathname.startsWith('/api/seating')) { if (route.request().method() === 'POST') return json(423, { ok: false, error: 'seating is not open' }); return json(200, { ok: true, open: false, frozen: false, configured: { ceremony: false, dinner: false }, ceremony: null, dinner: null, mine: { ceremony: {}, dinner: {} } }); }
     if (url.pathname.startsWith('/api/inventory')) return json(200, { ok: true, items: {} });
     return json(404, { ok: false });
@@ -293,6 +293,29 @@ await H2.go('review.html', 390);
 const conf2 = await H2.text('#journeystate');
 note('11 steffie sees confirmed honestly', /Journey confirmed/i.test(conf2) && /sent from another device/i.test(conf2) && (await page2.locator('#journeystate .p-wcard').count()) === 0 && !/No shared stay|Not decided/i.test(conf2), 'a device that never sent shows no invented cards');
 await H2.frames('review.html', 'S9c-confirmed-other-device', [390, 1440], [['#journeystate', 'S9c-confirmed-other-device-block']]);
+/* two senders: Steffie's device sends a later version; Peggy's device must not present its superseded snapshot as confirmed */
+await H2.go('your-journey.html', 390); await page2.locator('#bkksel [data-choose="u-sathorn-superior-garden"]').click(); await page2.waitForTimeout(300);
+await H2.go('you.html', 390); await page2.fill('#p-email', 'peggy.steffie@example.test'); await page2.locator('#p-email').dispatchEvent('change'); await page2.waitForTimeout(200);
+await H2.go('wedding.html', 390); const keys2 = await page2.evaluate(() => [...new Set([...document.querySelectorAll('[data-e]')].map((x) => x.getAttribute('data-e')))]);
+for (const g of [S.guestId, P.guestId]) for (const e of keys2) { await page2.locator('[data-g="' + g + '"][data-e="' + e + '"] [data-ev="yes"]').first().click().catch(() => {}); await page2.waitForTimeout(120); }
+await H2.go('wedding-preparation.html', 390); await page2.locator('#ack [data-ack="' + S.guestId + '"]').check().catch(() => {}); await page2.waitForTimeout(200);
+await page2.click('.prep-bar [data-switch]'); await page2.waitForSelector('.p-drawer:not([hidden])'); await page2.click('.p-drawer [data-who="' + P.guestId + '"]'); await page2.waitForTimeout(300);
+await page2.locator('#ack [data-ack="' + P.guestId + '"]').check().catch(() => {}); await page2.waitForTimeout(200);
+await page2.click('.prep-bar [data-switch]'); await page2.waitForSelector('.p-drawer:not([hidden])'); await page2.click('.p-drawer [data-who="' + S.guestId + '"]'); await page2.waitForTimeout(300);
+mock.status = { ok: true, received: true, receivedAt: mock.registered[0].registration.registration_submitted_at, confirmed: false, confirmedAt: null };
+await H2.go('review.html', 390); await page2.click('#send').catch(() => {}); await page2.waitForTimeout(1200);
+note('11b second device sends a later version', mock.registered.length >= 2 && mock.status.receivedAt === mock.registered[mock.registered.length - 1].registration.registration_submitted_at, mock.registered.length + ' registrations; server holds the latest stamp');
+await H.go('review.html', 390);
+note('11b earlier device says a newer version exists', /newer version was sent from another device/i.test(await H.text('#journeystate')), 'received state on Peggy\'s device names the later send');
+await H.crop('#journeystate', 'S7c-received-superseded', 390);
+mock.status = { ok: true, received: true, receivedAt: mock.status.receivedAt, confirmed: true, confirmedAt: new Date().toISOString() };
+await H.go('review.html', 390);
+const supTxt = await H.text('#journeystate');
+note('11b superseded snapshot never shown as confirmed', /sent again from another device after this one/i.test(supTxt) && (await page.locator('#journeystate .p-wcard').count()) === 0 && !/Shama|Party journey confirmation/i.test(supTxt), 'Peggy\'s device shows the honest card, no block A, no cards');
+await H.frames('review.html', 'S9d-confirmed-superseded', [390, 1440], [['#journeystate', 'S9d-confirmed-superseded-block']]);
+await H2.go('review.html', 390);
+const latestTxt = await H2.text('#journeystate');
+note('11b latest sender sees the confirmed journey', /U Sathorn/i.test(latestTxt) && (await page2.locator('#journeystate .p-wcard').count()) === 2 && !/Changed since/i.test(latestTxt), 'Steffie\'s device paints block A and both cards from the version Guest Relations holds');
 mock.status = null;
 
 /* ================================================================ 10 · stale session */
