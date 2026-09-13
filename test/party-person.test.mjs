@@ -426,9 +426,11 @@ test('readiness: the party cannot send while one personal acknowledgement is mis
   G.setProfile(PEGGY, 'access', '   ');
   assert.equal(G.accessAnswered(PEGGY), false, 'whitespace is not an answer');
   G.setProfile(PEGGY, 'access', 'None');
-  assert.equal(G.accessAnswered(PEGGY), true, '"None" is an answer'); assert.equal(G.accessAnswered(STEFFIE), false, 'each guest answers for themselves');
+  assert.equal(G.accessAnswered(PEGGY), false, 'dietary is required as well (Owner, 13 Sep 2026)');
+  G.setProfile(PEGGY, 'dietary', 'NONE');                 /* the explicit "Nothing to note" */
+  assert.equal(G.accessAnswered(PEGGY), true, '"None" and "Nothing to note" are answers'); assert.equal(G.accessAnswered(STEFFIE), false, 'each guest answers for themselves');
   deq(G.readiness().need.map((n) => n.key), ['you', 'about']);
-  G.setProfile(STEFFIE, 'access', 'No special requirements');
+  G.setProfile(STEFFIE, 'access', 'No special requirements'); G.setProfile(STEFFIE, 'dietary', 'No shellfish');
   assert.equal(G.stepState('about'), 'Completed');
   deq(G.readiness().need.map((n) => n.key), ['you']);
   G.setPartyField('phone', '+49 170 0000000');

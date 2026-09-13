@@ -712,6 +712,7 @@
   E("The Chao Phraya river and the Bangkok skyline", "Der Chao-Phraya-Fluss und die Skyline von Bangkok", "แม่น้ำเจ้าพระยาและเส้นขอบฟ้ากรุงเทพฯ", "チャオプラヤー川とバンコクのスカイライン");
   E("Patuxai and the fountain park in Vientiane at twilight", "Patuxai und der Brunnenpark in Vientiane in der Dämmerung", "ปะตูไซและสวนน้ำพุในเวียงจันทน์ยามพลบค่ำ", "夕暮れのビエンチャン、パトゥーサイと噴水公園");
   E("The Golden Horse and Jade Rooster archways in Kunming", "Die Torbögen von Goldenem Pferd und Jade-Hahn in Kunming", "ซุ้มประตูม้าทองและไก่หยกในคุนหมิง", "昆明の金馬・碧鶏坊");
+  E("The tiled roofs of Lijiang old town below Jade Dragon Snow Mountain", "Die Ziegeldächer der Altstadt von Lijiang unter dem Jadedrachen-Schneeberg", "หลังคากระเบื้องของเมืองเก่าลี่เจียง เบื้องหลังคือภูเขาหิมะมังกรหยก", "玉龍雪山を望む麗江古城の瓦屋根");
   E("Black Dragon Pool in Lijiang, Jade Dragon Snow Mountain behind it", "Der Schwarze-Drachen-Teich in Lijiang, dahinter der Jadedrachen-Schneeberg", "สระมังกรดำในลี่เจียง เบื้องหลังคือภูเขาหิมะมังกรหยก", "麗江の黒龍潭、その背後に玉龍雪山");
   E("The green gateway at Souphattra Heritage, Vientiane", "Das grüne Tor im Souphattra Heritage, Vientiane", "ซุ้มประตูสีเขียวที่ซูพัดตรา เฮอริเทจ เวียงจันทน์", "ビエンチャン、スパッタラ・ヘリテージの緑の門");
   E("The green door where the vows are spoken", "Die grüne Tür, an der die Trauversprechen gegeben werden", "ประตูสีเขียวที่กล่าวคำสาบาน", "誓いの言葉を交わす緑の扉");

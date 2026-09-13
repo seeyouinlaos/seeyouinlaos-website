@@ -200,6 +200,8 @@ for (const W of [390, 1280]) {
   note('5 China card carries the Lijiang file', china && /004-lijiang-black-dragon-pool\.jpg/.test(china.bg) && !/kunming-jinma/.test(china.bg) && /Black Dragon Pool/.test(china.label), JSON.stringify(china));
   const ok = await p.evaluate(async () => { const r = await fetch('assets/images/city/004-lijiang-black-dragon-pool.jpg'); return r.status; });
   note('5 the file is served', ok === 200, 'HTTP ' + ok);
+  const after = await p.evaluate(async () => { const a = document.querySelector('a.am[href="journeys.html#j-mu9646"]'); const r = await fetch('assets/images/city/004-lijiang-old-town-roofs-jade-dragon.jpg'); return { bg: a ? getComputedStyle(a).backgroundImage : '', status: r.status }; });
+  note('5 After the Wedding card carries the Lijiang old-town file', /004-lijiang-old-town-roofs-jade-dragon\.jpg/.test(after.bg) && after.status === 200, JSON.stringify(after));
   await p.close();
 }
 

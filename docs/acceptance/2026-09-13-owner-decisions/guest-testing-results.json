@@ -1,6 +1,6 @@
 {
   "origin": "http://127.0.0.1:8787",
-  "at": "2026-09-13T16:01:06.899Z",
+  "at": "2026-09-13T17:24:29.666Z",
   "results": [
     {
       "id": "1 U Sathorn chosen → the card says so, from the bag",
@@ -246,6 +246,11 @@
       "id": "5 the file is served",
       "ok": true,
       "d": "HTTP 200"
+    },
+    {
+      "id": "5 After the Wedding card carries the Lijiang old-town file",
+      "ok": true,
+      "d": "{\"bg\":\"url(\\\"http://127.0.0.1:8787/assets/images/city/004-lijiang-old-town-roofs-jade-dragon.jpg\\\")\",\"status\":200}"
     }
   ]
 }

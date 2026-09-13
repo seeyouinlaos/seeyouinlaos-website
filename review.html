@@ -298,7 +298,7 @@ var MSG={invitation:'Please open your invitation before sending your journey.',
          wedding:'Please answer the wedding participation for each named guest before sending.',
          preparation:'Please review the dress code — each of you, in your own name — before sending.'};
 var ACT={invitation:'Open my invitation',you:'Add your contact',journey:'Choose your journey',wedding:'Go there now',preparation:'Review dress code',about:'Answer now'};
-if(first&&first.key==='about'){MSG.about='Accessibility & comfort is answered by each named guest before the journey is sent — '+G.accessMissing().map(function(g){return G.nameOf(g.guestId)}).join(' and ')+' still to answer. "None" is an answer.'}
+if(first&&first.key==='about'){MSG.about='Food allergies or dietary requirements and accessibility & comfort are answered by each named guest before the journey is sent — '+G.accessMissing().map(function(g){return G.nameOf(g.guestId)}).join(' and ')+' still to answer. "Nothing to note" and "None" are answers.'}
 if(first&&first.key==='wedding'&&window.SIYL_TEMPLE&&SIYL_TEMPLE.decidedAll()&&!G.dressAckAll()){
   MSG.wedding='Please review the dress code before sending your journey — '+G.dressMissing().map(function(g){return G.nameOf(g.guestId)}).join(' and ')+' still to acknowledge, each in their own name.';
   first=Object.assign({},first,{href:'wedding-preparation.html#ack',action:'Review dress code'})}
