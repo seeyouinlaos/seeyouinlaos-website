@@ -316,3 +316,15 @@ media on one line, no errors. Production ledger: seating OPEN; four chairs held 
 - **Homepage "After the Wedding" card:** the Owner's Drive file `1lI07I8yTBcCtiEevBdduf1Pf7eGkbRS4`
   (`IMG_1291.WEBP`, 726 × 995, kept at native size) → `city/004-lijiang-old-town-roofs-jade-dragon.jpg`,
   replacing the Naxi rooftops on that card only (destination.html keeps them); mapped with the Drive id.
+- **Four further "replace, no review" image decisions (Owner, later the same evening):**
+  homepage "Before the Wedding" card → the Owner's Bangkok Skytrain / Mahanakhon file
+  `1l_gUqljSZyRFOy5wxqEbOg21N-9BPw7P` (`city/001-bangkok-skytrain-king-power-mahanakhon.jpg`, 6f24760);
+  homepage Vientiane duo, left frame → the rooftop terrace at dusk `15MwIXZIqdvLfS0_RC8N9CBY0k0QMZ8i9`
+  (`city/002-vientiane-rooftop-terrace-dusk.jpg`, 8c193dc); public wedding page, Vow Ceremony → the green
+  door entrance `1LHfLS0Ys4QV7Jds4PVmoMsvkCSlaAXXG` (`event/052-vow-ceremony-green-door-entrance.jpg`, 4d03b6f);
+  destination.html 03 · China card → the temple roofs with cherry blossom `1USQV7R6sIhlj_fo1JbUaQNn-P8V0h2nc`
+  (`city/003-kunming-temple-cherry-blossom.jpg`, now the Owner's bytes) and the Kunming stay
+  (journeys card, accommodation tile, bag thumbnail) → the Wanxiang Yueju entrance at night
+  `1rdIR-yB8F_ReV0vseUtAJXEG3ji1r9Ia` (`journey/kunming-wanxiang-yueju-entrance.jpg`, 1271 × 853, 3910929).
+  Every file mapped with its Drive id; i18n entries for the new labels; gates PASS, `npm test` 214/214;
+  each commit released through the automatic Workers Build and verified byte-identical on Worker and Pages.
