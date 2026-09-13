@@ -239,14 +239,14 @@ function stageHtml(seg,i){
   return h+'</section>'}
 
 function extraLine(x){
-  var m=J.meta(x),q=x.qty||1,href=detailHref(x),exp=m.unit==='experience';
+  var m=J.meta(x),q=x.qty||1,href=detailHref(x),exp=m.unit==='experience'||x.request;
   return '<div class="p-line"><a class="p-line-img" href="'+href+'" aria-label="Open '+esc(x.name)+'"'+(SIYL_BAG.thumb(x)?' style="background-image:url('+SIYL_BAG.thumb(x)+')"':'')+'></a>'+
     '<div class="p-line-body"><p class="t-l1">'+(J.when(x)||'')+(m.cat?' · '+m.cat:'')+'</p>'+
     '<h3 class="t-h2"><a href="'+href+'">'+esc(x.name)+'</a></h3><p class="t-b2">'+esc(x.meta||'')+'</p>'+
     (m.basis?'<p class="t-b2">'+esc(m.basis)+'</p>':'')+
-    (exp?'<div class="p-qty"><button type="button" class="p-sel" data-q="'+x.id+':-1" aria-label="One fewer">&minus;</button><b>'+q+'</b><button type="button" class="p-sel" data-q="'+x.id+':1" aria-label="One more">+</button></div>':'')+
+    (exp?'<div class="p-qty">'+(x.request?'<span class="t-l1">Participating guests</span>':'')+'<button type="button" class="p-sel" data-q="'+x.id+':-1" aria-label="One fewer">&minus;</button><b>'+q+'</b><button type="button" class="p-sel" data-q="'+x.id+':1" aria-label="One more">+</button></div>':'')+
     '<div class="p-actions"><button type="button" class="p-link mute" data-rm="'+(P?P.windowOf(x.id):x.id)+'">Remove</button></div></div>'+
-    (x.interest?'<p class="p-line-amt"><span class="t-l1">Interest · request</span></p>':x.request?'<p class="p-line-amt"><span class="t-l1">Request · '+esc(x.priceNote||'')+'</span></p>':'<p class="p-line-amt">'+money((x.price||0)*q)+'</p>')+'</div>'}
+    (x.interest?'<p class="p-line-amt"><span class="t-l1">Interest · request</span></p>':'<p class="p-line-amt">'+money((x.price||0)*q)+'</p>')+'</div>'}
 
 function render(){
   var b=SIYL_BAG.get(),box=document.getElementById('chrono'),h='';
@@ -278,7 +278,11 @@ function wire(){
     var w=bt.getAttribute('data-rm'),ids=P?P.ids(w):[w];ids.forEach(function(id){SIYL_BAG.remove(id)})})});
   document.querySelectorAll('[data-skip]').forEach(function(bt){bt.addEventListener('click',function(){J.skip(bt.getAttribute('data-skip'),true)})});
   document.querySelectorAll('[data-unskip]').forEach(function(bt){bt.addEventListener('click',function(){J.skip(bt.getAttribute('data-unskip'),false)})});
-  document.querySelectorAll('[data-q]').forEach(function(bt){bt.addEventListener('click',function(){var v=bt.getAttribute('data-q').split(':');SIYL_BAG.qty(v[0],parseInt(v[1],10))})})}
+  document.querySelectorAll('[data-q]').forEach(function(bt){bt.addEventListener('click',function(){var v=bt.getAttribute('data-q').split(':'),d=parseInt(v[1],10);
+    /* a restaurant request counts participating guests: never more than the party */
+    var ln=SIYL_BAG.get().filter(function(x){return x.id===v[0]})[0],G=window.SIYL_GUEST,pp=G&&G.party();
+    if(ln&&ln.request&&d>0&&pp&&(ln.qty||1)>=pp.guests.length)return;
+    SIYL_BAG.qty(v[0],d)})})}
 
 /* quiet editorial completeness — decisions, never a progress meter */
 function renderDecisions(){

@@ -47,19 +47,20 @@ await p.locator('#sel-add').click(); await p.waitForTimeout(500);
 note('gate opens without a session', await p.evaluate(() => document.body.classList.contains('siyl-inv-open')), 'invitation gate');
 await p.fill('.siyl-inv input', T2); await p.click('.siyl-inv .igo'); await p.waitForTimeout(2500);
 const st = await p.evaluate(() => ({ cur: document.querySelector('[data-sel-state="current"]')?.textContent.trim(), bag: JSON.parse(localStorage.getItem('siyl.bag') || '[]') }));
-note('selected → In your journey, one request line', st.cur === 'In your journey' && st.bag.length === 1 && st.bag[0].id === 'suhring' && st.bag[0].request === true && st.bag[0].price == null, JSON.stringify(st.bag));
+note('selected → In your journey · 2 guests · USD 360, one request line priced per person', /In your journey · 2 guests · USD 360/.test(st.cur) && st.bag.length === 1 && st.bag[0].id === 'suhring' && st.bag[0].request === true && st.bag[0].price === 180 && st.bag[0].qty === 2, JSON.stringify(st.bag));
 await shot('05-suhring-current');
 await p.reload({ waitUntil: 'networkidle' }); await p.waitForTimeout(900);
-note('reload keeps the state', (await p.evaluate(() => document.querySelector('[data-sel-state="current"]')?.textContent.trim())) === 'In your journey', 'current after reload');
+note('reload keeps the state', /In your journey · 2 guests · USD 360/.test(await p.evaluate(() => document.querySelector('[data-sel-state="current"]')?.textContent.trim())), 'current after reload');
 await p.evaluate(() => document.querySelectorAll('#sel-add').forEach((b) => b.click())); await p.waitForTimeout(300);
 note('no duplicate', (await p.evaluate(() => JSON.parse(localStorage.getItem('siyl.bag') || '[]').length)) === 1, 'one line');
 await p.goto(O + '/your-journey', { waitUntil: 'networkidle' }); await p.waitForTimeout(1200);
+if (await p.locator('.p-drawer:not([hidden]) [data-who]').count()) { await p.locator('.p-drawer:not([hidden]) [data-who]').first().click(); await p.waitForTimeout(600); }
 const yj = await p.evaluate(() => ({ t: document.getElementById('extra-lines')?.innerText.replace(/\s+/g, ' ').trim(), total: document.getElementById('tt')?.textContent.trim() }));
-note('Your Journey lists the request, total untouched', /Sühring/.test(yj.t) && /Request · USD 180/.test(yj.t) && yj.total === 'USD 0', yj.total + ' · ' + yj.t.slice(0, 100));
+note('Your Journey lists the request, USD 180 × 2 = USD 360 in the total', /Sühring/.test(yj.t) && /USD 180 per person/.test(yj.t) && /Participating guests/.test(yj.t) && yj.total === 'USD 360', yj.total + ' · ' + yj.t.slice(0, 100));
 await p.locator('#extras').scrollIntoViewIfNeeded().catch(() => {}); await shot('06-your-journey');
 await p.goto(O + '/review', { waitUntil: 'networkidle' }); await p.waitForTimeout(1500);
 const rv = await p.evaluate(() => ({ t: document.getElementById('items')?.innerText.replace(/\s+/g, ' ').trim(), total: document.getElementById('tt')?.textContent.trim() }));
-note('Review & Send shows the request, not in the total (nothing sent)', /Sühring/.test(rv.t) && /Request · USD 180/.test(rv.t) && rv.total === 'USD 0', rv.total);
+note('Review & Send shows the request with USD 360 in the total, never as confirmed (nothing sent)', /Sühring/.test(rv.t) && /USD 180 per person × 2 guests/.test(rv.t) && /not a confirmed reservation/.test(rv.t) && rv.total === 'USD 360', rv.total);
 await p.locator('#items').scrollIntoViewIfNeeded().catch(() => {}); await shot('07-review');
 /* remove, leaving the party's draft as it was */
 await p.goto(O + '/experience?id=bkk-suhring', { waitUntil: 'networkidle' }); await p.waitForTimeout(900);

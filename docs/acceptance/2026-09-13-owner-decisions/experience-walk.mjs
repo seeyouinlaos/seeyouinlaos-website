@@ -100,39 +100,53 @@ for (const [id, name] of [['bkk-suhring', 'Sühring'], ['bkk-dib', 'Dib Bangkok'
   await p.locator('[data-acc="3"]').click(); await p.waitForTimeout(200);
   const mentor = await txt(p, '#xs3');
   note('3 Sühring · The first mentor opens on tap and carries grandmother Christa', /grandmother Christa/.test(mentor) && await p.evaluate(() => document.getElementById('xs3').classList.contains('on')), mentor.slice(0, 60));
-  note('3 Sühring · price USD 180 as recorded, without an invented unit', rec.kv.some((k) => /^PRICE USD 180/.test(k) && !/per guest|per person|per menu/.test(k.split('The amount')[0]) && /does not state/.test(k)), rec.kv.find((k) => /^PRICE/.test(k)));
-  note('3 Sühring · opening hours verbatim', rec.kv.some((k) => /OPENING HOURS Lunch Thursday to Sunday 12:30 pm to 13:00 pm \(last seating\) Closed on Monday and Tuesday/.test(k)), rec.kv.find((k) => /^OPENING/.test(k)));
-  note('3 Sühring · map and website from the source', rec.links.some((l) => /maps\.app\.goo\.gl\/2b4whggW3YCnxN6u5/.test(l)) && rec.links.some((l) => /restaurantsuhring\.com\/menu\.html/.test(l)), rec.links.join(' '));
-  note('3 Sühring · the Journey action explains request, not reservation, and the untotalled amount', /It is a request, not a reservation/.test(rec.sel) && /not added to your journey total/.test(rec.sel) && rec.btn === 'Add to your journey', rec.btn);
+  note('3 Sühring · price USD 180 per person (Owner decision), hours verbatim, map and website', rec.kv.some((k) => /^PRICE USD 180 per person/.test(k)) && rec.kv.some((k) => /OPENING HOURS Lunch Thursday to Sunday 12:30 pm to 13:00 pm \(last seating\) Closed on Monday and Tuesday/.test(k)) && rec.links.some((l) => /maps\.app\.goo\.gl\/2b4whggW3YCnxN6u5/.test(l)) && rec.links.some((l) => /restaurantsuhring\.com/.test(l)), rec.kv.find((k) => /^PRICE/.test(k)));
+  note('3 Sühring · the Journey action: optional, a request, never a confirmed reservation, no date to choose', /Optional\./.test(rec.sel) && /not a confirmed reservation/.test(rec.sel) && /No date or time to choose/.test(rec.sel) && !/reservation confirmed|table confirmed|guaranteed availability/i.test(rec.sel) && /Add to your journey · USD 180/.test(rec.btn), rec.btn);
   /* the action is gated by the invitation: the code screen opens */
   await p.locator('#sel-add').click(); await p.waitForTimeout(400);
   const gate = await p.evaluate(() => document.body.classList.contains('siyl-inv-open'));
   note('3 Sühring · adding without a session opens the invitation gate, nothing is added', gate && (await p.evaluate(() => (localStorage.getItem('siyl.bag') || '[]'))) === '[]', 'gate ' + gate);
   await p.fill('.siyl-inv input', T2); await p.click('.siyl-inv .igo'); await p.waitForTimeout(1500);
   const bag1 = JSON.parse(await p.evaluate(() => localStorage.getItem('siyl.bag') || '[]'));
-  const st1 = await p.evaluate(() => ({ cur: document.querySelector('[data-sel-state="current"]')?.textContent.trim(), add: !!document.querySelector('#sel-add'), rm: !!document.querySelector('#sel-rm') }));
-  note('3 Sühring · after the code the request is in the bag as a REQUEST line without a price', bag1.length === 1 && bag1[0].id === 'suhring' && bag1[0].request === true && bag1[0].price == null && bag1[0].priceNote === 'USD 180' && bag1[0].exp === 'bkk-suhring', JSON.stringify(bag1));
-  note('3 Sühring · the page shows IN YOUR JOURNEY, the Add action is gone, Remove offered', st1.cur === 'In your journey' && !st1.add && st1.rm, JSON.stringify(st1));
+  const party = JSON.parse(await p.evaluate(() => localStorage.getItem('siyl.auth'))).guests.length;
+  const st1 = await p.evaluate(() => ({ cur: document.querySelector('[data-sel-state="current"]')?.textContent.trim(), add: !!document.querySelector('#sel-add'), rm: !!document.querySelector('#sel-rm'), q: document.getElementById('selq')?.textContent, amt: document.getElementById('selamt')?.textContent }));
+  note('3 Sühring · after the code ONE line: USD 180 per person × the whole party (' + party + ')', bag1.length === 1 && bag1[0].id === 'suhring' && bag1[0].price === 180 && bag1[0].qty === party && bag1[0].request === true && bag1[0].exp === 'bkk-suhring', JSON.stringify(bag1));
+  note('3 Sühring · IN YOUR JOURNEY · ' + party + ' guests · USD ' + 180 * party + ', Add gone, Remove offered', st1.cur === 'In your journey · ' + party + ' guests · USD ' + (180 * party) && !st1.add && st1.rm && st1.q === String(party) && st1.amt === 'USD ' + (180 * party), JSON.stringify(st1));
+  /* participation: one fewer guest → USD 180; never above the party; never below one */
+  await p.locator('[data-step="-1"]').click(); await p.waitForTimeout(200);
+  const one = await p.evaluate(() => ({ q: JSON.parse(localStorage.getItem('siyl.bag'))[0].qty, cur: document.querySelector('[data-sel-state="current"]')?.textContent.trim(), minus: document.querySelector('[data-step="-1"]').disabled }));
+  note('3 Sühring · one participating guest = USD 180, the minus stops at one', one.q === 1 && /1 guest · USD 180$/.test(one.cur) && one.minus, JSON.stringify(one));
+  await p.locator('[data-step="1"]').click(); await p.waitForTimeout(200);
+  const two = await p.evaluate(() => ({ q: JSON.parse(localStorage.getItem('siyl.bag'))[0].qty, plus: document.querySelector('[data-step="1"]').disabled, cur: document.querySelector('[data-sel-state="current"]')?.textContent.trim() }));
+  note('3 Sühring · two participating guests = USD 360, the plus stops at the party', two.q === 2 && /2 guests · USD 360$/.test(two.cur) && two.plus === (party === 2), JSON.stringify(two));
   await p.reload({ waitUntil: 'networkidle' }); await p.waitForTimeout(600);
   const st2 = await p.evaluate(() => ({ cur: document.querySelector('[data-sel-state="current"]')?.textContent.trim(), add: !!document.querySelector('#sel-add') }));
-  note('3 Sühring · reload keeps the current state', st2.cur === 'In your journey' && !st2.add, JSON.stringify(st2));
-  /* no duplicate: a second attempt through the page cannot add twice */
+  note('3 Sühring · reload keeps the selection and the count', /In your journey · 2 guests · USD 360/.test(st2.cur) && !st2.add, JSON.stringify(st2));
   await p.evaluate(() => { document.querySelectorAll('#sel-add').forEach((b) => b.click()); }); await p.waitForTimeout(300);
   const bag2 = JSON.parse(await p.evaluate(() => localStorage.getItem('siyl.bag') || '[]'));
-  note('3 Sühring · duplicate selection impossible', bag2.length === 1 && bag2[0].qty === 1, bag2.length + ' line, qty ' + bag2[0].qty);
+  note('3 Sühring · duplicate selection impossible', bag2.length === 1 && bag2[0].qty === 2, bag2.length + ' line, qty ' + bag2[0].qty);
   /* Your Journey */
   await p.goto(ORIGIN + '/your-journey.html', { waitUntil: 'networkidle' }); await p.waitForTimeout(700);
+  /* the party's first visit to a step asks WHO ARE YOU (accepted C behaviour): answer it */
+  if (await p.locator('.p-drawer:not([hidden]) [data-who]').count()) { await p.locator('.p-drawer:not([hidden]) [data-who]').first().click(); await p.waitForTimeout(500); }
   const yj = await p.evaluate(() => { const ex = document.getElementById('extras'); const line = ex && ex.querySelector('.p-line'); return { hidden: ex ? ex.hidden : true, text: line ? line.textContent.replace(/\s+/g, ' ').trim() : '', href: line ? line.querySelector('h3 a')?.getAttribute('href') : '', total: document.getElementById('tt')?.textContent.trim() }; });
-  note('3 Your Journey · Sühring listed as a request, opens its page, total untouched', !yj.hidden && /Sühring/.test(yj.text) && /Request · USD 180/.test(yj.text) && /BANGKOK DAYS · Restaurant/.test(yj.text) && /experience\.html\?id=bkk-suhring/.test(yj.href) && yj.total === 'USD 0', yj.total + ' · ' + yj.text.slice(0, 120));
+  note('3 Your Journey · Sühring listed at USD 180 per person, 2 participating guests, USD 360 in the total, opens its page', !yj.hidden && /Sühring/.test(yj.text) && /USD 180 per person/.test(yj.text) && /Participating guests/.test(yj.text) && /USD 360/.test(yj.text) && /BANGKOK DAYS · Restaurant/.test(yj.text) && /experience\.html\?id=bkk-suhring/.test(yj.href) && yj.total === 'USD 360', yj.total + ' · ' + yj.text.slice(0, 140));
+  /* the line's own stepper: one fewer → USD 180 in the total; one more → back; never above the party */
+  await p.locator('#extra-lines [data-q="suhring:-1"]').click(); await p.waitForTimeout(400);
+  const t1 = await txt(p, '#tt'); await p.locator('#extra-lines [data-q="suhring:1"]').click(); await p.waitForTimeout(400); const t2 = await txt(p, '#tt');
+  await p.locator('#extra-lines [data-q="suhring:1"]').click(); await p.waitForTimeout(400); const t3 = await txt(p, '#tt');
+  note('3 Your Journey · the participants stepper moves the total 360 → 180 → 360 and stops at the party', t1 === 'USD 180' && t2 === 'USD 360' && t3 === 'USD 360', t1 + ' · ' + t2 + ' · ' + t3);
   /* Review & Send */
   await p.goto(ORIGIN + '/review.html', { waitUntil: 'networkidle' }); await p.waitForTimeout(900);
   const rv = await p.evaluate(() => { const it = document.getElementById('items'); return { text: it ? it.textContent.replace(/\s+/g, ' ').trim() : '', total: document.getElementById('tt')?.textContent.trim() }; });
-  note('3 Review & Send · the request line is shown by name, USD 180 as recorded, not in the total', /Sühring/.test(rv.text) && /Request · USD 180/.test(rv.text) && /not a confirmed reservation/.test(rv.text) && rv.total === 'USD 0', rv.total + ' · ' + rv.text.slice(0, 140));
+  note('3 Review & Send · the request is shown by name with USD 180 per person × 2 guests and USD 360 in the total, never as confirmed', /Sühring/.test(rv.text) && /USD 180 per person × 2 guests/.test(rv.text) && /not a confirmed reservation/.test(rv.text) && !/reservation confirmed|table confirmed/i.test(rv.text) && rv.total === 'USD 360', rv.total + ' · ' + rv.text.slice(0, 160));
   /* remove follows the bag rule */
   await p.goto(ORIGIN + '/experience.html?id=bkk-suhring', { waitUntil: 'networkidle' }); await p.waitForTimeout(500);
   await p.locator('#sel-rm').click(); await p.waitForTimeout(300);
   const bag3 = JSON.parse(await p.evaluate(() => localStorage.getItem('siyl.bag') || '[]'));
   note('3 Sühring · Remove empties the line and returns the Add action', bag3.length === 0 && (await p.evaluate(() => !!document.querySelector('#sel-add'))), 'bag ' + bag3.length);
+  await p.goto(ORIGIN + '/your-journey.html', { waitUntil: 'networkidle' }); await p.waitForTimeout(600);
+  note('3 Your Journey · after removal the total is back to USD 0', (await txt(p, '#tt')) === 'USD 0', await txt(p, '#tt'));
   note('3 no page errors across the Sühring flow', errs.length === 0, errs.join(' | ') || 'clean');
   await p.close();
 }

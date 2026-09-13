@@ -241,10 +241,10 @@ return '<div class="p-line"><a class="p-line-img" href="'+href+'" aria-label="Op
 '<div class="p-line-body"><p class="t-l1">'+(when2?when2:'')+(m.cat?' · '+m.cat:'')+'</p>'+
 '<h3 class="t-h2"><a href="'+href+'">'+esc(x.name)+'</a></h3><p class="t-b2">'+esc(x.meta||'')+'</p>'+
 (x.complimentary?'<p class="t-b2">Complimentary · USD 0 payable. An independent stay: the wedding programme is included as it stands; arrival, departure and transfers are arranged by you, with no individual Guest Relations travel or accommodation support.</p>':'')+
-(J&&J.quantityLine(x)?'<p class="t-b2">'+esc(J.quantityLine(x))+'</p>':(m.basis?'<p class="t-b2">'+esc(m.basis)+'</p>':''))+
+(J&&J.quantityLine(x)?'<p class="t-b2">'+esc(J.quantityLine(x))+'</p>':'')+((x.request||!(J&&J.quantityLine(x)))&&m.basis?'<p class="t-b2">'+esc(m.basis)+'</p>':'')+
 (x.note?'<p class="t-l1 on">'+esc(x.note)+(x.noteBy?' · '+esc(x.noteBy):'')+'</p>':'')+
 (x.breakfast?'<p class="t-l1">'+esc(x.breakfast)+'</p>':'')+'</div>'+
-(x.interest?'<p class="p-line-amt"><span class="t-l1">Interest · request</span></p>':x.request?'<p class="p-line-amt"><span class="t-l1">Request · '+esc(x.priceNote||'')+'</span></p>':'<p class="p-line-amt">USD '+((x.price||0)*q).toLocaleString('en-US')+'</p>')+'</div>'}).join('')}
+(x.interest?'<p class="p-line-amt"><span class="t-l1">Interest · request</span></p>':'<p class="p-line-amt">USD '+((x.price||0)*q).toLocaleString('en-US')+'</p>')+'</div>'}).join('')}
 document.getElementById('tt').textContent='USD '+SIYL_BAG.total().toLocaleString('en-US');
 renderGaps();
 paintReady();
@@ -433,7 +433,8 @@ L.push('','SELECTIONS (in the order the journey happens):');
 .forEach(function(x){L.push('- '+x.name+' · '+(x.meta||'')+(x.qty>1?' · Quantity '+x.qty:'')+
 (x.rate!=null&&x.nights?' · USD '+x.rate+' per person / night · '+x.nights+(x.nights===1?' night':' nights'):'')+
 (x.note?' · '+x.note.toUpperCase()+(x.noteBy?' ('+x.noteBy+')':''):'')+
-(x.interest?' · INTEREST ONLY (no journey cost, payable at the spa)':x.request?' · TABLE REQUEST ('+(x.priceNote||'')+' as recorded by the hosts, unit not stated in the source; not a confirmed reservation; not in the journey total)':' · USD '+((x.price||0)*x.qty)))});
+(x.request?' · RESTAURANT REQUEST (USD 180 per person × '+x.qty+' participating; to be arranged through Guest Relations; not a confirmed reservation)':'')+
+(x.interest?' · INTEREST ONLY (no journey cost, payable at the spa)':' · USD '+((x.price||0)*x.qty)))});
 if(window.SIYL_JOURNEY){var op=SIYL_JOURNEY.open(),sk=SIYL_JOURNEY.SEGMENTS.filter(function(g){return SIYL_JOURNEY.state(g)==='declined'});
 if(sk.length){L.push('','NOT JOINING:');sk.forEach(function(g){L.push('- '+g.when+' · '+g.cat+' · '+g.place)})}
 if(op.length){L.push('','DECISION STILL OPEN:');op.forEach(function(g){L.push('- '+g.when+' · '+g.cat+' · '+g.place)})}}

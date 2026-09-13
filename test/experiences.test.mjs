@@ -121,44 +121,83 @@ test('SÜHRING — canonical entity, Bangkok, restaurant, source category, Drive
   assert.equal(GAL['bkk-suhring'].images.length, e.used);
 });
 
-test('SÜHRING — the full source record is rendered, the price without an invented unit, the hours verbatim', () => {
+test('SÜHRING — the full source record is rendered, the price per person by Owner decision, the hours verbatim', () => {
   const s = EXP.find((x) => x.id === 'bkk-suhring');
   assert.equal(s.sheet, 'FULL');
   assert.deepEqual(s.sections.map((k) => k.k), ['The philosophy', 'The founders', 'The foundation', 'The first mentor', 'Contemporary heritage']);
   assert.match(s.sections[3].p.join(' '), /grandmother Christa/);
-  assert.equal(s.practical.price, 'USD 180');
-  assert.doesNotMatch(s.practical.price, /per/);
-  assert.match(s.practical.priceNote, /does not state/);
+  assert.equal(s.practical.price, 'USD 180 per person');
   assert.deepEqual(s.practical.hours, ['Lunch', 'Thursday to Sunday', '12:30 pm to 13:00 pm (last seating)', 'Closed on Monday and Tuesday']);
   assert.equal(s.maps, 'https://maps.app.goo.gl/2b4whggW3YCnxN6u5?g_st=ic');
   assert.equal(s.link, 'https://www.restaurantsuhring.com/menu.html');
-  assert.deepEqual(s.select, { id: 'suhring', name: 'Sühring', meta: 'Lunch · German fine dining · Bangkok', price: 'USD 180' });
-  const page = src('experience.html');
-  assert.match(page, /request: true, priceNote: s\.price, exp: x\.id/);
-  assert.match(page, /if \(SIYL_BAG\.has\(s\.id\)\) \{ paintSel\(\); return; \}/, 'duplicate selection impossible');
-  assert.match(page, /data-sel-state="current" aria-current="true">In your journey/);
-  assert.match(page, /It is a request, not a reservation/);
+  assert.deepEqual(s.select, { id: 'suhring', price: 180, unit: 'per person' });
+  assert.ok(GAL['bkk-suhring'].images.length >= 5 && GAL['bkk-suhring'].images.length === byId['bkk-suhring'].used, 'the authorised gallery stays');
 });
 
-test('SÜHRING — the request line is named in Your Journey and Review & Send and never enters the total', () => {
-  const journey = src('assets/journey.js'), yj = src('your-journey.html'), rv = src('review.html');
-  assert.match(journey, /if \(x\.request\) return \{ cat: 'Restaurant'/);
-  assert.match(journey, /'suhring': 'BANGKOK DAYS'/);
-  assert.match(journey, /if \(x\.interest \|\| x\.request\) return '';/);
-  assert.match(yj, /x\.request\?'<p class="p-line-amt"><span class="t-l1">Request · '/);
-  assert.match(yj, /if\(x\.exp\)return 'experience\.html\?id='/);
-  assert.match(rv, /x\.request\?'<p class="p-line-amt"><span class="t-l1">Request · '/);
-  assert.match(rv, /TABLE REQUEST \('\+\(x\.priceNote\|\|''\)\+' as recorded by the hosts, unit not stated in the source; not a confirmed reservation; not in the journey total\)/);
-  /* the bag total is price × qty — a request line carries no price */
+/* the shop sandbox: the same modules the pages load, an in-memory localStorage */
+const shop = () => {
   const store = new Map();
   const localStorage = { getItem: (k) => (store.has(k) ? store.get(k) : null), setItem: (k, v) => store.set(k, String(v)), removeItem: (k) => store.delete(k) };
   const document = { addEventListener() {}, dispatchEvent() {}, querySelectorAll: () => [], getElementById: () => null, querySelector: () => null, createElement: () => ({ style: {}, classList: { add() {}, toggle() {} }, querySelector: () => ({}) }), head: { appendChild() {} }, body: { appendChild() {}, classList: { add() {}, remove() {}, toggle() {} } } };
   const window = { document, localStorage, addEventListener() {}, CustomEvent: class {} };
-  new Function('window', 'document', 'localStorage', 'CustomEvent', src('assets/bag.js'))(window, document, localStorage, class {});
-  const B = window.SIYL_BAG; B.badge = () => {};
-  B.add({ id: 'suhring', name: 'Sühring', meta: 'Lunch · German fine dining · Bangkok', request: true, priceNote: 'USD 180', exp: 'bkk-suhring', qty: 1 });
-  assert.equal(B.total(), 0);
-  assert.ok(B.has('suhring'));
-  /* reload = a fresh read of the same storage */
-  assert.equal(JSON.parse(localStorage.getItem('siyl.bag'))[0].request, true);
+  for (const f of ['assets/rooms-data.js', 'assets/pricing.js', 'assets/bag.js', 'assets/journey.js']) {
+    new Function('window', 'document', 'localStorage', 'CustomEvent', 'SIYL_BAG', 'SIYL_PRICE', 'SIYL_ROOMS', 'SIYL_STOCK', src(f))(window, document, localStorage, class {}, window.SIYL_BAG, window.SIYL_PRICE, window.SIYL_ROOMS, undefined);
+  }
+  window.SIYL_BAG.badge = () => {};
+  return { W: window, store };
+};
+const addSuhring = (W, n) => { const it = W.SIYL_PRICE.items('suhring')[0]; it.qty = n; it.request = true; it.exp = 'bkk-suhring'; W.SIYL_BAG.add(it); return it; };
+
+test('SÜHRING — USD 180 is priced PER PERSON by the one calculation source', () => {
+  const { W } = shop(); const P = W.SIYL_PRICE;
+  assert.equal(P.FLAT.suhring.price, 180);
+  assert.equal(P.FLAT.suhring.cat, 'Restaurant');
+  assert.match(P.FLAT.suhring.basis, /USD 180 per person/);
+  assert.equal(P.quote('suhring').unit, 'guest');
+  const line = P.items('suhring')[0];
+  assert.equal(line.price, 180); assert.equal(line.name, 'Sühring');
+  assert.equal(W.SIYL_JOURNEY.meta({ ...line, qty: 2, request: true }).cat, 'Restaurant');
+  assert.equal(W.SIYL_JOURNEY.quantityLine({ ...line, qty: 2 }), 'USD 180 per person × 2 guests');
+});
+
+test('SÜHRING — multiplied by the participating guests, the total follows; removal reverses it', () => {
+  const { W } = shop(); const B = W.SIYL_BAG;
+  addSuhring(W, 1); assert.equal(B.total(), 180);
+  B.qty('suhring', 1); assert.equal(B.total(), 360, '2 participating guests = USD 360');
+  B.qty('suhring', -1); assert.equal(B.total(), 180);
+  B.qty('suhring', -5); assert.equal(B.get()[0].qty, 1, 'never below one participant');
+  B.remove('suhring'); assert.equal(B.total(), 0); assert.ok(!B.has('suhring'));
+});
+
+test('SÜHRING — no duplicate addition, reload preserves the selection', () => {
+  const { W, store } = shop(); const B = W.SIYL_BAG;
+  addSuhring(W, 2);
+  /* the page guards with has(); a second add through the bag would only raise the count — the guard is pinned in the page */
+  assert.ok(B.has('suhring')); assert.equal(B.get().length, 1);
+  assert.match(src('experience.html'), /if \(SIYL_BAG\.has\(s\.id\)\) \{ paintSel\(\); return; \}/);
+  /* reload = the same storage read by a fresh engine */
+  const again = shop(); for (const [k, v] of store) again.store.set(k, v);
+  assert.ok(again.W.SIYL_BAG.has('suhring')); assert.equal(again.W.SIYL_BAG.get()[0].qty, 2); assert.equal(again.W.SIYL_BAG.total(), 360);
+});
+
+test('SÜHRING — Your Journey and Review & Send carry the request with its calculated amount', () => {
+  const yj = src('your-journey.html'), rv = src('review.html'), page = src('experience.html');
+  assert.match(yj, /exp=m\.unit==='experience'\|\|x\.request/, 'the participants stepper on the line');
+  assert.match(yj, /Participating guests/);
+  assert.match(yj, /if\(ln&&ln\.request&&d>0&&pp&&\(ln\.qty\|\|1\)>=pp\.guests\.length\)return;/, 'never more than the party');
+  assert.match(yj, /if\(x\.exp\)return 'experience\.html\?id='/);
+  assert.match(rv, /RESTAURANT REQUEST \(USD 180 per person × '\+x\.qty\+' participating; to be arranged through Guest Relations; not a confirmed reservation\)/);
+  assert.doesNotMatch(rv, /not in the journey total/);
+  assert.match(page, /data-sel-state="current" aria-current="true">In your journey · /);
+  assert.match(page, /Add to your journey · ' \+ money\(s\.price \* q\)/);
+  assert.match(page, /it\.qty = n; it\.request = true; it\.exp = x\.id;/);
+});
+
+test('SÜHRING — never described as a confirmed reservation, a confirmed table or guaranteed availability', () => {
+  for (const f of ['experience.html', 'assets/pricing.js', 'assets/experiences.js', 'review.html', 'your-journey.html', 'experiences.html']) {
+    const t = src(f);
+    assert.doesNotMatch(t, /reservation confirmed|table confirmed|availability (is )?guaranteed|confirmed table|guaranteed availability/i, f);
+  }
+  assert.match(src('experience.html'), /not a confirmed reservation, and availability is not guaranteed by this page/);
+  assert.match(src('assets/pricing.js'), /not a confirmed reservation/);
 });

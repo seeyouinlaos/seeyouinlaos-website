@@ -58,8 +58,8 @@
    "assets/images/experiences/bkk-suhring-08.jpg",
    "assets/images/experiences/bkk-suhring-09.jpg"
   ],
-  "note": "",
-  "price": "USD 180",
+  "note": "price unit set by the Owner 13 Sep 2026: per participating guest, in the journey total (assets/pricing.js FLAT.suhring)",
+  "price": "USD 180 per person",
   "hours": [
    "Lunch",
    "Thursday to Sunday",
