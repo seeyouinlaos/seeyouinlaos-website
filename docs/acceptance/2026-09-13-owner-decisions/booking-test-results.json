@@ -1,0 +1,56 @@
+{
+  "origin": "https://seeyouinlaos-website.suthep-hrg.workers.dev",
+  "at": "2026-09-13T10:14:23.271Z",
+  "results": [
+    {
+      "id": "0 ledger clean before",
+      "ok": true,
+      "d": "100 chairs, held 0"
+    },
+    {
+      "id": "1 INV-001 is one party of two",
+      "ok": true,
+      "d": "Haruthai & Suthep · G048 + G049 · lead G048"
+    },
+    {
+      "id": "1 seating open for the couple",
+      "ok": true,
+      "d": "2 plans · 100 chairs · nothing fixed · 02 · YOUR SEATS · SEATING IS OPEN Your seats Choos"
+    },
+    {
+      "id": "2 Haruthai holds two chairs (UI → ledger)",
+      "ok": true,
+      "d": "{\"ceremony\":{\"G048\":\"C-L-01-01\"},\"dinner\":{\"G048\":\"D-T-01\"}}"
+    },
+    {
+      "id": "3 same party · duplicate refused",
+      "ok": true,
+      "d": "UI: partner's chair not selectable · API: 409 taken"
+    },
+    {
+      "id": "4 other party · duplicate refused, no name shown",
+      "ok": true,
+      "d": "API 409 taken · INV-002 sees taken without a name"
+    },
+    {
+      "id": "5 both of the couple hold their own chairs",
+      "ok": true,
+      "d": "{\"ceremony\":{\"G048\":\"C-L-01-01\",\"G049\":\"C-L-01-02\"},\"dinner\":{\"G048\":\"D-T-01\",\"G049\":\"D-T-02\"}}"
+    },
+    {
+      "id": "6 change of chair · hold new, release old",
+      "ok": true,
+      "d": "C-L-01-01:yours:G048 C-L-01-02:yours:G049 D-T-02:yours:G049 D-B-25:yours:G048"
+    },
+    {
+      "id": "7 all chairs given back · ledger clean",
+      "ok": true,
+      "d": "100 available · held 0"
+    },
+    {
+      "id": "8 no page errors",
+      "ok": true,
+      "d": "clean"
+    }
+  ]
+}

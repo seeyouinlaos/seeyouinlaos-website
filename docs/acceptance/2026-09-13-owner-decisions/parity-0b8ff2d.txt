@@ -31,7 +31,7 @@ OK   assets/pricing.js 92b06c1070b0
 OK   assets/recon.css db52c42ece57
 OK   assets/recon.js 5874fabeb704
 OK   assets/rooms-data.js f8da2d375c1f
-OK   assets/seating.js 0f1cfeccb858
+OK   assets/seating.js c8273dbb10df
 OK   assets/shop-menu.js c03981b72a5f
 OK   assets/temple.js cd2d9c9c2620
 OK   assets/transport-data.js eb729c9c3688
@@ -49,7 +49,7 @@ OK   invitation.html 9d6994c02de9
 OK   journeys.html 8b74061b76b3
 OK   marsilea.html 628dca6c3ccc
 OK   register/crypto.mjs 6cfe9dbe5c79
-OK   register/invitations.enc.json 5b548691282d
+OK   register/invitations.enc.json 801982a83cc4
 OK   review.html c9c052921720
 OK   room.html 621c327a5ff0
 OK   tea.html 0c1c4df005bc

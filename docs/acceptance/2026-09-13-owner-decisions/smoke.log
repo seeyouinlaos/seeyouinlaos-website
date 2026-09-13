@@ -1,7 +1,7 @@
 PASS auth — https://seeyouinlaos-website.suthep-hrg.workers.dev opens INV-002 and asks who
 PASS status from worker — INV-002 is pristine on production: no state card, send available (real /api/status read)
 PASS shell status on another step — steps: 01Your InvitationOpen02Your JourneyCurrent03The WeddingOpen04Wedding PreparationOpen05About YouOptional06Review & SendOpen
-PASS seating open — production: 2 plans · 98 chairs (50 + 48) · family chairs 0 · 02 · YOUR SEATS · SEATING IS OPEN Your seats Choose a chair 
+PASS seating open — production: 2 plans · 100 chairs (50 + 50) · family chairs 0 · nothing fixed · 02 · YOUR SEATS · SEATING IS OPEN Your seats Choose a chair 
 PASS sangkhathan withheld — SANGKHATHAN · PERSONAL GIVING This part of the Temple Ceremony is prepared for couples. Guest Relati
 PASS inventory reachable — no CORS/inventory errors on https://seeyouinlaos-website.suthep-hrg.workers.dev
 PASS no writes — only GET requests to /api
@@ -10,7 +10,7 @@ PASS no page errors — clean console
 PASS auth — https://seeyouinlaos.github.io/seeyouinlaos-website opens INV-002 and asks who
 PASS status from worker — INV-002 is pristine on production: no state card, send available (real /api/status read)
 PASS shell status on another step — steps: 01Your InvitationOpen02Your JourneyCurrent03The WeddingOpen04Wedding PreparationOpen05About YouOptional06Review & SendOpen
-PASS seating open — production: 2 plans · 98 chairs (50 + 48) · family chairs 0 · 02 · YOUR SEATS · SEATING IS OPEN Your seats Choose a chair 
+PASS seating open — production: 2 plans · 100 chairs (50 + 50) · family chairs 0 · nothing fixed · 02 · YOUR SEATS · SEATING IS OPEN Your seats Choose a chair 
 PASS sangkhathan withheld — SANGKHATHAN · PERSONAL GIVING This part of the Temple Ceremony is prepared for couples. Guest Relati
 PASS inventory reachable — no CORS/inventory errors on https://seeyouinlaos.github.io/seeyouinlaos-website
 PASS no writes — only GET requests to /api
