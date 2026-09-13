@@ -144,6 +144,11 @@ test('E · the production bundle ships no inferred eligibility: every invitation
   const bad = list.filter((i) => i.givingEligibility && !['PAIR', 'NONE'].includes(i.givingEligibility));
   assert.equal(bad.length, 0, 'only PAIR or NONE may be written');
   assert.ok(explicit.length <= list.length);
+  /* Owner decision 13 Sep 2026: the offering is available, voluntarily, to every
+   * ACTIVE invited party — PAIR on each of them, no whitelist, no NONE, none unset */
+  const active = list.filter((i) => (i.status || 'ACTIVE') === 'ACTIVE');
+  assert.ok(active.length > 0);
+  assert.ok(active.every((i) => i.givingEligibility === 'PAIR'), 'every active invitation is PAIR: ' + active.filter((i) => i.givingEligibility !== 'PAIR').map((i) => i.invitationId).join(','));
 });
 
 /* ======================================================================== F */

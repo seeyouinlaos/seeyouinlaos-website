@@ -116,9 +116,11 @@ const G = await page.evaluate(() => JSON.parse(localStorage.getItem('siyl.auth')
 const P = G.find((g) => /peggy/i.test(g.preferredName)), S = G.find((g) => /steffie/i.test(g.preferredName));
 await page.click('.p-drawer [data-who="' + P.guestId + '"]'); await page.waitForTimeout(300);
 const auth = await ls('siyl.auth');
-note('E0 production eligibility', auth.givingEligibility === null || auth.givingEligibility === undefined, 'INV-002 ships UNRESOLVED (no inferred PAIR): ' + JSON.stringify(auth.givingEligibility));
+/* Owner decision 13 Sep 2026: every ACTIVE invitation ships PAIR — explicit in the private list, never inferred */
+note('E0 production eligibility', auth.givingEligibility === 'PAIR', 'INV-002 ships PAIR, explicitly (Owner decision 13 Sep 2026): ' + JSON.stringify(auth.givingEligibility));
 
-/* ================================================================ E · PRODUCTION (unresolved) */
+/* ================================================================ E · UNRESOLVED (injected: production is PAIR since 13 Sep 2026) */
+await setElig(null);
 await go('wedding.html', 390);
 await page.click('[data-g="' + P.guestId + '"][data-e="temple"] [data-ev="yes"]'); await page.waitForTimeout(200);
 await page.click('[data-g="' + S.guestId + '"][data-e="temple"] [data-ev="yes"]'); await page.waitForTimeout(300);
