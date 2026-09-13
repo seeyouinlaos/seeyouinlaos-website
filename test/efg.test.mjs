@@ -206,7 +206,16 @@ test('F · the token never reaches the client, and the surface never confirms it
   assert.doesNotMatch(rv, /BOOKING CONFIRMED|RESERVATION CONFIRMED|PAYMENT COMPLETE|ORDER CONFIRMED|boarding|barcode|<svg[^>]*qr/i);
   assert.match(rv, /p\.guests\.forEach\(function\(g\)\{\s*var id=g\.guestId,row=\(snap\.guests/, 'one card per named guest, from the snapshot that was SENT — never the live draft');
   assert.match(rv, /rememberSent\(registration\.registration_submitted_at\)/, 'the snapshot is taken at SEND');
-  assert.match(rv, /Changed since confirmation · not sent/); assert.match(rv, /from another device'\+\(superseded\?' after this one':''\)\+', so they are not shown here/); assert.match(rv, /snap\.at===C\.receivedAt\(\)/, 'the snapshot counts only when it is the version Guest Relations holds');
+  assert.match(rv, /Changed since confirmation · not sent/);
+  assert.match(rv, /held=C\.receivedAt\(\);\s*var current=!!\(mine&&held&&snap\.at===held\)/, 'the snapshot counts only when it is the version Guest Relations holds');
+  /* a second device is named only where the record carries a stamp this device
+   * did not send: LATER than this device's own send, or with nothing sent here.
+   * No stamp on the record, or one older than this device's, is not knowledge
+   * of another device and is never told as one. */
+  assert.match(rv, /were sent again from another device after this one, so they are not shown here/);
+  assert.match(rv, /var later=!!\(mine&&held&&held>snap\.at\),elsewhere=!!\(held&&!mine\)/, 'another device only on a later stamp, or on no send from here');
+  assert.match(rv, /this device cannot tell which version it was/, 'with no stamp on the record, no device is claimed');
+  assert.match(rv, /C\.receivedAt\(\)&&C\.receivedAt\(\)>sn\.at\)/, 'RECEIVED names a newer send only when the record is actually later');
 });
 
 /* ======================================================================== G */

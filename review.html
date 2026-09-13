@@ -319,7 +319,10 @@ if(st==='received'){
   box.innerHTML='<div class="p-card"><p class="t-l1 on">Journey received</p><h2 class="t-h1">Guest Relations has your journey</h2>'+
     '<p class="t-b1 measure">Received on '+when(C.receivedAt())+'. A person will read it. Received is not confirmed: Guest Relations confirms every arrangement with you personally, and until then nothing in your journey is final. You can still change anything below and send it again.</p></div>';
     var sn=sentSnapshot();
-  if(sn&&sn.invitationId===p.invitationId&&sn.at&&C.receivedAt()&&sn.at!==C.receivedAt())box.innerHTML+='<div class="p-card" style="margin-top:var(--s3)"><p class="t-l1 open">A newer version was sent from another device</p><p class="t-b2 measure">Guest Relations holds the journey sent on '+when(C.receivedAt())+' from another device, which replaced the one sent here on '+when(sn.at)+'. What you see below is this device\'s draft. Send again from here only if you want it to replace that newer version.</p></div>';
+  /* a later send is a stamp LATER than this device's, never merely a different
+   * one: a stale read of the record, or another device's clock behind this one,
+   * must never be announced as a newer version */
+  if(sn&&sn.invitationId===p.invitationId&&sn.at&&C.receivedAt()&&C.receivedAt()>sn.at)box.innerHTML+='<div class="p-card" style="margin-top:var(--s3)"><p class="t-l1 open">A newer version was sent from another device</p><p class="t-b2 measure">Guest Relations holds the journey sent on '+when(C.receivedAt())+' from another device, which replaced the one sent here on '+when(sn.at)+'. What you see below is this device\'s draft. Send again from here only if you want it to replace that newer version.</p></div>';
   else if(sn&&sn.invitationId===p.invitationId&&fingerprint(snapshotNow())!==fingerprint(sn))box.innerHTML+='<div class="p-card" style="margin-top:var(--s3)"><p class="t-l1 open">Changed since you sent it</p><p class="t-b2 measure">Something has changed here since '+when(sn.at)+'. Send your journey again so Guest Relations has the newer version — the newer one replaces the earlier one.</p></div>';
 if(send)send.hidden=false;return}
 /* CONFIRMED · painted from the snapshot taken when the journey was SENT from
@@ -331,11 +334,21 @@ var snap=sentSnapshot();
 /* the snapshot counts only when it is the very version Guest Relations holds:
  * the server keeps the submission stamp the client sent, and returns it as
  * receivedAt — a later send from another device makes this one superseded */
-var current=!!(snap&&snap.invitationId===p.invitationId&&snap.at&&C.receivedAt()&&snap.at===C.receivedAt());
+var mine=!!(snap&&snap.invitationId===p.invitationId&&snap.at),held=C.receivedAt();
+var current=!!(mine&&held&&snap.at===held);
 if(!current){
-  var superseded=!!(snap&&snap.invitationId===p.invitationId);
+  /* what is said here is only what the record supports: another device is named
+   * when the record carries a stamp this device did not send — later than this
+   * device's, or with nothing sent from here at all. With no stamp on the
+   * record (a journey that reached Guest Relations another way), or a stamp
+   * older than this device's own send, nothing is known about a second device
+   * and none is claimed. */
+  var later=!!(mine&&held&&held>snap.at),elsewhere=!!(held&&!mine);
+  var said=later?'The details Guest Relations confirmed were sent again from another device after this one, so they are not shown here.'
+          :elsewhere?'The details Guest Relations confirmed were sent from another device, so they are not shown here.'
+          :'What Guest Relations confirmed is not shown here: this device cannot tell which version it was.';
   box.innerHTML='<div class="p-card"><p class="t-l1 on">Journey confirmed</p><h2 class="t-h1">Guest Relations has confirmed your journey</h2>'+
-    '<p class="t-b1 measure">Confirmed on '+when(C.confirmedAt())+'. The details Guest Relations confirmed were sent'+(superseded?' again':'')+' from another device'+(superseded?' after this one':'')+', so they are not shown here. For a copy, or to change anything, write to <a href="mailto:guest.relation.seeyouinlaos@gmail.com?subject=Journey%20'+encodeURIComponent(p.invitationId)+'">Guest Relations</a>.</p>'+
+    '<p class="t-b1 measure">Confirmed on '+when(C.confirmedAt())+'. '+said+' For a copy, or to change anything, write to <a href="mailto:guest.relation.seeyouinlaos@gmail.com?subject=Journey%20'+encodeURIComponent(p.invitationId)+'">Guest Relations</a>.</p>'+
     '<p class="t-b2 measure" style="margin-top:var(--s3)">The sections below show what this device holds — not what was confirmed.</p></div>';
   return}
 var changed=fingerprint(snapshotNow())!==fingerprint(snap);
