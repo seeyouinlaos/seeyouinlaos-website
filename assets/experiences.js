@@ -12,11 +12,12 @@ window.SIYL_EXP = [
   { id: 'bkk-curvy', roles: ['lunch'], row: 'Day 02 · 22.02.2027', chapter: 'bkk', day: '22 FEB 2027', name: 'Curvy.Dining', where: 'Bangkok', cats: 'Dining · Design', img: 'assets/images/experiences/bkk-curvy-01.jpg', teaser: 'A design-led Bangkok dining room where Thai flavours meet modern European form.' },
   /* SÜHRING — the one place with a full record in the Owner's sheet
    * "Experience, Restaurant, Cafe_Details" (Suhring): every text below is that
-   * record, structured, nothing added. The price is the source cell "$180.00":
-   * the sheet does not say per guest, per menu or per table, so the website
-   * shows USD 180 and never multiplies it. Selectable by Owner decision
-   * (13 Sep 2026) through the Journey selection — a request to Guest
-   * Relations, never a confirmed reservation. */
+   * record, structured, nothing added. The price is the source cell "$180.00";
+   * the Owner set its unit on 13 Sep 2026: USD 180 PER PERSON, multiplied by
+   * the participating guests through the one calculation source
+   * (assets/pricing.js FLAT.suhring). Optional, selectable through the Journey
+   * like the Afternoon Tea — a restaurant request arranged through the
+   * Journey workflow, never a confirmed reservation. */
   { id: 'bkk-suhring', roles: ['lunch'], row: 'Experience, Restaurant, Cafe_Details · Suhring', sheet: 'FULL', chapter: 'bkk', featured: true, day: 'Bangkok days', name: 'Sühring', where: 'Bangkok', cats: 'German fine dining · Lunch',
     maps: 'https://maps.app.goo.gl/2b4whggW3YCnxN6u5?g_st=ic', link: 'https://www.restaurantsuhring.com/menu.html',
     img: 'assets/images/experiences/bkk-suhring-01.jpg',
@@ -30,11 +31,11 @@ window.SIYL_EXP = [
       { k: 'Contemporary heritage', t: 'The kitchen.', p: ['Today, we draw inspiration from cherished family recipes, childhood memories, and years of travel. Our cooking reinterprets the rich traditions of German cuisine with a contemporary twist, emphasizing technique, refinement, and a deep respect for the ingredients we work with.'] }
     ],
     practical: {
-      price: 'USD 180',
-      priceNote: 'The amount recorded by the hosts. The source does not state whether it is per guest or per menu, so it is shown as recorded and never multiplied here.',
+      price: 'USD 180 per person',
+      priceNote: 'For each participating guest, as decided by the hosts.',
       hours: ['Lunch', 'Thursday to Sunday', '12:30 pm to 13:00 pm (last seating)', 'Closed on Monday and Tuesday']
     },
-    select: { id: 'suhring', name: 'Sühring', meta: 'Lunch · German fine dining · Bangkok', price: 'USD 180' } },
+    select: { id: 'suhring', price: 180, unit: 'per person' } },
   { id: 'bkk-diorlv', roles: ['cafe'], row: 'Day 02 · 22.02.2027', chapter: 'bkk', day: '22 FEB 2027', name: 'Dior · Café LV', where: 'Bangkok', cats: 'Fashion · Design · Café', img: 'assets/images/experiences/bkk-dior-01.jpg', gallery: ['assets/images/experiences/bkk-dior-01.jpg', 'assets/images/experiences/bkk-lv-cafe-01.jpg'], teaser: 'A luxury design café stop — couture interiors, French pastry and contemporary calm.' },
   { id: 'bkk-lvvisionary', roles: ['experience'], row: 'Day 02 · 22.02.2027', chapter: 'bkk', featured: true, day: '22 FEB 2027', name: 'Louis Vuitton Visionary Journeys', where: 'Bangkok', cats: 'Exhibition · Design · Fashion', img: 'assets/images/experiences/bkk-lvvisionary-01.jpg', teaser: 'The house opens its world: an exhibition of craft, travel and imagination staged as architecture.' },
   { id: 'bkk-iconsiam', roles: ['place'], row: 'Day 02 · 22.02.2027', chapter: 'bkk', featured: true, day: '22 FEB 2027', name: 'ICONSIAM', where: 'Bangkok', cats: 'Riverfront · City · Design · Shopping', img: 'assets/images/experiences/bkk-iconsiam-01.jpg', teaser: 'The riverfront landmark — architecture, design floors and the Chao Phraya at golden hour.' },

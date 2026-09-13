@@ -47,6 +47,12 @@
 .x-cur .on { font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 10px; letter-spacing: 2.2px; text-transform: uppercase; color: var(--a-ink); display: inline-flex; align-items: center; gap: 10px; min-height: 44px; }
 .x-cur .on::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--a-ink); }
 .x-cur .a-link { margin: 0; }
+.x-qty { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--a-line); }
+.x-qty .a-eyebrow { flex: 1 1 100%; }
+.x-step { width: 44px; height: 44px; border: 1px solid var(--a-line); background: #fff; font-size: 18px; line-height: 1; cursor: pointer; color: var(--a-ink); }
+.x-step[disabled] { opacity: .35; cursor: default; }
+.x-qty b { font-family: 'PP Editorial Old', Georgia, serif; font-weight: 200; font-size: 22px; min-width: 28px; text-align: center; }
+.x-amt { margin-left: auto; font-family: 'PP Editorial Old', Georgia, serif; font-weight: 200; font-size: 19px; }
 .x-back { padding: 0 var(--a-gut); margin: 44px 0 0; }
 .x-none { padding: 80px var(--a-gut); max-width: 760px; }
 @media (min-width: 900px) {
@@ -63,6 +69,7 @@
 <main class="x-wrap" id="x"></main>
 <script src="assets/experiences.js"></script>
 <script src="assets/experience-galleries.js"></script>
+<script src="assets/pricing.js"></script>
 <script src="assets/bag.js"></script>
 <script src="assets/gallery.js"></script>
 <script>
@@ -116,12 +123,12 @@
         (x.link ? '<a class="a-link" href="' + esc(x.link) + '" target="_blank" rel="noopener">Website</a>' : '') + '</span></span></div>' : '') +
       '</div></section>';
   }
-  /* the Journey action — one place carries it, by Owner decision */
+  /* the Journey action — one place carries it, by Owner decision: the Afternoon
+   * Tea pattern, priced per participating guest by the one calculation source */
   if (x.select) {
-    h += '<section class="x-sel" id="sel"><p class="a-eyebrow">Your Journey</p><h2>' + esc(x.select.meta.split(' · ')[0]) + ' at ' + esc(x.name) + '</h2>' +
-      '<p class="price">' + esc(x.select.price) + '</p>' +
-      '<p>' + esc(pr.priceNote || '') + '</p>' +
-      '<p>Adding ' + esc(x.name) + ' to your journey asks Guest Relations for a table during the Bangkok days. It is a request, not a reservation: nothing is confirmed by this page, and the amount is not added to your journey total until the hosts have confirmed the table and its price with you.</p>' +
+    h += '<section class="x-sel" id="sel"><p class="a-eyebrow">Your Journey</p><h2>Lunch at ' + esc(x.name) + '</h2>' +
+      '<p class="price">USD ' + x.select.price + ' <span class="a-eyebrow" style="display:inline">' + esc(x.select.unit) + '</span></p>' +
+      '<p>Optional. Adding ' + esc(x.name) + ' places a restaurant request in your journey for the guests who take part; Guest Relations arrange the table through your journey. It is a request — not a confirmed reservation, and availability is not guaranteed by this page. No date or time to choose here.</p>' +
       '<div id="selbox"></div></section>';
   }
   h += '<p class="x-back"><a class="a-link" href="experiences.html#' + esc(x.chapter) + '">All experiences</a></p>';
@@ -134,31 +141,51 @@
     });
   });
 
-  /* selection: the Journey Bag is the one truth — has() decides the state,
-   * the invitation gate decides who may add, Remove follows the bag rule */
+  /* selection: the Journey Bag is the one truth — has() decides the state, the
+   * invitation gate decides who may add, the quantity is the participating
+   * guests (never more than the party), Remove follows the bag rule */
+  var Q = 1, qTouched = false;   /* untouched → every guest of the party takes part */
+  function partySize() { try { var a = JSON.parse(localStorage.getItem('siyl.auth') || 'null'); return a && a.guests ? a.guests.length : 0; } catch (e) { return 0; } }
+  function money(n) { return 'USD ' + Number(n).toLocaleString('en-US'); }
   function paintSel() {
     var box = document.getElementById('selbox'); if (!box || !window.SIYL_BAG) return;
-    var s = x.select, has = SIYL_BAG.has(s.id);
-    box.innerHTML = has
-      ? '<div class="x-cur"><span class="on" data-sel-state="current" aria-current="true">In your journey</span>' +
+    var s = x.select, line = SIYL_BAG.get().filter(function (l) { return l.id === s.id; })[0], max = partySize() || 6;
+    var q = line ? (line.qty || 1) : Math.min(Q, max);
+    var stepper = '<div class="x-qty"><span class="a-eyebrow">Participating guests</span>' +
+      '<button type="button" class="x-step" data-step="-1" aria-label="One fewer guest"' + (q <= 1 ? ' disabled' : '') + '>&minus;</button><b id="selq">' + q + '</b>' +
+      '<button type="button" class="x-step" data-step="1" aria-label="One more guest"' + (q >= max ? ' disabled' : '') + '>+</button>' +
+      '<span class="x-amt" id="selamt">' + money(s.price * q) + '</span></div>';
+    box.innerHTML = stepper + (line
+      ? '<div class="x-cur"><span class="on" data-sel-state="current" aria-current="true">In your journey · ' + q + (q === 1 ? ' guest' : ' guests') + ' · ' + money(s.price * q) + '</span>' +
         '<a class="a-link" href="your-journey.html">View Your Journey</a></div>' +
         '<p style="margin-top:14px"><button type="button" class="a-link" id="sel-rm" style="background:none;border:0;cursor:pointer">Remove from your journey</button></p>'
-      : '<button type="button" class="x-cta" id="sel-add" data-sel-state="open">Add to your journey</button>';
+      : '<button type="button" class="x-cta" id="sel-add" data-sel-state="open">Add to your journey · ' + money(s.price * q) + '</button>');
+    box.querySelectorAll('[data-step]').forEach(function (b) { b.addEventListener('click', function () {
+      var d = parseInt(b.getAttribute('data-step'), 10);
+      if (line) { var nq = Math.max(1, Math.min(max, (line.qty || 1) + d)); if (nq !== line.qty) SIYL_BAG.qty(s.id, nq - (line.qty || 1)); }
+      else { Q = Math.max(1, Math.min(max, q + d)); qTouched = true; }
+      paintSel();
+    }); });
     var add = document.getElementById('sel-add'), rm = document.getElementById('sel-rm');
     if (add) add.addEventListener('click', function () { gated(function () {
       if (SIYL_BAG.has(s.id)) { paintSel(); return; }
-      SIYL_BAG.add({ id: s.id, name: s.name, meta: s.meta, request: true, priceNote: s.price, exp: x.id, img: x.img, qty: 1 });
+      var n = qTouched ? Math.max(1, Math.min(partySize() || 6, Q)) : (partySize() || 1);
+      var it = (window.SIYL_PRICE ? SIYL_PRICE.items(s.id)[0] : null) || { id: s.id, name: x.name, price: s.price, img: x.img };
+      it.qty = n; it.request = true; it.exp = x.id;
+      SIYL_BAG.add(it);
       paintSel();
       var cur = document.querySelector('[data-sel-state="current"]'); if (cur) cur.focus();
     }); });
-    if (rm) rm.addEventListener('click', function () { SIYL_BAG.remove(s.id); paintSel(); var a = document.getElementById('sel-add'); if (a) a.focus(); });
+    if (rm) rm.addEventListener('click', function () { SIYL_BAG.remove(s.id); paintSel(); var a2 = document.getElementById('sel-add'); if (a2) a2.focus(); });
   }
   function gated(fn) {
     if (window.SIYL_INVITE) { SIYL_INVITE.require(fn); }
     else document.addEventListener('siyl:invite-ready', function () { SIYL_INVITE.require(fn); }, { once: true });
   }
+  Q = Math.max(1, partySize() || 1);
   paintSel();
   document.addEventListener('siyl:bag', paintSel);
+  document.addEventListener('siyl:auth', function () { if (!SIYL_BAG.has(x.select && x.select.id)) Q = Math.max(1, partySize() || 1); paintSel(); });
 })();
 </script>
 <script src="assets/recon.js"></script>

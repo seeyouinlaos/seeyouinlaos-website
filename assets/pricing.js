@@ -59,6 +59,13 @@
     'return': { price: 200, cat: 'Transportation', name: 'MU5924 + MU741 · Lijiang → Bangkok',
                 meta: '06 March 2027 · Economy flexible', img: 'assets/images/transport/mu5924-economy-cabin-1.jpg',
                 basis: 'USD 200 per person · 1 seat · Economy flexible · via Kunming' },
+    /* SÜHRING (Owner decision 13 Sep 2026): an optional restaurant REQUEST,
+     * USD 180 per participating guest, in the journey total like every other
+     * per-person line. The request is arranged through the Journey workflow —
+     * never a confirmed reservation, no availability promised. */
+    'suhring': { price: 180, cat: 'Restaurant', name: 'Sühring',
+                meta: 'Lunch · German fine dining · Bangkok', img: 'assets/images/experiences/bkk-suhring-01.jpg',
+                basis: 'USD 180 per person · a table requested through Guest Relations · not a confirmed reservation' },
     '1872':   { price: 180, cat: 'Experience', unit: 'experience',
                 basis: 'USD 180 per experience · for two guests' },
     /* The Sangkhathan is NOT an admission, a ticket or a hosted wedding cost.
@@ -296,7 +303,6 @@
       var f = FLAT[x.id];
       if (f) return f.basis;
       if (x.interest) return 'Interest · confirmed and payable at the spa';
-      if (x.request) return 'Request · ' + (x.priceNote || '') + ' as recorded by the hosts';
       /* a hosted line carries its own COMPLIMENTARY note — it must never also
        * read "Amount on request", which would suggest the price is unknown */
       if (x.complimentary) return '';
