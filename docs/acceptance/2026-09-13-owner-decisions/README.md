@@ -206,3 +206,59 @@ included at no / free of charge / at no cost" within 140 characters of "Tak Bat"
 the gate). The dictionary entries in `assets/i18n/` about a hosted dawn alms-giving belong to the
 retired pages and appear on no active surface. The Haruthai walk's dinner-placeholder pin, which
 the Owner's Wedding Dinner decision had superseded, now asserts the image set (24/24).
+
+## Post-release correction pass — 10 Sep markups reconciled · View All Steps (13 Sep 2026)
+
+### A · the 10 Sep Owner markups against the released state
+
+| Item | Previous state (10 Sep) | Final state | Action / superseded |
+|---|---|---|---|
+| Souphattra stay image | food photograph in "The stay" | hotel photographs only: `heritage-room.jpg` band on voyage.html, `heritage-courtyard-*` / `heritage-arches-dusk` everywhere else | ALREADY CORRECT (Haruthai pass, 91c52ad) |
+| Wedding Dinner imagery | screenshot complaint | Owner folder 056, six placed (voyage.html §04) | SUPERSEDED by the 13 Sep decision; verified, untouched |
+| "courtyard garden" wording | — | `Souphattra Heritage Vientiane · courtyard garden` in `journey.js` / `temple.js` and on the page | ALREADY CORRECT — the accepted venue data (D-14, d4a4518) |
+| Dress Code imagery | one retired image still present; stretched images | `resort-01` retired at 91c52ad (23 images, gate P7); the 3:4 `object-fit: cover` box of that pass still cropped people to make the cards equal — now every reference renders at its own proportion (`.p-rail` on step 04, `.dgal` on dress.html): height/width caps, `object-fit: contain`, no stretching, no cropping; 17 + 17 verified at 320/390/430/1280, rendered ratio = natural ratio | STILL WRONG (cropping) → FIXED; Haruthai H4 pin updated |
+| Kunming → Lijiang C86 arrival | 21:08 | 13:44 in `transport-data.js`, your-journey, journeys, sent text, tests; 0 × 21:08 | ALREADY CORRECT (91c52ad) |
+| Bangkok → Nong Khai night train | "in some cabins" · "Towels" | "In-suite washbasin in every cabin" · "Blankets" | ALREADY CORRECT (91c52ad) |
+| Shama Yen-Akat | house / keybox / elevator / breakfast self-pay / meals wording | "one studio per couple" · "Check-in at the lobby." · "Breakfast included." | ALREADY CORRECT (91c52ad); the house wording exists only on the Sathorn Penthouse, its own true facts |
+| U Sathorn | same | "one room per couple" · "Check-in at the lobby." · "Breakfast included." | ALREADY CORRECT (91c52ad) |
+| Tak Bat | "no charge" | self-pay everywhere; gate P8 guards it | ALREADY CORRECT (91c52ad, re-verified 636ef74) — not touched |
+
+### B · View All Steps — root cause and correction
+**Root cause.** The step index (`.prep-steps`) was a static block in normal flow, inserted at the
+top of the document after the site header and toggled `display: none/block`. Wherever the
+guest was scrolled, "View all steps" opened it *out of view at the top* while the whole page
+shifted down by its height (and snapped back on close); the open state was lost on every shell
+repaint (`aria-expanded` reset to false while the block stayed open); every row was a plain
+link, on the Worker origin a `.html` → clean-URL 307 first; the destination appeared as a hard
+cut; nothing had a pressed state. That is the "jumping around" the Owner saw.
+
+**Now (`assets/prep-shell.js`, `assets/prep.css`).** The index is part of the sticky bar
+itself — `position: absolute; top: 100%` — so it opens under the bar wherever the page is
+scrolled, over a light scrim, never pushing the page; it fades and settles 8 px over 240 ms,
+rows entering 25 ms apart; the scrim, Escape, the button and any choice close it; the open
+state survives repaints; the page under it keeps its position (scrim swallows wheel/touch
+scroll). Every row is one deterministic navigation to that step's top: the row presses, the
+index and the page take their leave (180 ms, 6 px), then the browser loads the step, addressed
+the way the origin already addresses it (`/wedding` on the Worker, `wedding.html` on Pages — no
+redirect); the step enters (280 ms, 8 px, opacity) and the bar names it (`0N / 06 · Title`).
+The current row is inert (closes the index). Browser back returns to a whole page with the
+index closed (`pageshow`). Hash deep links land clear of the sticky bar
+(`scroll-padding-top: var(--prep-bar-h)`, measured after every paint, fragment settled once
+on arrival). Drawers (Tak Bat, Sangkhathan, Switch) lock the page underneath (`position:
+fixed` body with the scroll offset kept) and restore it on close, trap Tab, return focus.
+Pressed / hover / focus-visible states on the bar button, Switch, rows, `.p-link`, `.p-act`,
+`.p-sel`; native tap highlight replaced by the design's own. `prefers-reduced-motion`: nothing
+travels, states change at once, navigation is immediate.
+
+**Deterministic coverage.** `steps-nav.mjs` (this directory): at 320 / 375 / 390 / 430 / 1280,
+from every step to every other step via the index (30 transitions per width): panel visible
+under the bar, `aria-expanded`, one navigation, landed on the expected file, `scrollY 0`, bar
+title, page entered, index closed; open/close without navigating keeps `scrollY`; scrim closes;
+current row inert; browser back; identity switch; `#documents` below the bar; drawer lock /
+label / focus / restore; reduced motion; zero page and console errors — **50/50** locally and on
+both live origins (see below).
+
+### Verification (this pass)
+`npm test` 206/206 · `release-check` all gates PASS (P7, P8 guard, P10, P11 included) ·
+`steps-nav.mjs` 50/50 · `a11y.mjs` 18/18 · release walk 78/78 · D 39/39 · C 39/39 ·
+Haruthai 24/24 (rails at native proportion) · E/F/G 37/37 · 0 page / console errors.

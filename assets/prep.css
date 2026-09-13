@@ -115,6 +115,9 @@ body.prep button, body.prep input, body.prep textarea, body.prep select { font-f
   cursor: pointer; transition: background .25s, color .25s;
 }
 .p-act:hover, .p-act:focus-visible { background: #1F1F1F; }
+.p-act { -webkit-tap-highlight-color: transparent; transition: background var(--p-t-fast) var(--p-ease), color var(--p-t-fast) var(--p-ease), opacity var(--p-t-fast) var(--p-ease); }
+.p-act:active { opacity: .78; }
+.p-act:focus-visible { outline: 1px solid var(--p-ink); outline-offset: 3px; }
 .p-act.quiet { background: none; color: var(--p-ink); }
 .p-act.quiet:hover { background: var(--p-ink); color: var(--p-paper); }
 .p-act.off { background: none; color: var(--p-mute); border-color: #C9C4BA; }
@@ -129,7 +132,10 @@ body.prep button, body.prep input, body.prep textarea, body.prep select { font-f
   text-decoration: none; border-bottom: 1px solid var(--p-ink); background: none;
   border-left: 0; border-right: 0; border-top: 0; cursor: pointer;
 }
+.p-link { -webkit-tap-highlight-color: transparent; transition: opacity var(--p-t-fast) var(--p-ease), border-color var(--p-t-fast) var(--p-ease), color var(--p-t-fast) var(--p-ease); }
 .p-link:hover { opacity: .6; }
+.p-link:active { opacity: .4; }
+.p-link:focus-visible { outline: 1px solid var(--p-ink); outline-offset: 3px; }
 .p-link.mute { color: var(--p-mute); border-bottom-color: #C9C4BA; }
 
 /* ----------------------------------------------------------- 3 SELECTION */
@@ -141,7 +147,10 @@ body.prep button, body.prep input, body.prep textarea, body.prep select { font-f
   letter-spacing: 2px; text-transform: uppercase; text-align: left;
   cursor: pointer; transition: border-color .2s, background .2s;
 }
+.p-sel { -webkit-tap-highlight-color: transparent; }
 .p-sel:hover { border-color: var(--p-ink); }
+.p-sel:active { border-color: var(--p-ink); background: rgba(30,28,26,.05); }
+.p-sel:focus-visible { outline: 1px solid var(--p-ink); outline-offset: 3px; }
 .p-sel[aria-pressed="true"], .p-sel.on { background: var(--p-ink); border-color: var(--p-ink); color: var(--p-paper); }
 .p-sel[disabled], .p-sel.gone { opacity: .45; cursor: default; }
 .p-sel .p-sel-r { margin-left: auto; font-family: var(--f-ed); font-size: 15px; letter-spacing: 0; text-transform: none; }
@@ -188,9 +197,13 @@ body.prep button, body.prep input, body.prep textarea, body.prep select { font-f
 .p-rail { display: flex; gap: var(--s4); overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; padding-bottom: var(--s1); }
 .p-rail::-webkit-scrollbar { display: none; }
 .p-rail > * { flex: 0 0 84%; max-width: 340px; scroll-snap-align: start; }
+/* the dress references keep their own proportions (Owner, 13 Sep 2026): a
+ * shared height cap and a width cap, never a forced box — no stretching, no
+ * cropping of a person to make the cards equal; the rail stays a rail */
+.p-rail { align-items: flex-start; }
 /* a photograph keeps its own proportions: 3:4, covered, never stretched */
-.p-rail > img { display: block; width: 84%; height: auto; aspect-ratio: 3 / 4; object-fit: cover; object-position: center top; background: #E7E3DB; }
-@media (min-width: 768px) { .p-rail > img { width: 320px; } }
+.p-rail > img { display: block; flex: 0 0 auto; width: auto; height: auto; max-height: min(92vw, 440px); max-width: min(84%, 340px); aspect-ratio: auto; object-fit: contain; background: none; }
+@media (min-width: 768px) { .p-rail > img { max-height: 440px; max-width: 340px; } }
 @media (min-width: 768px) { .p-rail > * { flex: 0 0 320px; } }
 
 /* ------------------------------------------------------------- disclosure */
@@ -210,6 +223,8 @@ body.p-drawer-open .p-drawer { transform: translateY(0); }
   body.p-drawer-open .p-drawer { transform: translateX(0); }
   .p-drawer-in { padding-top: var(--s7); }
 }
+.p-drawer { opacity: 0; transition: transform .35s var(--p-ease), opacity .25s var(--p-ease); }
+body.p-drawer-open .p-drawer { opacity: 1; }
 
 /* ============================================================ THE SHELL */
 .prep-bar { position: sticky; top: 0; z-index: 60; background: var(--p-paper); border-bottom: 1px solid var(--p-line); }
@@ -243,6 +258,12 @@ body.p-drawer-open .p-drawer { transform: translateY(0); }
 
 .prep-all { font-family: var(--f-ui); font-size: 8.5px; letter-spacing: 1.6px; text-transform: uppercase; color: var(--p-mute); background: none; border: 0; border-bottom: 1px solid var(--p-line); padding: var(--s3) 0 var(--s1); min-height: var(--p-tap); cursor: pointer; white-space: nowrap; }
 .prep-all:hover { border-color: var(--p-ink); color: var(--p-ink); }
+.prep-all { -webkit-tap-highlight-color: transparent; transition: color var(--p-t-fast) var(--p-ease), border-color var(--p-t-fast) var(--p-ease), opacity var(--p-t-fast) var(--p-ease); }
+.prep-all:active { opacity: .55; }
+.prep-all[aria-expanded="true"] { color: var(--p-ink); border-color: var(--p-ink); }
+.prep-all:focus-visible, .prep-who button:focus-visible, .prep-for button:focus-visible { outline: 1px solid var(--p-ink); outline-offset: 3px; }
+.prep-who button, .prep-for button { -webkit-tap-highlight-color: transparent; transition: opacity var(--p-t-fast) var(--p-ease), border-color var(--p-t-fast) var(--p-ease); }
+.prep-who button:active, .prep-for button:active { opacity: .5; }
 @media (min-width: 768px) {
   .prep-bar-in { align-items: center; }
   .prep-step { font-size: 23px; }
@@ -251,12 +272,43 @@ body.p-drawer-open .p-drawer { transform: translateY(0); }
   .prep-all:hover { border-color: var(--p-ink); }
 }
 
-/* the steps layer */
-.prep-steps { border-top: 1px solid var(--p-line); background: var(--p-card); display: none; }
-.prep-steps.on { display: block; }
+/* ---------------------------------------------------------------- MOTION
+ * One vocabulary for the whole shell (13 Sep 2026): opacity and a few
+ * pixels of travel, 180–320 ms, one easing. It says "received, happening,
+ * arrived" — never a show. With reduced motion nothing travels and every
+ * state change is immediate. */
+:root { --p-ease: cubic-bezier(.4, 0, .2, 1); --p-t-fast: .18s; --p-t: .24s; --p-t-page: .28s; }
+html { scroll-padding-top: calc(var(--prep-bar-h, 0px) + 12px); }
+/* the step arrives from its top: a quiet entrance, a quieter leave */
+body.prep main.prep-page { opacity: 0; transform: translateY(8px); }
+body.prep.p-in main.prep-page { opacity: 1; transform: none; transition: opacity var(--p-t-page) var(--p-ease), transform var(--p-t-page) var(--p-ease); }
+body.prep.p-leave main.prep-page { opacity: 0; transform: translateY(-6px); transition: opacity var(--p-t-fast) var(--p-ease), transform var(--p-t-fast) var(--p-ease); }
+/* while a drawer is open the page underneath holds its position */
+body.p-scroll-lock { position: fixed; left: 0; right: 0; width: 100%; overflow: hidden; }
+
+/* the steps index: part of the sticky bar, opens under it wherever the page
+ * is scrolled, never pushes the page, closes on the scrim, on Escape, on a
+ * choice */
+.prep-steps-scrim { position: fixed; inset: 0; background: rgba(30,28,26,.22); opacity: 0; pointer-events: none; transition: opacity var(--p-t) var(--p-ease); z-index: 59; }
+body.prep-steps-open .prep-steps-scrim { opacity: 1; pointer-events: auto; }
+.prep-steps { position: absolute; top: 100%; left: 0; right: 0; z-index: 61; border-top: 1px solid var(--p-line); border-bottom: 1px solid var(--p-line); background: var(--p-card);
+  max-height: calc(100vh - var(--prep-bar-h, 96px)); max-height: calc(100dvh - var(--prep-bar-h, 96px)); overflow-y: auto; -webkit-overflow-scrolling: touch;
+  box-shadow: 0 24px 40px -24px rgba(30,28,26,.28);
+  visibility: hidden; opacity: 0; transform: translateY(-8px);
+  transition: opacity var(--p-t) var(--p-ease), transform var(--p-t) var(--p-ease), visibility 0s linear var(--p-t); }
+.prep-steps.on { visibility: visible; opacity: 1; transform: none; transition: opacity var(--p-t) var(--p-ease), transform var(--p-t) var(--p-ease), visibility 0s; }
 .prep-steps-in { box-sizing: border-box; max-width: var(--p-frame); margin: 0 auto; padding: var(--s4) var(--p-gut) var(--s5); }
-.prep-srow { display: flex; align-items: baseline; gap: var(--s4); border-top: 1px solid var(--p-hair); padding: var(--s3) 0; text-decoration: none; min-height: var(--p-tap); }
+.prep-srow { display: flex; align-items: baseline; gap: var(--s4); border-top: 1px solid var(--p-hair); padding: var(--s3) var(--s2); margin: 0 calc(-1 * var(--s2)); text-decoration: none; min-height: var(--p-tap);
+  -webkit-tap-highlight-color: transparent; transition: background-color var(--p-t-fast) var(--p-ease), opacity var(--p-t-fast) var(--p-ease); }
 .prep-srow:first-of-type { border-top: 0; }
+.prep-srow:hover { background: rgba(30,28,26,.035); }
+.prep-srow:active, .prep-srow.pressed { background: rgba(30,28,26,.07); opacity: .8; }
+.prep-srow:focus-visible { outline: 1px solid var(--p-ink); outline-offset: -1px; }
+/* the index arrives row by row, barely */
+.prep-steps .prep-srow { opacity: 0; transform: translateY(4px); }
+.prep-steps.on .prep-srow { opacity: 1; transform: none; transition: opacity var(--p-t) var(--p-ease), transform var(--p-t) var(--p-ease), background-color var(--p-t-fast) var(--p-ease); }
+.prep-steps.on .prep-srow:nth-child(2) { transition-delay: 25ms; } .prep-steps.on .prep-srow:nth-child(3) { transition-delay: 50ms; }
+.prep-steps.on .prep-srow:nth-child(4) { transition-delay: 75ms; } .prep-steps.on .prep-srow:nth-child(5) { transition-delay: 100ms; } .prep-steps.on .prep-srow:nth-child(6) { transition-delay: 125ms; }
 .prep-srow .n { font-family: var(--f-ui); font-size: 10px; letter-spacing: 2px; color: var(--p-mute); flex: none; width: 26px; }
 .prep-srow .l { font-family: var(--f-ed); font-weight: 200; font-size: 17px; color: var(--p-ink); flex: 1; }
 .prep-srow .s { font-family: var(--f-ui); font-size: 9.5px; letter-spacing: 1.8px; text-transform: uppercase; color: var(--p-mute); white-space: nowrap; }
@@ -478,3 +530,15 @@ body.p-drawer-open .p-drawer { transform: translateY(0); }
 /* F · once Guest Relations has confirmed, the draft sections on Review & Send are informational: no readiness card, no red 'action needed' */
 .journey-confirmed #ready { display: none; }
 .journey-confirmed .p-block .t-l1.open { color: var(--p-mute); }
+
+/* ---------------------------------------------------- reduced motion
+ * nothing travels; states still change, at once */
+@media (prefers-reduced-motion: reduce) {
+  body.prep main.prep-page, body.prep.p-in main.prep-page, body.prep.p-leave main.prep-page { opacity: 1; transform: none; transition: none; }
+  .prep-steps, .prep-steps.on, .prep-steps .prep-srow, .prep-steps.on .prep-srow { transform: none; transition: none; transition-delay: 0s; }
+  .prep-steps.on .prep-srow { opacity: 1; }
+  .prep-steps-scrim, .p-drawer-scrim { transition: none; }
+  .p-drawer, body.p-drawer-open .p-drawer { transform: none; transition: opacity .01s; }
+  .p-drawer { visibility: hidden; } body.p-drawer-open .p-drawer { visibility: visible; }
+  .prep-srow, .prep-all, .p-act, .p-link, .p-sel, .prep-who button, .prep-for button { transition: none; }
+}
