@@ -1,6 +1,6 @@
 {
   "origin": "https://seeyouinlaos.github.io/seeyouinlaos-website",
-  "at": "2026-09-13T21:20:02.285Z",
+  "at": "2026-09-13T22:18:35.733Z",
   "results": [
     {
       "id": "1 Bangkok · restaurant, café, experience, shopping, bar rails",
@@ -217,24 +217,14 @@
       "d": "Our grandmother Christa, herself a trained chef, was our fir"
     },
     {
-      "id": "3 Sühring · price USD 180 as recorded, without an invented unit",
+      "id": "3 Sühring · price USD 180 per person (Owner decision), hours verbatim, map and website",
       "ok": true,
-      "d": "PRICE USD 180 The amount recorded by the hosts. The source does not state whether it is per guest or per menu, so it is shown as recorded and never multiplied here."
+      "d": "PRICE USD 180 per person For each participating guest, as decided by the hosts."
     },
     {
-      "id": "3 Sühring · opening hours verbatim",
+      "id": "3 Sühring · the Journey action: optional, a request, never a confirmed reservation, no date to choose",
       "ok": true,
-      "d": "OPENING HOURS Lunch Thursday to Sunday 12:30 pm to 13:00 pm (last seating) Closed on Monday and Tuesday"
-    },
-    {
-      "id": "3 Sühring · map and website from the source",
-      "ok": true,
-      "d": "https://maps.app.goo.gl/2b4whggW3YCnxN6u5?g_st=ic https://www.restaurantsuhring.com/menu.html"
-    },
-    {
-      "id": "3 Sühring · the Journey action explains request, not reservation, and the untotalled amount",
-      "ok": true,
-      "d": "Add to your journey"
+      "d": "Add to your journey · USD 180"
     },
     {
       "id": "3 Sühring · adding without a session opens the invitation gate, nothing is added",
@@ -242,39 +232,59 @@
       "d": "gate true"
     },
     {
-      "id": "3 Sühring · after the code the request is in the bag as a REQUEST line without a price",
+      "id": "3 Sühring · after the code ONE line: USD 180 per person × the whole party (2)",
       "ok": true,
-      "d": "[{\"id\":\"suhring\",\"name\":\"Sühring\",\"meta\":\"Lunch · German fine dining · Bangkok\",\"request\":true,\"priceNote\":\"USD 180\",\"exp\":\"bkk-suhring\",\"img\":\"assets/images/experiences/bkk-suhring-01.jpg\",\"qty\":1}]"
+      "d": "[{\"id\":\"suhring\",\"name\":\"Sühring\",\"meta\":\"Lunch · German fine dining · Bangkok\",\"price\":180,\"img\":\"assets/images/experiences/bkk-suhring-01.jpg\",\"qty\":2,\"request\":true,\"exp\":\"bkk-suhring\"}]"
     },
     {
-      "id": "3 Sühring · the page shows IN YOUR JOURNEY, the Add action is gone, Remove offered",
+      "id": "3 Sühring · IN YOUR JOURNEY · 2 guests · USD 360, Add gone, Remove offered",
       "ok": true,
-      "d": "{\"cur\":\"In your journey\",\"add\":false,\"rm\":true}"
+      "d": "{\"cur\":\"In your journey · 2 guests · USD 360\",\"add\":false,\"rm\":true,\"q\":\"2\",\"amt\":\"USD 360\"}"
     },
     {
-      "id": "3 Sühring · reload keeps the current state",
+      "id": "3 Sühring · one participating guest = USD 180, the minus stops at one",
       "ok": true,
-      "d": "{\"cur\":\"In your journey\",\"add\":false}"
+      "d": "{\"q\":1,\"cur\":\"In your journey · 1 guest · USD 180\",\"minus\":true}"
+    },
+    {
+      "id": "3 Sühring · two participating guests = USD 360, the plus stops at the party",
+      "ok": true,
+      "d": "{\"q\":2,\"plus\":true,\"cur\":\"In your journey · 2 guests · USD 360\"}"
+    },
+    {
+      "id": "3 Sühring · reload keeps the selection and the count",
+      "ok": true,
+      "d": "{\"cur\":\"In your journey · 2 guests · USD 360\",\"add\":false}"
     },
     {
       "id": "3 Sühring · duplicate selection impossible",
       "ok": true,
-      "d": "1 line, qty 1"
+      "d": "1 line, qty 2"
     },
     {
-      "id": "3 Your Journey · Sühring listed as a request, opens its page, total untouched",
+      "id": "3 Your Journey · Sühring listed at USD 180 per person, 2 participating guests, USD 360 in the total, opens its page",
       "ok": true,
-      "d": "USD 0 · BANGKOK DAYS · RestaurantSühringLunch · German fine dining · BangkokRequest · USD 180 as recorded by the hosts · a table"
+      "d": "USD 360 · BANGKOK DAYS · RestaurantSühringLunch · German fine dining · BangkokUSD 180 per person · a table requested through Guest Relations · not a c"
     },
     {
-      "id": "3 Review & Send · the request line is shown by name, USD 180 as recorded, not in the total",
+      "id": "3 Your Journey · the participants stepper moves the total 360 → 180 → 360 and stops at the party",
       "ok": true,
-      "d": "USD 0 · BANGKOK DAYS · RestaurantSühringLunch · German fine dining · BangkokRequest · USD 180 as recorded by the hosts · a table asked for through G"
+      "d": "USD 180 · USD 360 · USD 360"
+    },
+    {
+      "id": "3 Review & Send · the request is shown by name with USD 180 per person × 2 guests and USD 360 in the total, never as confirmed",
+      "ok": true,
+      "d": "USD 360 · BANGKOK DAYS · RestaurantSühringLunch · German fine dining · BangkokUSD 180 per person × 2 guestsUSD 180 per person · a table requested through Guest Relations "
     },
     {
       "id": "3 Sühring · Remove empties the line and returns the Add action",
       "ok": true,
       "d": "bag 0"
+    },
+    {
+      "id": "3 Your Journey · after removal the total is back to USD 0",
+      "ok": true,
+      "d": "USD 0"
     },
     {
       "id": "3 no page errors across the Sühring flow",
