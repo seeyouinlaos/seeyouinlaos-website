@@ -1020,7 +1020,7 @@ test('the retired imagery and the pool-side dinner narrative are gone', () => {
     assert.ok(!/052-temple-ceremony-bride/.test(src), f + ' reuses the retired photograph');
   }
   /* the vow keeps the green door, and it has no pool */
-  assert.match(vy, /052-vow-ceremony-green-door\.jpg/);
+  assert.match(vy, /052-vow-ceremony-green-door(-entrance)?\.jpg/, "the vow keeps the green door (the Owner's entrance photograph since 13 Sep 2026)");
   const vow = vy.slice(vy.indexOf('id="vows"'), vy.indexOf('id="vows"') + 700);
   assert.ok(!/pool/i.test(vow));
   /* the wedding-dinner imagery is the Owner's set (decision of 13 Sep 2026:
