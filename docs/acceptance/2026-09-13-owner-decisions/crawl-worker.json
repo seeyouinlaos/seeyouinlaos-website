@@ -1,0 +1,152 @@
+{
+  "origin": "https://seeyouinlaos-website.suthep-hrg.workers.dev",
+  "pages": [
+    {
+      "page": "index.html",
+      "status": 200,
+      "title": "See You In Laos",
+      "brokenImgs": [],
+      "missingAnchors": []
+    },
+    {
+      "page": "your-journey.html",
+      "status": 200,
+      "title": "Your Journey · See You In Laos",
+      "brokenImgs": [],
+      "missingAnchors": []
+    },
+    {
+      "page": "journeys.html",
+      "status": 200,
+      "title": "Journeys · See You In Laos",
+      "brokenImgs": [],
+      "missingAnchors": []
+    },
+    {
+      "page": "destination.html",
+      "status": 200,
+      "title": "Destinations · See You In Laos",
+      "brokenImgs": [],
+      "missingAnchors": []
+    },
+    {
+      "page": "voyage.html",
+      "status": 200,
+      "title": "The Wedding · See You In Laos",
+      "brokenImgs": [],
+      "missingAnchors": []
+    },
+    {
+      "page": "accommodation.html",
+      "status": 200,
+      "title": "Stays · See You In Laos",
+      "brokenImgs": [],
+      "missingAnchors": []
+    },
+    {
+      "page": "experiences.html",
+      "status": 200,
+      "title": "Experiences · See You In Laos",
+      "brokenImgs": [],
+      "missingAnchors": []
+    },
+    {
+      "page": "marsilea.html",
+      "status": 200,
+      "title": "Marsilea Spa · See You In Laos",
+      "brokenImgs": [],
+      "missingAnchors": []
+    },
+    {
+      "page": "1872.html",
+      "status": 200,
+      "title": "1872 · See You In Laos",
+      "brokenImgs": [],
+      "missingAnchors": []
+    },
+    {
+      "page": "room.html",
+      "status": 200,
+      "title": "Journeys · See You In Laos",
+      "brokenImgs": [],
+      "missingAnchors": []
+    },
+    {
+      "page": "invitation.html",
+      "status": 200,
+      "title": "Your invitation · See You In Laos",
+      "brokenImgs": [],
+      "missingAnchors": []
+    },
+    {
+      "page": "you.html",
+      "status": 200,
+      "title": "You & your party · See You In Laos",
+      "brokenImgs": [],
+      "missingAnchors": []
+    },
+    {
+      "page": "about-you.html",
+      "status": 200,
+      "title": "About you · See You In Laos",
+      "brokenImgs": [],
+      "missingAnchors": []
+    },
+    {
+      "page": "wedding-preparation.html",
+      "status": 200,
+      "title": "Wedding Preparation · See You In Laos",
+      "brokenImgs": [],
+      "missingAnchors": []
+    },
+    {
+      "page": "review.html",
+      "status": 200,
+      "title": "Review & Send · See You In Laos",
+      "brokenImgs": [],
+      "missingAnchors": []
+    },
+    {
+      "page": "transport.html",
+      "status": 200,
+      "title": "Special Express No. 25 · See You In Laos",
+      "brokenImgs": [],
+      "missingAnchors": []
+    },
+    {
+      "page": "wedding.html",
+      "status": 200,
+      "title": "The Wedding · See You In Laos",
+      "brokenImgs": [],
+      "missingAnchors": []
+    },
+    {
+      "page": "tea.html",
+      "status": 200,
+      "title": "Champagne Afternoon Tea at 1872 · See You In Laos",
+      "brokenImgs": [],
+      "missingAnchors": []
+    }
+  ],
+  "failures": [],
+  "consoleErrors": [],
+  "crossMissing": [
+    {
+      "from": "review.html",
+      "to": "you.html",
+      "id": "you"
+    },
+    {
+      "from": "review.html",
+      "to": "wedding.html",
+      "id": "ev-temple"
+    },
+    {
+      "from": "review.html",
+      "to": "about-you.html",
+      "id": "documents"
+    }
+  ],
+  "requestedCount": 192,
+  "resort01Requested": false
+}

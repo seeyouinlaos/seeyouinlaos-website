@@ -7,7 +7,22 @@ earlier conversation.
 
 > **13 Sep 2026 · FINAL RUN COMPLETE. FINAL PRE-RELEASE GATE · PASS.** Read `FINAL-REPORT.md`.
 > Nothing from this run is outstanding. The Owner's final release approval stays ON HOLD by
-> instruction; the one Owner decision before the letters go out is the INV-002 code rotation.
+> instruction.
+>
+> **13 Sep 2026, later · OWNER DECISIONS APPLIED at `7431761`** (record:
+> `docs/acceptance/2026-09-13-owner-decisions/README.md`): one code per party confirmed (INV-002
+> not rotated) · **seating OPEN on production** at the binding geometry with **no FAMILY chair**
+> (the FAMILY-ids dependency is closed; the couple/hosts book first through the same engine) ·
+> booking rule unchanged (authenticated party, OPEN, not FROZEN; no attendance prerequisite
+> exists) · the **Wedding Dinner carries the Owner's 10-image set** (all mapped, six placed on
+> voyage.html §04) · DOCS binding explained, not changed. Production: Worker version
+> **`21948251-e7b3-44b9-905c-417ba85599f9`** (wrangler, from 7431761) · Pages built from 7431761
+> · parity **61/61** · smoke 8/8 both origins · crawl clean both origins · REG_KV 0 keys ·
+> INV-002 pristine · seating plan 50 + 48 all available, held 0.
+> **Two Owner inputs remain:** (a) a party entry for the couple (and any host/VIP) in the private
+> guest list so they can book first — Owner data, not invented; (b) keep or disable the
+> **Cloudflare Workers Builds** git integration that auto-deploys on every push to `main`
+> (see the record's deployment note). INV-002 rotation stays an Owner decision.
 
 ## Secured state
 - Repository: `main` = **`ce462d7`** (the fix; the guest-facing source state) + one acceptance
@@ -25,8 +40,10 @@ earlier conversation.
   `a11y.mjs` **18/18** · regression C 39/39 · D 39/39 · E/F/G 37/37 · Haruthai 24/24 ·
   `smoke.mjs` **8/8 on both origins** · `crawl.mjs` 0 HTTP failures / 0 console errors on both
   origins.
-- Production ledger: REG_KV **0 keys**; INV-002 `received:false, confirmed:false`; seating
-  `open:false`, unconfigured, NOT OPEN. No write was made by this run.
+- Production ledger at the end of the FINAL RUN: REG_KV **0 keys**; INV-002 `received:false,
+  confirmed:false`; seating `open:false`, unconfigured, NOT OPEN. No write was made by that run.
+  **Superseded 13 Sep 2026 by the Owner decisions: seating is now OPEN and configured** (see the
+  note at the top and `docs/acceptance/2026-09-13-owner-decisions/`).
 
 ## Frozen (never reopen or alter)
 A design system · B shell · C party/person separation · D six surfaces · E Sangkhathan eligibility
@@ -58,8 +75,9 @@ failed). No subagent, no MCP, no claude-mem, one stream.
 ## Owner decisions pending (not release blockers)
 - **Rotate the INV-002 guest code** (in public git history 91afeb7…91c52ad; removed at 01a9671).
   Not performed — Owner decision.
-- Sangkhathan `givingEligibility` per invitation · FAMILY seat ids · seating opening authority ·
-  DOCS store binding · Wedding Dinner photograph.
+- Sangkhathan `givingEligibility` per invitation · DOCS store binding (question stated in the
+  13 Sep record) · the couple's / hosts' party entries for first booking · the Workers Builds
+  integration. (FAMILY seat ids, seating opening and the Wedding Dinner photograph: closed 13 Sep.)
 - Final release approval (ON HOLD by instruction).
 
 ## How to run the evidence scripts (local server `python3 -m http.server 8787` in the repo root)
