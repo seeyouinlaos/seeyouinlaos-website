@@ -1,6 +1,6 @@
 {
-  "origin": "http://127.0.0.1:8787",
-  "at": "2026-09-13T16:01:06.899Z",
+  "origin": "https://seeyouinlaos-website.suthep-hrg.workers.dev",
+  "at": "2026-09-13T16:04:53.213Z",
   "results": [
     {
       "id": "1 U Sathorn chosen → the card says so, from the bag",
@@ -105,7 +105,7 @@
     {
       "id": "3 route@390 lands on the seats, for Peggy, both maps titled to the task, couple at the front",
       "ok": true,
-      "d": "{\"file\":\"wedding-preparation.html\",\"below\":true,\"who\":\"G001\",\"cards\":[\"ceremony:open:Choose your ceremony seat\",\"dinner:open:Choose your dinner seat\"],\"bride\":1,\"dinnerFixed\":0}"
+      "d": "{\"file\":\"wedding-preparation\",\"below\":true,\"who\":\"G001\",\"cards\":[\"ceremony:open:Choose your ceremony seat\",\"dinner:open:Choose your dinner seat\"],\"bride\":1,\"dinnerFixed\":0}"
     },
     {
       "id": "3 ceremony@390 BRIDE and GROOM: front centre, never selectable, not counted",
@@ -150,7 +150,7 @@
     {
       "id": "3 route@1280 lands on the seats, for Peggy, both maps titled to the task, couple at the front",
       "ok": true,
-      "d": "{\"file\":\"wedding-preparation.html\",\"below\":true,\"who\":\"G001\",\"cards\":[\"ceremony:open:Choose your ceremony seat\",\"dinner:open:Choose your dinner seat\"],\"bride\":1,\"dinnerFixed\":0}"
+      "d": "{\"file\":\"wedding-preparation\",\"below\":true,\"who\":\"G001\",\"cards\":[\"ceremony:open:Choose your ceremony seat\",\"dinner:open:Choose your dinner seat\"],\"bride\":1,\"dinnerFixed\":0}"
     },
     {
       "id": "3 ceremony@1280 BRIDE and GROOM: front centre, never selectable, not counted",
@@ -195,12 +195,12 @@
     {
       "id": "4 sign out → clean code screen, session cleared, draft set aside",
       "ok": true,
-      "d": "{\"file\":\"invitation.html\",\"auth\":null,\"bag\":null,\"aside\":true,\"gate\":true,\"party\":false}"
+      "d": "{\"file\":\"invitation\",\"auth\":null,\"bag\":null,\"aside\":true,\"gate\":true,\"party\":false}"
     },
     {
       "id": "4 back after sign out reveals no party",
       "ok": true,
-      "d": "{\"file\":\"invitation.html\",\"party\":false,\"bar\":\"YOUR PRIVATE JOURNEY Open your invitation to begin\"}"
+      "d": "{\"file\":\"invitation\",\"party\":false,\"bar\":\"YOUR PRIVATE JOURNEY Open your invitation to begin\"}"
     },
     {
       "id": "4 ?open=1 presents the code prompt",
@@ -240,7 +240,7 @@
     {
       "id": "5 China card carries the Lijiang file",
       "ok": true,
-      "d": "{\"bg\":\"url(\\\"http://127.0.0.1:8787/assets/images/city/004-lijiang-black-dragon-pool.jpg\\\")\",\"label\":\"Black Dragon Pool in Lijiang, Jade Dragon Snow Mountain behind it\"}"
+      "d": "{\"bg\":\"url(\\\"https://seeyouinlaos-website.suthep-hrg.workers.dev/assets/images/city/004-lijiang-black-dragon-pool.jpg\\\")\",\"label\":\"Black Dragon Pool in Lijiang, Jade Dragon Snow Mountain behind it\"}"
     },
     {
       "id": "5 the file is served",

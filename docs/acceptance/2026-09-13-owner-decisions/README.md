@@ -291,3 +291,18 @@ returns a whole page, no errors.
 `release-check` all gates PASS · `guest-testing-walk.mjs` **49/49** · `steps-nav.mjs` 50/50 ·
 release walk **84/84** (six new access checks) · a11y 18/18 · D 39/39 · C 39/39 · Haruthai 24/24 ·
 E/F/G 37/37 · local crawl 0 HTTP failures / 0 broken images · 0 page errors.
+
+**Release and live verification.** Commits `022f13c` (the corrections), `acf0b98` (rail images
+carry their intrinsic size — a `#seats` deep link on the slower Pages origin drifted while the
+references loaded) and `4345a59` (a fragment holds its place for three seconds while the layout
+above it still grows, unless the guest scrolls). Automatic Workers Build and Pages workflow for
+each; live version **`1016863a`** at `4345a59`. Live: `guest-testing-walk.mjs` **49/49 on the
+Worker and 49/49 on Pages** (`guest-testing-worker.json`, `guest-testing-pages.json`; the Worker's
+API is mocked by the walk, production untouched) · `steps-nav.mjs` 50/50 on Pages · smoke 8/8 on
+both (ceremony front-centre positions present, dinner nothing fixed, 100 chairs, no writes) ·
+**parity 61/61** (`parity-4345a59.txt`) · iPhone 14 profile in WebKit on Pages with the real
+ledger: INV-001 sees "front centre" ×2 and two dinner CTAs, Suthep preselected on step 04 with no
+ceremony map and the dinner map open (50 chairs), Sign out → clean code screen, Back shows no
+party, `?open=1` presents the prompt, INV-002's Accessibility field required and focused, rail
+media on one line, no errors. Production ledger: seating OPEN; four chairs held by INV-002
+(the Owner's own production test at 14:02–14:03 UTC; not touched); REG_KV 0 keys.
