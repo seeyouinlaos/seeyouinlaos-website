@@ -1,6 +1,6 @@
 {
   "origin": "http://127.0.0.1:8787",
-  "at": "2026-09-13T14:56:39.764Z",
+  "at": "2026-09-13T17:17:00.904Z",
   "results": [
     {
       "id": "01 home fresh",
@@ -238,9 +238,14 @@
       "detail": "blank stays Required"
     },
     {
+      "id": "06 dietary required too",
+      "ok": true,
+      "detail": "two required fields · access alone does not complete"
+    },
+    {
       "id": "06 \"None\" is an answer",
       "ok": true,
-      "detail": "Peggy answered · step 05 still waits for Steffie"
+      "detail": "Peggy answered both · step 05 still waits for Steffie"
     },
     {
       "id": "06 each guest answers for themselves",
@@ -250,7 +255,7 @@
     {
       "id": "06 step 05 complete only with both",
       "ok": true,
-      "detail": "two independent answers · step 05 Completed"
+      "detail": "two independent answers each · step 05 Completed"
     },
     {
       "id": "07 review hierarchy",

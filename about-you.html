@@ -53,7 +53,7 @@ function size(n){return n>=1048576?(n/1048576).toFixed(1)+' MB':Math.max(1,Math.
 function field(id,q,n){
   var v=G.profile(id,q.key),req=!!q.required,missing=req&&!(v&&String(v).trim());
   return '<div class="p-field'+(req?' p-required':'')+'"'+(req?' data-required="'+q.key+'"':'')+'>'+(n?'<p class="t-l1">'+n+'</p>':'')+'<h3 class="t-h2">'+q.q+(req?' <span class="t-l1'+(missing?' open':' on')+'" data-req-state>'+(missing?'Required':'Answered')+'</span>':'')+'</h3><p class="t-b2">'+q.hint+'</p>'+
-    '<textarea data-q="'+q.key+'" data-g="'+esc(id)+'" placeholder="'+(req?'Required — for example: None':'Optional')+'" aria-label="'+esc(q.q)+'"'+(req?' aria-required="true" aria-invalid="'+(missing?'true':'false')+'"':'')+'>'+esc(v==='NONE'?'':v)+'</textarea>'+
+    '<textarea data-q="'+q.key+'" data-g="'+esc(id)+'" placeholder="'+(req?(q.none?'Required — or tick &ldquo;'+esc(q.none)+'&rdquo;':'Required — for example: None'):'Optional')+'" aria-label="'+esc(q.q)+'"'+(req?' aria-required="true" aria-invalid="'+(missing?'true':'false')+'"':'')+'>'+esc(v==='NONE'?'':v)+'</textarea>'+
     (q.none?'<label class="p-check"><input type="checkbox" data-none="'+q.key+'" data-g="'+esc(id)+'"'+(v==='NONE'?' checked':'')+'><span>'+q.none+'</span></label>':'')+
     '<p class="t-b2 p-why">'+q.why+'</p></div>'}
 
@@ -102,7 +102,7 @@ if(p.guests.length>1){
 
 /* 01 · HOSPITALITY PROFILE */
 h+='<section class="prep-sec"><p class="t-l1">01 · '+(forOther?'For '+name:'For you')+'</p><h2 class="t-h2">Hospitality profile</h2>'+
-   '<p class="t-b1 measure">Seven questions that let us look after '+(forOther?name:'you')+' personally. Kitchens in three countries, a night train and twelve days of small moments read from these answers.</p>';
+   '<p class="t-b1 measure">Seven questions that let us look after '+(forOther?name:'you')+' personally. Kitchens in three countries, a night train and twelve days of small moments read from these answers. The first is required — the kitchens need it; the rest are welcome.</p>';
 G.PROFILE.forEach(function(q){h+=field(id,q,q.n)});
 h+='</section>';
 
@@ -149,6 +149,8 @@ page.querySelectorAll('input[data-none]').forEach(function(cb){
     var k=cb.getAttribute('data-none'),g=cb.getAttribute('data-g');
     G.setProfile(g,k,cb.checked?'NONE':'');
     var t=page.querySelector('textarea[data-q="'+k+'"]');if(t&&cb.checked)t.value='';
+    /* "Nothing to note" is an answer: the required marker follows the tick */
+    var f=cb.closest('.p-field.p-required');if(f&&t){var ok=cb.checked||!!t.value.trim(),st=f.querySelector('[data-req-state]');t.setAttribute('aria-invalid',ok?'false':'true');if(st){st.textContent=ok?'Answered':'Required';st.className='t-l1 '+(ok?'on':'open')}}
     mark()})});
 page.querySelectorAll('[data-who]').forEach(function(b){
   b.addEventListener('click',function(){G.setSubject(b.getAttribute('data-who'))})});

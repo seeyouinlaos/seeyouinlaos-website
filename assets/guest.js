@@ -69,19 +69,22 @@
 
   /* the seven hospitality questions plus the one operational field.
    * Every one is optional; the first has an explicit "nothing to note". */
+  /* Owner, 13 Sep 2026: the dietary answer is REQUIRED of every named guest —
+   * in words, or the explicit "Nothing to note"; the favourite drink sits in
+   * the middle of the seven, not at their head */
   var PROFILE = [
-    { key: 'dietary', n: '01', q: 'Food allergies or dietary requirements',
-      hint: 'Tell us anything our team should know.', none: 'Nothing to note',
-      why: 'Kitchens in three countries cook for you; this is the one profile answer the kitchens actually receive.' },
-    { key: 'drink', n: '02', q: 'Your favourite drink',
-      hint: 'What would make you smile if it appeared unexpectedly?',
-      why: 'An unscheduled arrival in the room or at the table. Anything at all — coffee, matcha, a soft drink, a cocktail.' },
-    { key: 'coffeetea', n: '03', q: 'Coffee or tea',
+    { key: 'dietary', n: '01', q: 'Food allergies or dietary requirements', required: true,
+      hint: 'Tell us anything our team should know. If there is nothing, tick "Nothing to note".', none: 'Nothing to note',
+      why: 'Kitchens in three countries cook for you; this is the one profile answer the kitchens actually receive. Answered by each named guest — never assumed.' },
+    { key: 'coffeetea', n: '02', q: 'Coffee or tea',
       hint: 'How do you usually like it?',
       why: 'Breakfasts, the train, the long afternoons — it is the small thing that is always right or always slightly wrong.' },
-    { key: 'treat', n: '04', q: 'A small favourite',
+    { key: 'treat', n: '03', q: 'A small favourite',
       hint: 'Is there a snack, sweet or little treat you especially enjoy?',
       why: 'Turndown, a long transfer, the night train — a reason to leave something behind for you.' },
+    { key: 'drink', n: '04', q: 'Your favourite drink',
+      hint: 'What would make you smile if it appeared unexpectedly?',
+      why: 'An unscheduled arrival in the room or at the table. Anything at all — coffee, matcha, a soft drink, a cocktail.' },
     { key: 'comfort', n: '05', q: 'Travel comfort',
       hint: 'Is there anything that makes travelling more comfortable for you?',
       why: 'Twelve days, four flights and a night train. What helps you travel is worth knowing once.' },
@@ -262,11 +265,15 @@
       PROFILE.concat([ACCESS]).forEach(function (q) { if ((r.profile || {})[q.key]) n++; });
       return n;
     },
-    /* the one required personal answer of step 05: present, in words, not blank */
-    accessAnswered: function (id) {
-      var v = this.profile(id, ACCESS.key);
-      return typeof v === 'string' && v.trim().length > 0;
+    /* the required personal answers of step 05 — dietary and accessibility &
+     * comfort: each present, in words or as the explicit "Nothing to note",
+     * never blank, never assumed */
+    REQUIRED: PROFILE.filter(function (q) { return q.required; }).concat([ACCESS]),
+    requiredMissingFor: function (id) {
+      var self = this;
+      return this.REQUIRED.filter(function (q) { var v = self.profile(id, q.key); return !(typeof v === 'string' && v.trim().length > 0); });
     },
+    accessAnswered: function (id) { return this.requiredMissingFor(id).length === 0; },
     accessMissing: function () {
       var self = this, p = this.party();
       return p ? p.guests.filter(function (g) { return !self.accessAnswered(g.guestId); }) : [];
@@ -389,9 +396,10 @@
        * optional and never hold the step */
       var accessMissing = this.accessMissing().map(function (g) { return self.nameOf(g.guestId); });
       var aboutDone = accessMissing.length === 0;
+      var reqLabel = this.REQUIRED.map(function (q) { return q.q.toLowerCase(); }).join(' and ');
       out.push({ key: 'about', n: '05', label: 'About You', href: 'about-you.html', required: true,
         state: state(aboutDone, aboutStarted, true),
-        note: [accessMissing.length ? (accessMissing.join(' · ') + ' — accessibility & comfort still to answer') : 'Accessibility & comfort answered for each named guest',
+        note: [accessMissing.length ? (accessMissing.join(' · ') + ' — ' + reqLabel + ' still to answer') : 'Dietary requirements and accessibility & comfort answered for each named guest',
                docsIn ? (docsIn + ' of ' + docsTotal + ' documents received · the rest can be added later') : 'Travel documents are optional and can be added later'].filter(Boolean).join(' · '),
         action: aboutDone ? 'Review' : 'Answer for each guest', deep: 'about-you.html#access' });
       var ready = contact && chosen && weddingDecided && dress && aboutDone;

@@ -212,18 +212,21 @@ note('06 switch ≠ answering for', (await H.ls('siyl.who')).guestId === P.guest
    blank blocks, whitespace blocks, words complete — each person's own answer */
 await H.go('review.html', 390); await page.waitForTimeout(600);
 const readyBefore = await H.text('#ready');
-note('06 access required blocks the send', /About You/i.test(readyBefore) && /accessibility & comfort still to answer/i.test(readyBefore) && /Peggy · Steffie|Peggy/.test(readyBefore) && /In progress|Action needed/.test(await page.evaluate(() => window.SIYL_GUEST.stepState('about'))), 'review names the missing answers: ' + readyBefore.replace(/\s+/g, ' ').slice(0, 120));
+note('06 access required blocks the send', /About You/i.test(readyBefore) && /accessibility & comfort still to answer|dietary requirements[^]*still to answer/i.test(readyBefore) && /Peggy · Steffie|Peggy/.test(readyBefore) && /In progress|Action needed/.test(await page.evaluate(() => window.SIYL_GUEST.stepState('about'))), 'review names the missing answers: ' + readyBefore.replace(/\s+/g, ' ').slice(0, 120));
 await H.go('about-you.html#access', 390); await page.waitForTimeout(700);
 note('06 access deep link lands on the field', await page.evaluate(() => { const s = document.getElementById('access'); const r = s.getBoundingClientRect(); const bar = document.querySelector('.prep-bar').getBoundingClientRect(); return r.top >= bar.bottom - 1 && r.top < bar.bottom + 120 && document.activeElement === s.querySelector('textarea'); }), 'section below the bar, textarea focused');
 await page.fill('textarea[data-q="access"]', '   '); await page.locator('textarea[data-q="access"]').blur(); await page.waitForTimeout(200);
 note('06 whitespace is not an answer', !(await page.evaluate(() => window.SIYL_GUEST.accessAnswered(JSON.parse(localStorage.getItem('siyl.who')).guestId))) && (await page.locator('textarea[data-q="access"]').getAttribute('aria-invalid')) === 'true', 'blank stays Required');
 await page.fill('textarea[data-q="access"]', 'None'); await page.locator('textarea[data-q="access"]').blur(); await page.waitForTimeout(200);
-note('06 "None" is an answer', (await page.evaluate(() => window.SIYL_GUEST.accessAnswered(JSON.parse(localStorage.getItem('siyl.who')).guestId))) && (await page.locator('[data-req-state]').first().innerText()).trim().toUpperCase() === 'ANSWERED' && (await page.evaluate(() => window.SIYL_GUEST.stepState('about'))) === 'In progress', 'Peggy answered · step 05 still waits for Steffie');
+/* the dietary answer is required as well: Peggy has nothing to note and says so with the tick */
+note('06 dietary required too', !(await page.evaluate(() => window.SIYL_GUEST.accessAnswered(JSON.parse(localStorage.getItem('siyl.who')).guestId))) && (await page.locator('.p-field.p-required [data-req-state]').count()) === 2, 'two required fields · access alone does not complete');
+await page.locator('input[data-none="dietary"]').check(); await page.waitForTimeout(200);
+note('06 "None" is an answer', (await page.evaluate(() => window.SIYL_GUEST.accessAnswered(JSON.parse(localStorage.getItem('siyl.who')).guestId))) && (await page.evaluate(() => [...document.querySelectorAll('[data-req-state]')].every((e) => e.textContent.trim().toUpperCase() === 'ANSWERED'))) && (await page.evaluate(() => window.SIYL_GUEST.stepState('about'))) === 'In progress', 'Peggy answered both · step 05 still waits for Steffie');
 await H.go('about-you.html?for=' + S.guestId + '#access', 390); await page.waitForTimeout(500);
 note('06 each guest answers for themselves', (await page.locator('textarea[data-q="access"]').inputValue()) === '' && /Answering for\s*Steffie/i.test(await H.text('.prep-bar')), 'Steffie\'s field is empty although Peggy answered hers');
 await page.fill('textarea[data-q="access"]', 'No special requirements'); await page.locator('textarea[data-q="access"]').blur(); await page.waitForTimeout(200);
 rec = await H.ls('siyl.guest');
-note('06 step 05 complete only with both', rec.guests[P.guestId].profile.access === 'None' && rec.guests[S.guestId].profile.access === 'No special requirements' && (await page.evaluate(() => window.SIYL_GUEST.stepState('about'))) === 'Completed', 'two independent answers · step 05 Completed');
+note('06 step 05 complete only with both', rec.guests[P.guestId].profile.access === 'None' && rec.guests[P.guestId].profile.dietary === 'NONE' && rec.guests[S.guestId].profile.access === 'No special requirements' && rec.guests[S.guestId].profile.dietary === 'No shellfish' && (await page.evaluate(() => window.SIYL_GUEST.stepState('about'))) === 'Completed', 'two independent answers each · step 05 Completed');
 await H.frames('about-you.html', 'S5-about-you', PRIMARY);
 await H.frames('about-you.html?for=' + S.guestId, 'S5-about-you-for-steffie', [390, 1440], [['.prep-bar', 'S5-bar-for-steffie']]);
 
@@ -277,8 +280,8 @@ note('09 steffie dress personal', rec2.guests[S.guestId].dress.by === S.guestId,
 await H2.go('about-you.html', 390);
 note('09 steffie consent hers', (await page2.locator('[data-consent]').count()) === 1, 'her own consent, first person');
 /* the second device is its own draft: both required answers again */
-await page2.fill('textarea[data-q="access"]', 'None'); await page2.locator('textarea[data-q="access"]').blur(); await page2.waitForTimeout(150);
-await H2.go('about-you.html?for=' + P.guestId + '#access', 390); await page2.fill('textarea[data-q="access"]', 'None'); await page2.locator('textarea[data-q="access"]').blur(); await page2.waitForTimeout(150);
+await page2.fill('textarea[data-q="access"]', 'None'); await page2.locator('textarea[data-q="access"]').blur(); await page2.locator('input[data-none="dietary"]').check(); await page2.waitForTimeout(150);
+await H2.go('about-you.html?for=' + P.guestId + '#access', 390); await page2.fill('textarea[data-q="access"]', 'None'); await page2.locator('textarea[data-q="access"]').blur(); await page2.locator('input[data-none="dietary"]').check(); await page2.waitForTimeout(150);
 await H2.frames('wedding-preparation.html', 'S8-steffie-preparation', [390, 1440], [['#ack', 'S8-steffie-ack']]);
 
 /* SWITCH on Peggy's device: switching changes who is continuing, nobody's answers */

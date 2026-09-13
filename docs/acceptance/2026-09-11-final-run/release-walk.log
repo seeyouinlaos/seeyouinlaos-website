@@ -45,9 +45,10 @@ PASS 06 switch ≠ answering for — activeGuestId still Peggy after the deep li
 PASS 06 access required blocks the send — review names the missing answers: BEFORE YOU SEND A few things are still needed Required items cannot be answered for you afterwards; everything marked op
 PASS 06 access deep link lands on the field — section below the bar, textarea focused
 PASS 06 whitespace is not an answer — blank stays Required
-PASS 06 "None" is an answer — Peggy answered · step 05 still waits for Steffie
+PASS 06 dietary required too — two required fields · access alone does not complete
+PASS 06 "None" is an answer — Peggy answered both · step 05 still waits for Steffie
 PASS 06 each guest answers for themselves — Steffie's field is empty although Peggy answered hers
-PASS 06 step 05 complete only with both — two independent answers · step 05 Completed
+PASS 06 step 05 complete only with both — two independent answers each · step 05 Completed
 PASS 07 review hierarchy — five blocks
 PASS 07 status only — no controls, no gallery
 PASS 07 costs once, no checkout — USD 480 · says nothing is paid here
@@ -83,4 +84,4 @@ PASS 12 re-entry keeps record — answers survive re-entry
 PASS 13 review deep links — 21 edit links resolve while signed in
 PASS 13 wedding deep link for — subject via ?for=
 
-84/84 checks pass · page errors: 0 · console errors: 0
+85/85 checks pass · page errors: 0 · console errors: 0

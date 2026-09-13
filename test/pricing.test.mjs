@@ -618,7 +618,8 @@ test('ABOUT YOU is exactly seven questions and one operational field', () => {
   const g = readFileSync(join(ROOT, 'assets/guest.js'), 'utf8');
   const block = g.slice(g.indexOf('var PROFILE = ['), g.indexOf('var ACCESS ='));
   const keys = [...block.matchAll(/\{ key: '([a-z]+)'/g)].map((m) => m[1]);
-  assert.deepEqual(keys, ['dietary', 'drink', 'coffeetea', 'treat', 'comfort', 'avoid', 'anything']);
+  /* Owner, 13 Sep 2026: the favourite drink sits in the middle of the seven */
+  assert.deepEqual(keys, ['dietary', 'coffeetea', 'treat', 'drink', 'comfort', 'avoid', 'anything']);
   assert.match(g, /var ACCESS = \{ key: 'access'/);
   /* three layers, and a correction never destroys the invitation's own value —
    * and since C every entry is signed by the person who actually wrote it */

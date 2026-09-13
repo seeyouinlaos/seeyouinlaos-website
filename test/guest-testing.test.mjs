@@ -93,7 +93,10 @@ test('the journey page derives SELECTED from the bag and offers no second select
 test('ABOUT YOU: step 05 is required, Accessibility & comfort by each guest, documents still optional', () => {
   const g = src('assets/guest.js');
   assert.match(g, /key: 'about', n: '05', label: 'About You', href: 'about-you\.html', required: true/);
-  assert.match(g, /accessAnswered: function \(id\) \{[\s\S]*?v\.trim\(\)\.length > 0/);
+  assert.match(g, /requiredMissingFor: function \(id\) \{[\s\S]*?v\.trim\(\)\.length > 0/);
+  assert.match(g, /key: 'dietary', n: '01', q: 'Food allergies or dietary requirements', required: true/, 'dietary is required (Owner, 13 Sep 2026)');
+  assert.match(g, /key: 'drink', n: '04', q: 'Your favourite drink'/, 'the favourite drink sits in the middle of the seven');
+  assert.equal((g.match(/required: true/g) || []).length >= 2, true);
   assert.match(g, /var aboutDone = accessMissing\.length === 0;/, 'documents and consent never hold the step');
   assert.match(g, /var ready = contact && chosen && weddingDecided && dress && aboutDone;/, 'Review & Send cannot bypass it');
   const inv = src('invitation.html');
@@ -101,7 +104,7 @@ test('ABOUT YOU: step 05 is required, Accessibility & comfort by each guest, doc
   assert.doesNotMatch(inv, /Every answer optional/);
   const ab = src('about-you.html');
   assert.match(ab, /03 · Optional · can be added later<\/p><h2 class="t-h2">Travel documents/, 'documents remain optional');
-  assert.match(ab, /placeholder="'\+\(req\?'Required — for example: None':'Optional'\)\+'"/);
+  assert.match(ab, /placeholder="'\+\(req\?\(q\.none\?'Required — or tick &ldquo;'\+esc\(q\.none\)\+'&rdquo;':'Required — for example: None'\):'Optional'\)\+'"/);
 });
 
 test('SEATING: ceremony front-centre positions for the couple; dinner nothing fixed; the route is on The Wedding', async () => {
@@ -137,6 +140,9 @@ test('WORDING: no 1 + 1 seating, no blue dress, dinner poolside, China card is t
   assert.match(src('assets/journey.js'), /Souphattra Heritage Vientiane · poolside/); assert.match(src('voyage.html'), /19:30 · Poolside/);
   assert.match(src('index.html'), /destination\.html#china" style="background-image:url\(assets\/images\/city\/004-lijiang-black-dragon-pool\.jpg\)/);
   assert.match(src('assets/images/ASSET-MAP.md'), /1XBVp6qIwUSWfHpw4w3S0CH-apvsej154/, 'the Drive source is traceable');
+  /* the "After the Wedding" card carries the Owner's Lijiang old-town file (13 Sep 2026) */
+  assert.match(src('index.html'), /journeys\.html#j-mu9646" style="background-image:url\(assets\/images\/city\/004-lijiang-old-town-roofs-jade-dragon\.jpg\)/);
+  assert.match(src('assets/images/ASSET-MAP.md'), /1lI07I8yTBcCtiEevBdduf1Pf7eGkbRS4/);
   /* the first three tradition references, in the Owner's order */
   for (const f of ['wedding-preparation.html', 'dress.html']) {
     const order = [...src(f).matchAll(/images\/dress\/tradition-0(\d)\.jpg/g)].map((m) => m[1]).join('');

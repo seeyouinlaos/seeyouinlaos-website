@@ -306,3 +306,13 @@ ceremony map and the dinner map open (50 chairs), Sign out → clean code screen
 party, `?open=1` presents the prompt, INV-002's Accessibility field required and focused, rail
 media on one line, no errors. Production ledger: seating OPEN; four chairs held by INV-002
 (the Owner's own production test at 14:02–14:03 UTC; not touched); REG_KV 0 keys.
+
+### Follow-ups the same evening (Owner, 13 Sep 2026)
+- **About You:** the dietary answer is REQUIRED as well — text or the explicit "Nothing to note"
+  tick; blank stays "Required" (`guest.js` `REQUIRED` = dietary + accessibility; the completion,
+  the Review & Send block and the walk name both). The favourite-drink question moves to the middle
+  of the seven: 01 dietary · 02 coffee or tea · 03 a small favourite · 04 favourite drink ·
+  05 travel comfort · 06 avoid · 07 anything else. Release walk 85/85.
+- **Homepage "After the Wedding" card:** the Owner's Drive file `1lI07I8yTBcCtiEevBdduf1Pf7eGkbRS4`
+  (`IMG_1291.WEBP`, 726 × 995, kept at native size) → `city/004-lijiang-old-town-roofs-jade-dragon.jpg`,
+  replacing the Naxi rooftops on that card only (destination.html keeps them); mapped with the Drive id.
