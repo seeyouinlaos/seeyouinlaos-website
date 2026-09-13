@@ -44,7 +44,7 @@ var NEXT=[
  ['02','Your Journey','Where your party stays and how it travels, from Bangkok to Vientiane and on to Yunnan.','Required'],
  ['03','The Wedding','Who joins each part of the day — one answer per named guest.','Required'],
  ['04','Wedding Preparation','The dress code, understood and confirmed once, by name — and your seats when seating opens.','Required'],
- ['05','About You','Your hospitality profile, comfort needs, travel documents and privacy. Every answer optional.','Optional'],
+ ['05','About You','Your hospitality profile and your accessibility &amp; comfort needs — answered by each named guest. Travel documents and privacy can follow later.','Required'],
  ['06','Review &amp; Send','Everything in one place. Sending is a request — never a payment, never a confirmation.','Required']
 ];
 function render(){
@@ -85,6 +85,7 @@ h+='<div class="p-card'+(me?' on':'')+'"><p class="t-l1'+(me?' on':' open')+'">C
    (many||!me?'<p class="p-more"><button type="button" class="p-link" id="switch">'+(me?'Switch':'Choose your name')+'</button></p>':'')+'</div>';
 h+='<div class="p-card"><p class="t-l1">You are making decisions for</p><h3 class="t-h1">'+esc(G.partyNames())+'</h3>'+
    '<div class="p-kv"><div><p class="t-b1"><b>For your party</b></p><p class="t-b2">Where you stay, how you travel and your costs — shared by everyone on the invitation.</p></div></div>'+
+   '<div class="p-kv"><div><p class="t-b1"><b>Another invitation?</b></p><p class="t-b2">Helping someone with their own invitation, or done here for now? Leave this party — what you have sent stays with Guest Relations, and this invitation opens again with its code.</p><p class="p-more" style="margin-top:var(--s2)"><button type="button" class="p-link" data-leave="another">Open another invitation</button> <button type="button" class="p-link mute" data-leave="out" style="margin-left:16px">Sign out</button></p></div></div>'+
    '<div class="p-kv"><div><p class="t-b1"><b>'+(many?'For each of you':'For you')+'</b></p><p class="t-b2">The wedding day, the dress code, your preferences and your documents — answered by name'+(many?', and never changed for you without saying so':'')+'.</p></div></div>'+
    '</div></section>';
 
@@ -103,11 +104,16 @@ var go=document.getElementById('go');
 if(go)go.addEventListener('click',function(){G.setIdentityReviewed(true)});
 var sw=document.getElementById('switch');
 if(sw&&P)sw.addEventListener('click',function(){P.chooseIdentity(!!me)});
+page.querySelectorAll('[data-leave]').forEach(function(b){b.addEventListener('click',function(){if(P&&P.leave)P.leave(b.getAttribute('data-leave'))})});
 }
 document.addEventListener('siyl:who',render);
 document.addEventListener('siyl:guest',render);
 document.addEventListener('siyl:auth',render);
 render();
+/* "Open another invitation" arrives here with ?open=1: the code prompt is
+ * presented at once, on a clean screen, once the invitation module is ready */
+function autoOpen(){if(/[?&]open=1/.test(location.search)&&window.SIYL_INVITE&&!G.party())setTimeout(function(){SIYL_INVITE.require(render)},380)}
+if(window.SIYL_INVITE)autoOpen();else document.addEventListener('siyl:invite-ready',autoOpen,{once:true});
 if(window.SIYL_BAG&&SIYL_BAG.bar)SIYL_BAG.bar();
 })();
 </script>

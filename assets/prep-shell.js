@@ -71,9 +71,7 @@
       case 'journey':     return (B && B.get().length && window.SIYL_JOURNEY && !SIYL_JOURNEY.open().length) ? 'Complete' : 'Open';
       case 'wedding':     return (T && T.decidedAll()) ? 'Complete' : 'Open';
       case 'preparation': return (G && G.dressAckAll()) ? 'Complete' : 'Open';
-      case 'about':
-        if (!G || !p) return 'Optional';
-        return p.guests.some(function (g) { return G.profileAnswered(g.guestId) > 0; }) ? 'Complete' : 'Optional';
+      case 'about':     return (G && G.accessAll && G.accessAll()) ? 'Complete' : 'Open';
       case 'review': {
         var C = window.SIYL_CONFIRM;
         return C && C.state() === 'confirmed' ? 'Confirmed' : C && C.state() === 'received' ? 'Received' : 'Open';
@@ -145,6 +143,22 @@
     measureBar();
     t.scrollIntoView({ block: 'start' });
   }
+
+  /* ------------------------------------------------------ leaving a party */
+  function leaveParty(how) {
+    if (!window.SIYL_INVITE || !SIYL_INVITE.leave) return;
+    layer.classList.remove('on'); document.body.classList.remove('prep-steps-open');
+    document.body.classList.add('p-leave');
+    var go = function () {
+      SIYL_INVITE.leave();
+      location.replace(hrefOf('invitation.html') + (how === 'another' ? '?open=1' : ''));
+    };
+    if (calm) go(); else setTimeout(go, 200);
+  }
+  window.addEventListener('pageshow', function (e) {
+    /* a page restored from the cache after the party left it is not shown again */
+    if (e.persisted && window.SIYL_AUTH && !SIYL_AUTH.get()) location.reload();
+  });
 
   /* -------------------------------------------------------- the step index */
   function openIndex() {
@@ -222,7 +236,13 @@
       return '<a class="prep-srow"' + (cur ? ' aria-current="step"' : '') + ' href="' + hrefOf(s.file) + '" data-step="' + s.key + '">' +
         '<span class="n">' + s.n + '</span><span class="l">' + s.label + '</span>' +
         '<span class="s' + (st === 'Open' ? ' open' : '') + '">' + (cur ? 'Current' : st) + '</span></a>';
-    }).join('') + '</div>';
+    }).join('') +
+      /* leaving this party: two plain actions, on every step — SWITCH stays
+       * what it is, a change of person inside the same invitation */
+      '<div class="prep-leave"><span class="t-l1">' + esc(p.invitationId) + ' · ' + esc(partyNames()) + '</span>' +
+      '<button type="button" class="p-link mute" data-leave="another">Open another invitation</button>' +
+      '<button type="button" class="p-link mute" data-leave="out">Sign out</button></div></div>';
+    layer.querySelectorAll('[data-leave]').forEach(function (b) { b.addEventListener('click', function () { leaveParty(b.getAttribute('data-leave')); }); });
     layer.classList.toggle('on', indexOpen);
     layer.querySelectorAll('.prep-srow').forEach(function (row) {
       row.addEventListener('click', function (e) {
@@ -340,6 +360,7 @@
     closeDrawer: closeDrawer,
     openIndex: openIndex,
     closeIndex: closeIndex,
+    leave: leaveParty,
     indexOpen: function () { return indexOpen; },
     foot: foot,
     status: status,

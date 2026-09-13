@@ -145,7 +145,7 @@ for (const w of [320, 375, 430, 900]) { await H.go('your-journey.html', w); awai
 /* ================================================================ 4 · step 03 · the wedding (personal, with proxy) */
 await H.go('wedding.html', 390);
 const w3 = await H.text('main');
-note('04 four events', (await page.locator('main section.prep-sec').count()) === 4 && /Temple Ceremony/.test(w3) && /Coffee & Cake/.test(w3) && /Vow Ceremony/.test(w3) && /Wedding Dinner/.test(w3) && !/Welcome Dinner|Sacred Morning|Alms Giving Ceremony/.test(w3), 'exactly four');
+note('04 four events', (await page.locator('main section.prep-sec[id^="ev-"]').count()) === 4 && /Temple Ceremony/.test(w3) && /Coffee & Cake/.test(w3) && /Vow Ceremony/.test(w3) && /Wedding Dinner/.test(w3) && !/Welcome Dinner|Sacred Morning|Alms Giving Ceremony/.test(w3), 'exactly four');
 note('04 temple truth', /08:00 – 12:00/.test(w3) && /Wat Ong Teu/.test(w3) && /28 February 2027|28 FEB/.test(w3), 'date · time · place');
 note('04 tak bat self-pay', /self-pay/i.test(w3) && !/no charge|nothing to pay/i.test(w3) && !/Tak Bat[^.]{0,60}USD/.test(w3), 'inside the ceremony, self-pay, unpriced');
 for (const e of ['temple', 'coffee', 'vows', 'dinner']) { const b = page.locator('[data-g="' + P.guestId + '"][data-e="' + e + '"] [data-ev="yes"]'); if (await b.count()) { await b.click(); await page.waitForTimeout(200); } }
@@ -173,7 +173,7 @@ await H.frames('wedding.html', 'S3-wedding', PRIMARY, [['#sangkhathan', 'S3-sang
 /* ================================================================ 5 · step 04 · dress + seats (personal) */
 await H.go('wedding-preparation.html', 390);
 const w4 = await H.text('main');
-note('05 dress mapping', /Blue Lao Traditional Dress[\s\S]{0,120}Temple Ceremony/i.test(w4) && /Black Tie[\s\S]{0,200}(Coffee|Vow|Dinner)/i.test(w4) && /Resort Wear/i.test(w4), 'blue Lao traditional → temple · black tie → afternoon and evening · resort wear → travelling days');
+note('05 dress mapping', /Lao Traditional Dress[\s\S]{0,120}Temple Ceremony/i.test(w4) && !/Blue Lao/i.test(w4) && /Black Tie[\s\S]{0,200}(Coffee|Vow|Dinner)/i.test(w4) && /Resort Wear/i.test(w4), 'blue Lao traditional → temple · black tie → afternoon and evening · resort wear → travelling days');
 note('05 rails', (await page.locator('.p-rail img').count()) === 17 && !(await page.content()).includes('resort-01'), '17 references, resort-01 gone');
 note('05 one acknowledgement per guest', (await page.locator('#ack .p-card').count()) === 2 && (await page.locator('#ack [data-ack]').count()) === 1 && (await page.locator('#ack [data-ack="' + P.guestId + '"]').count()) === 1, 'Peggy sees her own checkbox only');
 await page.locator('#ack [data-ack="' + P.guestId + '"]').check(); await page.waitForTimeout(250);
@@ -208,6 +208,22 @@ await page.fill('textarea[data-q="dietary"]', 'No shellfish'); await page.locato
 rec = await H.ls('siyl.guest');
 note('06 proxy ownership', rec.guests[S.guestId].profile.dietary === 'No shellfish' && rec.guests[S.guestId].history.at(-1).by === P.guestId && rec.guests[P.guestId].profile.drink === 'Riesling' && !rec.guests[P.guestId].profile.dietary, 'Steffie\'s dietary signed by Peggy; Peggy\'s drink untouched');
 note('06 switch ≠ answering for', (await H.ls('siyl.who')).guestId === P.guestId, 'activeGuestId still Peggy after the deep link');
+/* ACCESSIBILITY & COMFORT IS REQUIRED of each named guest (Owner, 13 Sep 2026):
+   blank blocks, whitespace blocks, words complete — each person's own answer */
+await H.go('review.html', 390); await page.waitForTimeout(600);
+const readyBefore = await H.text('#ready');
+note('06 access required blocks the send', /About You/i.test(readyBefore) && /accessibility & comfort still to answer/i.test(readyBefore) && /Peggy · Steffie|Peggy/.test(readyBefore) && /In progress|Action needed/.test(await page.evaluate(() => window.SIYL_GUEST.stepState('about'))), 'review names the missing answers: ' + readyBefore.replace(/\s+/g, ' ').slice(0, 120));
+await H.go('about-you.html#access', 390); await page.waitForTimeout(700);
+note('06 access deep link lands on the field', await page.evaluate(() => { const s = document.getElementById('access'); const r = s.getBoundingClientRect(); const bar = document.querySelector('.prep-bar').getBoundingClientRect(); return r.top >= bar.bottom - 1 && r.top < bar.bottom + 120 && document.activeElement === s.querySelector('textarea'); }), 'section below the bar, textarea focused');
+await page.fill('textarea[data-q="access"]', '   '); await page.locator('textarea[data-q="access"]').blur(); await page.waitForTimeout(200);
+note('06 whitespace is not an answer', !(await page.evaluate(() => window.SIYL_GUEST.accessAnswered(JSON.parse(localStorage.getItem('siyl.who')).guestId))) && (await page.locator('textarea[data-q="access"]').getAttribute('aria-invalid')) === 'true', 'blank stays Required');
+await page.fill('textarea[data-q="access"]', 'None'); await page.locator('textarea[data-q="access"]').blur(); await page.waitForTimeout(200);
+note('06 "None" is an answer', (await page.evaluate(() => window.SIYL_GUEST.accessAnswered(JSON.parse(localStorage.getItem('siyl.who')).guestId))) && (await page.locator('[data-req-state]').first().innerText()).trim().toUpperCase() === 'ANSWERED' && (await page.evaluate(() => window.SIYL_GUEST.stepState('about'))) === 'In progress', 'Peggy answered · step 05 still waits for Steffie');
+await H.go('about-you.html?for=' + S.guestId + '#access', 390); await page.waitForTimeout(500);
+note('06 each guest answers for themselves', (await page.locator('textarea[data-q="access"]').inputValue()) === '' && /Answering for\s*Steffie/i.test(await H.text('.prep-bar')), 'Steffie\'s field is empty although Peggy answered hers');
+await page.fill('textarea[data-q="access"]', 'No special requirements'); await page.locator('textarea[data-q="access"]').blur(); await page.waitForTimeout(200);
+rec = await H.ls('siyl.guest');
+note('06 step 05 complete only with both', rec.guests[P.guestId].profile.access === 'None' && rec.guests[S.guestId].profile.access === 'No special requirements' && (await page.evaluate(() => window.SIYL_GUEST.stepState('about'))) === 'Completed', 'two independent answers · step 05 Completed');
 await H.frames('about-you.html', 'S5-about-you', PRIMARY);
 await H.frames('about-you.html?for=' + S.guestId, 'S5-about-you-for-steffie', [390, 1440], [['.prep-bar', 'S5-bar-for-steffie']]);
 
@@ -260,6 +276,9 @@ const rec2 = await H2.ls('siyl.guest');
 note('09 steffie dress personal', rec2.guests[S.guestId].dress.by === S.guestId, 'signed by Steffie');
 await H2.go('about-you.html', 390);
 note('09 steffie consent hers', (await page2.locator('[data-consent]').count()) === 1, 'her own consent, first person');
+/* the second device is its own draft: both required answers again */
+await page2.fill('textarea[data-q="access"]', 'None'); await page2.locator('textarea[data-q="access"]').blur(); await page2.waitForTimeout(150);
+await H2.go('about-you.html?for=' + P.guestId + '#access', 390); await page2.fill('textarea[data-q="access"]', 'None'); await page2.locator('textarea[data-q="access"]').blur(); await page2.waitForTimeout(150);
 await H2.frames('wedding-preparation.html', 'S8-steffie-preparation', [390, 1440], [['#ack', 'S8-steffie-ack']]);
 
 /* SWITCH on Peggy's device: switching changes who is continuing, nobody's answers */

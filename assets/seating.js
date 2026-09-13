@@ -13,8 +13,10 @@
      13 Sep 2026 configures none — every guest, the couple included, holds a
      chair through the same ledger, and the legend never lists a state that
      no chair on the plan can have)
-   Nobody has a fixed position: the dinner is fifty bookable chairs at one
-   long table, and the couple hold two of them like every other guest.
+   The ceremony has two fixed positions at the FRONT CENTRE — BRIDE and
+   GROOM — that are not chairs, carry no seat id and are never selectable
+   (Owner, 13 Sep 2026). The dinner is fifty bookable chairs at one long
+   table, and the couple hold two of them like every other guest.
 
    Until Guest Relations has configured the geometry and opened seating, the
    guest sees SEATING NOT OPEN YET, and this file draws nothing.
@@ -120,10 +122,24 @@
         var maxL = Math.max.apply(null, nums.map(function (n) { return byRow[n].L.length; }).concat([1]));
         var maxR = Math.max.apply(null, nums.map(function (n) { return byRow[n].R.length; }).concat([1]));
         var aisle = U * 1.6, pad = 16, top = 46;
-        var W = pad * 2 + maxL * U + aisle + maxR * U, H = top + nums.length * U + 28;
+        var fixedN = ((v && v.ceremony && v.ceremony.fixed) || []).length;
+        var W = pad * 2 + maxL * U + aisle + maxR * U, H = top + (fixedN ? 30 : 0) + nums.length * U + 28;
         var h = '<svg class="p-seatmap" viewBox="0 0 ' + W + ' ' + H + '" style="min-width:' + Math.round(W * 28 / seat) + 'px" role="group" aria-label="Ceremony seating, rows facing the ceremony">';
+        var fixedC = (v && v.ceremony && v.ceremony.fixed) || [];
+        if (fixedC.length) top = 46 + 30;
         h += '<line x1="' + pad + '" y1="18" x2="' + (W - pad) + '" y2="18" stroke="#313131" stroke-width="1"/>' +
              '<text x="' + (W / 2) + '" y="34" text-anchor="middle" ' + T + '>CEREMONY</text>';
+        /* the couple's place: front centre, between the two blocks, in front of
+         * row 1 — marked, named, never a chair */
+        if (fixedC.length) {
+          var cxC = pad + maxL * U + aisle / 2, yC = 46;
+          var TF = 'font-family="Hanken Grotesk, Helvetica, Arial, sans-serif" font-size="8" letter-spacing="1.4" fill="#313131"';
+          h += '<g class="fixed" aria-label="' + esc(fixedC.join(' and ')) + ', fixed positions at the front centre">' +
+               '<rect x="' + (cxC - 58) + '" y="' + yC + '" width="52" height="22" rx="11" fill="#F3EEE7" stroke="#313131" stroke-width="1"/>' +
+               '<text x="' + (cxC - 32) + '" y="' + (yC + 15) + '" text-anchor="middle" ' + TF + '>' + esc(fixedC[0] || '') + '</text>' +
+               '<rect x="' + (cxC + 6) + '" y="' + yC + '" width="52" height="22" rx="11" fill="#F3EEE7" stroke="#313131" stroke-width="1"/>' +
+               '<text x="' + (cxC + 32) + '" y="' + (yC + 15) + '" text-anchor="middle" ' + TF + '>' + esc(fixedC[1] || '') + '</text></g>';
+        }
         nums.forEach(function (n, i) {
           var y = top + i * U;
           var L = byRow[n].L, R = byRow[n].R;

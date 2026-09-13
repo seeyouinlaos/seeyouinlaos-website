@@ -1,6 +1,6 @@
 {
   "origin": "http://127.0.0.1:8787",
-  "at": "2026-09-11T01:57:32.644Z",
+  "at": "2026-09-13T15:11:39.908Z",
   "results": [
     {
       "id": "00 boundary",
@@ -25,12 +25,12 @@
     {
       "id": "02 active = Peggy",
       "ok": true,
-      "detail": "siyl.who = {\"partyId\":\"INV-002\",\"guestId\":\"G001\",\"at\":\"2026-09-11T01:56:16.816Z\"}"
+      "detail": "siyl.who = {\"partyId\":\"INV-002\",\"guestId\":\"G001\",\"at\":\"2026-09-13T15:10:16.640Z\"}"
     },
     {
       "id": "02 bar",
       "ok": true,
-      "detail": "bar: Your private journey01 / 06Your InvitationPeggy & Steffie · Continuing as PeggySwitchView all steps"
+      "detail": "bar: Your private journey01 / 06Your InvitationPeggy & Steffie · Continuing as PeggySwitchView all steps01Your InvitationCurrent02Your JourneyOpen03The WeddingOpen04Wedding PreparationOpen05About YouOpen06Review & SendOpenINV-002 · Peggy & SteffieOpen another invitationSign out"
     },
     {
       "id": "03 invitation says who continues",
@@ -40,7 +40,7 @@
     {
       "id": "04 journey label",
       "ok": true,
-      "detail": "#ysub: For your party · Peggy & Steffie · nothing is paid on this website"
+      "detail": "label: For your party · Peggy & Steffie"
     },
     {
       "id": "04 Peggy chose Shama",
@@ -60,7 +60,7 @@
     {
       "id": "06 ANSWERING FOR in the shell",
       "ok": true,
-      "detail": "bar: Your private journey05 / 06About YouPeggy & Steffie · Continuing as PeggySwitchAnswering forSteffieBack to yourselfView all steps"
+      "detail": "bar: Your private journey05 / 06About YouPeggy & Steffie · Continuing as PeggySwitchAnswering forSteffieBack to yourselfView all steps01Your InvitationOpen02Your JourneyOpen03The WeddingOpen04Wedding PreparationOpen05About YouCurrent06Review & SendOpenINV-002 · Peggy & SteffieOpen another invitationSign out"
     },
     {
       "id": "06 ANSWERING FOR on the page",
@@ -90,7 +90,7 @@
     {
       "id": "07 wedding ownership",
       "ok": true,
-      "detail": "FOR PEGGY · you / FOR STEFFIE · answering for band"
+      "detail": "FOR PEGGY · you / FOR STEFFIE · answering for, band at the boundary"
     },
     {
       "id": "08 two acknowledgements",
@@ -130,7 +130,7 @@
     {
       "id": "10 active = Steffie",
       "ok": true,
-      "detail": "bar: Your private journey04 / 06Wedding PreparationPeggy & Steffie · Continuing as SteffieSwitchView all steps"
+      "detail": "bar: Your private journey04 / 06Wedding PreparationPeggy & Steffie · Continuing as SteffieSwitchView all steps01Your InvitationOpen02Your JourneyOpen03The WeddingOpen04Wedding PreparationCurrent05About YouOpen06Review & SendOpenINV-002 · Peggy & SteffieOpen another invitationSign out"
     },
     {
       "id": "10 Peggy untouched by the switch",
@@ -170,7 +170,7 @@
     {
       "id": "12 semantic states",
       "ok": true,
-      "detail": "view all steps: 01Your InvitationOpen02Your JourneyComplete03The WeddingOpen04Wedding PreparationComplete05About YouCurrent06Review & SendOpen"
+      "detail": "view all steps: 01Your InvitationOpen02Your JourneyOpen03The WeddingOpen04Wedding PreparationComplete05About YouCurrent06Review & SendOpenINV-002 · Peggy & SteffieOpen another invitationSign out"
     },
     {
       "id": "13 identity from another invitation is dropped",

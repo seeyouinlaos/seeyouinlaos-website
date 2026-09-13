@@ -144,7 +144,7 @@ function paintWedding(){
 var box=document.getElementById('b3c'),J=window.SIYL_JOURNEY,T=window.SIYL_TEMPLE,G=window.SIYL_GUEST;
 if(!box||!J)return;
 var op=T?T.operational():null;
-var DRESS={temple:['Blue Lao Traditional Dress','wedding-preparation.html#dress-code'],
+var DRESS={temple:['Lao Traditional Dress','wedding-preparation.html#dress-code'],
            coffee:['Black Tie','wedding-preparation.html#dress-code'],
            vows:['Black Tie','wedding-preparation.html#dress-code'],
            dinner:['Black Tie','wedding-preparation.html#dress-code']};
@@ -169,10 +169,12 @@ if(op&&op.guests.length){
        (quiet?'':'<div class="p-actions"><a class="p-link mute" href="wedding.html#ev-temple">'+(g.sangkhathan?'View offering':'View &amp; choose')+'</a></div>')+'</div>'+
        '<p class="t-l1'+(sst==='Decision required'?' open':(g.sangkhathan?' on':''))+'">'+(g.sangkhathan?'Selected':(silent?'':sst))+'</p></div>';
     var Sx=window.SIYL_SEATS,cs=Sx?Sx.seatOf('ceremony',g.guestId):null,ds=Sx?Sx.seatOf('dinner',g.guestId):null,openS=Sx&&Sx.open();
-    h+='<div class="p-kv"><div><p class="t-b1"><b>Ceremony seat</b></p><p class="t-b2">'+(cs?esc(Sx.describe(cs))+' · held in '+esc(g.name)+'&rsquo;s name':(openS?'Not chosen yet':'Seating is not open yet'))+'</p></div>'+
-       '<p class="t-l1'+(cs?' on':(openS?' open':''))+'">'+(cs?esc(cs):(openS?'Choose':'Not open yet'))+'</p></div>'+
+    var seatTo='wedding-preparation.html?for='+encodeURIComponent(g.guestId)+'#seats',hosts=!!(G&&G.party()&&G.party().hosts);
+    h+=(hosts?'<div class="p-kv"><div><p class="t-b1"><b>Ceremony seat</b></p><p class="t-b2">Bride &amp; Groom · front centre</p></div><p class="t-l1 on">Front centre</p></div>'
+        :'<div class="p-kv"><div><p class="t-b1"><b>Ceremony seat</b></p><p class="t-b2">'+(cs?esc(Sx.describe(cs))+' · held in '+esc(g.name)+'&rsquo;s name':(openS?'Not chosen yet':'Seating is not open yet'))+'</p></div>'+
+       (cs?'<p class="t-l1 on">'+esc(cs)+'</p>':(openS?'<a class="p-link" href="'+seatTo+'">Choose your ceremony seat</a>':'<p class="t-l1">Not open yet</p>'))+'</div>')+
        '<div class="p-kv"><div><p class="t-b1"><b>Dinner seat</b></p><p class="t-b2">'+(ds?esc(Sx.describe(ds))+' · held in '+esc(g.name)+'&rsquo;s name':(openS?'Not chosen yet':'Seating is not open yet'))+'</p></div>'+
-       '<p class="t-l1'+(ds?' on':(openS?' open':''))+'">'+(ds?esc(ds):(openS?'Choose':'Not open yet'))+'</p></div></div>'})}
+       (ds?'<p class="t-l1 on">'+esc(ds)+'</p>':(openS?'<a class="p-link" href="'+seatTo+'">Choose your dinner seat</a>':'<p class="t-l1">Not open yet</p>'))+'</div></div>'})}
 /* E · the couple decision, said once for the party */
 if(op&&op.sangkhathanEligibility==='PAIR'){
   var pr=op.sangkhathanPair;
@@ -295,7 +297,8 @@ var MSG={invitation:'Please open your invitation before sending your journey.',
          journey:'Please choose your travel and your stays before sending your journey.',
          wedding:'Please answer the wedding participation for each named guest before sending.',
          preparation:'Please review the dress code — each of you, in your own name — before sending.'};
-var ACT={invitation:'Open my invitation',you:'Add your contact',journey:'Choose your journey',wedding:'Go there now',preparation:'Review dress code'};
+var ACT={invitation:'Open my invitation',you:'Add your contact',journey:'Choose your journey',wedding:'Go there now',preparation:'Review dress code',about:'Answer now'};
+if(first&&first.key==='about'){MSG.about='Accessibility & comfort is answered by each named guest before the journey is sent — '+G.accessMissing().map(function(g){return G.nameOf(g.guestId)}).join(' and ')+' still to answer. "None" is an answer.'}
 if(first&&first.key==='wedding'&&window.SIYL_TEMPLE&&SIYL_TEMPLE.decidedAll()&&!G.dressAckAll()){
   MSG.wedding='Please review the dress code before sending your journey — '+G.dressMissing().map(function(g){return G.nameOf(g.guestId)}).join(' and ')+' still to acknowledge, each in their own name.';
   first=Object.assign({},first,{href:'wedding-preparation.html#ack',action:'Review dress code'})}

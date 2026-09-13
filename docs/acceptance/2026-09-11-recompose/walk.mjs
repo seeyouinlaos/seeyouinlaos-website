@@ -124,7 +124,7 @@ await allWidths('your-journey.html', '02-journey-mu9646-economy', [['#s-mu9646',
 await go('your-journey.html', 390);
 await page.locator('#s-c86 [data-choose-flat="c86"]').click(); await page.waitForTimeout(300);
 const c86 = (await ls('siyl.bag')).filter((x) => x.id === 'c86');
-note('02 c86', c86.length === 1 && c86[0].price === 85 && /10:15/.test(await text('#s-c86')) && /13:44/.test(await text('#s-c86')) && /3h 29m · direct/.test(await text('#s-c86')) && /1 \+ 1 seating/.test(await text('#s-c86')), 'C86 · USD 85 · 10:15 → 13:44 · direct · 1+1');
+note('02 c86', c86.length === 1 && c86[0].price === 85 && /10:15/.test(await text('#s-c86')) && /13:44/.test(await text('#s-c86')) && /3h 29m · direct/.test(await text('#s-c86')) && /Business Class/.test(await text('#s-c86')) && !/1 \+ 1 seating/.test(await text('#s-c86')), 'C86 · USD 85 · 10:15 → 13:44 · direct · Business Class (no 1+1 claim — Owner 13 Sep 2026)');
 await allWidths('your-journey.html', '02-journey-c86', [['#s-c86', '02-journey-c86-stage']]);
 /* compact wedding block */
 const wb = await text('#s-wedding');
@@ -138,7 +138,7 @@ await go('wedding.html', 390);
 await page.click('[data-g="' + P.guestId + '"][data-e="temple"] [data-ev="yes"]'); await page.waitForTimeout(250);
 const w3 = await text('main');
 note('03 private module', /01 · 08:00 – 12:00/.test(w3) && /Temple Ceremony/.test(w3) && /More about Tak Bat/.test(w3) && /For Peggy · you/.test(w3) && /For Steffie · answering for Steffie/.test(w3) && /Answering for\s*Steffie/.test(await text('.p-for')), 'day in order, ownership at every control, band at the boundary');
-note('03 four events', (await page.evaluate(() => document.querySelectorAll('main section.prep-sec').length)) === 4, 'exactly four event sections');
+note('03 four events', (await page.evaluate(() => document.querySelectorAll('main section.prep-sec[id^="ev-"]').length)) === 4 && (await page.evaluate(() => document.querySelectorAll('main section.prep-sec').length)) === 5, 'exactly four event sections, plus the seats route (Owner 13 Sep 2026)');
 note('03 not the public page', !/assets\/images\/dress/.test(await page.content()) && !/Continue exploring/.test(w3), 'no editorial gallery, no public navigation');
 await allWidths('wedding.html', '03-wedding-peggy', [['#ev-temple', '03-wedding-temple']]);
 await go('wedding.html', 390);
@@ -207,7 +207,7 @@ await page.click('.prep-all'); await page.waitForTimeout(300);
 await shot('07-view-all-steps', 390, false);
 for (const w of [834, 1440, 1920]) { await go('your-journey.html', w); await page.click('.prep-all'); await page.waitForTimeout(300); await crop('.prep-bar, .prep-steps', '07-view-all-steps-bar', w); await page.screenshot({ path: path.join(OUT, '07-view-all-steps-' + w + '.png'), clip: { x: 0, y: 0, width: w, height: 640 } }); }
 const steps = await text('.prep-steps');
-note('07 semantic states', /Complete|Current|Open|Optional/.test(steps) && !/%/.test(steps) && (steps.match(/0\d/g) || []).length === 6, steps);
+note('07 semantic states', /Complete|Current|Open|Optional/.test(steps) && !/%/.test(steps) && (await page.locator('.prep-steps .prep-srow').count()) === 6, steps);
 await go('about-you.html', 390);
 await page.click('.prep-bar [data-switch]'); await page.waitForSelector('.p-drawer:not([hidden])'); await page.waitForTimeout(300);
 await shot('08-switch-person', 390, false);

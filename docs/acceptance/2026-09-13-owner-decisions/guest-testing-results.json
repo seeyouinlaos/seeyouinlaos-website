@@ -1,0 +1,251 @@
+{
+  "origin": "http://127.0.0.1:8787",
+  "at": "2026-09-13T15:29:35.925Z",
+  "results": [
+    {
+      "id": "1 U Sathorn chosen → the card says so, from the bag",
+      "ok": true,
+      "d": "{\"slug\":\"u-sathorn-superior-garden\",\"label\":\"Selected for your journey\",\"control\":\"Current selection\",\"selectBtn\":false,\"framed\":true}"
+    },
+    {
+      "id": "1 alternatives keep their action",
+      "ok": true,
+      "d": "[{\"slug\":\"penthouse\",\"btn\":\"Select this stay\",\"current\":false},{\"slug\":\"shama-king-studio-balcony\",\"btn\":\"Select this stay\",\"current\":false}]"
+    },
+    {
+      "id": "1 Full Experience keeps the manual U Sathorn",
+      "ok": true,
+      "d": "bag: bkk-stay:u-sathorn-superior-garden train prewed:heritage-grand-premier wedstay:heritage-grand-premier mu9646 kmg:italian c86 ljg:viewing-270 return kempinski:deluxe-balcony-king"
+    },
+    {
+      "id": "1 card still U Sathorn after Full Experience",
+      "ok": true,
+      "d": "u-sathorn-superior-garden"
+    },
+    {
+      "id": "1 Special Express No. 25: current state from the bag, inert control, remove offered",
+      "ok": true,
+      "d": "{\"on\":true,\"control\":\"Current selection\",\"selectBtn\":false,\"remove\":true}"
+    },
+    {
+      "id": "1 reload keeps the selections",
+      "ok": true,
+      "d": "{\"bkk\":\"u-sathorn-superior-garden\",\"train\":true}"
+    },
+    {
+      "id": "1 remove updates bag, card and action",
+      "ok": true,
+      "d": "{\"inBag\":false,\"card\":false,\"select\":true}"
+    },
+    {
+      "id": "1 switch keeps the party journey",
+      "ok": true,
+      "d": "party-level choice unchanged for Steffie"
+    },
+    {
+      "id": "1 errors",
+      "ok": true,
+      "d": "none"
+    },
+    {
+      "id": "2 rail@320 media and text start on one line, cover never stretches",
+      "ok": true,
+      "d": "imgTop -40 · labelTop 114 · cardH 680 · 3 cards"
+    },
+    {
+      "id": "2 no horizontal clipping@320",
+      "ok": true,
+      "d": "page width stays inside the viewport"
+    },
+    {
+      "id": "2 rail@375 media and text start on one line, cover never stretches",
+      "ok": true,
+      "d": "imgTop 21 · labelTop 210 · cardH 621 · 3 cards"
+    },
+    {
+      "id": "2 no horizontal clipping@375",
+      "ok": true,
+      "d": "page width stays inside the viewport"
+    },
+    {
+      "id": "2 rail@390 media and text start on one line, cover never stretches",
+      "ok": true,
+      "d": "imgTop 12 · labelTop 211 · cardH 630 · 3 cards"
+    },
+    {
+      "id": "2 no horizontal clipping@390",
+      "ok": true,
+      "d": "page width stays inside the viewport"
+    },
+    {
+      "id": "2 rail@430 media and text start on one line, cover never stretches",
+      "ok": true,
+      "d": "imgTop -22 · labelTop 201 · cardH 621 · 3 cards"
+    },
+    {
+      "id": "2 no horizontal clipping@430",
+      "ok": true,
+      "d": "page width stays inside the viewport"
+    },
+    {
+      "id": "2 rail@1280 media and text start on one line, cover never stretches",
+      "ok": true,
+      "d": "imgTop -12 · labelTop 254 · cardH 637 · 3 cards"
+    },
+    {
+      "id": "2 no horizontal clipping@1280",
+      "ok": true,
+      "d": "page width stays inside the viewport"
+    },
+    {
+      "id": "3 wedding@390 names the route to both seats, per guest",
+      "ok": true,
+      "d": "ceremony:open:Choose your ceremony seat:wedding-preparation.html?for=G001#seats | dinner:open:Choose your dinner seat:wedding-preparation.html?for=G001#seats | ceremony:open:Choose your ceremony seat:wedding-preparation.html?for=G002#seats | dinner:open:Choose your dinner seat:wedding-preparation.html?for=G002#seats"
+    },
+    {
+      "id": "3 route@390 lands on the seats, for Peggy, both maps titled to the task, couple at the front",
+      "ok": true,
+      "d": "{\"file\":\"wedding-preparation.html\",\"below\":true,\"who\":\"G001\",\"cards\":[\"ceremony:open:Choose your ceremony seat\",\"dinner:open:Choose your dinner seat\"],\"bride\":1,\"dinnerFixed\":0}"
+    },
+    {
+      "id": "3 ceremony@390 BRIDE and GROOM: front centre, never selectable, not counted",
+      "ok": true,
+      "d": "{\"label\":\"BRIDE and GROOM, fixed positions at the front centre\",\"selectable\":false,\"chairs\":50}"
+    },
+    {
+      "id": "3 booked@390 state: Your seat · held in Peggy's name · change by tapping another chair",
+      "ok": true,
+      "d": "ceremony:booked:Your ceremony seat:Held in Peggy’s name · Left side · row 2 | dinner:booked:Your dinner seat:Held in Peggy’s name · Long table · top "
+    },
+    {
+      "id": "3 change seat@390",
+      "ok": true,
+      "d": "C-L-02-01 → C-R-05-02"
+    },
+    {
+      "id": "3 two guests@390 independent seats, duplicate refused",
+      "ok": true,
+      "d": "Peggy D-T-03 · Steffie D-T-04"
+    },
+    {
+      "id": "3 wedding@390 shows booked seats with Change seat",
+      "ok": true,
+      "d": "ceremony:booked:Change seat | dinner:booked:Change seat | ceremony:open:Choose your ceremony seat | dinner:booked:Change seat"
+    },
+    {
+      "id": "3 review@390 seats by the ledger, per guest",
+      "ok": true,
+      "d": "Peggy 2 seats · Steffie dinner + open ceremony link · Ceremony seat Right side · row 5 · chair 2 · held in Peggy’s name C-R-05-02 Dinner seat Long table · top side · place 3 · held in Peg || Ceremony seat Not chosen yet CHOOSE YOUR CEREMONY SEAT Dinner seat Long table · top side · place 4 · held in Steffie’s name"
+    },
+    {
+      "id": "3 errors@390",
+      "ok": true,
+      "d": "none"
+    },
+    {
+      "id": "3 wedding@1280 names the route to both seats, per guest",
+      "ok": true,
+      "d": "ceremony:open:Choose your ceremony seat:wedding-preparation.html?for=G001#seats | dinner:open:Choose your dinner seat:wedding-preparation.html?for=G001#seats | ceremony:open:Choose your ceremony seat:wedding-preparation.html?for=G002#seats | dinner:open:Choose your dinner seat:wedding-preparation.html?for=G002#seats"
+    },
+    {
+      "id": "3 route@1280 lands on the seats, for Peggy, both maps titled to the task, couple at the front",
+      "ok": true,
+      "d": "{\"file\":\"wedding-preparation.html\",\"below\":true,\"who\":\"G001\",\"cards\":[\"ceremony:open:Choose your ceremony seat\",\"dinner:open:Choose your dinner seat\"],\"bride\":1,\"dinnerFixed\":0}"
+    },
+    {
+      "id": "3 ceremony@1280 BRIDE and GROOM: front centre, never selectable, not counted",
+      "ok": true,
+      "d": "{\"label\":\"BRIDE and GROOM, fixed positions at the front centre\",\"selectable\":false,\"chairs\":50}"
+    },
+    {
+      "id": "3 booked@1280 state: Your seat · held in Peggy's name · change by tapping another chair",
+      "ok": true,
+      "d": "ceremony:booked:Your ceremony seat:Held in Peggy’s name · Left side · row 2 | dinner:booked:Your dinner seat:Held in Peggy’s name · Long table · top "
+    },
+    {
+      "id": "3 change seat@1280",
+      "ok": true,
+      "d": "C-L-02-01 → C-R-05-02"
+    },
+    {
+      "id": "3 two guests@1280 independent seats, duplicate refused",
+      "ok": true,
+      "d": "Peggy D-T-03 · Steffie D-T-04"
+    },
+    {
+      "id": "3 wedding@1280 shows booked seats with Change seat",
+      "ok": true,
+      "d": "ceremony:booked:Change seat | dinner:booked:Change seat | ceremony:open:Choose your ceremony seat | dinner:booked:Change seat"
+    },
+    {
+      "id": "3 review@1280 seats by the ledger, per guest",
+      "ok": true,
+      "d": "Peggy 2 seats · Steffie dinner + open ceremony link · Ceremony seat Right side · row 5 · chair 2 · held in Peggy’s name C-R-05-02 Dinner seat Long table · top side · place 3 · held in Peg || Ceremony seat Not chosen yet CHOOSE YOUR CEREMONY SEAT Dinner seat Long table · top side · place 4 · held in Steffie’s name"
+    },
+    {
+      "id": "3 errors@1280",
+      "ok": true,
+      "d": "none"
+    },
+    {
+      "id": "4 both actions in the step index",
+      "ok": true,
+      "d": "another:Open another invitation | out:Sign out"
+    },
+    {
+      "id": "4 sign out → clean code screen, session cleared, draft set aside",
+      "ok": true,
+      "d": "{\"file\":\"invitation.html\",\"auth\":null,\"bag\":null,\"aside\":true,\"gate\":true,\"party\":false}"
+    },
+    {
+      "id": "4 back after sign out reveals no party",
+      "ok": true,
+      "d": "{\"file\":\"invitation.html\",\"party\":false,\"bar\":\"YOUR PRIVATE JOURNEY Open your invitation to begin\"}"
+    },
+    {
+      "id": "4 ?open=1 presents the code prompt",
+      "ok": true,
+      "d": "prompt open"
+    },
+    {
+      "id": "4 second party opens clean",
+      "ok": true,
+      "d": "{\"inv\":\"INV-001\",\"hosts\":true,\"bag\":0,\"aside2\":true}"
+    },
+    {
+      "id": "4 the hosts: ceremony = front centre for both, dinner chosen like everyone",
+      "ok": true,
+      "d": "{\"front\":4,\"ceremonyCta\":0,\"dinnerCta\":2}"
+    },
+    {
+      "id": "4 hosts on step 04: no ceremony map, dinner map open",
+      "ok": true,
+      "d": "ceremony:true:Your ceremony seat | dinner:open:Choose your dinner seat"
+    },
+    {
+      "id": "4 SWITCH offers only this party",
+      "ok": true,
+      "d": "Haruthai / Suthep"
+    },
+    {
+      "id": "4 INV-002 returns to its own draft",
+      "ok": true,
+      "d": "{\"inv\":\"INV-002\",\"usathorn\":true,\"aside\":false}"
+    },
+    {
+      "id": "4 errors",
+      "ok": true,
+      "d": "none"
+    },
+    {
+      "id": "5 China card carries the Lijiang file",
+      "ok": true,
+      "d": "{\"bg\":\"url(\\\"http://127.0.0.1:8787/assets/images/city/004-lijiang-black-dragon-pool.jpg\\\")\",\"label\":\"Black Dragon Pool in Lijiang, Jade Dragon Snow Mountain behind it\"}"
+    },
+    {
+      "id": "5 the file is served",
+      "ok": true,
+      "d": "HTTP 200"
+    }
+  ]
+}

@@ -70,6 +70,10 @@ async function main() {
       partyLead: inv.partyLead,
       guests: inv.guests.map((g) => ({ ...g, ...(g.status && g.status !== 'ACTIVE' ? { status: g.status } : {}) })),
       ...(inv.unresolvedMapping ? { unresolvedMapping: true } : {}),
+      /* the hosts' own party (Owner, 13 Sep 2026): at the ceremony their place is
+       * the fixed front-centre position, so no ceremony chair is asked of them;
+       * the dinner is booked like everyone else. Explicit in the private list. */
+      ...(inv.hosts === true ? { hosts: true } : {}),
       /* E · SANGKHATHAN ELIGIBILITY — explicit invitation-level source truth,
        * "PAIR" or "NONE". Never derived from party size, names or anything
        * else: absent in the private list means UNRESOLVED and ships as such. */

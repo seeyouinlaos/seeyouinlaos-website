@@ -252,7 +252,7 @@ State after this pass:
 |---|---|---|
 | Homepage · destination 01 Bangkok | `city/001-bangkok-chao-phraya-skyline.jpg` | real Bangkok |
 | Homepage · destination 02 Vientiane | `city/002-vientiane-patuxai-twilight.jpg` | real Vientiane city (was the green gate — corrected) |
-| Homepage · destination 03 China | `city/003-kunming-jinma-biji-archway.jpg` | real Kunming |
+| Homepage · destination 03 China | `city/004-lijiang-black-dragon-pool.jpg` (Owner Drive file 1XBVp6qIwUSWfHpw4w3S0CH-apvsej154, 13 Sep 2026) | real Lijiang |
 | Homepage / voyage · **The Wedding** | `event/052-ceremony-green-gateway.jpg` + `event/052-vow-ceremony-green-door.jpg` | the green gate / green door is the wedding visual (was the fountain — corrected). No pool anywhere. |
 | Voyage · Wedding Dinner | `event/053-wedding-dinner-courtyard-garden.jpg` | the courtyard garden where dinner is served — used ONLY under that heading, never as the wedding visual |
 | Voyage · Temple Ceremony | `event/052-temple-ceremony-bride.jpg` | owner-supplied 08 Sep 2026 (the bride, black and white) — replaces the placeholder |

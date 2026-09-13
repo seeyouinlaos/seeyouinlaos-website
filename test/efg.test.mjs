@@ -291,7 +291,11 @@ test('G · the geometry contract enforces the Owner geometry and refuses the ret
   assert.equal(d.length, 50, 'guest inventory 50');
   assert.equal(d.filter((s) => s.side === 'T').length, 25, 'top 25');
   assert.equal(d.filter((s) => s.side === 'B').length, 25, 'bottom 25');
-  assert.equal(ok.config.dinner.fixed, undefined, 'no fixed position for anyone');
+  assert.equal(ok.config.dinner.fixed, undefined, 'no fixed dinner position for anyone');
+  /* Owner 13 Sep 2026 (§14): the ceremony carries BRIDE and GROOM at the front
+   * centre — positions, not chairs: no seat id, never inventory, never selectable */
+  assert.deepEqual(ok.config.ceremony.fixed, ['BRIDE', 'GROOM'], 'the ceremony front-centre positions');
+  assert.equal(c.length, 50, 'the two positions are not counted as guest chairs');
   assert.equal(ok.config.dinner.totalPeople, 50, 'represented total = 50 people');
   assert.ok(d.every((s) => RULES.dinner.id.test(s.seatId)), 'D-T-01…25 / D-B-01…25');
   assert.equal(CAPACITY.ceremony.guestSeats, 50); assert.equal(CAPACITY.dinner.guestSeats, 50); assert.equal(CAPACITY.dinner.totalPeople, 50);
@@ -330,7 +334,7 @@ test('G · production ships no geometry: unconfigured, not open, NOT OPEN YET', 
   assert.deepEqual([v.open, v.frozen, v.configured.ceremony, v.configured.dinner, v.ceremony, v.dinner], [false, false, false, false, null, null]);
   const s = await call(l, 'select', { invitationId: 'INV-002', guestId: PEGGY, event: 'ceremony', seatId: 'C-L-01-01' });
   assert.equal(s.status, 423);
-  assert.deepEqual(JSON.parse(JSON.stringify(v.capacity)), { ceremony: { guestSeats: 50, left: 20, right: 30 }, dinner: { guestSeats: 50, top: 25, bottom: 25, totalPeople: 50 } }, 'the capacity contract is the Owner geometry even before configuration');
+  assert.deepEqual(JSON.parse(JSON.stringify(v.capacity)), { ceremony: { guestSeats: 50, left: 20, right: 30, fixed: 2 }, dinner: { guestSeats: 50, top: 25, bottom: 25, totalPeople: 50 } }, 'the capacity contract is the Owner geometry even before configuration');
   for (const f of ['assets/seating.js', 'src/seating.js', 'wedding-preparation.html', 'src/worker.js']) {
     assert.doesNotMatch(src(f), /seatId:\s*'[CD]-[LRTB]-\d|'C-[LR]-\d+-\d+'|'D-[LRTB]-\d+'/, f + ' carries a floor plan of its own');
     assert.doesNotMatch(src(f), /40 guest|20 \+ 20|34 selectable|perSide: 20/, f + ' still carries the retired 40-seat truth');
@@ -373,11 +377,18 @@ test('G · a seat belongs to a named guest; the new chair is held before the old
   assert.equal(r.ok, true);
   const mine = await call(l, 'mine', null, { q: '?invitation=INV-002' });
   assert.deepEqual(JSON.parse(JSON.stringify(mine.mine)), { ceremony: { [PEGGY]: free[1] }, dinner: { [PEGGY]: 'D-T-04' } });
-  /* there is no Bride/Groom chair id — the couple book ordinary chairs; ids outside the fifty do not exist */
+  /* there is no Bride/Groom chair id at the dinner — the couple book ordinary chairs; ids outside the fifty do not exist */
   for (const id of ['BRIDE', 'GROOM', 'D-BRIDE', 'D-T-26', 'D-B-00']) {
     const rr = await call(l, 'select', { invitationId: 'INV-002', guestId: STEFFIE, event: 'dinner', seatId: id });
     assert.equal(rr.status, 404, id + ' is not a guest seat');
   }
+  /* and the ceremony's BRIDE / GROOM positions can never be selected by anyone */
+  for (const id of ['BRIDE', 'GROOM', 'C-BRIDE']) {
+    const rr = await call(l, 'select', { invitationId: 'INV-002', guestId: STEFFIE, event: 'ceremony', seatId: id });
+    assert.equal(rr.status, 404, id + ' is a position, not a chair');
+  }
+  const cv = await call(l, 'read', null, { q: '?invitation=INV-002' });
+  assert.deepEqual(cv.ceremony.fixed, ['BRIDE', 'GROOM']); assert.equal(cv.ceremony.rows.flatMap((r) => r.seats).length, 50);
   /* frozen: the guest sees, cannot change; Guest Relations still can */
   await call(l, 'state', { frozen: true }, { gr: true });
   r = await call(l, 'select', { invitationId: 'INV-002', guestId: PEGGY, event: 'ceremony', seatId: free[2] });
@@ -403,7 +414,7 @@ test('G · the renderer draws only what it is given: rows facing the ceremony, o
   const w = page({ ...PARTY, givingEligibility: 'PAIR' });
   const S = w.SIYL_SEATS;
   const cfg = validateGeometry(SEAT_FIXTURE).config;
-  const view = { ceremony: { rows: cfg.ceremony.rows.map((r) => ({ ...r, seats: r.seats.map((s, i) => ({ ...s, state: s.family ? 'family' : (i === 0 && r.row === 3 && r.side === 'L' ? 'yours' : 'available'), guestId: PEGGY })) })) },
+  const view = { ceremony: { rows: cfg.ceremony.rows.map((r) => ({ ...r, seats: r.seats.map((s, i) => ({ ...s, state: s.family ? 'family' : (i === 0 && r.row === 3 && r.side === 'L' ? 'yours' : 'available'), guestId: PEGGY })) })), fixed: ['BRIDE', 'GROOM'] },
                  dinner: { sides: { T: cfg.dinner.sides.T.map((s, i) => ({ ...s, state: s.family ? 'family' : (i === 5 ? 'taken' : 'available') })), B: cfg.dinner.sides.B.map((s) => ({ ...s, state: s.family ? 'family' : 'available' })) }, fixed: ['BRIDE', 'GROOM'], totalPeople: 50 } };
   const c = S.svg('ceremony', view, { guestId: PEGGY, selectable: true });
   assert.equal((c.match(/<g class="seat/g) || []).length, 50, 'visual total 50');
@@ -411,6 +422,10 @@ test('G · the renderer draws only what it is given: rows facing the ceremony, o
   assert.equal((c.match(/seat-yours/g) || []).length, 1);
   assert.equal((c.match(/role="button"/g) || []).length, 44, 'available and your own chair are selectable, family is not');
   assert.match(c, />CEREMONY</); assert.match(c, />LEFT · 20</); assert.match(c, />RIGHT · 30</);
+  /* the front-centre positions are drawn, named, and are not chairs */
+  assert.match(c, /class="fixed" aria-label="BRIDE and GROOM, fixed positions at the front centre"/);
+  assert.match(c, />BRIDE</); assert.match(c, />GROOM</);
+  assert.ok(!/data-seat="(BRIDE|GROOM)"/.test(c), 'never selectable');
   /* ten rows, numbered, the asymmetry kept: the right block is wider than the left */
   for (let r = 1; r <= 10; r++) assert.match(c, new RegExp('>' + r + '</text>'));
   const d = S.svg('dinner', view, { guestId: STEFFIE, selectable: true });

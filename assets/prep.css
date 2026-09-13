@@ -200,7 +200,13 @@ body.prep button, body.prep input, body.prep textarea, body.prep select { font-f
 /* the dress references keep their own proportions (Owner, 13 Sep 2026): a
  * shared height cap and a width cap, never a forced box — no stretching, no
  * cropping of a person to make the cards equal; the rail stays a rail */
-.p-rail { align-items: flex-start; }
+.p-rail:not(.atrk) { align-items: flex-start; }
+/* a rail of cards shares one height and one top line: the vertical sibling
+ * spacing of stacked cards never applies sideways */
+.atrk.p-rail { align-items: stretch; }
+.atrk.p-rail > .p-card + .p-card, .p-rail-car .p-stay + .p-stay { margin-top: 0; }
+.atrk.p-rail > * { min-width: 0; }   /* a longer label never widens one card of the rail */
+.p-act.is-current { white-space: normal; text-align: center; }
 /* a photograph keeps its own proportions: 3:4, covered, never stretched */
 .p-rail > img { display: block; flex: 0 0 auto; width: auto; height: auto; max-height: min(92vw, 440px); max-width: min(84%, 340px); aspect-ratio: auto; object-fit: contain; background: none; }
 @media (min-width: 768px) { .p-rail > img { max-height: 440px; max-width: 340px; } }
@@ -315,6 +321,8 @@ body.prep-steps-open .prep-steps-scrim { opacity: 1; pointer-events: auto; }
 .prep-srow .s.open { color: var(--p-accent); }
 .prep-srow[aria-current="step"] .l { border-bottom: 1px solid var(--p-ink); }
 .prep-srow.locked { opacity: .45; pointer-events: none; }
+.prep-leave { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--s2) var(--s5); border-top: 1px solid var(--p-line); margin-top: var(--s4); padding-top: var(--s3); }
+.prep-leave .t-l1 { flex: 1 1 100%; color: var(--p-mute); margin: 0; }
 
 /* the foot: one primary continuation, one quiet way back */
 .prep-foot { border-top: 1px solid var(--p-line); margin-top: var(--s8); padding-top: var(--s5); display: flex; flex-wrap: wrap; gap: var(--s4); align-items: center; }
@@ -344,7 +352,15 @@ body.prep-steps-open .prep-steps-scrim { opacity: 1; pointer-events: auto; }
    structural padding on the card, which no child rule can undo. */
 .p-stay { display: flex; flex-direction: column; padding: 0 var(--s5) var(--s5); opacity: .62; transition: opacity .35s, border-color .35s; }
 .p-stay.on, .acar .aslide.on.p-stay, .p-stay.p-chosen, .acar .aslide.p-chosen { opacity: 1; }
-.p-stay.p-chosen { border-color: var(--p-ink); }
+.p-stay.p-chosen { border-color: var(--p-ink); background: var(--p-paper); box-shadow: inset 0 0 0 1px var(--p-ink); }
+.p-stay { transition: opacity var(--p-t) var(--p-ease), border-color var(--p-t) var(--p-ease), background-color var(--p-t) var(--p-ease), box-shadow var(--p-t) var(--p-ease); }
+/* ONE STATE FOR EVERY SELECTABLE THING (Owner, 13 Sep 2026): what is in the
+ * journey is framed and says so; its control is inert; alternatives keep their
+ * action. The state is read from the journey itself, never from a click. */
+.p-act.is-current { background: var(--p-paper); color: var(--p-ink); border-color: var(--p-ink); cursor: default; pointer-events: none; }
+.p-act.is-current::before { content: '✓'; margin-right: 10px; font-size: 12px; }
+.p-sum.on, .p-fare.on { background: var(--p-paper); box-shadow: inset 0 0 0 1px var(--p-ink); }
+.p-sum, .p-fare { transition: border-color var(--p-t) var(--p-ease), background-color var(--p-t) var(--p-ease), box-shadow var(--p-t) var(--p-ease); }
 .p-stay > * { margin: 0; }
 .p-stay > * + * { margin-top: var(--s3); }
 .p-stay-img { display: block; width: calc(100% + 2 * var(--s5)); margin: 0 calc(-1 * var(--s5)); aspect-ratio: 4/3; background: #E7E3DB center/cover no-repeat; }

@@ -25,10 +25,10 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 
   <div class="p-card" style="margin-top:24px">
     <p class="t-l1">Sunday, 28 February · Morning</p>
-    <h3 class="t-h1">Blue Lao Traditional Dress</h3>
+    <h3 class="t-h1">Lao Traditional Dress</h3>
     <p class="t-b2">Temple Ceremony · 08:00 – 12:00 · Wat Ong Teu, Vientiane</p>
-    <p class="t-b1 measure">The Buddhist morning is dressed in Lao tradition, in blue. Shoulders and knees are covered inside the temple, and shoes come off at the door. A sinh may be borrowed or made in Vientiane — Guest Relations helps anyone who would like that arranged.</p>
-    <div class="p-rail" aria-label="Lao traditional dress references"><img src="assets/images/dress/tradition-04.jpg" alt="Lao traditional dress — reference 4" loading="lazy" decoding="async"><img src="assets/images/dress/tradition-05.jpg" alt="Lao traditional dress — reference 5" loading="lazy" decoding="async"><img src="assets/images/dress/tradition-06.jpg" alt="Lao traditional dress — reference 6" loading="lazy" decoding="async"><img src="assets/images/dress/tradition-01.jpg" alt="Lao traditional dress — reference 1" loading="lazy" decoding="async"><img src="assets/images/dress/tradition-02.jpg" alt="Lao traditional dress — reference 2" loading="lazy" decoding="async"><img src="assets/images/dress/tradition-03.jpg" alt="Lao traditional dress — reference 3" loading="lazy" decoding="async"></div>
+    <p class="t-b1 measure">The Buddhist morning is dressed in Lao tradition. Shoulders and knees are covered inside the temple, and shoes come off at the door. A sinh may be borrowed or made in Vientiane — Guest Relations helps anyone who would like that arranged.</p>
+    <div class="p-rail" aria-label="Lao traditional dress references"><img src="assets/images/dress/tradition-01.jpg" alt="Lao traditional dress — reference 1" loading="lazy" decoding="async"><img src="assets/images/dress/tradition-02.jpg" alt="Lao traditional dress — reference 2" loading="lazy" decoding="async"><img src="assets/images/dress/tradition-03.jpg" alt="Lao traditional dress — reference 3" loading="lazy" decoding="async"><img src="assets/images/dress/tradition-04.jpg" alt="Lao traditional dress — reference 4" loading="lazy" decoding="async"><img src="assets/images/dress/tradition-05.jpg" alt="Lao traditional dress — reference 5" loading="lazy" decoding="async"><img src="assets/images/dress/tradition-06.jpg" alt="Lao traditional dress — reference 6" loading="lazy" decoding="async"></div>
   </div>
 
   <div class="p-card">
@@ -138,7 +138,8 @@ render();
 var S=window.SIYL_SEATS,P=window.SIYL_PREP,G=window.SIYL_GUEST,seatbox=document.getElementById('seatbox');
 if(!S||!P||!G||!seatbox)return;
 function esc(t){return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
-var subject=null;   /* whose chair is being chosen — defaults to the person continuing */
+var subject=null;   /* whose chair is being chosen — defaults to the person continuing, or to a ?for= deep link */
+(function(){var m=/[?&]for=([A-Za-z0-9_-]+)/.exec(location.search);if(m)subject=m[1]})();
 var EV=[['ceremony','Ceremony seat','Wat Ong Teu · 28 February · rows facing the ceremony'],['dinner','Dinner seat','Souphattra Heritage Vientiane · 19:30 · one long table']];
 function label(ev,id){var sid=S.seatOf(ev,id);return sid?sid:null}
 function paintSeats(){
@@ -170,9 +171,13 @@ function paintSeats(){
     if(forOther)h+='<div class="p-for" style="margin-top:var(--s4)"><span class="t-l1">Choosing for</span><b>'+name+'</b><span class="t-b2">You are continuing as '+esc(G.nameOf(me.guestId))+'. The chair is held in '+name+'&rsquo;s name.</span></div>'}
   EV.forEach(function(e){
     var ev=e[0],sid=label(ev,id),ok=S.configured(ev);
-    h+='<div class="p-card" style="margin-top:var(--s4)" data-seatmap="'+ev+'"><p class="t-l1'+(sid?' on':' open')+'">'+(sid?(S.frozen()?'Held for ':'Held in ')+name+(S.frozen()?'':'&rsquo;s name')+' · '+esc(S.describe(sid))+' <span style="color:var(--p-mute)">'+esc(sid)+'</span>':(S.frozen()?'No seat allocated':'Not chosen yet'))+'</p>'+
-      '<h3 class="t-h1">'+e[1]+'</h3><p class="t-b2">'+e[2]+'</p>'+
-      (ok?'<div class="p-seatbox" data-ev="'+ev+'" style="margin-top:var(--s4)"></div>':'<p class="t-b2 measure" style="margin-top:var(--s3)">The plan for this part of the day has not been opened yet.</p>')+
+    /* the hosts' party: the ceremony place is the fixed front centre — no chair to choose */
+    if(ev==='ceremony'&&p.hosts){
+      h+='<div class="p-card" style="margin-top:var(--s4)" data-seatmap="ceremony" data-hosts="true"><p class="t-l1 on">Bride &amp; Groom · front centre</p><h3 class="t-h1">Your ceremony seat</h3><p class="t-b2">'+e[2]+'</p>'+
+         '<p class="t-b1 measure">'+name+'&rsquo;s place at the ceremony is the front centre, in front of the rows — no chair to choose here. The dinner seat below is chosen like everyone else&rsquo;s.</p></div>';return}
+    h+='<div class="p-card" style="margin-top:var(--s4)" data-seatmap="'+ev+'" data-state="'+(sid?'booked':'open')+'"><p class="t-l1'+(sid?' on':' open')+'">'+(sid?(S.frozen()?'Held for ':'Held in ')+name+(S.frozen()?'':'&rsquo;s name')+' · '+esc(S.describe(sid))+' <span style="color:var(--p-mute)">'+esc(sid)+'</span>':(S.frozen()?'No seat allocated':'Not chosen yet'))+'</p>'+
+      '<h3 class="t-h1">'+(sid?'Your '+ev+' seat':'Choose your '+ev+' seat')+'</h3><p class="t-b2">'+e[2]+'</p>'+
+      (ok?(sid&&!S.frozen()?'<p class="t-b2 measure" style="margin-top:var(--s2)">To change it, tap another available chair.</p>':'')+'<div class="p-seatbox" data-ev="'+ev+'" style="margin-top:var(--s4)"></div>':'<p class="t-b2 measure" style="margin-top:var(--s3)">The plan for this part of the day has not been opened yet.</p>')+
       (sid&&!S.frozen()?'<div class="p-actions"><button type="button" class="p-link mute" data-seat-release="'+ev+'">Give this chair back</button></div>':'')+
       '</div>'});
   seatbox.innerHTML=h;

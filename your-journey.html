@@ -95,8 +95,8 @@ var TC={
    dep:['20:25','Krung Thep Aphiwat'],arr:['06:25','Nong Khai · next morning'],dur:'About 10 hours on board',cls:'First Class Sleeper · private cabin',
    ben:['A private, lockable cabin with two berths','Van and border logistics on to Vientiane, included','One package, the whole party travels together','Bedding, air conditioning and power at the berth'],basis:'per person · package'},
  c86:{img:'assets/images/transport/c642-train-snow-mountain.jpg',op:'China Railway · C86',route:'Kunming &rarr; Lijiang',date:'04 March 2027',
-   dep:['10:15','Kunming'],arr:['13:44','Lijiang'],dur:'3h 29m · direct',cls:'Business Class · 1 + 1 seating',
-   ben:['1 + 1 seating — one seat each side of the aisle','Snacks and drinks served at the seat','Priority ticketing','Power and wireless charging at the seat'],basis:'per person'},
+   dep:['10:15','Kunming'],arr:['13:44','Lijiang'],dur:'3h 29m · direct',cls:'Business Class',
+   ben:['Snacks and drinks served at the seat','Priority ticketing','Power and wireless charging at the seat'],basis:'per person'},
  'return':{img:'assets/images/transport/mu5924-economy-cabin-1.jpg',op:'China Eastern Airlines · MU5924 + MU741',route:'Lijiang &rarr; Kunming &rarr; Bangkok',date:'06 March 2027',
    dep:['10:35','Lijiang (LJG)'],arr:['14:55','Bangkok (BKK)'],dur:'5h 20m door to door · 1h 30m in Kunming',cls:'Economy flexible',
    ben:['One seat per guest on both legs','Two pieces of checked baggage, through to Bangkok','Free rescheduling before departure','Conditional refund before departure'],basis:'per person'}
@@ -115,7 +115,8 @@ function transportCard(seg,line){
       '<ul class="p-list">'+t.ben.map(function(b){return '<li class="t-b2">'+b+'</li>'}).join('')+'</ul>'+
       '<p class="p-price">'+money(f.price)+'<span class="t-l1">'+t.basis+(sel&&q>1?' × '+q+' guests · '+money(f.price*q):'')+'</span></p>'+
       '<div class="p-actions">'+
-        '<button type="button" class="p-act'+(sel?' quiet':'')+'" data-choose-flat="'+seg.key+'">'+(sel?'Selected':'Select this travel')+'</button>'+
+        (sel?'<span class="p-act quiet is-current" aria-current="true">Current selection</span>'
+            :'<button type="button" class="p-act" data-choose-flat="'+seg.key+'">Select this travel</button>')+
         '<a class="p-link mute" href="transport.html?id='+seg.key+'">View details</a>'+
         (sel?'<button type="button" class="p-link mute" data-rm="'+seg.key+'">Remove</button>':'<button type="button" class="p-link mute" data-skip="'+seg.key+'">Not joining this stage</button>')+
       '</div></div></div>'}
@@ -164,7 +165,8 @@ function bkkHtml(){
       '<p class="t-b2">'+esc(r.card||r.name)+'</p>'+
       '<p class="t-b2">21 – 24 February · 3 nights<br>'+esc(r.breakfast||stay.breakfast)+'</p>'+
       '<p class="p-price">'+P.money(q.total)+'<span class="t-l1">total per person</span></p>'+
-      '<button type="button" class="p-act'+(on?' quiet':'')+'" data-choose="'+r.slug+'">'+(on?'Selected':'Select this stay')+'</button>'+
+      (on?'<span class="p-act quiet is-current" aria-current="true">Current selection</span>'
+         :'<button type="button" class="p-act" data-choose="'+r.slug+'">Select this stay</button>')+
       '<p><a class="p-link mute" href="room.html?stay=sathorn&room='+r.slug+'">View details</a></p>'+
       '</article>'}).join('')+'</div>'+
     '<div class="arow"><div class="arail"><i></i></div><div class="anav">'+
@@ -196,7 +198,8 @@ function flyHtml(){
         '<h4 class="t-h1">'+c.short+'</h4>'+
         '<p class="p-price">'+P.money(c.price)+'<span class="t-l1">per person</span></p>'+
         '<ul class="p-list">'+c.notes.map(function(n){return '<li class="t-b2">'+n+'</li>'}).join('')+'</ul>'+
-        '<button type="button" class="p-act'+(on?' quiet':'')+'" data-cls="'+c.slug+'">'+(on?'Selected':'Select this fare')+'</button>'+
+        (on?'<span class="p-act quiet is-current" aria-current="true">Current fare</span>'
+           :'<button type="button" class="p-act" data-cls="'+c.slug+'">Select this fare</button>')+
         '</article>'}).join('')+'</div>'+
     '</div></div>'}
 
@@ -356,7 +359,7 @@ FXMODE=mode;
 var cost=mode==='cost';
 var h='<p class="t-l1">'+(cost?'Cost Saving Experience':'Full Experience')+'</p>'+
   '<h2 class="t-h1" style="margin-top:8px">'+(cost?'Two ways to stay for the wedding.':'Complete the remaining journey.')+'</h2>'+
-  '<p class="t-b1 measure" id="fxp" style="margin-top:12px">'+(cost?'':'All ten stages of the journey, each with the room, cabin or seat approved for the complete journey. This replaces the choices you have made so far, including a Cost Saving stay — you can still change any individual stage afterwards.')+'</p>'+
+  '<p class="t-b1 measure" id="fxp" style="margin-top:12px">'+(cost?'':'Every stage you have already chosen stays exactly as you chose it. Full Experience fills only the stages that are still open — each with the room, cabin or seat approved for the complete journey — and lifts a Cost Saving stay. You can still change any individual stage afterwards.')+'</p>'+
   '<div id="csel" style="margin-top:16px"></div>'+
   '<div class="p-actions" style="display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;margin-top:24px"><button type="button" class="p-link mute" id="fxc">Cancel</button>'+
   '<button type="button" class="p-act" id="fxg">'+(cost?'Use this Cost Saving option':'Add Full Experience')+'</button></div>';
@@ -389,7 +392,7 @@ gated(async function(){
       }
     }
     plan.remove.forEach(function(id){SIYL_BAG.remove(id)});
-    J.SEGMENTS.forEach(function(s2){J.skip(s2.key,plan.selfArranged.indexOf(s2.key)>=0)});
+    J.SEGMENTS.forEach(function(s2){J.skip(s2.key,plan.selfArranged.indexOf(s2.key)>=0,'cost')});
     plan.add.forEach(function(it){SIYL_BAG.put(it)});
   }else{
     var plan2=J.fullExperience();

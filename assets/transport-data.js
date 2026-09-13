@@ -185,9 +185,7 @@
       anchor: 'j-c86',
       story: 'Five hundred and twenty-seven kilometres of Yunnan in one ' +
         'morning: out of Kunming at a quarter past ten, across the gorges, and ' +
-        'into Lijiang in the early afternoon. Business Class here is a 1 + 1 ' +
-        'carriage — a single seat on each side of the aisle, so nobody sits ' +
-        'beside anyone.',
+        'into Lijiang in the early afternoon, in Business Class.',
       facts: [
         ['Service', 'C86 · high-speed train'],
         ['Route', 'Kunming Railway Station → Lijiang Railway Station'],
@@ -196,11 +194,10 @@
         ['Arrival', '13:44 · Lijiang'],
         ['Routing', 'Direct · 3 hours 29 minutes'],
         ['Distance', 'About 527 kilometres'],
-        ['Class', 'Business Class · 1 + 1 seating']
+        ['Class', 'Business Class']
       ],
       groups: [
         ['Your seat', [
-          '1 + 1 seating layout — one seat each side of the aisle',
           'Spacious seat pitch',
           'Adjustable backrest',
           'Tray table',
