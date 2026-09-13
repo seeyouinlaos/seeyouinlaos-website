@@ -37,7 +37,7 @@ export function lookupInvitation(query) {
    uploaded, never exposed on the site. It exists so the ledger's validation,
    the atomic hold/release and the renderer can be exercised. It follows the
    Owner's binding geometry (ceremony LEFT 10 × 2 = 20, RIGHT 10 × 3 = 30;
-   dinner TOP 24 + BOTTOM 24, BRIDE and GROOM fixed) — the FAMILY flags below
+   dinner TOP 25 + BOTTOM 25, nothing fixed for anyone) — the FAMILY flags below
    are deliberately arbitrary and NOT a proposal: the exact FAMILY chair ids
    come from the Owner through Guest Relations.
    ========================================================================== */
@@ -51,8 +51,8 @@ export const SEAT_FIXTURE = {
   },
   dinner: {
     sides: {
-      T: Array.from({ length: 24 }, (_, i) => ({ seatId: 'D-T-' + two(i + 1), family: i < 3 })),
-      B: Array.from({ length: 24 }, (_, i) => ({ seatId: 'D-B-' + two(i + 1), family: i < 3 })),
+      T: Array.from({ length: 25 }, (_, i) => ({ seatId: 'D-T-' + two(i + 1), family: i < 3 })),
+      B: Array.from({ length: 25 }, (_, i) => ({ seatId: 'D-B-' + two(i + 1), family: i < 3 })),
     },
   },
 };

@@ -24,14 +24,14 @@ note('shell status on another step', /Review & Send\s*Received/i.test((await p.l
 await p.goto(ORIGIN + '/wedding-preparation.html', { waitUntil: 'networkidle' }); await p.waitForTimeout(1000);
 const seats = (await p.locator('#seats').innerText()).replace(/\s+/g, ' ');
 /* Owner decision 13 Sep 2026: seating is OPEN at the binding geometry — the
-   ceremony rows (50) and the long table (48 + BRIDE + GROOM) are drawn from
-   the server's configuration, no chair is RESERVED · FAMILY, and reading the
-   plan writes nothing. */
+   ceremony rows (50) and the long table (50, nothing fixed for anyone) are
+   drawn from the server's configuration, no chair is RESERVED · FAMILY, and
+   reading the plan writes nothing. */
 const maps = await p.locator('#seats svg.p-seatmap').count();
 const chairs = await p.locator('#seats svg.p-seatmap g.seat').count();
 const family = await p.locator('#seats svg.p-seatmap g.seat-family').count();
-const fixed = (await p.locator('#seats svg.p-seatmap g.fixed[aria-label="BRIDE and GROOM, fixed central positions"]').count()) === 1;
-note('seating open', /seating is open/i.test(seats) && maps === 2 && chairs === 98 && family === 0 && fixed && !/Reserved · family/i.test(seats), 'production: ' + maps + ' plans · ' + chairs + ' chairs (50 + 48) · family chairs ' + family + ' · ' + seats.slice(0, 60));
+const nofixed = (await p.locator('#seats svg.p-seatmap g.fixed').count()) === 0 && !/BRIDE|GROOM/.test(await p.locator('#seats').evaluate((e) => e.textContent));
+note('seating open', /seating is open/i.test(seats) && maps === 2 && chairs === 100 && family === 0 && nofixed && !/Reserved · family/i.test(seats), 'production: ' + maps + ' plans · ' + chairs + ' chairs (50 + 50) · family chairs ' + family + ' · nothing fixed + ' · ' + seats.slice(0, 60));
 await p.goto(ORIGIN + '/wedding.html', { waitUntil: 'networkidle' }); await p.waitForTimeout(600);
 const sang = (await p.locator('#sangkhathan').innerText()).replace(/\s+/g, ' ');
 note('sangkhathan withheld', (await p.locator('#sangkhathan [data-off]').count()) === 0 && !/USD 30/.test(sang), sang.slice(0, 100));

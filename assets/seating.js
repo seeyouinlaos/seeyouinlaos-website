@@ -13,8 +13,8 @@
      13 Sep 2026 configures none — every guest, the couple included, holds a
      chair through the same ledger, and the legend never lists a state that
      no chair on the plan can have)
-   Bride & Groom are two fixed central positions at the dinner table — part of
-   the 50 people, never guest inventory, never selectable.
+   Nobody has a fixed position: the dinner is fifty bookable chairs at one
+   long table, and the couple hold two of them like every other guest.
 
    Until Guest Relations has configured the geometry and opened seating, the
    guest sees SEATING NOT OPEN YET, and this file draws nothing.
@@ -140,26 +140,21 @@
       }
 
       /* the long table, seen from above: TOP along the top, BOTTOM along the
-       * bottom, BRIDE and GROOM two fixed positions at the centre of the table
-       * itself — part of the 50 people, never guest inventory */
+       * bottom — fifty chairs, no fixed position for anyone */
       var sides = (v && v.dinner && v.dinner.sides) || { T: [], B: [] };
-      var top = sides.T || [], bottom = sides.B || [], fixed = (v && v.dinner && v.dinner.fixed) || ['BRIDE', 'GROOM'];
+      var top = sides.T || [], bottom = sides.B || [];
       var n = Math.max(top.length, bottom.length, 1), pad2 = 16, top2 = 40;
       var W2 = pad2 * 2 + n * U, tableH = 48, H2 = top2 + seat + G + tableH + G + seat + 44;
-      var total = top.length + bottom.length + fixed.length;
+      var total = top.length + bottom.length;
       var h2 = '<svg class="p-seatmap p-seatmap-table" viewBox="0 0 ' + W2 + ' ' + H2 + '" style="min-width:' + Math.round(W2 * 28 / seat) + 'px" role="group" aria-label="Wedding dinner, one long table, ' + total + ' people">';
       h2 += '<text x="' + pad2 + '" y="' + (top2 - 12) + '" ' + T + '>' + top.length + ' GUESTS · TOP</text>';
       top.forEach(function (s, j) { h2 += chair(s, pad2 + j * U + (U - seat) / 2, top2); });
       var ty = top2 + seat + G;
       h2 += '<rect x="' + pad2 + '" y="' + ty + '" width="' + (n * U) + '" height="' + tableH + '" rx="4" fill="#F3EEE7" stroke="#313131" stroke-width="1"/>';
-      var cx = pad2 + (n * U) / 2;
-      h2 += '<g class="fixed" aria-label="' + fixed.join(' and ') + ', fixed central positions">' +
-            '<text x="' + (cx - 30) + '" y="' + (ty + tableH / 2 + 3) + '" text-anchor="middle" ' + T + '>' + esc(fixed[0] || '') + '</text>' +
-            '<text x="' + (cx + 30) + '" y="' + (ty + tableH / 2 + 3) + '" text-anchor="middle" ' + T + '>' + esc(fixed[1] || '') + '</text>' +
-            '<line x1="' + cx + '" y1="' + (ty + 10) + '" x2="' + cx + '" y2="' + (ty + tableH - 10) + '" stroke="#DAD9D7"/></g>';
+      h2 += '<text x="' + (pad2 + (n * U) / 2) + '" y="' + (ty + tableH / 2 + 3) + '" text-anchor="middle" ' + T + '>ONE LONG TABLE</text>';
       bottom.forEach(function (s, j) { h2 += chair(s, pad2 + j * U + (U - seat) / 2, ty + tableH + G); });
       h2 += '<text x="' + pad2 + '" y="' + (H2 - 24) + '" ' + T + '>' + bottom.length + ' GUESTS · BOTTOM</text>' +
-            '<text x="' + pad2 + '" y="' + (H2 - 8) + '" ' + T + '>ONE LONG TABLE · ' + total + ' PEOPLE · ' + (top.length + bottom.length) + ' GUEST SEATS + ' + fixed.join(' + ') + '</text>';
+            '<text x="' + pad2 + '" y="' + (H2 - 8) + '" ' + T + '>ONE LONG TABLE · ' + total + ' PEOPLE · ' + total + ' GUEST SEATS</text>';
       return h2 + '</svg>';
     },
 

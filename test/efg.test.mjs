@@ -281,13 +281,16 @@ test('G · the geometry contract enforces the Owner geometry and refuses the ret
   assert.equal(new Set(c.map((s) => s.seatId)).size, 50, 'unique ids');
   assert.ok(c.every((s) => RULES.ceremony.id.test(s.seatId)), 'C-L-[ROW]-[SEAT] / C-R-[ROW]-[SEAT], rows 01–10');
   const d = seatsOf(ok.config, 'dinner');
-  assert.equal(d.length, 48, 'guest inventory 48');
-  assert.equal(d.filter((s) => s.side === 'T').length, 24, 'top 24');
-  assert.equal(d.filter((s) => s.side === 'B').length, 24, 'bottom 24');
-  assert.deepEqual(ok.config.dinner.fixed, ['BRIDE', 'GROOM'], 'Bride and Groom fixed');
+  /* Owner decision 13 Sep 2026: fifty bookable dinner chairs, nothing fixed for
+   * anyone — the couple hold two of the fifty like every other guest */
+  assert.equal(d.length, 50, 'guest inventory 50');
+  assert.equal(d.filter((s) => s.side === 'T').length, 25, 'top 25');
+  assert.equal(d.filter((s) => s.side === 'B').length, 25, 'bottom 25');
+  assert.equal(ok.config.dinner.fixed, undefined, 'no fixed position for anyone');
   assert.equal(ok.config.dinner.totalPeople, 50, 'represented total = 50 people');
-  assert.ok(d.every((s) => RULES.dinner.id.test(s.seatId)), 'D-T-01…24 / D-B-01…24');
-  assert.equal(CAPACITY.ceremony.guestSeats, 50); assert.equal(CAPACITY.dinner.guestSeats, 48); assert.equal(CAPACITY.dinner.totalPeople, 50);
+  assert.ok(d.every((s) => RULES.dinner.id.test(s.seatId)), 'D-T-01…25 / D-B-01…25');
+  assert.equal(CAPACITY.ceremony.guestSeats, 50); assert.equal(CAPACITY.dinner.guestSeats, 50); assert.equal(CAPACITY.dinner.totalPeople, 50);
+  assert.ok(!('fixed' in CAPACITY.dinner), 'the capacity contract knows no fixed chair');
   /* FAMILY ids are optional configuration — a plan without any is valid */
   const noFam = JSON.parse(JSON.stringify(SEAT_FIXTURE));
   noFam.ceremony.rows.forEach((r) => r.seats.forEach((s) => { s.family = false; }));
@@ -304,13 +307,16 @@ test('G · the geometry contract enforces the Owner geometry and refuses the ret
   assert.equal(validateGeometry(oldDinner).ok, false, 'the retired 20/20 L/R dinner is rejected');
   assert.match(validateGeometry(oldDinner).errors.join(' '), /retired L\/R model/);
   const short = JSON.parse(JSON.stringify(SEAT_FIXTURE)); short.dinner.sides.T.pop();
-  assert.match(validateGeometry(short).errors.join(' '), /top must hold 24/);
+  assert.match(validateGeometry(short).errors.join(' '), /top must hold 25/);
   const dup = JSON.parse(JSON.stringify(SEAT_FIXTURE)); dup.dinner.sides.B[1].seatId = dup.dinner.sides.B[0].seatId;
   assert.match(validateGeometry(dup).errors.join(' '), /duplicate/);
   const bad = JSON.parse(JSON.stringify(SEAT_FIXTURE)); bad.dinner.sides.T[0].seatId = 'D-T-1';
-  assert.match(validateGeometry(bad).errors.join(' '), /D-T-\[01–24\]/);
-  const extra = JSON.parse(JSON.stringify(SEAT_FIXTURE)); extra.dinner.sides.T.push({ seatId: 'D-T-25' });
-  assert.equal(validateGeometry(extra).ok, false, 'never 49, 50 or 52 selectable guest seats');
+  assert.match(validateGeometry(bad).errors.join(' '), /D-T-\[01–25\]/);
+  const extra = JSON.parse(JSON.stringify(SEAT_FIXTURE)); extra.dinner.sides.T.push({ seatId: 'D-T-26' });
+  assert.equal(validateGeometry(extra).ok, false, 'never 49, 51 or 52 guest seats — fifty, and only fifty');
+  /* the retired 24 + 24 (+ two fixed) dinner is rejected as well */
+  const old48 = JSON.parse(JSON.stringify(SEAT_FIXTURE)); old48.dinner.sides.T.pop(); old48.dinner.sides.B.pop();
+  assert.equal(validateGeometry(old48).ok, false, 'the retired 48 + BRIDE + GROOM dinner is rejected');
 });
 
 test('G · production ships no geometry: unconfigured, not open, NOT OPEN YET', async () => {
@@ -319,7 +325,7 @@ test('G · production ships no geometry: unconfigured, not open, NOT OPEN YET', 
   assert.deepEqual([v.open, v.frozen, v.configured.ceremony, v.configured.dinner, v.ceremony, v.dinner], [false, false, false, false, null, null]);
   const s = await call(l, 'select', { invitationId: 'INV-002', guestId: PEGGY, event: 'ceremony', seatId: 'C-L-01-01' });
   assert.equal(s.status, 423);
-  assert.deepEqual(JSON.parse(JSON.stringify(v.capacity)), { ceremony: { guestSeats: 50, left: 20, right: 30 }, dinner: { guestSeats: 48, top: 24, bottom: 24, fixed: 2, totalPeople: 50 } }, 'the capacity contract is the Owner geometry even before configuration');
+  assert.deepEqual(JSON.parse(JSON.stringify(v.capacity)), { ceremony: { guestSeats: 50, left: 20, right: 30 }, dinner: { guestSeats: 50, top: 25, bottom: 25, totalPeople: 50 } }, 'the capacity contract is the Owner geometry even before configuration');
   for (const f of ['assets/seating.js', 'src/seating.js', 'wedding-preparation.html', 'src/worker.js']) {
     assert.doesNotMatch(src(f), /seatId:\s*'[CD]-[LRTB]-\d|'C-[LR]-\d+-\d+'|'D-[LRTB]-\d+'/, f + ' carries a floor plan of its own');
     assert.doesNotMatch(src(f), /40 guest|20 \+ 20|34 selectable|perSide: 20/, f + ' still carries the retired 40-seat truth');
@@ -362,8 +368,8 @@ test('G · a seat belongs to a named guest; the new chair is held before the old
   assert.equal(r.ok, true);
   const mine = await call(l, 'mine', null, { q: '?invitation=INV-002' });
   assert.deepEqual(JSON.parse(JSON.stringify(mine.mine)), { ceremony: { [PEGGY]: free[1] }, dinner: { [PEGGY]: 'D-T-04' } });
-  /* Bride and Groom are not guest ids: they can never be selected */
-  for (const id of ['BRIDE', 'GROOM', 'D-BRIDE', 'D-T-25']) {
+  /* there is no Bride/Groom chair id — the couple book ordinary chairs; ids outside the fifty do not exist */
+  for (const id of ['BRIDE', 'GROOM', 'D-BRIDE', 'D-T-26', 'D-B-00']) {
     const rr = await call(l, 'select', { invitationId: 'INV-002', guestId: STEFFIE, event: 'dinner', seatId: id });
     assert.equal(rr.status, 404, id + ' is not a guest seat');
   }
@@ -381,10 +387,10 @@ test('G · a seat belongs to a named guest; the new chair is held before the old
   assert.equal(plan.events.ceremony.allocated, 1);
   assert.equal(plan.events.ceremony.available, 42);
   assert.equal(plan.events.ceremony.seats.find((s) => s.seatId === free[3]).guestId, STEFFIE);
-  /* operations output: GUEST SEATS · 48 and TOTAL PEOPLE · 50, Bride and Groom separate, never unassigned guests */
-  assert.equal(plan.events.dinner.guestSeats, 48);
-  assert.equal(plan.events.dinner.seats.length, 48);
-  assert.deepEqual(JSON.parse(JSON.stringify(plan.events.dinner.capacity)), { guestSeats: 48, top: 24, bottom: 24, fixed: ['BRIDE', 'GROOM'], totalPeople: 50 });
+  /* operations output: GUEST SEATS · 50 = TOTAL PEOPLE · 50, no separate fixed positions */
+  assert.equal(plan.events.dinner.guestSeats, 50);
+  assert.equal(plan.events.dinner.seats.length, 50);
+  assert.deepEqual(JSON.parse(JSON.stringify(plan.events.dinner.capacity)), { guestSeats: 50, top: 25, bottom: 25, totalPeople: 50 });
   assert.ok(!plan.events.dinner.seats.some((s) => /BRIDE|GROOM/.test(s.seatId)));
 });
 
@@ -403,12 +409,11 @@ test('G · the renderer draws only what it is given: rows facing the ceremony, o
   /* ten rows, numbered, the asymmetry kept: the right block is wider than the left */
   for (let r = 1; r <= 10; r++) assert.match(c, new RegExp('>' + r + '</text>'));
   const d = S.svg('dinner', view, { guestId: STEFFIE, selectable: true });
-  assert.equal((d.match(/<g class="seat/g) || []).length, 48, 'exactly 48 guest seat boxes');
+  assert.equal((d.match(/<g class="seat/g) || []).length, 50, 'exactly 50 guest seat boxes');
   assert.equal((d.match(/seat-taken/g) || []).length, 1);
-  assert.match(d, />BRIDE</); assert.match(d, />GROOM</);
-  assert.match(d, />24 GUESTS · TOP</); assert.match(d, />24 GUESTS · BOTTOM</); assert.match(d, /50 PEOPLE/);
-  assert.ok(!/data-seat="(BRIDE|GROOM)"/.test(d), 'Bride and Groom are never selectable boxes');
-  assert.equal((d.match(/role="button"/g) || []).length, 41);
+  assert.doesNotMatch(d, /BRIDE|GROOM|fixed/, 'no fixed position is drawn for anyone');
+  assert.match(d, />25 GUESTS · TOP</); assert.match(d, />25 GUESTS · BOTTOM</); assert.match(d, /50 PEOPLE · 50 GUEST SEATS/);
+  assert.equal((d.match(/role="button"/g) || []).length, 43);
   /* nothing drawn without configuration */
   assert.equal((S.svg('ceremony', { ceremony: null }, {}).match(/<g class="seat/g) || []).length, 0);
   /* states are said in words, never colour alone */
