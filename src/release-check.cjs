@@ -234,6 +234,19 @@ gate('P3', 'MASTER-02 programme truth (four events, no active Alms, no pool in v
     bad.push('the Buddhist morning must sit inside the Temple Ceremony, in order');
   if (/Alms Giving/i.test(vy)) bad.push('"Alms Giving" must not surface as an event name');
   if (/USD 15[^<]{0,60}(alms|Tak Bat)/i.test(vy)) bad.push('the alms-giving of food must never carry a price');
+  /* TAK BAT IS SELF-PAY (Owner correction 10 Sep 2026, applied 11 Sep at 91c52ad,
+   * re-affirmed as a post-release rule 13 Sep): on every guest-facing surface the
+   * alms-giving is never "no charge", "nothing to pay", "no separate charge",
+   * "complimentary" or "included" — the guest covers their own offering. */
+  const TAKBAT_FREE = /(no charge|nothing to pay|no separate charge|nothing is paid|complimentary|included at no|free of charge|at no cost)/i;
+  for (const f of ['voyage.html', 'wedding.html', 'your-journey.html', 'review.html', 'journeys.html', 'index.html', 'assets/journey.js', 'assets/temple.js']) {
+    const src = read(f);
+    const re = /(Tak Bat|alms-giving|alms giving)/gi; let m;
+    while ((m = re.exec(src))) {
+      const window = src.slice(Math.max(0, m.index - 140), m.index + 140);
+      if (TAKBAT_FREE.test(window) && !/self-pay/i.test(window)) { bad.push(f + ': the alms-giving reads as free of charge near "' + window.replace(/\s+/g, ' ').slice(0, 80) + '…"'); break; }
+    }
+  }
   if (/pool/i.test(vy)) bad.push('no pool narrative on the wedding page');
   if (/052-temple-ceremony-bride/.test(vy)) bad.push('the retired bride photograph is still on the page');
   if (/053-wedding-dinner-courtyard-garden/.test(vy)) bad.push('the fountain photograph is still the wedding dinner image');

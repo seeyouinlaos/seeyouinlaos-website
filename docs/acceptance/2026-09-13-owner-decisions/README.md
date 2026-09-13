@@ -180,3 +180,29 @@ for several minutes before propagating; after 0b8ff2d the new files were served 
 probe. Versions: `f63ff143` (7431761) · `88beab8e` (d6d77fd) · `97f05843` (95bdf7e) ·
 `314928b6` (0b8ff2d) · `7cdb5bd5` (84f1de7) · **`bf286abb` (72d9e15)** · one more for each later docs-only push. The technical clean-up
 (one deploy path) is deferred to a later, separate decision.
+
+## Post-release factual check — Tak Bat payment logic (13 Sep 2026)
+
+The Owner's 10 Sep correction (**Morning Alms-Giving · Tak Bat = SELF-PAY**; never "no
+charge", "nothing to pay", "no separate charge", "complimentary" or "included") was applied on
+11 Sep in the Haruthai correction pass (`91c52ad`) and is what the released state serves. The
+10 Sep screenshots show the state that pass replaced. Verified again on production (INV-002,
+Worker origin) after the release; exact wording per surface:
+
+| Surface | Wording now |
+|---|---|
+| Your Journey (02) — hosted wedding block | "Hosted by Haruthai & Suthep. The morning alms-giving inside the Temple Ceremony, Tak Bat, is self-pay." |
+| The Wedding (03) — Temple Ceremony | "…invited to take part in the traditional morning alms-giving, Tak Bat — food respectfully offered to the monks; self-pay, arranged by each guest on the morning." |
+| Tak Bat drawer | "It is part of the Temple Ceremony, and it is self-pay: the small offering of food is arranged and paid for by each guest on the morning itself. No amount is set on this website, and it is not the Sangkhathan." |
+| Sangkhathan drawer | "It is not the alms-giving. Tak Bat is the food offered during the ceremony, arranged and paid for by each guest themselves (self-pay); the Sangkhathan is separate, optional, and nobody needs one in order to attend." |
+| Review & Send (06) — §03 | "…four events. Hosted by Haruthai & Suthep. The morning alms-giving, Tak Bat, is self-pay. Your optional personal addition, the Sangkhathan, is USD 15 per selected guest — never the alms-giving and never a temple fee." |
+| Sent journey text | "Morning alms-giving (Tak Bat): part of the Temple Ceremony for everyone joining it, self-pay (no amount set)" · "Note: Tak Bat (morning alms-giving) is part of the Temple Ceremony and is self-pay. The Sangkhathan is a separate optional personal offering." · programme line "…OPTIONAL PARTICIPATION — SELF-PAY." |
+| Public wedding page (voyage.html) | "It is self-pay: each guest arranges their own small offering of food on the morning itself. No amount is set here." · eyebrow "Part of the Temple Ceremony · self-pay" |
+
+No guest-facing text changed. Hardened instead: gate **P8** now fails if any guest-facing file
+carries "no charge / nothing to pay / no separate charge / nothing is paid / complimentary /
+included at no / free of charge / at no cost" within 140 characters of "Tak Bat" or
+"alms-giving" without "self-pay" beside it (negative-tested: re-inserting the old wording fails
+the gate). The dictionary entries in `assets/i18n/` about a hosted dawn alms-giving belong to the
+retired pages and appear on no active surface. The Haruthai walk's dinner-placeholder pin, which
+the Owner's Wedding Dinner decision had superseded, now asserts the image set (24/24).

@@ -45,12 +45,16 @@ async function allWidths(file, name, crops = [], before = null) {
 /* ------------------------------------------------ 1 + 2 · the public wedding page */
 await allWidths('voyage.html', 'H1-voyage', [['#dinner', 'H1-dinner'], ['#the-stay-room', 'H1-stay-room'], ['#takbat', 'H1-takbat']]);
 const vy = await text('main, body');
-note('H1 dinner placeholder, no lounge chairs', (await page.locator('#dinner .am-placeholder').count()) === 1 && !/garden-terrace|sharing-menu/.test(await page.content()), 'placeholder present · retired images absent');
+/* Owner decision 13 Sep 2026 supersedes the placeholder of this pass: the
+   Wedding Dinner carries the Owner's own image set (folder 056), several
+   images, no placeholder — the retired fountain file stays gone */
+const dinnerImgs = (await page.content()).match(/053-wedding-dinner-[a-z-]+\.jpg/g) || [];
+note('H1 dinner carries the Owner image set', (await page.locator('#dinner .am-placeholder').count()) === 0 && new Set(dinnerImgs).size >= 4 && !/053-wedding-dinner-courtyard-garden\.jpg/.test(await page.content()), new Set(dinnerImgs).size + ' images from the Owner set · no placeholder · fountain gone');
 note('H1 stay shown as a room', /souphattra\/heritage-room\.jpg/.test(await page.content()) && (await page.locator('a[href="#dinner-table"]').count()) === 0, 'heritage-room band · "See the table" gone');
 const tb = await text('#takbat'), sk = await text('#sangkhathan-about');
 note('H1 Tak Bat self-pay, no amount', /self-pay/i.test(tb) && !/no charge|nothing to pay|no separate charge/i.test(vy) && !/USD/i.test(tb) && /Sangkhathan · Optional · USD 15 per guest/i.test(sk), 'Tak Bat section: self-pay, no amount · the USD 15 carries the Sangkhathan name');
-const ph = await page.evaluate(() => { const e = document.querySelector('#dinner .am-placeholder'); const r = e.getBoundingClientRect(); return { w: Math.round(r.width), h: Math.round(r.height) }; });
-note('H1 placeholder has a real box', ph.w > 200 && ph.h > 120, JSON.stringify(ph));
+const ph = await page.evaluate(() => { const e = document.querySelector('#dinner .am'); const r = e.getBoundingClientRect(); return { w: Math.round(r.width), h: Math.round(r.height) }; });
+note('H1 dinner lead image has a real box', ph.w > 200 && ph.h > 120, JSON.stringify(ph));
 
 /* ------------------------------------------------ open the party as Peggy */
 await go('invitation.html', 390);
