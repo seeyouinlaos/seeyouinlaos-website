@@ -376,10 +376,19 @@
     /* the step arrives: one quiet entrance, from where the guest expects it —
      * the top of the step; a hash deep link keeps its own target */
     window.requestAnimationFrame(function () { window.requestAnimationFrame(function () { document.body.classList.add('p-in'); settleFragment(); }); });
-    /* pages that render their sections after the party is known settle once more */
+    /* pages that render their sections after the party is known settle once
+     * more — and for a short while after arrival the fragment holds its place
+     * whenever the layout above it grows (a slower origin renders the personal
+     * sections later), unless the guest has already started to scroll */
     var settled = 0; var late = function () { if (settled++ < 2) window.requestAnimationFrame(settleFragment); };
     document.addEventListener('siyl:invite-ready', late);
     window.addEventListener('load', late);
+    if (location.hash && window.ResizeObserver) {
+      var until = Date.now() + 3000, moved = false, mark = function () { moved = true; };
+      ['wheel', 'touchmove', 'keydown', 'pointerdown'].forEach(function (ev) { window.addEventListener(ev, mark, { passive: true, once: true }); });
+      var ro = new ResizeObserver(function () { if (moved || Date.now() > until) { ro.disconnect(); return; } settleFragment(); });
+      ro.observe(document.body);
+    }
     /* coming back (bfcache, history) the page is whole again and the index closed */
     window.addEventListener('pageshow', function (e) {
       document.body.classList.remove('p-leave'); leaving = false;
