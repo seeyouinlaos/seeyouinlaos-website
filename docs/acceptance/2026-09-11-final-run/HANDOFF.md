@@ -5,6 +5,10 @@ This file, `README.md` beside it, and the project memory
 authoritative state. A fresh session continues from these three files and the repository HEAD —
 never from an earlier conversation.
 
+> **13 Sep 2026 · continuation complete.** The two open items are closed; the gate is BLOCKED on
+> deployment alone. Read `FINAL-REPORT.md` first — it supersedes the "Remaining work" list below,
+> which is now the Owner-machine sequence.
+
 ## Secured state
 - Repository HEAD: **2218221** (main, pushed). Working tree clean.
 - Production: Cloudflare Worker version **07d8374c-6033-4b7d-bcdb-34d288000a5e** · GitHub Pages
@@ -31,19 +35,45 @@ owner data.
 | 001 technical/product | PASS | none (LOW items recorded as baseline) |
 | 002 rendered UX | PASS | 4 LOW → fixed at 2218221 (drawer aria-label, review/you column, ≥10px labels on dress/transport, neutral draft sections once confirmed) — not yet re-checked by 002 |
 | 004 first-time guest | PASS | 4 LOW → fixed at 2218221 (journey.js on every step, snapshot covers profile/consent/documents, hold wording, contact gate proven) — not yet re-checked by 004 |
-| 007 confirmation/identity | FAIL (1 MEDIUM) | fixed at 2218221: the SENT snapshot counts only when `snap.at === receivedAt`; superseded device shows "sent again from another device after this one" with no cards; received state names a newer send. Walk checks "11b …" cover it (77/77). **Targeted 007 re-check pending.** |
-| Adversarial review | not delivered (rate-limited twice) | **pending** |
+| 007 confirmation/identity | FAIL (1 MEDIUM) at d4a4518 | fixed at 2218221; **re-checked 13 Sep 2026 · PASS** (5 checks, `FINAL-REPORT.md` §7) |
+| Adversarial review | **delivered 13 Sep 2026** | 2 findings, both fixed on this branch (§10–§12) |
 
-## Remaining work (in this order, one model stream at a time)
-1. Targeted 007 re-check of the supersession fix (3–5 checks: two-sender scenario on the local
-   server with the mock, received-superseded notice, normal send→confirmed cards, hygiene grep).
-   Reviewer reads `release-walk-results.json` first; direct reproduction only for the two-sender case.
-2. Adversarial review (single agent, reads the JSON results, opens ≤8 frames, reproduces only what a
-   credible finding needs).
-3. Fix only genuine findings; targeted regression (affected script only); commit; deploy both
-   origins; parity; docs.
-4. Final consolidated report in the 29-section format ending in
-   `FINAL PRE-RELEASE GATE · PASS` or `· BLOCKED`. Then STOP — final Owner release stays ON HOLD.
+## State after the continuation session (13 Sep 2026)
+Branch `claude/002-final-run-continuation-5ellm7` carries one commit on top of 7796f7c:
+`review.html` (the fix), `test/efg.test.mjs` (the guarantee pinned), `supersession-state-table.mjs`
++ its results JSON, and this directory's docs. `main` is untouched.
+
+The adversarial review found two genuine defects in the confirmation surface the round-2 fix had
+just touched, both of the 007 family — the page stating what the record does not say:
+1. a second device was named where `/api/status` carries no submission stamp at all (the email
+   backup channel reaches Guest Relations without a `reg:` record, and Guest Relations then
+   confirms on `conf:` alone);
+2. supersession was decided by difference between the two stamps rather than by order, so an
+   eventually consistent KV read or a clock behind this one could announce an earlier send as
+   the replacement of a later one.
+Both are fixed in one edit to `paintState`. The confirmed-cards path is unchanged: cards still
+require an exact stamp match. Only the wording on the paths that previously guessed differs.
+
+Verified here: `supersession-state-table.mjs` 8/8 · `npm test` 205/206 (the one failure is the
+gitignored `src/guestlist.private.json`, absent in a fresh clone; 206/206 where it exists) ·
+`npm run release-check` all gates PASS · inline script parses clean · the three release-walk
+regexes that assert this wording remain satisfied.
+
+Not executable in that session, and deferred to the Owner machine: `release-walk.mjs`,
+`a11y.mjs`, `crawl.mjs`, `smoke.mjs` and any deploy — the private token register and guest list
+are (correctly) gitignored and absent, Playwright is not installed, and there are no Cloudflare
+credentials.
+
+## Remaining work — Owner machine, in this order
+1. Merge the branch into `main`.
+2. `npm test` (206/206) · `npm run release-check` (all PASS) ·
+   `node docs/acceptance/2026-09-11-final-run/supersession-state-table.mjs` (8/8).
+3. `release-walk.mjs` (77/77) · `a11y.mjs` (18/18) — watch the three wording assertions in
+   `FINAL-REPORT.md` §14.
+4. Deploy the Worker, let Pages build, then `crawl.mjs` + `smoke.mjs` on both origins and the
+   50/50 byte-identical parity check.
+5. `FINAL PRE-RELEASE GATE · BLOCKED` stands until step 4 is proven. Final Owner release stays
+   ON HOLD either way.
 
 ## Usage controls in force (Owner authorisation 13 Sep 2026)
 A one reviewer at a time, targeted re-checks (≤5 checks, ≤8 frame opens), never relaunch after a

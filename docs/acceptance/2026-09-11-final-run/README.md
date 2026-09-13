@@ -7,6 +7,7 @@ Baseline: A–G accepted, Haruthai correction pass accepted (91c52ad). This run 
 - `a11y.mjs` — keyboard, focus, ESC, labels, aria-expanded, contrast, 44px, text resize, reduced motion: 18/18.
 - `crawl.mjs` — rendered link/asset crawl of 20 guest-facing pages on local, Worker and Pages: 0 HTTP failures, 0 console errors on production, resort-01 never requested.
 - `smoke.mjs` — read-only production smoke on both origins (sign-in, real status, seating closed, Sangkhathan withheld, CORS, no writes): 8/8 each.
+- `supersession-state-table.mjs` — F · what a CONFIRMED journey may claim, taken apart: the predicates are extracted verbatim from the shipped `review.html` and driven through every state the record can be in, including the two a browser walk reaches only with difficulty (no submission stamp on the record; a record read back older than this device's own send). No browser, no server, no guest code: 8/8.
 - Regression: C walk 39/39 · D walk 39/39 · E/F/G walk 37/37 · Haruthai walk 24/24 · `npm test` 206/206 · release gates all PASS.
 
 ## Corrections made in this run
@@ -16,7 +17,9 @@ Reviewer round 1 (001 technical · 002 rendered UX · 004 first-time guest · 00
 
 Production ledger: REG_KV cleaned of every acceptance registration (six `reg:INV-002*` from the old journey-shop channel, four fixture ids) and of this run's `conf:INV-002` test history. INV-002 reads `received:false, confirmed:false`. Inventory holds are only the intended Family / Bride & Groom reservations.
 
-Reviewer round 2 (at d4a4518): 001 PASS · 002 PASS (4 LOW) · 004 PASS (4 LOW) · 007 FAIL (1 MEDIUM: a superseded local snapshot shown as confirmed). All nine items fixed at 2218221 (snapshot valid only when its stamp equals the server's receivedAt; journey.js on every step; drawer aria-label; review/you column; ≥10px labels; neutral draft sections once confirmed; snapshot covers profile/consent/documents; hold wording). 007 targeted re-check and the adversarial review are pending.
+Reviewer round 2 (at d4a4518): 001 PASS · 002 PASS (4 LOW) · 004 PASS (4 LOW) · 007 FAIL (1 MEDIUM: a superseded local snapshot shown as confirmed). All nine items fixed at 2218221 (snapshot valid only when its stamp equals the server's receivedAt; journey.js on every step; drawer aria-label; review/you column; ≥10px labels; neutral draft sections once confirmed; snapshot covers profile/consent/documents; hold wording).
+
+007 targeted re-check (5 checks) and the adversarial review (one serial stream, 0 frames) are delivered — `FINAL-REPORT.md`. 007 PASS: the MEDIUM is closed. The adversarial review found two genuine defects in the same confirmation surface, both fixed in one edit to `review.html`: a second device was named where the record carries no submission stamp at all (the email backup channel reaches Guest Relations without a `reg:` record), and supersession was decided by difference between the two stamps rather than by order, so an eventually consistent read or a clock behind this one could announce an earlier send as the replacement of a later one. The guarantee is pinned in `test/efg.test.mjs`; `supersession-state-table.mjs` (new, browser-free, predicates extracted from the shipped file) covers eight states 8/8. The fix is on `claude/002-final-run-continuation-5ellm7` and is NOT deployed: the gate is BLOCKED on that deployment alone.
 
 ## Known authoritative data pending (not release failures)
 - Sangkhathan `givingEligibility` (PAIR/NONE) per invitation — all unresolved, action withheld.

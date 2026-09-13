@@ -1,0 +1,46 @@
+{
+ "source": "review.html",
+ "at": "2026-09-13T02:52:33.311Z",
+ "results": [
+  {
+   "id": "walk 11b · this device holds the version Guest Relations holds",
+   "ok": true,
+   "detail": "the confirmed journey is painted from this device's snapshot"
+  },
+  {
+   "id": "walk 11b · a later send from another device supersedes this one",
+   "ok": true,
+   "detail": "The details Guest Relations confirmed were sent again from another device after this one, so they are not shown here."
+  },
+  {
+   "id": "walk 11 · nothing was ever sent from this device",
+   "ok": true,
+   "detail": "The details Guest Relations confirmed were sent from another device, so they are not shown here."
+  },
+  {
+   "id": "no stamp on the record (email backup channel), this device did send",
+   "ok": true,
+   "detail": "What Guest Relations confirmed is not shown here: this device cannot tell which version it was."
+  },
+  {
+   "id": "no stamp on the record, nothing sent from this device either",
+   "ok": true,
+   "detail": "What Guest Relations confirmed is not shown here: this device cannot tell which version it was."
+  },
+  {
+   "id": "the record reads OLDER than this device's own send",
+   "ok": true,
+   "detail": "What Guest Relations confirmed is not shown here: this device cannot tell which version it was."
+  },
+  {
+   "id": "a snapshot left by a different invitation is not this party's",
+   "ok": true,
+   "detail": "The details Guest Relations confirmed were sent from another device, so they are not shown here."
+  },
+  {
+   "id": "a snapshot without a stamp cannot be the confirmed version",
+   "ok": true,
+   "detail": "The details Guest Relations confirmed were sent from another device, so they are not shown here."
+  }
+ ]
+}
