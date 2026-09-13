@@ -49,7 +49,7 @@ OK   invitation.html 9d6994c02de9
 OK   journeys.html 8b74061b76b3
 OK   marsilea.html 628dca6c3ccc
 OK   register/crypto.mjs 6cfe9dbe5c79
-OK   register/invitations.enc.json 801982a83cc4
+OK   register/invitations.enc.json 10644821038d
 OK   review.html c9c052921720
 OK   room.html 621c327a5ff0
 OK   tea.html 0c1c4df005bc
