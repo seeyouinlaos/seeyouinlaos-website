@@ -31,7 +31,7 @@ const maps = await p.locator('#seats svg.p-seatmap').count();
 const chairs = await p.locator('#seats svg.p-seatmap g.seat').count();
 const family = await p.locator('#seats svg.p-seatmap g.seat-family').count();
 const nofixed = (await p.locator('#seats svg.p-seatmap g.fixed').count()) === 0 && !/BRIDE|GROOM/.test(await p.locator('#seats').evaluate((e) => e.textContent));
-note('seating open', /seating is open/i.test(seats) && maps === 2 && chairs === 100 && family === 0 && nofixed && !/Reserved · family/i.test(seats), 'production: ' + maps + ' plans · ' + chairs + ' chairs (50 + 50) · family chairs ' + family + ' · nothing fixed + ' · ' + seats.slice(0, 60));
+note('seating open', /seating is open/i.test(seats) && maps === 2 && chairs === 100 && family === 0 && nofixed && !/Reserved · family/i.test(seats), 'production: ' + maps + ' plans · ' + chairs + ' chairs (50 + 50) · family chairs ' + family + ' · nothing fixed · ' + seats.slice(0, 60));
 await p.goto(ORIGIN + '/wedding.html', { waitUntil: 'networkidle' }); await p.waitForTimeout(600);
 const sang = (await p.locator('#sangkhathan').innerText()).replace(/\s+/g, ' ');
 note('sangkhathan withheld', (await p.locator('#sangkhathan [data-off]').count()) === 0 && !/USD 30/.test(sang), sang.slice(0, 100));
