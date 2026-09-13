@@ -19,7 +19,7 @@ PASS 03 chronology — 01 · 21 – 24 FEB | 02 · 24 – 25 FEB | 03 · 25 – 
 PASS 03 bangkok replaced not duplicated — one Bangkok line after two choices
 PASS 03 mu9646 one fare — business after economy → one line USD 275
 PASS 03 mu9646 truth — 05 · 01 MAR Vientiane → Kunming Transportation TRANSPORTATION · CHINA EASTERN AIRLINES MU9646 · Vientiane → Kunming 01 March 2027 · non-stop 15:50 VTE · TERMINAL 1 18:25 KMG 1h 35m · non-stop · Boeing
-PASS 03 c86 truth — 07 · 04 MAR Kunming → Lijiang Transportation SELECTED FOR YOUR JOURNEY C86 · Kunming → Lijiang 04 March 2027 · Kunming → Lijiang 10:15 KUNMING 13:44 LIJIANG 3h 29m · direct · Business Class · 1 + 1 se
+PASS 03 c86 truth — 07 · 04 MAR Kunming → Lijiang Transportation SELECTED FOR YOUR JOURNEY C86 · Kunming → Lijiang 04 March 2027 · Kunming → Lijiang 10:15 KUNMING 13:44 LIJIANG 3h 29m · direct · Business Class Snacks and
 PASS 03 train stage — 02 · 24 – 25 FEB Bangkok → Vientiane Transportation TRANSPORTATION · STATE RAILWAY OF THAILAND Special Express No. 25 24 – 25 February 2027 · Bangkok → Nong Kha
 PASS 04 four events — exactly four
 PASS 04 temple truth — date · time · place
@@ -42,6 +42,12 @@ PASS 06 peggy record — profile in Peggy's record; consent stored for Peggy onl
 PASS 06 deep link answering for — subject = Steffie, her consent not answerable by Peggy
 PASS 06 proxy ownership — Steffie's dietary signed by Peggy; Peggy's drink untouched
 PASS 06 switch ≠ answering for — activeGuestId still Peggy after the deep link
+PASS 06 access required blocks the send — review names the missing answers: BEFORE YOU SEND A few things are still needed Required items cannot be answered for you afterwards; everything marked op
+PASS 06 access deep link lands on the field — section below the bar, textarea focused
+PASS 06 whitespace is not an answer — blank stays Required
+PASS 06 "None" is an answer — Peggy answered · step 05 still waits for Steffie
+PASS 06 each guest answers for themselves — Steffie's field is empty although Peggy answered hers
+PASS 06 step 05 complete only with both — two independent answers · step 05 Completed
 PASS 07 review hierarchy — five blocks
 PASS 07 status only — no controls, no gallery
 PASS 07 costs once, no checkout — USD 480 · says nothing is paid here
@@ -49,7 +55,7 @@ PASS 07 shared once — 3 lines = bag
 PASS 07 not sent — send available, no state card
 PASS 07 send payload — one party record with both guests, no code inside
 PASS 07 received — received ≠ confirmed; a correction can still be sent (send stays available until Guest Relations confirms)
-PASS 07 shell received — step 06 reads Received from another step · 01 Your Invitation OPEN 02 Your Journey CURRENT 03 The Wedding COMPLETE 04 Wedding Preparation COMPLETE 05 About You COMPLETE 06 Review & Send RECEIVED
+PASS 07 shell received — step 06 reads Received from another step · 01 Your Invitation OPEN 02 Your Journey CURRENT 03 The Wedding COMPLETE 04 Wedding Preparation COMPLETE 05 About You COMPLETE 06 Review & Send RECEIVED INV-002 · PEGGY & STEFFIE OPEN ANOTHER INVITATIO
 PASS 07b changed since sending — the guest is told to send again
 PASS 07b back in step, no notice — restoring the sent answer clears the notice
 PASS 08 reload — identity, record and status survive reload
@@ -74,7 +80,7 @@ PASS 11b superseded snapshot never shown as confirmed — Peggy's device shows t
 PASS 11b latest sender sees the confirmed journey — Steffie's device paints block A and both cards from the version Guest Relations holds
 PASS 12 stale session — a session without names is not trusted; the guest is asked for the code again
 PASS 12 re-entry keeps record — answers survive re-entry
-PASS 13 review deep links — 22 edit links resolve while signed in
+PASS 13 review deep links — 21 edit links resolve while signed in
 PASS 13 wedding deep link for — subject via ?for=
 
-78/78 checks pass · page errors: 0 · console errors: 0
+84/84 checks pass · page errors: 0 · console errors: 0

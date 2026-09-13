@@ -247,7 +247,11 @@ gate('P3', 'MASTER-02 programme truth (four events, no active Alms, no pool in v
       if (TAKBAT_FREE.test(window) && !/self-pay/i.test(window)) { bad.push(f + ': the alms-giving reads as free of charge near "' + window.replace(/\s+/g, ' ').slice(0, 80) + '…"'); break; }
     }
   }
-  if (/pool/i.test(vy)) bad.push('no pool narrative on the wedding page');
+  /* Owner 13 Sep 2026: the Wedding Dinner is POOLSIDE; the pool stays out of the vow ceremony only */
+  const vowSec = vy.slice(vy.indexOf('id="vows"'), vy.indexOf('id="vows"') + 700);
+  if (/pool/i.test(vowSec)) bad.push('no pool narrative in the vow ceremony');
+  if (/courtyard garden/i.test(vy)) bad.push('the Wedding Dinner is poolside, never "courtyard garden"');
+  if (!/19:30 · Poolside/.test(vy)) bad.push('the Wedding Dinner must say Poolside');
   if (/052-temple-ceremony-bride/.test(vy)) bad.push('the retired bride photograph is still on the page');
   if (/053-wedding-dinner-courtyard-garden/.test(vy)) bad.push('the fountain photograph is still the wedding dinner image');
   /* participation is an explicit two-way decision for EVERY active event —
@@ -262,7 +266,7 @@ gate('P3', 'MASTER-02 programme truth (four events, no active Alms, no pool in v
     bad.length === 0,
     bad.length ? bad.join(' · ')
       : 'four events; Tak Bat and Sangkhathan sit inside the Temple Ceremony; alms-giving unpriced; ' +
-        'only the Sangkhathan is USD 15; no pool narrative; retired bride and fountain images removed');
+        'only the Sangkhathan is USD 15; dinner poolside, vow pool-free; retired bride and fountain images removed');
 }
 
 /* P9 — C · PARTY / PERSON STATE SEPARATION. The model classifies every piece
@@ -334,7 +338,7 @@ gate('P3', 'MASTER-02 programme truth (four events, no active Alms, no pool in v
   if (!/new_sqlite_classes": \["Seating"\]/.test(read('wrangler.jsonc'))) bad.push('the seating object is not migrated');
   /* the Owner geometry: ceremony 50 guest seats (20 + 30); dinner 50 bookable chairs (25 + 25), nothing fixed for anyone (Owner decision 13 Sep 2026 — no Bride/Groom position, no family chair); the retired 40 / 20+20 truth must not be active */
   const led = read('src/seating.js');
-  if (!/guestSeats: 50, left: 20, right: 30/.test(led) || !/guestSeats: 50, top: 25, bottom: 25, totalPeople: 50/.test(led) || /fixed: \['BRIDE', 'GROOM'\]/.test(led)) bad.push('the seating capacity contract is not the Owner geometry');
+  if (!/guestSeats: 50, left: 20, right: 30, fixed: 2/.test(led) || !/ceremony: \{ rows: 10, perRow: \{ L: 2, R: 3 \}, guestSeats: 50, fixed: \['BRIDE', 'GROOM'\]/.test(led) || !/guestSeats: 50, top: 25, bottom: 25, totalPeople: 50/.test(led) || /dinner:\s*\{[^}]*fixed:/.test(led)) bad.push('the seating capacity contract is not the Owner geometry (ceremony 50 + BRIDE/GROOM front centre; dinner 50 bookable, nothing fixed)');
   if (/perSide: 20|40 guest|20 \+ 20|34 selectable/.test(led + read('assets/seating.js'))) bad.push('retired 40-seat truth is still active');
   gate('P11', 'E/F/G: explicit eligibility, protected confirmation, geometry-free seating ledger',
     bad.length === 0, bad.length ? bad.join(' · ') : 'PAIR/NONE/unresolved only · GR token gate with constant-time compare · no geometry in code · token never in assets or git');
@@ -361,15 +365,21 @@ const activeSurfaces = fs.readdirSync(ROOT).filter((f) => /\.html$/.test(f) && f
   + fs.readdirSync(path.join(ROOT, 'assets')).filter((f) => /\.(js|mjs|css)$/.test(f)).map((f) => read('assets/' + f)).join('\n');
 const venueHit = /Souphattra Vientiane Hotel/.test(activeSurfaces);
 const mealHit = /hot meal|dinner window|17:30 – 19:00/i.test(activeSurfaces);
+/* Owner corrections 13 Sep 2026 (guest testing): no blue dress requirement — the temple
+ * is "Lao Traditional Dress"; C86 Business Class carries no 1 + 1 seating claim */
+const blueHit = /Blue Lao Traditional Dress|Lao Traditional Dress · Blue|dressed in Lao tradition, in blue/i.test(activeSurfaces);
+const onePlusOneHit = /1 \+ 1 seating|1\+1 seating|single seat on each side of the aisle|nobody sits beside/i.test(activeSurfaces);
 const exclusiveHit = /Heritage Exclusive/i.test(indexHtml) || /Heritage Exclusive/i.test(appJs) || /Heritage Exclusive/i.test(data) || /Heritage Exclusive/i.test(regHtml);
 const noRoomHit = /No room needed/i.test(appJs) || /No room needed/i.test(regHtml);
 const train88 = /contributionPerGuest: 75/.test(data);
 gate('P4', 'Wording and product guards',
-  !exclusiveHit && !noRoomHit && train88 && !venueHit && !mealHit,
+  !exclusiveHit && !noRoomHit && train88 && !venueHit && !mealHit && !blueHit && !onePlusOneHit,
   [exclusiveHit && "'Heritage Exclusive' found — the category is Heritage Executive",
    noRoomHit && "'No room needed' option must not exist",
    venueHit && "'Souphattra Vientiane Hotel' found — the venue is Souphattra Heritage Vientiane (D-14)",
    mealHit && 'C642-era dinner-window / hot-meal copy found on an active surface',
+   blueHit && 'a blue dress requirement is still on an active surface — the temple is Lao Traditional Dress',
+   onePlusOneHit && 'the C86 1 + 1 seating claim is still on an active surface — Business Class only',
    !train88 && 'Night Train must be USD 75 per guest (55 train + 20 van/luggage package)'].filter(Boolean).join(' · ')
   || "no 'Heritage Exclusive', no 'No room needed', train fixed at USD 75 per guest package");
 

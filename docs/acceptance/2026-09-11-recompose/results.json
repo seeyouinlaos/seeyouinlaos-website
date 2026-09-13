@@ -1,6 +1,6 @@
 {
   "origin": "http://127.0.0.1:8787",
-  "at": "2026-09-11T07:34:31.205Z",
+  "at": "2026-09-13T15:23:28.749Z",
   "results": [
     {
       "id": "01 invitation answers the five questions",
@@ -50,7 +50,7 @@
     {
       "id": "02 c86",
       "ok": true,
-      "detail": "C86 · USD 85 · 10:15 → 13:44 · direct · 1+1"
+      "detail": "C86 · USD 85 · 10:15 → 13:44 · direct · Business Class (no 1+1 claim — Owner 13 Sep 2026)"
     },
     {
       "id": "02 wedding compact",
@@ -75,7 +75,7 @@
     {
       "id": "03 four events",
       "ok": true,
-      "detail": "exactly four event sections"
+      "detail": "exactly four event sections, plus the seats route (Owner 13 Sep 2026)"
     },
     {
       "id": "03 not the public page",
@@ -175,7 +175,7 @@
     {
       "id": "07 semantic states",
       "ok": true,
-      "detail": "01Your InvitationOpen02Your JourneyCurrent03The WeddingOpen04Wedding PreparationOpen05About YouComplete06Review & SendOpen"
+      "detail": "01Your InvitationOpen02Your JourneyCurrent03The WeddingOpen04Wedding PreparationOpen05About YouOpen06Review & SendOpenINV-002 · Peggy & SteffieOpen another invitationSign out"
     },
     {
       "id": "08 switch drawer",

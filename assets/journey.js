@@ -64,7 +64,7 @@
       place: 'Souphattra Heritage Vientiane',
       note: 'Complimentary — hosted by Haruthai & Suthep.', anchor: 'voyage.html#vows' },
     { key: 'dinner', title: 'Wedding Dinner', when: '19:30',
-      place: 'Souphattra Heritage Vientiane · courtyard garden',
+      place: 'Souphattra Heritage Vientiane · poolside',
       note: 'Complimentary — hosted by Haruthai & Suthep.', anchor: 'voyage.html#dinner' }
   ];
 
@@ -132,11 +132,24 @@
     },
 
     isSkipped: function (key) { return skipped().indexOf(key) >= 0; },
-    skip: function (key, on) {
+    /* who said "not joining": the guest (manual) or a preset (cost). A preset
+     * may be revised by another preset; a guest's own word is never touched. */
+    skippedBy: function (key) { try { return (JSON.parse(localStorage.getItem(SKIP + '.by') || '{}'))[key] || 'manual'; } catch (e) { return 'manual'; } },
+    skip: function (key, on, by) {
       var a = skipped(), i = a.indexOf(key);
       if (on && i < 0) a.push(key);
       if (!on && i >= 0) a.splice(i, 1);
+      var m = {}; try { m = JSON.parse(localStorage.getItem(SKIP + '.by') || '{}'); } catch (e) { m = {}; }
+      if (on) m[key] = by || 'manual'; else delete m[key];
+      try { localStorage.setItem(SKIP + '.by', JSON.stringify(m)); } catch (e) {}
       setSkipped(a);
+    },
+    /* was this stage answered by the guest's own hand — a choice or a "not
+     * joining" — rather than filled by a preset? */
+    manual: function (seg) {
+      var B = window.SIYL_BAG, items = B ? B.get().filter(function (x) { return seg.ids.indexOf(x.id) >= 0; }) : [];
+      if (items.length) return items.every(function (x) { return !x.by; });
+      return this.isSkipped(seg.key) && this.skippedBy(seg.key) === 'manual';
     },
 
     /* answered = selected, or the guest said they are not joining this stage */
@@ -150,18 +163,22 @@
       var self = this;
       return SEG.filter(function (s) { return self.state(s) === 'open'; });
     },
-    /* FULL EXPERIENCE — a MODE, not a gap-filler.
-     * Confirming it produces THE canonical premium configuration of all ten
-     * stages, whatever the guest arrived from: empty, Cost Saving, a partly
-     * decided journey or an all-self-arranged one. There is exactly one Full
-     * Experience total. Every stage id the mode controls is cleared first — the
-     * complimentary private residence that answers the wedding stage under Cost
-     * Saving included — and every "not joining" decision is lifted.
-     * Lines that are not stages (1872, a spa interest) are never touched. */
+    /* FULL EXPERIENCE — the complete journey, with one rule above it (Owner,
+     * 13 Sep 2026): AN EXPLICIT CHOICE OF THE GUEST OUTRANKS THE PRESET.
+     * Confirming it fills every stage that is still open — or was filled by a
+     * preset such as Cost Saving — with the room, cabin or seat approved for
+     * the complete journey, and leaves untouched every stage the guest chose
+     * by hand (U Sathorn stays U Sathorn) or declined by hand. From an empty
+     * journey it is still the one canonical configuration; the total is what
+     * the retained choices come to. Lines that are not stages (1872, a spa
+     * interest) are never touched. */
     fullExperience: function () {
-      var P = window.SIYL_PRICE, out = [], self = this;
-      if (!P) return { remove: [], add: [] };
-      SEG.forEach(function (seg) { if (self.isSkipped(seg.key)) self.skip(seg.key, false); });
+      var P = window.SIYL_PRICE, out = [], self = this, keep = [];
+      if (!P) return { remove: [], add: [], kept: [] };
+      SEG.forEach(function (seg) {
+        if (self.manual(seg)) { keep.push(seg.key); return; }
+        if (self.isSkipped(seg.key)) self.skip(seg.key, false);
+      });
       /* how many guests this journey is for — the same number the bag carries */
       var qty = 1;
       if (window.SIYL_BAG) {
@@ -177,21 +194,24 @@
         };
       };
       this.soldOutStages = [];
-      SEG.forEach(function (seg) {
+      var fill = SEG.filter(function (seg) { return keep.indexOf(seg.key) < 0; });
+      fill.forEach(function (seg) {
         var id = seg.ids[0];
-        if (P.FLAT[id]) { P.items(id).forEach(function (it) { out.push(it); }); return; }
+        if (P.FLAT[id]) { P.items(id).forEach(function (it) { it.by = 'full'; out.push(it); }); return; }
         var room = P.approved(id, free(id));
-        if (room) { P.items(id, room.slug).forEach(function (it) { out.push(it); }); return; }
+        if (room) { P.items(id, room.slug).forEach(function (it) { it.by = 'full'; out.push(it); }); return; }
         /* nothing left in this stage at all — say so rather than pretend */
         self.soldOutStages.push(seg);
       });
       return {
-        /* every id any stage can be answered by, alternatives included */
-        remove: SEG.reduce(function (a, seg) {
+        /* every id a FILLED stage can be answered by, alternatives included —
+         * a stage the guest chose by hand is not on this list */
+        remove: fill.reduce(function (a, seg) {
           seg.ids.forEach(function (id) { P.ids(id).forEach(function (x) { if (a.indexOf(x) < 0) a.push(x); }); });
           return a;
         }, []),
-        add: out
+        add: out,
+        kept: keep
       };
     },
 
@@ -280,7 +300,8 @@
     /* the journey Cost Saving produces once an option is chosen */
     costSavingPlan: function (option) {
       return {
-        add: (option && option.items) || [],
+        /* a preset's lines say so, so a later preset may revise them */
+        add: ((option && option.items) || []).map(function (it) { var c = {}; for (var k in it) c[k] = it[k]; c.by = 'cost'; return c; }),
         remove: SEG.reduce(function (a, s) {
           s.ids.forEach(function (id) {
             (window.SIYL_PRICE ? window.SIYL_PRICE.ids(id) : [id]).forEach(function (x) {

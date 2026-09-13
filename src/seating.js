@@ -15,7 +15,10 @@
    by Guest Relations through the protected route and validated against the
    Owner's binding geometry (override of 2026-09-11):
      CEREMONY  50 guest seats · LEFT 10 rows × 2 chairs = 20 · RIGHT 10 rows ×
-               3 chairs = 30 · centre aisle · the asymmetry is deliberate
+               3 chairs = 30 · centre aisle · the asymmetry is deliberate ·
+               BRIDE and GROOM two fixed positions at the FRONT CENTRE (Owner,
+               13 Sep 2026): not guest chairs, no seat id, never selectable,
+               never counted as inventory — the couple's ceremony place
      DINNER    one long table · 50 people · TOP 25 guest seats · BOTTOM 25 guest
                seats = 50 guest seats, every one of them bookable
    NO CHAIR IS PREASSIGNED TO ANYONE (Owner decisions, 13 Sep 2026): there is
@@ -36,12 +39,12 @@
 
 export const RULES = {
   /* C-L-[ROW]-[SEAT] · C-R-[ROW]-[SEAT] · rows 01–10 · left seats 01–02 · right seats 01–03 */
-  ceremony: { rows: 10, perRow: { L: 2, R: 3 }, guestSeats: 50, id: /^C-([LR])-(0[1-9]|10)-(0[1-3])$/ },
+  ceremony: { rows: 10, perRow: { L: 2, R: 3 }, guestSeats: 50, fixed: ['BRIDE', 'GROOM'], id: /^C-([LR])-(0[1-9]|10)-(0[1-3])$/ },
   /* D-T-01 … D-T-25 · D-B-01 … D-B-25 · fifty chairs, no fixed position for anyone */
   dinner:   { perSide: 25, guestSeats: 50, totalPeople: 50, id: /^D-([TB])-(0[1-9]|1[0-9]|2[0-5])$/ },
 };
 export const CAPACITY = {
-  ceremony: { guestSeats: 50, left: 20, right: 30 },
+  ceremony: { guestSeats: 50, left: 20, right: 30, fixed: 2 },
   dinner: { guestSeats: 50, top: 25, bottom: 25, totalPeople: 50 },
 };
 export const EVENTS = ['ceremony', 'dinner'];
@@ -91,7 +94,7 @@ export function validateGeometry(input) {
       if (count.R !== CAPACITY.ceremony.right) errors.push('ceremony right must hold ' + CAPACITY.ceremony.right + ' guest seats, has ' + count.R);
       if (count.L + count.R !== CAPACITY.ceremony.guestSeats && !errors.length) errors.push('ceremony must hold ' + CAPACITY.ceremony.guestSeats + ' guest seats');
       /* FAMILY chairs: optional until the Owner supplies their ids — never required, never assumed */
-      out.ceremony = { rows: norm.sort((a, b) => a.row - b.row || (a.side < b.side ? -1 : 1)) };
+      out.ceremony = { rows: norm.sort((a, b) => a.row - b.row || (a.side < b.side ? -1 : 1)), fixed: RULES.ceremony.fixed.slice() };
     }
   }
 
@@ -174,7 +177,7 @@ export class Seating {
         return row;
       });
       out[event] = event === 'ceremony'
-        ? (cfg.ceremony ? { rows: cfg.ceremony.rows.map((r) => ({ side: r.side, row: r.row, seats: r.seats.map((s) => seats.find((x) => x.seatId === s.seatId)) })) } : null)
+        ? (cfg.ceremony ? { rows: cfg.ceremony.rows.map((r) => ({ side: r.side, row: r.row, seats: r.seats.map((s) => seats.find((x) => x.seatId === s.seatId)) })), fixed: RULES.ceremony.fixed.slice() } : null)
         : (cfg.dinner ? { sides: { T: seats.filter((s) => s.side === 'T'), B: seats.filter((s) => s.side === 'B') }, totalPeople: RULES.dinner.totalPeople } : null);
     }
     return out;
@@ -315,7 +318,7 @@ export class Seating {
           configured: seats.length > 0,
           seats,
           guestSeats: seats.length,
-          capacity: event === 'ceremony' ? { guestSeats: CAPACITY.ceremony.guestSeats, left: CAPACITY.ceremony.left, right: CAPACITY.ceremony.right }
+          capacity: event === 'ceremony' ? { guestSeats: CAPACITY.ceremony.guestSeats, left: CAPACITY.ceremony.left, right: CAPACITY.ceremony.right, fixed: RULES.ceremony.fixed.slice() }
                                         : { guestSeats: CAPACITY.dinner.guestSeats, top: CAPACITY.dinner.top, bottom: CAPACITY.dinner.bottom, totalPeople: CAPACITY.dinner.totalPeople },
           family: seats.filter((s) => s.family).length,
           held: seats.filter((s) => s.state === 'held').length,

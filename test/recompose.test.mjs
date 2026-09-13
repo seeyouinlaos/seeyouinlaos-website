@@ -23,7 +23,7 @@ test('final run: the dinner venue is Souphattra Heritage Vientiane; C86 carries 
   const D = readFileSync(new URL('../assets/transport-data.js', import.meta.url), 'utf8');
   const WP = readFileSync(new URL('../wedding-preparation.html', import.meta.url), 'utf8');
   for (const [n, s] of [['temple.js', T], ['journey.js', J], ['wedding-preparation.html', WP]]) assert.doesNotMatch(s, /Souphattra Vientiane Hotel/, n);
-  assert.match(T, /place: 'Souphattra Heritage Vientiane · courtyard garden'/);
+  assert.match(T, /place: 'Souphattra Heritage Vientiane · poolside'/);
   assert.doesNotMatch(D, /hot meal|dinner window|17:30 – 19:00/i, 'C86 keeps only its own facts');
   assert.match(D, /Departure from Vientiane is at 15:50 on 1 March/);
 });
@@ -125,7 +125,7 @@ test('MU9646 and C86 are preserved exactly, with decision-critical benefits only
   assert.match(p, /slug: 'business'[\s\S]{0,120}price: 275/);
   assert.match(p, /slug: 'economy-flexible'[\s\S]{0,120}price: 155/);
   assert.match(p, /'c86':\s*\{ price: 85/);
-  assert.match(yj, /dep:\['10:15','Kunming'\],arr:\['13:44','Lijiang'\],dur:'3h 29m · direct',cls:'Business Class · 1 \+ 1 seating'/);
+  assert.match(yj, /dep:\['10:15','Kunming'\],arr:\['13:44','Lijiang'\],dur:'3h 29m · direct',cls:'Business Class'/);
   const c86 = yj.slice(yj.indexOf("c86:{"), yj.indexOf("'return':{"));
   assert.ok((c86.match(/ben:\[([^\]]+)\]/)[1].split("','").length) <= 4, 'C86 carries at most four benefits in the selector');
 });
@@ -177,7 +177,7 @@ test('Review introduces no new selection control for an existing concept', () =>
 
 test('ABOUT YOU is four editorial areas, subject-driven, with documents inside and privacy first person', () => {
   const ab = read('about-you.html');
-  ['01 · ', '02 · Operational', '03 · Optional · can be added later', '04 · Privacy'].forEach((h) => assert.ok(ab.includes(h), h));
+  ['01 · ', '02 · Required', '03 · Optional · can be added later', '04 · Privacy'].forEach((h) => assert.ok(ab.includes(h), h));
   assert.match(ab, /G\.subject\(\)\.guestId/);
   assert.match(ab, /D\.mayConsent\(id\)/);
   assert.match(ab, /D\.send\(gid,kind,f\)/);

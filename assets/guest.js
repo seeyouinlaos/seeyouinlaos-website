@@ -92,9 +92,11 @@
       hint: 'Share any request, personal preference or detail that may help us look after you.',
       why: 'The open door — a request, an occasion, a piece of context that belongs to no other question.' }
   ];
-  var ACCESS = { key: 'access', q: 'Accessibility or comfort needs',
-    hint: 'Is there anything we can arrange to make the journey more comfortable or accessible for you?',
-    why: 'Operational, not hospitality: it changes rooms, transfers and the order of a day.' };
+  /* REQUIRED of every named guest (Owner, 13 Sep 2026): an answer in words —
+   * "None" or "No special requirements" is an answer; nothing is ever assumed */
+  var ACCESS = { key: 'access', q: 'Accessibility or comfort needs', required: true,
+    hint: 'Is there anything we can arrange to make the journey more comfortable or accessible for you? If there is nothing, please say so — "None" or "No special requirements".',
+    why: 'Operational, not hospitality: it changes rooms, transfers and the order of a day. Answered by each named guest — never assumed.' };
 
   var G = window.SIYL_GUEST = {
     PROFILE: PROFILE,
@@ -111,7 +113,9 @@
       return { invitationId: a.invitationId, partyName: a.partyName || '',
                partyLead: a.partyLead || '', guests: a.guests,
                /* E · 'PAIR' | 'NONE' | null (unresolved) — never inferred */
-               givingEligibility: a.givingEligibility === 'PAIR' || a.givingEligibility === 'NONE' ? a.givingEligibility : null };
+               givingEligibility: a.givingEligibility === 'PAIR' || a.givingEligibility === 'NONE' ? a.givingEligibility : null,
+               /* the hosts' party: ceremony place is the fixed front centre (explicit flag, never inferred) */
+               hosts: a.hosts === true };
     },
     /* the invitation is open, but from before the names were carried */
     stale: function () {
@@ -258,6 +262,16 @@
       PROFILE.concat([ACCESS]).forEach(function (q) { if ((r.profile || {})[q.key]) n++; });
       return n;
     },
+    /* the one required personal answer of step 05: present, in words, not blank */
+    accessAnswered: function (id) {
+      var v = this.profile(id, ACCESS.key);
+      return typeof v === 'string' && v.trim().length > 0;
+    },
+    accessMissing: function () {
+      var self = this, p = this.party();
+      return p ? p.guests.filter(function (g) { return !self.accessAnswered(g.guestId); }) : [];
+    },
+    accessAll: function () { var p = this.party(); return !!p && this.accessMissing().length === 0; },
 
     /* ---- party-level contact — one reliable pair is enough -------------- */
     partyField: function (f) { var st = read(); return (st.party || {})[f] || ''; },
@@ -370,13 +384,17 @@
         action: dress ? 'Review' : 'Review dress code',
         deep: 'wedding-preparation.html#dress-code' });
       var aboutStarted = answered > 0 || docsIn > 0 || consentDone > 0;
-      var aboutDone = answered === guests.length && docsIn === docsTotal && consentDone === guests.length;
-      out.push({ key: 'about', n: '05', label: 'About You', href: 'about-you.html', required: false,
-        state: !aboutStarted ? 'Optional · not completed' : (aboutDone ? 'Completed' : 'In progress'),
-        note: [answered ? (answered + ' of ' + guests.length + (guests.length === 1 ? ' guest has' : ' guests have') + ' shared something') : 'Optional — and welcome at any time',
-               docsIn ? (docsIn + ' of ' + docsTotal + ' documents received · the rest can be added later') : ''].filter(Boolean).join(' · '),
-        action: aboutStarted ? 'Review' : 'Answer the questions', deep: 'about-you.html#about-you' });
-      var ready = contact && chosen && weddingDecided && dress;
+      /* step 05 is REQUIRED (Owner, 13 Sep 2026): complete when every named
+       * guest has answered Accessibility & comfort; documents and consent stay
+       * optional and never hold the step */
+      var accessMissing = this.accessMissing().map(function (g) { return self.nameOf(g.guestId); });
+      var aboutDone = accessMissing.length === 0;
+      out.push({ key: 'about', n: '05', label: 'About You', href: 'about-you.html', required: true,
+        state: state(aboutDone, aboutStarted, true),
+        note: [accessMissing.length ? (accessMissing.join(' · ') + ' — accessibility & comfort still to answer') : 'Accessibility & comfort answered for each named guest',
+               docsIn ? (docsIn + ' of ' + docsTotal + ' documents received · the rest can be added later') : 'Travel documents are optional and can be added later'].filter(Boolean).join(' · '),
+        action: aboutDone ? 'Review' : 'Answer for each guest', deep: 'about-you.html#access' });
+      var ready = contact && chosen && weddingDecided && dress && aboutDone;
       out.push({ key: 'review', n: '06', label: 'Review & Send', href: 'review.html', required: true,
         state: ready ? 'Completed' : 'Action needed',
         note: ready ? 'Everything required is here' : 'Available after the required information is complete',

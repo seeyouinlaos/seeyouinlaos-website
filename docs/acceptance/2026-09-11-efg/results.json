@@ -1,11 +1,11 @@
 {
   "origin": "http://127.0.0.1:8787",
-  "at": "2026-09-11T13:20:27.547Z",
+  "at": "2026-09-13T15:16:11.604Z",
   "results": [
     {
       "id": "E0 production eligibility",
       "ok": true,
-      "detail": "INV-002 ships UNRESOLVED (no inferred PAIR): null"
+      "detail": "INV-002 ships PAIR, explicitly (Owner decision 13 Sep 2026): \"PAIR\""
     },
     {
       "id": "E1 unresolved: restrained, no price, no action",
@@ -85,10 +85,10 @@
     {
       "id": "G2 Owner geometry from configuration",
       "ok": true,
-      "detail": "ceremony 50 (20 + 30), dinner 48 guest boxes + BRIDE + GROOM fixed, family 6 + 6 (fixture)"
+      "detail": "ceremony 50 (20 + 30), dinner 50 guest boxes, nothing fixed, family 6 + 6 (fixture)"
     },
     {
-      "id": "G2 ten rows · 2 left · 3 right · aisle · 24 top · 24 bottom · 50 people",
+      "id": "G2 ten rows · 2 left · 3 right · aisle · 25 top · 25 bottom · 50 people",
       "ok": true,
       "detail": "labels read back from the drawings"
     },

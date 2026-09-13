@@ -1,6 +1,6 @@
 {
   "origin": "http://127.0.0.1:8787",
-  "at": "2026-09-13T13:20:03.604Z",
+  "at": "2026-09-13T14:56:39.764Z",
   "results": [
     {
       "id": "01 home fresh",
@@ -110,7 +110,7 @@
     {
       "id": "03 c86 truth",
       "ok": true,
-      "detail": "07 · 04 MAR Kunming → Lijiang Transportation SELECTED FOR YOUR JOURNEY C86 · Kunming → Lijiang 04 March 2027 · Kunming → Lijiang 10:15 KUNMING 13:44 LIJIANG 3h 29m · direct · Business Class · 1 + 1 se"
+      "detail": "07 · 04 MAR Kunming → Lijiang Transportation SELECTED FOR YOUR JOURNEY C86 · Kunming → Lijiang 04 March 2027 · Kunming → Lijiang 10:15 KUNMING 13:44 LIJIANG 3h 29m · direct · Business Class Snacks and"
     },
     {
       "id": "03 train stage",
@@ -223,6 +223,36 @@
       "detail": "activeGuestId still Peggy after the deep link"
     },
     {
+      "id": "06 access required blocks the send",
+      "ok": true,
+      "detail": "review names the missing answers: BEFORE YOU SEND A few things are still needed Required items cannot be answered for you afterwards; everything marked op"
+    },
+    {
+      "id": "06 access deep link lands on the field",
+      "ok": true,
+      "detail": "section below the bar, textarea focused"
+    },
+    {
+      "id": "06 whitespace is not an answer",
+      "ok": true,
+      "detail": "blank stays Required"
+    },
+    {
+      "id": "06 \"None\" is an answer",
+      "ok": true,
+      "detail": "Peggy answered · step 05 still waits for Steffie"
+    },
+    {
+      "id": "06 each guest answers for themselves",
+      "ok": true,
+      "detail": "Steffie's field is empty although Peggy answered hers"
+    },
+    {
+      "id": "06 step 05 complete only with both",
+      "ok": true,
+      "detail": "two independent answers · step 05 Completed"
+    },
+    {
       "id": "07 review hierarchy",
       "ok": true,
       "detail": "five blocks"
@@ -260,7 +290,7 @@
     {
       "id": "07 shell received",
       "ok": true,
-      "detail": "step 06 reads Received from another step · 01 Your Invitation OPEN 02 Your Journey CURRENT 03 The Wedding COMPLETE 04 Wedding Preparation COMPLETE 05 About You COMPLETE 06 Review & Send RECEIVED"
+      "detail": "step 06 reads Received from another step · 01 Your Invitation OPEN 02 Your Journey CURRENT 03 The Wedding COMPLETE 04 Wedding Preparation COMPLETE 05 About You COMPLETE 06 Review & Send RECEIVED INV-002 · PEGGY & STEFFIE OPEN ANOTHER INVITATIO"
     },
     {
       "id": "07b changed since sending",
@@ -385,7 +415,7 @@
     {
       "id": "13 review deep links",
       "ok": true,
-      "detail": "22 edit links resolve while signed in"
+      "detail": "21 edit links resolve while signed in"
     },
     {
       "id": "13 wedding deep link for",

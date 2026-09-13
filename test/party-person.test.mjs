@@ -420,7 +420,16 @@ test('readiness: the party cannot send while one personal acknowledgement is mis
   G.setActive(PEGGY);
   B.put({ id: 'bkk-shama', name: 'Shama Yen-Akat', price: 300, qty: 1 });
   decideAll(T, PEGGY); decideAll(T, STEFFIE); G.setDressAck(PEGGY, true); G.setActive(STEFFIE); G.setDressAck(STEFFIE, true); G.setActive(PEGGY);
-  assert.equal(G.readiness().ok, false, 'no contact yet');
+  /* step 05 is required as well (Owner, 13 Sep 2026): Accessibility & comfort, by each named guest */
+  assert.equal(G.readiness().ok, false, 'no contact yet, no accessibility answer yet');
+  deq(G.readiness().need.map((n) => n.key), ['you', 'about']);
+  G.setProfile(PEGGY, 'access', '   ');
+  assert.equal(G.accessAnswered(PEGGY), false, 'whitespace is not an answer');
+  G.setProfile(PEGGY, 'access', 'None');
+  assert.equal(G.accessAnswered(PEGGY), true, '"None" is an answer'); assert.equal(G.accessAnswered(STEFFIE), false, 'each guest answers for themselves');
+  deq(G.readiness().need.map((n) => n.key), ['you', 'about']);
+  G.setProfile(STEFFIE, 'access', 'No special requirements');
+  assert.equal(G.stepState('about'), 'Completed');
   deq(G.readiness().need.map((n) => n.key), ['you']);
   G.setPartyField('phone', '+49 170 0000000');
   G.setActive(STEFFIE); G.setDressAck(STEFFIE, false); G.setActive(PEGGY);

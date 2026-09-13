@@ -56,10 +56,48 @@ const AUTH = {
         .map((g) => ({ guestId: g.guestId, fullName: g.fullName, preferredName: g.preferredName || g.fullName })),
       /* E · explicit eligibility only; anything else is unresolved (null) */
       givingEligibility: inv.givingEligibility === 'PAIR' || inv.givingEligibility === 'NONE' ? inv.givingEligibility : null,
+      /* the hosts' own party (explicit in the private list, never inferred) */
+      hosts: inv.hosts === true,
       at: new Date().toISOString(),
     }));
+    /* this party's own local draft, set aside when it was left, comes back */
+    PARTY.restore(inv.invitationId);
   },
   clear() { localStorage.removeItem(KEY); },
+};
+
+/* LEAVING A PARTY (Owner, 13 Sep 2026). "Open another invitation" and "Sign
+ * out" both end the session of the party that is open. What Guest Relations
+ * already received stays received on the server; the party's local draft is
+ * set aside on this device under its own invitation id — never shown to
+ * another party, restored when that same party opens its code again — and
+ * the session itself is cleared, so nothing of one party can reach the next. */
+const PARTY_KEYS = ['siyl.who', 'siyl.guest', 'siyl.bag', 'siyl.temple', 'siyl.docs', 'siyl.sent', 'siyl.skip', 'siyl.skip.by'];
+const PARTY = {
+  leave() {
+    const a = AUTH.get();
+    if (a && a.invitationId) {
+      const draft = {};
+      PARTY_KEYS.forEach((k) => { const v = localStorage.getItem(k); if (v !== null) draft[k] = v; });
+      try { localStorage.setItem('siyl.party.' + a.invitationId, JSON.stringify(draft)); } catch (e) {}
+    }
+    PARTY_KEYS.forEach((k) => localStorage.removeItem(k));
+    localStorage.removeItem('siyl.draft.owner');
+    AUTH.clear();
+    try { document.dispatchEvent(new CustomEvent('siyl:signout')); } catch (e) {}
+  },
+  restore(invitationId) {
+    let draft = null;
+    try { draft = JSON.parse(localStorage.getItem('siyl.party.' + invitationId) || 'null'); } catch (e) { draft = null; }
+    /* the draft on this device belongs to one party: another party's is never
+     * inherited; the same party re-entering (a stale session, the code typed
+     * once more) keeps everything it had */
+    const owner = localStorage.getItem('siyl.draft.owner');
+    if (owner && owner !== invitationId) PARTY_KEYS.forEach((k) => localStorage.removeItem(k));
+    if (draft) Object.keys(draft).forEach((k) => { if (PARTY_KEYS.indexOf(k) >= 0 && localStorage.getItem(k) === null) localStorage.setItem(k, draft[k]); });
+    localStorage.removeItem('siyl.party.' + invitationId);
+    localStorage.setItem('siyl.draft.owner', invitationId);
+  },
 };
 
 /* ---------------- overlay (tea.html visual grammar, shared) ---------------- */
@@ -155,6 +193,8 @@ window.SIYL_INVITE = {
   },
   /* true when a stored session predates the named party */
   stale() { return !!AUTH.get() && !AUTH.hasNames(); },
+  /* leave this party: the code screen, clean; the party's draft kept aside */
+  leave() { PARTY.leave(); },
   open,
   close,
 };

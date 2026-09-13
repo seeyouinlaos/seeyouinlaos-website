@@ -1,6 +1,6 @@
 {
   "origin": "http://127.0.0.1:8787",
-  "at": "2026-09-13T13:27:15.419Z",
+  "at": "2026-09-13T15:13:57.638Z",
   "results": [
     {
       "id": "H1 dinner carries the Owner image set",
@@ -45,22 +45,22 @@
     {
       "id": "H4 rails @390",
       "ok": true,
-      "detail": "17 images · rendered = natural proportion for all · fit contain · widths 240/245/239/238/237"
+      "detail": "17 images · rendered = natural proportion for all · fit contain · widths 239/245/240/238/237"
     },
     {
       "id": "H4 rails @834",
       "ok": true,
-      "detail": "17 images · rendered = natural proportion for all · fit contain · widths 294/334/340/293/330/292/290"
+      "detail": "17 images · rendered = natural proportion for all · fit contain · widths 293/340/294/334/330/292/290"
     },
     {
       "id": "H4 rails @1440",
       "ok": true,
-      "detail": "17 images · rendered = natural proportion for all · fit contain · widths 294/334/340/293/330/292/290"
+      "detail": "17 images · rendered = natural proportion for all · fit contain · widths 293/340/294/334/330/292/290"
     },
     {
       "id": "H4 rails @1920",
       "ok": true,
-      "detail": "17 images · rendered = natural proportion for all · fit contain · widths 294/334/340/293/330/292/290"
+      "detail": "17 images · rendered = natural proportion for all · fit contain · widths 293/340/294/334/330/292/290"
     },
     {
       "id": "H5 dress.html 17 references, none retired",
@@ -100,7 +100,7 @@
     {
       "id": "H8 u-sathorn-superior-garden stage card",
       "ok": true,
-      "detail": "SELECTED FOR YOUR JOURNEY U Sathorn Bangkok Superior Room With Garden View 21 – 24 February · 3 nights Breakfast included USD 192 TOTAL PER PERSON SELECTED VIEW DETAILS"
+      "detail": "SELECTED FOR YOUR JOURNEY U Sathorn Bangkok Superior Room With Garden View 21 – 24 February · 3 nights Breakfast included USD 192 TOTAL PER PERSON CURRENT SELECTION VIEW DETAILS"
     },
     {
       "id": "H8 shama-king-studio-balcony inclusions",
@@ -120,7 +120,7 @@
     {
       "id": "H8 shama-king-studio-balcony stage card",
       "ok": true,
-      "detail": "SELECTED FOR YOUR JOURNEY Shama Yen-Akat Bangkok King Studio With Balcony 21 – 24 February · 3 nights Breakfast included USD 120 TOTAL PER PERSON SELECTED VIEW DETAILS"
+      "detail": "SELECTED FOR YOUR JOURNEY Shama Yen-Akat Bangkok King Studio With Balcony 21 – 24 February · 3 nights Breakfast included USD 120 TOTAL PER PERSON CURRENT SELECTION VIEW DETAILS"
     }
   ],
   "errors": []

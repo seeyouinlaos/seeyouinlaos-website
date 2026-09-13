@@ -268,3 +268,26 @@ Live, after the automatic builds (Worker `1d567e3c`, Pages workflow for afabb17 
 iPhone 14 profile in WebKit on Pages: index opens under the bar at scrollY 900, tap "03" →
 `wedding.html` at scrollY 0, bar "03 / 06 The Wedding", page entered, index closed, back
 returns a whole page, no errors.
+
+## Guest-testing correction pass (Owner, 13 Sep 2026 — sections 1–22)
+
+| Item | Previous state | Final state | Verified |
+|---|---|---|---|
+| 1/17 About You · Accessibility & comfort | optional; step 05 "Optional · Every answer optional" | REQUIRED of every named guest (blank / whitespace invalid; "None" is an answer); step 05 REQUIRED, completes only when every guest has answered; Review & Send blocks and names who is missing; deep link `#access` lands on the field, focused; Travel documents stay optional | unit (party-person, guest-testing) · release walk 06 |
+| 2/3 Journey selection state | chosen card looked like an option ("Selected" button active) | one model from the bag: chosen card framed (ink inset), "Selected for your journey", inert "✓ Current selection"; alternatives keep "Select this stay/travel/fare"; Special Express No. 25 and every flat travel, MU9646 fares, Bangkok rail, journeys.html cards and fares follow it; Vientiane stays keep "Change this stay" | unit · guest-testing walk 1 |
+| 4 Bangkok rail alignment | second/third card 16 px lower (`.p-card + .p-card` spacing leaked into the rail); cards un-stretched | one top line for media and text, one card height, `cover` never stretches, no card widened by its label | walk 2 at 320/375/390/430/1280 |
+| 5 Seat discoverability | seats only inside step 04 §02 | The Wedding (03) carries **Your seats · where each of you will sit**: per guest "Choose your ceremony seat" / "Choose your dinner seat" → step 04 `?for=<guest>#seats` (person preselected, section below the bar); booked → seat code + "Change seat"; Review & Send links the same; step 04 cards titled "Choose your … seat" / "Your … seat", "tap another chair to change" | walk 3 at 390/1280 |
+| 14 Ceremony BRIDE & GROOM | none (50 chairs only) | two fixed positions at the FRONT CENTRE in the ledger contract (`RULES.ceremony.fixed`, `CAPACITY.ceremony.fixed: 2`), drawn as two marks in front of row 1, no seat id, never selectable (404), not inventory (50 chairs unchanged); dinner unchanged — 50 bookable, nothing fixed | unit (efg, guest-testing) · gate P11 · walk 3 · smoke |
+| 14 The hosts' party | — | `hosts: true` on INV-001 in the private list → bundle → session; for the hosts the ceremony reads "Bride & Groom · front centre" (no chair to choose, nothing blocks them), the dinner is chosen like everyone | walk 4 |
+| 6 Sign out / Open another invitation | none | both actions in the step index on every step and on step 01: leave = the party's local draft set aside under its invitation id, session cleared, `invitation.html` (clean) or `?open=1` (code prompt); Back after leaving shows no party (`pageshow` re-check); another party opens clean; the same party returning gets its draft back; SWITCH stays inside one party | walk 4 · unit |
+| 7 China card | Kunming archway | the Owner's Drive file `1XBVp6qIwUSWfHpw4w3S0CH-apvsej154` — already in the set as `city/004-lijiang-black-dragon-pool.jpg` (same source, 1440 × 1795; byte-checked); the card uses it; map row carries the Drive id | walk 5 |
+| 15 Wedding Preparation first three | tradition-04/05/06/01/02/03 | tradition-01 (man beside the pool) · 02 (couple seated poolside) · 03 (woman on the balcony) · 04 · 05 · 06 — both rails, native proportions | unit · Haruthai walk |
+| 16 Full Experience vs manual choice | replaced every stage | fills only open or preset-filled stages; a hand-picked stage (U Sathorn) and a hand-declined stage stay; Cost Saving lines are marked `by: 'cost'` and give way; total follows the retained choices | unit ×3 · walk 1 |
+| 18 C86 | "Business Class · 1 + 1 seating" + prose | "Business Class"; the 1 + 1 prose gone (data, journey, journeys, pricing basis); gate P4 guards | unit · gate |
+| 19 Blue dress | "Blue Lao Traditional Dress", "in blue" | "Lao Traditional Dress"; gate P4 guards | unit · gate · release walk 05 |
+| 20 Wedding Dinner location | "courtyard garden" | **Poolside** (`journey.js`, `temple.js`, voyage.html eyebrow/copy/labels/captions, index, i18n); gate P8 requires "19:30 · Poolside", forbids "courtyard garden", keeps the vow pool-free | unit · gate |
+
+**Verification (local, before release):** `npm test` **214/214** (new `test/guest-testing.test.mjs`) ·
+`release-check` all gates PASS · `guest-testing-walk.mjs` **49/49** · `steps-nav.mjs` 50/50 ·
+release walk **84/84** (six new access checks) · a11y 18/18 · D 39/39 · C 39/39 · Haruthai 24/24 ·
+E/F/G 37/37 · local crawl 0 HTTP failures / 0 broken images · 0 page errors.

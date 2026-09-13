@@ -600,7 +600,7 @@ test('Review & Send is five editorial blocks, each with its own way back', () =>
 
 test('the dress code carries three codes and 18 owner references, acknowledged by nobody but the guest', () => {
   const page = readFileSync(join(ROOT, 'dress.html'), 'utf8');
-  assert.match(page, /Lao Traditional Dress · Blue/);
+  assert.match(page, /<h2>Lao Traditional Dress<\/h2>/); assert.doesNotMatch(page, /Blue Lao|in blue/i, 'no blue dress requirement (Owner, 13 Sep 2026)');
   assert.match(page, /<h2>Black Tie<\/h2>/);
   assert.match(page, /<h2>Resort Wear<\/h2>/);
   const imgs = [...page.matchAll(/assets\/images\/dress\/([a-z0-9-]+)\.jpg/g)].map((m) => m[1]);
@@ -628,7 +628,7 @@ test('ABOUT YOU is exactly seven questions and one operational field', () => {
   const about = readFileSync(join(ROOT, 'about-you.html'), 'utf8');
   assert.match(about, /<h1 class="t-d1">About you<\/h1>/);
   assert.match(about, /G\.PROFILE\.forEach/);
-  assert.match(about, /Operational · not hospitality/);
+  assert.match(about, /02 · Required · answered by/); assert.match(about, /aria-required="true"/, 'Accessibility & comfort is required of each guest (Owner, 13 Sep 2026)');
   assert.match(about, /Who are you answering for\?/);
   /* D · four editorial areas on one surface, documents INSIDE step 05, and
    * the shell's one continuation instead of a page-local nav */
@@ -689,7 +689,7 @@ test('an editorially small title is still a thumb-sized target', () => {
 test('no rule is ever drawn through the word BLUE', () => {
   const wed = readFileSync(join(ROOT, 'wedding.html'), 'utf8');
   /* in the decision module the dress code is plain type, never a link label */
-  assert.match(wed, /temple:'Blue Lao Traditional Dress'/);
+  assert.match(wed, /temple:'Lao Traditional Dress'/);
   assert.match(wed, /Dress · '\+DRESS\[e\.key\]\+'/);
   /* and in the design system every secondary action is inline-flex, so a rule
    * can never be drawn through a wrapped line of type */
@@ -1008,7 +1008,10 @@ test('the retired imagery and the pool-side dinner narrative are gone', () => {
   const vy = readFileSync(join(ROOT, 'voyage.html'), 'utf8');
   assert.ok(!/052-temple-ceremony-bride/.test(vy), 'the black-and-white bride photograph is still there');
   assert.ok(!/053-wedding-dinner-courtyard-garden/.test(vy), 'the fountain photograph is still there');
-  assert.ok(!/pool/i.test(vy), 'a pool narrative survives on the wedding page');
+  /* Owner, 13 Sep 2026: the Wedding Dinner is POOLSIDE — said so, never "courtyard garden"; the pool stays out of the vow only */
+  const dinnerSec = vy.slice(vy.indexOf('id="dinner"'), vy.indexOf('id="dinner"') + 900);
+  assert.match(dinnerSec, /19:30 · Poolside/); assert.match(dinnerSec, /gathering poolside/);
+  assert.ok(!/courtyard garden/i.test(vy), 'the dinner is poolside, not the courtyard garden');
   assert.ok(!/Sunset drinks/.test(vy));
   /* and the retired bride frame is not quietly moved to another event */
   for (const f of ['index.html', 'journeys.html', 'accommodation.html', 'destination.html', 'experiences.html']) {
@@ -1028,7 +1031,7 @@ test('the retired imagery and the pool-side dinner narrative are gone', () => {
   assert.doesNotMatch(vy, /am-placeholder|Photograph to follow/);
   const dinnerImages = vy.match(/053-wedding-dinner-[a-z-]+\.jpg/g) || [];
   assert.ok(new Set(dinnerImages).size >= 4, 'several images from the Wedding Dinner set, not one: ' + dinnerImages.join(', '));
-  assert.match(vy, /053-wedding-dinner-courtyard-from-above\.jpg/, 'the lead image is the courtyard garden');
+  assert.match(vy, /053-wedding-dinner-courtyard-from-above\.jpg/, 'the lead image is the poolside from above');
   assert.match(vy, /053-wedding-dinner-sharing-menu\.jpg[\s\S]{0,600}053-wedding-dinner-sharing-menu-table\.jpg/, 'the sharing menu is shown as a pair');
   for (const f of dinnerImages) assert.ok(existsSync(join(ROOT, 'assets/images/event', f)), f + ' is not in the asset set');
   assert.ok(!existsSync(join(ROOT, 'assets/images/event/053-wedding-dinner-courtyard-garden.jpg')), 'the fountain file (not from the Wedding Dinner folder) is retired');

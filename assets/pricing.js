@@ -55,7 +55,7 @@
                 basis: 'USD 275 per person · 1 seat · Business Class' },
     'c86':    { price: 85,  cat: 'Transportation', name: 'C86 · Kunming → Lijiang',
                 meta: '04 March 2027 · Business Class', img: 'assets/images/transport/c642-train-snow-mountain.jpg',
-                basis: 'USD 85 per person · 1 seat · Business Class · 1+1 seating' },
+                basis: 'USD 85 per person · 1 seat · Business Class' },
     'return': { price: 200, cat: 'Transportation', name: 'MU5924 + MU741 · Lijiang → Bangkok',
                 meta: '06 March 2027 · Economy flexible', img: 'assets/images/transport/mu5924-economy-cabin-1.jpg',
                 basis: 'USD 200 per person · 1 seat · Economy flexible · via Kunming' },

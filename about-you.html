@@ -51,9 +51,9 @@ function when(iso){try{return new Date(iso).toLocaleDateString('en-GB',{day:'2-d
 function size(n){return n>=1048576?(n/1048576).toFixed(1)+' MB':Math.max(1,Math.round(n/1024))+' KB'}
 
 function field(id,q,n){
-  var v=G.profile(id,q.key);
-  return '<div class="p-field">'+(n?'<p class="t-l1">'+n+'</p>':'')+'<h3 class="t-h2">'+q.q+'</h3><p class="t-b2">'+q.hint+'</p>'+
-    '<textarea data-q="'+q.key+'" data-g="'+esc(id)+'" placeholder="Optional" aria-label="'+esc(q.q)+'">'+esc(v==='NONE'?'':v)+'</textarea>'+
+  var v=G.profile(id,q.key),req=!!q.required,missing=req&&!(v&&String(v).trim());
+  return '<div class="p-field'+(req?' p-required':'')+'"'+(req?' data-required="'+q.key+'"':'')+'>'+(n?'<p class="t-l1">'+n+'</p>':'')+'<h3 class="t-h2">'+q.q+(req?' <span class="t-l1'+(missing?' open':' on')+'" data-req-state>'+(missing?'Required':'Answered')+'</span>':'')+'</h3><p class="t-b2">'+q.hint+'</p>'+
+    '<textarea data-q="'+q.key+'" data-g="'+esc(id)+'" placeholder="'+(req?'Required — for example: None':'Optional')+'" aria-label="'+esc(q.q)+'"'+(req?' aria-required="true" aria-invalid="'+(missing?'true':'false')+'"':'')+'>'+esc(v==='NONE'?'':v)+'</textarea>'+
     (q.none?'<label class="p-check"><input type="checkbox" data-none="'+q.key+'" data-g="'+esc(id)+'"'+(v==='NONE'?' checked':'')+'><span>'+q.none+'</span></label>':'')+
     '<p class="t-b2 p-why">'+q.why+'</p></div>'}
 
@@ -107,7 +107,7 @@ G.PROFILE.forEach(function(q){h+=field(id,q,q.n)});
 h+='</section>';
 
 /* 02 · ACCESSIBILITY & COMFORT */
-h+='<section class="prep-sec"><p class="t-l1">02 · Operational · not hospitality</p><h2 class="t-h2">Accessibility &amp; comfort</h2>'+
+h+='<section class="prep-sec" id="access"><p class="t-l1">02 · Required · answered by '+(forOther?name:'you')+'</p><h2 class="t-h2">Accessibility &amp; comfort</h2>'+
    field(id,G.ACCESS,'')+'</section>';
 
 /* 03 · TRAVEL DOCUMENTS */
@@ -138,7 +138,12 @@ function mark(){var s=document.getElementById('saved');if(s){s.textContent='Save
     var gid=b.getAttribute('data-who'),n=G.profileAnswered(gid);
     b.textContent=G.nameOf(gid)+(gid===me.guestId?' · you':'')})}
 page.querySelectorAll('textarea[data-q]').forEach(function(t){
-  t.addEventListener('change',function(){G.setProfile(t.getAttribute('data-g'),t.getAttribute('data-q'),t.value.trim());mark()})});
+  t.addEventListener('change',function(){G.setProfile(t.getAttribute('data-g'),t.getAttribute('data-q'),t.value.trim());
+    /* the required answer says where it stands, the moment it changes */
+    var f=t.closest('.p-field.p-required');if(f){var ok=!!t.value.trim(),st=f.querySelector('[data-req-state]');t.setAttribute('aria-invalid',ok?'false':'true');if(st){st.textContent=ok?'Answered':'Required';st.className='t-l1 '+(ok?'on':'open')}}
+    mark()})});
+/* a deep link to the required answer lands on it and opens it for typing */
+if(location.hash==='#access'){var ta=page.querySelector('#access textarea[data-q="access"]');if(ta)setTimeout(function(){ta.focus({preventScroll:true})},420)}
 page.querySelectorAll('input[data-none]').forEach(function(cb){
   cb.addEventListener('change',function(){
     var k=cb.getAttribute('data-none'),g=cb.getAttribute('data-g');

@@ -27,6 +27,14 @@ earlier conversation.
 > native proportions) and the View All Steps mobile UX rebuilt (index attached to the sticky bar,
 > deterministic navigation, entrance/leave motion, drawer scroll-lock, reduced motion,
 > `steps-nav.mjs` 50/50 on both origins). See the 13 Sep record, section "Post-release correction pass".
+>
+> **Guest-testing correction pass (13 Sep, sections 1–22):** Accessibility & comfort REQUIRED per guest
+> and step 05 REQUIRED · one selected-state model for every journey product (inert current control,
+> framed card) · Bangkok rail aligned · seats route on The Wedding, per guest · ceremony BRIDE & GROOM
+> front-centre positions (not chairs; dinner unchanged) · INV-001 flagged as the hosts · Sign out /
+> Open another invitation · Full Experience never overrides a manual choice · C86 Business Class only ·
+> no blue dress · Wedding Dinner poolside · China card = the Owner's Lijiang file · tradition rail
+> 01·02·03 first. Record: the 13 Sep README, section "Guest-testing correction pass".
 
 > **13 Sep 2026 · FINAL RUN COMPLETE. FINAL PRE-RELEASE GATE · PASS.** Read `FINAL-REPORT.md`.
 > Nothing from this run is outstanding. The Owner's final release approval stays ON HOLD by
