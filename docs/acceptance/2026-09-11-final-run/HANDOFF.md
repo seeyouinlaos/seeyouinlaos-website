@@ -16,6 +16,11 @@ earlier conversation.
 > redesign, deployment or code change belongs to this approval. **Future follow-ups only:**
 > possible INV-002 code rotation · DOCS privacy/storage architecture · Cloudflare
 > deployment-path clean-up.
+>
+> **Post-release factual check (13 Sep, after approval):** Tak Bat = SELF-PAY was already applied
+> at `91c52ad` (11 Sep) and is live on every surface; no guest-facing change. Gate P8 now guards it
+> permanently; the Haruthai walk's superseded dinner pin follows the Owner's image set (24/24).
+> See the 13 Sep record.
 
 > **13 Sep 2026 · FINAL RUN COMPLETE. FINAL PRE-RELEASE GATE · PASS.** Read `FINAL-REPORT.md`.
 > Nothing from this run is outstanding. The Owner's final release approval stays ON HOLD by

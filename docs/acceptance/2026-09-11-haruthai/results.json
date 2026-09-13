@@ -1,11 +1,11 @@
 {
   "origin": "http://127.0.0.1:8787",
-  "at": "2026-09-11T17:34:36.476Z",
+  "at": "2026-09-13T12:13:05.959Z",
   "results": [
     {
-      "id": "H1 dinner placeholder, no lounge chairs",
+      "id": "H1 dinner carries the Owner image set",
       "ok": true,
-      "detail": "placeholder present · retired images absent"
+      "detail": "6 images from the Owner set · no placeholder · fountain gone"
     },
     {
       "id": "H1 stay shown as a room",
@@ -18,7 +18,7 @@
       "detail": "Tak Bat section: self-pay, no amount · the USD 15 carries the Sangkhathan name"
     },
     {
-      "id": "H1 placeholder has a real box",
+      "id": "H1 dinner lead image has a real box",
       "ok": true,
       "detail": "{\"w\":544,\"h\":680}"
     },
