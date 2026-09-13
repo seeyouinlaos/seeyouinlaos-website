@@ -1,6 +1,6 @@
 {
   "origin": "http://127.0.0.1:8787",
-  "at": "2026-09-13T12:13:05.959Z",
+  "at": "2026-09-13T13:27:15.419Z",
   "results": [
     {
       "id": "H1 dinner carries the Owner image set",
@@ -45,22 +45,22 @@
     {
       "id": "H4 rails @390",
       "ok": true,
-      "detail": "17 images · ratios 0.75 · fit cover · widths 245"
+      "detail": "17 images · rendered = natural proportion for all · fit contain · widths 240/245/239/238/237"
     },
     {
       "id": "H4 rails @834",
       "ok": true,
-      "detail": "17 images · ratios 0.75 · fit cover · widths 320"
+      "detail": "17 images · rendered = natural proportion for all · fit contain · widths 294/334/340/293/330/292/290"
     },
     {
       "id": "H4 rails @1440",
       "ok": true,
-      "detail": "17 images · ratios 0.75 · fit cover · widths 320"
+      "detail": "17 images · rendered = natural proportion for all · fit contain · widths 294/334/340/293/330/292/290"
     },
     {
       "id": "H4 rails @1920",
       "ok": true,
-      "detail": "17 images · ratios 0.75 · fit cover · widths 320"
+      "detail": "17 images · rendered = natural proportion for all · fit contain · widths 294/334/340/293/330/292/290"
     },
     {
       "id": "H5 dress.html 17 references, none retired",

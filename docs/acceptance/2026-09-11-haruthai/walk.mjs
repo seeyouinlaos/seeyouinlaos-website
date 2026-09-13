@@ -95,8 +95,11 @@ await allWidths('wedding-preparation.html', 'H4-preparation', [['.p-rail[aria-la
 for (const w of WIDTHS) {
   await go('wedding-preparation.html', w); await scrollAll();
   const m = await page.evaluate(() => [...document.querySelectorAll('.p-rail img')].map((i) => { const r = i.getBoundingClientRect(); const cs = getComputedStyle(i); return { src: i.getAttribute('src').split('/').pop(), w: Math.round(r.width), h: Math.round(r.height), ratio: +(r.width / r.height).toFixed(3), fit: cs.objectFit, pos: cs.objectPosition, nat: i.naturalWidth + 'x' + i.naturalHeight, loaded: i.complete && i.naturalWidth > 0 }; }));
-  const ok = m.length === 17 && m.every((x) => x.fit === 'cover' && Math.abs(x.ratio - 0.75) < 0.02 && x.loaded && x.w >= 200) && !m.some((x) => x.src === 'resort-01.jpg');
-  note('H4 rails @' + w, ok, m.length + ' images · ratios ' + [...new Set(m.map((x) => x.ratio))].join('/') + ' · fit ' + [...new Set(m.map((x) => x.fit))].join('/') + ' · widths ' + [...new Set(m.map((x) => x.w))].join('/') + (m.some((x) => !x.loaded) ? ' · UNLOADED' : ''));
+  /* Owner, 13 Sep 2026 (supersedes the 3:4 box of this pass): every reference
+   * keeps its own proportion — rendered ratio = natural ratio, nothing cropped,
+   * nothing stretched; the rail stays a rail and no card is below 200 px wide */
+  const ok = m.length === 17 && m.every((x) => { const [nw, nh] = x.nat.split('x').map(Number); return x.loaded && Math.abs(x.ratio - nw / nh) < 0.02 && x.fit !== 'cover' && x.w >= 200; }) && !m.some((x) => x.src === 'resort-01.jpg');
+  note('H4 rails @' + w, ok, m.length + ' images · rendered = natural proportion for all · fit ' + [...new Set(m.map((x) => x.fit))].join('/') + ' · widths ' + [...new Set(m.map((x) => x.w))].join('/') + (m.some((x) => !x.loaded) ? ' · UNLOADED' : ''));
 }
 await allWidths('dress.html', 'H5-dress');
 note('H5 dress.html 17 references, none retired', (await page.locator('.dgal img').count()) === 17 && (await page.locator('img[src*="resort-01"]').count()) === 0, 'public dress page');

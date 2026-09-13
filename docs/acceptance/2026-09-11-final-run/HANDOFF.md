@@ -21,6 +21,12 @@ earlier conversation.
 > at `91c52ad` (11 Sep) and is live on every surface; no guest-facing change. Gate P8 now guards it
 > permanently; the Haruthai walk's superseded dinner pin follows the Owner's image set (24/24).
 > See the 13 Sep record.
+>
+> **Post-release correction pass (13 Sep):** the remaining 10 Sep markups reconciled against the
+> released state (all already corrected at 91c52ad except the dress-reference cropping, now at
+> native proportions) and the View All Steps mobile UX rebuilt (index attached to the sticky bar,
+> deterministic navigation, entrance/leave motion, drawer scroll-lock, reduced motion,
+> `steps-nav.mjs` 50/50 on both origins). See the 13 Sep record, section "Post-release correction pass".
 
 > **13 Sep 2026 · FINAL RUN COMPLETE. FINAL PRE-RELEASE GATE · PASS.** Read `FINAL-REPORT.md`.
 > Nothing from this run is outstanding. The Owner's final release approval stays ON HOLD by
