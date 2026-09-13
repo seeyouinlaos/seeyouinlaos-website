@@ -258,7 +258,13 @@ current row inert; browser back; identity switch; `#documents` below the bar; dr
 label / focus / restore; reduced motion; zero page and console errors — **50/50** locally and on
 both live origins (see below).
 
-### Verification (this pass)
-`npm test` 206/206 · `release-check` all gates PASS (P7, P8 guard, P10, P11 included) ·
+### Verification (this pass, `afabb17`)
+Local: `npm test` 206/206 · `release-check` all gates PASS (P7, P8 guard, P10, P11 included) ·
 `steps-nav.mjs` 50/50 · `a11y.mjs` 18/18 · release walk 78/78 · D 39/39 · C 39/39 ·
 Haruthai 24/24 (rails at native proportion) · E/F/G 37/37 · 0 page / console errors.
+Live, after the automatic builds (Worker `1d567e3c`, Pages workflow for afabb17 success):
+`steps-nav.mjs` **50/50 on the Worker** (`steps-nav-worker.json`) and **50/50 on Pages**
+(`steps-nav-pages.json`) · smoke 8/8 on both · **parity 61/61** (`parity-afabb17.txt`) ·
+iPhone 14 profile in WebKit on Pages: index opens under the bar at scrollY 900, tap "03" →
+`wedding.html` at scrollY 0, bar "03 / 06 The Wedding", page entered, index closed, back
+returns a whole page, no errors.

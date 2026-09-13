@@ -1,0 +1,256 @@
+{
+  "origin": "http://127.0.0.1:8787",
+  "at": "2026-09-13T13:14:08.021Z",
+  "results": [
+    {
+      "id": "nav@320 every row → its own step, at the top, named in the bar",
+      "ok": true,
+      "d": "30 transitions · panel under the bar · scrollY 0 · index closed · page entered"
+    },
+    {
+      "id": "open/close@320 keeps the page where it was",
+      "ok": true,
+      "d": "scrollY 600 → 600 → 600"
+    },
+    {
+      "id": "scrim@320 closes the index",
+      "ok": true,
+      "d": "tap outside → closed, still on 03"
+    },
+    {
+      "id": "current@320 row closes the index without navigating",
+      "ok": true,
+      "d": "same url · scrollY kept · closed"
+    },
+    {
+      "id": "back@320 returns to the previous step, whole",
+      "ok": true,
+      "d": "back → 03, page visible, index closed"
+    },
+    {
+      "id": "switch@320 Steffie navigates the same way",
+      "ok": true,
+      "d": "06 / 06 Review & Send · Steffie"
+    },
+    {
+      "id": "deeplink@320 #documents sits below the sticky bar",
+      "ok": true,
+      "d": "{\"top\":137,\"barBottom\":133,\"clear\":true}"
+    },
+    {
+      "id": "drawer@320 locks, labels, focuses, restores",
+      "ok": true,
+      "d": "{\"dr\":{\"open\":true,\"lock\":true,\"label\":\"Morning Alms-Giving · Tak Bat\",\"focusIn\":true},\"after\":{\"open\":false,\"lock\":false,\"y\":500,\"focusBack\":true}}"
+    },
+    {
+      "id": "reduced-motion@320 immediate, no travel, navigates",
+      "ok": true,
+      "d": "{\"calm\":{\"calm\":true,\"mainT\":\"none\",\"op\":\"1\"},\"panelT\":\"none\"}"
+    },
+    {
+      "id": "errors@320",
+      "ok": true,
+      "d": "no page or console errors"
+    },
+    {
+      "id": "nav@375 every row → its own step, at the top, named in the bar",
+      "ok": true,
+      "d": "30 transitions · panel under the bar · scrollY 0 · index closed · page entered"
+    },
+    {
+      "id": "open/close@375 keeps the page where it was",
+      "ok": true,
+      "d": "scrollY 600 → 600 → 600"
+    },
+    {
+      "id": "scrim@375 closes the index",
+      "ok": true,
+      "d": "tap outside → closed, still on 03"
+    },
+    {
+      "id": "current@375 row closes the index without navigating",
+      "ok": true,
+      "d": "same url · scrollY kept · closed"
+    },
+    {
+      "id": "back@375 returns to the previous step, whole",
+      "ok": true,
+      "d": "back → 03, page visible, index closed"
+    },
+    {
+      "id": "switch@375 Steffie navigates the same way",
+      "ok": true,
+      "d": "06 / 06 Review & Send · Steffie"
+    },
+    {
+      "id": "deeplink@375 #documents sits below the sticky bar",
+      "ok": true,
+      "d": "{\"top\":137,\"barBottom\":133,\"clear\":true}"
+    },
+    {
+      "id": "drawer@375 locks, labels, focuses, restores",
+      "ok": true,
+      "d": "{\"dr\":{\"open\":true,\"lock\":true,\"label\":\"Morning Alms-Giving · Tak Bat\",\"focusIn\":true},\"after\":{\"open\":false,\"lock\":false,\"y\":500,\"focusBack\":true}}"
+    },
+    {
+      "id": "reduced-motion@375 immediate, no travel, navigates",
+      "ok": true,
+      "d": "{\"calm\":{\"calm\":true,\"mainT\":\"none\",\"op\":\"1\"},\"panelT\":\"none\"}"
+    },
+    {
+      "id": "errors@375",
+      "ok": true,
+      "d": "no page or console errors"
+    },
+    {
+      "id": "nav@390 every row → its own step, at the top, named in the bar",
+      "ok": true,
+      "d": "30 transitions · panel under the bar · scrollY 0 · index closed · page entered"
+    },
+    {
+      "id": "open/close@390 keeps the page where it was",
+      "ok": true,
+      "d": "scrollY 600 → 600 → 600"
+    },
+    {
+      "id": "scrim@390 closes the index",
+      "ok": true,
+      "d": "tap outside → closed, still on 03"
+    },
+    {
+      "id": "current@390 row closes the index without navigating",
+      "ok": true,
+      "d": "same url · scrollY kept · closed"
+    },
+    {
+      "id": "back@390 returns to the previous step, whole",
+      "ok": true,
+      "d": "back → 03, page visible, index closed"
+    },
+    {
+      "id": "switch@390 Steffie navigates the same way",
+      "ok": true,
+      "d": "06 / 06 Review & Send · Steffie"
+    },
+    {
+      "id": "deeplink@390 #documents sits below the sticky bar",
+      "ok": true,
+      "d": "{\"top\":137,\"barBottom\":133,\"clear\":true}"
+    },
+    {
+      "id": "drawer@390 locks, labels, focuses, restores",
+      "ok": true,
+      "d": "{\"dr\":{\"open\":true,\"lock\":true,\"label\":\"Morning Alms-Giving · Tak Bat\",\"focusIn\":true},\"after\":{\"open\":false,\"lock\":false,\"y\":500,\"focusBack\":true}}"
+    },
+    {
+      "id": "reduced-motion@390 immediate, no travel, navigates",
+      "ok": true,
+      "d": "{\"calm\":{\"calm\":true,\"mainT\":\"none\",\"op\":\"1\"},\"panelT\":\"none\"}"
+    },
+    {
+      "id": "errors@390",
+      "ok": true,
+      "d": "no page or console errors"
+    },
+    {
+      "id": "nav@430 every row → its own step, at the top, named in the bar",
+      "ok": true,
+      "d": "30 transitions · panel under the bar · scrollY 0 · index closed · page entered"
+    },
+    {
+      "id": "open/close@430 keeps the page where it was",
+      "ok": true,
+      "d": "scrollY 600 → 600 → 600"
+    },
+    {
+      "id": "scrim@430 closes the index",
+      "ok": true,
+      "d": "tap outside → closed, still on 03"
+    },
+    {
+      "id": "current@430 row closes the index without navigating",
+      "ok": true,
+      "d": "same url · scrollY kept · closed"
+    },
+    {
+      "id": "back@430 returns to the previous step, whole",
+      "ok": true,
+      "d": "back → 03, page visible, index closed"
+    },
+    {
+      "id": "switch@430 Steffie navigates the same way",
+      "ok": true,
+      "d": "06 / 06 Review & Send · Steffie"
+    },
+    {
+      "id": "deeplink@430 #documents sits below the sticky bar",
+      "ok": true,
+      "d": "{\"top\":119,\"barBottom\":115,\"clear\":true}"
+    },
+    {
+      "id": "drawer@430 locks, labels, focuses, restores",
+      "ok": true,
+      "d": "{\"dr\":{\"open\":true,\"lock\":true,\"label\":\"Morning Alms-Giving · Tak Bat\",\"focusIn\":true},\"after\":{\"open\":false,\"lock\":false,\"y\":500,\"focusBack\":true}}"
+    },
+    {
+      "id": "reduced-motion@430 immediate, no travel, navigates",
+      "ok": true,
+      "d": "{\"calm\":{\"calm\":true,\"mainT\":\"none\",\"op\":\"1\"},\"panelT\":\"none\"}"
+    },
+    {
+      "id": "errors@430",
+      "ok": true,
+      "d": "no page or console errors"
+    },
+    {
+      "id": "nav@1280 every row → its own step, at the top, named in the bar",
+      "ok": true,
+      "d": "30 transitions · panel under the bar · scrollY 0 · index closed · page entered"
+    },
+    {
+      "id": "open/close@1280 keeps the page where it was",
+      "ok": true,
+      "d": "scrollY 600 → 600 → 600"
+    },
+    {
+      "id": "scrim@1280 closes the index",
+      "ok": true,
+      "d": "tap outside → closed, still on 03"
+    },
+    {
+      "id": "current@1280 row closes the index without navigating",
+      "ok": true,
+      "d": "same url · scrollY kept · closed"
+    },
+    {
+      "id": "back@1280 returns to the previous step, whole",
+      "ok": true,
+      "d": "back → 03, page visible, index closed"
+    },
+    {
+      "id": "switch@1280 Steffie navigates the same way",
+      "ok": true,
+      "d": "06 / 06 Review & Send · Steffie"
+    },
+    {
+      "id": "deeplink@1280 #documents sits below the sticky bar",
+      "ok": true,
+      "d": "{\"top\":117,\"barBottom\":113,\"clear\":true}"
+    },
+    {
+      "id": "drawer@1280 locks, labels, focuses, restores",
+      "ok": true,
+      "d": "{\"dr\":{\"open\":true,\"lock\":true,\"label\":\"Morning Alms-Giving · Tak Bat\",\"focusIn\":true},\"after\":{\"open\":false,\"lock\":false,\"y\":500,\"focusBack\":true}}"
+    },
+    {
+      "id": "reduced-motion@1280 immediate, no travel, navigates",
+      "ok": true,
+      "d": "{\"calm\":{\"calm\":true,\"mainT\":\"none\",\"op\":\"1\"},\"panelT\":\"none\"}"
+    },
+    {
+      "id": "errors@1280",
+      "ok": true,
+      "d": "no page or console errors"
+    }
+  ]
+}
