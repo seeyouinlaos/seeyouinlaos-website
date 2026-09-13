@@ -16,18 +16,18 @@
    Owner's binding geometry (override of 2026-09-11):
      CEREMONY  50 guest seats · LEFT 10 rows × 2 chairs = 20 · RIGHT 10 rows ×
                3 chairs = 30 · centre aisle · the asymmetry is deliberate
-     DINNER    one long table · 50 people · TOP 24 guest seats · BOTTOM 24 guest
-               seats = 48 guest seats · BRIDE and GROOM two fixed central
-               positions, never guest inventory, never selectable
-   NO FAMILY CHAIR IS CONFIGURED (Owner decision, 13 Sep 2026): there is no
-   preassigned family-seat mechanism. Every guest — the couple, hosts and
-   family included — holds a chair through this same ledger, in order of
-   booking; a chair once held is unavailable to the next guest. The `family`
-   flag below remains a validation option the uploaded geometry may carry,
-   unused until a future explicit Owner decision; it is never assumed and
-   never inferred from who a guest is. Until Guest Relations configures and
-   opens, both inventories are unconfigured and the guest sees SEATING NOT
-   OPEN YET.
+     DINNER    one long table · 50 people · TOP 25 guest seats · BOTTOM 25 guest
+               seats = 50 guest seats, every one of them bookable
+   NO CHAIR IS PREASSIGNED TO ANYONE (Owner decisions, 13 Sep 2026): there is
+   no family-seat mechanism and no fixed Bride/Groom position. Every guest —
+   the couple, hosts and family included — holds a chair through this same
+   ledger, in order of booking; the couple book two of the fifty dinner
+   chairs themselves, first, before the codes go out; a chair once held is
+   unavailable to the next guest. The `family` flag below remains a
+   validation option the uploaded geometry may carry, unused until a future
+   explicit Owner decision; it is never assumed and never inferred from who a
+   guest is. Until Guest Relations configures and opens, both inventories are
+   unconfigured and the guest sees SEATING NOT OPEN YET.
 
    Global state: SEATING_OPEN (guests may choose) and SEATING_FROZEN (guests
    see their authoritative allocation and cannot self-change; Guest Relations
@@ -37,12 +37,12 @@
 export const RULES = {
   /* C-L-[ROW]-[SEAT] · C-R-[ROW]-[SEAT] · rows 01–10 · left seats 01–02 · right seats 01–03 */
   ceremony: { rows: 10, perRow: { L: 2, R: 3 }, guestSeats: 50, id: /^C-([LR])-(0[1-9]|10)-(0[1-3])$/ },
-  /* D-T-01 … D-T-24 · D-B-01 … D-B-24 · BRIDE and GROOM fixed, outside the guest ids */
-  dinner:   { perSide: 24, guestSeats: 48, fixed: ['BRIDE', 'GROOM'], totalPeople: 50, id: /^D-([TB])-(0[1-9]|1[0-9]|2[0-4])$/ },
+  /* D-T-01 … D-T-25 · D-B-01 … D-B-25 · fifty chairs, no fixed position for anyone */
+  dinner:   { perSide: 25, guestSeats: 50, totalPeople: 50, id: /^D-([TB])-(0[1-9]|1[0-9]|2[0-5])$/ },
 };
 export const CAPACITY = {
   ceremony: { guestSeats: 50, left: 20, right: 30 },
-  dinner: { guestSeats: 48, top: 24, bottom: 24, fixed: 2, totalPeople: 50 },
+  dinner: { guestSeats: 50, top: 25, bottom: 25, totalPeople: 50 },
 };
 export const EVENTS = ['ceremony', 'dinner'];
 const MAX_PER_INVITATION = 6;   /* a party never holds more chairs than people it could have */
@@ -50,7 +50,7 @@ const HOLD = 'hold:';
 
 /* ---- the geometry contract ---------------------------------------------
  * ceremony: { rows: [ { side: 'L'|'R', row: n, seats: [ { seatId, family } ] } ] }
- * dinner:   { sides: { T: [ { seatId, family } ], B: [ ... ] } }   BRIDE/GROOM fixed, not seats
+ * dinner:   { sides: { T: [ { seatId, family } ], B: [ ... ] } }   25 + 25, nothing fixed
  * Either event may be null (not configured). Returns { ok, errors, config }. */
 export function validateGeometry(input) {
   const errors = [];
@@ -105,7 +105,7 @@ export function validateGeometry(input) {
       for (const s of list) {
         const seatId = String(s && s.seatId || '');
         const m = RULES.dinner.id.exec(seatId);
-        if (!m) { errors.push('dinner seat id ' + seatId + ' does not follow D-T-[01–24] / D-B-[01–24]'); continue; }
+        if (!m) { errors.push('dinner seat id ' + seatId + ' does not follow D-T-[01–25] / D-B-[01–25]'); continue; }
         if (m[1] !== side) errors.push('dinner seat ' + seatId + ' is not on its own side');
         if (ids.has(seatId)) errors.push('duplicate seat ' + seatId);
         ids.add(seatId);
@@ -114,8 +114,8 @@ export function validateGeometry(input) {
       if (norm[side].length !== RULES.dinner.perSide) errors.push('dinner ' + (side === 'T' ? 'top' : 'bottom') + ' must hold ' + RULES.dinner.perSide + ' guest seats, has ' + norm[side].length);
     }
     if (sides.L || sides.R) errors.push('dinner sides are T (top) and B (bottom); the retired L/R model is not accepted');
-    /* BRIDE and GROOM are fixed central positions — metadata, never guest seats, never selectable */
-    out.dinner = { sides: norm, fixed: RULES.dinner.fixed.slice(), totalPeople: RULES.dinner.totalPeople };
+    /* the couple hold two of these fifty like everyone else — nothing is fixed */
+    out.dinner = { sides: norm, totalPeople: RULES.dinner.totalPeople };
   }
   return { ok: errors.length === 0, errors, config: out };
 }
@@ -175,7 +175,7 @@ export class Seating {
       });
       out[event] = event === 'ceremony'
         ? (cfg.ceremony ? { rows: cfg.ceremony.rows.map((r) => ({ side: r.side, row: r.row, seats: r.seats.map((s) => seats.find((x) => x.seatId === s.seatId)) })) } : null)
-        : (cfg.dinner ? { sides: { T: seats.filter((s) => s.side === 'T'), B: seats.filter((s) => s.side === 'B') }, fixed: RULES.dinner.fixed.slice(), totalPeople: RULES.dinner.totalPeople } : null);
+        : (cfg.dinner ? { sides: { T: seats.filter((s) => s.side === 'T'), B: seats.filter((s) => s.side === 'B') }, totalPeople: RULES.dinner.totalPeople } : null);
     }
     return out;
   }
@@ -316,7 +316,7 @@ export class Seating {
           seats,
           guestSeats: seats.length,
           capacity: event === 'ceremony' ? { guestSeats: CAPACITY.ceremony.guestSeats, left: CAPACITY.ceremony.left, right: CAPACITY.ceremony.right }
-                                        : { guestSeats: CAPACITY.dinner.guestSeats, top: CAPACITY.dinner.top, bottom: CAPACITY.dinner.bottom, fixed: RULES.dinner.fixed.slice(), totalPeople: CAPACITY.dinner.totalPeople },
+                                        : { guestSeats: CAPACITY.dinner.guestSeats, top: CAPACITY.dinner.top, bottom: CAPACITY.dinner.bottom, totalPeople: CAPACITY.dinner.totalPeople },
           family: seats.filter((s) => s.family).length,
           held: seats.filter((s) => s.state === 'held').length,
           allocated: seats.filter((s) => s.state === 'allocated').length,

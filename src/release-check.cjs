@@ -319,9 +319,9 @@ gate('P3', 'MASTER-02 programme truth (four events, no active Alms, no pool in v
     if (/seatId:\s*'[CD]-[LRTB]-\d|'C-[LR]-\d+-\d+'|'D-[LRTB]-\d+'/.test(read(f))) bad.push(f + ' carries production geometry');
   }
   if (!/new_sqlite_classes": \["Seating"\]/.test(read('wrangler.jsonc'))) bad.push('the seating object is not migrated');
-  /* the Owner override: 50 guest seats (20 + 30), 48 + BRIDE + GROOM = 50 people; the retired 40 / 20+20 truth must not be active */
+  /* the Owner geometry: ceremony 50 guest seats (20 + 30); dinner 50 bookable chairs (25 + 25), nothing fixed for anyone (Owner decision 13 Sep 2026 — no Bride/Groom position, no family chair); the retired 40 / 20+20 truth must not be active */
   const led = read('src/seating.js');
-  if (!/guestSeats: 50, left: 20, right: 30/.test(led) || !/guestSeats: 48, top: 24, bottom: 24, fixed: 2, totalPeople: 50/.test(led)) bad.push('the seating capacity contract is not the Owner geometry');
+  if (!/guestSeats: 50, left: 20, right: 30/.test(led) || !/guestSeats: 50, top: 25, bottom: 25, totalPeople: 50/.test(led) || /fixed: \['BRIDE', 'GROOM'\]/.test(led)) bad.push('the seating capacity contract is not the Owner geometry');
   if (/perSide: 20|40 guest|20 \+ 20|34 selectable/.test(led + read('assets/seating.js'))) bad.push('retired 40-seat truth is still active');
   gate('P11', 'E/F/G: explicit eligibility, protected confirmation, geometry-free seating ledger',
     bad.length === 0, bad.length ? bad.join(' · ') : 'PAIR/NONE/unresolved only · GR token gate with constant-time compare · no geometry in code · token never in assets or git');
