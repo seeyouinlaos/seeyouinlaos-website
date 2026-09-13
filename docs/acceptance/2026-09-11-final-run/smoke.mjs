@@ -1,6 +1,7 @@
 /* FINAL RUN · read-only production smoke on one origin: open the invitation with
    the real code, choose Peggy, read the real status from the Worker, confirm
-   seating is closed and the Sangkhathan is withheld. Nothing is written. */
+   seating is OPEN at the binding geometry (Owner decision 13 Sep 2026) and the
+   Sangkhathan is withheld. Nothing is written. */
 import { chromium } from '/Users/thongantang/.npm-global/lib/node_modules/playwright/index.mjs';
 import fs from 'node:fs';
 const ORIGIN = process.argv[2];
@@ -22,7 +23,15 @@ await p.goto(ORIGIN + '/your-journey.html', { waitUntil: 'networkidle' }); await
 note('shell status on another step', /Review & Send\s*Received/i.test((await p.locator('.prep-steps').innerText().catch(() => '')).replace(/\s+/g, ' ')) || true, 'steps: ' + (await p.locator('.prep-steps').innerText().catch(() => '')).replace(/\s+/g, ' ').slice(0, 160));
 await p.goto(ORIGIN + '/wedding-preparation.html', { waitUntil: 'networkidle' }); await p.waitForTimeout(1000);
 const seats = (await p.locator('#seats').innerText()).replace(/\s+/g, ' ');
-note('seating closed', /Not open yet/i.test(seats) && (await p.locator('#seats svg').count()) === 0, 'production: ' + seats.slice(0, 80));
+/* Owner decision 13 Sep 2026: seating is OPEN at the binding geometry — the
+   ceremony rows (50) and the long table (48 + BRIDE + GROOM) are drawn from
+   the server's configuration, no chair is RESERVED · FAMILY, and reading the
+   plan writes nothing. */
+const maps = await p.locator('#seats svg.p-seatmap').count();
+const chairs = await p.locator('#seats svg.p-seatmap g.seat').count();
+const family = await p.locator('#seats svg.p-seatmap g.seat-family').count();
+const fixed = (await p.locator('#seats svg.p-seatmap g.fixed[aria-label="BRIDE and GROOM, fixed central positions"]').count()) === 1;
+note('seating open', /seating is open/i.test(seats) && maps === 2 && chairs === 98 && family === 0 && fixed && !/Reserved · family/i.test(seats), 'production: ' + maps + ' plans · ' + chairs + ' chairs (50 + 48) · family chairs ' + family + ' · ' + seats.slice(0, 60));
 await p.goto(ORIGIN + '/wedding.html', { waitUntil: 'networkidle' }); await p.waitForTimeout(600);
 const sang = (await p.locator('#sangkhathan').innerText()).replace(/\s+/g, ' ');
 note('sangkhathan withheld', (await p.locator('#sangkhathan [data-off]').count()) === 0 && !/USD 30/.test(sang), sang.slice(0, 100));

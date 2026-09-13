@@ -6,6 +6,10 @@
   `https://drive.google.com/drive/folders/1eT2eSEt2kB0ZHO2bGsfvJRTzeLqhRQnS`
   Contains the H&S Wedding Operations Master spreadsheet and the 008 Drive change
   logs. **No image folders.** It is a documents root, not an asset library.
+- Drive C — Wedding Dinner set (Owner, 13 Sep 2026)
+  `https://drive.google.com/drive/folders/1rLttJkzr3iuQgVBsmGppMmD4my3LfVM3`
+  Folder `056 - Event - Wedding Dinner`, 10 files, the authoritative source for
+  every Wedding Dinner image. All 10 are mapped below; six are placed.
 - Drive B — Image library
   `https://drive.google.com/drive/folders/1CSJtMKw2XuQf8YwFyq9UkjFHAIdHoVcJ`
   ~65 semantic folders: City, Hotel, Event, Experience, Transport, Restaurant,
@@ -31,7 +35,17 @@ page context must all agree before an asset is used.
 | event/051-coffee-and-cake-patisserie.jpg | B | 051 - Event - Cake and Coffee | Heritage_0354.jpg | Cake stand, patisserie, desserts | Wedding event: Coffee & Cake | ACTIVE |
 | event/051-coffee-and-cake-salon.jpg | B | 051 - Event - Cake and Coffee | Heritage_0180.jpg | Heritage salon where it is served | Coffee & Cake venue, secondary | ACTIVE |
 | event/052-vow-ceremony-green-door.jpg | B | 012 - Hotel - Souphattra Heritage Vientiane | DSC09069.webp | The green door, carved medallion, arched frame, leaf shadow. No pool. | Wedding event: Vow Ceremony | ACTIVE — new this pass |
-| event/053-wedding-dinner-courtyard-garden.jpg | B | 012 - Hotel - Souphattra Heritage Vientiane | Heritage_0605.jpg | Courtyard garden with fountain, where the dinner is served | Wedding event: Wedding Dinner (venue) | ACTIVE — new this pass |
+| event/053-wedding-dinner-courtyard-from-above.jpg | Owner | 056 - Event - Wedding Dinner | Copy of caption (8).jpg | The courtyard garden seen from above, hedges and the heritage houses (portrait) | Wedding Dinner lead image (voyage.html §04 pair) | ACTIVE — Owner decision 13 Sep 2026 |
+| event/053-wedding-dinner-sharing-menu.jpg | Owner | 056 - Event - Wedding Dinner | 700014883_122214825182553123_4439586546343798638_n.jpg | Bamboo steamers of dim sum — the Chinese sharing menu (square) | Wedding Dinner duo, left (voyage.html) | ACTIVE — Owner decision 13 Sep 2026 (file unchanged, now mapped) |
+| event/053-wedding-dinner-sharing-menu-table.jpg | Owner | 056 - Event - Wedding Dinner | 738745350_122221145570553123_3849906703421558048_n.jpg | The sharing menu set at the table — steamers, dark plate, chopsticks (square) | Wedding Dinner duo, right (voyage.html) | ACTIVE — Owner decision 13 Sep 2026 |
+| event/053-wedding-dinner-courtyard-wide.jpg | Owner | 056 - Event - Wedding Dinner | Copy of DSC09013-scaled.webp | The courtyard garden, wide, heritage houses on every side | Wedding Dinner band (voyage.html) | ACTIVE — Owner decision 13 Sep 2026 |
+| event/053-wedding-dinner-courtyard-gallery-view.jpg | Owner | 056 - Event - Wedding Dinner | Copy of DSC00168-1.webp | The courtyard garden from the upper gallery, through the trees | Wedding Dinner second duo, left (voyage.html) | ACTIVE — Owner decision 13 Sep 2026 |
+| event/053-wedding-dinner-courtyard-villa.jpg | Owner | 056 - Event - Wedding Dinner | Copy of DSC09021-scaled.webp | The heritage villa across the courtyard garden | Wedding Dinner second duo, right (voyage.html) | ACTIVE — Owner decision 13 Sep 2026 |
+| event/053-wedding-dinner-garden-terrace.jpg | Owner | 056 - Event - Wedding Dinner | Copy of 555880718.jpg | Garden terrace seating among the greenery (1024 px) | Wedding Dinner set — mapped, not placed (below the frame resolution of the pair/duo slots) | MAPPED — Owner decision 13 Sep 2026 (file unchanged) |
+| event/053-wedding-dinner-courtyard-loungers.jpg | Owner | 056 - Event - Wedding Dinner | Copy of DSC00025-scaled.webp | The courtyard garden from the side, loungers under the trees | Wedding Dinner set — mapped, not placed (near-duplicate of the wide view) | MAPPED — Owner decision 13 Sep 2026 |
+| event/053-wedding-dinner-courtyard-across-the-water.jpg | Owner | 056 - Event - Wedding Dinner | Copy of 1mc2112000e283a30C8DF_W_1280_853_R5.webp | The courtyard garden seen across the water (1280 px) | Wedding Dinner set — mapped, not placed (near-duplicate, lower resolution) | MAPPED — Owner decision 13 Sep 2026 |
+| event/053-wedding-dinner-sharing-menu-portrait.jpg | Owner | 056 - Event - Wedding Dinner | Screenshot 2026-09-05 at 10.20.23.png | Dim sum flat-lay, portrait — a screen capture of the same subject as the two originals | Wedding Dinner set — mapped, not placed (screen capture; the two originals are placed) | MAPPED — Owner decision 13 Sep 2026 |
+| ~~event/053-wedding-dinner-courtyard-garden.jpg~~ | B | 012 - Hotel - Souphattra Heritage Vientiane | Heritage_0605.jpg | Courtyard garden with fountain | was the Wedding Dinner venue image | RETIRED 13 Sep 2026 — not from the Wedding Dinner folder; file deleted, never referenced (gate P8 keeps it off the page) |
 | marsilea/*.jpg (13 files) | Owner PDF | Marsilea-Spa-Menu.pdf | reception, treatment room, body massage, facial products, scrub, therapist, singing bowl, oils, Jurlique tray, sauna, therapist silhouette | Laos > Vientiane > Wellness > Marsilea Spa | ACTIVE |
 
 Property imagery stays property imagery. Bangkok stays use the penthouse and
