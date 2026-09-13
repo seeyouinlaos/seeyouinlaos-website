@@ -712,6 +712,8 @@
   E("The Chao Phraya river and the Bangkok skyline", "Der Chao-Phraya-Fluss und die Skyline von Bangkok", "แม่น้ำเจ้าพระยาและเส้นขอบฟ้ากรุงเทพฯ", "チャオプラヤー川とバンコクのスカイライン");
   E("Patuxai and the fountain park in Vientiane at twilight", "Patuxai und der Brunnenpark in Vientiane in der Dämmerung", "ปะตูไซและสวนน้ำพุในเวียงจันทน์ยามพลบค่ำ", "夕暮れのビエンチャン、パトゥーサイと噴水公園");
   E("The Golden Horse and Jade Rooster archways in Kunming", "Die Torbögen von Goldenem Pferd und Jade-Hahn in Kunming", "ซุ้มประตูม้าทองและไก่หยกในคุนหมิง", "昆明の金馬・碧鶏坊");
+  E("Temple roofs and cherry blossom in Kunming", "Tempeldächer und Kirschblüte in Kunming", "หลังคาวัดและซากุระบานในคุนหมิง", "昆明の寺院の屋根と桜");
+  E("The entrance of Wanxiang Yueju, Kunming, at night", "Der Eingang des Wanxiang Yueju in Kunming bei Nacht", "ทางเข้าของว่านเซียงเยว่จวี คุนหมิง ยามค่ำคืน", "夜の万象悦居（昆明）のエントランス");
   E("The tiled roofs of Lijiang old town below Jade Dragon Snow Mountain", "Die Ziegeldächer der Altstadt von Lijiang unter dem Jadedrachen-Schneeberg", "หลังคากระเบื้องของเมืองเก่าลี่เจียง เบื้องหลังคือภูเขาหิมะมังกรหยก", "玉龍雪山を望む麗江古城の瓦屋根");
   E("A rooftop terrace over Vientiane at dusk, the sun low over the city", "Eine Dachterrasse über Vientiane in der Abenddämmerung, die Sonne tief über der Stadt", "ระเบียงดาดฟ้าเหนือเวียงจันทน์ยามโพล้เพล้ ดวงอาทิตย์คล้อยต่ำเหนือเมือง", "夕暮れのビエンチャンを見渡す屋上テラス、街の上に低く沈む太陽");
   E("Two BTS Skytrain carriages above the street, King Power Mahanakhon behind them, Bangkok", "Zwei BTS-Skytrain-Wagen über der Straße, dahinter der King Power Mahanakhon, Bangkok", "รถไฟฟ้าบีทีเอสสองขบวนเหนือถนน เบื้องหลังคือตึกคิง เพาเวอร์ มหานคร กรุงเทพฯ", "通りの上を走るBTSスカイトレインの車両2本、その背後にキングパワー・マハナコーン、バンコク");

@@ -336,7 +336,7 @@
       place: 'Kunming Railway Station MixC Branch',
       breakfast: 'Breakfast not included · self-pay',
       windows: [{ id: 'kmg', label: 'After the Wedding', dates: '01 – 04 March 2027', nights: '3 nights', n: 3,
-        bagName: 'Wanxiang Yueju · Kunming', bagImg: 'assets/images/journey/kunming-01.jpg' }],
+        bagName: 'Wanxiang Yueju · Kunming', bagImg: 'assets/images/journey/kunming-wanxiang-yueju-entrance.jpg' }],
       includes: [
         'Three nights, 1 → 2, 2 → 3 and 3 → 4 March, in the room category you choose.',
         'Free Wi-Fi, air conditioning and daily housekeeping in every category.',
