@@ -412,6 +412,16 @@ test('G · the renderer draws only what it is given: rows facing the ceremony, o
   /* nothing drawn without configuration */
   assert.equal((S.svg('ceremony', { ceremony: null }, {}).match(/<g class="seat/g) || []).length, 0);
   /* states are said in words, never colour alone */
-  assert.match(S.legend(), /Selected by you/); assert.match(S.legend(), /Reserved · family/); assert.match(S.legend(), /Taken/);
+  assert.match(S.legend(), /Selected by you/); assert.match(S.legend(), /Taken/);
+  /* RESERVED · FAMILY is a state only where the plan carries such a chair: the
+   * fixture does, production does not (Owner decision 13 Sep 2026 — no
+   * preassigned family-seat mechanism), and the legend never lists a state no
+   * chair on the plan can have */
+  assert.match(S.legend({ view }), /Reserved · family/, 'the fixture plan marks family chairs, so the legend names the state');
+  assert.doesNotMatch(S.legend(), /Reserved · family/, 'with no plan, or a plan without family chairs, the state is not offered');
+  const bare = { ceremony: { rows: view.ceremony.rows.map((r) => ({ ...r, seats: r.seats.map((x) => ({ ...x, state: x.state === 'family' ? 'available' : x.state })) })) }, dinner: view.dinner };
+  bare.dinner = { sides: { T: view.dinner.sides.T.map((x) => ({ ...x, state: x.state === 'family' ? 'available' : x.state })), B: view.dinner.sides.B.map((x) => ({ ...x, state: x.state === 'family' ? 'available' : x.state })) }, fixed: view.dinner.fixed, totalPeople: view.dinner.totalPeople };
+  assert.doesNotMatch(S.legend({ view: bare }), /Reserved · family/, 'a plan with every chair bookable lists no family state');
+  assert.equal(S.hasFamily(bare), false); assert.equal(S.hasFamily(view), true);
   assert.doesNotMatch(src('assets/seating.js'), /#(ff0000|00ff00|e53935|43a047|2196f3)/i, 'no airline colours');
 });

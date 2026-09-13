@@ -8,7 +8,11 @@
    plan of its own — and asks the server, never itself, to hold a chair.
 
    States, in words and never by colour alone:
-     AVAILABLE · SELECTED BY YOU · YOUR PARTY · RESERVED — FAMILY · TAKEN
+     AVAILABLE · SELECTED BY YOU · YOUR PARTY · TAKEN · (RESERVED — FAMILY only
+     where the floor plan actually marks such a chair; the Owner's decision of
+     13 Sep 2026 configures none — every guest, the couple included, holds a
+     chair through the same ledger, and the legend never lists a state that
+     no chair on the plan can have)
    Bride & Groom are two fixed central positions at the dinner table — part of
    the 50 people, never guest inventory, never selectable.
 
@@ -159,9 +163,17 @@
       return h2 + '</svg>';
     },
 
+    /* does the plan as configured carry any RESERVED · FAMILY chair at all */
+    hasFamily: function (v) {
+      v = v || view; if (!v) return false;
+      var c = !!(v.ceremony && v.ceremony.rows) && v.ceremony.rows.some(function (r) { return (r.seats || []).some(function (s) { return s && s.state === 'family'; }); });
+      var d = !!(v.dinner && v.dinner.sides) && ['T', 'B'].some(function (side) { return (v.dinner.sides[side] || []).some(function (s) { return s && s.state === 'family'; }); });
+      return c || d;
+    },
     legend: function (opts) {
-      var w = S.words(opts);
-      return '<ul class="p-seatlegend">' + ['available', 'yours', 'party', 'family', 'taken'].filter(function (k) { return w[k]; }).map(function (k) {
+      opts = opts || {};
+      var w = S.words(opts), family = S.hasFamily(opts.view || view);
+      return '<ul class="p-seatlegend">' + ['available', 'yours', 'party', 'family', 'taken'].filter(function (k) { return w[k] && (k !== 'family' || family); }).map(function (k) {
         return '<li class="t-l1"><span class="seat-' + k + '"></span>' + w[k] + '</li>'; }).join('') + '</ul>';
     },
 

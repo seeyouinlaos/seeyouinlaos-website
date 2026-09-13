@@ -1,0 +1,428 @@
+{
+ "ceremony": {
+  "rows": [
+   {
+    "side": "L",
+    "row": 1,
+    "seats": [
+     {
+      "seatId": "C-L-01-01"
+     },
+     {
+      "seatId": "C-L-01-02"
+     }
+    ]
+   },
+   {
+    "side": "R",
+    "row": 1,
+    "seats": [
+     {
+      "seatId": "C-R-01-01"
+     },
+     {
+      "seatId": "C-R-01-02"
+     },
+     {
+      "seatId": "C-R-01-03"
+     }
+    ]
+   },
+   {
+    "side": "L",
+    "row": 2,
+    "seats": [
+     {
+      "seatId": "C-L-02-01"
+     },
+     {
+      "seatId": "C-L-02-02"
+     }
+    ]
+   },
+   {
+    "side": "R",
+    "row": 2,
+    "seats": [
+     {
+      "seatId": "C-R-02-01"
+     },
+     {
+      "seatId": "C-R-02-02"
+     },
+     {
+      "seatId": "C-R-02-03"
+     }
+    ]
+   },
+   {
+    "side": "L",
+    "row": 3,
+    "seats": [
+     {
+      "seatId": "C-L-03-01"
+     },
+     {
+      "seatId": "C-L-03-02"
+     }
+    ]
+   },
+   {
+    "side": "R",
+    "row": 3,
+    "seats": [
+     {
+      "seatId": "C-R-03-01"
+     },
+     {
+      "seatId": "C-R-03-02"
+     },
+     {
+      "seatId": "C-R-03-03"
+     }
+    ]
+   },
+   {
+    "side": "L",
+    "row": 4,
+    "seats": [
+     {
+      "seatId": "C-L-04-01"
+     },
+     {
+      "seatId": "C-L-04-02"
+     }
+    ]
+   },
+   {
+    "side": "R",
+    "row": 4,
+    "seats": [
+     {
+      "seatId": "C-R-04-01"
+     },
+     {
+      "seatId": "C-R-04-02"
+     },
+     {
+      "seatId": "C-R-04-03"
+     }
+    ]
+   },
+   {
+    "side": "L",
+    "row": 5,
+    "seats": [
+     {
+      "seatId": "C-L-05-01"
+     },
+     {
+      "seatId": "C-L-05-02"
+     }
+    ]
+   },
+   {
+    "side": "R",
+    "row": 5,
+    "seats": [
+     {
+      "seatId": "C-R-05-01"
+     },
+     {
+      "seatId": "C-R-05-02"
+     },
+     {
+      "seatId": "C-R-05-03"
+     }
+    ]
+   },
+   {
+    "side": "L",
+    "row": 6,
+    "seats": [
+     {
+      "seatId": "C-L-06-01"
+     },
+     {
+      "seatId": "C-L-06-02"
+     }
+    ]
+   },
+   {
+    "side": "R",
+    "row": 6,
+    "seats": [
+     {
+      "seatId": "C-R-06-01"
+     },
+     {
+      "seatId": "C-R-06-02"
+     },
+     {
+      "seatId": "C-R-06-03"
+     }
+    ]
+   },
+   {
+    "side": "L",
+    "row": 7,
+    "seats": [
+     {
+      "seatId": "C-L-07-01"
+     },
+     {
+      "seatId": "C-L-07-02"
+     }
+    ]
+   },
+   {
+    "side": "R",
+    "row": 7,
+    "seats": [
+     {
+      "seatId": "C-R-07-01"
+     },
+     {
+      "seatId": "C-R-07-02"
+     },
+     {
+      "seatId": "C-R-07-03"
+     }
+    ]
+   },
+   {
+    "side": "L",
+    "row": 8,
+    "seats": [
+     {
+      "seatId": "C-L-08-01"
+     },
+     {
+      "seatId": "C-L-08-02"
+     }
+    ]
+   },
+   {
+    "side": "R",
+    "row": 8,
+    "seats": [
+     {
+      "seatId": "C-R-08-01"
+     },
+     {
+      "seatId": "C-R-08-02"
+     },
+     {
+      "seatId": "C-R-08-03"
+     }
+    ]
+   },
+   {
+    "side": "L",
+    "row": 9,
+    "seats": [
+     {
+      "seatId": "C-L-09-01"
+     },
+     {
+      "seatId": "C-L-09-02"
+     }
+    ]
+   },
+   {
+    "side": "R",
+    "row": 9,
+    "seats": [
+     {
+      "seatId": "C-R-09-01"
+     },
+     {
+      "seatId": "C-R-09-02"
+     },
+     {
+      "seatId": "C-R-09-03"
+     }
+    ]
+   },
+   {
+    "side": "L",
+    "row": 10,
+    "seats": [
+     {
+      "seatId": "C-L-10-01"
+     },
+     {
+      "seatId": "C-L-10-02"
+     }
+    ]
+   },
+   {
+    "side": "R",
+    "row": 10,
+    "seats": [
+     {
+      "seatId": "C-R-10-01"
+     },
+     {
+      "seatId": "C-R-10-02"
+     },
+     {
+      "seatId": "C-R-10-03"
+     }
+    ]
+   }
+  ]
+ },
+ "dinner": {
+  "sides": {
+   "T": [
+    {
+     "seatId": "D-T-01"
+    },
+    {
+     "seatId": "D-T-02"
+    },
+    {
+     "seatId": "D-T-03"
+    },
+    {
+     "seatId": "D-T-04"
+    },
+    {
+     "seatId": "D-T-05"
+    },
+    {
+     "seatId": "D-T-06"
+    },
+    {
+     "seatId": "D-T-07"
+    },
+    {
+     "seatId": "D-T-08"
+    },
+    {
+     "seatId": "D-T-09"
+    },
+    {
+     "seatId": "D-T-10"
+    },
+    {
+     "seatId": "D-T-11"
+    },
+    {
+     "seatId": "D-T-12"
+    },
+    {
+     "seatId": "D-T-13"
+    },
+    {
+     "seatId": "D-T-14"
+    },
+    {
+     "seatId": "D-T-15"
+    },
+    {
+     "seatId": "D-T-16"
+    },
+    {
+     "seatId": "D-T-17"
+    },
+    {
+     "seatId": "D-T-18"
+    },
+    {
+     "seatId": "D-T-19"
+    },
+    {
+     "seatId": "D-T-20"
+    },
+    {
+     "seatId": "D-T-21"
+    },
+    {
+     "seatId": "D-T-22"
+    },
+    {
+     "seatId": "D-T-23"
+    },
+    {
+     "seatId": "D-T-24"
+    }
+   ],
+   "B": [
+    {
+     "seatId": "D-B-01"
+    },
+    {
+     "seatId": "D-B-02"
+    },
+    {
+     "seatId": "D-B-03"
+    },
+    {
+     "seatId": "D-B-04"
+    },
+    {
+     "seatId": "D-B-05"
+    },
+    {
+     "seatId": "D-B-06"
+    },
+    {
+     "seatId": "D-B-07"
+    },
+    {
+     "seatId": "D-B-08"
+    },
+    {
+     "seatId": "D-B-09"
+    },
+    {
+     "seatId": "D-B-10"
+    },
+    {
+     "seatId": "D-B-11"
+    },
+    {
+     "seatId": "D-B-12"
+    },
+    {
+     "seatId": "D-B-13"
+    },
+    {
+     "seatId": "D-B-14"
+    },
+    {
+     "seatId": "D-B-15"
+    },
+    {
+     "seatId": "D-B-16"
+    },
+    {
+     "seatId": "D-B-17"
+    },
+    {
+     "seatId": "D-B-18"
+    },
+    {
+     "seatId": "D-B-19"
+    },
+    {
+     "seatId": "D-B-20"
+    },
+    {
+     "seatId": "D-B-21"
+    },
+    {
+     "seatId": "D-B-22"
+    },
+    {
+     "seatId": "D-B-23"
+    },
+    {
+     "seatId": "D-B-24"
+    }
+   ]
+  }
+ }
+}

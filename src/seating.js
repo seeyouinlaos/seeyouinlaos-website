@@ -19,10 +19,15 @@
      DINNER    one long table · 50 people · TOP 24 guest seats · BOTTOM 24 guest
                seats = 48 guest seats · BRIDE and GROOM two fixed central
                positions, never guest inventory, never selectable
-   FAMILY chairs (six per event, conceptually) stay RESERVED · FAMILY when the
-   configuration marks them; their exact ids are unresolved and are never
-   assumed. Until Guest Relations configures and opens, both inventories are
-   unconfigured and the guest sees SEATING NOT OPEN YET.
+   NO FAMILY CHAIR IS CONFIGURED (Owner decision, 13 Sep 2026): there is no
+   preassigned family-seat mechanism. Every guest — the couple, hosts and
+   family included — holds a chair through this same ledger, in order of
+   booking; a chair once held is unavailable to the next guest. The `family`
+   flag below remains a validation option the uploaded geometry may carry,
+   unused until a future explicit Owner decision; it is never assumed and
+   never inferred from who a guest is. Until Guest Relations configures and
+   opens, both inventories are unconfigured and the guest sees SEATING NOT
+   OPEN YET.
 
    Global state: SEATING_OPEN (guests may choose) and SEATING_FROZEN (guests
    see their authoritative allocation and cannot self-change; Guest Relations

@@ -4,7 +4,7 @@
  * Run: npm test */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync, existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
@@ -1019,9 +1019,18 @@ test('the retired imagery and the pool-side dinner narrative are gone', () => {
   assert.match(vy, /052-vow-ceremony-green-door\.jpg/);
   const vow = vy.slice(vy.indexOf('id="vows"'), vy.indexOf('id="vows"') + 700);
   assert.ok(!/pool/i.test(vow));
-  /* the new wedding-dinner imagery is in place */
-  /* the lounge chairs and the dim-sum are gone: the dinner is a clean placeholder until a long-table photograph exists, and the stay is shown as a room */
-  assert.doesNotMatch(vy, /053-wedding-dinner-garden-terrace|053-wedding-dinner-sharing-menu/);
-  assert.match(vy, /am-placeholder/);
+  /* the wedding-dinner imagery is the Owner's set (decision of 13 Sep 2026:
+   * folder "056 - Event - Wedding Dinner" is the authoritative source — the
+   * courtyard garden and the Chinese sharing menu, never one image, never a
+   * placeholder, never a photograph from another event). This supersedes the
+   * Haruthai-pass placeholder, which waited for a long-table photograph that
+   * the Owner's set does not contain. The stay is still shown as a room. */
+  assert.doesNotMatch(vy, /am-placeholder|Photograph to follow/);
+  const dinnerImages = vy.match(/053-wedding-dinner-[a-z-]+\.jpg/g) || [];
+  assert.ok(new Set(dinnerImages).size >= 4, 'several images from the Wedding Dinner set, not one: ' + dinnerImages.join(', '));
+  assert.match(vy, /053-wedding-dinner-courtyard-from-above\.jpg/, 'the lead image is the courtyard garden');
+  assert.match(vy, /053-wedding-dinner-sharing-menu\.jpg[\s\S]{0,600}053-wedding-dinner-sharing-menu-table\.jpg/, 'the sharing menu is shown as a pair');
+  for (const f of dinnerImages) assert.ok(existsSync(join(ROOT, 'assets/images/event', f)), f + ' is not in the asset set');
+  assert.ok(!existsSync(join(ROOT, 'assets/images/event/053-wedding-dinner-courtyard-garden.jpg')), 'the fountain file (not from the Wedding Dinner folder) is retired');
   assert.match(vy, /souphattra\/heritage-room\.jpg/);
 });
