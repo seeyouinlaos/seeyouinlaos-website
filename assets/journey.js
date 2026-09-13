@@ -44,7 +44,7 @@
    * therefore sorts between wedstay (3) and mu9646 (4); it is never appended
    * to the end of the journey because it happens to have been added last. */
   var AT = { '1872': 0.5, 'sangkhathan': 3.5 };
-  var AT_WHEN = { '1872': '21 – 24 FEB', 'sangkhathan': '28 FEB' };
+  var AT_WHEN = { '1872': '21 – 24 FEB', 'sangkhathan': '28 FEB', 'suhring': 'BANGKOK DAYS' };
 
   /* the wedding programme, in the order the day itself runs. Only items that
    * exist as products carry an id; the day is described, not invented. */
@@ -84,6 +84,10 @@
     meta: function (x) {
       var P = window.SIYL_PRICE;
       if (x.interest && x.id !== 'airbnb-2br') return { cat: 'Wellness', basis: 'Interest · confirmed and payable at the spa', unit: 'treatment' };
+      /* a RESTAURANT REQUEST (Owner, 13 Sep 2026): the table is asked for through
+       * Guest Relations; the source price is shown as recorded and never
+       * multiplied, because the source does not say per guest or per menu */
+      if (x.request) return { cat: 'Restaurant', basis: 'Request · ' + (x.priceNote || '') + ' as recorded by the hosts · a table asked for through Guest Relations, not a confirmed reservation', unit: 'request' };
       if (!P) return { cat: '', basis: '', unit: 'guest' };
       var f = P.FLAT[x.id];
       if (f) {
@@ -100,7 +104,7 @@
     /* "USD 85 per person × 2 guests" / "1 experience · for two guests" */
     quantityLine: function (x) {
       var m = this.meta(x), q = x.qty || 1;
-      if (x.interest) return '';
+      if (x.interest || x.request) return '';
       if (x.price == null) return '';
       if (m.unit === 'experience') {
         return q + (q === 1 ? ' experience · for two guests' : ' experiences · for ' + (q * 2) + ' guests');

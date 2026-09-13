@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Experience · See You In Laos</title>
+<link rel="stylesheet" href="assets/recon.css">
+<link rel="stylesheet" href="assets/aman.css">
+<style>
+/* ONE place: its photographs, its words, and — where the hosts offer it — the
+   Journey action. Same grammar as every editorial page; nothing new is invented. */
+.x-wrap { max-width: 1180px; margin: 0 auto; }
+.x-gal { margin: 0 0 34px; }
+.x-head { padding: 0 var(--a-gut); max-width: 760px; }
+.x-head .a-eyebrow { margin-bottom: 14px; }
+.x-head h1 { font-family: 'PP Editorial Old', Georgia, serif; font-weight: 200; font-size: 31px; line-height: 1.22; letter-spacing: .3px; margin: 0 0 16px; }
+.x-lede { font-size: 14px; line-height: 1.85; color: #4A4A4A; max-width: 32em; }
+.x-ctx { font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 10px; letter-spacing: 2.2px; text-transform: uppercase; color: var(--a-mute); line-height: 1.9; margin-top: 22px; }
+.x-sec { padding: 0 var(--a-gut); max-width: 760px; margin-top: 52px; }
+.x-sec h2 { font-family: 'PP Editorial Old', Georgia, serif; font-weight: 200; font-size: 24px; line-height: 1.3; margin: 8px 0 14px; }
+.x-sec p { font-size: 13.5px; line-height: 1.85; color: #4A4A4A; max-width: 32em; margin-bottom: 12px; }
+.x-acc { border-top: 1px solid var(--a-line); margin-top: 26px; }
+.x-acc > div { border-bottom: 1px solid var(--a-line); }
+.x-acc button { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 14px; background: none; border: 0; padding: 18px 0; font: inherit; cursor: pointer; min-height: 56px; text-align: left; color: var(--a-ink); }
+.x-acc button .k { font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 10px; letter-spacing: 2.2px; text-transform: uppercase; color: var(--a-mute); display: block; margin-bottom: 5px; }
+.x-acc button .t { font-family: 'PP Editorial Old', Georgia, serif; font-weight: 200; font-size: 21px; line-height: 1.25; display: block; }
+.x-acc button .x { font-size: 20px; line-height: 1; color: var(--a-mute); flex: 0 0 auto; width: 24px; text-align: center; transition: transform .24s; }
+.x-acc button[aria-expanded="true"] .x { transform: rotate(45deg); }
+.x-acc .in { display: none; padding: 0 0 22px; }
+.x-acc .in.on { display: block; }
+.x-acc .in .by { font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 10px; letter-spacing: 2.2px; text-transform: uppercase; color: var(--a-mute); }
+.x-kv { display: grid; grid-template-columns: 1fr; gap: 0; border-top: 1px solid var(--a-line); margin-top: 22px; }
+.x-kv > div { display: grid; grid-template-columns: 112px 1fr; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--a-line); align-items: baseline; }
+.x-kv .k { font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 10px; letter-spacing: 2.2px; text-transform: uppercase; color: var(--a-mute); }
+.x-kv .v { font-size: 13.5px; line-height: 1.75; color: var(--a-ink); }
+.x-kv .v .price { font-family: 'PP Editorial Old', Georgia, serif; font-weight: 200; font-size: 22px; line-height: 1.2; display: block; margin-bottom: 4px; }
+.x-kv .v small { display: block; font-size: 12px; line-height: 1.7; color: #4A4A4A; max-width: 30em; }
+.x-links { display: flex; flex-wrap: wrap; gap: 22px; margin-top: 18px; }
+.x-sel { margin: 60px var(--a-gut) 0; max-width: 760px; background: #FCFAF6; padding: 30px 24px 32px; }
+.x-sel h2 { font-family: 'PP Editorial Old', Georgia, serif; font-weight: 200; font-size: 25px; line-height: 1.25; margin: 12px 0 12px; }
+.x-sel .price { font-family: 'PP Editorial Old', Georgia, serif; font-weight: 200; font-size: 19px; }
+.x-sel p { font-size: 13px; line-height: 1.8; color: #4A4A4A; max-width: 32em; margin: 8px 0 0; }
+.x-cta { display: block; width: 100%; background: var(--a-ink); color: #F3EEE7; border: 0; padding: 19px; font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 11px; letter-spacing: 2.2px; text-transform: uppercase; cursor: pointer; min-height: 52px; text-align: center; margin-top: 24px; text-decoration: none; }
+.x-cta:focus-visible { outline: 2px solid var(--a-ink); outline-offset: 3px; }
+.x-cur { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 24px; padding: 16px 0 0; border-top: 1px solid var(--a-line); }
+.x-cur .on { font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 10px; letter-spacing: 2.2px; text-transform: uppercase; color: var(--a-ink); display: inline-flex; align-items: center; gap: 10px; min-height: 44px; }
+.x-cur .on::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--a-ink); }
+.x-cur .a-link { margin: 0; }
+.x-back { padding: 0 var(--a-gut); margin: 44px 0 0; }
+.x-none { padding: 80px var(--a-gut); max-width: 760px; }
+@media (min-width: 900px) {
+  .x-gal { margin-bottom: 44px; }
+  .x-head h1 { font-size: 40px; }
+  .x-head, .x-sec, .x-back { max-width: 760px; margin-left: auto; margin-right: auto; padding: 0; }
+  .x-sec { margin-top: 64px; }
+  .x-sel { max-width: 760px; margin: 76px auto 0; padding: 40px 44px 44px; }
+  .x-kv > div { grid-template-columns: 160px 1fr; }
+}
+</style>
+</head>
+<body>
+<main class="x-wrap" id="x"></main>
+<script src="assets/experiences.js"></script>
+<script src="assets/experience-galleries.js"></script>
+<script src="assets/bag.js"></script>
+<script src="assets/gallery.js"></script>
+<script>
+(function () {
+  var ROLE = { breakfast: 'Breakfast', lunch: 'Lunch', dinner: 'Dinner', cafe: 'Café', experience: 'Experience', place: 'Shopping & places', bar: 'Bar' };
+  function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
+  var id = new URLSearchParams(location.search).get('id') || '';
+  var x = (window.SIYL_EXP || []).filter(function (e) { return e.id === id; })[0];
+  var root = document.getElementById('x');
+  if (!x) {
+    document.title = 'Experiences · See You In Laos';
+    root.innerHTML = '<div class="x-none"><p class="a-eyebrow">Experiences</p><h1>This place is not on the list.</h1>' +
+      '<p class="x-lede" style="margin-top:14px">The places we would take you ourselves are all on one page.</p>' +
+      '<p style="margin-top:22px"><a class="a-link" href="experiences.html">All experiences</a></p></div>';
+    return;
+  }
+  document.title = x.name + ' · See You In Laos';
+  var roles = (x.roles || []).map(function (r) { return ROLE[r] || r; }).join(' · ');
+  var ctx = [];
+  if (x.row && x.row !== 'city' && x.sheet !== 'FULL') ctx.push("From the hosts' itinerary · " + x.row);
+  if (x.row === 'city') ctx.push('From the hosts’ Vientiane portrait');
+  if (x.sheet === 'FULL') ctx.push('From the hosts’ notes on the place');
+  var h = '';
+  h += '<section class="x-gal">' + (window.SIYL_XGAL ? SIYL_XGAL.html(x) : '') + '</section>';
+  h += '<header class="x-head"><p class="a-eyebrow">' + esc(x.where) + (roles ? ' · ' + esc(roles) : '') + (x.day ? ' · ' + esc(x.day) : '') + '</p>' +
+       '<h1>' + esc(x.name) + '</h1>' +
+       '<p class="x-lede">' + esc(x.intro || x.teaser || '') + '</p>' +
+       (ctx.length ? '<p class="x-ctx">' + ctx.map(esc).join('<br>') + '</p>' : '') + '</header>';
+  /* discovery entries: the hosts' own paragraphs where they wrote some */
+  if (x.detail && x.detail.length) {
+    h += '<section class="x-sec"><p class="a-eyebrow">About</p>' + x.detail.map(function (p) { return '<p>' + esc(p) + '</p>'; }).join('') + '</section>';
+  }
+  /* the full record: About, in the hosts' own sections, opened one at a time */
+  if (x.sections && x.sections.length) {
+    h += '<section class="x-sec"><p class="a-eyebrow">About ' + esc(x.name) + '</p><div class="x-acc">' +
+      x.sections.map(function (s, i) {
+        return '<div><button type="button" aria-expanded="' + (i === 0 ? 'true' : 'false') + '" aria-controls="xs' + i + '" data-acc="' + i + '">' +
+          '<span><span class="k">' + esc(s.k) + '</span><span class="t">' + esc(s.t) + '</span></span><span class="x" aria-hidden="true">+</span></button>' +
+          '<div class="in' + (i === 0 ? ' on' : '') + '" id="xs' + i + '">' + s.p.map(function (p) { return '<p>' + esc(p) + '</p>'; }).join('') +
+          (s.by ? '<p class="by">— ' + esc(s.by) + '</p>' : '') + '</div></div>';
+      }).join('') + '</div></section>';
+  }
+  /* practical information — only the fields the source actually carries */
+  var pr = x.practical || {};
+  if (pr.price || pr.hours || x.maps || x.link) {
+    h += '<section class="x-sec"><p class="a-eyebrow">Practical information</p><div class="x-kv">' +
+      (pr.price ? '<div><span class="k">Price</span><span class="v"><span class="price">' + esc(pr.price) + '</span>' + (pr.priceNote ? '<small>' + esc(pr.priceNote) + '</small>' : '') + '</span></div>' : '') +
+      (pr.hours ? '<div><span class="k">Opening hours</span><span class="v">' + pr.hours.map(esc).join('<br>') + '</span></div>' : '') +
+      ((x.maps || x.link) ? '<div><span class="k">Where</span><span class="v"><span class="x-links" style="margin-top:0">' +
+        (x.maps ? '<a class="a-link" href="' + esc(x.maps) + '" target="_blank" rel="noopener">Map</a>' : '') +
+        (x.link ? '<a class="a-link" href="' + esc(x.link) + '" target="_blank" rel="noopener">Website</a>' : '') + '</span></span></div>' : '') +
+      '</div></section>';
+  }
+  /* the Journey action — one place carries it, by Owner decision */
+  if (x.select) {
+    h += '<section class="x-sel" id="sel"><p class="a-eyebrow">Your Journey</p><h2>' + esc(x.select.meta.split(' · ')[0]) + ' at ' + esc(x.name) + '</h2>' +
+      '<p class="price">' + esc(x.select.price) + '</p>' +
+      '<p>' + esc(pr.priceNote || '') + '</p>' +
+      '<p>Adding ' + esc(x.name) + ' to your journey asks Guest Relations for a table during the Bangkok days. It is a request, not a reservation: nothing is confirmed by this page, and the amount is not added to your journey total until the hosts have confirmed the table and its price with you.</p>' +
+      '<div id="selbox"></div></section>';
+  }
+  h += '<p class="x-back"><a class="a-link" href="experiences.html#' + esc(x.chapter) + '">All experiences</a></p>';
+  root.innerHTML = h;
+  if (window.SIYL_XGAL) document.querySelectorAll('[data-xgal]').forEach(SIYL_XGAL.wire);
+  document.querySelectorAll('[data-acc]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var on = b.getAttribute('aria-expanded') === 'true', box = document.getElementById(b.getAttribute('aria-controls'));
+      b.setAttribute('aria-expanded', on ? 'false' : 'true'); box.classList.toggle('on', !on);
+    });
+  });
+
+  /* selection: the Journey Bag is the one truth — has() decides the state,
+   * the invitation gate decides who may add, Remove follows the bag rule */
+  function paintSel() {
+    var box = document.getElementById('selbox'); if (!box || !window.SIYL_BAG) return;
+    var s = x.select, has = SIYL_BAG.has(s.id);
+    box.innerHTML = has
+      ? '<div class="x-cur"><span class="on" data-sel-state="current" aria-current="true">In your journey</span>' +
+        '<a class="a-link" href="your-journey.html">View Your Journey</a></div>' +
+        '<p style="margin-top:14px"><button type="button" class="a-link" id="sel-rm" style="background:none;border:0;cursor:pointer">Remove from your journey</button></p>'
+      : '<button type="button" class="x-cta" id="sel-add" data-sel-state="open">Add to your journey</button>';
+    var add = document.getElementById('sel-add'), rm = document.getElementById('sel-rm');
+    if (add) add.addEventListener('click', function () { gated(function () {
+      if (SIYL_BAG.has(s.id)) { paintSel(); return; }
+      SIYL_BAG.add({ id: s.id, name: s.name, meta: s.meta, request: true, priceNote: s.price, exp: x.id, img: x.img, qty: 1 });
+      paintSel();
+      var cur = document.querySelector('[data-sel-state="current"]'); if (cur) cur.focus();
+    }); });
+    if (rm) rm.addEventListener('click', function () { SIYL_BAG.remove(s.id); paintSel(); var a = document.getElementById('sel-add'); if (a) a.focus(); });
+  }
+  function gated(fn) {
+    if (window.SIYL_INVITE) { SIYL_INVITE.require(fn); }
+    else document.addEventListener('siyl:invite-ready', function () { SIYL_INVITE.require(fn); }, { once: true });
+  }
+  paintSel();
+  document.addEventListener('siyl:bag', paintSel);
+})();
+</script>
+<script src="assets/recon.js"></script>
+<script src="assets/aman.js"></script>
+<script type="module" src="assets/invite.mjs"></script>
+</body>
+</html>
