@@ -1,0 +1,65 @@
+PASS H1 one code = one guest — session is Haruthai alone; the party is context
+PASS H2 step 01 onboarding · no SWITCH, name read-only, contact required, six-step roadmap — see you in laos. YOUR PRIVATE JOURNEY 01 / 06Your Invitation Haruthai · Your par
+PASS H2 step 01 · Continue is strict
+PASS H3 step 01 complete once email + mobile are valid; Continue enabled; ✓ Complete — COMPLETE
+PASS H4 room page · Presidential (Wedding Stay) held for Haruthai · Room A · 1/2 — {"btn":"Remove from Your Journey","av":"Your place is held","swap":"Current selection · Room A · You · 1 place available"}
+PASS H4 journeys · the hosts see the Presidential as theirs to choose, current selection · Room A — Souphattra Presidential RESERVED FOR BRIDE & GROOM · YOURS TO CHOOSE USD 750 TOTAL PER PERSON · 2 NIGHTS · SECOND NIGHT HOSTED BY HARUTHAI & SUTHEP CURRENT SELECTION · ROOM A YOUR PLACE IS HELD USD 75
+PASS H5 Your Journey · CURRENT SELECTION vocabulary, own room words, no party wording — see you in laos. 3 YOUR PRIVATE JOURNEY 02 / 06Your Journey Haruthai · Your party · Haruthai & Suthe
+PASS H5 Your Journey · total = train 100 + Presidential × 2 windows (one guest) — USD 2,350
+PASS H6 cart · bag icon opens the cart; lines grouped; own total; not ready → first missing item — wedding.html#ev-temple
+PASS H7 step 03 · own answers; Sangkhathan YES = USD 15 in her journey — Sangkhathan prepared in your name? A personal offering, prepared for you and presented by y
+PASS H7 cart · Sangkhathan USD 15 added once; total 115 + rooms — USD 2,365
+PASS H8 step 04 · dress acknowledged in her own name; ceremony fixed front centre (Bride)
+PASS H8 step 04 · dinner seat chosen on the plan, confirmed, the one YOUR WEDDING SEATS card, the pool in words — COMPLETE Your wedding seats GUEST Haruthai Amphai TEMPLE CEREMONY Bride · Front centre WEDDING DINNER Seat A1 Long table · run A · place 1 DATE Sunday, 28 Febru · The long table stands beside the swim
+PASS H9 step 05 · allergy NO completes, photography acknowledged; retired questions gone; 01–05 complete — complete,complete,complete,complete,complete,attention
+PASS H10 View All Steps · ✓ Complete ×5, Review needs attention (ready to send), no OPEN — 01 Your Invitation Name, email and mobile number ✓ COMPLETE 02 Your Journey Every stage answered ✓ COMPLETE 03 The Wedding Every part of the day answered ✓ COMPLETE 04 Wedding Preparation Dress code a
+PASS H11 Review & Send · own details, own total = cart total, everything here → send → RECEIVED with the server stamp; button SENT — RECEIVED Your journey has been received by Guest Relations Sent · 14 Sept 2026 · 22:25 · your time Guest Relations will 
+PASS H11 the register holds INV-G048 — 2026-09-14T20:25:55.973Z
+PASS H12 no page errors
+PASS H13 Open another invitation · session cleared, code screen
+PASS S1 one code = one guest · Suthep alone · no trace of Haruthai's draft
+PASS S2 journeys · Suthep sees the Presidential with 1 place left — Souphattra Presidential RESERVED FOR BRIDE & GROOM · YOURS TO CHOOSE USD 750 TOTAL PER PERSON · 2 NIGHTS · SECOND NIGHT HOSTED BY HARUTHAI & SUTHEP 1 PLACE LEFT USD 750 ›
+PASS S3 room page · joins the SAME room as Haruthai · Room A · Haruthai · You · Full — {"btn":"Remove from Your Journey","av":"Your place is held","swap":"Current selection · Room A · Haruthai · You · Full"}
+PASS S3 Your Journey · the room chooser: Room A is his and full with both first names; JOIN THIS ROOM on nothing else (one unit) — Room A Haruthai · You · Full YOUR ROOM
+PASS S4 cart · Suthep's own total: Presidential (wedding stay) only, no Sangkhathan, none of Haruthai's lines — USD 750
+PASS S5 step 04 · the plan shows Haruthai's first name on her chair; Suthep's seat confirmed; Groom fixed — Haruthai
+PASS S6 step 05 · allergy YES with details completes — COMPLETE
+PASS S7 Review & Send · his own data, his own total, his own send and stamp — USD 750
+PASS S7 the register holds INV-G049 separately from INV-G048 — 2026-09-14T20:26:22.089Z
+PASS S7 Haruthai's record untouched by Suthep's send
+PASS S8 no page errors
+PASS S9 Sign out · code screen, nothing of Suthep left
+PASS P1 one code = one guest · Peggy alone, not a host
+PASS P2 journeys · the Presidential is reserved for Bride & Groom — not Peggy's to choose — Souphattra Presidential RESERVED FOR BRIDE & GROOM USD 750 TOTAL PER PERSON · 2 NIGHTS · SECOND NIGHT HOSTED BY HARUTHAI & SUTHEP USD 750
+PASS P3 room page · The Heritage held for Peggy · Room A · 1/2 — {"btn":"Remove from Your Journey","av":"Your place is held","swap":"Current selection · Room A · You · 1 place available"}
+PASS P3 engine · Peggy asking for the Presidential with her own bearer is refused with the reason — reserved for Bride & Groom
+PASS P3 engine · Peggy cannot book a room for Steffie — not your guest
+PASS P4 step 04 · ceremony seat required for a temple guest; dinner seat confirmed; names of the hosts visible — Haruthai,Suthep
+PASS P4 step 04 · both seats held → the one card with TEMPLE CEREMONY seat and WEDDING DINNER seat — COMPLETE Your wedding seats GUEST Peggy Berger TEMPLE CEREMONY Seat A1 Left block · row 1 WEDDING DINNER Seat A3 Long table · run A · place 3 DATE Sunday, 28 February 2027 DOWNLOAD SEAT CONFIRMATION
+PASS P5 cart · Peggy's own total = Heritage + Sangkhathan 15, never Steffie's — USD 160
+PASS P6 Review & Send · Peggy's own send — USD 160
+PASS P7 no page errors
+PASS T1 one code = one guest · Steffie alone
+PASS T2 room page · Steffie joins Peggy's Room A · Peggy · You · Full — {"btn":"Remove from Your Journey","av":"Your place is held","swap":"Current selection · Room A · Peggy · You · Full"}
+PASS T2 Your Journey · five Heritage rooms: A full with both names, B–E available with JOIN / CHOOSE — Room A Peggy · You · Full YOUR ROOM | Room B 2 places available CHOOSE THIS ROOM | Room C 2 places available CHOOSE THIS ROOM | Room D 2 places available CHOOSE THIS ROOM | Room E 2 places available C
+PASS T3 change room · Steffie moves to Room B; Room A keeps Peggy alone — Room B · You · 1 place available
+PASS T3 engine · Room A: Peggy 1/2 · Room B: Steffie 1/2 — never double-booked
+PASS T3 change back · joins Peggy in Room A again · Full — ROOM A · PEGGY · YOU · FULL
+PASS T4 step 03 · not attending the temple: no Sangkhathan asked, step complete
+PASS T5 step 04 · no ceremony seat required when not attending; the dinner seat is — none
+PASS T5 step 04 · dinner seat confirmed; Peggy's name on the plan — Haruthai,Suthep,Peggy
+PASS T6 cart · Steffie's own total = Heritage only (no Sangkhathan) — USD 145
+PASS T7 Review & Send · Steffie's own send, separate stamp
+PASS T7 registers · INV-G001 and INV-G002 received separately
+PASS T8 the former party code is Peggy's code and nobody else's
+PASS T9 gate · Review with the acknowledgement undone lands on About You #photo with the reason — http://127.0.0.1:8788/about-you?from=review#photo
+PASS T10 sticky bar · VIEW → Review & Send when 01–05 are complete
+PASS T11 cart REMOVE · the place is released on the engine, the bag empties, step 02 needs attention — {"empty":true,"mine":null,"st":"attention"}
+PASS T11 sticky bar · gone with an empty bag; VIEW would lead to the first missing item
+PASS T12 room page · the stay chosen again → back beside Peggy in Room A — Current selection · Room A · Peggy · You · Full
+PASS W 320 · no horizontal overflow on the seven private surfaces
+PASS W 375 · no horizontal overflow on the seven private surfaces
+PASS W 430 · no horizontal overflow on the seven private surfaces
+PASS Z no page errors across the four identities
+
+63/63 checks passed
