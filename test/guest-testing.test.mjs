@@ -115,7 +115,7 @@ test('SEATING: ceremony front-centre positions for the couple; dinner nothing fi
   assert.match(wd, /id="seats-route"/); assert.match(wd, /Choose your '\+ev\+' seat/); assert.match(wd, /data-state="booked">'\+\(frozen\?'View seat':'Change seat'\)/);
   assert.match(wd, /if\(ev==='ceremony'&&p\.hosts\)/, 'the hosts have no ceremony chair to choose');
   const wp = src('wedding-preparation.html');
-  assert.match(wp, /data-hosts="true"/); assert.match(wp, /'Choose your '\+ev\+' seat'/);
+  assert.match(wp, /data-hosts="true"/); assert.match(wp, /'Choose '\+\(forOther\?name\+'&rsquo;s':'your'\)\+' '\+ev\+' seat'/);
   assert.match(src('assets/guest.js'), /hosts: a\.hosts === true/); assert.match(src('assets/invite.mjs'), /hosts: inv\.hosts === true/);
   assert.match(src('src/build-invitations.cjs'), /inv\.hosts === true \? \{ hosts: true \}/);
 });

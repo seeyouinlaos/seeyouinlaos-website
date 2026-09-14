@@ -74,7 +74,9 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/guest.js"></script>
 <script src="assets/docs.js"></script>
 <script src="assets/confirm.js"></script>
+<script src="assets/seatlabels.js"></script>
 <script src="assets/seating.js"></script>
+<script src="assets/seatpass.js"></script>
 <script src="assets/prep-shell.js"></script>
 <script src="assets/temple.js"></script>
 <script src="assets/inventory.js"></script>
@@ -168,13 +170,16 @@ if(op&&op.guests.length){
          sst==='Not available yet'?'Guest Relations will let you know if there is anything to arrange':sst)+'</p>'+
        (quiet?'':'<div class="p-actions"><a class="p-link mute" href="wedding.html#ev-temple">'+(g.sangkhathan?'View offering':'View &amp; choose')+'</a></div>')+'</div>'+
        '<p class="t-l1'+(sst==='Decision required'?' open':(g.sangkhathan?' on':''))+'">'+(g.sangkhathan?'Selected':(silent?'':sst))+'</p></div>';
-    var Sx=window.SIYL_SEATS,cs=Sx?Sx.seatOf('ceremony',g.guestId):null,ds=Sx?Sx.seatOf('dinner',g.guestId):null,openS=Sx&&Sx.open();
-    var seatTo='wedding-preparation.html?for='+encodeURIComponent(g.guestId)+'#seats',hosts=!!(G&&G.party()&&G.party().hosts);
-    h+=(hosts?'<div class="p-kv"><div><p class="t-b1"><b>Ceremony seat</b></p><p class="t-b2">Bride &amp; Groom · front centre</p></div><p class="t-l1 on">Front centre</p></div>'
-        :'<div class="p-kv"><div><p class="t-b1"><b>Ceremony seat</b></p><p class="t-b2">'+(cs?esc(Sx.describe(cs))+' · held in '+esc(g.name)+'&rsquo;s name':(openS?'Not chosen yet':'Seating is not open yet'))+'</p></div>'+
-       (cs?'<p class="t-l1 on">'+esc(cs)+'</p>':(openS?'<a class="p-link" href="'+seatTo+'">Choose your ceremony seat</a>':'<p class="t-l1">Not open yet</p>'))+'</div>')+
-       '<div class="p-kv"><div><p class="t-b1"><b>Dinner seat</b></p><p class="t-b2">'+(ds?esc(Sx.describe(ds))+' · held in '+esc(g.name)+'&rsquo;s name':(openS?'Not chosen yet':'Seating is not open yet'))+'</p></div>'+
-       (ds?'<p class="t-l1 on">'+esc(ds)+'</p>':(openS?'<a class="p-link" href="'+seatTo+'">Choose your dinner seat</a>':'<p class="t-l1">Not open yet</p>'))+'</div></div>'})}
+    var Sx=window.SIYL_SEATS,Lx=window.SIYL_SEATLABELS,cs=Sx?Sx.seatOf('ceremony',g.guestId):null,ds=Sx?Sx.seatOf('dinner',g.guestId):null,openS=Sx&&Sx.open();
+    var seatTo='wedding-preparation.html?for='+encodeURIComponent(g.guestId)+'#seats',hosts=!!(G&&G.party()&&G.party().hosts),invId=(G&&G.party()||{}).invitationId||'',lab=function(sid){return Lx&&Lx.label(sid)||''};
+    var passBtn=function(ev){return window.SIYL_SEATPASS?'<p class="p-more"><button type="button" class="p-link mute" data-seat-pass="'+ev+'" data-seat-pass-for="'+esc(g.guestId)+'" aria-label="Download seat confirmation · '+(ev==='ceremony'?'Temple Ceremony':'Wedding Dinner')+' · '+esc(g.name)+'">Download seat confirmation</button></p>':''};
+    /* the seat by its label (E4, A17) with its booking reference — never the ledger id */
+    var ag=((G&&G.party()||{}).guests||[]).filter(function(x){return x.guestId===g.guestId})[0]||{},hostWords=ag.hostRole==='BRIDE'?'Bride':ag.hostRole==='GROOM'?'Groom':'Bride &amp; Groom';
+    h+=(hosts?'<div class="p-kv"><div><p class="t-b1"><b>Ceremony seat</b></p><p class="t-b2">'+hostWords+' · front centre</p>'+passBtn('ceremony')+'</div><p class="t-l1 on">Front centre</p></div>'
+        :'<div class="p-kv"><div><p class="t-b1"><b>Ceremony seat</b></p><p class="t-b2">'+(cs?esc(Sx.describe(cs))+' · confirmed in '+esc(g.name)+'&rsquo;s name · '+esc(Lx?Lx.ref(invId,g.guestId,'ceremony',cs):''):(openS?'Not selected yet':'Seating is not open yet'))+'</p>'+(cs?passBtn('ceremony'):'')+'</div>'+
+       (cs?'<p class="t-l1 on">Seat '+esc(lab(cs))+'</p>':(openS?'<a class="p-link" href="'+seatTo+'">Choose your ceremony seat</a>':'<p class="t-l1">Not open yet</p>'))+'</div>')+
+       '<div class="p-kv"><div><p class="t-b1"><b>Dinner seat</b></p><p class="t-b2">'+(ds?esc(Sx.describe(ds))+' · confirmed in '+esc(g.name)+'&rsquo;s name · '+esc(Lx?Lx.ref(invId,g.guestId,'dinner',ds):''):(openS?'Not selected yet':'Seating is not open yet'))+'</p>'+(ds?passBtn('dinner'):'')+'</div>'+
+       (ds?'<p class="t-l1 on">Seat '+esc(lab(ds))+'</p>':(openS?'<a class="p-link" href="'+seatTo+'">Choose your dinner seat</a>':'<p class="t-l1">Not open yet</p>'))+'</div></div>'})}
 /* E · the couple decision, said once for the party */
 if(op&&op.sangkhathanEligibility==='PAIR'){
   var pr=op.sangkhathanPair;
@@ -189,7 +194,11 @@ if(G&&G.party()){G.party().guests.forEach(function(g){
      '<p class="t-b2">'+(a?'Reviewed in '+esc(G.nameOf(g.guestId))+'&rsquo;s own name':(mineD?'Not yet reviewed':'Not yet reviewed · '+esc(G.nameOf(g.guestId))+' acknowledges this in person'))+'</p></div>'+
      '<p class="t-l1'+(a?'':' open')+'">'+(a?'Reviewed · '+when(a.at):'Review required')+'</p></div>'})}
 h+='<div class="p-actions" style="margin-top:var(--s3)"><a class="p-link mute" href="wedding-preparation.html#ack">Review dress code</a></div></div>';
-box.innerHTML=h}
+box.innerHTML=h;
+/* the seat confirmation: the ledger read fresh, then the file */
+box.querySelectorAll('[data-seat-pass]').forEach(function(b){b.addEventListener('click',function(){
+  var PASS=window.SIYL_SEATPASS;if(!PASS||b.getAttribute('aria-disabled')==='true')return;var was=b.textContent;b.setAttribute('aria-disabled','true');b.textContent='Preparing…';
+  PASS.deliver([b.getAttribute('data-seat-pass')],b.getAttribute('data-seat-pass-for')).then(function(r){b.removeAttribute('aria-disabled');b.textContent=r&&r.ok?'Downloaded · again?':(r&&r.error==='no seat'?'No seat to confirm yet':'Could not prepare — try again')})})})}
 
 /* ---------------------------------------------------------------- BLOCK 04
  * DOCUMENTS & PRIVACY — the real state of every document, per named guest,
@@ -373,12 +382,12 @@ p.guests.forEach(function(g){
   h+='<div class="p-card p-wcard"><p class="t-l1">'+esc(G.labelFor(id))+'</p><h3 class="t-d1">'+esc(G.nameOf(id))+'</h3><p class="t-b2">'+esc(G.value(id,'fullName')||g.fullName)+'</p>'+
      '<p class="t-l1 on" style="margin-top:var(--s3)">28 February 2027 · Vientiane</p>'+
      '<div class="p-kv"><div><p class="t-b1"><b>Temple Ceremony</b></p></div><p class="t-l1'+(ev('temple')==='Joining'?' on':'')+'">'+(ev('temple')==='Joining'?'Attending':ev('temple')==='Not joining'?'Not attending':'Not decided')+'</p></div>'+
-     (cs?'<div class="p-kv"><div><p class="t-b1"><b>Ceremony seat</b></p><p class="t-b2">'+esc(Sx.describe(cs))+'</p></div><p class="t-l1 on">'+esc(cs)+'</p></div>':'')+
+     (cs?'<div class="p-kv"><div><p class="t-b1"><b>Ceremony seat</b></p><p class="t-b2">'+esc(Sx.describe(cs))+'</p></div><p class="t-l1 on">Seat '+esc(window.SIYL_SEATLABELS?SIYL_SEATLABELS.label(cs):'')+'</p></div>':'')+
      (row&&row.sangkhathan?'<div class="p-kv"><div><p class="t-b1"><b>Sangkhathan</b></p><p class="t-b2">A personal offering, prepared in '+esc(G.nameOf(id))+'&rsquo;s name</p></div><p class="t-l1 on">Prepared</p></div>':'')+
      '<div class="p-kv"><div><p class="t-b1"><b>Coffee &amp; Cake</b></p></div><p class="t-l1'+(ev('coffee')==='Joining'?' on':'')+'">'+ev('coffee')+'</p></div>'+
      '<div class="p-kv"><div><p class="t-b1"><b>Vow Ceremony</b></p></div><p class="t-l1'+(ev('vows')==='Joining'?' on':'')+'">'+ev('vows')+'</p></div>'+
      '<div class="p-kv"><div><p class="t-b1"><b>Wedding Dinner</b></p></div><p class="t-l1'+(ev('dinner')==='Joining'?' on':'')+'">'+ev('dinner')+'</p></div>'+
-     (ds?'<div class="p-kv"><div><p class="t-b1"><b>Dinner seat</b></p><p class="t-b2">'+esc(Sx.describe(ds))+'</p></div><p class="t-l1 on">'+esc(ds)+'</p></div>':'')+
+     (ds?'<div class="p-kv"><div><p class="t-b1"><b>Dinner seat</b></p><p class="t-b2">'+esc(Sx.describe(ds))+'</p></div><p class="t-l1 on">Seat '+esc(window.SIYL_SEATLABELS?SIYL_SEATLABELS.label(ds):'')+'</p></div>':'')+
      '<div class="p-kv"><div><p class="t-b1"><b>Dress code</b></p></div><p class="t-l1'+(a?' on':'')+'">'+(a?'Reviewed':'Not yet reviewed')+'</p></div>'+
      '</div>'});
 h+='</section>';
@@ -397,8 +406,9 @@ function snapshotNow(){
     guests:p.guests.map(function(g){var id=g.guestId,row=op?op.guests.filter(function(r){return r.guestId===id})[0]:null,a=G.dressAck(id);
       return {guestId:id,name:G.nameOf(id),fullName:G.value(id,'fullName')||g.fullName,events:row?row.events:null,sangkhathan:!!(row&&row.sangkhathan),
         dress:a?{at:a.at,by:a.by}:null,ceremonySeat:Sx&&Sx.ready()?Sx.seatOf('ceremony',id):null,dinnerSeat:Sx&&Sx.ready()?Sx.seatOf('dinner',id):null,
+        ceremonySeatLabel:Sx&&Sx.ready()&&window.SIYL_SEATLABELS?SIYL_SEATLABELS.label(Sx.seatOf('ceremony',id)):null,dinnerSeatLabel:Sx&&Sx.ready()&&window.SIYL_SEATLABELS?SIYL_SEATLABELS.label(Sx.seatOf('dinner',id)):null,
         profile:(G.rec(id)||{}).profile||{},consent:(window.SIYL_DOCS&&SIYL_DOCS.consentDecided(id))?!!SIYL_DOCS.consent(id):null,documents:window.SIYL_DOCS?SIYL_DOCS.forGuest(id).map(function(d){return d.state}):[]}})}}
-function fingerprint(o){if(!o)return '';var c=JSON.parse(JSON.stringify(o));delete c.at;(c.guests||[]).forEach(function(g){delete g.ceremonySeat;delete g.dinnerSeat});return JSON.stringify(c)}
+function fingerprint(o){if(!o)return '';var c=JSON.parse(JSON.stringify(o));delete c.at;(c.guests||[]).forEach(function(g){delete g.ceremonySeat;delete g.dinnerSeat;delete g.ceremonySeatLabel;delete g.dinnerSeatLabel});return JSON.stringify(c)}
 function sentSnapshot(){try{return JSON.parse(localStorage.getItem('siyl.sent')||'null')}catch(e){return null}}
 function rememberSent(at){var o=snapshotNow();if(!o)return;o.at=at;try{localStorage.setItem('siyl.sent',JSON.stringify(o))}catch(e){}}
 

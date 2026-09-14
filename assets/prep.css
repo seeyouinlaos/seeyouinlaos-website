@@ -414,6 +414,8 @@ body.prep-steps-open .prep-steps-scrim { opacity: 1; pointer-events: auto; }
      its 24 chairs a side — may use the frame; nothing else does */
   .prep-sec.wide { max-width: none; }
   .prep-sec.wide > .t-l1, .prep-sec.wide > .t-h2, .prep-sec.wide > .t-b1 { max-width: 860px; }
+  /* only the long table needs the whole frame; everything else in the seats section keeps the reading width */
+  .prep-sec.wide #seatbox > :not([data-seatmap="dinner"]) { max-width: 860px; }
 }
 
 /* ============================================================ D · SURFACES
@@ -520,21 +522,91 @@ body.prep-steps-open .prep-steps-scrim { opacity: 1; pointer-events: auto; }
 .p-seatwrap::-webkit-scrollbar { display: none; }
 .p-seatmap { display: block; width: 100%; height: auto; max-width: 620px; }
 .p-seatwrap.wide .p-seatmap { max-width: none; }
+.p-seatmap-ceremony { width: auto; max-width: 620px; }
+@media (min-width: 420px) { .p-seatmap-ceremony { width: 100%; } }
 .p-seatmap .seat[role="button"] { cursor: pointer; }
-.p-seatmap .seat[role="button"]:hover rect, .p-seatmap .seat[role="button"]:focus-visible rect { fill: #EDEBE7; }
-.p-seatmap .seat-yours[role="button"]:hover rect, .p-seatmap .seat-yours[role="button"]:focus-visible rect { fill: #1F1F1F; }
+/* a pointer that can hover: the available chair lifts; the chosen one deepens.
+   Touch has no hover, so a tapped chair never sticks in a hover fill */
+@media (hover: hover) {
+  .p-seatmap .seat-available[role="button"]:hover .pan { fill: #EDEBE7; }
+  .p-seatmap .seat-selected[role="button"]:hover .pan { fill: #1F1F1F; }
+}
+/* keyboard focus: the accent rim, visible on an outlined chair and on the chosen dark one alike */
+.p-seatmap .seat[role="button"]:focus-visible .pan { stroke: var(--p-accent); stroke-width: 2.2; }
+.p-seatmap .seat-selected[role="button"]:focus-visible .pan { fill: #1F1F1F; }
 .p-seatmap .seat:focus { outline: 0; }
 .p-seathint { margin-top: var(--s2); }
 .p-seatlegend { list-style: none; margin: var(--s3) 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--s2) var(--s4); }
 .p-seatlegend li { display: inline-flex; align-items: center; gap: var(--s2); margin: 0; }
 .p-seatlegend span { display: inline-block; width: 14px; height: 14px; border-radius: 2px; border: 1px solid #C9C4BA; background: var(--p-card); }
-.p-seatlegend .seat-yours { background: var(--p-ink); border-color: var(--p-ink); }
-.p-seatlegend .seat-party { border: 1.8px solid var(--p-ink); position: relative; }
-.p-seatlegend .seat-party::after { content: ''; position: absolute; left: 3px; top: 3px; width: 5px; height: 5px; border-radius: 50%; border: 1.2px solid var(--p-ink); }
-.p-seatlegend .seat-yours { position: relative; }
-.p-seatlegend .seat-yours::after { content: ''; position: absolute; left: 3px; top: 3px; width: 6px; height: 3px; border-left: 1.6px solid var(--p-paper); border-bottom: 1.6px solid var(--p-paper); transform: rotate(-45deg); }
+/* the swatches mirror the chairs: selected = the dark pan in its ring · yours = ivory, the dark rim, the dot · party = the dashed rim */
+.p-seatlegend .seat-selected { background: var(--p-ink); border-color: var(--p-ink); box-shadow: 0 0 0 2px var(--p-paper), 0 0 0 3px var(--p-ink); }
+.p-seatlegend .seat-yours { background: var(--p-paper); border: 1.8px solid var(--p-ink); position: relative; }
+.p-seatlegend .seat-yours::after { content: ''; position: absolute; right: 1px; top: 1px; width: 4px; height: 4px; border-radius: 50%; background: var(--p-ink); }
+.p-seatlegend .seat-party { border: 1.4px dashed var(--p-ink); }
 .p-seatlegend .seat-family { background: var(--p-hair); border: 1px dashed var(--p-mute); }
 .p-seatlegend .seat-taken { background: var(--p-line); }
+/* 002 · the booking experience around the plan: progress per named guest,
+   the seat as a card, the sticky booking summary, the confirmation that
+   arrives once the ledger has answered — the palette of the system throughout */
+.p-seatprog { padding-top: 0; padding-bottom: 0; }
+.p-seatprog > .t-l1 { padding-top: var(--s4); }
+.p-seatprog-row { display: flex; gap: var(--s4); align-items: baseline; box-sizing: border-box; width: 100%; text-align: left; background: none; border: 0; border-top: 1px solid var(--p-hair); padding: var(--s4) 0; margin: 0; font: inherit; color: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.p-seatprog-row > .p-seatprog-main { flex: 1; min-width: 0; display: block; }
+.p-seatprog-main > .t-b1 { display: block; }
+.p-seatprog-row > .t-l1 { margin-left: auto; white-space: nowrap; text-align: right; }
+div.p-seatprog-row { cursor: default; }
+.sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.p-seatprog-row:focus-visible { outline: 1px solid var(--p-ink); outline-offset: -3px; }
+.p-seatprog-row[aria-pressed="true"] .p-seatprog-name { box-shadow: inset 0 -1px 0 var(--p-ink); }
+.p-seatprog-name { display: inline-block; padding-bottom: 2px; }
+.p-seatprog-cells { display: flex; flex-wrap: wrap; gap: var(--s1) var(--s4); margin-top: var(--s1); }
+.p-seatprog-cells span { font-family: var(--f-ui); font-size: 12.5px; line-height: 1.7; color: var(--p-mute); }
+.p-seatprog-cells span b { font-weight: 400; color: var(--p-ink); }
+.p-seatprog-cells span.open b { color: var(--p-accent); }
+
+/* the seat as a card: the label large, the facts beneath, the plan under it */
+.p-seatlabel { font-family: var(--f-ed); font-weight: 200; font-size: 44px; line-height: 1; letter-spacing: -.01em; color: var(--p-ink); }
+.p-seatlabel small { display: block; font-family: var(--f-ui); font-size: 12.5px; letter-spacing: 0; line-height: 1.6; color: var(--p-mute); margin-top: var(--s2); }
+.p-seatfacts { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s3) var(--s5); }
+.p-seatfacts .t-l1 { line-height: 1.6; }
+.p-seatfacts .t-b1 { margin-top: 2px; overflow-wrap: anywhere; }
+.p-seatfacts .ref { font-family: var(--f-ui); font-size: 12px; letter-spacing: 1.6px; color: var(--p-ink); }
+@media (min-width: 600px) { .p-seatfacts { grid-template-columns: repeat(3, 1fr); } }
+.p-seatcard-actions { display: flex; flex-wrap: wrap; gap: var(--s3) var(--s5); align-items: center; }
+.p-seatcard-actions .p-act { width: 100%; }
+@media (min-width: 600px) { .p-seatcard-actions .p-act { width: auto; min-width: 240px; } }
+.p-seatnote:empty { display: none; }
+.p-seatnote.err { color: var(--p-accent); }
+
+/* the confirmation: it arrives, once */
+.p-seatconf { border-color: var(--p-ink); animation: p-seatconf-in .5s var(--p-ease) both; }
+@keyframes p-seatconf-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.p-seatconf .p-seatlabel { font-size: 60px; }
+.p-seatconf .p-seatconf-rule { border: 0; border-top: 1px solid var(--p-ink); margin: var(--s4) 0 0; }
+
+/* the sticky booking summary: under the thumb, above the journey bar (which
+   steps aside), clear of the home indicator, never laid over the plan — the
+   page gains the room the bar takes */
+.p-seatbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 58; box-sizing: border-box; background: var(--p-card); border-top: 1px solid var(--p-ink); padding: var(--s3) var(--p-gut) calc(var(--s3) + env(safe-area-inset-bottom, 0px)); transform: translateY(102%); transition: transform .28s var(--p-ease), visibility 0s .28s; visibility: hidden; }
+.p-seatbar.on { transform: none; visibility: visible; transition: transform .28s var(--p-ease), visibility 0s; }
+body.seatbar-on { padding-bottom: 168px; }
+body.seatbar-on .jbar { display: none; }
+.p-seatbar-in { max-width: 860px; margin: 0 auto; display: flex; flex-wrap: wrap; align-items: center; gap: var(--s3) var(--s5); }
+.p-seatbar-sum { flex: 1 1 200px; min-width: 0; }
+.p-seatbar-sum .t-l1 { line-height: 1.6; }
+.p-seatbar-sum .t-b2 { line-height: 1.5; }
+.p-seatbar-seat { font-family: var(--f-ed); font-weight: 200; font-size: 26px; line-height: 1.15; color: var(--p-ink); }
+.p-seatbar-seat .arrow { color: var(--p-mute); margin: 0 var(--s2); }
+.p-seatbar-act { display: flex; align-items: center; gap: var(--s4); flex: 1 1 100%; }
+.p-seatbar-act .p-act { flex: 1 1 auto; min-width: 0; }
+.p-seatbar-act .p-link { flex: none; }
+.p-seatbar-act .p-act[aria-disabled="true"] { opacity: .6; cursor: progress; }
+[data-seat-pass][aria-disabled="true"] { opacity: .6; cursor: progress; }
+@media (min-width: 600px) { .p-seatbar-act { flex: 0 0 auto; } .p-seatbar-act .p-act { min-width: 220px; } body.seatbar-on { padding-bottom: 120px; } }
+/* the chair the guest has tapped, breathing once */
+.p-seatmap .seat-selected .pan { transition: fill var(--p-t-fast) var(--p-ease), stroke var(--p-t-fast) var(--p-ease); }
+
 /* F · the personal wedding card: a card, not a ticket */
 .p-wcard { margin-top: var(--s4); }
 .p-wcard .t-d1 { font-size: 28px; }
@@ -557,4 +629,5 @@ body.prep-steps-open .prep-steps-scrim { opacity: 1; pointer-events: auto; }
   .p-drawer, body.p-drawer-open .p-drawer { transform: none; transition: opacity .01s; }
   .p-drawer { visibility: hidden; } body.p-drawer-open .p-drawer { visibility: visible; }
   .prep-srow, .prep-all, .p-act, .p-link, .p-sel, .prep-who button, .prep-for button { transition: none; }
+  .p-seatbar, .p-seatbar.on { transition: none; } .p-seatconf { animation: none; } .p-seatmap .seat-selected .pan { transition: none; }
 }

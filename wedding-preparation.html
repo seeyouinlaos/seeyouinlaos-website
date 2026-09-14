@@ -69,7 +69,9 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/aman.js"></script>
 <script src="assets/guest.js"></script>
 <script src="assets/temple.js"></script>
+<script src="assets/seatlabels.js"></script>
 <script src="assets/seating.js"></script>
+<script src="assets/seatpass.js"></script>
 <script src="assets/confirm.js"></script>
 <script src="assets/rooms-data.js"></script>
 <script src="assets/pricing.js"></script>
@@ -128,20 +130,66 @@ render();
 })();
 
 /* ============================================================================
-   G · YOUR SEATS. The floor plan is the server's configuration, never a plan
-   of this page. Until Guest Relations has opened seating the guest sees NOT
-   OPEN YET; when open, each named guest chooses their own chair — or the
-   person continuing chooses for another, and the surface says so; when frozen,
-   the authoritative allocation is shown and cannot be self-changed.
+   G · YOUR SEATS — the booking experience (002, Owner 14 Sep 2026).
+   The floor plan is the server's configuration, never a plan of this page,
+   and the ledger stays the only truth: a chair is held by the engine, in the
+   named guest's name, the moment CONFIRM is tapped — never on the tap of a
+   chair. Until Guest Relations has opened seating the guest sees NOT OPEN
+   YET; when open, each named guest chooses their own chair (or the person
+   continuing chooses for another, and the surface says so): tap a chair →
+   the booking summary → CONFIRM → the confirmation, downloadable. Changing
+   a seat keeps the current one authoritative until the new hold succeeds.
+   When frozen, the allocation is shown and cannot be self-changed. The words
+   carry the guest-facing labels (E4, A17); the ledger id never reaches them.
    ========================================================================== */
 (function(){
-var S=window.SIYL_SEATS,P=window.SIYL_PREP,G=window.SIYL_GUEST,seatbox=document.getElementById('seatbox');
-if(!S||!P||!G||!seatbox)return;
+var S=window.SIYL_SEATS,P=window.SIYL_PREP,G=window.SIYL_GUEST,L=window.SIYL_SEATLABELS,PASS=window.SIYL_SEATPASS,seatbox=document.getElementById('seatbox');
+if(!S||!P||!G||!L||!seatbox)return;
 function esc(t){return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 var subject=null;   /* whose chair is being chosen — defaults to the person continuing, or to a ?for= deep link */
 (function(){var m=/[?&]for=([A-Za-z0-9_-]+)/.exec(location.search);if(m)subject=m[1]})();
-var EV=[['ceremony','Ceremony seat','Wat Ong Teu · 28 February · rows facing the ceremony'],['dinner','Dinner seat','Souphattra Heritage Vientiane · 19:30 · one long table']];
-function label(ev,id){var sid=S.seatOf(ev,id);return sid?sid:null}
+/* the one thing in flight: { ev, kind:'choose'|'change', pending: seatId|null, err, busy } */
+var mode=null;
+/* the confirmation that has just arrived, until CONTINUE: { ev, guestId, seatId, shown } */
+var fresh=null;
+/* a word for one event that outlives the choice it belongs to (seating closed mid-flow, an allocation by Guest Relations) */
+var notice=null;
+/* the chair a choice was just withdrawn from — focus returns to it */
+var withdrawn=null;
+var EV=[['ceremony','Ceremony seat','Wat Ong Teu · 28 February · 08:00'],['dinner','Dinner seat','Souphattra Heritage · poolside · 19:30']];
+var VENUE=L.EVENT_VENUE,NAME=L.EVENT_NAME,DATE=L.EVENT_DATE;
+function seatOf(ev,id){return S.seatOf(ev,id)}
+/* a seat Guest Relations allocated is theirs to move, not the guest's */
+function allocated(ev,sid){var v=S.view();if(!v||!v[ev]||!sid)return false;var rows=ev==='ceremony'?(v.ceremony.rows||[]).flatMap(function(r){return r.seats||[]}):[].concat((v.dinner.sides||{}).T||[],(v.dinner.sides||{}).B||[]);return rows.some(function(r){return r&&r.seatId===sid&&r.allocated===true})}
+function role(id){var g=(P.party()||{guests:[]}).guests.filter(function(x){return x.guestId===id})[0];return g&&(g.hostRole==='BRIDE'||g.hostRole==='GROOM')?g.hostRole:null}
+function fixedWords(id){var r=role(id);return r?(r==='BRIDE'?'Bride':'Groom'):'Bride & Groom'}
+function labelOf(sid){return L.label(sid)||''}
+function refOf(ev,id,sid){return L.ref((P.party()||{}).invitationId||'',id,ev,sid)}
+function fullName(id){return G.value(id,'fullName')||G.nameOf(id)}
+/* the facts of one held seat, as the confirmation states them */
+function facts(ev,id,sid,fixed){
+  return '<div class="p-seatfacts">'+
+    '<div><p class="t-l1">Guest</p><p class="t-b1">'+esc(fullName(id))+'</p></div>'+
+    '<div><p class="t-l1">Invitation</p><p class="t-b1">'+esc((P.party()||{}).partyName||(P.party()||{}).invitationId||'')+'</p></div>'+
+    '<div><p class="t-l1">Event</p><p class="t-b1">'+esc(NAME[ev])+'</p></div>'+
+    '<div><p class="t-l1">Date</p><p class="t-b1">'+esc(DATE)+'</p></div>'+
+    '<div><p class="t-l1">Venue</p><p class="t-b1">'+esc(VENUE[ev])+'</p></div>'+
+    '<div><p class="t-l1">Booking reference</p><p class="t-b1"><span class="ref">'+(fixed?'Front centre':esc(refOf(ev,id,sid)))+'</span></p></div>'+
+    '<div><p class="t-l1">Status</p><p class="t-b1"><b>Confirmed</b></p></div></div>'}
+function passLink(ev,id,quiet){return PASS?'<button type="button" class="'+(quiet?'p-link':'p-act quiet')+'" data-seat-pass="'+ev+'" data-seat-pass-for="'+esc(id)+'" aria-label="Download seat confirmation · '+esc(NAME[ev])+' · '+esc(G.nameOf(id))+'">Download seat confirmation</button>':''}
+/* progress, per named guest — every state, at a glance; a row is also the way to choose for that guest */
+function progress(p,me,cur){
+  var h='<div class="p-card p-seatprog" style="margin-top:var(--s4)"><p class="t-l1" id="seatprog-h">Progress</p>';
+  p.guests.forEach(function(g){
+    var id=g.guestId,cells=[],done=0,total=0;
+    EV.forEach(function(e){var ev=e[0];
+      if(ev==='ceremony'&&p.hosts){cells.push('<span><b>Ceremony</b> · Front centre · '+esc(fixedWords(id))+'</span>');return}
+      total++;var sid=seatOf(ev,id);if(sid)done++;
+      cells.push('<span'+(sid?'':' class="open"')+'>'+(ev==='ceremony'?'Ceremony':'Dinner')+' · <b>'+(sid?'Seat '+esc(labelOf(sid)):(S.frozen()?'No seat':'Not selected'))+'</b></span>')});
+    var state=S.frozen()?'':(done===total?'Complete':done+' of '+total);
+    var tag=p.guests.length>1?'button':'div';   /* a row is a way to choose for that guest — pointless for a party of one */
+    h+='<'+tag+(tag==='button'?' type="button" aria-pressed="'+(id===cur)+'" data-seat-who="'+esc(id)+'"':'')+' class="p-seatprog-row" data-seat-progress="'+done+'/'+total+'"><span class="p-seatprog-main"><span class="t-b1"><b class="p-seatprog-name">'+esc(G.nameOf(id))+'</b>'+(id===me.guestId?' · you':'')+'</span><span class="p-seatprog-cells">'+cells.join('')+'</span></span><span class="t-l1'+(state==='Complete'?' on':' open')+'">'+state+'</span></'+tag+'>'});
+  return h+'</div>'}
 function paintSeats(){
   if(!P.ready()||!S.ready())return;
   var p=P.party(),me=P.active(),v=S.view();
@@ -151,49 +199,146 @@ function paintSeats(){
   var sec=document.getElementById('seats');if(sec)sec.classList.toggle('wide',!!(S.open()&&any));
   /* NOT OPEN: the state as it is, plus any allocation Guest Relations already made */
   if(!S.open()||!any){
+    mode=null;fresh=null;notice=null;bar();
     eyebrow.textContent='02 · Your seats';
     lede.textContent='Your ceremony seat and your dinner seat will appear here when seating opens. Guest Relations arranges the tables and the rows, and you will be told the moment you can choose.';
-    var h='<div class="p-card" style="margin-top:16px">';
+    var h0='<div class="p-card" style="margin-top:16px">';
     p.guests.forEach(function(g){
-      h+='<div class="p-kv"><div><p class="t-l1'+(me.guestId===g.guestId?' on':'')+'">'+esc(G.labelFor(g.guestId))+(me.guestId===g.guestId?' · you':'')+'</p></div></div>';
-      EV.forEach(function(e){var sid=label(e[0],g.guestId);
-        h+='<div class="p-kv"><div><p class="t-b1"><b>'+e[1]+'</b></p><p class="t-b2">'+e[2]+'</p></div><p class="t-l1'+(sid?' on':'')+'">'+(sid?esc(sid):'Not open yet')+'</p></div>'})});
-    seatbox.innerHTML=h+'</div>';return}
+      h0+='<div class="p-kv"><div><p class="t-l1'+(me.guestId===g.guestId?' on':'')+'">'+esc(G.labelFor(g.guestId))+(me.guestId===g.guestId?' · you':'')+'</p></div></div>';
+      EV.forEach(function(e){var sid=seatOf(e[0],g.guestId);
+        h0+='<div class="p-kv"><div><p class="t-b1"><b>'+e[1]+'</b></p><p class="t-b2">'+e[2]+'</p></div><p class="t-l1'+(sid?' on':'')+'">'+(sid?'Seat '+esc(labelOf(sid)):'Not open yet')+'</p></div>'})});
+    seatbox.innerHTML=h0+'</div>';return}
   var id=(subject&&p.guests.some(function(g){return g.guestId===subject}))?subject:me.guestId;
+  if(mode&&mode.guestId!==id)mode=null;          /* SWITCH isolates: a choice in flight belongs to one guest only */
+  if(fresh&&fresh.guestId!==id)fresh=null;
+  if(S.frozen()&&mode){notice={ev:mode.ev,text:'Seating has just been closed — nothing more can be chosen or changed here. To change a seat, write to Guest Relations.'};mode=null}
+  var focusWas=document.activeElement,hadFocus=!!(focusWas&&(seatbox.contains(focusWas)||(barEl&&barEl.contains(focusWas)))),prevPending=withdrawn;withdrawn=null;
   var forOther=id!==me.guestId,name=esc(G.nameOf(id)),others=p.guests.filter(function(g){return g.guestId!==id});
   var words={subjectName:forOther?G.nameOf(id):null,partyName:others.length===1?G.nameOf(others[0].guestId):(others.length?'Your party':null),frozen:S.frozen()};
   eyebrow.textContent=S.frozen()?'02 · Your seats · seating is closed':'02 · Your seats · seating is open';
-  lede.textContent=S.frozen()?'Seating has been closed. Your seats are shown as Guest Relations holds them; to change one, write to Guest Relations.':'Choose a chair for each of you. A chair is held the moment you choose it, and you can change it while seating stays open.';
-  var h='';
+  lede.textContent=S.frozen()?'Seating has been closed. Your seats are shown as Guest Relations holds them; to change one, write to Guest Relations.':'Choose a chair for each of you: tap a chair on the plan, read the summary, confirm. A chair is held in your name only once you confirm it, and you can change it while seating stays open.';
+  var h=progress(p,me,id);
   if(p.guests.length>1){
     h+='<p class="t-l1" style="margin-top:var(--s4)">'+(S.frozen()?'Seats for':'Choosing a seat for')+'</p><div class="p-selrow">'+p.guests.map(function(g){
       return '<button type="button" class="p-sel" aria-pressed="'+(g.guestId===id)+'" data-seat-who="'+esc(g.guestId)+'">'+esc(G.nameOf(g.guestId))+(g.guestId===me.guestId?' · you':'')+'</button>'}).join('')+'</div>';
     if(forOther)h+='<div class="p-for" style="margin-top:var(--s4)"><span class="t-l1">Choosing for</span><b>'+name+'</b><span class="t-b2">You are continuing as '+esc(G.nameOf(me.guestId))+'. The chair is held in '+name+'&rsquo;s name.</span></div>'}
   EV.forEach(function(e){
-    var ev=e[0],sid=label(ev,id),ok=S.configured(ev);
+    var ev=e[0],sid=seatOf(ev,id),ok=S.configured(ev),changing=!!(mode&&mode.ev===ev&&mode.kind==='change'),choosing=!!(mode&&mode.ev===ev);
     /* the hosts' party: the ceremony place is the fixed front centre — no chair to choose */
     if(ev==='ceremony'&&p.hosts){
-      h+='<div class="p-card" style="margin-top:var(--s4)" data-seatmap="ceremony" data-hosts="true"><p class="t-l1 on">Bride &amp; Groom · front centre</p><h3 class="t-h1">Your ceremony seat</h3><p class="t-b2">'+e[2]+'</p>'+
-         '<p class="t-b1 measure">'+name+'&rsquo;s place at the ceremony is the front centre, in front of the rows — no chair to choose here. The dinner seat below is chosen like everyone else&rsquo;s.</p></div>';return}
-    h+='<div class="p-card" style="margin-top:var(--s4)" data-seatmap="'+ev+'" data-state="'+(sid?'booked':'open')+'"><p class="t-l1'+(sid?' on':' open')+'">'+(sid?(S.frozen()?'Held for ':'Held in ')+name+(S.frozen()?'':'&rsquo;s name')+' · '+esc(S.describe(sid))+' <span style="color:var(--p-mute)">'+esc(sid)+'</span>':(S.frozen()?'No seat allocated':'Not chosen yet'))+'</p>'+
-      '<h3 class="t-h1">'+(sid?'Your '+ev+' seat':'Choose your '+ev+' seat')+'</h3><p class="t-b2">'+e[2]+'</p>'+
-      (ok?(sid&&!S.frozen()?'<p class="t-b2 measure" style="margin-top:var(--s2)">To change it, tap another available chair.</p>':'')+'<div class="p-seatbox" data-ev="'+ev+'" style="margin-top:var(--s4)"></div>':'<p class="t-b2 measure" style="margin-top:var(--s3)">The plan for this part of the day has not been opened yet.</p>')+
-      (sid&&!S.frozen()?'<div class="p-actions"><button type="button" class="p-link mute" data-seat-release="'+ev+'">Give this chair back</button></div>':'')+
-      '</div>'});
+      h+='<div class="p-card" style="margin-top:var(--s4)" data-seatmap="ceremony" data-hosts="true" data-state="fixed"><p class="t-l1 on">Front centre · '+esc(fixedWords(id))+'</p><h3 class="t-h1">Your ceremony place</h3><p class="t-b2">'+e[2]+'</p>'+
+         '<p class="t-b1 measure">'+name+'&rsquo;s place at the ceremony is the front centre, in front of the rows — no chair to choose here. The dinner seat below is chosen like everyone else&rsquo;s.</p>'+
+         '<div class="p-seatcard-actions">'+passLink('ceremony',id,true)+'</div></div>';return}
+    /* the confirmation that has just arrived */
+    if(sid&&fresh&&fresh.ev===ev&&fresh.seatId===sid){
+      h+='<div class="p-card p-seatconf" style="margin-top:var(--s4)" data-seatmap="'+ev+'" data-state="confirmed" tabindex="-1"><p class="t-l1 on">Seat confirmed</p><h3 class="t-h1">'+(forOther?name+'&rsquo;s '+ev+' seat is confirmed':'Your '+ev+' seat is confirmed')+'</h3>'+
+         '<p class="p-seatlabel" data-seat-label="'+esc(labelOf(sid))+'">'+esc(labelOf(sid))+'<small>'+esc(L.describe(sid))+'</small></p><hr class="p-seatconf-rule">'+facts(ev,id,sid)+
+         '<div class="p-seatcard-actions"><button type="button" class="p-act" data-seat-continue="'+ev+'">Continue</button>'+passLink(ev,id)+'</div></div>';return}
+    var byGR=!!(sid&&allocated(ev,sid)),giving=!!(mode&&mode.ev===ev&&mode.kind==='give');
+    var open='<div class="p-card" style="margin-top:var(--s4)" data-seatmap="'+ev+'" data-state="'+(sid?(changing?'changing':(byGR?'allocated':'booked')):(S.frozen()?'none':'open'))+'">';
+    if(sid){
+      /* held: the seat as a card; changing keeps it authoritative until the new hold succeeds; an allocation by Guest Relations is not the guest's to move */
+      open+='<p class="t-l1 on">'+(changing?'Changing '+(forOther?name+'&rsquo;s':'your')+' '+ev+' seat':(byGR?'Seat allocated by Guest Relations':S.frozen()?'Seat allocated':'Seat confirmed'))+'</p><h3 class="t-h1">'+(forOther?name+'&rsquo;s '+ev+' seat':'Your '+ev+' seat')+'</h3><p class="t-b2">'+e[2]+'</p>'+
+        '<p class="p-seatlabel" data-seat-label="'+esc(labelOf(sid))+'">'+esc(labelOf(sid))+'<small>'+esc(L.describe(sid))+(S.frozen()||byGR?'':' · held in '+name+'&rsquo;s name')+'</small></p>'+facts(ev,id,sid)+
+        (changing?'<p class="t-b1 measure">Seat '+esc(labelOf(sid))+' stays '+name+'&rsquo;s until a new one is confirmed. Tap an available chair, then confirm the change.</p>':'')+
+        (byGR?'<p class="t-b1 measure">Guest Relations placed '+(forOther?name:'you')+' here. To change it, write to Guest Relations.</p>':'')+
+        (giving?'<p class="t-b1 measure" data-seat-give-ask="'+ev+'">Give seat '+esc(labelOf(sid))+' back? It becomes available to every guest at once, and '+name+' will have no '+ev+' seat until a new one is chosen.</p>':'')+
+        '<div class="p-seatcard-actions">'+
+          (S.frozen()||byGR?'':(changing?'<button type="button" class="p-link mute" data-seat-keep="'+ev+'">Keep seat '+esc(labelOf(sid))+'</button>':giving?'<button type="button" class="p-act quiet" data-seat-release="'+ev+'">Yes, give it back</button><button type="button" class="p-link mute" data-seat-keep="'+ev+'">Keep seat '+esc(labelOf(sid))+'</button>':'<button type="button" class="p-act quiet" data-seat-change="'+ev+'">Change seat</button>'))+
+          (giving?'':passLink(ev,id,true))+
+          (sid&&!S.frozen()&&!byGR&&!changing&&!giving?'<button type="button" class="p-link mute" data-seat-give="'+ev+'">Give this chair back</button>':'')+
+        '</div>';
+    }else{
+      open+='<p class="t-l1'+(S.frozen()?'':' open')+'">'+(S.frozen()?'No seat allocated':'Not selected')+'</p><h3 class="t-h1">'+(S.frozen()?(forOther?name+'&rsquo;s '+ev+' seat':'Your '+ev+' seat'):'Choose '+(forOther?name+'&rsquo;s':'your')+' '+ev+' seat')+'</h3><p class="t-b2">'+e[2]+'</p>'+
+        (ok&&!S.frozen()?'<p class="t-b2 measure">Tap an available chair. Nothing is held until you confirm.</p>':'')}
+    var noteText=(mode&&mode.ev===ev&&mode.err)||(notice&&notice.ev===ev&&notice.text)||'';
+    open+='<p class="t-b2 p-seatnote'+(noteText?' err':'')+'" data-seat-note="'+ev+'" tabindex="-1">'+esc(noteText)+'</p>';
+    open+=(ok?'<div class="p-seatbox" data-ev="'+ev+'"></div>':'<p class="t-b2 measure" style="margin-top:var(--s3)">The plan for this part of the day has not been opened yet.</p>');
+    h+=open+'</div>'});
   seatbox.innerHTML=h;
   EV.forEach(function(e){var ev=e[0],box=seatbox.querySelector('[data-ev="'+ev+'"]');if(!box)return;
-    S.render(box,ev,{guestId:id,selectable:!S.frozen(),subjectName:words.subjectName,partyName:words.partyName,frozen:words.frozen,onSelect:function(seatId){
-      S.select(ev,seatId,id).then(function(d){
-        if(d&&d.ok)return;
-        var card=seatbox.querySelector('[data-seatmap="'+ev+'"] .t-l1');
-        if(card)card.textContent=d&&d.error==='taken'?'That chair has just been taken — choose another':(d&&d.error==='seating is frozen'?'Seating is closed':'The chair could not be held — please try again');
-      })}})});
-  seatbox.querySelectorAll('[data-seat-who]').forEach(function(b){b.addEventListener('click',function(){subject=b.getAttribute('data-seat-who');paintSeats()})});
-  seatbox.querySelectorAll('[data-seat-release]').forEach(function(b){b.addEventListener('click',function(){S.release(b.getAttribute('data-seat-release'),id)})});
+    var sid=seatOf(ev,id),choosing=!!(!S.frozen()&&(!sid||(mode&&mode.ev===ev&&mode.kind==='change'))&&!(mode&&mode.busy));
+    S.render(box,ev,{guestId:id,selectable:!S.frozen(),choosing:choosing,pending:mode&&mode.ev===ev?mode.pending:null,subjectName:words.subjectName,partyName:words.partyName,frozen:words.frozen,onSelect:function(seatId){
+      if(!choosing||(mode&&mode.busy))return;
+      if(!mode||mode.ev!==ev)mode={ev:ev,kind:sid?'change':'choose',guestId:id,pending:null,err:null};
+      if(mode.pending===seatId){withdrawn=seatId;mode.pending=null}else mode.pending=seatId;
+      mode.err=null;notice=null;
+      paintSeats()}})});
+  seatbox.querySelectorAll('[data-seat-who]').forEach(function(b){b.addEventListener('click',function(){subject=b.getAttribute('data-seat-who');paintSeats();var f=seatbox.querySelector('.p-for');if(f)f.scrollIntoView({block:'nearest'})})});
+  seatbox.querySelectorAll('[data-seat-change]').forEach(function(b){b.addEventListener('click',function(){if(mode&&mode.busy)return;var ev=b.getAttribute('data-seat-change');mode={ev:ev,kind:'change',guestId:id,pending:null,err:null};fresh=null;notice=null;paintSeats();var m=seatbox.querySelector('[data-ev="'+ev+'"]');if(m)m.scrollIntoView({block:'nearest'});var first=seatbox.querySelector('[data-ev="'+ev+'"] g[data-seat]');if(first)try{first.focus({preventScroll:true})}catch(x){}})});
+  seatbox.querySelectorAll('[data-seat-keep]').forEach(function(b){b.addEventListener('click',function(){if(mode&&mode.busy)return;var ev=b.getAttribute('data-seat-keep');mode=null;paintSeats();var c=seatbox.querySelector('[data-seatmap="'+ev+'"] [data-seat-change]');if(c)try{c.focus({preventScroll:true})}catch(x){}})});
+  seatbox.querySelectorAll('[data-seat-give]').forEach(function(b){b.addEventListener('click',function(){if(mode&&mode.busy)return;var ev=b.getAttribute('data-seat-give');mode={ev:ev,kind:'give',guestId:id,pending:null,err:null};fresh=null;notice=null;paintSeats();var q=seatbox.querySelector('[data-seatmap="'+ev+'"] [data-seat-release]');if(q)try{q.focus({preventScroll:true})}catch(x){}})});
+  seatbox.querySelectorAll('[data-seat-continue]').forEach(function(b){b.addEventListener('click',function(){var ev=b.getAttribute('data-seat-continue');fresh=null;notice=null;paintSeats();
+    /* onward: the other event still open for this guest, else the foot of the page */
+    var next=EV.map(function(x){return x[0]}).filter(function(x){return x!==ev&&!(x==='ceremony'&&p.hosts)&&!seatOf(x,id)})[0];
+    var to=next?seatbox.querySelector('[data-seatmap="'+next+'"]'):document.getElementById('foot');if(to){to.scrollIntoView({behavior:reduced()?'auto':'smooth',block:'start'});if(!to.hasAttribute('tabindex'))to.setAttribute('tabindex','-1');try{to.focus({preventScroll:true})}catch(x){}}})});
+  seatbox.querySelectorAll('[data-seat-release]').forEach(function(b){b.addEventListener('click',function(){var ev=b.getAttribute('data-seat-release');if(!mode||mode.ev!==ev||mode.kind!=='give'||mode.busy)return;mode.busy=true;b.disabled=true;b.textContent='Giving back…';
+    S.release(ev,id).then(function(d){mode=null;fresh=null;if(d&&d.error==='allocated by Guest Relations')notice={ev:ev,text:'Guest Relations placed '+G.nameOf(id)+' here — write to Guest Relations to change it.'};else if(!(d&&d.ok&&!d.error&&!S.seatOf(ev,id)))notice={ev:ev,text:'The chair could not be given back — please try again.'};paintSeats()})})});
+  seatbox.querySelectorAll('[data-seat-pass]').forEach(function(b){b.addEventListener('click',function(){pass(b,[b.getAttribute('data-seat-pass')],b.getAttribute('data-seat-pass-for'))})});
+  if(fresh&&!fresh.shown){fresh.shown=true;var c=seatbox.querySelector('.p-seatconf');if(c){c.scrollIntoView({behavior:reduced()?'auto':'smooth',block:'start'});try{c.focus({preventScroll:true})}catch(x){}}}
+  bar(id);
+  /* focus follows the choice: onto CONFIRM once a chair is chosen, back onto the chair when the choice is withdrawn, onto the words when a choice is refused — never dropped on the body */
+  if(hadFocus&&!(fresh&&fresh.shown&&document.activeElement&&document.activeElement.classList.contains('p-seatconf'))){
+    var said=seatbox.querySelector('.p-seatnote.err');
+    var next=mode&&mode.pending?barEl.querySelector('[data-seat-confirm]'):said?said:(prevPending?seatbox.querySelector('g[data-seat="'+prevPending+'"]'):null);
+    if(next)try{next.focus({preventScroll:true})}catch(x){}}
+  say();
+  /* the chair just tapped is never left under the summary: the page moves the little it needs */
+  if(mode&&mode.pending&&barEl){var sel=seatbox.querySelector('.seat-selected');if(sel){var r=sel.getBoundingClientRect(),top=window.innerHeight-barEl.offsetHeight;if(r.bottom>top-8)window.scrollBy({top:r.bottom-top+24,behavior:reduced()?'auto':'smooth'})}}
 }
+function reduced(){try{return window.matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){return false}}
+/* the download: read the ledger fresh, then hand over the file */
+function pass(b,events,id){
+  if(!PASS||b.getAttribute('aria-disabled')==='true')return;var was=b.textContent;b.setAttribute('aria-disabled','true');b.textContent='Preparing…';
+  PASS.deliver(events,id).then(function(r){b.removeAttribute('aria-disabled');b.textContent=r&&r.ok?'Downloaded · again?':was;
+    var n=seatbox.querySelector('[data-seat-note="'+events[0]+'"]');
+    if(r&&!r.ok&&n){n.textContent=r.error==='no seat'?'There is no seat to confirm yet.':'The confirmation could not be prepared — please try again.';n.classList.add('err')}
+    if(liveEl)liveEl.textContent=r&&r.ok?'Seat confirmation downloaded: '+r.file:(n?n.textContent:'')})}
+/* one live region for the whole section, kept across paints, so a refusal or a choice is spoken even though the cards are redrawn */
+var liveEl=null;
+function say(){
+  if(!liveEl){liveEl=document.createElement('p');liveEl.className='sr-only';liveEl.setAttribute('role','status');liveEl.setAttribute('aria-live','polite');liveEl.setAttribute('aria-atomic','true');seatbox.parentNode.insertBefore(liveEl,seatbox)}
+  var err=seatbox.querySelector('.p-seatnote.err'),text=err?err.textContent:(mode&&mode.pending?(barEl&&barEl.querySelector('.p-seatbar-sum')?barEl.querySelector('.p-seatbar-sum').textContent.replace(/\s+/g,' ').trim():''):(fresh?'Seat confirmed':''));
+  if(liveEl.textContent!==text)liveEl.textContent=text}
+/* the sticky booking summary: one element, kept across paints */
+var barEl=null;
+function bar(id){
+  if(!barEl){barEl=document.createElement('div');barEl.className='p-seatbar';barEl.setAttribute('role','region');barEl.setAttribute('aria-label','Booking summary');barEl.setAttribute('aria-live','polite');document.body.appendChild(barEl)}
+  var on=!!(mode&&mode.pending&&id);
+  if(!on){barEl.classList.remove('on');document.body.classList.remove('seatbar-on');document.body.style.paddingBottom='';barEl.innerHTML='';return}
+  var ev=mode.ev,cur=seatOf(ev,id),nu=mode.pending,name=G.nameOf(id),change=mode.kind==='change'&&cur;
+  barEl.innerHTML='<div class="p-seatbar-in"><div class="p-seatbar-sum"><p class="t-l1">'+(change?'Change of seat':'Booking summary')+'</p>'+
+    '<p class="t-b2"><b>'+esc(name)+'</b> · '+esc(NAME[ev])+'</p>'+
+    (change?'<p class="p-seatbar-seat"><span data-seat-current="'+esc(labelOf(cur))+'">'+esc(labelOf(cur))+'</span><span class="arrow" aria-hidden="true">→</span><span data-seat-new="'+esc(labelOf(nu))+'">'+esc(labelOf(nu))+'</span></p><p class="t-b2">Current seat '+esc(labelOf(cur))+' · New seat '+esc(labelOf(nu))+' · '+esc(L.describe(nu))+'</p>'
+           :'<p class="p-seatbar-seat" data-seat-new="'+esc(labelOf(nu))+'">Seat '+esc(labelOf(nu))+'</p><p class="t-b2">'+esc(L.describe(nu))+' · not yet held</p>')+
+    '</div><div class="p-seatbar-act"><button type="button" class="p-act" data-seat-confirm="'+ev+'"'+(mode.busy?' aria-disabled="true"':'')+'>'+(mode.busy?'Confirming…':(change?'Confirm change':'Confirm seat'))+'</button>'+
+    '<button type="button" class="p-link mute" data-seat-cancel>'+(change?'Keep '+esc(labelOf(cur)):'Cancel')+'</button></div></div>';
+  barEl.classList.add('on');document.body.classList.add('seatbar-on');
+  /* the page gains exactly the room the bar takes, whatever else sits at the foot */
+  document.body.style.paddingBottom=(barEl.offsetHeight+16)+'px';
+  barEl.querySelector('[data-seat-cancel]').addEventListener('click',function(){withdrawn=mode&&mode.pending;if(mode&&mode.kind==='change')mode.pending=null;else mode=null;paintSeats()});
+  barEl.querySelector('[data-seat-confirm]').addEventListener('click',function(){confirmSeat(id)});
+}
+/* CONFIRM: the engine holds the new chair (and releases the old one) in one
+ * atomic step; on refusal the old seat is untouched and the words say why */
+function confirmSeat(id){
+  if(!mode||!mode.pending||mode.busy)return;
+  var ev=mode.ev,seatId=mode.pending;mode.busy=true;paintSeats();   /* the plan is not for tapping while the engine answers */
+  S.select(ev,seatId,id).then(function(d){
+    if(!mode||mode.ev!==ev||mode.guestId!==id)return;   /* a late answer for another guest's choice changes nothing here */
+    /* the engine answers a refusal with its status and its reason beside the fresh view — the reason and the status decide, never the view's own ok */
+    var held=!!(d&&d.ok&&!d.error&&(!d.status||d.status<400)&&S.seatOf(ev,id)===seatId);
+    if(held){fresh={ev:ev,guestId:id,seatId:seatId};mode=null;paintSeats();return}
+    mode.busy=false;
+    var own=S.seatOf(ev,id),who=id===(P.active()||{}).guestId?'yours':G.nameOf(id)+'’s';
+    if(d&&d.error==='taken'){mode.pending=null;mode.err='That chair has just been taken — '+(own?'seat '+labelOf(own)+' is still '+who+'. ':'')+'Choose another.'}
+    else if(d&&d.error==='seating is frozen'){notice={ev:ev,text:'Seating has just been closed — the chair could not be held.'+(own?' Seat '+labelOf(own)+' stays '+who+'.':'')};mode=null}
+    else if(d&&d.error==='allocated by Guest Relations'){notice={ev:ev,text:'Guest Relations placed '+G.nameOf(id)+' here — write to Guest Relations to change it.'};mode=null}
+    else{mode.err='The chair could not be held — please try again.'}
+    paintSeats()})}
 document.addEventListener('siyl:seats',paintSeats);
-document.addEventListener('siyl:who',function(){subject=null;paintSeats()});
-document.addEventListener('siyl:auth',function(){S.load(true)});
+document.addEventListener('siyl:who',function(){subject=null;mode=null;fresh=null;notice=null;paintSeats()});
+document.addEventListener('siyl:auth',function(){mode=null;fresh=null;notice=null;S.load(true)});
 if(P&&P.party())S.load();
 })();
 if(window.SIYL_BAG&&SIYL_BAG.bar)SIYL_BAG.bar();

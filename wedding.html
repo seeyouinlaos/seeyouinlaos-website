@@ -29,7 +29,9 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/temple.js"></script>
 <script src="assets/journey.js"></script>
 <script src="assets/confirm.js"></script>
+<script src="assets/seatlabels.js"></script>
 <script src="assets/seating.js"></script>
+<script src="assets/seatpass.js"></script>
 <script src="assets/prep-shell.js"></script>
 <script type="module" src="assets/invite.mjs"></script>
 <script>
@@ -62,23 +64,32 @@ var SANG='<p class="t-l1">Optional · within the Temple Ceremony</p>'+
  * change it; an open one gets one clear action. The hosts' party has its
  * ceremony place at the front centre and books only the dinner. */
 function seatsSection(p,me){
-  var S=window.SIYL_SEATS,open=!!(S&&S.ready()&&S.open()),frozen=!!(S&&S.frozen());
+  var S=window.SIYL_SEATS,L=window.SIYL_SEATLABELS,open=!!(S&&S.ready()&&S.open()),frozen=!!(S&&S.frozen()),PASS=window.SIYL_SEATPASS;
+  var lab=function(sid){return L&&L.label(sid)||''};
   var h='<section class="prep-sec" id="seats-route"><p class="t-l1">Your seats · '+(open?(frozen?'seating is closed':'seating is open'):'not open yet')+'</p><h2 class="t-h2">Where each of you will sit</h2>'+
-    '<p class="t-b1 measure">'+(open?'A chair for the ceremony and a place at the dinner table, chosen by each named guest. A chair is held the moment it is chosen and can be changed while seating stays open.':'Your ceremony seat and your dinner seat will be chosen here once seating opens. Guest Relations will let you know.')+'</p>';
+    '<p class="t-b1 measure">'+(open?'A chair for the ceremony and a place at the dinner table, chosen by each named guest on the plan, confirmed in one step, and changeable while seating stays open. A confirmed seat comes with a seat confirmation to download.':'Your ceremony seat and your dinner seat will be chosen here once seating opens. Guest Relations will let you know.')+'</p>';
   p.guests.forEach(function(g){
-    var name=esc(G.nameOf(g.guestId)),mine=g.guestId===me.guestId,to='wedding-preparation.html?for='+encodeURIComponent(g.guestId)+'#seats';
-    h+='<div class="p-card" style="margin-top:var(--s4)"><p class="t-l1'+(mine?' on':'')+'">'+name+(mine?' · you':'')+'</p>';
-    [['ceremony','Ceremony seat','Wat Ong Teu · 28 February'],['dinner','Dinner seat','Souphattra Heritage Vientiane · poolside · 19:30']].forEach(function(e){
-      var ev=e[0],sid=S&&S.ready()?S.seatOf(ev,g.guestId):null;
+    var id=g.guestId,name=esc(G.nameOf(id)),mine=id===me.guestId,to='wedding-preparation.html?for='+encodeURIComponent(id)+'#seats',role=g.hostRole==='BRIDE'?'Bride':g.hostRole==='GROOM'?'Groom':'Bride &amp; Groom';
+    var cs=S&&S.ready()?S.seatOf('ceremony',id):null,ds=S&&S.ready()?S.seatOf('dinner',id):null,both=!!(ds&&(cs||p.hosts));
+    h+='<div class="p-card" style="margin-top:var(--s4)" data-seat-guest="'+esc(id)+'"><p class="t-l1'+(mine?' on':'')+'">'+name+(mine?' · you':'')+'</p>';
+    [['ceremony','Ceremony seat','Wat Ong Teu · 28 February'],['dinner','Dinner seat','Souphattra Heritage · poolside · 19:30']].forEach(function(e){
+      var ev=e[0],sid=ev==='ceremony'?cs:ds;
       if(ev==='ceremony'&&p.hosts){
-        h+='<div class="p-kv"><div><p class="t-b1"><b>'+e[1]+'</b></p><p class="t-b2">'+e[2]+' · Bride &amp; Groom · front centre</p></div><p class="t-l1 on">Front centre</p></div>';return}
-      /* the action sits under its own line; the right-hand slot carries only the state */
-      h+='<div class="p-kv"><div><p class="t-b1"><b>'+e[1]+'</b></p><p class="t-b2">'+e[2]+(sid?'<br>'+esc(S.describe(sid))+' <span style="color:var(--p-mute)">'+esc(sid)+'</span>':'')+'</p>'+
-         (sid?'<p class="p-more"><a class="p-link" href="'+to+'" data-seat-cta="'+ev+'" data-state="booked">'+(frozen?'View seat':'Change seat')+'</a></p>'
+        h+='<div class="p-kv"><div><p class="t-b1"><b>'+e[1]+'</b></p><p class="t-b2">'+e[2]+' · '+role+' · front centre</p>'+
+           (PASS?'<p class="p-more"><button type="button" class="p-link mute" data-seat-pass="ceremony" data-seat-pass-for="'+esc(id)+'" aria-label="Download seat confirmation · Temple Ceremony · '+name+'">Download seat confirmation</button></p>':'')+'</div><p class="t-l1 on">Front centre</p></div>';return}
+      /* the action sits under its own line; the right-hand slot carries only the state — the seat by its label, never the ledger id */
+      h+='<div class="p-kv"><div><p class="t-b1"><b>'+e[1]+'</b></p><p class="t-b2">'+e[2]+(sid?'<br>'+esc(S.describe(sid))+' · confirmed':'')+'</p>'+
+         (sid?'<p class="p-more"><a class="p-link" href="'+to+'" data-seat-cta="'+ev+'" data-state="booked">'+(frozen?'View seat':'Change seat')+'</a>'+(PASS?' <button type="button" class="p-link mute" style="margin-left:var(--s4)" data-seat-pass="'+ev+'" data-seat-pass-for="'+esc(id)+'" aria-label="Download seat confirmation · '+(ev==='ceremony'?'Temple Ceremony':'Wedding Dinner')+' · '+name+'">Download seat confirmation</button>':'')+'</p>'
              :(open&&!frozen?'<p class="p-more"><a class="p-link" href="'+to+'" data-seat-cta="'+ev+'" data-state="open">Choose your '+ev+' seat</a></p>':''))+'</div>'+
-         '<p class="t-l1'+(sid?' on':(open&&!frozen?' open':''))+'">'+(sid?esc(sid):(open&&!frozen?'Not chosen':'Not open yet'))+'</p></div>'});
+         '<p class="t-l1'+(sid?' on':(open&&!frozen?' open':''))+'" data-seat-state="'+(sid?'booked':'open')+'">'+(sid?'Seat '+esc(lab(sid)):(open&&!frozen?'Not selected':'Not open yet'))+'</p></div>'});
+    if(both&&PASS)h+='<div class="p-actions" style="margin-top:var(--s3)"><button type="button" class="p-link" data-seat-pass="all" data-seat-pass-for="'+esc(id)+'" aria-label="Download your wedding seats · both events · '+name+'">Download your wedding seats</button></div>';
     h+='</div>'});
   return h+'</section>'}
+/* the download: the ledger read fresh, then the file */
+function wirePasses(root){
+  root.querySelectorAll('[data-seat-pass]').forEach(function(b){b.addEventListener('click',function(){
+    var PASS=window.SIYL_SEATPASS;if(!PASS||b.getAttribute('aria-disabled')==='true')return;var ev=b.getAttribute('data-seat-pass'),was=b.textContent;b.setAttribute('aria-disabled','true');b.textContent='Preparing…';
+    PASS.deliver(ev==='all'?['ceremony','dinner']:[ev],b.getAttribute('data-seat-pass-for')).then(function(r){b.removeAttribute('aria-disabled');b.textContent=r&&r.ok?'Downloaded · again?':(r&&r.error==='no seat'?'No seat to confirm yet':'Could not prepare — try again')})})})}
 /* one answer row per named guest, under each part of the day */
 function personRow(g,e,me){
   var id=g.guestId,mine=me.guestId===id,name=esc(G.nameOf(id)),v=T.eventOf(id,e.key);
@@ -165,6 +176,7 @@ function render(){
     b.addEventListener('click',function(){var id=me.guestId;T.setOffering(id,b.getAttribute('data-off'));render()})});
   page.querySelectorAll('[data-more]').forEach(function(b){
     b.addEventListener('click',function(){P.drawer(b.getAttribute('data-more')==='takbat'?TAKBAT:SANG)})});
+  wirePasses(page);
   P.foot(document.getElementById('foot'));
   if(window.SIYL_SEATS&&!SIYL_SEATS.ready())SIYL_SEATS.load();
 }

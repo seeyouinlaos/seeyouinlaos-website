@@ -44,7 +44,7 @@ function page(auth, seed) {
   sb.window = sb; vm.createContext(sb);
   if (auth) sb.localStorage.setItem('siyl.auth', JSON.stringify(auth));
   if (seed) Object.entries(seed).forEach(([k, v]) => sb.localStorage.setItem(k, JSON.stringify(v)));
-  for (const f of ['assets/bag.js', 'assets/rooms-data.js', 'assets/pricing.js', 'assets/guest.js', 'assets/temple.js', 'assets/docs.js', 'assets/seating.js', 'assets/confirm.js']) vm.runInContext(src(f), sb, { filename: f });
+  for (const f of ['assets/bag.js', 'assets/rooms-data.js', 'assets/pricing.js', 'assets/guest.js', 'assets/temple.js', 'assets/docs.js', 'assets/seatlabels.js', 'assets/seating.js', 'assets/seatpass.js', 'assets/confirm.js']) vm.runInContext(src(f), sb, { filename: f });
   return sb;
 }
 const json = (w, k) => JSON.parse(w.localStorage.getItem(k) || 'null');
@@ -420,8 +420,18 @@ test('G · the renderer draws only what it is given: rows facing the ceremony, o
   assert.equal((c.match(/<g class="seat/g) || []).length, 50, 'visual total 50');
   assert.equal((c.match(/seat-family/g) || []).length, 6);
   assert.equal((c.match(/seat-yours/g) || []).length, 1);
-  assert.equal((c.match(/role="button"/g) || []).length, 44, 'available and your own chair are selectable, family is not');
-  assert.match(c, />CEREMONY</); assert.match(c, />LEFT · 20</); assert.match(c, />RIGHT · 30</);
+  assert.equal((c.match(/role="button"/g) || []).length, 43, 'the available chairs are selectable; the own chair is changed through CHANGE SEAT, family never');
+  assert.match(c, />CEREMONY · FRONT</); assert.match(c, />LEFT BLOCK · 20</); assert.match(c, />RIGHT BLOCK · 30</); assert.match(c, />AISLE</);
+  /* the guest-facing labels: columns A B | aisle | D E F, never C; the words carry the label, never the ledger id */
+  assert.match(c, /aria-label="Ceremony seat E4, available"/); assert.match(c, /aria-label="Ceremony seat A3, your seat"/);
+  assert.doesNotMatch(c, /aria-label="[^"]*C-[LR]-\d\d/, 'no ledger id in the words');
+  assert.equal((c.match(/data-label="C\d+"/g) || []).length, 0, 'no column C');
+  /* a pending choice is drawn as SELECTED BY YOU, still a button, and said so */
+  const pend = S.svg('ceremony', view, { guestId: PEGGY, selectable: true, pending: 'C-R-04-02' });
+  assert.match(pend, /class="seat seat-selected" role="button" tabindex="0" data-seat="C-R-04-02" data-label="E4" aria-label="Ceremony seat E4, selected"/);
+  /* not choosing (a held seat, not being changed): nothing is a button, everything is still described */
+  const still = S.svg('ceremony', view, { guestId: PEGGY, selectable: true, choosing: false });
+  assert.equal((still.match(/role="button"/g) || []).length, 0); assert.match(still, /aria-label="Ceremony seat A3, your seat"/);
   /* the front-centre positions are drawn, named, and are not chairs */
   assert.match(c, /class="fixed" aria-label="BRIDE and GROOM, fixed positions at the front centre"/);
   assert.match(c, />BRIDE</); assert.match(c, />GROOM</);
@@ -432,12 +442,15 @@ test('G · the renderer draws only what it is given: rows facing the ceremony, o
   assert.equal((d.match(/<g class="seat/g) || []).length, 50, 'exactly 50 guest seat boxes');
   assert.equal((d.match(/seat-taken/g) || []).length, 1);
   assert.doesNotMatch(d, /BRIDE|GROOM|fixed/, 'no fixed position is drawn for anyone');
-  assert.match(d, />25 GUESTS · TOP</); assert.match(d, />25 GUESTS · BOTTOM</); assert.match(d, /50 PEOPLE · 50 GUEST SEATS/);
+  assert.match(d, />RUN A · 25 PLACES</); assert.match(d, />RUN B · 25 PLACES</); assert.match(d, /ONE LONG TABLE · 50 PLACES/); assert.match(d, /50 GUEST SEATS · NO FIXED PLACES/);
   assert.equal((d.match(/role="button"/g) || []).length, 43);
+  assert.match(d, /aria-label="Dinner seat A6, unavailable"/); assert.match(d, /aria-label="Dinner seat B25, available"/);
   /* nothing drawn without configuration */
   assert.equal((S.svg('ceremony', { ceremony: null }, {}).match(/<g class="seat/g) || []).length, 0);
   /* states are said in words, never colour alone */
-  assert.match(S.legend(), /Selected by you/); assert.match(S.legend(), /Taken/);
+  assert.match(S.legend(), /Available/); assert.match(S.legend(), /Selected by you/); assert.match(S.legend(), /Your seat/); assert.match(S.legend(), /Unavailable/);
+  assert.match(S.legend({ partyName: 'Steffie' }), /Steffie’s seat/); assert.doesNotMatch(S.legend(), /’s seat/);
+  assert.doesNotMatch(S.legend({ frozen: true }), /Available|Selected by you/, 'frozen: nothing is offered');
   /* RESERVED · FAMILY is a state only where the plan carries such a chair: the
    * fixture does, production does not (Owner decision 13 Sep 2026 — no
    * preassigned family-seat mechanism), and the legend never lists a state no

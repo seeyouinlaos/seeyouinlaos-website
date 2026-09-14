@@ -180,26 +180,30 @@ mock.selections['C-L-04-02'] = { inv: 'INV-003', guestId: 'g-other' };   /* some
 mock.selections['D-B-07'] = { inv: 'INV-003', guestId: 'g-other' };
 await go('wedding-preparation.html', 390);
 const seatsOpen = await text('#seats');
-note('G2 open: two maps, per named guest', /seating is open/.test(seatsOpen) && (await page.locator('#seats svg.p-seatmap').count()) === 2 && /Choosing a seat for/.test(seatsOpen) && /Not chosen yet/.test(seatsOpen), 'ceremony and dinner drawn from the fixture');
+note('G2 open: two maps, per named guest', /seating is open/.test(seatsOpen) && (await page.locator('#seats svg.p-seatmap').count()) === 2 && /Choosing a seat for/.test(seatsOpen) && /Not selected/.test(seatsOpen), 'ceremony and dinner drawn from the fixture');
 note('G2 Owner geometry from configuration', (await page.locator('#seats [data-ev="ceremony"] g.seat').count()) === 50 && (await page.locator('#seats [data-ev="dinner"] g.seat').count()) === 50 && (await page.locator('#seats [data-ev="ceremony"] g.seat-family').count()) === 6 && (await page.locator('#seats [data-ev="dinner"] g.seat-family').count()) === 6 && (await page.locator('#seats [data-ev="dinner"] g[data-seat="BRIDE"], #seats [data-ev="dinner"] g[data-seat="GROOM"]').count()) === 0, 'ceremony 50 (20 + 30), dinner 50 guest boxes, nothing fixed, family 6 + 6 (fixture)');
-note('G2 ten rows · 2 left · 3 right · aisle · 25 top · 25 bottom · 50 people', (await page.evaluate(() => { const c = document.querySelector('#seats [data-ev="ceremony"] svg').textContent; const d = document.querySelector('#seats [data-ev="dinner"] svg').textContent; return /CEREMONY/.test(c) && /LEFT · 20/.test(c) && /RIGHT · 30/.test(c) && /10/.test(c) && /25 GUESTS · TOP/.test(d) && /25 GUESTS · BOTTOM/.test(d) && !/BRIDE|GROOM/.test(d) && /50 PEOPLE/.test(d) && /BRIDE/.test(c) && /GROOM/.test(c) && document.querySelectorAll('#seats [data-ev="ceremony"] g.fixed').length === 1; })), 'labels read back from the drawings');
-note('G2 no symmetry regression', (await page.evaluate(() => { const rects = [...document.querySelectorAll('#seats [data-ev="ceremony"] g.seat rect')].map((r) => Number(r.getAttribute('x'))); const xs = [...new Set(rects)].sort((a, b) => a - b); return xs.length === 5; })), 'two chair columns left of the aisle, three right of it');
+note('G2 ten rows · 2 left · 3 right · aisle · 25 top · 25 bottom · 50 people', (await page.evaluate(() => { const c = document.querySelector('#seats [data-ev="ceremony"] svg').textContent; const d = document.querySelector('#seats [data-ev="dinner"] svg').textContent; return /CEREMONY · FRONT/.test(c) && /LEFT BLOCK · 20/.test(c) && /RIGHT BLOCK · 30/.test(c) && /AISLE/.test(c) && /10/.test(c) && /RUN A · 25 PLACES/.test(d) && /RUN B · 25 PLACES/.test(d) && !/BRIDE|GROOM/.test(d) && /50 GUEST SEATS/.test(d) && /BRIDE/.test(c) && /GROOM/.test(c) && document.querySelectorAll('#seats [data-ev="ceremony"] g.fixed').length === 1; })), 'labels read back from the drawings (002: the physical plan)');
+note('G2 no symmetry regression', (await page.evaluate(() => { const rects = [...document.querySelectorAll('#seats [data-ev="ceremony"] g.seat rect.pan')].map((r) => Number(r.getAttribute('x'))); const xs = [...new Set(rects)].sort((a, b) => a - b); return xs.length === 5; })), 'two chair columns left of the aisle, three right of it (the seat pans; the backrest bar sits 3 units in)');
 /* Peggy chooses */
-await page.locator('#seats [data-ev="ceremony"] g[data-seat="C-L-04-01"]').click(); await page.waitForTimeout(300);
-await page.locator('#seats [data-ev="dinner"] g[data-seat="D-T-08"]').click(); await page.waitForTimeout(300);
+/* 002 (14 Sep): two steps — tap, then CONFIRM in the summary; then CONTINUE past the confirmation */
+const book = async (ev, seatId) => { await page.locator('#seats [data-ev="' + ev + '"] g[data-seat="' + seatId + '"]').click(); await page.waitForTimeout(300); const pend = !mock.selections[seatId]; await page.locator('.p-seatbar.on [data-seat-confirm="' + ev + '"]').click(); await page.waitForTimeout(600); await page.locator('[data-seat-continue="' + ev + '"]').click(); await page.waitForTimeout(400); return pend; };
+const pend1 = await book('ceremony', 'C-L-04-01'), pend2 = await book('dinner', 'D-T-08');
 const afterPick = await text('#seats');
-note('G2 seat belongs to Peggy', /Held in Peggy’s name · Left side · row 4 · chair 1/.test(afterPick) && /Long table · top side · place 8/.test(afterPick) && mock.selections['C-L-04-01'].guestId === P.guestId, 'C-L-04-01 and D-T-08 held for ' + P.guestId);
+note('G2 seat belongs to Peggy', pend1 && pend2 && /A4/.test(afterPick) && /Left block · row 4 · held in Peggy’s name/.test(afterPick) && /Long table · run A · place 8/.test(afterPick) && !/C-L-04-01|D-T-08/.test(afterPick) && mock.selections['C-L-04-01'].guestId === P.guestId, 'A4 and A8 held for ' + P.guestId + ' — nothing on the tap, everything on CONFIRM, labels only');
 /* a taken chair, a family chair */
+await page.locator('[data-seat-change="ceremony"]').click(); await page.waitForTimeout(300);
 await page.locator('#seats [data-ev="ceremony"] g[data-seat="C-L-04-02"]').count().then((n) => note('G2 taken is not selectable', n === 0, 'C-L-04-02 (another invitation) has no button'));
 note('G2 family is not selectable', (await page.locator('#seats [data-ev="ceremony"] g[data-seat="C-L-01-01"]').count()) === 0, 'C-L-01-01 is FAMILY (fixture)');
 /* change: new chair held, old released */
 await page.locator('#seats [data-ev="ceremony"] g[data-seat="C-R-03-02"]').click(); await page.waitForTimeout(300);
-note('G2 change is atomic', mock.selections['C-R-03-02'] && mock.selections['C-R-03-02'].guestId === P.guestId && !mock.selections['C-L-04-01'], 'C-R-03-02 held, C-L-04-01 released');
+const chgBar = await text('.p-seatbar.on'); const oldStill = mock.selections['C-L-04-01'] && mock.selections['C-L-04-01'].guestId === P.guestId && !mock.selections['C-R-03-02'];
+await page.locator('.p-seatbar.on [data-seat-confirm="ceremony"]').click(); await page.waitForTimeout(600); await page.locator('[data-seat-continue="ceremony"]').click(); await page.waitForTimeout(300);
+note('G2 change is atomic', /Current seat A4 · New seat E3/.test(chgBar) && oldStill && mock.selections['C-R-03-02'] && mock.selections['C-R-03-02'].guestId === P.guestId && !mock.selections['C-L-04-01'], 'A4 → E3: the old chair stays until CONFIRM CHANGE, then C-R-03-02 held, C-L-04-01 released');
 await frames('wedding-preparation.html', 'mock-g-seats-open-peggy', [['#seats', 'mock-g-seats-open-peggy-section'], ['#seats [data-ev="ceremony"]', 'mock-g-ceremony-map'], ['#seats [data-ev="dinner"]', 'mock-g-dinner-map']]);
 /* choosing for Steffie */
 await page.click('#seats [data-seat-who="' + S.guestId + '"]'); await page.waitForTimeout(200);
 note('G3 choosing for Steffie', /Choosing for\s*Steffie/.test(await text('#seats .p-for')) && /continuing as Peggy/.test(await text('#seats .p-for')), 'the boundary is said');
-await page.locator('#seats [data-ev="ceremony"] g[data-seat="C-R-03-03"]').click(); await page.waitForTimeout(300);
+await book('ceremony', 'C-R-03-03');
 note('G3 Steffie\'s chair is hers', mock.selections['C-R-03-03'] && mock.selections['C-R-03-03'].guestId === S.guestId && mock.selections['C-R-03-02'].guestId === P.guestId, 'C-R-03-03 for Steffie, C-R-03-02 still Peggy\'s');
 await still(); await crop('#seats', 'mock-g-seats-choosing-for-steffie', 390);
 for (const w of [834, 1440, 1920]) { await go('wedding-preparation.html', w); await page.click('#seats [data-seat-who="' + S.guestId + '"]'); await page.waitForTimeout(200); await still(); await crop('#seats', 'mock-g-seats-choosing-for-steffie', w); }
@@ -208,13 +212,13 @@ note('G3 targets', (await tapTargets()).length === 0, 'chairs ≥24px at 390, co
 /* review shows both seats by name */
 await go('review.html', 390);
 const b3s = await text('#b3');
-note('G4 review seats by name', /C-R-03-02/.test(b3s) && /C-R-03-03/.test(b3s) && /D-T-08/.test(b3s) && /Right side · row 3 · chair 2 · held in Peggy’s name/.test(b3s), 'ceremony and dinner seats per named guest');
+note('G4 review seats by name', /Seat E3/i.test(b3s) && /Seat F3/i.test(b3s) && /Seat A8/i.test(b3s) && /E3 · Right block · row 3 · confirmed in Peggy’s name · SYL-TC-E3-/.test(b3s) && !/C-R-03|D-T-08/.test(b3s), 'ceremony and dinner seats per named guest, by label, with the reference');
 await frames('review.html', 'mock-g-review-seats', [['#b3', 'mock-g-review-seats-wedding']]);
 /* frozen */
 mock.seating = { open: true, frozen: true };
 await go('wedding-preparation.html', 390);
 const frozen = await text('#seats');
-note('G5 frozen', /seating is closed/.test(frozen) && (await page.locator('#seats g[data-seat]').count()) === 0 && /C-R-03-02/.test(frozen) && !/Give this chair back/.test(frozen), 'authoritative view, no self-change');
+note('G5 frozen', /seating is closed/.test(frozen) && (await page.locator('#seats g[data-seat]').count()) === 0 && /\bE3\b/.test(frozen) && !/Give this chair back|Change seat/.test(frozen), 'authoritative view, no self-change');
 await frames('wedding-preparation.html', 'mock-g-seats-frozen', [['#seats', 'mock-g-seats-frozen-section']]);
 mock.seating = null;
 
@@ -235,7 +239,7 @@ await go('review.html', 390);
 const conf = await text('#journeystate');
 note('F2 confirmed', /Journey confirmed/.test(conf) && /A · Party journey confirmation/.test(conf) && /For your party · Peggy & Steffie/.test(conf) && /B · Personal wedding card/.test(conf) && (await page.locator('#journeystate .p-wcard').count()) === 2 && (await page.locator('#sendbox').first().isHidden()), 'party confirmation + one card per named guest, send withdrawn');
 const cards = await page.locator('#journeystate .p-wcard').allTextContents();
-note('F2 cards are personal', /Peggy/.test(cards[0]) && /Steffie/.test(cards[1]) && /28 February 2027 · Vientiane/.test(cards[0]) && /Ceremony seat.*C-R-03-02/.test(cards[0].replace(/\s+/g, ' ')) && /Ceremony seat.*C-R-03-03/.test(cards[1].replace(/\s+/g, ' ')) && /Right side · row 3 · chair 2/.test(cards[0].replace(/\s+/g, ' ')) && /Dress code/.test(cards[0]), 'each card from its own guest\'s state, seats only when authoritative');
+note('F2 cards are personal', /Peggy/.test(cards[0]) && /Steffie/.test(cards[1]) && /28 February 2027 · Vientiane/.test(cards[0]) && /Ceremony seat.*Seat E3/i.test(cards[0].replace(/\s+/g, ' ')) && /Ceremony seat.*Seat F3/i.test(cards[1].replace(/\s+/g, ' ')) && /E3 · Right block · row 3/.test(cards[0].replace(/\s+/g, ' ')) && !/C-R-03/.test(cards[0] + cards[1]) && /Dress code/.test(cards[0]), 'each card from its own guest\'s state, seats only when authoritative');
 note('F2 no ticket imitation', (await page.locator('#journeystate svg, #journeystate canvas, #journeystate img').count()) === 0 && !/barcode|scan|boarding/i.test(conf), 'no barcode, no QR, no scan');
 await frames('review.html', 'mock-f-confirmed', [['#journeystate', 'mock-f-confirmed-block'], ['#journeystate .p-wcard', 'mock-f-personal-card-peggy']]);
 note('F2 targets', (await tapTargets()).length === 0, 'tap targets: ' + JSON.stringify(await tapTargets()));
