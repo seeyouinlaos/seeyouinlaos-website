@@ -55,12 +55,12 @@ for (const [stay, slug, name, n] of [['souphattra', 'souphattra-presidential', '
   note('2 live INV-001 · ' + name + ': the label, the choice, the live count', w.length === n && w.every((x) => /Reserved for bride & groom · held for your party — yours to choose/i.test(x.rsv) && /Add to Your Journey/.test(x.cta) && !x.disabled && /room(s)? remaining/.test(x.av)), JSON.stringify(w));
   if (OUT) await p.screenshot({ path: path.join(OUT, 'live-' + slug + '.png') });
   await p.locator('.buy .win .cta').first().click(); await p.waitForTimeout(400);
-  const after = await p.evaluate(() => (document.querySelector('.buy .win .cta') || {}).textContent);
-  note('2 live INV-001 · ' + name + ' selected (this device’s journey)', /Remove from Your Journey/.test(after || '') && JSON.parse(localStorage.getItem('siyl.bag') || '[]').some((x) => x.room === slug), after);
+  const after = await p.evaluate((slug) => ({ btn: (document.querySelector('.buy .win .cta') || {}).textContent, inBag: JSON.parse(localStorage.getItem('siyl.bag') || '[]').some((x) => x.room === slug) }), slug);
+  note('2 live INV-001 · ' + name + ' selected (this device’s journey)', /Remove from Your Journey/.test(after.btn || '') && after.inBag, after.btn);
 }
 await go('journeys.html');
 const rows = await p.evaluate(() => [...document.querySelectorAll('.var')].filter((a) => a.querySelector('.vr')).map((a) => ({ name: a.dataset.name, rsvd: a.classList.contains('rsvd'), gone: a.classList.contains('gone'), on: a.classList.contains('on'), vr: a.querySelector('.vr').textContent.trim() })));
-note('2 live INV-001 · journeys: Bride & Groom rows open and selected, family rows reserved', rows.filter((r) => /bride/i.test(r.vr)).every((r) => !r.rsvd && !r.gone && r.on) && rows.filter((r) => /family/i.test(r.vr)).every((r) => r.rsvd && r.gone), JSON.stringify(rows).slice(0, 300));
+note('2 live INV-001 · journeys: every Bride & Groom row open (the three chosen ones selected), family rows reserved', rows.filter((r) => /bride/i.test(r.vr)).every((r) => !r.rsvd && !r.gone) && rows.filter((r) => /bride/i.test(r.vr) && r.on).length === 3 && rows.filter((r) => /family/i.test(r.vr)).every((r) => r.rsvd && r.gone), JSON.stringify(rows).slice(0, 300));
 if (OUT) await p.screenshot({ path: path.join(OUT, 'live-journeys-hosts.png') });
 await p.evaluate(() => localStorage.clear());
 

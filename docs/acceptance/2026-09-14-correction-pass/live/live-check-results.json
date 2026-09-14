@@ -1,0 +1,108 @@
+{
+ "origin": "https://seeyouinlaos-website.suthep-hrg.workers.dev",
+ "at": "2026-09-14T16:20:47.939Z",
+ "pass": 20,
+ "total": 20,
+ "results": [
+  {
+   "id": "0 production read",
+   "ok": true,
+   "d": "INV-001 received true (2026-09-14T13:54:18.054Z) · alloc [{\"key\":\"wedstay/heritage\",\"units\":1,\"qty\":2}] · INV-002 received false · alloc null"
+  },
+  {
+   "id": "1 live ledger · read as INV-001: every Bride & Groom category open to the couple; read as INV-002: reserved",
+   "ok": true,
+   "d": "prewed/souphattra-presidential hosts:1 guest:0 · wedstay/souphattra-presidential hosts:1 guest:0 · kmg/solarium hosts:1 guest:0 · ljg/view-suite-270 hosts:4 guest:0"
+  },
+  {
+   "id": "1 live ledger · INV-002 asking for the Presidential is refused, the reason named, nothing written",
+   "ok": true,
+   "d": "[{\"key\":\"wedstay/souphattra-presidential\",\"name\":\"Souphattra Presidential\",\"unit\":\"room\",\"wanted\":1,\"remaining\":0,\"heldFor\":\"Bride & Groom\"}]"
+  },
+  {
+   "id": "1 live ledger · INV-001 reserving its own categories is accepted",
+   "ok": true,
+   "d": "[{\"key\":\"wedstay/heritage\",\"units\":1,\"qty\":2},{\"key\":\"wedstay/souphattra-presidential\",\"units\":1,\"qty\":2},{\"key\":\"kmg/solarium\",\"units\":1,\"qty\":2},{\"key\":\"ljg/view-suite-270\",\"units\":1,\"qty\":2}]"
+  },
+  {
+   "id": "1 live ledger · INV-001 allocation restored exactly",
+   "ok": true,
+   "d": "[{\"key\":\"wedstay/heritage\",\"units\":1,\"qty\":2}]"
+  },
+  {
+   "id": "2 live INV-001 · signed out, session cleared, code entered again: hosts flag explicit",
+   "ok": true,
+   "d": "party of 2"
+  },
+  {
+   "id": "2 live INV-001 · Souphattra Presidential: the label, the choice, the live count",
+   "ok": true,
+   "d": "[{\"rsv\":\"Reserved for bride & groom · held for your party — yours to choose\",\"cta\":\"Add to Your Journey\",\"disabled\":false,\"av\":\"1 room remaining\"},{\"rsv\":\"Reserved for bride & groom · held for your party — yours to choose\",\"cta\":\"Add to Your Journey\",\"disabled\":false,\"av\":\"1 room remaining\"}]"
+  },
+  {
+   "id": "2 live INV-001 · Souphattra Presidential selected (this device’s journey)",
+   "ok": true,
+   "d": "Remove from Your Journey"
+  },
+  {
+   "id": "2 live INV-001 · Solarium Bath Suite: the label, the choice, the live count",
+   "ok": true,
+   "d": "[{\"rsv\":\"Reserved for bride & groom · held for your party — yours to choose\",\"cta\":\"Add to Your Journey\",\"disabled\":false,\"av\":\"1 room remaining\"}]"
+  },
+  {
+   "id": "2 live INV-001 · Solarium Bath Suite selected (this device’s journey)",
+   "ok": true,
+   "d": "Remove from Your Journey"
+  },
+  {
+   "id": "2 live INV-001 · 270° Snow Mountain View Suite: the label, the choice, the live count",
+   "ok": true,
+   "d": "[{\"rsv\":\"Reserved for bride & groom · held for your party — yours to choose\",\"cta\":\"Add to Your Journey\",\"disabled\":false,\"av\":\"4 rooms remaining\"}]"
+  },
+  {
+   "id": "2 live INV-001 · 270° Snow Mountain View Suite selected (this device’s journey)",
+   "ok": true,
+   "d": "Remove from Your Journey"
+  },
+  {
+   "id": "2 live INV-001 · journeys: every Bride & Groom row open (the three chosen ones selected), family rows reserved",
+   "ok": true,
+   "d": "[{\"name\":\"Souphattra Presidential\",\"rsvd\":false,\"gone\":false,\"on\":true,\"vr\":\"Reserved for bride & groom · yours to choose\"},{\"name\":\"Grand Majestic Suite\",\"rsvd\":true,\"gone\":true,\"on\":false,\"vr\":\"Reserved for family\"},{\"name\":\"Souphattra Presidential\",\"rsvd\":false,\"gone\":false,\"on\":false,\"vr\":\"Reser"
+  },
+  {
+   "id": "3 live INV-002 · the Presidential stays reserved, no button",
+   "ok": true,
+   "d": "[{\"rsv\":\"Reserved for bride & groom\",\"cta\":false},{\"rsv\":\"Reserved for bride & groom\",\"cta\":false}]"
+  },
+  {
+   "id": "3 live · Special Express No. 25 says USD 100 per person · package",
+   "ok": true,
+   "d": "USD 100 PER PERSON "
+  },
+  {
+   "id": "3 live REVIEW & SEND · the real register endpoint stored it: RECEIVED with the server’s stamp, the button SENT TO GUEST RELATIONS",
+   "ok": true,
+   "d": "{\"h\":\"Your journey has been received by Guest Relations\",\"at\":\"Received · 14 Sept 2026 · 18:20 · your time\",\"btn\":\"Sent to Guest Relations\",\"state\":\"sent\",\"hidden\":false,\"done\":false,\"card\":\"JOURNEY RECEIVED Guest Relations has your journey Received on 14 Sept · server receivedAt 2026-09-14T16:20:38.360Z"
+  },
+  {
+   "id": "3 live REVIEW & SEND · a reload keeps the server-backed SENT state",
+   "ok": true,
+   "d": "{\"btn\":\"Sent to Guest Relations\",\"state\":\"sent\",\"hidden\":false}"
+  },
+  {
+   "id": "3 live · the ledger holds INV-002’s test rooms (to be released)",
+   "ok": true,
+   "d": "[\"bkk-stay/penthouse\",\"prewed/heritage-grand-premier\",\"wedstay/heritage-grand-premier\",\"kmg/italian\",\"ljg/viewing-270\",\"kempinski/deluxe-balcony-king\"]"
+  },
+  {
+   "id": "4 restored · INV-002 back to no record and no allocation; INV-001 record and allocation lines as before",
+   "ok": true,
+   "d": "deleted reg:INV-002 · INV-001 receivedAt 2026-09-14T13:54:18.054Z"
+  },
+  {
+   "id": "5 live errors",
+   "ok": true,
+   "d": "none"
+  }
+ ]
+}

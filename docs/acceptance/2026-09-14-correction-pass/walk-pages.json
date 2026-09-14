@@ -1,0 +1,163 @@
+{
+ "origin": "https://seeyouinlaos.github.io/seeyouinlaos-website",
+ "at": "2026-09-14T16:24:53.311Z",
+ "pass": 31,
+ "total": 31,
+ "results": [
+  {
+   "id": "1 fresh INV-001 login",
+   "ok": true,
+   "d": "hosts flag explicit in the bundle · party of two"
+  },
+  {
+   "id": "2 INV-001 · Souphattra Presidential offers the choice",
+   "ok": true,
+   "d": "[{\"label\":\"Pre-Wedding Stay\",\"rsv\":\"Reserved for bride & groom · held for your party — yours to choose\",\"cta\":\"Add to Your Journey\",\"disabled\":false,\"av\":\"1 room remaining\"},{\"label\":\"Wedding Stay\",\"rsv\":\"Reserved for bride & groom · held for your party — yours to choose\",\"cta\":\"Add to Your Journey\",\"disabled\":false,\"av\":\"1 room remaining\"}]"
+  },
+  {
+   "id": "2 INV-001 · Souphattra Presidential selected",
+   "ok": true,
+   "d": "bag: prewed wedstay · buttons: Remove from Your Journey | Remove from Your Journey"
+  },
+  {
+   "id": "2 INV-001 · Solarium Bath Suite offers the choice",
+   "ok": true,
+   "d": "[{\"label\":\"After the Wedding\",\"rsv\":\"Reserved for bride & groom · held for your party — yours to choose\",\"cta\":\"Add to Your Journey\",\"disabled\":false,\"av\":\"1 room remaining\"}]"
+  },
+  {
+   "id": "2 INV-001 · Solarium Bath Suite selected",
+   "ok": true,
+   "d": "bag: kmg · buttons: Remove from Your Journey"
+  },
+  {
+   "id": "2 INV-001 · 270° Snow Mountain View Suite offers the choice",
+   "ok": true,
+   "d": "[{\"label\":\"After the Wedding\",\"rsv\":\"Reserved for bride & groom · held for your party — yours to choose\",\"cta\":\"Add to Your Journey\",\"disabled\":false,\"av\":\"4 rooms remaining\"}]"
+  },
+  {
+   "id": "2 INV-001 · 270° Snow Mountain View Suite selected",
+   "ok": true,
+   "d": "bag: ljg · buttons: Remove from Your Journey"
+  },
+  {
+   "id": "3 INV-001 · journeys rows: every Bride & Groom row open and marked selected, family rows reserved",
+   "ok": true,
+   "d": "[{\"name\":\"Souphattra Presidential\",\"rsvd\":false,\"gone\":false,\"on\":true,\"vr\":\"Reserved for bride & groom · yours to choose\",\"sel\":\"Selected · in your journey\"},{\"name\":\"Grand Majestic Suite\",\"rsvd\":true,\"gone\":true,\"on\":false,\"vr\":\"Reserved for family\",\"sel\":\"\"},{\"name\":\"Souphattra Presidential\",\"rsvd\":false,\"gone\":false,\"on\":true,\"vr\":\"Reserved for bride & groom · yours to choose\",\"sel\":\"Selected "
+  },
+  {
+   "id": "3 INV-001 · stay actions say Selected · Change room / Remove for the chosen stays, Add for the open ones",
+   "ok": true,
+   "d": "prewed:SELECTED · IN YOUR JOURNEY Souphattra Presidential CHANGE ROOM REMOVE FROM YOUR  | wedstay:SELECTED · IN YOUR JOURNEY Souphattra Presidential CHANGE ROOM REMOVE FROM YOUR  | kmg:SELECTED · IN YOUR JOURNEY Solarium Bath Suite CHANGE ROOM REMOVE FROM YOUR JOUR | ljg:SELECTED · IN YOUR JOURNEY 270° Snow Mountain View Suite CHANGE ROOM REMOVE FROM | kempinski:ADD TO YOUR JOURNEY"
+  },
+  {
+   "id": "3 INV-001 · totals and the selection persist across a reload",
+   "ok": true,
+   "d": "USD 2,652 = USD 2,652"
+  },
+  {
+   "id": "3b INV-001 · Full Experience fills the open stages and keeps the couple’s reserved rooms",
+   "ok": true,
+   "d": "prewed:souphattra-presidential wedstay:souphattra-presidential kmg:solarium ljg:view-suite-270 bkk-stay:penthouse train mu9646 c86 return kempinski:deluxe-balcony-king"
+  },
+  {
+   "id": "4 INV-002 · the Presidential stays reserved: the label, no button",
+   "ok": true,
+   "d": "[{\"rsv\":\"Reserved for bride & groom\",\"cta\":false},{\"rsv\":\"Reserved for bride & groom\",\"cta\":false}]"
+  },
+  {
+   "id": "4 INV-002 · every reserved row (Bride & Groom and family) unavailable, label intact",
+   "ok": true,
+   "d": "[{\"name\":\"Souphattra Presidential\",\"rsvd\":true,\"gone\":true,\"vr\":\"Reserved for bride & groom\"},{\"name\":\"Grand Majestic Suite\",\"rsvd\":true,\"gone\":true,\"vr\":\"Reserved for family\"},{\"name\":\"Souphattra Presidential\",\"rsvd\":true,\"gone\":true,\"vr\":\"Reserved for bride & groom\"},{\"name\":\"Grand Majestic Suite\""
+  },
+  {
+   "id": "4 INV-002 · the ledger refuses a Bride & Groom room smuggled into the bag: not sent, the reason named",
+   "ok": true,
+   "d": "NOT SENT One of your rooms has just been taken Your journey was not sent, and nothing has been changed. Another guest confirmed the same category while you were"
+  },
+  {
+   "id": "5 Kempinski selected: Selected · Deluxe Balcony King · REMOVE, no Add, no Change (one room only)",
+   "ok": true,
+   "d": "{\"text\":\"SELECTED · IN YOUR JOURNEY Deluxe Balcony King REMOVE FROM YOUR JOURNEY\",\"add\":0,\"change\":0,\"remove\":1,\"row\":\"Selected · in your journey\"}"
+  },
+  {
+   "id": "5 Kempinski removed: Add to Your Journey offered, no row selected",
+   "ok": true,
+   "d": "{\"text\":\"ADD TO YOUR JOURNEY\",\"add\":1,\"row\":false}"
+  },
+  {
+   "id": "5 Kempinski added again (one room: added at once), the row and the state agree, one line in the journey",
+   "ok": true,
+   "d": "{\"text\":\"SELECTED · IN YOUR JOURNEY Deluxe Balcony King REMOVE FROM YOUR JOURNEY\",\"row\":true}"
+  },
+  {
+   "id": "5 Lijiang CHANGE ROOM → rows become the choice in place → a tap replaces the room, one line, still on the page",
+   "ok": true,
+   "d": "starry-sky → SELECTED · IN YOUR JOURNEY Immersive View CHANGE ROOM REMOVE"
+  },
+  {
+   "id": "6 Special Express No. 25 · Your Journey card says USD 100 per person · package; the line is 100",
+   "ok": true,
+   "d": "USD 100 PER PERSON "
+  },
+  {
+   "id": "6 Special Express No. 25 · journeys card and the detail page say USD 100, never 75",
+   "ok": true,
+   "d": "USD 100 per person Per person  · detail: USD 275,USD 85,USD 200,USD 100,USD 100"
+  },
+  {
+   "id": "6 Special Express No. 25 · Review & Send line: USD 100 per person × 1 guest = USD 100",
+   "ok": true,
+   "d": "Special Express No. 25 24 – 25 February 2027 · First Class Sleeper USD 100 per person × 1 guest USD 100 2"
+  },
+  {
+   "id": "6 Special Express No. 25 · two participating guests → USD 100 per person × 2 guests = USD 200",
+   "ok": true,
+   "d": "Special Express No. 25 24 – 25 February 2027 · First Class Sleeper USD 100 per person × 2 guests USD 200 "
+  },
+  {
+   "id": "7 server failure paints NO success: the backup channel, the button still SEND",
+   "ok": true,
+   "d": "{\"err\":\"Your selection could not be stored right now. Please try again in a moment, or use the email backup channel: send via email.\",\"sent\":true,\"btn\":\"Send to Guest Relations\",\"state\":\"ready\",\"done\""
+  },
+  {
+   "id": "7 first send → RECEIVED: the success card with the server’s stamp, the button reads SENT TO GUEST RELATIONS, focus on it, the What-happens-now box under it",
+   "ok": true,
+   "d": "{\"sentHidden\":false,\"h\":\"Your journey has been received by Guest Relations\",\"at\":\"Received · 14 Sept 2026 · 18:24 · your time\",\"btn\":\"Sent to Guest Relations\",\"aria\":\"true\",\"state\":\"sent\",\"done\":false,\"card\":\"JOURNEY RECEIVED Guest Relations has your journey Received on 14 Sept 2026. A person will r"
+  },
+  {
+   "id": "7 a second tap on SENT sends nothing again (no duplicate)",
+   "ok": true,
+   "d": "registered 1"
+  },
+  {
+   "id": "7 reload keeps the server-backed SENT state (button + card)",
+   "ok": true,
+   "d": "{\"sentHidden\":false,\"btn\":\"Sent to Guest Relations\",\"state\":\"sent\",\"card\":\"JOURNEY RECEIVED Guest Relations has your journey Received o\"}"
+  },
+  {
+   "id": "7 CHANGE MY JOURNEY AND SEND AGAIN reopens the send (button \"Send to Guest Relations again\")",
+   "ok": true,
+   "d": "{\"btn\":\"Send to Guest Relations again\",\"state\":\"again\",\"sentHidden\":true}"
+  },
+  {
+   "id": "7 a change after sending: \"Changed since you sent it\", the button offers the send again, no SENT claim",
+   "ok": true,
+   "d": "Send to Guest Relations again"
+  },
+  {
+   "id": "7 the newer send supersedes: SENT again with the newer stamp, no \"changed\" notice, two records (newest wins), never counted twice",
+   "ok": true,
+   "d": "Received · 14 Sept 2026 · 18:24 · your time"
+  },
+  {
+   "id": "7 a newer version from another device: named, and this device does not claim SENT",
+   "ok": true,
+   "d": "Send to Guest Relations again"
+  },
+  {
+   "id": "7 CONFIRMED stays distinct: the confirmation card, the send area withdrawn",
+   "ok": true,
+   "d": "JOURNEY CONFIRMED Guest Relations has confirmed your journey Confirmed on 14 Sep"
+  }
+ ]
+}
