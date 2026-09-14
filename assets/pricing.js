@@ -47,9 +47,9 @@
   };
 
   var FLAT = {
-    'train':  { price: 75,  cat: 'Transportation', name: 'Special Express No. 25',
+    'train':  { price: 100, cat: 'Transportation', name: 'Special Express No. 25',
                 meta: '24 – 25 February 2027 · First Class Sleeper', img: 'assets/images/transport/train-no25-srt-train.jpg',
-                basis: 'USD 75 per person · package · First Class Sleeper, van and border logistics' },
+                basis: 'USD 100 per person · package · First Class Sleeper, van and border logistics' },
     'mu9646': { price: 275, cat: 'Transportation', name: 'MU9646 · Vientiane → Kunming',
                 meta: '01 March 2027 · Business Class', img: 'assets/images/transport/mu9632-business-1.jpg',
                 basis: 'USD 275 per person · 1 seat · Business Class' },
@@ -221,8 +221,25 @@
       return ['wedstay', 'wedstay-n1', 'wedstay-n2'];   /* legacy rows go too */
     },
 
+    /* WHO MAY SELECT A RESERVED ROOM (Owner, 14 Sep 2026). A room marked
+     * "Reserved for bride & groom" belongs to the couple's own party — the
+     * invitation the encrypted bundle marks `hosts: true` (explicit, never
+     * inferred from a name) — and to nobody else; a room reserved for family
+     * is out of reach of everyone on the website. The label always stays. */
+    hosts: function () {
+      try { var a = JSON.parse(localStorage.getItem('siyl.auth') || 'null'); return !!(a && a.hosts === true && Array.isArray(a.guests) && a.guests.length); } catch (e) { return false; }
+    },
+    reservedFor: function (room) {
+      if (!room || !room.reserved) return null;
+      return /bride\s*&(amp;)?\s*groom/i.test(room.reserved) ? 'hosts' : 'family';
+    },
+    eligible: function (room) {
+      var who = this.reservedFor(room);
+      return !who || (who === 'hosts' && this.hosts());
+    },
+
     /* the most expensive room a guest may actually select — reserved
-     * inventory (Bride & Groom, family) is never eligible.
+     * inventory (Bride & Groom, family) is never eligible for a preset.
      * `available` is an optional predicate (slug) → boolean: when the shared
      * ledger says a category is gone, the choice falls to the next best one
      * that is still there rather than to a room nobody can have. */

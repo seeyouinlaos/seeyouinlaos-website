@@ -371,7 +371,7 @@ const blueHit = /Blue Lao Traditional Dress|Lao Traditional Dress · Blue|dresse
 const onePlusOneHit = /1 \+ 1 seating|1\+1 seating|single seat on each side of the aisle|nobody sits beside/i.test(activeSurfaces);
 const exclusiveHit = /Heritage Exclusive/i.test(indexHtml) || /Heritage Exclusive/i.test(appJs) || /Heritage Exclusive/i.test(data) || /Heritage Exclusive/i.test(regHtml);
 const noRoomHit = /No room needed/i.test(appJs) || /No room needed/i.test(regHtml);
-const train88 = /contributionPerGuest: 75/.test(data);
+const train88 = /contributionPerGuest: 100/.test(data);
 gate('P4', 'Wording and product guards',
   !exclusiveHit && !noRoomHit && train88 && !venueHit && !mealHit && !blueHit && !onePlusOneHit,
   [exclusiveHit && "'Heritage Exclusive' found — the category is Heritage Executive",
@@ -380,8 +380,8 @@ gate('P4', 'Wording and product guards',
    mealHit && 'C642-era dinner-window / hot-meal copy found on an active surface',
    blueHit && 'a blue dress requirement is still on an active surface — the temple is Lao Traditional Dress',
    onePlusOneHit && 'the C86 1 + 1 seating claim is still on an active surface — Business Class only',
-   !train88 && 'Night Train must be USD 75 per guest (55 train + 20 van/luggage package)'].filter(Boolean).join(' · ')
-  || "no 'Heritage Exclusive', no 'No room needed', train fixed at USD 75 per guest package");
+   !train88 && 'Night Train must be USD 100 per guest package (Owner, 14 Sep 2026)'].filter(Boolean).join(' · ')
+  || "no 'Heritage Exclusive', no 'No room needed', train fixed at USD 100 per guest package");
 
 /* P6 — LINE/QR owner rule (2026-08-26): no invented LINE ID, no line.me
  * destination, no generated QR. Only the owner's original QR assets. */

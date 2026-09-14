@@ -210,7 +210,7 @@ test('F · the token never reaches the client, and the surface never confirms it
   assert.match(rv, /A · Party journey confirmation/); assert.match(rv, /B · Personal wedding card/);
   assert.doesNotMatch(rv, /BOOKING CONFIRMED|RESERVATION CONFIRMED|PAYMENT COMPLETE|ORDER CONFIRMED|boarding|barcode|<svg[^>]*qr/i);
   assert.match(rv, /p\.guests\.forEach\(function\(g\)\{\s*var id=g\.guestId,row=\(snap\.guests/, 'one card per named guest, from the snapshot that was SENT — never the live draft');
-  assert.match(rv, /rememberSent\(registration\.registration_submitted_at\)/, 'the snapshot is taken at SEND');
+  assert.match(rv, /var at=\(ans&&ans\.submittedAt\)\|\|registration\.registration_submitted_at;\nrememberSent\(at\);/, 'the snapshot is taken at SEND, stamped with what the server stored');
   assert.match(rv, /Changed since confirmation · not sent/);
   assert.match(rv, /held=C\.receivedAt\(\);\s*var current=!!\(mine&&held&&snap\.at===held\)/, 'the snapshot counts only when it is the version Guest Relations holds');
   /* a second device is named only where the record carries a stamp this device

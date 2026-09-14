@@ -48,7 +48,9 @@
 
     load: function (force) {
       if (loading && !force) return loading;
-      loading = fetch(API, { cache: 'no-store' })
+      /* the ledger as THIS party sees it: what is held for the couple is open to the couple */
+      var inv = invitationId();
+      loading = fetch(API + (inv ? '?invitation=' + encodeURIComponent(inv) : ''), { cache: 'no-store' })
         .then(function (r) { return r.json(); })
         .then(function (d) {
           if (!d || !d.ok) throw new Error('inventory unavailable');

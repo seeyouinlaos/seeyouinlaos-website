@@ -102,8 +102,25 @@ export function unitsFor(key, guests) {
   return s.unit === 'guest' ? n : Math.ceil(n / (s.occupancy || 1));
 }
 
-/* what may ever be sold: capacity minus the allocations that already exist */
-export function sellable(key) {
+/* THE HOSTS' OWN PARTY (Owner, 14 Sep 2026). The categories held "for Bride &
+ * Groom" are held for exactly one invitation: the couple's, INV-001 — the same
+ * party the private guest list marks `hosts: true` (both are set by the Owner
+ * together; the id is the party reference, never a code). That invitation may
+ * select what is held for it; every other party sees the category as reserved.
+ * Stock held for Family stays out of reach of everyone on the website. */
+export const HOSTS_INVITATION = 'INV-001';
+export const HELD_FOR_HOSTS = 'Bride & Groom';
+
+/* is this held stock the asking party's own */
+export function heldForParty(key, invitationId) {
   const s = SEED[key];
-  return s ? Math.max(0, s.capacity - (s.held || 0)) : 0;
+  return !!(s && s.held > 0 && s.heldFor === HELD_FOR_HOSTS && invitationId === HOSTS_INVITATION);
+}
+
+/* what may ever be sold: capacity minus the allocations that already exist —
+ * unless the asking party is the one the allocation was made for */
+export function sellable(key, invitationId) {
+  const s = SEED[key];
+  if (!s) return 0;
+  return Math.max(0, s.capacity - (heldForParty(key, invitationId) ? 0 : (s.held || 0)));
 }

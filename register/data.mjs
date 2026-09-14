@@ -242,7 +242,7 @@ export const TRAIN = {
    * guest as ONE package — USD 55 train (First Class Sleeper) + USD 20 Van
    * Pickup & Luggage Service from Nong Khai to the hotel. Guests on the
    * train never book a separate Nong Khai arrival transfer. */
-  contributionPerGuest: 75,
+  contributionPerGuest: 100,
   packageNote: 'Train USD 55 · Van Pickup & Luggage Service after arrival USD 20 — USD 75 per guest, everything to the hotel included.',
 };
 
@@ -278,7 +278,7 @@ export const TRANSFERS = [
      * package — never charged separately, never offered as an extra. */
     pricePerUnit: 0, perGuest: true, direction: 'arrival', fieldsFor: 'train',
     included: 'Included in your Special Express package · met at your carriage exit · luggage handled',
-    blurb: 'Your van pickup and luggage service after the train arrival are already part of the USD 75 package — Guest Relations confirms the exact pickup details personally.' },
+    blurb: 'Your van pickup and luggage service after the train arrival are already part of the USD 100 package — Guest Relations confirms the exact pickup details personally.' },
   { id: 'lcr-pickup-jaguar', group: 'LCR Railway Station', name: 'LCR Station to Hotel by Jaguar',
     pricePerUnit: 40, direction: 'arrival', fieldsFor: 'train',
     included: 'Private vehicle and driver · met personally · luggage handled',

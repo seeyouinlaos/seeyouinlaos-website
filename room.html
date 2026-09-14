@@ -211,7 +211,7 @@ if (others.length) {
     h += '<a class="occard" href="room.html?stay=' + stayKey + '&room=' + r.slug + '">' + img +
       '<div class="ot"><p class="oe">' + esc(r.cat) + '</p><p class="on">' + esc(r.name) + '</p>' +
       '<p class="od">' + esc(r.desc) + '</p>' +
-      '<p>' + (r.reserved ? '<span class="op">USD ' + (P.quote(W0.id, r.slug).total) + '</span> <span class="oe">per person</span> <span class="rsv">' + esc(r.reserved) + '</span>' : priceLine(r)) + '</p>' +
+      '<p>' + (r.reserved && !P.eligible(r) ? '<span class="op">USD ' + (P.quote(W0.id, r.slug).total) + '</span> <span class="oe">per person</span> <span class="rsv">' + esc(r.reserved) + '</span>' : priceLine(r) + (r.reserved ? ' <span class="rsv">' + esc(r.reserved) + ' · yours to choose</span>' : '')) + '</p>' +
       '<p class="oe" data-oav="' + r.slug + '"></p></div></a>';
   });
   h += '</div>';
@@ -231,11 +231,14 @@ stay.windows.forEach(function (w, wi) {
     /* real inventory without an approved guest amount — never an invented price */
     h += '<p class="price">Amount on request</p><p class="per">Guest Relations confirms the amount</p>';
     h += '<p class="enq">This room is part of the house but not yet released with an amount. Guest Relations will confirm it for you.</p>';
-  } else if (room.reserved) {
+  } else if (room.reserved && !P.eligible(room)) {
+    /* held for another party: the amount and the words, never a button */
     h += amountBlock(q);
     if ((room.breakfast || stay.breakfast)) h += '<p class="bf">' + esc((room.breakfast || stay.breakfast)) + '</p>';
     h += '<p class="rsvline">' + esc(room.reserved) + '</p>';
   } else {
+    /* a room held for THIS party (the couple's own) keeps its label and is chosen like any other */
+    if (room.reserved) h += '<p class="rsvline">' + esc(room.reserved) + ' · held for your party — yours to choose</p>';
     /* ONE presentation for every window: the amount, exactly what it covers,
      * and the exact nights it covers. The nights are never left implicit. */
     h += amountBlock(q);

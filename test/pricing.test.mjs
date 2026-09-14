@@ -35,9 +35,9 @@ test('A · one guest, Sathorn Penthouse only → USD 255', () => {
   assert.equal(q.breakfast, 'Breakfast not included · self-pay');
 });
 
-test('B · one guest, Sathorn + Special Express No. 25 → USD 330', () => {
-  const bag = [...pick('bkk-stay', 'penthouse'), { ...P.FLAT.train, price: 75, qty: 1 }];
-  assert.equal(total(bag), 330);
+test('B · one guest, Sathorn + Special Express No. 25 → USD 355', () => {
+  const bag = [...pick('bkk-stay', 'penthouse'), { ...P.FLAT.train, price: 100, qty: 1 }];
+  assert.equal(total(bag), 355);
 });
 
 test('C · two guests, Sathorn Penthouse only → USD 510', () => {
@@ -175,8 +175,8 @@ test('F · changing a paid Kunming / Lijiang variant replaces, never duplicates'
   assert.equal(total(bag), 261 + 420);        /* USD 210 × 2 nights */
 });
 
-test('G · Special Express No. 25 is USD 75 per person and carries no cabin upgrade', () => {
-  assert.equal(P.FLAT.train.price, 75);
+test('G · Special Express No. 25 is USD 100 per person and carries no cabin upgrade', () => {
+  assert.equal(P.FLAT.train.price, 100);
   assert.doesNotMatch(P.FLAT.train.basis, /130|private single cabin/i);
   for (const f of ['journeys.html', 'your-journey.html', 'review.html', 'room.html',
                    'assets/pricing.js', 'assets/journey.js', 'assets/rooms-data.js']) {
@@ -269,14 +269,14 @@ test('the six approved Full Experience compositions come out of component pricin
   /* nothing is hard-coded: each total is the same ten components with two of
    * them swapped, exactly as the Owner listed them */
   const BASE = ['train', 'prewed', 'wedstay', 'kmg', 'c86', 'ljg', 'return', 'kempinski'];
-  const base = 75 + 340 + 170 + 150 + 85 + 200 + 200 + 380;   /* 1,600 */
+  const base = 100 + 340 + 170 + 150 + 85 + 200 + 200 + 380;   /* 1,625 — the train USD 100 since 14 Sep 2026 */
   const bkk = { penthouse: 255, 'u-sathorn-superior-garden': 192, 'shama-king-studio-balcony': 120 };
   const fly = { business: 275, 'economy-flexible': 155 };
   const want = {
-    'penthouse|business': 2130, 'u-sathorn-superior-garden|business': 2067,
-    'shama-king-studio-balcony|business': 1995, 'penthouse|economy-flexible': 2010,
-    'u-sathorn-superior-garden|economy-flexible': 1947,
-    'shama-king-studio-balcony|economy-flexible': 1875,
+    'penthouse|business': 2155, 'u-sathorn-superior-garden|business': 2092,
+    'shama-king-studio-balcony|business': 2020, 'penthouse|economy-flexible': 2035,
+    'u-sathorn-superior-garden|economy-flexible': 1972,
+    'shama-king-studio-balcony|economy-flexible': 1900,
   };
   Object.keys(bkk).forEach((room) => Object.keys(fly).forEach((cls) => {
     const total = base + P.items('bkk-stay', room)[0].price + P.items('mu9646', cls)[0].price;
@@ -350,7 +350,7 @@ test('Full Experience picks the premium ELIGIBLE room — never reserved invento
 
 test('Full Experience lines come from the single pricing source, transport included', () => {
   const t = P.items('train')[0];
-  assert.equal(t.price, 75); assert.equal(t.name, 'Special Express No. 25');
+  assert.equal(t.price, 100); assert.equal(t.name, 'Special Express No. 25');
   assert.equal(P.items('mu9646')[0].price, 275);
   assert.equal(P.items('c86')[0].price, 85);
   assert.equal(P.items('return')[0].price, 200);
@@ -360,9 +360,9 @@ test('Full Experience lines come from the single pricing source, transport inclu
   assert.equal(all.length, 10, 'ten stages, ten lines');
   /* the premium-max sum still exists as arithmetic; it is simply no longer
      what Full Experience selects */
-  assert.equal(total(all), 255 + 75 + 580 + 290 + 275 + 261 + 85 + 420 + 200 + 380);
-  assert.equal(total(all), 2821);
-  assert.notEqual(total(all), 2130);
+  assert.equal(total(all), 255 + 100 + 580 + 290 + 275 + 261 + 85 + 420 + 200 + 380);
+  assert.equal(total(all), 2846);
+  assert.notEqual(total(all), 2155);
 });
 
 test('Review & Send: the Temple Ceremony is optional, the other three hosted', () => {
@@ -724,7 +724,7 @@ const fullExperience = (available) =>
 test('Full Experience is ONE canonical configuration, from any starting point', () => {
   const canonical = fullExperience();
   assert.equal(canonical.length, 10);
-  assert.equal(total(canonical), 2130);
+  assert.equal(total(canonical), 2155);
   /* stage 04 is a Souphattra room at one payable night — never the
      complimentary residence that answers the same stage under Cost Saving */
   const wed = canonical.find((x) => x.id === 'wedstay');
@@ -738,10 +738,10 @@ test('Full Experience is ONE canonical configuration, from any starting point', 
 
 /* OWNER-APPROVED 09 September 2026. Full Experience is a named configuration,
    not "the most expensive room in every house". */
-test('the ten Owner-approved Full Experience selections sum to USD 2,130', () => {
+test('the ten Owner-approved Full Experience selections sum to USD 2,155 (train USD 100 since 14 Sep 2026)', () => {
   const expect = {
     'bkk-stay':  { room: 'penthouse',              rate: 85,  pay: 3, amount: 255 },
-    train:       {                                             amount: 75 },
+    train:       {                                             amount: 100 },
     prewed:      { room: 'heritage-grand-premier', rate: 170, pay: 2, amount: 340 },
     wedstay:     { room: 'heritage-grand-premier', rate: 170, pay: 1, amount: 170 },
     mu9646:      {                                             amount: 275 },
@@ -762,11 +762,11 @@ test('the ten Owner-approved Full Experience selections sum to USD 2,130', () =>
     assert.equal(q.total, e.amount, w + ' amount');
     sum += e.amount;
   }
-  assert.equal(sum, 2130);
-  /* 255 + 75 + 340 + 170 + 275 + 150 + 85 + 200 + 200 + 380 */
-  assert.equal(255 + 75 + 340 + 170 + 275 + 150 + 85 + 200 + 200 + 380, 2130);
+  assert.equal(sum, 2155);
+  /* 255 + 100 + 340 + 170 + 275 + 150 + 85 + 200 + 200 + 380 */
+  assert.equal(255 + 100 + 340 + 170 + 275 + 150 + 85 + 200 + 200 + 380, 2155);
   /* the superseded premium-max configuration is NOT what the mode produces */
-  assert.notEqual(sum, 2821);
+  assert.notEqual(sum, 2846);
 });
 
 test('the total is never hard-coded: a sold-out room changes it', () => {
@@ -783,9 +783,9 @@ test('the total is never hard-coded: a sold-out room changes it', () => {
   const wed = lines.find((x) => x.id === 'wedstay');
   assert.equal(wed.room, 'heritage-grand-premier');
   assert.equal(wed.price, 170);
-  assert.equal(total(lines), 2130 - 340 + 310);
-  assert.equal(total(lines), 2100);
-  assert.notEqual(total(lines), 2130, 'the canonical total must not survive a substitution');
+  assert.equal(total(lines), 2155 - 340 + 310);
+  assert.equal(total(lines), 2125);
+  assert.notEqual(total(lines), 2155, 'the canonical total must not survive a substitution');
 });
 
 test('the approved room is preferred, and the fallback is the nearest, not the dearest', () => {
@@ -875,7 +875,7 @@ test('the Owner-overridden transport facts are the ones on the page', () => {
   assert.equal(P.items('mu9646')[0].cls, 'business');
   assert.equal(P.items('mu9646', 'economy-flexible')[0].price, 155);
   assert.equal(P.items('mu9646', 'economy-flexible')[0].id, 'mu9646');
-  assert.equal(P.FLAT.train.price, 75);
+  assert.equal(P.FLAT.train.price, 100);
   assert.equal(P.FLAT['return'].price, 200);
 });
 
@@ -971,16 +971,16 @@ test('the Sangkhathan is a per-guest offering, not an admission', () => {
   assert.equal(line.room, undefined);
 });
 
-test('Full Experience stays USD 2,130; one offering makes the journey 2,145', () => {
+test('Full Experience stays USD 2,155; one offering makes the journey 2,170', () => {
   const canonical = STAGES.flatMap((w) => (P.FLAT[w] ? P.items(w) : P.items(w, P.approved(w).slug)));
-  assert.equal(total(canonical), 2130, 'the canonical base is unchanged');
+  assert.equal(total(canonical), 2155, 'the canonical base is unchanged');
   const withOffering = [...canonical, { ...P.items('sangkhathan')[0], qty: 1 }];
   assert.equal(withOffering.length, 11, 'the offering is an addition, not a stage');
-  assert.equal(total(withOffering), 2145);
+  assert.equal(total(withOffering), 2170);
   /* the canonical configuration itself is never redefined */
-  assert.equal(total(canonical), 2130);
+  assert.equal(total(canonical), 2155);
   const two = [...canonical, { ...P.items('sangkhathan')[0], qty: 2 }];
-  assert.equal(total(two), 2160);
+  assert.equal(total(two), 2185);
 });
 
 test('the wedding page: four events, the Buddhist morning inside the ceremony', () => {
