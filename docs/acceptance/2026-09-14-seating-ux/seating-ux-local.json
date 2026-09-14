@@ -1,0 +1,778 @@
+{
+ "origin": "http://127.0.0.1:8787",
+ "at": "2026-09-14T06:13:37.196Z",
+ "pass": 154,
+ "total": 154,
+ "results": [
+  {
+   "id": "1 room@320 ceremony 50 chairs A/B|aisle|D/E/F × 1–10, front + BRIDE/GROOM, dinner 25+25, legend in words, no raw id, no page overflow",
+   "ok": true,
+   "d": "{\"chairs\":50,\"dchairs\":50,\"buttons\":50,\"front\":true,\"bride\":true,\"aisle\":true,\"cols\":true,\"aria\":[\"Ceremony seat A1, available\",\"Ceremony seat B1, available\",\"Ceremony seat D1, available\"],\"c4\":false,\"raw\":false,\"legend\":[\"Available\",\"Selected by you\",\"Your seat\",\"Steffie’s seat\",\"Unavailable\"],\"table\":true,\"runs\":true,\"wide\":false,\"progress\":[\"0/2\",\"0/2\"]}"
+  },
+  {
+   "id": "2 summary@320 tap = SELECTED BY YOU, nothing held; the summary names guest · event · Seat E4 with CONFIRM; fixed to the bottom, the journey bar steps aside, the chair stays clear of it",
+   "ok": true,
+   "d": "{\"on\":true,\"text\":\"BOOKING SUMMARY Peggy · Temple Ceremony Seat E4 Right block · row 4 · not yet held CONFIRM SEAT CANCEL\",\"bottom\":0,\"top\":671.609375,\"live\":\"polite\",\"region\":\"region\",\"pad\":188,\"jbar\":false,\"chairClear\":true,\"selAria\":\"Ceremony seat E4, selected\"}"
+  },
+  {
+   "id": "3 confirmed@320 SEAT CONFIRMED · guest · event · date · venue · Seat E4 · reference · CONTINUE + DOWNLOAD; the summary is gone; focus on the confirmation",
+   "ok": true,
+   "d": "SEAT CONFIRMED Your ceremony seat is confirmed E4 Right block · row 4 GUEST Peggy Berger INVITATION Peggy & Steffie EVENT Temple Ceremony DATE Sunday, 28 February 2027 VENUE Wat Ong Teu, Vientiane BOOKING REFERENCE SYL-T"
+  },
+  {
+   "id": "4 pdf@320 a PDF file downloads: see-you-in-laos-tc-seat-peggy.pdf · text read back",
+   "ok": true,
+   "d": "%PDF-1.4 see you in laos. SEAT CONFIRMATION GUEST INVITATION Peggy Berger Peggy & Steffie INV-002 EVENT Temple Ceremony DATE VENUE Sunday, 28 February 2027 Wat Ong Teu, Vientiane SEAT BOOKING REFERENC"
+  },
+  {
+   "id": "5 continue@320 booked card: Seat E4 as YOUR SEAT on a plan that is not for tapping, CHANGE SEAT + give back; the page moved on to the dinner; progress 1 of 2",
+   "ok": true,
+   "d": "{\"state\":\"booked\",\"label\":\"E4\",\"yours\":\"Ceremony seat E4, your seat\",\"buttons\":0,\"change\":true,\"give\":true,\"dinnerNear\":true,\"progress\":\"1/2|0/2\"}"
+  },
+  {
+   "id": "6 change@320 CURRENT SEAT E4 → NEW SEAT F4 in the summary, E4 still held while pending, KEEP E4 returns to the changing map, CONFIRM CHANGE moves the hold atomically and confirms F4",
+   "ok": true,
+   "d": "{\"chg\":\"CHANGE OF SEAT Peggy · Temple Ceremony E4→F4 Current seat E4 · New seat F4 · Right block · row 4 CONFIRM CHANGE KEEP E4\",\"kept\":{\"bar\":false,\"state\":\"changing\",\"selected\":false}}"
+  },
+  {
+   "id": "7 race@320 the chair taken in between is refused: F4 stays, A6 is now UNAVAILABLE, the words say so, the change stays open",
+   "ok": true,
+   "d": "{\"note\":\"That chair has just been taken — seat F4 is still yours. Choose another.\",\"state\":\"changing\",\"bar\":false,\"taken\":\"Ceremony seat A6, unavailable\",\"yours\":\"Ceremony seat F4, your seat\"}"
+  },
+  {
+   "id": "8 dinner@320 Seat B17 · Long table · run B · place 17 in the summary; the plan scrolls sideways and the chosen place is in view, the hint says swipe",
+   "ok": true,
+   "d": "{\"text\":\"BOOKING SUMMARY Peggy · Wedding Dinner Seat B17 Long table · run B · place 17 · not yet held CONFIRM SEAT CANCEL\",\"scrolls\":true,\"visible\":true,\"hint\":true}"
+  },
+  {
+   "id": "9 keyboard@320 a chair is focusable, Enter selects (Seat A2) and focus lands on CONFIRM, Cancel returns focus to the chair, Enter on CONFIRM books it",
+   "ok": true,
+   "d": "CONFIRM · A2 · CONFIRM → SEAT CONFIRMED Your dinner seat is confirmed A2 Long table ·"
+  },
+  {
+   "id": "9b focus@320 after CONFIRM by keyboard the confirmation card holds focus",
+   "ok": true,
+   "d": "confirmation"
+  },
+  {
+   "id": "9c give back@320 asks first (Give seat A2 back? …), Keep releases nothing, Yes releases it and the card is open again",
+   "ok": true,
+   "d": "{\"q\":\"Give seat A2 back? It becomes available to every guest at once, and Peggy will have no dinner seat until a new one is chosen.\",\"yes\":true,\"keep\":true,\"focused\":\"dinner\"}"
+  },
+  {
+   "id": "10 pdf dinner@320 see-you-in-laos-wd-seat-peggy.pdf",
+   "ok": true,
+   "d": "%PDF-1.4 see you in laos. SEAT CONFIRMATION GUEST INVITATION Peggy Berger Peggy & Steffie INV-002 EVENT Wedding Dinner DATE VENUE Sunday, 28 February 2027 Souph"
+  },
+  {
+   "id": "10b download feedback@320 the button says Downloaded · again? (the page was not repainted under it)",
+   "ok": true,
+   "d": "Downloaded · again?"
+  },
+  {
+   "id": "11a busy@320 while CONFIRM is in flight no chair is a button, CONFIRM is disabled and says Confirming…, a stray tap changes nothing, the confirmation is A9",
+   "ok": true,
+   "d": "{\"buttons\":0,\"bar\":\"CHANGE OF SEAT Peggy · Temple Ceremony F4→A9 Current seat F4 · New seat A9 · Left block · row 9 CONFIRMING… KEEP F4\",\"disabled\":true}"
+  },
+  {
+   "id": "11b allocated@320 a seat placed by Guest Relations: SEAT ALLOCATED BY GUEST RELATIONS, no Change / Give back, the download still there",
+   "ok": true,
+   "d": "{\"state\":\"allocated\",\"eyebrow\":\"SEAT ALLOCATED BY GUEST RELATIONS\",\"change\":0,\"words\":true,\"pass\":1}"
+  },
+  {
+   "id": "11c frozen mid-flow@320 the refused CONFIRM is explained, F4 stays, seating reads closed, nothing tappable",
+   "ok": true,
+   "d": "{\"note\":\"Seating has just been closed — the chair could not be held. Seat F4 stays yours.\",\"bar\":false,\"eyebrow\":\"02 · YOUR SEATS · SEATING IS CLOSED\",\"buttons\":0}"
+  },
+  {
+   "id": "11 switch@320 the pending change for Peggy is dropped on SWITCH; Steffie's view: choosing for Steffie, F4 = Peggy’s seat (not tappable), both cards open",
+   "ok": true,
+   "d": "{\"bar\":false,\"who\":\"G002\",\"forWho\":\"CHOOSING FOR Steffie You are continuing as Peggy. The chair is held in Steffie’s name.\",\"peggy\":\"Ceremony seat F4, Peggy’s seat\",\"tappable\":false,\"legend\":\"Available|Selected for Steffie|Steffie’s seat|Peggy’s seat|Unavailable\",\"cards\":\"open|open\"}"
+  },
+  {
+   "id": "12 hosts@320 Haruthai: Front centre · Bride, no ceremony map; dinner 50 chairs; progress says Front centre · Bride / Groom",
+   "ok": true,
+   "d": "ceremony:fixed:FRONT CENTRE · BRIDE|dinner:open:NOT SELECTED · Haruthai · you Ceremony · Front centre · Bride Dinner · Not selected 0 OF 1 || Suthep Ceremony · Front centre · Groom Di"
+  },
+  {
+   "id": "13 bride pdf@320 see-you-in-laos-tc-seat-haruthai.pdf",
+   "ok": true,
+   "d": "%PDF-1.4 see you in laos. SEAT CONFIRMATION GUEST INVITATION Haruthai Amphai Haruthai & Suthep INV-001 EVENT Temple Ceremony DATE VENUE Sunday, 28 February 2027"
+  },
+  {
+   "id": "14 frozen@320 seating closed: allocation shown as Seat B9, no chair tappable, no change, no give back, no Available in the legend",
+   "ok": true,
+   "d": "{\"eyebrow\":\"02 · YOUR SEATS · SEATING IS CLOSED\",\"buttons\":0,\"change\":0,\"card\":\"SEAT ALLOCATED Your dinner seat Souphattra Heritage · poolside · 19:30 B9 Long table · run B · place 9 GUEST Haruthai Amphai INVITATION Haruthai & Suthep EVENT "
+  },
+  {
+   "id": "15 reduced motion@320 no bar transition, no confirmation animation",
+   "ok": true,
+   "d": "none · none"
+  },
+  {
+   "id": "16 errors@320",
+   "ok": true,
+   "d": "none"
+  },
+  {
+   "id": "1 room@375 ceremony 50 chairs A/B|aisle|D/E/F × 1–10, front + BRIDE/GROOM, dinner 25+25, legend in words, no raw id, no page overflow",
+   "ok": true,
+   "d": "{\"chairs\":50,\"dchairs\":50,\"buttons\":50,\"front\":true,\"bride\":true,\"aisle\":true,\"cols\":true,\"aria\":[\"Ceremony seat A1, available\",\"Ceremony seat B1, available\",\"Ceremony seat D1, available\"],\"c4\":false,\"raw\":false,\"legend\":[\"Available\",\"Selected by you\",\"Your seat\",\"Steffie’s seat\",\"Unavailable\"],\"table\":true,\"runs\":true,\"wide\":false,\"progress\":[\"0/2\",\"0/2\"]}"
+  },
+  {
+   "id": "2 summary@375 tap = SELECTED BY YOU, nothing held; the summary names guest · event · Seat E4 with CONFIRM; fixed to the bottom, the journey bar steps aside, the chair stays clear of it",
+   "ok": true,
+   "d": "{\"on\":true,\"text\":\"BOOKING SUMMARY Peggy · Temple Ceremony Seat E4 Right block · row 4 · not yet held CONFIRM SEAT CANCEL\",\"bottom\":0,\"top\":671.609375,\"live\":\"polite\",\"region\":\"region\",\"pad\":188,\"jbar\":false,\"chairClear\":true,\"selAria\":\"Ceremony seat E4, selected\"}"
+  },
+  {
+   "id": "3 confirmed@375 SEAT CONFIRMED · guest · event · date · venue · Seat E4 · reference · CONTINUE + DOWNLOAD; the summary is gone; focus on the confirmation",
+   "ok": true,
+   "d": "SEAT CONFIRMED Your ceremony seat is confirmed E4 Right block · row 4 GUEST Peggy Berger INVITATION Peggy & Steffie EVENT Temple Ceremony DATE Sunday, 28 February 2027 VENUE Wat Ong Teu, Vientiane BOOKING REFERENCE SYL-T"
+  },
+  {
+   "id": "4 pdf@375 a PDF file downloads: see-you-in-laos-tc-seat-peggy.pdf · text read back",
+   "ok": true,
+   "d": "%PDF-1.4 see you in laos. SEAT CONFIRMATION GUEST INVITATION Peggy Berger Peggy & Steffie INV-002 EVENT Temple Ceremony DATE VENUE Sunday, 28 February 2027 Wat Ong Teu, Vientiane SEAT BOOKING REFERENC"
+  },
+  {
+   "id": "5 continue@375 booked card: Seat E4 as YOUR SEAT on a plan that is not for tapping, CHANGE SEAT + give back; the page moved on to the dinner; progress 1 of 2",
+   "ok": true,
+   "d": "{\"state\":\"booked\",\"label\":\"E4\",\"yours\":\"Ceremony seat E4, your seat\",\"buttons\":0,\"change\":true,\"give\":true,\"dinnerNear\":true,\"progress\":\"1/2|0/2\"}"
+  },
+  {
+   "id": "6 change@375 CURRENT SEAT E4 → NEW SEAT F4 in the summary, E4 still held while pending, KEEP E4 returns to the changing map, CONFIRM CHANGE moves the hold atomically and confirms F4",
+   "ok": true,
+   "d": "{\"chg\":\"CHANGE OF SEAT Peggy · Temple Ceremony E4→F4 Current seat E4 · New seat F4 · Right block · row 4 CONFIRM CHANGE KEEP E4\",\"kept\":{\"bar\":false,\"state\":\"changing\",\"selected\":false}}"
+  },
+  {
+   "id": "7 race@375 the chair taken in between is refused: F4 stays, A6 is now UNAVAILABLE, the words say so, the change stays open",
+   "ok": true,
+   "d": "{\"note\":\"That chair has just been taken — seat F4 is still yours. Choose another.\",\"state\":\"changing\",\"bar\":false,\"taken\":\"Ceremony seat A6, unavailable\",\"yours\":\"Ceremony seat F4, your seat\"}"
+  },
+  {
+   "id": "8 dinner@375 Seat B17 · Long table · run B · place 17 in the summary; the plan scrolls sideways and the chosen place is in view, the hint says swipe",
+   "ok": true,
+   "d": "{\"text\":\"BOOKING SUMMARY Peggy · Wedding Dinner Seat B17 Long table · run B · place 17 · not yet held CONFIRM SEAT CANCEL\",\"scrolls\":true,\"visible\":true,\"hint\":true}"
+  },
+  {
+   "id": "9 keyboard@375 a chair is focusable, Enter selects (Seat A2) and focus lands on CONFIRM, Cancel returns focus to the chair, Enter on CONFIRM books it",
+   "ok": true,
+   "d": "CONFIRM · A2 · CONFIRM → SEAT CONFIRMED Your dinner seat is confirmed A2 Long table ·"
+  },
+  {
+   "id": "9b focus@375 after CONFIRM by keyboard the confirmation card holds focus",
+   "ok": true,
+   "d": "confirmation"
+  },
+  {
+   "id": "9c give back@375 asks first (Give seat A2 back? …), Keep releases nothing, Yes releases it and the card is open again",
+   "ok": true,
+   "d": "{\"q\":\"Give seat A2 back? It becomes available to every guest at once, and Peggy will have no dinner seat until a new one is chosen.\",\"yes\":true,\"keep\":true,\"focused\":\"dinner\"}"
+  },
+  {
+   "id": "10 pdf dinner@375 see-you-in-laos-wd-seat-peggy.pdf",
+   "ok": true,
+   "d": "%PDF-1.4 see you in laos. SEAT CONFIRMATION GUEST INVITATION Peggy Berger Peggy & Steffie INV-002 EVENT Wedding Dinner DATE VENUE Sunday, 28 February 2027 Souph"
+  },
+  {
+   "id": "10b download feedback@375 the button says Downloaded · again? (the page was not repainted under it)",
+   "ok": true,
+   "d": "Downloaded · again?"
+  },
+  {
+   "id": "11a busy@375 while CONFIRM is in flight no chair is a button, CONFIRM is disabled and says Confirming…, a stray tap changes nothing, the confirmation is A9",
+   "ok": true,
+   "d": "{\"buttons\":0,\"bar\":\"CHANGE OF SEAT Peggy · Temple Ceremony F4→A9 Current seat F4 · New seat A9 · Left block · row 9 CONFIRMING… KEEP F4\",\"disabled\":true}"
+  },
+  {
+   "id": "11b allocated@375 a seat placed by Guest Relations: SEAT ALLOCATED BY GUEST RELATIONS, no Change / Give back, the download still there",
+   "ok": true,
+   "d": "{\"state\":\"allocated\",\"eyebrow\":\"SEAT ALLOCATED BY GUEST RELATIONS\",\"change\":0,\"words\":true,\"pass\":1}"
+  },
+  {
+   "id": "11c frozen mid-flow@375 the refused CONFIRM is explained, F4 stays, seating reads closed, nothing tappable",
+   "ok": true,
+   "d": "{\"note\":\"Seating has just been closed — the chair could not be held. Seat F4 stays yours.\",\"bar\":false,\"eyebrow\":\"02 · YOUR SEATS · SEATING IS CLOSED\",\"buttons\":0}"
+  },
+  {
+   "id": "11 switch@375 the pending change for Peggy is dropped on SWITCH; Steffie's view: choosing for Steffie, F4 = Peggy’s seat (not tappable), both cards open",
+   "ok": true,
+   "d": "{\"bar\":false,\"who\":\"G002\",\"forWho\":\"CHOOSING FOR Steffie You are continuing as Peggy. The chair is held in Steffie’s name.\",\"peggy\":\"Ceremony seat F4, Peggy’s seat\",\"tappable\":false,\"legend\":\"Available|Selected for Steffie|Steffie’s seat|Peggy’s seat|Unavailable\",\"cards\":\"open|open\"}"
+  },
+  {
+   "id": "12 hosts@375 Haruthai: Front centre · Bride, no ceremony map; dinner 50 chairs; progress says Front centre · Bride / Groom",
+   "ok": true,
+   "d": "ceremony:fixed:FRONT CENTRE · BRIDE|dinner:open:NOT SELECTED · Haruthai · you Ceremony · Front centre · Bride Dinner · Not selected 0 OF 1 || Suthep Ceremony · Front centre · Groom Di"
+  },
+  {
+   "id": "13 bride pdf@375 see-you-in-laos-tc-seat-haruthai.pdf",
+   "ok": true,
+   "d": "%PDF-1.4 see you in laos. SEAT CONFIRMATION GUEST INVITATION Haruthai Amphai Haruthai & Suthep INV-001 EVENT Temple Ceremony DATE VENUE Sunday, 28 February 2027"
+  },
+  {
+   "id": "14 frozen@375 seating closed: allocation shown as Seat B9, no chair tappable, no change, no give back, no Available in the legend",
+   "ok": true,
+   "d": "{\"eyebrow\":\"02 · YOUR SEATS · SEATING IS CLOSED\",\"buttons\":0,\"change\":0,\"card\":\"SEAT ALLOCATED Your dinner seat Souphattra Heritage · poolside · 19:30 B9 Long table · run B · place 9 GUEST Haruthai Amphai INVITATION Haruthai & Suthep EVENT "
+  },
+  {
+   "id": "15 reduced motion@375 no bar transition, no confirmation animation",
+   "ok": true,
+   "d": "none · none"
+  },
+  {
+   "id": "16 errors@375",
+   "ok": true,
+   "d": "none"
+  },
+  {
+   "id": "1 room@390 ceremony 50 chairs A/B|aisle|D/E/F × 1–10, front + BRIDE/GROOM, dinner 25+25, legend in words, no raw id, no page overflow",
+   "ok": true,
+   "d": "{\"chairs\":50,\"dchairs\":50,\"buttons\":50,\"front\":true,\"bride\":true,\"aisle\":true,\"cols\":true,\"aria\":[\"Ceremony seat A1, available\",\"Ceremony seat B1, available\",\"Ceremony seat D1, available\"],\"c4\":false,\"raw\":false,\"legend\":[\"Available\",\"Selected by you\",\"Your seat\",\"Steffie’s seat\",\"Unavailable\"],\"table\":true,\"runs\":true,\"wide\":false,\"progress\":[\"0/2\",\"0/2\"]}"
+  },
+  {
+   "id": "2 summary@390 tap = SELECTED BY YOU, nothing held; the summary names guest · event · Seat E4 with CONFIRM; fixed to the bottom, the journey bar steps aside, the chair stays clear of it",
+   "ok": true,
+   "d": "{\"on\":true,\"text\":\"BOOKING SUMMARY Peggy · Temple Ceremony Seat E4 Right block · row 4 · not yet held CONFIRM SEAT CANCEL\",\"bottom\":0,\"top\":671.609375,\"live\":\"polite\",\"region\":\"region\",\"pad\":188,\"jbar\":false,\"chairClear\":true,\"selAria\":\"Ceremony seat E4, selected\"}"
+  },
+  {
+   "id": "3 confirmed@390 SEAT CONFIRMED · guest · event · date · venue · Seat E4 · reference · CONTINUE + DOWNLOAD; the summary is gone; focus on the confirmation",
+   "ok": true,
+   "d": "SEAT CONFIRMED Your ceremony seat is confirmed E4 Right block · row 4 GUEST Peggy Berger INVITATION Peggy & Steffie EVENT Temple Ceremony DATE Sunday, 28 February 2027 VENUE Wat Ong Teu, Vientiane BOOKING REFERENCE SYL-T"
+  },
+  {
+   "id": "4 pdf@390 a PDF file downloads: see-you-in-laos-tc-seat-peggy.pdf · text read back",
+   "ok": true,
+   "d": "%PDF-1.4 see you in laos. SEAT CONFIRMATION GUEST INVITATION Peggy Berger Peggy & Steffie INV-002 EVENT Temple Ceremony DATE VENUE Sunday, 28 February 2027 Wat Ong Teu, Vientiane SEAT BOOKING REFERENC"
+  },
+  {
+   "id": "5 continue@390 booked card: Seat E4 as YOUR SEAT on a plan that is not for tapping, CHANGE SEAT + give back; the page moved on to the dinner; progress 1 of 2",
+   "ok": true,
+   "d": "{\"state\":\"booked\",\"label\":\"E4\",\"yours\":\"Ceremony seat E4, your seat\",\"buttons\":0,\"change\":true,\"give\":true,\"dinnerNear\":true,\"progress\":\"1/2|0/2\"}"
+  },
+  {
+   "id": "6 change@390 CURRENT SEAT E4 → NEW SEAT F4 in the summary, E4 still held while pending, KEEP E4 returns to the changing map, CONFIRM CHANGE moves the hold atomically and confirms F4",
+   "ok": true,
+   "d": "{\"chg\":\"CHANGE OF SEAT Peggy · Temple Ceremony E4→F4 Current seat E4 · New seat F4 · Right block · row 4 CONFIRM CHANGE KEEP E4\",\"kept\":{\"bar\":false,\"state\":\"changing\",\"selected\":false}}"
+  },
+  {
+   "id": "7 race@390 the chair taken in between is refused: F4 stays, A6 is now UNAVAILABLE, the words say so, the change stays open",
+   "ok": true,
+   "d": "{\"note\":\"That chair has just been taken — seat F4 is still yours. Choose another.\",\"state\":\"changing\",\"bar\":false,\"taken\":\"Ceremony seat A6, unavailable\",\"yours\":\"Ceremony seat F4, your seat\"}"
+  },
+  {
+   "id": "8 dinner@390 Seat B17 · Long table · run B · place 17 in the summary; the plan scrolls sideways and the chosen place is in view, the hint says swipe",
+   "ok": true,
+   "d": "{\"text\":\"BOOKING SUMMARY Peggy · Wedding Dinner Seat B17 Long table · run B · place 17 · not yet held CONFIRM SEAT CANCEL\",\"scrolls\":true,\"visible\":true,\"hint\":true}"
+  },
+  {
+   "id": "9 keyboard@390 a chair is focusable, Enter selects (Seat A2) and focus lands on CONFIRM, Cancel returns focus to the chair, Enter on CONFIRM books it",
+   "ok": true,
+   "d": "CONFIRM · A2 · CONFIRM → SEAT CONFIRMED Your dinner seat is confirmed A2 Long table ·"
+  },
+  {
+   "id": "9b focus@390 after CONFIRM by keyboard the confirmation card holds focus",
+   "ok": true,
+   "d": "confirmation"
+  },
+  {
+   "id": "9c give back@390 asks first (Give seat A2 back? …), Keep releases nothing, Yes releases it and the card is open again",
+   "ok": true,
+   "d": "{\"q\":\"Give seat A2 back? It becomes available to every guest at once, and Peggy will have no dinner seat until a new one is chosen.\",\"yes\":true,\"keep\":true,\"focused\":\"dinner\"}"
+  },
+  {
+   "id": "10 pdf dinner@390 see-you-in-laos-wd-seat-peggy.pdf",
+   "ok": true,
+   "d": "%PDF-1.4 see you in laos. SEAT CONFIRMATION GUEST INVITATION Peggy Berger Peggy & Steffie INV-002 EVENT Wedding Dinner DATE VENUE Sunday, 28 February 2027 Souph"
+  },
+  {
+   "id": "10b download feedback@390 the button says Downloaded · again? (the page was not repainted under it)",
+   "ok": true,
+   "d": "Downloaded · again?"
+  },
+  {
+   "id": "11a busy@390 while CONFIRM is in flight no chair is a button, CONFIRM is disabled and says Confirming…, a stray tap changes nothing, the confirmation is A9",
+   "ok": true,
+   "d": "{\"buttons\":0,\"bar\":\"CHANGE OF SEAT Peggy · Temple Ceremony F4→A9 Current seat F4 · New seat A9 · Left block · row 9 CONFIRMING… KEEP F4\",\"disabled\":true}"
+  },
+  {
+   "id": "11b allocated@390 a seat placed by Guest Relations: SEAT ALLOCATED BY GUEST RELATIONS, no Change / Give back, the download still there",
+   "ok": true,
+   "d": "{\"state\":\"allocated\",\"eyebrow\":\"SEAT ALLOCATED BY GUEST RELATIONS\",\"change\":0,\"words\":true,\"pass\":1}"
+  },
+  {
+   "id": "11c frozen mid-flow@390 the refused CONFIRM is explained, F4 stays, seating reads closed, nothing tappable",
+   "ok": true,
+   "d": "{\"note\":\"Seating has just been closed — the chair could not be held. Seat F4 stays yours.\",\"bar\":false,\"eyebrow\":\"02 · YOUR SEATS · SEATING IS CLOSED\",\"buttons\":0}"
+  },
+  {
+   "id": "11 switch@390 the pending change for Peggy is dropped on SWITCH; Steffie's view: choosing for Steffie, F4 = Peggy’s seat (not tappable), both cards open",
+   "ok": true,
+   "d": "{\"bar\":false,\"who\":\"G002\",\"forWho\":\"CHOOSING FOR Steffie You are continuing as Peggy. The chair is held in Steffie’s name.\",\"peggy\":\"Ceremony seat F4, Peggy’s seat\",\"tappable\":false,\"legend\":\"Available|Selected for Steffie|Steffie’s seat|Peggy’s seat|Unavailable\",\"cards\":\"open|open\"}"
+  },
+  {
+   "id": "12 hosts@390 Haruthai: Front centre · Bride, no ceremony map; dinner 50 chairs; progress says Front centre · Bride / Groom",
+   "ok": true,
+   "d": "ceremony:fixed:FRONT CENTRE · BRIDE|dinner:open:NOT SELECTED · Haruthai · you Ceremony · Front centre · Bride Dinner · Not selected 0 OF 1 || Suthep Ceremony · Front centre · Groom Di"
+  },
+  {
+   "id": "13 bride pdf@390 see-you-in-laos-tc-seat-haruthai.pdf",
+   "ok": true,
+   "d": "%PDF-1.4 see you in laos. SEAT CONFIRMATION GUEST INVITATION Haruthai Amphai Haruthai & Suthep INV-001 EVENT Temple Ceremony DATE VENUE Sunday, 28 February 2027"
+  },
+  {
+   "id": "14 frozen@390 seating closed: allocation shown as Seat B9, no chair tappable, no change, no give back, no Available in the legend",
+   "ok": true,
+   "d": "{\"eyebrow\":\"02 · YOUR SEATS · SEATING IS CLOSED\",\"buttons\":0,\"change\":0,\"card\":\"SEAT ALLOCATED Your dinner seat Souphattra Heritage · poolside · 19:30 B9 Long table · run B · place 9 GUEST Haruthai Amphai INVITATION Haruthai & Suthep EVENT "
+  },
+  {
+   "id": "15 reduced motion@390 no bar transition, no confirmation animation",
+   "ok": true,
+   "d": "none · none"
+  },
+  {
+   "id": "16 errors@390",
+   "ok": true,
+   "d": "none"
+  },
+  {
+   "id": "1 room@393 ceremony 50 chairs A/B|aisle|D/E/F × 1–10, front + BRIDE/GROOM, dinner 25+25, legend in words, no raw id, no page overflow",
+   "ok": true,
+   "d": "{\"chairs\":50,\"dchairs\":50,\"buttons\":50,\"front\":true,\"bride\":true,\"aisle\":true,\"cols\":true,\"aria\":[\"Ceremony seat A1, available\",\"Ceremony seat B1, available\",\"Ceremony seat D1, available\"],\"c4\":false,\"raw\":false,\"legend\":[\"Available\",\"Selected by you\",\"Your seat\",\"Steffie’s seat\",\"Unavailable\"],\"table\":true,\"runs\":true,\"wide\":false,\"progress\":[\"0/2\",\"0/2\"]}"
+  },
+  {
+   "id": "2 summary@393 tap = SELECTED BY YOU, nothing held; the summary names guest · event · Seat E4 with CONFIRM; fixed to the bottom, the journey bar steps aside, the chair stays clear of it",
+   "ok": true,
+   "d": "{\"on\":true,\"text\":\"BOOKING SUMMARY Peggy · Temple Ceremony Seat E4 Right block · row 4 · not yet held CONFIRM SEAT CANCEL\",\"bottom\":0,\"top\":671.609375,\"live\":\"polite\",\"region\":\"region\",\"pad\":188,\"jbar\":false,\"chairClear\":true,\"selAria\":\"Ceremony seat E4, selected\"}"
+  },
+  {
+   "id": "3 confirmed@393 SEAT CONFIRMED · guest · event · date · venue · Seat E4 · reference · CONTINUE + DOWNLOAD; the summary is gone; focus on the confirmation",
+   "ok": true,
+   "d": "SEAT CONFIRMED Your ceremony seat is confirmed E4 Right block · row 4 GUEST Peggy Berger INVITATION Peggy & Steffie EVENT Temple Ceremony DATE Sunday, 28 February 2027 VENUE Wat Ong Teu, Vientiane BOOKING REFERENCE SYL-T"
+  },
+  {
+   "id": "4 pdf@393 a PDF file downloads: see-you-in-laos-tc-seat-peggy.pdf · text read back",
+   "ok": true,
+   "d": "%PDF-1.4 see you in laos. SEAT CONFIRMATION GUEST INVITATION Peggy Berger Peggy & Steffie INV-002 EVENT Temple Ceremony DATE VENUE Sunday, 28 February 2027 Wat Ong Teu, Vientiane SEAT BOOKING REFERENC"
+  },
+  {
+   "id": "5 continue@393 booked card: Seat E4 as YOUR SEAT on a plan that is not for tapping, CHANGE SEAT + give back; the page moved on to the dinner; progress 1 of 2",
+   "ok": true,
+   "d": "{\"state\":\"booked\",\"label\":\"E4\",\"yours\":\"Ceremony seat E4, your seat\",\"buttons\":0,\"change\":true,\"give\":true,\"dinnerNear\":true,\"progress\":\"1/2|0/2\"}"
+  },
+  {
+   "id": "6 change@393 CURRENT SEAT E4 → NEW SEAT F4 in the summary, E4 still held while pending, KEEP E4 returns to the changing map, CONFIRM CHANGE moves the hold atomically and confirms F4",
+   "ok": true,
+   "d": "{\"chg\":\"CHANGE OF SEAT Peggy · Temple Ceremony E4→F4 Current seat E4 · New seat F4 · Right block · row 4 CONFIRM CHANGE KEEP E4\",\"kept\":{\"bar\":false,\"state\":\"changing\",\"selected\":false}}"
+  },
+  {
+   "id": "7 race@393 the chair taken in between is refused: F4 stays, A6 is now UNAVAILABLE, the words say so, the change stays open",
+   "ok": true,
+   "d": "{\"note\":\"That chair has just been taken — seat F4 is still yours. Choose another.\",\"state\":\"changing\",\"bar\":false,\"taken\":\"Ceremony seat A6, unavailable\",\"yours\":\"Ceremony seat F4, your seat\"}"
+  },
+  {
+   "id": "8 dinner@393 Seat B17 · Long table · run B · place 17 in the summary; the plan scrolls sideways and the chosen place is in view, the hint says swipe",
+   "ok": true,
+   "d": "{\"text\":\"BOOKING SUMMARY Peggy · Wedding Dinner Seat B17 Long table · run B · place 17 · not yet held CONFIRM SEAT CANCEL\",\"scrolls\":true,\"visible\":true,\"hint\":true}"
+  },
+  {
+   "id": "9 keyboard@393 a chair is focusable, Enter selects (Seat A2) and focus lands on CONFIRM, Cancel returns focus to the chair, Enter on CONFIRM books it",
+   "ok": true,
+   "d": "CONFIRM · A2 · CONFIRM → SEAT CONFIRMED Your dinner seat is confirmed A2 Long table ·"
+  },
+  {
+   "id": "9b focus@393 after CONFIRM by keyboard the confirmation card holds focus",
+   "ok": true,
+   "d": "confirmation"
+  },
+  {
+   "id": "9c give back@393 asks first (Give seat A2 back? …), Keep releases nothing, Yes releases it and the card is open again",
+   "ok": true,
+   "d": "{\"q\":\"Give seat A2 back? It becomes available to every guest at once, and Peggy will have no dinner seat until a new one is chosen.\",\"yes\":true,\"keep\":true,\"focused\":\"dinner\"}"
+  },
+  {
+   "id": "10 pdf dinner@393 see-you-in-laos-wd-seat-peggy.pdf",
+   "ok": true,
+   "d": "%PDF-1.4 see you in laos. SEAT CONFIRMATION GUEST INVITATION Peggy Berger Peggy & Steffie INV-002 EVENT Wedding Dinner DATE VENUE Sunday, 28 February 2027 Souph"
+  },
+  {
+   "id": "10b download feedback@393 the button says Downloaded · again? (the page was not repainted under it)",
+   "ok": true,
+   "d": "Downloaded · again?"
+  },
+  {
+   "id": "11a busy@393 while CONFIRM is in flight no chair is a button, CONFIRM is disabled and says Confirming…, a stray tap changes nothing, the confirmation is A9",
+   "ok": true,
+   "d": "{\"buttons\":0,\"bar\":\"CHANGE OF SEAT Peggy · Temple Ceremony F4→A9 Current seat F4 · New seat A9 · Left block · row 9 CONFIRMING… KEEP F4\",\"disabled\":true}"
+  },
+  {
+   "id": "11b allocated@393 a seat placed by Guest Relations: SEAT ALLOCATED BY GUEST RELATIONS, no Change / Give back, the download still there",
+   "ok": true,
+   "d": "{\"state\":\"allocated\",\"eyebrow\":\"SEAT ALLOCATED BY GUEST RELATIONS\",\"change\":0,\"words\":true,\"pass\":1}"
+  },
+  {
+   "id": "11c frozen mid-flow@393 the refused CONFIRM is explained, F4 stays, seating reads closed, nothing tappable",
+   "ok": true,
+   "d": "{\"note\":\"Seating has just been closed — the chair could not be held. Seat F4 stays yours.\",\"bar\":false,\"eyebrow\":\"02 · YOUR SEATS · SEATING IS CLOSED\",\"buttons\":0}"
+  },
+  {
+   "id": "11 switch@393 the pending change for Peggy is dropped on SWITCH; Steffie's view: choosing for Steffie, F4 = Peggy’s seat (not tappable), both cards open",
+   "ok": true,
+   "d": "{\"bar\":false,\"who\":\"G002\",\"forWho\":\"CHOOSING FOR Steffie You are continuing as Peggy. The chair is held in Steffie’s name.\",\"peggy\":\"Ceremony seat F4, Peggy’s seat\",\"tappable\":false,\"legend\":\"Available|Selected for Steffie|Steffie’s seat|Peggy’s seat|Unavailable\",\"cards\":\"open|open\"}"
+  },
+  {
+   "id": "12 hosts@393 Haruthai: Front centre · Bride, no ceremony map; dinner 50 chairs; progress says Front centre · Bride / Groom",
+   "ok": true,
+   "d": "ceremony:fixed:FRONT CENTRE · BRIDE|dinner:open:NOT SELECTED · Haruthai · you Ceremony · Front centre · Bride Dinner · Not selected 0 OF 1 || Suthep Ceremony · Front centre · Groom Di"
+  },
+  {
+   "id": "13 bride pdf@393 see-you-in-laos-tc-seat-haruthai.pdf",
+   "ok": true,
+   "d": "%PDF-1.4 see you in laos. SEAT CONFIRMATION GUEST INVITATION Haruthai Amphai Haruthai & Suthep INV-001 EVENT Temple Ceremony DATE VENUE Sunday, 28 February 2027"
+  },
+  {
+   "id": "14 frozen@393 seating closed: allocation shown as Seat B9, no chair tappable, no change, no give back, no Available in the legend",
+   "ok": true,
+   "d": "{\"eyebrow\":\"02 · YOUR SEATS · SEATING IS CLOSED\",\"buttons\":0,\"change\":0,\"card\":\"SEAT ALLOCATED Your dinner seat Souphattra Heritage · poolside · 19:30 B9 Long table · run B · place 9 GUEST Haruthai Amphai INVITATION Haruthai & Suthep EVENT "
+  },
+  {
+   "id": "15 reduced motion@393 no bar transition, no confirmation animation",
+   "ok": true,
+   "d": "none · none"
+  },
+  {
+   "id": "16 errors@393",
+   "ok": true,
+   "d": "none"
+  },
+  {
+   "id": "1 room@430 ceremony 50 chairs A/B|aisle|D/E/F × 1–10, front + BRIDE/GROOM, dinner 25+25, legend in words, no raw id, no page overflow",
+   "ok": true,
+   "d": "{\"chairs\":50,\"dchairs\":50,\"buttons\":50,\"front\":true,\"bride\":true,\"aisle\":true,\"cols\":true,\"aria\":[\"Ceremony seat A1, available\",\"Ceremony seat B1, available\",\"Ceremony seat D1, available\"],\"c4\":false,\"raw\":false,\"legend\":[\"Available\",\"Selected by you\",\"Your seat\",\"Steffie’s seat\",\"Unavailable\"],\"table\":true,\"runs\":true,\"wide\":false,\"progress\":[\"0/2\",\"0/2\"]}"
+  },
+  {
+   "id": "2 summary@430 tap = SELECTED BY YOU, nothing held; the summary names guest · event · Seat E4 with CONFIRM; fixed to the bottom, the journey bar steps aside, the chair stays clear of it",
+   "ok": true,
+   "d": "{\"on\":true,\"text\":\"BOOKING SUMMARY Peggy · Temple Ceremony Seat E4 Right block · row 4 · not yet held CONFIRM SEAT CANCEL\",\"bottom\":0,\"top\":671.609375,\"live\":\"polite\",\"region\":\"region\",\"pad\":188,\"jbar\":false,\"chairClear\":true,\"selAria\":\"Ceremony seat E4, selected\"}"
+  },
+  {
+   "id": "3 confirmed@430 SEAT CONFIRMED · guest · event · date · venue · Seat E4 · reference · CONTINUE + DOWNLOAD; the summary is gone; focus on the confirmation",
+   "ok": true,
+   "d": "SEAT CONFIRMED Your ceremony seat is confirmed E4 Right block · row 4 GUEST Peggy Berger INVITATION Peggy & Steffie EVENT Temple Ceremony DATE Sunday, 28 February 2027 VENUE Wat Ong Teu, Vientiane BOOKING REFERENCE SYL-T"
+  },
+  {
+   "id": "4 pdf@430 a PDF file downloads: see-you-in-laos-tc-seat-peggy.pdf · text read back",
+   "ok": true,
+   "d": "%PDF-1.4 see you in laos. SEAT CONFIRMATION GUEST INVITATION Peggy Berger Peggy & Steffie INV-002 EVENT Temple Ceremony DATE VENUE Sunday, 28 February 2027 Wat Ong Teu, Vientiane SEAT BOOKING REFERENC"
+  },
+  {
+   "id": "5 continue@430 booked card: Seat E4 as YOUR SEAT on a plan that is not for tapping, CHANGE SEAT + give back; the page moved on to the dinner; progress 1 of 2",
+   "ok": true,
+   "d": "{\"state\":\"booked\",\"label\":\"E4\",\"yours\":\"Ceremony seat E4, your seat\",\"buttons\":0,\"change\":true,\"give\":true,\"dinnerNear\":true,\"progress\":\"1/2|0/2\"}"
+  },
+  {
+   "id": "6 change@430 CURRENT SEAT E4 → NEW SEAT F4 in the summary, E4 still held while pending, KEEP E4 returns to the changing map, CONFIRM CHANGE moves the hold atomically and confirms F4",
+   "ok": true,
+   "d": "{\"chg\":\"CHANGE OF SEAT Peggy · Temple Ceremony E4→F4 Current seat E4 · New seat F4 · Right block · row 4 CONFIRM CHANGE KEEP E4\",\"kept\":{\"bar\":false,\"state\":\"changing\",\"selected\":false}}"
+  },
+  {
+   "id": "7 race@430 the chair taken in between is refused: F4 stays, A6 is now UNAVAILABLE, the words say so, the change stays open",
+   "ok": true,
+   "d": "{\"note\":\"That chair has just been taken — seat F4 is still yours. Choose another.\",\"state\":\"changing\",\"bar\":false,\"taken\":\"Ceremony seat A6, unavailable\",\"yours\":\"Ceremony seat F4, your seat\"}"
+  },
+  {
+   "id": "8 dinner@430 Seat B17 · Long table · run B · place 17 in the summary; the plan scrolls sideways and the chosen place is in view, the hint says swipe",
+   "ok": true,
+   "d": "{\"text\":\"BOOKING SUMMARY Peggy · Wedding Dinner Seat B17 Long table · run B · place 17 · not yet held CONFIRM SEAT CANCEL\",\"scrolls\":true,\"visible\":true,\"hint\":true}"
+  },
+  {
+   "id": "9 keyboard@430 a chair is focusable, Enter selects (Seat A2) and focus lands on CONFIRM, Cancel returns focus to the chair, Enter on CONFIRM books it",
+   "ok": true,
+   "d": "CONFIRM · A2 · CONFIRM → SEAT CONFIRMED Your dinner seat is confirmed A2 Long table ·"
+  },
+  {
+   "id": "9b focus@430 after CONFIRM by keyboard the confirmation card holds focus",
+   "ok": true,
+   "d": "confirmation"
+  },
+  {
+   "id": "9c give back@430 asks first (Give seat A2 back? …), Keep releases nothing, Yes releases it and the card is open again",
+   "ok": true,
+   "d": "{\"q\":\"Give seat A2 back? It becomes available to every guest at once, and Peggy will have no dinner seat until a new one is chosen.\",\"yes\":true,\"keep\":true,\"focused\":\"dinner\"}"
+  },
+  {
+   "id": "10 pdf dinner@430 see-you-in-laos-wd-seat-peggy.pdf",
+   "ok": true,
+   "d": "%PDF-1.4 see you in laos. SEAT CONFIRMATION GUEST INVITATION Peggy Berger Peggy & Steffie INV-002 EVENT Wedding Dinner DATE VENUE Sunday, 28 February 2027 Souph"
+  },
+  {
+   "id": "10b download feedback@430 the button says Downloaded · again? (the page was not repainted under it)",
+   "ok": true,
+   "d": "Downloaded · again?"
+  },
+  {
+   "id": "11a busy@430 while CONFIRM is in flight no chair is a button, CONFIRM is disabled and says Confirming…, a stray tap changes nothing, the confirmation is A9",
+   "ok": true,
+   "d": "{\"buttons\":0,\"bar\":\"CHANGE OF SEAT Peggy · Temple Ceremony F4→A9 Current seat F4 · New seat A9 · Left block · row 9 CONFIRMING… KEEP F4\",\"disabled\":true}"
+  },
+  {
+   "id": "11b allocated@430 a seat placed by Guest Relations: SEAT ALLOCATED BY GUEST RELATIONS, no Change / Give back, the download still there",
+   "ok": true,
+   "d": "{\"state\":\"allocated\",\"eyebrow\":\"SEAT ALLOCATED BY GUEST RELATIONS\",\"change\":0,\"words\":true,\"pass\":1}"
+  },
+  {
+   "id": "11c frozen mid-flow@430 the refused CONFIRM is explained, F4 stays, seating reads closed, nothing tappable",
+   "ok": true,
+   "d": "{\"note\":\"Seating has just been closed — the chair could not be held. Seat F4 stays yours.\",\"bar\":false,\"eyebrow\":\"02 · YOUR SEATS · SEATING IS CLOSED\",\"buttons\":0}"
+  },
+  {
+   "id": "11 switch@430 the pending change for Peggy is dropped on SWITCH; Steffie's view: choosing for Steffie, F4 = Peggy’s seat (not tappable), both cards open",
+   "ok": true,
+   "d": "{\"bar\":false,\"who\":\"G002\",\"forWho\":\"CHOOSING FOR Steffie You are continuing as Peggy. The chair is held in Steffie’s name.\",\"peggy\":\"Ceremony seat F4, Peggy’s seat\",\"tappable\":false,\"legend\":\"Available|Selected for Steffie|Steffie’s seat|Peggy’s seat|Unavailable\",\"cards\":\"open|open\"}"
+  },
+  {
+   "id": "12 hosts@430 Haruthai: Front centre · Bride, no ceremony map; dinner 50 chairs; progress says Front centre · Bride / Groom",
+   "ok": true,
+   "d": "ceremony:fixed:FRONT CENTRE · BRIDE|dinner:open:NOT SELECTED · Haruthai · you Ceremony · Front centre · Bride Dinner · Not selected 0 OF 1 || Suthep Ceremony · Front centre · Groom Di"
+  },
+  {
+   "id": "13 bride pdf@430 see-you-in-laos-tc-seat-haruthai.pdf",
+   "ok": true,
+   "d": "%PDF-1.4 see you in laos. SEAT CONFIRMATION GUEST INVITATION Haruthai Amphai Haruthai & Suthep INV-001 EVENT Temple Ceremony DATE VENUE Sunday, 28 February 2027"
+  },
+  {
+   "id": "14 frozen@430 seating closed: allocation shown as Seat B9, no chair tappable, no change, no give back, no Available in the legend",
+   "ok": true,
+   "d": "{\"eyebrow\":\"02 · YOUR SEATS · SEATING IS CLOSED\",\"buttons\":0,\"change\":0,\"card\":\"SEAT ALLOCATED Your dinner seat Souphattra Heritage · poolside · 19:30 B9 Long table · run B · place 9 GUEST Haruthai Amphai INVITATION Haruthai & Suthep EVENT "
+  },
+  {
+   "id": "15 reduced motion@430 no bar transition, no confirmation animation",
+   "ok": true,
+   "d": "none · none"
+  },
+  {
+   "id": "16 errors@430",
+   "ok": true,
+   "d": "none"
+  },
+  {
+   "id": "1 room@834 ceremony 50 chairs A/B|aisle|D/E/F × 1–10, front + BRIDE/GROOM, dinner 25+25, legend in words, no raw id, no page overflow",
+   "ok": true,
+   "d": "{\"chairs\":50,\"dchairs\":50,\"buttons\":50,\"front\":true,\"bride\":true,\"aisle\":true,\"cols\":true,\"aria\":[\"Ceremony seat A1, available\",\"Ceremony seat B1, available\",\"Ceremony seat D1, available\"],\"c4\":false,\"raw\":false,\"legend\":[\"Available\",\"Selected by you\",\"Your seat\",\"Steffie’s seat\",\"Unavailable\"],\"table\":true,\"runs\":true,\"wide\":false,\"progress\":[\"0/2\",\"0/2\"]}"
+  },
+  {
+   "id": "2 summary@834 tap = SELECTED BY YOU, nothing held; the summary names guest · event · Seat E4 with CONFIRM; fixed to the bottom, the journey bar steps aside, the chair stays clear of it",
+   "ok": true,
+   "d": "{\"on\":true,\"text\":\"BOOKING SUMMARY Peggy · Temple Ceremony Seat E4 Right block · row 4 · not yet held CONFIRM SEAT CANCEL\",\"bottom\":0,\"top\":791.609375,\"live\":\"polite\",\"region\":\"region\",\"pad\":124,\"jbar\":false,\"chairClear\":true,\"selAria\":\"Ceremony seat E4, selected\"}"
+  },
+  {
+   "id": "3 confirmed@834 SEAT CONFIRMED · guest · event · date · venue · Seat E4 · reference · CONTINUE + DOWNLOAD; the summary is gone; focus on the confirmation",
+   "ok": true,
+   "d": "SEAT CONFIRMED Your ceremony seat is confirmed E4 Right block · row 4 GUEST Peggy Berger INVITATION Peggy & Steffie EVENT Temple Ceremony DATE Sunday, 28 February 2027 VENUE Wat Ong Teu, Vientiane BOOKING REFERENCE SYL-T"
+  },
+  {
+   "id": "4 pdf@834 a PDF file downloads: see-you-in-laos-tc-seat-peggy.pdf · text read back",
+   "ok": true,
+   "d": "%PDF-1.4 see you in laos. SEAT CONFIRMATION GUEST INVITATION Peggy Berger Peggy & Steffie INV-002 EVENT Temple Ceremony DATE VENUE Sunday, 28 February 2027 Wat Ong Teu, Vientiane SEAT BOOKING REFERENC"
+  },
+  {
+   "id": "5 continue@834 booked card: Seat E4 as YOUR SEAT on a plan that is not for tapping, CHANGE SEAT + give back; the page moved on to the dinner; progress 1 of 2",
+   "ok": true,
+   "d": "{\"state\":\"booked\",\"label\":\"E4\",\"yours\":\"Ceremony seat E4, your seat\",\"buttons\":0,\"change\":true,\"give\":true,\"dinnerNear\":true,\"progress\":\"1/2|0/2\"}"
+  },
+  {
+   "id": "6 change@834 CURRENT SEAT E4 → NEW SEAT F4 in the summary, E4 still held while pending, KEEP E4 returns to the changing map, CONFIRM CHANGE moves the hold atomically and confirms F4",
+   "ok": true,
+   "d": "{\"chg\":\"CHANGE OF SEAT Peggy · Temple Ceremony E4→F4 Current seat E4 · New seat F4 · Right block · row 4 CONFIRM CHANGE KEEP E4\",\"kept\":{\"bar\":false,\"state\":\"changing\",\"selected\":false}}"
+  },
+  {
+   "id": "7 race@834 the chair taken in between is refused: F4 stays, A6 is now UNAVAILABLE, the words say so, the change stays open",
+   "ok": true,
+   "d": "{\"note\":\"That chair has just been taken — seat F4 is still yours. Choose another.\",\"state\":\"changing\",\"bar\":false,\"taken\":\"Ceremony seat A6, unavailable\",\"yours\":\"Ceremony seat F4, your seat\"}"
+  },
+  {
+   "id": "8 dinner@834 Seat B17 · Long table · run B · place 17 in the summary; the plan scrolls sideways and the chosen place is in view, the hint says swipe",
+   "ok": true,
+   "d": "{\"text\":\"BOOKING SUMMARY Peggy · Wedding Dinner Seat B17 Long table · run B · place 17 · not yet held CONFIRM SEAT CANCEL\",\"scrolls\":true,\"visible\":true,\"hint\":true}"
+  },
+  {
+   "id": "9 keyboard@834 a chair is focusable, Enter selects (Seat A2) and focus lands on CONFIRM, Cancel returns focus to the chair, Enter on CONFIRM books it",
+   "ok": true,
+   "d": "CONFIRM · A2 · CONFIRM → SEAT CONFIRMED Your dinner seat is confirmed A2 Long table ·"
+  },
+  {
+   "id": "9b focus@834 after CONFIRM by keyboard the confirmation card holds focus",
+   "ok": true,
+   "d": "confirmation"
+  },
+  {
+   "id": "9c give back@834 asks first (Give seat A2 back? …), Keep releases nothing, Yes releases it and the card is open again",
+   "ok": true,
+   "d": "{\"q\":\"Give seat A2 back? It becomes available to every guest at once, and Peggy will have no dinner seat until a new one is chosen.\",\"yes\":true,\"keep\":true,\"focused\":\"dinner\"}"
+  },
+  {
+   "id": "10 pdf dinner@834 see-you-in-laos-wd-seat-peggy.pdf",
+   "ok": true,
+   "d": "%PDF-1.4 see you in laos. SEAT CONFIRMATION GUEST INVITATION Peggy Berger Peggy & Steffie INV-002 EVENT Wedding Dinner DATE VENUE Sunday, 28 February 2027 Souph"
+  },
+  {
+   "id": "10b download feedback@834 the button says Downloaded · again? (the page was not repainted under it)",
+   "ok": true,
+   "d": "Downloaded · again?"
+  },
+  {
+   "id": "11a busy@834 while CONFIRM is in flight no chair is a button, CONFIRM is disabled and says Confirming…, a stray tap changes nothing, the confirmation is A9",
+   "ok": true,
+   "d": "{\"buttons\":0,\"bar\":\"CHANGE OF SEAT Peggy · Temple Ceremony F4→A9 Current seat F4 · New seat A9 · Left block · row 9 CONFIRMING… KEEP F4\",\"disabled\":true}"
+  },
+  {
+   "id": "11b allocated@834 a seat placed by Guest Relations: SEAT ALLOCATED BY GUEST RELATIONS, no Change / Give back, the download still there",
+   "ok": true,
+   "d": "{\"state\":\"allocated\",\"eyebrow\":\"SEAT ALLOCATED BY GUEST RELATIONS\",\"change\":0,\"words\":true,\"pass\":1}"
+  },
+  {
+   "id": "11c frozen mid-flow@834 the refused CONFIRM is explained, F4 stays, seating reads closed, nothing tappable",
+   "ok": true,
+   "d": "{\"note\":\"Seating has just been closed — the chair could not be held. Seat F4 stays yours.\",\"bar\":false,\"eyebrow\":\"02 · YOUR SEATS · SEATING IS CLOSED\",\"buttons\":0}"
+  },
+  {
+   "id": "11 switch@834 the pending change for Peggy is dropped on SWITCH; Steffie's view: choosing for Steffie, F4 = Peggy’s seat (not tappable), both cards open",
+   "ok": true,
+   "d": "{\"bar\":false,\"who\":\"G002\",\"forWho\":\"CHOOSING FOR Steffie You are continuing as Peggy. The chair is held in Steffie’s name.\",\"peggy\":\"Ceremony seat F4, Peggy’s seat\",\"tappable\":false,\"legend\":\"Available|Selected for Steffie|Steffie’s seat|Peggy’s seat|Unavailable\",\"cards\":\"open|open\"}"
+  },
+  {
+   "id": "12 hosts@834 Haruthai: Front centre · Bride, no ceremony map; dinner 50 chairs; progress says Front centre · Bride / Groom",
+   "ok": true,
+   "d": "ceremony:fixed:FRONT CENTRE · BRIDE|dinner:open:NOT SELECTED · Haruthai · you Ceremony · Front centre · Bride Dinner · Not selected 0 OF 1 || Suthep Ceremony · Front centre · Groom Di"
+  },
+  {
+   "id": "13 bride pdf@834 see-you-in-laos-tc-seat-haruthai.pdf",
+   "ok": true,
+   "d": "%PDF-1.4 see you in laos. SEAT CONFIRMATION GUEST INVITATION Haruthai Amphai Haruthai & Suthep INV-001 EVENT Temple Ceremony DATE VENUE Sunday, 28 February 2027"
+  },
+  {
+   "id": "14 frozen@834 seating closed: allocation shown as Seat B9, no chair tappable, no change, no give back, no Available in the legend",
+   "ok": true,
+   "d": "{\"eyebrow\":\"02 · YOUR SEATS · SEATING IS CLOSED\",\"buttons\":0,\"change\":0,\"card\":\"SEAT ALLOCATED Your dinner seat Souphattra Heritage · poolside · 19:30 B9 Long table · run B · place 9 GUEST Haruthai Amphai INVITATION Haruthai & Suthep EVENT "
+  },
+  {
+   "id": "15 reduced motion@834 no bar transition, no confirmation animation",
+   "ok": true,
+   "d": "none · none"
+  },
+  {
+   "id": "16 errors@834",
+   "ok": true,
+   "d": "none"
+  },
+  {
+   "id": "1 room@1440 ceremony 50 chairs A/B|aisle|D/E/F × 1–10, front + BRIDE/GROOM, dinner 25+25, legend in words, no raw id, no page overflow",
+   "ok": true,
+   "d": "{\"chairs\":50,\"dchairs\":50,\"buttons\":50,\"front\":true,\"bride\":true,\"aisle\":true,\"cols\":true,\"aria\":[\"Ceremony seat A1, available\",\"Ceremony seat B1, available\",\"Ceremony seat D1, available\"],\"c4\":false,\"raw\":false,\"legend\":[\"Available\",\"Selected by you\",\"Your seat\",\"Steffie’s seat\",\"Unavailable\"],\"table\":true,\"runs\":true,\"wide\":false,\"progress\":[\"0/2\",\"0/2\"]}"
+  },
+  {
+   "id": "2 summary@1440 tap = SELECTED BY YOU, nothing held; the summary names guest · event · Seat E4 with CONFIRM; fixed to the bottom, the journey bar steps aside, the chair stays clear of it",
+   "ok": true,
+   "d": "{\"on\":true,\"text\":\"BOOKING SUMMARY Peggy · Temple Ceremony Seat E4 Right block · row 4 · not yet held CONFIRM SEAT CANCEL\",\"bottom\":0,\"top\":791.609375,\"live\":\"polite\",\"region\":\"region\",\"pad\":124,\"jbar\":false,\"chairClear\":true,\"selAria\":\"Ceremony seat E4, selected\"}"
+  },
+  {
+   "id": "3 confirmed@1440 SEAT CONFIRMED · guest · event · date · venue · Seat E4 · reference · CONTINUE + DOWNLOAD; the summary is gone; focus on the confirmation",
+   "ok": true,
+   "d": "SEAT CONFIRMED Your ceremony seat is confirmed E4 Right block · row 4 GUEST Peggy Berger INVITATION Peggy & Steffie EVENT Temple Ceremony DATE Sunday, 28 February 2027 VENUE Wat Ong Teu, Vientiane BOOKING REFERENCE SYL-T"
+  },
+  {
+   "id": "4 pdf@1440 a PDF file downloads: see-you-in-laos-tc-seat-peggy.pdf · text read back",
+   "ok": true,
+   "d": "%PDF-1.4 see you in laos. SEAT CONFIRMATION GUEST INVITATION Peggy Berger Peggy & Steffie INV-002 EVENT Temple Ceremony DATE VENUE Sunday, 28 February 2027 Wat Ong Teu, Vientiane SEAT BOOKING REFERENC"
+  },
+  {
+   "id": "5 continue@1440 booked card: Seat E4 as YOUR SEAT on a plan that is not for tapping, CHANGE SEAT + give back; the page moved on to the dinner; progress 1 of 2",
+   "ok": true,
+   "d": "{\"state\":\"booked\",\"label\":\"E4\",\"yours\":\"Ceremony seat E4, your seat\",\"buttons\":0,\"change\":true,\"give\":true,\"dinnerNear\":true,\"progress\":\"1/2|0/2\"}"
+  },
+  {
+   "id": "6 change@1440 CURRENT SEAT E4 → NEW SEAT F4 in the summary, E4 still held while pending, KEEP E4 returns to the changing map, CONFIRM CHANGE moves the hold atomically and confirms F4",
+   "ok": true,
+   "d": "{\"chg\":\"CHANGE OF SEAT Peggy · Temple Ceremony E4→F4 Current seat E4 · New seat F4 · Right block · row 4 CONFIRM CHANGE KEEP E4\",\"kept\":{\"bar\":false,\"state\":\"changing\",\"selected\":false}}"
+  },
+  {
+   "id": "7 race@1440 the chair taken in between is refused: F4 stays, A6 is now UNAVAILABLE, the words say so, the change stays open",
+   "ok": true,
+   "d": "{\"note\":\"That chair has just been taken — seat F4 is still yours. Choose another.\",\"state\":\"changing\",\"bar\":false,\"taken\":\"Ceremony seat A6, unavailable\",\"yours\":\"Ceremony seat F4, your seat\"}"
+  },
+  {
+   "id": "8 dinner@1440 Seat B17 · Long table · run B · place 17 in the summary; the whole table fits",
+   "ok": true,
+   "d": "{\"text\":\"BOOKING SUMMARY Peggy · Wedding Dinner Seat B17 Long table · run B · place 17 · not yet held CONFIRM SEAT CANCEL\",\"scrolls\":false,\"visible\":true,\"hint\":false}"
+  },
+  {
+   "id": "9 keyboard@1440 a chair is focusable, Enter selects (Seat A2) and focus lands on CONFIRM, Cancel returns focus to the chair, Enter on CONFIRM books it",
+   "ok": true,
+   "d": "CONFIRM · A2 · CONFIRM → SEAT CONFIRMED Your dinner seat is confirmed A2 Long table ·"
+  },
+  {
+   "id": "9b focus@1440 after CONFIRM by keyboard the confirmation card holds focus",
+   "ok": true,
+   "d": "confirmation"
+  },
+  {
+   "id": "9c give back@1440 asks first (Give seat A2 back? …), Keep releases nothing, Yes releases it and the card is open again",
+   "ok": true,
+   "d": "{\"q\":\"Give seat A2 back? It becomes available to every guest at once, and Peggy will have no dinner seat until a new one is chosen.\",\"yes\":true,\"keep\":true,\"focused\":\"dinner\"}"
+  },
+  {
+   "id": "10 pdf dinner@1440 see-you-in-laos-wd-seat-peggy.pdf",
+   "ok": true,
+   "d": "%PDF-1.4 see you in laos. SEAT CONFIRMATION GUEST INVITATION Peggy Berger Peggy & Steffie INV-002 EVENT Wedding Dinner DATE VENUE Sunday, 28 February 2027 Souph"
+  },
+  {
+   "id": "10b download feedback@1440 the button says Downloaded · again? (the page was not repainted under it)",
+   "ok": true,
+   "d": "Downloaded · again?"
+  },
+  {
+   "id": "11a busy@1440 while CONFIRM is in flight no chair is a button, CONFIRM is disabled and says Confirming…, a stray tap changes nothing, the confirmation is A9",
+   "ok": true,
+   "d": "{\"buttons\":0,\"bar\":\"CHANGE OF SEAT Peggy · Temple Ceremony F4→A9 Current seat F4 · New seat A9 · Left block · row 9 CONFIRMING… KEEP F4\",\"disabled\":true}"
+  },
+  {
+   "id": "11b allocated@1440 a seat placed by Guest Relations: SEAT ALLOCATED BY GUEST RELATIONS, no Change / Give back, the download still there",
+   "ok": true,
+   "d": "{\"state\":\"allocated\",\"eyebrow\":\"SEAT ALLOCATED BY GUEST RELATIONS\",\"change\":0,\"words\":true,\"pass\":1}"
+  },
+  {
+   "id": "11c frozen mid-flow@1440 the refused CONFIRM is explained, F4 stays, seating reads closed, nothing tappable",
+   "ok": true,
+   "d": "{\"note\":\"Seating has just been closed — the chair could not be held. Seat F4 stays yours.\",\"bar\":false,\"eyebrow\":\"02 · YOUR SEATS · SEATING IS CLOSED\",\"buttons\":0}"
+  },
+  {
+   "id": "11 switch@1440 the pending change for Peggy is dropped on SWITCH; Steffie's view: choosing for Steffie, F4 = Peggy’s seat (not tappable), both cards open",
+   "ok": true,
+   "d": "{\"bar\":false,\"who\":\"G002\",\"forWho\":\"CHOOSING FOR Steffie You are continuing as Peggy. The chair is held in Steffie’s name.\",\"peggy\":\"Ceremony seat F4, Peggy’s seat\",\"tappable\":false,\"legend\":\"Available|Selected for Steffie|Steffie’s seat|Peggy’s seat|Unavailable\",\"cards\":\"open|open\"}"
+  },
+  {
+   "id": "12 hosts@1440 Haruthai: Front centre · Bride, no ceremony map; dinner 50 chairs; progress says Front centre · Bride / Groom",
+   "ok": true,
+   "d": "ceremony:fixed:FRONT CENTRE · BRIDE|dinner:open:NOT SELECTED · Haruthai · you Ceremony · Front centre · Bride Dinner · Not selected 0 OF 1 || Suthep Ceremony · Front centre · Groom Di"
+  },
+  {
+   "id": "13 bride pdf@1440 see-you-in-laos-tc-seat-haruthai.pdf",
+   "ok": true,
+   "d": "%PDF-1.4 see you in laos. SEAT CONFIRMATION GUEST INVITATION Haruthai Amphai Haruthai & Suthep INV-001 EVENT Temple Ceremony DATE VENUE Sunday, 28 February 2027"
+  },
+  {
+   "id": "14 frozen@1440 seating closed: allocation shown as Seat B9, no chair tappable, no change, no give back, no Available in the legend",
+   "ok": true,
+   "d": "{\"eyebrow\":\"02 · YOUR SEATS · SEATING IS CLOSED\",\"buttons\":0,\"change\":0,\"card\":\"SEAT ALLOCATED Your dinner seat Souphattra Heritage · poolside · 19:30 B9 Long table · run B · place 9 GUEST Haruthai Amphai INVITATION Haruthai & Suthep EVENT "
+  },
+  {
+   "id": "15 reduced motion@1440 no bar transition, no confirmation animation",
+   "ok": true,
+   "d": "none · none"
+  },
+  {
+   "id": "16 errors@1440",
+   "ok": true,
+   "d": "none"
+  }
+ ]
+}

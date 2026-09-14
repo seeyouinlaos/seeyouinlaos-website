@@ -1,0 +1,38 @@
+{
+ "origin": "https://seeyouinlaos-website.suthep-hrg.workers.dev",
+ "at": "2026-09-14T06:36:03.085Z",
+ "pass": 6,
+ "total": 6,
+ "results": [
+  {
+   "id": "iphone plan: 50 + 50 chairs, labels, no raw id, no page overflow",
+   "ok": true,
+   "d": "{\"chairs\":50,\"dchairs\":50,\"wide\":false,\"raw\":false,\"a1\":\"Ceremony seat A1, available\"}"
+  },
+  {
+   "id": "iphone tap → summary Seat E4 at the bottom (safe-area padding applied)",
+   "ok": true,
+   "d": "{\"on\":true,\"text\":\"BOOKING SUMMARY Peggy · Temple Ceremony Seat E4 Right block · row 4 · not yet held CONFIRM SEAT CANCEL\",\"bottom\":0,\"pad\":\"12px\"}"
+  },
+  {
+   "id": "iphone CONFIRM → SEAT CONFIRMED E4 with the reference",
+   "ok": true,
+   "d": "SEAT CONFIRMED Your ceremony seat is confirmed E4 Right block · row 4 GUEST Peggy Berger INVITATION Peggy & Steffie EVENT Temple Ceremony DATE Sunday, 28 Februa"
+  },
+  {
+   "id": "iphone download: see-you-in-laos-tc-seat-peggy.pdf is a PDF with the fields",
+   "ok": true,
+   "d": "%PDF-1.4 see you in laos. SEAT CONFIRMATION GUEST INVITATION Peggy Berger Peggy & Steffie INV-002 EVENT Temple Ceremony DATE VENUE Sunday, 28 February 2027 Wat "
+  },
+  {
+   "id": "iphone PDF renders under Apple PDFKit (Quick Look thumbnail)",
+   "ok": true,
+   "d": "/tmp/claude-501/seatux/live-iphone/iphone-ceremony-peggy.pdf.png"
+  },
+  {
+   "id": "iphone errors",
+   "ok": true,
+   "d": "none"
+  }
+ ]
+}
