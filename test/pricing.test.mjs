@@ -87,7 +87,7 @@ test('Vientiane · the guest is told exactly which nights an amount buys', () =>
   const wed = P.quote('wedstay', 'heritage');
   assert.equal(wed.amount, 'USD 145');
   assert.equal(wed.nightsCovered, 'Both nights: 27 → 28 February + 28 February → 01 March');
-  assert.match(wed.basis, /First night your contribution at USD 145 per person \/ night · second night complimentary/);
+  assert.match(wed.basis, /First night your room rate at USD 145 per person \/ night · second night hosted by Haruthai & Suthep/);
 
   /* no night between 25 February and 1 March is uncovered, and 27 February is
    * the transition day shared by the two windows */
@@ -130,10 +130,10 @@ test('D · the Wedding Stay is ONE payable item, never two complimentary rows', 
   assert.equal(bag[0].price, 145, 'one payable night of the two-night window');
   assert.equal(bag[0].nights, 2);
   assert.equal(bag[0].pay, 1);
-  assert.equal(bag[0].note, 'Second night complimentary');
-  assert.equal(bag[0].noteBy, 'Hosted by Bride & Groom');
+  assert.equal(bag[0].note, 'Second night');
+  assert.equal(bag[0].noteBy, 'Hosted by Haruthai & Suthep');
   assert.equal(total(bag), 145);
-  assert.equal(total(pick('wedstay', 'heritage', 2)), 290, 'two guests at 145 each');
+  assert.equal(total(pick('wedstay', 'heritage', 1)), 145, 'one guest, one price — never a partner in the total');
   assert.match(P.lineBasis(bag[0]), /USD 145 total per person · 2 nights · Both nights: 27 → 28 February \+ 28 February → 01 March/);
   const q = P.quote('wedstay', 'heritage');
   assert.doesNotMatch(q.basis, /^Complimentary/);
@@ -307,18 +307,14 @@ test('the private journey has one shell, one design system and a hard boundary',
 
   const shell = readFileSync(join(ROOT, 'assets/prep-shell.js'), 'utf8');
   /* the boundary: no 01–06 before an invitation is open */
-  assert.match(shell, /if \(!p\) \{[\s\S]{0,400}Open your invitation to begin/);
-  /* the code opens the invitation; the person then says who they are */
-  assert.match(shell, /Who are you\?/);
-  assert.match(shell, /Who are you continuing as\?/);
-  /* C · the identity model lives in the guest record; the shell only asks it */
+  assert.match(shell, /if \(!p \|\| !m\) \{[\s\S]{0,400}Open your invitation to begin/);
+  /* the code opens the guest's own invitation; the guest IS the session — no question, no switch */
+  assert.doesNotMatch(shell, /Who are you\?|Who are you continuing as\?|data-switch/);
   const model = readFileSync(join(ROOT, 'assets/guest.js'), 'utf8');
-  assert.match(model, /partyId: p\.invitationId, guestId: guestId/);
-  assert.match(shell, /function active\(\) \{ var g = G\(\); return g \? g\.active\(\) : null; \}/);
-  /* an identity never leaks across invitations */
-  assert.match(model, /if \(!w \|\| w\.partyId !== p\.invitationId\) return null;/);
+  assert.match(model, /if \(!a \|\| !a\.guestId \|\| !a\.bearer \|\| a\.invitationId !== 'INV-' \+ a\.guestId\) return null;/);
+  assert.match(shell, /function me\(\) \{ var g = G\(\); return g \? g\.me\(\) : null; \}/);
   /* semantic states only — no score, no percentage, no progress bar */
-  assert.ok(!/%|progress|score/i.test(shell.slice(shell.indexOf('function status'), shell.indexOf('/* ----------------------------------------------------------------- shell'))));
+  assert.ok(!/%|progress bar|score/i.test(shell.slice(shell.indexOf('function status'), shell.indexOf('/* ----------------------------------------------------------------- shell'))));
   /* one disclosure contract, and ESC closes it */
   assert.match(shell, /e\.key === 'Escape'/);
   assert.match(shell, /aria-modal', 'true'/);
@@ -375,11 +371,11 @@ test('Review & Send: the Temple Ceremony is optional, the other three hosted', (
     .forEach((t) => assert.ok(prog.includes(t), t + ' missing from the wedding programme'));
   assert.equal((prog.match(/Complimentary — hosted by Haruthai & Suthep\./g) || []).length, 3,
     'exactly three complimentary parts beside the Temple Ceremony');
+  assert.match(prog, /Tak Bat, the morning alms-giving — a personal offering, arranged individually on the morning/);
   /* the times the Owner's programme actually carries */
   assert.match(prog, /when: 'From 12:00'/);
   assert.match(prog, /when: '16:30'/);
   assert.match(prog, /when: '19:30'/);
-  assert.match(prog, /Includes the morning alms-giving, Tak Bat\. Optional participation — self-pay\./);
   assert.match(prog, /Optional · USD 15 per guest/);
   /* the Temple Ceremony is never labelled Hosted, and only the Sangkhathan
    * carries an amount anywhere in the programme */
@@ -393,11 +389,11 @@ test('Review & Send: the Temple Ceremony is optional, the other three hosted', (
     'Review & Send still describes a feature instead of showing the answers');
   /* the operational preparation list is per named guest, and attendance and
    * offering stay two different fields */
-  assert.match(page, /WEDDING PARTICIPATION \(per named guest\):/);
+  assert.match(page, /WEDDING PARTICIPATION:/);
   assert.match(page, /Sangkhathan offerings to prepare/);
   assert.match(page, /DOCUMENTS & PRIVACY \(received only — nothing here is reviewed or verified\):/);
   assert.match(page, /templeCeremony:window\.SIYL_TEMPLE\?SIYL_TEMPLE\.operational\(\):null/);
-  assert.match(page, /Morning alms-giving \(Tak Bat\): part of the Temple Ceremony for everyone joining it, self-pay \(no amount set\)/);
+  assert.match(page, /Morning alms-giving \(Tak Bat\): part of the Temple Ceremony for everyone joining it — a personal offering, arranged on the morning \(no amount set\)/);
 });
 
 test('THE WEDDING sits at 28 FEB in the chronology — the Sangkhathan is never last', () => {
@@ -411,23 +407,24 @@ test('THE WEDDING sits at 28 FEB in the chronology — the Sangkhathan is never 
   assert.equal(keys[4], 'mu9646');
 });
 
-test('the Sangkhathan is one couple decision for an eligible pair, and never restored silently', () => {
+test('the Sangkhathan is the guest\'s own decision, explicit eligibility, never restored silently', () => {
   const t = readFileSync(join(ROOT, 'assets/temple.js'), 'utf8');
   ['attendanceOf', 'attendingOf', 'offeringOf', 'offeringOf_', 'offeringDecidedOf',
-   'setAttendance', 'setOffering', 'offeringGuests', 'undecided', 'eligibility', 'pairCan', 'pairDecision']
+   'setAttendance', 'setOffering', 'offeringGuests', 'undecided', 'eligibility', 'canOffer']
     .forEach((fn) => assert.ok(t.includes(fn + ':'), fn + ' missing'));
-  /* E · not attending removes the couple decision, and it is never restored */
-  assert.match(t, /if \(st\.by\[id\]\.attend !== 'yes'\) delete st\.pair;/);
-  /* the decision can only be made while the pair can take part */
-  assert.match(t, /if \(!this\.pairCan\(\)\) return false;/);
+  assert.doesNotMatch(t, /pairCan:|pairDecision:/, 'the couple decision is retired');
+  /* not attending removes the guest's own decision, and it is never restored */
+  assert.match(t, /if \(st\.by\[id\]\.attend !== 'yes'\) \{ delete st\.by\[id\]\.off; delete st\.by\[id\]\.offering; \}/);
+  /* the decision can only be made by the guest, while they may take part */
+  assert.match(t, /if \(!mine\(id\)\) return false;\s*if \(!this\.canOffer\(id\)\) return false;/);
   /* eligibility is explicit source truth, never derived */
-  assert.match(t, /p\.givingEligibility === 'PAIR' \|\| p\.givingEligibility === 'NONE'/);
+  assert.match(t, /p\.sangkhathan === 'ELIGIBLE' \|\| p\.sangkhathan === 'NONE'/);
   assert.doesNotMatch(t, /guests\(\)\.length === 2|people\(\)\.length === 2/, 'eligibility must not be inferred from party size');
-  /* the bag quantity is DERIVED from the named decisions — no counter */
-  assert.match(t, /var n = T\.offerings\(\);/);
+  /* the bag line is DERIVED from the guest's decision — quantity one, no counter */
+  assert.match(t, /var n = T\.offerings\(\) \? 1 : 0;/);
   const page = readFileSync(join(ROOT, 'wedding.html'), 'utf8');
   assert.doesNotMatch(page, /data-q=/, 'a quantity stepper survives on the wedding step');
-  assert.match(page, /T\.setOffering\(id,b\.getAttribute\('data-off'\)\)/);
+  assert.match(page, /T\.setOffering\(me\.guestId,b\.getAttribute\('data-off'\)\)/);
   /* and the public editorial page no longer owns the decision */
   const pub = readFileSync(join(ROOT, 'voyage.html'), 'utf8');
   assert.doesNotMatch(pub, /id="tdec"/, 'the decision module is still on the public page');
@@ -440,11 +437,11 @@ test('three states, never two: NOT DECIDED is not NOT ATTENDING', () => {
   assert.match(t, /if \(self\.attendingOf\(id\) && !self\.offeringDecidedOf\(id\)\) missing\.push\('Sangkhathan'\);/);
   assert.match(t, /sangkhathanState: a !== 'yes' \? 'Not applicable'/);
   const page = readFileSync(join(ROOT, 'wedding.html'), 'utf8');
-  /* the pair is offered BOTH answers, so silence is never read as a refusal */
-  assert.match(page, /data-off="yes">We would like to take part/);
-  assert.match(page, /data-off="no">Continue without Sangkhathan/);
-  assert.match(page, /Not decided/);
-  /* and every active event carries both answers, for every named guest */
+  /* the guest is offered BOTH answers, so silence is never read as a refusal */
+  assert.match(page, /data-off="yes">Yes, I would like to take part/);
+  assert.match(page, /data-off="no">No, thank you/);
+  assert.match(page, /Required · not decided/);
+  /* and every active event carries both answers */
   assert.match(page, /data-ev="yes">Attending/);
   assert.match(page, /data-ev="no">Not attending/);
 });
@@ -453,8 +450,8 @@ test('Tak Bat is explained before anyone is asked, and is never the Sangkhathan'
   const page = readFileSync(join(ROOT, 'wedding.html'), 'utf8');
   /* the explanation travels with the Temple row and opens in the shell's own
    * detail layer — the guest is never thrown back to the public website */
-  assert.match(page, /invited to take part in the traditional morning alms-giving, Tak Bat/);
-  assert.match(page, /it is <b>self-pay<\/b>/);
+  assert.match(page, /welcome to take part in Tak Bat, the traditional offering of food to Buddhist monks/);
+  assert.match(page, /The offering is personal and arranged individually on the morning/);
   assert.doesNotMatch(page, /no separate charge for Tak Bat|nothing is paid/);
   assert.doesNotMatch(page, /Everyone who comes takes part/);
   assert.match(page, /It is <b>not<\/b> the alms-giving/);
@@ -462,23 +459,22 @@ test('Tak Bat is explained before anyone is asked, and is never the Sangkhathan'
   assert.match(page, /data-more="sang"/);
   assert.match(page, /P\.drawer\(/, 'the detail layer must be the shell drawer');
   const review = readFileSync(join(ROOT, 'review.html'), 'utf8');
-  assert.match(review, /never the alms-giving and never a temple fee/);
+  assert.match(review, /Tak Bat remains a personal offering at the temple/);
 });
 
 test('the wedding cost model is stated in words on both surfaces', () => {
   ['your-journey.html', 'review.html'].forEach((f) => {
     const page = readFileSync(join(ROOT, f), 'utf8');
-    assert.match(page, /Hosted by Haruthai &amp; Suthep/, f);
-    assert.match(page, /Tak Bat, is self-pay/, f);
-    assert.doesNotMatch(page, /No separate charge/, f);
-    assert.match(page, /Your optional personal addition/, f);
+    assert.match(page, /[Hh]osted by Haruthai &amp; Suthep/, f);
+    assert.match(page, /Tak Bat remains a personal offering at the temple/, f);
+    assert.doesNotMatch(page, /No separate charge|self-pay/, f);
   });
 });
 
 test('SEND is unavailable until the required steps are done — and never fails silently', () => {
   const page = readFileSync(join(ROOT, 'review.html'), 'utf8');
   assert.match(page, /if\(!SIYL_BAG\.get\(\)\.length\|\|!G\|\|!G\.party\(\)\|\|!G\.readiness\(\)\.ok\)\{blockSend\(\);return\}/);
-  assert.match(page, /Please review the dress code before sending your journey/);
+  assert.match(page, /Before you send: '\+esc\(first\.label\)/, 'the first missing item is named');
   assert.match(page, /Send to Guest Relations — not ready yet/);
   const g = readFileSync(join(ROOT, 'assets/guest.js'), 'utf8');
   /* required vs optional: optional never blocks */
@@ -486,10 +482,9 @@ test('SEND is unavailable until the required steps are done — and never fails 
   ['you', 'journey', 'wedding', 'preparation', 'about', 'review'].forEach((k) =>
     assert.ok(r.includes("key: '" + k + "'"), k + ' is not one of the six steps'));
   /* the four states, in words — never colour alone */
-  ['Completed', 'Action needed', 'Optional · not completed', 'In progress'].forEach((st) =>
-    assert.ok(r.includes(st), st + ' is not a step state'));
-  /* required blocks, optional never does */
-  assert.match(r, /s\.required && s\.key !== 'review' && s\.state !== 'Completed'/);
+  assert.match(r, /STATE_LABEL: \{ complete: '✓ Complete', current: 'Current', attention: 'Needs attention', locked: 'Locked' \}/);
+  /* required blocks, optional never does: readiness is the missing items of steps 01–05 */
+  assert.match(r, /if \(s\.key !== 'review'\) s\.missing\.forEach/);
 });
 
 test('a session stored without names is not an open invitation', () => {
@@ -497,23 +492,23 @@ test('a session stored without names is not an open invitation', () => {
    * per-person surface is impossible in that state, so it must show its gate
    * and ask for the code once — never a blank page. */
   const g = readFileSync(join(ROOT, 'assets/guest.js'), 'utf8');
-  assert.match(g, /if \(!a \|\| !Array\.isArray\(a\.guests\) \|\| !a\.guests\.length\) return null;/);
+  assert.match(g, /if \(!a \|\| !a\.guestId \|\| !a\.bearer \|\| a\.invitationId !== 'INV-' \+ a\.guestId\) return null;/);
   assert.match(g, /stale: function/);
   /* and an unresolved party never edits the journey: a stale session must not
    * quietly drop a line the guest already chose */
   const t = readFileSync(join(ROOT, 'assets/temple.js'), 'utf8');
   assert.match(t, /if \(G && !G\.party\(\)\) return;/);
   const inv = readFileSync(join(ROOT, 'assets/invite.mjs'), 'utf8');
-  assert.match(inv, /hasNames\(\) \{/);
-  assert.match(inv, /if \(a && AUTH\.hasNames\(\)\) \{ fn\(a\); return; \}/);
-  /* and no surface may index into an empty party */
-  ['about-you.html', 'you.html', 'invitation.html'].forEach((f) => {
+  assert.match(inv, /valid\(\) \{/);
+  assert.match(inv, /if \(a && AUTH\.valid\(\)\) \{ fn\(a\); return; \}/);
+  /* and no surface may render without the guest */
+  ['about-you.html', 'invitation.html', 'cart.html'].forEach((f) => {
     const page = readFileSync(join(ROOT, f), 'utf8');
-    assert.match(page, /if\(!p\|\|!p\.guests\.length\)\{/, f + ' can still crash on an empty party');
+    assert.match(page, /if\(!p\|\|!me\)\{/, f + ' can still crash without a guest');
     assert.match(page, /Open your invitation once more/, f + ' does not explain a stale session');
     /* recovery copy stays short, and never exposes how the thing is built */
-    assert.match(page, /We&rsquo;ve updated your private journey so every choice can now be shown by name\./, f);
-    [/older build/i, /stored session/i, /payload/i, /guest array/i, /migration/i]
+    assert.match(page, /Your invitation is now personal: every guest has their own code\./, f);
+    [/older build/i, /stored session/i, /payload/i, /guest array/i, /migration/i, /bearer/i]
       .forEach((bad) => assert.doesNotMatch(page, bad, f + ' leaks an implementation concept'));
   });
   /* the private wedding step refuses to render a per-person decision without
@@ -524,10 +519,11 @@ test('a session stored without names is not an open invitation', () => {
 
 test('the invitation briefing tells the guest who is invited and who they decide for', () => {
   const page = readFileSync(join(ROOT, 'invitation.html'), 'utf8');
-  assert.match(page, /You are invited to join <span class="nb">Haruthai &amp; Suthep<\/span>/);
-  assert.match(page, /Your party/);
-  assert.match(page, /You are making decisions for/);
-  assert.match(page, /setIdentityReviewed\(true\)/);
+  assert.match(page, /', you are invited<\/h1>/);
+  assert.match(page, /Haruthai &amp; Suthep would love you to join them in Vientiane/);
+  assert.match(page, /Your party · '\+esc\(G\.partyNames\(\)\)/, 'the party as context');
+  assert.match(page, /Each of you has your own invitation and your own code; nothing here is answered for anyone else/);
+  assert.match(page, /Six steps, in order/);
   /* and it is step one of the preparation, not a page nobody can find */
   const prep = readFileSync(join(ROOT, 'assets/prep-shell.js'), 'utf8');
   ['invitation.html', 'your-journey.html', 'wedding.html',
@@ -550,7 +546,7 @@ test('Review & Send carries DOCUMENTS & PRIVACY, and promises no vault it does n
   assert.match(page, /<h2>Documents &amp; privacy<\/h2>/);
   assert.match(page, /Publication of photographs/);
   assert.match(page, /D\.forGuest\(id\)\.forEach/, 'document states are not read per named guest');
-  assert.match(page, /no document byte is kept in this browser/);
+  assert.doesNotMatch(page, /vault|encrypted store/i);
   /* the real controls live on the step, not on the summary */
   const docsPage = readFileSync(join(ROOT, 'about-you.html'), 'utf8');
   assert.match(docsPage, /<input type="file" accept="/);
@@ -568,33 +564,28 @@ test('Review & Send carries DOCUMENTS & PRIVACY, and promises no vault it does n
 test('Review & Send is five editorial blocks, each with its own way back', () => {
   const page = readFileSync(join(ROOT, 'review.html'), 'utf8');
   assert.doesNotMatch(page, /<span class="bno">/, 'review blocks carry no numbering that competes with the six steps');
-  ['you.html#you', 'wedding.html', 'your-journey.html',
-   'wedding-preparation.html#ack', 'invitation.html', 'about-you.html#about-you', 'about-you.html#documents']
+  ['invitation.html#contact', 'wedding.html', 'your-journey.html',
+   'wedding-preparation.html#ack', 'invitation.html', 'about-you.html', 'about-you.html#documents', 'cart.html']
     .forEach((href) => assert.ok(page.includes('href="' + href + '"'), href + ' has no edit route'));
-  /* the approved architecture: YOU · YOUR JOURNEY · THE WEDDING ·
-   * DOCUMENTS & PRIVACY · YOUR COSTS — About you lives inside YOU */
+  /* the architecture for ONE guest: YOU · YOUR JOURNEY · THE WEDDING ·
+   * ABOUT YOU · DOCUMENTS & PRIVACY · YOUR COST */
   const body = page.slice(page.indexOf('<main'), page.indexOf('</main>'));
   let at = -1;
-  ['b1', 'b2', 'b3', 'b4', 'b5'].forEach((id) => {
+  ['b1', 'b2', 'b3', 'b6', 'b4', 'b5'].forEach((id) => {
     const i = body.indexOf('id="' + id + '"');
     assert.ok(i > at, id + ' is out of order in the page');
     at = i;
   });
-  [['b1', '<h2>You</h2>'], ['b2', '<h2>Your journey</h2>'], ['b3', '<h2>The Wedding</h2>'],
-   ['b4', '<h2>Documents &amp; privacy</h2>'], ['b5', '<h2>Your costs</h2>']]
+  [['b1', '<h2>You</h2>'], ['b2', '<h2>Your journey</h2>'], ['b3', '<h2>The Wedding</h2>'], ['b6', '<h2>About you</h2>'],
+   ['b4', '<h2>Documents &amp; privacy</h2>'], ['b5', '<h2>Your cost</h2>']]
     .forEach(([id, heading]) => assert.ok(page.includes(heading), id + ' does not carry ' + heading));
-  /* ABOUT YOU is summarised inside YOU and edited on its own page — it is
-   * never one of the five blocks */
-  assert.match(page, /<h2 style="font-size:17px">About you<\/h2>/);
-  assert.match(page, /href="about-you.html#about-you">Edit/);
-  assert.doesNotMatch(body, /<h2>About you<\/h2>/);
   /* RECEIVED is not CONFIRMED, and a sent journey stays editable */
-  assert.match(page, /Received is not confirmed/);
+  assert.match(page, /Nothing is confirmed yet/);
   assert.match(page, /Confirmed<\/b> is something only Guest Relations can tell you/);
   assert.match(page, /Change my journey and send again/);
-  /* the party reads by name, never as a headcount */
-  assert.match(page, /p\.guests\.forEach/);
-  assert.equal(page.includes('YOUR COSTS'), true);
+  /* one guest, never a party headcount */
+  assert.doesNotMatch(page, /p\.guests\.forEach|For your party|Total for your party/);
+  assert.equal(page.includes('YOUR COST'), true);
   assert.doesNotMatch(page, /Contribution|Beitrag|Eigenanteil/);
 });
 
@@ -614,43 +605,36 @@ test('the dress code carries three codes and 18 owner references, acknowledged b
   assert.doesNotMatch(page, /id="ack" checked|checked id="ack"/);
 });
 
-test('ABOUT YOU is exactly seven questions and one operational field', () => {
+test('ABOUT YOU is one required question, six favourites and one required acknowledgement', () => {
   const g = readFileSync(join(ROOT, 'assets/guest.js'), 'utf8');
-  const block = g.slice(g.indexOf('var PROFILE = ['), g.indexOf('var ACCESS ='));
+  const block = g.slice(g.indexOf('var PROFILE = ['), g.indexOf('var PHOTO_TEXT ='));
   const keys = [...block.matchAll(/\{ key: '([a-z]+)'/g)].map((m) => m[1]);
-  /* Owner, 13 Sep 2026: the favourite drink sits in the middle of the seven */
-  assert.deepEqual(keys, ['dietary', 'coffeetea', 'treat', 'drink', 'comfort', 'avoid', 'anything']);
-  assert.match(g, /var ACCESS = \{ key: 'access'/);
-  /* three layers, and a correction never destroys the invitation's own value —
-   * and since C every entry is signed by the person who actually wrote it */
-  assert.match(g, /r\.history\.push\(\{ field: field, from: from, to: v, at: stamp\(\), by: /);
-  /* ABOUT YOU is its own step and its own page — never buried under contact
-   * details, and the preparation rail names exactly what the page presents. */
+  assert.deepEqual(keys, ['coffeetea', 'treat', 'drink', 'avoid', 'film', 'music']);
+  assert.match(g, /var ALLERGY = \{ key: 'allergy'/);
+  assert.doesNotMatch(g, /var ACCESS =|key: 'comfort'|key: 'anything'|key: 'dietary'/);
+  /* three layers, and a correction never destroys the invitation's own value — every entry is signed by the guest */
+  assert.match(g, /r\.history\.push\(\{ field: field, from: from, to: v, at: stamp\(\), by: me\.guestId \}\)/);
   const about = readFileSync(join(ROOT, 'about-you.html'), 'utf8');
   assert.match(about, /<h1 class="t-d1">About you<\/h1>/);
   assert.match(about, /G\.PROFILE\.forEach/);
-  assert.match(about, /02 · Required · answered by/); assert.match(about, /aria-required="true"/, 'Accessibility & comfort is required of each guest (Owner, 13 Sep 2026)');
-  assert.match(about, /Who are you answering for\?/);
-  /* D · four editorial areas on one surface, documents INSIDE step 05, and
-   * the shell's one continuation instead of a page-local nav */
-  ['Hospitality profile', 'Accessibility &amp; comfort', 'Travel documents', 'Photographs and film']
+  assert.match(about, /id="allergy-text" data-allergy-text aria-required="true"/);
+  assert.doesNotMatch(about, /Who are you answering for\?/);
+  ['A little more about you', 'Travel documents', 'Photography &amp; film', 'Your publication choice']
     .forEach((h) => assert.ok(about.includes(h), 'ABOUT YOU lacks the area ' + h));
   assert.match(about, /D\.KINDS\.map/, 'documents must live inside step 05');
   assert.match(about, /P\.foot\(/, 'the continuation is the shell foot');
   assert.doesNotMatch(about, /href="documents\.html"/, 'documents are not a separate step');
   assert.ok(!existsSync(join(ROOT, 'assets/prep.js')), 'the retired registration rail is deleted');
-  /* identity and contact stay on their own page, with their own anchors */
+  /* identity and contact live on step 01 itself; the old address hands over */
   const you = readFileSync(join(ROOT, 'you.html'), 'utf8');
-  assert.match(you, /From your invitation/);
-  assert.doesNotMatch(you, /G\.PROFILE\.forEach/, 'the questionnaire is still buried in you.html');
-  assert.match(you, /id="you"/);
-  assert.match(you, /id="contact"/);
+  assert.match(you, /url=invitation\.html#contact/);
+  const inv = readFileSync(join(ROOT, 'invitation.html'), 'utf8');
+  assert.match(inv, /id="p-email"/); assert.match(inv, /id="p-phone"/); assert.match(inv, /From your invitation/);
 });
 
 test('every underlined title leads somewhere, and the Sangkhathan carries its own action', () => {
   const review = readFileSync(join(ROOT, 'review.html'), 'utf8');
-  assert.match(review, /View offering':'View &amp; choose/);
-  assert.match(review, /href="wedding\.html#ev-temple"/, 'the offering action leads to its primary home, step 03');
+  assert.match(review, /href="wedding\.html#sangkhathan">Complete this/, 'the offering action leads to its primary home, step 03');
   /* the journey keeps the wedding compact and sends the guest to step 03 */
   const journey = readFileSync(join(ROOT, 'your-journey.html'), 'utf8');
   assert.match(journey, /Complete wedding decisions/);

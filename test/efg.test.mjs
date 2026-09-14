@@ -14,128 +14,84 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import path from 'node:path';
-import vm from 'node:vm';
-import { fileURLToPath } from 'node:url';
 import { Seating, validateGeometry, seatsOf, RULES, CAPACITY } from '../src/seating.js';
 import { SEAT_FIXTURE } from './fixtures.mjs';
+import { page as sandboxPage, json, src, PEGGY as PEGGY_S, STEFFIE as STEFFIE_S, LIN as LIN_S } from './sandbox.mjs';
+import { authIdOf } from '../register/crypto.mjs';
 
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const src = (f) => fs.readFileSync(path.join(ROOT, f), 'utf8');
-const PARTY = {
-  invitationId: 'INV-002', partyName: 'Peggy & Steffie', partyLead: 'g-peggy',
-  guests: [{ guestId: 'g-peggy', fullName: 'Peggy Berger', preferredName: 'Peggy' },
-           { guestId: 'g-steffie', fullName: 'Steffie Miedel', preferredName: 'Steffie' }],
-};
 const PEGGY = 'g-peggy', STEFFIE = 'g-steffie';
-
-/* a page: the browser modules in a sandbox, as in the C tests */
-function page(auth, seed) {
-  const store = new Map(), listeners = {};
-  const sb = {
-    console,
-    localStorage: { getItem: (k) => (store.has(k) ? store.get(k) : null), setItem: (k, v) => store.set(k, String(v)), removeItem: (k) => store.delete(k) },
-    document: { readyState: 'complete', addEventListener: (t, fn) => { (listeners[t] = listeners[t] || []).push(fn); }, dispatchEvent: (e) => { (listeners[e.type] || []).forEach((fn) => fn(e)); return true; },
-      querySelector: () => null, querySelectorAll: () => [], createElement: () => ({ style: {}, appendChild() {}, setAttribute() {} }), body: { classList: { add() {}, remove() {}, toggle() {}, contains() { return false; } }, appendChild() {} }, head: { appendChild() {} } },
-    location: { pathname: '/wedding.html', hostname: 'localhost', search: '' },
-    CustomEvent: class { constructor(type, init) { this.type = type; this.detail = init && init.detail; } },
-    setTimeout: (fn) => fn(), fetch: () => Promise.reject(new Error('no network')),
-  };
-  sb.window = sb; vm.createContext(sb);
-  if (auth) sb.localStorage.setItem('siyl.auth', JSON.stringify(auth));
-  if (seed) Object.entries(seed).forEach(([k, v]) => sb.localStorage.setItem(k, JSON.stringify(v)));
-  for (const f of ['assets/bag.js', 'assets/rooms-data.js', 'assets/pricing.js', 'assets/guest.js', 'assets/temple.js', 'assets/docs.js', 'assets/seatlabels.js', 'assets/seating.js', 'assets/seatpass.js', 'assets/confirm.js']) vm.runInContext(src(f), sb, { filename: f });
-  return sb;
-}
-const json = (w, k) => JSON.parse(w.localStorage.getItem(k) || 'null');
+const ID_PEGGY = { invitationId: 'INV-g-peggy', guestId: PEGGY, partyId: 'INV-DEMO-002', hosts: false };
+const ID_STEFFIE = { invitationId: 'INV-g-steffie', guestId: STEFFIE, partyId: 'INV-DEMO-002', hosts: false };
+const ID_SERAY = { invitationId: 'INV-g-seray', guestId: 'g-seray', partyId: 'INV-DEMO-009', hosts: false };
+/* a page: the browser modules in a sandbox, one guest session */
+function page(auth, seed) { return sandboxPage({ auth: auth === undefined ? PEGGY_S : auth, seed }); }
 
 /* ======================================================================== E */
 
-test('E · eligibility is explicit invitation metadata: PAIR, NONE, or unresolved — never inferred', () => {
-  assert.equal(page({ ...PARTY, givingEligibility: 'PAIR' }).SIYL_TEMPLE.eligibility(), 'PAIR');
-  assert.equal(page({ ...PARTY, givingEligibility: 'NONE' }).SIYL_TEMPLE.eligibility(), 'NONE');
-  assert.equal(page(PARTY).SIYL_TEMPLE.eligibility(), null, 'two names are not a pair');
-  assert.equal(page({ ...PARTY, givingEligibility: 'COUPLE' }).SIYL_TEMPLE.eligibility(), null, 'unknown values are unresolved');
+test('E · eligibility is explicit invitation metadata: ELIGIBLE, NONE, or unresolved — never inferred', () => {
+  assert.equal(page({ ...PEGGY_S, sangkhathan: 'ELIGIBLE' }).SIYL_TEMPLE.eligibility(), 'ELIGIBLE');
+  assert.equal(page({ ...PEGGY_S, sangkhathan: 'NONE' }).SIYL_TEMPLE.eligibility(), 'NONE');
+  assert.equal(page({ ...PEGGY_S, sangkhathan: 'PAIR' }).SIYL_TEMPLE.eligibility(), null, 'the retired couple value is unresolved');
+  assert.equal(page({ ...PEGGY_S, sangkhathan: undefined }).SIYL_TEMPLE.eligibility(), null);
   const t = src('assets/temple.js');
   assert.doesNotMatch(t, /length === 2|length == 2/, 'no party-size inference');
-  const inv = src('assets/invite.mjs');
-  assert.match(inv, /givingEligibility: inv\.givingEligibility === 'PAIR' \|\| inv\.givingEligibility === 'NONE' \? inv\.givingEligibility : null/);
-  const b = src('src/build-invitations.cjs');
-  assert.match(b, /inv\.givingEligibility === 'PAIR' \|\| inv\.givingEligibility === 'NONE'/);
+  assert.doesNotMatch(t, /pairCan|pairDecision/, 'no couple decision remains');
+  assert.match(src('assets/invite.mjs'), /sangkhathan: inv\.sangkhathan === 'ELIGIBLE' \|\| inv\.sangkhathan === 'NONE' \? inv\.sangkhathan : 'UNRESOLVED'/);
+  assert.match(src('src/build-invitations.cjs'), /p\.givingEligibility === 'PAIR' \? 'ELIGIBLE' : 'UNRESOLVED'/);
 });
 
-test('E · PAIR: one couple decision, both take part or neither, USD 30 for the party', () => {
-  const w = page({ ...PARTY, givingEligibility: 'PAIR' });
-  const G = w.SIYL_GUEST, T = w.SIYL_TEMPLE, B = w.SIYL_BAG;
-  G.setActive(PEGGY);
-  assert.equal(T.pairCan(), false, 'not until both attend');
+test('E · ELIGIBLE: the guest\'s own YES / NO, USD 15 for this guest, available while attending the temple, never restored silently', () => {
+  const w = page();
+  const T = w.SIYL_TEMPLE, B = w.SIYL_BAG;
+  assert.equal(T.canOffer(PEGGY), false, 'not until she attends');
   assert.equal(T.setOffering(PEGGY, 'yes'), false);
   T.setAttendance(PEGGY, 'yes');
-  assert.equal(T.pairCan(), false);
-  T.setAttendance(STEFFIE, 'yes');
-  assert.equal(T.pairCan(), true);
-  assert.ok([...T.openFor(PEGGY)].includes('Sangkhathan'), 'the couple decision is open');
+  assert.equal(T.canOffer(PEGGY), true);
+  assert.ok([...T.openFor(PEGGY)].includes('Sangkhathan'), 'the decision is open');
   assert.equal(T.setOffering(PEGGY, 'yes'), true);
   assert.equal(T.offeringOf(PEGGY), true);
-  assert.equal(T.offeringOf(STEFFIE), true, 'never Peggy yes / Steffie no');
-  assert.equal(T.offerings(), 2);
-  assert.equal(json(w, 'siyl.temple').pair.by, PEGGY, 'the decision is signed');
+  assert.equal(T.offerings(), 1);
+  assert.equal(json(w, 'siyl.temple').by[PEGGY].by, PEGGY, 'signed by the guest');
   const line = B.get().find((x) => x.id === 'sangkhathan');
-  assert.equal(line.qty, 2);
-  assert.equal(line.price, 15);
-  assert.equal(B.total(), 30, 'USD 15 per participating named guest, USD 30 for the party');
+  assert.equal(line.qty, 1); assert.equal(line.price, 15);
+  assert.equal(B.total(), 15, 'USD 15 — this guest only');
   const op = T.operational();
-  assert.equal(op.sangkhathanEligibility, 'PAIR');
-  assert.equal(op.sangkhathanPair, 'yes');
-  assert.deepEqual([...op.guests.map((g) => g.sangkhathanState)], ['Selected', 'Selected']);
-  assert.equal(op.offeringsUsd, 30);
-  /* the other answer */
-  T.setOffering(STEFFIE, 'no');
-  assert.equal(T.offerings(), 0);
-  assert.equal(B.has('sangkhathan'), false);
-  assert.deepEqual([...T.operational().guests.map((g) => g.sangkhathanState)], ['Not selected', 'Not selected']);
-});
-
-test('E · the couple decision depends on every named guest attending, and is never restored silently', () => {
-  const w = page({ ...PARTY, givingEligibility: 'PAIR' });
-  const G = w.SIYL_GUEST, T = w.SIYL_TEMPLE, B = w.SIYL_BAG;
-  G.setActive(PEGGY);
-  T.setAttendance(PEGGY, 'yes'); T.setAttendance(STEFFIE, 'yes'); T.setOffering(PEGGY, 'yes');
-  assert.equal(B.total(), 30);
-  T.setAttendance(STEFFIE, 'no');
-  assert.equal(T.pairCan(), false);
-  assert.equal(T.pairDecision(), null);
-  assert.equal(json(w, 'siyl.temple').pair, undefined, 'the decision is removed, not hidden');
-  assert.equal(B.has('sangkhathan'), false, 'and the line is gone from the journey');
-  assert.equal(T.operational().guests[1].sangkhathanState, 'Not applicable');
-  T.setAttendance(STEFFIE, 'yes');
-  assert.equal(T.pairDecision(), null, 'asked again, from not decided');
-  assert.ok([...T.openFor(STEFFIE)].includes('Sangkhathan'));
-  assert.equal(T.operational().sangkhathanPair, 'Decision required');
+  assert.equal(op.sangkhathanEligibility, 'ELIGIBLE'); assert.equal(op.sangkhathanPair, undefined);
+  assert.deepEqual([...op.guests.map((g) => g.sangkhathanState)], ['Selected']);
+  assert.equal(op.offeringsUsd, 15);
+  T.setOffering(PEGGY, 'no');
+  assert.equal(T.offerings(), 0); assert.equal(B.has('sangkhathan'), false);
+  assert.deepEqual([...T.operational().guests.map((g) => g.sangkhathanState)], ['Not selected']);
+  T.setOffering(PEGGY, 'yes');
+  T.setAttendance(PEGGY, 'no');
+  assert.equal(T.offeringOf_(PEGGY), null); assert.equal(B.has('sangkhathan'), false, 'not attending: the offering goes');
+  assert.equal(T.operational().guests[0].sangkhathanState, 'Not applicable');
+  T.setAttendance(PEGGY, 'yes');
+  assert.equal(T.offeringOf_(PEGGY), null, 'asked again, from not decided');
+  assert.equal(T.operational().guests[0].sangkhathanState, 'Decision required');
 });
 
 test('E · NONE and unresolved: nothing is offered, nothing blocks, nothing is priced', () => {
-  for (const [auth, elig, state] of [[{ ...PARTY, givingEligibility: 'NONE' }, 'NONE', 'Not eligible'], [PARTY, 'UNRESOLVED', 'Not available yet']]) {
+  for (const [auth, elig, state] of [[{ ...PEGGY_S, sangkhathan: 'NONE' }, 'NONE', 'Not eligible'], [{ ...PEGGY_S, sangkhathan: undefined }, 'UNRESOLVED', 'Not available yet']]) {
     const w = page(auth);
-    const G = w.SIYL_GUEST, T = w.SIYL_TEMPLE, B = w.SIYL_BAG;
-    G.setActive(PEGGY);
-    T.setAttendance(PEGGY, 'yes'); T.setAttendance(STEFFIE, 'yes');
-    assert.equal(T.pairCan(), false);
+    const T = w.SIYL_TEMPLE, B = w.SIYL_BAG;
+    T.setAttendance(PEGGY, 'yes');
+    assert.equal(T.canOffer(PEGGY), false);
     assert.equal(T.setOffering(PEGGY, 'yes'), false);
     assert.ok(![...T.openFor(PEGGY)].includes('Sangkhathan'), 'the Sangkhathan never blocks a journey it is not offered to');
     assert.equal(B.has('sangkhathan'), false);
     const op = T.operational();
     assert.equal(op.sangkhathanEligibility, elig);
-    assert.deepEqual([...op.guests.map((g) => g.sangkhathanState)], [state, state]);
+    assert.deepEqual([...op.guests.map((g) => g.sangkhathanState)], [state]);
     assert.equal(op.offeringsUsd, 0);
   }
   const wd = src('wedding.html');
   assert.match(wd, /There is nothing you need to arrange for your invitation\./);
   assert.match(wd, /Guest Relations will let you know if there is anything to arrange for your invitation\./);
   assert.doesNotMatch(wd, /metadata|configuration incomplete|givingEligibility undefined/i, 'no technical wording on the surface');
-  assert.match(wd, /data-off="yes">We would like to take part/);
-  assert.match(wd, /data-off="no">Continue without Sangkhathan/);
-  assert.match(wd, /Total for your party/);
+  assert.match(wd, /data-off="yes">Yes, I would like to take part/);
+  assert.match(wd, /data-off="no">No, thank you/);
+  assert.doesNotMatch(wd, /Total for your party|We would like to take part/);
 });
 
 test('E · the production bundle ships no inferred eligibility: every invitation is explicit or unresolved', () => {
@@ -168,18 +124,32 @@ function kv() {
   };
 }
 const req = (path, init) => new Request('https://seeyouinlaos-website.suthep-hrg.workers.dev' + path, init);
+/* the deployed auth index, as the Worker reads it through ASSETS */
+async function assets() {
+  const entries = {};
+  entries[await authIdOf(PEGGY_S.bearer)] = { i: 'INV-g-peggy', g: 'g-peggy', p: 'INV-DEMO-002' };
+  entries[await authIdOf(STEFFIE_S.bearer)] = { i: 'INV-g-steffie', g: 'g-steffie', p: 'INV-DEMO-002' };
+  const body = JSON.stringify({ v: 2, entries });
+  return { fetch: (r) => new Response(new URL(r.url).pathname === '/register/auth-index.json' ? body : 'asset', { status: 200 }) };
+}
 
 test('F · status: none → received (after a stored registration) → confirmed (only by Guest Relations)', async () => {
   const w = await worker();
-  const env = { REG_KV: kv(), GR_TOKEN: 'secret-token-of-guest-relations', ASSETS: { fetch: () => new Response('') } };
+  const env = { REG_KV: kv(), GR_TOKEN: 'secret-token-of-guest-relations', ASSETS: await assets() };
   let r = await (await w.fetch(req('/api/status?invitation=INV-002'), env)).json();
   assert.deepEqual([r.received, r.confirmed], [false, false]);
   /* a registration lands (the register route stores it; the mail call fails harmlessly here) */
   globalThis.fetch = async () => new Response('', { status: 500 });
-  r = await (await w.fetch(req('/api/register', { method: 'POST', body: JSON.stringify({ invitationId: 'INV-002', text: 'SEE YOU IN LAOS — JOURNEY SELECTION', registration: { registration_submitted_at: '2026-09-11T10:00:00.000Z' } }) }), env)).json();
+  const body = JSON.stringify({ invitationId: 'INV-002', text: 'SEE YOU IN LAOS — JOURNEY SELECTION', registration: { guestId: 'g-peggy', registration_submitted_at: '2026-09-11T10:00:00.000Z' } });
+  assert.equal((await w.fetch(req('/api/register', { method: 'POST', body }), env)).status, 401, 'no bearer, no send');
+  assert.equal((await w.fetch(req('/api/register', { method: 'POST', headers: { 'x-siyl-auth': STEFFIE_S.bearer }, body }), env)).status, 401, 'another guest cannot send this journey');
+  assert.equal((await w.fetch(req('/api/register', { method: 'POST', headers: { 'x-siyl-auth': PEGGY_S.bearer }, body }), env)).status, 401, 'the invitation must be the guest\'s own');
+  const own = JSON.stringify({ invitationId: 'INV-g-peggy', text: 'SEE YOU IN LAOS — JOURNEY SELECTION', registration: { guestId: 'g-peggy', registration_submitted_at: '2026-09-11T10:00:00.000Z' } });
+  assert.equal((await w.fetch(req('/api/register', { method: 'POST', headers: { 'x-siyl-auth': STEFFIE_S.bearer }, body: own }), env)).status, 401, 'a party member cannot send it either');
+  r = await (await w.fetch(req('/api/register', { method: 'POST', headers: { 'x-siyl-auth': PEGGY_S.bearer }, body: own }), env)).json();
   assert.equal(r.ok, true);
   assert.equal(r.status, 'UNDER_REVIEW', 'sending never confirms');
-  r = await (await w.fetch(req('/api/status?invitation=INV-002'), env)).json();
+  r = await (await w.fetch(req('/api/status?invitation=INV-g-peggy'), env)).json();
   assert.deepEqual([r.received, r.receivedAt, r.confirmed], [true, '2026-09-11T10:00:00.000Z', false]);
   /* the guest cannot confirm: no token, wrong token */
   assert.equal((await w.fetch(req('/api/confirm', { method: 'POST', body: JSON.stringify({ invitationId: 'INV-002' }) }), env)).status, 401);
@@ -206,10 +176,11 @@ test('F · the token never reaches the client, and the surface never confirms it
   assert.match(c, /noteReceived/);
   assert.doesNotMatch(c, /confirmed: true/, 'the client never writes the confirmed state');
   const rv = src('review.html');
-  assert.match(rv, /Journey received/); assert.match(rv, /Journey confirmed/);
-  assert.match(rv, /A · Party journey confirmation/); assert.match(rv, /B · Personal wedding card/);
+  assert.match(rv, /We have your journey/); assert.match(rv, /Your journey is confirmed/);
+  assert.match(rv, /Your confirmed journey/); assert.match(rv, /Your wedding card/);
+  assert.doesNotMatch(rv, /Party journey confirmation|one decision for your party|For your party/);
   assert.doesNotMatch(rv, /BOOKING CONFIRMED|RESERVATION CONFIRMED|PAYMENT COMPLETE|ORDER CONFIRMED|boarding|barcode|<svg[^>]*qr/i);
-  assert.match(rv, /p\.guests\.forEach\(function\(g\)\{\s*var id=g\.guestId,row=\(snap\.guests/, 'one card per named guest, from the snapshot that was SENT — never the live draft');
+  assert.match(rv, /var rowS=\(snap\.guests\|\|\[\]\)\[0\]/, 'the card comes from the snapshot that was SENT — never the live draft');
   assert.match(rv, /var at=\(ans&&ans\.submittedAt\)\|\|registration\.registration_submitted_at;\nrememberSent\(at\);/, 'the snapshot is taken at SEND, stamped with what the server stored');
   assert.match(rv, /Changed since confirmation · not sent/);
   assert.match(rv, /held=C\.receivedAt\(\);\s*var current=!!\(mine&&held&&snap\.at===held\)/, 'the snapshot counts only when it is the version Guest Relations holds');
@@ -266,8 +237,9 @@ test('F · every preparation step reads the journey status, so the shell says Re
   assert.match(shell, /SIYL_CONFIRM && party\(\)\) SIYL_CONFIRM\.load\(\)/, 'the shell reads the status once the party is known');
 });
 
+/* `as` is the identity the Worker would have verified from the bearer */
 const call = (l, op, body, opts = {}) => l.fetch(new Request('https://x/api/seating/' + op + (opts.q || ''), {
-  method: body ? 'POST' : 'GET', headers: opts.gr ? { 'x-gr-verified': 'yes' } : {}, body: body ? JSON.stringify(body) : undefined,
+  method: body ? 'POST' : 'GET', headers: { ...(opts.gr ? { 'x-gr-verified': 'yes' } : {}), ...(opts.as ? { 'x-siyl-identity': JSON.stringify(opts.as) } : {}) }, body: body ? JSON.stringify(body) : undefined,
 })).then(async (r) => ({ status: r.status, ...(await r.json()) }));
 
 test('G · the geometry contract enforces the Owner geometry and refuses the retired truth', () => {
@@ -332,8 +304,9 @@ test('G · production ships no geometry: unconfigured, not open, NOT OPEN YET', 
   const l = ledger();
   const v = await call(l, 'read', null, { q: '?invitation=INV-002' });
   assert.deepEqual([v.open, v.frozen, v.configured.ceremony, v.configured.dinner, v.ceremony, v.dinner], [false, false, false, false, null, null]);
-  const s = await call(l, 'select', { invitationId: 'INV-002', guestId: PEGGY, event: 'ceremony', seatId: 'C-L-01-01' });
+  const s = await call(l, 'select', { invitationId: 'INV-g-peggy', guestId: PEGGY, event: 'ceremony', seatId: 'C-L-01-01' }, { as: ID_PEGGY });
   assert.equal(s.status, 423);
+  assert.equal((await call(l, 'select', { invitationId: 'INV-g-peggy', guestId: PEGGY, event: 'ceremony', seatId: 'C-L-01-01' })).status, 401, 'no identity, no hold');
   assert.deepEqual(JSON.parse(JSON.stringify(v.capacity)), { ceremony: { guestSeats: 50, left: 20, right: 30, fixed: 2 }, dinner: { guestSeats: 50, top: 25, bottom: 25, totalPeople: 50 } }, 'the capacity contract is the Owner geometry even before configuration');
   for (const f of ['assets/seating.js', 'src/seating.js', 'wedding-preparation.html', 'src/worker.js']) {
     assert.doesNotMatch(src(f), /seatId:\s*'[CD]-[LRTB]-\d|'C-[LR]-\d+-\d+'|'D-[LRTB]-\d+'/, f + ' carries a floor plan of its own');
@@ -351,49 +324,75 @@ test('G · a seat belongs to a named guest; the new chair is held before the old
   await call(l, 'state', { open: true }, { gr: true });
   const free = seatsOf(validateGeometry(SEAT_FIXTURE).config, 'ceremony').filter((s) => !s.family).map((s) => s.seatId);
   const fam = seatsOf(validateGeometry(SEAT_FIXTURE).config, 'ceremony').filter((s) => s.family)[0].seatId;
-  let r = await call(l, 'select', { invitationId: 'INV-002', guestId: PEGGY, event: 'ceremony', seatId: free[0] });
+  let r = await call(l, 'select', { invitationId: 'INV-g-peggy', guestId: PEGGY, event: 'ceremony', seatId: free[0], name: 'Peggy' }, { as: ID_PEGGY });
   assert.equal(r.ok, true);
   assert.equal(r.mine.ceremony[PEGGY], free[0]);
-  /* another invitation cannot take Peggy's chair */
-  r = await call(l, 'select', { invitationId: 'INV-003', guestId: 'g-seray', event: 'ceremony', seatId: free[0] });
+  /* another guest cannot take Peggy's chair */
+  r = await call(l, 'select', { invitationId: 'INV-g-seray', guestId: 'g-seray', event: 'ceremony', seatId: free[0] }, { as: ID_SERAY });
   assert.equal(r.status, 409); assert.equal(r.error, 'taken');
-  /* Steffie, same invitation, cannot take it either — the chair is Peggy's, by name */
-  r = await call(l, 'select', { invitationId: 'INV-002', guestId: STEFFIE, event: 'ceremony', seatId: free[0] });
+  /* Steffie, same party, cannot take it either — the chair is Peggy's, by name */
+  r = await call(l, 'select', { invitationId: 'INV-g-steffie', guestId: STEFFIE, event: 'ceremony', seatId: free[0] }, { as: ID_STEFFIE });
   assert.equal(r.status, 409);
+  /* and nobody books a chair in another guest's name: the body must be the identity's */
+  r = await call(l, 'select', { invitationId: 'INV-g-steffie', guestId: STEFFIE, event: 'ceremony', seatId: free[5] }, { as: ID_PEGGY });
+  assert.equal(r.status, 403);
+  r = await call(l, 'release', { invitationId: 'INV-g-peggy', guestId: PEGGY, event: 'ceremony' }, { as: ID_STEFFIE });
+  assert.equal(r.status, 403, 'nor releases one');
   /* Peggy changes: the new chair is held, then the old is released */
-  r = await call(l, 'select', { invitationId: 'INV-002', guestId: PEGGY, event: 'ceremony', seatId: free[1] });
+  r = await call(l, 'select', { invitationId: 'INV-g-peggy', guestId: PEGGY, event: 'ceremony', seatId: free[1], name: 'Peggy' }, { as: ID_PEGGY });
   assert.equal(r.ok, true);
   assert.equal(r.mine.ceremony[PEGGY], free[1]);
-  const view = await call(l, 'read', null, { q: '?invitation=INV-003' });
+  const view = await call(l, 'read', null, { q: '?invitation=INV-g-seray' });
   const flat = view.ceremony.rows.flatMap((x) => x.seats);
   assert.equal(flat.find((s) => s.seatId === free[0]).state, 'available', 'the old chair was released');
-  assert.equal(flat.find((s) => s.seatId === free[1]).state, 'taken', 'and shown as taken to everyone else, without a name');
+  assert.equal(flat.find((s) => s.seatId === free[1]).state, 'taken', 'and shown as taken to a plain read, without a name');
   assert.equal(flat.find((s) => s.seatId === free[1]).guestId, undefined);
+  assert.equal(flat.find((s) => s.seatId === free[1]).name, undefined);
+  /* an authenticated guest sees the first name, and a party member's chair as their party's */
+  const named = await call(l, 'read', null, { as: ID_STEFFIE });
+  const nf = named.ceremony.rows.flatMap((x) => x.seats).find((s) => s.seatId === free[1]);
+  assert.equal(nf.state, 'party'); assert.equal(nf.name, 'Peggy'); assert.equal(named.named, true);
+  const other = await call(l, 'read', null, { as: ID_SERAY });
+  const of = other.ceremony.rows.flatMap((x) => x.seats).find((s) => s.seatId === free[1]);
+  assert.equal(of.state, 'taken'); assert.equal(of.name, 'Peggy');
   /* family chairs are never selectable */
-  r = await call(l, 'select', { invitationId: 'INV-002', guestId: PEGGY, event: 'ceremony', seatId: fam });
+  r = await call(l, 'select', { invitationId: 'INV-g-peggy', guestId: PEGGY, event: 'ceremony', seatId: fam }, { as: ID_PEGGY });
   assert.equal(r.status, 409);
   /* the two inventories are independent */
-  r = await call(l, 'select', { invitationId: 'INV-002', guestId: PEGGY, event: 'dinner', seatId: 'D-T-04' });
+  r = await call(l, 'select', { invitationId: 'INV-g-peggy', guestId: PEGGY, event: 'dinner', seatId: 'D-T-04' }, { as: ID_PEGGY });
   assert.equal(r.ok, true);
-  const mine = await call(l, 'mine', null, { q: '?invitation=INV-002' });
+  const mine = await call(l, 'mine', null, { q: '?invitation=INV-g-peggy' });
   assert.deepEqual(JSON.parse(JSON.stringify(mine.mine)), { ceremony: { [PEGGY]: free[1] }, dinner: { [PEGGY]: 'D-T-04' } });
   /* there is no Bride/Groom chair id at the dinner — the couple book ordinary chairs; ids outside the fifty do not exist */
   for (const id of ['BRIDE', 'GROOM', 'D-BRIDE', 'D-T-26', 'D-B-00']) {
-    const rr = await call(l, 'select', { invitationId: 'INV-002', guestId: STEFFIE, event: 'dinner', seatId: id });
+    const rr = await call(l, 'select', { invitationId: 'INV-g-steffie', guestId: STEFFIE, event: 'dinner', seatId: id }, { as: ID_STEFFIE });
     assert.equal(rr.status, 404, id + ' is not a guest seat');
   }
   /* and the ceremony's BRIDE / GROOM positions can never be selected by anyone */
   for (const id of ['BRIDE', 'GROOM', 'C-BRIDE']) {
-    const rr = await call(l, 'select', { invitationId: 'INV-002', guestId: STEFFIE, event: 'ceremony', seatId: id });
+    const rr = await call(l, 'select', { invitationId: 'INV-g-steffie', guestId: STEFFIE, event: 'ceremony', seatId: id }, { as: ID_STEFFIE });
     assert.equal(rr.status, 404, id + ' is a position, not a chair');
   }
-  const cv = await call(l, 'read', null, { q: '?invitation=INV-002' });
+  const cv = await call(l, 'read', null, { q: '?invitation=INV-g-peggy' });
   assert.deepEqual(cv.ceremony.fixed, ['BRIDE', 'GROOM']); assert.equal(cv.ceremony.rows.flatMap((r) => r.seats).length, 50);
+  /* the pool side is configuration, or unknown — never invented */
+  assert.equal(cv.dinner.poolSide, null);
+  await call(l, 'state', { poolSide: 'X' }, { gr: true });
+  assert.equal((await call(l, 'read', null, {})).dinner.poolSide, null, 'an invalid side is ignored');
+  await call(l, 'state', { poolSide: 'B' }, { gr: true });
+  assert.equal((await call(l, 'read', null, {})).dinner.poolSide, 'B');
+  await call(l, 'state', { poolSide: null }, { gr: true });
+  /* REKEY: a hold under the retired party id is relabelled for the guest's own invitation, name and party; nothing else moves */
+  await l.storage.put('hold:dinner:D-B-13', { invitationId: 'INV-002', guestId: 'g-old', at: 'x', state: 'held' });
+  r = await call(l, 'rekey', { holds: [{ event: 'dinner', seatId: 'D-B-13', fromInvitationId: 'INV-002', guestId: 'g-old', invitationId: 'INV-g-old', partyId: 'INV-002', name: 'Old' }, { event: 'dinner', seatId: 'D-B-14', invitationId: 'x' }] }, { gr: true });
+  assert.equal(r.done.length, 1); assert.equal(r.refused[0].error, 'no hold');
+  assert.deepEqual((await l.storage.get('hold:dinner:D-B-13')).invitationId, 'INV-g-old');
+  assert.equal((await call(l, 'rekey', { holds: [] })).status, 404, 'a client cannot rekey');
   /* frozen: the guest sees, cannot change; Guest Relations still can */
   await call(l, 'state', { frozen: true }, { gr: true });
-  r = await call(l, 'select', { invitationId: 'INV-002', guestId: PEGGY, event: 'ceremony', seatId: free[2] });
+  r = await call(l, 'select', { invitationId: 'INV-g-peggy', guestId: PEGGY, event: 'ceremony', seatId: free[2] }, { as: ID_PEGGY });
   assert.equal(r.status, 423);
-  r = await call(l, 'assign', { invitationId: 'INV-002', guestId: STEFFIE, event: 'ceremony', seatId: free[3], actor: 'GR' }, { gr: true });
+  r = await call(l, 'assign', { invitationId: 'INV-g-steffie', guestId: STEFFIE, event: 'ceremony', seatId: free[3], actor: 'GR' }, { gr: true });
   assert.equal(r.ok, true); assert.equal(r.state, 'allocated');
   const plan = await call(l, 'plan', null, { gr: true });
   assert.equal(plan.events.ceremony.guestSeats, 50);
@@ -402,6 +401,7 @@ test('G · a seat belongs to a named guest; the new chair is held before the old
   assert.equal(plan.events.ceremony.held, 1);
   assert.equal(plan.events.ceremony.allocated, 1);
   assert.equal(plan.events.ceremony.available, 42);
+  assert.equal(plan.events.ceremony.seats.find((s) => s.seatId === free[1]).name, 'Peggy', 'the plan carries the first name');
   assert.equal(plan.events.ceremony.seats.find((s) => s.seatId === free[3]).guestId, STEFFIE);
   /* operations output: GUEST SEATS · 50 = TOTAL PEOPLE · 50, no separate fixed positions */
   assert.equal(plan.events.dinner.guestSeats, 50);
@@ -411,7 +411,7 @@ test('G · a seat belongs to a named guest; the new chair is held before the old
 });
 
 test('G · the renderer draws only what it is given: rows facing the ceremony, one long table, states in marks', () => {
-  const w = page({ ...PARTY, givingEligibility: 'PAIR' });
+  const w = page();
   const S = w.SIYL_SEATS;
   const cfg = validateGeometry(SEAT_FIXTURE).config;
   const view = { ceremony: { rows: cfg.ceremony.rows.map((r) => ({ ...r, seats: r.seats.map((s, i) => ({ ...s, state: s.family ? 'family' : (i === 0 && r.row === 3 && r.side === 'L' ? 'yours' : 'available'), guestId: PEGGY })) })), fixed: ['BRIDE', 'GROOM'] },
@@ -448,7 +448,7 @@ test('G · the renderer draws only what it is given: rows facing the ceremony, o
   /* nothing drawn without configuration */
   assert.equal((S.svg('ceremony', { ceremony: null }, {}).match(/<g class="seat/g) || []).length, 0);
   /* states are said in words, never colour alone */
-  assert.match(S.legend(), /Available/); assert.match(S.legend(), /Selected by you/); assert.match(S.legend(), /Your seat/); assert.match(S.legend(), /Unavailable/);
+  assert.match(S.legend(), /Available/); assert.match(S.legend(), /Selected by you/); assert.match(S.legend(), /Your seat/); assert.match(S.legend(), /Taken/);
   assert.match(S.legend({ partyName: 'Steffie' }), /Steffie’s seat/); assert.doesNotMatch(S.legend(), /’s seat/);
   assert.doesNotMatch(S.legend({ frozen: true }), /Available|Selected by you/, 'frozen: nothing is offered');
   /* RESERVED · FAMILY is a state only where the plan carries such a chair: the
@@ -462,4 +462,18 @@ test('G · the renderer draws only what it is given: rows facing the ceremony, o
   assert.doesNotMatch(S.legend({ view: bare }), /Reserved · family/, 'a plan with every chair bookable lists no family state');
   assert.equal(S.hasFamily(bare), false); assert.equal(S.hasFamily(view), true);
   assert.doesNotMatch(src('assets/seating.js'), /#(ff0000|00ff00|e53935|43a047|2196f3)/i, 'no airline colours');
+  /* FIRST NAMES (Owner, 14 Sep 2026): an authenticated view carries names, drawn under the chairs; a plain view carries none */
+  const namedView = JSON.parse(JSON.stringify(view)); namedView.named = true;
+  namedView.dinner.sides.T[5].name = 'Haruthai'; namedView.dinner.sides.T[6].state = 'party'; namedView.dinner.sides.T[6].name = 'Steffie';
+  const dn = S.svg('dinner', namedView, { guestId: PEGGY, selectable: true });
+  assert.match(dn, /class="seat-name"[^>]*>Haruthai</); assert.match(dn, /aria-label="Dinner seat A6, taken by Haruthai"/);
+  assert.match(dn, /aria-label="Dinner seat A7, Steffie, your party"/);
+  assert.doesNotMatch(d, /seat-name/, 'no names on a plain view');
+  /* THE POOL (Owner, 14 Sep 2026): a landmark on the recorded side, never invented */
+  assert.doesNotMatch(dn, /SWIMMING POOL/, 'no side on record, no pool drawn');
+  assert.match(S.poolNote.call(S) || 'x', /./);
+  const poolView = JSON.parse(JSON.stringify(view)); poolView.dinner.poolSide = 'B';
+  const dp = S.svg('dinner', poolView, { guestId: PEGGY, selectable: true });
+  assert.match(dp, /SWIMMING POOL/); assert.match(dp, /RUN B · 25 PLACES · POOLSIDE/); assert.doesNotMatch(dp, /RUN A · 25 PLACES · POOLSIDE/);
+  assert.match(dp, /the swimming pool along run B/);
 });

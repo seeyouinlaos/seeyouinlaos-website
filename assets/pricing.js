@@ -155,7 +155,7 @@
       q.totalLine = 'Total per person · ' + q.nightsLine;
       q.nightsCovered = nightsCovered(q);
       q.contribution = q.hosted > 0
-        ? 'First night your contribution at ' + q.nightly + ' · second night complimentary'
+        ? 'First night your room rate at ' + q.nightly + ' · second night hosted by Haruthai & Suthep'
         : (rate == null ? '' : q.nightly + ' × ' + q.nightsLine);
       if (rate == null) {
         q.basis = 'Amount on request · Guest Relations';
@@ -222,12 +222,13 @@
     },
 
     /* WHO MAY SELECT A RESERVED ROOM (Owner, 14 Sep 2026). A room marked
-     * "Reserved for bride & groom" belongs to the couple's own party — the
-     * invitation the encrypted bundle marks `hosts: true` (explicit, never
+     * "Reserved for bride & groom" belongs to the hosts themselves — the
+     * guests the encrypted bundle marks `hosts: true` (explicit, never
      * inferred from a name) — and to nobody else; a room reserved for family
-     * is out of reach of everyone on the website. The label always stays. */
+     * is out of reach of everyone on the website. The label always stays.
+     * The server engine applies the same rule to every place it holds. */
     hosts: function () {
-      try { var a = JSON.parse(localStorage.getItem('siyl.auth') || 'null'); return !!(a && a.hosts === true && Array.isArray(a.guests) && a.guests.length); } catch (e) { return false; }
+      try { var a = JSON.parse(localStorage.getItem('siyl.auth') || 'null'); return !!(a && a.hosts === true && a.guestId && a.bearer); } catch (e) { return false; }
     },
     reservedFor: function (room) {
       if (!room || !room.reserved) return null;

@@ -10,12 +10,12 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 .bb{position:absolute;top:1px;right:0;min-width:14px;height:14px;padding:0 3px;background:#313131;color:#F3EEE7;font-size:8.5px;line-height:1;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;display:none;align-items:center;justify-content:center;box-shadow:0 0 0 2px #F3EEE7;border-radius:1px}
 </style>
 <link rel="stylesheet" href="assets/aman.css"><link rel="stylesheet" href="assets/prep.css"></head><body>
-<header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="your-journey.html" aria-label="Your Journey"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
+<header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="cart.html" aria-label="Your Journey"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main class="prep-page" id="wedding">
 <div class="prep-head">
   <p class="t-l1">Sunday, 28 February 2027 · Vientiane</p>
   <h1 class="t-d1">The Wedding</h1>
-  <p class="t-b1 measure">One day, four parts, all hosted by <span class="nb">Haruthai &amp; Suthep</span>. Each named guest answers each part for themselves, so every table, every car and every morning is prepared for the people who are actually there.</p>
+  <p class="t-b1 measure">One day, four moments. The temple in the morning. Coffee &amp; Cake on the return. The vows at the green door. Dinner poolside. Coffee &amp; Cake, the Vow Ceremony and the Wedding Dinner are hosted by <span class="nb">Haruthai &amp; Suthep</span>; Tak Bat remains a personal offering at the temple. Every answer here is yours alone.</p>
 </div>
 <div id="page"></div>
 <div id="foot"></div>
@@ -27,6 +27,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/pricing.js"></script>
 <script src="assets/guest.js"></script>
 <script src="assets/temple.js"></script>
+<script src="assets/rooms.js"></script>
 <script src="assets/journey.js"></script>
 <script src="assets/confirm.js"></script>
 <script src="assets/seatlabels.js"></script>
@@ -52,135 +53,119 @@ var DRESS={temple:'Lao Traditional Dress',coffee:'Black Tie',vows:'Black Tie',di
 
 var TAKBAT='<p class="t-l1">Part of the Temple Ceremony</p>'+
  '<h2 class="t-h1" style="margin-top:8px">Morning Alms-Giving · Tak Bat</h2>'+
- '<p class="t-b1 measure" style="margin-top:12px">Guests attending the Temple Ceremony are invited to take part in the traditional morning alms-giving, Tak Bat. This is the moment in which food is respectfully offered to Buddhist monks — one of the oldest ways a day begins in Laos.</p>'+
- '<p class="t-b1 measure" style="margin-top:12px">It is part of the Temple Ceremony, and it is <b>self-pay</b>: the small offering of food is arranged and paid for by each guest on the morning itself. No amount is set on this website, and it is not the Sangkhathan.</p>';
+ '<p class="t-b1 measure" style="margin-top:12px">Guests attending the Temple Ceremony are welcome to take part in Tak Bat, the traditional offering of food to Buddhist monks — one of the oldest ways a day begins in Laos.</p>'+
+ '<p class="t-b1 measure" style="margin-top:12px">The offering is personal and arranged individually on the morning. Guest Relations will guide you; no fixed amount is set, and it is not the Sangkhathan.</p>';
 var SANG='<p class="t-l1">Optional · within the Temple Ceremony</p>'+
  '<h2 class="t-h1" style="margin-top:8px">Sangkhathan · a personal offering</h2>'+
  '<p class="t-b1 measure" style="margin-top:12px">A Sangkhathan is a personal offering of useful everyday items for the monastic community, prepared in your name and presented by you.</p>'+
- '<p class="t-b1 measure" style="margin-top:12px">It is <b>not</b> the alms-giving. Tak Bat is the food offered during the ceremony, arranged and paid for by each guest themselves (self-pay); the Sangkhathan is separate, optional, and nobody needs one in order to attend. It is prepared for couples, as one decision for both: the USD 15 per person prepares your own offering — it is not an entrance, not a temple fee and not a wedding extra.</p>';
+ '<p class="t-b1 measure" style="margin-top:12px">It is <b>not</b> the alms-giving. Tak Bat is the food offered during the ceremony, arranged by each guest on the morning; the Sangkhathan is separate, optional, and nobody needs one in order to attend. USD 15 prepares your own offering — it is your choice alone, never an entrance and never a wedding extra.</p>';
 
-/* YOUR SEATS — the route to both chairs, per named guest (Owner, 13 Sep 2026).
- * The ledger is the truth: a held chair is shown with its place and a way to
- * change it; an open one gets one clear action. The hosts' party has its
- * ceremony place at the front centre and books only the dinner. */
+/* YOUR SEATS — the route to both chairs (Owner, 13/14 Sep 2026). The ledger
+ * is the truth: a held chair is shown with its place and a way to change it;
+ * an open one gets one clear action. The hosts have their ceremony place at
+ * the front centre and book only the dinner. */
 function seatsSection(p,me){
   var S=window.SIYL_SEATS,L=window.SIYL_SEATLABELS,open=!!(S&&S.ready()&&S.open()),frozen=!!(S&&S.frozen()),PASS=window.SIYL_SEATPASS;
   var lab=function(sid){return L&&L.label(sid)||''};
-  var h='<section class="prep-sec" id="seats-route"><p class="t-l1">Your seats · '+(open?(frozen?'seating is closed':'seating is open'):'not open yet')+'</p><h2 class="t-h2">Where each of you will sit</h2>'+
-    '<p class="t-b1 measure">'+(open?'A chair for the ceremony and a place at the dinner table, chosen by each named guest on the plan, confirmed in one step, and changeable while seating stays open. A confirmed seat comes with a seat confirmation to download.':'Your ceremony seat and your dinner seat will be chosen here once seating opens. Guest Relations will let you know.')+'</p>';
-  p.guests.forEach(function(g){
-    var id=g.guestId,name=esc(G.nameOf(id)),mine=id===me.guestId,to='wedding-preparation.html?for='+encodeURIComponent(id)+'#seats',role=g.hostRole==='BRIDE'?'Bride':g.hostRole==='GROOM'?'Groom':'Bride &amp; Groom';
-    var cs=S&&S.ready()?S.seatOf('ceremony',id):null,ds=S&&S.ready()?S.seatOf('dinner',id):null,both=!!(ds&&(cs||p.hosts));
-    h+='<div class="p-card" style="margin-top:var(--s4)" data-seat-guest="'+esc(id)+'"><p class="t-l1'+(mine?' on':'')+'">'+name+(mine?' · you':'')+'</p>';
-    [['ceremony','Ceremony seat','Wat Ong Teu · 28 February'],['dinner','Dinner seat','Souphattra Heritage · poolside · 19:30']].forEach(function(e){
-      var ev=e[0],sid=ev==='ceremony'?cs:ds;
-      if(ev==='ceremony'&&p.hosts){
-        h+='<div class="p-kv"><div><p class="t-b1"><b>'+e[1]+'</b></p><p class="t-b2">'+e[2]+' · '+role+' · front centre</p>'+
-           (PASS?'<p class="p-more"><button type="button" class="p-link mute" data-seat-pass="ceremony" data-seat-pass-for="'+esc(id)+'" aria-label="Download seat confirmation · Temple Ceremony · '+name+'">Download seat confirmation</button></p>':'')+'</div><p class="t-l1 on">Front centre</p></div>';return}
-      /* the action sits under its own line; the right-hand slot carries only the state — the seat by its label, never the ledger id */
-      h+='<div class="p-kv"><div><p class="t-b1"><b>'+e[1]+'</b></p><p class="t-b2">'+e[2]+(sid?'<br>'+esc(S.describe(sid))+' · confirmed':'')+'</p>'+
-         (sid?'<p class="p-more"><a class="p-link" href="'+to+'" data-seat-cta="'+ev+'" data-state="booked">'+(frozen?'View seat':'Change seat')+'</a>'+(PASS?' <button type="button" class="p-link mute" style="margin-left:var(--s4)" data-seat-pass="'+ev+'" data-seat-pass-for="'+esc(id)+'" aria-label="Download seat confirmation · '+(ev==='ceremony'?'Temple Ceremony':'Wedding Dinner')+' · '+name+'">Download seat confirmation</button>':'')+'</p>'
-             :(open&&!frozen?'<p class="p-more"><a class="p-link" href="'+to+'" data-seat-cta="'+ev+'" data-state="open">Choose your '+ev+' seat</a></p>':''))+'</div>'+
-         '<p class="t-l1'+(sid?' on':(open&&!frozen?' open':''))+'" data-seat-state="'+(sid?'booked':'open')+'">'+(sid?'Seat '+esc(lab(sid)):(open&&!frozen?'Not selected':'Not open yet'))+'</p></div>'});
-    if(both&&PASS)h+='<div class="p-actions" style="margin-top:var(--s3)"><button type="button" class="p-link" data-seat-pass="all" data-seat-pass-for="'+esc(id)+'" aria-label="Download your wedding seats · both events · '+name+'">Download your wedding seats</button></div>';
-    h+='</div>'});
+  var id=me.guestId,name=esc(G.nameOf(id)),to='wedding-preparation.html#seats',role=me.hostRole==='BRIDE'?'Bride':me.hostRole==='GROOM'?'Groom':'Bride &amp; Groom';
+  var cs=S&&S.ready()?S.seatOf('ceremony',id):null,ds=S&&S.ready()?S.seatOf('dinner',id):null,both=!!(ds&&(cs||p.hosts));
+  var h='<section class="prep-sec" id="seats-route"><p class="t-l1">Your seats · '+(open?(frozen?'seating is closed':'seating is open'):'not open yet')+'</p><h2 class="t-h2">Where you will sit</h2>'+
+    '<p class="t-b1 measure">'+(open?'A chair for the ceremony and a place at the dinner table, chosen by you on the plan — with the first names of the guests already seated, so you can find the people you know.':'Your ceremony seat and your dinner seat will be chosen here once seating opens. Guest Relations will let you know.')+'</p>';
+  h+='<div class="p-card" style="margin-top:var(--s4)" data-seat-guest="'+esc(id)+'"><p class="t-l1 on">'+name+'</p>';
+  [['ceremony','Ceremony seat','Wat Ong Teu · 28 February'],['dinner','Dinner seat','Souphattra Heritage · poolside · 19:30']].forEach(function(e){
+    var ev=e[0],sid=ev==='ceremony'?cs:ds,attends=ev==='ceremony'?T.attendingOf(id):T.joining(id,'dinner');
+    if(ev==='ceremony'&&p.hosts){
+      h+='<div class="p-kv"><div><p class="t-b1"><b>'+e[1]+'</b></p><p class="t-b2">'+e[2]+' · '+role+' · front centre</p></div><p class="t-l1 on">Front centre</p></div>';return}
+    if(!attends){h+='<div class="p-kv"><div><p class="t-b1"><b>'+e[1]+'</b></p><p class="t-b2">'+e[2]+'</p></div><p class="t-l1">'+(T.eventOf(id,ev==='ceremony'?'temple':'dinner')==='no'?'Not attending':'Answer above first')+'</p></div>';return}
+    h+='<div class="p-kv"><div><p class="t-b1"><b>'+e[1]+'</b></p><p class="t-b2">'+e[2]+(sid?'<br>'+esc(S.describe(sid))+' · confirmed':'')+'</p>'+
+       (sid?'<p class="p-more"><a class="p-link" href="'+to+'" data-seat-cta="'+ev+'" data-state="booked">'+(frozen?'View seat':'Change seat')+'</a></p>'
+           :(open&&!frozen?'<p class="p-more"><a class="p-link" href="'+to+'" data-seat-cta="'+ev+'" data-state="open">Choose your '+ev+' seat</a></p>':''))+'</div>'+
+       '<p class="t-l1'+(sid?' on':(open&&!frozen?' open':''))+'" data-seat-state="'+(sid?'booked':'open')+'">'+(sid?'Seat '+esc(lab(sid)):(open&&!frozen?'Required':'Not open yet'))+'</p></div>'});
+  if(both&&PASS)h+='<div class="p-actions" style="margin-top:var(--s3)"><button type="button" class="p-link" data-seat-pass="all" data-seat-pass-for="'+esc(id)+'" aria-label="Download seat confirmation · '+name+'">Download seat confirmation</button></div>';
+  h+='</div>';
   return h+'</section>'}
 /* the download: the ledger read fresh, then the file */
 function wirePasses(root){
   root.querySelectorAll('[data-seat-pass]').forEach(function(b){b.addEventListener('click',function(){
-    var PASS=window.SIYL_SEATPASS;if(!PASS||b.getAttribute('aria-disabled')==='true')return;var ev=b.getAttribute('data-seat-pass'),was=b.textContent;b.setAttribute('aria-disabled','true');b.textContent='Preparing…';
+    var PASS=window.SIYL_SEATPASS;if(!PASS||b.getAttribute('aria-disabled')==='true')return;var ev=b.getAttribute('data-seat-pass');b.setAttribute('aria-disabled','true');b.textContent='Preparing…';
     PASS.deliver(ev==='all'?['ceremony','dinner']:[ev],b.getAttribute('data-seat-pass-for')).then(function(r){b.removeAttribute('aria-disabled');b.textContent=r&&r.ok?'Downloaded · again?':(r&&r.error==='no seat'?'No seat to confirm yet':'Could not prepare — try again')})})})}
-/* one answer row per named guest, under each part of the day */
-function personRow(g,e,me){
-  var id=g.guestId,mine=me.guestId===id,name=esc(G.nameOf(id)),v=T.eventOf(id,e.key);
+/* one answer row — the guest's own — under each part of the day */
+function personRow(me,e){
+  var id=me.guestId,v=T.eventOf(id,e.key);
   return '<div class="p-card flat" data-g="'+esc(id)+'" data-e="'+e.key+'">'+
-    '<p class="t-l1'+(mine?' on':'')+'">'+esc(G.labelFor(id))+(mine?' · you':' · answering for '+name)+'</p>'+
+    '<p class="t-l1 on">'+esc(G.nameOf(id))+' · you</p>'+
     '<div class="p-selrow">'+
       '<button type="button" class="p-sel" aria-pressed="'+(v==='yes')+'" data-ev="yes">Attending</button>'+
       '<button type="button" class="p-sel" aria-pressed="'+(v==='no')+'" data-ev="no">Not attending</button>'+
     '</div>'+
-    (v===null?'<p class="t-l1 open">Not decided</p>':'')+
+    (v===null?'<p class="t-l1 open">Required · not decided</p>':'')+
     '</div>'}
-/* E · SANGKHATHAN — one couple decision, explicit eligibility, no guessing.
- * PAIR: both named guests take part, or neither; available only while every
- * named guest is attending the Temple Ceremony. NONE: nothing to arrange.
- * Unresolved: a restrained line, no price, no action, no technical wording. */
+/* SANGKHATHAN — the guest's own YES / NO, USD 15 for this guest only (Owner,
+ * 14 Sep 2026). Explicit eligibility; available while attending the temple. */
 function sangSection(p,me){
-  var elig=T.eligibility(),names=p.guests.map(function(g){return esc(G.nameOf(g.guestId))});
-  var h='<div class="p-card" id="sangkhathan" style="margin-top:var(--s5)"><p class="t-l1">Sangkhathan · personal giving</p>'+
-    '<h3 class="t-h1">This part of the Temple Ceremony is prepared for couples.</h3>';
+  var elig=T.eligibility(),id=me.guestId;
+  var h='<div class="p-card" id="sangkhathan" style="margin-top:var(--s5)"><p class="t-l1">Sangkhathan · a personal offering</p>'+
+    '<h3 class="t-h1">Would you like a Sangkhathan prepared in your name?</h3>';
   if(elig==='NONE'){
     return h+'<p class="t-b1 measure">There is nothing you need to arrange for your invitation.</p>'+
       '<p class="p-more"><button type="button" class="p-link mute" data-more="sang">More about Sangkhathan</button></p></div>'}
-  if(elig!=='PAIR'){
+  if(elig!=='ELIGIBLE'){
     return h+'<p class="t-b1 measure">Guest Relations will let you know if there is anything to arrange for your invitation.</p>'+
       '<p class="p-more"><button type="button" class="p-link mute" data-more="sang">More about Sangkhathan</button></p></div>'}
-  var can=T.pairCan(),off=T.pairDecision(),missing=p.guests.filter(function(g){return !T.attendingOf(g.guestId)});
-  h+='<p class="t-b1 measure">If you choose to take part, a personal Sangkhathan offering will be prepared for each of you to present yourselves.</p>';
-  h+='<div class="p-group">'+p.guests.map(function(g){return '<div class="p-kv"><div><p class="t-b1"><b>'+esc(G.nameOf(g.guestId))+'</b></p></div><p class="t-l1 on">'+PR.money(15)+'</p></div>'}).join('')+
-     '<div class="p-kv"><div><p class="t-l1">Total for your party</p></div><p class="t-l1 on">'+PR.money(15*p.guests.length)+'</p></div></div>';
+  var can=T.canOffer(id),off=T.offeringOf_(id);
+  h+='<p class="t-b1 measure">A personal offering, prepared for you and presented by you at the Temple Ceremony. '+PR.money(15)+' · your cost, your choice alone.</p>';
   h+='<p class="p-more"><button type="button" class="p-link" data-more="sang">More about Sangkhathan</button></p>';
   if(can){
     h+='<div class="p-selrow" style="margin-top:16px">'+
-      '<button type="button" class="p-sel" aria-pressed="'+(off==='yes')+'" data-off="yes">We would like to take part</button>'+
-      '<button type="button" class="p-sel" aria-pressed="'+(off==='no')+'" data-off="no">Continue without Sangkhathan</button>'+
+      '<button type="button" class="p-sel" aria-pressed="'+(off==='yes')+'" data-off="yes">Yes, I would like to take part<span class="p-sel-r">'+PR.money(15)+'</span></button>'+
+      '<button type="button" class="p-sel" aria-pressed="'+(off==='no')+'" data-off="no">No, thank you</button>'+
       '</div>'+
-      (off===null?'<p class="t-l1 open">Not decided · one decision for <span class="nb">'+names.join(' &amp; ')+'</span></p>'
-        :off==='yes'?'<p class="t-l1 on">Selected · '+PR.money(15*p.guests.length)+' for your party · <span class="nb">'+names.join(' &amp; ')+'</span></p>'
+      (off===null?'<p class="t-l1 open">Required · not decided</p>'
+        :off==='yes'?'<p class="t-l1 on">Selected · '+PR.money(15)+' · in your journey</p>'
         :'<p class="t-l1 on">Continuing without Sangkhathan</p>')}
   else{
-    h+='<p class="t-b2 measure" style="margin-top:12px">The offering is prepared for '+names.join(' and ')+' together. It becomes available once '+(missing.length===1?esc(G.nameOf(missing[0].guestId))+' has':'both of you have')+' chosen to attend the Temple Ceremony.</p>'}
+    h+='<p class="t-b2 measure" style="margin-top:12px">Available once you have chosen to attend the Temple Ceremony.</p>'}
   return h+'</div>'}
 
 function render(){
   if(!P.ready()){
     page.innerHTML='<div class="p-card"><p class="t-l1">Your invitation</p>'+
       '<h2 class="t-h1">Open your invitation to answer</h2>'+
-      '<p class="t-b1 measure">Each guest on your invitation answers the wedding day for themselves, by name — so we open your invitation first.</p>'+
+      '<p class="t-b1 measure">The wedding day is answered in your own name, so we open your invitation first.</p>'+
       '<p style="margin-top:16px"><button type="button" class="p-act" id="open">Open my invitation</button></p></div>';
     var b=document.getElementById('open'); if(b)b.addEventListener('click',function(){gated(render)});
     return;
   }
-  var p=P.party(),me=P.active(),others=p.guests.filter(function(g){return g.guestId!==me.guestId});
+  var p=P.party(),me=P.me();
   var h='';
-  /* the interaction boundary: whose answers these are */
-  if(others.length){
-    h+='<div class="p-for"><span class="t-l1">Answering for</span><b>'+esc(others.map(function(g){return G.nameOf(g.guestId)}).join(' & '))+'</b>'+
-       '<span class="t-b2">You are continuing as '+esc(G.nameOf(me.guestId))+'. Answers you give for '+esc(others.map(function(g){return G.nameOf(g.guestId)}).join(' and '))+' are kept in '+(others.length===1?esc(G.nameOf(others[0].guestId))+'&rsquo;s name':'their own names')+' and say that you gave them.</span>'+
-       others.map(function(g){return '<button type="button" class="p-link mute" data-switch="'+esc(g.guestId)+'">Switch to '+esc(G.nameOf(g.guestId))+'</button>'}).join('')+'</div>'}
-  /* the day, in its order */
   T.EVENTS.forEach(function(e,i){
     h+='<section class="prep-sec" id="ev-'+e.key+'">'+
        '<p class="t-l1">0'+(i+1)+' · '+e.when+' · '+esc(e.place)+'</p>'+
        '<h2 class="t-h2">'+e.label+'</h2>'+
-       '<p class="t-b2">'+(e.key==='temple'?'Optional participation · ':'Hosted · ')+'Dress · '+DRESS[e.key]+'</p>'+
+       '<p class="t-b2">'+(e.key==='temple'?'Optional participation · ':'Hosted by Haruthai &amp; Suthep · ')+'Dress · '+DRESS[e.key]+'</p>'+
        (e.key==='temple'
-         ?'<p class="t-b1 measure">The Buddhist morning at Wat Ong Teu. Guests attending are invited to take part in the traditional morning alms-giving, Tak Bat — food respectfully offered to the monks; self-pay, arranged by each guest on the morning.</p>'+
+         ?'<p class="t-b1 measure">The Buddhist morning at Wat Ong Teu. Guests attending are welcome to take part in Tak Bat, the traditional offering of food to Buddhist monks — a personal offering, arranged individually on the morning.</p>'+
           '<p class="p-more"><button type="button" class="p-link" data-more="takbat">More about Tak Bat</button></p>'
          :'')+
-       p.guests.map(function(g){return personRow(g,e,me)}).join('')+
+       personRow(me,e)+
        (e.key==='temple'?sangSection(p,me):'')+
        '</section>'});
   h+=seatsSection(p,me);
   page.innerHTML=h;
 
-  page.querySelectorAll('[data-switch]').forEach(function(b){
-    b.addEventListener('click',function(){P.setActive(b.getAttribute('data-switch'))})});
   page.querySelectorAll('[data-g]').forEach(function(card){
     var id=card.getAttribute('data-g'),key=card.getAttribute('data-e');
     card.querySelectorAll('[data-ev]').forEach(function(b){
-      b.addEventListener('click',function(){T.setEvent(id,key,b.getAttribute('data-ev'));render()})});
+      b.addEventListener('click',function(){T.setEvent(id,key,b.getAttribute('data-ev'));render();var again=page.querySelector('[data-g="'+id+'"][data-e="'+key+'"] [data-ev="'+b.getAttribute('data-ev')+'"]');if(again)try{again.focus({preventScroll:true})}catch(x){}})});
   });
-  /* the couple decision is asked once, by the person continuing */
   page.querySelectorAll('#sangkhathan [data-off]').forEach(function(b){
-    b.addEventListener('click',function(){var id=me.guestId;T.setOffering(id,b.getAttribute('data-off'));render()})});
+    b.addEventListener('click',function(){T.setOffering(me.guestId,b.getAttribute('data-off'));render();var again=page.querySelector('#sangkhathan [data-off="'+b.getAttribute('data-off')+'"]');if(again)try{again.focus({preventScroll:true})}catch(x){}})});
   page.querySelectorAll('[data-more]').forEach(function(b){
     b.addEventListener('click',function(){P.drawer(b.getAttribute('data-more')==='takbat'?TAKBAT:SANG)})});
   wirePasses(page);
   P.foot(document.getElementById('foot'));
   if(window.SIYL_SEATS&&!SIYL_SEATS.ready())SIYL_SEATS.load();
 }
-document.addEventListener('siyl:who',render);
 document.addEventListener('siyl:seats',render);
 document.addEventListener('siyl:guest',render);
 document.addEventListener('siyl:auth',render);

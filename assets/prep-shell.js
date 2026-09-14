@@ -7,15 +7,20 @@
 
        YOUR PRIVATE JOURNEY
        02 / 06 · Your Journey
-       Peggy & Steffie · Continuing as Peggy · SWITCH      VIEW ALL STEPS
+       Peggy · Your party · Peggy & Steffie          VIEW ALL STEPS
 
    THE BOUNDARY IS HARD. Before an invitation is open there is no 01–06 and no
    Preparation navigation at all — there is the editorial website and a way in.
-   The code opens the INVITATION; the person then says who they are. Those are
-   two different things and the shell keeps them apart:
+   ONE CODE = ONE GUEST (Owner, 14 Sep 2026): the code opens the guest's own
+   invitation, and the guest IS the session. There is no switch, nobody to
+   answer for. OPEN ANOTHER INVITATION and SIGN OUT are always in reach.
 
-       SWITCH IDENTITY   I continue as another member of this invitation
-       ANSWERING FOR     I stay myself and deliberately complete for another
+   THE FLOW IS SEQUENTIAL. The six steps are read from ONE readiness engine
+   (assets/guest.js): ✓ COMPLETE · CURRENT · NEEDS ATTENTION · LOCKED. A step
+   that needs attention says exactly what is missing, with a link to the very
+   control; a locked step cannot be entered until the earlier ones are done;
+   a deep link into a locked step lands on the first missing item instead.
+   Every CONTINUE checks the engine before it moves.
 
    The shell also owns the one disclosure contract: a detail layer opens INSIDE
    the private journey and closing it returns the guest exactly where they were.
@@ -26,58 +31,40 @@
 
   /* The six steps. There is no seventh. */
   var STEPS = [
-    { n: '01', key: 'invitation', label: 'Your Invitation',       file: 'invitation.html' },
+    { n: '01', key: 'you',        label: 'Your Invitation',       file: 'invitation.html' },
     { n: '02', key: 'journey',    label: 'Your Journey',          file: 'your-journey.html' },
     { n: '03', key: 'wedding',    label: 'The Wedding',           file: 'wedding.html' },
     { n: '04', key: 'preparation',label: 'Wedding Preparation',   file: 'wedding-preparation.html' },
     { n: '05', key: 'about',      label: 'About You',             file: 'about-you.html' },
     { n: '06', key: 'review',     label: 'Review & Send',         file: 'review.html' }
   ];
-  var WHO = 'siyl.who';
 
   /* Cloudflare serves /review, the mirror serves /review.html — same page. */
   var here = (location.pathname.split('/').pop() || 'index.html').toLowerCase().replace(/\.html$/, '');
   /* a page inside a step (you.html belongs to 01) says so on its <main data-step> */
   var sub = document.querySelector('main[data-step]');
-  if (sub && sub.getAttribute('data-step')) here = STEPS.filter(function (s) { return s.key === sub.getAttribute('data-step'); }).map(function (s) { return s.file.replace(/\.html$/, ''); })[0] || here;
+  var subKey = sub && sub.getAttribute('data-step');
+  if (subKey === 'invitation') subKey = 'you';
+  if (subKey) here = STEPS.filter(function (s) { return s.key === subKey; }).map(function (s) { return s.file.replace(/\.html$/, ''); })[0] || here;
   var idx = STEPS.map(function (s) { return s.file.replace(/\.html$/, ''); }).indexOf(here);
   if (idx < 0) return;
   var STEP = STEPS[idx];
 
   /* ------------------------------------------------------------- identity
-   * C · the model lives in the guest record (assets/guest.js). The shell only
-   * asks it: who is the party, who is continuing, who is being answered for. */
+   * The model lives in the guest record (assets/guest.js). The shell only
+   * asks it: who is the guest, who belongs to their party. */
   function G() { return window.SIYL_GUEST || null; }
   function party() { var g = G(); return g ? g.party() : null; }
-  function active() { var g = G(); return g ? g.active() : null; }
-  function subject() { var g = G(); return g ? g.subject() : null; }
-  function answeringFor() { var g = G(); return !!(g && g.answeringFor()); }
-  function setActive(guestId) {
-    var g = G(); if (!g) return;
-    if (g.setActive(guestId)) paint();
-  }
+  function me() { var g = G(); return g ? g.me() : null; }
   function nameOf(g) { var m = G(); return (g && m) ? m.nameOf(g.guestId) : ''; }
   function partyNames() { var g = G(); return g ? g.partyNames() : ''; }
+  function steps() { var g = G(); return g && party() ? g.steps(STEP.key) : []; }
 
-  /* --------------------------------------------------------------- status
-   * Semantic only — Complete · Current · Open · Optional · Not open yet.
-   * No percentage, no score, no progress bar. */
+  /* the retired vocabulary, for any reader that still asks */
   function status(key) {
-    var G = window.SIYL_GUEST, T = window.SIYL_TEMPLE, B = window.SIYL_BAG, D = window.SIYL_DOCS;
-    var p = party();
-    if (key === STEP.key) return 'Current';
-    switch (key) {
-      case 'invitation':  return (G && G.identityReviewed()) ? 'Complete' : 'Open';
-      case 'journey':     return (B && B.get().length && window.SIYL_JOURNEY && !SIYL_JOURNEY.open().length) ? 'Complete' : 'Open';
-      case 'wedding':     return (T && T.decidedAll()) ? 'Complete' : 'Open';
-      case 'preparation': return (G && G.dressAckAll()) ? 'Complete' : 'Open';
-      case 'about':     return (G && G.accessAll && G.accessAll()) ? 'Complete' : 'Open';
-      case 'review': {
-        var C = window.SIYL_CONFIRM;
-        return C && C.state() === 'confirmed' ? 'Confirmed' : C && C.state() === 'received' ? 'Received' : 'Open';
-      }
-    }
-    return '';
+    var s = steps().filter(function (x) { return x.key === key; })[0];
+    if (!s) return '';
+    return s.state === 'complete' ? 'Complete' : s.state === 'current' ? 'Current' : s.state === 'locked' ? 'Locked' : 'Needs attention';
   }
 
   /* ----------------------------------------------------------------- shell */
@@ -89,7 +76,7 @@
    * links the way this origin already addresses the page, so a tap is one
    * navigation and never a redirect first */
   var cleanUrls = !/\.html$/i.test(location.pathname) && location.pathname.split('/').pop() !== '';
-  function hrefOf(file) { return cleanUrls ? file.replace(/\.html$/, '') : file; }
+  function hrefOf(file) { return cleanUrls ? file.replace(/\.html(?=[?#]|$)/, '') : file; }
 
   function build() {
     bar = document.createElement('div');
@@ -144,8 +131,8 @@
     t.scrollIntoView({ block: 'start' });
   }
 
-  /* ------------------------------------------------------ leaving a party */
-  function leaveParty(how) {
+  /* ------------------------------------------------------ leaving a guest */
+  function leave(how) {
     if (!window.SIYL_INVITE || !SIYL_INVITE.leave) return;
     layer.classList.remove('on'); document.body.classList.remove('prep-steps-open');
     document.body.classList.add('p-leave');
@@ -156,7 +143,7 @@
     if (calm) go(); else setTimeout(go, 200);
   }
   window.addEventListener('pageshow', function (e) {
-    /* a page restored from the cache after the party left it is not shown again */
+    /* a page restored from the cache after the guest left it is not shown again */
     if (e.persisted && window.SIYL_AUTH && !SIYL_AUTH.get()) location.reload();
   });
 
@@ -167,8 +154,6 @@
     layer.classList.add('on');
     document.body.classList.add('prep-steps-open');
     var all = bar.querySelector('.prep-all'); if (all) all.setAttribute('aria-expanded', 'true');
-    /* focus stays on the button (aria-expanded says what happened); the rows
-     * are next in the tab order, and a finger never sees a keyboard ring */
   }
   function closeIndex(restoreFocus) {
     if (!indexOpen) return;
@@ -179,26 +164,42 @@
     if (restoreFocus && indexFocus && indexFocus.focus) indexFocus.focus({ preventScroll: true });
     indexFocus = null;
   }
-  /* one tap, one destination: the chosen step, from its top. The index and
-   * the page take their leave first; with reduced motion the page simply
-   * changes. */
+  /* one tap, one destination. The index and the page take their leave first;
+   * with reduced motion the page simply changes. */
   var leaving = false;
-  function goTo(file) {
+  function goTo(url) {
     if (leaving) return; leaving = true;
-    var url = hrefOf(file);
     layer.classList.remove('on');
     document.body.classList.remove('prep-steps-open');
     document.body.classList.add('p-leave');
     var go = function () { location.href = url; };
     if (calm) go(); else setTimeout(go, 200);
   }
+  /* a link to a control on this very page: close the index and go there */
+  function samePage(href) {
+    var file = href.split('#')[0].split('?')[0];
+    return file === '' || file.replace(/\.html$/, '') === STEP.file.replace(/\.html$/, '') || file.replace(/\.html$/, '') === here;
+  }
+  function focusControl(hash) {
+    var id = (hash || '').replace(/^#/, ''); if (!id) return;
+    var t = document.getElementById(id); if (!t) return;
+    measureBar();
+    t.scrollIntoView({ behavior: calm ? 'auto' : 'smooth', block: 'center' });
+    var f = t.matches('input, textarea, select, button, a[href]') ? t : t.querySelector('input:not([type=hidden]), textarea, select, button, a[href]');
+    if (f) setTimeout(function () { try { f.focus({ preventScroll: true }); } catch (e) {} }, calm ? 0 : 320);
+    t.classList.remove('p-attend'); void t.offsetWidth; t.classList.add('p-attend');
+  }
+
+  function esc(t) {
+    return String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
 
   function paint() {
     if (!bar) return;
-    var p = party(), me = active();
+    var p = party(), m = me();
 
     /* Before the invitation is open there is no Preparation navigation. */
-    if (!p) {
+    if (!p || !m) {
       bar.innerHTML = '<div class="prep-bar-in"><div class="prep-bar-l">' +
         '<p class="prep-eyebrow">Your private journey</p>' +
         '<p class="prep-step">Open your invitation to begin</p>' +
@@ -207,20 +208,14 @@
       return;
     }
 
-    var sub = subject(), forOther = answeringFor();
+    var list = steps(), cur = list.filter(function (s) { return s.key === STEP.key; })[0];
+    var others = G().others ? G().others() : [];
     bar.innerHTML = '<div class="prep-bar-in">' +
       '<div class="prep-bar-l">' +
         '<p class="prep-eyebrow">Your private journey</p>' +
         '<p class="prep-step"><b>' + STEP.n + ' / 06</b>' + STEP.label + '</p>' +
-        '<p class="prep-who">' + esc(partyNames()) +
-          (me ? ' · Continuing as <b>' + esc(nameOf(me)) + '</b><button type="button" data-switch>Switch</button>' : '') +
-        '</p>' +
-        /* C · when the subject is not the active person the shell says so, in
-         * words, on every repaint — a tab never silently changes the owner */
-        (forOther ? '<p class="prep-for" role="status"><span class="prep-for-l">Answering for</span>' +
-          '<b>' + esc(nameOf(sub)) + '</b>' +
-          '<button type="button" data-self>Back to yourself</button></p>' : '') +
-        /* F · once Guest Relations has confirmed, a change made here is not a
+        '<p class="prep-who"><b>' + esc(nameOf(m)) + '</b>' + (others.length ? ' · Your party · ' + esc(partyNames()) : '') + '</p>' +
+        /* once Guest Relations has confirmed, a change made here is not a
          * change of the confirmed journey — said on every step, in words */
         ((window.SIYL_CONFIRM && SIYL_CONFIRM.state() === 'confirmed' && STEP.key !== 'review')
           ? '<p class="prep-for" role="status"><span class="prep-for-l">Journey confirmed</span>' +
@@ -231,61 +226,47 @@
       '</div>';
     bar.appendChild(layer);
 
-    layer.innerHTML = '<div class="prep-steps-in">' + STEPS.map(function (s) {
-      var st = status(s.key), cur = s.key === STEP.key;
-      return '<a class="prep-srow"' + (cur ? ' aria-current="step"' : '') + ' href="' + hrefOf(s.file) + '" data-step="' + s.key + '">' +
-        '<span class="n">' + s.n + '</span><span class="l">' + s.label + '</span>' +
-        '<span class="s' + (st === 'Open' ? ' open' : '') + '">' + (cur ? 'Current' : st) + '</span></a>';
+    layer.innerHTML = '<div class="prep-steps-in">' + list.map(function (s) {
+      var curRow = s.key === STEP.key, locked = s.state === 'locked';
+      var tag = locked ? 'div' : 'a';
+      var h = '<' + tag + ' class="prep-srow is-' + s.state + '"' + (curRow ? ' aria-current="step"' : '') + (locked ? ' aria-disabled="true"' : ' href="' + hrefOf(s.href) + '"') + ' data-step="' + s.key + '" data-state="' + s.state + '">' +
+        '<span class="n">' + s.n + '</span><span class="l">' + s.label + (s.note ? '<span class="prep-note">' + esc(s.note) + '</span>' : '') + '</span>' +
+        '<span class="s" data-state-label>' + (s.state === 'complete' ? '<i class="prep-tick" aria-hidden="true"></i>' : '') + esc(s.stateLabel.replace(/^✓\s*/, '')) + '</span></' + tag + '>';
+      /* what is missing, each item a way to the exact control */
+      if (s.state === 'attention' || (curRow && s.missing.length)) {
+        h += '<ul class="prep-missing" aria-label="' + esc(s.label) + ' — still needed">' + s.missing.map(function (x) {
+          return '<li><a href="' + hrefOf(x.href) + '" data-missing="' + esc(x.key) + '"><span class="prep-dot" aria-hidden="true"></span>' + esc(x.label) + '</a></li>';
+        }).join('') + '</ul>';
+      }
+      return h;
     }).join('') +
-      /* leaving this party: two plain actions, on every step — SWITCH stays
-       * what it is, a change of person inside the same invitation */
-      '<div class="prep-leave"><span class="t-l1">' + esc(p.invitationId) + ' · ' + esc(partyNames()) + '</span>' +
-      '<button type="button" class="p-link mute" data-leave="another">Open another invitation</button>' +
+      /* leaving: two plain actions, on every step — the only way to another invitation */
+      '<div class="prep-leave"><span class="t-l1">' + esc(nameOf(m)) + (others.length ? ' · ' + esc(partyNames()) : '') + '</span>' +
+      '<button type="button" class="p-link" data-leave="another">Open another invitation</button>' +
       '<button type="button" class="p-link mute" data-leave="out">Sign out</button></div></div>';
-    layer.querySelectorAll('[data-leave]').forEach(function (b) { b.addEventListener('click', function () { leaveParty(b.getAttribute('data-leave')); }); });
+    layer.querySelectorAll('[data-leave]').forEach(function (b) { b.addEventListener('click', function () { leave(b.getAttribute('data-leave')); }); });
     layer.classList.toggle('on', indexOpen);
-    layer.querySelectorAll('.prep-srow').forEach(function (row) {
+    layer.querySelectorAll('a.prep-srow').forEach(function (row) {
       row.addEventListener('click', function (e) {
         e.preventDefault();
         var key = row.getAttribute('data-step');
         /* the current step is where the guest already is: the index simply closes */
         if (key === STEP.key) { closeIndex(true); return; }
-        var dest = STEPS.filter(function (s) { return s.key === key; })[0];
-        if (!dest) return;
         row.classList.add('pressed');
-        goTo(dest.file);
+        goTo(row.getAttribute('href'));
+      });
+    });
+    layer.querySelectorAll('[data-missing]').forEach(function (a) {
+      a.addEventListener('click', function (e) {
+        var href = a.getAttribute('href');
+        if (samePage(href)) { e.preventDefault(); closeIndex(false); focusControl(href.split('#')[1] ? '#' + href.split('#')[1] : ''); return; }
+        e.preventDefault(); goTo(href);
       });
     });
 
     var all = bar.querySelector('.prep-all');
     all.addEventListener('click', function () { if (indexOpen) closeIndex(false); else openIndex(); });
     measureBar();
-    var sw = bar.querySelector('[data-switch]');
-    if (sw) sw.addEventListener('click', function () { chooseIdentity(true); });
-    var self = bar.querySelector('[data-self]');
-    if (self) self.addEventListener('click', function () { var g = G(); if (g) g.setSubject(null); });
-  }
-
-  /* ---------------------------------------------------- who are you?  */
-  function chooseIdentity(switching) {
-    var p = party(); if (!p) return;
-    var me = active();
-    var h = '<p class="t-l1">' + (switching ? 'Switch identity' : 'Your invitation · ' + esc(p.invitationId)) + '</p>' +
-      '<h2 class="t-h1" style="margin-top:8px">' + (switching ? 'Who are you continuing as?' : 'Who are you?') + '</h2>' +
-      '<p class="t-b1 measure" style="margin-top:12px">This invitation belongs to ' + esc(partyNames()) +
-      '. Choose your name so we can show your personal details and decisions correctly.</p>' +
-      '<p class="t-b2 measure" style="margin-top:8px">This is not another password — your travel choices belong to the whole party either way.' +
-        (switching ? ' Switching changes who is continuing; it changes nobody&rsquo;s answers.' : '') + '</p>' +
-      '<div class="p-selrow" style="margin-top:24px">' + p.guests.map(function (g) {
-        var on = me && me.guestId === g.guestId;
-        return '<button type="button" class="p-sel" aria-pressed="' + (on ? 'true' : 'false') +
-          '" data-who="' + esc(g.guestId) + '">' + esc(nameOf(g)) + '</button>';
-      }).join('') + '</div>';
-    openDrawer(h, function (el) {
-      el.querySelectorAll('[data-who]').forEach(function (b) {
-        b.addEventListener('click', function () { setActive(b.getAttribute('data-who')); closeDrawer(); });
-      });
-    });
   }
 
   /* -------------------------------------------------------- detail layer */
@@ -325,61 +306,102 @@
     if (lastFocus && lastFocus.focus) lastFocus.focus({ preventScroll: true });
   }
 
-  function esc(t) {
-    return String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  }
-
   /* ---------------------------------------------------------------- foot
    * One primary continuation at the natural completion point, and one quiet
-   * way back. Never a pair of tiny arrows. */
+   * way back. THE CONTINUE IS STRICT: it asks the engine first. Incomplete →
+   * the first missing control is brought into view with the reason, and the
+   * page does not move on. Complete → the step is marked, the check draws,
+   * the next step opens. */
   function foot(el) {
     if (!el) return;
     var prev = STEPS[idx - 1], next = STEPS[idx + 1];
     el.className = 'prep-foot';
     el.innerHTML =
       (prev ? '<a class="p-link mute" href="' + hrefOf(prev.file) + '">Back to ' + prev.label + '</a>' : '<span></span>') +
-      (next ? '<a class="p-act" href="' + hrefOf(next.file) + '">Continue to ' + next.label + '</a>' : '');
+      (next ? '<button type="button" class="p-act" data-continue="' + next.key + '">Continue to ' + next.label + '</button>' : '') +
+      '<p class="t-b2 prep-foot-note" role="status" aria-live="polite" hidden></p>';
+    var b = el.querySelector('[data-continue]'), note = el.querySelector('.prep-foot-note');
+    if (!b) return;
+    b.addEventListener('click', function () { continueTo(next, b, note); });
+  }
+  function continueTo(next, b, note) {
+    var g = G(); if (!g || !party()) { location.href = hrefOf('invitation.html'); return; }
+    var missing = g.missingFor(STEP.key);
+    if (missing.length) {
+      var first = missing[0];
+      if (note) { note.hidden = false; note.textContent = 'Before you continue: ' + first.label.replace(/ — .*$/, '') + '.'; }
+      b.classList.remove('p-shake'); void b.offsetWidth; b.classList.add('p-shake');
+      if (samePage(first.href)) focusControl('#' + (first.href.split('#')[1] || ''));
+      else goTo(hrefOf(first.href));
+      return;
+    }
+    /* complete: the check draws on the button, then the next step */
+    b.classList.add('is-done'); b.setAttribute('aria-disabled', 'true');
+    b.innerHTML = '<i class="prep-tick big" aria-hidden="true"></i>Complete';
+    if (note) { note.hidden = false; note.textContent = STEP.label + ' complete.'; }
+    setTimeout(function () { goTo(hrefOf(next.file)); }, calm ? 0 : 520);
   }
 
   window.SIYL_PREP = {
     STEPS: STEPS,
     step: STEP,
     party: party,
-    active: active,
-    activeName: function () { return nameOf(active()); },
-    subject: subject,
-    subjectName: function () { return nameOf(subject()); },
-    answeringFor: answeringFor,
-    setSubject: function (id) { var g = G(); return !!(g && g.setSubject(id)); },
+    me: me,
+    active: me,
+    activeName: function () { return nameOf(me()); },
+    subject: me,
+    subjectName: function () { return nameOf(me()); },
+    answeringFor: function () { return false; },
     partyNames: partyNames,
     partyLabel: function () { var g = G(); return g ? g.partyLabel() : ''; },
     labelFor: function (id) { var g = G(); return g ? g.labelFor(id) : ''; },
-    setActive: setActive,
-    chooseIdentity: chooseIdentity,
     drawer: openDrawer,
     closeDrawer: closeDrawer,
     openIndex: openIndex,
     closeIndex: closeIndex,
-    leave: leaveParty,
+    leave: leave,
     indexOpen: function () { return indexOpen; },
     foot: foot,
     status: status,
+    focusControl: focusControl,
+    hrefOf: hrefOf,
     /* a page asks the shell whether it may show its content at all */
-    ready: function () { return !!(party() && active()); }
+    ready: function () { return !!(party() && me()); }
   };
+
+  /* THE GATE: a step behind an incomplete required step is not entered —
+   * the guest lands on the first missing item instead, and is told why */
+  function gate() {
+    var g = G(); if (!g || !party()) return false;
+    if (STEP.key === 'you') return false;
+    if (g.mayEnter(STEP.key)) return false;
+    var fm = g.firstMissing(); if (!fm) return false;
+    /* the destination is a control on this same page: no navigation, just the control */
+    if (samePage(fm.href)) { focusControl('#' + (fm.href.split('#')[1] || '')); return false; }
+    var parts = /^([^?#]*)(\?[^#]*)?(#.*)?$/.exec(fm.href) || [];
+    var to = (parts[1] || fm.href) + (parts[2] ? parts[2] + '&' : '?') + 'from=' + STEP.key + (parts[3] || '');
+    location.replace(hrefOf(to));
+    return true;
+  }
+  /* arriving from a gate: say, once, why this page and not the one asked for */
+  function arrivedFrom() {
+    var m = /[?&]from=([a-z]+)/.exec(location.search); if (!m) return;
+    var from = STEPS.filter(function (s) { return s.key === m[1]; })[0]; if (!from) return;
+    var n = document.createElement('p'); n.className = 'prep-gate-note t-b2'; n.setAttribute('role', 'status');
+    n.textContent = from.n + ' · ' + from.label + ' opens once this is complete.';
+    var main = document.querySelector('main'); if (main) main.insertBefore(n, main.firstChild);
+  }
 
   function init() {
     document.body.classList.add('prep');
     if (calm) document.body.classList.add('p-calm');
     build();
+    if (gate()) return;
     paint();
+    arrivedFrom();
     /* the step arrives: one quiet entrance, from where the guest expects it —
      * the top of the step; a hash deep link keeps its own target */
     window.requestAnimationFrame(function () { window.requestAnimationFrame(function () { document.body.classList.add('p-in'); settleFragment(); }); });
-    /* pages that render their sections after the party is known settle once
-     * more — and for a short while after arrival the fragment holds its place
-     * whenever the layout above it grows (a slower origin renders the personal
-     * sections later), unless the guest has already started to scroll */
     var settled = 0; var late = function () { if (settled++ < 2) window.requestAnimationFrame(settleFragment); };
     document.addEventListener('siyl:invite-ready', late);
     window.addEventListener('load', late);
@@ -395,27 +417,12 @@
       document.body.classList.add('p-in');
       if (e.persisted) { closeIndex(false); unlockScroll(); }
     });
-    /* the identity question is asked once, immediately after the code */
-    if (party() && !active()) setTimeout(function () { chooseIdentity(false); }, 260);
-    /* an exact-task deep link may say whom the guest is answering for — it
-     * is explicit, validated, and gone again on the next page */
-    document.addEventListener('siyl:who', paint);
-    document.addEventListener('siyl:subject', paint);
-    var m = /[?&]for=([A-Za-z0-9_-]+)/.exec(location.search);
-    if (m && G() && active()) G().setSubject(m[1]);
-    document.addEventListener('siyl:guest', paint);
-    document.addEventListener('siyl:temple', paint);
-    document.addEventListener('siyl:bag', paint);
-    document.addEventListener('siyl:docs', paint);
-    document.addEventListener('siyl:confirm', paint);
+    ['siyl:guest', 'siyl:temple', 'siyl:bag', 'siyl:docs', 'siyl:confirm', 'siyl:seats', 'siyl:units'].forEach(function (ev) { document.addEventListener(ev, paint); });
     /* the journey's status (none / received / confirmed) is one truth on every
-     * step, not only on Review & Send: read it once the party is known */
+     * step, not only on Review & Send: read it once the guest is known */
     if (window.SIYL_CONFIRM && party()) SIYL_CONFIRM.load();
-    document.addEventListener('siyl:auth', function () { if (window.SIYL_CONFIRM) SIYL_CONFIRM.load(true); });
-    document.addEventListener('siyl:invite-ready', function () { paint(); if (party() && !active()) chooseIdentity(false); });
-    /* the code has just opened the party on this very page: no reload, the
-     * identity question follows the code immediately */
-    document.addEventListener('siyl:auth', function () { paint(); if (party() && !active()) setTimeout(function () { chooseIdentity(false); }, 260); });
+    document.addEventListener('siyl:auth', function () { if (window.SIYL_CONFIRM) SIYL_CONFIRM.load(true); if (!gate()) paint(); });
+    document.addEventListener('siyl:invite-ready', paint);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();

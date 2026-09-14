@@ -10,11 +10,16 @@
  * storage nor forwarding succeeds it returns 503 and the client falls back
  * to the mailto channel — a registration is never silently lost.
  *
- * Plus the SHARED INVENTORY routes — /api/inventory[/reserve|/release|/mine].
- * They are proxied to ONE Durable Object instance ("ledger") so that every
- * guest, in every browser and on either deployment, reads and writes the same
- * stock, and a reservation is decided by a single-threaded actor rather than
- * by whoever happens to submit first.
+ * Plus the ROOM OCCUPANCY routes — /api/rooms[/join|/leave|/mine] — proxied
+ * to ONE Durable Object instance ("rooms"): every guest, in every browser and
+ * on either deployment, reads and writes the same allocation units, and a
+ * place is decided by a single-threaded actor rather than by whoever happens
+ * to tap first. The retired category ledger (/api/inventory) answers 410.
+ *
+ * ONE CODE = ONE GUEST (Owner, 14 Sep 2026): every write — a seat, a room, a
+ * journey — is tied to the guest the bearer resolves to (src/auth.js). The
+ * identity is passed to the objects in a header the Worker sets itself and
+ * strips from every incoming request, so a client can never claim one.
  *
  * No payment collection, no railway/hotel booking APIs, no guest directory.
  */
@@ -34,7 +39,7 @@ function corsHeaders(request) {
     'access-control-allow-methods': 'GET, POST, OPTIONS',
     /* the document endpoint authenticates with the invitation the client
      * already holds, so those headers must survive the preflight */
-    'access-control-allow-headers': 'content-type, x-invitation, x-guest, x-kind, x-filename',
+    'access-control-allow-headers': 'content-type, x-invitation, x-guest, x-kind, x-filename, x-siyl-auth',
     'access-control-max-age': '7200',
   };
 }
@@ -43,6 +48,8 @@ function corsHeaders(request) {
  * the Worker origin, so the two deployments share ONE ledger. */
 export { Inventory } from './inventory.js';
 export { Seating } from './seating.js';
+export { Rooms } from './rooms.js';
+import { identify, owns } from './auth.js';
 
 /* ---- the Guest Relations gate (F + G) ------------------------------------
  * A secret set with `wrangler secret put GR_TOKEN`, compared in constant
@@ -56,22 +63,38 @@ function grAuthorised(request, env) {
   for (let i = 0; i < secret.length; i++) diff |= given.charCodeAt(i) ^ secret.charCodeAt(i);
   return diff === 0;
 }
-const GR_SEATING_OPS = ['config', 'state', 'assign', 'unassign', 'plan'];
+const GR_SEATING_OPS = ['config', 'state', 'assign', 'unassign', 'plan', 'rekey'];
+const GR_ROOMS_OPS = ['plan', 'migrate', 'assign', 'unassign'];
 
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
+    /* THE RETIRED CATEGORY LEDGER: replaced by the room occupancy engine */
     if (url.pathname === '/api/inventory' || url.pathname.startsWith('/api/inventory/')) {
-      if (request.method === 'OPTIONS') {
-        return new Response(null, { status: 204, headers: corsHeaders(request) });
+      if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders(request) });
+      return json({ ok: false, error: 'retired — use /api/rooms' }, 410, corsHeaders(request));
+    }
+
+    /* THE ROOM OCCUPANCY ENGINE: guests read, join and leave allocation units
+     * in their own name; Guest Relations reads the plan and migrates */
+    if (url.pathname === '/api/rooms' || url.pathname.startsWith('/api/rooms/')) {
+      if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders(request) });
+      if (!env.ROOMS) return json({ ok: false, error: 'rooms unavailable' }, 503, corsHeaders(request));
+      const op = url.pathname.replace(/^\/api\/rooms\/?/, '') || 'read';
+      const headers = new Headers(request.headers);
+      headers.delete('x-gr-verified'); headers.delete('x-siyl-identity');   /* a client can never claim either */
+      if (GR_ROOMS_OPS.includes(op)) {
+        if (!env.GR_TOKEN) return json({ ok: false, error: 'rooms operations are not enabled' }, 503);
+        if (!grAuthorised(request, env)) return json({ ok: false, error: 'unauthorised' }, 401);
+        headers.set('x-gr-verified', 'yes');
+      } else {
+        const who = await identify(request, env);
+        if (who) headers.set('x-siyl-identity', JSON.stringify(who));
+        else if (op === 'join' || op === 'leave') return json({ ok: false, error: 'unauthorised' }, 401, corsHeaders(request));
       }
-      if (!env.INVENTORY) {
-        return json({ ok: false, error: 'inventory unavailable' }, 503, corsHeaders(request));
-      }
-      /* one id, one actor, one truth — every request lands on the same object */
-      const stub = env.INVENTORY.get(env.INVENTORY.idFromName('ledger'));
-      const res = await stub.fetch(request);
+      const stub = env.ROOMS.get(env.ROOMS.idFromName('rooms'));
+      const res = await stub.fetch(new Request(request, { headers }));
       const out = new Response(res.body, res);
       for (const [k, v] of Object.entries(corsHeaders(request))) out.headers.set(k, v);
       return out;
@@ -113,11 +136,15 @@ export default {
       if (!env.SEATING) return json({ ok: false, error: 'seating unavailable' }, 503, corsHeaders(request));
       const op = url.pathname.replace(/^\/api\/seating\/?/, '') || 'read';
       const headers = new Headers(request.headers);
-      headers.delete('x-gr-verified');                     /* a client can never claim the gate */
+      headers.delete('x-gr-verified'); headers.delete('x-siyl-identity');   /* a client can never claim either */
       if (GR_SEATING_OPS.includes(op)) {
         if (!env.GR_TOKEN) return json({ ok: false, error: 'seating operations are not enabled' }, 503);
         if (!grAuthorised(request, env)) return json({ ok: false, error: 'unauthorised' }, 401);
         headers.set('x-gr-verified', 'yes');
+      } else {
+        const who = await identify(request, env);
+        if (who) headers.set('x-siyl-identity', JSON.stringify(who));
+        else if (op === 'select' || op === 'release') return json({ ok: false, error: 'unauthorised' }, 401, corsHeaders(request));
       }
       const forwarded = new Request(request, { headers });
       const stub = env.SEATING.get(env.SEATING.idFromName('seating'));
@@ -145,7 +172,7 @@ export default {
      * product loads from that directory — crypto.mjs and the encrypted
      * invitation bundle — pass through untouched. */
     if (url.pathname === '/register' || url.pathname.startsWith('/register/')) {
-      const keep = /^\/register\/(crypto\.mjs|invitations\.enc\.json)$/.test(url.pathname);
+      const keep = /^\/register\/(crypto\.mjs|invitations\.enc\.json|auth-index\.json)$/.test(url.pathname);
       if (!keep) return Response.redirect(url.origin + '/invitation.html', 302);
     }
 
@@ -165,6 +192,10 @@ async function handleDocument(request, env) {
 
   if (!/^INV-[A-Za-z0-9_-]{1,32}$/.test(invitationId) || !/^[A-Za-z0-9_-]{1,32}$/.test(guestId)) {
     return json({ ok: false, error: 'invalid invitation or guest' }, 400, corsHeaders(request));
+  }
+  /* a document is sent by the guest it belongs to, and by nobody else */
+  if (!owns(await identify(request, env), invitationId, guestId)) {
+    return json({ ok: false, error: 'unauthorised' }, 401, corsHeaders(request));
   }
   if (kind !== 'passport' && kind !== 'flight') {
     return json({ ok: false, error: 'unknown document kind' }, 400, corsHeaders(request));
@@ -211,6 +242,11 @@ async function handleRegister(request, env) {
   const { invitationId, registration, text } = body || {};
   if (!invitationId || typeof text !== 'string' || !text.startsWith('SEE YOU IN LAOS')) {
     return json({ ok: false, error: 'invalid registration payload' }, 400);
+  }
+  /* a journey is sent by the guest it belongs to, under their own invitation */
+  const who = await identify(request, env);
+  if (!who || who.invitationId !== String(invitationId).trim() || (registration && registration.guestId && registration.guestId !== who.guestId)) {
+    return json({ ok: false, error: 'unauthorised' }, 401, corsHeaders(request));
   }
 
   const submittedAt = (registration && registration.registration_submitted_at) || new Date().toISOString();

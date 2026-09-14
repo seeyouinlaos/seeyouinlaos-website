@@ -142,37 +142,23 @@
   });
 
   /* selection: the Journey Bag is the one truth — has() decides the state, the
-   * invitation gate decides who may add, the quantity is the participating
-   * guests (never more than the party), Remove follows the bag rule */
-  var Q = 1, qTouched = false;   /* untouched → every guest of the party takes part */
-  function partySize() { try { var a = JSON.parse(localStorage.getItem('siyl.auth') || 'null'); return a && a.guests ? a.guests.length : 0; } catch (e) { return 0; } }
+   * invitation gate decides who may add. ONE GUEST = ONE PRICE (Owner, 14 Sep
+   * 2026): the request is this guest's own, USD 180, never multiplied. */
   function money(n) { return 'USD ' + Number(n).toLocaleString('en-US'); }
   function paintSel() {
     var box = document.getElementById('selbox'); if (!box || !window.SIYL_BAG) return;
-    var s = x.select, line = SIYL_BAG.get().filter(function (l) { return l.id === s.id; })[0], max = partySize() || 6;
-    var q = line ? (line.qty || 1) : Math.min(Q, max);
-    var stepper = '<div class="x-qty"><span class="a-eyebrow">Participating guests</span>' +
-      '<button type="button" class="x-step" data-step="-1" aria-label="One fewer guest"' + (q <= 1 ? ' disabled' : '') + '>&minus;</button><b id="selq">' + q + '</b>' +
-      '<button type="button" class="x-step" data-step="1" aria-label="One more guest"' + (q >= max ? ' disabled' : '') + '>+</button>' +
-      '<span class="x-amt" id="selamt">' + money(s.price * q) + '</span></div>';
-    box.innerHTML = stepper + (line
-      ? '<div class="x-cur"><span class="on" data-sel-state="current" aria-current="true">In your journey · ' + q + (q === 1 ? ' guest' : ' guests') + ' · ' + money(s.price * q) + '</span>' +
-        '<a class="a-link" href="your-journey.html">View Your Journey</a></div>' +
+    var s = x.select, line = SIYL_BAG.get().filter(function (l) { return l.id === s.id; })[0];
+    box.innerHTML = '<p class="x-amt" id="selamt">' + money(s.price) + ' <span class="a-eyebrow">per person · your cost</span></p>' + (line
+      ? '<div class="x-cur"><span class="on" data-sel-state="current" aria-current="true">Current selection · ' + money(s.price) + '</span>' +
+        '<a class="a-link" href="cart.html">View your bag</a></div>' +
         '<p style="margin-top:14px"><button type="button" class="a-link" id="sel-rm" style="background:none;border:0;cursor:pointer">Remove from your journey</button></p>'
-      : '<button type="button" class="x-cta" id="sel-add" data-sel-state="open">Add to your journey · ' + money(s.price * q) + '</button>');
-    box.querySelectorAll('[data-step]').forEach(function (b) { b.addEventListener('click', function () {
-      var d = parseInt(b.getAttribute('data-step'), 10);
-      if (line) { var nq = Math.max(1, Math.min(max, (line.qty || 1) + d)); if (nq !== line.qty) SIYL_BAG.qty(s.id, nq - (line.qty || 1)); }
-      else { Q = Math.max(1, Math.min(max, q + d)); qTouched = true; }
-      paintSel();
-    }); });
+      : '<button type="button" class="x-cta" id="sel-add" data-sel-state="open">Add to your journey · ' + money(s.price) + '</button>');
     var add = document.getElementById('sel-add'), rm = document.getElementById('sel-rm');
     if (add) add.addEventListener('click', function () { gated(function () {
       if (SIYL_BAG.has(s.id)) { paintSel(); return; }
-      var n = qTouched ? Math.max(1, Math.min(partySize() || 6, Q)) : (partySize() || 1);
       var it = (window.SIYL_PRICE ? SIYL_PRICE.items(s.id)[0] : null) || { id: s.id, name: x.name, price: s.price, img: x.img };
-      it.qty = n; it.request = true; it.exp = x.id;
-      SIYL_BAG.add(it);
+      it.qty = 1; it.request = true; it.exp = x.id;
+      SIYL_BAG.put(it);
       paintSel();
       var cur = document.querySelector('[data-sel-state="current"]'); if (cur) cur.focus();
     }); });
@@ -182,10 +168,9 @@
     if (window.SIYL_INVITE) { SIYL_INVITE.require(fn); }
     else document.addEventListener('siyl:invite-ready', function () { SIYL_INVITE.require(fn); }, { once: true });
   }
-  Q = Math.max(1, partySize() || 1);
   paintSel();
   document.addEventListener('siyl:bag', paintSel);
-  document.addEventListener('siyl:auth', function () { if (!SIYL_BAG.has(x.select && x.select.id)) Q = Math.max(1, partySize() || 1); paintSel(); });
+  document.addEventListener('siyl:auth', paintSel);
 })();
 </script>
 <script src="assets/recon.js"></script>

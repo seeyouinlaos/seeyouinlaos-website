@@ -24,12 +24,15 @@
 (function () {
   'use strict';
   var ORIGIN = 'https://seeyouinlaos-website.suthep-hrg.workers.dev';
-  var API = (location.hostname === 'seeyouinlaos-website.suthep-hrg.workers.dev') ? '/api/seating' : ORIGIN + '/api/seating';
+  /* the Worker's own origin and a local `wrangler dev` answer at the same path; the Pages mirror asks the Worker */
+  var API = (location.hostname === 'seeyouinlaos-website.suthep-hrg.workers.dev' || /^(localhost|127\.0\.0\.1)$/.test(location.hostname)) ? '/api/seating' : ORIGIN + '/api/seating';
 
   var view = null, loading = null, lastError = null;
-  function invitationId() {
-    try { var a = JSON.parse(localStorage.getItem('siyl.auth') || 'null'); return (a && a.invitationId) || ''; } catch (e) { return ''; }
-  }
+  function auth() { try { return JSON.parse(localStorage.getItem('siyl.auth') || 'null'); } catch (e) { return null; } }
+  function invitationId() { var a = auth(); return (a && a.invitationId) || ''; }
+  /* the bearer on every request: a read then carries first names, a write is the guest's own */
+  function headers(json) { var a = auth(), h = {}; if (json) h['content-type'] = 'application/json'; if (a && a.bearer) h['x-siyl-auth'] = a.bearer; return h; }
+  function firstName() { var G = window.SIYL_GUEST, a = auth(); return (G && G.nameOf && G.nameOf()) || (a && a.preferredName) || ''; }
   function announce() { try { document.dispatchEvent(new CustomEvent('siyl:seats')); } catch (e) {} }
   function esc(t) { return String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
 
@@ -48,25 +51,25 @@
     load: function (force) {
       if (loading && !force) return loading;
       var inv = invitationId();
-      loading = fetch(API + '?invitation=' + encodeURIComponent(inv), { cache: 'no-store' })
+      loading = fetch(API + '?invitation=' + encodeURIComponent(inv), { cache: 'no-store', headers: headers(false) })
         .then(function (r) { return r.json(); })
         .then(function (d) { if (!d || !d.ok) throw new Error('seating unavailable'); view = d; lastError = null; announce(); return d; })
         .catch(function (e) { lastError = String(e && e.message || e); announce(); return null; })
         .then(function (v) { loading = null; return v; });
       return loading;
     },
-    /* hold a chair for a named guest — the server decides, atomically */
+    /* hold a chair for the guest — the server decides, atomically, and only for the guest the bearer names */
     select: function (event, seatId, guestId) {
       var inv = invitationId();
-      return fetch(API + '/select', { method: 'POST', headers: { 'content-type': 'application/json', 'x-invitation': inv },
-        body: JSON.stringify({ invitationId: inv, guestId: guestId, event: event, seatId: seatId }) })
+      return fetch(API + '/select', { method: 'POST', headers: headers(true),
+        body: JSON.stringify({ invitationId: inv, guestId: guestId, event: event, seatId: seatId, name: firstName() }) })
         .then(function (r) { return r.json().then(function (d) { d.status = r.status; return d; }); })
         .then(function (d) { if (d && d.configured) { view = d; announce(); } else S.load(true); return d; })
         .catch(function () { return { ok: false, error: 'unreachable' }; });
     },
     release: function (event, guestId) {
       var inv = invitationId();
-      return fetch(API + '/release', { method: 'POST', headers: { 'content-type': 'application/json', 'x-invitation': inv },
+      return fetch(API + '/release', { method: 'POST', headers: headers(true),
         body: JSON.stringify({ invitationId: inv, guestId: guestId, event: event }) })
         .then(function (r) { return r.json(); })
         .then(function (d) { if (d && d.configured) { view = d; announce(); } else S.load(true); return d; })
@@ -78,7 +81,7 @@
      * rows and positions come from the configuration exactly as given. The
      * guest sees airline-style labels (A1 … F10 · A1 … B25, assets/seatlabels.js);
      * the ledger id stays inside data-seat and never reaches the words. */
-    STATES: { available: 'Available', selected: 'Selected by you', yours: 'Your seat', party: 'Your party', family: 'Reserved · family', taken: 'Unavailable' },
+    STATES: { available: 'Available', selected: 'Selected by you', yours: 'Your seat', party: 'Your party', family: 'Reserved · family', taken: 'Taken' },
     LABELS: window.SIYL_SEATLABELS || null,
     /* the guest-facing label of a ledger id (E4, A17) */
     label: function (seatId) { var L = S.LABELS; return L ? (L.label(seatId) || '') : ''; },
@@ -99,8 +102,11 @@
     svg: function (event, v, opts) {
       opts = opts || {};
       var forGuest = opts.guestId || null, pending = opts.pending || null, choosing = !!opts.selectable && opts.choosing !== false;
-      var U = 36, seat = 30, WORDS = S.words(opts), EV = event === 'ceremony' ? 'Ceremony' : 'Dinner';
+      /* first names under held chairs (Owner, 14 Sep 2026): the plan says who sits where */
+      var named = !!(v && v.named), NAME_H = named ? 12 : 0;
+      var U = 36, seat = 30, RH = U + NAME_H, WORDS = S.words(opts), EV = event === 'ceremony' ? 'Ceremony' : 'Dinner';
       var FONT = 'Hanken Grotesk, Helvetica, Arial, sans-serif';
+      function short(n) { n = String(n || ''); return n.length > 9 ? n.slice(0, 8) + '…' : n; }
       /* one chair: backrest bar + seat pan, its label inside, its state in words */
       function chair(s, x, y) {
         var st = s.state === 'yours' ? (forGuest && s.guestId !== forGuest ? 'party' : 'yours') : s.state;
@@ -108,7 +114,8 @@
         var lab = S.label(s.seatId);
         var selectable = choosing && (st === 'available' || st === 'selected');
         /* the spoken state names the guest being chosen for when that is not the person continuing */
-        var words = st === 'available' ? 'available' : st === 'selected' ? (opts.subjectName ? 'selected for ' + opts.subjectName : 'selected') : st === 'yours' ? (opts.subjectName ? opts.subjectName + '’s seat' : 'your seat') : st === 'party' ? WORDS.party : st === 'family' ? 'reserved for family' : 'unavailable';
+        var who = s.name && st !== 'yours' && st !== 'selected' ? s.name : '';
+        var words = st === 'available' ? 'available' : st === 'selected' ? (opts.subjectName ? 'selected for ' + opts.subjectName : 'selected') : st === 'yours' ? (opts.subjectName ? opts.subjectName + '’s seat' : 'your seat') : st === 'party' ? (who ? who + ', your party' : WORDS.party) : st === 'family' ? 'reserved for family' : (who ? 'taken by ' + who : 'unavailable');
         var aria = EV + ' seat ' + lab + ', ' + words;
         /* available = an outlined chair (rim 3.3:1 on the card) · unavailable = a filled chair, struck through, its label 4.3:1 on the fill */
         var pan = st === 'selected' ? '#313131' : st === 'yours' ? '#F3EEE7' : st === 'taken' ? '#E7E3DB' : st === 'family' ? '#EDEBE7' : '#FCFAF6';
@@ -124,7 +131,8 @@
           ' aria-label="' + esc(aria) + '">' +
           '<rect class="back" x="' + (x + 3) + '" y="' + y + '" width="' + (seat - 6) + '" height="6" rx="2" fill="' + back + '"/>' +
           '<rect class="pan" x="' + x + '" y="' + (y + 8) + '" width="' + seat + '" height="' + (seat - 8) + '" rx="5" fill="' + pan + '" stroke="' + stroke + '" stroke-width="' + sw + '"' + dash + '/>' +
-          '<text x="' + (x + seat / 2) + '" y="' + (y + 8 + (seat - 8) / 2 + 3.4) + '" text-anchor="middle" font-family="' + FONT + '" font-size="9.5" letter-spacing=".4" fill="' + ink + '">' + esc(lab) + '</text>' + extra + '</g>';
+          '<text x="' + (x + seat / 2) + '" y="' + (y + 8 + (seat - 8) / 2 + 3.4) + '" text-anchor="middle" font-family="' + FONT + '" font-size="9.5" letter-spacing=".4" fill="' + ink + '">' + esc(lab) + '</text>' + extra +
+          (named && (who || st === 'yours') ? '<text class="seat-name" x="' + (x + seat / 2) + '" y="' + (y + seat + 9) + '" text-anchor="middle" font-family="' + FONT + '" font-size="7" letter-spacing=".3" fill="#313131">' + esc(st === 'yours' ? 'You' : short(who)) + '</text>' : '') + '</g>';
       }
       var T = 'font-family="' + FONT + '" font-size="8.5" letter-spacing="2" fill="#6B6964"';
       var TH = 'font-family="' + FONT + '" font-size="8.5" letter-spacing="1.2" fill="#6B6964"';
@@ -138,7 +146,7 @@
         var maxR = Math.max.apply(null, nums.map(function (n) { return byRow[n].R.length; }).concat([1]));
         var aisle = 52, pad = 20, frontH = 30, fixedC = (v && v.ceremony && v.ceremony.fixed) || [];
         var headY = frontH + (fixedC.length ? 44 : 10), top = headY + 18;
-        var W = pad * 2 + maxL * U + aisle + maxR * U, H = top + nums.length * U + 26;
+        var W = pad * 2 + maxL * U + aisle + maxR * U, H = top + nums.length * RH + 26;
         var cxC = pad + maxL * U + aisle / 2;
         /* the chairs keep a real size on a narrow screen: the plan scrolls sideways rather than shrinking its labels */
         var h = '<svg class="p-seatmap p-seatmap-ceremony" viewBox="0 0 ' + W + ' ' + H + '" style="min-width:' + Math.round(W * 1.1) + 'px" role="group" aria-label="Ceremony seating plan: the front with the Bride and Groom, a left block of two seats and a right block of three seats per row, ten rows, a centre aisle">';
@@ -161,7 +169,7 @@
         for (var jr = 0; jr < maxR; jr++) h += '<text x="' + (pad + maxL * U + aisle + jr * U + seat / 2) + '" y="' + headY + '" text-anchor="middle" ' + TH + '>' + (LC.R[jr] || '') + '</text>';
         h += '<text x="' + cxC + '" y="' + headY + '" text-anchor="middle" ' + TH + '>AISLE</text>';
         nums.forEach(function (n, i) {
-          var y = top + i * U;
+          var y = top + i * RH;
           var L = byRow[n].L, R = byRow[n].R;
           /* each chair stands in the column its own id names (…-01, -02, -03), whatever order the configuration lists it in */
           L.forEach(function (s, j) { var m = /-(\d\d)$/.exec(s.seatId || ''), col = m ? Number(m[1]) - 1 : j; h += chair(s, pad + (maxL - L.length + col) * U, y); });
@@ -176,24 +184,39 @@
       }
 
       /* the long table, seen from above: run A along the top, run B along the
-       * bottom — fifty places, no fixed position for anyone, poolside */
+       * bottom — fifty places, no fixed position for anyone, poolside. THE
+       * POOL is drawn as a landmark on the side Guest Relations has recorded
+       * in the geometry (dinner.poolSide: 'T' | 'B'); until that side is on
+       * record nothing is invented — the words say so instead (Owner, 14 Sep
+       * 2026: do not fabricate the orientation). */
       var sides = (v && v.dinner && v.dinner.sides) || { T: [], B: [] };
       var top2s = sides.T || [], bottom = sides.B || [];
-      var n = Math.max(top2s.length, bottom.length, 1), pad2 = 20, headY2 = 30, y0 = 44;
-      var W2 = pad2 * 2 + n * U, tableH = 40, H2 = y0 + seat + 8 + tableH + 8 + seat + 40;
+      var poolSide = v && v.dinner && (v.dinner.poolSide === 'T' || v.dinner.poolSide === 'B') ? v.dinner.poolSide : null;
+      var n = Math.max(top2s.length, bottom.length, 1), pad2 = 20, headY2 = 30, POOL_H = 34, GAP = 10;
+      var y0 = 44 + (poolSide === 'T' ? POOL_H + GAP : 0);
+      var W2 = pad2 * 2 + n * U, tableH = 40;
+      var yTop = y0, ty = yTop + seat + NAME_H + 8, yBot = ty + tableH + 8, afterBot = yBot + seat + NAME_H + 8;
+      var H2 = afterBot + (poolSide === 'B' ? POOL_H + GAP : 0) + 30;
       var total = top2s.length + bottom.length;
       var RN = (S.LABELS && S.LABELS.RUNS) || { T: 'A', B: 'B' };
-      var h2 = '<svg class="p-seatmap p-seatmap-table" viewBox="0 0 ' + W2 + ' ' + H2 + '" style="min-width:' + Math.round(W2 * 1.15) + 'px" role="group" aria-label="Wedding dinner seating plan, poolside: one long table with run A of ' + top2s.length + ' places along one side and run B of ' + bottom.length + ' along the other">';
+      var poolWords = poolSide ? 'the swimming pool along run ' + RN[poolSide] : 'the pool side of the table to be confirmed by Guest Relations';
+      var h2 = '<svg class="p-seatmap p-seatmap-table" viewBox="0 0 ' + W2 + ' ' + H2 + '" style="min-width:' + Math.round(W2 * 1.15) + 'px" role="group" aria-label="Wedding dinner seating plan, poolside: one long table with run A of ' + top2s.length + ' places along one side and run B of ' + bottom.length + ' along the other, ' + poolWords + '">';
       h2 += '<line x1="' + pad2 + '" y1="14" x2="' + (W2 - pad2) + '" y2="14" stroke="#313131" stroke-width="1"/>' +
             '<text x="' + pad2 + '" y="' + headY2 + '" ' + T + '>WEDDING DINNER · POOLSIDE</text>' +
-            '<text x="' + (W2 - pad2) + '" y="' + headY2 + '" text-anchor="end" ' + T + '>RUN ' + RN.T + ' · ' + top2s.length + ' PLACES</text>';
+            '<text x="' + (W2 - pad2) + '" y="' + headY2 + '" text-anchor="end" ' + T + '>RUN ' + RN.T + ' · ' + top2s.length + ' PLACES' + (poolSide === 'T' ? ' · POOLSIDE' : '') + '</text>';
+      function pool(y) {
+        return '<g class="pool" aria-hidden="true"><rect x="' + pad2 + '" y="' + y + '" width="' + (n * U) + '" height="' + POOL_H + '" rx="10" fill="#E3E6E3" stroke="#B9C3BE" stroke-width="1"/>' +
+               '<path d="M' + (pad2 + 10) + ' ' + (y + POOL_H / 2 + 6) + ' q 6 -5 12 0 t 12 0 t 12 0 t 12 0 t 12 0" fill="none" stroke="#B9C3BE" stroke-width="1"/>' +
+               '<text x="' + (pad2 + (n * U) / 2) + '" y="' + (y + POOL_H / 2 + 3) + '" text-anchor="middle" ' + T + '>SWIMMING POOL</text></g>';
+      }
+      if (poolSide === 'T') h2 += pool(44);
       var placeOf = function (s, j) { var m = /-(\d\d)$/.exec(s.seatId || ''); return m ? Number(m[1]) - 1 : j; };
-      top2s.forEach(function (s, j) { h2 += chair(s, pad2 + placeOf(s, j) * U + (U - seat) / 2, y0); });
-      var ty = y0 + seat + 8;
+      top2s.forEach(function (s, j) { h2 += chair(s, pad2 + placeOf(s, j) * U + (U - seat) / 2, yTop); });
       h2 += '<rect x="' + pad2 + '" y="' + ty + '" width="' + (n * U) + '" height="' + tableH + '" rx="6" fill="#F3EEE7" stroke="#313131" stroke-width="1"/>';
       h2 += '<text x="' + (pad2 + (n * U) / 2) + '" y="' + (ty + tableH / 2 + 3) + '" text-anchor="middle" ' + T + '>ONE LONG TABLE · ' + total + ' PLACES</text>';
-      bottom.forEach(function (s, j) { h2 += chair(s, pad2 + placeOf(s, j) * U + (U - seat) / 2, ty + tableH + 8); });
-      h2 += '<text x="' + (W2 - pad2) + '" y="' + (H2 - 10) + '" text-anchor="end" ' + T + '>RUN ' + RN.B + ' · ' + bottom.length + ' PLACES</text>' +
+      bottom.forEach(function (s, j) { h2 += chair(s, pad2 + placeOf(s, j) * U + (U - seat) / 2, yBot); });
+      if (poolSide === 'B') h2 += pool(afterBot);
+      h2 += '<text x="' + (W2 - pad2) + '" y="' + (H2 - 10) + '" text-anchor="end" ' + T + '>RUN ' + RN.B + ' · ' + bottom.length + ' PLACES' + (poolSide === 'B' ? ' · POOLSIDE' : '') + '</text>' +
             '<text x="' + pad2 + '" y="' + (H2 - 10) + '" ' + T + '>' + total + ' GUEST SEATS · NO FIXED PLACES</text>';
       return h2 + '</svg>';
     },
@@ -205,11 +228,24 @@
       var d = !!(v.dinner && v.dinner.sides) && ['T', 'B'].some(function (side) { return (v.dinner.sides[side] || []).some(function (s) { return s && s.state === 'family'; }); });
       return c || d;
     },
+    hasParty: function (v) {
+      v = v || view; if (!v) return false;
+      var c = !!(v.ceremony && v.ceremony.rows) && v.ceremony.rows.some(function (r) { return (r.seats || []).some(function (s) { return s && s.state === 'party'; }); });
+      var d = !!(v.dinner && v.dinner.sides) && ['T', 'B'].some(function (side) { return (v.dinner.sides[side] || []).some(function (s) { return s && s.state === 'party'; }); });
+      return c || d;
+    },
     legend: function (opts) {
       opts = opts || {};
-      var w = S.words(opts), family = S.hasFamily(opts.view || view);
-      return '<ul class="p-seatlegend" aria-label="Seat states">' + ['available', 'selected', 'yours', 'party', 'family', 'taken'].filter(function (k) { return w[k] && (k !== 'family' || family) && (k !== 'party' || opts.partyName); }).map(function (k) {
+      var w = S.words(opts), family = S.hasFamily(opts.view || view), party = S.hasParty(opts.view || view) || !!opts.partyName;
+      return '<ul class="p-seatlegend" aria-label="Seat states">' + ['available', 'selected', 'yours', 'party', 'family', 'taken'].filter(function (k) { return w[k] && (k !== 'family' || family) && (k !== 'party' || party); }).map(function (k) {
         return '<li class="t-l1"><span class="seat-' + k + '" aria-hidden="true"></span>' + esc(w[k]) + '</li>'; }).join('') + '</ul>';
+    },
+    /* the pool, in words, under the dinner plan */
+    poolNote: function () {
+      var d = view && view.dinner, RN = (S.LABELS && S.LABELS.RUNS) || { T: 'A', B: 'B' };
+      if (!d) return '';
+      if (d.poolSide === 'T' || d.poolSide === 'B') return 'Run ' + RN[d.poolSide] + ' sits beside the swimming pool.';
+      return 'The long table stands beside the swimming pool — which run faces the water will be confirmed by Guest Relations.';
     },
 
     /* draw one event into a container and wire the choice */
@@ -218,7 +254,9 @@
       if (!container || !view || !view[event]) { if (container) container.innerHTML = ''; return; }
       var wide = event === 'dinner';
       container.innerHTML = '<div class="p-seatwrap' + (wide ? ' wide' : '') + '">' + S.svg(event, view, opts) + '</div>' +
-        '<p class="t-l1 p-seathint" hidden>Swipe or scroll sideways to see the whole plan</p>' + S.legend(opts);
+        '<p class="t-l1 p-seathint" hidden>Swipe or scroll sideways to see the whole plan</p>' + S.legend(opts) +
+        (event === 'dinner' && S.poolNote() ? '<p class="t-b2 p-poolnote">' + esc(S.poolNote()) + '</p>' : '') +
+        (view && view.named ? '<p class="t-b2 p-poolnote">First names show who already sits where.</p>' : '');
       container.classList.toggle('is-choosing', !!opts.selectable && opts.choosing !== false);
       /* on a narrow screen the plan keeps its chairs at a real size and
        * scrolls sideways — the guest is told so, in words */

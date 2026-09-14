@@ -13,7 +13,7 @@
  *                                 runs fn after a valid code (the interrupted
  *                                 action completes; the guest stays on page).
  */
-import { lookupByToken } from '../register/crypto.mjs';
+import { lookupByToken, bearerOf } from '../register/crypto.mjs';
 
 const KEY = 'siyl.auth';
 
@@ -26,6 +26,10 @@ async function loadRecords() {
   return records;
 }
 
+/* ONE CODE = ONE GUEST (Owner decision, 14 Sep 2026). The code opens ONE
+ * guest's invitation: the session is that guest and nobody else. There is no
+ * "who are you", no switch, no answering for another person — a sister who
+ * helps four guests opens four invitations, one code at a time. */
 const AUTH = {
   get() {
     try {
@@ -33,74 +37,138 @@ const AUTH = {
       return v && v.invitationId ? v : null;
     } catch (e) { return null; }
   },
-  /* A session opened before the named party travelled with it carries an
-   * invitation but no names. Every per-person surface — the wedding, the
-   * documents, the profile — is impossible in that state, so it counts as
-   * NOT authenticated and the guest is asked for the code once more. */
-  hasNames() {
+  /* a session is valid only in the guest-scoped form: one guest, one bearer */
+  valid() {
     const v = this.get();
-    return !!(v && Array.isArray(v.guests) && v.guests.length);
+    return !!(v && v.guestId && v.bearer && v.invitationId === 'INV-' + v.guestId);
   },
-  set(inv) {
-    /* The named party travels with the session. Wave 1 needs per-person state
-     * — attendance, the Sangkhathan, seats, the profile — and per-person state
-     * is impossible without the names the invitation already resolved.
-     * SOURCE ONLY: exactly what the encrypted bundle carries today
-     * (guestId, fullName, preferredName). No new personal data is shipped. */
+  hasNames() { return this.valid(); },
+  async set(inv) {
+    const bearer = await bearerOf(inv.token);
     localStorage.setItem(KEY, JSON.stringify({
       invitationId: inv.invitationId,
+      guestId: inv.guestId,
+      partyId: inv.partyId || '',
       partyName: inv.partyName || '',
-      partyLead: inv.partyLead || '',
-      guests: (inv.guests || [])
-        .filter((g) => (g.status || 'ACTIVE') === 'ACTIVE')
-        .map((g) => ({ guestId: g.guestId, fullName: g.fullName, preferredName: g.preferredName || g.fullName,
-          /* the hosts' roles at the ceremony (Bride, Groom) — explicit in the private list, never inferred */
-          ...(g.hostRole === 'BRIDE' || g.hostRole === 'GROOM' ? { hostRole: g.hostRole } : {}) })),
-      /* E · explicit eligibility only; anything else is unresolved (null) */
-      givingEligibility: inv.givingEligibility === 'PAIR' || inv.givingEligibility === 'NONE' ? inv.givingEligibility : null,
-      /* the hosts' own party (explicit in the private list, never inferred) */
+      fullName: inv.fullName || '',
+      preferredName: inv.preferredName || inv.fullName || '',
+      /* the hosts' roles at the ceremony (Bride, Groom) — explicit in the private list, never inferred */
+      ...(inv.hostRole === 'BRIDE' || inv.hostRole === 'GROOM' ? { hostRole: inv.hostRole } : {}),
       hosts: inv.hosts === true,
+      /* who belongs together — first names, for context only, never authority */
+      members: (inv.members || []).map((m) => ({ guestId: m.guestId, preferredName: m.preferredName })),
+      /* the Sangkhathan is offered to this guest, or not — explicit source truth */
+      sangkhathan: inv.sangkhathan === 'ELIGIBLE' || inv.sangkhathan === 'NONE' ? inv.sangkhathan : 'UNRESOLVED',
+      /* what the Worker checks on every write — never the code itself */
+      bearer,
       at: new Date().toISOString(),
     }));
-    /* this party's own local draft, set aside when it was left, comes back */
-    PARTY.restore(inv.invitationId);
+    /* this guest's own local draft, set aside when they left, comes back */
+    GUEST.restore(inv.invitationId, inv.partyId || '', inv.guestId);
   },
   clear() { localStorage.removeItem(KEY); },
 };
 
-/* LEAVING A PARTY (Owner, 13 Sep 2026). "Open another invitation" and "Sign
- * out" both end the session of the party that is open. What Guest Relations
- * already received stays received on the server; the party's local draft is
- * set aside on this device under its own invitation id — never shown to
- * another party, restored when that same party opens its code again — and
- * the session itself is cleared, so nothing of one party can reach the next. */
-const PARTY_KEYS = ['siyl.who', 'siyl.guest', 'siyl.bag', 'siyl.temple', 'siyl.docs', 'siyl.sent', 'siyl.skip', 'siyl.skip.by'];
-const PARTY = {
+/* LEAVING (Owner, 13/14 Sep 2026). "Open another invitation" and "Sign out"
+ * both end the session of the guest that is open. What Guest Relations
+ * already received stays received on the server; the guest's local draft is
+ * set aside on this device under their own invitation id — never shown to
+ * another guest, restored when that same guest opens their code again — and
+ * the session itself is cleared, so nothing of one guest can reach the next.
+ * No second code is ever kept: there is nothing to switch to. */
+const GUEST_KEYS = ['siyl.guest', 'siyl.bag', 'siyl.temple', 'siyl.docs', 'siyl.sent', 'siyl.skip', 'siyl.skip.by'];
+const RETIRED_KEYS = ['siyl.who'];
+const GUEST = {
   leave() {
     const a = AUTH.get();
-    if (a && a.invitationId) {
+    if (a && a.invitationId && a.guestId) {
       const draft = {};
-      PARTY_KEYS.forEach((k) => { const v = localStorage.getItem(k); if (v !== null) draft[k] = v; });
+      GUEST_KEYS.forEach((k) => { const v = localStorage.getItem(k); if (v !== null) draft[k] = v; });
       try { localStorage.setItem('siyl.party.' + a.invitationId, JSON.stringify(draft)); } catch (e) {}
     }
-    PARTY_KEYS.forEach((k) => localStorage.removeItem(k));
+    GUEST_KEYS.concat(RETIRED_KEYS).forEach((k) => localStorage.removeItem(k));
     localStorage.removeItem('siyl.draft.owner');
     AUTH.clear();
     try { document.dispatchEvent(new CustomEvent('siyl:signout')); } catch (e) {}
   },
-  restore(invitationId) {
+  restore(invitationId, partyId, guestId) {
     let draft = null;
     try { draft = JSON.parse(localStorage.getItem('siyl.party.' + invitationId) || 'null'); } catch (e) { draft = null; }
-    /* the draft on this device belongs to one party: another party's is never
-     * inherited; the same party re-entering (a stale session, the code typed
-     * once more) keeps everything it had */
     const owner = localStorage.getItem('siyl.draft.owner');
-    if (owner && owner !== invitationId) PARTY_KEYS.forEach((k) => localStorage.removeItem(k));
-    if (draft) Object.keys(draft).forEach((k) => { if (PARTY_KEYS.indexOf(k) >= 0 && localStorage.getItem(k) === null) localStorage.setItem(k, draft[k]); });
+    /* a draft from the retired party model on this device (the party open
+     * when the code was last used, or set aside under the party id) becomes
+     * this guest's own initial state — only where the mapping is unambiguous */
+    let legacy = null;
+    if (partyId && owner === partyId) { legacy = {}; GUEST_KEYS.concat(RETIRED_KEYS).forEach((k) => { const v = localStorage.getItem(k); if (v !== null) legacy[k] = v; }); }
+    else if (partyId) { try { legacy = JSON.parse(localStorage.getItem('siyl.party.' + partyId) || 'null'); } catch (e) { legacy = null; } }
+    /* the draft on this device belongs to one guest: another guest's is never
+     * inherited; the same guest re-entering keeps everything they had */
+    if (owner && owner !== invitationId) GUEST_KEYS.concat(RETIRED_KEYS).forEach((k) => localStorage.removeItem(k));
+    if (draft) Object.keys(draft).forEach((k) => { if (GUEST_KEYS.indexOf(k) >= 0 && localStorage.getItem(k) === null) localStorage.setItem(k, draft[k]); });
+    else if (legacy) migrateLegacy(legacy, partyId, guestId);
     localStorage.removeItem('siyl.party.' + invitationId);
     localStorage.setItem('siyl.draft.owner', invitationId);
   },
 };
+
+/* the retired party draft → this guest's own draft. Per-guest data follows
+ * the guestId; party choices become an individual initial selection only
+ * where the mapping is unambiguous; nothing ambiguous is invented; a party
+ * send is never counted as this guest's send. The result is noted on this
+ * device only. */
+function migrateLegacy(legacy, partyId, guestId) {
+  const parse = (k) => { try { return JSON.parse(legacy[k] || 'null'); } catch (e) { return null; } };
+  const note = { from: partyId, guestId, at: new Date().toISOString(), moved: [] };
+  const g = parse('siyl.guest');
+  if (g) {
+    const mine = (g.guests || {})[guestId];
+    const out = { guests: {} };
+    if (mine) { out.guests[guestId] = { submitted: mine.submitted || {}, profile: {}, history: (mine.history || []).filter((h) => !h.by || h.by === guestId), dress: mine.dress && mine.dress.by === guestId ? mine.dress : null }; note.moved.push('names'); if (mine.dress && mine.dress.by === guestId) note.moved.push('dress'); }
+    /* the profile: only what this guest wrote in their own name; the retired
+     * questions (comfort, anything, access) are not carried */
+    if (mine && mine.profile) {
+      const keep = ['coffeetea', 'treat', 'drink', 'avoid'];
+      const wroteSelf = !(mine.history || []).some((h) => /^profile\./.test(h.field) && h.by && h.by !== guestId);
+      if (wroteSelf) { keep.forEach((k) => { if (mine.profile[k]) out.guests[guestId].profile[k] = mine.profile[k]; }); note.moved.push('profile'); }
+      else note.moved.push('profile:skipped-written-by-another');
+    }
+    /* one party contact → an initial value for this guest, to confirm in step 01 */
+    if (g.party && (g.party.email || g.party.phone)) { out.contact = { email: g.party.email || '', phone: g.party.phone || '' }; note.moved.push('contact'); }
+    localStorage.setItem('siyl.guest', JSON.stringify(out));
+  }
+  const t = parse('siyl.temple');
+  if (t) {
+    const by = (t.by || {})[guestId];
+    const out = { by: {} };
+    if (by) {
+      out.by[guestId] = { attend: by.attend || null, events: by.events || {}, at: by.at, by: guestId };
+      /* the pair decision was one explicit choice for both: it becomes this guest's own, if they attend */
+      if (t.pair && by.attend === 'yes' && (t.pair.off === 'yes' || t.pair.off === 'no')) { out.by[guestId].off = t.pair.off; note.moved.push('sangkhathan'); }
+      note.moved.push('attendance');
+    }
+    localStorage.setItem('siyl.temple', JSON.stringify(out));
+  }
+  const bag = parse('siyl.bag');
+  if (Array.isArray(bag)) {
+    /* per-person lines become one line for this guest; a stay keeps its room
+     * choice and is held in a unit only once the guest chooses their place */
+    const out = bag.filter((x) => x && x.id).map((x) => { const c = Object.assign({}, x); c.qty = 1; delete c.by; return c; });
+    localStorage.setItem('siyl.bag', JSON.stringify(out));
+    if (out.length) note.moved.push('journey:' + out.length);
+  }
+  ['siyl.skip', 'siyl.skip.by'].forEach((k) => { if (legacy[k]) localStorage.setItem(k, legacy[k]); });
+  const d = parse('siyl.docs');
+  if (d) {
+    const out = { guests: {}, consent: {} };
+    if (d.guests && d.guests[guestId]) out.guests[guestId] = d.guests[guestId];
+    if (d.consent && d.consent[guestId] && d.consent[guestId].by === guestId) out.consent[guestId] = d.consent[guestId];
+    localStorage.setItem('siyl.docs', JSON.stringify(out));
+  }
+  localStorage.removeItem('siyl.sent');
+  RETIRED_KEYS.forEach((k) => localStorage.removeItem(k));
+  if (partyId) localStorage.removeItem('siyl.party.' + partyId);
+  try { localStorage.setItem('siyl.migrated', JSON.stringify(note)); } catch (e) {}
+}
 
 /* ---------------- overlay (tea.html visual grammar, shared) ---------------- */
 const CSS = `
@@ -154,9 +222,9 @@ function build() {
     go.disabled = true;
     try {
       const inv = await lookupByToken(code, await loadRecords());
-      if (inv) {
-        AUTH.set(inv);
-        /* the PARTY is open — the shell now asks who is continuing */
+      if (inv && inv.guestId) {
+        await AUTH.set(inv);
+        /* the guest's own invitation is open — the guest IS the session */
         try { document.dispatchEvent(new CustomEvent('siyl:auth')); } catch (e) {}
         err.textContent = '';
         input.value = '';
@@ -189,14 +257,16 @@ window.SIYL_AUTH = AUTH;
 window.SIYL_INVITE = {
   require(fn) {
     const a = AUTH.get();
-    if (a && AUTH.hasNames()) { fn(a); return; }
+    if (a && AUTH.valid()) { fn(a); return; }
     pending = fn;
     open();
   },
-  /* true when a stored session predates the named party */
-  stale() { return !!AUTH.get() && !AUTH.hasNames(); },
-  /* leave this party: the code screen, clean; the party's draft kept aside */
-  leave() { PARTY.leave(); },
+  /* true when a stored session predates the guest-scoped invitations */
+  stale() { return !!AUTH.get() && !AUTH.valid(); },
+  /* leave: the code screen, clean; this guest's draft kept aside */
+  leave() { GUEST.leave(); },
+  /* the bearer for an authenticated write — never the code */
+  bearer() { const a = AUTH.get(); return a && a.bearer ? a.bearer : ''; },
   open,
   close,
 };

@@ -94,7 +94,7 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:22px;margin:40
 .vcs{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#6B6964;margin-left:12px;white-space:nowrap}
 @media (min-width:768px){.pcard{flex:0 0 320px}.pselhint{display:none}}
 </style><link rel="stylesheet" href="assets/desktop.css"><link rel="stylesheet" href="assets/aman.css"></head><body>
-<header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="your-journey.html" aria-label="Your Journey"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
+<header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="cart.html" aria-label="Your Journey"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main><h1>Journeys</h1>
 <p class="jstat" id="jstat"></p>
 <h2>Before the Wedding</h2><p class="win">21 – 27 February 2027</p>
@@ -122,7 +122,8 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:22px;margin:40
 <script src="assets/aman.js"></script>
 <script src="assets/rooms-data.js"></script>
 <script src="assets/pricing.js"></script>
-<script src="assets/inventory.js"></script>
+<script src="assets/rooms.js"></script>
+<script src="assets/stay.js"></script>
 <script src="assets/journey.js"></script>
 <script type="module" src="assets/invite.mjs"></script>
 <script>
@@ -145,7 +146,7 @@ if(gp){gp.addEventListener('click',function(){go(-1)});gx.addEventListener('clic
 /* ---------------- variant products — NO second calculation layer.
  * Every amount below is produced by SIYL_PRICE (assets/pricing.js) from the
  * approved per-person/per-night rate and the number of nights in the window. */
-var P = window.SIYL_PRICE;
+var P = window.SIYL_PRICE, U = window.SIYL_UNITS, ST = window.SIYL_STAY;
 var VSTAY = { 'bkk-stay': 'sathorn', prewed: 'souphattra', wedstay: 'souphattra', kmg: 'kunming', ljg: 'lijiang', kempinski: 'kempinski' };
 /* which window does this room list belong to */
 function boxWin(box){var p=box.closest('.p');return p?p.getAttribute('data-vprod'):null}
@@ -165,7 +166,7 @@ var right, sub='';
 if(q&&r.rate!=null){
   right='<span class="vp">'+P.money(q.total)+'</span>';
   sub = q.hosted>0
-    ? P.money(q.total)+' total per person · '+q.nightsLine+' · second night complimentary'
+    ? P.money(q.total)+' total per person · '+q.nightsLine+' · second night hosted by Haruthai & Suthep'
     : P.money(q.total)+' total per person · '+q.nightsLine+' · '+P.money(r.rate)+' per person / night';
 }else{right='<span class="vr" style="margin:0">On request</span>'}
 var href = changing ? '#' : 'room.html?stay='+sk+'&room='+r.slug;
@@ -261,7 +262,7 @@ var low=open.reduce(function(m,r){return Math.min(m,r.rate)},1e9);
 var lowTotal = low * q0.pay;
 el.textContent = 'From '+P.money(lowTotal)+' total per person · '+q0.nightsLine+
   (q0.nightsCovered ? ' · '+q0.nightsCovered : '')+
-  (q0.hosted>0 ? ' · second night complimentary, hosted by the Bride & Groom'
+  (q0.hosted>0 ? ' · second night hosted by Haruthai & Suthep'
                : ' · from '+P.money(low)+' per person / night');
 });
 /* ---------------- adds are invitation-gated (real engine validation) ------ */
@@ -276,37 +277,36 @@ b.classList.toggle('sel',has)})}
 document.querySelectorAll('[data-add]').forEach(function(b){b.addEventListener('click',function(){
 var it=JSON.parse(b.getAttribute('data-add'));
 if(SIYL_BAG.has(it.id)){SIYL_BAG.remove(it.id);paintAdds();return}
-gated(function(){SIYL_BAG.add(it);paintAdds()})})});
+gated(function(){it.qty=1;SIYL_BAG.put(it);paintAdds()})})});
 document.addEventListener('siyl:bag',paintAdds);paintAdds();
 if(SIYL_BAG.bar)SIYL_BAG.bar();
 
 /* ---------------- journey decisions: selected state, "not joining", context ----
  * The bag stays the only calculation truth — this only shows what is answered. */
 function paintRooms(){
-var St=window.SIYL_STOCK;
 document.querySelectorAll('[data-rooms]').forEach(function(box){
 var win=boxWin(box);if(!win)return;
 var ids=P.ids(win),line=SIYL_BAG.get().filter(function(x){return ids.indexOf(x.id)>=0})[0];
-var qty=(line&&line.qty)||1;
 box.querySelectorAll('.var').forEach(function(a){
 var name=a.getAttribute('data-name'),on=!!(line&&line.meta&&line.meta.indexOf(name)>=0);
 var slug=a.getAttribute('data-room');
 a.classList.toggle('on',on);
 var host=a.querySelector('span[style*="flex:1"]');
 var tag=a.querySelector('.vsel');
-if(on&&!tag){var s2=document.createElement('span');s2.className='vsel';s2.textContent='Selected · in your journey';
+if(on&&!tag){var s2=document.createElement('span');s2.className='vsel';s2.textContent='Current selection'+(line&&line.unitName?' · '+line.unitName:'');
 host.appendChild(s2)}
+if(on&&tag)tag.textContent='Current selection'+(line&&line.unitName?' · '+line.unitName:'');
 if(!on&&tag)tag.remove();
-/* ---- live availability from the shared ledger ---- */
+/* ---- live availability from the room engine ---- */
 var av=a.querySelector('.vav');
-if(St&&St.ready()&&St.tracked(win,slug)){
-  var txt=St.label(win,slug,qty),gone=!St.fits(win,slug,qty)&&!on;
+if(U&&U.ready()&&U.tracked(win,slug)){
+  var txt=U.label(win,slug),gone=!U.fits(win,slug)&&!on;
   /* the row already carries its own "Reserved for …" line — never say it twice */
   if(a.querySelector('.vr')&&/^Reserved/.test(txt))txt='';
   if(!txt){if(av)av.remove();a.classList.toggle('gone',gone);return}
   if(!av){av=document.createElement('span');av.className='vav';host.appendChild(av)}
   av.textContent=txt;
-  av.classList.toggle('low',St.scarce(win,slug)||St.soldOut(win,slug));
+  av.classList.toggle('low',U.scarce(win,slug)||U.soldOut(win,slug));
   a.classList.toggle('gone',gone);
   if(gone){a.setAttribute('aria-disabled','true')}else{a.removeAttribute('aria-disabled')}
 }else if(av){av.remove();a.classList.remove('gone')}
@@ -334,7 +334,7 @@ if(el&&window.SIYL_JOURNEY)el.textContent=SIYL_JOURNEY.statusLine()}
 
 function paintAll(){paintRooms();paintStayActions();paintDecisions();paintStatus()}
 document.addEventListener('siyl:bag',paintAll);
-document.addEventListener('siyl:stock',paintAll);
+document.addEventListener('siyl:units',paintAll);
 paintAll();
 /* a room that is gone must not open as if it could still be chosen */
 document.addEventListener('click',function(e){
@@ -346,16 +346,17 @@ if(a){e.preventDefault();e.stopPropagation()}},true);
 var t=document.getElementById(h.slice(1));if(!t)return;
 setTimeout(function(){t.scrollIntoView({block:'start'});window.scrollBy(0,-90)},60);
 setTimeout(function(){t.scrollIntoView({block:'start'});window.scrollBy(0,-90)},420)})();
-/* ---------------- CHANGE: replace one variant in place, keep everything else */
+/* ---------------- CHOOSE: the place is held in the guest's own name first;
+ * only then does the line replace whatever this window held — never a duplicate */
 function select(win, stay, slug, back){
-gated(function(){
-  /* a change replaces every id this window writes — never a duplicate */
-  P.ids(win).forEach(function(id){SIYL_BAG.remove(id)});
-  P.items(win, slug).forEach(function(it){SIYL_BAG.put(it)});
+ST.select(win, slug).then(function(r){
   paintAll();
-  if(back) location.href='your-journey.html';
+  if(!r.ok){note(win, ST.refusal(r));return}
+  if(back) location.href='your-journey.html#s-'+win;
 });
 }
+function note(win,text){var host=document.getElementById('j-'+win);if(!host)return;var n=host.querySelector('.chgnote.err');
+if(!n){n=document.createElement('p');n.className='chgnote err';n.setAttribute('role','status');host.appendChild(n)}n.textContent=text}
 function wirePicks(box){
 box.querySelectorAll('[data-pick]').forEach(function(a){
 a.addEventListener('click',function(e){
@@ -372,8 +373,8 @@ a.addEventListener('click',function(e){
  * choose is added at once; with several, the rows become the choice, in place.
  * Never a second ADD for a room already in the journey. */
 function eligibleRooms(box){
-var sk=box.getAttribute('data-rooms'),stay=window.SIYL_ROOMS[sk],win=boxWin(box),St=window.SIYL_STOCK;
-return stay.rooms.filter(function(r){return r.rate!=null&&!r.interest&&P.eligible(r)&&!(St&&St.ready()&&St.tracked(win,r.slug)&&!St.fits(win,r.slug,1))})}
+var sk=box.getAttribute('data-rooms'),stay=window.SIYL_ROOMS[sk],win=boxWin(box);
+return stay.rooms.filter(function(r){return r.rate!=null&&!r.interest&&P.eligible(r)&&!(U&&U.ready()&&U.tracked(win,r.slug)&&!U.fits(win,r.slug))})}
 function paintStayActions(){
 document.querySelectorAll('[data-rooms]').forEach(function(box){
 var win=boxWin(box);if(!win)return;
@@ -383,10 +384,11 @@ if(!act||!act.hasAttribute('data-stayact')){act=document.createElement('div');ac
 var ids=P.ids(win),line=SIYL_BAG.get().filter(function(x){return ids.indexOf(x.id)>=0})[0];
 var picking=box.getAttribute('data-picking')==='1',opts=eligibleRooms(box);
 if(line){
-  var room=String(line.meta||'').split(' · ').pop();
-  act.innerHTML='<p class="stsel"><span class="stsel-l">Selected · in your journey</span><b>'+room+'</b></p>'+
-    '<div class="stbtns">'+(opts.length>1?'<button type="button" class="add sel" data-stay-change="'+win+'">'+(picking?'Keep this room':'Change room')+'</button>':'')+
-    '<button type="button" class="stlink" data-stay-remove="'+win+'">Remove from Your Journey</button></div>'+
+  var room=String(line.meta||'').split(' · ').pop(),words=ST.unitWords(line);
+  act.innerHTML='<p class="stsel"><span class="stsel-l">Current selection</span><b>'+room+'</b>'+(words?'<span class="stsel-l" style="margin-top:6px">'+words+'</span>':'')+'</p>'+
+    '<div class="stbtns">'+(opts.length>1?'<button type="button" class="add sel" data-stay-change="'+win+'">'+(picking?'Keep this room':'Change')+'</button>':'')+
+    (ST.held(line)&&U&&U.ready()&&U.tracked(win,line.room)?'<a class="stlink" href="your-journey.html?room='+win+'#s-'+win+'">Change room</a>':'')+
+    '<button type="button" class="stlink" data-stay-remove="'+win+'">Remove</button></div>'+
     (picking?'<p class="chgnote" style="margin:12px 0 0">Tap another room above — it replaces '+room+' in your journey; nothing else changes.</p>':'');
 }else{
   act.innerHTML='<div class="stbtns"><button type="button" class="add" data-stay-add="'+win+'">'+(picking?'Cancel':'Add to Your Journey')+'</button></div>'+
@@ -401,7 +403,7 @@ act.querySelectorAll('[data-stay-add]').forEach(function(b){b.addEventListener('
 act.querySelectorAll('[data-stay-change]').forEach(function(b){b.addEventListener('click',function(){
   var on=box.getAttribute('data-picking')==='1';renderRows(box,!on);paintAll();if(!on)box.scrollIntoView({block:'center'})})});
 act.querySelectorAll('[data-stay-remove]').forEach(function(b){b.addEventListener('click',function(){
-  P.ids(win).forEach(function(id){SIYL_BAG.remove(id)});renderRows(box,false);paintAll()})});
+  ST.remove(win).then(function(){renderRows(box,false);paintAll()})})});
 })}
 if(CHG){
   var host=document.getElementById('j-'+CHG);

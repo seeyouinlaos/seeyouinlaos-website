@@ -1,0 +1,168 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Your Bag · See You In Laos</title>
+<style>
+@font-face{font-family:'PP Editorial Old';src:url('assets/fonts/PPEditorialOld-Ultralight.otf') format('opentype');font-weight:200;font-display:swap}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;font-weight:300;font-size:14px;line-height:1.6}
+.hd{display:grid;grid-template-columns:44px 1fr 44px;align-items:center;padding:14px 20px}
+.hb{width:44px;height:44px;display:flex;flex-direction:column;justify-content:center;gap:5px;background:none;border:0;cursor:pointer}.hb i{display:block;width:20px;height:1.4px;background:#313131}
+.bd{font-family:'PP Editorial Old',serif;font-weight:200;font-size:19px;text-align:center}.bd .dot{color:#8A5A55}
+.bag{width:44px;height:44px;display:flex;align-items:center;justify-content:center;position:relative;color:#313131;text-decoration:none}.bag .bgi{display:block}
+.bb{position:absolute;top:1px;right:0;min-width:14px;height:14px;padding:0 3px;background:#313131;color:#F3EEE7;font-size:8.5px;line-height:1;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;display:none;align-items:center;justify-content:center;box-shadow:0 0 0 2px #F3EEE7;border-radius:1px}
+.cart-foot{position:fixed;left:0;right:0;bottom:0;z-index:55;background:#FCFAF6;border-top:1px solid #DAD9D7;padding:12px 20px calc(12px + env(safe-area-inset-bottom));transform:translateY(100%);transition:transform .26s cubic-bezier(.4,0,.2,1)}
+.cart-foot:not([hidden]){transform:none}
+.cart-foot-in{max-width:640px;margin:0 auto;display:flex;align-items:center;gap:16px}
+.cart-foot-in .p-act{margin-left:auto;width:auto;min-width:0;padding:0 22px}
+.cart-total{font-family:'PP Editorial Old',serif;font-weight:200;font-size:22px;color:#313131}
+body.cart-on{padding-bottom:96px}
+.cart-line{transition:opacity .22s cubic-bezier(.4,0,.2,1),transform .22s cubic-bezier(.4,0,.2,1)}
+.cart-line.cart-out{opacity:0;transform:translateX(-6px)}
+@media (prefers-reduced-motion:reduce){.cart-foot,.cart-line{transition:none}}
+</style>
+<link rel="stylesheet" href="assets/aman.css"><link rel="stylesheet" href="assets/prep.css"></head><body>
+<header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="cart.html" aria-label="Your bag" aria-current="page"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
+<main class="prep-page" id="cart">
+<div class="prep-head">
+  <p class="t-l1" id="cart-own">Your bag</p>
+  <h1 class="t-d1">Your bag</h1>
+  <p class="t-b1 measure" id="cart-lede">What you have chosen so far, with your cost. Change or remove anything here; your journey and Review &amp; Send follow at once.</p>
+</div>
+<div id="page"></div>
+</main>
+<div class="cart-foot" id="cart-foot" hidden><div class="cart-foot-in"><div><p class="t-l1">Your total</p><p class="cart-total" id="cart-total">USD 0</p></div><a class="p-act" id="cart-review" href="review.html">Review your journey</a></div></div>
+<script src="assets/bag.js"></script>
+<script src="assets/shop-menu.js"></script>
+<script src="assets/aman.js"></script>
+<script src="assets/rooms-data.js"></script>
+<script src="assets/pricing.js"></script>
+<script src="assets/guest.js"></script>
+<script src="assets/temple.js"></script>
+<script src="assets/rooms.js"></script>
+<script src="assets/stay.js"></script>
+<script src="assets/seatlabels.js"></script>
+<script src="assets/seating.js"></script>
+<script src="assets/confirm.js"></script>
+<script src="assets/transport-data.js"></script>
+<script src="assets/journey.js"></script>
+<script type="module" src="assets/invite.mjs"></script>
+<script>
+/* ============================================================================
+   YOUR BAG — the cart (Owner decision, 14 Sep 2026). A utility outside the
+   six steps, opened from the bag icon on every page: what the authenticated
+   guest has chosen, grouped, with the date, the current selection, the cost
+   for this guest, and CHANGE · REMOVE · VIEW DETAILS. One total, from the
+   one pricing source. REVIEW YOUR JOURNEY opens 06 · Review & Send when
+   steps 01–05 are complete, and names the first missing item otherwise.
+   Nothing is paid on this website — this is never a payment step.
+   ========================================================================== */
+(function(){
+var G=window.SIYL_GUEST,P=window.SIYL_PRICE,J=window.SIYL_JOURNEY,T=window.SIYL_TEMPLE,ST=window.SIYL_STAY,B=window.SIYL_BAG,page=document.getElementById('page');
+if(!G||!P||!J||!B||!page)return;
+function esc(t){return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function money(n){return 'USD '+Number(n).toLocaleString('en-US')}
+function gated(fn){if(window.SIYL_INVITE){SIYL_INVITE.require(fn)}
+else document.addEventListener('siyl:invite-ready',function(){SIYL_INVITE.require(fn)},{once:true})}
+var calm=!!(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+function segOf(x){return J.SEGMENTS.filter(function(s){return s.ids.indexOf(x.id)>=0})[0]||null}
+function detailHref(x){
+  if(x.stay&&x.room)return 'room.html?stay='+x.stay+'&room='+x.room;
+  if(x.id==='1872'||x.id==='tea1872')return '1872.html';
+  if(x.exp)return 'experience.html?id='+encodeURIComponent(x.exp);
+  if(x.interest&&x.id!=='airbnb-2br')return 'marsilea.html';
+  if(x.id==='sangkhathan')return 'wedding.html#sangkhathan';
+  if(window.SIYL_TRANSPORT&&window.SIYL_TRANSPORT[x.id])return 'transport.html?id='+x.id;
+  var at=P.locate(x.id);
+  if(at&&x.room)return 'room.html?stay='+at.key+'&room='+x.room;
+  return 'journeys.html#j-'+P.windowOf(x.id)}
+/* CHANGE returns the guest to the exact selector of that item */
+function changeHref(x){
+  var seg=segOf(x);
+  if(x.id==='sangkhathan')return 'wedding.html#sangkhathan';
+  if(seg&&seg.cat==='Accommodation')return 'journeys.html?change='+P.windowOf(x.id)+'#j-'+P.windowOf(x.id);
+  if(seg)return 'your-journey.html#s-'+seg.key;
+  if(x.id==='suhring')return 'experience.html?id=bkk-suhring';
+  if(x.id==='tea1872')return '1872.html';
+  if(x.interest)return 'marsilea.html';
+  return detailHref(x)}
+function group(x){
+  var m=J.meta(x);
+  if(x.id==='sangkhathan'||m.cat==='Wedding programme')return 'Wedding';
+  if(m.cat==='Accommodation')return 'Accommodation';
+  if(m.cat==='Transportation')return 'Transport';
+  return 'Experiences & additions'}
+function status(x){
+  var seg=segOf(x);
+  if(x.interest)return 'Interest · Guest Relations confirms times';
+  if(seg&&seg.cat==='Accommodation'){var w=ST.unitWords(x);if(!ST.held(x))return 'Room still to choose';return w||'Current selection'}
+  if(x.cls){var c=P.classOf(x.id,x.cls);return c?c.short+' · Current selection':'Current selection'}
+  if(x.request)return 'Requested through Guest Relations';
+  return 'Current selection'}
+function item(x){
+  var seg=segOf(x),when=J.when(x),m=J.meta(x),held=!(seg&&seg.cat==='Accommodation')||ST.held(x);
+  return '<div class="p-line cart-line" data-line="'+esc(x.id)+'">'+
+    '<a class="p-line-img" href="'+detailHref(x)+'" aria-label="Open '+esc(x.name)+'"'+(B.thumb(x)?' style="background-image:url('+B.thumb(x)+')"':'')+'></a>'+
+    '<div class="p-line-body"><p class="t-l1">'+(when?esc(when):esc(group(x)))+'</p>'+
+    '<h3 class="t-h2">'+esc(x.name)+'</h3><p class="t-b2">'+esc(x.meta||'')+'</p>'+
+    '<p class="t-l1'+(held?' on':' open')+'">'+esc(status(x))+'</p>'+
+    (m.basis&&!x.interest?'<p class="t-b2">'+esc(m.basis)+'</p>':'')+
+    '<div class="p-actions">'+
+      '<a class="p-link" href="'+changeHref(x)+'" data-change="'+esc(x.id)+'">'+(seg&&seg.cat==='Accommodation'&&!held?'Choose your room':'Change')+'</a>'+
+      '<button type="button" class="p-link mute" data-remove="'+esc(x.id)+'">Remove</button>'+
+      '<a class="p-link mute" href="'+detailHref(x)+'">View details</a>'+
+    '</div></div>'+
+    (x.interest?'<p class="p-line-amt"><span class="t-l1">Paid at the spa</span></p>':(x.complimentary?'<p class="p-line-amt"><span class="t-l1">Complimentary</span></p>':'<p class="p-line-amt">'+money(x.price||0)+'</p>'))+'</div>'}
+
+var lastCount=null;
+function render(){
+  var p=G.party(),me=G.me(),foot=document.getElementById('cart-foot');
+  if(!p||!me){
+    page.innerHTML='<div class="p-card"><p class="t-l1">'+(G.stale()?'Once more':'Your invitation')+'</p><h2 class="t-h1">'+(G.stale()?'Open your invitation once more':'Open your invitation')+'</h2>'+
+      '<p class="t-b1 measure">'+(G.stale()?'Your invitation is now personal: every guest has their own code. Enter your code once more — what you chose before stays with you.':'Your bag belongs to your invitation, so we open it first.')+'</p>'+
+      '<p style="margin-top:16px"><button type="button" class="p-act" id="open">Open my invitation</button></p></div>';
+    document.getElementById('open').addEventListener('click',function(){gated(render)});
+    foot.hidden=true;document.body.classList.remove('cart-on');return}
+  document.getElementById('cart-own').textContent='Your bag · '+G.nameOf();
+  var b=J.sorted(B.get());
+  if(!b.length){
+    page.innerHTML='<div class="p-card cart-empty"><p class="t-l1">Your bag is empty</p><h2 class="t-h1">Your Journey choices will appear here as you add them.</h2>'+
+      '<div class="p-actions" style="margin-top:var(--s4)"><a class="p-act" href="your-journey.html">Go to Your Journey</a></div></div>';
+    foot.hidden=true;document.body.classList.remove('cart-on');lastCount=0;return}
+  var groups=['Accommodation','Transport','Wedding','Experiences & additions'],h='';
+  groups.forEach(function(gname){
+    var lines=b.filter(function(x){return group(x)===gname});if(!lines.length)return;
+    h+='<section class="prep-sec cart-group"><p class="t-l1">'+esc(gname)+'</p>'+lines.map(item).join('')+'</section>'});
+  var ready=G.readiness(),first=ready.first;
+  h+='<section class="prep-sec"><div class="p-card cart-sum"><div class="p-total"><span class="t-l1">Your total</span><b id="tt">'+money(B.total())+'</b></div>'+
+     '<p class="t-b2 measure-w">One calculation for the whole website — the same amount on Your Journey, in this bag and on Review &amp; Send. Nothing is paid here.</p>'+
+     (ready.ok?'<div class="p-actions" style="margin-top:var(--s4)"><a class="p-act" href="review.html">Review your journey</a></div>'
+       :'<div class="p-card flat" style="margin-top:var(--s4)"><p class="t-l1 open">Your journey is not ready to review yet</p>'+
+        (first?'<p class="t-b1"><b>'+esc(first.n)+' · '+esc(first.stepLabel)+'</b> · '+esc(first.label)+'</p><div class="p-actions"><a class="p-act quiet" href="'+first.href+'">Complete this</a></div>':'')+'</div>')+
+     '</div></section>';
+  page.innerHTML=h;
+  if(lastCount!==null&&lastCount!==b.length){var sum=page.querySelector('.cart-sum');if(sum)sum.classList.add('p-reveal')}
+  lastCount=b.length;
+  document.getElementById('cart-total').textContent=money(B.total());
+  var rv=document.getElementById('cart-review');
+  rv.setAttribute('href',ready.ok?'review.html':(first?first.href:'your-journey.html'));
+  rv.textContent=ready.ok?'Review your journey':'Complete this first';
+  foot.hidden=false;document.body.classList.add('cart-on');
+  page.querySelectorAll('[data-remove]').forEach(function(bt){bt.addEventListener('click',function(){
+    var id=bt.getAttribute('data-remove'),line=page.querySelector('[data-line="'+id+'"]');
+    bt.disabled=true;bt.textContent='Removing…';
+    var after=function(){if(line&&!calm){line.classList.add('cart-out');setTimeout(render,220)}else render()};
+    if(id==='sangkhathan'&&T&&me){T.setOffering(me.guestId,null);after();return}
+    if(P.locate(id)){ST.remove(P.windowOf(id)).then(after);return}
+    B.remove(id);after()})});
+}
+document.addEventListener('siyl:bag',render);
+document.addEventListener('siyl:guest',render);
+document.addEventListener('siyl:temple',render);
+document.addEventListener('siyl:units',render);
+document.addEventListener('siyl:seats',render);
+document.addEventListener('siyl:auth',render);
+document.addEventListener('siyl:invite-ready',render);
+render();
+if(window.SIYL_SEATS&&G.party())SIYL_SEATS.load();
+})();
+</script>
+</body></html>

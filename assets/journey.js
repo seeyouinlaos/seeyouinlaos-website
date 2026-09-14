@@ -2,7 +2,7 @@
  *
  * Display + decision only. It never calculates a price: every amount on every
  * surface still comes from SIYL_BAG (one calculation truth). What this file adds:
- *   · the chronological arc of the shared journey (Bangkok → … → Bangkok)
+ *   · the chronological arc of the guest's own journey (Bangkok → … → Bangkok)
  *   · the category and the price basis for each product, so a guest never has to
  *     ask "per person? per night? for two?"
  *   · explicit decisions: a stage is answered when it is selected OR when the
@@ -51,7 +51,7 @@
   var WEDDING = [
     { key: 'temple', title: 'Temple Ceremony', when: '08:00 – 12:00',
       place: 'Wat Ong Teu, Vientiane',
-      note: 'Includes the morning alms-giving, Tak Bat. Optional participation — self-pay.',
+      note: 'Guests attending are welcome to take part in Tak Bat, the morning alms-giving — a personal offering, arranged individually on the morning.',
       anchor: 'voyage.html#temple' },
     { key: 'sangkhathan', title: 'Sangkhathan Temple Offering', when: 'Within the Temple Ceremony',
       place: 'Wat Ong Teu, Vientiane', id: 'sangkhathan',
@@ -97,7 +97,7 @@
       return { cat: '', basis: '', unit: 'guest' };
     },
 
-    /* "USD 85 per person × 2 guests" / "1 experience · for two guests" */
+    /* "USD 85 per person" / "1 experience · for two guests" — one guest, one line */
     quantityLine: function (x) {
       var m = this.meta(x), q = x.qty || 1;
       if (x.interest) return '';
@@ -105,7 +105,7 @@
       if (m.unit === 'experience') {
         return q + (q === 1 ? ' experience · for two guests' : ' experiences · for ' + (q * 2) + ' guests');
       }
-      return 'USD ' + x.price + ' per person × ' + q + (q === 1 ? ' guest' : ' guests');
+      return 'USD ' + x.price + ' per person · your cost';
     },
 
     /* the bag reads like an itinerary: chronological position of a line */
@@ -179,18 +179,14 @@
         if (self.manual(seg)) { keep.push(seg.key); return; }
         if (self.isSkipped(seg.key)) self.skip(seg.key, false);
       });
-      /* how many guests this journey is for — the same number the bag carries */
+      /* one guest, one place: the room engine decides what still has a place
+       * for this guest, so Full Experience can never select a full category */
       var qty = 1;
-      if (window.SIYL_BAG) {
-        SIYL_BAG.get().forEach(function (x) { if (x.qty > qty) qty = x.qty; });
-      }
-      /* the approved choice, and only if it is still THERE: the shared ledger
-       * decides, so Full Experience can never select a sold-out room */
       var free = function (win) {
         return function (slug) {
-          var St = window.SIYL_STOCK;
-          if (!St || !St.ready()) return true;      /* ledger unread — do not block */
-          return St.fits(win, slug, qty);
+          var U = window.SIYL_UNITS;
+          if (!U || !U.ready()) return true;      /* engine unread — do not block */
+          return U.fits(win, slug);
         };
       };
       this.soldOutStages = [];
@@ -233,11 +229,11 @@
        nothing.
        ====================================================================== */
     costSavingOptions: function (qty) {
-      var P = window.SIYL_PRICE, St = window.SIYL_STOCK;
-      var guests = Math.max(1, parseInt(qty, 10) || 1);
-      var ready = !!(St && St.ready());
+      var P = window.SIYL_PRICE, U = window.SIYL_UNITS;
+      var guests = 1;
+      var ready = !!(U && U.ready());
       var free = function (win) {
-        return function (slug) { return ready ? St.fits(win, slug, guests) : true; };
+        return function (slug) { return ready ? U.fits(win, slug) : true; };
       };
       var out = [];
 
@@ -253,7 +249,7 @@
         note: 'A hotel stay inside the wedding programme, with Guest Relations support during the Vientiane Wedding Stay.',
         service: [
           'Two nights: 27 → 28 February and 28 February → 01 March',
-          'First night your contribution · second night complimentary, hosted by the Bride & Groom',
+          'First night: your room rate · second night: hosted by Haruthai & Suthep',
           'Breakfast included',
           'Guest Relations support during the Vientiane Wedding Stay'
         ]
@@ -273,8 +269,8 @@
       }
       out.push(hotel);
 
-      /* B · the complimentary residence, if the party still fits */
-      var fits = ready ? St.fits('airbnb-2br', 'private-residence', guests) : true;
+      /* B · the complimentary residence, if a place is still free */
+      var fits = ready ? U.fits('airbnb-2br', 'private-residence') : true;
       out.push({
         key: 'residence',
         eyebrow: 'Cost Saving · Complimentary',
@@ -283,7 +279,7 @@
         stayName: 'Downtown Vientiane',
         dates: '27 February – 01 March 2027',
         amount: 'Complimentary',
-        amountNote: fits ? 'USD 0 payable · up to 6 guests' : 'not enough places for your party',
+        amountNote: fits ? 'Complimentary · up to 6 guests' : 'no place left',
         items: P ? P.items('airbnb-2br', 'private-residence') : [],
         stock: ready ? { win: 'airbnb-2br', slug: 'private-residence' } : null,
         note: 'An independent stay. The wedding programme is yours as it stands; everything around it you arrange yourself.',
@@ -323,10 +319,8 @@
     /* quiet editorial status line — never a progress meter */
     statusLine: function () {
       var n = this.open().length;
-      if (!n) return 'Your journey is complete — every stage has an answer.';
-      return n === 1
-        ? 'Your journey still needs one decision.'
-        : 'Your journey still needs ' + n + ' decisions.';
+      if (!n) return 'Your journey is ready.';
+      return n === 1 ? 'One detail left to choose.' : n + ' details to choose.';
     }
   };
 })();

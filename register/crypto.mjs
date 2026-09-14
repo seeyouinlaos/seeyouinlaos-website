@@ -61,3 +61,22 @@ export async function lookupByToken(token, records) {
   if (inv) inv.token = String(token).trim().toLowerCase();
   return inv;
 }
+
+/* ---- ONE CODE = ONE GUEST (Owner, 14 Sep 2026) --------------------------
+ * The code never leaves the browser. What the Worker sees on a write is the
+ * BEARER — a one-way derivation of the code — and what the deployed index
+ * carries is a further one-way derivation of the bearer (the AUTH ID). The
+ * index therefore reveals nothing usable: knowing an auth id gives neither
+ * the bearer nor the code, and only the guest who typed the code can produce
+ * the bearer the Worker will accept. */
+async function sha256hex(s) {
+  return hex(await subtle.digest('SHA-256', enc.encode(s)));
+}
+/** The bearer a client sends on every authenticated write. */
+export async function bearerOf(token) {
+  return sha256hex('siyl.bearer:' + String(token || '').trim().toLowerCase());
+}
+/** The public index key of a bearer — what register/auth-index.json holds. */
+export async function authIdOf(bearer) {
+  return sha256hex('siyl.auth:' + String(bearer || '').trim().toLowerCase());
+}

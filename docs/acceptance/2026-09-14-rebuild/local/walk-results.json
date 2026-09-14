@@ -1,0 +1,324 @@
+{
+  "origin": "http://127.0.0.1:8788",
+  "at": "2026-09-14T20:28:20.940Z",
+  "pass": 63,
+  "total": 63,
+  "results": [
+    {
+      "id": "H1 one code = one guest",
+      "ok": true,
+      "d": "session is Haruthai alone; the party is context"
+    },
+    {
+      "id": "H2 step 01 onboarding · no SWITCH, name read-only, contact required, six-step roadmap",
+      "ok": true,
+      "d": "see you in laos. YOUR PRIVATE JOURNEY 01 / 06Your Invitation Haruthai · Your par"
+    },
+    {
+      "id": "H2 step 01 · Continue is strict",
+      "ok": true,
+      "d": ""
+    },
+    {
+      "id": "H3 step 01 complete once email + mobile are valid; Continue enabled; ✓ Complete",
+      "ok": true,
+      "d": "COMPLETE"
+    },
+    {
+      "id": "H4 room page · Presidential (Wedding Stay) held for Haruthai · Room A · 1/2",
+      "ok": true,
+      "d": "{\"btn\":\"Remove from Your Journey\",\"av\":\"Your place is held\",\"swap\":\"Current selection · Room A · You · 1 place available\"}"
+    },
+    {
+      "id": "H4 journeys · the hosts see the Presidential as theirs to choose, current selection · Room A",
+      "ok": true,
+      "d": "Souphattra Presidential RESERVED FOR BRIDE & GROOM · YOURS TO CHOOSE USD 750 TOTAL PER PERSON · 2 NIGHTS · SECOND NIGHT HOSTED BY HARUTHAI & SUTHEP CURRENT SELECTION · ROOM A YOUR PLACE IS HELD USD 750 ›"
+    },
+    {
+      "id": "H5 Your Journey · CURRENT SELECTION vocabulary, own room words, no party wording",
+      "ok": true,
+      "d": "see you in laos. 3 YOUR PRIVATE JOURNEY 02 / 06Your Journey Haruthai · Your party · Haruthai & Suthe"
+    },
+    {
+      "id": "H5 Your Journey · total = train 100 + Presidential × 2 windows (one guest)",
+      "ok": true,
+      "d": "USD 2,350"
+    },
+    {
+      "id": "H6 cart · bag icon opens the cart; lines grouped; own total; not ready → first missing item",
+      "ok": true,
+      "d": "wedding.html#ev-temple"
+    },
+    {
+      "id": "H7 step 03 · own answers; Sangkhathan YES = USD 15 in her journey",
+      "ok": true,
+      "d": "Sangkhathan prepared in your name? A personal offering, prepared for you and presented by y"
+    },
+    {
+      "id": "H7 cart · Sangkhathan USD 15 added once; total 115 + rooms",
+      "ok": true,
+      "d": "USD 2,365"
+    },
+    {
+      "id": "H8 step 04 · dress acknowledged in her own name; ceremony fixed front centre (Bride)",
+      "ok": true,
+      "d": ""
+    },
+    {
+      "id": "H8 step 04 · dinner seat chosen on the plan, confirmed, the one YOUR WEDDING SEATS card, the pool in words",
+      "ok": true,
+      "d": "COMPLETE Your wedding seats GUEST Haruthai Amphai TEMPLE CEREMONY Bride · Front centre WEDDING DINNER Seat A1 Long table · run A · place 1 DATE Sunday, 28 Febru · The long table stands beside the swimming pool — which run faces the water will be confirmed by Guest Relations."
+    },
+    {
+      "id": "H9 step 05 · allergy NO completes, photography acknowledged; retired questions gone; 01–05 complete",
+      "ok": true,
+      "d": "complete,complete,complete,complete,complete,attention"
+    },
+    {
+      "id": "H10 View All Steps · ✓ Complete ×5, Review needs attention (ready to send), no OPEN",
+      "ok": true,
+      "d": "01 Your Invitation Name, email and mobile number ✓ COMPLETE 02 Your Journey Every stage answered ✓ COMPLETE 03 The Wedding Every part of the day answered ✓ COMPLETE 04 Wedding Preparation Dress code a"
+    },
+    {
+      "id": "H11 Review & Send · own details, own total = cart total, everything here → send → RECEIVED with the server stamp; button SENT",
+      "ok": true,
+      "d": "RECEIVED Your journey has been received by Guest Relations Sent · 14 Sept 2026 · 22:25 · your time Guest Relations will "
+    },
+    {
+      "id": "H11 the register holds INV-G048",
+      "ok": true,
+      "d": "2026-09-14T20:25:55.973Z"
+    },
+    {
+      "id": "H12 no page errors",
+      "ok": true,
+      "d": ""
+    },
+    {
+      "id": "H13 Open another invitation · session cleared, code screen",
+      "ok": true,
+      "d": ""
+    },
+    {
+      "id": "S1 one code = one guest · Suthep alone · no trace of Haruthai's draft",
+      "ok": true,
+      "d": ""
+    },
+    {
+      "id": "S2 journeys · Suthep sees the Presidential with 1 place left",
+      "ok": true,
+      "d": "Souphattra Presidential RESERVED FOR BRIDE & GROOM · YOURS TO CHOOSE USD 750 TOTAL PER PERSON · 2 NIGHTS · SECOND NIGHT HOSTED BY HARUTHAI & SUTHEP 1 PLACE LEFT USD 750 ›"
+    },
+    {
+      "id": "S3 room page · joins the SAME room as Haruthai · Room A · Haruthai · You · Full",
+      "ok": true,
+      "d": "{\"btn\":\"Remove from Your Journey\",\"av\":\"Your place is held\",\"swap\":\"Current selection · Room A · Haruthai · You · Full\"}"
+    },
+    {
+      "id": "S3 Your Journey · the room chooser: Room A is his and full with both first names; JOIN THIS ROOM on nothing else (one unit)",
+      "ok": true,
+      "d": "Room A Haruthai · You · Full YOUR ROOM"
+    },
+    {
+      "id": "S4 cart · Suthep's own total: Presidential (wedding stay) only, no Sangkhathan, none of Haruthai's lines",
+      "ok": true,
+      "d": "USD 750"
+    },
+    {
+      "id": "S5 step 04 · the plan shows Haruthai's first name on her chair; Suthep's seat confirmed; Groom fixed",
+      "ok": true,
+      "d": "Haruthai"
+    },
+    {
+      "id": "S6 step 05 · allergy YES with details completes",
+      "ok": true,
+      "d": "COMPLETE"
+    },
+    {
+      "id": "S7 Review & Send · his own data, his own total, his own send and stamp",
+      "ok": true,
+      "d": "USD 750"
+    },
+    {
+      "id": "S7 the register holds INV-G049 separately from INV-G048",
+      "ok": true,
+      "d": "2026-09-14T20:26:22.089Z"
+    },
+    {
+      "id": "S7 Haruthai's record untouched by Suthep's send",
+      "ok": true,
+      "d": ""
+    },
+    {
+      "id": "S8 no page errors",
+      "ok": true,
+      "d": ""
+    },
+    {
+      "id": "S9 Sign out · code screen, nothing of Suthep left",
+      "ok": true,
+      "d": ""
+    },
+    {
+      "id": "P1 one code = one guest · Peggy alone, not a host",
+      "ok": true,
+      "d": ""
+    },
+    {
+      "id": "P2 journeys · the Presidential is reserved for Bride & Groom — not Peggy's to choose",
+      "ok": true,
+      "d": "Souphattra Presidential RESERVED FOR BRIDE & GROOM USD 750 TOTAL PER PERSON · 2 NIGHTS · SECOND NIGHT HOSTED BY HARUTHAI & SUTHEP USD 750"
+    },
+    {
+      "id": "P3 room page · The Heritage held for Peggy · Room A · 1/2",
+      "ok": true,
+      "d": "{\"btn\":\"Remove from Your Journey\",\"av\":\"Your place is held\",\"swap\":\"Current selection · Room A · You · 1 place available\"}"
+    },
+    {
+      "id": "P3 engine · Peggy asking for the Presidential with her own bearer is refused with the reason",
+      "ok": true,
+      "d": "reserved for Bride & Groom"
+    },
+    {
+      "id": "P3 engine · Peggy cannot book a room for Steffie",
+      "ok": true,
+      "d": "not your guest"
+    },
+    {
+      "id": "P4 step 04 · ceremony seat required for a temple guest; dinner seat confirmed; names of the hosts visible",
+      "ok": true,
+      "d": "Haruthai,Suthep"
+    },
+    {
+      "id": "P4 step 04 · both seats held → the one card with TEMPLE CEREMONY seat and WEDDING DINNER seat",
+      "ok": true,
+      "d": "COMPLETE Your wedding seats GUEST Peggy Berger TEMPLE CEREMONY Seat A1 Left block · row 1 WEDDING DINNER Seat A3 Long table · run A · place 3 DATE Sunday, 28 February 2027 DOWNLOAD SEAT CONFIRMATION"
+    },
+    {
+      "id": "P5 cart · Peggy's own total = Heritage + Sangkhathan 15, never Steffie's",
+      "ok": true,
+      "d": "USD 160"
+    },
+    {
+      "id": "P6 Review & Send · Peggy's own send",
+      "ok": true,
+      "d": "USD 160"
+    },
+    {
+      "id": "P7 no page errors",
+      "ok": true,
+      "d": ""
+    },
+    {
+      "id": "T1 one code = one guest · Steffie alone",
+      "ok": true,
+      "d": ""
+    },
+    {
+      "id": "T2 room page · Steffie joins Peggy's Room A · Peggy · You · Full",
+      "ok": true,
+      "d": "{\"btn\":\"Remove from Your Journey\",\"av\":\"Your place is held\",\"swap\":\"Current selection · Room A · Peggy · You · Full\"}"
+    },
+    {
+      "id": "T2 Your Journey · five Heritage rooms: A full with both names, B–E available with JOIN / CHOOSE",
+      "ok": true,
+      "d": "Room A Peggy · You · Full YOUR ROOM | Room B 2 places available CHOOSE THIS ROOM | Room C 2 places available CHOOSE THIS ROOM | Room D 2 places available CHOOSE THIS ROOM | Room E 2 places available CHOOSE THIS ROOM"
+    },
+    {
+      "id": "T3 change room · Steffie moves to Room B; Room A keeps Peggy alone",
+      "ok": true,
+      "d": "Room B · You · 1 place available"
+    },
+    {
+      "id": "T3 engine · Room A: Peggy 1/2 · Room B: Steffie 1/2 — never double-booked",
+      "ok": true,
+      "d": ""
+    },
+    {
+      "id": "T3 change back · joins Peggy in Room A again · Full",
+      "ok": true,
+      "d": "ROOM A · PEGGY · YOU · FULL"
+    },
+    {
+      "id": "T4 step 03 · not attending the temple: no Sangkhathan asked, step complete",
+      "ok": true,
+      "d": ""
+    },
+    {
+      "id": "T5 step 04 · no ceremony seat required when not attending; the dinner seat is",
+      "ok": true,
+      "d": "none"
+    },
+    {
+      "id": "T5 step 04 · dinner seat confirmed; Peggy's name on the plan",
+      "ok": true,
+      "d": "Haruthai,Suthep,Peggy"
+    },
+    {
+      "id": "T6 cart · Steffie's own total = Heritage only (no Sangkhathan)",
+      "ok": true,
+      "d": "USD 145"
+    },
+    {
+      "id": "T7 Review & Send · Steffie's own send, separate stamp",
+      "ok": true,
+      "d": ""
+    },
+    {
+      "id": "T7 registers · INV-G001 and INV-G002 received separately",
+      "ok": true,
+      "d": ""
+    },
+    {
+      "id": "T8 the former party code is Peggy's code and nobody else's",
+      "ok": true,
+      "d": ""
+    },
+    {
+      "id": "T9 gate · Review with the acknowledgement undone lands on About You #photo with the reason",
+      "ok": true,
+      "d": "http://127.0.0.1:8788/about-you?from=review#photo"
+    },
+    {
+      "id": "T10 sticky bar · VIEW → Review & Send when 01–05 are complete",
+      "ok": true,
+      "d": ""
+    },
+    {
+      "id": "T11 cart REMOVE · the place is released on the engine, the bag empties, step 02 needs attention",
+      "ok": true,
+      "d": "{\"empty\":true,\"mine\":null,\"st\":\"attention\"}"
+    },
+    {
+      "id": "T11 sticky bar · gone with an empty bag; VIEW would lead to the first missing item",
+      "ok": true,
+      "d": ""
+    },
+    {
+      "id": "T12 room page · the stay chosen again → back beside Peggy in Room A",
+      "ok": true,
+      "d": "Current selection · Room A · Peggy · You · Full"
+    },
+    {
+      "id": "W 320 · no horizontal overflow on the seven private surfaces",
+      "ok": true,
+      "d": ""
+    },
+    {
+      "id": "W 375 · no horizontal overflow on the seven private surfaces",
+      "ok": true,
+      "d": ""
+    },
+    {
+      "id": "W 430 · no horizontal overflow on the seven private surfaces",
+      "ok": true,
+      "d": ""
+    },
+    {
+      "id": "Z no page errors across the four identities",
+      "ok": true,
+      "d": ""
+    }
+  ],
+  "errors": []
+}

@@ -33,7 +33,7 @@ hr{border:0;border-top:1px solid #DAD9D7;margin:0 0 22px}
 .ja-n{font-family:'PP Editorial Old',serif;font-weight:200;font-size:17px;line-height:1.3}
 .ja-m{font-size:11px;color:#6B6964;margin-top:5px}
 </style><link rel="stylesheet" href="assets/desktop.css"><link rel="stylesheet" href="assets/aman.css"></head><body>
-<header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="your-journey.html" aria-label="Your Journey"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
+<header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="cart.html" aria-label="Your Journey"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main>
 <div class="media" style="background:url(assets/images/1872/tea-2.jpg) center/cover no-repeat"></div>
 <section class="panel">
@@ -43,10 +43,7 @@ hr{border:0;border-top:1px solid #DAD9D7;margin:0 0 22px}
 <p class="price">USD 180</p>
 <p class="per">For two guests</p>
 <hr>
-<p class="eyebrow" style="margin-bottom:8px">Quantity</p>
-<div style="display:flex;align-items:center;gap:18px;margin-bottom:8px">
-<button class="qb" id="qm" aria-label="Fewer">−</button><span id="qv" style="font-family:'PP Editorial Old',serif;font-size:19px">1</span><button class="qb" id="qp" aria-label="More">+</button>
-<span id="qt" style="margin-left:auto;font-family:'PP Editorial Old',serif;font-size:15px">USD 180</span></div>
+<p class="per" style="margin-bottom:8px">One experience · your cost</p>
 <a class="tlink" href="1872.html">Discover 1872</a>
 <button class="cta" id="add">Add to Your Journey</button>
 </section>
@@ -55,18 +52,15 @@ hr{border:0;border-top:1px solid #DAD9D7;margin:0 0 22px}
 <div class="ov" id="ov"></div>
 <script>
 var Q=1;var st=new URLSearchParams(location.search).get('state');
-var q0=parseInt(new URLSearchParams(location.search).get('q')||'1',10);if(q0>0)Q=q0;
-function qr(){document.getElementById('qv').textContent=Q;document.getElementById('qt').textContent='USD '+(180*Q)}
+function qr(){}
 
 var ov=document.getElementById('ov');
 /* real invitation gate: validated against the engine (assets/invite.mjs) */
 function gated(fn){if(window.SIYL_INVITE){SIYL_INVITE.require(fn)}
 else document.addEventListener('siyl:invite-ready',function(){SIYL_INVITE.require(fn)},{once:true})}
 function invite(){gated(added)}
-function added(){SIYL_BAG.add({id:'tea1872',name:'Champagne Afternoon Tea at 1872',meta:'For two guests',price:180,unit:true,qty:Q,img:'assets/images/1872/tea-1.jpg'});ov.innerHTML='<p class="eyebrow">Just added to your journey</p><div class="ja-row"><div class="ja-th"></div><div><p class="ja-n">Champagne Afternoon Tea at 1872</p><p class="ja-m">Quantity '+Q+' · USD '+(180*Q)+' · For two guests</p></div></div><a class="cta" style="margin-top:0" href="your-journey.html">View Your Journey</a><p style="text-align:center;margin-top:16px"><a class="tlink" href="#" id="cont">Continue exploring</a></p>';document.body.classList.add('show');var c=document.getElementById('cont');if(c)c.addEventListener('click',function(e){e.preventDefault();document.body.classList.remove('show')})}
+function added(){SIYL_BAG.put({id:'tea1872',name:'Champagne Afternoon Tea at 1872',meta:'For two guests',price:180,unit:true,qty:1,img:'assets/images/1872/tea-1.jpg'});ov.innerHTML='<p class="eyebrow">Just added to your journey</p><div class="ja-row"><div class="ja-th"></div><div><p class="ja-n">Champagne Afternoon Tea at 1872</p><p class="ja-m">USD 180 · For two guests</p></div></div><a class="cta" style="margin-top:0" href="your-journey.html">View Your Journey</a><p style="text-align:center;margin-top:16px"><a class="tlink" href="#" id="cont">Continue exploring</a></p>';document.body.classList.add('show');var c=document.getElementById('cont');if(c)c.addEventListener('click',function(e){e.preventDefault();document.body.classList.remove('show')})}
 qr();
-document.getElementById('qm').addEventListener('click',function(){if(Q>1){Q--;qr()}});
-document.getElementById('qp').addEventListener('click',function(){Q++;qr()});
 document.getElementById('add').addEventListener('click',invite);
 document.getElementById('scrim').addEventListener('click',function(){document.body.classList.remove('show')});
 if(st==='invite'){document.addEventListener('siyl:invite-ready',function(){SIYL_INVITE.open()},{once:true})}

@@ -13,7 +13,8 @@
 (function () {
   'use strict';
   var ORIGIN = 'https://seeyouinlaos-website.suthep-hrg.workers.dev';
-  var API = (location.hostname === 'seeyouinlaos-website.suthep-hrg.workers.dev') ? '/api/status' : ORIGIN + '/api/status';
+  /* the Worker's own origin and a local `wrangler dev` answer at the same path; the Pages mirror asks the Worker */
+  var API = (location.hostname === 'seeyouinlaos-website.suthep-hrg.workers.dev' || /^(localhost|127\.0\.0\.1)$/.test(location.hostname)) ? '/api/status' : ORIGIN + '/api/status';
   var status = null, loading = null;
   function invitationId() {
     try { var a = JSON.parse(localStorage.getItem('siyl.auth') || 'null'); return (a && a.invitationId) || ''; } catch (e) { return ''; }

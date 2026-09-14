@@ -105,7 +105,8 @@
     /* the name in the left column only: a long name is set smaller, never over the invitation */
     var nameSize = 22; while (nameSize > 11 && width(doc.guest.fullName, nameSize, 'F1') > W / 2 - 18) nameSize -= 1;
     p.label(M, y, 'Guest'); p.text(M, y - 22, doc.guest.fullName, 'F1', nameSize);
-    p.label(M + W / 2, y, 'Invitation'); p.text(M + W / 2, y - 20, doc.party.partyName || doc.party.invitationId, 'F1', 13); p.text(M + W / 2, y - 36, doc.party.invitationId, 'F2', 8, MUTE, 1.2);
+    /* the party as context only — never an id, never a code */
+    if (doc.party.partyName && doc.party.members > 1) { p.label(M + W / 2, y, 'Your party'); p.text(M + W / 2, y - 20, doc.party.partyName, 'F1', 13); }
     y -= 60; p.line(M, y, M + W, y); y -= 34;
     doc.seats.forEach(function (s, i) {
       var lab = s.fixed ? fixedWords(s.fixed) + ' · Front Centre' : L.label(s.seatId);
@@ -114,8 +115,8 @@
       p.label(M + W / 2, y, 'Venue'); p.text(M + W / 2, y - 18, L.EVENT_VENUE[s.event], 'F1', 12.5); y -= 44;
       p.label(M, y, 'Seat'); p.text(M, y - 34, lab, 'F1', s.fixed ? 22 : 34);
       if (!s.fixed) p.text(M, y - 50, L.describe(s.seatId), 'F2', 8.5, MUTE, 0.6);
-      p.label(M + W / 2, y, 'Booking reference'); p.text(M + W / 2, y - 20, s.fixed ? 'Front centre · no seat number' : L.ref(doc.party.invitationId, doc.guest.guestId, s.event, s.seatId), 'F2', 11, INK, 1.4);
-      p.label(M + W / 2, y - 40, 'Status'); p.text(M + W / 2, y - 56, 'CONFIRMED', 'F2', 9.5, INK, 2.2);
+      p.label(M + W / 2, y, 'Status'); p.text(M + W / 2, y - 20, s.fixed ? 'FRONT CENTRE' : 'CONFIRMED', 'F2', 9.5, INK, 2.2);
+      p.label(M + W / 2, y - 40, 'Held for'); p.text(M + W / 2, y - 56, doc.guest.preferredName || doc.guest.fullName, 'F2', 9.5, INK, 1.2);
       y -= 76; p.line(M, y, M + W, y); y -= 34;
     });
     /* the words at the foot */
@@ -125,7 +126,7 @@
     p.label(M, 64, 'Downloaded ' + doc.downloadedAt.replace('T', ' ').slice(0, 16) + ' UTC');
     p.label(M + W, 64, 'Sunday, 28 February 2027 · Vientiane, Laos', 'right');
     var title = (doc.seats.length > 1 ? 'Your wedding seats' : L.EVENT_NAME[doc.seats[0].event] + ' seat confirmation') + ' · ' + doc.guest.preferredName;
-    return build([p], { title: title, subject: 'Seat confirmation · ' + doc.party.invitationId });
+    return build([p], { title: title, subject: 'Seat confirmation · ' + (doc.guest.preferredName || doc.guest.fullName) });
   }
   function filename(doc) {
     var who = String(doc.guest.preferredName || 'guest').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'guest';
@@ -155,7 +156,7 @@
     });
     if (!seats.length) return null;
     return { guest: { fullName: names.fullName || g.fullName || g.preferredName || '', preferredName: names.preferredName || g.preferredName || g.fullName || '', guestId: guestId },
-             party: { invitationId: party.invitationId || '', partyName: party.partyName || '' }, seats: seats, downloadedAt: at || new Date().toISOString() };
+             party: { invitationId: party.invitationId || '', partyName: party.partyName || '', members: (party.members || party.guests || []).length }, seats: seats, downloadedAt: at || new Date().toISOString() };
   }
   /* in the browser: read the ledger fresh — a private read that repaints
    * nothing — then hand over the file: never a confirmation of a seat the

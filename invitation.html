@@ -10,7 +10,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 .bb{position:absolute;top:1px;right:0;min-width:14px;height:14px;padding:0 3px;background:#313131;color:#F3EEE7;font-size:8.5px;line-height:1;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;display:none;align-items:center;justify-content:center;box-shadow:0 0 0 2px #F3EEE7;border-radius:1px}
 </style>
 <link rel="stylesheet" href="assets/aman.css"><link rel="stylesheet" href="assets/prep.css"></head><body>
-<header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="your-journey.html" aria-label="Your Journey"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
+<header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="cart.html" aria-label="Your Journey"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main class="prep-page" id="invitation">
 <div id="page"></div>
 </main>
@@ -22,15 +22,20 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/confirm.js"></script>
 <script src="assets/rooms-data.js"></script>
 <script src="assets/pricing.js"></script>
+<script src="assets/rooms.js"></script>
+<script src="assets/seatlabels.js"></script>
+<script src="assets/seating.js"></script>
 <script src="assets/transport-data.js"></script>
 <script src="assets/journey.js"></script>
 <script src="assets/prep-shell.js"></script>
 <script type="module" src="assets/invite.mjs"></script>
 <script>
 /* ============================================================================
-   01 · YOUR INVITATION — the calm opening of the private journey.
-   Whose invitation is this, who am I, what is shared, what is personal, what
-   happens next. Nothing here is a database field.
+   01 · YOUR INVITATION — the onboarding of the private journey (Owner, 14 Sep
+   2026). Who am I · what is this · what happens next · how many steps.
+   The name is the invitation's; the email address and the mobile number are
+   REQUIRED and validated; the step completes when both are valid, and only
+   then does CONTINUE TO YOUR JOURNEY open. Nothing further is shown early.
    ========================================================================== */
 (function(){
 var G=window.SIYL_GUEST,P=window.SIYL_PREP,page=document.getElementById('page');
@@ -38,75 +43,81 @@ if(!G||!page)return;
 function esc(t){return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 function gated(fn){if(window.SIYL_INVITE){SIYL_INVITE.require(fn)}
 else document.addEventListener('siyl:invite-ready',function(){SIYL_INVITE.require(fn)},{once:true})}
-function when(iso){try{return new Date(iso).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}catch(e){return ''}}
 var HERO='<span class="p-media" style="background-image:url(assets/images/event/052-ceremony-green-gateway.jpg)" role="img" aria-label="The green gateway at Souphattra Heritage, Vientiane"></span>';
-var NEXT=[
- ['02','Your Journey','Where your party stays and how it travels, from Bangkok to Vientiane and on to Yunnan.','Required'],
- ['03','The Wedding','Who joins each part of the day — one answer per named guest.','Required'],
- ['04','Wedding Preparation','The dress code, understood and confirmed once, by name — and your seats when seating opens.','Required'],
- ['05','About You','Your dietary requirements, your accessibility &amp; comfort needs and your hospitality profile — answered by each named guest. Travel documents and privacy can follow later.','Required'],
- ['06','Review &amp; Send','Everything in one place. Sending is a request — never a payment, never a confirmation.','Required']
-];
+var calm=!!(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+var wasComplete=null;
 function render(){
-var p=G.party();
-if(!p||!p.guests.length){
+var p=G.party(),me=G.me();
+if(!p||!me){
   page.innerHTML='<div class="prep-head">'+HERO+
     '<p class="t-l1">Sunday, 28 February 2027 · Vientiane, Laos</p>'+
     '<h1 class="t-d1">Your invitation</h1>'+
-    '<p class="t-b1 measure">Open your invitation and we can show you who is travelling with you, and what there is to arrange.</p></div>'+
+    '<p class="t-b1 measure">Open your invitation and your private journey begins — your name, your travel, the wedding day.</p></div>'+
     '<div class="p-card"><p class="t-l1">'+(G.stale()?'Once more':'Your invitation')+'</p>'+
     '<h2 class="t-h1">'+(G.stale()?'Open your invitation once more':'Open your invitation')+'</h2>'+
     '<p class="t-b1 measure">'+(G.stale()
-      ? 'We&rsquo;ve updated your private journey so every choice can now be shown by name. Enter your invitation code once more. Your existing journey choices will remain.'
-      : 'Your invitation carries your names. Everything on this website — your journey, the wedding day, your preferences — belongs to it.')+'</p>'+
+      ? 'Your invitation is now personal: every guest has their own code. Enter your code once more — what you chose before stays with you.'
+      : 'Your invitation carries your name. Everything on this website — your journey, the wedding day, your preferences — belongs to it, and to nobody else.')+'</p>'+
     '<p style="margin-top:var(--s4)"><button type="button" class="p-act" id="open">Open my invitation</button></p></div>';
   document.getElementById('open').addEventListener('click',function(){gated(render)});
   return}
-var me=G.active(),seen=G.identityReviewed(),many=p.guests.length>1;
+var others=G.others(),steps=G.steps('you'),complete=G.done('you');
+var email=G.contact('email'),phone=G.contact('phone'),okE=G.validEmail(email),okP=G.validPhone(phone);
 var h='<div class="prep-head">'+HERO+
-  '<p class="t-l1">Your invitation · '+esc(p.invitationId)+'</p>'+
-  '<h1 class="t-d1">'+esc(p.partyName||G.partyNames())+'</h1>'+
-  '<p class="t-b1 measure">You are invited to join <span class="nb">Haruthai &amp; Suthep</span> in Vientiane for their wedding on Sunday, 28 February 2027.</p>'+
-  '<p class="t-b2 measure-w">This private journey brings together your travel arrangements, the Wedding Day, your personal preferences and the details our Guest Relations team needs to look after you. Nothing on this website is paid for here, and nothing is confirmed until Guest Relations confirms it with you personally.</p>'+
+  '<p class="t-l1">Sunday, 28 February 2027 · Vientiane, Laos</p>'+
+  '<h1 class="t-d1">'+esc(G.nameOf())+', you are invited</h1>'+
+  '<p class="t-b1 measure">Haruthai &amp; Suthep would love you to join them in Vientiane for their wedding on Sunday, 28 February 2027.</p>'+
+  '<p class="t-b2 measure-w">Your private journey: your travel, the wedding day and the details that help us take care of you along the way — all in one place. No payment is taken here. Guest Relations will confirm each arrangement with you personally.</p>'+
   '</div>';
 
-/* YOUR PARTY */
-h+='<section class="prep-sec"><p class="t-l1">Your party</p><h2 class="t-h2">Who travels on this invitation</h2><div class="p-card">';
-p.guests.forEach(function(g){
-  h+='<div class="p-kv"><div><p class="t-b1"><b>'+esc(G.nameOf(g.guestId))+'</b></p><p class="t-b2">'+esc(G.value(g.guestId,'fullName')||g.fullName)+'</p></div><p class="t-l1">Named guest</p></div>'});
-h+='</div></section>';
+/* WHO AM I */
+h+='<section class="prep-sec" id="you"><p class="t-l1">Your name</p><h2 class="t-h2">'+esc(G.value(me.guestId,'fullName')||me.fullName)+'</h2>'+
+   '<p class="t-b2 measure-w">From your invitation'+(others.length?' · Your party · '+esc(G.partyNames())+'. Each of you has your own invitation and your own code; nothing here is answered for anyone else.':'')+'</p></section>';
 
-/* WHO AM I · what is shared · what is personal */
-h+='<section class="prep-sec"><p class="t-l1">Who you are</p><h2 class="t-h2">'+(me?'You are continuing as '+esc(G.nameOf(me.guestId)):'Choose your name')+'</h2>';
-h+='<div class="p-card'+(me?' on':'')+'"><p class="t-l1'+(me?' on':' open')+'">Continuing as</p><h3 class="t-h1">'+(me?esc(G.nameOf(me.guestId)):'&mdash;')+'</h3>'+
-   '<p class="t-b2 measure">'+(me
-     ? 'Your personal answers are kept in your own name.'+(many?' If you are '+esc(p.guests.filter(function(g){return g.guestId!==me.guestId}).map(function(g){return G.nameOf(g.guestId)}).join(' or '))+', switch before you continue.':'')
-     : 'Choose your name so your personal answers are kept in your own name.')+'</p>'+
-   (many||!me?'<p class="p-more"><button type="button" class="p-link" id="switch">'+(me?'Switch':'Choose your name')+'</button></p>':'')+'</div>';
-h+='<div class="p-card"><p class="t-l1">You are making decisions for</p><h3 class="t-h1">'+esc(G.partyNames())+'</h3>'+
-   '<div class="p-kv"><div><p class="t-b1"><b>For your party</b></p><p class="t-b2">Where you stay, how you travel and your costs — shared by everyone on the invitation.</p></div></div>'+
-   '<div class="p-kv"><div><p class="t-b1"><b>Another invitation?</b></p><p class="t-b2">Helping someone with their own invitation, or done here for now? Leave this party — what you have sent stays with Guest Relations, and this invitation opens again with its code.</p><p class="p-more" style="margin-top:var(--s2)"><button type="button" class="p-link" data-leave="another">Open another invitation</button> <button type="button" class="p-link mute" data-leave="out" style="margin-left:16px">Sign out</button></p></div></div>'+
-   '<div class="p-kv"><div><p class="t-b1"><b>'+(many?'For each of you':'For you')+'</b></p><p class="t-b2">The wedding day, the dress code, your preferences and your documents — answered by name'+(many?', and never changed for you without saying so':'')+'.</p></div></div>'+
+/* CONTACT — required, validated */
+h+='<section class="prep-sec" id="contact"><div class="p-block-h"><h2 class="t-h2">Your contact details</h2><p class="t-l1'+(complete?' on':' open')+'" id="contact-state">'+(complete?'<i class="prep-tick" aria-hidden="true"></i> Complete':'Required')+'</p></div>'+
+   '<p class="t-b1 measure">How Guest Relations reaches you about your own arrangements. Both are required.</p>'+
+   '<div class="p-card" style="margin-top:var(--s4)">'+
+   '<div class="p-field" style="margin-top:0"><label class="t-l1" for="p-email">Email <span aria-hidden="true">· required</span></label><input id="p-email" type="email" inputmode="email" autocomplete="email" value="'+esc(email)+'" data-c="email" aria-required="true" aria-invalid="'+(email&&!okE?'true':'false')+'" aria-describedby="e-email">'+
+   '<p class="t-b2" id="e-email" role="status">'+(okE?'<span class="t-l1 on">Looks right</span>':(email?'<span class="t-l1 open">Please check the address</span>':''))+'</p></div>'+
+   '<div class="p-field"><label class="t-l1" for="p-phone">Mobile number <span aria-hidden="true">· required</span></label><input id="p-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+66 …" value="'+esc(phone)+'" data-c="phone" aria-required="true" aria-invalid="'+(phone&&!okP?'true':'false')+'" aria-describedby="e-phone">'+
+   '<p class="t-b2" id="e-phone" role="status">'+(okP?'<span class="t-l1 on">Looks right</span>':(phone?'<span class="t-l1 open">Please include the country code — digits, spaces and + are fine</span>':'With the country code, in any format.'))+'</p></div>'+
    '</div></section>';
 
-/* WHAT HAPPENS NEXT */
-h+='<section class="prep-sec"><p class="t-l1">What happens next</p><h2 class="t-h2">Five more steps</h2><div class="p-card p-steps">';
-NEXT.forEach(function(s){
-  h+='<div class="p-kv"><span class="n">'+s[0]+'</span><div><p class="t-b1"><b>'+s[1]+'</b></p><p class="t-b2">'+s[2]+'</p></div><p class="t-l1'+(s[3]==='Required'?' open':'')+'">'+s[3]+'</p></div>'});
+/* WHAT HAPPENS NEXT — the six steps as they stand, nothing ahead shown as done */
+h+='<section class="prep-sec"><p class="t-l1">What happens next</p><h2 class="t-h2">Six steps, in order</h2>'+
+   '<p class="t-b1 measure">Each step opens once the one before it is complete. You can return to a completed step at any time.</p><div class="p-card p-steps">';
+steps.forEach(function(s){
+  h+='<div class="p-kv"><span class="n">'+s.n+'</span><div><p class="t-b1"><b>'+esc(s.label)+'</b></p><p class="t-b2">'+esc(({you:'Your name and how we reach you.',journey:'Your travel and your stays, from Bangkok to Vientiane and on to Yunnan.',wedding:'Which parts of the wedding day you will join — and the Sangkhathan.',preparation:'The dress code, and your seats at the ceremony and the dinner.',about:'Food allergies, a few favourites, photography.',review:'Everything in one place, sent to Guest Relations.'})[s.key])+'</p></div>'+
+     '<p class="t-l1'+(s.state==='complete'||s.state==='current'?' on':(s.state==='attention'?' open':''))+'">'+(s.state==='complete'?'<i class="prep-tick" aria-hidden="true"></i> Complete':s.state==='current'?'Current':s.state==='attention'?'Needs attention':'Locked')+'</p></div>'});
 h+='</div></section>';
 
-/* the one continuation */
-h+='<div class="prep-foot"><a class="p-link mute" href="you.html#you">Something here is not right</a>'+
-   '<a class="p-act" id="go" href="your-journey.html">Continue to Your Journey</a></div>'+
-   '<p class="t-b2" style="margin-top:var(--s3)">'+(seen&&when(seen.at)?'Your party was confirmed on '+when(seen.at)+'.':'Continuing simply tells us you have seen who travels on this invitation.')+'</p>';
+/* leaving */
+h+='<section class="prep-sec"><p class="t-l1">Another invitation?</p><h2 class="t-h2">Helping someone with theirs?</h2>'+
+   '<p class="t-b1 measure">Every guest has their own code. Open another invitation to continue as someone else; what you have already sent stays with Guest Relations, and yours opens again with your code.</p>'+
+   '<div class="p-actions" style="margin-top:var(--s3)"><button type="button" class="p-link" data-leave="another">Open another invitation</button> <button type="button" class="p-link mute" data-leave="out" style="margin-left:16px">Sign out</button></div></section>';
+
+/* the one continuation — strict */
+h+='<div class="prep-foot"><span></span><button type="button" class="p-act'+(complete?'':' off')+'" id="go" aria-disabled="'+(complete?'false':'true')+'">Continue to Your Journey</button>'+
+   '<p class="t-b2 prep-foot-note" role="status" aria-live="polite"'+(complete?' hidden':'')+'>Add your email address and mobile number to continue.</p></div>';
 page.innerHTML=h;
-var go=document.getElementById('go');
-if(go)go.addEventListener('click',function(){G.setIdentityReviewed(true)});
-var sw=document.getElementById('switch');
-if(sw&&P)sw.addEventListener('click',function(){P.chooseIdentity(!!me)});
+
+/* the completion: the check draws once, when the step becomes complete */
+if(wasComplete===false&&complete){var st=document.getElementById('contact-state');if(st){st.classList.add('p-reveal')}var go=document.getElementById('go');if(go)go.classList.add('p-reveal')}
+wasComplete=complete;
+
+page.querySelectorAll('input[data-c]').forEach(function(i){
+  var save=function(){G.setContact(i.getAttribute('data-c'),i.value.trim())};
+  i.addEventListener('change',function(){save();var f=i.id;render();var n=document.getElementById(f);if(n)try{n.focus({preventScroll:true})}catch(e){}});
+  i.addEventListener('blur',save)});
 page.querySelectorAll('[data-leave]').forEach(function(b){b.addEventListener('click',function(){if(P&&P.leave)P.leave(b.getAttribute('data-leave'))})});
+var go=document.getElementById('go');
+if(go)go.addEventListener('click',function(){
+  var missing=G.missingFor('you');
+  if(missing.length){var note=page.querySelector('.prep-foot-note');if(note){note.hidden=false;note.textContent='Before you continue: '+missing[0].label.toLowerCase()+'.'}go.classList.remove('p-shake');void go.offsetWidth;go.classList.add('p-shake');if(P)P.focusControl('#'+missing[0].href.split('#')[1]);return}
+  go.classList.add('is-done');go.setAttribute('aria-disabled','true');go.innerHTML='<i class="prep-tick big" aria-hidden="true"></i>Complete';
+  setTimeout(function(){location.href=(P?P.hrefOf('your-journey.html'):'your-journey.html')},calm?0:520)});
 }
-document.addEventListener('siyl:who',render);
 document.addEventListener('siyl:guest',render);
 document.addEventListener('siyl:auth',render);
 render();
@@ -114,6 +125,8 @@ render();
  * presented at once, on a clean screen, once the invitation module is ready */
 function autoOpen(){if(/[?&]open=1/.test(location.search)&&window.SIYL_INVITE&&!G.party())setTimeout(function(){SIYL_INVITE.require(render)},380)}
 if(window.SIYL_INVITE)autoOpen();else document.addEventListener('siyl:invite-ready',autoOpen,{once:true});
+/* a deep link to one of the two fields lands on it, open for typing */
+if(/^#p-(email|phone)$/.test(location.hash)&&P)setTimeout(function(){P.focusControl(location.hash)},420);
 if(window.SIYL_BAG&&SIYL_BAG.bar)SIYL_BAG.bar();
 })();
 </script>
