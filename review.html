@@ -53,6 +53,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <div id="soldout"></div>
 <div id="ready"></div>
 <div id="sendbox" class="prep-sec">
+<div id="sent" class="p-card" hidden data-state="" style="margin-bottom:var(--s4)"><p class="t-l1 on">Received</p><h2 class="t-h1" id="sent-h">Your journey has been received by Guest Relations</h2><p class="t-b1" id="sent-at"></p><p class="t-b2 measure-w">A person will read it. Received is not confirmed — Guest Relations confirms every arrangement with you personally. Nothing is paid on this website.</p></div>
 <button type="button" class="p-act" id="send">Send to Guest Relations</button>
 <p class="t-b2" id="err" role="alert" aria-live="polite" style="margin-top:var(--s3)"></p>
 <p class="t-b2 measure-w" style="margin-top:var(--s3)">Sending shares your journey with Guest Relations so a person can look at it. It is a request, never a payment, and it is not a confirmation — Guest Relations confirms every arrangement with you personally.</p>
@@ -93,6 +94,35 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 var SUBMIT_URL='https://seeyouinlaos-website.suthep-hrg.workers.dev/api/register';
 function esc(t){return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 function when(iso){try{return new Date(iso).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}catch(e){return ''}}
+function whenAt(iso){try{var d=new Date(iso);return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})+' · '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}catch(e){return ''}}
+/* THE SEND AREA SAYS WHAT THE SERVER PROVED (Owner, 14 Sep 2026). 'sent' is
+ * painted only after the Worker has answered that the record is stored —
+ * the received stamp is the server's — and only while this device's draft is
+ * the version Guest Relations holds. Anything else is 'ready': the button
+ * offers the send (again). Nothing here claims an email was delivered. */
+function wireAgain(){
+var ag=document.getElementById('again');
+if(ag&&!ag.dataset.wired){ag.dataset.wired='1';
+ag.addEventListener('click',function(){
+  document.getElementById('sendbox').hidden=false;
+  document.getElementById('donebox').hidden=true;
+  paintSend('again');
+  paintReady();
+  document.getElementById('sendbox').scrollIntoView({behavior:'smooth',block:'center'})})}}
+function paintSend(mode,at){
+var box=document.getElementById('sent'),btn=document.getElementById('send');
+if(!box||!btn)return;
+if(mode==='sent'){
+  box.hidden=false;box.setAttribute('data-state','sent');
+  document.getElementById('sent-at').innerHTML='<b>Received</b> · '+esc(whenAt(at))+' · your time';
+  btn.textContent='Sent to Guest Relations';btn.classList.add('sent');btn.setAttribute('aria-disabled','true');btn.setAttribute('data-state','sent');
+  /* the explanation and the way to change stay in reach on every later visit */
+  var d=document.getElementById('donebox'),dm=document.getElementById('donemsg');
+  if(d&&d.hidden){if(dm&&!dm.textContent)dm.textContent='Your journey has been received. Guest Relations works through it and confirms each arrangement with you personally. Nothing is paid on this website.';d.hidden=false;wireAgain()}
+}else{
+  box.hidden=true;box.setAttribute('data-state','');
+  btn.textContent=mode==='again'?'Send to Guest Relations again':'Send to Guest Relations';btn.classList.remove('sent');btn.removeAttribute('aria-disabled');btn.setAttribute('data-state',mode==='again'?'again':'ready');
+}}
 function row(label,value,right,open){
 return '<div class="p-kv"><div><p class="t-b1"><b>'+label+'</b></p>'+(value?'<p class="t-b2">'+value+'</p>':'')+'</div>'+
   (right?'<p class="t-l1'+(open?' open':'')+'">'+right+'</p>':'')+'</div>'}
@@ -293,8 +323,10 @@ var ready=r.ok&&!!SIYL_BAG.get().length;
 btn.disabled=false;
 btn.removeAttribute('aria-disabled');
 btn.setAttribute('aria-describedby','ready');
+/* the send state (sent · again) painted by the server's truth is never overwritten here */
+if(btn.getAttribute('data-state')==='sent'){btn.classList.remove('off');return}
 btn.classList.toggle('off',!ready);
-btn.textContent=ready?'Send to Guest Relations':'Send to Guest Relations — not ready yet';
+btn.textContent=ready?(btn.getAttribute('data-state')==='again'?'Send to Guest Relations again':'Send to Guest Relations'):'Send to Guest Relations — not ready yet';
 }
 
 /* what to say when a guest presses SEND too early */
@@ -327,7 +359,7 @@ var box=document.getElementById('journeystate'),C=window.SIYL_CONFIRM,G=window.S
 if(!box||!C||!G||!G.party()){if(box)box.innerHTML='';return}
 var st=C.state(),p=G.party(),send=document.getElementById('sendbox');
 document.body.classList.toggle('journey-confirmed',st==='confirmed');
-if(st==='none'){box.innerHTML='';if(send)send.hidden=false;return}
+if(st==='none'){box.innerHTML='';if(send)send.hidden=false;paintSend('ready');return}
 if(st==='received'){
   box.innerHTML='<div class="p-card"><p class="t-l1 on">Journey received</p><h2 class="t-h1">Guest Relations has your journey</h2>'+
     '<p class="t-b1 measure">Received on '+when(C.receivedAt())+'. A person will read it. Received is not confirmed: Guest Relations confirms every arrangement with you personally, and until then nothing in your journey is final. You can still change anything below and send it again.</p></div>';
@@ -336,7 +368,11 @@ if(st==='received'){
    * one: a stale read of the record, or another device's clock behind this one,
    * must never be announced as a newer version */
   if(sn&&sn.invitationId===p.invitationId&&sn.at&&C.receivedAt()&&C.receivedAt()>sn.at)box.innerHTML+='<div class="p-card" style="margin-top:var(--s3)"><p class="t-l1 open">A newer version was sent from another device</p><p class="t-b2 measure">Guest Relations holds the journey sent on '+when(C.receivedAt())+' from another device, which replaced the one sent here on '+when(sn.at)+'. What you see below is this device\'s draft. Send again from here only if you want it to replace that newer version.</p></div>';
-  else if(sn&&sn.invitationId===p.invitationId&&fingerprint(snapshotNow())!==fingerprint(sn))box.innerHTML+='<div class="p-card" style="margin-top:var(--s3)"><p class="t-l1 open">Changed since you sent it</p><p class="t-b2 measure">Something has changed here since '+when(sn.at)+'. Send your journey again so Guest Relations has the newer version — the newer one replaces the earlier one.</p></div>';
+  var newer=!!(sn&&sn.invitationId===p.invitationId&&sn.at&&C.receivedAt()&&C.receivedAt()>sn.at);
+  var changedHere=!!(sn&&sn.invitationId===p.invitationId&&fingerprint(snapshotNow())!==fingerprint(sn));
+  /* this device sent the version Guest Relations holds and nothing changed since → SENT; otherwise the send (again) is offered */
+  paintSend(sn&&sn.invitationId===p.invitationId&&!newer&&!changedHere?'sent':(sn&&sn.invitationId===p.invitationId?'again':'ready'),C.receivedAt());
+  if(!newer&&changedHere)box.innerHTML+='<div class="p-card" style="margin-top:var(--s3)"><p class="t-l1 open">Changed since you sent it</p><p class="t-b2 measure">Something has changed here since '+when(sn.at)+'. Send your journey again so Guest Relations has the newer version — the newer one replaces the earlier one.</p></div>';
 if(send)send.hidden=false;return}
 /* CONFIRMED · painted from the snapshot taken when the journey was SENT from
  * this device (siyl.sent). The live draft is never shown under a confirmed
@@ -496,6 +532,7 @@ else document.addEventListener('siyl:invite-ready',function(){SIYL_INVITE.requir
 
 document.getElementById('send').addEventListener('click',function(){
 var G=window.SIYL_GUEST;
+if(this.getAttribute('aria-disabled')==='true')return;   /* already sent, nothing changed since */
 if(!SIYL_BAG.get().length||!G||!G.party()||!G.readiness().ok){blockSend();return}
 gated(async function(auth){
 var btn=document.getElementById('send'),err=document.getElementById('err');
@@ -533,21 +570,21 @@ registration_submitted_at:new Date().toISOString()};
 try{
 var r=await fetch(SUBMIT_URL,{method:'POST',headers:{'content-type':'application/json'},
 body:JSON.stringify({registration:registration,invitationId:auth.invitationId,text:text})});
-if(r.ok){document.getElementById('sendbox').hidden=true;
-rememberSent(registration.registration_submitted_at);
-if(window.SIYL_CONFIRM)SIYL_CONFIRM.noteReceived(registration.registration_submitted_at);
+if(r.ok){
+/* the server has stored the record: that, and only that, is the success —
+ * said at once, around the button the guest pressed, with the server's stamp */
+var ans=null;try{ans=await r.json()}catch(e0){}
+var at=(ans&&ans.submittedAt)||registration.registration_submitted_at;
+rememberSent(at);
+if(window.SIYL_CONFIRM)SIYL_CONFIRM.noteReceived(at);
+btn.disabled=false;paintSend('sent',at);
 var d=document.getElementById('donebox');d.hidden=false;
 document.getElementById('donemsg').textContent=hold.unreachable
  ? 'Your journey has been received. The room ledger could not be reached, so no room is held yet — Guest Relations checks availability and comes back to you personally. Nothing is paid on this website.'
  : 'Your journey has been received, and your rooms are held in your name while Guest Relations works through it. A held room is not yet confirmed — Guest Relations confirms each arrangement with you personally. Nothing is paid on this website.';
-d.scrollIntoView({behavior:'smooth',block:'center'});
-var ag=document.getElementById('again');
-if(ag&&!ag.dataset.wired){ag.dataset.wired='1';
-ag.addEventListener('click',function(){
-  document.getElementById('sendbox').hidden=false;
-  d.hidden=true;
-  paintReady();
-  document.getElementById('sendbox').scrollIntoView({behavior:'smooth',block:'center'})})}
+document.getElementById('sent').scrollIntoView({behavior:'smooth',block:'center'});
+try{document.getElementById('sent').setAttribute('tabindex','-1');document.getElementById('sent').focus({preventScroll:true})}catch(e1){}
+wireAgain();
 return}
 }catch(e){/* endpoint unreachable — emergency channel below */}
 if(!hold.unreachable&&window.SIYL_STOCK){try{await SIYL_STOCK.release()}catch(e2){}}

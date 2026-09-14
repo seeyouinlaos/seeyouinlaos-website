@@ -347,7 +347,7 @@ test('J/K · changing a confirmed Cost Saving stay is atomic and never loses the
   assert.match(client, /reserveLines: function/);
   /* the ledger itself replaces an invitation's own allocation in one turn */
   const ledger = readFileSync(join(ROOT, 'src/inventory.js'), 'utf8');
-  assert.match(ledger, /snapshot\(invitationId\)/, 'a re-reservation must exclude the invitation itself');
+  assert.match(ledger, /snapshot\(invitationId, invitationId\)/, 'a re-reservation must exclude the invitation itself — and read the ledger as that party');
   assert.match(ledger, /blockConcurrencyWhile/);
 });
 
@@ -358,7 +358,7 @@ test('L · with both choices gone, Cost Saving cannot be confirmed', () => {
   assert.match(yj, /getElementById\('fxg'\)\.disabled=true/);
 });
 
-test('M/N · Cost Saving → Full removes whichever stay was taken, and 2,130 stands', () => {
+test('M/N · Cost Saving → Full removes whichever stay was taken, and 2,155 stands', () => {
   const w = shop();
   const P = w.SIYL_PRICE;
   const plan = w.SIYL_JOURNEY.fullExperience();
@@ -369,5 +369,5 @@ test('M/N · Cost Saving → Full removes whichever stay was taken, and 2,130 st
   assert.equal(wed.room, 'heritage-grand-premier');
   assert.equal(wed.price, 170);
   assert.ok(!plan.add.some((x) => x.id === 'airbnb-2br'));
-  assert.equal(plan.add.reduce((t, x) => t + (x.price || 0), 0), 2130);
+  assert.equal(plan.add.reduce((t, x) => t + (x.price || 0), 0), 2155);
 });

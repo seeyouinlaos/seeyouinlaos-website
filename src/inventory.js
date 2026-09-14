@@ -18,7 +18,7 @@
    key and a number of units. Nothing else.
    ========================================================================== */
 
-import { SEED, unitsFor, sellable } from './inventory-seed.js';
+import { SEED, unitsFor, sellable, heldForParty } from './inventory-seed.js';
 
 const ALLOC = 'alloc:';
 
@@ -37,7 +37,9 @@ export class Inventory {
   }
 
   /* --- derived remaining stock, the only place a total is computed ------ */
-  async snapshot(exceptInvitation) {
+  /* the ledger as one party sees it: `forInvitation` unlocks what is held for
+   * that party (the couple's own categories), nothing else changes */
+  async snapshot(exceptInvitation, forInvitation) {
     const allocs = await this.allocations();
     const used = {};
     for (const [inv, rec] of Object.entries(allocs)) {
@@ -49,14 +51,16 @@ export class Inventory {
     const items = {};
     for (const key of Object.keys(SEED)) {
       const s = SEED[key];
-      const cap = sellable(key);
+      const own = heldForParty(key, forInvitation);
+      const cap = sellable(key, forInvitation);
       const taken = used[key] || 0;
       items[key] = {
         unit: s.unit,
         occupancy: s.occupancy || null,
         capacity: s.capacity,
-        held: s.held || 0,
+        held: own ? 0 : (s.held || 0),
         heldFor: s.heldFor || null,
+        heldForYou: own,
         allocated: taken,
         remaining: Math.max(0, cap - taken),
         soldOut: cap - taken <= 0,
@@ -71,7 +75,9 @@ export class Inventory {
     const op = url.pathname.replace(/^.*\/api\/inventory\/?/, '') || 'read';
 
     if (op === 'read') {
-      const snap = await this.snapshot(null);
+      /* ?invitation=INV-nnn reads the ledger as that party sees it */
+      const asking = String(url.searchParams.get('invitation') || '').trim() || null;
+      const snap = await this.snapshot(null, asking);
       return json({ ok: true, ...snap });
     }
 
@@ -86,7 +92,7 @@ export class Inventory {
       return await this.state.blockConcurrencyWhile(async () => {
         /* an invitation re-submitting replaces its OWN allocation, so its
          * existing rooms are not counted against it a second time */
-        const snap = await this.snapshot(invitationId);
+        const snap = await this.snapshot(invitationId, invitationId);
 
         const want = [];
         for (const l of lines) {
@@ -109,13 +115,13 @@ export class Inventory {
           }));
 
         if (conflicts.length) {
-          const after = await this.snapshot(null);
+          const after = await this.snapshot(null, invitationId);
           return json({ ok: false, error: 'sold out', conflicts, ...after }, 409);
         }
 
         const record = { invitationId, lines: want, at: new Date().toISOString() };
         await this.sql.put(ALLOC + invitationId, record);
-        const after = await this.snapshot(null);
+        const after = await this.snapshot(null, invitationId);
         return json({ ok: true, reserved: want, ...after });
       });
     }
@@ -126,7 +132,7 @@ export class Inventory {
       if (!invitationId) return json({ ok: false, error: 'invalid release' }, 400);
       return await this.state.blockConcurrencyWhile(async () => {
         await this.sql.delete(ALLOC + invitationId);
-        const after = await this.snapshot(null);
+        const after = await this.snapshot(null, invitationId);
         return json({ ok: true, released: invitationId, ...after });
       });
     }

@@ -42,9 +42,9 @@ test('FULL EXPERIENCE keeps a manual choice: U Sathorn stays U Sathorn', () => {
   /* every other stage was open and is now filled with the approved default */
   for (const s of J.SEGMENTS) assert.ok(lineOf(w, s.key), s.key + ' filled');
   assert.equal(J.open().length, 0);
-  /* the total is what the retained choices come to — not the canonical 2,130 */
+  /* the total is what the retained choices come to — not the canonical 2,155 */
   const total = B.get().reduce((t, x) => t + (x.price || 0) * (x.qty || 1), 0);
-  const canonical = 2130, penthouse = P.quote('bkk-stay', 'penthouse').total, usathorn = P.quote('bkk-stay', 'u-sathorn-superior-garden').total;
+  const canonical = 2155, penthouse = P.quote('bkk-stay', 'penthouse').total, usathorn = P.quote('bkk-stay', 'u-sathorn-superior-garden').total;
   assert.equal(total, canonical - penthouse + usathorn, 'total follows the retained real selections');
 });
 
