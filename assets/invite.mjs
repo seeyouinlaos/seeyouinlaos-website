@@ -53,7 +53,9 @@ const AUTH = {
       partyLead: inv.partyLead || '',
       guests: (inv.guests || [])
         .filter((g) => (g.status || 'ACTIVE') === 'ACTIVE')
-        .map((g) => ({ guestId: g.guestId, fullName: g.fullName, preferredName: g.preferredName || g.fullName })),
+        .map((g) => ({ guestId: g.guestId, fullName: g.fullName, preferredName: g.preferredName || g.fullName,
+          /* the hosts' roles at the ceremony (Bride, Groom) — explicit in the private list, never inferred */
+          ...(g.hostRole === 'BRIDE' || g.hostRole === 'GROOM' ? { hostRole: g.hostRole } : {}) })),
       /* E · explicit eligibility only; anything else is unresolved (null) */
       givingEligibility: inv.givingEligibility === 'PAIR' || inv.givingEligibility === 'NONE' ? inv.givingEligibility : null,
       /* the hosts' own party (explicit in the private list, never inferred) */

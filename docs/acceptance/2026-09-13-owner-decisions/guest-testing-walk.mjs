@@ -121,23 +121,29 @@ for (const W of [390, 1280]) {
   note('3 route@' + W + ' lands on the seats, for Peggy, both maps titled to the task, couple at the front', /wedding-preparation/.test(landed.file) && landed.below && landed.who === P.guestId && landed.cards.join('|') === 'ceremony:open:Choose your ceremony seat|dinner:open:Choose your dinner seat' && landed.bride === 1 && landed.dinnerFixed === 0, JSON.stringify(landed));
   const bride = await p.evaluate(() => { const g = document.querySelector('[data-ev="ceremony"] g.fixed'); return { label: g.getAttribute('aria-label'), selectable: !!g.getAttribute('data-seat') || g.getAttribute('role') === 'button', chairs: document.querySelectorAll('[data-ev="ceremony"] g.seat').length }; });
   note('3 ceremony@' + W + ' BRIDE and GROOM: front centre, never selectable, not counted', bride.label === 'BRIDE and GROOM, fixed positions at the front centre' && !bride.selectable && bride.chairs === 50, JSON.stringify(bride));
-  await p.locator('[data-ev="ceremony"] g[data-seat="C-L-02-01"]').click(); await p.waitForTimeout(600);
-  await p.locator('[data-ev="dinner"] g[data-seat="D-T-03"]').click(); await p.waitForTimeout(600);
-  const booked = await p.evaluate(() => [...document.querySelectorAll('[data-seatmap]')].map((c) => c.dataset.seatmap + ':' + c.dataset.state + ':' + c.querySelector('h3').textContent.trim() + ':' + (c.querySelector('.t-l1').textContent.replace(/\s+/g, ' ').trim().slice(0, 40))));
-  note('3 booked@' + W + ' state: Your seat · held in Peggy\'s name · change by tapping another chair', /^ceremony:booked:Your ceremony seat:Held in Peggy.s name · Left side · row 2/.test(booked[0]) && /^dinner:booked:Your dinner seat:Held in Peggy.s name · Long table · top/.test(booked[1]) && /To change it, tap another available chair/.test(await txt(p, '[data-seatmap="ceremony"]')), booked.join(' | '));
-  /* change seat: tap another chair — the old one is released */
-  await p.locator('[data-ev="ceremony"] g[data-seat="C-R-05-02"]').click(); await p.waitForTimeout(600);
-  note('3 change seat@' + W, holds['ceremony:C-R-05-02'] && holds['ceremony:C-R-05-02'].guestId === P.guestId && !holds['ceremony:C-L-02-01'], 'C-L-02-01 → C-R-05-02');
+  /* 002 (14 Sep): the booking is two steps — tap a chair (nothing held), read the summary, CONFIRM; then the confirmation, CONTINUE */
+  const book = async (ev, seatId) => { await p.locator('[data-ev="' + ev + '"] g[data-seat="' + seatId + '"]').click(); await p.waitForTimeout(400); const pend = !holds[ev + ':' + seatId]; await p.locator('.p-seatbar.on [data-seat-confirm="' + ev + '"]').click(); await p.waitForTimeout(700); const conf = await txt(p, '[data-seatmap="' + ev + '"][data-state="confirmed"]'); await p.locator('[data-seat-continue="' + ev + '"]').click(); await p.waitForTimeout(500); return { pend, conf }; };
+  const b1 = await book('ceremony', 'C-L-02-01'), b2 = await book('dinner', 'D-T-03');
+  note('3 two-step@' + W + ' nothing held on the tap, held on CONFIRM, the confirmation says guest · event · seat A2 / A3 · reference', b1.pend && b2.pend && /SEAT CONFIRMED/i.test(b1.conf) && /Peggy Berger/.test(b1.conf) && /Temple Ceremony/.test(b1.conf) && /\bA2\b/.test(b1.conf) && /SYL-TC-A2-/.test(b1.conf) && /Wedding Dinner/.test(b2.conf) && /\bA3\b/.test(b2.conf) && /Download seat confirmation/i.test(b1.conf), (b1.conf + ' || ' + b2.conf).slice(0, 300));
+  const booked = await p.evaluate(() => [...document.querySelectorAll('[data-seatmap]')].map((c) => c.dataset.seatmap + ':' + c.dataset.state + ':' + c.querySelector('h3').textContent.trim() + ':' + (c.querySelector('.t-l1').textContent.replace(/\s+/g, ' ').trim().slice(0, 40)) + ':' + (c.querySelector('.p-seatlabel')?.dataset.seatLabel || '')));
+  note('3 booked@' + W + ' state: seat confirmed · A2 / A3 by label · Change seat offered', /^ceremony:booked:Your ceremony seat:Seat confirmed:A2$/.test(booked[0]) && /^dinner:booked:Your dinner seat:Seat confirmed:A3$/.test(booked[1]) && (await p.locator('[data-seat-change="ceremony"]').count()) === 1 && !/C-L-02-01|D-T-03/.test(await txt(p, '#seatbox')), booked.join(' | '));
+  /* change seat: CHANGE SEAT → tap another chair → CONFIRM CHANGE; the old one stays until the new hold succeeds */
+  await p.locator('[data-seat-change="ceremony"]').click(); await p.waitForTimeout(400);
+  await p.locator('[data-ev="ceremony"] g[data-seat="C-R-05-02"]').click(); await p.waitForTimeout(400);
+  const chg = await txt(p, '.p-seatbar.on');
+  const stillOld = holds['ceremony:C-L-02-01'] && holds['ceremony:C-L-02-01'].guestId === P.guestId && !holds['ceremony:C-R-05-02'];
+  await p.locator('.p-seatbar.on [data-seat-confirm="ceremony"]').click(); await p.waitForTimeout(700); await p.locator('[data-seat-continue="ceremony"]').click(); await p.waitForTimeout(400);
+  note('3 change seat@' + W + ' A2 → E5: summary names current and new, old authoritative until confirmed, then atomic', /Current seat A2 · New seat E5/.test(chg) && stillOld && holds['ceremony:C-R-05-02'] && holds['ceremony:C-R-05-02'].guestId === P.guestId && !holds['ceremony:C-L-02-01'], chg.slice(0, 160));
   /* Steffie books her own; cannot take Peggy's */
-  await p.locator('[data-seat-who="' + S.guestId + '"]').click(); await p.waitForTimeout(400);
-  const peggyChair = await p.evaluate(() => { const g = document.querySelector('[data-ev="dinner"] g[aria-label*="place 3"]'); return g ? g.getAttribute('aria-disabled') === 'true' && !g.getAttribute('data-seat') : null; });
-  await p.locator('[data-ev="dinner"] g[data-seat="D-T-04"]').click(); await p.waitForTimeout(600);
-  note('3 two guests@' + W + ' independent seats, duplicate refused', peggyChair === true && holds['dinner:D-T-04'] && holds['dinner:D-T-04'].guestId === S.guestId && holds['dinner:D-T-03'].guestId === P.guestId, 'Peggy D-T-03 · Steffie D-T-04');
+  await p.locator('[data-seat-who="' + S.guestId + '"]').first().click(); await p.waitForTimeout(400);
+  const peggyChair = await p.evaluate(() => { const g = document.querySelector('[data-ev="dinner"] g[data-label="A3"]'); return g ? g.getAttribute('aria-disabled') === 'true' && !g.getAttribute('data-seat') && /Dinner seat A3, Peggy.s seat/.test(g.getAttribute('aria-label')) : null; });
+  await book('dinner', 'D-T-04');
+  note('3 two guests@' + W + ' independent seats, duplicate refused', peggyChair === true && holds['dinner:D-T-04'] && holds['dinner:D-T-04'].guestId === S.guestId && holds['dinner:D-T-03'].guestId === P.guestId, 'Peggy A3 · Steffie A4');
   await p.goto(ORIGIN + '/wedding.html', { waitUntil: 'networkidle' }); await p.waitForTimeout(900);
   const route2 = await p.evaluate(() => [...document.querySelectorAll('#seats-route [data-seat-cta]')].map((a) => a.getAttribute('data-seat-cta') + ':' + a.dataset.state + ':' + a.textContent.trim()));
-  note('3 wedding@' + W + ' shows booked seats with Change seat', route2.filter((r) => /:booked:Change seat$/.test(r)).length === 3 && route2.filter((r) => /^ceremony:open:Choose your ceremony seat$/.test(r)).length === 1 && /C-R-05-02/.test(await txt(p, '#seats-route')), route2.join(' | '));
+  note('3 wedding@' + W + ' shows booked seats by label with Change seat and the download', route2.filter((r) => /:booked:Change seat$/.test(r)).length === 3 && route2.filter((r) => /^ceremony:open:Choose your ceremony seat$/.test(r)).length === 1 && /Seat E5/i.test(await txt(p, '#seats-route')) && !/C-R-05-02|D-T-0/.test(await txt(p, '#seats-route')) && (await p.locator('#seats-route [data-seat-pass]').count()) >= 3, route2.join(' | '));
   const rev = await p.goto(ORIGIN + '/review.html', { waitUntil: 'networkidle' }).then(() => p.waitForTimeout(900)).then(() => txt(p, 'main'));
-  note('3 review@' + W + ' seats by the ledger, per guest', /C-R-05-02/.test(rev) && /D-T-03/.test(rev) && /D-T-04/.test(rev) && /Choose your ceremony seat/i.test(rev), 'Peggy 2 seats · Steffie dinner + open ceremony link · ' + (rev.match(/Ceremony seat[^]{0,120}/g) || []).join(' || ').slice(0, 260));
+  note('3 review@' + W + ' seats by the ledger, per guest, by label with the reference', /Seat E5/i.test(rev) && /Seat A3/i.test(rev) && /Seat A4/i.test(rev) && /SYL-TC-E5-/.test(rev) && !/C-R-05-02|D-T-03|D-T-04/.test(rev) && /Choose your ceremony seat/i.test(rev), 'Peggy 2 seats · Steffie dinner + open ceremony link · ' + (rev.match(/Ceremony seat[^]{0,120}/gi) || []).join(' || ').slice(0, 260));
   note('3 errors@' + W, errs.length === 0, errs.slice(0, 2).join(' | ') || 'none');
   await ctx.close();
 }
@@ -175,7 +181,7 @@ for (const W of [390, 1280]) {
   note('4 the hosts: ceremony = front centre for both, dinner chosen like everyone', hosts.front >= 2 && hosts.ceremonyCta === 0 && hosts.dinnerCta === 2, JSON.stringify(hosts));
   await p.goto(ORIGIN + '/wedding-preparation.html#seats', { waitUntil: 'networkidle' }); await p.waitForTimeout(900);
   const hostCards = await p.evaluate(() => [...document.querySelectorAll('[data-seatmap]')].map((c) => c.dataset.seatmap + ':' + (c.dataset.hosts || c.dataset.state) + ':' + c.querySelector('h3').textContent.trim()));
-  note('4 hosts on step 04: no ceremony map, dinner map open', hostCards.join('|') === 'ceremony:true:Your ceremony seat|dinner:open:Choose your dinner seat' && (await p.locator('[data-ev="ceremony"]').count()) === 0 && (await p.locator('[data-ev="dinner"] g.seat').count()) === 50, hostCards.join(' | '));
+  note('4 hosts on step 04: no ceremony map, front centre by role, dinner map open', hostCards.join('|') === 'ceremony:true:Your ceremony place|dinner:open:Choose your dinner seat' && /Front centre · (Bride|Groom)/i.test(await txt(p, '[data-seatmap="ceremony"]')) && (await p.locator('[data-ev="ceremony"]').count()) === 0 && (await p.locator('[data-ev="dinner"] g.seat').count()) === 50, hostCards.join(' | '));
   /* SWITCH stays inside the party */
   await tap(p, '.prep-bar [data-switch]'); await p.waitForSelector('.p-drawer:not([hidden])'); await p.waitForTimeout(200);
   const who = await p.evaluate(() => [...document.querySelectorAll('.p-drawer [data-who]')].map((b) => b.textContent.trim()));
