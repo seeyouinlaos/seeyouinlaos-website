@@ -86,11 +86,12 @@ test('the journey is the authoritative chronology, never insertion order', () =>
 test('the shared journey selection appears once on every surface', () => {
   const yj = read('your-journey.html'), rv = read('review.html');
   /* one Bangkok line, one fare line, one C86 line: a change REPLACES */
-  assert.match(yj, /P\.ids\('bkk-stay'\)\.forEach\(function\(id\)\{SIYL_BAG\.remove\(id\)\}\);\s*P\.items\('bkk-stay'/, 'a new Bangkok choice must replace the previous one atomically');
+  assert.match(yj, /ST\.select\('bkk-stay',bt\.getAttribute\('data-choose'\)\)/, 'a new Bangkok choice goes through the one stay engine: place held, line replaced');
+  assert.match(read('assets/stay.js'), /p\.ids\(win\)\.forEach\(function \(id\) \{ b\.remove\(id\); \}\);\s*p\.items\(win, slug\)/, 'a change REPLACES, never duplicates');
   assert.match(yj, /if\(SIYL_BAG\.has\(id\)\)return;/, 'a flat product is never added twice');
-  /* the journey block on Review is filtered from the bag, not composed per guest */
+  /* the journey block on Review is filtered from the bag, one guest, never composed per party */
   assert.match(rv, /\.filter\(function\(x\)\{return !\(window\.SIYL_JOURNEY&&SIYL_JOURNEY\.isWedding\(x\)\)\}\)/);
-  assert.doesNotMatch(rv, /p\.guests\.forEach\([^)]*\)\s*\{[^}]*SIYL_BAG\.get\(\)/, 'costs are never multiplied by the party');
+  assert.doesNotMatch(rv, /p\.guests\.forEach/, 'nothing is composed per party');
 });
 
 test('retired products never reach the active journey', () => {
@@ -111,7 +112,7 @@ test('the Bangkok choice is exactly three addresses, one active, in the accepted
   assert.deepEqual([...sathorn.matchAll(/property: '([^']+)'/g)].map((m) => m[1]),
     ['Sathorn Penthouse Bangkok', 'U Sathorn Bangkok', 'Shama Yen-Akat Bangkok']);
   assert.match(yj, /Select this stay/);
-  assert.match(yj, /Selected for your journey/);
+  assert.match(yj, /Current selection/);
   assert.doesNotMatch(yj, /CHOOSE THIS ADDRESS|Choose this address|SEE THE ROOMS|See the rooms/i);
 });
 
@@ -149,8 +150,8 @@ test('exactly four Wedding Programme events, and step 03 is the private module, 
 
 test('the dress code is understood once, in step 04, and acknowledged per guest — nowhere else', () => {
   const wp = read('wedding-preparation.html');
-  assert.match(wp, /setDressAck\(c\.getAttribute\('data-ack'\)/);
-  assert.match(wp, /p\.guests\.forEach\(function\(g\)\{/);
+  assert.match(wp, /setDressAck\(c\.checked\)/);
+  assert.doesNotMatch(wp, /p\.guests\.forEach/, 'one guest, one acknowledgement');
   assert.equal((wp.match(/assets\/images\/dress\//g) || []).length, 17);
   assert.doesNotMatch(wp, /resort-01\.jpg/, 'the crossed-out beach photograph is gone');
   for (const f of ['invitation.html', 'your-journey.html', 'wedding.html', 'about-you.html', 'review.html']) {
@@ -171,19 +172,18 @@ test('Review introduces no new selection control for an existing concept', () =>
   assert.doesNotMatch(rv, /data-choose|data-cls|data-ev=|data-off=|data-ack=|data-consent|<textarea|type="file"/);
   /* the one action is SEND; everything else is an EDIT back to a primary home */
   assert.equal((rv.match(/class="p-act" id="send"/g) || []).length, 1);
-  ['you.html#you', 'your-journey.html', 'wedding.html', 'wedding-preparation.html#ack', 'about-you.html#about-you', 'about-you.html#documents']
+  ['invitation.html#contact', 'your-journey.html', 'wedding.html', 'wedding-preparation.html#ack', 'about-you.html', 'about-you.html#documents', 'cart.html']
     .forEach((href) => assert.ok(rv.includes('href="' + href + '"'), href));
 });
 
-test('ABOUT YOU is four editorial areas, subject-driven, with documents inside and privacy first person', () => {
+test('ABOUT YOU is the guest\'s own: the allergy first, the favourites, documents optional, photography acknowledged, publication first person', () => {
   const ab = read('about-you.html');
-  ['01 · ', '02 · Required', '03 · Optional · can be added later', '04 · Privacy'].forEach((h) => assert.ok(ab.includes(h), h));
-  assert.match(ab, /G\.subject\(\)\.guestId/);
+  ['id="allergy"', 'id="favourites"', 'id="documents"', 'id="photo"', 'id="publication"'].forEach((h) => assert.ok(ab.includes(h), h));
+  assert.match(ab, /01 · Required<\/p><h2 class="t-h2">'\+G\.ALLERGY\.q/);
   assert.match(ab, /D\.mayConsent\(id\)/);
   assert.match(ab, /D\.send\(gid,kind,f\)/);
   assert.doesNotMatch(ab, /localStorage\.setItem/, 'no document byte in the browser');
-  /* the name selector is the system's selection control */
-  assert.match(ab, /class="p-sel" aria-pressed="[^"]*" data-who=/);
+  assert.doesNotMatch(ab, /data-who=|G\.subject\(\)|Answering for/, 'nobody answers for anyone');
 });
 
 test('the shell foot is the one continuation on every surface', () => {
@@ -191,5 +191,5 @@ test('the shell foot is the one continuation on every surface', () => {
     assert.match(read(f), /\.foot\(document\.getElementById\('foot'\)\)/, f + ' has no shell continuation');
   });
   assert.match(read('invitation.html'), /Continue to Your Journey/);
-  assert.match(read('invitation.html'), /setIdentityReviewed\(true\)/);
+  assert.match(read('invitation.html'), /var missing=G\.missingFor\('you'\);\s*if\(missing\.length\)/, 'the continue is strict');
 });

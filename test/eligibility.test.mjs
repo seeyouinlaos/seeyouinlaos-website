@@ -1,9 +1,9 @@
 /* BRIDE & GROOM INVENTORY (Owner, 14 Sep 2026). A room "Reserved for bride &
-   groom" is held for the couple's own party and nobody else; a room reserved
+   groom" is held for the hosts themselves and nobody else; a room reserved
    for family is out of reach of everyone on the website. The rule lives in two
-   places that must agree: the calculation source in the browser (the party's
-   explicit `hosts` flag from the encrypted bundle) and the shared ledger on the
-   server (the hosts' invitation reference). No access code appears here. */
+   places that must agree: the calculation source in the browser (the guest's
+   explicit `hosts` flag from the encrypted bundle) and the room engine on the
+   server (the verified identity's `hosts`). No access code appears here. */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -11,7 +11,8 @@ import path from 'node:path';
 import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
 import { SEED, sellable, heldForParty, HOSTS_INVITATION, HELD_FOR_HOSTS } from '../src/inventory-seed.js';
-import { Inventory } from '../src/inventory.js';
+import { Rooms, unitsOf, mayJoin } from '../src/rooms.js';
+import { HARUTHAI, SUTHEP, PEGGY, LIN } from './sandbox.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const src = (f) => fs.readFileSync(path.join(ROOT, f), 'utf8');
@@ -24,9 +25,9 @@ function priceWith(auth) {
   for (const f of ['assets/rooms-data.js', 'assets/pricing.js']) vm.runInContext(src(f), sb, { filename: f });
   return { P: sb.window.SIYL_PRICE, ROOMS: sb.window.SIYL_ROOMS };
 }
-const HOSTS = { invitationId: 'INV-001', partyName: 'Haruthai & Suthep', hosts: true, guests: [{ guestId: 'G048', fullName: 'Haruthai Amphai', preferredName: 'Haruthai', hostRole: 'BRIDE' }, { guestId: 'G049', fullName: 'Suthep Thongantang', preferredName: 'Suthep', hostRole: 'GROOM' }] };
-const NORMAL = { invitationId: 'INV-002', partyName: 'Peggy & Steffie', hosts: false, guests: [{ guestId: 'G001', fullName: 'Peggy Berger', preferredName: 'Peggy' }, { guestId: 'G002', fullName: 'Steffie Miedel', preferredName: 'Steffie' }] };
-const FAMILY = { invitationId: 'INV-003', partyName: 'A family party', guests: [{ guestId: 'G003', fullName: 'A Guest', preferredName: 'A' }] };
+const HOSTS = HARUTHAI;
+const NORMAL = PEGGY;
+const FAMILY = { ...LIN, hosts: undefined };
 
 /* every room the catalogue holds for the couple, and every one held for family */
 function reservedRooms(ROOMS) {
@@ -97,45 +98,51 @@ test('LEDGER · the held units are sellable to the hosts’ invitation only; fam
   assert.equal(sellable('wedstay/heritage-grand-premier', 'INV-002'), sellable('wedstay/heritage-grand-premier', HOSTS_INVITATION));
 });
 
-/* a Durable Object stand-in: storage as a Map, blockConcurrencyWhile runs at once */
-function ledger() {
+/* the engine: a Durable Object stand-in, the identity as the Worker verified it */
+function engine() {
   const m = new Map();
   const state = { storage: { get: async (k) => m.get(k), put: async (k, v) => { m.set(k, v); }, delete: async (k) => { m.delete(k); }, list: async ({ prefix }) => new Map([...m].filter(([k]) => k.startsWith(prefix))) }, blockConcurrencyWhile: (fn) => fn() };
-  const I = new Inventory(state);
-  const call = async (op, body, query) => { const r = await I.fetch(new Request('https://x/api/inventory/' + op + (query || ''), body ? { method: 'POST', body: JSON.stringify(body) } : {})); return { status: r.status, ...(await r.json()) }; };
+  const R = new Rooms(state);
+  const call = async (op, body, as) => { const r = await R.fetch(new Request('https://x/api/rooms/' + op, { method: body ? 'POST' : 'GET', headers: as ? { 'x-siyl-identity': JSON.stringify(as) } : {}, body: body ? JSON.stringify(body) : undefined })); return { status: r.status, ...(await r.json()) }; };
   return { call };
 }
+const asId = (s) => ({ invitationId: s.invitationId, guestId: s.guestId, partyId: s.partyId, hosts: !!s.hosts });
 
-test('LEDGER · INV-001 reserves the Presidential (both windows), the Solarium and the 270° suite; INV-002 is refused with the reason; family is refused for both', async () => {
-  const L = ledger();
-  const lines = [{ win: 'prewed', slug: 'souphattra-presidential', qty: 2 }, { win: 'wedstay', slug: 'souphattra-presidential', qty: 2 }, { win: 'kmg', slug: 'solarium', qty: 2 }, { win: 'ljg', slug: 'view-suite-270', qty: 2 }];
-  const ok = await L.call('reserve', { invitationId: 'INV-001', lines });
-  assert.equal(ok.status, 200); assert.equal(ok.ok, true); assert.equal(ok.reserved.length, 4);
-  assert.equal(ok.items['wedstay/souphattra-presidential'].remaining, 0, 'the one Presidential is now the couple’s');
-  const no = await L.call('reserve', { invitationId: 'INV-002', lines: [{ win: 'wedstay', slug: 'souphattra-presidential', qty: 2 }] });
-  assert.equal(no.status, 409); assert.equal(no.ok, false); assert.equal(no.conflicts[0].heldFor, 'Bride & Groom');
-  const fam1 = await L.call('reserve', { invitationId: 'INV-001', lines: [{ win: 'wedstay', slug: 'grand-majestic', qty: 2 }] });
-  const fam2 = await L.call('reserve', { invitationId: 'INV-002', lines: [{ win: 'wedstay', slug: 'grand-majestic', qty: 2 }] });
-  assert.equal(fam1.status, 409); assert.equal(fam2.status, 409); assert.equal(fam1.conflicts[0].heldFor, 'Family');
-  /* the read, as each party sees it */
-  const asHosts = await L.call('read', null, '?invitation=INV-001'), asGuest = await L.call('read', null, '?invitation=INV-002'), plain = await L.call('read');
-  assert.equal(asHosts.items['kmg/solarium'].heldForYou, true); assert.equal(asHosts.items['kmg/solarium'].held, 0);
-  assert.equal(asGuest.items['kmg/solarium'].heldForYou, false); assert.equal(asGuest.items['kmg/solarium'].held, 1); assert.equal(asGuest.items['kmg/solarium'].remaining, 0);
-  assert.equal(plain.items['kmg/solarium'].remaining, 0);
-  /* a re-send by the hosts replaces their own allocation, never counts it twice */
-  const again = await L.call('reserve', { invitationId: 'INV-001', lines: [{ win: 'wedstay', slug: 'souphattra-presidential', qty: 2 }] });
-  assert.equal(again.status, 200); assert.equal(again.items['wedstay/souphattra-presidential'].remaining, 0);
-  const rel = await L.call('release', { invitationId: 'INV-001' });
-  assert.equal(rel.ok, true); assert.equal(rel.items['wedstay/souphattra-presidential'].remaining, 1, 'released: the couple sees it open again');
+test('ENGINE · Haruthai and Suthep take the Presidential (both windows), the Solarium and the 270° suite; Peggy is refused with the reason; family is refused for everyone', async () => {
+  const E = engine();
+  for (const key of ['prewed/souphattra-presidential', 'wedstay/souphattra-presidential', 'kmg/solarium', 'ljg/view-suite-270']) {
+    const ok = await E.call('join', { invitationId: HARUTHAI.invitationId, guestId: HARUTHAI.guestId, key, label: 'A', name: 'Haruthai' }, asId(HARUTHAI));
+    assert.equal(ok.status, 200, key);
+    const two = await E.call('join', { invitationId: SUTHEP.invitationId, guestId: SUTHEP.guestId, key, label: 'A', name: 'Suthep' }, asId(SUTHEP));
+    assert.equal(two.status, 200, key + ' · the second place is his');
+    assert.equal(two.units[key][0].full, true, key + ' · ROOM A is full at 2/2');
+    const no = await E.call('join', { invitationId: PEGGY.invitationId, guestId: PEGGY.guestId, key, label: 'A', name: 'Peggy' }, asId(PEGGY));
+    assert.equal(no.status, 403); assert.match(no.error, /reserved for Bride & Groom/);
+  }
+  for (const key of ['prewed/grand-majestic', 'wedstay/grand-majestic']) {
+    const fam1 = await E.call('join', { invitationId: HARUTHAI.invitationId, guestId: HARUTHAI.guestId, key, label: 'A', name: 'Haruthai' }, asId(HARUTHAI));
+    const fam2 = await E.call('join', { invitationId: PEGGY.invitationId, guestId: PEGGY.guestId, key, label: 'A', name: 'Peggy' }, asId(PEGGY));
+    assert.equal(fam1.status, 403); assert.equal(fam2.status, 403); assert.match(fam1.error, /Family/);
+  }
+  /* the read, as each guest sees it */
+  const asHost = await E.call('read', null, asId(HARUTHAI)), asGuest = await E.call('read', null, asId(PEGGY)), plain = await E.call('read');
+  assert.equal(asHost.units['kmg/solarium'][0].eligible, true); assert.equal(asGuest.units['kmg/solarium'][0].eligible, false); assert.equal(plain.units['kmg/solarium'][0].eligible, false);
+  assert.equal(asGuest.summary['kmg/solarium'].free, 0); assert.equal(asGuest.summary['wedstay/heritage'].free, 10);
+  /* no name decides anything: a guest named like a host is a guest */
+  const pretender = await E.call('join', { invitationId: PEGGY.invitationId, guestId: PEGGY.guestId, key: 'kmg/solarium', label: 'A', name: 'Haruthai' }, asId(PEGGY));
+  assert.equal(pretender.status, 403);
+  assert.equal(mayJoin(unitsOf('kmg/solarium')[0], { hosts: true }).ok, true); assert.equal(mayJoin(unitsOf('kmg/solarium')[0], { hosts: false }).ok, false);
 });
 
-test('SURFACES · the room page and the journeys rows decide by eligibility, the label stays, the ledger read carries the party', () => {
-  const room = src('room.html'), journeys = src('journeys.html'), inv = src('assets/inventory.js');
-  assert.match(room, /room\.reserved && !P\.eligible\(room\)/); assert.match(room, /held for your party — yours to choose/);
+test('SURFACES · the room page and the journeys rows decide by eligibility, the label stays, the engine read carries the bearer', () => {
+  const room = src('room.html'), journeys = src('journeys.html'), inv = src('assets/rooms.js');
+  assert.match(room, /room\.reserved && !P\.eligible\(room\)/); assert.match(room, /held for you — yours to choose/);
   assert.match(room, /r\.reserved && !P\.eligible\(r\)/);
   assert.match(journeys, /r\.reserved&&!P\.eligible\(r\)\?' rsvd':''/); assert.match(journeys, /P\.eligible\(r\)\?' · yours to choose':''/);
-  assert.match(inv, /'\?invitation=' \+ encodeURIComponent\(inv\)/);
+  assert.match(inv, /h\['x-siyl-auth'\] = a\.bearer/);
   /* the stay-level state model: one action per stay, never a second ADD for a chosen room */
-  assert.match(journeys, /data-stay-add=/); assert.match(journeys, /data-stay-change=/); assert.match(journeys, /data-stay-remove=/); assert.match(journeys, /Selected · in your journey/);
-  assert.doesNotMatch(src('assets/pricing.js'), /Haruthai|Suthep/, 'no name decides anything in the calculation source');
+  assert.match(journeys, /data-stay-add=/); assert.match(journeys, /data-stay-change=/); assert.match(journeys, /data-stay-remove=/); assert.match(journeys, /Current selection/);
+  const hostsFn = src('assets/pricing.js').match(/hosts: function \(\) \{[^}]*\}/)[0];
+  assert.doesNotMatch(hostsFn, /Haruthai|Suthep|preferredName|fullName/, 'no name decides anything in the calculation source');
+  assert.match(hostsFn, /a\.hosts === true && a\.guestId && a\.bearer/);
 });

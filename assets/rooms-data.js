@@ -127,12 +127,12 @@
          * and never a USD 0 row. */
         { id: 'wedstay', label: 'Wedding Stay', dates: '27 February – 01 March 2027', nights: '2 nights', n: 2, pay: 1,
           window: 'fixed', nightsList: ['27 → 28 February', '28 February → 01 March'],
-          note: 'Second night complimentary', noteBy: 'Hosted by Bride & Groom',
+          note: 'Second night', noteBy: 'Hosted by Haruthai & Suthep',
           bagName: 'Wedding Stay · Souphattra Heritage', bagImg: 'assets/images/souphattra/heritage-arches-dusk.jpg' }
       ],
       includes: [
-        'Pre-Wedding Stay (25 – 27 February): two nights, 25 → 26 and 26 → 27 February. Both nights are your contribution.',
-        'Wedding Stay (27 February – 1 March): two nights, 27 → 28 February and 28 February → 1 March. The first night is your contribution; the second night is complimentary, hosted by the Bride & Groom, ' + HS + '.',
+        'Pre-Wedding Stay (25 – 27 February): two nights, 25 → 26 and 26 → 27 February. Both nights at your room rate.',
+        'Wedding Stay (27 February – 1 March): two nights, 27 → 28 February and 28 February → 1 March. The first night at your room rate; the second night hosted by Haruthai & Suthep.',
         'The two stays run back to back — 27 February is the transition day, and no night between 25 February and 1 March is left uncovered.',
         'Each window is a fixed two-night window: arriving late or leaving early does not change the amount.',
         'Breakfast is included on every morning.',

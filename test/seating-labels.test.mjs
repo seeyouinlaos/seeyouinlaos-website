@@ -109,10 +109,11 @@ test('PDF · the seat confirmation: a real PDF, the Owner\'s fields, labels only
   const offs = [...pdf.matchAll(/^(\d{10}) 00000 n /gm)].map((m) => +m[1]);
   offs.forEach((o, i) => assert.match(pdf.slice(o, o + 12), new RegExp('^' + (i + 1) + ' 0 obj')));
   /* the Owner's fields, in the text of the page */
-  for (const t of ['see you in laos.', 'SEAT CONFIRMATION', 'GUEST', 'Peggy Berger', 'INVITATION', 'Peggy & Steffie', 'INV-002', 'EVENT', 'Temple Ceremony', 'DATE', 'Sunday, 28 February 2027', 'VENUE', 'Wat Ong Teu, Vientiane', 'SEAT', 'E4', 'Right block · row 4', 'BOOKING REFERENCE', L.ref('INV-002', 'G001', 'ceremony', 'C-R-04-02'), 'STATUS', 'CONFIRMED']) {
+  for (const t of ['see you in laos.', 'SEAT CONFIRMATION', 'GUEST', 'Peggy Berger', 'YOUR PARTY', 'Peggy & Steffie', 'EVENT', 'Temple Ceremony', 'DATE', 'Sunday, 28 February 2027', 'VENUE', 'Wat Ong Teu, Vientiane', 'SEAT', 'E4', 'Right block · row 4', 'STATUS', 'CONFIRMED', 'HELD FOR']) {
     assert.ok(pdf.includes(t.replace('·', '\\267').replace('&', '&')), 'text: ' + t);
   }
   assert.doesNotMatch(pdf, /C-R-04-02|D-T-17/, 'no ledger id in the confirmation');
+  assert.doesNotMatch(pdf, /INV-002|INV-G|BOOKING REFERENCE|SYL-/, 'no invitation id, no reference, no code (Owner, 14 Sep 2026)');
   assert.doesNotMatch(pdf, /QR|barcode|Barcode|BOARDING|Boarding|USD|\$|PAID|Paid|payment/i, 'no QR, no barcode, no boarding pass, no payment');
   assert.doesNotMatch(pdf, /\/XObject|\/Image|\/Subtype \/Image|\/JavaScript|\/URI/, 'no image, no script, no link');
   assert.doesNotMatch(pdf, /[a-z0-9]{16}/, 'nothing token-shaped');
@@ -130,11 +131,13 @@ test('PDF · the seat confirmation: a real PDF, the Owner\'s fields, labels only
   /* a guest without a seat gets no document; a seat the ledger does not hold is never written */
   assert.equal(PASS.docFor(party, 'G002', mine, ['ceremony'], '2026-09-14T10:00:00.000Z'), null);
   assert.equal(PASS.docFor(party, 'G002', mine, ['ceremony', 'dinner'], '2026-09-14T10:00:00.000Z').seats.length, 1);
-  /* after a change of seat the confirmation carries the new label and a new reference */
+  /* after a change of seat the confirmation carries the new label */
   const moved = PASS.docFor(party, 'G001', { ceremony: { G001: 'C-R-04-03' }, dinner: {} }, ['ceremony'], '2026-09-14T10:00:00.000Z');
   const pdf3 = PASS.compose(moved);
   assert.ok(pdf3.includes('(F4)') && !pdf3.includes('(E4)'));
-  assert.ok(pdf3.includes(L.ref('INV-002', 'G001', 'ceremony', 'C-R-04-03')) && !pdf3.includes(L.ref('INV-002', 'G001', 'ceremony', 'C-R-04-02')));
+  /* a guest travelling alone: no party line at all */
+  const solo = PASS.compose(PASS.docFor({ invitationId: 'INV-G003', partyName: 'Lin', members: [{ guestId: 'G003' }], guests: [{ guestId: 'G003', fullName: 'Lin Demo', preferredName: 'Lin' }] }, 'G003', { ceremony: { G003: 'C-R-04-02' }, dinner: {} }, ['ceremony'], '2026-09-14T10:00:00.000Z'));
+  assert.doesNotMatch(solo, /YOUR PARTY/);
 });
 
 test('PDF · the hosts: Bride and Groom at the front centre, no seat number, the dinner place like everyone else\'s', () => {
@@ -143,12 +146,12 @@ test('PDF · the hosts: Bride and Groom at the front centre, no seat number, the
   const bride = PASS.docFor(party, 'G048', mine, ['ceremony', 'dinner'], '2026-09-14T10:00:00.000Z');
   assert.deepEqual(bride.seats, [{ event: 'ceremony', fixed: 'BRIDE' }, { event: 'dinner', seatId: 'D-B-03' }]);
   const pdf = PASS.compose(bride);
-  assert.match(pdf, /Bride \\267 Front Centre/); assert.match(pdf, /Front centre \\267 no seat number/); assert.ok(pdf.includes('(B3)'));
+  assert.match(pdf, /Bride \\267 Front Centre/); assert.match(pdf, /FRONT CENTRE/); assert.ok(pdf.includes('(B3)'));
   const groom = PASS.docFor(party, 'G049', mine, ['ceremony', 'dinner'], '2026-09-14T10:00:00.000Z');
   assert.deepEqual(groom.seats, [{ event: 'ceremony', fixed: 'GROOM' }], 'no dinner seat yet: only the front centre');
   assert.match(PASS.compose(groom), /Groom \\267 Front Centre/);
   /* the roles travel with the invitation only when the private list says so — explicit, never inferred */
-  assert.match(src('assets/invite.mjs'), /g\.hostRole === 'BRIDE' \|\| g\.hostRole === 'GROOM' \? \{ hostRole: g\.hostRole \} : \{\}/);
+  assert.match(src('assets/invite.mjs'), /inv\.hostRole === 'BRIDE' \|\| inv\.hostRole === 'GROOM' \? \{ hostRole: inv\.hostRole \} : \{\}/);
   assert.equal(PASS.fixedWords('BRIDE'), 'Bride'); assert.equal(PASS.fixedWords('GROOM'), 'Groom'); assert.equal(PASS.fixedWords('HOSTS'), 'Bride & Groom');
 });
 
@@ -166,13 +169,13 @@ test('SURFACES · the preparation, The Wedding and Review & Send speak in labels
   assert.match(wp, /if\(mode\.pending===seatId\)\{withdrawn=seatId;mode\.pending=null\}else mode\.pending=seatId;/, 'the tap only marks a pending choice (and a second tap withdraws it)');
   assert.match(wp, /S\.select\(ev,seatId,id\)\.then/, 'CONFIRM is the one call into the engine');
   assert.ok(!/S\.select\([^)]*\)[^\n]*onSelect/.test(wp), 'never selected inside the tap');
-  assert.match(wp, /if\(ev==='ceremony'&&p\.hosts\)/); assert.match(wp, /Front centre · '\+esc\(fixedWords\(id\)\)/);
+  assert.match(wp, /if\(ev==='ceremony'&&p\.hosts\)/); assert.match(wp, /Front centre · '\+esc\(fixedWords\(\)\)/);
   assert.match(wp, /p-seatbar-seat/);
   /* the raw id never reaches the words on any surface */
   assert.doesNotMatch(wp, /esc\(sid\)<\/span>|'>'\+esc\(sid\)\+'</, 'preparation: no raw id span');
   assert.doesNotMatch(wd, /esc\(sid\)<\/span>|'>'\+esc\(sid\)\+'</, 'The Wedding: no raw id span');
   assert.doesNotMatch(rv, /'>'\+esc\(cs\)\+'<|'>'\+esc\(ds\)\+'</, 'Review & Send: no raw id');
-  assert.match(rv, /Seat '\+esc\(lab\(cs\)\)/); assert.match(rv, /Seat '\+esc\(lab\(ds\)\)/); assert.match(rv, /Lx\.ref\(invId,g\.guestId,'ceremony',cs\)/);
+  assert.match(rv, /Seat '\+esc\(lab\(cs\)\)/); assert.match(rv, /Seat '\+esc\(lab\(ds\)\)/); assert.doesNotMatch(rv, /Lx\.ref\(/, 'no reference on the surface');
   assert.match(wd, /'Seat '\+esc\(lab\(sid\)\)/);
   /* the seating engine (ids, API, holds, party auth, open/frozen, capacity) is the 13 Sep engine */
   const eng = src('src/seating.js');
@@ -182,7 +185,7 @@ test('SURFACES · the preparation, The Wedding and Review & Send speak in labels
   assert.match(client, /select: function \(event, seatId, guestId\)/); assert.match(client, /release: function \(event, guestId\)/);
   assert.match(client, /API \+ '\/select'/); assert.match(client, /API \+ '\/release'/);
   /* the words of the states, the Owner's four plus the party */
-  assert.match(client, /available: 'Available', selected: 'Selected by you', yours: 'Your seat', party: 'Your party', family: 'Reserved · family', taken: 'Unavailable'/);
+  assert.match(client, /available: 'Available', selected: 'Selected by you', yours: 'Your seat', party: 'Your party', family: 'Reserved · family', taken: 'Taken'/);
   /* the confirmation never promises what the ledger does not hold */
   assert.doesNotMatch(src('assets/seatpass.js'), /\/XObject|\/Image|\/URI|\/JavaScript|\bBI\b|USD \d|\$\d/, 'the writer knows no image, no link, no script, no amount');
   assert.match(src('assets/seatpass.js'), /fetch\(S\.API \+ '\?invitation=' \+ encodeURIComponent\(party\.invitationId\), \{ cache: 'no-store' \}\)/, 'downloaded from a fresh, private read of the ledger (no repaint under the button)');

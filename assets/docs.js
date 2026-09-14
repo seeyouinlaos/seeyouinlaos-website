@@ -20,7 +20,7 @@
 (function () {
   'use strict';
   var KEY = 'siyl.docs';
-  var API = (location.hostname.indexOf('github.io') >= 0)
+  var API = !(location.hostname === 'seeyouinlaos-website.suthep-hrg.workers.dev' || /^(localhost|127\.0\.0\.1)$/.test(location.hostname))
     ? 'https://seeyouinlaos-website.suthep-hrg.workers.dev/api/document'
     : '/api/document';
 
@@ -87,6 +87,7 @@
         method: 'POST',
         headers: {
           'content-type': file.type || 'application/octet-stream',
+          'x-siyl-auth': a.bearer || '',
           'x-invitation': a.invitationId,
           'x-guest': guestId,
           'x-kind': kind,
@@ -131,10 +132,10 @@
       var c = (read().consent || {})[guestId];
       return !!c && (c.given === true || c.given === false);
     },
-    /* C · a consent is a first-person statement: only the person who is
-     * continuing may give or decline their own. Nobody answers it for them. */
+    /* a consent is a first-person statement: only the guest themselves may
+     * give or decline their own. Nobody answers it for them. */
     mayConsent: function (guestId) {
-      var G = window.SIYL_GUEST, a = G && G.active ? G.active() : null;
+      var G = window.SIYL_GUEST, a = G && G.me ? G.me() : null;
       return !!(a && a.guestId === guestId);
     },
     setConsent: function (guestId, given) {

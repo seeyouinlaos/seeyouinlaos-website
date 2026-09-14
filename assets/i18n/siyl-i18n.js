@@ -68,7 +68,6 @@
   E("Your costs", "Eure Kosten", "ค่าใช้จ่ายของคุณ", "ご負担の費用");
   E("Pha That Luang", "Pha That Luang", "พระธาตุหลวง", "タート・ルアン");
   E("Vientiane Night Market", "Vientiane Night Market", "ตลาดกลางคืนเวียงจันทน์", "ビエンチャン・ナイトマーケット");
-  E("Le Padaek", "Le Padaek", "Le Padaek", "ル・パデーク");
   E("3 Merchants Restaurant", "3 Merchants Restaurant", "3 Merchants Restaurant", "3マーチャンツ・レストラン");
   E("Sona Cafe and Bar", "Sona Cafe and Bar", "Sona Cafe and Bar", "ソナ・カフェ＆バー");
   E("Thong Smith", "Thong Smith", "Thong Smith", "トン・スミス");
@@ -656,6 +655,14 @@
   E("The temple morning, coffee and cake, the vows and the wedding dinner. Everything around it — where you stay, how you travel, what you join — is prepared for you inside your invitation.", "Der Morgen im Tempel, Kaffee und Kuchen, das Eheversprechen und das Hochzeitsdinner. Alles darum herum \u2014 wo ihr wohnt, wie ihr reist, woran ihr teilnehmt \u2014 ist in eurer Einladung f\u00fcr euch vorbereitet.", "ช่วงเช้าที่วัด กาแฟและเค้ก พิธีสาบาน และงานเลี้ยงอาหารค่ำ ทุกสิ่งรอบ ๆ ทั้งที่พัก การเดินทาง และสิ่งที่คุณเข้าร่วม ถูกเตรียมไว้ในคำเชิญของคุณแล้ว", "寺院の朝、コーヒーとケーキ、誓いの儀式、そして披露宴。滞在先、移動、参加される内容まで、すべて招待状の中にご用意しています。");
   E("Thailand → Laos → China · 21 February – 6 March 2027. The complete journey opens with the private code from your invitation.", "Thailand \u2192 Laos \u2192 China \u00b7 21. Februar \u2013 6. M\u00e4rz 2027. Die vollst\u00e4ndige Reise \u00f6ffnet sich mit dem pers\u00f6nlichen Code aus eurer Einladung.", "ไทย \u2192 ลาว \u2192 จีน \u00b7 21 กุมภาพันธ์ – 6 มีนาคม 2027 การเดินทางทั้งหมดเปิดด้วยรหัสส่วนตัวจากคำเชิญของคุณ", "タイ \u2192 ラオス \u2192 中国 \u00b7 2027年2月21日〜3月6日。招待状のプライベートコードで旅の全体が開きます。");
   E("The journey along the Mekong", "Die Reise entlang des Mekong", "การเดินทางเลียบแม่น้ำโขง", "メコン川に沿った旅");
+  /* 007 review / Owner, 14 Sep 2026: the journey runs to 8 March; no day count; one journey */
+  E("One invitation.", "Eine Einladung.", "หนึ่งคำเชิญ", "ひとつの招待。");
+  E("Three countries. One journey.", "Drei Länder. Eine Reise.", "สามประเทศ หนึ่งการเดินทาง", "三つの国、ひとつの旅。");
+  E("Thailand, Laos and China — prepared around you.", "Thailand, Laos und China — um euch herum vorbereitet.", "ไทย ลาว และจีน — จัดเตรียมไว้รอบตัวคุณ", "タイ、ラオス、中国——あなたのために整えた旅。");
+  E("21 February – 8 March 2027. Bangkok before the wedding, Vientiane at its heart, Kunming and Lijiang after — then two final nights back in Bangkok. The complete journey opens with the private code from your invitation.", "21. Februar – 8. März 2027. Bangkok vor der Hochzeit, Vientiane als ihr Herz, Kunming und Lijiang danach — und zum Schluss zwei Nächte zurück in Bangkok. Die vollständige Reise öffnet sich mit dem persönlichen Code aus eurer Einladung.", "21 กุมภาพันธ์ – 8 มีนาคม 2027 กรุงเทพฯ ก่อนงานแต่ง เวียงจันทน์คือหัวใจของการเดินทาง คุนหมิงและลี่เจียงหลังจากนั้น — แล้วปิดท้ายด้วยสองคืนสุดท้ายที่กรุงเทพฯ การเดินทางทั้งหมดเปิดด้วยรหัสส่วนตัวจากคำเชิญของคุณ", "2027年2月21日〜3月8日。挙式前はバンコク、その中心にビエンチャン、その後は昆明と麗江へ——そして最後にバンコクで二泊。旅の全体は、招待状のプライベートコードで開きます。");
+  E("One invitation · one journey", "Eine Einladung · eine Reise", "หนึ่งคำเชิญ · หนึ่งการเดินทาง", "ひとつの招待 · ひとつの旅");
+  E("Three countries, one continuous journey.", "Drei Länder, eine zusammenhängende Reise.", "สามประเทศ หนึ่งการเดินทางที่ต่อเนื่อง", "三つの国、ひとつの続く旅。");
+  E("Bangkok opens the journey. Vientiane holds the wedding at its centre. Kunming and Lijiang follow, before two final nights back in Bangkok.", "Bangkok eröffnet die Reise. Vientiane trägt die Hochzeit in ihrer Mitte. Kunming und Lijiang folgen, bevor zwei letzte Nächte zurück nach Bangkok führen.", "กรุงเทพฯ เปิดการเดินทาง เวียงจันทน์คือศูนย์กลางของงานแต่ง คุนหมิงและลี่เจียงตามมา ก่อนปิดท้ายด้วยสองคืนสุดท้ายที่กรุงเทพฯ", "バンコクで旅が始まり、ビエンチャンがその中心に挙式を迎え、昆明と麗江が続き、最後にバンコクで二泊。");
   E("One invitation, three journeys.", "Eine Einladung, drei Reisen.", "หนึ่งคำเชิญ สามการเดินทาง", "ひとつの招待、三つの旅。");
   E("One journey, prepared around you.", "Eine Reise, um euch herum vorbereitet.", "หนึ่งการเดินทาง เตรียมไว้รอบตัวคุณ", "あなたを中心に用意された、ひとつの旅。");
   E("· Sunday, 28 February 2027 · Vientiane", "· Sonntag, 28. Februar 2027 · Vientiane", "· วันอาทิตย์ที่ 28 กุมภาพันธ์ 2027 · เวียงจันทน์", "· 2027年2月28日（日）· ビエンチャン");

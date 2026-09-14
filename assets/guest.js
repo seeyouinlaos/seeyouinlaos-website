@@ -1,53 +1,32 @@
 /* ============================================================================
    SEE YOU IN LAOS — THE GUEST RECORD.
 
-   One authenticated state for the whole website. Three layers, never merged,
-   so a guest's correction can never destroy the record the invitation came from:
+   ONE GUEST = ONE INVITATION = ONE CODE = ONE JOURNEY = ONE TOTAL = ONE SET
+   OF ANSWERS (Owner decision, 14 Sep 2026). The session IS the guest: there
+   is no party to switch inside, nobody to answer for, and nothing on this
+   website is written in another person's name. The party — who belongs
+   together — is context: first names for room sharing and the seat plan.
+
+   Three layers, never merged, so a guest's correction can never destroy the
+   record the invitation came from:
 
      source{}     what the invitation resolved — read-only, always shown as
                   "from your invitation"
      submitted{}  what the guest has entered or corrected
      history[]    { field, from, to, at, by } — every change, kept, and signed
 
-   Per NAMED guest it also carries the decisions Wave 1 introduces: the temple,
-   the Sangkhathan, the hospitality profile. Seats have their slot here and are
-   filled by Wave 2; nothing invents them now.
-
-   C · PARTY / PERSON. Two kinds of state, never merged, and every key belongs
-   to exactly one of them (SCOPE below):
-
-     PARTY STATE     shared by everyone on the invitation — the journey, the
-                     costs, one contact, the invitation confirmed once.
-                     Guest-facing label:  FOR YOUR PARTY · PEGGY & STEFFIE
-     PERSONAL STATE  belongs to one named guest — names, profile, the temple,
-                     the dress-code acknowledgement, documents, consent, seats.
-                     Guest-facing label:  FOR PEGGY
-
-   And two kinds of person, never confused:
-
-     ACTIVE    activeGuestId — who is continuing. The code opens the PARTY;
-               the person then says who they are (WHO ARE YOU). Stored against
-               the invitation it was chosen on, so it never survives into
-               another party's session. SWITCH IDENTITY changes this and
-               touches nobody's data.
-     SUBJECT   subjectGuestId — whose personal item is being completed right
-               now. It defaults to the active person and is never persisted:
-               ANSWERING FOR is a deliberate act on one surface, and a new
-               page always starts with the guest answering for themselves.
-               Acknowledgements (dress code, consent) are first person only.
-
-   Every write is signed: history[] entries carry `by`, the active person who
-   actually wrote them, so a record completed for someone says so.
+   And ONE readiness engine. Every surface — the shell, View All Steps, the
+   sticky bar, Review & Send, the send guard, every Continue button — asks
+   steps() and readiness() below and nothing else. A step is COMPLETE, the
+   CURRENT one, NEEDS ATTENTION, or LOCKED behind an earlier required step;
+   what is missing is named, with the exact control it is answered on.
 
    Storage is the same localStorage draft the Journey Bag uses. Documents are
-   NOT here: no document byte ever touches this file (Wave 3).
+   NOT here: no document byte ever touches this file.
    ========================================================================== */
 (function () {
   'use strict';
   var KEY = 'siyl.guest';
-  var WHO = 'siyl.who';
-  /* the subject lives in memory only — see the header */
-  var subjectId = null;
 
   function auth() {
     try { return JSON.parse(localStorage.getItem('siyl.auth') || 'null'); } catch (e) { return null; }
@@ -55,9 +34,6 @@
   function read() {
     var st;
     try { st = JSON.parse(localStorage.getItem(KEY) || 'null') || {}; } catch (e) { st = {}; }
-    /* A party-wide dress acknowledgement from before C cannot be attributed
-     * to a person, so it counts for nobody — and it is not destroyed either. */
-    if (st.dress) { st.dressLegacy = st.dressLegacy || st.dress; delete st.dress; localStorage.setItem(KEY, JSON.stringify(st)); }
     return st;
   }
   function stamp() { return new Date().toISOString(); }
@@ -67,164 +43,106 @@
     try { document.dispatchEvent(new CustomEvent('siyl:bag')); } catch (e) {}
   }
 
-  /* the seven hospitality questions plus the one operational field.
-   * Every one is optional; the first has an explicit "nothing to note". */
-  /* Owner, 13 Sep 2026: the dietary answer is REQUIRED of every named guest —
-   * in words, or the explicit "Nothing to note"; the favourite drink sits in
-   * the middle of the seven, not at their head */
+  /* ---- ABOUT YOU (Owner, 14 Sep 2026) ----------------------------------
+   * One required question first — food allergies, answered YES or NO, with
+   * the details only when the answer is YES — then the favourites, all
+   * optional. The three retired questions of the party model are gone.
+   * Sequential numbering after the removals. */
+  var ALLERGY = { key: 'allergy', n: '01', q: 'Do you have any food allergies?', required: true,
+    details: 'Please tell us which — the kitchens read this.' };
   var PROFILE = [
-    { key: 'dietary', n: '01', q: 'Food allergies or dietary requirements', required: true,
-      hint: 'Tell us anything our team should know. If there is nothing, tick "Nothing to note".', none: 'Nothing to note',
-      why: 'Kitchens in three countries cook for you; this is the one profile answer the kitchens actually receive. Answered by each named guest — never assumed.' },
-    { key: 'coffeetea', n: '02', q: 'Coffee or tea',
-      hint: 'How do you usually like it?',
-      why: 'Breakfasts, the train, the long afternoons — it is the small thing that is always right or always slightly wrong.' },
-    { key: 'treat', n: '03', q: 'A small favourite',
-      hint: 'Is there a snack, sweet or little treat you especially enjoy?',
-      why: 'Turndown, a long transfer, the night train — a reason to leave something behind for you.' },
-    { key: 'drink', n: '04', q: 'Your favourite drink',
-      hint: 'What would make you smile if it appeared unexpectedly?',
-      why: 'An unscheduled arrival in the room or at the table. Anything at all — coffee, matcha, a soft drink, a cocktail.' },
-    { key: 'comfort', n: '05', q: 'Travel comfort',
-      hint: 'Is there anything that makes travelling more comfortable for you?',
-      why: 'Twelve days, four flights and a night train. What helps you travel is worth knowing once.' },
-    { key: 'avoid', n: '06', q: 'Anything you would rather avoid?',
-      hint: 'Anything our team should be mindful of during the journey?',
-      why: 'Knowing what not to do is as useful to us as knowing what to do.' },
-    { key: 'anything', n: '07', q: 'Anything else we should know?',
-      hint: 'Share any request, personal preference or detail that may help us look after you.',
-      why: 'The open door — a request, an occasion, a piece of context that belongs to no other question.' }
+    { key: 'coffeetea', n: '02', q: 'Coffee or tea', hint: 'And how you like it.' },
+    { key: 'treat', n: '03', q: 'My favourite', hint: 'A snack, sweet or little treat you never say no to.' },
+    { key: 'drink', n: '04', q: 'Favourite drink', hint: 'The one you would choose without looking at the menu.' },
+    { key: 'avoid', n: '05', q: 'Anything you would rather avoid?', hint: 'A taste, a scent, a habit — anything at all.' },
+    { key: 'film', n: '06', q: 'Favourite film', hint: 'The one you could happily watch again.' },
+    { key: 'music', n: '07', q: 'Favourite music', hint: 'A song, an album, an artist you never skip.' }
   ];
-  /* REQUIRED of every named guest (Owner, 13 Sep 2026): an answer in words —
-   * "None" or "No special requirements" is an answer; nothing is ever assumed */
-  var ACCESS = { key: 'access', q: 'Accessibility or comfort needs', required: true,
-    hint: 'Is there anything we can arrange to make the journey more comfortable or accessible for you? If there is nothing, please say so — "None" or "No special requirements".',
-    why: 'Operational, not hospitality: it changes rooms, transfers and the order of a day. Answered by each named guest — never assumed.' };
+  /* REQUIRED: the guest knows that photography and filming take place. It is
+   * an acknowledgement — never a consent to publication, which stays a
+   * separate, optional, withdrawable choice (assets/docs.js). */
+  var PHOTO_TEXT = 'I understand and acknowledge this.';
+  var PHOTO_VERSION = '2026-09-14';
+
+  var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  function validEmail(v) { return EMAIL_RE.test(String(v || '').trim()); }
+  /* a telephone number of the world: digits, with the usual separators, at
+   * least seven digits, at most twenty — never one country's format */
+  function validPhone(v) {
+    var s = String(v || '').trim();
+    if (!/^\+?[\d\s().\-\/]+$/.test(s)) return false;
+    var d = s.replace(/\D/g, '');
+    return d.length >= 7 && d.length <= 20;
+  }
 
   var G = window.SIYL_GUEST = {
+    ALLERGY: ALLERGY,
     PROFILE: PROFILE,
-    ACCESS: ACCESS,
+    PHOTO_TEXT: PHOTO_TEXT,
+    PHOTO_VERSION: PHOTO_VERSION,
+    validEmail: validEmail,
+    validPhone: validPhone,
 
-    /* ---- the party, from the invitation and nowhere else ---------------- */
+    /* ---- the guest, from the invitation and nowhere else ---------------- */
+    me: function () {
+      var a = auth();
+      if (!a || !a.guestId || !a.bearer || a.invitationId !== 'INV-' + a.guestId) return null;
+      return { guestId: a.guestId, fullName: a.fullName || '', preferredName: a.preferredName || a.fullName || '',
+               hostRole: a.hostRole === 'BRIDE' || a.hostRole === 'GROOM' ? a.hostRole : null };
+    },
+    /* the invitation as the surfaces read it: one guest, their party as context */
     party: function () {
-      var a = auth();
-      /* No names, no party. A session stored before the named party travelled
-       * with the invitation cannot answer a single per-person question, so it
-       * is treated as not open — the surface shows its gate and the guest
-       * enters the code once, instead of meeting a blank page. */
-      if (!a || !Array.isArray(a.guests) || !a.guests.length) return null;
-      return { invitationId: a.invitationId, partyName: a.partyName || '',
-               partyLead: a.partyLead || '', guests: a.guests,
-               /* E · 'PAIR' | 'NONE' | null (unresolved) — never inferred */
-               givingEligibility: a.givingEligibility === 'PAIR' || a.givingEligibility === 'NONE' ? a.givingEligibility : null,
-               /* the hosts' party: ceremony place is the fixed front centre (explicit flag, never inferred) */
-               hosts: a.hosts === true };
+      var a = auth(), me = this.me();
+      if (!me) return null;
+      return { invitationId: a.invitationId, guestId: me.guestId, partyId: a.partyId || '', partyName: a.partyName || '',
+               guests: [me], members: Array.isArray(a.members) ? a.members : [me],
+               /* the hosts (explicit flag, never inferred): ceremony place is the fixed front centre */
+               hosts: a.hosts === true,
+               /* the Sangkhathan: 'ELIGIBLE' | 'NONE' | 'UNRESOLVED' — never inferred */
+               sangkhathan: a.sangkhathan === 'ELIGIBLE' || a.sangkhathan === 'NONE' ? a.sangkhathan : 'UNRESOLVED' };
     },
-    /* the invitation is open, but from before the names were carried */
-    stale: function () {
-      var a = auth();
-      return !!(a && a.invitationId) && !(Array.isArray(a.guests) && a.guests.length);
-    },
+    /* a session from before the guest-scoped invitations: the code is asked again */
+    stale: function () { var a = auth(); return !!(a && a.invitationId) && !this.me(); },
     guests: function () { var p = this.party(); return p ? p.guests : []; },
-    isParty: function () { return this.guests().length > 1; },
-    named: function (id) {
-      var g = this.guests().filter(function (x) { return x.guestId === id; })[0];
-      return g ? (g.preferredName || g.fullName) : id;
-    },
-    /* the name the guest actually goes by — their correction first */
+    isParty: function () { return false; },
+    active: function () { return this.me(); },
+    subject: function () { return this.me(); },
+    answeringFor: function () { return false; },
+    who: function () { var m = this.me(); return m ? { guestId: m.guestId, activeGuestId: m.guestId, subjectGuestId: m.guestId } : null; },
+    mayAcknowledge: function (id) { var m = this.me(); return !!(m && (!id || id === m.guestId)); },
+    named: function (id) { return this.nameOf(id) || id; },
+    /* the name the guest goes by — their correction first; a party member by first name */
     nameOf: function (id) {
-      var g = this.guests().filter(function (x) { return x.guestId === id; })[0];
-      if (!g) return '';
-      return this.value(id, 'preferredName') || g.preferredName || g.fullName;
+      var m = this.me(); if (!m) return '';
+      if (!id || id === m.guestId) return this.value(m.guestId, 'preferredName') || m.preferredName || m.fullName;
+      var p = this.party(), x = (p.members || []).filter(function (y) { return y.guestId === id; })[0];
+      return x ? (x.preferredName || '') : '';
     },
+    /* the party, by first names — context, never authority */
     partyNames: function () {
       var self = this, p = this.party(); if (!p) return '';
-      var n = p.guests.map(function (g) { return self.nameOf(g.guestId); });
+      var n = (p.members || []).map(function (g) { return self.nameOf(g.guestId); }).filter(Boolean);
       return n.length > 1 ? n.slice(0, -1).join(', ') + ' & ' + n[n.length - 1] : (n[0] || p.partyName);
     },
-
-    /* ---- WHAT BELONGS TO WHOM ------------------------------------------ */
-    SCOPE: {
-      party:    ['identity', 'contact', 'journey', 'costs'],
-      personal: ['names', 'profile', 'access', 'temple', 'events', 'sangkhathan',
-                 'dress', 'documents', 'consent', 'ceremonySeat', 'dinnerSeat']
-    },
-    scopeOf: function (key) {
-      if (this.SCOPE.party.indexOf(key) >= 0) return 'party';
-      if (this.SCOPE.personal.indexOf(key) >= 0) return 'personal';
-      return null;
-    },
-    /* guest-facing labels — never a data-model word */
-    partyLabel: function () { var p = this.party(); return p ? 'For your party · ' + this.partyNames() : ''; },
+    partyLabel: function () { var p = this.party(); return p ? 'Your party · ' + this.partyNames() : ''; },
     labelFor: function (id) { return 'For ' + this.nameOf(id); },
+    others: function () { var p = this.party(), me = this.me(); return p ? (p.members || []).filter(function (g) { return g.guestId !== me.guestId; }) : []; },
 
-    /* ---- WHO IS CONTINUING, AND WHO IS BEING ANSWERED FOR --------------- */
-    whoStored: function () {
-      try { return JSON.parse(localStorage.getItem(WHO) || 'null'); } catch (e) { return null; }
-    },
-    active: function () {
-      var p = this.party(); if (!p) return null;
-      var w = this.whoStored();
-      /* an identity only belongs to the invitation it was chosen on */
-      if (!w || w.partyId !== p.invitationId) return null;
-      return p.guests.filter(function (g) { return g.guestId === w.guestId; })[0] || null;
-    },
-    activeName: function () { var a = this.active(); return a ? this.nameOf(a.guestId) : ''; },
-    /* SWITCH IDENTITY — I am now continuing as another member of this
-     * invitation. Nobody's data moves. The subject resets to the new person. */
-    setActive: function (guestId) {
-      var p = this.party(); if (!p) return false;
-      if (!p.guests.some(function (g) { return g.guestId === guestId; })) return false;
-      localStorage.setItem(WHO, JSON.stringify({ partyId: p.invitationId, guestId: guestId, at: stamp() }));
-      subjectId = null;
-      try { document.dispatchEvent(new CustomEvent('siyl:who')); } catch (e) {}
-      return true;
-    },
-    subject: function () {
-      var a = this.active(); if (!a) return null;
-      if (!subjectId) return a;
-      return this.guests().filter(function (g) { return g.guestId === subjectId; })[0] || a;
-    },
-    subjectName: function () { var s = this.subject(); return s ? this.nameOf(s.guestId) : ''; },
-    /* ANSWERING FOR — I remain who I am and deliberately complete a permitted
-     * personal item for another named guest. null: back to myself. */
-    setSubject: function (guestId) {
-      var a = this.active(); if (!a) return false;
-      if (guestId == null || guestId === a.guestId) { subjectId = null; }
-      else {
-        if (!this.guests().some(function (g) { return g.guestId === guestId; })) return false;
-        subjectId = guestId;
-      }
-      try { document.dispatchEvent(new CustomEvent('siyl:subject')); } catch (e) {}
-      return true;
-    },
-    answeringFor: function () {
-      var a = this.active(), s = this.subject();
-      return !!(a && s && a.guestId !== s.guestId);
-    },
-    who: function () {
-      var p = this.party(); if (!p) return null;
-      var a = this.active(), s = this.subject();
-      return { partyId: p.invitationId, activeGuestId: a ? a.guestId : null, subjectGuestId: s ? s.guestId : null };
-    },
-    /* an acknowledgement is a first-person statement: only the person */
-    mayAcknowledge: function (id) { var a = this.active(); return !!(a && a.guestId === id); },
-
-    /* ---- per-guest record ---------------------------------------------- */
+    /* ---- the record ---------------------------------------------------- */
     rec: function (id) {
-      var st = read();
+      var st = read(), me = this.me();
+      id = id || (me && me.guestId);
       st.guests = st.guests || {};
       st.guests[id] = st.guests[id] || { submitted: {}, profile: {}, history: [] };
       return st.guests[id];
     },
     /* SOURCE is never written to — it is the invitation's own value */
     source: function (id, field) {
-      var g = this.guests().filter(function (x) { return x.guestId === id; })[0] || {};
-      if (field === 'fullName') return g.fullName || '';
-      if (field === 'preferredName') return g.preferredName || g.fullName || '';
+      var m = this.me(); if (!m || (id && id !== m.guestId)) return '';
+      if (field === 'fullName') return m.fullName || '';
+      if (field === 'preferredName') return m.preferredName || m.fullName || '';
       return '';
     },
-    /* what the guest sees in the field: their value, else the source */
     value: function (id, field) {
       var r = this.rec(id);
       if (r.submitted && r.submitted[field] != null) return r.submitted[field];
@@ -232,10 +150,11 @@
     },
     edited: function (id, field) {
       var r = this.rec(id);
-      return !!(r.submitted && r.submitted[field] != null &&
-                String(r.submitted[field]) !== String(this.source(id, field)));
+      return !!(r.submitted && r.submitted[field] != null && String(r.submitted[field]) !== String(this.source(id, field)));
     },
     set: function (id, field, v) {
+      var me = this.me(); if (!me) return;
+      id = id || me.guestId; if (id !== me.guestId) return;
       var st = read();
       st.guests = st.guests || {};
       st.guests[id] = st.guests[id] || { submitted: {}, profile: {}, history: [] };
@@ -243,13 +162,39 @@
       var from = r.submitted[field] != null ? r.submitted[field] : this.source(id, field);
       if (String(from) === String(v)) return;
       r.submitted[field] = v;
-      r.history.push({ field: field, from: from, to: v, at: stamp(), by: this.who() && this.who().activeGuestId });
+      r.history.push({ field: field, from: from, to: v, at: stamp(), by: me.guestId });
       write(st);
     },
 
-    /* ---- hospitality profile — every answer optional -------------------- */
+    /* ---- contact — REQUIRED, the guest's own, both valid ---------------- */
+    contact: function (f) { var st = read(); return (st.contact || {})[f] || ''; },
+    setContact: function (f, v) {
+      var me = this.me(); if (!me) return;
+      var st = read();
+      st.contact = st.contact || {};
+      var from = st.contact[f] || '';
+      if (from === v) return;
+      st.contact[f] = v;
+      st.history = st.history || [];
+      st.history.push({ field: 'contact.' + f, from: from, to: v, at: stamp(), by: me.guestId });
+      write(st);
+    },
+    contactMissing: function () {
+      var out = [];
+      if (!validEmail(this.contact('email'))) out.push({ key: 'email', label: 'Email address', href: 'invitation.html#p-email' });
+      if (!validPhone(this.contact('phone'))) out.push({ key: 'phone', label: 'Mobile number', href: 'invitation.html#p-phone' });
+      return out;
+    },
+    contactComplete: function () { return this.contactMissing().length === 0; },
+    /* the retired party-level fields, kept as names for the record's history */
+    partyField: function (f) { return this.contact(f); },
+    setPartyField: function (f, v) { return this.setContact(f, v); },
+
+    /* ---- about you --------------------------------------------------- */
     profile: function (id, key) { var r = this.rec(id); return (r.profile || {})[key] || ''; },
     setProfile: function (id, key, v) {
+      var me = this.me(); if (!me) return;
+      id = id || me.guestId; if (id !== me.guestId) return;
       var st = read();
       st.guests = st.guests || {};
       st.guests[id] = st.guests[id] || { submitted: {}, profile: {}, history: [] };
@@ -257,207 +202,223 @@
       if (from === (v || '')) return;
       r.profile[key] = v;
       r.history = r.history || [];
-      r.history.push({ field: 'profile.' + key, from: from, to: v, at: stamp(), by: this.who() && this.who().activeGuestId });
+      r.history.push({ field: 'profile.' + key, from: from, to: v, at: stamp(), by: me.guestId });
       write(st);
     },
     profileAnswered: function (id) {
       var r = this.rec(id), n = 0;
-      PROFILE.concat([ACCESS]).forEach(function (q) { if ((r.profile || {})[q.key]) n++; });
+      PROFILE.forEach(function (q) { if ((r.profile || {})[q.key]) n++; });
       return n;
     },
-    /* the required personal answers of step 05 — dietary and accessibility &
-     * comfort: each present, in words or as the explicit "Nothing to note",
-     * never blank, never assumed */
-    REQUIRED: PROFILE.filter(function (q) { return q.required; }).concat([ACCESS]),
-    requiredMissingFor: function (id) {
-      var self = this;
-      return this.REQUIRED.filter(function (q) { var v = self.profile(id, q.key); return !(typeof v === 'string' && v.trim().length > 0); });
-    },
-    accessAnswered: function (id) { return this.requiredMissingFor(id).length === 0; },
-    accessMissing: function () {
-      var self = this, p = this.party();
-      return p ? p.guests.filter(function (g) { return !self.accessAnswered(g.guestId); }) : [];
-    },
-    accessAll: function () { var p = this.party(); return !!p && this.accessMissing().length === 0; },
-
-    /* ---- party-level contact — one reliable pair is enough -------------- */
-    partyField: function (f) { var st = read(); return (st.party || {})[f] || ''; },
-    setPartyField: function (f, v) {
-      var st = read();
-      st.party = st.party || {};
-      var from = st.party[f] || '';
-      if (from === v) return;
-      st.party[f] = v;
-      st.history = st.history || [];
-      st.history.push({ field: 'party.' + f, from: from, to: v, at: stamp(), by: this.who() && this.who().activeGuestId });
-      write(st);
-    },
-
-    /* ---- the dress-code acknowledgement — PERSONAL, first person only ---
-     * One per named guest, never ticked for anyone, never pre-ticked. Without
-     * a name it means the person who is continuing. */
-    DRESS_TEXT: "I've reviewed the dress code and know what to prepare for the wedding journey.",
-    DRESS_VERSION: '2026-09-09',
-    dressAck: function (id) {
-      if (!id) { var a = this.active(); if (!a) return null; id = a.guestId; }
-      var st = read();
-      return ((st.guests || {})[id] || {}).dress || null;
-    },
-    setDressAck: function (id, on) {
-      if (!this.mayAcknowledge(id)) return false;
+    /* the allergy: 'yes' | 'no' | null; the details only matter for 'yes' */
+    allergy: function () { var r = this.rec(); return r.allergy && (r.allergy.answer === 'yes' || r.allergy.answer === 'no') ? r.allergy.answer : null; },
+    allergyDetails: function () { var r = this.rec(); return (r.allergy && r.allergy.details) || ''; },
+    setAllergy: function (answer, details) {
+      var me = this.me(); if (!me) return;
       var st = read();
       st.guests = st.guests || {};
-      st.guests[id] = st.guests[id] || { submitted: {}, profile: {}, history: [] };
-      st.guests[id].dress = on ? { acknowledged: true, at: stamp(), textVersion: G.DRESS_VERSION, by: id } : null;
+      st.guests[me.guestId] = st.guests[me.guestId] || { submitted: {}, profile: {}, history: [] };
+      var r = st.guests[me.guestId], prev = r.allergy || {};
+      var next = { answer: answer === 'yes' || answer === 'no' ? answer : null, details: answer === 'yes' ? String(details == null ? prev.details || '' : details).trim() : '', at: stamp(), by: me.guestId };
+      if (prev.answer === next.answer && (prev.details || '') === next.details) return;
+      r.allergy = next;
+      r.history = r.history || [];
+      r.history.push({ field: 'allergy', from: (prev.answer || '') + (prev.details ? ': ' + prev.details : ''), to: (next.answer || '') + (next.details ? ': ' + next.details : ''), at: next.at, by: me.guestId });
+      write(st);
+    },
+    allergyMissing: function () {
+      var a = this.allergy();
+      if (a === null) return [{ key: 'allergy', label: 'Food allergy answer', href: 'about-you.html#allergy' }];
+      if (a === 'yes' && !this.allergyDetails()) return [{ key: 'allergy-details', label: 'Food allergy details', href: 'about-you.html#allergy-details' }];
+      return [];
+    },
+    allergyComplete: function () { return this.allergyMissing().length === 0; },
+    /* the photography acknowledgement — required, first person, never pre-ticked */
+    photoAck: function () { var r = this.rec(); return r.photo && r.photo.acknowledged ? r.photo : null; },
+    setPhotoAck: function (on) {
+      var me = this.me(); if (!me) return false;
+      var st = read();
+      st.guests = st.guests || {};
+      st.guests[me.guestId] = st.guests[me.guestId] || { submitted: {}, profile: {}, history: [] };
+      st.guests[me.guestId].photo = on ? { acknowledged: true, at: stamp(), textVersion: PHOTO_VERSION, by: me.guestId } : null;
       write(st);
       return true;
     },
-    dressAckAll: function () {
-      var self = this, g = this.guests();
-      return g.length > 0 && g.every(function (x) { return !!self.dressAck(x.guestId); });
+    aboutMissing: function () {
+      var out = this.allergyMissing();
+      if (!this.photoAck()) out.push({ key: 'photo', label: 'Photography acknowledgement', href: 'about-you.html#photo' });
+      return out;
     },
-    dressMissing: function () {
-      var self = this;
-      return this.guests().filter(function (x) { return !self.dressAck(x.guestId); });
-    },
+    aboutComplete: function () { return this.aboutMissing().length === 0; },
+    /* the retired names, kept for the record's readers */
+    REQUIRED: [ALLERGY],
+    requiredMissingFor: function () { return this.aboutMissing(); },
+    accessAnswered: function () { return this.aboutComplete(); },
+    accessMissing: function () { return this.aboutComplete() ? [] : this.guests(); },
+    accessAll: function () { return this.aboutComplete(); },
 
-    /* ---- the invitation briefing ---------------------------------------- */
-    /* A guest who has never seen who is invited, and for whom they are
-     * deciding, has not been briefed — and an unbriefed guest cannot send a
-     * journey on behalf of other named people. */
-    identityReviewed: function () { var st = read(); return st.identity || null; },
-    setIdentityReviewed: function (on) {
+    /* ---- the dress-code acknowledgement — first person only ------------- */
+    DRESS_TEXT: "I've reviewed the dress code and know what to prepare for the wedding journey.",
+    DRESS_VERSION: '2026-09-09',
+    dressAck: function (id) {
+      var me = this.me(); if (!me || (id && id !== me.guestId)) return null;
+      return this.rec(me.guestId).dress || null;
+    },
+    setDressAck: function (id, on) {
+      var me = this.me(); if (!me) return false;
+      if (typeof id === 'boolean') { on = id; id = me.guestId; }
+      if (id && id !== me.guestId) return false;
       var st = read();
-      st.identity = on ? { at: stamp(), by: this.who() && this.who().activeGuestId } : null;
+      st.guests = st.guests || {};
+      st.guests[me.guestId] = st.guests[me.guestId] || { submitted: {}, profile: {}, history: [] };
+      st.guests[me.guestId].dress = on ? { acknowledged: true, at: stamp(), textVersion: G.DRESS_VERSION, by: me.guestId } : null;
       write(st);
+      return true;
     },
+    dressAckAll: function () { return !!this.dressAck(); },
+    dressMissing: function () { return this.dressAck() ? [] : this.guests(); },
 
-    /* ---- THE SIX STEPS, AND WHAT EACH ONE ACTUALLY HOLDS -----------------
-     * Every step has a purpose, a real interaction, a visible state and one
-     * next action. Four states, said in words and never by colour alone:
-     *   Completed · Action needed · Optional · not completed · In progress
-     * REQUIRED means nobody else can answer it for the guest afterwards.
-     * OPTIONAL never blocks a submission. */
+    /* ---- THE SIX STEPS — ONE READINESS ENGINE ----------------------------
+     * Every step is a list of named requirements with the control each one
+     * is answered on. A step is done when its list is empty. The order is
+     * hard: a step is LOCKED while an earlier required step is not done. */
     STEP_DEFS: [
       { key: 'you', n: '01', label: 'Your Invitation', href: 'invitation.html', required: true },
       { key: 'journey', n: '02', label: 'Your Journey', href: 'your-journey.html', required: true },
       { key: 'wedding', n: '03', label: 'The Wedding', href: 'wedding.html', required: true },
       { key: 'preparation', n: '04', label: 'Wedding Preparation', href: 'wedding-preparation.html', required: true },
-      { key: 'about', n: '05', label: 'About You', href: 'about-you.html', required: false },
+      { key: 'about', n: '05', label: 'About You', href: 'about-you.html', required: true },
       { key: 'review', n: '06', label: 'Review & Send', href: 'review.html', required: true }
     ],
+    STATE_LABEL: { complete: '✓ Complete', current: 'Current', attention: 'Needs attention', locked: 'Locked' },
 
-    steps: function () {
-      var self = this, T = window.SIYL_TEMPLE, B = window.SIYL_BAG, D = window.SIYL_DOCS;
-      var p = this.party(), guests = p ? p.guests : [];
-      var contact = !!(this.partyField('email') || this.partyField('phone'));
-      var chosen = !!(B && B.get().length);
-      var weddingDecided = !!(T && T.decidedAll());
-      var dress = this.dressAckAll();
-      var dressOpen = this.dressMissing().map(function (g) { return self.nameOf(g.guestId); });
-      var answered = guests.filter(function (g) { return self.profileAnswered(g.guestId) > 0; }).length;
-      var docsIn = 0, docsTotal = guests.length * 2, consentDone = 0;
-      if (D) guests.forEach(function (g) {
-        D.forGuest(g.guestId).forEach(function (d) { if (d.state !== 'Not provided') docsIn++; });
-        if (D.consentDecided(g.guestId)) consentDone++;
-      });
-
-      function state(done, started, required) {
-        if (done) return 'Completed';
-        if (required) return started ? 'In progress' : 'Action needed';
-        return started ? 'In progress' : 'Optional · not completed';
-      }
-
+    /* what each step still needs, in order, with the exact control */
+    missingFor: function (key) {
+      var self = this, T = window.SIYL_TEMPLE, B = window.SIYL_BAG, J = window.SIYL_JOURNEY, S = window.SIYL_SEATS, U = window.SIYL_UNITS, P = window.SIYL_PRICE;
+      var p = this.party(), me = this.me();
+      if (!p) return [{ key: 'invitation', label: 'Open your invitation', href: 'invitation.html' }];
       var out = [];
-      out.push({ key: 'you', n: '01', label: 'Your Invitation', href: 'invitation.html', required: true,
-        state: state(contact, guests.length > 0, true),
-        note: contact ? 'Names and one way to reach you' : 'One email address or telephone number is still needed',
-        action: contact ? 'Review' : 'Add your contact', deep: 'you.html#contact' });
-      out.push({ key: 'journey', n: '02', label: 'Your Journey', href: 'your-journey.html', required: true,
-        state: state(chosen, false, true),
-        note: chosen ? (B.get().length + ' selections') : 'Choose your travel and your stays',
-        action: chosen ? 'Review' : 'Choose your journey', deep: chosen ? 'your-journey.html' : 'journeys.html' });
-      var wOpen = (T && T.undecided().length)
-        ? T.undecided().map(function (g) { return g.preferredName || g.fullName; }).join(' · ') + ' — still to answer'
-        : 'Participation answered for each named guest';
-      out.push({ key: 'wedding', n: '03', label: 'The Wedding', href: 'wedding.html', required: true,
-        state: state(weddingDecided, !!(T && T.people().some(function (g) { return T.attendanceOf(g.guestId) !== null; })), true),
-        note: wOpen,
-        action: !weddingDecided ? 'Answer for each guest' : 'Review',
-        deep: 'wedding.html' });
-      out.push({ key: 'preparation', n: '04', label: 'Wedding Preparation', href: 'wedding-preparation.html', required: true,
-        state: state(dress, guests.length > dressOpen.length, true),
-        note: dress ? 'Dress code acknowledged by each of you' : 'Dress code still to be acknowledged by ' + dressOpen.join(' · '),
-        action: dress ? 'Review' : 'Review dress code',
-        deep: 'wedding-preparation.html#dress-code' });
-      var aboutStarted = answered > 0 || docsIn > 0 || consentDone > 0;
-      /* step 05 is REQUIRED (Owner, 13 Sep 2026): complete when every named
-       * guest has answered Accessibility & comfort; documents and consent stay
-       * optional and never hold the step */
-      var accessMissing = this.accessMissing().map(function (g) { return self.nameOf(g.guestId); });
-      var aboutDone = accessMissing.length === 0;
-      var reqLabel = this.REQUIRED.map(function (q) { return q.q.toLowerCase(); }).join(' and ');
-      out.push({ key: 'about', n: '05', label: 'About You', href: 'about-you.html', required: true,
-        state: state(aboutDone, aboutStarted, true),
-        note: [accessMissing.length ? (accessMissing.join(' · ') + ' — ' + reqLabel + ' still to answer') : 'Dietary requirements and accessibility & comfort answered for each named guest',
-               docsIn ? (docsIn + ' of ' + docsTotal + ' documents received · the rest can be added later') : 'Travel documents are optional and can be added later'].filter(Boolean).join(' · '),
-        action: aboutDone ? 'Review' : 'Answer for each guest', deep: 'about-you.html#access' });
-      var ready = contact && chosen && weddingDecided && dress && aboutDone;
-      out.push({ key: 'review', n: '06', label: 'Review & Send', href: 'review.html', required: true,
-        state: ready ? 'Completed' : 'Action needed',
-        note: ready ? 'Everything required is here' : 'Available after the required information is complete',
-        action: 'Open', deep: 'review.html' });
+      if (key === 'you') return this.contactMissing();
+      if (key === 'journey') {
+        if (!J || !B) return [];
+        J.SEGMENTS.forEach(function (seg) {
+          var st = J.state(seg);
+          if (st === 'open') { out.push({ key: 'stage:' + seg.key, label: seg.when + ' · ' + seg.place + ' — choose or say you are not joining', href: 'your-journey.html#s-' + seg.key }); return; }
+          /* a chosen stay is complete only once the guest holds a place in a room of it */
+          if (st === 'selected' && seg.cat === 'Accommodation' && U && U.ready()) {
+            var line = B.get().filter(function (x) { return seg.ids.indexOf(x.id) >= 0; })[0];
+            var win = line ? (P ? P.windowOf(line.id) : line.id) : null;
+            var held = win && line && line.room ? U.mine(U.stageOf(win + '/' + line.room)) : null;
+            if (line && line.room && !line.interest && !(held && held.key === win + '/' + line.room)) out.push({ key: 'room:' + seg.key, label: (line.name || seg.label) + ' — choose your room', href: 'your-journey.html?room=' + seg.key + '#s-' + seg.key });
+          }
+        });
+        return out;
+      }
+      if (key === 'wedding') {
+        if (!T) return [];
+        T.EVENTS.forEach(function (e) { if (T.eventOf(me.guestId, e.key) === null) out.push({ key: 'event:' + e.key, label: e.label + ' — attending or not', href: 'wedding.html#ev-' + e.key }); });
+        if (T.attendingOf(me.guestId) && T.canOffer(me.guestId) && T.offeringOf_(me.guestId) === null) out.push({ key: 'sangkhathan', label: 'Sangkhathan — yes or no', href: 'wedding.html#sangkhathan' });
+        return out;
+      }
+      if (key === 'preparation') {
+        if (!this.dressAck()) out.push({ key: 'dress', label: 'Dress code acknowledgement', href: 'wedding-preparation.html#ack' });
+        /* seats: required for the events the guest attends, while seating is open to choose */
+        if (T && S && S.ready() && S.open() && !S.frozen()) {
+          if (T.attendingOf(me.guestId) && !p.hosts && S.configured('ceremony') && !S.seatOf('ceremony', me.guestId)) out.push({ key: 'seat:ceremony', label: 'Ceremony seat', href: 'wedding-preparation.html#seats' });
+          if (T.joining(me.guestId, 'dinner') && S.configured('dinner') && !S.seatOf('dinner', me.guestId)) out.push({ key: 'seat:dinner', label: 'Dinner seat', href: 'wedding-preparation.html#seats' });
+        }
+        return out;
+      }
+      if (key === 'about') return this.aboutMissing();
+      if (key === 'review') {
+        var C = window.SIYL_CONFIRM;
+        /* a sent journey is complete only while steps 01–05 still are: what came undone comes first */
+        if (!this.mayEnter('review')) { var fm = this.firstMissing(); out.push({ key: 'steps', label: 'Complete ' + (fm ? fm.step.n + ' · ' + fm.step.label : 'the earlier steps'), href: fm ? fm.href : 'invitation.html' }); }
+        else if (!(C && C.state() !== 'none')) out.push({ key: 'send', label: 'Send your journey to Guest Relations', href: 'review.html#send' });
+        return out;
+      }
       return out;
     },
-
-    stepState: function (key) {
-      var s = this.steps().filter(function (x) { return x.key === key; })[0];
-      return s ? s.state : '';
+    done: function (key) { return this.missingFor(key).length === 0; },
+    /* may the guest enter this step: every earlier required step is done */
+    mayEnter: function (key) {
+      var self = this, defs = this.STEP_DEFS, i = defs.map(function (d) { return d.key; }).indexOf(key);
+      if (i < 0) return false;
+      for (var j = 0; j < i; j++) if (defs[j].required && !self.done(defs[j].key)) return false;
+      return true;
     },
+    /* the first thing still needed across steps 01–05, with its step */
+    firstMissing: function () {
+      var self = this, defs = this.STEP_DEFS;
+      for (var i = 0; i < defs.length - 1; i++) {
+        var m = self.missingFor(defs[i].key);
+        if (m.length) return { step: defs[i], item: m[0], href: m[0].href };
+      }
+      return null;
+    },
+    /* where VIEW / CONTINUE / REVIEW should go: Review & Send when it may be entered, else the first missing item */
+    nextHref: function () { var fm = this.firstMissing(); return fm ? fm.href : 'review.html'; },
+
+    steps: function (currentKey) {
+      var self = this, C = window.SIYL_CONFIRM;
+      var p = this.party();
+      return this.STEP_DEFS.map(function (d) {
+        var missing = p ? self.missingFor(d.key) : [], done = !!p && missing.length === 0, may = !!p && self.mayEnter(d.key);
+        var state = done ? 'complete' : (d.key === currentKey ? 'current' : (may ? 'attention' : 'locked'));
+        if (d.key === currentKey && !done) state = 'current';
+        var note = '';
+        if (!p) note = 'Open your invitation';
+        else if (d.key === 'review') note = done ? (C && C.state() === 'confirmed' ? 'Confirmed by Guest Relations' : 'Received by Guest Relations') : (may ? 'Ready to send' : 'Available once steps 01–05 are complete');
+        else if (done) note = ({ you: 'Name, email and mobile number', journey: 'Every stage answered', wedding: 'Every part of the day answered', preparation: 'Dress code and seats', about: 'Allergies and photography answered' })[d.key] || '';
+        else if (!may) note = 'Complete the earlier steps first';
+        else note = missing.length === 1 ? '1 item to complete' : missing.length + ' items to complete';
+        return { key: d.key, n: d.n, label: d.label, href: d.href, required: d.required, done: done, state: state, stateLabel: self.STATE_LABEL[state],
+                 missing: missing, may: may, note: note, deep: missing.length ? missing[0].href : d.href,
+                 /* the retired vocabulary, for readers that still ask for it */
+                 action: done ? 'Review' : 'Complete this', legacyState: done ? 'Completed' : 'Action needed' };
+      });
+    },
+    stepState: function (key) { var s = this.steps().filter(function (x) { return x.key === key; })[0]; return s ? s.state : ''; },
 
     readiness: function () {
       var p = this.party();
-      if (!p) return { ok: false, need: [{ key: 'invitation', label: 'Open your invitation', href: 'invitation.html' }],
-                       optional: [], steps: [] };
+      if (!p) return { ok: false, need: [{ key: 'invitation', label: 'Open your invitation', href: 'invitation.html' }], optional: [], steps: [], first: null };
       var steps = this.steps();
-      var need = steps.filter(function (s) { return s.required && s.key !== 'review' && s.state !== 'Completed'; })
-        .map(function (s) { return { key: s.key, label: s.label, href: s.deep, note: s.note, action: s.action }; });
-      return { ok: need.length === 0, need: need, steps: steps,
-               optional: steps.filter(function (s) { return !s.required; }) };
+      var need = [];
+      steps.forEach(function (s) { if (s.key !== 'review') s.missing.forEach(function (m) { need.push({ key: m.key, step: s, label: m.label, href: m.href, n: s.n, stepLabel: s.label }); }); });
+      return { ok: need.length === 0, need: need, steps: steps, optional: [], first: need[0] || null };
     },
 
     /* ---- what Guest Relations receives ---------------------------------- */
     operational: function () {
-      var self = this, p = this.party();
+      var self = this, p = this.party(), me = this.me();
       if (!p) return null;
-      var T = window.SIYL_TEMPLE, w = this.who();
-      var acked = p.guests.filter(function (g) { return !!self.dressAck(g.guestId); }).map(function (g) { return g.guestId; });
+      var T = window.SIYL_TEMPLE, r = this.rec(me.guestId);
       return {
         invitationId: p.invitationId,
+        guestId: me.guestId,
+        partyId: p.partyId,
         partyName: p.partyName,
-        /* who pressed SEND — the active person, never the subject */
-        submittedBy: w ? w.activeGuestId : null,
-        party: { label: this.partyLabel(), names: this.partyNames(), identityReviewed: this.identityReviewed() },
-        contact: { email: this.partyField('email'), phone: this.partyField('phone') },
-        dress: { all: this.dressAckAll(), acknowledged: acked,
-                 missing: this.dressMissing().map(function (g) { return g.guestId; }) },
-        guests: p.guests.map(function (g) {
-          var r = self.rec(g.guestId);
-          return {
-            guestId: g.guestId,
-            name: self.nameOf(g.guestId),
-            source: { fullName: g.fullName, preferredName: g.preferredName },
-            submitted: r.submitted || {},
-            profile: r.profile || {},
-            dress: r.dress || null,
-            temple: T ? T.attendanceOf(g.guestId) : null,
-            sangkhathan: T ? T.offeringOf(g.guestId) : false,
-            /* G · the seats as the server ledger holds them, by name */
-            ceremonySeat: (window.SIYL_SEATS && SIYL_SEATS.ready()) ? SIYL_SEATS.seatOf('ceremony', g.guestId) : null,
-            dinnerSeat: (window.SIYL_SEATS && SIYL_SEATS.ready()) ? SIYL_SEATS.seatOf('dinner', g.guestId) : null,
-            history: r.history || []
-          };
-        })
+        party: { label: this.partyLabel(), names: this.partyNames(), members: (p.members || []).map(function (m) { return m.guestId; }) },
+        contact: { email: this.contact('email'), phone: this.contact('phone') },
+        dress: { all: !!this.dressAck(), acknowledged: this.dressAck() ? [me.guestId] : [], missing: this.dressAck() ? [] : [me.guestId] },
+        allergy: { answer: this.allergy(), details: this.allergyDetails() },
+        photo: this.photoAck(),
+        guests: [{
+          guestId: me.guestId,
+          name: this.nameOf(me.guestId),
+          source: { fullName: me.fullName, preferredName: me.preferredName },
+          submitted: r.submitted || {},
+          profile: r.profile || {},
+          allergy: r.allergy || null,
+          photo: r.photo || null,
+          dress: r.dress || null,
+          temple: T ? T.attendanceOf(me.guestId) : null,
+          sangkhathan: T ? T.offeringOf(me.guestId) : false,
+          ceremonySeat: (window.SIYL_SEATS && SIYL_SEATS.ready()) ? SIYL_SEATS.seatOf('ceremony', me.guestId) : null,
+          dinnerSeat: (window.SIYL_SEATS && SIYL_SEATS.ready()) ? SIYL_SEATS.seatOf('dinner', me.guestId) : null,
+          history: r.history || []
+        }]
       };
     }
   };

@@ -38,34 +38,40 @@ gate(2, 'Inventory display decision recorded',
   true,
   invExact ? "EXACT counts shown publicly — requires final allocation sign-off." : "REQUEST mode (UI states the authoritative wedding allocation; live remaining counts stay internal). OK for release.");
 
-/* Gate 2b — SHARED INVENTORY: one server-side ledger, atomic reservation,
-   no client-side allocation, and stock that comes from the seed and nowhere
-   else. This is what makes a public availability claim honest. */
+/* Gate 2b — THE ROOM OCCUPANCY ENGINE (Owner, 14 Sep 2026): one server-side
+   engine of persistent allocation units with two guest places each, atomic
+   join / change / release in the guest's own name, no client-side allocation,
+   stock from the seed and nowhere else. This is what makes a public
+   availability claim honest. */
 {
   const seed = read('src/inventory-seed.js');
-  const ledger = read('src/inventory.js');
+  const engine = read('src/rooms.js');
   const worker = read('src/worker.js');
-  const client = read('assets/inventory.js');
+  const client = read('assets/rooms.js');
+  const stay = read('assets/stay.js');
   const wrangler = read('wrangler.jsonc');
   const inv = [];
-  if (!/durable_objects/.test(wrangler) || !/"class_name":\s*"Inventory"/.test(wrangler)) inv.push('no Durable Object binding');
-  if (!/new_sqlite_classes/.test(wrangler)) inv.push('no Durable Object migration');
-  if (!/idFromName\('ledger'\)/.test(worker)) inv.push('the Worker does not route to ONE ledger');
-  if (!/blockConcurrencyWhile/.test(ledger)) inv.push('reservation is not serialised');
-  if (!/status:\s*409|\}, 409\)/.test(ledger)) inv.push('sold out does not answer 409');
+  if (!/durable_objects/.test(wrangler) || !/"class_name":\s*"Rooms"/.test(wrangler)) inv.push('no Rooms Durable Object binding');
+  if (!/new_sqlite_classes": \["Rooms"\]/.test(wrangler)) inv.push('no Rooms Durable Object migration');
+  if (!/idFromName\('rooms'\)/.test(worker)) inv.push('the Worker does not route to ONE engine');
+  if (!/blockConcurrencyWhile/.test(engine)) inv.push('a join is not serialised');
+  if (!/\}, 409\)/.test(engine)) inv.push('full does not answer 409');
+  if (!/export const PLACES = 2;/.test(engine)) inv.push('a room unit is not two guest places');
+  if (!/HOLD THE NEW PLACE FIRST/.test(engine) || !/AND ONLY THEN LET THE OLD ONE GO/.test(engine)) inv.push('a change is not join-then-release');
+  if (!/if \(invitationId !== identity\.invitationId \|\| guestId !== identity\.guestId\) return json\(\{ ok: false, error: 'not your guest' \}, 403\);/.test(engine)) inv.push('a place can be held for another guest');
+  if (!/reservedFor === HELD_FOR_HOSTS\) return identity && identity\.hosts/.test(engine)) inv.push('the Bride & Groom rule is not the identity\'s');
   /* the client must never decide an allocation for itself */
-  if (/capacity\s*[:=]\s*\d/.test(client)) inv.push('assets/inventory.js carries its own capacity numbers');
+  if (/capacity\s*[:=]\s*\d/.test(client)) inv.push('assets/rooms.js carries its own capacity numbers');
+  if (!/u\.join\(win, slug, unit\.label\)\.then/.test(stay)) inv.push('a stay is written before the place is held');
+  if (!/retired — use \/api\/rooms/.test(worker)) inv.push('the retired category ledger still answers');
+  if (fs.existsSync(path.join(ROOT, 'assets/inventory.js'))) inv.push('the retired inventory client is still shipped');
   const keys = (seed.match(/^\s*'[a-z0-9-]+\/[a-z0-9-]+':/gm) || []).length;
   if (keys < 30) inv.push('inventory seed covers only ' + keys + ' categories');
-  const rv = read('review.html');
-  const reserveFirst = rv.indexOf('SIYL_STOCK.reserve()') > 0 && rv.indexOf('SIYL_STOCK.reserve()') < rv.indexOf('fetch(SUBMIT_URL');
-  if (!reserveFirst) inv.push('Review & Send does not reserve BEFORE it submits');
-  gate('2b', 'Shared inventory, atomic reservation, no client-side allocation',
+  gate('2b', 'Room occupancy engine: persistent units of two places, atomic join/change/release in the guest\'s own name, no client-side allocation',
     inv.length === 0,
     inv.length ? inv.join(' · ')
-      : 'one Durable Object ledger ("ledger") serialises every reservation; ' + keys +
-        ' stock-controlled categories seeded from Accommodation_Details; sold out answers 409; ' +
-        'Review & Send holds the rooms before it stores the registration; the client holds no capacity of its own.');
+      : 'one Durable Object engine ("rooms") serialises every place; ' + keys +
+        ' categories seeded from Accommodation_Details; full answers 409; a change holds the new place before the old one goes; the client holds no capacity of its own.');
 }
 
 /* Gate 3 — production lookup: encrypted bundle, no demo data, no plaintext PII */
@@ -77,12 +83,12 @@ for (const t of ['demo-amara', 'demo-lin', 'demo-family', 'demo-noor', 'Amara De
 if (/Demonstration build: try/.test(regHtml)) demoHits.push('demo hint copy in register/index.html');
 let encOk = false;
 try {
-  const enc = read('register/invitations.enc.json');
+  const enc = read('register/invitations.enc.json') + read('register/auth-index.json');
   encOk = enc.length > 100;
-  for (const name of ['Peggy', 'Steffie', 'Seray', 'Orhan', 'Marcel', 'Nongyao', 'Vipavee']) {
-    if (enc.includes(name)) demoHits.push('PLAINTEXT guest name in invitations.enc.json: ' + name);
+  for (const name of ['Peggy', 'Steffie', 'Seray', 'Orhan', 'Marcel', 'Nongyao', 'Vipavee', 'Haruthai', 'Suthep']) {
+    if (enc.includes(name)) demoHits.push('PLAINTEXT guest name in the deployed register: ' + name);
   }
-} catch (e) { demoHits.push('register/invitations.enc.json missing — run node src/build-invitations.cjs'); }
+} catch (e) { demoHits.push('register/invitations.enc.json or auth-index.json missing — run node src/build-invitations.cjs'); }
 gate(3, 'Production guest lookup (encrypted, token-only)',
   demoHits.length === 0 && encOk,
   demoHits.length ? demoHits.join(' · ') : 'encrypted invitation bundle present; token-only lookup; no demo data; no plaintext PII');
@@ -269,25 +275,39 @@ gate('P3', 'MASTER-02 programme truth (four events, no active Alms, no pool in v
         'only the Sangkhathan is USD 15; dinner poolside, vow pool-free; retired bride and fountain images removed');
 }
 
-/* P9 — C · PARTY / PERSON STATE SEPARATION. The model classifies every piece
-   of state; the acknowledgements are personal and first person; the subject
-   is explicit; the shell says ANSWERING FOR in words; nothing asks for the
-   Sangkhathan eligibility (that is E). */
+/* P9 — ONE CODE = ONE GUEST (Owner, 14 Sep 2026). The session is one guest;
+   nothing is written in another guest's name; there is no switch and nobody
+   to answer for; the code never enters the session; every write to the
+   Worker carries the bearer and is refused for any other guest; the party is
+   context, never authority; the readiness engine is the one truth. */
 {
-  const g = read('assets/guest.js'), sh = read('assets/prep-shell.js'), d = read('assets/docs.js');
-  const wp = read('wedding-preparation.html'), ab = read('about-you.html'), rv = read('review.html'), wd = read('wedding.html');
-  const bad = [];
-  if (!/SCOPE: \{\s*party:/.test(g) || !/personal: \[/.test(g)) bad.push('the guest record must classify state as party or personal');
-  if (!/setSubject: function/.test(g) || !/answeringFor: function/.test(g)) bad.push('the subject (ANSWERING FOR) must be explicit in the model');
-  if (!/mayAcknowledge/.test(g) || !/setDressAck: function \(id, on\)/.test(g)) bad.push('the dress acknowledgement must be per guest and first person');
-  if (/dressAck\(\)/.test(wp) || /dressAck\(\)/.test(rv)) bad.push('no Preparation surface may read a party-wide dress acknowledgement');
-  if (!/setDressAck\(c\.getAttribute\('data-ack'\)/.test(wp)) bad.push('step 04 must acknowledge by named guest');
-  if (!/G\.setSubject\(/.test(ab)) bad.push('step 05 must switch the subject explicitly, never a silent tab');
-  if (!/prep-for/.test(sh) || !/Answering for/.test(sh)) bad.push('the shell must say ANSWERING FOR in words');
-  if (!/data-switch/.test(wd)) bad.push('step 03 must offer SWITCH beside another guest\'s answers');
+  const g = read('assets/guest.js'), sh = read('assets/prep-shell.js'), inv = read('assets/invite.mjs'), t = read('assets/temple.js'), d = read('assets/docs.js'), w = read('src/worker.js'), au = read('src/auth.js'), bad = [];
+  if (!/if \(!a \|\| !a\.guestId \|\| !a\.bearer \|\| a\.invitationId !== 'INV-' \+ a\.guestId\) return null;/.test(g)) bad.push('the guest record must accept only a guest-scoped session');
+  if (/setActive: function|setSubject: function|activeGuestId: w/.test(g)) bad.push('the retired switch / answering-for model is still in the record');
+  if (!/mayAcknowledge: function \(id\) \{ var m = this\.me\(\); return !!\(m && \(!id \|\| id === m\.guestId\)\); \}/.test(g)) bad.push('an acknowledgement must be first person only');
+  if (!/if \(!mine\(id\)\) return false;/.test(t)) bad.push('the temple must refuse another guest\'s answer');
   if (!/mayConsent/.test(d)) bad.push('publication consent must be first person only');
-  gate('P9', 'Party / person state separation (C): scoped state, explicit subject, personal acknowledgements',
-    bad.length === 0, bad.length ? bad.join(' · ') : 'SCOPE registry · activeGuestId / subjectGuestId · dress + consent per guest, first person · ANSWERING FOR said in words');
+  if (/data-switch|chooseIdentity|Answering for|Switch identity|siyl\.who/.test(sh)) bad.push('the shell still offers a switch');
+  if (!/data-leave="another"/.test(sh) || !/data-leave="out"/.test(sh)) bad.push('OPEN ANOTHER INVITATION and SIGN OUT must be in reach');
+  for (const f of ['wedding.html', 'wedding-preparation.html', 'about-you.html', 'review.html', 'your-journey.html', 'invitation.html']) {
+    if (/data-switch|setSubject\(|\?for=|data-who=/.test(read(f))) bad.push(f + ' still carries a cross-guest path');
+  }
+  if (!/bearer,\n/.test(inv) || /token: inv\.token|token: String\(/.test(inv)) bad.push('the session must carry the bearer and never the code');
+  if (!/const GUEST_KEYS = \['siyl\.guest', 'siyl\.bag', 'siyl\.temple', 'siyl\.docs', 'siyl\.sent', 'siyl\.skip', 'siyl\.skip\.by'\];/.test(inv)) bad.push('leaving must set aside exactly the guest\'s draft');
+  if (!/const who = await identify\(request, env\);/.test(w) || !/who\.invitationId !== String\(invitationId\)\.trim\(\)/.test(w)) bad.push('the register route must verify the bearer against the invitation');
+  if (!/headers\.delete\('x-gr-verified'\); headers\.delete\('x-siyl-identity'\);/.test(w)) bad.push('a client could claim an identity');
+  if (!/else if \(op === 'select' \|\| op === 'release'\) return json\(\{ ok: false, error: 'unauthorised' \}, 401/.test(w)) bad.push('a seat write without a bearer must be refused');
+  if (!/else if \(op === 'join' \|\| op === 'leave'\) return json\(\{ ok: false, error: 'unauthorised' \}, 401/.test(w)) bad.push('a room write without a bearer must be refused');
+  if (!/export async function identify/.test(au) || !/x-siyl-auth/.test(au)) bad.push('the identity module is missing');
+  if (!/if \(!identity\) return json\(\{ ok: false, error: 'unauthorised' \}, 401\);/.test(read('src/seating.js'))) bad.push('the seating object must refuse an unidentified write');
+  /* one readiness engine, and every surface reads it */
+  if (!/missingFor: function \(key\)/.test(g) || !/mayEnter: function \(key\)/.test(g) || !/nextHref: function/.test(g)) bad.push('the readiness engine is incomplete');
+  if (!/G\.nextHref\(\)/.test(read('assets/bag.js'))) bad.push('the sticky VIEW does not read the engine');
+  if (!/g\.mayEnter\(STEP\.key\)/.test(sh) || !/g\.missingFor\(STEP\.key\)/.test(sh)) bad.push('the shell gate / continue does not read the engine');
+  if (!/G\.readiness\(\)/.test(read('review.html')) || !/G\.readiness\(\)/.test(read('cart.html'))) bad.push('Review / the cart do not read the engine');
+  if (!/<a class="bag" href="cart\.html"/.test(read('journeys.html')) || /<a class="bag" href="your-journey\.html"/.test(read('wedding.html'))) bad.push('the bag icon must open the cart');
+  gate('P9', 'One code = one guest: guest-scoped session, first-person writes, bearer-verified Worker, one readiness engine, cart routing',
+    bad.length === 0, bad.length ? bad.join(' · ') : 'session = one guest with a bearer · no switch, nobody answers for anyone · every write verified at the Worker · steps read one engine · bag → cart');
 }
 
 /* P10 — D · RECOMPOSED SURFACES. The six steps live in the shell and the
@@ -317,10 +337,10 @@ gate('P3', 'MASTER-02 programme truth (four events, no active Alms, no pool in v
 {
   const bad = [];
   const t = read('assets/temple.js'), inv = read('assets/invite.mjs');
-  if (!/[ap]\.givingEligibility === 'PAIR' \|\| [ap]\.givingEligibility === 'NONE'/.test(read('assets/guest.js'))) bad.push('eligibility must be explicit invitation metadata');
+  if (!/a\.sangkhathan === 'ELIGIBLE' \|\| a\.sangkhathan === 'NONE'/.test(read('assets/guest.js'))) bad.push('eligibility must be explicit invitation metadata');
   if (/length === 2|length == 2/.test(t)) bad.push('eligibility must not be inferred from party size');
-  if (!/if \(!this\.pairCan\(\)\) return false;/.test(t)) bad.push('the couple decision must be refused unless the pair can take part');
-  if (!/givingEligibility/.test(inv)) bad.push('the invitation must carry eligibility to the client');
+  if (!/if \(!this\.canOffer\(id\)\) return false;/.test(t)) bad.push('the offering must be refused unless the guest may take part');
+  if (!/sangkhathan: inv\.sangkhathan/.test(inv)) bad.push('the invitation must carry eligibility to the client');
   const w = read('src/worker.js');
   if (!/grAuthorised\(request, env\)/.test(w) || !/x-gr-token/.test(w)) bad.push('the Guest Relations gate is missing');
   if (!/headers\.delete\('x-gr-verified'\)/.test(w)) bad.push('a client could claim the gate');

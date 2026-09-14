@@ -146,7 +146,7 @@ const shop = () => {
   window.SIYL_BAG.badge = () => {};
   return { W: window, store };
 };
-const addSuhring = (W, n) => { const it = W.SIYL_PRICE.items('suhring')[0]; it.qty = n; it.request = true; it.exp = 'bkk-suhring'; W.SIYL_BAG.add(it); return it; };
+const addSuhring = (W, n) => { const it = W.SIYL_PRICE.items('suhring')[0]; it.qty = n; it.request = true; it.exp = 'bkk-suhring'; W.SIYL_BAG.put(it); return it; };
 
 test('SÜHRING — USD 180 is priced PER PERSON by the one calculation source', () => {
   const { W } = shop(); const P = W.SIYL_PRICE;
@@ -157,40 +157,36 @@ test('SÜHRING — USD 180 is priced PER PERSON by the one calculation source', 
   const line = P.items('suhring')[0];
   assert.equal(line.price, 180); assert.equal(line.name, 'Sühring');
   assert.equal(W.SIYL_JOURNEY.meta({ ...line, qty: 2, request: true }).cat, 'Restaurant');
-  assert.equal(W.SIYL_JOURNEY.quantityLine({ ...line, qty: 2 }), 'USD 180 per person × 2 guests');
+  assert.equal(W.SIYL_JOURNEY.quantityLine({ ...line, qty: 1 }), 'USD 180 per person · your cost');
 });
 
-test('SÜHRING — multiplied by the participating guests, the total follows; removal reverses it', () => {
+test('SÜHRING — one guest, one price: USD 180 for this guest; removal reverses it', () => {
   const { W } = shop(); const B = W.SIYL_BAG;
   addSuhring(W, 1); assert.equal(B.total(), 180);
-  B.qty('suhring', 1); assert.equal(B.total(), 360, '2 participating guests = USD 360');
-  B.qty('suhring', -1); assert.equal(B.total(), 180);
-  B.qty('suhring', -5); assert.equal(B.get()[0].qty, 1, 'never below one participant');
   B.remove('suhring'); assert.equal(B.total(), 0); assert.ok(!B.has('suhring'));
 });
 
 test('SÜHRING — no duplicate addition, reload preserves the selection', () => {
   const { W, store } = shop(); const B = W.SIYL_BAG;
-  addSuhring(W, 2);
-  /* the page guards with has(); a second add through the bag would only raise the count — the guard is pinned in the page */
+  addSuhring(W, 1); addSuhring(W, 1);
+  /* the page guards with has(), and put() replaces in place — never a second line */
   assert.ok(B.has('suhring')); assert.equal(B.get().length, 1);
   assert.match(src('experience.html'), /if \(SIYL_BAG\.has\(s\.id\)\) \{ paintSel\(\); return; \}/);
+  assert.match(src('experience.html'), /it\.qty = 1; it\.request = true; it\.exp = x\.id;\s*SIYL_BAG\.put\(it\);/);
   /* reload = the same storage read by a fresh engine */
   const again = shop(); for (const [k, v] of store) again.store.set(k, v);
-  assert.ok(again.W.SIYL_BAG.has('suhring')); assert.equal(again.W.SIYL_BAG.get()[0].qty, 2); assert.equal(again.W.SIYL_BAG.total(), 360);
+  assert.ok(again.W.SIYL_BAG.has('suhring')); assert.equal(again.W.SIYL_BAG.get()[0].qty, 1); assert.equal(again.W.SIYL_BAG.total(), 180);
 });
 
 test('SÜHRING — Your Journey and Review & Send carry the request with its calculated amount', () => {
   const yj = src('your-journey.html'), rv = src('review.html'), page = src('experience.html');
-  assert.match(yj, /exp=m\.unit==='experience'\|\|x\.request/, 'the participants stepper on the line');
-  assert.match(yj, /Participating guests/);
-  assert.match(yj, /if\(ln&&ln\.request&&d>0&&pp&&\(ln\.qty\|\|1\)>=pp\.guests\.length\)return;/, 'never more than the party');
+  assert.doesNotMatch(yj, /Participating guests|data-q=/, 'no participant stepper: one guest, one request');
   assert.match(yj, /if\(x\.exp\)return 'experience\.html\?id='/);
-  assert.match(rv, /RESTAURANT REQUEST \(USD 180 per person × '\+x\.qty\+' participating; to be arranged through Guest Relations; not a confirmed reservation\)/);
+  assert.match(rv, /RESTAURANT REQUEST \(USD 180 per person; to be arranged through Guest Relations; not a confirmed reservation\)/);
   assert.doesNotMatch(rv, /not in the journey total/);
-  assert.match(page, /data-sel-state="current" aria-current="true">In your journey · /);
-  assert.match(page, /Add to your journey · ' \+ money\(s\.price \* q\)/);
-  assert.match(page, /it\.qty = n; it\.request = true; it\.exp = x\.id;/);
+  assert.match(page, /data-sel-state="current" aria-current="true">Current selection · /);
+  assert.match(page, /Add to your journey · ' \+ money\(s\.price\)/);
+  assert.match(page, /it\.qty = 1; it\.request = true; it\.exp = x\.id;/);
 });
 
 test('SÜHRING — never described as a confirmed reservation, a confirmed table or guaranteed availability', () => {

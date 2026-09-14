@@ -917,28 +917,6 @@
   "link": null
  },
  {
-  "id": "vte-pvo",
-  "name": "PVO Vietnamese Food",
-  "city": "Vientiane",
-  "roles": [
-   "breakfast"
-  ],
-  "overview": "Day 05 · 25.02.2027",
-  "sheet": "NONE",
-  "selectable": false,
-  "drive": "— no Drive folder",
-  "driveIds": [],
-  "sourceImages": 0,
-  "used": 0,
-  "primary": null,
-  "gallery": [],
-  "note": "name + day from the Overview only",
-  "price": null,
-  "hours": null,
-  "maps": "https://maps.app.goo.gl/EgPxLNAcBzgbDnsh9?g_st=ic",
-  "link": null
- },
- {
   "id": "vte-rivermoon",
   "name": "River Moon",
   "city": "Vientiane",
@@ -967,28 +945,6 @@
   "price": null,
   "hours": null,
   "maps": "https://maps.app.goo.gl/NMbPP5kvLKurozJJ8?g_st=ic",
-  "link": null
- },
- {
-  "id": "vte-parkson",
-  "name": "Parkson Supermarket Laos",
-  "city": "Vientiane",
-  "roles": [
-   "place"
-  ],
-  "overview": "Day 05 · 25.02.2027",
-  "sheet": "NONE",
-  "selectable": false,
-  "drive": "— no Drive folder",
-  "driveIds": [],
-  "sourceImages": 0,
-  "used": 0,
-  "primary": null,
-  "gallery": [],
-  "note": "name + day from the Overview only",
-  "price": null,
-  "hours": null,
-  "maps": "https://maps.app.goo.gl/FoLWdYEkYXoxET3d7?g_st=ic",
   "link": null
  },
  {
@@ -1053,28 +1009,6 @@
   "link": null
  },
  {
-  "id": "vte-khopchaideu",
-  "name": "Khop Chai Deu",
-  "city": "Vientiane",
-  "roles": [
-   "lunch"
-  ],
-  "overview": "Day 06 · 26.02.2027",
-  "sheet": "NONE",
-  "selectable": false,
-  "drive": "— no Drive folder",
-  "driveIds": [],
-  "sourceImages": 0,
-  "used": 0,
-  "primary": null,
-  "gallery": [],
-  "note": "name + day from the Overview only",
-  "price": null,
-  "hours": null,
-  "maps": "https://maps.app.goo.gl/kZtH2y38zMQHH8vc8?g_st=ic",
-  "link": null
- },
- {
   "id": "vte-kaogee",
   "name": "Kaogee Le Triomphe",
   "city": "Vientiane",
@@ -1110,8 +1044,7 @@
   "name": "Lacuna VTE",
   "city": "Vientiane",
   "roles": [
-   "cafe",
-   "bar"
+   "cafe"
   ],
   "overview": "Day 06 · 26.02.2027",
   "sheet": "NONE",
@@ -1165,28 +1098,6 @@
   "price": null,
   "hours": null,
   "maps": "https://maps.app.goo.gl/TKSjr5kc2P6vWvWSA?g_st=ic",
-  "link": null
- },
- {
-  "id": "vte-lepadaek",
-  "name": "Le Padaek",
-  "city": "Vientiane",
-  "roles": [
-   "dinner"
-  ],
-  "overview": "Day 06 · 26.02.2027",
-  "sheet": "NONE",
-  "selectable": false,
-  "drive": "— no Drive folder",
-  "driveIds": [],
-  "sourceImages": 0,
-  "used": 0,
-  "primary": null,
-  "gallery": [],
-  "note": "name + day from the Overview only",
-  "price": null,
-  "hours": null,
-  "maps": "https://maps.app.goo.gl/WD3gNtNm5AVaDrFU6?g_st=ic",
   "link": null
  },
  {

@@ -636,3 +636,77 @@ body.seatbar-on .jbar { display: none; }
   .prep-srow, .prep-all, .p-act, .p-link, .p-sel, .prep-who button, .prep-for button { transition: none; }
   .p-seatbar, .p-seatbar.on { transition: none; } .p-seatconf { animation: none; } .p-seatmap .seat-selected .pan { transition: none; }
 }
+
+/* ======================================================================
+   THE SEQUENTIAL FLOW (Owner, 14 Sep 2026) — four states, said in words and
+   drawn with the palette: ✓ COMPLETE · CURRENT · NEEDS ATTENTION · LOCKED.
+   Motion is meaningful and brief (180–280 ms): a check draws, a status
+   settles, a control the guest is sent to is emphasised once. No bounce, no
+   confetti, nothing bright. Reduced motion: everything is immediate.
+   ====================================================================== */
+.prep-srow .l { display: flex; flex-direction: column; gap: 2px; }
+.prep-note { font-family: var(--f-ui); font-weight: 300; font-size: 11px; letter-spacing: 0; color: var(--p-mute); line-height: 1.5; }
+.prep-srow .s { display: inline-flex; align-items: center; gap: 7px; transition: color var(--p-t-fast) var(--p-ease); }
+.prep-srow.is-complete .s { color: var(--p-ink); }
+.prep-srow.is-current .s { color: var(--p-ink); }
+.prep-srow.is-attention .s { color: var(--p-accent); }
+.prep-srow.is-locked { opacity: .5; cursor: default; }
+.prep-srow.is-locked .s { color: var(--p-mute); }
+.prep-srow.is-locked .l { color: var(--p-mute); }
+.prep-srow.is-locked:hover { background: none; }
+.prep-srow.is-complete .n { color: var(--p-ink); }
+/* the check: an 8 × 12 tick drawn from its own line, once, when it appears */
+.prep-tick { position: relative; display: inline-block; width: 9px; height: 13px; flex: none; }
+.prep-tick::before { content: ''; position: absolute; left: 0; bottom: 3px; width: 8px; height: 13px; border-right: 1.4px solid currentColor; border-bottom: 1.4px solid currentColor; transform: rotate(40deg) scale(1); transform-origin: 70% 90%; animation: prep-tick-draw .28s var(--p-ease) both; }
+.prep-tick.big { width: 12px; height: 17px; margin-right: 10px; vertical-align: -3px; }
+.prep-tick.big::before { width: 10px; height: 17px; border-width: 1.6px; }
+@keyframes prep-tick-draw { from { clip-path: inset(0 0 100% 0); opacity: 0; } to { clip-path: inset(0); opacity: 1; } }
+/* what is missing, under the step, each line a way to the exact control */
+.prep-missing { list-style: none; margin: 0 0 var(--s2) 26px; padding: 0 0 var(--s2); }
+.prep-missing li { margin: 0; }
+.prep-missing a { display: inline-flex; align-items: center; gap: 10px; min-height: 36px; font-family: var(--f-ui); font-weight: 300; font-size: 12.5px; color: var(--p-ink); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color var(--p-t-fast) var(--p-ease); }
+.prep-missing a:hover, .prep-missing a:focus-visible { border-bottom-color: var(--p-ink); outline: 0; }
+.prep-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--p-accent); flex: none; }
+.prep-leave .p-link { min-height: var(--p-tap); }
+/* arriving from a gate: one line, at the top of the page */
+.prep-gate-note { margin: 0 0 var(--s4); padding: var(--s3) var(--s4); border: 1px solid var(--p-line); background: var(--p-card); color: var(--p-ink); }
+/* the control the guest is sent to: emphasised once, then still */
+.p-attend { animation: p-attend .9s var(--p-ease) 1; }
+@keyframes p-attend { 0% { box-shadow: 0 0 0 0 rgba(138,90,85,0); } 30% { box-shadow: 0 0 0 4px rgba(138,90,85,.28); } 100% { box-shadow: 0 0 0 0 rgba(138,90,85,0); } }
+/* a Continue that could not continue: one controlled settle, no bounce */
+.p-shake { animation: p-shake .26s var(--p-ease) 1; }
+@keyframes p-shake { 0% { transform: translateX(0); } 35% { transform: translateX(-3px); } 70% { transform: translateX(3px); } 100% { transform: translateX(0); } }
+.prep-foot-note { flex: 1 1 100%; order: 3; margin: 0; }
+.p-act.is-done { background: none; color: var(--p-ink); border: 1px solid var(--p-ink); cursor: default; }
+/* the status word of a card settles rather than flips */
+.t-l1.on, .t-l1.open { transition: color var(--p-t-fast) var(--p-ease); }
+.p-card { transition: border-color var(--p-t) var(--p-ease), background-color var(--p-t) var(--p-ease); }
+.p-sel { transition: background-color var(--p-t-fast) var(--p-ease), border-color var(--p-t-fast) var(--p-ease), color var(--p-t-fast) var(--p-ease); }
+/* a section that has just been completed: a quiet reveal */
+.p-reveal { animation: p-reveal .28s var(--p-ease) both; }
+@keyframes p-reveal { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+/* the bag badge acknowledges a change */
+.bb-tick { animation: bb-tick .24s var(--p-ease) 1; }
+@keyframes bb-tick { 0% { transform: scale(1); } 50% { transform: scale(1.18); } 100% { transform: scale(1); } }
+/* the plan: first names under held chairs, the pool in words */
+.p-poolnote { margin-top: var(--s2); }
+.p-seatmap .seat-name { pointer-events: none; }
+/* the room allocation units */
+.p-units { margin-top: var(--s3); border-top: 1px solid var(--p-hair); }
+.p-unit { display: flex; align-items: center; gap: var(--s3); border-bottom: 1px solid var(--p-hair); padding: var(--s3) 0; transition: background-color var(--p-t-fast) var(--p-ease); }
+.p-unit > div { flex: 1; min-width: 0; }
+.p-unit .p-unit-name { font-family: var(--f-ed); font-weight: 200; font-size: 17px; color: var(--p-ink); }
+.p-unit .p-unit-who { font-family: var(--f-ui); font-weight: 300; font-size: 12.5px; color: var(--p-mute); line-height: 1.6; margin-top: 2px; }
+.p-unit .p-unit-who b { font-weight: 400; color: var(--p-ink); }
+.p-unit.mine { background: var(--p-card); box-shadow: inset 2px 0 0 var(--p-ink); padding-left: var(--s3); }
+.p-unit.full:not(.mine) { opacity: .55; }
+.p-unit .p-link, .p-unit .p-act { flex: none; }
+.p-unit .p-act { width: auto; min-width: 0; padding: 0 var(--s4); min-height: var(--p-tap); font-size: 10px; }
+.p-places { display: inline-flex; gap: 4px; margin-right: var(--s2); vertical-align: middle; }
+.p-places i { width: 8px; height: 8px; border: 1px solid var(--p-ink); border-radius: 50%; display: inline-block; transition: background-color var(--p-t-fast) var(--p-ease); }
+.p-places i.on { background: var(--p-ink); }
+.p-places i.me { background: var(--p-accent); border-color: var(--p-accent); }
+@media (prefers-reduced-motion: reduce) {
+  .prep-tick::before, .p-attend, .p-shake, .p-reveal, .bb-tick { animation: none; }
+  .prep-srow .s, .prep-missing a, .p-card, .p-unit, .p-places i, .t-l1.on, .t-l1.open { transition: none; }
+}

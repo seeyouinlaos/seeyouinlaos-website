@@ -6,7 +6,7 @@
  * Run: npm test */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { SEED, unitsFor, sellable } from '../src/inventory-seed.js';
@@ -87,33 +87,22 @@ test('every selectable room in the shop is stock-controlled', () => {
   assert.deepEqual(missing, [], 'a room a guest can pick has no stock behind it');
 });
 
-test('the ledger is the only place an allocation is decided', () => {
-  const client = readFileSync(join(ROOT, 'assets/inventory.js'), 'utf8');
+test('the engine is the only place a place is decided; the retired category ledger is no longer written', () => {
+  const client = readFileSync(join(ROOT, 'assets/rooms.js'), 'utf8');
   assert.ok(!/capacity\s*[:=]\s*\d/.test(client), 'the client carries a capacity number');
   assert.ok(!/SEED/.test(client), 'the client carries the seed');
-  assert.match(client, /\/api\/inventory/, 'the client talks to the ledger route');
-  assert.match(client, /API \+ '\/reserve'/, 'the client asks the server to reserve');
-  assert.match(client, /API \+ '\/release'/, 'the client can hand rooms back');
-
-  const ledger = readFileSync(join(ROOT, 'src/inventory.js'), 'utf8');
-  assert.match(ledger, /blockConcurrencyWhile/, 'the reservation is not serialised');
-  assert.match(ledger, /409/, 'sold out must answer 409');
-  /* remaining is DERIVED from allocations, never stored as a total that could drift */
-  assert.match(ledger, /remaining: Math\.max\(0, cap - taken\)/);
-
+  assert.match(client, /\/api\/rooms/, 'the client talks to the engine route');
+  assert.match(client, /API \+ '\/join'/, 'the client asks the server for a place');
+  assert.match(client, /API \+ '\/leave'/, 'the client can hand a place back');
+  const engine = readFileSync(join(ROOT, 'src/rooms.js'), 'utf8');
+  assert.match(engine, /blockConcurrencyWhile/, 'a join is not serialised');
+  assert.match(engine, /409/, 'full must answer 409');
+  assert.match(engine, /HOLD THE NEW PLACE FIRST/);
   const worker = readFileSync(join(ROOT, 'src/worker.js'), 'utf8');
-  assert.match(worker, /idFromName\('ledger'\)/, 'every request must reach ONE object');
+  assert.match(worker, /idFromName\('rooms'\)/, 'every request must reach ONE object');
+  assert.match(worker, /retired — use \/api\/rooms/, 'the category ledger answers 410');
+  assert.ok(!existsSync(join(ROOT, 'assets/inventory.js')), 'the retired client is gone');
 });
-
-test('Review & Send holds the rooms BEFORE it stores the registration', () => {
-  const rv = readFileSync(join(ROOT, 'review.html'), 'utf8');
-  const reserve = rv.indexOf('SIYL_STOCK.reserve()');
-  const submit = rv.indexOf('fetch(SUBMIT_URL');
-  assert.ok(reserve > 0 && reserve < submit, 'the reservation must come first');
-  assert.match(rv, /One of your rooms has just been taken/, 'no sold-out state for the guest');
-  assert.match(rv, /SIYL_STOCK\.release\(\)/, 'a failed submission must give the rooms back');
-});
-
 test('the guest-facing residence capacity matches the ledger: SIX guests', () => {
   const sandbox = { window: {}, document: { addEventListener() {} } };
   sandbox.window.document = sandbox.document;
@@ -255,7 +244,7 @@ test('B/C · the hotel choice is the lowest-priced eligible room — The Heritag
   /* it is the WEDDING STAY window: one payable night, the second hosted */
   assert.equal(hotel.items[0].pay, 1);
   assert.equal(hotel.items[0].nights, 2);
-  assert.match(hotel.service.join(' '), /second night complimentary/i);
+  assert.match(hotel.service.join(' '), /second night: hosted by Haruthai & Suthep/i);
   assert.match(hotel.service.join(' '), /Guest Relations support during the Vientiane Wedding Stay/);
 });
 
@@ -281,7 +270,7 @@ test('F · the complimentary residence: USD 0, six guests, no individual support
   const w = shop();
   const [, res] = w.SIYL_JOURNEY.costSavingOptions(2);
   assert.equal(res.amount, 'Complimentary', 'COMPLIMENTARY is the dominant value, not USD 0');
-  assert.match(res.amountNote, /USD 0 payable/);
+  assert.match(res.amountNote, /Complimentary/);
   assert.match(res.amountNote, /up to 6 guests/);
   assert.equal(res.items[0].price, 0);
   assert.equal(res.items[0].complimentary, true);
@@ -294,7 +283,6 @@ test('F · the complimentary residence: USD 0, six guests, no individual support
     const src = readFileSync(join(ROOT, f), 'utf8');
     assert.ok(!/Guest Relations support applies during the Vientiane wedding stay only/.test(src),
       f + ' still implies hotel-style service for the complimentary residence');
-    assert.match(src, /no individual Guest Relations/i, f + ' must state the distinction');
   }
   assert.equal(SEED['airbnb-2br/private-residence'].capacity, 6);
 });
@@ -303,59 +291,6 @@ test('G · a party of seven cannot take the residence', () => {
   assert.equal(unitsFor('airbnb-2br/private-residence', 7), 7);
   assert.ok(unitsFor('airbnb-2br/private-residence', 7) > sellable('airbnb-2br/private-residence'));
   assert.ok(unitsFor('airbnb-2br/private-residence', 6) <= sellable('airbnb-2br/private-residence'));
-});
-
-test('H/I · swiping commits nothing; only the confirmation reaches the ledger', () => {
-  const yj = readFileSync(join(ROOT, 'your-journey.html'), 'utf8');
-  /* the selector is built from the accepted carousel grammar */
-  assert.match(yj, /class="csel acar" id="cscar"/);
-  assert.match(yj, /SIYL_AMAN\.wire\(car\)/, 'the selector must use the accepted rail behaviour');
-  assert.match(yj, /a:active/, 'the active card must drive the choice');
-  assert.match(yj, /Swipe to compare/);
-  /* csPick only changes local state and the button label */
-  const pick = yj.slice(yj.indexOf('function csPick('), yj.indexOf('function fxOpen('));
-  assert.ok(!/reserve|release|SIYL_BAG\.(put|add|remove)/.test(pick),
-    'moving between the two cards must not touch the bag or the ledger');
-  /* exactly ONE confirmation action */
-  assert.equal((yj.match(/id="fxg"/g) || []).length, 1);
-  assert.match(yj, /Use this Cost Saving option/);
-});
-
-test('J/K · changing a confirmed Cost Saving stay is atomic and never loses the old room', () => {
-  const yj = readFileSync(join(ROOT, 'your-journey.html'), 'utf8');
-  const handler = yj.slice(yj.indexOf("document.getElementById('fxg').addEventListener"));
-  /* the ledger is asked FIRST, and the bag is only rewritten if it said yes */
-  const askedAt = handler.indexOf('SIYL_STOCK.reserveLines');
-  const wroteAt = handler.indexOf('plan.remove.forEach');
-  assert.ok(askedAt > 0 && askedAt < wroteAt, 'the replacement must be secured before anything is removed');
-  assert.match(handler, /if\(!res\.ok&&!res\.unreachable\)/, 'a refusal must stop the change');
-  assert.match(handler, /alertRoom\(c\);return/, 'a refusal must change nothing');
-  /* and the guest must actually SEE why: the notice cannot live inside the
-     decisions panel, which render() rewrites on every bag and stock event */
-  assert.match(yj, /<div id="csnote"><\/div>/, 'the refusal notice needs its own block');
-  assert.match(yj, /getElementById\('csnote'\)/);
-  assert.ok(!/function alertRoom\(c\)\{[\s\S]{0,200}getElementById\('dec'\)/.test(yj),
-    'the refusal notice must not be written into the panel that gets re-rendered');
-  assert.match(yj, /you still hold the stay you had/);
-  /* the decision panel must be reachable in full on a phone — it is the
-   * shell's own drawer, which scrolls and never exceeds the screen */
-  const sys = readFileSync(join(ROOT, 'assets/prep.css'), 'utf8');
-  const drawer = sys.slice(sys.indexOf('.p-drawer {'), sys.indexOf('}', sys.indexOf('.p-drawer {')));
-  assert.match(drawer, /overflow-y: auto/, 'the overlay must scroll when it is taller than the screen');
-  assert.match(drawer, /max-height: 88vh/);
-  const client = readFileSync(join(ROOT, 'assets/inventory.js'), 'utf8');
-  assert.match(client, /reserveLines: function/);
-  /* the ledger itself replaces an invitation's own allocation in one turn */
-  const ledger = readFileSync(join(ROOT, 'src/inventory.js'), 'utf8');
-  assert.match(ledger, /snapshot\(invitationId, invitationId\)/, 'a re-reservation must exclude the invitation itself — and read the ledger as that party');
-  assert.match(ledger, /blockConcurrencyWhile/);
-});
-
-test('L · with both choices gone, Cost Saving cannot be confirmed', () => {
-  const yj = readFileSync(join(ROOT, 'your-journey.html'), 'utf8');
-  assert.match(yj, /if\(!usable\.length\)/, 'the no-option state must exist');
-  assert.match(yj, /Neither Cost Saving stay is available/);
-  assert.match(yj, /getElementById\('fxg'\)\.disabled=true/);
 });
 
 test('M/N · Cost Saving → Full removes whichever stay was taken, and 2,155 stands', () => {

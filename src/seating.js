@@ -11,6 +11,12 @@
    atomic in the only safe order: hold the new chair first; only when that
    succeeded, release the old one.
 
+   ONE CODE = ONE GUEST (Owner, 14 Sep 2026): a chair is held or released
+   only by the guest the Worker has identified (src/auth.js), for that guest
+   and nobody else. A hold carries the guest's first name and party, so the
+   plan can show every authenticated guest where the people they know sit —
+   first names only, never a surname, never a code.
+
    NO FAMILY CHAIR IS INVENTED HERE. The floor plan is configuration, uploaded
    by Guest Relations through the protected route and validated against the
    Owner's binding geometry (override of 2026-09-11):
@@ -117,8 +123,13 @@ export function validateGeometry(input) {
       if (norm[side].length !== RULES.dinner.perSide) errors.push('dinner ' + (side === 'T' ? 'top' : 'bottom') + ' must hold ' + RULES.dinner.perSide + ' guest seats, has ' + norm[side].length);
     }
     if (sides.L || sides.R) errors.push('dinner sides are T (top) and B (bottom); the retired L/R model is not accepted');
+    /* the swimming pool as a landmark: the run it lies along, recorded by
+     * Guest Relations from the venue — 'T' | 'B' — or null until known.
+     * Nothing here invents the orientation (Owner, 14 Sep 2026). */
+    const ps = cfg.dinner.poolSide;
+    if (ps != null && ps !== 'T' && ps !== 'B') errors.push('dinner.poolSide must be T, B or null');
     /* the couple hold two of these fifty like everyone else — nothing is fixed */
-    out.dinner = { sides: norm, totalPeople: RULES.dinner.totalPeople };
+    out.dinner = { sides: norm, totalPeople: RULES.dinner.totalPeople, poolSide: ps === 'T' || ps === 'B' ? ps : null };
   }
   return { ok: errors.length === 0, errors, config: out };
 }
@@ -154,31 +165,37 @@ export class Seating {
   async holdOf(event, invitationId, guestId) {
     const holds = await this.holds(event);
     for (const [seatId, h] of Object.entries(holds)) {
-      if (h.invitationId === invitationId && h.guestId === guestId) return { seatId, ...h };
+      if (h.guestId === guestId && (!invitationId || h.invitationId === invitationId)) return { seatId, ...h };
     }
     return null;
   }
 
-  /* what a guest may see: every seat's state, their own chairs by name,
-   * nobody else's name — a taken chair is simply taken */
-  async view(invitationId) {
+  /* what a guest may see: every seat's state; their own chair by name; the
+   * first name on every held chair for an authenticated guest (Owner, 14 Sep
+   * 2026 — a guest may see where the people they know sit); nothing else.
+   * `who` is the verified identity, or an invitation id for a plain read. */
+  async view(who) {
+    const identity = who && typeof who === 'object' ? who : null;
+    const invitationId = identity ? identity.invitationId : (who || '');
     const cfg = await this.config();
     const out = { ok: true, open: !!cfg.open, frozen: !!cfg.frozen, updatedAt: cfg.updatedAt || null,
-                  configured: { ceremony: !!cfg.ceremony, dinner: !!cfg.dinner }, capacity: CAPACITY, mine: { ceremony: {}, dinner: {} } };
+                  configured: { ceremony: !!cfg.ceremony, dinner: !!cfg.dinner }, capacity: CAPACITY, mine: { ceremony: {}, dinner: {} },
+                  named: !!identity };
     for (const event of EVENTS) {
       const holds = await this.holds(event);
       const seats = seatsOf(cfg, event).map((s) => {
         const h = holds[s.seatId];
         let state = 'available';
         if (s.family) state = 'family';
-        else if (h) state = (invitationId && h.invitationId === invitationId) ? 'yours' : 'taken';
+        else if (h) state = (invitationId && h.invitationId === invitationId) ? 'yours' : (identity && identity.partyId && h.partyId === identity.partyId ? 'party' : 'taken');
         const row = { ...s, state };
         if (state === 'yours') { row.guestId = h.guestId; row.allocated = h.state === 'allocated'; out.mine[event][h.guestId] = s.seatId; }
+        if (h && identity && h.name) row.name = h.name;
         return row;
       });
       out[event] = event === 'ceremony'
         ? (cfg.ceremony ? { rows: cfg.ceremony.rows.map((r) => ({ side: r.side, row: r.row, seats: r.seats.map((s) => seats.find((x) => x.seatId === s.seatId)) })), fixed: RULES.ceremony.fixed.slice() } : null)
-        : (cfg.dinner ? { sides: { T: seats.filter((s) => s.side === 'T'), B: seats.filter((s) => s.side === 'B') }, totalPeople: RULES.dinner.totalPeople } : null);
+        : (cfg.dinner ? { sides: { T: seats.filter((s) => s.side === 'T'), B: seats.filter((s) => s.side === 'B') }, totalPeople: RULES.dinner.totalPeople, poolSide: cfg.dinner.poolSide === 'T' || cfg.dinner.poolSide === 'B' ? cfg.dinner.poolSide : null } : null);
     }
     return out;
   }
@@ -187,22 +204,26 @@ export class Seating {
     const url = new URL(request.url);
     const op = url.pathname.replace(/^.*\/api\/seating\/?/, '') || 'read';
     const gr = request.headers.get('x-gr-verified') === 'yes';   /* set only by the Worker after the token check */
+    let identity = null;                                          /* set only by the Worker after the bearer check */
+    try { identity = JSON.parse(request.headers.get('x-siyl-identity') || 'null'); } catch (e) { identity = null; }
 
-    if (op === 'read') return json(await this.view(url.searchParams.get('invitation') || ''));
+    if (op === 'read') return json(await this.view(identity || url.searchParams.get('invitation') || ''));
 
     if (op === 'mine') {
-      const inv = url.searchParams.get('invitation') || '';
-      const v = await this.view(inv);
+      const v = await this.view(identity || url.searchParams.get('invitation') || '');
       return json({ ok: true, open: v.open, frozen: v.frozen, configured: v.configured, mine: v.mine });
     }
 
     if (op === 'select') {
+      if (!identity) return json({ ok: false, error: 'unauthorised' }, 401);
       const body = await safeJson(request);
       const invitationId = String(body && body.invitationId || '').trim();
       const guestId = String(body && body.guestId || '').trim();
       const event = String(body && body.event || '');
       const seatId = String(body && body.seatId || '');
+      const name = String(body && body.name || '').slice(0, 24);
       if (!invitationId || !guestId || !EVENTS.includes(event) || !seatId) return json({ ok: false, error: 'invalid selection' }, 400);
+      if (invitationId !== identity.invitationId || guestId !== identity.guestId) return json({ ok: false, error: 'not your guest' }, 403);
       return await this.state.blockConcurrencyWhile(async () => {
         const cfg = await this.config();
         if (!cfg.open) return json({ ok: false, error: 'seating is not open' }, 423);
@@ -212,34 +233,36 @@ export class Seating {
         if (seat.family) return json({ ok: false, error: 'reserved for family' }, 409);
         const holds = await this.holds(event);
         const current = holds[seatId];
-        if (current && !(current.invitationId === invitationId && current.guestId === guestId)) {
-          return json({ ok: false, error: 'taken', ...(await this.view(invitationId)) }, 409);
+        if (current && !(current.guestId === guestId)) {
+          return json({ ok: false, error: 'taken', ...(await this.view(identity)) }, 409);
         }
-        const previous = await this.holdOf(event, invitationId, guestId);
+        const previous = await this.holdOf(event, null, guestId);
         if (previous && previous.state === 'allocated') return json({ ok: false, error: 'allocated by Guest Relations' }, 423);
         const held = Object.values(holds).filter((h) => h.invitationId === invitationId && !(previous && h.guestId === guestId)).length;
         if (held >= MAX_PER_INVITATION) return json({ ok: false, error: 'too many seats for one invitation' }, 409);
         /* HOLD THE NEW CHAIR FIRST … */
-        await this.storage.put(HOLD + event + ':' + seatId, { invitationId, guestId, at: new Date().toISOString(), state: 'held' });
+        await this.storage.put(HOLD + event + ':' + seatId, { invitationId, guestId, partyId: identity.partyId || null, name, at: new Date().toISOString(), state: 'held' });
         /* … AND ONLY THEN LET THE OLD ONE GO */
         if (previous && previous.seatId !== seatId) await this.storage.delete(HOLD + event + ':' + previous.seatId);
-        return json({ ok: true, event, seatId, guestId, ...(await this.view(invitationId)) });
+        return json({ ok: true, event, seatId, guestId, ...(await this.view(identity)) });
       });
     }
 
     if (op === 'release') {
+      if (!identity) return json({ ok: false, error: 'unauthorised' }, 401);
       const body = await safeJson(request);
       const invitationId = String(body && body.invitationId || '').trim();
       const guestId = String(body && body.guestId || '').trim();
       const event = String(body && body.event || '');
       if (!invitationId || !guestId || !EVENTS.includes(event)) return json({ ok: false, error: 'invalid release' }, 400);
+      if (invitationId !== identity.invitationId || guestId !== identity.guestId) return json({ ok: false, error: 'not your guest' }, 403);
       return await this.state.blockConcurrencyWhile(async () => {
         const cfg = await this.config();
         if (cfg.frozen) return json({ ok: false, error: 'seating is frozen' }, 423);
-        const previous = await this.holdOf(event, invitationId, guestId);
+        const previous = await this.holdOf(event, null, guestId);
         if (previous && previous.state === 'allocated') return json({ ok: false, error: 'allocated by Guest Relations' }, 423);
         if (previous) await this.storage.delete(HOLD + event + ':' + previous.seatId);
-        return json({ ok: true, released: previous ? previous.seatId : null, ...(await this.view(invitationId)) });
+        return json({ ok: true, released: previous ? previous.seatId : null, ...(await this.view(identity)) });
       });
     }
 
@@ -270,9 +293,11 @@ export class Seating {
         const cfg = await this.config();
         if (typeof body.open === 'boolean') cfg.open = body.open;
         if (typeof body.frozen === 'boolean') cfg.frozen = body.frozen;
+        /* the pool side, once Guest Relations has it from the venue */
+        if ('poolSide' in body && cfg.dinner) { const ps = body.poolSide; if (ps === 'T' || ps === 'B' || ps === null) cfg.dinner.poolSide = ps; }
         cfg.updatedAt = new Date().toISOString();
         await this.storage.put('config', cfg);
-        return json({ ok: true, open: cfg.open, frozen: cfg.frozen, updatedAt: cfg.updatedAt });
+        return json({ ok: true, open: cfg.open, frozen: cfg.frozen, poolSide: cfg.dinner ? cfg.dinner.poolSide || null : null, updatedAt: cfg.updatedAt });
       });
     }
 
@@ -298,9 +323,30 @@ export class Seating {
         if (current && !(current.invitationId === invitationId && current.guestId === guestId) && !body.force) {
           return json({ ok: false, error: 'taken', by: current }, 409);
         }
-        await this.storage.put(HOLD + event + ':' + seatId, { invitationId, guestId, at: new Date().toISOString(), state: 'allocated', by: String(body.actor || 'guest-relations') });
+        await this.storage.put(HOLD + event + ':' + seatId, { invitationId, guestId, partyId: body.partyId || (current && current.partyId) || null, name: String(body.name || (current && current.name) || '').slice(0, 24), at: new Date().toISOString(), state: 'allocated', by: String(body.actor || 'guest-relations') });
         if (previous && previous.seatId !== seatId) await this.storage.delete(HOLD + event + ':' + previous.seatId);
         return json({ ok: true, event, seatId, invitationId, guestId, state: 'allocated' });
+      });
+    }
+
+    /* REKEY (migration, 14 Sep 2026): a hold made under the retired party
+     * invitation is re-labelled with the guest's own invitation, party and
+     * first name. The chair, the guest and the state do not change. */
+    if (op === 'rekey') {
+      const body = await safeJson(request);
+      const list = Array.isArray(body && body.holds) ? body.holds : [];
+      return await this.state.blockConcurrencyWhile(async () => {
+        const done = [], refused = [];
+        for (const r of list) {
+          const event = String(r.event || ''), seatId = String(r.seatId || '');
+          const cur = EVENTS.includes(event) ? (await this.holds(event))[seatId] : null;
+          if (!cur) { refused.push({ event, seatId, error: 'no hold' }); continue; }
+          if (r.fromInvitationId && cur.invitationId !== r.fromInvitationId) { refused.push({ event, seatId, error: 'held by another invitation' }); continue; }
+          if (r.guestId && cur.guestId !== r.guestId) { refused.push({ event, seatId, error: 'held by another guest' }); continue; }
+          await this.storage.put(HOLD + event + ':' + seatId, { ...cur, invitationId: String(r.invitationId || cur.invitationId), partyId: r.partyId || cur.partyId || null, name: String(r.name || cur.name || '').slice(0, 24), rekeyedAt: new Date().toISOString() });
+          done.push({ event, seatId, invitationId: String(r.invitationId || cur.invitationId), guestId: cur.guestId });
+        }
+        return json({ ok: refused.length === 0, done, refused });
       });
     }
 
@@ -312,7 +358,7 @@ export class Seating {
         const holds = await this.holds(event);
         const seats = seatsOf(cfg, event).map((s) => {
           const h = holds[s.seatId];
-          return { ...s, state: s.family ? 'family' : h ? h.state : 'available', invitationId: h ? h.invitationId : null, guestId: h ? h.guestId : null, at: h ? h.at : null };
+          return { ...s, state: s.family ? 'family' : h ? h.state : 'available', invitationId: h ? h.invitationId : null, guestId: h ? h.guestId : null, partyId: h ? h.partyId || null : null, name: h ? h.name || '' : '', at: h ? h.at : null };
         });
         out.events[event] = {
           configured: seats.length > 0,

@@ -30,12 +30,18 @@
          and dinner, in ONE actor — a seat belongs to a named guest, holding a
          new chair always precedes releasing the old one. No geometry is coded;
          Guest Relations configures it through the protected route. */
-      { "name": "SEATING", "class_name": "Seating" }
+      { "name": "SEATING", "class_name": "Seating" },
+      /* THE ROOM OCCUPANCY ENGINE (Owner, 14 Sep 2026): persistent allocation
+         units — ROOM A, B, C … — of two guest places each, joined and left by
+         one guest at a time in their own name. The category ledger above stays
+         bound for its history; the site no longer writes to it. */
+      { "name": "ROOMS", "class_name": "Rooms" }
     ]
   },
   "migrations": [
     { "tag": "v1", "new_sqlite_classes": ["Inventory"] },
-    { "tag": "v2", "new_sqlite_classes": ["Seating"] }
+    { "tag": "v2", "new_sqlite_classes": ["Seating"] },
+    { "tag": "v3", "new_sqlite_classes": ["Rooms"] }
   ],
 
   "observability": { "enabled": true }

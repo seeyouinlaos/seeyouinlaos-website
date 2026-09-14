@@ -5,18 +5,19 @@
    coming to the temple, who is not, and for whom a Sangkhathan offering has to
    be prepared. Two decisions, kept deliberately apart:
 
-     ATTENDANCE   attend / not attending. Stored per invitation. It buys
-                  nothing and it consumes no inventory.
-     SANGKHATHAN  an optional personal offering, USD 15 per participating
-                  named guest. E · ELIGIBILITY IS PAIR-BASED and EXPLICIT:
-                  the invitation carries givingEligibility "PAIR" or "NONE";
-                  anything else is unresolved and nothing is offered. It is
-                  never derived from party size, names or wording. For an
-                  eligible pair there is ONE couple decision — both named
-                  guests take part, or neither — available only while every
-                  named guest is attending the Temple Ceremony. It is a normal
-                  journey line, priced by assets/pricing.js like everything
-                  else, and deliberately absent from the room ledger.
+     ATTENDANCE   attend / not attending. Stored per guest, in the guest's
+                  own name. It buys nothing and it consumes no inventory.
+     SANGKHATHAN  an optional personal offering, USD 15 for THIS guest
+                  (Owner decision, 14 Sep 2026: an individual YES / NO, never
+                  a couple decision, never another guest's amount in this
+                  guest's journey). ELIGIBILITY IS EXPLICIT: the invitation
+                  carries sangkhathan "ELIGIBLE" or "NONE"; anything else is
+                  unresolved and nothing is offered. It is never derived from
+                  party size, names or wording. The choice is available only
+                  while the guest is attending the Temple Ceremony. It is a
+                  normal journey line, priced by assets/pricing.js like
+                  everything else, and deliberately absent from the room
+                  engine.
 
    Tak Bat — the morning alms-giving, in which food is respectfully offered to
    Buddhist monks — is part of the Temple Ceremony. Guests attending are INVITED
@@ -26,7 +27,8 @@
    they paid USD 15 for the alms-giving.
 
    Three states per person, never two: NOT DECIDED is not NOT ATTENDING, and a
-   guest who has not answered the Sangkhathan has not declined it.
+   guest who has not answered the Sangkhathan has not declined it. Every
+   record here is keyed by the guest's own id and written only by that guest.
    ========================================================================== */
 (function () {
   'use strict';
@@ -36,19 +38,19 @@
     try { return JSON.parse(localStorage.getItem(KEY) || 'null') || {}; }
     catch (e) { return {}; }
   }
-  /* the active person — who is actually answering, for themselves or for
-   * another named guest (C · ANSWERING FOR). Never the subject. */
+  /* the guest — the only person who ever writes here */
   function by() {
-    var G = window.SIYL_GUEST, w = G && G.who ? G.who() : null;
-    return w ? w.activeGuestId : null;
+    var G = window.SIYL_GUEST, m = G && G.me ? G.me() : null;
+    return m ? m.guestId : null;
   }
+  function mine(id) { var m = by(); return !!(m && id === m); }
   function write(v) {
     localStorage.setItem(KEY, JSON.stringify(v));
     try { document.dispatchEvent(new CustomEvent('siyl:temple')); } catch (e) {}
     try { document.dispatchEvent(new CustomEvent('siyl:bag')); } catch (e) {}
   }
 
-  /* the named party, or a single anonymous stand-in before authentication */
+  /* the guest, or a single anonymous stand-in before authentication */
   function people() {
     var G = window.SIYL_GUEST, list = G ? G.guests() : [];
     if (!list.length) return [{ guestId: 'self', fullName: '', preferredName: 'You' }];
@@ -92,6 +94,7 @@
     },
     joining: function (id, key) { return this.eventOf(id, key) === 'yes'; },
     setEvent: function (id, key, v) {
+      if (!mine(id)) return false;
       if (key === 'temple') return this.setAttendance(id, v);
       var st = read();
       st.by = st.by || {};
@@ -111,34 +114,28 @@
     },
     attendingOf: function (id) { return this.attendanceOf(id) === 'yes'; },
 
-    /* ---- E · SANGKHATHAN — one couple decision, explicit eligibility ---- */
+    /* ---- SANGKHATHAN — the guest's own YES / NO, explicit eligibility ---- */
     eligibility: function () {
       var G = window.SIYL_GUEST, p = G && G.party ? G.party() : null;
-      return p && (p.givingEligibility === 'PAIR' || p.givingEligibility === 'NONE') ? p.givingEligibility : null;
+      return p && (p.sangkhathan === 'ELIGIBLE' || p.sangkhathan === 'NONE') ? p.sangkhathan : null;
     },
-    /* the pair may take part only while EVERY named guest is attending */
-    pairCan: function () {
-      var self = this, list = people();
-      return this.eligibility() === 'PAIR' && list.length > 0 &&
-        list.every(function (g) { return self.attendingOf(g.guestId); });
-    },
-    pairDecision: function () {
-      var st = read();
-      return this.pairCan() && st.pair && (st.pair.off === 'yes' || st.pair.off === 'no') ? st.pair.off : null;
-    },
+    /* the guest may choose only while they attend the Temple Ceremony */
+    canOffer: function (id) { return this.eligibility() === 'ELIGIBLE' && this.attendingOf(id); },
     offeringOf: function (id) { return this.offeringOf_(id) === 'yes'; },
     /* 'yes' selected · 'no' continued without one · null not decided or not offered */
     offeringOf_: function (id) {
-      if (!this.attendingOf(id)) return null;
-      return this.pairDecision();
+      if (!this.canOffer(id)) return null;
+      var v = (read().by || {})[id];
+      return v && (v.off === 'yes' || v.off === 'no') ? v.off : null;
     },
-    /* nothing to decide unless the pair is eligible and able */
+    /* nothing to decide unless the guest is eligible and attending */
     offeringDecidedOf: function (id) {
-      if (!this.pairCan()) return true;
-      return this.pairDecision() !== null;
+      if (!this.canOffer(id)) return true;
+      return this.offeringOf_(id) !== null;
     },
 
     setAttendance: function (id, v) {
+      if (!mine(id)) return false;
       var st = read();
       st.by = st.by || {};
       st.by[id] = st.by[id] || {};
@@ -149,23 +146,22 @@
        * returning to attending never silently restores it — they are asked
        * again, from NOT DECIDED. */
       if (st.by[id].attend !== 'yes') { delete st.by[id].off; delete st.by[id].offering; }
-      /* E · the couple decision depends on every named guest attending: when
-       * one of them is not, the pair decision is removed — and it is never
-       * restored silently when they return; the pair is asked again. */
-      if (st.by[id].attend !== 'yes') delete st.pair;
+      delete st.pair;   /* the retired couple decision never counts for anyone */
       write(st);
       sync();
     },
-    /* v: 'yes' | 'no' | null — the couple's ONE decision, recorded once for
-     * both. Refused when the invitation is not an eligible pair or the pair
-     * cannot take part yet. `id` is the named guest asking; it must belong to
-     * the party. */
+    /* v: 'yes' | 'no' | null — this guest's own decision, in their own name.
+     * Refused unless the guest is eligible and attending. */
     setOffering: function (id, v) {
-      if (!people().some(function (g) { return g.guestId === id; })) return false;
-      if (!this.pairCan()) return false;
+      if (!mine(id)) return false;
+      if (!this.canOffer(id)) return false;
       var st = read();
-      if (v === 'yes' || v === 'no') st.pair = { off: v, at: new Date().toISOString(), by: by() };
-      else delete st.pair;
+      st.by = st.by || {};
+      st.by[id] = st.by[id] || {};
+      if (v === 'yes' || v === 'no') st.by[id].off = v; else delete st.by[id].off;
+      st.by[id].offAt = new Date().toISOString();
+      st.by[id].by = by();
+      delete st.pair;
       write(st);
       sync();
       return true;
@@ -197,11 +193,10 @@
       return people().filter(function (g) { return self.openFor(g.guestId).length > 0; });
     },
     anyAttending: function () { return this.attendees().length > 0; },
-    /* every named guest of an eligible pair that chose to take part */
+    /* the guest, when they chose to take part */
     offeringGuests: function () {
       var self = this;
-      if (this.pairDecision() !== 'yes') return [];
-      return people().filter(function (g) { return self.attendingOf(g.guestId); });
+      return people().filter(function (g) { return self.offeringOf(g.guestId); });
     },
     offerings: function () { return this.offeringGuests().length; },
 
@@ -212,7 +207,7 @@
     /* what Guest Relations needs to prepare */
     operational: function () {
       var self = this;
-      var elig = this.eligibility(), can = this.pairCan(), pair = this.pairDecision();
+      var elig = this.eligibility();
       var rows = people().map(function (g) {
         var a = self.attendanceOf(g.guestId), o = self.offeringOf_(g.guestId);
         var events = {};
@@ -231,17 +226,15 @@
           sangkhathan: o === 'yes',
           sangkhathanState: a !== 'yes' ? 'Not applicable'
             : elig === 'NONE' ? 'Not eligible'
-            : elig !== 'PAIR' ? 'Not available yet'
-            : !can ? 'Not applicable'
+            : elig !== 'ELIGIBLE' ? 'Not available yet'
             : o === 'yes' ? 'Selected' : o === 'no' ? 'Not selected' : 'Decision required'
         };
       });
       var n = this.offerings();
       return {
         guests: rows,
-        /* E · the couple decision, as source truth and as a state */
+        /* eligibility as source truth */
         sangkhathanEligibility: elig || 'UNRESOLVED',
-        sangkhathanPair: elig === 'PAIR' ? (can ? (pair || 'Decision required') : 'Not applicable') : (elig === 'NONE' ? 'Not eligible' : 'Not available yet'),
         attending: rows.filter(function (r) { return r.attending; }).length,
         notAttending: rows.filter(function (r) { return r.temple === 'Not attending'; }).length,
         undecided: rows.filter(function (r) { return r.temple === 'Not decided'; }).length,
@@ -253,22 +246,21 @@
     }
   };
 
-  /* the ONE bag line, quantity = the number of named guests who chose it */
+  /* the ONE bag line — this guest's own offering, USD 15, quantity one */
   function sync() {
     if (!window.SIYL_BAG || !window.SIYL_PRICE) return;
-    /* When the party is not resolved — no invitation open, or a session that
-     * predates the names — we do not know who chose anything. Silence is not a
-     * cancellation: leave the journey exactly as the guest left it and wait
-     * for the names to come back. */
+    /* When the guest is not resolved — no invitation open, or a session that
+     * predates the guest-scoped invitations — nothing is known. Silence is not
+     * a cancellation: leave the journey exactly as the guest left it. */
     var G = window.SIYL_GUEST;
     if (G && !G.party()) return;
-    var n = T.offerings();
+    var n = T.offerings() ? 1 : 0;
     if (!n) { if (SIYL_BAG.has('sangkhathan')) SIYL_BAG.remove('sangkhathan'); return; }
     var line = SIYL_PRICE.items('sangkhathan')[0];
-    line.qty = n;
+    line.qty = 1;
     line.guests = T.offeringGuests().map(function (g) { return g.guestId; });
     var cur = SIYL_BAG.get().filter(function (x) { return x.id === 'sangkhathan'; })[0];
-    if (!cur || cur.qty !== n) SIYL_BAG.put(line);
+    if (!cur || cur.qty !== 1) SIYL_BAG.put(line);
   }
 
   /* an offering can never outlive the decision that allowed it */

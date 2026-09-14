@@ -93,14 +93,15 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:22px;margin:44
 .backrow{text-align:center;margin-top:34px}
 .backrow a{font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:#313131;text-decoration:none;border-bottom:1px solid #313131;padding:8px 0 3px;display:inline-block;min-height:44px}
 </style><link rel="stylesheet" href="assets/desktop.css"><link rel="stylesheet" href="assets/aman.css"></head><body>
-<header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="your-journey.html" aria-label="Your Journey"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
+<header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="cart.html" aria-label="Your Journey"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main id="m"></main>
 <script src="assets/bag.js"></script>
 <script src="assets/shop-menu.js"></script>
 <script src="assets/aman.js"></script>
 <script src="assets/rooms-data.js"></script>
 <script src="assets/pricing.js"></script>
-<script src="assets/inventory.js"></script>
+<script src="assets/rooms.js"></script>
+<script src="assets/stay.js"></script>
 <script src="assets/journey.js"></script>
 <script type="module" src="assets/invite.mjs"></script>
 <script>
@@ -238,7 +239,7 @@ stay.windows.forEach(function (w, wi) {
     h += '<p class="rsvline">' + esc(room.reserved) + '</p>';
   } else {
     /* a room held for THIS party (the couple's own) keeps its label and is chosen like any other */
-    if (room.reserved) h += '<p class="rsvline">' + esc(room.reserved) + ' · held for your party — yours to choose</p>';
+    if (room.reserved) h += '<p class="rsvline">' + esc(room.reserved) + ' · held for you — yours to choose</p>';
     /* ONE presentation for every window: the amount, exactly what it covers,
      * and the exact nights it covers. The nights are never left implicit. */
     h += amountBlock(q);
@@ -250,7 +251,7 @@ stay.windows.forEach(function (w, wi) {
   }
   h += '</div>';
 });
-h += '<p class="note">Amounts are the total per person for the nights shown and are never charged on this website — Guest Relations confirms every arrangement with you.</p></section>';
+h += '<p class="note">Amounts are the total per person for the nights shown. Nothing is paid on this website — Guest Relations confirms every arrangement with you.</p></section>';
 h += '<p class="backrow"><a href="journeys.html#j-' + stay.windows[0].id + '">Back to Journeys</a></p>';
 
 document.getElementById('m').innerHTML = h;
@@ -309,12 +310,12 @@ function held(w) {
   var ids = P.ids(w.id);
   return SIYL_BAG.get().filter(function (x) { return ids.indexOf(x.id) >= 0; })[0] || null;
 }
+var U = window.SIYL_UNITS, ST = window.SIYL_STAY;
 function paint() {
   /* the sibling cards carry the same live counts as the page they open */
-  var St0 = window.SIYL_STOCK;
   document.querySelectorAll('[data-oav]').forEach(function (el) {
     var slug = el.getAttribute('data-oav');
-    el.textContent = (St0 && St0.ready() && St0.tracked(W0.id, slug)) ? St0.label(W0.id, slug, 1) : '';
+    el.textContent = (U && U.ready() && U.tracked(W0.id, slug)) ? U.label(W0.id, slug) : '';
   });
   document.querySelectorAll('[data-win]').forEach(function (b) {
     var wi = parseInt(b.getAttribute('data-win'), 10), w = stay.windows[wi];
@@ -324,7 +325,7 @@ function paint() {
     if (line) {
       b.textContent = 'Remove from Your Journey';
       b.classList.add('sel');
-      if (swap) { swap.hidden = true; }
+      if (swap) { var words = ST ? ST.unitWords(line) : ''; swap.hidden = !words; swap.textContent = words ? 'Current selection · ' + words : ''; }
       if (chg) chg.hidden = false;
     } else {
       b.textContent = 'Add to Your Journey';
@@ -335,29 +336,28 @@ function paint() {
         else swap.hidden = true;
       }
     }
-    /* ---- what the shared ledger says about THIS room, right now ---- */
-    var St = window.SIYL_STOCK;
+    /* ---- what the room engine says about THIS room, right now ---- */
     var av = document.querySelector('[data-av="' + w.id + '"]');
-    if (av && St && St.ready() && St.tracked(w.id, room.slug)) {
-      var qty = (line && line.qty) || 1;
+    if (av && U && U.ready() && U.tracked(w.id, room.slug)) {
       av.hidden = false;
-      av.textContent = St.label(w.id, room.slug, qty);
-      av.classList.toggle('low', St.scarce(w.id, room.slug) || St.soldOut(w.id, room.slug));
-      var gone = !line && !St.fits(w.id, room.slug, qty);
+      av.textContent = U.label(w.id, room.slug);
+      av.classList.toggle('low', U.scarce(w.id, room.slug) || U.soldOut(w.id, room.slug));
+      var gone = !line && !U.fits(w.id, room.slug);
       b.disabled = gone;
-      if (gone) b.textContent = St.soldOut(w.id, room.slug) ? 'Sold out' : 'Not enough rooms left';
+      if (gone) b.textContent = U.eligible(w.id, room.slug) ? 'Fully booked' : 'Reserved';
     } else if (av) { av.hidden = true; b.disabled = false; }
   });
 }
 document.querySelectorAll('[data-win]').forEach(function (b) {
   b.addEventListener('click', function () {
     var w = stay.windows[parseInt(b.getAttribute('data-win'), 10)];
-    if (mine(w)) { P.ids(w.id).forEach(function (id) { SIYL_BAG.remove(id); }); paint(); return; }
-    gated(function () {
-      /* a selection replaces every id this window writes — never a duplicate */
-      P.ids(w.id).forEach(function (id) { SIYL_BAG.remove(id); });
-      P.items(w.id, room.slug).forEach(function (it) { SIYL_BAG.put(it); });
+    if (mine(w)) { ST.remove(w.id).then(paint); return; }
+    /* the place is held in the guest's own name first; only then the line */
+    b.disabled = true; b.textContent = 'Holding your place…';
+    ST.select(w.id, room.slug).then(function (r) {
       paint();
+      var av = document.querySelector('[data-av="' + w.id + '"]');
+      if (!r.ok && av) { av.hidden = false; av.textContent = ST.refusal(r); av.classList.add('low'); }
     });
   });
 });
@@ -369,7 +369,7 @@ document.querySelectorAll('[data-chg]').forEach(function (b) {
   });
 });
 document.addEventListener('siyl:bag', paint);
-document.addEventListener('siyl:stock', paint);
+document.addEventListener('siyl:units', paint);
 paint();
 if (window.SIYL_BAG.bar) SIYL_BAG.bar();
 })();

@@ -12,9 +12,13 @@
      GR_TOKEN=… node src/gr.cjs unconfirm INV-002 --actor "Name"
      GR_TOKEN=… node src/gr.cjs seating-plan
      GR_TOKEN=… node src/gr.cjs seating-config geometry.json --actor "Name"
-     GR_TOKEN=… node src/gr.cjs seating-state --open true|false --frozen true|false
+     GR_TOKEN=… node src/gr.cjs seating-state --open true|false --frozen true|false [--pool T|B|none]
      GR_TOKEN=… node src/gr.cjs seating-assign ceremony C-L-1-1 INV-002 G001 [--force]
      GR_TOKEN=… node src/gr.cjs seating-unassign ceremony INV-002 G001
+     GR_TOKEN=… node src/gr.cjs seating-rekey holds.json          # migration: relabel holds by guest
+     GR_TOKEN=… node src/gr.cjs rooms-plan                        # every allocation unit, who is where
+     GR_TOKEN=… node src/gr.cjs rooms-migrate occupants.json      # migration: place guests in units
+     GR_TOKEN=… node src/gr.cjs rooms-unassign G001 [--stage wedstay]
 
    The token is read from GR_TOKEN, or from src/gr-token.private.txt (never
    committed). ORIGIN defaults to the production Worker.
@@ -54,10 +58,15 @@ async function call(route, method, body) {
       const body = { actor };
       if (flag('open') !== undefined) body.open = flag('open') === 'true';
       if (flag('frozen') !== undefined) body.frozen = flag('frozen') === 'true';
+      if (flag('pool') !== undefined) body.poolSide = flag('pool') === 'none' ? null : flag('pool');
       return call('/api/seating/state', 'POST', body);
     }
     case 'seating-assign': return call('/api/seating/assign', 'POST', { event: args[0], seatId: args[1], invitationId: args[2], guestId: args[3], actor, force: args.includes('--force') });
     case 'seating-unassign': return call('/api/seating/unassign', 'POST', { event: args[0], invitationId: args[1], guestId: args[2], actor });
+    case 'seating-rekey': return call('/api/seating/rekey', 'POST', { holds: JSON.parse(fs.readFileSync(args[0], 'utf8')), actor });
+    case 'rooms-plan': return call('/api/rooms/plan', 'GET');
+    case 'rooms-migrate': return call('/api/rooms/migrate', 'POST', { occupants: JSON.parse(fs.readFileSync(args[0], 'utf8')), actor, force: args.includes('--force') });
+    case 'rooms-unassign': return call('/api/rooms/unassign', 'POST', { guestId: args[0], stage: flag('stage') || '', actor });
     default:
       console.error('usage: see the header of src/gr.cjs'); process.exit(2);
   }
