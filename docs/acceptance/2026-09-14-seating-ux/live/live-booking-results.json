@@ -1,0 +1,63 @@
+{
+ "origin": "https://seeyouinlaos-website.suthep-hrg.workers.dev",
+ "at": "2026-09-14T06:23:31.710Z",
+ "pass": 11,
+ "total": 11,
+ "results": [
+  {
+   "id": "0 production seating OPEN, ledger read",
+   "ok": true,
+   "d": "held 6 · INV-002 {\"ceremony\":{\"G001\":\"C-R-02-01\",\"G002\":\"C-R-02-02\"},\"dinner\":{\"G001\":\"D-B-13\",\"G002\":\"D-B-14\"}} · INV-001 {\"ceremony\":{},\"dinner\":{\"G048\":\"D-T-13\",\"G049\":\"D-T-14\"}}"
+  },
+  {
+   "id": "1 live INV-002 Peggy: both seats booked by label (D2 / B13), 100 chairs drawn, no raw id",
+   "ok": true,
+   "d": "ceremony:booked:D2|dinner:booked:B13"
+  },
+  {
+   "id": "2 live change D2 → D4: the summary names CURRENT and NEW, the engine moved the hold atomically, the confirmation shows D4 with its reference",
+   "ok": true,
+   "d": "SEAT CONFIRMED Your ceremony seat is confirmed D4 Right block · row 4 GUEST Peggy Berger INVITATION Peggy & Steffie EVENT Temple Ceremony DATE Sunday, 28 Februa"
+  },
+  {
+   "id": "3 live PDF see-you-in-laos-tc-seat-peggy.pdf · the live seat D4 · the reference · CONFIRMED · no ledger id",
+   "ok": true,
+   "d": "%PDF-1.4 see you in laos. SEAT CONFIRMATION GUEST INVITATION Peggy Berger Peggy & Steffie INV-002 EVENT Temple Ceremony DATE VENUE Sunday, 28 February 2027 Wat "
+  },
+  {
+   "id": "4 live change back D4 → D2: INV-002 exactly as before",
+   "ok": true,
+   "d": "SEAT CONFIRMED Your ceremony seat is confirmed D2 Right block · row 2 GUEST Pegg"
+  },
+  {
+   "id": "5 live The Wedding + Review & Send: Seat D2 by label, downloads offered, no raw id",
+   "ok": true,
+   "d": "YOUR SEATS · SEATING IS OPEN Where each of you will sit A chair for the ceremony and a place at the dinner table, chosen"
+  },
+  {
+   "id": "6 live INV-001 Haruthai: ceremony = Front centre · Bride (hostRole live in the bundle), no ceremony map, dinner A13 booked",
+   "ok": true,
+   "d": "FRONT CENTRE · BRIDE Your ceremony place Wat Ong Teu · 28 February · 08:00 Haruthai’s place at the c"
+  },
+  {
+   "id": "7 live dinner change A13 → A20 for the Bride, confirmed",
+   "ok": true,
+   "d": "CHANGE OF SEAT Haruthai · Wedding Dinner A13→A20 Current seat A13 · New seat A20 · Long table · run "
+  },
+  {
+   "id": "8 live PDF for the Bride: see-you-in-laos-wd-seat-haruthai.pdf",
+   "ok": true,
+   "d": "%PDF-1.4 see you in laos. SEAT CONFIRMATION GUEST INVITATION Haruthai Amphai Haruthai & Suthep INV-001 EVENT Wedding Din"
+  },
+  {
+   "id": "9 live ledger restored exactly: INV-001 and INV-002 as the Owner left them",
+   "ok": true,
+   "d": "held 6 · INV-001 {\"ceremony\":{},\"dinner\":{\"G048\":\"D-T-13\",\"G049\":\"D-T-14\"}} · INV-002 {\"ceremony\":{\"G001\":\"C-R-02-01\",\"G002\":\"C-R-02-02\"},\"dinner\":{\"G001\":\"D-B-13\",\"G002\":\"D-B-14\"}}"
+  },
+  {
+   "id": "10 live errors",
+   "ok": true,
+   "d": "none"
+  }
+ ]
+}

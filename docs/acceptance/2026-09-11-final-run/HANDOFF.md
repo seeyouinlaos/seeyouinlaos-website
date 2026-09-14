@@ -36,6 +36,17 @@ earlier conversation.
 > no blue dress · Wedding Dinner poolside · China card = the Owner's Lijiang file · tradition rail
 > 01·02·03 first. Record: the 13 Sep README, section "Guest-testing correction pass".
 
+> **002 — SEATING UX UPGRADE (14 Sep 2026, Owner instruction) · released at `36ae09d`.** The seating engine
+> (`src/seating.js`, `/api/seating`) is unchanged; the guest-facing layer is new: the plan as a room with guest
+> labels (A/B | aisle | D/E/F × 1–10; dinner A1–A25 / B1–B25), two-step booking with a sticky summary and
+> CONFIRM, a confirmation card, CHANGE SEAT with the old seat authoritative, a downloadable PDF seat
+> confirmation, the hosts' front centre by role (`hostRole` in the private list → bundle rebuilt, tokens
+> unchanged). Automatic Workers Build + Pages, parity 257/257, the real flow proven on production (INV-002
+> Peggy D2 → D4 → D2 with the PDF; INV-001 Haruthai "Front centre · Bride", A13 → A20 → A13), the ledger
+> restored exactly. Record: `docs/acceptance/2026-09-14-seating-ux/README.md`. Engine follow-up for the
+> Owner: the 409 "taken" body carries the view's `ok:true` (the client judges by status + error + ledger).
+> Note: a hosts' session stored before 14 Sep carries no role until the code is entered again.
+
 > **13 Sep 2026 · FINAL RUN COMPLETE. FINAL PRE-RELEASE GATE · PASS.** Read `FINAL-REPORT.md`.
 > Nothing from this run is outstanding. The Owner's final release approval stays ON HOLD by
 > instruction.

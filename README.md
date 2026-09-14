@@ -41,6 +41,13 @@ wrangler.jsonc              Worker config (assets binding)
 .assetsignore                What is excluded from public static assets
 ```
 
+### Seating (002, 14 Sep 2026)
+`assets/seatlabels.js` (guest labels ↔ ledger ids, the booking reference) · `assets/seating.js` (the plan drawn
+as a room, states in marks and words) · `assets/seatpass.js` (the PDF seat confirmation, dependency-free) ·
+`wedding-preparation.html` (two-step booking: tap → summary → CONFIRM → confirmation; CHANGE SEAT) ·
+`src/seating.js` (the Durable Object ledger — unchanged by the UX pass). Tests: `test/seating-labels.test.mjs`;
+walks: `docs/acceptance/2026-09-14-seating-ux/`.
+
 ## Develop
 
 ```
