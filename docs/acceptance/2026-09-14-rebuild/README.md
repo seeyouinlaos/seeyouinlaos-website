@@ -46,10 +46,29 @@ the category allocations, the statuses. The migration plan and result carry firs
 privately too.
 
 ## Evidence
-- `local/walk-results.json` — the four-identity walk (`walk.mjs`) against a local Worker with the real
-  engines (Miniflare): **63/63**, no page errors, no horizontal overflow at 320 / 375 / 430.
-- `live/` — the same walk against production after deployment (see the section below).
+- `local/walk-results.json`, `local/walk-local.log` — the four-identity walk (`walk.mjs`) against a local
+  Worker with the real engines (Miniflare): **63/63**, no page errors, no horizontal overflow at 320 / 375 / 430.
+- `live/walk-results.json`, `live/walk-live.log`, `live/*.png` — the same walk against the **production
+  Worker** at `c8dacb6` after the automatic Workers Build and the migration: **63/63** — Haruthai, then
+  Suthep, then Peggy, then Steffie, each with their own code, each alone (no SWITCH; Haruthai's suite Room A
+  1/2 → Suthep joins → 2/2 with both first names; Peggy refused the Presidential with the reason and refused
+  a room for Steffie; Peggy Room A of The Heritage 1/2 → Steffie joins → Full → changes to Room B → Room A
+  keeps Peggy alone → back; individual Sangkhathan 15 / 0; first names on the dinner plan; the one
+  YOUR WEDDING SEATS card; allergy NO / YES+details; four separate sends with four separate stamps; the gate
+  into Review lands on the missing control; cart REMOVE releases the place and the step needs attention).
+  Test state removed again by `restore.mjs`: the four test registrations deleted, the four guests' room
+  places released, the six migrated seat holds put back exactly (verified: RESTORED, room places 0, KV empty).
+- Pages mirror: sign-in, the engine read with the bearer (CORS), the named seat view, the cart — 0 errors.
+- Parity local = Worker = Pages by SHA-256: **262/262** (the accepted 259 − `assets/inventory.js`
+  + `assets/rooms.js`, `assets/stay.js`, `cart.html`, `register/auth-index.json`).
 - Unit / system tests: `npm test` 240/240 · `npm run release-check` 21/21 gates PASS.
+
+## Migration on production (applied 14 Sep 2026, after the Worker build at c8dacb6)
+`RESET=1 node src/migrate-individual.cjs --apply <private backup>` — 6 seat holds rekeyed (ok, 0 refused),
+0 room places, the 3 `reg:INV-001*` keys of the Owner's 14 Sep test sends deleted (backed up privately; the
+retired category ledger is no longer written by the site). Production afterwards: seats INV-G001 C-R-02-03 /
+D-B-13, INV-G002 C-R-02-02 / D-B-14, INV-G049 D-B-15, INV-G048 D-B-16 with first names; REG_KV empty; room
+engine empty; seating OPEN.
 
 ## Known limits / Owner decisions
 - The pool side of the long table is not in any project or venue record: the plan draws the pool only once

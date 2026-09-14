@@ -41,7 +41,12 @@ async function signIn(code) {
   await p.waitForTimeout(600);
   return ls('siyl.auth');
 }
-async function leave(how) { await p.evaluate((how) => { const b = document.querySelector('[data-leave="' + how + '"]'); if (b) b.click(); else window.SIYL_PREP.leave(how); }, how); await p.waitForTimeout(800); }
+async function leave(how) {
+  await p.evaluate((how) => { const b = document.querySelector('[data-leave="' + how + '"]'); if (b) b.click(); else window.SIYL_PREP.leave(how); }, how);
+  /* the code screen, on a clean page: the session is gone and — for OPEN ANOTHER INVITATION — the overlay is up */
+  await p.waitForFunction((how) => !localStorage.getItem('siyl.auth') && /invitation/.test(location.pathname) && (how !== 'another' || !!document.querySelector('.siyl-inv input')), how, { timeout: 15000 }).catch(() => {});
+  await p.waitForTimeout(400);
+}
 async function contact(email, phone) {
   await go('invitation.html');
   await p.fill('#p-email', email); await p.locator('#p-email').dispatchEvent('change'); await p.waitForTimeout(150);
@@ -67,6 +72,9 @@ async function dinnerSeat() {
   await go('wedding-preparation.html#seats');
   await p.waitForFunction(() => window.SIYL_SEATS && SIYL_SEATS.ready(), null, { timeout: 15000 }); await p.waitForTimeout(500);
   const names = await p.evaluate(() => [...document.querySelectorAll('[data-ev="dinner"] .seat-name')].map((t) => t.textContent));
+  /* a seat already held (production: the migrated holds) — the change flow instead of the first choice */
+  const held = await p.evaluate(() => window.SIYL_SEATS.seatOf('dinner', window.SIYL_GUEST.me().guestId));
+  if (held) { await p.click('[data-seatmap="dinner"] [data-seat-change]'); await p.waitForTimeout(400); }
   const first = p.locator('[data-ev="dinner"] g[data-seat]').first();
   const lab = await first.getAttribute('data-label');
   await first.dispatchEvent('click'); await p.waitForTimeout(400);
@@ -74,7 +82,7 @@ async function dinnerSeat() {
   await p.click('[data-seat-confirm]'); await p.waitForFunction(() => !!document.querySelector('.p-seatconf'), null, { timeout: 15000 }); await p.waitForTimeout(400);
   const conf = await txt('.p-seatconf');
   await p.click('[data-seat-continue]'); await p.waitForTimeout(500);
-  return { names, lab, bar, conf, card: await txt('.p-wseats'), pool: await txt('.p-poolnote') };
+  return { names, lab, bar, conf, held, card: await txt('.p-wseats'), pool: await txt('.p-poolnote') };
 }
 async function aboutYou(allergy, details) {
   await go('about-you.html');
@@ -131,7 +139,7 @@ await go('wedding-preparation.html');
 await p.check('[data-ack]'); await p.waitForTimeout(300);
 note('H8 step 04 · dress acknowledged in her own name; ceremony fixed front centre (Bride)', /Complete/i.test(await txt('#ack-state')) && (await p.evaluate(() => (document.querySelector('[data-seatmap="ceremony"]') || {}).getAttribute('data-state'))) === 'fixed' && /Front centre · Bride/i.test(await body()));
 const ds = await dinnerSeat();
-note('H8 step 04 · dinner seat chosen on the plan, confirmed, the one YOUR WEDDING SEATS card, the pool in words', /Seat confirmed/i.test(ds.conf) && /Your wedding seats/i.test(ds.card) && /Bride · Front centre/i.test(ds.card) && /Seat A\d+/i.test(ds.card) && /Download seat confirmation/i.test(ds.card) && /pool/i.test(ds.pool) && /Booking summary/i.test(ds.bar), ds.card.slice(0, 160) + ' · ' + ds.pool);
+note('H8 step 04 · dinner seat chosen on the plan, confirmed, the one YOUR WEDDING SEATS card, the pool in words', /Seat confirmed/i.test(ds.conf) && /Your wedding seats/i.test(ds.card) && /Bride · Front centre/i.test(ds.card) && /Seat [AB]\d+/i.test(ds.card) && /Download seat confirmation/i.test(ds.card) && /pool/i.test(ds.pool) && /(Booking summary|Change of seat)/i.test(ds.bar), ds.card.slice(0, 160) + ' · ' + ds.pool);
 await shot('H-04');
 const ay = await aboutYou('no');
 note('H9 step 05 · allergy NO completes, photography acknowledged; retired questions gone; 01–05 complete', /Complete/i.test(ay.allergyState) && /Complete/i.test(ay.photoState) && ay.steps.slice(0, 5).every((s) => s === 'complete') && !/Travel comfort|Accessibility|Anything else we should know|Nothing here needs a tick/.test(await body()), ay.steps.join(','));
@@ -204,7 +212,7 @@ const ds3 = await dinnerSeat();
 note('P4 step 04 · ceremony seat required for a temple guest; dinner seat confirmed; names of the hosts visible', /Seat confirmed/i.test(ds3.conf) && ds3.names.includes('Haruthai') && ds3.names.includes('Suthep'), ds3.names.join(','));
 /* the ceremony seat, too */
 await go('wedding-preparation.html#seats'); await p.waitForFunction(() => window.SIYL_SEATS && SIYL_SEATS.ready(), null, { timeout: 15000 }); await p.waitForTimeout(400);
-await p.locator('[data-ev="ceremony"] g[data-seat]').first().dispatchEvent('click'); await p.waitForTimeout(300); await p.click('[data-seat-confirm]'); await p.waitForFunction(() => !!document.querySelector('.p-seatconf'), null, { timeout: 15000 }); await p.click('[data-seat-continue]'); await p.waitForTimeout(400);
+if (!(await p.evaluate(() => window.SIYL_SEATS.seatOf('ceremony', window.SIYL_GUEST.me().guestId)))) { await p.locator('[data-ev="ceremony"] g[data-seat]').first().dispatchEvent('click'); await p.waitForTimeout(300); await p.click('[data-seat-confirm]'); await p.waitForFunction(() => !!document.querySelector('.p-seatconf'), null, { timeout: 15000 }); await p.click('[data-seat-continue]'); await p.waitForTimeout(400); }
 note('P4 step 04 · both seats held → the one card with TEMPLE CEREMONY seat and WEDDING DINNER seat', /Your wedding seats/i.test(await txt('.p-wseats')) && /Seat [A-F]\d+/.test(await txt('.p-wseats')), await txt('.p-wseats'));
 await shot('P-04');
 const ay3 = await aboutYou('no');
@@ -240,7 +248,8 @@ await wedding('no', null);
 note('T4 step 03 · not attending the temple: no Sangkhathan asked, step complete', (await p.evaluate(() => window.SIYL_GUEST.done('wedding'))) === true, '');
 await go('wedding-preparation.html'); await p.check('[data-ack]'); await p.waitForTimeout(300);
 const cer = await p.evaluate(() => (document.querySelector('[data-seatmap="ceremony"]') || {}).getAttribute('data-state'));
-note('T5 step 04 · no ceremony seat required when not attending; the dinner seat is', cer === 'none' && (await p.evaluate(() => window.SIYL_GUEST.missingFor('preparation').map((m) => m.key))).join(',') === 'seat:dinner', cer);
+const missP = await p.evaluate(() => ({ miss: window.SIYL_GUEST.missingFor('preparation').map((m) => m.key).join(','), heldD: !!window.SIYL_SEATS.seatOf('dinner', window.SIYL_GUEST.me().guestId) }));
+note('T5 step 04 · no ceremony seat required when not attending; the dinner seat is (unless already held)', cer === 'none' && (missP.heldD ? missP.miss === '' : missP.miss === 'seat:dinner'), cer + ' · ' + JSON.stringify(missP));
 const ds4 = await dinnerSeat();
 note('T5 step 04 · dinner seat confirmed; Peggy\'s name on the plan', /Seat confirmed/i.test(ds4.conf) && ds4.names.includes('Peggy'), ds4.names.join(','));
 await aboutYou('no');
@@ -281,8 +290,7 @@ await p.setViewportSize({ width: 390, height: 844 });
 note('Z no page errors across the four identities', errs.length === 0, errs.join(' | ').slice(0, 300));
 await go('review.html'); await leave('out');
 
-/* ---- restore: the test state is removed again on a production run */
-if (clean && process.env.RESTORE === '1') { console.log('RESTORE requested — see restore.mjs'); }
+/* ---- restore: the test state is removed again on a production run (restore.mjs) */
 await b.close();
 const pass = R.filter((x) => x.ok).length;
 console.log('\n' + pass + '/' + R.length + ' checks passed' + (errs.length ? ' · page errors: ' + errs.length : ''));
