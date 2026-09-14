@@ -340,3 +340,20 @@ retired: `experiences/bkk-lv-cafe-01.jpg`, `vte-3merchants.jpg`, `vte-sona.jpg`,
 | experiences/bkk-iconsiam-04.jpg | Owner · Drive folder `222 - Mall - ICONSIAM Bangkok` (`1IVKu15aTmQov07tjSuQwW1ay4JTeTvFJ`) | Drive file `1jhRvbhZ_PsOBdoA6SVp9M3XtbrnrMGSR` · IMG_3499.jpeg | The SookSiam floating-market floor (900 × 500) | ICONSIAM — gallery 4/6 on experience.html · experiences.html card | ACTIVE — Experience content pass 13 Sep 2026 |
 | experiences/bkk-iconsiam-05.jpg | Owner · Drive folder `222 - Mall - ICONSIAM Bangkok` (`1IVKu15aTmQov07tjSuQwW1ay4JTeTvFJ`) | Drive file `1gRt-1krCiisqjyfLg7aqtHyv-p6AF1QF` · ICONSIAM5.jpg | Escalators in the gold atrium (1230 × 724) | ICONSIAM — gallery 5/6 on experience.html · experiences.html card | ACTIVE — Experience content pass 13 Sep 2026 |
 | experiences/bkk-iconsiam-06.jpg | Owner · Drive folder `222 - Mall - ICONSIAM Bangkok` (`1IVKu15aTmQov07tjSuQwW1ay4JTeTvFJ`) | Drive file `1MOFh6BjC_6FEzcOIFmQYlgPGp-HTb4Zk` · iconsiam01.jpg | The façade at dusk (1400 × 700) | ICONSIAM — gallery 6/6 on experience.html · experiences.html card | ACTIVE — Experience content pass 13 Sep 2026 |
+
+## 14 SEP Morning Alms-Giving — the couple's own alms-giving frames (Owner markup, 13/14 Sep 2026)
+The Owner rejected the two Tak Bat frames on the public wedding page (one male guest kneeling alone; an anonymous
+bowl-and-garland close-up). Replacements come from the Owner's **`001–010_Couple_Monk.jpeg` series** — physically
+stored in Drive folder `170 - Experience - Dib Bangkok`, where they are misfiled (recorded 13 Sep in
+`src/experience-inventory.json`); they are the couple's alms-giving photographs and are mapped here to their
+**correct wedding role (Temple Ceremony · Morning Alms-Giving)**, never as Dib Bangkok imagery. Drive originals untouched.
+
+| Production asset | Drive | Source folder | Source file | Verified subject | Used for | Status |
+|---|---|---|---|---|---|---|
+| temple/takbat-couple-giving-novice.jpg | Owner | `170 - Experience - Dib Bangkok` (misfiled couple series) | Drive file `1bJruhMOv9_tGr7m3k89o9LWokFyDFH6x` · `007 _Couple_Monk.jpeg` (1365 × 2048, native proportions, re-encoded q86) | Haruthai and Suthep kneeling in Lao traditional dress, placing sticky rice into a novice monk's alms bowl; a second monk behind | voyage.html · 01a Morning Alms-Giving · main image (`.a-pair.rev .am`) | ACTIVE — 14 Sep 2026 |
+| temple/takbat-couple-offering-bowl.jpg | Owner | `170 - Experience - Dib Bangkok` (misfiled couple series) | Drive file `1w4kuxmtNfxuBst9CONdFLbxdJekgZiOv` · `002_Couple_Monk.jpeg` (2048 × 1365, native proportions, re-encoded q86) | Haruthai offering food into a monk's alms bowl, Suthep kneeling beside her, a second monk passing | voyage.html · the alms-giving duo · second frame (`.a-duo .am`), beside `takbat-novices-with-bowls.jpg` | ACTIVE — 14 Sep 2026 |
+| temple/takbat-giving-into-bowl.jpg | B | `330` (DSC07733, 7cb33df) | — | One male guest kneeling alone, offering into a monk's bowl | was voyage.html 01a main image | RETIRED 14 Sep 2026 (Owner: replace with the couple) — file removed |
+| temple/temple-alms-bowl-garland.jpg | B | (7cb33df) | — | An alms bowl held with a jasmine garland, close-up | was voyage.html duo second frame | RETIRED 14 Sep 2026 (Owner: no anonymous close-up) — file removed |
+
+Not used from the series: 001 (couple seated, van behind), 003 (portrait, car behind), 004/005 (near-duplicates of 002),
+006/008 (near-duplicates of 007; 008 with a traffic cone), 009/010 (the couple in wai, onlookers behind) — held in reserve.
