@@ -7,6 +7,8 @@
 <title>The Wedding · See You In Laos</title>
 <link rel="stylesheet" href="assets/recon.css">
 <link rel="stylesheet" href="assets/aman.css">
+<link rel="stylesheet" href="assets/motion.css">
+<link rel="stylesheet" href="assets/venue.css">
 </head>
 <body>
 <main>
@@ -30,7 +32,7 @@
 
   <!-- 01 · TEMPLE CEREMONY — the Buddhist morning, in three moments:
        the ceremony, the alms-giving of food, and the personal offering. -->
-  <section class="a-sec a-pair" id="temple">
+  <section class="a-sec a-pair" id="temple" data-motion="reveal">
     <div class="am" style="background-image:url(assets/images/temple/temple-ceremony-morning.jpg)" role="img" aria-label="Novice monks with their alms bowls in the morning, and a guest kneeling in greeting"></div>
     <div class="ac">
       <p class="a-eyebrow">09:00 – approximately 12:00 · Wat Ong Teu, Vientiane</p>
@@ -44,7 +46,7 @@
   </section>
 
   <!-- 01a · MORNING ALMS-GIVING — part of the ceremony, never a product -->
-  <section class="a-sec a-pair rev" id="takbat">
+  <section class="a-sec a-pair rev" id="takbat" data-motion="reveal">
     <div class="am" style="background-image:url(assets/images/temple/takbat-couple-giving-novice.jpg)" role="img" aria-label="Haruthai and Suthep kneeling in Lao traditional dress, placing food in a novice monk's alms bowl during the morning offering"></div>
     <div class="ac">
       <p class="a-eyebrow">Part of the morning · Tak Bat / Sai Bat</p>
@@ -54,7 +56,7 @@
     </div>
   </section>
 
-  <section class="a-sec a-duo" aria-label="The morning alms-giving">
+  <section class="a-sec a-duo" data-motion="reveal" aria-label="The morning alms-giving">
     <div class="am" style="background-image:url(assets/images/temple/takbat-novices-with-bowls.jpg)" role="img" aria-label="Novice monks waiting with their alms bowls"></div>
     <div class="am" style="background-image:url(assets/images/temple/takbat-couple-offering-bowl.jpg);background-position:68% 50%" role="img" aria-label="Haruthai offering food into a monk's alms bowl, Suthep kneeling beside her, a second monk passing behind"></div>
     <p class="cap">The morning alms-giving · Tak Bat</p>
@@ -65,7 +67,7 @@
        directly beneath it, so a guest arriving from the Journey Bag never
        has to go looking for the choice. -->
   <div id="sangkhathan">
-  <section class="a-sec a-pair" id="sangkhathan-about">
+  <section class="a-sec a-pair" id="sangkhathan-about" data-motion="reveal">
     <div class="am" style="background-image:url(assets/images/temple/sangkhathan-prepared-offerings.jpg)" role="img" aria-label="Prepared Sangkhathan offerings in woven baskets, tied with ribbon"></div>
     <div class="ac">
       <p class="a-eyebrow">Sangkhathan · Optional · USD 15 per guest</p>
@@ -78,7 +80,7 @@
   </section>
 
   <!-- 01c · THE DECISION — attendance first, the offering only for attendees -->
-  <section class="a-sec a-lede" id="temple-decision">
+  <section class="a-sec a-lede" id="temple-decision" data-motion="reveal">
     <div>
       <p class="a-eyebrow">Your private journey</p>
       <h2>Who is joining which part of the day?</h2>
@@ -88,7 +90,7 @@
   </section>
   </div>
   <!-- 02 · COFFEE & CAKE -->
-  <section class="a-sec a-pair rev" id="coffee">
+  <section class="a-sec a-pair rev" id="coffee" data-motion="reveal">
     <div class="am" style="background-image:url(assets/images/event/051-coffee-and-cake-patisserie.jpg)" role="img" aria-label="Coffee and cake after the temple"></div>
     <div class="ac">
       <p class="a-eyebrow">On the return · Souphattra Heritage</p>
@@ -100,7 +102,7 @@
   </section>
 
   <!-- 03 · VOW CEREMONY — the green door -->
-  <section class="a-sec a-pair" id="vows">
+  <section class="a-sec a-pair" id="vows" data-motion="reveal">
     <div class="am" style="background-image:url(assets/images/event/052-vow-ceremony-green-door-entrance.jpg)" role="img" aria-label="The green door of Souphattra Heritage, open, with its steps and lanterns — where the vows are spoken"></div>
     <div class="ac">
       <p class="a-eyebrow">15:30 · Souphattra Heritage</p>
@@ -112,7 +114,7 @@
   </section>
 
   <!-- 04 · WEDDING DINNER -->
-  <section class="a-sec a-pair rev" id="dinner">
+  <section class="a-sec a-pair rev" id="dinner" data-motion="reveal">
     <div class="am" style="background-image:url(assets/images/event/053-wedding-dinner-courtyard-from-above.jpg)" role="img" aria-label="Poolside at Souphattra Heritage Vientiane, seen from above — where the Wedding Dinner is served"></div>
     <div class="ac">
       <p class="a-eyebrow">19:30 · Poolside</p>
@@ -123,17 +125,18 @@
     </div>
   </section>
 
-  <section class="a-sec a-duo" aria-label="The Chinese sharing menu">
+  <section class="a-sec a-duo" data-motion="reveal" aria-label="The Chinese sharing menu">
     <div class="am" style="background-image:url(assets/images/event/053-wedding-dinner-sharing-menu.jpg)" role="img" aria-label="Bamboo steamers of dim sum — the Chinese sharing menu"></div>
     <div class="am" style="background-image:url(assets/images/event/053-wedding-dinner-sharing-menu-table.jpg)" role="img" aria-label="The sharing menu set at the table — steamers, a dark plate and chopsticks"></div>
     <p class="cap">The Chinese sharing menu · at the table</p>
   </section>
 
-  <section class="a-sec tight">
-    <div class="a-band" style="background-image:url(assets/images/event/053-wedding-dinner-courtyard-wide.jpg)" role="img" aria-label="Poolside at Souphattra Heritage Vientiane, the heritage houses on every side"></div>
-  </section>
+  <!-- THE VENUE (003, 15 Sep 2026): the real aerial photograph, an architectural
+       information layer over it, the real photography of every place behind it.
+       Data: assets/venue-data.js · component: assets/venue.js -->
+  <section class="a-sec venue" id="venue" aria-labelledby="venue-h" data-venue></section>
 
-  <section class="a-sec a-duo" aria-label="Poolside">
+  <section class="a-sec a-duo" data-motion="reveal" aria-label="Poolside">
     <div class="am" style="background-image:url(assets/images/event/053-wedding-dinner-courtyard-gallery-view.jpg)" role="img" aria-label="The poolside seen from the upper gallery, through the trees"></div>
     <div class="am" style="background-image:url(assets/images/event/053-wedding-dinner-courtyard-villa.jpg)" role="img" aria-label="The heritage villa across the pool"></div>
     <p class="cap">Poolside · Souphattra Heritage Vientiane</p>
@@ -173,5 +176,8 @@
 <script type="module" src="assets/invite.mjs"></script>
 <script src="assets/recon.js"></script>
 <script src="assets/aman.js"></script>
+<script src="assets/motion.js"></script>
+<script src="assets/venue-data.js"></script>
+<script src="assets/venue.js"></script>
 </body>
 </html>

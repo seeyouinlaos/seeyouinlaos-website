@@ -1,0 +1,14 @@
+/* THE MOTION SYSTEM — tokens and the reveal primitive (assets/motion.js). */
+:root {
+  --m-fast: 220ms; --m-reveal: 480ms; --m-photo: 800ms; --m-trace: 1100ms;
+  --m-ease: cubic-bezier(.22, .61, .21, 1);          /* physical, decelerating */
+  --m-ease-in-out: cubic-bezier(.45, .05, .25, 1);
+}
+[data-motion="reveal"] { opacity: 0; transform: translate3d(0, 14px, 0); transition: opacity var(--m-reveal) var(--m-ease), transform var(--m-reveal) var(--m-ease); transition-delay: calc(var(--m-i, 0) * 70ms); will-change: opacity, transform; }
+[data-motion="reveal"].is-in { opacity: 1; transform: none; will-change: auto; }
+/* reduced motion: every state applies at once, nothing moves, nothing is hidden */
+.m-reduced [data-motion], .m-reduced [data-motion] * { transition: none !important; animation: none !important; }
+.m-reduced [data-motion="reveal"] { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  [data-motion="reveal"] { opacity: 1; transform: none; transition: none; }
+}
