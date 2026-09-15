@@ -1,0 +1,338 @@
+{
+  "origin": "https://seeyouinlaos.github.io/seeyouinlaos-website",
+  "at": "2026-09-15T18:51:07.779Z",
+  "pass": 66,
+  "total": 66,
+  "results": [
+    {
+      "id": "V320 stage · the real aerial served (souphattra-aerial-tall-600.avif 320x400) at 320 px, no overflow, no video",
+      "ok": true,
+      "d": "280x350 · overflow false"
+    },
+    {
+      "id": "V320 labels · three labels, on the photograph, none colliding, none hidden",
+      "ok": true,
+      "d": "05Wedding Dinner · Poolside 10px | 06Swimming pool 10px | 07Courtyard garden 10px"
+    },
+    {
+      "id": "V375 stage · the real aerial served (souphattra-aerial-tall-600.avif 375x468) at 375 px, no overflow, no video",
+      "ok": true,
+      "d": "331x414 · overflow false"
+    },
+    {
+      "id": "V375 labels · three labels, on the photograph, none colliding, none hidden",
+      "ok": true,
+      "d": "05Wedding Dinner · Poolside 10px | 06Swimming pool 10px | 07Courtyard garden 10px"
+    },
+    {
+      "id": "V390 stage · the real aerial served (souphattra-aerial-tall-600.avif 390x487) at 390 px, no overflow, no video",
+      "ok": true,
+      "d": "346x433 · overflow false"
+    },
+    {
+      "id": "V390 labels · three labels, on the photograph, none colliding, none hidden",
+      "ok": true,
+      "d": "05Wedding Dinner · Poolside 10px | 06Swimming pool 10px | 07Courtyard garden 10px"
+    },
+    {
+      "id": "V390 performance · LCP 1108 ms · CLS 0.000 · long tasks 0 (longest 0 ms) · venue images 166 KB",
+      "ok": true,
+      "d": "souphattra-aerial-tall-600.avif 76KB, 053-wedding-dinner-courtyard-from-above-320.jpg 34KB, pool-terrace-oblique-320.jpg 17KB, 053-wedding-dinner-courtyard-wide-320.jpg 15KB, 053-wedding-dinner-sharing-menu-320.jpg 24KB"
+    },
+    {
+      "id": "V393 stage · the real aerial served (souphattra-aerial-tall-600.avif 393x491) at 393 px, no overflow, no video",
+      "ok": true,
+      "d": "349x436 · overflow false"
+    },
+    {
+      "id": "V393 labels · three labels, on the photograph, none colliding, none hidden",
+      "ok": true,
+      "d": "05Wedding Dinner · Poolside 10px | 06Swimming pool 10px | 07Courtyard garden 10px"
+    },
+    {
+      "id": "V430 stage · the real aerial served (souphattra-aerial-tall-600.avif 430x537) at 430 px, no overflow, no video",
+      "ok": true,
+      "d": "386x483 · overflow false"
+    },
+    {
+      "id": "V430 labels · three labels, on the photograph, none colliding, none hidden",
+      "ok": true,
+      "d": "05Wedding Dinner · Poolside 10px | 06Swimming pool 10px | 07Courtyard garden 10px"
+    },
+    {
+      "id": "V768 stage · the real aerial served (souphattra-aerial-1000.avif 767x431) at 768 px, no overflow, no video",
+      "ok": true,
+      "d": "680x383 · overflow false"
+    },
+    {
+      "id": "V768 labels · three labels, on the photograph, none colliding, none hidden",
+      "ok": true,
+      "d": "05Wedding Dinner · Poolside 10.5px | 06Swimming pool 10.5px | 07Courtyard garden 10.5px"
+    },
+    {
+      "id": "V834 stage · the real aerial served (souphattra-aerial-1000.avif 834x468) at 834 px, no overflow, no video",
+      "ok": true,
+      "d": "746x420 · overflow false"
+    },
+    {
+      "id": "V834 labels · three labels, on the photograph, none colliding, none hidden",
+      "ok": true,
+      "d": "05Wedding Dinner · Poolside 10.5px | 06Swimming pool 10.5px | 07Courtyard garden 10.5px"
+    },
+    {
+      "id": "V1024 stage · the real aerial served (souphattra-aerial-1600.avif 1024x576) at 1024 px, no overflow, no video",
+      "ok": true,
+      "d": "896x504 · overflow false"
+    },
+    {
+      "id": "V1024 labels · three labels, on the photograph, none colliding, none hidden",
+      "ok": true,
+      "d": "05Wedding Dinner · Poolside 11px | 06Swimming pool 11px | 07Courtyard garden 11px"
+    },
+    {
+      "id": "V1280 stage · the real aerial served (souphattra-aerial-1600.avif 1180x663) at 1280 px, no overflow, no video",
+      "ok": true,
+      "d": "1052x592 · overflow false"
+    },
+    {
+      "id": "V1280 labels · three labels, on the photograph, none colliding, none hidden",
+      "ok": true,
+      "d": "05Wedding Dinner · Poolside 11.5px | 06Swimming pool 11.5px | 07Courtyard garden 11.5px"
+    },
+    {
+      "id": "V1280 performance · LCP 1264 ms · CLS 0.075 · long tasks 0 (longest 0 ms) · venue images 312 KB",
+      "ok": true,
+      "d": "souphattra-aerial-1600.avif 222KB, 053-wedding-dinner-courtyard-from-above-320.jpg 34KB, 053-wedding-dinner-courtyard-wide-320.jpg 15KB, pool-terrace-oblique-320.jpg 17KB, 053-wedding-dinner-sharing-menu-320.jpg 24KB"
+    },
+    {
+      "id": "V1440 stage · the real aerial served (souphattra-aerial-1600.avif 1180x663) at 1440 px, no overflow, no video",
+      "ok": true,
+      "d": "1052x592 · overflow false"
+    },
+    {
+      "id": "V1440 labels · three labels, on the photograph, none colliding, none hidden",
+      "ok": true,
+      "d": "05Wedding Dinner · Poolside 11.5px | 06Swimming pool 11.5px | 07Courtyard garden 11.5px"
+    },
+    {
+      "id": "A320 stage · the real aerial served (souphattra-aerial-tall-600.avif 320x400) at 320 px, no overflow, no video",
+      "ok": true,
+      "d": "280x350 · overflow false"
+    },
+    {
+      "id": "A320 labels · three labels, on the photograph, none colliding, none hidden",
+      "ok": true,
+      "d": "05Wedding Dinner · Poolside 10px | 06Swimming pool 10px | 07Courtyard garden 10px"
+    },
+    {
+      "id": "A375 stage · the real aerial served (souphattra-aerial-tall-600.avif 375x468) at 375 px, no overflow, no video",
+      "ok": true,
+      "d": "331x414 · overflow false"
+    },
+    {
+      "id": "A375 labels · three labels, on the photograph, none colliding, none hidden",
+      "ok": true,
+      "d": "05Wedding Dinner · Poolside 10px | 06Swimming pool 10px | 07Courtyard garden 10px"
+    },
+    {
+      "id": "A390 stage · the real aerial served (souphattra-aerial-tall-600.avif 390x487) at 390 px, no overflow, no video",
+      "ok": true,
+      "d": "346x433 · overflow false"
+    },
+    {
+      "id": "A390 labels · three labels, on the photograph, none colliding, none hidden",
+      "ok": true,
+      "d": "05Wedding Dinner · Poolside 10px | 06Swimming pool 10px | 07Courtyard garden 10px"
+    },
+    {
+      "id": "A390 performance · LCP 1452 ms · CLS 0.000 · long tasks 0 (longest 0 ms) · venue images 166 KB",
+      "ok": true,
+      "d": "souphattra-aerial-tall-600.avif 76KB, 053-wedding-dinner-courtyard-from-above-320.jpg 34KB, pool-terrace-oblique-320.jpg 17KB, 053-wedding-dinner-courtyard-wide-320.jpg 15KB, 053-wedding-dinner-sharing-menu-320.jpg 24KB"
+    },
+    {
+      "id": "A393 stage · the real aerial served (souphattra-aerial-tall-600.avif 393x491) at 393 px, no overflow, no video",
+      "ok": true,
+      "d": "349x436 · overflow false"
+    },
+    {
+      "id": "A393 labels · three labels, on the photograph, none colliding, none hidden",
+      "ok": true,
+      "d": "05Wedding Dinner · Poolside 10px | 06Swimming pool 10px | 07Courtyard garden 10px"
+    },
+    {
+      "id": "A430 stage · the real aerial served (souphattra-aerial-tall-600.avif 430x537) at 430 px, no overflow, no video",
+      "ok": true,
+      "d": "386x483 · overflow false"
+    },
+    {
+      "id": "A430 labels · three labels, on the photograph, none colliding, none hidden",
+      "ok": true,
+      "d": "05Wedding Dinner · Poolside 10px | 06Swimming pool 10px | 07Courtyard garden 10px"
+    },
+    {
+      "id": "A768 stage · the real aerial served (souphattra-aerial-1000.avif 767x431) at 768 px, no overflow, no video",
+      "ok": true,
+      "d": "680x383 · overflow false"
+    },
+    {
+      "id": "A768 labels · three labels, on the photograph, none colliding, none hidden",
+      "ok": true,
+      "d": "05Wedding Dinner · Poolside 10.5px | 06Swimming pool 10.5px | 07Courtyard garden 10.5px"
+    },
+    {
+      "id": "A834 stage · the real aerial served (souphattra-aerial-1000.avif 834x468) at 834 px, no overflow, no video",
+      "ok": true,
+      "d": "746x420 · overflow false"
+    },
+    {
+      "id": "A834 labels · three labels, on the photograph, none colliding, none hidden",
+      "ok": true,
+      "d": "05Wedding Dinner · Poolside 10.5px | 06Swimming pool 10.5px | 07Courtyard garden 10.5px"
+    },
+    {
+      "id": "A1024 stage · the real aerial served (souphattra-aerial-1600.avif 1024x576) at 1024 px, no overflow, no video",
+      "ok": true,
+      "d": "896x504 · overflow false"
+    },
+    {
+      "id": "A1024 labels · three labels, on the photograph, none colliding, none hidden",
+      "ok": true,
+      "d": "05Wedding Dinner · Poolside 11px | 06Swimming pool 11px | 07Courtyard garden 11px"
+    },
+    {
+      "id": "A1280 stage · the real aerial served (souphattra-aerial-1600.avif 1180x663) at 1280 px, no overflow, no video",
+      "ok": true,
+      "d": "1052x592 · overflow false"
+    },
+    {
+      "id": "A1280 labels · three labels, on the photograph, none colliding, none hidden",
+      "ok": true,
+      "d": "05Wedding Dinner · Poolside 11.5px | 06Swimming pool 11.5px | 07Courtyard garden 11.5px"
+    },
+    {
+      "id": "A1280 performance · LCP 2456 ms · CLS 0.034 · long tasks 0 (longest 0 ms) · venue images 312 KB",
+      "ok": true,
+      "d": "souphattra-aerial-1600.avif 222KB, 053-wedding-dinner-courtyard-from-above-320.jpg 34KB, pool-terrace-oblique-320.jpg 17KB, 053-wedding-dinner-sharing-menu-320.jpg 24KB, 053-wedding-dinner-courtyard-wide-320.jpg 15KB"
+    },
+    {
+      "id": "A1440 stage · the real aerial served (souphattra-aerial-1600.avif 1180x663) at 1440 px, no overflow, no video",
+      "ok": true,
+      "d": "1052x592 · overflow false"
+    },
+    {
+      "id": "A1440 labels · three labels, on the photograph, none colliding, none hidden",
+      "ok": true,
+      "d": "05Wedding Dinner · Poolside 11.5px | 06Swimming pool 11.5px | 07Courtyard garden 11.5px"
+    },
+    {
+      "id": "I390 the first place opens by itself: Wedding Dinner · Poolside, its area lit",
+      "ok": true,
+      "d": "Wedding Dinner · Poolside"
+    },
+    {
+      "id": "I390 tap a label on the photograph → that place opens: label and legend pressed, the rest released, the area lit, one-sentence announcement",
+      "ok": true,
+      "d": "{\"active\":\"pool\",\"lbl\":\"true\",\"item\":\"true\",\"other\":\"false\",\"title\":\"The swimming pool\",\"live\":\"The swimming pool. Every day of the stay.\",\"veil\":\"0.34\",\"hole\":\"1\"}"
+    },
+    {
+      "id": "I390 a place without a marker (the lobby) opens from the legend: its photograph and story, the whole photograph kept, no label pressed",
+      "ok": true,
+      "d": "{\"active\":\"\",\"title\":\"The lobby\",\"live\":\"The lobby. Arrival · 27 February.\",\"img\":true,\"thumbs\":3,\"pressedLabels\":0,\"veil\":\"0\"}"
+    },
+    {
+      "id": "I390 the gallery: the second photograph replaces the first (cross-fade done, the old one gone), the thumbnail pressed, the file loaded",
+      "ok": true,
+      "d": "{\"n\":\"1\",\"imgs\":1,\"pressed\":\"true\",\"loaded\":true,\"src\":\"https://seeyouinlaos.github.io/seeyouinlaos-website/assets/images/venue/lobby-clock-800.avif\"}"
+    },
+    {
+      "id": "I390 keyboard · arrow keys walk the legend (lobby → ceremony), Enter opens it, the focus ring is visible",
+      "ok": true,
+      "d": "{\"k1\":\"ceremony\",\"k2\":{\"title\":\"Wedding Ceremony\",\"outline\":\"solid\",\"zone\":\"ceremony\"}}"
+    },
+    {
+      "id": "I390 keyboard · a label on the photograph takes focus (visible ring) and Space opens its place",
+      "ok": true,
+      "d": "{\"title\":\"The courtyard garden\",\"outline\":\"solid\",\"active\":\"garden\"}"
+    },
+    {
+      "id": "I390 screen reader · the map is described in text, the legend is a labelled list, the detail a labelled region, every photograph has alt text",
+      "ok": true,
+      "d": "{\"figureDesc\":\"On the photograph: Wedding Dinner · Poolside, Swimming pool, Courtyard garden. Every place of the venue is listed below.\",\"region\":\"region\",\"labelled\":\"venue-detail-h\",\"listLabel\":\"Venue map\",\"h2\":\"Souphattra Heritage Vientiane\",\"alts\":true}"
+    },
+    {
+      "id": "I390 reduced motion · everything is simply there: the stage, the labels, the outlines, the detail, every story section — nothing moves, nothing is missing",
+      "ok": true,
+      "d": "{\"cls\":true,\"stageIn\":true,\"labels\":[\"1\",\"0.62\",\"0.62\"],\"img\":\"1\",\"title\":\"Wedding Dinner · Poolside\",\"dash\":\"0px\",\"sections\":[\"1\",\"1\",\"1\",\"1\",\"1\",\"1\",\"1\",\"1\",\"1\",\"1\",\"1\",\"1\"]}"
+    },
+    {
+      "id": "I1280 the first place opens by itself: Wedding Dinner · Poolside, its area lit",
+      "ok": true,
+      "d": "Wedding Dinner · Poolside"
+    },
+    {
+      "id": "I1280 tap a label on the photograph → that place opens: label and legend pressed, the rest released, the area lit, one-sentence announcement",
+      "ok": true,
+      "d": "{\"active\":\"pool\",\"lbl\":\"true\",\"item\":\"true\",\"other\":\"false\",\"title\":\"The swimming pool\",\"live\":\"The swimming pool. Every day of the stay.\",\"veil\":\"0.34\",\"hole\":\"1\"}"
+    },
+    {
+      "id": "I1280 a place without a marker (the lobby) opens from the legend: its photograph and story, the whole photograph kept, no label pressed",
+      "ok": true,
+      "d": "{\"active\":\"\",\"title\":\"The lobby\",\"live\":\"The lobby. Arrival · 27 February.\",\"img\":true,\"thumbs\":3,\"pressedLabels\":0,\"veil\":\"0\"}"
+    },
+    {
+      "id": "I1280 the gallery: the second photograph replaces the first (cross-fade done, the old one gone), the thumbnail pressed, the file loaded",
+      "ok": true,
+      "d": "{\"n\":\"1\",\"imgs\":1,\"pressed\":\"true\",\"loaded\":true,\"src\":\"https://seeyouinlaos.github.io/seeyouinlaos-website/assets/images/venue/lobby-clock-800.avif\"}"
+    },
+    {
+      "id": "I1280 keyboard · arrow keys walk the legend (lobby → ceremony), Enter opens it, the focus ring is visible",
+      "ok": true,
+      "d": "{\"k1\":\"ceremony\",\"k2\":{\"title\":\"Wedding Ceremony\",\"outline\":\"solid\",\"zone\":\"ceremony\"}}"
+    },
+    {
+      "id": "I1280 keyboard · a label on the photograph takes focus (visible ring) and Space opens its place",
+      "ok": true,
+      "d": "{\"title\":\"The courtyard garden\",\"outline\":\"solid\",\"active\":\"garden\"}"
+    },
+    {
+      "id": "I1280 screen reader · the map is described in text, the legend is a labelled list, the detail a labelled region, every photograph has alt text",
+      "ok": true,
+      "d": "{\"figureDesc\":\"On the photograph: Wedding Dinner · Poolside, Swimming pool, Courtyard garden. Every place of the venue is listed below.\",\"region\":\"region\",\"labelled\":\"venue-detail-h\",\"listLabel\":\"Venue map\",\"h2\":\"Souphattra Heritage Vientiane\",\"alts\":true}"
+    },
+    {
+      "id": "I1280 reduced motion · everything is simply there: the stage, the labels, the outlines, the detail, every story section — nothing moves, nothing is missing",
+      "ok": true,
+      "d": "{\"cls\":true,\"stageIn\":true,\"labels\":[\"1\",\"0.62\",\"0.62\"],\"img\":\"1\",\"title\":\"Wedding Dinner · Poolside\",\"dash\":\"0px\",\"sections\":[\"1\",\"1\",\"1\",\"1\",\"1\",\"1\",\"1\",\"1\",\"1\",\"1\",\"1\",\"1\"]}"
+    },
+    {
+      "id": "S375 WebKit · the aerial (souphattra-aerial-tall-600.avif) with three labels, no overflow, the detail rendered",
+      "ok": true,
+      "d": "331x414"
+    },
+    {
+      "id": "S390 WebKit · the aerial (souphattra-aerial-tall-600.avif) with three labels, no overflow, the detail rendered",
+      "ok": true,
+      "d": "346x433"
+    },
+    {
+      "id": "S430 WebKit · the aerial (souphattra-aerial-tall-600.avif) with three labels, no overflow, the detail rendered",
+      "ok": true,
+      "d": "386x483"
+    },
+    {
+      "id": "F voyage.html · the rendered footer carries Sühring · Lunch, 1872 · Afternoon Tea and Your tickets",
+      "ok": true,
+      "d": "1872 · Afternoon Tea | Sühring · Lunch | Your tickets"
+    },
+    {
+      "id": "F accommodation.html · the rendered footer carries Sühring · Lunch, 1872 · Afternoon Tea and Your tickets",
+      "ok": true,
+      "d": "1872 · Afternoon Tea | Sühring · Lunch | Your tickets"
+    },
+    {
+      "id": "F the public menu still lists Sühring · Lunch in Bangkok and 1872",
+      "ok": true,
+      "d": ""
+    }
+  ]
+}

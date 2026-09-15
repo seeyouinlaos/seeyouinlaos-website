@@ -1,5 +1,5 @@
 007 — FINAL V2 FULL-WEBSITE TEXT EXTRACTION · see you in laos.
-The complete guest-facing text of the current release (main ad75a0c), extracted 2026-09-15T18:36:36.279Z from a local Worker running the deployed source with the real engines.
+The complete guest-facing text of the current release (main 1d772ab), extracted 2026-09-15T18:52:59.281Z from a local Worker running the deployed source with the real engines.
 Every active route and every reachable state was rendered in a browser and the live DOM walked in document order: text, [aria-label], [alt], [title], [placeholder], resolved aria-labelledby / aria-describedby, control states, live regions; "(hidden)" marks text in the page but not shown until an interaction.
 The generated sent-journey text, the email backup, the seat tickets and travel passes (PDF text read back) and the plan words are included. Exact-duplicate global blocks are written once as G-nnn and referenced with USES G-nnn; every variant is written in full.
 No access code appears: [SECRET ACCESS CODE OMITTED] stands where one would be typed or shown. Contacts are test values. Nothing is summarised, corrected or shortened.
@@ -18310,7 +18310,7 @@ USD 2,325
 A spa interest carries no journey cost — paid directly at the spa.
 Received
 Your journey has been received by Guest Relations
-Sent · 15 Sept 2026 · 20:33 · your time
+Sent · 15 Sept 2026 · 20:50 · your time
 Guest Relations will review your selections personally. Nothing is confirmed yet; we will confirm each arrangement with you once it is ready.
 [aria-describedby → spoken] EVERYTHING WE NEED IS HERE · Your journey can be sent · Anything optional can follow at any time — it never delays your journey.
 [state] disabled
@@ -19976,15 +19976,15 @@ SEATS (as the ledger holds them):
 DOCUMENTS & PRIVACY (received only — nothing here is reviewed or verified):
 - Passport: NOT PROVIDED
 - Flight information: NOT PROVIDED
-- Publication of photographs: GIVEN (2026-09-15T18:33:38.796Z, wording 2026-09-09-draft)
+- Publication of photographs: GIVEN (2026-09-15T18:50:02.392Z, wording 2026-09-09-draft)
 
 GUEST:
 - Name: Peggy Berger
 - Contact: peggy.test@example.com · +49 170 000 0001
 - Party: Peggy & Steffie
-- Dress code: acknowledged 2026-09-15T18:33:11.345Z (text version 2026-09-09)
+- Dress code: acknowledged 2026-09-15T18:49:35.242Z (text version 2026-09-09)
 - Food allergies: NONE
-- Photography & film: acknowledged 2026-09-15T18:33:39.496Z (text version 2026-09-14)
+- Photography & film: acknowledged 2026-09-15T18:50:03.092Z (text version 2026-09-14)
 - Coffee or tea: Tea, black
 - My favourite: Mango sticky rice
 - Favourite drink: Water
@@ -19994,7 +19994,7 @@ GUEST:
 
 YOUR COST: USD 2,325
 Note: Tak Bat (morning alms-giving) is part of the Temple Ceremony and a personal offering. The Sangkhathan is a separate optional personal offering.
-Submitted via Review & Send · 2026-09-15T18:34:11.935Z
+Submitted via Review & Send · 2026-09-15T18:50:35.050Z
 
 ==================================================
 SURFACE 272
@@ -20047,15 +20047,15 @@ SEATS (as the ledger holds them):
 DOCUMENTS & PRIVACY (received only — nothing here is reviewed or verified):
 - Passport: NOT PROVIDED
 - Flight information: NOT PROVIDED
-- Publication of photographs: GIVEN (2026-09-15T18:33:38.796Z, wording 2026-09-09-draft)
+- Publication of photographs: GIVEN (2026-09-15T18:50:02.392Z, wording 2026-09-09-draft)
 
 GUEST:
 - Name: Peggy Berger
 - Contact: peggy.test@example.com · +49 170 000 0001
 - Party: Peggy & Steffie
-- Dress code: acknowledged 2026-09-15T18:33:11.345Z (text version 2026-09-09)
+- Dress code: acknowledged 2026-09-15T18:49:35.242Z (text version 2026-09-09)
 - Food allergies: NONE
-- Photography & film: acknowledged 2026-09-15T18:33:39.496Z (text version 2026-09-14)
+- Photography & film: acknowledged 2026-09-15T18:50:03.092Z (text version 2026-09-14)
 - Coffee or tea: Tea, black
 - My favourite: Mango sticky rice
 - Favourite drink: Water
@@ -20065,7 +20065,7 @@ GUEST:
 
 YOUR COST: USD 2,325
 Note: Tak Bat (morning alms-giving) is part of the Temple Ceremony and a personal offering. The Sangkhathan is a separate optional personal offering.
-Submitted via Review & Send · 2026-09-15T18:33:46.048Z
+Submitted via Review & Send · 2026-09-15T18:50:09.613Z
 
 ==================================================
 SURFACE 273
@@ -20271,29 +20271,6 @@ CONTEXT: folded in for completeness — every literal here is guest-facing in so
 ==================================================
 SURFACE 283
 ==================================================
-ROUTE: source strings · assets/venue-data.js
-STATE: SOURCE STRINGS · wording that reaches a guest only in a state not rendered above (each line as written, with the function or template it belongs to)
-SOURCE: assets/venue-data.js
-CONTEXT: folded in for completeness — every literal here is guest-facing in some state
-
-[one] 003 - Hotel - Pool & Garden
-[one] 002 - Hotel - Lobby & Public Areas
-[one] 001 - Hotel - Exterior & Architecture
-[one] 021 / 001 - Room - The Heritage
-[one] room photography already in the repository
-[one] 051 - Event - Cake and Coffee
-[one] Owner upload, 13 Sep 2026
-[one] 06 - The Door
-[one] souphattra herritage - 007.webp
-[one] Copy of DSC09013-scaled.webp
-[one] 056 - Event - Wedding Dinner
-[one] Copy of DSC00168-1.webp
-[one] Copy of DSC09021-scaled.webp
-[one] Copy of DSC00025-scaled.webp
-
-==================================================
-SURFACE 284
-==================================================
 ROUTE: source strings · assets/guest.js
 STATE: SOURCE STRINGS · wording that reaches a guest only in a state not rendered above (each line as written, with the function or template it belongs to)
 SOURCE: assets/guest.js
@@ -20303,7 +20280,7 @@ CONTEXT: folded in for completeness — every literal here is guest-facing in so
 [steps] Action needed
 
 ==================================================
-SURFACE 285
+SURFACE 284
 ==================================================
 ROUTE: source strings · assets/invite.mjs
 STATE: SOURCE STRINGS · wording that reaches a guest only in a state not rendered above (each line as written, with the function or template it belongs to)
@@ -20314,7 +20291,7 @@ CONTEXT: folded in for completeness — every literal here is guest-facing in so
 [open] .siyl-inv input
 
 ==================================================
-SURFACE 286
+SURFACE 285
 ==================================================
 ROUTE: source strings · assets/journey.js
 STATE: SOURCE STRINGS · wording that reaches a guest only in a state not rendered above (each line as written, with the function or template it belongs to)
@@ -20328,7 +20305,7 @@ CONTEXT: folded in for completeness — every literal here is guest-facing in so
 [free] no place left
 
 ==================================================
-SURFACE 287
+SURFACE 286
 ==================================================
 ROUTE: source strings · assets/pricing.js
 STATE: SOURCE STRINGS · wording that reaches a guest only in a state not rendered above (each line as written, with the function or template it belongs to)
@@ -20341,7 +20318,7 @@ CONTEXT: folded in for completeness — every literal here is guest-facing in so
 [quote] Amount on request · Guest Relations
 
 ==================================================
-SURFACE 288
+SURFACE 287
 ==================================================
 ROUTE: source strings · assets/recon.js
 STATE: SOURCE STRINGS · wording that reaches a guest only in a state not rendered above (each line as written, with the function or template it belongs to)
@@ -20351,7 +20328,7 @@ CONTEXT: folded in for completeness — every literal here is guest-facing in so
 [refresh] Your selection — nothing chosen yet
 
 ==================================================
-SURFACE 289
+SURFACE 288
 ==================================================
 ROUTE: source strings · assets/rooms-data.js
 STATE: SOURCE STRINGS · wording that reaches a guest only in a state not rendered above (each line as written, with the function or template it belongs to)
@@ -20373,7 +20350,7 @@ CONTEXT: folded in for completeness — every literal here is guest-facing in so
 [seq] Coffee & tea
 
 ==================================================
-SURFACE 290
+SURFACE 289
 ==================================================
 ROUTE: source strings · assets/stay.js
 STATE: SOURCE STRINGS · wording that reaches a guest only in a state not rendered above (each line as written, with the function or template it belongs to)
@@ -20385,7 +20362,7 @@ CONTEXT: folded in for completeness — every literal here is guest-facing in so
 [refusal] Your place could not be held right now — please try again in a moment.
 
 ==================================================
-SURFACE 291
+SURFACE 290
 ==================================================
 ROUTE: source strings · assets/seating.js
 STATE: SOURCE STRINGS · wording that reaches a guest only in a state not rendered above (each line as written, with the function or template it belongs to)
@@ -20396,7 +20373,7 @@ CONTEXT: folded in for completeness — every literal here is guest-facing in so
 [render] .seat-selected rect, .seat-yours rect
 
 ==================================================
-SURFACE 292
+SURFACE 291
 ==================================================
 ROUTE: source strings · assets/travelpass.js
 STATE: SOURCE STRINGS · wording that reaches a guest only in a state not rendered above (each line as written, with the function or template it belongs to)
@@ -20408,7 +20385,7 @@ CONTEXT: folded in for completeness — every literal here is guest-facing in so
 [W] The code carries this pass: the reference, your first name, the leg, the date and the class. It is not the carrier\u2019s ticket.
 
 ==================================================
-SURFACE 293
+SURFACE 292
 ==================================================
 ROUTE: source strings · assets/temple.js
 STATE: SOURCE STRINGS · wording that reaches a guest only in a state not rendered above (each line as written, with the function or template it belongs to)
@@ -20423,20 +20400,20 @@ CONTEXT: folded in for completeness — every literal here is guest-facing in so
 ==================================================
 007 FINAL REVIEW METADATA
 ==================================================
-MAIN SHA: ad75a0c
-EXTRACTION DATE: 2026-09-15T18:36:36.305Z
+MAIN SHA: 1d772ab
+EXTRACTION DATE: 2026-09-15T18:52:59.307Z
 
 DISTINCT ACTIVE ROUTES: 26
-DISTINCT SURFACES: 293
-DYNAMIC / CONDITIONAL STATES: 185
+DISTINCT SURFACES: 292
+DYNAMIC / CONDITIONAL STATES: 184
 EXPERIENCE ENTITIES: 39
 STAY / ROOM ROUTES: 33
 TRANSPORT ROUTES: 5
 TICKET / PDF TEMPLATES: 14
 
-LINES: 20447
-WORDS: 105017
-CHARACTERS: 676407
+LINES: 20424
+WORDS: 104876
+CHARACTERS: 675472
 
 SOURCE-TRUTH CLAIMS CHECKED: 123
 SOURCE-TRUTH MATCH: 98
@@ -20446,4 +20423,4 @@ OWNER DECISION OVERRIDES: 17
 STALE / RETIRED SOURCE: 1
 
 SECRET SCAN: PASS
-COMPLETENESS CHECK: PASS · 1880 guest-facing source literals represented · 155 folded in from states not rendered · 0 leftover · 0 failed steps
+COMPLETENESS CHECK: PASS · 1866 guest-facing source literals represented · 141 folded in from states not rendered · 0 leftover · 0 failed steps
