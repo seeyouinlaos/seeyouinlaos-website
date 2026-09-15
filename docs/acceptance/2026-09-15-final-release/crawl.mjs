@@ -23,7 +23,7 @@ const gr = fs.existsSync(path.join(ROOT, 'src/gr-token.private.txt')) ? fs.readF
 const list = JSON.parse(fs.readFileSync(path.join(ROOT, 'src/guestlist.private.json'), 'utf8'));
 const nonHostNames = list.filter((p) => !p.hosts).flatMap((p) => p.guests.map((g) => g.fullName)).filter((n) => n && n.split(' ').length > 1);
 const indexKeys = new Set(Object.keys(JSON.parse(fs.readFileSync(path.join(ROOT, 'register/auth-index.json'), 'utf8')).entries));
-const RETIRED = /\bSWITCH\b|Continuing as|Answering for|WHO ARE YOU|Reserved for bride|Reserved for the family|yours to choose|held for you|Alms Giving Ceremony|answeringFor|chooseIdentity/i;
+const RETIRED = /\bSWITCH\b|Continuing as|Answering for|WHO ARE YOU|Reserved for bride|Reserved for the family|yours to choose|held for you|Alms Giving Ceremony|answeringFor|chooseIdentity|\b08:00\b|\b16:30\b|SYL-TC-|Wat Ong Teu · 28 February|WEDDING · TEMPLE|C86 · Kunming → Lijiang[\s\S]{0,160}USD 105/i;
 
 const b = await chromium.launch();
 const ctx = await b.newContext({ viewport: { width: 1440, height: 1000 } });
