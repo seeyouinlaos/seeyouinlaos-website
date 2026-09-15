@@ -20,6 +20,24 @@ against this list when its current review returns (regenerate with `node docs/re
   Relations / Confirmed by Guest Relations; downloadable as a PDF. It is the guest's selection, not the
   carrier's ticket, and says so. Seats keep no code.
 - C86 · Kunming → Lijiang: **USD 105 per person** (Owner, 15 Sep 2026) on every active surface.
+- **Rooms (Owner override, 15 Sep 2026): NO PRE-RESERVED ROOMS.** Nothing is held for the Bride & Groom, the
+  family or anyone else; every physical room is available until a guest books a place in it, the couple book
+  their own two places like everyone else. The physical room count is the inventory: one room = one unit =
+  two places (a single room one place); the Sathorn Penthouse is six bedrooms, Room A – F, twelve places.
+  Category words are derived from the rooms ("2 rooms · 3 places available", "Fully booked", "Your place is
+  held · Room A"); the room page lists every physical room with its places. Gone: "Reserved for bride &
+  groom", "Reserved for family", "yours to choose", "held for you", "This category is reserved", "N places left".
+- **About You (Owner, 15 Sep 2026): every visible question is required** — the six favourites say "Required"
+  and "✓ Complete", the readiness names the exact unanswered question ("02 · Coffee or tea"), Continue focuses
+  it, Review & Send says "Not answered yet · Complete this"; the lede reads "A word or two for each is enough."
+  Only the travel documents (and the separate publication choice) stay optional.
+- **Tickets (Owner, 15 Sep 2026): TICKET = TICKET · CART = CART · REVIEW = REVIEW.** The seat confirmation is
+  a SEAT TICKET (a framed ticket with a stub: event, seat, guest, status, held for, ticket reference SYL-TC-…/
+  SYL-WD-…, a code; downloaded as a PDF drawn on the same ticket frame); the travel pass is drawn on the same
+  frame. A new page **tickets.html** ("Your tickets") gathers the seat tickets and the travel passes. The cart
+  and Review & Send carry no code, no reference, no QR any more (Review links to "Your tickets"). New words:
+  "Seat tickets", "Travel passes", "Download this ticket", "Download seat tickets", "All your tickets",
+  "Scan at the door", "Show to Guest Relations", "Held in your name".
 
 ## Surfaces and wording (public + private)
 | Surface | What changed |
@@ -36,6 +54,8 @@ against this list when its current review returns (regenerate with `node docs/re
 | you.html | retired; hands over to invitation.html#contact |
 | your-journey.html (02) | "Choose what feels right at each stage …" · labels "For you · <Name>" · CURRENT SELECTION everywhere (no "Selected for your journey", "Current fare", "Change this day") · VIEW DETAILS / CHANGE / CHANGE ROOM / REMOVE · the room chooser under a chosen stay · presets "Complete journey" / "Essential journey" · "Start with our suggested journey" · status "Your journey is ready." / "One detail left to choose." / "N details to choose." · costs block "Your cost" · **15 Sep**: every transport stage carries the ticket ("Train · State Railway of Thailand" / "Flight · China Eastern Airlines", BKK 20:25 → NKI 06:25 …, "Class", "Guest", "Travel pass SYL-…", "Your cost", "Selected · in your journey", "Download travel pass", "Not selected" / "Issued with your selection" before the choice); the flight product line "01 March 2027 · non-stop · 1h 35m · Boeing 738" |
 | wedding.html (03) | lede "One day, four moments. …" · one answer row ("<Name> · you") · Sangkhathan "Would you like a Sangkhathan prepared in your name?" YES "Yes, I would like to take part · USD 15" / "No, thank you" · Tak Bat wording ("welcome to take part in Tak Bat … The offering is personal and arranged individually on the morning.") · seats: "Where you will sit", "Required" |
+| tickets.html (new) | "Your tickets · <Name>" · "Every ticket of your journey, exactly as it stands …" · "Seat tickets" / "Travel passes" · empty states "No seat is held in your name yet …" / "No transport is in your journey yet …" · closing note "A travel pass records your selection; Guest Relations confirms each arrangement with you personally and issues the carrier’s ticket. A seat ticket shows your seat exactly as the seating ledger holds it. Nothing is paid on this website." |
+| room.html | **15 Sep**: the physical rooms of the category under each window ("Room A · 2 places available · CHOOSE THIS ROOM", "Room B · Haruthai · 1 place available · JOIN THIS ROOM", "Full"); the category line "6 rooms · 12 places available"; no reservation line |
 | wedding-preparation.html (04) | one acknowledgement ("Your acknowledgement", ✓ Complete) · seats "required for the events you attend" · "Not attending" / "Answer step 03 first" cards · YOUR WEDDING SEATS card · "Download seat confirmation" / "Download this seat" · seat facts without invitation / reference · booking summary punctuated for speech ("Peggy. Temple Ceremony." / "Seat E4. Right block · row 4. Not yet held.") |
 | about-you.html (05) | rebuilt: 01 "Do you have any food allergies?" YES / NO (+ "Which allergies?") · "A little more about you — The little things you love are often the ones that matter most. Share as much or as little as you like." · 02 Coffee or tea · 03 My favourite · 04 Favourite drink · 05 Anything you would rather avoid? · 06 Favourite film · 07 Favourite music (all optional, no "why" lines) · Travel documents "Optional · can be added later" / "Optional · not added" · "Photography & film — Photography and filming take place during the wedding day. [ ] I understand and acknowledge this." (required) · "Your publication choice" (optional, separate) · DELETED: Hospitality profile heading, Travel comfort, Anything else we should know?, Accessibility & comfort, "Nothing here needs a tick." |
 | review.html (06) | one guest: You (name / email / mobile with "Complete this"), Your journey (unit words), The Wedding (own answers, Sangkhathan USD 15, seats, dress), About you, Documents & privacy, Your cost · "A few things still need your answer" + COMPLETE THIS · received card "Your journey has been received by Guest Relations · Sent · <stamp>" · "We have your journey …", "Your journey has changed …", "Your journey is confirmed …" · sent text: "GUEST:", "SEATS (as the ledger holds them)", "YOUR COST" |

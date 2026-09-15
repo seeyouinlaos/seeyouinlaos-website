@@ -146,7 +146,7 @@
           story: 'Only one Presidential exists in the house. Two bedrooms, each with its own bathroom — a king in one, twins in the other — open onto a separate living area and a shared co-living space beneath a high ceiling. A pantry and a dining table make it the suite a family gathers in rather than passes through.',
           groups: soupGroups(['118 sq.m., the only one in the house', 'Two bedrooms, each with its own private bathroom', 'King bed and twin beds', 'Separate living area and shared co-living space', 'High ceiling', 'Pantry and dining table'], null, null),
           amenities: ['Two bedrooms', 'Private bathrooms', 'Separate living area', 'Shared living space', 'Pantry', 'Dining table', 'High ceiling'],
-          rate: 750, reserved: 'Reserved for bride & groom' },
+          rate: 750, legacyNote: 'Master once marked: bride & groom' }   /* no reservation (Owner, 15 Sep 2026): available until booked */,
         { slug: 'souphattra-majestic', name: 'Souphattra Majestic Suite', cat: 'Suite',
           desc: 'The house suite: a separate living area, pantry and bar, and a long balcony over the pool.',
           gallery: [[RM + 'souphattra-majestic-suite-1.jpg', 'Bedroom towards the balcony'], [RM + 'souphattra-majestic-suite-2.jpg', 'The living area'], [RM + 'souphattra-majestic-suite-4.jpg', 'The bedroom'], [RM + 'souphattra-majestic-suite-3.jpg', 'The bathroom'], [RM + 'souphattra-majestic-suite-5.jpg', 'The bed']],
@@ -161,7 +161,7 @@
           story: 'French colonial and Laotian design in sixty-seven square metres: a living room under a high ceiling, a pantry of its own, and a private balcony to take the first coffee of the day on.',
           groups: soupGroups(['66 – 75 sq.m.', 'Separate living room', 'High ceiling', 'Pantry', 'Private balcony', 'Sofa, wardrobe, desk and coffee table'], null, null),
           amenities: ['Living room', 'High ceiling', 'Pantry', 'Private balcony', 'Smart TV', 'Mini bar', 'WiFi'],
-          rate: 250, reserved: 'Reserved for family' },
+          rate: 250, legacyNote: 'Master once marked: family' }   /* no reservation (Owner, 15 Sep 2026): available until booked */,
         { slug: 'noble-courtyard', name: 'Noble Courtyard Suite', cat: 'Suite',
           desc: 'A 63 square metre retreat with a King bed, two bathrooms, a separate living area and a private balcony overlooking the garden and pool.',
           gallery: [[RM + 'noble-courtyard-1.jpg', 'The bedroom'], [RM + 'noble-courtyard-2.jpg', 'Bedroom and desk'], [RM + 'noble-courtyard-3.jpg', 'The living area']],
@@ -477,7 +477,7 @@
           facts: [['Size', '68 sq.m.'], ['Bed', '1 Queen Bed (1.8m wide)'], ['Occupancy', '2 Adults'], ['Location', 'Floor 14']],
           story: 'The Solarium Bath Suite is the one with the bathtub set into the light: 68 sq.m. on the fourteenth floor, non-smoking, with the city beyond the glass.',
           amenities: ['Air conditioning', 'Audio equipment', 'Balcony', 'Bathtub', 'Butler service', 'Clothes dryer', 'Dining table', 'Electric blanket', 'Electric kettle', 'Free bottled water', 'Free Wi-Fi', 'Hair dryer', 'Heating', 'Iron and ironing board', 'Microwave', 'Minibar', 'Refrigerator', 'Shower', 'Slippers', 'Smart door lock', 'Smart room controls', 'Smart toilet', 'Sofa', 'TV', 'Wardrobe', 'Washing machine'],
-          rate: 54, reserved: 'Reserved for bride & groom' },
+          rate: 54, legacyNote: 'Master once marked: bride & groom' }   /* no reservation (Owner, 15 Sep 2026): available until booked */,
         { slug: 'standard-single', name: 'Standard Single Room', cat: 'Designer room · 68 sqm',
           desc: 'Standard Single Room — 68 sq.m., 1 queen bed (1.8m wide), 2 adults. Floor 16.',
           gallery: [
@@ -636,7 +636,7 @@
           facts: [['Size', '70 sq.m.'], ['Bed', '1 King Bed (2m wide)'], ['Occupancy', '2 Adults'], ['Location', 'Floor 3rd floor']],
           story: 'Two hundred and seventy degrees of mountain from the third floor, with a snow-view terrace, a private soup pool and a fireplace.',
           amenities: ['Air conditioning', 'Air purifier', 'Audio equipment', 'Balcony', 'Bathrobe', 'Bathtub or shower', 'Butler service', 'Coffee maker / teapot', 'Electric kettle', 'Fireplace', 'Free Wi-Fi', 'Hair dryer', 'Heating', 'Iron and ironing board', 'Minibar', 'Private hot springs / soup pool', 'Projector', 'Refrigerator', 'Safe in room', 'Slippers', 'Smart door lock', 'Smart room controls', 'Smart toilet', 'Sofa', 'Terrace'],
-          rate: 120, reserved: 'Reserved for bride & groom' },
+          rate: 120, legacyNote: 'Master once marked: bride & groom' }   /* no reservation (Owner, 15 Sep 2026): available until booked */,
       ]
     },
 

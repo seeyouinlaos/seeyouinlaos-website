@@ -222,33 +222,26 @@
       return ['wedstay', 'wedstay-n1', 'wedstay-n2'];   /* legacy rows go too */
     },
 
-    /* WHO MAY SELECT A RESERVED ROOM (Owner, 14 Sep 2026). A room marked
-     * "Reserved for bride & groom" belongs to the hosts themselves — the
-     * guests the encrypted bundle marks `hosts: true` (explicit, never
-     * inferred from a name) — and to nobody else; a room reserved for family
-     * is out of reach of everyone on the website. The label always stays.
-     * The server engine applies the same rule to every place it holds. */
+    /* NO PRE-RESERVED ROOMS (Owner override, 15 Sep 2026). No room belongs
+     * to anyone in advance — not to the hosts, not to the family: every
+     * room is available until a guest books a place in it through the room
+     * engine, and the couple book their own two places like everyone else.
+     * `hosts()` still says who the hosts are (their ceremony positions);
+     * it no longer opens or closes any room. */
     hosts: function () {
       try { var a = JSON.parse(localStorage.getItem('siyl.auth') || 'null'); return !!(a && a.hosts === true && a.guestId && a.bearer); } catch (e) { return false; }
     },
-    reservedFor: function (room) {
-      if (!room || !room.reserved) return null;
-      return /bride\s*&(amp;)?\s*groom/i.test(room.reserved) ? 'hosts' : 'family';
-    },
-    eligible: function (room) {
-      var who = this.reservedFor(room);
-      return !who || (who === 'hosts' && this.hosts());
-    },
+    reservedFor: function () { return null; },
+    eligible: function (room) { return !!room; },
 
-    /* the most expensive room a guest may actually select — reserved
-     * inventory (Bride & Groom, family) is never eligible for a preset.
-     * `available` is an optional predicate (slug) → boolean: when the shared
-     * ledger says a category is gone, the choice falls to the next best one
-     * that is still there rather than to a room nobody can have. */
+    /* the most expensive room a guest may actually select. `available` is an
+     * optional predicate (slug) → boolean: when the room engine says a
+     * category is full, the choice falls to the next best one that is still
+     * there rather than to a room nobody can have. */
     premium: function (windowId, available) {
       var at = locate(windowId);
       if (!at) return null;
-      var open = at.stay.rooms.filter(function (r) { return !r.reserved && r.rate != null && !r.interest; });
+      var open = at.stay.rooms.filter(function (r) { return r.rate != null && !r.interest; });
       if (!open.length) return null;
       var free = typeof available === 'function'
         ? open.filter(function (r) { return available(r.slug); })
@@ -261,14 +254,14 @@
      * The Owner's approved room comes first. If the shared ledger says it is
      * gone, the choice falls to the nearest ELIGIBLE and AVAILABLE category by
      * rate — the closest to what was approved, and the gentler of two equals —
-     * never to whatever happens to be most expensive, and never to reserved
-     * inventory. `available` is the ledger's predicate; without it every
-     * eligible room counts as available and the approved room always wins. */
+     * never to whatever happens to be most expensive. `available` is the
+     * engine's predicate; without it every room counts as available and the
+     * approved room always wins. */
     approved: function (windowId, available) {
       var at = locate(windowId);
       if (!at) return null;
       var wish = (window.SIYL_FULL_EXPERIENCE || {})[windowId];
-      var open = at.stay.rooms.filter(function (r) { return !r.reserved && r.rate != null && !r.interest; });
+      var open = at.stay.rooms.filter(function (r) { return r.rate != null && !r.interest; });
       if (!open.length) return null;
       var free = typeof available === 'function'
         ? open.filter(function (r) { return available(r.slug); })
@@ -287,14 +280,13 @@
       }, free[0]);
     },
 
-    /* THE LOWEST-COST ELIGIBLE ROOM a guest may actually take — the mirror of
-     * approved(): same eligibility rules, same ledger predicate, opposite end
-     * of the price list. Reserved inventory is never eligible, and a sold-out
-     * category is simply skipped. */
+    /* THE LOWEST-COST ROOM a guest may actually take — the mirror of
+     * approved(): same engine predicate, opposite end of the price list. A
+     * full category is simply skipped. */
     cheapest: function (windowId, available) {
       var at = locate(windowId);
       if (!at) return null;
-      var open = at.stay.rooms.filter(function (r) { return !r.reserved && r.rate != null && !r.interest; });
+      var open = at.stay.rooms.filter(function (r) { return r.rate != null && !r.interest; });
       var free = typeof available === 'function'
         ? open.filter(function (r) { return available(r.slug); })
         : open;
@@ -307,8 +299,7 @@
       if ((CLASSES[windowId] || []).length > 1) return true;
       var at = locate(windowId);
       if (!at) return false;
-      var sel = at.stay.rooms.filter(function (r) { return !r.reserved; });
-      return sel.length > 1;
+      return at.stay.rooms.length > 1;
     },
 
     /* the window a bag line belongs to (a hosted night points at its window) */

@@ -1,0 +1,40 @@
+PASS R0 one code = one guest — Suthep
+PASS R1 engine · the Presidential is ONE physical room → exactly Room A with two places, no reservation, open to this guest — {"taken":0,"free":2,"occupants":[]}
+PASS R1 engine · the six-bedroom Penthouse is exactly Room A – F, twelve places, never a Room G — {"units":6,"places":12,"free":12,"rooms":6,"reservedFor":null,"name":"Sathorn Penthouse","kind":"room"}
+PASS R1 engine · the category summary is derived from its rooms (free = sum of unused places; rooms = rooms with a place left)
+PASS R2 room page · the Presidential shows ROOM A with its places (2 places available); the category words are the rooms' own; no RESERVED, no "held for you" — Room A 2 places available CHOOSE THIS ROOM · 1 room · 2 places available
+PASS R3 host · takes a place in Room A — {"key":"wedstay/souphattra-presidential","label":"A"}
+PASS R3 engine · Room A: the host and 1 place available — Suthep (you) · free 1
+PASS R3 Your Journey · the stay says Room A · You · 1 place available — Room A · You · 1 place available
+PASS R4 guest · sees the host's first name in Room A and 1 place available — no reservation in the way — Suthep
+PASS R4 journeys · the Presidential row reads from its rooms (1 room · 1 place available), never RESERVED — Souphattra Presidential USD 750 TOTAL PER PERSON · 2 NIGHTS · SECOND NIGHT HOSTED BY HARUTHAI & SUTHEP 1 ROOM · 1 PLACE AVAILABLE USD 750 ›
+PASS R5 guest · joins the SAME Room A beside the host → Room A is FULL — ["Peggy","Suthep"]
+PASS R6 third guest · Room A is FULL: refused with "full", Room A unchanged, nothing else moves — full
+PASS R6 third guest · there is no Room B for one physical room — unknown room
+PASS R6 journeys · the full Presidential reads Fully booked, from its rooms — Souphattra Presidential USD 750 TOTAL PER PERSON · 2 NIGHTS · SECOND NIGHT HOSTED BY HARUTHAI & SUTHEP FULLY BOOKED USD 750
+PASS R7 room page · the Penthouse lists Room A – F and nothing more; the words say 6 rooms · 12 places available (less what is booked) — 6 rooms · 12 places available
+PASS A1 About You · no OPTIONAL on the six questions; each says Required; the step is not complete with them unanswered — 02 · Required | 03 · Required | 04 · Required | 05 · Required | 06 · Required | 07 · Required · optional words left: 0
+PASS A1 readiness · names every unanswered question exactly, with the way to its box — 02 · Coffee or tea→about-you.html#q-coffeetea | 03 · My favourite→about-you.html#q-treat | 04 · Favourite drink→about-you.html#q-drink | 05 · Anything you would rather avoid?→about-you.html#q-avoid | 06 · Favourite film→
+PASS A2 Continue · blocked (still on About You) and the first unanswered question has the focus — /about-you · focus coffeetea
+PASS A3 View All Steps · 05 is the current step with "6 items to complete", the exact question "02 · Coffee or tea" named; 06 is locked — 05 About You 6 items to complete CURRENT 02 · Coffee or tea 03 · My favourite 04 · Favourite drink 05 · Anything you would rather avoid? 06 · Favourite film 07 · Favourite music 06 Review & Send Avail
+PASS A4 a blank answer never counts
+PASS A5 answering each question updates the readiness at once: 05 complete, 06 may open — you:complete journey:complete wedding:complete preparation:complete about:complete review:attention
+PASS T1 Your Journey (390 px) · every ticket fits the phone: frame inside the viewport, header on screen, nothing cut off at the top — [["train",49,341,390,140,"spill 0/0"],["mu9646",24,366,390,140,"spill 0/0"],["c86",49,341,390,140,"spill 0/0"],["return",49,341,390,140,"spill 0/0"]]
+PASS T2 seat tickets · one per event, a ticket each: event, seat, guest, status, held for, the ticket reference and its code — the reference is the ledger's own — seat:ceremony:SYL-TC-A1-N2V9:true seat:dinner:SYL-WD-A1-FDND:true
+PASS T2 seat tickets (390 px) · nothing clipped, the header on screen — [["seat:ceremony",24,366,390,160,"spill 0/0"],["seat:dinner",24,366,390,140,"spill 0/0"]]
+PASS T3 seat ticket PDF · framed tickets (rounded frame, perforation), both events, the references, the codes, SEAT TICKET, the download stamp; no invitation id — see-you-in-laos-wedding-seats-peggy.pdf
+PASS T4 tickets page · TICKET = TICKET: the two seat tickets and the two travel passes together, each with its reference and code — seat:ceremony:SYL-TC-A1-N2V9 seat:dinner:SYL-WD-A1-FDND train:SYL-TN25-WKS6 c86:SYL-C86-X7SQ
+PASS T4 tickets page (390 px) · nothing clipped — [["seat:ceremony",24,366,390,37,"spill 0/0"],["seat:dinner",24,366,390,37,"spill 0/0"],["train",24,366,390,37,"spill 0/0"],["c86",24,366,390,37,"spill 0/0"]]
+PASS T5 travel pass PDF · a framed pass with the perforation, the reference, the code, TRAVEL PASS, the state, the download stamp — see-you-in-laos-travel-pass-tn25-peggy.pdf
+PASS T6 the cart · lines, CHANGE / REMOVE / VIEW DETAILS, the total — no code, no reference, no QR
+PASS T6 Review & Send · the review, with the way to the tickets — no code, no QR
+PASS T7 tickets.html (1280 px) · every ticket fits, nothing clipped — [["seat:ceremony",56,916,1280,37,"spill 0/0"],["seat:dinner",56,916,1280,37,"spill 0/0"],["train",56,916,1280,37,"spill 0/0"],["c86",56,916,1280,37,"spill 0/0"]]
+PASS T7 your-journey.html (1280 px) · every ticket fits, nothing clipped — [["train",89,883,1280,138,"spill 0/0"],["mu9646",56,448,1280,138,"spill 0/0"],["c86",89,883,1280,138,"spill 0/0"],["return",89,883,1280,138,"spill 0/0"]]
+PASS T7 wedding-preparation.html#seats (1280 px) · every ticket fits, nothing clipped — [["seat:ceremony",56,916,1280,138,"spill 0/0"],["seat:dinner",56,916,1280,138,"spill 0/0"]]
+PASS T7 tickets page (320 px) · every ticket fits the narrowest phone — [["seat:ceremony",24,296,320,37,"spill 0/0"],["seat:dinner",24,296,320,37,"spill 0/0"],["train",24,296,320,37,"spill 0/0"],["c86",24,296,320,37,"spill 0/0"]]
+PASS Z no page errors
+released G049 wedstay/souphattra-presidential ok
+released G001 wedstay/souphattra-presidential ok
+
+35/35 checks passed
+EXIT 0

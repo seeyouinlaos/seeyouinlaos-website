@@ -88,6 +88,8 @@ async function aboutYou(allergy, details) {
   await go('about-you.html');
   await p.click('[data-allergy="' + allergy + '"]'); await p.waitForTimeout(250);
   if (allergy === 'yes') { await p.fill('#allergy-text', details); await p.locator('#allergy-text').dispatchEvent('change'); await p.waitForTimeout(250); }
+  /* every visible question is required (Owner, 15 Sep 2026) */
+  for (const q of ['coffeetea', 'treat', 'drink', 'avoid', 'film', 'music']) { await p.fill('textarea[data-q="' + q + '"]', 'Test answer'); await p.locator('textarea[data-q="' + q + '"]').dispatchEvent('change'); await p.waitForTimeout(80); }
   await p.check('#photo-ack'); await p.waitForTimeout(300);
   return { allergyState: await txt('#allergy-state'), photoState: await txt('#photo-state'), steps: await p.evaluate(() => window.SIYL_GUEST.steps().map((s) => s.state)) };
 }
@@ -116,7 +118,7 @@ const r1 = await selectRoomViaPage('souphattra', 'souphattra-presidential', 'wed
 note('H4 room page · Presidential (Wedding Stay) held for Haruthai · Room A · 1/2', /Remove from Your Journey/.test(r1.btn || '') && /Your place is held/.test(r1.av || '') && /Room A · You · 1 place available/.test(r1.swap || ''), JSON.stringify(r1));
 await go('journeys.html#j-wedstay');
 const row = await p.evaluate(() => { const a = document.querySelector('#j-wedstay .var[data-room="souphattra-presidential"]'); return a ? a.innerText.replace(/\s+/g, ' ') : ''; });
-note('H4 journeys · the hosts see the Presidential as theirs to choose, current selection · Room A', /yours to choose/i.test(row) && /Current selection · Room A/i.test(row), row);
+note('H4 journeys · the Presidential is a room like any other (no reservation words): current selection · Room A, the place held', !/yours to choose|Reserved/i.test(row) && /Current selection · Room A/i.test(row) && /Your place is held · Room A/i.test(row), row);
 await p.evaluate(() => window.SIYL_STAY.select('prewed', 'souphattra-presidential'));
 await p.waitForTimeout(800);
 await p.click('[data-choose-flat="train"]').catch(() => {});
@@ -139,7 +141,7 @@ await go('wedding-preparation.html');
 await p.check('[data-ack]'); await p.waitForTimeout(300);
 note('H8 step 04 · dress acknowledged in her own name; ceremony fixed front centre (Bride)', /Complete/i.test(await txt('#ack-state')) && (await p.evaluate(() => (document.querySelector('[data-seatmap="ceremony"]') || {}).getAttribute('data-state'))) === 'fixed' && /Front centre · Bride/i.test(await body()));
 const ds = await dinnerSeat();
-note('H8 step 04 · dinner seat chosen on the plan, confirmed, the one YOUR WEDDING SEATS card, the pool in words', /Seat confirmed/i.test(ds.conf) && /Your wedding seats/i.test(ds.card) && /Bride · Front centre/i.test(ds.card) && /Seat [AB]\d+/i.test(ds.card) && /Download seat confirmation/i.test(ds.card) && /pool/i.test(ds.pool) && /(Booking summary|Change of seat)/i.test(ds.bar), ds.card.slice(0, 160) + ' · ' + ds.pool);
+note('H8 step 04 · dinner seat chosen on the plan, confirmed, the YOUR WEDDING SEATS tickets (Front centre · a dinner seat · references · download), the pool in words', /Seat confirmed/i.test(ds.conf) && /Your wedding seats/i.test(ds.card) && /Front centre/i.test(ds.card) && /\b[AB]\d{1,2}\b/.test(ds.card) && /SYL-WD-/.test(ds.card) && /Download seat tickets/i.test(ds.card) && /pool/i.test(ds.pool) && /(Booking summary|Change of seat)/i.test(ds.bar), ds.card.slice(0, 160) + ' · ' + ds.pool);
 await shot('H-04');
 const ay = await aboutYou('no');
 note('H9 step 05 · allergy NO completes, photography acknowledged; retired questions gone; 01–05 complete', /Complete/i.test(ay.allergyState) && /Complete/i.test(ay.photoState) && ay.steps.slice(0, 5).every((s) => s === 'complete') && !/Travel comfort|Accessibility|Anything else we should know|Nothing here needs a tick/.test(await body()), ay.steps.join(','));
@@ -163,7 +165,7 @@ note('S1 one code = one guest · Suthep alone · no trace of Haruthai\'s draft',
 await contact('suthep.test@example.com', '+66 81 000 0002');
 await go('journeys.html#j-wedstay');
 const row2 = await p.evaluate(() => { const a = document.querySelector('#j-wedstay .var[data-room="souphattra-presidential"]'); return a ? a.innerText.replace(/\s+/g, ' ') : ''; });
-note('S2 journeys · Suthep sees the Presidential with 1 place left', /1 place left/i.test(row2) && /yours to choose/i.test(row2), row2);
+note('S2 journeys · Suthep sees the Presidential with 1 room · 1 place available — no reservation words', /1 room · 1 place available/i.test(row2) && !/yours to choose|Reserved/i.test(row2), row2);
 const r2 = await selectRoomViaPage('souphattra', 'souphattra-presidential', 'wedstay');
 note('S3 room page · joins the SAME room as Haruthai · Room A · Haruthai · You · Full', /Room A · Haruthai · You · Full/.test(r2.swap || ''), JSON.stringify(r2));
 await go('your-journey.html');
@@ -198,11 +200,11 @@ note('P1 one code = one guest · Peggy alone, not a host', P1.guestId === 'G001'
 await contact('peggy.test@example.com', '+49 170 000 0001');
 await go('journeys.html#j-wedstay');
 const row3 = await p.evaluate(() => { const a = document.querySelector('#j-wedstay .var[data-room="souphattra-presidential"]'); return { text: a ? a.innerText.replace(/\s+/g, ' ') : '', rsvd: a && a.classList.contains('rsvd') }; });
-note('P2 journeys · the Presidential is reserved for Bride & Groom — not Peggy\'s to choose', row3.rsvd === true && /Reserved for bride & groom/i.test(row3.text) && !/yours to choose/i.test(row3.text), row3.text);
+note('P2 journeys · NO PRE-RESERVED ROOMS (Owner, 15 Sep 2026): the Presidential is a room like any other — its real places, no reservation words', row3.rsvd !== true && !/Reserved|yours to choose/i.test(row3.text) && /(1 room · 1 place available|1 room · 2 places available|Fully booked)/i.test(row3.text), row3.text);
 const r3 = await selectRoomViaPage('souphattra', 'heritage', 'wedstay');
 note('P3 room page · The Heritage held for Peggy · Room A · 1/2', /Your place is held/.test(r3.av || '') && /Room A · You · 1 place available/.test(r3.swap || ''), JSON.stringify(r3));
-const eng = await (await fetch(API + '/rooms/join', { method: 'POST', headers: { 'content-type': 'application/json', 'x-siyl-auth': P1.bearer }, body: JSON.stringify({ invitationId: 'INV-G001', guestId: 'G001', key: 'wedstay/souphattra-presidential', label: 'A', name: 'x' }) })).json();
-note('P3 engine · Peggy asking for the Presidential with her own bearer is refused with the reason', eng.ok === false && /Bride & Groom/.test(eng.error || ''), eng.error);
+const eng = await (await fetch(API + '/rooms/join', { method: 'POST', headers: { 'content-type': 'application/json', 'x-siyl-auth': P1.bearer }, body: JSON.stringify({ invitationId: 'INV-G001', guestId: 'G001', key: 'wedstay/souphattra-presidential', label: 'B', name: 'x' }) })).json();
+note('P3 engine · one physical Presidential = one unit: Room B does not exist and is refused; nothing else moves', eng.ok === false && eng.error === 'unknown room', eng.error);
 const other = await (await fetch(API + '/rooms/join', { method: 'POST', headers: { 'content-type': 'application/json', 'x-siyl-auth': P1.bearer }, body: JSON.stringify({ invitationId: 'INV-G002', guestId: 'G002', key: 'wedstay/heritage', label: 'A', name: 'x' }) })).json();
 note('P3 engine · Peggy cannot book a room for Steffie', other.ok === false && /not your guest/.test(other.error || ''), other.error);
 await declineOthers(['wedstay']);
@@ -213,7 +215,7 @@ note('P4 step 04 · ceremony seat required for a temple guest; dinner seat confi
 /* the ceremony seat, too */
 await go('wedding-preparation.html#seats'); await p.waitForFunction(() => window.SIYL_SEATS && SIYL_SEATS.ready(), null, { timeout: 15000 }); await p.waitForTimeout(400);
 if (!(await p.evaluate(() => window.SIYL_SEATS.seatOf('ceremony', window.SIYL_GUEST.me().guestId)))) { await p.locator('[data-ev="ceremony"] g[data-seat]').first().dispatchEvent('click'); await p.waitForTimeout(300); await p.click('[data-seat-confirm]'); await p.waitForFunction(() => !!document.querySelector('.p-seatconf'), null, { timeout: 15000 }); await p.click('[data-seat-continue]'); await p.waitForTimeout(400); }
-note('P4 step 04 · both seats held → the one card with TEMPLE CEREMONY seat and WEDDING DINNER seat', /Your wedding seats/i.test(await txt('.p-wseats')) && /Seat [A-F]\d+/.test(await txt('.p-wseats')), await txt('.p-wseats'));
+note('P4 step 04 · both seats held → YOUR WEDDING SEATS with a TEMPLE CEREMONY ticket and a WEDDING DINNER ticket, each with its reference', /Your wedding seats/i.test(await txt('.p-wseats')) && /Temple Ceremony/i.test(await txt('.p-wseats')) && /Wedding Dinner/i.test(await txt('.p-wseats')) && /SYL-TC-/.test(await txt('.p-wseats')) && /SYL-WD-/.test(await txt('.p-wseats')), (await txt('.p-wseats')).slice(0, 200));
 await shot('P-04');
 const ay3 = await aboutYou('no');
 const heritageW = await p.evaluate(() => window.SIYL_PRICE.quote('wedstay', 'heritage').total);

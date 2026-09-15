@@ -17,10 +17,18 @@
      'guest' — a whole-property or per-person product (the Sathorn Penthouse,
                the hosted residence, priced and held per person).
 
-   `held` is stock that is already spoken for and can never be sold: the
-   Bride & Groom's own rooms and the family allocation. It is subtracted from
-   capacity before anything is offered, so those categories read SOLD OUT /
-   RESERVED to every guest and the server can never allocate them.
+   `held` / `heldFor` are the Master's historical notes of which categories
+   the sheet once marked for the Bride & Groom or the family. OWNER OVERRIDE
+   (15 Sep 2026): there are NO pre-reserved rooms. Every physical room is
+   available until a guest actually books a place in it — the couple book
+   their own two places like everyone else. The notes stay for the record;
+   nothing reads them to hold, hide or disable a room any more.
+
+   ROOM ALLOCATION (Owner, 15 Sep 2026): the physical room count IS the
+   inventory. One physical room = one persistent allocation unit = two
+   individual guest places (a single room = one place). Capacity is never a
+   separate counter: it is units × places, and only real guest bookings
+   consume it.
 
    The two Vientiane windows are SEPARATE stock: the same 26 physical rooms are
    sold twice, once for 25 – 27 February and once for 27 February – 1 March.
@@ -32,10 +40,11 @@
 export const SEED = {
   /* ---------------------------------------------------------- Bangkok, before */
   /* Three approved Bangkok addresses share the window; a guest holds one of
-   * them. The penthouse is a whole home and is counted in guests; the two
-   * hotels are counted in rooms of two, as every other hotel here is. */
+   * them. The penthouse is one home of SIX bedrooms (Owner, 15 Sep 2026):
+   * six allocation units, Room A – F, twelve guest places — never more. The
+   * two hotels are counted in rooms of two, as every other hotel here is. */
   'bkk-stay/penthouse':
-    { unit: 'guest', capacity: 12, held: 0, name: 'Sathorn Penthouse', stay: 'Sathorn Penthouse Bangkok' },
+    { unit: 'room', capacity: 6, occupancy: 2, held: 0, name: 'Sathorn Penthouse', stay: 'Sathorn Penthouse Bangkok' },
   'bkk-stay/u-sathorn-superior-garden':
     { unit: 'room', capacity: 38, occupancy: 2, held: 0, name: 'Superior Room With Garden View', stay: 'U Sathorn Bangkok' },
   'bkk-stay/shama-king-studio-balcony':
@@ -102,12 +111,10 @@ export function unitsFor(key, guests) {
   return s.unit === 'guest' ? n : Math.ceil(n / (s.occupancy || 1));
 }
 
-/* THE HOSTS' OWN PARTY (Owner, 14 Sep 2026). The categories held "for Bride &
- * Groom" are held for exactly one invitation: the couple's, INV-001 — the same
- * party the private guest list marks `hosts: true` (both are set by the Owner
- * together; the id is the party reference, never a code). That invitation may
- * select what is held for it; every other party sees the category as reserved.
- * Stock held for Family stays out of reach of everyone on the website. */
+/* THE RETIRED CATEGORY LEDGER'S helpers (14 Sep 2026), kept only so the old
+ * records can still be read. The room engine (src/rooms.js) ignores `held`
+ * entirely since the Owner override of 15 Sep 2026: no room is reserved for
+ * anyone in advance. */
 export const HOSTS_INVITATION = 'INV-001';
 export const HELD_FOR_HOSTS = 'Bride & Groom';
 

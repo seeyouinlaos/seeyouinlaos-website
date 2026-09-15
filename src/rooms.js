@@ -19,13 +19,15 @@
    a guest is never double-booked and never left without a room by a failed
    change.
 
-   Whole properties (the Sathorn Penthouse, the private residence) are one
-   unit each, with as many places as the seed says they sleep.
+   The private residence is one unit with as many places as the source says
+   it sleeps (six); the Sathorn Penthouse is six bedrooms, Room A – F.
 
-   ELIGIBILITY is the identity's, never a room name's: units held for
-   BRIDE & GROOM open only to the guests the private register marks as the
-   hosts; units held for FAMILY open to nobody on the website. The rule lives
-   here, in the engine, and every category carrying the flag inherits it.
+   NO PRE-RESERVED ROOMS (Owner override, 15 Sep 2026). Nothing is held for
+   the Bride & Groom, the family or anyone else in advance: every unit is
+   available until a guest actually books a place in it, and the couple book
+   their own two places like every other guest. The seed's historical
+   `held` notes have no effect here. Capacity is units × places, never a
+   separate counter, and only real bookings consume it.
 
    A guest holds at most one place per STAGE of the journey: the wedding
    window is one stage whether spent in the hotel or in the residence.
@@ -34,6 +36,7 @@
 import { SEED } from './inventory-seed.js';
 
 export const PLACES = 2;
+/* the retired labels, exported for readers of old records only — no unit carries them any more */
 export const HELD_FOR_HOSTS = 'Bride & Groom';
 export const HELD_FOR_FAMILY = 'Family';
 const OCC = 'occ:';
@@ -48,16 +51,16 @@ export function unitsOf(key) {
   const s = SEED[key];
   if (!s) return [];
   if (s.unit === 'guest') {
-    return [{ key, label: 'A', name: s.name, kind: 'property', places: s.capacity, reservedFor: s.held > 0 ? (s.heldFor || 'Reserved') : null }];
+    return [{ key, label: 'A', name: s.name, kind: 'property', places: s.capacity, reservedFor: null }];
   }
   const out = [];
+  /* exactly one unit per physical room — never a Room G for six rooms */
   for (let i = 0; i < s.capacity; i++) {
     const label = i < 26 ? LETTERS[i] : LETTERS[Math.floor(i / 26) - 1] + LETTERS[i % 26];
     out.push({ key, label, name: 'Room ' + label, kind: 'room',
       /* the Owner's rule: two guest places per room; a single room stays what it is */
       places: s.occupancy === 1 ? 1 : PLACES,
-      /* the first `held` units of a category carry its reservation */
-      reservedFor: i < (s.held || 0) ? (s.heldFor || 'Reserved') : null });
+      reservedFor: null });
   }
   return out;
 }
@@ -68,12 +71,11 @@ export function allUnits() {
 }
 export function unitOf(key, label) { return unitsOf(key).find((u) => u.label === String(label || '').toUpperCase()) || null; }
 
-/* may this identity take a place in this unit — the engine's one rule */
+/* may this identity take a place in this unit — any authenticated guest may, in any unit (Owner, 15 Sep 2026) */
 export function mayJoin(unit, identity) {
   if (!unit) return { ok: false, error: 'unknown room' };
-  if (!unit.reservedFor) return { ok: true };
-  if (unit.reservedFor === HELD_FOR_HOSTS) return identity && identity.hosts ? { ok: true } : { ok: false, error: 'reserved for ' + HELD_FOR_HOSTS };
-  return { ok: false, error: 'reserved for ' + unit.reservedFor };
+  if (!identity) return { ok: false, error: 'unauthorised' };
+  return { ok: true };
 }
 
 export class Rooms {
@@ -120,8 +122,9 @@ export class Rooms {
     const summary = {};
     for (const key of Object.keys(units)) {
       const list = units[key];
-      summary[key] = { units: list.length, places: list.reduce((n, u) => n + u.places, 0), free: list.filter((u) => u.eligible).reduce((n, u) => n + u.free, 0),
-                       reservedFor: SEED[key].heldFor || null, name: SEED[key].name, kind: list.length && list[0].kind };
+      /* derived exactly from the units — available places = unused places, available rooms = units with a place left */
+      summary[key] = { units: list.length, places: list.reduce((n, u) => n + u.places, 0), free: list.reduce((n, u) => n + u.free, 0),
+                       rooms: list.filter((u) => u.free > 0).length, reservedFor: null, name: SEED[key].name, kind: list.length && list[0].kind };
     }
     return { ok: true, units, summary, mine, places: PLACES };
   }

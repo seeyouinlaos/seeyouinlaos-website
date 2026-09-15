@@ -60,8 +60,7 @@
           var go = function () {
             if (!u.tracked(win, slug)) { self.write(win, slug, null); resolve({ ok: true, unit: null }); return; }
             var unit = label ? u.units(win, slug).filter(function (x) { return x.label === label; })[0] : (u.mineFor(win, slug) ? u.units(win, slug).filter(function (x) { return x.label === u.mineFor(win, slug).label; })[0] : u.suggest(win, slug));
-            if (!unit) { resolve({ ok: false, error: u.eligible(win, slug) ? 'full' : 'reserved' }); return; }
-            if (!unit.eligible) { resolve({ ok: false, error: 'reserved' }); return; }
+            if (!unit) { resolve({ ok: false, error: 'full' }); return; }
             u.join(win, slug, unit.label).then(function (d) {
               if (d && d.ok) { self.write(win, slug, unit.label); resolve({ ok: true, unit: unit.label }); return; }
               resolve({ ok: false, error: d && d.error === 'full' ? 'full' : (d && /reserved/.test(d.error || '') ? 'reserved' : (d && d.error) || 'unreachable') });
@@ -120,7 +119,7 @@
     unitsHtml: function (win, slug, opts) {
       opts = opts || {};
       var u = U(); if (!u || !u.ready() || !u.tracked(win, slug)) return '';
-      var list = u.units(win, slug), mine = u.mineFor(win, slug), any = list.some(function (x) { return x.eligible && !x.full; });
+      var list = u.units(win, slug), mine = u.mineFor(win, slug), any = list.some(function (x) { return !x.full; });
       var h = '<div class="p-units" data-units="' + esc(win) + '|' + esc(slug) + '">';
       list.forEach(function (x) {
         var isMine = !!(mine && mine.label === x.label);
@@ -128,15 +127,16 @@
         var dots = '';
         for (var i = 0; i < x.places; i++) { var o = x.occupants[i]; dots += '<i class="' + (o ? (o.mine ? 'on me' : 'on') : '') + '" aria-hidden="true"></i>'; }
         var who = names.length ? names.map(function (n) { return '<b>' + esc(n) + '</b>'; }).join(' · ') : '';
-        var state = !x.eligible ? (x.reservedFor ? 'Reserved for ' + esc(x.reservedFor) : 'Reserved') : x.full ? 'Full' : (x.free === 1 ? '1 place available' : x.free + ' places available');
+        /* factual states only (Owner, 15 Sep 2026): available · 1 place available · Full · Your room */
+        var state = x.full ? 'Full' : (x.free === 1 ? '1 place available' : x.free + ' places available');
         var act = isMine ? '<span class="t-l1 on">Your room</span>'
-                : (!x.eligible ? '' : x.full ? '<span class="t-l1">Full</span>'
+                : (x.full ? '<span class="t-l1">Full</span>'
                 : '<button type="button" class="p-act quiet" data-join="' + esc(win) + '|' + esc(slug) + '|' + esc(x.label) + '">' + (names.length ? 'Join this room' : 'Choose this room') + '</button>');
         h += '<div class="p-unit' + (isMine ? ' mine' : '') + (x.full ? ' full' : '') + '" data-unit="' + esc(x.label) + '" data-free="' + x.free + '">' +
              '<div><p class="p-unit-name">' + esc(u.unitName(x)) + '</p><p class="p-unit-who"><span class="p-places">' + dots + '</span>' + (who ? who + ' · ' : '') + state + '</p></div>' + act + '</div>';
       });
       h += '</div>';
-      if (!any && !mine) h += '<p class="t-b2 measure-w" style="margin-top:var(--s3)">' + (list.some(function (x) { return x.eligible; }) ? 'Every room of this category is full.' : 'This category is reserved.') + '</p>';
+      if (!any && !mine) h += '<p class="t-b2 measure-w" style="margin-top:var(--s3)">Every room of this category is full.</p>';
       return h;
     },
     wire: function (root, onDone) {
@@ -155,7 +155,6 @@
     refusal: function (r) {
       if (!r || r.ok) return '';
       if (r.error === 'full') return 'That room has just filled — choose another room.';
-      if (r.error === 'reserved') return 'This room is reserved and cannot be chosen.';
       if (r.error === 'not signed in') return 'Open your invitation to choose a room.';
       return 'Your place could not be held right now — please try again in a moment.';
     }

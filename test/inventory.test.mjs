@@ -9,6 +9,7 @@ import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
+import { unitsOf } from '../src/rooms.js';
 import { SEED, unitsFor, sellable } from '../src/inventory-seed.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -32,21 +33,14 @@ test('the Souphattra stock is the Sheet stock: 26 rooms, per window', () => {
   assert.notEqual('prewed/heritage', 'wedstay/heritage');
 });
 
-test('rooms already spoken for can never be sold', () => {
-  const heldOut = Object.entries(SEED).filter(([, s]) => s.held > 0);
-  assert.equal(heldOut.length, 6, 'six categories are allocated already');
-  for (const [key, s] of heldOut) {
-    assert.equal(sellable(key), s.capacity - s.held, key);
-    assert.ok(s.heldFor, key + ' must say who holds it');
-  }
-  assert.equal(sellable('prewed/grand-majestic'), 0);
-  assert.equal(sellable('wedstay/grand-majestic'), 0);
-  assert.equal(sellable('prewed/souphattra-presidential'), 0);
-  assert.equal(sellable('wedstay/souphattra-presidential'), 0);
-  assert.equal(sellable('kmg/solarium'), 0);
-  assert.equal(sellable('ljg/view-suite-270'), 0);
+test('the historical held notes stay in the seed for the record — and shape nothing on the website (Owner, 15 Sep 2026)', () => {
+  const noted = Object.entries(SEED).filter(([, s]) => s.held > 0);
+  assert.equal(noted.length, 6, 'the six categories the Master once marked');
   assert.equal(SEED['prewed/grand-majestic'].heldFor, 'Family');
   assert.equal(SEED['prewed/souphattra-presidential'].heldFor, 'Bride & Groom');
+  /* `sellable` belongs to the retired category ledger; the room engine derives every unit from `capacity` alone */
+  for (const [key] of noted) assert.equal(unitsOf(key).every((u) => u.reservedFor === null), true, key + ' has no reserved unit');
+  assert.doesNotMatch(readFileSync(join(ROOT, 'src/rooms.js'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, ''), /\.held\b|heldFor/, 'the engine never reads the notes');
 });
 
 test('a party consumes rooms, not seats — ceil(guests ÷ occupancy)', () => {
@@ -60,10 +54,11 @@ test('a party consumes rooms, not seats — ceil(guests ÷ occupancy)', () => {
   assert.equal(unitsFor('kmg/left-bank', 5), 2);
 });
 
-test('the whole-property products are held in GUESTS, not rooms', () => {
-  assert.equal(SEED['bkk-stay/penthouse'].unit, 'guest');
-  assert.equal(SEED['bkk-stay/penthouse'].capacity, 12);
-  assert.equal(unitsFor('bkk-stay/penthouse', 4), 4);
+test('the six-bedroom Penthouse is six rooms of two places; the residence is held in GUESTS', () => {
+  assert.equal(SEED['bkk-stay/penthouse'].unit, 'room');
+  assert.equal(SEED['bkk-stay/penthouse'].capacity, 6);
+  assert.equal(SEED['bkk-stay/penthouse'].occupancy, 2);
+  assert.equal(unitsFor('bkk-stay/penthouse', 4), 2);
   /* the hosted residence: the Owner's capacity is SIX guests */
   assert.equal(SEED['airbnb-2br/private-residence'].unit, 'guest');
   assert.equal(SEED['airbnb-2br/private-residence'].capacity, 6);
@@ -198,8 +193,8 @@ test('Full Experience falls back to the next available room', () => {
   assert.equal(P.approved('prewed', (s) => s !== 'heritage-grand-premier').slug, 'heritage-executive');
   /* and again → The Heritage, still the nearest rate rather than the dearest */
   assert.equal(P.approved('prewed', (s) => !['heritage-grand-premier', 'heritage-executive'].includes(s)).slug, 'heritage');
-  /* reserved inventory is still never chosen, however empty the house gets */
-  assert.equal(P.approved('prewed', (s) => s === 'grand-majestic'), null);
+  /* no room is held back any more (Owner, 15 Sep 2026): with only the Grand Majestic left, it is the room */
+  assert.equal(P.approved('prewed', (s) => s === 'grand-majestic').slug, 'grand-majestic');
   assert.equal(P.approved('prewed', () => false), null, 'a stage with nothing left returns nothing');
   /* Full Experience must record that stage rather than skip it silently */
   const j = readFileSync(join(ROOT, 'assets/journey.js'), 'utf8');
@@ -257,13 +252,11 @@ test('D · when The Heritage is sold out the next-cheapest available room is use
   assert.equal(P.cheapest('wedstay', (s) => !['heritage', 'heritage-executive'].includes(s)).slug, 'heritage-grand-premier');
 });
 
-test('E · reserved Family / Bride & Groom rooms never become the Cost Saving hotel', () => {
+test('E · no room is held back from the Cost Saving hotel (Owner, 15 Sep 2026): the cheapest available room is the room', () => {
   const w = shop();
   const P = w.SIYL_PRICE;
-  assert.equal(P.cheapest('wedstay', (s) => ['grand-majestic', 'souphattra-presidential'].includes(s)), null);
-  /* and they are held out in the ledger too, so the predicate never sees them free */
-  assert.equal(sellable('wedstay/grand-majestic'), 0);
-  assert.equal(sellable('wedstay/souphattra-presidential'), 0);
+  assert.equal(P.cheapest('wedstay', (s) => ['grand-majestic', 'souphattra-presidential'].includes(s)).slug, 'grand-majestic');
+  assert.equal(P.cheapest('wedstay', () => false), null);
 });
 
 test('F · the complimentary residence: USD 0, six guests, no individual support', () => {

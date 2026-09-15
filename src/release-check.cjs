@@ -59,7 +59,13 @@ gate(2, 'Inventory display decision recorded',
   if (!/export const PLACES = 2;/.test(engine)) inv.push('a room unit is not two guest places');
   if (!/HOLD THE NEW PLACE FIRST/.test(engine) || !/AND ONLY THEN LET THE OLD ONE GO/.test(engine)) inv.push('a change is not join-then-release');
   if (!/if \(invitationId !== identity\.invitationId \|\| guestId !== identity\.guestId\) return json\(\{ ok: false, error: 'not your guest' \}, 403\);/.test(engine)) inv.push('a place can be held for another guest');
-  if (!/reservedFor === HELD_FOR_HOSTS\) return identity && identity\.hosts/.test(engine)) inv.push('the Bride & Groom rule is not the identity\'s');
+  /* NO PRE-RESERVED ROOMS (Owner, 15 Sep 2026): any authenticated guest may take any unit; no unit carries a reservation; capacity is units × places */
+  if (!/if \(!identity\) return \{ ok: false, error: 'unauthorised' \};\s*return \{ ok: true \};/.test(engine)) inv.push('the engine still decides by reservation, not by identity alone');
+  if (/reservedFor: (?!null|u\.reservedFor)/.test(engine)) inv.push('a unit still carries a reservation label');
+  if (/reservedFor === HELD_FOR_HOSTS/.test(engine) || /s\.held/.test(engine)) inv.push('the seed\'s historical held notes still shape availability');
+  if (!/free: list\.reduce\(\(n, u\) => n \+ u\.free, 0\)/.test(engine) || !/rooms: list\.filter\(\(u\) => u\.free > 0\)\.length/.test(engine)) inv.push('the category summary is not derived from its units');
+  const seedSrc = seed;
+  if (!/'bkk-stay\/penthouse':\s*\{ unit: 'room', capacity: 6, occupancy: 2/.test(seedSrc)) inv.push('the six-bedroom Penthouse is not six units of two places');
   /* the client must never decide an allocation for itself */
   if (/capacity\s*[:=]\s*\d/.test(client)) inv.push('assets/rooms.js carries its own capacity numbers');
   if (!/u\.join\(win, slug, unit\.label\)\.then/.test(stay)) inv.push('a stay is written before the place is held');

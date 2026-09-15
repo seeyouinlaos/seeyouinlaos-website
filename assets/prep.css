@@ -172,6 +172,8 @@ body.prep button, body.prep input, body.prep textarea, body.prep select { font-f
   line-height: 1.7; color: var(--p-ink); min-height: 48px;
 }
 .p-field textarea { min-height: 88px; resize: vertical; }
+.p-field.on textarea { border-color: var(--p-ink); }
+.p-field textarea[aria-invalid="true"]:not(:focus) { border-color: #C9C4BA; }
 .p-field input:focus, .p-field textarea:focus { outline: 0; border-color: var(--p-ink); }
 .p-check { display: flex; gap: var(--s3); align-items: flex-start; min-height: var(--p-tap); padding: var(--s2) 0; cursor: pointer; }
 .p-check input { width: 20px; height: 20px; margin-top: 3px; flex: none; accent-color: var(--p-ink); }
@@ -719,15 +721,17 @@ body.seatbar-on .jbar { display: none; }
    on Your Journey, the transport page, in the bag and on Review & Send.
    Paper, ink, one hairline — nothing an airline app would sell.
    ====================================================================== */
-.p-ticket { position: relative; box-sizing: border-box; background: var(--p-card); border: 1px solid var(--p-line); padding: var(--s5); transition: border-color var(--p-t) var(--p-ease), background-color var(--p-t) var(--p-ease), box-shadow var(--p-t) var(--p-ease); }
+.p-ticket { position: relative; box-sizing: border-box; overflow: hidden; --p-notch: var(--p-paper); background: var(--p-card); border: 1px solid var(--p-line); padding: var(--s5); transition: border-color var(--p-t) var(--p-ease), background-color var(--p-t) var(--p-ease), box-shadow var(--p-t) var(--p-ease); }
 .p-ticket.on { border-color: var(--p-ink); box-shadow: inset 0 0 0 1px var(--p-ink); background: var(--p-paper); }
 .p-ticket > * + * { margin-top: var(--s4); }
-.p-ticket-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s3); flex-wrap: wrap; }
+.p-ticket-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s3); flex-wrap: wrap; min-width: 0; }
+.p-ticket > .t-h1 { overflow-wrap: anywhere; }
+.p-ticket .p-actions { min-width: 0; }
 .p-ticket-head .t-l1 { display: inline-flex; align-items: center; gap: 8px; }
 .p-ticket > .t-h1 { margin-top: var(--s1); }
 /* the route: from · line · to — on a phone the two ends share the first row and the line runs beneath them */
 .p-ticket-route { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s2) var(--s3); align-items: start; }
-.p-ticket-end { display: flex; flex-direction: column; min-width: 0; }
+.p-ticket-end { display: flex; flex-direction: column; min-width: 0; overflow-wrap: anywhere; }
 .p-ticket-end.to { text-align: right; align-items: flex-end; }
 .p-ticket-code { font-family: var(--f-ed); font-weight: 200; font-size: 34px; line-height: 1; letter-spacing: .01em; color: var(--p-ink); }
 .p-ticket-time { font-family: var(--f-ui); font-weight: 400; font-size: 13px; letter-spacing: 1px; color: var(--p-ink); margin-top: var(--s2); }
@@ -747,17 +751,18 @@ body.seatbar-on .jbar { display: none; }
 }
 /* the tear: a dashed hairline with two notches, the way a pass is torn */
 .p-ticket-tear { position: relative; height: 0; border-top: 1px dashed var(--p-line); margin-left: calc(var(--s5) * -1); margin-right: calc(var(--s5) * -1); }
-.p-ticket-tear::before, .p-ticket-tear::after { content: ''; position: absolute; top: -8px; width: 16px; height: 16px; border-radius: 50%; background: #FFFFFF; border: 1px solid var(--p-line); box-sizing: border-box; }
+.p-ticket-tear::before, .p-ticket-tear::after { content: ''; position: absolute; top: -8px; width: 16px; height: 16px; border-radius: 50%; background: var(--p-notch); border: 1px solid var(--p-line); box-sizing: border-box; }
 .p-ticket-tear::before { left: -8px; } .p-ticket-tear::after { right: -8px; }
 .p-ticket.on .p-ticket-tear::before, .p-ticket.on .p-ticket-tear::after { border-color: var(--p-ink); }
 /* the body: the facts beside the code */
 .p-ticket-body { display: grid; grid-template-columns: 1fr; gap: var(--s4); align-items: start; }
-.p-ticket-facts { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s3) var(--s4); }
+.p-ticket-facts { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s3) var(--s4); min-width: 0; }
+.p-ticket-facts > div { min-width: 0; overflow-wrap: anywhere; }
 .p-ticket-facts .t-l1 { line-height: 1.6; }
 .p-ticket-facts .t-b1 { line-height: 1.4; color: var(--p-ink); }
 .p-ticket-facts .ref { font-family: var(--f-ui); font-weight: 400; letter-spacing: 1.6px; font-size: 12.5px; }
 .p-ticket-facts .t-b1 .t-l1 { display: block; line-height: 1.6; }
-.p-ticket-code-box { display: flex; flex-direction: column; align-items: flex-start; gap: var(--s2); }
+.p-ticket-code-box { display: flex; flex-direction: column; align-items: flex-start; gap: var(--s2); min-width: 0; }
 .p-ticket-code-box .p-qr { display: block; width: 96px; height: 96px; border: 1px solid var(--p-hair); background: #FCFAF6; }
 .p-ticket .p-actions { margin-top: var(--s4); }
 .p-ticket.compact { padding: var(--s4); }
@@ -769,6 +774,14 @@ body.seatbar-on .jbar { display: none; }
   .p-ticket-code-box { align-items: flex-end; text-align: right; }
 }
 @media (prefers-reduced-motion: reduce) { .p-ticket { transition: none; } }
+/* the seat ticket: the seat where the route would be, the time and the venue opposite */
+.p-ticket-seat .p-ticket-code.small { font-size: 22px; line-height: 1.15; }
+.p-ticket-event { grid-template-columns: 1fr 1fr; }
+.p-ticket-event .p-ticket-end .t-b2 { margin-top: var(--s2); }
+.p-tickets > .p-ticket + .p-ticket { margin-top: var(--s4); }
+.p-wseats > * + * { margin-top: var(--s3); }
+.p-wseats .p-tickets { margin-top: var(--s4); }
+.p-wseats .p-seatcard-actions { margin-top: var(--s4); }
 /* the strip: the pass in one row, in the bag and on Review & Send */
 .p-pass { display: flex; gap: var(--s4); align-items: flex-start; border: 1px solid var(--p-line); background: var(--p-card); padding: var(--s3) var(--s4); }
 .p-pass .p-qr { flex: none; width: 64px; height: 64px; border: 1px solid var(--p-hair); }
@@ -788,6 +801,8 @@ body.seatbar-on .jbar { display: none; }
 @media (min-width: 560px) { .cart-pass { margin-left: 88px; } }
 /* the ticket inside a stage card: full width under the image and the words */
 .p-sum-ticket { padding: 0 var(--s5) var(--s5); min-width: 0; }
+.p-sum-ticket .p-ticket, .p-product > .p-ticket { --p-notch: var(--p-card); }
+.p-sum.on .p-sum-ticket .p-ticket { --p-notch: var(--p-paper); }
 .p-sum-ticket:empty { display: none; }
 .p-product > .p-ticket { margin-top: var(--s4); }
 .p-sum-ticket .p-actions, .p-ticket .p-actions { display: flex; flex-wrap: wrap; gap: var(--s3) var(--s5); align-items: center; }

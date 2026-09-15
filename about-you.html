@@ -38,11 +38,13 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script type="module" src="assets/invite.mjs"></script>
 <script>
 /* ============================================================================
-   05 · ABOUT YOU — the guest's own profile (Owner, 14 Sep 2026).
-   REQUIRED: the food allergy answer (YES with details, or NO) and the
-   photography acknowledgement. OPTIONAL: the favourites and the travel
-   documents — they never hold the step. Nothing here is answered for
-   anyone else, and nothing explains what will be done with an answer.
+   05 · ABOUT YOU — the guest's own profile (Owner, 14 Sep 2026 · 15 Sep 2026).
+   REQUIRED: the food allergy answer (YES with details, or NO), every one of
+   the six questions shown under "A little more about you", and the
+   photography acknowledgement — a question that is shown must be answered.
+   OPTIONAL: only the travel documents (add later) and the separate
+   publication choice. Nothing here is answered for anyone else, and nothing
+   explains what will be done with an answer.
    ========================================================================== */
 (function(){
 var G=window.SIYL_GUEST,P=window.SIYL_PREP,D=window.SIYL_DOCS,page=document.getElementById('page');
@@ -54,9 +56,10 @@ function when(iso){try{return new Date(iso).toLocaleDateString('en-GB',{day:'2-d
 function size(n){return n>=1048576?(n/1048576).toFixed(1)+' MB':Math.max(1,Math.round(n/1024))+' KB'}
 
 function field(id,q){
-  var v=G.profile(id,q.key);
-  return '<div class="p-field" id="q-'+q.key+'"><p class="t-l1">'+q.n+' · Optional</p><h3 class="t-h2">'+q.q+'</h3><p class="t-b2">'+q.hint+'</p>'+
-    '<textarea data-q="'+q.key+'" data-g="'+esc(id)+'" placeholder="Optional" aria-label="'+esc(q.q)+'">'+esc(v)+'</textarea></div>'}
+  var v=G.profile(id,q.key),ok=!!String(v||'').trim();
+  /* every visible question is required (Owner, 15 Sep 2026): its state says so, its box never silently counts as done */
+  return '<div class="p-field'+(ok?' on':'')+'" id="q-'+q.key+'"><p class="t-l1'+(ok?' on':' open')+'" data-q-state="'+q.key+'">'+q.n+' · '+(ok?'<i class="prep-tick" aria-hidden="true"></i> Complete':'Required')+'</p><h3 class="t-h2">'+q.q+'</h3><p class="t-b2">'+q.hint+'</p>'+
+    '<textarea data-q="'+q.key+'" data-g="'+esc(id)+'" placeholder="Your answer" aria-label="'+esc(q.q)+'" aria-required="true" aria-invalid="'+(ok?'false':'true')+'">'+esc(v)+'</textarea></div>'}
 
 function docRow(id,k){
   var r=D.get(id,k.key);
@@ -93,9 +96,10 @@ h+='<section class="prep-sec" id="allergy"><p class="t-l1">01 · Required</p><h2
      '<textarea id="allergy-text" data-allergy-text aria-required="true" aria-invalid="'+(needDetails?'true':'false')+'" placeholder="For example: peanuts, shellfish">'+esc(details)+'</textarea></div>':'')+
    '</div></section>';
 
-/* 02–07 · A LITTLE MORE ABOUT YOU — optional favourites */
-h+='<section class="prep-sec" id="favourites"><p class="t-l1">Optional</p><h2 class="t-h2">A little more about you</h2>'+
-   '<p class="t-b1 measure">The little things you love are often the ones that matter most. Share as much or as little as you like.</p>';
+/* 02–07 · A LITTLE MORE ABOUT YOU — every question answered (Owner, 15 Sep 2026) */
+var favDone=G.PROFILE.every(function(q){return !!String(G.profile(id,q.key)||'').trim()});
+h+='<section class="prep-sec" id="favourites"><p class="t-l1'+(favDone?' on':'')+'" id="fav-state">'+(favDone?'<i class="prep-tick" aria-hidden="true"></i> Complete':'Required')+'</p><h2 class="t-h2">A little more about you</h2>'+
+   '<p class="t-b1 measure">The little things you love are often the ones that matter most. A word or two for each is enough.</p>';
 G.PROFILE.forEach(function(q){h+=field(id,q)});
 h+='</section>';
 
@@ -131,7 +135,14 @@ page.querySelectorAll('[data-allergy]').forEach(function(b){b.addEventListener('
 var at=page.querySelector('[data-allergy-text]');
 if(at){var save=function(){G.setAllergy('yes',at.value.trim())};at.addEventListener('change',function(){save();render();var t=document.getElementById('allergy-text');if(t)try{t.focus({preventScroll:true})}catch(e){}});at.addEventListener('blur',save)}
 page.querySelectorAll('textarea[data-q]').forEach(function(t){
-  t.addEventListener('change',function(){G.setProfile(t.getAttribute('data-g'),t.getAttribute('data-q'),t.value.trim());mark()})});
+  /* an answer updates the readiness at once — the field's state, the section's, the shell's — without losing the caret */
+  t.addEventListener('change',function(){G.setProfile(t.getAttribute('data-g'),t.getAttribute('data-q'),t.value.trim());mark();
+    var ok=!!t.value.trim(),f=t.closest('.p-field'),st=f&&f.querySelector('[data-q-state]');
+    if(f)f.classList.toggle('on',ok);t.setAttribute('aria-invalid',ok?'false':'true');
+    if(st){st.className='t-l1'+(ok?' on':' open');st.innerHTML=st.textContent.split(' · ')[0]+' · '+(ok?'<i class="prep-tick" aria-hidden="true"></i> Complete':'Required')}
+    var all=G.PROFILE.every(function(q){return !!String(G.profile(id,q.key)||'').trim()}),fs=document.getElementById('fav-state');
+    if(fs){fs.className='t-l1'+(all?' on':'');fs.innerHTML=all?'<i class="prep-tick" aria-hidden="true"></i> Complete':'Required'}
+    if(window.SIYL_PREP)SIYL_PREP.foot(document.getElementById('foot'))})});
 var pa=page.querySelector('[data-photo-ack]');
 if(pa)pa.addEventListener('change',function(){G.setPhotoAck(pa.checked);render();var again=page.querySelector('[data-photo-ack]');if(again)try{again.focus({preventScroll:true})}catch(e){}});
 page.querySelectorAll('[data-consent]').forEach(function(cb){
