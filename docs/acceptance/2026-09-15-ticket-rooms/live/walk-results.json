@@ -1,8 +1,8 @@
 {
   "origin": "https://seeyouinlaos-website.suthep-hrg.workers.dev",
-  "at": "2026-09-15T05:59:32.869Z",
-  "pass": 34,
-  "total": 34,
+  "at": "2026-09-15T07:28:23.781Z",
+  "pass": 35,
+  "total": 35,
   "results": [
     {
       "id": "R0 one code = one guest",
@@ -138,6 +138,11 @@
       "id": "T5 travel pass PDF · a framed pass with the perforation, the reference, the code, TRAVEL PASS, the state, the download stamp",
       "ok": true,
       "d": "see-you-in-laos-travel-pass-tn25-peggy.pdf"
+    },
+    {
+      "id": "T6 the cart · C86 saved at 85 reads USD 105 on the line and USD 105 per person beneath it; the total is the sum of authoritative amounts",
+      "ok": true,
+      "d": "{\"cart\":\"USD 205\",\"sum\":205,\"engine\":205,\"c86\":105}"
     },
     {
       "id": "T6 the cart · lines, CHANGE / REMOVE / VIEW DETAILS, the total — no code, no reference, no QR",
