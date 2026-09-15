@@ -25,6 +25,7 @@ PASS T3 seat ticket PDF · framed tickets (rounded frame, perforation), both eve
 PASS T4 tickets page · TICKET = TICKET: the two seat tickets and the two travel passes together, each with its reference and code — seat:ceremony:SYL-TC-F2-QXF6 seat:dinner:SYL-WD-B13-V3SS train:SYL-TN25-WKS6 c86:SYL-C86-X7SQ
 PASS T4 tickets page (390 px) · nothing clipped — [["seat:ceremony",24,366,390,37,"spill 0/0"],["seat:dinner",24,366,390,37,"spill 0/0"],["train",24,366,390,37,"spill 0/0"],["c86",24,366,390,37,"spill 0/0"]]
 PASS T5 travel pass PDF · a framed pass with the perforation, the reference, the code, TRAVEL PASS, the state, the download stamp — see-you-in-laos-travel-pass-tn25-peggy.pdf
+PASS T6 the cart · C86 saved at 85 reads USD 105 on the line and USD 105 per person beneath it; the total is the sum of authoritative amounts — {"cart":"USD 205","sum":205,"engine":205,"c86":105}
 PASS T6 the cart · lines, CHANGE / REMOVE / VIEW DETAILS, the total — no code, no reference, no QR
 PASS T6 Review & Send · the review, with the way to the tickets — no code, no QR
 PASS T7 tickets.html (1280 px) · every ticket fits, nothing clipped — [["seat:ceremony",56,916,1280,37,"spill 0/0"],["seat:dinner",56,916,1280,37,"spill 0/0"],["train",56,916,1280,37,"spill 0/0"],["c86",56,916,1280,37,"spill 0/0"]]
@@ -34,5 +35,5 @@ PASS T7 tickets page (320 px) · every ticket fits the narrowest phone — [["se
 PASS Z no page errors
 released G049 wedstay/souphattra-presidential ok
 
-34/34 checks passed
+35/35 checks passed
 EXIT 0
