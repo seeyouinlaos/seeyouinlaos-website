@@ -1,5 +1,5 @@
 007 — FINAL FULL-WEBSITE TEXT EXTRACTION · see you in laos.
-The complete guest-facing text of the current release (main 5209f9c), extracted 2026-09-15T15:08:01.526Z from a local Worker running the deployed source with the real engines.
+The complete guest-facing text of the current release (main d299355), extracted 2026-09-15T16:23:17.866Z from a local Worker running the deployed source with the real engines.
 Every active route and every reachable state was rendered in a browser and the live DOM walked in document order: text, [aria-label], [alt], [title], [placeholder], resolved aria-labelledby / aria-describedby, control states, live regions; "(hidden)" marks text in the page but not shown until an interaction.
 The generated sent-journey text, the email backup, the seat tickets and travel passes (PDF text read back) and the plan words are included. Exact-duplicate global blocks are written once as G-nnn and referenced with USES G-nnn; every variant is written in full.
 No access code appears: [SECRET ACCESS CODE OMITTED] stands where one would be typed or shown. Contacts are test values. Nothing is summarised, corrected or shortened.
@@ -1454,7 +1454,7 @@ USD 150
 ›
 Light French Suite
 USD 147 total per person · 3 nights · USD 49 per person / night
-1 room · 1 place available
+1 room · 2 places available
 USD 147
 ›
 Add to Your Journey
@@ -1525,7 +1525,7 @@ USD 200
 ›
 Snow Mountain Viewing Room
 USD 150 total per person · 2 nights · USD 75 per person / night
-4 rooms · 4 places available
+4 rooms · 8 places available
 USD 150
 ›
 Add to Your Journey
@@ -4461,9 +4461,9 @@ USD 150total per person · 3 nights
 1 room · 2 places available
 Designer suite · 68 sqm
 Light French Suite
-Light French Suite — 68 sq.m., 1 queen bed (1.8m wide), 1 adult. Floor 14th floor.
+Light French Suite — 68 sq.m., 1 queen bed (1.8m wide), 2 adults. Floor 14th floor.
 USD 147total per person · 3 nights
-1 room · 1 place available
+1 room · 2 places available
 1 / 11
 [aria-label] Previous room
 ‹
@@ -4607,9 +4607,9 @@ USD 150total per person · 3 nights
 1 room · 2 places available
 Designer suite · 68 sqm
 Light French Suite
-Light French Suite — 68 sq.m., 1 queen bed (1.8m wide), 1 adult. Floor 14th floor.
+Light French Suite — 68 sq.m., 1 queen bed (1.8m wide), 2 adults. Floor 14th floor.
 USD 147total per person · 3 nights
-1 room · 1 place available
+1 room · 2 places available
 1 / 11
 [aria-label] Previous room
 ‹
@@ -4758,9 +4758,9 @@ USD 150total per person · 3 nights
 1 room · 2 places available
 Designer suite · 68 sqm
 Light French Suite
-Light French Suite — 68 sq.m., 1 queen bed (1.8m wide), 1 adult. Floor 14th floor.
+Light French Suite — 68 sq.m., 1 queen bed (1.8m wide), 2 adults. Floor 14th floor.
 USD 147total per person · 3 nights
-1 room · 1 place available
+1 room · 2 places available
 1 / 11
 [aria-label] Previous room
 ‹
@@ -4912,9 +4912,9 @@ USD 150total per person · 3 nights
 1 room · 2 places available
 Designer suite · 68 sqm
 Light French Suite
-Light French Suite — 68 sq.m., 1 queen bed (1.8m wide), 1 adult. Floor 14th floor.
+Light French Suite — 68 sq.m., 1 queen bed (1.8m wide), 2 adults. Floor 14th floor.
 USD 147total per person · 3 nights
-1 room · 1 place available
+1 room · 2 places available
 1 / 11
 [aria-label] Previous room
 ‹
@@ -5064,9 +5064,9 @@ USD 150total per person · 3 nights
 1 room · 2 places available
 Designer suite · 68 sqm
 Light French Suite
-Light French Suite — 68 sq.m., 1 queen bed (1.8m wide), 1 adult. Floor 14th floor.
+Light French Suite — 68 sq.m., 1 queen bed (1.8m wide), 2 adults. Floor 14th floor.
 USD 147total per person · 3 nights
-1 room · 1 place available
+1 room · 2 places available
 1 / 11
 [aria-label] Previous room
 ‹
@@ -5218,9 +5218,9 @@ USD 150total per person · 3 nights
 1 room · 2 places available
 Designer suite · 68 sqm
 Light French Suite
-Light French Suite — 68 sq.m., 1 queen bed (1.8m wide), 1 adult. Floor 14th floor.
+Light French Suite — 68 sq.m., 1 queen bed (1.8m wide), 2 adults. Floor 14th floor.
 USD 147total per person · 3 nights
-1 room · 1 place available
+1 room · 2 places available
 1 / 11
 [aria-label] Previous room
 ‹
@@ -5368,9 +5368,9 @@ USD 150total per person · 3 nights
 1 room · 2 places available
 Designer suite · 68 sqm
 Light French Suite
-Light French Suite — 68 sq.m., 1 queen bed (1.8m wide), 1 adult. Floor 14th floor.
+Light French Suite — 68 sq.m., 1 queen bed (1.8m wide), 2 adults. Floor 14th floor.
 USD 147total per person · 3 nights
-1 room · 1 place available
+1 room · 2 places available
 1 / 11
 [aria-label] Previous room
 ‹
@@ -5520,9 +5520,9 @@ USD 150total per person · 3 nights
 1 room · 2 places available
 Designer suite · 68 sqm
 Light French Suite
-Light French Suite — 68 sq.m., 1 queen bed (1.8m wide), 1 adult. Floor 14th floor.
+Light French Suite — 68 sq.m., 1 queen bed (1.8m wide), 2 adults. Floor 14th floor.
 USD 147total per person · 3 nights
-1 room · 1 place available
+1 room · 2 places available
 1 / 11
 [aria-label] Previous room
 ‹
@@ -5674,9 +5674,9 @@ USD 150total per person · 3 nights
 1 room · 2 places available
 Designer suite · 68 sqm
 Light French Suite
-Light French Suite — 68 sq.m., 1 queen bed (1.8m wide), 1 adult. Floor 14th floor.
+Light French Suite — 68 sq.m., 1 queen bed (1.8m wide), 2 adults. Floor 14th floor.
 USD 147total per person · 3 nights
-1 room · 1 place available
+1 room · 2 places available
 1 / 11
 [aria-label] Previous room
 ‹
@@ -5823,9 +5823,9 @@ USD 150total per person · 3 nights
 1 room · 2 places available
 Designer suite · 68 sqm
 Light French Suite
-Light French Suite — 68 sq.m., 1 queen bed (1.8m wide), 1 adult. Floor 14th floor.
+Light French Suite — 68 sq.m., 1 queen bed (1.8m wide), 2 adults. Floor 14th floor.
 USD 147total per person · 3 nights
-1 room · 1 place available
+1 room · 2 places available
 1 / 11
 [aria-label] Previous room
 ‹
@@ -5977,9 +5977,9 @@ USD 150total per person · 3 nights
 1 room · 2 places available
 Designer suite · 68 sqm
 Light French Suite
-Light French Suite — 68 sq.m., 1 queen bed (1.8m wide), 1 adult. Floor 14th floor.
+Light French Suite — 68 sq.m., 1 queen bed (1.8m wide), 2 adults. Floor 14th floor.
 USD 147total per person · 3 nights
-1 room · 1 place available
+1 room · 2 places available
 1 / 11
 [aria-label] Previous room
 ‹
@@ -6033,7 +6033,7 @@ The room
 1 / 6
 Designer suite · 68 sqm · Wanxiang Yueju · Kunming
 Light French Suite
-Light French Suite — 68 sq.m., 1 queen bed (1.8m wide), 1 adult. Floor 14th floor.
+Light French Suite — 68 sq.m., 1 queen bed (1.8m wide), 2 adults. Floor 14th floor.
 Light French Suite, the entry room of the house: 68 sq.m., a queen bed, a balcony and the same city view as every other floor.
 The Room
 Size
@@ -6041,7 +6041,7 @@ Size
 Bed
 1 Queen Bed (1.8m wide)
 Occupancy
-1 Adult
+2 Adults
 Location
 Floor 14th floor
 Comfort & amenities
@@ -6149,9 +6149,9 @@ USD 147 total per person
 Total per person · 3 nights · 01 – 04 March 2027
 USD 49 per person / night × 3 nights
 Breakfast not included · self-pay
-1 room · 1 place available
+1 room · 2 places available
 Room A
-1 place available
+2 places available
 Choose this room
 Add to Your Journey
 (hidden) Change selection
@@ -6264,9 +6264,9 @@ USD 200total per person · 2 nights
 4 rooms · 8 places available
 Snow mountain room
 Snow Mountain Viewing Room
-Snow Mountain Viewing Room — 50 sq.m., 1 king bed (2m wide), 1 adult. Floor 2nd floor.
+Snow Mountain Viewing Room — 50 sq.m., 1 king bed (2m wide), 2 adults. Floor 2nd floor.
 USD 150total per person · 2 nights
-4 rooms · 4 places available
+4 rooms · 8 places available
 1 / 8
 [aria-label] Previous room
 ‹
@@ -6408,9 +6408,9 @@ USD 200total per person · 2 nights
 4 rooms · 8 places available
 Snow mountain room
 Snow Mountain Viewing Room
-Snow Mountain Viewing Room — 50 sq.m., 1 king bed (2m wide), 1 adult. Floor 2nd floor.
+Snow Mountain Viewing Room — 50 sq.m., 1 king bed (2m wide), 2 adults. Floor 2nd floor.
 USD 150total per person · 2 nights
-4 rooms · 4 places available
+4 rooms · 8 places available
 1 / 8
 [aria-label] Previous room
 ‹
@@ -6553,9 +6553,9 @@ USD 200total per person · 2 nights
 4 rooms · 8 places available
 Snow mountain room
 Snow Mountain Viewing Room
-Snow Mountain Viewing Room — 50 sq.m., 1 king bed (2m wide), 1 adult. Floor 2nd floor.
+Snow Mountain Viewing Room — 50 sq.m., 1 king bed (2m wide), 2 adults. Floor 2nd floor.
 USD 150total per person · 2 nights
-4 rooms · 4 places available
+4 rooms · 8 places available
 1 / 8
 [aria-label] Previous room
 ‹
@@ -6696,9 +6696,9 @@ USD 200total per person · 2 nights
 4 rooms · 8 places available
 Snow mountain room
 Snow Mountain Viewing Room
-Snow Mountain Viewing Room — 50 sq.m., 1 king bed (2m wide), 1 adult. Floor 2nd floor.
+Snow Mountain Viewing Room — 50 sq.m., 1 king bed (2m wide), 2 adults. Floor 2nd floor.
 USD 150total per person · 2 nights
-4 rooms · 4 places available
+4 rooms · 8 places available
 1 / 8
 [aria-label] Previous room
 ‹
@@ -6845,9 +6845,9 @@ USD 200total per person · 2 nights
 4 rooms · 8 places available
 Snow mountain room
 Snow Mountain Viewing Room
-Snow Mountain Viewing Room — 50 sq.m., 1 king bed (2m wide), 1 adult. Floor 2nd floor.
+Snow Mountain Viewing Room — 50 sq.m., 1 king bed (2m wide), 2 adults. Floor 2nd floor.
 USD 150total per person · 2 nights
-4 rooms · 4 places available
+4 rooms · 8 places available
 1 / 8
 [aria-label] Previous room
 ‹
@@ -6990,9 +6990,9 @@ USD 200total per person · 2 nights
 4 rooms · 8 places available
 Snow mountain room
 Snow Mountain Viewing Room
-Snow Mountain Viewing Room — 50 sq.m., 1 king bed (2m wide), 1 adult. Floor 2nd floor.
+Snow Mountain Viewing Room — 50 sq.m., 1 king bed (2m wide), 2 adults. Floor 2nd floor.
 USD 150total per person · 2 nights
-4 rooms · 4 places available
+4 rooms · 8 places available
 1 / 8
 [aria-label] Previous room
 ‹
@@ -7133,9 +7133,9 @@ USD 200total per person · 2 nights
 4 rooms · 8 places available
 Snow mountain room
 Snow Mountain Viewing Room
-Snow Mountain Viewing Room — 50 sq.m., 1 king bed (2m wide), 1 adult. Floor 2nd floor.
+Snow Mountain Viewing Room — 50 sq.m., 1 king bed (2m wide), 2 adults. Floor 2nd floor.
 USD 150total per person · 2 nights
-4 rooms · 4 places available
+4 rooms · 8 places available
 1 / 8
 [aria-label] Previous room
 ‹
@@ -7278,9 +7278,9 @@ USD 210total per person · 2 nights
 4 rooms · 8 places available
 Snow mountain room
 Snow Mountain Viewing Room
-Snow Mountain Viewing Room — 50 sq.m., 1 king bed (2m wide), 1 adult. Floor 2nd floor.
+Snow Mountain Viewing Room — 50 sq.m., 1 king bed (2m wide), 2 adults. Floor 2nd floor.
 USD 150total per person · 2 nights
-4 rooms · 4 places available
+4 rooms · 8 places available
 1 / 8
 [aria-label] Previous room
 ‹
@@ -7334,7 +7334,7 @@ Jade Dragon Snow Mountain over the rooftops
 1 / 1
 Snow mountain room · Luye Baisha · Lijiang
 Snow Mountain Viewing Room
-Snow Mountain Viewing Room — 50 sq.m., 1 king bed (2m wide), 1 adult. Floor 2nd floor.
+Snow Mountain Viewing Room — 50 sq.m., 1 king bed (2m wide), 2 adults. Floor 2nd floor.
 Fifty square metres facing the peak: a starry-sky terrace, a private hot-spring soup pool and a fireplace for the cold end of the day.
 The Room
 Size
@@ -7342,7 +7342,7 @@ Size
 Bed
 1 King Bed (2m wide)
 Occupancy
-1 Adult
+2 Adults
 Location
 Floor 2nd floor
 Comfort & amenities
@@ -7430,18 +7430,18 @@ USD 150 total per person
 Total per person · 2 nights · 04 – 06 March 2027
 USD 75 per person / night × 2 nights
 Breakfast included
-4 rooms · 4 places available
+4 rooms · 8 places available
 Room A
-1 place available
+2 places available
 Choose this room
 Room B
-1 place available
+2 places available
 Choose this room
 Room C
-1 place available
+2 places available
 Choose this room
 Room D
-1 place available
+2 places available
 Choose this room
 Add to Your Journey
 (hidden) Change selection
@@ -12053,7 +12053,7 @@ USD 150
 ›
 Light French Suite
 USD 147 total per person · 3 nights · USD 49 per person / night
-1 room · 1 place available
+1 room · 2 places available
 USD 147
 ›
 Current selection
@@ -12128,7 +12128,7 @@ USD 200
 ›
 Snow Mountain Viewing Room
 USD 150 total per person · 2 nights · USD 75 per person / night
-4 rooms · 4 places available
+4 rooms · 8 places available
 USD 150
 ›
 Current selection
@@ -17538,6 +17538,11 @@ CONTEXT: the send in progress
 Send to Guest Relations
 [state] live region · polite · role alert
 Sending shares your journey with Guest Relations so a person can look at it. It is a request, never a payment, and it is not a confirmation — Guest Relations confirms every arrangement with you personally.
+Received
+Your journey has been received by Guest Relations
+Sent · 15 Sept 2026 · 18:20 · your time
+Guest Relations will review your selections personally. Nothing is confirmed yet; we will confirm each arrangement with you once it is ready.
+Sent to Guest Relations
 
 ==================================================
 SURFACE 203
@@ -17756,7 +17761,7 @@ USD 2,345
 A spa interest carries no journey cost — paid directly at the spa.
 Received
 Your journey has been received by Guest Relations
-Sent · 15 Sept 2026 · 17:05 · your time
+Sent · 15 Sept 2026 · 18:20 · your time
 Guest Relations will review your selections personally. Nothing is confirmed yet; we will confirm each arrangement with you once it is ready.
 [aria-describedby → spoken] EVERYTHING WE NEED IS HERE · Your journey can be sent · Anything optional can follow at any time — it never delays your journey.
 [state] disabled
@@ -19422,15 +19427,15 @@ SEATS (as the ledger holds them):
 DOCUMENTS & PRIVACY (received only — nothing here is reviewed or verified):
 - Passport: NOT PROVIDED
 - Flight information: NOT PROVIDED
-- Publication of photographs: GIVEN (2026-09-15T15:05:04.327Z, wording 2026-09-09-draft)
+- Publication of photographs: GIVEN (2026-09-15T16:20:20.623Z, wording 2026-09-09-draft)
 
 GUEST:
 - Name: Peggy Berger
 - Contact: peggy.test@example.com · +49 170 000 0001
 - Party: Peggy & Steffie
-- Dress code: acknowledged 2026-09-15T15:04:36.991Z (text version 2026-09-09)
+- Dress code: acknowledged 2026-09-15T16:19:53.185Z (text version 2026-09-09)
 - Food allergies: NONE
-- Photography & film: acknowledged 2026-09-15T15:05:05.057Z (text version 2026-09-14)
+- Photography & film: acknowledged 2026-09-15T16:20:21.321Z (text version 2026-09-14)
 - Coffee or tea: Tea, black
 - My favourite: Mango sticky rice
 - Favourite drink: Water
@@ -19440,7 +19445,7 @@ GUEST:
 
 YOUR COST: USD 2,345
 Note: Tak Bat (morning alms-giving) is part of the Temple Ceremony and a personal offering. The Sangkhathan is a separate optional personal offering.
-Submitted via Review & Send · 2026-09-15T15:05:37.267Z
+Submitted via Review & Send · 2026-09-15T16:20:53.205Z
 
 ==================================================
 SURFACE 242
@@ -19493,15 +19498,15 @@ SEATS (as the ledger holds them):
 DOCUMENTS & PRIVACY (received only — nothing here is reviewed or verified):
 - Passport: NOT PROVIDED
 - Flight information: NOT PROVIDED
-- Publication of photographs: GIVEN (2026-09-15T15:05:04.327Z, wording 2026-09-09-draft)
+- Publication of photographs: GIVEN (2026-09-15T16:20:20.623Z, wording 2026-09-09-draft)
 
 GUEST:
 - Name: Peggy Berger
 - Contact: peggy.test@example.com · +49 170 000 0001
 - Party: Peggy & Steffie
-- Dress code: acknowledged 2026-09-15T15:04:36.991Z (text version 2026-09-09)
+- Dress code: acknowledged 2026-09-15T16:19:53.185Z (text version 2026-09-09)
 - Food allergies: NONE
-- Photography & film: acknowledged 2026-09-15T15:05:05.057Z (text version 2026-09-14)
+- Photography & film: acknowledged 2026-09-15T16:20:21.321Z (text version 2026-09-14)
 - Coffee or tea: Tea, black
 - My favourite: Mango sticky rice
 - Favourite drink: Water
@@ -19511,7 +19516,7 @@ GUEST:
 
 YOUR COST: USD 2,345
 Note: Tak Bat (morning alms-giving) is part of the Temple Ceremony and a personal offering. The Sangkhathan is a separate optional personal offering.
-Submitted via Review & Send · 2026-09-15T15:05:11.559Z
+Submitted via Review & Send · 2026-09-15T16:20:27.839Z
 
 ==================================================
 SURFACE 243
@@ -19846,8 +19851,8 @@ CONTEXT: folded in for completeness — every literal here is guest-facing in so
 ==================================================
 007 FINAL REVIEW METADATA
 ==================================================
-MAIN SHA: 5209f9c
-EXTRACTION DATE: 2026-09-15T15:08:01.551Z
+MAIN SHA: d299355
+EXTRACTION DATE: 2026-09-15T16:23:17.891Z
 
 DISTINCT ACTIVE ROUTES: 26
 DISTINCT SURFACES: 262
@@ -19857,13 +19862,13 @@ STAY / ROOM ROUTES: 33
 TRANSPORT ROUTES: 5
 TICKET / PDF TEMPLATES: 14
 
-LINES: 19870
-WORDS: 102117
-CHARACTERS: 654852
+LINES: 19875
+WORDS: 102162
+CHARACTERS: 655159
 
-SOURCE-TRUTH CLAIMS CHECKED: 121
+SOURCE-TRUTH CLAIMS CHECKED: 119
 SOURCE-TRUTH MATCH: 97
-SOURCE-TRUTH CONFLICT: 6
+SOURCE-TRUTH CONFLICT: 4
 SOURCE MISSING: 5
 OWNER DECISION OVERRIDES: 12
 
