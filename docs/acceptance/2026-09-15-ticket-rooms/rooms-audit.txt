@@ -1,0 +1,48 @@
+WINDOW     PROPERTY                        ROOM TYPE                                   SOURCE  UNITS  CAP  PLACES  OCC  LEFT  LABELS
+bkk-stay   Sathorn Penthouse Bangkok       Sathorn Penthouse                           6       6      2    12      0    12    ABCDEF
+bkk-stay   U Sathorn Bangkok               Superior Room With Garden View              38      38     2    76      1    75    ABCDEFGHIJKLMNOPQRSTUVWXYZAAABACADAEAFAGAHAIAJAKAL
+bkk-stay   Shama Yen-Akat Bangkok          King Studio With Balcony                    27      27     2    54      0    54    ABCDEFGHIJKLMNOPQRSTUVWXYZAA
+prewed     Souphattra Heritage Vientiane   The Heritage                                5       5      2    10      0    10    ABCDE
+prewed     Souphattra Heritage Vientiane   Heritage Executive                          13      13     2    26      0    26    ABCDEFGHIJKLM
+prewed     Souphattra Heritage Vientiane   Heritage Grand Premier                      3       3      2    6       0    6     ABC
+prewed     Souphattra Heritage Vientiane   Noble Courtyard Suite                       1       1      2    2       0    2     A
+prewed     Souphattra Heritage Vientiane   Grand Majestic Suite                        2       2      2    4       0    4     AB
+prewed     Souphattra Heritage Vientiane   Souphattra Majestic Suite                   1       1      2    2       0    2     A
+prewed     Souphattra Heritage Vientiane   Souphattra Presidential                     1       1      2    2       1    1     A
+wedstay    Souphattra Heritage Vientiane   The Heritage                                5       5      2    10      0    10    ABCDE
+wedstay    Souphattra Heritage Vientiane   Heritage Executive                          13      13     2    26      0    26    ABCDEFGHIJKLM
+wedstay    Souphattra Heritage Vientiane   Heritage Grand Premier                      3       3      2    6       0    6     ABC
+wedstay    Souphattra Heritage Vientiane   Noble Courtyard Suite                       1       1      2    2       0    2     A
+wedstay    Souphattra Heritage Vientiane   Grand Majestic Suite                        2       2      2    4       0    4     AB
+wedstay    Souphattra Heritage Vientiane   Souphattra Majestic Suite                   1       1      2    2       0    2     A
+wedstay    Souphattra Heritage Vientiane   Souphattra Presidential                     1       1      2    2       1    1     A
+airbnb-2br Private Residence · Vientiane   Private Residence                           1 property (6 guests)1      6    6       0    6     A
+kmg        Kunming                         Left Bank French-Style King Room            1       1      2    2       0    2     A
+kmg        Kunming                         Penang Forest Nanyang-Style Deluxe Suite    1       1      2    2       0    2     A
+kmg        Kunming                         Family Suite                                1       1      2    2       0    2     A
+kmg        Kunming                         Seine Evening Glow Loft Family Room         1       1      2    2       0    2     A
+kmg        Kunming                         Smart Family Room                           1       1      2    2       0    2     A
+kmg        Kunming                         Solarium Bath Suite                         1       1      2    2       0    2     A
+kmg        Kunming                         Standard Single Room                        1       1      2    2       0    2     A
+kmg        Kunming                         Junting City-View Loft                      1       1      2    2       0    2     A
+kmg        Kunming                         Mid-century Amber Suite                     1       1      2    2       0    2     A
+kmg        Kunming                         Milano Minimalist Loft                      1       1      2    2       0    2     A
+kmg        Kunming                         Italian Style Suite                         1       1      2    2       1    1     A
+kmg        Kunming                         Light French Suite                          1       1      1    1       0    1     A
+ljg        Lijiang                         Luye Starry Sky Suite · Immersive View      4       4      2    8       0    8     ABCD
+ljg        Lijiang                         Boundless Floor-to-Ceiling Glass Sunlit Su  4       4      2    8       0    8     ABCD
+ljg        Lijiang                         Snow Mountain Private Soup Viewing Suite    4       4      2    8       0    8     ABCD
+ljg        Lijiang                         Snow Mountain Manor Suite                   4       4      2    8       0    8     ABCD
+ljg        Lijiang                         270° Snow Mountain View Suite               4       4      2    8       0    8     ABCD
+ljg        Lijiang                         270° Snow Mountain View Room Private Soup   4       4      2    8       0    8     ABCD
+ljg        Lijiang                         270° Private Courtyard Snow Mountain View   4       4      2    8       0    8     ABCD
+ljg        Lijiang                         270° Snow Mountain Viewing Room             4       4      2    8       1    7     ABCD
+ljg        Lijiang                         Snow Mountain Viewing Room                  4       4      1    4       0    4     ABCD
+kempinski  Siam Kempinski Bangkok          Deluxe Balcony King                         4       4      2    8       1    7     ABCD
+
+OCCUPANCY SOURCE: the deployed engine at https://seeyouinlaos-website.suthep-hrg.workers.dev
+CATEGORIES: 40 · UNITS: 176 · PLACES: 351 · OCCUPIED: 6
+PENTHOUSE: 6 units (ABCDEF) · 12 places — as the Owner requires
+RESERVATIONS: none (no unit carries a reservation)
+
+INVARIANT HOLDS: units = source room count; places = rooms × 2 (singles × 1; a property what it sleeps).
