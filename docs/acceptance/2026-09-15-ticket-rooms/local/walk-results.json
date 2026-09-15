@@ -1,8 +1,8 @@
 {
   "origin": "http://127.0.0.1:8788",
-  "at": "2026-09-15T05:39:04.555Z",
-  "pass": 35,
-  "total": 35,
+  "at": "2026-09-15T07:20:17.136Z",
+  "pass": 36,
+  "total": 36,
   "results": [
     {
       "id": "R0 one code = one guest",
@@ -122,7 +122,7 @@
     {
       "id": "T2 seat tickets (390 px) · nothing clipped, the header on screen",
       "ok": true,
-      "d": "[[\"seat:ceremony\",24,366,390,160,\"spill 0/0\"],[\"seat:dinner\",24,366,390,140,\"spill 0/0\"]]"
+      "d": "[[\"seat:ceremony\",24,366,390,157,\"spill 0/0\"],[\"seat:dinner\",24,366,390,140,\"spill 0/0\"]]"
     },
     {
       "id": "T3 seat ticket PDF · framed tickets (rounded frame, perforation), both events, the references, the codes, SEAT TICKET, the download stamp; no invitation id",
@@ -143,6 +143,11 @@
       "id": "T5 travel pass PDF · a framed pass with the perforation, the reference, the code, TRAVEL PASS, the state, the download stamp",
       "ok": true,
       "d": "see-you-in-laos-travel-pass-tn25-peggy.pdf"
+    },
+    {
+      "id": "T6 the cart · C86 saved at 85 reads USD 105 on the line and USD 105 per person beneath it; the total is the sum of authoritative amounts",
+      "ok": true,
+      "d": "{\"cart\":\"USD 955\",\"sum\":955,\"engine\":955,\"c86\":105}"
     },
     {
       "id": "T6 the cart · lines, CHANGE / REMOVE / VIEW DETAILS, the total — no code, no reference, no QR",

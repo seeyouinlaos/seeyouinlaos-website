@@ -36,6 +36,7 @@ const txt = async (sel) => ((await p.locator(sel).first().innerText().catch(() =
 const body = async () => (await p.evaluate(() => document.body.innerText)).replace(/\s+/g, ' ');
 const shot = async (n) => { if (OUT) await p.screenshot({ path: path.join(OUT, n + '.png'), fullPage: true }); };
 const overflow = async () => p.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1);
+const money = (n) => 'USD ' + Number(n).toLocaleString('en-US');
 async function signIn(code) {
   await go('invitation.html?open=1');
   await p.waitForSelector('.siyl-inv input', { timeout: 8000 });
@@ -226,9 +227,13 @@ const [dlP] = await Promise.all([p.waitForEvent('download', { timeout: 15000 }),
 const pdfP = fs.readFileSync(await dlP.path(), 'latin1');
 note('T5 travel pass PDF · a framed pass with the perforation, the reference, the code, TRAVEL PASS, the state, the download stamp', /^%PDF-1\.4/.test(pdfP) && / c h B/.test(pdfP) && /\[3 3\] 0 d /.test(pdfP) && pdfP.includes(tk.find((t) => t.id === 'train').ref) && /TRAVEL PASS/.test(pdfP) && /\(SELECTED\)/.test(pdfP) && /DOWNLOADED 20/.test(pdfP), dlP.suggestedFilename());
 if (OUT) fs.copyFileSync(await dlP.path(), path.join(OUT, 'travel-pass-sample.pdf'));
-/* CART = CART · REVIEW = REVIEW */
+/* CART = CART · REVIEW = REVIEW — and ONE PRICE SOURCE: a line saved at C86 85 (the Owner's screenshot) shows 105 and counts 105 */
+await p.evaluate(() => { const b = JSON.parse(localStorage.getItem('siyl.bag') || '[]'); const c = b.find((x) => x.id === 'c86'); if (c) c.price = 85; localStorage.setItem('siyl.bag', JSON.stringify(b)); });
 await go('cart.html'); await p.waitForTimeout(600);
 const cartT = await body();
+const c86line = await p.evaluate(() => { const l = document.querySelector('.cart-line[data-line="c86"]'); return l ? { amt: (l.querySelector('.p-line-amt') || {}).textContent, text: l.innerText.replace(/\s+/g, ' ') } : null; });
+const totals = await p.evaluate(() => ({ cart: document.getElementById('cart-total').textContent, sum: window.SIYL_BAG.get().reduce((n, x) => n + (x.price || 0) * (x.qty || 1), 0), engine: window.SIYL_BAG.total(), c86: window.SIYL_BAG.get().find((x) => x.id === 'c86').price }));
+note('T6 the cart · C86 saved at 85 reads USD 105 on the line and USD 105 per person beneath it; the total is the sum of authoritative amounts', c86line && c86line.amt === 'USD 105' && /USD 105 per person/.test(c86line.text) && !/USD 85/.test(cartT) && totals.c86 === 105 && totals.cart === money(totals.engine) && totals.engine === totals.sum, JSON.stringify(totals));
 note('T6 the cart · lines, CHANGE / REMOVE / VIEW DETAILS, the total — no code, no reference, no QR', (await p.evaluate(() => document.querySelectorAll('svg.p-qr, .p-pass, [data-travel-pass]').length)) === 0 && !/SYL-/.test(cartT) && /Change/i.test(cartT) && /Remove/i.test(cartT) && /View details/i.test(cartT) && /Your total/i.test(cartT), '');
 await shot('T-cart-390');
 await go('about-you.html'); await p.click('[data-allergy="no"]'); await p.waitForTimeout(250);

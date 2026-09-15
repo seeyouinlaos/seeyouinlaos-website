@@ -26,7 +26,8 @@ thumb:function(x){return x.img||this.THUMBS[x.id]||''},
 badge:function(){var n=authed()?this.get().length:0,el=document.querySelector('[data-bag-badge]');
 if(el){var was=el.textContent;el.textContent=n>0?n:'';el.style.display=n>0?'flex':'none';if(was!==el.textContent&&n>0){el.classList.remove('bb-tick');void el.offsetWidth;el.classList.add('bb-tick')}}}};
 /* RETIRED PRODUCTS. C86 replaces C642 and MU9646 replaces MU9632 by Owner
- * order; the class and the amount are unchanged. A journey chosen before the
+ * order; the class is unchanged and the amount is re-derived from the one
+ * pricing source (assets/pricing.js) on load. A journey chosen before the
  * change keeps its place — the line is renamed, never dropped. */
 (function(){var M={c642:{id:'c86',name:'C86 · Kunming → Lijiang'},
                    mu9632:{id:'mu9646',name:'MU9646 · Vientiane → Kunming'}};

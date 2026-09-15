@@ -21,11 +21,12 @@ PASS A4 a blank answer never counts
 PASS A5 answering each question updates the readiness at once: 05 complete, 06 may open — you:complete journey:complete wedding:complete preparation:complete about:complete review:attention
 PASS T1 Your Journey (390 px) · every ticket fits the phone: frame inside the viewport, header on screen, nothing cut off at the top — [["train",49,341,390,140,"spill 0/0"],["mu9646",24,366,390,140,"spill 0/0"],["c86",49,341,390,140,"spill 0/0"],["return",49,341,390,140,"spill 0/0"]]
 PASS T2 seat tickets · one per event, a ticket each: event, seat, guest, status, held for, the ticket reference and its code — the reference is the ledger's own — seat:ceremony:SYL-TC-A1-N2V9:true seat:dinner:SYL-WD-A1-FDND:true
-PASS T2 seat tickets (390 px) · nothing clipped, the header on screen — [["seat:ceremony",24,366,390,160,"spill 0/0"],["seat:dinner",24,366,390,140,"spill 0/0"]]
+PASS T2 seat tickets (390 px) · nothing clipped, the header on screen — [["seat:ceremony",24,366,390,157,"spill 0/0"],["seat:dinner",24,366,390,140,"spill 0/0"]]
 PASS T3 seat ticket PDF · framed tickets (rounded frame, perforation), both events, the references, the codes, SEAT TICKET, the download stamp; no invitation id — see-you-in-laos-wedding-seats-peggy.pdf
 PASS T4 tickets page · TICKET = TICKET: the two seat tickets and the two travel passes together, each with its reference and code — seat:ceremony:SYL-TC-A1-N2V9 seat:dinner:SYL-WD-A1-FDND train:SYL-TN25-WKS6 c86:SYL-C86-X7SQ
 PASS T4 tickets page (390 px) · nothing clipped — [["seat:ceremony",24,366,390,37,"spill 0/0"],["seat:dinner",24,366,390,37,"spill 0/0"],["train",24,366,390,37,"spill 0/0"],["c86",24,366,390,37,"spill 0/0"]]
 PASS T5 travel pass PDF · a framed pass with the perforation, the reference, the code, TRAVEL PASS, the state, the download stamp — see-you-in-laos-travel-pass-tn25-peggy.pdf
+PASS T6 the cart · C86 saved at 85 reads USD 105 on the line and USD 105 per person beneath it; the total is the sum of authoritative amounts — {"cart":"USD 955","sum":955,"engine":955,"c86":105}
 PASS T6 the cart · lines, CHANGE / REMOVE / VIEW DETAILS, the total — no code, no reference, no QR
 PASS T6 Review & Send · the review, with the way to the tickets — no code, no QR
 PASS T7 tickets.html (1280 px) · every ticket fits, nothing clipped — [["seat:ceremony",56,916,1280,37,"spill 0/0"],["seat:dinner",56,916,1280,37,"spill 0/0"],["train",56,916,1280,37,"spill 0/0"],["c86",56,916,1280,37,"spill 0/0"]]
@@ -36,5 +37,5 @@ PASS Z no page errors
 released G049 wedstay/souphattra-presidential ok
 released G001 wedstay/souphattra-presidential ok
 
-35/35 checks passed
+36/36 checks passed
 EXIT 0
