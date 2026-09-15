@@ -33,11 +33,21 @@ beside the swimming pool; run B faces it across the table." The "to be confirmed
 
 ## Evidence
 - `npm test` 251/251 (13 files + `test/travelpass.test.mjs`) · `node src/release-check.cjs` 21/21.
-- `walk.mjs` — the browser walk of the Owner's list J (Haruthai, then Peggy): 40/40 locally against the
-  Miniflare Worker (`local/`) and 40/40 on production (`live/`); the C86 code on the page is rasterised and
-  read back by an independent decoder (jsQR) — see the H3 line; the downloaded PDF is kept as
-  `live/travel-pass-c86-sample.pdf`; screenshots at 390 px and 1280 px.
-- The 14 Sep four-identity walk re-run: 63/63 locally and 63/63 on production (no regression).
-- Parity Worker ↔ Pages on the full private/public file list (`parity.txt`).
-- Production restored afterwards with `../2026-09-14-rebuild/restore.mjs` (registrations removed, seats back
-  to the migrated holds, no room places).
+- `walk.mjs` — the browser walk of the Owner's list J (a host, then a guest who is not a host): 40/40
+  locally against the Miniflare Worker as Haruthai + Peggy (`local/`) and 40/40 on production as Suthep +
+  Peggy (`live/`); the C86 code on the page is rasterised and read back by an independent decoder (jsQR) —
+  see the H3 line; the downloaded PDF is kept as `live/travel-pass-c86-sample.pdf`; screenshots at 390 px and
+  1280 px.
+- The 14 Sep four-identity walk re-run locally on this build: 63/63 (no regression).
+- Parity Worker ↔ Pages on the full public file list, 264/264 (`parity-files.txt`; the two new files included).
+
+## Production afterwards
+Haruthai's invitation was in live use when the pack went live: a journey sent from it at 02:33:12 UTC on
+15 Sep (six room places on the engine, the migrated seat B16) — not test data of this pack. A first live run
+of the walk as Haruthai replaced that record and moved her seat; both were put back exactly (the Worker keeps
+the superseded version under `:prev:`, restored as current with its own stamp; the seat re-selected with her
+own bearer) before the walk was re-run as Suthep. Suthep's walk registration was removed and his seat put back
+to B15. The 14 Sep walk was therefore not re-run on production this time (its restore would remove that live
+record). Final ledgers: registrations INV-G048 only (02:33:12 UTC); seats C-R-02-02 G002 · C-R-02-03 G001 ·
+D-B-13 G001 · D-B-14 G002 · D-B-15 G049 · D-B-16 G048; six room places for G048; seating OPEN, run A poolside
+recorded explicitly (`seating-state --pool T`).
