@@ -7,6 +7,8 @@
 <title>Stays · See You In Laos</title>
 <link rel="stylesheet" href="assets/recon.css">
 <link rel="stylesheet" href="assets/aman.css">
+<link rel="stylesheet" href="assets/motion.css">
+<link rel="stylesheet" href="assets/venue.css">
 <style>
 /* the night-by-night list: hairline rows, no cards, no chrome */
 .slist { box-sizing: border-box; padding: 0 var(--a-gut); max-width: var(--a-frame); margin: 0 auto; }
@@ -106,9 +108,10 @@
     </div>
   </section>
 
-  <section class="a-sec tight">
-    <div class="a-band" style="background-image:url(assets/images/souphattra/heritage-courtyard-aerial.jpg)" role="img" aria-label="Souphattra Heritage from above"></div>
-  </section>
+  <!-- THE VENUE (003, 15 Sep 2026): the real aerial photograph, an architectural
+       information layer over it, the real photography of every place behind it.
+       Data: assets/venue-data.js · component: assets/venue.js -->
+  <section class="a-sec venue" id="venue" aria-labelledby="venue-h" data-venue></section>
 
   <section class="a-sec">
     <div class="a-lede" style="margin-bottom:34px"><div>
@@ -135,5 +138,8 @@
 </main>
 <script src="assets/recon.js"></script>
 <script src="assets/aman.js"></script>
+<script src="assets/motion.js"></script>
+<script src="assets/venue-data.js"></script>
+<script src="assets/venue.js"></script>
 </body>
 </html>
