@@ -95,7 +95,7 @@ for stay, s in site['stays'].items():
             expected_places = (expected_units * (1 if sd.get('occupancy') == 1 else 2)) if expected_units is not None else None
             if sd.get('unit') == 'guest': expected_places = sd['capacity']
             ok = (u['units'] == expected_units and u['places'] == expected_places) if expected_units is not None else None
-            room_rows.append(dict(stay=s['name'], win=win, room=r['name'], src_rooms=(6 if r['slug'] == 'penthouse' else src_rooms), src_pax=src_pax, exp_places=expected_places, units=u['units'], labels=u['labels'], places=u['places'], ok=ok, note=src_rooms_note, site_rate=r.get('rate'), src_rate=(num(m['Price per Person']) if m else None), site_bf=(r.get('breakfast') or s.get('breakfast')), src_bf=(str(m['Breakfast']) if m else '—'), occ=sd.get('occupancy')))
+            room_rows.append(dict(stay=s['name'], win=win, room=r['name'], src_rooms=(6 if r['slug'] == 'penthouse' else src_rooms), src_pax=src_pax, exp_places=expected_places, units=u['units'], labels=u['labels'], places=u['places'], ok=ok, note=src_rooms_note, site_rate=r.get('rate'), site_occ=next((f[1] for f in (r.get('facts') or []) if f[0] == 'Occupancy'), None), src_rate=(num(m['Price per Person']) if m else None), site_bf=(r.get('breakfast') or s.get('breakfast')), src_bf=(str(m['Breakfast']) if m else '—'), occ=sd.get('occupancy')))
 # the residence
 key = 'airbnb-2br/private-residence'; u = units[key]
 room_rows.append(dict(stay='Alternative Stay · Vientiane', win='airbnb-2br', room='Private Residence', src_rooms='limited to 6 persons', src_pax='6 persons', exp_places=6, units=u['units'], labels=u['labels'], places=u['places'], ok=(u['places'] == 6 and u['units'] == 1), note='Overview Day 05-02 / Day 07: "Airbnb Guest House complimentary … limited to 6 persons"', site_rate=None, src_rate=None, site_bf='—', src_bf='—', occ=None))
@@ -104,10 +104,15 @@ room_rows.append(dict(stay='Alternative Stay · Vientiane', win='airbnb-2br', ro
 for rr in room_rows:
     if rr['ok'] is False:
         issue('Room engine · ' + rr['stay'] + ' · ' + rr['room'] + ' (' + rr['win'] + ')', 'units ' + rr['labels'] + ' · ' + str(rr['places']) + ' places', 'Rooms available ' + str(rr['src_rooms']) + ' · Pax ' + rr['src_pax'], 'Accommodation_Details', 'CONFLICT', rr['note'])
-# capacity conflicts: singles the sheet sleeps two
+# capacity: a room the seed treats as a single while the sheet sleeps two is a conflict (none since the final release: ST-015 / ST-016 applied)
 for rr in room_rows:
     if rr['occ'] == 1 and re.search(r'2 Adults', rr['src_pax'], re.I):
         issue('Room engine · ' + rr['stay'] + ' · ' + rr['room'], 'one guest place per room (a single room)', 'Pax "' + rr['src_pax'] + '"', 'Accommodation_Details row Pax', 'CONFLICT', 'The seed treats the room as a single (occupancy 1 → 1 place); the sheet sleeps two adults. NEEDS OWNER DECISION (2 places would apply the standard rule).')
+# the site's own room-page occupancy words against the sheet's Pax (rooms the site calls "1 Adult" while the sheet sleeps two)
+for rr in room_rows:
+    site_occ = rr.get('site_occ')
+    if site_occ and re.search(r'^1 Adult', site_occ, re.I) and re.search(r'2 Adults', rr['src_pax'], re.I):
+        issue('Room page · ' + rr['stay'] + ' · ' + rr['room'], 'Occupancy "' + site_occ + '"', 'Pax "' + rr['src_pax'] + '"', 'Accommodation_Details row Pax', 'CONFLICT', 'The room page states one adult; the sheet sleeps two.')
 issue('Room engine · Sathorn Penthouse', 'Room A – F · 12 guest places (six bedrooms of two)', 'Accommodation_Details: Category "Elegant 6BR Sathon Penthouse" · Bedroom 6.0 · Pax 12 Adults · "Rooms avaible" 5.0; Overview Day 01: "12 guests 6 bedrooms 6 beds 5 bathrooms"; Owner override 15 Sep 2026: 6 physical rooms → Room A–F → 12 places', 'Accommodation_Details Penthouse column · Overview Day 01 · Owner override 15 Sep 2026', 'OWNER DECISION OVERRIDE', 'Bedrooms (6) and guests (12) match; the "Rooms avaible 5.0" cell conflicts with both and is not used.')
 issue('Room engine · every category', 'No room is reserved for anyone in advance: the Presidential, the Grand Majestic, the Solarium and the 270° Snow Mountain View Suite are available until booked', 'Accommodation_Details Status: Souphattra Presidential "Reserved for Bride & Groom" · Grand Majestic Suite "Reserved for Familiy (Mum, Dad and amy, Luck)" · Solarium Bath Suite "Reserved for Bride & Groom" · 006 - 270° Snow Mountain View Suite "Reserved for Bride & Groom"; Budget_Room - Rate: Grand Majestic "2/2 Room reserved mum and dad + amy & luck" · Presidential "reserved bride & groom"', 'Accommodation_Details row Status · Budget_Room - Rate', 'OWNER DECISION OVERRIDE', 'Owner override 15 Sep 2026: NO PRE-RESERVED ROOMS; the sheet\'s reservations stay as history.')
 issue('Room rates · Sathorn Penthouse', 'USD 85 per person / night · 3 nights · USD 255 total per person', 'Accommodation_Details: Price per Person 85 · Price Per Room per Night 340; Overview Day 01: "USD 90 per person per nights"', 'Accommodation_Details · Overview Day 01', 'CONFLICT', 'The sheet carries two values (85 in Accommodation_Details, 90 in the Overview); the website uses 85. NEEDS OWNER DECISION on which cell is authoritative (the website follows Accommodation_Details, which also feeds every other rate).')
@@ -219,7 +224,7 @@ w('')
 w('==================================================')
 w('K · ROOM SOURCE AUDIT')
 w('==================================================')
-w('Rule: 1 physical room = 2 guest places (a single room = 1; a whole property what the source says it sleeps). Source physical rooms = Accommodation_Details "Rooms avaible" (the Penthouse: its six bedrooms — see ST issue). Website allocation units = src/rooms.js unitsOf() over src/inventory-seed.js.')
+w('Rule: 1 physical room = 2 guest places (a whole property what the source says it sleeps; no room in the source is a single). Source physical rooms = Accommodation_Details "Rooms avaible" (the Penthouse: its six bedrooms — see ST issue). Website allocation units = src/rooms.js unitsOf() over src/inventory-seed.js.')
 w('')
 w('PROPERTY / STAY | WINDOW | ROOM TYPE | SOURCE PHYSICAL ROOMS | SOURCE PAX | EXPECTED GUEST PLACES | WEBSITE ALLOCATION UNITS | WEBSITE PLACES | RATE website / source | BREAKFAST website / source | MATCH / CONFLICT')
 for r in room_rows:

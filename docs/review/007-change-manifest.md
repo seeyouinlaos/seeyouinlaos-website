@@ -23,7 +23,9 @@ against this list when its current review returns (regenerate with `node docs/re
 - **Rooms (Owner override, 15 Sep 2026): NO PRE-RESERVED ROOMS.** Nothing is held for the Bride & Groom, the
   family or anyone else; every physical room is available until a guest books a place in it, the couple book
   their own two places like everyone else. The physical room count is the inventory: one room = one unit =
-  two places (a single room one place); the Sathorn Penthouse is six bedrooms, Room A – F, twelve places.
+  two places; the Sathorn Penthouse is six bedrooms, Room A – F, twelve places. Final release (15 Sep 2026):
+  the Light French Suite and the Snow Mountain Viewing Room, seeded as singles from an older sheet state, now
+  carry two places and say "2 adults" as Accommodation_Details "Pax" does (audit ST-015 / ST-016).
   Category words are derived from the rooms ("2 rooms · 3 places available", "Fully booked", "Your place is
   held · Room A"); the room page lists every physical room with its places. Gone: "Reserved for bride &
   groom", "Reserved for family", "yours to choose", "held for you", "This category is reserved", "N places left".

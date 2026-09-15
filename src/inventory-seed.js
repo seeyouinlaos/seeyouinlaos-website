@@ -26,7 +26,9 @@
 
    ROOM ALLOCATION (Owner, 15 Sep 2026): the physical room count IS the
    inventory. One physical room = one persistent allocation unit = two
-   individual guest places (a single room = one place). Capacity is never a
+   individual guest places (every room in the source sleeps two adults —
+   Accommodation_Details "Pax"; the Light French Suite and the Snow Mountain
+   Viewing Room included, final release 15 Sep 2026). Capacity is never a
    separate counter: it is units × places, and only real guest bookings
    consume it.
 
@@ -85,7 +87,7 @@ export const SEED = {
   'kmg/mid-century':    { unit: 'room', capacity: 1, occupancy: 2, held: 0, name: 'Mid-century Amber Suite' },
   'kmg/milano':         { unit: 'room', capacity: 1, occupancy: 2, held: 0, name: 'Milano Minimalist Loft' },
   'kmg/italian':        { unit: 'room', capacity: 1, occupancy: 2, held: 0, name: 'Italian Style Suite' },
-  'kmg/light-french':   { unit: 'room', capacity: 1, occupancy: 1, held: 0, name: 'Light French Suite' },
+  'kmg/light-french':   { unit: 'room', capacity: 1, occupancy: 2, held: 0, name: 'Light French Suite' },
 
   /* ------------------------------------------------------------ Lijiang */
   'ljg/starry-sky':            { unit: 'room', capacity: 4, occupancy: 2, held: 0, name: 'Luye Starry Sky Suite · Immersive View' },
@@ -96,7 +98,7 @@ export const SEED = {
   'ljg/soup-pool-270':         { unit: 'room', capacity: 4, occupancy: 2, held: 0, name: '270° Snow Mountain View Room Private Soup Pool' },
   'ljg/private-courtyard-270': { unit: 'room', capacity: 4, occupancy: 2, held: 0, name: '270° Private Courtyard Snow Mountain View' },
   'ljg/viewing-270':           { unit: 'room', capacity: 4, occupancy: 2, held: 0, name: '270° Snow Mountain Viewing Room' },
-  'ljg/snow-mountain-viewing': { unit: 'room', capacity: 4, occupancy: 1, held: 0, name: 'Snow Mountain Viewing Room' },
+  'ljg/snow-mountain-viewing': { unit: 'room', capacity: 4, occupancy: 2, held: 0, name: 'Snow Mountain Viewing Room' },
 
   /* ------------------------------------------------------ Bangkok, closing */
   'kempinski/deluxe-balcony-king':

@@ -388,7 +388,7 @@
           amenities: ['Air conditioning', 'Audio equipment', 'Balcony', 'Butler service', 'Coffee maker / teapot', 'Dining table', 'Electric blanket', 'Electric fan', 'Electric kettle', 'Free bottled water', 'Free Wi-Fi', 'Hair dryer', 'Heating', 'Iron and ironing board', 'Microwave', 'Minibar', 'Refrigerator', 'Shower', 'Slippers', 'Smart door lock', 'Smart room controls', 'Smart toilet', 'Sofa', 'TV', 'Wardrobe', 'Washing machine'],
           rate: 50 },
         { slug: 'light-french', name: 'Light French Suite', cat: 'Designer suite · 68 sqm',
-          desc: 'Light French Suite — 68 sq.m., 1 queen bed (1.8m wide), 1 adult. Floor 14th floor.',
+          desc: 'Light French Suite — 68 sq.m., 1 queen bed (1.8m wide), 2 adults. Floor 14th floor.',
           gallery: [
           [KMG + 'light-french-1.jpg', 'The room'],
           [KMG + 'light-french-2.jpg', 'The room'],
@@ -396,7 +396,7 @@
           [KMG + 'light-french-4.jpg', 'The room'],
           [KMG + 'light-french-5.jpg', 'The room'],
           [KMG + 'light-french-6.jpg', 'The room']],
-          facts: [['Size', '68 sq.m.'], ['Bed', '1 Queen Bed (1.8m wide)'], ['Occupancy', '1 Adult'], ['Location', 'Floor 14th floor']],
+          facts: [['Size', '68 sq.m.'], ['Bed', '1 Queen Bed (1.8m wide)'], ['Occupancy', '2 Adults'], ['Location', 'Floor 14th floor']],
           story: 'Light French Suite, the entry room of the house: 68 sq.m., a queen bed, a balcony and the same city view as every other floor.',
           amenities: ['Air conditioning', 'Audio equipment', 'Balcony', 'Butler service', 'Clothes dryer', 'Dining table', 'Electric blanket', 'Electric kettle', 'Free bottled water', 'Free Wi-Fi', 'Hair dryer', 'Heating', 'Iron and ironing board', 'Microwave', 'Minibar', 'Range hood', 'Refrigerator', 'Shower', 'Slippers', 'Smart door lock', 'Smart room controls', 'Smart toilet', 'Sofa', 'TV', 'Wardrobe', 'Washing machine'],
           rate: 49 },
@@ -558,12 +558,12 @@
           amenities: ['Air conditioning', 'Air purifier', 'Audio equipment', 'Bathrobe', 'Bathtub or shower', 'Butler service', 'Coffee maker / teapot', 'Electric kettle', 'Fireplace', 'Free Wi-Fi', 'Heating', 'Iron and ironing board', 'Minibar', 'Private courtyard', 'Private hot springs', 'Projector', 'Safe in room', 'Slippers', 'Smart door lock', 'Smart room controls', 'Smart toilet', 'Sofa'],
           rate: 105 },
         { slug: 'snow-mountain-viewing', name: 'Snow Mountain Viewing Room', cat: 'Snow mountain room',
-          desc: 'Snow Mountain Viewing Room — 50 sq.m., 1 king bed (2m wide), 1 adult. Floor 2nd floor.',
+          desc: 'Snow Mountain Viewing Room — 50 sq.m., 1 king bed (2m wide), 2 adults. Floor 2nd floor.',
           /* the Owner-designated photograph for this room (08 Sep 2026): Jade
            * Dragon Snow Mountain over the Baisha rooftops. Canonical — used for
            * this room only, everywhere the room appears. */
           gallery: [[LJG + 'snow-mountain-viewing-1.jpg', 'Jade Dragon Snow Mountain over the rooftops']],
-          facts: [['Size', '50 sq.m.'], ['Bed', '1 King Bed (2m wide)'], ['Occupancy', '1 Adult'], ['Location', 'Floor 2nd floor']],
+          facts: [['Size', '50 sq.m.'], ['Bed', '1 King Bed (2m wide)'], ['Occupancy', '2 Adults'], ['Location', 'Floor 2nd floor']],
           story: 'Fifty square metres facing the peak: a starry-sky terrace, a private hot-spring soup pool and a fireplace for the cold end of the day.',
           amenities: ['Air conditioning', 'Air purifier', 'Audio equipment', 'Balcony', 'Bathrobe', 'Bathtub or shower', 'Butler service', 'Coffee maker / teapot', 'Electric kettle', 'Fireplace', 'Free Wi-Fi', 'Heating', 'Iron and ironing board', 'Minibar', 'Private hot springs', 'Projector', 'Safe in room', 'Slippers', 'Smart door lock', 'Smart room controls', 'Smart toilet', 'Sofa', 'Terrace'],
           rate: 75 },

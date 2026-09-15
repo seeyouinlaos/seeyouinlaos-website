@@ -3,7 +3,7 @@
    physical room is available until a guest actually books a place in it, and
    the couple book their own two places like everyone else. The PHYSICAL ROOM
    COUNT is the inventory: one physical room = one persistent allocation unit
-   = two individual guest places (a single room = one place). Capacity is units
+   = two individual guest places (no room in the source is a single). Capacity is units
    × places, never a separate counter; only real bookings consume it. The rule
    lives in the engine and the browser must agree with it. No access code
    appears here. */
@@ -60,7 +60,7 @@ test('NO PRE-RESERVED ROOMS · no unit carries a reservation; the historical hel
   }
 });
 
-test('PHYSICAL ROOM COUNT IS AUTHORITATIVE · 1 room → 1 unit → 2 places; 5 → 5 → 10; 6 → A–F → 12, never a Room G; a single room is one place', () => {
+test('PHYSICAL ROOM COUNT IS AUTHORITATIVE · 1 room → 1 unit → 2 places; 5 → 5 → 10; 6 → A–F → 12, never a Room G; the two former "singles" sleep two adults as the source says', () => {
   assert.equal(PLACES, 2);
   const one = unitsOf('prewed/souphattra-presidential'); assert.equal(one.length, 1); assert.deepEqual(one.map((u) => u.label), ['A']); assert.equal(one[0].places, 2);
   const five = unitsOf('wedstay/heritage'); assert.equal(five.length, 5); assert.deepEqual(five.map((u) => u.label), ['A', 'B', 'C', 'D', 'E']); assert.equal(five.reduce((n, u) => n + u.places, 0), 10);
@@ -68,8 +68,9 @@ test('PHYSICAL ROOM COUNT IS AUTHORITATIVE · 1 room → 1 unit → 2 places; 5 
   const pent = unitsOf('bkk-stay/penthouse'); assert.equal(pent.length, 6); assert.deepEqual(pent.map((u) => u.label), ['A', 'B', 'C', 'D', 'E', 'F']); assert.equal(pent.reduce((n, u) => n + u.places, 0), 12);
   assert.ok(!pent.some((u) => u.label === 'G')); assert.ok(pent.every((u) => u.kind === 'room' && u.places === 2));
   const thirteen = unitsOf('wedstay/heritage-executive'); assert.equal(thirteen.length, 13); assert.equal(thirteen.reduce((n, u) => n + u.places, 0), 26);
-  /* singles */
-  for (const key of ['kmg/light-french', 'ljg/snow-mountain-viewing']) for (const u of unitsOf(key)) assert.equal(u.places, 1, key + ' is a single room: one place');
+  /* the Light French Suite and the Snow Mountain Viewing Room: Pax "2 Adults" in Accommodation_Details → two places each (final release, 15 Sep 2026) */
+  for (const key of ['kmg/light-french', 'ljg/snow-mountain-viewing']) for (const u of unitsOf(key)) assert.equal(u.places, 2, key + ' sleeps two adults: two places');
+  assert.ok(!Object.values(SEED).some((s) => s.unit === 'room' && s.occupancy === 1), 'no room is seeded as a single');
   /* the invariant across the whole inventory: units = source room count; places = count × 2 for standard rooms */
   for (const [key, s] of Object.entries(SEED)) {
     const units = unitsOf(key);
