@@ -1,11 +1,11 @@
 SOURCE-TRUTH AUDIT
-DATE: 2026-09-15 15:08 UTC
-MAIN SHA: 5209f9c
+DATE: 2026-09-15 16:23 UTC
+MAIN SHA: d299355
 SOURCE: H&S_Wedding_Operations_Master (Google Sheet, owner suthep.hrg@gmail.com, last modified 2026-09-13T12:44:10Z; export ops-master.xlsx of 2026-09-13 19:27 UTC, every tab: Overview_Hotel_Restaurant · Accommodation_Details · Experience, Restaurant, Cafe_Details · Snack_Details · Transportation · Budget_Room - Rate · Printing_Stationnary · Budget_Finance · Guestlist · Accommodation · Master_Timeline · Inventory · Invitation Giveaway · Deposit · Auis hotel inspection) · the documented Owner decisions (docs/DECISION-REGISTER.md, docs/acceptance/*/README.md, docs/review/007-change-manifest.md, docs/references/SEE-YOU-IN-LAOS-FINAL-DESIGN-SYSTEM-MASTER.md §18)
 
-TOTAL FACTUAL CLAIMS CHECKED: 121 (33 claims below · 47 priced items · 41 room categories)
+TOTAL FACTUAL CLAIMS CHECKED: 119 (31 claims below · 47 priced items · 41 room categories)
 MATCH: 97
-CONFLICT: 6
+CONFLICT: 4
 SOURCE MISSING: 5
 OWNER DECISION OVERRIDES: 12
 STALE / RETIRED SOURCE ONLY: 6 (the sheet still carries C642 16:39 → 21:06, the room reservations for Bride & Groom / Family, Khop Chai Deu, Le Padaek, Parkson Supermarket and the Overview's USD 90 Penthouse rate — none is active on the website)
@@ -150,26 +150,6 @@ ACTION: NO CHANGE — REVIEW ONLY
 
 ISSUE ST-015
 
-SURFACE: Room engine · Wanxiang Yueju · Kunming · Light French Suite
-CURRENT WEBSITE: one guest place per room (a single room)
-AUTHORITATIVE SOURCE: Pax "2 Adults"
-SOURCE LOCATION: Accommodation_Details row Pax
-CLASSIFICATION: CONFLICT · NEEDS OWNER DECISION
-NOTE: The seed treats the room as a single (occupancy 1 → 1 place); the sheet sleeps two adults. NEEDS OWNER DECISION (2 places would apply the standard rule).
-ACTION: NO CHANGE — REVIEW ONLY
-
-ISSUE ST-016
-
-SURFACE: Room engine · Luye Baisha · Lijiang · Snow Mountain Viewing Room
-CURRENT WEBSITE: one guest place per room (a single room)
-AUTHORITATIVE SOURCE: Pax "2 Adults"
-SOURCE LOCATION: Accommodation_Details row Pax
-CLASSIFICATION: CONFLICT · NEEDS OWNER DECISION
-NOTE: The seed treats the room as a single (occupancy 1 → 1 place); the sheet sleeps two adults. NEEDS OWNER DECISION (2 places would apply the standard rule).
-ACTION: NO CHANGE — REVIEW ONLY
-
-ISSUE ST-017
-
 SURFACE: Room engine · Sathorn Penthouse
 CURRENT WEBSITE: Room A – F · 12 guest places (six bedrooms of two)
 AUTHORITATIVE SOURCE: Accommodation_Details: Category "Elegant 6BR Sathon Penthouse" · Bedroom 6.0 · Pax 12 Adults · "Rooms avaible" 5.0; Overview Day 01: "12 guests 6 bedrooms 6 beds 5 bathrooms"; Owner override 15 Sep 2026: 6 physical rooms → Room A–F → 12 places
@@ -178,7 +158,7 @@ CLASSIFICATION: OWNER DECISION OVERRIDE
 NOTE: Bedrooms (6) and guests (12) match; the "Rooms avaible 5.0" cell conflicts with both and is not used.
 ACTION: NO CHANGE — REVIEW ONLY
 
-ISSUE ST-018
+ISSUE ST-016
 
 SURFACE: Room engine · every category
 CURRENT WEBSITE: No room is reserved for anyone in advance: the Presidential, the Grand Majestic, the Solarium and the 270° Snow Mountain View Suite are available until booked
@@ -188,7 +168,7 @@ CLASSIFICATION: OWNER DECISION OVERRIDE
 NOTE: Owner override 15 Sep 2026: NO PRE-RESERVED ROOMS; the sheet's reservations stay as history.
 ACTION: NO CHANGE — REVIEW ONLY
 
-ISSUE ST-019
+ISSUE ST-017
 
 SURFACE: Room rates · Sathorn Penthouse
 CURRENT WEBSITE: USD 85 per person / night · 3 nights · USD 255 total per person
@@ -198,7 +178,7 @@ CLASSIFICATION: CONFLICT · NEEDS OWNER DECISION
 NOTE: The sheet carries two values (85 in Accommodation_Details, 90 in the Overview); the website uses 85. NEEDS OWNER DECISION on which cell is authoritative (the website follows Accommodation_Details, which also feeds every other rate).
 ACTION: NO CHANGE — REVIEW ONLY
 
-ISSUE ST-020
+ISSUE ST-018
 
 SURFACE: Wedding Stay · Souphattra Heritage (27 Feb – 1 Mar)
 CURRENT WEBSITE: Two nights as one selection: the first night at the room rate, the second night hosted by Haruthai & Suthep
@@ -208,7 +188,7 @@ CLASSIFICATION: OWNER DECISION OVERRIDE
 NOTE: The hosted second night is an Owner decision not reflected in the sheet, which prices both nights.
 ACTION: NO CHANGE — REVIEW ONLY
 
-ISSUE ST-021
+ISSUE ST-019
 
 SURFACE: Alternative Stay · Private Residence
 CURRENT WEBSITE: Complimentary · up to 6 guests · an independent stay, arranged around the wedding programme by you
@@ -217,7 +197,7 @@ SOURCE LOCATION: Overview Day 05-02
 CLASSIFICATION: MATCH
 ACTION: NO CHANGE — REVIEW ONLY
 
-ISSUE ST-022
+ISSUE ST-020
 
 SURFACE: Stays · breakfast
 CURRENT WEBSITE: Penthouse: not included · self-pay; U Sathorn, Shama: included; Souphattra: included; Kunming: not included · self-pay; Lijiang: included; Siam Kempinski: included
@@ -226,7 +206,7 @@ SOURCE LOCATION: Accommodation_Details row Breakfast
 CLASSIFICATION: MATCH
 ACTION: NO CHANGE — REVIEW ONLY
 
-ISSUE ST-023
+ISSUE ST-021
 
 SURFACE: Stays · hotel names
 CURRENT WEBSITE: Sathorn Penthouse Bangkok · U Sathorn Bangkok · Shama Yen-Akat Bangkok · Souphattra Heritage Vientiane · Wanxiang Yueju · Kunming (Kunming Railway Station MixC Branch) · Luye Baisha · Lijiang (Rizhao Jinshan) · Siam Kempinski Bangkok
@@ -235,7 +215,7 @@ SOURCE LOCATION: Accommodation_Details · Overview
 CLASSIFICATION: MATCH
 ACTION: NO CHANGE — REVIEW ONLY
 
-ISSUE ST-024
+ISSUE ST-022
 
 SURFACE: Souphattra Heritage · room count
 CURRENT WEBSITE: 26 rooms: The Heritage 5 · Heritage Executive 13 · Heritage Grand Premier 3 · Noble Courtyard Suite 1 · Grand Majestic Suite 2 · Souphattra Majestic Suite 1 · Souphattra Presidential 1 (per window, sold twice: 25–27 Feb and 27 Feb – 1 Mar)
@@ -245,7 +225,7 @@ CLASSIFICATION: MATCH
 NOTE: Budget_Room - Rate shows the Grand Majestic amount as 0 because it was reserved; Accommodation_Details says 2 rooms — the website follows Accommodation_Details (2 rooms, open since the 15 Sep override).
 ACTION: NO CHANGE — REVIEW ONLY
 
-ISSUE ST-025
+ISSUE ST-023
 
 SURFACE: Kunming · Family Suite / Seine / Penang / Left Bank
 CURRENT WEBSITE: Two guest places per room (the standard rule)
@@ -255,7 +235,7 @@ CLASSIFICATION: OWNER DECISION OVERRIDE
 NOTE: Owner rule 15 Sep 2026: one physical room = two guest places unless the source defines a different occupancy; the sheet's 4-adult rooms are still offered as two places (as the Presidential, 4 adults, is). The seed's Family Suite occupancy (2) differs from the sheet (4) and Left Bank (seed 4, sheet 2) — no guest-facing effect under the two-places rule.
 ACTION: NO CHANGE — REVIEW ONLY
 
-ISSUE ST-026
+ISSUE ST-024
 
 SURFACE: Experiences · Sühring
 CURRENT WEBSITE: Sühring · German fine dining · Lunch · Thursday to Sunday · 12:30 pm to 13:00 pm (last seating) · Closed on Monday and Tuesday · USD 180 per person · a table requested through Guest Relations · not a confirmed reservation · Bangkok · in the footer and featured beside 1872
@@ -265,7 +245,7 @@ CLASSIFICATION: MATCH
 NOTE: Owner decision (13 Sep): USD 180 per person, request only. The sheet's "12:30 pm to 13:00 pm (last seating)" is reproduced verbatim on the website.
 ACTION: NO CHANGE — REVIEW ONLY
 
-ISSUE ST-027
+ISSUE ST-025
 
 SURFACE: 1872 · Champagne Afternoon Tea
 CURRENT WEBSITE: USD 180 · for two guests · Aman Nai Lert Bangkok · served daily 14:00 – 17:00
@@ -275,7 +255,7 @@ CLASSIFICATION: SOURCE MISSING
 NOTE: The amount and the hours come from the Owner's experience pass decision (Drive-derived), not from the sheet.
 ACTION: NO CHANGE — REVIEW ONLY
 
-ISSUE ST-028
+ISSUE ST-026
 
 SURFACE: Wellness · Marsilea Spa
 CURRENT WEBSITE: Six categories · seventeen treatments · open 10:00 – 20:00 · an interest carries no journey cost · paid at the spa
@@ -285,7 +265,7 @@ CLASSIFICATION: SOURCE MISSING
 NOTE: The treatment menu is the Owner's Drive-derived registry.
 ACTION: NO CHANGE — REVIEW ONLY
 
-ISSUE ST-029
+ISSUE ST-027
 
 SURFACE: Experiences · the registry vs the Overview day lists
 CURRENT WEBSITE: 39 experience entities on the website
@@ -295,7 +275,7 @@ CLASSIFICATION: SOURCE MISSING
 NOTE: Entities not named in the Overview day lists (they come from the Drive-derived registry the Owner approved 13 Sep): Sühring, Dior · Café LV, Let's Relax, Patuxai, Wat Si Saket, Wat Si Muang, Ha Phrakeo Museum, Presidential Palace, That Dam, Buddha Park
 ACTION: NO CHANGE — REVIEW ONLY
 
-ISSUE ST-030
+ISSUE ST-028
 
 SURFACE: Experiences · retired entities
 CURRENT WEBSITE: PVO Vietnamese Food, Khop Chai Deu, Le Padaek, Parkson Supermarket are absent from the website; Lacuna VTE is a café only
@@ -305,7 +285,7 @@ CLASSIFICATION: OWNER DECISION OVERRIDE
 NOTE: Removed by the Owner (14 Sep 2026 rebuild); Lacuna VTE café only. The website stays absent of them; the sheet still names them.
 ACTION: NO CHANGE — REVIEW ONLY
 
-ISSUE ST-031
+ISSUE ST-029
 
 SURFACE: Experiences · Cam On Restaurant · Molly's Vientiane · Curvy.Dining vendor list
 CURRENT WEBSITE: Cam On Restaurant is not an experience entity on the website
@@ -315,7 +295,7 @@ CLASSIFICATION: SOURCE MISSING
 NOTE: No Drive folder / detail source; not invented on the website (review only).
 ACTION: NO CHANGE — REVIEW ONLY
 
-ISSUE ST-032
+ISSUE ST-030
 
 SURFACE: Seating plans
 CURRENT WEBSITE: Ceremony: 50 guest chairs (left block 2 × 10, right block 3 × 10) + two fixed positions front centre (Bride, Groom); Dinner: one long table, 50 places, run A 25 · run B 25
@@ -325,7 +305,7 @@ CLASSIFICATION: OWNER DECISION OVERRIDE
 NOTE: The chair count (52 = 50 + 2 fixed) agrees with the Inventory tab; the pax figures in the timeline (36) are planning numbers, not capacity.
 ACTION: NO CHANGE — REVIEW ONLY
 
-ISSUE ST-033
+ISSUE ST-031
 
 SURFACE: Seating · pool side
 CURRENT WEBSITE: The swimming pool along run A; "Run A sits beside the swimming pool; run B faces it across the table."
@@ -394,7 +374,7 @@ C86 = USD 105 on every surface (authoritative FLAT.c86 105 · journeys.html USD 
 ==================================================
 K · ROOM SOURCE AUDIT
 ==================================================
-Rule: 1 physical room = 2 guest places (a single room = 1; a whole property what the source says it sleeps). Source physical rooms = Accommodation_Details "Rooms avaible" (the Penthouse: its six bedrooms — see ST issue). Website allocation units = src/rooms.js unitsOf() over src/inventory-seed.js.
+Rule: 1 physical room = 2 guest places (a whole property what the source says it sleeps; no room in the source is a single). Source physical rooms = Accommodation_Details "Rooms avaible" (the Penthouse: its six bedrooms — see ST issue). Website allocation units = src/rooms.js unitsOf() over src/inventory-seed.js.
 
 PROPERTY / STAY | WINDOW | ROOM TYPE | SOURCE PHYSICAL ROOMS | SOURCE PAX | EXPECTED GUEST PLACES | WEBSITE ALLOCATION UNITS | WEBSITE PLACES | RATE website / source | BREAKFAST website / source | MATCH / CONFLICT
 Souphattra Heritage Vientiane | prewed | Souphattra Presidential | 1.0 | 4 adults, 2 children | 2 | 1 (A) | 2 | USD 750 / USD 750 | Breakfast included / Brakfast incl.  | MATCH
@@ -426,7 +406,7 @@ Wanxiang Yueju · Kunming | kmg | Junting City-View Loft | 1.0 | 2 Adults | 2 | 
 Wanxiang Yueju · Kunming | kmg | Mid-century Amber Suite | 1.0 | 2 Adults | 2 | 1 (A) | 2 | USD 51 / USD 51 | Breakfast not included · self-pay / Not included, selfe pay, breakfast location ausgewahlt | MATCH
 Wanxiang Yueju · Kunming | kmg | Milano Minimalist Loft | 1.0 | 2 Adults | 2 | 1 (A) | 2 | USD 50 / USD 50 | Breakfast not included · self-pay / Not included, selfe pay, breakfast location ausgewahlt | MATCH
 Wanxiang Yueju · Kunming | kmg | Italian Style Suite | 1.0 | 2 Adults | 2 | 1 (A) | 2 | USD 50 / USD 50 | Breakfast not included · self-pay / Not included, selfe pay, breakfast location ausgewahlt | MATCH
-Wanxiang Yueju · Kunming | kmg | Light French Suite | 1.0 | 2 Adults | 1 | 1 (A) | 1 | USD 49 / USD 49 | Breakfast not included · self-pay / Not included, selfe pay, breakfast location ausgewahlt | MATCH
+Wanxiang Yueju · Kunming | kmg | Light French Suite | 1.0 | 2 Adults | 2 | 1 (A) | 2 | USD 49 / USD 49 | Breakfast not included · self-pay / Not included, selfe pay, breakfast location ausgewahlt | MATCH
 Luye Baisha · Lijiang | ljg | Luye Starry Sky Suite · Immersive View | 4.0 | 2 Adults | 8 | 4 (ABCD) | 8 | USD 210 / USD 210 | Breakfast included / Brakfast incl.  | MATCH
 Luye Baisha · Lijiang | ljg | Boundless Floor-to-Ceiling Glass Sunlit Suite | 4.0 | 2 Adults | 8 | 4 (ABCD) | 8 | USD 170 / USD 170 | Breakfast included / Brakfast incl.  | MATCH
 Luye Baisha · Lijiang | ljg | Snow Mountain Private Soup Viewing Suite | 4.0 | 2 Adults | 8 | 4 (ABCD) | 8 | USD 125 / USD 125 | Breakfast included / Brakfast incl.  | MATCH
@@ -435,7 +415,7 @@ Luye Baisha · Lijiang | ljg | 270° Snow Mountain View Suite | 4.0 | 2 Adults |
 Luye Baisha · Lijiang | ljg | 270° Snow Mountain View Room Private Soup Pool | 4.0 | 2 Adults | 8 | 4 (ABCD) | 8 | USD 105 / USD 105 | Breakfast included / Brakfast incl.  | MATCH
 Luye Baisha · Lijiang | ljg | 270° Private Courtyard Snow Mountain View | 4.0 | 2 Adults | 8 | 4 (ABCD) | 8 | USD 105 / USD 105 | Breakfast included / Brakfast incl.  | MATCH
 Luye Baisha · Lijiang | ljg | 270° Snow Mountain Viewing | 4.0 | 2 Adults | 8 | 4 (ABCD) | 8 | USD 100 / USD 100 | Breakfast included / Brakfast incl.  | MATCH
-Luye Baisha · Lijiang | ljg | Snow Mountain Viewing Room | 4.0 | 2 Adults | 4 | 4 (ABCD) | 4 | USD 75 / USD 75 | Breakfast included / Brakfast incl.  | MATCH
+Luye Baisha · Lijiang | ljg | Snow Mountain Viewing Room | 4.0 | 2 Adults | 8 | 4 (ABCD) | 8 | USD 75 / USD 75 | Breakfast included / Brakfast incl.  | MATCH
 Siam Kempinski Bangkok | kempinski | Deluxe Balcony King | 4.0 | 2.0 | 8 | 4 (ABCD) | 8 | USD 190 / USD 190 | Breakfast included / Brakfast incl.  | MATCH
 Alternative Stay · Vientiane | airbnb-2br | Private Residence | limited to 6 persons | 6 persons | 6 | 1 (A) | 6 | — / — | — / — | MATCH · Overview Day 05-02 / Day 07: "Airbnb Guest House complimentary … limited to 6 persons"
 

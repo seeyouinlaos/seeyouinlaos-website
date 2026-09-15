@@ -1,0 +1,19 @@
+{
+  "at": "2026-09-15T15:33:56.538Z",
+  "origin": "https://seeyouinlaos-website.suthep-hrg.workers.dev",
+  "counts": {
+    "guests": 47,
+    "apiAccepted": 47,
+    "roomsPlacesSeen": 1,
+    "seatsSeen": 6,
+    "statusReceived": 1,
+    "statusConfirmed": 0,
+    "browserSignedIn": 47,
+    "browserSignedOut": 47,
+    "rejectedBadBearer": 1,
+    "writesObserved": 0,
+    "emptyCart": 47,
+    "partyShown": 42
+  },
+  "fails": []
+}
