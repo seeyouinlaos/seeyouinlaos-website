@@ -4,9 +4,10 @@
      update the authoritative state · deep links land on the exact selector · gating holds · the transport
      UI is a ticket with a code that scans · C86 = USD 105 everywhere · run A = poolside on the plan ·
      the travel pass downloads as a real PDF · mobile and desktop.
-   HARUTHAI (host) walks the whole thing; PEGGY (not a host) proves her own bag and her own pass.
-   Codes from the private register, never printed. Production is restored afterwards (restore.mjs).
-     node docs/acceptance/2026-09-15-cart-ticket/walk.mjs <origin> [outdir] [jsqr-path]
+   A HOST walks the whole thing (HOST=G048 Haruthai by default; HOST=G049 Suthep when Haruthai's invitation
+   is in live use); a GUEST who is not a host (GUEST=G001 Peggy) proves their own bag and their own pass.
+   Codes from the private register, never printed. Production is restored afterwards.
+     HOST=G049 GUEST=G001 node docs/acceptance/2026-09-15-cart-ticket/walk.mjs <origin> [outdir] [jsqr-path]
    */
 import { chromium } from '/Users/thongantang/.npm-global/lib/node_modules/playwright/index.mjs';
 import fs from 'node:fs';
@@ -74,9 +75,11 @@ async function scans(sel) {
 }
 
 /* ================================================================ HARUTHAI */
-const H = await signIn(tok('G048'));
-note('H1 one code = one guest', H.guestId === 'G048' && H.hosts === true && !!H.bearer, '');
-await contact('haruthai.test@example.com', '+66 81 000 0001');
+const HOST = process.env.HOST || 'G048', GUEST = process.env.GUEST || 'G001';
+const H = await signIn(tok(HOST));
+const HN = H.preferredName;   /* the host's first name, from the session — never typed here */
+note('H1 one code = one guest', H.guestId === HOST && H.hosts === true && !!H.bearer && !!HN, HN);
+await contact(HN.toLowerCase() + '.test@example.com', '+66 81 000 0001');
 /* the four legs, from Your Journey (the planner) */
 await go('your-journey.html');
 for (const leg of ['train', 'c86', 'return']) { await p.click('[data-choose-flat="' + leg + '"]'); await p.waitForTimeout(500); }
@@ -86,19 +89,19 @@ await go('your-journey.html');
 let t = await body();
 const T1 = await ticket('train'), T2 = await ticket('mu9646'), T3 = await ticket('c86'), T4 = await ticket('return');
 note('H2 Your Journey · every transport leg is a ticket: both ends, times, class, the guest, the pass reference, the code, the download', [T1, T2, T3, T4].every((x) => x && x.on && x.qr && /^SYL-/.test(x.ref) && x.dl && /Current selection/i.test(x.state)) && T1.codes.join('>') === 'BKK>NKI' && T1.times.join('>') === '20:25>06:25' && T2.codes.join('>') === 'VTE>KMG' && T2.times.join('>') === '15:50>18:25' && T3.codes.join('>') === 'KMG>LJG' && T3.times.join('>') === '10:15>13:44' && T4.codes.join('>') === 'LJG>BKK' && T4.times.join('>') === '10:35>14:55', JSON.stringify([T1.ref, T2.ref, T3.ref, T4.ref]));
-note('H2 Your Journey · the ticket names the guest and the class; the flight ticket follows the chosen fare', /Guest Haruthai/i.test(T2.text) && /Class Business Class/i.test(T2.text) && /Class First Class Sleeper/i.test(T1.text) && /Class Economy flexible/i.test(T4.text), T2.text.slice(0, 160));
+note('H2 Your Journey · the ticket names the guest and the class; the flight ticket follows the chosen fare', new RegExp('Guest ' + HN, 'i').test(T2.text) && /Class Business Class/i.test(T2.text) && /Class First Class Sleeper/i.test(T1.text) && /Class Economy flexible/i.test(T4.text), T2.text.slice(0, 160));
 note('H3 C86 = USD 105 on Your Journey (ticket + card); total = 100 + 275 + 105 + 200', /USD 105/.test(T3.text) && (await txt('#tt')) === money(680), await txt('#tt'));
 const scan = await scans('[data-ticket="c86"] svg.p-qr');
-note('H3 the C86 code SCANS (independent decoder) and carries the pass, the guest, the leg, the date, the class, the state', scan === 'skipped' || (/TRAVEL PASS SYL-C86-/.test(scan) && /Haruthai/.test(scan) && /C86 Kunming → Lijiang/.test(scan) && /04 March 2027/.test(scan) && /Business Class/.test(scan) && /SELECTED/.test(scan)), String(scan).replace(/\n/g, ' | '));
+note('H3 the C86 code SCANS (independent decoder) and carries the pass, the guest, the leg, the date, the class, the state', scan === 'skipped' || (/TRAVEL PASS SYL-C86-/.test(scan) && scan.includes(HN) && /C86 Kunming → Lijiang/.test(scan) && /04 March 2027/.test(scan) && /Business Class/.test(scan) && /SELECTED/.test(scan)), String(scan).replace(/\n/g, ' | '));
 await shot('H-journey-tickets');
 /* the download: a real PDF with the reference */
 const [dl] = await Promise.all([p.waitForEvent('download', { timeout: 15000 }), p.click('[data-ticket="c86"] [data-travel-pass]')]);
 const pdfPath = await dl.path(); const pdf = fs.readFileSync(pdfPath, 'latin1');
-note('H4 Download travel pass · a real PDF, named for the leg and the guest, carrying the reference, the route, the class, the code and honest words', /^%PDF-1\.4/.test(pdf) && dl.suggestedFilename() === 'see-you-in-laos-travel-pass-c86-haruthai.pdf' && pdf.includes(T3.ref) && /\(KMG\)/.test(pdf) && /\(LJG\)/.test(pdf) && /Business Class/.test(pdf) && (pdf.match(/ re f/g) || []).length > 300 && /Nothing is paid on this website/.test(pdf) && !/INV-G048/.test(pdf), dl.suggestedFilename() + ' · ' + pdf.length + ' bytes');
+note('H4 Download travel pass · a real PDF, named for the leg and the guest, carrying the reference, the route, the class, the code and honest words', /^%PDF-1\.4/.test(pdf) && dl.suggestedFilename() === 'see-you-in-laos-travel-pass-c86-' + HN.toLowerCase() + '.pdf' && pdf.includes(T3.ref) && /\(KMG\)/.test(pdf) && /\(LJG\)/.test(pdf) && /Business Class/.test(pdf) && (pdf.match(/ re f/g) || []).length > 300 && /Nothing is paid on this website/.test(pdf) && !pdf.includes('INV-' + HOST), dl.suggestedFilename() + ' · ' + pdf.length + ' bytes');
 if (OUT) fs.copyFileSync(pdfPath, path.join(OUT, 'travel-pass-c86-sample.pdf'));
 /* the bag */
 let c = await cart(); await shot('H-cart');
-note('H5 bag icon → the cart · own lines, grouped under Transport, each transport line carrying its pass strip with the code and the reference', (await p.evaluate(() => (document.querySelector('a.bag') || {}).getAttribute('href'))) === 'cart.html' && /Your bag · Haruthai/i.test(c.text) && c.lines.length === 4 && c.lines.every((l) => l.pass && l.qr && /^SYL-/.test(l.ref)) && /Transport/i.test(c.text) && c.foot === true, c.lines.map((l) => l.id + ':' + l.ref).join(' '));
+note('H5 bag icon → the cart · own lines, grouped under Transport, each transport line carrying its pass strip with the code and the reference', (await p.evaluate(() => (document.querySelector('a.bag') || {}).getAttribute('href'))) === 'cart.html' && new RegExp('Your bag · ' + HN, 'i').test(c.text) && c.lines.length === 4 && c.lines.every((l) => l.pass && l.qr && /^SYL-/.test(l.ref)) && /Transport/i.test(c.text) && c.foot === true, c.lines.map((l) => l.id + ':' + l.ref).join(' '));
 let sb = await sticky();
 note('H5 cart · C86 line says USD 105; cart total = sticky total = 680', c.lines.find((l) => l.id === 'c86').text.includes('USD 105') && c.total === money(680) && sb.total === money(680), c.total + ' / ' + sb.total);
 note('H5 cart · no checkout language, no quantity controls, the words are YOUR BAG · YOUR TOTAL · REVIEW YOUR JOURNEY', !/checkout|delivery|payment|card details/i.test(c.text) && !(await p.evaluate(() => !!document.querySelector('[data-qty], .qty, .stepper'))) && /Your total/i.test(c.text) && /Review your journey|Complete this first/i.test(c.text), '');
@@ -166,8 +169,8 @@ await p.click('#send'); await p.waitForFunction(() => document.getElementById('s
 const after = await p.evaluate(() => ({ state: document.getElementById('send').getAttribute('data-state'), passes: [...document.querySelectorAll('#items .p-pass')].map((x) => x.innerText.replace(/\s+/g, ' ')) }));
 note('H12 sent · every pass now says Sent to Guest Relations (the same references)', after.state === 'sent' && after.passes.length === 4 && after.passes.every((w) => /Sent to Guest Relations/i.test(w)) && after.passes.every((w, i) => w.includes(rv.passes[i].ref)), after.passes[0]);
 await shot('H-review-sent');
-const status = await (await fetch(API + '/status?invitation=INV-G048')).json();
-note('H12 the register holds INV-G048', status.received === true, status.receivedAt);
+const status = await (await fetch(API + '/status?invitation=INV-' + HOST)).json();
+note('H12 the register holds the host\'s invitation', status.received === true, status.receivedAt);
 await go('cart.html'); await p.waitForTimeout(800);
 const bagWords = await p.evaluate(() => [...document.querySelectorAll('.p-pass')].map((x) => x.innerText));
 note('H12 the bag says Sent too', bagWords.length === 4 && bagWords.every((w) => /Sent to Guest Relations/i.test(w)), bagWords.length);
@@ -182,24 +185,25 @@ note('H13 no page errors', errs.length === 0, errs.join(' | '));
 await leave();
 
 /* ================================================================== PEGGY */
-const P1 = await signIn(tok('G001'));
-note('P1 one code = one guest · Peggy alone · an empty bag, none of Haruthai\'s passes', P1.guestId === 'G001' && P1.hosts === false && (await p.evaluate(() => JSON.parse(localStorage.getItem('siyl.bag') || '[]').length)) === 0, '');
-await contact('peggy.test@example.com', '+49 170 000 0001');
+const P1 = await signIn(tok(GUEST));
+const GN = P1.preferredName;
+note('P1 one code = one guest · the guest alone · an empty bag, none of the host\'s passes', P1.guestId === GUEST && P1.hosts === false && (await p.evaluate(() => JSON.parse(localStorage.getItem('siyl.bag') || '[]').length)) === 0, GN);
+await contact(GN.toLowerCase() + '.test@example.com', '+49 170 000 0001');
 await go('your-journey.html'); await p.click('[data-choose-flat="c86"]'); await p.waitForTimeout(600);
 const pT = await ticket('c86');
-note('P2 Peggy\'s C86 ticket · her own name, her own reference (not Haruthai\'s), USD 105', /Guest Peggy/i.test(pT.text) && pT.ref !== T3.ref && /^SYL-C86-/.test(pT.ref) && /USD 105/.test(pT.text), pT.ref);
+note('P2 the guest\'s C86 ticket · their own name, their own reference (not the host\'s), USD 105', new RegExp('Guest ' + GN, 'i').test(pT.text) && pT.ref !== T3.ref && /^SYL-C86-/.test(pT.ref) && /USD 105/.test(pT.text), pT.ref);
 c = await cart();
 sb = await sticky();
-note('P3 Peggy\'s bag · one line, her pass, USD 105 = sticky', c.lines.length === 1 && c.lines[0].id === 'c86' && c.lines[0].ref === pT.ref && c.total === money(105) && sb.total === money(105), c.total + ' / ' + sb.total);
+note('P3 the guest\'s bag · one line, their pass, USD 105 = sticky', c.lines.length === 1 && c.lines[0].id === 'c86' && c.lines[0].ref === pT.ref && c.total === money(105) && sb.total === money(105), c.total + ' / ' + sb.total);
 await declineOthers(['c86']);
 await go('wedding.html');
 for (const [k, v] of [['temple', 'yes'], ['coffee', 'yes'], ['vows', 'yes'], ['dinner', 'yes']]) { await p.click('[data-e="' + k + '"] [data-ev="' + v + '"]'); await p.waitForTimeout(250); }
 await p.click('#sangkhathan [data-off="no"]'); await p.waitForTimeout(300);
 await go('wedding-preparation.html#seats'); await p.waitForFunction(() => window.SIYL_SEATS && SIYL_SEATS.ready(), null, { timeout: 15000 }); await p.waitForTimeout(500);
 const pv = await p.evaluate(() => ({ svg: (document.querySelector('[data-ev="dinner"] svg') || {}).outerHTML || '', names: [...document.querySelectorAll('[data-ev="dinner"] .seat-name')].map((t) => t.textContent) }));
-note('P4 the plan for a guest · the pool along run A, Haruthai\'s first name on her run-A chair', /RUN A · 25 PLACES · POOLSIDE/.test(pv.svg) && pv.names.includes('Haruthai'), pv.names.join(','));
+note('P4 the plan for a guest · the pool along run A, the host\'s first name on their run-A chair', /RUN A · 25 PLACES · POOLSIDE/.test(pv.svg) && pv.names.includes(HN), pv.names.join(','));
 await go('cart.html'); await p.click('.cart-line[data-line="c86"] [data-remove]'); await p.waitForTimeout(900);
-note('P5 REMOVE · her bag empties', /Your bag is empty/i.test(await body()), '');
+note('P5 REMOVE · the bag empties', /Your bag is empty/i.test(await body()), '');
 for (const w of [320, 375, 430]) {
   await p.setViewportSize({ width: w, height: 844 });
   await p.evaluate(() => { window.SIYL_BAG.put(window.SIYL_PRICE.items('train')[0]); window.SIYL_BAG.put(window.SIYL_PRICE.items('mu9646', 'business')[0]); });
