@@ -1,21 +1,21 @@
 # 007 — FINAL V2 DELTA (pre-patch → final)
 
-Generated 2026-09-15 18:37 UTC by docs/review/007-final-v2-delta.py.
+Generated 2026-09-15 18:57 UTC by docs/review/007-final-v2-delta.py.
 
 PRE-PATCH: docs/review/007-final-full-website-text.txt (MAIN SHA d299355) · docs/review/007-final-source-truth-audit.txt
-FINAL:     docs/review/007-final-v2-text.txt (MAIN SHA ad75a0c) · docs/review/007-final-v2-source-truth-audit.txt
+FINAL:     docs/review/007-final-v2-text.txt (MAIN SHA 1d772ab) · docs/review/007-final-v2-source-truth-audit.txt
 
 | metric | pre-patch | final |
 |---|---|---|
 | DISTINCT ACTIVE ROUTES | 26 | 26 |
-| DISTINCT SURFACES | 262 | 293 |
-| DYNAMIC / CONDITIONAL STATES | 154 | 185 |
+| DISTINCT SURFACES | 262 | 292 |
+| DYNAMIC / CONDITIONAL STATES | 154 | 184 |
 | EXPERIENCE ENTITIES | 39 | 39 |
 | STAY / ROOM ROUTES | 33 | 33 |
 | TRANSPORT ROUTES | 5 | 5 |
 | TICKET / PDF TEMPLATES | 14 | 14 |
-| LINES | 19875 | 20447 |
-| WORDS | 102162 | 105017 |
+| LINES | 19875 | 20424 |
+| WORDS | 102162 | 104876 |
 | SOURCE-TRUTH CLAIMS CHECKED | 119 | 123 |
 | SOURCE-TRUTH MATCH | 97 | 98 |
 | SOURCE-TRUTH CONFLICT | 4 | 0 |
@@ -23,9 +23,9 @@ FINAL:     docs/review/007-final-v2-text.txt (MAIN SHA ad75a0c) · docs/review/0
 | OWNER DECISION OVERRIDES | 12 | 17 |
 | STALE / RETIRED SOURCE | — | 1 |
 | SECRET SCAN | PASS | PASS |
-| COMPLETENESS CHECK | PASS · 1813 guest-facing source literals represented · 141 folded in from states not rendered · 0 leftover · 0 failed steps | PASS · 1880 guest-facing source literals represented · 155 folded in from states not rendered · 0 leftover · 0 failed steps |
+| COMPLETENESS CHECK | PASS · 1813 guest-facing source literals represented · 141 folded in from states not rendered · 0 leftover · 0 failed steps | PASS · 1866 guest-facing source literals represented · 141 folded in from states not rendered · 0 leftover · 0 failed steps |
 
-Unique text lines (surfaces, states, templates; references and stamps normalised): 4240 → 4402 · appeared 224 · disappeared 62
+Unique text lines (surfaces, states, templates; references and stamps normalised): 4240 → 4386 · appeared 208 · disappeared 62
 
 ## Text that APPEARED in the final
 
@@ -89,7 +89,7 @@ Unique text lines (surfaces, states, templates; references and stamps normalised
 - [pdf title] Vow Ceremony seat ticket \267 Peggy
 - [pdf title] Vow Ceremony seat ticket \267 Suthep
 
-### The venue stage (new guest-facing text) (93)
+### The venue stage (new guest-facing text) (91)
 
 - A lawn, old trees and a small fountain between the heritage houses.
 - Arrival · 27 February
@@ -131,7 +131,6 @@ Unique text lines (surfaces, states, templates; references and stamps normalised
 - ROUTE: /voyage · the venue · pool · photographs
 - ROUTE: /voyage · the venue · rooms
 - ROUTE: /voyage · the venue · rooms · photographs
-- ROUTE: source strings · assets/venue-data.js
 - Souphattra Heritage Vientiane from above · the real photograph · the labels on the real places
 - Swimming pool
 - The Wedding Dinner
@@ -151,7 +150,8 @@ Unique text lines (surfaces, states, templates; references and stamps normalised
 - [alt] Garden terrace seating among the greenery
 - [alt] Loungers under the trees beside the pool
 - [alt] Souphattra Heritage Vientiane from above: the heritage houses with their tiled roofs around the courtyard garden and the swimming pool
-- … 33 more
+- [alt] The arched gateway to the green door
+- … 31 more
 
 ### Accessibility text (aria / alt / live regions) (16)
 
@@ -181,11 +181,11 @@ Unique text lines (surfaces, states, templates; references and stamps normalised
 - USD 85per person
 - YOUR COST: USD 2,325
 
-### other (58)
+### other (44)
 
-- - Dress code: acknowledged 2026-09-15T18:33:11.345Z (text version 2026-09-09)
-- - Photography & film: acknowledged 2026-09-15T18:33:39.496Z (text version 2026-09-14)
-- - Publication of photographs: GIVEN (2026-09-15T18:33:38.796Z, wording 2026-09-09-draft)
+- - Dress code: acknowledged 2026-09-15T18:49:35.242Z (text version 2026-09-09)
+- - Photography & film: acknowledged 2026-09-15T18:50:03.092Z (text version 2026-09-14)
+- - Publication of photographs: GIVEN (2026-09-15T18:50:02.392Z, wording 2026-09-09-draft)
 - 07
 - Page foot: DOWNLOADED <YYYY-MM-DD HH:MM> UTC · SUNDAY, 28 FEBRUARY 2027 · VIENTIANE, LAOS · file names see-you-in-laos-wc-seat-<name>.pdf | see-you-in-laos-wd-seat-<name>.pdf | see-you-in-laos-wedding-seats-<name>.pdf
 - Rooms
@@ -220,27 +220,13 @@ Unique text lines (surfaces, states, templates; references and stamps normalised
 - SURFACE 290
 - SURFACE 291
 - SURFACE 292
-- SURFACE 293
-- Sent · 15 Sept 2026 · 20:33 · your time
+- Sent · 15 Sept 2026 · 20:50 · your time
 - Souphattra Heritage, Vientiane
 - Sunday, 28 February 2027 Souphattra Heritage, Vientiane
-- The complete guest-facing text of the current release (main ad75a0c), extracted 2026-09-15T18:36:36.279Z from a local Worker running the deployed source with the real engines.
+- The complete guest-facing text of the current release (main 1d772ab), extracted 2026-09-15T18:52:59.281Z from a local Worker running the deployed source with the real engines.
 - The rooms
 - [file name] see-you-in-laos-wc-seat-peggy.pdf
 - [file name] see-you-in-laos-wc-seat-suthep.pdf
-- [one] 001 - Hotel - Exterior & Architecture
-- [one] 003 - Hotel - Pool & Garden
-- [one] 021 / 001 - Room - The Heritage
-- [one] 051 - Event - Cake and Coffee
-- [one] 056 - Event - Wedding Dinner
-- [one] 06 - The Door
-- [one] Copy of DSC00025-scaled.webp
-- [one] Copy of DSC00168-1.webp
-- [one] Copy of DSC09013-scaled.webp
-- [one] Copy of DSC09021-scaled.webp
-- [one] Owner upload, 13 Sep 2026
-- [one] room photography already in the repository
-- [one] souphattra herritage - 007.webp
 
 ## Text that DISAPPEARED from the final (removed active text — each line checked: retired by the Owner patch, moved into the venue stage, or a stamp)
 
@@ -335,6 +321,7 @@ Unique text lines (surfaces, states, templates; references and stamps normalised
 | The Wedding (03) · Wedding public page | MATCH — Vow Ceremony · 16:30 · Souphattra Heritage Vientiane | SOURCE MISSING — Coffee & Cake · From 12:00 · Souphattra Heritage Vientiane |
 | The Wedding (03) · Wedding public page · Review & Send · seat tickets · seating plan | new claim | OWNER DECISION OVERRIDE — Wedding Ceremony (Vow Ceremony) · Sunday, 28 February 2027 · 15:30 · Souphattra  |
 | The Wedding (03) · Wedding public page · seat tickets · seating plan | CONFLICT · NEEDS OWNER DECISION — Wedding Dinner · 19:30 · Souphattra Heritage Vientiane · poolside (seat ticket 1 | OWNER DECISION OVERRIDE — Wedding Dinner · 19:30 · Souphattra Heritage Vientiane · poolside (seat ticket 1 |
+| The Wedding (03) · Tak Bat drawer · sent journey | OWNER DECISION OVERRIDE · NEEDS OWNER DECISION — Tak Bat (morning alms-giving) is part of the Temple Ceremony; a personal offerin | OWNER DECISION OVERRIDE — Tak Bat (morning alms-giving) is part of the Temple Ceremony; a personal offerin |
 | The Wedding · dress code | CONFLICT · NEEDS OWNER DECISION — Temple Ceremony: Lao Traditional Dress · Coffee & Cake, Vow Ceremony, Wedding Di | OWNER DECISION OVERRIDE — Temple Ceremony: Lao Traditional Dress · Coffee & Cake, Vow Ceremony, Wedding Di |
 | Journeys · Your Journey · Transport · travel pass · sent journey | OWNER DECISION OVERRIDE — C86 · high-speed train · Kunming Railway Station 10:15 → Lijiang Railway Station | OWNER DECISION OVERRIDE — C86 · high-speed train · Kunming Railway Station 10:15 → Lijiang Railway Station |
 | Room rates · Sathorn Penthouse | CONFLICT · NEEDS OWNER DECISION — USD 85 per person / night · 3 nights · USD 255 total per person | STALE / RETIRED SOURCE — USD 85 per person / night · 3 nights · USD 255 total per person |
@@ -350,5 +337,4 @@ Unique text lines (surfaces, states, templates; references and stamps normalised
 
 ## Still needing an Owner decision
 
-- The Wedding (03) · Tak Bat drawer · sent journey — OWNER DECISION OVERRIDE · NEEDS OWNER DECISION
 - The venue stage · labels WITHOUT a position — SOURCE MISSING · NEEDS OWNER DECISION

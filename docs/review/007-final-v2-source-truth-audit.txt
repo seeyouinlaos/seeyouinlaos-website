@@ -1,6 +1,6 @@
 SOURCE-TRUTH AUDIT · FINAL V2 (003 — after the Owner patch of 15 Sep 2026 and the venue experience)
-DATE: 2026-09-15 18:37 UTC
-MAIN SHA: ad75a0c
+DATE: 2026-09-15 18:57 UTC
+MAIN SHA: 1d772ab
 SOURCE: H&S_Wedding_Operations_Master (Google Sheet, owner suthep.hrg@gmail.com, last modified 2026-09-13T12:44:10Z; export ops-master.xlsx of 2026-09-13 19:27 UTC, every tab: Overview_Hotel_Restaurant · Accommodation_Details · Experience, Restaurant, Cafe_Details · Snack_Details · Transportation · Budget_Room - Rate · Printing_Stationnary · Budget_Finance · Guestlist · Accommodation · Master_Timeline · Inventory · Invitation Giveaway · Deposit · Auis hotel inspection) · the documented Owner decisions (docs/DECISION-REGISTER.md, docs/acceptance/*/README.md, docs/review/007-change-manifest.md, docs/references/SEE-YOU-IN-LAOS-FINAL-DESIGN-SYSTEM-MASTER.md §18)
 
 TOTAL FACTUAL CLAIMS CHECKED: 123 (35 claims below · 47 priced items · 41 room categories)
@@ -87,8 +87,8 @@ SURFACE: The Wedding (03) · Tak Bat drawer · sent journey
 CURRENT WEBSITE: Tak Bat (morning alms-giving) is part of the Temple Ceremony; a personal offering, arranged individually on the morning; no amount set
 AUTHORITATIVE SOURCE: Budget_Finance row "Alms Giving Ceremony · Souphattra Heritage · Guest Experience · Booking-driven. Do not hardcode pax. · 0 / 40 / 1 · Suthep"; Master_Timeline 05:30–06:15 Alms Giving Ceremony at Souphattra Heritage (36 pax · Denim, White); Owner correction 10 Sep 2026: Tak Bat = SELF-PAY
 SOURCE LOCATION: Budget_Finance row 56 · Master_Timeline · docs/acceptance/2026-09-13-owner-decisions/README.md "Tak Bat payment logic"
-CLASSIFICATION: OWNER DECISION OVERRIDE · NEEDS OWNER DECISION
-NOTE: The sheet puts the alms giving at the hotel at 05:30; the website folds it into the Temple Ceremony at Wat Ong Teu. NEEDS OWNER DECISION on place and time (see the Temple Ceremony issue).
+CLASSIFICATION: OWNER DECISION OVERRIDE
+NOTE: Tak Bat = self-pay (Owner decision, restated in 003 on 15 Sep 2026) and part of the Temple Ceremony at Wat Ong Teu (the Owner's 9 Sep correction); the sheet's 05:30 hotel row is the separate operational alms-giving timing, which the Owner told 003 not to confuse with the Temple Ceremony. No decision outstanding.
 ACTION: NO CHANGE — REVIEW ONLY
 
 ISSUE ST-009
@@ -528,7 +528,7 @@ SECRET SCAN: PASS
 O · COMPLETENESS VALIDATION
 ==================================================
 Active HTML routes covered: 26 (/, /1872, /about-you, /accommodation, /api, /cart, /destination, /documents, /dress, /experience, /experiences, /invitation, /journeys, /marsilea, /nothing-here, /register, /review, /room, /tea, /tickets, /transport, /voyage, /wedding, /wedding-preparation, /you, /your-journey)
-Experience entities covered: 39 · stay / room routes covered: 33 · transport routes covered: 5 (overview + 4 legs) · ticket / PDF templates covered: 14 (+ the template block) · sent-text templates covered: 2 (the sent journey, the email backup) · surfaces: 293 · dynamic states: 185
-Guest-facing source literals: 1880 scanned across every page and script a guest loads · 1725 found in a rendered state · 155 reached only in states not rendered and folded in verbatim (SURFACES "source strings · …") · 0 left over · implementation-only literals (error keys, font names, PDF operators) classified out by rule.
+Experience entities covered: 39 · stay / room routes covered: 33 · transport routes covered: 5 (overview + 4 legs) · ticket / PDF templates covered: 14 (+ the template block) · sent-text templates covered: 2 (the sent journey, the email backup) · surfaces: 292 · dynamic states: 184
+Guest-facing source literals: 1866 scanned across every page and script a guest loads · 1725 found in a rendered state · 141 reached only in states not rendered and folded in verbatim (SURFACES "source strings · …") · 0 left over · implementation-only literals (error keys, font names, PDF operators) classified out by rule.
 Failed steps during extraction: 0 · page errors: 0
 COMPLETENESS CHECK: PASS
