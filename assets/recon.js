@@ -38,9 +38,11 @@
         '<a href="accommodation.html">Stays</a><a href="experiences.html">Experiences</a></div>' +
       '<div><h4>The Wedding</h4>' +
         '<a href="voyage.html">The wedding days</a><a href="marsilea.html">Wellness</a>' +
-        '<a href="1872.html">1872 · Afternoon Tea</a></div>' +
+        '<a href="1872.html">1872 · Afternoon Tea</a>' +
+        '<a href="experience.html?id=bkk-suhring">Sühring · Lunch</a></div>' +
       '<div><h4>Guest Relations</h4>' +
         '<a href="your-journey.html">Your Journey</a>' +
+        '<a href="tickets.html">Your tickets</a>' +
         '<a href="mailto:guest.relation.seeyouinlaos@gmail.com">guest.relation.seeyouinlaos@gmail.com</a></div>' +
     '</div>' +
     '<p class="sf-legal">Sunday, 28 February 2027 · Vientiane, Laos</p>';

@@ -197,3 +197,18 @@ test('SÜHRING — never described as a confirmed reservation, a confirmed table
   assert.match(src('experience.html'), /not a confirmed reservation, and availability is not guaranteed by this page/);
   assert.match(src('assets/pricing.js'), /not a confirmed reservation/);
 });
+
+/* ONE FOOTER, TWO BUILDERS (15 Sep 2026): the public pages build their footer in assets/recon.js, the
+   private pages in assets/shop-menu.js — the two lists must be the same list, and both must feature
+   Sühring beside 1872 and the way to the tickets. */
+test('FOOTER · recon.js and shop-menu.js list exactly the same links; Sühring · Lunch and Your tickets are in both', () => {
+  const links = (f) => { const seg = src(f); const foot = seg.slice(seg.indexOf('sfoot-in'), seg.indexOf('sf-legal')); return [...foot.matchAll(/<a href="([^"]+)">([^<]+)<\/a>/g)].map((m) => m[1] + ' · ' + m[2]); };
+  const a = links('assets/recon.js'), b = links('assets/shop-menu.js');
+  assert.deepEqual(a, b, 'the two footers diverged');
+  assert.ok(a.includes('experience.html?id=bkk-suhring · Sühring · Lunch'), 'Sühring is featured');
+  assert.ok(a.includes('tickets.html · Your tickets'), 'the tickets are in the footer');
+  assert.ok(a.indexOf('1872.html · 1872 · Afternoon Tea') + 1 === a.indexOf('experience.html?id=bkk-suhring · Sühring · Lunch'), 'Sühring stands directly beside 1872');
+  /* every page that builds a footer builds it from one of the two */
+  for (const f of ['index.html', 'destination.html', 'accommodation.html', 'experiences.html', 'experience.html', 'voyage.html']) assert.match(src(f), /assets\/recon\.js/, f);
+  for (const f of ['cart.html', 'tickets.html', 'journeys.html', 'transport.html', 'room.html', '1872.html', 'tea.html', 'marsilea.html', 'invitation.html', 'your-journey.html', 'wedding.html', 'wedding-preparation.html', 'about-you.html', 'review.html']) assert.match(src(f), /assets\/shop-menu\.js/, f);
+});
