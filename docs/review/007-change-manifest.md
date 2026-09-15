@@ -98,3 +98,36 @@ seating-state --pool B` remains for Guest Relations should the venue ever change
 
 **Not changed — source-truth items for 001/Owner:** Sathorn per-night rates · dinner venue "Souphattra
 Heritage" vs the invitation brief's "Souphattra Vientiane Hotel".
+
+## 003 — Owner patch (Edit 2, 15 Sep 2026) + the venue experience
+
+**Applied from `Edit 2(1).zip` (six review screenshots) and the final Owner decisions:**
+- **C86 = USD 85 per person** (supersedes the USD 105 decision of the same day) at the one price source
+  (`assets/pricing.js`), on Your Journey, the C86 card, the transport detail, the travel pass and its PDF,
+  the cart, the sticky total, Review & Send, the sent journey and the presets; a persisted 105 reprices to
+  85 on load; the Full Experience canonical total is USD 2,155 (was 2,175).
+- **Temple Ceremony 09:00 – approximately 12:00** at Wat Ong Teu (was 08:00 – 12:00): the programme
+  (`assets/journey.js`, `assets/temple.js`), the public wedding page, the dress-code pages. Attendance
+  only — no seats.
+- **Vow Ceremony 15:30** at Souphattra Heritage (was 16:30); the wedding seat belongs to it: seat
+  vocabulary (`assets/seatlabels.js`: Vow Ceremony · Souphattra Heritage, Vientiane · reference SYL-WC-…),
+  the seat ticket (WEDDING CEREMONY · SOUPHATTRA HERITAGE · Vow Ceremony · 15:30 · Sunday, 28 February 2027),
+  its QR payload and PDF, the "Where you will sit" and "Your ceremony place" cards, Review & Send and the
+  sent journey; the seat requirement follows the Vow Ceremony answer, never temple attendance (the
+  readiness engine, wedding.html, wedding-preparation.html, review.html).
+- Sathorn Penthouse USD 85 per person / night · 3 nights · USD 255 confirmed (Accommodation_Details
+  authoritative; the Overview's USD 90 is a stale source).
+- The actions row (Download seat tickets · Your tickets) never lets links touch (`.p-actions` global rule).
+
+**The venue experience (new guest-facing surface on voyage.html and accommodation.html):** the real
+aerial (Drive `Copy of Heritage_0631.jpg`, 2560 × 1440; a 4:5 crop of the same file on phones) as a venue
+stage — an architectural line layer over the photograph, labels on the real places (Wedding Dinner ·
+Poolside, Swimming pool, Courtyard garden), a seven-place legend (Lobby, Rooms, Coffee & Cake · Breakfast,
+Wedding Ceremony, Wedding Dinner · Poolside, Swimming pool, Courtyard garden) with a story, a time line and
+real photographs for each, a cross-fading photo reveal and a gallery strip. New text is in
+`assets/venue-data.js` only. The wide poolside band on voyage.html gave way to the stage (its photograph
+is in the dinner gallery); the aerial band on accommodation.html became the stage.
+
+**Owner decision still needed:** the marked layout for Lobby, Rooms (×3), Coffee & Cake / Breakfast and
+Wedding Ceremony on the aerial — until then these four carry no marker on the photograph (rule 003 / PART
+19: nothing is inferred from the photograph). Adding them is a data change in `assets/venue-data.js`.
