@@ -78,7 +78,7 @@ test('LABELS · the mapping is a bijection over the ledger, in both directions, 
 
 test('LABELS · the booking reference is derived, non-secret, stable, event- and seat-bound, and never carries a token', () => {
   const r = L.ref('INV-002', 'G001', 'ceremony', 'C-R-04-02');
-  assert.match(r, /^SYL-TC-E4-[23456789BCDFGHJKMNPQRSTVWXZ]{4}$/, r);
+  assert.match(r, /^SYL-WC-E4-[23456789BCDFGHJKMNPQRSTVWXZ]{4}$/, r);   /* WC = the Wedding (Vow) Ceremony at Souphattra Heritage (Owner, Edit 2 · 15 Sep 2026) */
   assert.equal(r, L.ref('INV-002', 'G001', 'ceremony', 'C-R-04-02'), 'deterministic');
   assert.notEqual(r, L.ref('INV-002', 'G002', 'ceremony', 'C-R-04-02'), 'another guest, another reference');
   assert.notEqual(r, L.ref('INV-001', 'G001', 'ceremony', 'C-R-04-02'), 'another party, another reference');
@@ -109,12 +109,14 @@ test('PDF · the seat confirmation: a real PDF, the Owner\'s fields, labels only
   const offs = [...pdf.matchAll(/^(\d{10}) 00000 n /gm)].map((m) => +m[1]);
   offs.forEach((o, i) => assert.match(pdf.slice(o, o + 12), new RegExp('^' + (i + 1) + ' 0 obj')));
   /* the Owner's fields, in the text of the page: a TICKET (Owner, 15 Sep 2026) — event, guest, seat, status, held for, the reference, the download stamp */
-  for (const t of ['see you in laos.', 'SEAT TICKET', 'YOUR WEDDING SEAT', 'GUEST', 'Peggy Berger', 'Peggy & Steffie', 'EVENT', 'Temple Ceremony', 'Sunday, 28 February 2027 · 08:00', 'Wat Ong Teu, Vientiane', 'SEAT', 'E4', 'Right block · row 4', 'STATUS', 'CONFIRMED', 'HELD FOR', 'SYL-TC-E4-', 'SCAN AT THE DOOR', 'DOWNLOADED 2026-09-14 10:00 UTC', 'WEDDING OF HARUTHAI & SUTHEP']) {
+  for (const t of ['see you in laos.', 'SEAT TICKET', 'YOUR WEDDING SEAT', 'GUEST', 'Peggy Berger', 'Peggy & Steffie', 'EVENT', 'Vow Ceremony', 'Sunday, 28 February 2027 · 15:30', 'Souphattra Heritage, Vientiane', 'SEAT', 'E4', 'Right block · row 4', 'STATUS', 'CONFIRMED', 'HELD FOR', 'SYL-WC-E4-', 'SCAN AT THE DOOR', 'DOWNLOADED 2026-09-14 10:00 UTC', 'WEDDING OF HARUTHAI & SUTHEP']) {
     assert.ok(pdf.includes(t.replace('·', '\\267')), 'text: ' + t);
   }
   assert.doesNotMatch(pdf, /C-R-04-02|D-T-17/, 'no ledger id on the ticket');
   assert.doesNotMatch(pdf, /INV-002|INV-G|BOOKING REFERENCE/, 'no invitation id on the ticket');
-  assert.match(pdf, /\(SYL-TC-E4-[23456789BCDFGHJKMNPQRSTVWXZ]{4}\)/, 'the ticket reference, from the ledger');
+  assert.match(pdf, /\(SYL-WC-E4-[23456789BCDFGHJKMNPQRSTVWXZ]{4}\)/, 'the ticket reference, from the ledger');
+  /* the wedding seat is never the Temple Ceremony's (Owner, Edit 2): no temple, no Wat Ong Teu, no morning time on a seat ticket */
+  assert.doesNotMatch(pdf, /Temple|Wat Ong Teu|08:00|09:00/, 'a wedding seat ticket names the Vow Ceremony at Souphattra Heritage, 15:30');
   assert.doesNotMatch(pdf, /barcode|Barcode|BOARDING|Boarding|USD|\$|PAID|Paid|payment/i, 'no barcode, no boarding pass, no payment');
   assert.doesNotMatch(pdf, /\/XObject|\/Image|\/Subtype \/Image|\/JavaScript|\/URI/, 'no image, no script, no link');
   assert.doesNotMatch(pdf, /[a-z0-9]{16}/, 'nothing token-shaped');
@@ -125,17 +127,17 @@ test('PDF · the seat confirmation: a real PDF, the Owner\'s fields, labels only
   const geo = PASS.writer.within(PASS.compose.lastPage); assert.equal(geo.ok, true, 'outside the safe area: ' + JSON.stringify(geo.outside.slice(0, 3)));
   const topMost = Math.max(...PASS.compose.lastPage.marks.map((m) => m.y + m.h));
   assert.ok(topMost <= PASS.PAGE.h - 40, 'the top is well inside the page: ' + topMost);
-  assert.equal(PASS.filename(doc), 'see-you-in-laos-tc-seat-peggy.pdf');
+  assert.equal(PASS.filename(doc), 'see-you-in-laos-wc-seat-peggy.pdf');
   /* Latin-1 bytes only: a byte per character, the WinAnsi marks mapped */
   const bytes = PASS.toBytes(pdf); assert.equal(bytes.length, pdf.length);
   /* the combined pass: both events, in order, one page, the 'YOUR WEDDING SEATS' title */
   const both = PASS.docFor(party, 'G001', mine, ['ceremony', 'dinner'], '2026-09-14T10:00:00.000Z');
   assert.equal(both.seats.length, 2);
   const pdf2 = PASS.compose(both);
-  assert.match(pdf2, /YOUR WEDDING SEATS/); assert.match(pdf2, /Temple Ceremony/); assert.match(pdf2, /Wedding Dinner/); assert.match(pdf2, /Souphattra Heritage, Vientiane \\267 poolside/);
-  assert.ok(pdf2.indexOf('Temple Ceremony') < pdf2.indexOf('Wedding Dinner'));
+  assert.match(pdf2, /YOUR WEDDING SEATS/); assert.match(pdf2, /Vow Ceremony/); assert.doesNotMatch(pdf2, /Temple/); assert.match(pdf2, /Wedding Dinner/); assert.match(pdf2, /Souphattra Heritage, Vientiane \\267 poolside/);
+  assert.ok(pdf2.indexOf('Vow Ceremony') < pdf2.indexOf('Wedding Dinner'));
   assert.ok(pdf2.includes('(E4)') && pdf2.includes('(A17)'));
-  assert.match(pdf2, /SYL-TC-E4-/); assert.match(pdf2, /SYL-WD-A17-/);
+  assert.match(pdf2, /SYL-WC-E4-/); assert.match(pdf2, /SYL-WD-A17-/);
   assert.equal(PASS.writer.within(PASS.compose.lastPage).ok, true, 'two tickets fit the page without clipping');
   /* the ticket reference is the ledger's; the code carries the ticket and nothing secret */
   assert.equal(PASS.refOf(both, both.seats[0]), L.ref('INV-002', 'G001', 'ceremony', 'C-R-04-02'));
@@ -162,7 +164,9 @@ test('PDF · the hosts: Bride and Groom at the front centre, no seat number, the
   assert.deepEqual(bride.seats, [{ event: 'ceremony', fixed: 'BRIDE' }, { event: 'dinner', seatId: 'D-B-03' }]);
   const pdf = PASS.compose(bride);
   assert.match(pdf, /Bride \\267 Front Centre/); assert.match(pdf, /FRONT CENTRE/); assert.ok(pdf.includes('(B3)'));
-  assert.match(pdf, /SYL-TC-FC-[A-Z0-9]{4}/, 'a fixed position carries its own reference'); assert.match(pdf, /SYL-WD-B3-/);
+  assert.match(pdf, /SYL-WC-FC-[A-Z0-9]{4}/, 'a fixed position carries its own reference'); assert.match(pdf, /SYL-WD-B3-/);
+  assert.doesNotMatch(pdf, /Temple|Wat Ong Teu|08:00|09:00/, 'the Bride\'s front centre belongs to the Vow Ceremony at Souphattra Heritage');
+  assert.ok(pdf.includes('Souphattra Heritage, Vientiane') && pdf.includes('Sunday, 28 February 2027 \\267 15:30'), 'venue and time of the Wedding Ceremony');
   assert.equal(PASS.writer.within(PASS.compose.lastPage).ok, true);
   const groom = PASS.docFor(party, 'G049', mine, ['ceremony', 'dinner'], '2026-09-14T10:00:00.000Z');
   assert.deepEqual(groom.seats, [{ event: 'ceremony', fixed: 'GROOM' }], 'no dinner seat yet: only the front centre');

@@ -53,10 +53,10 @@
     'mu9646': { price: 275, cat: 'Transportation', name: 'MU9646 · Vientiane → Kunming',
                 meta: '01 March 2027 · Business Class', img: 'assets/images/transport/mu9632-business-1.jpg',
                 basis: 'USD 275 per person · 1 seat · Business Class' },
-    /* C86 (Owner decision, 15 Sep 2026): USD 105 per person */
-    'c86':    { price: 105, cat: 'Transportation', name: 'C86 · Kunming → Lijiang',
+    /* C86 (Owner decision, Edit 2 · 15 Sep 2026): USD 85 per person — supersedes the earlier USD 105 */
+    'c86':    { price: 85, cat: 'Transportation', name: 'C86 · Kunming → Lijiang',
                 meta: '04 March 2027 · Business Class', img: 'assets/images/transport/c642-train-snow-mountain.jpg',
-                basis: 'USD 105 per person · 1 seat · Business Class' },
+                basis: 'USD 85 per person · 1 seat · Business Class' },
     'return': { price: 200, cat: 'Transportation', name: 'MU5924 + MU741 · Lijiang → Bangkok',
                 meta: '06 March 2027 · Economy flexible', img: 'assets/images/transport/mu5924-economy-cabin-1.jpg',
                 basis: 'USD 200 per person · 1 seat · Economy flexible · via Kunming' },

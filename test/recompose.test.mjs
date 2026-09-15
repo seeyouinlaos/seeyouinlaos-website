@@ -127,7 +127,7 @@ test('MU9646 and C86 are preserved exactly, with decision-critical benefits only
   const p = read('assets/pricing.js');
   assert.match(p, /slug: 'business'[\s\S]{0,120}price: 275/);
   assert.match(p, /slug: 'economy-flexible'[\s\S]{0,120}price: 155/);
-  assert.match(p, /'c86':\s*\{ price: 105/);   /* Owner decision, 15 Sep 2026 */
+  assert.match(p, /'c86':\s*\{ price: 85/);   /* Owner decision, Edit 2 · 15 Sep 2026 (supersedes 105) */
   assert.match(yj, /dep:\['10:15','Kunming'\],arr:\['13:44','Lijiang'\],dur:'3h 29m · direct',cls:'Business Class'/);
   const c86 = yj.slice(yj.indexOf("c86:{"), yj.indexOf("'return':{"));
   assert.ok((c86.match(/ben:\[([^\]]+)\]/)[1].split("','").length) <= 4, 'C86 carries at most four benefits in the selector');

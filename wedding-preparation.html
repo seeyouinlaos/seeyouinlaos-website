@@ -26,7 +26,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
   <div class="p-card" style="margin-top:24px">
     <p class="t-l1">Sunday, 28 February · Morning</p>
     <h3 class="t-h1">Lao Traditional Dress</h3>
-    <p class="t-b2">Temple Ceremony · 08:00 – 12:00 · Wat Ong Teu, Vientiane</p>
+    <p class="t-b2">Temple Ceremony · 09:00 – approximately 12:00 · Wat Ong Teu, Vientiane</p>
     <p class="t-b1 measure">The Buddhist morning is dressed in Lao tradition. Shoulders and knees are covered inside the temple, and shoes come off at the door. A sinh may be borrowed or made in Vientiane — Guest Relations helps anyone who would like that arranged.</p>
     <div class="p-rail" aria-label="Lao traditional dress references"><img width="1140" height="1712" src="assets/images/dress/tradition-01.jpg" alt="Lao traditional dress — reference 1" loading="lazy" decoding="async"><img width="1365" height="2048" src="assets/images/dress/tradition-02.jpg" alt="Lao traditional dress — reference 2" loading="lazy" decoding="async"><img width="2048" height="1365" src="assets/images/dress/tradition-03.jpg" alt="Lao traditional dress — reference 3" loading="lazy" decoding="async"><img width="409" height="612" src="assets/images/dress/tradition-04.jpg" alt="Lao traditional dress — reference 4" loading="lazy" decoding="async"><img width="1200" height="1582" src="assets/images/dress/tradition-05.jpg" alt="Lao traditional dress — reference 5" loading="lazy" decoding="async"><img width="1440" height="1800" src="assets/images/dress/tradition-06.jpg" alt="Lao traditional dress — reference 6" loading="lazy" decoding="async"></div>
   </div>
@@ -56,7 +56,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
   <p class="t-b1 measure" id="seats-lede">Your ceremony seat and your dinner seat will appear here when seating opens. Guest Relations arranges the tables and the rows, and you will be told the moment you can choose.</p>
   <div id="seatbox">
   <div class="p-card" style="margin-top:16px">
-    <div class="p-kv"><div><p class="t-b1"><b>Ceremony seat</b></p><p class="t-b2">Wat Ong Teu · 28 February</p></div><p class="t-l1">Not open yet</p></div>
+    <div class="p-kv"><div><p class="t-b1"><b>Ceremony seat</b></p><p class="t-b2">Souphattra Heritage · 28 February · 15:30</p></div><p class="t-l1">Not open yet</p></div>
     <div class="p-kv"><div><p class="t-b1"><b>Dinner seat</b></p><p class="t-b2">Souphattra Heritage Vientiane · 19:30</p></div><p class="t-l1">Not open yet</p></div>
   </div>
   </div>
@@ -146,7 +146,7 @@ var fresh=null;
 var notice=null;
 /* the chair a choice was just withdrawn from — focus returns to it */
 var withdrawn=null;
-var EV=[['ceremony','Ceremony seat','Wat Ong Teu · 28 February · 08:00'],['dinner','Dinner seat','Souphattra Heritage · poolside · 19:30']];
+var EV=[['ceremony','Ceremony seat','Souphattra Heritage · 28 February · 15:30'],['dinner','Dinner seat','Souphattra Heritage · poolside · 19:30']];
 var VENUE=L.EVENT_VENUE,NAME=L.EVENT_NAME,DATE=L.EVENT_DATE;
 var T=window.SIYL_TEMPLE;
 function seatOf(ev,id){return S.seatOf(ev,id)}
@@ -157,8 +157,8 @@ function fixedWords(){var r=role();return r?(r==='BRIDE'?'Bride':'Groom'):'Bride
 function labelOf(sid){return L.label(sid)||''}
 function fullName(id){return G.value(id,'fullName')||G.nameOf(id)}
 /* does this guest need a seat at this event: attending, and — at the ceremony — not one of the hosts */
-function needs(ev){var p=P.party(),id=P.me().guestId;if(!T)return true;if(ev==='ceremony')return !p.hosts&&T.attendingOf(id);return T.joining(id,'dinner')}
-function attending(ev){var id=P.me().guestId;return !T||(ev==='ceremony'?T.attendingOf(id):T.joining(id,'dinner'))}
+function needs(ev){var p=P.party(),id=P.me().guestId;if(!T)return true;if(ev==='ceremony')return !p.hosts&&T.joining(id,'vows');return T.joining(id,'dinner')}
+function attending(ev){var id=P.me().guestId;return !T||(ev==='ceremony'?T.joining(id,'vows'):T.joining(id,'dinner'))}
 /* the facts of one held seat, as the confirmation states them — the guest, the event, the date, the venue; no reference, no code */
 function facts(ev,id,sid,fixed){
   return '<div class="p-seatfacts">'+
@@ -219,8 +219,8 @@ function paintSeats(){
          '<p class="t-b1 measure">Your place at the ceremony is the front centre, in front of the rows — no chair to choose here. The dinner seat below is chosen like everyone else&rsquo;s.</p></div>';return}
     /* not attending this event: no seat is needed, and none is asked */
     if(!attending(ev)){
-      h+='<div class="p-card" style="margin-top:var(--s4)" data-seatmap="'+ev+'" data-state="'+(T&&T.eventOf(id,ev==='ceremony'?'temple':'dinner')===null?'undecided':'none')+'"><p class="t-l1">'+(T&&T.eventOf(id,ev==='ceremony'?'temple':'dinner')===null?'Answer step 03 first':'Not attending')+'</p><h3 class="t-h1">Your '+ev+' seat</h3><p class="t-b2">'+e[2]+'</p>'+
-         '<p class="t-b1 measure">'+(T&&T.eventOf(id,ev==='ceremony'?'temple':'dinner')===null?'Once you have answered whether you attend the '+NAME[ev]+', your seat can be chosen here.':'You are not attending the '+NAME[ev]+', so no seat is needed.')+(sid?' A seat is still held in your name — give it back below if you no longer need it.':'')+'</p>'+
+      h+='<div class="p-card" style="margin-top:var(--s4)" data-seatmap="'+ev+'" data-state="'+(T&&T.eventOf(id,ev==='ceremony'?'vows':'dinner')===null?'undecided':'none')+'"><p class="t-l1">'+(T&&T.eventOf(id,ev==='ceremony'?'vows':'dinner')===null?'Answer step 03 first':'Not attending')+'</p><h3 class="t-h1">Your '+ev+' seat</h3><p class="t-b2">'+e[2]+'</p>'+
+         '<p class="t-b1 measure">'+(T&&T.eventOf(id,ev==='ceremony'?'vows':'dinner')===null?'Once you have answered whether you attend the '+NAME[ev]+', your seat can be chosen here.':'You are not attending the '+NAME[ev]+', so no seat is needed.')+(sid?' A seat is still held in your name — give it back below if you no longer need it.':'')+'</p>'+
          (sid?'<div class="p-seatcard-actions"><button type="button" class="p-link mute" data-seat-give="'+ev+'">Give seat '+esc(labelOf(sid))+' back</button></div>':'')+'</div>';
       if(!sid)return}
     /* the confirmation that has just arrived */

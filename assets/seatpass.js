@@ -11,7 +11,7 @@
    Nothing is ever clipped: every ticket is placed inside the page's safe
    area, and the test measures that.
 
-   THE CODE BELONGS ON THE TICKET. The reference (SYL-TC-E4-XXXX) is a
+   THE CODE BELONGS ON THE TICKET. The reference (SYL-WC-E4-XXXX) is a
    harmless digest of the seat as the ledger holds it; the QR carries the
    reference, the guest's first name, the event, the date, the seat words
    and the state — never an access code, never an invitation id, never a
@@ -191,7 +191,9 @@
   }
 
   /* ---- the seat ticket ---------------------------------------------------- */
-  var EVENT_TIME = { ceremony: '08:00', dinner: '19:30' };
+  /* Owner, Edit 2 (15 Sep 2026): the Wedding (Vow) Ceremony at Souphattra Heritage, 15:30; the dinner poolside, 19:30 */
+  var EVENT_TIME = { ceremony: '15:30', dinner: '19:30' };
+  var EVENT_HEAD = { ceremony: 'Wedding Ceremony · Souphattra Heritage', dinner: 'Wedding Dinner · Poolside' };
   var ALPHA = '23456789BCDFGHJKMNPQRSTVWXZ';
   /* the hosts' ceremony place, in words: their role when the record names it */
   function fixedWords(role) { return role === 'BRIDE' ? 'Bride' : role === 'GROOM' ? 'Groom' : 'Bride & Groom'; }
@@ -242,7 +244,7 @@
     p.qr(modules(payload(doc, s)), qx, qy, size);
     p.text(st.cx, qy - 18, refOf(doc, s), 'F2', 8.6, INK, 1.4, 'center');
     p.label(st.cx, qy - 32, stateOf(s), 'center', ACCENT);
-    p.label(st.cx, qy - 50, L.EVENT_CODE[s.event] === 'TC' ? 'Temple Ceremony' : 'Wedding Dinner', 'center');
+    p.label(st.cx, qy - 50, L.EVENT_NAME[s.event], 'center');
     p.label(st.cx, qy - 62, '28 Feb 2027 · ' + EVENT_TIME[s.event], 'center');
     p.label(st.cx, by, 'Scan at the door', 'center');
   }
@@ -330,7 +332,7 @@
     if (!doc || !doc.seats || !doc.seats.length) return '';
     var s = doc.seats[0], ref = refOf(doc, s), e = escH;
     return '<div class="p-ticket on p-ticket-seat" data-ticket="seat:' + e(s.event) + '" data-ticket-ref="' + e(ref) + '">' +
-      '<div class="p-ticket-head"><p class="t-l1">Wedding · ' + e(L.EVENT_CODE[s.event] === 'TC' ? 'Temple' : 'Dinner') + '</p><p class="t-l1 on" data-ticket-state><i class="prep-tick" aria-hidden="true"></i>' + e(s.fixed ? 'Front centre' : 'Confirmed') + '</p></div>' +
+      '<div class="p-ticket-head"><p class="t-l1">' + e(EVENT_HEAD[s.event]) + '</p><p class="t-l1 on" data-ticket-state><i class="prep-tick" aria-hidden="true"></i>' + e(s.fixed ? 'Front centre' : 'Confirmed') + '</p></div>' +
       '<h3 class="t-h1">' + e(L.EVENT_NAME[s.event]) + '</h3>' +
       '<div class="p-ticket-route p-ticket-event">' +
         '<div class="p-ticket-end"><b class="p-ticket-code' + (s.fixed ? ' small' : '') + '">' + e(seatWords(s)) + '</b><span class="t-b2">' + e(seatDetail(s)) + '</span></div>' +
