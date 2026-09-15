@@ -61,3 +61,16 @@ Two Owner packs applied together. No access code appears here or in any file of 
 - `rooms-audit.txt`: the audit against the live engine after the deploy — 40 categories, 176 units, 351
   places, the invariant holding for every category, the Penthouse A – F / 12, no reservation anywhere.
 - The 14 Sep walk 63/63 locally and the cart/ticket walk 41/41 locally, both updated to the new rules.
+
+## Addendum — cart price source of truth · Sühring featured navigation (same release)
+- The Owner's screenshot showed a C86 line at USD 85 above "USD 105 per person": the bag line had been saved
+  before the price changed and the cart printed the saved amount. Root cause fixed in `assets/pricing.js`
+  (`repriceFlat`): every flat product line — the train, the flights (chosen class kept), C86, the Sangkhathan,
+  the Sühring table — is re-derived from the one pricing source on every load (amount, name, words, picture;
+  the guest's flags kept), so the line, its words, the badge, the sticky bar, Your Journey, the bag, Review &
+  Send and the sent journey read one amount: `SIYL_BAG.total()` over authoritative lines. `assets/bag.js`
+  no longer claims a retired product keeps its amount. Regression: `test/travelpass.test.mjs` "ONE PRICE
+  SOURCE" (85 → 105 on load, descriptive line, total, −105 / +105, every surface reads the same line and
+  total, no C86 amount of its own on any surface); the walk's T6 seeds a stale 85 and reads USD 105 and a
+  total equal to the engine's.
+- Sühring featured: a featured section on Experiences beside 1872 and "Sühring · Lunch" in the footer menu.

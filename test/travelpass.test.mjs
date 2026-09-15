@@ -125,6 +125,31 @@ test('SURFACES: TICKET = TICKET · CART = CART · REVIEW = REVIEW (Owner, 15 Sep
   assert.match(src('assets/shop-menu.js'), /tickets\.html">Your tickets/);
 });
 
+test('ONE PRICE SOURCE (Owner, 15 Sep 2026): a bag line saved at C86 85 is re-derived to 105 on load; the line, its words, the total, removing and re-adding, and every surface agree', () => {
+  /* the guest's bag as the Owner's screenshot had it: C86 saved before the price changed, beside a flight saved at a wrong amount */
+  const w = page({ modules: ['assets/bag.js', 'assets/rooms-data.js', 'assets/pricing.js', 'assets/guest.js', 'assets/temple.js', 'assets/confirm.js', 'assets/seatlabels.js', 'assets/seating.js', 'assets/rooms.js', 'assets/stay.js', 'assets/transport-data.js', 'assets/journey.js'],
+    seed: { 'siyl.bag': [{ id: 'train', name: 'Special Express No. 25', meta: '24 – 25 February 2027 · First Class Sleeper', price: 100, qty: 1 }, { id: 'c86', name: 'C86 · Kunming → Lijiang', meta: '04 March 2027 · Business Class', price: 85, qty: 1 }, { id: 'mu9646', name: 'MU9646 · Vientiane → Kunming', meta: 'x', price: 250, qty: 1, cls: 'business' }] } });
+  const B = w.SIYL_BAG, P = w.SIYL_PRICE, J = w.SIYL_JOURNEY;
+  const c86 = B.get().find((x) => x.id === 'c86');
+  assert.equal(P.FLAT.c86.price, 105, 'the authoritative price');
+  assert.equal(c86.price, 105, 'the cart\'s prominent line price is the authoritative one, not the saved 85');
+  assert.equal(c86.meta, '04 March 2027 · Business Class');
+  assert.match(J.meta(c86).basis, /^USD 105 per person · 1 seat · Business Class$/, 'the descriptive line');
+  assert.equal(B.get().find((x) => x.id === 'mu9646').price, 275, 'every flat line is re-derived, the chosen class kept');
+  assert.equal(B.total(), 100 + 105 + 275, 'the total is the sum of authoritative amounts');
+  /* removing C86 takes exactly 105 off; adding it back puts exactly 105 on — from the source, not from any saved amount */
+  const before = B.total(); B.remove('c86'); assert.equal(B.total(), before - 105);
+  B.put(P.items('c86')[0]); assert.equal(B.total(), before); assert.equal(B.get().find((x) => x.id === 'c86').price, 105);
+  /* every surface reads the same line and the same total: no second arithmetic anywhere */
+  assert.match(src('cart.html'), /'<p class="p-line-amt">'\+money\(x\.price\|\|0\)\+'<\/p>'/, 'the cart line price is the line');
+  assert.match(src('cart.html'), /money\(B\.total\(\)\)/); assert.match(src('assets/bag.js'), /B\.money\(B\.total\(\)\)/, 'the sticky bar');
+  assert.match(src('your-journey.html'), /money\(SIYL_BAG\.total\(\)\)/); assert.match(src('review.html'), /SIYL_BAG\.total\(\)\.toLocaleString/, 'Review & Send');
+  assert.match(src('review.html'), /'YOUR COST: USD '\+SIYL_BAG\.total\(\)\.toLocaleString/, 'the sent journey');
+  assert.match(src('review.html'), /' · USD '\+\(x\.price\|\|0\)/, 'the sent lines carry the line amount');
+  assert.match(src('assets/pricing.js'), /\(function repriceFlat\(\) \{/);
+  for (const f of ['cart.html', 'your-journey.html', 'review.html', 'assets/bag.js', 'assets/journey.js']) assert.doesNotMatch(src(f), /price\s*[:=]\s*85\b|\bUSD 85\b/, f + ': no C86 amount of its own');
+});
+
 test('C86 = USD 105 everywhere active — no mixed legacy amount', () => {
   const w = page({ modules: WITH_PASS });
   assert.equal(w.SIYL_PRICE.FLAT.c86.price, 105); assert.equal(w.SIYL_PRICE.items('c86')[0].price, 105); assert.match(w.SIYL_PRICE.FLAT.c86.basis, /USD 105 per person/);

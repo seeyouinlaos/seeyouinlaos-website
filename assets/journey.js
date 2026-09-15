@@ -97,7 +97,7 @@
       return { cat: '', basis: '', unit: 'guest' };
     },
 
-    /* "USD 85 per person" / "1 experience · for two guests" — one guest, one line */
+    /* "USD 100 per person" / "1 experience · for two guests" — one guest, one line */
     quantityLine: function (x) {
       var m = this.meta(x), q = x.qty || 1;
       if (x.interest) return '';

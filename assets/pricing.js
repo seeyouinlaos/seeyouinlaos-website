@@ -330,7 +330,36 @@
   };
 
   /* ---- repricing -------------------------------------------------------
-   * A bag saved before the Vientiane price basis was verified against the
+   * ONE PRICE SOURCE (Owner, 15 Sep 2026). A bag line is the guest's choice,
+   * never the guest's price: the amount, the name, the words and the picture
+   * of every flat product — the train, the flights, C86, the Sangkhathan, the
+   * Sühring table — are re-derived from the data above on every load, so a
+   * line saved before a price changed can never show one amount
+   * on the line and another beneath it, and the total the sticky bar, Your
+   * Journey, the bag, Review & Send and the sent journey read is the sum of
+   * authoritative amounts. The guest's own flags (qty, request, exp, by) and
+   * the chosen class are kept. Runs before the accommodation repricing, with
+   * or without the room data on the page. */
+  (function repriceFlat() {
+    var B = window.SIYL_BAG;
+    if (!B) return;
+    var bag = B.get(), changed = false;
+    var next = bag.map(function (x) {
+      if (!x || !x.id || x.stay || x.room || x.interest || x.complimentary) return x;
+      if (!FLAT[x.id] && !CLASSES[x.id]) return x;
+      var fresh = window.SIYL_PRICE.items(x.id, x.cls)[0];
+      if (!fresh || fresh.price == null) return x;
+      var same = x.price === fresh.price && x.name === fresh.name && x.meta === fresh.meta && (x.cls || null) === (fresh.cls || null);
+      if (same) return x;
+      changed = true;
+      var out = {}; Object.keys(x).forEach(function (k) { out[k] = x[k]; });
+      out.name = fresh.name; out.meta = fresh.meta; out.price = fresh.price; out.img = fresh.img || x.img;
+      if (fresh.cls) out.cls = fresh.cls; else delete out.cls;
+      return out;
+    });
+    if (changed) B.set(next);
+  })();
+  /* A bag saved before the Vientiane price basis was verified against the
    * source holds the pre-wedding window at one night instead of two. Every
    * accommodation line is re-quoted from the data above, so a returning guest
    * never carries a stale amount into Review & Send. */
