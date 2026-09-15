@@ -1,7 +1,7 @@
 /* ============================================================================
    THE TRAVEL PASS (Owner, 15 Sep 2026) — every transport leg is a ticket with
    a code to scan; the same pass on Your Journey, the transport page, the bag
-   and Review & Send; a real PDF; C86 USD 105 everywhere; no checkout words.
+   and Review & Send; a real PDF; C86 USD 85 everywhere (Owner, Edit 2 · 15 Sep 2026); no checkout words.
    ========================================================================== */
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -36,10 +36,10 @@ test('REFERENCE: deterministic per guest · leg · class, never the access code,
 });
 
 test('THE CODE: a real QR (UTF-8 byte mode) that carries the pass and nothing secret; the SVG is crisp modules', () => {
-  const d = T.docFor('c86', { guest, price: 105, state: 'selected' });
+  const d = T.docFor('c86', { guest, price: 85, state: 'selected' });
   const p = T.payload(d);
   assert.match(p, /^SEE YOU IN LAOS\nTRAVEL PASS SYL-C86-[A-Z0-9]{4}\nPeggy\nC86 Kunming → Lijiang\n04 March 2027\nBusiness Class\nSELECTED$/);
-  assert.doesNotMatch(p, /INV-|g-peggy|USD|105/, 'no invitation id, no guest id, no price in the code');
+  assert.doesNotMatch(p, /INV-|g-peggy|USD|\b85\b|105/, 'no invitation id, no guest id, no price in the code');
   const m = T.modules(p); assert.ok(m.length >= 21 && m.length % 4 === 1, 'a QR version'); assert.equal(m[0].length, m.length);
   /* the finder pattern in the top-left corner: a 7 × 7 frame */
   assert.deepEqual(m[0].slice(0, 7), [true, true, true, true, true, true, true]); assert.deepEqual(m[1].slice(0, 7), [true, false, false, false, false, false, true]);
@@ -78,13 +78,13 @@ test('THE PDF: a real document with the route, the guest, the class, the referen
 });
 
 test('THE CARD on the page: the ticket grammar — both ends, times, class, guest, reference, code — for a selected leg; a quiet card otherwise', () => {
-  const w = page({ modules: WITH_PASS, seed: { 'siyl.bag': [{ id: 'c86', name: 'C86 · Kunming → Lijiang', meta: '04 March 2027 · Business Class', price: 105 }] } });
-  const on = w.SIYL_TRAVELPASS.card('c86', { selected: true, price: 'USD 105', actions: w.SIYL_TRAVELPASS.button('c86') });
+  const w = page({ modules: WITH_PASS, seed: { 'siyl.bag': [{ id: 'c86', name: 'C86 · Kunming → Lijiang', meta: '04 March 2027 · Business Class', price: 85 }] } });
+  const on = w.SIYL_TRAVELPASS.card('c86', { selected: true, price: 'USD 85', actions: w.SIYL_TRAVELPASS.button('c86') });
   assert.match(on, /class="p-ticket on" data-ticket="c86"/); assert.match(on, /Train · High-speed train/); assert.match(on, /Current selection/);
   assert.match(on, /<b class="p-ticket-code">KMG<\/b><span class="p-ticket-time">10:15<\/span>/); assert.match(on, /<b class="p-ticket-code">LJG<\/b><span class="p-ticket-time">13:44<\/span>/);
   assert.match(on, /04 Mar 2027/); assert.match(on, /<p class="t-l1">Class<\/p><p class="t-b1">Business Class<\/p>/); assert.match(on, /<p class="t-l1">Guest<\/p><p class="t-b1">Peggy<\/p>/);
   assert.match(on, /<span class="ref">SYL-C86-[A-Z0-9]{4}<\/span>/); assert.match(on, /<svg class="p-qr"/); assert.match(on, /Selected · in your journey/);
-  assert.match(on, /Your cost<\/p><p class="t-b1">USD 105<\/p>/); assert.match(on, /data-travel-pass="c86">Download travel pass</); assert.match(on, /p-ticket-tear/); assert.match(on, /p-ticket-train/);
+  assert.match(on, /Your cost<\/p><p class="t-b1">USD 85<\/p>/); assert.match(on, /data-travel-pass="c86">Download travel pass</); assert.match(on, /p-ticket-tear/); assert.match(on, /p-ticket-train/);
   const off = w.SIYL_TRAVELPASS.card('train', { selected: false });
   assert.match(off, /class="p-ticket" data-ticket="train"/); assert.match(off, /Not selected/); assert.doesNotMatch(off, /p-qr|SYL-TN25/, 'no pass before the selection');
   assert.match(off, /Issued with your selection/); assert.match(off, /p-ticket-train/);
@@ -125,21 +125,21 @@ test('SURFACES: TICKET = TICKET · CART = CART · REVIEW = REVIEW (Owner, 15 Sep
   assert.match(src('assets/shop-menu.js'), /tickets\.html">Your tickets/);
 });
 
-test('ONE PRICE SOURCE (Owner, 15 Sep 2026): a bag line saved at C86 85 is re-derived to 105 on load; the line, its words, the total, removing and re-adding, and every surface agree', () => {
-  /* the guest's bag as the Owner's screenshot had it: C86 saved before the price changed, beside a flight saved at a wrong amount */
+test('ONE PRICE SOURCE (Owner, 15 Sep 2026 · Edit 2): a bag line saved at C86 105 is re-derived to 85 on load; the line, its words, the total, removing and re-adding, and every surface agree', () => {
+  /* the guest's bag as the Owner's Edit 2 screenshot had it: C86 saved at the superseded 105, beside a flight saved at a wrong amount */
   const w = page({ modules: ['assets/bag.js', 'assets/rooms-data.js', 'assets/pricing.js', 'assets/guest.js', 'assets/temple.js', 'assets/confirm.js', 'assets/seatlabels.js', 'assets/seating.js', 'assets/rooms.js', 'assets/stay.js', 'assets/transport-data.js', 'assets/journey.js'],
-    seed: { 'siyl.bag': [{ id: 'train', name: 'Special Express No. 25', meta: '24 – 25 February 2027 · First Class Sleeper', price: 100, qty: 1 }, { id: 'c86', name: 'C86 · Kunming → Lijiang', meta: '04 March 2027 · Business Class', price: 85, qty: 1 }, { id: 'mu9646', name: 'MU9646 · Vientiane → Kunming', meta: 'x', price: 250, qty: 1, cls: 'business' }] } });
+    seed: { 'siyl.bag': [{ id: 'train', name: 'Special Express No. 25', meta: '24 – 25 February 2027 · First Class Sleeper', price: 100, qty: 1 }, { id: 'c86', name: 'C86 · Kunming → Lijiang', meta: '04 March 2027 · Business Class', price: 105, qty: 1 }, { id: 'mu9646', name: 'MU9646 · Vientiane → Kunming', meta: 'x', price: 250, qty: 1, cls: 'business' }] } });
   const B = w.SIYL_BAG, P = w.SIYL_PRICE, J = w.SIYL_JOURNEY;
   const c86 = B.get().find((x) => x.id === 'c86');
-  assert.equal(P.FLAT.c86.price, 105, 'the authoritative price');
-  assert.equal(c86.price, 105, 'the cart\'s prominent line price is the authoritative one, not the saved 85');
+  assert.equal(P.FLAT.c86.price, 85, 'the authoritative price');
+  assert.equal(c86.price, 85, 'the cart\'s prominent line price is the authoritative one, not the saved 105');
   assert.equal(c86.meta, '04 March 2027 · Business Class');
-  assert.match(J.meta(c86).basis, /^USD 105 per person · 1 seat · Business Class$/, 'the descriptive line');
+  assert.match(J.meta(c86).basis, /^USD 85 per person · 1 seat · Business Class$/, 'the descriptive line');
   assert.equal(B.get().find((x) => x.id === 'mu9646').price, 275, 'every flat line is re-derived, the chosen class kept');
-  assert.equal(B.total(), 100 + 105 + 275, 'the total is the sum of authoritative amounts');
-  /* removing C86 takes exactly 105 off; adding it back puts exactly 105 on — from the source, not from any saved amount */
-  const before = B.total(); B.remove('c86'); assert.equal(B.total(), before - 105);
-  B.put(P.items('c86')[0]); assert.equal(B.total(), before); assert.equal(B.get().find((x) => x.id === 'c86').price, 105);
+  assert.equal(B.total(), 100 + 85 + 275, 'the total is the sum of authoritative amounts');
+  /* removing C86 takes exactly 85 off; adding it back puts exactly 85 on — from the source, not from any saved amount */
+  const before = B.total(); B.remove('c86'); assert.equal(B.total(), before - 85);
+  B.put(P.items('c86')[0]); assert.equal(B.total(), before); assert.equal(B.get().find((x) => x.id === 'c86').price, 85);
   /* every surface reads the same line and the same total: no second arithmetic anywhere */
   assert.match(src('cart.html'), /'<p class="p-line-amt">'\+money\(x\.price\|\|0\)\+'<\/p>'/, 'the cart line price is the line');
   assert.match(src('cart.html'), /money\(B\.total\(\)\)/); assert.match(src('assets/bag.js'), /B\.money\(B\.total\(\)\)/, 'the sticky bar');
@@ -147,23 +147,23 @@ test('ONE PRICE SOURCE (Owner, 15 Sep 2026): a bag line saved at C86 85 is re-de
   assert.match(src('review.html'), /'YOUR COST: USD '\+SIYL_BAG\.total\(\)\.toLocaleString/, 'the sent journey');
   assert.match(src('review.html'), /' · USD '\+\(x\.price\|\|0\)/, 'the sent lines carry the line amount');
   assert.match(src('assets/pricing.js'), /\(function repriceFlat\(\) \{/);
-  for (const f of ['cart.html', 'your-journey.html', 'review.html', 'assets/bag.js', 'assets/journey.js']) assert.doesNotMatch(src(f), /price\s*[:=]\s*85\b|\bUSD 85\b/, f + ': no C86 amount of its own');
+  for (const f of ['cart.html', 'your-journey.html', 'review.html', 'assets/bag.js', 'assets/journey.js']) assert.doesNotMatch(src(f), /price\s*[:=]\s*(85|105)\b|\bUSD (85|105)\b/, f + ': no C86 amount of its own');
 });
 
-test('C86 = USD 105 everywhere active — no mixed legacy amount', () => {
+test('C86 = USD 85 everywhere active — no mixed legacy amount, no active 105 (Owner, Edit 2 · 15 Sep 2026)', () => {
   const w = page({ modules: WITH_PASS });
-  assert.equal(w.SIYL_PRICE.FLAT.c86.price, 105); assert.equal(w.SIYL_PRICE.items('c86')[0].price, 105); assert.match(w.SIYL_PRICE.FLAT.c86.basis, /USD 105 per person/);
-  assert.match(src('journeys.html'), /<p class="pp">USD 105 per person<\/p><button class="add" data-add='\{"id":"c86"/); assert.match(src('journeys.html'), /"id":"c86"[^']*"price":105/);
-  assert.match(src('register/data.mjs'), /id: 'kmg-ljg'[^\n]*contribution: 105/);
+  assert.equal(w.SIYL_PRICE.FLAT.c86.price, 85); assert.equal(w.SIYL_PRICE.items('c86')[0].price, 85); assert.match(w.SIYL_PRICE.FLAT.c86.basis, /USD 85 per person/);
+  assert.match(src('journeys.html'), /<p class="pp">USD 85 per person<\/p><button class="add" data-add='\{"id":"c86"/); assert.match(src('journeys.html'), /"id":"c86"[^']*"price":85/);
+  assert.match(src('register/data.mjs'), /id: 'kmg-ljg'[^\n]*contribution: 85/);
   for (const f of ['assets/pricing.js', 'journeys.html', 'your-journey.html', 'transport.html', 'assets/transport-data.js', 'assets/journey.js', 'cart.html', 'review.html', 'register/data.mjs', 'assets/travelpass.js']) {
     const s = src(f);
-    assert.doesNotMatch(s, /c86[^\n]{0,80}\b85\b/i, f + ' still carries C86 at 85');
-    assert.doesNotMatch(s, /USD 85 per person[^\n]{0,60}(Business|C86|Lijiang)/, f + ' still says USD 85 for C86');
+    assert.doesNotMatch(s, /c86[^\n]{0,80}\b105\b/i, f + ' still carries C86 at 105');
+    assert.doesNotMatch(s, /USD 105 per person[^\n]{0,60}(Business|C86|Lijiang)/, f + ' still says USD 105 for C86');
   }
   /* the journey, the bag, the sticky total and Review & Send are one calculation */
   w.SIYL_BAG.put(w.SIYL_PRICE.items('c86')[0]);
-  assert.equal(w.SIYL_BAG.total(), 105);
-  assert.equal(w.SIYL_TRAVELPASS.docFromPage('c86').price, 105);
+  assert.equal(w.SIYL_BAG.total(), 85);
+  assert.equal(w.SIYL_TRAVELPASS.docFromPage('c86').price, 85);
 });
 
 test('NO CHECKOUT LANGUAGE on the bag, the tickets or the passes — this is a private journey, not a shop', () => {

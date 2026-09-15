@@ -448,6 +448,7 @@ body.prep-steps-open .prep-steps-scrim { opacity: 1; pointer-events: auto; }
 .p-stage-h .t-l1 { margin-bottom: var(--s1); }
 .p-stage-h .t-h2 { margin: 0; }
 .p-stage-h .t-b2 { margin-top: var(--s1); }
+.p-actions { display: flex; flex-wrap: wrap; gap: var(--s3) var(--s5); align-items: center; }   /* every actions row: the links never touch (Owner, Edit 2) */
 .p-stage .p-actions { display: flex; flex-wrap: wrap; gap: var(--s3) var(--s5); align-items: center; margin-top: var(--s4); }
 @media (min-width: 900px) {
   .p-stage-h { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 var(--s4); }

@@ -49,7 +49,7 @@
   /* the wedding programme, in the order the day itself runs. Only items that
    * exist as products carry an id; the day is described, not invented. */
   var WEDDING = [
-    { key: 'temple', title: 'Temple Ceremony', when: '08:00 – 12:00',
+    { key: 'temple', title: 'Temple Ceremony', when: '09:00 – approximately 12:00',
       place: 'Wat Ong Teu, Vientiane',
       note: 'Guests attending are welcome to take part in Tak Bat, the morning alms-giving — a personal offering, arranged individually on the morning.',
       anchor: 'voyage.html#temple' },
@@ -60,7 +60,7 @@
     { key: 'coffee', title: 'Coffee & Cake', when: 'From 12:00',
       place: 'Souphattra Heritage Vientiane',
       note: 'Complimentary — hosted by Haruthai & Suthep.', anchor: 'voyage.html#coffee' },
-    { key: 'vows', title: 'Vow Ceremony', when: '16:30',
+    { key: 'vows', title: 'Vow Ceremony', when: '15:30',
       place: 'Souphattra Heritage Vientiane',
       note: 'Complimentary — hosted by Haruthai & Suthep.', anchor: 'voyage.html#vows' },
     { key: 'dinner', title: 'Wedding Dinner', when: '19:30',

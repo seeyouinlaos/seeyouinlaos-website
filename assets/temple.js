@@ -70,11 +70,11 @@
    * Four events, all complimentary, hosted by Haruthai & Suthep. Each named
    * guest answers each one: joining, not joining, or not yet decided. */
   var EVENTS = [
-    { key: 'temple', label: 'Temple Ceremony', when: '08:00 – 12:00',
+    { key: 'temple', label: 'Temple Ceremony', when: '09:00 – approximately 12:00',
       place: 'Wat Ong Teu, Vientiane' },
     { key: 'coffee', label: 'Coffee & Cake', when: 'From 12:00',
       place: 'Souphattra Heritage Vientiane' },
-    { key: 'vows', label: 'Vow Ceremony', when: '16:30',
+    { key: 'vows', label: 'Vow Ceremony', when: '15:30',
       place: 'Souphattra Heritage Vientiane' },
     { key: 'dinner', label: 'Wedding Dinner', when: '19:30',
       place: 'Souphattra Heritage Vientiane · poolside' }

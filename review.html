@@ -193,7 +193,7 @@ if(g){
      (sst==='Decision required'?'<a class="p-link" href="wedding.html#sangkhathan">Complete this</a>':'<p class="t-l1'+(g.sangkhathan?' on':'')+'">'+(g.sangkhathan?'USD 15':(quiet?'':sst==='Not selected'?'No':'—'))+'</p>')+'</div>';
   var Sx=window.SIYL_SEATS,Lx=window.SIYL_SEATLABELS,cs=Sx?Sx.seatOf('ceremony',me.guestId):null,ds=Sx?Sx.seatOf('dinner',me.guestId):null,openS=Sx&&Sx.open()&&!Sx.frozen();
   var lab=function(sid){return Lx&&Lx.label(sid)||''},hostWords=me.hostRole==='BRIDE'?'Bride':me.hostRole==='GROOM'?'Groom':'Bride &amp; Groom';
-  var needC=!p.hosts&&T.attendingOf(me.guestId),needD=T.joining(me.guestId,'dinner');
+  var needC=!p.hosts&&T.joining(me.guestId,'vows'),needD=T.joining(me.guestId,'dinner');
   h+=(p.hosts?'<div class="p-kv"><div><p class="t-b1"><b>Ceremony seat</b></p><p class="t-b2">'+hostWords+' · front centre</p></div><p class="t-l1 on">Front centre</p></div>'
       :'<div class="p-kv"><div><p class="t-b1"><b>Ceremony seat</b></p><p class="t-b2">'+(cs?esc(Sx.describe(cs))+' · held in your name':(!needC?'Not attending · no seat needed':(openS?'Not selected yet':'Seating is not open yet')))+'</p></div>'+
        (cs?'<p class="t-l1 on">Seat '+esc(lab(cs))+'</p>':(needC&&openS?'<a class="p-link" href="wedding-preparation.html#seats">Complete this</a>':'<p class="t-l1">'+(needC?'Not open yet':'—')+'</p>'))+'</div>')+
@@ -426,7 +426,7 @@ L.push('- Sangkhathan offerings to prepare: '+t.offerings+(t.offerings?' (USD '+
 var Sx=window.SIYL_SEATS,Lx=window.SIYL_SEATLABELS,id=auth.guestId;
 if(Sx&&Sx.ready()){var cs=Sx.seatOf('ceremony',id),ds=Sx.seatOf('dinner',id);
 L.push('','SEATS (as the ledger holds them):');
-L.push('- Temple Ceremony: '+(G.party().hosts?'FRONT CENTRE ('+(G.me().hostRole||'HOSTS')+')':cs?'seat '+Lx.label(cs)+' ('+cs+')':'none'));
+L.push('- Vow Ceremony (Souphattra Heritage, 15:30): '+(G.party().hosts?'FRONT CENTRE ('+(G.me().hostRole||'HOSTS')+')':cs?'seat '+Lx.label(cs)+' ('+cs+')':'none'));
 L.push('- Wedding Dinner: '+(ds?'seat '+Lx.label(ds)+' ('+ds+')':'none'))}
 if(window.SIYL_DOCS){var d=SIYL_DOCS.operational();
 if(d){L.push('','DOCUMENTS & PRIVACY (received only — nothing here is reviewed or verified):');

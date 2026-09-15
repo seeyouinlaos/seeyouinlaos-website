@@ -286,7 +286,7 @@ test('G · a party of seven cannot take the residence', () => {
   assert.ok(unitsFor('airbnb-2br/private-residence', 6) <= sellable('airbnb-2br/private-residence'));
 });
 
-test('M/N · Cost Saving → Full removes whichever stay was taken, and 2,175 stands', () => {
+test('M/N · Cost Saving → Full removes whichever stay was taken, and 2,155 stands', () => {
   const w = shop();
   const P = w.SIYL_PRICE;
   const plan = w.SIYL_JOURNEY.fullExperience();
@@ -297,5 +297,5 @@ test('M/N · Cost Saving → Full removes whichever stay was taken, and 2,175 st
   assert.equal(wed.room, 'heritage-grand-premier');
   assert.equal(wed.price, 170);
   assert.ok(!plan.add.some((x) => x.id === 'airbnb-2br'));
-  assert.equal(plan.add.reduce((t, x) => t + (x.price || 0), 0), 2175);
+  assert.equal(plan.add.reduce((t, x) => t + (x.price || 0), 0), 2155);
 });

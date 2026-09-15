@@ -63,9 +63,9 @@ async function declineOthers(keep) {
   await p.evaluate((keep) => { window.SIYL_JOURNEY.SEGMENTS.forEach((s) => { if (!keep.includes(s.key) && window.SIYL_JOURNEY.state(s) === 'open') window.SIYL_JOURNEY.skip(s.key, true); }); }, keep);
   await p.waitForTimeout(400);
 }
-async function wedding(temple, offering) {
+async function wedding(temple, offering, vows) {
   await go('wedding.html');
-  for (const [k, v] of [['temple', temple], ['coffee', 'yes'], ['vows', 'yes'], ['dinner', 'yes']]) { await p.click('[data-e="' + k + '"] [data-ev="' + v + '"]'); await p.waitForTimeout(250); }
+  for (const [k, v] of [['temple', temple], ['coffee', 'yes'], ['vows', vows || 'yes'], ['dinner', 'yes']]) { await p.click('[data-e="' + k + '"] [data-ev="' + v + '"]'); await p.waitForTimeout(250); }
   if (temple === 'yes' && offering) { await p.click('#sangkhathan [data-off="' + offering + '"]'); await p.waitForTimeout(300); }
 }
 async function dinnerSeat() {
@@ -211,11 +211,11 @@ await declineOthers(['wedstay']);
 await wedding('yes', 'yes');
 await go('wedding-preparation.html'); await p.check('[data-ack]'); await p.waitForTimeout(300);
 const ds3 = await dinnerSeat();
-note('P4 step 04 · ceremony seat required for a temple guest; dinner seat confirmed; names of the hosts visible', /Seat confirmed/i.test(ds3.conf) && ds3.names.includes('Haruthai') && ds3.names.includes('Suthep'), ds3.names.join(','));
+note('P4 step 04 · ceremony seat required for a guest joining the Vow Ceremony; dinner seat confirmed; names of the hosts visible', /Seat confirmed/i.test(ds3.conf) && ds3.names.includes('Haruthai') && ds3.names.includes('Suthep'), ds3.names.join(','));
 /* the ceremony seat, too */
 await go('wedding-preparation.html#seats'); await p.waitForFunction(() => window.SIYL_SEATS && SIYL_SEATS.ready(), null, { timeout: 15000 }); await p.waitForTimeout(400);
 if (!(await p.evaluate(() => window.SIYL_SEATS.seatOf('ceremony', window.SIYL_GUEST.me().guestId)))) { await p.locator('[data-ev="ceremony"] g[data-seat]').first().dispatchEvent('click'); await p.waitForTimeout(300); await p.click('[data-seat-confirm]'); await p.waitForFunction(() => !!document.querySelector('.p-seatconf'), null, { timeout: 15000 }); await p.click('[data-seat-continue]'); await p.waitForTimeout(400); }
-note('P4 step 04 · both seats held → YOUR WEDDING SEATS with a TEMPLE CEREMONY ticket and a WEDDING DINNER ticket, each with its reference', /Your wedding seats/i.test(await txt('.p-wseats')) && /Temple Ceremony/i.test(await txt('.p-wseats')) && /Wedding Dinner/i.test(await txt('.p-wseats')) && /SYL-TC-/.test(await txt('.p-wseats')) && /SYL-WD-/.test(await txt('.p-wseats')), (await txt('.p-wseats')).slice(0, 200));
+note('P4 step 04 · both seats held → YOUR WEDDING SEATS with a VOW CEREMONY ticket (Souphattra Heritage · 15:30, never the temple) and a WEDDING DINNER ticket, each with its reference', /Your wedding seats/i.test(await txt('.p-wseats')) && /Vow Ceremony/i.test(await txt('.p-wseats')) && /Souphattra Heritage/i.test(await txt('.p-wseats')) && /15:30/.test(await txt('.p-wseats')) && !/Temple|Wat Ong Teu|08:00|09:00/i.test(await txt('.p-wseats')) && /Wedding Dinner/i.test(await txt('.p-wseats')) && /SYL-WC-/.test(await txt('.p-wseats')) && /SYL-WD-/.test(await txt('.p-wseats')), (await txt('.p-wseats')).slice(0, 200));
 await shot('P-04');
 const ay3 = await aboutYou('no');
 const heritageW = await p.evaluate(() => window.SIYL_PRICE.quote('wedstay', 'heritage').total);
@@ -249,9 +249,15 @@ await declineOthers(['wedstay']);
 await wedding('no', null);
 note('T4 step 03 · not attending the temple: no Sangkhathan asked, step complete', (await p.evaluate(() => window.SIYL_GUEST.done('wedding'))) === true, '');
 await go('wedding-preparation.html'); await p.check('[data-ack]'); await p.waitForTimeout(300);
+/* Owner, Edit 2 (15 Sep 2026): the ceremony seat belongs to the Vow Ceremony — not attending the temple changes nothing about it */
+const cerV = await p.evaluate(() => (document.querySelector('[data-seatmap="ceremony"]') || {}).getAttribute('data-state'));
+const missV = await p.evaluate(() => ({ miss: window.SIYL_GUEST.missingFor('preparation').map((m) => m.key).join(','), heldC: !!window.SIYL_SEATS.seatOf('ceremony', window.SIYL_GUEST.me().guestId) }));
+note('T5 step 04 · not attending the temple but joining the Vow Ceremony: the ceremony seat is still required (it belongs to the Vow Ceremony at Souphattra Heritage)', cerV !== 'none' && (missV.heldC || /seat:ceremony/.test(missV.miss)), cerV + ' · ' + JSON.stringify(missV));
+await wedding('no', null, 'no');
+await go('wedding-preparation.html'); await p.check('[data-ack]'); await p.waitForTimeout(300);
 const cer = await p.evaluate(() => (document.querySelector('[data-seatmap="ceremony"]') || {}).getAttribute('data-state'));
 const missP = await p.evaluate(() => ({ miss: window.SIYL_GUEST.missingFor('preparation').map((m) => m.key).join(','), heldD: !!window.SIYL_SEATS.seatOf('dinner', window.SIYL_GUEST.me().guestId) }));
-note('T5 step 04 · no ceremony seat required when not attending; the dinner seat is (unless already held)', cer === 'none' && (missP.heldD ? missP.miss === '' : missP.miss === 'seat:dinner'), cer + ' · ' + JSON.stringify(missP));
+note('T5 step 04 · not joining the Vow Ceremony: no ceremony seat required; the dinner seat is (unless already held)', cer === 'none' && (missP.heldD ? missP.miss === '' : missP.miss === 'seat:dinner'), cer + ' · ' + JSON.stringify(missP));
 const ds4 = await dinnerSeat();
 note('T5 step 04 · dinner seat confirmed; Peggy\'s name on the plan', /Seat confirmed/i.test(ds4.conf) && ds4.names.includes('Peggy'), ds4.names.join(','));
 await aboutYou('no');

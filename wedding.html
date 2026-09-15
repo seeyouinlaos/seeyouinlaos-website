@@ -73,11 +73,11 @@ function seatsSection(p,me){
   var h='<section class="prep-sec" id="seats-route"><p class="t-l1">Your seats · '+(open?(frozen?'seating is closed':'seating is open'):'not open yet')+'</p><h2 class="t-h2">Where you will sit</h2>'+
     '<p class="t-b1 measure">'+(open?'A chair for the ceremony and a place at the dinner table, chosen by you on the plan — with the first names of the guests already seated, so you can find the people you know.':'Your ceremony seat and your dinner seat will be chosen here once seating opens. Guest Relations will let you know.')+'</p>';
   h+='<div class="p-card" style="margin-top:var(--s4)" data-seat-guest="'+esc(id)+'"><p class="t-l1 on">'+name+'</p>';
-  [['ceremony','Ceremony seat','Wat Ong Teu · 28 February'],['dinner','Dinner seat','Souphattra Heritage · poolside · 19:30']].forEach(function(e){
-    var ev=e[0],sid=ev==='ceremony'?cs:ds,attends=ev==='ceremony'?T.attendingOf(id):T.joining(id,'dinner');
+  [['ceremony','Ceremony seat','Souphattra Heritage · 28 February · 15:30'],['dinner','Dinner seat','Souphattra Heritage · poolside · 19:30']].forEach(function(e){
+    var ev=e[0],sid=ev==='ceremony'?cs:ds,attends=ev==='ceremony'?T.joining(id,'vows'):T.joining(id,'dinner');
     if(ev==='ceremony'&&p.hosts){
       h+='<div class="p-kv"><div><p class="t-b1"><b>'+e[1]+'</b></p><p class="t-b2">'+e[2]+' · '+role+' · front centre</p></div><p class="t-l1 on">Front centre</p></div>';return}
-    if(!attends){h+='<div class="p-kv"><div><p class="t-b1"><b>'+e[1]+'</b></p><p class="t-b2">'+e[2]+'</p></div><p class="t-l1">'+(T.eventOf(id,ev==='ceremony'?'temple':'dinner')==='no'?'Not attending':'Answer above first')+'</p></div>';return}
+    if(!attends){h+='<div class="p-kv"><div><p class="t-b1"><b>'+e[1]+'</b></p><p class="t-b2">'+e[2]+'</p></div><p class="t-l1">'+(T.eventOf(id,ev==='ceremony'?'vows':'dinner')==='no'?'Not attending':'Answer above first')+'</p></div>';return}
     h+='<div class="p-kv"><div><p class="t-b1"><b>'+e[1]+'</b></p><p class="t-b2">'+e[2]+(sid?'<br>'+esc(S.describe(sid))+' · confirmed':'')+'</p>'+
        (sid?'<p class="p-more"><a class="p-link" href="'+to+'" data-seat-cta="'+ev+'" data-state="booked">'+(frozen?'View seat':'Change seat')+'</a></p>'
            :(open&&!frozen?'<p class="p-more"><a class="p-link" href="'+to+'" data-seat-cta="'+ev+'" data-state="open">Choose your '+ev+' seat</a></p>':''))+'</div>'+

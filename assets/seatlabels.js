@@ -29,9 +29,9 @@
   'use strict';
   var COLS = { L: ['A', 'B'], R: ['D', 'E', 'F'] };
   var RUNS = { T: 'A', B: 'B' };
-  var EVENT_CODE = { ceremony: 'TC', dinner: 'WD' };
-  var EVENT_NAME = { ceremony: 'Temple Ceremony', dinner: 'Wedding Dinner' };
-  var EVENT_VENUE = { ceremony: 'Wat Ong Teu, Vientiane', dinner: 'Souphattra Heritage, Vientiane · poolside' };
+  var EVENT_CODE = { ceremony: 'WC', dinner: 'WD' };   /* WC = Wedding (Vow) Ceremony · WD = Wedding Dinner */
+  var EVENT_NAME = { ceremony: 'Vow Ceremony', dinner: 'Wedding Dinner' };
+  var EVENT_VENUE = { ceremony: 'Souphattra Heritage, Vientiane', dinner: 'Souphattra Heritage, Vientiane · poolside' };
   var EVENT_DATE = 'Sunday, 28 February 2027';
 
   /* internal id → guest-facing label; null for anything that is not a seat */

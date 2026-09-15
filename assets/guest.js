@@ -333,7 +333,7 @@
         if (!this.dressAck()) out.push({ key: 'dress', label: 'Dress code acknowledgement', href: 'wedding-preparation.html#ack' });
         /* seats: required for the events the guest attends, while seating is open to choose */
         if (T && S && S.ready() && S.open() && !S.frozen()) {
-          if (T.attendingOf(me.guestId) && !p.hosts && S.configured('ceremony') && !S.seatOf('ceremony', me.guestId)) out.push({ key: 'seat:ceremony', label: 'Ceremony seat', href: 'wedding-preparation.html#seats' });
+          if (T.joining(me.guestId, 'vows') && !p.hosts && S.configured('ceremony') && !S.seatOf('ceremony', me.guestId)) out.push({ key: 'seat:ceremony', label: 'Ceremony seat', href: 'wedding-preparation.html#seats' });
           if (T.joining(me.guestId, 'dinner') && S.configured('dinner') && !S.seatOf('dinner', me.guestId)) out.push({ key: 'seat:dinner', label: 'Dinner seat', href: 'wedding-preparation.html#seats' });
         }
         return out;
