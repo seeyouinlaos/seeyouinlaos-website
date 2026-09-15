@@ -133,7 +133,7 @@ test('AUTH · leaving keeps this guest\'s draft aside and hands nothing to the n
   await w.SIYL_AUTH.set({ ...STEFFIE, token: 'demo-steffie-code' });
   assert.equal(store.has('siyl.bag'), false, 'Steffie inherits no bag');
   assert.equal(w.SIYL_AUTH.get().guestId, 'g-steffie');
-  store.set('siyl.bag', JSON.stringify([{ id: 'c86', qty: 1, price: 85 }]));
+  store.set('siyl.bag', JSON.stringify([{ id: 'c86', qty: 1, price: 105 }]));
   w.SIYL_INVITE.leave();
   /* Peggy again: her own bag, not Steffie's */
   await w.SIYL_AUTH.set({ ...PEGGY, token: 'demo-peggy-code' });

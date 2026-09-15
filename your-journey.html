@@ -45,6 +45,9 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/stay.js"></script>
 <script src="assets/seatlabels.js"></script>
 <script src="assets/seating.js"></script>
+<script src="assets/seatpass.js"></script>
+<script src="assets/vendor/qrcode.js"></script>
+<script src="assets/travelpass.js"></script>
 <script src="assets/transport-data.js"></script>
 <script src="assets/journey.js"></script>
 <script src="assets/prep-shell.js"></script>
@@ -97,22 +100,21 @@ var TC={
 };
 function actions(list){return '<div class="p-actions">'+list.join('')+'</div>'}
 function transportCard(seg,line){
-  var t=TC[seg.key],f=P.FLAT[seg.key],sel=!!line;
+  var t=TC[seg.key],f=P.FLAT[seg.key],sel=!!line,TP=window.SIYL_TRAVELPASS;
+  /* the ticket (Owner, 15 Sep 2026): the route, the times, the class, the guest, the pass and its code */
+  var ticket=TP?TP.card(seg.key,{selected:sel,price:money(f.price)+' <span class="t-l1">'+t.basis+'</span>',
+      actions:sel?[TP.button(seg.key,true),'<a class="p-link mute" href="transport.html?id='+seg.key+'">View details</a>','<button type="button" class="p-link mute" data-rm="'+seg.key+'">Remove</button>'].join('')
+                 :['<button type="button" class="p-act" data-choose-flat="'+seg.key+'">Select this travel</button>','<a class="p-link mute" href="transport.html?id='+seg.key+'">View details</a>','<button type="button" class="p-link mute" data-skip="'+seg.key+'">Not joining this stage</button>'].join('')}):'';
   return '<div class="p-sum'+(sel?' on':'')+'">'+
     '<span class="p-sum-img" style="background-image:url('+t.img+')" role="img" aria-label="'+esc(f.name)+'"></span>'+
     '<div class="p-sum-body">'+
       '<p class="t-l1'+(sel?' on':'')+'">'+(sel?'Current selection':'Transportation · '+t.op)+'</p>'+
       '<h3 class="t-h1">'+esc(f.name)+'</h3>'+
       (t.lede?'<p class="t-b1 measure">'+t.lede+'</p>':'')+
-      '<p class="t-b2">'+t.date+' · '+t.route+'</p>'+
-      '<p class="p-time">'+t.dep[0]+' <span>'+t.dep[1]+'</span></p>'+
-      '<p class="p-time">'+t.arr[0]+' <span>'+t.arr[1]+'</span></p>'+
-      '<p class="t-b2">'+t.dur+' · '+t.cls+'</p>'+
       '<ul class="p-list">'+t.ben.map(function(b){return '<li class="t-b2">'+b+'</li>'}).join('')+'</ul>'+
       '<p class="p-price">'+money(f.price)+'<span class="t-l1">'+t.basis+' · your cost</span></p>'+
-      actions(sel?['<a class="p-link" href="transport.html?id='+seg.key+'">View details</a>','<button type="button" class="p-link mute" data-rm="'+seg.key+'">Remove</button>']
-                 :['<button type="button" class="p-act" data-choose-flat="'+seg.key+'">Select this travel</button>','<a class="p-link mute" href="transport.html?id='+seg.key+'">View details</a>','<button type="button" class="p-link mute" data-skip="'+seg.key+'">Not joining this stage</button>'])+
-      '</div></div>'}
+      '</div>'+
+    '<div class="p-sum-ticket">'+ticket+'</div></div>'}
 
 /* THE STAY CARD: the category, the place the guest holds in it, the cost */
 function staySummary(seg,x){
@@ -184,18 +186,17 @@ function bkkHtml(){
 /* MU9646 — one flight, two approved fares; the fare column never becomes a strip */
 function flyHtml(){
   if(!P.classesOf)return '';
-  var line=lineOf({ids:['mu9646']}),cur=line?(line.cls||'business'):null;
+  var line=lineOf({ids:['mu9646']}),cur=line?(line.cls||'business'):null,TP=window.SIYL_TRAVELPASS,c0=P.classOf('mu9646',cur||'business');
+  var ticket=TP?TP.card('mu9646',{selected:!!line,cls:cur||'business',price:line?money(c0.price)+' <span class="t-l1">per person</span>':null,
+      actions:[(line?TP.button('mu9646',true):''),'<a class="p-link mute" href="transport.html?id=mu9646">View details</a>',(line?'<button type="button" class="p-link mute" data-rm="mu9646">Remove</button>':'<button type="button" class="p-link mute" data-skip="mu9646">Not joining this stage</button>')].join('')}):'';
   return '<div id="flysel"><div class="p-product">'+
     '<span class="p-media" style="background-image:url(assets/images/transport/mu9632-business-1.jpg)" role="img" aria-label="Business Class · China Eastern"></span>'+
     '<div class="p-body">'+
       '<p class="t-l1'+(line?' on':'')+'">'+(line?'Current selection':'Transportation · China Eastern Airlines')+'</p>'+
       '<h3 class="t-h1">MU9646 · Vientiane &rarr; Kunming</h3>'+
-      '<p class="t-b2">01 March 2027 · non-stop</p>'+
-      '<p class="p-time">15:50 <span>VTE · Terminal 1</span></p>'+
-      '<p class="p-time">18:25 <span>KMG</span></p>'+
-      '<p class="t-b2">1h 35m · non-stop · Boeing 738</p>'+
-      actions(['<a class="p-link mute" href="transport.html?id=mu9646">View details</a>',(line?'<button type="button" class="p-link mute" data-rm="mu9646">Remove</button>':'<button type="button" class="p-link mute" data-skip="mu9646">Not joining this stage</button>')])+
+      '<p class="t-b2">01 March 2027 · non-stop · 1h 35m · Boeing 738</p>'+
     '</div>'+
+    ticket+
     '<div class="p-choices">'+P.classesOf('mu9646').map(function(c){
       var on=cur===c.slug;
       return '<article class="p-card p-fare'+(on?' on':'')+'">'+
@@ -253,6 +254,7 @@ function render(){
   document.getElementById('extra-lines').innerHTML=extras.map(extraLine).join('');
   document.getElementById('tt').textContent=money(SIYL_BAG.total());
   wire();renderDecisions();SIYL_BAG.badge();
+  if(window.SIYL_TRAVELPASS)SIYL_TRAVELPASS.wire(box);
   if(SH)SH.foot(document.getElementById('foot'))}
 
 function say(box,text,ok){var n=box&&box.querySelector('.p-rooms-note');if(n){n.textContent=text||'';n.classList.toggle('t-l1',false)}}
@@ -411,11 +413,13 @@ box.scrollIntoView({behavior:'smooth',block:'center'})}
 document.addEventListener('siyl:bag',function(){var b=document.getElementById('csnote');if(b)b.innerHTML=''});
 
 document.addEventListener('siyl:bag',render);
+document.addEventListener('siyl:confirm',render);
 document.addEventListener('siyl:temple',render);
 document.addEventListener('siyl:guest',render);
 document.addEventListener('siyl:units',render);
 document.addEventListener('siyl:auth',render);
 render();
+if(window.SIYL_CONFIRM&&window.SIYL_GUEST&&SIYL_GUEST.me())SIYL_CONFIRM.load();   /* the passes say Selected / Sent / Confirmed */
 var q=new URLSearchParams(location.search);
 var rm=q.get('rm');if(rm){if(P.locate(rm))ST.remove(rm);else SIYL_BAG.remove(rm)}
 if(window.SIYL_BAG&&SIYL_BAG.bar)SIYL_BAG.bar();

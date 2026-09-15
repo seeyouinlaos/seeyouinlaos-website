@@ -175,5 +175,7 @@
         return { ok: true, file: download(doc), doc: doc };
       });
   }
-  return { compose: compose, filename: filename, download: download, docFor: docFor, deliver: deliver, toBytes: toBytes, PAGE: PAGE, fixedWords: fixedWords };
+  /* the writer, shared with the travel pass (assets/travelpass.js): one PDF grammar for every confirmation */
+  var writer = { Page: Page, build: build, toBytes: toBytes, width: width, PAGE: PAGE, INK: INK, MUTE: MUTE, LINE: LINE, GROUND: GROUND, PAPER: PAPER };
+  return { compose: compose, filename: filename, download: download, docFor: docFor, deliver: deliver, toBytes: toBytes, PAGE: PAGE, fixedWords: fixedWords, writer: writer };
 });

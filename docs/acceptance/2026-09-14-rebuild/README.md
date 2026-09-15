@@ -71,8 +71,9 @@ D-B-13, INV-G002 C-R-02-02 / D-B-14, INV-G049 D-B-15, INV-G048 D-B-16 with first
 engine empty; seating OPEN.
 
 ## Known limits / Owner decisions
-- The pool side of the long table is not in any project or venue record: the plan draws the pool only once
-  Guest Relations records the side (`node src/gr.cjs seating-state --pool T|B`); until then the words say so.
+- ~~The pool side of the long table is not in any project or venue record~~ — **resolved 15 Sep 2026**: the
+  Owner uploaded the venue plan and confirmed RUN A = POOLSIDE; the server default is run A and the plan
+  draws the water there (see `docs/acceptance/2026-09-15-cart-ticket/`).
 - Single rooms (one bed, occupancy 1 in the seed) are one place, not two; every other room is two places.
 - 007's About You proposal (eleven favourites + a CARE section) conflicts with the Owner's spec and was not
-  applied; source-truth items (C86 amount, Sathorn rates, dinner venue name) untouched.
+  applied; source-truth items (Sathorn rates, dinner venue name) untouched — C86 = USD 105 since 15 Sep 2026.

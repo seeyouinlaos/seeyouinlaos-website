@@ -1,0 +1,209 @@
+{
+  "origin": "http://127.0.0.1:8788",
+  "at": "2026-09-15T02:55:24.573Z",
+  "pass": 40,
+  "total": 40,
+  "results": [
+    {
+      "id": "H1 one code = one guest",
+      "ok": true,
+      "d": ""
+    },
+    {
+      "id": "H2 Your Journey · every transport leg is a ticket: both ends, times, class, the guest, the pass reference, the code, the download",
+      "ok": true,
+      "d": "[\"SYL-TN25-3V26\",\"SYL-MU9646-VDMJ\",\"SYL-C86-RZ4S\",\"SYL-MU5924-73BS\"]"
+    },
+    {
+      "id": "H2 Your Journey · the ticket names the guest and the class; the flight ticket follows the chosen fare",
+      "ok": true,
+      "d": "FLIGHT · CHINA EASTERN AIRLINES CURRENT SELECTION MU9646 · Vientiane → Kunming VTE 15:50 Vientiane Terminal 1 01 MAR 2027 1H 35M · NON-STOP KMG 18:25 Kunming No"
+    },
+    {
+      "id": "H3 C86 = USD 105 on Your Journey (ticket + card); total = 100 + 275 + 105 + 200",
+      "ok": true,
+      "d": "USD 680"
+    },
+    {
+      "id": "H3 the C86 code SCANS (independent decoder) and carries the pass, the guest, the leg, the date, the class, the state",
+      "ok": true,
+      "d": "SEE YOU IN LAOS | TRAVEL PASS SYL-C86-RZ4S | Haruthai | C86 Kunming → Lijiang | 04 March 2027 | Business Class | SELECTED"
+    },
+    {
+      "id": "H4 Download travel pass · a real PDF, named for the leg and the guest, carrying the reference, the route, the class, the code and honest words",
+      "ok": true,
+      "d": "see-you-in-laos-travel-pass-c86-haruthai.pdf · 57854 bytes"
+    },
+    {
+      "id": "H5 bag icon → the cart · own lines, grouped under Transport, each transport line carrying its pass strip with the code and the reference",
+      "ok": true,
+      "d": "train:SYL-TN25-3V26 mu9646:SYL-MU9646-VDMJ c86:SYL-C86-RZ4S return:SYL-MU5924-73BS"
+    },
+    {
+      "id": "H5 cart · C86 line says USD 105; cart total = sticky total = 680",
+      "ok": true,
+      "d": "USD 680 / USD 680"
+    },
+    {
+      "id": "H5 cart · no checkout language, no quantity controls, the words are YOUR BAG · YOUR TOTAL · REVIEW YOUR JOURNEY",
+      "ok": true,
+      "d": ""
+    },
+    {
+      "id": "H5 cart · not ready → REVIEW YOUR JOURNEY leads to the first missing item (step 03)",
+      "ok": true,
+      "d": "wedding.html#ev-temple"
+    },
+    {
+      "id": "H6 cart · CHANGE on the flight → the flight stage on Your Journey (the fare selector)",
+      "ok": true,
+      "d": "your-journey.html#s-mu9646"
+    },
+    {
+      "id": "H6 change · lands on Your Journey at the flight stage",
+      "ok": true,
+      "d": "http://127.0.0.1:8788/your-journey#s-mu9646"
+    },
+    {
+      "id": "H6 change · Economy Flexible is the current selection: the ticket says the new class and carries a NEW pass reference; the journey total follows (560)",
+      "ok": true,
+      "d": "SYL-MU9646-VDMJ → SYL-MU9646-8BSV"
+    },
+    {
+      "id": "H6 cart · the flight line says Economy Flexible with the new reference; total 560 = sticky",
+      "ok": true,
+      "d": "USD 560 / USD 560"
+    },
+    {
+      "id": "H7 cart REMOVE · C86 leaves the bag: three lines, total 455 = sticky, badge 3",
+      "ok": true,
+      "d": "USD 455 / USD 455 · badge 3"
+    },
+    {
+      "id": "H7 Your Journey after REMOVE · the C86 stage is open again (Select this travel), its ticket quiet without a pass; step 02 needs attention",
+      "ok": true,
+      "d": "Not selected"
+    },
+    {
+      "id": "H7 select again · C86 back at USD 105; total 455 + 105 = 560",
+      "ok": true,
+      "d": "USD 560"
+    },
+    {
+      "id": "H8 transport page · the C86 ticket with its pass, USD 105 per person, Download travel pass; the ADD/REMOVE decision beside it",
+      "ok": true,
+      "d": "SYL-C86-RZ4S · USD 105 PER PERSON USD 105 PER PERSON · REMOVE FROM YOUR JOURNEY"
+    },
+    {
+      "id": "H8 transport page · the flight ticket says Economy Flexible (the chosen fare)",
+      "ok": true,
+      "d": ""
+    },
+    {
+      "id": "H9 the plan · RUN A = POOLSIDE from the server (default T); the pool drawn as water along run A, named; run B named opposite the pool; WEDDING DINNER · POOLSIDE",
+      "ok": true,
+      "d": "Run A sits beside the swimming pool; run B faces it across the table."
+    },
+    {
+      "id": "H9 a run-A seat · the words say Poolside on the bar, the confirmation and the card",
+      "ok": true,
+      "d": "SEAT CONFIRMED Your dinner seat is confirmed A1 Long table · run A · Poolside · place 1 GUEST Haruthai Amphai EVENT Wedding Dinner DATE Sund"
+    },
+    {
+      "id": "H9 the plan · the held chair is named (her own says You; other guests see her first name — P4)",
+      "ok": true,
+      "d": "You"
+    },
+    {
+      "id": "H10 cart · 01–05 complete → REVIEW YOUR JOURNEY leads to Review & Send; sticky VIEW the same",
+      "ok": true,
+      "d": "review.html / review.html"
+    },
+    {
+      "id": "H11 Review & Send · the four passes with their codes and references; C86 at USD 105; Review total = cart total = sticky (575)",
+      "ok": true,
+      "d": "USD 575 / USD 575 / USD 575"
+    },
+    {
+      "id": "H12 sent · every pass now says Sent to Guest Relations (the same references)",
+      "ok": true,
+      "d": "BKK 20:25 → NKI 06:25 24 – 25 February 2027 · First Class Sleeper · private cabin TRAVEL PASS SYL-TN25-3V26 · SENT TO GUEST RELATIONS DOWNLOAD TRAVEL PASS"
+    },
+    {
+      "id": "H12 the register holds INV-G048",
+      "ok": true,
+      "d": "2026-09-15T02:54:42.122Z"
+    },
+    {
+      "id": "H12 the bag says Sent too",
+      "ok": true,
+      "d": "4"
+    },
+    {
+      "id": "D1 desktop · Your Journey tickets, no overflow",
+      "ok": true,
+      "d": ""
+    },
+    {
+      "id": "D2 desktop · the cart, no overflow",
+      "ok": true,
+      "d": ""
+    },
+    {
+      "id": "D3 desktop · the transport page ticket, no overflow",
+      "ok": true,
+      "d": ""
+    },
+    {
+      "id": "H13 no page errors",
+      "ok": true,
+      "d": ""
+    },
+    {
+      "id": "P1 one code = one guest · Peggy alone · an empty bag, none of Haruthai's passes",
+      "ok": true,
+      "d": ""
+    },
+    {
+      "id": "P2 Peggy's C86 ticket · her own name, her own reference (not Haruthai's), USD 105",
+      "ok": true,
+      "d": "SYL-C86-X7SQ"
+    },
+    {
+      "id": "P3 Peggy's bag · one line, her pass, USD 105 = sticky",
+      "ok": true,
+      "d": "USD 105 / USD 105"
+    },
+    {
+      "id": "P4 the plan for a guest · the pool along run A, Haruthai's first name on her run-A chair",
+      "ok": true,
+      "d": "Haruthai"
+    },
+    {
+      "id": "P5 REMOVE · her bag empties",
+      "ok": true,
+      "d": ""
+    },
+    {
+      "id": "W 320 · no horizontal overflow with tickets on the four surfaces",
+      "ok": true,
+      "d": ""
+    },
+    {
+      "id": "W 375 · no horizontal overflow with tickets on the four surfaces",
+      "ok": true,
+      "d": ""
+    },
+    {
+      "id": "W 430 · no horizontal overflow with tickets on the four surfaces",
+      "ok": true,
+      "d": ""
+    },
+    {
+      "id": "Z no page errors across both identities",
+      "ok": true,
+      "d": ""
+    }
+  ],
+  "errors": []
+}

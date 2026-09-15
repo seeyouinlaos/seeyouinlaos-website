@@ -185,29 +185,39 @@
 
       /* the long table, seen from above: run A along the top, run B along the
        * bottom — fifty places, no fixed position for anyone, poolside. THE
-       * POOL is drawn as a landmark on the side Guest Relations has recorded
-       * in the geometry (dinner.poolSide: 'T' | 'B'); until that side is on
-       * record nothing is invented — the words say so instead (Owner, 14 Sep
-       * 2026: do not fabricate the orientation). */
+       * POOL is the landmark: RUN A is the poolside run (Owner, 15 Sep 2026,
+       * source of truth from the venue plan; the geometry may record 'B' if
+       * the venue ever changes the layout). The water is drawn as water —
+       * a calm band with a few ripples — and named; the other run is named
+       * as the run opposite the pool. Nothing childish, nothing bright. */
       var sides = (v && v.dinner && v.dinner.sides) || { T: [], B: [] };
       var top2s = sides.T || [], bottom = sides.B || [];
-      var poolSide = v && v.dinner && (v.dinner.poolSide === 'T' || v.dinner.poolSide === 'B') ? v.dinner.poolSide : null;
-      var n = Math.max(top2s.length, bottom.length, 1), pad2 = 20, headY2 = 30, POOL_H = 34, GAP = 10;
+      var poolSide = v && v.dinner && v.dinner.poolSide === 'B' ? 'B' : 'T';
+      var n = Math.max(top2s.length, bottom.length, 1), pad2 = 20, headY2 = 30, POOL_H = 62, GAP = 14;
       var y0 = 44 + (poolSide === 'T' ? POOL_H + GAP : 0);
       var W2 = pad2 * 2 + n * U, tableH = 40;
       var yTop = y0, ty = yTop + seat + NAME_H + 8, yBot = ty + tableH + 8, afterBot = yBot + seat + NAME_H + 8;
       var H2 = afterBot + (poolSide === 'B' ? POOL_H + GAP : 0) + 30;
       var total = top2s.length + bottom.length;
       var RN = (S.LABELS && S.LABELS.RUNS) || { T: 'A', B: 'B' };
-      var poolWords = poolSide ? 'the swimming pool along run ' + RN[poolSide] : 'the pool side of the table to be confirmed by Guest Relations';
+      var poolWords = 'the swimming pool along run ' + RN[poolSide];
       var h2 = '<svg class="p-seatmap p-seatmap-table" viewBox="0 0 ' + W2 + ' ' + H2 + '" style="min-width:' + Math.round(W2 * 1.15) + 'px" role="group" aria-label="Wedding dinner seating plan, poolside: one long table with run A of ' + top2s.length + ' places along one side and run B of ' + bottom.length + ' along the other, ' + poolWords + '">';
+      h2 += '<defs><linearGradient id="siyl-water" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#DCE5E2"/><stop offset="1" stop-color="#CCD9D5"/></linearGradient></defs>';
       h2 += '<line x1="' + pad2 + '" y1="14" x2="' + (W2 - pad2) + '" y2="14" stroke="#313131" stroke-width="1"/>' +
             '<text x="' + pad2 + '" y="' + headY2 + '" ' + T + '>WEDDING DINNER · POOLSIDE</text>' +
-            '<text x="' + (W2 - pad2) + '" y="' + headY2 + '" text-anchor="end" ' + T + '>RUN ' + RN.T + ' · ' + top2s.length + ' PLACES' + (poolSide === 'T' ? ' · POOLSIDE' : '') + '</text>';
+            '<text x="' + (W2 - pad2) + '" y="' + headY2 + '" text-anchor="end" ' + T + '>RUN ' + RN.T + ' · ' + top2s.length + ' PLACES' + (poolSide === 'T' ? ' · POOLSIDE' : ' · OPPOSITE THE POOL') + '</text>';
       function pool(y) {
-        return '<g class="pool" aria-hidden="true"><rect x="' + pad2 + '" y="' + y + '" width="' + (n * U) + '" height="' + POOL_H + '" rx="10" fill="#E3E6E3" stroke="#B9C3BE" stroke-width="1"/>' +
-               '<path d="M' + (pad2 + 10) + ' ' + (y + POOL_H / 2 + 6) + ' q 6 -5 12 0 t 12 0 t 12 0 t 12 0 t 12 0" fill="none" stroke="#B9C3BE" stroke-width="1"/>' +
-               '<text x="' + (pad2 + (n * U) / 2) + '" y="' + (y + POOL_H / 2 + 3) + '" text-anchor="middle" ' + T + '>SWIMMING POOL</text></g>';
+        var w = n * U, cx = pad2 + w / 2, ripple = '', k;
+        for (k = 0; k < 3; k++) {
+          var ry = y + 16 + k * 15, rx = pad2 + 18 + k * 30;
+          ripple += '<path d="M' + rx + ' ' + ry + ' q 7 -4 14 0 t 14 0 t 14 0 t 14 0" fill="none" stroke="#FFFFFF" stroke-opacity=".7" stroke-width="1"/>';
+          ripple += '<path d="M' + (pad2 + w - 60 - k * 30) + ' ' + (ry + 6) + ' q 7 -4 14 0 t 14 0 t 14 0" fill="none" stroke="#FFFFFF" stroke-opacity=".55" stroke-width="1"/>';
+        }
+        return '<g class="pool" role="img" aria-label="The swimming pool, along run ' + RN[poolSide] + '">' +
+               '<rect x="' + pad2 + '" y="' + y + '" width="' + w + '" height="' + POOL_H + '" rx="12" fill="url(#siyl-water)" stroke="#B9C7C2" stroke-width="1"/>' +
+               '<rect x="' + (pad2 + 3) + '" y="' + (y + 3) + '" width="' + (w - 6) + '" height="' + (POOL_H - 6) + '" rx="10" fill="none" stroke="#FFFFFF" stroke-opacity=".5" stroke-width="1"/>' +
+               ripple +
+               '<text x="' + cx + '" y="' + (y + POOL_H / 2 + 3) + '" text-anchor="middle" font-family="' + FONT + '" font-size="9" letter-spacing="3" fill="#3E5A54">SWIMMING POOL</text></g>';
       }
       if (poolSide === 'T') h2 += pool(44);
       var placeOf = function (s, j) { var m = /-(\d\d)$/.exec(s.seatId || ''); return m ? Number(m[1]) - 1 : j; };
@@ -216,7 +226,7 @@
       h2 += '<text x="' + (pad2 + (n * U) / 2) + '" y="' + (ty + tableH / 2 + 3) + '" text-anchor="middle" ' + T + '>ONE LONG TABLE · ' + total + ' PLACES</text>';
       bottom.forEach(function (s, j) { h2 += chair(s, pad2 + placeOf(s, j) * U + (U - seat) / 2, yBot); });
       if (poolSide === 'B') h2 += pool(afterBot);
-      h2 += '<text x="' + (W2 - pad2) + '" y="' + (H2 - 10) + '" text-anchor="end" ' + T + '>RUN ' + RN.B + ' · ' + bottom.length + ' PLACES' + (poolSide === 'B' ? ' · POOLSIDE' : '') + '</text>' +
+      h2 += '<text x="' + (W2 - pad2) + '" y="' + (H2 - 10) + '" text-anchor="end" ' + T + '>RUN ' + RN.B + ' · ' + bottom.length + ' PLACES' + (poolSide === 'B' ? ' · POOLSIDE' : ' · OPPOSITE THE POOL') + '</text>' +
             '<text x="' + pad2 + '" y="' + (H2 - 10) + '" ' + T + '>' + total + ' GUEST SEATS · NO FIXED PLACES</text>';
       return h2 + '</svg>';
     },
@@ -240,12 +250,12 @@
       return '<ul class="p-seatlegend" aria-label="Seat states">' + ['available', 'selected', 'yours', 'party', 'family', 'taken'].filter(function (k) { return w[k] && (k !== 'family' || family) && (k !== 'party' || party); }).map(function (k) {
         return '<li class="t-l1"><span class="seat-' + k + '" aria-hidden="true"></span>' + esc(w[k]) + '</li>'; }).join('') + '</ul>';
     },
-    /* the pool, in words, under the dinner plan */
+    /* the pool, in words, under the dinner plan: run A is poolside (Owner, 15 Sep 2026) */
     poolNote: function () {
       var d = view && view.dinner, RN = (S.LABELS && S.LABELS.RUNS) || { T: 'A', B: 'B' };
       if (!d) return '';
-      if (d.poolSide === 'T' || d.poolSide === 'B') return 'Run ' + RN[d.poolSide] + ' sits beside the swimming pool.';
-      return 'The long table stands beside the swimming pool — which run faces the water will be confirmed by Guest Relations.';
+      var ps = d.poolSide === 'B' ? 'B' : 'T', other = ps === 'B' ? 'T' : 'B';
+      return 'Run ' + RN[ps] + ' sits beside the swimming pool; run ' + RN[other] + ' faces it across the table.';
     },
 
     /* draw one event into a container and wire the choice */

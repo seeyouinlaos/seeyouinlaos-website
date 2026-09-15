@@ -670,7 +670,7 @@ test('post wedding architecture: canonical China train price, rest pending, no C
   assert.equal(fl.contribution, 275);
   const cn = POST_WEDDING.find((c) => c.id === 'kmg-ljg');
   assert.equal(cn.type, 'Train');
-  assert.equal(cn.contribution, 85);                        // C642 Business Class (supersedes 145/105)
+  assert.equal(cn.contribution, 105);                       // C86 Business Class · USD 105 (Owner decision, 15 Sep 2026)
   assert.equal(cn.perGuest, true);
   assert.ok(/Business Class/.test(cn.sub));
   // stays never surface as flat contributions (they price per guest-night)
@@ -698,17 +698,17 @@ test('event naming: Wedding Dinner without Reception (§25)', () => {
 test('post wedding total: only guest-payable First Class train × guests', async () => {
   const { postWeddingTotal } = await import('../register/logic.mjs');
   /* 06 SEP final data pass: postWeddingTotal covers the per-guest TRAVEL
-   * components (MU9632 275 + C642 85 + return 200 = 560 pp → 1120 for two);
+   * components (MU9632 275 + C86 105 + return 200 = 580 pp → 1160 for two);
    * the complete Package E adds the two stays — Kunming 150 pp fixed 3-night
    * amount and the selected Lijiang fixed-window variant. Reference case:
-   * 2 guests, 70-pp Lijiang variant → 2 × (275+150+85+70+200) = 1560. */
-  assert.equal(postWeddingTotal(POST_WEDDING, true, 2), 1120);
+   * 2 guests, 70-pp Lijiang variant → 2 × (275+150+105+70+200) = 1600. */
+  assert.equal(postWeddingTotal(POST_WEDDING, true, 2), 1160);
   const kn = POST_WEDDING.find((c) => c.id === 'kunming-stay');
   assert.equal(kn.ratePerGuestNight * kn.nightsCount, 150);   // Kunming fixed-stay pp
   const lj = POST_WEDDING.find((c) => c.id === 'lijiang-stay');
   const ljPP = Object.fromEntries(lj.variants);
   assert.equal(ljPP['270° Snow Mountain Viewing'], 70);       // per person, whole window
-  assert.equal(1120 + 2 * (150 + ljPP['270° Snow Mountain Viewing']), 1560);
+  assert.equal(1160 + 2 * (150 + ljPP['270° Snow Mountain Viewing']), 1600);
   assert.equal(postWeddingTotal(POST_WEDDING, false, 2), 0);
 });
 

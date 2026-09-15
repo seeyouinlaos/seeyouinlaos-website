@@ -42,9 +42,9 @@ test('FULL EXPERIENCE keeps a manual choice: U Sathorn stays U Sathorn', () => {
   /* every other stage was open and is now filled with the approved default */
   for (const s of J.SEGMENTS) assert.ok(lineOf(w, s.key), s.key + ' filled');
   assert.equal(J.open().length, 0);
-  /* the total is what the retained choices come to — not the canonical 2,155 */
+  /* the total is what the retained choices come to — not the canonical 2,175 (C86 USD 105 since 15 Sep 2026) */
   const total = B.get().reduce((t, x) => t + (x.price || 0) * (x.qty || 1), 0);
-  const canonical = 2155, penthouse = P.quote('bkk-stay', 'penthouse').total, usathorn = P.quote('bkk-stay', 'u-sathorn-superior-garden').total;
+  const canonical = 2175, penthouse = P.quote('bkk-stay', 'penthouse').total, usathorn = P.quote('bkk-stay', 'u-sathorn-superior-garden').total;
   assert.equal(total, canonical - penthouse + usathorn, 'total follows the retained real selections');
 });
 
@@ -79,7 +79,8 @@ test('the journey page derives SELECTED from the bag and offers no second select
   const yj = src('your-journey.html');
   assert.match(yj, /var line=lineOf\(\{ids:\[win\]\}\),pick=line\?line\.room:null;/, 'the Bangkok rail reads the bag');
   assert.match(yj, /on\?'<span class="p-act quiet is-current" aria-current="true">Current selection<\/span>'\s*:'<button type="button" class="p-act" data-choose="'\+r\.slug\+'"[^>]*>Select this stay<\/button>'/, 'chosen card: inert current control · alternatives: the action');
-  assert.match(yj, /actions\(sel\?\['<a class="p-link" href="transport\.html\?id='\+seg\.key\+'">View details<\/a>','<button type="button" class="p-link mute" data-rm="'\+seg\.key\+'">Remove<\/button>'\]\s*:\['<button type="button" class="p-act" data-choose-flat="'\+seg\.key\+'">Select this travel<\/button>'/, 'Special Express and every flat travel: the same rule');
+  /* the flat travel is a ticket (Owner, 15 Sep 2026): selected → the pass, View details, Remove · otherwise → Select this travel */
+  assert.match(yj, /actions:sel\?\[TP\.button\(seg\.key,true\),'<a class="p-link mute" href="transport\.html\?id='\+seg\.key\+'">View details<\/a>','<button type="button" class="p-link mute" data-rm="'\+seg\.key\+'">Remove<\/button>'\]\.join\(''\)\s*:\['<button type="button" class="p-act" data-choose-flat="'\+seg\.key\+'">Select this travel<\/button>'/, 'Special Express and every flat travel: the same rule');
   assert.match(yj, /on\?'<span class="p-act quiet is-current" aria-current="true">Current selection<\/span>'\s*:'<button type="button" class="p-act" data-cls="'\+c\.slug\+'">/, 'fares too — one selection language');
   assert.doesNotMatch(yj, /Change this day|Current fare|Current stay|Selected for your journey/, 'no second vocabulary');
   assert.match(yj, /Every stage you have already chosen stays exactly as you chose it/, 'Full Experience says what it does');
