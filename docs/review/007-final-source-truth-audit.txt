@@ -1,6 +1,6 @@
 SOURCE-TRUTH AUDIT
-DATE: 2026-09-15 12:52 UTC
-MAIN SHA: 379189a
+DATE: 2026-09-15 15:08 UTC
+MAIN SHA: 5209f9c
 SOURCE: H&S_Wedding_Operations_Master (Google Sheet, owner suthep.hrg@gmail.com, last modified 2026-09-13T12:44:10Z; export ops-master.xlsx of 2026-09-13 19:27 UTC, every tab: Overview_Hotel_Restaurant · Accommodation_Details · Experience, Restaurant, Cafe_Details · Snack_Details · Transportation · Budget_Room - Rate · Printing_Stationnary · Budget_Finance · Guestlist · Accommodation · Master_Timeline · Inventory · Invitation Giveaway · Deposit · Auis hotel inspection) · the documented Owner decisions (docs/DECISION-REGISTER.md, docs/acceptance/*/README.md, docs/review/007-change-manifest.md, docs/references/SEE-YOU-IN-LAOS-FINAL-DESIGN-SYSTEM-MASTER.md §18)
 
 TOTAL FACTUAL CLAIMS CHECKED: 121 (33 claims below · 47 priced items · 41 room categories)
@@ -507,6 +507,6 @@ O · COMPLETENESS VALIDATION
 ==================================================
 Active HTML routes covered: 26 (/, /1872, /about-you, /accommodation, /api, /cart, /destination, /documents, /dress, /experience, /experiences, /invitation, /journeys, /marsilea, /nothing-here, /register, /review, /room, /tea, /tickets, /transport, /voyage, /wedding, /wedding-preparation, /you, /your-journey)
 Experience entities covered: 39 · stay / room routes covered: 33 · transport routes covered: 5 (overview + 4 legs) · ticket / PDF templates covered: 14 (+ the template block) · sent-text templates covered: 2 (the sent journey, the email backup) · surfaces: 262 · dynamic states: 154
-Guest-facing source literals: 1812 scanned across every page and script a guest loads · 1671 found in a rendered state · 141 reached only in states not rendered and folded in verbatim (SURFACES "source strings · …") · 0 left over · implementation-only literals (error keys, font names, PDF operators) classified out by rule.
+Guest-facing source literals: 1813 scanned across every page and script a guest loads · 1672 found in a rendered state · 141 reached only in states not rendered and folded in verbatim (SURFACES "source strings · …") · 0 left over · implementation-only literals (error keys, font names, PDF operators) classified out by rule.
 Failed steps during extraction: 0 · page errors: 0
 COMPLETENESS CHECK: PASS
