@@ -53,5 +53,11 @@ Two Owner packs applied together. No access code appears here or in any file of 
   rooms), Step 05 (Required, readiness naming the question, Continue blocked and focusing it, View All Steps,
   a blank never counts, answers complete at once), tickets (seat tickets matching the ledger's references, the
   PDFs framed with the codes, the tickets page, nothing clipped at 320 / 390 / 1280 px, the cart and Review
-  without codes). Live: see `live/`.
+  without codes). **Live: 34/34 on production** (`live/`) — the Owner's own live place in Room A of the
+  Presidential (Haruthai) was left exactly as it is; Suthep, on his own code, saw "Haruthai · 1 place
+  available", joined the same room → FULL; a third guest was refused with "full" and Room B does not exist;
+  the Penthouse reads Room A – F · 12 places on the live engine. Suthep's test place was released at the end;
+  rooms, seats and registrations were proven identical before and after (no registration was sent).
+- `rooms-audit.txt`: the audit against the live engine after the deploy — 40 categories, 176 units, 351
+  places, the invariant holding for every category, the Penthouse A – F / 12, no reservation anywhere.
 - The 14 Sep walk 63/63 locally and the cart/ticket walk 41/41 locally, both updated to the new rules.
