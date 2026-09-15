@@ -65,7 +65,7 @@
     var c = /^C-([LR])-(\d+)-(\d+)$/.exec(seatId0 || '');
     if (c) return (c[1] === 'L' ? 'Left block' : 'Right block') + ' · row ' + Number(c[2]);
     var d = /^D-([TB])-(\d+)$/.exec(seatId0 || '');
-    if (d) return 'Long table · ' + (d[1] === 'T' ? 'run A' : 'run B') + ' · place ' + Number(d[2]);
+    if (d) return 'Long table · ' + (d[1] === 'T' ? 'run A · Poolside' : 'run B') + ' · place ' + Number(d[2]);
     return '';
   }
 

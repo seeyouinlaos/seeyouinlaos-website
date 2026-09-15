@@ -72,7 +72,7 @@ test('LABELS · the mapping is a bijection over the ledger, in both directions, 
   const drawn = seatsOf(cfg, 'ceremony').map((s) => s.seatId); assert.deepEqual(drawn.sort(), [...CEREMONY].sort());
   const drawnD = seatsOf(cfg, 'dinner').map((s) => s.seatId); assert.deepEqual(drawnD.sort(), [...DINNER].sort());
   /* words: label first, then the place — no ledger id anywhere */
-  assert.equal(L.describe('C-R-04-02'), 'Right block · row 4'); assert.equal(L.describe('C-L-02-01'), 'Left block · row 2'); assert.equal(L.describe('D-T-17'), 'Long table · run A · place 17');
+  assert.equal(L.describe('C-R-04-02'), 'Right block · row 4'); assert.equal(L.describe('C-L-02-01'), 'Left block · row 2'); assert.equal(L.describe('D-T-17'), 'Long table · run A · Poolside · place 17'); assert.equal(L.describe('D-B-03'), 'Long table · run B · place 3');
   assert.doesNotMatch(L.describe('C-R-04-02') + L.describe('D-B-03'), /C-R|D-B/);
 });
 

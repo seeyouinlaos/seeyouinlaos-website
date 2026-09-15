@@ -119,13 +119,15 @@ test('the Bangkok choice is exactly three addresses, one active, in the accepted
 test('MU9646 and C86 are preserved exactly, with decision-critical benefits only', () => {
   const yj = read('your-journey.html');
   assert.match(yj, /MU9646 · Vientiane &rarr; Kunming/);
-  assert.match(yj, /15:50 <span>VTE · Terminal 1<\/span>/);
-  assert.match(yj, /18:25 <span>KMG<\/span>/);
-  assert.match(yj, /1h 35m · non-stop/);
+  /* the times live on the ticket (assets/travelpass.js) since 15 Sep 2026 — the flight product keeps the summary line */
+  const tp = read('assets/travelpass.js');
+  assert.match(tp, /mu9646: \{ id: 'mu9646', code: 'MU9646', kind: 'flight'[\s\S]{0,400}from: \{ code: 'VTE', name: 'Vientiane', place: 'Terminal 1', time: '15:50', date: '01 Mar 2027' \}/);
+  assert.match(tp, /to: \{ code: 'KMG', name: 'Kunming', place: 'Non-stop', time: '18:25', date: '01 Mar 2027' \}/);
+  assert.match(yj, /01 March 2027 · non-stop · 1h 35m · Boeing 738/);
   const p = read('assets/pricing.js');
   assert.match(p, /slug: 'business'[\s\S]{0,120}price: 275/);
   assert.match(p, /slug: 'economy-flexible'[\s\S]{0,120}price: 155/);
-  assert.match(p, /'c86':\s*\{ price: 85/);
+  assert.match(p, /'c86':\s*\{ price: 105/);   /* Owner decision, 15 Sep 2026 */
   assert.match(yj, /dep:\['10:15','Kunming'\],arr:\['13:44','Lijiang'\],dur:'3h 29m · direct',cls:'Business Class'/);
   const c86 = yj.slice(yj.indexOf("c86:{"), yj.indexOf("'return':{"));
   assert.ok((c86.match(/ben:\[([^\]]+)\]/)[1].split("','").length) <= 4, 'C86 carries at most four benefits in the selector');

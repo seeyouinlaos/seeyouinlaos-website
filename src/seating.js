@@ -123,13 +123,14 @@ export function validateGeometry(input) {
       if (norm[side].length !== RULES.dinner.perSide) errors.push('dinner ' + (side === 'T' ? 'top' : 'bottom') + ' must hold ' + RULES.dinner.perSide + ' guest seats, has ' + norm[side].length);
     }
     if (sides.L || sides.R) errors.push('dinner sides are T (top) and B (bottom); the retired L/R model is not accepted');
-    /* the swimming pool as a landmark: the run it lies along, recorded by
-     * Guest Relations from the venue — 'T' | 'B' — or null until known.
-     * Nothing here invents the orientation (Owner, 14 Sep 2026). */
+    /* the swimming pool as a landmark: the run it lies along. SOURCE OF TRUTH
+     * (Owner, 15 Sep 2026, from the venue plan): RUN A — the top run, 'T' —
+     * is the poolside run. Guest Relations may still record 'B' if the venue
+     * ever changes the layout; null means the default, never "unknown". */
     const ps = cfg.dinner.poolSide;
     if (ps != null && ps !== 'T' && ps !== 'B') errors.push('dinner.poolSide must be T, B or null');
     /* the couple hold two of these fifty like everyone else — nothing is fixed */
-    out.dinner = { sides: norm, totalPeople: RULES.dinner.totalPeople, poolSide: ps === 'T' || ps === 'B' ? ps : null };
+    out.dinner = { sides: norm, totalPeople: RULES.dinner.totalPeople, poolSide: ps === 'B' ? 'B' : 'T' };
   }
   return { ok: errors.length === 0, errors, config: out };
 }
@@ -195,7 +196,7 @@ export class Seating {
       });
       out[event] = event === 'ceremony'
         ? (cfg.ceremony ? { rows: cfg.ceremony.rows.map((r) => ({ side: r.side, row: r.row, seats: r.seats.map((s) => seats.find((x) => x.seatId === s.seatId)) })), fixed: RULES.ceremony.fixed.slice() } : null)
-        : (cfg.dinner ? { sides: { T: seats.filter((s) => s.side === 'T'), B: seats.filter((s) => s.side === 'B') }, totalPeople: RULES.dinner.totalPeople, poolSide: cfg.dinner.poolSide === 'T' || cfg.dinner.poolSide === 'B' ? cfg.dinner.poolSide : null } : null);
+        : (cfg.dinner ? { sides: { T: seats.filter((s) => s.side === 'T'), B: seats.filter((s) => s.side === 'B') }, totalPeople: RULES.dinner.totalPeople, poolSide: cfg.dinner.poolSide === 'B' ? 'B' : 'T' } : null);
     }
     return out;
   }
@@ -293,11 +294,11 @@ export class Seating {
         const cfg = await this.config();
         if (typeof body.open === 'boolean') cfg.open = body.open;
         if (typeof body.frozen === 'boolean') cfg.frozen = body.frozen;
-        /* the pool side, once Guest Relations has it from the venue */
-        if ('poolSide' in body && cfg.dinner) { const ps = body.poolSide; if (ps === 'T' || ps === 'B' || ps === null) cfg.dinner.poolSide = ps; }
+        /* the pool side: run A ('T') is the source of truth (Owner, 15 Sep 2026); null returns to it */
+        if ('poolSide' in body && cfg.dinner) { const ps = body.poolSide; if (ps === 'T' || ps === 'B' || ps === null) cfg.dinner.poolSide = ps === 'B' ? 'B' : 'T'; }
         cfg.updatedAt = new Date().toISOString();
         await this.storage.put('config', cfg);
-        return json({ ok: true, open: cfg.open, frozen: cfg.frozen, poolSide: cfg.dinner ? cfg.dinner.poolSide || null : null, updatedAt: cfg.updatedAt });
+        return json({ ok: true, open: cfg.open, frozen: cfg.frozen, poolSide: cfg.dinner ? (cfg.dinner.poolSide === 'B' ? 'B' : 'T') : null, updatedAt: cfg.updatedAt });
       });
     }
 

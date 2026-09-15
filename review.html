@@ -82,6 +82,8 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/seatlabels.js"></script>
 <script src="assets/seating.js"></script>
 <script src="assets/seatpass.js"></script>
+<script src="assets/vendor/qrcode.js"></script>
+<script src="assets/travelpass.js"></script>
 <script src="assets/temple.js"></script>
 <script src="assets/rooms.js"></script>
 <script src="assets/stay.js"></script>
@@ -240,8 +242,10 @@ el.innerHTML=(window.SIYL_JOURNEY?SIYL_JOURNEY.sorted(b):b)
 .filter(function(x){return !(window.SIYL_JOURNEY&&SIYL_JOURNEY.isWedding(x))})
 .map(function(x){
 var J=window.SIYL_JOURNEY,m=J?J.meta(x):{cat:'',basis:''},when2=J?J.when(x):'';
-var href=detailHref(x),unit=ST&&x.room&&!x.interest?ST.unitWords(x):'';
-return '<div class="p-line"><a class="p-line-img" href="'+href+'" aria-label="Open '+esc(x.name)+'"'+(SIYL_BAG.thumb(x)?' style="background-image:url('+SIYL_BAG.thumb(x)+')"':'')+'></a>'+
+var href=detailHref(x),unit=ST&&x.room&&!x.interest?ST.unitWords(x):'',TP=window.SIYL_TRAVELPASS;
+/* a transport line is a ticket: the pass beneath the line (Owner, 15 Sep 2026) */
+var pass=TP&&TP.isLeg(x.id)?TP.strip(x.id):'';
+return '<div class="cart-line"><div class="p-line"><a class="p-line-img" href="'+href+'" aria-label="Open '+esc(x.name)+'"'+(SIYL_BAG.thumb(x)?' style="background-image:url('+SIYL_BAG.thumb(x)+')"':'')+'></a>'+
 '<div class="p-line-body"><p class="t-l1">'+(when2?when2:'')+(m.cat?' · '+m.cat:'')+'</p>'+
 '<h3 class="t-h2"><a href="'+href+'">'+esc(x.name)+'</a></h3><p class="t-b2">'+esc(x.meta||'')+'</p>'+
 (unit?'<p class="t-l1 on">'+esc(unit)+'</p>':'')+
@@ -249,7 +253,9 @@ return '<div class="p-line"><a class="p-line-img" href="'+href+'" aria-label="Op
 (J&&J.quantityLine(x)?'<p class="t-b2">'+esc(J.quantityLine(x))+'</p>':'')+((x.request||!(J&&J.quantityLine(x)))&&m.basis?'<p class="t-b2">'+esc(m.basis)+'</p>':'')+
 (x.note?'<p class="t-l1 on">'+esc(x.note)+(x.noteBy?' · '+esc(x.noteBy):'')+'</p>':'')+
 (x.breakfast?'<p class="t-l1">'+esc(x.breakfast)+'</p>':'')+'</div>'+
-(x.interest?'<p class="p-line-amt"><span class="t-l1">Interest · request</span></p>':'<p class="p-line-amt">USD '+((x.price||0)).toLocaleString('en-US')+'</p>')+'</div>'}).join('')}
+(x.interest?'<p class="p-line-amt"><span class="t-l1">Interest · request</span></p>':'<p class="p-line-amt">USD '+((x.price||0)).toLocaleString('en-US')+'</p>')+'</div>'+
+(pass?'<div class="cart-pass">'+pass+'</div>':'')+'</div>'}).join('');
+if(window.SIYL_TRAVELPASS)SIYL_TRAVELPASS.wire(el)}
 document.getElementById('tt').textContent='USD '+SIYL_BAG.total().toLocaleString('en-US');
 paintReady();
 SIYL_BAG.badge()}
@@ -374,7 +380,7 @@ function rememberSent(at){var o=snapshotNow();if(!o)return;o.at=at;try{localStor
 
 function paintBlocks(){paintYou();paintAbout();paintWedding();paintDocs();paintReady();paintState();
   if(window.SIYL_PREP)SIYL_PREP.foot(document.getElementById('foot'))}
-document.addEventListener('siyl:confirm',paintBlocks);
+document.addEventListener('siyl:confirm',function(){render();paintBlocks()});   /* the passes say Sent / Confirmed */
 document.addEventListener('siyl:seats',paintBlocks);
 document.addEventListener('siyl:units',function(){render();paintBlocks()});
 if(window.SIYL_CONFIRM)SIYL_CONFIRM.load();
@@ -398,7 +404,9 @@ L.push('- '+w.title+' · '+w.when+' · '+w.place+' · '+w.note.toUpperCase())})}
 L.push('','SELECTIONS (in the order the journey happens):');
 (window.SIYL_JOURNEY?SIYL_JOURNEY.sorted(b):b)
 .filter(function(x){return !(window.SIYL_JOURNEY&&SIYL_JOURNEY.isWedding(x))})
-.forEach(function(x){L.push('- '+x.name+' · '+(x.meta||'')+
+.forEach(function(x){var TP=window.SIYL_TRAVELPASS,pd=TP&&TP.isLeg(x.id)?TP.docFromPage(x.id):null;
+L.push('- '+x.name+' · '+(x.meta||'')+
+(pd?' · '+pd.leg.from.code+' '+pd.leg.from.time+' → '+pd.leg.to.code+' '+pd.leg.to.time+' · TRAVEL PASS '+pd.ref:'')+
 (x.unit?' · '+(x.unitName||('Room '+x.unit))+(ST?' ('+ST.unitWords(x)+')':''):'')+
 (x.rate!=null&&x.nights?' · USD '+x.rate+' per person / night · '+x.nights+(x.nights===1?' night':' nights'):'')+
 (x.note?' · '+x.note.toUpperCase()+(x.noteBy?' ('+x.noteBy+')':''):'')+

@@ -375,13 +375,14 @@ test('G · a seat belongs to a named guest; the new chair is held before the old
   }
   const cv = await call(l, 'read', null, { q: '?invitation=INV-g-peggy' });
   assert.deepEqual(cv.ceremony.fixed, ['BRIDE', 'GROOM']); assert.equal(cv.ceremony.rows.flatMap((r) => r.seats).length, 50);
-  /* the pool side is configuration, or unknown — never invented */
-  assert.equal(cv.dinner.poolSide, null);
+  /* the pool side: RUN A ('T') is the source of truth (Owner, 15 Sep 2026); Guest Relations may record B; null returns to run A */
+  assert.equal(cv.dinner.poolSide, 'T');
   await call(l, 'state', { poolSide: 'X' }, { gr: true });
-  assert.equal((await call(l, 'read', null, {})).dinner.poolSide, null, 'an invalid side is ignored');
+  assert.equal((await call(l, 'read', null, {})).dinner.poolSide, 'T', 'an invalid side is ignored');
   await call(l, 'state', { poolSide: 'B' }, { gr: true });
   assert.equal((await call(l, 'read', null, {})).dinner.poolSide, 'B');
   await call(l, 'state', { poolSide: null }, { gr: true });
+  assert.equal((await call(l, 'read', null, {})).dinner.poolSide, 'T', 'null is the default, run A');
   /* REKEY: a hold under the retired party id is relabelled for the guest's own invitation, name and party; nothing else moves */
   await l.storage.put('hold:dinner:D-B-13', { invitationId: 'INV-002', guestId: 'g-old', at: 'x', state: 'held' });
   r = await call(l, 'rekey', { holds: [{ event: 'dinner', seatId: 'D-B-13', fromInvitationId: 'INV-002', guestId: 'g-old', invitationId: 'INV-g-old', partyId: 'INV-002', name: 'Old' }, { event: 'dinner', seatId: 'D-B-14', invitationId: 'x' }] }, { gr: true });
@@ -442,7 +443,7 @@ test('G · the renderer draws only what it is given: rows facing the ceremony, o
   assert.equal((d.match(/<g class="seat/g) || []).length, 50, 'exactly 50 guest seat boxes');
   assert.equal((d.match(/seat-taken/g) || []).length, 1);
   assert.doesNotMatch(d, /BRIDE|GROOM|fixed/, 'no fixed position is drawn for anyone');
-  assert.match(d, />RUN A · 25 PLACES</); assert.match(d, />RUN B · 25 PLACES</); assert.match(d, /ONE LONG TABLE · 50 PLACES/); assert.match(d, /50 GUEST SEATS · NO FIXED PLACES/);
+  assert.match(d, />RUN A · 25 PLACES · POOLSIDE</); assert.match(d, />RUN B · 25 PLACES · OPPOSITE THE POOL</); assert.match(d, /ONE LONG TABLE · 50 PLACES/); assert.match(d, /50 GUEST SEATS · NO FIXED PLACES/);
   assert.equal((d.match(/role="button"/g) || []).length, 43);
   assert.match(d, /aria-label="Dinner seat A6, unavailable"/); assert.match(d, /aria-label="Dinner seat B25, available"/);
   /* nothing drawn without configuration */
@@ -469,9 +470,12 @@ test('G · the renderer draws only what it is given: rows facing the ceremony, o
   assert.match(dn, /class="seat-name"[^>]*>Haruthai</); assert.match(dn, /aria-label="Dinner seat A6, taken by Haruthai"/);
   assert.match(dn, /aria-label="Dinner seat A7, Steffie, your party"/);
   assert.doesNotMatch(d, /seat-name/, 'no names on a plain view');
-  /* THE POOL (Owner, 14 Sep 2026): a landmark on the recorded side, never invented */
-  assert.doesNotMatch(dn, /SWIMMING POOL/, 'no side on record, no pool drawn');
-  assert.match(S.poolNote.call(S) || 'x', /./);
+  /* THE POOL (Owner, 15 Sep 2026): run A is poolside — the water is drawn as a landmark along run A, the other run is named as opposite the pool */
+  assert.match(dn, /SWIMMING POOL/, 'the pool is drawn'); assert.match(dn, /RUN A · 25 PLACES · POOLSIDE/); assert.match(dn, /RUN B · 25 PLACES · OPPOSITE THE POOL/);
+  assert.match(dn, /the swimming pool along run A/); assert.match(dn, /WEDDING DINNER · POOLSIDE/);
+  assert.match(dn, /aria-label="The swimming pool, along run A"/); assert.match(dn, /siyl-water/);
+  assert.doesNotMatch(dn, /to be confirmed/, 'nothing about the pool is left open');
+  assert.doesNotMatch(dn, /#(1e90ff|2196f3|00bfff|0000ff)/i, 'no bright blue water');
   const poolView = JSON.parse(JSON.stringify(view)); poolView.dinner.poolSide = 'B';
   const dp = S.svg('dinner', poolView, { guestId: PEGGY, selectable: true });
   assert.match(dp, /SWIMMING POOL/); assert.match(dp, /RUN B · 25 PLACES · POOLSIDE/); assert.doesNotMatch(dp, /RUN A · 25 PLACES · POOLSIDE/);
