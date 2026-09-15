@@ -72,5 +72,6 @@ Two Owner packs applied together. No access code appears here or in any file of 
   no longer claims a retired product keeps its amount. Regression: `test/travelpass.test.mjs` "ONE PRICE
   SOURCE" (85 → 105 on load, descriptive line, total, −105 / +105, every surface reads the same line and
   total, no C86 amount of its own on any surface); the walk's T6 seeds a stale 85 and reads USD 105 and a
-  total equal to the engine's.
+  total equal to the engine's. Live at 9b662ae: the walk 35/35 on production (T6: a stale 85 → USD 105, cart
+  total = engine total), rooms, seats and registrations identical before and after.
 - Sühring featured: a featured section on Experiences beside 1872 and "Sühring · Lunch" in the footer menu.
