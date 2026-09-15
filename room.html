@@ -87,12 +87,13 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:22px;margin:44
 .chg{display:block;width:100%;background:none;border:0;border-bottom:1px solid #313131;font:inherit;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#313131;padding:12px 0 4px;margin:14px auto 0;cursor:pointer;min-height:44px;width:auto}
 .enq{font-size:11.5px;color:#6B6964;line-height:1.7;border:1px solid #DAD9D7;padding:16px;text-align:center}
 .swap{font-size:11px;color:#6B6964;margin-top:10px;line-height:1.6}
+.rooms{margin:12px 0 14px}.rooms:empty{display:none}
 [hidden]{display:none!important}
-.rsvline{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#6B6964;border:1px solid #DAD9D7;padding:17px;text-align:center}
 .note{font-size:11px;color:#6B6964;margin-top:16px;line-height:1.7}
 .backrow{text-align:center;margin-top:34px}
 .backrow a{font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:#313131;text-decoration:none;border-bottom:1px solid #313131;padding:8px 0 3px;display:inline-block;min-height:44px}
-</style><link rel="stylesheet" href="assets/desktop.css"><link rel="stylesheet" href="assets/aman.css"></head><body>
+</style><link rel="stylesheet" href="assets/prep.css">
+<link rel="stylesheet" href="assets/desktop.css"><link rel="stylesheet" href="assets/aman.css"></head><body>
 <header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="cart.html" aria-label="Your Journey"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main id="m"></main>
 <script src="assets/bag.js"></script>
@@ -212,7 +213,7 @@ if (others.length) {
     h += '<a class="occard" href="room.html?stay=' + stayKey + '&room=' + r.slug + '">' + img +
       '<div class="ot"><p class="oe">' + esc(r.cat) + '</p><p class="on">' + esc(r.name) + '</p>' +
       '<p class="od">' + esc(r.desc) + '</p>' +
-      '<p>' + (r.reserved && !P.eligible(r) ? '<span class="op">USD ' + (P.quote(W0.id, r.slug).total) + '</span> <span class="oe">per person</span> <span class="rsv">' + esc(r.reserved) + '</span>' : priceLine(r) + (r.reserved ? ' <span class="rsv">' + esc(r.reserved) + ' · yours to choose</span>' : '')) + '</p>' +
+      '<p>' + priceLine(r) + '</p>' +
       '<p class="oe" data-oav="' + r.slug + '"></p></div></a>';
   });
   h += '</div>';
@@ -232,20 +233,16 @@ stay.windows.forEach(function (w, wi) {
     /* real inventory without an approved guest amount — never an invented price */
     h += '<p class="price">Amount on request</p><p class="per">Guest Relations confirms the amount</p>';
     h += '<p class="enq">This room is part of the house but not yet released with an amount. Guest Relations will confirm it for you.</p>';
-  } else if (room.reserved && !P.eligible(room)) {
-    /* held for another party: the amount and the words, never a button */
-    h += amountBlock(q);
-    if ((room.breakfast || stay.breakfast)) h += '<p class="bf">' + esc((room.breakfast || stay.breakfast)) + '</p>';
-    h += '<p class="rsvline">' + esc(room.reserved) + '</p>';
   } else {
-    /* a room held for THIS party (the couple's own) keeps its label and is chosen like any other */
-    if (room.reserved) h += '<p class="rsvline">' + esc(room.reserved) + ' · held for you — yours to choose</p>';
-    /* ONE presentation for every window: the amount, exactly what it covers,
+    /* NO PRE-RESERVED ROOMS (Owner, 15 Sep 2026): every room is chosen like any other, available until booked.
+     * ONE presentation for every window: the amount, exactly what it covers,
      * and the exact nights it covers. The nights are never left implicit. */
     h += amountBlock(q);
     if (q.note) h += '<p class="hn2">' + esc(q.note) + '<span>' + esc(q.noteBy) + '</span></p>';
     if ((room.breakfast || stay.breakfast)) h += '<p class="bf">' + esc((room.breakfast || stay.breakfast)) + '</p>';
     h += '<p class="av" data-av="' + w.id + '" hidden></p>';
+    /* the physical rooms of this category, each with its two places — the primary picture of availability */
+    h += '<div class="rooms prep" data-rooms-box="' + w.id + '"></div>';
     h += '<button class="cta" data-win="' + wi + '" data-avwin="' + w.id + '">Add to Your Journey</button><span class="swap" data-swap="' + wi + '" hidden></span>';
     if (P.hasVariants(w.id)) h += '<button type="button" class="chg" data-chg="' + wi + '" hidden>Change selection</button>';
   }
@@ -336,16 +333,17 @@ function paint() {
         else swap.hidden = true;
       }
     }
-    /* ---- what the room engine says about THIS room, right now ---- */
-    var av = document.querySelector('[data-av="' + w.id + '"]');
+    /* ---- what the room engine says about THIS room, right now: the category's exact numbers and every physical room ---- */
+    var av = document.querySelector('[data-av="' + w.id + '"]'), box = document.querySelector('[data-rooms-box="' + w.id + '"]');
     if (av && U && U.ready() && U.tracked(w.id, room.slug)) {
       av.hidden = false;
       av.textContent = U.label(w.id, room.slug);
       av.classList.toggle('low', U.scarce(w.id, room.slug) || U.soldOut(w.id, room.slug));
       var gone = !line && !U.fits(w.id, room.slug);
       b.disabled = gone;
-      if (gone) b.textContent = U.eligible(w.id, room.slug) ? 'Fully booked' : 'Reserved';
-    } else if (av) { av.hidden = true; b.disabled = false; }
+      if (gone) b.textContent = 'Fully booked';
+      if (box && ST) { box.innerHTML = ST.unitsHtml(w.id, room.slug); ST.wire(box, function (r) { paint(); if (!r.ok) { av.hidden = false; av.textContent = ST.refusal(r); av.classList.add('low'); } }); }
+    } else if (av) { av.hidden = true; b.disabled = false; if (box) box.innerHTML = ''; }
   });
 }
 document.querySelectorAll('[data-win]').forEach(function (b) {

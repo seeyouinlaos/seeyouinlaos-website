@@ -65,22 +65,10 @@
   function payload(doc) {
     return ['SEE YOU IN LAOS', 'TRAVEL PASS ' + doc.ref, doc.guest.preferredName, doc.leg.code + ' ' + doc.leg.route, doc.leg.dates, doc.cls, doc.state.toUpperCase()].join('\n');
   }
-  /* ---- the QR code as modules, via the vendored encoder (MIT, Kazuhiko Arase) ---- */
-  function modules(text) {
-    var q = (root && root.qrcode) || (typeof require === 'function' ? require('./vendor/qrcode.js') : null);
-    if (!q) return null;
-    if (q.stringToBytesFuncs && q.stringToBytesFuncs['UTF-8']) q.stringToBytes = q.stringToBytesFuncs['UTF-8'];   /* names and arrows survive the scan */
-    var c = q(0, 'M'); c.addData(text, 'Byte'); c.make();
-    var n = c.getModuleCount(), out = [];
-    for (var r = 0; r < n; r++) { var row = []; for (var col = 0; col < n; col++) row.push(c.isDark(r, col)); out.push(row); }
-    return out;
-  }
-  function qrSvg(text, size, label) {
-    var m = modules(text); if (!m) return '';
-    var n = m.length, quiet = 2, N = n + quiet * 2, d = '';
-    for (var r = 0; r < n; r++) for (var c = 0; c < n; c++) if (m[r][c]) d += 'M' + (c + quiet) + ' ' + (r + quiet) + 'h1v1h-1z';
-    return '<svg class="p-qr" viewBox="0 0 ' + N + ' ' + N + '" width="' + size + '" height="' + size + '" shape-rendering="crispEdges" role="img" aria-label="' + esc(label || 'Travel pass code') + '"><rect width="' + N + '" height="' + N + '" fill="#FCFAF6"/><path d="' + d + '" fill="#313131"/></svg>';
-  }
+  /* ---- the QR code: the shared writer's (assets/seatpass.js) — one routine for every ticket ---- */
+  function W0() { var w = root && root.SIYL_SEATPASS && root.SIYL_SEATPASS.writer; if (!w && typeof require === 'function') w = require('./seatpass.js').writer; if (!w) throw new Error('no ticket writer'); return w; }
+  function modules(text) { return W0().modules(text); }
+  function qrSvg(text, size, label) { return W0().qrSvg(text, size, label); }
 
   /* ---- the document: the guest, the leg, the class, the state ---- */
   function stateOf(C) {
@@ -166,63 +154,79 @@
     });
   }
 
-  /* ---- the PDF ---- */
+  /* ---- the PDF: a real travel pass — the ticket frame, the route, the guest, the stub with the code ---- */
   /* WinAnsi has no arrow: the route reads with an en dash on paper */
   function paper(t) { return String(t == null ? '' : t).replace(/\s*→\s*/g, ' \u2013 '); }
+  var TICKET_H = 338;
+  function drawPass(p, doc, box) {
+    var W = W0(), INK = W.INK, MUTE = W.MUTE, LINE = W.LINE, ACCENT = W.ACCENT;
+    var g = p.ticket({ x: box.x, y: box.y, w: box.w, h: box.h, stub: 156 });
+    var x = g.x, top = g.y, w = g.w, l = doc.leg;
+    /* the header */
+    p.text(x, top - 14, 'see you in laos.', 'F1', 15, INK, 0.2);
+    p.label(x + w, top - 12, 'Travel pass · ' + (l.kind === 'train' ? 'Train' : 'Flight'), 'right');
+    p.line(x, top - 24, x + w, top - 24, INK, 0.7);
+    /* the leg */
+    p.label(x, top - 46, l.operator); p.text(x, top - 66, paper(l.title), 'F1', W.fit(paper(l.title), 17, 'F1', w, 12));
+    /* the route: two ends, the line between, the duration above it */
+    var ry = top - 108;
+    p.text(x, ry, l.from.code, 'F1', 30); p.text(x + w, ry, l.to.code, 'F1', 30, INK, 0, 'right');
+    var lx1 = x + 92, lx2 = x + w - 92;
+    p.line(lx1, ry + 10, lx2, ry + 10, LINE, 0.8); p.circle(lx1, ry + 10, 2.2, INK); p.circle(lx2, ry + 10, 2.2, INK);
+    var ds = W.fit(l.duration, 7.2, 'F2', lx2 - lx1 - 20 - 0.6 * l.duration.length, 5.5);
+    p.text((lx1 + lx2) / 2, ry + 16, l.duration, 'F2', ds, MUTE, ds < 7.2 ? 0.4 : 1.2, 'center');
+    p.text(x, ry - 16, l.from.time, 'F2', 10.5, INK, 1); p.text(x + w, ry - 16, l.to.time, 'F2', 10.5, INK, 1, 'right');
+    /* each end keeps to its half: the name, then the place beneath it */
+    var half = w / 2 - 10;
+    p.text(x, ry - 30, l.from.name, 'F2', 8.5, INK); p.text(x + w, ry - 30, l.to.name, 'F2', 8.5, INK, 0, 'right');
+    p.text(x, ry - 42, l.from.place, 'F2', W.fit(l.from.place, 8, 'F2', half, 6.5), MUTE); p.text(x + w, ry - 42, l.to.place, 'F2', W.fit(l.to.place, 8, 'F2', half, 6.5), MUTE, 0, 'right');
+    p.label(x, ry - 56, l.from.date); p.label(x + w, ry - 56, l.to.date, 'right');
+    p.line(x, ry - 70, x + w, ry - 70);
+    /* the facts: two rows of two */
+    var fy = ry - 90, c1 = x, c2 = x + w * 0.52;
+    p.label(c1, fy, 'Guest'); p.text(c1, fy - 18, doc.guest.fullName, 'F1', W.fit(doc.guest.fullName, 13, 'F1', c2 - c1 - 14, 9));
+    p.label(c2, fy, 'Class'); p.text(c2, fy - 18, doc.cls, 'F1', W.fit(doc.cls, 13, 'F1', x + w - c2, 9));
+    p.label(c1, fy - 38, 'Date'); p.text(c1, fy - 54, l.dates, 'F1', W.fit(l.dates, 12, 'F1', c2 - c1 - 14, 9));
+    p.label(c2, fy - 38, 'Your cost'); p.text(c2, fy - 54, doc.price != null ? 'USD ' + Number(doc.price).toLocaleString('en-US') + ' · per person' : 'Guest Relations confirms', 'F1', 12);
+    /* the foot of the body */
+    var by = g.bottom;
+    p.line(x, by + 14, x + w, by + 14);
+    p.label(x, by, 'Wedding journey of Haruthai & Suthep');
+    p.label(x + w, by, doc.state, 'right');
+    /* the stub */
+    var st = g.stub, size = 96, qx = st.cx - size / 2, qy = top - 14 - size;
+    p.qr(modules(payload(doc)), qx, qy, size);
+    p.text(st.cx, qy - 18, doc.ref, 'F2', 8.6, INK, 1.4, 'center');
+    p.label(st.cx, qy - 32, doc.state, 'center', ACCENT);
+    p.label(st.cx, qy - 50, l.code + ' · ' + l.from.code + ' – ' + l.to.code, 'center');
+    p.label(st.cx, qy - 62, l.from.date + ' · ' + l.from.time, 'center');
+    p.label(st.cx, by, 'Show to Guest Relations', 'center');
+  }
   function compose(doc) {
-    var W0 = root && root.SIYL_SEATPASS && root.SIYL_SEATPASS.writer;
-    if (!W0 && typeof require === 'function') W0 = require('./seatpass.js').writer;
-    if (!W0) throw new Error('no pdf writer');
-    var p = new W0.Page(), PAGE = W0.PAGE, M = 56, W = PAGE.w - M * 2, y = PAGE.h - 64, INK = W0.INK, MUTE = W0.MUTE, LINE = W0.LINE;
-    p.rect(0, 0, PAGE.w, PAGE.h, W0.GROUND);
-    p.rect(M - 16, 48, W + 32, PAGE.h - 96, W0.PAPER, LINE, 0.6);
-    p.text(M, y, 'see you in laos.', 'F1', 21, INK, 0.2); y -= 20;
-    p.label(M, y, 'Travel pass'); p.label(M + W, y, doc.stateWords, 'right'); y -= 30;
-    p.line(M, y, M + W, y, INK, 0.7); y -= 34;
-    p.label(M, y, doc.leg.kind === 'train' ? 'Train' : 'Flight'); p.text(M, y - 24, paper(doc.leg.title), 'F1', 19); p.text(M, y - 42, doc.leg.operator, 'F2', 9.5, MUTE); y -= 70;
-    /* the route: two ends, the codes large */
-    p.text(M, y, doc.leg.from.code, 'F1', 30); p.text(M + W, y, doc.leg.to.code, 'F1', 30, INK, 0, 'right');
-    p.line(M + 110, y + 8, M + W - 110, y + 8, LINE, 0.8);
-    p.text(M + W / 2, y + 14, doc.leg.duration, 'F2', 8, MUTE, 0.8, 'center');
+    var W = W0(), p = new W.Page(), PAGE = W.PAGE, M = 48, Wd = PAGE.w - M * 2, y = PAGE.h - 72, INK = W.INK, MUTE = W.MUTE;
+    p.ops.push(W.GROUND + ' rg 0 0 ' + PAGE.w + ' ' + PAGE.h + ' re f');   /* the ground — the page itself */
+    p.text(M, y, 'see you in laos.', 'F1', 19, INK, 0.2);
+    p.label(M + Wd, y + 2, 'Your travel pass', 'right');
     y -= 18;
-    p.text(M, y, doc.leg.from.time + ' · ' + doc.leg.from.date, 'F2', 10); p.text(M + W, y, doc.leg.to.time + ' · ' + doc.leg.to.date, 'F2', 10, INK, 0, 'right'); y -= 14;
-    p.text(M, y, doc.leg.from.name + ' · ' + doc.leg.from.place, 'F2', 8.5, MUTE); p.text(M + W, y, doc.leg.to.name + ' · ' + doc.leg.to.place, 'F2', 8.5, MUTE, 0, 'right'); y -= 30;
-    p.line(M, y, M + W, y); y -= 30;
-    /* the facts */
-    p.label(M, y, 'Guest'); p.text(M, y - 20, doc.guest.fullName, 'F1', 15);
-    p.label(M + W / 2, y, 'Class'); p.text(M + W / 2, y - 20, doc.cls, 'F1', 15); y -= 48;
-    p.label(M, y, 'Date'); p.text(M, y - 18, doc.leg.dates, 'F1', 12.5);
-    p.label(M + W / 2, y, 'Route'); p.text(M + W / 2, y - 18, paper(doc.leg.route), 'F1', 12.5); y -= 46;
-    p.label(M, y, 'Travel pass'); p.text(M, y - 20, doc.ref, 'F2', 12, INK, 1.6);
-    p.label(M + W / 2, y, 'Your cost'); p.text(M + W / 2, y - 20, doc.price != null ? 'USD ' + Number(doc.price).toLocaleString('en-US') + ' · per person' : 'Guest Relations confirms', 'F2', 11);
-    y -= 40;
-    if (doc.leg.note) { p.text(M, y, doc.leg.note, 'F3', 9.5, MUTE); y -= 18; }
-    y -= 8; p.line(M, y, M + W, y); y -= 24;
-    /* the code: modules as rectangles, quiet zone kept */
-    var m = modules(payload(doc));
-    if (m) {
-      var size = 120, n = m.length, cell = size / n, x0 = M, y0 = y - size;
-      p.rect(x0 - 8, y0 - 8, size + 16, size + 16, '1 1 1');
-      for (var r = 0; r < n; r++) for (var c = 0; c < n; c++) if (m[r][c]) p.rect(x0 + c * cell, y0 + (n - 1 - r) * cell, cell + 0.15, cell + 0.15, INK);
-      p.label(M + size + 24, y - 10, 'Scan');
-      p.text(M + size + 24, y - 28, 'The code carries this pass: the reference, your first name, the leg, the date and the class.', 'F3', 9.5, MUTE);
-      p.text(M + size + 24, y - 42, 'Guest Relations reads it at a glance. It is not the carrier’s ticket.', 'F3', 9.5, MUTE);
-      y = y0 - 24;
-    }
-    p.line(M, y, M + W, y); y -= 22;
-    p.text(M, y, 'This travel pass records your selection for the wedding journey of Haruthai & Suthep as it stands at the time of download.', 'F3', 9.5, MUTE); y -= 14;
-    p.text(M, y, doc.state === 'confirmed' ? 'Guest Relations has confirmed this arrangement. The carrier’s ticket follows from Guest Relations.' : doc.state === 'sent' ? 'Guest Relations has received your journey. The arrangement is confirmed with you personally; the carrier’s ticket follows from Guest Relations.' : 'Nothing is paid on this website. Guest Relations confirms the arrangement with you personally; the carrier’s ticket follows from Guest Relations.', 'F3', 9.5, MUTE); y -= 14;
-    p.text(M, y, 'If you change your journey, download this pass again; the newer one is the one that counts.', 'F3', 9.5, MUTE);
-    p.label(M, 64, 'Downloaded ' + doc.downloadedAt.replace('T', ' ').slice(0, 16) + ' UTC');
-    p.label(M + W, 64, 'Thailand · Laos · China · 21 February – 8 March 2027', 'right');
-    return W0.build([p], { title: 'Travel pass · ' + paper(doc.leg.title) + ' · ' + doc.guest.preferredName, subject: 'Travel pass ' + doc.ref });
+    p.text(M, y, doc.guest.fullName + ' · ' + paper(doc.leg.title), 'F2', 9.5, MUTE);
+    y -= 28;
+    drawPass(p, doc, { x: M, y: y - TICKET_H, w: Wd, h: TICKET_H }); y -= TICKET_H + 28;
+    var notes = ['This travel pass records your selection for the wedding journey of Haruthai & Suthep as it stands at the time of download.',
+      doc.state === 'confirmed' ? 'Guest Relations has confirmed this arrangement. The carrier\u2019s ticket follows from Guest Relations.' : doc.state === 'sent' ? 'Guest Relations has received your journey. The arrangement is confirmed with you personally; the carrier\u2019s ticket follows from Guest Relations.' : 'Nothing is paid on this website. Guest Relations confirms the arrangement with you personally; the carrier\u2019s ticket follows from Guest Relations.',
+      'The code carries this pass: the reference, your first name, the leg, the date and the class. It is not the carrier\u2019s ticket.',
+      'If you change your journey, download this pass again; the newer one is the one that counts.'];
+    notes.forEach(function (n) { W.wrap(n, 9.5, 'F3', Wd).forEach(function (line) { p.text(M, y, line, 'F3', 9.5, MUTE); y -= 14; }); });
+    p.label(M, W.SAFE.y + 14, 'Downloaded ' + doc.downloadedAt.replace('T', ' ').slice(0, 16) + ' UTC');
+    p.label(M + Wd, W.SAFE.y + 14, 'Thailand · Laos · China · 21 February – 8 March 2027', 'right');
+    compose.lastPage = p;
+    return W.build([p], { title: 'Travel pass · ' + paper(doc.leg.title) + ' · ' + doc.guest.preferredName, subject: 'Travel pass ' + doc.ref });
   }
   function filename(doc) {
     var who = String(doc.guest.preferredName || 'guest').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'guest';
     return 'see-you-in-laos-travel-pass-' + doc.leg.code.toLowerCase() + '-' + who + '.pdf';
   }
   function download(doc) {
-    var W0 = root.SIYL_SEATPASS.writer, bytes = W0.toBytes(compose(doc)), blob = new Blob([bytes], { type: 'application/pdf' }), url = URL.createObjectURL(blob);
+    var bytes = W0().toBytes(compose(doc)), blob = new Blob([bytes], { type: 'application/pdf' }), url = URL.createObjectURL(blob);
     var a = document.createElement('a'); a.href = url; a.download = filename(doc); a.rel = 'noopener'; document.body.appendChild(a); a.click();
     setTimeout(function () { document.body.removeChild(a); URL.revokeObjectURL(url); }, 90000);
     return a.download;

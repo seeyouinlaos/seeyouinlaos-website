@@ -21,6 +21,7 @@
           '<a href="1872.html">1872 · Afternoon Tea</a></div>' +
         '<div><h4>Guest Relations</h4>' +
           '<a href="your-journey.html">Your Journey</a>' +
+          '<a href="tickets.html">Your tickets</a>' +
           '<a href="mailto:guest.relation.seeyouinlaos@gmail.com">guest.relation.seeyouinlaos@gmail.com</a></div>' +
       '</div>' +
       '<p class="sf-legal">Sunday, 28 February 2027 · Vientiane, Laos</p>';

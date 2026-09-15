@@ -41,9 +41,6 @@ body.cart-on{padding-bottom:96px}
 <script src="assets/seatlabels.js"></script>
 <script src="assets/seating.js"></script>
 <script src="assets/confirm.js"></script>
-<script src="assets/seatpass.js"></script>
-<script src="assets/vendor/qrcode.js"></script>
-<script src="assets/travelpass.js"></script>
 <script src="assets/transport-data.js"></script>
 <script src="assets/journey.js"></script>
 <script type="module" src="assets/invite.mjs"></script>
@@ -101,9 +98,8 @@ function status(x){
   if(x.request)return 'Requested through Guest Relations';
   return 'Current selection'}
 function item(x){
-  var seg=segOf(x),when=J.when(x),m=J.meta(x),held=!(seg&&seg.cat==='Accommodation')||ST.held(x),TP=window.SIYL_TRAVELPASS;
-  /* a transport line is a ticket: the pass sits beneath the line (Owner, 15 Sep 2026) */
-  var pass=TP&&TP.isLeg(x.id)?TP.strip(x.id):'';
+  var seg=segOf(x),when=J.when(x),m=J.meta(x),held=!(seg&&seg.cat==='Accommodation')||ST.held(x);
+  /* CART = CART (Owner, 15 Sep 2026): the line, its selection, its price, CHANGE · REMOVE · VIEW DETAILS — the ticket and its code live on the ticket, never here */
   return '<div class="cart-line" data-line="'+esc(x.id)+'"><div class="p-line">'+
     '<a class="p-line-img" href="'+detailHref(x)+'" aria-label="Open '+esc(x.name)+'"'+(B.thumb(x)?' style="background-image:url('+B.thumb(x)+')"':'')+'></a>'+
     '<div class="p-line-body"><p class="t-l1">'+(when?esc(when):esc(group(x)))+'</p>'+
@@ -115,8 +111,7 @@ function item(x){
       '<button type="button" class="p-link mute" data-remove="'+esc(x.id)+'">Remove</button>'+
       '<a class="p-link mute" href="'+detailHref(x)+'">View details</a>'+
     '</div></div>'+
-    (x.interest?'<p class="p-line-amt"><span class="t-l1">Paid at the spa</span></p>':(x.complimentary?'<p class="p-line-amt"><span class="t-l1">Complimentary</span></p>':'<p class="p-line-amt">'+money(x.price||0)+'</p>'))+'</div>'+
-    (pass?'<div class="cart-pass">'+pass+'</div>':'')+'</div>'}
+    (x.interest?'<p class="p-line-amt"><span class="t-l1">Paid at the spa</span></p>':(x.complimentary?'<p class="p-line-amt"><span class="t-l1">Complimentary</span></p>':'<p class="p-line-amt">'+money(x.price||0)+'</p>'))+'</div></div>'}
 
 var lastCount=null;
 function render(){
@@ -152,7 +147,6 @@ function render(){
   rv.setAttribute('href',ready.ok?'review.html':(first?first.href:'your-journey.html'));
   rv.textContent=ready.ok?'Review your journey':'Complete this first';
   foot.hidden=false;document.body.classList.add('cart-on');
-  if(window.SIYL_TRAVELPASS)SIYL_TRAVELPASS.wire(page);
   page.querySelectorAll('[data-remove]').forEach(function(bt){bt.addEventListener('click',function(){
     var id=bt.getAttribute('data-remove'),line=page.querySelector('[data-line="'+id+'"]');
     bt.disabled=true;bt.textContent='Removing…';
@@ -167,11 +161,9 @@ document.addEventListener('siyl:temple',render);
 document.addEventListener('siyl:units',render);
 document.addEventListener('siyl:seats',render);
 document.addEventListener('siyl:auth',render);
-document.addEventListener('siyl:confirm',render);
 document.addEventListener('siyl:invite-ready',render);
 render();
 if(window.SIYL_SEATS&&G.party())SIYL_SEATS.load();
-if(window.SIYL_CONFIRM&&G.party())SIYL_CONFIRM.load();
 })();
 </script>
 </body></html>

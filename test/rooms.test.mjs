@@ -34,23 +34,22 @@ test('ROOMS · 1 room = 2 places; 5 rooms = 10 places; units are persistent labe
   assert.equal(five.reduce((n, u) => n + u.places, 0), 10);
   assert.deepEqual(unitsOf('wedstay/heritage'), five, 'the same identities on every derivation');
   const one = unitsOf('prewed/souphattra-presidential');
-  assert.equal(one.length, 1); assert.equal(one[0].places, 2, 'the reserved suite has two guest places');
-  assert.equal(unitsOf('bkk-stay/penthouse')[0].kind, 'property');
-  assert.equal(unitsOf('bkk-stay/penthouse')[0].places, SEED['bkk-stay/penthouse'].capacity);
+  assert.equal(one.length, 1); assert.equal(one[0].places, 2, 'the Presidential is one room of two guest places');
+  /* the six-bedroom Penthouse (Owner, 15 Sep 2026): Room A – F, twelve places */
+  assert.deepEqual(unitsOf('bkk-stay/penthouse').map((u) => u.label), ['A', 'B', 'C', 'D', 'E', 'F']);
+  assert.equal(unitsOf('bkk-stay/penthouse').reduce((n, u) => n + u.places, 0), 12);
+  assert.equal(unitsOf('airbnb-2br/private-residence')[0].kind, 'property'); assert.equal(unitsOf('airbnb-2br/private-residence')[0].places, 6);
   assert.equal(unitsOf('kmg/light-french')[0].places, 1, 'a single room is a single room');
   assert.equal(allUnits().length, Object.keys(SEED).reduce((n, k) => n + (SEED[k].unit === 'guest' ? 1 : SEED[k].capacity), 0));
 });
 
-test('ROOMS · eligibility is the engine\'s: Bride & Groom to the hosts only, Family to nobody, everything else open', () => {
+test('ROOMS · no pre-reserved rooms (Owner, 15 Sep 2026): every unit is open to every authenticated guest; nobody without an identity', () => {
   const pres = unitsOf('wedstay/souphattra-presidential')[0];
-  assert.equal(pres.reservedFor, 'Bride & Groom');
-  assert.equal(mayJoin(pres, HAR).ok, true);
-  assert.equal(mayJoin(pres, PEG).ok, false);
+  assert.equal(pres.reservedFor, null);
+  assert.equal(mayJoin(pres, HAR).ok, true); assert.equal(mayJoin(pres, PEG).ok, true); assert.equal(mayJoin(pres, SUT).ok, true);
   assert.equal(mayJoin(pres, null).ok, false);
   const fam = unitsOf('wedstay/grand-majestic')[0];
-  assert.equal(fam.reservedFor, 'Family');
-  assert.equal(mayJoin(fam, HAR).ok, false, 'not even the hosts');
-  for (const key of Object.keys(SEED)) if (SEED[key].heldFor === 'Bride & Groom') for (const u of unitsOf(key).filter((x) => x.reservedFor)) assert.equal(mayJoin(u, SUT).ok, true, key + ' opens to the hosts');
+  assert.equal(fam.reservedFor, null); assert.equal(mayJoin(fam, HAR).ok, true); assert.equal(mayJoin(fam, LIN).ok, true);
   assert.equal(mayJoin(unitsOf('wedstay/heritage')[0], LIN).ok, true);
   assert.equal(stageOf('airbnb-2br/private-residence'), 'wedstay', 'the residence is the wedding stage');
 });
@@ -112,9 +111,9 @@ test('ROOMS · a write is the identity\'s own: another guest, another invitation
   r = await call(rooms, 'join', { invitationId: PEG.invitationId, guestId: PEG.guestId, key: 'wedstay/heritage', label: 'A', name: 'x' }, null);
   assert.equal(r.status, 401);
   r = await call(rooms, 'join', { invitationId: PEG.invitationId, guestId: PEG.guestId, key: 'wedstay/souphattra-presidential', label: 'A', name: 'x' }, PEG);
-  assert.equal(r.status, 403, 'Bride & Groom stays reserved');
+  assert.equal(r.status, 200, 'the Presidential is available until booked — to Peggy too (Owner, 15 Sep 2026)');
   r = await call(rooms, 'join', { invitationId: HAR.invitationId, guestId: HAR.guestId, key: 'wedstay/grand-majestic', label: 'A', name: 'x' }, HAR);
-  assert.equal(r.status, 403, 'Family stays out of reach');
+  assert.equal(r.status, 200, 'the Grand Majestic is available until booked');
   r = await call(rooms, 'leave', { invitationId: STE.invitationId, guestId: STE.guestId, stage: 'wedstay' }, PEG);
   assert.equal(r.status, 403);
 });

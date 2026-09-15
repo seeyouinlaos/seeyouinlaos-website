@@ -108,15 +108,23 @@ test('PDF · the seat confirmation: a real PDF, the Owner\'s fields, labels only
   assert.equal(pdf.slice(xref, xref + 4), 'xref');
   const offs = [...pdf.matchAll(/^(\d{10}) 00000 n /gm)].map((m) => +m[1]);
   offs.forEach((o, i) => assert.match(pdf.slice(o, o + 12), new RegExp('^' + (i + 1) + ' 0 obj')));
-  /* the Owner's fields, in the text of the page */
-  for (const t of ['see you in laos.', 'SEAT CONFIRMATION', 'GUEST', 'Peggy Berger', 'YOUR PARTY', 'Peggy & Steffie', 'EVENT', 'Temple Ceremony', 'DATE', 'Sunday, 28 February 2027', 'VENUE', 'Wat Ong Teu, Vientiane', 'SEAT', 'E4', 'Right block · row 4', 'STATUS', 'CONFIRMED', 'HELD FOR']) {
-    assert.ok(pdf.includes(t.replace('·', '\\267').replace('&', '&')), 'text: ' + t);
+  /* the Owner's fields, in the text of the page: a TICKET (Owner, 15 Sep 2026) — event, guest, seat, status, held for, the reference, the download stamp */
+  for (const t of ['see you in laos.', 'SEAT TICKET', 'YOUR WEDDING SEAT', 'GUEST', 'Peggy Berger', 'Peggy & Steffie', 'EVENT', 'Temple Ceremony', 'Sunday, 28 February 2027 · 08:00', 'Wat Ong Teu, Vientiane', 'SEAT', 'E4', 'Right block · row 4', 'STATUS', 'CONFIRMED', 'HELD FOR', 'SYL-TC-E4-', 'SCAN AT THE DOOR', 'DOWNLOADED 2026-09-14 10:00 UTC', 'WEDDING OF HARUTHAI & SUTHEP']) {
+    assert.ok(pdf.includes(t.replace('·', '\\267')), 'text: ' + t);
   }
-  assert.doesNotMatch(pdf, /C-R-04-02|D-T-17/, 'no ledger id in the confirmation');
-  assert.doesNotMatch(pdf, /INV-002|INV-G|BOOKING REFERENCE|SYL-/, 'no invitation id, no reference, no code (Owner, 14 Sep 2026)');
-  assert.doesNotMatch(pdf, /QR|barcode|Barcode|BOARDING|Boarding|USD|\$|PAID|Paid|payment/i, 'no QR, no barcode, no boarding pass, no payment');
+  assert.doesNotMatch(pdf, /C-R-04-02|D-T-17/, 'no ledger id on the ticket');
+  assert.doesNotMatch(pdf, /INV-002|INV-G|BOOKING REFERENCE/, 'no invitation id on the ticket');
+  assert.match(pdf, /\(SYL-TC-E4-[23456789BCDFGHJKMNPQRSTVWXZ]{4}\)/, 'the ticket reference, from the ledger');
+  assert.doesNotMatch(pdf, /barcode|Barcode|BOARDING|Boarding|USD|\$|PAID|Paid|payment/i, 'no barcode, no boarding pass, no payment');
   assert.doesNotMatch(pdf, /\/XObject|\/Image|\/Subtype \/Image|\/JavaScript|\/URI/, 'no image, no script, no link');
   assert.doesNotMatch(pdf, /[a-z0-9]{16}/, 'nothing token-shaped');
+  /* the code is drawn on the stub, module by module; the ticket frame with its perforation is there */
+  assert.ok((pdf.match(/ re f/g) || []).length > 300, 'the QR modules');
+  assert.match(pdf, /\[3 3\] 0 d /, 'the perforation'); assert.match(pdf, / c h B/, 'the rounded ticket frame');
+  /* NOTHING CLIPPED: every drawn thing lies inside the page's safe area */
+  const geo = PASS.writer.within(PASS.compose.lastPage); assert.equal(geo.ok, true, 'outside the safe area: ' + JSON.stringify(geo.outside.slice(0, 3)));
+  const topMost = Math.max(...PASS.compose.lastPage.marks.map((m) => m.y + m.h));
+  assert.ok(topMost <= PASS.PAGE.h - 40, 'the top is well inside the page: ' + topMost);
   assert.equal(PASS.filename(doc), 'see-you-in-laos-tc-seat-peggy.pdf');
   /* Latin-1 bytes only: a byte per character, the WinAnsi marks mapped */
   const bytes = PASS.toBytes(pdf); assert.equal(bytes.length, pdf.length);
@@ -127,6 +135,13 @@ test('PDF · the seat confirmation: a real PDF, the Owner\'s fields, labels only
   assert.match(pdf2, /YOUR WEDDING SEATS/); assert.match(pdf2, /Temple Ceremony/); assert.match(pdf2, /Wedding Dinner/); assert.match(pdf2, /Souphattra Heritage, Vientiane \\267 poolside/);
   assert.ok(pdf2.indexOf('Temple Ceremony') < pdf2.indexOf('Wedding Dinner'));
   assert.ok(pdf2.includes('(E4)') && pdf2.includes('(A17)'));
+  assert.match(pdf2, /SYL-TC-E4-/); assert.match(pdf2, /SYL-WD-A17-/);
+  assert.equal(PASS.writer.within(PASS.compose.lastPage).ok, true, 'two tickets fit the page without clipping');
+  /* the ticket reference is the ledger's; the code carries the ticket and nothing secret */
+  assert.equal(PASS.refOf(both, both.seats[0]), L.ref('INV-002', 'G001', 'ceremony', 'C-R-04-02'));
+  const pl = PASS.payload(both, both.seats[1]);
+  assert.match(pl, /^SEE YOU IN LAOS\nSEAT TICKET SYL-WD-A17-[A-Z0-9]{4}\nPeggy\nWedding Dinner\nSunday, 28 February 2027 · 19:30\nSeat A17 · Long table · run A · Poolside · place 17\nCONFIRMED$/);
+  assert.doesNotMatch(pl, /INV-|G001|siyl/);
   assert.equal(PASS.filename(both), 'see-you-in-laos-wedding-seats-peggy.pdf');
   /* a guest without a seat gets no document; a seat the ledger does not hold is never written */
   assert.equal(PASS.docFor(party, 'G002', mine, ['ceremony'], '2026-09-14T10:00:00.000Z'), null);
@@ -147,6 +162,8 @@ test('PDF · the hosts: Bride and Groom at the front centre, no seat number, the
   assert.deepEqual(bride.seats, [{ event: 'ceremony', fixed: 'BRIDE' }, { event: 'dinner', seatId: 'D-B-03' }]);
   const pdf = PASS.compose(bride);
   assert.match(pdf, /Bride \\267 Front Centre/); assert.match(pdf, /FRONT CENTRE/); assert.ok(pdf.includes('(B3)'));
+  assert.match(pdf, /SYL-TC-FC-[A-Z0-9]{4}/, 'a fixed position carries its own reference'); assert.match(pdf, /SYL-WD-B3-/);
+  assert.equal(PASS.writer.within(PASS.compose.lastPage).ok, true);
   const groom = PASS.docFor(party, 'G049', mine, ['ceremony', 'dinner'], '2026-09-14T10:00:00.000Z');
   assert.deepEqual(groom.seats, [{ event: 'ceremony', fixed: 'GROOM' }], 'no dinner seat yet: only the front centre');
   assert.match(PASS.compose(groom), /Groom \\267 Front Centre/);
@@ -160,7 +177,7 @@ test('SURFACES · the preparation, The Wedding and Review & Send speak in labels
   for (const [f, s] of [['wedding-preparation.html', wp], ['wedding.html', wd], ['review.html', rv]]) {
     assert.ok(s.indexOf('assets/seatlabels.js') < s.indexOf('assets/seating.js'), f + ': labels before the map');
     assert.match(s, /assets\/seatpass\.js/, f + ': the confirmation module');
-    assert.match(s, /data-seat-pass=/, f + ': a download');
+    assert.match(s, /data-seat-pass=|tickets\.html/, f + ': a download or the way to the tickets');
   }
   /* the two-step booking: tap → summary → CONFIRM; nothing is held on the tap */
   assert.match(wp, /data-seat-confirm=/); assert.match(wp, /data-seat-cancel/); assert.match(wp, /Confirm seat/); assert.match(wp, /Confirm change/);
@@ -175,7 +192,7 @@ test('SURFACES · the preparation, The Wedding and Review & Send speak in labels
   assert.doesNotMatch(wp, /esc\(sid\)<\/span>|'>'\+esc\(sid\)\+'</, 'preparation: no raw id span');
   assert.doesNotMatch(wd, /esc\(sid\)<\/span>|'>'\+esc\(sid\)\+'</, 'The Wedding: no raw id span');
   assert.doesNotMatch(rv, /'>'\+esc\(cs\)\+'<|'>'\+esc\(ds\)\+'</, 'Review & Send: no raw id');
-  assert.match(rv, /Seat '\+esc\(lab\(cs\)\)/); assert.match(rv, /Seat '\+esc\(lab\(ds\)\)/); assert.doesNotMatch(rv, /Lx\.ref\(/, 'no reference on the surface');
+  assert.match(rv, /Seat '\+esc\(lab\(cs\)\)/); assert.match(rv, /Seat '\+esc\(lab\(ds\)\)/); assert.doesNotMatch(rv, /Lx\.ref\(|PASS\.card|p-qr/, 'REVIEW = REVIEW: no ticket code on Review & Send');
   assert.match(wd, /'Seat '\+esc\(lab\(sid\)\)/);
   /* the seating engine (ids, API, holds, party auth, open/frozen, capacity) is the 13 Sep engine */
   const eng = src('src/seating.js');

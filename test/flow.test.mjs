@@ -32,6 +32,8 @@ function completeExceptJourney(w, opts = {}) {
   if (opts.temple === 'yes') T.setOffering(id, opts.offering || 'no');
   G.setDressAck(true);
   G.setAllergy('no'); G.setPhotoAck(true);
+  /* every visible question answered (Owner, 15 Sep 2026) */
+  G.PROFILE.forEach((q) => G.setProfile(id, q.key, 'Answered'));
 }
 
 test('FLOW · steps are sequential: 02 is locked until 01 is complete, 06 until 01–05; the first missing item is named with its control', () => {
@@ -92,16 +94,26 @@ test('FLOW · step 03 is every event, and the Sangkhathan while attending the te
   assert.equal(G.done('preparation'), true);
 });
 
-test('FLOW · step 05: allergy NO completes; YES needs details; photography must be acknowledged; favourites and documents never block', () => {
+test('FLOW · step 05: allergy NO completes; YES needs details; every visible question must be answered (Owner, 15 Sep 2026); photography must be acknowledged; documents never block', () => {
   const w = page({ auth: PEGGY });
   const G = w.SIYL_GUEST, D = w.SIYL_DOCS;
-  deq(G.missingFor('about').map((m) => m.key), ['allergy', 'photo']);
+  const QS = ['profile:coffeetea', 'profile:treat', 'profile:drink', 'profile:avoid', 'profile:film', 'profile:music'];
+  deq(G.missingFor('about').map((m) => m.key), ['allergy', ...QS, 'photo']);
   G.setAllergy('yes');
-  deq(G.missingFor('about').map((m) => [m.key, m.href]), [['allergy-details', 'about-you.html#allergy-details'], ['photo', 'about-you.html#photo']]);
+  deq(G.missingFor('about').slice(0, 2).map((m) => [m.key, m.href]), [['allergy-details', 'about-you.html#allergy-details'], ['profile:coffeetea', 'about-you.html#q-coffeetea']]);
   G.setAllergy('yes', 'peanuts');
-  deq(G.missingFor('about').map((m) => m.key), ['photo']);
+  deq(G.missingFor('about').map((m) => m.key), [...QS, 'photo']);
+  /* each unanswered question is named exactly, with the way to its box; an empty or blank answer never counts */
+  deq(G.missingFor('about')[0], { key: 'profile:coffeetea', label: '02 · Coffee or tea', href: 'about-you.html#q-coffeetea' });
+  G.setProfile('g-peggy', 'coffeetea', '   ');
+  assert.equal(G.missingFor('about')[0].key, 'profile:coffeetea', 'blank is not an answer');
+  G.setProfile('g-peggy', 'coffeetea', 'Tea, black');
+  deq(G.missingFor('about').map((m) => m.key), QS.slice(1).concat(['photo']), 'answering updates the readiness at once');
   G.setPhotoAck(true);
-  assert.equal(G.done('about'), true, 'no favourite, no document, no consent needed');
+  assert.equal(G.done('about'), false, 'five questions still open hold the step');
+  assert.equal(G.mayEnter('review'), false);
+  for (const [k, v] of [['treat', 'Mango sticky rice'], ['drink', 'Water'], ['avoid', 'Nothing'], ['film', 'In the Mood for Love'], ['music', 'Jazz']]) G.setProfile('g-peggy', k, v);
+  assert.equal(G.done('about'), true, 'no document, no consent needed');
   G.setAllergy('no');
   assert.equal(G.allergyDetails(), '', 'NO never keeps stale details');
   assert.equal(G.done('about'), true);
@@ -117,7 +129,15 @@ test('FLOW · step 05: allergy NO completes; YES needs details; photography must
     assert.doesNotMatch(s, /key: 'comfort'|key: 'anything'|key: 'access'/, f);
   }
   assert.match(src('assets/guest.js'), /I understand and acknowledge this\./); assert.match(src('about-you.html'), /G\.PHOTO_TEXT/);
-  assert.match(src('about-you.html'), /Optional · not added/);
+  assert.match(src('about-you.html'), /Optional · not added/, 'documents stay optional');
+  /* no contradictory OPTIONAL label on a required question */
+  const about = src('about-you.html');
+  assert.doesNotMatch(about, /q\.n\+' · Optional'|placeholder="Optional"|<p class="t-l1">Optional<\/p><h2 class="t-h2">A little more/);
+  assert.match(about, /aria-required="true" aria-invalid="'\+\(ok\?'false':'true'\)\+'"/);
+  assert.match(about, /Complete':'Required'/);
+  assert.match(src('assets/guest.js'), /required: true \},\n\s*\{ key: 'treat'/);
+  /* Review names an unanswered question with the way to it */
+  assert.match(src('review.html'), /about-you\.html#q-'\+q\.key/);
 });
 
 test('FLOW · 06 opens only when 01–05 are complete; readiness lists every missing item with COMPLETE THIS', () => {

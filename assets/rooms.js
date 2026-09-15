@@ -43,6 +43,8 @@
     ready: function () { return view !== null; },
     error: function () { return lastError; },
     view: function () { return view; },
+    /* a view handed in by a test or a migration script — never by a page */
+    _set: function (v) { view = v; lastError = null; },
     stageOf: function (key) { var w = String(key || '').split('/')[0]; return STAGE_OF[w] || w; },
 
     load: function (force) {
@@ -65,29 +67,39 @@
     mineFor: function (win, slug) { var m = this.mine(this.stageOf(keyOf(win, slug))); return m && m.key === keyOf(win, slug) ? m : null; },
     /* free places a guest may take in this category */
     free: function (win, slug) { var s = this.summary(win, slug); return s ? s.free : null; },
-    eligible: function (win, slug) { return this.units(win, slug).some(function (u) { return u.eligible; }); },
+    /* every room is open to every guest (Owner, 15 Sep 2026); kept for readers of the old rule */
+    eligible: function (win, slug) { return this.units(win, slug).length > 0; },
     fits: function (win, slug) {
       if (!this.tracked(win, slug)) return true;
       if (this.mineFor(win, slug)) return true;
-      return this.units(win, slug).some(function (u) { return u.eligible && !u.full; });
+      return this.units(win, slug).some(function (u) { return !u.full; });
     },
     soldOut: function (win, slug) { return this.tracked(win, slug) && !this.fits(win, slug); },
     /* the unit to suggest: a unit a party member already holds with a place
      * free, else the first unit with a place free */
     suggest: function (win, slug) {
-      var list = this.units(win, slug).filter(function (u) { return u.eligible && !u.full; });
+      var list = this.units(win, slug).filter(function (u) { return !u.full; });
       var withParty = list.filter(function (u) { return u.occupants.some(function (o) { return o.party && !o.mine; }); })[0];
       return withParty || list[0] || null;
     },
-    /* the words the guest reads about a category */
+    /* the words the guest reads about a category — derived exactly from its
+     * physical rooms (Owner, 15 Sep 2026): the rooms with a place left and the
+     * unused places across them; never a separate stock counter, never a
+     * reservation. "Your place is held" only when this guest holds one here. */
     label: function (win, slug) {
       var s = this.summary(win, slug);
       if (!s) return '';
+      var list = this.units(win, slug), mine = this.mineFor(win, slug);
+      if (mine) return 'Your place is held · ' + this.unitName(list.filter(function (u) { return u.label === mine.label; })[0] || { kind: 'room', label: mine.label });
+      var free = list.reduce(function (n, u) { return n + u.free; }, 0), rooms = list.filter(function (u) { return u.free > 0; }).length;
+      if (free <= 0) return 'Fully booked';
+      if (list.length === 1 && list[0].kind === 'property') return free === 1 ? '1 place available' : free + ' places available';
+      return (rooms === 1 ? '1 room' : rooms + ' rooms') + ' · ' + (free === 1 ? '1 place available' : free + ' places available');
+    },
+    /* the category's exact numbers, from its rooms */
+    count: function (win, slug) {
       var list = this.units(win, slug);
-      if (!list.some(function (u) { return u.eligible; })) return s.reservedFor ? 'Reserved for ' + s.reservedFor : 'Reserved';
-      if (this.mineFor(win, slug)) return 'Your place is held';
-      if (s.free <= 0) return 'Fully booked';
-      return s.free === 1 ? '1 place left' : s.free + ' places left';
+      return { rooms: list.length, places: list.reduce(function (n, u) { return n + u.places; }, 0), free: list.reduce(function (n, u) { return n + u.free; }, 0), open: list.filter(function (u) { return u.free > 0; }).length };
     },
     scarce: function (win, slug) { var s = this.summary(win, slug); return !!s && s.free > 0 && s.free <= 2; },
     unitName: function (u) { return u ? (u.kind === 'property' ? u.name : 'Room ' + u.label) : ''; },

@@ -43,20 +43,23 @@
     try { document.dispatchEvent(new CustomEvent('siyl:bag')); } catch (e) {}
   }
 
-  /* ---- ABOUT YOU (Owner, 14 Sep 2026) ----------------------------------
-   * One required question first — food allergies, answered YES or NO, with
-   * the details only when the answer is YES — then the favourites, all
-   * optional. The three retired questions of the party model are gone.
-   * Sequential numbering after the removals. */
+  /* ---- ABOUT YOU (Owner, 14 Sep 2026 · 15 Sep 2026) ---------------------
+   * One question first — food allergies, answered YES or NO, with the
+   * details only when the answer is YES — then the favourites. EVERY visible
+   * question is required (Owner override, 15 Sep 2026): a question shown in
+   * the profile flow must be answered, an empty box never counts as done,
+   * and the readiness engine names the exact unanswered question. Only the
+   * travel documents stay optional. The three retired questions of the party
+   * model are gone. Sequential numbering after the removals. */
   var ALLERGY = { key: 'allergy', n: '01', q: 'Do you have any food allergies?', required: true,
     details: 'Please tell us which — the kitchens read this.' };
   var PROFILE = [
-    { key: 'coffeetea', n: '02', q: 'Coffee or tea', hint: 'And how you like it.' },
-    { key: 'treat', n: '03', q: 'My favourite', hint: 'A snack, sweet or little treat you never say no to.' },
-    { key: 'drink', n: '04', q: 'Favourite drink', hint: 'The one you would choose without looking at the menu.' },
-    { key: 'avoid', n: '05', q: 'Anything you would rather avoid?', hint: 'A taste, a scent, a habit — anything at all.' },
-    { key: 'film', n: '06', q: 'Favourite film', hint: 'The one you could happily watch again.' },
-    { key: 'music', n: '07', q: 'Favourite music', hint: 'A song, an album, an artist you never skip.' }
+    { key: 'coffeetea', n: '02', q: 'Coffee or tea', hint: 'And how you like it.', required: true },
+    { key: 'treat', n: '03', q: 'My favourite', hint: 'A snack, sweet or little treat you never say no to.', required: true },
+    { key: 'drink', n: '04', q: 'Favourite drink', hint: 'The one you would choose without looking at the menu.', required: true },
+    { key: 'avoid', n: '05', q: 'Anything you would rather avoid?', hint: 'A taste, a scent, a habit — anything at all. "Nothing" is an answer.', required: true },
+    { key: 'film', n: '06', q: 'Favourite film', hint: 'The one you could happily watch again.', required: true },
+    { key: 'music', n: '07', q: 'Favourite music', hint: 'A song, an album, an artist you never skip.', required: true }
   ];
   /* REQUIRED: the guest knows that photography and filming take place. It is
    * an acknowledgement — never a consent to publication, which stays a
@@ -244,8 +247,14 @@
       write(st);
       return true;
     },
+    /* every visible question, unanswered → named, with the way to its box */
+    profileMissing: function () {
+      var me = this.me(), self = this; if (!me) return [];
+      return PROFILE.filter(function (q) { return q.required && !String(self.profile(me.guestId, q.key) || '').trim(); })
+        .map(function (q) { return { key: 'profile:' + q.key, label: q.n + ' · ' + q.q, href: 'about-you.html#q-' + q.key }; });
+    },
     aboutMissing: function () {
-      var out = this.allergyMissing();
+      var out = this.allergyMissing().concat(this.profileMissing());
       if (!this.photoAck()) out.push({ key: 'photo', label: 'Photography acknowledgement', href: 'about-you.html#photo' });
       return out;
     },

@@ -31,6 +31,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <p class="t-l1" id="b2who">For you</p>
 <p class="t-b2 measure-w">Your travel, your stays and your experiences, in the order the journey happens.</p>
 <div id="items"></div>
+<div class="p-actions" style="margin-top:var(--s3)"><a class="p-link mute" href="tickets.html">Your tickets</a></div>
 </section>
 
 <section class="p-block" id="b3">
@@ -162,7 +163,8 @@ var G=window.SIYL_GUEST,box=document.getElementById('b6c');if(!box||!G||!G.party
 var a=G.allergy(),d=G.allergyDetails(),ack=G.photoAck();
 var h='<div class="p-group">';
 h+=row('Food allergies',a==='no'?'None':a==='yes'?(d?esc(d):'Details still needed'):'Not answered yet',a==='no'||(a==='yes'&&d)?'Answered':'<a class="p-link" href="about-you.html#allergy">Complete this</a>',!(a==='no'||(a==='yes'&&d)));
-G.PROFILE.forEach(function(q){var v=G.profile(G.me().guestId,q.key);if(v)h+=row(q.q,esc(v),'',false)});
+/* every visible question is required (Owner, 15 Sep 2026): an unanswered one is named, with the way to it */
+G.PROFILE.forEach(function(q){var v=String(G.profile(G.me().guestId,q.key)||'').trim();h+=row(q.q,v?esc(v):'Not answered yet',v?'Answered':'<a class="p-link" href="about-you.html#q-'+q.key+'">Complete this</a>',!v)});
 h+=row('Photography &amp; film',ack?'Acknowledged on '+when(ack.at):'Not acknowledged yet',ack?'Acknowledged':'<a class="p-link" href="about-you.html#photo">Complete this</a>',!ack);
 box.innerHTML=h+'</div>'}
 
@@ -199,7 +201,7 @@ if(g){
      (ds?'<p class="t-l1 on">Seat '+esc(lab(ds))+'</p>':(needD&&openS?'<a class="p-link" href="wedding-preparation.html#seats">Complete this</a>':'<p class="t-l1">'+(needD?'Not open yet':'—')+'</p>'))+'</div>';
   var a=G.dressAck();
   h+='<div class="p-kv"><div><p class="t-b1"><b>Dress code</b></p><p class="t-b2">'+(a?'Acknowledged on '+when(a.at):'Not yet acknowledged')+'</p></div>'+(a?'<p class="t-l1 on">Acknowledged</p>':'<a class="p-link" href="wedding-preparation.html#ack">Complete this</a>')+'</div>';
-  if((cs||ds||p.hosts)&&window.SIYL_SEATPASS)h+='<div class="p-actions" style="margin-top:var(--s3)"><button type="button" class="p-link mute" data-seat-pass="all" data-seat-pass-for="'+esc(me.guestId)+'">Download seat confirmation</button></div>';
+  if((cs||ds||p.hosts)&&window.SIYL_SEATPASS)h+='<div class="p-actions" style="margin-top:var(--s3)"><a class="p-link mute" href="tickets.html">Your tickets</a></div>';
   h+='</div>'}
 box.innerHTML=h;
 box.querySelectorAll('[data-seat-pass]').forEach(function(b){b.addEventListener('click',function(){
@@ -242,10 +244,9 @@ el.innerHTML=(window.SIYL_JOURNEY?SIYL_JOURNEY.sorted(b):b)
 .filter(function(x){return !(window.SIYL_JOURNEY&&SIYL_JOURNEY.isWedding(x))})
 .map(function(x){
 var J=window.SIYL_JOURNEY,m=J?J.meta(x):{cat:'',basis:''},when2=J?J.when(x):'';
-var href=detailHref(x),unit=ST&&x.room&&!x.interest?ST.unitWords(x):'',TP=window.SIYL_TRAVELPASS;
-/* a transport line is a ticket: the pass beneath the line (Owner, 15 Sep 2026) */
-var pass=TP&&TP.isLeg(x.id)?TP.strip(x.id):'';
-return '<div class="cart-line"><div class="p-line"><a class="p-line-img" href="'+href+'" aria-label="Open '+esc(x.name)+'"'+(SIYL_BAG.thumb(x)?' style="background-image:url('+SIYL_BAG.thumb(x)+')"':'')+'></a>'+
+var href=detailHref(x),unit=ST&&x.room&&!x.interest?ST.unitWords(x):'';
+/* REVIEW = REVIEW (Owner, 15 Sep 2026): the selection as it stands — the tickets and their codes live on the tickets page */
+return '<div class="p-line"><a class="p-line-img" href="'+href+'" aria-label="Open '+esc(x.name)+'"'+(SIYL_BAG.thumb(x)?' style="background-image:url('+SIYL_BAG.thumb(x)+')"':'')+'></a>'+
 '<div class="p-line-body"><p class="t-l1">'+(when2?when2:'')+(m.cat?' · '+m.cat:'')+'</p>'+
 '<h3 class="t-h2"><a href="'+href+'">'+esc(x.name)+'</a></h3><p class="t-b2">'+esc(x.meta||'')+'</p>'+
 (unit?'<p class="t-l1 on">'+esc(unit)+'</p>':'')+
@@ -253,9 +254,7 @@ return '<div class="cart-line"><div class="p-line"><a class="p-line-img" href="'
 (J&&J.quantityLine(x)?'<p class="t-b2">'+esc(J.quantityLine(x))+'</p>':'')+((x.request||!(J&&J.quantityLine(x)))&&m.basis?'<p class="t-b2">'+esc(m.basis)+'</p>':'')+
 (x.note?'<p class="t-l1 on">'+esc(x.note)+(x.noteBy?' · '+esc(x.noteBy):'')+'</p>':'')+
 (x.breakfast?'<p class="t-l1">'+esc(x.breakfast)+'</p>':'')+'</div>'+
-(x.interest?'<p class="p-line-amt"><span class="t-l1">Interest · request</span></p>':'<p class="p-line-amt">USD '+((x.price||0)).toLocaleString('en-US')+'</p>')+'</div>'+
-(pass?'<div class="cart-pass">'+pass+'</div>':'')+'</div>'}).join('');
-if(window.SIYL_TRAVELPASS)SIYL_TRAVELPASS.wire(el)}
+(x.interest?'<p class="p-line-amt"><span class="t-l1">Interest · request</span></p>':'<p class="p-line-amt">USD '+((x.price||0)).toLocaleString('en-US')+'</p>')+'</div>'}).join('')}
 document.getElementById('tt').textContent='USD '+SIYL_BAG.total().toLocaleString('en-US');
 paintReady();
 SIYL_BAG.badge()}

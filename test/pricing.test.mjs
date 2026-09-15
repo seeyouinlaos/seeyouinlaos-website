@@ -335,13 +335,13 @@ test('Sathorn gallery holds eleven distinct photographs, none repeated', () => {
   assert.ok(g.includes('assets/images/penthouse/exterior-elevated.jpg'), 'the missing Drive 001 exterior is in');
 });
 
-test('Full Experience picks the premium ELIGIBLE room — never reserved inventory', () => {
-  assert.equal(P.premium('prewed').slug, 'souphattra-majestic');   /* Presidential (750) is Bride & Groom, Grand Majestic (250) is family */
-  assert.equal(P.premium('wedstay').slug, 'souphattra-majestic');
+test('the premium room of a stage is the dearest a guest may take — no room is held back (Owner, 15 Sep 2026)', () => {
+  assert.equal(P.premium('prewed').slug, 'souphattra-presidential');   /* the Presidential (750) is available until booked, like every room */
+  assert.equal(P.premium('wedstay').slug, 'souphattra-presidential');
   assert.equal(P.premium('kmg').slug, 'left-bank');
   assert.equal(P.premium('ljg').slug, 'starry-sky');
   assert.equal(P.premium('kempinski').slug, 'deluxe-balcony-king');
-  for (const w of ['prewed', 'wedstay', 'kmg', 'ljg']) assert.ok(!P.premium(w).reserved);
+  for (const w of ['prewed', 'wedstay', 'kmg', 'ljg']) assert.equal(P.premium(w).reserved, undefined);
 });
 
 test('Full Experience lines come from the single pricing source, transport included', () => {
@@ -354,10 +354,11 @@ test('Full Experience lines come from the single pricing source, transport inclu
   const all = ['bkk-stay', 'train', 'prewed', 'wedstay', 'mu9646', 'kmg', 'c86', 'ljg', 'return', 'kempinski']
     .flatMap((w) => P.FLAT[w] ? P.items(w) : P.items(w, P.premium(w).slug));
   assert.equal(all.length, 10, 'ten stages, ten lines');
-  /* the premium-max sum still exists as arithmetic; it is simply no longer
-     what Full Experience selects */
-  assert.equal(total(all), 255 + 100 + 580 + 290 + 275 + 261 + 105 + 420 + 200 + 380);
-  assert.equal(total(all), 2866);
+  /* the premium-max sum still exists as arithmetic (the Presidential in both
+     Vientiane windows since 15 Sep 2026); it is simply no longer what Full
+     Experience selects */
+  assert.equal(total(all), 255 + 100 + 1500 + 750 + 275 + 261 + 105 + 420 + 200 + 380);
+  assert.equal(total(all), 4246);
   assert.notEqual(total(all), 2175);
 });
 
@@ -781,8 +782,8 @@ test('the approved room is preferred, and the fallback is the nearest, not the d
   assert.equal(P.approved('ljg', (s) => s !== 'viewing-270').slug, 'soup-pool-270');
   /* it never reaches for the most expensive suite just because it is there */
   assert.notEqual(P.approved('prewed', (s) => s !== 'heritage-grand-premier').slug, 'souphattra-majestic');
-  /* reserved inventory is never eligible, however empty the house gets */
-  assert.equal(P.approved('prewed', (s) => s === 'grand-majestic'), null);
+  /* no room is held back (Owner, 15 Sep 2026): with only the Grand Majestic left, it is the room */
+  assert.equal(P.approved('prewed', (s) => s === 'grand-majestic').slug, 'grand-majestic');
   assert.equal(P.approved('prewed', () => false), null, 'a stage with nothing left returns nothing');
 });
 

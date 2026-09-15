@@ -33,6 +33,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/seatlabels.js"></script>
 <script src="assets/seating.js"></script>
 <script src="assets/seatpass.js"></script>
+<script src="assets/vendor/qrcode.js"></script>
 <script src="assets/prep-shell.js"></script>
 <script type="module" src="assets/invite.mjs"></script>
 <script>
@@ -81,7 +82,7 @@ function seatsSection(p,me){
        (sid?'<p class="p-more"><a class="p-link" href="'+to+'" data-seat-cta="'+ev+'" data-state="booked">'+(frozen?'View seat':'Change seat')+'</a></p>'
            :(open&&!frozen?'<p class="p-more"><a class="p-link" href="'+to+'" data-seat-cta="'+ev+'" data-state="open">Choose your '+ev+' seat</a></p>':''))+'</div>'+
        '<p class="t-l1'+(sid?' on':(open&&!frozen?' open':''))+'" data-seat-state="'+(sid?'booked':'open')+'">'+(sid?'Seat '+esc(lab(sid)):(open&&!frozen?'Required':'Not open yet'))+'</p></div>'});
-  if(both&&PASS)h+='<div class="p-actions" style="margin-top:var(--s3)"><button type="button" class="p-link" data-seat-pass="all" data-seat-pass-for="'+esc(id)+'" aria-label="Download seat confirmation · '+name+'">Download seat confirmation</button></div>';
+  if(both&&PASS)h+='<div class="p-actions" style="margin-top:var(--s3)"><button type="button" class="p-link" data-seat-pass="all" data-seat-pass-for="'+esc(id)+'" aria-label="Download seat tickets · '+name+'">Download seat tickets</button><a class="p-link mute" href="tickets.html">Your tickets</a></div>';
   h+='</div>';
   return h+'</section>'}
 /* the download: the ledger read fresh, then the file */

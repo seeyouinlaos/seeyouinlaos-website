@@ -171,10 +171,10 @@ if(q&&r.rate!=null){
 }else{right='<span class="vr" style="margin:0">On request</span>'}
 var href = changing ? '#' : 'room.html?stay='+sk+'&room='+r.slug;
 if(!img) sub = (sub?sub+' · ':'')+'Photography to follow';
-return '<a class="var'+(r.reserved&&!P.eligible(r)?' rsvd':'')+'" data-room="'+r.slug+'" data-win="'+win+'" data-stay="'+sk+'"'+
+return '<a class="var" data-room="'+r.slug+'" data-win="'+win+'" data-stay="'+sk+'"'+
 (changing?' data-pick="1"':'')+' data-name="'+r.name.replace(/"/g,'&quot;')+'" href="'+href+'">'+
 '<span class="vt'+(img?'':' none')+'"'+(img?' style="background-image:url('+img+')"':'')+'></span>'+
-'<span style="flex:1">'+r.name+(r.reserved?'<span class="vr">'+r.reserved+(P.eligible(r)?' · yours to choose':'')+'</span>':'')+
+'<span style="flex:1">'+r.name+
 (sub?'<span class="vn">'+sub+'</span>':'')+'</span>'+
 right+'<span class="vgo" aria-hidden="true">›</span></a>'}).join('');
 wirePicks(box);
@@ -256,7 +256,7 @@ el.textContent='From '+P.money(lo)+' per person · Business '+P.money(hi)+' per 
 document.querySelectorAll('.pb[data-from]').forEach(function(el){
 var win=el.getAttribute('data-from'),sk=VSTAY[win],stay=window.SIYL_ROOMS[sk];
 var q0=P.quote(win, stay.rooms[0].slug);
-var open=stay.rooms.filter(function(r){return !r.reserved && r.rate!=null});
+var open=stay.rooms.filter(function(r){return r.rate!=null});
 if(!open.length||!q0)return;
 var low=open.reduce(function(m,r){return Math.min(m,r.rate)},1e9);
 var lowTotal = low * q0.pay;
@@ -301,8 +301,6 @@ if(!on&&tag)tag.remove();
 var av=a.querySelector('.vav');
 if(U&&U.ready()&&U.tracked(win,slug)){
   var txt=U.label(win,slug),gone=!U.fits(win,slug)&&!on;
-  /* the row already carries its own "Reserved for …" line — never say it twice */
-  if(a.querySelector('.vr')&&/^Reserved/.test(txt))txt='';
   if(!txt){if(av)av.remove();a.classList.toggle('gone',gone);return}
   if(!av){av=document.createElement('span');av.className='vav';host.appendChild(av)}
   av.textContent=txt;
@@ -361,7 +359,7 @@ function wirePicks(box){
 box.querySelectorAll('[data-pick]').forEach(function(a){
 a.addEventListener('click',function(e){
   e.preventDefault();
-  if(a.classList.contains('rsvd')||a.classList.contains('gone'))return;
+  if(a.classList.contains('gone'))return;
   var fromJourney=!!(CHG && CHG===a.getAttribute('data-win'));
   select(a.getAttribute('data-win'), a.getAttribute('data-stay'), a.getAttribute('data-room'), fromJourney);
   if(!fromJourney){renderRows(box,false);paintAll()}
@@ -421,7 +419,7 @@ if(qa){qa.split(',').forEach(function(id){
 var b=document.querySelector('[data-add*=\'"id":"'+id+'"\']');
 if(b){b.click();return}
 var st=VSTAY[id];
-if(st){var first=window.SIYL_ROOMS[st].rooms.filter(function(r){return !r.reserved&&r.rate!=null})[0];
+if(st){var first=window.SIYL_ROOMS[st].rooms.filter(function(r){return r.rate!=null})[0];
 if(first)select(id, st, first.slug, false)}});}
 </script>
 </body></html>

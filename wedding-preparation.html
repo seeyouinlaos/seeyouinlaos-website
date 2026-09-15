@@ -72,6 +72,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/seatlabels.js"></script>
 <script src="assets/seating.js"></script>
 <script src="assets/seatpass.js"></script>
+<script src="assets/vendor/qrcode.js"></script>
 <script src="assets/confirm.js"></script>
 <script src="assets/rooms-data.js"></script>
 <script src="assets/pricing.js"></script>
@@ -166,22 +167,26 @@ function facts(ev,id,sid,fixed){
     '<div><p class="t-l1">Date</p><p class="t-b1">'+esc(DATE)+'</p></div>'+
     '<div><p class="t-l1">Venue</p><p class="t-b1">'+esc(VENUE[ev])+'</p></div>'+
     '<div><p class="t-l1">Status</p><p class="t-b1"><b>'+(fixed?'Front centre':'Confirmed')+'</b></p></div></div>'}
-function passLink(ev,id,quiet){return PASS?'<button type="button" class="'+(quiet?'p-link mute':'p-act quiet')+'" data-seat-pass="'+ev+'" data-seat-pass-for="'+esc(id)+'" aria-label="Download seat confirmation · '+esc(NAME[ev])+' · '+esc(G.nameOf(id))+'">Download this seat</button>':''}
-/* YOUR WEDDING SEATS — the one confirmation card, once every seat the guest
- * needs is held (Owner, 14 Sep 2026): guest · Temple Ceremony · Wedding
- * Dinner · one download. */
+function passLink(ev,id,quiet){return PASS?'<button type="button" class="'+(quiet?'p-link':'p-act quiet')+'" data-seat-pass="'+ev+'" data-seat-pass-for="'+esc(id)+'" aria-label="Download seat ticket · '+esc(NAME[ev])+' · '+esc(G.nameOf(id))+'">Download this ticket</button>':''}
+/* YOUR WEDDING SEATS — the tickets (Owner, 15 Sep 2026): once every seat the
+ * guest needs is held, one SEAT TICKET per event — the event, the seat, the
+ * guest, the status, held for, the ticket reference and its code — exactly as
+ * the ledger holds it, with one download for the whole set. */
 function wcard(p,id){
   var cs=seatOf('ceremony',id),ds=seatOf('dinner',id),hosts=p.hosts;
   var cerem=hosts?fixedWords()+' · Front centre':(needs('ceremony')?(cs?'Seat '+labelOf(cs):null):(attending('ceremony')?null:'Not attending'));
   var din=needs('dinner')?(ds?'Seat '+labelOf(ds):null):'Not attending';
   var complete=cerem!==null&&din!==null,any=!!(cs||ds||hosts);
-  if(!complete||!any)return '';
-  return '<div class="p-card p-wseats" style="margin-top:var(--s4)" data-wseats="complete"><p class="t-l1 on"><i class="prep-tick" aria-hidden="true"></i> Complete</p><h3 class="t-h1">Your wedding seats</h3>'+
-    '<div class="p-seatfacts"><div><p class="t-l1">Guest</p><p class="t-b1">'+esc(fullName(id))+'</p></div>'+
-    '<div><p class="t-l1">Temple Ceremony</p><p class="t-b1"><b>'+esc(cerem)+'</b>'+(cs?'<br><span class="t-b2">'+esc(L.describe(cs))+'</span>':'')+'</p></div>'+
-    '<div><p class="t-l1">Wedding Dinner</p><p class="t-b1"><b>'+esc(din)+'</b>'+(ds?'<br><span class="t-b2">'+esc(L.describe(ds))+'</span>':'')+'</p></div>'+
-    '<div><p class="t-l1">Date</p><p class="t-b1">'+esc(DATE)+'</p></div></div>'+
-    (PASS?'<div class="p-seatcard-actions"><button type="button" class="p-act" data-seat-pass="all" data-seat-pass-for="'+esc(id)+'" aria-label="Download seat confirmation · '+esc(G.nameOf(id))+'">Download seat confirmation</button></div>':'')+
+  if(!complete||!any||!PASS)return '';
+  var names={fullName:fullName(id),preferredName:G.nameOf(id)},h='';
+  ['ceremony','dinner'].forEach(function(ev){
+    var doc=PASS.docFor(p,id,S.mine(),[ev],null,names);if(!doc)return;
+    h+=PASS.card(doc,{actions:passLink(ev,id,true)})});
+  if(!h)return '';
+  return '<div class="p-wseats" style="margin-top:var(--s4)" data-wseats="complete"><p class="t-l1 on"><i class="prep-tick" aria-hidden="true"></i> Complete</p><h3 class="t-h1">Your wedding seats</h3>'+
+    '<p class="t-b2 measure-w">Your seat tickets, as Guest Relations hold them. The code on each ticket is read at the door.</p>'+
+    '<div class="p-tickets">'+h+'</div>'+
+    '<div class="p-seatcard-actions"><button type="button" class="p-act" data-seat-pass="all" data-seat-pass-for="'+esc(id)+'" aria-label="Download your wedding seat tickets · '+esc(G.nameOf(id))+'">Download seat tickets</button><a class="p-link mute" href="tickets.html">All your tickets</a></div>'+
     '</div>'}
 function paintSeats(){
   if(!P.ready()||!S.ready())return;

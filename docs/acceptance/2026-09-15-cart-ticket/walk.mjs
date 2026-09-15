@@ -101,7 +101,7 @@ note('H4 Download travel pass · a real PDF, named for the leg and the guest, ca
 if (OUT) fs.copyFileSync(pdfPath, path.join(OUT, 'travel-pass-c86-sample.pdf'));
 /* the bag */
 let c = await cart(); await shot('H-cart');
-note('H5 bag icon → the cart · own lines, grouped under Transport, each transport line carrying its pass strip with the code and the reference', (await p.evaluate(() => (document.querySelector('a.bag') || {}).getAttribute('href'))) === 'cart.html' && new RegExp('Your bag · ' + HN, 'i').test(c.text) && c.lines.length === 4 && c.lines.every((l) => l.pass && l.qr && /^SYL-/.test(l.ref)) && /Transport/i.test(c.text) && c.foot === true, c.lines.map((l) => l.id + ':' + l.ref).join(' '));
+note('H5 bag icon → the cart · own lines, grouped under Transport · CART = CART: no pass strip, no code, no reference on any line (Owner, 15 Sep 2026)', (await p.evaluate(() => (document.querySelector('a.bag') || {}).getAttribute('href'))) === 'cart.html' && new RegExp('Your bag · ' + HN, 'i').test(c.text) && c.lines.length === 4 && c.lines.every((l) => !l.pass && !l.qr && !l.ref) && !/SYL-/.test(c.text) && /Transport/i.test(c.text) && c.foot === true, c.lines.map((l) => l.id).join(' '));
 let sb = await sticky();
 note('H5 cart · C86 line says USD 105; cart total = sticky total = 680', c.lines.find((l) => l.id === 'c86').text.includes('USD 105') && c.total === money(680) && sb.total === money(680), c.total + ' / ' + sb.total);
 note('H5 cart · no checkout language, no quantity controls, the words are YOUR BAG · YOUR TOTAL · REVIEW YOUR JOURNEY', !/checkout|delivery|payment|card details/i.test(c.text) && !(await p.evaluate(() => !!document.querySelector('[data-qty], .qty, .stepper'))) && /Your total/i.test(c.text) && /Review your journey|Complete this first/i.test(c.text), '');
@@ -116,7 +116,7 @@ const T2b = await ticket('mu9646');
 note('H6 change · Economy Flexible is the current selection: the ticket says the new class and carries a NEW pass reference; the journey total follows (560)', /Class Economy Flexible/i.test(T2b.text) && T2b.ref !== T2.ref && /^SYL-MU9646-/.test(T2b.ref) && (await txt('#tt')) === money(560), T2.ref + ' → ' + T2b.ref);
 c = await cart();
 sb = await sticky();
-note('H6 cart · the flight line says Economy Flexible with the new reference; total 560 = sticky', /Economy Flexible/i.test(c.lines.find((l) => l.id === 'mu9646').text) && c.lines.find((l) => l.id === 'mu9646').ref === T2b.ref && c.total === money(560) && sb.total === money(560), c.total + ' / ' + sb.total);
+note('H6 cart · the flight line says Economy Flexible; total 560 = sticky', /Economy Flexible/i.test(c.lines.find((l) => l.id === 'mu9646').text) && c.total === money(560) && sb.total === money(560), c.total + ' / ' + sb.total);
 /* REMOVE from the cart: the authoritative state, the badge, the sticky, the journey */
 await go('cart.html'); await p.waitForTimeout(600);
 await p.click('.cart-line[data-line="c86"] [data-remove]'); await p.waitForTimeout(900);
@@ -157,23 +157,29 @@ note('H9 a run-A seat · the words say Poolside on the bar, the confirmation and
 const names = await p.evaluate(() => [...document.querySelectorAll('[data-ev="dinner"] .seat-name')].map((t) => t.textContent));
 note('H9 the plan · the held chair is named (her own says You; other guests see her first name — P4)', names.includes('You'), names.join(','));
 await shot('H-seats-pool');
-await go('about-you.html'); await p.click('[data-allergy="no"]'); await p.waitForTimeout(250); await p.check('#photo-ack'); await p.waitForTimeout(300);
+await go('about-you.html'); await p.click('[data-allergy="no"]'); await p.waitForTimeout(250);
+for (const q of ['coffeetea', 'treat', 'drink', 'avoid', 'film', 'music']) { await p.fill('textarea[data-q="' + q + '"]', 'Test answer'); await p.locator('textarea[data-q="' + q + '"]').dispatchEvent('change'); await p.waitForTimeout(80); }
+await p.check('#photo-ack'); await p.waitForTimeout(300);
 /* gating and Review */
 c = await cart(); sb = await sticky();
 note('H10 cart · 01–05 complete → REVIEW YOUR JOURNEY leads to Review & Send; sticky VIEW the same', c.review === 'review.html' && sb.view === 'review.html', c.review + ' / ' + sb.view);
 await go('review.html'); await p.waitForFunction(() => window.SIYL_SEATS && SIYL_SEATS.ready(), null, { timeout: 15000 }); await p.waitForTimeout(600);
-const rv = await p.evaluate(() => ({ total: document.getElementById('tt').textContent, passes: [...document.querySelectorAll('#items .p-pass')].map((x) => ({ leg: x.getAttribute('data-pass'), ref: (x.querySelector('.ref') || {}).textContent, qr: !!x.querySelector('svg.p-qr'), words: x.innerText.replace(/\s+/g, ' ') })), c86: [...document.querySelectorAll('#items .p-line')].map((l) => l.innerText.replace(/\s+/g, ' ')).find((s) => /C86/.test(s)) || '' }));
+const rv = await p.evaluate(() => ({ total: document.getElementById('tt').textContent, qr: document.querySelectorAll('svg.p-qr').length, tickets: !!document.querySelector('a[href="tickets.html"]'), c86: [...document.querySelectorAll('#items .p-line')].map((l) => l.innerText.replace(/\s+/g, ' ')).find((s) => /C86/.test(s)) || '' }));
 /* 100 + 155 (Economy Flexible) + 105 + 200 + 15 Sangkhathan = 575 */
-note('H11 Review & Send · the four passes with their codes and references; C86 at USD 105; Review total = cart total = sticky (575)', rv.passes.length === 4 && rv.passes.every((x) => x.qr && /^SYL-/.test(x.ref) && /Selected · in your journey/i.test(x.words)) && /USD 105/.test(rv.c86) && rv.total === money(575) && c.total === money(575) && sb.total === money(575), rv.total + ' / ' + c.total + ' / ' + sb.total);
+note('H11 Review & Send · REVIEW = REVIEW: the selection with C86 at USD 105, no code on the page, the way to the tickets; Review total = cart total = sticky (575)', rv.qr === 0 && rv.tickets && /USD 105/.test(rv.c86) && !/SYL-/.test(await body()) && rv.total === money(575) && c.total === money(575) && sb.total === money(575), rv.total + ' / ' + c.total + ' / ' + sb.total);
 await p.click('#send'); await p.waitForFunction(() => document.getElementById('send').getAttribute('data-state') === 'sent' || (document.getElementById('err') || {}).textContent, null, { timeout: 20000 }); await p.waitForTimeout(700);
-const after = await p.evaluate(() => ({ state: document.getElementById('send').getAttribute('data-state'), passes: [...document.querySelectorAll('#items .p-pass')].map((x) => x.innerText.replace(/\s+/g, ' ')) }));
-note('H12 sent · every pass now says Sent to Guest Relations (the same references)', after.state === 'sent' && after.passes.length === 4 && after.passes.every((w) => /Sent to Guest Relations/i.test(w)) && after.passes.every((w, i) => w.includes(rv.passes[i].ref)), after.passes[0]);
+const after = await p.evaluate(() => ({ state: document.getElementById('send').getAttribute('data-state') }));
+note('H12 sent', after.state === 'sent', '');
 await shot('H-review-sent');
+/* TICKET = TICKET: the tickets page carries the four passes, now saying Sent, with the same references */
+await go('tickets.html'); await p.waitForFunction(() => window.SIYL_SEATS && SIYL_SEATS.ready(), null, { timeout: 15000 }); await p.waitForTimeout(800);
+const tkp = await p.evaluate(() => [...document.querySelectorAll('[data-ticket]')].map((t) => ({ id: t.getAttribute('data-ticket'), ref: (t.querySelector('.ref') || {}).textContent || '', qr: !!t.querySelector('svg.p-qr'), words: t.innerText.replace(/\s+/g, ' ') })));
+note('H12 tickets page · four travel passes with codes and references, every one Sent to Guest Relations, the same references as on Your Journey; the seat tickets beside them', tkp.filter((t) => !/^seat:/.test(t.id)).length === 4 && tkp.filter((t) => !/^seat:/.test(t.id)).every((t) => t.qr && /^SYL-/.test(t.ref) && /Sent/i.test(t.words)) && tkp.some((t) => t.id === 'mu9646' && t.ref === T2b.ref) && tkp.some((t) => t.id === 'seat:dinner' && t.qr && /^SYL-WD-/.test(t.ref)), tkp.map((t) => t.id + ':' + t.ref).join(' '));
+await shot('H-tickets');
 const status = await (await fetch(API + '/status?invitation=INV-' + HOST)).json();
 note('H12 the register holds the host\'s invitation', status.received === true, status.receivedAt);
 await go('cart.html'); await p.waitForTimeout(800);
-const bagWords = await p.evaluate(() => [...document.querySelectorAll('.p-pass')].map((x) => x.innerText));
-note('H12 the bag says Sent too', bagWords.length === 4 && bagWords.every((w) => /Sent to Guest Relations/i.test(w)), bagWords.length);
+note('H12 the bag stays a bag after sending: no code, no reference', (await p.evaluate(() => document.querySelectorAll('svg.p-qr, .p-pass').length)) === 0 && !/SYL-/.test(await body()), '');
 /* desktop */
 await p.setViewportSize({ width: 1280, height: 900 });
 await go('your-journey.html'); note('D1 desktop · Your Journey tickets, no overflow', !(await overflow()) && (await ticket('c86')).qr, ''); await shot('D-journey');
@@ -194,7 +200,7 @@ const pT = await ticket('c86');
 note('P2 the guest\'s C86 ticket · their own name, their own reference (not the host\'s), USD 105', new RegExp('Guest ' + GN, 'i').test(pT.text) && pT.ref !== T3.ref && /^SYL-C86-/.test(pT.ref) && /USD 105/.test(pT.text), pT.ref);
 c = await cart();
 sb = await sticky();
-note('P3 the guest\'s bag · one line, their pass, USD 105 = sticky', c.lines.length === 1 && c.lines[0].id === 'c86' && c.lines[0].ref === pT.ref && c.total === money(105) && sb.total === money(105), c.total + ' / ' + sb.total);
+note('P3 the guest\'s bag · one line, USD 105 = sticky, no code', c.lines.length === 1 && c.lines[0].id === 'c86' && !c.lines[0].qr && c.total === money(105) && sb.total === money(105), c.total + ' / ' + sb.total);
 await declineOthers(['c86']);
 await go('wedding.html');
 for (const [k, v] of [['temple', 'yes'], ['coffee', 'yes'], ['vows', 'yes'], ['dinner', 'yes']]) { await p.click('[data-e="' + k + '"] [data-ev="' + v + '"]'); await p.waitForTimeout(250); }

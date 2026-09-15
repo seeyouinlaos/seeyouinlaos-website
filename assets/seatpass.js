@@ -1,13 +1,26 @@
 /* ============================================================================
-   SEE YOU IN LAOS — THE SEAT CONFIRMATION (a downloadable PDF).
+   SEE YOU IN LAOS — THE SEAT TICKET, and the ticket writer every ticket shares.
 
-   A real PDF, written here byte by byte (PDF 1.4, base-14 fonts Times and
-   Helvetica, WinAnsi text, no compression, no images), so it opens on an
-   iPhone, prints at A4 and can be read back by a test. It says what the
-   seating ledger says at the moment of download and nothing more: the guest,
-   the party (never the access code), the event, the date, the venue, the
-   seat's guest-facing label, a harmless seat reference, the status. No QR
-   code, no barcode, no price — it is a seat confirmation, not a ticket.
+   A TICKET LOOKS LIKE A TICKET (Owner, 15 Sep 2026). The wedding seat is a
+   premium event ticket: a framed ticket body with a header, the event, the
+   guest, the seat, the status, "held for", and a stub — torn off along a
+   perforation — that carries the ticket reference and a code to scan. The
+   same composition stands on screen (the card) and on paper (a real PDF,
+   PDF 1.4, base-14 fonts, WinAnsi text, no images, no scripts, no links),
+   so it opens on an iPhone, prints at A4 and can be read back by a test.
+   Nothing is ever clipped: every ticket is placed inside the page's safe
+   area, and the test measures that.
+
+   THE CODE BELONGS ON THE TICKET. The reference (SYL-TC-E4-XXXX) is a
+   harmless digest of the seat as the ledger holds it; the QR carries the
+   reference, the guest's first name, the event, the date, the seat words
+   and the state — never an access code, never an invitation id, never a
+   bearer. It says what the seating ledger says at the moment of download and
+   nothing more. It is a seat ticket for a private wedding: nothing here is
+   charged.
+
+   THE WRITER (`writer`) is shared with the travel pass (assets/travelpass.js):
+   one PDF grammar, one ticket frame, one QR routine for every ticket.
    ========================================================================== */
 (function (root, factory) {
   var api = factory(root && root.SIYL_SEATLABELS ? root.SIYL_SEATLABELS : (typeof require === 'function' ? require('./seatlabels.js') : null), root);
@@ -15,8 +28,10 @@
   if (root) root.SIYL_SEATPASS = api;
 })(typeof window !== 'undefined' ? window : null, function (L, root) {
   'use strict';
-  var INK = '0.192 0.192 0.192', MUTE = '0.42 0.412 0.392', LINE = '0.855 0.851 0.843', GROUND = '0.953 0.933 0.906', PAPER = '0.988 0.98 0.965';
+  var INK = '0.192 0.192 0.192', MUTE = '0.42 0.412 0.392', LINE = '0.855 0.851 0.843', GROUND = '0.953 0.933 0.906', PAPER = '0.988 0.98 0.965', SHADE = '0.898 0.878 0.851', ACCENT = '0.541 0.353 0.333';
   var PAGE = { w: 595.28, h: 841.89 };
+  /* the safe area: nothing is drawn nearer the edge than this — the test measures it */
+  var SAFE = { x: 40, y: 40 };
 
   /* ---- text encoding: WinAnsi (Latin-1 plus the usual typographic marks) */
   var WIN = { '’': 146, '‘': 145, '“': 147, '”': 148, '–': 150, '—': 151, '·': 183, '•': 149, '…': 133, '€': 128 };
@@ -39,23 +54,87 @@
     for (var i = 0; i < s.length; i++) { var ch = s[i]; w += /[ijl.,'!|:;]/.test(ch) ? 0.28 : /[mwMW]/.test(ch) ? 0.83 : /[A-Z]/.test(ch) ? 0.66 : /[0-9]/.test(ch) ? 0.5 : ch === ' ' ? 0.25 : 0.5; }
     return w * size * (font === 'F2' ? 1.02 : 1);
   }
+  /* words broken into lines that fit the width */
+  function wrap(t, size, font, maxW) {
+    var words = String(t == null ? '' : t).split(/\s+/), lines = [], cur = '';
+    words.forEach(function (wd) { var next = cur ? cur + ' ' + wd : wd; if (width(next, size, font) > maxW * 0.9 && cur) { lines.push(cur); cur = wd; } else cur = next; });
+    if (cur) lines.push(cur);
+    return lines;
+  }
+  /* a size that fits: shrink until the words fit the width, never below the floor */
+  function fit(t, size, font, maxW, floor) { while (size > (floor || 9) && width(t, size, font) > maxW * 0.9) size -= 0.5; return size; }   /* the estimate is rough: keep a tenth in hand */
 
   /* ---- one page of drawing operators ---- */
-  function Page() { this.ops = []; }
+  function Page() { this.ops = []; this.marks = []; }
+  /* every drawn thing is remembered as a box, so a test can prove nothing leaves the safe area */
+  Page.prototype.mark = function (x, y, w, h, what) { this.marks.push({ x: x, y: y, w: w, h: h, what: what || '' }); };
   Page.prototype.rect = function (x, y, w, h, fill, stroke, sw) {
     var o = [];
     if (fill) o.push(fill + ' rg');
     if (stroke) o.push(stroke + ' RG ' + (sw || 0.6) + ' w');
     o.push(x.toFixed(2) + ' ' + y.toFixed(2) + ' ' + w.toFixed(2) + ' ' + h.toFixed(2) + ' re ' + (fill && stroke ? 'B' : fill ? 'f' : 'S'));
     this.ops.push(o.join(' '));
+    this.mark(x, y, w, h, 'rect');
   };
-  Page.prototype.line = function (x1, y1, x2, y2, color, sw) { this.ops.push((color || LINE) + ' RG ' + (sw || 0.6) + ' w ' + x1.toFixed(2) + ' ' + y1.toFixed(2) + ' m ' + x2.toFixed(2) + ' ' + y2.toFixed(2) + ' l S'); };
+  Page.prototype.line = function (x1, y1, x2, y2, color, sw) { this.ops.push((color || LINE) + ' RG ' + (sw || 0.6) + ' w ' + x1.toFixed(2) + ' ' + y1.toFixed(2) + ' m ' + x2.toFixed(2) + ' ' + y2.toFixed(2) + ' l S'); this.mark(Math.min(x1, x2), Math.min(y1, y2), Math.abs(x2 - x1), Math.abs(y2 - y1), 'line'); };
+  /* a perforation: a dashed line, the dash pattern set and reset in the same operator */
+  Page.prototype.dashes = function (x1, y1, x2, y2, color, sw) { this.ops.push('[3 3] 0 d ' + (color || LINE) + ' RG ' + (sw || 0.7) + ' w ' + x1.toFixed(2) + ' ' + y1.toFixed(2) + ' m ' + x2.toFixed(2) + ' ' + y2.toFixed(2) + ' l S [] 0 d'); this.mark(Math.min(x1, x2), Math.min(y1, y2), Math.abs(x2 - x1), Math.abs(y2 - y1), 'dashes'); };
+  var K = 0.5523;
+  Page.prototype.roundRect = function (x, y, w, h, r, fill, stroke, sw) {
+    var o = [], f = function (n) { return n.toFixed(2); };
+    if (fill) o.push(fill + ' rg');
+    if (stroke) o.push(stroke + ' RG ' + (sw || 0.6) + ' w');
+    o.push(f(x + r) + ' ' + f(y) + ' m ' + f(x + w - r) + ' ' + f(y) + ' l ' +
+      f(x + w - r + r * K) + ' ' + f(y) + ' ' + f(x + w) + ' ' + f(y + r - r * K) + ' ' + f(x + w) + ' ' + f(y + r) + ' c ' +
+      f(x + w) + ' ' + f(y + h - r) + ' l ' +
+      f(x + w) + ' ' + f(y + h - r + r * K) + ' ' + f(x + w - r + r * K) + ' ' + f(y + h) + ' ' + f(x + w - r) + ' ' + f(y + h) + ' c ' +
+      f(x + r) + ' ' + f(y + h) + ' l ' +
+      f(x + r - r * K) + ' ' + f(y + h) + ' ' + f(x) + ' ' + f(y + h - r + r * K) + ' ' + f(x) + ' ' + f(y + h - r) + ' c ' +
+      f(x) + ' ' + f(y + r) + ' l ' +
+      f(x) + ' ' + f(y + r - r * K) + ' ' + f(x + r - r * K) + ' ' + f(y) + ' ' + f(x + r) + ' ' + f(y) + ' c h ' + (fill && stroke ? 'B' : fill ? 'f' : 'S'));
+    this.ops.push(o.join(' '));
+    this.mark(x, y, w, h, 'roundRect');
+  };
+  Page.prototype.circle = function (cx, cy, r, fill, stroke, sw) {
+    var o = [], f = function (n) { return n.toFixed(2); }, k = r * K;
+    if (fill) o.push(fill + ' rg');
+    if (stroke) o.push(stroke + ' RG ' + (sw || 0.6) + ' w');
+    o.push(f(cx + r) + ' ' + f(cy) + ' m ' +
+      f(cx + r) + ' ' + f(cy + k) + ' ' + f(cx + k) + ' ' + f(cy + r) + ' ' + f(cx) + ' ' + f(cy + r) + ' c ' +
+      f(cx - k) + ' ' + f(cy + r) + ' ' + f(cx - r) + ' ' + f(cy + k) + ' ' + f(cx - r) + ' ' + f(cy) + ' c ' +
+      f(cx - r) + ' ' + f(cy - k) + ' ' + f(cx - k) + ' ' + f(cy - r) + ' ' + f(cx) + ' ' + f(cy - r) + ' c ' +
+      f(cx + k) + ' ' + f(cy - r) + ' ' + f(cx + r) + ' ' + f(cy - k) + ' ' + f(cx + r) + ' ' + f(cy) + ' c h ' + (fill && stroke ? 'B' : fill ? 'f' : 'S'));
+    this.ops.push(o.join(' '));
+  };
   Page.prototype.text = function (x, y, t, font, size, color, spacing, align) {
     var w = width(t, size, font) + (spacing || 0) * String(t).length;
     if (align === 'center') x -= w / 2; else if (align === 'right') x -= w;
     this.ops.push('BT ' + (color || INK) + ' rg /' + font + ' ' + size + ' Tf ' + (spacing || 0) + ' Tc ' + x.toFixed(2) + ' ' + y.toFixed(2) + ' Td ' + enc(t) + ' Tj ET');
+    this.mark(x, y - size * 0.22, w, size, 'text:' + String(t).slice(0, 24));
   };
-  Page.prototype.label = function (x, y, t, align) { this.text(x, y, String(t).toUpperCase(), 'F2', 7.2, MUTE, 1.6, align); };
+  Page.prototype.label = function (x, y, t, align, color) { this.text(x, y, String(t).toUpperCase(), 'F2', 7.2, color || MUTE, 1.6, align); };
+  /* the QR code, module by module, quiet zone kept */
+  Page.prototype.qr = function (modules, x, y, size, ink) {
+    if (!modules) return;
+    var n = modules.length, cell = size / n;
+    this.rect(x - 6, y - 6, size + 12, size + 12, '1 1 1');
+    for (var r = 0; r < n; r++) for (var c = 0; c < n; c++) if (modules[r][c]) this.rect(x + c * cell, y + (n - 1 - r) * cell, cell + 0.15, cell + 0.15, ink || INK);
+  };
+
+  /* ---- the ticket frame: paper on the ground, a stub torn off along a perforation ----
+   * box = { x, y (bottom), w, h, stub (width of the stub on the right) }
+   * returns the geometry of the body and the stub for the words           */
+  Page.prototype.ticket = function (box) {
+    var r = 10, pad = 22;
+    this.roundRect(box.x + 2, box.y - 3, box.w, box.h, r, SHADE);                       /* a soft shadow: the ticket lies on the page */
+    this.roundRect(box.x, box.y, box.w, box.h, r, PAPER, LINE, 0.7);
+    var px = box.x + box.w - box.stub;
+    this.dashes(px, box.y + 8, px, box.y + box.h - 8, LINE, 0.7);                         /* the perforation */
+    this.circle(px, box.y + box.h, 6, GROUND, LINE, 0.7);                                 /* the two notches, cut out of the frame */
+    this.circle(px, box.y, 6, GROUND, LINE, 0.7);
+    this.mark(box.x, box.y, box.w, box.h, 'ticket');
+    return { x: box.x + pad, y: box.y + box.h - pad, w: px - box.x - pad * 2, bottom: box.y + pad, stub: { x: px + 18, w: box.stub - 36, cx: px + box.stub / 2 } };
+  };
 
   /* ---- the document: pages → bytes ---- */
   function build(pages, meta) {
@@ -74,7 +153,7 @@
     });
     var pagesObj = add('<< /Type /Pages /Kids [' + kids.join(' ') + '] /Count ' + kids.length + ' >>');
     if (pagesObj !== pagesIdx) throw new Error('pdf: object order');
-    var info = add('<< /Title ' + enc(meta.title) + ' /Author (see you in laos.) /Subject ' + enc(meta.subject) + ' /Creator (see you in laos. seat confirmation) /Producer (see you in laos.) >>');
+    var info = add('<< /Title ' + enc(meta.title) + ' /Author (see you in laos.) /Subject ' + enc(meta.subject) + ' /Creator (see you in laos. tickets) /Producer (see you in laos.) >>');
     var catalog = add('<< /Type /Catalog /Pages ' + pagesObj + ' 0 R >>');
     var out = '%PDF-1.4\n%âãÏÓ\n', offsets = [];
     objs.forEach(function (o, i) { offsets.push(byteLen(out)); out += (i + 1) + ' 0 obj\n' + o + '\nendobj\n'; });
@@ -86,47 +165,115 @@
   }
   function byteLen(s) { var n = 0; for (var i = 0; i < s.length; i++) n += s.charCodeAt(i) > 255 ? 1 : 1; return n; }   /* latin-1 bytes, one per char */
   function toBytes(s) { var b = new Uint8Array(s.length); for (var i = 0; i < s.length; i++) b[i] = s.charCodeAt(i) & 255; return b; }
+  /* does everything drawn on a page lie inside the safe area — the release requirement, measured */
+  function within(page) {
+    var bad = [];
+    page.marks.forEach(function (m) { if (m.x < SAFE.x - 0.5 || m.y < SAFE.y - 0.5 || m.x + m.w > PAGE.w - SAFE.x + 0.5 || m.y + m.h > PAGE.h - SAFE.y + 0.5) bad.push(m); });
+    return { ok: bad.length === 0, outside: bad };
+  }
 
+  /* ---- the QR code (the vendored encoder — MIT, Kazuhiko Arase), shared by every ticket ---- */
+  function modules(text) {
+    var q = (root && root.qrcode) || (typeof require === 'function' ? require('./vendor/qrcode.js') : null);
+    if (!q) return null;
+    if (q.stringToBytesFuncs && q.stringToBytesFuncs['UTF-8']) q.stringToBytes = q.stringToBytesFuncs['UTF-8'];   /* names and arrows survive the scan */
+    var c = q(0, 'M'); c.addData(text, 'Byte'); c.make();
+    var n = c.getModuleCount(), out = [];
+    for (var r = 0; r < n; r++) { var row = []; for (var col = 0; col < n; col++) row.push(c.isDark(r, col)); out.push(row); }
+    return out;
+  }
+  function escH(t) { return String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+  function qrSvg(text, size, label) {
+    var m = modules(text); if (!m) return '';
+    var n = m.length, quiet = 2, N = n + quiet * 2, d = '';
+    for (var r = 0; r < n; r++) for (var c = 0; c < n; c++) if (m[r][c]) d += 'M' + (c + quiet) + ' ' + (r + quiet) + 'h1v1h-1z';
+    return '<svg class="p-qr" viewBox="0 0 ' + N + ' ' + N + '" width="' + size + '" height="' + size + '" shape-rendering="crispEdges" role="img" aria-label="' + escH(label || 'Ticket code') + '"><rect width="' + N + '" height="' + N + '" fill="#FCFAF6"/><path d="' + d + '" fill="#313131"/></svg>';
+  }
+
+  /* ---- the seat ticket ---------------------------------------------------- */
+  var EVENT_TIME = { ceremony: '08:00', dinner: '19:30' };
+  var ALPHA = '23456789BCDFGHJKMNPQRSTVWXZ';
   /* the hosts' ceremony place, in words: their role when the record names it */
   function fixedWords(role) { return role === 'BRIDE' ? 'Bride' : role === 'GROOM' ? 'Groom' : 'Bride & Groom'; }
+  function seatWords(s) { return s.fixed ? fixedWords(s.fixed) + ' · Front Centre' : L.label(s.seatId); }
+  function seatDetail(s) { return s.fixed ? 'Front · between the two blocks' : L.describe(s.seatId); }
+  /* the ticket reference: the ledger's own for a held chair; for a fixed position a digest of the position — never a code, never an id */
+  function refOf(doc, s) {
+    if (!s.fixed) return L.ref(doc.party.invitationId, doc.guest.guestId, s.event, s.seatId);
+    var hex = L.sha256(doc.party.invitationId + '|' + doc.guest.guestId + '|' + s.event + '|FIXED:' + s.fixed), tail = '';
+    for (var i = 0; i < 4; i++) tail += ALPHA[parseInt(hex.substr(i * 4, 4), 16) % ALPHA.length];
+    return 'SYL-' + L.EVENT_CODE[s.event] + '-FC-' + tail;
+  }
+  function stateOf(s) { return s.fixed ? 'FRONT CENTRE' : 'CONFIRMED'; }
+  /* the words inside the code: the ticket, readable by any scanner, secret to nobody */
+  function payload(doc, s) {
+    return ['SEE YOU IN LAOS', 'SEAT TICKET ' + refOf(doc, s), doc.guest.preferredName, L.EVENT_NAME[s.event], L.EVENT_DATE + ' · ' + EVENT_TIME[s.event], (s.fixed ? seatWords(s) : 'Seat ' + L.label(s.seatId) + ' · ' + L.describe(s.seatId)), stateOf(s)].join('\n');
+  }
+
+  /* one seat ticket drawn on a page: box = { x, y (bottom), w, h } — h is TICKET_H */
+  var TICKET_H = 278;
+  function drawSeatTicket(p, doc, s, box) {
+    var g = p.ticket({ x: box.x, y: box.y, w: box.w, h: box.h, stub: 156 });
+    var x = g.x, top = g.y, w = g.w;
+    /* the header: the wordmark and what this is */
+    p.text(x, top - 14, 'see you in laos.', 'F1', 15, INK, 0.2);
+    p.label(x + w, top - 12, 'Seat ticket', 'right');
+    p.line(x, top - 24, x + w, top - 24, INK, 0.7);
+    /* the event */
+    p.label(x, top - 48, 'Event'); p.text(x, top - 68, L.EVENT_NAME[s.event], 'F1', fit(L.EVENT_NAME[s.event], 21, 'F1', w, 14));
+    p.text(x, top - 84, L.EVENT_DATE + ' · ' + EVENT_TIME[s.event], 'F2', 9.5, INK);
+    p.text(x, top - 98, L.EVENT_VENUE[s.event], 'F2', 9.5, MUTE);
+    p.line(x, top - 114, x + w, top - 114);
+    /* the guest, the seat, the status — three columns */
+    var c1 = x, c2 = x + w * 0.40, c3 = x + w * 0.75, fy = top - 134;
+    p.label(c1, fy, 'Guest'); p.text(c1, fy - 20, doc.guest.fullName, 'F1', fit(doc.guest.fullName, 15, 'F1', c2 - c1 - 14, 10));
+    p.label(c1, fy - 42, 'Held for'); p.text(c1, fy - 56, doc.guest.preferredName || doc.guest.fullName, 'F2', 10, INK, 0.8);
+    p.label(c2, fy, 'Seat'); p.text(c2, fy - 27, seatWords(s), 'F1', s.fixed ? fit(seatWords(s), 15, 'F1', c3 - c2 - 12, 10) : 28);
+    var detail = seatDetail(s); p.text(c2, fy - 42, detail, 'F2', fit(detail, 8, 'F2', c3 - c2 - 12, 6.5), MUTE, 0);
+    p.label(c3, fy, 'Status'); p.text(c3, fy - 20, stateOf(s), 'F2', 8.5, INK, 1.8);
+    p.label(c3, fy - 42, 'Date'); p.text(c3, fy - 56, '28 Feb 2027 · ' + EVENT_TIME[s.event], 'F2', 9, INK, 0.4);
+    /* the foot of the body */
+    var by = g.bottom;
+    p.line(x, by + 14, x + w, by + 14);
+    p.label(x, by, 'Wedding of Haruthai & Suthep');
+    p.label(x + w, by, 'Vientiane, Laos', 'right');
+    /* the stub: the code, the reference, the state, the event */
+    var st = g.stub, size = 96, qx = st.cx - size / 2, qy = top - 14 - size;
+    p.qr(modules(payload(doc, s)), qx, qy, size);
+    p.text(st.cx, qy - 18, refOf(doc, s), 'F2', 8.6, INK, 1.4, 'center');
+    p.label(st.cx, qy - 32, stateOf(s), 'center', ACCENT);
+    p.label(st.cx, qy - 50, L.EVENT_CODE[s.event] === 'TC' ? 'Temple Ceremony' : 'Wedding Dinner', 'center');
+    p.label(st.cx, qy - 62, '28 Feb 2027 · ' + EVENT_TIME[s.event], 'center');
+    p.label(st.cx, by, 'Scan at the door', 'center');
+  }
 
   /* ---- the confirmation itself ---------------------------------------
    * doc = { guest: { fullName, preferredName, guestId }, party: { invitationId, partyName },
    *         seats: [ { event: 'ceremony'|'dinner', seatId | fixed: 'BRIDE'|'GROOM' } ],
    *         downloadedAt: ISO string }                                          */
   function compose(doc) {
-    var p = new Page(), M = 56, W = PAGE.w - M * 2, y = PAGE.h - 64;
-    p.rect(0, 0, PAGE.w, PAGE.h, GROUND);
-    p.rect(M - 16, 48, W + 32, PAGE.h - 96, PAPER, LINE, 0.6);
-    p.text(M, y, 'see you in laos.', 'F1', 21, INK, 0.2); y -= 20;
-    p.label(M, y, doc.seats.length > 1 ? 'Your wedding seats' : 'Seat confirmation'); y -= 30;
-    p.line(M, y, M + W, y, INK, 0.7); y -= 34;
-    /* the guest, the party */
-    /* the name in the left column only: a long name is set smaller, never over the invitation */
-    var nameSize = 22; while (nameSize > 11 && width(doc.guest.fullName, nameSize, 'F1') > W / 2 - 18) nameSize -= 1;
-    p.label(M, y, 'Guest'); p.text(M, y - 22, doc.guest.fullName, 'F1', nameSize);
-    /* the party as context only — never an id, never a code */
-    if (doc.party.partyName && doc.party.members > 1) { p.label(M + W / 2, y, 'Your party'); p.text(M + W / 2, y - 20, doc.party.partyName, 'F1', 13); }
-    y -= 60; p.line(M, y, M + W, y); y -= 34;
-    doc.seats.forEach(function (s, i) {
-      var lab = s.fixed ? fixedWords(s.fixed) + ' · Front Centre' : L.label(s.seatId);
-      p.label(M, y, 'Event'); p.text(M, y - 24, L.EVENT_NAME[s.event], 'F1', 19); y -= 46;
-      p.label(M, y, 'Date'); p.text(M, y - 18, L.EVENT_DATE, 'F1', 12.5);
-      p.label(M + W / 2, y, 'Venue'); p.text(M + W / 2, y - 18, L.EVENT_VENUE[s.event], 'F1', 12.5); y -= 44;
-      p.label(M, y, 'Seat'); p.text(M, y - 34, lab, 'F1', s.fixed ? 22 : 34);
-      if (!s.fixed) p.text(M, y - 50, L.describe(s.seatId), 'F2', 8.5, MUTE, 0.6);
-      p.label(M + W / 2, y, 'Status'); p.text(M + W / 2, y - 20, s.fixed ? 'FRONT CENTRE' : 'CONFIRMED', 'F2', 9.5, INK, 2.2);
-      p.label(M + W / 2, y - 40, 'Held for'); p.text(M + W / 2, y - 56, doc.guest.preferredName || doc.guest.fullName, 'F2', 9.5, INK, 1.2);
-      y -= 76; p.line(M, y, M + W, y); y -= 34;
-    });
+    var p = new Page(), M = 48, W = PAGE.w - M * 2, y = PAGE.h - 72;
+    p.ops.push(GROUND + ' rg 0 0 ' + PAGE.w + ' ' + PAGE.h + ' re f');   /* the ground — the page itself, not a drawn thing */
+    /* the page title, well inside the safe area */
+    p.text(M, y, 'see you in laos.', 'F1', 19, INK, 0.2);
+    p.label(M + W, y + 2, doc.seats.length > 1 ? 'Your wedding seats' : 'Your wedding seat', 'right');
+    y -= 18;
+    p.text(M, y, doc.guest.fullName + (doc.party.partyName && doc.party.members > 1 ? ' · ' + doc.party.partyName : ''), 'F2', 9.5, MUTE);
+    y -= 28;
+    /* one ticket per seat, in the order of the day */
+    var H = TICKET_H, GAP = 22;
+    doc.seats.forEach(function (s) { drawSeatTicket(p, doc, s, { x: M, y: y - H, w: W, h: H }); y -= H + GAP; });
     /* the words at the foot */
-    p.text(M, y, 'This confirmation shows your seat exactly as Guest Relations hold it in the seating ledger at the time of download.', 'F3', 9.5, MUTE); y -= 14;
-    p.text(M, y, 'It is a seat confirmation for the wedding of Haruthai & Suthep — not a ticket, and nothing here is charged.', 'F3', 9.5, MUTE); y -= 14;
-    p.text(M, y, 'If you change a seat, download this confirmation again; the newer one is the one that counts.', 'F3', 9.5, MUTE);
-    p.label(M, 64, 'Downloaded ' + doc.downloadedAt.replace('T', ' ').slice(0, 16) + ' UTC');
-    p.label(M + W, 64, 'Sunday, 28 February 2027 · Vientiane, Laos', 'right');
-    var title = (doc.seats.length > 1 ? 'Your wedding seats' : L.EVENT_NAME[doc.seats[0].event] + ' seat confirmation') + ' · ' + doc.guest.preferredName;
-    return build([p], { title: title, subject: 'Seat confirmation · ' + (doc.guest.preferredName || doc.guest.fullName) });
+    y -= 6;
+    p.text(M, y, 'This ticket shows your seat exactly as Guest Relations hold it in the seating ledger at the time of download.', 'F3', 9.5, MUTE); y -= 14;
+    p.text(M, y, 'It is a seat ticket for the wedding of Haruthai & Suthep; nothing here is charged.', 'F3', 9.5, MUTE); y -= 14;
+    p.text(M, y, 'If you change a seat, download this ticket again; the newer one is the one that counts.', 'F3', 9.5, MUTE);
+    p.label(M, SAFE.y + 14, 'Downloaded ' + doc.downloadedAt.replace('T', ' ').slice(0, 16) + ' UTC');
+    p.label(M + W, SAFE.y + 14, 'Sunday, 28 February 2027 · Vientiane, Laos', 'right');
+    var title = (doc.seats.length > 1 ? 'Your wedding seats' : L.EVENT_NAME[doc.seats[0].event] + ' seat ticket') + ' · ' + doc.guest.preferredName;
+    var out = build([p], { title: title, subject: 'Seat ticket · ' + (doc.guest.preferredName || doc.guest.fullName) });
+    compose.lastPage = p;   /* for the geometry test */
+    return out;
   }
   function filename(doc) {
     var who = String(doc.guest.preferredName || 'guest').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'guest';
@@ -142,7 +289,7 @@
   }
   /* the document for one named guest, from the party as the invitation
    * carries it and the ledger view as it stands: only seats that exist.
-   * events = ['ceremony'] | ['dinner'] | ['ceremony','dinner'] (the combined pass) */
+   * events = ['ceremony'] | ['dinner'] | ['ceremony','dinner'] (the combined ticket) */
   function docFor(party, guestId, mine, events, at, names) {
     var g = null; (party && party.guests || []).forEach(function (x) { if (x.guestId === guestId) g = x; });
     if (!g) return null;
@@ -159,7 +306,7 @@
              party: { invitationId: party.invitationId || '', partyName: party.partyName || '', members: (party.members || party.guests || []).length }, seats: seats, downloadedAt: at || new Date().toISOString() };
   }
   /* in the browser: read the ledger fresh — a private read that repaints
-   * nothing — then hand over the file: never a confirmation of a seat the
+   * nothing — then hand over the file: never a ticket for a seat the
    * ledger no longer holds */
   function deliver(events, guestId) {
     var S = root && root.SIYL_SEATS, G = root && root.SIYL_GUEST, party = G && G.party();
@@ -175,7 +322,32 @@
         return { ok: true, file: download(doc), doc: doc };
       });
   }
-  /* the writer, shared with the travel pass (assets/travelpass.js): one PDF grammar for every confirmation */
-  var writer = { Page: Page, build: build, toBytes: toBytes, width: width, PAGE: PAGE, INK: INK, MUTE: MUTE, LINE: LINE, GROUND: GROUND, PAPER: PAPER };
-  return { compose: compose, filename: filename, download: download, docFor: docFor, deliver: deliver, toBytes: toBytes, PAGE: PAGE, fixedWords: fixedWords, writer: writer };
+
+  /* ---- the seat ticket on screen: the same composition as a card ----
+   * doc as above with exactly one seat; opts: { actions: html, compact } */
+  function card(doc, opts) {
+    opts = opts || {};
+    if (!doc || !doc.seats || !doc.seats.length) return '';
+    var s = doc.seats[0], ref = refOf(doc, s), e = escH;
+    return '<div class="p-ticket on p-ticket-seat" data-ticket="seat:' + e(s.event) + '" data-ticket-ref="' + e(ref) + '">' +
+      '<div class="p-ticket-head"><p class="t-l1">Wedding · ' + e(L.EVENT_CODE[s.event] === 'TC' ? 'Temple' : 'Dinner') + '</p><p class="t-l1 on" data-ticket-state><i class="prep-tick" aria-hidden="true"></i>' + e(s.fixed ? 'Front centre' : 'Confirmed') + '</p></div>' +
+      '<h3 class="t-h1">' + e(L.EVENT_NAME[s.event]) + '</h3>' +
+      '<div class="p-ticket-route p-ticket-event">' +
+        '<div class="p-ticket-end"><b class="p-ticket-code' + (s.fixed ? ' small' : '') + '">' + e(seatWords(s)) + '</b><span class="t-b2">' + e(seatDetail(s)) + '</span></div>' +
+        '<div class="p-ticket-end to"><span class="p-ticket-time">' + e(EVENT_TIME[s.event]) + '</span><span class="t-b2">' + e(L.EVENT_DATE) + '<br>' + e(L.EVENT_VENUE[s.event]) + '</span></div>' +
+      '</div>' +
+      '<div class="p-ticket-tear" aria-hidden="true"></div>' +
+      '<div class="p-ticket-body"><div class="p-ticket-facts">' +
+        '<div><p class="t-l1">Guest</p><p class="t-b1">' + e(doc.guest.fullName) + '</p></div>' +
+        '<div><p class="t-l1">Held for</p><p class="t-b1">' + e(doc.guest.preferredName || doc.guest.fullName) + '</p></div>' +
+        '<div><p class="t-l1">Status</p><p class="t-b1">' + e(s.fixed ? 'Front centre' : 'Confirmed') + '</p></div>' +
+        '<div><p class="t-l1">Ticket reference</p><p class="t-b1"><span class="ref">' + e(ref) + '</span></p></div></div>' +
+        '<div class="p-ticket-code-box">' + qrSvg(payload(doc, s), 96, 'Seat ticket code ' + ref) + '<p class="t-l1">' + e(s.fixed ? 'Front centre' : 'Held in your name') + '</p></div></div>' +
+      (opts.actions ? '<div class="p-actions">' + opts.actions + '</div>' : '') + '</div>';
+  }
+
+  /* the writer, shared with the travel pass (assets/travelpass.js): one PDF grammar, one ticket frame, one code for every ticket */
+  var writer = { Page: Page, build: build, toBytes: toBytes, width: width, fit: fit, wrap: wrap, within: within, modules: modules, qrSvg: qrSvg, PAGE: PAGE, SAFE: SAFE, INK: INK, MUTE: MUTE, LINE: LINE, GROUND: GROUND, PAPER: PAPER, SHADE: SHADE, ACCENT: ACCENT };
+  return { compose: compose, filename: filename, download: download, docFor: docFor, deliver: deliver, toBytes: toBytes, PAGE: PAGE, fixedWords: fixedWords,
+           refOf: refOf, payload: payload, card: card, seatWords: seatWords, EVENT_TIME: EVENT_TIME, writer: writer };
 });
