@@ -1,0 +1,91 @@
+{
+ "at": "2026-09-16T18:19:37.988Z",
+ "origin": "https://seeyouinlaos-website.suthep-hrg.workers.dev",
+ "results": [
+  {
+   "id": "houses-mobile-images",
+   "ok": true,
+   "d": "{\"Sathorn Penthouse\":\"assets/images/penthouse/exterior-golden-hour.jpg\",\"U Sathorn Bangkok\":\"assets/images/usathorn/pool-pavilion-day.jpg\",\"Shama Yen-Akat Bangkok\":\"assets/images/shama/king-studio-balcony.jpg\",\"Souphattra Heritage\":\"assets/images/souphattra/heritage-courtyard-pool.jpg\",\"Private Residence\":\"assets/images/airbnb/airbnb-01.jpg\",\"Wanxiang Yueju\":\"assets/images/journey/kunming-wanxiang-yueju-entrance.jpg\",\"Luye Baisha\":\"assets/images/journey/lijiang-01.jpg\",\"Siam Kempinski\":\"assets/images/kempinski/facade-garden.jpg\"}"
+  },
+  {
+   "id": "houses-mobile-no-broken",
+   "ok": true,
+   "d": "none"
+  },
+  {
+   "id": "houses-desktop-images",
+   "ok": true,
+   "d": "{\"Sathorn Penthouse\":\"assets/images/penthouse/exterior-golden-hour.jpg\",\"U Sathorn Bangkok\":\"assets/images/usathorn/pool-pavilion-day.jpg\",\"Shama Yen-Akat Bangkok\":\"assets/images/shama/king-studio-balcony.jpg\",\"Souphattra Heritage\":\"assets/images/souphattra/heritage-courtyard-pool.jpg\",\"Private Residence\":\"assets/images/airbnb/airbnb-01.jpg\",\"Wanxiang Yueju\":\"assets/images/journey/kunming-wanxiang-yueju-entrance.jpg\",\"Luye Baisha\":\"assets/images/journey/lijiang-01.jpg\",\"Siam Kempinski\":\"assets/images/kempinski/facade-garden.jpg\"}"
+  },
+  {
+   "id": "houses-desktop-no-broken",
+   "ok": true,
+   "d": "none"
+  },
+  {
+   "id": "your-journey-cards",
+   "ok": true,
+   "d": "[{\"name\":\"Sathorn Penthouse Bangkok\",\"img\":\"assets/images/penthouse/exterior-golden-hour.jpg\"},{\"name\":\"U Sathorn Bangkok\",\"img\":\"assets/images/usathorn/pool-pavilion-day.jpg\"},{\"name\":\"Shama Yen-Akat Bangkok\",\"img\":\"assets/images/shama/king-studio-balcony.jpg\"}]"
+  },
+  {
+   "id": "usathorn-detail-hero",
+   "ok": true,
+   "d": "hero pool-pavilion-dusk.jpg rendered: true"
+  },
+  {
+   "id": "usathorn-detail-own-images",
+   "ok": true,
+   "d": "gallery frames: 12 · usathorn"
+  },
+  {
+   "id": "usathorn-detail-other-rooms",
+   "ok": true,
+   "d": "[\"assets/images/penthouse/exterior-golden-hour.jpg\",\"assets/images/shama/king-studio-balcony.jpg\"]"
+  },
+  {
+   "id": "usathorn-detail-no-broken",
+   "ok": true,
+   "d": "none"
+  },
+  {
+   "id": "shama-detail-hero",
+   "ok": true,
+   "d": "hero king-studio-balcony.jpg rendered: true"
+  },
+  {
+   "id": "shama-detail-own-images",
+   "ok": true,
+   "d": "gallery frames: 7 · shama"
+  },
+  {
+   "id": "shama-detail-other-rooms",
+   "ok": true,
+   "d": "[\"assets/images/penthouse/exterior-golden-hour.jpg\",\"assets/images/usathorn/pool-pavilion-day.jpg\"]"
+  },
+  {
+   "id": "shama-detail-no-broken",
+   "ok": true,
+   "d": "none"
+  },
+  {
+   "id": "penthouse-detail-hero",
+   "ok": true,
+   "d": "hero penthouse-01.jpg rendered: true"
+  },
+  {
+   "id": "penthouse-detail-own-images",
+   "ok": true,
+   "d": "gallery frames: 12 · journey,penthouse"
+  },
+  {
+   "id": "penthouse-detail-other-rooms",
+   "ok": true,
+   "d": "[\"assets/images/usathorn/pool-pavilion-day.jpg\",\"assets/images/shama/king-studio-balcony.jpg\"]"
+  },
+  {
+   "id": "penthouse-detail-no-broken",
+   "ok": true,
+   "d": "none"
+  }
+ ]
+}
