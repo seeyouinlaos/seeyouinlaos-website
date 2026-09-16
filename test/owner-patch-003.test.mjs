@@ -118,3 +118,14 @@ test('SATHORN PENTHOUSE · USD 85 per person / night · 3 nights · USD 255 — 
   assert.equal(room.rate, 85);
   for (const f of ACTIVE) assert.doesNotMatch(stripComments(src(f)), /USD 90 per person|rate: 90\b/, f + ' carries the retired USD 90 rate');
 });
+
+test('EDIT 4 (Owner, 16 Sep 2026) · Luye Baisha and Siam Kempinski say self-pay everywhere the stay summary appears; Harudot sits in the existing Bangkok Cafés rail, never in a rail of its own; the stage never stays invisible', () => {
+  assert.match(src('accommodation.html'), /<span class="sn">Luye Baisha<\/span><span class="sw">4 – 6 Mar<\/span><span class="sc">Lijiang · 2 nights · breakfast included · self-pay<\/span>/);
+  assert.match(src('accommodation.html'), /<span class="sn">Siam Kempinski<\/span><span class="sw">6 – 8 Mar<\/span><span class="sc">Bangkok · 2 nights · breakfast included · self-pay<\/span>/);
+  assert.match(src('journeys.html'), /<p class="pm">04 – 06 March · 2 nights · breakfast included · self-pay<\/p>/);
+  assert.match(src('journeys.html'), /<p class="pm">06 – 08 March · 2 nights · breakfast included · self-pay<\/p>/);
+  for (const f of ['accommodation.html', 'journeys.html']) assert.doesNotMatch(src(f), /2 nights · breakfast included(?! · self-pay)/, f + ': no summary of the two stays without self-pay');
+  const x = src('experiences.html');
+  assert.match(x, /if \(key === 'bkk'\) return x\.chapter === 'bkk' && \(x\.leg !== 'return' \|\| isCafe\(x\)\);\s*if \(key === 'bkk-return'\) return x\.chapter === 'bkk' && x\.leg === 'return' && !isCafe\(x\);/, 'the cafés of Bangkok are one rail');
+  assert.match(src('assets/venue.js'), /root\.setTimeout\(begin, 3000\);/, 'the stage enters by itself after three seconds at the latest');
+});

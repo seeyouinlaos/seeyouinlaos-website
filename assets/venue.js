@@ -189,9 +189,14 @@
     drawLayer();
     if (narrow.addEventListener) narrow.addEventListener('change', drawLayer);
     /* the entrance: the photograph, then the traces, then the labels; the first place opens by itself */
-    var first = data.first || (placed[0] && placed[0].id);
-    function begin() { stage.classList.add('is-in'); (M() ? M().after('photo', function () { select(first, false); }) : select(first, false)); }
-    if (M() && !M().reduced()) { stage.addEventListener('siyl:motion-in', begin, { once: true }); M().reveal(stage); M().scan(host); }
+    var first = data.first || (placed[0] && placed[0].id), begun = false;
+    function begin() { if (begun) return; begun = true; stage.classList.add('is-in'); (M() ? M().after('photo', function () { select(first, false); }) : select(first, false)); }
+    if (M() && !M().reduced()) {
+      stage.addEventListener('siyl:motion-in', begin, { once: true }); M().reveal(stage); M().scan(host);
+      /* the photograph and its labels are content: should the intersection entrance not have happened three seconds after
+         mount (an observer that never fires), the stage enters by itself — nothing of the venue stays invisible */
+      root.setTimeout(begin, 3000);
+    }
     else { host.querySelectorAll('[data-motion]').forEach(function (el) { el.classList.add('is-in'); }); begin(); }
     return { select: select, active: function () { return active; }, zones: data.zones.map(function (z) { return z.id; }) };
   }

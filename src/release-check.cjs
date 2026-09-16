@@ -486,6 +486,15 @@ gate('P7', 'Dress Code imagery real (23 — resort-01 retired by the owner), no 
     missing.length ? missing.length + ' required strings lack DE/TH/JA coverage: ' + missing.slice(0, 6).map((x) => JSON.stringify(x.slice(0, 40))).join(', ') : catalog.length + ' required strings covered by dictionary or localization patterns');
 }
 
+/* GATE C1 — asset fingerprints (Owner, Edit 4 · 16 Sep 2026): every stylesheet and script a page references
+ * carries the content hash of the file it names (src/asset-versions.cjs), so a fresh page can never pair
+ * with a stale cached asset on the ten-minute Pages cache. */
+{
+  const { spawnSync } = require('child_process');
+  const r = spawnSync('node', [path.join(__dirname, 'asset-versions.cjs'), '--check'], { encoding: 'utf8' });
+  gate('C1', 'Asset fingerprints current on every page', r.status === 0, (r.stdout || '').trim().replace(/^ASSET VERSIONS: /, ''));
+}
+
 let failed = 0;
 for (const r of results) {
   if (!r.ok) failed++;
