@@ -41,6 +41,14 @@
    the test suite import it — there is no second copy anywhere.
    ========================================================================== */
 
+/* THE HOSTS' FIXED ALLOCATION (Owner, 16 Sep 2026 · ROOM A HOTFIX): Room A of the Sathorn Penthouse is occupied by BOTH
+   hosts — a fixed Owner allocation the engine counts before anything else: capacity 2, occupied 2, remaining 0, never
+   bookable, never released by a guest booking, never released by either host for the other. The guest ids are the
+   hosts' (the shipped auth index carries the same ids with the hosts flag); the names are the hosts' first names. */
+export const FIXED = [
+  { key: 'bkk-stay/penthouse', label: 'A', guestId: 'G048', invitationId: 'INV-G048', name: 'Haruthai' },
+  { key: 'bkk-stay/penthouse', label: 'A', guestId: 'G049', invitationId: 'INV-G049', name: 'Suthep' },
+];
 export const SEED = {
   /* ---------------------------------------------------------- Bangkok, before */
   /* Three approved Bangkok addresses share the window; a guest holds one of

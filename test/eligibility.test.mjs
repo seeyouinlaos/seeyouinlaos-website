@@ -57,7 +57,7 @@ test('THE MASTER\'S RESERVATIONS (Owner, 16 Sep 2026) · a Bride & Groom room is
   assert.equal(mayJoin(unitsOf('kmg/solarium')[0], null).ok, false, 'nobody joins without an identity');
   /* the retired guest-facing reservation wording stays gone; the live word is RESERVED · <for whom> from the engine's unit */
   for (const f of ['journeys.html', 'room.html', 'your-journey.html', 'assets/journey.js']) assert.doesNotMatch(src(f).replace(/\/\*[\s\S]*?\*\//g, ''), /Reserved for (bride|family)|yours to choose|held for you|This category is reserved/i, f);
-  assert.match(src('assets/stay.js'), /var reserved = !!\(x\.reservedFor && !x\.eligible\);/); assert.match(src('assets/stay.js'), /'Reserved · ' \+ esc\(list\[0\]\.reservedFor\) \+ ' — not bookable through the website\.'/, 'a category reserved in full never reads "full"'); assert.match(src('assets/stay.js'), /reserved \? '<span class="t-l1">Reserved<\/span>'/, 'a reserved room carries no Choose button');
+  assert.match(src('assets/stay.js'), /var reserved = !!\(x\.reservedFor && !x\.eligible && !isMine\);/); assert.match(src('assets/stay.js'), /'Reserved · ' \+ esc\(list\[0\]\.reservedFor\) \+ ' — not bookable through the website\.'/, 'a category reserved in full never reads "full"'); assert.match(src('assets/stay.js'), /reserved \? '<span class="t-l1">Reserved<\/span>'/, 'a reserved room carries no Choose button');
   assert.match(src('assets/rooms.js'), /if \(u\.reservedFor && !u\.eligible\) return \(names\.length \? names\.join\(' · '\) \+ ' · ' : ''\) \+ 'Reserved · ' \+ u\.reservedFor;/);
 });
 
@@ -112,15 +112,18 @@ test('CAPACITY · the six-room Penthouse fills at twelve and never beyond; count
   const v0 = await E.call('read', null, asId(PEGGY));
   assert.equal(v0.summary[key].units, 6); assert.equal(v0.summary[key].places, 12); assert.equal(v0.summary[key].reserved, 1); assert.equal(v0.summary[key].rooms, 5); assert.equal(v0.summary[key].free, 10);
   assert.equal((await join(E, PEGGY, key, 'A')).status, 403, 'Room A is the hosts\'');
-  let i = 0;
-  for (const label of ['A', 'B', 'C', 'D', 'E', 'F']) for (let k = 0; k < 2; k++) { const r = await join(E, guests[i++], key, label); assert.equal(r.status, 200, label + ' ' + k); }
-  const v = await E.call('read', null, asId(HARUTHAI));
+  /* ROOM A (Owner, 16 Sep 2026 · hotfix): the hosts' FIXED allocation — 2/2 before anything is booked, by nobody's booking */
+  const a0 = v0.units[key][0]; assert.equal(a0.taken, 2); assert.equal(a0.free, 0); assert.equal(a0.full, true); assert.deepEqual(a0.occupants.map((o) => o.name), ['Haruthai', 'Suthep']);
+  let i = 2;   /* the ten guest places are B – F */
+  for (const label of ['B', 'C', 'D', 'E', 'F']) for (let k = 0; k < 2; k++) { const r = await join(E, guests[i++], key, label); assert.equal(r.status, 200, label + ' ' + k); }
+  const v = await E.call('read', null, asId(PEGGY));
   assert.equal(v.summary[key].units, 6); assert.equal(v.summary[key].places, 12); assert.equal(v.summary[key].free, 0); assert.equal(v.summary[key].rooms, 0);
+  assert.equal(v.units[key].reduce((n, u) => n + u.taken, 0), 12, 'twelve places taken: the hosts\' two and ten guests');
   const g13 = { ...LIN, guestId: 'g-13', invitationId: 'INV-g-13' };
   assert.equal((await join(E, g13, key, 'A')).status, 403, 'A is the hosts\''); assert.equal((await join(E, g13, key, 'F')).status, 409, 'F is full');
   const g = await join(E, g13, key, 'G'); assert.equal(g.status, 404, 'there is no Room G');
   /* release one → exactly one place, one room */
-  const left = await E.call('leave', { invitationId: SUTHEP.invitationId, guestId: SUTHEP.guestId, key }, asId(SUTHEP));
+  const left = await E.call('leave', { invitationId: PEGGY.invitationId, guestId: PEGGY.guestId, key }, asId(PEGGY));
   assert.equal(left.summary[key].free, 1); assert.equal(left.summary[key].rooms, 1);
   assert.equal(left.summary[key].free, left.units[key].reduce((n, u) => n + u.free, 0), 'the summary is the sum of the units');
 });

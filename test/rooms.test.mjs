@@ -65,7 +65,7 @@ test('ROOMS · guest 1 joins A → 1/2; guest 2 joins A → 2/2 with both first 
   const rooms = new Rooms(doState()), key = 'wedstay/souphattra-presidential';
   let r = await call(rooms, 'join', { invitationId: HAR.invitationId, guestId: HAR.guestId, key, label: 'A', name: 'Haruthai' }, HAR);
   assert.equal(r.status, 200); assert.equal(unit(r.d, key, 'A').taken, 1); assert.equal(unit(r.d, key, 'A').free, 1);
-  assert.deepEqual(r.d.mine, { wedstay: { key, label: 'A' } });
+  assert.deepEqual(r.d.mine, { 'bkk-stay': { key: 'bkk-stay/penthouse', label: 'A' }, wedstay: { key, label: 'A' } }, 'the fixed Sathorn Room A is hers before anything is booked');
   r = await call(rooms, 'read', null, SUT);
   const seen = unit(r.d, key, 'A');
   assert.deepEqual(seen.occupants.map((o) => [o.name, o.mine, o.party]), [['Haruthai', false, true]], 'Suthep sees Haruthai in Room A, as his party');
@@ -160,4 +160,37 @@ test('ROOMS · migration and the plan are Guest Relations acts, refused to a cli
   assert.equal(r.status, 404);
   r = await call(rooms, 'unassign', { guestId: 'G049', stage: 'wedstay' }, null, true);
   assert.equal(r.d.released.length, 1);
+});
+
+test('ROOM A (Owner, 16 Sep 2026 · hotfix) · the Sathorn Penthouse Room A is BOTH hosts\' fixed allocation: 2/2 before any booking, "Haruthai · You · Full" for Suthep and "You · Suthep · Full" for Haruthai, YOUR ROOM for each; a guest is refused; neither host can release or move it; Guest Relations cannot overwrite it; the category reads 5 rooms · 10 places for a guest and for the hosts; no Room G', async () => {
+  const rooms = new Rooms(doState()), key = 'bkk-stay/penthouse';
+  const words = (u) => u.occupants.map((o) => (o.mine ? 'You' : o.name)).join(' · ') + (u.full ? ' · Full' : '');
+  let r = await call(rooms, 'read', null, SUT); let a = unit(r.d, key, 'A');
+  assert.equal(a.taken, 2); assert.equal(a.free, 0); assert.equal(a.full, true); assert.equal(a.eligible, true); assert.equal(words(a), 'Haruthai · You · Full');
+  assert.deepEqual(r.d.mine['bkk-stay'], { key, label: 'A' }, 'YOUR ROOM for Suthep');
+  assert.equal(r.d.summary[key].units, 6); assert.equal(r.d.summary[key].places, 12); assert.equal(r.d.summary[key].rooms, 5); assert.equal(r.d.summary[key].free, 10);
+  assert.equal(unit(r.d, key, 'B').eligible, false, 'a host with a fixed room has no other room to choose in that stage');
+  r = await call(rooms, 'read', null, HAR); a = unit(r.d, key, 'A');
+  assert.equal(words(a), 'You · Suthep · Full'); assert.deepEqual(r.d.mine['bkk-stay'], { key, label: 'A' }, 'YOUR ROOM for Haruthai');
+  /* a guest: Room A reserved and full, five rooms · ten places */
+  r = await call(rooms, 'read', null, PEG); a = unit(r.d, key, 'A');
+  assert.equal(a.full, true); assert.equal(a.eligible, false); assert.equal(a.reservedFor, 'Bride & Groom'); assert.deepEqual(a.occupants.map((o) => o.name), ['Haruthai', 'Suthep']);
+  assert.equal(r.d.summary[key].rooms, 5); assert.equal(r.d.summary[key].free, 10); assert.equal(r.d.units[key].length, 6); assert.equal(r.d.units[key].map((u) => u.label).join(''), 'ABCDEF');
+  r = await call(rooms, 'join', { invitationId: PEG.invitationId, guestId: PEG.guestId, key, label: 'A', name: 'Peggy' }, PEG); assert.equal(r.status, 403);
+  r = await call(rooms, 'join', { invitationId: PEG.invitationId, guestId: PEG.guestId, key, label: 'G', name: 'Peggy' }, PEG); assert.equal(r.status, 404);
+  /* neither host can release it or move within the stage; a host's stray stored hold in that stage is inert */
+  r = await call(rooms, 'leave', { invitationId: SUT.invitationId, guestId: SUT.guestId, stage: 'bkk-stay' }, SUT); assert.equal(r.status, 403); assert.equal(r.d.error, 'fixed host allocation');
+  r = await call(rooms, 'leave', { invitationId: HAR.invitationId, guestId: HAR.guestId, key }, HAR); assert.equal(r.status, 403);
+  r = await call(rooms, 'join', { invitationId: SUT.invitationId, guestId: SUT.guestId, key: 'bkk-stay/u-sathorn-superior-garden', label: 'A', name: 'Suthep' }, SUT); assert.equal(r.status, 403); assert.equal(r.d.error, 'fixed host allocation');
+  r = await call(rooms, 'join', { invitationId: HAR.invitationId, guestId: HAR.guestId, key, label: 'B', name: 'Haruthai' }, HAR); assert.equal(r.status, 403);
+  await rooms.storage.put('occ:bkk-stay/u-sathorn-superior-garden|A|G048', { invitationId: 'INV-G048', partyId: 'INV-001', name: 'Haruthai', at: 'x' });
+  r = await call(rooms, 'read', null, HAR); assert.equal(unit(r.d, 'bkk-stay/u-sathorn-superior-garden', 'A').taken, 0, 'the stray hold counts nowhere'); assert.deepEqual(r.d.mine['bkk-stay'], { key, label: 'A' });
+  /* Guest Relations: assign to Room A or of a host in that stage refused; unassign leaves the fixed allocation alone */
+  const gr = async (op, body) => { const res = await rooms.fetch(new Request('https://x/api/rooms/' + op, { method: 'POST', headers: { 'x-gr-verified': 'yes' }, body: JSON.stringify(body) })); return { status: res.status, d: await res.json() }; };
+  r = await gr('assign', { occupants: [{ key, label: 'A', guestId: PEG.guestId, invitationId: PEG.invitationId, name: 'Peggy' }, { key: 'bkk-stay/shama-king-studio-balcony', label: 'A', guestId: SUT.guestId, invitationId: SUT.invitationId, name: 'Suthep' }] });
+  assert.equal(r.d.refused.length, 2); assert.ok(r.d.refused.every((x) => x.error === 'fixed host allocation'));
+  r = await gr('unassign', { guestId: SUT.guestId, stage: 'bkk-stay' }); assert.deepEqual(r.d.released, []);
+  r = await gr('plan', {}); const pa = r.d.units[key][0]; assert.deepEqual(pa.occupants.map((o) => o.guestId), ['G048', 'G049']);
+  /* the other stages stay the hosts' to choose */
+  r = await call(rooms, 'join', { invitationId: SUT.invitationId, guestId: SUT.guestId, key: 'kmg/solarium', label: 'A', name: 'Suthep' }, SUT); assert.equal(r.status, 200);
 });

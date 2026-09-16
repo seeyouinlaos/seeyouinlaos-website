@@ -128,11 +128,12 @@
         for (var i = 0; i < x.places; i++) { var o = x.occupants[i]; dots += '<i class="' + (o ? (o.mine ? 'on me' : 'on') : '') + '" aria-hidden="true"></i>'; }
         var who = names.length ? names.map(function (n) { return '<b>' + esc(n) + '</b>'; }).join(' · ') : '';
         /* factual states only (Owner, 15 Sep 2026): available · 1 place available · Full · Your room */
-        var reserved = !!(x.reservedFor && !x.eligible);
+        var reserved = !!(x.reservedFor && !x.eligible && !isMine);
         var state = reserved ? 'Reserved · ' + esc(x.reservedFor) : x.full ? 'Full' : (x.free === 1 ? '1 place available' : x.free + ' places available');
         var act = isMine ? '<span class="t-l1 on">Your room</span>'
                 : (reserved ? '<span class="t-l1">Reserved</span>'
                 : x.full ? '<span class="t-l1">Full</span>'
+                : !x.eligible ? ''
                 : '<button type="button" class="p-act quiet" data-join="' + esc(win) + '|' + esc(slug) + '|' + esc(x.label) + '">' + (names.length ? 'Join this room' : 'Choose this room') + '</button>');
         h += '<div class="p-unit' + (isMine ? ' mine' : '') + (x.full ? ' full' : '') + (reserved ? ' reserved' : '') + '" data-unit="' + esc(x.label) + '" data-free="' + (reserved ? 0 : x.free) + '"' + (reserved ? ' data-reserved="' + esc(x.reservedFor) + '"' : '') + '>' +
              '<div><p class="p-unit-name">' + esc(u.unitName(x)) + '</p><p class="p-unit-who"><span class="p-places">' + dots + '</span>' + (who ? who + ' · ' : '') + state + '</p></div>' + act + '</div>';
@@ -161,6 +162,7 @@
       if (!r || r.ok) return '';
       if (r.error === 'full') return 'This room was just filled. Please choose another room.';
       if (r.error === 'reserved') return 'This room is reserved — please choose another room.';
+      if (r.error === 'fixed host allocation') return 'Your room here is fixed by the hosts\' allocation.';
       if (r.error === 'not signed in') return 'Open your invitation to choose a room.';
       return 'Your place could not be held right now — please try again in a moment.';
     }

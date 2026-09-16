@@ -69,7 +69,7 @@ gate(2, 'Inventory display decision recorded',
   if (!/reservedFor: i < \(s\.held \|\| 0\) && s\.heldFor \? s\.heldFor : null/.test(engine)) inv.push('the reserved rooms are not the Master\'s held count');
   if (!/free: open\.reduce\(\(n, u\) => n \+ u\.free, 0\), rooms: open\.filter\(\(u\) => u\.free > 0\)\.length/.test(engine)) inv.push('the category availability is not derived from its open units');
   if (!/reserved: list\.filter\(\(u\) => u\.reservedFor\)\.length/.test(engine)) inv.push('the summary does not count the reserved rooms');
-  if (!/var open = list\.filter\(function \(u\) \{ return u\.eligible; \}\);/.test(client)) inv.push('the client counts reserved rooms as available');
+  if (!/var open = list\.filter\(function \(u\) \{ return !u\.reservedFor \|\| u\.eligible; \}\);/.test(client)) inv.push('the client counts reserved rooms as available');
   if (!/This room was just filled\. Please choose another room\./.test(stay)) inv.push('the oversell refusal does not carry the Owner\'s words');
   const seedSrc = seed;
   if (!/'bkk-stay\/penthouse':\s*\{ unit: 'room', capacity: 6, occupancy: 2/.test(seedSrc)) inv.push('the six-bedroom Penthouse is not six units of two places');
