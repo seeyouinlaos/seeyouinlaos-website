@@ -1,0 +1,73 @@
+{
+  "origin": "https://seeyouinlaos-website.suthep-hrg.workers.dev",
+  "guest": "G001",
+  "at": "2026-09-16T13:37:12.565Z",
+  "results": [
+    {
+      "id": "A/B · production seating before the controlled test: 0 guest holds at the ceremony and the dinner, seating open",
+      "ok": true,
+      "d": "{\"open\":true,\"frozen\":false,\"held\":{\"ceremony\":[],\"dinner\":[]}}"
+    },
+    {
+      "id": "SUTHEP · HARUTHAI · read-only: both authenticated, seating open and configured for both, no seat held by either — the same capability",
+      "ok": true,
+      "d": "{\"G049\":{\"ok\":true,\"open\":true,\"frozen\":false,\"configured\":{\"ceremony\":true,\"dinner\":true},\"mine\":{\"ceremony\":{},\"dinner\":{}}},\"G048\":{\"ok\":true,\"open\":true,\"frozen\":false,\"configured\":{\"ceremony\":true,\"dinner\":true},\"mine\":{\"ceremony\":{},\"dinner\":{}}}}"
+    },
+    {
+      "id": "SEATING OPEN · Wedding Preparation for the guest: the plans drawn, no \"Not open yet\"",
+      "ok": true,
+      "d": "{\"eyebrow\":\"02 · Your seats · required for the events you attend\",\"cards\":[\"ceremony:open\",\"dinner:open\"],\"notOpen\":false,\"available\":0}"
+    },
+    {
+      "id": "C · one controlled selection: the server holds D-T-05 (dinner) and C-R-05-02 (ceremony) for the guest — atomically, saved at once",
+      "ok": true,
+      "d": "{\"s1\":{\"ceremony\":{},\"dinner\":{\"G001\":\"D-T-05\"}},\"s2\":{\"ceremony\":{\"G001\":\"C-R-05-02\"},\"dinner\":{\"G001\":\"D-T-05\"}}}"
+    },
+    {
+      "id": "OWNERSHIP · another guest cannot mutate this guest's seat (refused) · the same chair for another guest answers taken",
+      "ok": true,
+      "d": "{\"cross\":\"not your guest\",\"taken\":\"taken\"}"
+    },
+    {
+      "id": "D · after a hard refresh the same seats are shown, held in the guest's name; the ticket download is offered",
+      "ok": true,
+      "d": "{\"labels\":[\"E5\",\"A5\"],\"states\":[\"ceremony:booked\",\"dinner:booked\"],\"ticket\":true,\"give\":2}"
+    },
+    {
+      "id": "D · after sign out and sign in the seats remain (server: D-T-05 · C-R-05-02)",
+      "ok": true,
+      "d": "{\"page\":{\"states\":[\"ceremony:booked\",\"dinner:booked\"],\"ticket\":true},\"server\":{\"ceremony\":{\"G001\":\"C-R-05-02\"},\"dinner\":{\"G001\":\"D-T-05\"}}}"
+    },
+    {
+      "id": "TICKET · the seat tickets render after the selection (WEDDING CEREMONY · WEDDING DINNER)",
+      "ok": true,
+      "d": "{\"tickets\":2,\"text\":\"see you in laos. SIGNED IN · PEGGY YOUR JOURNEY SIGN OUT YOUR TICKETS · PEGGY Your tickets Every ticket of your journey, exactly as it stands: your seat tickets for the wedding day and a travel pass for each leg you have chosen. Each carries its own reference and a code; each ca"
+    },
+    {
+      "id": "E/F · both seats given back: production seating at 0 guest holds again, no names",
+      "ok": true,
+      "d": "{\"g1\":true,\"g2\":true,\"plan\":{\"open\":true,\"frozen\":false,\"held\":{\"ceremony\":[],\"dinner\":[]}}}"
+    },
+    {
+      "id": "EMAIL · the journey is stored with a submission reference before any email (SYL-G001-D3A10A83)",
+      "ok": true,
+      "d": "{\"status\":202,\"stored\":true,\"id\":\"SYL-G001-D3A10A83\"}"
+    },
+    {
+      "id": "EMAIL · Guest Relations email accepted by the provider with a message id",
+      "ok": false,
+      "d": "{\"provider\":\"none\",\"accepted\":false,\"id\":null,\"error\":\"no email provider configured (set the Worker secret BREVO_API_KEY or RESEND_API_KEY and the variable MAIL_FROM)\"}"
+    },
+    {
+      "id": "EMAIL · guest confirmation email accepted by the provider with a message id",
+      "ok": false,
+      "d": "{\"provider\":\"none\",\"accepted\":false,\"id\":null,\"error\":\"no email provider configured (set the Worker secret BREVO_API_KEY or RESEND_API_KEY and the variable MAIL_FROM)\",\"to\":\"p…@example.com\"}"
+    },
+    {
+      "id": "EMAIL · the retry answers with the same submission reference (no new submission)",
+      "ok": true,
+      "d": "{\"status\":200,\"id\":\"SYL-G001-D3A10A83\",\"mail\":{\"owner\":{\"provider\":\"none\",\"accepted\":false,\"id\":null,\"error\":\"no email provider configured (set the Worker secret BREVO_API_KEY or RESEND_API_KEY and the variable MAIL_FROM)\"},\"guest\":{\"provider\":\"none\",\"accepted\":false,\"id\":null,\"error\":\"no email provider configured (set the Worker secret BREVO_API_KEY or RESEND_API_KEY and the variable MAIL_FROM)\",\"to\":\"p…@example.com\"},\"at\":\"2026-09-16T13:37:12.594Z\"}}"
+    }
+  ],
+  "errors": []
+}

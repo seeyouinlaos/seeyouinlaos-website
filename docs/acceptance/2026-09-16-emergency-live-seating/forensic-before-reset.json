@@ -1,0 +1,35 @@
+{
+  "at": "forensic before reset",
+  "holds": [
+    {
+      "seat": "C-R-02-02",
+      "guestId": "G002",
+      "name": ""
+    },
+    {
+      "seat": "C-R-02-03",
+      "guestId": "G001",
+      "name": ""
+    },
+    {
+      "seat": "D-B-11",
+      "guestId": "G002",
+      "name": "Steffie"
+    },
+    {
+      "seat": "D-B-12",
+      "guestId": "G001",
+      "name": "Peggy"
+    },
+    {
+      "seat": "D-B-13",
+      "guestId": "G049",
+      "name": "Suthep"
+    },
+    {
+      "seat": "D-B-14",
+      "guestId": "G048",
+      "name": "Haruthai"
+    }
+  ]
+}
