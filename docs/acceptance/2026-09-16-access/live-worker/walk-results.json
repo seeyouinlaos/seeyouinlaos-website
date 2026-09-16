@@ -1,0 +1,194 @@
+{
+  "origin": "https://seeyouinlaos-website.suthep-hrg.workers.dev",
+  "guest": "G001",
+  "at": "2026-09-16T03:17:34.099Z",
+  "pass": 37,
+  "total": 37,
+  "results": [
+    {
+      "id": "OUT journeys.html → the invitation page with the way back",
+      "ok": true,
+      "d": "invitation?open=1&next=journeys"
+    },
+    {
+      "id": "OUT cart.html → the invitation page with the way back",
+      "ok": true,
+      "d": "invitation?open=1&next=cart"
+    },
+    {
+      "id": "OUT tickets.html → the invitation page with the way back",
+      "ok": true,
+      "d": "invitation?open=1&next=tickets"
+    },
+    {
+      "id": "OUT your-journey.html → the invitation page with the way back",
+      "ok": true,
+      "d": "invitation?open=1&next=your-journey"
+    },
+    {
+      "id": "OUT wedding.html → the invitation page with the way back",
+      "ok": true,
+      "d": "invitation?open=1&next=wedding"
+    },
+    {
+      "id": "OUT wedding-preparation.html → the invitation page with the way back",
+      "ok": true,
+      "d": "invitation?open=1&next=wedding-preparation"
+    },
+    {
+      "id": "OUT about-you.html → the invitation page with the way back",
+      "ok": true,
+      "d": "invitation?open=1&next=about-you"
+    },
+    {
+      "id": "OUT review.html → the invitation page with the way back",
+      "ok": true,
+      "d": "invitation?open=1&next=review"
+    },
+    {
+      "id": "OUT index.html · the header says NOT SIGNED IN · OPEN YOUR INVITATION ()",
+      "ok": true,
+      "d": "Not signed inOpen your invitation"
+    },
+    {
+      "id": "OUT destination.html · the header says NOT SIGNED IN · OPEN YOUR INVITATION (destination)",
+      "ok": true,
+      "d": "Not signed inOpen your invitation"
+    },
+    {
+      "id": "OUT accommodation.html · the header says NOT SIGNED IN · OPEN YOUR INVITATION (accommodation)",
+      "ok": true,
+      "d": "Not signed inOpen your invitation"
+    },
+    {
+      "id": "OUT experiences.html · the header says NOT SIGNED IN · OPEN YOUR INVITATION (experiences)",
+      "ok": true,
+      "d": "Not signed inOpen your invitation"
+    },
+    {
+      "id": "OUT voyage.html · the header says NOT SIGNED IN · OPEN YOUR INVITATION (voyage)",
+      "ok": true,
+      "d": "Not signed inOpen your invitation"
+    },
+    {
+      "id": "OUT experience.html?id=bkk-suhring · the header says NOT SIGNED IN · OPEN YOUR INVITATION (experience?id=bkk-suhring)",
+      "ok": true,
+      "d": "Not signed inOpen your invitation"
+    },
+    {
+      "id": "OUT room.html?stay=souphattra&room=heritage · the header says NOT SIGNED IN · OPEN YOUR INVITATION (room?stay=souphattra&room=heritage)",
+      "ok": true,
+      "d": "Not signed inOpen your invitation"
+    },
+    {
+      "id": "OUT transport.html?id=mu9646 · the header says NOT SIGNED IN · OPEN YOUR INVITATION (transport?id=mu9646)",
+      "ok": true,
+      "d": "Not signed inOpen your invitation"
+    },
+    {
+      "id": "OUT marsilea.html · the header says NOT SIGNED IN · OPEN YOUR INVITATION (marsilea)",
+      "ok": true,
+      "d": "Not signed inOpen your invitation"
+    },
+    {
+      "id": "OUT 1872.html · the header says NOT SIGNED IN · OPEN YOUR INVITATION (1872)",
+      "ok": true,
+      "d": "Not signed inOpen your invitation"
+    },
+    {
+      "id": "OUT dress.html · the header says NOT SIGNED IN · OPEN YOUR INVITATION (dress)",
+      "ok": true,
+      "d": "Not signed inOpen your invitation"
+    },
+    {
+      "id": "OUT invitation.html · the header says NOT SIGNED IN · OPEN YOUR INVITATION (invitation)",
+      "ok": true,
+      "d": "Not signed inOpen your invitation"
+    },
+    {
+      "id": "OUT the close CTA reads Open your invitation and leads to the invitation page",
+      "ok": true,
+      "d": "Open your invitation → invitation.html"
+    },
+    {
+      "id": "OUT every link to a private surface on the page carries the invitation page as its target (18 links)",
+      "ok": true,
+      "d": "your-journey.html→invitation?open=1&next=your-journey.html | journeys.html#j-bkk-stay→invitation?open=1&next=journeys.html%23j-bkk-stay | journeys.html#j-kmg→invitation?open=1&next=journeys.html%23j-kmg"
+    },
+    {
+      "id": "OUT the menu's Journeys leads to the invitation page (with journeys as the way back)",
+      "ok": true,
+      "d": "invitation?open=1&next=journeys.html"
+    },
+    {
+      "id": "OUT the menu's Your Journey leads to the invitation page",
+      "ok": true,
+      "d": "invitation?open=1&next=your-journey.html"
+    },
+    {
+      "id": "OUT the footer's Your tickets leads to the invitation page",
+      "ok": true,
+      "d": "invitation?open=1&next=tickets.html"
+    },
+    {
+      "id": "OUT the bag icon leads to the invitation page",
+      "ok": true,
+      "d": "invitation?open=1&next=your-journey.html"
+    },
+    {
+      "id": "OUT ADD on a public detail page hands over to the invitation page and remembers the page",
+      "ok": true,
+      "d": "invitation?open=1&next=transport%3Fid%3Dc86"
+    },
+    {
+      "id": "OUT Harudot is listed as a café, not under Shopping & Places",
+      "ok": true,
+      "d": "Bangkok · CaféHarudotA café of rose plaster and spiral stairs — architecture first, coffee close behind.5 photographs · Discover"
+    },
+    {
+      "id": "IN after the code, the guest is back on the journeys catalogue",
+      "ok": true,
+      "d": "journeys"
+    },
+    {
+      "id": "IN the header names the guest: SIGNED IN · <name> · YOUR JOURNEY · SIGN OUT",
+      "ok": true,
+      "d": "Signed in · PeggyYour JourneySign out"
+    },
+    {
+      "id": "IN destination.html · the header still names the guest",
+      "ok": true,
+      "d": "Signed in · PeggyYour JourneySign out · destination"
+    },
+    {
+      "id": "IN voyage.html · the header still names the guest",
+      "ok": true,
+      "d": "Signed in · PeggyYour JourneySign out · voyage"
+    },
+    {
+      "id": "IN cart.html · the header still names the guest",
+      "ok": true,
+      "d": "Signed in · PeggyYour JourneySign out · cart"
+    },
+    {
+      "id": "IN the bag icon opens the private journey (the bag, or the step the readiness engine asks for first) — never the code gate",
+      "ok": true,
+      "d": "your-journey"
+    },
+    {
+      "id": "IN Sign out from the header returns to the invitation page and clears the session",
+      "ok": true,
+      "d": "invitation"
+    },
+    {
+      "id": "OUT again: the bag hands over once more",
+      "ok": true,
+      "d": "invitation?open=1&next=cart"
+    },
+    {
+      "id": "Z no page errors · no write request",
+      "ok": true,
+      "d": ""
+    }
+  ]
+}

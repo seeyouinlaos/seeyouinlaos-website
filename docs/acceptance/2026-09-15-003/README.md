@@ -49,3 +49,10 @@ identical.
 0 console errors, 0 missing anchors, 0 retired strings (now including 08:00 · 16:30 · SYL-TC- ·
 "Wat Ong Teu · 28 February" · WEDDING · TEMPLE · C86 at 105), 0 stale / private routes served, 0 secret
 exposure over every response body, rendered text of the two origins identical (65 pages compared).
+
+## Edit 3 (16 Sep 2026)
+The Owner's third review (`Edit_3.zip`) — the access rule for every link, the close CTA, Harudot as a
+café, the dress reference cards — is applied and proven in `docs/acceptance/2026-09-16-access/`
+(annotation table, the rendered access walk 37 / 37 on both origins, the booking regression on
+production with production restored, the venue walk 66 / 66 on both origins, 47 / 47 read-only
+coverage, the public crawl of both origins CLEAN, parity 717 / 717).

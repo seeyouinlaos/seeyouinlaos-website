@@ -1,21 +1,21 @@
 # 007 — FINAL V2 DELTA (pre-patch → final)
 
-Generated 2026-09-15 18:57 UTC by docs/review/007-final-v2-delta.py.
+Generated 2026-09-16 03:29 UTC by docs/review/007-final-v2-delta.py.
 
 PRE-PATCH: docs/review/007-final-full-website-text.txt (MAIN SHA d299355) · docs/review/007-final-source-truth-audit.txt
-FINAL:     docs/review/007-final-v2-text.txt (MAIN SHA 1d772ab) · docs/review/007-final-v2-source-truth-audit.txt
+FINAL:     docs/review/007-final-v2-text.txt (MAIN SHA 40adcf4) · docs/review/007-final-v2-source-truth-audit.txt
 
 | metric | pre-patch | final |
 |---|---|---|
 | DISTINCT ACTIVE ROUTES | 26 | 26 |
-| DISTINCT SURFACES | 262 | 292 |
-| DYNAMIC / CONDITIONAL STATES | 154 | 184 |
+| DISTINCT SURFACES | 262 | 295 |
+| DYNAMIC / CONDITIONAL STATES | 154 | 191 |
 | EXPERIENCE ENTITIES | 39 | 39 |
 | STAY / ROOM ROUTES | 33 | 33 |
 | TRANSPORT ROUTES | 5 | 5 |
 | TICKET / PDF TEMPLATES | 14 | 14 |
-| LINES | 19875 | 20424 |
-| WORDS | 102162 | 104876 |
+| LINES | 19875 | 19878 |
+| WORDS | 102162 | 101139 |
 | SOURCE-TRUTH CLAIMS CHECKED | 119 | 123 |
 | SOURCE-TRUTH MATCH | 97 | 98 |
 | SOURCE-TRUTH CONFLICT | 4 | 0 |
@@ -23,9 +23,9 @@ FINAL:     docs/review/007-final-v2-text.txt (MAIN SHA 1d772ab) · docs/review/0
 | OWNER DECISION OVERRIDES | 12 | 17 |
 | STALE / RETIRED SOURCE | — | 1 |
 | SECRET SCAN | PASS | PASS |
-| COMPLETENESS CHECK | PASS · 1813 guest-facing source literals represented · 141 folded in from states not rendered · 0 leftover · 0 failed steps | PASS · 1866 guest-facing source literals represented · 141 folded in from states not rendered · 0 leftover · 0 failed steps |
+| COMPLETENESS CHECK | PASS · 1813 guest-facing source literals represented · 141 folded in from states not rendered · 0 leftover · 0 failed steps | PASS · 1867 guest-facing source literals represented · 153 folded in from states not rendered · 0 leftover · 0 failed steps |
 
-Unique text lines (surfaces, states, templates; references and stamps normalised): 4240 → 4386 · appeared 208 · disappeared 62
+Unique text lines (surfaces, states, templates; references and stamps normalised): 4240 → 4397 · appeared 250 · disappeared 93
 
 ## Text that APPEARED in the final
 
@@ -181,13 +181,30 @@ Unique text lines (surfaces, states, templates; references and stamps normalised
 - USD 85per person
 - YOUR COST: USD 2,325
 
-### other (44)
+### other (86)
 
-- - Dress code: acknowledged 2026-09-15T18:49:35.242Z (text version 2026-09-09)
-- - Photography & film: acknowledged 2026-09-15T18:50:03.092Z (text version 2026-09-14)
-- - Publication of photographs: GIVEN (2026-09-15T18:50:02.392Z, wording 2026-09-09-draft)
+- - Dress code: acknowledged 2026-09-16T03:24:26.689Z (text version 2026-09-09)
+- - Photography & film: acknowledged 2026-09-16T03:24:54.725Z (text version 2026-09-14)
+- - Publication of photographs: GIVEN (2026-09-16T03:24:54.026Z, wording 2026-09-09-draft)
 - 07
+- Acknowledged on 16 Sept 2026
+- Bangkok · Café · 06 MAR 2027
+- Cafés · 1
+- Complete · 16 Sept 2026
+- Given on 16 Sept 2026
+- Given · 16 Sept 2026
+- Guest Relations confirmed your arrangements on 16 Sept 2026
+- Guest Relations holds the journey sent on 16 Sept 2026 from another device, which replaced the one sent here on 16 Sept 2026. What you see below is this device's draft. Send again from here only if you want it to replace
+- Not signed in
 - Page foot: DOWNLOADED <YYYY-MM-DD HH:MM> UTC · SUNDAY, 28 FEBRUARY 2027 · VIENTIANE, LAOS · file names see-you-in-laos-wc-seat-<name>.pdf | see-you-in-laos-wd-seat-<name>.pdf | see-you-in-laos-wedding-seats-<name>.pdf
+- ROUTE: /cart · signed out
+- ROUTE: /invitation · after a hand-over
+- ROUTE: /journeys · signed out
+- ROUTE: /review · signed out
+- ROUTE: /tickets · signed out
+- ROUTE: /wedding · signed out
+- ROUTE: /your-journey · signed out
+- Received on 16 Sept 2026. Guest Relations will review your selections personally. Nothing is confirmed yet; we will confirm each arrangement with you once it is ready. You can still change anything below and send it agai
 - Rooms
 - STALE / RETIRED SOURCE: 1
 - SURFACE 263
@@ -220,13 +237,13 @@ Unique text lines (surfaces, states, templates; references and stamps normalised
 - SURFACE 290
 - SURFACE 291
 - SURFACE 292
-- Sent · 15 Sept 2026 · 20:50 · your time
-- Souphattra Heritage, Vientiane
-- Sunday, 28 February 2027 Souphattra Heritage, Vientiane
-- The complete guest-facing text of the current release (main 1d772ab), extracted 2026-09-15T18:52:59.281Z from a local Worker running the deployed source with the real engines.
-- The rooms
-- [file name] see-you-in-laos-wc-seat-peggy.pdf
-- [file name] see-you-in-laos-wc-seat-suthep.pdf
+- SURFACE 293
+- SURFACE 294
+- SURFACE 295
+- Sent · 16 Sept 2026 · 05:25 · your time
+- Signed in · Peggy
+- Signed in · Steffie
+- … 26 more
 
 ## Text that DISAPPEARED from the final (removed active text — each line checked: retired by the Owner patch, moved into the venue stage, or a stamp)
 
@@ -259,7 +276,7 @@ Unique text lines (surfaces, states, templates; references and stamps normalised
 - USD 105per person
 - USD 2,175
 
-### Wedding (Vow) Ceremony 15:30 · seat model (temple → Souphattra Heritage) (22)
+### Wedding (Vow) Ceremony 15:30 · seat model (temple → Souphattra Heritage) (23)
 
 - - Temple Ceremony: seat E4 (C-R-04-02)
 - - Vow Ceremony · 16:30 · Souphattra Heritage Vientiane · COMPLIMENTARY — HOSTED BY HARUTHAI & SUTHEP.
@@ -267,6 +284,7 @@ Unique text lines (surfaces, states, templates; references and stamps normalised
 - 16:30 · Souphattra Heritage
 - 16:30 · Souphattra Heritage Vientiane · Dress · Black Tie
 - Bride · Front Centre                                          TEMPLE CEREMONY
+- Coffee & Cake, the Vow Ceremony and the Wedding Dinner are hosted by Haruthai & Suthep. Tak Bat remains a personal offering at the temple.
 - Groom · Front Centre                                          TEMPLE CEREMONY
 - Peggy. Temple Ceremony.
 - ROUTE: generated · seat ticket PDF · Temple Ceremony seat ticket (a guest)
@@ -288,8 +306,9 @@ Unique text lines (surfaces, states, templates; references and stamps normalised
 
 - [aria-label] Poolside at Souphattra Heritage Vientiane, the heritage houses on every side
 
-### Accessibility text (aria / alt / live regions) (1)
+### Accessibility text (aria / alt / live regions) (2)
 
+- [aria-describedby → spoken] REQUIRED · Open your invitation · Your journey is sent under your own invitation, so we open it first. · Your invitation · OPEN
 - [aria-label] Souphattra Heritage from above
 
 ### Totals and amounts that follow C86 (5)
@@ -300,16 +319,45 @@ Unique text lines (surfaces, states, templates; references and stamps normalised
 - USD 2,510
 - YOUR COST: USD 2,345
 
-### other (10)
+### other (39)
 
+- (hidden) For you
+- (hidden) Swipe to see the other two addresses
 - - Dress code: acknowledged 2026-09-15T16:19:53.185Z (text version 2026-09-09)
 - - Photography & film: acknowledged 2026-09-15T16:20:21.321Z (text version 2026-09-14)
 - - Publication of photographs: GIVEN (2026-09-15T16:20:20.623Z, wording 2026-09-09-draft)
+- Acknowledged on 15 Sept 2026
+- Bangkok · Shopping & places · 06 MAR 2027
+- Complete · 15 Sept 2026
+- For you
+- Given on 15 Sept 2026
+- Given · 15 Sept 2026
+- Guest Relations confirmed your arrangements on 15 Sept 2026
+- Guest Relations holds the journey sent on 15 Sept 2026 from another device, which replaced the one sent here on 15 Sept 2026. What you see below is this device's draft. Send again from here only if you want it to replace
+- Not open yet
+- Nothing is in your journey yet. Everything you add appears here before sending.
+- Open
+- Open your invitation and your details appear here.
+- Open your invitation to answer
+- Open your invitation to confirm
 - Page foot: DOWNLOADED <YYYY-MM-DD HH:MM> UTC · SUNDAY, 28 FEBRUARY 2027 · VIENTIANE, LAOS · file names see-you-in-laos-tc-seat-<name>.pdf | see-you-in-laos-wd-seat-<name>.pdf | see-you-in-laos-wedding-seats-<name>.pdf
+- Plan your journey
+- Received on 15 Sept 2026. Guest Relations will review your selections personally. Nothing is confirmed yet; we will confirm each arrangement with you once it is ready. You can still change anything below and send it agai
+- Send to Guest Relations — not ready yet
 - Sent · 15 Sept 2026 · 18:20 · your time
+- Shopping & places · 1
+- Souphattra Heritage Vientiane · 19:30
 - Sunday, 28 February 2027 Wat Ong Teu, Vientiane
 - The complete guest-facing text of the current release (main d299355), extracted 2026-09-15T16:23:17.866Z from a local Worker running the deployed source with the real engines.
+- The dress code is confirmed in your own name, so we open your invitation first.
+- The wedding day is answered in your own name, so we open your invitation first.
+- These answers belong to you, so we open your invitation first.
 - Wat Ong Teu, Vientiane
+- You have made changes since the last version was sent on 15 Sept 2026. Send the updated version whenever you are ready — the newer one replaces the earlier one.
+- Your bag belongs to your invitation, so we open it first.
+- Your journey is sent under your own invitation, so we open it first.
+- Your journey · nothing is paid on this website
+- Your tickets belong to your invitation, so we open it first.
 - [file name] see-you-in-laos-tc-seat-peggy.pdf
 - [file name] see-you-in-laos-tc-seat-suthep.pdf
 

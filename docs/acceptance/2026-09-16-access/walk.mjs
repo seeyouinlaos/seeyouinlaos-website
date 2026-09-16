@@ -61,7 +61,7 @@ const sIn = await status(); await shot('in-journeys');
 note('IN the header names the guest: SIGNED IN · <name> · YOUR JOURNEY · SIGN OUT', /Signed in ·/.test(sIn) && /Your Journey/.test(sIn) && /Sign out/.test(sIn), sIn);
 for (const f of ['destination.html', 'voyage.html', 'cart.html']) { await go(f); const s = await status(); note('IN ' + f + ' · the header still names the guest', /Signed in ·/.test(s) && !/^invitation/.test(rel()), s + ' · ' + rel()); }
 await go('index.html'); await p.evaluate(() => document.querySelector('header a.bag, header .hd-right a').click()); await p.waitForTimeout(900);
-note('IN the bag icon opens the private journey (the bag, or the step the readiness engine asks for first) — never the code gate', /^(cart|your-journey|invitation\?from=)/.test(rel()) && !/open=1&next=/.test(rel()), rel());
+note('IN the bag icon opens the private journey (the bag, or the step the readiness engine asks for first) — never the code gate', /^(cart|your-journey|invitation(\.html)?\?from=)/.test(rel()) && !/open=1&next=/.test(rel()), rel());
 await go('index.html'); await p.evaluate(() => document.querySelector('[data-access-out]').click()); await p.waitForTimeout(1200);
 note('IN Sign out from the header returns to the invitation page and clears the session', /^invitation/.test(rel()) && (await p.evaluate(() => !localStorage.getItem('siyl.auth'))), rel());
 await go('cart.html'); note('OUT again: the bag hands over once more', /^invitation(\.html)?\?open=1&next=cart/.test(rel()), rel());
