@@ -1,37 +1,22 @@
 {
-  "at": "2026-09-16T13:37:12.527Z",
-  "submissionId": "SYL-G001-D3A10A83",
+  "at": "2026-09-16T15:08:59.403Z",
+  "controlledTest": true,
+  "submissionId": "SYL-G001-7FA64314",
   "stored": true,
   "mail": {
     "owner": {
-      "provider": "none",
-      "accepted": false,
-      "id": null,
-      "error": "no email provider configured (set the Worker secret BREVO_API_KEY or RESEND_API_KEY and the variable MAIL_FROM)"
+      "provider": "brevo",
+      "accepted": true,
+      "id": "<202609161508.77663392179@smtp-relay.mailin.fr>",
+      "error": null
     },
     "guest": {
-      "provider": "none",
-      "accepted": false,
-      "id": null,
-      "error": "no email provider configured (set the Worker secret BREVO_API_KEY or RESEND_API_KEY and the variable MAIL_FROM)",
-      "to": "p…@example.com"
+      "provider": "brevo",
+      "accepted": true,
+      "id": "<202609161508.75018659747@smtp-relay.mailin.fr>",
+      "error": null,
+      "to": "s…@gmail.com"
     },
-    "at": "2026-09-16T13:37:12.409Z"
-  },
-  "retry": {
-    "owner": {
-      "provider": "none",
-      "accepted": false,
-      "id": null,
-      "error": "no email provider configured (set the Worker secret BREVO_API_KEY or RESEND_API_KEY and the variable MAIL_FROM)"
-    },
-    "guest": {
-      "provider": "none",
-      "accepted": false,
-      "id": null,
-      "error": "no email provider configured (set the Worker secret BREVO_API_KEY or RESEND_API_KEY and the variable MAIL_FROM)",
-      "to": "p…@example.com"
-    },
-    "at": "2026-09-16T13:37:12.594Z"
+    "at": "2026-09-16T15:08:59.281Z"
   }
 }
