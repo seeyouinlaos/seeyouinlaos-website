@@ -190,7 +190,7 @@
       var at = locate(windowId);
       if (!at) return [];
       var room = roomOf(at.stay, slug) || at.stay.rooms[0];
-      var img = room && room.gallery && room.gallery.length ? room.gallery[0][0] : at.win.bagImg;
+      var img = room && (room.cardImg || (room.gallery && room.gallery.length && room.gallery[0][0])) || at.win.bagImg;
       /* where a window offers whole properties rather than room categories,
        * the journey line carries the property the guest actually chose */
       var bagName = (room && room.property) || at.win.bagName;

@@ -233,7 +233,7 @@ test('Bangkok offers three approved addresses, one window, one active choice', (
   /* the penthouse stays the approved default, so the Full Experience is unmoved */
   assert.equal(sandbox.window.SIYL_FULL_EXPERIENCE['bkk-stay'], 'penthouse');
   /* each property shows its OWN photographs, and nothing is borrowed */
-  assert.equal(rooms[1].gallery.length, 5);
+  assert.equal(rooms[1].gallery.length, 11);   /* the Owner's 16 Sep 2026 U Sathorn imagery: the hotel (5) and the room (6) */
   assert.equal(rooms[2].gallery.length, 6);
   rooms[1].gallery.forEach(([f]) => {
     assert.match(f, /^assets\/images\/usathorn\//, 'U Sathorn borrowed ' + f);

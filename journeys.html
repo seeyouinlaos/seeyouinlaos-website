@@ -127,8 +127,8 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:22px;margin:40
 <script src="assets/draft.js?v=51131a8b"></script>
 <script src="assets/shop-menu.js?v=7f4ee3cc"></script>
 <script src="assets/aman.js?v=fd12151c"></script>
-<script src="assets/rooms-data.js?v=30c293db"></script>
-<script src="assets/pricing.js?v=a3c88e2e"></script>
+<script src="assets/rooms-data.js?v=eb3283fa"></script>
+<script src="assets/pricing.js?v=ca8f5f5b"></script>
 <script src="assets/rooms.js?v=2cd10246"></script>
 <script src="assets/stay.js?v=d3aff276"></script>
 <script src="assets/journey.js?v=cadb3e68"></script>
@@ -174,7 +174,7 @@ function renderRows(box, changing){
 var sk=box.getAttribute('data-rooms'),stay=window.SIYL_ROOMS[sk],win=boxWin(box);
 box.setAttribute('data-picking', changing?'1':'');
 box.innerHTML=stay.rooms.map(function(r){
-var img=r.gallery.length?r.gallery[0][0]:'';
+var img=r.cardImg||(r.gallery.length?r.gallery[0][0]:'');
 var q=P.quote(win, r.slug);
 var right, sub='';
 if(q&&r.rate!=null){
@@ -207,7 +207,7 @@ function paint(){
   var chosen=(window.SIYL_BAG?SIYL_BAG.get().filter(function(x){return x.id===win})[0]:null);
   var pick=chosen?chosen.room:null;
   box.innerHTML='<div class="acar psel-car"><div class="atrk">'+stay.rooms.map(function(r){
-    var q=P.quote(win,r.slug),img=r.gallery.length?r.gallery[0][0]:'';
+    var q=P.quote(win,r.slug),img=r.cardImg||(r.gallery.length?r.gallery[0][0]:'');
     var on=pick===r.slug;
     /* live availability from the room engine (Owner, 16 Sep 2026): the words of the category, no Choose at 0 */
     var av=(U&&U.ready()&&U.tracked(win,r.slug))?U.label(win,r.slug):'',gone=!!av&&!U.fits(win,r.slug)&&!on;

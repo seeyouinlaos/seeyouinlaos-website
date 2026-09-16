@@ -37,8 +37,8 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/bag.js?v=c6ade073"></script>
 <script src="assets/shop-menu.js?v=7f4ee3cc"></script>
 <script src="assets/aman.js?v=fd12151c"></script>
-<script src="assets/rooms-data.js?v=30c293db"></script>
-<script src="assets/pricing.js?v=a3c88e2e"></script>
+<script src="assets/rooms-data.js?v=eb3283fa"></script>
+<script src="assets/pricing.js?v=ca8f5f5b"></script>
 <script src="assets/guest.js?v=276467ba"></script>
 <script src="assets/draft.js?v=51131a8b"></script>
 <script src="assets/confirm.js?v=15cc65d2"></script>
@@ -160,7 +160,7 @@ function bkkHtml(){
   var stay=window.SIYL_ROOMS&&SIYL_ROOMS.sathorn,win='bkk-stay';if(!stay)return '';
   var line=lineOf({ids:[win]}),pick=line?line.room:null;
   var h='<div id="bkksel"><div class="acar p-rail-car"><div class="atrk p-rail">'+stay.rooms.map(function(r){
-    var q=P.quote(win,r.slug),img=r.gallery.length?r.gallery[0][0]:'',on=pick===r.slug;
+    var q=P.quote(win,r.slug),img=r.cardImg||(r.gallery.length?r.gallery[0][0]:''),on=pick===r.slug;
     var av=U&&U.ready()&&U.tracked(win,r.slug)?U.label(win,r.slug):'';
     return '<article class="aslide p-card p-stay'+(on?' p-chosen':'')+'" data-slug="'+r.slug+'">'+
       '<span class="p-stay-img"'+(img?' style="background-image:url('+img+')"':'')+' role="img" aria-label="'+esc(r.property||stay.name)+'"></span>'+

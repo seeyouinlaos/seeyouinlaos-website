@@ -358,3 +358,16 @@ stored in Drive folder `170 - Experience - Dib Bangkok`, where they are misfiled
 
 Not used from the series: 001 (couple seated, van behind), 003 (portrait, car behind), 004/005 (near-duplicates of 002),
 006/008 (near-duplicates of 007; 008 with a traffic cone), 009/010 (the couple in wai, onlookers behind) — held in reserve.
+
+## U Sathorn Bangkok — the Owner's Drive folder of 16 Sep 2026 (14 images, all U Sathorn)
+| production file | source | use |
+|---|---|---|
+| usathorn/pool-pavilion-dusk.jpg | IMG_4049.jpeg (2005×1334 → 1600) | detail hero, gallery 1 |
+| usathorn/pool-pavilion-day.jpg | IMG_4050.jpeg (1998×1253 → 1600) | card (every rail), THE HOUSES, gallery 2 |
+| usathorn/driveway-sunset.jpg | IMG_4052.jpeg (1200×800) | gallery |
+| usathorn/entrance-u-garden.jpg | IMG_4053.jpeg (678×452, = IMG_2091 larger) | gallery |
+| usathorn/lobby.jpg | IMG_2087.JPG (1024×651) | gallery |
+| usathorn/aerial.jpg | IMG_2088.JPG (700×460) | kept, not placed (too small for a frame) |
+| usathorn/superior-garden-entry.jpg | IMG_3861.jpeg (1418×817) | gallery (the room's entry and television wall) |
+| — | IMG_2089.JPG (smaller duplicate of IMG_4049), IMG_2090.JPG (588×327), IMG_2091.JPG (smaller duplicate of IMG_4053), IMG_3856/3858/3859 (identical to the existing bed-terrace / desk-lawn / bed-mirror), IMG_4051.jpeg (a watermark baked in) | not placed |
+The one source map: `assets/rooms-data.js` → `SIYL_STAY_IMAGES` (hero · card · houses · gallery per Bangkok property).

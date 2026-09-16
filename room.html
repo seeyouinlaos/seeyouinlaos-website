@@ -101,8 +101,8 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:22px;margin:44
 <script src="assets/draft.js?v=51131a8b"></script>
 <script src="assets/shop-menu.js?v=7f4ee3cc"></script>
 <script src="assets/aman.js?v=fd12151c"></script>
-<script src="assets/rooms-data.js?v=30c293db"></script>
-<script src="assets/pricing.js?v=a3c88e2e"></script>
+<script src="assets/rooms-data.js?v=eb3283fa"></script>
+<script src="assets/pricing.js?v=ca8f5f5b"></script>
 <script src="assets/rooms.js?v=2cd10246"></script>
 <script src="assets/stay.js?v=d3aff276"></script>
 <script src="assets/journey.js?v=cadb3e68"></script>
@@ -211,7 +211,7 @@ var others = stay.rooms.filter(function (r) { return r.slug !== room.slug; });
 if (others.length) {
   h += '<section class="others"><h2>Other rooms at ' + esc(stay.name) + '</h2><div class="oc" id="oc">';
   others.forEach(function (r) {
-    var img = r.gallery.length ? '<div class="ph" style="background-image:url(' + r.gallery[0][0] + ')"></div>' : '<div class="ph" style="display:flex;align-items:center;justify-content:center;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#6B6964">Photography to follow</div>';
+    var img = (r.cardImg || r.gallery.length) ? '<div class="ph" style="background-image:url(' + (r.cardImg || r.gallery[0][0]) + ')"></div>' : '<div class="ph" style="display:flex;align-items:center;justify-content:center;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#6B6964">Photography to follow</div>';
     h += '<a class="occard" href="room.html?stay=' + stayKey + '&room=' + r.slug + '">' + img +
       '<div class="ot"><p class="oe">' + esc(r.cat) + '</p><p class="on">' + esc(r.name) + '</p>' +
       '<p class="od">' + esc(r.desc) + '</p>' +

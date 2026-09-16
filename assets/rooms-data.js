@@ -24,6 +24,23 @@
   var KMG = 'assets/images/kunming/';
   var LJG = 'assets/images/lijiang/';
   var PENT = 'assets/images/penthouse/';
+  /* ONE SOURCE MAP for the Bangkok accommodation imagery (Owner, 16 Sep 2026 · image quality quickfix): the hero of the
+   * detail page, the card of every rail and overview (Your Journey, the journeys page, "Other rooms at …", THE HOUSES),
+   * the gallery — one assignment per property, read everywhere. U Sathorn: the Owner's Drive folder of 16 Sep 2026
+   * (14 images, all U Sathorn Bangkok: the pool pavilion at dusk and by day, the driveway, the U garden, the lobby, the
+   * aerial, the garden-view room). Shama and the Penthouse keep their own photography. */
+  var USA = 'assets/images/usathorn/', SHA = 'assets/images/shama/';
+  var STAY_IMAGES = window.SIYL_STAY_IMAGES = {
+    sathornPenthouse: { hero: 'assets/images/journey/penthouse-01.jpg', card: PENT + 'exterior-golden-hour.jpg', houses: PENT + 'exterior-golden-hour.jpg' },
+    uSathorn: { hero: USA + 'pool-pavilion-dusk.jpg', card: USA + 'pool-pavilion-day.jpg', houses: USA + 'pool-pavilion-day.jpg',
+      gallery: [[USA + 'pool-pavilion-dusk.jpg', 'The pool pavilion at dusk'], [USA + 'pool-pavilion-day.jpg', 'The courtyard pool by day'], [USA + 'driveway-sunset.jpg', 'The driveway at sunset'],
+        [USA + 'entrance-u-garden.jpg', 'The entrance and the U garden'], [USA + 'lobby.jpg', 'The lobby'],
+        [USA + 'superior-garden-bed-terrace.jpg', 'The room and its garden terrace'], [USA + 'superior-garden-bed-mirror.jpg', 'Towards the terrace doors'], [USA + 'superior-garden-desk-lawn.jpg', 'The desk and the lawn beyond'],
+        [USA + 'terrace-frangipani.jpg', 'The terrace, under the frangipani'], [USA + 'superior-garden-depth.jpg', 'The length of the room'], [USA + 'superior-garden-entry.jpg', 'The entry and the television wall']] },
+    shamaYenAkat: { hero: SHA + 'king-studio-balcony.jpg', card: SHA + 'king-studio-balcony.jpg', houses: SHA + 'king-studio-balcony.jpg',
+      gallery: [[SHA + 'king-studio-balcony.jpg', 'The studio, from the entrance'], [SHA + 'king-studio-balcony-doors.jpg', 'The balcony doors'], [SHA + 'king-studio-dining.jpg', 'The dining corner'],
+        [SHA + 'king-studio-entry-vanity.jpg', 'The entry and the vanity'], [SHA + 'king-studio-bathroom.jpg', 'The bathroom'], [SHA + 'king-studio-shower-dressing.jpg', 'The shower and the dressing corner']] },
+  };
   var KEM = 'assets/images/kempinski/';
   var HERITAGE_AMENITIES = ['Bathrobe', 'Bathtub', 'Coffee & tea facilities', 'Hair dryer', 'Mini bar',
     'Nespresso machine', 'Safe deposit box', 'Shower', 'Slippers', 'Smart TV', 'Wardrobe', 'WiFi'];
@@ -232,7 +249,7 @@
         'Arrival 21 February 2027: personal pickup by Haruthai — hosted.'
       ],
       rooms: [
-        { slug: 'penthouse', name: 'Sathorn Penthouse', cat: 'Whole home · six bedrooms',
+        { slug: 'penthouse', name: 'Sathorn Penthouse', cat: 'Whole home · six bedrooms', cardImg: STAY_IMAGES.sathornPenthouse.card,
           desc: 'The shared days in Bangkok before travelling on to Laos — one penthouse for the whole party, capacity 12 adults.',
           /* eleven UNIQUE photographs from Drive 020 (000–010). The former slide 2
            * was the same living-room frame as slide 1 at a smaller size; it is
@@ -281,12 +298,8 @@
           property: 'U Sathorn Bangkok', place: 'Sathorn, Bangkok',
           breakfast: 'Breakfast included',
           desc: 'A garden-view room for two in a colonial-style hotel with a courtyard pool, a spa and a proper restaurant.',
-          gallery: [
-            ['assets/images/usathorn/superior-garden-bed-terrace.jpg', 'The room and its garden terrace'],
-            ['assets/images/usathorn/superior-garden-bed-mirror.jpg', 'Towards the terrace doors'],
-            ['assets/images/usathorn/superior-garden-desk-lawn.jpg', 'The desk and the lawn beyond'],
-            ['assets/images/usathorn/terrace-frangipani.jpg', 'The terrace, under the frangipani'],
-            ['assets/images/usathorn/superior-garden-depth.jpg', 'The length of the room']],
+          cardImg: STAY_IMAGES.uSathorn.card,
+          gallery: STAY_IMAGES.uSathorn.gallery,
           facts: [['Size', '32 sq.m.'], ['Occupancy', '2 adults'], ['Outlook', 'Garden view'],
             ['Stay', '21 – 24 February 2027 · 3 nights'], ['Breakfast', 'Included']],
           story: 'A room of thirty-two square metres looking onto the garden, in a hotel built around a courtyard and a pool. Breakfast is included, the spa and the gym are on site, and the restaurants and the bar mean an evening never has to leave the building.',
@@ -309,13 +322,8 @@
           property: 'Shama Yen-Akat Bangkok', place: 'Yen Akat, Bangkok',
           breakfast: 'Breakfast included',
           desc: 'A serviced studio for two with its own balcony, a dining area and a kitchen corner of your own.',
-          gallery: [
-            ['assets/images/shama/king-studio-balcony.jpg', 'The studio, from the entrance'],
-            ['assets/images/shama/king-studio-balcony-doors.jpg', 'The balcony doors'],
-            ['assets/images/shama/king-studio-dining.jpg', 'The dining corner'],
-            ['assets/images/shama/king-studio-entry-vanity.jpg', 'The entry and the vanity'],
-            ['assets/images/shama/king-studio-bathroom.jpg', 'The bathroom'],
-            ['assets/images/shama/king-studio-shower-dressing.jpg', 'The shower and the dressing corner']],
+          cardImg: STAY_IMAGES.shamaYenAkat.card,
+          gallery: STAY_IMAGES.shamaYenAkat.gallery,
           facts: [['Size', '36 sq.m.'], ['Occupancy', '2 adults'], ['Outlook', 'Balcony and terrace'],
             ['Stay', '21 – 24 February 2027 · 3 nights'], ['Breakfast', 'Included']],
           story: 'Thirty-six square metres with a balcony and a dining area — a studio to live in rather than a room to sleep in. Breakfast is included, the pool is indoors, and there is a café, a garden and a laundry room downstairs.',

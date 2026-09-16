@@ -114,7 +114,7 @@ test('ACCESS · the pages: the bag, the tickets, the room and transport planning
   assert.match(src('1872.html'), /<p class="price" data-private>USD 180<\/p><p class="per" data-private>For two guests<\/p>/);
   assert.match(src('experiences.html'), /Guest Relations<span data-private>, USD 180 per person<\/span>/);
   assert.match(src('voyage.html'), /Optional<span data-private> · USD 15 per guest<\/span>/); assert.equal((src('voyage.html').match(/data-cta-swap href="journeys\.html#j-wedstay"/g) || []).length, 2);
-  assert.equal((src('accommodation.html').match(/<a class="a-more" data-cta-swap href="room\.html\?stay=/g) || []).length, 2);
+  assert.equal((src('accommodation.html').match(/<a class="a-more" data-cta-swap href="room\.html\?stay=/g) || []).length, 4);   /* the Penthouse, U Sathorn, Shama, the residence (16 Sep 2026) */
   for (const f of ['index.html', 'destination.html', 'accommodation.html', 'marsilea.html', 'dress.html']) assert.doesNotMatch(src(f), /USD \d/, f + ' carries no amount');
   assert.match(src('assets/aman.js'), /\['The Journey', 'journeys\.html', \[/); assert.match(src('assets/recon.js'), /<a href="journeys\.html">The Journey<\/a>/); assert.match(src('assets/shop-menu.js'), /<a href="journeys\.html">The Journey<\/a>/);
   assert.match(src('assets/prep-shell.js'), /if \(!\/\^invitation\(\\\.html\)\?\$\/\.test\(location\.pathname\.split\('\/'\)\.pop\(\)\)\) \{\s*var toGate = function \(\) \{ if \(window\.SIYL_INVITE && SIYL_INVITE\.require\) SIYL_INVITE\.require\(function \(\) \{\}\); \};/, 'the private shell hands over');
