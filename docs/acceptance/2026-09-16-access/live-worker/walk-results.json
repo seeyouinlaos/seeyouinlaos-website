@@ -1,7 +1,7 @@
 {
   "origin": "https://seeyouinlaos-website.suthep-hrg.workers.dev",
   "guest": "G001",
-  "at": "2026-09-16T03:17:34.099Z",
+  "at": "2026-09-16T04:30:42.322Z",
   "pass": 37,
   "total": 37,
   "results": [
@@ -173,7 +173,7 @@
     {
       "id": "IN the bag icon opens the private journey (the bag, or the step the readiness engine asks for first) — never the code gate",
       "ok": true,
-      "d": "your-journey"
+      "d": "invitation?from=journey#p-email"
     },
     {
       "id": "IN Sign out from the header returns to the invitation page and clears the session",

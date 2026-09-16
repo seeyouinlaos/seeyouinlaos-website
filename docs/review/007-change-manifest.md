@@ -150,3 +150,6 @@ Wedding Ceremony on the aerial — until then these four carry no marker on the 
   covered from the top (`assets/prep.css .p-rail > img`), on every rail.
 - Menu entry "Journeys · Update by owner" (IMG_4026) read as the access rule above: the entry stays,
   signed out it leads to the invitation page.
+- The status line's space is reserved before any script runs (`6170755`): a placeholder in the markup of
+  every page with a static header, `assets/recon.js` placing it with the header it builds, the rules in
+  `assets/aman.css` — no layout shift from the line (no text change).

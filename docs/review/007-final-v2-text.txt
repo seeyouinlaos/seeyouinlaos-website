@@ -1,5 +1,5 @@
 007 — FINAL V2 FULL-WEBSITE TEXT EXTRACTION · see you in laos.
-The complete guest-facing text of the current release (main 40adcf4), extracted 2026-09-16T03:27:51.153Z from a local Worker running the deployed source with the real engines.
+The complete guest-facing text of the current release (main 6170755), extracted 2026-09-16T04:39:57.404Z from a local Worker running the deployed source with the real engines.
 Every active route and every reachable state was rendered in a browser and the live DOM walked in document order: text, [aria-label], [alt], [title], [placeholder], resolved aria-labelledby / aria-describedby, control states, live regions; "(hidden)" marks text in the page but not shown until an interaction.
 The generated sent-journey text, the email backup, the seat tickets and travel passes (PDF text read back) and the plan words are included. Exact-duplicate global blocks are written once as G-nnn and referenced with USES G-nnn; every variant is written in full.
 No access code appears: [SECRET ACCESS CODE OMITTED] stands where one would be typed or shown. Contacts are test values. Nothing is summarised, corrected or shortened.
@@ -17524,11 +17524,6 @@ CONTEXT: the send in progress
 Send to Guest Relations
 [state] live region · polite · role alert
 Sending shares your journey with Guest Relations so a person can look at it. It is a request, never a payment, and it is not a confirmation — Guest Relations confirms every arrangement with you personally.
-Received
-Your journey has been received by Guest Relations
-Sent · 16 Sept 2026 · 05:25 · your time
-Guest Relations will review your selections personally. Nothing is confirmed yet; we will confirm each arrangement with you once it is ready.
-Sent to Guest Relations
 
 ==================================================
 SURFACE 236
@@ -17747,7 +17742,7 @@ USD 2,325
 A spa interest carries no journey cost — paid directly at the spa.
 Received
 Your journey has been received by Guest Relations
-Sent · 16 Sept 2026 · 05:25 · your time
+Sent · 16 Sept 2026 · 06:37 · your time
 Guest Relations will review your selections personally. Nothing is confirmed yet; we will confirm each arrangement with you once it is ready.
 [aria-describedby → spoken] EVERYTHING WE NEED IS HERE · Your journey can be sent · Anything optional can follow at any time — it never delays your journey.
 [state] disabled
@@ -19418,15 +19413,15 @@ SEATS (as the ledger holds them):
 DOCUMENTS & PRIVACY (received only — nothing here is reviewed or verified):
 - Passport: NOT PROVIDED
 - Flight information: NOT PROVIDED
-- Publication of photographs: GIVEN (2026-09-16T03:24:54.026Z, wording 2026-09-09-draft)
+- Publication of photographs: GIVEN (2026-09-16T04:37:01.180Z, wording 2026-09-09-draft)
 
 GUEST:
 - Name: Peggy Berger
 - Contact: peggy.test@example.com · +49 170 000 0001
 - Party: Peggy & Steffie
-- Dress code: acknowledged 2026-09-16T03:24:26.689Z (text version 2026-09-09)
+- Dress code: acknowledged 2026-09-16T04:36:34.063Z (text version 2026-09-09)
 - Food allergies: NONE
-- Photography & film: acknowledged 2026-09-16T03:24:54.725Z (text version 2026-09-14)
+- Photography & film: acknowledged 2026-09-16T04:37:01.880Z (text version 2026-09-14)
 - Coffee or tea: Tea, black
 - My favourite: Mango sticky rice
 - Favourite drink: Water
@@ -19436,7 +19431,7 @@ GUEST:
 
 YOUR COST: USD 2,325
 Note: Tak Bat (morning alms-giving) is part of the Temple Ceremony and a personal offering. The Sangkhathan is a separate optional personal offering.
-Submitted via Review & Send · 2026-09-16T03:25:26.731Z
+Submitted via Review & Send · 2026-09-16T04:37:33.579Z
 
 ==================================================
 SURFACE 275
@@ -19489,15 +19484,15 @@ SEATS (as the ledger holds them):
 DOCUMENTS & PRIVACY (received only — nothing here is reviewed or verified):
 - Passport: NOT PROVIDED
 - Flight information: NOT PROVIDED
-- Publication of photographs: GIVEN (2026-09-16T03:24:54.026Z, wording 2026-09-09-draft)
+- Publication of photographs: GIVEN (2026-09-16T04:37:01.180Z, wording 2026-09-09-draft)
 
 GUEST:
 - Name: Peggy Berger
 - Contact: peggy.test@example.com · +49 170 000 0001
 - Party: Peggy & Steffie
-- Dress code: acknowledged 2026-09-16T03:24:26.689Z (text version 2026-09-09)
+- Dress code: acknowledged 2026-09-16T04:36:34.063Z (text version 2026-09-09)
 - Food allergies: NONE
-- Photography & film: acknowledged 2026-09-16T03:24:54.725Z (text version 2026-09-14)
+- Photography & film: acknowledged 2026-09-16T04:37:01.880Z (text version 2026-09-14)
 - Coffee or tea: Tea, black
 - My favourite: Mango sticky rice
 - Favourite drink: Water
@@ -19507,7 +19502,7 @@ GUEST:
 
 YOUR COST: USD 2,325
 Note: Tak Bat (morning alms-giving) is part of the Temple Ceremony and a personal offering. The Sangkhathan is a separate optional personal offering.
-Submitted via Review & Send · 2026-09-16T03:25:01.259Z
+Submitted via Review & Send · 2026-09-16T04:37:08.345Z
 
 ==================================================
 SURFACE 276
@@ -19854,8 +19849,8 @@ CONTEXT: folded in for completeness — every literal here is guest-facing in so
 ==================================================
 007 FINAL REVIEW METADATA
 ==================================================
-MAIN SHA: 40adcf4
-EXTRACTION DATE: 2026-09-16T03:27:51.178Z
+MAIN SHA: 6170755
+EXTRACTION DATE: 2026-09-16T04:39:57.429Z
 
 DISTINCT ACTIVE ROUTES: 26
 DISTINCT SURFACES: 295
@@ -19865,9 +19860,9 @@ STAY / ROOM ROUTES: 33
 TRANSPORT ROUTES: 5
 TICKET / PDF TEMPLATES: 14
 
-LINES: 19878
-WORDS: 101139
-CHARACTERS: 656411
+LINES: 19873
+WORDS: 101094
+CHARACTERS: 656146
 
 SOURCE-TRUTH CLAIMS CHECKED: 123
 SOURCE-TRUTH MATCH: 98
@@ -19877,4 +19872,4 @@ OWNER DECISION OVERRIDES: 17
 STALE / RETIRED SOURCE: 1
 
 SECRET SCAN: PASS
-COMPLETENESS CHECK: PASS · 1867 guest-facing source literals represented · 153 folded in from states not rendered · 0 leftover · 0 failed steps
+COMPLETENESS CHECK: PASS · 1868 guest-facing source literals represented · 153 folded in from states not rendered · 0 leftover · 0 failed steps

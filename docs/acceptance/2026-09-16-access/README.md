@@ -14,8 +14,17 @@ Owner uses live.
 | IMG_4026 (menu · Journeys) | "Journeys — Update by owner" | read as the access rule: the entry stays; signed out it leads to the invitation page |
 | IMG_4027 · IMG_4028 (dress reference rails) | "Picture size is wrong" | every reference photograph is one 3:4 card, covered from the top, max 300 px (`assets/prep.css .p-rail > img`) |
 
+The status line's space is reserved before any script runs (`6170755`): the placeholder sits in the markup
+of the fifteen pages with a static header, `assets/recon.js` places it with the header it builds (a
+`.hd-space` stand-in of the same height holds the first paint on the six script-built pages), the rules
+live in `assets/aman.css`; on a phone both states are two rows of one height — the line no longer shifts
+the page (venue walk CLS at 1280 px: voyage 0.091 → 0.031, accommodation 0.093 → 0.034; the load itself
+0.001 by a buffered layout-shift observer; the residue is the shared header's web-font swap, unchanged
+since before Edit 3).
+
 Tests: `test/access.test.mjs` (5) — the private list, the gate URL, the hand-overs, the status texts,
-the page hand-overs, the CTAs, `invite.mjs` on 21 pages, Harudot, the dress CSS. Suite 272 / 272.
+the page hand-overs, the CTAs, `invite.mjs` on 21 pages, the reserved placeholder on every page, Harudot,
+the dress CSS. Suite 272 / 272.
 
 ## The rendered access walk (`walk.mjs`, 37 checks · G001, read-only)
 Signed out: every private page hands over with the way back; every private link on the public pages
@@ -25,7 +34,7 @@ walk returns to the page it left (`?next=`), the header names the guest on every
 opens the private journey, Sign out from the header returns to the invitation page and clears the
 session, the private pages hand over again.
 - Local Worker at the final code: 37 / 37.
-- `live-worker/` (Worker origin, 40adcf4): 37 / 37 · `live-pages/` (GitHub Pages mirror): 37 / 37
+- `live-worker/` (Worker origin, 6170755): 37 / 37 · `live-pages/` (GitHub Pages mirror): 37 / 37
   (screenshots: `out-destination.png`, `out-experiences.png`, `in-journeys.png`; `walk-results.json`).
 
 ## Booking-system regression at the final code (the gate must not break a signed-in guest)
@@ -38,8 +47,9 @@ session, the private pages hand over again.
   Suthep's dinner seat D-B-15 → D-T-01 and wrote `reg:INV-G049`; both were restored and the three
   snapshots compared again: `ROOMS {"removed":[],"added":[]}` · `SEATS {…}` empty · `KV {…}` empty —
   Haruthai's live registration (`reg:INV-G048` + its `:prev:` record) and six room places untouched.
-- `live-venue-worker/` · `live-venue-pages/`: the venue walk on both origins at 40adcf4 (the header
-  status line now sits on the venue pages too): 66 / 66 · 66 / 66.
+- `live-venue-worker/` · `live-venue-pages/`: the venue walk on both origins at 6170755 (the header
+  status line now sits on the venue pages too): 66 / 66 · 66 / 66 — CLS 0.001 / 0.031 (voyage 390 / 1280),
+  0.002 / 0.034 (accommodation), long tasks 0, no video, the real aerial at every width, WebKit at 375 · 390 · 430.
 
 ## Read-only guest coverage on production (final code)
 `2026-09-15-final-release/auth-coverage.mjs` → `auth-coverage-production.json`: 47 / 47 guests —
@@ -56,5 +66,5 @@ rendered text of the two origins identical. The private pages (`journeys`, `cart
 longer public surfaces: signed out they hand over to the invitation page.
 
 ## Parity
-717 served files hashed locally and on both origins at 40adcf4: 717 / 717 identical (the two
-design exclusions — `docs/venue/ASSET-MAP.md` and `register-landing.html` — are not served by the Worker).
+717 served files hashed locally and on both origins: 717 / 717 identical at 40adcf4 and again at 6170755
+(`docs/` is not served by either origin — `.assetsignore` —, `register-landing.html` is not served by the Worker).

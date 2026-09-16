@@ -55,4 +55,5 @@ The Owner's third review (`Edit_3.zip`) — the access rule for every link, the 
 café, the dress reference cards — is applied and proven in `docs/acceptance/2026-09-16-access/`
 (annotation table, the rendered access walk 37 / 37 on both origins, the booking regression on
 production with production restored, the venue walk 66 / 66 on both origins, 47 / 47 read-only
-coverage, the public crawl of both origins CLEAN, parity 717 / 717).
+coverage, the public crawl of both origins CLEAN, parity 717 / 717; the status line's space reserved so
+nothing shifts, `6170755`).

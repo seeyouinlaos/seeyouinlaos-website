@@ -1,9 +1,9 @@
 # 007 — FINAL V2 DELTA (pre-patch → final)
 
-Generated 2026-09-16 03:29 UTC by docs/review/007-final-v2-delta.py.
+Generated 2026-09-16 04:51 UTC by docs/review/007-final-v2-delta.py.
 
 PRE-PATCH: docs/review/007-final-full-website-text.txt (MAIN SHA d299355) · docs/review/007-final-source-truth-audit.txt
-FINAL:     docs/review/007-final-v2-text.txt (MAIN SHA 40adcf4) · docs/review/007-final-v2-source-truth-audit.txt
+FINAL:     docs/review/007-final-v2-text.txt (MAIN SHA 6170755) · docs/review/007-final-v2-source-truth-audit.txt
 
 | metric | pre-patch | final |
 |---|---|---|
@@ -14,8 +14,8 @@ FINAL:     docs/review/007-final-v2-text.txt (MAIN SHA 40adcf4) · docs/review/0
 | STAY / ROOM ROUTES | 33 | 33 |
 | TRANSPORT ROUTES | 5 | 5 |
 | TICKET / PDF TEMPLATES | 14 | 14 |
-| LINES | 19875 | 19878 |
-| WORDS | 102162 | 101139 |
+| LINES | 19875 | 19873 |
+| WORDS | 102162 | 101094 |
 | SOURCE-TRUTH CLAIMS CHECKED | 119 | 123 |
 | SOURCE-TRUTH MATCH | 97 | 98 |
 | SOURCE-TRUTH CONFLICT | 4 | 0 |
@@ -23,7 +23,7 @@ FINAL:     docs/review/007-final-v2-text.txt (MAIN SHA 40adcf4) · docs/review/0
 | OWNER DECISION OVERRIDES | 12 | 17 |
 | STALE / RETIRED SOURCE | — | 1 |
 | SECRET SCAN | PASS | PASS |
-| COMPLETENESS CHECK | PASS · 1813 guest-facing source literals represented · 141 folded in from states not rendered · 0 leftover · 0 failed steps | PASS · 1867 guest-facing source literals represented · 153 folded in from states not rendered · 0 leftover · 0 failed steps |
+| COMPLETENESS CHECK | PASS · 1813 guest-facing source literals represented · 141 folded in from states not rendered · 0 leftover · 0 failed steps | PASS · 1868 guest-facing source literals represented · 153 folded in from states not rendered · 0 leftover · 0 failed steps |
 
 Unique text lines (surfaces, states, templates; references and stamps normalised): 4240 → 4397 · appeared 250 · disappeared 93
 
@@ -183,9 +183,9 @@ Unique text lines (surfaces, states, templates; references and stamps normalised
 
 ### other (86)
 
-- - Dress code: acknowledged 2026-09-16T03:24:26.689Z (text version 2026-09-09)
-- - Photography & film: acknowledged 2026-09-16T03:24:54.725Z (text version 2026-09-14)
-- - Publication of photographs: GIVEN (2026-09-16T03:24:54.026Z, wording 2026-09-09-draft)
+- - Dress code: acknowledged 2026-09-16T04:36:34.063Z (text version 2026-09-09)
+- - Photography & film: acknowledged 2026-09-16T04:37:01.880Z (text version 2026-09-14)
+- - Publication of photographs: GIVEN (2026-09-16T04:37:01.180Z, wording 2026-09-09-draft)
 - 07
 - Acknowledged on 16 Sept 2026
 - Bangkok · Café · 06 MAR 2027
@@ -240,7 +240,7 @@ Unique text lines (surfaces, states, templates; references and stamps normalised
 - SURFACE 293
 - SURFACE 294
 - SURFACE 295
-- Sent · 16 Sept 2026 · 05:25 · your time
+- Sent · 16 Sept 2026 · 06:37 · your time
 - Signed in · Peggy
 - Signed in · Steffie
 - … 26 more
