@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script src="assets/invite-early.js"></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
@@ -117,7 +118,7 @@
   var pr = x.practical || {};
   if (pr.price || pr.hours || x.maps || x.link) {
     h += '<section class="x-sec"><p class="a-eyebrow">Practical information</p><div class="x-kv">' +
-      (pr.price ? '<div><span class="k">Price</span><span class="v"><span class="price">' + esc(pr.price) + '</span>' + (pr.priceNote ? '<small>' + esc(pr.priceNote) + '</small>' : '') + '</span></div>' : '') +
+      (pr.price ? '<div data-private><span class="k">Price</span><span class="v"><span class="price">' + esc(pr.price) + '</span>' + (pr.priceNote ? '<small>' + esc(pr.priceNote) + '</small>' : '') + '</span></div>' : '') +
       (pr.hours ? '<div><span class="k">Opening hours</span><span class="v">' + pr.hours.map(esc).join('<br>') + '</span></div>' : '') +
       ((x.maps || x.link) ? '<div><span class="k">Where</span><span class="v"><span class="x-links" style="margin-top:0">' +
         (x.maps ? '<a class="a-link" href="' + esc(x.maps) + '" target="_blank" rel="noopener">Map</a>' : '') +
@@ -128,9 +129,10 @@
    * Tea pattern, priced per participating guest by the one calculation source */
   if (x.select) {
     h += '<section class="x-sel" id="sel"><p class="a-eyebrow">Your Journey</p><h2>Lunch at ' + esc(x.name) + '</h2>' +
-      '<p class="price">USD ' + x.select.price + ' <span class="a-eyebrow" style="display:inline">' + esc(x.select.unit) + '</span></p>' +
+      '<p class="price" data-private>USD ' + x.select.price + ' <span class="a-eyebrow" style="display:inline">' + esc(x.select.unit) + '</span></p>' +
       '<p>Optional. Adding ' + esc(x.name) + ' places a restaurant request in your journey for the guests who take part; Guest Relations arrange the table through your journey. It is a request — not a confirmed reservation, and availability is not guaranteed by this page. No date or time to choose here.</p>' +
-      '<div id="selbox"></div></section>';
+      '<div id="selbox" data-private></div>' +
+      '<p class="x-way" data-private-cta><a class="a-link" data-private-cta href="invitation.html?open=1">Open your invitation</a></p></section>';
   }
   h += '<p class="x-back"><a class="a-link" href="experiences.html#' + esc(x.chapter) + '">All experiences</a></p>';
   root.innerHTML = h;
@@ -148,6 +150,8 @@
   function money(n) { return 'USD ' + Number(n).toLocaleString('en-US'); }
   function paintSel() {
     var box = document.getElementById('selbox'); if (!box || !window.SIYL_BAG) return;
+    /* the price and the add exist for a signed-in guest only (Owner, 16 Sep 2026): signed out nothing is rendered here */
+    if (document.documentElement.getAttribute('data-session') !== 'in') { box.innerHTML = ''; return; }
     var s = x.select, line = SIYL_BAG.get().filter(function (l) { return l.id === s.id; })[0];
     box.innerHTML = '<p class="x-amt" id="selamt">' + money(s.price) + ' <span class="a-eyebrow">per person · your cost</span></p>' + (line
       ? '<div class="x-cur"><span class="on" data-sel-state="current" aria-current="true">Current selection · ' + money(s.price) + '</span>' +

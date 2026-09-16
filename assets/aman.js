@@ -17,7 +17,7 @@
       ['Vientiane', 'destination.html#vientiane'],
       ['Kunming &amp; Lijiang', 'destination.html#china']
     ]],
-    ['Journeys', 'journeys.html', [
+    ['The Journey', 'journeys.html', [
       ['Before the Wedding', 'journeys.html#j-bkk-stay'],
       ['The Wedding', 'journeys.html#j-wedstay'],
       ['After the Wedding', 'journeys.html#j-mu9646']

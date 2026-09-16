@@ -1,0 +1,20 @@
+004 — GUEST RECONCILIATION SUMMARY · 2026-09-16T06:33:02Z
+Source: the connected H&S_Wedding_Operations_Master (modified 2026-09-16T02:39Z) — sheet Guestlist and sheet Accommodation.
+Against: the private guest list, the private code register and the private distribution register (never in this repository).
+Method: every guest-role row classified exactly once by name, party partner and the rooming sheet; Contact ID is not a unique key (CON060 is carried by two different people). Nothing is invented: a row without evidence is UNRESOLVED.
+
+DRIVE CONTACTS TOTAL              59 (76 rows carry an ID: 59 contacts + 17 rows without a role · the sheet overview says 59 contacts)
+GUEST-ROLE ROWS                   57 (Guest - Suthep 29 · Guest - Haruthai 28)
+ACTIVE INVITATION                 36
+INACTIVE / CANCELLED              0
+EXCLUDED / NOT INVITED            18 (guest-role contacts with no invitation and no place in the rooming sheet — Owner to confirm the intent)
+DUPLICATE PERSON RECORD           0
+DUPLICATE IDS                     1 (CON060 — two different people under one ID)
+UNRESOLVED                        3 (CON009, CON046, CON048)
+
+REGISTER SIDE                     47 active invitations: 2 hosts (the sheet's Document Owners) + 36 matched to guest-role rows + 9 with no row among the 57 (G007, G010, G039, G041, G042, G043, G044, G046, G047)
+ROOMING SHEET SIDE                26 rooms; 7 occupants with no register person (ROM005 guest 1 — the UNRESOLVED CON009 question; ROM014 and ROM015 guest 2 — the two "Daughter" places, CON046 / CON048; ROM025 and ROM026 — two rooms, four occupants, no invitation and no contact row)
+CANCELLED IN THE REGISTER         2 — in neither sheet (consistent)
+
+FINAL VERIFIED ACTIVE GUEST COUNT NOT VERIFIED — the register holds 47; the 57-row reconciliation proves 38 of them, leaves 3 unresolved rows, 9 register invitations without a contact row (one of them, G010, appears in no current sheet at all; G046 / G047 stand in the register and the printing sheet but not in the rooming sheet) and 7 rooming places without an invitation. The Owner resolves each line in src/guest-reconciliation.private.txt; only then is the count final.
+RELEASE CONDITION                 UNRESOLVED = 0 — NOT MET

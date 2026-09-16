@@ -256,7 +256,10 @@ function build() {
 
 /* ---- ACCESS (Owner, Edit 3 · 16 Sep 2026): nobody sees the journey, the bag, the
  * tickets or any step before they are signed in; every page says which it is ---- */
-const PRIVATE = /^(?:\.\/)?(your-journey|cart|tickets|journeys|wedding|wedding-preparation|about-you|review)(?:\.html)?(?=$|[?#])/;
+/* the private surfaces: the personal planner and its steps, the bag, the tickets, the room and transport
+   planning pages (rates, live inventory, fares, adds). The Journey (journeys.html) is public editorial —
+   its private fragments are marked data-private and stay out of a signed-out page (assets/invite-early.js). */
+const PRIVATE = /^(?:\.\/)?(your-journey|cart|tickets|room|transport|wedding|wedding-preparation|about-you|review)(?:\.html)?(?=$|[?#])/;
 const LOC = typeof location !== 'undefined' ? location : { pathname: '/', search: '', hash: '', replace() {} };
 const cleanUrls = !/\.html$/i.test(LOC.pathname) && LOC.pathname.split('/').pop() !== '';
 const hrefOf = (file) => (cleanUrls ? file.replace(/\.html(?=[?#]|$)/, '') : file);
@@ -286,11 +289,32 @@ function esc(t) { return String(t == null ? '' : t).replace(/&/g, '&amp;').repla
 function gateLinks() {
   if (!document.querySelectorAll) return;
   const a = AUTH.get(), ok = !!(a && AUTH.valid());
+  if (document.documentElement && document.documentElement.setAttribute) document.documentElement.setAttribute('data-session', ok ? 'in' : 'out');
   document.querySelectorAll('a[href]').forEach((l) => {
     const orig = l.getAttribute('data-private-href') || l.getAttribute('href');
     if (!isPrivate(orig)) return;
     if (!l.hasAttribute('data-private-href')) l.setAttribute('data-private-href', orig);
     l.setAttribute('href', ok ? orig : gateUrl(orig.replace(/^\.?\//, '')));
+  });
+  /* the way in, where private planning would be (data-private-cta: exists only while nobody is signed in — the
+     stylesheet hides it for a guest): it leads to the invitation page with the way back to this page */
+  document.querySelectorAll('a[data-private-cta]').forEach((l) => { const h = ok ? hrefOf('your-journey.html') : gateUrl(here()); if (l.getAttribute('href') !== h) l.setAttribute('href', h); });
+  /* the public close call to action (data-cta-in): Open your invitation → the invitation page while nobody is signed in;
+     Continue Your Journey → the planner for a guest */
+  document.querySelectorAll('a[data-cta-in]').forEach((l) => {
+    if (!l.hasAttribute('data-cta-out')) { l.setAttribute('data-cta-out', l.textContent); l.setAttribute('data-href-out', l.getAttribute('href')); }
+    const text = ok ? l.getAttribute('data-cta-in') : l.getAttribute('data-cta-out'), href = ok ? hrefOf(l.getAttribute('data-href-in')) : l.getAttribute('data-href-out');
+    if (l.textContent !== text) l.textContent = text;
+    if (l.getAttribute('href') !== href) l.setAttribute('href', href);
+  });
+  /* a public call to action that leads into private planning (data-cta-swap): signed out it reads Open your
+     invitation and leads to the invitation page with the way back; signed in it is the relevant private action */
+  document.querySelectorAll('a[data-cta-swap]').forEach((l) => {
+    if (!l.hasAttribute('data-cta-text')) { l.setAttribute('data-cta-text', l.textContent); l.setAttribute('data-cta-href', l.getAttribute('data-private-href') || l.getAttribute('href')); }
+    const text = ok ? l.getAttribute('data-cta-text') : 'Open your invitation', href = ok ? l.getAttribute('data-cta-href') : gateUrl(here());
+    /* assign only what changes: a text node replaced on every pass would wake the observer below without end */
+    if (l.textContent !== text) l.textContent = text;
+    if (l.getAttribute('href') !== href) l.setAttribute('href', href);
   });
 }
 document.addEventListener('click', (e) => {
@@ -300,7 +324,11 @@ document.addEventListener('click', (e) => {
   const a = AUTH.get(); if (a && AUTH.valid()) return;
   e.preventDefault(); toGate(orig.replace(/^\.?\//, ''));
 }, true);
-function accessReady() { renderAccess(); gateLinks(); }
+/* a private fragment of a public page (a price of the journey, live inventory, an add, a fare — data-private) leaves the
+   document while nobody is signed in: hidden from the first paint by the stylesheet, removed here (a sign-in always
+   arrives by the invitation page, so the page is rebuilt with them) */
+function dropPrivate() { const a = AUTH.get(); if (a && AUTH.valid()) return; if (!document.querySelectorAll) return; document.querySelectorAll('[data-private]').forEach((el) => { if (el.parentNode) el.parentNode.removeChild(el); }); }
+function accessReady() { dropPrivate(); renderAccess(); gateLinks(); }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', accessReady); else accessReady();
 document.addEventListener('siyl:auth', accessReady); document.addEventListener('siyl:signout', accessReady);
 /* menus and footers are built by scripts after this one: one more pass once everything is in place */

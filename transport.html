@@ -212,7 +212,7 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:22px;margin:44
   h += '<button class="cta" id="add">Add to Your Journey</button>';
   h += '<p class="ok" id="ok" hidden>In your journey · <a href="your-journey.html">View</a> · <a href="cart.html">Your bag</a></p></div>';
   h += '<p class="note">Amounts are per person and are never charged on this website — Guest Relations confirms every arrangement with you.</p></section>';
-  h += '<p class="backrow"><a href="journeys.html#' + T.anchor + '">Back to Journeys</a></p>';
+  h += '<p class="backrow"><a href="journeys.html#' + T.anchor + '">Back to The Journey</a></p>';
 
   document.getElementById('m').innerHTML = h;
   if (window.SIYL_BAG) SIYL_BAG.badge();
@@ -251,6 +251,9 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:22px;margin:44
     if (window.SIYL_INVITE) { SIYL_INVITE.require(fn); }
     else document.addEventListener('siyl:invite-ready', function () { SIYL_INVITE.require(fn); }, { once: true });
   }
+  /* ACCESS (Owner, 16 Sep 2026 · final IA): a transport page is private planning — fares, the class, the add — so
+     without a session it hands over to the invitation page and comes back here after the code */
+  gated(function () {});
   var btn = document.getElementById('add'), ok = document.getElementById('ok'), tk = document.getElementById('ticket');
   function paintTicket() {
     var TP = window.SIYL_TRAVELPASS; if (!TP || !TP.isLeg(id)) { tk.hidden = true; return; }

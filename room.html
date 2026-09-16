@@ -250,7 +250,7 @@ stay.windows.forEach(function (w, wi) {
   h += '</div>';
 });
 h += '<p class="note">Amounts are the total per person for the nights shown. Nothing is paid on this website — Guest Relations confirms every arrangement with you.</p></section>';
-h += '<p class="backrow"><a href="journeys.html#j-' + stay.windows[0].id + '">Back to Journeys</a></p>';
+h += '<p class="backrow"><a href="journeys.html#j-' + stay.windows[0].id + '">Back to The Journey</a></p>';
 
 document.getElementById('m').innerHTML = h;
 if (window.SIYL_BAG) SIYL_BAG.badge();
@@ -298,6 +298,9 @@ function gated(fn) {
   if (window.SIYL_INVITE) SIYL_INVITE.require(fn);
   else document.addEventListener('siyl:invite-ready', function () { SIYL_INVITE.require(fn); }, { once: true });
 }
+/* ACCESS (Owner, 16 Sep 2026 · final IA): a room page is private planning — rates, live places, the choice — so
+   without a session it hands over to the invitation page and comes back here after the code */
+gated(function () {});
 /* the product surface reads and writes the same bag state as Your Journey */
 function mine(w) {
   var ids = P.ids(w.id);

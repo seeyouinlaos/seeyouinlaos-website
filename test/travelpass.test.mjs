@@ -153,7 +153,7 @@ test('ONE PRICE SOURCE (Owner, 15 Sep 2026 · Edit 2): a bag line saved at C86 1
 test('C86 = USD 85 everywhere active — no mixed legacy amount, no active 105 (Owner, Edit 2 · 15 Sep 2026)', () => {
   const w = page({ modules: WITH_PASS });
   assert.equal(w.SIYL_PRICE.FLAT.c86.price, 85); assert.equal(w.SIYL_PRICE.items('c86')[0].price, 85); assert.match(w.SIYL_PRICE.FLAT.c86.basis, /USD 85 per person/);
-  assert.match(src('journeys.html'), /<p class="pp">USD 85 per person<\/p><button class="add" data-add='\{"id":"c86"/); assert.match(src('journeys.html'), /"id":"c86"[^']*"price":85/);
+  assert.match(src('journeys.html'), /<p class="pp" data-private>USD 85 per person<\/p><button class="add" data-private data-add='\{"id":"c86"/); assert.match(src('journeys.html'), /"id":"c86"[^']*"price":85/);
   assert.match(src('register/data.mjs'), /id: 'kmg-ljg'[^\n]*contribution: 85/);
   for (const f of ['assets/pricing.js', 'journeys.html', 'your-journey.html', 'transport.html', 'assets/transport-data.js', 'assets/journey.js', 'cart.html', 'review.html', 'register/data.mjs', 'assets/travelpass.js']) {
     const s = src(f);

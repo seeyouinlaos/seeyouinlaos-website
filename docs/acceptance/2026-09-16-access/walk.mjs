@@ -26,10 +26,14 @@ const status = async () => (await p.evaluate(() => (document.querySelector('[dat
 const shot = async (n) => { if (OUT) await p.screenshot({ path: path.join(OUT, n + '.png') }); };
 
 /* ---- signed out ---- */
-for (const f of ['journeys.html', 'cart.html', 'tickets.html', 'your-journey.html', 'wedding.html', 'wedding-preparation.html', 'about-you.html', 'review.html']) {
-  await go(f); note('OUT ' + f + ' → the invitation page with the way back', /^invitation(\.html)?\?open=1&next=/.test(rel()) && rel().includes(f.replace('.html', '')), rel());
+for (const f of ['cart.html', 'tickets.html', 'your-journey.html', 'wedding.html', 'wedding-preparation.html', 'about-you.html', 'review.html', 'room.html?stay=souphattra&room=heritage', 'transport.html?id=mu9646']) {
+  await go(f); note('OUT ' + f + ' → the invitation page with the way back', /^invitation(\.html)?\?open=1&next=/.test(rel()) && rel().includes(f.split('?')[0].replace('.html', '')), rel());
 }
-for (const f of ['index.html', 'destination.html', 'accommodation.html', 'experiences.html', 'voyage.html', 'experience.html?id=bkk-suhring', 'room.html?stay=souphattra&room=heritage', 'transport.html?id=mu9646', 'marsilea.html', '1872.html', 'dress.html', 'invitation.html']) {
+/* THE JOURNEY (final IA, 16 Sep 2026): public editorial — no amount, no room, no fare, no add; the way in stands where the planning would be */
+await go('journeys.html'); const tj = await p.evaluate(() => ({ h1: (document.querySelector('h1') || {}).textContent, usd: (document.body.innerText.match(/USD\s?\d/g) || []).length, adds: document.querySelectorAll('.add, [data-add], .vars .var, .psel .pcard').length, ways: [...document.querySelectorAll('a[data-private-cta]')].filter((a) => a.offsetParent !== null).length, first: (document.querySelector('a[data-private-cta]') || {}).getAttribute ? document.querySelector('a[data-private-cta]').getAttribute('href') : '', swaps: [...document.querySelectorAll('a[data-cta-swap]')].map((a) => a.textContent.trim() + '→' + a.getAttribute('href')) }));
+note('OUT The Journey is public editorial: no amount, no room row, no fare, no add · the way in in every stay card (' + tj.ways + ')', /^journeys/.test(rel()) && tj.h1 === 'The Journey' && tj.usd === 0 && tj.adds === 0 && tj.ways >= 6 && /^invitation(\.html)?\?open=1&next=journeys/.test(tj.first), JSON.stringify(tj).slice(0, 200));
+note('OUT the view links into private planning read Open your invitation and lead to the invitation page', tj.swaps.length === 5 && tj.swaps.every((x) => /^Open your invitation→invitation(\.html)?\?open=1&next=journeys/.test(x)), tj.swaps.join(' | '));
+for (const f of ['index.html', 'destination.html', 'accommodation.html', 'experiences.html', 'voyage.html', 'journeys.html', 'experience.html?id=bkk-suhring', 'marsilea.html', '1872.html', 'tea.html', 'dress.html', 'invitation.html']) {
   await go(f); const s = await status();
   note('OUT ' + f + ' · the header says NOT SIGNED IN · OPEN YOUR INVITATION (' + rel() + ')', /Not signed in/.test(s) && /Open your invitation/.test(s) && !/open=1&next=/.test(rel()), s);
 }
@@ -38,28 +42,37 @@ const cta = await p.evaluate(() => { const a = document.querySelector('.a-cta');
 note('OUT the close CTA reads Open your invitation and leads to the invitation page', cta === 'Open your invitation → invitation.html', cta);
 const gl = await p.evaluate(() => [...document.querySelectorAll('a[data-private-href]')].map((a) => a.getAttribute('data-private-href') + '→' + a.getAttribute('href')));
 note('OUT every link to a private surface on the page carries the invitation page as its target (' + gl.length + ' links)', gl.length >= 3 && gl.every((x) => /→invitation(\.html)?\?open=1&next=/.test(x)), gl.slice(0, 3).join(' | '));
-await p.click('#menu-open, .hb'); await p.waitForTimeout(500); await p.click('.a-menu a:has-text("Journeys")'); await p.waitForTimeout(900);
-note('OUT the menu\'s Journeys leads to the invitation page (with journeys as the way back)', /^invitation(\.html)?\?open=1&next=journeys/.test(rel()), rel());
+await p.click('#menu-open, .hb'); await p.waitForTimeout(500); await p.click('.a-menu a:has-text("The Journey")'); await p.waitForTimeout(900);
+note('OUT the menu\'s The Journey opens the public editorial overview', /^journeys/.test(rel()), rel());
+const prices = {}; for (const f of ['tea.html', '1872.html', 'experiences.html', 'voyage.html', 'experience.html?id=bkk-suhring']) { await go(f); prices[f] = await p.evaluate(() => (document.body.innerText.match(/USD\s?\d/g) || []).length + document.querySelectorAll('[data-private]').length); }
+note('OUT no amount of the journey on any public page, no private fragment left in the document (tea · 1872 · experiences · the wedding · Sühring)', Object.values(prices).every((v) => v === 0), JSON.stringify(prices));
 await go('index.html'); await p.click('#menu-open, .hb'); await p.waitForTimeout(500); await p.click('.a-menu a:has-text("Your Journey")'); await p.waitForTimeout(900);
 note('OUT the menu\'s Your Journey leads to the invitation page', /^invitation(\.html)?\?open=1&next=your-journey/.test(rel()), rel());
 await go('voyage.html'); await p.evaluate(() => document.querySelector('footer a[href*="tickets"], footer a[data-private-href*="tickets"]').click()); await p.waitForTimeout(900);
 note('OUT the footer\'s Your tickets leads to the invitation page', /^invitation(\.html)?\?open=1&next=tickets/.test(rel()), rel());
 await go('index.html'); await p.evaluate(() => document.querySelector('header a.bag, header .hd-right a').click()); await p.waitForTimeout(900);
 note('OUT the bag icon leads to the invitation page', /^invitation(\.html)?\?open=1&next=/.test(rel()), rel());
-await go('transport.html?id=c86'); await p.click('#add'); await p.waitForTimeout(900);
-note('OUT ADD on a public detail page hands over to the invitation page and remembers the page', /^invitation(\.html)?\?open=1&next=transport/.test(rel()), rel());
+await go('tea.html'); const teaAdd = await p.evaluate(() => ({ add: !!document.getElementById('add'), way: [...document.querySelectorAll('a[data-private-cta]')].map((a) => a.textContent.trim() + '→' + a.getAttribute('href')).join() }));
+note('OUT the tea page: no ADD without a session, the way in stands there', !teaAdd.add && /^Open your invitation→invitation(\.html)?\?open=1&next=tea/.test(teaAdd.way), JSON.stringify(teaAdd));
 await go('experiences.html'); const cafes = await p.evaluate(() => { const secs = [...document.querySelectorAll('section, .a-sec')]; const out = {}; for (const s of secs) { const h = (s.querySelector('.a-eyebrow, h2, .eyebrow') || {}).textContent || ''; if (/Harudot/.test(s.textContent)) out[h.trim()] = true; } return Object.keys(out); });
 const hcat = await p.evaluate(() => { const c = [...document.querySelectorAll('*')].find((e) => /^Harudot$/.test((e.textContent || '').trim()) && /^H[1-4]$/.test(e.tagName)); const card = c && c.closest('article, .a-card, .xcard, li, div'); return card ? card.textContent.replace(/\s+/g, ' ').slice(0, 160) : ''; });
 note('OUT Harudot is listed as a café, not under Shopping & Places', /Caf/i.test(hcat) && !/Shopping & Places/i.test(hcat), hcat);
 await shot('out-experiences');
 
 /* ---- the way back: the code on the invitation page returns the guest to the page they wanted ---- */
-await go('journeys.html'); await p.waitForSelector('.siyl-inv input', { timeout: 10000 }); await p.fill('.siyl-inv input', tok); await p.click('.siyl-inv .igo');
+await go('journeys.html'); await p.click('a[data-private-cta]'); await p.waitForSelector('.siyl-inv input', { timeout: 10000 }); await p.fill('.siyl-inv input', tok); await p.click('.siyl-inv .igo');
 await p.waitForFunction(() => /journeys/.test(location.pathname), null, { timeout: 15000 }).catch(() => {}); await p.waitForTimeout(1200);
-note('IN after the code, the guest is back on the journeys catalogue', /^journeys/.test(rel()), rel());
+const pj = await p.evaluate(() => ({ usd: (document.body.innerText.match(/USD\s?\d/g) || []).length, rows: document.querySelectorAll('.vars .var').length, ways: [...document.querySelectorAll('a[data-private-cta]')].filter((a) => a.offsetParent !== null).length }));
+note('IN after the code, the guest is back on The Journey — now the planner: amounts, room rows, no way-in link', /^journeys/.test(rel()) && pj.usd > 0 && pj.rows > 0 && pj.ways === 0, rel() + ' ' + JSON.stringify(pj));
 const sIn = await status(); await shot('in-journeys');
 note('IN the header names the guest: SIGNED IN · <name> · YOUR JOURNEY · SIGN OUT', /Signed in ·/.test(sIn) && /Your Journey/.test(sIn) && /Sign out/.test(sIn), sIn);
 for (const f of ['destination.html', 'voyage.html', 'cart.html']) { await go(f); const s = await status(); note('IN ' + f + ' · the header still names the guest', /Signed in ·/.test(s) && !/^invitation/.test(rel()), s + ' · ' + rel()); }
+await go('index.html'); const ctaIn = await p.evaluate(() => { const a = document.querySelector('.a-cta'); return a ? a.textContent.trim() + ' → ' + a.getAttribute('href') : ''; });
+note('IN the close CTA reads Continue Your Journey and leads to the planner', /^Continue Your Journey → your-journey(\.html)?$/.test(ctaIn), ctaIn);
+await go('voyage.html'); const swapIn = await p.evaluate(() => [...document.querySelectorAll('a[data-cta-swap]')].map((a) => a.textContent.trim() + '→' + a.getAttribute('href')).join(' | '));
+note('IN the wedding page\'s calls to action are the private actions again (Choose your wedding stay / Choose your room → The Journey)', /Choose your wedding stay→journeys\.html#j-wedstay \| Choose your room→journeys\.html#j-wedstay/.test(swapIn), swapIn);
+await go('room.html?stay=souphattra&room=heritage'); const roomIn = await p.evaluate(() => ({ usd: (document.body.innerText.match(/USD\s?\d/g) || []).length, choose: document.querySelectorAll('[data-choose], .choose, button').length }));
+note('IN a room page opens with its rates and places for the guest', /^room/.test(rel()) && roomIn.usd > 0, rel() + ' ' + JSON.stringify(roomIn));
 await go('index.html'); await p.evaluate(() => document.querySelector('header a.bag, header .hd-right a').click()); await p.waitForTimeout(900);
 note('IN the bag icon opens the private journey (the bag, or the step the readiness engine asks for first) — never the code gate', /^(cart|your-journey|invitation(\.html)?\?from=)/.test(rel()) && !/open=1&next=/.test(rel()), rel());
 await go('index.html'); await p.evaluate(() => document.querySelector('[data-access-out]').click()); await p.waitForTimeout(1200);

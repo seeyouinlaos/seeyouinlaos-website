@@ -106,7 +106,7 @@
         return '<button type="button" class="venue-thumb" data-photo="' + k + '" aria-pressed="' + (k === (i || 0) ? 'true' : 'false') + '" aria-label="' + esc(q.alt) + '"><img src="' + q.src + '" alt="" loading="lazy" decoding="async" width="96" height="72"></button>';
       }).join('') + '</div>' : '') +
       '<p class="venue-story">' + esc(z.story) + '</p>' +
-      (z.href ? '<a class="a-link" href="' + esc(z.href) + '">' + esc(z.cta) + '</a>' : '') +
+      (z.href ? '<a class="a-link"' + (z.swap ? ' data-cta-swap' : '') + ' href="' + esc(z.href) + '">' + esc(z.cta) + '</a>' : '') +
       '</div>';
   }
 

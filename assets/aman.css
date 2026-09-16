@@ -543,3 +543,9 @@ a.am { display: block; text-decoration: none; }
 @media (max-width: 479px) { .hd-access { flex-direction: column; align-items: flex-end; gap: 2px; min-height: 53px; } }
 @media (min-width: 768px) { .hd-access { padding: 9px 44px; } }
 @media (min-width: 900px) { .hd-access { padding: 9px 64px; } }
+
+/* ---- the public / private rule (Owner, 16 Sep 2026): a private fragment of a public page — a price of the journey,
+   live inventory, an add, a fare — exists only for a signed-in guest (<html data-session="in">, set before the first
+   paint by assets/invite-early.js); the way in takes its place while nobody is signed in ---- */
+html:not([data-session="in"]) [data-private] { display: none !important; }
+html[data-session="in"] [data-private-cta] { display: none !important; }

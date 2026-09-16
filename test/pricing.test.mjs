@@ -985,7 +985,7 @@ test('the wedding page: four events, the Buddhist morning inside the ceremony', 
   assert.match(vy, /Part of the Temple Ceremony · self-pay/);
   assert.doesNotMatch(vy, /USD \d+[^<]{0,40}(alms|Tak Bat)|Tak Bat[^<]{0,60}USD \d+/, 'no amount is ever invented for Tak Bat');
   /* only the Sangkhathan is USD 15 */
-  assert.match(vy, /Optional · USD 15 per guest/);
+  assert.match(vy, /Optional<span data-private> · USD 15 per guest<\/span>/);
   assert.match(vy, /09:00 – approximately 12:00 · Wat Ong Teu, Vientiane/);
   assert.match(vy, /15:30 · Souphattra Heritage/);
   assert.doesNotMatch(vy, /08:00|16:30/, 'no retired time on the public wedding page');

@@ -39,7 +39,7 @@ test('C86 · USD 85 is the one price: source, journey, transport detail, travel 
     assert.doesNotMatch(s, /c86[^\n]{0,120}\b105\b/i, f + ' carries C86 at 105');
     assert.doesNotMatch(s, /USD 105/, f + ' says USD 105');
   }
-  assert.match(src('journeys.html'), /USD 85 per person<\/p><button class="add" data-add='\{"id":"c86"/);
+  assert.match(src('journeys.html'), /USD 85 per person<\/p><button class="add" data-private data-add='\{"id":"c86"/);
   assert.match(src('review.html'), /'YOUR COST: USD '\+SIYL_BAG\.total\(\)\.toLocaleString/, 'the sent journey totals from the bag, never its own arithmetic');
 });
 

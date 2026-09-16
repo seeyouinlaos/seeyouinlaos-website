@@ -40,7 +40,7 @@
     '<div class="sfoot-in">' +
       '<div><p class="sf-brand">see you in laos<span class="dot">.</span></p></div>' +
       '<div><h4>Discover</h4>' +
-        '<a href="destination.html">Destinations</a><a href="journeys.html">Journeys</a>' +
+        '<a href="destination.html">Destinations</a><a href="journeys.html">The Journey</a>' +
         '<a href="accommodation.html">Stays</a><a href="experiences.html">Experiences</a></div>' +
       '<div><h4>The Wedding</h4>' +
         '<a href="voyage.html">The wedding days</a><a href="marsilea.html">Wellness</a>' +

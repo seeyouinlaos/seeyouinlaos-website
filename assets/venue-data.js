@@ -60,7 +60,7 @@
           { x: 37.5, y: 71, w: 21, h: 29, anchor: { x: 52, y: 85 }, tall: { x: 44, y: 93 } }
         ],
         story: 'Twenty-six rooms in the heritage houses, from The Heritage to the Presidential. The first night is your contribution, the second is hosted by Haruthai & Suthep.',
-        href: 'journeys.html#j-wedstay', cta: 'Choose your room',
+        href: 'journeys.html#j-wedstay', cta: 'Choose your room', swap: true,   /* private planning: signed out the link reads Open your invitation */
         photos: [
           { single: one(H + 'heritage-balconies.jpg', 2000, 1334, 'The balconies of the heritage houses over the courtyard'), drive: '1TCozr65dNM7EIdesnPLMpJ4lPwevmzpf' },
           { single: one(H + 'heritage-room.jpg', 2000, 1334, 'A room at Souphattra Heritage Vientiane') },
