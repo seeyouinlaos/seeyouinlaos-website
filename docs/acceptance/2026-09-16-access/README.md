@@ -1,5 +1,9 @@
 # 003 — Edit 3 (Owner, 16 Sep 2026) · access, CTA, Harudot, dress references · evidence
 
+> 004 (later on 16 Sep 2026): the Owner's final information architecture supersedes the hand-over of `journeys.html` —
+> The Journey is public editorial, the room and transport pages are private; see `../2026-09-16-public-private/README.md`.
+> The result folders here were refreshed at the final code 621be9c (access walk 44 / 44, venue walk 68 / 68, production walks 35 / 35 · 41 / 41, crawl, coverage).
+
 No access code, bearer or hash appears in this folder. The private register is gitignored. Every
 production walk ran as Suthep (G049), Peggy (G001) or Steffie (G002) — never as the invitation the
 Owner uses live.

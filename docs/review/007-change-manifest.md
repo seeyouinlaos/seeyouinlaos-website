@@ -153,3 +153,25 @@ Wedding Ceremony on the aerial — until then these four carry no marker on the 
 - The status line's space is reserved before any script runs (`6170755`): a placeholder in the markup of
   every page with a static header, `assets/recon.js` placing it with the header it builds, the rules in
   `assets/aman.css` — no layout shift from the line (no text change).
+
+## 004 · Owner authorisation of 16 Sep 2026 — security remediation, venue mapping, final IA, reconciliation
+
+- **Security:** G001's credential rotated (one record, one index entry; the other 46 byte-identical); the public git
+  history rewritten so the old credential appears in no reachable commit (every SHA after the 11 Sep E/F/G commit
+  changed — see `docs/review/004-history-rewrite.md`); the old credential is rejected everywhere, 0 occurrences in the
+  tree, the history, the 007 files, the evidence and every deployed response body.
+- **Venue mapping (Owner's seven labels):** top left building Lobby · top right / lower right / lower centre buildings
+  Rooms · left centre event area Wedding Ceremony · centre pool / poolside Wedding Dinner · lower left building Coffee &
+  Cake · Breakfast, on the clean real aerial; the swimming pool and the courtyard garden stay legend places. Text
+  unchanged except the stage description ("On the photograph: Lobby, Rooms, Coffee & Cake · Breakfast, Wedding
+  Ceremony, Wedding Dinner · Poolside.").
+- **Destinations hero:** the Owner's photograph IMG_3174 (two books about Laos on a bed) replaces the Mekong sunset.
+- **Final IA:** The Journey (`journeys.html`) is public editorial (title, h1 and menu entry "The Journey"; the way in
+  "Open your invitation" in every stay card and under the title; the view links read "Open your invitation" signed
+  out); the room and transport pages are private; the prices of the tea, 1872, Sühring and the Sangkhathan are private
+  fragments; the close CTA reads "Continue Your Journey" for a guest; the footers say "The Journey"; the room and
+  transport pages' back link reads "Back to The Journey".
+- **Guest reconciliation:** `docs/review/004-guest-reconciliation-summary.txt` (counts only) — UNRESOLVED 3, the
+  active count 47 not verified against the Owner's master; no text and no register changed.
+- **007 FINAL V3:** `007-final-v3-text.txt`, `007-final-v3-source-truth-audit.txt`, `007-final-v3-delta.md` (v2 → v3),
+  generators `007-final-v3-extract.mjs` · `007-final-v3-audit.py` · `007-final-v3-delta.py`; the v2 files stay as history.

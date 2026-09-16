@@ -1,0 +1,534 @@
+SOURCE-TRUTH AUDIT · FINAL V3 (004 — 16 Sep 2026: after the security remediation, the Owner's final venue mapping, the final public / private information architecture and the guest reconciliation)
+DATE: 2026-09-16 08:02 UTC
+MAIN SHA: 621be9c
+SOURCE: H&S_Wedding_Operations_Master (Google Sheet, owner suthep.hrg@gmail.com, last modified 2026-09-13T12:44:10Z; export ops-master.xlsx of 2026-09-13 19:27 UTC, every tab: Overview_Hotel_Restaurant · Accommodation_Details · Experience, Restaurant, Cafe_Details · Snack_Details · Transportation · Budget_Room - Rate · Printing_Stationnary · Budget_Finance · Guestlist · Accommodation · Master_Timeline · Inventory · Invitation Giveaway · Deposit · Auis hotel inspection) · the documented Owner decisions (docs/DECISION-REGISTER.md, docs/acceptance/*/README.md, docs/review/007-change-manifest.md, docs/references/SEE-YOU-IN-LAOS-FINAL-DESIGN-SYSTEM-MASTER.md §18)
+
+TOTAL FACTUAL CLAIMS CHECKED: 123 (35 claims below · 47 priced items · 41 room categories)
+MATCH: 99
+CONFLICT: 1
+SOURCE MISSING: 5
+OWNER DECISION OVERRIDES: 16
+STALE / RETIRED SOURCE: 1
+STALE SOURCE VALUES NOTED INSIDE OTHER CLAIMS: the sheet still carries C642 16:39 → 21:06 at USD 105 (superseded by C86 at USD 85), the Vow Ceremony at 16:30 (superseded by 15:30), the room reservations for Bride & Groom / Family, Khop Chai Deu, Le Padaek, Parkson Supermarket — none is active on the website
+
+NOTE: the website's rooms are audited in full below (section K), the prices in full (section J), the experiences in full (section L). Classification MATCH means the website says what the sheet says; CONFLICT means the sources disagree and nobody chose; SOURCE MISSING means the sheet carries no value for the claim; STALE / RETIRED SOURCE means a sheet value the Owner has superseded for the website; OWNER DECISION OVERRIDE means a documented Owner decision replaces the sheet value. Every ACTION is NO CHANGE — REVIEW ONLY.
+
+ISSUE ST-001
+
+SURFACE: Homepage · Destinations · Your Journey
+CURRENT WEBSITE: The journey runs 21 February – 8 March 2027; Bangkok 21–24 Feb · night train 24–25 Feb · Vientiane 25–27 Feb and 27 Feb – 1 Mar · Kunming 1–4 Mar · Lijiang 4–6 Mar · Bangkok 6–8 Mar
+AUTHORITATIVE SOURCE: Overview_Hotel_Restaurant: Day 01 21.02.2027 … Day 16 08.03.2027; Accommodation_Details check-in/out: Penthouse/U Sathorn/Shama 21.02–24.02 · train 24.02–25.02 · Souphattra 25.02/27.02 → 27.02/01.03 · Kunming 01.03–04.03 · Lijiang 04.03–06.03 · Kempinski 06.03–08.03
+SOURCE LOCATION: Overview_Hotel_Restaurant rows Day 01–16 · Accommodation_Details rows Check In Date / Check Out Date
+CLASSIFICATION: MATCH
+ACTION: NO CHANGE — REVIEW ONLY
+
+ISSUE ST-002
+
+SURFACE: Every wedding surface
+CURRENT WEBSITE: The wedding: Sunday, 28 February 2027 · Vientiane
+AUTHORITATIVE SOURCE: Day 08 28.02.2027 Vientiane (Overview) · Master_Timeline DAY 07 28.02.2027 Sunday
+SOURCE LOCATION: Overview_Hotel_Restaurant Day 08 · Master_Timeline
+CLASSIFICATION: MATCH
+ACTION: NO CHANGE — REVIEW ONLY
+
+ISSUE ST-003
+
+SURFACE: The Wedding (03) · Wedding public page · the programme · dress code
+CURRENT WEBSITE: Temple Ceremony · Sunday, 28 February 2027 · 09:00 – approximately 12:00 · Wat Ong Teu, Vientiane — attendance only, no seats
+AUTHORITATIVE SOURCE: Operations Master: no timed temple entry; Master_Timeline 28.02 has "Alms Giving Ceremony 05:30–06:15 · Souphattra Heritage Vientiane"; Overview Day 08 lists "Wat Ong Teu; Souphattra Heritage" (Experience) and "Wat Ong Teu Vientiane" (Mall/Park/Other) without a time. The locked programme in docs/references/SEE-YOU-IN-LAOS-FINAL-DESIGN-SYSTEM-MASTER.md §18 says TEMPLE CEREMONY · 09:00–approx. 12:00 · Wat Ong Teu.
+SOURCE LOCATION: Master_Timeline DAY 07 rows 05:30–06:15 · Overview Day 08 · design-system master §18 · Owner decision Edit 2 (15 Sep 2026)
+CLASSIFICATION: OWNER DECISION OVERRIDE
+NOTE: Venue matches (Wat Ong Teu). FINAL OWNER TIME (Edit 2, 15 Sep 2026): 09:00 – approximately 12:00 — the same as the locked programme; the earlier website value 08:00 is retired. The sheet's 05:30 alms-giving row is the separate Tak Bat timing, not this event.
+ACTION: NO CHANGE — REVIEW ONLY
+
+ISSUE ST-004
+
+SURFACE: The Wedding (03) · Wedding public page
+CURRENT WEBSITE: Coffee & Cake · From 12:00 · Souphattra Heritage Vientiane
+AUTHORITATIVE SOURCE: Overview Day 08 cafe column "Souphattra Heritage Coffee & Cake" (no time); Master_Timeline 28.02: guests lunch 13:00–14:30, no Coffee & Cake row; design-system master §18: COFFEE & CAKE · starts 12:00
+SOURCE LOCATION: Overview Day 08 · Master_Timeline DAY 07 · design-system master §18
+CLASSIFICATION: SOURCE MISSING
+NOTE: The event and venue are in the sheet; the time is only in the locked programme document.
+ACTION: NO CHANGE — REVIEW ONLY
+
+ISSUE ST-005
+
+SURFACE: The Wedding (03) · Wedding public page · Review & Send · seat tickets · seating plan
+CURRENT WEBSITE: Wedding Ceremony (Vow Ceremony) · Sunday, 28 February 2027 · 15:30 · Souphattra Heritage, Vientiane — the ceremony seating belongs to it: the Bride and the Groom front centre, every guest the chair they chose; ticket reference SYL-WC-…
+AUTHORITATIVE SOURCE: Master_Timeline 28.02: 16:20 Bride walks down the aisle · 16:30–17:00 Wedding ceremony · Souphattra Heritage Vientiane; design-system master §18: VOW CEREMONY · 16:30; Owner correction Edit 2 (15 Sep 2026): "Vow Ceremony always start at 15:30", the wedding seat is at Souphattra Heritage, never the temple
+SOURCE LOCATION: Master_Timeline DAY 07 16:30–17:00 · Owner Edit 2 (IMG_4012, IMG_4014, IMG_4015, IMG_4017)
+CLASSIFICATION: OWNER DECISION OVERRIDE
+NOTE: The sheet's 16:30 is superseded by the Owner's 15:30 (stale source). The venue matches. Before Edit 2 the seat ticket said Temple Ceremony · Wat Ong Teu · 08:00 — corrected at source (seat vocabulary, ticket, QR payload, PDF, sent journey, readiness).
+ACTION: NO CHANGE — REVIEW ONLY
+
+ISSUE ST-006
+
+SURFACE: The Wedding (03) · Wedding public page · seat tickets · seating plan
+CURRENT WEBSITE: Wedding Dinner · 19:30 · Souphattra Heritage Vientiane · poolside (seat ticket 19:30)
+AUTHORITATIVE SOURCE: Master_Timeline 28.02: 18:30–19:00 Go to wedding dinner venue · 19:00–19:15 Grand entrance · 19:15–21:30 Wedding Dinner (Appetizer & main course) · Souphattra Heritage Vientiane; design-system master §18: WEDDING DINNER · 19:30 · Souphattra Vientiane Hotel
+SOURCE LOCATION: Master_Timeline DAY 07 19:00–21:30 · design-system master §18 · Owner decision D-20 (13 Sep 2026) · Owner 003 (15 Sep 2026): Poolside, Run A = Poolside
+CLASSIFICATION: OWNER DECISION OVERRIDE
+NOTE: Time: 19:30 as the locked programme and the Owner decision of 13 Sep 2026 (the sheet's 19:00 grand entrance / 19:15 dinner rows are planning detail). Venue name follows the sheet. Poolside and Run A = Poolside are Owner truth (15 Sep 2026), preserved.
+ACTION: NO CHANGE — REVIEW ONLY
+
+ISSUE ST-007
+
+SURFACE: Wedding Dinner · every surface · the seating plan
+CURRENT WEBSITE: Dinner = Poolside; the long table beside the swimming pool; RUN A = poolside, RUN B opposite the pool
+AUTHORITATIVE SOURCE: Inventory AST007 "Ceremony chairs · Pool side ceremony, 52 plus 2 spare" · AST015 "Warm cotton towels · Pool side, wedding day"; the dinner venue row says "Souphattra Heritage (Wedding Dinner)" without a side. Owner decision D-20 (13 Sep 2026): Poolside; Owner decision 15 Sep 2026 (venue plan uploaded): RUN A = POOLSIDE
+SOURCE LOCATION: Inventory sheet · docs/acceptance/2026-09-13-owner-decisions/README.md item 20 · docs/acceptance/2026-09-15-cart-ticket/README.md
+CLASSIFICATION: OWNER DECISION OVERRIDE
+NOTE: The sheet places the ceremony chairs poolside; the dinner side and the run are the Owner's decisions, not a sheet value.
+ACTION: NO CHANGE — REVIEW ONLY
+
+ISSUE ST-008
+
+SURFACE: The Wedding (03) · Tak Bat drawer · sent journey
+CURRENT WEBSITE: Tak Bat (morning alms-giving) is part of the Temple Ceremony; a personal offering, arranged individually on the morning; no amount set
+AUTHORITATIVE SOURCE: Budget_Finance row "Alms Giving Ceremony · Souphattra Heritage · Guest Experience · Booking-driven. Do not hardcode pax. · 0 / 40 / 1 · Suthep"; Master_Timeline 05:30–06:15 Alms Giving Ceremony at Souphattra Heritage (36 pax · Denim, White); Owner correction 10 Sep 2026: Tak Bat = SELF-PAY
+SOURCE LOCATION: Budget_Finance row 56 · Master_Timeline · docs/acceptance/2026-09-13-owner-decisions/README.md "Tak Bat payment logic"
+CLASSIFICATION: OWNER DECISION OVERRIDE
+NOTE: Tak Bat = self-pay (Owner decision, restated in 003 on 15 Sep 2026) and part of the Temple Ceremony at Wat Ong Teu (the Owner's 9 Sep correction); the sheet's 05:30 hotel row is the separate operational alms-giving timing, which the Owner told 003 not to confuse with the Temple Ceremony. No decision outstanding.
+ACTION: NO CHANGE — REVIEW ONLY
+
+ISSUE ST-009
+
+SURFACE: The Wedding (03) · cart · review · sent journey
+CURRENT WEBSITE: Sangkhathan · USD 15 · an individual YES / NO for the guest alone
+AUTHORITATIVE SOURCE: No Sangkhathan row in Budget_Finance, Snack_Details or the Overview; Owner decision 13 Sep 2026 (USD 15 per participating person) and 14 Sep 2026 (individual, never USD 30)
+SOURCE LOCATION: docs/acceptance/2026-09-13-owner-decisions/README.md §7 · docs/review/007-change-manifest.md
+CLASSIFICATION: OWNER DECISION OVERRIDE
+NOTE: Amount not in the sheet.
+ACTION: NO CHANGE — REVIEW ONLY
+
+ISSUE ST-010
+
+SURFACE: The Wedding · dress code
+CURRENT WEBSITE: Temple Ceremony: Lao Traditional Dress · Coffee & Cake, Vow Ceremony, Wedding Dinner: Black Tie · travelling days: Resort Wear
+AUTHORITATIVE SOURCE: Master_Timeline 28.02: guests "Black Tie" from 15:30; alms giving "Denim, White"; Bangkok days "Elegant Resort Wear" / "Cocktail Attire"
+SOURCE LOCATION: Master_Timeline DAY 07 · DAY 02–03 dress column · Owner decision 13 Sep 2026 (#19)
+CLASSIFICATION: OWNER DECISION OVERRIDE
+NOTE: The wedding-day Black Tie matches. The sheet dresses the morning "Denim, White"; the Owner decided Lao Traditional Dress for the temple (13 Sep 2026, #19) — the sheet's value is stale for the website.
+ACTION: NO CHANGE — REVIEW ONLY
+
+ISSUE ST-011
+
+SURFACE: Journeys · Your Journey · Transport · travel pass
+CURRENT WEBSITE: Special Express No. 25 · Bangkok (Krung Thep Aphiwat) 20:25 → Nong Khai 06:25 · 24–25 February 2027 · First Class Sleeper · van and border logistics to Vientiane · USD 100 per person · package
+AUTHORITATIVE SOURCE: Accommodation_Details column "Special Express No. 25 · First Class cabin": Price per Person 100 · check-in 24.02 → 25.02 · 1 night · 12 available · Pax 2 adults, 1 child; Transportation tab: Train Bangkok – Nong Khai THB 2,900 = USD 88.31 (First class lounge access, complimentary water) + Van Nong Khai – Vientiane THB 3,500 = USD 105 + Document for custom THB 100 = USD 3.05; Overview Day 04: "USD 90 per person per nights" · "Special Express No. 25 + Document for border crossing incl. Breakfast and Dinner"; no departure/arrival times in the sheet
+SOURCE LOCATION: Accommodation_Details · Transportation · Overview Day 04
+CLASSIFICATION: OWNER DECISION OVERRIDE
+NOTE: USD 100 per person is the Accommodation_Details value and the Owner decision of 14 Sep 2026 (the Overview still says 90; the Transportation tab itemises 88.31 + 105 + 3.05). The times 20:25 / 06:25 are not in the sheet (railway timetable). Breakfast and dinner on board: the website says "breakfast and dinner included" on Journeys; the Overview agrees.
+ACTION: NO CHANGE — REVIEW ONLY
+
+ISSUE ST-012
+
+SURFACE: Journeys · Your Journey · Transport · travel pass
+CURRENT WEBSITE: MU9646 · China Eastern Airlines · Vientiane (VTE) Terminal 1 15:50 → Kunming (KMG) 18:25 · 01 March 2027 · non-stop · 1 h 35 m · Boeing 738 · Business Class USD 275 · Economy Flexible USD 155
+AUTHORITATIVE SOURCE: Overview Day 09-01: China Eastern Airlines MU9646 · Boeing738 · 2027-03-01 · 15:50 VTE T1 → 18:25 KMG · Non-stop · 1h35m · Business Class Standard USD 275 per Pax · 8 seat(s) left · 2 pieces of free checked baggage; Accommodation_Details: Business 275 · Economy 155 · 4 available each
+SOURCE LOCATION: Overview Day 09-01 · Accommodation_Details flight columns
+CLASSIFICATION: MATCH
+NOTE: Seat counts (4 / "8 seat(s) left") are not shown on the website (transport is uncapped by decision).
+ACTION: NO CHANGE — REVIEW ONLY
+
+ISSUE ST-013
+
+SURFACE: Journeys · Your Journey · Transport · travel pass · sent journey
+CURRENT WEBSITE: C86 · high-speed train · Kunming Railway Station 10:15 → Lijiang Railway Station 13:44 · 04 March 2027 · direct · 3 h 29 m · about 527 km · Business Class · USD 85 per person (source, journey, transport detail, travel pass, ticket, cart, sticky total, Review & Send, sent journey, presets)
+AUTHORITATIVE SOURCE: Overview Day 12-01: "Train C642 · 16:39 → 21:06 · Direct · 4 hr 27 min · USD 105 per person · BUSINESS CLASS · 1+1 seating layout · PRIORITY TICKETING"; Accommodation_Details: China Train · 105 · 4 available; Owner truth 15 Sep 2026: Train C86 · 10:15 → 13:44 · direct 3h29 · Business Class; FINAL OWNER PRICE (Edit 2, 15 Sep 2026): USD 85 per person — supersedes the earlier Owner decision (USD 105) and the sheet's 105
+SOURCE LOCATION: Overview Day 12-01 · Accommodation_Details · Owner correction 15 Sep 2026 (Edit 2, IMG_4013 / IMG_4016)
+CLASSIFICATION: OWNER DECISION OVERRIDE
+NOTE: The sheet still names C642 16:39 → 21:06 at USD 105; the Owner replaced the service with C86 10:15 → 13:44 and, in Edit 2, the price with USD 85. The sheet's 105 and the earlier decision are stale / retired for the website; a persisted 105 reprices itself to 85 on load.
+ACTION: NO CHANGE — REVIEW ONLY
+
+ISSUE ST-014
+
+SURFACE: Journeys · Your Journey · Transport · travel pass
+CURRENT WEBSITE: MU5924 + MU741 · Lijiang (LJG) 10:35 → Kunming 11:45 · transfer 1 h 30 m · Kunming 13:15 → Bangkok (BKK) 14:55 · 06 March 2027 · Economy flexible · USD 200 per person · 1 h 10 m + 2 h 40 m · 5 h 20 m door to door
+AUTHORITATIVE SOURCE: Overview Day 14-01: MU5924 Boeing 737 Lijiang–Kunming 10:35–11:45 1h10m · Transfer in Kunming 1h 30m · MU741 Boeing 738 Kunming–Bangkok 13:15–14:55 2h40m · Economy Class flexible · USD 200 per Pax; Accommodation_Details: Flight Lijiang – Bangkok 200 · 4 available
+SOURCE LOCATION: Overview Day 14-01 · Accommodation_Details
+CLASSIFICATION: MATCH
+ACTION: NO CHANGE — REVIEW ONLY
+
+ISSUE ST-015
+
+SURFACE: Room engine · Sathorn Penthouse
+CURRENT WEBSITE: Room A – F · 12 guest places (six bedrooms of two)
+AUTHORITATIVE SOURCE: Accommodation_Details: Category "Elegant 6BR Sathon Penthouse" · Bedroom 6.0 · Pax 12 Adults · "Rooms avaible" 5.0; Overview Day 01: "12 guests 6 bedrooms 6 beds 5 bathrooms"; Owner override 15 Sep 2026: 6 physical rooms → Room A–F → 12 places
+SOURCE LOCATION: Accommodation_Details Penthouse column · Overview Day 01 · Owner override 15 Sep 2026
+CLASSIFICATION: OWNER DECISION OVERRIDE
+NOTE: Bedrooms (6) and guests (12) match; the "Rooms avaible 5.0" cell conflicts with both and is not used.
+ACTION: NO CHANGE — REVIEW ONLY
+
+ISSUE ST-016
+
+SURFACE: Room engine · every category
+CURRENT WEBSITE: No room is reserved for anyone in advance: the Presidential, the Grand Majestic, the Solarium and the 270° Snow Mountain View Suite are available until booked
+AUTHORITATIVE SOURCE: Accommodation_Details Status: Souphattra Presidential "Reserved for Bride & Groom" · Grand Majestic Suite "Reserved for Familiy (Mum, Dad and amy, Luck)" · Solarium Bath Suite "Reserved for Bride & Groom" · 006 - 270° Snow Mountain View Suite "Reserved for Bride & Groom"; Budget_Room - Rate: Grand Majestic "2/2 Room reserved mum and dad + amy & luck" · Presidential "reserved bride & groom"
+SOURCE LOCATION: Accommodation_Details row Status · Budget_Room - Rate
+CLASSIFICATION: OWNER DECISION OVERRIDE
+NOTE: Owner override 15 Sep 2026: NO PRE-RESERVED ROOMS; the sheet's reservations stay as history.
+ACTION: NO CHANGE — REVIEW ONLY
+
+ISSUE ST-017
+
+SURFACE: Room rates · Sathorn Penthouse
+CURRENT WEBSITE: USD 85 per person / night · 3 nights · USD 255 total per person
+AUTHORITATIVE SOURCE: Accommodation_Details: Price per Person 85 · Price Per Room per Night 340; Overview Day 01: "USD 90 per person per nights"
+SOURCE LOCATION: Accommodation_Details · Overview Day 01 · Owner decision 003 (15 Sep 2026)
+CLASSIFICATION: STALE / RETIRED SOURCE
+NOTE: FINAL OWNER RATE (003, 15 Sep 2026): USD 85 per person / night, 3 nights, USD 255 — Accommodation_Details is authoritative and the website matches it; the Overview's USD 90 is a stale / superseded source for the guest-facing website. Resolved.
+ACTION: NO CHANGE — REVIEW ONLY
+
+ISSUE ST-018
+
+SURFACE: Wedding Stay · Souphattra Heritage (27 Feb – 1 Mar)
+CURRENT WEBSITE: Two nights as one selection: the first night at the room rate, the second night hosted by Haruthai & Suthep
+AUTHORITATIVE SOURCE: Overview Day 05-02 / Day 07: "You have a choice between the buyout hotel, an optional complimentary Airbnb guesthouse; the two-day duration is fixed … Paket C und D sind identisch"; Budget_Room - Rate prices 2 nights per package; no hosted night in the sheet. Owner rebuild spec 14 Sep 2026: "second night hosted by Haruthai & Suthep"
+SOURCE LOCATION: Overview Day 05-02 / 07 · Budget_Room - Rate · docs/review/007-change-manifest.md (assets/rooms-data.js)
+CLASSIFICATION: OWNER DECISION OVERRIDE
+NOTE: The hosted second night is an Owner decision not reflected in the sheet, which prices both nights.
+ACTION: NO CHANGE — REVIEW ONLY
+
+ISSUE ST-019
+
+SURFACE: Alternative Stay · Private Residence
+CURRENT WEBSITE: Complimentary · up to 6 guests · an independent stay, arranged around the wedding programme by you
+AUTHORITATIVE SOURCE: Overview Day 05-02 / 07: "Airbnb Guest House complimentary … limited to 6 persons"
+SOURCE LOCATION: Overview Day 05-02
+CLASSIFICATION: MATCH
+ACTION: NO CHANGE — REVIEW ONLY
+
+ISSUE ST-020
+
+SURFACE: Stays · breakfast
+CURRENT WEBSITE: Penthouse: not included · self-pay; U Sathorn, Shama: included; Souphattra: included; Kunming: not included · self-pay; Lijiang: included; Siam Kempinski: included
+AUTHORITATIVE SOURCE: Accommodation_Details Breakfast row: Penthouse "Not included, self pay, breakfast location ausgewählt" · U Sathorn Included · Shama Included · Souphattra "Breakfast incl." · Kunming "Not included, self pay" · Lijiang "Breakfast incl." · Kempinski "Breakfast incl."
+SOURCE LOCATION: Accommodation_Details row Breakfast
+CLASSIFICATION: MATCH
+ACTION: NO CHANGE — REVIEW ONLY
+
+ISSUE ST-021
+
+SURFACE: Stays · hotel names
+CURRENT WEBSITE: Sathorn Penthouse Bangkok · U Sathorn Bangkok · Shama Yen-Akat Bangkok · Souphattra Heritage Vientiane · Wanxiang Yueju · Kunming (Kunming Railway Station MixC Branch) · Luye Baisha · Lijiang (Rizhao Jinshan) · Siam Kempinski Bangkok
+AUTHORITATIVE SOURCE: Accommodation_Details Room row: Penthouse · U Sathorn Bangkok · Shama Yen-Akat Bangkok · Souphattra (souphattra.com/heritage-vientiane) · Wanxiang Yueju Designer Homestay (Kunming Railway Station MixC Branch) · Luye Baisha · Rizhao Jinshan · Siam Kempinski
+SOURCE LOCATION: Accommodation_Details · Overview
+CLASSIFICATION: MATCH
+ACTION: NO CHANGE — REVIEW ONLY
+
+ISSUE ST-022
+
+SURFACE: Souphattra Heritage · room count
+CURRENT WEBSITE: 26 rooms: The Heritage 5 · Heritage Executive 13 · Heritage Grand Premier 3 · Noble Courtyard Suite 1 · Grand Majestic Suite 2 · Souphattra Majestic Suite 1 · Souphattra Presidential 1 (per window, sold twice: 25–27 Feb and 27 Feb – 1 Mar)
+AUTHORITATIVE SOURCE: Budget_Room - Rate Amount column 5 + 13 + 3 + 1 + 0 (reserved) + 1 + 1 (tab header "26 rooms"); Accommodation_Details Rooms available 5 · 13 · 3 · 1 · 2 · 1 · 1
+SOURCE LOCATION: Budget_Room - Rate · Accommodation_Details
+CLASSIFICATION: MATCH
+NOTE: Budget_Room - Rate shows the Grand Majestic amount as 0 because it was reserved; Accommodation_Details says 2 rooms — the website follows Accommodation_Details (2 rooms, open since the 15 Sep override).
+ACTION: NO CHANGE — REVIEW ONLY
+
+ISSUE ST-023
+
+SURFACE: Kunming · Family Suite / Seine / Penang / Left Bank
+CURRENT WEBSITE: Two guest places per room (the standard rule)
+AUTHORITATIVE SOURCE: Accommodation_Details Pax: Family Suite 4 Adults · Seine 4 Adults · Penang 4 Adults · Left Bank 2 Adults; the seed carries occupancy 2 / 4 / 4 / 4
+SOURCE LOCATION: Accommodation_Details row Pax
+CLASSIFICATION: OWNER DECISION OVERRIDE
+NOTE: Owner rule 15 Sep 2026: one physical room = two guest places unless the source defines a different occupancy; the sheet's 4-adult rooms are still offered as two places (as the Presidential, 4 adults, is). The seed's Family Suite occupancy (2) differs from the sheet (4) and Left Bank (seed 4, sheet 2) — no guest-facing effect under the two-places rule.
+ACTION: NO CHANGE — REVIEW ONLY
+
+ISSUE ST-024
+
+SURFACE: Experiences · Sühring
+CURRENT WEBSITE: Sühring · German fine dining · Lunch · Thursday to Sunday · 12:30 pm to 13:00 pm (last seating) · Closed on Monday and Tuesday · USD 180 per person · a table requested through Guest Relations · not a confirmed reservation · Bangkok · in the footer and featured beside 1872
+AUTHORITATIVE SOURCE: Experience, Restaurant, Cafe_Details: Suhring · German fine dining · Price 180 · Opening hours "Lunch / Thursday to Sunday / 12:30 pm to 13:00 pm (last seating) / Closed on Monday and Tuesday"
+SOURCE LOCATION: Experience, Restaurant, Cafe_Details
+CLASSIFICATION: MATCH
+NOTE: Owner decision (13 Sep): USD 180 per person, request only. The sheet's "12:30 pm to 13:00 pm (last seating)" is reproduced verbatim on the website.
+ACTION: NO CHANGE — REVIEW ONLY
+
+ISSUE ST-025
+
+SURFACE: 1872 · Champagne Afternoon Tea
+CURRENT WEBSITE: USD 180 · for two guests · Aman Nai Lert Bangkok · served daily 14:00 – 17:00
+AUTHORITATIVE SOURCE: No 1872 / afternoon tea row in any tab of the Operations Master
+SOURCE LOCATION: Experience, Restaurant, Cafe_Details (absent) · Overview (absent)
+CLASSIFICATION: SOURCE MISSING
+NOTE: The amount and the hours come from the Owner's experience pass decision (Drive-derived), not from the sheet.
+ACTION: NO CHANGE — REVIEW ONLY
+
+ISSUE ST-026
+
+SURFACE: Wellness · Marsilea Spa
+CURRENT WEBSITE: Six categories · seventeen treatments · open 10:00 – 20:00 · an interest carries no journey cost · paid at the spa
+AUTHORITATIVE SOURCE: No Marsilea / spa row in any tab of the Operations Master
+SOURCE LOCATION: Operations Master (absent)
+CLASSIFICATION: SOURCE MISSING
+NOTE: The treatment menu is the Owner's Drive-derived registry.
+ACTION: NO CHANGE — REVIEW ONLY
+
+ISSUE ST-027
+
+SURFACE: Experiences · the registry vs the Overview day lists
+CURRENT WEBSITE: 39 experience entities on the website
+AUTHORITATIVE SOURCE: Overview_Hotel_Restaurant day columns Breakfast / Lunch / Cafe / Experience / Mall / Dinner / Bar (Day 02–15)
+SOURCE LOCATION: Overview_Hotel_Restaurant
+CLASSIFICATION: SOURCE MISSING
+NOTE: Entities not named in the Overview day lists (they come from the Drive-derived registry the Owner approved 13 Sep): Sühring, Dior · Café LV, Let's Relax, Patuxai, Wat Si Saket, Wat Si Muang, Ha Phrakeo Museum, Presidential Palace, That Dam, Buddha Park
+ACTION: NO CHANGE — REVIEW ONLY
+
+ISSUE ST-028
+
+SURFACE: Experiences · retired entities
+CURRENT WEBSITE: PVO Vietnamese Food, Khop Chai Deu, Le Padaek, Parkson Supermarket are absent from the website; Lacuna VTE is a café only
+AUTHORITATIVE SOURCE: Overview Day 06 still lists "Khop Chai Deu / Kaogee Le Triomphe" (lunch), "Le Padaek / Lao Derm / Cam On Restaurant" (dinner), "Lacuna VTE Vientiane" (bar); Master_Timeline lists Parkson Supermarket (Day 05) and Cam On (dinner, vendor Le Padaek)
+SOURCE LOCATION: Overview Day 06 · Master_Timeline
+CLASSIFICATION: OWNER DECISION OVERRIDE
+NOTE: Removed by the Owner (14 Sep 2026 rebuild); Lacuna VTE café only. The website stays absent of them; the sheet still names them.
+ACTION: NO CHANGE — REVIEW ONLY
+
+ISSUE ST-029
+
+SURFACE: Experiences · Cam On Restaurant · Molly's Vientiane · Curvy.Dining vendor list
+CURRENT WEBSITE: Cam On Restaurant is not an experience entity on the website
+AUTHORITATIVE SOURCE: Overview Day 06 dinner "Le Padaek / Lao Derm / Cam On Restaurant"; docs/acceptance/2026-09-13-owner-decisions/EXPERIENCE-INVENTORY.md records Cam On (Day 06 dinner) and Molly's Vientiane (Day 05 breakfast) as places without a Drive folder
+SOURCE LOCATION: Overview Day 06 · EXPERIENCE-INVENTORY.md
+CLASSIFICATION: SOURCE MISSING
+NOTE: No Drive folder / detail source; not invented on the website (review only).
+ACTION: NO CHANGE — REVIEW ONLY
+
+ISSUE ST-030
+
+SURFACE: The Wedding · The stays · the venue stage · base photograph
+CURRENT WEBSITE: The real top-down aerial of Souphattra Heritage Vientiane (2560 × 1440), served as itself in two art directions (the full frame; a 4:5 crop of the same file centred on the pool and the courtyard) — nothing generated, redrawn or reconstructed
+AUTHORITATIVE SOURCE: Drive 003 - Hotel - Pool & Garden · Copy of Heritage_0631.jpg (id 1VIz9oIZDOUlktJD7pase7e4UilhvsO9j) — byte-compared to the served file
+SOURCE LOCATION: docs/venue/asset-manifest.json
+CLASSIFICATION: MATCH
+NOTE: DRIVE VISUAL EVIDENCE. The architecture is unaltered: resize, crop and encode only (docs/venue/build-images.py).
+ACTION: NO CHANGE — REVIEW ONLY
+
+ISSUE ST-031
+
+SURFACE: The venue stage · labels ON the photograph
+CURRENT WEBSITE: Seven labels sit on the real houses and areas of the aerial: Lobby (top left building) · Rooms (top right, lower right and lower centre buildings — one place, three houses) · Wedding Ceremony (left centre event area) · Wedding Dinner · Poolside (centre pool / poolside area) · Coffee & Cake · Breakfast (lower left building); the swimming pool and the courtyard garden are legend places without a marker
+AUTHORITATIVE SOURCE: Owner final mapping, 16 Sep 2026 (OWNER AUTHORIZATION — FINAL SECURITY REMEDIATION + RELEASE FREEZE, §5): top left building Lobby · top right building Rooms · left centre event area Wedding Ceremony · centre pool / poolside area Dinner · lower left building Coffee & Cake · Breakfast · lower right building Rooms · lower centre building Rooms; the clean real aerial for production, the marked image as placement reference only
+SOURCE LOCATION: Owner instruction 16 Sep 2026 · assets/venue-data.js (marks) · docs/acceptance/2026-09-15-venue/walk.mjs (68 checks)
+CLASSIFICATION: MATCH · NEEDS OWNER DECISION
+NOTE: DRIVE VISUAL EVIDENCE + OWNER DECISION. The labels follow the Owner's words for each position; the boxes trace the houses visible in the photograph (Heritage_0631). No red mark, no development label, no marked screenshot is published. The previous SOURCE MISSING · NEEDS OWNER DECISION entry (v2) is closed by this mapping.
+ACTION: NO CHANGE — REVIEW ONLY
+
+ISSUE ST-032
+
+SURFACE: The venue stage · supporting photography
+CURRENT WEBSITE: Every photograph behind a place is a real Owner photograph mapped to its Drive file: lobby (Heritage_0702, 5.jpg, 2025-12-18_Souphattra…), rooms (DSC00021 + the room photography), coffee & cake / breakfast (Heritage_0354, Heritage_0180, Breakfast_01, Breakfast_02), wedding ceremony (IMG_1737, Heritage_0593, souphattra herritage - 007), dinner (caption (8), Heritage_0640, DSC09013, the sharing menu), pool (DSC00168-1, DSC09021, DSC00025), garden (555880718, DSC00168-1)
+AUTHORITATIVE SOURCE: Drive venue library 1S7DffYrFmNSmEfOzL0nGss0oN6ujysN3, folders 001 · 002 · 003 · 004 · 06 · 051 · 056 (docs/venue/asset-manifest.json: id, folder, filename, subject, orientation, role, selected / rejected, reason, production filename, surface)
+SOURCE LOCATION: docs/venue/asset-manifest.json
+CLASSIFICATION: MATCH
+NOTE: DRIVE VISUAL EVIDENCE. Rejected: da25ec52… (1024 px duplicate subject of Heritage_0702), 1mc0m12000… (568 px clock detail), the HEIC flower photographs (decoration, not a place), the eleven videos in 091 - Raw - Videos (14 – 143 MB each — above the connector's transfer limit, so they could not be inspected; none used).
+ACTION: NO CHANGE — REVIEW ONLY
+
+ISSUE ST-033
+
+SURFACE: Invitation register · active guests
+CURRENT WEBSITE: 47 individual invitations, 47 unique credentials, 2 cancelled (no code, no index entry, no record); one credential (G001) rotated on 16 Sep 2026 — the other 46 unchanged
+AUTHORITATIVE SOURCE: Guestlist tab: 59 contacts, 57 guest-role rows; Accommodation tab: 26 rooms; reconciliation 16 Sep 2026: 36 guest-role rows match an active invitation, 18 carry no invitation and no rooming place, 3 are UNRESOLVED (CON009, CON046, CON048); 9 active invitations have no contact row; 7 rooming occupants have no invitation (docs/review/004-guest-reconciliation-summary.txt)
+SOURCE LOCATION: H&S_Wedding_Operations_Master · Guestlist · Accommodation · src/register-audit.mjs · docs/review/004-guest-reconciliation-summary.txt
+CLASSIFICATION: CONFLICT · NEEDS OWNER DECISION
+NOTE: NEEDS OWNER DECISION: the register and the Owner's current sheets disagree on who is invited — the count 47 is not verified by the 57-row reconciliation (UNRESOLVED = 3, register-only invitations 9, rooming-only occupants 7). No guest-facing text carries a guest count; the conflict is between the private register and the Owner's master, not in the published website. Nothing was invented; nothing was changed.
+ACTION: NO CHANGE — REVIEW ONLY
+
+ISSUE ST-034
+
+SURFACE: Seating plans
+CURRENT WEBSITE: Ceremony: 50 guest chairs (left block 2 × 10, right block 3 × 10) + two fixed positions front centre (Bride, Groom); Dinner: one long table, 50 places, run A 25 · run B 25
+AUTHORITATIVE SOURCE: Inventory AST007 "Ceremony chairs · 52 plus 2 spare · Pool side ceremony"; Master_Timeline 28.02: 36 pax (guests seating 31 pax); Guestlist tab: 59 contacts; the private guest list: 47 active guests; Owner geometry decision 13 Sep 2026: 50 + 2 fixed / 50
+SOURCE LOCATION: Inventory AST007 · Master_Timeline · docs/acceptance/2026-09-13-owner-decisions/seating-geometry.json
+CLASSIFICATION: OWNER DECISION OVERRIDE
+NOTE: The chair count (52 = 50 + 2 fixed) agrees with the Inventory tab; the pax figures in the timeline (36) are planning numbers, not capacity.
+ACTION: NO CHANGE — REVIEW ONLY
+
+ISSUE ST-035
+
+SURFACE: Seating · pool side
+CURRENT WEBSITE: The swimming pool along run A; "Run A sits beside the swimming pool; run B faces it across the table."
+AUTHORITATIVE SOURCE: Not in the sheet; Owner venue plan image and decision 15 Sep 2026
+SOURCE LOCATION: Owner upload 15 Sep 2026 · docs/acceptance/2026-09-15-cart-ticket/README.md
+CLASSIFICATION: OWNER DECISION OVERRIDE
+ACTION: NO CHANGE — REVIEW ONLY
+
+==================================================
+J · PRICE CONSISTENCY AUDIT
+==================================================
+Method: every currently selectable paid item was put into one bag through the live pricing source (assets/pricing.js items()), the bag was reloaded (repriceFlat / repriceAccommodation), and the line read back. The cart line price, the Your Journey line, the sticky-total contribution, the Review & Send line and the sent-journey line are all the same persisted line (cart.html money(x.price) · your-journey.html money(x.price) · bag.js B.total() · review.html USD x.price · buildText " · USD " + x.price); the totals are SIYL_BAG.total() on every surface — one calculation, pinned by test/travelpass.test.mjs "ONE PRICE SOURCE" and walked live (docs/acceptance/2026-09-15-ticket-rooms · T6).
+
+ITEM | AUTHORITATIVE UNIT PRICE | CART PRICE | JOURNEY PRICE | STICKY TOTAL CONTRIBUTION | REVIEW PRICE | SENT-JOURNEY PRICE | MATCH / CONFLICT
+Special Express No. 25 (train) | USD 100 | USD 100 | USD 100 | USD 100 | USD 100 | USD 100 | MATCH
+MU9646 · Business Class | USD 275 | USD 275 | USD 275 | USD 275 | USD 275 | USD 275 | MATCH
+MU9646 · Economy Flexible | USD 155 | USD 155 | USD 155 | USD 155 | USD 155 | USD 155 | MATCH
+C86 · Kunming → Lijiang | USD 85 | USD 85 | USD 85 | USD 85 | USD 85 | USD 85 | MATCH
+MU5924 + MU741 (return) | USD 200 | USD 200 | USD 200 | USD 200 | USD 200 | USD 200 | MATCH
+Sangkhathan | USD 15 | USD 15 | USD 15 | USD 15 | USD 15 | USD 15 | MATCH
+Sühring (request) | USD 180 | USD 180 | USD 180 | USD 180 | USD 180 | USD 180 | MATCH
+Champagne Afternoon Tea at 1872 (tea1872) | USD 180 | USD 180 | USD 180 | USD 180 | USD 180 | USD 180 | MATCH
+Souphattra Heritage Vientiane · Souphattra Presidential · prewed | USD 1500 | USD 1500 | USD 1500 | USD 1500 | USD 1500 | USD 1500 | MATCH
+Souphattra Heritage Vientiane · Souphattra Presidential · wedstay | USD 750 | USD 750 | USD 750 | USD 750 | USD 750 | USD 750 | MATCH
+Souphattra Heritage Vientiane · Souphattra Majestic Suite · prewed | USD 580 | USD 580 | USD 580 | USD 580 | USD 580 | USD 580 | MATCH
+Souphattra Heritage Vientiane · Souphattra Majestic Suite · wedstay | USD 290 | USD 290 | USD 290 | USD 290 | USD 290 | USD 290 | MATCH
+Souphattra Heritage Vientiane · Grand Majestic Suite · prewed | USD 500 | USD 500 | USD 500 | USD 500 | USD 500 | USD 500 | MATCH
+Souphattra Heritage Vientiane · Grand Majestic Suite · wedstay | USD 250 | USD 250 | USD 250 | USD 250 | USD 250 | USD 250 | MATCH
+Souphattra Heritage Vientiane · Noble Courtyard Suite · prewed | USD 480 | USD 480 | USD 480 | USD 480 | USD 480 | USD 480 | MATCH
+Souphattra Heritage Vientiane · Noble Courtyard Suite · wedstay | USD 240 | USD 240 | USD 240 | USD 240 | USD 240 | USD 240 | MATCH
+Souphattra Heritage Vientiane · Heritage Grand Premier · prewed | USD 340 | USD 340 | USD 340 | USD 340 | USD 340 | USD 340 | MATCH
+Souphattra Heritage Vientiane · Heritage Grand Premier · wedstay | USD 170 | USD 170 | USD 170 | USD 170 | USD 170 | USD 170 | MATCH
+Souphattra Heritage Vientiane · Heritage Executive · prewed | USD 310 | USD 310 | USD 310 | USD 310 | USD 310 | USD 310 | MATCH
+Souphattra Heritage Vientiane · Heritage Executive · wedstay | USD 155 | USD 155 | USD 155 | USD 155 | USD 155 | USD 155 | MATCH
+Souphattra Heritage Vientiane · The Heritage · prewed | USD 290 | USD 290 | USD 290 | USD 290 | USD 290 | USD 290 | MATCH
+Souphattra Heritage Vientiane · The Heritage · wedstay | USD 145 | USD 145 | USD 145 | USD 145 | USD 145 | USD 145 | MATCH
+Bangkok · Before the Wedding · Sathorn Penthouse · bkk-stay | USD 255 | USD 255 | USD 255 | USD 255 | USD 255 | USD 255 | MATCH
+Bangkok · Before the Wedding · Superior Room With Garden View · bkk-stay | USD 192 | USD 192 | USD 192 | USD 192 | USD 192 | USD 192 | MATCH
+Bangkok · Before the Wedding · King Studio With Balcony · bkk-stay | USD 120 | USD 120 | USD 120 | USD 120 | USD 120 | USD 120 | MATCH
+Wanxiang Yueju · Kunming · Left Bank French-Style King Room · kmg | USD 261 | USD 261 | USD 261 | USD 261 | USD 261 | USD 261 | MATCH
+Wanxiang Yueju · Kunming · Penang Forest Nanyang-Style Deluxe Suite · kmg | USD 237 | USD 237 | USD 237 | USD 237 | USD 237 | USD 237 | MATCH
+Wanxiang Yueju · Kunming · Family Suite · kmg | USD 198 | USD 198 | USD 198 | USD 198 | USD 198 | USD 198 | MATCH
+Wanxiang Yueju · Kunming · Seine Evening Glow Loft Family Room · kmg | USD 198 | USD 198 | USD 198 | USD 198 | USD 198 | USD 198 | MATCH
+Wanxiang Yueju · Kunming · Smart Family Room · kmg | USD 165 | USD 165 | USD 165 | USD 165 | USD 165 | USD 165 | MATCH
+Wanxiang Yueju · Kunming · Solarium Bath Suite · kmg | USD 162 | USD 162 | USD 162 | USD 162 | USD 162 | USD 162 | MATCH
+Wanxiang Yueju · Kunming · Standard Single Room · kmg | USD 159 | USD 159 | USD 159 | USD 159 | USD 159 | USD 159 | MATCH
+Wanxiang Yueju · Kunming · Junting City-View Loft · kmg | USD 153 | USD 153 | USD 153 | USD 153 | USD 153 | USD 153 | MATCH
+Wanxiang Yueju · Kunming · Mid-century Amber Suite · kmg | USD 153 | USD 153 | USD 153 | USD 153 | USD 153 | USD 153 | MATCH
+Wanxiang Yueju · Kunming · Milano Minimalist Loft · kmg | USD 150 | USD 150 | USD 150 | USD 150 | USD 150 | USD 150 | MATCH
+Wanxiang Yueju · Kunming · Italian Style Suite · kmg | USD 150 | USD 150 | USD 150 | USD 150 | USD 150 | USD 150 | MATCH
+Wanxiang Yueju · Kunming · Light French Suite · kmg | USD 147 | USD 147 | USD 147 | USD 147 | USD 147 | USD 147 | MATCH
+Luye Baisha · Lijiang · Luye Starry Sky Suite · Immersive View · ljg | USD 420 | USD 420 | USD 420 | USD 420 | USD 420 | USD 420 | MATCH
+Luye Baisha · Lijiang · Boundless Floor-to-Ceiling Glass Sunlit Suite · ljg | USD 340 | USD 340 | USD 340 | USD 340 | USD 340 | USD 340 | MATCH
+Luye Baisha · Lijiang · Snow Mountain Private Soup Viewing Suite · ljg | USD 250 | USD 250 | USD 250 | USD 250 | USD 250 | USD 250 | MATCH
+Luye Baisha · Lijiang · Snow Mountain Manor Suite · ljg | USD 240 | USD 240 | USD 240 | USD 240 | USD 240 | USD 240 | MATCH
+Luye Baisha · Lijiang · 270° Snow Mountain View Suite · ljg | USD 240 | USD 240 | USD 240 | USD 240 | USD 240 | USD 240 | MATCH
+Luye Baisha · Lijiang · 270° Snow Mountain View Room Private Soup Pool · ljg | USD 210 | USD 210 | USD 210 | USD 210 | USD 210 | USD 210 | MATCH
+Luye Baisha · Lijiang · 270° Private Courtyard Snow Mountain View · ljg | USD 210 | USD 210 | USD 210 | USD 210 | USD 210 | USD 210 | MATCH
+Luye Baisha · Lijiang · 270° Snow Mountain Viewing · ljg | USD 200 | USD 200 | USD 200 | USD 200 | USD 200 | USD 200 | MATCH
+Luye Baisha · Lijiang · Snow Mountain Viewing Room · ljg | USD 150 | USD 150 | USD 150 | USD 150 | USD 150 | USD 150 | MATCH
+Siam Kempinski Bangkok · Deluxe Balcony King · kempinski | USD 380 | USD 380 | USD 380 | USD 380 | USD 380 | USD 380 | MATCH
+
+INVARIANT: CART = STICKY = YOUR JOURNEY = REVIEW = SENT JOURNEY for the same authenticated guest state — HOLDS (47 items, one source; bag total of every item at once USD 12,530)
+C86 = USD 105 on every surface (authoritative FLAT.c86 105 · journeys.html USD 105 per person · cart / journey / review / sent line 105 · travel pass "Your cost USD 105 · per person").
+
+==================================================
+K · ROOM SOURCE AUDIT
+==================================================
+Rule: 1 physical room = 2 guest places (a whole property what the source says it sleeps; no room in the source is a single). Source physical rooms = Accommodation_Details "Rooms avaible" (the Penthouse: its six bedrooms — see ST issue). Website allocation units = src/rooms.js unitsOf() over src/inventory-seed.js.
+
+PROPERTY / STAY | WINDOW | ROOM TYPE | SOURCE PHYSICAL ROOMS | SOURCE PAX | EXPECTED GUEST PLACES | WEBSITE ALLOCATION UNITS | WEBSITE PLACES | RATE website / source | BREAKFAST website / source | MATCH / CONFLICT
+Souphattra Heritage Vientiane | prewed | Souphattra Presidential | 1.0 | 4 adults, 2 children | 2 | 1 (A) | 2 | USD 750 / USD 750 | Breakfast included / Brakfast incl.  | MATCH
+Souphattra Heritage Vientiane | wedstay | Souphattra Presidential | 1.0 | 4 adults, 2 children | 2 | 1 (A) | 2 | USD 750 / USD 750 | Breakfast included / Brakfast incl.  | MATCH
+Souphattra Heritage Vientiane | prewed | Souphattra Majestic Suite | 1.0 | 2 adults, 2 children | 2 | 1 (A) | 2 | USD 290 / USD 290 | Breakfast included / Brakfast incl.  | MATCH
+Souphattra Heritage Vientiane | wedstay | Souphattra Majestic Suite | 1.0 | 2 adults, 2 children | 2 | 1 (A) | 2 | USD 290 / USD 290 | Breakfast included / Brakfast incl.  | MATCH
+Souphattra Heritage Vientiane | prewed | Grand Majestic Suite | 2.0 | 2 adults, 1 child | 4 | 2 (AB) | 4 | USD 250 / USD 250 | Breakfast included / Brakfast incl.  | MATCH
+Souphattra Heritage Vientiane | wedstay | Grand Majestic Suite | 2.0 | 2 adults, 1 child | 4 | 2 (AB) | 4 | USD 250 / USD 250 | Breakfast included / Brakfast incl.  | MATCH
+Souphattra Heritage Vientiane | prewed | Noble Courtyard Suite | 1.0 | 2 adults, 1 child | 2 | 1 (A) | 2 | USD 240 / USD 240 | Breakfast included / Brakfast incl.  | MATCH
+Souphattra Heritage Vientiane | wedstay | Noble Courtyard Suite | 1.0 | 2 adults, 1 child | 2 | 1 (A) | 2 | USD 240 / USD 240 | Breakfast included / Brakfast incl.  | MATCH
+Souphattra Heritage Vientiane | prewed | Heritage Grand Premier | 3.0 | 2 Adults | 1 Child (sharing bedding with parent) | 6 | 3 (ABC) | 6 | USD 170 / USD 170 | Breakfast included / Brakfast incl.  | MATCH
+Souphattra Heritage Vientiane | wedstay | Heritage Grand Premier | 3.0 | 2 Adults | 1 Child (sharing bedding with parent) | 6 | 3 (ABC) | 6 | USD 170 / USD 170 | Breakfast included / Brakfast incl.  | MATCH
+Souphattra Heritage Vientiane | prewed | Heritage Executive | 13.0 | 1 King / 3 Twin | 26 | 13 (ABCDEFGHIJKLM) | 26 | USD 155 / USD 155 | Breakfast included / Brakfast incl.  | MATCH
+Souphattra Heritage Vientiane | wedstay | Heritage Executive | 13.0 | 1 King / 3 Twin | 26 | 13 (ABCDEFGHIJKLM) | 26 | USD 155 / USD 155 | Breakfast included / Brakfast incl.  | MATCH
+Souphattra Heritage Vientiane | prewed | The Heritage | 5.0 | 2 adults, 1 child | 10 | 5 (ABCDE) | 10 | USD 145 / USD 145 | Breakfast included / Brakfast incl.  | MATCH
+Souphattra Heritage Vientiane | wedstay | The Heritage | 5.0 | 2 adults, 1 child | 10 | 5 (ABCDE) | 10 | USD 145 / USD 145 | Breakfast included / Brakfast incl.  | MATCH
+Alternative Stay · Vientiane | airbnb-2br | Private Residence | None | — | 6 | 1 (A) | 6 | — / — | None / — | SOURCE MISSING
+Bangkok · Before the Wedding | bkk-stay | Sathorn Penthouse | 6 | 12 Adults | 12 | 6 (ABCDEF) | 12 | USD 85 / USD 85 | Breakfast not included · self-pay / Not included, selfe pay, breakfast location ausgewahlt | MATCH · 6 bedrooms (Bedroom row 6.0; "Elegant 6BR"; Owner 15 Sep: six physical rooms) — the "Rooms avaible" cell says 5.0
+Bangkok · Before the Wedding | bkk-stay | Superior Room With Garden View | 38.0 | 2 adults | 76 | 38 (ABCDEFGHIJKLMNOPQRSTUVWXYZAAABACADAEAFAGAHAIAJAKAL) | 76 | USD 64 / USD 64 | Breakfast included / Included | MATCH
+Bangkok · Before the Wedding | bkk-stay | King Studio With Balcony | 27.0 | 2 adults | 54 | 27 (ABCDEFGHIJKLMNOPQRSTUVWXYZAA) | 54 | USD 40 / USD 40 | Breakfast included / Included | MATCH
+Wanxiang Yueju · Kunming | kmg | Left Bank French-Style King Room | 1.0 | 2 Adults | 2 | 1 (A) | 2 | USD 87 / USD 87 | Breakfast not included · self-pay / Not included, selfe pay, breakfast location ausgewahlt | MATCH
+Wanxiang Yueju · Kunming | kmg | Penang Forest Nanyang-Style Deluxe Suite | 1.0 | 4 Adults | 2 | 1 (A) | 2 | USD 79 / USD 79 | Breakfast not included · self-pay / Not included, selfe pay, breakfast location ausgewahlt | MATCH
+Wanxiang Yueju · Kunming | kmg | Family Suite | 1.0 | 4 Adults | 2 | 1 (A) | 2 | USD 66 / USD 66 | Breakfast not included · self-pay / Not included, selfe pay, breakfast location ausgewahlt | MATCH
+Wanxiang Yueju · Kunming | kmg | Seine Evening Glow Loft Family Room | 1.0 | 4 Adults | 2 | 1 (A) | 2 | USD 66 / USD 66 | Breakfast not included · self-pay / Not included, selfe pay, breakfast location ausgewahlt | MATCH
+Wanxiang Yueju · Kunming | kmg | Smart Family Room | 1.0 | 2 Adults | 2 | 1 (A) | 2 | USD 55 / USD 55 | Breakfast not included · self-pay / Not included, selfe pay, breakfast location ausgewahlt | MATCH
+Wanxiang Yueju · Kunming | kmg | Solarium Bath Suite | 1.0 | 2 Adults | 2 | 1 (A) | 2 | USD 54 / USD 54 | Breakfast not included · self-pay / Not included, selfe pay, breakfast location ausgewahlt | MATCH
+Wanxiang Yueju · Kunming | kmg | Standard Single Room | 1.0 | 2 Adults | 2 | 1 (A) | 2 | USD 53 / USD 53 | Breakfast not included · self-pay / Not included, selfe pay, breakfast location ausgewahlt | MATCH
+Wanxiang Yueju · Kunming | kmg | Junting City-View Loft | 1.0 | 2 Adults | 2 | 1 (A) | 2 | USD 51 / USD 51 | Breakfast not included · self-pay / Not included, selfe pay, breakfast location ausgewahlt | MATCH
+Wanxiang Yueju · Kunming | kmg | Mid-century Amber Suite | 1.0 | 2 Adults | 2 | 1 (A) | 2 | USD 51 / USD 51 | Breakfast not included · self-pay / Not included, selfe pay, breakfast location ausgewahlt | MATCH
+Wanxiang Yueju · Kunming | kmg | Milano Minimalist Loft | 1.0 | 2 Adults | 2 | 1 (A) | 2 | USD 50 / USD 50 | Breakfast not included · self-pay / Not included, selfe pay, breakfast location ausgewahlt | MATCH
+Wanxiang Yueju · Kunming | kmg | Italian Style Suite | 1.0 | 2 Adults | 2 | 1 (A) | 2 | USD 50 / USD 50 | Breakfast not included · self-pay / Not included, selfe pay, breakfast location ausgewahlt | MATCH
+Wanxiang Yueju · Kunming | kmg | Light French Suite | 1.0 | 2 Adults | 2 | 1 (A) | 2 | USD 49 / USD 49 | Breakfast not included · self-pay / Not included, selfe pay, breakfast location ausgewahlt | MATCH
+Luye Baisha · Lijiang | ljg | Luye Starry Sky Suite · Immersive View | 4.0 | 2 Adults | 8 | 4 (ABCD) | 8 | USD 210 / USD 210 | Breakfast included / Brakfast incl.  | MATCH
+Luye Baisha · Lijiang | ljg | Boundless Floor-to-Ceiling Glass Sunlit Suite | 4.0 | 2 Adults | 8 | 4 (ABCD) | 8 | USD 170 / USD 170 | Breakfast included / Brakfast incl.  | MATCH
+Luye Baisha · Lijiang | ljg | Snow Mountain Private Soup Viewing Suite | 4.0 | 2 Adults | 8 | 4 (ABCD) | 8 | USD 125 / USD 125 | Breakfast included / Brakfast incl.  | MATCH
+Luye Baisha · Lijiang | ljg | Snow Mountain Manor Suite | 4.0 | 2 Adults | 8 | 4 (ABCD) | 8 | USD 120 / USD 120 | Breakfast included / Brakfast incl.  | MATCH
+Luye Baisha · Lijiang | ljg | 270° Snow Mountain View Suite | 4.0 | 2 Adults | 8 | 4 (ABCD) | 8 | USD 120 / USD 120 | Breakfast included / Brakfast incl.  | MATCH
+Luye Baisha · Lijiang | ljg | 270° Snow Mountain View Room Private Soup Pool | 4.0 | 2 Adults | 8 | 4 (ABCD) | 8 | USD 105 / USD 105 | Breakfast included / Brakfast incl.  | MATCH
+Luye Baisha · Lijiang | ljg | 270° Private Courtyard Snow Mountain View | 4.0 | 2 Adults | 8 | 4 (ABCD) | 8 | USD 105 / USD 105 | Breakfast included / Brakfast incl.  | MATCH
+Luye Baisha · Lijiang | ljg | 270° Snow Mountain Viewing | 4.0 | 2 Adults | 8 | 4 (ABCD) | 8 | USD 100 / USD 100 | Breakfast included / Brakfast incl.  | MATCH
+Luye Baisha · Lijiang | ljg | Snow Mountain Viewing Room | 4.0 | 2 Adults | 8 | 4 (ABCD) | 8 | USD 75 / USD 75 | Breakfast included / Brakfast incl.  | MATCH
+Siam Kempinski Bangkok | kempinski | Deluxe Balcony King | 4.0 | 2.0 | 8 | 4 (ABCD) | 8 | USD 190 / USD 190 | Breakfast included / Brakfast incl.  | MATCH
+Alternative Stay · Vientiane | airbnb-2br | Private Residence | limited to 6 persons | 6 persons | 6 | 1 (A) | 6 | — / — | — / — | MATCH · Overview Day 05-02 / Day 07: "Airbnb Guest House complimentary … limited to 6 persons"
+
+PENTHOUSE: 6 physical rooms → 6 allocation units (ABCDEF) → 12 guest places → no Room G · MATCH
+RATES: every room rate on the website equals the Accommodation_Details "Price per Person" cell (39 of 39 priced rooms).
+
+==================================================
+L · EXPERIENCE COMPLETENESS
+==================================================
+Website entities (assets/experiences.js · src/experience-inventory.json), each against the Overview day lists of the Operations Master:
+- Curvy.Dining (bkk-curvy) · Bangkok · Dining · Design → in the Overview day lists
+- Sühring (bkk-suhring) · Bangkok · German fine dining · Lunch → not in the Overview day lists (Drive-derived registry)
+- Dior · Café LV (bkk-diorlv) · Bangkok · Fashion · Design · Café → not in the Overview day lists (Drive-derived registry)
+- Louis Vuitton Visionary Journeys (bkk-lvvisionary) · Bangkok · Exhibition · Design · Fashion → in the Overview day lists
+- ICONSIAM (bkk-iconsiam) · Bangkok · Riverfront · City · Design · Shopping → in the Overview day lists
+- Phra Nakhon (bkk-phranakorn) · Bangkok · Thai dining · Riverside → in the Overview day lists
+- BKK Social Club (bkk-socialclub) · Bangkok · Bar · Design · Evening → in the Overview day lists
+- Time Space Cafe (bkk-timespace) · Bangkok · Café · Design → in the Overview day lists
+- Moo Yoo Rose House (bkk-mooyoo) · Bangkok · House · Garden · Café → in the Overview day lists
+- Whispering Cafe (bkk-whispering) · Sam Phran · Nakhon Pathom · Architecture · Garden · Landscape · Day escape → in the Overview day lists
+- Dib Bangkok (bkk-dib) · Bangkok · Art · Architecture · Design → in the Overview day lists
+- EmQuartier (bkk-emquartier) · Bangkok · City · Design · Shopping → in the Overview day lists
+- The Commons Thonglor (bkk-commons) · Bangkok · Food · Design · Social → in the Overview day lists
+- Bar Us (bkk-barus) · Bangkok · Bar · Evening · Design → in the Overview day lists
+- IGNIV (bkk-igniv) · Bangkok · Dining · Evening → in the Overview day lists
+- Thong Smith (bkk-thongsmith) · Bangkok · Thai · Boat Noodles → in the Overview day lists
+- Let's Relax (bkk-letsrelax) · Bangkok · Wellness · Spa → not in the Overview day lists (Drive-derived registry)
+- Dusit Central Park (bkk-dusit) · Bangkok · City · Park · Design · Lifestyle → in the Overview day lists
+- Cafe Madeleine (bkk-madeleine) · Four Seasons Hotel Bangkok · Pâtisserie · Hotel · Café → in the Overview day lists
+- Tang Jai Yang (bkk-tangjaiyang) · Bangkok · Cantonese · Charcoal · Dining → in the Overview day lists
+- Harudot (bkk-harudot) · Bangkok · Café · Architecture · Design → in the Overview day lists
+- ALATi (bkk-alati) · Siam Kempinski Hotel Bangkok · Lunch · Brunch · Hotel → in the Overview day lists
+- Pha That Luang (vte-thatluang) · Vientiane · Heritage · Architecture · Culture → in the Overview day lists
+- Patuxai (vte-patuxai) · Vientiane · Monument · Architecture · City → not in the Overview day lists (Drive-derived registry)
+- Vientiane Night Market (vte-nightmarket) · Vientiane · Night market · Riverfront · Local life → in the Overview day lists
+- Wat Si Saket (vte-sisaket) · Vientiane · Temple · Heritage · Museum → not in the Overview day lists (Drive-derived registry)
+- Wat Si Muang (vte-simuang) · Vientiane · Temple · Local life · Sacred → not in the Overview day lists (Drive-derived registry)
+- Ha Phrakeo Museum (vte-haphrakeo) · Vientiane · Museum · Heritage · Garden → not in the Overview day lists (Drive-derived registry)
+- Presidential Palace (vte-palace) · Vientiane · Landmark · Architecture → not in the Overview day lists (Drive-derived registry)
+- That Dam (vte-thatdam) · Vientiane · Stupa · Legend · City → not in the Overview day lists (Drive-derived registry)
+- Buddha Park (vte-buddhapark) · Xieng Khuan · Vientiane · Sculpture park · Riverside · Day escape → not in the Overview day lists (Drive-derived registry)
+- River Moon (vte-rivermoon) · Vientiane · Riverside · Landscape · Dining → in the Overview day lists
+- 3 Merchants Restaurant (vte-3merchants) · Vientiane · Indochinese · Dining → in the Overview day lists
+- Sona Cafe and Bar (vte-sona) · Vientiane · Bar · Evening → in the Overview day lists
+- Kaogee Le Triomphe (vte-kaogee) · Vientiane · Local · Bakery · Café → in the Overview day lists
+- Lacuna VTE (vte-lacuna) · Vientiane · Café · Design → in the Overview day lists
+- KokKok Mega Mall Patuxay (vte-kokkok) · Vientiane · City · Shopping → in the Overview day lists
+- Lao Derm (vte-laoderm) · Vientiane · Lao · Dining → in the Overview day lists
+- Kunming Cherry Blossoms (cn-blossom) · Kunming · Yunnan · Nature · Garden · Seasonal · Photography → in the Overview day lists
+Sühring: present on the experience page, the Experiences page (featured beside 1872), the footer menu ("Sühring · Lunch"), the journey (request line USD 180), the bag, Review & Send and the sent journey.
+1872: present (1872.html, tea.html, the footer, the journey line "Champagne Afternoon Tea at 1872 · USD 180 · for two guests").
+Retired and absent: PVO Vietnamese Food · Khop Chai Deu · Le Padaek · Parkson Supermarket. Lacuna VTE: Café · Design (café only). Wellness: Marsilea Spa (17 treatments, 6 categories) on marsilea.html.
+Missing details (not invented): Cam On Restaurant and Molly's Vientiane (named in the sheet, no Drive folder); Kunming / Lijiang dining, cafés and bars marked "(TBD)" in the sheet are not on the website.
+
+==================================================
+M · ACCESSIBILITY TEXT REVIEW
+==================================================
+Every aria-label, alt, title, placeholder, resolved aria-labelledby / aria-describedby, live region and control state is in the corpus (see [aria-label], [aria-describedby → spoken], [state] lines). Automated concatenation check over every spoken name (a lower-case letter directly followed by a capital inside one accessible name, proper nouns excluded): 0 finding(s).
+- none: block boundaries inside a described region are read as pauses (" · ") and no name runs two words together.
+
+==================================================
+N · SECRET / PRIVACY SCAN
+==================================================
+Scanned both files for the 47 access codes of the private register, the four test bearers, any 64-character hash and the local Guest Relations token: 0 hit(s). Contacts in the corpus are test values (example.com); first names and the hosts' names appear where the authenticated UI shows them; ticket references (SYL-…) are guest-facing by design; no ledger ids (C-R-…, D-T-…) or guest ids appear as guest-facing text.
+SECRET SCAN: PASS
+
+==================================================
+O · COMPLETENESS VALIDATION
+==================================================
+Active HTML routes covered: 26 (/, /1872, /about-you, /accommodation, /api, /cart, /destination, /documents, /dress, /experience, /experiences, /invitation, /journeys, /marsilea, /nothing-here, /register, /review, /room, /tea, /tickets, /transport, /voyage, /wedding, /wedding-preparation, /you, /your-journey)
+Experience entities covered: 39 · stay / room routes covered: 33 · transport routes covered: 5 (overview + 4 legs) · ticket / PDF templates covered: 14 (+ the template block) · sent-text templates covered: 2 (the sent journey, the email backup) · surfaces: 303 · dynamic states: 236
+Guest-facing source literals: 1877 scanned across every page and script a guest loads · 1718 found in a rendered state · 159 reached only in states not rendered and folded in verbatim (SURFACES "source strings · …") · 0 left over · implementation-only literals (error keys, font names, PDF operators) classified out by rule.
+Failed steps during extraction: 0 · page errors: 0
+COMPLETENESS CHECK: PASS

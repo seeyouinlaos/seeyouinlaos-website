@@ -1,15 +1,10 @@
 {
   "origin": "https://seeyouinlaos-website.suthep-hrg.workers.dev",
   "guest": "G001",
-  "at": "2026-09-16T04:30:42.322Z",
-  "pass": 37,
-  "total": 37,
+  "at": "2026-09-16T07:36:57.031Z",
+  "pass": 44,
+  "total": 44,
   "results": [
-    {
-      "id": "OUT journeys.html → the invitation page with the way back",
-      "ok": true,
-      "d": "invitation?open=1&next=journeys"
-    },
     {
       "id": "OUT cart.html → the invitation page with the way back",
       "ok": true,
@@ -46,6 +41,26 @@
       "d": "invitation?open=1&next=review"
     },
     {
+      "id": "OUT room.html?stay=souphattra&room=heritage → the invitation page with the way back",
+      "ok": true,
+      "d": "invitation?open=1&next=room%3Fstay%3Dsouphattra%26room%3Dheritage"
+    },
+    {
+      "id": "OUT transport.html?id=mu9646 → the invitation page with the way back",
+      "ok": true,
+      "d": "invitation?open=1&next=transport%3Fid%3Dmu9646"
+    },
+    {
+      "id": "OUT The Journey is public editorial: no amount, no room row, no fare, no add · the way in in every stay card (7)",
+      "ok": true,
+      "d": "{\"h1\":\"The Journey\",\"usd\":0,\"adds\":0,\"ways\":7,\"first\":\"invitation?open=1&next=journeys\",\"swaps\":[\"Open your invitation→invitation?open=1&next=journeys\",\"Open your invitation→invitation?open=1&next=jou"
+    },
+    {
+      "id": "OUT the view links into private planning read Open your invitation and lead to the invitation page",
+      "ok": true,
+      "d": "Open your invitation→invitation?open=1&next=journeys | Open your invitation→invitation?open=1&next=journeys | Open your invitation→invitation?open=1&next=journeys | Open your invitation→invitation?open=1&next=journeys | Open your invitation→invitation?open=1&next=journeys"
+    },
+    {
       "id": "OUT index.html · the header says NOT SIGNED IN · OPEN YOUR INVITATION ()",
       "ok": true,
       "d": "Not signed inOpen your invitation"
@@ -71,17 +86,12 @@
       "d": "Not signed inOpen your invitation"
     },
     {
+      "id": "OUT journeys.html · the header says NOT SIGNED IN · OPEN YOUR INVITATION (journeys)",
+      "ok": true,
+      "d": "Not signed inOpen your invitation"
+    },
+    {
       "id": "OUT experience.html?id=bkk-suhring · the header says NOT SIGNED IN · OPEN YOUR INVITATION (experience?id=bkk-suhring)",
-      "ok": true,
-      "d": "Not signed inOpen your invitation"
-    },
-    {
-      "id": "OUT room.html?stay=souphattra&room=heritage · the header says NOT SIGNED IN · OPEN YOUR INVITATION (room?stay=souphattra&room=heritage)",
-      "ok": true,
-      "d": "Not signed inOpen your invitation"
-    },
-    {
-      "id": "OUT transport.html?id=mu9646 · the header says NOT SIGNED IN · OPEN YOUR INVITATION (transport?id=mu9646)",
       "ok": true,
       "d": "Not signed inOpen your invitation"
     },
@@ -92,6 +102,11 @@
     },
     {
       "id": "OUT 1872.html · the header says NOT SIGNED IN · OPEN YOUR INVITATION (1872)",
+      "ok": true,
+      "d": "Not signed inOpen your invitation"
+    },
+    {
+      "id": "OUT tea.html · the header says NOT SIGNED IN · OPEN YOUR INVITATION (tea)",
       "ok": true,
       "d": "Not signed inOpen your invitation"
     },
@@ -111,14 +126,19 @@
       "d": "Open your invitation → invitation.html"
     },
     {
-      "id": "OUT every link to a private surface on the page carries the invitation page as its target (18 links)",
+      "id": "OUT every link to a private surface on the page carries the invitation page as its target (9 links)",
       "ok": true,
-      "d": "your-journey.html→invitation?open=1&next=your-journey.html | journeys.html#j-bkk-stay→invitation?open=1&next=journeys.html%23j-bkk-stay | journeys.html#j-kmg→invitation?open=1&next=journeys.html%23j-kmg"
+      "d": "your-journey.html→invitation?open=1&next=your-journey.html | your-journey.html→invitation?open=1&next=your-journey.html | tickets.html→invitation?open=1&next=tickets.html"
     },
     {
-      "id": "OUT the menu's Journeys leads to the invitation page (with journeys as the way back)",
+      "id": "OUT the menu's The Journey opens the public editorial overview",
       "ok": true,
-      "d": "invitation?open=1&next=journeys.html"
+      "d": "journeys"
+    },
+    {
+      "id": "OUT no amount of the journey on any public page, no private fragment left in the document (tea · 1872 · experiences · the wedding · Sühring)",
+      "ok": true,
+      "d": "{\"tea.html\":0,\"1872.html\":0,\"experiences.html\":0,\"voyage.html\":0,\"experience.html?id=bkk-suhring\":0}"
     },
     {
       "id": "OUT the menu's Your Journey leads to the invitation page",
@@ -136,9 +156,9 @@
       "d": "invitation?open=1&next=your-journey.html"
     },
     {
-      "id": "OUT ADD on a public detail page hands over to the invitation page and remembers the page",
+      "id": "OUT the tea page: no ADD without a session, the way in stands there",
       "ok": true,
-      "d": "invitation?open=1&next=transport%3Fid%3Dc86"
+      "d": "{\"add\":false,\"way\":\"Open your invitation→invitation?open=1&next=tea\"}"
     },
     {
       "id": "OUT Harudot is listed as a café, not under Shopping & Places",
@@ -146,9 +166,9 @@
       "d": "Bangkok · CaféHarudotA café of rose plaster and spiral stairs — architecture first, coffee close behind.5 photographs · Discover"
     },
     {
-      "id": "IN after the code, the guest is back on the journeys catalogue",
+      "id": "IN after the code, the guest is back on The Journey — now the planner: amounts, room rows, no way-in link",
       "ok": true,
-      "d": "journeys"
+      "d": "journeys {\"usd\":126,\"rows\":38,\"ways\":0}"
     },
     {
       "id": "IN the header names the guest: SIGNED IN · <name> · YOUR JOURNEY · SIGN OUT",
@@ -169,6 +189,21 @@
       "id": "IN cart.html · the header still names the guest",
       "ok": true,
       "d": "Signed in · PeggyYour JourneySign out · cart"
+    },
+    {
+      "id": "IN the close CTA reads Continue Your Journey and leads to the planner",
+      "ok": true,
+      "d": "Continue Your Journey → your-journey.html"
+    },
+    {
+      "id": "IN the wedding page's calls to action are the private actions again (Choose your wedding stay / Choose your room → The Journey)",
+      "ok": true,
+      "d": "Choose your wedding stay→journeys.html#j-wedstay | Choose your room→journeys.html#j-wedstay"
+    },
+    {
+      "id": "IN a room page opens with its rates and places for the guest",
+      "ok": true,
+      "d": "room?stay=souphattra&room=heritage {\"usd\":10,\"choose\":26}"
     },
     {
       "id": "IN the bag icon opens the private journey (the bag, or the step the readiness engine asks for first) — never the code gate",

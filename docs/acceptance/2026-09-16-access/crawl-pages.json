@@ -1,9 +1,9 @@
 {
   "origin": "https://seeyouinlaos.github.io/seeyouinlaos-website",
-  "at": "2026-09-16T04:47:47.002Z",
+  "at": "2026-09-16T07:54:17.054Z",
   "reader": "G049",
-  "publicPages": 52,
-  "authPages": 45,
+  "publicPages": 49,
+  "authPages": 48,
   "pages": [
     {
       "page": "index.html",
@@ -14,8 +14,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "45f436d5",
-      "textLength": 2190
+      "textHash": "9b793d4d",
+      "textLength": 2193
     },
     {
       "page": "invitation.html",
@@ -26,8 +26,20 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "312eb3e3",
-      "textLength": 726
+      "textHash": "66d7fd7f",
+      "textLength": 729
+    },
+    {
+      "page": "journeys.html",
+      "signedIn": false,
+      "status": 200,
+      "title": "The Journey · See You In Laos",
+      "brokenImgs": [],
+      "undecodedImgs": 0,
+      "missingAnchors": [],
+      "retired": null,
+      "textHash": "733609ce",
+      "textLength": 3069
     },
     {
       "page": "destination.html",
@@ -38,8 +50,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "c5f87b06",
-      "textLength": 1499
+      "textHash": "bf4bf7c",
+      "textLength": 1502
     },
     {
       "page": "voyage.html",
@@ -50,8 +62,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "a287520c",
-      "textLength": 4700
+      "textHash": "109f35ad",
+      "textLength": 4758
     },
     {
       "page": "accommodation.html",
@@ -62,8 +74,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "c32a0ce7",
-      "textLength": 3341
+      "textHash": "3179a7fe",
+      "textLength": 3432
     },
     {
       "page": "experiences.html",
@@ -74,8 +86,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "906809e3",
-      "textLength": 8528
+      "textHash": "4688b802",
+      "textLength": 8511
     },
     {
       "page": "marsilea.html",
@@ -86,8 +98,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "dcd3c0bf",
-      "textLength": 1425
+      "textHash": "e2eb7323",
+      "textLength": 1428
     },
     {
       "page": "1872.html",
@@ -98,8 +110,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "47805e82",
-      "textLength": 551
+      "textHash": "33924c9",
+      "textLength": 531
     },
     {
       "page": "experience.html?id=bkk-suhring",
@@ -110,32 +122,8 @@
       "undecodedImgs": 6,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "b6e777d6",
-      "textLength": 1496
-    },
-    {
-      "page": "room.html?stay=sathorn&room=penthouse",
-      "signedIn": false,
-      "status": 200,
-      "title": "Sathorn Penthouse · Bangkok · Before the Wedding · See You In Laos",
-      "brokenImgs": [],
-      "undecodedImgs": 0,
-      "missingAnchors": [],
-      "retired": null,
-      "textHash": "40bf252a",
-      "textLength": 3954
-    },
-    {
-      "page": "room.html?stay=airbnb&room=private-residence",
-      "signedIn": false,
-      "status": 200,
-      "title": "Private Residence · Alternative Stay · Vientiane · See You In Laos",
-      "brokenImgs": [],
-      "undecodedImgs": 0,
-      "missingAnchors": [],
-      "retired": null,
-      "textHash": "4e69fbc1",
-      "textLength": 1874
+      "textHash": "7594b290",
+      "textLength": 1360
     },
     {
       "page": "you.html",
@@ -146,8 +134,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "312eb3e3",
-      "textLength": 726
+      "textHash": "66d7fd7f",
+      "textLength": 729
     },
     {
       "page": "experience.html?id=bkk-curvy",
@@ -158,8 +146,8 @@
       "undecodedImgs": 3,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "6147a832",
-      "textLength": 508
+      "textHash": "8ece72d0",
+      "textLength": 511
     },
     {
       "page": "experience.html?id=bkk-phranakorn",
@@ -170,8 +158,8 @@
       "undecodedImgs": 5,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "5b6297dd",
-      "textLength": 488
+      "textHash": "9366df45",
+      "textLength": 491
     },
     {
       "page": "experience.html?id=bkk-timespace",
@@ -182,8 +170,8 @@
       "undecodedImgs": 4,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "b544934",
-      "textLength": 496
+      "textHash": "62731a8e",
+      "textLength": 499
     },
     {
       "page": "experience.html?id=bkk-mooyoo",
@@ -194,8 +182,8 @@
       "undecodedImgs": 3,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "37743e14",
-      "textLength": 510
+      "textHash": "3d4479ae",
+      "textLength": 513
     },
     {
       "page": "experience.html?id=bkk-commons",
@@ -206,8 +194,8 @@
       "undecodedImgs": 2,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "d9469f0c",
-      "textLength": 539
+      "textHash": "9e46d5b6",
+      "textLength": 542
     },
     {
       "page": "experience.html?id=bkk-igniv",
@@ -218,8 +206,8 @@
       "undecodedImgs": 5,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "94ea302b",
-      "textLength": 525
+      "textHash": "5dbbbc37",
+      "textLength": 528
     },
     {
       "page": "experience.html?id=bkk-thongsmith",
@@ -230,8 +218,8 @@
       "undecodedImgs": 4,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "dda99d81",
-      "textLength": 496
+      "textHash": "1a504721",
+      "textLength": 499
     },
     {
       "page": "experience.html?id=bkk-tangjaiyang",
@@ -242,8 +230,8 @@
       "undecodedImgs": 1,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "9c2952d6",
-      "textLength": 533
+      "textHash": "a9df15ac",
+      "textLength": 536
     },
     {
       "page": "experience.html?id=bkk-diorlv",
@@ -254,8 +242,8 @@
       "undecodedImgs": 7,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "6064e0db",
-      "textLength": 514
+      "textHash": "78530d87",
+      "textLength": 517
     },
     {
       "page": "experience.html?id=bkk-whispering",
@@ -266,8 +254,8 @@
       "undecodedImgs": 2,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "3187882",
-      "textLength": 635
+      "textHash": "39b00080",
+      "textLength": 638
     },
     {
       "page": "experience.html?id=bkk-madeleine",
@@ -278,8 +266,8 @@
       "undecodedImgs": 3,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "8218f7d4",
-      "textLength": 516
+      "textHash": "949067ee",
+      "textLength": 519
     },
     {
       "page": "experience.html?id=bkk-lvvisionary",
@@ -290,8 +278,8 @@
       "undecodedImgs": 5,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "b9e8c6e7",
-      "textLength": 551
+      "textHash": "7482dbfb",
+      "textLength": 554
     },
     {
       "page": "experience.html?id=bkk-dib",
@@ -302,8 +290,8 @@
       "undecodedImgs": 5,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "6b1c0620",
-      "textLength": 525
+      "textHash": "6f2d2622",
+      "textLength": 528
     },
     {
       "page": "experience.html?id=bkk-letsrelax",
@@ -314,8 +302,8 @@
       "undecodedImgs": 2,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "9d1e77c1",
-      "textLength": 492
+      "textHash": "199244e1",
+      "textLength": 495
     },
     {
       "page": "experience.html?id=bkk-iconsiam",
@@ -326,8 +314,8 @@
       "undecodedImgs": 3,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "596a4cd3",
-      "textLength": 526
+      "textHash": "56427e8f",
+      "textLength": 529
     },
     {
       "page": "experience.html?id=bkk-emquartier",
@@ -338,8 +326,8 @@
       "undecodedImgs": 3,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "6895094b",
-      "textLength": 522
+      "textHash": "5484cf17",
+      "textLength": 525
     },
     {
       "page": "experience.html?id=bkk-dusit",
@@ -350,8 +338,8 @@
       "undecodedImgs": 2,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "72e2e1c6",
-      "textLength": 522
+      "textHash": "6d7fe0bc",
+      "textLength": 525
     },
     {
       "page": "experience.html?id=bkk-socialclub",
@@ -362,8 +350,8 @@
       "undecodedImgs": 2,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "99339f7b",
-      "textLength": 513
+      "textHash": "3b6c4ae7",
+      "textLength": 516
     },
     {
       "page": "experience.html?id=bkk-barus",
@@ -374,8 +362,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "528d238e",
-      "textLength": 517
+      "textHash": "937ce9f4",
+      "textLength": 520
     },
     {
       "page": "experience.html?id=bkk-alati",
@@ -386,8 +374,8 @@
       "undecodedImgs": 2,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "272f929a",
-      "textLength": 544
+      "textHash": "16158f68",
+      "textLength": 547
     },
     {
       "page": "experience.html?id=bkk-harudot",
@@ -398,8 +386,8 @@
       "undecodedImgs": 2,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "5e51d830",
-      "textLength": 506
+      "textHash": "13555a12",
+      "textLength": 509
     },
     {
       "page": "experience.html?id=vte-rivermoon",
@@ -410,8 +398,8 @@
       "undecodedImgs": 3,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "3bdbafe6",
-      "textLength": 541
+      "textHash": "bf3ade9c",
+      "textLength": 544
     },
     {
       "page": "experience.html?id=vte-3merchants",
@@ -422,8 +410,8 @@
       "undecodedImgs": 2,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "113fc4f9",
-      "textLength": 548
+      "textHash": "48eb4ca9",
+      "textLength": 551
     },
     {
       "page": "experience.html?id=vte-kaogee",
@@ -434,8 +422,8 @@
       "undecodedImgs": 2,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "86da39be",
-      "textLength": 530
+      "textHash": "ea25e5c4",
+      "textLength": 533
     },
     {
       "page": "experience.html?id=vte-laoderm",
@@ -446,8 +434,8 @@
       "undecodedImgs": 5,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "74ee93f5",
-      "textLength": 548
+      "textHash": "7c944c2d",
+      "textLength": 551
     },
     {
       "page": "experience.html?id=vte-sona",
@@ -458,8 +446,8 @@
       "undecodedImgs": 2,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "bfa754b9",
-      "textLength": 545
+      "textHash": "ee7ca4e9",
+      "textLength": 548
     },
     {
       "page": "experience.html?id=vte-lacuna",
@@ -470,8 +458,8 @@
       "undecodedImgs": 3,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "1cfa065",
-      "textLength": 521
+      "textHash": "bdbaa9bd",
+      "textLength": 524
     },
     {
       "page": "experience.html?id=vte-thatluang",
@@ -482,8 +470,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "1ab5e9ca",
-      "textLength": 821
+      "textHash": "5471aa38",
+      "textLength": 824
     },
     {
       "page": "experience.html?id=vte-patuxai",
@@ -494,8 +482,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "eb2d8e6b",
-      "textLength": 881
+      "textHash": "e770b5f7",
+      "textLength": 884
     },
     {
       "page": "experience.html?id=vte-nightmarket",
@@ -506,8 +494,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "4138b15d",
-      "textLength": 897
+      "textHash": "e16855c5",
+      "textLength": 900
     },
     {
       "page": "experience.html?id=vte-sisaket",
@@ -518,8 +506,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "816c0915",
-      "textLength": 699
+      "textHash": "f835430d",
+      "textLength": 702
     },
     {
       "page": "experience.html?id=vte-simuang",
@@ -530,8 +518,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "91156b3d",
-      "textLength": 651
+      "textHash": "888acfe5",
+      "textLength": 654
     },
     {
       "page": "experience.html?id=vte-haphrakeo",
@@ -542,8 +530,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "d0f3e97a",
-      "textLength": 687
+      "textHash": "d4f4c88",
+      "textLength": 690
     },
     {
       "page": "experience.html?id=vte-palace",
@@ -554,8 +542,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "52a5ab50",
-      "textLength": 688
+      "textHash": "ba1b32f2",
+      "textLength": 691
     },
     {
       "page": "experience.html?id=vte-thatdam",
@@ -566,8 +554,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "14cd7c97",
-      "textLength": 649
+      "textHash": "d1b6084b",
+      "textLength": 652
     },
     {
       "page": "experience.html?id=vte-buddhapark",
@@ -578,8 +566,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "d942e354",
-      "textLength": 689
+      "textHash": "ebd4cc6e",
+      "textLength": 692
     },
     {
       "page": "experience.html?id=vte-kokkok",
@@ -590,8 +578,8 @@
       "undecodedImgs": 2,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "cc509020",
-      "textLength": 521
+      "textHash": "50345c22",
+      "textLength": 524
     },
     {
       "page": "tea.html",
@@ -602,32 +590,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "8f6e3ee6",
-      "textLength": 584
-    },
-    {
-      "page": "room.html?stay=sathorn&room=u-sathorn-superior-garden",
-      "signedIn": false,
-      "status": 200,
-      "title": "Superior Room With Garden View · Bangkok · Before the Wedding · See You In Laos",
-      "brokenImgs": [],
-      "undecodedImgs": 0,
-      "missingAnchors": [],
-      "retired": null,
-      "textHash": "f04d5f47",
-      "textLength": 3952
-    },
-    {
-      "page": "room.html?stay=sathorn&room=shama-king-studio-balcony",
-      "signedIn": false,
-      "status": 200,
-      "title": "King Studio With Balcony · Bangkok · Before the Wedding · See You In Laos",
-      "brokenImgs": [],
-      "undecodedImgs": 0,
-      "missingAnchors": [],
-      "retired": null,
-      "textHash": "b1060f77",
-      "textLength": 3508
+      "textHash": "b1268e85",
+      "textLength": 538
     },
     {
       "page": "invitation.html",
@@ -638,8 +602,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "53d085da",
-      "textLength": 2143
+      "textHash": "9408d428",
+      "textLength": 2146
     },
     {
       "page": "your-journey.html",
@@ -650,20 +614,20 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "1e0816cd",
-      "textLength": 2190
+      "textHash": "cc55ba55",
+      "textLength": 2193
     },
     {
       "page": "journeys.html",
       "signedIn": true,
       "status": 200,
-      "title": "Journeys · See You In Laos",
+      "title": "The Journey · See You In Laos",
       "brokenImgs": [],
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "be34b93a",
-      "textLength": 9950
+      "textHash": "f28e9242",
+      "textLength": 10054
     },
     {
       "page": "wedding.html",
@@ -674,8 +638,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "86970680",
-      "textLength": 2189
+      "textHash": "5dfdc9c2",
+      "textLength": 2192
     },
     {
       "page": "wedding-preparation.html",
@@ -686,8 +650,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "73cc83e7",
-      "textLength": 2197
+      "textHash": "a1a9fefb",
+      "textLength": 2200
     },
     {
       "page": "about-you.html",
@@ -698,8 +662,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "650b1429",
-      "textLength": 2187
+      "textHash": "813f6f79",
+      "textLength": 2190
     },
     {
       "page": "review.html",
@@ -710,8 +674,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "a899a8e8",
-      "textLength": 2191
+      "textHash": "2e8f2e5a",
+      "textLength": 2194
     },
     {
       "page": "cart.html",
@@ -722,8 +686,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "85719eac",
-      "textLength": 564
+      "textHash": "fe103216",
+      "textLength": 567
     },
     {
       "page": "tickets.html",
@@ -734,8 +698,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "5fec8b94",
-      "textLength": 1644
+      "textHash": "c5073c2e",
+      "textLength": 1647
     },
     {
       "page": "room.html?stay=souphattra&room=heritage",
@@ -746,8 +710,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "2f17ba7c",
-      "textLength": 5134
+      "textHash": "24cd209e",
+      "textLength": 5140
     },
     {
       "page": "room.html?stay=sathorn&room=penthouse",
@@ -758,8 +722,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "817c87a5",
-      "textLength": 3960
+      "textHash": "f283ab07",
+      "textLength": 3966
     },
     {
       "page": "room.html?stay=kunming&room=light-french",
@@ -770,8 +734,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "f9b7d4ed",
-      "textLength": 4209
+      "textHash": "3311e24f",
+      "textLength": 4215
     },
     {
       "page": "room.html?stay=lijiang&room=snow-mountain-viewing",
@@ -782,8 +746,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "12c69761",
-      "textLength": 3825
+      "textHash": "3ad9fdc3",
+      "textLength": 3831
     },
     {
       "page": "transport.html?id=c86",
@@ -794,8 +758,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "f1cce733",
-      "textLength": 3066
+      "textHash": "ae85a815",
+      "textLength": 3072
     },
     {
       "page": "experience.html?id=bkk-suhring",
@@ -806,8 +770,8 @@
       "undecodedImgs": 6,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "f8188e11",
-      "textLength": 1502
+      "textHash": "2e7ccc91",
+      "textLength": 1505
     },
     {
       "page": "experiences.html",
@@ -818,8 +782,44 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "edbcbb1e",
-      "textLength": 8534
+      "textHash": "8ac1c7c8",
+      "textLength": 8538
+    },
+    {
+      "page": "room.html?stay=airbnb&room=private-residence",
+      "signedIn": true,
+      "status": 200,
+      "title": "Private Residence · Alternative Stay · Vientiane · See You In Laos",
+      "brokenImgs": [],
+      "undecodedImgs": 0,
+      "missingAnchors": [],
+      "retired": null,
+      "textHash": "48cda05e",
+      "textLength": 1886
+    },
+    {
+      "page": "room.html?stay=sathorn&room=u-sathorn-superior-garden",
+      "signedIn": true,
+      "status": 200,
+      "title": "Superior Room With Garden View · Bangkok · Before the Wedding · See You In Laos",
+      "brokenImgs": [],
+      "undecodedImgs": 0,
+      "missingAnchors": [],
+      "retired": null,
+      "textHash": "b7fa6f43",
+      "textLength": 3965
+    },
+    {
+      "page": "room.html?stay=sathorn&room=shama-king-studio-balcony",
+      "signedIn": true,
+      "status": 200,
+      "title": "King Studio With Balcony · Bangkok · Before the Wedding · See You In Laos",
+      "brokenImgs": [],
+      "undecodedImgs": 0,
+      "missingAnchors": [],
+      "retired": null,
+      "textHash": "9116acd4",
+      "textLength": 3520
     },
     {
       "page": "transport.html?id=train",
@@ -830,8 +830,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "9f6d0cb4",
-      "textLength": 4268
+      "textHash": "92b9e8d6",
+      "textLength": 4274
     },
     {
       "page": "room.html?stay=souphattra&room=souphattra-presidential",
@@ -842,8 +842,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "992548e0",
-      "textLength": 4964
+      "textHash": "6fe75402",
+      "textLength": 4970
     },
     {
       "page": "room.html?stay=souphattra&room=souphattra-majestic",
@@ -854,8 +854,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "8a455d98",
-      "textLength": 4907
+      "textHash": "b22feba",
+      "textLength": 4913
     },
     {
       "page": "room.html?stay=souphattra&room=grand-majestic",
@@ -866,8 +866,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "d685f59f",
-      "textLength": 4773
+      "textHash": "4cdd3581",
+      "textLength": 4779
     },
     {
       "page": "room.html?stay=souphattra&room=noble-courtyard",
@@ -878,8 +878,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "6018fdd3",
-      "textLength": 4943
+      "textHash": "cce46b5",
+      "textLength": 4949
     },
     {
       "page": "room.html?stay=souphattra&room=heritage-grand-premier",
@@ -890,8 +890,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "907ec41a",
-      "textLength": 4972
+      "textHash": "5b21fbbc",
+      "textLength": 4978
     },
     {
       "page": "room.html?stay=souphattra&room=heritage-executive",
@@ -902,8 +902,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "cf1c87b5",
-      "textLength": 5846
+      "textHash": "d6875f17",
+      "textLength": 5852
     },
     {
       "page": "transport.html?id=mu9646",
@@ -914,8 +914,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "d4c101a",
-      "textLength": 3257
+      "textHash": "a3c647bc",
+      "textLength": 3263
     },
     {
       "page": "room.html?stay=kunming&room=left-bank",
@@ -926,8 +926,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "3d756a2b",
-      "textLength": 4303
+      "textHash": "c54e110d",
+      "textLength": 4309
     },
     {
       "page": "room.html?stay=kunming&room=penang",
@@ -938,8 +938,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "9f1f5ae4",
-      "textLength": 4205
+      "textHash": "9624d306",
+      "textLength": 4211
     },
     {
       "page": "room.html?stay=kunming&room=family-suite",
@@ -950,8 +950,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "e9f19a1b",
-      "textLength": 4217
+      "textHash": "1828cfd",
+      "textLength": 4223
     },
     {
       "page": "room.html?stay=kunming&room=seine",
@@ -962,8 +962,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "af437449",
-      "textLength": 4306
+      "textHash": "55e78cab",
+      "textLength": 4312
     },
     {
       "page": "room.html?stay=kunming&room=smart-family",
@@ -974,8 +974,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "28b782b7",
-      "textLength": 4188
+      "textHash": "3a869099",
+      "textLength": 4194
     },
     {
       "page": "room.html?stay=kunming&room=solarium",
@@ -986,8 +986,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "39032ad2",
-      "textLength": 4240
+      "textHash": "51bc7874",
+      "textLength": 4246
     },
     {
       "page": "room.html?stay=kunming&room=standard-single",
@@ -998,8 +998,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "eb09a11c",
-      "textLength": 4157
+      "textHash": "511f8f3e",
+      "textLength": 4163
     },
     {
       "page": "room.html?stay=kunming&room=junting",
@@ -1010,8 +1010,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "bea80302",
-      "textLength": 4199
+      "textHash": "398a6ca4",
+      "textLength": 4205
     },
     {
       "page": "room.html?stay=kunming&room=mid-century",
@@ -1022,8 +1022,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "24b07dd0",
-      "textLength": 4209
+      "textHash": "431314f2",
+      "textLength": 4215
     },
     {
       "page": "room.html?stay=kunming&room=milano",
@@ -1034,8 +1034,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "c8a3010a",
-      "textLength": 4126
+      "textHash": "7600c4ac",
+      "textLength": 4132
     },
     {
       "page": "room.html?stay=kunming&room=italian",
@@ -1046,8 +1046,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "2b120cbe",
-      "textLength": 4200
+      "textHash": "1f9d3960",
+      "textLength": 4206
     },
     {
       "page": "room.html?stay=lijiang&room=starry-sky",
@@ -1058,8 +1058,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "7f4dd033",
-      "textLength": 3851
+      "textHash": "a7f3d115",
+      "textLength": 3857
     },
     {
       "page": "room.html?stay=lijiang&room=boundless",
@@ -1070,8 +1070,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "d15e32d9",
-      "textLength": 3847
+      "textHash": "9dfd1f3b",
+      "textLength": 3853
     },
     {
       "page": "room.html?stay=lijiang&room=private-soup-view",
@@ -1082,8 +1082,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "b180d55d",
-      "textLength": 3834
+      "textHash": "54d4cebf",
+      "textLength": 3840
     },
     {
       "page": "room.html?stay=lijiang&room=manor-suite",
@@ -1094,8 +1094,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "99e4d891",
-      "textLength": 3874
+      "textHash": "d3ae9af3",
+      "textLength": 3880
     },
     {
       "page": "room.html?stay=lijiang&room=view-suite-270",
@@ -1106,8 +1106,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "fa6dc22b",
-      "textLength": 3868
+      "textHash": "ca4690d",
+      "textLength": 3874
     },
     {
       "page": "room.html?stay=lijiang&room=soup-pool-270",
@@ -1118,8 +1118,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "7f2d926c",
-      "textLength": 3870
+      "textHash": "44bd448e",
+      "textLength": 3876
     },
     {
       "page": "room.html?stay=lijiang&room=private-courtyard-270",
@@ -1130,8 +1130,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "d745f064",
-      "textLength": 3833
+      "textHash": "d654886",
+      "textLength": 3839
     },
     {
       "page": "room.html?stay=lijiang&room=viewing-270",
@@ -1142,8 +1142,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "8901a9a8",
-      "textLength": 3844
+      "textHash": "b4d9feca",
+      "textLength": 3850
     },
     {
       "page": "transport.html?id=return",
@@ -1154,8 +1154,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "7b97762d",
-      "textLength": 3250
+      "textHash": "9683938f",
+      "textLength": 3256
     },
     {
       "page": "room.html?stay=kempinski&room=deluxe-balcony-king",
@@ -1166,8 +1166,8 @@
       "undecodedImgs": 0,
       "missingAnchors": [],
       "retired": null,
-      "textHash": "b21edb07",
-      "textLength": 2861
+      "textHash": "86fe6ce9",
+      "textLength": 2867
     }
   ],
   "failures": [],
@@ -1333,7 +1333,7 @@
     }
   ],
   "exposure": [],
-  "bodiesScanned": 1652,
+  "bodiesScanned": 1708,
   "bagAfter": null,
   "signedOut": true,
   "totals": {
