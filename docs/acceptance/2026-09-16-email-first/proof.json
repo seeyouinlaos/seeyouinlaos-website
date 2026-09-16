@@ -1,0 +1,31 @@
+{
+ "at": "2026-09-16T16:33:50.790Z",
+ "worker": "b4223c0",
+ "rootCause": "the journey-shop payload carries the email at registration.contact (guest under guestRecord); the Worker read only registration.guests[0].contact (the test fixture shape) \u2192 owner mail accepted, guest mail \"no valid guest email address in the journey\" for every real submission (G049 15:32Z, G048 15:54Z)",
+ "realPath": {
+  "guest": "G049 (the Owner, byte-identical re-send of the stored journey \u2014 selections unchanged)",
+  "identity": "bearer \u2192 auth index \u2192 INV-G049 / G049",
+  "recipientSource": "journey contact \u2192 persisted as contact:INV-G049 (server contact from now on)",
+  "submissionId": "SYL-G049-E64ABD3E",
+  "status": 202
+ },
+ "ownerMail": {
+  "accepted": true,
+  "messageId": "<202609161633.69353844579@smtp-relay.mailin.fr>"
+ },
+ "guestMail": {
+  "accepted": true,
+  "messageId": "<202609161633.65531954291@smtp-relay.mailin.fr>",
+  "to": "s\u2026@gmail.com",
+  "delivered": "ARRIVED in the guest inbox (Gmail message 1a0ab11495e9bac0, 2026-09-16T16:33:50Z, INBOX)"
+ },
+ "mailSummary": {
+  "ownerMailStatus": "accepted",
+  "ownerMessageId": "<202609161633.69353844579@smtp-relay.mailin.fr>",
+  "guestMailStatus": "accepted",
+  "guestMessageId": "<202609161633.65531954291@smtp-relay.mailin.fr>",
+  "guestTo": "s\u2026@gmail.com",
+  "mailLastError": null,
+  "at": "2026-09-16T16:33:50.605Z"
+ }
+}
