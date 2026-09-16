@@ -1,9 +1,9 @@
 # 007 — FINAL V3 DELTA (final V2 → final V3)
 
-Generated 2026-09-16 08:34 UTC by docs/review/007-final-v3-delta.py.
+Generated 2026-09-16 12:39 UTC by docs/review/007-final-v3-delta.py.
 
 FINAL V2:  docs/review/007-final-v2-text.txt (MAIN SHA 6170755) · docs/review/007-final-v2-source-truth-audit.txt
-FINAL:     docs/review/007-final-v3-text.txt (MAIN SHA 621be9c) · docs/review/007-final-v3-source-truth-audit.txt
+FINAL:     docs/review/007-final-v3-text.txt (MAIN SHA 57de900) · docs/review/007-final-v3-source-truth-audit.txt
 
 | metric | pre-patch | final |
 |---|---|---|
@@ -14,8 +14,8 @@ FINAL:     docs/review/007-final-v3-text.txt (MAIN SHA 621be9c) · docs/review/0
 | STAY / ROOM ROUTES | 33 | 33 |
 | TRANSPORT ROUTES | 5 | 5 |
 | TICKET / PDF TEMPLATES | 14 | 14 |
-| LINES | 19873 | 20207 |
-| WORDS | 101094 | 104323 |
+| LINES | 19873 | 20247 |
+| WORDS | 101094 | 104533 |
 | SOURCE-TRUTH CLAIMS CHECKED | 123 | 123 |
 | SOURCE-TRUTH MATCH | 98 | 99 |
 | SOURCE-TRUTH CONFLICT | 0 | 0 |
@@ -23,9 +23,9 @@ FINAL:     docs/review/007-final-v3-text.txt (MAIN SHA 621be9c) · docs/review/0
 | OWNER DECISION OVERRIDES | 17 | 16 |
 | STALE / RETIRED SOURCE | 1 | 1 |
 | SECRET SCAN | PASS | PASS |
-| COMPLETENESS CHECK | PASS · 1868 guest-facing source literals represented · 153 folded in from states not rendered · 0 leftover · 0 failed steps | PASS · 1877 guest-facing source literals represented · 159 folded in from states not rendered · 0 leftover · 0 failed steps |
+| COMPLETENESS CHECK | PASS · 1868 guest-facing source literals represented · 153 folded in from states not rendered · 0 leftover · 0 failed steps | PASS · 1876 guest-facing source literals represented · 159 folded in from states not rendered · 0 leftover · 0 failed steps |
 
-Unique text lines (surfaces, states, templates; references and stamps normalised): 4397 → 4414 · appeared 41 · disappeared 24
+Unique text lines (surfaces, states, templates; references and stamps normalised): 4397 → 4412 · appeared 46 · disappeared 31
 
 ## Text that APPEARED in the final
 
@@ -38,21 +38,29 @@ Unique text lines (surfaces, states, templates; references and stamps normalised
 - On the photograph: Lobby, Rooms, Coffee & Cake · Breakfast, Wedding Ceremony, Wedding Dinner · Poolside. Every place of the venue is listed below.
 - [aria-describedby → spoken] On the photograph: Lobby, Rooms, Coffee & Cake · Breakfast, Wedding Ceremony, Wedding Dinner · Poolside. Every place of the venue is listed below.
 
+### The venue stage (new guest-facing text) (4)
+
+- 04 – 06 March · 2 nights · breakfast included · self-pay
+- 06 – 08 March · 2 nights · breakfast included · self-pay
+- Bangkok · 2 nights · breakfast included · self-pay
+- Lijiang · 2 nights · breakfast included · self-pay
+
 ### Accessibility text (aria / alt / live regions) (3)
 
 - (hidden) [state] current The Journey
 - [aria-label] Show The Journey sections
 - [aria-label] Two books about Laos on a bed: The Lao Sangha and Modernity, and a photograph of a Lao temple
 
-### other (35)
+### other (36)
 
 - (hidden) Open your invitation
 - (hidden) The Journey
 - (hidden) [aria-label] Show The Journey sections
-- - Dress code: acknowledged 2026-09-16T07:36:31.722Z (text version 2026-09-09)
-- - Photography & film: acknowledged 2026-09-16T07:36:59.572Z (text version 2026-09-14)
-- - Publication of photographs: GIVEN (2026-09-16T07:36:58.872Z, wording 2026-09-09-draft)
+- - Dress code: acknowledged 2026-09-16T12:34:56.181Z (text version 2026-09-09)
+- - Photography & film: acknowledged 2026-09-16T12:35:24.253Z (text version 2026-09-14)
+- - Publication of photographs: GIVEN (2026-09-16T12:35:23.534Z, wording 2026-09-09-draft)
 - Back to The Journey
+- Cafés · 5
 - Continue Your Journey
 - German fine dining in a Bangkok villa — lunch, Thursday to Sunday. The other experience you can add to your Journey Bag: a table asked for through Guest Relations, never a confirmed reservation until they say so.
 - ROUTE: /room?stay=souphattra&room=heritage · signed out
@@ -71,10 +79,10 @@ Unique text lines (surfaces, states, templates; references and stamps normalised
 - SURFACE 302
 - SURFACE 303
 - Sangkhathan · Optional
-- Sent · 16 Sept 2026 · 09:37 · your time
+- Sent · 16 Sept 2026 · 14:35 · your time
 - Steffie · 1 place available
 - The Journey
-- The complete guest-facing text of the current release (main 621be9c), extracted 2026-09-16T07:39:55.130Z from a local Worker running the deployed source with the real engines.
+- The complete guest-facing text of the current release (main 57de900), extracted 2026-09-16T12:38:21.224Z from a local Worker running the deployed source with the real engines.
 - The trip, chapter by chapter. Rooms, fares, seats and tickets are chosen inside your invitation — Open your invitation
 - [page title] The Journey · See You In Laos
 - invitation?open=1&next=room%3Fstay%3Dsouphattra%26room%3Dheritage
@@ -89,14 +97,19 @@ Unique text lines (surfaces, states, templates; references and stamps normalised
 - On the photograph: Wedding Dinner · Poolside, Swimming pool, Courtyard garden. Every place of the venue is listed below.
 - [aria-describedby → spoken] On the photograph: Wedding Dinner · Poolside, Swimming pool, Courtyard garden. Every place of the venue is listed below.
 
-### The venue stage (new guest-facing text) (1)
+### The venue stage (new guest-facing text) (5)
 
+- 04 – 06 March · 2 nights · breakfast included
+- 06 – 08 March · 2 nights · breakfast included
+- Bangkok · 2 nights · breakfast included
 - Choose your room
+- Lijiang · 2 nights · breakfast included
 
-### Accessibility text (aria / alt / live regions) (3)
+### Accessibility text (aria / alt / live regions) (4)
 
 - (hidden) [state] current Journeys
 - [aria-label] Show Journeys sections
+- [aria-label] Souphattra Heritage from above — the courtyard, the pool and the tiled roofs
 - [aria-label] The Mekong promenade in Vientiane at sunset
 
 ### Totals and amounts that follow C86 (2)
@@ -104,7 +117,7 @@ Unique text lines (surfaces, states, templates; references and stamps normalised
 - German fine dining in a Bangkok villa — lunch, Thursday to Sunday. The other experience you can add to your Journey Bag: a table asked for through Guest Relations, USD 180 per person, never a confirmed reservation until 
 - Sangkhathan · Optional · USD 15 per guest
 
-### other (16)
+### other (18)
 
 - (hidden) Journeys
 - (hidden) [aria-label] Show Journeys sections
@@ -114,6 +127,8 @@ Unique text lines (surfaces, states, templates; references and stamps normalised
 - A guest · 1 place available
 - A guest · A guest · Full
 - Back to Journeys
+- Cafés · 1
+- Cafés · 4
 - Choose your wedding stay
 - Journeys
 - ROUTE: /journeys · signed out

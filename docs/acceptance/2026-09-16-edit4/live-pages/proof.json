@@ -1,0 +1,96 @@
+{
+  "origin": "https://seeyouinlaos.github.io/seeyouinlaos-website",
+  "at": "2026-09-16T12:28:44.788Z",
+  "measures": {
+    "prevLink": "The wedding days",
+    "prevBottom": 2887,
+    "headTop": 2943,
+    "h2": "Souphattra Heritage Vientiane",
+    "h2Bottom": 3008,
+    "headBottom": 3099,
+    "img": {
+      "top": 3131,
+      "bottom": 3563,
+      "h": 433,
+      "w": 346
+    },
+    "imgOp": 1,
+    "src": "souphattra-aerial-tall-800.avif",
+    "legend": {
+      "top": 3639,
+      "bottom": 4108,
+      "h": 470,
+      "w": 346
+    },
+    "detail": {
+      "top": 4136,
+      "bottom": 4685,
+      "h": 548,
+      "w": 346
+    },
+    "venueBottom": 4685,
+    "nextTop": 4741,
+    "nextEyebrow": "One invitation · one journey",
+    "nextEyebrowTop": 4741,
+    "labels": [
+      "lobby",
+      "rooms",
+      "rooms",
+      "rooms",
+      "coffee",
+      "ceremony",
+      "dinner"
+    ],
+    "labelsVisible": 7,
+    "overlap": false,
+    "overflow": false,
+    "legendItems": 7,
+    "vh": 844
+  },
+  "results": {
+    "served bytes": {
+      "ok": true,
+      "d": "8/8 changed files byte-identical to the tree"
+    },
+    "live HTML references fingerprinted assets": {
+      "ok": true,
+      "d": "10 fingerprinted references, all current"
+    },
+    "phone · the aerial visible right after the venue heading (souphattra-aerial-tall-800.avif)": {
+      "ok": true,
+      "d": "heading → aerial 32 px (target 24–48) · aerial 346×433"
+    },
+    "phone · seven Owner mappings on the aerial, visible, none colliding": {
+      "ok": true,
+      "d": "lobby,rooms,rooms,rooms,coffee,ceremony,dinner · visible 7 · legend 7"
+    },
+    "phone · giant top gap 0": {
+      "ok": true,
+      "d": "previous section → venue heading 56 px · heading → aerial 32 px (half a viewport = 422)"
+    },
+    "phone · giant bottom gap 0 · venue end → next section eyebrow \"One invitation · one journey\"": {
+      "ok": true,
+      "d": "56 px (target 40–80)"
+    },
+    "phone · horizontal overflow 0": {
+      "ok": true,
+      "d": "false"
+    },
+    "desktop · seven labels on the stage": {
+      "ok": true,
+      "d": "7/7"
+    },
+    "Cafés · Harudot in the existing Bangkok Cafés rail, once, as Bangkok · Café": {
+      "ok": true,
+      "d": "Cafés · 5 [Dior · Café LV, Time Space Cafe, Whispering Cafe, Cafe Madeleine, Harudot] · rails with Harudot: bkk:cafe · Cafés · 5 · card Bangkok · Café"
+    },
+    "Stays · Luye Baisha and Siam Kempinski say self-pay": {
+      "ok": true,
+      "d": "Lijiang · 2 nights · breakfast included · self-pay | Bangkok · 2 nights · breakfast included · self-pay"
+    },
+    "WebKit phone · seven labels visible, the aerial visible, no overflow": {
+      "ok": true,
+      "d": "{\"labels\":7,\"imgOp\":1,\"overflow\":false}"
+    }
+  }
+}

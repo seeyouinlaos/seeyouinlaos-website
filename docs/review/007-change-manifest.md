@@ -189,3 +189,11 @@ Wedding Ceremony on the aerial — until then these four carry no marker on the 
   in the 007 V3 corpus now also appear on the homepage; the band's aria-label ("Souphattra Heritage from above — the
   courtyard, the pool and the tiled roofs") is gone. The corpus was not re-extracted (the Owner's instruction: code
   patch only).
+
+## EDIT 4 (Owner, 16 Sep 2026) — self-pay, Harudot in Cafés, the mobile venue live, cache correctness
+- `accommodation.html` + `journeys.html`: "Lijiang · 2 nights · breakfast included · self-pay", "Bangkok · 2 nights ·
+  breakfast included · self-pay" (Luye Baisha, Siam Kempinski — the same summary copy on both pages).
+- `experiences.html`: Harudot in the existing Bangkok Cafés rail (Cafés · 5); the return section keeps ALATi.
+- `assets/venue.js`: the stage enters by itself three seconds after mount at the latest.
+- Cache: every stylesheet / script reference on the 23 pages carries its content hash (`src/asset-versions.cjs`;
+  release gate C1). 007 FINAL V3 re-extracted at 57de900 (CONFLICT 0). Evidence: `docs/acceptance/2026-09-16-edit4/`.

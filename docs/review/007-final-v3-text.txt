@@ -1,5 +1,5 @@
 007 — FINAL V3 FULL-WEBSITE TEXT EXTRACTION · see you in laos.
-The complete guest-facing text of the current release (main 621be9c), extracted 2026-09-16T07:39:55.130Z from a local Worker running the deployed source with the real engines.
+The complete guest-facing text of the current release (main 57de900), extracted 2026-09-16T12:38:21.224Z from a local Worker running the deployed source with the real engines.
 Every active route and every reachable state was rendered in a browser and the live DOM walked in document order: text, [aria-label], [alt], [title], [placeholder], resolved aria-labelledby / aria-describedby, control states, live regions; "(hidden)" marks text in the page but not shown until an interaction.
 The generated sent-journey text, the email backup, the seat tickets and travel passes (PDF text read back) and the plan words are included. Exact-duplicate global blocks are written once as G-nnn and referenced with USES G-nnn; every variant is written in full.
 No access code appears: [SECRET ACCESS CODE OMITTED] stands where one would be typed or shown. Contacts are test values. Nothing is summarised, corrected or shortened.
@@ -1161,7 +1161,52 @@ Sunday, 28 February 2027
 The Wedding
 The temple in the morning, coffee and cake on the return, the vows at the green door and dinner poolside. Coffee and cake, the vows and the dinner are hosted for every guest; Buddhist giving at the temple is personal.
 The wedding days
-[aria-label] Souphattra Heritage from above — the courtyard, the pool and the tiled roofs
+[aria-labelledby → spoken] Souphattra Heritage Vientiane
+The venue
+Souphattra Heritage Vientiane
+One address for the wedding day and the wedding stay: the heritage houses around the courtyard, the garden, the pool. Seen from above, then close.
+[aria-describedby → spoken] On the photograph: Lobby, Rooms, Coffee & Cake · Breakfast, Wedding Ceremony, Wedding Dinner · Poolside. Every place of the venue is listed below.
+[alt] Souphattra Heritage Vientiane from above: the heritage houses with their tiled roofs around the courtyard garden and the swimming pool
+01
+Lobby
+02
+Rooms
+02
+Rooms
+02
+Rooms
+03
+Coffee & Cake · Breakfast
+04
+Wedding Ceremony
+05
+Wedding Dinner · Poolside
+Souphattra Heritage Vientiane from above · the real photograph · the labels on the real places
+On the photograph: Lobby, Rooms, Coffee & Cake · Breakfast, Wedding Ceremony, Wedding Dinner · Poolside. Every place of the venue is listed below.
+[aria-label] Venue map
+01
+Lobby
+Arrival · 27 February
+02
+Rooms
+Two nights · 27 February – 1 March
+03
+Coffee & Cake · Breakfast
+From 12:00 on the wedding day · breakfast every morning
+04
+Wedding Ceremony
+Sunday, 28 February 2027 · 15:30
+05
+Wedding Dinner · Poolside
+Sunday, 28 February 2027 · 19:30
+06
+Swimming pool
+Every day of the stay
+07
+Courtyard garden
+Between the houses
+[aria-labelledby → spoken] 
+[state] live region · polite
 [aria-label] Featured journeys
 One invitation · one journey
 Featured journeys
@@ -1389,10 +1434,10 @@ Wanxiang Yueju
 Kunming · 3 nights · breakfast not included, self-pay
 Luye Baisha
 4 – 6 Mar
-Lijiang · 2 nights · breakfast included
+Lijiang · 2 nights · breakfast included · self-pay
 Siam Kempinski
 6 – 8 Mar
-Bangkok · 2 nights · breakfast included
+Bangkok · 2 nights · breakfast included · self-pay
 Your Invitation
 Choose the rooms that are yours.
 Open your invitation
@@ -1501,7 +1546,7 @@ Cantonese charcoal barbecue — smoke, lacquer and generations of craft.
 [state] disabled
 [aria-label] Next
 [aria-label] Cafés
-Cafés · 4
+Cafés · 5
 [aria-label] Use the arrow keys to move between slides
 [aria-label] Dior · Café LV, Bangkok — 10 photographs
 Bangkok · Café
@@ -1523,6 +1568,11 @@ Four Seasons Hotel Bangkok · Café
 Cafe Madeleine
 Refined hotel pâtisserie — French pastry in the Four Seasons' calm.
 6 photographs · Discover
+[aria-label] Harudot, Bangkok — 5 photographs
+Bangkok · Café
+Harudot
+A café of rose plaster and spiral stairs — architecture first, coffee close behind.
+5 photographs · Discover
 [aria-label] Carousel position
 [aria-label] Previous
 [state] disabled
@@ -1608,15 +1658,6 @@ Restaurants · 1
 Siam Kempinski Hotel Bangkok · Lunch
 ALATi
 Brunch at the Siam Kempinski — the last Bangkok table of the journey, the day before the flight home.
-5 photographs · Discover
-[aria-label] Previous
-[aria-label] Next
-[aria-label] Cafés
-Cafés · 1
-[aria-label] Harudot, Bangkok — 5 photographs
-Bangkok · Café
-Harudot
-A café of rose plaster and spiral stairs — architecture first, coffee close behind.
 5 photographs · Discover
 [aria-label] Previous
 [aria-label] Next
@@ -2179,7 +2220,7 @@ C86 · Kunming → Lijiang
 Open your invitation
 04 – 06 Mar · Accommodation · Lijiang
 Luye Baisha · Lijiang
-04 – 06 March · 2 nights · breakfast included
+04 – 06 March · 2 nights · breakfast included · self-pay
 Open your invitation
 [aria-label] Economy Class · China Eastern
 [aria-label] Economy Class seats
@@ -2198,7 +2239,7 @@ MU5924 + MU741 · Lijiang → Bangkok
 Open your invitation
 06 – 08 Mar · Accommodation · Bangkok
 Siam Kempinski Bangkok
-06 – 08 March · 2 nights · breakfast included
+06 – 08 March · 2 nights · breakfast included · self-pay
 Open your invitation
 USES G-012 (menu)
 USES G-003 (footer)
@@ -10403,7 +10444,6 @@ Enter your private invitation code.
 [aria-label] Invitation code
 [state] live region · polite · role alert
 We could not find that invitation code. Please use the private code from your invitation letter — or write to Guest Relations and we will help right away.
-[state] disabled
 Continue
 Lost your code? guest.relation.seeyouinlaos@gmail.com
 (hidden) Your Invitation
@@ -12208,7 +12248,7 @@ Remove from Your Journey
 View the train
 04 – 06 Mar · Accommodation · Lijiang
 Luye Baisha · Lijiang
-04 – 06 March · 2 nights · breakfast included
+04 – 06 March · 2 nights · breakfast included · self-pay
 From USD 150 total per person · 2 nights · from USD 75 per person / night
 Rooms & suites
 Luye Starry Sky Suite · Immersive View
@@ -12283,7 +12323,7 @@ Remove from Your Journey
 View the return flights
 06 – 08 Mar · Accommodation · Bangkok
 Siam Kempinski Bangkok
-06 – 08 March · 2 nights · breakfast included
+06 – 08 March · 2 nights · breakfast included · self-pay
 USD 380 total per person
 2 nights · 06 → 07 and 07 → 08 March · USD 190 per person / night
 Rooms & suites
@@ -18023,7 +18063,7 @@ USD 2,325
 A spa interest carries no journey cost — paid directly at the spa.
 Received
 Your journey has been received by Guest Relations
-Sent · 16 Sept 2026 · 09:37 · your time
+Sent · 16 Sept 2026 · 14:35 · your time
 Guest Relations will review your selections personally. Nothing is confirmed yet; we will confirm each arrangement with you once it is ready.
 [aria-describedby → spoken] EVERYTHING WE NEED IS HERE · Your journey can be sent · Anything optional can follow at any time — it never delays your journey.
 [state] disabled
@@ -19696,15 +19736,15 @@ SEATS (as the ledger holds them):
 DOCUMENTS & PRIVACY (received only — nothing here is reviewed or verified):
 - Passport: NOT PROVIDED
 - Flight information: NOT PROVIDED
-- Publication of photographs: GIVEN (2026-09-16T07:36:58.872Z, wording 2026-09-09-draft)
+- Publication of photographs: GIVEN (2026-09-16T12:35:23.534Z, wording 2026-09-09-draft)
 
 GUEST:
 - Name: Peggy Berger
 - Contact: peggy.test@example.com · +49 170 000 0001
 - Party: Peggy & Steffie
-- Dress code: acknowledged 2026-09-16T07:36:31.722Z (text version 2026-09-09)
+- Dress code: acknowledged 2026-09-16T12:34:56.181Z (text version 2026-09-09)
 - Food allergies: NONE
-- Photography & film: acknowledged 2026-09-16T07:36:59.572Z (text version 2026-09-14)
+- Photography & film: acknowledged 2026-09-16T12:35:24.253Z (text version 2026-09-14)
 - Coffee or tea: Tea, black
 - My favourite: Mango sticky rice
 - Favourite drink: Water
@@ -19714,7 +19754,7 @@ GUEST:
 
 YOUR COST: USD 2,325
 Note: Tak Bat (morning alms-giving) is part of the Temple Ceremony and a personal offering. The Sangkhathan is a separate optional personal offering.
-Submitted via Review & Send · 2026-09-16T07:37:31.411Z
+Submitted via Review & Send · 2026-09-16T12:35:56.668Z
 
 ==================================================
 SURFACE 278
@@ -19767,15 +19807,15 @@ SEATS (as the ledger holds them):
 DOCUMENTS & PRIVACY (received only — nothing here is reviewed or verified):
 - Passport: NOT PROVIDED
 - Flight information: NOT PROVIDED
-- Publication of photographs: GIVEN (2026-09-16T07:36:58.872Z, wording 2026-09-09-draft)
+- Publication of photographs: GIVEN (2026-09-16T12:35:23.534Z, wording 2026-09-09-draft)
 
 GUEST:
 - Name: Peggy Berger
 - Contact: peggy.test@example.com · +49 170 000 0001
 - Party: Peggy & Steffie
-- Dress code: acknowledged 2026-09-16T07:36:31.722Z (text version 2026-09-09)
+- Dress code: acknowledged 2026-09-16T12:34:56.181Z (text version 2026-09-09)
 - Food allergies: NONE
-- Photography & film: acknowledged 2026-09-16T07:36:59.572Z (text version 2026-09-14)
+- Photography & film: acknowledged 2026-09-16T12:35:24.253Z (text version 2026-09-14)
 - Coffee or tea: Tea, black
 - My favourite: Mango sticky rice
 - Favourite drink: Water
@@ -19785,7 +19825,7 @@ GUEST:
 
 YOUR COST: USD 2,325
 Note: Tak Bat (morning alms-giving) is part of the Temple Ceremony and a personal offering. The Sangkhathan is a separate optional personal offering.
-Submitted via Review & Send · 2026-09-16T07:37:06.092Z
+Submitted via Review & Send · 2026-09-16T12:35:30.702Z
 
 ==================================================
 SURFACE 279
@@ -20183,8 +20223,8 @@ CONTEXT: folded in for completeness — every literal here is guest-facing in so
 ==================================================
 007 FINAL REVIEW METADATA
 ==================================================
-MAIN SHA: 621be9c
-EXTRACTION DATE: 2026-09-16T07:39:55.156Z
+MAIN SHA: 57de900
+EXTRACTION DATE: 2026-09-16T12:38:21.250Z
 
 DISTINCT ACTIVE ROUTES: 26
 DISTINCT SURFACES: 303
@@ -20194,9 +20234,9 @@ STAY / ROOM ROUTES: 33
 TRANSPORT ROUTES: 5
 TICKET / PDF TEMPLATES: 14
 
-LINES: 20207
-WORDS: 104323
-CHARACTERS: 677872
+LINES: 20247
+WORDS: 104533
+CHARACTERS: 679111
 
 SOURCE-TRUTH CLAIMS CHECKED: 123
 SOURCE-TRUTH MATCH: 99
@@ -20206,4 +20246,4 @@ OWNER DECISION OVERRIDES: 16
 STALE / RETIRED SOURCE: 1
 
 SECRET SCAN: PASS
-COMPLETENESS CHECK: PASS · 1877 guest-facing source literals represented · 159 folded in from states not rendered · 0 leftover · 0 failed steps
+COMPLETENESS CHECK: PASS · 1876 guest-facing source literals represented · 159 folded in from states not rendered · 0 leftover · 0 failed steps
