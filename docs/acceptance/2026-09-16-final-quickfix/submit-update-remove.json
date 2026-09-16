@@ -1,0 +1,113 @@
+{
+ "at": "2026-09-16T17:53:13.769Z",
+ "origin": "https://seeyouinlaos-website.suthep-hrg.workers.dev",
+ "guest": "G002",
+ "reference": "SYL-G002-34DBEFD3",
+ "results": [
+  {
+   "id": "state-draft",
+   "ok": true,
+   "d": "Your journey · saved as draft"
+  },
+  {
+   "id": "sent-facts",
+   "ok": true,
+   "d": "✓ Journey saved | ✓ Sent to Guest Relations | ✓ Confirmation email sent to s…@gmail.com | Reference: SYL-G002-34DBEFD3 | Sent: 16 Sept 2026 · 19:52"
+  },
+  {
+   "id": "state-sent",
+   "ok": true,
+   "d": "Sent to Guest Relations · reference SYL-G002-34DBEFD3 · 16 Sept 2026 · 19:52 · Sent to Guest Relations"
+  },
+  {
+   "id": "server-sent",
+   "ok": true,
+   "d": "{\"submissionStatus\":\"sent\",\"submissionId\":\"SYL-G002-34DBEFD3\",\"submittedAt\":\"2026-09-16T17:52:41.404Z\",\"lastSentAt\":\"2026-09-16T17:52:41.696Z\",\"version\":1,\"hasUnsentChanges\":false,\"mail\":{\"ownerMailStatus\":\"accepted\",\"ownerMessageId\":\"<202609161752.78180402677@smtp-relay.mailin.fr>\",\"guestMailStatus\":\"accepted\",\"guestMessageId\":\"<202609161752.32056141797@smtp-relay.mailin.fr>\",\"guestTo\":\"s…@gmail.com\",\"mailLastError\":null,\"at\":\"2026-09-16T17:52:41.950Z\"}}"
+  },
+  {
+   "id": "changes-not-sent",
+   "ok": true,
+   "d": "{\"submissionStatus\":\"changes-not-sent\",\"submissionId\":\"SYL-G002-34DBEFD3\",\"submittedAt\":\"2026-09-16T17:52:41.404Z\",\"lastSentAt\":\"2026-09-16T17:52:41.696Z\",\"version\":1,\"hasUnsentChanges\":true,\"mail\":{\"ownerMailStatus\":\"accepted\",\"ownerMessageId\":\"<202609161752.78180402677@smtp-relay.mailin.fr>\",\"guestMailStatus\":\"accepted\",\"guestMessageId\":\"<202609161752.32056141797@smtp-relay.mailin.fr>\",\"guestTo\":\"s…@gmail.com\",\"mailLastError\":null,\"at\":\"2026-09-16T17:52:41.950Z\"}}"
+  },
+  {
+   "id": "shell-words-changed",
+   "ok": true,
+   "d": "CHANGES SAVED · NOT YET SENT TO GUEST RELATIONS · Send updated journey"
+  },
+  {
+   "id": "btn-send-updated",
+   "ok": false,
+   "d": "Send to Guest Relations again"
+  },
+  {
+   "id": "updated-facts",
+   "ok": true,
+   "d": "✓ Changes saved | ✓ Updated journey sent to Guest Relations | ✓ Confirmation email sent to s…@gmail.com | Reference: SYL-G002-34DBEFD3 | Sent: 16 Sept 2026 · 19:52"
+  },
+  {
+   "id": "server-updated",
+   "ok": true,
+   "d": "{\"submissionStatus\":\"sent\",\"submissionId\":\"SYL-G002-34DBEFD3\",\"submittedAt\":\"2026-09-16T17:52:41.404Z\",\"lastSentAt\":\"2026-09-16T17:52:54.247Z\",\"version\":2,\"hasUnsentChanges\":false,\"mail\":{\"ownerMailStatus\":\"accepted\",\"ownerMessageId\":\"<202609161752.56793587921@smtp-relay.mailin.fr>\",\"guestMailStatus\":\"accepted\",\"guestMessageId\":\"<202609161752.38167438151@smtp-relay.mailin.fr>\",\"guestTo\":\"s…@gmail.com\",\"mailLastError\":null,\"at\":\"2026-09-16T17:52:54.485Z\"}}"
+  },
+  {
+   "id": "state-updated-words",
+   "ok": true,
+   "d": "Sent to Guest Relations · reference SYL-G002-34DBEFD3 · 16 Sept 2026 · 19:52 · version 2"
+  },
+  {
+   "id": "before-remove",
+   "ok": true,
+   "d": "{\"rooms\":6,\"places\":11,\"soldOut\":false,\"mine\":{\"key\":\"bkk-stay/u-sathorn-superior-garden\",\"label\":\"C\"}}"
+  },
+  {
+   "id": "removed-1",
+   "ok": true,
+   "d": "{\"rooms\":6,\"places\":12,\"soldOut\":false,\"mine\":null}"
+  },
+  {
+   "id": "words-after-remove-1",
+   "ok": true,
+   "d": "[\"Sathorn Penthouse Bangkok: Preferred / total per person · your cost / 5 rooms · 10 places available / Select this stay\",\"U Sathorn Bangkok: Alternative / total per person · your cost / 6 rooms · 12 places available / Select this stay\",\"Shama Yen-Akat Bangkok: Alternative / total per person · your cost / 6 rooms · 12 places available / Select this stay\"]"
+  },
+  {
+   "id": "reselected-1",
+   "ok": true,
+   "d": "{\"rooms\":6,\"places\":11,\"soldOut\":false,\"mine\":{\"key\":\"bkk-stay/u-sathorn-superior-garden\",\"label\":\"C\"}}"
+  },
+  {
+   "id": "removed-2",
+   "ok": true,
+   "d": "{\"rooms\":6,\"places\":12,\"soldOut\":false,\"mine\":null}"
+  },
+  {
+   "id": "words-after-remove-2",
+   "ok": true,
+   "d": "[\"Sathorn Penthouse Bangkok: Preferred / total per person · your cost / 5 rooms · 10 places available / Select this stay\",\"U Sathorn Bangkok: Alternative / total per person · your cost / 6 rooms · 12 places available / Select this stay\",\"Shama Yen-Akat Bangkok: Alternative / total per person · your cost / 6 rooms · 12 places available / Select this stay\"]"
+  },
+  {
+   "id": "reselected-2",
+   "ok": true,
+   "d": "{\"rooms\":6,\"places\":11,\"soldOut\":false,\"mine\":{\"key\":\"bkk-stay/u-sathorn-superior-garden\",\"label\":\"C\"}}"
+  },
+  {
+   "id": "removed-3",
+   "ok": true,
+   "d": "{\"rooms\":6,\"places\":12,\"soldOut\":false,\"mine\":null}"
+  },
+  {
+   "id": "words-after-remove-3",
+   "ok": true,
+   "d": "[\"Sathorn Penthouse Bangkok: Preferred / total per person · your cost / 5 rooms · 10 places available / Select this stay\",\"U Sathorn Bangkok: Alternative / total per person · your cost / 6 rooms · 12 places available / Select this stay\",\"Shama Yen-Akat Bangkok: Alternative / total per person · your cost / 6 rooms · 12 places available / Select this stay\"]"
+  },
+  {
+   "id": "reselected-3",
+   "ok": true,
+   "d": "{\"rooms\":6,\"places\":11,\"soldOut\":false,\"mine\":{\"key\":\"bkk-stay/u-sathorn-superior-garden\",\"label\":\"C\"}}"
+  },
+  {
+   "id": "after-changes-state",
+   "ok": true,
+   "d": "the same room again → no change to send: {\"submissionStatus\":\"sent\",\"submissionId\":\"SYL-G002-34DBEFD3\",\"submittedAt\":\"2026-09-16T17:52:41.404Z\",\"lastSentAt\":\"202"
+  }
+ ]
+}

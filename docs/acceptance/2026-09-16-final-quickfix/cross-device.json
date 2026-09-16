@@ -1,0 +1,67 @@
+{
+ "at": "2026-09-16T17:52:18.655Z",
+ "origin": "https://seeyouinlaos-website.suthep-hrg.workers.dev",
+ "guest": "G002",
+ "results": [
+  {
+   "id": "A-saved",
+   "ok": true,
+   "d": "Saved · 19:52"
+  },
+  {
+   "id": "A-refresh-keeps",
+   "ok": true,
+   "d": "after a hard refresh: {\"contact\":{\"email\":\"suthep.hrg@gmail.com\",\"phone\":\"+66 81 000 0000\"},\"allergy\":\"no\",\"profile\":{\"coffeetea\":\"Oolong, no milk\",\"treat\":\"Mango sticky rice\",\"drink"
+  },
+  {
+   "id": "B-contact",
+   "ok": true,
+   "d": "{\"email\":\"suthep.hrg@gmail.com\",\"phone\":\"+66 81 000 0000\"}"
+  },
+  {
+   "id": "B-answers",
+   "ok": true,
+   "d": "{\"allergy\":\"no\",\"profile\":{\"coffeetea\":\"Oolong, no milk\",\"treat\":\"Mango sticky rice\",\"drink\":\"Coconut water\",\"avoid\":\"Nothing\"}}"
+  },
+  {
+   "id": "B-bag",
+   "ok": true,
+   "d": "[\"train\",\"bkk-stay:u-sathorn-superior-garden/B\"]"
+  },
+  {
+   "id": "B-wedding",
+   "ok": true,
+   "d": "{\"by\":{\"G002\":{\"attend\":\"yes\",\"at\":\"2026-09-16T17:51:49.735Z\",\"by\":\"G002\",\"events\":{\"coffee\":\"yes\",\"vows\":\"yes\",\"dinner\""
+  },
+  {
+   "id": "B-steps",
+   "ok": true,
+   "d": "[\"you:complete\",\"journey:complete\",\"wedding:complete\",\"preparation:complete\",\"about:attention\",\"review:locked\"]"
+  },
+  {
+   "id": "B-room-engine",
+   "ok": true,
+   "d": "{\"bkk-stay\":{\"key\":\"bkk-stay/u-sathorn-superior-garden\",\"label\":\"B\"}}"
+  },
+  {
+   "id": "B-seats-engine",
+   "ok": true,
+   "d": "{\"ceremony\":\"C-R-05-02\",\"dinner\":\"D-T-05\"}"
+  },
+  {
+   "id": "B-saved",
+   "ok": true,
+   "d": "Saved · 19:52"
+  },
+  {
+   "id": "A-sees-B-change",
+   "ok": true,
+   "d": "{\"coffeetea\":\"Oolong, no milk\",\"treat\":\"Mango sticky rice\",\"drink\":\"Fresh lime soda\",\"avoid\":\"Nothing\"}"
+  },
+  {
+   "id": "A-state-words",
+   "ok": true,
+   "d": "Your journey · saved as draft"
+  }
+ ]
+}

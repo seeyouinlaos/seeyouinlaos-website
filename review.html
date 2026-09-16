@@ -162,7 +162,7 @@ if(mode==='sent'){
 /* the server's word on the state — DRAFT · SENT · CHANGES NOT YET SENT (Owner, 16 Sep 2026) */
 function paintServerState(){var sub=window.SIYL_DRAFT&&SIYL_DRAFT.submission(),el=document.getElementById('srvstate');if(!el)return;
   if(!sub||sub.submissionStatus==='draft'){el.innerHTML='<b>Your journey</b> · saved as draft';return}
-  if(sub.hasUnsentChanges){el.innerHTML='<b>Changes saved</b> · not yet sent to Guest Relations · reference '+esc(sub.submissionId);var b=document.getElementById('send');if(b&&b.getAttribute('data-state')==='sent'){paintSend('again')}return}
+  if(sub.hasUnsentChanges){el.innerHTML='<b>Changes saved</b> · not yet sent to Guest Relations · reference '+esc(sub.submissionId);var b=document.getElementById('send');if(b&&b.getAttribute('data-state')!=='ready'&&b.textContent!=='Send updated journey'){paintSend('again')}return}
   el.innerHTML='<b>Sent to Guest Relations</b> · reference '+esc(sub.submissionId)+' · '+esc(whenAt(sub.lastSentAt))+(sub.version>1?' · version '+sub.version:'')}
 document.addEventListener('siyl:draft',paintServerState);document.addEventListener('DOMContentLoaded',paintServerState);
 function row(label,value,right,open){

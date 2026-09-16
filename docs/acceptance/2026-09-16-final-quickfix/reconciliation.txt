@@ -1,0 +1,44 @@
+KEY                               MASTER  STATUS                    CANON  PLACES  RSVD  LIVE  OCC  AVAIL R/P  UI                                CHOOSE  OK
+bkk-stay/penthouse                5       Open                      6      12      1     6     2    5/10       5 rooms · 10 places available     yes     PASS
+bkk-stay/u-sathorn-superior-garden6       Open                      6      12      0     6     0    6/12       6 rooms · 12 places available     yes     PASS
+bkk-stay/shama-king-studio-balcony6       Open                      6      12      0     6     0    6/12       6 rooms · 12 places available     yes     PASS
+prewed/heritage                   5       Open                      5      10      0     5     0    5/10       5 rooms · 10 places available     yes     PASS
+prewed/heritage-executive         13      Open                      13     26      0     13    0    13/26      13 rooms · 26 places available    yes     PASS
+prewed/heritage-grand-premier     3       Open                      3      6       0     3     0    3/6        3 rooms · 6 places available      yes     PASS
+prewed/noble-courtyard            1       Open                      1      2       0     1     0    1/2        1 room · 2 places available       yes     PASS
+prewed/grand-majestic             2       Reserved for Family       2      4       2     2     0    0/0        Reserved · Family                 no      PASS
+prewed/souphattra-majestic        1       Open                      1      2       0     1     0    1/2        1 room · 2 places available       yes     PASS
+prewed/souphattra-presidential    1       Reserved for Bride & Gro  1      2       1     1     2    0/0        Reserved · Bride & Groom          no      PASS
+wedstay/heritage                  5       Open                      5      10      0     5     0    5/10       5 rooms · 10 places available     yes     PASS
+wedstay/heritage-executive        13      Open                      13     26      0     13    0    13/26      13 rooms · 26 places available    yes     PASS
+wedstay/heritage-grand-premier    3       Open                      3      6       0     3     0    3/6        3 rooms · 6 places available      yes     PASS
+wedstay/noble-courtyard           1       Open                      1      2       0     1     0    1/2        1 room · 2 places available       yes     PASS
+wedstay/grand-majestic            2       Reserved for Family       2      4       2     2     0    0/0        Reserved · Family                 no      PASS
+wedstay/souphattra-majestic       1       Open                      1      2       0     1     0    1/2        1 room · 2 places available       yes     PASS
+wedstay/souphattra-presidential   1       Reserved for Bride & Gro  1      2       1     1     2    0/0        Reserved · Bride & Groom          no      PASS
+airbnb-2br/private-residence      —       Owner                     1      6       0     1     0    1/6        6 places available                yes     PASS
+kmg/left-bank                     1       Open                      1      2       0     1     0    1/2        1 room · 2 places available       yes     PASS
+kmg/penang                        1       Open                      1      2       0     1     0    1/2        1 room · 2 places available       yes     PASS
+kmg/family-suite                  1       Open                      1      2       0     1     0    1/2        1 room · 2 places available       yes     PASS
+kmg/seine                         1       Open                      1      2       0     1     0    1/2        1 room · 2 places available       yes     PASS
+kmg/smart-family                  1       Open                      1      2       0     1     0    1/2        1 room · 2 places available       yes     PASS
+kmg/solarium                      1       Reserved for Bride & Gro  1      2       1     1     2    0/0        Reserved · Bride & Groom          no      PASS
+kmg/standard-single               1       Open                      1      2       0     1     0    1/2        1 room · 2 places available       yes     PASS
+kmg/junting                       1       Open                      1      2       0     1     0    1/2        1 room · 2 places available       yes     PASS
+kmg/mid-century                   1       Open                      1      2       0     1     0    1/2        1 room · 2 places available       yes     PASS
+kmg/milano                        1       Open                      1      2       0     1     0    1/2        1 room · 2 places available       yes     PASS
+kmg/italian                       1       Open                      1      2       0     1     0    1/2        1 room · 2 places available       yes     PASS
+kmg/light-french                  1       Open                      1      2       0     1     0    1/2        1 room · 2 places available       yes     PASS
+ljg/starry-sky                    4       Open                      4      8       0     4     0    4/8        4 rooms · 8 places available      yes     PASS
+ljg/boundless                     4       Open                      4      8       0     4     0    4/8        4 rooms · 8 places available      yes     PASS
+ljg/private-soup-view             4       Open                      4      8       0     4     0    4/8        4 rooms · 8 places available      yes     PASS
+ljg/manor-suite                   4       Open                      4      8       0     4     0    4/8        4 rooms · 8 places available      yes     PASS
+ljg/view-suite-270                4       Reserved for Bride & Gro  4      8       4     4     0    0/0        Reserved · Bride & Groom          no      PASS
+ljg/soup-pool-270                 4       Open                      4      8       0     4     0    4/8        4 rooms · 8 places available      yes     PASS
+ljg/private-courtyard-270         4       Open                      4      8       0     4     0    4/8        4 rooms · 8 places available      yes     PASS
+ljg/viewing-270                   4       Open                      4      8       0     4     2    3/6        3 rooms · 6 places available      yes     PASS
+ljg/snow-mountain-viewing         4       Open                      4      8       0     4     0    4/8        4 rooms · 8 places available      yes     PASS
+kempinski/deluxe-balcony-king     4       Open                      4      8       0     4     2    3/6        3 rooms · 6 places available      yes     PASS
+
+TOTALS {"categories":40,"canonicalRooms":123,"canonicalPlaces":250,"reservedRooms":12,"occupied":12,"remainingPlaces":222}
+ALL ASSERTIONS HOLD (40 categories)
