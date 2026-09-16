@@ -6,7 +6,7 @@
  *
  * The endpoint degrades safely: it accepts the structured registration,
  * stores it in KV when a REG_KV binding exists, and forwards a copy to
- * Guest Relations via MailChannels when running on Cloudflare. If neither
+ * Guest Relations and the guest through the configured email provider (Brevo or Resend, a Worker secret). If neither
  * storage nor forwarding succeeds it returns 503 and the client falls back
  * to the mailto channel — a registration is never silently lost.
  *
@@ -163,6 +163,12 @@ export default {
       }
       return handleRegister(request, env);
     }
+    /* the confirmation emails, sent again for a journey already stored — never a new submission (Owner, 16 Sep 2026) */
+    if (url.pathname === '/api/register/mail-retry') {
+      if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders(request) });
+      if (request.method !== 'POST') return json({ ok: false, error: 'method not allowed' }, 405, corsHeaders(request));
+      return handleMailRetry(request, env);
+    }
 
     /* HISTORICAL FIREWALL (final pre-release run, 11 SEP 2026): the invitation
      * letters link to /register/?invite=…, the entry of the superseded
@@ -254,49 +260,120 @@ async function handleRegister(request, env) {
   // a normal repeat submission/retry OVERWRITES the same key (no accidental
   // duplicates); the previous state is kept alongside as a bounded history.
   const regKey = 'reg:' + invitationId;
+  const submissionId = await submissionIdOf(invitationId, submittedAt);
   let stored = false;
-  let mailed = false;
 
-  // 1) DURABLE PERSISTENCE FIRST (HSW-001-ED-FER-001 §1). Without a stored
-  //    record the endpoint reports failure and the client falls back to the
-  //    clearly-labelled emergency channel — success is never simulated.
+  // 1) DURABLE PERSISTENCE FIRST. Without a stored record the endpoint reports
+  //    failure and the client falls back to the clearly-labelled emergency
+  //    channel — success is never simulated. The record carries the submission
+  //    id; the provider's answer is written to it after the emails (step 2).
+  let record = null;
   if (env.REG_KV) {
     try {
-      const record = JSON.stringify({ invitationId, submittedAt, registration, text });
+      record = { invitationId, submittedAt, submissionId, registration, text, mail: null };
       const prev = await env.REG_KV.get(regKey);
-      await env.REG_KV.put(regKey, record, { metadata: { invitationId, submittedAt } });
-      if (prev && prev !== record) {
-        await env.REG_KV.put(regKey + ':prev:' + submittedAt, prev, {
-          metadata: { invitationId, supersededBy: submittedAt },
-          expirationTtl: 60 * 60 * 24 * 90,
-        });
+      await env.REG_KV.put(regKey, JSON.stringify(record), { metadata: { invitationId, submittedAt, submissionId } });
+      if (prev) {
+        let prevObj = null; try { prevObj = JSON.parse(prev); } catch (e) {}
+        if (!prevObj || prevObj.submittedAt !== submittedAt) {
+          await env.REG_KV.put(regKey + ':prev:' + submittedAt, prev, {
+            metadata: { invitationId, supersededBy: submittedAt },
+            expirationTtl: 60 * 60 * 24 * 90,
+          });
+        }
       }
       stored = true;
     } catch (e) { /* persistence failed — reported honestly below */ }
   }
-
-  // 2) forward the structured record to Guest Relations
-  try {
-    const r = await fetch('https://api.mailchannels.net/tx/v1/send', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({
-        personalizations: [{ to: [{ email: GR_EMAIL, name: 'Guest Relations' }] }],
-        from: { email: 'registration@seeyouinlaos-website.suthep-hrg.workers.dev', name: 'See You In Laos — Registration' },
-        subject: 'Guest Registration — ' + invitationId,
-        content: [{ type: 'text/plain', value: text }],
-      }),
-    });
-    mailed = r.ok;
-  } catch (e) { /* fall through */ }
-
-  // §1.5: only durable persistence counts as digital submission success.
-  // A mailed-but-not-stored state is NOT success; notification failure on a
-  // stored record does not destroy the registration.
   if (!stored) {
-    return json({ ok: false, error: 'registration could not be stored', mailed }, 503, corsHeaders(request));
+    return json({ ok: false, error: 'registration could not be stored', mailed: false }, 503, corsHeaders(request));
   }
-  return json({ ok: true, status: 'UNDER_REVIEW', stored, mailed, submittedAt }, 202, corsHeaders(request));
+
+  // 2) THE TWO EMAILS — Guest Relations and the guest — through the configured
+  //    provider; the provider's acceptance and message ids are recorded on the
+  //    stored record. An email failure never loses the booking: the journey is
+  //    saved, the client says so and offers the retry.
+  const mail = await sendJourneyMail(env, record, request);
+  try { await env.REG_KV.put(regKey, JSON.stringify({ ...record, mail }), { metadata: { invitationId, submittedAt, submissionId } }); } catch (e) { /* the record stands; the mail result is in the response */ }
+  return json({ ok: true, status: 'UNDER_REVIEW', stored, mailed: !!(mail.owner && mail.owner.accepted), submittedAt, submissionId, mail: publicMail(mail) }, 202, corsHeaders(request));
+}
+
+/* the submission reference: SYL-<guest>-<8 hex of the stored record's time and invitation> — no code, no bearer */
+async function submissionIdOf(invitationId, submittedAt) {
+  const d = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('siyl.submission:' + invitationId + ':' + submittedAt));
+  return 'SYL-' + String(invitationId).replace(/^INV-/, '') + '-' + [...new Uint8Array(d)].slice(0, 4).map((b) => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+}
+const MAIL_FROM_NAME = 'See You In Laos — Guest Relations';
+/* the email provider — the API key is a Worker secret, never in the repository:
+ *   BREVO_API_KEY   → https://api.brevo.com/v3/smtp/email (sender = MAIL_FROM, a sender validated in Brevo)
+ *   RESEND_API_KEY  → https://api.resend.com/emails       (sender = MAIL_FROM, a domain verified in Resend)
+ * Without a key nothing is sent and the answer says so: { provider: 'none', accepted: false }. */
+async function sendMail(env, to, toName, subject, text) {
+  const from = (env.MAIL_FROM || GR_EMAIL).trim();
+  const out = { provider: 'none', accepted: false, id: null, status: 0, error: null, at: new Date().toISOString() };
+  try {
+    if (env.BREVO_API_KEY) {
+      out.provider = 'brevo';
+      const r = await fetch('https://api.brevo.com/v3/smtp/email', { method: 'POST', headers: { 'api-key': env.BREVO_API_KEY, 'content-type': 'application/json', accept: 'application/json' },
+        body: JSON.stringify({ sender: { email: from, name: MAIL_FROM_NAME }, to: [{ email: to, name: toName || to }], replyTo: { email: GR_EMAIL, name: 'Guest Relations' }, subject, textContent: text }) });
+      out.status = r.status; let d = null; try { d = await r.json(); } catch (e) {}
+      out.accepted = r.ok; out.id = d && (d.messageId || null); if (!r.ok) out.error = (d && (d.message || d.code)) || ('HTTP ' + r.status);
+    } else if (env.RESEND_API_KEY) {
+      out.provider = 'resend';
+      const r = await fetch('https://api.resend.com/emails', { method: 'POST', headers: { authorization: 'Bearer ' + env.RESEND_API_KEY, 'content-type': 'application/json' },
+        body: JSON.stringify({ from: MAIL_FROM_NAME + ' <' + from + '>', to: [to], reply_to: GR_EMAIL, subject, text }) });
+      out.status = r.status; let d = null; try { d = await r.json(); } catch (e) {}
+      out.accepted = r.ok; out.id = d && (d.id || null); if (!r.ok) out.error = (d && (d.message || d.name)) || ('HTTP ' + r.status);
+    } else {
+      out.error = 'no email provider configured (set the Worker secret BREVO_API_KEY or RESEND_API_KEY and the variable MAIL_FROM)';
+    }
+  } catch (e) { out.error = String(e && e.message || e).slice(0, 160); }
+  return out;
+}
+function guestEmailOf(record) {
+  const g = record && record.registration && Array.isArray(record.registration.guests) ? record.registration.guests[0] : null;
+  const e = g && g.contact && typeof g.contact.email === 'string' ? g.contact.email.trim() : '';
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e) ? e : '';
+}
+function guestNameOf(record) { const g = record && record.registration && record.registration.guests && record.registration.guests[0]; return (g && (g.fullName || g.name)) || record.registration && record.registration.guestId || 'Guest'; }
+function seatWords(record) {
+  const g = record && record.registration && record.registration.guests && record.registration.guests[0];
+  if (!g) return { ceremony: 'not recorded', dinner: 'not recorded' };
+  return { ceremony: g.ceremonySeatLabel || (g.ceremonySeat ? g.ceremonySeat : 'no seat held'), dinner: g.dinnerSeatLabel || (g.dinnerSeat ? g.dinnerSeat : 'no seat held') };
+}
+/* both emails for one stored record — the content is the journey as sent, never an access code */
+async function sendJourneyMail(env, record, request) {
+  const origin = new URL(request.url).origin;
+  const name = guestNameOf(record), guestId = record.registration && record.registration.guestId || '', seats = seatWords(record), g = record.registration && record.registration.guests && record.registration.guests[0] || {};
+  const total = record.registration && record.registration.total != null ? 'USD ' + record.registration.total : 'see the selections';
+  const ownerHead = ['SEE YOU IN LAOS — JOURNEY RECEIVED', 'Guest: ' + name + ' (' + guestId + ')', 'Invitation: ' + record.invitationId, 'Submission: ' + record.submissionId, 'Submitted at: ' + record.submittedAt,
+    'Wedding Ceremony seat: ' + seats.ceremony, 'Wedding Dinner seat: ' + seats.dinner, 'Contact: ' + (g.contact && g.contact.email || '—') + ' · ' + (g.contact && g.contact.phone || '—'),
+    'Allergy: ' + (g.allergy && g.allergy.answer || '—') + (g.allergy && g.allergy.details ? ' · ' + g.allergy.details : ''), 'Total / contribution: ' + total,
+    'Follow-up: ' + origin + '/api/status?invitation=' + encodeURIComponent(record.invitationId) + ' · KV record reg:' + record.invitationId, ''].join('\n');
+  const owner = await sendMail(env, GR_EMAIL, 'Guest Relations', 'Journey received — ' + name + ' · ' + record.submissionId, ownerHead + record.text);
+  const guestTo = guestEmailOf(record);
+  const guestBody = ['Your Journey has been received', '', 'Dear ' + name + ',', '', 'Thank you — your journey has reached Guest Relations. Your choices are saved; Guest Relations will review them personally and confirm each arrangement with you.',
+    'Reference: ' + record.submissionId, 'Received: ' + record.submittedAt, 'Wedding Ceremony seat: ' + seats.ceremony, 'Wedding Dinner seat: ' + seats.dinner, '',
+    'Your journey (as sent):', '', record.text, '', 'To open your journey again: ' + origin + '/invitation (enter your own invitation code — it is never sent by email).',
+    'Guest Relations: ' + GR_EMAIL, '', 'See You In Laos'].join('\n');
+  const guest = guestTo ? await sendMail(env, guestTo, name, 'Your Journey has been received — ' + record.submissionId, guestBody) : { provider: 'none', accepted: false, id: null, status: 0, error: 'no valid guest email address in the journey', at: new Date().toISOString() };
+  return { owner, guest: { ...guest, to: guestTo ? guestTo.replace(/^(.).*(@.*)$/, '$1…$2') : null }, at: new Date().toISOString() };
+}
+function publicMail(mail) { const pick = (m) => m ? { provider: m.provider, accepted: !!m.accepted, id: m.id || null, error: m.error || null, to: m.to || undefined } : null; return { owner: pick(mail.owner), guest: pick(mail.guest), at: mail.at }; }
+/* the retry: the stored record's emails once more — the guest's own record only, no new submission */
+async function handleMailRetry(request, env) {
+  let body; try { body = await request.json(); } catch (e) { return json({ ok: false, error: 'invalid JSON' }, 400, corsHeaders(request)); }
+  const invitationId = String(body && body.invitationId || '').trim();
+  const who = await identify(request, env);
+  if (!who || !invitationId || who.invitationId !== invitationId) return json({ ok: false, error: 'unauthorised' }, 401, corsHeaders(request));
+  if (!env.REG_KV) return json({ ok: false, error: 'no store' }, 503, corsHeaders(request));
+  const raw = await env.REG_KV.get('reg:' + invitationId);
+  if (!raw) return json({ ok: false, error: 'no stored journey to confirm' }, 404, corsHeaders(request));
+  let record; try { record = JSON.parse(raw); } catch (e) { return json({ ok: false, error: 'stored journey unreadable' }, 500, corsHeaders(request)); }
+  if (!record.submissionId) record.submissionId = await submissionIdOf(invitationId, record.submittedAt || '');
+  const mail = await sendJourneyMail(env, record, request);
+  try { await env.REG_KV.put('reg:' + invitationId, JSON.stringify({ ...record, mail, mailRetries: (record.mailRetries || 0) + 1 }), { metadata: { invitationId, submittedAt: record.submittedAt, submissionId: record.submissionId } }); } catch (e) {}
+  return json({ ok: true, submissionId: record.submissionId, submittedAt: record.submittedAt, mailed: !!(mail.owner && mail.owner.accepted), mail: publicMail(mail) }, 200, corsHeaders(request));
 }
 
 /* ---- F · status and confirmation --------------------------------------- */

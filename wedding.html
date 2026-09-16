@@ -71,7 +71,8 @@ function seatsSection(p,me){
   var lab=function(sid){return L&&L.label(sid)||''};
   var id=me.guestId,name=esc(G.nameOf(id)),to='wedding-preparation.html#seats',role=me.hostRole==='BRIDE'?'Bride':me.hostRole==='GROOM'?'Groom':'Bride &amp; Groom';
   var cs=S&&S.ready()?S.seatOf('ceremony',id):null,ds=S&&S.ready()?S.seatOf('dinner',id):null,both=!!(ds&&(cs||p.hosts));
-  var h='<section class="prep-sec" id="seats-route"><p class="t-l1">Your seats · '+(open?(frozen?'seating is closed':'seating is open'):'not open yet')+'</p><h2 class="t-h2">Where you will sit</h2>'+
+  var unread=!(S&&S.ready()),unreadWords=S&&S.error()?'could not be loaded':'loading';
+  var h='<section class="prep-sec" id="seats-route"><p class="t-l1">Your seats · '+(open?(frozen?'seating is closed':'seating is open'):unread?unreadWords:'not open yet')+'</p><h2 class="t-h2">Where you will sit</h2>'+
     '<p class="t-b1 measure">'+(open?'A chair for the ceremony and a place at the dinner table, chosen by you on the plan — with the first names of the guests already seated, so you can find the people you know.':'Your ceremony seat and your dinner seat will be chosen here once seating opens. Guest Relations will let you know.')+'</p>';
   h+='<div class="p-card" style="margin-top:var(--s4)" data-seat-guest="'+esc(id)+'"><p class="t-l1 on">'+name+'</p>';
   [['ceremony','Ceremony seat','Souphattra Heritage · 28 February · 15:30'],['dinner','Dinner seat','Souphattra Heritage · poolside · 19:30']].forEach(function(e){
@@ -82,7 +83,7 @@ function seatsSection(p,me){
     h+='<div class="p-kv"><div><p class="t-b1"><b>'+e[1]+'</b></p><p class="t-b2">'+e[2]+(sid?'<br>'+esc(S.describe(sid))+' · confirmed':'')+'</p>'+
        (sid?'<p class="p-more"><a class="p-link" href="'+to+'" data-seat-cta="'+ev+'" data-state="booked">'+(frozen?'View seat':'Change seat')+'</a></p>'
            :(open&&!frozen?'<p class="p-more"><a class="p-link" href="'+to+'" data-seat-cta="'+ev+'" data-state="open">Choose your '+ev+' seat</a></p>':''))+'</div>'+
-       '<p class="t-l1'+(sid?' on':(open&&!frozen?' open':''))+'" data-seat-state="'+(sid?'booked':'open')+'">'+(sid?'Seat '+esc(lab(sid)):(open&&!frozen?'Required':'Not open yet'))+'</p></div>'});
+       '<p class="t-l1'+(sid?' on':(open&&!frozen?' open':''))+'" data-seat-state="'+(sid?'booked':'open')+'">'+(sid?'Seat '+esc(lab(sid)):(open&&!frozen?'Required':unread?'…':'Not open yet'))+'</p></div>'});
   if(both&&PASS)h+='<div class="p-actions" style="margin-top:var(--s3)"><button type="button" class="p-link" data-seat-pass="all" data-seat-pass-for="'+esc(id)+'" aria-label="Download seat tickets · '+name+'">Download seat tickets</button><a class="p-link mute" href="tickets.html">Your tickets</a></div>';
   h+='</div>';
   return h+'</section>'}

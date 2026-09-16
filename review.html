@@ -67,6 +67,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <div id="donebox" hidden class="p-card prep-sec">
 <p class="t-l1 on">What happens now</p>
 <p class="t-b1 measure" id="donemsg"></p>
+<div id="mailbox" hidden data-mail="" style="margin:var(--s3) 0"><p class="t-l1" id="mail-l"></p><p class="t-b1 measure" id="mail-msg"></p><div class="p-actions" style="display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;margin-top:var(--s2)"><button type="button" class="p-act quiet" id="mail-retry" hidden>Retry confirmation email</button></div></div>
 <p class="t-b2 measure-w"><b>Received</b> means your journey is safely with Guest Relations. <b>Confirmed</b> is something only Guest Relations can tell you, once each arrangement is held with the hotels, the railway and the airlines. Until you hear from them, nothing in your journey is final.</p>
 <p class="t-b2 measure-w">You can keep changing anything here. Change it, send it again, and the newer version replaces the earlier one.</p>
 <div class="p-actions" style="display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;margin-top:var(--s4)"><button type="button" class="p-act quiet" id="again">Change my journey and send again</button><a class="p-link mute" href="journeys.html">Continue exploring</a></div>
@@ -103,6 +104,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
    afterwards is named here, with the exact control to complete it.
    ========================================================================== */
 var SUBMIT_URL=(location.hostname==='seeyouinlaos-website.suthep-hrg.workers.dev'||/^(localhost|127\.0\.0\.1)$/.test(location.hostname))?'/api/register':'https://seeyouinlaos-website.suthep-hrg.workers.dev/api/register';
+var RETRY_URL=SUBMIT_URL+'/mail-retry';
 function esc(t){return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 function when(iso){try{return new Date(iso).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}catch(e){return ''}}
 function whenAt(iso){try{var d=new Date(iso);return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})+' · '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}catch(e){return ''}}
@@ -112,6 +114,22 @@ function bearer(){try{var a=JSON.parse(localStorage.getItem('siyl.auth')||'null'
  * server's — and only while this device's draft is the version Guest
  * Relations holds. Anything else is 'ready': the button offers the send
  * (again). Nothing here claims an email was delivered. */
+/* THE EMAILS (Owner, 16 Sep 2026): the journey is saved first; the confirmation emails come after it. A provider that
+   refuses never loses the booking — the words say the journey is saved, the email could not be sent, and offer the retry
+   (the stored journey's emails once more, never another submission). */
+function paintMail(mail,ref){
+  var box=document.getElementById('mailbox'),l=document.getElementById('mail-l'),m=document.getElementById('mail-msg'),rb=document.getElementById('mail-retry');
+  if(!box)return;box.hidden=false;
+  var ok=!!(mail&&mail.guest&&mail.guest.accepted),okOwner=!!(mail&&mail.owner&&mail.owner.accepted);
+  box.setAttribute('data-mail',ok?'sent':'failed');
+  if(ok){l.textContent='Confirmation email sent';m.textContent='A confirmation is on its way to '+(mail.guest.to||'your email address')+(ref?' · reference '+ref:'')+'. Guest Relations '+(okOwner?'have their copy.':'will be notified.');rb.hidden=true;return}
+  l.textContent='Your journey is saved';
+  m.textContent='Confirmation email could not be sent. '+(okOwner?'Guest Relations has been notified':'Guest Relations will be notified')+' — please retry.'+(ref?' Your reference is '+ref+'.':'')+(mail&&mail.guest&&mail.guest.error?' ('+mail.guest.error+')':'');
+  rb.hidden=false;rb.disabled=false;
+  rb.onclick=function(){rb.disabled=true;m.textContent='Sending the confirmation email again…';
+    fetch(RETRY_URL,{method:'POST',headers:{'content-type':'application/json','x-siyl-auth':bearer()},body:JSON.stringify({invitationId:(function(){try{return JSON.parse(localStorage.getItem('siyl.auth')||'null').invitationId}catch(e){return ''}})()})})
+      .then(function(r){return r.json()}).then(function(d){paintMail(d&&d.mail,d&&d.submissionId)})
+      .catch(function(){rb.disabled=false;m.textContent='The email could not be sent again just now. Your journey stays saved — try once more in a moment.'})}}
 function wireAgain(){
 var ag=document.getElementById('again');
 if(ag&&!ag.dataset.wired){ag.dataset.wired='1';
@@ -193,13 +211,15 @@ if(g){
        sst==='Not available yet'?'Guest Relations will let you know if there is anything to arrange':sst==='Not selected'?'Continuing without Sangkhathan':sst)+'</p></div>'+
      (sst==='Decision required'?'<a class="p-link" href="wedding.html#sangkhathan">Complete this</a>':'<p class="t-l1'+(g.sangkhathan?' on':'')+'">'+(g.sangkhathan?'USD 15':(quiet?'':sst==='Not selected'?'No':'—'))+'</p>')+'</div>';
   var Sx=window.SIYL_SEATS,Lx=window.SIYL_SEATLABELS,cs=Sx?Sx.seatOf('ceremony',me.guestId):null,ds=Sx?Sx.seatOf('dinner',me.guestId):null,openS=Sx&&Sx.open()&&!Sx.frozen();
+  /* the plan not read yet (or unreadable) is never "not open": the words say what is true (Owner, 16 Sep 2026) */
+  var unread=!(Sx&&Sx.ready()),unreadWords=Sx&&Sx.error()?'Seats could not be loaded — open Wedding Preparation to try again':'Loading your seats…';
   var lab=function(sid){return Lx&&Lx.label(sid)||''},hostWords=me.hostRole==='BRIDE'?'Bride':me.hostRole==='GROOM'?'Groom':'Bride &amp; Groom';
   var needC=!p.hosts&&T.joining(me.guestId,'vows'),needD=T.joining(me.guestId,'dinner');
   h+=(p.hosts?'<div class="p-kv"><div><p class="t-b1"><b>Ceremony seat</b></p><p class="t-b2">'+hostWords+' · front centre</p></div><p class="t-l1 on">Front centre</p></div>'
-      :'<div class="p-kv"><div><p class="t-b1"><b>Ceremony seat</b></p><p class="t-b2">'+(cs?esc(Sx.describe(cs))+' · held in your name':(!needC?'Not attending · no seat needed':(openS?'Not selected yet':'Seating is not open yet')))+'</p></div>'+
-       (cs?'<p class="t-l1 on">Seat '+esc(lab(cs))+'</p>':(needC&&openS?'<a class="p-link" href="wedding-preparation.html#seats">Complete this</a>':'<p class="t-l1">'+(needC?'Not open yet':'—')+'</p>'))+'</div>')+
-     '<div class="p-kv"><div><p class="t-b1"><b>Dinner seat</b></p><p class="t-b2">'+(ds?esc(Sx.describe(ds))+' · held in your name':(!needD?'Not attending · no seat needed':(openS?'Not selected yet':'Seating is not open yet')))+'</p></div>'+
-     (ds?'<p class="t-l1 on">Seat '+esc(lab(ds))+'</p>':(needD&&openS?'<a class="p-link" href="wedding-preparation.html#seats">Complete this</a>':'<p class="t-l1">'+(needD?'Not open yet':'—')+'</p>'))+'</div>';
+      :'<div class="p-kv"><div><p class="t-b1"><b>Ceremony seat</b></p><p class="t-b2">'+(cs?esc(Sx.describe(cs))+' · held in your name':(!needC?'Not attending · no seat needed':(openS?'Not selected yet':unread?unreadWords:'Seating is not open yet')))+'</p></div>'+
+       (cs?'<p class="t-l1 on">Seat '+esc(lab(cs))+'</p>':(needC&&openS?'<a class="p-link" href="wedding-preparation.html#seats">Complete this</a>':'<p class="t-l1">'+(needC?(unread?'—':'Not open yet'):'—')+'</p>'))+'</div>')+
+     '<div class="p-kv"><div><p class="t-b1"><b>Dinner seat</b></p><p class="t-b2">'+(ds?esc(Sx.describe(ds))+' · held in your name':(!needD?'Not attending · no seat needed':(openS?'Not selected yet':unread?unreadWords:'Seating is not open yet')))+'</p></div>'+
+     (ds?'<p class="t-l1 on">Seat '+esc(lab(ds))+'</p>':(needD&&openS?'<a class="p-link" href="wedding-preparation.html#seats">Complete this</a>':'<p class="t-l1">'+(needD?(unread?'—':'Not open yet'):'—')+'</p>'))+'</div>';
   var a=G.dressAck();
   h+='<div class="p-kv"><div><p class="t-b1"><b>Dress code</b></p><p class="t-b2">'+(a?'Acknowledged on '+when(a.at):'Not yet acknowledged')+'</p></div>'+(a?'<p class="t-l1 on">Acknowledged</p>':'<a class="p-link" href="wedding-preparation.html#ack">Complete this</a>')+'</div>';
   if((cs||ds||p.hosts)&&window.SIYL_SEATPASS)h+='<div class="p-actions" style="margin-top:var(--s3)"><a class="p-link mute" href="tickets.html">Your tickets</a></div>';
@@ -478,6 +498,7 @@ if(r.ok){
 var ans=null;try{ans=await r.json()}catch(e0){}
 var at=(ans&&ans.submittedAt)||registration.registration_submitted_at;
 rememberSent(at);
+paintMail(ans&&ans.mail,ans&&ans.submissionId);
 if(window.SIYL_CONFIRM)SIYL_CONFIRM.noteReceived(at);
 btn.disabled=false;paintSend('sent',at);
 var d=document.getElementById('donebox');d.hidden=false;

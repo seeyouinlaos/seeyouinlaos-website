@@ -57,8 +57,8 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
   <p class="t-b1 measure" id="seats-lede">Your ceremony seat and your dinner seat will appear here when seating opens. Guest Relations arranges the tables and the rows, and you will be told the moment you can choose.</p>
   <div id="seatbox">
   <div class="p-card" style="margin-top:16px">
-    <div class="p-kv"><div><p class="t-b1"><b>Ceremony seat</b></p><p class="t-b2">Souphattra Heritage · 28 February · 15:30</p></div><p class="t-l1">Not open yet</p></div>
-    <div class="p-kv"><div><p class="t-b1"><b>Dinner seat</b></p><p class="t-b2">Souphattra Heritage Vientiane · 19:30</p></div><p class="t-l1">Not open yet</p></div>
+    <div class="p-kv"><div><p class="t-b1"><b>Ceremony seat</b></p><p class="t-b2">Souphattra Heritage · 28 February · 15:30</p></div><p class="t-l1" data-seat-loading>Loading your seats…</p></div>
+    <div class="p-kv"><div><p class="t-b1"><b>Dinner seat</b></p><p class="t-b2">Souphattra Heritage Vientiane · 19:30</p></div><p class="t-l1" data-seat-loading>Loading your seats…</p></div>
   </div>
   </div>
 </section>
@@ -190,7 +190,15 @@ function wcard(p,id){
     '<div class="p-seatcard-actions"><button type="button" class="p-act" data-seat-pass="all" data-seat-pass-for="'+esc(id)+'" aria-label="Download your wedding seat tickets · '+esc(G.nameOf(id))+'">Download seat tickets</button><a class="p-link mute" href="tickets.html">All your tickets</a></div>'+
     '</div>'}
 function paintSeats(){
-  if(!P.ready()||!S.ready())return;
+  if(!P.ready())return;
+  /* the plan could not be read (network, engine): say so, never "not open" — and offer the retry (Owner, 16 Sep 2026) */
+  if(!S.ready()){
+    if(!S.error())return;
+    var eb=document.getElementById('seats-eyebrow'),ld=document.getElementById('seats-lede');
+    if(eb)eb.textContent='02 · Your seats';if(ld)ld.textContent='Your seats could not be loaded just now. Seating is open — try again in a moment.';
+    seatbox.innerHTML='<div class="p-card" style="margin-top:16px" data-seatmap="error"><p class="t-l1">Could not load</p><h3 class="t-h1">Your seats could not be loaded</h3><p class="t-b1 measure">The seating plan did not answer. Nothing you chose is lost — your seats are held on the server. Try again.</p><div class="p-seatcard-actions"><button type="button" class="p-act" data-seat-retry>Try again</button></div></div>';
+    var rb=seatbox.querySelector('[data-seat-retry]');if(rb)rb.addEventListener('click',function(){rb.disabled=true;S.load(true)});
+    return}
   var p=P.party(),me=P.me(),v=S.view(),id=me.guestId;
   var any=S.configured('ceremony')||S.configured('dinner');
   var eyebrow=document.getElementById('seats-eyebrow'),lede=document.getElementById('seats-lede');
@@ -328,7 +336,7 @@ function confirmSeat(id){
     if(held){fresh={ev:ev,guestId:id,seatId:seatId};mode=null;paintSeats();return}
     mode.busy=false;
     var own=S.seatOf(ev,id),who='yours';
-    if(d&&d.error==='taken'){mode.pending=null;mode.err='That chair has just been taken — '+(own?'seat '+labelOf(own)+' is still '+who+'. ':'')+'Choose another.'}
+    if(d&&d.error==='taken'){mode.pending=null;mode.err='This seat was just taken. Please choose another.'+(own?' Seat '+labelOf(own)+' is still '+who+'.':'')}
     else if(d&&d.error==='seating is frozen'){notice={ev:ev,text:'Seating has just been closed — the chair could not be held.'+(own?' Seat '+labelOf(own)+' stays '+who+'.':'')};mode=null}
     else if(d&&d.error==='allocated by Guest Relations'){notice={ev:ev,text:'Guest Relations placed '+G.nameOf(id)+' here — write to Guest Relations to change it.'};mode=null}
     else{mode.err='The chair could not be held — please try again.'}

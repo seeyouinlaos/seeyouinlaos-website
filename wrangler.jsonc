@@ -19,6 +19,11 @@
     { "binding": "REG_KV", "id": "090270d0da434a8b8f49933cb604beb3" }
   ],
 
+  // THE EMAILS (Owner, 16 Sep 2026): every stored journey notifies Guest Relations and the guest
+  // through a real provider. The key is a Worker secret — `wrangler secret put BREVO_API_KEY`
+  // (or RESEND_API_KEY); MAIL_FROM is the validated sender address of that provider account.
+  "vars": { "MAIL_FROM": "guest.relation.seeyouinlaos@gmail.com" },
+
   // THE SHARED INVENTORY LEDGER. One Durable Object instance holds the stock of
   // every room category in every window. Cloudflare routes every request for
   // the id "ledger" to the same actor and runs them one at a time, which is
