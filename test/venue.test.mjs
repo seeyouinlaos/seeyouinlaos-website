@@ -19,21 +19,32 @@ const exists = (p) => fs.existsSync(path.join(ROOT, p));
 function jpegSize(p) { const b = fs.readFileSync(path.join(ROOT, p)); let i = 2; while (i < b.length) { if (b[i] !== 0xFF) { i++; continue; } const m = b[i + 1]; if (m >= 0xC0 && m <= 0xCF && m !== 0xC4 && m !== 0xC8 && m !== 0xCC) return { h: b.readUInt16BE(i + 5), w: b.readUInt16BE(i + 7) }; i += 2 + b.readUInt16BE(i + 2); } return null; }
 const sha = (p) => createHash('sha256').update(fs.readFileSync(path.join(ROOT, p))).digest('hex');
 
-test('DATA · seven places in the Owner\'s order; a marker only where the layout is established; every zone has its story, its time and real photographs', () => {
+test('DATA · seven places in the Owner\'s order; the Owner\'s final mapping of 16 Sep 2026 (seven labels on the aerial: lobby, rooms × 3, ceremony, dinner, coffee & cake); every zone has its story, its time and real photographs', () => {
   assert.deepEqual(DATA.zones.map((z) => z.id), ['lobby', 'rooms', 'coffee', 'ceremony', 'dinner', 'pool', 'garden']);
   assert.deepEqual(DATA.zones.map((z) => z.label), ['Lobby', 'Rooms', 'Coffee & Cake · Breakfast', 'Wedding Ceremony', 'Wedding Dinner · Poolside', 'Swimming pool', 'Courtyard garden']);
-  const placed = DATA.zones.filter((z) => z.area).map((z) => z.id);
-  assert.deepEqual(placed, ['dinner', 'pool', 'garden'], 'the poolside dinner (Owner truth), the pool and the garden (the photograph itself) — nothing else is inferred');
+  const marked = DATA.zones.filter((z) => z.marks && z.marks.length).map((z) => z.id + '×' + z.marks.length);
+  assert.deepEqual(marked, ['lobby×1', 'rooms×3', 'coffee×1', 'ceremony×1', 'dinner×1'], 'the Owner\'s seven labels: top left → Lobby, top right / lower right / lower centre → Rooms, left centre → Wedding Ceremony, centre pool → Dinner, lower left → Coffee & Cake · Breakfast');
+  assert.equal(DATA.zones.reduce((n, z) => n + (z.marks ? z.marks.length : 0), 0), 7, 'seven labels on the photograph');
   for (const z of DATA.zones) {
     assert.ok(z.n && z.title && z.when && z.story && z.photos.length >= 2, z.id + ' is complete');
-    if (z.area) { const a = z.area; assert.ok(a.x >= 0 && a.y >= 0 && a.x + a.w <= 100 && a.y + a.h <= 100, z.id + ' inside the frame'); assert.ok(z.anchor.x >= a.x && z.anchor.x <= a.x + a.w && z.anchor.y >= a.y && z.anchor.y <= a.y + a.h, z.id + ' label on its own area'); }
-    else assert.equal(z.anchor, undefined, z.id + ' has no anchor without an area');
+    for (const m of (z.marks || [])) {
+      assert.ok(m.x >= 0 && m.y >= 0 && m.x + m.w <= 100 && m.y + m.h <= 100, z.id + ' inside the frame');
+      assert.ok(m.anchor.x >= m.x && m.anchor.x <= m.x + m.w && m.anchor.y >= m.y && m.anchor.y <= m.y + m.h, z.id + ' label on its own area');
+      if (m.tall) assert.ok(m.tall.x >= Math.max(m.x, 26) && m.tall.x <= Math.min(m.x + m.w, 71) && m.tall.y >= m.y && m.tall.y <= m.y + m.h, z.id + ' phone label on the visible part of its own area');
+    }
+    if (!z.marks) assert.equal(z.anchor, undefined, z.id + ' has no anchor without a mark');
   }
-  /* the dinner marker sits on the pool terrace and contains the pool; the pool box is water only */
-  const d = DATA.zones.find((z) => z.id === 'dinner').area, p = DATA.zones.find((z) => z.id === 'pool').area;
-  assert.ok(p.x >= d.x && p.x + p.w <= d.x + d.w && p.y >= d.y && p.y + p.h <= d.y + d.h, 'the pool lies inside the poolside dinner area');
+  /* the Owner's positions on the frame: left column x 12.5 – 33.5 (three rows), right column x 62 – 81, the pool in the centre, the lower centre house under the pool */
+  const M = (id) => DATA.zones.find((z) => z.id === id).marks;
+  assert.deepEqual(M('lobby')[0], { x: 12.5, y: 0, w: 21, h: 31, anchor: { x: 23, y: 15 }, tall: { x: 28.5, y: 15, align: 'left' } });
+  assert.deepEqual(M('ceremony')[0], { x: 12.5, y: 33, w: 21, h: 26, anchor: { x: 22, y: 56 }, tall: { x: 28.5, y: 40, align: 'left' } });
+  assert.deepEqual(M('coffee')[0], { x: 12.5, y: 60, w: 21, h: 40, anchor: { x: 23, y: 80 }, tall: { x: 28.5, y: 72, align: 'left' } });
+  assert.deepEqual(M('rooms').map((m) => [m.x, m.y, m.w, m.h]), [[62, 0, 18, 40], [62, 50, 19, 40], [37.5, 71, 21, 29]]);
+  assert.deepEqual(M('dinner')[0], { x: 39.5, y: 37, w: 20.5, h: 32, anchor: { x: 49.7, y: 43.5 }, tall: { x: 48.5, y: 57 } });
+  assert.equal(DATA.first, 'dinner');
   assert.match(DATA.zones.find((z) => z.id === 'dinner').story, /run A poolside, run B opposite the pool/);
   assert.doesNotMatch(JSON.stringify(DATA), /\b(north|south|east|west)\b/i, 'no compass direction is invented');
+
   assert.match(DATA.zones.find((z) => z.id === 'ceremony').when, /15:30/); assert.match(DATA.zones.find((z) => z.id === 'dinner').when, /19:30/);
   assert.doesNotMatch(JSON.stringify(DATA), /Temple|Wat Ong Teu|08:00|16:30/, 'the venue is Souphattra Heritage: no temple, no retired time');
 });
@@ -73,11 +84,12 @@ test('GEOMETRY · the two art directions map the same coordinates: a box on the 
   const full = plain(G.frameOf(DATA));
   assert.deepEqual(full, { x: 0, w: 100, ratio: 2560 / 1440 });
   const tall = { x: 26, w: 45, ratio: 1152 / 1440 };
-  const pool = DATA.zones.find((z) => z.id === 'pool').area;
+  const pool = DATA.zones.find((z) => z.id === 'dinner').marks[0];
   const onTall = G.map(tall, pool);
   assert.ok(Math.abs(onTall.x - (pool.x - 26) / 45 * 100) < 1e-9 && onTall.y === pool.y && Math.abs(onTall.w - pool.w / 45 * 100) < 1e-9, 'x rescales into the crop, y is unchanged');
-  assert.ok(onTall.x > 0 && onTall.x + onTall.w < 100, 'the pool is inside the tall crop');
-  for (const z of DATA.zones.filter((z) => z.area)) assert.equal(G.visible(tall, z.anchor), true, z.id + ' label visible on a phone');
+  assert.ok(onTall.x > 0 && onTall.x + onTall.w < 100, 'the poolside area is inside the tall crop');
+  for (const z of DATA.zones) for (const m of (z.marks || [])) { assert.equal(G.visible(tall, m.tall || m.anchor), true, z.id + ' label visible on a phone'); assert.equal(G.visible(full, m.anchor), true, z.id + ' label visible on the full frame'); }
+  assert.equal(G.visible(tall, DATA.zones.find((z) => z.id === 'lobby').marks[0].anchor), false, 'the desktop anchor of the lobby lies outside the phone crop — the phone anchor takes over');
   assert.equal(G.visible(tall, { x: 5, y: 50 }), false, 'a point outside the crop is not drawn');
   /* the tall crop of the build matches the data: 26 % → 71 % of 2560 = x 665 … 1817 */
   assert.match(src('docs/venue/build-images.py'), /x0 = 665; tall = base\.crop\(\(x0, 0, x0 \+ 1152, 1440\)\)/);
@@ -90,10 +102,20 @@ test('MARKUP · every label and legend item is a button with a name and a presse
   vm.runInContext(src('assets/venue.js'), sb, { filename: 'assets/venue.js' });
   const H = sb.SIYL_VENUE.html, G = sb.SIYL_VENUE.geometry, fr = G.frameOf(DATA);
   const labels = H.labels(DATA, fr);
-  assert.equal((labels.match(/<button type="button" class="venue-label"/g) || []).length, 3);
-  assert.match(labels, /aria-pressed="false" aria-controls="venue-detail"/); assert.match(labels, /<span class="venue-t">Wedding Dinner · Poolside<\/span>/);
+  assert.equal((labels.match(/<button type="button" class="venue-label"/g) || []).length, 7, 'the Owner\'s seven labels');
+  assert.equal((labels.match(/data-zone="rooms"/g) || []).length, 3, 'Rooms three times, one per house');
+  assert.match(labels, /aria-pressed="false" aria-controls="venue-detail"/); assert.match(labels, /<span class="venue-t">Wedding Dinner · Poolside<\/span>/); assert.match(labels, /<span class="venue-t">Coffee &amp; Cake · Breakfast<\/span>/);
+  assert.doesNotMatch(labels, /data-align=/, 'on the full frame every label is centred on its anchor');
+  /* on a phone (the tall crop, 26 – 71 % of the frame) the seven labels stay, each on the visible part of its own house: three hang from the crop's left edge, two from its right */
+  const ph = load(['assets/venue-data.js']);
+  ph.document = sb.document; ph.matchMedia = () => ({ matches: true, addEventListener() {} });
+  vm.runInContext(src('assets/venue.js'), ph, { filename: 'assets/venue.js' });
+  const phone = ph.SIYL_VENUE.html.labels(DATA, ph.SIYL_VENUE.geometry.frameOf(DATA));
+  assert.equal((phone.match(/<button type="button" class="venue-label"/g) || []).length, 7, 'seven labels on a phone too');
+  assert.equal((phone.match(/data-align="left"/g) || []).length, 3); assert.equal((phone.match(/data-align="right"/g) || []).length, 2);
+  assert.match(src('assets/venue.css'), /\.venue-label\[data-align="left"\] \{ transform: translate\(-13px, -50%\); \}/); assert.match(src('assets/venue.css'), /\.venue-label\[data-align="right"\] \{ transform: translate\(calc\(-100% \+ 13px\), -50%\); flex-direction: row-reverse;/);
   const trace = H.trace(DATA, fr);
-  assert.match(trace, /<svg class="venue-trace" viewBox="0 0 100 56\.250" preserveAspectRatio="none" aria-hidden="true"/); assert.equal((trace.match(/class="venue-outline"/g) || []).length, 3); assert.equal((trace.match(/class="venue-tick"/g) || []).length, 12);
+  assert.match(trace, /<svg class="venue-trace" viewBox="0 0 100 56\.250" preserveAspectRatio="none" aria-hidden="true"/); assert.equal((trace.match(/class="venue-outline"/g) || []).length, 7); assert.equal((trace.match(/class="venue-tick"/g) || []).length, 28);
   for (const z of DATA.zones) {
     const d = H.detail(z, 0);
     assert.match(d, /<h3 id="venue-detail-h" class="venue-title">/); assert.match(d, /<p class="venue-story">/);

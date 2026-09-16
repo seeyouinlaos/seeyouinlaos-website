@@ -14,7 +14,8 @@
      media-gallery the supporting photographs of the place, one at a time
 
    RULES: the photograph is the hero, the interface explains it; a marker
-   exists only where the Owner-marked layout puts it (assets/venue-data.js);
+   exists only where the Owner-marked layout puts it (assets/venue-data.js —
+   a zone's `marks`, one label per marked house or area, the same place);
    nothing is hover-only; every control is a button with a name and a state;
    the selection is announced once, in one sentence; reduced motion keeps
    every state and every piece of information.
@@ -60,16 +61,19 @@
   function frameOf(data) { return narrow.matches ? { x: data.base.tallCrop.x, w: data.base.tallCrop.w, ratio: data.base.tall.w / data.base.tall.h } : { x: 0, w: 100, ratio: data.base.full.w / data.base.full.h }; }
   function map(fr, box) { return { x: (box.x - fr.x) / fr.w * 100, y: box.y, w: box.w / fr.w * 100, h: box.h }; }
   function visible(fr, pt) { var x = (pt.x - fr.x) / fr.w * 100; return x > 3 && x < 97; }
+  /* the Owner-marked places of a zone (none for an unmarked zone) and the label anchor for the frame on screen */
+  function marksOf(z) { return z.marks || []; }
+  function anchorOf(m) { return narrow.matches && m.tall ? m.tall : m.anchor; }
 
   function traceHtml(data, fr) {
     var W = 100, H = 100 / fr.ratio, out = [];
     out.push('<svg class="venue-trace" viewBox="0 0 ' + W + ' ' + H.toFixed(3) + '" preserveAspectRatio="none" aria-hidden="true" focusable="false">');
     out.push('<defs><mask id="venue-veil-mask"><rect x="0" y="0" width="' + W + '" height="' + H.toFixed(3) + '" fill="#fff"/>');
-    data.zones.forEach(function (z) { if (!z.area) return; var b = map(fr, z.area); var y = b.y / 100 * H, h = b.h / 100 * H; out.push('<rect class="venue-hole" data-zone="' + z.id + '" x="' + b.x.toFixed(2) + '" y="' + y.toFixed(2) + '" width="' + b.w.toFixed(2) + '" height="' + h.toFixed(2) + '" rx="0.6" fill="#000"/>'); });
+    data.zones.forEach(function (z) { marksOf(z).forEach(function (m) { var b = map(fr, m); var y = b.y / 100 * H, h = b.h / 100 * H; out.push('<rect class="venue-hole" data-zone="' + z.id + '" x="' + b.x.toFixed(2) + '" y="' + y.toFixed(2) + '" width="' + b.w.toFixed(2) + '" height="' + h.toFixed(2) + '" rx="0.6" fill="#000"/>'); }); });
     out.push('</mask></defs>');
     out.push('<rect class="venue-veil" x="0" y="0" width="' + W + '" height="' + H.toFixed(3) + '" mask="url(#venue-veil-mask)"/>');
-    data.zones.forEach(function (z) {
-      if (!z.area) return; var b = map(fr, z.area); var y = b.y / 100 * H, h = b.h / 100 * H, t = 1.6;   /* the viewBox keeps the photograph's aspect: one unit is one unit both ways */
+    data.zones.forEach(function (z) { marksOf(z).forEach(function (m) {
+      var b = map(fr, m); var y = b.y / 100 * H, h = b.h / 100 * H, t = 1.6;   /* the viewBox keeps the photograph's aspect: one unit is one unit both ways */
       out.push('<g class="venue-zone" data-zone="' + z.id + '">');
       out.push('<rect class="venue-outline" x="' + b.x.toFixed(2) + '" y="' + y.toFixed(2) + '" width="' + b.w.toFixed(2) + '" height="' + h.toFixed(2) + '" pathLength="100" vector-effect="non-scaling-stroke"/>');
       /* corner ticks: the architectural notation */
@@ -77,15 +81,18 @@
         out.push('<path class="venue-tick" vector-effect="non-scaling-stroke" d="M' + (c[0] + c[2] * t).toFixed(2) + ' ' + c[1].toFixed(2) + ' L' + c[0].toFixed(2) + ' ' + c[1].toFixed(2) + ' L' + c[0].toFixed(2) + ' ' + (c[1] + c[3] * t).toFixed(2) + '"/>');
       });
       out.push('</g>');
-    });
+    }); });
     out.push('</svg>');
     return out.join('');
   }
   function labelsHtml(data, fr) {
-    return data.zones.filter(function (z) { return z.area && visible(fr, z.anchor); }).map(function (z) {
-      var p = { x: (z.anchor.x - fr.x) / fr.w * 100, y: z.anchor.y };
-      return '<button type="button" class="venue-label" data-zone="' + z.id + '" aria-pressed="false" aria-controls="venue-detail" style="--x:' + p.x.toFixed(2) + '%;--y:' + p.y.toFixed(2) + '%"><span class="venue-dot" aria-hidden="true"></span><span class="venue-n" aria-hidden="true">' + esc(z.n) + '</span><span class="venue-t">' + esc(z.label) + '</span></button>';
-    }).join('');
+    var out = [];
+    data.zones.forEach(function (z) { marksOf(z).forEach(function (m) {
+      var a = anchorOf(m); if (!visible(fr, a)) return;
+      var p = { x: (a.x - fr.x) / fr.w * 100, y: a.y };
+      out.push('<button type="button" class="venue-label" data-zone="' + z.id + '"' + (a.align ? ' data-align="' + a.align + '"' : '') + ' aria-pressed="false" aria-controls="venue-detail" style="--x:' + p.x.toFixed(2) + '%;--y:' + p.y.toFixed(2) + '%"><span class="venue-dot" aria-hidden="true"></span><span class="venue-n" aria-hidden="true">' + esc(z.n) + '</span><span class="venue-t">' + esc(z.label) + '</span></button>');
+    }); });
+    return out.join('');
   }
 
   function detailHtml(z, i) {
@@ -105,7 +112,7 @@
 
   function mount(host, data) {
     if (!host || !data) return null;
-    var placed = data.zones.filter(function (z) { return z.area; });
+    var placed = data.zones.filter(function (z) { return marksOf(z).length; });
     host.innerHTML =
       '<div class="venue-head" data-motion="reveal">' +
         '<p class="a-eyebrow">' + esc(data.kicker) + '</p>' +
@@ -160,7 +167,7 @@
       frag.querySelectorAll('.venue-thumb').forEach(function (b) { b.addEventListener('click', function () { showPhoto(z, Number(b.getAttribute('data-photo')), frag); }); });
       if (announce && changed) live.textContent = z.title + '. ' + z.when + '.';
       /* the plan highlights the real area of the place; a place without a marker keeps the whole photograph */
-      if (!z.area) stage.setAttribute('data-active', '');
+      if (!marksOf(z).length) stage.setAttribute('data-active', '');
       try { doc.dispatchEvent(new root.CustomEvent('siyl:venue', { detail: { zone: id } })); } catch (e) {}
     }
     function showPhoto(z, k, scope) {
@@ -193,6 +200,6 @@
     var host = doc.querySelector('[data-venue]'); if (!host || !root.SIYL_VENUE_DATA) return;
     root.SIYL_VENUE.instance = mount(host, root.SIYL_VENUE_DATA);
   }
-  root.SIYL_VENUE = { mount: mount, boot: boot, instance: null, geometry: { frameOf: frameOf, map: map, visible: visible }, thumbOf: thumbOf, html: { picture: pictureHtml, base: baseHtml, trace: traceHtml, labels: labelsHtml, detail: detailHtml } };
+  root.SIYL_VENUE = { mount: mount, boot: boot, instance: null, geometry: { frameOf: frameOf, map: map, visible: visible, marksOf: marksOf, anchorOf: anchorOf }, thumbOf: thumbOf, html: { picture: pictureHtml, base: baseHtml, trace: traceHtml, labels: labelsHtml, detail: detailHtml } };
   if (doc.readyState === 'loading') doc.addEventListener('DOMContentLoaded', boot); else boot();
 })(typeof window !== 'undefined' ? window : null);

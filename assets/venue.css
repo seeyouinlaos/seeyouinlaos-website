@@ -27,7 +27,7 @@
 .venue-veil { fill: #14120E; opacity: 0; transition: opacity var(--m-reveal) var(--m-ease); }
 .venue-stage[data-active]:not([data-active=""]) .venue-veil { opacity: .34; }
 .venue-hole { opacity: 0; transition: opacity var(--m-reveal) var(--m-ease); }
-.venue-stage[data-active="dinner"] .venue-hole[data-zone="dinner"], .venue-stage[data-active="pool"] .venue-hole[data-zone="pool"], .venue-stage[data-active="garden"] .venue-hole[data-zone="garden"] { opacity: 1; }
+.venue-hole.is-active { opacity: 1; }   /* the active place's areas (all of them: the rooms are three houses) cut the veil */
 /* the outline: a fine perimeter that draws itself once the stage is in view */
 .venue-outline { fill: none; stroke: #F6F1E9; stroke-width: 1.1px; opacity: .55; stroke-dasharray: 100; stroke-dashoffset: 100; transition: stroke-dashoffset var(--m-trace) var(--m-ease-in-out) 350ms, opacity var(--m-reveal) var(--m-ease); }
 .venue-stage.is-in .venue-outline { stroke-dashoffset: 0; }
@@ -39,7 +39,7 @@
 /* ---- the labels: on the real place, semantic, 44 px targets ---- */
 .venue-labels { position: absolute; inset: 0; }
 .venue-label {
-  position: absolute; left: var(--x); top: var(--y); transform: translate(-50%, -50%);
+  position: absolute; left: var(--x); top: var(--y); transform: translate(-50%, -50%);   /* the dot on the anchor, the text centred */
   display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 8px 12px 8px 8px; margin: 0;
   background: none; border: 0; cursor: pointer; color: #F6F1E9; text-align: left; white-space: nowrap;
   font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; line-height: 1.2;
@@ -47,6 +47,8 @@
   opacity: 0; transition: opacity var(--m-reveal) var(--m-ease) calc(1100ms + var(--m-i, 0) * 140ms), transform var(--m-reveal) var(--m-ease) calc(1100ms + var(--m-i, 0) * 140ms);
   -webkit-tap-highlight-color: transparent;
 }
+.venue-label[data-align="left"] { transform: translate(-13px, -50%); }    /* the dot on the anchor, the text hanging to the right (the phone crop's left edge) */
+.venue-label[data-align="right"] { transform: translate(calc(-100% + 13px), -50%); flex-direction: row-reverse; padding: 8px 8px 8px 12px; }
 .venue-stage.is-in .venue-label { opacity: 1; }
 .venue-stage[data-active]:not([data-active=""]) .venue-label:not(.is-active) { opacity: .62; }
 .venue-label .venue-dot { width: 10px; height: 10px; border-radius: 50%; border: 1.2px solid #F6F1E9; background: rgba(246,241,233,.08); box-shadow: 0 0 0 4px rgba(246,241,233,.12); flex: none; transition: background var(--m-fast) var(--m-ease), box-shadow var(--m-fast) var(--m-ease); }
