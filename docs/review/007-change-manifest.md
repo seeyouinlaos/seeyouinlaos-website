@@ -182,3 +182,10 @@ Wedding Ceremony on the aerial — until then these four carry no marker on the 
   OPERATIONAL RECONCILIATION — CONFLICT 0 · COMPLETENESS PASS · SECRET SCAN PASS. The corpus was not re-extracted (no
   guest-facing code changed); the audit and the delta were regenerated deterministically from the existing corpus.
 - **RELEASE FREEZE (16 Sep 2026):** the website is frozen at the served code `621be9c`.
+
+## FINAL MOBILE VENUE FIX (Owner, 16 Sep 2026) — code patch only
+- `index.html`: the wordless aerial band gave way to the venue stage (labels, legend, detail); `assets/venue.css`:
+  the phone rhythm (32 / 24 / 56 px). Evidence: `docs/acceptance/mobile-venue-fix/`. Text: the venue texts already
+  in the 007 V3 corpus now also appear on the homepage; the band's aria-label ("Souphattra Heritage from above — the
+  courtyard, the pool and the tiled roofs") is gone. The corpus was not re-extracted (the Owner's instruction: code
+  patch only).
