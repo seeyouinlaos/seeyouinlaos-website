@@ -138,7 +138,10 @@
              '<div><p class="p-unit-name">' + esc(u.unitName(x)) + '</p><p class="p-unit-who"><span class="p-places">' + dots + '</span>' + (who ? who + ' · ' : '') + state + '</p></div>' + act + '</div>';
       });
       h += '</div>';
-      if (!any && !mine) h += '<p class="t-b2 measure-w" style="margin-top:var(--s3)">Every room of this category is full.</p>';
+      if (!any && !mine) {
+        var allReserved = list.length && list.every(function (x) { return x.reservedFor && !x.eligible; });
+        h += '<p class="t-b2 measure-w" style="margin-top:var(--s3)">' + (allReserved ? 'Reserved · ' + esc(list[0].reservedFor) + ' — not bookable through the website.' : 'Every room of this category is full.') + '</p>';
+      }
       return h;
     },
     wire: function (root, onDone) {

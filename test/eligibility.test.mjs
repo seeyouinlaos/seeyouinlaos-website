@@ -57,7 +57,7 @@ test('THE MASTER\'S RESERVATIONS (Owner, 16 Sep 2026) · a Bride & Groom room is
   assert.equal(mayJoin(unitsOf('kmg/solarium')[0], null).ok, false, 'nobody joins without an identity');
   /* the retired guest-facing reservation wording stays gone; the live word is RESERVED · <for whom> from the engine's unit */
   for (const f of ['journeys.html', 'room.html', 'your-journey.html', 'assets/journey.js']) assert.doesNotMatch(src(f).replace(/\/\*[\s\S]*?\*\//g, ''), /Reserved for (bride|family)|yours to choose|held for you|This category is reserved/i, f);
-  assert.match(src('assets/stay.js'), /var reserved = !!\(x\.reservedFor && !x\.eligible\);/); assert.match(src('assets/stay.js'), /reserved \? '<span class="t-l1">Reserved<\/span>'/, 'a reserved room carries no Choose button');
+  assert.match(src('assets/stay.js'), /var reserved = !!\(x\.reservedFor && !x\.eligible\);/); assert.match(src('assets/stay.js'), /'Reserved · ' \+ esc\(list\[0\]\.reservedFor\) \+ ' — not bookable through the website\.'/, 'a category reserved in full never reads "full"'); assert.match(src('assets/stay.js'), /reserved \? '<span class="t-l1">Reserved<\/span>'/, 'a reserved room carries no Choose button');
   assert.match(src('assets/rooms.js'), /if \(u\.reservedFor && !u\.eligible\) return \(names\.length \? names\.join\(' · '\) \+ ' · ' : ''\) \+ 'Reserved · ' \+ u\.reservedFor;/);
 });
 

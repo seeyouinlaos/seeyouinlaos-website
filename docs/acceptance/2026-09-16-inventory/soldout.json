@@ -1,0 +1,108 @@
+{
+ "at": "2026-09-16T16:10:21.056Z",
+ "origin": "https://seeyouinlaos-website.suthep-hrg.workers.dev",
+ "fixture": "prewed/noble-courtyard",
+ "guests": {
+  "A": "G001",
+  "B": "G002",
+  "C": "G003"
+ },
+ "results": [
+  {
+   "id": "fixture",
+   "ok": true,
+   "d": "prewed/noble-courtyard is one open room, empty: [{\"label\":\"A\",\"reservedFor\":null,\"occupants\":[]}]"
+  },
+  {
+   "id": "no-hold-G001",
+   "ok": true,
+   "d": "G001 holds nothing in the prewed stage (a join would move a genuine hold)"
+  },
+  {
+   "id": "no-hold-G002",
+   "ok": true,
+   "d": "G002 holds nothing in the prewed stage (a join would move a genuine hold)"
+  },
+  {
+   "id": "no-hold-G003",
+   "ok": true,
+   "d": "G003 holds nothing in the prewed stage (a join would move a genuine hold)"
+  },
+  {
+   "id": "words-0",
+   "ok": true,
+   "d": "{\"label\":\"1 room · 2 places available\",\"fits\":true,\"soldOut\":false,\"count\":{\"rooms\":1,\"places\":2,\"reserved\":0,\"free\":2,\"open\":1},\"unit\":\"2 places · Available\",\"refusalFull\":\"This room was just filled. Please choose another room.\"}"
+  },
+  {
+   "id": "A-join",
+   "ok": true,
+   "d": "status 200"
+  },
+  {
+   "id": "words-1",
+   "ok": true,
+   "d": "{\"label\":\"1 room · 1 place available\",\"count\":{\"rooms\":1,\"places\":2,\"reserved\":0,\"free\":1,\"open\":1}}"
+  },
+  {
+   "id": "B-join",
+   "ok": true,
+   "d": "status 200"
+  },
+  {
+   "id": "words-2",
+   "ok": true,
+   "d": "{\"label\":\"Fully booked\",\"api\":{\"units\":1,\"places\":2,\"reserved\":0,\"reservedFor\":null,\"free\":0,\"rooms\":0,\"name\":\"Noble Courtyard Suite\",\"kind\":\"room\"}}"
+  },
+  {
+   "id": "C-refused",
+   "ok": true,
+   "d": "status 409 · full"
+  },
+  {
+   "id": "C-words",
+   "ok": true,
+   "d": "This room was just filled. Please choose another room."
+  },
+  {
+   "id": "room-unchanged",
+   "ok": true,
+   "d": "[{\"label\":\"A\",\"reservedFor\":null,\"occupants\":[\"G001\",\"G002\"]}]"
+  },
+  {
+   "id": "your-room-A",
+   "ok": true,
+   "d": "{\"key\":\"prewed/noble-courtyard\",\"label\":\"A\"}"
+  },
+  {
+   "id": "burst-refused",
+   "ok": true,
+   "d": "409,409,409"
+  },
+  {
+   "id": "no-invented-room",
+   "ok": true,
+   "d": "status 404 · unknown room"
+  },
+  {
+   "id": "released",
+   "ok": true,
+   "d": "200,200"
+  },
+  {
+   "id": "room-empty",
+   "ok": true,
+   "d": "[{\"label\":\"A\",\"reservedFor\":null,\"occupants\":[]}]"
+  },
+  {
+   "id": "plan-restored",
+   "ok": true,
+   "d": "the plan after equals the snapshot record for record (12 holds)"
+  },
+  {
+   "id": "words-3",
+   "ok": true,
+   "d": "1 room · 2 places available"
+  }
+ ],
+ "restored": true
+}

@@ -1,0 +1,3289 @@
+{
+ "at": "2026-09-16T16:10:13.742Z",
+ "origin": "https://seeyouinlaos-website.suthep-hrg.workers.dev",
+ "guestView": "G001",
+ "totals": {
+  "categories": 40,
+  "canonicalRooms": 176,
+  "canonicalPlaces": 356,
+  "reservedRooms": 12,
+  "occupied": 12,
+  "remainingPlaces": 326
+ },
+ "ok": true,
+ "failures": [],
+ "categories": [
+  {
+   "stay": "BANGKOK (Sathorn Penthouse · U Sathorn · Shama)",
+   "window": "bkk-stay",
+   "category": "Sathorn Penthouse",
+   "key": "bkk-stay/penthouse",
+   "source": {
+    "column": 1,
+    "masterRooms": 5,
+    "masterStatus": "Open",
+    "physicalRooms": 6,
+    "places": 12,
+    "reservedRooms": 1,
+    "reservedFor": "Bride & Groom",
+    "note": "the Owner: six physical rooms A – F, Room A the hosts' (reserved), the Master's 5 = bookable rooms"
+   },
+   "canonical": {
+    "rooms": 6,
+    "places": 12,
+    "reserved": 1,
+    "reservedFor": "Bride & Groom",
+    "labels": "ABCDEF"
+   },
+   "live": {
+    "rooms": 6,
+    "places": 12,
+    "reservedRooms": 1,
+    "reservedPlaces": 2,
+    "ownerOccupied": 0,
+    "guestOccupied": 0,
+    "occupied": 0,
+    "remainingRooms": 5,
+    "remainingPlaces": 10,
+    "perRoom": [
+     "A:RESERVED(Bride & Groom)0/2",
+     "B:0/2",
+     "C:0/2",
+     "D:0/2",
+     "E:0/2",
+     "F:0/2"
+    ]
+   },
+   "guestView": {
+    "rooms": [
+     "A:RESERVED",
+     "B:2",
+     "C:2",
+     "D:2",
+     "E:2",
+     "F:2"
+    ],
+    "roomsAnonymous": 6,
+    "api": {
+     "units": 6,
+     "places": 12,
+     "reserved": 1,
+     "rooms": 5,
+     "free": 10
+    },
+    "uiWords": "5 rooms · 10 places available",
+    "chooseButton": true,
+    "count": {
+     "rooms": 6,
+     "places": 12,
+     "reserved": 1,
+     "free": 10,
+     "open": 5
+    },
+    "yourRoom": null
+   },
+   "asserts": {
+    "canonicalRoomsMatchMaster": true,
+    "canonicalPlacesMatchMaster": true,
+    "reservedMatchesMaster": true,
+    "liveRoomsEqualCanonical": true,
+    "liveReservedEqualCanonical": true,
+    "renderedRoomsLteCanonical": true,
+    "noInventedRoom": true,
+    "apiAvailabilityFromOpenUnits": true,
+    "yourRoomIsThePersistedRoom": true,
+    "uiWordsMatchApi": true,
+    "chooseOnlyWhenAvailable": true,
+    "noGuestInReservedRoom": true
+   },
+   "ok": true
+  },
+  {
+   "stay": "BANGKOK (Sathorn Penthouse · U Sathorn · Shama)",
+   "window": "bkk-stay",
+   "category": "Superior Room With Garden View",
+   "key": "bkk-stay/u-sathorn-superior-garden",
+   "source": {
+    "column": 2,
+    "masterRooms": 38,
+    "masterStatus": "Open",
+    "physicalRooms": 38,
+    "places": 76,
+    "reservedRooms": 0,
+    "reservedFor": null,
+    "note": null
+   },
+   "canonical": {
+    "rooms": 38,
+    "places": 76,
+    "reserved": 0,
+    "reservedFor": null,
+    "labels": "ABCDEFGHIJKLMNOPQRSTUVWXYZAAABACADAEAFAGAHAIAJAKAL"
+   },
+   "live": {
+    "rooms": 38,
+    "places": 76,
+    "reservedRooms": 0,
+    "reservedPlaces": 0,
+    "ownerOccupied": 0,
+    "guestOccupied": 2,
+    "occupied": 2,
+    "remainingRooms": 37,
+    "remainingPlaces": 74,
+    "perRoom": [
+     "A:2/2",
+     "B:0/2",
+     "C:0/2",
+     "D:0/2",
+     "E:0/2",
+     "F:0/2",
+     "G:0/2",
+     "H:0/2",
+     "I:0/2",
+     "J:0/2",
+     "K:0/2",
+     "L:0/2",
+     "M:0/2",
+     "N:0/2",
+     "O:0/2",
+     "P:0/2",
+     "Q:0/2",
+     "R:0/2",
+     "S:0/2",
+     "T:0/2",
+     "U:0/2",
+     "V:0/2",
+     "W:0/2",
+     "X:0/2",
+     "Y:0/2",
+     "Z:0/2",
+     "AA:0/2",
+     "AB:0/2",
+     "AC:0/2",
+     "AD:0/2",
+     "AE:0/2",
+     "AF:0/2",
+     "AG:0/2",
+     "AH:0/2",
+     "AI:0/2",
+     "AJ:0/2",
+     "AK:0/2",
+     "AL:0/2"
+    ]
+   },
+   "guestView": {
+    "rooms": [
+     "A:FULL",
+     "B:2",
+     "C:2",
+     "D:2",
+     "E:2",
+     "F:2",
+     "G:2",
+     "H:2",
+     "I:2",
+     "J:2",
+     "K:2",
+     "L:2",
+     "M:2",
+     "N:2",
+     "O:2",
+     "P:2",
+     "Q:2",
+     "R:2",
+     "S:2",
+     "T:2",
+     "U:2",
+     "V:2",
+     "W:2",
+     "X:2",
+     "Y:2",
+     "Z:2",
+     "AA:2",
+     "AB:2",
+     "AC:2",
+     "AD:2",
+     "AE:2",
+     "AF:2",
+     "AG:2",
+     "AH:2",
+     "AI:2",
+     "AJ:2",
+     "AK:2",
+     "AL:2"
+    ],
+    "roomsAnonymous": 38,
+    "api": {
+     "units": 38,
+     "places": 76,
+     "reserved": 0,
+     "rooms": 37,
+     "free": 74
+    },
+    "uiWords": "37 rooms · 74 places available",
+    "chooseButton": true,
+    "count": {
+     "rooms": 38,
+     "places": 76,
+     "reserved": 0,
+     "free": 74,
+     "open": 37
+    },
+    "yourRoom": null
+   },
+   "asserts": {
+    "canonicalRoomsMatchMaster": true,
+    "canonicalPlacesMatchMaster": true,
+    "reservedMatchesMaster": true,
+    "liveRoomsEqualCanonical": true,
+    "liveReservedEqualCanonical": true,
+    "renderedRoomsLteCanonical": true,
+    "noInventedRoom": true,
+    "apiAvailabilityFromOpenUnits": true,
+    "yourRoomIsThePersistedRoom": true,
+    "uiWordsMatchApi": true,
+    "chooseOnlyWhenAvailable": true,
+    "noGuestInReservedRoom": true
+   },
+   "ok": true
+  },
+  {
+   "stay": "BANGKOK (Sathorn Penthouse · U Sathorn · Shama)",
+   "window": "bkk-stay",
+   "category": "King Studio With Balcony",
+   "key": "bkk-stay/shama-king-studio-balcony",
+   "source": {
+    "column": 3,
+    "masterRooms": 27,
+    "masterStatus": "Open",
+    "physicalRooms": 27,
+    "places": 54,
+    "reservedRooms": 0,
+    "reservedFor": null,
+    "note": null
+   },
+   "canonical": {
+    "rooms": 27,
+    "places": 54,
+    "reserved": 0,
+    "reservedFor": null,
+    "labels": "ABCDEFGHIJKLMNOPQRSTUVWXYZAA"
+   },
+   "live": {
+    "rooms": 27,
+    "places": 54,
+    "reservedRooms": 0,
+    "reservedPlaces": 0,
+    "ownerOccupied": 0,
+    "guestOccupied": 0,
+    "occupied": 0,
+    "remainingRooms": 27,
+    "remainingPlaces": 54,
+    "perRoom": [
+     "A:0/2",
+     "B:0/2",
+     "C:0/2",
+     "D:0/2",
+     "E:0/2",
+     "F:0/2",
+     "G:0/2",
+     "H:0/2",
+     "I:0/2",
+     "J:0/2",
+     "K:0/2",
+     "L:0/2",
+     "M:0/2",
+     "N:0/2",
+     "O:0/2",
+     "P:0/2",
+     "Q:0/2",
+     "R:0/2",
+     "S:0/2",
+     "T:0/2",
+     "U:0/2",
+     "V:0/2",
+     "W:0/2",
+     "X:0/2",
+     "Y:0/2",
+     "Z:0/2",
+     "AA:0/2"
+    ]
+   },
+   "guestView": {
+    "rooms": [
+     "A:2",
+     "B:2",
+     "C:2",
+     "D:2",
+     "E:2",
+     "F:2",
+     "G:2",
+     "H:2",
+     "I:2",
+     "J:2",
+     "K:2",
+     "L:2",
+     "M:2",
+     "N:2",
+     "O:2",
+     "P:2",
+     "Q:2",
+     "R:2",
+     "S:2",
+     "T:2",
+     "U:2",
+     "V:2",
+     "W:2",
+     "X:2",
+     "Y:2",
+     "Z:2",
+     "AA:2"
+    ],
+    "roomsAnonymous": 27,
+    "api": {
+     "units": 27,
+     "places": 54,
+     "reserved": 0,
+     "rooms": 27,
+     "free": 54
+    },
+    "uiWords": "27 rooms · 54 places available",
+    "chooseButton": true,
+    "count": {
+     "rooms": 27,
+     "places": 54,
+     "reserved": 0,
+     "free": 54,
+     "open": 27
+    },
+    "yourRoom": null
+   },
+   "asserts": {
+    "canonicalRoomsMatchMaster": true,
+    "canonicalPlacesMatchMaster": true,
+    "reservedMatchesMaster": true,
+    "liveRoomsEqualCanonical": true,
+    "liveReservedEqualCanonical": true,
+    "renderedRoomsLteCanonical": true,
+    "noInventedRoom": true,
+    "apiAvailabilityFromOpenUnits": true,
+    "yourRoomIsThePersistedRoom": true,
+    "uiWordsMatchApi": true,
+    "chooseOnlyWhenAvailable": true,
+    "noGuestInReservedRoom": true
+   },
+   "ok": true
+  },
+  {
+   "stay": "SOUPHATTRA · pre-wedding window",
+   "window": "prewed",
+   "category": "The Heritage",
+   "key": "prewed/heritage",
+   "source": {
+    "column": 5,
+    "masterRooms": 5,
+    "masterStatus": "Open",
+    "physicalRooms": 5,
+    "places": 10,
+    "reservedRooms": 0,
+    "reservedFor": null,
+    "note": null
+   },
+   "canonical": {
+    "rooms": 5,
+    "places": 10,
+    "reserved": 0,
+    "reservedFor": null,
+    "labels": "ABCDE"
+   },
+   "live": {
+    "rooms": 5,
+    "places": 10,
+    "reservedRooms": 0,
+    "reservedPlaces": 0,
+    "ownerOccupied": 0,
+    "guestOccupied": 0,
+    "occupied": 0,
+    "remainingRooms": 5,
+    "remainingPlaces": 10,
+    "perRoom": [
+     "A:0/2",
+     "B:0/2",
+     "C:0/2",
+     "D:0/2",
+     "E:0/2"
+    ]
+   },
+   "guestView": {
+    "rooms": [
+     "A:2",
+     "B:2",
+     "C:2",
+     "D:2",
+     "E:2"
+    ],
+    "roomsAnonymous": 5,
+    "api": {
+     "units": 5,
+     "places": 10,
+     "reserved": 0,
+     "rooms": 5,
+     "free": 10
+    },
+    "uiWords": "5 rooms · 10 places available",
+    "chooseButton": true,
+    "count": {
+     "rooms": 5,
+     "places": 10,
+     "reserved": 0,
+     "free": 10,
+     "open": 5
+    },
+    "yourRoom": null
+   },
+   "asserts": {
+    "canonicalRoomsMatchMaster": true,
+    "canonicalPlacesMatchMaster": true,
+    "reservedMatchesMaster": true,
+    "liveRoomsEqualCanonical": true,
+    "liveReservedEqualCanonical": true,
+    "renderedRoomsLteCanonical": true,
+    "noInventedRoom": true,
+    "apiAvailabilityFromOpenUnits": true,
+    "yourRoomIsThePersistedRoom": true,
+    "uiWordsMatchApi": true,
+    "chooseOnlyWhenAvailable": true,
+    "noGuestInReservedRoom": true
+   },
+   "ok": true
+  },
+  {
+   "stay": "SOUPHATTRA · pre-wedding window",
+   "window": "prewed",
+   "category": "Heritage Executive",
+   "key": "prewed/heritage-executive",
+   "source": {
+    "column": 6,
+    "masterRooms": 13,
+    "masterStatus": "Open",
+    "physicalRooms": 13,
+    "places": 26,
+    "reservedRooms": 0,
+    "reservedFor": null,
+    "note": null
+   },
+   "canonical": {
+    "rooms": 13,
+    "places": 26,
+    "reserved": 0,
+    "reservedFor": null,
+    "labels": "ABCDEFGHIJKLM"
+   },
+   "live": {
+    "rooms": 13,
+    "places": 26,
+    "reservedRooms": 0,
+    "reservedPlaces": 0,
+    "ownerOccupied": 0,
+    "guestOccupied": 0,
+    "occupied": 0,
+    "remainingRooms": 13,
+    "remainingPlaces": 26,
+    "perRoom": [
+     "A:0/2",
+     "B:0/2",
+     "C:0/2",
+     "D:0/2",
+     "E:0/2",
+     "F:0/2",
+     "G:0/2",
+     "H:0/2",
+     "I:0/2",
+     "J:0/2",
+     "K:0/2",
+     "L:0/2",
+     "M:0/2"
+    ]
+   },
+   "guestView": {
+    "rooms": [
+     "A:2",
+     "B:2",
+     "C:2",
+     "D:2",
+     "E:2",
+     "F:2",
+     "G:2",
+     "H:2",
+     "I:2",
+     "J:2",
+     "K:2",
+     "L:2",
+     "M:2"
+    ],
+    "roomsAnonymous": 13,
+    "api": {
+     "units": 13,
+     "places": 26,
+     "reserved": 0,
+     "rooms": 13,
+     "free": 26
+    },
+    "uiWords": "13 rooms · 26 places available",
+    "chooseButton": true,
+    "count": {
+     "rooms": 13,
+     "places": 26,
+     "reserved": 0,
+     "free": 26,
+     "open": 13
+    },
+    "yourRoom": null
+   },
+   "asserts": {
+    "canonicalRoomsMatchMaster": true,
+    "canonicalPlacesMatchMaster": true,
+    "reservedMatchesMaster": true,
+    "liveRoomsEqualCanonical": true,
+    "liveReservedEqualCanonical": true,
+    "renderedRoomsLteCanonical": true,
+    "noInventedRoom": true,
+    "apiAvailabilityFromOpenUnits": true,
+    "yourRoomIsThePersistedRoom": true,
+    "uiWordsMatchApi": true,
+    "chooseOnlyWhenAvailable": true,
+    "noGuestInReservedRoom": true
+   },
+   "ok": true
+  },
+  {
+   "stay": "SOUPHATTRA · pre-wedding window",
+   "window": "prewed",
+   "category": "Heritage Grand Premier",
+   "key": "prewed/heritage-grand-premier",
+   "source": {
+    "column": 7,
+    "masterRooms": 3,
+    "masterStatus": "Open",
+    "physicalRooms": 3,
+    "places": 6,
+    "reservedRooms": 0,
+    "reservedFor": null,
+    "note": null
+   },
+   "canonical": {
+    "rooms": 3,
+    "places": 6,
+    "reserved": 0,
+    "reservedFor": null,
+    "labels": "ABC"
+   },
+   "live": {
+    "rooms": 3,
+    "places": 6,
+    "reservedRooms": 0,
+    "reservedPlaces": 0,
+    "ownerOccupied": 0,
+    "guestOccupied": 0,
+    "occupied": 0,
+    "remainingRooms": 3,
+    "remainingPlaces": 6,
+    "perRoom": [
+     "A:0/2",
+     "B:0/2",
+     "C:0/2"
+    ]
+   },
+   "guestView": {
+    "rooms": [
+     "A:2",
+     "B:2",
+     "C:2"
+    ],
+    "roomsAnonymous": 3,
+    "api": {
+     "units": 3,
+     "places": 6,
+     "reserved": 0,
+     "rooms": 3,
+     "free": 6
+    },
+    "uiWords": "3 rooms · 6 places available",
+    "chooseButton": true,
+    "count": {
+     "rooms": 3,
+     "places": 6,
+     "reserved": 0,
+     "free": 6,
+     "open": 3
+    },
+    "yourRoom": null
+   },
+   "asserts": {
+    "canonicalRoomsMatchMaster": true,
+    "canonicalPlacesMatchMaster": true,
+    "reservedMatchesMaster": true,
+    "liveRoomsEqualCanonical": true,
+    "liveReservedEqualCanonical": true,
+    "renderedRoomsLteCanonical": true,
+    "noInventedRoom": true,
+    "apiAvailabilityFromOpenUnits": true,
+    "yourRoomIsThePersistedRoom": true,
+    "uiWordsMatchApi": true,
+    "chooseOnlyWhenAvailable": true,
+    "noGuestInReservedRoom": true
+   },
+   "ok": true
+  },
+  {
+   "stay": "SOUPHATTRA · pre-wedding window",
+   "window": "prewed",
+   "category": "Noble Courtyard Suite",
+   "key": "prewed/noble-courtyard",
+   "source": {
+    "column": 8,
+    "masterRooms": 1,
+    "masterStatus": "Open",
+    "physicalRooms": 1,
+    "places": 2,
+    "reservedRooms": 0,
+    "reservedFor": null,
+    "note": null
+   },
+   "canonical": {
+    "rooms": 1,
+    "places": 2,
+    "reserved": 0,
+    "reservedFor": null,
+    "labels": "A"
+   },
+   "live": {
+    "rooms": 1,
+    "places": 2,
+    "reservedRooms": 0,
+    "reservedPlaces": 0,
+    "ownerOccupied": 0,
+    "guestOccupied": 0,
+    "occupied": 0,
+    "remainingRooms": 1,
+    "remainingPlaces": 2,
+    "perRoom": [
+     "A:0/2"
+    ]
+   },
+   "guestView": {
+    "rooms": [
+     "A:2"
+    ],
+    "roomsAnonymous": 1,
+    "api": {
+     "units": 1,
+     "places": 2,
+     "reserved": 0,
+     "rooms": 1,
+     "free": 2
+    },
+    "uiWords": "1 room · 2 places available",
+    "chooseButton": true,
+    "count": {
+     "rooms": 1,
+     "places": 2,
+     "reserved": 0,
+     "free": 2,
+     "open": 1
+    },
+    "yourRoom": null
+   },
+   "asserts": {
+    "canonicalRoomsMatchMaster": true,
+    "canonicalPlacesMatchMaster": true,
+    "reservedMatchesMaster": true,
+    "liveRoomsEqualCanonical": true,
+    "liveReservedEqualCanonical": true,
+    "renderedRoomsLteCanonical": true,
+    "noInventedRoom": true,
+    "apiAvailabilityFromOpenUnits": true,
+    "yourRoomIsThePersistedRoom": true,
+    "uiWordsMatchApi": true,
+    "chooseOnlyWhenAvailable": true,
+    "noGuestInReservedRoom": true
+   },
+   "ok": true
+  },
+  {
+   "stay": "SOUPHATTRA · pre-wedding window",
+   "window": "prewed",
+   "category": "Grand Majestic Suite",
+   "key": "prewed/grand-majestic",
+   "source": {
+    "column": 9,
+    "masterRooms": 2,
+    "masterStatus": "Reserved for Family",
+    "physicalRooms": 2,
+    "places": 4,
+    "reservedRooms": 2,
+    "reservedFor": "Family",
+    "note": null
+   },
+   "canonical": {
+    "rooms": 2,
+    "places": 4,
+    "reserved": 2,
+    "reservedFor": "Family",
+    "labels": "AB"
+   },
+   "live": {
+    "rooms": 2,
+    "places": 4,
+    "reservedRooms": 2,
+    "reservedPlaces": 4,
+    "ownerOccupied": 0,
+    "guestOccupied": 0,
+    "occupied": 0,
+    "remainingRooms": 0,
+    "remainingPlaces": 0,
+    "perRoom": [
+     "A:RESERVED(Family)0/2",
+     "B:RESERVED(Family)0/2"
+    ]
+   },
+   "guestView": {
+    "rooms": [
+     "A:RESERVED",
+     "B:RESERVED"
+    ],
+    "roomsAnonymous": 2,
+    "api": {
+     "units": 2,
+     "places": 4,
+     "reserved": 2,
+     "rooms": 0,
+     "free": 0
+    },
+    "uiWords": "Reserved · Family",
+    "chooseButton": false,
+    "count": {
+     "rooms": 2,
+     "places": 4,
+     "reserved": 2,
+     "free": 0,
+     "open": 0
+    },
+    "yourRoom": null
+   },
+   "asserts": {
+    "canonicalRoomsMatchMaster": true,
+    "canonicalPlacesMatchMaster": true,
+    "reservedMatchesMaster": true,
+    "liveRoomsEqualCanonical": true,
+    "liveReservedEqualCanonical": true,
+    "renderedRoomsLteCanonical": true,
+    "noInventedRoom": true,
+    "apiAvailabilityFromOpenUnits": true,
+    "yourRoomIsThePersistedRoom": true,
+    "uiWordsMatchApi": true,
+    "chooseOnlyWhenAvailable": true,
+    "noGuestInReservedRoom": true
+   },
+   "ok": true
+  },
+  {
+   "stay": "SOUPHATTRA · pre-wedding window",
+   "window": "prewed",
+   "category": "Souphattra Majestic Suite",
+   "key": "prewed/souphattra-majestic",
+   "source": {
+    "column": 10,
+    "masterRooms": 1,
+    "masterStatus": "Open",
+    "physicalRooms": 1,
+    "places": 2,
+    "reservedRooms": 0,
+    "reservedFor": null,
+    "note": null
+   },
+   "canonical": {
+    "rooms": 1,
+    "places": 2,
+    "reserved": 0,
+    "reservedFor": null,
+    "labels": "A"
+   },
+   "live": {
+    "rooms": 1,
+    "places": 2,
+    "reservedRooms": 0,
+    "reservedPlaces": 0,
+    "ownerOccupied": 0,
+    "guestOccupied": 0,
+    "occupied": 0,
+    "remainingRooms": 1,
+    "remainingPlaces": 2,
+    "perRoom": [
+     "A:0/2"
+    ]
+   },
+   "guestView": {
+    "rooms": [
+     "A:2"
+    ],
+    "roomsAnonymous": 1,
+    "api": {
+     "units": 1,
+     "places": 2,
+     "reserved": 0,
+     "rooms": 1,
+     "free": 2
+    },
+    "uiWords": "1 room · 2 places available",
+    "chooseButton": true,
+    "count": {
+     "rooms": 1,
+     "places": 2,
+     "reserved": 0,
+     "free": 2,
+     "open": 1
+    },
+    "yourRoom": null
+   },
+   "asserts": {
+    "canonicalRoomsMatchMaster": true,
+    "canonicalPlacesMatchMaster": true,
+    "reservedMatchesMaster": true,
+    "liveRoomsEqualCanonical": true,
+    "liveReservedEqualCanonical": true,
+    "renderedRoomsLteCanonical": true,
+    "noInventedRoom": true,
+    "apiAvailabilityFromOpenUnits": true,
+    "yourRoomIsThePersistedRoom": true,
+    "uiWordsMatchApi": true,
+    "chooseOnlyWhenAvailable": true,
+    "noGuestInReservedRoom": true
+   },
+   "ok": true
+  },
+  {
+   "stay": "SOUPHATTRA · pre-wedding window",
+   "window": "prewed",
+   "category": "Souphattra Presidential",
+   "key": "prewed/souphattra-presidential",
+   "source": {
+    "column": 11,
+    "masterRooms": 1,
+    "masterStatus": "Reserved for Bride & Groom",
+    "physicalRooms": 1,
+    "places": 2,
+    "reservedRooms": 1,
+    "reservedFor": "Bride & Groom",
+    "note": null
+   },
+   "canonical": {
+    "rooms": 1,
+    "places": 2,
+    "reserved": 1,
+    "reservedFor": "Bride & Groom",
+    "labels": "A"
+   },
+   "live": {
+    "rooms": 1,
+    "places": 2,
+    "reservedRooms": 1,
+    "reservedPlaces": 2,
+    "ownerOccupied": 2,
+    "guestOccupied": 0,
+    "occupied": 2,
+    "remainingRooms": 0,
+    "remainingPlaces": 0,
+    "perRoom": [
+     "A:RESERVED(Bride & Groom)2/2"
+    ]
+   },
+   "guestView": {
+    "rooms": [
+     "A:RESERVED"
+    ],
+    "roomsAnonymous": 1,
+    "api": {
+     "units": 1,
+     "places": 2,
+     "reserved": 1,
+     "rooms": 0,
+     "free": 0
+    },
+    "uiWords": "Reserved · Bride & Groom",
+    "chooseButton": false,
+    "count": {
+     "rooms": 1,
+     "places": 2,
+     "reserved": 1,
+     "free": 0,
+     "open": 0
+    },
+    "yourRoom": null
+   },
+   "asserts": {
+    "canonicalRoomsMatchMaster": true,
+    "canonicalPlacesMatchMaster": true,
+    "reservedMatchesMaster": true,
+    "liveRoomsEqualCanonical": true,
+    "liveReservedEqualCanonical": true,
+    "renderedRoomsLteCanonical": true,
+    "noInventedRoom": true,
+    "apiAvailabilityFromOpenUnits": true,
+    "yourRoomIsThePersistedRoom": true,
+    "uiWordsMatchApi": true,
+    "chooseOnlyWhenAvailable": true,
+    "noGuestInReservedRoom": true
+   },
+   "ok": true
+  },
+  {
+   "stay": "SOUPHATTRA · wedding window",
+   "window": "wedstay",
+   "category": "The Heritage",
+   "key": "wedstay/heritage",
+   "source": {
+    "column": 5,
+    "masterRooms": 5,
+    "masterStatus": "Open",
+    "physicalRooms": 5,
+    "places": 10,
+    "reservedRooms": 0,
+    "reservedFor": null,
+    "note": null
+   },
+   "canonical": {
+    "rooms": 5,
+    "places": 10,
+    "reserved": 0,
+    "reservedFor": null,
+    "labels": "ABCDE"
+   },
+   "live": {
+    "rooms": 5,
+    "places": 10,
+    "reservedRooms": 0,
+    "reservedPlaces": 0,
+    "ownerOccupied": 0,
+    "guestOccupied": 0,
+    "occupied": 0,
+    "remainingRooms": 5,
+    "remainingPlaces": 10,
+    "perRoom": [
+     "A:0/2",
+     "B:0/2",
+     "C:0/2",
+     "D:0/2",
+     "E:0/2"
+    ]
+   },
+   "guestView": {
+    "rooms": [
+     "A:2",
+     "B:2",
+     "C:2",
+     "D:2",
+     "E:2"
+    ],
+    "roomsAnonymous": 5,
+    "api": {
+     "units": 5,
+     "places": 10,
+     "reserved": 0,
+     "rooms": 5,
+     "free": 10
+    },
+    "uiWords": "5 rooms · 10 places available",
+    "chooseButton": true,
+    "count": {
+     "rooms": 5,
+     "places": 10,
+     "reserved": 0,
+     "free": 10,
+     "open": 5
+    },
+    "yourRoom": null
+   },
+   "asserts": {
+    "canonicalRoomsMatchMaster": true,
+    "canonicalPlacesMatchMaster": true,
+    "reservedMatchesMaster": true,
+    "liveRoomsEqualCanonical": true,
+    "liveReservedEqualCanonical": true,
+    "renderedRoomsLteCanonical": true,
+    "noInventedRoom": true,
+    "apiAvailabilityFromOpenUnits": true,
+    "yourRoomIsThePersistedRoom": true,
+    "uiWordsMatchApi": true,
+    "chooseOnlyWhenAvailable": true,
+    "noGuestInReservedRoom": true
+   },
+   "ok": true
+  },
+  {
+   "stay": "SOUPHATTRA · wedding window",
+   "window": "wedstay",
+   "category": "Heritage Executive",
+   "key": "wedstay/heritage-executive",
+   "source": {
+    "column": 6,
+    "masterRooms": 13,
+    "masterStatus": "Open",
+    "physicalRooms": 13,
+    "places": 26,
+    "reservedRooms": 0,
+    "reservedFor": null,
+    "note": null
+   },
+   "canonical": {
+    "rooms": 13,
+    "places": 26,
+    "reserved": 0,
+    "reservedFor": null,
+    "labels": "ABCDEFGHIJKLM"
+   },
+   "live": {
+    "rooms": 13,
+    "places": 26,
+    "reservedRooms": 0,
+    "reservedPlaces": 0,
+    "ownerOccupied": 0,
+    "guestOccupied": 0,
+    "occupied": 0,
+    "remainingRooms": 13,
+    "remainingPlaces": 26,
+    "perRoom": [
+     "A:0/2",
+     "B:0/2",
+     "C:0/2",
+     "D:0/2",
+     "E:0/2",
+     "F:0/2",
+     "G:0/2",
+     "H:0/2",
+     "I:0/2",
+     "J:0/2",
+     "K:0/2",
+     "L:0/2",
+     "M:0/2"
+    ]
+   },
+   "guestView": {
+    "rooms": [
+     "A:2",
+     "B:2",
+     "C:2",
+     "D:2",
+     "E:2",
+     "F:2",
+     "G:2",
+     "H:2",
+     "I:2",
+     "J:2",
+     "K:2",
+     "L:2",
+     "M:2"
+    ],
+    "roomsAnonymous": 13,
+    "api": {
+     "units": 13,
+     "places": 26,
+     "reserved": 0,
+     "rooms": 13,
+     "free": 26
+    },
+    "uiWords": "13 rooms · 26 places available",
+    "chooseButton": true,
+    "count": {
+     "rooms": 13,
+     "places": 26,
+     "reserved": 0,
+     "free": 26,
+     "open": 13
+    },
+    "yourRoom": null
+   },
+   "asserts": {
+    "canonicalRoomsMatchMaster": true,
+    "canonicalPlacesMatchMaster": true,
+    "reservedMatchesMaster": true,
+    "liveRoomsEqualCanonical": true,
+    "liveReservedEqualCanonical": true,
+    "renderedRoomsLteCanonical": true,
+    "noInventedRoom": true,
+    "apiAvailabilityFromOpenUnits": true,
+    "yourRoomIsThePersistedRoom": true,
+    "uiWordsMatchApi": true,
+    "chooseOnlyWhenAvailable": true,
+    "noGuestInReservedRoom": true
+   },
+   "ok": true
+  },
+  {
+   "stay": "SOUPHATTRA · wedding window",
+   "window": "wedstay",
+   "category": "Heritage Grand Premier",
+   "key": "wedstay/heritage-grand-premier",
+   "source": {
+    "column": 7,
+    "masterRooms": 3,
+    "masterStatus": "Open",
+    "physicalRooms": 3,
+    "places": 6,
+    "reservedRooms": 0,
+    "reservedFor": null,
+    "note": null
+   },
+   "canonical": {
+    "rooms": 3,
+    "places": 6,
+    "reserved": 0,
+    "reservedFor": null,
+    "labels": "ABC"
+   },
+   "live": {
+    "rooms": 3,
+    "places": 6,
+    "reservedRooms": 0,
+    "reservedPlaces": 0,
+    "ownerOccupied": 0,
+    "guestOccupied": 0,
+    "occupied": 0,
+    "remainingRooms": 3,
+    "remainingPlaces": 6,
+    "perRoom": [
+     "A:0/2",
+     "B:0/2",
+     "C:0/2"
+    ]
+   },
+   "guestView": {
+    "rooms": [
+     "A:2",
+     "B:2",
+     "C:2"
+    ],
+    "roomsAnonymous": 3,
+    "api": {
+     "units": 3,
+     "places": 6,
+     "reserved": 0,
+     "rooms": 3,
+     "free": 6
+    },
+    "uiWords": "3 rooms · 6 places available",
+    "chooseButton": true,
+    "count": {
+     "rooms": 3,
+     "places": 6,
+     "reserved": 0,
+     "free": 6,
+     "open": 3
+    },
+    "yourRoom": null
+   },
+   "asserts": {
+    "canonicalRoomsMatchMaster": true,
+    "canonicalPlacesMatchMaster": true,
+    "reservedMatchesMaster": true,
+    "liveRoomsEqualCanonical": true,
+    "liveReservedEqualCanonical": true,
+    "renderedRoomsLteCanonical": true,
+    "noInventedRoom": true,
+    "apiAvailabilityFromOpenUnits": true,
+    "yourRoomIsThePersistedRoom": true,
+    "uiWordsMatchApi": true,
+    "chooseOnlyWhenAvailable": true,
+    "noGuestInReservedRoom": true
+   },
+   "ok": true
+  },
+  {
+   "stay": "SOUPHATTRA · wedding window",
+   "window": "wedstay",
+   "category": "Noble Courtyard Suite",
+   "key": "wedstay/noble-courtyard",
+   "source": {
+    "column": 8,
+    "masterRooms": 1,
+    "masterStatus": "Open",
+    "physicalRooms": 1,
+    "places": 2,
+    "reservedRooms": 0,
+    "reservedFor": null,
+    "note": null
+   },
+   "canonical": {
+    "rooms": 1,
+    "places": 2,
+    "reserved": 0,
+    "reservedFor": null,
+    "labels": "A"
+   },
+   "live": {
+    "rooms": 1,
+    "places": 2,
+    "reservedRooms": 0,
+    "reservedPlaces": 0,
+    "ownerOccupied": 0,
+    "guestOccupied": 0,
+    "occupied": 0,
+    "remainingRooms": 1,
+    "remainingPlaces": 2,
+    "perRoom": [
+     "A:0/2"
+    ]
+   },
+   "guestView": {
+    "rooms": [
+     "A:2"
+    ],
+    "roomsAnonymous": 1,
+    "api": {
+     "units": 1,
+     "places": 2,
+     "reserved": 0,
+     "rooms": 1,
+     "free": 2
+    },
+    "uiWords": "1 room · 2 places available",
+    "chooseButton": true,
+    "count": {
+     "rooms": 1,
+     "places": 2,
+     "reserved": 0,
+     "free": 2,
+     "open": 1
+    },
+    "yourRoom": null
+   },
+   "asserts": {
+    "canonicalRoomsMatchMaster": true,
+    "canonicalPlacesMatchMaster": true,
+    "reservedMatchesMaster": true,
+    "liveRoomsEqualCanonical": true,
+    "liveReservedEqualCanonical": true,
+    "renderedRoomsLteCanonical": true,
+    "noInventedRoom": true,
+    "apiAvailabilityFromOpenUnits": true,
+    "yourRoomIsThePersistedRoom": true,
+    "uiWordsMatchApi": true,
+    "chooseOnlyWhenAvailable": true,
+    "noGuestInReservedRoom": true
+   },
+   "ok": true
+  },
+  {
+   "stay": "SOUPHATTRA · wedding window",
+   "window": "wedstay",
+   "category": "Grand Majestic Suite",
+   "key": "wedstay/grand-majestic",
+   "source": {
+    "column": 9,
+    "masterRooms": 2,
+    "masterStatus": "Reserved for Family",
+    "physicalRooms": 2,
+    "places": 4,
+    "reservedRooms": 2,
+    "reservedFor": "Family",
+    "note": null
+   },
+   "canonical": {
+    "rooms": 2,
+    "places": 4,
+    "reserved": 2,
+    "reservedFor": "Family",
+    "labels": "AB"
+   },
+   "live": {
+    "rooms": 2,
+    "places": 4,
+    "reservedRooms": 2,
+    "reservedPlaces": 4,
+    "ownerOccupied": 0,
+    "guestOccupied": 0,
+    "occupied": 0,
+    "remainingRooms": 0,
+    "remainingPlaces": 0,
+    "perRoom": [
+     "A:RESERVED(Family)0/2",
+     "B:RESERVED(Family)0/2"
+    ]
+   },
+   "guestView": {
+    "rooms": [
+     "A:RESERVED",
+     "B:RESERVED"
+    ],
+    "roomsAnonymous": 2,
+    "api": {
+     "units": 2,
+     "places": 4,
+     "reserved": 2,
+     "rooms": 0,
+     "free": 0
+    },
+    "uiWords": "Reserved · Family",
+    "chooseButton": false,
+    "count": {
+     "rooms": 2,
+     "places": 4,
+     "reserved": 2,
+     "free": 0,
+     "open": 0
+    },
+    "yourRoom": null
+   },
+   "asserts": {
+    "canonicalRoomsMatchMaster": true,
+    "canonicalPlacesMatchMaster": true,
+    "reservedMatchesMaster": true,
+    "liveRoomsEqualCanonical": true,
+    "liveReservedEqualCanonical": true,
+    "renderedRoomsLteCanonical": true,
+    "noInventedRoom": true,
+    "apiAvailabilityFromOpenUnits": true,
+    "yourRoomIsThePersistedRoom": true,
+    "uiWordsMatchApi": true,
+    "chooseOnlyWhenAvailable": true,
+    "noGuestInReservedRoom": true
+   },
+   "ok": true
+  },
+  {
+   "stay": "SOUPHATTRA · wedding window",
+   "window": "wedstay",
+   "category": "Souphattra Majestic Suite",
+   "key": "wedstay/souphattra-majestic",
+   "source": {
+    "column": 10,
+    "masterRooms": 1,
+    "masterStatus": "Open",
+    "physicalRooms": 1,
+    "places": 2,
+    "reservedRooms": 0,
+    "reservedFor": null,
+    "note": null
+   },
+   "canonical": {
+    "rooms": 1,
+    "places": 2,
+    "reserved": 0,
+    "reservedFor": null,
+    "labels": "A"
+   },
+   "live": {
+    "rooms": 1,
+    "places": 2,
+    "reservedRooms": 0,
+    "reservedPlaces": 0,
+    "ownerOccupied": 0,
+    "guestOccupied": 0,
+    "occupied": 0,
+    "remainingRooms": 1,
+    "remainingPlaces": 2,
+    "perRoom": [
+     "A:0/2"
+    ]
+   },
+   "guestView": {
+    "rooms": [
+     "A:2"
+    ],
+    "roomsAnonymous": 1,
+    "api": {
+     "units": 1,
+     "places": 2,
+     "reserved": 0,
+     "rooms": 1,
+     "free": 2
+    },
+    "uiWords": "1 room · 2 places available",
+    "chooseButton": true,
+    "count": {
+     "rooms": 1,
+     "places": 2,
+     "reserved": 0,
+     "free": 2,
+     "open": 1
+    },
+    "yourRoom": null
+   },
+   "asserts": {
+    "canonicalRoomsMatchMaster": true,
+    "canonicalPlacesMatchMaster": true,
+    "reservedMatchesMaster": true,
+    "liveRoomsEqualCanonical": true,
+    "liveReservedEqualCanonical": true,
+    "renderedRoomsLteCanonical": true,
+    "noInventedRoom": true,
+    "apiAvailabilityFromOpenUnits": true,
+    "yourRoomIsThePersistedRoom": true,
+    "uiWordsMatchApi": true,
+    "chooseOnlyWhenAvailable": true,
+    "noGuestInReservedRoom": true
+   },
+   "ok": true
+  },
+  {
+   "stay": "SOUPHATTRA · wedding window",
+   "window": "wedstay",
+   "category": "Souphattra Presidential",
+   "key": "wedstay/souphattra-presidential",
+   "source": {
+    "column": 11,
+    "masterRooms": 1,
+    "masterStatus": "Reserved for Bride & Groom",
+    "physicalRooms": 1,
+    "places": 2,
+    "reservedRooms": 1,
+    "reservedFor": "Bride & Groom",
+    "note": null
+   },
+   "canonical": {
+    "rooms": 1,
+    "places": 2,
+    "reserved": 1,
+    "reservedFor": "Bride & Groom",
+    "labels": "A"
+   },
+   "live": {
+    "rooms": 1,
+    "places": 2,
+    "reservedRooms": 1,
+    "reservedPlaces": 2,
+    "ownerOccupied": 2,
+    "guestOccupied": 0,
+    "occupied": 2,
+    "remainingRooms": 0,
+    "remainingPlaces": 0,
+    "perRoom": [
+     "A:RESERVED(Bride & Groom)2/2"
+    ]
+   },
+   "guestView": {
+    "rooms": [
+     "A:RESERVED"
+    ],
+    "roomsAnonymous": 1,
+    "api": {
+     "units": 1,
+     "places": 2,
+     "reserved": 1,
+     "rooms": 0,
+     "free": 0
+    },
+    "uiWords": "Reserved · Bride & Groom",
+    "chooseButton": false,
+    "count": {
+     "rooms": 1,
+     "places": 2,
+     "reserved": 1,
+     "free": 0,
+     "open": 0
+    },
+    "yourRoom": null
+   },
+   "asserts": {
+    "canonicalRoomsMatchMaster": true,
+    "canonicalPlacesMatchMaster": true,
+    "reservedMatchesMaster": true,
+    "liveRoomsEqualCanonical": true,
+    "liveReservedEqualCanonical": true,
+    "renderedRoomsLteCanonical": true,
+    "noInventedRoom": true,
+    "apiAvailabilityFromOpenUnits": true,
+    "yourRoomIsThePersistedRoom": true,
+    "uiWordsMatchApi": true,
+    "chooseOnlyWhenAvailable": true,
+    "noGuestInReservedRoom": true
+   },
+   "ok": true
+  },
+  {
+   "stay": "PRIVATE RESIDENCE",
+   "window": "airbnb-2br",
+   "category": "Private Residence",
+   "key": "airbnb-2br/private-residence",
+   "source": {
+    "column": null,
+    "masterRooms": null,
+    "masterStatus": null,
+    "physicalRooms": 1,
+    "places": 6,
+    "reservedRooms": 0,
+    "reservedFor": null,
+    "note": "not an Accommodation_Details column — the Owner (16 Sep 2026): one property, capacity 6 guests, no invented rooms"
+   },
+   "canonical": {
+    "rooms": 1,
+    "places": 6,
+    "reserved": 0,
+    "reservedFor": null,
+    "labels": "A"
+   },
+   "live": {
+    "rooms": 1,
+    "places": 6,
+    "reservedRooms": 0,
+    "reservedPlaces": 0,
+    "ownerOccupied": 0,
+    "guestOccupied": 0,
+    "occupied": 0,
+    "remainingRooms": 1,
+    "remainingPlaces": 6,
+    "perRoom": [
+     "A:0/6"
+    ]
+   },
+   "guestView": {
+    "rooms": [
+     "A:6"
+    ],
+    "roomsAnonymous": 1,
+    "api": {
+     "units": 1,
+     "places": 6,
+     "reserved": 0,
+     "rooms": 1,
+     "free": 6
+    },
+    "uiWords": "6 places available",
+    "chooseButton": true,
+    "count": {
+     "rooms": 1,
+     "places": 6,
+     "reserved": 0,
+     "free": 6,
+     "open": 1
+    },
+    "yourRoom": null
+   },
+   "asserts": {
+    "canonicalRoomsMatchMaster": true,
+    "canonicalPlacesMatchMaster": true,
+    "reservedMatchesMaster": true,
+    "liveRoomsEqualCanonical": true,
+    "liveReservedEqualCanonical": true,
+    "renderedRoomsLteCanonical": true,
+    "noInventedRoom": true,
+    "apiAvailabilityFromOpenUnits": true,
+    "yourRoomIsThePersistedRoom": true,
+    "uiWordsMatchApi": true,
+    "chooseOnlyWhenAvailable": true,
+    "noGuestInReservedRoom": true
+   },
+   "ok": true
+  },
+  {
+   "stay": "KUNMING",
+   "window": "kmg",
+   "category": "Left Bank French-Style King Room",
+   "key": "kmg/left-bank",
+   "source": {
+    "column": 25,
+    "masterRooms": 1,
+    "masterStatus": "Open",
+    "physicalRooms": 1,
+    "places": 2,
+    "reservedRooms": 0,
+    "reservedFor": null,
+    "note": null
+   },
+   "canonical": {
+    "rooms": 1,
+    "places": 2,
+    "reserved": 0,
+    "reservedFor": null,
+    "labels": "A"
+   },
+   "live": {
+    "rooms": 1,
+    "places": 2,
+    "reservedRooms": 0,
+    "reservedPlaces": 0,
+    "ownerOccupied": 0,
+    "guestOccupied": 0,
+    "occupied": 0,
+    "remainingRooms": 1,
+    "remainingPlaces": 2,
+    "perRoom": [
+     "A:0/2"
+    ]
+   },
+   "guestView": {
+    "rooms": [
+     "A:2"
+    ],
+    "roomsAnonymous": 1,
+    "api": {
+     "units": 1,
+     "places": 2,
+     "reserved": 0,
+     "rooms": 1,
+     "free": 2
+    },
+    "uiWords": "1 room · 2 places available",
+    "chooseButton": true,
+    "count": {
+     "rooms": 1,
+     "places": 2,
+     "reserved": 0,
+     "free": 2,
+     "open": 1
+    },
+    "yourRoom": null
+   },
+   "asserts": {
+    "canonicalRoomsMatchMaster": true,
+    "canonicalPlacesMatchMaster": true,
+    "reservedMatchesMaster": true,
+    "liveRoomsEqualCanonical": true,
+    "liveReservedEqualCanonical": true,
+    "renderedRoomsLteCanonical": true,
+    "noInventedRoom": true,
+    "apiAvailabilityFromOpenUnits": true,
+    "yourRoomIsThePersistedRoom": true,
+    "uiWordsMatchApi": true,
+    "chooseOnlyWhenAvailable": true,
+    "noGuestInReservedRoom": true
+   },
+   "ok": true
+  },
+  {
+   "stay": "KUNMING",
+   "window": "kmg",
+   "category": "Penang Forest Nanyang-Style Deluxe Suite",
+   "key": "kmg/penang",
+   "source": {
+    "column": 24,
+    "masterRooms": 1,
+    "masterStatus": "Open",
+    "physicalRooms": 1,
+    "places": 2,
+    "reservedRooms": 0,
+    "reservedFor": null,
+    "note": null
+   },
+   "canonical": {
+    "rooms": 1,
+    "places": 2,
+    "reserved": 0,
+    "reservedFor": null,
+    "labels": "A"
+   },
+   "live": {
+    "rooms": 1,
+    "places": 2,
+    "reservedRooms": 0,
+    "reservedPlaces": 0,
+    "ownerOccupied": 0,
+    "guestOccupied": 0,
+    "occupied": 0,
+    "remainingRooms": 1,
+    "remainingPlaces": 2,
+    "perRoom": [
+     "A:0/2"
+    ]
+   },
+   "guestView": {
+    "rooms": [
+     "A:2"
+    ],
+    "roomsAnonymous": 1,
+    "api": {
+     "units": 1,
+     "places": 2,
+     "reserved": 0,
+     "rooms": 1,
+     "free": 2
+    },
+    "uiWords": "1 room · 2 places available",
+    "chooseButton": true,
+    "count": {
+     "rooms": 1,
+     "places": 2,
+     "reserved": 0,
+     "free": 2,
+     "open": 1
+    },
+    "yourRoom": null
+   },
+   "asserts": {
+    "canonicalRoomsMatchMaster": true,
+    "canonicalPlacesMatchMaster": true,
+    "reservedMatchesMaster": true,
+    "liveRoomsEqualCanonical": true,
+    "liveReservedEqualCanonical": true,
+    "renderedRoomsLteCanonical": true,
+    "noInventedRoom": true,
+    "apiAvailabilityFromOpenUnits": true,
+    "yourRoomIsThePersistedRoom": true,
+    "uiWordsMatchApi": true,
+    "chooseOnlyWhenAvailable": true,
+    "noGuestInReservedRoom": true
+   },
+   "ok": true
+  },
+  {
+   "stay": "KUNMING",
+   "window": "kmg",
+   "category": "Family Suite",
+   "key": "kmg/family-suite",
+   "source": {
+    "column": 22,
+    "masterRooms": 1,
+    "masterStatus": "Open",
+    "physicalRooms": 1,
+    "places": 2,
+    "reservedRooms": 0,
+    "reservedFor": null,
+    "note": null
+   },
+   "canonical": {
+    "rooms": 1,
+    "places": 2,
+    "reserved": 0,
+    "reservedFor": null,
+    "labels": "A"
+   },
+   "live": {
+    "rooms": 1,
+    "places": 2,
+    "reservedRooms": 0,
+    "reservedPlaces": 0,
+    "ownerOccupied": 0,
+    "guestOccupied": 0,
+    "occupied": 0,
+    "remainingRooms": 1,
+    "remainingPlaces": 2,
+    "perRoom": [
+     "A:0/2"
+    ]
+   },
+   "guestView": {
+    "rooms": [
+     "A:2"
+    ],
+    "roomsAnonymous": 1,
+    "api": {
+     "units": 1,
+     "places": 2,
+     "reserved": 0,
+     "rooms": 1,
+     "free": 2
+    },
+    "uiWords": "1 room · 2 places available",
+    "chooseButton": true,
+    "count": {
+     "rooms": 1,
+     "places": 2,
+     "reserved": 0,
+     "free": 2,
+     "open": 1
+    },
+    "yourRoom": null
+   },
+   "asserts": {
+    "canonicalRoomsMatchMaster": true,
+    "canonicalPlacesMatchMaster": true,
+    "reservedMatchesMaster": true,
+    "liveRoomsEqualCanonical": true,
+    "liveReservedEqualCanonical": true,
+    "renderedRoomsLteCanonical": true,
+    "noInventedRoom": true,
+    "apiAvailabilityFromOpenUnits": true,
+    "yourRoomIsThePersistedRoom": true,
+    "uiWordsMatchApi": true,
+    "chooseOnlyWhenAvailable": true,
+    "noGuestInReservedRoom": true
+   },
+   "ok": true
+  },
+  {
+   "stay": "KUNMING",
+   "window": "kmg",
+   "category": "Seine Evening Glow Loft Family Room",
+   "key": "kmg/seine",
+   "source": {
+    "column": 23,
+    "masterRooms": 1,
+    "masterStatus": "Open",
+    "physicalRooms": 1,
+    "places": 2,
+    "reservedRooms": 0,
+    "reservedFor": null,
+    "note": null
+   },
+   "canonical": {
+    "rooms": 1,
+    "places": 2,
+    "reserved": 0,
+    "reservedFor": null,
+    "labels": "A"
+   },
+   "live": {
+    "rooms": 1,
+    "places": 2,
+    "reservedRooms": 0,
+    "reservedPlaces": 0,
+    "ownerOccupied": 0,
+    "guestOccupied": 0,
+    "occupied": 0,
+    "remainingRooms": 1,
+    "remainingPlaces": 2,
+    "perRoom": [
+     "A:0/2"
+    ]
+   },
+   "guestView": {
+    "rooms": [
+     "A:2"
+    ],
+    "roomsAnonymous": 1,
+    "api": {
+     "units": 1,
+     "places": 2,
+     "reserved": 0,
+     "rooms": 1,
+     "free": 2
+    },
+    "uiWords": "1 room · 2 places available",
+    "chooseButton": true,
+    "count": {
+     "rooms": 1,
+     "places": 2,
+     "reserved": 0,
+     "free": 2,
+     "open": 1
+    },
+    "yourRoom": null
+   },
+   "asserts": {
+    "canonicalRoomsMatchMaster": true,
+    "canonicalPlacesMatchMaster": true,
+    "reservedMatchesMaster": true,
+    "liveRoomsEqualCanonical": true,
+    "liveReservedEqualCanonical": true,
+    "renderedRoomsLteCanonical": true,
+    "noInventedRoom": true,
+    "apiAvailabilityFromOpenUnits": true,
+    "yourRoomIsThePersistedRoom": true,
+    "uiWordsMatchApi": true,
+    "chooseOnlyWhenAvailable": true,
+    "noGuestInReservedRoom": true
+   },
+   "ok": true
+  },
+  {
+   "stay": "KUNMING",
+   "window": "kmg",
+   "category": "Smart Family Room",
+   "key": "kmg/smart-family",
+   "source": {
+    "column": 21,
+    "masterRooms": 1,
+    "masterStatus": "Open",
+    "physicalRooms": 1,
+    "places": 2,
+    "reservedRooms": 0,
+    "reservedFor": null,
+    "note": null
+   },
+   "canonical": {
+    "rooms": 1,
+    "places": 2,
+    "reserved": 0,
+    "reservedFor": null,
+    "labels": "A"
+   },
+   "live": {
+    "rooms": 1,
+    "places": 2,
+    "reservedRooms": 0,
+    "reservedPlaces": 0,
+    "ownerOccupied": 0,
+    "guestOccupied": 0,
+    "occupied": 0,
+    "remainingRooms": 1,
+    "remainingPlaces": 2,
+    "perRoom": [
+     "A:0/2"
+    ]
+   },
+   "guestView": {
+    "rooms": [
+     "A:2"
+    ],
+    "roomsAnonymous": 1,
+    "api": {
+     "units": 1,
+     "places": 2,
+     "reserved": 0,
+     "rooms": 1,
+     "free": 2
+    },
+    "uiWords": "1 room · 2 places available",
+    "chooseButton": true,
+    "count": {
+     "rooms": 1,
+     "places": 2,
+     "reserved": 0,
+     "free": 2,
+     "open": 1
+    },
+    "yourRoom": null
+   },
+   "asserts": {
+    "canonicalRoomsMatchMaster": true,
+    "canonicalPlacesMatchMaster": true,
+    "reservedMatchesMaster": true,
+    "liveRoomsEqualCanonical": true,
+    "liveReservedEqualCanonical": true,
+    "renderedRoomsLteCanonical": true,
+    "noInventedRoom": true,
+    "apiAvailabilityFromOpenUnits": true,
+    "yourRoomIsThePersistedRoom": true,
+    "uiWordsMatchApi": true,
+    "chooseOnlyWhenAvailable": true,
+    "noGuestInReservedRoom": true
+   },
+   "ok": true
+  },
+  {
+   "stay": "KUNMING",
+   "window": "kmg",
+   "category": "Solarium Bath Suite",
+   "key": "kmg/solarium",
+   "source": {
+    "column": 20,
+    "masterRooms": 1,
+    "masterStatus": "Reserved for Bride & Groom",
+    "physicalRooms": 1,
+    "places": 2,
+    "reservedRooms": 1,
+    "reservedFor": "Bride & Groom",
+    "note": null
+   },
+   "canonical": {
+    "rooms": 1,
+    "places": 2,
+    "reserved": 1,
+    "reservedFor": "Bride & Groom",
+    "labels": "A"
+   },
+   "live": {
+    "rooms": 1,
+    "places": 2,
+    "reservedRooms": 1,
+    "reservedPlaces": 2,
+    "ownerOccupied": 2,
+    "guestOccupied": 0,
+    "occupied": 2,
+    "remainingRooms": 0,
+    "remainingPlaces": 0,
+    "perRoom": [
+     "A:RESERVED(Bride & Groom)2/2"
+    ]
+   },
+   "guestView": {
+    "rooms": [
+     "A:RESERVED"
+    ],
+    "roomsAnonymous": 1,
+    "api": {
+     "units": 1,
+     "places": 2,
+     "reserved": 1,
+     "rooms": 0,
+     "free": 0
+    },
+    "uiWords": "Reserved · Bride & Groom",
+    "chooseButton": false,
+    "count": {
+     "rooms": 1,
+     "places": 2,
+     "reserved": 1,
+     "free": 0,
+     "open": 0
+    },
+    "yourRoom": null
+   },
+   "asserts": {
+    "canonicalRoomsMatchMaster": true,
+    "canonicalPlacesMatchMaster": true,
+    "reservedMatchesMaster": true,
+    "liveRoomsEqualCanonical": true,
+    "liveReservedEqualCanonical": true,
+    "renderedRoomsLteCanonical": true,
+    "noInventedRoom": true,
+    "apiAvailabilityFromOpenUnits": true,
+    "yourRoomIsThePersistedRoom": true,
+    "uiWordsMatchApi": true,
+    "chooseOnlyWhenAvailable": true,
+    "noGuestInReservedRoom": true
+   },
+   "ok": true
+  },
+  {
+   "stay": "KUNMING",
+   "window": "kmg",
+   "category": "Standard Single Room",
+   "key": "kmg/standard-single",
+   "source": {
+    "column": 19,
+    "masterRooms": 1,
+    "masterStatus": "Open",
+    "physicalRooms": 1,
+    "places": 2,
+    "reservedRooms": 0,
+    "reservedFor": null,
+    "note": null
+   },
+   "canonical": {
+    "rooms": 1,
+    "places": 2,
+    "reserved": 0,
+    "reservedFor": null,
+    "labels": "A"
+   },
+   "live": {
+    "rooms": 1,
+    "places": 2,
+    "reservedRooms": 0,
+    "reservedPlaces": 0,
+    "ownerOccupied": 0,
+    "guestOccupied": 0,
+    "occupied": 0,
+    "remainingRooms": 1,
+    "remainingPlaces": 2,
+    "perRoom": [
+     "A:0/2"
+    ]
+   },
+   "guestView": {
+    "rooms": [
+     "A:2"
+    ],
+    "roomsAnonymous": 1,
+    "api": {
+     "units": 1,
+     "places": 2,
+     "reserved": 0,
+     "rooms": 1,
+     "free": 2
+    },
+    "uiWords": "1 room · 2 places available",
+    "chooseButton": true,
+    "count": {
+     "rooms": 1,
+     "places": 2,
+     "reserved": 0,
+     "free": 2,
+     "open": 1
+    },
+    "yourRoom": null
+   },
+   "asserts": {
+    "canonicalRoomsMatchMaster": true,
+    "canonicalPlacesMatchMaster": true,
+    "reservedMatchesMaster": true,
+    "liveRoomsEqualCanonical": true,
+    "liveReservedEqualCanonical": true,
+    "renderedRoomsLteCanonical": true,
+    "noInventedRoom": true,
+    "apiAvailabilityFromOpenUnits": true,
+    "yourRoomIsThePersistedRoom": true,
+    "uiWordsMatchApi": true,
+    "chooseOnlyWhenAvailable": true,
+    "noGuestInReservedRoom": true
+   },
+   "ok": true
+  },
+  {
+   "stay": "KUNMING",
+   "window": "kmg",
+   "category": "Junting City-View Loft",
+   "key": "kmg/junting",
+   "source": {
+    "column": 17,
+    "masterRooms": 1,
+    "masterStatus": "Open",
+    "physicalRooms": 1,
+    "places": 2,
+    "reservedRooms": 0,
+    "reservedFor": null,
+    "note": null
+   },
+   "canonical": {
+    "rooms": 1,
+    "places": 2,
+    "reserved": 0,
+    "reservedFor": null,
+    "labels": "A"
+   },
+   "live": {
+    "rooms": 1,
+    "places": 2,
+    "reservedRooms": 0,
+    "reservedPlaces": 0,
+    "ownerOccupied": 0,
+    "guestOccupied": 0,
+    "occupied": 0,
+    "remainingRooms": 1,
+    "remainingPlaces": 2,
+    "perRoom": [
+     "A:0/2"
+    ]
+   },
+   "guestView": {
+    "rooms": [
+     "A:2"
+    ],
+    "roomsAnonymous": 1,
+    "api": {
+     "units": 1,
+     "places": 2,
+     "reserved": 0,
+     "rooms": 1,
+     "free": 2
+    },
+    "uiWords": "1 room · 2 places available",
+    "chooseButton": true,
+    "count": {
+     "rooms": 1,
+     "places": 2,
+     "reserved": 0,
+     "free": 2,
+     "open": 1
+    },
+    "yourRoom": null
+   },
+   "asserts": {
+    "canonicalRoomsMatchMaster": true,
+    "canonicalPlacesMatchMaster": true,
+    "reservedMatchesMaster": true,
+    "liveRoomsEqualCanonical": true,
+    "liveReservedEqualCanonical": true,
+    "renderedRoomsLteCanonical": true,
+    "noInventedRoom": true,
+    "apiAvailabilityFromOpenUnits": true,
+    "yourRoomIsThePersistedRoom": true,
+    "uiWordsMatchApi": true,
+    "chooseOnlyWhenAvailable": true,
+    "noGuestInReservedRoom": true
+   },
+   "ok": true
+  },
+  {
+   "stay": "KUNMING",
+   "window": "kmg",
+   "category": "Mid-century Amber Suite",
+   "key": "kmg/mid-century",
+   "source": {
+    "column": 18,
+    "masterRooms": 1,
+    "masterStatus": "Open",
+    "physicalRooms": 1,
+    "places": 2,
+    "reservedRooms": 0,
+    "reservedFor": null,
+    "note": null
+   },
+   "canonical": {
+    "rooms": 1,
+    "places": 2,
+    "reserved": 0,
+    "reservedFor": null,
+    "labels": "A"
+   },
+   "live": {
+    "rooms": 1,
+    "places": 2,
+    "reservedRooms": 0,
+    "reservedPlaces": 0,
+    "ownerOccupied": 0,
+    "guestOccupied": 0,
+    "occupied": 0,
+    "remainingRooms": 1,
+    "remainingPlaces": 2,
+    "perRoom": [
+     "A:0/2"
+    ]
+   },
+   "guestView": {
+    "rooms": [
+     "A:2"
+    ],
+    "roomsAnonymous": 1,
+    "api": {
+     "units": 1,
+     "places": 2,
+     "reserved": 0,
+     "rooms": 1,
+     "free": 2
+    },
+    "uiWords": "1 room · 2 places available",
+    "chooseButton": true,
+    "count": {
+     "rooms": 1,
+     "places": 2,
+     "reserved": 0,
+     "free": 2,
+     "open": 1
+    },
+    "yourRoom": null
+   },
+   "asserts": {
+    "canonicalRoomsMatchMaster": true,
+    "canonicalPlacesMatchMaster": true,
+    "reservedMatchesMaster": true,
+    "liveRoomsEqualCanonical": true,
+    "liveReservedEqualCanonical": true,
+    "renderedRoomsLteCanonical": true,
+    "noInventedRoom": true,
+    "apiAvailabilityFromOpenUnits": true,
+    "yourRoomIsThePersistedRoom": true,
+    "uiWordsMatchApi": true,
+    "chooseOnlyWhenAvailable": true,
+    "noGuestInReservedRoom": true
+   },
+   "ok": true
+  },
+  {
+   "stay": "KUNMING",
+   "window": "kmg",
+   "category": "Milano Minimalist Loft",
+   "key": "kmg/milano",
+   "source": {
+    "column": 15,
+    "masterRooms": 1,
+    "masterStatus": "Open",
+    "physicalRooms": 1,
+    "places": 2,
+    "reservedRooms": 0,
+    "reservedFor": null,
+    "note": null
+   },
+   "canonical": {
+    "rooms": 1,
+    "places": 2,
+    "reserved": 0,
+    "reservedFor": null,
+    "labels": "A"
+   },
+   "live": {
+    "rooms": 1,
+    "places": 2,
+    "reservedRooms": 0,
+    "reservedPlaces": 0,
+    "ownerOccupied": 0,
+    "guestOccupied": 0,
+    "occupied": 0,
+    "remainingRooms": 1,
+    "remainingPlaces": 2,
+    "perRoom": [
+     "A:0/2"
+    ]
+   },
+   "guestView": {
+    "rooms": [
+     "A:2"
+    ],
+    "roomsAnonymous": 1,
+    "api": {
+     "units": 1,
+     "places": 2,
+     "reserved": 0,
+     "rooms": 1,
+     "free": 2
+    },
+    "uiWords": "1 room · 2 places available",
+    "chooseButton": true,
+    "count": {
+     "rooms": 1,
+     "places": 2,
+     "reserved": 0,
+     "free": 2,
+     "open": 1
+    },
+    "yourRoom": null
+   },
+   "asserts": {
+    "canonicalRoomsMatchMaster": true,
+    "canonicalPlacesMatchMaster": true,
+    "reservedMatchesMaster": true,
+    "liveRoomsEqualCanonical": true,
+    "liveReservedEqualCanonical": true,
+    "renderedRoomsLteCanonical": true,
+    "noInventedRoom": true,
+    "apiAvailabilityFromOpenUnits": true,
+    "yourRoomIsThePersistedRoom": true,
+    "uiWordsMatchApi": true,
+    "chooseOnlyWhenAvailable": true,
+    "noGuestInReservedRoom": true
+   },
+   "ok": true
+  },
+  {
+   "stay": "KUNMING",
+   "window": "kmg",
+   "category": "Italian Style Suite",
+   "key": "kmg/italian",
+   "source": {
+    "column": 16,
+    "masterRooms": 1,
+    "masterStatus": "Open",
+    "physicalRooms": 1,
+    "places": 2,
+    "reservedRooms": 0,
+    "reservedFor": null,
+    "note": null
+   },
+   "canonical": {
+    "rooms": 1,
+    "places": 2,
+    "reserved": 0,
+    "reservedFor": null,
+    "labels": "A"
+   },
+   "live": {
+    "rooms": 1,
+    "places": 2,
+    "reservedRooms": 0,
+    "reservedPlaces": 0,
+    "ownerOccupied": 0,
+    "guestOccupied": 0,
+    "occupied": 0,
+    "remainingRooms": 1,
+    "remainingPlaces": 2,
+    "perRoom": [
+     "A:0/2"
+    ]
+   },
+   "guestView": {
+    "rooms": [
+     "A:2"
+    ],
+    "roomsAnonymous": 1,
+    "api": {
+     "units": 1,
+     "places": 2,
+     "reserved": 0,
+     "rooms": 1,
+     "free": 2
+    },
+    "uiWords": "1 room · 2 places available",
+    "chooseButton": true,
+    "count": {
+     "rooms": 1,
+     "places": 2,
+     "reserved": 0,
+     "free": 2,
+     "open": 1
+    },
+    "yourRoom": null
+   },
+   "asserts": {
+    "canonicalRoomsMatchMaster": true,
+    "canonicalPlacesMatchMaster": true,
+    "reservedMatchesMaster": true,
+    "liveRoomsEqualCanonical": true,
+    "liveReservedEqualCanonical": true,
+    "renderedRoomsLteCanonical": true,
+    "noInventedRoom": true,
+    "apiAvailabilityFromOpenUnits": true,
+    "yourRoomIsThePersistedRoom": true,
+    "uiWordsMatchApi": true,
+    "chooseOnlyWhenAvailable": true,
+    "noGuestInReservedRoom": true
+   },
+   "ok": true
+  },
+  {
+   "stay": "KUNMING",
+   "window": "kmg",
+   "category": "Light French Suite",
+   "key": "kmg/light-french",
+   "source": {
+    "column": 14,
+    "masterRooms": 1,
+    "masterStatus": "Open",
+    "physicalRooms": 1,
+    "places": 2,
+    "reservedRooms": 0,
+    "reservedFor": null,
+    "note": null
+   },
+   "canonical": {
+    "rooms": 1,
+    "places": 2,
+    "reserved": 0,
+    "reservedFor": null,
+    "labels": "A"
+   },
+   "live": {
+    "rooms": 1,
+    "places": 2,
+    "reservedRooms": 0,
+    "reservedPlaces": 0,
+    "ownerOccupied": 0,
+    "guestOccupied": 0,
+    "occupied": 0,
+    "remainingRooms": 1,
+    "remainingPlaces": 2,
+    "perRoom": [
+     "A:0/2"
+    ]
+   },
+   "guestView": {
+    "rooms": [
+     "A:2"
+    ],
+    "roomsAnonymous": 1,
+    "api": {
+     "units": 1,
+     "places": 2,
+     "reserved": 0,
+     "rooms": 1,
+     "free": 2
+    },
+    "uiWords": "1 room · 2 places available",
+    "chooseButton": true,
+    "count": {
+     "rooms": 1,
+     "places": 2,
+     "reserved": 0,
+     "free": 2,
+     "open": 1
+    },
+    "yourRoom": null
+   },
+   "asserts": {
+    "canonicalRoomsMatchMaster": true,
+    "canonicalPlacesMatchMaster": true,
+    "reservedMatchesMaster": true,
+    "liveRoomsEqualCanonical": true,
+    "liveReservedEqualCanonical": true,
+    "renderedRoomsLteCanonical": true,
+    "noInventedRoom": true,
+    "apiAvailabilityFromOpenUnits": true,
+    "yourRoomIsThePersistedRoom": true,
+    "uiWordsMatchApi": true,
+    "chooseOnlyWhenAvailable": true,
+    "noGuestInReservedRoom": true
+   },
+   "ok": true
+  },
+  {
+   "stay": "LIJIANG",
+   "window": "ljg",
+   "category": "Luye Starry Sky Suite · Immersive View",
+   "key": "ljg/starry-sky",
+   "source": {
+    "column": 35,
+    "masterRooms": 4,
+    "masterStatus": "Open",
+    "physicalRooms": 4,
+    "places": 8,
+    "reservedRooms": 0,
+    "reservedFor": null,
+    "note": null
+   },
+   "canonical": {
+    "rooms": 4,
+    "places": 8,
+    "reserved": 0,
+    "reservedFor": null,
+    "labels": "ABCD"
+   },
+   "live": {
+    "rooms": 4,
+    "places": 8,
+    "reservedRooms": 0,
+    "reservedPlaces": 0,
+    "ownerOccupied": 0,
+    "guestOccupied": 0,
+    "occupied": 0,
+    "remainingRooms": 4,
+    "remainingPlaces": 8,
+    "perRoom": [
+     "A:0/2",
+     "B:0/2",
+     "C:0/2",
+     "D:0/2"
+    ]
+   },
+   "guestView": {
+    "rooms": [
+     "A:2",
+     "B:2",
+     "C:2",
+     "D:2"
+    ],
+    "roomsAnonymous": 4,
+    "api": {
+     "units": 4,
+     "places": 8,
+     "reserved": 0,
+     "rooms": 4,
+     "free": 8
+    },
+    "uiWords": "4 rooms · 8 places available",
+    "chooseButton": true,
+    "count": {
+     "rooms": 4,
+     "places": 8,
+     "reserved": 0,
+     "free": 8,
+     "open": 4
+    },
+    "yourRoom": null
+   },
+   "asserts": {
+    "canonicalRoomsMatchMaster": true,
+    "canonicalPlacesMatchMaster": true,
+    "reservedMatchesMaster": true,
+    "liveRoomsEqualCanonical": true,
+    "liveReservedEqualCanonical": true,
+    "renderedRoomsLteCanonical": true,
+    "noInventedRoom": true,
+    "apiAvailabilityFromOpenUnits": true,
+    "yourRoomIsThePersistedRoom": true,
+    "uiWordsMatchApi": true,
+    "chooseOnlyWhenAvailable": true,
+    "noGuestInReservedRoom": true
+   },
+   "ok": true
+  },
+  {
+   "stay": "LIJIANG",
+   "window": "ljg",
+   "category": "Boundless Floor-to-Ceiling Glass Sunlit Suite",
+   "key": "ljg/boundless",
+   "source": {
+    "column": 34,
+    "masterRooms": 4,
+    "masterStatus": "Open",
+    "physicalRooms": 4,
+    "places": 8,
+    "reservedRooms": 0,
+    "reservedFor": null,
+    "note": null
+   },
+   "canonical": {
+    "rooms": 4,
+    "places": 8,
+    "reserved": 0,
+    "reservedFor": null,
+    "labels": "ABCD"
+   },
+   "live": {
+    "rooms": 4,
+    "places": 8,
+    "reservedRooms": 0,
+    "reservedPlaces": 0,
+    "ownerOccupied": 0,
+    "guestOccupied": 0,
+    "occupied": 0,
+    "remainingRooms": 4,
+    "remainingPlaces": 8,
+    "perRoom": [
+     "A:0/2",
+     "B:0/2",
+     "C:0/2",
+     "D:0/2"
+    ]
+   },
+   "guestView": {
+    "rooms": [
+     "A:2",
+     "B:2",
+     "C:2",
+     "D:2"
+    ],
+    "roomsAnonymous": 4,
+    "api": {
+     "units": 4,
+     "places": 8,
+     "reserved": 0,
+     "rooms": 4,
+     "free": 8
+    },
+    "uiWords": "4 rooms · 8 places available",
+    "chooseButton": true,
+    "count": {
+     "rooms": 4,
+     "places": 8,
+     "reserved": 0,
+     "free": 8,
+     "open": 4
+    },
+    "yourRoom": null
+   },
+   "asserts": {
+    "canonicalRoomsMatchMaster": true,
+    "canonicalPlacesMatchMaster": true,
+    "reservedMatchesMaster": true,
+    "liveRoomsEqualCanonical": true,
+    "liveReservedEqualCanonical": true,
+    "renderedRoomsLteCanonical": true,
+    "noInventedRoom": true,
+    "apiAvailabilityFromOpenUnits": true,
+    "yourRoomIsThePersistedRoom": true,
+    "uiWordsMatchApi": true,
+    "chooseOnlyWhenAvailable": true,
+    "noGuestInReservedRoom": true
+   },
+   "ok": true
+  },
+  {
+   "stay": "LIJIANG",
+   "window": "ljg",
+   "category": "Snow Mountain Private Soup Viewing Suite",
+   "key": "ljg/private-soup-view",
+   "source": {
+    "column": 33,
+    "masterRooms": 4,
+    "masterStatus": "Open",
+    "physicalRooms": 4,
+    "places": 8,
+    "reservedRooms": 0,
+    "reservedFor": null,
+    "note": null
+   },
+   "canonical": {
+    "rooms": 4,
+    "places": 8,
+    "reserved": 0,
+    "reservedFor": null,
+    "labels": "ABCD"
+   },
+   "live": {
+    "rooms": 4,
+    "places": 8,
+    "reservedRooms": 0,
+    "reservedPlaces": 0,
+    "ownerOccupied": 0,
+    "guestOccupied": 0,
+    "occupied": 0,
+    "remainingRooms": 4,
+    "remainingPlaces": 8,
+    "perRoom": [
+     "A:0/2",
+     "B:0/2",
+     "C:0/2",
+     "D:0/2"
+    ]
+   },
+   "guestView": {
+    "rooms": [
+     "A:2",
+     "B:2",
+     "C:2",
+     "D:2"
+    ],
+    "roomsAnonymous": 4,
+    "api": {
+     "units": 4,
+     "places": 8,
+     "reserved": 0,
+     "rooms": 4,
+     "free": 8
+    },
+    "uiWords": "4 rooms · 8 places available",
+    "chooseButton": true,
+    "count": {
+     "rooms": 4,
+     "places": 8,
+     "reserved": 0,
+     "free": 8,
+     "open": 4
+    },
+    "yourRoom": null
+   },
+   "asserts": {
+    "canonicalRoomsMatchMaster": true,
+    "canonicalPlacesMatchMaster": true,
+    "reservedMatchesMaster": true,
+    "liveRoomsEqualCanonical": true,
+    "liveReservedEqualCanonical": true,
+    "renderedRoomsLteCanonical": true,
+    "noInventedRoom": true,
+    "apiAvailabilityFromOpenUnits": true,
+    "yourRoomIsThePersistedRoom": true,
+    "uiWordsMatchApi": true,
+    "chooseOnlyWhenAvailable": true,
+    "noGuestInReservedRoom": true
+   },
+   "ok": true
+  },
+  {
+   "stay": "LIJIANG",
+   "window": "ljg",
+   "category": "Snow Mountain Manor Suite",
+   "key": "ljg/manor-suite",
+   "source": {
+    "column": 31,
+    "masterRooms": 4,
+    "masterStatus": "Open",
+    "physicalRooms": 4,
+    "places": 8,
+    "reservedRooms": 0,
+    "reservedFor": null,
+    "note": null
+   },
+   "canonical": {
+    "rooms": 4,
+    "places": 8,
+    "reserved": 0,
+    "reservedFor": null,
+    "labels": "ABCD"
+   },
+   "live": {
+    "rooms": 4,
+    "places": 8,
+    "reservedRooms": 0,
+    "reservedPlaces": 0,
+    "ownerOccupied": 0,
+    "guestOccupied": 0,
+    "occupied": 0,
+    "remainingRooms": 4,
+    "remainingPlaces": 8,
+    "perRoom": [
+     "A:0/2",
+     "B:0/2",
+     "C:0/2",
+     "D:0/2"
+    ]
+   },
+   "guestView": {
+    "rooms": [
+     "A:2",
+     "B:2",
+     "C:2",
+     "D:2"
+    ],
+    "roomsAnonymous": 4,
+    "api": {
+     "units": 4,
+     "places": 8,
+     "reserved": 0,
+     "rooms": 4,
+     "free": 8
+    },
+    "uiWords": "4 rooms · 8 places available",
+    "chooseButton": true,
+    "count": {
+     "rooms": 4,
+     "places": 8,
+     "reserved": 0,
+     "free": 8,
+     "open": 4
+    },
+    "yourRoom": null
+   },
+   "asserts": {
+    "canonicalRoomsMatchMaster": true,
+    "canonicalPlacesMatchMaster": true,
+    "reservedMatchesMaster": true,
+    "liveRoomsEqualCanonical": true,
+    "liveReservedEqualCanonical": true,
+    "renderedRoomsLteCanonical": true,
+    "noInventedRoom": true,
+    "apiAvailabilityFromOpenUnits": true,
+    "yourRoomIsThePersistedRoom": true,
+    "uiWordsMatchApi": true,
+    "chooseOnlyWhenAvailable": true,
+    "noGuestInReservedRoom": true
+   },
+   "ok": true
+  },
+  {
+   "stay": "LIJIANG",
+   "window": "ljg",
+   "category": "270° Snow Mountain View Suite",
+   "key": "ljg/view-suite-270",
+   "source": {
+    "column": 32,
+    "masterRooms": 4,
+    "masterStatus": "Reserved for Bride & Groom",
+    "physicalRooms": 4,
+    "places": 8,
+    "reservedRooms": 4,
+    "reservedFor": "Bride & Groom",
+    "note": null
+   },
+   "canonical": {
+    "rooms": 4,
+    "places": 8,
+    "reserved": 4,
+    "reservedFor": "Bride & Groom",
+    "labels": "ABCD"
+   },
+   "live": {
+    "rooms": 4,
+    "places": 8,
+    "reservedRooms": 4,
+    "reservedPlaces": 8,
+    "ownerOccupied": 0,
+    "guestOccupied": 0,
+    "occupied": 0,
+    "remainingRooms": 0,
+    "remainingPlaces": 0,
+    "perRoom": [
+     "A:RESERVED(Bride & Groom)0/2",
+     "B:RESERVED(Bride & Groom)0/2",
+     "C:RESERVED(Bride & Groom)0/2",
+     "D:RESERVED(Bride & Groom)0/2"
+    ]
+   },
+   "guestView": {
+    "rooms": [
+     "A:RESERVED",
+     "B:RESERVED",
+     "C:RESERVED",
+     "D:RESERVED"
+    ],
+    "roomsAnonymous": 4,
+    "api": {
+     "units": 4,
+     "places": 8,
+     "reserved": 4,
+     "rooms": 0,
+     "free": 0
+    },
+    "uiWords": "Reserved · Bride & Groom",
+    "chooseButton": false,
+    "count": {
+     "rooms": 4,
+     "places": 8,
+     "reserved": 4,
+     "free": 0,
+     "open": 0
+    },
+    "yourRoom": null
+   },
+   "asserts": {
+    "canonicalRoomsMatchMaster": true,
+    "canonicalPlacesMatchMaster": true,
+    "reservedMatchesMaster": true,
+    "liveRoomsEqualCanonical": true,
+    "liveReservedEqualCanonical": true,
+    "renderedRoomsLteCanonical": true,
+    "noInventedRoom": true,
+    "apiAvailabilityFromOpenUnits": true,
+    "yourRoomIsThePersistedRoom": true,
+    "uiWordsMatchApi": true,
+    "chooseOnlyWhenAvailable": true,
+    "noGuestInReservedRoom": true
+   },
+   "ok": true
+  },
+  {
+   "stay": "LIJIANG",
+   "window": "ljg",
+   "category": "270° Snow Mountain View Room Private Soup Pool",
+   "key": "ljg/soup-pool-270",
+   "source": {
+    "column": 30,
+    "masterRooms": 4,
+    "masterStatus": "Open",
+    "physicalRooms": 4,
+    "places": 8,
+    "reservedRooms": 0,
+    "reservedFor": null,
+    "note": null
+   },
+   "canonical": {
+    "rooms": 4,
+    "places": 8,
+    "reserved": 0,
+    "reservedFor": null,
+    "labels": "ABCD"
+   },
+   "live": {
+    "rooms": 4,
+    "places": 8,
+    "reservedRooms": 0,
+    "reservedPlaces": 0,
+    "ownerOccupied": 0,
+    "guestOccupied": 0,
+    "occupied": 0,
+    "remainingRooms": 4,
+    "remainingPlaces": 8,
+    "perRoom": [
+     "A:0/2",
+     "B:0/2",
+     "C:0/2",
+     "D:0/2"
+    ]
+   },
+   "guestView": {
+    "rooms": [
+     "A:2",
+     "B:2",
+     "C:2",
+     "D:2"
+    ],
+    "roomsAnonymous": 4,
+    "api": {
+     "units": 4,
+     "places": 8,
+     "reserved": 0,
+     "rooms": 4,
+     "free": 8
+    },
+    "uiWords": "4 rooms · 8 places available",
+    "chooseButton": true,
+    "count": {
+     "rooms": 4,
+     "places": 8,
+     "reserved": 0,
+     "free": 8,
+     "open": 4
+    },
+    "yourRoom": null
+   },
+   "asserts": {
+    "canonicalRoomsMatchMaster": true,
+    "canonicalPlacesMatchMaster": true,
+    "reservedMatchesMaster": true,
+    "liveRoomsEqualCanonical": true,
+    "liveReservedEqualCanonical": true,
+    "renderedRoomsLteCanonical": true,
+    "noInventedRoom": true,
+    "apiAvailabilityFromOpenUnits": true,
+    "yourRoomIsThePersistedRoom": true,
+    "uiWordsMatchApi": true,
+    "chooseOnlyWhenAvailable": true,
+    "noGuestInReservedRoom": true
+   },
+   "ok": true
+  },
+  {
+   "stay": "LIJIANG",
+   "window": "ljg",
+   "category": "270° Private Courtyard Snow Mountain View",
+   "key": "ljg/private-courtyard-270",
+   "source": {
+    "column": 29,
+    "masterRooms": 4,
+    "masterStatus": "Open",
+    "physicalRooms": 4,
+    "places": 8,
+    "reservedRooms": 0,
+    "reservedFor": null,
+    "note": null
+   },
+   "canonical": {
+    "rooms": 4,
+    "places": 8,
+    "reserved": 0,
+    "reservedFor": null,
+    "labels": "ABCD"
+   },
+   "live": {
+    "rooms": 4,
+    "places": 8,
+    "reservedRooms": 0,
+    "reservedPlaces": 0,
+    "ownerOccupied": 0,
+    "guestOccupied": 0,
+    "occupied": 0,
+    "remainingRooms": 4,
+    "remainingPlaces": 8,
+    "perRoom": [
+     "A:0/2",
+     "B:0/2",
+     "C:0/2",
+     "D:0/2"
+    ]
+   },
+   "guestView": {
+    "rooms": [
+     "A:2",
+     "B:2",
+     "C:2",
+     "D:2"
+    ],
+    "roomsAnonymous": 4,
+    "api": {
+     "units": 4,
+     "places": 8,
+     "reserved": 0,
+     "rooms": 4,
+     "free": 8
+    },
+    "uiWords": "4 rooms · 8 places available",
+    "chooseButton": true,
+    "count": {
+     "rooms": 4,
+     "places": 8,
+     "reserved": 0,
+     "free": 8,
+     "open": 4
+    },
+    "yourRoom": null
+   },
+   "asserts": {
+    "canonicalRoomsMatchMaster": true,
+    "canonicalPlacesMatchMaster": true,
+    "reservedMatchesMaster": true,
+    "liveRoomsEqualCanonical": true,
+    "liveReservedEqualCanonical": true,
+    "renderedRoomsLteCanonical": true,
+    "noInventedRoom": true,
+    "apiAvailabilityFromOpenUnits": true,
+    "yourRoomIsThePersistedRoom": true,
+    "uiWordsMatchApi": true,
+    "chooseOnlyWhenAvailable": true,
+    "noGuestInReservedRoom": true
+   },
+   "ok": true
+  },
+  {
+   "stay": "LIJIANG",
+   "window": "ljg",
+   "category": "270° Snow Mountain Viewing Room",
+   "key": "ljg/viewing-270",
+   "source": {
+    "column": 28,
+    "masterRooms": 4,
+    "masterStatus": "Open",
+    "physicalRooms": 4,
+    "places": 8,
+    "reservedRooms": 0,
+    "reservedFor": null,
+    "note": null
+   },
+   "canonical": {
+    "rooms": 4,
+    "places": 8,
+    "reserved": 0,
+    "reservedFor": null,
+    "labels": "ABCD"
+   },
+   "live": {
+    "rooms": 4,
+    "places": 8,
+    "reservedRooms": 0,
+    "reservedPlaces": 0,
+    "ownerOccupied": 0,
+    "guestOccupied": 2,
+    "occupied": 2,
+    "remainingRooms": 3,
+    "remainingPlaces": 6,
+    "perRoom": [
+     "A:2/2",
+     "B:0/2",
+     "C:0/2",
+     "D:0/2"
+    ]
+   },
+   "guestView": {
+    "rooms": [
+     "A:FULL",
+     "B:2",
+     "C:2",
+     "D:2"
+    ],
+    "roomsAnonymous": 4,
+    "api": {
+     "units": 4,
+     "places": 8,
+     "reserved": 0,
+     "rooms": 3,
+     "free": 6
+    },
+    "uiWords": "3 rooms · 6 places available",
+    "chooseButton": true,
+    "count": {
+     "rooms": 4,
+     "places": 8,
+     "reserved": 0,
+     "free": 6,
+     "open": 3
+    },
+    "yourRoom": null
+   },
+   "asserts": {
+    "canonicalRoomsMatchMaster": true,
+    "canonicalPlacesMatchMaster": true,
+    "reservedMatchesMaster": true,
+    "liveRoomsEqualCanonical": true,
+    "liveReservedEqualCanonical": true,
+    "renderedRoomsLteCanonical": true,
+    "noInventedRoom": true,
+    "apiAvailabilityFromOpenUnits": true,
+    "yourRoomIsThePersistedRoom": true,
+    "uiWordsMatchApi": true,
+    "chooseOnlyWhenAvailable": true,
+    "noGuestInReservedRoom": true
+   },
+   "ok": true
+  },
+  {
+   "stay": "LIJIANG",
+   "window": "ljg",
+   "category": "Snow Mountain Viewing Room",
+   "key": "ljg/snow-mountain-viewing",
+   "source": {
+    "column": 27,
+    "masterRooms": 4,
+    "masterStatus": "Open",
+    "physicalRooms": 4,
+    "places": 8,
+    "reservedRooms": 0,
+    "reservedFor": null,
+    "note": null
+   },
+   "canonical": {
+    "rooms": 4,
+    "places": 8,
+    "reserved": 0,
+    "reservedFor": null,
+    "labels": "ABCD"
+   },
+   "live": {
+    "rooms": 4,
+    "places": 8,
+    "reservedRooms": 0,
+    "reservedPlaces": 0,
+    "ownerOccupied": 0,
+    "guestOccupied": 0,
+    "occupied": 0,
+    "remainingRooms": 4,
+    "remainingPlaces": 8,
+    "perRoom": [
+     "A:0/2",
+     "B:0/2",
+     "C:0/2",
+     "D:0/2"
+    ]
+   },
+   "guestView": {
+    "rooms": [
+     "A:2",
+     "B:2",
+     "C:2",
+     "D:2"
+    ],
+    "roomsAnonymous": 4,
+    "api": {
+     "units": 4,
+     "places": 8,
+     "reserved": 0,
+     "rooms": 4,
+     "free": 8
+    },
+    "uiWords": "4 rooms · 8 places available",
+    "chooseButton": true,
+    "count": {
+     "rooms": 4,
+     "places": 8,
+     "reserved": 0,
+     "free": 8,
+     "open": 4
+    },
+    "yourRoom": null
+   },
+   "asserts": {
+    "canonicalRoomsMatchMaster": true,
+    "canonicalPlacesMatchMaster": true,
+    "reservedMatchesMaster": true,
+    "liveRoomsEqualCanonical": true,
+    "liveReservedEqualCanonical": true,
+    "renderedRoomsLteCanonical": true,
+    "noInventedRoom": true,
+    "apiAvailabilityFromOpenUnits": true,
+    "yourRoomIsThePersistedRoom": true,
+    "uiWordsMatchApi": true,
+    "chooseOnlyWhenAvailable": true,
+    "noGuestInReservedRoom": true
+   },
+   "ok": true
+  },
+  {
+   "stay": "SIAM KEMPINSKI",
+   "window": "kempinski",
+   "category": "Deluxe Balcony King",
+   "key": "kempinski/deluxe-balcony-king",
+   "source": {
+    "column": 37,
+    "masterRooms": 4,
+    "masterStatus": "Open",
+    "physicalRooms": 4,
+    "places": 8,
+    "reservedRooms": 0,
+    "reservedFor": null,
+    "note": null
+   },
+   "canonical": {
+    "rooms": 4,
+    "places": 8,
+    "reserved": 0,
+    "reservedFor": null,
+    "labels": "ABCD"
+   },
+   "live": {
+    "rooms": 4,
+    "places": 8,
+    "reservedRooms": 0,
+    "reservedPlaces": 0,
+    "ownerOccupied": 0,
+    "guestOccupied": 2,
+    "occupied": 2,
+    "remainingRooms": 3,
+    "remainingPlaces": 6,
+    "perRoom": [
+     "A:2/2",
+     "B:0/2",
+     "C:0/2",
+     "D:0/2"
+    ]
+   },
+   "guestView": {
+    "rooms": [
+     "A:FULL",
+     "B:2",
+     "C:2",
+     "D:2"
+    ],
+    "roomsAnonymous": 4,
+    "api": {
+     "units": 4,
+     "places": 8,
+     "reserved": 0,
+     "rooms": 3,
+     "free": 6
+    },
+    "uiWords": "3 rooms · 6 places available",
+    "chooseButton": true,
+    "count": {
+     "rooms": 4,
+     "places": 8,
+     "reserved": 0,
+     "free": 6,
+     "open": 3
+    },
+    "yourRoom": null
+   },
+   "asserts": {
+    "canonicalRoomsMatchMaster": true,
+    "canonicalPlacesMatchMaster": true,
+    "reservedMatchesMaster": true,
+    "liveRoomsEqualCanonical": true,
+    "liveReservedEqualCanonical": true,
+    "renderedRoomsLteCanonical": true,
+    "noInventedRoom": true,
+    "apiAvailabilityFromOpenUnits": true,
+    "yourRoomIsThePersistedRoom": true,
+    "uiWordsMatchApi": true,
+    "chooseOnlyWhenAvailable": true,
+    "noGuestInReservedRoom": true
+   },
+   "ok": true
+  }
+ ]
+}
