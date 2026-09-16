@@ -11,12 +11,12 @@
   {
    "id": "A-refresh-keeps",
    "ok": true,
-   "d": "after a hard refresh: {\"contact\":{\"email\":\"suthep.hrg@gmail.com\",\"phone\":\"+66 81 000 0000\"},\"allergy\":\"no\",\"profile\":{\"coffeetea\":\"Oolong, no milk\",\"treat\":\"Mango sticky rice\",\"drink"
+   "d": "after a hard refresh: {\"contact\":{\"email\":\"s…@gmail.com\",\"phone\":\"+66 81 000 0000\"},\"allergy\":\"no\",\"profile\":{\"coffeetea\":\"Oolong, no milk\",\"treat\":\"Mango sticky rice\",\"drink"
   },
   {
    "id": "B-contact",
    "ok": true,
-   "d": "{\"email\":\"suthep.hrg@gmail.com\",\"phone\":\"+66 81 000 0000\"}"
+   "d": "{\"email\":\"s…@gmail.com\",\"phone\":\"+66 81 000 0000\"}"
   },
   {
    "id": "B-answers",
