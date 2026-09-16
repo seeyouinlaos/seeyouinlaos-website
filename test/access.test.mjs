@@ -81,6 +81,15 @@ test('ACCESS · the pages: the bag, the tickets, the journeys catalogue and ever
     assert.doesNotMatch(src(f), /<a class="a-cta" href="journeys\.html">Plan your journey<\/a>/, f);
   }
   for (const f of ['index.html', 'destination.html', 'journeys.html', 'accommodation.html', 'experiences.html', 'experience.html', 'voyage.html', 'marsilea.html', '1872.html', 'tea.html', 'transport.html', 'room.html', 'dress.html', 'invitation.html', 'your-journey.html', 'wedding.html', 'wedding-preparation.html', 'about-you.html', 'review.html', 'cart.html', 'tickets.html']) assert.match(src(f), /assets\/invite\.mjs/, f + ' loads the gate');
+  /* the status line's space is reserved before any script runs: the placeholder sits in the markup of every page with a
+     static header, assets/recon.js places it with the header it builds, the rules live in the shared stylesheet — the module only fills it */
+  const PH = '<p class="hd-access" data-access data-state="out"><span>Not signed in</span><span class="hd-access-do"><a href="invitation.html?open=1">Open your invitation</a></span></p>';
+  for (const f of ['1872.html', 'about-you.html', 'cart.html', 'dress.html', 'invitation.html', 'marsilea.html', 'review.html', 'journeys.html', 'tickets.html', 'tea.html', 'transport.html', 'wedding.html', 'wedding-preparation.html', 'room.html', 'your-journey.html']) { const h = src(f); assert.equal(h.split(PH).length, 2, f + ' carries the placeholder once'); assert.ok(h.indexOf('</header>') < h.indexOf(PH) && h.indexOf(PH) - h.indexOf('</header>') < 12, f + ' — right after the header'); }
+  for (const f of ['index.html', 'destination.html', 'accommodation.html', 'experiences.html', 'experience.html', 'voyage.html']) assert.doesNotMatch(src(f), /data-access/, f + ' has no static header — recon.js places the line');
+  assert.match(src('assets/recon.js'), /access\.setAttribute\('data-access', ''\); access\.setAttribute\('data-state', 'out'\);\s*access\.innerHTML = '<span>Not signed in<\/span><span class="hd-access-do"><a href="invitation\.html\?open=1">Open your invitation<\/a><\/span>';\s*document\.body\.prepend\(header, access\);/);
+  assert.match(src('assets/aman.css'), /\n\.hd-access \{ margin: 0; padding: 9px 22px; display: flex; justify-content: flex-end; align-items: center; gap: 6px 14px;[^}]*min-height: 35px; box-sizing: border-box; \}/, 'the rules are in the shared stylesheet');
+  assert.match(src('assets/aman.css'), /@media \(max-width: 479px\) \{ \.hd-access \{ flex-direction: column; align-items: flex-end; gap: 2px; min-height: 53px; \} \}/, 'on a phone both states are two rows of the same height');
+  assert.doesNotMatch(src('assets/invite.mjs'), /\n\.hd-access \{/, 'the module injects no status rules');
   /* the journeys catalogue is the planner: no fare, room or add is reachable signed out because the page itself hands over first */
   const j = src('journeys.html'); assert.ok(j.indexOf('gated(function(){});') < j.indexOf("document.querySelectorAll('[data-add]').forEach(function(b){b.addEventListener('click'"), 'the hand-over precedes every selector');
 });

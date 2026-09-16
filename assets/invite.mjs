@@ -180,14 +180,6 @@ function migrateLegacy(legacy, partyId, guestId) {
 
 /* ---------------- overlay (tea.html visual grammar, shared) ---------------- */
 const CSS = `
-.hd-access { margin: 0; padding: 9px 22px; display: flex; justify-content: flex-end; align-items: center; flex-wrap: wrap; gap: 6px 14px; font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; line-height: 1.6; color: #6B6964; background: #F3EEE7; border-bottom: 1px solid #DAD9D7; }
-.hd-access .on { color: #313131; }
-.hd-access a { color: #313131; text-decoration: none; border-bottom: 1px solid #313131; padding-bottom: 1px; min-height: 0; }
-.hd-access a:hover { opacity: .6; }
-.hd-access .hd-access-out { background: none; border: 0; padding: 0; cursor: pointer; font: inherit; letter-spacing: inherit; text-transform: inherit; color: #6B6964; border-bottom: 1px solid #DAD9D7; }
-@media (min-width: 768px) { .hd-access { padding: 9px 44px; } }
-@media (min-width: 900px) { .hd-access { padding: 9px 64px; } }
-
 .siyl-inv-scrim{position:fixed;inset:0;background:rgba(30,30,30,.45);display:none;z-index:80}
 .siyl-inv{position:fixed;left:0;right:0;bottom:0;background:#FCFAF6;padding:34px 26px calc(38px + env(safe-area-inset-bottom));display:none;z-index:81}
 body.siyl-inv-open .siyl-inv-scrim,body.siyl-inv-open .siyl-inv{display:block}
@@ -273,7 +265,9 @@ function isPrivate(href) { if (!href) return false; const h = String(href).trim(
 function safeNext(v) { return /^[a-z0-9-]+(?:\.html)?(?:\?[\w=&%.-]*)?(?:#[\w-]*)?$/i.test(v || '') ? v : ''; }
 function gateUrl(next) { return hrefOf('invitation.html') + '?open=1' + (safeNext(next) ? '&next=' + encodeURIComponent(next) : ''); }
 function toGate(next) { LOC.replace(gateUrl(next)); }
-/* the status line under every header: signed in · name · Your Journey | not signed in · Open your invitation */
+/* the status line under every header: signed in · name · Your Journey | not signed in · Open your invitation.
+   Its space is reserved before this module runs: the line sits in the markup of every page (assets/recon.js
+   places it with the header it builds), styled by assets/aman.css — this only fills it, so nothing shifts. */
 function renderAccess() {
   if (!document.querySelector) return;
   ensureStyle();
@@ -283,8 +277,8 @@ function renderAccess() {
   const a = AUTH.get(), ok = !!(a && AUTH.valid());
   el.setAttribute('data-state', ok ? 'in' : 'out');
   el.innerHTML = ok
-    ? '<span class="on">Signed in · ' + esc(a.preferredName || a.fullName || 'you') + '</span><a href="' + hrefOf('your-journey.html') + '">Your Journey</a><button type="button" class="hd-access-out" data-access-out>Sign out</button>'
-    : '<span>Not signed in</span><a href="' + gateUrl('') + '">Open your invitation</a>';
+    ? '<span class="on">Signed in · ' + esc(a.preferredName || a.fullName || 'you') + '</span><span class="hd-access-do"><a href="' + hrefOf('your-journey.html') + '">Your Journey</a><button type="button" class="hd-access-out" data-access-out>Sign out</button></span>'
+    : '<span>Not signed in</span><span class="hd-access-do"><a href="' + gateUrl('') + '">Open your invitation</a></span>';
   const out = el.querySelector('[data-access-out]'); if (out) out.addEventListener('click', () => { GUEST.leave(); LOC.replace(hrefOf('invitation.html')); });
 }
 function esc(t) { return String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
