@@ -54,13 +54,13 @@ export function unitsOf(key) {
     return [{ key, label: 'A', name: s.name, kind: 'property', places: s.capacity, reservedFor: null }];
   }
   const out = [];
-  /* exactly one unit per physical room — never a Room G for six rooms */
+  /* exactly one unit per physical room — never a Room G for six rooms; the first `held` rooms are the Master's reservation */
   for (let i = 0; i < s.capacity; i++) {
     const label = i < 26 ? LETTERS[i] : LETTERS[Math.floor(i / 26) - 1] + LETTERS[i % 26];
     out.push({ key, label, name: 'Room ' + label, kind: 'room',
       /* the Owner's rule: two guest places per room; a single room stays what it is */
       places: s.occupancy === 1 ? 1 : PLACES,
-      reservedFor: null });
+      reservedFor: i < (s.held || 0) && s.heldFor ? s.heldFor : null });
   }
   return out;
 }
@@ -72,9 +72,13 @@ export function allUnits() {
 export function unitOf(key, label) { return unitsOf(key).find((u) => u.label === String(label || '').toUpperCase()) || null; }
 
 /* may this identity take a place in this unit — any authenticated guest may, in any unit (Owner, 15 Sep 2026) */
+/* who may take a place in a unit (Owner, 16 Sep 2026): an open room — any authenticated guest; a room reserved for the
+   Bride & Groom — the hosts only; a room reserved for the Family — nobody through the website (Guest Relations assign it) */
 export function mayJoin(unit, identity) {
   if (!unit) return { ok: false, error: 'unknown room' };
   if (!identity) return { ok: false, error: 'unauthorised' };
+  if (unit.reservedFor === 'Bride & Groom') return identity.hosts ? { ok: true } : { ok: false, error: 'reserved · bride & groom' };
+  if (unit.reservedFor) return { ok: false, error: 'reserved · ' + String(unit.reservedFor).toLowerCase() };
   return { ok: true };
 }
 
@@ -118,13 +122,15 @@ export class Rooms {
       });
     }
     if (identity) for (const o of occ) if (o.guestId === identity.guestId) mine[stageOf(o.key)] = { key: o.key, label: o.label };
-    /* the category as a whole: places left for a guest who may take them */
+    /* the category as a whole: TOTAL is the physical stock; AVAILABLE is what this guest may still take — a reserved room
+       (the hosts', the family's) is never available to a guest, its places never counted (Owner, 16 Sep 2026) */
     const summary = {};
     for (const key of Object.keys(units)) {
-      const list = units[key];
-      /* derived exactly from the units — available places = unused places, available rooms = units with a place left */
-      summary[key] = { units: list.length, places: list.reduce((n, u) => n + u.places, 0), free: list.reduce((n, u) => n + u.free, 0),
-                       rooms: list.filter((u) => u.free > 0).length, reservedFor: null, name: SEED[key].name, kind: list.length && list[0].kind };
+      const list = units[key], open = list.filter((u) => u.eligible || (!identity && !u.reservedFor));
+      summary[key] = { units: list.length, places: list.reduce((n, u) => n + u.places, 0),
+                       reserved: list.filter((u) => u.reservedFor).length, reservedFor: (list.find((u) => u.reservedFor) || {}).reservedFor || null,
+                       free: open.reduce((n, u) => n + u.free, 0), rooms: open.filter((u) => u.free > 0).length,
+                       name: SEED[key].name, kind: list.length && list[0].kind };
     }
     return { ok: true, units, summary, mine, places: PLACES };
   }
@@ -166,7 +172,7 @@ export class Rooms {
         const occ = await this.occupancies();
         const already = occ.some((o) => o.key === key && o.label === label && o.guestId === guestId);
         const others = occ.filter((o) => o.key === key && o.label === label && o.guestId !== guestId).length;
-        if (!already && others >= unit.places) return json({ ...(await this.view(identity)), ok: false, error: 'full' }, 409);
+        if (!already && others >= unit.places) return json({ ...(await this.view(identity)), ok: false, error: 'full' }, 409);   /* the last place was just filled: one wins, the other chooses another room */
         /* HOLD THE NEW PLACE FIRST … */
         await this.storage.put(this.keyOf(key, label, guestId), { invitationId, partyId: identity.partyId || null, name, at: new Date().toISOString() });
         /* … AND ONLY THEN LET THE OLD ONE GO — every other place of this stage */

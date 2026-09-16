@@ -119,7 +119,7 @@
     unitsHtml: function (win, slug, opts) {
       opts = opts || {};
       var u = U(); if (!u || !u.ready() || !u.tracked(win, slug)) return '';
-      var list = u.units(win, slug), mine = u.mineFor(win, slug), any = list.some(function (x) { return !x.full; });
+      var list = u.units(win, slug), mine = u.mineFor(win, slug), any = list.some(function (x) { return !x.full && x.eligible; });
       var h = '<div class="p-units" data-units="' + esc(win) + '|' + esc(slug) + '">';
       list.forEach(function (x) {
         var isMine = !!(mine && mine.label === x.label);
@@ -128,11 +128,13 @@
         for (var i = 0; i < x.places; i++) { var o = x.occupants[i]; dots += '<i class="' + (o ? (o.mine ? 'on me' : 'on') : '') + '" aria-hidden="true"></i>'; }
         var who = names.length ? names.map(function (n) { return '<b>' + esc(n) + '</b>'; }).join(' · ') : '';
         /* factual states only (Owner, 15 Sep 2026): available · 1 place available · Full · Your room */
-        var state = x.full ? 'Full' : (x.free === 1 ? '1 place available' : x.free + ' places available');
+        var reserved = !!(x.reservedFor && !x.eligible);
+        var state = reserved ? 'Reserved · ' + esc(x.reservedFor) : x.full ? 'Full' : (x.free === 1 ? '1 place available' : x.free + ' places available');
         var act = isMine ? '<span class="t-l1 on">Your room</span>'
-                : (x.full ? '<span class="t-l1">Full</span>'
+                : (reserved ? '<span class="t-l1">Reserved</span>'
+                : x.full ? '<span class="t-l1">Full</span>'
                 : '<button type="button" class="p-act quiet" data-join="' + esc(win) + '|' + esc(slug) + '|' + esc(x.label) + '">' + (names.length ? 'Join this room' : 'Choose this room') + '</button>');
-        h += '<div class="p-unit' + (isMine ? ' mine' : '') + (x.full ? ' full' : '') + '" data-unit="' + esc(x.label) + '" data-free="' + x.free + '">' +
+        h += '<div class="p-unit' + (isMine ? ' mine' : '') + (x.full ? ' full' : '') + (reserved ? ' reserved' : '') + '" data-unit="' + esc(x.label) + '" data-free="' + (reserved ? 0 : x.free) + '"' + (reserved ? ' data-reserved="' + esc(x.reservedFor) + '"' : '') + '>' +
              '<div><p class="p-unit-name">' + esc(u.unitName(x)) + '</p><p class="p-unit-who"><span class="p-places">' + dots + '</span>' + (who ? who + ' · ' : '') + state + '</p></div>' + act + '</div>';
       });
       h += '</div>';
@@ -154,7 +156,8 @@
     /* the words for a refusal */
     refusal: function (r) {
       if (!r || r.ok) return '';
-      if (r.error === 'full') return 'That room has just filled — choose another room.';
+      if (r.error === 'full') return 'This room was just filled. Please choose another room.';
+      if (r.error === 'reserved') return 'This room is reserved — please choose another room.';
       if (r.error === 'not signed in') return 'Open your invitation to choose a room.';
       return 'Your place could not be held right now — please try again in a moment.';
     }

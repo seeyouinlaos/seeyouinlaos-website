@@ -59,11 +59,18 @@ gate(2, 'Inventory display decision recorded',
   if (!/export const PLACES = 2;/.test(engine)) inv.push('a room unit is not two guest places');
   if (!/HOLD THE NEW PLACE FIRST/.test(engine) || !/AND ONLY THEN LET THE OLD ONE GO/.test(engine)) inv.push('a change is not join-then-release');
   if (!/if \(invitationId !== identity\.invitationId \|\| guestId !== identity\.guestId\) return json\(\{ ok: false, error: 'not your guest' \}, 403\);/.test(engine)) inv.push('a place can be held for another guest');
-  /* NO PRE-RESERVED ROOMS (Owner, 15 Sep 2026): any authenticated guest may take any unit; no unit carries a reservation; capacity is units × places */
-  if (!/if \(!identity\) return \{ ok: false, error: 'unauthorised' \};\s*return \{ ok: true \};/.test(engine)) inv.push('the engine still decides by reservation, not by identity alone');
-  if (/reservedFor: (?!null|u\.reservedFor)/.test(engine)) inv.push('a unit still carries a reservation label');
-  if (/reservedFor === HELD_FOR_HOSTS/.test(engine) || /s\.held/.test(engine)) inv.push('the seed\'s historical held notes still shape availability');
-  if (!/free: list\.reduce\(\(n, u\) => n \+ u\.free, 0\)/.test(engine) || !/rooms: list\.filter\(\(u\) => u\.free > 0\)\.length/.test(engine)) inv.push('the category summary is not derived from its units');
+  /* THE MASTER'S RESERVATIONS (Owner, 16 Sep 2026): the seed's held / heldFor are the Master's Status column — the first `held`
+     physical rooms of a category are RESERVED for `heldFor`; a Bride & Groom room is the hosts' alone, a Family room is nobody's
+     through the website; every other room is open to any authenticated guest. The total stays the physical count; the availability
+     (free places, rooms with a place left) is derived from the OPEN units only — never from a separate counter. */
+  if (!/if \(!identity\) return \{ ok: false, error: 'unauthorised' \};/.test(engine)) inv.push('an anonymous request can hold a place');
+  if (!/if \(unit\.reservedFor === 'Bride & Groom'\) return identity\.hosts \? \{ ok: true \} : \{ ok: false, error: 'reserved · bride & groom' \};/.test(engine)) inv.push('a Bride & Groom room is not the hosts\' alone');
+  if (!/if \(unit\.reservedFor\) return \{ ok: false, error: 'reserved · ' \+ String\(unit\.reservedFor\)\.toLowerCase\(\) \};/.test(engine)) inv.push('a Family room can be taken through the website');
+  if (!/reservedFor: i < \(s\.held \|\| 0\) && s\.heldFor \? s\.heldFor : null/.test(engine)) inv.push('the reserved rooms are not the Master\'s held count');
+  if (!/free: open\.reduce\(\(n, u\) => n \+ u\.free, 0\), rooms: open\.filter\(\(u\) => u\.free > 0\)\.length/.test(engine)) inv.push('the category availability is not derived from its open units');
+  if (!/reserved: list\.filter\(\(u\) => u\.reservedFor\)\.length/.test(engine)) inv.push('the summary does not count the reserved rooms');
+  if (!/var open = list\.filter\(function \(u\) \{ return u\.eligible; \}\);/.test(client)) inv.push('the client counts reserved rooms as available');
+  if (!/This room was just filled\. Please choose another room\./.test(stay)) inv.push('the oversell refusal does not carry the Owner\'s words');
   const seedSrc = seed;
   if (!/'bkk-stay\/penthouse':\s*\{ unit: 'room', capacity: 6, occupancy: 2/.test(seedSrc)) inv.push('the six-bedroom Penthouse is not six units of two places');
   /* the client must never decide an allocation for itself */

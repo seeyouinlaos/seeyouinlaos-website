@@ -42,8 +42,8 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/guest.js?v=925ff14c"></script>
 <script src="assets/confirm.js?v=15cc65d2"></script>
 <script src="assets/temple.js?v=dfa289bc"></script>
-<script src="assets/rooms.js?v=d7f59cc2"></script>
-<script src="assets/stay.js?v=b5d23467"></script>
+<script src="assets/rooms.js?v=1e289dbd"></script>
+<script src="assets/stay.js?v=93406ce3"></script>
 <script src="assets/seatlabels.js?v=4994e1f4"></script>
 <script src="assets/seating.js?v=76c2abde"></script>
 <script src="assets/seatpass.js?v=bd9e22bf"></script>
@@ -168,7 +168,7 @@ function bkkHtml(){
       '<p class="t-b2">'+esc(r.card||r.name)+'</p>'+
       '<p class="t-b2">21 – 24 February · 3 nights<br>'+esc(r.breakfast||stay.breakfast)+'</p>'+
       '<p class="p-price">'+P.money(q.total)+'<span class="t-l1">total per person · your cost</span></p>'+
-      (av?'<p class="t-l1'+(/Fully/.test(av)?' open':'')+'">'+esc(av)+'</p>':'')+
+      (av?'<p class="t-l1'+(/Fully|Reserved/.test(av)?' open':'')+'">'+esc(av)+'</p>':'')+
       (on?'<span class="p-act quiet is-current" aria-current="true">Current selection</span>'
          :'<button type="button" class="p-act" data-choose="'+r.slug+'"'+(U&&U.ready()&&U.tracked(win,r.slug)&&!U.fits(win,r.slug)?' disabled':'')+'>Select this stay</button>')+
       '<p><a class="p-link mute" href="room.html?stay=sathorn&room='+r.slug+'">View details</a></p>'+
@@ -323,7 +323,7 @@ var cards=opts.map(function(o){
     '<p class="t-b2">'+esc(o.stayName)+' · '+esc(o.dates)+'</p>'+
     '<p class="p-price">'+esc(o.amount)+'<span class="t-l1">'+esc(o.amountNote)+'</span></p>'+
     '<ul class="p-list">'+o.service.map(function(l){return '<li class="t-b2">'+esc(l)+'</li>'}).join('')+'</ul>'+
-    (av?'<p class="t-l1'+(/Fully/.test(av)?' open':'')+'">'+esc(av)+'</p>':'')+
+    (av?'<p class="t-l1'+(/Fully|Reserved/.test(av)?' open':'')+'">'+esc(av)+'</p>':'')+
     '</div></article>'}).join('');
 return '<p class="t-l1">Swipe to compare</p>'+
   '<div class="csel acar" id="cscar"><div class="atrk p-rail">'+cards+'</div>'+

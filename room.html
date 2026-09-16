@@ -102,8 +102,8 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:22px;margin:44
 <script src="assets/aman.js?v=fd12151c"></script>
 <script src="assets/rooms-data.js?v=30c293db"></script>
 <script src="assets/pricing.js?v=a3c88e2e"></script>
-<script src="assets/rooms.js?v=d7f59cc2"></script>
-<script src="assets/stay.js?v=b5d23467"></script>
+<script src="assets/rooms.js?v=1e289dbd"></script>
+<script src="assets/stay.js?v=93406ce3"></script>
 <script src="assets/journey.js?v=cadb3e68"></script>
 <script type="module" src="assets/invite.mjs?v=82a1294b"></script>
 <script>
@@ -345,7 +345,7 @@ function paint() {
       av.classList.toggle('low', U.scarce(w.id, room.slug) || U.soldOut(w.id, room.slug));
       var gone = !line && !U.fits(w.id, room.slug);
       b.disabled = gone;
-      if (gone) b.textContent = 'Fully booked';
+      if (gone) b.textContent = U.reserved(w.id, room.slug) ? 'Reserved' : 'Fully booked';
       if (box && ST) { box.innerHTML = ST.unitsHtml(w.id, room.slug); ST.wire(box, function (r) { paint(); if (!r.ok) { av.hidden = false; av.textContent = ST.refusal(r); av.classList.add('low'); } }); }
     } else if (av) { av.hidden = true; b.disabled = false; if (box) box.innerHTML = ''; }
   });

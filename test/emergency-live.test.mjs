@@ -5,7 +5,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { bearerOf, authIdOf } from '../register/crypto.mjs';
-import { src } from './sandbox.mjs';
+import { src, doState } from './sandbox.mjs';
+import { Rooms } from '../src/rooms.js';
 
 const ORIGIN = 'https://seeyouinlaos-website.suthep-hrg.workers.dev';
 function req(path, headers = {}, body) { return new Request(ORIGIN + path, { method: body ? 'POST' : 'GET', headers: { 'content-type': 'application/json', ...headers }, body: body ? JSON.stringify(body) : undefined }); }
@@ -45,6 +46,33 @@ test('EMAIL · the journey is stored first with a submission id, then Guest Rela
     for (const k of ['Your Journey has been received', 'Dear Peggy Berger', 'Reference: ' + d.submissionId, 'Wedding Dinner seat: B12', 'Special Express No. 25', ORIGIN + '/invitation', 'never sent by email', 'guest.relation.seeyouinlaos@gmail.com']) assert.ok(guest.textContent.includes(k), 'guest email carries ' + k);
     assert.doesNotMatch(owner.textContent + guest.textContent, /demo-peggy|x-siyl-auth|bearer/i);
     assert.equal(h.calls[0].auth, 'x'); assert.equal(h.calls[0].body.sender.email, 'guest.relation.seeyouinlaos@gmail.com');
+  } finally { h.done(); }
+});
+
+test('EMAIL · THE PERSISTED ROOM (Owner, 16 Sep 2026): both emails name the room the engine holds for the guest — read on the server under the guest\'s own identity, never the client\'s claim; with no engine the line says "not read"', async () => {
+  const h = await harness('brevo');
+  try {
+    /* one engine, Peggy holds Heritage Room B in the wedding window and Room C of the Penthouse */
+    const rooms = new Rooms(doState());
+    const stub = { fetch: (r) => rooms.fetch(r) };
+    h.env.ROOMS = { idFromName: () => 'rooms', get: () => stub };
+    const me = { invitationId: 'INV-G001', guestId: 'G001', partyId: 'INV-002', hosts: false };
+    for (const [key, label] of [['wedstay/heritage', 'B'], ['bkk-stay/penthouse', 'C']]) {
+      const j = await rooms.fetch(new Request('https://x/api/rooms/join', { method: 'POST', headers: { 'x-siyl-identity': JSON.stringify(me) }, body: JSON.stringify({ invitationId: 'INV-G001', guestId: 'G001', key, label, name: 'Peggy' }) }));
+      assert.equal(j.status, 200);
+    }
+    /* the client claims another room in its text — the emails carry the engine's */
+    const r = await h.w.fetch(req('/api/register', { 'x-siyl-auth': h.peggy }, { invitationId: 'INV-G001', registration: REG, text: TEXT + '\n- The Heritage · Room A' }), h.env);
+    assert.equal(r.status, 202);
+    const rec = JSON.parse(h.store.m.get('reg:INV-G001').v);
+    assert.deepEqual(rec.rooms, { wedstay: { key: 'wedstay/heritage', label: 'B', name: 'The Heritage', stay: null, room: 'Room B' }, 'bkk-stay': { key: 'bkk-stay/penthouse', label: 'C', name: 'Sathorn Penthouse', stay: 'Sathorn Penthouse Bangkok', room: 'Room C' } });
+    const owner = h.calls[0].body.textContent, guest = h.calls[1].body.textContent;
+    for (const t of [owner, guest]) { assert.match(t, /Rooms held \(room engine — the persisted allocation\):\n  Bangkok stay: Room C · Sathorn Penthouse · Sathorn Penthouse Bangkok\n  Vientiane · wedding: Room B · The Heritage/); }
+    /* without an engine the line is honest */
+    delete h.env.ROOMS; h.calls.length = 0;
+    await h.w.fetch(req('/api/register', { 'x-siyl-auth': h.peggy }, { invitationId: 'INV-G001', registration: REG, text: TEXT }), h.env);
+    assert.match(h.calls[0].body.textContent, /Rooms held \(room engine\): not read/);
+    assert.match(src('src/worker.js'), /const rooms = await engineRooms\(env, who\);/, 'the rooms are read on the server, from the engine');
   } finally { h.done(); }
 });
 

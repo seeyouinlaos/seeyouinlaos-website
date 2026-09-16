@@ -1,0 +1,301 @@
+{
+ "source": "Operations Master · Accommodation_Details (Owner, 16 Sep 2026) · rows \"Rooms avaible\" and \"Status\" · transport rows kept for completeness, not accommodation",
+ "rows": [
+  {
+   "col": 1,
+   "property": "Penthouse",
+   "category": "Elegant 6BR Sathon Penthouse",
+   "pax": "12 Adults",
+   "roomsAvailable": 5,
+   "status": "Open"
+  },
+  {
+   "col": 2,
+   "property": "U Sathorn Bangkok",
+   "category": "Superior Room With Garden View",
+   "pax": "2 adults",
+   "roomsAvailable": 38,
+   "status": "Open"
+  },
+  {
+   "col": 3,
+   "property": "Shama Yen-Akat Bangkok",
+   "category": "King Studio With Balcony",
+   "pax": "2 adults",
+   "roomsAvailable": 27,
+   "status": "Open"
+  },
+  {
+   "col": 4,
+   "property": "Special Express No. 25:  Bangkok to Nong Khai",
+   "category": "First Class cabin Special Express No. 25",
+   "pax": "2 adults, 1 child",
+   "roomsAvailable": 12,
+   "status": "Open"
+  },
+  {
+   "col": 5,
+   "property": "The Heritage",
+   "category": "The Heritage",
+   "pax": "2 adults, 1 child",
+   "roomsAvailable": 5,
+   "status": "Open"
+  },
+  {
+   "col": 6,
+   "property": "Heritage Executive",
+   "category": "Heritage Executive",
+   "pax": "1 King / 3 Twin",
+   "roomsAvailable": 13,
+   "status": "Open"
+  },
+  {
+   "col": 7,
+   "property": "Heritage Grand Premier",
+   "category": "Heritage Grand Premier",
+   "pax": "2 Adults | 1 Child (sharing bedding with parent)",
+   "roomsAvailable": 3,
+   "status": "Open"
+  },
+  {
+   "col": 8,
+   "property": "Noble Courtyard",
+   "category": "Noble Courtyard",
+   "pax": "2 adults, 1 child",
+   "roomsAvailable": 1,
+   "status": "Open"
+  },
+  {
+   "col": 9,
+   "property": "Grand Majestic Suite",
+   "category": "Grand Majestic Suite",
+   "pax": "2 adults, 1 child",
+   "roomsAvailable": 2,
+   "status": "Reserved for Family"
+  },
+  {
+   "col": 10,
+   "property": "Souphattra Majestic Suite",
+   "category": "Souphattra Majestic Suite",
+   "pax": "2 adults, 2 children",
+   "roomsAvailable": 1,
+   "status": "Open"
+  },
+  {
+   "col": 11,
+   "property": "Souphattra Presidential",
+   "category": "Souphattra Presidential",
+   "pax": "4 adults, 2 children",
+   "roomsAvailable": 1,
+   "status": "Reserved for Bride & Groom"
+  },
+  {
+   "col": 12,
+   "property": "Flight Vientiane - Kunming",
+   "category": "China Eastern Airline",
+   "pax": "1 Adult",
+   "roomsAvailable": 4,
+   "status": "Open"
+  },
+  {
+   "col": 13,
+   "property": "Flight Vientiane - Kunming",
+   "category": "China Eastern Airline",
+   "pax": "1 Adult",
+   "roomsAvailable": 4,
+   "status": "Open"
+  },
+  {
+   "col": 14,
+   "property": "Wanxiang Yueju Designer Homestay",
+   "category": "001 - Light French Suite",
+   "pax": "2 Adults",
+   "roomsAvailable": 1,
+   "status": "Open"
+  },
+  {
+   "col": 15,
+   "property": "Wanxiang Yueju Designer Homestay",
+   "category": "002 - Milano Minimalist",
+   "pax": "2 Adults",
+   "roomsAvailable": 1,
+   "status": "Open"
+  },
+  {
+   "col": 16,
+   "property": "Wanxiang Yueju Designer Homestay",
+   "category": "003 - Italian Style Suite",
+   "pax": "2 Adults",
+   "roomsAvailable": 1,
+   "status": "Open"
+  },
+  {
+   "col": 17,
+   "property": "Wanxiang Yueju Designer Homestay",
+   "category": "004 - Junting City-View Loft",
+   "pax": "2 Adults",
+   "roomsAvailable": 1,
+   "status": "Open"
+  },
+  {
+   "col": 18,
+   "property": "Wanxiang Yueju Designer Homestay",
+   "category": "005 - Mid-century Amber Suite",
+   "pax": "2 Adults",
+   "roomsAvailable": 1,
+   "status": "Open"
+  },
+  {
+   "col": 19,
+   "property": "Wanxiang Yueju Designer Homestay",
+   "category": "006 - Standard Single Room",
+   "pax": "2 Adults",
+   "roomsAvailable": 1,
+   "status": "Open"
+  },
+  {
+   "col": 20,
+   "property": "Wanxiang Yueju Designer Homestay",
+   "category": "007 - Solarium Bath Suite",
+   "pax": "2 Adults",
+   "roomsAvailable": 1,
+   "status": "Reserved for Bride & Groom"
+  },
+  {
+   "col": 21,
+   "property": "Wanxiang Yueju Designer Homestay",
+   "category": "008 - Smart Family Room",
+   "pax": "2 Adults",
+   "roomsAvailable": 1,
+   "status": "Open"
+  },
+  {
+   "col": 22,
+   "property": "Wanxiang Yueju Designer Homestay",
+   "category": "009 - Family Suite",
+   "pax": "4 Adults",
+   "roomsAvailable": 1,
+   "status": "Open"
+  },
+  {
+   "col": 23,
+   "property": "Wanxiang Yueju Designer Homestay",
+   "category": "010 - Seine Evening Glow Loft Family Room (Smart Guest Contr",
+   "pax": "4 Adults",
+   "roomsAvailable": 1,
+   "status": "Open"
+  },
+  {
+   "col": 24,
+   "property": "Wanxiang Yueju Designer Homestay",
+   "category": "011 - Penang Forest Nanyang-Style Deluxe Suite",
+   "pax": "4 Adults",
+   "roomsAvailable": 1,
+   "status": "Open"
+  },
+  {
+   "col": 25,
+   "property": "Wanxiang Yueju Designer Homestay",
+   "category": "012 - Left Bank French-Style",
+   "pax": "2 Adults",
+   "roomsAvailable": 1,
+   "status": "Open"
+  },
+  {
+   "col": 26,
+   "property": "Train Kunming to Lijiang",
+   "category": "China Train",
+   "pax": "1 Adult",
+   "roomsAvailable": 4,
+   "status": "Open"
+  },
+  {
+   "col": 27,
+   "property": "Luye Baisha · Rizhao Jinshan",
+   "category": "001 - Snow Mountain Viewing Room",
+   "pax": "2 Adults",
+   "roomsAvailable": 4,
+   "status": "Open"
+  },
+  {
+   "col": 28,
+   "property": "Luye Baisha · Rizhao Jinshan",
+   "category": "002 - 270 ° C Snow Mountain Viewing",
+   "pax": "2 Adults",
+   "roomsAvailable": 4,
+   "status": "Open"
+  },
+  {
+   "col": 29,
+   "property": "Luye Baisha · Rizhao Jinshan",
+   "category": "003 - 270 ° C Private Courtyard Snow Mountain View",
+   "pax": "2 Adults",
+   "roomsAvailable": 4,
+   "status": "Open"
+  },
+  {
+   "col": 30,
+   "property": "Luye Baisha · Rizhao Jinshan",
+   "category": "004 - 270 ° C Snow Mountain View Room Private Soup Pool",
+   "pax": "2 Adults",
+   "roomsAvailable": 4,
+   "status": "Open"
+  },
+  {
+   "col": 31,
+   "property": "Luye Baisha · Rizhao Jinshan",
+   "category": "005 - Snow Mountain Manor Suite",
+   "pax": "2 Adults",
+   "roomsAvailable": 4,
+   "status": "Open"
+  },
+  {
+   "col": 32,
+   "property": "Luye Baisha · Rizhao Jinshan",
+   "category": "006 - 270 ° C Snow Mountain View Suite",
+   "pax": "2 Adults",
+   "roomsAvailable": 4,
+   "status": "Reserved for Bride & Groom"
+  },
+  {
+   "col": 33,
+   "property": "Luye Baisha · Rizhao Jinshan",
+   "category": "007 - Snow Mountain Private Soup View",
+   "pax": "2 Adults",
+   "roomsAvailable": 4,
+   "status": "Open"
+  },
+  {
+   "col": 34,
+   "property": "Luye Baisha · Rizhao Jinshan",
+   "category": "008 - Boundless Floor To Ceiling Glass Sunlit",
+   "pax": "2 Adults",
+   "roomsAvailable": 4,
+   "status": "Open"
+  },
+  {
+   "col": 35,
+   "property": "Luye Baisha · Rizhao Jinshan",
+   "category": "009 - Luye Starry Sky Suite Immersive View",
+   "pax": "2 Adults",
+   "roomsAvailable": 4,
+   "status": "Open"
+  },
+  {
+   "col": 36,
+   "property": "Flight Lijiang - Bangkok",
+   "category": "China Eastern Airline",
+   "pax": "1 Adult",
+   "roomsAvailable": 4,
+   "status": "Open"
+  },
+  {
+   "col": 37,
+   "property": "Deluxe Balcony Room with King Bed",
+   "category": "Siam Kempinski",
+   "pax": "2.0",
+   "roomsAvailable": 4,
+   "status": "Open"
+  }
+ ]
+}

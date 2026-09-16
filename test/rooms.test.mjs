@@ -43,14 +43,21 @@ test('ROOMS · 1 room = 2 places; 5 rooms = 10 places; units are persistent labe
   assert.equal(allUnits().length, Object.keys(SEED).reduce((n, k) => n + (SEED[k].unit === 'guest' ? 1 : SEED[k].capacity), 0));
 });
 
-test('ROOMS · no pre-reserved rooms (Owner, 15 Sep 2026): every unit is open to every authenticated guest; nobody without an identity', () => {
+test('ROOMS · the Master\'s reservations (Owner, 16 Sep 2026): a Bride & Groom room is the hosts\' alone, a Family room is nobody\'s through the website, every other room is open to every authenticated guest; nobody without an identity', () => {
   const pres = unitsOf('wedstay/souphattra-presidential')[0];
-  assert.equal(pres.reservedFor, null);
-  assert.equal(mayJoin(pres, HAR).ok, true); assert.equal(mayJoin(pres, PEG).ok, true); assert.equal(mayJoin(pres, SUT).ok, true);
+  assert.equal(pres.reservedFor, 'Bride & Groom');
+  assert.equal(mayJoin(pres, HAR).ok, true); assert.equal(mayJoin(pres, SUT).ok, true); assert.equal(mayJoin(pres, PEG).ok, false); assert.equal(mayJoin(pres, PEG).error, 'reserved · bride & groom');
   assert.equal(mayJoin(pres, null).ok, false);
-  const fam = unitsOf('wedstay/grand-majestic')[0];
-  assert.equal(fam.reservedFor, null); assert.equal(mayJoin(fam, HAR).ok, true); assert.equal(mayJoin(fam, LIN).ok, true);
+  const fam = unitsOf('wedstay/grand-majestic');
+  assert.deepEqual(fam.map((u) => u.reservedFor), ['Family', 'Family']); assert.equal(mayJoin(fam[0], HAR).ok, false); assert.equal(mayJoin(fam[0], LIN).ok, false); assert.equal(mayJoin(fam[0], LIN).error, 'reserved · family');
   assert.equal(mayJoin(unitsOf('wedstay/heritage')[0], LIN).ok, true);
+  /* the Penthouse: six bedrooms, Room A the hosts', B – F open — never a Room G */
+  const pent = unitsOf('bkk-stay/penthouse');
+  assert.deepEqual(pent.map((u) => u.label), ['A', 'B', 'C', 'D', 'E', 'F']); assert.equal(pent[0].reservedFor, 'Bride & Groom'); assert.deepEqual(pent.slice(1).map((u) => u.reservedFor), [null, null, null, null, null]);
+  assert.equal(mayJoin(pent[0], PEG).ok, false); assert.equal(mayJoin(pent[1], PEG).ok, true); assert.equal(mayJoin(pent[0], HAR).ok, true);
+  /* Kunming: the Solarium (the Master's Status) is the hosts'; Lijiang: the 270° View Suite, all four rooms */
+  assert.equal(unitsOf('kmg/solarium')[0].reservedFor, 'Bride & Groom'); assert.equal(unitsOf('kmg/standard-single')[0].reservedFor, null);
+  assert.deepEqual(unitsOf('ljg/view-suite-270').map((u) => u.reservedFor), ['Bride & Groom', 'Bride & Groom', 'Bride & Groom', 'Bride & Groom']);
   assert.equal(stageOf('airbnb-2br/private-residence'), 'wedstay', 'the residence is the wedding stage');
 });
 
@@ -111,9 +118,15 @@ test('ROOMS · a write is the identity\'s own: another guest, another invitation
   r = await call(rooms, 'join', { invitationId: PEG.invitationId, guestId: PEG.guestId, key: 'wedstay/heritage', label: 'A', name: 'x' }, null);
   assert.equal(r.status, 401);
   r = await call(rooms, 'join', { invitationId: PEG.invitationId, guestId: PEG.guestId, key: 'wedstay/souphattra-presidential', label: 'A', name: 'x' }, PEG);
-  assert.equal(r.status, 200, 'the Presidential is available until booked — to Peggy too (Owner, 15 Sep 2026)');
+  assert.equal(r.status, 403, 'the Presidential is the Bride & Groom\'s — Peggy is refused (Owner, 16 Sep 2026)'); assert.equal(r.d.error, 'reserved · bride & groom');
+  r = await call(rooms, 'join', { invitationId: HAR.invitationId, guestId: HAR.guestId, key: 'wedstay/souphattra-presidential', label: 'A', name: 'Haruthai' }, HAR);
+  assert.equal(r.status, 200, 'the hosts take their reserved room');
   r = await call(rooms, 'join', { invitationId: HAR.invitationId, guestId: HAR.guestId, key: 'wedstay/grand-majestic', label: 'A', name: 'x' }, HAR);
-  assert.equal(r.status, 200, 'the Grand Majestic is available until booked');
+  assert.equal(r.status, 403, 'the Grand Majestic is the Family\'s — Guest Relations assign it, the website offers it to nobody'); assert.equal(r.d.error, 'reserved · family');
+  r = await call(rooms, 'join', { invitationId: PEG.invitationId, guestId: PEG.guestId, key: 'bkk-stay/penthouse', label: 'A', name: 'x' }, PEG);
+  assert.equal(r.status, 403, 'Penthouse Room A is the hosts\'');
+  r = await call(rooms, 'join', { invitationId: PEG.invitationId, guestId: PEG.guestId, key: 'bkk-stay/penthouse', label: 'B', name: 'Peggy' }, PEG);
+  assert.equal(r.status, 200, 'Room B is open'); assert.equal(r.d.summary['bkk-stay/penthouse'].units, 6); assert.equal(r.d.summary['bkk-stay/penthouse'].reserved, 1); assert.equal(r.d.summary['bkk-stay/penthouse'].rooms, 5); assert.equal(r.d.summary['bkk-stay/penthouse'].free, 9, 'ten bookable places, one taken');
   r = await call(rooms, 'leave', { invitationId: STE.invitationId, guestId: STE.guestId, stage: 'wedstay' }, PEG);
   assert.equal(r.status, 403);
 });

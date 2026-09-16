@@ -33,14 +33,15 @@ test('the Souphattra stock is the Sheet stock: 26 rooms, per window', () => {
   assert.notEqual('prewed/heritage', 'wedstay/heritage');
 });
 
-test('the historical held notes stay in the seed for the record — and shape nothing on the website (Owner, 15 Sep 2026)', () => {
+test('the Master\'s reservations live in the seed and shape the units (Owner, 16 Sep 2026): the first `held` rooms of a category are reserved for `heldFor`', () => {
   const noted = Object.entries(SEED).filter(([, s]) => s.held > 0);
-  assert.equal(noted.length, 6, 'the six categories the Master once marked');
-  assert.equal(SEED['prewed/grand-majestic'].heldFor, 'Family');
-  assert.equal(SEED['prewed/souphattra-presidential'].heldFor, 'Bride & Groom');
-  /* `sellable` belongs to the retired category ledger; the room engine derives every unit from `capacity` alone */
-  for (const [key] of noted) assert.equal(unitsOf(key).every((u) => u.reservedFor === null), true, key + ' has no reserved unit');
-  assert.doesNotMatch(readFileSync(join(ROOT, 'src/rooms.js'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, ''), /\.held\b|heldFor/, 'the engine never reads the notes');
+  assert.equal(noted.length, 7, 'the six categories the Master marks + the Penthouse\'s Room A (the Owner\'s allocation)');
+  assert.equal(SEED['prewed/grand-majestic'].heldFor, 'Family'); assert.equal(SEED['wedstay/grand-majestic'].held, 2);
+  assert.equal(SEED['prewed/souphattra-presidential'].heldFor, 'Bride & Groom'); assert.equal(SEED['wedstay/souphattra-presidential'].heldFor, 'Bride & Groom');
+  assert.equal(SEED['bkk-stay/penthouse'].held, 1); assert.equal(SEED['bkk-stay/penthouse'].heldFor, 'Bride & Groom');
+  assert.equal(SEED['kmg/solarium'].heldFor, 'Bride & Groom'); assert.equal(SEED['ljg/view-suite-270'].held, 4);
+  for (const [key, sd] of noted) { const units = unitsOf(key); assert.equal(units.filter((u) => u.reservedFor === sd.heldFor).length, sd.held, key + ': exactly `held` reserved rooms'); assert.equal(units.slice(sd.held).every((u) => u.reservedFor === null), true, key + ': the rest open'); }
+  for (const [key] of Object.entries(SEED).filter(([, s]) => !s.held)) assert.equal(unitsOf(key).every((u) => u.reservedFor === null), true, key + ' has no reserved unit');
 });
 
 test('a party consumes rooms, not seats — ceil(guests ÷ occupancy)', () => {
@@ -127,7 +128,7 @@ test('the Owner-approved Full Experience rooms all have stock behind them', () =
     const key = `${win}/${slug}`;
     assert.ok(SEED[key], key + ' is not stock-controlled');
     assert.ok(sellable(key) > 0, key + ' has no sellable stock');
-    assert.ok(!SEED[key].heldFor, key + ' is reserved inventory and cannot be a Full Experience default');
+    assert.ok((SEED[key].held || 0) < SEED[key].capacity, key + ' is wholly reserved inventory and cannot be a Full Experience default');
   }
 });
 

@@ -17,12 +17,14 @@
      'guest' — a whole-property or per-person product (the Sathorn Penthouse,
                the hosted residence, priced and held per person).
 
-   `held` / `heldFor` are the Master's historical notes of which categories
-   the sheet once marked for the Bride & Groom or the family. OWNER OVERRIDE
-   (15 Sep 2026): there are NO pre-reserved rooms. Every physical room is
-   available until a guest actually books a place in it — the couple book
-   their own two places like everyone else. The notes stay for the record;
-   nothing reads them to hold, hide or disable a room any more.
+   `held` / `heldFor` are the Master's reservations (Accommodation_Details,
+   row "Status", and the Owner's allocation of 16 Sep 2026): the first `held`
+   physical rooms of the category are RESERVED for `heldFor` — the Bride &
+   Groom (only the hosts may take them) or the Family (Guest Relations assign
+   them; the website offers them to nobody). A reserved room is never counted
+   as available to a guest, never carries a Choose button, and is shown as
+   RESERVED. The Penthouse: six bedrooms, Room A the hosts' — five rooms and
+   ten places bookable (the Master's "Rooms avaible 5").
 
    ROOM ALLOCATION (Owner, 15 Sep 2026): the physical room count IS the
    inventory. One physical room = one persistent allocation unit = two
@@ -46,7 +48,7 @@ export const SEED = {
    * six allocation units, Room A – F, twelve guest places — never more. The
    * two hotels are counted in rooms of two, as every other hotel here is. */
   'bkk-stay/penthouse':
-    { unit: 'room', capacity: 6, occupancy: 2, held: 0, name: 'Sathorn Penthouse', stay: 'Sathorn Penthouse Bangkok' },
+    { unit: 'room', capacity: 6, occupancy: 2, held: 1, heldFor: 'Bride & Groom', name: 'Sathorn Penthouse', stay: 'Sathorn Penthouse Bangkok' },
   'bkk-stay/u-sathorn-superior-garden':
     { unit: 'room', capacity: 38, occupancy: 2, held: 0, name: 'Superior Room With Garden View', stay: 'U Sathorn Bangkok' },
   'bkk-stay/shama-king-studio-balcony':

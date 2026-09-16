@@ -72,13 +72,15 @@
     fits: function (win, slug) {
       if (!this.tracked(win, slug)) return true;
       if (this.mineFor(win, slug)) return true;
-      return this.units(win, slug).some(function (u) { return !u.full; });
+      return this.units(win, slug).some(function (u) { return !u.full && u.eligible; });
     },
     soldOut: function (win, slug) { return this.tracked(win, slug) && !this.fits(win, slug); },
+    /* the whole category is the Master's reservation (no room this guest may take) */
+    reserved: function (win, slug) { var list = this.units(win, slug); return list.length > 0 && list.every(function (u) { return u.reservedFor && !u.eligible; }); },
     /* the unit to suggest: a unit a party member already holds with a place
      * free, else the first unit with a place free */
     suggest: function (win, slug) {
-      var list = this.units(win, slug).filter(function (u) { return !u.full; });
+      var list = this.units(win, slug).filter(function (u) { return !u.full && u.eligible; });
       var withParty = list.filter(function (u) { return u.occupants.some(function (o) { return o.party && !o.mine; }); })[0];
       return withParty || list[0] || null;
     },
@@ -91,7 +93,11 @@
       if (!s) return '';
       var list = this.units(win, slug), mine = this.mineFor(win, slug);
       if (mine) return 'Your place is held · ' + this.unitName(list.filter(function (u) { return u.label === mine.label; })[0] || { kind: 'room', label: mine.label });
-      var free = list.reduce(function (n, u) { return n + u.free; }, 0), rooms = list.filter(function (u) { return u.free > 0; }).length;
+      /* available = the rooms this guest may take (a reserved room is never one of them) — the total stays the physical count */
+      var open = list.filter(function (u) { return u.eligible; });
+      var free = open.reduce(function (n, u) { return n + u.free; }, 0), rooms = open.filter(function (u) { return u.free > 0; }).length;
+      /* a category the Master reserves in full (every room reserved, none this guest may take) says so — it is not "booked" */
+      if (!open.length && list.length && list.every(function (u) { return u.reservedFor; })) return 'Reserved · ' + list[0].reservedFor;
       if (free <= 0) return 'Fully booked';
       if (list.length === 1 && list[0].kind === 'property') return free === 1 ? '1 place available' : free + ' places available';
       return (rooms === 1 ? '1 room' : rooms + ' rooms') + ' · ' + (free === 1 ? '1 place available' : free + ' places available');
@@ -99,13 +105,15 @@
     /* the category's exact numbers, from its rooms */
     count: function (win, slug) {
       var list = this.units(win, slug);
-      return { rooms: list.length, places: list.reduce(function (n, u) { return n + u.places; }, 0), free: list.reduce(function (n, u) { return n + u.free; }, 0), open: list.filter(function (u) { return u.free > 0; }).length };
+      var open = list.filter(function (u) { return u.eligible; });
+      return { rooms: list.length, places: list.reduce(function (n, u) { return n + u.places; }, 0), reserved: list.filter(function (u) { return u.reservedFor; }).length, free: open.reduce(function (n, u) { return n + u.free; }, 0), open: open.filter(function (u) { return u.free > 0; }).length };
     },
     scarce: function (win, slug) { var s = this.summary(win, slug); return !!s && s.free > 0 && s.free <= 2; },
     unitName: function (u) { return u ? (u.kind === 'property' ? u.name : 'Room ' + u.label) : ''; },
     unitWords: function (u) {
       if (!u) return '';
       var names = u.occupants.map(function (o) { return o.mine ? 'You' : (o.name || 'A guest'); });
+      if (u.reservedFor && !u.eligible) return (names.length ? names.join(' · ') + ' · ' : '') + 'Reserved · ' + u.reservedFor;
       if (u.full) return names.join(' · ') + ' · Full';
       if (!names.length) return u.places + (u.places === 1 ? ' place' : ' places') + ' · Available';
       return names.join(' · ') + ' · ' + u.free + (u.free === 1 ? ' place available' : ' places available');

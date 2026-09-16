@@ -50,6 +50,7 @@ export { Inventory } from './inventory.js';
 export { Seating } from './seating.js';
 export { Rooms } from './rooms.js';
 import { identify, owns } from './auth.js';
+import { SEED } from './inventory-seed.js';
 
 /* ---- the Guest Relations gate (F + G) ------------------------------------
  * A secret set with `wrangler secret put GR_TOKEN`, compared in constant
@@ -267,10 +268,13 @@ async function handleRegister(request, env) {
   //    failure and the client falls back to the clearly-labelled emergency
   //    channel — success is never simulated. The record carries the submission
   //    id; the provider's answer is written to it after the emails (step 2).
+  /* THE PERSISTED ROOMS (Owner, 16 Sep 2026): the rooms this guest holds are read from the room engine on the server —
+     the emails name the room the engine persists, never a room the client claims */
+  const rooms = await engineRooms(env, who);
   let record = null;
   if (env.REG_KV) {
     try {
-      record = { invitationId, submittedAt, submissionId, registration, text, mail: null };
+      record = { invitationId, submittedAt, submissionId, registration, text, rooms, mail: null };
       const prev = await env.REG_KV.get(regKey);
       await env.REG_KV.put(regKey, JSON.stringify(record), { metadata: { invitationId, submittedAt, submissionId } });
       if (prev) {
@@ -336,6 +340,27 @@ function guestEmailOf(record) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e) ? e : '';
 }
 function guestNameOf(record) { const g = record && record.registration && record.registration.guests && record.registration.guests[0]; return (g && (g.fullName || g.name)) || record.registration && record.registration.guestId || 'Guest'; }
+/* the guest's rooms as the engine persists them: { stage: { key, label, name } } — read server-side under the guest's own identity */
+async function engineRooms(env, who) {
+  if (!env.ROOMS || !who) return null;
+  try {
+    const stub = env.ROOMS.get(env.ROOMS.idFromName('rooms'));
+    const r = await stub.fetch(new Request('https://rooms/api/rooms/mine', { headers: { 'x-siyl-identity': JSON.stringify(who) } }));
+    const v = await r.json();
+    if (!v || !v.ok || !v.mine) return null;
+    const out = {};
+    for (const [stage, m] of Object.entries(v.mine)) { const s = SEED[m.key]; out[stage] = { key: m.key, label: m.label, name: s ? s.name : m.key, stay: s && s.stay ? s.stay : null, room: s && s.unit === 'guest' ? s.name : 'Room ' + m.label }; }
+    return out;
+  } catch (e) { return null; }
+}
+const STAGE_WORDS = { 'bkk-stay': 'Bangkok stay', prewed: 'Vientiane · pre-wedding', wedstay: 'Vientiane · wedding', kmg: 'Kunming', ljg: 'Lijiang', kempinski: 'Bangkok · Siam Kempinski' };
+function roomLines(record) {
+  const r = record && record.rooms;
+  if (r === null || r === undefined) return ['Rooms held (room engine): not read'];
+  const order = Object.keys(STAGE_WORDS), keys = Object.keys(r).sort((a, b) => (order.indexOf(a) + 1 || 99) - (order.indexOf(b) + 1 || 99));   /* journey order */
+  if (!keys.length) return ['Rooms held (room engine): none'];
+  return ['Rooms held (room engine — the persisted allocation):'].concat(keys.map((st) => '  ' + (STAGE_WORDS[st] || st) + ': ' + r[st].room + ' · ' + r[st].name + (r[st].stay ? ' · ' + r[st].stay : '')));
+}
 function seatWords(record) {
   const g = record && record.registration && record.registration.guests && record.registration.guests[0];
   if (!g) return { ceremony: 'not recorded', dinner: 'not recorded' };
@@ -347,15 +372,15 @@ async function sendJourneyMail(env, record, request) {
   const name = guestNameOf(record), guestId = record.registration && record.registration.guestId || '', seats = seatWords(record), g = record.registration && record.registration.guests && record.registration.guests[0] || {};
   const total = record.registration && record.registration.total != null ? 'USD ' + record.registration.total : 'see the selections';
   const ownerHead = ['SEE YOU IN LAOS — JOURNEY RECEIVED', 'Guest: ' + name + ' (' + guestId + ')', 'Invitation: ' + record.invitationId, 'Submission: ' + record.submissionId, 'Submitted at: ' + record.submittedAt,
-    'Wedding Ceremony seat: ' + seats.ceremony, 'Wedding Dinner seat: ' + seats.dinner, 'Contact: ' + (g.contact && g.contact.email || '—') + ' · ' + (g.contact && g.contact.phone || '—'),
+    'Wedding Ceremony seat: ' + seats.ceremony, 'Wedding Dinner seat: ' + seats.dinner].concat(roomLines(record)).concat(['Contact: ' + (g.contact && g.contact.email || '—') + ' · ' + (g.contact && g.contact.phone || '—'),
     'Allergy: ' + (g.allergy && g.allergy.answer || '—') + (g.allergy && g.allergy.details ? ' · ' + g.allergy.details : ''), 'Total / contribution: ' + total,
-    'Follow-up: ' + origin + '/api/status?invitation=' + encodeURIComponent(record.invitationId) + ' · KV record reg:' + record.invitationId, ''].join('\n');
+    'Follow-up: ' + origin + '/api/status?invitation=' + encodeURIComponent(record.invitationId) + ' · KV record reg:' + record.invitationId, '']).join('\n');
   const owner = await sendMail(env, GR_EMAIL, 'Guest Relations', 'Journey received — ' + name + ' · ' + record.submissionId, ownerHead + record.text);
   const guestTo = guestEmailOf(record);
   const guestBody = ['Your Journey has been received', '', 'Dear ' + name + ',', '', 'Thank you — your journey has reached Guest Relations. Your choices are saved; Guest Relations will review them personally and confirm each arrangement with you.',
-    'Reference: ' + record.submissionId, 'Received: ' + record.submittedAt, 'Wedding Ceremony seat: ' + seats.ceremony, 'Wedding Dinner seat: ' + seats.dinner, '',
+    'Reference: ' + record.submissionId, 'Received: ' + record.submittedAt, 'Wedding Ceremony seat: ' + seats.ceremony, 'Wedding Dinner seat: ' + seats.dinner].concat(roomLines(record)).concat(['',
     'Your journey (as sent):', '', record.text, '', 'To open your journey again: ' + origin + '/invitation (enter your own invitation code — it is never sent by email).',
-    'Guest Relations: ' + GR_EMAIL, '', 'See You In Laos'].join('\n');
+    'Guest Relations: ' + GR_EMAIL, '', 'See You In Laos']).join('\n');
   const guest = guestTo ? await sendMail(env, guestTo, name, 'Your Journey has been received — ' + record.submissionId, guestBody) : { provider: 'none', accepted: false, id: null, status: 0, error: 'no valid guest email address in the journey', at: new Date().toISOString() };
   return { owner, guest: { ...guest, to: guestTo ? guestTo.replace(/^(.).*(@.*)$/, '$1…$2') : null }, at: new Date().toISOString() };
 }
