@@ -21,8 +21,9 @@
 
   // THE EMAILS (Owner, 16 Sep 2026): every stored journey notifies Guest Relations and the guest
   // through a real provider. The key is a Worker secret — `wrangler secret put BREVO_API_KEY`
-  // (or RESEND_API_KEY); MAIL_FROM is the validated sender address of that provider account.
-  "vars": { "MAIL_FROM": "guest.relation.seeyouinlaos@gmail.com" },
+  // (or RESEND_API_KEY); MAIL_FROM is the validated sender address of that provider account
+  // (Brevo account of 16 Sep 2026: the sender validated there is the Owner's own address; replies go to Guest Relations).
+  "vars": { "MAIL_FROM": "suthep.hrg@gmail.com" },
 
   // THE SHARED INVENTORY LEDGER. One Durable Object instance holds the stock of
   // every room category in every window. Cloudflare routes every request for
