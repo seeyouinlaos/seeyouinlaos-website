@@ -53,8 +53,10 @@ note('grand-majestic-words', gm.av === 'Reserved · Family' && gm.disabled === t
 await page.goto(O + '/journeys.html', { waitUntil: 'load' });
 await page.waitForFunction(() => document.querySelectorAll('.vav').length > 5, null, { timeout: 20000 });
 const j = await page.evaluate(() => [...document.querySelectorAll('a[href*="room="]')].filter((a) => a.querySelector('.vav')).map((a) => ({ href: a.getAttribute('href').replace(/.*room=/, ''), av: a.querySelector('.vav').textContent.trim(), gone: a.classList.contains('gone'), aria: a.getAttribute('aria-disabled') })));
-const jp = j.find((x) => x.href === 'penthouse'), jpr = j.filter((x) => x.href === 'souphattra-presidential'), jgm = j.filter((x) => x.href === 'grand-majestic');
-note('journeys-penthouse', jp && jp.av === '5 rooms · 10 places available' && !jp.gone, JSON.stringify(jp));
+const cards = await page.evaluate(() => [...document.querySelectorAll('.psel .pcard')].map((c) => ({ room: c.getAttribute('data-room'), av: (c.querySelector('.pcav') || {}).textContent || '', gone: c.classList.contains('gone'), choose: !!c.querySelector('button[data-choose]'), off: (c.querySelector('.pcgo.off') || {}).textContent || '' })));
+const jp = cards.find((x) => x.room === 'penthouse'), jpr = j.filter((x) => x.href === 'souphattra-presidential'), jgm = j.filter((x) => x.href === 'grand-majestic');
+note('journeys-penthouse', jp && jp.av === '5 rooms · 10 places available' && !jp.gone && jp.choose, JSON.stringify(jp));
+note('journeys-bangkok-cards', cards.length === 3 && cards.every((c) => /available$/.test(c.av) && c.choose), JSON.stringify(cards));
 note('journeys-presidential', jpr.length > 0 && jpr.every((x) => x.av === 'Reserved · Bride & Groom' && x.gone && x.aria === 'true'), JSON.stringify(jpr));
 note('journeys-grand-majestic', jgm.length > 0 && jgm.every((x) => x.av === 'Reserved · Family' && x.gone), JSON.stringify(jgm));
 await page.screenshot({ path: path.join(OUT, TAG + '-journeys.png'), fullPage: false });

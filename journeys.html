@@ -76,6 +76,8 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:22px;margin:40
 .pcprice{font-family:'PP Editorial Old',serif;font-size:22px;margin:0 18px 2px}
 .pcprice span{font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;font-size:10px;letter-spacing:1.6px;text-transform:uppercase;color:#6B6964;display:block;margin-top:4px}
 .pcrate{font-size:10px;letter-spacing:1.6px;text-transform:uppercase;color:#6B6964;margin:0 18px 14px}
+.pcav{font-size:10px;letter-spacing:1.6px;text-transform:uppercase;color:#6B6964;margin:-8px 18px 14px}.pcav.low{color:#8A5A55}
+.pcgo.off{display:block;box-sizing:border-box;text-align:center;background:none;color:#8A8680;border:1px solid #CFC9C0;cursor:default;pointer-events:none}
 .pcgo{display:block;width:calc(100% - 36px);margin:0 18px;background:#313131;color:#F3EEE7;border:0;padding:16px;font:inherit;font-size:10px;letter-spacing:2.2px;text-transform:uppercase;cursor:pointer;min-height:48px}
 .pcgo.on{background:none;color:#313131;border:1px solid #313131}
 .pcview{display:inline-block;margin:12px 18px 0;font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#6B6964;text-decoration:none;border-bottom:1px solid #C9C4BA;padding:10px 0 3px;min-height:44px}
@@ -206,7 +208,9 @@ function paint(){
   box.innerHTML='<div class="acar psel-car"><div class="atrk">'+stay.rooms.map(function(r){
     var q=P.quote(win,r.slug),img=r.gallery.length?r.gallery[0][0]:'';
     var on=pick===r.slug;
-    return '<div class="aslide pcard'+(on?' picked':'')+'" data-room="'+r.slug+'">'+
+    /* live availability from the room engine (Owner, 16 Sep 2026): the words of the category, no Choose at 0 */
+    var av=(U&&U.ready()&&U.tracked(win,r.slug))?U.label(win,r.slug):'',gone=!!av&&!U.fits(win,r.slug)&&!on;
+    return '<div class="aslide pcard'+(on?' picked':'')+(gone?' gone':'')+'" data-room="'+r.slug+'">'+
       '<span class="pcimg"'+(img?' style="background-image:url('+img+')"':'')+' aria-hidden="true"></span>'+
       '<p class="pceyebrow'+(on?' picked':'')+'">'+(on?'Selected for your journey':(r.role?r.role:'Alternative'))+'</p>'+
       '<h3 class="pcname">'+(r.property||stay.name)+'</h3>'+
@@ -215,7 +219,9 @@ function paint(){
         (r.breakfast||stay.breakfast)+'</p>'+
       '<p class="pcprice">'+P.money(q.total)+' <span>total per person · '+q.nightsLine+'</span></p>'+
       '<p class="pcrate">'+P.money(r.rate)+' per person / night</p>'+
+      (av?'<p class="pcav vav'+((U.scarce(win,r.slug)||U.soldOut(win,r.slug))?' low':'')+'">'+av+'</p>':'')+
       (on?'<span class="pcgo on" aria-current="true">&#10003;&nbsp; Current selection</span>'
+         :gone?'<span class="pcgo off" aria-disabled="true">'+(U.reserved(win,r.slug)?'Reserved':'Fully booked')+'</span>'
          :'<button type="button" class="pcgo" data-choose="'+r.slug+'">Choose this address</button>')+
       '<a class="pcview" href="room.html?stay='+sk+'&room='+r.slug+'">See the rooms</a>'+
       '</div>'}).join('')+'</div>'+
@@ -231,6 +237,7 @@ function paint(){
     })});
 }
 document.addEventListener('siyl:bag',paint);
+document.addEventListener('siyl:units',paint);
 paint()});
 
 /* ------------------------------------------------------- HOW WOULD YOU FLY
