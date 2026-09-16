@@ -35,14 +35,14 @@ const room = async (stay, slug, win) => {
   }, win);
 };
 const p = await room('sathorn', 'penthouse', 'bkk-stay');
-await page.screenshot({ path: path.join(OUT, TAG + '-penthouse.png'), fullPage: false });
+await (await page.$('[data-av="bkk-stay"]')).scrollIntoViewIfNeeded(); await page.screenshot({ path: path.join(OUT, TAG + '-penthouse.png'), fullPage: false });
 note('penthouse-words', p.av === '5 rooms · 10 places available', p.av);
 note('penthouse-rooms', p.units && p.units.length === 6 && p.units.map((u) => u.label).join('') === 'ABCDEF', JSON.stringify(p.units && p.units.map((u) => u.label)));
 note('penthouse-A-reserved', p.units && p.units[0].reserved && /Reserved · Bride & Groom/.test(p.units[0].state) && !p.units[0].choose, JSON.stringify(p.units && p.units[0]));
 note('penthouse-B-open', p.units && !p.units[1].reserved && p.units[1].choose && p.units[1].free === '2', JSON.stringify(p.units && p.units[1]));
 note('penthouse-cta', p.disabled === false && !/Fully|Reserved/.test(p.btn), p.btn);
 const pr = await room('souphattra', 'souphattra-presidential', 'wedstay');
-await page.screenshot({ path: path.join(OUT, TAG + '-presidential.png'), fullPage: false });
+await (await page.$('[data-av="wedstay"]')).scrollIntoViewIfNeeded(); await page.screenshot({ path: path.join(OUT, TAG + '-presidential.png'), fullPage: false });
 note('presidential-words', pr.av === 'Reserved · Bride & Groom' && pr.disabled === true && pr.btn === 'Reserved', JSON.stringify({ av: pr.av, btn: pr.btn, disabled: pr.disabled }));
 note('presidential-room', pr.units && pr.units.length === 1 && pr.units[0].reserved && !pr.units[0].choose, JSON.stringify(pr.units));
 const so = await room('kunming', 'solarium', 'kmg');
@@ -59,7 +59,7 @@ note('journeys-penthouse', jp && jp.av === '5 rooms · 10 places available' && !
 note('journeys-bangkok-cards', cards.length === 3 && cards.every((c) => /available$/.test(c.av) && c.choose), JSON.stringify(cards));
 note('journeys-presidential', jpr.length > 0 && jpr.every((x) => x.av === 'Reserved · Bride & Groom' && x.gone && x.aria === 'true'), JSON.stringify(jpr));
 note('journeys-grand-majestic', jgm.length > 0 && jgm.every((x) => x.av === 'Reserved · Family' && x.gone), JSON.stringify(jgm));
-await page.screenshot({ path: path.join(OUT, TAG + '-journeys.png'), fullPage: false });
+await (await page.$('.psel .pcard')).scrollIntoViewIfNeeded(); await page.screenshot({ path: path.join(OUT, TAG + '-journeys.png'), fullPage: false });
 await browser.close();
 fs.writeFileSync(path.join(OUT, TAG + '-walk.json'), JSON.stringify({ at: new Date().toISOString(), origin: O, guest: GUEST, results: R }, null, 1));
 console.log(R.every((x) => x.ok) ? 'WALK ' + TAG + ': PASS' : 'WALK ' + TAG + ': FAIL');

@@ -1,0 +1,72 @@
+{
+ "at": "2026-09-16T16:18:19.832Z",
+ "origin": "https://seeyouinlaos.github.io/seeyouinlaos-website",
+ "guest": "G001",
+ "results": [
+  {
+   "id": "penthouse-words",
+   "ok": true,
+   "d": "5 rooms · 10 places available"
+  },
+  {
+   "id": "penthouse-rooms",
+   "ok": true,
+   "d": "[\"A\",\"B\",\"C\",\"D\",\"E\",\"F\"]"
+  },
+  {
+   "id": "penthouse-A-reserved",
+   "ok": true,
+   "d": "{\"label\":\"A\",\"state\":\"Reserved · Bride & Groom\",\"reserved\":true,\"free\":\"0\",\"choose\":false}"
+  },
+  {
+   "id": "penthouse-B-open",
+   "ok": true,
+   "d": "{\"label\":\"B\",\"state\":\"2 places available\",\"reserved\":false,\"free\":\"2\",\"choose\":true}"
+  },
+  {
+   "id": "penthouse-cta",
+   "ok": true,
+   "d": "Add to Your Journey"
+  },
+  {
+   "id": "presidential-words",
+   "ok": true,
+   "d": "{\"av\":\"Reserved · Bride & Groom\",\"btn\":\"Reserved\",\"disabled\":true}"
+  },
+  {
+   "id": "presidential-room",
+   "ok": true,
+   "d": "[{\"label\":\"A\",\"state\":\"Haruthai · Suthep · Reserved · Bride & Groom\",\"reserved\":true,\"free\":\"0\",\"choose\":false}]"
+  },
+  {
+   "id": "solarium-words",
+   "ok": true,
+   "d": "{\"av\":\"Reserved · Bride & Groom\",\"btn\":\"Reserved\"}"
+  },
+  {
+   "id": "grand-majestic-words",
+   "ok": true,
+   "d": "{\"av\":\"Reserved · Family\",\"btn\":\"Reserved\",\"units\":[{\"label\":\"A\",\"state\":\"Reserved · Family\",\"reserved\":true,\"free\":\"0\",\"choose\":false},{\"label\":\"B\",\"state\":\"Reserved · Family\",\"reserved\":true,\"free\":\"0\",\"choose\":false}]}"
+  },
+  {
+   "id": "journeys-penthouse",
+   "ok": true,
+   "d": "{\"room\":\"penthouse\",\"av\":\"5 rooms · 10 places available\",\"gone\":false,\"choose\":true,\"off\":\"\"}"
+  },
+  {
+   "id": "journeys-bangkok-cards",
+   "ok": true,
+   "d": "[{\"room\":\"penthouse\",\"av\":\"5 rooms · 10 places available\",\"gone\":false,\"choose\":true,\"off\":\"\"},{\"room\":\"u-sathorn-superior-garden\",\"av\":\"37 rooms · 74 places available\",\"gone\":false,\"choose\":true,\"off\":\"\"},{\"room\":\"shama-king-studio-balcony\",\"av\":\"27 rooms · 54 places available\",\"gone\":false,\"choose\":true,\"off\":\"\"}]"
+  },
+  {
+   "id": "journeys-presidential",
+   "ok": true,
+   "d": "[{\"href\":\"souphattra-presidential\",\"av\":\"Reserved · Bride & Groom\",\"gone\":true,\"aria\":\"true\"},{\"href\":\"souphattra-presidential\",\"av\":\"Reserved · Bride & Groom\",\"gone\":true,\"aria\":\"true\"}]"
+  },
+  {
+   "id": "journeys-grand-majestic",
+   "ok": true,
+   "d": "[{\"href\":\"grand-majestic\",\"av\":\"Reserved · Family\",\"gone\":true,\"aria\":\"true\"},{\"href\":\"grand-majestic\",\"av\":\"Reserved · Family\",\"gone\":true,\"aria\":\"true\"}]"
+  }
+ ]
+}
