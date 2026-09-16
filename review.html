@@ -79,7 +79,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/aman.js?v=fd12151c"></script>
 <script src="assets/rooms-data.js?v=30c293db"></script>
 <script src="assets/pricing.js?v=a3c88e2e"></script>
-<script src="assets/guest.js?v=925ff14c"></script>
+<script src="assets/guest.js?v=276467ba"></script>
 <script src="assets/docs.js?v=7c1c7bfd"></script>
 <script src="assets/confirm.js?v=15cc65d2"></script>
 <script src="assets/seatlabels.js?v=4994e1f4"></script>
@@ -122,13 +122,16 @@ function paintMail(mail,ref){
   if(!box)return;box.hidden=false;
   var ok=!!(mail&&mail.guest&&mail.guest.accepted),okOwner=!!(mail&&mail.owner&&mail.owner.accepted);
   box.setAttribute('data-mail',ok?'sent':'failed');
-  if(ok){l.textContent='Confirmation email sent';m.textContent='A confirmation is on its way to '+(mail.guest.to||'your email address')+(ref?' · reference '+ref:'')+'. Guest Relations '+(okOwner?'have their copy.':'will be notified.');rb.hidden=true;return}
+  /* three separate truths (Owner, 16 Sep 2026): saved · Guest Relations notified · the confirmation to the guest's own address */
+  var lines=['Journey saved',okOwner?'Guest Relations notified':'Guest Relations could not be notified — the retry sends both emails'];
+  if(ok){lines.push('Confirmation email sent to: '+(mail.guest.to||'your email address'));l.textContent='Confirmation email sent';m.innerHTML=lines.map(esc).join('<br>')+(ref?'<br>Reference '+esc(ref):'');rb.hidden=true;return}
+  lines.push('Confirmation email could not be sent'+(mail&&mail.guest&&mail.guest.error==='no valid guest email address in the journey'?' — please add your email address in <a class="p-link" href="invitation.html#p-email">Your Invitation</a>, then retry':''));
   l.textContent='Your journey is saved';
-  m.textContent='Confirmation email could not be sent. '+(okOwner?'Guest Relations has been notified':'Guest Relations will be notified')+' — please retry.'+(ref?' Your reference is '+ref+'.':'')+(mail&&mail.guest&&mail.guest.error?' ('+mail.guest.error+')':'');
-  rb.hidden=false;rb.disabled=false;
+  m.innerHTML=lines.map(function(t,i){return i===2?t:esc(t)}).join('<br>')+(ref?'<br>Reference '+esc(ref):'');
+  rb.hidden=false;rb.disabled=false;rb.textContent='Retry email';
   rb.onclick=function(){rb.disabled=true;m.textContent='Sending the confirmation email again…';
     fetch(RETRY_URL,{method:'POST',headers:{'content-type':'application/json','x-siyl-auth':bearer()},body:JSON.stringify({invitationId:(function(){try{return JSON.parse(localStorage.getItem('siyl.auth')||'null').invitationId}catch(e){return ''}})()})})
-      .then(function(r){return r.json()}).then(function(d){paintMail(d&&d.mail,d&&d.submissionId)})
+      .then(function(r){return r.json()}).then(function(d){if(d&&d.error==='email required'){rb.disabled=false;m.innerHTML=esc(d.message||'Please add your email address so we can send your confirmation.')+' <a class="p-link" href="invitation.html#p-email">Add your email address</a>';return}paintMail(d&&d.mail,d&&d.submissionId)})
       .catch(function(){rb.disabled=false;m.textContent='The email could not be sent again just now. Your journey stays saved — try once more in a moment.'})}}
 function wireAgain(){
 var ag=document.getElementById('again');
@@ -509,6 +512,7 @@ try{document.getElementById('sent').setAttribute('tabindex','-1');document.getEl
 wireAgain();
 return}
 if(r.status===401){btn.disabled=false;err.innerHTML='Your invitation could not be verified. Please open your invitation once more with your code, then send again.';return}
+if(r.status===422){var e422=null;try{e422=await r.json()}catch(e2){}btn.disabled=false;err.innerHTML=esc((e422&&e422.message)||'Please add your email address so we can send your confirmation.')+' <a class="p-link" href="invitation.html#p-email" style="margin-left:8px">Add your email address</a>';try{err.scrollIntoView({behavior:'smooth',block:'center'})}catch(e3){}return}
 }catch(e){/* endpoint unreachable — emergency channel below */}
 btn.disabled=false;
 err.innerHTML='Your selection could not be stored right now. Please try again in a moment, or use the email backup channel: <a href="mailto:guest.relation.seeyouinlaos@gmail.com?subject='+encodeURIComponent('Journey Selection — '+G.nameOf())+'&body='+encodeURIComponent(text)+'" style="color:#313131">send via email</a>.'})});

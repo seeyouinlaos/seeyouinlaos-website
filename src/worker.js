@@ -119,6 +119,12 @@ export default {
       return handleDocument(request, env);
     }
 
+    /* THE GUEST'S CONTACT (Owner, 16 Sep 2026 · EMAIL FIRST): the email and mobile number persisted on the server under
+       the authenticated guest's own invitation — the one recipient of the confirmation email, the same on every device */
+    if (url.pathname === '/api/contact') {
+      if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders(request) });
+      return handleContact(request, env);
+    }
     /* THE JOURNEY'S STATUS (F): received / confirmed, read by the guest site */
     if (url.pathname === '/api/status') {
       if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders(request) });
@@ -268,13 +274,20 @@ async function handleRegister(request, env) {
   //    failure and the client falls back to the clearly-labelled emergency
   //    channel — success is never simulated. The record carries the submission
   //    id; the provider's answer is written to it after the emails (step 2).
+  /* THE RECIPIENT (Owner, 16 Sep 2026 · EMAIL FIRST): the authenticated guest → the contact persisted on the server under
+     their invitation → the confirmation email. A journey without a valid email is not accepted: the guest is sent back to
+     the email field; the email they add is persisted server-side and Review & Send is open again. */
+  const recipient = await resolveRecipient(env, who, registration);
+  if (!recipient.email) {
+    return json({ ok: false, error: 'email required', message: 'Please add your email address so we can send your confirmation.', field: 'email' }, 422, corsHeaders(request));
+  }
   /* THE PERSISTED ROOMS (Owner, 16 Sep 2026): the rooms this guest holds are read from the room engine on the server —
      the emails name the room the engine persists, never a room the client claims */
   const rooms = await engineRooms(env, who);
   let record = null;
   if (env.REG_KV) {
     try {
-      record = { invitationId, submittedAt, submissionId, registration, text, rooms, mail: null };
+      record = { invitationId, submittedAt, submissionId, guestId: who.guestId, registration, text, rooms, recipient, mail: null };
       const prev = await env.REG_KV.get(regKey);
       await env.REG_KV.put(regKey, JSON.stringify(record), { metadata: { invitationId, submittedAt, submissionId } });
       if (prev) {
@@ -298,8 +311,58 @@ async function handleRegister(request, env) {
   //    stored record. An email failure never loses the booking: the journey is
   //    saved, the client says so and offers the retry.
   const mail = await sendJourneyMail(env, record, request);
-  try { await env.REG_KV.put(regKey, JSON.stringify({ ...record, mail }), { metadata: { invitationId, submittedAt, submissionId } }); } catch (e) { /* the record stands; the mail result is in the response */ }
-  return json({ ok: true, status: 'UNDER_REVIEW', stored, mailed: !!(mail.owner && mail.owner.accepted), submittedAt, submissionId, mail: publicMail(mail) }, 202, corsHeaders(request));
+  try { await env.REG_KV.put(regKey, JSON.stringify({ ...record, mail, mailSummary: mailSummary(mail) }), { metadata: { invitationId, submittedAt, submissionId } }); } catch (e) { /* the record stands; the mail result is in the response */ }
+  return json({ ok: true, status: 'UNDER_REVIEW', stored, mailed: !!(mail.owner && mail.owner.accepted), submittedAt, submissionId, mail: publicMail(mail), mailSummary: mailSummary(mail) }, 202, corsHeaders(request));
+}
+/* the flat mail record the Owner asked for, beside the provider answers */
+function mailSummary(mail) {
+  const o = mail && mail.owner || {}, g = mail && mail.guest || {};
+  return { ownerMailStatus: o.accepted ? 'accepted' : 'failed', ownerMessageId: o.id || null, guestMailStatus: g.accepted ? 'accepted' : 'failed', guestMessageId: g.id || null, guestTo: g.to || null, mailLastError: g.error || o.error || null, at: mail && mail.at || null };
+}
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const validEmail = (e) => typeof e === 'string' && EMAIL_RE.test(e.trim()) ? e.trim() : '';
+const contactKey = (invitationId) => 'contact:' + invitationId;
+async function storedContact(env, invitationId) {
+  if (!env.REG_KV) return null;
+  try { const raw = await env.REG_KV.get(contactKey(invitationId)); return raw ? JSON.parse(raw) : null; } catch (e) { return null; }
+}
+/* the authenticated guest's contact: GET reads it, PUT/POST stores it — the guest's own invitation only */
+async function handleContact(request, env) {
+  const who = await identify(request, env);
+  if (!who) return json({ ok: false, error: 'unauthorised' }, 401, corsHeaders(request));
+  if (!env.REG_KV) return json({ ok: false, error: 'no store' }, 503, corsHeaders(request));
+  if (request.method === 'GET') {
+    const c = await storedContact(env, who.invitationId);
+    return json({ ok: true, invitationId: who.invitationId, contact: c ? { email: c.email || '', phone: c.phone || '', at: c.at } : null }, 200, corsHeaders(request));
+  }
+  if (request.method !== 'PUT' && request.method !== 'POST') return json({ ok: false, error: 'method not allowed' }, 405, corsHeaders(request));
+  let body; try { body = await request.json(); } catch (e) { return json({ ok: false, error: 'invalid JSON' }, 400, corsHeaders(request)); }
+  if (body && body.invitationId && String(body.invitationId) !== who.invitationId) return json({ ok: false, error: 'not your invitation' }, 403, corsHeaders(request));
+  const prev = await storedContact(env, who.invitationId) || {};
+  const email = body && typeof body.email === 'string' ? body.email.trim().slice(0, 254) : prev.email || '';
+  const phone = body && typeof body.phone === 'string' ? body.phone.trim().slice(0, 40) : prev.phone || '';
+  if (email && !validEmail(email)) return json({ ok: false, error: 'invalid email', field: 'email' }, 422, corsHeaders(request));
+  const contact = { invitationId: who.invitationId, guestId: who.guestId, email, phone, at: new Date().toISOString() };
+  try { await env.REG_KV.put(contactKey(who.invitationId), JSON.stringify(contact), { metadata: { invitationId: who.invitationId, at: contact.at } }); } catch (e) { return json({ ok: false, error: 'contact could not be stored' }, 503, corsHeaders(request)); }
+  return json({ ok: true, invitationId: who.invitationId, contact: { email, phone, at: contact.at } }, 200, corsHeaders(request));
+}
+/* THE IDENTITY CHAIN: authenticated guest → canonical guestId → the contact email persisted on the server → the recipient.
+   The server-side contact wins; a valid email carried by the journey itself is accepted once and persisted (so the next
+   device and the retry read the same one); a fixture shape (guests[0].contact) is read last. */
+async function resolveRecipient(env, who, registration) {
+  const stored = await storedContact(env, who.invitationId);
+  if (stored && validEmail(stored.email)) return { email: validEmail(stored.email), phone: stored.phone || '', source: 'server contact' };
+  const r = registration || {};
+  const candidates = [[r.contact && r.contact.email, 'journey contact'], [r.guestRecord && r.guestRecord.contact && r.guestRecord.contact.email, 'journey guest record'],
+    [Array.isArray(r.guests) && r.guests[0] && r.guests[0].contact && r.guests[0].contact.email, 'journey guests[0]']];
+  for (const [e, source] of candidates) {
+    const email = validEmail(e);
+    if (!email) continue;
+    const phone = (r.contact && r.contact.phone) || (r.guestRecord && r.guestRecord.contact && r.guestRecord.contact.phone) || '';
+    if (env.REG_KV) { try { await env.REG_KV.put(contactKey(who.invitationId), JSON.stringify({ invitationId: who.invitationId, guestId: who.guestId, email, phone, at: new Date().toISOString(), from: source })); } catch (e) { /* the send still goes to it */ } }
+    return { email, phone, source };
+  }
+  return { email: '', phone: '', source: 'none' };
 }
 
 /* the submission reference: SYL-<guest>-<8 hex of the stored record's time and invitation> — no code, no bearer */
@@ -335,11 +398,19 @@ async function sendMail(env, to, toName, subject, text) {
   return out;
 }
 function guestEmailOf(record) {
-  const g = record && record.registration && Array.isArray(record.registration.guests) ? record.registration.guests[0] : null;
-  const e = g && g.contact && typeof g.contact.email === 'string' ? g.contact.email.trim() : '';
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e) ? e : '';
+  if (record && record.recipient && validEmail(record.recipient.email)) return validEmail(record.recipient.email);
+  const r = record && record.registration || {};
+  for (const e of [r.contact && r.contact.email, r.guestRecord && r.guestRecord.contact && r.guestRecord.contact.email, Array.isArray(r.guests) && r.guests[0] && r.guests[0].contact && r.guests[0].contact.email]) { const v = validEmail(e); if (v) return v; }
+  return '';
 }
-function guestNameOf(record) { const g = record && record.registration && record.registration.guests && record.registration.guests[0]; return (g && (g.fullName || g.name)) || record.registration && record.registration.guestId || 'Guest'; }
+function guestPhoneOf(record) { const r = record && record.registration || {}; return (record && record.recipient && record.recipient.phone) || (r.contact && r.contact.phone) || (r.guestRecord && r.guestRecord.contact && r.guestRecord.contact.phone) || (Array.isArray(r.guests) && r.guests[0] && r.guests[0].contact && r.guests[0].contact.phone) || ''; }
+function guestNameOf(record) {
+  const r = record && record.registration || {};
+  const gr = r.guestRecord && Array.isArray(r.guestRecord.guests) && r.guestRecord.guests[0] || null;
+  const g = Array.isArray(r.guests) && r.guests[0] || null;
+  return (gr && gr.source && gr.source.fullName) || (gr && gr.name) || (g && (g.fullName || g.name)) || record && record.guestId || r.guestId || 'Guest';
+}
+function guestRowOf(record) { const r = record && record.registration || {}; const gr = r.guestRecord && Array.isArray(r.guestRecord.guests) && r.guestRecord.guests[0] || null; const g = Array.isArray(r.guests) && r.guests[0] || null; return { allergy: (g && g.allergy) || (r.guestRecord && r.guestRecord.allergy) || null, row: gr || g || {} }; }
 /* the guest's rooms as the engine persists them: { stage: { key, label, name } } — read server-side under the guest's own identity */
 async function engineRooms(env, who) {
   if (!env.ROOMS || !who) return null;
@@ -362,17 +433,21 @@ function roomLines(record) {
   return ['Rooms held (room engine — the persisted allocation):'].concat(keys.map((st) => '  ' + (STAGE_WORDS[st] || st) + ': ' + r[st].room + ' · ' + r[st].name + (r[st].stay ? ' · ' + r[st].stay : '')));
 }
 function seatWords(record) {
-  const g = record && record.registration && record.registration.guests && record.registration.guests[0];
-  if (!g) return { ceremony: 'not recorded', dinner: 'not recorded' };
-  return { ceremony: g.ceremonySeatLabel || (g.ceremonySeat ? g.ceremonySeat : 'no seat held'), dinner: g.dinnerSeatLabel || (g.dinnerSeat ? g.dinnerSeat : 'no seat held') };
+  const r = record && record.registration || {}, g = Array.isArray(r.guests) && r.guests[0] || null;
+  if (g) return { ceremony: g.ceremonySeatLabel || (g.ceremonySeat ? g.ceremonySeat : 'no seat held'), dinner: g.dinnerSeatLabel || (g.dinnerSeat ? g.dinnerSeat : 'no seat held') };
+  /* the journey-shop shape: seats = the seating engine's mine { ceremony: { guestId: seatId }, dinner: { … } } */
+  const id = record && record.guestId || r.guestId, m = r.seats && typeof r.seats === 'object' ? r.seats : null;
+  if (!m || !id) return { ceremony: 'not recorded', dinner: 'not recorded' };
+  const pick = (ev) => (m[ev] && (m[ev][id] || (typeof m[ev] === 'string' ? m[ev] : null))) || 'no seat held';
+  return { ceremony: pick('ceremony'), dinner: pick('dinner') };
 }
 /* both emails for one stored record — the content is the journey as sent, never an access code */
 async function sendJourneyMail(env, record, request) {
   const origin = new URL(request.url).origin;
-  const name = guestNameOf(record), guestId = record.registration && record.registration.guestId || '', seats = seatWords(record), g = record.registration && record.registration.guests && record.registration.guests[0] || {};
+  const name = guestNameOf(record), guestId = record.guestId || record.registration && record.registration.guestId || '', seats = seatWords(record), g = guestRowOf(record), contact = { email: guestEmailOf(record), phone: guestPhoneOf(record) };
   const total = record.registration && record.registration.total != null ? 'USD ' + record.registration.total : 'see the selections';
   const ownerHead = ['SEE YOU IN LAOS — JOURNEY RECEIVED', 'Guest: ' + name + ' (' + guestId + ')', 'Invitation: ' + record.invitationId, 'Submission: ' + record.submissionId, 'Submitted at: ' + record.submittedAt,
-    'Wedding Ceremony seat: ' + seats.ceremony, 'Wedding Dinner seat: ' + seats.dinner].concat(roomLines(record)).concat(['Contact: ' + (g.contact && g.contact.email || '—') + ' · ' + (g.contact && g.contact.phone || '—'),
+    'Wedding Ceremony seat: ' + seats.ceremony, 'Wedding Dinner seat: ' + seats.dinner].concat(roomLines(record)).concat(['Contact: ' + (contact.email || '—') + ' · ' + (contact.phone || '—'),
     'Allergy: ' + (g.allergy && g.allergy.answer || '—') + (g.allergy && g.allergy.details ? ' · ' + g.allergy.details : ''), 'Total / contribution: ' + total,
     'Follow-up: ' + origin + '/api/status?invitation=' + encodeURIComponent(record.invitationId) + ' · KV record reg:' + record.invitationId, '']).join('\n');
   const owner = await sendMail(env, GR_EMAIL, 'Guest Relations', 'Journey received — ' + name + ' · ' + record.submissionId, ownerHead + record.text);
@@ -396,9 +471,14 @@ async function handleMailRetry(request, env) {
   if (!raw) return json({ ok: false, error: 'no stored journey to confirm' }, 404, corsHeaders(request));
   let record; try { record = JSON.parse(raw); } catch (e) { return json({ ok: false, error: 'stored journey unreadable' }, 500, corsHeaders(request)); }
   if (!record.submissionId) record.submissionId = await submissionIdOf(invitationId, record.submittedAt || '');
+  if (!record.guestId) record.guestId = who.guestId;
+  /* the recipient is resolved again — the contact the guest has since added on the server is the one used */
+  const recipient = await resolveRecipient(env, who, record.registration);
+  if (!recipient.email) return json({ ok: false, error: 'email required', message: 'Please add your email address so we can send your confirmation.', field: 'email', submissionId: record.submissionId }, 422, corsHeaders(request));
+  record.recipient = recipient;
   const mail = await sendJourneyMail(env, record, request);
-  try { await env.REG_KV.put('reg:' + invitationId, JSON.stringify({ ...record, mail, mailRetries: (record.mailRetries || 0) + 1 }), { metadata: { invitationId, submittedAt: record.submittedAt, submissionId: record.submissionId } }); } catch (e) {}
-  return json({ ok: true, submissionId: record.submissionId, submittedAt: record.submittedAt, mailed: !!(mail.owner && mail.owner.accepted), mail: publicMail(mail) }, 200, corsHeaders(request));
+  try { await env.REG_KV.put('reg:' + invitationId, JSON.stringify({ ...record, mail, mailSummary: mailSummary(mail), mailRetries: (record.mailRetries || 0) + 1 }), { metadata: { invitationId, submittedAt: record.submittedAt, submissionId: record.submissionId } }); } catch (e) {}
+  return json({ ok: true, submissionId: record.submissionId, submittedAt: record.submittedAt, mailed: !!(mail.owner && mail.owner.accepted), mail: publicMail(mail), mailSummary: mailSummary(mail) }, 200, corsHeaders(request));
 }
 
 /* ---- F · status and confirmation --------------------------------------- */

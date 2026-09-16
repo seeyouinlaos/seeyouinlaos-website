@@ -27,6 +27,8 @@
 (function () {
   'use strict';
   var KEY = 'siyl.guest';
+  var ORIGIN = 'https://seeyouinlaos-website.suthep-hrg.workers.dev';
+  var CONTACT_API = (typeof location !== 'undefined' && (location.hostname === 'seeyouinlaos-website.suthep-hrg.workers.dev' || /^(localhost|127\.0\.0\.1)$/.test(location.hostname))) ? '/api/contact' : ORIGIN + '/api/contact';
 
   function auth() {
     try { return JSON.parse(localStorage.getItem('siyl.auth') || 'null'); } catch (e) { return null; }
@@ -169,7 +171,10 @@
       write(st);
     },
 
-    /* ---- contact — REQUIRED, the guest's own, both valid ---------------- */
+    /* ---- contact — REQUIRED, the guest's own, both valid ----------------
+     * SERVER-SIDE (Owner, 16 Sep 2026 · EMAIL FIRST): the email and mobile number are persisted on the Worker under the
+     * guest's invitation (/api/contact) — the recipient of the confirmation email and the same on every device. This
+     * browser's draft is written first; the server copy follows; a device with an empty draft loads the server copy. */
     contact: function (f) { var st = read(); return (st.contact || {})[f] || ''; },
     setContact: function (f, v) {
       var me = this.me(); if (!me) return;
@@ -181,6 +186,28 @@
       st.history = st.history || [];
       st.history.push({ field: 'contact.' + f, from: from, to: v, at: stamp(), by: me.guestId });
       write(st);
+      this.pushContact();
+    },
+    pushContact: function () {
+      var a = auth(), st = read(), c = st.contact || {};
+      if (!a || !a.bearer || typeof fetch !== 'function') return Promise.resolve(null);
+      var body = { invitationId: a.invitationId, email: c.email || '', phone: c.phone || '' };
+      return fetch(CONTACT_API, { method: 'PUT', headers: { 'content-type': 'application/json', 'x-siyl-auth': a.bearer }, body: JSON.stringify(body) })
+        .then(function (r) { return r.json(); }).then(function (d) { if (d && d.ok) { var s2 = read(); s2.contactSyncedAt = d.contact && d.contact.at || stamp(); localStorage.setItem(KEY, JSON.stringify(s2)); } return d; }).catch(function () { return null; });
+    },
+    /* the server copy: fills an empty draft on this device (a signed-in guest on a new phone sees their own email);
+       a draft this device already holds that the server lacks is pushed */
+    pullContact: function () {
+      var self = this, a = auth();
+      if (!a || !a.bearer || typeof fetch !== 'function') return Promise.resolve(null);
+      return fetch(CONTACT_API, { headers: { 'x-siyl-auth': a.bearer } }).then(function (r) { return r.json(); }).then(function (d) {
+        if (!d || !d.ok) return d;
+        var st = read(), c = st.contact || {}, srv = d.contact || null, changed = false;
+        if (srv) { ['email', 'phone'].forEach(function (f) { if (!c[f] && srv[f]) { c[f] = srv[f]; changed = true; } }); }
+        if (changed) { st.contact = c; write(st); }
+        if ((c.email && !(srv && srv.email)) || (c.phone && !(srv && srv.phone))) self.pushContact();
+        return d;
+      }).catch(function () { return null; });
     },
     contactMissing: function () {
       var out = [];
@@ -431,4 +458,9 @@
       };
     }
   };
+  /* the pull: once per page when a guest is signed in, and again when a sign-in happens on this page */
+  var pulled = '';
+  function pullOnce() { var a = auth(); if (!a || !a.bearer || !G.me()) return; if (pulled === a.invitationId) return; pulled = a.invitationId; G.pullContact(); }
+  if (typeof document !== 'undefined') { document.addEventListener('siyl:auth', pullOnce); document.addEventListener('siyl:invite-ready', pullOnce); }
+  try { pullOnce(); } catch (e) {}
 })();
