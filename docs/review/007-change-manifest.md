@@ -171,7 +171,14 @@ Wedding Ceremony on the aerial — until then these four carry no marker on the 
   out); the room and transport pages are private; the prices of the tea, 1872, Sühring and the Sangkhathan are private
   fragments; the close CTA reads "Continue Your Journey" for a guest; the footers say "The Journey"; the room and
   transport pages' back link reads "Back to The Journey".
-- **Guest reconciliation:** `docs/review/004-guest-reconciliation-summary.txt` (counts only) — UNRESOLVED 3, the
-  active count 47 not verified against the Owner's master; no text and no register changed.
+- **Guest reconciliation:** `docs/review/004-guest-reconciliation-summary.txt` (counts only). FINAL OWNER DECISION
+  (16 Sep 2026): the active website invitation register governs website access (47 guests · 47 invitations · 47
+  credentials); the Operations Master Contacts sheet is broader CRM scope, not invitation authority; the three
+  unconfirmed contact ↔ invitation mappings and the other sheet differences are non-blocking operations data items.
+  No text and no register changed.
 - **007 FINAL V3:** `007-final-v3-text.txt`, `007-final-v3-source-truth-audit.txt`, `007-final-v3-delta.md` (v2 → v3),
   generators `007-final-v3-extract.mjs` · `007-final-v3-audit.py` · `007-final-v3-delta.py`; the v2 files stay as history.
+  Final classification (Owner decision): the register claim is SOURCE MISSING · SOURCE-SCOPE DIFFERENCE · NON-BLOCKING
+  OPERATIONAL RECONCILIATION — CONFLICT 0 · COMPLETENESS PASS · SECRET SCAN PASS. The corpus was not re-extracted (no
+  guest-facing code changed); the audit and the delta were regenerated deterministically from the existing corpus.
+- **RELEASE FREEZE (16 Sep 2026):** the website is frozen at the served code `621be9c`.

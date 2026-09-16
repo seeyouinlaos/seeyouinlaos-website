@@ -10,11 +10,14 @@ INACTIVE / CANCELLED              0
 EXCLUDED / NOT INVITED            18 (guest-role contacts with no invitation and no place in the rooming sheet — Owner to confirm the intent)
 DUPLICATE PERSON RECORD           0
 DUPLICATE IDS                     1 (CON060 — two different people under one ID)
-UNRESOLVED                        3 (CON009, CON046, CON048)
+CONTACT / INVITATION MAPPING UNCONFIRMED   3 (CON009, CON046, CON048) — NON-BLOCKING FOR WEBSITE RELEASE (Owner decision 16 Sep 2026): identity not inferred, no invitation created or deleted, no code changed; operations data cleanup
+UNRESOLVED (release-blocking)     0
 
 REGISTER SIDE                     47 active invitations: 2 hosts (the sheet's Document Owners) + 36 matched to guest-role rows + 9 with no row among the 57 (G007, G010, G039, G041, G042, G043, G044, G046, G047)
-ROOMING SHEET SIDE                26 rooms; 7 occupants with no register person (ROM005 guest 1 — the UNRESOLVED CON009 question; ROM014 and ROM015 guest 2 — the two "Daughter" places, CON046 / CON048; ROM025 and ROM026 — two rooms, four occupants, no invitation and no contact row)
+ROOMING SHEET SIDE                26 rooms; 7 occupants with no register person (ROM005 guest 1 — the CON009 mapping, unconfirmed and non-blocking; ROM014 and ROM015 guest 2 — the two "Daughter" places, CON046 / CON048; ROM025 and ROM026 — two rooms, four occupants, no invitation and no contact row)
 CANCELLED IN THE REGISTER         2 — in neither sheet (consistent)
 
-FINAL VERIFIED ACTIVE GUEST COUNT NOT VERIFIED — the register holds 47; the 57-row reconciliation proves 38 of them, leaves 3 unresolved rows, 9 register invitations without a contact row (one of them, G010, appears in no current sheet at all; G046 / G047 stand in the register and the printing sheet but not in the rooming sheet) and 7 rooming places without an invitation. The Owner resolves each line in src/guest-reconciliation.private.txt; only then is the count final.
-RELEASE CONDITION                 UNRESOLVED = 0 — NOT MET
+FINAL OWNER DECISION (16 Sep 2026) "Operations Master Contacts is not the website invitation source of truth. Active Invitation Register governs website access." The Guestlist tab is a contact register ("Contacts (No Supplier)" — "Everyone we call during the trip"): broader CRM / contact scope, not invitation authority; 57 guest-role rows do not mean 57 website invitations.
+ACTIVE WEBSITE GUESTS             47 (the active website invitation register — verified: 47 invitations · 47 unique credentials · 0 missing · 0 duplicate · auth coverage 47 / 47 · every credential opens exactly one guest)
+RELATIONSHIP                      the differences above (contacts without invitations, invitations without a contact row — 9, incl. G010 in no current sheet; rooming placeholders without invitations — 7; the duplicate contact id CON060) are documented operations data-quality items, NOT website release blockers: no active invited guest fails to authenticate, no two guests share a credential, no credential maps to the wrong guest, no guest reaches another guest's private data, no required active guest lacks an invitation.
+RELEASE CONDITION                 UNRESOLVED (release-blocking) = 0 — MET

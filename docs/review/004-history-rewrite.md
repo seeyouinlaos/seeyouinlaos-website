@@ -20,10 +20,10 @@ public history solely to remove it.
    in the tracked files, the untracked working tree, the generated 007 files, the acceptance evidence, and in every
    deployed response body of both origins (719 served files × 2). The other 46 credentials are unchanged and valid.
 
-**What remains on GitHub's side.** The pre-rewrite commits are no longer reachable from any ref, but GitHub keeps
-unreferenced objects until its garbage collection runs; the old commit ids still resolve by direct address until
-then. The credential they carry is invalid. Only GitHub Support can purge dangling objects early — the Owner may ask
-for that.
+**What remains on GitHub's side — documented once and closed (Owner decision, 16 Sep 2026).** The pre-rewrite commits
+are no longer reachable from any ref; GitHub keeps unreferenced objects until its garbage collection runs, so the old
+commit ids still resolve by direct address until then. The credential they carry is invalid (rotated); this is not a
+release blocker. Only GitHub Support can purge dangling objects early — the Owner may ask for that at any time.
 
 **Commit id map (the release commits of 15–16 Sep 2026, old → new).**
 

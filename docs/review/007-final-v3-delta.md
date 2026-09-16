@@ -1,6 +1,6 @@
 # 007 — FINAL V3 DELTA (final V2 → final V3)
 
-Generated 2026-09-16 08:02 UTC by docs/review/007-final-v3-delta.py.
+Generated 2026-09-16 08:34 UTC by docs/review/007-final-v3-delta.py.
 
 FINAL V2:  docs/review/007-final-v2-text.txt (MAIN SHA 6170755) · docs/review/007-final-v2-source-truth-audit.txt
 FINAL:     docs/review/007-final-v3-text.txt (MAIN SHA 621be9c) · docs/review/007-final-v3-source-truth-audit.txt
@@ -18,8 +18,8 @@ FINAL:     docs/review/007-final-v3-text.txt (MAIN SHA 621be9c) · docs/review/0
 | WORDS | 101094 | 104323 |
 | SOURCE-TRUTH CLAIMS CHECKED | 123 | 123 |
 | SOURCE-TRUTH MATCH | 98 | 99 |
-| SOURCE-TRUTH CONFLICT | 0 | 1 |
-| SOURCE MISSING | 6 | 5 |
+| SOURCE-TRUTH CONFLICT | 0 | 0 |
+| SOURCE MISSING | 6 | 6 |
 | OWNER DECISION OVERRIDES | 17 | 16 |
 | STALE / RETIRED SOURCE | 1 | 1 |
 | SECRET SCAN | PASS | PASS |
@@ -128,14 +128,13 @@ Unique text lines (surfaces, states, templates; references and stamps normalised
 | surface | pre-patch | final |
 |---|---|---|
 | The venue stage · labels ON the photograph | OWNER DECISION OVERRIDE — Three labels sit on real areas: 05 Wedding Dinner · Poolside (the pool terrace), | MATCH · NEEDS OWNER DECISION — Seven labels sit on the real houses and areas of the aerial: Lobby (top left bui |
-| Invitation register · active guests | new claim | CONFLICT · NEEDS OWNER DECISION — 47 individual invitations, 47 unique credentials, 2 cancelled (no code, no index |
+| Invitation register · active guests | new claim | SOURCE MISSING — 47 individual invitations, 47 unique credentials, 2 cancelled (no code, no index |
 | The venue stage · labels WITHOUT a position | SOURCE MISSING · NEEDS OWNER DECISION — Lobby · Rooms (×3 in the Owner's concept) · Coffee & Cake / Breakfast · Wedding  | claim retired |
 
 ## Newly introduced source-truth conflicts
 
-- Invitation register · active guests
+- none
 
 ## Still needing an Owner decision
 
 - The venue stage · labels ON the photograph — MATCH · NEEDS OWNER DECISION
-- Invitation register · active guests — CONFLICT · NEEDS OWNER DECISION

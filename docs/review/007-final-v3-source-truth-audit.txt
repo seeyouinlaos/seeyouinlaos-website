@@ -1,12 +1,12 @@
 SOURCE-TRUTH AUDIT · FINAL V3 (004 — 16 Sep 2026: after the security remediation, the Owner's final venue mapping, the final public / private information architecture and the guest reconciliation)
-DATE: 2026-09-16 08:02 UTC
-MAIN SHA: 621be9c
+DATE: 2026-09-16 08:34 UTC
+MAIN SHA: 0774184
 SOURCE: H&S_Wedding_Operations_Master (Google Sheet, owner suthep.hrg@gmail.com, last modified 2026-09-13T12:44:10Z; export ops-master.xlsx of 2026-09-13 19:27 UTC, every tab: Overview_Hotel_Restaurant · Accommodation_Details · Experience, Restaurant, Cafe_Details · Snack_Details · Transportation · Budget_Room - Rate · Printing_Stationnary · Budget_Finance · Guestlist · Accommodation · Master_Timeline · Inventory · Invitation Giveaway · Deposit · Auis hotel inspection) · the documented Owner decisions (docs/DECISION-REGISTER.md, docs/acceptance/*/README.md, docs/review/007-change-manifest.md, docs/references/SEE-YOU-IN-LAOS-FINAL-DESIGN-SYSTEM-MASTER.md §18)
 
 TOTAL FACTUAL CLAIMS CHECKED: 123 (35 claims below · 47 priced items · 41 room categories)
 MATCH: 99
-CONFLICT: 1
-SOURCE MISSING: 5
+CONFLICT: 0
+SOURCE MISSING: 6
 OWNER DECISION OVERRIDES: 16
 STALE / RETIRED SOURCE: 1
 STALE SOURCE VALUES NOTED INSIDE OTHER CLAIMS: the sheet still carries C642 16:39 → 21:06 at USD 105 (superseded by C86 at USD 85), the Vow Ceremony at 16:30 (superseded by 15:30), the room reservations for Bride & Groom / Family, Khop Chai Deu, Le Padaek, Parkson Supermarket — none is active on the website
@@ -330,11 +330,11 @@ ACTION: NO CHANGE — REVIEW ONLY
 ISSUE ST-033
 
 SURFACE: Invitation register · active guests
-CURRENT WEBSITE: 47 individual invitations, 47 unique credentials, 2 cancelled (no code, no index entry, no record); one credential (G001) rotated on 16 Sep 2026 — the other 46 unchanged
-AUTHORITATIVE SOURCE: Guestlist tab: 59 contacts, 57 guest-role rows; Accommodation tab: 26 rooms; reconciliation 16 Sep 2026: 36 guest-role rows match an active invitation, 18 carry no invitation and no rooming place, 3 are UNRESOLVED (CON009, CON046, CON048); 9 active invitations have no contact row; 7 rooming occupants have no invitation (docs/review/004-guest-reconciliation-summary.txt)
-SOURCE LOCATION: H&S_Wedding_Operations_Master · Guestlist · Accommodation · src/register-audit.mjs · docs/review/004-guest-reconciliation-summary.txt
-CLASSIFICATION: CONFLICT · NEEDS OWNER DECISION
-NOTE: NEEDS OWNER DECISION: the register and the Owner's current sheets disagree on who is invited — the count 47 is not verified by the 57-row reconciliation (UNRESOLVED = 3, register-only invitations 9, rooming-only occupants 7). No guest-facing text carries a guest count; the conflict is between the private register and the Owner's master, not in the published website. Nothing was invented; nothing was changed.
+CURRENT WEBSITE: 47 individual invitations, 47 unique credentials, 2 cancelled (no code, no index entry, no record); one credential (G001) rotated on 16 Sep 2026 — the other 46 unchanged; auth coverage 47 / 47 on production
+AUTHORITATIVE SOURCE: FINAL OWNER DECISION (16 Sep 2026): "Operations Master Contacts is not the website invitation source of truth. Active Invitation Register governs website access." The Operations Master Guestlist tab is a contact register ("Contacts (No Supplier)" — "Everyone we call during the trip"): 59 contacts, 57 rows with a Guest - … role — broader CRM / contact scope, not invitation authority; the numeric difference is not a release conflict. Three contact ↔ invitation identities (CON009, CON046, CON048) stay CONTACT / INVITATION MAPPING UNCONFIRMED · NON-BLOCKING FOR WEBSITE RELEASE; contacts without invitations, invitations without a contact row, rooming placeholders and the duplicate contact id CON060 are documented operations data-quality items (docs/review/004-guest-reconciliation-summary.txt)
+SOURCE LOCATION: The active website invitation register (src/register-audit.mjs) · Owner decision 16 Sep 2026 · docs/review/004-guest-reconciliation-summary.txt
+CLASSIFICATION: SOURCE MISSING
+NOTE: SOURCE-SCOPE DIFFERENCE · NON-BLOCKING OPERATIONAL RECONCILIATION. The register is the source of truth for website authentication, invitations and private journey access: ACTIVE WEBSITE GUESTS 47 · INVITATIONS 47 · UNIQUE ACTIVE CREDENTIALS 47 · MISSING 0 · DUPLICATES 0 · AUTH COVERAGE 47 / 47. No identity was inferred, no invitation created or deleted, no code changed.
 ACTION: NO CHANGE — REVIEW ONLY
 
 ISSUE ST-034
