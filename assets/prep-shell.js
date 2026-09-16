@@ -229,8 +229,11 @@
             '<a href="mailto:guest.relation.seeyouinlaos@gmail.com?subject=Journey%20' + encodeURIComponent(p.invitationId) + '">Write to Guest Relations to change anything</a></p>' : '') +
       '</div>' +
       '<div class="prep-bar-r"><button type="button" class="prep-all" aria-expanded="' + (indexOpen ? 'true' : 'false') + '" aria-controls="prep-steps">View all steps</button></div>' +
-      '</div>';
+      '</div>' +
+      /* DRAFT · SENT · CHANGES NOT YET SENT and SAVE MY PROGRESS on every step (Owner, 16 Sep 2026) — painted by the draft module */
+      '<div class="prep-save" data-prep-save></div>';
     bar.appendChild(layer);
+    if (window.SIYL_DRAFT) SIYL_DRAFT.mount(bar.querySelector('[data-prep-save]'));
 
     layer.innerHTML = '<div class="prep-steps-in">' + list.map(function (s) {
       var curRow = s.key === STEP.key, locked = s.state === 'locked';

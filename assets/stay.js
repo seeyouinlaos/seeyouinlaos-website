@@ -87,7 +87,8 @@
       var line = this.line(win);
       var done = function () { p.ids(win).forEach(function (id) { b.remove(id); }); };
       if (!u || !line || !line.room || line.interest || !u.tracked(win, line.room)) { done(); return Promise.resolve({ ok: true }); }
-      return u.leave(stageOf(win)).then(function () { done(); return { ok: true }; });
+      /* the release is the engine's: only a released place leaves the bag; the hosts' fixed room is never released */
+      return u.leave(stageOf(win)).then(function (d) { if (d && d.ok === false && d.error === 'fixed host allocation') return d; done(); return { ok: true }; });
     },
     /* the engine and the bag agree: a place the engine holds is in the bag;
      * a line the engine does not hold is marked so the guest chooses a room */

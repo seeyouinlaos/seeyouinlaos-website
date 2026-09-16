@@ -54,13 +54,15 @@ export const SEED = {
   /* Three approved Bangkok addresses share the window; a guest holds one of
    * them. The penthouse is one home of SIX bedrooms (Owner, 15 Sep 2026):
    * six allocation units, Room A – F, twelve guest places — never more. The
-   * two hotels are counted in rooms of two, as every other hotel here is. */
+   * two hotels are counted in rooms of two, as every other hotel here is.
+   * The Master (Owner, 16 Sep 2026, 17:17 UTC): U Sathorn 6 rooms, Shama 6 rooms
+   * — the earlier 38 / 27 are retired; six physical rooms, twelve places each. */
   'bkk-stay/penthouse':
     { unit: 'room', capacity: 6, occupancy: 2, held: 1, heldFor: 'Bride & Groom', name: 'Sathorn Penthouse', stay: 'Sathorn Penthouse Bangkok' },
   'bkk-stay/u-sathorn-superior-garden':
-    { unit: 'room', capacity: 38, occupancy: 2, held: 0, name: 'Superior Room With Garden View', stay: 'U Sathorn Bangkok' },
+    { unit: 'room', capacity: 6, occupancy: 2, held: 0, name: 'Superior Room With Garden View', stay: 'U Sathorn Bangkok' },
   'bkk-stay/shama-king-studio-balcony':
-    { unit: 'room', capacity: 27, occupancy: 2, held: 0, name: 'King Studio With Balcony', stay: 'Shama Yen-Akat Bangkok' },
+    { unit: 'room', capacity: 6, occupancy: 2, held: 0, name: 'King Studio With Balcony', stay: 'Shama Yen-Akat Bangkok' },
 
   /* ------------------------------------------ Vientiane · Pre-Wedding Stay */
   'prewed/heritage':                 { unit: 'room', capacity: 5,  occupancy: 2, held: 0, name: 'The Heritage' },

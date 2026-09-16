@@ -124,12 +124,13 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:22px;margin:40
 <div class="p" id="j-kempinski" data-vprod="kempinski"><div class="pimg" style="background-image:url(assets/images/kempinski/facade-garden.jpg)"></div><p class="pw"><b>06 – 08 Mar</b> · Accommodation · Bangkok</p><p class="pn">Siam Kempinski Bangkok</p><p class="pm">06 – 08 March · 2 nights · breakfast included · self-pay</p><p class="pp" data-private>USD 380 total per person</p><p class="pb" data-private>2 nights · 06 &rarr; 07 and 07 &rarr; 08 March · USD 190 per person / night</p><p class="vl" data-private>Rooms &amp; suites</p><div class="vars" data-private data-rooms="kempinski"></div><a class="vw jcta" data-private-cta href="invitation.html?open=1">Open your invitation</a></div>
 </main>
 <script src="assets/bag.js?v=c6ade073"></script>
+<script src="assets/draft.js?v=51131a8b"></script>
 <script src="assets/shop-menu.js?v=7f4ee3cc"></script>
 <script src="assets/aman.js?v=fd12151c"></script>
 <script src="assets/rooms-data.js?v=30c293db"></script>
 <script src="assets/pricing.js?v=a3c88e2e"></script>
-<script src="assets/rooms.js?v=17f9b582"></script>
-<script src="assets/stay.js?v=9c32598a"></script>
+<script src="assets/rooms.js?v=2cd10246"></script>
+<script src="assets/stay.js?v=d3aff276"></script>
 <script src="assets/journey.js?v=cadb3e68"></script>
 <script type="module" src="assets/invite.mjs?v=82a1294b"></script>
 <script>
@@ -221,7 +222,7 @@ function paint(){
       '<p class="pcrate">'+P.money(r.rate)+' per person / night</p>'+
       (av?'<p class="pcav vav'+((U.scarce(win,r.slug)||U.soldOut(win,r.slug))?' low':'')+'">'+av+'</p>':'')+
       (on?'<span class="pcgo on" aria-current="true">&#10003;&nbsp; Current selection</span>'
-         :gone?'<span class="pcgo off" aria-disabled="true">'+(U.reserved(win,r.slug)?'Reserved':'Fully booked')+'</span>'
+         :gone?'<span class="pcgo off" aria-disabled="true">'+(U.ctaWords(win,r.slug)||'Fully booked')+'</span>'
          :'<button type="button" class="pcgo" data-choose="'+r.slug+'">Choose this address</button>')+
       '<a class="pcview" href="room.html?stay='+sk+'&room='+r.slug+'">See the rooms</a>'+
       '</div>'}).join('')+'</div>'+

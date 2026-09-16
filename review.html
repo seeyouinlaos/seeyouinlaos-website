@@ -9,7 +9,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 .bag{width:44px;height:44px;display:flex;align-items:center;justify-content:center;position:relative;color:#313131;text-decoration:none}.bag .bgi{display:block}
 .bb{position:absolute;top:1px;right:0;min-width:14px;height:14px;padding:0 3px;background:#313131;color:#F3EEE7;font-size:8.5px;line-height:1;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;display:none;align-items:center;justify-content:center;box-shadow:0 0 0 2px #F3EEE7;border-radius:1px}
 </style>
-<link rel="stylesheet" href="assets/aman.css?v=4338c841"><link rel="stylesheet" href="assets/prep.css?v=d8ad9045"></head><body>
+<link rel="stylesheet" href="assets/aman.css?v=4338c841"><link rel="stylesheet" href="assets/prep.css?v=47767267"></head><body>
 <header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="cart.html" aria-label="Your Journey"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <p class="hd-access" data-access data-state="out"><span>Not signed in</span><span class="hd-access-do"><a href="invitation.html?open=1">Open your invitation</a></span></p>
 <main class="prep-page" id="review">
@@ -60,6 +60,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 
 <div id="sendbox" class="prep-sec">
 <div id="sent" class="p-card" hidden data-state="" style="margin-bottom:var(--s4)"><p class="t-l1 on"><i class="prep-tick" aria-hidden="true"></i> Received</p><h2 class="t-h1" id="sent-h">Your journey has been received by Guest Relations</h2><p class="t-b1" id="sent-at"></p><p class="t-b2 measure-w">Guest Relations will review your selections personally. Nothing is confirmed yet; we will confirm each arrangement with you once it is ready.</p></div>
+<p class="t-l1" id="srvstate" role="status" aria-live="polite" style="margin-bottom:var(--s3)"><b>Your journey</b> · saved as draft</p>
 <button type="button" class="p-act" id="send">Send to Guest Relations</button>
 <p class="t-b2" id="err" role="alert" aria-live="polite" style="margin-top:var(--s3)"></p>
 <p class="t-b2 measure-w" style="margin-top:var(--s3)">Sending shares your journey with Guest Relations so a person can look at it. It is a request, never a payment, and it is not a confirmation — Guest Relations confirms every arrangement with you personally.</p>
@@ -80,6 +81,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/rooms-data.js?v=30c293db"></script>
 <script src="assets/pricing.js?v=a3c88e2e"></script>
 <script src="assets/guest.js?v=276467ba"></script>
+<script src="assets/draft.js?v=51131a8b"></script>
 <script src="assets/docs.js?v=7c1c7bfd"></script>
 <script src="assets/confirm.js?v=15cc65d2"></script>
 <script src="assets/seatlabels.js?v=4994e1f4"></script>
@@ -88,11 +90,11 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/vendor/qrcode.js?v=18ae399f"></script>
 <script src="assets/travelpass.js?v=efb9929b"></script>
 <script src="assets/temple.js?v=dfa289bc"></script>
-<script src="assets/rooms.js?v=17f9b582"></script>
-<script src="assets/stay.js?v=9c32598a"></script>
+<script src="assets/rooms.js?v=2cd10246"></script>
+<script src="assets/stay.js?v=d3aff276"></script>
 <script src="assets/transport-data.js?v=f54e56e9"></script>
 <script src="assets/journey.js?v=cadb3e68"></script>
-<script src="assets/prep-shell.js?v=32367fdf"></script>
+<script src="assets/prep-shell.js?v=e7d4e8f2"></script>
 <script type="module" src="assets/invite.mjs?v=82a1294b"></script>
 <script>
 /* ============================================================================
@@ -117,18 +119,19 @@ function bearer(){try{var a=JSON.parse(localStorage.getItem('siyl.auth')||'null'
 /* THE EMAILS (Owner, 16 Sep 2026): the journey is saved first; the confirmation emails come after it. A provider that
    refuses never loses the booking — the words say the journey is saved, the email could not be sent, and offer the retry
    (the stored journey's emails once more, never another submission). */
-function paintMail(mail,ref){
+function paintMail(mail,ref,ans){
   var box=document.getElementById('mailbox'),l=document.getElementById('mail-l'),m=document.getElementById('mail-msg'),rb=document.getElementById('mail-retry');
   if(!box)return;box.hidden=false;
-  var ok=!!(mail&&mail.guest&&mail.guest.accepted),okOwner=!!(mail&&mail.owner&&mail.owner.accepted);
+  var ok=!!(mail&&mail.guest&&mail.guest.accepted),okOwner=!!(mail&&mail.owner&&mail.owner.accepted),upd=!!(ans&&ans.kind==='update'),sentAt=(ans&&(ans.lastSentAt||ans.submittedAt))||null;
   box.setAttribute('data-mail',ok?'sent':'failed');
   /* three separate truths (Owner, 16 Sep 2026): saved · Guest Relations notified · the confirmation to the guest's own address */
-  var lines=['Journey saved',okOwner?'Guest Relations notified':'Guest Relations could not be notified — the retry sends both emails'];
-  if(ok){lines.push('Confirmation email sent to: '+(mail.guest.to||'your email address'));l.textContent='Confirmation email sent';m.innerHTML=lines.map(esc).join('<br>')+(ref?'<br>Reference '+esc(ref):'');rb.hidden=true;return}
-  lines.push('Confirmation email could not be sent'+(mail&&mail.guest&&mail.guest.error==='no valid guest email address in the journey'?' — please add your email address in <a class="p-link" href="invitation.html#p-email">Your Invitation</a>, then retry':''));
+  var lines=[upd?'✓ Changes saved':'✓ Journey saved',okOwner?(upd?'✓ Updated journey sent to Guest Relations':'✓ Sent to Guest Relations'):'! Guest Relations could not be notified — the retry sends both emails'];
+  var tail=(ref?'<br>Reference: '+esc(ref):'')+(sentAt?'<br>Sent: '+esc(whenAt(sentAt)):'');
+  if(ok){lines.push('✓ Confirmation email sent to '+(mail.guest.to||'your email address'));l.textContent=upd?'Updated journey sent':'Confirmation email sent';m.innerHTML=lines.map(esc).join('<br>')+tail;rb.hidden=true;return}
+  lines.push('! Confirmation email could not be sent'+(mail&&mail.guest&&mail.guest.error==='no valid guest email address in the journey'?' — please add your email address in <a class="p-link" href="invitation.html#p-email">Your Invitation</a>, then retry':''));
   l.textContent='Your journey is saved';
-  m.innerHTML=lines.map(function(t,i){return i===2?t:esc(t)}).join('<br>')+(ref?'<br>Reference '+esc(ref):'');
-  rb.hidden=false;rb.disabled=false;rb.textContent='Retry email';
+  m.innerHTML=lines.map(function(t,i){return i===2?t:esc(t)}).join('<br>')+tail;
+  rb.hidden=false;rb.disabled=false;rb.textContent='Retry confirmation email';
   rb.onclick=function(){rb.disabled=true;m.textContent='Sending the confirmation email again…';
     fetch(RETRY_URL,{method:'POST',headers:{'content-type':'application/json','x-siyl-auth':bearer()},body:JSON.stringify({invitationId:(function(){try{return JSON.parse(localStorage.getItem('siyl.auth')||'null').invitationId}catch(e){return ''}})()})})
       .then(function(r){return r.json()}).then(function(d){if(d&&d.error==='email required'){rb.disabled=false;m.innerHTML=esc(d.message||'Please add your email address so we can send your confirmation.')+' <a class="p-link" href="invitation.html#p-email">Add your email address</a>';return}paintMail(d&&d.mail,d&&d.submissionId)})
@@ -153,8 +156,15 @@ if(mode==='sent'){
   if(d&&d.hidden){if(dm&&!dm.textContent)dm.textContent='We have your journey. Guest Relations will review your selections personally. Nothing is confirmed yet; we will confirm each arrangement with you once it is ready.';d.hidden=false;wireAgain()}
 }else{
   box.hidden=true;box.setAttribute('data-state','');
-  btn.textContent=mode==='again'?'Send to Guest Relations again':'Send to Guest Relations';btn.classList.remove('sent');btn.removeAttribute('aria-disabled');btn.setAttribute('data-state',mode==='again'?'again':'ready');
+  var sub=window.SIYL_DRAFT&&SIYL_DRAFT.submission(),upd=!!(sub&&sub.submissionId&&(sub.hasUnsentChanges||mode==='again'));
+  btn.textContent=upd?'Send updated journey':(mode==='again'?'Send to Guest Relations again':'Send to Guest Relations');btn.classList.remove('sent');btn.removeAttribute('aria-disabled');btn.setAttribute('data-state',mode==='again'?'again':'ready');
 }}
+/* the server's word on the state — DRAFT · SENT · CHANGES NOT YET SENT (Owner, 16 Sep 2026) */
+function paintServerState(){var sub=window.SIYL_DRAFT&&SIYL_DRAFT.submission(),el=document.getElementById('srvstate');if(!el)return;
+  if(!sub||sub.submissionStatus==='draft'){el.innerHTML='<b>Your journey</b> · saved as draft';return}
+  if(sub.hasUnsentChanges){el.innerHTML='<b>Changes saved</b> · not yet sent to Guest Relations · reference '+esc(sub.submissionId);var b=document.getElementById('send');if(b&&b.getAttribute('data-state')==='sent'){paintSend('again')}return}
+  el.innerHTML='<b>Sent to Guest Relations</b> · reference '+esc(sub.submissionId)+' · '+esc(whenAt(sub.lastSentAt))+(sub.version>1?' · version '+sub.version:'')}
+document.addEventListener('siyl:draft',paintServerState);document.addEventListener('DOMContentLoaded',paintServerState);
 function row(label,value,right,open){
 return '<div class="p-kv"><div><p class="t-b1"><b>'+label+'</b></p>'+(value?'<p class="t-b2">'+value+'</p>':'')+'</div>'+
   (right?'<p class="t-l1'+(open?' open':'')+'">'+right+'</p>':'')+'</div>'}
@@ -483,6 +493,8 @@ if(!SIYL_BAG.get().length||!G||!G.party()||!G.readiness().ok){blockSend();return
 gated(async function(auth){
 var btn=document.getElementById('send'),err=document.getElementById('err');
 btn.disabled=true;err.textContent='';
+/* the complete draft reaches the server first (Owner, 16 Sep 2026): what is sent is what is saved */
+if(window.SIYL_DRAFT){var fl=await SIYL_DRAFT.flush('send');if(!fl||!fl.ok){btn.disabled=false;err.textContent='Your journey could not be saved just now — please try again in a moment.';return}}
 var text=buildText(auth);
 var U=window.SIYL_UNITS,rooms=U&&U.view()?U.view().mine:null;
 var registration={channel:'journey-shop',guestId:auth.guestId,partyId:auth.partyId||null,selections:SIYL_BAG.get(),totalUsd:SIYL_BAG.total(),
@@ -501,11 +513,12 @@ if(r.ok){
 var ans=null;try{ans=await r.json()}catch(e0){}
 var at=(ans&&ans.submittedAt)||registration.registration_submitted_at;
 rememberSent(at);
-paintMail(ans&&ans.mail,ans&&ans.submissionId);
+paintMail(ans&&ans.mail,ans&&ans.submissionId,ans);
 if(window.SIYL_CONFIRM)SIYL_CONFIRM.noteReceived(at);
-btn.disabled=false;paintSend('sent',at);
+btn.disabled=false;paintSend('sent',(ans&&ans.lastSentAt)||at);
 var d=document.getElementById('donebox');d.hidden=false;
-document.getElementById('donemsg').textContent='We have your journey. Guest Relations will review your selections personally. Nothing is confirmed yet; we will confirm each arrangement with you once it is ready.';
+document.getElementById('donemsg').textContent=(ans&&ans.kind==='update')?'We have your updated journey — it replaces the earlier version. Guest Relations will review the changes personally. Nothing is confirmed yet; we will confirm each arrangement with you once it is ready.':'We have your journey. Guest Relations will review your selections personally. Nothing is confirmed yet; we will confirm each arrangement with you once it is ready.';
+if(window.SIYL_DRAFT){SIYL_DRAFT.flush('auto').then(function(){SIYL_DRAFT.refresh()})}
 document.getElementById('sent').classList.add('p-reveal');
 document.getElementById('sent').scrollIntoView({behavior:'smooth',block:'center'});
 try{document.getElementById('sent').setAttribute('tabindex','-1');document.getElementById('sent').focus({preventScroll:true})}catch(e1){}

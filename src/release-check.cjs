@@ -67,9 +67,13 @@ gate(2, 'Inventory display decision recorded',
   if (!/if \(unit\.reservedFor === 'Bride & Groom'\) return identity\.hosts \? \{ ok: true \} : \{ ok: false, error: 'reserved · bride & groom' \};/.test(engine)) inv.push('a Bride & Groom room is not the hosts\' alone');
   if (!/if \(unit\.reservedFor\) return \{ ok: false, error: 'reserved · ' \+ String\(unit\.reservedFor\)\.toLowerCase\(\) \};/.test(engine)) inv.push('a Family room can be taken through the website');
   if (!/reservedFor: i < \(s\.held \|\| 0\) && s\.heldFor \? s\.heldFor : null/.test(engine)) inv.push('the reserved rooms are not the Master\'s held count');
-  if (!/free: open\.reduce\(\(n, u\) => n \+ u\.free, 0\), rooms: open\.filter\(\(u\) => u\.free > 0\)\.length/.test(engine)) inv.push('the category availability is not derived from its open units');
-  if (!/reserved: list\.filter\(\(u\) => u\.reservedFor\)\.length/.test(engine)) inv.push('the summary does not count the reserved rooms');
-  if (!/var open = list\.filter\(function \(u\) \{ return !u\.reservedFor \|\| u\.eligible; \}\);/.test(client)) inv.push('the client counts reserved rooms as available');
+  /* ONE CANONICAL AVAILABILITY OBJECT (Owner, 16 Sep 2026 · final quickfix): source − Owner reservations − real bookings; soldOut = remainingPlaces === 0; the client renders it, never recomputes */
+  if (!/export function availabilityOf\(key, list\)/.test(engine) || !/remainingRooms, remainingPlaces, soldOut: remainingPlaces === 0,/.test(engine)) inv.push('the engine has no canonical availability object');
+  if (!/ownerReservedRooms: reservedU\.length, ownerReservedPlaces:/.test(engine) || !/guestOccupiedRooms: guestU\.filter\(\(u\) => u\.taken > 0\)\.length, guestOccupiedPlaces:/.test(engine)) inv.push('the availability object lacks the reserved / occupied split');
+  if (!/var free = s\.remainingPlaces, rooms = s\.remainingRooms;/.test(client) || !/s\.soldOut === true; \}/.test(client)) inv.push('the client does not render the engine\'s availability object');
+  if (!/if \(!this\.tracked\(win, slug\) \|\| this\.fits\(win, slug\)\) return '';\s*if \(this\.reserved\(win, slug\)\) return 'Reserved';\s*if \(this\.soldOut\(win, slug\)\) return 'Fully booked';/.test(client)) inv.push('"Fully booked" is not the engine\'s sold-out word alone');
+  if (/capacity: 38|capacity: 27/.test(seed)) inv.push('the retired U Sathorn / Shama counts (38 / 27) are still in the seed');
+  if (!/'bkk-stay\/u-sathorn-superior-garden':\s*\{ unit: 'room', capacity: 6,/.test(seed) || !/'bkk-stay\/shama-king-studio-balcony':\s*\{ unit: 'room', capacity: 6,/.test(seed)) inv.push('U Sathorn / Shama are not six rooms as the Master says');
   if (!/This room was just filled\. Please choose another room\./.test(stay)) inv.push('the oversell refusal does not carry the Owner\'s words');
   const seedSrc = seed;
   if (!/'bkk-stay\/penthouse':\s*\{ unit: 'room', capacity: 6, occupancy: 2/.test(seedSrc)) inv.push('the six-bedroom Penthouse is not six units of two places');

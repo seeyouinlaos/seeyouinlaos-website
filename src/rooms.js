@@ -84,6 +84,25 @@ export function mayJoin(unit, identity) {
   return { ok: true };
 }
 
+/* ONE CANONICAL AVAILABILITY OBJECT per category (Owner, 16 Sep 2026): the source inventory, minus the Owner's
+   reservations, minus the real guest bookings — the same object every surface renders, the same rule the booking
+   answers by. soldOut is remainingPlaces === 0 and nothing else: never a guest's own selection, never the CTA. */
+export function availabilityOf(key, list) {
+  const reservedU = list.filter((u) => u.reservedFor), guestU = list.filter((u) => !u.reservedFor);
+  const sourcePlaces = list.reduce((n, u) => n + u.places, 0);
+  const remainingPlaces = guestU.reduce((n, u) => n + u.free, 0), remainingRooms = guestU.filter((u) => u.free > 0).length;
+  return {
+    units: list.length, places: sourcePlaces,
+    sourceRooms: list.length, sourcePlaces,
+    ownerReservedRooms: reservedU.length, ownerReservedPlaces: reservedU.reduce((n, u) => n + u.places, 0),
+    guestOccupiedRooms: guestU.filter((u) => u.taken > 0).length, guestOccupiedPlaces: guestU.reduce((n, u) => n + u.taken, 0),
+    remainingRooms, remainingPlaces, soldOut: remainingPlaces === 0,
+    reserved: reservedU.length, reservedFor: (reservedU[0] || {}).reservedFor || null,
+    free: remainingPlaces, rooms: remainingRooms,
+    name: SEED[key].name, kind: list.length ? list[0].kind : 'room',
+  };
+}
+
 export class Rooms {
   constructor(state) {
     this.state = state;
@@ -132,14 +151,7 @@ export class Rooms {
     /* the category as a whole: TOTAL is the physical stock; AVAILABLE is what this guest may still take — a reserved room
        (the hosts', the family's) is never available to a guest, its places never counted (Owner, 16 Sep 2026) */
     const summary = {};
-    for (const key of Object.keys(units)) {
-      /* open = the rooms bookable through the website: every unreserved room, plus a reserved room this guest may take */
-      const list = units[key], open = list.filter((u) => !u.reservedFor || u.eligible);
-      summary[key] = { units: list.length, places: list.reduce((n, u) => n + u.places, 0),
-                       reserved: list.filter((u) => u.reservedFor).length, reservedFor: (list.find((u) => u.reservedFor) || {}).reservedFor || null,
-                       free: open.reduce((n, u) => n + u.free, 0), rooms: open.filter((u) => u.free > 0).length,
-                       name: SEED[key].name, kind: list.length && list[0].kind };
-    }
+    for (const key of Object.keys(units)) summary[key] = availabilityOf(key, units[key]);
     return { ok: true, units, summary, mine, places: PLACES };
   }
 
@@ -236,7 +248,10 @@ export class Rooms {
         const occ = await this.occupancies();
         const had = occ.filter((o) => !o.fixed && o.guestId === guestId && (!stage || stageOf(o.key) === stage));
         for (const o of had) await this.storage.delete(this.keyOf(o.key, o.label, o.guestId));
-        return json({ ok: true, released: had.map((o) => ({ key: o.key, label: o.label })) });
+        /* a stray stored hold of a fixed guest in the fixed stage (inert already) is cleaned from the storage too */
+        const raw = await this.storage.list({ prefix: OCC }), strays = [];
+        for (const k of raw.keys()) { const parts = k.slice(OCC.length).split('|'); if (parts[2] === guestId && fixedFor(guestId, stageOf(parts[0])) && (!stage || stageOf(parts[0]) === stage)) { await this.storage.delete(k); strays.push({ key: parts[0], label: parts[1], stray: true }); } }
+        return json({ ok: true, released: had.map((o) => ({ key: o.key, label: o.label })).concat(strays) });
       });
     }
     return json({ ok: false, error: 'unknown rooms operation' }, 404);

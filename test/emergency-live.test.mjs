@@ -98,8 +98,8 @@ test('EMAIL · a provider that refuses (or none configured) never loses the book
   } finally { n.done(); }
   /* the client: the saved-but-not-mailed words and the retry that never re-submits */
   const rv = src('review.html');
-  assert.match(rv, /l\.textContent='Your journey is saved';/); assert.match(rv, /'Confirmation email could not be sent'/); assert.match(rv, /id="mail-retry" hidden>Retry confirmation email<\/button>/);
-  assert.match(rv, /var RETRY_URL=SUBMIT_URL\+'\/mail-retry';/); assert.match(rv, /paintMail\(ans&&ans\.mail,ans&&ans\.submissionId\);/);
+  assert.match(rv, /l\.textContent='Your journey is saved';/); assert.match(rv, /'! Confirmation email could not be sent'/); assert.match(rv, /id="mail-retry" hidden>Retry confirmation email<\/button>/);
+  assert.match(rv, /var RETRY_URL=SUBMIT_URL\+'\/mail-retry';/); assert.match(rv, /paintMail\(ans&&ans\.mail,ans&&ans\.submissionId,ans\);/);
   assert.doesNotMatch(src('src/worker.js'), /mailchannels/i, 'the retired provider is gone');
 });
 

@@ -13,7 +13,7 @@
     "build:rooms": "node src/build-rooms.cjs",
     "build:standalone": "node src/build-standalone.cjs",
     "edit": "node src/dev-editor-server.cjs",
-    "test": "node --experimental-vm-modules --test 'test/registration.test.mjs' 'test/pricing.test.mjs' 'test/inventory.test.mjs' 'test/rooms.test.mjs' 'test/auth.test.mjs' 'test/guest-scope.test.mjs' 'test/flow.test.mjs' 'test/recompose.test.mjs' 'test/efg.test.mjs' 'test/guest-testing.test.mjs' 'test/experiences.test.mjs' 'test/seating-labels.test.mjs' 'test/eligibility.test.mjs' 'test/travelpass.test.mjs' 'test/release-auth.test.mjs' 'test/owner-patch-003.test.mjs' 'test/venue.test.mjs' 'test/access.test.mjs' 'test/emergency-live.test.mjs' 'test/real-guest-mail.test.mjs'",
+    "test": "node --experimental-vm-modules --test 'test/registration.test.mjs' 'test/pricing.test.mjs' 'test/inventory.test.mjs' 'test/rooms.test.mjs' 'test/auth.test.mjs' 'test/guest-scope.test.mjs' 'test/flow.test.mjs' 'test/recompose.test.mjs' 'test/efg.test.mjs' 'test/guest-testing.test.mjs' 'test/experiences.test.mjs' 'test/seating-labels.test.mjs' 'test/eligibility.test.mjs' 'test/travelpass.test.mjs' 'test/release-auth.test.mjs' 'test/owner-patch-003.test.mjs' 'test/venue.test.mjs' 'test/access.test.mjs' 'test/emergency-live.test.mjs' 'test/real-guest-mail.test.mjs' 'test/journey-draft.test.mjs'",
     "deploy": "wrangler deploy",
     "release-check": "node src/release-check.cjs"
   },

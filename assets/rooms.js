@@ -74,9 +74,10 @@
       if (this.mineFor(win, slug)) return true;
       return this.units(win, slug).some(function (u) { return !u.full && u.eligible; });
     },
-    soldOut: function (win, slug) { return this.tracked(win, slug) && !this.fits(win, slug); },
+    /* SOLD OUT is the engine's word alone: remainingPlaces === 0 — never "this guest may not choose here" */
+    soldOut: function (win, slug) { var s = this.summary(win, slug); return this.tracked(win, slug) && !!s && s.soldOut === true; },
     /* the whole category is the Master's reservation (no room this guest may take) */
-    reserved: function (win, slug) { var list = this.units(win, slug); return list.length > 0 && list.every(function (u) { return u.reservedFor && !u.eligible; }); },
+    reserved: function (win, slug) { var list = this.units(win, slug); return list.length > 0 && list.every(function (u) { return u.reservedFor; }) && !this.mineFor(win, slug); },
     /* the unit to suggest: a unit a party member already holds with a place
      * free, else the first unit with a place free */
     suggest: function (win, slug) {
@@ -84,29 +85,33 @@
       var withParty = list.filter(function (u) { return u.occupants.some(function (o) { return o.party && !o.mine; }); })[0];
       return withParty || list[0] || null;
     },
-    /* the words the guest reads about a category — derived exactly from its
-     * physical rooms (Owner, 15 Sep 2026): the rooms with a place left and the
-     * unused places across them; never a separate stock counter, never a
-     * reservation. "Your place is held" only when this guest holds one here. */
+    /* the words the guest reads about a category — rendered DIRECTLY from the engine's one canonical availability
+     * object (Owner, 16 Sep 2026): source inventory minus the Owner's reservations minus the real guest bookings.
+     * No second calculation here. soldOut = remainingPlaces === 0 and nothing else. "Your place is held" only when
+     * this guest holds one here; a category the Master reserves in full says RESERVED, never "booked". */
     label: function (win, slug) {
       var s = this.summary(win, slug);
       if (!s) return '';
       var list = this.units(win, slug), mine = this.mineFor(win, slug);
       if (mine) return 'Your place is held · ' + this.unitName(list.filter(function (u) { return u.label === mine.label; })[0] || { kind: 'room', label: mine.label });
-      /* available = the rooms this guest may take (a reserved room is never one of them) — the total stays the physical count */
-      var open = list.filter(function (u) { return !u.reservedFor || u.eligible; });
-      var free = open.reduce(function (n, u) { return n + u.free; }, 0), rooms = open.filter(function (u) { return u.free > 0; }).length;
-      /* a category the Master reserves in full (every room reserved, none this guest may take) says so — it is not "booked" */
-      if (!open.length && list.length && list.every(function (u) { return u.reservedFor; })) return 'Reserved · ' + list[0].reservedFor;
-      if (free <= 0) return 'Fully booked';
-      if (list.length === 1 && list[0].kind === 'property') return free === 1 ? '1 place available' : free + ' places available';
+      if (this.reserved(win, slug)) return 'Reserved · ' + s.reservedFor;
+      var free = s.remainingPlaces, rooms = s.remainingRooms;
+      if (s.soldOut || free <= 0) return 'Fully booked';
+      if (s.kind === 'property') return free === 1 ? '1 place available' : free + ' places available';
       return (rooms === 1 ? '1 room' : rooms + ' rooms') + ' · ' + (free === 1 ? '1 place available' : free + ' places available');
     },
-    /* the category's exact numbers, from its rooms */
+    /* the category's exact numbers — the engine's object */
     count: function (win, slug) {
-      var list = this.units(win, slug);
-      var open = list.filter(function (u) { return !u.reservedFor || u.eligible; });
-      return { rooms: list.length, places: list.reduce(function (n, u) { return n + u.places; }, 0), reserved: list.filter(function (u) { return u.reservedFor; }).length, free: open.reduce(function (n, u) { return n + u.free; }, 0), open: open.filter(function (u) { return u.free > 0; }).length };
+      var s = this.summary(win, slug);
+      if (!s) return { rooms: 0, places: 0, reserved: 0, free: 0, open: 0 };
+      return { rooms: s.sourceRooms, places: s.sourcePlaces, reserved: s.ownerReservedRooms, free: s.remainingPlaces, open: s.remainingRooms };
+    },
+    /* why this guest cannot choose here, in one word for a CTA — '' when they can */
+    ctaWords: function (win, slug) {
+      if (!this.tracked(win, slug) || this.fits(win, slug)) return '';
+      if (this.reserved(win, slug)) return 'Reserved';
+      if (this.soldOut(win, slug)) return 'Fully booked';
+      return 'Your room is fixed';
     },
     scarce: function (win, slug) { var s = this.summary(win, slug); return !!s && s.free > 0 && s.free <= 2; },
     unitName: function (u) { return u ? (u.kind === 'property' ? u.name : 'Room ' + u.label) : ''; },

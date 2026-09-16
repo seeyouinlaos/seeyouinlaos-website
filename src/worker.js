@@ -49,7 +49,7 @@ function corsHeaders(request) {
 export { Inventory } from './inventory.js';
 export { Seating } from './seating.js';
 export { Rooms } from './rooms.js';
-import { identify, owns } from './auth.js';
+import { identify, owns, loadIndex } from './auth.js';
 import { SEED } from './inventory-seed.js';
 
 /* ---- the Guest Relations gate (F + G) ------------------------------------
@@ -124,6 +124,23 @@ export default {
     if (url.pathname === '/api/contact') {
       if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders(request) });
       return handleContact(request, env);
+    }
+    /* THE JOURNEY DRAFT (Owner, 16 Sep 2026 · FINAL QUICKFIX): ONE server-side draft per authenticated guest — the complete
+       journey (contact, answers, bag, wedding, documents state, sent stamp) keyed by the invitation; the browser is a cache.
+       GET reads it with the submission state (draft / sent / changes not yet sent); PUT stores it. */
+    if (url.pathname === '/api/draft') {
+      if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders(request) });
+      /* a page-hide beacon cannot set headers: the bearer travels in the body and becomes the header here */
+      if (url.searchParams.get('beacon') === '1' && request.method === 'POST' && !request.headers.get('x-siyl-auth')) {
+        try { const raw = await request.text(); const b = JSON.parse(raw); const h = new Headers(request.headers); if (b && typeof b.bearer === 'string') h.set('x-siyl-auth', b.bearer); delete b.bearer; return handleDraft(new Request(request.url, { method: 'PUT', headers: h, body: JSON.stringify(b) }), env); } catch (e) { return json({ ok: false, error: 'invalid JSON' }, 400); }
+      }
+      return handleDraft(request, env);
+    }
+    /* GUEST RELATIONS: every guest's canonical current data (draft, submission, rooms, seats, mail) — the GR token only */
+    if (url.pathname === '/api/gr/journeys') {
+      if (!env.GR_TOKEN) return json({ ok: false, error: 'not enabled' }, 503);
+      if (!grAuthorised(request, env)) return json({ ok: false, error: 'unauthorised' }, 401);
+      return handleGrJourneys(request, env);
     }
     /* THE JOURNEY'S STATUS (F): received / confirmed, read by the guest site */
     if (url.pathname === '/api/status') {
@@ -263,11 +280,13 @@ async function handleRegister(request, env) {
   }
 
   const submittedAt = (registration && registration.registration_submitted_at) || new Date().toISOString();
-  // stable registration identifier: one durable record per invitation —
-  // a normal repeat submission/retry OVERWRITES the same key (no accidental
-  // duplicates); the previous state is kept alongside as a bounded history.
+  // ONE LOGICAL JOURNEY per invitation (Owner, 16 Sep 2026): the first submission sets the reference; every later send is an
+  // UPDATE of the same journey — same submissionId, version + 1, the previous state kept alongside as a bounded history.
   const regKey = 'reg:' + invitationId;
-  const submissionId = await submissionIdOf(invitationId, submittedAt);
+  let existing = null; if (env.REG_KV) { try { existing = JSON.parse(await env.REG_KV.get(regKey) || 'null'); } catch (e) { existing = null; } }
+  const isUpdate = !!(existing && existing.submissionId);
+  const submissionId = isUpdate ? existing.submissionId : await submissionIdOf(invitationId, submittedAt);
+  const version = isUpdate ? (existing.version || 1) + 1 : 1;
   let stored = false;
 
   // 1) DURABLE PERSISTENCE FIRST. Without a stored record the endpoint reports
@@ -287,14 +306,18 @@ async function handleRegister(request, env) {
   let record = null;
   if (env.REG_KV) {
     try {
-      record = { invitationId, submittedAt, submissionId, guestId: who.guestId, registration, text, rooms, recipient, mail: null };
+      const draftFingerprint = await journeyFingerprint(env, who);
+      const now = new Date().toISOString();
+      record = { invitationId, submittedAt: isUpdate ? existing.submittedAt : submittedAt, submissionId, version, kind: isUpdate ? 'update' : 'initial',
+        firstSentAt: isUpdate ? (existing.firstSentAt || existing.submittedAt) : submittedAt, lastSentAt: now, updatedAt: now,
+        guestId: who.guestId, registration, text, rooms, recipient, draftFingerprint, mail: null };
       const prev = await env.REG_KV.get(regKey);
-      await env.REG_KV.put(regKey, JSON.stringify(record), { metadata: { invitationId, submittedAt, submissionId } });
+      await env.REG_KV.put(regKey, JSON.stringify(record), { metadata: { invitationId, submittedAt: record.submittedAt, submissionId, version, lastSentAt: now } });
       if (prev) {
         let prevObj = null; try { prevObj = JSON.parse(prev); } catch (e) {}
-        if (!prevObj || prevObj.submittedAt !== submittedAt) {
-          await env.REG_KV.put(regKey + ':prev:' + submittedAt, prev, {
-            metadata: { invitationId, supersededBy: submittedAt },
+        if (!prevObj || (prevObj.lastSentAt || prevObj.submittedAt) !== now) {
+          await env.REG_KV.put(regKey + ':prev:' + now, prev, {
+            metadata: { invitationId, supersededBy: now },
             expirationTtl: 60 * 60 * 24 * 90,
           });
         }
@@ -312,7 +335,93 @@ async function handleRegister(request, env) {
   //    saved, the client says so and offers the retry.
   const mail = await sendJourneyMail(env, record, request);
   try { await env.REG_KV.put(regKey, JSON.stringify({ ...record, mail, mailSummary: mailSummary(mail) }), { metadata: { invitationId, submittedAt, submissionId } }); } catch (e) { /* the record stands; the mail result is in the response */ }
-  return json({ ok: true, status: 'UNDER_REVIEW', stored, mailed: !!(mail.owner && mail.owner.accepted), submittedAt, submissionId, mail: publicMail(mail), mailSummary: mailSummary(mail) }, 202, corsHeaders(request));
+  return json({ ok: true, status: 'UNDER_REVIEW', stored, mailed: !!(mail.owner && mail.owner.accepted), submittedAt: record.submittedAt, lastSentAt: record.lastSentAt, submissionId, version, kind: record.kind, mail: publicMail(mail), mailSummary: mailSummary(mail), submission: submissionStateOf(record, false) }, 202, corsHeaders(request));
+}
+/* ---- THE JOURNEY DRAFT ------------------------------------------------------------------------------------------
+   draft:<invitationId> = { invitationId, guestId, keys: { 'siyl.guest': <json string>, 'siyl.bag': …, 'siyl.temple': …,
+   'siyl.docs': … (states only, never a document byte), 'siyl.sent': …, 'siyl.skip': …, 'siyl.skip.by': … }, updatedAt,
+   savedAt, fingerprint }. The fingerprint covers what the guest chose and answered (histories and stamps left out) plus
+   the rooms and seats the engines hold for them — the submission stores the fingerprint it was sent with, so
+   "changes not yet sent" is a comparison, never a guess. */
+const DRAFT_KEYS = ['siyl.guest', 'siyl.bag', 'siyl.temple', 'siyl.docs', 'siyl.sent', 'siyl.skip', 'siyl.skip.by'];
+const draftKey = (invitationId) => 'draft:' + invitationId;
+async function storedDraft(env, invitationId) { if (!env.REG_KV) return null; try { return JSON.parse(await env.REG_KV.get(draftKey(invitationId)) || 'null'); } catch (e) { return null; } }
+function draftContent(keys) {
+  const out = {};
+  for (const k of ['siyl.guest', 'siyl.bag', 'siyl.temple', 'siyl.docs', 'siyl.skip', 'siyl.skip.by']) {
+    let v = null; try { v = JSON.parse(keys && keys[k] || 'null'); } catch (e) { v = keys && keys[k] || null; }
+    if (v && typeof v === 'object' && !Array.isArray(v)) { delete v.history; delete v.contactSyncedAt; if (v.guests) for (const g of Object.values(v.guests)) if (g && typeof g === 'object') delete g.history; }
+    out[k] = v;
+  }
+  return out;
+}
+async function sha256Hex(text) { const d = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text)); return [...new Uint8Array(d)].map((b) => b.toString(16).padStart(2, '0')).join(''); }
+async function engineSeats(env, who) {
+  if (!env.SEATING || !who) return null;
+  try { const stub = env.SEATING.get(env.SEATING.idFromName('seating')); const r = await stub.fetch(new Request('https://seating/api/seating/mine?invitation=' + encodeURIComponent(who.invitationId), { headers: { 'x-siyl-identity': JSON.stringify(who) } })); const v = await r.json(); return v && v.mine ? v.mine : null; } catch (e) { return null; }
+}
+async function journeyFingerprint(env, who, draft) {
+  const d = draft === undefined ? await storedDraft(env, who.invitationId) : draft;
+  const [rooms, seats] = await Promise.all([engineRooms(env, who), engineSeats(env, who)]);
+  return sha256Hex(JSON.stringify({ draft: draftContent(d && d.keys), rooms, seats }));
+}
+function submissionStateOf(record, hasUnsentChanges) {
+  if (!record || !record.submissionId) return { submissionStatus: 'draft', submissionId: null, submittedAt: null, lastSentAt: null, version: 0, hasUnsentChanges: false };
+  return { submissionStatus: hasUnsentChanges ? 'changes-not-sent' : 'sent', submissionId: record.submissionId, submittedAt: record.submittedAt, lastSentAt: record.lastSentAt || record.submittedAt, version: record.version || 1, hasUnsentChanges: !!hasUnsentChanges, mail: record.mailSummary || null };
+}
+async function submissionFor(env, who, draft) {
+  let record = null; try { record = JSON.parse(await env.REG_KV.get('reg:' + who.invitationId) || 'null'); } catch (e) { record = null; }
+  if (!record) return submissionStateOf(null, false);
+  const fp = await journeyFingerprint(env, who, draft === undefined ? undefined : draft);
+  return submissionStateOf(record, !!record.draftFingerprint && record.draftFingerprint !== fp);
+}
+async function handleDraft(request, env) {
+  const who = await identify(request, env);
+  if (!who) return json({ ok: false, error: 'unauthorised' }, 401, corsHeaders(request));
+  if (!env.REG_KV) return json({ ok: false, error: 'no store' }, 503, corsHeaders(request));
+  if (request.method === 'GET') {
+    const d = await storedDraft(env, who.invitationId);
+    const submission = await submissionFor(env, who, d);
+    return json({ ok: true, invitationId: who.invitationId, guestId: who.guestId, draft: d ? { keys: d.keys, updatedAt: d.updatedAt, savedAt: d.savedAt, clientUpdatedAt: d.clientUpdatedAt || null } : null, submission }, 200, corsHeaders(request));
+  }
+  if (request.method !== 'PUT' && request.method !== 'POST') return json({ ok: false, error: 'method not allowed' }, 405, corsHeaders(request));
+  let body; try { const raw = await request.text(); if (raw.length > MAX_BODY) return json({ ok: false, error: 'payload too large' }, 413, corsHeaders(request)); body = JSON.parse(raw); } catch (e) { return json({ ok: false, error: 'invalid JSON' }, 400, corsHeaders(request)); }
+  if (body && body.invitationId && String(body.invitationId) !== who.invitationId) return json({ ok: false, error: 'not your invitation' }, 403, corsHeaders(request));
+  const incoming = {};
+  for (const k of DRAFT_KEYS) if (body && body.keys && typeof body.keys[k] === 'string') incoming[k] = body.keys[k];
+  if (!Object.keys(incoming).length) return json({ ok: false, error: 'nothing to save' }, 400, corsHeaders(request));
+  /* a device sends the keys it holds; a key it does not hold is kept from the stored draft (never silently emptied) */
+  const prevDraft = await storedDraft(env, who.invitationId);
+  const keys = Object.assign({}, prevDraft && prevDraft.keys || {}, incoming);
+  const now = new Date().toISOString();
+  const d = { invitationId: who.invitationId, guestId: who.guestId, keys, updatedAt: now, savedAt: now, clientUpdatedAt: body && body.clientUpdatedAt || null, reason: body && body.reason || null };
+  try { await env.REG_KV.put(draftKey(who.invitationId), JSON.stringify(d), { metadata: { invitationId: who.invitationId, guestId: who.guestId, updatedAt: now } }); } catch (e) { return json({ ok: false, error: 'draft could not be stored' }, 503, corsHeaders(request)); }
+  /* the contact inside the draft is the server contact too (the recipient of the confirmation) */
+  try { const g = JSON.parse(keys['siyl.guest'] || 'null'); const c = g && g.contact; if (c && (validEmail(c.email) || c.phone)) { const prev = await storedContact(env, who.invitationId) || {}; const email = validEmail(c.email) || prev.email || '', phone = (c.phone || '').trim().slice(0, 40) || prev.phone || ''; if (email !== (prev.email || '') || phone !== (prev.phone || '')) await env.REG_KV.put(contactKey(who.invitationId), JSON.stringify({ invitationId: who.invitationId, guestId: who.guestId, email, phone, at: now, from: 'draft' })); } } catch (e) { /* the draft stands */ }
+  const submission = await submissionFor(env, who, d);
+  return json({ ok: true, invitationId: who.invitationId, savedAt: now, updatedAt: now, submission }, 200, corsHeaders(request));
+}
+/* ---- GUEST RELATIONS: the canonical current data of every guest with a draft or a submission ---- */
+async function handleGrJourneys(request, env) {
+  if (!env.REG_KV) return json({ ok: false, error: 'no store' }, 503);
+  const entries = await loadIndex(env, new URL(request.url).origin, false);
+  const byInv = {}; for (const e of Object.values(entries || {})) byInv[e.i] = e;
+  const invs = new Set();
+  for (const prefix of ['draft:', 'reg:']) { let cursor; do { const l = await env.REG_KV.list({ prefix, cursor }); for (const k of l.keys) { const inv = k.name.slice(prefix.length); if (!inv.includes(':')) invs.add(inv); } cursor = l.list_complete ? null : l.cursor; } while (cursor); }
+  const out = [];
+  for (const inv of [...invs].sort()) {
+    const e = byInv[inv] || null, who = e ? { invitationId: inv, guestId: e.g, partyId: e.p, hosts: e.h === 1 } : { invitationId: inv, guestId: inv.replace(/^INV-/, ''), partyId: null, hosts: false };
+    const d = await storedDraft(env, inv); let rec = null; try { rec = JSON.parse(await env.REG_KV.get('reg:' + inv) || 'null'); } catch (x) { rec = null; }
+    const content = draftContent(d && d.keys), g = content['siyl.guest'] || {}, sub = await submissionFor(env, who, d);
+    const [rooms, seats] = await Promise.all([engineRooms(env, who), engineSeats(env, who)]);
+    const contact = await storedContact(env, inv);
+    out.push({ invitationId: inv, guestId: who.guestId, partyId: who.partyId, hosts: who.hosts, name: rec ? guestNameOf(rec) : null,
+      status: sub.submissionStatus, submissionId: sub.submissionId, version: sub.version, submittedAt: sub.submittedAt, lastSentAt: sub.lastSentAt, hasUnsentChanges: sub.hasUnsentChanges,
+      draftUpdatedAt: d ? d.updatedAt : null, contact: contact ? { email: contact.email, phone: contact.phone } : (g.contact || null),
+      bag: content['siyl.bag'] || null, wedding: content['siyl.temple'] || null, aboutYou: g.guests ? Object.values(g.guests).map((x) => ({ submitted: x.submitted, profile: x.profile })) : null, documents: content['siyl.docs'] || null,
+      rooms, seats, mail: rec ? (rec.mailSummary || null) : null, text: rec ? rec.text : null });
+  }
+  return json({ ok: true, at: new Date().toISOString(), journeys: out });
 }
 /* the flat mail record the Owner asked for, beside the provider answers */
 function mailSummary(mail) {
@@ -446,17 +555,21 @@ async function sendJourneyMail(env, record, request) {
   const origin = new URL(request.url).origin;
   const name = guestNameOf(record), guestId = record.guestId || record.registration && record.registration.guestId || '', seats = seatWords(record), g = guestRowOf(record), contact = { email: guestEmailOf(record), phone: guestPhoneOf(record) };
   const total = record.registration && record.registration.total != null ? 'USD ' + record.registration.total : 'see the selections';
-  const ownerHead = ['SEE YOU IN LAOS — JOURNEY RECEIVED', 'Guest: ' + name + ' (' + guestId + ')', 'Invitation: ' + record.invitationId, 'Submission: ' + record.submissionId, 'Submitted at: ' + record.submittedAt,
+  /* an UPDATE of a sent journey says so (Owner, 16 Sep 2026): the same reference, the version, when it was first sent */
+  const upd = record.kind === 'update' && (record.version || 1) > 1, sentAt = record.lastSentAt || record.submittedAt;
+  const ownerHead = ['SEE YOU IN LAOS — ' + (upd ? 'JOURNEY UPDATED (version ' + record.version + ')' : 'JOURNEY RECEIVED'), 'Guest: ' + name + ' (' + guestId + ')', 'Invitation: ' + record.invitationId, 'Submission: ' + record.submissionId, (upd ? 'Updated at: ' + sentAt + ' · first sent ' + (record.firstSentAt || record.submittedAt) : 'Submitted at: ' + record.submittedAt),
     'Wedding Ceremony seat: ' + seats.ceremony, 'Wedding Dinner seat: ' + seats.dinner].concat(roomLines(record)).concat(['Contact: ' + (contact.email || '—') + ' · ' + (contact.phone || '—'),
     'Allergy: ' + (g.allergy && g.allergy.answer || '—') + (g.allergy && g.allergy.details ? ' · ' + g.allergy.details : ''), 'Total / contribution: ' + total,
     'Follow-up: ' + origin + '/api/status?invitation=' + encodeURIComponent(record.invitationId) + ' · KV record reg:' + record.invitationId, '']).join('\n');
-  const owner = await sendMail(env, GR_EMAIL, 'Guest Relations', 'Journey received — ' + name + ' · ' + record.submissionId, ownerHead + record.text);
+  const owner = await sendMail(env, GR_EMAIL, 'Guest Relations', (upd ? 'Journey updated — ' : 'Journey received — ') + name + ' · ' + record.submissionId, ownerHead + record.text);
   const guestTo = guestEmailOf(record);
-  const guestBody = ['Your Journey has been received', '', 'Dear ' + name + ',', '', 'Thank you — your journey has reached Guest Relations. Your choices are saved; Guest Relations will review them personally and confirm each arrangement with you.',
-    'Reference: ' + record.submissionId, 'Received: ' + record.submittedAt, 'Wedding Ceremony seat: ' + seats.ceremony, 'Wedding Dinner seat: ' + seats.dinner].concat(roomLines(record)).concat(['',
+  const guestBody = [upd ? 'Your Journey has been updated' : 'Your Journey has been received', '', 'Dear ' + name + ',', '',
+    upd ? 'Thank you — your updated journey has reached Guest Relations and replaces the earlier version. Your changes are saved; Guest Relations will review them personally and confirm each arrangement with you.'
+        : 'Thank you — your journey has reached Guest Relations. Your choices are saved; Guest Relations will review them personally and confirm each arrangement with you.',
+    'Reference: ' + record.submissionId, (upd ? 'Updated: ' + sentAt + ' (version ' + record.version + ' · first sent ' + (record.firstSentAt || record.submittedAt) + ')' : 'Received: ' + record.submittedAt), 'Wedding Ceremony seat: ' + seats.ceremony, 'Wedding Dinner seat: ' + seats.dinner].concat(roomLines(record)).concat(['',
     'Your journey (as sent):', '', record.text, '', 'To open your journey again: ' + origin + '/invitation (enter your own invitation code — it is never sent by email).',
     'Guest Relations: ' + GR_EMAIL, '', 'See You In Laos']).join('\n');
-  const guest = guestTo ? await sendMail(env, guestTo, name, 'Your Journey has been received — ' + record.submissionId, guestBody) : { provider: 'none', accepted: false, id: null, status: 0, error: 'no valid guest email address in the journey', at: new Date().toISOString() };
+  const guest = guestTo ? await sendMail(env, guestTo, name, (upd ? 'Your Journey has been updated — ' : 'Your Journey has been received — ') + record.submissionId, guestBody) : { provider: 'none', accepted: false, id: null, status: 0, error: 'no valid guest email address in the journey', at: new Date().toISOString() };
   return { owner, guest: { ...guest, to: guestTo ? guestTo.replace(/^(.).*(@.*)$/, '$1…$2') : null }, at: new Date().toISOString() };
 }
 function publicMail(mail) { const pick = (m) => m ? { provider: m.provider, accepted: !!m.accepted, id: m.id || null, error: m.error || null, to: m.to || undefined } : null; return { owner: pick(mail.owner), guest: pick(mail.guest), at: mail.at }; }

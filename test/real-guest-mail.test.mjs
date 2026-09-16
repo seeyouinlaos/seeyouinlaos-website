@@ -104,5 +104,6 @@ test('CLIENT · the guest store pushes the contact to the server and pulls it on
   assert.match(g, /fetch\(CONTACT_API, \{ method: 'PUT', headers: \{ 'content-type': 'application\/json', 'x-siyl-auth': a\.bearer \}/);
   assert.match(g, /document\.addEventListener\('siyl:auth', pullOnce\)/);
   assert.match(rv, /if\(r\.status===422\)/); assert.match(rv, /Please add your email address so we can send your confirmation\./); assert.match(rv, /invitation\.html#p-email/);
-  assert.match(rv, /'Journey saved'/); assert.match(rv, /'Guest Relations notified'/); assert.match(rv, /'Confirmation email sent to: '/); assert.match(rv, /'Confirmation email could not be sent'/); assert.match(rv, /rb\.textContent='Retry email'/);
+  assert.match(rv, /'✓ Journey saved'/); assert.match(rv, /'✓ Sent to Guest Relations'/); assert.match(rv, /'✓ Confirmation email sent to '/); assert.match(rv, /'! Confirmation email could not be sent'/); assert.match(rv, /rb\.textContent='Retry confirmation email'/);
+  assert.match(rv, /'✓ Changes saved'/); assert.match(rv, /'✓ Updated journey sent to Guest Relations'/); assert.match(rv, /'Send updated journey'/);
 });

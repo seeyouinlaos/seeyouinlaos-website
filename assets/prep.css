@@ -811,3 +811,15 @@ body.seatbar-on .jbar { display: none; }
   .p-sum-ticket { grid-column: 1 / -1; padding: 0 var(--s6) var(--s6); }
   .p-ticket .p-actions .p-act { width: auto; min-width: 240px; }
 }
+
+/* ---- the draft state and SAVE MY PROGRESS (Owner, 16 Sep 2026) ---- */
+.prep-save { box-sizing: border-box; max-width: var(--p-frame); margin: 0 auto; padding: 0 var(--p-gut) var(--s3); display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2) var(--s4); }
+.prep-state { margin: 0; font-family: var(--f-ui); font-size: 8.5px; letter-spacing: 1.6px; text-transform: uppercase; color: var(--p-mute); }
+.prep-state.is-sent b { color: var(--p-ink); font-weight: 500; }
+.prep-state.is-changed b { color: #8A5A55; font-weight: 500; }
+.prep-state.is-draft b { font-weight: 400; }
+.prep-send-upd { font-family: var(--f-ui); font-size: 8.5px; letter-spacing: 1.6px; text-transform: uppercase; color: #F3EEE7; background: #313131; text-decoration: none; padding: 10px 14px; min-height: 36px; display: inline-flex; align-items: center; }
+.prep-save-btn { font-family: var(--f-ui); font-size: 8.5px; letter-spacing: 1.6px; text-transform: uppercase; color: var(--p-ink); background: none; border: 1px solid var(--p-ink); padding: 10px 14px; min-height: 36px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.prep-save-btn[disabled] { opacity: .55; cursor: default; }
+.prep-save-state { margin: 0; font-family: var(--f-ui); font-size: 8.5px; letter-spacing: 1.6px; text-transform: uppercase; color: var(--p-mute); min-height: 1em; }
+.prep-save-state.is-failed { color: #8A5A55; }

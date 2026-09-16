@@ -251,8 +251,9 @@ test('Bangkok offers three approved addresses, one window, one active choice', (
 
 test('the two new Bangkok addresses carry their own shared inventory', async () => {
   const { SEED } = await import('../src/inventory-seed.js');
-  assert.equal(SEED['bkk-stay/u-sathorn-superior-garden'].capacity, 38);
-  assert.equal(SEED['bkk-stay/shama-king-studio-balcony'].capacity, 27);
+  /* the Master (Owner, 16 Sep 2026): six rooms each — the earlier 38 / 27 are retired */
+  assert.equal(SEED['bkk-stay/u-sathorn-superior-garden'].capacity, 6);
+  assert.equal(SEED['bkk-stay/shama-king-studio-balcony'].capacity, 6);
   ['u-sathorn-superior-garden', 'shama-king-studio-balcony'].forEach((k) => {
     assert.equal(SEED['bkk-stay/' + k].unit, 'room');
     assert.equal(SEED['bkk-stay/' + k].occupancy, 2);
