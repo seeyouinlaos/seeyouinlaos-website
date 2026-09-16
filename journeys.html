@@ -268,6 +268,8 @@ el.textContent = 'From '+P.money(lowTotal)+' total per person · '+q0.nightsLine
 /* ---------------- adds are invitation-gated (real engine validation) ------ */
 function gated(fn){if(window.SIYL_INVITE){SIYL_INVITE.require(fn)}
 else document.addEventListener('siyl:invite-ready',function(){SIYL_INVITE.require(fn)},{once:true})}
+/* ACCESS (Owner, Edit 3 · 16 Sep 2026): the journey is planned only by a signed-in guest — without a session this page hands over to the invitation page (fares, rooms and adds are never selectable signed out) */
+gated(function(){});
 /* the product row reads and writes the same bag state as Your Journey:
  * ADD becomes REMOVE, and the live total updates immediately. */
 function paintAdds(){document.querySelectorAll('[data-add]').forEach(function(b){

@@ -50,6 +50,8 @@ if(!G||!PASS||!TP||!B||!page)return;
 function esc(t){return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 function gated(fn){if(window.SIYL_INVITE){SIYL_INVITE.require(fn)}
 else document.addEventListener('siyl:invite-ready',function(){SIYL_INVITE.require(fn)},{once:true})}
+/* ACCESS (Owner, Edit 3): the tickets are private — without a session the guest goes to the invitation page */
+gated(function(){});
 function render(){
   var p=G.party(),me=G.me();
   if(!p||!me){

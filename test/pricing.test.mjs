@@ -307,7 +307,7 @@ test('the private journey has one shell, one design system and a hard boundary',
 
   const shell = readFileSync(join(ROOT, 'assets/prep-shell.js'), 'utf8');
   /* the boundary: no 01–06 before an invitation is open */
-  assert.match(shell, /if \(!p \|\| !m\) \{[\s\S]{0,400}Open your invitation to begin/);
+  assert.match(shell, /if \(!p \|\| !m\) \{[\s\S]{0,900}Open your invitation to begin/);
   /* the code opens the guest's own invitation; the guest IS the session — no question, no switch */
   assert.doesNotMatch(shell, /Who are you\?|Who are you continuing as\?|data-switch/);
   const model = readFileSync(join(ROOT, 'assets/guest.js'), 'utf8');

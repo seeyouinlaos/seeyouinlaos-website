@@ -62,6 +62,8 @@ function money(n){return 'USD '+Number(n).toLocaleString('en-US')}
 function gated(fn){if(window.SIYL_INVITE){SIYL_INVITE.require(fn)}
 else document.addEventListener('siyl:invite-ready',function(){SIYL_INVITE.require(fn)},{once:true})}
 var calm=!!(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+/* ACCESS (Owner, Edit 3): the bag is private — without a session the guest goes to the invitation page */
+gated(function(){});
 
 function segOf(x){return J.SEGMENTS.filter(function(s){return s.ids.indexOf(x.id)>=0})[0]||null}
 function detailHref(x){

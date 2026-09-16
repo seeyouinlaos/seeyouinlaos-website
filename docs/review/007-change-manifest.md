@@ -131,3 +131,22 @@ is in the dinner gallery); the aerial band on accommodation.html became the stag
 **Owner decision still needed:** the marked layout for Lobby, Rooms (×3), Coffee & Cake / Breakfast and
 Wedding Ceremony on the aerial — until then these four carry no marker on the photograph (rule 003 / PART
 19: nothing is inferred from the photograph). Adding them is a data change in `assets/venue-data.js`.
+
+## 003 · Edit 3 (Owner, 16 Sep 2026) — access, CTA, Harudot, dress references
+
+**Applied from `Edit 3.zip` (eight review images):**
+- **Access (IMG_4022 · IMG_4023 · IMG_4026):** "Guests have to log in before they plan the journey … this
+  rule is for all links." Nobody sees the journey, the bag, the tickets, the journeys catalogue or any
+  private step without a session: those pages hand over to the invitation page and come back after the
+  code (`?next=`); every link to a private surface on a public page (menu, footer, bag icon, CTAs, cards)
+  leads there; ADD / fare / room selection is unreachable signed out (the catalogue hands over first).
+  Every page now says which state it is in — a header status line: NOT SIGNED IN · OPEN YOUR INVITATION,
+  or SIGNED IN · <name> · YOUR JOURNEY · SIGN OUT (`assets/invite.mjs`, loaded on every page).
+- **Close CTA (IMG_4019 · IMG_4020):** "Plan your journey" → **Open your invitation**, linking to the
+  invitation page (index, destination, accommodation, experiences, voyage).
+- **Harudot (IMG_4024):** Shopping & Places → **Café** (`assets/experiences.js`,
+  `src/experience-inventory.json`).
+- **Dress references (IMG_4027 · IMG_4028):** every reference photograph is now the same 3:4 card,
+  covered from the top (`assets/prep.css .p-rail > img`), on every rail.
+- Menu entry "Journeys · Update by owner" (IMG_4026) read as the access rule above: the entry stays,
+  signed out it leads to the invitation page.

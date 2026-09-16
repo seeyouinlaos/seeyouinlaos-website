@@ -205,9 +205,8 @@ body.prep button, body.prep input, body.prep textarea, body.prep select { font-f
 .p-rail { display: flex; gap: var(--s4); overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; padding-bottom: var(--s1); }
 .p-rail::-webkit-scrollbar { display: none; }
 .p-rail > * { flex: 0 0 84%; max-width: 340px; scroll-snap-align: start; }
-/* the dress references keep their own proportions (Owner, 13 Sep 2026): a
- * shared height cap and a width cap, never a forced box — no stretching, no
- * cropping of a person to make the cards equal; the rail stays a rail */
+/* the dress references share ONE size (Owner, Edit 3 · 16 Sep 2026: "picture size is wrong"): every
+ * reference is the same 3:4 card, the photograph covers it from the top (faces kept), nothing is stretched */
 .p-rail:not(.atrk) { align-items: flex-start; }
 /* a rail of cards shares one height and one top line: the vertical sibling
  * spacing of stacked cards never applies sideways */
@@ -215,9 +214,9 @@ body.prep button, body.prep input, body.prep textarea, body.prep select { font-f
 .atrk.p-rail > .p-card + .p-card, .p-rail-car .p-stay + .p-stay { margin-top: 0; }
 .atrk.p-rail > * { min-width: 0; }   /* a longer label never widens one card of the rail */
 .p-act.is-current { white-space: normal; text-align: center; }
-/* a photograph keeps its own proportions: 3:4, covered, never stretched */
-.p-rail > img { display: block; flex: 0 0 auto; width: auto; height: auto; max-height: min(92vw, 440px); max-width: min(84%, 340px); aspect-ratio: auto; object-fit: contain; background: none; }
-@media (min-width: 768px) { .p-rail > img { max-height: 440px; max-width: 340px; } }
+/* every photograph of a rail: the same 3:4 card, covered, never stretched */
+.p-rail > img { display: block; flex: 0 0 72%; width: 72%; max-width: 300px; height: auto; aspect-ratio: 3 / 4; object-fit: cover; object-position: 50% 12%; background: #E7E3DB; }
+@media (min-width: 768px) { .p-rail > img { flex-basis: 300px; width: 300px; max-width: 300px; } }
 @media (min-width: 768px) { .p-rail > * { flex: 0 0 320px; } }
 
 /* ------------------------------------------------------------- disclosure */

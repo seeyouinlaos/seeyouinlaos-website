@@ -156,7 +156,6 @@ await go('index.html'); await page.evaluate(() => localStorage.clear());
 const PUBLIC = [
   ['/ (index.html)', 'index.html', 'the homepage'],
   ['/destination', 'destination.html', 'the destinations'],
-  ['/journeys', 'journeys.html', 'the journeys · every stay category and transport product, chosen from here'],
   ['/accommodation', 'accommodation.html', 'the stays'],
   ['/experiences', 'experiences.html', 'the experiences · discovery'],
   ['/voyage', 'voyage.html', 'the wedding · public'],
@@ -165,8 +164,6 @@ const PUBLIC = [
   ['/tea', 'tea.html', 'the afternoon tea · the selection page'],
   ['/transport', 'transport.html', 'transport · the overview'],
   ['/dress', 'dress.html', 'dress code (direct address only)'],
-  ['/cart', 'cart.html', 'the bag · signed out'],
-  ['/tickets', 'tickets.html', 'the tickets · signed out'],
 ];
 for (const [route, file, ctxt] of PUBLIC) {
   await step(route, async () => {
@@ -175,6 +172,16 @@ for (const [route, file, ctxt] of PUBLIC) {
     const diff = wide.filter((l) => !narrow.includes(l)); if (diff.length) add(route, 'PUBLIC · DEFAULT · lines present at 1280 px only', file, ctxt + ' · the desktop layout', [{ name: 'page', lines: diff }]);
   });
 }
+/* ACCESS (Owner, Edit 3 · 16 Sep 2026): signed out, every private surface hands over to the invitation page and remembers the way back */
+await step('access · signed out', async () => {
+  for (const f of ['journeys.html', 'cart.html', 'tickets.html', 'your-journey.html', 'wedding.html', 'review.html']) {
+    await go(f, 390);
+    const landed = page.url().replace(ORIGIN + '/', '');
+    add('/' + f.replace('.html', '') + ' · signed out', 'ACCESS · HANDS OVER TO THE INVITATION PAGE · ' + landed, f, 'no private surface without a session; the guest returns here after the code (?next=)', [{ name: 'landed on', lines: [landed] }, { name: 'status line', lines: await dumpSel('[data-access]') }]);
+    if (f !== 'journeys.html') continue;
+    add('/invitation · after a hand-over', 'ACCESS · THE CODE PROMPT OPEN · the way back kept', 'invitation.html', 'the invitation page opened by a private link, signed out', await parts());
+  }
+});
 await step('menu', async () => { await go('index.html', 390); await clickIf('.hb, #menu-open'); for (const btn of await page.locator('.a-menu .a-ch').all()) await btn.click().catch(() => {}); await page.waitForTimeout(300); add('/ · the site menu', 'MENU OPEN · every group expanded', 'assets/aman.js buildMenu()', 'the menu behind the ☰ button on every public page', [{ name: 'menu', lines: await dumpSel('.a-menu') }]); });
 await step('forwarders', async () => {
   await go('documents.html'); add('/documents', 'FORWARDING ADDRESS', 'documents.html', 'forwards to about-you.html#documents', await parts());

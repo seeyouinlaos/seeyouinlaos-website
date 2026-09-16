@@ -8,10 +8,18 @@
  * API (window):
  *   SIYL_AUTH.get()            -> { invitationId, partyName } | null
  *   SIYL_AUTH.clear()
- *   SIYL_INVITE.require(fn)    -> runs fn immediately when authenticated,
- *                                 otherwise opens the invitation overlay and
- *                                 runs fn after a valid code (the interrupted
- *                                 action completes; the guest stays on page).
+ *   SIYL_INVITE.require(fn)    -> runs fn immediately when authenticated;
+ *                                 otherwise (Owner, Edit 3 · 16 Sep 2026) the
+ *                                 guest is taken to the invitation page, where
+ *                                 the code is entered, and returns to where
+ *                                 they were (?next=). On the invitation page
+ *                                 itself the code prompt opens in place.
+ *   SIYL_INVITE.private(href)  -> true for a private surface (the journey, the
+ *                                 bag, the tickets, the steps): never reachable
+ *                                 without a session — every such link on a
+ *                                 public page leads to the invitation page.
+ *   SIYL_INVITE.gateUrl(next)  -> invitation.html?open=1&next=<page>
+ *   The header of every page says whether a guest is signed in or not.
  */
 import { lookupByToken, bearerOf } from '../register/crypto.mjs';
 
@@ -172,6 +180,14 @@ function migrateLegacy(legacy, partyId, guestId) {
 
 /* ---------------- overlay (tea.html visual grammar, shared) ---------------- */
 const CSS = `
+.hd-access { margin: 0; padding: 9px 22px; display: flex; justify-content: flex-end; align-items: center; flex-wrap: wrap; gap: 6px 14px; font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; line-height: 1.6; color: #6B6964; background: #F3EEE7; border-bottom: 1px solid #DAD9D7; }
+.hd-access .on { color: #313131; }
+.hd-access a { color: #313131; text-decoration: none; border-bottom: 1px solid #313131; padding-bottom: 1px; min-height: 0; }
+.hd-access a:hover { opacity: .6; }
+.hd-access .hd-access-out { background: none; border: 0; padding: 0; cursor: pointer; font: inherit; letter-spacing: inherit; text-transform: inherit; color: #6B6964; border-bottom: 1px solid #DAD9D7; }
+@media (min-width: 768px) { .hd-access { padding: 9px 44px; } }
+@media (min-width: 900px) { .hd-access { padding: 9px 64px; } }
+
 .siyl-inv-scrim{position:fixed;inset:0;background:rgba(30,30,30,.45);display:none;z-index:80}
 .siyl-inv{position:fixed;left:0;right:0;bottom:0;background:#FCFAF6;padding:34px 26px calc(38px + env(safe-area-inset-bottom));display:none;z-index:81}
 body.siyl-inv-open .siyl-inv-scrim,body.siyl-inv-open .siyl-inv{display:block}
@@ -188,12 +204,12 @@ body.siyl-inv-open .siyl-inv-scrim,body.siyl-inv-open .siyl-inv{display:block}
 let built = false;
 let pending = null;
 
+let styled = false;
+function ensureStyle() { if (styled || !document.head || !document.createElement) return; styled = true; const style = document.createElement('style'); style.textContent = CSS; document.head.appendChild(style); }
 function build() {
   if (built) return;
   built = true;
-  const style = document.createElement('style');
-  style.textContent = CSS;
-  document.head.appendChild(style);
+  ensureStyle();
   const scrim = document.createElement('div');
   scrim.className = 'siyl-inv-scrim';
   const ov = document.createElement('div');
@@ -231,6 +247,9 @@ function build() {
         close();
         const fn = pending; pending = null;
         if (fn) fn(AUTH.get());
+        /* back to where the guest was going (a page of this site only) */
+        const nx = safeNext(decodeURIComponent((LOC.search.match(/[?&]next=([^&]+)/) || [, ''])[1]));
+        if (nx) { LOC.replace(hrefOf(nx)); return; }
       } else {
         err.textContent = 'We could not find that invitation code. Please use the private code from your invitation letter — or write to Guest Relations and we will help right away.';
       }
@@ -242,6 +261,57 @@ function build() {
   go.addEventListener('click', attempt);
   input.addEventListener('keydown', (e) => { if (e.key === 'Enter') attempt(); });
 }
+
+/* ---- ACCESS (Owner, Edit 3 · 16 Sep 2026): nobody sees the journey, the bag, the
+ * tickets or any step before they are signed in; every page says which it is ---- */
+const PRIVATE = /^(?:\.\/)?(your-journey|cart|tickets|journeys|wedding|wedding-preparation|about-you|review)(?:\.html)?(?=$|[?#])/;
+const LOC = typeof location !== 'undefined' ? location : { pathname: '/', search: '', hash: '', replace() {} };
+const cleanUrls = !/\.html$/i.test(LOC.pathname) && LOC.pathname.split('/').pop() !== '';
+const hrefOf = (file) => (cleanUrls ? file.replace(/\.html(?=[?#]|$)/, '') : file);
+const here = () => LOC.pathname.split('/').pop() + LOC.search + LOC.hash;
+function isPrivate(href) { if (!href) return false; const h = String(href).trim(); if (/^(https?:|mailto:|tel:|javascript:|#)/i.test(h)) return false; return PRIVATE.test(h.replace(/^\//, '')); }
+function safeNext(v) { return /^[a-z0-9-]+(?:\.html)?(?:\?[\w=&%.-]*)?(?:#[\w-]*)?$/i.test(v || '') ? v : ''; }
+function gateUrl(next) { return hrefOf('invitation.html') + '?open=1' + (safeNext(next) ? '&next=' + encodeURIComponent(next) : ''); }
+function toGate(next) { LOC.replace(gateUrl(next)); }
+/* the status line under every header: signed in · name · Your Journey | not signed in · Open your invitation */
+function renderAccess() {
+  if (!document.querySelector) return;
+  ensureStyle();
+  const header = document.querySelector('header.hd'); if (!header) return;
+  let el = document.querySelector('[data-access]');
+  if (!el) { el = document.createElement('p'); el.className = 'hd-access'; el.setAttribute('data-access', ''); header.insertAdjacentElement('afterend', el); }
+  const a = AUTH.get(), ok = !!(a && AUTH.valid());
+  el.setAttribute('data-state', ok ? 'in' : 'out');
+  el.innerHTML = ok
+    ? '<span class="on">Signed in · ' + esc(a.preferredName || a.fullName || 'you') + '</span><a href="' + hrefOf('your-journey.html') + '">Your Journey</a><button type="button" class="hd-access-out" data-access-out>Sign out</button>'
+    : '<span>Not signed in</span><a href="' + gateUrl('') + '">Open your invitation</a>';
+  const out = el.querySelector('[data-access-out]'); if (out) out.addEventListener('click', () => { GUEST.leave(); LOC.replace(hrefOf('invitation.html')); });
+}
+function esc(t) { return String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+/* every link to a private surface leads to the invitation page while nobody is signed in */
+function gateLinks() {
+  if (!document.querySelectorAll) return;
+  const a = AUTH.get(), ok = !!(a && AUTH.valid());
+  document.querySelectorAll('a[href]').forEach((l) => {
+    const orig = l.getAttribute('data-private-href') || l.getAttribute('href');
+    if (!isPrivate(orig)) return;
+    if (!l.hasAttribute('data-private-href')) l.setAttribute('data-private-href', orig);
+    l.setAttribute('href', ok ? orig : gateUrl(orig.replace(/^\.?\//, '')));
+  });
+}
+document.addEventListener('click', (e) => {
+  const l = e.target && e.target.closest ? e.target.closest('a[href]') : null; if (!l) return;
+  const orig = l.getAttribute('data-private-href') || l.getAttribute('href');
+  if (!isPrivate(orig)) return;
+  const a = AUTH.get(); if (a && AUTH.valid()) return;
+  e.preventDefault(); toGate(orig.replace(/^\.?\//, ''));
+}, true);
+function accessReady() { renderAccess(); gateLinks(); }
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', accessReady); else accessReady();
+document.addEventListener('siyl:auth', accessReady); document.addEventListener('siyl:signout', accessReady);
+/* menus and footers are built by scripts after this one: one more pass once everything is in place */
+if (typeof window !== 'undefined' && window.addEventListener) window.addEventListener('load', () => { gateLinks(); renderAccess(); });
+if (typeof MutationObserver !== 'undefined' && document.documentElement) new MutationObserver(() => { if (document.querySelector('a[href]:not([data-private-href])')) gateLinks(); }).observe(document.documentElement, { childList: true, subtree: true });
 
 function open() {
   build();
@@ -258,9 +328,13 @@ window.SIYL_INVITE = {
   require(fn) {
     const a = AUTH.get();
     if (a && AUTH.valid()) { fn(a); return; }
+    if (!/^invitation(\.html)?$/.test(LOC.pathname.split('/').pop())) { toGate(here()); return; }
     pending = fn;
     open();
   },
+  private: isPrivate,
+  gateUrl,
+  authed() { const a = AUTH.get(); return !!(a && AUTH.valid()); },
   /* true when a stored session predates the guest-scoped invitations */
   stale() { return !!AUTH.get() && !AUTH.valid(); },
   /* leave: the code screen, clean; this guest's draft kept aside */

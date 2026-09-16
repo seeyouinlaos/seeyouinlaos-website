@@ -66,7 +66,7 @@ async function visit(rel, signedIn) {
 }
 function hash(s) { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return (h >>> 0).toString(16); }
 const KEEP_QUERY = /^(room|experience|transport)\.html$/;
-const norm = (h) => { const clean = h.split('#')[0].replace(/^\.\//, '').replace(/^\//, ''); const [file, q] = clean.split('?'); const f = file === '' ? 'index.html' : (/\.html$/.test(file) ? file : (/\/$/.test(file) ? file + 'index.html' : (/\./.test(file) ? null : file + '.html'))); if (!f) return null; return KEEP_QUERY.test(f) && q ? f + '?' + q.split('&').filter((x) => /^id=/.test(x)).join('&') : f; };
+const norm = (h) => { const clean = h.split('#')[0].replace(/^\.\//, '').replace(/^\//, ''); const [file, q] = clean.split('?'); const f = file === '' ? 'index.html' : (/\.html$/.test(file) ? file : (/\/$/.test(file) ? file + 'index.html' : (/\./.test(file) ? null : file + '.html'))); if (!f) return null; return KEEP_QUERY.test(f) && q ? f + '?' + q.split("&").filter((x) => /^(id|stay|room)=/.test(x)).join("&") : f; };
 
 /* 1 · the public site, no session */
 const seen = new Set(), queue = ['index.html'];
@@ -89,7 +89,7 @@ await p.waitForSelector('.siyl-inv input', { timeout: 10000 });
 await p.fill('.siyl-inv input', reader.token); await p.click('.siyl-inv .igo');
 await p.waitForFunction((g) => { try { const a = JSON.parse(localStorage.getItem('siyl.auth') || 'null'); return !!(a && a.guestId === g && a.bearer); } catch (e) { return false; } }, READER, { timeout: 15000 });
 await p.waitForTimeout(500);
-const AUTH_PAGES = ['invitation.html', 'your-journey.html', 'journeys.html', 'wedding.html', 'wedding-preparation.html', 'about-you.html', 'review.html', 'cart.html', 'tickets.html', 'room.html?id=wedstay/heritage', 'room.html?id=bkk-stay/penthouse', 'room.html?id=kmg/light-french', 'room.html?id=ljg/snow-mountain-viewing', 'transport.html?id=c86', 'experience.html?id=bkk-suhring', 'experiences.html'];
+const AUTH_PAGES = ['invitation.html', 'your-journey.html', 'journeys.html', 'wedding.html', 'wedding-preparation.html', 'about-you.html', 'review.html', 'cart.html', 'tickets.html', 'room.html?stay=souphattra&room=heritage', 'room.html?stay=sathorn&room=penthouse', 'room.html?stay=kunming&room=light-french', 'room.html?stay=lijiang&room=snow-mountain-viewing', 'transport.html?id=c86', 'experience.html?id=bkk-suhring', 'experiences.html'];
 const authSeen = new Set();
 const q2 = [...AUTH_PAGES];
 while (q2.length) {

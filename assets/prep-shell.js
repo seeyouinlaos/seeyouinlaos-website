@@ -198,8 +198,14 @@
     if (!bar) return;
     var p = party(), m = me();
 
-    /* Before the invitation is open there is no Preparation navigation. */
+    /* Before the invitation is open there is no Preparation navigation — and no
+     * private page either (Owner, Edit 3 · 16 Sep 2026): the guest goes to the
+     * invitation page and comes back here once signed in. */
     if (!p || !m) {
+      if (!/^invitation(\.html)?$/.test(location.pathname.split('/').pop())) {
+        var toGate = function () { if (window.SIYL_INVITE && SIYL_INVITE.require) SIYL_INVITE.require(function () {}); };
+        if (window.SIYL_INVITE) toGate(); else document.addEventListener('siyl:invite-ready', toGate, { once: true });
+      }
       bar.innerHTML = '<div class="prep-bar-in"><div class="prep-bar-l">' +
         '<p class="prep-eyebrow">Your private journey</p>' +
         '<p class="prep-step">Open your invitation to begin</p>' +
