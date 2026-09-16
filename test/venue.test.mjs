@@ -143,8 +143,12 @@ test('MOTION · one system, three timings, physical easing; reduced motion keeps
   assert.doesNotMatch(v + c, /bounce|spin|rotate\(|confetti|perspective\(/i, 'no bouncing, spinning, 3D or confetti');
   const vy = src('voyage.html');
   assert.equal((vy.match(/data-motion="reveal"/g) || []).length, 10, 'the story sections and duos of the wedding page reveal');
-  for (const f of ['voyage.html', 'accommodation.html']) { const s = src(f); assert.match(s, /<section class="a-sec venue" id="venue" aria-labelledby="venue-h" data-venue><\/section>/, f); assert.match(s, /assets\/venue-data\.js"><\/script>\s*<script src="assets\/venue\.js"/, f); assert.match(s, /assets\/motion\.css/); }
+  for (const f of ['index.html', 'voyage.html', 'accommodation.html']) { const s = src(f); assert.match(s, /<section class="a-sec venue" id="venue" aria-labelledby="venue-h" data-venue><\/section>/, f); assert.match(s, /assets\/venue-data\.js"><\/script>\s*<script src="assets\/venue\.js"/, f); assert.match(s, /assets\/motion\.css/); }
   assert.doesNotMatch(vy, /heritage-courtyard-wide\.jpg\)" role="img" aria-label="Poolside at Souphattra Heritage Vientiane, the heritage houses/, 'the wide band gave way to the stage');
+  /* the homepage (Owner, 16 Sep 2026 — the mobile venue fix): the wordless 300 px band of the aerial gave way to the stage with the seven labels, the legend and the detail; on a phone the section flows in document order */
+  assert.doesNotMatch(src('index.html'), /class="a-band" style="background-image:url\(assets\/images\/souphattra\/heritage-courtyard-aerial\.jpg\)/, 'the band is gone');
+  assert.match(v, /@media \(max-width: 767px\) \{\s*\.venue-head \{ margin-bottom: 32px; \}\s*\.venue-grid \{ gap: 24px; \}\s*\.venue-cap \{ padding-top: 8px; \}\s*\.a-sec\.venue \{ margin: 56px 0; \}\s*\.a-sec\.venue \+ \.a-sec \{ margin-top: 56px; \}\s*\.a-sec:has\(\+ \.a-sec\.venue\) \{ margin-bottom: 56px; \}\s*\}/, 'the phone rhythm');
+  assert.doesNotMatch(v, /\d+vh|position: sticky|min-height: (?:[2-9]\d{2}|\d{4,})px/, 'no viewport-height spacer, no sticky reservoir, no reservoir of 200 px or more in the venue styles (the detail keeps 120 px while a photograph cross-fades)');
 });
 
 test('NAVIGATION · the public menu and both footers are unchanged by the venue work: Sühring · Lunch and 1872 stay, the two footer lists stay equal', () => {

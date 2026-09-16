@@ -98,6 +98,16 @@
 .venue-thumb:focus-visible { outline: 2px solid var(--a-ink); outline-offset: 2px; }
 .venue-story { font-size: 13.5px; line-height: 1.9; color: #4A4A4A; margin: 0 0 16px; max-width: 32em; }
 
+/* ---- the phone: the section flows in document order — heading → aerial 32 px, aerial → legend 24 px, section → next section 56 px;
+   no spacer, no sticky reservoir, no viewport height anywhere ---- */
+@media (max-width: 767px) {
+  .venue-head { margin-bottom: 32px; }
+  .venue-grid { gap: 24px; }
+  .venue-cap { padding-top: 8px; }
+  .a-sec.venue { margin: 56px 0; }
+  .a-sec.venue + .a-sec { margin-top: 56px; }
+  .a-sec:has(+ .a-sec.venue) { margin-bottom: 56px; }
+}
 /* ---- tablet and desktop: the photograph keeps the full frame, the legend and the detail sit beside it ---- */
 @media (min-width: 768px) {
   .venue-head { margin-bottom: 34px; }
