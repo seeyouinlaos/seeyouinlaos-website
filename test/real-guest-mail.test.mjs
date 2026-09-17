@@ -39,8 +39,9 @@ test('REAL PATH · the journey-shop payload: the guest email at registration.con
     assert.deepEqual(d.mailSummary, { ownerMailStatus: 'accepted', ownerMessageId: '<msg-1@brevo>', guestMailStatus: 'accepted', guestMessageId: '<msg-2@brevo>', guestTo: 's…@example.org', mailLastError: null, at: d.mailSummary.at });
     assert.equal(h.calls[1].body.to[0].email, 'sam.example@example.org'); assert.equal(h.calls[1].body.to[0].name, 'Sam Example');
     assert.match(h.calls[0].body.subject, /Journey received — Sam Example · SYL-G777-/);
-    assert.match(h.calls[0].body.textContent, /Guest: Sam Example \(G777\)\n/); assert.match(h.calls[0].body.textContent, /Wedding Ceremony seat: C-R-05-02\nWedding Dinner seat: D-12-03/); assert.match(h.calls[0].body.textContent, /Contact: sam.example@example.org · \+66 81 000 0000/);
-    assert.match(h.calls[1].body.textContent, /Dear Sam Example,/);
+    assert.match(h.calls[0].body.textContent, /Guest: Sam Example · G777\n/); assert.match(h.calls[0].body.textContent, /Wedding Ceremony: Seat E5\n· Wedding Dinner: Seat D-12-03/); assert.match(h.calls[0].body.textContent, /Email: sam.example@example.org\nMobile: \+66 81 000 0000/);
+    assert.match(h.calls[0].body.textContent, /Ceremony seat record: C-R-05-02/, 'the internal id sits in the internal reference only');
+    assert.match(h.calls[1].body.textContent, /Dear Sam,/); assert.doesNotMatch(h.calls[1].body.textContent, /C-R-05-02|(?<!SYL-)G777|INV-G777/, 'no internal id reaches the guest');
     const rec = JSON.parse(h.store.m.get('reg:INV-G777').v);
     assert.equal(rec.guestId, 'G777'); assert.deepEqual(rec.recipient, { email: 'sam.example@example.org', phone: '+66 81 000 0000', source: 'journey contact' });
     assert.equal(rec.mailSummary.guestMessageId, '<msg-2@brevo>'); assert.equal(rec.mailSummary.guestMailStatus, 'accepted');

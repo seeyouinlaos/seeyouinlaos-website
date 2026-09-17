@@ -51,6 +51,7 @@ export { Seating } from './seating.js';
 export { Rooms } from './rooms.js';
 import { identify, owns, loadIndex } from './auth.js';
 import { SEED } from './inventory-seed.js';
+import { composeGuestMail, composeOwnerMail } from './mail-templates.js';
 
 /* ---- the Guest Relations gate (F + G) ------------------------------------
  * A secret set with `wrangler secret put GR_TOKEN`, compared in constant
@@ -484,20 +485,20 @@ const MAIL_FROM_NAME = 'See You In Laos — Guest Relations';
  *   BREVO_API_KEY   → https://api.brevo.com/v3/smtp/email (sender = MAIL_FROM, a sender validated in Brevo)
  *   RESEND_API_KEY  → https://api.resend.com/emails       (sender = MAIL_FROM, a domain verified in Resend)
  * Without a key nothing is sent and the answer says so: { provider: 'none', accepted: false }. */
-async function sendMail(env, to, toName, subject, text) {
+async function sendMail(env, to, toName, subject, text, html) {
   const from = (env.MAIL_FROM || GR_EMAIL).trim();
   const out = { provider: 'none', accepted: false, id: null, status: 0, error: null, at: new Date().toISOString() };
   try {
     if (env.BREVO_API_KEY) {
       out.provider = 'brevo';
       const r = await fetch('https://api.brevo.com/v3/smtp/email', { method: 'POST', headers: { 'api-key': env.BREVO_API_KEY, 'content-type': 'application/json', accept: 'application/json' },
-        body: JSON.stringify({ sender: { email: from, name: MAIL_FROM_NAME }, to: [{ email: to, name: toName || to }], replyTo: { email: GR_EMAIL, name: 'Guest Relations' }, subject, textContent: text }) });
+        body: JSON.stringify({ sender: { email: from, name: MAIL_FROM_NAME }, to: [{ email: to, name: toName || to }], replyTo: { email: GR_EMAIL, name: 'Guest Relations' }, subject, textContent: text, ...(html ? { htmlContent: html } : {}) }) });
       out.status = r.status; let d = null; try { d = await r.json(); } catch (e) {}
       out.accepted = r.ok; out.id = d && (d.messageId || null); if (!r.ok) out.error = (d && (d.message || d.code)) || ('HTTP ' + r.status);
     } else if (env.RESEND_API_KEY) {
       out.provider = 'resend';
       const r = await fetch('https://api.resend.com/emails', { method: 'POST', headers: { authorization: 'Bearer ' + env.RESEND_API_KEY, 'content-type': 'application/json' },
-        body: JSON.stringify({ from: MAIL_FROM_NAME + ' <' + from + '>', to: [to], reply_to: GR_EMAIL, subject, text }) });
+        body: JSON.stringify({ from: MAIL_FROM_NAME + ' <' + from + '>', to: [to], reply_to: GR_EMAIL, subject, text, ...(html ? { html } : {}) }) });
       out.status = r.status; let d = null; try { d = await r.json(); } catch (e) {}
       out.accepted = r.ok; out.id = d && (d.id || null); if (!r.ok) out.error = (d && (d.message || d.name)) || ('HTTP ' + r.status);
     } else {
@@ -512,14 +513,12 @@ function guestEmailOf(record) {
   for (const e of [r.contact && r.contact.email, r.guestRecord && r.guestRecord.contact && r.guestRecord.contact.email, Array.isArray(r.guests) && r.guests[0] && r.guests[0].contact && r.guests[0].contact.email]) { const v = validEmail(e); if (v) return v; }
   return '';
 }
-function guestPhoneOf(record) { const r = record && record.registration || {}; return (record && record.recipient && record.recipient.phone) || (r.contact && r.contact.phone) || (r.guestRecord && r.guestRecord.contact && r.guestRecord.contact.phone) || (Array.isArray(r.guests) && r.guests[0] && r.guests[0].contact && r.guests[0].contact.phone) || ''; }
 function guestNameOf(record) {
   const r = record && record.registration || {};
   const gr = r.guestRecord && Array.isArray(r.guestRecord.guests) && r.guestRecord.guests[0] || null;
   const g = Array.isArray(r.guests) && r.guests[0] || null;
   return (gr && gr.source && gr.source.fullName) || (gr && gr.name) || (g && (g.fullName || g.name)) || record && record.guestId || r.guestId || 'Guest';
 }
-function guestRowOf(record) { const r = record && record.registration || {}; const gr = r.guestRecord && Array.isArray(r.guestRecord.guests) && r.guestRecord.guests[0] || null; const g = Array.isArray(r.guests) && r.guests[0] || null; return { allergy: (g && g.allergy) || (r.guestRecord && r.guestRecord.allergy) || null, row: gr || g || {} }; }
 /* the guest's rooms as the engine persists them: { stage: { key, label, name } } — read server-side under the guest's own identity */
 async function engineRooms(env, who) {
   if (!env.ROOMS || !who) return null;
@@ -533,43 +532,16 @@ async function engineRooms(env, who) {
     return out;
   } catch (e) { return null; }
 }
-const STAGE_WORDS = { 'bkk-stay': 'Bangkok stay', prewed: 'Vientiane · pre-wedding', wedstay: 'Vientiane · wedding', kmg: 'Kunming', ljg: 'Lijiang', kempinski: 'Bangkok · Siam Kempinski' };
-function roomLines(record) {
-  const r = record && record.rooms;
-  if (r === null || r === undefined) return ['Rooms held (room engine): not read'];
-  const order = Object.keys(STAGE_WORDS), keys = Object.keys(r).sort((a, b) => (order.indexOf(a) + 1 || 99) - (order.indexOf(b) + 1 || 99));   /* journey order */
-  if (!keys.length) return ['Rooms held (room engine): none'];
-  return ['Rooms held (room engine — the persisted allocation):'].concat(keys.map((st) => '  ' + (STAGE_WORDS[st] || st) + ': ' + r[st].room + ' · ' + r[st].name + (r[st].stay ? ' · ' + r[st].stay : '')));
-}
-function seatWords(record) {
-  const r = record && record.registration || {}, g = Array.isArray(r.guests) && r.guests[0] || null;
-  if (g) return { ceremony: g.ceremonySeatLabel || (g.ceremonySeat ? g.ceremonySeat : 'no seat held'), dinner: g.dinnerSeatLabel || (g.dinnerSeat ? g.dinnerSeat : 'no seat held') };
-  /* the journey-shop shape: seats = the seating engine's mine { ceremony: { guestId: seatId }, dinner: { … } } */
-  const id = record && record.guestId || r.guestId, m = r.seats && typeof r.seats === 'object' ? r.seats : null;
-  if (!m || !id) return { ceremony: 'not recorded', dinner: 'not recorded' };
-  const pick = (ev) => (m[ev] && (m[ev][id] || (typeof m[ev] === 'string' ? m[ev] : null))) || 'no seat held';
-  return { ceremony: pick('ceremony'), dinner: pick('dinner') };
-}
 /* both emails for one stored record — the content is the journey as sent, never an access code */
 async function sendJourneyMail(env, record, request) {
   const origin = new URL(request.url).origin;
-  const name = guestNameOf(record), guestId = record.guestId || record.registration && record.registration.guestId || '', seats = seatWords(record), g = guestRowOf(record), contact = { email: guestEmailOf(record), phone: guestPhoneOf(record) };
-  const total = record.registration && record.registration.total != null ? 'USD ' + record.registration.total : 'see the selections';
-  /* an UPDATE of a sent journey says so (Owner, 16 Sep 2026): the same reference, the version, when it was first sent */
-  const upd = record.kind === 'update' && (record.version || 1) > 1, sentAt = record.lastSentAt || record.submittedAt;
-  const ownerHead = ['SEE YOU IN LAOS — ' + (upd ? 'JOURNEY UPDATED (version ' + record.version + ')' : 'JOURNEY RECEIVED'), 'Guest: ' + name + ' (' + guestId + ')', 'Invitation: ' + record.invitationId, 'Submission: ' + record.submissionId, (upd ? 'Updated at: ' + sentAt + ' · first sent ' + (record.firstSentAt || record.submittedAt) : 'Submitted at: ' + record.submittedAt),
-    'Wedding Ceremony seat: ' + seats.ceremony, 'Wedding Dinner seat: ' + seats.dinner].concat(roomLines(record)).concat(['Contact: ' + (contact.email || '—') + ' · ' + (contact.phone || '—'),
-    'Allergy: ' + (g.allergy && g.allergy.answer || '—') + (g.allergy && g.allergy.details ? ' · ' + g.allergy.details : ''), 'Total / contribution: ' + total,
-    'Follow-up: ' + origin + '/api/status?invitation=' + encodeURIComponent(record.invitationId) + ' · KV record reg:' + record.invitationId, '']).join('\n');
-  const owner = await sendMail(env, GR_EMAIL, 'Guest Relations', (upd ? 'Journey updated — ' : 'Journey received — ') + name + ' · ' + record.submissionId, ownerHead + record.text);
+  const name = guestNameOf(record);
+  /* the words and the look come from src/mail-templates.js (See You In Laos CI); the facts are the stored record's */
+  const ownerMail = composeOwnerMail(record, origin + '/api/status?invitation=' + encodeURIComponent(record.invitationId));
+  const owner = await sendMail(env, GR_EMAIL, 'Guest Relations', ownerMail.subject, ownerMail.text, ownerMail.html);
   const guestTo = guestEmailOf(record);
-  const guestBody = [upd ? 'Your Journey has been updated' : 'Your Journey has been received', '', 'Dear ' + name + ',', '',
-    upd ? 'Thank you — your updated journey has reached Guest Relations and replaces the earlier version. Your changes are saved; Guest Relations will review them personally and confirm each arrangement with you.'
-        : 'Thank you — your journey has reached Guest Relations. Your choices are saved; Guest Relations will review them personally and confirm each arrangement with you.',
-    'Reference: ' + record.submissionId, (upd ? 'Updated: ' + sentAt + ' (version ' + record.version + ' · first sent ' + (record.firstSentAt || record.submittedAt) + ')' : 'Received: ' + record.submittedAt), 'Wedding Ceremony seat: ' + seats.ceremony, 'Wedding Dinner seat: ' + seats.dinner].concat(roomLines(record)).concat(['',
-    'Your journey (as sent):', '', record.text, '', 'To open your journey again: ' + origin + '/invitation (enter your own invitation code — it is never sent by email).',
-    'Guest Relations: ' + GR_EMAIL, '', 'See You In Laos']).join('\n');
-  const guest = guestTo ? await sendMail(env, guestTo, name, (upd ? 'Your Journey has been updated — ' : 'Your Journey has been received — ') + record.submissionId, guestBody) : { provider: 'none', accepted: false, id: null, status: 0, error: 'no valid guest email address in the journey', at: new Date().toISOString() };
+  const guestMail = composeGuestMail(record);
+  const guest = guestTo ? await sendMail(env, guestTo, name, guestMail.subject, guestMail.text, guestMail.html) : { provider: 'none', accepted: false, id: null, status: 0, error: 'no valid guest email address in the journey', at: new Date().toISOString() };
   return { owner, guest: { ...guest, to: guestTo ? guestTo.replace(/^(.).*(@.*)$/, '$1…$2') : null }, at: new Date().toISOString() };
 }
 function publicMail(mail) { const pick = (m) => m ? { provider: m.provider, accepted: !!m.accepted, id: m.id || null, error: m.error || null, to: m.to || undefined } : null; return { owner: pick(mail.owner), guest: pick(mail.guest), at: mail.at }; }

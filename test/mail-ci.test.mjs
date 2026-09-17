@@ -1,0 +1,67 @@
+/* THE EMAILS IN THE SEE YOU IN LAOS CI (Owner, 16 Sep 2026 · presentation only): composed from a controlled record of the
+   real journey-shop shape — HTML + plain text, ivory / charcoal, serif headings, tracked labels, one column, the Worker
+   CTA, human seats and dates, no system word, no raw timestamp, no internal id for the guest; Guest Relations keeps the
+   operational detail with the internal ids in one final muted section. */
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { composeGuestMail, composeOwnerMail, seatLabel, whenWords, journeyModel } from '../src/mail-templates.js';
+import { page } from './sandbox.mjs';
+
+const REG = { channel: 'journey-shop', guestId: 'G777', totalUsd: 292, contact: { email: 'sam.example@example.org', phone: '+66 81 000 0000' },
+  selections: [{ id: 'train', name: 'Special Express No. 25', meta: '24 – 25 February 2027 · First Class Sleeper', price: 100 }, { id: 'bkk-stay', name: 'U Sathorn Bangkok', meta: '21 – 24 February 2027 · Superior Room With Garden View', price: 192, stay: 'sathorn', room: 'u-sathorn-superior-garden', breakfast: 'Breakfast included', unit: 'B', unitName: 'Room B' }, { id: 'sangkhathan', name: 'Sangkhathan Temple Offering', meta: 'Sunday, 28 February 2027 · Temple Ceremony', price: 15 }],
+  templeCeremony: { guests: [{ guestId: 'G777', events: { temple: 'Joining', coffee: 'Joining', vows: 'Joining', dinner: 'Not joining' } }] },
+  guestRecord: { partyName: 'Peggy & Steffie', dress: { all: true }, photo: { acknowledged: true }, guests: [{ guestId: 'G777', name: 'Sam', source: { fullName: 'Sam Example', preferredName: 'Sam' }, allergy: { answer: 'yes', details: 'Peanuts' }, profile: { coffeetea: 'Oolong', drink: 'Fresh lime soda' }, dress: { acknowledged: true, at: '2026-09-16T17:52:35.999Z', textVersion: '2026-09-09' } }] },
+  documents: { guests: [{ guestId: 'G777', documents: [{ kind: 'passport', label: 'Passport', state: 'Not provided' }], publication: 'Given' }] },
+  seats: { ceremony: { G777: 'C-R-05-02' }, dinner: { G777: 'D-T-05' } } };
+const rec = (extra) => ({ invitationId: 'INV-G777', guestId: 'G777', submissionId: 'SYL-G777-34DBEFD3', registration: REG, recipient: { email: 'sam.example@example.org', phone: '+66 81 000 0000' }, rooms: { 'bkk-stay': { key: 'bkk-stay/u-sathorn-superior-garden', label: 'C', room: 'Room C', name: 'Superior Room With Garden View' } }, kind: 'initial', version: 1, submittedAt: '2026-09-16T17:52:41.404Z', lastSentAt: '2026-09-16T17:52:41.696Z', firstSentAt: '2026-09-16T17:52:41.404Z', ...(extra || {}) });
+const DEBUG = /ledger|engine|persisted allocation|controlled production|fixture|payload|version 2|text version|NOT PROVIDED|NOT ANSWERED|Submitted via Review & Send|\d{4}-\d\d-\d\dT\d\d:\d\d|github\.io|guestId|invitationId|fingerprint|registration|API|\brecord\b/i;
+
+test('seat labels · the same pure mapping as assets/seatlabels.js (every ceremony and dinner seat)', () => {
+  const L = page({ auth: null }).SIYL_SEATLABELS;
+  const ids = [];
+  for (const side of ['L', 'R']) for (let r = 1; r <= 10; r++) for (let c = 1; c <= 3; c++) ids.push('C-' + side + '-' + String(r).padStart(2, '0') + '-0' + c);
+  for (const run of ['T', 'B']) for (let n = 1; n <= 25; n++) ids.push('D-' + run + '-' + String(n).padStart(2, '0'));
+  for (const id of ids) assert.equal(seatLabel(id), L.label(id), id);
+  assert.equal(seatLabel('C-R-05-02'), 'E5'); assert.equal(seatLabel('D-T-05'), 'A5'); assert.equal(seatLabel('nope'), null);
+  assert.equal(whenWords('2026-09-16T17:52:41.696Z'), '16 September 2026 · 19:52');
+});
+
+test('the guest email · CI, human words, the Worker CTA, no system term, no id, no raw stamp; the engine\'s room wins over the line\'s', () => {
+  const m = composeGuestMail(rec());
+  assert.equal(m.subject, 'Your Journey has been received — SYL-G777-34DBEFD3');
+  for (const body of [m.html, m.text]) {
+    assert.doesNotMatch(body, DEBUG, 'no debug language'); assert.doesNotMatch(body, /(?<!SYL-)G777|INV-G777|C-R-05-02|D-T-05/, 'no internal id (the reference carries the guest id by design)');
+    assert.match(body, /Dear Sam,/); assert.match(body, /Reference:?\s*(<[^>]+>\s*)*SYL-G777-34DBEFD3/); assert.match(body, /16 September 2026 · 19:52/);
+    assert.match(body, /Seat E5/); assert.match(body, /Seat A5/); assert.match(body, /Room C/); assert.doesNotMatch(body, /Room B/, 'the engine\'s room, never the line\'s claim');
+    assert.match(body, /USD 292/); assert.match(body, /Peanuts/); assert.match(body, /Oolong/); assert.match(body, /Dress code/); assert.match(body, /Reviewed/);
+    assert.match(body, /https:\/\/seeyouinlaos-website\.suthep-hrg\.workers\.dev\/invitation/); assert.match(body, /never sent by email/); assert.match(body, /guest\.relation\.seeyouinlaos@gmail\.com/); assert.match(body, /Vientiane · 28 February 2027/);
+    assert.doesNotMatch(body, /Passport/, 'an optional document not provided is omitted for the guest');
+    assert.match(body, /Wat Ong Teu/); assert.match(body, /09:00 – approximately 12:00/); assert.match(body, /From 12:00/); assert.match(body, /15:30/); assert.match(body, /19:30/); assert.match(body, /poolside/); assert.match(body, /Not joining/);
+  }
+  assert.match(m.html, /background:#f4eee5/); assert.match(m.html, /Georgia, 'Times New Roman'/); assert.match(m.html, /letter-spacing:2px;text-transform:uppercase/); assert.match(m.html, /max-width:640px/); assert.match(m.html, /Open your journey/);
+  assert.match(m.html, /<meta name="viewport"/); assert.doesNotMatch(m.html, /display:\s*grid|display:\s*flex|<script/);
+  assert.match(m.text, /^SEE YOU IN LAOS — YOUR JOURNEY\n\nYour journey has been received\n\nDear Sam,/);
+});
+
+test('the update email · same reference, "updated", versioning kept internal for the guest, shown to Guest Relations', () => {
+  const g = composeGuestMail(rec({ kind: 'update', version: 2, lastSentAt: '2026-09-16T18:10:03.000Z' }));
+  assert.equal(g.subject, 'Your Journey has been updated — SYL-G777-34DBEFD3');
+  for (const body of [g.html, g.text]) { assert.match(body, /Your journey has been updated/); assert.match(body, /replaces the previous version for review/); assert.match(body, /Updated:?\s*(<[^>]+>\s*)*16 September 2026 · 20:10/); assert.doesNotMatch(body, /version 2|first sent/i); }
+  const o = composeOwnerMail(rec({ kind: 'update', version: 2, lastSentAt: '2026-09-16T18:10:03.000Z' }), 'https://x/api/status?invitation=INV-G777');
+  assert.equal(o.subject, 'Journey updated — Sam Example · SYL-G777-34DBEFD3');
+  assert.match(o.text, /Journey updated\n\nLatest version received 16 September 2026 · 20:10 \(replaces the version first sent 16 September 2026 · 19:52\)/);
+  assert.match(o.text, /Status: Updated journey/); assert.match(o.text, /Submission: SYL-G777-34DBEFD3 · version 2/);
+});
+
+test('the Guest Relations email · operational detail retained, internal ids in the last section only, still-needed documents, no raw stamp', () => {
+  const o = composeOwnerMail(rec(), 'https://x/api/status?invitation=INV-G777');
+  for (const body of [o.html, o.text]) {
+    assert.match(body, /New journey received/); assert.match(body, /Sam Example · G777/); assert.match(body, /Peggy & Steffie|Peggy &amp; Steffie/); assert.match(body, /sam\.example@example\.org/); assert.match(body, /\+66 81 000 0000/);
+    assert.match(body, /Initial submission/); assert.match(body, /Seat E5/); assert.match(body, /Seat A5/); assert.match(body, /Room C/); assert.match(body, /Peanuts/); assert.match(body, /Passport/); assert.match(body, /Still needed: Passport/); assert.match(body, /USD 292/);
+    assert.match(body, /INV-G777/); assert.match(body, /C-R-05-02/); assert.match(body, /D-T-05/);
+    assert.doesNotMatch(body, /\d{4}-\d\d-\d\dT\d\d:\d\d|ledger|engine|persisted|payload|fixture|github\.io/i); assert.doesNotMatch(body, /NOT PROVIDED|NOT ANSWERED/, 'normal case for Guest Relations');
+  }
+  const i = o.text.indexOf('INTERNAL REFERENCE'); assert.ok(i > 0); assert.ok(o.text.indexOf('C-R-05-02') > i && o.text.indexOf('INV-G777') > i, 'the internal ids come after everything else');
+  assert.match(o.html, /Guest Relations<\/p>/, 'the eyebrow says whose email it is');
+  const M = journeyModel(rec()); assert.equal(M.hosts, false); assert.equal(journeyModel(rec({ guestId: 'G049' })).seats.ceremony.label, 'Front centre', 'a host without a ceremony seat sits front centre');
+});

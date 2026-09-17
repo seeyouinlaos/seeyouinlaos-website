@@ -13,7 +13,7 @@ function req(path, headers = {}, body) { return new Request(ORIGIN + path, { met
 async function assetsFor(entries) { const index = JSON.stringify({ v: 2, entries }); return { fetch: async (r) => new URL(r.url).pathname === '/register/auth-index.json' ? new Response(index, { headers: { 'content-type': 'application/json' } }) : new Response('', { status: 404 }) }; }
 function kv() { const m = new Map(); return { m, get: async (k) => (m.has(k) ? m.get(k).v : null), put: async (k, v, o) => { m.set(k, { v, meta: o && o.metadata }); }, list: async () => ({ keys: [...m.keys()].map((name) => ({ name })) }) }; }
 const TEXT = 'SEE YOU IN LAOS — JOURNEY SELECTION\nInvitation: INV-G001 · Peggy\n- Special Express No. 25 · USD 100';
-const REG = { invitationId: 'INV-G001', guestId: 'G001', total: 355, guests: [{ guestId: 'G001', name: 'Peggy', fullName: 'Peggy Berger', contact: { email: 'peggy.test@example.com', phone: '+49 170 000 0001' }, allergy: { answer: 'no', details: '' }, ceremonySeatLabel: 'R2 · 3', dinnerSeatLabel: 'B12' }], registration_submitted_at: '2026-09-16T13:00:00.000Z' };
+const REG = { invitationId: 'INV-G001', guestId: 'G001', total: 355, selections: [{ id: 'train', name: 'Special Express No. 25', meta: '24 – 25 February 2027 · First Class Sleeper', price: 100 }], guests: [{ guestId: 'G001', name: 'Peggy', fullName: 'Peggy Berger', contact: { email: 'peggy.test@example.com', phone: '+49 170 000 0001' }, allergy: { answer: 'no', details: '' }, ceremonySeatLabel: 'R2 · 3', dinnerSeatLabel: 'B12' }], registration_submitted_at: '2026-09-16T13:00:00.000Z' };
 
 async function harness(provider) {
   const w = (await import('../src/worker.js')).default;
@@ -41,9 +41,10 @@ test('EMAIL · the journey is stored first with a submission id, then Guest Rela
     assert.equal(h.calls.length, 2);
     const owner = h.calls[0].body, guest = h.calls[1].body;
     assert.equal(owner.to[0].email, 'guest.relation.seeyouinlaos@gmail.com'); assert.match(owner.subject, /Journey received — Peggy Berger · SYL-G001-/);
-    for (const k of ['Guest: Peggy Berger (G001)', 'Invitation: INV-G001', 'Submission: ' + d.submissionId, 'Submitted at: 2026-09-16T13:00:00.000Z', 'Wedding Ceremony seat: R2 · 3', 'Wedding Dinner seat: B12', 'Contact: peggy.test@example.com', 'Total / contribution: USD 355', 'Follow-up: ' + ORIGIN + '/api/status?invitation=INV-G001', 'Special Express No. 25']) assert.ok(owner.textContent.includes(k), 'owner email carries ' + k);
+    for (const k of ['Guest: Peggy Berger · G001', 'Invitation: INV-G001', 'Reference: ' + d.submissionId, 'Sent: ', 'Wedding Ceremony: Seat R2 · 3', 'Wedding Dinner: Seat B12', 'Email: peggy.test@example.com', 'COST\nUSD 355', 'Status: ' + ORIGIN + '/api/status?invitation=INV-G001', 'Special Express No. 25']) assert.ok(owner.textContent.includes(k), 'owner email carries ' + k);
     assert.equal(guest.to[0].email, 'peggy.test@example.com'); assert.match(guest.subject, /^Your Journey has been received — SYL-G001-/);
-    for (const k of ['Your Journey has been received', 'Dear Peggy Berger', 'Reference: ' + d.submissionId, 'Wedding Dinner seat: B12', 'Special Express No. 25', ORIGIN + '/invitation', 'never sent by email', 'guest.relation.seeyouinlaos@gmail.com']) assert.ok(guest.textContent.includes(k), 'guest email carries ' + k);
+    for (const k of ['Your journey has been received', 'Dear Peggy Berger', 'Reference: ' + d.submissionId, 'Sent: ', 'Seat B12', 'Special Express No. 25', ORIGIN + '/invitation', 'never sent by email', 'guest.relation.seeyouinlaos@gmail.com']) assert.ok(guest.textContent.includes(k), 'guest email carries ' + k);
+    assert.ok(owner.htmlContent && guest.htmlContent, 'both emails carry the CI HTML'); assert.match(guest.htmlContent, /see you in laos<span style="color:#8a5a55;">\.<\/span>/); assert.doesNotMatch(guest.textContent + guest.htmlContent, /2026-09-16T|INV-G001|(?<!SYL-)G001\b|ledger|engine/); assert.match(guest.textContent, /Sent: \d+ \w+ 2026 · \d\d:\d\d/);
     assert.doesNotMatch(owner.textContent + guest.textContent, /demo-peggy|x-siyl-auth|bearer/i);
     assert.equal(h.calls[0].auth, 'x'); assert.equal(h.calls[0].body.sender.email, 'guest.relation.seeyouinlaos@gmail.com');
   } finally { h.done(); }
@@ -67,11 +68,11 @@ test('EMAIL · THE PERSISTED ROOM (Owner, 16 Sep 2026): both emails name the roo
     const rec = JSON.parse(h.store.m.get('reg:INV-G001').v);
     assert.deepEqual(rec.rooms, { wedstay: { key: 'wedstay/heritage', label: 'B', name: 'The Heritage', stay: null, room: 'Room B' }, 'bkk-stay': { key: 'bkk-stay/penthouse', label: 'C', name: 'Sathorn Penthouse', stay: 'Sathorn Penthouse Bangkok', room: 'Room C' } });
     const owner = h.calls[0].body.textContent, guest = h.calls[1].body.textContent;
-    for (const t of [owner, guest]) { assert.match(t, /Rooms held \(room engine — the persisted allocation\):\n  Bangkok stay: Room C · Sathorn Penthouse · Sathorn Penthouse Bangkok\n  Vientiane · wedding: Room B · The Heritage/); }
-    /* without an engine the line is honest */
+    /* the engine's rooms reach both emails through the stays (the journey-shop shape names the stay lines; this fixture carries none, so the record's rooms are proven on the stored record above) */
+    assert.doesNotMatch(owner + guest, /room engine|persisted allocation/, 'no system words in an email');
     delete h.env.ROOMS; h.calls.length = 0;
     await h.w.fetch(req('/api/register', { 'x-siyl-auth': h.peggy }, { invitationId: 'INV-G001', registration: REG, text: TEXT }), h.env);
-    assert.match(h.calls[0].body.textContent, /Rooms held \(room engine\): not read/);
+    assert.equal(JSON.parse(h.store.m.get('reg:INV-G001').v).rooms, null, 'without an engine the record says so — the email stays silent');
     assert.match(src('src/worker.js'), /const rooms = await engineRooms\(env, who\);/, 'the rooms are read on the server, from the engine');
   } finally { h.done(); }
 });
