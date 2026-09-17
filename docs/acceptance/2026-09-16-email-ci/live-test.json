@@ -1,0 +1,25 @@
+{
+ "at": "2026-09-17T18:52:12.952Z",
+ "status": 202,
+ "submissionId": "SYL-G002-DCABD080",
+ "kind": "initial",
+ "mail": {
+  "owner": {
+   "provider": "brevo",
+   "accepted": true,
+   "id": "<202609171852.92048804703@smtp-relay.mailin.fr>",
+   "error": null
+  },
+  "guest": {
+   "provider": "brevo",
+   "accepted": true,
+   "id": "<202609171852.77244156904@smtp-relay.mailin.fr>",
+   "error": null,
+   "to": "s\u2026@gmail.com"
+  },
+  "at": "2026-09-17T18:52:12.177Z"
+ },
+ "delivered": {
+  "guest": "Gmail message 1a0b0b6531ef48ce \u00b7 INBOX \u00b7 2026-09-17T18:52:12Z \u00b7 the CI HTML as sent (Brevo wraps the CTA in its click-tracking redirect, which resolves to the Worker URL; the plain text carries the direct Worker URL)"
+ }
+}
