@@ -1,0 +1,15 @@
+# See You In Laos — team workflow (frozen, 17 Sep 2026)
+
+The canonical briefing is the **local, untracked** file `PROJECT_MASTER_BRIEF.md` in this checkout (excluded through `.git/info/exclude`; never committed — the repository is public). Its explicit Owner decisions are authoritative under its source-truth hierarchy. If it is missing, stop substantial work and report the missing local brief; never invent project rules.
+
+## Roles
+Owner — final authority · ChatGPT — product lead and final product/UX review · **Claude Code — implementation agent** · **OpenAI Codex** (`codex@openai-codex` plugin) — independent adversarial technical reviewer · **Graphify** (`graphify-out/`) — architecture, dependency, call-path and impact analysis · **Context Mode** — implementation context management.
+
+## Every substantial or critical task, automatically
+1. Read `PROJECT_MASTER_BRIEF.md`. 2. Inspect the actual repository, branch, working tree and live-runtime state read-only. 3. Use Graphify where architecture, dependencies, call paths or impact matter. 4. Write the implementation plan. 5. Run the Codex adversarial review of the plan **before** implementing; evaluate every finding — **VALID** (incorporate/fix), **FALSE POSITIVE** (briefly justified), **OUT OF SCOPE** (named, never silently ignored). 6. Implement only after that review. 7. Run the automated tests, real dummy E2E flows (synthetic guests, cleaned up), cross-device checks and the other evidence the brief requires; real mobile/tablet/desktop visual QA whenever guest-facing UI changes. 8. Run the Codex review again **after** implementation; fix every valid P0/P1 finding and retest; if fixes materially change reviewed code, repeat the relevant review — finite, no endless loop. 9. Verify. 10. Return **one** consolidated result to the Owner only when the task's workflow is complete. Trivial edits skip Codex only where the brief allows it.
+
+## Rules
+- The automatic Codex Review Gate stays **OFF**; Claude runs Codex itself. The Owner never copies reports between Claude, Codex and ChatGPT.
+- Never override an explicit Owner decision unless there is a critical functional defect, a security/privacy issue or a factual/source-truth conflict — say so explicitly instead.
+- Public GitHub: work on a task branch for substantial changes; use a PR as ChatGPT's review surface with safe code, tests and sanitised evidence only. Never commit invitation codes, bearers, tokens, guest personal data, private operational data, `src/*.private.*`, `graphify-out/` or Master Brief content; sanitise screenshots or use synthetic guests. Private evidence stays local and is summarised without sensitive content.
+- Deploy only within an authorised release scope; verify the live Worker afterwards.
