@@ -46,6 +46,7 @@
   function meta() { try { return JSON.parse(localStorage.getItem(META) || 'null') || {}; } catch (e) { return {}; } }
   function setMeta(patch) { var m = Object.assign(meta(), patch); try { localStorage.setItem(META, JSON.stringify(m)); } catch (e) {} return m; }
   function snapshot() { var out = {}; KEYS.forEach(function (k) { var v = localStorage.getItem(k); if (v !== null) out[k] = v; }); return out; }
+  function unchangedSince(keys) { var now = snapshot(); return KEYS.every(function (k) { return now[k] === keys[k]; }); }
   function announce() { try { document.dispatchEvent(new CustomEvent('siyl:draft', { detail: state })); } catch (e) {} }
   function signedIn() { var a = auth(); return !!(a && a.bearer && a.guestId && a.invitationId === 'INV-' + a.guestId); }
   function headers() { var a = auth(); return { 'content-type': 'application/json', 'x-siyl-auth': a ? a.bearer : '' }; }
@@ -96,6 +97,10 @@
             return { ok: false, error: 'stale', applied: true, lost: m3.lost };
           }
           if (!d || !d.ok) { state.phase = 'failed'; state.error = (d && d.error) || 'save failed'; announce(); setMeta({ lastError: state.error }); return d || { ok: false }; }
+          /* THE PUT IS ACKNOWLEDGED (Codex final review): the revision it returned and the keys it stored are this device's base
+             from this moment — before any read-back, whatever the read-back says — so a later push never names an older
+             revision and never mistakes this device's own saved answer for another device's change */
+          setBase(keys); setMeta({ serverUpdatedAt: d.updatedAt, lastSavedAt: d.savedAt, lastError: null });
           /* read back: SAVED only when the server's copy is the one sent */
           if (reason === 'save') {
             return fetch(API, { headers: headers() }).then(function (r) { return r.json(); }).then(function (g) {
@@ -110,7 +115,8 @@
         .then(function (d) { inflight = null; return d; });
       inflight = req;
       return req;
-      function done(d, submission) { state.phase = state.notice === 'stale' ? 'stale' : 'saved'; state.at = d.savedAt; state.submission = submission || state.submission; setBase(keys); setMeta({ serverUpdatedAt: d.updatedAt, dirty: false, lastSavedAt: d.savedAt, lastError: null }); announce(); return d; }
+      /* dirty stays true when something was typed while this request was in flight — that edit is not on the server yet */
+      function done(d, submission) { state.phase = state.notice === 'stale' ? 'stale' : 'saved'; state.at = d.savedAt; state.submission = submission || state.submission; setBase(keys); setMeta({ serverUpdatedAt: d.updatedAt, dirty: !unchangedSince(keys), lastSavedAt: d.savedAt, lastError: null }); announce(); return d; }
     },
     /* PULL: the server copy. A device with unsent local changes pushes them first; otherwise a newer server copy wins. */
     pull: function () {

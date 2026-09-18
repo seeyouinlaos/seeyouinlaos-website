@@ -232,3 +232,35 @@ test('CODEX FINAL-2 · a draft actor whose KV seed read fails refuses reads and 
   const w3 = await put({ invitationId: 'INV-G777', keys: { 'siyl.bag': '[]' }, baseUpdatedAt: legacy.updatedAt }); assert.equal(w3.status, 200);
   const cur = JSON.parse(h.env.REG_KV.m.get('draft:INV-G777').v); assert.equal(cur.keys['siyl.bag'], '[]'); assert.equal(cur.keys['siyl.guest'], legacy.keys['siyl.guest'], 'the profile survives the write');
 });
+
+test('CODEX FINAL-3 · an acknowledged Save whose read-back fails still records its revision and base: an answer typed meanwhile is pushed against the acknowledged revision (no 409, no self-conflict), and dirty stays true until it lands', async () => {
+  const baseKeys = { 'siyl.bag': '[]', 'siyl.guest': '{"contact":{"email":"a@b.c"},"guests":{"g":{"profile":{"drink":"A"}}}}' };
+  const drink = (v) => { try { return JSON.parse(v).guests.g.profile.drink; } catch (e) { return null; } };
+  const bodies = []; let gets = 0, rejectReadback, readbackAsked; const readback = new Promise((_, rej) => { rejectReadback = rej; }); const asked = new Promise((res) => { readbackAsked = res; });
+  const fetch = (url, init) => {
+    if (!/\/api\/draft/.test(String(url))) return Promise.resolve({ status: 200, json: async () => ({ ok: true }) });
+    if (init && init.method === 'PUT') { bodies.push(JSON.parse(init.body)); return Promise.resolve({ status: 200, json: async () => ({ ok: true, updatedAt: 'R' + (bodies.length + 1), savedAt: 'R' + (bodies.length + 1), submission: null }) }); }
+    gets += 1; if (gets === 1) return Promise.resolve({ status: 200, json: async () => ({ ok: true, draft: { keys: baseKeys, updatedAt: 'R1', savedAt: 'R1' }, submission: null }) });
+    readbackAsked(); return readback;                                                           /* the Save's verification never answers */
+  };
+  const w = page({ auth: PEGGY, fetch, modules: ['assets/bag.js', 'assets/guest.js', 'assets/draft.js'], seed: { ...baseKeys, 'siyl.draft.base': JSON.stringify(baseKeys), 'siyl.draft.meta': JSON.stringify({ invitationId: PEGGY.invitationId, serverUpdatedAt: 'R1', dirty: false }) } });
+  const D = w.SIYL_DRAFT; await Promise.resolve();
+  w.localStorage.setItem('siyl.guest', baseKeys['siyl.guest'].replace('"A"', '"B"'));       /* answer B, then SAVE MY PROGRESS */
+  const p1 = D.push('save');
+  await asked;                                                                                 /* the PUT stored R2; the read-back is in flight */
+  assert.equal(JSON.parse(w.localStorage.getItem('siyl.draft.meta')).serverUpdatedAt, 'R2', 'the acknowledged revision is recorded before the read-back');
+  assert.equal(drink(JSON.parse(w.localStorage.getItem('siyl.draft.base'))['siyl.guest']), 'B', 'and the stored keys are the base');
+  w.localStorage.setItem('siyl.guest', baseKeys['siyl.guest'].replace('"A"', '"C"'));       /* answer C typed meanwhile */
+  const p2 = D.push('auto');
+  rejectReadback(new Error('offline'));
+  const r1 = await p1; assert.equal(r1.ok, false, 'the Save reports its failed verification'); await p2;
+  assert.equal(drink(w.localStorage.getItem('siyl.guest')), 'C', 'the newest answer stays on the device');
+  assert.equal(bodies.length, 2); assert.equal(bodies[1].baseUpdatedAt, 'R2', 'the queued push names the acknowledged revision'); assert.equal(drink(bodies[1].keys['siyl.guest']), 'C');
+  assert.equal(D.state().notice, null); assert.equal(D.state().phase, 'saved'); assert.equal(JSON.parse(w.localStorage.getItem('siyl.draft.meta')).dirty, false);
+  /* dirty survives a request that a later edit outran */
+  let hold; const held = new Promise((res) => { hold = res; }); const w2fetch = (url, init) => { if (init && init.method === 'PUT') return held; return Promise.resolve({ status: 200, json: async () => ({ ok: true, draft: { keys: baseKeys, updatedAt: 'R1', savedAt: 'R1' }, submission: null }) }); };
+  const w2 = page({ auth: PEGGY, fetch: w2fetch, modules: ['assets/bag.js', 'assets/guest.js', 'assets/draft.js'], seed: { ...baseKeys, 'siyl.draft.base': JSON.stringify(baseKeys), 'siyl.draft.meta': JSON.stringify({ invitationId: PEGGY.invitationId, serverUpdatedAt: 'R1', dirty: false }) } });
+  await Promise.resolve(); const q = w2.SIYL_DRAFT.push('auto'); w2.localStorage.setItem('siyl.guest', baseKeys['siyl.guest'].replace('"A"', '"D"')); w2.SIYL_DRAFT.touch();
+  hold({ status: 200, json: async () => ({ ok: true, updatedAt: 'R2', savedAt: 'R2', submission: null }) }); await q;
+  assert.equal(JSON.parse(w2.localStorage.getItem('siyl.draft.meta')).dirty, true, 'the edit typed during the request is still unsaved');
+});

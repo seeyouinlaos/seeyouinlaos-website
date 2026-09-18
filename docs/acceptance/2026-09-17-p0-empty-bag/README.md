@@ -17,7 +17,7 @@ Plan and state contract: `docs/plans/2026-09-17-p0-empty-bag/PLAN.md`. Synthetic
 - **One persistent layer**: the sticky My Bag bar (`assets/bag.js`) carries the total, "Open My Bag", My Trip · My Bag · My Profile · Sign out, and a Top control after one viewport of scroll.
 
 ## Automated tests
-`npm test` → 304 pass · 0 fail (new `test/empty-bag.test.mjs`, 13 tests incl. the five Codex pins). `node src/release-check.cjs` → RELEASE CHECK PASSED.
+`npm test` → 305 pass · 0 fail (new `test/empty-bag.test.mjs`, 14 tests incl. the six Codex pins). `node src/release-check.cjs` → RELEASE CHECK PASSED.
 
 ## Dummy E2E (isolated stage worker, Miniflare, synthetic register) — `e2e/e2e.json`, 49/49 PASS (re-run after the final-review fixes)
 - A1–A3: three times select → change → remove → empty (USD 0 everywhere) → save → hard reload → sign out → sign in → Review total USD 0.
@@ -31,7 +31,7 @@ Plan and state contract: `docs/plans/2026-09-17-p0-empty-bag/PLAN.md`. Synthetic
 signed-out My Bag and The Journey · My Trip · My Bag empty · My Bag filled · Arranged for you (My Trip + My Bag) · room selection · Review & Send · My Profile · account navigation while scrolled (Top control) · Remove failure while offline.
 
 ## Codex reviews
-Plan/implementation review: three P1 findings, all VALID, all fixed and pinned (PLAN.md §7). Final review on the committed branch: two P1 findings (a mid-flight edit lost on a 409; a failed KV seed read taken as "no draft"), both VALID, both fixed and pinned (PLAN.md §7), E2E and screenshots re-run afterwards. Confirming pass: see the end of this file.
+Plan/implementation review: three P1 findings, all VALID, all fixed and pinned (PLAN.md §7). Final review on the committed branch: two P1 findings (a mid-flight edit lost on a 409; a failed KV seed read taken as "no draft"), both VALID, both fixed and pinned (PLAN.md §7). Confirming pass: F-1 and F-2 resolved, one further P1 (a Save acknowledged by the server but with a failed read-back left the device on the old revision), VALID, fixed and pinned (PLAN.md §7). E2E and screenshots re-run after every fix. Closing pass: see the end of this file.
 
 ## Deployment
 Not deployed. Release requires the Owner's authorisation after the ChatGPT product review. Rollback: the live Worker stays at `dbf8bc5`; if released and reverted, the Drafts DO holds only mirrors of `draft:<inv>` KV values, so `dbf8bc5` reads the same drafts from KV (a draft written after release remains in KV through the mirror).
