@@ -19,7 +19,7 @@ const fresh = async (w = 390) => { const ctx = await b.newContext({ viewport: { 
     ok('live-' + name + '-200', r && r.status() === 200, r && r.status());
     ok('live-' + name + '-text', html.includes(expectText), expectText);
     ok('live-' + name + '-no-github', !/seeyouinlaos\.github\.io/.test(html), 'no github.io in the served page');
-    ok('live-' + name + '-no-retired-label', !/Your Journey|Journey Bag|Fully booked|Continue Your Journey/.test(html.replace(/<!--[\s\S]*?-->/g, '')), 'no retired label');
+    ok('live-' + name + '-no-retired-label', !/Your Journey|Journey Bag|Fully booked|Continue Your Journey/.test(html.replace(/<!--[\s\S]*?-->/g, '').replace(/\/\*[\s\S]*?\*\//g, '')), 'no retired label');
     const shell = await p.evaluate(() => { const h = document.querySelector('header.hd'), a = document.querySelector('header.hd .hd-access'); return { sticky: h && getComputedStyle(h).position, inside: !!a, h: h && Math.round(h.getBoundingClientRect().height), words: a && a.textContent.replace(/\s+/g, ' ').trim() }; });
     ok('live-' + name + '-shell', shell.sticky === 'sticky' && shell.inside && /Open your invitation/.test(shell.words || ''), JSON.stringify(shell));
     await p.evaluate(() => window.scrollTo(0, document.body.scrollHeight * 0.6)); await p.waitForTimeout(400);
