@@ -189,3 +189,46 @@ test('CODEX P1-3 · a legacy Bag line of the fixed stage never reaches a submiss
     const g = composeGuestMail(rec2); assert.doesNotMatch(g.text + g.html, /USD 255|USD 355/); assert.match(g.text, /Sathorn Penthouse Bangkok — Room A/); assert.doesNotMatch(g.text, /EXPERIENCES/);
   } finally { globalThis.fetch = realFetch; }
 });
+
+/* ---- the Codex FINAL review of 18 Sep 2026 (branch p0-empty-bag vs main), each pinned ---- */
+test('CODEX FINAL-1 · an answer typed while a save is in flight survives that save\'s 409: the merge reads the keys of this moment, the answer is kept and sent again on the new revision, nothing is named as lost', async () => {
+  const baseKeys = { 'siyl.bag': '[{"id":"train"}]', 'siyl.guest': '{"contact":{"email":"a@b.c"},"guests":{}}' };
+  const bodies = []; let resolveFirst; const first = new Promise((res) => { resolveFirst = res; });
+  const fetch = (url, init) => {
+    if (!/\/api\/draft/.test(String(url))) return Promise.resolve({ status: 200, json: async () => ({ ok: true }) });   /* the guest module's own contact sync */
+    if (init && init.method === 'PUT') { bodies.push(JSON.parse(init.body)); if (bodies.length === 1) return first; return Promise.resolve({ status: 200, json: async () => ({ ok: true, updatedAt: 'R3', savedAt: 'R3', submission: null }) }); }
+    return Promise.resolve({ status: 200, json: async () => ({ ok: true, draft: { keys: baseKeys, updatedAt: 'R1', savedAt: 'R1' }, submission: null }) });
+  };
+  const w = page({ auth: PEGGY, fetch, modules: ['assets/bag.js', 'assets/guest.js', 'assets/draft.js'], seed: { ...baseKeys, 'siyl.draft.base': JSON.stringify(baseKeys), 'siyl.draft.meta': JSON.stringify({ invitationId: PEGGY.invitationId, serverUpdatedAt: 'R1', dirty: false }) } });
+  const D = w.SIYL_DRAFT; await Promise.resolve();
+  const p1 = D.push('auto');                                                                   /* leaves on R1, its answer delayed */
+  const typed = '{"contact":{"email":"a@b.c"},"guests":{"g":{"profile":{"drink":"Oolong"}}}}';
+  w.localStorage.setItem('siyl.guest', typed);                                                /* typed while the save is in flight */
+  const p2 = D.push('auto');                                                                   /* queued behind it */
+  resolveFirst({ status: 409, json: async () => ({ ok: false, error: 'stale', draft: { keys: { 'siyl.bag': '[]', 'siyl.guest': baseKeys['siyl.guest'] }, updatedAt: 'R2', savedAt: 'R2' }, submission: null }) });   /* the train was removed elsewhere */
+  await p1; await p2;
+  const drink = (v) => { try { return JSON.parse(v).guests.g.profile.drink; } catch (e) { return null; } };   /* the guest module stamps contactSyncedAt on the event; the answer is what counts */
+  assert.equal(drink(w.localStorage.getItem('siyl.guest')), 'Oolong', 'the answer typed during the save is kept');
+  assert.equal(w.localStorage.getItem('siyl.bag'), '[]', 'the removal elsewhere stands');
+  const sent = bodies.slice(1); assert.ok(sent.length >= 1, 'the kept answer is sent again');
+  assert.equal(sent[0].baseUpdatedAt, 'R2'); sent.forEach((b) => { assert.equal(drink(b.keys['siyl.guest']), 'Oolong'); assert.equal(b.keys['siyl.bag'], '[]'); });
+  assert.equal(D.state().notice, null, 'nothing was lost, so nothing is named'); assert.equal(D.state().phase, 'saved');
+});
+
+test('CODEX FINAL-2 · a draft actor whose KV seed read fails refuses reads and writes (503 · retry) instead of treating a legacy draft as absent; once the mirror answers, the legacy draft seeds the actor and the precondition holds', async () => {
+  const h = await harness();
+  const legacy = { invitationId: 'INV-G777', guestId: 'G777', keys: { 'siyl.bag': '[{"id":"train"}]', 'siyl.guest': '{"contact":{"email":"sam@example.org"}}' }, updatedAt: '2026-09-10T10:00:00.000Z', savedAt: '2026-09-10T10:00:00.000Z' };
+  await h.env.REG_KV.put('draft:INV-G777', JSON.stringify(legacy));
+  const realGet = h.env.REG_KV.get; let down = true;
+  h.env.REG_KV.get = async (k) => { if (down && String(k).startsWith('draft:')) throw new Error('kv unavailable'); return realGet(k); };
+  const put = async (body) => { const r = await h.w.fetch(req('/api/draft', { 'x-siyl-auth': h.guest }, body, 'PUT'), h.env); return { status: r.status, d: await r.json() }; };
+  const g1 = await h.w.fetch(req('/api/draft', { 'x-siyl-auth': h.guest }), h.env); assert.equal(g1.status, 503, 'a read is not answered with an empty draft');
+  const w1 = await put({ invitationId: 'INV-G777', keys: { 'siyl.bag': '[]' } }); assert.equal(w1.status, 503); assert.equal(w1.d.retry, true);
+  const w1b = await put({ invitationId: 'INV-G777', keys: { 'siyl.bag': '[]' }, baseUpdatedAt: legacy.updatedAt }); assert.equal(w1b.status, 503, 'even a correct base cannot write before the seed is known');
+  assert.equal(JSON.parse(h.env.REG_KV.m.get('draft:INV-G777').v).keys['siyl.guest'], legacy.keys['siyl.guest'], 'the mirror is untouched');
+  down = false;
+  const g2 = await (await h.w.fetch(req('/api/draft', { 'x-siyl-auth': h.guest }), h.env)).json(); assert.equal(g2.draft.updatedAt, legacy.updatedAt, 'the legacy draft seeds the actor');
+  const w2 = await put({ invitationId: 'INV-G777', keys: { 'siyl.bag': '[]' } }); assert.equal(w2.status, 409, 'no base against the legacy draft is stale');
+  const w3 = await put({ invitationId: 'INV-G777', keys: { 'siyl.bag': '[]' }, baseUpdatedAt: legacy.updatedAt }); assert.equal(w3.status, 200);
+  const cur = JSON.parse(h.env.REG_KV.m.get('draft:INV-G777').v); assert.equal(cur.keys['siyl.bag'], '[]'); assert.equal(cur.keys['siyl.guest'], legacy.keys['siyl.guest'], 'the profile survives the write');
+});

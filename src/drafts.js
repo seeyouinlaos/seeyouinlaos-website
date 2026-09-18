@@ -20,13 +20,20 @@ const json = (obj, status = 200) => new Response(JSON.stringify(obj), { status, 
 export class Drafts {
   constructor(state, env) { this.state = state; this.storage = state.storage; this.env = env; }
 
-  /* the stored draft — seeded once from the KV mirror for a guest whose draft predates this actor */
+  /* the stored draft — seeded once from the KV mirror for a guest whose draft predates this actor. A seed read that FAILS is
+     not "no draft" (Codex final review): until the mirror has answered once, every read and write is refused as retryable,
+     so a legacy draft can never be replaced by a write that passed the precondition against a false absence. */
   async current(invitationId) {
     let d = await this.storage.get('draft');
-    if (!d && this.env && this.env.REG_KV) {
-      try { d = JSON.parse(await this.env.REG_KV.get('draft:' + invitationId) || 'null'); } catch (e) { d = null; }
+    if (d) return d;
+    if (await this.storage.get('seeded')) return null;
+    if (this.env && this.env.REG_KV) {
+      let raw = null;
+      try { raw = await this.env.REG_KV.get('draft:' + invitationId); } catch (e) { const err = new Error('draft store unavailable'); err.seed = true; throw err; }
+      try { d = JSON.parse(raw || 'null'); } catch (e) { d = null; }
       if (d) await this.storage.put('draft', d);
     }
+    await this.storage.put('seeded', true);
     return d || null;
   }
 
@@ -37,11 +44,11 @@ export class Drafts {
     const invitationId = String(body.invitationId || '');
     if (!invitationId) return json({ ok: false, error: 'invitation required' }, 400);
 
-    if (op === 'get') return json({ ok: true, draft: await this.current(invitationId) });
+    if (op === 'get') { try { return json({ ok: true, draft: await this.current(invitationId) }); } catch (e) { return json({ ok: false, error: e && e.seed ? 'draft store unavailable' : 'draft could not be read', retry: true }, 503); } }
 
     if (op === 'put') {
       return await this.state.blockConcurrencyWhile(async () => {
-        const prev = await this.current(invitationId);
+        let prev; try { prev = await this.current(invitationId); } catch (e) { return json({ ok: false, error: e && e.seed ? 'draft store unavailable' : 'draft could not be read', retry: true }, 503); }
         const incoming = {};
         for (const k of DRAFT_KEYS) if (body.keys && typeof body.keys[k] === 'string') incoming[k] = body.keys[k];
         if (!Object.keys(incoming).length) return json({ ok: false, error: 'nothing to save' }, 400);

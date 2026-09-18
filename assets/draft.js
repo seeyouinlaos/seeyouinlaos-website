@@ -82,7 +82,9 @@
           /* STALE DEVICE (Owner, 17 Sep 2026 · Codex P1-2): the server holds a newer revision — merged three ways against the base
              this device last read: a removal elsewhere stands, an independent edit made here is kept and sent again */
           if (d && d.status === 409 && d.error === 'stale' && d.draft && d.draft.keys) {
-            var m3 = merge(keys, base(), d.draft.keys);
+            /* the merge reads THIS MOMENT's keys, not the request's snapshot (Codex final review): an answer typed while
+               the save was in flight is a local edit against the same base and is kept, never rolled back to the old value */
+            var m3 = merge(snapshot(), base(), d.draft.keys);
             apply(m3.keys); setBase(d.draft.keys); state.submission = d.submission || state.submission;
             setMeta({ invitationId: a.invitationId, serverUpdatedAt: d.draft.updatedAt, dirty: m3.keep.length > 0, lastSavedAt: d.draft.savedAt, lastError: null });
             state.at = d.draft.savedAt; state.error = null;

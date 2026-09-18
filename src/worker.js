@@ -360,8 +360,9 @@ const draftKey = (invitationId) => 'draft:' + invitationId;
 /* the draft lives in the per-invitation actor (src/drafts.js); the KV mirror answers only where the actor is not bound */
 function draftActor(env, invitationId) { return env.DRAFTS ? env.DRAFTS.get(env.DRAFTS.idFromName(invitationId)) : null; }
 async function draftOp(env, invitationId, op, body) { const stub = draftActor(env, invitationId); const r = await stub.fetch(new Request('https://drafts/' + op, { method: 'POST', body: JSON.stringify({ invitationId, ...(body || {}) }) })); return { status: r.status, ...(await r.json()) }; }
-async function storedDraft(env, invitationId) {
-  if (env.DRAFTS) { try { const r = await draftOp(env, invitationId, 'get'); return r.draft || null; } catch (e) { return null; } }
+/* strict: a failed read is thrown (the draft endpoint answers 503 instead of pretending an empty draft); otherwise null */
+async function storedDraft(env, invitationId, strict) {
+  if (env.DRAFTS) { try { const r = await draftOp(env, invitationId, 'get'); if (!r.ok) throw new Error(r.error || 'draft could not be read'); return r.draft || null; } catch (e) { if (strict) throw e; return null; } }
   if (!env.REG_KV) return null; try { return JSON.parse(await env.REG_KV.get(draftKey(invitationId)) || 'null'); } catch (e) { return null; }
 }
 /* the stages a guest's fixed arrangements occupy — never Bag lines (src/inventory-seed.js FIXED) */
@@ -404,7 +405,7 @@ async function handleDraft(request, env) {
   if (!who) return json({ ok: false, error: 'unauthorised' }, 401, corsHeaders(request));
   if (!env.REG_KV) return json({ ok: false, error: 'no store' }, 503, corsHeaders(request));
   if (request.method === 'GET') {
-    const d = await storedDraft(env, who.invitationId);
+    let d; try { d = await storedDraft(env, who.invitationId, true); } catch (e) { return json({ ok: false, error: 'draft store unavailable', retry: true }, 503, corsHeaders(request)); }
     const submission = await submissionFor(env, who, d);
     return json({ ok: true, invitationId: who.invitationId, guestId: who.guestId, draft: d ? { keys: d.keys, updatedAt: d.updatedAt, savedAt: d.savedAt, clientUpdatedAt: d.clientUpdatedAt || null } : null, submission }, 200, corsHeaders(request));
   }
@@ -423,7 +424,7 @@ async function handleDraft(request, env) {
   if (env.DRAFTS) {
     const r = await draftOp(env, who.invitationId, 'put', { keys: incoming, baseUpdatedAt: base, clientUpdatedAt: body && body.clientUpdatedAt || null, reason: body && body.reason || null, guestId: who.guestId, fixedStages: fixedStagesOf(who.guestId) });
     if (r.status === 409) { const submission = await submissionFor(env, who, r.draft); return json({ ok: false, error: 'stale', invitationId: who.invitationId, draft: { keys: r.draft.keys, updatedAt: r.draft.updatedAt, savedAt: r.draft.savedAt }, submission }, 409, corsHeaders(request)); }
-    if (!r.ok) return json({ ok: false, error: r.error || 'draft could not be stored' }, r.status === 400 ? 400 : 503, corsHeaders(request));
+    if (!r.ok) return json({ ok: false, error: r.error || 'draft could not be stored', ...(r.retry ? { retry: true } : {}) }, r.status === 400 ? 400 : 503, corsHeaders(request));
     d = r.draft;
   } else {
     /* no actor bound (a reduced test environment): the same rules, one request at a time */

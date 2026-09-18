@@ -70,4 +70,11 @@ Rules: zero selections is a canonical state (count 0, USD 0); the sticky bar, ca
 
 After the fixes: suite 302/302, release check PASSED, stage E2E 49/49, screenshots 48 at 320/390/834/1440 with 0 horizontal overflow.
 
-**Final review** — see `docs/acceptance/2026-09-17-p0-empty-bag/README.md` (recorded after this commit).
+**Final review** — run against the committed branch (`p0-empty-bag` vs `main`, thread 01a0b239, scope: branch diff). Verdict: needs-attention, two findings, both reproduced by Codex with the shipped modules, both classified **VALID** and fixed:
+
+| # | Codex finding | Class | Fix | Pin |
+|---|---|---|---|---|
+| F-1 | `assets/draft.js` reconciled a 409 against the *request's* snapshot: an answer typed while that save was in flight was rolled back to its old value by `apply()`, and the queued push then saved the old value (notice null — silent loss). | VALID | The 409 merge reads `snapshot()` — the keys of this moment — against the saved base; the mid-flight answer is an independent local edit, kept and sent again on the new revision. | "CODEX FINAL-1": deferred 409 with an edit typed in between → the answer stays on the device and in the re-push, base `R2`, nothing named as lost |
+| F-2 | `src/drafts.js current()` treated a *failed* KV seed read as "no draft": a PUT with no base then passed the precondition and replaced a legacy draft (bag-only write erased the profile in the actor and the mirror). | VALID | A failed seed read throws; `get` and `put` answer `503 { error: 'draft store unavailable', retry: true }` until the mirror has answered once (a `seeded` marker remembers a genuine absence); the Worker's GET answers 503 instead of an empty draft (`storedDraft(..., strict)`), the PUT carries `retry`. | "CODEX FINAL-2": KV down → GET 503, PUT 503 (with and without a base), mirror untouched; KV back → the legacy draft seeds the actor, no base → 409, the right base → 200 with the profile intact |
+
+After the fixes: suite 304/304, release check PASSED, stage E2E 49/49 re-run, 48 screenshots re-shot (0 overflow). A confirming Codex pass on the fixed branch is recorded in `docs/acceptance/2026-09-17-p0-empty-bag/README.md`.
