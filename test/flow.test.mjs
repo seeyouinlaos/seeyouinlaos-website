@@ -27,13 +27,14 @@ async function livePage(auth, rooms, seed) {
 /* complete steps 01 and 03–05 for one guest, leave 02 to the test */
 function completeExceptJourney(w, opts = {}) {
   const G = w.SIYL_GUEST, T = w.SIYL_TEMPLE, id = G.me().guestId;
+  G.setScope({ all: true });   /* WHERE WILL YOU JOIN US (Owner, 18 Sep 2026): the first decision — every destination here */
   G.setContact('email', 'guest@example.com'); G.setContact('phone', '+66 81 234 5678');
   T.setAttendance(id, opts.temple || 'no'); ['coffee', 'vows', 'dinner'].forEach((k) => T.setEvent(id, k, opts.dinner === false && k === 'dinner' ? 'no' : 'yes'));
   if (opts.temple === 'yes') T.setOffering(id, opts.offering || 'no');
   G.setDressAck(true);
   G.setAllergy('no'); G.setPhotoAck(true);
   /* every visible question answered (Owner, 15 Sep 2026) */
-  G.PROFILE.forEach((q) => G.setProfile(id, q.key, 'Answered'));
+  G.PROFILE.forEach((q) => G.setProfile(id, q.key, q.choices ? q.choices[0] : 'Answered'));
 }
 
 test('FLOW · steps are sequential: 02 is locked until 01 is complete, 06 until 01–05; the first missing item is named with its control', () => {
@@ -53,7 +54,7 @@ test('FLOW · steps are sequential: 02 is locked until 01 is complete, 06 until 
   assert.equal(stepOf(G, 'you').stateLabel, '✓ Complete');
   assert.equal(stepOf(G, 'journey').stateLabel, 'Needs attention');
   assert.equal(stepOf(G, 'wedding').stateLabel, 'Locked');
-  assert.deepEqual(Object.values(G.STATE_LABEL), ['✓ Complete', 'Current', 'Needs attention', 'Locked'], 'four states, no generic OPEN');
+  assert.deepEqual(Object.values(G.STATE_LABEL), ['✓ Complete', 'Current', 'Needs attention', 'Locked', 'Not joining'], 'five states, no generic OPEN — Not joining for a step outside the guest\'s scope');
 });
 
 test('FLOW · step 02 needs every stage answered AND a place in every chosen room; a declined stage is an answer', async () => {
@@ -61,7 +62,7 @@ test('FLOW · step 02 needs every stage answered AND a place in every chosen roo
   const w = await livePage(PEGGY, rooms);
   const G = w.SIYL_GUEST, J = w.SIYL_JOURNEY, ST = w.SIYL_STAY;
   completeExceptJourney(w);
-  assert.equal(stepOf(G, 'journey').missing.length, J.SEGMENTS.length, 'ten stages to answer');
+  assert.equal(stepOf(G, 'journey').missing.length, J.SEGMENTS.length, 'ten stages to answer (every destination joined)');
   assert.equal(stepOf(G, 'journey').missing[0].href, 'your-journey.html#s-bkk-stay');
   J.SEGMENTS.forEach((s) => J.skip(s.key, true));
   assert.equal(G.done('journey'), true, 'not joining is an answer');
@@ -97,7 +98,7 @@ test('FLOW · step 03 is every event, and the Sangkhathan while attending the te
 test('FLOW · step 05: allergy NO completes; YES needs details; every visible question must be answered (Owner, 15 Sep 2026); photography must be acknowledged; documents never block', () => {
   const w = page({ auth: PEGGY });
   const G = w.SIYL_GUEST, D = w.SIYL_DOCS;
-  const QS = ['profile:coffeetea', 'profile:treat', 'profile:drink', 'profile:avoid', 'profile:film', 'profile:music'];
+  const QS = ['profile:coffeetea', 'profile:flavor', 'profile:drink', 'profile:avoid', 'profile:film', 'profile:music'];
   deq(G.missingFor('about').map((m) => m.key), ['allergy', ...QS, 'photo']);
   G.setAllergy('yes');
   deq(G.missingFor('about').slice(0, 2).map((m) => [m.key, m.href]), [['allergy-details', 'about-you.html#allergy-details'], ['profile:coffeetea', 'about-you.html#q-coffeetea']]);
@@ -112,7 +113,7 @@ test('FLOW · step 05: allergy NO completes; YES needs details; every visible qu
   G.setPhotoAck(true);
   assert.equal(G.done('about'), false, 'five questions still open hold the step');
   assert.equal(G.mayEnter('review'), false);
-  for (const [k, v] of [['treat', 'Mango sticky rice'], ['drink', 'Water'], ['avoid', 'Nothing'], ['film', 'In the Mood for Love'], ['music', 'Jazz']]) G.setProfile('g-peggy', k, v);
+  for (const [k, v] of [['flavor', 'Pandan'], ['drink', 'Water'], ['avoid', 'Nothing'], ['film', 'In the Mood for Love'], ['music', 'Jazz']]) G.setProfile('g-peggy', k, v);
   assert.equal(G.done('about'), true, 'no document, no consent needed');
   G.setAllergy('no');
   assert.equal(G.allergyDetails(), '', 'NO never keeps stale details');
@@ -120,7 +121,7 @@ test('FLOW · step 05: allergy NO completes; YES needs details; every visible qu
   assert.equal(D.consentDecided('g-peggy'), false, 'the publication consent is a separate optional choice');
   assert.equal(G.photoAck().textVersion, G.PHOTO_VERSION);
   /* the retired questions are truly gone */
-  deq(G.PROFILE.map((q) => q.key), ['coffeetea', 'treat', 'drink', 'avoid', 'film', 'music']);
+  deq(G.PROFILE.map((q) => q.key), ['coffeetea', 'flavor', 'drink', 'avoid', 'film', 'music']);
   deq(G.PROFILE.map((q) => q.n), ['02', '03', '04', '05', '06', '07'], 'sequential numbering after the allergy question');
   assert.equal(G.ALLERGY.n, '01');
   for (const f of ['assets/guest.js', 'about-you.html', 'review.html']) {
@@ -135,7 +136,7 @@ test('FLOW · step 05: allergy NO completes; YES needs details; every visible qu
   assert.doesNotMatch(about, /q\.n\+' · Optional'|placeholder="Optional"|<p class="t-l1">Optional<\/p><h2 class="t-h2">A little more/);
   assert.match(about, /aria-required="true" aria-invalid="'\+\(ok\?'false':'true'\)\+'"/);
   assert.match(about, /Complete':'Required'/);
-  assert.match(src('assets/guest.js'), /required: true \},\n\s*\{ key: 'treat'/);
+  assert.match(src('assets/guest.js'), /\{ key: 'flavor', n: '03', q: 'My Favorite Flavor', hint: 'Choose one\.', required: true, type: 'choice', choices: \['Coffee', 'Milk', 'Butter', 'Pandan', 'Matcha Green Tea', 'Strawberry Milk'\] \}/);
   /* Review names an unanswered question with the way to it */
   assert.match(src('review.html'), /about-you\.html#q-'\+q\.key/);
 });

@@ -1,6 +1,7 @@
-/* STICKY SHELL REGRESSION (Owner, 18 Sep 2026): on every long guest-facing page, after a deep scroll, the header row
-   (Menu · wordmark · Bag) AND the account-access row (signed out: Open your invitation · signed in: My Trip · My Bag ·
-   My Profile · Sign out) are inside the viewport, and nothing scrolls underneath them. Exits 1 on any failure.
+/* STICKY SHELL REGRESSION (Owner, 18 Sep 2026 · release 011): on every long guest-facing page, after a deep scroll, the one
+   header band (Menu · wordmark · Bag — nothing beneath, Aman) is inside the viewport and nothing scrolls underneath it; the
+   account navigation (signed out: Open your invitation · signed in: My Trip · My Profile · Sign out) lives in the menu drawer
+   and is checked once per width. Exits 1 on any failure.
      node docs/acceptance/2026-09-18-aman-geometry/shell-scroll.mjs <origin> <scratchpad-with-synth-codes> [widths…] */
 import fs from 'node:fs';
 import { chromium } from '/Users/thongantang/.npm-global/lib/node_modules/playwright/index.mjs';
@@ -31,10 +32,12 @@ const check = async (p, page, expect) => {
 };
 for (const W of WIDTHS) {
   const ctx = await b.newContext({ viewport: { width: W, height: W < 800 ? 844 : 1000 }, deviceScaleFactor: 1, isMobile: W <= 390, hasTouch: W <= 390 }); const p = await ctx.newPage();
-  for (const page of PUBLIC) { await p.goto(O + '/' + page, { waitUntil: 'load' }); await p.waitForTimeout(1200); await check(p, W + ' signed-out ' + page, ['Menu', 'see you in laos', 'My Bag', 'Open your invitation']); }
+  for (const page of PUBLIC) { await p.goto(O + '/' + page, { waitUntil: 'load' }); await p.waitForTimeout(1200); await check(p, W + ' signed-out ' + page, ['Menu', 'see you in laos', 'My Bag']); }
+  { await p.goto(O + '/index.html', { waitUntil: 'load' }); await p.waitForTimeout(1200); await p.click('header.hd .hb, header.hd #menu-open'); await p.waitForTimeout(500); const acct = await p.evaluate(() => (document.querySelector('body.a-open [data-account]') || {}).innerText || ''); checks++; if (!/Open your invitation/i.test(acct)) { fails++; console.log('FAIL', W, 'signed-out drawer account', JSON.stringify(acct)); } await p.keyboard.press('Escape'); }
   await p.goto(O + '/invitation.html?open=1', { waitUntil: 'load' }); await p.waitForSelector('.siyl-inv input', { state: 'visible', timeout: 20000 }); await p.fill('.siyl-inv input', codes.T002); await p.click('.siyl-inv .igo'); await p.waitForFunction(() => { try { return !!JSON.parse(localStorage.getItem('siyl.auth') || 'null').bearer; } catch (e) { return false; } }, null, { timeout: 20000 }); await p.waitForTimeout(1500);
   await p.goto(O + '/invitation.html', { waitUntil: 'load' }); await p.waitForSelector('input[data-c="email"]', { timeout: 20000 }); await p.fill('input[data-c="email"]', 'ben.test@example.org'); await p.dispatchEvent('input[data-c="email"]', 'change'); await p.fill('input[data-c="phone"]', '+66 81 000 0002'); await p.dispatchEvent('input[data-c="phone"]', 'change'); await p.waitForTimeout(1200);
-  for (const page of [...PUBLIC, ...PRIVATE]) { await p.goto(O + '/' + page, { waitUntil: 'load' }); await p.waitForTimeout(1400); await check(p, W + ' signed-in ' + page, ['Menu', 'see you in laos', 'My Bag', 'My Trip', 'My Profile', 'Sign out']); }
+  for (const page of [...PUBLIC, ...PRIVATE]) { await p.goto(O + '/' + page, { waitUntil: 'load' }); await p.waitForTimeout(1400); await check(p, W + ' signed-in ' + page, ['Menu', 'see you in laos', 'My Bag']); const under = await p.evaluate(() => !!document.querySelector('header.hd .hd-access, header.hd [data-account]')); checks++; if (under) { fails++; console.log('FAIL', W, page, 'a row under the logo'); } }
+  { await p.goto(O + '/your-journey.html', { waitUntil: 'load' }); await p.waitForTimeout(1400); await p.click('header.hd .hb, header.hd #menu-open'); await p.waitForTimeout(500); const acct = await p.evaluate(() => (document.querySelector('body.a-open [data-account]') || {}).innerText || ''); checks++; if (!(/My Trip/i.test(acct) && /My Profile/i.test(acct) && /Sign out/i.test(acct) && !/My Bag/i.test(acct))) { fails++; console.log('FAIL', W, 'signed-in drawer account', JSON.stringify(acct)); } await p.keyboard.press('Escape'); }
   await ctx.close();
 }
 await b.close();

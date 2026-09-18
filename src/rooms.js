@@ -110,22 +110,24 @@ export class Rooms {
   }
 
   /* every place held, as { key, label, guestId, invitationId, partyId, name, at } */
-  /* every occupancy: the hosts' FIXED allocation first (never stored, never released), then the stored holds — a stored
-     hold of a fixed guest in the fixed stage is inert (the fixed room is theirs, nothing else in that stage) */
+  /* every occupancy: the hosts' FIXED allocation first (never stored, never released), then the stored holds. A fixed guest
+     may ALSO hold a place in another unit of the fixed stage — the hotel they choose themselves (Owner, Edit 5 · 18 Sep 2026);
+     the fixed unit itself is never a stored hold. */
   async occupancies() {
     const map = await this.storage.list({ prefix: OCC });
     const out = FIXED.map((f) => ({ ...f, partyId: null, at: null, fixed: true }));
     for (const [k, v] of map) {
       const parts = k.slice(OCC.length).split('|');   /* occ:<key>|<label>|<guestId> */
-      if (fixedFor(parts[2], stageOf(parts[0]))) continue;
+      if (FIXED.some((f) => f.key === parts[0] && f.label === parts[1])) continue;   /* the fixed unit is the FIXED entry's alone */
       out.push({ key: parts[0], label: parts[1], guestId: parts[2], ...v });
     }
     return out;
   }
   keyOf(key, label, guestId) { return OCC + key + '|' + label + '|' + guestId; }
+  /* the guest's own HOLDS in a stage — never the fixed allocation */
   async mineIn(stage, guestId, occ) {
     const list = occ || await this.occupancies();
-    return list.filter((o) => o.guestId === guestId && stageOf(o.key) === stage);
+    return list.filter((o) => !o.fixed && o.guestId === guestId && stageOf(o.key) === stage);
   }
 
   /* the engine as one guest sees it. With an identity: first names and the
@@ -140,20 +142,21 @@ export class Rooms {
         const occupants = identity
           ? here.map((o) => ({ name: o.name || '', mine: o.guestId === identity.guestId, party: !!(identity.partyId && o.partyId === identity.partyId), ...(o.guestId === identity.guestId ? { guestId: o.guestId } : {}) }))
           : here.map(() => ({}));
-        /* nobody joins without an identity; a guest with a fixed room in this stage is eligible for that room alone */
-        const fx = identity ? fixedFor(identity.guestId, stageOf(key)) : null;
-        const elig = !identity ? { ok: false } : fx ? { ok: fx.key === key && fx.label === u.label } : mayJoin(u, identity);
+        /* nobody joins without an identity; a fixed guest may choose any open room of the stage besides their fixed one (Owner, Edit 5) */
+        const elig = !identity ? { ok: false } : mayJoin(u, identity);
         return { label: u.label, name: u.name, kind: u.kind, places: u.places, reservedFor: u.reservedFor,
                  eligible: elig.ok, occupants, taken, free: Math.max(0, u.places - taken), full: taken >= u.places };
       });
     }
-    /* the guest's own places; a FIXED allocation carries `fixed: true` — the Owner's arrangement, never a Bag product (Owner, 17 Sep 2026) */
-    if (identity) for (const o of occ) if (o.guestId === identity.guestId) mine[stageOf(o.key)] = { key: o.key, label: o.label, ...(o.fixed ? { fixed: true } : {}) };
+    /* the guest's own places: `mine` holds the places the guest chose, `fixed` the Owner's arrangement per stage — shown under
+       Arranged for you, never a Bag product (Owner, 17 Sep 2026 · Edit 5, 18 Sep 2026) */
+    const fixed = {};
+    if (identity) for (const o of occ) if (o.guestId === identity.guestId) { if (o.fixed) fixed[stageOf(o.key)] = { key: o.key, label: o.label, fixed: true }; else mine[stageOf(o.key)] = { key: o.key, label: o.label }; }
     /* the category as a whole: TOTAL is the physical stock; AVAILABLE is what this guest may still take — a reserved room
        (the hosts', the family's) is never available to a guest, its places never counted (Owner, 16 Sep 2026) */
     const summary = {};
     for (const key of Object.keys(units)) summary[key] = availabilityOf(key, units[key]);
-    return { ok: true, units, summary, mine, places: PLACES };
+    return { ok: true, units, summary, mine, fixed, places: PLACES };
   }
 
   async fetch(request) {
@@ -166,7 +169,7 @@ export class Rooms {
     if (op === 'read') return json(await this.view(identity));
     if (op === 'mine') {
       const v = await this.view(identity);
-      return json({ ok: true, mine: v.mine });
+      return json({ ok: true, mine: v.mine, fixed: v.fixed });
     }
 
     if (op === 'join' || op === 'leave') {
@@ -182,15 +185,15 @@ export class Rooms {
         if (op === 'leave') {
           const stage = key ? stageOf(key) : String(body && body.stage || '');
           if (!stage) return json({ ok: false, error: 'invalid release' }, 400);
-          if (fixedFor(guestId, stage)) return json({ ...(await this.view(identity)), ok: false, error: 'fixed host allocation' }, 403);
+          /* a fixed guest releases only their own chosen hold; the fixed allocation is never stored, never released */
           const had = await this.mineIn(stage, guestId);
           for (const o of had) await this.storage.delete(this.keyOf(o.key, o.label, o.guestId));
           return json({ ok: true, released: had.map((o) => ({ key: o.key, label: o.label })), ...(await this.view(identity)) });
         }
         const unit = unitOf(key, label);
         if (!unit) return json({ ok: false, error: 'unknown room' }, 404);
-        /* the hosts' fixed room: a fixed guest neither moves within that stage nor is moved; nobody else joins the fixed room */
-        if (fixedFor(guestId, stageOf(key))) return json({ ...(await this.view(identity)), ok: false, error: 'fixed host allocation' }, 403);
+        /* the hosts' fixed room is nobody's to join — the hosts are in it already, everyone else is refused; a fixed guest may
+           hold a place in any other open unit of the stage (Owner, Edit 5 · 18 Sep 2026) */
         if (FIXED.some((f) => f.key === key && f.label === label)) return json({ ...(await this.view(identity)), ok: false, error: 'reserved · bride & groom' }, 403);
         const may = mayJoin(unit, identity);
         if (!may.ok) return json({ ...(await this.view(identity)), ok: false, error: may.error }, 403);
@@ -203,7 +206,7 @@ export class Rooms {
         /* … AND ONLY THEN LET THE OLD ONE GO — every other place of this stage */
         const stage = stageOf(key);
         for (const o of occ) {
-          if (o.guestId === guestId && stageOf(o.key) === stage && !(o.key === key && o.label === label)) await this.storage.delete(this.keyOf(o.key, o.label, o.guestId));
+          if (!o.fixed && o.guestId === guestId && stageOf(o.key) === stage && !(o.key === key && o.label === label)) await this.storage.delete(this.keyOf(o.key, o.label, o.guestId));
         }
         return json({ ok: true, joined: { key, label }, ...(await this.view(identity)) });
       });
@@ -229,13 +232,13 @@ export class Rooms {
           const key = String(o.key || ''), label = String(o.label || '').toUpperCase(), guestId = String(o.guestId || '');
           const unit = unitOf(key, label);
           if (!unit || !guestId || !o.invitationId) { refused.push({ ...o, error: 'invalid' }); continue; }
-          if (FIXED.some((f) => f.key === key && f.label === label) || fixedFor(guestId, stageOf(key))) { refused.push({ ...o, error: 'fixed host allocation' }); continue; }
+          if (FIXED.some((f) => f.key === key && f.label === label)) { refused.push({ ...o, error: 'fixed host allocation' }); continue; }
           const occ = await this.occupancies();
           const others = occ.filter((x) => x.key === key && x.label === label && x.guestId !== guestId).length;
           if (others >= unit.places && !body.force) { refused.push({ ...o, error: 'full' }); continue; }
           await this.storage.put(this.keyOf(key, label, guestId), { invitationId: String(o.invitationId), partyId: o.partyId || null, name: String(o.name || '').slice(0, 24), at: new Date().toISOString(), by: String(body.actor || 'guest-relations') });
           const stage = stageOf(key);
-          for (const x of occ) if (x.guestId === guestId && stageOf(x.key) === stage && !(x.key === key && x.label === label)) await this.storage.delete(this.keyOf(x.key, x.label, x.guestId));
+          for (const x of occ) if (!x.fixed && x.guestId === guestId && stageOf(x.key) === stage && !(x.key === key && x.label === label)) await this.storage.delete(this.keyOf(x.key, x.label, x.guestId));
           done.push({ key, label, guestId });
         }
         return json({ ok: refused.length === 0, done, refused });
@@ -249,10 +252,7 @@ export class Rooms {
         const occ = await this.occupancies();
         const had = occ.filter((o) => !o.fixed && o.guestId === guestId && (!stage || stageOf(o.key) === stage));
         for (const o of had) await this.storage.delete(this.keyOf(o.key, o.label, o.guestId));
-        /* a stray stored hold of a fixed guest in the fixed stage (inert already) is cleaned from the storage too */
-        const raw = await this.storage.list({ prefix: OCC }), strays = [];
-        for (const k of raw.keys()) { const parts = k.slice(OCC.length).split('|'); if (parts[2] === guestId && fixedFor(guestId, stageOf(parts[0])) && (!stage || stageOf(parts[0]) === stage)) { await this.storage.delete(k); strays.push({ key: parts[0], label: parts[1], stray: true }); } }
-        return json({ ok: true, released: had.map((o) => ({ key: o.key, label: o.label })).concat(strays) });
+        return json({ ok: true, released: had.map((o) => ({ key: o.key, label: o.label })) });
       });
     }
     return json({ ok: false, error: 'unknown rooms operation' }, 404);

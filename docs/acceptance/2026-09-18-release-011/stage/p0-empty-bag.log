@@ -1,0 +1,49 @@
+PASS A1-select — ["bkk-stay:u-sathorn-superior-garden:B:192"] bar USD 192
+PASS A1-change — ["bkk-stay:u-sathorn-superior-garden:C:192"]
+PASS A1-remove-empty — bag [] · bar My Bag USD 0 · YOUR BAG IS EMPTY No selections yet · USD 0 Anything you cho
+PASS A1-save — Saved · 20:03
+PASS A1-reload — []
+PASS A1-signout-signin — []
+PASS A1-review-total — USD 0
+PASS A2-select — ["bkk-stay:u-sathorn-superior-garden:B:192"] bar USD 192
+PASS A2-change — ["bkk-stay:u-sathorn-superior-garden:C:192"]
+PASS A2-remove-empty — bag [] · bar My Bag USD 0 · YOUR BAG IS EMPTY No selections yet · USD 0 Anything you cho
+PASS A2-save — Saved · 20:04
+PASS A2-reload — []
+PASS A2-signout-signin — []
+PASS A2-review-total — USD 0
+PASS A3-select — ["bkk-stay:u-sathorn-superior-garden:B:192"] bar USD 192
+PASS A3-change — ["bkk-stay:u-sathorn-superior-garden:C:192"]
+PASS A3-remove-empty — bag [] · bar My Bag USD 0 · YOUR BAG IS EMPTY No selections yet · USD 0 Anything you cho
+PASS A3-save — Saved · 20:04
+PASS A3-reload — []
+PASS A3-signout-signin — []
+PASS A3-review-total — USD 0
+PASS B-second-session-empty — []
+PASS B-A-sees-B-room — ["bkk-stay:shama-king-studio-balcony:A:120"]
+PASS B-removed — []
+PASS B-stale-device-refused — {"before":1,"phase":"saved","after":0,"words":"Saved · 20:04"}
+PASS B-independent-edit-kept — {"device":{"phase":"saved","drink":"Stale-device answer","bag":0},"serverDrink":"Stale-device answer","serverBag":"[]"}
+PASS B-server-empty — server bag []
+PASS B-engine-released — {}
+PASS C-host-bag-zero — [] bar USD 0
+PASS C-host-arranged — ["BANGKOK · 21 – 24 FEBRUARY 2027 Sathorn Penthouse Bangkok Room A · Elegant 6BR Sathon Penthouse · 3 nights Haruthai · You FIXED ARRANGEMENT · NOT PART OF YOUR BAG VIEW DETAILS"]
+PASS C-host-no-controls — {"removeOnArranged":false,"penthouseChoice":false,"otherChoices":2,"words":true}
+PASS C-host-cart — {"arranged":1,"empty":true,"removes":0,"total":"USD 0"}
+PASS C-host-engine-release-keeps-arrangement — 200 released [] fixed {"bkk-stay":{"key":"bkk-stay/penthouse","label":"A","fixed":true}}
+PASS C-host-review — {"page":"/review","arranged":1,"total":"USD 0","bar":"USD 0"}
+PASS C-host-bag-still-zero — []
+PASS C-others-untouched — penthouse 5/10
+PASS D-first-place — 200
+PASS D-last-place-race — winner 1 · refused 1
+PASS D-sold-out-words — {"soldOut":true,"remainingPlaces":0}
+PASS D-hold-elsewhere — 200
+PASS D-failed-change-keeps-old — {"key":"prewed/heritage","label":"A"}
+PASS D-offline-remove-settles — {"btn":"Remove","note":"Nothing was changed — we could not reach Guest Relations just now. Please try again.","bag":1}
+PASS E-empty-bag-can-send — {"total":"USD 0","ready":true}
+PASS E-sent — {"submissionStatus":"sent","submissionId":"SYL-T001-9432EAA2","submittedAt":"2026-09-18T18:05:44.363Z","lastSentAt":"2026-09-18T18:05:44.367Z","version":1,"hasU
+PASS E-changes-not-sent — changes-not-sent
+PASS E-send-updated-button — Send Updated Trip
+PASS E-updated-same-reference — {"submissionStatus":"sent","submissionId":"SYL-T001-9432EAA2","submittedAt":"2026-09-18T18:05:44.363Z","lastSentAt":"2026-09-18T18:05:50.485Z","version":2,"hasU
+PASS E-reload-same — SYL-T001-9432EAA2 v2
+PASS Z-cleanup — noble 2 · usathorn 12 · penthouse 10 (the fixed Room A stays)

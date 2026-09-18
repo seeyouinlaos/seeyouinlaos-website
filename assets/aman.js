@@ -79,18 +79,21 @@
         '<a class="a-brand" href="index.html">see you in laos<span class="dot">.</span></a>' +
         '<button type="button" class="a-mx">Close</button>' +
       '</div>' +
+      /* THE ACCOUNT (Owner, 18 Sep 2026 · Aman): signed in · name, My Trip · My Profile · Sign out — in the drawer, never a second row under the wordmark; filled by assets/invite.mjs */
+      '<div class="a-macct" data-account data-state="out"><span class="a-macct-who">Not signed in</span><nav class="a-macct-nav" aria-label="Your account"><a href="invitation.html?open=1" data-access-nav="in">Open your invitation</a></nav></div>' +
       '<nav class="a-mnav" aria-label="Primary">' + rows + '</nav>' +
       '<div class="a-mfoot">' +
         '<p>Guest Relations</p>' +
         '<a href="mailto:guest.relation.seeyouinlaos@gmail.com">guest.relation.seeyouinlaos@gmail.com</a>' +
         '<a href="invitation.html">Your invitation</a>' +
         '<a href="you.html">You &amp; your party</a>' +
-        '<a href="profile.html">My Profile</a>' +
         '<a href="about-you.html">About You</a>' +
         '<a href="wedding-preparation.html#dress-code">Dress code</a>' +
         '<a href="review.html">Review &amp; Send</a>' +
       '</div>';
     document.body.append(scrim, menu);
+    /* the account block is the invitation module's to fill (assets/invite.mjs) — tell it the drawer exists */
+    try { document.dispatchEvent(new CustomEvent('siyl:menu')); } catch (e) { /* an old browser: the module fills it on load */ }
 
     function set(open) {
       document.body.classList.toggle('a-open', open);
@@ -213,14 +216,80 @@
     paint();
   }
 
+  /* ------------------------------------------------------------ card video
+     A destination card may carry a short, silent, local clip (data-video =
+     a same-origin H.264 MP4 under assets/, never a hotlink). The photograph
+     the card already frames is the poster: it is on screen first and stays
+     underneath, the clip fades in only once it is actually playing, at the
+     card's own geometry (the 5:4 frame, cover-cropped like the photograph).
+     The photograph is the answer whenever motion is not wanted or not
+     possible — reduced motion, Save-Data, a source that fails to load, an
+     autoplay the browser refuses (Low Power Mode) — and the clip pauses while
+     the card is off screen. Presentation only: no state, no persistence. */
+  function calmMotion() {
+    var mq = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)');
+    return !!(mq && mq.matches) || !!(navigator.connection && navigator.connection.saveData);
+  }
+  function unmountVideo(frame) {
+    var v = frame.querySelector('video.am-clip');
+    if (v) { try { v.pause(); } catch (e) { /* nothing to pause */ } v.remove(); }
+    frame.classList.remove('am-playing');
+    frame.removeAttribute('data-video-state');
+  }
+  function mountVideo(frame) {
+    var src = frame.getAttribute('data-video');
+    if (!src || frame.querySelector('video.am-clip')) return null;
+    if (calmMotion()) { frame.setAttribute('data-video-state', 'still'); return null; }
+    var v = document.createElement('video');
+    v.className = 'am-clip';
+    v.muted = true; v.defaultMuted = true; v.loop = true; v.autoplay = true;
+    v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.setAttribute('webkit-playsinline', '');
+    v.setAttribute('loop', ''); v.setAttribute('autoplay', ''); v.setAttribute('preload', 'metadata');
+    v.setAttribute('aria-hidden', 'true'); v.setAttribute('tabindex', '-1'); v.disablePictureInPicture = true;
+    var poster = (frame.style.backgroundImage || '').replace(/^url\(["']?|["']?\)$/g, '');
+    if (poster) v.setAttribute('poster', poster);
+    var s = document.createElement('source'); s.src = src; s.type = 'video/mp4';
+    v.appendChild(s);
+    var fail = function () { unmountVideo(frame); frame.setAttribute('data-video-state', 'still'); };
+    s.addEventListener('error', fail);
+    v.addEventListener('error', fail);
+    v.addEventListener('playing', function () { frame.classList.add('am-playing'); frame.setAttribute('data-video-state', 'playing'); });
+    frame.setAttribute('data-video-state', 'loading');
+    frame.insertBefore(v, frame.firstChild);
+    var attempt = function () {
+      var p; try { p = v.play(); } catch (e) { fail(); return; }
+      if (p && p.then) p.then(null, function () { if (v.isConnected) fail(); });
+    };
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (es) {
+        es.forEach(function (en) {
+          if (!v.isConnected) { io.disconnect(); return; }
+          if (en.isIntersecting) attempt(); else { try { v.pause(); } catch (e) { /* nothing to pause */ } }
+        });
+      }, { threshold: 0.15 });
+      io.observe(frame);
+    } else attempt();
+    return v;
+  }
+  function wireVideos(root) {
+    var frames = Array.prototype.slice.call((root || document).querySelectorAll('.am[data-video]'));
+    frames.forEach(mountVideo);
+    var mq = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)');
+    if (mq && mq.addEventListener) mq.addEventListener('change', function () {
+      frames.forEach(function (f) { if (calmMotion()) { unmountVideo(f); f.setAttribute('data-video-state', 'still'); } else mountVideo(f); });
+    });
+    return frames;
+  }
+
   /* the same carousel behaviour is available to a rail built after load —
      the Cost Saving selector is created when the guest opens it, and gets the
      accepted swipe, snap, keyboard and position rail from this one function. */
-  window.SIYL_AMAN = { wire: wire };
+  window.SIYL_AMAN = { wire: wire, video: { mount: mountVideo, unmount: unmountVideo, wire: wireVideos, calm: calmMotion } };
 
   function init() {
     buildMenu();
     document.querySelectorAll('.acar').forEach(wire);
+    wireVideos(document);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();

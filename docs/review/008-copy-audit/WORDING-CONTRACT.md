@@ -17,7 +17,11 @@ Authority: PROJECT_MASTER_BRIEF.md §9 (information architecture), §10 (Bag and
 | The guest's removable selections | **My Bag** · in prose "your bag" | cart.html h1, bar label, menu, footer, header icon aria-label | Your Journey (bag icon), Your bag (label), Journey bag, cart, basket |
 | The final review and transmission | **Review & Send** | step 06, cart link, menus | Review your journey, Review your journey → opens…, Submit |
 | The guest's answers (step 05) | **About You** · canonical "05 / 06 · About You" | about-you.html h1, step 05, bar, menu, the profile's "Edit About You" | My Profile (as the step name — retired 18 Sep 2026), Account |
-| The guest's account dashboard | **My Profile** · in prose "your profile" | profile.html h1, the sticky account row (MY TRIP · MY PROFILE · SIGN OUT), menu | About You (for the account), Account, Dashboard |
+| The guest's account dashboard | **My Profile** · in prose "your profile" | profile.html h1, the menu drawer's account block (Signed in · name · MY TRIP · MY PROFILE · SIGN OUT — release 011: the header is menu · wordmark · bag and nothing beneath) | About You (for the account), Account, Dashboard |
+| The participation question (step 02, first) | **Where will you join us?** · answered: **Where you join us · Bangkok · Vientiane · China** (the destinations chosen, in journey order) · **I’ll join all** · **I won’t be joining this trip** → **Not joining this trip** | your-journey.html #scope, the steps panel, My Profile, Review & Send ("Where you join us"), the emails ("Where you join us" / "Where they join us") | Attendance, RSVP, Participation (as a label), Scope |
+| A stage outside the guest's destinations | **Not part of your trip** (card) · "Nothing is asked, held or charged for these stages." · **Change where you join us** | the excluded card under the stages | Hidden, Skipped, N/A |
+| A step outside the guest's destinations | state **Not joining** · note **Not joining Vientiane** (the wedding steps) / **Not joining this trip** | the steps panel, My Profile | Locked, Complete, Not applicable, N/A |
+| The flavour question (About You · 03) | **My Favorite Flavor** · hint **Choose one.** · exactly **Coffee · Milk · Butter · Pandan · Matcha Green Tea · Strawberry Milk** | about-you.html (one radiogroup), Review & Send, the emails, the record | My Favorite Snack (retired 18 Sep 2026), Favourite flavour (British spelling on this label), free text |
 | The people who receive the trip | **Guest Relations** | everywhere | the team, the Owner, the hosts (for operational contact), support |
 | The guest's cost line | **Your cost** (per item) · **Your total** (the Bag) · **USD 0** when empty | product pages, My Bag, Review & Send, emails | Journey cost, journey costs, Your Costs (plural label), price (as a label for the guest's share) |
 
@@ -38,6 +42,8 @@ Authority: PROJECT_MASTER_BRIEF.md §9 (information architecture), §10 (Bag and
 | Self-pay | **Your cost** · "Nothing is paid on this website" | the guest's own contribution | Price, Fee, Charge |
 | Unknown price | **Amount on request** | not zero, not complimentary | USD 0, Free, TBC |
 | Held place | **Your place is held · Room B** | a live hold in the guest's name, not a booking | Booked, Reserved, Confirmed |
+| Stage declined by the guest | **Not joining · arranged by you** · "You are arranging this stage yourself. Nothing is held or charged for it." | one direct action from any stage state; whatever was held or chosen leaves first | Skipped, Removed, Cancelled |
+| Another address beside a fixed arrangement (the hosts) | **Arranged for you** (the fixed room, never in the Bag) · **Another address, if you prefer** (the open rail) | Edit 5: the fixed unit is never selectable, never removable; a chosen address is a normal hold | Change room (for the fixed room), Remove (for the fixed room) |
 
 ## Actions (a guest knows what happens before pressing)
 
@@ -45,6 +51,8 @@ Authority: PROJECT_MASTER_BRIEF.md §9 (information architecture), §10 (Bag and
 |---|---|---|
 | Add a product | **Add to My Bag · USD n** | travel, experiences, the Sangkhathan; never "Add to Your Journey" |
 | Remove a product | **Remove** (in My Bag) · **Remove from My Bag** (on a product page) | never rendered for a fixed arrangement |
+| Decline a stage | **Not joining this stage** → **Reconsider this stage** | offered on every stage that is the guest's to decide (untouched, chosen or held); never on a fixed arrangement |
+| Answer the participation question | **Bangkok** · **Vientiane** · **China** (multi-select) · **I’ll join all** · **I won’t be joining this trip** (exclusive) | any combination is valid; the answer comes before every stage |
 | Choose a room | **Choose this room** · a held room: **Change room** / **Remove** | rooms are chosen, not added; "Join this room" only where the guest joins a party member's room |
 | Save the draft | **Save My Progress** → **Saved · HH:MM** | |
 | Go to the final review | **Review & Send** | replaces "Review your journey" |

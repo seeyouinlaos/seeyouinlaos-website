@@ -226,9 +226,10 @@ test('historical firewall: /register/ lands in the accepted product, the bundle 
   }
   assert.deepEqual(seen, ['/register/crypto.mjs', '/register/invitations.enc.json', '/invitation.html']);
   const ai = fs.readFileSync(new URL('../.assetsignore', import.meta.url), 'utf8');
-  const jk = fs.readFileSync(new URL('../_config.yml', import.meta.url), 'utf8');
-  for (const f of ['register/index.html', 'register/app.mjs', 'register/data.mjs', 'register/logic.mjs']) { assert.match(ai, new RegExp('^' + f.replace('.', '\\.') + '$', 'm')); assert.match(jk, new RegExp('- ' + f.replace('.', '\\.') + '$', 'm')); }
+  for (const f of ['register/index.html', 'register/app.mjs', 'register/data.mjs', 'register/logic.mjs']) assert.match(ai, new RegExp('^' + f.replace('.', '\\.') + '$', 'm'));
   assert.doesNotMatch(ai, /^register\/crypto\.mjs$|^register\/invitations\.enc\.json$|^register$/m);
+  /* the retired GitHub Pages build config and its redirect stub never return (one runtime, 18 Sep 2026) */
+  for (const f of ['_config.yml', 'register-landing.html', 'CNAME', '.nojekyll', '.github/workflows']) assert.ok(!fs.existsSync(new URL('../' + f, import.meta.url)), f + ' is a retired Pages artifact');
 });
 
 test('F · every preparation step reads the journey status, so the shell says Received / Confirmed everywhere', () => {

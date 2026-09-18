@@ -21,7 +21,7 @@
 (function () {
   'use strict';
   var ORIGIN = 'https://seeyouinlaos-website.suthep-hrg.workers.dev';
-  /* the Worker's own origin and a local `wrangler dev` answer at the same path; the Pages mirror asks the Worker */
+  /* the Worker's own origin and a local `wrangler dev` answer at the same path; any other host (a stage) asks the Worker */
   var API = (location.hostname === 'seeyouinlaos-website.suthep-hrg.workers.dev' || /^(localhost|127\.0\.0\.1)$/.test(location.hostname)) ? '/api/rooms' : ORIGIN + '/api/rooms';
 
   var view = null, loading = null, lastError = null;
@@ -63,10 +63,13 @@
     units: function (win, slug) { return view && view.units ? (view.units[keyOf(win, slug)] || []) : []; },
     summary: function (win, slug) { return view && view.summary ? (view.summary[keyOf(win, slug)] || null) : null; },
     /* the place this guest holds for a stage: { key, label } | null */
+    /* the guest's own chosen hold in a stage (never the fixed allocation) */
     mine: function (stage) { return view && view.mine ? (view.mine[stage] || null) : null; },
+    /* the Owner's fixed arrangement in a stage — shown under Arranged for you, never a Bag product (Owner, Edit 5 · 18 Sep 2026) */
+    fixedUnit: function (stage) { return view && view.fixed ? (view.fixed[stage] || null) : null; },
     /* the Owner's FIXED arrangement for this guest in a stage (never a Bag product, never released here) */
-    fixed: function (stage) { var m = this.mine(stage); return !!(m && m.fixed); },
-    fixedStages: function () { var m = (view && view.mine) || {}; return Object.keys(m).filter(function (st) { return m[st] && m[st].fixed; }); },
+    fixed: function (stage) { return !!this.fixedUnit(stage); },
+    fixedStages: function () { var f = (view && view.fixed) || {}; return Object.keys(f).filter(function (st) { return !!f[st]; }); },
     mineFor: function (win, slug) { var m = this.mine(this.stageOf(keyOf(win, slug))); return m && m.key === keyOf(win, slug) ? m : null; },
     /* free places a guest may take in this category */
     free: function (win, slug) { var s = this.summary(win, slug); return s ? s.free : null; },
@@ -114,7 +117,7 @@
       if (!this.tracked(win, slug) || this.fits(win, slug)) return '';
       if (this.reserved(win, slug)) return 'Reserved';
       if (this.soldOut(win, slug)) return 'Sold out';
-      return 'Your room is fixed';
+      return 'Not available for you';
     },
     scarce: function (win, slug) { var s = this.summary(win, slug); return !!s && s.free > 0 && s.free <= 2; },
     unitName: function (u) { return u ? (u.kind === 'property' ? u.name : 'Room ' + u.label) : ''; },

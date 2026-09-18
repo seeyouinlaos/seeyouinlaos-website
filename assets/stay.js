@@ -52,7 +52,8 @@
     /* CHOOSE: hold the place first, then write the line. Resolves
      * { ok, unit } or { ok:false, error: 'full' | 'reserved' | 'unreachable' | 'not signed in' } */
     select: function (win, slug, label) {
-      if (this.fixed(win)) return Promise.resolve({ ok: false, error: 'fixed' });
+      /* the fixed unit itself is never selected; a fixed guest may choose another hotel of the stage (Owner, Edit 5 · 18 Sep 2026) */
+      if (this.fixedSlug(win) === slug) return Promise.resolve({ ok: false, error: 'fixed' });
       var self = this;
       return new Promise(function (resolve) {
         gated(function () {
@@ -86,9 +87,10 @@
     /* ARRANGED FOR YOU (Owner, 17 Sep 2026 · P0): a stage the engine holds as FIXED for this guest is not a Bag concern —
      * nothing is written for it, nothing is removed through it, nothing is selected in it */
     fixed: function (win) { var u = U(); return !!(u && u.ready() && u.fixed(stageOf(win))); },
+    /* the slug of the fixed unit in this window ('' when none) */
+    fixedSlug: function (win) { var u = U(); var f = u && u.ready() ? u.fixedUnit(stageOf(win)) : null; return f && f.key.split('/')[0] === win ? f.key.split('/').slice(1).join('/') : ''; },
     remove: function (win) {
       var self = this, u = U(), p = P(), b = B();
-      if (this.fixed(win)) return Promise.resolve({ ok: false, error: 'fixed' });
       var line = this.line(win);
       var done = function () { p.ids(win).forEach(function (id) { b.remove(id); }); };
       if (!u || !line || !line.room || line.interest || !u.tracked(win, line.room)) { done(); return Promise.resolve({ ok: true }); }
@@ -104,10 +106,10 @@
     sync: function () {
       var u = U(), p = P(), b = B(); if (!u || !u.ready() || !p || !b || !b.authed()) return;
       var bag = b.get(), changed = false;
-      /* a Bag line of a stage the engine holds as FIXED is a leftover of the older model: it leaves the Bag (and the total) */
-      var fixedWins = [];
-      u.fixedStages().forEach(function (st) { (window.SIYL_JOURNEY ? SIYL_JOURNEY.SEGMENTS : []).forEach(function (seg) { if (seg.key === st) seg.ids.forEach(function (id) { fixedWins.push(id); }); }); if (fixedWins.indexOf(st) < 0) fixedWins.push(st); });
-      var kept = bag.filter(function (x) { return fixedWins.indexOf(x.id) < 0 && fixedWins.indexOf(p.windowOf(x.id)) < 0; });
+      /* a Bag line that IS the fixed unit (its window with the fixed room, or with no room yet) is a leftover of the older model:
+         it leaves the Bag (and the total); a hotel the hosts chose themselves in the same stage stays (Owner, Edit 5 · 18 Sep 2026) */
+      var fixedUnits = u.fixedStages().map(function (st) { var f = u.fixedUnit(st); return { win: f.key.split('/')[0], slug: f.key.split('/').slice(1).join('/') }; });
+      var kept = bag.filter(function (x) { return !fixedUnits.some(function (f) { return p.windowOf(x.id) === f.win && (!x.room || x.room === f.slug); }); });
       if (kept.length !== bag.length) { bag = kept; changed = true; }
       bag.forEach(function (x) {
         if (!x.room || x.interest) return;
@@ -120,7 +122,6 @@
        * another device): the line comes back from the one pricing source */
       var mine = (u.view() && u.view().mine) || {};
       Object.keys(mine).forEach(function (stage) {
-        if (mine[stage].fixed) return;   /* the Owner's arrangement is shown under Arranged for you, never written into the Bag */
         var key = mine[stage].key, win = key.split('/')[0], slug = key.split('/').slice(1).join('/');
         var at = p.locate(win); if (!at) return;
         if (ST.line(win)) return;

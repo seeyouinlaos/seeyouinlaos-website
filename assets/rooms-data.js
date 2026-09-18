@@ -217,18 +217,18 @@
         bagName: 'Private Residence · Vientiane', bagImg: 'assets/images/airbnb/airbnb-01.jpg' }],
       includes: [
         'Two nights, 27 → 28 February and 28 February → 1 March, for the wedding window.',
-        'Complimentary — nothing to pay. Up to six guests in total; places are held as they are taken.',
+        'Complimentary — nothing to pay. Up to four guests in total; places are held as they are taken.',
         'Guest Relations coordinates the keys, the arrival and the return personally.',
         'Breakfast, meals and transport in Vientiane are your own.'
       ],
       rooms: [
         { slug: 'private-residence', name: 'Private Residence', cat: 'Alternative stay',
-          desc: 'A warm two-bedroom residence in central Vientiane, secured for the wedding stay and hosted for up to six guests. Guest Relations coordinates the arrangements personally.',
+          desc: 'A warm two-bedroom residence in central Vientiane, secured for the wedding stay and hosted for up to four guests. Guest Relations coordinates the arrangements personally.',
           gallery: [['assets/images/airbnb/airbnb-01.jpg', 'Living and dining'], ['assets/images/airbnb/airbnb-02.jpg', 'The entry'], ['assets/images/airbnb/airbnb-03.jpg', 'The balcony'], ['assets/images/airbnb/airbnb-04.jpg', 'Towards the temple roofs'], ['assets/images/airbnb/airbnb-05.jpg', 'By the window'], ['assets/images/airbnb/airbnb-06.jpg', 'A corner of the living room']],
-          facts: [['Type', 'Private residence'], ['Bedrooms', 'Two bedrooms'], ['Occupancy', 'Up to 6 guests'], ['Location', 'Downtown Vientiane · 300 m to the Mekong Night Market · 800 m to Wat Sisaket']],
-          story: 'A two-bedroom residence in downtown Vientiane, three hundred metres from the Mekong night market and eight hundred from Wat Sisaket. It is offered complimentary for the wedding window to up to six guests, and Guest Relations arranges the keys, the arrival and everything around it personally.',
+          facts: [['Type', 'Private residence'], ['Bedrooms', 'Two bedrooms'], ['Occupancy', 'Up to 4 guests'], ['Location', 'Downtown Vientiane · 300 m to the Mekong Night Market · 800 m to Wat Sisaket']],
+          story: 'A two-bedroom residence in downtown Vientiane, three hundred metres from the Mekong night market and eight hundred from Wat Sisaket. It is offered complimentary for the wedding window to up to four guests, and Guest Relations arranges the keys, the arrival and everything around it personally.',
           amenities: ['WiFi', 'Air conditioning', 'Hot water', 'Washer & laundry area', 'Refrigerator', 'Kettle & kitchenette', 'Hair dryer', 'Free parking'],
-          price: null, status: 'Complimentary · up to 6 guests', interest: true }
+          price: null, status: 'Complimentary · up to 4 guests', interest: true }
       ]
     },
 

@@ -68,6 +68,16 @@
       note: 'Complimentary — hosted by Haruthai & Suthep.', anchor: 'voyage.html#dinner' }
   ];
 
+  /* WHERE WILL YOU JOIN US (Owner, 18 Sep 2026): every stage belongs to the destinations it serves. A stay belongs to its
+   * city; a transport leg needs both ends; the Kempinski nights after China need both Bangkok and China. A stage whose
+   * destinations the guest does not join is not part of their trip: it is never asked, never counted, never held. */
+  var SCOPE_OF = { 'bkk-stay': ['bangkok'], train: ['bangkok', 'vientiane'], prewed: ['vientiane'], wedstay: ['vientiane'], mu9646: ['vientiane', 'china'],
+    kmg: ['china'], c86: ['china'], ljg: ['china'], 'return': ['china'], kempinski: ['bangkok', 'china'] };
+  /* the lines that are not stages: the Bangkok experiences, the Vientiane offering and the spa interest */
+  var EXTRA_SCOPE = { '1872': ['bangkok'], tea1872: ['bangkok'], suhring: ['bangkok'], sangkhathan: ['vientiane'] };
+  function scope() { var G = window.SIYL_GUEST; return G && G.scope ? G.scope() : null; }
+  function joinsAll(dests) { var s = scope(); if (!s) return true; if (s.none) return false; return dests.every(function (d) { return s[d]; }); }
+
   function skipped() {
     try { return JSON.parse(localStorage.getItem(SKIP) || '[]'); } catch (e) { return []; }
   }
@@ -78,6 +88,39 @@
 
   window.SIYL_JOURNEY = {
     SEGMENTS: SEG,
+    SCOPE_OF: SCOPE_OF,
+    /* is this stage part of the guest's trip (an unanswered scope keeps every stage, so nothing disappears before the guest has spoken) */
+    relevant: function (seg) { return joinsAll(SCOPE_OF[seg.key] || []); },
+    relevantSegments: function () { var self = this; return SEG.filter(function (s) { return self.relevant(s); }); },
+    excludedSegments: function () { var self = this; return SEG.filter(function (s) { return !self.relevant(s); }); },
+    /* is a Bag line part of the guest's trip: by its stage, else by what it is */
+    lineRelevant: function (x) {
+      var seg = SEG.filter(function (s) { return s.ids.indexOf(x.id) >= 0; })[0];
+      if (seg) return this.relevant(seg);
+      if (EXTRA_SCOPE[x.id]) return joinsAll(EXTRA_SCOPE[x.id]);
+      if (x.interest) return joinsAll(['vientiane']);
+      return true;
+    },
+    /* NOT JOINING THIS STAGE, in one action (Owner, 18 Sep 2026): whatever the guest holds or chose in the stage is released
+     * first — a room through the engine, a line through the Bag — and the stage is then declined. From an untouched stage
+     * it is the same one action. Resolves once the stage reads as declined. */
+    decline: function (seg) {
+      var self = this, B = window.SIYL_BAG, ST = window.SIYL_STAY, P = window.SIYL_PRICE;
+      var finish = function () { self.skip(seg.key, true, 'manual'); return { ok: true }; };
+      if (!B) return Promise.resolve(finish());
+      var lines = B.get().filter(function (x) { return seg.ids.indexOf(x.id) >= 0; });
+      if (!lines.length) return Promise.resolve(finish());
+      var stay = lines.filter(function (x) { return x.room && !x.interest; })[0];
+      if (seg.cat === 'Accommodation' && stay && ST) {
+        return ST.remove(P ? P.windowOf(stay.id) : stay.id).then(function (r) {
+          if (r && r.ok === false && r.error !== 'fixed') return r;     /* the engine could not release: nothing changes, the guest is told */
+          lines.forEach(function (x) { B.remove(x.id); });
+          return finish();
+        });
+      }
+      lines.forEach(function (x) { B.remove(x.id); });
+      return Promise.resolve(finish());
+    },
 
     /* display metadata for a bag line — category eyebrow + price basis.
      * The wording comes from SIYL_PRICE: one calculation, one vocabulary. */
@@ -152,16 +195,18 @@
       return this.isSkipped(seg.key) && this.skippedBy(seg.key) === 'manual';
     },
 
-    /* answered = selected, or the guest said they are not joining this stage */
+    /* answered = selected, or the guest said they are not joining this stage, or the Owner arranged it (the hosts' fixed room) */
     state: function (seg) {
       var has = window.SIYL_BAG && SIYL_BAG.get().some(function (x) { return seg.ids.indexOf(x.id) >= 0; });
       if (has) return 'selected';
       if (this.isSkipped(seg.key)) return 'declined';
+      var U = window.SIYL_UNITS; if (U && U.ready && U.ready() && U.fixed && U.fixed(seg.key)) return 'arranged';
       return 'open';
     },
+    /* the stages still to answer — of the guest's own trip only */
     open: function () {
       var self = this;
-      return SEG.filter(function (s) { return self.state(s) === 'open'; });
+      return SEG.filter(function (s) { return self.relevant(s) && self.state(s) === 'open'; });
     },
     /* FULL EXPERIENCE — the complete journey, with one rule above it (Owner,
      * 13 Sep 2026): AN EXPLICIT CHOICE OF THE GUEST OUTRANKS THE PRESET.
@@ -192,7 +237,7 @@
         };
       };
       this.soldOutStages = [];
-      var fill = SEG.filter(function (seg) { return keep.indexOf(seg.key) < 0; });
+      var fill = SEG.filter(function (seg) { return keep.indexOf(seg.key) < 0 && self.relevant(seg); });   /* a preset fills the guest's own trip only */
       fill.forEach(function (seg) {
         var id = seg.ids[0];
         if (P.FLAT[id]) { P.items(id).forEach(function (it) { it.by = 'full'; out.push(it); }); return; }
@@ -222,7 +267,7 @@
                             inside the wedding programme, with Guest Relations
                             support during the Vientiane wedding stay.
          B · RESIDENCE      the complimentary private residence, USD 0, up to
-                            six guests. An independent stay: the wedding
+                            four guests. An independent stay: the wedding
                             programme is included, everything around it is not.
 
        Both mean the same reduced journey — every other stage is self-arranged.
@@ -281,7 +326,7 @@
         stayName: 'Downtown Vientiane',
         dates: '27 February – 01 March 2027',
         amount: 'Complimentary',
-        amountNote: fits ? 'Complimentary · up to 6 guests' : 'no place left',
+        amountNote: fits ? 'Complimentary · up to 4 guests' : 'no place left',
         items: P ? P.items('airbnb-2br', 'private-residence') : [],
         stock: ready ? { win: 'airbnb-2br', slug: 'private-residence' } : null,
         note: 'An independent stay. The wedding programme is yours as it stands; everything around it you arrange yourself.',

@@ -1,0 +1,33 @@
+PASS 4-header-nothing-beneath-logo — {"under":true,"text":"see you in laos.","h":56}
+PASS 4-drawer-account — Signed in · AdaMy TripMy ProfileSign out · trip=your-journey,profile=profile
+PASS 5-no-textual-my-bag — Signed in · AdaMy TripMy ProfileSign out
+PASS 3-bag-icon-is-my-bag — cart.html|My Bag
+PASS calm-step-header — {"text":"01 / 06Your Invitation Ada · Your party · Ada & Ben MY TRIP · SAVED AS DRAFT SAVE MY PROGRESS VIEW ALL STEPS","eyebrow":false,"order":"prep-step>prep-who>prep-state>prep-save-btn>prep-all","h":156}
+PASS 1-profile-no-redirect-nothing-complete — {"url":"http://127.0.0.1:8788/profile","h1":"My Profile","gate":false,"identity":true} · need 16 first invitation.html#p-email
+PASS 7-readiness-untouched-by-profile — 16 → 16
+PASS 2-state-nothing-complete — SAVED AS DRAFT Your trip is not sent yet 16 things are still needed, first: Email address (01 · Your Invitation). CONTINUE YOUR TRIP OPEN MY TRIP
+PASS 6a-about-you-still-gated — {"url":"http://127.0.0.1:8788/invitation?from=about#p-email","gate":"05 · About You opens once this is complete."}
+PASS 3-bag-icon-opens-cart — http://127.0.0.1:8788/cart
+PASS 2-state-partly-complete — HOW WE REACH YOU ada.test@example.org +66 81 000 0000 EDIT CONTACT DETAILS
+PASS 8-held-room-on-profile — 21 – 24 FEB U Sathorn Bangkok 21 – 24 February 2027 · Superior Room With Garden View YOUR PLACE IS HELD · ROOM B · YOU · 1 PLACE AVAILABLE USD 192 · your cost VIEW DETAILS CHANGE IN MY BAG · badge 1
+PASS 8-no-second-total — the profile carries no total of its own
+PASS 2-state-complete — SAVED AS DRAFT Your trip is not sent yet Everything needed is complete. Send it to Guest Relations whenever you are read · COMPLETE About You Your food allergy answer, a few questions the kitchens and th
+PASS 8-seats-and-tickets — seat:ceremony:SEAT TICKET · VOW CEREMONY HELD IN YOUR NAME Seat E5 Sunday, | seat:dinner:SEAT TICKET · WEDDING DINNER HELD IN YOUR NAME Seat A5 Sunda · SUNDAY, 28 FEBRUARY 2027 · 15:30 Vow Ceremony Souphattra Heritage, V
+PASS 6b-about-you-is-step-05 — 05 / 06About You Ada · Your party · Ada & Ben MY TRIP · SAVED AS DRAFT SAVE MY PROGRESS SAVED · 19:2 · h1 About You
+PASS 6c-review-opens-when-about-complete — http://127.0.0.1:8788/review
+PASS 6d-review-locked-when-about-incomplete — http://127.0.0.1:8788/about-you?from=review#photo
+PASS 1-profile-no-redirect-with-missing-step — http://127.0.0.1:8788/profile
+PASS photo-none-yet — GET 404
+PASS photo-upload — Photo saved · 18 September 2026. · url("blob:http://127.0.0.1:8788/7a2153f4
+PASS photo-stored-jpeg-private — GET 200 image/jpeg
+PASS photo-survives-reload — CHANGE PHOTO REMOVE PHOTO · bg url("blob:http://127.0.0.1:8788/9a788057-e772-4f30
+PASS photo-not-visible-to-another-guest — T003 GET 404
+PASS photo-removed — GET 404
+PASS photo-limits — 415,413,401
+PASS 9-sign-out — http://127.0.0.1:8788/invitation · auth null
+PASS profile-private-when-signed-out — http://127.0.0.1:8788/invitation?open=1&next=profile
+PASS 8-fixed-arrangement-not-in-bag — BANGKOK · 21 – 24 FEBRUARY 2027 Sathorn Penthouse Bangkok Room A · Elegant 6BR Sathon Penthouse · 3 nights · You · Suthep ARRANGED FOR YOU FIXED ARRANGEMENT · N · {"bag":0,"total":0,"badge":""}
+PASS width-320 — no horizontal overflow: profile true · my trip true
+PASS width-834 — no horizontal overflow: profile true · my trip true
+PASS width-1440 — no horizontal overflow: profile true · my trip true
+PASS cleanup-T001 — room 200 · photo 200/404

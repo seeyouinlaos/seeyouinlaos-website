@@ -83,7 +83,6 @@ to use these folders; sources are documented here for accountability.
 | Bar BKK/Bar Us/SnapInsta…785758983 | Martini with olives on silver tray | bkk-barus-01.jpg | Bar Us |
 | Bar BKK/BKK Social Club/IMG_3560 | Art-deco bar room, arched brass panels, marble bar | bkk-social-01.jpg | BKK Social Club |
 | Restaurant BKK/Phra Nakhon/IMG_3550 | Riverfront garden pavilion, city towers behind | bkk-phranakorn-01.jpg | Phra Nakhon |
-| Restaurant BKK/IGNIV/IMG_3621 | IGNIV sweets buffet, glass jars + chocolate shards | bkk-igniv-01.jpg | IGNIV |
 | Restaurant BKK/Thong Smith/SnapInsta…786628851 | Boat-noodle bowls, lime squeeze | bkk-thongsmith-01.jpg | Thong Smith |
 | Restaurant BKK/Tang Jai Yang/IMG_3644 | Charcoal-roast pork on jade plate | bkk-tjy-01.jpg | Tang Jai Yang |
 | 002-Cafe-BKK/Dior Cafe/IMG_3523.webp | Gold-panelled Dior café salon, garden doors | bkk-dior-01.jpg | Dior · Café LV (lead) |

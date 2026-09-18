@@ -64,16 +64,19 @@ export function journeyModel(record) {
   const contact = { email: (record.recipient && record.recipient.email) || (r.contact && r.contact.email) || (gr.contact && gr.contact.email) || (legacy && legacy.contact && legacy.contact.email) || '',
     phone: (record.recipient && record.recipient.phone) || (r.contact && r.contact.phone) || (gr.contact && gr.contact.phone) || (legacy && legacy.contact && legacy.contact.phone) || '' };
   const rooms0 = record.rooms || null;
-  const fixedStages = Object.entries(rooms0 || {}).filter(([, m]) => m && m.fixed).map(([st]) => st);
-  /* a line of a fixed stage is never a product of any kind — not a stay, not an experience, never in a total (Codex P1-3) */
-  const lines = (Array.isArray(r.selections) ? r.selections : (Array.isArray(r.shared) ? r.shared : [])).filter((x) => !(x && (fixedStages.includes(String(x.id)) || fixedStages.includes(STAGE_OF_STAY[String(x.id)] || ''))));
+  /* the fixed UNITS (never a product of any kind, never in a total — Codex P1-3); a hotel the hosts chose themselves in the same
+     stage is their own selection and stays (Owner, Edit 5 · 18 Sep 2026) */
+  const fixedUnits = Object.values(rooms0 || {}).filter((m) => m && m.fixed).map((m) => ({ win: String(m.key || '').split('/')[0], slug: String(m.key || '').split('/').slice(1).join('/') }));
+  const isFixedLine = (x) => fixedUnits.some((f) => x && String(x.id) === f.win && (!x.room || String(x.room) === f.slug));
+  const fixedStages = fixedUnits.length ? fixedUnits.map((f) => STAGE_OF_STAY[f.win] || f.win) : [];
+  const lines = (Array.isArray(r.selections) ? r.selections : (Array.isArray(r.shared) ? r.shared : [])).filter((x) => !isFixedLine(x));
   const order = (x) => { const i = STAGES.indexOf(x.id); return i < 0 ? 50 : i; };
   const sorted = lines.slice().sort((a, b) => order(a) - order(b));
   const rooms = record.rooms || null;
-  const roomOf = (x) => { const st = STAGE_OF_STAY[x.id]; const m = rooms && rooms[st]; if (m && m.room) return m.room; return x.unitName || (x.unit ? 'Room ' + x.unit : ''); };
+  const roomOf = (x) => { const st = STAGE_OF_STAY[x.id]; const m = rooms && rooms[st]; if (m && m.room && !m.fixed) return m.room; return x.unitName || (x.unit ? 'Room ' + x.unit : ''); };
   /* ARRANGED FOR YOU: the fixed rooms the engine holds for this guest — never a Bag line, never an amount */
-  const arranged = Object.entries(rooms || {}).filter(([, m]) => m && m.fixed).map(([stage, m]) => ({ stage, name: m.stay || m.name, room: m.room, category: m.stay ? m.name : '' }));
-  const stays = sorted.filter((x) => (x.stay || STAGE_OF_STAY[x.id]) && !arranged.some((a) => a.stage === STAGE_OF_STAY[x.id])).map((x) => ({ name: x.name, dates: (x.meta || '').split(' · ')[0], category: (x.meta || '').split(' · ').slice(1).join(' · '), room: roomOf(x), price: x.price, rate: x.rate, nights: x.nights, note: x.note ? x.note + (x.noteBy ? ' · ' + x.noteBy : '') : '', breakfast: x.breakfast || '', interest: !!x.interest }));
+  const arranged = Object.entries(rooms || {}).filter(([, m]) => m && m.fixed).map(([k, m]) => ({ stage: m.stage || k.replace(/\/fixed$/, ''), name: m.stay || m.name, room: m.room, category: m.stay ? m.name : '' }));
+  const stays = sorted.filter((x) => (x.stay || STAGE_OF_STAY[x.id])).map((x) => ({ name: x.name, dates: (x.meta || '').split(' · ')[0], category: (x.meta || '').split(' · ').slice(1).join(' · '), room: roomOf(x), price: x.price, rate: x.rate, nights: x.nights, note: x.note ? x.note + (x.noteBy ? ' · ' + x.noteBy : '') : '', breakfast: x.breakfast || '', interest: !!x.interest }));
   const travel = sorted.filter((x) => TRAVEL.has(x.id) || (x.cls && !x.stay)).map((x) => ({ name: x.name, meta: x.meta || '', price: x.price }));
   const experiences = sorted.filter((x) => !stays.some((s) => s.name === x.name) && !travel.some((t) => t.name === x.name) && x.id !== 'sangkhathan').map((x) => ({ name: x.name, meta: x.meta || '', price: x.price }));
   const sang = lines.find((x) => x.id === 'sangkhathan');
@@ -103,6 +106,9 @@ export function journeyModel(record) {
   const total = stated == null ? null : (fixedStages.length ? lines.reduce((t, x) => t + (Number(x.price) || 0) * (Number(x.qty) || 1), 0) : stated);
   const upd = record.kind === 'update' && (record.version || 1) > 1;
   return { guestId, fullName, firstName, partyName, contact, stays, arranged, travel, experiences, wedding, sangkhathan, seats, profile, allergy, allergyDetails, acks, docs, publication, total, hosts,
+    /* WHERE THEY JOIN US (Owner, 18 Sep 2026): the guest's participation scope as sent — the words the guest chose, or a decline */
+    scope: typeof gr.scopeWords === 'string' && gr.scopeWords ? gr.scopeWords : (gr.scope && gr.scope.none ? 'Not joining this trip' : ''),
+    notJoining: !!(gr.scope && gr.scope.none),
     reference: record.submissionId || '', sentAt: record.lastSentAt || record.submittedAt || '', firstSentAt: record.firstSentAt || record.submittedAt || '', version: record.version || 1, upd, invitationId: record.invitationId || '' };
 }
 
@@ -175,7 +181,7 @@ export function composeGuestMail(record) {
     h1(M.upd ? 'Your trip has been updated' : 'Your trip has been received') +
     para('Dear ' + esc(M.firstName) + ',') + para(esc(intro)) +
     '</td></tr>' + gap(10) +
-    '<tr><td>' + kvTable([kvRow('Reference', M.reference), kvRow(M.upd ? 'Updated' : 'Sent', whenWords(M.sentAt))]) + '</td></tr>' + gap(14) + rule() +
+    '<tr><td>' + kvTable([kvRow('Reference', M.reference), kvRow(M.upd ? 'Updated' : 'Sent', whenWords(M.sentAt)), M.scope ? kvRow('Where you join us', M.scope) : ''].filter(Boolean)) + '</td></tr>' + gap(14) + rule() +
     journeySections(M, false);
   if (M.total != null) inner += section('Your cost', '<p style="margin:4px 0 10px;font-family:' + SERIF + ';font-size:30px;line-height:1.2;color:' + INK + ';">' + esc(money(M.total)) + '</p>' +
     small('Nothing is paid on the website. Guest Relations confirms each arrangement with you personally.') +
@@ -187,7 +193,7 @@ export function composeGuestMail(record) {
   /* the plain-text fallback: the same facts, in order */
   const T = [];
   T.push('SEE YOU IN LAOS — MY TRIP', '', M.upd ? 'Your trip has been updated' : 'Your trip has been received', '', 'Dear ' + M.firstName + ',', '', intro, '',
-    'Reference: ' + M.reference, (M.upd ? 'Updated: ' : 'Sent: ') + whenWords(M.sentAt), '');
+    'Reference: ' + M.reference, (M.upd ? 'Updated: ' : 'Sent: ') + whenWords(M.sentAt), M.scope ? 'Where you join us: ' + M.scope : '', '');
   if (M.travel.length) { T.push('TRAVEL'); M.travel.forEach((t) => T.push('· ' + t.name + ' — ' + t.meta + (t.price != null ? ' — ' + money(t.price) : ''))); T.push(''); }
   if (M.arranged.length) { T.push('ARRANGED FOR YOU'); M.arranged.forEach((a) => T.push('· ' + a.name + ' — ' + a.room + (a.category ? ' — ' + a.category : '') + ' — fixed arrangement, not part of your bag')); T.push(''); }
   if (M.stays.length) { T.push('STAYS'); M.stays.forEach((x) => T.push('· ' + x.name + ' — ' + x.dates + (x.category ? ' — ' + x.category : '') + (x.room ? ' — ' + x.room : '') + (x.price != null ? ' — ' + money(x.price) : '') + (x.note ? ' (' + x.note + ')' : ''))); T.push(''); }
@@ -210,7 +216,7 @@ export function composeOwnerMail(record, statusUrl) {
     h1(M.upd ? 'Trip updated' : 'New trip received') + '</td></tr>' +
     (M.upd ? '<tr><td>' + label('Updated trip') + para('Latest version received ' + esc(whenWords(M.sentAt)) + '. It replaces the version first sent ' + esc(whenWords(M.firstSentAt)) + '.') + '</td></tr>' : '') +
     '<tr><td>' + kvTable([kvRow('Guest', M.fullName), M.partyName ? kvRow('Party', M.partyName) : '', kvRow('Email', M.contact.email || '—'), kvRow('Mobile', M.contact.phone || '—'),
-      kvRow('Reference', M.reference), kvRow('Status', M.upd ? 'Updated trip' : 'Initial submission'), kvRow(M.upd ? 'Updated' : 'Sent', whenWords(M.sentAt))].filter(Boolean)) + '</td></tr>' + gap(14) + rule() +
+      kvRow('Reference', M.reference), kvRow('Status', M.upd ? 'Updated trip' : 'Initial submission'), kvRow(M.upd ? 'Updated' : 'Sent', whenWords(M.sentAt)), M.scope ? kvRow('Where they join us', M.scope) : ''].filter(Boolean)) + '</td></tr>' + gap(14) + rule() +
     journeySections(M, true);
   if (docsRows.length) inner += section('Documents', kvTable(docsRows) + (missing.length ? '<p style="margin:10px 0 0;font-family:' + SANS + ';font-size:13px;color:' + INK + ';">Still needed: ' + esc(missing.join(', ')) + '</p>' : ''));
   if (M.total != null) inner += section('Cost', '<p style="margin:4px 0 6px;font-family:' + SERIF + ';font-size:26px;color:' + INK + ';">' + esc(money(M.total)) + '</p>' + small('The guest’s contribution as the website calculates it — nothing paid on the website.'));
@@ -221,7 +227,7 @@ export function composeOwnerMail(record, statusUrl) {
   const T = [];
   T.push('SEE YOU IN LAOS — GUEST RELATIONS', '', M.upd ? 'Trip updated' : 'New trip received', '');
   if (M.upd) T.push('Latest version received ' + whenWords(M.sentAt) + ' (replaces the version first sent ' + whenWords(M.firstSentAt) + ')', '');
-  T.push('Guest: ' + M.fullName, M.partyName ? 'Party: ' + M.partyName : '', 'Email: ' + (M.contact.email || '—'), 'Mobile: ' + (M.contact.phone || '—'), 'Reference: ' + M.reference, 'Status: ' + (M.upd ? 'Updated trip' : 'Initial submission'), (M.upd ? 'Updated: ' : 'Sent: ') + whenWords(M.sentAt), '');
+  T.push('Guest: ' + M.fullName, M.partyName ? 'Party: ' + M.partyName : '', 'Email: ' + (M.contact.email || '—'), 'Mobile: ' + (M.contact.phone || '—'), 'Reference: ' + M.reference, 'Status: ' + (M.upd ? 'Updated trip' : 'Initial submission'), (M.upd ? 'Updated: ' : 'Sent: ') + whenWords(M.sentAt), M.scope ? 'Where they join us: ' + M.scope : '', '');
   if (M.travel.length) { T.push('TRAVEL'); M.travel.forEach((t) => T.push('· ' + t.name + ' — ' + t.meta + ' — ' + money(t.price))); T.push(''); }
   if (M.arranged.length) { T.push('ARRANGED FOR YOU'); M.arranged.forEach((a) => T.push('· ' + a.name + ' — ' + a.room + (a.category ? ' — ' + a.category : '') + ' — fixed arrangement')); T.push(''); }
   if (M.stays.length) { T.push('STAYS'); M.stays.forEach((x) => T.push('· ' + x.name + ' — ' + x.dates + (x.category ? ' — ' + x.category : '') + (x.room ? ' — ' + x.room : '') + ' — ' + money(x.price) + (x.note ? ' (' + x.note + ')' : ''))); T.push(''); }

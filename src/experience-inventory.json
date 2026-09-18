@@ -432,52 +432,59 @@
   "overview": "Day 03 · 23.02.2027",
   "sheet": "NONE",
   "selectable": false,
-  "drive": "Bar BKK/Bar Us (earlier Drive path; no numbered folder)",
-  "driveIds": [],
-  "sourceImages": 1,
-  "used": 1,
+  "drive": "Bar Us Bangkok (Owner Drive folder, Edit 5 · 18 Sep 2026)",
+  "driveIds": [
+   "1POkw60vcuEBBrm8mUnpL6cbVB3eLXqUP"
+  ],
+  "sourceImages": 7,
+  "used": 7,
   "primary": "assets/images/experiences/bkk-barus-01.jpg",
   "gallery": [
-   "assets/images/experiences/bkk-barus-01.jpg"
+   "assets/images/experiences/bkk-barus-01.jpg",
+   "assets/images/experiences/bkk-barus-02.jpg",
+   "assets/images/experiences/bkk-barus-03.jpg",
+   "assets/images/experiences/bkk-barus-04.jpg",
+   "assets/images/experiences/bkk-barus-05.jpg",
+   "assets/images/experiences/bkk-barus-06.jpg",
+   "assets/images/experiences/bkk-barus-07.jpg"
   ],
-  "note": "single Instagram frame, 05 Sep 2026",
+  "note": "Edit 5: the Owner’s Drive folder replaces the single Instagram frame; the tray martini stays the lead",
   "price": null,
   "hours": null,
   "maps": "https://maps.app.goo.gl/2KLduE51ybg4qAqd9?g_st=ic",
   "link": null
  },
  {
-  "id": "bkk-igniv",
-  "name": "IGNIV",
+  "id": "bkk-ledukaan",
+  "name": "Le Du Kaan",
   "city": "Bangkok",
   "roles": [
-   "dinner",
-   "bar"
+   "dinner"
   ],
   "overview": "Day 03 · 23.02.2027",
-  "sheet": "NONE",
+  "sheet": "DETAIL",
   "selectable": false,
-  "drive": "087 - Restaurant - IGNIV",
+  "drive": "Le Du Kaan (Owner Drive folder, Edit 5)",
   "driveIds": [
-   "14mtdPWa04TX8gXO7oHr0g_8dBsZFVkV4"
+   "1ISGuUGvABhEDXLswY5PyVxUaecNPRAGB"
   ],
-  "sourceImages": 17,
+  "sourceImages": 8,
   "used": 8,
-  "primary": "assets/images/experiences/bkk-igniv-01.jpg",
+  "primary": "assets/images/experiences/bkk-ledukaan-01.jpg",
   "gallery": [
-   "assets/images/experiences/bkk-igniv-01.jpg",
-   "assets/images/experiences/bkk-igniv-02.jpg",
-   "assets/images/experiences/bkk-igniv-03.jpg",
-   "assets/images/experiences/bkk-igniv-04.jpg",
-   "assets/images/experiences/bkk-igniv-05.jpg",
-   "assets/images/experiences/bkk-igniv-06.jpg",
-   "assets/images/experiences/bkk-igniv-07.jpg",
-   "assets/images/experiences/bkk-igniv-08.jpg"
+   "assets/images/experiences/bkk-ledukaan-01.jpg",
+   "assets/images/experiences/bkk-ledukaan-02.jpg",
+   "assets/images/experiences/bkk-ledukaan-03.jpg",
+   "assets/images/experiences/bkk-ledukaan-04.jpg",
+   "assets/images/experiences/bkk-ledukaan-05.jpg",
+   "assets/images/experiences/bkk-ledukaan-06.jpg",
+   "assets/images/experiences/bkk-ledukaan-07.jpg",
+   "assets/images/experiences/bkk-ledukaan-08.jpg"
   ],
-  "note": "IMG_3605 (Michelin plaque) excluded",
+  "note": "Edit 5 (18 Sep 2026): replaces IGNIV; description and hours from H&S_Wedding_Operations_Master; no price in the source",
   "price": null,
-  "hours": null,
-  "maps": "https://maps.app.goo.gl/vkS23W4viFPRWkf78?g_st=ic",
+  "hours": "Lunch 11:30 – 14:30 · Dinner 17:00 – 22:30 · Bar 17:00 – 01:00",
+  "maps": null,
   "link": null
  },
  {
@@ -558,14 +565,13 @@
    "1EuP1FzarJEWgqq1EQwsFmDX8RFuj4Yyl"
   ],
   "sourceImages": 6,
-  "used": 5,
+  "used": 4,
   "primary": "assets/images/experiences/bkk-dusit-01.jpg",
   "gallery": [
    "assets/images/experiences/bkk-dusit-01.jpg",
    "assets/images/experiences/bkk-dusit-02.jpg",
    "assets/images/experiences/bkk-dusit-03.jpg",
-   "assets/images/experiences/bkk-dusit-04.jpg",
-   "assets/images/experiences/bkk-dusit-05.jpg"
+   "assets/images/experiences/bkk-dusit-04.jpg"
   ],
   "note": "IMG_3625 (600×800 png) excluded",
   "price": null,
@@ -917,6 +923,98 @@
   "link": null
  },
  {
+  "id": "vte-laonationalmuseum",
+  "name": "Lao National Museum",
+  "city": "Vientiane",
+  "roles": [
+   "experience"
+  ],
+  "overview": "Museums · Vientiane",
+  "sheet": "DETAIL",
+  "selectable": false,
+  "drive": "Lao National Museum (Owner Drive folder, Edit 5)",
+  "driveIds": [
+   "16gX3TfbIBdsmiXpUwSULwF7VvSHfuVW7"
+  ],
+  "sourceImages": 6,
+  "used": 6,
+  "primary": "assets/images/experiences/vte-laonationalmuseum-01.jpg",
+  "gallery": [
+   "assets/images/experiences/vte-laonationalmuseum-01.jpg",
+   "assets/images/experiences/vte-laonationalmuseum-02.jpg",
+   "assets/images/experiences/vte-laonationalmuseum-03.jpg",
+   "assets/images/experiences/vte-laonationalmuseum-04.jpg",
+   "assets/images/experiences/vte-laonationalmuseum-05.jpg",
+   "assets/images/experiences/vte-laonationalmuseum-06.jpg"
+  ],
+  "note": "Edit 5 (18 Sep 2026): description, admission and hours from H&S_Wedding_Operations_Master",
+  "price": "30,000 KIP per person (foreign visitors)",
+  "hours": "Monday – Friday 8:00 – 12:00 and 13:00 – 16:00",
+  "maps": null,
+  "link": null
+ },
+ {
+  "id": "vte-silkresidence",
+  "name": "Traditional Lao Silk Residence",
+  "city": "Vientiane",
+  "roles": [
+   "experience"
+  ],
+  "overview": "Museums · Vientiane",
+  "sheet": "DETAIL",
+  "selectable": false,
+  "drive": "Traditional Lao Silk Residence (Owner Drive folder, Edit 5)",
+  "driveIds": [
+   "1WgfxaI1LkCM34XlePC4U8lVJAHmw5Tga"
+  ],
+  "sourceImages": 5,
+  "used": 5,
+  "primary": "assets/images/experiences/vte-silkresidence-01.jpg",
+  "gallery": [
+   "assets/images/experiences/vte-silkresidence-01.jpg",
+   "assets/images/experiences/vte-silkresidence-02.jpg",
+   "assets/images/experiences/vte-silkresidence-03.jpg",
+   "assets/images/experiences/vte-silkresidence-04.jpg",
+   "assets/images/experiences/vte-silkresidence-05.jpg"
+  ],
+  "note": "Edit 5 (18 Sep 2026): description, admission and hours from H&S_Wedding_Operations_Master",
+  "price": "50,000 LAK per person (about USD 2.23)",
+  "hours": "Open daily 9:00 – 17:00",
+  "maps": null,
+  "link": null
+ },
+ {
+  "id": "vte-laoartmuseum",
+  "name": "Lao Art Museum",
+  "city": "Vientiane",
+  "roles": [
+   "experience"
+  ],
+  "overview": "Museums · Vientiane",
+  "sheet": "DETAIL",
+  "selectable": false,
+  "drive": "Lao Art Museum (Owner Drive folder, Edit 5)",
+  "driveIds": [
+   "19ZR1IFqAfnkuceGydMYaEmMx9jGqEb9k"
+  ],
+  "sourceImages": 6,
+  "used": 6,
+  "primary": "assets/images/experiences/vte-laoartmuseum-01.jpg",
+  "gallery": [
+   "assets/images/experiences/vte-laoartmuseum-01.jpg",
+   "assets/images/experiences/vte-laoartmuseum-02.jpg",
+   "assets/images/experiences/vte-laoartmuseum-03.jpg",
+   "assets/images/experiences/vte-laoartmuseum-04.jpg",
+   "assets/images/experiences/vte-laoartmuseum-05.jpg",
+   "assets/images/experiences/vte-laoartmuseum-06.jpg"
+  ],
+  "note": "Edit 5 (18 Sep 2026): description, entry and hours from H&S_Wedding_Operations_Master",
+  "price": "220,000 LAK (about USD 10 – 15) for foreign visitors",
+  "hours": "08:30 – 16:00",
+  "maps": null,
+  "link": null
+ },
+ {
   "id": "vte-rivermoon",
   "name": "River Moon",
   "city": "Vientiane",
@@ -1024,14 +1122,13 @@
    "1riNV8y_gYMzIbY2VNQNjRoMLoT2aVW_J"
   ],
   "sourceImages": 6,
-  "used": 5,
+  "used": 4,
   "primary": "assets/images/experiences/vte-kaogee-01.jpg",
   "gallery": [
    "assets/images/experiences/vte-kaogee-01.jpg",
    "assets/images/experiences/vte-kaogee-02.jpg",
    "assets/images/experiences/vte-kaogee-03.jpg",
-   "assets/images/experiences/vte-kaogee-04.jpg",
-   "assets/images/experiences/vte-kaogee-05.jpg"
+   "assets/images/experiences/vte-kaogee-04.jpg"
   ],
   "note": "",
   "price": null,

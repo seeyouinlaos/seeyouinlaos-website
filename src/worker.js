@@ -44,8 +44,7 @@ function corsHeaders(request) {
   };
 }
 
-/* The GitHub Pages mirror has no backend of its own: it calls these routes on
- * the Worker origin, so the two deployments share ONE ledger. */
+/* The Worker is the one runtime: pages and API share this origin, so there is ONE ledger. */
 export { Inventory } from './inventory.js';
 export { Seating } from './seating.js';
 export { Rooms } from './rooms.js';
@@ -372,11 +371,15 @@ async function storedDraft(env, invitationId, strict) {
   if (env.DRAFTS) { try { const r = await draftOp(env, invitationId, 'get'); if (!r.ok) throw new Error(r.error || 'draft could not be read'); return r.draft || null; } catch (e) { if (strict) throw e; return null; } }
   if (!env.REG_KV) return null; try { return JSON.parse(await env.REG_KV.get(draftKey(invitationId)) || 'null'); } catch (e) { return null; }
 }
-/* the stages a guest's fixed arrangements occupy — never Bag lines (src/inventory-seed.js FIXED) */
-const STAGE_OF_WINDOW = { 'bkk-stay': 'bkk-stay', prewed: 'prewed', wedstay: 'wedstay', 'airbnb-2br': 'wedstay', kmg: 'kmg', ljg: 'ljg', kempinski: 'kempinski' };
-function fixedStagesOf(guestId) { return FIXED.filter((f) => f.guestId === guestId).map((f) => stageOf(f.key)); }
-/* a Bag / selections array without the lines of the guest's fixed stages, and the total it comes to */
-function withoutFixed(list, fixedStages) { if (!Array.isArray(list) || !fixedStages.length) return { list, changed: false }; const kept = list.filter((x) => !(x && (fixedStages.includes(String(x.id)) || fixedStages.includes(STAGE_OF_WINDOW[String(x.id)] || '')))); return { list: kept, changed: kept.length !== list.length }; }
+/* the units a guest's fixed arrangements occupy — never Bag lines (src/inventory-seed.js FIXED). The fixed UNIT is what
+   never becomes a product; another hotel chosen in the same stage is the guest's own selection (Owner, Edit 5 · 18 Sep 2026) */
+function fixedStagesOf(guestId) { return FIXED.filter((f) => f.guestId === guestId).map((f) => f.key); }
+/* a Bag / selections array without the lines that ARE the guest's fixed unit (its window with the fixed room, or with no room yet) */
+function withoutFixed(list, fixedKeys) {
+  if (!Array.isArray(list) || !fixedKeys.length) return { list, changed: false };
+  const isFixed = (x) => fixedKeys.some((k) => { const win = k.split('/')[0], slug = k.split('/').slice(1).join('/'); return x && String(x.id) === win && (!x.room || String(x.room) === slug); });
+  const kept = list.filter((x) => !isFixed(x)); return { list: kept, changed: kept.length !== list.length };
+}
 const totalOf = (list) => (Array.isArray(list) ? list : []).reduce((t, x) => t + (Number(x && x.price) || 0) * (Number(x && x.qty) || 1), 0);
 function draftContent(keys) {
   const out = {};
@@ -606,7 +609,10 @@ async function engineRooms(env, who) {
     const v = await r.json();
     if (!v || !v.ok || !v.mine) return null;
     const out = {};
-    for (const [stage, m] of Object.entries(v.mine)) { const s = SEED[m.key]; out[stage] = { key: m.key, label: m.label, name: s ? s.name : m.key, stay: s && s.stay ? s.stay : null, room: s && s.unit === 'guest' ? s.name : 'Room ' + m.label, ...(m.fixed ? { fixed: true } : {}) }; }
+    const entry = (m, stage) => { const s = SEED[m.key]; return { stage, key: m.key, label: m.label, name: s ? s.name : m.key, stay: s && s.stay ? s.stay : null, room: s && s.unit === 'guest' ? s.name : 'Room ' + m.label, ...(m.fixed ? { fixed: true } : {}) }; };
+    for (const [stage, m] of Object.entries(v.mine)) out[stage] = entry(m, stage);
+    /* the Owner's fixed arrangement: under its stage when the guest holds nothing else there, beside it (stage/fixed) when they do (Owner, Edit 5) */
+    for (const [stage, m] of Object.entries(v.fixed || {})) out[out[stage] ? stage + '/fixed' : stage] = entry(m, stage);
     return out;
   } catch (e) { return null; }
 }

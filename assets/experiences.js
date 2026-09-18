@@ -50,7 +50,15 @@ window.SIYL_EXP = [
   { id: 'bkk-emquartier', roles: ['place'], row: 'Day 03 · 23.02.2027', chapter: 'bkk', day: '23 FEB 2027', name: 'EmQuartier', where: 'Bangkok', cats: 'City · Design · Shopping', img: 'assets/images/experiences/bkk-emquartier-01.jpg', teaser: 'Sukhumvit’s design quarter — cascading gardens, galleries of shops and city energy.' },
   { id: 'bkk-commons', roles: ['place','dinner'], row: 'Day 03 · 23.02.2027', chapter: 'bkk', day: '23 FEB 2027', name: 'The Commons Thonglor', where: 'Bangkok', cats: 'Food · Design · Social', img: 'assets/images/experiences/bkk-commons-01.jpg', teaser: "Thonglor's vertical village — one evening, many kitchens, easy drinks in between." },
   { id: 'bkk-barus', roles: ['bar'], row: 'Day 03 · 23.02.2027', chapter: 'bkk', day: '23 FEB 2027', name: 'Bar Us', where: 'Bangkok', cats: 'Bar · Evening · Design', maps: 'https://maps.app.goo.gl/2KLduE51ybg4qAqd9?g_st=ic', img: 'assets/images/experiences/bkk-barus-01.jpg', teaser: 'An intimate evening alternative — a small bar of precision and warmth.' },
-  { id: 'bkk-igniv', roles: ['dinner','bar'], row: 'Day 03 · 23.02.2027', chapter: 'bkk', day: '23 FEB 2027', name: 'IGNIV', where: 'Bangkok', cats: 'Dining · Evening', maps: 'https://maps.app.goo.gl/vkS23W4viFPRWkf78?g_st=ic', img: 'assets/images/experiences/bkk-igniv-01.jpg', teaser: 'A sharing-menu evening alternative — fine dining made convivial.' },
+  { id: 'bkk-ledukaan', roles: ['dinner'], row: 'city', chapter: 'bkk', day: 'Bangkok days', name: 'Le Du Kaan', where: 'Bangkok', cats: 'Thai fine dining · Rooftop · Bar',
+    img: 'assets/images/experiences/bkk-ledukaan-01.jpg',
+    teaser: 'A culinary journey through Thailand — the casual dining concept of Michelin-starred Chef Thitid “Ton” Tassanakajohn, on the 56th floor of The Empire.',
+    detail: [
+      'Le Du Kaan invites you to embark on a gastronomic adventure through the heart of Thailand. Celebrating the rich diversity of Thai cuisine, the restaurant blends traditional flavours with a contemporary twist — the artistry of Michelin-starred Chef Thitid “Ton” Tassanakajohn, who transforms fresh, locally sourced ingredients into dishes that capture the beauty and complexity of Thai culture.',
+      'A casual dining concept crafted by the chef behind Le Du, winner of Asia’s 50 Best Restaurants 2023, in collaboration with Head Chef Chatchawan “Bank” Varahajeerakul. Each dish is designed to reflect Thailand’s cultural heritage and diverse regional flavours, turning traditional Thai cuisine into an artful, modern dining experience.',
+      'The outdoor bar serves cocktails and mocktails inspired by Thailand’s four regions, with a sommelier-curated wine selection. Nestled on the 56th floor of EA Rooftop at The Empire, with a choice of indoor dining and an expansive outdoor terrace and rooftop bar over the Bangkok skyline.'
+    ],
+    practical: { hours: ['Lunch 11:30 – 14:30 (last order 14:00)', 'Dinner 17:00 – 22:30 (last order 22:00)', 'Bar 17:00 – 01:00 (last order 23:45)'] } },
   { id: 'bkk-thongsmith', roles: ['lunch'], row: 'Day 04 · 24.02.2027', chapter: 'bkk', day: '24 FEB 2027', name: 'Thong Smith', where: 'Bangkok', cats: 'Thai · Boat Noodles', img: 'assets/images/experiences/bkk-thongsmith-01.jpg', teaser: 'Siamese boat noodles, elevated — a Bangkok classic done beautifully.' },
   { id: 'bkk-letsrelax', roles: ['experience'], row: 'Day 04 · 24.02.2027', chapter: 'bkk', day: '24 FEB 2027', name: "Let's Relax", where: 'Bangkok', cats: 'Wellness · Spa', img: 'assets/images/experiences/bkk-letsrelax-01.jpg', teaser: 'A quiet hour of Thai wellness before the journey continues.' },
   { id: 'bkk-dusit', roles: ['place'], row: 'Day 04 · 24.02.2027', chapter: 'bkk', day: '24 FEB 2027', name: 'Dusit Central Park', where: 'Bangkok', cats: 'City · Park · Design · Lifestyle', img: 'assets/images/experiences/bkk-dusit-01.jpg', teaser: 'The new green heart above Silom — architecture, park levels and city views.' },
@@ -106,6 +114,30 @@ window.SIYL_EXP = [
     img: 'assets/images/experiences/vte-buddhapark-01.jpg',
     teaser: 'A riverside sculpture garden of giants, about an hour from the city.',
     detail: ['Some twenty kilometres downstream, Hindu and Buddhist figures crowd a green meadow — the great reclining Buddha above all. An easy half-day escape, and a favourite with children.'] },
+  { id: 'vte-laonationalmuseum', roles: ['experience'], row: 'city', chapter: 'laos', day: 'Museums', name: 'Lao National Museum', where: 'Vientiane', cats: 'Museum · History · Heritage',
+    img: 'assets/images/experiences/vte-laonationalmuseum-01.jpg',
+    teaser: 'The national collection of Lao history and culture — first opened in 1980 in the former French Governor’s Residence, since 2017 in a new building six kilometres from the centre.',
+    detail: [
+      'The Lao National Museum was first established in 1980 as the Lao Revolutionary Exhibition Hall in the former French Governor’s Residence on Samsenthai Road. Built in the French colonial style in 1925, the building has an important place in Lao history: it was here that Laos gained its independence from France on 12 October 1945. Renamed the Revolutionary Museum in 1985, it became the Lao National Museum in 2000.',
+      'The museum is one of the main institutes responsible for researching, protecting, conserving, storing and promoting the historical and cultural heritage of Laos. In 2017 it moved to a new building, built between 2013 and 2017, six kilometres from the centre of Vientiane — with room for artefact storage, conservation work, the protection of historical documents and the display of the Lao historical and cultural collections from prehistory to the present.'
+    ],
+    practical: { price: 'Admission: 30,000 KIP per person (foreign visitors) · 5,000 KIP (Lao nationals)', hours: ['Monday – Friday 8:00 – 16:00', 'Saturday – Sunday 9:00 – 16:00'] } },
+  { id: 'vte-silkresidence', roles: ['experience'], row: 'city', chapter: 'laos', day: 'Museums', name: 'Traditional Lao Silk Residence', where: 'Vientiane', cats: 'Museum · Textiles · Craft',
+    img: 'assets/images/experiences/vte-silkresidence-01.jpg',
+    teaser: 'Textile Treasures of Laos — heirloom silks and living weaving traditions, shown in the Hor Kham Residence next to the Presidential Office.',
+    detail: [
+      'Textile Treasures of Laos, the Lao Silk House, opened at the Hor Kham Residence next to the Presidential Office. Organised by the Lao Handicrafts Association, the exhibition brings together prized heirloom pieces loaned from families across the country, allowing the public to appreciate the deep cultural heritage and artistry behind Lao textiles.',
+      'The exhibition is arranged in two sections. The Heritage Hall features over 100 traditional textiles that showcase the skill of Lao weavers — from ceremonial sinh to household fabrics, with motifs that convey ancient beliefs and folklore; some pieces date back more than a century. The adjacent gallery shows the future of Lao weaving: contemporary artisans reinterpreting traditional motifs, such as naga patterns, on minimalist wall hangings and fashion pieces.',
+      'Set within the Hor Kham Residence, a blend of French Indochinese influence and serene gardens, natural light streams through floor-to-ceiling windows onto the silks. A branch of Naked Espresso on site serves locally sourced coffee. Photography is permitted without flash.'
+    ],
+    practical: { price: '50,000 LAK per person (about USD 2.23)', hours: ['Open daily 9:00 – 17:00'] } },
+  { id: 'vte-laoartmuseum', roles: ['experience'], row: 'city', chapter: 'laos', day: 'Museums', name: 'Lao Art Museum', where: 'Vientiane', cats: 'Museum · Art · Craft',
+    img: 'assets/images/experiences/vte-laoartmuseum-01.jpg',
+    teaser: 'A newly established landmark for the artistic and cultural heritage of Laos — wood carvings, traditional paintings and crafted Lao products.',
+    detail: [
+      'The Lao Art Museum in Vientiane is a newly established landmark dedicated to celebrating and preserving the rich artistic and cultural heritage of Laos. Designed to be more than a traditional museum, the space offers an immersive experience: exquisite wood carvings, traditional paintings and uniquely crafted Lao products. The museum serves as a hub for both art appreciation and cultural education — a stop for history enthusiasts, artists and travellers alike.'
+    ],
+    practical: { price: 'Entry 220,000 LAK (about USD 10 – 15) for foreign visitors · electric cart or shuttle an additional 50,000 – 120,000 LAK', hours: ['Open 08:30 – 16:00'] } },
   /* LAOS · VIENTIANE — tables & days · 25 FEB – 01 MAR 2027 */
   { id: 'vte-rivermoon', roles: ['lunch'], row: 'Day 05 · 25.02.2027', chapter: 'laos', featured: true, day: '25 FEB 2027', name: 'River Moon', where: 'Vientiane', cats: 'Riverside · Landscape · Dining', maps: 'https://maps.app.goo.gl/NMbPP5kvLKurozJJ8?g_st=ic', img: 'assets/images/experiences/vte-rivermoon-01.jpg', teaser: "Lao and Thai barbecue at the water's edge — riverside landscape and slow midday." },
   { id: 'vte-3merchants', roles: ['dinner'], row: 'Day 05 · 25.02.2027', chapter: 'laos', day: '25 FEB 2027', name: '3 Merchants Restaurant', where: 'Vientiane', cats: 'Indochinese · Dining', maps: 'https://maps.app.goo.gl/q3nJqc74P1hn6mkf6?g_st=ic',

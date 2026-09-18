@@ -10,7 +10,7 @@ FINAL COMMIT
 DEPLOYED REVISION
   Cloudflare Worker : https://seeyouinlaos-website.suthep-hrg.workers.dev
                       Version 0c64451a-5902-490c-bdb4-03eb207107b8
-  GitHub Pages      : https://seeyouinlaos-website.suthep-hrg.workers.dev/
+  GitHub Pages      : retired 18 Sep 2026 (historical parity note below; the Worker is the one runtime)
   Parity            : 14/14 files verified curl+shasum — Worker == GH Pages == git
                       (journeys, marsilea, review, tea, your-journey, index,
                       destination, voyage, 1872, invite.mjs, shop-menu.js,

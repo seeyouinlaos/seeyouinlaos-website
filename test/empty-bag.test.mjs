@@ -15,10 +15,10 @@ import { composeGuestMail, composeOwnerMail } from '../src/mail-templates.js';
 const HOST = { invitationId: 'INV-G049', guestId: 'G049', partyId: 'INV-001', hosts: true, preferredName: 'Suthep', fullName: 'Suthep Test', bearer: 'x' };
 const call = async (rooms, op, body, as) => { const r = await rooms.fetch(new Request('https://x/api/rooms/' + op, { method: 'POST', headers: as ? { 'x-siyl-identity': JSON.stringify(as) } : {}, body: JSON.stringify(body || {}) })); return { status: r.status, d: await r.json() }; };
 
-test('ENGINE · the guest\'s own map marks the FIXED room; a normal hold carries no marker', async () => {
+test('ENGINE · the guest\'s FIXED room is under `fixed`, never a hold in `mine`; a normal hold carries no marker (Edit 5, 18 Sep 2026)', async () => {
   const rooms = new Rooms(doState());
   const h = await call(rooms, 'read', null, HOST);
-  assert.deepEqual(h.d.mine['bkk-stay'], { key: 'bkk-stay/penthouse', label: 'A', fixed: true });
+  assert.deepEqual(h.d.fixed['bkk-stay'], { key: 'bkk-stay/penthouse', label: 'A', fixed: true }); assert.equal(h.d.mine['bkk-stay'], undefined); assert.deepEqual(h.d.mine, {});
   const j = await call(rooms, 'join', { invitationId: PEGGY.invitationId, guestId: PEGGY.guestId, key: 'bkk-stay/u-sathorn-superior-garden', label: 'B', name: 'Peggy' }, { invitationId: PEGGY.invitationId, guestId: PEGGY.guestId, partyId: PEGGY.partyId, hosts: false });
   assert.equal(j.status, 200); assert.deepEqual(j.d.mine['bkk-stay'], { key: 'bkk-stay/u-sathorn-superior-garden', label: 'B' });
 });
@@ -29,7 +29,7 @@ test('CLIENT · a fixed hold is never written into the Bag; a stale Bag line of 
   /* the older model left the fixed room in the Bag as a product */
   B.set([{ id: 'bkk-stay', name: 'Sathorn Penthouse Bangkok', meta: '21 – 24 February 2027 · Sathorn Penthouse', price: 255, stay: 'sathorn', room: 'penthouse', rate: 85, nights: 3, qty: 1, unit: 'A', unitName: 'Room A' }]);
   assert.equal(B.total(), 255);
-  U._set({ ok: true, places: 2, mine: { 'bkk-stay': { key: 'bkk-stay/penthouse', label: 'A', fixed: true } },
+  U._set({ ok: true, places: 2, mine: {}, fixed: { 'bkk-stay': { key: 'bkk-stay/penthouse', label: 'A', fixed: true } },
     units: { 'bkk-stay/penthouse': [{ label: 'A', name: 'Room A', kind: 'room', places: 2, reservedFor: 'Bride & Groom', eligible: true, occupants: [{ name: 'Haruthai' }, { name: 'Suthep', mine: true }], taken: 2, free: 0, full: true }] },
     summary: { 'bkk-stay/penthouse': { units: 6, places: 12, sourceRooms: 6, sourcePlaces: 12, ownerReservedRooms: 1, ownerReservedPlaces: 2, guestOccupiedRooms: 0, guestOccupiedPlaces: 0, remainingRooms: 5, remainingPlaces: 10, soldOut: false, free: 10, rooms: 5, reserved: 1, reservedFor: 'Bride & Groom', kind: 'room' } } });
   assert.equal(U.fixed('bkk-stay'), true); assert.equal(JSON.stringify(U.fixedStages()), '["bkk-stay"]');
@@ -39,14 +39,18 @@ test('CLIENT · a fixed hold is never written into the Bag; a stale Bag line of 
   assert.equal(ST.fixed('bkk-stay'), true);
   const items = A.items(); assert.equal(items.length, 1); assert.equal(items[0].property, 'Sathorn Penthouse Bangkok'); assert.equal(items[0].name, 'Room A'); assert.equal(items[0].who, 'Haruthai · You');
   const html = A.html(); assert.match(html, /Arranged for you/); assert.match(html, /Fixed arrangement · not part of your bag/); assert.doesNotMatch(html, /data-remove|Remove|Change room|USD/);
+  /* HARUTHAI MAY CHOOSE ANOTHER ADDRESS (Edit 5): a U Sathorn line of the host is a real Bag line beside the fixed room — the sync keeps it */
+  B.set([{ id: 'bkk-stay', name: 'U Sathorn Bangkok', meta: '21 – 24 February 2027 · U Sathorn', price: 192, stay: 'sathorn', room: 'u-sathorn-superior-garden', rate: 64, nights: 3, qty: 1 }]);
+  ST.sync(); assert.equal(B.get().length, 1); assert.equal(B.get()[0].room, 'u-sathorn-superior-garden'); assert.equal(B.total(), 192);
+  assert.equal(A.items().length, 1, 'the arranged room is still shown, once'); assert.equal(ST.fixedSlug('bkk-stay'), 'penthouse');
 });
 
-test('CLIENT · Remove is refused for a fixed stage without touching the Bag; select in a fixed stage is refused; a normal remove is idempotent and leaves USD 0', async () => {
+test('CLIENT · the fixed unit itself is never selected and never a Bag line; Remove in the fixed stage with nothing held is a no-op that keeps the arrangement; a normal remove is idempotent and leaves USD 0', async () => {
   const w = page({ auth: HOST }); const U = w.SIYL_UNITS, ST = w.SIYL_STAY, B = w.SIYL_BAG;
-  U._set({ ok: true, places: 2, mine: { 'bkk-stay': { key: 'bkk-stay/penthouse', label: 'A', fixed: true } }, units: {}, summary: {} });
+  U._set({ ok: true, places: 2, mine: {}, fixed: { 'bkk-stay': { key: 'bkk-stay/penthouse', label: 'A', fixed: true } }, units: {}, summary: {} });
   B.set([]);
-  const r = await ST.remove('bkk-stay'); assert.equal(JSON.stringify(r), JSON.stringify({ ok: false, error: 'fixed' })); assert.equal(JSON.stringify(B.get()), '[]');
-  const s = await ST.select('bkk-stay', 'u-sathorn-superior-garden'); assert.equal(JSON.stringify(s), JSON.stringify({ ok: false, error: 'fixed' }));
+  const r = await ST.remove('bkk-stay'); assert.equal(JSON.stringify(r), JSON.stringify({ ok: true })); assert.equal(JSON.stringify(B.get()), '[]'); assert.equal(ST.fixed('bkk-stay'), true, 'the arrangement is not the Bag\'s to remove');
+  const s = await ST.select('bkk-stay', 'penthouse'); assert.equal(JSON.stringify(s), JSON.stringify({ ok: false, error: 'fixed' }), 'the fixed unit is not selectable');
   assert.equal(ST.refusal({ ok: false, error: 'fixed' }), 'This room is arranged for you and stays as it is.');
   assert.equal(ST.refusal({ ok: false, error: 'unreachable' }), 'Nothing was changed — we could not reach Guest Relations just now. Please try again.');
   /* a normal guest: two removes of the same line */
@@ -60,21 +64,21 @@ test('CLIENT · Remove is refused for a fixed stage without touching the Bag; se
 test('CLIENT · Full Experience keeps a fixed stage out of both its remove and its add lists', () => {
   const w = page({ auth: HOST }); const U = w.SIYL_UNITS, J = w.SIYL_JOURNEY, B = w.SIYL_BAG;
   B.set([]);
-  U._set({ ok: true, places: 2, mine: { 'bkk-stay': { key: 'bkk-stay/penthouse', label: 'A', fixed: true } }, units: {}, summary: {} });
+  U._set({ ok: true, places: 2, mine: {}, fixed: { 'bkk-stay': { key: 'bkk-stay/penthouse', label: 'A', fixed: true } }, units: {}, summary: {} });
   const plan = J.fullExperience();
   assert.ok(plan.kept.includes('bkk-stay'), 'the fixed stage is kept as it is');
   assert.ok(!plan.remove.some((id) => id === 'bkk-stay'), 'never removed');
   assert.ok(!plan.add.some((it) => it.id === 'bkk-stay'), 'never added');
 });
 
-test('SURFACES · the sticky bar says My Bag and stands at USD 0 for a signed-in guest; the account links are on it; the cart, My Trip and Review read the arranged renderer; the header names My Trip · My Profile · Sign out (the bag icon is My Bag)', () => {
+test('SURFACES · the sticky bar says My Bag and stands at USD 0 for a signed-in guest; the account links are on it; the cart, My Trip and Review read the arranged renderer; the drawer names My Trip · My Profile · Sign out (the bag icon is My Bag)', () => {
   const b = src('assets/bag.js'), c = src('cart.html'), yj = src('your-journey.html'), rv = src('review.html'), inv = src('assets/invite.mjs');
   assert.match(b, /<span class="jb-l">My Bag<\/span>/); assert.match(b, /data-bag-view>Open My Bag</); assert.match(b, /var on=B\.authed\(\);/, 'the bar stands whenever a guest is signed in — an empty bag is a real state');
   assert.match(b, /data-nav="top"/); assert.doesNotMatch(b, /data-nav="trip"/, 'the account surfaces moved into the sticky header shell (Owner, 18 Sep 2026)');
   assert.match(c, /arranged=window\.SIYL_ARRANGED\?SIYL_ARRANGED\.html\(\):''/); assert.match(c, /No selections yet · USD 0/); assert.match(c, /if\(bt\.disabled\)return;/, 'double remove is idempotent'); assert.match(c, /never an endless "Removing…"/);
-  assert.match(yj, /if\(window\.SIYL_ARRANGED&&U&&U\.ready\(\)&&U\.fixed\(win\)\)return SIYL_ARRANGED\.html\(\{heading:true\}\);/); assert.match(yj, /<h1 class="t-d1">My Trip<\/h1>/);
+  assert.match(yj, /var fixed=!!\(window\.SIYL_ARRANGED&&U&&U\.ready\(\)&&U\.fixed\(win\)\),fixedSlug=fixed\?ST\.fixedSlug\(win\):'';/, 'the arranged room stands above the addresses, which stay open (Edit 5)'); assert.match(yj, /stay\.rooms\.filter\(function\(r\)\{return r\.slug!==fixedSlug\}\)/, 'the fixed unit is not on the rail'); assert.match(yj, /<h1 class="t-d1">My Trip<\/h1>/);
   assert.match(rv, /function paintArranged\(\)/); assert.match(rv, /<div id="arranged"><\/div>/);
-  assert.match(inv, /data-access-nav="trip">My Trip<\/a>/); assert.doesNotMatch(inv, /data-access-nav="bag"/); assert.match(inv, /data-access-nav="profile">My Profile<\/a><button type="button" class="hd-access-out" data-access-out>Sign out<\/button>/); assert.match(inv, /if \(el\.parentElement !== header\)/, 'the access row lives inside the sticky header');
+  assert.match(inv, /data-access-nav="trip">My Trip<\/a>/); assert.doesNotMatch(inv, /data-access-nav="bag"/); assert.match(inv, /data-access-nav="profile">My Profile<\/a><button type="button" class="a-macct-out" data-access-out>Sign out<\/button>/); assert.match(inv, /let el = inMenu \|\| document\.querySelector\('\[data-account\]'\);/, 'the account block lives in the menu drawer (Aman header, 18 Sep 2026)');
   for (const f of ['your-journey.html', 'cart.html', 'review.html']) assert.match(src(f), /assets\/arranged\.js/, f + ' loads the arranged renderer');
 });
 

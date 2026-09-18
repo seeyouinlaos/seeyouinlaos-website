@@ -66,7 +66,7 @@ test('EMAIL · THE PERSISTED ROOM (Owner, 16 Sep 2026): both emails name the roo
     const r = await h.w.fetch(req('/api/register', { 'x-siyl-auth': h.peggy }, { invitationId: 'INV-G001', registration: REG, text: TEXT + '\n- The Heritage · Room A' }), h.env);
     assert.equal(r.status, 202);
     const rec = JSON.parse(h.store.m.get('reg:INV-G001').v);
-    assert.deepEqual(rec.rooms, { wedstay: { key: 'wedstay/heritage', label: 'B', name: 'The Heritage', stay: null, room: 'Room B' }, 'bkk-stay': { key: 'bkk-stay/penthouse', label: 'C', name: 'Sathorn Penthouse', stay: 'Sathorn Penthouse Bangkok', room: 'Room C' } });
+    assert.deepEqual(rec.rooms, { wedstay: { stage: 'wedstay', key: 'wedstay/heritage', label: 'B', name: 'The Heritage', stay: null, room: 'Room B' }, 'bkk-stay': { stage: 'bkk-stay', key: 'bkk-stay/penthouse', label: 'C', name: 'Sathorn Penthouse', stay: 'Sathorn Penthouse Bangkok', room: 'Room C' } }, 'each record line names its stage (Edit 5: a fixed arrangement may stand beside a chosen hold)');
     const owner = h.calls[0].body.textContent, guest = h.calls[1].body.textContent;
     /* the engine's rooms reach both emails through the stays (the journey-shop shape names the stay lines; this fixture carries none, so the record's rooms are proven on the stored record above) */
     assert.doesNotMatch(owner + guest, /room engine|persisted allocation/, 'no system words in an email');

@@ -24,7 +24,7 @@
 (function () {
   'use strict';
   var ORIGIN = 'https://seeyouinlaos-website.suthep-hrg.workers.dev';
-  /* the Worker's own origin and a local `wrangler dev` answer at the same path; the Pages mirror asks the Worker */
+  /* the Worker's own origin and a local `wrangler dev` answer at the same path; any other host (a stage) asks the Worker */
   var API = (location.hostname === 'seeyouinlaos-website.suthep-hrg.workers.dev' || /^(localhost|127\.0\.0\.1)$/.test(location.hostname)) ? '/api/seating' : ORIGIN + '/api/seating';
 
   var view = null, loading = null, lastError = null;

@@ -2,8 +2,8 @@
 
 Self-contained scroll-scrubbed six-scene journey. Source of truth for production
 planning lives in the local workspace (`~/Desktop/scroll.website`); this folder is the
-deployable build. Served at `/journey/` on both GitHub Pages and the Worker — all
-asset URLs are relative, so the repository subpath needs no configuration.
+deployable build. Not served by the Worker (`/journey` is in `.assetsignore`) — all
+asset URLs are relative, so a subpath needs no configuration.
 
 ## Media replacement contract (no source edits, ever)
 

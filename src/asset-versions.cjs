@@ -2,8 +2,8 @@
 /**
  * Asset fingerprints (Owner, Edit 4 · 16 Sep 2026 — cache correctness).
  *
- * GitHub Pages serves every file with `cache-control: max-age=600`; a browser that kept an old
- * stylesheet or script could pair it with a fresh page for up to ten minutes after a deploy.
+ * A browser that kept an old stylesheet or script could pair it with a fresh page after a
+ * deploy (the Worker's static assets are cacheable and edge caches lag a release by minutes).
  * So every stylesheet and script a page references carries the content hash of the file it
  * names: `assets/venue.css?v=3f2a9c1d`. A changed file changes its URL; an unchanged file keeps
  * its cached copy. Idempotent — run before every commit that touches assets or pages:
@@ -19,7 +19,7 @@ const path = require('path');
 const crypto = require('crypto');
 const ROOT = path.join(__dirname, '..');
 const CHECK = process.argv.includes('--check');
-const PAGES = fs.readdirSync(ROOT).filter((f) => /\.html$/.test(f) && f !== 'register-landing.html');
+const PAGES = fs.readdirSync(ROOT).filter((f) => /\.html$/.test(f));
 const RE = /((?:href|src)=")(assets\/[A-Za-z0-9_./-]+\.(?:css|js|mjs))(?:\?v=[0-9a-f]{8})?(")/g;
 const hashes = {};
 const hashOf = (rel) => { if (!hashes[rel]) { const f = path.join(ROOT, rel); if (!fs.existsSync(f)) return null; hashes[rel] = crypto.createHash('sha256').update(fs.readFileSync(f)).digest('hex').slice(0, 8); } return hashes[rel]; };

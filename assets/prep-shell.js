@@ -39,7 +39,7 @@
     { n: '06', key: 'review',     label: 'Review & Send',         file: 'review.html' }
   ];
 
-  /* Cloudflare serves /review, the mirror serves /review.html — same page. */
+  /* the Worker serves /review and /review.html alike — same page. */
   var here = (location.pathname.split('/').pop() || 'index.html').toLowerCase().replace(/\.html$/, '');
   /* a page inside a step (you.html belongs to 01) says so on its <main data-step> */
   var sub = document.querySelector('main[data-step]');
@@ -72,9 +72,9 @@
   /* motion is a courtesy, never a requirement: with reduced motion every
    * change is immediate and nothing moves */
   var calm = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-  /* Cloudflare serves /wedding, the mirror serves /wedding.html: the shell
-   * links the way this origin already addresses the page, so a tap is one
-   * navigation and never a redirect first */
+  /* the Worker serves /wedding and /wedding.html alike: the shell links the
+   * way this origin already addresses the page, so a tap is one navigation
+   * and never a redirect first */
   var cleanUrls = !/\.html$/i.test(location.pathname) && location.pathname.split('/').pop() !== '';
   function hrefOf(file) { return cleanUrls ? file.replace(/\.html(?=[?#]|$)/, '') : file; }
 
@@ -94,9 +94,20 @@
     stepsScrim = document.createElement('div'); stepsScrim.className = 'prep-steps-scrim';
     document.body.appendChild(stepsScrim);
     stepsScrim.addEventListener('click', function () { closeIndex(true); });
-    /* the page underneath keeps its position while the index is open */
+    /* THE INDEX SCROLLS, THE PAGE STAYS (Owner, 18 Sep 2026 · iPhone Safari): the panel is a fixed layer under the bar that
+     * scrolls on its own; while it is open the page is held without moving it — no body offset, so the sticky shell stays exactly
+     * where it is — and a touch that would scroll the page instead of the panel is stopped at its edges */
     stepsScrim.addEventListener('touchmove', function (e) { e.preventDefault(); }, { passive: false });
     stepsScrim.addEventListener('wheel', function (e) { e.preventDefault(); }, { passive: false });
+    var touchY = 0;
+    layer.addEventListener('touchstart', function (e) { touchY = e.touches && e.touches[0] ? e.touches[0].clientY : 0; }, { passive: true });
+    layer.addEventListener('touchmove', function (e) {
+      if (!indexOpen || !e.touches || !e.touches[0]) return;
+      var y = e.touches[0].clientY, up = y > touchY, atTop = layer.scrollTop <= 0, atEnd = layer.scrollTop + layer.clientHeight >= layer.scrollHeight - 1;
+      if ((up && atTop) || (!up && atEnd)) e.preventDefault();   /* the page never takes over at the panel's edges */
+      touchY = y;
+    }, { passive: false });
+    document.addEventListener('touchmove', function (e) { if (indexOpen && !layer.contains(e.target) && !bar.contains(e.target)) e.preventDefault(); }, { passive: false });
 
     scrim = document.createElement('div'); scrim.className = 'p-drawer-scrim';
     drawer = document.createElement('aside'); drawer.className = 'p-drawer';
@@ -148,10 +159,12 @@
   });
 
   /* -------------------------------------------------------- the step index */
+  var heldY = null;
   function openIndex() {
     if (indexOpen) return;
     indexOpen = true; indexFocus = document.activeElement;
-    layer.classList.add('on');
+    heldY = window.scrollY || window.pageYOffset || 0;
+    layer.classList.add('on'); layer.scrollTop = 0;
     document.body.classList.add('prep-steps-open');
     var all = bar.querySelector('.prep-all'); if (all) all.setAttribute('aria-expanded', 'true');
   }
@@ -160,6 +173,9 @@
     indexOpen = false;
     layer.classList.remove('on');
     document.body.classList.remove('prep-steps-open');
+    /* the page is exactly where it was: no lock style accumulates, no jump */
+    if (heldY !== null && Math.abs((window.scrollY || 0) - heldY) > 1) window.scrollTo(0, heldY);
+    heldY = null;
     var all = bar.querySelector('.prep-all'); if (all) all.setAttribute('aria-expanded', 'false');
     if (restoreFocus && indexFocus && indexFocus.focus) indexFocus.focus({ preventScroll: true });
     indexFocus = null;

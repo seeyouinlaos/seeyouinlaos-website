@@ -19,14 +19,16 @@ async function harness({ auth = null, page = '/destination.html' } = {}) {
   const mkLink = (href) => { const attrs = { href }; return { tagName: 'A', getAttribute: (k) => (k in attrs ? attrs[k] : null), setAttribute: (k, v) => { attrs[k] = v; }, hasAttribute: (k) => k in attrs, attrs, addEventListener() {} }; };
   ['your-journey.html', 'cart.html', 'tickets.html', 'journeys.html#j-wedstay', 'wedding.html', 'invitation.html', 'experiences.html', 'https://example.org/x', 'mailto:x@y.z', '#top', 'room.html?stay=souphattra&room=heritage', 'transport.html?id=c86', 'review.html'].forEach((h) => links.push(mkLink(h)));
   const swap = mkLink('journeys.html#j-wedstay'); swap.attrs['data-cta-swap'] = ''; swap.textContent = 'Choose your room'; const way = mkLink('invitation.html?open=1'); way.attrs['data-private-cta'] = ''; way.textContent = 'Open your invitation';
-  const header = { insertAdjacentElement: (where, el) => inserted.push(el) };
+  /* the header is menu · wordmark · bag; the account block is the first child of the menu drawer (Owner, 18 Sep 2026) */
+  const header = { insertAdjacentElement: (where, el) => inserted.push(el), offsetHeight: 57 };
+  const menu = { firstChild: null, insertBefore: (el) => inserted.push(el) };
   const mkEl = () => { const el = { attrs: {}, children: [], className: '', innerHTML: '', value: '', disabled: false, textContent: '', setAttribute(k, v) { el.attrs[k] = v; }, getAttribute(k) { return el.attrs[k]; }, querySelector: () => mkEl(), addEventListener() {}, appendChild() {}, focus() {} }; return el; };
   const sb = {
     console, localStorage: { getItem: (k) => (store.has(k) ? store.get(k) : null), setItem: (k, v) => store.set(k, String(v)), removeItem: (k) => store.delete(k) },
     location: { pathname: page, search: '', hash: '', replaced: null, replace(u) { this.replaced = u; } },
     document: { readyState: 'complete', documentElement: { attrs: {}, setAttribute(k, v) { this.attrs[k] = v; }, getAttribute(k) { return this.attrs[k] || null; } }, head: { appendChild() {} }, body: { classList: { add() {}, remove() {}, contains() { return false; } }, append() {} },
       addEventListener: (t, fn) => { (listeners[t] = listeners[t] || []).push(fn); }, dispatchEvent: (e) => { (listeners[e.type] || []).forEach((fn) => fn(e)); return true; },
-      createElement: () => mkEl(), querySelector: (sel) => (sel === 'header.hd' ? header : sel === '[data-access]' ? (inserted[0] || null) : null), querySelectorAll: (sel) => (sel === 'a[data-private-cta]' ? [way] : sel === 'a[data-cta-swap]' ? [swap] : sel === 'a[href]' ? links : []) },
+      createElement: () => mkEl(), querySelector: (sel) => (sel === 'header.hd' ? header : sel === '.a-menu' ? menu : sel === '[data-account]' ? (inserted[0] || null) : null), querySelectorAll: (sel) => (sel === 'a[data-private-cta]' ? [way] : sel === 'a[data-cta-swap]' ? [swap] : sel === 'a[href]' ? links : []) },
     CustomEvent: class { constructor(type, init) { this.type = type; this.detail = init && init.detail; } },
     setTimeout: (fn) => fn(), fetch: () => Promise.reject(new Error('no network')), TextEncoder, TextDecoder, crypto: globalThis.crypto,
     MutationObserver: class { observe() {} },
@@ -55,8 +57,8 @@ test('ACCESS · signed out: require() on any page but the invitation page hands 
   let ran = false; sb.SIYL_INVITE.require(() => { ran = true; });
   assert.equal(ran, false); assert.equal(sb.location.replaced, 'invitation.html?open=1&next=experiences.html', 'the interrupted page comes back after the code');
   assert.equal(sb.SIYL_INVITE.authed(), false);
-  const status = inserted[0]; assert.ok(status, 'the status line is inserted after the header');
-  assert.equal(status.attrs['data-state'], 'out'); assert.match(status.innerHTML, /Not signed in/); assert.match(status.innerHTML, /href="invitation\.html\?open=1">Open your invitation</);
+  const status = inserted[0]; assert.ok(status, 'the account block is placed in the menu drawer');
+  assert.equal(status.attrs['data-state'], 'out'); assert.match(status.innerHTML, /Not signed in/); assert.match(status.innerHTML, /href="invitation\.html\?open=1" data-access-nav="in">Open your invitation</);
   const by = (h) => links.find((l) => l.attrs['data-private-href'] === h || l.attrs.href === h);
   assert.equal(by('your-journey.html').attrs.href, 'invitation.html?open=1&next=your-journey.html');
   assert.equal(by('room.html?stay=souphattra&room=heritage').attrs.href, 'invitation.html?open=1&next=room.html%3Fstay%3Dsouphattra%26room%3Dheritage');
@@ -79,7 +81,7 @@ test('ACCESS · signed in: require() runs at once, private links keep their targ
   const { sb, links, inserted } = await harness({ auth: PEGGY, page: '/experiences.html' });
   let ran = null; sb.SIYL_INVITE.require((a) => { ran = a; });
   assert.equal(ran && ran.guestId, 'g-peggy'); assert.equal(sb.location.replaced, null);
-  assert.equal(inserted[0].attrs['data-state'], 'in'); assert.match(inserted[0].innerHTML, /Signed in · Peggy/); assert.match(inserted[0].innerHTML, /href="your-journey\.html" data-access-nav="trip">My Trip</); assert.match(inserted[0].innerHTML, /data-access-nav="profile">My Profile</, 'the four surfaces live on the one sticky shell (Owner, 18 Sep 2026)'); assert.match(inserted[0].innerHTML, /data-access-out>Sign out</);
+  assert.equal(inserted[0].attrs['data-state'], 'in'); assert.match(inserted[0].innerHTML, /Signed in · Peggy/); assert.match(inserted[0].innerHTML, /href="your-journey\.html" data-access-nav="trip">My Trip</); assert.match(inserted[0].innerHTML, /data-access-nav="profile">My Profile</, 'the account navigation lives in the menu drawer (Owner, 18 Sep 2026 · Aman header)'); assert.match(inserted[0].innerHTML, /data-access-out>Sign out</);
   assert.equal(links.find((l) => l.attrs.href === 'your-journey.html').attrs.href, 'your-journey.html');
   assert.equal(sb.document.documentElement.getAttribute('data-session'), 'in');
   const { swap, way } = await harness({ auth: PEGGY, page: '/voyage.html' });
@@ -123,16 +125,24 @@ test('ACCESS · the pages: the bag, the tickets, the room and transport planning
     assert.doesNotMatch(src(f), /<a class="a-cta" href="journeys\.html">Plan your journey<\/a>/, f);
   }
   for (const f of ['index.html', 'destination.html', 'journeys.html', 'accommodation.html', 'experiences.html', 'experience.html', 'voyage.html', 'marsilea.html', '1872.html', 'tea.html', 'transport.html', 'room.html', 'dress.html', 'invitation.html', 'your-journey.html', 'wedding.html', 'wedding-preparation.html', 'about-you.html', 'review.html', 'cart.html', 'tickets.html']) assert.match(src(f), /assets\/invite\.mjs/, f + ' loads the gate');
-  /* the status line's space is reserved before any script runs: the placeholder sits in the markup of every page with a
-     static header, assets/recon.js places it with the header it builds, the rules live in the shared stylesheet — the module only fills it */
-  const PH = '<p class="hd-access" data-access data-state="out"><span>Not signed in</span><span class="hd-access-do"><a href="invitation.html?open=1">Open your invitation</a></span></p>';
-  for (const f of ['1872.html', 'about-you.html', 'cart.html', 'dress.html', 'invitation.html', 'marsilea.html', 'review.html', 'journeys.html', 'tickets.html', 'tea.html', 'transport.html', 'wedding.html', 'wedding-preparation.html', 'room.html', 'your-journey.html']) { const h = src(f); assert.equal(h.split(PH).length, 2, f + ' carries the placeholder once'); assert.ok(h.indexOf(PH) < h.indexOf('</header>') && h.indexOf(PH) - h.indexOf('</header>') < 12, f + ' — right after the header'); }
-  for (const f of ['index.html', 'destination.html', 'accommodation.html', 'experiences.html', 'experience.html', 'voyage.html']) assert.doesNotMatch(src(f), /data-access/, f + ' has no static header — recon.js places the line');
-  assert.match(src('assets/recon.js'), /access\.setAttribute\('data-access', ''\); access\.setAttribute\('data-state', 'out'\);\s*access\.innerHTML = '<span>Not signed in<\/span><span class="hd-access-do"><a href="invitation\.html\?open=1">Open your invitation<\/a><\/span>';\s*header\.appendChild\(access\);[^\n]*\n\s*var space = document\.querySelector\('\.hd-space'\);\s*document\.body\.prepend\(header\);\s*if \(space\) space\.remove\(\);/, 'recon.js swaps the stand-in for the header and the line');
-  assert.match(src('assets/recon.css'), /\.hd-space \{ height: 79px; \}\n@media \(min-width: 768px\) \{ \.hd-space \{ height: 80px; \} \}\n@media \(min-width: 1024px\) \{ \.hd-space \{ height: 84px; \} \}/, 'the stand-in has the measured heights');
+  /* ONE CLEAN HEADER (Owner, 18 Sep 2026 · Aman): menu · wordmark · bag and nothing beneath. No page carries an access
+     row; the account block is the first child of the menu drawer (assets/aman.js builds it, assets/invite.mjs fills it);
+     recon.js builds the same three-part header; the stand-in has the measured height of the one band */
+  for (const f of ['1872.html', 'about-you.html', 'cart.html', 'dress.html', 'invitation.html', 'marsilea.html', 'review.html', 'journeys.html', 'tickets.html', 'tea.html', 'transport.html', 'wedding.html', 'wedding-preparation.html', 'room.html', 'your-journey.html', 'profile.html', 'index.html', 'destination.html', 'accommodation.html', 'experiences.html', 'experience.html', 'voyage.html']) {
+    const h = src(f); assert.doesNotMatch(h, /hd-access|data-access(?!-nav|-out)/, f + ' carries no access row'); assert.doesNotMatch(h, /MY TRIP · MY PROFILE|My Trip · My Profile/, f + ' has no sticky account row');
+  }
+  for (const f of ['1872.html', 'about-you.html', 'cart.html', 'dress.html', 'invitation.html', 'marsilea.html', 'review.html', 'journeys.html', 'tickets.html', 'tea.html', 'transport.html', 'wedding.html', 'wedding-preparation.html', 'room.html', 'your-journey.html', 'profile.html']) {
+    const h = src(f); const head = h.slice(h.indexOf('<header class="hd">'), h.indexOf('</header>'));
+    assert.ok(head.length > 0, f + ' has the static header'); assert.match(head, /^<header class="hd"><button class="hb" aria-label="Menu">/, f + ' menu left'); assert.match(head, /<div class="bd">see you in laos<span class="dot">\.<\/span><\/div>/, f + ' wordmark centre'); assert.match(head, /<a class="bag" href="cart\.html" aria-label="My Bag"(?: aria-current="page")?>[\s\S]*<span class="bb" data-bag-badge><\/span><\/a>$/, f + ' bag right, last');
+  }
+  assert.match(src('assets/aman.js'), /<div class="a-macct" data-account data-state="out"><span class="a-macct-who">Not signed in<\/span><nav class="a-macct-nav" aria-label="Your account"><a href="invitation\.html\?open=1" data-access-nav="in">Open your invitation<\/a><\/nav><\/div>/, 'the drawer opens with the account block');
+  assert.match(src('assets/invite.mjs'), /data-access-nav="trip">My Trip<\/a><a href="' \+ hrefOf\('profile\.html'\) \+ '" data-access-nav="profile">My Profile<\/a><button type="button" class="a-macct-out" data-access-out>Sign out<\/button>/, 'signed in: My Trip · My Profile · Sign out in the drawer');
+  assert.match(src('assets/recon.js'), /ONE CLEAN HEADER[^\n]*\n\s*var space = document\.querySelector\('\.hd-space'\);\s*document\.body\.prepend\(header\);\s*if \(space\) space\.remove\(\);/, 'recon.js swaps the stand-in for the header — no access line');
+  assert.doesNotMatch(src('assets/recon.js'), /data-access|hd-access/, 'recon.js builds no access row');
+  assert.match(src('assets/recon.css'), /\.hd-space \{ height: 57px; \}\n@media \(min-width: 768px\) \{ \.hd-space \{ height: 57px; \} \}\n@media \(min-width: 1024px\) \{ \.hd-space \{ height: 61px; \} \}/, 'the stand-in has the measured height of the one band');
   for (const f of ['index.html', 'destination.html', 'accommodation.html', 'experiences.html', 'experience.html', 'voyage.html']) assert.match(src(f), /<body>\n<div class="hd-space" aria-hidden="true"><\/div>/, f + ' opens with the stand-in');
-  assert.match(src('assets/aman.css'), /\n\.hd-access \{ grid-column: 1 \/ -1; flex: 1 1 100%; margin: 0; padding: 0 0 7px; display: flex; justify-content: space-between; align-items: center;[^}]*min-height: 29px; \}/, 'the rules are in the shared stylesheet, and the row is a row of the sticky shell');
-  assert.match(src('assets/aman.css'), /@media \(max-width: 599px\) \{ \.hd-access > span:first-child \{ display: none; \} \}/, 'on a phone the row carries the surfaces (or the way in) on one line');
+  assert.doesNotMatch(src('assets/aman.css'), /\.hd-access/, 'no access-row rules remain');
+  assert.match(src('assets/aman.css'), /\.a-macct-nav \{ display: flex;/, 'the drawer account navigation has its rules in the shared stylesheet');
   assert.doesNotMatch(src('assets/invite.mjs'), /\n\.hd-access \{/, 'the module injects no status rules');
 });
 

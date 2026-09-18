@@ -80,7 +80,7 @@ test('the journey page derives SELECTED from the bag and offers no second select
   assert.match(yj, /var line=lineOf\(\{ids:\[win\]\}\),pick=line\?line\.room:null;/, 'the Bangkok rail reads the bag');
   assert.match(yj, /on\?'<span class="p-act quiet is-current" aria-current="true">Current selection<\/span>'\s*:\(U&&U\.ready\(\)&&U\.ctaWords\(win,r\.slug\)\)\?'<span class="p-act quiet is-current" aria-disabled="true">'\+esc\(U\.ctaWords\(win,r\.slug\)\)\+'<\/span>'\s*:'<button type="button" class="p-act" data-choose="'\+r\.slug\+'">Select this stay<\/button>'/, 'chosen card: inert current control · sold out / reserved / fixed: the engine\'s word · otherwise: the action');
   /* the flat travel is a ticket (Owner, 15 Sep 2026): selected → the pass, View details, Remove · otherwise → Select this travel */
-  assert.match(yj, /actions:sel\?\[TP\.button\(seg\.key,true\),'<a class="p-link mute" href="transport\.html\?id='\+seg\.key\+'">View details<\/a>','<button type="button" class="p-link mute" data-rm="'\+seg\.key\+'">Remove<\/button>'\]\.join\(''\)\s*:\['<button type="button" class="p-act" data-choose-flat="'\+seg\.key\+'">Select this travel<\/button>'/, 'Special Express and every flat travel: the same rule');
+  assert.match(yj, /actions:sel\?\[TP\.button\(seg\.key,true\),'<a class="p-link mute" href="transport\.html\?id='\+seg\.key\+'">View details<\/a>','<button type="button" class="p-link mute" data-rm="'\+seg\.key\+'">Remove<\/button>','<button type="button" class="p-link mute" data-skip="'\+seg\.key\+'">Not joining this stage<\/button>'\]\.join\(''\)\s*:\['<button type="button" class="p-act" data-choose-flat="'\+seg\.key\+'">Select this travel<\/button>'/, 'Special Express and every flat travel: the same rule');
   assert.match(yj, /on\?'<span class="p-act quiet is-current" aria-current="true">Current selection<\/span>'\s*:'<button type="button" class="p-act" data-cls="'\+c\.slug\+'">/, 'fares too — one selection language');
   assert.doesNotMatch(yj, /Change this day|Current fare|Current stay|Selected for your journey/, 'no second vocabulary');
   assert.match(yj, /Every stage you have already chosen stays exactly as you chose it/, 'Full Experience says what it does');
@@ -99,7 +99,7 @@ test('ABOUT YOU: step 05 is required — the allergy answer and the photography 
   assert.match(g, /key: 'drink', n: '04', q: 'Favourite drink'/);
   assert.match(g, /key: 'film', n: '06', q: 'Favourite film'/); assert.match(g, /key: 'music', n: '07', q: 'Favourite music'/);
   assert.match(g, /aboutMissing: function \(\) \{[\s\S]*?if \(!this\.photoAck\(\)\) out\.push/, 'the acknowledgement holds the step');
-  assert.match(g, /if \(key === 'about'\) return this\.aboutMissing\(\);/, 'documents and consent never hold the step');
+  assert.match(g, /if \(key === 'about'\) return this\.applicable\('about'\) \? this\.aboutMissing\(\) : \[\];/, 'documents and consent never hold the step; a guest not joining the trip owes no hospitality answer');
   const inv = src('invitation.html');
   assert.match(inv, /about:'Food allergies, a few favourites, photography\.'/);
   const ab = src('about-you.html');

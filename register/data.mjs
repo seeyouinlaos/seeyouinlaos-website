@@ -28,8 +28,8 @@ export const PUBLICATION = {
   rates: 'APPROVED',
   inventoryDisplay: 'REQUEST',
   submit: 'endpoint',
-  /* Absolute Worker URL: guests on BOTH production surfaces (Worker and
-   * GitHub Pages) submit into the same durable store (FER-001 §1.10). */
+  /* Absolute Worker URL: every submission lands in the one durable store
+   * of the one runtime (FER-001 §1.10). */
   submitUrl: 'https://seeyouinlaos-website.suthep-hrg.workers.dev/api/register',
 };
 

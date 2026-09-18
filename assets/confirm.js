@@ -7,13 +7,13 @@
      CONFIRMED  Guest Relations confirmed it — an authoritative act on the
                 server, never a consequence of sending, never self-service
 
-   The status is read from the Worker for the open invitation; the GitHub
-   Pages mirror reads the same Worker, so both origins tell one truth.
+   The status is read from the Worker for the open invitation — the one
+   runtime, so every page tells one truth.
    ========================================================================== */
 (function () {
   'use strict';
   var ORIGIN = 'https://seeyouinlaos-website.suthep-hrg.workers.dev';
-  /* the Worker's own origin and a local `wrangler dev` answer at the same path; the Pages mirror asks the Worker */
+  /* the Worker's own origin and a local `wrangler dev` answer at the same path; any other host (a stage) asks the Worker */
   var API = (location.hostname === 'seeyouinlaos-website.suthep-hrg.workers.dev' || /^(localhost|127\.0\.0\.1)$/.test(location.hostname)) ? '/api/status' : ORIGIN + '/api/status';
   var status = null, loading = null;
   function invitationId() {

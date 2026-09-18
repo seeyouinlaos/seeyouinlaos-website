@@ -7,7 +7,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { composeGuestMail, composeOwnerMail, SITE } from '../src/mail-templates.js';
 
-const PAGES = fs.readdirSync('.').filter((f) => f.endsWith('.html') && f !== 'register-landing.html');
+const PAGES = fs.readdirSync('.').filter((f) => f.endsWith('.html'));
 const CLIENT = fs.readdirSync('assets').filter((f) => /\.(js|mjs)$/.test(f)).map((f) => 'assets/' + f);
 const GUEST_FACING = [...PAGES, ...CLIENT, 'src/mail-templates.js'];
 const strip = (src) => src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/<!--[\s\S]*?-->/g, '').split('\n').filter((l) => !/^\s*\/\//.test(l)).join('\n');
@@ -60,9 +60,9 @@ test('COPY · the emails speak of the guest\'s trip, carry the one Worker link a
 test('COPY · one voice for the shell and the bar: the six step labels, the bar navigation and the header access line agree', () => {
   const shell = read('assets/prep-shell.js'), guest = read('assets/guest.js'), bar = read('assets/bag.js'), header = read('assets/invite.mjs');
   for (const label of ['Your Invitation', 'My Trip', 'The Wedding', 'Wedding Preparation', 'About You', 'Review & Send']) { assert.match(shell, new RegExp("label: '" + label.replace(/[&]/g, '&') + "'")); assert.match(guest, new RegExp("label: '" + label + "'")); }
-  assert.match(bar, /data-nav="top"/); assert.doesNotMatch(bar, /data-nav="trip"/, 'the account surfaces live in the sticky header shell, not on a second bar');
-  /* ACCOUNT ROW (Owner, 18 Sep 2026): MY TRIP · MY PROFILE · SIGN OUT — the bag icon is My Bag, the row never repeats it */
-  assert.match(header, /data-access-nav="trip">My Trip<\/a><a href="' \+ hrefOf\('profile\.html'\) \+ '" data-access-nav="profile">My Profile<\/a><button type="button" class="hd-access-out" data-access-out>Sign out<\/button>/);
-  assert.doesNotMatch(header, /data-access-nav="bag"/, 'no textual My Bag on the account row');
+  assert.match(bar, /data-nav="top"/); assert.doesNotMatch(bar, /data-nav="trip"/, 'the account surfaces live in the menu drawer, not on a second bar');
+  /* THE ACCOUNT IN THE MENU (Owner, 18 Sep 2026 · Aman header): My Trip · My Profile · Sign out in the drawer — the bag icon is My Bag, the drawer never repeats it */
+  assert.match(header, /data-access-nav="trip">My Trip<\/a><a href="' \+ hrefOf\('profile\.html'\) \+ '" data-access-nav="profile">My Profile<\/a><button type="button" class="a-macct-out" data-access-out>Sign out<\/button>/);
+  assert.doesNotMatch(header, /data-access-nav="bag"/, 'no textual My Bag in the account block');
   assert.doesNotMatch(shell, /prep-eyebrow/, 'the step header carries no eyebrow: step · guest · state · Save · View all steps');
 });

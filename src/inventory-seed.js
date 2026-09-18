@@ -69,7 +69,7 @@ export const SEED = {
   'prewed/heritage-executive':       { unit: 'room', capacity: 13, occupancy: 2, held: 0, name: 'Heritage Executive' },
   'prewed/heritage-grand-premier':   { unit: 'room', capacity: 3,  occupancy: 2, held: 0, name: 'Heritage Grand Premier' },
   'prewed/noble-courtyard':          { unit: 'room', capacity: 1,  occupancy: 2, held: 0, name: 'Noble Courtyard Suite' },
-  'prewed/grand-majestic':           { unit: 'room', capacity: 2,  occupancy: 2, held: 2, name: 'Grand Majestic Suite', heldFor: 'Family' },
+  'prewed/grand-majestic':           { unit: 'room', capacity: 2,  occupancy: 2, held: 0, name: 'Grand Majestic Suite' },   /* opened to everyone (Owner, Edit 5 · 18 Sep 2026) */
   'prewed/souphattra-majestic':      { unit: 'room', capacity: 1,  occupancy: 2, held: 0, name: 'Souphattra Majestic Suite' },
   'prewed/souphattra-presidential':  { unit: 'room', capacity: 1,  occupancy: 4, held: 1, name: 'Souphattra Presidential', heldFor: 'Bride & Groom' },
 
@@ -78,14 +78,14 @@ export const SEED = {
   'wedstay/heritage-executive':      { unit: 'room', capacity: 13, occupancy: 2, held: 0, name: 'Heritage Executive' },
   'wedstay/heritage-grand-premier':  { unit: 'room', capacity: 3,  occupancy: 2, held: 0, name: 'Heritage Grand Premier' },
   'wedstay/noble-courtyard':         { unit: 'room', capacity: 1,  occupancy: 2, held: 0, name: 'Noble Courtyard Suite' },
-  'wedstay/grand-majestic':          { unit: 'room', capacity: 2,  occupancy: 2, held: 2, name: 'Grand Majestic Suite', heldFor: 'Family' },
+  'wedstay/grand-majestic':          { unit: 'room', capacity: 2,  occupancy: 2, held: 0, name: 'Grand Majestic Suite' },   /* opened to everyone (Owner, Edit 5 · 18 Sep 2026) */
   'wedstay/souphattra-majestic':     { unit: 'room', capacity: 1,  occupancy: 2, held: 0, name: 'Souphattra Majestic Suite' },
   'wedstay/souphattra-presidential': { unit: 'room', capacity: 1,  occupancy: 4, held: 1, name: 'Souphattra Presidential', heldFor: 'Bride & Groom' },
 
   /* the complimentary alternative for the same wedding window — held in GUESTS,
      because it is one residence shared by whoever is given it */
   'airbnb-2br/private-residence':
-    { unit: 'guest', capacity: 6, held: 0, name: 'Private Residence', stay: 'Private Residence · Vientiane' },
+    { unit: 'guest', capacity: 4, held: 0, name: 'Private Residence', stay: 'Private Residence · Vientiane' },   /* Owner, Edit 5 (18 Sep 2026): up to four guests */
 
   /* ------------------------------------------------------------ Kunming */
   'kmg/left-bank':      { unit: 'room', capacity: 1, occupancy: 4, held: 0, name: 'Left Bank French-Style King Room' },
@@ -93,7 +93,7 @@ export const SEED = {
   'kmg/family-suite':   { unit: 'room', capacity: 1, occupancy: 2, held: 0, name: 'Family Suite' },
   'kmg/seine':          { unit: 'room', capacity: 1, occupancy: 4, held: 0, name: 'Seine Evening Glow Loft Family Room' },
   'kmg/smart-family':   { unit: 'room', capacity: 1, occupancy: 2, held: 0, name: 'Smart Family Room' },
-  'kmg/solarium':       { unit: 'room', capacity: 1, occupancy: 2, held: 1, name: 'Solarium Bath Suite', heldFor: 'Bride & Groom' },
+  'kmg/solarium':       { unit: 'room', capacity: 1, occupancy: 2, held: 0, name: 'Solarium Bath Suite' },   /* opened to everyone (Owner, Edit 5 · 18 Sep 2026) */
   'kmg/standard-single':{ unit: 'room', capacity: 1, occupancy: 2, held: 0, name: 'Standard Single Room' },
   'kmg/junting':        { unit: 'room', capacity: 1, occupancy: 2, held: 0, name: 'Junting City-View Loft' },
   'kmg/mid-century':    { unit: 'room', capacity: 1, occupancy: 2, held: 0, name: 'Mid-century Amber Suite' },
@@ -106,7 +106,7 @@ export const SEED = {
   'ljg/boundless':             { unit: 'room', capacity: 4, occupancy: 2, held: 0, name: 'Boundless Floor-to-Ceiling Glass Sunlit Suite' },
   'ljg/private-soup-view':     { unit: 'room', capacity: 4, occupancy: 2, held: 0, name: 'Snow Mountain Private Soup Viewing Suite' },
   'ljg/manor-suite':           { unit: 'room', capacity: 4, occupancy: 2, held: 0, name: 'Snow Mountain Manor Suite' },
-  'ljg/view-suite-270':        { unit: 'room', capacity: 4, occupancy: 2, held: 4, name: '270° Snow Mountain View Suite', heldFor: 'Bride & Groom' },
+  'ljg/view-suite-270':        { unit: 'room', capacity: 4, occupancy: 2, held: 0, name: '270° Snow Mountain View Suite' },   /* opened to everyone (Owner, Edit 5 · 18 Sep 2026) */
   'ljg/soup-pool-270':         { unit: 'room', capacity: 4, occupancy: 2, held: 0, name: '270° Snow Mountain View Room Private Soup Pool' },
   'ljg/private-courtyard-270': { unit: 'room', capacity: 4, occupancy: 2, held: 0, name: '270° Private Courtyard Snow Mountain View' },
   'ljg/viewing-270':           { unit: 'room', capacity: 4, occupancy: 2, held: 0, name: '270° Snow Mountain Viewing Room' },

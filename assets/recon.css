@@ -239,6 +239,6 @@ body { font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; }
 /* the space of the header and the access line before assets/recon.js builds them (the six pages without a
    static header): the measured heights — header 92 px under 1024, 100 px from 1024; the access line 55 px
    on a phone (two rows), 37 px from 480 px — so the first paint and the built page have the same layout */
-.hd-space { height: 79px; }
-@media (min-width: 768px) { .hd-space { height: 80px; } }
-@media (min-width: 1024px) { .hd-space { height: 84px; } }   /* measured 18 Sep 2026: the one sticky shell (header row + access row) */
+.hd-space { height: 57px; }
+@media (min-width: 768px) { .hd-space { height: 57px; } }
+@media (min-width: 1024px) { .hd-space { height: 61px; } }   /* measured 18 Sep 2026 (Aman): the one clean header band — menu · wordmark · bag */

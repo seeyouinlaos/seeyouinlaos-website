@@ -33,13 +33,12 @@ test('the Souphattra stock is the Sheet stock: 26 rooms, per window', () => {
   assert.notEqual('prewed/heritage', 'wedstay/heritage');
 });
 
-test('the Master\'s reservations live in the seed and shape the units (Owner, 16 Sep 2026): the first `held` rooms of a category are reserved for `heldFor`', () => {
+test('the Master\'s reservations live in the seed and shape the units (Owner, 16 Sep 2026 · Edit 5, 18 Sep 2026): the first `held` rooms of a category are reserved for `heldFor`; the Grand Majestic, the Solarium and the 270° suite are open to everyone', () => {
   const noted = Object.entries(SEED).filter(([, s]) => s.held > 0);
-  assert.equal(noted.length, 7, 'the six categories the Master marks + the Penthouse\'s Room A (the Owner\'s allocation)');
-  assert.equal(SEED['prewed/grand-majestic'].heldFor, 'Family'); assert.equal(SEED['wedstay/grand-majestic'].held, 2);
+  assert.equal(noted.length, 3, 'the Presidential (both windows) + the Penthouse\'s Room A (the Owner\'s allocation)');
+  for (const k of ['prewed/grand-majestic', 'wedstay/grand-majestic', 'kmg/solarium', 'ljg/view-suite-270']) { assert.equal(SEED[k].held, 0, k + ' is open to everyone (Owner, Edit 5)'); assert.equal(SEED[k].heldFor, undefined); }
   assert.equal(SEED['prewed/souphattra-presidential'].heldFor, 'Bride & Groom'); assert.equal(SEED['wedstay/souphattra-presidential'].heldFor, 'Bride & Groom');
   assert.equal(SEED['bkk-stay/penthouse'].held, 1); assert.equal(SEED['bkk-stay/penthouse'].heldFor, 'Bride & Groom');
-  assert.equal(SEED['kmg/solarium'].heldFor, 'Bride & Groom'); assert.equal(SEED['ljg/view-suite-270'].held, 4);
   for (const [key, sd] of noted) { const units = unitsOf(key); assert.equal(units.filter((u) => u.reservedFor === sd.heldFor).length, sd.held, key + ': exactly `held` reserved rooms'); assert.equal(units.slice(sd.held).every((u) => u.reservedFor === null), true, key + ': the rest open'); }
   for (const [key] of Object.entries(SEED).filter(([, s]) => !s.held)) assert.equal(unitsOf(key).every((u) => u.reservedFor === null), true, key + ' has no reserved unit');
 });
@@ -60,11 +59,11 @@ test('the six-bedroom Penthouse is six rooms of two places; the residence is hel
   assert.equal(SEED['bkk-stay/penthouse'].capacity, 6);
   assert.equal(SEED['bkk-stay/penthouse'].occupancy, 2);
   assert.equal(unitsFor('bkk-stay/penthouse', 4), 2);
-  /* the hosted residence: the Owner's capacity is SIX guests */
+  /* the hosted residence: the Owner's capacity is FOUR guests (Edit 5, 18 Sep 2026) */
   assert.equal(SEED['airbnb-2br/private-residence'].unit, 'guest');
-  assert.equal(SEED['airbnb-2br/private-residence'].capacity, 6);
-  assert.equal(unitsFor('airbnb-2br/private-residence', 6), 6);
-  assert.equal(unitsFor('airbnb-2br/private-residence', 7), 7, 'a seventh guest does not fit in six places');
+  assert.equal(SEED['airbnb-2br/private-residence'].capacity, 4);
+  assert.equal(unitsFor('airbnb-2br/private-residence', 4), 4);
+  assert.equal(unitsFor('airbnb-2br/private-residence', 5), 5, 'a fifth guest does not fit in four places');
 });
 
 test('every selectable room in the shop is stock-controlled', () => {
@@ -99,16 +98,16 @@ test('the engine is the only place a place is decided; the retired category ledg
   assert.match(worker, /retired — use \/api\/rooms/, 'the category ledger answers 410');
   assert.ok(!existsSync(join(ROOT, 'assets/inventory.js')), 'the retired client is gone');
 });
-test('the guest-facing residence capacity matches the ledger: SIX guests', () => {
+test('the guest-facing residence capacity matches the ledger: FOUR guests (Owner, Edit 5)', () => {
   const sandbox = { window: {}, document: { addEventListener() {} } };
   sandbox.window.document = sandbox.document;
   new Function('window', 'document', readFileSync(join(ROOT, 'assets/rooms-data.js'), 'utf8'))(sandbox.window, sandbox.document);
   const res = sandbox.window.SIYL_ROOMS.airbnb.rooms.find((r) => r.slug === 'private-residence');
-  assert.equal(SEED['airbnb-2br/private-residence'].capacity, 6, 'the ledger holds six');
-  assert.match(JSON.stringify(res.facts), /Up to 6 guests/, 'the room page must say six');
-  assert.match(res.story, /six guests/);
-  assert.match(res.status, /up to 6 guests/);
-  assert.ok(!/[Uu]p to 4/.test(JSON.stringify(res)), 'the retired capacity of four is still shown');
+  assert.equal(SEED['airbnb-2br/private-residence'].capacity, 4, 'the ledger holds four');
+  assert.match(JSON.stringify(res.facts), /Up to 4 guests/, 'the room page must say four');
+  assert.match(res.story, /four guests/);
+  assert.match(res.status, /up to 4 guests/);
+  assert.ok(!/[Uu]p to 6|six guests/.test(JSON.stringify(res)), 'the retired capacity of six is still shown');
   for (const f of ['journeys.html', 'accommodation.html']) {
     const src = readFileSync(join(ROOT, f), 'utf8');
     const block = src.slice(Math.max(0, src.indexOf('Private Residence') - 400), src.indexOf('Private Residence') + 600);
@@ -260,12 +259,12 @@ test('E · no room is held back from the Cost Saving hotel (Owner, 15 Sep 2026):
   assert.equal(P.cheapest('wedstay', () => false), null);
 });
 
-test('F · the complimentary residence: USD 0, six guests, no individual support', () => {
+test('F · the complimentary residence: USD 0, four guests, no individual support', () => {
   const w = shop();
   const [, res] = w.SIYL_JOURNEY.costSavingOptions(2);
   assert.equal(res.amount, 'Complimentary', 'COMPLIMENTARY is the dominant value, not USD 0');
   assert.match(res.amountNote, /Complimentary/);
-  assert.match(res.amountNote, /up to 6 guests/);
+  assert.match(res.amountNote, /up to 4 guests/);
   assert.equal(res.items[0].price, 0);
   assert.equal(res.items[0].complimentary, true);
   const svc = res.service.join(' ');
@@ -278,13 +277,13 @@ test('F · the complimentary residence: USD 0, six guests, no individual support
     assert.ok(!/Guest Relations support applies during the Vientiane wedding stay only/.test(src),
       f + ' still implies hotel-style service for the complimentary residence');
   }
-  assert.equal(SEED['airbnb-2br/private-residence'].capacity, 6);
+  assert.equal(SEED['airbnb-2br/private-residence'].capacity, 4);
 });
 
-test('G · a party of seven cannot take the residence', () => {
-  assert.equal(unitsFor('airbnb-2br/private-residence', 7), 7);
-  assert.ok(unitsFor('airbnb-2br/private-residence', 7) > sellable('airbnb-2br/private-residence'));
-  assert.ok(unitsFor('airbnb-2br/private-residence', 6) <= sellable('airbnb-2br/private-residence'));
+test('G · a party of five cannot take the residence (four places · Owner, Edit 5)', () => {
+  assert.equal(unitsFor('airbnb-2br/private-residence', 5), 5);
+  assert.ok(unitsFor('airbnb-2br/private-residence', 5) > sellable('airbnb-2br/private-residence'));
+  assert.ok(unitsFor('airbnb-2br/private-residence', 4) <= sellable('airbnb-2br/private-residence'));
 });
 
 test('M/N · Cost Saving → Full removes whichever stay was taken, and 2,155 stands', () => {

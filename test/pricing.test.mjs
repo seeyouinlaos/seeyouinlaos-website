@@ -485,8 +485,8 @@ test('SEND is unavailable until the required steps are done — and never fails 
   const r = g.slice(g.indexOf('STEP_DEFS:'), g.indexOf('/* ---- what Guest Relations receives'));
   ['you', 'journey', 'wedding', 'preparation', 'about', 'review'].forEach((k) =>
     assert.ok(r.includes("key: '" + k + "'"), k + ' is not one of the six steps'));
-  /* the four states, in words — never colour alone */
-  assert.match(r, /STATE_LABEL: \{ complete: '✓ Complete', current: 'Current', attention: 'Needs attention', locked: 'Locked' \}/);
+  /* the five states, in words — never colour alone (Not joining: a step outside the guest's participation, 18 Sep 2026) */
+  assert.match(r, /STATE_LABEL: \{ complete: '✓ Complete', current: 'Current', attention: 'Needs attention', locked: 'Locked', na: 'Not joining' \}/);
   /* required blocks, optional never does: readiness is the missing items of steps 01–05 */
   assert.match(r, /if \(s\.key !== 'review'\) s\.missing\.forEach/);
 });
@@ -613,7 +613,10 @@ test('ABOUT YOU is one required question, six favourites and one required acknow
   const g = readFileSync(join(ROOT, 'assets/guest.js'), 'utf8');
   const block = g.slice(g.indexOf('var PROFILE = ['), g.indexOf('var PHOTO_TEXT ='));
   const keys = [...block.matchAll(/\{ key: '([a-z]+)'/g)].map((m) => m[1]);
-  assert.deepEqual(keys, ['coffeetea', 'treat', 'drink', 'avoid', 'film', 'music']);
+  assert.deepEqual(keys, ['coffeetea', 'flavor', 'drink', 'avoid', 'film', 'music']);
+  /* My Favorite Flavor (Owner, 18 Sep 2026): one choice of exactly six, in this order */
+  assert.match(block, /key: 'flavor', n: '03', q: 'My Favorite Flavor', hint: 'Choose one\.', required: true, type: 'choice', choices: \['Coffee', 'Milk', 'Butter', 'Pandan', 'Matcha Green Tea', 'Strawberry Milk'\]/);
+  assert.doesNotMatch(block, /q: 'My Favorite Snack'|key: 'treat'/, 'the snack question is retired');
   assert.match(g, /var ALLERGY = \{ key: 'allergy'/);
   assert.doesNotMatch(g, /var ACCESS =|key: 'comfort'|key: 'anything'|key: 'dietary'/);
   /* three layers, and a correction never destroys the invitation's own value — every entry is signed by the guest */

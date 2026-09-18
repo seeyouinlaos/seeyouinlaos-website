@@ -96,6 +96,12 @@ test('detail content exists where the source carries it; discovery places carry 
     if (e.sheet === 'FULL') {
       assert.ok(x.intro && x.sections && x.sections.length >= 5, x.id + ' full record structured');
       assert.ok(x.practical && x.practical.price && x.practical.hours, x.id + ' practical fields');
+    } else if (e.sheet === 'DETAIL') {
+      /* Edit 5 (Owner, 18 Sep 2026): the Operations Master carries a description and the practical facts, not the full structured record */
+      assert.ok(x.teaser && Array.isArray(x.detail) && x.detail.length >= 1 && x.detail.every((p) => p.length > 40), x.id + ' description from the source');
+      assert.ok(x.practical && Array.isArray(x.practical.hours) && x.practical.hours.length, x.id + ' hours from the source');
+      assert.equal(!!x.practical.price, !!e.price, x.id + ' a price only where the source carries one');
+      assert.ok(!x.sections && !x.intro, x.id + ' no invented structured record');
     } else {
       assert.ok(!x.sections && !x.practical, x.id + ' no invented detail record');
       assert.ok(x.teaser, x.id + ' teaser');

@@ -31,9 +31,9 @@
 header.hd {
   position: sticky; top: 0; z-index: 60;
   background: var(--a-ground);
-  /* ONE STICKY SHELL (Owner, 18 Sep 2026): the menu · wordmark · bag row and the account-access row scroll together.
-     Measured against the Aman mobile references: their header is ~56 px; ours is 52 px + a 30 px access row. */
-  padding: calc(4px + env(safe-area-inset-top, 0px)) var(--a-gut) 0;
+  /* ONE CLEAN HEADER (Owner, 18 Sep 2026 · Aman): menu · wordmark · bag on one row and nothing beneath — the account
+     navigation lives in the menu drawer. Measured against the Aman mobile reference: a ~56 px band, generous quiet space. */
+  padding: calc(6px + env(safe-area-inset-top, 0px)) var(--a-gut) 6px;
   row-gap: 0;
 }
 header.hd .bd, header.hd .brand { letter-spacing: .3px; }
@@ -206,6 +206,12 @@ input:focus-visible, .siyl-inv input:focus { outline: 1px solid var(--a-ink); ou
   .aslide.on .am[href] { cursor: pointer; }
 }
 a.am { display: block; text-decoration: none; }
+/* the card clip sits under the veil at the photograph's geometry; the
+   photograph (the card background) is the poster and shows until the clip
+   is actually playing — then a fade, never a jump */
+.am .am-clip { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; opacity: 0; transition: opacity .6s ease; pointer-events: none; background: transparent; }
+.am.am-playing .am-clip { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .am .am-clip { display: none; } }
 .arail { cursor: pointer; padding: 14px 0; background-clip: content-box; box-sizing: content-box; height: 1px; }
 .arail i { top: 13px; }
 @media (prefers-reduced-motion: reduce) {
@@ -224,7 +230,7 @@ a.am { display: block; text-decoration: none; }
 
 /* HERO — the photograph establishes place first; the words stay quiet */
 .a-hero { position: relative; }
-.a-hero { padding: 0 var(--a-gut); }
+.a-hero { padding: 24px var(--a-gut) 0; }   /* the Aman gap: the framed picture begins a quiet 24 px below the header band */
 .a-hero .am { width: 100%; height: auto; aspect-ratio: 1 / 1; background: #E7E3DB center/cover no-repeat; }   /* measured: the Aman mobile references frame a square photograph (341 × 341), never full-bleed */
 .a-hero .ah {
   position: static; padding: 18px 0 0; color: var(--a-ink);
@@ -538,16 +544,14 @@ a.am { display: block; text-decoration: none; }
 @media (prefers-reduced-motion: reduce) { .xgal .atrk { scroll-behavior: auto; } }
 
 /* ---- the account-access row of the shell (filled by assets/invite.mjs) — inside the sticky header, on every page ---- */
-.hd-access { grid-column: 1 / -1; flex: 1 1 100%; margin: 0; padding: 0 0 7px; display: flex; justify-content: space-between; align-items: center; gap: 4px 14px; font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 10.5px; letter-spacing: 1.8px; text-transform: uppercase; line-height: 22px; color: var(--a-mute); min-height: 29px; }
-.hd-access .on { color: #313131; }
-.hd-access .hd-access-do { display: flex; gap: 14px; align-items: center; margin-left: auto; white-space: nowrap; }
-.hd-access a { color: #313131; text-decoration: none; border-bottom: 1px solid #313131; padding-bottom: 1px; min-height: 0; }
-.hd-access a:hover { opacity: .6; }
-.hd-access .hd-access-out { background: none; border: 0; padding: 0; cursor: pointer; font: inherit; letter-spacing: inherit; text-transform: inherit; color: #6B6964; border-bottom: 1px solid #DAD9D7; }
-/* phones: the row carries the four surfaces (or the way in); the "Signed in · name" label lives in the step shell and the menu */
-@media (max-width: 599px) { .hd-access > span:first-child { display: none; } }
-@media (max-width: 359px) { .hd-access { font-size: 10px; letter-spacing: 1.2px; } .hd-access .hd-access-do { gap: 10px; } }
-@media (min-width: 768px) { .hd-access { min-height: 32px; } }
+/* THE ACCOUNT IN THE DRAWER (Owner, 18 Sep 2026): who is signed in, then My Trip · My Profile · Sign out as quiet rows */
+.a-macct { padding: 6px var(--a-gut) 0; }
+.a-macct-who { display: block; font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 10px; letter-spacing: 2.2px; text-transform: uppercase; color: var(--a-mute); padding: 6px 0 10px; }
+.a-macct[data-state="in"] .a-macct-who { color: var(--a-ink); }
+.a-macct-nav { display: flex; flex-wrap: wrap; gap: 0 22px; border-top: 1px solid var(--a-line); padding: 12px 0 10px; }
+.a-macct-nav a, .a-macct-nav button { display: inline-flex; align-items: center; box-sizing: border-box; font: inherit; font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 10.5px; line-height: 1; letter-spacing: 1.8px; text-transform: uppercase; color: var(--a-ink); text-decoration: none; background: none; border: 0; margin: 0; padding: 0; min-height: 44px; cursor: pointer; border-bottom: 1px solid transparent; -webkit-appearance: none; appearance: none; }
+.a-macct-nav a:hover, .a-macct-nav button:hover { border-bottom-color: var(--a-ink); }
+.a-macct-nav .a-macct-out { color: var(--a-mute); }
 
 /* ---- the public / private rule (Owner, 16 Sep 2026): a private fragment of a public page — a price of the journey,
    live inventory, an add, a fare — exists only for a signed-in guest (<html data-session="in">, set before the first

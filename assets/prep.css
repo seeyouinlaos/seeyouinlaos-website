@@ -162,6 +162,13 @@ body.prep button, body.prep input, body.prep textarea, body.prep select { font-f
 .p-sel[aria-pressed="true"] .p-sel-r { color: var(--p-paper); }
 .p-selrow { display: flex; flex-wrap: wrap; gap: var(--s3); }
 .p-selrow > .p-sel { width: auto; flex: 1 1 auto; min-width: 160px; justify-content: center; }
+/* WHERE WILL YOU JOIN US (Owner, 18 Sep 2026): the three destinations as selection controls, the dates beneath each name */
+.p-scope > .p-sel { flex-direction: column; align-items: flex-start; gap: 4px; min-width: 0; flex: 1 1 calc(33.333% - var(--s3)); padding: var(--s3) var(--s4); text-align: left; }
+.p-scope .p-sel-t { font-family: var(--f-ed); font-weight: 200; font-size: 19px; letter-spacing: 0; text-transform: none; line-height: 1.15; }
+.p-scope .p-sel-s { font-size: 9.5px; letter-spacing: 1.4px; text-transform: uppercase; opacity: .75; line-height: 1.4; }
+@media (max-width: 519px) { .p-scope > .p-sel { flex-basis: 100%; } }
+.p-link.on { color: var(--p-ink); border-bottom-color: var(--p-ink); font-weight: 500; }
+.p-link.on::before { content: '✓'; margin-right: 8px; }
 
 /* ----------------------------------------------------------------- field */
 .p-field { margin-top: var(--s5); }
@@ -313,13 +320,16 @@ body.p-scroll-lock { position: fixed; left: 0; right: 0; width: 100%; overflow: 
  * choice */
 .prep-steps-scrim { position: fixed; inset: 0; background: rgba(30,28,26,.22); opacity: 0; pointer-events: none; transition: opacity var(--p-t) var(--p-ease); z-index: 59; }
 body.prep-steps-open .prep-steps-scrim { opacity: 1; pointer-events: auto; }
-.prep-steps { position: absolute; top: 100%; left: 0; right: 0; z-index: 61; border-top: 1px solid var(--p-line); border-bottom: 1px solid var(--p-line); background: var(--p-card);
-  max-height: calc(100vh - var(--prep-bar-h, 96px)); max-height: calc(100dvh - var(--prep-bar-h, 96px)); overflow-y: auto; -webkit-overflow-scrolling: touch;
+/* the step bar stays above its own scrim while the panel is open: Save and View all steps remain the guest's to tap
+   (the scrim is a later sibling at the same level, so without this it would cover the bar — found on iPhone Safari, 18 Sep 2026) */
+body.prep-steps-open .prep-bar { z-index: 60; }
+body.prep-steps-open { overflow: hidden; }   /* the page is held while the index is open — without moving it, so the sticky shell stays put */
+.prep-steps { position: fixed; top: calc(var(--hd-h, 0px) + var(--prep-bar-h, 0px)); left: 0; right: 0; bottom: 0; max-height: calc(100vh - var(--hd-h, 0px) - var(--prep-bar-h, 0px)); max-height: calc(100dvh - var(--hd-h, 0px) - var(--prep-bar-h, 0px)); overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; touch-action: pan-y; z-index: 61; border-top: 1px solid var(--p-line); border-bottom: 1px solid var(--p-line); background: var(--p-card);
   box-shadow: 0 24px 40px -24px rgba(30,28,26,.28);
   visibility: hidden; opacity: 0; transform: translateY(-8px);
   transition: opacity var(--p-t) var(--p-ease), transform var(--p-t) var(--p-ease), visibility 0s linear var(--p-t); }
 .prep-steps.on { visibility: visible; opacity: 1; transform: none; transition: opacity var(--p-t) var(--p-ease), transform var(--p-t) var(--p-ease), visibility 0s; }
-.prep-steps-in { box-sizing: border-box; max-width: var(--p-frame); margin: 0 auto; padding: var(--s4) var(--p-gut) var(--s5); }
+.prep-steps-in { box-sizing: border-box; max-width: var(--p-frame); margin: 0 auto; padding: var(--s4) var(--p-gut) calc(var(--s7) + env(safe-area-inset-bottom, 0px)); }
 .prep-srow { display: flex; align-items: baseline; gap: var(--s4); border-top: 1px solid var(--p-hair); padding: var(--s3) var(--s2); margin: 0 calc(-1 * var(--s2)); text-decoration: none; min-height: var(--p-tap);
   -webkit-tap-highlight-color: transparent; transition: background-color var(--p-t-fast) var(--p-ease), opacity var(--p-t-fast) var(--p-ease); }
 .prep-srow:first-of-type { border-top: 0; }

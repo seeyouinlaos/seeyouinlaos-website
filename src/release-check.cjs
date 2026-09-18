@@ -134,21 +134,22 @@ gate(5, 'Legacy content excluded from active release',
     .filter(Boolean).join(' · ') || 'clean (journey excluded, no legacy terms/files in active surfaces)');
 
 /* Release plumbing reminders (not numbered gates) */
-/* R1 (final pre-release run, 11 SEP 2026): the superseded registration engine
- * is NEVER served — its four files are excluded on both origins, its entry
- * (the issued /register/?invite= link) redirects into the accepted product,
- * and the two files the accepted product loads from register/ stay public. */
-const jekyll = read('_config.yml');
+/* R1 (final pre-release run, 11 SEP 2026 · one runtime since 18 SEP 2026): the superseded
+ * registration engine is NEVER served — its four files are excluded from the Worker's assets,
+ * its entry (the issued /register/?invite= link) redirects into the accepted product, and the
+ * two files the accepted product loads from register/ stay public. The retired GitHub Pages
+ * build config and its redirect stub are gone: no _config.yml, no register-landing.html,
+ * no CNAME, no .nojekyll, no Pages workflow may return. */
 const workerSrc = read('src/worker.js');
 const engineFiles = ['register/index.html', 'register/app.mjs', 'register/data.mjs', 'register/logic.mjs'];
-const engineHidden = engineFiles.every((f) => new RegExp('^' + f.replace('.', '\\.') + '$', 'm').test(assetsignore) && new RegExp('^\\s*-\\s*' + f.replace('.', '\\.') + '$', 'm').test(jekyll));
+const engineHidden = engineFiles.every((f) => new RegExp('^' + f.replace('.', '\\.') + '$', 'm').test(assetsignore));
 const engineKept = !/^register\/crypto\.mjs$/m.test(assetsignore) && !/^register\/invitations\.enc\.json$/m.test(assetsignore) && !/^register\/?$/m.test(assetsignore);
 const engineRedirect = workerSrc.includes("url.pathname === '/register' || url.pathname.startsWith('/register/')") && workerSrc.includes('crypto\\.mjs|invitations\\.enc\\.json') && workerSrc.includes("'/invitation.html', 302)");
-const landing = fs.existsSync(path.join(ROOT, 'register-landing.html')) && /permalink: \/register\/index\.html/.test(read('register-landing.html'));
-gate('R1', 'Superseded registration engine never served; /register/ lands in the accepted product',
-  engineHidden && engineKept && engineRedirect && landing,
-  [!engineHidden && 'engine files not excluded on both origins', !engineKept && 'crypto.mjs / invitations.enc.json must stay public', !engineRedirect && 'Worker redirect for /register/ missing', !landing && 'Pages redirect stub missing'].filter(Boolean).join(' · ')
-  || 'index/app/data/logic excluded (.assetsignore + _config.yml) · Worker 302 /register/* → /invitation.html · crypto.mjs + bundle public · Pages stub in place');
+const pagesArtifacts = ['_config.yml', 'register-landing.html', 'CNAME', '.nojekyll', '.github/workflows'].filter((f) => fs.existsSync(path.join(ROOT, f)));
+gate('R1', 'Superseded registration engine never served; /register/ lands in the accepted product; no GitHub Pages artifact',
+  engineHidden && engineKept && engineRedirect && !pagesArtifacts.length,
+  [!engineHidden && 'engine files not excluded from the Worker assets', !engineKept && 'crypto.mjs / invitations.enc.json must stay public', !engineRedirect && 'Worker redirect for /register/ missing', pagesArtifacts.length && ('retired GitHub Pages artifact present: ' + pagesArtifacts.join(', '))].filter(Boolean).join(' · ')
+  || 'index/app/data/logic excluded (.assetsignore) · Worker 302 /register/* → /invitation.html · crypto.mjs + bundle public · no Pages artifact');
 gate('R2', 'Guest Relations view stays private',
   /^src$/m.test(assetsignore),
   'src/ excluded from public assets — GR view needs authenticated hosting in production.');
@@ -400,7 +401,7 @@ gate('P5', 'Lightbox overlays: hidden wins, no empty-gallery navigation',
 /* final pre-release run (001 findings 2 + 3): the dinner venue is Souphattra Heritage Vientiane —
  * "Souphattra Vientiane Hotel" does not exist (DECISION-REGISTER D-14); C86 (10:15 → 13:44) never
  * carries the retired C642 dinner-window meal copy. Checked on every active guest surface. */
-const activeSurfaces = fs.readdirSync(ROOT).filter((f) => /\.html$/.test(f) && f !== 'register-landing.html').map((f) => read(f)).join('\n')
+const activeSurfaces = fs.readdirSync(ROOT).filter((f) => /\.html$/.test(f)).map((f) => read(f)).join('\n')
   + fs.readdirSync(path.join(ROOT, 'assets')).filter((f) => /\.(js|mjs|css)$/.test(f)).map((f) => read('assets/' + f)).join('\n');
 const venueHit = /Souphattra Vientiane Hotel/.test(activeSurfaces);
 const mealHit = /hot meal|dinner window|17:30 – 19:00/i.test(activeSurfaces);
@@ -501,11 +502,43 @@ gate('P7', 'Dress Code imagery real (23 — resort-01 retired by the owner), no 
 
 /* GATE C1 — asset fingerprints (Owner, Edit 4 · 16 Sep 2026): every stylesheet and script a page references
  * carries the content hash of the file it names (src/asset-versions.cjs), so a fresh page can never pair
- * with a stale cached asset on the ten-minute Pages cache. */
+ * with a stale cached asset behind an edge cache. */
 {
   const { spawnSync } = require('child_process');
   const r = spawnSync('node', [path.join(__dirname, 'asset-versions.cjs'), '--check'], { encoding: 'utf8' });
   gate('C1', 'Asset fingerprints current on every page', r.status === 0, (r.stdout || '').trim().replace(/^ASSET VERSIONS: /, ''));
+}
+
+/* GATE V1 — card clips (Owner, 18 Sep 2026 · Bangkok destination card): every data-video a page declares is a
+ * same-origin H.264 MP4 under assets/video/ — present, small (≤ 4.5 MB), no audio, yuv420p, moov first — never a
+ * hotlink; the photograph the card frames stays its poster (the module falls back to it). ffprobe verifies the
+ * codec facts when it is installed; the file facts are checked always. */
+{
+  const decl = [];
+  for (const f of fs.readdirSync(ROOT).filter((x) => /\.html$/.test(x))) {
+    const h = read(f);
+    for (const m of h.matchAll(/data-video="([^"]*)"/g)) decl.push({ page: f, src: m[1] });
+  }
+  const problems = [];
+  const { spawnSync } = require('child_process');
+  const ffprobe = ['/opt/homebrew/bin/ffprobe', '/usr/local/bin/ffprobe', 'ffprobe'].find((c) => spawnSync(c, ['-version'], { encoding: 'utf8' }).status === 0);
+  for (const d of decl) {
+    if (!/^assets\/video\/[a-z0-9-]+\.mp4$/.test(d.src)) { problems.push(d.page + ': ' + d.src + ' is not a same-origin assets/video/*.mp4'); continue; }
+    const file = path.join(ROOT, d.src);
+    if (!fs.existsSync(file)) { problems.push(d.page + ': ' + d.src + ' missing'); continue; }
+    const size = fs.statSync(file).size;
+    if (size > 4.5 * 1024 * 1024) problems.push(d.src + ' is ' + (size / 1048576).toFixed(1) + ' MB (max 4.5)');
+    const head = fs.readFileSync(file).subarray(0, 4096).toString('latin1');
+    if (head.indexOf('moov') < 0) problems.push(d.src + ': moov atom not at the start (faststart)');
+    if (ffprobe) {
+      const r = spawnSync(ffprobe, ['-v', 'error', '-show_entries', 'stream=codec_type,codec_name,pix_fmt', '-of', 'csv=p=0', file], { encoding: 'utf8' });
+      const streams = (r.stdout || '').trim().split('\n').filter(Boolean);
+      if (!streams.some((x) => /^video,h264,yuv420p$/.test(x))) problems.push(d.src + ': not H.264 yuv420p (' + streams.join(' · ') + ')');
+      if (streams.some((x) => /^audio/.test(x))) problems.push(d.src + ': carries an audio stream');
+    }
+  }
+  gate('V1', 'Card clips local, small, silent, H.264, poster-first', problems.length === 0,
+    problems.join(' · ') || (decl.length ? decl.map((d) => d.src).join(', ') + ' verified' + (ffprobe ? ' (ffprobe)' : ' (file facts only)') : 'no card clip declared — every card is its photograph'));
 }
 
 /* GATE I1 — INFRASTRUCTURE FREEZE (Owner, 18 Sep 2026 · P0 recovery): the repository against infra/PRODUCTION.json —

@@ -57,7 +57,9 @@
     details: 'Please tell us which — the kitchens read this.' };
   var PROFILE = [
     { key: 'coffeetea', n: '02', q: 'Coffee or tea', hint: 'And how you like it.', required: true },
-    { key: 'treat', n: '03', q: 'My favourite', hint: 'A snack, sweet or little treat you never say no to.', required: true },
+    /* MY FAVORITE FLAVOR (Owner, 18 Sep 2026): one choice of six — replaces the free-text snack question; an older answer under
+     * `treat` is kept in the record's history and never read as a flavour unless it is one of the six */
+    { key: 'flavor', n: '03', q: 'My Favorite Flavor', hint: 'Choose one.', required: true, type: 'choice', choices: ['Coffee', 'Milk', 'Butter', 'Pandan', 'Matcha Green Tea', 'Strawberry Milk'] },
     { key: 'drink', n: '04', q: 'Favourite drink', hint: 'The one you would choose without looking at the menu.', required: true },
     { key: 'avoid', n: '05', q: 'Anything you would rather avoid?', hint: 'A taste, a scent, a habit — anything at all. "Nothing" is an answer.', required: true },
     { key: 'film', n: '06', q: 'Favourite film', hint: 'The one you could happily watch again.', required: true },
@@ -175,6 +177,50 @@
      * SERVER-SIDE (Owner, 16 Sep 2026 · EMAIL FIRST): the email and mobile number are persisted on the Worker under the
      * guest's invitation (/api/contact) — the recipient of the confirmation email and the same on every device. This
      * browser's draft is written first; the server copy follows; a device with an empty draft loads the server copy. */
+    /* ---- WHERE WILL YOU JOIN US (Owner, 18 Sep 2026) ----------------------
+     * The participation scope is the guest's first decision and the source of
+     * truth for everything after it: which stages exist for them, what
+     * readiness asks, which holds and tickets can stand, what Review & Send
+     * expects. A guest may join any combination of the three destinations;
+     * "I won't be joining this trip" is exclusive. The hosts join everything
+     * by definition — their scope reads as all three until they say otherwise. */
+    DESTINATIONS: [
+      { key: 'bangkok', label: 'Bangkok', when: '21 – 24 February · 6 – 8 March 2027' },
+      { key: 'vientiane', label: 'Vientiane', when: '25 February – 1 March 2027 · the wedding' },
+      { key: 'china', label: 'China', when: '1 – 6 March 2027 · Kunming and Lijiang' }
+    ],
+    scope: function () {
+      var st = read(), s = st.scope, p = this.party();
+      if (s && s.at && (s.none || s.bangkok || s.vientiane || s.china)) return { bangkok: !!s.bangkok && !s.none, vientiane: !!s.vientiane && !s.none, china: !!s.china && !s.none, none: !!s.none, at: s.at, by: s.by || 'guest' };
+      if (p && p.hosts) return { bangkok: true, vientiane: true, china: true, none: false, at: null, by: 'hosts' };
+      return null;
+    },
+    scopeAnswered: function () { return !!this.scope(); },
+    joins: function (dest) { var s = this.scope(); return !!(s && !s.none && s[dest]); },
+    joiningAny: function () { var s = this.scope(); return !!(s && !s.none && (s.bangkok || s.vientiane || s.china)); },
+    notJoining: function () { var s = this.scope(); return !!(s && s.none); },
+    joinsAll: function () { var s = this.scope(); return !!(s && !s.none && s.bangkok && s.vientiane && s.china); },
+    scopeWords: function () {
+      var s = this.scope(); if (!s) return '';
+      if (s.none) return 'Not joining this trip';
+      var names = this.DESTINATIONS.filter(function (d) { return s[d.key]; }).map(function (d) { return d.label; });
+      return names.length === 3 ? 'Bangkok · Vientiane · China' : names.join(' · ');
+    },
+    /* setScope({ bangkok: true }) toggles one destination (clearing "not joining"); setScope({ none: true }) declines the whole
+     * trip (clearing the destinations); setScope({ all: true }) joins every destination */
+    setScope: function (patch) {
+      var me = this.me(); if (!me || !patch) return;
+      var st = read(), cur = Object.assign({ bangkok: false, vientiane: false, china: false, none: false }, st.scope || {});
+      if (!(st.scope && st.scope.at) && this.party() && this.party().hosts) cur = { bangkok: true, vientiane: true, china: true, none: false };
+      if (patch.all === true) cur = { bangkok: true, vientiane: true, china: true, none: false };
+      else if (patch.none === true) cur = { bangkok: false, vientiane: false, china: false, none: true };
+      else { ['bangkok', 'vientiane', 'china'].forEach(function (k) { if (typeof patch[k] === 'boolean') cur[k] = patch[k]; }); if (cur.bangkok || cur.vientiane || cur.china) cur.none = false; }
+      cur.at = stamp(); cur.by = me.guestId;
+      st.scope = cur;
+      st.guests = st.guests || {}; st.guests[me.guestId] = st.guests[me.guestId] || { submitted: {}, profile: {}, history: [] };
+      var r = st.guests[me.guestId]; r.history = r.history || []; r.history.push({ field: 'scope', from: null, to: cur.none ? 'none' : ['bangkok', 'vientiane', 'china'].filter(function (k) { return cur[k]; }).join('+'), at: cur.at, by: me.guestId });
+      write(st);
+    },
     contact: function (f) { var st = read(); return (st.contact || {})[f] || ''; },
     setContact: function (f, v) {
       var me = this.me(); if (!me) return;
@@ -221,10 +267,16 @@
     setPartyField: function (f, v) { return this.setContact(f, v); },
 
     /* ---- about you --------------------------------------------------- */
-    profile: function (id, key) { var r = this.rec(id); return (r.profile || {})[key] || ''; },
+    profile: function (id, key) {
+      var r = this.rec(id), q = PROFILE.filter(function (x) { return x.key === key; })[0], v = (r.profile || {})[key] || '';
+      if (q && q.choices) { if (q.choices.indexOf(v) >= 0) return v; var old = (r.profile || {}).treat; return q.choices.indexOf(old) >= 0 ? old : ''; }   /* a choice is one of the six or nothing */
+      return v;
+    },
     setProfile: function (id, key, v) {
       var me = this.me(); if (!me) return;
       id = id || me.guestId; if (id !== me.guestId) return;
+      var q = PROFILE.filter(function (x) { return x.key === key; })[0];
+      if (q && q.choices && v && q.choices.indexOf(v) < 0) return;   /* a choice question takes one of its choices, or nothing */
       var st = read();
       st.guests = st.guests || {};
       st.guests[id] = st.guests[id] || { submitted: {}, profile: {}, history: [] };
@@ -326,7 +378,7 @@
       { key: 'about', n: '05', label: 'About You', href: 'about-you.html', required: true },
       { key: 'review', n: '06', label: 'Review & Send', href: 'review.html', required: true }
     ],
-    STATE_LABEL: { complete: '✓ Complete', current: 'Current', attention: 'Needs attention', locked: 'Locked' },
+    STATE_LABEL: { complete: '✓ Complete', current: 'Current', attention: 'Needs attention', locked: 'Locked', na: 'Not joining' },
 
     /* what each step still needs, in order, with the exact control */
     missingFor: function (key) {
@@ -337,8 +389,13 @@
       if (key === 'you') return this.contactMissing();
       if (key === 'journey') {
         if (!J || !B) return [];
+        /* the scope first: nothing else is asked until the guest has said where they join us; a guest who is not joining is asked nothing more here */
+        if (!this.scopeAnswered()) return [{ key: 'scope', label: 'Where will you join us?', href: 'your-journey.html#scope' }];
+        if (this.notJoining()) return [];
         J.SEGMENTS.forEach(function (seg) {
+          if (J.relevant && !J.relevant(seg)) return;   /* a stage of a destination the guest is not joining asks nothing */
           var st = J.state(seg);
+          if (st === 'arranged') return;                  /* the Owner's fixed arrangement is already the answer */
           if (st === 'open') { out.push({ key: 'stage:' + seg.key, label: seg.when + ' · ' + seg.place + ' — choose or say you are not joining', href: 'your-journey.html#s-' + seg.key }); return; }
           /* a chosen stay is complete only once the guest holds a place in a room of it */
           if (st === 'selected' && seg.cat === 'Accommodation' && U && U.ready()) {
@@ -352,11 +409,13 @@
       }
       if (key === 'wedding') {
         if (!T) return [];
+        if (!this.applicable('wedding')) return [];
         T.EVENTS.forEach(function (e) { if (T.eventOf(me.guestId, e.key) === null) out.push({ key: 'event:' + e.key, label: e.label + ' — attending or not', href: 'wedding.html#ev-' + e.key }); });
         if (T.attendingOf(me.guestId) && T.canOffer(me.guestId) && T.offeringOf_(me.guestId) === null) out.push({ key: 'sangkhathan', label: 'Sangkhathan — yes or no', href: 'wedding.html#sangkhathan' });
         return out;
       }
       if (key === 'preparation') {
+        if (!this.applicable('preparation')) return [];
         if (!this.dressAck()) out.push({ key: 'dress', label: 'Dress code acknowledgement', href: 'wedding-preparation.html#ack' });
         /* seats: required for the events the guest attends, while seating is open to choose */
         if (T && S && S.ready() && S.open() && !S.frozen()) {
@@ -365,7 +424,7 @@
         }
         return out;
       }
-      if (key === 'about') return this.aboutMissing();
+      if (key === 'about') return this.applicable('about') ? this.aboutMissing() : [];   /* a guest not joining the trip owes no hospitality answer */
       if (key === 'review') {
         var C = window.SIYL_CONFIRM;
         /* a sent journey is complete only while steps 01–05 still are: what came undone comes first */
@@ -376,6 +435,13 @@
       return out;
     },
     done: function (key) { return this.missingFor(key).length === 0; },
+    /* does a step apply to this guest at all — the scope decides: the wedding steps need Vientiane, About You needs a guest who joins something */
+    applicable: function (key) {
+      if (!this.scopeAnswered()) return true;
+      if (key === 'wedding' || key === 'preparation') return this.joins('vientiane');
+      if (key === 'about') return !this.notJoining();
+      return true;
+    },
     /* may the guest enter this step: every earlier required step is done */
     mayEnter: function (key) {
       var self = this, defs = this.STEP_DEFS, i = defs.map(function (d) { return d.key; }).indexOf(key);
@@ -399,13 +465,15 @@
       var self = this, C = window.SIYL_CONFIRM;
       var p = this.party();
       return this.STEP_DEFS.map(function (d) {
-        var missing = p ? self.missingFor(d.key) : [], done = !!p && missing.length === 0, may = !!p && self.mayEnter(d.key);
+        var missing = p ? self.missingFor(d.key) : [], done = !!p && missing.length === 0, may = !!p && self.mayEnter(d.key), applies = !p || self.applicable(d.key);
         var state = done ? 'complete' : (d.key === currentKey ? 'current' : (may ? 'attention' : 'locked'));
         if (d.key === currentKey && !done) state = 'current';
+        if (p && !applies && d.key !== currentKey) state = 'na';
         var note = '';
         if (!p) note = 'Open your invitation';
+        else if (!applies) note = self.notJoining() ? 'Not joining this trip' : 'Not joining Vientiane';
         else if (d.key === 'review') note = done ? (C && C.state() === 'confirmed' ? 'Confirmed by Guest Relations' : 'Received by Guest Relations') : (may ? 'Ready to send' : 'Available once steps 01–05 are complete');
-        else if (done) note = ({ you: 'Name, email and mobile number', journey: 'Every stage answered', wedding: 'Every part of the day answered', preparation: 'Dress code and seats', about: 'Allergies and photography answered' })[d.key] || '';
+        else if (done) note = ({ you: 'Name, email and mobile number', journey: self.notJoining() ? 'Not joining this trip' : 'Every stage answered', wedding: 'Every part of the day answered', preparation: 'Dress code and seats', about: 'Allergies and photography answered' })[d.key] || '';
         else if (!may) note = 'Complete the earlier steps first';
         else note = missing.length === 1 ? '1 item to complete' : missing.length + ' items to complete';
         return { key: d.key, n: d.n, label: d.label, href: d.href, required: d.required, done: done, state: state, stateLabel: self.STATE_LABEL[state],
@@ -437,6 +505,8 @@
         partyName: p.partyName,
         party: { label: this.partyLabel(), names: this.partyNames(), members: (p.members || []).map(function (m) { return m.guestId; }) },
         contact: { email: this.contact('email'), phone: this.contact('phone') },
+        scope: this.scope(),
+        scopeWords: this.scopeWords(),
         dress: { all: !!this.dressAck(), acknowledged: this.dressAck() ? [me.guestId] : [], missing: this.dressAck() ? [] : [me.guestId] },
         allergy: { answer: this.allergy(), details: this.allergyDetails() },
         photo: this.photoAck(),

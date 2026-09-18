@@ -927,7 +927,6 @@
   E("What’s your favourite drink?", "Was ist euer Lieblingsgetränk?", "เครื่องดื่มโปรดของคุณคืออะไร?", "好きな飲み物は？");
   E("How do you like your coffee?", "Wie trinkt ihr euren Kaffee?", "คุณชอบกาแฟแบบไหน?", "コーヒーはどのように？");
   E("What tea do you love?", "Welchen Tee liebt ihr?", "ชาแบบไหนที่คุณรัก?", "お気に入りのお茶は？");
-  E("What’s your favourite snack?", "Was ist euer Lieblingssnack?", "ของว่างโปรดของคุณคืออะไร?", "好きなおやつは？");
   E("What’s your favourite colour?", "Was ist eure Lieblingsfarbe?", "สีโปรดของคุณคือสีอะไร?", "好きな色は？");
   E("What flowers do you love?", "Welche Blumen liebt ihr?", "ดอกไม้ที่คุณรักคือดอกอะไร?", "好きな花は？");
   E("What’s a book you love?", "Welches Buch liebt ihr?", "หนังสือที่คุณรักคือเล่มไหน?", "好きな本は？");

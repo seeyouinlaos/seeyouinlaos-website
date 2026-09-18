@@ -29,7 +29,7 @@ test('2 · the profile is reachable at every readiness state: the engine lists n
   for (const fill of [0, 1, 2]) {
     const w = page({ auth: PEGGY }); const G = w.SIYL_GUEST, T = w.SIYL_TEMPLE, id = G.me().guestId;
     if (fill >= 1) { G.setContact('email', 'guest@example.com'); G.setContact('phone', '+66 81 234 5678'); T.setAttendance(id, 'no'); ['coffee', 'vows', 'dinner'].forEach((k) => T.setEvent(id, k, 'yes')); }
-    if (fill >= 2) { G.setDressAck(true); G.setAllergy('no'); G.setPhotoAck(true); G.PROFILE.forEach((q) => G.setProfile(id, q.key, 'Answered')); }
+    if (fill >= 2) { G.setDressAck(true); G.setAllergy('no'); G.setPhotoAck(true); G.PROFILE.forEach((q) => G.setProfile(id, q.key, q.choices ? q.choices[0] : 'Answered')); }
     const r = G.readiness();
     assert.ok(!r.need.some((n) => /profile/.test(n.href) || /My Profile/.test(n.stepLabel)), 'no requirement points at the profile');
     assert.ok(!G.steps().some((s) => s.key === 'profile'), 'the profile is not in the step list');
@@ -43,13 +43,13 @@ test('3 · the bag icon IS My Bag: on every private page the header icon opens c
   assert.match(bag, /badge:function\(\)\{var n=authed\(\)\?this\.get\(\)\.length:0,el=document\.querySelector\('\[data-bag-badge\]'\);/);
 });
 
-test('4 · the sticky account row reads MY TRIP · MY PROFILE · SIGN OUT, inside the sticky header', () => {
-  assert.match(inv, /data-access-nav="trip">My Trip<\/a><a href="' \+ hrefOf\('profile\.html'\) \+ '" data-access-nav="profile">My Profile<\/a><button type="button" class="hd-access-out" data-access-out>Sign out<\/button>/);
-  assert.match(inv, /if \(el\.parentElement !== header\)/, 'the row lives inside header.hd');
+test('4 · the account navigation reads MY TRIP · MY PROFILE · SIGN OUT, inside the menu drawer (Owner, 18 Sep 2026 · Aman header: nothing beneath the logo)', () => {
+  assert.match(inv, /data-access-nav="trip">My Trip<\/a><a href="' \+ hrefOf\('profile\.html'\) \+ '" data-access-nav="profile">My Profile<\/a><button type="button" class="a-macct-out" data-access-out>Sign out<\/button>/);
+  assert.match(inv, /let el = inMenu \|\| document\.querySelector\('\[data-account\]'\);/, 'the block lives in the drawer'); assert.doesNotMatch(inv, /insertAdjacentElement\('afterend'/, 'nothing is inserted under the header');
   assert.match(inv, /\(your-journey\|cart\|tickets\|room\|transport\|wedding\|wedding-preparation\|about-you\|profile\|review\)/, 'profile.html is a private surface: signed out it leads to the invitation');
 });
 
-test('5 · no textual MY BAG on the account row or the bottom bar navigation', () => {
+test('5 · no textual MY BAG in the account block or the bottom bar navigation', () => {
   assert.doesNotMatch(inv, /data-access-nav="bag"/);
   assert.doesNotMatch(bag, /data-nav="bag"|data-nav="trip"|data-nav="profile"/, 'the bottom layer is the Bag summary and Top only');
   assert.match(bag, /<span class="jb-l">My Bag<\/span>/, 'the Bag summary keeps its total and Open My Bag');
@@ -64,7 +64,7 @@ test('6 · ABOUT YOU stays step 05 and still gates Review & Send', () => {
   assert.equal(G.mayEnter('review'), false, 'About You incomplete: Review & Send is locked');
   assert.ok(G.readiness().need.some((n) => n.stepLabel === 'About You' && n.n === '05'), 'the missing items name step 05 · About You');
   assert.ok(G.missingFor('about').length > 0);
-  G.setAllergy('no'); G.setPhotoAck(true); G.PROFILE.forEach((q) => G.setProfile(id, q.key, 'Answered'));
+  G.setAllergy('no'); G.setPhotoAck(true); G.PROFILE.forEach((q) => G.setProfile(id, q.key, q.choices ? q.choices[0] : 'Answered'));
   assert.equal(G.missingFor('about').length, 0); assert.ok(!G.readiness().need.some((n) => n.stepLabel === 'About You'));
   for (const f of ['assets/prep-shell.js', 'assets/guest.js', 'about-you.html', 'assets/aman.js', 'register/logic.mjs']) assert.doesNotMatch(src(f).replace(/profile\.html">My Profile/g, ''), /(label|h1[^>]*>|under) ?'?My Profile/, f + ' no longer calls the step My Profile');
 });

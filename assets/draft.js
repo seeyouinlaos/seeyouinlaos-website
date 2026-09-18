@@ -151,6 +151,10 @@
         return D.push('auto').then(function () { return D.refresh(); });
       }
       if (m.invitationId === a.invitationId && m.dirty) pending = true;
+      /* AN EDIT MADE WHILE THE COPY IS BEING READ IS KEPT (Owner, 18 Sep 2026 — "Not joining this stage did nothing"): the
+         keys as they stood when the read left; a key the guest changed meanwhile is a fresh edit against that moment, kept
+         and sent again, never rolled back to the server's older value */
+      var before = snapshot();
       return fetch(API, { headers: headers() }).then(function (r) { return r.json(); }).then(function (g) {
         if (!same(s)) return null;
         if (!g || !g.ok) return g;
@@ -158,7 +162,12 @@
         if (g.draft && g.draft.keys) {
           var local = snapshot(), localEmpty = !Object.keys(local).length;
           var newer = (m.invitationId !== a.invitationId) || localEmpty || !m.serverUpdatedAt || g.draft.updatedAt > m.serverUpdatedAt;
-          if (newer) { apply(g.draft.keys); setBase(g.draft.keys); }
+          if (newer) {
+            var m3 = merge(local, before, g.draft.keys, true);
+            apply(m3.keys); setBase(g.draft.keys);
+            if (m3.keep.length) pending = true;
+            if (m3.lost.length) state.notice = 'stale';   /* the same key changed elsewhere meanwhile: the server's stands, the guest is told */
+          }
           /* a device that already holds this revision but has no merge base yet (a browser upgraded from an older release):
              the server copy of this very revision IS the base (Codex release review) — otherwise a later conflict would
              mistake the unchanged server answer for a competing edit */

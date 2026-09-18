@@ -14,11 +14,7 @@
       '<div class="hd-right"><a class="hd-cta bag" href="cart.html" aria-label="My Bag"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></div>' +
     '</div>' +
     '';
-  /* the access line (filled by assets/invite.mjs) travels with the header so the page never shifts */
-  var access = document.createElement('p');
-  access.className = 'hd-access'; access.setAttribute('data-access', ''); access.setAttribute('data-state', 'out');
-  access.innerHTML = '<span>Not signed in</span><span class="hd-access-do"><a href="invitation.html?open=1">Open your invitation</a></span>';
-  header.appendChild(access);   /* ONE sticky shell (Owner, 18 Sep 2026): the access row travels inside the header */
+  /* ONE CLEAN HEADER (Owner, 18 Sep 2026 · Aman): menu · wordmark · bag and nothing beneath; the account navigation lives in the menu drawer (assets/invite.mjs fills it) */
   var space = document.querySelector('.hd-space');
   document.body.prepend(header);
   if (space) space.remove();

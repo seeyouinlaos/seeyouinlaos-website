@@ -61,10 +61,12 @@ export class Drafts {
         /* THE REVISION PRECONDITION: the device names the revision it last read; an older one is refused with the current draft */
         const base = typeof body.baseUpdatedAt === 'string' ? body.baseUpdatedAt : null;
         if (prev && prev.updatedAt && base !== prev.updatedAt) return json({ ok: false, error: 'stale', draft: prev }, 409);
-        /* a guest with a FIXED room in a stage never carries that stage as a Bag line */
-        const fixedStages = Array.isArray(body.fixedStages) ? body.fixedStages.map(String) : [];
-        if (fixedStages.length && typeof incoming['siyl.bag'] === 'string') {
-          try { const bag = JSON.parse(incoming['siyl.bag']); if (Array.isArray(bag)) { const kept = bag.filter((x) => !(x && fixedStages.includes(String(x.id)))); if (kept.length !== bag.length) incoming['siyl.bag'] = JSON.stringify(kept); } } catch (e) { /* stored as sent */ }
+        /* a guest with a FIXED room never carries that unit as a Bag line — another hotel chosen in the same stage is theirs to keep
+           (the keys are `<window>/<slug>`; a line of the window with the fixed room, or with no room yet, is the fixed unit) */
+        const fixedKeys = Array.isArray(body.fixedStages) ? body.fixedStages.map(String) : [];
+        if (fixedKeys.length && typeof incoming['siyl.bag'] === 'string') {
+          const isFixed = (x) => fixedKeys.some((k) => { const win = k.split('/')[0], slug = k.split('/').slice(1).join('/'); return x && String(x.id) === win && (!slug || !x.room || String(x.room) === slug); });
+          try { const bag = JSON.parse(incoming['siyl.bag']); if (Array.isArray(bag)) { const kept = bag.filter((x) => !isFixed(x)); if (kept.length !== bag.length) incoming['siyl.bag'] = JSON.stringify(kept); } } catch (e) { /* stored as sent */ }
         }
         const keys = Object.assign({}, prev && prev.keys || {}, incoming);
         /* strictly increasing revisions, even within one millisecond */

@@ -135,7 +135,7 @@ function migrateLegacy(legacy, partyId, guestId) {
     /* the profile: only what this guest wrote in their own name; the retired
      * questions (comfort, anything, access) are not carried */
     if (mine && mine.profile) {
-      const keep = ['coffeetea', 'treat', 'drink', 'avoid'];
+      const keep = ['coffeetea', 'flavor', 'drink', 'avoid'];
       const wroteSelf = !(mine.history || []).some((h) => /^profile\./.test(h.field) && h.by && h.by !== guestId);
       if (wroteSelf) { keep.forEach((k) => { if (mine.profile[k]) out.guests[guestId].profile[k] = mine.profile[k]; }); note.moved.push('profile'); }
       else note.moved.push('profile:skipped-written-by-another');
@@ -277,16 +277,24 @@ function renderAccess() {
   if (!document.querySelector) return;
   ensureStyle();
   const header = document.querySelector('header.hd'); if (!header) return;
-  let el = document.querySelector('[data-access]');
-  if (!el) { el = document.createElement('p'); el.className = 'hd-access'; el.setAttribute('data-access', ''); }
-  /* ONE sticky shell: the line lives INSIDE the header so header + account access scroll together */
-  if (el.parentElement !== header) { if (typeof header.appendChild === 'function') header.appendChild(el); else if (header.insertAdjacentElement) header.insertAdjacentElement('beforeend', el); }
+  /* THE ACCOUNT LIVES IN THE MENU (Owner, 18 Sep 2026 · Aman): the header is menu · wordmark · bag and nothing beneath. The
+     drawer's account block (assets/aman.js) says who is signed in and carries My Trip · My Profile · Sign out; signed out it
+     carries the way in. The bag icon is My Bag on every page. */
+  /* the drawer's own block wins; a block this module placed before the drawer existed (the module runs before aman.js has
+     built the menu) is dropped as soon as the drawer carries one */
+  const inMenu = document.querySelector('.a-menu [data-account]');
+  if (inMenu && document.querySelectorAll) document.querySelectorAll('[data-account]').forEach((x) => { if (x !== inMenu && x.parentElement !== inMenu && typeof x.remove === 'function') x.remove(); });
+  let el = inMenu || document.querySelector('[data-account]');
+  if (!el) { el = document.createElement('div'); el.className = 'a-macct'; el.setAttribute('data-account', ''); const menu = document.querySelector('.a-menu'); if (menu && typeof menu.insertBefore === 'function') menu.insertBefore(el, menu.firstChild); else if (document.body && typeof document.body.appendChild === 'function') { el.hidden = true; document.body.appendChild(el); } }
+  if (el.hidden && el.parentElement && el.parentElement.classList && el.parentElement.classList.contains('a-menu')) el.hidden = false;
   const a = AUTH.get(), ok = !!(a && AUTH.valid());
   el.setAttribute('data-state', ok ? 'in' : 'out');
   el.innerHTML = ok
-    ? '<span class="on">Signed in · ' + esc(a.preferredName || a.fullName || 'you') + '</span><span class="hd-access-do"><a href="' + hrefOf('your-journey.html') + '" data-access-nav="trip">My Trip</a><a href="' + hrefOf('profile.html') + '" data-access-nav="profile">My Profile</a><button type="button" class="hd-access-out" data-access-out>Sign out</button></span>'
-    : '<span>Not signed in</span><span class="hd-access-do"><a href="' + gateUrl('') + '">Open your invitation</a></span>';
+    ? '<span class="a-macct-who">Signed in · ' + esc(a.preferredName || a.fullName || 'you') + '</span><nav class="a-macct-nav" aria-label="Your account"><a href="' + hrefOf('your-journey.html') + '" data-access-nav="trip">My Trip</a><a href="' + hrefOf('profile.html') + '" data-access-nav="profile">My Profile</a><button type="button" class="a-macct-out" data-access-out>Sign out</button></nav>'
+    : '<span class="a-macct-who">Not signed in</span><nav class="a-macct-nav" aria-label="Your account"><a href="' + gateUrl('') + '" data-access-nav="in">Open your invitation</a></nav>';
   const out = el.querySelector('[data-access-out]'); if (out) out.addEventListener('click', () => { GUEST.leave(); LOC.replace(hrefOf('invitation.html')); });
+  /* a stale access row of the older shell, if a cached page still carries one */
+  const old = document.querySelector('header.hd [data-access]'); if (old && old.parentElement && typeof old.parentElement.removeChild === 'function') old.parentElement.removeChild(old);
   publishShellHeight(header);
 }
 /* the shell's real height, for everything that sticks below it (the step bar) and for anchor scrolling */
@@ -340,6 +348,8 @@ function dropPrivate() { const a = AUTH.get(); if (a && AUTH.valid()) return; if
 function accessReady() { dropPrivate(); renderAccess(); gateLinks(); }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', accessReady); else accessReady();
 document.addEventListener('siyl:auth', accessReady); document.addEventListener('siyl:signout', accessReady);
+/* the drawer is built by assets/aman.js after this module ran: fill its account block the moment it exists */
+document.addEventListener('siyl:menu', renderAccess);
 /* menus and footers are built by scripts after this one: one more pass once everything is in place */
 if (typeof window !== 'undefined' && window.addEventListener) window.addEventListener('load', () => { gateLinks(); renderAccess(); });
 if (typeof MutationObserver !== 'undefined' && document.documentElement) new MutationObserver(() => { if (document.querySelector('a[href]:not([data-private-href])')) gateLinks(); }).observe(document.documentElement, { childList: true, subtree: true });

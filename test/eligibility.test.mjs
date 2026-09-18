@@ -40,20 +40,18 @@ function engine() {
 const asId = (s) => ({ invitationId: s.invitationId, guestId: s.guestId, partyId: s.partyId, hosts: !!s.hosts });
 const join = (E, s, key, label) => E.call('join', { invitationId: s.invitationId, guestId: s.guestId, key, label, name: s.preferredName }, asId(s));
 
-test('THE MASTER\'S RESERVATIONS (Owner, 16 Sep 2026) · a Bride & Groom room is the hosts\' alone, a Family room is nobody\'s through the website, every other room is open to any authenticated guest; the words say RESERVED, never a Choose button', () => {
+test('THE MASTER\'S RESERVATIONS (Owner, 16 Sep 2026 · Edit 5, 18 Sep 2026) · a Bride & Groom room is the hosts\' alone; the Grand Majestic, the Solarium and the 270° suite are open to everyone; every other room is open to any authenticated guest; the words say RESERVED, never a Choose button', () => {
   const R = {}; for (const key of Object.keys(SEED)) for (const u of unitsOf(key)) if (u.reservedFor) (R[key] = R[key] || []).push(u.label + ':' + u.reservedFor);
   assert.deepEqual(R, {
     'bkk-stay/penthouse': ['A:Bride & Groom'],
-    'prewed/grand-majestic': ['A:Family', 'B:Family'], 'prewed/souphattra-presidential': ['A:Bride & Groom'],
-    'wedstay/grand-majestic': ['A:Family', 'B:Family'], 'wedstay/souphattra-presidential': ['A:Bride & Groom'],
-    'kmg/solarium': ['A:Bride & Groom'],
-    'ljg/view-suite-270': ['A:Bride & Groom', 'B:Bride & Groom', 'C:Bride & Groom', 'D:Bride & Groom'] });
-  for (const key of ['prewed/souphattra-presidential', 'wedstay/souphattra-presidential', 'kmg/solarium', 'ljg/view-suite-270', 'bkk-stay/penthouse']) {
+    'prewed/souphattra-presidential': ['A:Bride & Groom'],
+    'wedstay/souphattra-presidential': ['A:Bride & Groom'] });
+  for (const key of ['prewed/souphattra-presidential', 'wedstay/souphattra-presidential', 'bkk-stay/penthouse']) {
     assert.equal(mayJoin(unitsOf(key)[0], asId(PEGGY)).ok, false, key + ' closed to a guest'); assert.equal(mayJoin(unitsOf(key)[0], asId(LIN)).ok, false);
     assert.equal(mayJoin(unitsOf(key)[0], asId(HARUTHAI)).ok, true, key + ' open to the hosts'); assert.equal(mayJoin(unitsOf(key)[0], asId(SUTHEP)).ok, true);
   }
-  for (const key of ['prewed/grand-majestic', 'wedstay/grand-majestic']) for (const who of [PEGGY, LIN, HARUTHAI]) assert.equal(mayJoin(unitsOf(key)[0], asId(who)).ok, false, key + ' is the Family\'s — Guest Relations assign it');
-  assert.equal(mayJoin(unitsOf('bkk-stay/penthouse')[1], asId(PEGGY)).ok, true, 'Penthouse Room B is open'); assert.equal(mayJoin(unitsOf('kmg/standard-single')[0], asId(PEGGY)).ok, true, 'the Standard Single is open (the Master reserves the Solarium)');
+  for (const key of ['prewed/grand-majestic', 'wedstay/grand-majestic', 'kmg/solarium', 'ljg/view-suite-270']) for (const who of [PEGGY, LIN, HARUTHAI]) assert.equal(mayJoin(unitsOf(key)[0], asId(who)).ok, true, key + ' is open to everyone (Owner, Edit 5)');
+  assert.equal(mayJoin(unitsOf('bkk-stay/penthouse')[1], asId(PEGGY)).ok, true, 'Penthouse Room B is open'); assert.equal(mayJoin(unitsOf('kmg/standard-single')[0], asId(PEGGY)).ok, true, 'the Standard Single is open');
   assert.equal(mayJoin(unitsOf('kmg/solarium')[0], null).ok, false, 'nobody joins without an identity');
   /* the retired guest-facing reservation wording stays gone; the live word is RESERVED · <for whom> from the engine's unit */
   for (const f of ['journeys.html', 'room.html', 'your-journey.html', 'assets/journey.js']) assert.doesNotMatch(src(f).replace(/\/\*[\s\S]*?\*\//g, ''), /Reserved for (bride|family)|yours to choose|held for you|This category is reserved/i, f);
@@ -162,17 +160,17 @@ test('THE WORDS · category lines are derived from the physical rooms: rooms wit
                          { label: 'C', name: 'Room C', kind: 'room', places: 2, reservedFor: null, eligible: true, occupants: [], taken: 0, free: 2, full: false }],
     'wedstay/souphattra-presidential': [{ label: 'A', name: 'Room A', kind: 'room', places: 2, reservedFor: 'Bride & Groom', eligible: false, occupants: [{ name: 'Haruthai' }, { name: 'Suthep' }], taken: 2, free: 0, full: true }],
     'bkk-stay/penthouse': [{ label: 'A', name: 'Room A', kind: 'room', places: 2, reservedFor: 'Bride & Groom', eligible: false, occupants: [], taken: 0, free: 2, full: false }, { label: 'B', name: 'Room B', kind: 'room', places: 2, reservedFor: null, eligible: true, occupants: [], taken: 0, free: 2, full: false }],
-    'airbnb-2br/private-residence': [{ label: 'A', name: 'Private Residence', kind: 'property', places: 6, reservedFor: null, eligible: true, occupants: [], taken: 0, free: 6, full: false }] },
+    'airbnb-2br/private-residence': [{ label: 'A', name: 'Private Residence', kind: 'property', places: 4, reservedFor: null, eligible: true, occupants: [], taken: 0, free: 6, full: false }] },
     summary: { 'wedstay/heritage': { units: 3, places: 6, sourceRooms: 3, sourcePlaces: 6, ownerReservedRooms: 0, ownerReservedPlaces: 0, guestOccupiedRooms: 2, guestOccupiedPlaces: 3, remainingRooms: 2, remainingPlaces: 3, soldOut: false, free: 3, rooms: 2, reserved: 0, reservedFor: null, kind: 'room' },
                'wedstay/souphattra-presidential': { units: 1, places: 2, sourceRooms: 1, sourcePlaces: 2, ownerReservedRooms: 1, ownerReservedPlaces: 2, guestOccupiedRooms: 0, guestOccupiedPlaces: 0, remainingRooms: 0, remainingPlaces: 0, soldOut: true, free: 0, rooms: 0, reserved: 1, reservedFor: 'Bride & Groom', kind: 'room' },
                'bkk-stay/penthouse': { units: 2, places: 4, sourceRooms: 2, sourcePlaces: 4, ownerReservedRooms: 1, ownerReservedPlaces: 2, guestOccupiedRooms: 0, guestOccupiedPlaces: 0, remainingRooms: 1, remainingPlaces: 2, soldOut: false, free: 2, rooms: 1, reserved: 1, reservedFor: 'Bride & Groom', kind: 'room' },
-               'airbnb-2br/private-residence': { units: 1, places: 6, sourceRooms: 1, sourcePlaces: 6, ownerReservedRooms: 0, ownerReservedPlaces: 0, guestOccupiedRooms: 0, guestOccupiedPlaces: 0, remainingRooms: 1, remainingPlaces: 6, soldOut: false, free: 6, rooms: 1, reserved: 0, reservedFor: null, kind: 'property' } } };
+               'airbnb-2br/private-residence': { units: 1, places: 4, sourceRooms: 1, sourcePlaces: 4, ownerReservedRooms: 0, ownerReservedPlaces: 0, guestOccupiedRooms: 0, guestOccupiedPlaces: 0, remainingRooms: 1, remainingPlaces: 4, soldOut: false, free: 4, rooms: 1, reserved: 0, reservedFor: null, kind: 'property' } } };
   U._set(view);
   assert.equal(U.label('wedstay', 'heritage'), '2 rooms · 3 places available');
   assert.equal(U.label('wedstay', 'souphattra-presidential'), 'Reserved · Bride & Groom', 'a category the Master reserves in full says RESERVED, never "booked"'); assert.equal(U.reserved('wedstay', 'souphattra-presidential'), true); assert.equal(U.reserved('bkk-stay', 'penthouse'), false); assert.equal(U.fits('wedstay', 'souphattra-presidential'), false);
   assert.equal(U.label('bkk-stay', 'penthouse'), '1 room · 2 places available', 'the hosts\' Room A is never counted as available'); assert.equal(U.unitWords(view.units['bkk-stay/penthouse'][0]), 'Reserved · Bride & Groom'); assert.equal(U.fits('bkk-stay', 'penthouse'), true);
   assert.deepEqual(JSON.parse(JSON.stringify(U.count('bkk-stay', 'penthouse'))), { rooms: 2, places: 4, reserved: 1, free: 2, open: 1 });
-  assert.equal(U.label('airbnb-2br', 'private-residence'), '6 places available');
+  assert.equal(U.label('airbnb-2br', 'private-residence'), '4 places available');
   assert.deepEqual(JSON.parse(JSON.stringify(U.count('wedstay', 'heritage'))), { rooms: 3, places: 6, reserved: 0, free: 3, open: 2 });
   assert.equal(U.unitWords(view.units['wedstay/heritage'][0]), 'Haruthai · 1 place available');
   assert.equal(U.unitWords(view.units['wedstay/heritage'][1]), 'Lin · Noor · Full');

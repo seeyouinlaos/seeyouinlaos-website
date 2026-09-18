@@ -29,7 +29,7 @@
     items: function () {
       var U = window.SIYL_UNITS; if (!U || !U.ready()) return [];
       return U.fixedStages().map(function (stage) {
-        var m = U.mine(stage), r = roomOf(m.key), u = unitOf(U, m.key, m.label), s = STAGE[stage] || {};
+        var m = U.fixedUnit(stage), r = roomOf(m.key), u = unitOf(U, m.key, m.label), s = STAGE[stage] || {};
         var names = u ? u.occupants.map(function (o) { return o.mine ? 'You' : (o.name || 'A guest'); }) : [];
         return { stage: stage, key: m.key, label: m.label, name: U.unitName(u || { kind: 'room', label: m.label }), property: r ? (r.room.property || r.stay.name) : m.key,
           category: r ? (r.room.card || r.room.name) : '', when: s.when || '', nights: s.nights || '', place: s.place || '', who: names.join(' · '),
