@@ -30,7 +30,7 @@ const reset = async (id) => { const p = await fresh(); await signIn(p, id);
   for (const ev of ['ceremony', 'dinner']) await api(p, '/api/seating/release', { method: 'POST', body: JSON.stringify({ invitationId: 'INV-' + id, guestId: id, event: ev }) });
   for (const stage of ['bkk-stay', 'prewed', 'wedstay', 'kmg', 'ljg', 'kempinski']) await api(p, '/api/rooms/leave', { method: 'POST', body: JSON.stringify({ invitationId: 'INV-' + id, guestId: id, stage }) });
   await p.evaluate(() => { ['siyl.guest', 'siyl.bag', 'siyl.temple', 'siyl.docs', 'siyl.sent', 'siyl.skip', 'siyl.skip.by'].forEach((k) => localStorage.removeItem(k)); });
-  const cur = await api(p, '/api/draft'); if (cur.status === 200 && cur.body && cur.body.draft) { const empty = {}; ['siyl.guest', 'siyl.bag', 'siyl.temple', 'siyl.docs', 'siyl.sent', 'siyl.skip', 'siyl.skip.by'].forEach((k) => { empty[k] = null; }); await api(p, '/api/draft', { method: 'PUT', body: JSON.stringify({ keys: empty, baseUpdatedAt: cur.body.draft.updatedAt }) }); }
+  const cur = await api(p, '/api/draft'); if (cur.status === 200 && cur.body && cur.body.draft) { const empty = { 'siyl.guest': '{}', 'siyl.bag': '[]', 'siyl.temple': '{}', 'siyl.docs': '{}', 'siyl.skip': '[]', 'siyl.skip.by': '{}', 'siyl.sent': null };   /* empty values, not nulls: the store refuses a save of nothing */ await api(p, '/api/draft', { method: 'PUT', body: JSON.stringify({ keys: empty, baseUpdatedAt: cur.body.draft.updatedAt }) }); }
   await p.context().close(); };
 
 /* ===== 0 · clean slate ===== */

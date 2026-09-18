@@ -20,11 +20,15 @@ const fresh = async (w = 390) => { const ctx = await b.newContext({ viewport: { 
     ok('live-' + name + '-text', html.includes(expectText), expectText);
     ok('live-' + name + '-no-github', !/seeyouinlaos\.github\.io/.test(html), 'no github.io in the served page');
     ok('live-' + name + '-no-retired-label', !/Your Journey|Journey Bag|Fully booked|Continue Your Journey/.test(html.replace(/<!--[\s\S]*?-->/g, '').replace(/\/\*[\s\S]*?\*\//g, '')), 'no retired label');
-    const shell = await p.evaluate(() => { const h = document.querySelector('header.hd'), a = document.querySelector('header.hd .hd-access'); return { sticky: h && getComputedStyle(h).position, inside: !!a, h: h && Math.round(h.getBoundingClientRect().height), words: a && a.textContent.replace(/\s+/g, ' ').trim() }; });
-    ok('live-' + name + '-shell', shell.sticky === 'sticky' && shell.inside && /Open your invitation/.test(shell.words || ''), JSON.stringify(shell));
+    /* release 011 (Aman header): one band — menu · wordmark · bag, nothing beneath; the way in lives in the menu drawer */
+    const shell = await p.evaluate(() => { const h = document.querySelector('header.hd'); return { sticky: h && getComputedStyle(h).position, under: !!(h && h.querySelector('.hd-access, [data-account]')), h: h && Math.round(h.getBoundingClientRect().height), words: h && h.innerText.replace(/\s+/g, ' ').trim() }; });
+    ok('live-' + name + '-shell', shell.sticky === 'sticky' && !shell.under && shell.h <= 64 && shell.words === 'see you in laos.', JSON.stringify(shell));
     await p.evaluate(() => window.scrollTo(0, document.body.scrollHeight * 0.6)); await p.waitForTimeout(400);
-    const after = await p.evaluate(() => { const a = document.querySelector('header.hd .hd-access a'); const r = a && a.getBoundingClientRect(); return r ? { top: Math.round(r.top), bottom: Math.round(r.bottom) } : null; });
+    const after = await p.evaluate(() => { const a = document.querySelector('header.hd a.bag'); const r = a && a.getBoundingClientRect(); return r ? { top: Math.round(r.top), bottom: Math.round(r.bottom) } : null; });
     ok('live-' + name + '-shell-scrolled', after && after.top >= 0 && after.bottom <= 844, JSON.stringify(after));
+    await p.evaluate(() => window.scrollTo(0, 0)); await p.waitForTimeout(300); await p.dispatchEvent('header.hd .hb, header.hd #menu-open', 'click').catch(() => {}); await p.waitForSelector('body.a-open [data-account]', { state: 'visible', timeout: 5000 }).catch(() => {});
+    const drawer = await p.evaluate(() => ((document.querySelector('body.a-open [data-account]') || {}).innerText || '').replace(/\s+/g, ' ').trim());
+    ok('live-' + name + '-drawer-way-in', /Open your invitation/i.test(drawer), drawer); await p.keyboard.press('Escape');
     if (name === 'home') { const stamps = [...html.matchAll(/assets\/(aman|prep)\.css\?v=([0-9a-f]{8})/g)].map((m) => m[1] + '=' + m[2]); ok('live-asset-stamps', stamps.length >= 1, stamps.join(' ')); }
     await p.screenshot({ path: path.join(OUT, 'live-' + name + '-390.png') });
   }
@@ -46,7 +50,7 @@ if (CODES) {
   const A = await fresh(390); const p = A.p;
   await signIn(p, 'T001');
   await p.goto(O + '/invitation.html', { waitUntil: 'load' }); await p.waitForSelector('input[data-c="email"]', { timeout: 20000 }); await p.fill('input[data-c="email"]', 'ada.live@example.org'); await p.dispatchEvent('input[data-c="email"]', 'change'); await p.fill('input[data-c="phone"]', '+66 81 000 0001'); await p.dispatchEvent('input[data-c="phone"]', 'change'); await p.waitForTimeout(1800);
-  const hdr = await p.evaluate(() => document.querySelector('header.hd .hd-access').textContent.replace(/\s+/g, ' ').trim()); ok('live-signed-in-shell', /My Trip.*My Bag.*My Profile.*Sign out/.test(hdr), hdr);
+  await p.click('header.hd .hb, header.hd #menu-open'); await p.waitForTimeout(500); const hdr = await p.evaluate(() => ((document.querySelector('body.a-open [data-account]') || {}).innerText || '').replace(/\s+/g, ' ').trim()); ok('live-signed-in-drawer', /My Trip.*My Profile.*Sign out/i.test(hdr) && !/My Bag/i.test(hdr), hdr); await p.keyboard.press('Escape');
   const j = await api(p, '/api/rooms/join', { invitationId: 'INV-T001', guestId: 'T001', key: 'bkk-stay/u-sathorn-superior-garden', label: 'F', name: 'Ada' }); ok('live-room-hold', j.status === 200, j.status + ' ' + JSON.stringify(j.body).slice(0, 80));
   await p.goto(O + '/cart.html', { waitUntil: 'load' }); await p.waitForTimeout(2500);
   const total1 = await p.evaluate(() => (document.querySelector('.jb-t') || {}).textContent); ok('live-bag-total', /USD 192/.test(total1 || ''), total1);
