@@ -7,7 +7,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { bearerOf, authIdOf } from '../register/crypto.mjs';
-import { page, src, PEGGY, HARUTHAI } from './sandbox.mjs';
+import { page, src, PEGGY, STEFFIE, HARUTHAI } from './sandbox.mjs';
 
 const profile = src('profile.html'), shell = src('assets/prep-shell.js'), guest = src('assets/guest.js'), inv = src('assets/invite.mjs'), bag = src('assets/bag.js'), worker = src('src/worker.js'), avatar = src('assets/avatar.js');
 const PRIVATE_PAGES = ['profile.html', 'your-journey.html', 'cart.html', 'tickets.html', 'about-you.html', 'review.html', 'wedding.html', 'wedding-preparation.html', 'invitation.html', 'room.html', 'transport.html'];
@@ -125,4 +125,28 @@ test('PHOTO · stored and read only with the guest\'s own bearer; JPEG · PNG ·
   assert.match(worker, /const MAX_PHOTO = 1024 \* 1024;/); assert.match(worker, /const PHOTO_TYPES = \['image\/jpeg', 'image\/png', 'image\/webp'\];/);
   assert.match(avatar, /c\.toBlob\(function \(blob\) \{[\s\S]*?\}, 'image\/jpeg', 0\.86\)/, 'the browser reduces the picture before it is sent');
   assert.match(avatar, /var SIDE = 512, MAX_IN = 12 \* 1024 \* 1024, MAX_OUT = 1024 \* 1024;/);
+});
+
+test('CODEX CONFIRM-2 · a delayed photo read after an account switch never populates the second guest\'s cache; an upload chosen by the first guest is not sent once the session moved; sign-out forgets the picture', async () => {
+  const opened = []; const w = page({ auth: PEGGY, fetch: null, modules: [] });
+  w.URL = { createObjectURL: (b) => { const u = 'blob:' + (b.tag || 'x'); opened.push(u); return u; }, revokeObjectURL: () => {} };
+  let resolveA; const gets = [];
+  w.fetch = (url, init) => { gets.push({ bearer: init && init.headers && init.headers['x-siyl-auth'], method: (init && init.method) || 'GET' }); if (gets.length === 1) return new Promise((res) => { resolveA = res; }); return Promise.resolve({ status: 404, ok: false }); };
+  const vm = await import('node:vm'); vm.runInContext(src('assets/avatar.js'), w, { filename: 'assets/avatar.js' });
+  const AV = w.SIYL_AVATAR;
+  const pA = AV.load();                                                                            /* Peggy's read leaves, delayed */
+  w.document.dispatchEvent(new w.CustomEvent('siyl:signout')); w.localStorage.setItem('siyl.auth', JSON.stringify(STEFFIE)); w.document.dispatchEvent(new w.CustomEvent('siyl:auth'));
+  const uB = await AV.load();                                                                       /* Steffie's read: no photo */
+  assert.equal(uB, null); assert.equal(gets[1].bearer, STEFFIE.bearer);
+  resolveA({ status: 200, ok: true, blob: async () => ({ tag: 'peggy' }) });                        /* Peggy's picture arrives late */
+  assert.equal(await pA, null, 'the late picture is not returned to the session that is here now');
+  assert.equal(await AV.load(), null, 'Steffie\'s cache holds no photo'); assert.equal(AV.current(), null); assert.equal(opened.length, 0, 'the late bytes were never turned into a picture');
+  /* an upload chosen as Peggy, reduced while the session moves to Steffie: nothing is sent */
+  const w3 = page({ auth: PEGGY, fetch: () => { throw new Error('must not upload'); }, modules: [] }); w3.URL = w.URL;
+  w3.Image = class { set src(v) { const self = this; w3.setTimeout(() => { self.naturalWidth = 8; self.naturalHeight = 8; w3.localStorage.setItem('siyl.auth', JSON.stringify(STEFFIE)); self.onload(); }); } };
+  w3.document.createElement = () => ({ getContext: () => ({ drawImage() {} }), toBlob: (cb) => cb({ size: 10, tag: 'p' }) });
+  vm.runInContext(src('assets/avatar.js'), w3, { filename: 'assets/avatar.js' });
+  const up = await w3.SIYL_AVATAR.upload({ size: 100, type: 'image/png' });
+  assert.equal(up.ok, false); assert.equal(up.error, 'session changed', 'the picture chosen as Peggy is not sent as Steffie');
+  assert.match(src('assets/avatar.js'), /if \(!same\(s\)\) return null;\s*\/\* the session moved on/); assert.match(src('assets/avatar.js'), /document\.addEventListener\('siyl:signout', moved\); document\.addEventListener\('siyl:auth', moved\);/);
 });

@@ -508,6 +508,16 @@ gate('P7', 'Dress Code imagery real (23 — resort-01 retired by the owner), no 
   gate('C1', 'Asset fingerprints current on every page', r.status === 0, (r.stdout || '').trim().replace(/^ASSET VERSIONS: /, ''));
 }
 
+/* GATE I1 — INFRASTRUCTURE FREEZE (Owner, 18 Sep 2026 · P0 recovery): the repository against infra/PRODUCTION.json —
+ * service name, workers.dev, public origin, KV / Durable Object bindings, auth authority, email transport, GitHub Pages
+ * disabled, no Cloudflare Pages. An infrastructure change passes only with the Owner's OWNER-INFRA-CHANGE marker. */
+{
+  const { spawnSync } = require('child_process');
+  const r = spawnSync('node', [path.join(__dirname, 'infra-guard.cjs')], { encoding: 'utf8' });
+  const lines = (r.stdout || '').trim().split('\n');
+  gate('I1', 'Infrastructure freeze: one Worker, one public origin, frozen bindings, auth and email, GitHub Pages disabled', r.status === 0, lines[lines.length - 1].replace(/^INFRASTRUCTURE FREEZE: /, '') + (r.status === 0 ? '' : ' · ' + lines.filter((l) => /^FAIL/.test(l)).join(' · ')));
+}
+
 let failed = 0;
 for (const r of results) {
   if (!r.ok) failed++;

@@ -7,7 +7,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { bearerOf, authIdOf } from '../register/crypto.mjs';
-import { page, src, doState, HARUTHAI, SUTHEP, PEGGY } from './sandbox.mjs';
+import { page, src, doState, HARUTHAI, SUTHEP, PEGGY, STEFFIE } from './sandbox.mjs';
 import { Rooms } from '../src/rooms.js';
 import { Drafts } from '../src/drafts.js';
 import { composeGuestMail, composeOwnerMail } from '../src/mail-templates.js';
@@ -166,7 +166,7 @@ test('CODEX P1-2 · the three-way merge on the device: a removal elsewhere stand
   /* a key this device never held follows the server */
   const m3 = merge({}, {}, { 'siyl.skip': '["kmg"]' }); assert.equal(m3.keys['siyl.skip'], '["kmg"]');
   const d = src('assets/draft.js');
-  assert.match(d, /if \(inflight\) \{ if \(!queued\) queued = inflight\.then/, 'pushes are serialised'); assert.match(d, /\} finally \{ state\.applying = false; \}/, 'no autosave while a server copy is applied'); assert.match(d, /state\.notice = 'stale'; state\.phase = 'stale';/, 'a lost edit is named until the guest\'s next own change');
+  assert.match(d, /if \(inflight\) \{ if \(!queued\) \{ var qs = session\(\); var again = function \(\) \{ queued = null; return same\(qs\) \? D\.push\(reason\)/, 'pushes are serialised, a queued push runs only for the session that queued it'); assert.match(d, /\} finally \{ state\.applying = false; \}/, 'no autosave while a server copy is applied'); assert.match(d, /state\.notice = 'stale'; state\.phase = 'stale';/, 'a lost edit is named until the guest\'s next own change');
 });
 
 test('CODEX P1-3 · a legacy Bag line of the fixed stage never reaches a submission as a product: the registration boundary strips it and recomputes the total; the email model never classifies it (no stay, no experience, no amount)', async () => {
@@ -324,4 +324,41 @@ test('CODEX RELEASE-3 · an upgraded browser with UNSENT edits and no merge base
   assert.ok(same.gets.length >= 1, 'the server is read before the push'); assert.equal(same.bodies[0] && same.bodies[0].baseUpdatedAt, 'R1', 'the push names the known revision'); assert.equal(drink(JSON.parse(same.base)['siyl.guest']), 'B', 'after the accepted push the base is what was sent'); assert.equal(same.drinkLocal, 'B', 'the unsent answer stands'); assert.ok(same.bodies.length >= 1 && drink(same.bodies[0].keys['siyl.guest']) === 'B', 'and was sent');
   const moved = await run('R2');
   assert.equal(moved.bag, '[]', 'the removal elsewhere stands'); assert.equal(moved.drinkLocal, 'B', 'the typed answer is kept'); assert.ok(moved.bodies.some((b) => b.baseUpdatedAt === 'R2' && drink(b.keys['siyl.guest']) === 'B'), 'and sent again on the new revision');
+});
+
+test('CODEX CONFIRM-1 · a save\'s late 409 after an account switch on the same browser is dropped whole: nothing of the first guest is merged into the second guest\'s device, nothing is retried under the second bearer, and a push queued behind it does not run', async () => {
+  const A_KEYS = { 'siyl.bag': '[{"id":"train","price":100}]', 'siyl.guest': '{"contact":{"email":"peggy@example.org"},"guests":{}}' };
+  const B_KEYS = { 'siyl.bag': '[]', 'siyl.guest': '{"contact":{"email":"steffie@example.org"},"guests":{}}' };
+  const puts = []; let resolveFirst; const first = new Promise((res) => { resolveFirst = res; });
+  const fetch = (url, init) => {
+    if (!/\/api\/draft/.test(String(url))) return Promise.resolve({ status: 200, json: async () => ({ ok: true }) });
+    if (init && init.method === 'PUT') { puts.push({ bearer: init.headers['x-siyl-auth'], body: JSON.parse(init.body) }); if (puts.length === 1) return first; return Promise.resolve({ status: 200, json: async () => ({ ok: true, updatedAt: 'R9', savedAt: 'R9', submission: null }) }); }
+    return Promise.resolve({ status: 200, json: async () => ({ ok: true, draft: null, submission: null }) });
+  };
+  const w = page({ auth: PEGGY, fetch, modules: ['assets/bag.js', 'assets/guest.js', 'assets/draft.js'], seed: { ...A_KEYS, 'siyl.draft.base': JSON.stringify(A_KEYS), 'siyl.draft.meta': JSON.stringify({ invitationId: PEGGY.invitationId, serverUpdatedAt: 'R1', dirty: true }) } });
+  const D = w.SIYL_DRAFT; await Promise.resolve();
+  const p1 = D.push('auto');                                                                     /* Peggy's save leaves, its answer delayed */
+  const p2 = D.push('auto');                                                                     /* and another queued behind it */
+  /* another tab: Peggy signs out, Steffie signs in — the shared device now holds Steffie's session and Steffie's draft */
+  w.document.dispatchEvent(new w.CustomEvent('siyl:signout'));
+  ['siyl.guest', 'siyl.bag', 'siyl.temple', 'siyl.docs', 'siyl.sent', 'siyl.skip', 'siyl.skip.by'].forEach((k) => w.localStorage.removeItem(k));
+  w.localStorage.setItem('siyl.auth', JSON.stringify(STEFFIE)); Object.entries(B_KEYS).forEach(([k, v]) => w.localStorage.setItem(k, v));
+  w.localStorage.setItem('siyl.draft.base', JSON.stringify(B_KEYS)); w.localStorage.setItem('siyl.draft.meta', JSON.stringify({ invitationId: STEFFIE.invitationId, serverUpdatedAt: 'S1', dirty: false }));
+  /* Peggy's server copy answers late: stale, with Peggy's own private draft */
+  resolveFirst({ status: 409, json: async () => ({ ok: false, error: 'stale', draft: { keys: { 'siyl.bag': '[{"id":"train","price":100},{"id":"mu9646","price":275}]', 'siyl.guest': A_KEYS['siyl.guest'] }, updatedAt: 'R2', savedAt: 'R2' }, submission: null }) });
+  const r1 = await p1, r2 = await p2;
+  assert.equal(r1.error, 'session changed'); assert.equal(r2.error, 'session changed');
+  const gB = JSON.parse(w.localStorage.getItem('siyl.guest')); assert.equal(gB.contact.email, 'steffie@example.org', 'Steffie\'s device keeps Steffie\'s answers'); assert.ok(!JSON.stringify(gB).includes('peggy@example.org'), 'nothing of Peggy\'s reaches Steffie\'s device');
+  assert.equal(w.localStorage.getItem('siyl.bag'), B_KEYS['siyl.bag'], 'nothing of Peggy\'s bag reaches Steffie\'s device');
+  assert.equal(w.localStorage.getItem('siyl.draft.base'), JSON.stringify(B_KEYS), 'Steffie\'s merge base is untouched');
+  assert.deepEqual(JSON.parse(w.localStorage.getItem('siyl.draft.meta')), { invitationId: STEFFIE.invitationId, serverUpdatedAt: 'S1', dirty: false }, 'no revision of Peggy\'s is recorded for Steffie');
+  assert.equal(puts.length, 1, 'no retry, no queued push under the second bearer'); assert.equal(puts[0].bearer, PEGGY.bearer);
+  assert.equal(D.state().phase, 'idle', 'the late answer paints no state for the guest who is here now');
+  /* the same for a late read: a pull that started for Peggy never applies to Steffie's device */
+  let resolveGet; const w2 = page({ auth: PEGGY, fetch: (url, init) => (/\/api\/draft/.test(String(url)) && !(init && init.method) ? new Promise((res) => { resolveGet = res; }) : Promise.resolve({ status: 200, json: async () => ({ ok: true }) })), modules: ['assets/bag.js', 'assets/guest.js', 'assets/draft.js'] });
+  await Promise.resolve(); const pull = w2.SIYL_DRAFT.pull();
+  w2.document.dispatchEvent(new w2.CustomEvent('siyl:signout')); w2.localStorage.setItem('siyl.auth', JSON.stringify(STEFFIE)); w2.localStorage.setItem('siyl.guest', B_KEYS['siyl.guest']);
+  resolveGet({ status: 200, json: async () => ({ ok: true, draft: { keys: A_KEYS, updatedAt: 'R1', savedAt: 'R1' }, submission: null }) });
+  assert.equal(await pull, null); assert.equal(JSON.parse(w2.localStorage.getItem('siyl.guest')).contact.email, 'steffie@example.org'); assert.equal(w2.localStorage.getItem('siyl.bag'), null, 'Peggy\'s late copy is dropped');
+  assert.match(src('assets/draft.js'), /if \(!same\(s\)\) return \{ ok: false, error: 'session changed' \};/); assert.match(src('assets/draft.js'), /window\.addEventListener\('storage', function \(e\) \{ if \(e && e\.key === 'siyl\.auth'\) \{ sessionChanged\(\);/, 'another tab\'s change of session ends this tab\'s in-flight work');
 });

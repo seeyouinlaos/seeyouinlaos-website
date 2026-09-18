@@ -53,6 +53,13 @@
   function announce() { try { document.dispatchEvent(new CustomEvent('siyl:draft', { detail: state })); } catch (e) {} }
   function signedIn() { var a = auth(); return !!(a && a.bearer && a.guestId && a.invitationId === 'INV-' + a.guestId); }
   function headers() { var a = auth(); return { 'content-type': 'application/json', 'x-siyl-auth': a ? a.bearer : '' }; }
+  /* ONE SESSION PER ANSWER (Codex confirming pass, 18 Sep 2026): a request belongs to the guest who started it. When its answer
+   * arrives after that guest signed out — or after another guest signed in, here or in another tab of the same browser — the
+   * answer is dropped whole: nothing is applied, no base or revision is recorded, nothing is retried under the new bearer. */
+  var gen = 0;
+  function session() { var a = auth(); return a && a.bearer ? { bearer: a.bearer, invitationId: a.invitationId, gen: gen } : null; }
+  function same(s) { var a = auth(); return !!(s && a && a.bearer === s.bearer && a.invitationId === s.invitationId && s.gen === gen); }
+  function sessionChanged() { gen++; pending = false; queued = null; state.ready = false; if (timer) { clearTimeout(timer); timer = null; } }
 
   /* apply a server copy to this device: only the keys the server holds; the pages re-render on the events */
   function apply(keys) {
@@ -74,8 +81,9 @@
     /* PUSH: this device's complete draft to the server. reason: 'auto' | 'save' | 'continue' | 'send' */
     push: function (reason) {
       /* one request at a time (Codex P1-2): a push while another is in flight waits for it and then sends the current snapshot */
-      if (inflight) { if (!queued) queued = inflight.then(function () { queued = null; return D.push(reason); }, function () { queued = null; return D.push(reason); }); return queued; }
+      if (inflight) { if (!queued) { var qs = session(); var again = function () { queued = null; return same(qs) ? D.push(reason) : { ok: false, error: 'session changed' }; }; queued = inflight.then(again, again); } return queued; }
       var a = auth(); if (!signedIn()) return Promise.resolve({ ok: false, error: 'not signed in' });
+      var s = session();
       var keys = snapshot(); if (!Object.keys(keys).length) return Promise.resolve({ ok: false, error: 'nothing to save' });
       state.phase = 'saving'; state.error = null; announce();
       var m = setMeta({ invitationId: a.invitationId, dirty: true });
@@ -83,6 +91,7 @@
       var req = fetch(API, { method: 'PUT', headers: headers(), body: JSON.stringify(body) })
         .then(function (r) { return r.json().then(function (d) { d.status = r.status; return d; }); })
         .then(function (d) {
+          if (!same(s)) return { ok: false, error: 'session changed' };
           /* STALE DEVICE (Owner, 17 Sep 2026 · Codex P1-2): the server holds a newer revision — merged three ways against the base
              this device last read: a removal elsewhere stands, an independent edit made here is kept and sent again */
           if (d && d.status === 409 && d.error === 'stale' && d.draft && d.draft.keys) {
@@ -107,14 +116,15 @@
           /* read back: SAVED only when the server's copy is the one sent */
           if (reason === 'save') {
             return fetch(API, { headers: headers() }).then(function (r) { return r.json(); }).then(function (g) {
-              var same = !!(g && g.ok && g.draft && g.draft.updatedAt === d.updatedAt && KEYS.every(function (k) { return keys[k] === undefined || g.draft.keys[k] === keys[k]; }));
-              if (!same) { state.phase = 'failed'; state.error = 'the saved copy differs'; announce(); return { ok: false, error: state.error }; }
+              if (!same(s)) return { ok: false, error: 'session changed' };
+              var equal = !!(g && g.ok && g.draft && g.draft.updatedAt === d.updatedAt && KEYS.every(function (k) { return keys[k] === undefined || g.draft.keys[k] === keys[k]; }));
+              if (!equal) { state.phase = 'failed'; state.error = 'the saved copy differs'; announce(); return { ok: false, error: state.error }; }
               return done(d, g.submission);
             });
           }
           return done(d, d.submission);
         })
-        .catch(function () { state.phase = 'failed'; state.error = 'unreachable'; announce(); setMeta({ lastError: 'unreachable' }); return { ok: false, error: 'unreachable' }; })
+        .catch(function () { if (!same(s)) return { ok: false, error: 'session changed' }; state.phase = 'failed'; state.error = 'unreachable'; announce(); setMeta({ lastError: 'unreachable' }); return { ok: false, error: 'unreachable' }; })
         .then(function (d) { inflight = null; return d; });
       inflight = req;
       return req;
@@ -124,7 +134,7 @@
     /* PULL: the server copy. A device with unsent local changes pushes them first; otherwise a newer server copy wins. */
     pull: function () {
       var a = auth(); if (!signedIn()) return Promise.resolve(null);
-      var m = meta();
+      var s = session(), m = meta();
       /* a device that has synced before and holds unsent changes pushes them first (merged on the server); a device that
          has never read the server copy for this guest reads it first — its cache never overwrites the journey */
       if (m.invitationId === a.invitationId && m.dirty && m.serverUpdatedAt) {
@@ -133,6 +143,7 @@
            revision this device knows, that copy IS the base — the push that follows then merges three ways as it should */
         if (localStorage.getItem(BASE) === null) {
           return fetch(API, { headers: headers() }).then(function (r) { return r.json(); }).catch(function () { return null; }).then(function (g) {
+            if (!same(s)) return null;
             if (g && g.ok && g.draft && g.draft.keys && g.draft.updatedAt === m.serverUpdatedAt) setBase(g.draft.keys);
             return D.push('auto').then(function () { return D.refresh(); });
           });
@@ -141,6 +152,7 @@
       }
       if (m.invitationId === a.invitationId && m.dirty) pending = true;
       return fetch(API, { headers: headers() }).then(function (r) { return r.json(); }).then(function (g) {
+        if (!same(s)) return null;
         if (!g || !g.ok) return g;
         state.submission = g.submission || null;
         if (g.draft && g.draft.keys) {
@@ -170,7 +182,8 @@
     /* the submission state alone (after a send) */
     refresh: function () {
       if (!signedIn()) return Promise.resolve(null);
-      return fetch(API, { headers: headers() }).then(function (r) { return r.json(); }).then(function (g) { if (g && g.ok) { state.submission = g.submission || null; announce(); } return g; }).catch(function () { return null; });
+      var s = session();
+      return fetch(API, { headers: headers() }).then(function (r) { return r.json(); }).then(function (g) { if (!same(s)) return null; if (g && g.ok) { state.submission = g.submission || null; announce(); } return g; }).catch(function () { return null; });
     },
     /* autosave: any change on this device, debounced */
     touch: function () {
@@ -215,7 +228,9 @@
   ['siyl:guest', 'siyl:bag', 'siyl:temple', 'siyl:docs'].forEach(function (ev) { document.addEventListener(ev, function () { D.touch(); }); });
   function pullOnce() { var a = auth(); if (!signedIn()) return; if (pulled === a.invitationId) return; pulled = a.invitationId; D.pull(); }
   document.addEventListener('siyl:auth', pullOnce); document.addEventListener('siyl:invite-ready', pullOnce);
-  document.addEventListener('siyl:signout', function () { pulled = ''; pending = false; queued = null; state.ready = false; state.notice = null; state.submission = null; state.phase = 'idle'; try { localStorage.removeItem(META); localStorage.removeItem(BASE); } catch (e) {} });
+  document.addEventListener('siyl:signout', function () { sessionChanged(); pulled = ''; state.notice = null; state.submission = null; state.phase = 'idle'; try { localStorage.removeItem(META); localStorage.removeItem(BASE); } catch (e) {} });
+  /* another tab of this browser signed out or signed in as someone else: whatever this tab still had in flight belongs to the guest before */
+  if (typeof window.addEventListener === 'function') window.addEventListener('storage', function (e) { if (e && e.key === 'siyl.auth') { sessionChanged(); pulled = ''; } });
   /* Continue buttons flush the draft on their way */
   document.addEventListener('click', function (e) { var b = e.target && e.target.closest ? e.target.closest('[data-continue]') : null; if (b) D.flush('continue'); }, true);
   /* the page-hide beacon: only from a device that has read the server copy (a never-synced cache must not overwrite the journey) */

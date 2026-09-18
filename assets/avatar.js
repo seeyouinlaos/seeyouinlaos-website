@@ -22,7 +22,13 @@
   var cache = { inv: '', url: null, none: false };
 
   function auth() { try { return JSON.parse(localStorage.getItem('siyl.auth') || 'null'); } catch (e) { return null; } }
-  function headers(extra) { var a = auth(); var h = Object.assign({}, extra || {}); if (a && a.bearer) h['x-siyl-auth'] = a.bearer; return h; }
+  /* ONE SESSION PER ANSWER (Codex confirming pass, 18 Sep 2026): every read, upload and removal is bound to the guest who
+   * started it — the bearer and the invitation captured first, and a generation that moves on sign-out, on sign-in and on
+   * another tab's change of session. An answer arriving for a session that is gone is dropped: never cached, never shown. */
+  var gen = 0;
+  function session() { var a = auth(); return a && a.bearer && a.invitationId ? { bearer: a.bearer, invitationId: a.invitationId, gen: gen } : null; }
+  function same(s) { var a = auth(); return !!(s && a && a.bearer === s.bearer && a.invitationId === s.invitationId && s.gen === gen); }
+  function headersFor(s, extra) { var h = Object.assign({}, extra || {}); if (s) h['x-siyl-auth'] = s.bearer; return h; }
   function announce() { try { document.dispatchEvent(new CustomEvent('siyl:avatar')); } catch (e) {} }
   function forget() { if (cache.url) { try { URL.revokeObjectURL(cache.url); } catch (e) {} } cache = { inv: '', url: null, none: false }; }
 
@@ -48,32 +54,40 @@
     ACCEPT: ACCEPT, MAX_IN: MAX_IN, SIDE: SIDE,
     /* the stored photo as an object URL for this session, or null when there is none */
     load: function (force) {
-      var a = auth(); if (!a || !a.bearer || !a.invitationId) { forget(); return Promise.resolve(null); }
-      if (!force && cache.inv === a.invitationId && (cache.url || cache.none)) return Promise.resolve(cache.url);
-      forget(); cache.inv = a.invitationId;
-      return fetch(API, { headers: headers(), cache: 'no-store' }).then(function (r) {
-        if (r.status === 404) { cache.none = true; return null; }
+      var s = session(); if (!s) { forget(); return Promise.resolve(null); }
+      if (!force && cache.inv === s.invitationId && (cache.url || cache.none)) return Promise.resolve(cache.url);
+      return fetch(API, { headers: headersFor(s), cache: 'no-store' }).then(function (r) {
+        if (!same(s)) return null;
+        if (r.status === 404) { forget(); cache.inv = s.invitationId; cache.none = true; return null; }
         if (!r.ok) throw new Error('read');
-        return r.blob().then(function (b) { cache.url = URL.createObjectURL(b); return cache.url; });
-      }).catch(function () { cache.none = true; return null; });
+        return r.blob().then(function (b) {
+          if (!same(s)) return null;                                   /* the session moved on while the bytes were read: not this guest's picture */
+          forget(); cache.inv = s.invitationId; cache.url = URL.createObjectURL(b); return cache.url;
+        });
+      }).catch(function () { if (same(s)) { forget(); cache.inv = s.invitationId; cache.none = true; } return null; });
     },
     current: function () { return cache.url; },
     upload: function (file) {
+      var s = session(); if (!s) return Promise.resolve({ ok: false, error: 'not signed in', status: 401 });
       if (!file) return Promise.resolve({ ok: false, error: 'no file' });
       if (file.size > MAX_IN) return Promise.resolve({ ok: false, error: 'too large' });
       if (!/^image\//.test(file.type || '')) return Promise.resolve({ ok: false, error: 'not an image' });
       return reduce(file).then(function (blob) {
         if (blob.size > MAX_OUT) return { ok: false, error: 'too large' };
-        return fetch(API, { method: 'PUT', headers: headers({ 'content-type': 'image/jpeg' }), body: blob }).then(function (r) { return r.json().catch(function () { return { ok: false }; }).then(function (j) {
+        if (!same(s)) return { ok: false, error: 'session changed' };  /* the guest who chose the picture is gone: nothing is sent */
+        return fetch(API, { method: 'PUT', headers: headersFor(s, { 'content-type': 'image/jpeg' }), body: blob }).then(function (r) { return r.json().catch(function () { return { ok: false }; }).then(function (j) {
           if (!r.ok || !j.ok) return { ok: false, error: (j && j.error) || 'not stored', status: r.status };
-          forget(); cache.inv = (auth() || {}).invitationId || ''; cache.url = URL.createObjectURL(blob); announce(); return { ok: true, at: j.at };
+          if (!same(s)) return { ok: false, error: 'session changed' };  /* stored under the guest who sent it; not shown to whoever is here now */
+          forget(); cache.inv = s.invitationId; cache.url = URL.createObjectURL(blob); announce(); return { ok: true, at: j.at };
         }); });
       }).catch(function (e) { return { ok: false, error: e && e.message === 'decode' ? 'not an image' : 'failed' }; });
     },
     remove: function () {
-      return fetch(API, { method: 'DELETE', headers: headers() }).then(function (r) { return r.ok ? r.json() : { ok: false }; }).then(function (j) {
+      var s = session(); if (!s) return Promise.resolve({ ok: false });
+      return fetch(API, { method: 'DELETE', headers: headersFor(s) }).then(function (r) { return r.ok ? r.json() : { ok: false }; }).then(function (j) {
         if (!j || !j.ok) return { ok: false };
-        forget(); cache.inv = (auth() || {}).invitationId || ''; cache.none = true; announce(); return { ok: true };
+        if (!same(s)) return { ok: true };
+        forget(); cache.inv = s.invitationId; cache.none = true; announce(); return { ok: true };
       }).catch(function () { return { ok: false }; });
     },
     /* the words for a refusal, for the guest */
@@ -86,5 +100,7 @@
       return 'The photo could not be saved. Nothing was stored — please try again.';
     }
   };
-  document.addEventListener('siyl:signout', forget);
+  function moved() { gen++; forget(); }
+  document.addEventListener('siyl:signout', moved); document.addEventListener('siyl:auth', moved);
+  if (typeof window.addEventListener === 'function') window.addEventListener('storage', function (e) { if (e && e.key === 'siyl.auth') moved(); });
 })();

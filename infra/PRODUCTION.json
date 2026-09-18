@@ -1,0 +1,31 @@
+{
+  "_": "INFRASTRUCTURE FREEZE (Owner, 18 Sep 2026) — the documented production state. src/infra-guard.cjs compares the repository against this file on every release check and in the test suite. Changing anything here, or anything it pins, is an infrastructure change: it needs the Owner's explicit authorisation for that exact change, carried as an `OWNER-INFRA-CHANGE:` trailer in the commit that makes it.",
+  "runtime": "cloudflare-worker",
+  "service": "seeyouinlaos-website",
+  "workersDevSubdomain": "suthep-hrg",
+  "workersDev": true,
+  "publicOrigin": "https://seeyouinlaos-website.suthep-hrg.workers.dev",
+  "customDomains": [],
+  "routes": [],
+  "githubPages": "disabled",
+  "cloudflarePages": "not used",
+  "assets": { "binding": "ASSETS", "directory": "." },
+  "kv": [{ "binding": "REG_KV", "id": "090270d0da434a8b8f49933cb604beb3" }],
+  "durableObjects": [
+    { "name": "INVENTORY", "class": "Inventory" },
+    { "name": "SEATING", "class": "Seating" },
+    { "name": "ROOMS", "class": "Rooms" },
+    { "name": "DRAFTS", "class": "Drafts" }
+  ],
+  "migrations": ["v1:Inventory", "v2:Seating", "v3:Rooms", "v4:Drafts"],
+  "auth": {
+    "authority": "register/auth-index.json read through the ASSETS binding; the bearer is verified by src/auth.js",
+    "files": {
+      "src/auth.js": "182be318ea9da997f9595c13f95c8aa50f3ff6a30bb4321a4faa499a9e67955f",
+      "register/crypto.mjs": "8e045a46b059242cf4de0b3c2e949076e158170621f10ed219df48fd05100cfe"
+    }
+  },
+  "email": { "provider": "brevo", "endpoint": "https://api.brevo.com/v3/smtp/email", "secret": "BREVO_API_KEY", "from": "suthep.hrg@gmail.com" },
+  "guestFacingRoots": ["assets", "src", "journey", "build", "register"],
+  "forbiddenHosts": ["github.io", "pages.dev", "trycloudflare.com"]
+}
