@@ -45,6 +45,52 @@
     return { keys: out, keep: keep, lost: lost };
   }
 
+  /* THE LIVE EDIT, REPLAYED ON THE FETCHED COPY (Codex confirming pass, 18 Sep 2026): a key changed on this device while the
+   * first copy was being read carries the guest's live action — but only that action is carried over, never the device's older
+   * cache around it. The Bag is replayed line by line (a line added or changed here is added, a line removed here is removed,
+   * a line the server no longer holds stays gone), the stage decisions as a set, every other record field by field. */
+  function parseJson(v) { if (v === undefined || v === null) return undefined; try { return JSON.parse(v); } catch (e) { return undefined; } }
+  function isObj(v) { return !!v && typeof v === 'object' && !Array.isArray(v); }
+  function sameJson(a, b) { return JSON.stringify(a) === JSON.stringify(b); }
+  function replayObject(base, local, server) {
+    var out = {}, k;
+    for (k in server) out[k] = server[k];
+    var keys = {}; for (k in base || {}) keys[k] = 1; for (k in local || {}) keys[k] = 1;
+    Object.keys(keys).forEach(function (key) {
+      var B = base ? base[key] : undefined, L = local ? local[key] : undefined;
+      if (sameJson(B, L)) return;                                   /* untouched here: the server's */
+      if (L === undefined) { delete out[key]; return; }             /* removed here */
+      if (isObj(B) && isObj(L) && isObj(out[key])) { out[key] = replayObject(B, L, out[key]); return; }
+      out[key] = L;                                                  /* set or replaced here */
+    });
+    return out;
+  }
+  function replayKey(k, before, local, server) {
+    if (server === undefined || local === undefined) return local;
+    var B = parseJson(before), L = parseJson(local), S = parseJson(server);
+    if (L === undefined || S === undefined) return local;
+    var idOf = function (x) { return x && x.id; };
+    if (k === 'siyl.bag' && Array.isArray(L) && Array.isArray(S)) {
+      var Ba = Array.isArray(B) ? B : [], out = [];
+      var removed = Ba.filter(function (x) { return !L.some(function (y) { return idOf(y) === idOf(x); }); }).map(idOf);
+      S.forEach(function (x) { if (removed.indexOf(idOf(x)) < 0) out.push(x); });
+      L.forEach(function (y) {
+        var was = Ba.filter(function (x) { return idOf(x) === idOf(y); })[0];
+        if (was && sameJson(was, y)) return;                          /* a line the device already had, unchanged */
+        var i = -1; out.forEach(function (x, j) { if (idOf(x) === idOf(y)) i = j; });
+        if (i >= 0) out[i] = y; else out.push(y);
+      });
+      return JSON.stringify(out);
+    }
+    if (Array.isArray(L) && Array.isArray(S) && L.every(function (x) { return typeof x === 'string'; })) {
+      var Bs = Array.isArray(B) ? B : [], res = S.filter(function (x) { return !(Bs.indexOf(x) >= 0 && L.indexOf(x) < 0); });
+      L.forEach(function (x) { if (Bs.indexOf(x) < 0 && res.indexOf(x) < 0) res.push(x); });
+      return JSON.stringify(res);
+    }
+    if (isObj(L) && isObj(S)) return JSON.stringify(replayObject(isObj(B) ? B : {}, L, S));
+    return local;
+  }
+
   function auth() { try { return JSON.parse(localStorage.getItem('siyl.auth') || 'null'); } catch (e) { return null; } }
   function meta() { try { return JSON.parse(localStorage.getItem(META) || 'null') || {}; } catch (e) { return {}; } }
   function setMeta(patch) { var m = Object.assign(meta(), patch); try { localStorage.setItem(META, JSON.stringify(m)); } catch (e) {} return m; }
@@ -76,7 +122,7 @@
   var D = window.SIYL_DRAFT = {
     KEYS: KEYS,
     state: function () { return state; },
-    _merge: merge,
+    _merge: merge, _replay: replayKey,
     submission: function () { return state.submission; },
     /* PUSH: this device's complete draft to the server. reason: 'auto' | 'save' | 'continue' | 'send' */
     push: function (reason) {
@@ -169,7 +215,8 @@
                server's older value for it is what was being fetched, never a competing edit. It is kept and sent again. */
             KEYS.forEach(function (k) {
               if (local[k] === before[k]) return;
-              if (local[k] === undefined) delete m3.keys[k]; else m3.keys[k] = local[k];
+              var v = replayKey(k, before[k], local[k], g.draft.keys[k]);
+              if (v === undefined) delete m3.keys[k]; else m3.keys[k] = v;
               var li = m3.lost.indexOf(k); if (li >= 0) m3.lost.splice(li, 1);
               if (m3.keep.indexOf(k) < 0) m3.keep.push(k);
             });

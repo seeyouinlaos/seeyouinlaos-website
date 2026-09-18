@@ -458,7 +458,8 @@
           out.push({ key: 'release:room:' + stage, label: (seg ? seg.when + ' · ' + seg.place : stage) + ' — a room is still held for a stage outside your trip', href: 'your-journey.html#scope' });
         });
       }
-      if (S && S.ready && S.ready() && me && !this.joins('vientiane')) ['ceremony', 'dinner'].forEach(function (ev) {
+      /* a seat while the ledger is open to the guest; a frozen ledger is Guest Relations' to change — the decline is sent, the seat is theirs to release */
+      if (S && S.ready && S.ready() && S.open() && !S.frozen() && me && !this.joins('vientiane')) ['ceremony', 'dinner'].forEach(function (ev) {
         if (S.seatOf(ev, me.guestId)) out.push({ key: 'release:seat:' + ev, label: (ev === 'ceremony' ? 'Ceremony' : 'Dinner') + ' seat — still held although you are not joining Vientiane', href: 'your-journey.html#scope' });
       });
       return out;

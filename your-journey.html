@@ -39,10 +39,10 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/aman.js?v=42ea411e"></script>
 <script src="assets/rooms-data.js?v=08435b54"></script>
 <script src="assets/pricing.js?v=e864296d"></script>
-<script src="assets/guest.js?v=ccd25409"></script>
-<script src="assets/draft.js?v=2eb57913"></script>
+<script src="assets/guest.js?v=dab9e334"></script>
+<script src="assets/draft.js?v=c2546d90"></script>
 <script src="assets/confirm.js?v=f35e0aa8"></script>
-<script src="assets/temple.js?v=9dcd5ec7"></script>
+<script src="assets/temple.js?v=a5a16527"></script>
 <script src="assets/rooms.js?v=468e54b1"></script>
 <script src="assets/arranged.js?v=d4ba78b8"></script>
 <script src="assets/stay.js?v=33ea56d6"></script>
@@ -294,7 +294,7 @@ function render(){
   if(SH)SH.foot(document.getElementById('foot'));
   /* what is still held outside the trip is released once per answer on this page — after a reload, on a second device, after a
      failed release (then the guest is told and may release again) */
-  if(G&&G.me()&&G.scopeAnswered()&&G.staleFor&&G.staleFor().length&&RECON!==scopeTag())reconcileScope()}
+  if(G&&G.me()&&G.scopeAnswered()&&!RECONCILING&&G.staleFor&&G.staleFor().length&&RECON!==scopeTag())reconcileScope()}
 
 function say(box,text,ok){var n=box&&box.querySelector('.p-rooms-note');if(n){n.textContent=text||'';n.classList.toggle('t-l1',false)}}
 function wire(){
@@ -364,24 +364,33 @@ function wireScope(sc){
 /* WHAT NO LONGER BELONGS LEAVES (Owner, 18 Sep 2026): a room held in a stage the guest is not joining is released through the
    engine, a Bag line of such a stage is removed, a seat for a wedding the guest is not attending is released — the guest's own
    resources only, through the existing paths, never another guest's. Idempotent: it releases only what is there. */
-var RECON='',RECON_FAILED=[];
+var RECON='',RECON_FAILED=[],RECONCILING=false,RECON_AGAIN=false;
 function scopeTag(){var G=window.SIYL_GUEST,s=G&&G.me()?G.scope():null;return s?JSON.stringify([s.bangkok,s.vientiane,s.china,s.none]):''}
 function reconcileScope(){
-  var G=window.SIYL_GUEST,S=window.SIYL_SEATS,s=G&&G.me()?G.scope():null;if(!s)return;
+  var G=window.SIYL_GUEST,S=window.SIYL_SEATS,U=window.SIYL_UNITS,s=G&&G.me()?G.scope():null;if(!s)return;
   var tag=JSON.stringify([s.bangkok,s.vientiane,s.china,s.none]);
+  /* ONE RECONCILIATION AT A TIME (Codex confirming pass, 18 Sep 2026): the guard is set before any mutation — a Bag removal
+     re-renders synchronously and render() must not re-enter; an answer changed while one runs is reconciled afterwards */
+  if(RECONCILING){RECON_AGAIN=true;return}
+  RECONCILING=true;RECON=tag;RECON_AGAIN=false;
   var jobs=[],failed=[];
   /* a release the engine refused or could not reach stays named (Codex final pass, 18 Sep 2026): the line stays, readiness
      names it, Review & Send waits, and the guest may release again */
   var track=function(name,pr){return pr.then(function(r){if(r&&r.ok===false)failed.push(name);return r},function(){failed.push(name);return null})};
+  var done={};
   SIYL_BAG.get().forEach(function(x){if(J.lineRelevant(x))return;
-    if(x.room&&!x.interest&&P.locate(x.id)){jobs.push(track(x.name||x.id,ST.remove(P.windowOf(x.id))))}else{SIYL_BAG.remove(x.id)}});
-  /* the seats: the ledger is read first when this page has not read it yet — a seat is released only when it is the guest's own */
-  if(!G.joins('vientiane')&&S){var me=G.me();var rel=function(){var inner=[];['ceremony','dinner'].forEach(function(ev){if(S.seatOf(ev,me.guestId))inner.push(track((ev==='ceremony'?'your ceremony seat':'your dinner seat'),S.release(ev,me.guestId)))});return Promise.all(inner)};
-    jobs.push(S.ready()?rel():S.load(true).then(function(v){if(v)return rel();failed.push('your seats');return null}))}
-  if(!G.joins('vientiane')&&window.SIYL_TEMPLE&&G.me()&&SIYL_TEMPLE.offeringOf(G.me().guestId)){SIYL_BAG.remove('sangkhathan')}
-  RECON=tag;
-  Promise.all(jobs).then(function(){RECON_FAILED=failed;render()});
-  if(!jobs.length){RECON_FAILED=[];render()}
+    if(x.room&&!x.interest&&P.locate(x.id)){var win=P.windowOf(x.id);done[U&&U.stageOf?U.stageOf(win+'/x'):win]=true;jobs.push(track(x.name||x.id,ST.remove(win)))}else{SIYL_BAG.remove(x.id)}});
+  /* an engine hold outside the trip with no Bag line of its own (a stale draft, a migration) is released through the engine as well */
+  if(U&&U.ready&&U.ready()&&U.view()){var mine=U.view().mine||{};Object.keys(mine).forEach(function(stage){if(done[stage])return;
+    var seg=J.SEGMENTS.filter(function(z){return z.key===stage||z.ids.indexOf(stage)>=0})[0];var rel=seg?J.relevant(seg):J.lineRelevant({id:stage});if(rel)return;
+    done[stage]=true;jobs.push(track(seg?seg.place:stage,U.leave(stage)))})}
+  /* the seats: the ledger is read first when this page has not read it yet — a seat is released only when it is the guest's own,
+     and only while the ledger is open (a frozen ledger is Guest Relations' to change: the decline is sent, the seat is theirs to release) */
+  if(!G.joins('vientiane')&&S){var me=G.me();var rel2=function(){var inner=[];if(!S.open()||S.frozen())return Promise.resolve([]);['ceremony','dinner'].forEach(function(ev){if(S.seatOf(ev,me.guestId))inner.push(track((ev==='ceremony'?'your ceremony seat':'your dinner seat'),S.release(ev,me.guestId)))});return Promise.all(inner)};
+    jobs.push(S.ready()?rel2():S.load(true).then(function(v){if(v)return rel2();failed.push('your seats');return null}))}
+  if(!G.joins('vientiane')&&SIYL_BAG.has&&SIYL_BAG.has('sangkhathan')){SIYL_BAG.remove('sangkhathan')}
+  var finish=function(){RECON_FAILED=failed;RECONCILING=false;render();if(RECON_AGAIN){RECON_AGAIN=false;RECON='';reconcileScope()}};
+  Promise.all(jobs).then(finish,finish);
 }
 
 /* ---- COMPLETE / ESSENTIAL JOURNEY: one confirmation, inside the shell's own

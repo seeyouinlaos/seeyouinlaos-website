@@ -194,8 +194,11 @@
     },
     anyAttending: function () { return this.attendees().length > 0; },
     /* the guest, when they chose to take part */
+    /* nobody who is not joining Vientiane prepares an offering — the Bag line follows the scope (the earlier answer stays on the
+       device for a reconsideration; Codex confirming pass, 18 Sep 2026) */
     offeringGuests: function () {
       var self = this;
+      if (this.participation()) return [];
       return people().filter(function (g) { return self.offeringOf(g.guestId); });
     },
     offerings: function () { return this.offeringGuests().length; },

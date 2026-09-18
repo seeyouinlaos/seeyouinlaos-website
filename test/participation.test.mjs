@@ -267,6 +267,8 @@ test('CODEX 011-2 · a guest not joining Vientiane sends no wedding attendance: 
   assert.equal(op.participation, 'Not joining this trip'); deq(op.guests[0].events, { temple: 'Not joining', coffee: 'Not joining', vows: 'Not joining', dinner: 'Not joining' });
   assert.equal(op.guests[0].temple, 'Not attending'); assert.equal(op.guests[0].sangkhathan, false); assert.equal(op.guests[0].sangkhathanState, 'Not applicable'); assert.equal(op.offerings, 0); deq(op.guests[0].open, []);
   G.setScope({ bangkok: true }); assert.equal(T.operational().participation, 'Not joining Vientiane'); assert.equal(T.operational().guests[0].events.vows, 'Not joining');
+  /* the offering line follows: the temple module's own sync never brings it back on a later page load (Codex confirming pass) */
+  deq(T.offeringGuests(), []); w.SIYL_BAG.put({ id: 'sangkhathan', name: 'Sangkhathan', price: 15, qty: 1 }); T.sync(); assert.equal(w.SIYL_BAG.has('sangkhathan'), false, 'the line leaves with the scope');
   /* the answers themselves stay on the device for a reconsideration */
   G.setScope({ vientiane: true }); assert.equal(T.operational().guests[0].events.dinner, 'Joining');
   /* the emails: an older record shape that still carries "Joining" answers with a scope outside Vientiane prints Not joining, no seat */
@@ -314,4 +316,77 @@ test('CODEX 011-5 · both emails carry My Favorite Flavor — and a migrated rec
   for (const [profile, want, not] of [[{ flavor: 'Pandan' }, 'My Favorite Flavor: Pandan', null], [{ treat: 'Coffee' }, 'My Favorite Flavor: Coffee', null], [{ treat: 'Mango sticky rice' }, null, 'Mango sticky rice'], [{ flavor: 'Pizza', treat: 'Milk' }, 'My Favorite Flavor: Milk', 'Pizza']]) {
     for (const m of compose(rec(profile))) { if (want) assert.ok(m.text.includes(want), want); if (not) assert.ok(!m.text.includes(not), 'never ' + not); assert.ok(!/Favourite:/.test(m.text), 'the retired label is gone'); }
   }
+});
+
+/* ---- CODEX CONFIRMING PASS (18 Sep 2026) — four findings, each a regression ---- */
+
+test('CODEX 011-6 · one reconciliation at a time: the guard is set before any mutation, a Bag removal re-rendering synchronously never re-enters, an answer changed meanwhile is reconciled afterwards; the offering line leaves only when it is in the Bag', () => {
+  const yj = src('your-journey.html');
+  const fn = yj.slice(yj.indexOf('function reconcileScope(){'), yj.indexOf('/* ---- COMPLETE / ESSENTIAL JOURNEY'));
+  assert.match(fn, /if\(RECONCILING\)\{RECON_AGAIN=true;return\}\n\s*RECONCILING=true;RECON=tag;RECON_AGAIN=false;\n\s*var jobs=\[\],failed=\[\];/, 'the guard and the tag are set before the first mutation');
+  assert.ok(fn.indexOf('RECONCILING=true') < fn.indexOf('SIYL_BAG.remove('), 'no Bag removal before the guard');
+  assert.match(fn, /var finish=function\(\)\{RECON_FAILED=failed;RECONCILING=false;render\(\);if\(RECON_AGAIN\)\{RECON_AGAIN=false;RECON='';reconcileScope\(\)\}\};\n\s*Promise\.all\(jobs\)\.then\(finish,finish\);/, 'the guard clears when every release has answered, then a queued answer runs once');
+  assert.match(fn, /if\(!G\.joins\('vientiane'\)&&SIYL_BAG\.has&&SIYL_BAG\.has\('sangkhathan'\)\)\{SIYL_BAG\.remove\('sangkhathan'\)\}/, 'the offering line is removed only when it exists — never on the earlier answer alone');
+  assert.match(yj, /&&!RECONCILING&&G\.staleFor&&G\.staleFor\(\)\.length&&RECON!==scopeTag\(\)\)reconcileScope\(\)/, 'render() never starts a reconciliation while one runs');
+});
+
+test('CODEX 011-7 · an engine hold outside the trip with no Bag line of its own is named and released through the engine — never stranded', async () => {
+  const rooms = new Rooms(doState());
+  const w = await livePage(PEGGY, rooms); const G = w.SIYL_GUEST, U = w.SIYL_UNITS, B = w.SIYL_BAG;
+  answerTheRest(w); G.setScope({ all: true });
+  /* the hold exists in the engine only (a stale draft, a migration): no Bag line */
+  const j = await rooms.fetch(new Request('https://x/api/rooms/join', { method: 'POST', headers: { 'x-siyl-identity': JSON.stringify(identity(PEGGY)) }, body: JSON.stringify({ invitationId: PEGGY.invitationId, guestId: PEGGY.guestId, key: 'prewed/heritage', label: 'A', name: 'Peggy' }) }));
+  assert.equal(j.status, 200); await U.load(true); assert.ok(U.mine('prewed'));
+  /* the sync brings the line back from the hold; a stale draft leaves it without its room — the reconciliation removes such a line
+     and the hold would be stranded were the engine's own holds not walked */
+  B.set(B.get().map((x) => { const c = Object.assign({}, x); delete c.room; return c; })); assert.equal(B.get()[0].room, undefined);
+  G.setScope({ vientiane: false });
+  assert.ok(G.staleFor().some((m) => m.key === 'release:prewed'), 'the line is named'); assert.equal(G.readiness().ok, false);
+  B.remove('prewed'); deq(B.get(), []); assert.ok(U.mine('prewed'), 'the hold is still the engine\'s');
+  assert.ok(G.staleFor().some((m) => m.key === 'release:room:prewed'), 'the hold is named on its own'); assert.equal(G.readiness().ok, false);
+  const r = await U.leave('prewed'); assert.equal(r.ok, true); assert.ok(!U.mine('prewed')); assert.equal(G.staleFor().length, 0); assert.ok(!G.missingFor('journey').some((m) => /^release:/.test(m.key)), 'nothing left to release');
+  const yj = src('your-journey.html');
+  assert.match(yj, /var mine=U\.view\(\)\.mine\|\|\{\};Object\.keys\(mine\)\.forEach\(function\(stage\)\{if\(done\[stage\]\)return;/, 'the planner walks the engine\'s own holds'); assert.match(yj, /jobs\.push\(track\(seg\?seg\.place:stage,U\.leave\(stage\)\)\)/, 'and releases each through the engine');
+  /* the hosts' fixed room is never such a hold: it is not in mine */
+  const HS = [{ guestId: 'G048', preferredName: 'Haruthai' }, { guestId: 'G049', preferredName: 'Suthep' }];
+  const h = await livePage(session({ guestId: 'G049', partyId: 'INV-001', partyName: 'Haruthai & Suthep', fullName: 'Suthep Test', preferredName: 'Suthep', members: HS, hosts: true, hostRole: 'GROOM' }), rooms);
+  h.SIYL_GUEST.setScope({ bangkok: false }); assert.equal(h.SIYL_GUEST.staleFor().length, 0, 'the arrangement is never named for release'); assert.equal(h.SIYL_UNITS.fixed('bkk-stay'), true);
+});
+
+test('CODEX 011-8 · a frozen seating ledger never blocks a truthful decline: the seat is Guest Relations\' to release, the decline is sent', () => {
+  const w = page({ auth: PEGGY }); const G = w.SIYL_GUEST, id = PEGGY.guestId;
+  answerTheRest(w); G.setScope({ bangkok: true });
+  const seats = { mine: { ceremony: { [id]: 'C-R-05-02' }, dinner: { [id]: 'D-T-05' } }, open: true, frozen: true };
+  w.SIYL_SEATS = { ready: () => true, seatOf: (ev, g) => (seats.mine[ev] || {})[g] || null, open: () => seats.open, frozen: () => seats.frozen, configured: () => true, view: () => seats, mine: () => seats.mine };
+  for (const k of ['bkk-stay']) w.SIYL_JOURNEY.skip(k, true, 'manual');
+  assert.equal(G.staleFor().length, 0, 'frozen: no blocker'); assert.equal(G.readiness().ok, true);
+  seats.frozen = false; assert.equal(G.staleFor().length, 2, 'open: both seats are named until released'); assert.equal(G.readiness().ok, false);
+  seats.open = false; assert.equal(G.staleFor().length, 0, 'closed: no blocker');
+  assert.match(src('your-journey.html'), /if\(!S\.open\(\)\|\|S\.frozen\(\)\)return Promise\.resolve\(\[\]\);/, 'the planner does not even try while the ledger is not the guest\'s to change');
+  assert.equal(w.SIYL_TEMPLE.operational().participation, 'Not joining Vientiane', 'what is sent says so');
+});
+
+test('CODEX 011-9 · the live edit is replayed onto the fetched copy — a removal made elsewhere never comes back, a line added here is added, a field changed here is changed, the rest is the server\'s', async () => {
+  const w = page({ auth: PEGGY, modules: ['assets/bag.js', 'assets/guest.js', 'assets/draft.js'] }); const R = w.SIYL_DRAFT._replay;
+  const j = JSON.stringify;
+  /* device A cached the train; device B removed it; during A's read the guest added 1872 here */
+  assert.equal(R('siyl.bag', j([{ id: 'train', price: 100 }]), j([{ id: 'train', price: 100 }, { id: '1872', price: 180 }]), j([])), j([{ id: '1872', price: 180 }]));
+  /* a line changed here replaces the server's copy of that line; the server's other lines stay */
+  assert.equal(R('siyl.bag', j([{ id: 'bkk-stay', room: null }]), j([{ id: 'bkk-stay', room: 'u-sathorn', unit: 'B' }]), j([{ id: 'bkk-stay', room: null }, { id: 'train' }])), j([{ id: 'bkk-stay', room: 'u-sathorn', unit: 'B' }, { id: 'train' }]));
+  /* a line removed here is removed from the server's copy too */
+  assert.equal(R('siyl.bag', j([{ id: 'train' }, { id: 'kmg' }]), j([{ id: 'kmg' }]), j([{ id: 'train' }, { id: 'kmg' }, { id: 'ljg' }])), j([{ id: 'kmg' }, { id: 'ljg' }]));
+  /* the decisions as a set */
+  assert.equal(R('siyl.skip', '["prewed"]', '["train"]', '["prewed","kmg"]'), '["kmg","train"]');
+  /* the record field by field: the scope set here, the contact from the server kept, a nested profile merged */
+  assert.equal(R('siyl.guest', '{}', j({ scope: { bangkok: true, at: 'x' } }), j({ contact: { email: 'a@b' } })), j({ contact: { email: 'a@b' }, scope: { bangkok: true, at: 'x' } }));
+  assert.equal(R('siyl.guest', j({ guests: { g: { profile: { drink: 'tea' } } } }), j({ guests: { g: { profile: { drink: 'tea', flavor: 'Milk' } } } }), j({ guests: { g: { profile: { drink: 'coffee', film: 'x' } } } })), j({ guests: { g: { profile: { drink: 'coffee', film: 'x', flavor: 'Milk' } } } }));
+  /* through the pull itself: the cached train is not resurrected, the 1872 added during the read is kept and pushed */
+  let resolveGet; const gets = [], puts = [];
+  const w2 = page({ auth: PEGGY, seed: { 'siyl.bag': j([{ id: 'train', price: 100 }]) }, modules: ['assets/bag.js', 'assets/guest.js', 'assets/journey.js', 'assets/draft.js'],
+    fetch: (url, init) => { if (!init || !init.method || init.method === 'GET') { gets.push(url); return new Promise((r) => { resolveGet = r; }); } puts.push(JSON.parse(init.body)); return Promise.resolve({ ok: true, status: 200, json: async () => ({ ok: true, draft: { keys: JSON.parse(init.body).keys, updatedAt: '2026-09-18T10:00:01.000Z', savedAt: '2026-09-18T10:00:01.000Z' } }) }); } });
+  const before = gets.length; const pulling = w2.SIYL_DRAFT.pull(); await Promise.resolve(); assert.equal(gets.length, before + 1);
+  w2.SIYL_BAG.put({ id: '1872', name: '1872', price: 180, qty: 1 });
+  resolveGet({ ok: true, status: 200, json: async () => ({ ok: true, draft: { keys: { 'siyl.bag': '[]' }, updatedAt: '2026-09-18T10:00:00.000Z', savedAt: '2026-09-18T10:00:00.000Z' } }) });
+  await pulling; await new Promise((r) => setTimeout(r, 0));
+  deq(JSON.parse(w2.localStorage.getItem('siyl.bag')).map((x) => x.id), ['1872'], 'the removal made elsewhere stands; the line added here is here');
 });

@@ -13,4 +13,17 @@ the verbatim first result (verdict: needs-attention, five findings). Classificat
 | 5 | [medium] Both emails still mapped the retired snack answer; the required flavour never reached Guest Relations | **VALID · P2** (fixed) | `src/mail-templates.js`: My Favorite Flavor with the client's migration rule (one of the six, or the snack answer only when it is one of the six). Regression `CODEX 011-5` |
 
 After the fixes: `npm test` 348 / 348 · release-check 24 gates · stage E2E release-011 51 / 51, P0 Empty Bag 49 / 49,
-account IA 33 / 33, sticky shell 320 checks · 0 failures. The confirming pass follows in `CODEX-REVIEW-2.md`.
+account IA 33 / 33, sticky shell 320 checks · 0 failures.
+
+## Confirming pass (`CODEX-REVIEW-2.md`, verdict: needs-attention, four findings)
+
+| # | Finding | Class | Action |
+|---|---|---|---|
+| 6 | [high] The reconciliation re-entered itself: a synchronous Bag removal re-rendered before the guard was set, and the earlier offering answer removed an absent line again and again — a release storm | **VALID · P1** | `reconcileScope` sets its guard and tag before any mutation, runs one at a time (an answer changed meanwhile is reconciled once afterwards), removes the offering line only when it exists; `render()` never starts one while one runs. The offering itself now follows the scope in `assets/temple.js` (`offeringGuests()` is empty for a guest not joining Vientiane, so its own sync never brings the line back on a later page). Regression `CODEX 011-6`; E2E `reentrancy-one-release-each` (one `leave`, two seat releases, nothing more) |
+| 7 | [medium] An engine hold without a Bag line of its own (a stale draft) was named but never released — stranded | **VALID · P2** (fixed) | the planner walks `SIYL_UNITS.view().mine` and releases every hold outside the trip through the engine (`U.leave`), the fixed arrangement excluded by construction (never in `mine`). Regression `CODEX 011-7` |
+| 8 | [medium] A frozen seating ledger made a truthful decline impossible to send | **VALID · P2** (fixed) | a seat counts as a blocker only while the ledger is open to the guest (`open && !frozen`); a frozen ledger's seat is Guest Relations' to release — the decline is sent and says Not joining. Regression `CODEX 011-8` |
+| 9 | [medium] The whole-key pull override could resurrect a line removed on another device (the device's older cache around the live edit) | **VALID · P2** (fixed) | `assets/draft.js` replays only the live edit onto the fetched copy: the Bag line by line (a line added or changed here is added, a line removed here is removed, a line the server no longer holds stays gone), the stage decisions as a set, every other record field by field. Regression `CODEX 011-9` (the reviewer's two-device case included) |
+
+No XSS, cross-guest or fixed-room finding in either pass. After the fixes: `npm test` 352 / 352 · release-check 24 gates ·
+stage E2E release-011 52 / 52, P0 Empty Bag 49 / 49, account IA 33 / 33, sticky shell 320 checks · 0 failures. A third,
+confirming pass follows in `CODEX-REVIEW-3.md`.

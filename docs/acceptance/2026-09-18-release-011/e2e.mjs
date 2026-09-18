@@ -98,6 +98,17 @@ const B2 = await fresh(); await signIn(B2, 'T002'); const jb = await api(B2, '/a
 await trip(C); await C.click('[data-scope="vientiane"]'); await C.waitForTimeout(1500); await C.click('[data-scope="vientiane"]'); await C.waitForTimeout(2500);
 const benAfter = (await engineMine(B2)).mine; note('other-guest-untouched', jb.status === 200 && benAfter && benAfter.prewed && benAfter.prewed.label === 'B', JSON.stringify(benAfter));
 
+/* ===== 4a · RE-ENTRANCY (Codex 011-6) and an engine-only hold (Codex 011-7): a Sangkhathan line, two seats and a room held in the engine alone, then Vientiane is left — one release each, no storm ===== */
+await trip(C); await C.click('[data-scope="vientiane"]'); await C.waitForTimeout(1500);
+const jr = await api(C, '/api/rooms/join', { method: 'POST', body: JSON.stringify({ invitationId: 'INV-T003', guestId: 'T003', key: 'prewed/heritage', label: 'A', name: 'Cleo' }) });
+for (const [ev, seatId] of [['ceremony', 'C-R-06-02'], ['dinner', 'D-T-06']]) await api(C, '/api/seating/select', { method: 'POST', body: JSON.stringify({ invitationId: 'INV-T003', guestId: 'T003', event: ev, seatId, name: 'Cleo' }) });
+await C.evaluate(() => { SIYL_TEMPLE.setAttendance(SIYL_GUEST.me().guestId, 'yes'); SIYL_TEMPLE.setOffering(SIYL_GUEST.me().guestId, 'yes'); SIYL_BAG.put({ id: 'sangkhathan', name: 'Sangkhathan', price: 15, qty: 1 }); });
+await trip(C); await C.evaluate(() => { const b = SIYL_BAG.get().filter((x) => x.id !== 'prewed'); SIYL_BAG.set(b); });   /* the room stays the engine's alone (a stale draft) */
+const counts = { leave: 0, release: 0, renders: 0 }; const onReq = (r) => { const u = r.url(); if (/\/api\/rooms\/leave/.test(u)) counts.leave++; if (/\/api\/seating\/release/.test(u)) counts.release++; }; C.on('request', onReq);
+await C.click('[data-scope="vientiane"]'); await C.waitForTimeout(4000); C.off('request', onReq);
+const re = { mine: (await engineMine(C)).mine, seats: seatsOf((await api(C, '/api/seating', { method: 'GET' })).body), bag: await C.evaluate(() => SIYL_BAG.get().map((x) => x.id)), need: await need(C), counts, failed: !!(await C.$('[data-scope-failed]')) };
+note('reentrancy-one-release-each', jr.status === 200 && !(re.mine && re.mine.prewed) && re.seats.length === 0 && !re.bag.includes('sangkhathan') && !re.need.keys.some((k) => /^release:/.test(k)) && re.counts.leave === 1 && re.counts.release === 2 && !re.failed, JSON.stringify(re));
+
 /* ===== 4b · A RELEASE THAT FAILS (Codex 011-1): the room stays, it is named, Review & Send waits, Release again resolves it ===== */
 await trip(C); await C.click('[data-scope="vientiane"]'); await C.waitForTimeout(1500);
 const jc2 = await api(C, '/api/rooms/join', { method: 'POST', body: JSON.stringify({ invitationId: 'INV-T003', guestId: 'T003', key: 'prewed/heritage', label: 'A', name: 'Cleo' }) });
