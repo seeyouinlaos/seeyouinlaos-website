@@ -179,8 +179,8 @@ test('F · the token never reaches the client, and the surface never confirms it
   assert.match(c, /noteReceived/);
   assert.doesNotMatch(c, /confirmed: true/, 'the client never writes the confirmed state');
   const rv = src('review.html');
-  assert.match(rv, /We have your journey/); assert.match(rv, /Your journey is confirmed/);
-  assert.match(rv, /Your confirmed journey/); assert.match(rv, /Your wedding card/);
+  assert.match(rv, /We have your trip/); assert.match(rv, /Your trip is confirmed/);
+  assert.match(rv, /Your confirmed trip/); assert.match(rv, /Your wedding card/);
   assert.doesNotMatch(rv, /Party journey confirmation|one decision for your party|For your party/);
   assert.doesNotMatch(rv, /BOOKING CONFIRMED|RESERVATION CONFIRMED|PAYMENT COMPLETE|ORDER CONFIRMED|boarding|barcode|<svg[^>]*qr/i);
   assert.match(rv, /var rowS=\(snap\.guests\|\|\[\]\)\[0\]/, 'the card comes from the snapshot that was SENT — never the live draft');
@@ -193,7 +193,7 @@ test('F · the token never reaches the client, and the surface never confirms it
    * of another device and is never told as one. */
   assert.match(rv, /were sent again from another device after this one, so they are not shown here/);
   assert.match(rv, /var later=!!\(mine&&held&&held>snap\.at\),elsewhere=!!\(held&&!mine\)/, 'another device only on a later stamp, or on no send from here');
-  assert.match(rv, /this device cannot tell which version it was/, 'with no stamp on the record, no device is claimed');
+  assert.match(rv, /this device cannot tell which copy it was/, 'with no stamp on the record, no device is claimed');
   assert.match(rv, /C\.receivedAt\(\)&&C\.receivedAt\(\)>sn\.at\)/, 'RECEIVED names a newer send only when the record is actually later');
 });
 

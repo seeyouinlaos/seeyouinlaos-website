@@ -370,7 +370,7 @@
         var C = window.SIYL_CONFIRM;
         /* a sent journey is complete only while steps 01–05 still are: what came undone comes first */
         if (!this.mayEnter('review')) { var fm = this.firstMissing(); out.push({ key: 'steps', label: 'Complete ' + (fm ? fm.step.n + ' · ' + fm.step.label : 'the earlier steps'), href: fm ? fm.href : 'invitation.html' }); }
-        else if (!(C && C.state() !== 'none')) out.push({ key: 'send', label: 'Send your journey to Guest Relations', href: 'review.html#send' });
+        else if (!(C && C.state() !== 'none')) out.push({ key: 'send', label: 'Send your trip to Guest Relations', href: 'review.html#send' });
         return out;
       }
       return out;

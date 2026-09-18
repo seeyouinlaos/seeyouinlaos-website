@@ -177,7 +177,7 @@
       if (!host) return;
       function paint() {
         var w = D.words(), ph = state.phase, t = state.at ? new Date(state.at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : '';
-        var status = ph === 'saving' ? 'Saving…' : ph === 'failed' ? 'Save failed · try again' : ph === 'stale' ? 'This device was out of date — showing your latest saved trip' : ph === 'saved' && t ? 'Saved · ' + t : '';
+        var status = ph === 'saving' ? 'Saving…' : ph === 'failed' ? 'Not saved · try again' : ph === 'stale' ? 'This device was out of date — showing your latest saved trip' : ph === 'saved' && t ? 'Saved · ' + t : '';
         host.innerHTML = '<p class="prep-state is-' + w.key + '" role="status"><b>' + esc(w.line) + '</b></p>' +
           (w.cta ? '<a class="prep-send-upd" href="' + (window.SIYL_PREP && SIYL_PREP.hrefOf ? SIYL_PREP.hrefOf('review.html') : 'review.html') + '">' + esc(w.cta) + '</a>' : '') +
           '<button type="button" class="prep-save-btn" data-save-progress' + (ph === 'saving' ? ' disabled' : '') + '>Save My Progress</button>' +

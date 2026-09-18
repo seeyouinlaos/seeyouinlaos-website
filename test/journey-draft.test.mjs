@@ -63,7 +63,7 @@ test('ONE LOGICAL JOURNEY · the first send sets the reference; a change afterwa
     const r1 = await h.w.fetch(req('/api/register', { 'x-siyl-auth': h.sam }, { invitationId: 'INV-G777', registration: REG('sam.example@example.org'), text: TEXT }), h.env);
     assert.equal(r1.status, 202); const d1 = await r1.json();
     assert.equal(d1.kind, 'initial'); assert.equal(d1.version, 1); assert.match(d1.submissionId, /^SYL-G777-[0-9A-F]{8}$/); assert.equal(d1.submission.submissionStatus, 'sent'); assert.equal(d1.submission.hasUnsentChanges, false);
-    assert.match(h.calls[0].body.subject, /^Journey received — Sam Example/); assert.match(h.calls[1].body.subject, /^Your Journey has been received — /);
+    assert.match(h.calls[0].body.subject, /^Trip received — Sam Example/); assert.match(h.calls[1].body.subject, /^Your trip has been received — /);
     let s = await state(); assert.equal(s.submissionStatus, 'sent'); assert.equal(s.submissionId, d1.submissionId);
     /* the same draft saved again (history stamps differ) is not a change */
     await put({ 'siyl.guest': GUEST({ coffeetea: 'Oolong' }).replace('"at":"x"', '"at":"z"'), 'siyl.bag': JSON.stringify([{ id: 'train' }]) });
@@ -75,8 +75,8 @@ test('ONE LOGICAL JOURNEY · the first send sets the reference; a change afterwa
     const r2 = await h.w.fetch(req('/api/register', { 'x-siyl-auth': h.sam }, { invitationId: 'INV-G777', registration: REG('sam.example@example.org', { registration_submitted_at: '2026-09-16T10:30:00.000Z' }), text: TEXT + '\n- Espresso' }), h.env);
     const d2 = await r2.json();
     assert.equal(d2.kind, 'update'); assert.equal(d2.version, 2); assert.equal(d2.submissionId, d1.submissionId, 'the same logical journey'); assert.equal(d2.submission.hasUnsentChanges, false); assert.equal(d2.submission.submissionStatus, 'sent');
-    assert.match(h.calls[2].body.subject, /^Journey updated — Sam Example · SYL-G777-/); assert.match(h.calls[3].body.subject, /^Your Journey has been updated — SYL-G777-/);
-    assert.match(h.calls[2].body.textContent, /Journey updated\n\nLatest version received .* \(replaces the version first sent 16 September 2026 · 12:00\)/); assert.match(h.calls[3].body.textContent, /replaces the previous version for review/); assert.doesNotMatch(h.calls[3].body.textContent, /version 2|2026-09-16T/, 'versioning stays internal for the guest');
+    assert.match(h.calls[2].body.subject, /^Trip updated — Sam Example · SYL-G777-/); assert.match(h.calls[3].body.subject, /^Your trip has been updated — SYL-G777-/);
+    assert.match(h.calls[2].body.textContent, /Trip updated\n\nLatest version received .* \(replaces the version first sent 16 September 2026 · 12:00\)/); assert.match(h.calls[3].body.textContent, /replaces the previous version for review/); assert.doesNotMatch(h.calls[3].body.textContent, /version 2|2026-09-16T/, 'versioning stays internal for the guest');
     assert.equal(d2.mailSummary.guestMessageId, '<msg-4@brevo>');
     const rec = JSON.parse(h.store.m.get('reg:INV-G777').v); assert.equal(rec.version, 2); assert.equal(rec.firstSentAt, '2026-09-16T10:00:00.000Z'); assert.ok(rec.lastSentAt > rec.firstSentAt);
     assert.equal([...h.store.m.keys()].filter((k) => k.startsWith('reg:INV-G777:prev:')).length, 1, 'the previous version is kept');
@@ -102,7 +102,7 @@ test('CLIENT · the draft module: autosave on every change, pull on sign-in, Sav
   assert.match(d, /var KEYS = \['siyl\.guest', 'siyl\.bag', 'siyl\.temple', 'siyl\.docs', 'siyl\.sent', 'siyl\.skip', 'siyl\.skip\.by'\];/);
   assert.match(d, /\['siyl:guest', 'siyl:bag', 'siyl:temple', 'siyl:docs'\]\.forEach\(function \(ev\) \{ document\.addEventListener\(ev, function \(\) \{ D\.touch\(\); \}\); \}\);/, 'autosave');
   assert.match(d, /document\.addEventListener\('siyl:auth', pullOnce\)/); assert.match(d, /if \(reason === 'save'\) \{/); assert.match(d, /the saved copy differs/);
-  assert.match(d, /closest\('\[data-continue\]'\)/); assert.match(d, /Save My Progress</); assert.match(d, /'Saving…'/); assert.match(d, /'Save failed · try again'/); assert.match(d, /'Saved · ' \+ t/);
+  assert.match(d, /closest\('\[data-continue\]'\)/); assert.match(d, /Save My Progress</); assert.match(d, /'Saving…'/); assert.match(d, /'Not saved · try again'/); assert.match(d, /'Saved · ' \+ t/);
   assert.match(d, /CHANGES SAVED · NOT YET SENT TO GUEST RELATIONS/); assert.match(d, /'Send Updated Trip'/); assert.match(d, /'Sent to Guest Relations · Reference ' \+ s\.submissionId/); assert.match(d, /saved as draft/);
   assert.match(sh, /SIYL_DRAFT\.mount\(bar\.querySelector\('\[data-prep-save\]'\)\)/);
   for (const f of ['about-you.html', 'cart.html', 'invitation.html', 'review.html', 'tickets.html', 'transport.html', 'wedding-preparation.html', 'wedding.html', 'your-journey.html', 'room.html', 'journeys.html']) assert.match(src(f), /assets\/draft\.js/, f + ' loads the draft module');

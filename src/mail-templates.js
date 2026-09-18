@@ -132,7 +132,7 @@ function shell(title, inner, eyebrow) {
     '<tr><td class="pad" style="padding:36px 40px 32px;">' +
     /* the header: the wordmark, YOUR JOURNEY, a thin rule */
     '<p style="margin:0 0 4px;font-family:' + SERIF + ';font-size:22px;line-height:1.2;color:' + INK + ';">see you in laos<span style="color:#8a5a55;">.</span></p>' +
-    '<p style="margin:0 0 22px;font-family:' + SANS + ';font-size:10px;letter-spacing:2.4px;text-transform:uppercase;color:' + MUTE + ';">' + esc(eyebrow || 'Your journey') + '</p>' +
+    '<p style="margin:0 0 22px;font-family:' + SANS + ';font-size:10px;letter-spacing:2.4px;text-transform:uppercase;color:' + MUTE + ';">' + esc(eyebrow || 'My Trip') + '</p>' +
     '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">' + rule() + gap(22) + '</table>' +
     inner +
     '</td></tr></table>' +
@@ -167,26 +167,26 @@ function journeySections(M, forOwner) {
 /* ---- THE GUEST EMAIL ---- */
 export function composeGuestMail(record) {
   const M = journeyModel(record);
-  const subject = (M.upd ? 'Your Journey has been updated — ' : 'Your Journey has been received — ') + M.reference;
+  const subject = (M.upd ? 'Your trip has been updated — ' : 'Your trip has been received — ') + M.reference;
   const intro = M.upd
-    ? 'Your latest changes have been saved and sent to Guest Relations. This updated journey replaces the previous version for review.'
-    : 'Thank you — your journey has reached Guest Relations. Your selections are saved, and we’ll review each arrangement personally with you.';
+    ? 'Your latest changes have been saved and sent to Guest Relations. This updated trip replaces the previous version for review.'
+    : 'Thank you — your trip has reached Guest Relations. Your selections are saved, and we’ll review each arrangement personally with you.';
   let inner = '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td>' +
-    h1(M.upd ? 'Your journey has been updated' : 'Your journey has been received') +
+    h1(M.upd ? 'Your trip has been updated' : 'Your trip has been received') +
     para('Dear ' + esc(M.firstName) + ',') + para(esc(intro)) +
     '</td></tr>' + gap(10) +
     '<tr><td>' + kvTable([kvRow('Reference', M.reference), kvRow(M.upd ? 'Updated' : 'Sent', whenWords(M.sentAt))]) + '</td></tr>' + gap(14) + rule() +
     journeySections(M, false);
   if (M.total != null) inner += section('Your cost', '<p style="margin:4px 0 10px;font-family:' + SERIF + ';font-size:30px;line-height:1.2;color:' + INK + ';">' + esc(money(M.total)) + '</p>' +
     small('Nothing is paid on the website. Guest Relations confirms each arrangement with you personally.') +
-    small('Tak Bat, the morning alms-giving, is a personal offering and not part of the journey cost. The Sangkhathan is an optional personal offering.'));
-  inner += '<tr><td style="padding:30px 0 10px;">' + button(SITE + '/invitation', 'Open your journey') + '</td></tr>' +
+    small('Tak Bat, the morning alms-giving, is a personal offering and not part of your trip cost. The Sangkhathan is an optional personal offering.'));
+  inner += '<tr><td style="padding:30px 0 10px;">' + button(SITE + '/invitation', 'Open My Trip') + '</td></tr>' +
     '<tr><td>' + small('Use your own invitation code to sign in. For privacy, invitation codes are never sent by email.') +
     small('Guest Relations<br><a href="mailto:' + GR_EMAIL + '" style="color:' + INK + ';text-decoration:none;">' + GR_EMAIL + '</a>') + '</td></tr></table>';
   const html = shell(subject, inner);
   /* the plain-text fallback: the same facts, in order */
   const T = [];
-  T.push('SEE YOU IN LAOS — YOUR JOURNEY', '', M.upd ? 'Your journey has been updated' : 'Your journey has been received', '', 'Dear ' + M.firstName + ',', '', intro, '',
+  T.push('SEE YOU IN LAOS — MY TRIP', '', M.upd ? 'Your trip has been updated' : 'Your trip has been received', '', 'Dear ' + M.firstName + ',', '', intro, '',
     'Reference: ' + M.reference, (M.upd ? 'Updated: ' : 'Sent: ') + whenWords(M.sentAt), '');
   if (M.travel.length) { T.push('TRAVEL'); M.travel.forEach((t) => T.push('· ' + t.name + ' — ' + t.meta + (t.price != null ? ' — ' + money(t.price) : ''))); T.push(''); }
   if (M.arranged.length) { T.push('ARRANGED FOR YOU'); M.arranged.forEach((a) => T.push('· ' + a.name + ' — ' + a.room + (a.category ? ' — ' + a.category : '') + ' — fixed arrangement, not part of your bag')); T.push(''); }
@@ -195,22 +195,22 @@ export function composeGuestMail(record) {
   T.push('WEDDING'); M.wedding.forEach((e) => T.push('· ' + e.label + ' · ' + e.when + ' · ' + e.place + ': ' + (e.answer || '—'))); if (M.sangkhathan) T.push('· Sangkhathan: ' + M.sangkhathan); T.push('');
   if (M.seats.ceremony.label || M.seats.dinner.label) { T.push('YOUR SEATS'); if (M.seats.ceremony.label) T.push('· Wedding Ceremony · Souphattra Heritage · 15:30: ' + (/^Front/.test(M.seats.ceremony.label) ? M.seats.ceremony.label : 'Seat ' + M.seats.ceremony.label)); if (M.seats.dinner.label) T.push('· Wedding Dinner · Souphattra Heritage · 19:30: Seat ' + M.seats.dinner.label); T.push(''); }
   if (M.allergy || M.profile.length || M.acks.length) { T.push('ABOUT YOU'); if (M.allergy) T.push('· Food allergies: ' + (M.allergy === 'yes' ? (M.allergyDetails || 'Yes') : 'None')); M.profile.forEach((p) => T.push('· ' + p.label + ': ' + p.value)); M.acks.forEach(([k, v]) => T.push('· ' + k + ': ' + v)); T.push(''); }
-  if (M.total != null) T.push('YOUR COST', money(M.total), 'Nothing is paid on the website. Guest Relations confirms each arrangement with you personally.', 'Tak Bat, the morning alms-giving, is a personal offering and not part of the journey cost. The Sangkhathan is an optional personal offering.', '');
-  T.push('Open your journey: ' + SITE + '/invitation', 'Use your own invitation code to sign in. For privacy, invitation codes are never sent by email.', '', 'Guest Relations · ' + GR_EMAIL, '', 'see you in laos. · Vientiane · 28 February 2027');
+  if (M.total != null) T.push('YOUR COST', money(M.total), 'Nothing is paid on the website. Guest Relations confirms each arrangement with you personally.', 'Tak Bat, the morning alms-giving, is a personal offering and not part of your trip cost. The Sangkhathan is an optional personal offering.', '');
+  T.push('Open My Trip: ' + SITE + '/invitation', 'Use your own invitation code to sign in. For privacy, invitation codes are never sent by email.', '', 'Guest Relations · ' + GR_EMAIL, '', 'see you in laos. · Vientiane · 28 February 2027');
   return { subject, html, text: T.join('\n') };
 }
 
 /* ---- THE GUEST RELATIONS EMAIL ---- */
 export function composeOwnerMail(record, statusUrl) {
   const M = journeyModel(record);
-  const subject = (M.upd ? 'Journey updated — ' : 'Journey received — ') + M.fullName + ' · ' + M.reference;
+  const subject = (M.upd ? 'Trip updated — ' : 'Trip received — ') + M.fullName + ' · ' + M.reference;
   const docsRows = M.docs.map((d) => kvRow(d.label, d.state)).concat(M.publication ? [kvRow('Publication of photographs', M.publication)] : []);
   const missing = M.docs.filter((d) => /not provided/i.test(d.state)).map((d) => d.label);
   let inner = '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td>' +
-    h1(M.upd ? 'Journey updated' : 'New journey received') + '</td></tr>' +
-    (M.upd ? '<tr><td>' + label('Updated journey') + para('Latest version received ' + esc(whenWords(M.sentAt)) + '. It replaces the version first sent ' + esc(whenWords(M.firstSentAt)) + '.') + '</td></tr>' : '') +
-    '<tr><td>' + kvTable([kvRow('Guest', M.fullName + (M.guestId ? ' · ' + M.guestId : '')), M.partyName ? kvRow('Party', M.partyName) : '', kvRow('Email', M.contact.email || '—'), kvRow('Mobile', M.contact.phone || '—'),
-      kvRow('Reference', M.reference), kvRow('Status', M.upd ? 'Updated journey' : 'Initial submission'), kvRow(M.upd ? 'Updated' : 'Sent', whenWords(M.sentAt))].filter(Boolean)) + '</td></tr>' + gap(14) + rule() +
+    h1(M.upd ? 'Trip updated' : 'New trip received') + '</td></tr>' +
+    (M.upd ? '<tr><td>' + label('Updated trip') + para('Latest version received ' + esc(whenWords(M.sentAt)) + '. It replaces the version first sent ' + esc(whenWords(M.firstSentAt)) + '.') + '</td></tr>' : '') +
+    '<tr><td>' + kvTable([kvRow('Guest', M.fullName), M.partyName ? kvRow('Party', M.partyName) : '', kvRow('Email', M.contact.email || '—'), kvRow('Mobile', M.contact.phone || '—'),
+      kvRow('Reference', M.reference), kvRow('Status', M.upd ? 'Updated trip' : 'Initial submission'), kvRow(M.upd ? 'Updated' : 'Sent', whenWords(M.sentAt))].filter(Boolean)) + '</td></tr>' + gap(14) + rule() +
     journeySections(M, true);
   if (docsRows.length) inner += section('Documents', kvTable(docsRows) + (missing.length ? '<p style="margin:10px 0 0;font-family:' + SANS + ';font-size:13px;color:' + INK + ';">Still needed: ' + esc(missing.join(', ')) + '</p>' : ''));
   if (M.total != null) inner += section('Cost', '<p style="margin:4px 0 6px;font-family:' + SERIF + ';font-size:26px;color:' + INK + ';">' + esc(money(M.total)) + '</p>' + small('The guest’s contribution as the website calculates it — nothing paid on the website.'));
@@ -219,9 +219,9 @@ export function composeOwnerMail(record, statusUrl) {
   inner += '</table>';
   const html = shell(subject, inner, 'Guest Relations');
   const T = [];
-  T.push('SEE YOU IN LAOS — GUEST RELATIONS', '', M.upd ? 'Journey updated' : 'New journey received', '');
+  T.push('SEE YOU IN LAOS — GUEST RELATIONS', '', M.upd ? 'Trip updated' : 'New trip received', '');
   if (M.upd) T.push('Latest version received ' + whenWords(M.sentAt) + ' (replaces the version first sent ' + whenWords(M.firstSentAt) + ')', '');
-  T.push('Guest: ' + M.fullName + (M.guestId ? ' · ' + M.guestId : ''), M.partyName ? 'Party: ' + M.partyName : '', 'Email: ' + (M.contact.email || '—'), 'Mobile: ' + (M.contact.phone || '—'), 'Reference: ' + M.reference, 'Status: ' + (M.upd ? 'Updated journey' : 'Initial submission'), (M.upd ? 'Updated: ' : 'Sent: ') + whenWords(M.sentAt), '');
+  T.push('Guest: ' + M.fullName, M.partyName ? 'Party: ' + M.partyName : '', 'Email: ' + (M.contact.email || '—'), 'Mobile: ' + (M.contact.phone || '—'), 'Reference: ' + M.reference, 'Status: ' + (M.upd ? 'Updated trip' : 'Initial submission'), (M.upd ? 'Updated: ' : 'Sent: ') + whenWords(M.sentAt), '');
   if (M.travel.length) { T.push('TRAVEL'); M.travel.forEach((t) => T.push('· ' + t.name + ' — ' + t.meta + ' — ' + money(t.price))); T.push(''); }
   if (M.arranged.length) { T.push('ARRANGED FOR YOU'); M.arranged.forEach((a) => T.push('· ' + a.name + ' — ' + a.room + (a.category ? ' — ' + a.category : '') + ' — fixed arrangement')); T.push(''); }
   if (M.stays.length) { T.push('STAYS'); M.stays.forEach((x) => T.push('· ' + x.name + ' — ' + x.dates + (x.category ? ' — ' + x.category : '') + (x.room ? ' — ' + x.room : '') + ' — ' + money(x.price) + (x.note ? ' (' + x.note + ')' : ''))); T.push(''); }

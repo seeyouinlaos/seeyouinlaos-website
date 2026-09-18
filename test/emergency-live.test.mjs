@@ -40,10 +40,10 @@ test('EMAIL · the journey is stored first with a submission id, then Guest Rela
     /* the two emails: Guest Relations first with the required fields, then the guest — the same reference, never an access code */
     assert.equal(h.calls.length, 2);
     const owner = h.calls[0].body, guest = h.calls[1].body;
-    assert.equal(owner.to[0].email, 'guest.relation.seeyouinlaos@gmail.com'); assert.match(owner.subject, /Journey received — Peggy Berger · SYL-G001-/);
-    for (const k of ['Guest: Peggy Berger · G001', 'Invitation: INV-G001', 'Reference: ' + d.submissionId, 'Sent: ', 'Wedding Ceremony: Seat R2 · 3', 'Wedding Dinner: Seat B12', 'Email: peggy.test@example.com', 'COST\nUSD 355', 'Status: ' + ORIGIN + '/api/status?invitation=INV-G001', 'Special Express No. 25']) assert.ok(owner.textContent.includes(k), 'owner email carries ' + k);
-    assert.equal(guest.to[0].email, 'peggy.test@example.com'); assert.match(guest.subject, /^Your Journey has been received — SYL-G001-/);
-    for (const k of ['Your journey has been received', 'Dear Peggy,', 'Reference: ' + d.submissionId, 'Sent: ', 'Seat B12', 'Special Express No. 25', ORIGIN + '/invitation', 'never sent by email', 'guest.relation.seeyouinlaos@gmail.com']) assert.ok(guest.textContent.includes(k), 'guest email carries ' + k);
+    assert.equal(owner.to[0].email, 'guest.relation.seeyouinlaos@gmail.com'); assert.match(owner.subject, /Trip received — Peggy Berger · SYL-G001-/);
+    for (const k of ['Guest: Peggy Berger', 'Invitation: INV-G001', 'Reference: ' + d.submissionId, 'Sent: ', 'Wedding Ceremony: Seat R2 · 3', 'Wedding Dinner: Seat B12', 'Email: peggy.test@example.com', 'COST\nUSD 355', 'Status: ' + ORIGIN + '/api/status?invitation=INV-G001', 'Special Express No. 25']) assert.ok(owner.textContent.includes(k), 'owner email carries ' + k);
+    assert.equal(guest.to[0].email, 'peggy.test@example.com'); assert.match(guest.subject, /^Your trip has been received — SYL-G001-/);
+    for (const k of ['Your trip has been received', 'Dear Peggy,', 'Reference: ' + d.submissionId, 'Sent: ', 'Seat B12', 'Special Express No. 25', ORIGIN + '/invitation', 'never sent by email', 'guest.relation.seeyouinlaos@gmail.com']) assert.ok(guest.textContent.includes(k), 'guest email carries ' + k);
     assert.ok(owner.htmlContent && guest.htmlContent, 'both emails carry the CI HTML'); assert.match(guest.htmlContent, /see you in laos<span style="color:#8a5a55;">\.<\/span>/); assert.doesNotMatch(guest.textContent + guest.htmlContent, /2026-09-16T|INV-G001|(?<!SYL-)G001\b|ledger|engine/); assert.match(guest.textContent, /Sent: \d+ \w+ 2026 · \d\d:\d\d/);
     assert.doesNotMatch(owner.textContent + guest.textContent, /demo-peggy|x-siyl-auth|bearer/i);
     assert.equal(h.calls[0].auth, 'x'); assert.equal(h.calls[0].body.sender.email, 'guest.relation.seeyouinlaos@gmail.com');
@@ -99,7 +99,7 @@ test('EMAIL · a provider that refuses (or none configured) never loses the book
   } finally { n.done(); }
   /* the client: the saved-but-not-mailed words and the retry that never re-submits */
   const rv = src('review.html');
-  assert.match(rv, /l\.textContent='Your journey is saved';/); assert.match(rv, /'! Confirmation email could not be sent'/); assert.match(rv, /id="mail-retry" hidden>Retry confirmation email<\/button>/);
+  assert.match(rv, /l\.textContent='Your trip is saved';/); assert.match(rv, /'! Confirmation email could not be sent'/); assert.match(rv, /id="mail-retry" hidden>Retry confirmation email<\/button>/);
   assert.match(rv, /var RETRY_URL=SUBMIT_URL\+'\/mail-retry';/); assert.match(rv, /paintMail\(ans&&ans\.mail,ans&&ans\.submissionId,ans\);/);
   assert.doesNotMatch(src('src/worker.js'), /mailchannels/i, 'the retired provider is gone');
 });

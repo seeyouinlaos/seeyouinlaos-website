@@ -148,7 +148,7 @@ test('the mode actions are three different weights, and all are 44 px targets', 
   const sys = readFileSync(join(ROOT, 'assets/prep.css'), 'utf8');
   /* FULL EXPERIENCE — the bordered block (the system's quiet primary action) */
   assert.match(yj, /class="p-act quiet" id="fxb"/, 'Full Experience must be the primary block');
-  assert.match(yj, /The complete journey/, 'the primary action must say what it does');
+  assert.match(yj, /The complete trip/, 'the primary action must say what it does');
   const quiet = sys.slice(sys.indexOf('.p-act.quiet {'), sys.indexOf('}', sys.indexOf('.p-act.quiet {')));
   assert.match(quiet, /background: none; color: var\(--p-ink\)/, 'the quiet primary is a bordered block');
   assert.match(sys, /--p-act-h: 52px/, 'every primary action is a real block target');

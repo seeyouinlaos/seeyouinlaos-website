@@ -47,7 +47,7 @@
       duration: '5h 20m door to door · 1h 30m in Kunming', dates: '06 March 2027', route: 'Lijiang → Kunming → Bangkok', cls: 'Economy flexible' }
   };
   var ORDER = ['train', 'mu9646', 'c86', 'return'];
-  var STATE_WORDS = { selected: 'Selected · in your journey', sent: 'Sent to Guest Relations', confirmed: 'Confirmed by Guest Relations' };
+  var STATE_WORDS = { selected: 'Selected · in My Bag', sent: 'Sent to Guest Relations', confirmed: 'Confirmed by Guest Relations' };
   var ALPHA = '23456789BCDFGHJKMNPQRSTVWXZ';
 
   function esc(t) { return String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
@@ -149,7 +149,7 @@
         if (b.getAttribute('aria-disabled') === 'true') return;
         var was = b.textContent; b.setAttribute('aria-disabled', 'true'); b.textContent = 'Preparing…';
         var r = deliver(b.getAttribute('data-travel-pass'));
-        b.removeAttribute('aria-disabled'); b.textContent = r && r.ok ? 'Downloaded · again?' : (r && r.error === 'not selected' ? 'Not in your journey' : was);
+        b.removeAttribute('aria-disabled'); b.textContent = r && r.ok ? 'Downloaded · again?' : (r && r.error === 'not selected' ? 'Not in My Bag' : was);
       });
     });
   }
@@ -212,9 +212,9 @@
     y -= 28;
     drawPass(p, doc, { x: M, y: y - TICKET_H, w: Wd, h: TICKET_H }); y -= TICKET_H + 28;
     var notes = ['This travel pass records your selection for the wedding journey of Haruthai & Suthep as it stands at the time of download.',
-      doc.state === 'confirmed' ? 'Guest Relations has confirmed this arrangement. The carrier\u2019s ticket follows from Guest Relations.' : doc.state === 'sent' ? 'Guest Relations has received your journey. The arrangement is confirmed with you personally; the carrier\u2019s ticket follows from Guest Relations.' : 'Nothing is paid on this website. Guest Relations confirms the arrangement with you personally; the carrier\u2019s ticket follows from Guest Relations.',
+      doc.state === 'confirmed' ? 'Guest Relations has confirmed this arrangement. The carrier\u2019s ticket follows from Guest Relations.' : doc.state === 'sent' ? 'Guest Relations has received your trip. The arrangement is confirmed with you personally; the carrier\u2019s ticket follows from Guest Relations.' : 'Nothing is paid on this website. Guest Relations confirms the arrangement with you personally; the carrier\u2019s ticket follows from Guest Relations.',
       'The code carries this pass: the reference, your first name, the leg, the date and the class. It is not the carrier\u2019s ticket.',
-      'If you change your journey, download this pass again; the newer one is the one that counts.'];
+      'If you change your trip, download this pass again; the newer one is the one that counts.'];
     notes.forEach(function (n) { W.wrap(n, 9.5, 'F3', Wd).forEach(function (line) { p.text(M, y, line, 'F3', 9.5, MUTE); y -= 14; }); });
     p.label(M, W.SAFE.y + 14, 'Downloaded ' + doc.downloadedAt.replace('T', ' ').slice(0, 16) + ' UTC');
     p.label(M + Wd, W.SAFE.y + 14, 'Thailand · Laos · China · 21 February – 8 March 2027', 'right');

@@ -99,7 +99,7 @@
       if (mine) return 'Your place is held · ' + this.unitName(list.filter(function (u) { return u.label === mine.label; })[0] || { kind: 'room', label: mine.label });
       if (this.reserved(win, slug)) return 'Reserved · ' + s.reservedFor;
       var free = s.remainingPlaces, rooms = s.remainingRooms;
-      if (s.soldOut || free <= 0) return 'Fully booked';
+      if (s.soldOut || free <= 0) return 'Sold out';
       if (s.kind === 'property') return free === 1 ? '1 place available' : free + ' places available';
       return (rooms === 1 ? '1 room' : rooms + ' rooms') + ' · ' + (free === 1 ? '1 place available' : free + ' places available');
     },
@@ -113,7 +113,7 @@
     ctaWords: function (win, slug) {
       if (!this.tracked(win, slug) || this.fits(win, slug)) return '';
       if (this.reserved(win, slug)) return 'Reserved';
-      if (this.soldOut(win, slug)) return 'Fully booked';
+      if (this.soldOut(win, slug)) return 'Sold out';
       return 'Your room is fixed';
     },
     scarce: function (win, slug) { var s = this.summary(win, slug); return !!s && s.free > 0 && s.free <= 2; },

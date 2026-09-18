@@ -182,10 +182,10 @@ test('SÜHRING — Your Journey and Review & Send carry the request with its cal
   const yj = src('your-journey.html'), rv = src('review.html'), page = src('experience.html');
   assert.doesNotMatch(yj, /Participating guests|data-q=/, 'no participant stepper: one guest, one request');
   assert.match(yj, /if\(x\.exp\)return 'experience\.html\?id='/);
-  assert.match(rv, /RESTAURANT REQUEST \(USD 180 per person; to be arranged through Guest Relations; not a confirmed reservation\)/);
+  assert.match(rv, /RESTAURANT REQUEST \(USD 180 per person; to be arranged through Guest Relations; not a reservation\)/);
   assert.doesNotMatch(rv, /not in the journey total/);
   assert.match(page, /data-sel-state="current" aria-current="true">Current selection · /);
-  assert.match(page, /Add to your journey · ' \+ money\(s\.price\)/);
+  assert.match(page, /Add to My Bag · ' \+ money\(s\.price\)/);
   assert.match(page, /it\.qty = 1; it\.request = true; it\.exp = x\.id;/);
 });
 
@@ -194,8 +194,8 @@ test('SÜHRING — never described as a confirmed reservation, a confirmed table
     const t = src(f);
     assert.doesNotMatch(t, /reservation confirmed|table confirmed|availability (is )?guaranteed|confirmed table|guaranteed availability/i, f);
   }
-  assert.match(src('experience.html'), /not a confirmed reservation, and availability is not guaranteed by this page/);
-  assert.match(src('assets/pricing.js'), /not a confirmed reservation/);
+  assert.match(src('experience.html'), /not a reservation — availability is not guaranteed by this page/);
+  assert.match(src('assets/pricing.js'), /a request, not a reservation/);
 });
 
 /* ONE FOOTER, TWO BUILDERS (15 Sep 2026): the public pages build their footer in assets/recon.js, the

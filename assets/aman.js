@@ -44,7 +44,7 @@
       ['Vow Ceremony', 'voyage.html#vows'],
       ['Wedding Dinner', 'voyage.html#dinner']
     ]],
-    ['Your Journey', 'your-journey.html', null]
+    ['My Trip', 'your-journey.html', null]
   ];
 
   /* clean paths on one deployment, file names on the other — same page */

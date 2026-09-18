@@ -83,7 +83,7 @@
      * The wording comes from SIYL_PRICE: one calculation, one vocabulary. */
     meta: function (x) {
       var P = window.SIYL_PRICE;
-      if (x.interest && x.id !== 'airbnb-2br') return { cat: 'Wellness', basis: 'Interest · confirmed and payable at the spa', unit: 'treatment' };
+      if (x.interest && x.id !== 'airbnb-2br') return { cat: 'Wellness', basis: 'Interest · Marsilea Spa confirms the time · payable at the spa', unit: 'treatment' };
       if (!P) return { cat: '', basis: '', unit: 'guest' };
       var f = P.FLAT[x.id];
       if (f) {
@@ -321,7 +321,7 @@
     /* quiet editorial status line — never a progress meter */
     statusLine: function () {
       var n = this.open().length;
-      if (!n) return 'Your journey is ready.';
+      if (!n) return 'Your trip is ready.';
       return n === 1 ? 'One detail left to choose.' : n + ' details to choose.';
     }
   };

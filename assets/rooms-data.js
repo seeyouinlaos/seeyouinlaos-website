@@ -217,7 +217,7 @@
         bagName: 'Private Residence · Vientiane', bagImg: 'assets/images/airbnb/airbnb-01.jpg' }],
       includes: [
         'Two nights, 27 → 28 February and 28 February → 1 March, for the wedding window.',
-        'Complimentary — USD 0 payable by you. Up to six guests in total, and the ledger holds the places live.',
+        'Complimentary — nothing to pay. Up to six guests in total; places are held as they are taken.',
         'Guest Relations coordinates the keys, the arrival and the return personally.',
         'Breakfast, meals and transport in Vientiane are your own.'
       ],

@@ -74,7 +74,7 @@ test('WEDDING (VOW) CEREMONY · Souphattra Heritage · Sunday, 28 February 2027 
   const party = { invitationId: 'INV-G001', partyName: 'Peggy & Steffie', hosts: false, guests: [{ guestId: 'G001', fullName: 'Peggy Demo', preferredName: 'Peggy' }] };
   const doc = PASS.docFor(party, 'G001', { ceremony: { G001: 'C-R-04-02' }, dinner: {} }, ['ceremony'], '2026-09-15T10:00:00.000Z');
   const pay = PASS.payload(doc, doc.seats[0]);
-  assert.match(pay, /^SEE YOU IN LAOS\nSEAT TICKET SYL-WC-E4-[A-Z0-9]{4}\nPeggy\nVow Ceremony\nSunday, 28 February 2027 · 15:30\nSeat E4 · Right block · row 4\nCONFIRMED$/, 'the QR payload maps to the Wedding Ceremony');
+  assert.match(pay, /^SEE YOU IN LAOS\nSEAT TICKET SYL-WC-E4-[A-Z0-9]{4}\nPeggy\nVow Ceremony\nSunday, 28 February 2027 · 15:30\nSeat E4 · Right block · row 4\nHELD$/, 'the QR payload maps to the Wedding Ceremony');
   const pdf = PASS.compose(doc);
   for (const t of ['Vow Ceremony', 'Sunday, 28 February 2027 \\267 15:30', 'Souphattra Heritage, Vientiane', 'SYL-WC-E4-']) assert.ok(pdf.includes(t), 'PDF: ' + t);
   assert.doesNotMatch(pdf, /Temple|Wat Ong Teu|08:00|09:00/, 'no wedding seat ticket says Wat Ong Teu or a morning time');

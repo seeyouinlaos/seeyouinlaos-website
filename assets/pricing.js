@@ -66,7 +66,7 @@
      * never a confirmed reservation, no availability promised. */
     'suhring': { price: 180, cat: 'Restaurant', name: 'Sühring',
                 meta: 'Lunch · German fine dining · Bangkok', img: 'assets/images/experiences/bkk-suhring-01.jpg',
-                basis: 'USD 180 per person · a table requested through Guest Relations · not a confirmed reservation' },
+                basis: 'USD 180 per person · a table requested through Guest Relations · a request, not a reservation' },
     '1872':   { price: 180, cat: 'Experience', unit: 'experience',
                 basis: 'USD 180 per experience · for two guests' },
     /* The Sangkhathan is NOT an admission, a ticket or a hosted wedding cost.
@@ -312,7 +312,7 @@
     lineBasis: function (x) {
       var f = FLAT[x.id];
       if (f) return f.basis;
-      if (x.interest) return 'Interest · confirmed and payable at the spa';
+      if (x.interest) return 'Interest · Marsilea Spa confirms the time · payable at the spa';
       /* a hosted line carries its own COMPLIMENTARY note — it must never also
        * read "Amount on request", which would suggest the price is unknown */
       if (x.complimentary) return '';

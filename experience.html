@@ -71,7 +71,7 @@
 <main class="x-wrap" id="x"></main>
 <script src="assets/experiences.js?v=7d9bdafc"></script>
 <script src="assets/experience-galleries.js?v=b9fce11a"></script>
-<script src="assets/pricing.js?v=ca8f5f5b"></script>
+<script src="assets/pricing.js?v=e864296d"></script>
 <script src="assets/bag.js?v=ee697358"></script>
 <script src="assets/gallery.js?v=85069204"></script>
 <script>
@@ -128,9 +128,9 @@
   /* the Journey action — one place carries it, by Owner decision: the Afternoon
    * Tea pattern, priced per participating guest by the one calculation source */
   if (x.select) {
-    h += '<section class="x-sel" id="sel"><p class="a-eyebrow">Your Journey</p><h2>Lunch at ' + esc(x.name) + '</h2>' +
+    h += '<section class="x-sel" id="sel"><p class="a-eyebrow">My Bag</p><h2>Lunch at ' + esc(x.name) + '</h2>' +
       '<p class="price" data-private>USD ' + x.select.price + ' <span class="a-eyebrow" style="display:inline">' + esc(x.select.unit) + '</span></p>' +
-      '<p>Optional. Adding ' + esc(x.name) + ' places a restaurant request in your journey for the guests who take part; Guest Relations arrange the table through your journey. It is a request — not a confirmed reservation, and availability is not guaranteed by this page. No date or time to choose here.</p>' +
+      '<p>Optional. Adding ' + esc(x.name) + ' places a restaurant request in your bag for the guests who take part; Guest Relations arrange the table. It is a request, not a reservation — availability is not guaranteed by this page. No date or time to choose here.</p>' +
       '<div id="selbox" data-private></div>' +
       '<p class="x-way" data-private-cta><a class="a-link" data-private-cta href="invitation.html?open=1">Open your invitation</a></p></section>';
   }
@@ -155,9 +155,9 @@
     var s = x.select, line = SIYL_BAG.get().filter(function (l) { return l.id === s.id; })[0];
     box.innerHTML = '<p class="x-amt" id="selamt">' + money(s.price) + ' <span class="a-eyebrow">per person · your cost</span></p>' + (line
       ? '<div class="x-cur"><span class="on" data-sel-state="current" aria-current="true">Current selection · ' + money(s.price) + '</span>' +
-        '<a class="a-link" href="cart.html">View your bag</a></div>' +
-        '<p style="margin-top:14px"><button type="button" class="a-link" id="sel-rm" style="background:none;border:0;cursor:pointer">Remove from your journey</button></p>'
-      : '<button type="button" class="x-cta" id="sel-add" data-sel-state="open">Add to your journey · ' + money(s.price) + '</button>');
+        '<a class="a-link" href="cart.html">Open My Bag</a></div>' +
+        '<p style="margin-top:14px"><button type="button" class="a-link" id="sel-rm" style="background:none;border:0;cursor:pointer">Remove from My Bag</button></p>'
+      : '<button type="button" class="x-cta" id="sel-add" data-sel-state="open">Add to My Bag · ' + money(s.price) + '</button>');
     var add = document.getElementById('sel-add'), rm = document.getElementById('sel-rm');
     if (add) add.addEventListener('click', function () { gated(function () {
       if (SIYL_BAG.has(s.id)) { paintSel(); return; }
@@ -179,7 +179,7 @@
 })();
 </script>
 <script src="assets/recon.js?v=628bd01b"></script>
-<script src="assets/aman.js?v=fd12151c"></script>
+<script src="assets/aman.js?v=10dc5fbe"></script>
 <script type="module" src="assets/invite.mjs?v=5d3e1c62"></script>
 </body>
 </html>

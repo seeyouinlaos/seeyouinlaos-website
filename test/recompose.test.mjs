@@ -192,6 +192,6 @@ test('the shell foot is the one continuation on every surface', () => {
   ['your-journey.html', 'wedding.html', 'wedding-preparation.html', 'about-you.html', 'review.html'].forEach((f) => {
     assert.match(read(f), /\.foot\(document\.getElementById\('foot'\)\)/, f + ' has no shell continuation');
   });
-  assert.match(read('invitation.html'), /Continue to Your Journey/);
+  assert.match(read('invitation.html'), /Continue to My Trip/);
   assert.match(read('invitation.html'), /var missing=G\.missingFor\('you'\);\s*if\(missing\.length\)/, 'the continue is strict');
 });
