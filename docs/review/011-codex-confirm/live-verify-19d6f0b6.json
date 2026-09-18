@@ -1,0 +1,241 @@
+{
+ "origin": "https://seeyouinlaos-website.suthep-hrg.workers.dev",
+ "at": "2026-09-18T14:15:22.953Z",
+ "results": [
+  {
+   "id": "live-home-200",
+   "ok": true,
+   "d": "200"
+  },
+  {
+   "id": "live-home-text",
+   "ok": true,
+   "d": "One invitation"
+  },
+  {
+   "id": "live-home-no-github",
+   "ok": true,
+   "d": "no github.io in the served page"
+  },
+  {
+   "id": "live-home-no-retired-label",
+   "ok": true,
+   "d": "no retired label"
+  },
+  {
+   "id": "live-home-shell",
+   "ok": true,
+   "d": "{\"sticky\":\"sticky\",\"inside\":true,\"h\":79,\"words\":\"Not signed inOpen your invitation\"}"
+  },
+  {
+   "id": "live-home-shell-scrolled",
+   "ok": true,
+   "d": "{\"top\":48,\"bottom\":72}"
+  },
+  {
+   "id": "live-asset-stamps",
+   "ok": true,
+   "d": "aman=3f5163d8"
+  },
+  {
+   "id": "live-destinations-200",
+   "ok": true,
+   "d": "200"
+  },
+  {
+   "id": "live-destinations-text",
+   "ok": true,
+   "d": "Thailand, Laos"
+  },
+  {
+   "id": "live-destinations-no-github",
+   "ok": true,
+   "d": "no github.io in the served page"
+  },
+  {
+   "id": "live-destinations-no-retired-label",
+   "ok": true,
+   "d": "no retired label"
+  },
+  {
+   "id": "live-destinations-shell",
+   "ok": true,
+   "d": "{\"sticky\":\"sticky\",\"inside\":true,\"h\":79,\"words\":\"Not signed inOpen your invitation\"}"
+  },
+  {
+   "id": "live-destinations-shell-scrolled",
+   "ok": true,
+   "d": "{\"top\":48,\"bottom\":72}"
+  },
+  {
+   "id": "live-stays-200",
+   "ok": true,
+   "d": "200"
+  },
+  {
+   "id": "live-stays-text",
+   "ok": true,
+   "d": "Six places"
+  },
+  {
+   "id": "live-stays-no-github",
+   "ok": true,
+   "d": "no github.io in the served page"
+  },
+  {
+   "id": "live-stays-no-retired-label",
+   "ok": true,
+   "d": "no retired label"
+  },
+  {
+   "id": "live-stays-shell",
+   "ok": true,
+   "d": "{\"sticky\":\"sticky\",\"inside\":true,\"h\":79,\"words\":\"Not signed inOpen your invitation\"}"
+  },
+  {
+   "id": "live-stays-shell-scrolled",
+   "ok": true,
+   "d": "{\"top\":48,\"bottom\":72}"
+  },
+  {
+   "id": "live-the-journey-200",
+   "ok": true,
+   "d": "200"
+  },
+  {
+   "id": "live-the-journey-text",
+   "ok": true,
+   "d": "The Journey"
+  },
+  {
+   "id": "live-the-journey-no-github",
+   "ok": true,
+   "d": "no github.io in the served page"
+  },
+  {
+   "id": "live-the-journey-no-retired-label",
+   "ok": true,
+   "d": "no retired label"
+  },
+  {
+   "id": "live-the-journey-shell",
+   "ok": true,
+   "d": "{\"sticky\":\"sticky\",\"inside\":true,\"h\":79,\"words\":\"Not signed inOpen your invitation\"}"
+  },
+  {
+   "id": "live-the-journey-shell-scrolled",
+   "ok": true,
+   "d": "{\"top\":48,\"bottom\":72}"
+  },
+  {
+   "id": "live-wedding-200",
+   "ok": true,
+   "d": "200"
+  },
+  {
+   "id": "live-wedding-text",
+   "ok": true,
+   "d": "The Wedding"
+  },
+  {
+   "id": "live-wedding-no-github",
+   "ok": true,
+   "d": "no github.io in the served page"
+  },
+  {
+   "id": "live-wedding-no-retired-label",
+   "ok": true,
+   "d": "no retired label"
+  },
+  {
+   "id": "live-wedding-shell",
+   "ok": true,
+   "d": "{\"sticky\":\"sticky\",\"inside\":true,\"h\":79,\"words\":\"Not signed inOpen your invitation\"}"
+  },
+  {
+   "id": "live-wedding-shell-scrolled",
+   "ok": true,
+   "d": "{\"top\":48,\"bottom\":72}"
+  },
+  {
+   "id": "live-experiences-200",
+   "ok": true,
+   "d": "200"
+  },
+  {
+   "id": "live-experiences-text",
+   "ok": true,
+   "d": "Experiences"
+  },
+  {
+   "id": "live-experiences-no-github",
+   "ok": true,
+   "d": "no github.io in the served page"
+  },
+  {
+   "id": "live-experiences-no-retired-label",
+   "ok": true,
+   "d": "no retired label"
+  },
+  {
+   "id": "live-experiences-shell",
+   "ok": true,
+   "d": "{\"sticky\":\"sticky\",\"inside\":true,\"h\":79,\"words\":\"Not signed inOpen your invitation\"}"
+  },
+  {
+   "id": "live-experiences-shell-scrolled",
+   "ok": true,
+   "d": "{\"top\":48,\"bottom\":72}"
+  },
+  {
+   "id": "live-invitation-200",
+   "ok": true,
+   "d": "200"
+  },
+  {
+   "id": "live-invitation-text",
+   "ok": true,
+   "d": "Enter your private invitation code"
+  },
+  {
+   "id": "live-invitation-no-github",
+   "ok": true,
+   "d": "no github.io in the served page"
+  },
+  {
+   "id": "live-invitation-no-retired-label",
+   "ok": true,
+   "d": "no retired label"
+  },
+  {
+   "id": "live-invitation-shell",
+   "ok": true,
+   "d": "{\"sticky\":\"sticky\",\"inside\":true,\"h\":79,\"words\":\"Not signed inOpen your invitation\"}"
+  },
+  {
+   "id": "live-invitation-shell-scrolled",
+   "ok": true,
+   "d": "{\"top\":48,\"bottom\":72}"
+  },
+  {
+   "id": "live-signed-out-no-page-errors",
+   "ok": true,
+   "d": "none"
+  },
+  {
+   "id": "live-api-reachable",
+   "ok": true,
+   "d": "404"
+  },
+  {
+   "id": "live-api-draft-private",
+   "ok": true,
+   "d": "401"
+  },
+  {
+   "id": "live-auth-index-served",
+   "ok": true,
+   "d": "one-way ids only · 47 entries"
+  }
+ ]
+}

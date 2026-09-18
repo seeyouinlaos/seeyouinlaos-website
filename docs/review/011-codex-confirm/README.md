@@ -10,3 +10,5 @@
 Release 009's RELEASE-3 draft fix (pull / merge base, seed race) was in scope of the pass and drew no finding.
 
 Verification: `npm test` 328/328 (incl. the two regressions and the infrastructure-freeze guard tests) · release-check PASSED (gate I1 new) · stage E2E account flow 32/32 · P0 Empty Bag E2E 49/49 · live: read-only `live-verify.mjs` after the deploy (see the commit).
+
+Live: main `5b846f1` deployed as Worker version `19d6f0b6-8a35-4e76-9b38-673060b973ff` (16 assets; the Worker script and every binding unchanged; the real register, 47 entries). `live-verify.mjs` read-only 47/47 (`live-verify-19d6f0b6.json`); `node src/infra-guard.cjs --live`: public DNS (Cloudflare and Google DoH) resolves the origin, HTTPS 200 from Cloudflare, `/api/draft` 401, GitHub Pages 404; `/infra/PRODUCTION.json` is not served (404). Rollback: version `6214100b` (main `82a068f`).
