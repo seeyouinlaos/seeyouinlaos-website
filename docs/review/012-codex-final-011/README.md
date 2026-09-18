@@ -25,5 +25,15 @@ account IA 33 / 33, sticky shell 320 checks · 0 failures.
 | 9 | [medium] The whole-key pull override could resurrect a line removed on another device (the device's older cache around the live edit) | **VALID · P2** (fixed) | `assets/draft.js` replays only the live edit onto the fetched copy: the Bag line by line (a line added or changed here is added, a line removed here is removed, a line the server no longer holds stays gone), the stage decisions as a set, every other record field by field. Regression `CODEX 011-9` (the reviewer's two-device case included) |
 
 No XSS, cross-guest or fixed-room finding in either pass. After the fixes: `npm test` 352 / 352 · release-check 24 gates ·
-stage E2E release-011 52 / 52, P0 Empty Bag 49 / 49, account IA 33 / 33, sticky shell 320 checks · 0 failures. A third,
-confirming pass follows in `CODEX-REVIEW-3.md`.
+stage E2E release-011 52 / 52, P0 Empty Bag 49 / 49, account IA 33 / 33, sticky shell 320 checks · 0 failures.
+
+## Third pass (`CODEX-REVIEW-3.md`, verdict: needs-attention — "No defensible P0/P1 [high] remains"; two P2 on the replay)
+
+| # | Finding | Class | Action |
+|---|---|---|---|
+| 10 | [medium] A fresh device answering the question during the first read replaced the server's whole guest record with the one it had just created around the answer — saved answers lost, the emptied record sent | **VALID · P2** (fixed) | `replayObject` recurses with an empty base when the device's record did not exist before, so every server field the device did not name survives; lists are replayed as sets (the server's history plus the device's new entries). Regression `CODEX 011-10` through the real pull, including the outgoing PUT |
+| 11 | [medium] Field-by-field replay could combine a destination chosen here with a decline made elsewhere ("not joining" with a destination) | **VALID · P2** (fixed) | the participation answer is replayed whole (`ATOMIC.scope`): the live decision on this device stands, in both directions. Regression `CODEX 011-11` (both directions, the outgoing PUT checked) |
+
+After the fixes: `npm test` 354 / 354 · release-check 24 gates · stage E2E release-011 52 / 52. Codex's own line: "Fixes 6–8
+address the reported paths"; no [high] remained at the third pass, and the two remaining [medium] are fixed and pinned above.
+The pass sequence therefore ends with every finding VALID and closed: 5 + 4 + 2 = 11 findings, 3 × P1, 8 × P2, 0 open.

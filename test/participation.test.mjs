@@ -390,3 +390,41 @@ test('CODEX 011-9 · the live edit is replayed onto the fetched copy — a remov
   await pulling; await new Promise((r) => setTimeout(r, 0));
   deq(JSON.parse(w2.localStorage.getItem('siyl.bag')).map((x) => x.id), ['1872'], 'the removal made elsewhere stands; the line added here is here');
 });
+
+/* ---- CODEX THIRD PASS (18 Sep 2026) — two replay findings, each a regression through the real pull ---- */
+
+test('CODEX 011-10 · a fresh device that answers the question while the first copy is being read keeps every saved answer of the server\'s record — and sends the merged record, not an emptied one', async () => {
+  let resolveGet; const gets = [], puts = [];
+  const w = page({ auth: PEGGY, modules: ['assets/bag.js', 'assets/guest.js', 'assets/journey.js', 'assets/draft.js'],
+    fetch: (url, init) => { if (!init || !init.method || init.method === 'GET') { gets.push(url); return new Promise((r) => { resolveGet = r; }); } puts.push(JSON.parse(init.body)); return Promise.resolve({ ok: true, status: 200, json: async () => ({ ok: true, draft: { keys: JSON.parse(init.body).keys, updatedAt: '2026-09-18T10:00:01.000Z', savedAt: '2026-09-18T10:00:01.000Z' } }) }); } });
+  const G = w.SIYL_GUEST, id = PEGGY.guestId; assert.equal(w.localStorage.getItem('siyl.guest'), null, 'nothing on the device yet');
+  const before = gets.length; const pulling = w.SIYL_DRAFT.pull(); await Promise.resolve(); assert.equal(gets.length, before + 1);
+  G.setScope({ bangkok: true });   /* creates the record around the answer: guests[id] with empty profile and submitted */
+  const server = { contact: { email: 'peggy@example.org', phone: '+66 81 234 5678' }, guests: { [id]: { submitted: { x: 1 }, profile: { drink: 'Lime', flavor: 'Milk', film: 'A film' }, history: [{ field: 'profile.drink', to: 'Lime', at: '2026-09-18T09:00:00.000Z', by: id }], photo: { acknowledged: true, at: '2026-09-18T09:00:00.000Z' } } } };
+  resolveGet({ ok: true, status: 200, json: async () => ({ ok: true, draft: { keys: { 'siyl.guest': JSON.stringify(server) }, updatedAt: '2026-09-18T10:00:00.000Z', savedAt: '2026-09-18T10:00:00.000Z' } }) });
+  await pulling; await new Promise((r) => setTimeout(r, 0));
+  const rec = JSON.parse(w.localStorage.getItem('siyl.guest'));
+  assert.equal(G.joins('bangkok'), true, 'the live answer stands'); assert.equal(G.profile(id, 'drink'), 'Lime'); assert.equal(G.profile(id, 'flavor'), 'Milk'); assert.equal(G.contact('email'), 'peggy@example.org'); assert.ok(G.photoAck(), 'the acknowledgement survives');
+  deq(rec.guests[id].submitted, { x: 1 }); assert.equal(rec.guests[id].history.length, 2, 'the server\'s history and the scope entry');
+  assert.ok(puts.length >= 1, 'the merged record is sent'); const sent = JSON.parse(puts[puts.length - 1].keys['siyl.guest']); assert.equal(sent.guests[id].profile.drink, 'Lime'); assert.equal(sent.scope.bangkok, true);
+});
+
+test('CODEX 011-11 · the participation answer is one decision: a destination chosen here while another device declined the trip is replayed whole — never "not joining" with a destination', async () => {
+  let resolveGet; const gets = [], puts = [];
+  const w = page({ auth: PEGGY, seed: { 'siyl.guest': { scope: { bangkok: true, vientiane: false, china: false, none: false, at: '2026-09-18T08:00:00.000Z', by: PEGGY.guestId } } }, modules: ['assets/bag.js', 'assets/guest.js', 'assets/journey.js', 'assets/draft.js'],
+    fetch: (url, init) => { if (!init || !init.method || init.method === 'GET') { gets.push(url); return new Promise((r) => { resolveGet = r; }); } puts.push(JSON.parse(init.body)); return Promise.resolve({ ok: true, status: 200, json: async () => ({ ok: true, draft: { keys: JSON.parse(init.body).keys, updatedAt: '2026-09-18T10:00:01.000Z', savedAt: '2026-09-18T10:00:01.000Z' } }) }); } });
+  const G = w.SIYL_GUEST;
+  const before = gets.length; const pulling = w.SIYL_DRAFT.pull(); await Promise.resolve(); assert.equal(gets.length, before + 1);
+  G.setScope({ china: true });   /* the live choice here */
+  resolveGet({ ok: true, status: 200, json: async () => ({ ok: true, draft: { keys: { 'siyl.guest': JSON.stringify({ scope: { bangkok: false, vientiane: false, china: false, none: true, at: '2026-09-18T09:00:00.000Z', by: PEGGY.guestId } }) }, updatedAt: '2026-09-18T10:00:00.000Z', savedAt: '2026-09-18T10:00:00.000Z' } }) });
+  await pulling; await new Promise((r) => setTimeout(r, 0));
+  assert.equal(G.notJoining(), false, 'never "not joining" with a destination'); assert.equal(G.joins('china'), true); assert.equal(G.joins('bangkok'), true); assert.equal(G.scopeWords(), 'Bangkok · China');
+  const sent = JSON.parse(puts[puts.length - 1].keys['siyl.guest']); assert.equal(sent.scope.none, false); assert.equal(sent.scope.china, true);
+  /* and the reverse: "not joining" chosen here while another device chose a destination — the decline here stands whole */
+  const w2 = page({ auth: PEGGY, seed: { 'siyl.guest': { scope: { bangkok: true, vientiane: false, china: false, none: false, at: '2026-09-18T08:00:00.000Z', by: PEGGY.guestId } } }, modules: ['assets/bag.js', 'assets/guest.js', 'assets/journey.js', 'assets/draft.js'],
+    fetch: (url, init) => { if (!init || !init.method || init.method === 'GET') { gets.push(url); return new Promise((r) => { resolveGet = r; }); } return Promise.resolve({ ok: true, status: 200, json: async () => ({ ok: true, draft: { keys: JSON.parse(init.body).keys, updatedAt: '2026-09-18T10:00:02.000Z', savedAt: '2026-09-18T10:00:02.000Z' } }) }); } });
+  const p2 = w2.SIYL_DRAFT.pull(); await Promise.resolve(); w2.SIYL_GUEST.setScope({ none: true });
+  resolveGet({ ok: true, status: 200, json: async () => ({ ok: true, draft: { keys: { 'siyl.guest': JSON.stringify({ scope: { bangkok: true, vientiane: true, china: false, none: false, at: '2026-09-18T09:00:00.000Z', by: PEGGY.guestId } }) }, updatedAt: '2026-09-18T10:00:00.000Z', savedAt: '2026-09-18T10:00:00.000Z' } }) });
+  await p2; await new Promise((r) => setTimeout(r, 0));
+  assert.equal(w2.SIYL_GUEST.notJoining(), true); assert.equal(w2.SIYL_GUEST.joins('vientiane'), false, 'no destination survives beside the decline');
+});

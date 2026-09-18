@@ -52,6 +52,17 @@
   function parseJson(v) { if (v === undefined || v === null) return undefined; try { return JSON.parse(v); } catch (e) { return undefined; } }
   function isObj(v) { return !!v && typeof v === 'object' && !Array.isArray(v); }
   function sameJson(a, b) { return JSON.stringify(a) === JSON.stringify(b); }
+  /* a decision replayed whole: the participation answer is one choice (a destination and "not joining" are exclusive) */
+  var ATOMIC = { scope: 1 };
+  /* a list replayed as a set: what this device added is appended, what it removed is removed, the rest is the server's */
+  function replayArray(B, L, S) {
+    var key = function (x) { return JSON.stringify(x); };
+    var Bk = B.map(key), Lk = L.map(key);
+    var removed = Bk.filter(function (k) { return Lk.indexOf(k) < 0; });
+    var out = S.filter(function (x) { return removed.indexOf(key(x)) < 0; }), outK = out.map(key);
+    L.forEach(function (x, i) { if (Bk.indexOf(Lk[i]) < 0 && outK.indexOf(Lk[i]) < 0) { out.push(x); outK.push(Lk[i]); } });
+    return out;
+  }
   function replayObject(base, local, server) {
     var out = {}, k;
     for (k in server) out[k] = server[k];
@@ -60,7 +71,11 @@
       var B = base ? base[key] : undefined, L = local ? local[key] : undefined;
       if (sameJson(B, L)) return;                                   /* untouched here: the server's */
       if (L === undefined) { delete out[key]; return; }             /* removed here */
-      if (isObj(B) && isObj(L) && isObj(out[key])) { out[key] = replayObject(B, L, out[key]); return; }
+      if (ATOMIC[key]) { out[key] = L; return; }                     /* a decision: whole */
+      /* a record this device only just created around its edit (a fresh device) carries nothing of the server's answers:
+         recurse with an empty base so every server field it does not name survives (Codex third pass, 18 Sep 2026) */
+      if (isObj(L) && isObj(out[key])) { out[key] = replayObject(isObj(B) ? B : {}, L, out[key]); return; }
+      if (Array.isArray(L) && Array.isArray(out[key])) { out[key] = replayArray(Array.isArray(B) ? B : [], L, out[key]); return; }
       out[key] = L;                                                  /* set or replaced here */
     });
     return out;
@@ -82,11 +97,7 @@
       });
       return JSON.stringify(out);
     }
-    if (Array.isArray(L) && Array.isArray(S) && L.every(function (x) { return typeof x === 'string'; })) {
-      var Bs = Array.isArray(B) ? B : [], res = S.filter(function (x) { return !(Bs.indexOf(x) >= 0 && L.indexOf(x) < 0); });
-      L.forEach(function (x) { if (Bs.indexOf(x) < 0 && res.indexOf(x) < 0) res.push(x); });
-      return JSON.stringify(res);
-    }
+    if (Array.isArray(L) && Array.isArray(S)) return JSON.stringify(replayArray(Array.isArray(B) ? B : [], L, S));
     if (isObj(L) && isObj(S)) return JSON.stringify(replayObject(isObj(B) ? B : {}, L, S));
     return local;
   }
