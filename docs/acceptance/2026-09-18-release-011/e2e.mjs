@@ -5,7 +5,10 @@
 import fs from 'node:fs'; import path from 'node:path'; import { execFileSync } from 'node:child_process';
 import { chromium, webkit, devices } from '/Users/thongantang/.npm-global/lib/node_modules/playwright/index.mjs';
 const N = process.argv[2], OUT = process.argv[3], O = (process.argv[4] || 'http://127.0.0.1:8788').replace(/\/$/, ''); fs.mkdirSync(OUT, { recursive: true });
-const codes = JSON.parse(fs.readFileSync(N + '/synth-codes.json', 'utf8'));
+/* LIVE=1: the controlled live run with the temporary synthetic guests (T001 Ada · T002 Ben · T003 Cleo): no seat is held on the live
+   ledger, no host pair exists, nothing is sent to Guest Relations (the send path is proven on the stage), every hold is released */
+const LIVE = process.env.LIVE === '1';
+const codes = JSON.parse(fs.readFileSync(N + (LIVE ? '/live-synth-codes.json' : '/synth-codes.json'), 'utf8'));
 const R = []; const note = (id, ok, d) => { R.push({ id, ok: !!ok, d: String(d).slice(0, 300) }); console.log((ok ? 'PASS ' : 'FAIL ') + id + ' — ' + String(d).slice(0, 220)); };
 const b = await chromium.launch();
 const errors = new Map(), statuses = new Set();   /* a 404 for a photo not yet uploaded, a 409 draft precondition and the release this run aborts on purpose (4b) are answers, not errors */
@@ -20,7 +23,7 @@ const trip = async (p) => { await p.goto(O + '/your-journey.html', { waitUntil: 
 const stageWords = (p, key) => p.$eval('#s-' + key, (e) => e.innerText.replace(/\s+/g, ' ').trim()).catch(() => '');
 const visibleStages = (p) => p.$$eval('#chrono [id^="s-"]', (l) => l.map((e) => e.id.replace(/^s-/, '')).filter((k) => k !== 'wedding' && k !== 'excluded'));
 const engineMine = async (p) => (await api(p, '/api/rooms/mine', { method: 'POST', body: '{}' })).body;
-const wedding = async (p, temple) => { await p.goto(O + '/wedding.html', { waitUntil: 'load' }); await p.waitForTimeout(800); for (const [k, v] of [['temple', temple || 'no'], ['coffee', 'yes'], ['vows', 'yes'], ['dinner', 'yes']]) { if (await p.$('[data-e="' + k + '"] [data-ev="' + v + '"]')) { await p.click('[data-e="' + k + '"] [data-ev="' + v + '"]'); await p.waitForTimeout(200); } } if (await p.$('#sangkhathan [data-off="no"]')) await p.click('#sangkhathan [data-off="no"]'); await p.waitForTimeout(1000); };
+const wedding = async (p, temple, ev) => { await p.goto(O + '/wedding.html', { waitUntil: 'load' }); await p.waitForTimeout(800); for (const [k, v] of [['temple', temple || 'no'], ['coffee', ev || 'yes'], ['vows', ev || 'yes'], ['dinner', ev || 'yes']]) { if (await p.$('[data-e="' + k + '"] [data-ev="' + v + '"]')) { await p.click('[data-e="' + k + '"] [data-ev="' + v + '"]'); await p.waitForTimeout(200); } } if (await p.$('#sangkhathan [data-off="no"]')) await p.click('#sangkhathan [data-off="no"]'); await p.waitForTimeout(1000); };
 const prep = async (p) => { await p.goto(O + '/wedding-preparation.html', { waitUntil: 'load' }); await p.waitForTimeout(600); await p.evaluate(() => { const a = document.querySelector('[data-ack]'); if (a && !a.checked) a.click(); }); await p.waitForTimeout(1000); };
 const about = async (p, flavor) => { await p.goto(O + '/about-you.html', { waitUntil: 'load' }); await p.waitForSelector('[data-allergy="no"]', { timeout: 20000 }); await p.click('[data-allergy="no"]'); await p.click('[data-choice="flavor"] [data-pick="' + (flavor || 'Pandan') + '"]'); for (const [k, v] of [['coffeetea', 'Oolong'], ['drink', 'Lime'], ['avoid', 'Nothing'], ['film', 'Film'], ['music', 'Music']]) { const el = await p.$('textarea[data-q="' + k + '"]'); if (el) { await el.fill(v); await el.dispatchEvent('change'); } } const pa = await p.$('[data-photo-ack]'); if (pa && !(await pa.evaluate((e) => e.checked || e.getAttribute('aria-pressed') === 'true'))) await pa.click(); await p.waitForTimeout(1400); };
 const reset = async (id) => { const p = await fresh(); await signIn(p, id);
@@ -31,7 +34,7 @@ const reset = async (id) => { const p = await fresh(); await signIn(p, id);
   await p.context().close(); };
 
 /* ===== 0 · clean slate ===== */
-for (const id of ['T001', 'T002', 'T003', 'G048']) await reset(id);
+for (const id of (LIVE ? ['T001', 'T002', 'T003'] : ['T001', 'T002', 'T003', 'G048'])) await reset(id);
 
 /* ===== 1 · THE HEADER (signed out and in) at four widths ===== */
 for (const w of [320, 390, 834, 1440]) { const p = await fresh(w); await p.goto(O + '/index.html', { waitUntil: 'load' }); await p.waitForTimeout(1200);
@@ -80,14 +83,14 @@ await shot(A, '390-not-joining-stages');
 const C = await fresh(); await signIn(C, 'T003'); await contact(C, 'cleo.test@example.org'); await trip(C); await C.click('[data-scope-all]'); await C.waitForTimeout(1200);
 await C.goto(O + '/room.html?stay=souphattra&room=heritage', { waitUntil: 'load' }); await C.waitForTimeout(1500);
 const joinC = await api(C, '/api/rooms/join', { method: 'POST', body: JSON.stringify({ invitationId: 'INV-T003', guestId: 'T003', key: 'prewed/heritage', label: 'A', name: 'Cleo' }) });
-await wedding(C, 'no'); await prep(C);
-for (const [ev, seatId] of [['ceremony', 'C-R-06-02'], ['dinner', 'D-T-06']]) await api(C, '/api/seating/select', { method: 'POST', body: JSON.stringify({ invitationId: 'INV-T003', guestId: 'T003', event: ev, seatId, name: 'Cleo' }) });
+await wedding(C, 'no', LIVE ? 'no' : 'yes'); await prep(C);
+if (!LIVE) for (const [ev, seatId] of [['ceremony', 'C-R-06-02'], ['dinner', 'D-T-06']]) await api(C, '/api/seating/select', { method: 'POST', body: JSON.stringify({ invitationId: 'INV-T003', guestId: 'T003', event: ev, seatId, name: 'Cleo' }) });
 await trip(C); await C.evaluate(() => SIYL_STAY.sync()); await C.waitForTimeout(800);
 const t0 = { mine: (await engineMine(C)).mine, seats: (await api(C, '/api/seating', { method: 'GET' })).body, bag: await C.evaluate(() => SIYL_BAG.get().map((x) => x.id)) };
 const seatsOf = (v) => { try { const out = []; for (const ev of ['ceremony', 'dinner']) { const m = v && v.mine && v.mine[ev]; if (m && m.T003) out.push(ev + ':' + m.T003); } return out; } catch (e) { return []; } };
 await C.click('[data-scope="vientiane"]'); await C.waitForTimeout(3000);
 const t1 = { mine: (await engineMine(C)).mine, seats: (await api(C, '/api/seating', { method: 'GET' })).body, bag: await C.evaluate(() => SIYL_BAG.get().map((x) => x.id)), stages: await visibleStages(C), steps: await steps(C), words: await C.evaluate(() => SIYL_GUEST.scopeWords()) };
-note('tickets-follow-attendance', joinC.status === 200 && t0.mine && t0.mine.prewed && seatsOf(t0.seats).length === 2 && !(t1.mine && t1.mine.prewed) && seatsOf(t1.seats).length === 0 && !t1.bag.includes('prewed') && !t1.stages.includes('prewed') && !t1.stages.includes('wedstay') && t1.steps.includes('wedding:na') && t1.steps.includes('preparation:na') && t1.words === 'Bangkok · China', JSON.stringify({ before: { mine: t0.mine, seats: seatsOf(t0.seats) }, after: { mine: t1.mine, seats: seatsOf(t1.seats), stages: t1.stages, steps: t1.steps } }).slice(0, 300));
+note('tickets-follow-attendance', joinC.status === 200 && t0.mine && t0.mine.prewed && seatsOf(t0.seats).length === (LIVE ? 0 : 2) && !(t1.mine && t1.mine.prewed) && seatsOf(t1.seats).length === 0 && !t1.bag.includes('prewed') && !t1.stages.includes('prewed') && !t1.stages.includes('wedstay') && t1.steps.includes('wedding:na') && t1.steps.includes('preparation:na') && t1.words === 'Bangkok · China', JSON.stringify({ before: { mine: t0.mine, seats: seatsOf(t0.seats) }, after: { mine: t1.mine, seats: seatsOf(t1.seats), stages: t1.stages, steps: t1.steps } }).slice(0, 300));
 await C.goto(O + '/tickets.html', { waitUntil: 'load' }); await C.waitForTimeout(1500); const tk = await C.$eval('main', (e) => e.innerText.replace(/\s+/g, ' ').trim());
 note('tickets-page-no-vientiane', !/Seat [A-Z]?\d/.test(tk) && !/Souphattra|Heritage/.test(tk), tk.slice(0, 200));
 await C.goto(O + '/wedding.html', { waitUntil: 'load' }); await C.waitForTimeout(1500); const wd = await C.$eval('main', (e) => e.innerText.replace(/\s+/g, ' ').trim());
@@ -101,13 +104,13 @@ const benAfter = (await engineMine(B2)).mine; note('other-guest-untouched', jb.s
 /* ===== 4a · RE-ENTRANCY (Codex 011-6) and an engine-only hold (Codex 011-7): a Sangkhathan line, two seats and a room held in the engine alone, then Vientiane is left — one release each, no storm ===== */
 await trip(C); await C.click('[data-scope="vientiane"]'); await C.waitForTimeout(1500);
 const jr = await api(C, '/api/rooms/join', { method: 'POST', body: JSON.stringify({ invitationId: 'INV-T003', guestId: 'T003', key: 'prewed/heritage', label: 'A', name: 'Cleo' }) });
-for (const [ev, seatId] of [['ceremony', 'C-R-06-02'], ['dinner', 'D-T-06']]) await api(C, '/api/seating/select', { method: 'POST', body: JSON.stringify({ invitationId: 'INV-T003', guestId: 'T003', event: ev, seatId, name: 'Cleo' }) });
+if (!LIVE) for (const [ev, seatId] of [['ceremony', 'C-R-06-02'], ['dinner', 'D-T-06']]) await api(C, '/api/seating/select', { method: 'POST', body: JSON.stringify({ invitationId: 'INV-T003', guestId: 'T003', event: ev, seatId, name: 'Cleo' }) });
 await C.evaluate(() => { SIYL_TEMPLE.setAttendance(SIYL_GUEST.me().guestId, 'yes'); SIYL_TEMPLE.setOffering(SIYL_GUEST.me().guestId, 'yes'); SIYL_BAG.put({ id: 'sangkhathan', name: 'Sangkhathan', price: 15, qty: 1 }); });
 await trip(C); await C.evaluate(() => { const b = SIYL_BAG.get().filter((x) => x.id !== 'prewed'); SIYL_BAG.set(b); });   /* the room stays the engine's alone (a stale draft) */
 const counts = { leave: 0, release: 0, renders: 0 }; const onReq = (r) => { const u = r.url(); if (/\/api\/rooms\/leave/.test(u)) counts.leave++; if (/\/api\/seating\/release/.test(u)) counts.release++; }; C.on('request', onReq);
 await C.click('[data-scope="vientiane"]'); await C.waitForTimeout(4000); C.off('request', onReq);
 const re = { mine: (await engineMine(C)).mine, seats: seatsOf((await api(C, '/api/seating', { method: 'GET' })).body), bag: await C.evaluate(() => SIYL_BAG.get().map((x) => x.id)), need: await need(C), counts, failed: !!(await C.$('[data-scope-failed]')) };
-note('reentrancy-one-release-each', jr.status === 200 && !(re.mine && re.mine.prewed) && re.seats.length === 0 && !re.bag.includes('sangkhathan') && !re.need.keys.some((k) => /^release:/.test(k)) && re.counts.leave === 1 && re.counts.release === 2 && !re.failed, JSON.stringify(re));
+note('reentrancy-one-release-each', jr.status === 200 && !(re.mine && re.mine.prewed) && re.seats.length === 0 && !re.bag.includes('sangkhathan') && !re.need.keys.some((k) => /^release:/.test(k)) && re.counts.leave === 1 && re.counts.release === (LIVE ? 0 : 2) && !re.failed, JSON.stringify(re));
 
 /* ===== 4b · A RELEASE THAT FAILS (Codex 011-1): the room stays, it is named, Review & Send waits, Release again resolves it ===== */
 await trip(C); await C.click('[data-scope="vientiane"]'); await C.waitForTimeout(1500);
@@ -133,16 +136,16 @@ const rv = await C.$eval('main', (e) => e.innerText.replace(/\s+/g, ' ').trim())
 const tOp = await C.evaluate(() => SIYL_TEMPLE.operational()); const txt = await C.evaluate(() => (typeof buildText === 'function' ? buildText(JSON.parse(localStorage.getItem('siyl.auth'))) : ''));
 note('decline-path-review', /\/review/.test(C.url()) && /Where you join us/i.test(rv) && /Not joining this trip/i.test(rv) && sendOn && /USD 0/.test(rv), rv.slice(0, 200) + ' · send ' + sendOn);
 note('decline-path-no-wedding-attendance-sent', tOp.participation === 'Not joining this trip' && Object.values(tOp.guests[0].events).every((v) => v === 'Not joining') && tOp.offerings === 0 && /WHERE THEY JOIN US: NOT JOINING THIS TRIP/.test(txt) && !/: JOINING/.test(txt), JSON.stringify(tOp.guests[0].events) + ' · ' + (txt.match(/WEDDING PARTICIPATION[\s\S]{0,160}/) || [''])[0].replace(/\s+/g, ' '));
-await C.click('#send'); await C.waitForTimeout(4000); const st = (await api(C, '/api/status?invitation=INV-T003', { method: 'GET' })).body;
-const sentRec = await api(C, '/api/draft', { method: 'GET' });
-note('decline-path-sent', st && st.received === true && !!st.receivedAt, JSON.stringify(st).slice(0, 200));
+if (!LIVE) { await C.click('#send'); await C.waitForTimeout(4000); const st = (await api(C, '/api/status?invitation=INV-T003', { method: 'GET' })).body;
+note('decline-path-sent', st && st.received === true && !!st.receivedAt, JSON.stringify(st).slice(0, 200)); }
+else note('decline-path-send-ready-not-sent', sendOn, 'live: the send button is enabled; nothing is sent to Guest Relations from a synthetic guest (the send path is proven on the stage)');
 await shot(C, '390-decline-path-sent');
 
 /* ===== 6 · PARTIAL ATTENDANCE (Ada): Bangkok + Vientiane answered, review shows the words, China asks nothing ===== */
 await trip(A); const pa0 = await visibleStages(A);
 for (const k of ['prewed', 'wedstay']) { await A.click('#s-' + k + ' [data-skip="' + k + '"]'); await A.waitForTimeout(1000); }
-await wedding(A, 'no'); await prep(A);
-for (const [ev, seatId] of [['ceremony', 'C-R-05-02'], ['dinner', 'D-T-05']]) await api(A, '/api/seating/select', { method: 'POST', body: JSON.stringify({ invitationId: 'INV-T001', guestId: 'T001', event: ev, seatId, name: 'Ada' }) });
+await wedding(A, 'no', LIVE ? 'no' : 'yes'); await prep(A);
+if (!LIVE) for (const [ev, seatId] of [['ceremony', 'C-R-05-02'], ['dinner', 'D-T-05']]) await api(A, '/api/seating/select', { method: 'POST', body: JSON.stringify({ invitationId: 'INV-T001', guestId: 'T001', event: ev, seatId, name: 'Ada' }) });
 await about(A, 'Matcha Green Tea');
 const pa1 = { need: await need(A), steps: await steps(A) };
 await A.goto(O + '/review.html', { waitUntil: 'load' }); await A.waitForTimeout(2000); const rva = await A.$eval('main', (e) => e.innerText.replace(/\s+/g, ' ').trim());
@@ -164,7 +167,8 @@ const ch = { stages: await visibleStages(A), steps: await steps(A), need: await 
 note('partial-china-only', JSON.stringify(ch.stages) === JSON.stringify(['kmg', 'c86', 'ljg', 'return']) && ch.steps.includes('wedding:na') && ch.steps.includes('preparation:na') && ch.need.keys.filter((k) => /^stage:/.test(k)).length === 4, JSON.stringify(ch).slice(0, 240));
 
 /* ===== 7 · HARUTHAI (G048): the fixed room, never required, another address possible ===== */
-const H = await fresh(); await signIn(H, 'G048'); await contact(H, 'bride.test@example.org'); await trip(H);
+if (LIVE) note('haruthai-live', true, 'no synthetic host pair exists on the live register: the fixed-arrangement flow is proven on the stage (stage/e2e.json); the live host record is never used by a test');
+const H = LIVE ? null : await fresh(); if (!LIVE) { await signIn(H, 'G048'); await contact(H, 'bride.test@example.org'); await trip(H);
 const h0 = { words: await stageWords(H, 'bkk-stay'), need: await need(H), scope: await H.evaluate(() => SIYL_GUEST.scopeWords()), bag: await H.evaluate(() => SIYL_BAG.total()), rail: await H.$$eval('#s-bkk-stay [data-choose]', (l) => l.map((e) => e.getAttribute('data-choose'))) };
 note('haruthai-arranged-not-required', /Arranged for you/i.test(h0.words) && /Room A/.test(h0.words) && !/USD/.test(h0.words.split(/Another address/i)[0]) && !h0.need.keys.some((k) => /bkk-stay/.test(k)) && h0.scope === 'Bangkok · Vientiane · China' && h0.bag === 0 && h0.rail.length >= 1 && !h0.rail.includes('penthouse') && /Another address, if you prefer/i.test(h0.words), JSON.stringify(h0).slice(0, 300));
 await shot(H, '390-haruthai-my-trip');
@@ -177,7 +181,7 @@ await H.click('#s-bkk-stay [data-rm="bkk-stay"]'); await H.waitForTimeout(2500);
 const h3 = { mine: (await engineMine(H)).mine, fixed: (await engineMine(H)).fixed, bag: await H.evaluate(() => SIYL_BAG.get().length), words: await stageWords(H, 'bkk-stay') };
 note('haruthai-remove-keeps-arrangement', !(h3.mine && h3.mine['bkk-stay']) && h3.fixed && h3.fixed['bkk-stay'] && h3.bag === 0 && /Arranged for you/i.test(h3.words) && /Room A/.test(h3.words), JSON.stringify(h3).slice(0, 240));
 await H.goto(O + '/cart.html', { waitUntil: 'load' }); await H.waitForTimeout(1500); const hc = await H.$eval('main', (e) => e.innerText.replace(/\s+/g, ' ').trim());
-note('haruthai-bag-usd-0', /USD 0/.test(hc) && /Arranged for you/i.test(hc) && !/Remove/i.test(hc.split(/Arranged for you/i)[1] || 'Remove'), hc.slice(0, 200));
+note('haruthai-bag-usd-0', /USD 0/.test(hc) && /Arranged for you/i.test(hc) && !/Remove/i.test(hc.split(/Arranged for you/i)[1] || 'Remove'), hc.slice(0, 200)); }
 
 /* ===== 9 · VIEW ALL STEPS on iPhone Safari (WebKit) and in Chromium at 320 / 390 / 834 ===== */
 const wk = await webkit.launch();
@@ -246,7 +250,7 @@ for (const w of [320, 390, 834, 1440]) { const p = await fresh(w); await signIn(
 note('console-errors', errors.size === 0, (errors.size ? [...errors.keys()].slice(0, 4).join(' | ') : 'no script or console errors on any visited page') + (statuses.size ? ' · expected HTTP answers logged by the browser: ' + [...statuses].join(', ') : ''));
 
 /* ===== Z · cleanup ===== */
-for (const id of ['T001', 'T002', 'T003', 'G048']) await reset(id);
+for (const id of (LIVE ? ['T001', 'T002', 'T003'] : ['T001', 'T002', 'T003', 'G048'])) await reset(id);
 await b.close(); await wk.close();
 fs.writeFileSync(path.join(OUT, 'results.json'), JSON.stringify(R, null, 1));
 const fails = R.filter((r) => !r.ok); console.log('\n' + (R.length - fails.length) + '/' + R.length + ' checks passed' + (fails.length ? ' · FAILED: ' + fails.map((f) => f.id).join(', ') : ''));
