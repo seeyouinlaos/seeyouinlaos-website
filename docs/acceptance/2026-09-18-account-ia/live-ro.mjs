@@ -1,0 +1,14 @@
+import fs from 'node:fs'; import { chromium } from '/Users/thongantang/.npm-global/lib/node_modules/playwright/index.mjs';
+const O='https://seeyouinlaos-website.suthep-hrg.workers.dev', OUT=process.argv[2]; fs.mkdirSync(OUT,{recursive:true}); const R=[]; const ok=(id,c,d)=>{R.push({id,ok:!!c,d:String(d).slice(0,200)});console.log((c?'PASS ':'FAIL ')+id+' — '+String(d).slice(0,160));};
+const b=await chromium.launch(); const p=await (await b.newContext({viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true})).newPage(); const errs=[]; p.on('pageerror',e=>errs.push(String(e)));
+await p.goto(O+'/profile.html',{waitUntil:'load'}); await p.waitForTimeout(2500); ok('live-profile-private-signed-out',/invitation\?open=1&next=profile/.test(p.url()),p.url()); await p.screenshot({path:OUT+'/390-profile-signed-out.png'});
+await p.goto(O+'/about-you',{waitUntil:'load'}); await p.waitForTimeout(2500); ok('live-about-you-private',/invitation/.test(p.url()),p.url());
+await p.goto(O+'/index.html',{waitUntil:'load'}); await p.waitForTimeout(2000); const row=await p.$eval('header.hd .hd-access',e=>e.textContent.replace(/\s+/g,' ').trim()); ok('live-row-signed-out',/Open your invitation/.test(row)&&!/My Bag/.test(row),row);
+const inv=await (await fetch(O+'/assets/invite.mjs')).text(); ok('live-invite-module-row',/data-access-nav="profile">My Profile</.test(inv)&&!/data-access-nav="bag"/.test(inv)&&/hrefOf\('profile\.html'\)/.test(inv),'MY TRIP · MY PROFILE · SIGN OUT in the shipped module');
+const sh=await (await fetch(O+'/assets/prep-shell.js')).text(); ok('live-shell-about-you-step-05',/label: 'About You',\s*file: 'about-you\.html'/.test(sh)&&!/prep-eyebrow/.test(sh),'step 05 About You · no eyebrow');
+const ab=await (await fetch(O+'/about-you.html',{redirect:'follow'})).text(); ok('live-about-you-page',/<title>About You · See You In Laos<\/title>/.test(ab)&&/<h1 class="t-d1">About You<\/h1>/.test(ab),'title + h1');
+const pf=await (await fetch(O+'/profile.html',{redirect:'follow'})).text(); ok('live-profile-page',/<h1 class="t-d1">My Profile<\/h1>/.test(pf)&&!/prep-shell\.js/.test(pf)&&/assets\/avatar\.js/.test(pf),'My Profile h1 · no step shell · avatar module');
+for (const [m,exp] of [['GET',401],['PUT',401],['DELETE',401]]) { const r=await fetch(O+'/api/profile/photo',{method:m}); ok('live-photo-'+m+'-anonymous',r.status===exp,r.status); }
+const c=await fetch(O+'/api/profile/photo',{method:'OPTIONS',headers:{Origin:'https://seeyouinlaos.github.io','Access-Control-Request-Method':'PUT'}}); ok('live-retired-origin-no-cors',c.status===204&&!c.headers.get('access-control-allow-origin'),'github.io gets no CORS grant');
+ok('live-no-console-errors',errs.length===0,errs.join(' | ')||'none');
+fs.writeFileSync(OUT+'/live-ro.json',JSON.stringify(R,null,1)); const f=R.filter(x=>!x.ok).length; console.log(f?'LIVE RO FAILED '+f:'LIVE RO PASSED · '+R.length+' checks'); await b.close(); process.exit(f?1:0);

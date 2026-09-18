@@ -1,0 +1,62 @@
+[
+ {
+  "id": "live-profile-private-signed-out",
+  "ok": true,
+  "d": "https://seeyouinlaos-website.suthep-hrg.workers.dev/invitation?open=1&next=profile"
+ },
+ {
+  "id": "live-about-you-private",
+  "ok": true,
+  "d": "https://seeyouinlaos-website.suthep-hrg.workers.dev/invitation?open=1&next=about-you"
+ },
+ {
+  "id": "live-row-signed-out",
+  "ok": true,
+  "d": "Not signed inOpen your invitation"
+ },
+ {
+  "id": "live-invite-module-row",
+  "ok": true,
+  "d": "MY TRIP · MY PROFILE · SIGN OUT in the shipped module"
+ },
+ {
+  "id": "live-shell-about-you-step-05",
+  "ok": true,
+  "d": "step 05 About You · no eyebrow"
+ },
+ {
+  "id": "live-about-you-page",
+  "ok": true,
+  "d": "title + h1"
+ },
+ {
+  "id": "live-profile-page",
+  "ok": true,
+  "d": "My Profile h1 · no step shell · avatar module"
+ },
+ {
+  "id": "live-photo-GET-anonymous",
+  "ok": true,
+  "d": "401"
+ },
+ {
+  "id": "live-photo-PUT-anonymous",
+  "ok": true,
+  "d": "401"
+ },
+ {
+  "id": "live-photo-DELETE-anonymous",
+  "ok": true,
+  "d": "401"
+ },
+ {
+  "id": "live-retired-origin-no-cors",
+  "ok": true,
+  "d": "github.io gets no CORS grant"
+ },
+ {
+  "id": "live-no-console-errors",
+  "ok": true,
+  "d": "none"
+ }
+]

@@ -5,6 +5,8 @@
 import fs from 'node:fs'; import path from 'node:path'; import zlib from 'node:zlib';
 import { chromium } from '/Users/thongantang/.npm-global/lib/node_modules/playwright/index.mjs';
 const N = process.argv[2], OUT = process.argv[3], O = (process.argv[4] || 'http://127.0.0.1:8788').replace(/\/$/, ''); fs.mkdirSync(OUT, { recursive: true });
+/* LIVE=1: the controlled live run with the temporary synthetic guests (T001 · T003 only): no seat is held on the live ledger, no host pair exists, and everything held is released at the end */
+const LIVE = process.env.LIVE === '1';
 const codes = JSON.parse(fs.readFileSync(N + '/synth-codes.json', 'utf8'));
 const R = []; const note = (id, ok, d) => { R.push({ id, ok: !!ok, d: String(d).slice(0, 300) }); console.log((ok ? 'PASS ' : 'FAIL ') + id + ' — ' + String(d).slice(0, 220)); };
 const b = await chromium.launch();
@@ -36,6 +38,8 @@ for (const id of ['T001', 'T003']) { const p = await fresh(); await signIn(p, id
   for (const stage of ['bkk-stay', 'prewed', 'wedstay', 'kmg', 'ljg', 'kempinski']) await api(p, '/api/rooms/leave', { method: 'POST', body: JSON.stringify({ invitationId: 'INV-' + id, guestId: id, stage }) });
   await api(p, '/api/profile/photo', { method: 'DELETE' });
   await p.evaluate(() => { ['siyl.guest', 'siyl.bag', 'siyl.temple', 'siyl.docs', 'siyl.sent', 'siyl.skip', 'siyl.skip.by'].forEach((k) => localStorage.removeItem(k)); });
+  /* the server draft too — emptied against its current revision, so a re-run starts from nothing */
+  const cur = await api(p, '/api/draft'); if (cur.status === 200 && cur.body && cur.body.draft) { const empty = {}; ['siyl.guest', 'siyl.bag', 'siyl.temple', 'siyl.docs', 'siyl.sent', 'siyl.skip', 'siyl.skip.by'].forEach((k) => { empty[k] = k === 'siyl.bag' || k === 'siyl.skip' ? '[]' : '{}'; }); await api(p, '/api/draft', { method: 'PUT', body: JSON.stringify({ keys: empty, baseUpdatedAt: cur.body.draft.updatedAt, reason: 'reset' }) }); }
   await p.evaluate(async () => { const a = JSON.parse(localStorage.getItem('siyl.auth')); await fetch('/api/contact', { method: 'PUT', headers: { 'x-siyl-auth': a.bearer, 'content-type': 'application/json' }, body: JSON.stringify({ email: '', phone: '' }) }); });
   await p.context().close(); }
 
@@ -70,13 +74,15 @@ const line = await A.$eval('[data-profile-item="line:bkk-stay"]', (e) => ({ text
 const badge = await A.$eval('[data-bag-badge]', (e) => e.textContent).catch(() => '');
 note('8-held-room-on-profile', !!line && /Your place is held · Room B/i.test(line.text) && /url\(/.test(line.img) && /USD 192 · your cost/.test(line.text) && badge === '1', line ? line.text.slice(0, 200) + ' · badge ' + badge : 'no card');
 const noTotal = await A.evaluate(() => !document.querySelector('#profile .p-total') && !/Your total/.test(document.querySelector('#profile').innerText)); note('8-no-second-total', noTotal, 'the profile carries no total of its own');
-await completeSteps(A, 'T001', 'Ada', { ceremony: 'C-R-05-02', dinner: 'D-T-05' });
+await completeSteps(A, 'T001', 'Ada', LIVE ? {} : { ceremony: 'C-R-05-02', dinner: 'D-T-05' });
 const r2 = await need(A); const p2 = await openProfile(A);
 const st2 = await A.$eval('[data-profile-status]', (e) => e.innerText.replace(/\s+/g, ' ')); const about2 = await A.$eval('[data-profile-about]', (e) => e.innerText.replace(/\s+/g, ' '));
-note('2-state-complete', r2.ok && /\/profile/.test(p2.url) && !p2.gate && /Everything needed is complete/i.test(st2) && /Complete/i.test(about2) && /Edit About You/i.test(about2), st2.slice(0, 120) + ' · ' + about2.slice(0, 80));
+if (LIVE) note('2-state-complete-but-seats', /2 things are still needed, first: Ceremony seat/i.test(st2) && /\/profile/.test(p2.url) && !p2.gate && /Complete/i.test(about2) && /Edit About You/i.test(about2), 'live: the two seats are the only things still needed (no seat is held on the live ledger) · ' + st2.slice(0, 100) + ' · ' + about2.slice(0, 60));
+else note('2-state-complete', r2.ok && /\/profile/.test(p2.url) && !p2.gate && /Everything needed is complete/i.test(st2) && /Complete/i.test(about2) && /Edit About You/i.test(about2), st2.slice(0, 120) + ' · ' + about2.slice(0, 80));
 const seats = await A.$$eval('[data-profile-ticket]', (l) => l.map((e) => e.getAttribute('data-profile-ticket') + ':' + e.innerText.replace(/\s+/g, ' ').slice(0, 60)));
 const wed = await A.$eval('[data-profile-item="wedding:ceremony"]', (e) => e.innerText.replace(/\s+/g, ' '));
-note('8-seats-and-tickets', seats.some((s) => /^seat:ceremony/.test(s) && /Held in your name/i.test(s)) && seats.some((s) => /^seat:dinner/.test(s)) && /Seat .* · Held in your name/i.test(wed), seats.join(' | ') + ' · ' + wed.slice(0, 120));
+if (LIVE) note('8-seats-not-held-live', !seats.some((s) => /^seat:/.test(s)) && /No seat held yet/i.test(wed), 'no seat is held on the live ledger by a synthetic guest · ' + wed.slice(0, 120));
+else note('8-seats-and-tickets', seats.some((s) => /^seat:ceremony/.test(s) && /Held in your name/i.test(s)) && seats.some((s) => /^seat:dinner/.test(s)) && /Seat .* · Held in your name/i.test(wed), seats.join(' | ') + ' · ' + wed.slice(0, 120));
 await shot(A, '390-profile-complete'); await A.evaluate(() => window.scrollTo(0, document.body.scrollHeight * 0.45)); await A.waitForTimeout(500); await shot(A, '390-profile-scrolled');
 /* about-you: step 05 · About You, reachable now, the bar names it */
 await A.goto(O + '/about-you.html', { waitUntil: 'load' }); await A.waitForTimeout(1800); const bar5 = await A.$eval('.prep-bar', (e) => e.innerText.replace(/\s+/g, ' ')); const h15 = await A.$eval('main h1', (e) => e.textContent);
@@ -110,15 +116,24 @@ await A.goto(O + '/profile.html', { waitUntil: 'load' }); await A.waitForTimeout
 const auth = await A.evaluate(() => localStorage.getItem('siyl.auth')); note('9-sign-out', /invitation/.test(A.url()) && !auth, A.url() + ' · auth ' + auth);
 await A.goto(O + '/profile.html', { waitUntil: 'load' }); await A.waitForTimeout(1800); note('profile-private-when-signed-out', /invitation/.test(A.url()) && /next=profile/.test(A.url()), A.url());
 
-/* ===== E · the fixed host pair: the arrangement on the profile, never in the bag ===== */
+/* ===== E · the fixed host pair: the arrangement on the profile, never in the bag (the stage only — no synthetic host exists live) ===== */
+if (!LIVE) {
 const H = await fresh(); await signIn(H, 'G048'); await H.goto(O + '/profile.html', { waitUntil: 'load' }); await H.waitForTimeout(3000);
 const fixed = await H.$eval('[data-profile-item="fixed:bkk-stay"]', (e) => ({ text: e.innerText.replace(/\s+/g, ' '), img: getComputedStyle(e.querySelector('.pf-img')).backgroundImage })).catch(() => null);
 const hb = await H.evaluate(() => ({ bag: JSON.parse(localStorage.getItem('siyl.bag') || '[]').length, total: SIYL_BAG.total(), badge: (document.querySelector('[data-bag-badge]') || {}).textContent }));
 note('8-fixed-arrangement-not-in-bag', !!fixed && /Arranged for you/i.test(fixed.text) && /Fixed arrangement · not part of your bag/i.test(fixed.text) && !/USD/.test(fixed.text) && /url\(/.test(fixed.img) && hb.bag === 0 && hb.total === 0 && hb.badge === '', (fixed ? fixed.text.slice(0, 160) : 'no card') + ' · ' + JSON.stringify(hb));
-await shot(H, '390-profile-host');
+await shot(H, '390-profile-host'); await H.context().close();
+}
 
 /* ===== F · the widths: the profile and the step header at 320 · 834 · 1440 ===== */
 for (const w of [320, 834, 1440]) { const p = await fresh(w); await signIn(p, 'T001'); await p.goto(O + '/profile.html', { waitUntil: 'load' }); await p.waitForTimeout(2600); const ov = await p.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth); await shot(p, w + '-profile'); await p.goto(O + '/your-journey.html', { waitUntil: 'load' }); await p.waitForTimeout(1600); const ov2 = await p.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth); await shot(p, w + '-my-trip-header'); note('width-' + w, !ov && !ov2, 'no horizontal overflow: profile ' + !ov + ' · my trip ' + !ov2); await p.context().close(); }
 
+/* ===== cleanup: nothing stays held or stored in a synthetic guest's name ===== */
+for (const id of ['T001', 'T003']) { const p = await fresh(); await signIn(p, id);
+  for (const ev of ['ceremony', 'dinner']) await api(p, '/api/seating/release', { method: 'POST', body: JSON.stringify({ invitationId: 'INV-' + id, guestId: id, event: ev }) });
+  const lv = await api(p, '/api/rooms/leave', { method: 'POST', body: JSON.stringify({ invitationId: 'INV-' + id, guestId: id, stage: 'bkk-stay' }) });
+  const ph = await api(p, '/api/profile/photo', { method: 'DELETE' }); const g = await api(p, '/api/profile/photo');
+  if (id === 'T001') note('cleanup-' + id, (lv.status === 200 || lv.status === 404) && ph.status === 200 && g.status === 404, 'room ' + lv.status + ' · photo ' + ph.status + '/' + g.status);
+  await p.context().close(); }
 fs.writeFileSync(path.join(OUT, 'e2e.json'), JSON.stringify(R, null, 1));
 const fails = R.filter((x) => !x.ok).length; console.log('\n' + (fails ? 'E2E FAILED · ' + fails + ' of ' + R.length : 'E2E PASSED · ' + R.length + ' checks')); await b.close(); process.exit(fails ? 1 : 0);
