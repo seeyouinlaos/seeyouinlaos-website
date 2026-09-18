@@ -206,7 +206,7 @@
     for (var i = 0; i < 4; i++) tail += ALPHA[parseInt(hex.substr(i * 4, 4), 16) % ALPHA.length];
     return 'SYL-' + L.EVENT_CODE[s.event] + '-FC-' + tail;
   }
-  function stateOf(s) { return s.fixed ? 'FRONT CENTRE' : 'CONFIRMED'; }
+  function stateOf(s) { return s.fixed ? 'FRONT CENTRE' : 'HELD'; }
   /* the words inside the code: the ticket, readable by any scanner, secret to nobody */
   function payload(doc, s) {
     return ['SEE YOU IN LAOS', 'SEAT TICKET ' + refOf(doc, s), doc.guest.preferredName, L.EVENT_NAME[s.event], L.EVENT_DATE + ' · ' + EVENT_TIME[s.event], (s.fixed ? seatWords(s) : 'Seat ' + L.label(s.seatId) + ' · ' + L.describe(s.seatId)), stateOf(s)].join('\n');
@@ -267,7 +267,7 @@
     doc.seats.forEach(function (s) { drawSeatTicket(p, doc, s, { x: M, y: y - H, w: W, h: H }); y -= H + GAP; });
     /* the words at the foot */
     y -= 6;
-    p.text(M, y, 'This ticket shows your seat exactly as Guest Relations hold it in the seating ledger at the time of download.', 'F3', 9.5, MUTE); y -= 14;
+    p.text(M, y, 'This ticket shows your seat exactly as Guest Relations hold it at the time of download.', 'F3', 9.5, MUTE); y -= 14;
     p.text(M, y, 'It is a seat ticket for the wedding of Haruthai & Suthep; nothing here is charged.', 'F3', 9.5, MUTE); y -= 14;
     p.text(M, y, 'If you change a seat, download this ticket again; the newer one is the one that counts.', 'F3', 9.5, MUTE);
     p.label(M, SAFE.y + 14, 'Downloaded ' + doc.downloadedAt.replace('T', ' ').slice(0, 16) + ' UTC');
@@ -332,7 +332,7 @@
     if (!doc || !doc.seats || !doc.seats.length) return '';
     var s = doc.seats[0], ref = refOf(doc, s), e = escH;
     return '<div class="p-ticket on p-ticket-seat" data-ticket="seat:' + e(s.event) + '" data-ticket-ref="' + e(ref) + '">' +
-      '<div class="p-ticket-head"><p class="t-l1">' + e(EVENT_HEAD[s.event]) + '</p><p class="t-l1 on" data-ticket-state><i class="prep-tick" aria-hidden="true"></i>' + e(s.fixed ? 'Front centre' : 'Confirmed') + '</p></div>' +
+      '<div class="p-ticket-head"><p class="t-l1">' + e(EVENT_HEAD[s.event]) + '</p><p class="t-l1 on" data-ticket-state><i class="prep-tick" aria-hidden="true"></i>' + e(s.fixed ? 'Front centre' : 'Held in your name') + '</p></div>' +
       '<h3 class="t-h1">' + e(L.EVENT_NAME[s.event]) + '</h3>' +
       '<div class="p-ticket-route p-ticket-event">' +
         '<div class="p-ticket-end"><b class="p-ticket-code' + (s.fixed ? ' small' : '') + '">' + e(seatWords(s)) + '</b><span class="t-b2">' + e(seatDetail(s)) + '</span></div>' +
@@ -342,7 +342,7 @@
       '<div class="p-ticket-body"><div class="p-ticket-facts">' +
         '<div><p class="t-l1">Guest</p><p class="t-b1">' + e(doc.guest.fullName) + '</p></div>' +
         '<div><p class="t-l1">Held for</p><p class="t-b1">' + e(doc.guest.preferredName || doc.guest.fullName) + '</p></div>' +
-        '<div><p class="t-l1">Status</p><p class="t-b1">' + e(s.fixed ? 'Front centre' : 'Confirmed') + '</p></div>' +
+        '<div><p class="t-l1">Status</p><p class="t-b1">' + e(s.fixed ? 'Front centre' : 'Held in your name') + '</p></div>' +
         '<div><p class="t-l1">Ticket reference</p><p class="t-b1"><span class="ref">' + e(ref) + '</span></p></div></div>' +
         '<div class="p-ticket-code-box">' + qrSvg(payload(doc, s), 96, 'Seat ticket code ' + ref) + '<p class="t-l1">' + e(s.fixed ? 'Front centre' : 'Held in your name') + '</p></div></div>' +
       (opts.actions ? '<div class="p-actions">' + opts.actions + '</div>' : '') + '</div>';

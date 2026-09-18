@@ -109,7 +109,7 @@ test('PDF · the seat confirmation: a real PDF, the Owner\'s fields, labels only
   const offs = [...pdf.matchAll(/^(\d{10}) 00000 n /gm)].map((m) => +m[1]);
   offs.forEach((o, i) => assert.match(pdf.slice(o, o + 12), new RegExp('^' + (i + 1) + ' 0 obj')));
   /* the Owner's fields, in the text of the page: a TICKET (Owner, 15 Sep 2026) — event, guest, seat, status, held for, the reference, the download stamp */
-  for (const t of ['see you in laos.', 'SEAT TICKET', 'YOUR WEDDING SEAT', 'GUEST', 'Peggy Berger', 'Peggy & Steffie', 'EVENT', 'Vow Ceremony', 'Sunday, 28 February 2027 · 15:30', 'Souphattra Heritage, Vientiane', 'SEAT', 'E4', 'Right block · row 4', 'STATUS', 'CONFIRMED', 'HELD FOR', 'SYL-WC-E4-', 'SCAN AT THE DOOR', 'DOWNLOADED 2026-09-14 10:00 UTC', 'WEDDING OF HARUTHAI & SUTHEP']) {
+  for (const t of ['see you in laos.', 'SEAT TICKET', 'YOUR WEDDING SEAT', 'GUEST', 'Peggy Berger', 'Peggy & Steffie', 'EVENT', 'Vow Ceremony', 'Sunday, 28 February 2027 · 15:30', 'Souphattra Heritage, Vientiane', 'SEAT', 'E4', 'Right block · row 4', 'STATUS', 'HELD', 'HELD FOR', 'SYL-WC-E4-', 'SCAN AT THE DOOR', 'DOWNLOADED 2026-09-14 10:00 UTC', 'WEDDING OF HARUTHAI & SUTHEP']) {
     assert.ok(pdf.includes(t.replace('·', '\\267')), 'text: ' + t);
   }
   assert.doesNotMatch(pdf, /C-R-04-02|D-T-17/, 'no ledger id on the ticket');
@@ -142,7 +142,7 @@ test('PDF · the seat confirmation: a real PDF, the Owner\'s fields, labels only
   /* the ticket reference is the ledger's; the code carries the ticket and nothing secret */
   assert.equal(PASS.refOf(both, both.seats[0]), L.ref('INV-002', 'G001', 'ceremony', 'C-R-04-02'));
   const pl = PASS.payload(both, both.seats[1]);
-  assert.match(pl, /^SEE YOU IN LAOS\nSEAT TICKET SYL-WD-A17-[A-Z0-9]{4}\nPeggy\nWedding Dinner\nSunday, 28 February 2027 · 19:30\nSeat A17 · Long table · run A · Poolside · place 17\nCONFIRMED$/);
+  assert.match(pl, /^SEE YOU IN LAOS\nSEAT TICKET SYL-WD-A17-[A-Z0-9]{4}\nPeggy\nWedding Dinner\nSunday, 28 February 2027 · 19:30\nSeat A17 · Long table · run A · Poolside · place 17\nHELD$/);
   assert.doesNotMatch(pl, /INV-|G001|siyl/);
   assert.equal(PASS.filename(both), 'see-you-in-laos-wedding-seats-peggy.pdf');
   /* a guest without a seat gets no document; a seat the ledger does not hold is never written */
@@ -185,7 +185,7 @@ test('SURFACES · the preparation, The Wedding and Review & Send speak in labels
   }
   /* the two-step booking: tap → summary → CONFIRM; nothing is held on the tap */
   assert.match(wp, /data-seat-confirm=/); assert.match(wp, /data-seat-cancel/); assert.match(wp, /Confirm seat/); assert.match(wp, /Confirm change/);
-  assert.match(wp, /barEl\.className='p-seatbar'/); assert.match(wp, /setAttribute\('aria-live','polite'\)/); assert.match(wp, /Seat confirmed/); assert.match(wp, /data-seat-continue=/); assert.match(wp, /data-seat-change=/); assert.match(wp, /data-seat-keep=/);
+  assert.match(wp, /barEl\.className='p-seatbar'/); assert.match(wp, /setAttribute\('aria-live','polite'\)/); assert.match(wp, /Seat held/); assert.match(wp, /data-seat-continue=/); assert.match(wp, /data-seat-change=/); assert.match(wp, /data-seat-keep=/);
   assert.match(wp, /Current seat '\+esc\(labelOf\(cur\)\)\+' · New seat '\+esc\(labelOf\(nu\)\)/);
   assert.match(wp, /if\(mode\.pending===seatId\)\{withdrawn=seatId;mode\.pending=null\}else mode\.pending=seatId;/, 'the tap only marks a pending choice (and a second tap withdraws it)');
   assert.match(wp, /S\.select\(ev,seatId,id\)\.then/, 'CONFIRM is the one call into the engine');

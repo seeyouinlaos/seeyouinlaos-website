@@ -38,8 +38,8 @@ test('REAL PATH · the journey-shop payload: the guest email at registration.con
     assert.equal(d.mail.guest.accepted, true); assert.equal(d.mail.guest.to, 's…@example.org'); assert.equal(d.mail.owner.accepted, true);
     assert.deepEqual(d.mailSummary, { ownerMailStatus: 'accepted', ownerMessageId: '<msg-1@brevo>', guestMailStatus: 'accepted', guestMessageId: '<msg-2@brevo>', guestTo: 's…@example.org', mailLastError: null, at: d.mailSummary.at });
     assert.equal(h.calls[1].body.to[0].email, 'sam.example@example.org'); assert.equal(h.calls[1].body.to[0].name, 'Sam Example');
-    assert.match(h.calls[0].body.subject, /Journey received — Sam Example · SYL-G777-/);
-    assert.match(h.calls[0].body.textContent, /Guest: Sam Example · G777\n/); assert.match(h.calls[0].body.textContent, /Wedding Ceremony: Seat E5\n· Wedding Dinner: Seat D-12-03/); assert.match(h.calls[0].body.textContent, /Email: sam.example@example.org\nMobile: \+66 81 000 0000/);
+    assert.match(h.calls[0].body.subject, /Trip received — Sam Example · SYL-G777-/);
+    assert.match(h.calls[0].body.textContent, /Guest: Sam Example\n/); assert.match(h.calls[0].body.textContent, /Wedding Ceremony: Seat E5\n· Wedding Dinner: Seat D-12-03/); assert.match(h.calls[0].body.textContent, /Email: sam.example@example.org\nMobile: \+66 81 000 0000/);
     assert.match(h.calls[0].body.textContent, /Ceremony seat record: C-R-05-02/, 'the internal id sits in the internal reference only');
     assert.match(h.calls[1].body.textContent, /Dear Sam,/); assert.doesNotMatch(h.calls[1].body.textContent, /C-R-05-02|(?<!SYL-)G777|INV-G777/, 'no internal id reaches the guest');
     const rec = JSON.parse(h.store.m.get('reg:INV-G777').v);
@@ -105,6 +105,6 @@ test('CLIENT · the guest store pushes the contact to the server and pulls it on
   assert.match(g, /fetch\(CONTACT_API, \{ method: 'PUT', headers: \{ 'content-type': 'application\/json', 'x-siyl-auth': a\.bearer \}/);
   assert.match(g, /document\.addEventListener\('siyl:auth', pullOnce\)/);
   assert.match(rv, /if\(r\.status===422\)/); assert.match(rv, /Please add your email address so we can send your confirmation\./); assert.match(rv, /invitation\.html#p-email/);
-  assert.match(rv, /'✓ Journey saved'/); assert.match(rv, /'✓ Sent to Guest Relations'/); assert.match(rv, /'✓ Confirmation email sent to '/); assert.match(rv, /'! Confirmation email could not be sent'/); assert.match(rv, /rb\.textContent='Retry confirmation email'/);
-  assert.match(rv, /'✓ Changes saved'/); assert.match(rv, /'✓ Updated journey sent to Guest Relations'/); assert.match(rv, /'Send updated journey'/);
+  assert.match(rv, /'✓ Trip saved'/); assert.match(rv, /'✓ Sent to Guest Relations'/); assert.match(rv, /'✓ Confirmation email sent to '/); assert.match(rv, /'! Confirmation email could not be sent'/); assert.match(rv, /rb\.textContent='Retry confirmation email'/);
+  assert.match(rv, /'✓ Changes saved'/); assert.match(rv, /'✓ Updated trip sent to Guest Relations'/); assert.match(rv, /'Send Updated Trip'/);
 });

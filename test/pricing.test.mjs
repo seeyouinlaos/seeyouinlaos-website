@@ -580,13 +580,13 @@ test('Review & Send is five editorial blocks, each with its own way back', () =>
     assert.ok(i > at, id + ' is out of order in the page');
     at = i;
   });
-  [['b1', '<h2>You</h2>'], ['b2', '<h2>Your journey</h2>'], ['b3', '<h2>The Wedding</h2>'], ['b6', '<h2>About you</h2>'],
+  [['b1', '<h2>You</h2>'], ['b2', '<h2>My Trip</h2>'], ['b3', '<h2>The Wedding</h2>'], ['b6', '<h2>About you</h2>'],
    ['b4', '<h2>Documents &amp; privacy</h2>'], ['b5', '<h2>Your cost</h2>']]
     .forEach(([id, heading]) => assert.ok(page.includes(heading), id + ' does not carry ' + heading));
   /* RECEIVED is not CONFIRMED, and a sent journey stays editable */
   assert.match(page, /Nothing is confirmed yet/);
   assert.match(page, /Confirmed<\/b> is something only Guest Relations can tell you/);
-  assert.match(page, /Change my journey and send again/);
+  assert.match(page, /Change and send again/);
   /* one guest, never a party headcount */
   assert.doesNotMatch(page, /p\.guests\.forEach|For your party|Total for your party/);
   assert.equal(page.includes('YOUR COST'), true);

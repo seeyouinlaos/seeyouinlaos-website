@@ -1,0 +1,212 @@
+[
+ {
+  "name": "email-guest-received",
+  "w": 390,
+  "overflow": false
+ },
+ {
+  "name": "email-guest-updated",
+  "w": 390,
+  "overflow": false
+ },
+ {
+  "name": "email-guest-relations",
+  "w": 390,
+  "overflow": false
+ },
+ {
+  "name": "email-guest-received",
+  "w": 834,
+  "overflow": false
+ },
+ {
+  "name": "email-guest-updated",
+  "w": 834,
+  "overflow": false
+ },
+ {
+  "name": "email-guest-relations",
+  "w": 834,
+  "overflow": false
+ },
+ {
+  "name": "public-wedding-private-pointer",
+  "w": 390,
+  "overflow": false
+ },
+ {
+  "name": "invitation-entry",
+  "w": 390,
+  "overflow": false
+ },
+ {
+  "name": "invitation-signed-in",
+  "w": 390,
+  "overflow": false
+ },
+ {
+  "name": "product-add",
+  "w": 390,
+  "overflow": false
+ },
+ {
+  "name": "product-added",
+  "w": 390,
+  "overflow": false
+ },
+ {
+  "name": "the-journey-signed-in",
+  "w": 390,
+  "overflow": false
+ },
+ {
+  "name": "seat-your-seat",
+  "w": 390,
+  "overflow": false
+ },
+ {
+  "name": "seat-held",
+  "w": 390,
+  "overflow": false
+ },
+ {
+  "name": "your-tickets",
+  "w": 390,
+  "overflow": false
+ },
+ {
+  "name": "public-wedding-private-pointer",
+  "w": 320,
+  "overflow": false
+ },
+ {
+  "name": "invitation-entry",
+  "w": 320,
+  "overflow": false
+ },
+ {
+  "name": "invitation-signed-in",
+  "w": 320,
+  "overflow": false
+ },
+ {
+  "name": "product-add",
+  "w": 320,
+  "overflow": false
+ },
+ {
+  "name": "product-added",
+  "w": 320,
+  "overflow": false
+ },
+ {
+  "name": "the-journey-signed-in",
+  "w": 320,
+  "overflow": false
+ },
+ {
+  "name": "seat-your-seat",
+  "w": 320,
+  "overflow": false
+ },
+ {
+  "name": "seat-held",
+  "w": 320,
+  "overflow": false
+ },
+ {
+  "name": "your-tickets",
+  "w": 320,
+  "overflow": false
+ },
+ {
+  "name": "public-wedding-private-pointer",
+  "w": 834,
+  "overflow": false
+ },
+ {
+  "name": "invitation-entry",
+  "w": 834,
+  "overflow": false
+ },
+ {
+  "name": "invitation-signed-in",
+  "w": 834,
+  "overflow": false
+ },
+ {
+  "name": "product-add",
+  "w": 834,
+  "overflow": false
+ },
+ {
+  "name": "product-added",
+  "w": 834,
+  "overflow": false
+ },
+ {
+  "name": "the-journey-signed-in",
+  "w": 834,
+  "overflow": false
+ },
+ {
+  "name": "seat-your-seat",
+  "w": 834,
+  "overflow": false
+ },
+ {
+  "name": "seat-held",
+  "w": 834,
+  "overflow": false
+ },
+ {
+  "name": "your-tickets",
+  "w": 834,
+  "overflow": false
+ },
+ {
+  "name": "public-wedding-private-pointer",
+  "w": 1440,
+  "overflow": false
+ },
+ {
+  "name": "invitation-entry",
+  "w": 1440,
+  "overflow": false
+ },
+ {
+  "name": "invitation-signed-in",
+  "w": 1440,
+  "overflow": false
+ },
+ {
+  "name": "product-add",
+  "w": 1440,
+  "overflow": false
+ },
+ {
+  "name": "product-added",
+  "w": 1440,
+  "overflow": false
+ },
+ {
+  "name": "the-journey-signed-in",
+  "w": 1440,
+  "overflow": false
+ },
+ {
+  "name": "seat-your-seat",
+  "w": 1440,
+  "overflow": false
+ },
+ {
+  "name": "seat-held",
+  "w": 1440,
+  "overflow": false
+ },
+ {
+  "name": "your-tickets",
+  "w": 1440,
+  "overflow": false
+ }
+]

@@ -94,18 +94,18 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:22px;margin:44
 .backrow a{font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:#313131;text-decoration:none;border-bottom:1px solid #313131;padding:8px 0 3px;display:inline-block;min-height:44px}
 </style><link rel="stylesheet" href="assets/prep.css?v=47767267">
 <link rel="stylesheet" href="assets/desktop.css?v=1099ec60"><link rel="stylesheet" href="assets/aman.css?v=4338c841"></head><body>
-<header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="cart.html" aria-label="Your Journey"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
+<header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="cart.html" aria-label="My Bag"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <p class="hd-access" data-access data-state="out"><span>Not signed in</span><span class="hd-access-do"><a href="invitation.html?open=1">Open your invitation</a></span></p>
 <main id="m"></main>
 <script src="assets/bag.js?v=ee697358"></script>
-<script src="assets/draft.js?v=f52ddf43"></script>
+<script src="assets/draft.js?v=f552e00b"></script>
 <script src="assets/shop-menu.js?v=75d5662d"></script>
-<script src="assets/aman.js?v=fd12151c"></script>
-<script src="assets/rooms-data.js?v=eb3283fa"></script>
-<script src="assets/pricing.js?v=ca8f5f5b"></script>
-<script src="assets/rooms.js?v=1923c6eb"></script>
-<script src="assets/stay.js?v=348cbc4b"></script>
-<script src="assets/journey.js?v=48a50f21"></script>
+<script src="assets/aman.js?v=10dc5fbe"></script>
+<script src="assets/rooms-data.js?v=08d91b2d"></script>
+<script src="assets/pricing.js?v=e864296d"></script>
+<script src="assets/rooms.js?v=6ad9f395"></script>
+<script src="assets/stay.js?v=e1950ee9"></script>
+<script src="assets/journey.js?v=e5c9ee3c"></script>
 <script type="module" src="assets/invite.mjs?v=5d3e1c62"></script>
 <script>
 (function () {
@@ -230,7 +230,7 @@ stay.windows.forEach(function (w, wi) {
   h += '<div class="win"><p class="wl">' + esc(w.label) + '</p><p class="wd">' + esc(w.dates) + '</p><p class="wn">' + esc(w.nights) + '</p>';
   if (room.interest) {
     h += '<p class="price">' + esc(room.status) + '</p><p class="per">Guest Relations arranges the rest</p>';
-    h += '<button class="cta" data-win="' + wi + '">Add to Your Journey</button>';
+    h += '<button class="cta" data-win="' + wi + '">Add to My Bag</button>';
   } else if (room.rate == null) {
     /* real inventory without an approved guest amount — never an invented price */
     h += '<p class="price">Amount on request</p><p class="per">Guest Relations confirms the amount</p>';
@@ -245,7 +245,7 @@ stay.windows.forEach(function (w, wi) {
     h += '<p class="av" data-av="' + w.id + '" hidden></p>';
     /* the physical rooms of this category, each with its two places — the primary picture of availability */
     h += '<div class="rooms prep" data-rooms-box="' + w.id + '"></div>';
-    h += '<button class="cta" data-win="' + wi + '" data-avwin="' + w.id + '">Add to Your Journey</button><span class="swap" data-swap="' + wi + '" hidden></span>';
+    h += '<button class="cta" data-win="' + wi + '" data-avwin="' + w.id + '">Add to My Bag</button><span class="swap" data-swap="' + wi + '" hidden></span>';
     if (P.hasVariants(w.id)) h += '<button type="button" class="chg" data-chg="' + wi + '" hidden>Change selection</button>';
   }
   h += '</div>';
@@ -325,16 +325,16 @@ function paint() {
     var chg = document.querySelector('[data-chg="' + wi + '"]');
     var line = mine(w), other = held(w);
     if (line) {
-      b.textContent = 'Remove from Your Journey';
+      b.textContent = 'Remove from My Bag';
       b.classList.add('sel');
       if (swap) { var words = ST ? ST.unitWords(line) : ''; swap.hidden = !words; swap.textContent = words ? 'Current selection · ' + words : ''; }
       if (chg) chg.hidden = false;
     } else {
-      b.textContent = 'Add to Your Journey';
+      b.textContent = 'Add to My Bag';
       b.classList.remove('sel');
       if (chg) chg.hidden = true;
       if (swap) {
-        if (other) { swap.hidden = false; swap.textContent = 'Your journey currently holds ' + String(other.meta).split(' · ').pop() + ' for this stay — adding this room replaces it.'; }
+        if (other) { swap.hidden = false; swap.textContent = 'Your trip currently holds ' + String(other.meta).split(' · ').pop() + ' for this stay — adding this room replaces it.'; }
         else swap.hidden = true;
       }
     }
@@ -346,7 +346,7 @@ function paint() {
       av.classList.toggle('low', U.scarce(w.id, room.slug) || U.soldOut(w.id, room.slug));
       var gone = !line && !U.fits(w.id, room.slug);
       b.disabled = gone;
-      if (gone) b.textContent = U.ctaWords(w.id, room.slug) || 'Fully booked';
+      if (gone) b.textContent = U.ctaWords(w.id, room.slug) || 'Sold out';
       if (box && ST) { box.innerHTML = ST.unitsHtml(w.id, room.slug); ST.wire(box, function (r) { paint(); if (!r.ok) { av.hidden = false; av.textContent = ST.refusal(r); av.classList.add('low'); } }); }
     } else if (av) { av.hidden = true; b.disabled = false; if (box) box.innerHTML = ''; }
   });

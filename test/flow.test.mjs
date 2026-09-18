@@ -214,7 +214,7 @@ test('CART · the navigation matrix: bag icon → cart; cart → Your Journey / 
   }
   const c = src('cart.html');
   assert.match(c, /Your bag is empty/); assert.match(c, /No selections yet · USD 0/); assert.match(c, /href="your-journey\.html">Open My Trip</);
-  assert.match(c, /Review your journey/); assert.match(c, /Your journey is not ready to review yet/); assert.match(c, /Complete this/);
+  assert.match(c, /Review (&amp;|&) Send/); assert.match(c, /Not ready for Review &amp; Send yet/); assert.match(c, /Complete this/);
   assert.match(c, /ready\.ok\?'review\.html':\(first\?first\.href/);
   assert.match(c, /journeys\.html\?change='\+P\.windowOf\(x\.id\)\+'#j-'/, 'accommodation CHANGE → the exact stay selector');
   assert.match(c, /wedding\.html#sangkhathan/, 'Sangkhathan CHANGE → the exact decision');

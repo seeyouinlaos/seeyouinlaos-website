@@ -28,7 +28,7 @@ test('seat labels · the same pure mapping as assets/seatlabels.js (every ceremo
 
 test('the guest email · CI, human words, the Worker CTA, no system term, no id, no raw stamp; the engine\'s room wins over the line\'s', () => {
   const m = composeGuestMail(rec());
-  assert.equal(m.subject, 'Your Journey has been received — SYL-G777-34DBEFD3');
+  assert.equal(m.subject, 'Your trip has been received — SYL-G777-34DBEFD3');
   for (const body of [m.html, m.text]) {
     assert.doesNotMatch(body, DEBUG, 'no debug language'); assert.doesNotMatch(body, /(?<!SYL-)G777|INV-G777|C-R-05-02|D-T-05/, 'no internal id (the reference carries the guest id by design)');
     assert.match(body, /Dear Sam,/); assert.match(body, /Reference:?\s*(<[^>]+>\s*)*SYL-G777-34DBEFD3/); assert.match(body, /16 September 2026 · 19:52/);
@@ -38,25 +38,25 @@ test('the guest email · CI, human words, the Worker CTA, no system term, no id,
     assert.doesNotMatch(body, /Passport/, 'an optional document not provided is omitted for the guest');
     assert.match(body, /Wat Ong Teu/); assert.match(body, /09:00 – approximately 12:00/); assert.match(body, /From 12:00/); assert.match(body, /15:30/); assert.match(body, /19:30/); assert.match(body, /poolside/); assert.match(body, /Not joining/);
   }
-  assert.match(m.html, /background:#f4eee5/); assert.match(m.html, /Georgia, 'Times New Roman'/); assert.match(m.html, /letter-spacing:2px;text-transform:uppercase/); assert.match(m.html, /max-width:640px/); assert.match(m.html, /Open your journey/);
+  assert.match(m.html, /background:#f4eee5/); assert.match(m.html, /Georgia, 'Times New Roman'/); assert.match(m.html, /letter-spacing:2px;text-transform:uppercase/); assert.match(m.html, /max-width:640px/); assert.match(m.html, /Open My Trip/);
   assert.match(m.html, /<meta name="viewport"/); assert.doesNotMatch(m.html, /display:\s*grid|display:\s*flex|<script/);
-  assert.match(m.text, /^SEE YOU IN LAOS — YOUR JOURNEY\n\nYour journey has been received\n\nDear Sam,/);
+  assert.match(m.text, /^SEE YOU IN LAOS — MY TRIP\n\nYour trip has been received\n\nDear Sam,/);
 });
 
 test('the update email · same reference, "updated", versioning kept internal for the guest, shown to Guest Relations', () => {
   const g = composeGuestMail(rec({ kind: 'update', version: 2, lastSentAt: '2026-09-16T18:10:03.000Z' }));
-  assert.equal(g.subject, 'Your Journey has been updated — SYL-G777-34DBEFD3');
-  for (const body of [g.html, g.text]) { assert.match(body, /Your journey has been updated/); assert.match(body, /replaces the previous version for review/); assert.match(body, /Updated:?\s*(<[^>]+>\s*)*16 September 2026 · 20:10/); assert.doesNotMatch(body, /version 2|first sent/i); }
+  assert.equal(g.subject, 'Your trip has been updated — SYL-G777-34DBEFD3');
+  for (const body of [g.html, g.text]) { assert.match(body, /Your trip has been updated/); assert.match(body, /replaces the previous version for review/); assert.match(body, /Updated:?\s*(<[^>]+>\s*)*16 September 2026 · 20:10/); assert.doesNotMatch(body, /version 2|first sent/i); }
   const o = composeOwnerMail(rec({ kind: 'update', version: 2, lastSentAt: '2026-09-16T18:10:03.000Z' }), 'https://x/api/status?invitation=INV-G777');
-  assert.equal(o.subject, 'Journey updated — Sam Example · SYL-G777-34DBEFD3');
-  assert.match(o.text, /Journey updated\n\nLatest version received 16 September 2026 · 20:10 \(replaces the version first sent 16 September 2026 · 19:52\)/);
-  assert.match(o.text, /Status: Updated journey/); assert.match(o.text, /Submission: SYL-G777-34DBEFD3 · version 2/);
+  assert.equal(o.subject, 'Trip updated — Sam Example · SYL-G777-34DBEFD3');
+  assert.match(o.text, /Trip updated\n\nLatest version received 16 September 2026 · 20:10 \(replaces the version first sent 16 September 2026 · 19:52\)/);
+  assert.match(o.text, /Status: Updated trip/); assert.match(o.text, /Submission: SYL-G777-34DBEFD3 · version 2/);
 });
 
 test('the Guest Relations email · operational detail retained, internal ids in the last section only, still-needed documents, no raw stamp', () => {
   const o = composeOwnerMail(rec(), 'https://x/api/status?invitation=INV-G777');
   for (const body of [o.html, o.text]) {
-    assert.match(body, /New journey received/); assert.match(body, /Sam Example · G777/); assert.match(body, /Peggy & Steffie|Peggy &amp; Steffie/); assert.match(body, /sam\.example@example\.org/); assert.match(body, /\+66 81 000 0000/);
+    assert.match(body, /New trip received/); assert.match(body, /Sam Example/); assert.match(body, /Peggy & Steffie|Peggy &amp; Steffie/); assert.match(body, /sam\.example@example\.org/); assert.match(body, /\+66 81 000 0000/);
     assert.match(body, /Initial submission/); assert.match(body, /Seat E5/); assert.match(body, /Seat A5/); assert.match(body, /Room C/); assert.match(body, /Peanuts/); assert.match(body, /Passport/); assert.match(body, /Still needed: Passport/); assert.match(body, /USD 292/);
     assert.match(body, /INV-G777/); assert.match(body, /C-R-05-02/); assert.match(body, /D-T-05/);
     assert.doesNotMatch(body, /\d{4}-\d\d-\d\dT\d\d:\d\d|ledger|engine|persisted|payload|fixture|github\.io/i); assert.doesNotMatch(body, /NOT PROVIDED|NOT ANSWERED/, 'normal case for Guest Relations');

@@ -207,7 +207,7 @@
         if (window.SIYL_INVITE) toGate(); else document.addEventListener('siyl:invite-ready', toGate, { once: true });
       }
       bar.innerHTML = '<div class="prep-bar-in"><div class="prep-bar-l">' +
-        '<p class="prep-eyebrow">Your private journey</p>' +
+        '<p class="prep-eyebrow">Private</p>' +
         '<p class="prep-step">Open your invitation to begin</p>' +
         '</div></div>';
       layer.classList.remove('on');
@@ -218,7 +218,7 @@
     var others = G().others ? G().others() : [];
     bar.innerHTML = '<div class="prep-bar-in">' +
       '<div class="prep-bar-l">' +
-        '<p class="prep-eyebrow">Your private journey</p>' +
+        '<p class="prep-eyebrow">Private</p>' +
         '<p class="prep-step"><b>' + STEP.n + ' / 06</b>' + STEP.label + '</p>' +
         '<p class="prep-who"><b>' + esc(nameOf(m)) + '</b>' + (others.length ? ' · Your party · ' + esc(partyNames()) : '') + '</p>' +
         /* once Guest Relations has confirmed, a change made here is not a

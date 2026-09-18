@@ -33,7 +33,7 @@ hr{border:0;border-top:1px solid #DAD9D7;margin:0 0 22px}
 .ja-n{font-family:'PP Editorial Old',serif;font-weight:200;font-size:17px;line-height:1.3}
 .ja-m{font-size:11px;color:#6B6964;margin-top:5px}
 </style><link rel="stylesheet" href="assets/desktop.css?v=1099ec60"><link rel="stylesheet" href="assets/aman.css?v=4338c841"></head><body>
-<header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="cart.html" aria-label="Your Journey"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
+<header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="cart.html" aria-label="My Bag"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <p class="hd-access" data-access data-state="out"><span>Not signed in</span><span class="hd-access-do"><a href="invitation.html?open=1">Open your invitation</a></span></p>
 <main>
 <div class="media" style="background:url(assets/images/1872/tea-2.jpg) center/cover no-repeat"></div>
@@ -46,7 +46,7 @@ hr{border:0;border-top:1px solid #DAD9D7;margin:0 0 22px}
 <hr>
 <p class="per" style="margin-bottom:8px" data-private>One experience · your cost</p>
 <a class="tlink" href="1872.html">Discover 1872</a>
-<button class="cta" id="add" data-private>Add to Your Journey</button>
+<button class="cta" id="add" data-private>Add to My Bag</button>
 <a class="cta" data-private-cta href="invitation.html?open=1">Open your invitation</a>
 </section>
 </main>
@@ -61,7 +61,7 @@ var ov=document.getElementById('ov');
 function gated(fn){if(window.SIYL_INVITE){SIYL_INVITE.require(fn)}
 else document.addEventListener('siyl:invite-ready',function(){SIYL_INVITE.require(fn)},{once:true})}
 function invite(){gated(added)}
-function added(){SIYL_BAG.put({id:'tea1872',name:'Champagne Afternoon Tea at 1872',meta:'For two guests',price:180,unit:true,qty:1,img:'assets/images/1872/tea-1.jpg'});ov.innerHTML='<p class="eyebrow">Just added to your journey</p><div class="ja-row"><div class="ja-th"></div><div><p class="ja-n">Champagne Afternoon Tea at 1872</p><p class="ja-m">USD 180 · For two guests</p></div></div><a class="cta" style="margin-top:0" href="your-journey.html">View Your Journey</a><p style="text-align:center;margin-top:16px"><a class="tlink" href="#" id="cont">Continue exploring</a></p>';document.body.classList.add('show');var c=document.getElementById('cont');if(c)c.addEventListener('click',function(e){e.preventDefault();document.body.classList.remove('show')})}
+function added(){SIYL_BAG.put({id:'tea1872',name:'Champagne Afternoon Tea at 1872',meta:'For two guests',price:180,unit:true,qty:1,img:'assets/images/1872/tea-1.jpg'});ov.innerHTML='<p class="eyebrow">Added to My Bag</p><div class="ja-row"><div class="ja-th"></div><div><p class="ja-n">Champagne Afternoon Tea at 1872</p><p class="ja-m">USD 180 · For two guests</p></div></div><a class="cta" style="margin-top:0" href="cart.html">Open My Bag</a><p style="text-align:center;margin-top:16px"><a class="tlink" href="#" id="cont">Continue exploring</a></p>';document.body.classList.add('show');var c=document.getElementById('cont');if(c)c.addEventListener('click',function(e){e.preventDefault();document.body.classList.remove('show')})}
 qr();
 document.getElementById('add').addEventListener('click',invite);
 document.getElementById('scrim').addEventListener('click',function(){document.body.classList.remove('show')});
@@ -69,5 +69,5 @@ if(st==='invite'){document.addEventListener('siyl:invite-ready',function(){SIYL_
 if(st==='added')added();
 </script><script src="assets/bag.js?v=ee697358"></script>
 <script src="assets/shop-menu.js?v=75d5662d"></script>
-<script src="assets/aman.js?v=fd12151c"></script>
+<script src="assets/aman.js?v=10dc5fbe"></script>
 <script type="module" src="assets/invite.mjs?v=5d3e1c62"></script></body></html>

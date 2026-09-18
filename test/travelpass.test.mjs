@@ -51,7 +51,7 @@ test('THE CODE: a real QR (UTF-8 byte mode) that carries the pass and nothing se
 });
 
 test('THE DOCUMENT: state words Selected / Sent / Confirmed; the guest; the class from the bag line', () => {
-  assert.equal(T.docFor('train', { guest, state: 'selected' }).stateWords, 'Selected · in your journey');
+  assert.equal(T.docFor('train', { guest, state: 'selected' }).stateWords, 'Selected · in My Bag');
   assert.equal(T.docFor('train', { guest, state: 'sent' }).stateWords, 'Sent to Guest Relations');
   assert.equal(T.docFor('train', { guest, state: 'confirmed' }).stateWords, 'Confirmed by Guest Relations');
   assert.equal(T.docFor('train', { guest: null }), null, 'no guest, no pass');
@@ -83,7 +83,7 @@ test('THE CARD on the page: the ticket grammar — both ends, times, class, gues
   assert.match(on, /class="p-ticket on" data-ticket="c86"/); assert.match(on, /Train · High-speed train/); assert.match(on, /Current selection/);
   assert.match(on, /<b class="p-ticket-code">KMG<\/b><span class="p-ticket-time">10:15<\/span>/); assert.match(on, /<b class="p-ticket-code">LJG<\/b><span class="p-ticket-time">13:44<\/span>/);
   assert.match(on, /04 Mar 2027/); assert.match(on, /<p class="t-l1">Class<\/p><p class="t-b1">Business Class<\/p>/); assert.match(on, /<p class="t-l1">Guest<\/p><p class="t-b1">Peggy<\/p>/);
-  assert.match(on, /<span class="ref">SYL-C86-[A-Z0-9]{4}<\/span>/); assert.match(on, /<svg class="p-qr"/); assert.match(on, /Selected · in your journey/);
+  assert.match(on, /<span class="ref">SYL-C86-[A-Z0-9]{4}<\/span>/); assert.match(on, /<svg class="p-qr"/); assert.match(on, /Selected · in My Bag/);
   assert.match(on, /Your cost<\/p><p class="t-b1">USD 85<\/p>/); assert.match(on, /data-travel-pass="c86">Download travel pass</); assert.match(on, /p-ticket-tear/); assert.match(on, /p-ticket-train/);
   const off = w.SIYL_TRAVELPASS.card('train', { selected: false });
   assert.match(off, /class="p-ticket" data-ticket="train"/); assert.match(off, /Not selected/); assert.doesNotMatch(off, /p-qr|SYL-TN25/, 'no pass before the selection');
@@ -172,7 +172,7 @@ test('NO CHECKOUT LANGUAGE on the bag, the tickets or the passes — this is a p
     assert.doesNotMatch(s, /\b(checkout|check out|delivery|payment method|card details|add to cart|boarding pass|gate closes|seat \d+[A-F]\b)/i, f);
     assert.doesNotMatch(s, /data-qty|class="qty|stepper|aria-label="Quantity|Quantity<|B\.qty\(|SIYL_BAG\.qty\(/, f + ': no quantity controls');
   }
-  assert.match(src('cart.html'), /Your bag/); assert.match(src('cart.html'), /Your total/); assert.match(src('cart.html'), /Review your journey/);
+  assert.match(src('cart.html'), /Your bag/); assert.match(src('cart.html'), /Your total/); assert.match(src('cart.html'), /Review (&amp;|&) Send/);
   assert.match(src('cart.html'), /data-change=/); assert.match(src('cart.html'), /data-remove=/); assert.match(src('cart.html'), /View details/);
 });
 
