@@ -264,3 +264,42 @@ test('CODEX FINAL-3 · an acknowledged Save whose read-back fails still records 
   hold({ status: 200, json: async () => ({ ok: true, updatedAt: 'R2', savedAt: 'R2', submission: null }) }); await q;
   assert.equal(JSON.parse(w2.localStorage.getItem('siyl.draft.meta')).dirty, true, 'the edit typed during the request is still unsaved');
 });
+
+test('CODEX RELEASE-1 · a delayed seed read never overwrites a save that landed meanwhile: GET starts on an unseeded actor, its KV read is held, a PUT seeds and saves an empty bag, the held read resolves — the saved revision stands', async () => {
+  const { doState } = await import('./sandbox.mjs');
+  const legacy = { invitationId: 'INV-G777', guestId: 'G777', keys: { 'siyl.bag': '[{"id":"train"}]', 'siyl.guest': '{"contact":{"email":"sam@example.org"}}' }, updatedAt: '2026-09-10T10:00:00.000Z', savedAt: '2026-09-10T10:00:00.000Z' };
+  const m = new Map([['draft:INV-G777', JSON.stringify(legacy)]]);
+  let holdFirst = null; let reads = 0;
+  const kv = { get: (k) => { reads += 1; if (reads === 1) return new Promise((res) => { holdFirst = () => res(m.get(k) || null); }); return Promise.resolve(m.get(k) || null); }, put: async (k, v) => { m.set(k, v); } };
+  const state = doState();
+  /* a real actor serialises: a get in flight blocks the put. The stub state below runs blockConcurrencyWhile as a plain call, so this test proves the storage recheck on its own */
+  const a = new Drafts(state, { REG_KV: kv });
+  const call = (op, body) => a.fetch(new Request('https://drafts/' + op, { method: 'POST', body: JSON.stringify({ invitationId: 'INV-G777', ...body }) })).then(async (r) => ({ status: r.status, d: await r.json() }));
+  const g = call('get', {});                                                                   /* the seed read is held */
+  await new Promise((r) => setTimeout(r, 5));
+  const w = await call('put', { keys: { 'siyl.bag': '[]' }, baseUpdatedAt: legacy.updatedAt });   /* seeds (a second, fresh KV read) and saves the empty bag */
+  assert.equal(w.status, 200); const saved = w.d.draft.updatedAt;
+  holdFirst(); const got = await g;
+  assert.equal(got.status, 200);
+  const cur = await call('get', {});
+  assert.equal(cur.d.draft.updatedAt, saved, 'the held seed read did not roll the revision back'); assert.equal(cur.d.draft.keys['siyl.bag'], '[]', 'the removed train did not come back');
+});
+
+test('CODEX RELEASE-2 · a browser upgraded from an older release (a revision, no merge base) takes the server copy of that revision as its base on the first read, so a later 409 keeps its independent edit', async () => {
+  const baseKeys = { 'siyl.bag': '[{"id":"train"}]', 'siyl.guest': '{"contact":{"email":"a@b.c"},"guests":{"g":{"profile":{"drink":"A"}}}}' };
+  const drink = (v) => { try { return JSON.parse(v).guests.g.profile.drink; } catch (e) { return null; } };
+  const bodies = [];
+  const fetch = (url, init) => {
+    if (!/\/api\/draft/.test(String(url))) return Promise.resolve({ status: 200, json: async () => ({ ok: true }) });
+    if (init && init.method === 'PUT') { bodies.push(JSON.parse(init.body)); const b = bodies[bodies.length - 1]; if (b.baseUpdatedAt === 'R1') return Promise.resolve({ status: 409, json: async () => ({ ok: false, error: 'stale', draft: { keys: { 'siyl.bag': '[]', 'siyl.guest': baseKeys['siyl.guest'] }, updatedAt: 'R2', savedAt: 'R2' }, submission: null }) }); return Promise.resolve({ status: 200, json: async () => ({ ok: true, updatedAt: 'R3', savedAt: 'R3', submission: null }) }); }
+    return Promise.resolve({ status: 200, json: async () => ({ ok: true, draft: { keys: baseKeys, updatedAt: 'R1', savedAt: 'R1' }, submission: null }) });
+  };
+  /* the legacy meta: the revision is known, no siyl.draft.base exists */
+  const w = page({ auth: PEGGY, fetch, modules: ['assets/bag.js', 'assets/guest.js', 'assets/draft.js'], seed: { ...baseKeys, 'siyl.draft.meta': JSON.stringify({ invitationId: PEGGY.invitationId, serverUpdatedAt: 'R1', dirty: false }) } });
+  const D = w.SIYL_DRAFT; await new Promise((r) => setTimeout(r, 30));   /* the first read settles */
+  assert.equal(JSON.parse(w.localStorage.getItem('siyl.draft.base') || 'null') && drink(JSON.parse(w.localStorage.getItem('siyl.draft.base'))['siyl.guest']), 'A', 'the first read installed the base');
+  w.localStorage.setItem('siyl.guest', baseKeys['siyl.guest'].replace('"A"', '"B"'));        /* an independent profile edit here */
+  const r = await D.push('auto');                                                            /* another device removed the train meanwhile (409 on R1) */
+  assert.equal(drink(w.localStorage.getItem('siyl.guest')), 'B', 'the independent edit is kept'); assert.equal(w.localStorage.getItem('siyl.bag'), '[]', 'the removal elsewhere stands');
+  assert.equal(D.state().notice, null, 'nothing was lost'); assert.ok(bodies.length >= 2 && drink(bodies[bodies.length - 1].keys['siyl.guest']) === 'B', 'the kept edit was sent again');
+});

@@ -31,6 +31,11 @@ export class Drafts {
       let raw = null;
       try { raw = await this.env.REG_KV.get('draft:' + invitationId); } catch (e) { const err = new Error('draft store unavailable'); err.seed = true; throw err; }
       try { d = JSON.parse(raw || 'null'); } catch (e) { d = null; }
+      /* the KV read awaited outside the actor's own storage: a write may have seeded and saved meanwhile (Codex release
+         review) — the actor's copy, if one exists now, is the truth and the stale mirror never overwrites it */
+      const now = await this.storage.get('draft');
+      if (now) return now;
+      if (await this.storage.get('seeded')) return null;
       if (d) await this.storage.put('draft', d);
     }
     await this.storage.put('seeded', true);
@@ -44,7 +49,8 @@ export class Drafts {
     const invitationId = String(body.invitationId || '');
     if (!invitationId) return json({ ok: false, error: 'invitation required' }, 400);
 
-    if (op === 'get') { try { return json({ ok: true, draft: await this.current(invitationId) }); } catch (e) { return json({ ok: false, error: e && e.seed ? 'draft store unavailable' : 'draft could not be read', retry: true }, 503); } }
+    /* reads are serialised with writes too: a seed can never interleave with a save */
+    if (op === 'get') { return await this.state.blockConcurrencyWhile(async () => { try { return json({ ok: true, draft: await this.current(invitationId) }); } catch (e) { return json({ ok: false, error: e && e.seed ? 'draft store unavailable' : 'draft could not be read', retry: true }, 503); } }); }
 
     if (op === 'put') {
       return await this.state.blockConcurrencyWhile(async () => {

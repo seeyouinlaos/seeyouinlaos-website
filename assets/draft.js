@@ -133,6 +133,10 @@
           var local = snapshot(), localEmpty = !Object.keys(local).length;
           var newer = (m.invitationId !== a.invitationId) || localEmpty || !m.serverUpdatedAt || g.draft.updatedAt > m.serverUpdatedAt;
           if (newer) { apply(g.draft.keys); setBase(g.draft.keys); }
+          /* a device that already holds this revision but has no merge base yet (a browser upgraded from an older release):
+             the server copy of this very revision IS the base (Codex release review) — otherwise a later conflict would
+             mistake the unchanged server answer for a competing edit */
+          else if (!localStorage.getItem(BASE)) setBase(g.draft.keys);
           setMeta({ invitationId: a.invitationId, serverUpdatedAt: g.draft.updatedAt, dirty: false });
           state.phase = 'saved'; state.at = g.draft.savedAt;
           state.ready = true;
