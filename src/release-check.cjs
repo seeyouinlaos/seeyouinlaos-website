@@ -319,7 +319,9 @@ gate('P3', 'MASTER-02 programme truth (four events, no active Alms, no pool in v
   if (!/if \(!identity\) return json\(\{ ok: false, error: 'unauthorised' \}, 401\);/.test(read('src/seating.js'))) bad.push('the seating object must refuse an unidentified write');
   /* one readiness engine, and every surface reads it */
   if (!/missingFor: function \(key\)/.test(g) || !/mayEnter: function \(key\)/.test(g) || !/nextHref: function/.test(g)) bad.push('the readiness engine is incomplete');
-  if (!/G\.nextHref\(\)/.test(read('assets/bag.js'))) bad.push('the sticky VIEW does not read the engine');
+  /* P0 (Owner, 17 Sep 2026): the sticky bar opens MY BAG and stands for every signed-in guest (an empty bag is a real state); My Bag's own Review link follows the readiness engine */
+  if (!/function dest\(\)\{return 'cart\.html'\}/.test(read('assets/bag.js')) || !/var on=B\.authed\(\);/.test(read('assets/bag.js'))) bad.push('the sticky bar does not open My Bag for every signed-in guest');
+  if (!/ready0\.ok\?'<a class="p-link" href="review\.html">Review &amp; Send<\/a>'/.test(read('cart.html'))) bad.push('My Bag\'s Review link does not follow the readiness engine');
   if (!/g\.mayEnter\(STEP\.key\)/.test(sh) || !/g\.missingFor\(STEP\.key\)/.test(sh)) bad.push('the shell gate / continue does not read the engine');
   if (!/G\.readiness\(\)/.test(read('review.html')) || !/G\.readiness\(\)/.test(read('cart.html'))) bad.push('Review / the cart do not read the engine');
   if (!/<a class="bag" href="cart\.html"/.test(read('journeys.html')) || /<a class="bag" href="your-journey\.html"/.test(read('wedding.html'))) bad.push('the bag icon must open the cart');

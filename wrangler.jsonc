@@ -41,13 +41,19 @@
          units — ROOM A, B, C … — of two guest places each, joined and left by
          one guest at a time in their own name. The category ledger above stays
          bound for its history; the site no longer writes to it. */
-      { "name": "ROOMS", "class_name": "Rooms" }
+      { "name": "ROOMS", "class_name": "Rooms" },
+      /* THE JOURNEY DRAFT STORE (Owner, 17 Sep 2026 · P0): one actor per
+         invitation — the revision comparison and the write are one serialised
+         step, so a stale device or an overlapping autosave can never overwrite
+         a removal. KV keeps a mirror for Guest Relations' listing. */
+      { "name": "DRAFTS", "class_name": "Drafts" }
     ]
   },
   "migrations": [
     { "tag": "v1", "new_sqlite_classes": ["Inventory"] },
     { "tag": "v2", "new_sqlite_classes": ["Seating"] },
-    { "tag": "v3", "new_sqlite_classes": ["Rooms"] }
+    { "tag": "v3", "new_sqlite_classes": ["Rooms"] },
+    { "tag": "v4", "new_sqlite_classes": ["Drafts"] }
   ],
 
   "observability": { "enabled": true }

@@ -32,10 +32,10 @@
   /* The six steps. There is no seventh. */
   var STEPS = [
     { n: '01', key: 'you',        label: 'Your Invitation',       file: 'invitation.html' },
-    { n: '02', key: 'journey',    label: 'Your Journey',          file: 'your-journey.html' },
+    { n: '02', key: 'journey',    label: 'My Trip',               file: 'your-journey.html' },
     { n: '03', key: 'wedding',    label: 'The Wedding',           file: 'wedding.html' },
     { n: '04', key: 'preparation',label: 'Wedding Preparation',   file: 'wedding-preparation.html' },
-    { n: '05', key: 'about',      label: 'About You',             file: 'about-you.html' },
+    { n: '05', key: 'about',      label: 'My Profile',             file: 'about-you.html' },
     { n: '06', key: 'review',     label: 'Review & Send',         file: 'review.html' }
   ];
 

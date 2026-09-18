@@ -1,0 +1,112 @@
+/* P0 · REAL DUMMY E2E on the isolated stage worker (PROJECT_MASTER_BRIEF §19–§20). Synthetic guests only (synthetic
+   register: T001/T002 one party, T003 another, G048/G049 the fixed pair with synthetic codes). No live data touched.
+     node docs/acceptance/2026-09-17-p0-empty-bag/e2e.mjs <scratchpad> <outDir>
+   The stage worker must be up (stage-up.sh). Codes are read from the scratchpad's synth-codes.json and never printed. */
+import fs from 'node:fs'; import path from 'node:path';
+import { chromium } from '/Users/thongantang/.npm-global/lib/node_modules/playwright/index.mjs';
+const O = 'http://127.0.0.1:8788', N = process.argv[2], OUT = process.argv[3]; fs.mkdirSync(OUT, { recursive: true });
+const codes = JSON.parse(fs.readFileSync(N + '/synth-codes.json', 'utf8'));
+const R = []; const note = (id, ok, d) => { R.push({ id, ok: !!ok, d: String(d).slice(0, 300) }); console.log((ok ? 'PASS ' : 'FAIL ') + id + ' — ' + String(d).slice(0, 220)); };
+const b = await chromium.launch();
+const fresh = async (w) => (await b.newContext({ viewport: { width: w || 390, height: 844 }, deviceScaleFactor: 2 })).newPage();
+const signIn = async (p, id) => { await p.goto(O + '/invitation.html?open=1', { waitUntil: 'load' }); await p.waitForSelector('.siyl-inv input', { state: 'visible', timeout: 20000 }); await p.fill('.siyl-inv input', codes[id]); await p.click('.siyl-inv .igo'); await p.waitForFunction(() => { try { return !!JSON.parse(localStorage.getItem('siyl.auth') || 'null').bearer; } catch (e) { return false; } }, null, { timeout: 20000 }); await p.waitForTimeout(2200); };
+const signOut = async (p) => { await p.goto(O + '/your-journey.html', { waitUntil: 'load' }); await p.waitForSelector('[data-access-out]', { timeout: 20000 }); await p.click('[data-access-out]'); await p.waitForTimeout(1200); };
+const contact = async (p, email) => { await p.goto(O + '/invitation.html', { waitUntil: 'load' }); await p.waitForSelector('input[data-c="email"]', { timeout: 20000 }); await p.fill('input[data-c="email"]', email); await p.dispatchEvent('input[data-c="email"]', 'change'); await p.fill('input[data-c="phone"]', '+66 81 000 0000'); await p.dispatchEvent('input[data-c="phone"]', 'change'); await p.waitForTimeout(1600); };
+const state = (p) => p.evaluate(() => ({ bag: JSON.parse(localStorage.getItem('siyl.bag') || '[]').map((x) => x.id + ':' + (x.room || '') + ':' + (x.unit || '') + ':' + x.price), total: SIYL_BAG.total(), bar: (document.querySelector('.jbar .jb-t') || {}).textContent || null, barLabel: (document.querySelector('.jbar .jb-l') || {}).textContent || null, mine: SIYL_UNITS.view() ? SIYL_UNITS.view().mine : null }));
+const api = (p, path, init) => p.evaluate(async ([path, init]) => { const a = JSON.parse(localStorage.getItem('siyl.auth')); const r = await fetch(path, Object.assign({ headers: { 'x-siyl-auth': a.bearer, 'content-type': 'application/json' } }, init || {})); return { status: r.status, body: await r.json() }; }, [path, init]);
+const selectRoom = async (p, slug, label) => { await p.goto(O + '/room.html?stay=sathorn&room=' + slug, { waitUntil: 'load' }); await p.waitForSelector('[data-rooms-box="bkk-stay"] [data-join$="|' + label + '"]', { timeout: 20000 }); await p.click('[data-rooms-box="bkk-stay"] [data-join$="|' + label + '"]'); await p.waitForFunction((l) => new RegExp('Your place is held · Room ' + l).test((document.querySelector('[data-av="bkk-stay"]') || {}).textContent || ''), label, { timeout: 20000 }); await p.waitForTimeout(1600); };
+const saveProgress = async (p) => { await p.waitForSelector('[data-save-progress]', { timeout: 20000 }); await p.click('[data-save-progress]'); await p.waitForFunction(() => /^(Saved · |This device)/.test((document.querySelector('.prep-save-state') || {}).textContent || ''), null, { timeout: 20000 }); return p.$eval('.prep-save-state', (e) => e.textContent); };
+const cartRemove = async (p) => { await p.goto(O + '/cart.html', { waitUntil: 'load' }); await p.waitForSelector('[data-remove="bkk-stay"]', { timeout: 20000 }); await p.click('[data-remove="bkk-stay"]'); await p.waitForFunction(() => !!document.querySelector('.cart-empty') || !document.querySelector('[data-remove="bkk-stay"]'), null, { timeout: 20000 }); await p.waitForTimeout(1600); };
+
+const completeSteps = async (p, id, name, seats) => {
+  await p.goto(O + '/your-journey.html', { waitUntil: 'load' }); await p.waitForTimeout(800); await p.evaluate(() => { SIYL_JOURNEY.SEGMENTS.forEach((s) => { if (SIYL_JOURNEY.state(s) === 'open') SIYL_JOURNEY.skip(s.key, true); }); }); await p.waitForTimeout(1500);
+  await p.goto(O + '/wedding.html', { waitUntil: 'load' }); await p.waitForTimeout(800); for (const [k, v] of [['temple', 'yes'], ['coffee', 'yes'], ['vows', 'yes'], ['dinner', 'yes']]) { await p.click('[data-e="' + k + '"] [data-ev="' + v + '"]'); await p.waitForTimeout(200); } if (await p.$('#sangkhathan [data-off="no"]')) await p.click('#sangkhathan [data-off="no"]'); await p.waitForTimeout(1500);
+  await p.goto(O + '/wedding-preparation.html', { waitUntil: 'load' }); await p.waitForTimeout(600); await p.evaluate(() => { const a = document.querySelector('[data-ack]'); if (a && !a.checked) a.click(); }); await p.waitForTimeout(1200);
+  for (const [ev, seatId] of Object.entries(seats)) await api(p, '/api/seating/select', { method: 'POST', body: JSON.stringify({ invitationId: 'INV-' + id, guestId: id, event: ev, seatId, name }) });
+  await p.goto(O + '/about-you.html', { waitUntil: 'load' }); await p.waitForSelector('[data-allergy="no"]', { timeout: 20000 }); await p.click('[data-allergy="no"]'); for (const [k, v] of [['coffeetea', 'Oolong'], ['treat', 'Mango'], ['drink', 'Lime'], ['avoid', 'Nothing'], ['film', 'Film'], ['music', 'Music']]) { const el = await p.$('textarea[data-q="' + k + '"]'); if (el) { await el.fill(v); await el.dispatchEvent('change'); } } const pa = await p.$('[data-photo-ack]'); if (pa && !(await pa.evaluate((e) => e.checked || e.getAttribute('aria-pressed') === 'true'))) await pa.click(); await p.waitForTimeout(1600);
+};
+
+/* ===== A · the normal guest cycle, three times (T001) ===== */
+const A = await fresh(); await signIn(A, 'T001'); await contact(A, 'ada.test@example.org');
+for (let i = 1; i <= 3; i++) {
+  await selectRoom(A, 'u-sathorn-superior-garden', 'B'); let s = await state(A); note('A' + i + '-select', s.bag.length === 1 && s.total === 192 && /USD 192/.test(s.bar), JSON.stringify(s.bag) + ' bar ' + s.bar);
+  await selectRoom(A, 'u-sathorn-superior-garden', 'C'); s = await state(A); note('A' + i + '-change', s.bag.length === 1 && /:C:/.test(s.bag[0]) && s.mine['bkk-stay'].label === 'C', JSON.stringify(s.bag));
+  await cartRemove(A); s = await state(A); const empty = await A.$eval('.cart-empty', (e) => e.innerText.replace(/\s+/g, ' ')).catch(() => '');
+  note('A' + i + '-remove-empty', s.bag.length === 0 && s.total === 0 && s.bar === 'USD 0' && s.barLabel === 'My Bag' && /No selections yet · USD 0/.test(empty) && !s.mine['bkk-stay'], 'bag ' + JSON.stringify(s.bag) + ' · bar ' + s.barLabel + ' ' + s.bar + ' · ' + empty.slice(0, 60));
+  await A.goto(O + '/your-journey.html', { waitUntil: 'load' }); const saved = await saveProgress(A); note('A' + i + '-save', /^Saved · /.test(saved), saved);
+  await A.reload({ waitUntil: 'load' }); await A.waitForTimeout(2500); s = await state(A); note('A' + i + '-reload', s.bag.length === 0 && s.total === 0, JSON.stringify(s.bag));
+  await signOut(A); await signIn(A, 'T001'); await A.goto(O + '/cart.html', { waitUntil: 'load' }); await A.waitForTimeout(2500); s = await state(A); note('A' + i + '-signout-signin', s.bag.length === 0 && s.total === 0 && !!(await A.$('.cart-empty')), JSON.stringify(s.bag));
+  await A.goto(O + '/review.html', { waitUntil: 'load' }); await A.waitForTimeout(2200); const rt = await A.$eval('#tt', (e) => e.textContent).catch(() => 'n/a'); note('A' + i + '-review-total', rt === 'USD 0', rt);
+}
+if (process.env.SHOT) await A.screenshot({ path: path.join(OUT, 'a-review-empty.png') });
+/* ===== B · second clean session sees the empty bag; stale device cannot resurrect ===== */
+const B = await fresh(); await signIn(B, 'T001'); await B.goto(O + '/cart.html', { waitUntil: 'load' }); await B.waitForTimeout(2500); let sB = await state(B); note('B-second-session-empty', sB.bag.length === 0 && sB.total === 0, JSON.stringify(sB.bag));
+/* the stale device: B selects a room and saves; A (older revision) reads it; then B removes; A pushes its stale bag */
+await selectRoom(B, 'shama-king-studio-balcony', 'A'); await B.goto(O + '/your-journey.html', { waitUntil: 'load' }); await saveProgress(B);
+await A.goto(O + '/your-journey.html', { waitUntil: 'load' }); await A.waitForTimeout(3000); let sA = await state(A); note('B-A-sees-B-room', sA.bag.length === 1 && /shama/.test(sA.bag[0]), JSON.stringify(sA.bag));
+await cartRemove(B); await B.goto(O + '/your-journey.html', { waitUntil: 'load' }); await saveProgress(B); sB = await state(B); note('B-removed', sB.bag.length === 0, JSON.stringify(sB.bag));
+/* A is stale now: it still holds the shama line in its cache; it edits (a wedding answer) and autosaves → the server refuses, A shows the current journey */
+const stale = await A.evaluate(async () => { const before = JSON.parse(localStorage.getItem('siyl.bag') || '[]').length; SIYL_DRAFT.touch(); await new Promise((r) => setTimeout(r, 1800)); const st = SIYL_DRAFT.state(); return { before, phase: st.phase, after: JSON.parse(localStorage.getItem('siyl.bag') || '[]').length, words: (document.querySelector('.prep-save-state') || {}).textContent || '' }; });
+/* the stale line leaves this device (the server's removal stands); with no independent edit of its own the device simply catches up (three-way merge) */
+note('B-stale-device-refused', stale.before === 1 && stale.after === 0 && (stale.phase === 'saved' || stale.phase === 'stale'), JSON.stringify(stale));
+/* an independent edit typed on the stale device survives the merge: a profile answer while the server removed the room */
+const indep = await A.evaluate(async () => { SIYL_GUEST.setProfile(SIYL_GUEST.me().guestId, 'drink', 'Stale-device answer'); await new Promise((r) => setTimeout(r, 2200)); const st = SIYL_DRAFT.state(); return { phase: st.phase, drink: SIYL_GUEST.profile(SIYL_GUEST.me().guestId, 'drink'), bag: JSON.parse(localStorage.getItem('siyl.bag') || '[]').length }; });
+const srvI = await api(A, '/api/draft'); const srvGuest = JSON.parse(srvI.body.draft.keys['siyl.guest'] || '{}'); const srvDrink = srvGuest.guests && Object.values(srvGuest.guests)[0] && Object.values(srvGuest.guests)[0].profile && Object.values(srvGuest.guests)[0].profile.drink;
+note('B-independent-edit-kept', indep.drink === 'Stale-device answer' && indep.bag === 0 && srvDrink === 'Stale-device answer' && JSON.parse(srvI.body.draft.keys['siyl.bag']).length === 0, JSON.stringify({ device: indep, serverDrink: srvDrink, serverBag: srvI.body.draft.keys['siyl.bag'] }));
+const srv = await api(A, '/api/draft'); note('B-server-empty', JSON.parse(srv.body.draft.keys['siyl.bag']).length === 0, 'server bag ' + srv.body.draft.keys['siyl.bag']);
+const engineB = await api(B, '/api/rooms/mine'); note('B-engine-released', !engineB.body.mine['bkk-stay'], JSON.stringify(engineB.body.mine));
+/* ===== C · the fixed host: Room A arranged, Bag USD 0, no Remove ===== */
+const H = await fresh(); await signIn(H, 'G049'); await contact(H, 'groom.test@example.org');
+await H.goto(O + '/your-journey.html', { waitUntil: 'load' }); await H.waitForTimeout(3000); let sH = await state(H);
+const arranged = await H.evaluate(() => [...document.querySelectorAll('[data-arranged-item]')].map((e) => e.innerText.replace(/\s+/g, ' ')));
+note('C-host-bag-zero', sH.bag.length === 0 && sH.total === 0 && sH.bar === 'USD 0', JSON.stringify(sH.bag) + ' bar ' + sH.bar);
+note('C-host-arranged', arranged.length === 1 && /Sathorn Penthouse Bangkok/.test(arranged[0]) && /Room A/.test(arranged[0]) && /Haruthai · You/.test(arranged[0]) && /Fixed arrangement · not part of your bag/i.test(arranged[0]) && !/Remove|Change|USD/.test(arranged[0]), JSON.stringify(arranged));
+const rmH = await H.$('#s-bkk-stay [data-rm], #s-bkk-stay [data-remove], #s-bkk-stay [data-choose], #s-bkk-stay [data-rooms-for]'); note('C-host-no-controls', !rmH, 'no Remove / Change / Select control on the fixed stage');
+await H.goto(O + '/cart.html', { waitUntil: 'load' }); await H.waitForTimeout(2500); const cartH = await H.evaluate(() => ({ arranged: document.querySelectorAll('[data-arranged-item]').length, empty: !!document.querySelector('.cart-empty'), removes: document.querySelectorAll('[data-remove]').length, total: (document.getElementById('cart-total') || {}).textContent }));
+note('C-host-cart', cartH.arranged === 1 && cartH.empty && cartH.removes === 0 && cartH.total === 'USD 0', JSON.stringify(cartH));
+const leaveH = await api(H, '/api/rooms/leave', { method: 'POST', body: JSON.stringify({ invitationId: 'INV-G049', guestId: 'G049', stage: 'bkk-stay' }) }); note('C-host-engine-refuses-release', leaveH.status === 403, leaveH.status + ' ' + leaveH.body.error);
+await completeSteps(H, 'G049', 'GroomTest', { dinner: 'D-B-12' });
+await H.goto(O + '/review.html', { waitUntil: 'load' }); await H.waitForTimeout(2500); const revH = await H.evaluate(() => ({ page: location.pathname, arranged: document.querySelectorAll('#arranged [data-arranged-item]').length, total: document.getElementById('tt').textContent, bar: (document.querySelector('.jbar .jb-t') || {}).textContent })); note('C-host-review', /review/.test(revH.page) && revH.arranged === 1 && revH.total === 'USD 0' && revH.bar === 'USD 0', JSON.stringify(revH));
+if (process.env.SHOT) await H.screenshot({ path: path.join(OUT, 'c-host-review.png') });
+/* the host's bag stays empty after every step and the arranged room never re-enters it */
+const sH2 = await state(H); note('C-host-bag-still-zero', sH2.bag.length === 0 && sH2.total === 0, JSON.stringify(sH2.bag));
+if (process.env.SHOT) { await H.goto(O + '/your-journey.html', { waitUntil: 'load' }); await H.waitForTimeout(2500); await H.screenshot({ path: path.join(OUT, 'c-host-my-trip.png') }); await H.goto(O + '/cart.html', { waitUntil: 'load' }); await H.waitForTimeout(2500); await H.screenshot({ path: path.join(OUT, 'c-host-my-bag.png') }); }
+/* the other guest's room and seats are untouched by everything above */
+const plan = await api(H, '/api/rooms/read'); note('C-others-untouched', !plan.body.mine['kmg'] && JSON.stringify(plan.body.summary['bkk-stay/penthouse']).includes('"remainingPlaces":10'), 'penthouse ' + plan.body.summary['bkk-stay/penthouse'].remainingRooms + '/' + plan.body.summary['bkk-stay/penthouse'].remainingPlaces);
+/* ===== D · sold-out + last-place race + failed change (T001, T002, T003 on Noble Courtyard — one room, two places) ===== */
+const P2 = await fresh(); await signIn(P2, 'T002'); const P3 = await fresh(); await signIn(P3, 'T003');
+const join = (p, id, label) => api(p, '/api/rooms/join', { method: 'POST', body: JSON.stringify({ invitationId: 'INV-' + id, guestId: id, key: 'prewed/noble-courtyard', label, name: id }) });
+const j1 = await join(A, 'T001', 'A'); note('D-first-place', j1.status === 200, j1.status);
+const [j2, j3] = await Promise.all([join(P2, 'T002', 'A'), join(P3, 'T003', 'A')]);
+const winners = [j2, j3].filter((j) => j.status === 200).length, losers = [j2, j3].filter((j) => j.status === 409 && j.body.error === 'full').length;
+note('D-last-place-race', winners === 1 && losers === 1, 'winner ' + winners + ' · refused ' + losers);
+const view3 = await api(P3, '/api/rooms/read'); const nc = view3.body.summary['prewed/noble-courtyard']; note('D-sold-out-words', nc.soldOut === true && nc.remainingPlaces === 0, JSON.stringify({ soldOut: nc.soldOut, remainingPlaces: nc.remainingPlaces }));
+/* failed change: the guest who holds a place elsewhere tries the full room — the old valid room stays */
+const loser = j2.status === 200 ? P3 : P2, loserId = j2.status === 200 ? 'T003' : 'T002';
+const jb = await api(loser, '/api/rooms/join', { method: 'POST', body: JSON.stringify({ invitationId: 'INV-' + loserId, guestId: loserId, key: 'prewed/heritage', label: 'A', name: loserId }) }); note('D-hold-elsewhere', jb.status === 200, jb.status);
+const jc = await join(loser, loserId, 'A'); const mineL = await api(loser, '/api/rooms/mine'); note('D-failed-change-keeps-old', jc.status === 409 && mineL.body.mine.prewed && mineL.body.mine.prewed.key === 'prewed/heritage' && mineL.body.mine.prewed.label === 'A', JSON.stringify(mineL.body.mine.prewed));
+/* offline / server failure: the Remove control settles, nothing changes */
+await loser.goto(O + '/cart.html', { waitUntil: 'load' }); await loser.waitForTimeout(2500);
+const hadLine = await loser.$('[data-remove="prewed"]');
+if (hadLine) { await loser.context().setOffline(true); await loser.click('[data-remove="prewed"]'); await loser.waitForTimeout(2500); const off = await loser.evaluate(() => ({ btn: (document.querySelector('[data-remove="prewed"]') || {}).textContent, note: (document.querySelector('[data-remove-note]') || {}).textContent || '', bag: JSON.parse(localStorage.getItem('siyl.bag') || '[]').length })); await loser.context().setOffline(false); note('D-offline-remove-settles', off.btn === 'Remove' && /Nothing was changed/.test(off.note) && off.bag >= 1, JSON.stringify(off)); }
+else note('D-offline-remove-settles', false, 'no prewed line in the bag to test');
+/* ===== E · send → edit → send updated: one logical reference (A releases the race hold first: an empty bag) ===== */
+await api(A, '/api/rooms/leave', { method: 'POST', body: JSON.stringify({ invitationId: 'INV-T001', guestId: 'T001', stage: 'prewed' }) });
+await completeSteps(A, 'T001', 'Ada', { ceremony: 'C-R-05-02', dinner: 'D-T-05' });
+await A.goto(O + '/review.html', { waitUntil: 'load' }); await A.waitForSelector('#send', { timeout: 20000 }); await A.waitForTimeout(2500);
+const emptyReview = await A.evaluate(() => ({ total: document.getElementById('tt').textContent, ready: !document.getElementById('send').disabled && document.getElementById('send').getAttribute('aria-disabled') !== 'true' }));
+note('E-empty-bag-can-send', emptyReview.total === 'USD 0' && emptyReview.ready, JSON.stringify(emptyReview));
+await A.click('#send'); await A.waitForSelector('#mailbox[data-mail]:not([data-mail=""])', { timeout: 40000 }); await A.waitForTimeout(1200);
+const sent = await api(A, '/api/draft'); const ref = sent.body.submission.submissionId; note('E-sent', sent.body.submission.submissionStatus === 'sent' && /^SYL-T001-/.test(ref) && sent.body.submission.version === 1, JSON.stringify(sent.body.submission).slice(0, 160));
+await selectRoom(A, 'u-sathorn-superior-garden', 'B'); const chg = await api(A, '/api/draft'); note('E-changes-not-sent', chg.body.submission.submissionStatus === 'changes-not-sent', chg.body.submission.submissionStatus);
+await A.goto(O + '/review.html', { waitUntil: 'load' }); await A.waitForSelector('#send', { timeout: 20000 }); await A.waitForTimeout(3000); const btn = await A.$eval('#send', (e) => e.textContent); note('E-send-updated-button', btn === 'Send updated journey' || btn === 'Send Updated Trip', btn);
+await A.click('#send'); await A.waitForSelector('#mailbox[data-mail]:not([data-mail=""])', { timeout: 40000 }); await A.waitForTimeout(1200);
+const upd = await api(A, '/api/draft'); note('E-updated-same-reference', upd.body.submission.submissionId === ref && upd.body.submission.version === 2 && upd.body.submission.submissionStatus === 'sent', JSON.stringify(upd.body.submission).slice(0, 160));
+await A.reload({ waitUntil: 'load' }); await A.waitForTimeout(2500); const after = await api(A, '/api/draft'); note('E-reload-same', after.body.submission.submissionId === ref && after.body.submission.version === 2, after.body.submission.submissionId + ' v' + after.body.submission.version);
+/* ===== cleanup: release everything the fixtures hold; the stage store is disposable ===== */
+for (const [p, id] of [[A, 'T001'], [P2, 'T002'], [P3, 'T003']]) { for (const stage of ['bkk-stay', 'prewed']) await api(p, '/api/rooms/leave', { method: 'POST', body: JSON.stringify({ invitationId: 'INV-' + id, guestId: id, stage }) }); }
+const fin = await api(H, '/api/rooms/read'); note('Z-cleanup', fin.body.summary['prewed/noble-courtyard'].remainingPlaces === 2 && fin.body.summary['bkk-stay/u-sathorn-superior-garden'].remainingPlaces === 12 && fin.body.summary['bkk-stay/penthouse'].remainingPlaces === 10, 'noble ' + fin.body.summary['prewed/noble-courtyard'].remainingPlaces + ' · usathorn ' + fin.body.summary['bkk-stay/u-sathorn-superior-garden'].remainingPlaces + ' · penthouse ' + fin.body.summary['bkk-stay/penthouse'].remainingPlaces + ' (the fixed Room A stays)');
+await b.close();
+fs.writeFileSync(path.join(OUT, 'e2e.json'), JSON.stringify({ at: new Date().toISOString(), origin: O, results: R }, null, 1));
+console.log(R.every((x) => x.ok) ? 'P0 E2E: PASS (' + R.length + ' checks)' : 'P0 E2E: FAIL (' + R.filter((x) => !x.ok).length + ' of ' + R.length + ')');
+process.exit(R.every((x) => x.ok) ? 0 : 1);

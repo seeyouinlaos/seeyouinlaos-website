@@ -152,7 +152,7 @@ test('FLOW · 06 opens only when 01–05 are complete; readiness lists every mis
   G.setPhotoAck(false);
   const r = G.readiness();
   assert.equal(r.ok, false);
-  deq(r.need.map((n) => [n.n, n.stepLabel, n.href]), [['05', 'About You', 'about-you.html#photo']]);
+  deq(r.need.map((n) => [n.n, n.stepLabel, n.href]), [['05', 'My Profile', 'about-you.html#photo']]);
   assert.equal(G.nextHref(), 'about-you.html#photo');
   assert.equal(stepOf(G, 'about').state, 'attention');
   assert.equal(stepOf(G, 'review').state, 'locked');
@@ -213,7 +213,7 @@ test('CART · the navigation matrix: bag icon → cart; cart → Your Journey / 
     assert.doesNotMatch(src(f), /<a class="bag" href="your-journey\.html"/, f);
   }
   const c = src('cart.html');
-  assert.match(c, /Your bag is empty/); assert.match(c, /Your Journey choices will appear here as you add them\./); assert.match(c, /href="your-journey\.html">Go to Your Journey</);
+  assert.match(c, /Your bag is empty/); assert.match(c, /No selections yet · USD 0/); assert.match(c, /href="your-journey\.html">Open My Trip</);
   assert.match(c, /Review your journey/); assert.match(c, /Your journey is not ready to review yet/); assert.match(c, /Complete this/);
   assert.match(c, /ready\.ok\?'review\.html':\(first\?first\.href/);
   assert.match(c, /journeys\.html\?change='\+P\.windowOf\(x\.id\)\+'#j-'/, 'accommodation CHANGE → the exact stay selector');
@@ -223,7 +223,7 @@ test('CART · the navigation matrix: bag icon → cart; cart → Your Journey / 
   assert.match(c, /ST\.remove\(P\.windowOf\(id\)\)/, 'REMOVE gives the room place back');
   assert.doesNotMatch(c, /assets\/prep-shell\.js/, 'the cart is not a numbered step');
   const bag = src('assets/bag.js');
-  assert.match(bag, /G\.nextHref\(\)/, 'sticky VIEW follows the engine');
+  assert.match(bag, /function dest\(\)\{return 'cart\.html'\}/, 'the sticky bar opens My Bag (Owner, 17 Sep 2026); My Bag\'s own Review link follows the readiness engine'); assert.match(c, /ready0\.ok\?'<a class="p-link" href="review\.html">Review &amp; Send<\/a>'/);
   assert.match(bag, /authed\(\)\?this\.get\(\)\.length:0/, 'the badge counts the guest\'s own lines only');
   assert.match(src('assets/prep-shell.js'), /data-leave="another"/); assert.match(src('assets/prep-shell.js'), /data-leave="out"/);
 });

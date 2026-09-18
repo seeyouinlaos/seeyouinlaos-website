@@ -175,7 +175,9 @@
     fullExperience: function () {
       var P = window.SIYL_PRICE, out = [], self = this, keep = [];
       if (!P) return { remove: [], add: [], kept: [] };
+      var U0 = window.SIYL_UNITS;
       SEG.forEach(function (seg) {
+        if (U0 && U0.ready && U0.ready() && U0.fixed && U0.fixed(seg.key)) { keep.push(seg.key); return; }   /* arranged for the guest: neither removed nor added */
         if (self.manual(seg)) { keep.push(seg.key); return; }
         if (self.isSkipped(seg.key)) self.skip(seg.key, false);
       });

@@ -21,7 +21,8 @@
           '<a href="1872.html">1872 · Afternoon Tea</a>' +
           '<a href="experience.html?id=bkk-suhring">Sühring · Lunch</a></div>' +
         '<div><h4>Guest Relations</h4>' +
-          '<a href="your-journey.html">Your Journey</a>' +
+          '<a href="your-journey.html">My Trip</a>' +
+          '<a href="cart.html">My Bag</a>' +
           '<a href="tickets.html">Your tickets</a>' +
           '<a href="mailto:guest.relation.seeyouinlaos@gmail.com">guest.relation.seeyouinlaos@gmail.com</a></div>' +
       '</div>' +

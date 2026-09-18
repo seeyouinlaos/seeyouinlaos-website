@@ -477,7 +477,7 @@ test('the wedding cost model is stated in words on both surfaces', () => {
 
 test('SEND is unavailable until the required steps are done — and never fails silently', () => {
   const page = readFileSync(join(ROOT, 'review.html'), 'utf8');
-  assert.match(page, /if\(!SIYL_BAG\.get\(\)\.length\|\|!G\|\|!G\.party\(\)\|\|!G\.readiness\(\)\.ok\)\{blockSend\(\);return\}/);
+  assert.match(page, /if\(!G\|\|!G\.party\(\)\|\|!G\.readiness\(\)\.ok\)\{blockSend\(\);return\}/, 'the readiness engine gates the send — an empty bag does not (Owner, 17 Sep 2026)');
   assert.match(page, /Before you send: '\+esc\(first\.label\)/, 'the first missing item is named');
   assert.match(page, /Send to Guest Relations — not ready yet/);
   const g = readFileSync(join(ROOT, 'assets/guest.js'), 'utf8');
@@ -619,7 +619,7 @@ test('ABOUT YOU is one required question, six favourites and one required acknow
   /* three layers, and a correction never destroys the invitation's own value — every entry is signed by the guest */
   assert.match(g, /r\.history\.push\(\{ field: field, from: from, to: v, at: stamp\(\), by: me\.guestId \}\)/);
   const about = readFileSync(join(ROOT, 'about-you.html'), 'utf8');
-  assert.match(about, /<h1 class="t-d1">About you<\/h1>/);
+  assert.match(about, /<h1 class="t-d1">My Profile<\/h1>/);
   assert.match(about, /G\.PROFILE\.forEach/);
   assert.match(about, /id="allergy-text" data-allergy-text aria-required="true"/);
   assert.doesNotMatch(about, /Who are you answering for\?/);

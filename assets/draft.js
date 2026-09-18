@@ -21,8 +21,26 @@
   var ORIGIN = 'https://seeyouinlaos-website.suthep-hrg.workers.dev';
   var API = (location.hostname === 'seeyouinlaos-website.suthep-hrg.workers.dev' || /^(localhost|127\.0\.0\.1)$/.test(location.hostname)) ? '/api/draft' : ORIGIN + '/api/draft';
   var META = 'siyl.draft.meta';   /* { invitationId, serverUpdatedAt, dirty, lastSavedAt, lastError } */
-  var state = { phase: 'idle', at: null, error: null, submission: null, applying: false, ready: false };   /* ready: the server copy has been read once for this sign-in */
-  var timer = null, inflight = null, pulled = '', pending = false;
+  var BASE = 'siyl.draft.base';   /* the keys as last read from / written to the server — the base of the three-way merge */
+  var state = { phase: 'idle', at: null, error: null, submission: null, applying: false, ready: false, notice: null };   /* ready: the server copy has been read once for this sign-in; notice: a conflict the guest should see until their next own change */
+  var timer = null, inflight = null, pulled = '', pending = false, queued = null;
+  function base() { try { return JSON.parse(localStorage.getItem(BASE) || 'null') || {}; } catch (e) { return {}; } }
+  function setBase(keys) { try { localStorage.setItem(BASE, JSON.stringify(keys || {})); } catch (e) {} }
+  /* THE THREE-WAY MERGE (Codex P1-2): for each key — unchanged here → the server's; changed here while the server still holds
+   * the base → this device's independent edit (kept and pushed again); changed on both sides → the server's, and the guest is
+   * told. A removal elsewhere therefore never comes back, and an independent answer typed here is never thrown away. */
+  function merge(local, baseKeys, server) {
+    var out = {}, keep = [], lost = [];
+    KEYS.forEach(function (k) {
+      var L = local[k], Bk = baseKeys[k], S = server[k];
+      if (L === undefined && S === undefined) return;
+      if (L === undefined || L === Bk) { if (S !== undefined) out[k] = S; return; }          /* unchanged here: the server's */
+      if (S === undefined || S === Bk) { out[k] = L; keep.push(k); return; }                  /* independent local edit: kept */
+      if (S === L) { out[k] = S; return; }                                                    /* both made the same change */
+      out[k] = S; lost.push(k);                                                               /* both changed: the server's */
+    });
+    return { keys: out, keep: keep, lost: lost };
+  }
 
   function auth() { try { return JSON.parse(localStorage.getItem('siyl.auth') || 'null'); } catch (e) { return null; } }
   function meta() { try { return JSON.parse(localStorage.getItem(META) || 'null') || {}; } catch (e) { return {}; } }
@@ -36,26 +54,45 @@
   function apply(keys) {
     state.applying = true;
     var changed = false;
-    KEYS.forEach(function (k) { if (typeof keys[k] === 'string' && localStorage.getItem(k) !== keys[k]) { localStorage.setItem(k, keys[k]); changed = true; } });
-    state.applying = false;
-    if (changed) ['siyl:guest', 'siyl:bag', 'siyl:temple', 'siyl:docs'].forEach(function (ev) { try { document.dispatchEvent(new CustomEvent(ev)); } catch (e) {} });
+    try {
+      KEYS.forEach(function (k) { if (typeof keys[k] === 'string' && localStorage.getItem(k) !== keys[k]) { localStorage.setItem(k, keys[k]); changed = true; } });
+      /* the pages re-render on the events — while they do, nothing counts as a new edit of this device (no autosave is scheduled) */
+      if (changed) ['siyl:guest', 'siyl:bag', 'siyl:temple', 'siyl:docs'].forEach(function (ev) { try { document.dispatchEvent(new CustomEvent(ev)); } catch (e) {} });
+    } finally { state.applying = false; }
     return changed;
   }
 
   var D = window.SIYL_DRAFT = {
     KEYS: KEYS,
     state: function () { return state; },
+    _merge: merge,
     submission: function () { return state.submission; },
     /* PUSH: this device's complete draft to the server. reason: 'auto' | 'save' | 'continue' | 'send' */
     push: function (reason) {
+      /* one request at a time (Codex P1-2): a push while another is in flight waits for it and then sends the current snapshot */
+      if (inflight) { if (!queued) queued = inflight.then(function () { queued = null; return D.push(reason); }, function () { queued = null; return D.push(reason); }); return queued; }
       var a = auth(); if (!signedIn()) return Promise.resolve({ ok: false, error: 'not signed in' });
       var keys = snapshot(); if (!Object.keys(keys).length) return Promise.resolve({ ok: false, error: 'nothing to save' });
       state.phase = 'saving'; state.error = null; announce();
       var m = setMeta({ invitationId: a.invitationId, dirty: true });
-      var body = { invitationId: a.invitationId, keys: keys, clientUpdatedAt: new Date().toISOString(), reason: reason || 'auto' };
+      var body = { invitationId: a.invitationId, keys: keys, clientUpdatedAt: new Date().toISOString(), reason: reason || 'auto', baseUpdatedAt: m.serverUpdatedAt || null };
       var req = fetch(API, { method: 'PUT', headers: headers(), body: JSON.stringify(body) })
         .then(function (r) { return r.json().then(function (d) { d.status = r.status; return d; }); })
         .then(function (d) {
+          /* STALE DEVICE (Owner, 17 Sep 2026 · Codex P1-2): the server holds a newer revision — merged three ways against the base
+             this device last read: a removal elsewhere stands, an independent edit made here is kept and sent again */
+          if (d && d.status === 409 && d.error === 'stale' && d.draft && d.draft.keys) {
+            var m3 = merge(keys, base(), d.draft.keys);
+            apply(m3.keys); setBase(d.draft.keys); state.submission = d.submission || state.submission;
+            setMeta({ invitationId: a.invitationId, serverUpdatedAt: d.draft.updatedAt, dirty: m3.keep.length > 0, lastSavedAt: d.draft.savedAt, lastError: null });
+            state.at = d.draft.savedAt; state.error = null;
+            if (m3.lost.length) { state.notice = 'stale'; state.phase = 'stale'; }
+            else { state.phase = m3.keep.length ? 'saving' : 'saved'; }
+            announce();
+            inflight = null;
+            if (m3.keep.length) return D.push(reason).then(function (r2) { return { ok: !!(r2 && r2.ok), error: r2 && r2.ok ? null : 'stale', merged: true, kept: m3.keep, lost: m3.lost }; });
+            return { ok: false, error: 'stale', applied: true, lost: m3.lost };
+          }
           if (!d || !d.ok) { state.phase = 'failed'; state.error = (d && d.error) || 'save failed'; announce(); setMeta({ lastError: state.error }); return d || { ok: false }; }
           /* read back: SAVED only when the server's copy is the one sent */
           if (reason === 'save') {
@@ -71,7 +108,7 @@
         .then(function (d) { inflight = null; return d; });
       inflight = req;
       return req;
-      function done(d, submission) { state.phase = 'saved'; state.at = d.savedAt; state.submission = submission || state.submission; setMeta({ serverUpdatedAt: d.updatedAt, dirty: false, lastSavedAt: d.savedAt, lastError: null }); announce(); return d; }
+      function done(d, submission) { state.phase = state.notice === 'stale' ? 'stale' : 'saved'; state.at = d.savedAt; state.submission = submission || state.submission; setBase(keys); setMeta({ serverUpdatedAt: d.updatedAt, dirty: false, lastSavedAt: d.savedAt, lastError: null }); announce(); return d; }
     },
     /* PULL: the server copy. A device with unsent local changes pushes them first; otherwise a newer server copy wins. */
     pull: function () {
@@ -87,7 +124,7 @@
         if (g.draft && g.draft.keys) {
           var local = snapshot(), localEmpty = !Object.keys(local).length;
           var newer = (m.invitationId !== a.invitationId) || localEmpty || !m.serverUpdatedAt || g.draft.updatedAt > m.serverUpdatedAt;
-          if (newer) apply(g.draft.keys);
+          if (newer) { apply(g.draft.keys); setBase(g.draft.keys); }
           setMeta({ invitationId: a.invitationId, serverUpdatedAt: g.draft.updatedAt, dirty: false });
           state.phase = 'saved'; state.at = g.draft.savedAt;
           state.ready = true;
@@ -112,6 +149,7 @@
     /* autosave: any change on this device, debounced */
     touch: function () {
       if (state.applying || !signedIn()) return;
+      state.notice = null;
       setMeta({ invitationId: auth().invitationId, dirty: true });
       if (timer) clearTimeout(timer);
       /* never before the server copy has been read for this sign-in: a fresh device must not overwrite the journey with its empty cache */
@@ -122,8 +160,8 @@
     /* the words of the state, for any surface */
     words: function () {
       var s = state.submission;
-      if (!s || s.submissionStatus === 'draft') return { key: 'draft', label: 'Saved as draft', line: 'Your journey · saved as draft', cta: null };
-      if (s.hasUnsentChanges) return { key: 'changed', label: 'Changes saved · not yet sent to Guest Relations', line: 'CHANGES SAVED · NOT YET SENT TO GUEST RELATIONS', cta: 'Send updated journey' };
+      if (!s || s.submissionStatus === 'draft') return { key: 'draft', label: 'Saved as draft', line: 'My Trip · saved as draft', cta: null };
+      if (s.hasUnsentChanges) return { key: 'changed', label: 'Changes saved · not yet sent to Guest Relations', line: 'CHANGES SAVED · NOT YET SENT TO GUEST RELATIONS', cta: 'Send Updated Trip' };
       return { key: 'sent', label: 'Sent to Guest Relations', line: 'Sent to Guest Relations · Reference ' + s.submissionId, cta: null };
     },
     /* the SAVE MY PROGRESS control: paint it into a host element */
@@ -131,10 +169,10 @@
       if (!host) return;
       function paint() {
         var w = D.words(), ph = state.phase, t = state.at ? new Date(state.at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : '';
-        var status = ph === 'saving' ? 'Saving…' : ph === 'failed' ? 'Save failed · try again' : ph === 'saved' && t ? 'Saved · ' + t : '';
+        var status = ph === 'saving' ? 'Saving…' : ph === 'failed' ? 'Save failed · try again' : ph === 'stale' ? 'This device was out of date — showing your latest saved trip' : ph === 'saved' && t ? 'Saved · ' + t : '';
         host.innerHTML = '<p class="prep-state is-' + w.key + '" role="status"><b>' + esc(w.line) + '</b></p>' +
           (w.cta ? '<a class="prep-send-upd" href="' + (window.SIYL_PREP && SIYL_PREP.hrefOf ? SIYL_PREP.hrefOf('review.html') : 'review.html') + '">' + esc(w.cta) + '</a>' : '') +
-          '<button type="button" class="prep-save-btn" data-save-progress' + (ph === 'saving' ? ' disabled' : '') + '>Save my progress</button>' +
+          '<button type="button" class="prep-save-btn" data-save-progress' + (ph === 'saving' ? ' disabled' : '') + '>Save My Progress</button>' +
           '<p class="prep-save-state' + (ph === 'failed' ? ' is-failed' : '') + '" aria-live="polite">' + esc(status) + '</p>';
         var b = host.querySelector('[data-save-progress]');
         if (b) b.addEventListener('click', function () { flushForms(); D.flush('save'); });
@@ -151,10 +189,10 @@
   ['siyl:guest', 'siyl:bag', 'siyl:temple', 'siyl:docs'].forEach(function (ev) { document.addEventListener(ev, function () { D.touch(); }); });
   function pullOnce() { var a = auth(); if (!signedIn()) return; if (pulled === a.invitationId) return; pulled = a.invitationId; D.pull(); }
   document.addEventListener('siyl:auth', pullOnce); document.addEventListener('siyl:invite-ready', pullOnce);
-  document.addEventListener('siyl:signout', function () { pulled = ''; pending = false; state.ready = false; state.submission = null; state.phase = 'idle'; try { localStorage.removeItem(META); } catch (e) {} });
+  document.addEventListener('siyl:signout', function () { pulled = ''; pending = false; queued = null; state.ready = false; state.notice = null; state.submission = null; state.phase = 'idle'; try { localStorage.removeItem(META); localStorage.removeItem(BASE); } catch (e) {} });
   /* Continue buttons flush the draft on their way */
   document.addEventListener('click', function (e) { var b = e.target && e.target.closest ? e.target.closest('[data-continue]') : null; if (b) D.flush('continue'); }, true);
   /* the page-hide beacon: only from a device that has read the server copy (a never-synced cache must not overwrite the journey) */
-  window.addEventListener('pagehide', function () { var m = meta(); if (m.dirty && m.serverUpdatedAt && state.ready && signedIn() && navigator.sendBeacon) { try { var a = auth(); navigator.sendBeacon(API + '?beacon=1', new Blob([JSON.stringify({ invitationId: a.invitationId, keys: snapshot(), clientUpdatedAt: new Date().toISOString(), reason: 'auto', bearer: a.bearer })], { type: 'application/json' })); } catch (e) {} } });
+  if (typeof window.addEventListener === 'function') window.addEventListener('pagehide', function () { var m = meta(); if (m.dirty && m.serverUpdatedAt && state.ready && signedIn() && navigator.sendBeacon) { try { var a = auth(); navigator.sendBeacon(API + '?beacon=1', new Blob([JSON.stringify({ invitationId: a.invitationId, keys: snapshot(), clientUpdatedAt: new Date().toISOString(), reason: 'auto', baseUpdatedAt: m.serverUpdatedAt || null, bearer: a.bearer })], { type: 'application/json' })); } catch (e) {} } });
   try { pullOnce(); } catch (e) {}
 })();

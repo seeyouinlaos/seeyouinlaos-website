@@ -280,7 +280,7 @@ function renderAccess() {
   const a = AUTH.get(), ok = !!(a && AUTH.valid());
   el.setAttribute('data-state', ok ? 'in' : 'out');
   el.innerHTML = ok
-    ? '<span class="on">Signed in · ' + esc(a.preferredName || a.fullName || 'you') + '</span><span class="hd-access-do"><a href="' + hrefOf('your-journey.html') + '">Your Journey</a><button type="button" class="hd-access-out" data-access-out>Sign out</button></span>'
+    ? '<span class="on">Signed in · ' + esc(a.preferredName || a.fullName || 'you') + '</span><span class="hd-access-do"><a href="' + hrefOf('your-journey.html') + '">My Trip</a><button type="button" class="hd-access-out" data-access-out>Sign out</button></span>'
     : '<span>Not signed in</span><span class="hd-access-do"><a href="' + gateUrl('') + '">Open your invitation</a></span>';
   const out = el.querySelector('[data-access-out]'); if (out) out.addEventListener('click', () => { GUEST.leave(); LOC.replace(hrefOf('invitation.html')); });
 }

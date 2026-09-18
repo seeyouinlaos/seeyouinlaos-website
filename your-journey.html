@@ -15,7 +15,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <main class="prep-page" id="your-journey">
 <div class="prep-head">
   <p class="t-l1" data-party-label>For you</p>
-  <h1 class="t-d1">Your Journey</h1>
+  <h1 class="t-d1">My Trip</h1>
   <p class="t-b1 measure">Choose what feels right at each stage — from Bangkok to Vientiane, on to Yunnan and home again, in the order it happens. Every choice here is yours alone, and nothing is paid on this website.</p>
 </div>
 <div id="dec" class="prep-col"></div>
@@ -34,26 +34,27 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 </section>
 <div id="foot"></div>
 </main>
-<script src="assets/bag.js?v=c6ade073"></script>
-<script src="assets/shop-menu.js?v=7f4ee3cc"></script>
+<script src="assets/bag.js?v=ee697358"></script>
+<script src="assets/shop-menu.js?v=75d5662d"></script>
 <script src="assets/aman.js?v=fd12151c"></script>
 <script src="assets/rooms-data.js?v=eb3283fa"></script>
 <script src="assets/pricing.js?v=ca8f5f5b"></script>
-<script src="assets/guest.js?v=276467ba"></script>
-<script src="assets/draft.js?v=51131a8b"></script>
+<script src="assets/guest.js?v=bfd25018"></script>
+<script src="assets/draft.js?v=763ea9c6"></script>
 <script src="assets/confirm.js?v=15cc65d2"></script>
 <script src="assets/temple.js?v=dfa289bc"></script>
-<script src="assets/rooms.js?v=2cd10246"></script>
-<script src="assets/stay.js?v=d3aff276"></script>
+<script src="assets/rooms.js?v=1923c6eb"></script>
+<script src="assets/arranged.js?v=9786c070"></script>
+<script src="assets/stay.js?v=348cbc4b"></script>
 <script src="assets/seatlabels.js?v=4994e1f4"></script>
 <script src="assets/seating.js?v=76c2abde"></script>
 <script src="assets/seatpass.js?v=bd9e22bf"></script>
 <script src="assets/vendor/qrcode.js?v=18ae399f"></script>
 <script src="assets/travelpass.js?v=efb9929b"></script>
 <script src="assets/transport-data.js?v=f54e56e9"></script>
-<script src="assets/journey.js?v=cadb3e68"></script>
-<script src="assets/prep-shell.js?v=e7d4e8f2"></script>
-<script type="module" src="assets/invite.mjs?v=82a1294b"></script>
+<script src="assets/journey.js?v=48a50f21"></script>
+<script src="assets/prep-shell.js?v=0a6c0cf7"></script>
+<script type="module" src="assets/invite.mjs?v=5d3e1c62"></script>
 <script>
 /* ============================================================================
    02 · YOUR JOURNEY — the guest's own journey, in true chronology.
@@ -158,6 +159,8 @@ function openStage(seg,declined){
 /* THE BANGKOK ADDRESSES — three, one of them yours, on the accepted rail */
 function bkkHtml(){
   var stay=window.SIYL_ROOMS&&SIYL_ROOMS.sathorn,win='bkk-stay';if(!stay)return '';
+  /* ARRANGED FOR YOU (Owner, 17 Sep 2026): a stage the engine holds as fixed for this guest is not a selection — no rail, no Remove, no Change */
+  if(window.SIYL_ARRANGED&&U&&U.ready()&&U.fixed(win))return SIYL_ARRANGED.html({heading:true});
   var line=lineOf({ids:[win]}),pick=line?line.room:null;
   var h='<div id="bkksel"><div class="acar p-rail-car"><div class="atrk p-rail">'+stay.rooms.map(function(r){
     var q=P.quote(win,r.slug),img=r.cardImg||(r.gallery.length?r.gallery[0][0]:''),on=pick===r.slug;

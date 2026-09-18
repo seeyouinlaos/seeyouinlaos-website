@@ -44,23 +44,34 @@ B.bar=function(){
 if(document.querySelector('.jbar'))return;
 var css=document.createElement('style');
 css.textContent='.jbar{position:fixed;left:0;right:0;bottom:0;z-index:55;background:#FCFAF6;border-top:1px solid #DAD9D7;padding:12px 20px calc(12px + env(safe-area-inset-bottom));display:none;transform:translateY(100%);transition:transform .26s cubic-bezier(.4,0,.2,1)}'+
-'.jbar.on{display:block}.jbar.in{transform:none}body.jbar-on{padding-bottom:78px}'+
+'.jbar.on{display:block}.jbar.in{transform:none}body.jbar-on{padding-bottom:118px}'+
 '.jb-t{transition:opacity .2s}.jb-t.tick{opacity:.35}'+
 '@media (prefers-reduced-motion:reduce){.jbar,.jb-t{transition:none}}'+
 '.jb-in{max-width:640px;margin:0 auto;display:flex;align-items:baseline;gap:12px}'+
+'.jb-nav{max-width:640px;margin:8px auto 0;display:flex;gap:18px;align-items:baseline}.jb-nav a,.jb-nav button{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#6B6964;text-decoration:none;background:none;border:0;padding:4px 0;cursor:pointer;min-height:24px}.jb-nav a.on{color:#313131}.jb-top{margin-left:auto;color:#313131;visibility:hidden}.jb-top.show{visibility:visible}'+
 '.jb-l{font-size:10px;letter-spacing:2.2px;text-transform:uppercase;color:#6B6964}'+
 '.jb-t{font-family:"PP Editorial Old",serif;font-size:19px;margin-left:auto}'+
 '.jb-a{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#313131;text-decoration:none;border-bottom:1px solid #313131;padding:6px 0 3px;margin-left:16px}';
 document.head.appendChild(css);
 var el=document.createElement('div');el.className='jbar';
-el.innerHTML='<div class="jb-in"><span class="jb-l">Your Journey</span><span class="jb-t"></span><a class="jb-a" href="review.html" data-bag-view>View</a></div>';
+el.innerHTML='<div class="jb-in"><span class="jb-l">My Bag</span><span class="jb-t"></span><a class="jb-a" href="cart.html" data-bag-view>Open My Bag</a></div>'+
+ /* ACCOUNT NAVIGATION (Owner, 17 Sep 2026): My Trip · My Bag · My Profile · Sign out stay reachable while scrolling — on this one layer, never a second bar */
+ '<div class="jb-nav"><a href="your-journey.html" data-nav="trip">My Trip</a><a href="cart.html" data-nav="bag">My Bag</a><a href="about-you.html" data-nav="profile">My Profile</a><button type="button" data-nav="out">Sign out</button><button type="button" class="jb-top" data-nav="top" aria-label="Back to top">Top ↑</button></div>';
 document.body.appendChild(el);
-/* VIEW respects the sequential flow: Review & Send when it may be entered, else the first missing item */
-function dest(){var G=window.SIYL_GUEST;return (G&&G.nextHref)?G.nextHref():'review.html'}
+/* the bag opens the bag; Review & Send is reached from there once the steps allow it */
+function dest(){return 'cart.html'}
+var here=location.pathname.split('/').pop().replace(/\.html$/,'');
+el.querySelectorAll('[data-nav]').forEach(function(a){var k=a.getAttribute('data-nav');
+  if((k==='trip'&&here==='your-journey')||(k==='bag'&&here==='cart')||(k==='profile'&&here==='about-you'))a.classList.add('on');
+  if(k==='out')a.addEventListener('click',function(){var I=window.SIYL_INVITE;if(I&&I.leave){I.leave()}else{document.querySelector('[data-access-out]')&&document.querySelector('[data-access-out]').click()}});
+  if(k==='top')a.addEventListener('click',function(){window.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'})})});
+function topShow(){var t=el.querySelector('.jb-top');if(t)t.classList.toggle('show',window.scrollY>innerHeight)}
+window.addEventListener('scroll',topShow,{passive:true});
 function sync(){var n=B.authed()?B.get().length:0,t=el.querySelector('.jb-t'),v=B.money(B.total());
 if(t.textContent!==v){t.classList.add('tick');t.textContent=v;setTimeout(function(){t.classList.remove('tick')},200)}
-el.querySelector('[data-bag-view]').setAttribute('href',dest());
-var on=n>0;el.classList.toggle('on',on);document.body.classList.toggle('jbar-on',on);
+var view=el.querySelector('[data-bag-view]');view.setAttribute('href',dest());if(here==='cart'){view.hidden=true}
+/* the bar stands whenever a guest is signed in — an empty bag is a real state (USD 0), and the account access must not vanish with it */
+var on=B.authed();el.classList.toggle('on',on);document.body.classList.toggle('jbar-on',on);topShow();
 if(on)requestAnimationFrame(function(){el.classList.add('in')});else el.classList.remove('in')}
 document.addEventListener('siyl:bag',sync);document.addEventListener('siyl:guest',sync);document.addEventListener('siyl:temple',sync);document.addEventListener('siyl:seats',sync);document.addEventListener('siyl:units',sync);document.addEventListener('siyl:auth',sync);document.addEventListener('siyl:signout',sync);sync()};
 })();

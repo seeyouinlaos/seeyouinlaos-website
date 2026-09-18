@@ -64,6 +64,9 @@
     summary: function (win, slug) { return view && view.summary ? (view.summary[keyOf(win, slug)] || null) : null; },
     /* the place this guest holds for a stage: { key, label } | null */
     mine: function (stage) { return view && view.mine ? (view.mine[stage] || null) : null; },
+    /* the Owner's FIXED arrangement for this guest in a stage (never a Bag product, never released here) */
+    fixed: function (stage) { var m = this.mine(stage); return !!(m && m.fixed); },
+    fixedStages: function () { var m = (view && view.mine) || {}; return Object.keys(m).filter(function (st) { return m[st] && m[st].fixed; }); },
     mineFor: function (win, slug) { var m = this.mine(this.stageOf(keyOf(win, slug))); return m && m.key === keyOf(win, slug) ? m : null; },
     /* free places a guest may take in this category */
     free: function (win, slug) { var s = this.summary(win, slug); return s ? s.free : null; },

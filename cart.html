@@ -24,28 +24,30 @@ body.cart-on{padding-bottom:96px}
 <main class="prep-page" id="cart">
 <div class="prep-head">
   <p class="t-l1" id="cart-own">Your bag</p>
-  <h1 class="t-d1">Your bag</h1>
+  <h1 class="t-d1">My Bag</h1>
   <p class="t-b1 measure" id="cart-lede">What you have chosen so far, with your cost. Change or remove anything here; your journey and Review &amp; Send follow at once.</p>
 </div>
 <div id="page"></div>
 </main>
-<div class="cart-foot" id="cart-foot" hidden><div class="cart-foot-in"><div><p class="t-l1">Your total</p><p class="cart-total" id="cart-total">USD 0</p></div><a class="p-act" id="cart-review" href="review.html">Review your journey</a></div></div>
-<script src="assets/bag.js?v=c6ade073"></script>
-<script src="assets/shop-menu.js?v=7f4ee3cc"></script>
+<!-- the sticky total is the one bag bar (assets/bag.js) — no second fixed footer (Owner, 17 Sep 2026); the page's own Review link lives in the summary card -->
+<div id="cart-foot" hidden><span id="cart-total" hidden>USD 0</span><a id="cart-review" hidden href="review.html">Review &amp; Send</a></div>
+<script src="assets/bag.js?v=ee697358"></script>
+<script src="assets/shop-menu.js?v=75d5662d"></script>
 <script src="assets/aman.js?v=fd12151c"></script>
 <script src="assets/rooms-data.js?v=eb3283fa"></script>
 <script src="assets/pricing.js?v=ca8f5f5b"></script>
-<script src="assets/guest.js?v=276467ba"></script>
-<script src="assets/draft.js?v=51131a8b"></script>
+<script src="assets/guest.js?v=bfd25018"></script>
+<script src="assets/draft.js?v=763ea9c6"></script>
 <script src="assets/temple.js?v=dfa289bc"></script>
-<script src="assets/rooms.js?v=2cd10246"></script>
-<script src="assets/stay.js?v=d3aff276"></script>
+<script src="assets/rooms.js?v=1923c6eb"></script>
+<script src="assets/arranged.js?v=9786c070"></script>
+<script src="assets/stay.js?v=348cbc4b"></script>
 <script src="assets/seatlabels.js?v=4994e1f4"></script>
 <script src="assets/seating.js?v=76c2abde"></script>
 <script src="assets/confirm.js?v=15cc65d2"></script>
 <script src="assets/transport-data.js?v=f54e56e9"></script>
-<script src="assets/journey.js?v=cadb3e68"></script>
-<script type="module" src="assets/invite.mjs?v=82a1294b"></script>
+<script src="assets/journey.js?v=48a50f21"></script>
+<script type="module" src="assets/invite.mjs?v=5d3e1c62"></script>
 <script>
 /* ============================================================================
    YOUR BAG — the cart (Owner decision, 14 Sep 2026). A utility outside the
@@ -125,40 +127,48 @@ function render(){
       '<p class="t-b1 measure">'+(G.stale()?'Your invitation is now personal: every guest has their own code. Enter your code once more — what you chose before stays with you.':'Your bag belongs to your invitation, so we open it first.')+'</p>'+
       '<p style="margin-top:16px"><button type="button" class="p-act" id="open">Open my invitation</button></p></div>';
     document.getElementById('open').addEventListener('click',function(){gated(render)});
-    foot.hidden=true;document.body.classList.remove('cart-on');return}
-  document.getElementById('cart-own').textContent='Your bag · '+G.nameOf();
-  var b=J.sorted(B.get());
+    foot.hidden=true;return}
+  document.getElementById('cart-own').textContent='My Bag · '+G.nameOf();
+  var b=J.sorted(B.get()),arranged=window.SIYL_ARRANGED?SIYL_ARRANGED.html():'';
   if(!b.length){
-    page.innerHTML='<div class="p-card cart-empty"><p class="t-l1">Your bag is empty</p><h2 class="t-h1">Your Journey choices will appear here as you add them.</h2>'+
-      '<div class="p-actions" style="margin-top:var(--s4)"><a class="p-act" href="your-journey.html">Go to Your Journey</a></div></div>';
-    foot.hidden=true;document.body.classList.remove('cart-on');lastCount=0;return}
+    /* EMPTY BAG IS A REAL STATE (Owner, 17 Sep 2026): zero selections, USD 0 — the arrangements stand apart, the wedding and the review are not blocked by it */
+    var ready0=G.readiness();
+    page.innerHTML=arranged+'<div class="p-card cart-empty"><p class="t-l1">Your bag is empty</p><h2 class="t-h1">No selections yet · USD 0</h2>'+
+      '<p class="t-b2 measure-w">Anything you choose in My Trip appears here. An empty bag is fine — your wedding answers and your arrangements stay as they are.</p>'+
+      '<div class="p-actions" style="margin-top:var(--s4)"><a class="p-act" href="your-journey.html">Open My Trip</a>'+(ready0.ok?'<a class="p-link" href="review.html">Review &amp; Send</a>':'')+'</div></div>';
+    document.getElementById('cart-total').textContent=money(0);
+    foot.hidden=true;lastCount=0;return}
   var groups=['Accommodation','Transport','Wedding','Experiences & additions'],h='';
   groups.forEach(function(gname){
     var lines=b.filter(function(x){return group(x)===gname});if(!lines.length)return;
     h+='<section class="prep-sec cart-group"><p class="t-l1">'+esc(gname)+'</p>'+lines.map(item).join('')+'</section>'});
   var ready=G.readiness(),first=ready.first;
   h+='<section class="prep-sec"><div class="p-card cart-sum"><div class="p-total"><span class="t-l1">Your total</span><b id="tt">'+money(B.total())+'</b></div>'+
-     '<p class="t-b2 measure-w">One calculation for the whole website — the same amount on Your Journey, in this bag and on Review &amp; Send. Nothing is paid here.</p>'+
+     '<p class="t-b2 measure-w">One calculation for the whole website — the same amount in My Trip, in this bag and on Review &amp; Send. Nothing is paid here.</p>'+
      (ready.ok?'<div class="p-actions" style="margin-top:var(--s4)"><a class="p-act" href="review.html">Review your journey</a></div>'
        :'<div class="p-card flat" style="margin-top:var(--s4)"><p class="t-l1 open">Your journey is not ready to review yet</p>'+
         (first?'<p class="t-b1"><b>'+esc(first.n)+' · '+esc(first.stepLabel)+'</b> · '+esc(first.label)+'</p><div class="p-actions"><a class="p-act quiet" href="'+first.href+'">Complete this</a></div>':'')+'</div>')+
      '</div></section>';
-  page.innerHTML=h;
+  page.innerHTML=arranged+h;
   if(lastCount!==null&&lastCount!==b.length){var sum=page.querySelector('.cart-sum');if(sum)sum.classList.add('p-reveal')}
   lastCount=b.length;
   document.getElementById('cart-total').textContent=money(B.total());
   var rv=document.getElementById('cart-review');
   rv.setAttribute('href',ready.ok?'review.html':(first?first.href:'your-journey.html'));
   rv.textContent=ready.ok?'Review your journey':'Complete this first';
-  foot.hidden=false;document.body.classList.add('cart-on');
+  foot.hidden=true;
   page.querySelectorAll('[data-remove]').forEach(function(bt){bt.addEventListener('click',function(){
     var id=bt.getAttribute('data-remove'),line=page.querySelector('[data-line="'+id+'"]');
+    if(bt.disabled)return;   /* a second click while the first is in flight does nothing (idempotent) */
     bt.disabled=true;bt.textContent='Removing…';
     var after=function(){if(line&&!calm){line.classList.add('cart-out');setTimeout(render,220)}else render()};
+    /* a removal that could not happen leaves everything as it was and says so — never an endless "Removing…" */
+    var failed=function(r){bt.disabled=false;bt.textContent='Remove';var n=line&&line.querySelector('[data-remove-note]');if(!n&&line){n=document.createElement('p');n.className='t-b2';n.setAttribute('data-remove-note','');n.setAttribute('role','status');line.querySelector('.p-line-body').appendChild(n)}if(n)n.textContent=ST.refusal(r)||'Nothing was removed — please try again.'};
     if(id==='sangkhathan'&&T&&me){T.setOffering(me.guestId,null);after();return}
-    if(P.locate(id)){ST.remove(P.windowOf(id)).then(after);return}
+    if(P.locate(id)){ST.remove(P.windowOf(id)).then(function(r){if(r&&r.ok===false)failed(r);else after()}).catch(function(){failed({ok:false,error:'unreachable'})});return}
     B.remove(id);after()})});
 }
+if(window.SIYL_BAG&&SIYL_BAG.bar)SIYL_BAG.bar();
 document.addEventListener('siyl:bag',render);
 document.addEventListener('siyl:guest',render);
 document.addEventListener('siyl:temple',render);

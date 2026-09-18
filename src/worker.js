@@ -49,8 +49,10 @@ function corsHeaders(request) {
 export { Inventory } from './inventory.js';
 export { Seating } from './seating.js';
 export { Rooms } from './rooms.js';
+export { Drafts } from './drafts.js';
 import { identify, owns, loadIndex } from './auth.js';
-import { SEED } from './inventory-seed.js';
+import { SEED, FIXED } from './inventory-seed.js';
+import { stageOf } from './rooms.js';
 import { composeGuestMail, composeOwnerMail } from './mail-templates.js';
 
 /* ---- the Guest Relations gate (F + G) ------------------------------------
@@ -294,6 +296,15 @@ async function handleRegister(request, env) {
   //    failure and the client falls back to the clearly-labelled emergency
   //    channel — success is never simulated. The record carries the submission
   //    id; the provider's answer is written to it after the emails (step 2).
+  /* THE FIXED ARRANGEMENT NEVER REACHES A SUBMISSION AS A PRODUCT (Codex P1-3): a legacy Bag line of a fixed stage is
+     removed at this boundary and the canonical total recomputed — the record, the emails and Guest Relations read the
+     normalised selections; the guest's text stays as sent. */
+  const fixedStages = fixedStagesOf(who.guestId);
+  if (registration && fixedStages.length) {
+    for (const k of ['selections', 'shared']) { if (Array.isArray(registration[k])) { const w = withoutFixed(registration[k], fixedStages); if (w.changed) { registration[k] = w.list; registration.normalised = (registration.normalised || []).concat(k + ': fixed arrangement removed'); } } }
+    const lines = Array.isArray(registration.selections) ? registration.selections : (Array.isArray(registration.shared) ? registration.shared : null);
+    if (lines) { const t = totalOf(lines); if (registration.totalUsd !== undefined && registration.totalUsd !== t) { registration.totalUsd = t; registration.normalised = (registration.normalised || []).concat('totalUsd recomputed'); } if (registration.total !== undefined && registration.total !== t) { registration.total = t; } }
+  }
   /* THE RECIPIENT (Owner, 16 Sep 2026 · EMAIL FIRST): the authenticated guest → the contact persisted on the server under
      their invitation → the confirmation email. A journey without a valid email is not accepted: the guest is sent back to
      the email field; the email they add is persisted server-side and Review & Send is open again. */
@@ -346,7 +357,19 @@ async function handleRegister(request, env) {
    "changes not yet sent" is a comparison, never a guess. */
 const DRAFT_KEYS = ['siyl.guest', 'siyl.bag', 'siyl.temple', 'siyl.docs', 'siyl.sent', 'siyl.skip', 'siyl.skip.by'];
 const draftKey = (invitationId) => 'draft:' + invitationId;
-async function storedDraft(env, invitationId) { if (!env.REG_KV) return null; try { return JSON.parse(await env.REG_KV.get(draftKey(invitationId)) || 'null'); } catch (e) { return null; } }
+/* the draft lives in the per-invitation actor (src/drafts.js); the KV mirror answers only where the actor is not bound */
+function draftActor(env, invitationId) { return env.DRAFTS ? env.DRAFTS.get(env.DRAFTS.idFromName(invitationId)) : null; }
+async function draftOp(env, invitationId, op, body) { const stub = draftActor(env, invitationId); const r = await stub.fetch(new Request('https://drafts/' + op, { method: 'POST', body: JSON.stringify({ invitationId, ...(body || {}) }) })); return { status: r.status, ...(await r.json()) }; }
+async function storedDraft(env, invitationId) {
+  if (env.DRAFTS) { try { const r = await draftOp(env, invitationId, 'get'); return r.draft || null; } catch (e) { return null; } }
+  if (!env.REG_KV) return null; try { return JSON.parse(await env.REG_KV.get(draftKey(invitationId)) || 'null'); } catch (e) { return null; }
+}
+/* the stages a guest's fixed arrangements occupy — never Bag lines (src/inventory-seed.js FIXED) */
+const STAGE_OF_WINDOW = { 'bkk-stay': 'bkk-stay', prewed: 'prewed', wedstay: 'wedstay', 'airbnb-2br': 'wedstay', kmg: 'kmg', ljg: 'ljg', kempinski: 'kempinski' };
+function fixedStagesOf(guestId) { return FIXED.filter((f) => f.guestId === guestId).map((f) => stageOf(f.key)); }
+/* a Bag / selections array without the lines of the guest's fixed stages, and the total it comes to */
+function withoutFixed(list, fixedStages) { if (!Array.isArray(list) || !fixedStages.length) return { list, changed: false }; const kept = list.filter((x) => !(x && (fixedStages.includes(String(x.id)) || fixedStages.includes(STAGE_OF_WINDOW[String(x.id)] || '')))); return { list: kept, changed: kept.length !== list.length }; }
+const totalOf = (list) => (Array.isArray(list) ? list : []).reduce((t, x) => t + (Number(x && x.price) || 0) * (Number(x && x.qty) || 1), 0);
 function draftContent(keys) {
   const out = {};
   for (const k of ['siyl.guest', 'siyl.bag', 'siyl.temple', 'siyl.docs', 'siyl.skip', 'siyl.skip.by']) {
@@ -391,12 +414,28 @@ async function handleDraft(request, env) {
   const incoming = {};
   for (const k of DRAFT_KEYS) if (body && body.keys && typeof body.keys[k] === 'string') incoming[k] = body.keys[k];
   if (!Object.keys(incoming).length) return json({ ok: false, error: 'nothing to save' }, 400, corsHeaders(request));
-  /* a device sends the keys it holds; a key it does not hold is kept from the stored draft (never silently emptied) */
-  const prevDraft = await storedDraft(env, who.invitationId);
-  const keys = Object.assign({}, prevDraft && prevDraft.keys || {}, incoming);
-  const now = new Date().toISOString();
-  const d = { invitationId: who.invitationId, guestId: who.guestId, keys, updatedAt: now, savedAt: now, clientUpdatedAt: body && body.clientUpdatedAt || null, reason: body && body.reason || null };
-  try { await env.REG_KV.put(draftKey(who.invitationId), JSON.stringify(d), { metadata: { invitationId: who.invitationId, guestId: who.guestId, updatedAt: now } }); } catch (e) { return json({ ok: false, error: 'draft could not be stored' }, 503, corsHeaders(request)); }
+  /* THE WRITE IS THE ACTOR'S (Codex P1-1): the revision comparison, the fixed-line strip, the merge over the stored keys and
+     the write happen inside one serialised step per invitation — two devices, or two overlapping autosaves, can never both
+     pass the same base revision. A stale device (an older `baseUpdatedAt`, or none against a stored draft) is refused with the
+     current draft; its independent edits are merged on the device against the base it last read (assets/draft.js). */
+  const base = body && typeof body.baseUpdatedAt === 'string' ? body.baseUpdatedAt : null;
+  let d = null;
+  if (env.DRAFTS) {
+    const r = await draftOp(env, who.invitationId, 'put', { keys: incoming, baseUpdatedAt: base, clientUpdatedAt: body && body.clientUpdatedAt || null, reason: body && body.reason || null, guestId: who.guestId, fixedStages: fixedStagesOf(who.guestId) });
+    if (r.status === 409) { const submission = await submissionFor(env, who, r.draft); return json({ ok: false, error: 'stale', invitationId: who.invitationId, draft: { keys: r.draft.keys, updatedAt: r.draft.updatedAt, savedAt: r.draft.savedAt }, submission }, 409, corsHeaders(request)); }
+    if (!r.ok) return json({ ok: false, error: r.error || 'draft could not be stored' }, r.status === 400 ? 400 : 503, corsHeaders(request));
+    d = r.draft;
+  } else {
+    /* no actor bound (a reduced test environment): the same rules, one request at a time */
+    const prevDraft = await storedDraft(env, who.invitationId);
+    if (prevDraft && prevDraft.updatedAt && base !== prevDraft.updatedAt) { const submission = await submissionFor(env, who, prevDraft); return json({ ok: false, error: 'stale', invitationId: who.invitationId, draft: { keys: prevDraft.keys, updatedAt: prevDraft.updatedAt, savedAt: prevDraft.savedAt }, submission }, 409, corsHeaders(request)); }
+    if (typeof incoming['siyl.bag'] === 'string') { try { const w = withoutFixed(JSON.parse(incoming['siyl.bag']), fixedStagesOf(who.guestId)); if (w.changed) incoming['siyl.bag'] = JSON.stringify(w.list); } catch (e) { /* stored as sent */ } }
+    const keys = Object.assign({}, prevDraft && prevDraft.keys || {}, incoming);
+    let now = new Date().toISOString(); if (prevDraft && prevDraft.updatedAt && now <= prevDraft.updatedAt) now = new Date(Date.parse(prevDraft.updatedAt) + 1).toISOString();
+    d = { invitationId: who.invitationId, guestId: who.guestId, keys, updatedAt: now, savedAt: now, clientUpdatedAt: body && body.clientUpdatedAt || null, reason: body && body.reason || null };
+    try { await env.REG_KV.put(draftKey(who.invitationId), JSON.stringify(d), { metadata: { invitationId: who.invitationId, guestId: who.guestId, updatedAt: now } }); } catch (e) { return json({ ok: false, error: 'draft could not be stored' }, 503, corsHeaders(request)); }
+  }
+  const keys = d.keys, now = d.updatedAt;
   /* the contact inside the draft is the server contact too (the recipient of the confirmation) */
   try { const g = JSON.parse(keys['siyl.guest'] || 'null'); const c = g && g.contact; if (c && (validEmail(c.email) || c.phone)) { const prev = await storedContact(env, who.invitationId) || {}; const email = validEmail(c.email) || prev.email || '', phone = (c.phone || '').trim().slice(0, 40) || prev.phone || ''; if (email !== (prev.email || '') || phone !== (prev.phone || '')) await env.REG_KV.put(contactKey(who.invitationId), JSON.stringify({ invitationId: who.invitationId, guestId: who.guestId, email, phone, at: now, from: 'draft' })); } } catch (e) { /* the draft stands */ }
   const submission = await submissionFor(env, who, d);
@@ -528,7 +567,7 @@ async function engineRooms(env, who) {
     const v = await r.json();
     if (!v || !v.ok || !v.mine) return null;
     const out = {};
-    for (const [stage, m] of Object.entries(v.mine)) { const s = SEED[m.key]; out[stage] = { key: m.key, label: m.label, name: s ? s.name : m.key, stay: s && s.stay ? s.stay : null, room: s && s.unit === 'guest' ? s.name : 'Room ' + m.label }; }
+    for (const [stage, m] of Object.entries(v.mine)) { const s = SEED[m.key]; out[stage] = { key: m.key, label: m.label, name: s ? s.name : m.key, stay: s && s.stay ? s.stay : null, room: s && s.unit === 'guest' ? s.name : 'Room ' + m.label, ...(m.fixed ? { fixed: true } : {}) }; }
     return out;
   } catch (e) { return null; }
 }

@@ -7,6 +7,7 @@ import assert from 'node:assert/strict';
 import { bearerOf, authIdOf } from '../register/crypto.mjs';
 import { src, doState } from './sandbox.mjs';
 import { Rooms } from '../src/rooms.js';
+import { Drafts } from '../src/drafts.js';
 
 const ORIGIN = 'https://seeyouinlaos-website.suthep-hrg.workers.dev';
 function req(path, headers = {}, body, method) { return new Request(ORIGIN + path, { method: method || (body ? 'POST' : 'GET'), headers: { 'content-type': 'application/json', ...headers }, body: body ? JSON.stringify(body) : undefined }); }
@@ -24,6 +25,7 @@ async function harness() {
   const store = kv(); const calls = [];
   const rooms = new Rooms(doState()); const stub = { fetch: (r) => rooms.fetch(r) };
   const env = { ASSETS: await assetsFor(entries), REG_KV: store, MAIL_FROM: 'guest.relation.seeyouinlaos@gmail.com', BREVO_API_KEY: 'x', GR_TOKEN: 'gr-secret', ROOMS: { idFromName: () => 'rooms', get: () => stub } };
+  const actors = {}; env.DRAFTS = { idFromName: (n) => n, get: (n) => { if (!actors[n]) { const a = new Drafts(doState(), env); actors[n] = { fetch: (r) => a.fetch(r) }; } return actors[n]; } };
   const realFetch = globalThis.fetch;
   globalThis.fetch = async (url, init) => { const u = String(url); if (/api\.brevo\.com/.test(u)) { const body = JSON.parse(init.body); calls.push({ body }); return new Response(JSON.stringify({ messageId: '<msg-' + calls.length + '@brevo>' }), { status: 201, headers: { 'content-type': 'application/json' } }); } return realFetch(url, init); };
   return { w, env, store, calls, sam, other, rooms, done: () => { globalThis.fetch = realFetch; } };
@@ -46,7 +48,7 @@ test('DRAFT · one server-side draft per guest: PUT stores the complete keys und
     assert.equal((await h.w.fetch(req('/api/draft', {}, { keys }, 'PUT'), h.env)).status, 401);
     assert.equal((await h.w.fetch(req('/api/draft', { 'x-siyl-auth': h.sam }, { keys: { 'siyl.auth': 'x' } }, 'PUT'), h.env)).status, 400, 'only the journey keys are accepted');
     /* the page-hide beacon: the bearer in the body */
-    const bc = await h.w.fetch(req('/api/draft?beacon=1', { 'content-type': 'application/json' }, { invitationId: 'INV-G777', keys: { 'siyl.bag': '[]' }, bearer: h.sam }), h.env);
+    const bc = await h.w.fetch(req('/api/draft?beacon=1', { 'content-type': 'application/json' }, { invitationId: 'INV-G777', keys: { 'siyl.bag': '[]' }, baseUpdatedAt: d.updatedAt, bearer: h.sam }), h.env);
     assert.equal(bc.status, 200); assert.equal(JSON.parse(h.store.m.get('draft:INV-G777').v).keys['siyl.bag'], '[]');
   } finally { h.done(); }
 });
@@ -54,7 +56,8 @@ test('DRAFT · one server-side draft per guest: PUT stores the complete keys und
 test('ONE LOGICAL JOURNEY · the first send sets the reference; a change afterwards reads CHANGES NOT YET SENT (a server comparison, rooms and seats included); Send Updated Journey keeps the reference, version 2, "Journey updated" to both, the previous version kept; hasUnsentChanges false again; a retry never makes a submission', async () => {
   const h = await harness();
   try {
-    const put = async (keys) => (await h.w.fetch(req('/api/draft', { 'x-siyl-auth': h.sam }, { invitationId: 'INV-G777', keys }, 'PUT'), h.env)).json();
+    /* every PUT names the revision it read (the client does the same) */
+    const put = async (keys) => { const cur = await (await h.w.fetch(req('/api/draft', { 'x-siyl-auth': h.sam }), h.env)).json(); return (await h.w.fetch(req('/api/draft', { 'x-siyl-auth': h.sam }, { invitationId: 'INV-G777', keys, baseUpdatedAt: cur.draft ? cur.draft.updatedAt : null }, 'PUT'), h.env)).json(); };
     const state = async () => (await (await h.w.fetch(req('/api/draft', { 'x-siyl-auth': h.sam }), h.env)).json()).submission;
     await put({ 'siyl.guest': GUEST({ coffeetea: 'Oolong' }), 'siyl.bag': JSON.stringify([{ id: 'train' }]) });
     const r1 = await h.w.fetch(req('/api/register', { 'x-siyl-auth': h.sam }, { invitationId: 'INV-G777', registration: REG('sam.example@example.org'), text: TEXT }), h.env);
@@ -99,8 +102,8 @@ test('CLIENT · the draft module: autosave on every change, pull on sign-in, Sav
   assert.match(d, /var KEYS = \['siyl\.guest', 'siyl\.bag', 'siyl\.temple', 'siyl\.docs', 'siyl\.sent', 'siyl\.skip', 'siyl\.skip\.by'\];/);
   assert.match(d, /\['siyl:guest', 'siyl:bag', 'siyl:temple', 'siyl:docs'\]\.forEach\(function \(ev\) \{ document\.addEventListener\(ev, function \(\) \{ D\.touch\(\); \}\); \}\);/, 'autosave');
   assert.match(d, /document\.addEventListener\('siyl:auth', pullOnce\)/); assert.match(d, /if \(reason === 'save'\) \{/); assert.match(d, /the saved copy differs/);
-  assert.match(d, /closest\('\[data-continue\]'\)/); assert.match(d, /Save my progress</); assert.match(d, /'Saving…'/); assert.match(d, /'Save failed · try again'/); assert.match(d, /'Saved · ' \+ t/);
-  assert.match(d, /CHANGES SAVED · NOT YET SENT TO GUEST RELATIONS/); assert.match(d, /'Send updated journey'/); assert.match(d, /'Sent to Guest Relations · Reference ' \+ s\.submissionId/); assert.match(d, /saved as draft/);
+  assert.match(d, /closest\('\[data-continue\]'\)/); assert.match(d, /Save My Progress</); assert.match(d, /'Saving…'/); assert.match(d, /'Save failed · try again'/); assert.match(d, /'Saved · ' \+ t/);
+  assert.match(d, /CHANGES SAVED · NOT YET SENT TO GUEST RELATIONS/); assert.match(d, /'Send Updated Trip'/); assert.match(d, /'Sent to Guest Relations · Reference ' \+ s\.submissionId/); assert.match(d, /saved as draft/);
   assert.match(sh, /SIYL_DRAFT\.mount\(bar\.querySelector\('\[data-prep-save\]'\)\)/);
   for (const f of ['about-you.html', 'cart.html', 'invitation.html', 'review.html', 'tickets.html', 'transport.html', 'wedding-preparation.html', 'wedding.html', 'your-journey.html', 'room.html', 'journeys.html']) assert.match(src(f), /assets\/draft\.js/, f + ' loads the draft module');
   assert.match(rv, /var fl=await SIYL_DRAFT\.flush\('send'\);/); assert.match(rv, /id="srvstate"/);

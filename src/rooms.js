@@ -147,7 +147,8 @@ export class Rooms {
                  eligible: elig.ok, occupants, taken, free: Math.max(0, u.places - taken), full: taken >= u.places };
       });
     }
-    if (identity) for (const o of occ) if (o.guestId === identity.guestId) mine[stageOf(o.key)] = { key: o.key, label: o.label };
+    /* the guest's own places; a FIXED allocation carries `fixed: true` — the Owner's arrangement, never a Bag product (Owner, 17 Sep 2026) */
+    if (identity) for (const o of occ) if (o.guestId === identity.guestId) mine[stageOf(o.key)] = { key: o.key, label: o.label, ...(o.fixed ? { fixed: true } : {}) };
     /* the category as a whole: TOTAL is the physical stock; AVAILABLE is what this guest may still take — a reserved room
        (the hosts', the family's) is never available to a guest, its places never counted (Owner, 16 Sep 2026) */
     const summary = {};

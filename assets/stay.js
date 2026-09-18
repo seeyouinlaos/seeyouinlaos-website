@@ -52,6 +52,7 @@
     /* CHOOSE: hold the place first, then write the line. Resolves
      * { ok, unit } or { ok:false, error: 'full' | 'reserved' | 'unreachable' | 'not signed in' } */
     select: function (win, slug, label) {
+      if (this.fixed(win)) return Promise.resolve({ ok: false, error: 'fixed' });
       var self = this;
       return new Promise(function (resolve) {
         gated(function () {
@@ -82,19 +83,32 @@
       return u.unitName(x) || ('Room ' + label);
     },
     /* REMOVE: the place is given back first, then the line goes */
+    /* ARRANGED FOR YOU (Owner, 17 Sep 2026 · P0): a stage the engine holds as FIXED for this guest is not a Bag concern —
+     * nothing is written for it, nothing is removed through it, nothing is selected in it */
+    fixed: function (win) { var u = U(); return !!(u && u.ready() && u.fixed(stageOf(win))); },
     remove: function (win) {
       var self = this, u = U(), p = P(), b = B();
+      if (this.fixed(win)) return Promise.resolve({ ok: false, error: 'fixed' });
       var line = this.line(win);
       var done = function () { p.ids(win).forEach(function (id) { b.remove(id); }); };
       if (!u || !line || !line.room || line.interest || !u.tracked(win, line.room)) { done(); return Promise.resolve({ ok: true }); }
-      /* the release is the engine's: only a released place leaves the bag; the hosts' fixed room is never released */
-      return u.leave(stageOf(win)).then(function (d) { if (d && d.ok === false && d.error === 'fixed host allocation') return d; done(); return { ok: true }; });
+      /* the release is the engine's: only a released place leaves the bag; an idempotent second remove finds nothing to release */
+      return u.leave(stageOf(win)).then(function (d) {
+        if (d && d.ok === false && d.error === 'fixed host allocation') return { ok: false, error: 'fixed' };
+        if (d && d.ok === false) return d;   /* unreachable / refused: nothing changed, the line stays, the guest is told */
+        done(); return { ok: true };
+      });
     },
     /* the engine and the bag agree: a place the engine holds is in the bag;
      * a line the engine does not hold is marked so the guest chooses a room */
     sync: function () {
       var u = U(), p = P(), b = B(); if (!u || !u.ready() || !p || !b || !b.authed()) return;
       var bag = b.get(), changed = false;
+      /* a Bag line of a stage the engine holds as FIXED is a leftover of the older model: it leaves the Bag (and the total) */
+      var fixedWins = [];
+      u.fixedStages().forEach(function (st) { (window.SIYL_JOURNEY ? SIYL_JOURNEY.SEGMENTS : []).forEach(function (seg) { if (seg.key === st) seg.ids.forEach(function (id) { fixedWins.push(id); }); }); if (fixedWins.indexOf(st) < 0) fixedWins.push(st); });
+      var kept = bag.filter(function (x) { return fixedWins.indexOf(x.id) < 0 && fixedWins.indexOf(p.windowOf(x.id)) < 0; });
+      if (kept.length !== bag.length) { bag = kept; changed = true; }
       bag.forEach(function (x) {
         if (!x.room || x.interest) return;
         var win = p.windowOf(x.id), m = u.mineFor(win, x.room);
@@ -106,6 +120,7 @@
        * another device): the line comes back from the one pricing source */
       var mine = (u.view() && u.view().mine) || {};
       Object.keys(mine).forEach(function (stage) {
+        if (mine[stage].fixed) return;   /* the Owner's arrangement is shown under Arranged for you, never written into the Bag */
         var key = mine[stage].key, win = key.split('/')[0], slug = key.split('/').slice(1).join('/');
         var at = p.locate(win); if (!at) return;
         if (ST.line(win)) return;
@@ -163,7 +178,8 @@
       if (!r || r.ok) return '';
       if (r.error === 'full') return 'This room was just filled. Please choose another room.';
       if (r.error === 'reserved') return 'This room is reserved — please choose another room.';
-      if (r.error === 'fixed host allocation') return 'Your room here is fixed by the hosts\' allocation.';
+      if (r.error === 'fixed host allocation' || r.error === 'fixed') return 'This room is arranged for you and stays as it is.';
+      if (r.error === 'unreachable') return 'Nothing was changed — we could not reach Guest Relations just now. Please try again.';
       if (r.error === 'not signed in') return 'Open your invitation to choose a room.';
       return 'Your place could not be held right now — please try again in a moment.';
     }

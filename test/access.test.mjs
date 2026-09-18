@@ -79,7 +79,7 @@ test('ACCESS · signed in: require() runs at once, private links keep their targ
   const { sb, links, inserted } = await harness({ auth: PEGGY, page: '/experiences.html' });
   let ran = null; sb.SIYL_INVITE.require((a) => { ran = a; });
   assert.equal(ran && ran.guestId, 'g-peggy'); assert.equal(sb.location.replaced, null);
-  assert.equal(inserted[0].attrs['data-state'], 'in'); assert.match(inserted[0].innerHTML, /Signed in · Peggy/); assert.match(inserted[0].innerHTML, /href="your-journey\.html">Your Journey</); assert.match(inserted[0].innerHTML, /data-access-out>Sign out</);
+  assert.equal(inserted[0].attrs['data-state'], 'in'); assert.match(inserted[0].innerHTML, /Signed in · Peggy/); assert.match(inserted[0].innerHTML, /href="your-journey\.html">My Trip</); assert.doesNotMatch(inserted[0].innerHTML, /My Profile/, 'the persistent links live on the one sticky layer (assets/bag.js), not twice on screen'); assert.match(inserted[0].innerHTML, /data-access-out>Sign out</);
   assert.equal(links.find((l) => l.attrs.href === 'your-journey.html').attrs.href, 'your-journey.html');
   assert.equal(sb.document.documentElement.getAttribute('data-session'), 'in');
   const { swap, way } = await harness({ auth: PEGGY, page: '/voyage.html' });

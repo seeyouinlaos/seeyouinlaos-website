@@ -63,12 +63,17 @@ export function journeyModel(record) {
   const partyName = gr.partyName || r.partyName || '';
   const contact = { email: (record.recipient && record.recipient.email) || (r.contact && r.contact.email) || (gr.contact && gr.contact.email) || (legacy && legacy.contact && legacy.contact.email) || '',
     phone: (record.recipient && record.recipient.phone) || (r.contact && r.contact.phone) || (gr.contact && gr.contact.phone) || (legacy && legacy.contact && legacy.contact.phone) || '' };
-  const lines = Array.isArray(r.selections) ? r.selections : (Array.isArray(r.shared) ? r.shared : []);
+  const rooms0 = record.rooms || null;
+  const fixedStages = Object.entries(rooms0 || {}).filter(([, m]) => m && m.fixed).map(([st]) => st);
+  /* a line of a fixed stage is never a product of any kind — not a stay, not an experience, never in a total (Codex P1-3) */
+  const lines = (Array.isArray(r.selections) ? r.selections : (Array.isArray(r.shared) ? r.shared : [])).filter((x) => !(x && (fixedStages.includes(String(x.id)) || fixedStages.includes(STAGE_OF_STAY[String(x.id)] || ''))));
   const order = (x) => { const i = STAGES.indexOf(x.id); return i < 0 ? 50 : i; };
   const sorted = lines.slice().sort((a, b) => order(a) - order(b));
   const rooms = record.rooms || null;
   const roomOf = (x) => { const st = STAGE_OF_STAY[x.id]; const m = rooms && rooms[st]; if (m && m.room) return m.room; return x.unitName || (x.unit ? 'Room ' + x.unit : ''); };
-  const stays = sorted.filter((x) => x.stay || STAGE_OF_STAY[x.id]).map((x) => ({ name: x.name, dates: (x.meta || '').split(' · ')[0], category: (x.meta || '').split(' · ').slice(1).join(' · '), room: roomOf(x), price: x.price, rate: x.rate, nights: x.nights, note: x.note ? x.note + (x.noteBy ? ' · ' + x.noteBy : '') : '', breakfast: x.breakfast || '', interest: !!x.interest }));
+  /* ARRANGED FOR YOU: the fixed rooms the engine holds for this guest — never a Bag line, never an amount */
+  const arranged = Object.entries(rooms || {}).filter(([, m]) => m && m.fixed).map(([stage, m]) => ({ stage, name: m.stay || m.name, room: m.room, category: m.stay ? m.name : '' }));
+  const stays = sorted.filter((x) => (x.stay || STAGE_OF_STAY[x.id]) && !arranged.some((a) => a.stage === STAGE_OF_STAY[x.id])).map((x) => ({ name: x.name, dates: (x.meta || '').split(' · ')[0], category: (x.meta || '').split(' · ').slice(1).join(' · '), room: roomOf(x), price: x.price, rate: x.rate, nights: x.nights, note: x.note ? x.note + (x.noteBy ? ' · ' + x.noteBy : '') : '', breakfast: x.breakfast || '', interest: !!x.interest }));
   const travel = sorted.filter((x) => TRAVEL.has(x.id) || (x.cls && !x.stay)).map((x) => ({ name: x.name, meta: x.meta || '', price: x.price }));
   const experiences = sorted.filter((x) => !stays.some((s) => s.name === x.name) && !travel.some((t) => t.name === x.name) && x.id !== 'sangkhathan').map((x) => ({ name: x.name, meta: x.meta || '', price: x.price }));
   const sang = lines.find((x) => x.id === 'sangkhathan');
@@ -94,9 +99,10 @@ export function journeyModel(record) {
   /* documents (optional for the guest — Guest Relations sees the state) */
   const docs = r.documents && Array.isArray(r.documents.guests) && r.documents.guests[0] && Array.isArray(r.documents.guests[0].documents) ? r.documents.guests[0].documents.map((d) => ({ label: d.label || d.kind, state: d.state || '' })) : [];
   const publication = r.documents && Array.isArray(r.documents.guests) && r.documents.guests[0] ? r.documents.guests[0].publication || '' : '';
-  const total = r.totalUsd != null ? r.totalUsd : (r.total != null ? r.total : null);
+  const stated = r.totalUsd != null ? r.totalUsd : (r.total != null ? r.total : null);
+  const total = stated == null ? null : (fixedStages.length ? lines.reduce((t, x) => t + (Number(x.price) || 0) * (Number(x.qty) || 1), 0) : stated);
   const upd = record.kind === 'update' && (record.version || 1) > 1;
-  return { guestId, fullName, firstName, partyName, contact, stays, travel, experiences, wedding, sangkhathan, seats, profile, allergy, allergyDetails, acks, docs, publication, total, hosts,
+  return { guestId, fullName, firstName, partyName, contact, stays, arranged, travel, experiences, wedding, sangkhathan, seats, profile, allergy, allergyDetails, acks, docs, publication, total, hosts,
     reference: record.submissionId || '', sentAt: record.lastSentAt || record.submittedAt || '', firstSentAt: record.firstSentAt || record.submittedAt || '', version: record.version || 1, upd, invitationId: record.invitationId || '' };
 }
 
@@ -142,6 +148,7 @@ function shell(title, inner, eyebrow) {
 function journeySections(M, forOwner) {
   let s = '';
   if (M.travel.length) s += section('Travel', M.travel.map((t) => item(t.name, esc(t.meta), forOwner || t.price != null ? money(t.price) : '')).join(''));
+  if (M.arranged.length) s += section('Arranged for you', M.arranged.map((a) => item(a.name, esc(a.room) + (a.category ? ' · ' + esc(a.category) : '') + '<br>Fixed arrangement · not part of your bag', '')).join(''));
   if (M.stays.length) s += section('Stays', M.stays.map((x) => item(x.name, esc(x.dates) + (x.category ? '<br>' + esc(x.category) : '') + (x.room ? '<br><span style="color:' + INK + ';">' + esc(x.room) + '</span>' : '') + (x.breakfast ? '<br>' + esc(x.breakfast) : '') + (x.note ? '<br>' + esc(x.note) : ''), x.price != null ? money(x.price) : '')).join(''));
   if (M.experiences.length) s += section('Experiences', M.experiences.map((e) => item(e.name, esc(e.meta), e.price != null ? money(e.price) : '')).join(''));
   s += section('Wedding', kvTable(M.wedding.map((e) => kvRow(e.label, e.answer || '—', e.when + ' · ' + e.place)).concat(M.sangkhathan ? [kvRow('Sangkhathan', M.sangkhathan, 'A personal offering · USD 15 per participating guest')] : [])));
@@ -182,6 +189,7 @@ export function composeGuestMail(record) {
   T.push('SEE YOU IN LAOS — YOUR JOURNEY', '', M.upd ? 'Your journey has been updated' : 'Your journey has been received', '', 'Dear ' + M.firstName + ',', '', intro, '',
     'Reference: ' + M.reference, (M.upd ? 'Updated: ' : 'Sent: ') + whenWords(M.sentAt), '');
   if (M.travel.length) { T.push('TRAVEL'); M.travel.forEach((t) => T.push('· ' + t.name + ' — ' + t.meta + (t.price != null ? ' — ' + money(t.price) : ''))); T.push(''); }
+  if (M.arranged.length) { T.push('ARRANGED FOR YOU'); M.arranged.forEach((a) => T.push('· ' + a.name + ' — ' + a.room + (a.category ? ' — ' + a.category : '') + ' — fixed arrangement, not part of your bag')); T.push(''); }
   if (M.stays.length) { T.push('STAYS'); M.stays.forEach((x) => T.push('· ' + x.name + ' — ' + x.dates + (x.category ? ' — ' + x.category : '') + (x.room ? ' — ' + x.room : '') + (x.price != null ? ' — ' + money(x.price) : '') + (x.note ? ' (' + x.note + ')' : ''))); T.push(''); }
   if (M.experiences.length) { T.push('EXPERIENCES'); M.experiences.forEach((e) => T.push('· ' + e.name + ' — ' + e.meta + (e.price != null ? ' — ' + money(e.price) : ''))); T.push(''); }
   T.push('WEDDING'); M.wedding.forEach((e) => T.push('· ' + e.label + ' · ' + e.when + ' · ' + e.place + ': ' + (e.answer || '—'))); if (M.sangkhathan) T.push('· Sangkhathan: ' + M.sangkhathan); T.push('');
@@ -215,6 +223,7 @@ export function composeOwnerMail(record, statusUrl) {
   if (M.upd) T.push('Latest version received ' + whenWords(M.sentAt) + ' (replaces the version first sent ' + whenWords(M.firstSentAt) + ')', '');
   T.push('Guest: ' + M.fullName + (M.guestId ? ' · ' + M.guestId : ''), M.partyName ? 'Party: ' + M.partyName : '', 'Email: ' + (M.contact.email || '—'), 'Mobile: ' + (M.contact.phone || '—'), 'Reference: ' + M.reference, 'Status: ' + (M.upd ? 'Updated journey' : 'Initial submission'), (M.upd ? 'Updated: ' : 'Sent: ') + whenWords(M.sentAt), '');
   if (M.travel.length) { T.push('TRAVEL'); M.travel.forEach((t) => T.push('· ' + t.name + ' — ' + t.meta + ' — ' + money(t.price))); T.push(''); }
+  if (M.arranged.length) { T.push('ARRANGED FOR YOU'); M.arranged.forEach((a) => T.push('· ' + a.name + ' — ' + a.room + (a.category ? ' — ' + a.category : '') + ' — fixed arrangement')); T.push(''); }
   if (M.stays.length) { T.push('STAYS'); M.stays.forEach((x) => T.push('· ' + x.name + ' — ' + x.dates + (x.category ? ' — ' + x.category : '') + (x.room ? ' — ' + x.room : '') + ' — ' + money(x.price) + (x.note ? ' (' + x.note + ')' : ''))); T.push(''); }
   if (M.experiences.length) { T.push('EXPERIENCES'); M.experiences.forEach((e) => T.push('· ' + e.name + ' — ' + e.meta + ' — ' + money(e.price))); T.push(''); }
   T.push('WEDDING PARTICIPATION'); M.wedding.forEach((e) => T.push('· ' + e.label + ' (' + e.when + ' · ' + e.place + '): ' + (e.answer || '—'))); if (M.sangkhathan) T.push('· Sangkhathan: ' + M.sangkhathan); T.push('');
