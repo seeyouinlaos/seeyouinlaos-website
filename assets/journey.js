@@ -342,9 +342,13 @@
 
     /* the journey Cost Saving produces once an option is chosen */
     costSavingPlan: function (option) {
+      var self = this;
+      /* the Essential trip is the Vientiane wedding stay: a guest who is not joining Vientiane gets no line from it, and a
+         stage outside the guest's destinations is neither filled nor marked self-arranged (Codex final pass, 18 Sep 2026) */
+      var vte = joinsAll(['vientiane']);
       return {
         /* a preset's lines say so, so a later preset may revise them */
-        add: ((option && option.items) || []).map(function (it) { var c = {}; for (var k in it) c[k] = it[k]; c.by = 'cost'; return c; }),
+        add: vte ? ((option && option.items) || []).map(function (it) { var c = {}; for (var k in it) c[k] = it[k]; c.by = 'cost'; return c; }) : [],
         remove: SEG.reduce(function (a, s) {
           s.ids.forEach(function (id) {
             (window.SIYL_PRICE ? window.SIYL_PRICE.ids(id) : [id]).forEach(function (x) {
@@ -353,7 +357,7 @@
           });
           return a;
         }, []),
-        selfArranged: SEG.filter(function (s) { return s.key !== 'wedstay'; }).map(function (s) { return s.key; })
+        selfArranged: SEG.filter(function (s) { return s.key !== 'wedstay' && self.relevant(s); }).map(function (s) { return s.key; })
       };
     },
 

@@ -227,3 +227,91 @@ test('EMAILS · both emails carry where the guest joins us, in the guest\'s word
   assert.ok(b.text.includes('Where they join us: Not joining this trip'));
   const c = composeGuestMail({ ...base, registration: reg({}) }); assert.ok(!c.text.includes('Where you join us'), 'an older record without the answer prints no row');
 });
+
+/* ---- CODEX FINAL PASS (18 Sep 2026) — five findings, each a regression ---- */
+
+test('CODEX 011-1 · a release that fails keeps the stage held AND named: readiness refuses to send until it is released', async () => {
+  const rooms = new Rooms(doState());
+  const w = await livePage(PEGGY, rooms); const G = w.SIYL_GUEST, J = w.SIYL_JOURNEY, B = w.SIYL_BAG, ST = w.SIYL_STAY, U = w.SIYL_UNITS;
+  answerTheRest(w); G.setScope({ all: true });
+  assert.equal((await ST.select('prewed', 'heritage')).ok, true); for (const k of ALL.filter((x) => x !== 'prewed')) J.skip(k, true, 'manual');
+  assert.equal(G.readiness().ok, true);
+  /* the guest leaves Vientiane; the engine cannot be reached for the release */
+  G.setScope({ vientiane: false });
+  const realFetch = w.fetch; w.fetch = () => Promise.reject(new Error('offline'));
+  const r = await ST.remove('prewed'); assert.equal(r.ok, false, 'the release failed');
+  assert.ok(U.mine('prewed'), 'the place is still held'); assert.equal(B.get().some((x) => x.id === 'prewed'), true, 'the line is still there');
+  const stale = G.staleFor(); assert.ok(stale.some((m) => m.key === 'release:prewed'), 'what is outside the trip is named'); assert.equal(stale[0].href, 'your-journey.html#scope');
+  assert.equal(G.readiness().ok, false, 'Review & Send waits'); assert.ok(G.missingFor('journey').some((m) => /^release:/.test(m.key)));
+  /* and the same for "I won't be joining this trip" */
+  G.setScope({ none: true }); assert.equal(G.readiness().ok, false); assert.ok(G.missingFor('journey').some((m) => m.key === 'release:prewed'));
+  /* the engine comes back: released, and the trip is ready */
+  w.fetch = realFetch; assert.equal((await ST.remove('prewed')).ok, true); assert.equal(G.staleFor().length, 0); assert.equal(G.readiness().ok, true);
+  /* the seats too: a held seat outside Vientiane is named while it lasts */
+  const seats = { mine: { ceremony: { [PEGGY.guestId]: 'C-R-05-02' }, dinner: {} }, open: true, frozen: false, configured: { ceremony: true, dinner: true } };
+  w.SIYL_SEATS = { ready: () => true, seatOf: (ev, id) => (seats.mine[ev] || {})[id] || null, open: () => true, frozen: () => false, configured: () => true, view: () => seats, mine: () => seats.mine };
+  assert.ok(G.staleFor().some((m) => m.key === 'release:seat:ceremony')); assert.equal(G.readiness().ok, false);
+  seats.mine.ceremony = {}; assert.equal(G.readiness().ok, true);
+  /* the planner: a failed release is named on the scope card with a way to release again; the page retries once per answer */
+  const yj = src('your-journey.html');
+  assert.match(yj, /data-scope-failed/); assert.match(yj, /data-scope-retry>Release again</); assert.match(yj, /G\.staleFor&&G\.staleFor\(\)\.length&&RECON!==scopeTag\(\)\)reconcileScope\(\)/);
+});
+
+test('CODEX 011-2 · a guest not joining Vientiane sends no wedding attendance: every moment reads Not joining, no offering, no seat — in the payload and both emails', () => {
+  const w = page({ auth: PEGGY }); const G = w.SIYL_GUEST, T = w.SIYL_TEMPLE, id = PEGGY.guestId;
+  answerTheRest(w); T.setAttendance(id, 'yes'); T.setOffering(id, 'yes'); ['coffee', 'vows', 'dinner'].forEach((k) => T.setEvent(id, k, 'yes'));
+  G.setScope({ all: true });
+  let op = T.operational(); assert.equal(op.guests[0].events.dinner, 'Joining'); assert.equal(op.participation, 'Joining Vientiane');
+  G.setScope({ none: true });
+  op = T.operational();
+  assert.equal(op.participation, 'Not joining this trip'); deq(op.guests[0].events, { temple: 'Not joining', coffee: 'Not joining', vows: 'Not joining', dinner: 'Not joining' });
+  assert.equal(op.guests[0].temple, 'Not attending'); assert.equal(op.guests[0].sangkhathan, false); assert.equal(op.guests[0].sangkhathanState, 'Not applicable'); assert.equal(op.offerings, 0); deq(op.guests[0].open, []);
+  G.setScope({ bangkok: true }); assert.equal(T.operational().participation, 'Not joining Vientiane'); assert.equal(T.operational().guests[0].events.vows, 'Not joining');
+  /* the answers themselves stay on the device for a reconsideration */
+  G.setScope({ vientiane: true }); assert.equal(T.operational().guests[0].events.dinner, 'Joining');
+  /* the emails: an older record shape that still carries "Joining" answers with a scope outside Vientiane prints Not joining, no seat */
+  const base = { invitationId: 'INV-G777', guestId: 'G777', submissionId: 'SYL-G777-34DBEFD3', kind: 'initial', version: 1, submittedAt: '2026-09-18T10:00:00.000Z', firstSentAt: '2026-09-18T10:00:00.000Z', lastSentAt: '2026-09-18T10:00:00.000Z', recipient: { email: 'sam@example.org', phone: '+66 81 000 0000' }, rooms: null,
+    seats: { ceremony: { G777: 'C-R-05-02' }, dinner: { G777: 'D-T-05' } },
+    registration: { channel: 'journey-shop', guestId: 'G777', totalUsd: 15, contact: { email: 'sam@example.org', phone: '+66 81 000 0000' }, selections: [{ id: 'sangkhathan', name: 'Sangkhathan', price: 15 }],
+      templeCeremony: { guests: [{ guestId: 'G777', events: { temple: 'Joining', coffee: 'Joining', vows: 'Joining', dinner: 'Joining' }, sangkhathan: true, sangkhathanState: 'Selected' }] },
+      guestRecord: { scope: { bangkok: true, vientiane: false, china: false, none: false, at: '2026-09-18T09:00:00.000Z' }, scopeWords: 'Bangkok', guests: [{ guestId: 'G777', name: 'Sam', source: { fullName: 'Sam Example', preferredName: 'Sam' }, profile: {} }] } } };
+  for (const mail of [composeGuestMail(base), composeOwnerMail(base, 'https://x/api/status')]) {
+    assert.ok(!/Joining\b(?! Vientiane)/.test(mail.text.replace(/Not joining/g, '')), 'no Joining answer survives'); assert.ok((mail.text.match(/Not joining/g) || []).length >= 4, 'every moment reads Not joining');
+    assert.ok(!/Seat [A-Z]?\d/.test(mail.text), 'no seat'); assert.ok(!/Sangkhathan: Yes|Sangkhathan · Yes/.test(mail.text), 'no offering');
+  }
+});
+
+test('CODEX 011-3 · the Essential trip is Vientiane\'s: a guest who is not joining Vientiane is not offered it and its plan adds nothing; stages outside the trip are never marked self-arranged', () => {
+  const w = page({ auth: PEGGY }); const G = w.SIYL_GUEST, J = w.SIYL_JOURNEY;
+  answerTheRest(w); G.setScope({ bangkok: true });
+  const opt = { key: 'hotel', items: [{ id: 'wedstay', name: 'Heritage', price: 280, stay: 'souphattra', room: 'heritage' }] };
+  const plan = J.costSavingPlan(opt);
+  deq(plan.add, [], 'nothing of Vientiane is added'); deq(plan.selfArranged, ['bkk-stay'], 'only a stage of the trip is marked self-arranged'); assert.ok(plan.remove.includes('wedstay'));
+  G.setScope({ vientiane: true }); const plan2 = J.costSavingPlan(opt);
+  assert.equal(plan2.add.length, 1); assert.equal(plan2.add[0].by, 'cost'); deq(plan2.selfArranged, ['bkk-stay', 'train', 'prewed'], 'only the relevant stages besides the wedding stay');
+  assert.match(src('your-journey.html'), /\(G\.joins\('vientiane'\)\?'<button type="button" class="p-link" id="csb">Essential trip<\/button>':''\)/, 'the control exists only for a guest joining Vientiane');
+});
+
+test('CODEX 011-4 · a decision made while the first copy is being read wins: the server\'s older value for that key is what was being fetched, never a competing edit', async () => {
+  let resolveGet; const gets = [];
+  const w = page({ auth: PEGGY, modules: ['assets/bag.js', 'assets/rooms-data.js', 'assets/pricing.js', 'assets/guest.js', 'assets/temple.js', 'assets/docs.js', 'assets/confirm.js', 'assets/transport-data.js', 'assets/journey.js', 'assets/draft.js'],
+    fetch: (url, init) => { if (!init || !init.method || init.method === 'GET') { gets.push(url); return new Promise((r) => { resolveGet = r; }); } return Promise.resolve({ ok: true, status: 200, json: async () => ({ ok: true, draft: { keys: {}, updatedAt: '2026-09-18T10:00:01.000Z', savedAt: '2026-09-18T10:00:01.000Z' } }) }); } });
+  const D = w.SIYL_DRAFT, J = w.SIYL_JOURNEY; assert.ok(D && D.pull, 'the draft module is loaded');
+  const before = gets.length;   /* the module's own read on load stays in flight; the read under test is the one that leaves now */
+  const pulling = D.pull(); await Promise.resolve(); assert.equal(gets.length, before + 1, 'the read left');
+  /* the guest declines the train while the read is in flight — on a fresh device nothing was stored before */
+  J.skip('train', true, 'manual'); assert.equal(J.isSkipped('train'), true);
+  resolveGet({ ok: true, status: 200, json: async () => ({ ok: true, draft: { keys: { 'siyl.skip': '[]', 'siyl.skip.by': '{}', 'siyl.guest': '{}' }, updatedAt: '2026-09-18T10:00:00.000Z', savedAt: '2026-09-18T10:00:00.000Z' } }) });
+  await pulling; await new Promise((r) => setTimeout(r, 0));
+  assert.equal(J.isSkipped('train'), true, 'the stage stays declined'); assert.equal(J.skippedBy('train'), 'manual');
+  assert.equal(w.localStorage.getItem('siyl.guest'), '{}', 'a key the guest did not touch follows the server');
+});
+
+test('CODEX 011-5 · both emails carry My Favorite Flavor — and a migrated record\'s snack answer only when it is one of the six', () => {
+  const base = { invitationId: 'INV-G777', guestId: 'G777', submissionId: 'SYL-G777-34DBEFD3', kind: 'initial', version: 1, submittedAt: '2026-09-18T10:00:00.000Z', firstSentAt: '2026-09-18T10:00:00.000Z', lastSentAt: '2026-09-18T10:00:00.000Z', recipient: { email: 'sam@example.org', phone: '+66 81 000 0000' }, rooms: null };
+  const rec = (profile) => ({ ...base, registration: { channel: 'journey-shop', guestId: 'G777', totalUsd: 0, contact: { email: 'sam@example.org', phone: '+66 81 000 0000' }, selections: [], guestRecord: { guests: [{ guestId: 'G777', name: 'Sam', source: { fullName: 'Sam Example', preferredName: 'Sam' }, profile }] } } });
+  const compose = (r) => [composeGuestMail(r), composeOwnerMail(r, 'https://x/api/status')];
+  for (const [profile, want, not] of [[{ flavor: 'Pandan' }, 'My Favorite Flavor: Pandan', null], [{ treat: 'Coffee' }, 'My Favorite Flavor: Coffee', null], [{ treat: 'Mango sticky rice' }, null, 'Mango sticky rice'], [{ flavor: 'Pizza', treat: 'Milk' }, 'My Favorite Flavor: Milk', 'Pizza']]) {
+    for (const m of compose(rec(profile))) { if (want) assert.ok(m.text.includes(want), want); if (not) assert.ok(!m.text.includes(not), 'never ' + not); assert.ok(!/Favourite:/.test(m.text), 'the retired label is gone'); }
+  }
+});

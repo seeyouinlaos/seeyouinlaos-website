@@ -391,7 +391,10 @@
         if (!J || !B) return [];
         /* the scope first: nothing else is asked until the guest has said where they join us; a guest who is not joining is asked nothing more here */
         if (!this.scopeAnswered()) return [{ key: 'scope', label: 'Where will you join us?', href: 'your-journey.html#scope' }];
-        if (this.notJoining()) return [];
+        /* WHAT IS OUTSIDE THE TRIP MUST HAVE LEFT (Codex final pass, 18 Sep 2026): a room, a seat or a line still held for a
+           destination the guest is not joining blocks Review & Send until it is released — a failed release is never sent */
+        out = out.concat(this.staleFor());
+        if (this.notJoining()) return out;
         J.SEGMENTS.forEach(function (seg) {
           if (J.relevant && !J.relevant(seg)) return;   /* a stage of a destination the guest is not joining asks nothing */
           var st = J.state(seg);
@@ -435,6 +438,31 @@
       return out;
     },
     done: function (key) { return this.missingFor(key).length === 0; },
+    /* what this guest still holds outside their destinations: Bag lines, engine rooms, wedding seats — each a way back to the question */
+    staleFor: function () {
+      var J = window.SIYL_JOURNEY, B = window.SIYL_BAG, U = window.SIYL_UNITS, S = window.SIYL_SEATS, me = this.me(), out = [];
+      if (!J || !J.lineRelevant || !this.scopeAnswered()) return out;
+      var seen = {};
+      if (B) B.get().forEach(function (x) {
+        if (J.lineRelevant(x)) return;
+        seen[x.id] = true;
+        out.push({ key: 'release:' + x.id, label: (x.name || x.id) + ' — outside your trip now, still to be released', href: 'your-journey.html#scope' });
+      });
+      if (U && U.ready && U.ready() && U.view()) {
+        var mine = U.view().mine || {};
+        Object.keys(mine).forEach(function (stage) {
+          var seg = J.SEGMENTS.filter(function (s) { return s.key === stage || s.ids.indexOf(stage) >= 0; })[0];
+          var relevant = seg ? J.relevant(seg) : J.lineRelevant({ id: stage });
+          if (relevant) return;
+          if (seg && seg.ids.some(function (id) { return seen[id]; })) return;   /* already named through its Bag line */
+          out.push({ key: 'release:room:' + stage, label: (seg ? seg.when + ' · ' + seg.place : stage) + ' — a room is still held for a stage outside your trip', href: 'your-journey.html#scope' });
+        });
+      }
+      if (S && S.ready && S.ready() && me && !this.joins('vientiane')) ['ceremony', 'dinner'].forEach(function (ev) {
+        if (S.seatOf(ev, me.guestId)) out.push({ key: 'release:seat:' + ev, label: (ev === 'ceremony' ? 'Ceremony' : 'Dinner') + ' seat — still held although you are not joining Vientiane', href: 'your-journey.html#scope' });
+      });
+      return out;
+    },
     /* does a step apply to this guest at all — the scope decides: the wedding steps need Vientiane, About You needs a guest who joins something */
     applicable: function (key) {
       if (!this.scopeAnswered()) return true;

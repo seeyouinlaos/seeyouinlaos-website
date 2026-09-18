@@ -164,6 +164,15 @@
           var newer = (m.invitationId !== a.invitationId) || localEmpty || !m.serverUpdatedAt || g.draft.updatedAt > m.serverUpdatedAt;
           if (newer) {
             var m3 = merge(local, before, g.draft.keys, true);
+            /* A DECISION MADE ON THIS DEVICE WHILE THE COPY WAS BEING READ WINS (Codex final pass, 18 Sep 2026): the snapshot
+               taken before the read is not a common ancestor — a key the guest changed meanwhile is their live action, and the
+               server's older value for it is what was being fetched, never a competing edit. It is kept and sent again. */
+            KEYS.forEach(function (k) {
+              if (local[k] === before[k]) return;
+              if (local[k] === undefined) delete m3.keys[k]; else m3.keys[k] = local[k];
+              var li = m3.lost.indexOf(k); if (li >= 0) m3.lost.splice(li, 1);
+              if (m3.keep.indexOf(k) < 0) m3.keep.push(k);
+            });
             apply(m3.keys); setBase(g.draft.keys);
             if (m3.keep.length) pending = true;
             if (m3.lost.length) state.notice = 'stale';   /* the same key changed elsewhere meanwhile: the server's stands, the guest is told */

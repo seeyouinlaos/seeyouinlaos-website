@@ -205,14 +205,23 @@
     sync: function () { sync(); },
 
     /* what Guest Relations needs to prepare */
+    /* WHERE THE GUEST JOINS US (Owner, 18 Sep 2026): a guest who is not joining Vientiane is not at the wedding — what is
+       sent says so for every moment, whatever was answered before the scope changed (the earlier answers stay on the device
+       for a reconsideration; they are never sent as attendance). Read from the guest record, which owns the scope. */
+    participation: function () {
+      var G = window.SIYL_GUEST;
+      if (!G || !G.scopeAnswered || !G.scopeAnswered() || G.joins('vientiane')) return '';
+      return G.notJoining() ? 'Not joining this trip' : 'Not joining Vientiane';
+    },
     operational: function () {
       var self = this;
       var elig = this.eligibility();
+      var away = this.participation();
       var rows = people().map(function (g) {
-        var a = self.attendanceOf(g.guestId), o = self.offeringOf_(g.guestId);
+        var a = away ? 'no' : self.attendanceOf(g.guestId), o = away ? 'no' : self.offeringOf_(g.guestId);
         var events = {};
         EVENTS.forEach(function (e) {
-          var v = self.eventOf(g.guestId, e.key);
+          var v = away ? 'no' : self.eventOf(g.guestId, e.key);
           events[e.key] = v === 'yes' ? 'Joining' : v === 'no' ? 'Not joining' : 'Not decided';
         });
         return {
@@ -220,19 +229,21 @@
           name: g.preferredName || g.fullName || 'You',
           answeredBy: ((read().by || {})[g.guestId] || {}).by || null,
           events: events,
-          open: self.openFor(g.guestId),
+          open: away ? [] : self.openFor(g.guestId),
           temple: a === 'yes' ? 'Attending' : a === 'no' ? 'Not attending' : 'Not decided',
           attending: a === 'yes',
           sangkhathan: o === 'yes',
           sangkhathanState: a !== 'yes' ? 'Not applicable'
             : elig === 'NONE' ? 'Not eligible'
             : elig !== 'ELIGIBLE' ? 'Not available yet'
-            : o === 'yes' ? 'Selected' : o === 'no' ? 'Not selected' : 'Decision required'
+            : o === 'yes' ? 'Selected' : o === 'no' ? 'Not selected' : 'Decision required',
+          participation: away || 'Joining Vientiane'
         };
       });
-      var n = this.offerings();
+      var n = away ? 0 : this.offerings();
       return {
         guests: rows,
+        participation: away || 'Joining Vientiane',
         /* eligibility as source truth */
         sangkhathanEligibility: elig || 'UNRESOLVED',
         attending: rows.filter(function (r) { return r.attending; }).length,
@@ -241,7 +252,7 @@
         sangkhathanUndecided: rows.filter(function (r) { return r.sangkhathanState === 'Decision required'; }).length,
         offerings: n,
         offeringsUsd: n * 15,
-        offeringNames: this.offeringGuests().map(function (g) { return g.preferredName || g.fullName; })
+        offeringNames: away ? [] : this.offeringGuests().map(function (g) { return g.preferredName || g.fullName; })
       };
     }
   };

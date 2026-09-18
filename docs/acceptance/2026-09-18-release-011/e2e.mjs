@@ -8,8 +8,8 @@ const N = process.argv[2], OUT = process.argv[3], O = (process.argv[4] || 'http:
 const codes = JSON.parse(fs.readFileSync(N + '/synth-codes.json', 'utf8'));
 const R = []; const note = (id, ok, d) => { R.push({ id, ok: !!ok, d: String(d).slice(0, 300) }); console.log((ok ? 'PASS ' : 'FAIL ') + id + ' — ' + String(d).slice(0, 220)); };
 const b = await chromium.launch();
-const errors = new Map(), statuses = new Set();   /* a 404 for a photo not yet uploaded and a 409 draft precondition are answers, not errors */
-const fresh = async (w, opts) => { const ctx = await b.newContext(Object.assign({ viewport: { width: w || 390, height: 844 }, deviceScaleFactor: 2, isMobile: (w || 390) <= 390, hasTouch: (w || 390) <= 390 }, opts || {})); const p = await ctx.newPage(); p.on('console', (m) => { if (m.type() === 'error' && !/Failed to load resource: the server responded with a status of (404|409)/.test(m.text())) errors.set(p.url() + ' · ' + m.text().slice(0, 120), 1); else if (m.type() === 'error') statuses.add(m.text().slice(-40)); }); p.on('pageerror', (e) => errors.set(p.url() + ' · ' + String(e).slice(0, 120), 1)); return p; };
+const errors = new Map(), statuses = new Set();   /* a 404 for a photo not yet uploaded, a 409 draft precondition and the release this run aborts on purpose (4b) are answers, not errors */
+const fresh = async (w, opts) => { const ctx = await b.newContext(Object.assign({ viewport: { width: w || 390, height: 844 }, deviceScaleFactor: 2, isMobile: (w || 390) <= 390, hasTouch: (w || 390) <= 390 }, opts || {})); const p = await ctx.newPage(); p.on('console', (m) => { if (m.type() === 'error' && !/Failed to load resource: (the server responded with a status of (404|409)|net::ERR_FAILED)/.test(m.text())) errors.set(p.url() + ' · ' + m.text().slice(0, 120), 1); else if (m.type() === 'error') statuses.add(m.text().slice(-40)); }); p.on('pageerror', (e) => errors.set(p.url() + ' · ' + String(e).slice(0, 120), 1)); return p; };
 const shot = (p, name) => p.screenshot({ path: path.join(OUT, name + '.png') });
 const signIn = async (p, id) => { await p.goto(O + '/invitation.html?open=1', { waitUntil: 'load' }); await p.waitForSelector('.siyl-inv input', { state: 'visible', timeout: 20000 }); await p.fill('.siyl-inv input', codes[id]); await p.click('.siyl-inv .igo'); await p.waitForFunction(() => { try { return !!JSON.parse(localStorage.getItem('siyl.auth') || 'null').bearer; } catch (e) { return false; } }, null, { timeout: 20000 }); await p.waitForTimeout(2200); };
 const contact = async (p, email) => { await p.goto(O + '/invitation.html', { waitUntil: 'load' }); await p.waitForSelector('input[data-c="email"]', { timeout: 20000 }); await p.fill('input[data-c="email"]', email); await p.dispatchEvent('input[data-c="email"]', 'change'); await p.fill('input[data-c="phone"]', '+66 81 000 0000'); await p.dispatchEvent('input[data-c="phone"]', 'change'); await p.waitForTimeout(1600); };
@@ -98,6 +98,19 @@ const B2 = await fresh(); await signIn(B2, 'T002'); const jb = await api(B2, '/a
 await trip(C); await C.click('[data-scope="vientiane"]'); await C.waitForTimeout(1500); await C.click('[data-scope="vientiane"]'); await C.waitForTimeout(2500);
 const benAfter = (await engineMine(B2)).mine; note('other-guest-untouched', jb.status === 200 && benAfter && benAfter.prewed && benAfter.prewed.label === 'B', JSON.stringify(benAfter));
 
+/* ===== 4b · A RELEASE THAT FAILS (Codex 011-1): the room stays, it is named, Review & Send waits, Release again resolves it ===== */
+await trip(C); await C.click('[data-scope="vientiane"]'); await C.waitForTimeout(1500);
+const jc2 = await api(C, '/api/rooms/join', { method: 'POST', body: JSON.stringify({ invitationId: 'INV-T003', guestId: 'T003', key: 'prewed/heritage', label: 'A', name: 'Cleo' }) });
+await trip(C); await C.evaluate(() => SIYL_STAY.sync()); await C.waitForTimeout(600);
+await C.route('**/api/rooms/leave', (r) => r.abort());
+await C.click('[data-scope="vientiane"]'); await C.waitForTimeout(3000);
+const f1 = { mine: (await engineMine(C)).mine, card: await C.$eval('[data-scope-failed]', (e) => e.innerText.replace(/\s+/g, ' ')).catch(() => ''), retry: !!(await C.$('[data-scope-retry]')), need: await need(C), bag: await C.evaluate(() => SIYL_BAG.get().map((x) => x.id)) };
+await C.unroute('**/api/rooms/leave');
+await C.click('[data-scope-retry]'); await C.waitForTimeout(3000);
+const f2 = { mine: (await engineMine(C)).mine, card: !!(await C.$('[data-scope-failed]')), need: await need(C), bag: await C.evaluate(() => SIYL_BAG.get().map((x) => x.id)) };
+note('failed-release-named-then-released', jc2.status === 200 && f1.mine && f1.mine.prewed && /Not released yet/i.test(f1.card) && f1.retry && !f1.need.ok && f1.need.keys.some((k) => /^release:/.test(k)) && f1.bag.includes('prewed') && !(f2.mine && f2.mine.prewed) && !f2.card && !f2.bag.includes('prewed') && !f2.need.keys.some((k) => /^release:/.test(k)), JSON.stringify({ f1: { mine: f1.mine, card: f1.card.slice(0, 80), need: f1.need.keys.filter((k) => /^release/.test(k)) }, f2: { mine: f2.mine, card: f2.card, bag: f2.bag } }).slice(0, 300));
+await shot(C, '390-release-failed');
+
 /* ===== 5 · THE FULL DECLINE PATH (T003): INVITATION → NOT JOINING → REVIEW → SEND ===== */
 await trip(C); await C.click('[data-scope-none]'); await C.waitForTimeout(2500);
 const d0 = { stages: await visibleStages(C), steps: await steps(C), need: await need(C), words: await C.evaluate(() => SIYL_GUEST.scopeWords()), mine: (await engineMine(C)).mine };
@@ -106,7 +119,9 @@ await shot(C, '390-decline-path-my-trip');
 await C.click('.prep-all'); await C.waitForTimeout(800); const ov = await C.$eval('#prep-steps, .prep-steps', (e) => e.innerText.replace(/\s+/g, ' ').trim()); note('decline-path-steps-read-not-joining', (ov.match(/Not joining/g) || []).length >= 3, ov.slice(0, 220)); await shot(C, '390-decline-path-steps'); await C.keyboard.press('Escape'); await C.waitForTimeout(400);
 await C.goto(O + '/review.html', { waitUntil: 'load' }); await C.waitForTimeout(2000);
 const rv = await C.$eval('main', (e) => e.innerText.replace(/\s+/g, ' ').trim()); const sendOn = await C.$eval('#send', (b) => !b.disabled);
+const tOp = await C.evaluate(() => SIYL_TEMPLE.operational()); const txt = await C.evaluate(() => (typeof buildText === 'function' ? buildText(JSON.parse(localStorage.getItem('siyl.auth'))) : ''));
 note('decline-path-review', /\/review/.test(C.url()) && /Where you join us/i.test(rv) && /Not joining this trip/i.test(rv) && sendOn && /USD 0/.test(rv), rv.slice(0, 200) + ' · send ' + sendOn);
+note('decline-path-no-wedding-attendance-sent', tOp.participation === 'Not joining this trip' && Object.values(tOp.guests[0].events).every((v) => v === 'Not joining') && tOp.offerings === 0 && /WHERE THEY JOIN US: NOT JOINING THIS TRIP/.test(txt) && !/: JOINING/.test(txt), JSON.stringify(tOp.guests[0].events) + ' · ' + (txt.match(/WEDDING PARTICIPATION[\s\S]{0,160}/) || [''])[0].replace(/\s+/g, ' '));
 await C.click('#send'); await C.waitForTimeout(4000); const st = (await api(C, '/api/status?invitation=INV-T003', { method: 'GET' })).body;
 const sentRec = await api(C, '/api/draft', { method: 'GET' });
 note('decline-path-sent', st && st.received === true && !!st.receivedAt, JSON.stringify(st).slice(0, 200));

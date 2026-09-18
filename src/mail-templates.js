@@ -28,7 +28,15 @@ const EVENTS = [
   { key: 'vows', label: 'Wedding Ceremony', when: '15:30', place: 'Souphattra Heritage' },
   { key: 'dinner', label: 'Wedding Dinner', when: '19:30', place: 'Souphattra Heritage · poolside' },
 ];
-const PROFILE = [['coffeetea', 'Coffee or tea'], ['treat', 'Favourite'], ['drink', 'Favourite drink'], ['avoid', 'Rather avoid'], ['film', 'Favourite film'], ['music', 'Favourite music']];
+/* MY FAVORITE FLAVOR (Owner, 18 Sep 2026): one of six; an older record's snack answer counts only when it is one of the six */
+const FLAVORS = ['Coffee', 'Milk', 'Butter', 'Pandan', 'Matcha Green Tea', 'Strawberry Milk'];
+const PROFILE = [['coffeetea', 'Coffee or tea'], ['flavor', 'My Favorite Flavor'], ['drink', 'Favourite drink'], ['avoid', 'Rather avoid'], ['film', 'Favourite film'], ['music', 'Favourite music']];
+function profileValue(profile, k) {
+  const p = profile || {};
+  if (k !== 'flavor') return p[k] || '';
+  if (FLAVORS.includes(p.flavor)) return p.flavor;
+  return FLAVORS.includes(p.treat) ? p.treat : '';
+}
 const HOST_IDS = new Set(FIXED.map((f) => f.guestId));
 
 /* the seat label the guest knows (assets/seatlabels.js, the same pure mapping): C-L-rr-01 → A rr … D-T-nn → A nn */
@@ -83,17 +91,19 @@ export function journeyModel(record) {
   /* the wedding answers */
   const tc = r.templeCeremony && Array.isArray(r.templeCeremony.guests) && r.templeCeremony.guests[0] || null;
   const answerOf = (k) => { const v = tc && tc.events && tc.events[k]; if (!v) return legacy && legacy.events && legacy.events[k] ? String(legacy.events[k]) : ''; return String(v); };
-  const wedding = EVENTS.map((e) => ({ ...e, answer: answerOf(e.key) }));
-  const sangkhathan = sang ? 'Yes · USD 15' : (tc && tc.sangkhathanState ? tc.sangkhathanState : '');
+  /* a guest not joining Vientiane is not at the wedding: every moment reads Not joining, no offering, no seat (Codex final pass, 18 Sep 2026) */
+  const away = !!((gr.scope && gr.scope.at && !gr.scope.vientiane) || (gr.scope && gr.scope.none) || (tc && /^Not joining/.test(String(tc.participation || ''))) || (r.templeCeremony && /^Not joining/.test(String(r.templeCeremony.participation || ''))));
+  const wedding = EVENTS.map((e) => ({ ...e, answer: away ? 'Not joining' : answerOf(e.key) }));
+  const sangkhathan = away ? '' : (sang ? 'Yes · USD 15' : (tc && tc.sangkhathanState ? tc.sangkhathanState : ''));
   /* the seats: the engine's map for this guest */
   const m = r.seats && typeof r.seats === 'object' ? r.seats : null;
-  const seatId = (ev) => (m && m[ev] && (m[ev][guestId] || (typeof m[ev] === 'string' ? m[ev] : null))) || (legacy && legacy[ev + 'Seat']) || null;
+  const seatId = (ev) => away ? null : ((m && m[ev] && (m[ev][guestId] || (typeof m[ev] === 'string' ? m[ev] : null))) || (legacy && legacy[ev + 'Seat']) || null);
   const hosts = HOST_IDS.has(guestId);
-  const labelOf = (ev) => { const id = seatId(ev); if (id) return seatLabel(id) || (legacy && legacy[ev + 'SeatLabel']) || id; return (legacy && legacy[ev + 'SeatLabel']) || (ev === 'ceremony' && hosts ? 'Front centre' : ''); };
+  const labelOf = (ev) => { if (away) return ''; const id = seatId(ev); if (id) return seatLabel(id) || (legacy && legacy[ev + 'SeatLabel']) || id; return (legacy && legacy[ev + 'SeatLabel']) || (ev === 'ceremony' && hosts ? 'Front centre' : ''); };
   const seats = { ceremony: { id: seatId('ceremony'), label: labelOf('ceremony'), when: '15:30', place: 'Souphattra Heritage' },
     dinner: { id: seatId('dinner'), label: labelOf('dinner'), when: '19:30', place: 'Souphattra Heritage · poolside' } };
   /* about you */
-  const profile = PROFILE.map(([k, label]) => ({ label, value: g0.profile && g0.profile[k] || '' })).filter((p) => p.value);
+  const profile = PROFILE.map(([k, label]) => ({ label, value: profileValue(g0.profile, k) })).filter((p) => p.value);
   const allergy = (g0.allergy && g0.allergy.answer) || (gr.allergy && gr.allergy.answer) || (legacy && legacy.allergy && legacy.allergy.answer) || '';
   const allergyDetails = (g0.allergy && g0.allergy.details) || (gr.allergy && gr.allergy.details) || (legacy && legacy.allergy && legacy.allergy.details) || '';
   const acks = [];
