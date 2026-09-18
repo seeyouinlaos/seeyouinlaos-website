@@ -54,11 +54,11 @@
 
 /* ------------------------------------------------------------------ type */
 .t-d1 { font-family: var(--f-ed); font-weight: 200; font-size: 32px; line-height: 1.12; letter-spacing: -.01em; color: var(--p-ink); }
-.t-h1 { font-family: var(--f-ed); font-weight: 200; font-size: 23px; line-height: 1.22; color: var(--p-ink); }
-.t-h2 { font-family: var(--f-ed); font-weight: 200; font-size: 19px; line-height: 1.30; color: var(--p-ink); }
-.t-b1 { font-family: var(--f-ui); font-weight: 300; font-size: 14px; line-height: 1.75; color: #4A4A4A; }
-.t-b2 { font-family: var(--f-ui); font-weight: 300; font-size: 12.5px; line-height: 1.75; color: var(--p-mute); }
-.t-l1 { font-family: var(--f-ui); font-weight: 400; font-size: 10px; line-height: 2.0; letter-spacing: 2.2px; text-transform: uppercase; color: var(--p-mute); }
+.t-h1 { font-family: var(--f-ed); font-weight: 200; font-size: 22px; line-height: 1.25; color: var(--p-ink); }
+.t-h2 { font-family: var(--f-ed); font-weight: 200; font-size: 20px; line-height: 1.30; color: var(--p-ink); }
+.t-b1 { font-family: var(--f-ui); font-weight: 300; font-size: 14px; line-height: 1.6; color: #4A4A4A; }
+.t-b2 { font-family: var(--f-ui); font-weight: 300; font-size: 14px; line-height: 1.55; color: var(--p-mute); }   /* measured: no guest-facing body below 14 px */
+.t-l1 { font-family: var(--f-ui); font-weight: 400; font-size: 10.5px; line-height: 2.0; letter-spacing: 2px; text-transform: uppercase; color: var(--p-mute); }
 .t-l1.on   { color: var(--p-ink); }
 .t-l1.open { color: var(--p-accent); }
 .t-b1 b, .t-b2 b, .t-l1 b { font-weight: 400; color: var(--p-ink); }
@@ -189,7 +189,7 @@ body.prep button, body.prep input, body.prep textarea, body.prep select { font-f
    A fare or variant column never falls below 340px; below that breakpoint
    the structure becomes a stack. */
 .p-product { display: block; }
-.p-product > .p-media { display: block; width: 100%; aspect-ratio: 3/2; background: #E7E3DB center/cover no-repeat; }
+.p-product > .p-media { display: block; width: 100%; aspect-ratio: 16/10; background: #E7E3DB center/cover no-repeat; }   /* measured: the Aman room photograph is 341 × 211 */
 .p-product > .p-body { padding-top: var(--s5); }
 .p-choices { margin-top: var(--s5); display: grid; gap: var(--s3); }
 @media (min-width: 900px) {
@@ -204,7 +204,7 @@ body.prep button, body.prep input, body.prep textarea, body.prep select { font-f
 /* the swipe rail, for choices that are whole products */
 .p-rail { display: flex; gap: var(--s4); overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; padding-bottom: var(--s1); }
 .p-rail::-webkit-scrollbar { display: none; }
-.p-rail > * { flex: 0 0 84%; max-width: 340px; scroll-snap-align: start; }
+.p-rail > * { flex: 0 0 calc(100% - 24px); max-width: 340px; scroll-snap-align: start; }   /* measured: 318 of 342, the next card peeks */
 /* the dress references share ONE size (Owner, Edit 3 · 16 Sep 2026: "picture size is wrong"): every
  * reference is the same 3:4 card, the photograph covers it from the top (faces kept), nothing is stretched */
 .p-rail:not(.atrk) { align-items: flex-start; }
@@ -240,7 +240,7 @@ body.p-drawer-open .p-drawer { transform: translateY(0); }
 body.p-drawer-open .p-drawer { opacity: 1; }
 
 /* ============================================================ THE SHELL */
-.prep-bar { position: sticky; top: 0; z-index: 60; background: var(--p-paper); border-bottom: 1px solid var(--p-line); }
+.prep-bar { position: sticky; top: var(--hd-h, 0px); z-index: 59; background: var(--p-paper); border-bottom: 1px solid var(--p-line); }
 .prep-bar-in { box-sizing: border-box; max-width: var(--p-frame); margin: 0 auto; padding: var(--s4) var(--p-gut); display: flex; align-items: flex-start; gap: var(--s4); }
 .prep-bar-l { min-width: 0; flex: 1; }
 /* Perceptual order in the bar: the STEP first, the party and person second,
@@ -291,7 +291,7 @@ body.p-drawer-open .p-drawer { opacity: 1; }
  * arrived" — never a show. With reduced motion nothing travels and every
  * state change is immediate. */
 :root { --p-ease: cubic-bezier(.4, 0, .2, 1); --p-t-fast: .18s; --p-t: .24s; --p-t-page: .28s; }
-html { scroll-padding-top: calc(var(--prep-bar-h, 0px) + 12px); }
+html { scroll-padding-top: calc(var(--hd-h, 0px) + var(--prep-bar-h, 0px) + 12px); }
 /* the step arrives from its top: a quiet entrance, a quieter leave */
 body.prep main.prep-page { opacity: 0; transform: translateY(8px); }
 body.prep.p-in main.prep-page { opacity: 1; transform: none; transition: opacity var(--p-t-page) var(--p-ease), transform var(--p-t-page) var(--p-ease); }
@@ -370,16 +370,16 @@ body.prep-steps-open .prep-steps-scrim { opacity: 1; pointer-events: auto; }
 .p-sum, .p-fare { transition: border-color var(--p-t) var(--p-ease), background-color var(--p-t) var(--p-ease), box-shadow var(--p-t) var(--p-ease); }
 .p-stay > * { margin: 0; }
 .p-stay > * + * { margin-top: var(--s3); }
-.p-stay-img { display: block; width: calc(100% + 2 * var(--s5)); margin: 0 calc(-1 * var(--s5)); aspect-ratio: 4/3; background: #E7E3DB center/cover no-repeat; }
+.p-stay-img { display: block; width: calc(100% + 2 * var(--s5)); margin: 0 calc(-1 * var(--s5)); aspect-ratio: 5/4; background: #E7E3DB center/cover no-repeat; }   /* measured: 318 × 251 */
 .p-stay > .t-l1 { margin-top: var(--s5); }
 .p-stay .p-act { margin-top: var(--s4); width: 100%; min-width: 0; }
 .p-stay:not(.on):not(.p-chosen) .p-act { background: none; color: var(--p-ink); border-color: var(--p-line); }
 /* the rail is borrowed from the public carousel, whose element rules
    (.aslide h3, .aslide p) would otherwise resize the system's roles */
-.aslide.p-stay h3.t-h1 { font-family: var(--f-ed); font-weight: 200; font-size: 23px; line-height: 1.22; letter-spacing: 0; margin: var(--s1) 0 0; }
+.aslide.p-stay h3.t-h1 { font-family: var(--f-ed); font-weight: 200; font-size: 20px; line-height: 1.3; letter-spacing: 0; margin: var(--s1) 0 0; }
 .aslide.p-stay p { font-family: var(--f-ui); margin: var(--s3) 0 0; color: var(--p-mute); }
-.aslide.p-stay p.t-b2 { font-size: 12.5px; line-height: 1.75; }
-.aslide.p-stay p.t-l1 { font-size: 10px; line-height: 2; letter-spacing: 2.2px; text-transform: uppercase; }
+.aslide.p-stay p.t-b2 { font-size: 14px; line-height: 1.5; }
+.aslide.p-stay p.t-l1 { font-size: 10.5px; line-height: 2; letter-spacing: 2px; text-transform: uppercase; }
 .aslide.p-stay p.t-l1.on { color: var(--p-ink); }
 .aslide.p-stay p.p-price { font-family: var(--f-ed); font-weight: 200; font-size: 26px; line-height: 1.1; color: var(--p-ink); margin-top: var(--s4); }
 .aslide.p-stay p.p-price span { font-family: var(--f-ui); font-size: 10px; letter-spacing: 2.2px; margin-top: var(--s2); color: var(--p-mute); }
@@ -477,7 +477,7 @@ body.prep-steps-open .prep-steps-scrim { opacity: 1; pointer-events: auto; }
    are not stages. A small photograph, the facts, the amount at the right. */
 .p-line { display: flex; gap: var(--s4); align-items: flex-start; border-top: 1px solid var(--p-hair); padding: var(--s4) 0; }
 .p-line:first-child { border-top: 0; }
-.p-line-img { flex: none; width: 72px; aspect-ratio: 4/5; background: #E7E3DB center/cover no-repeat; }
+.p-line-img { flex: none; width: 72px; aspect-ratio: 1/1; background: #E7E3DB center/cover no-repeat; }   /* measured: the Aman bag thumbnail is square */
 .p-line-body { flex: 1; min-width: 0; }
 .p-line-body > * + * { margin-top: var(--s1); }
 .p-line-body .p-actions { display: flex; flex-wrap: wrap; gap: var(--s2) var(--s5); margin-top: var(--s2); }

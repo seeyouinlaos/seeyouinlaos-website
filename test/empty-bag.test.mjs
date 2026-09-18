@@ -70,11 +70,11 @@ test('CLIENT · Full Experience keeps a fixed stage out of both its remove and i
 test('SURFACES · the sticky bar says My Bag and stands at USD 0 for a signed-in guest; the account links are on it; the cart, My Trip and Review read the arranged renderer; the header names My Trip · My Bag · My Profile', () => {
   const b = src('assets/bag.js'), c = src('cart.html'), yj = src('your-journey.html'), rv = src('review.html'), inv = src('assets/invite.mjs');
   assert.match(b, /<span class="jb-l">My Bag<\/span>/); assert.match(b, /data-bag-view>Open My Bag</); assert.match(b, /var on=B\.authed\(\);/, 'the bar stands whenever a guest is signed in — an empty bag is a real state');
-  assert.match(b, /data-nav="trip">My Trip</); assert.match(b, /data-nav="bag">My Bag</); assert.match(b, /data-nav="profile">My Profile</); assert.match(b, /data-nav="out">Sign out</); assert.match(b, /data-nav="top"/);
+  assert.match(b, /data-nav="top"/); assert.doesNotMatch(b, /data-nav="trip"/, 'the account surfaces moved into the sticky header shell (Owner, 18 Sep 2026)');
   assert.match(c, /arranged=window\.SIYL_ARRANGED\?SIYL_ARRANGED\.html\(\):''/); assert.match(c, /No selections yet · USD 0/); assert.match(c, /if\(bt\.disabled\)return;/, 'double remove is idempotent'); assert.match(c, /never an endless "Removing…"/);
   assert.match(yj, /if\(window\.SIYL_ARRANGED&&U&&U\.ready\(\)&&U\.fixed\(win\)\)return SIYL_ARRANGED\.html\(\{heading:true\}\);/); assert.match(yj, /<h1 class="t-d1">My Trip<\/h1>/);
   assert.match(rv, /function paintArranged\(\)/); assert.match(rv, /<div id="arranged"><\/div>/);
-  assert.match(inv, /My Trip<\/a><button type="button" class="hd-access-out" data-access-out>Sign out<\/button>/);
+  assert.match(inv, /data-access-nav="trip">My Trip<\/a>/); assert.match(inv, /data-access-nav="bag">My Bag<\/a>/); assert.match(inv, /data-access-nav="profile">My Profile<\/a><button type="button" class="hd-access-out" data-access-out>Sign out<\/button>/); assert.match(inv, /if \(el\.parentElement !== header\)/, 'the access row lives inside the sticky header');
   for (const f of ['your-journey.html', 'cart.html', 'review.html']) assert.match(src(f), /assets\/arranged\.js/, f + ' loads the arranged renderer');
 });
 

@@ -60,7 +60,7 @@ test('COPY · the emails speak of the guest\'s trip, carry the one Worker link a
 test('COPY · one voice for the shell and the bar: the six step labels, the bar navigation and the header access line agree', () => {
   const shell = read('assets/prep-shell.js'), guest = read('assets/guest.js'), bar = read('assets/bag.js'), header = read('assets/invite.mjs');
   for (const label of ['Your Invitation', 'My Trip', 'The Wedding', 'Wedding Preparation', 'My Profile', 'Review & Send']) { assert.match(shell, new RegExp("label: '" + label.replace(/[&]/g, '&') + "'")); assert.match(guest, new RegExp("label: '" + label + "'")); }
-  assert.match(bar, /data-nav="trip">My Trip<\/a><a href="cart\.html" data-nav="bag">My Bag<\/a><a href="about-you\.html" data-nav="profile">My Profile<\/a><button type="button" data-nav="out">Sign out<\/button>/);
-  assert.match(header, /My Trip<\/a><button type="button" class="hd-access-out" data-access-out>Sign out<\/button>/);
+  assert.match(bar, /data-nav="top"/); assert.doesNotMatch(bar, /data-nav="trip"/, 'the account surfaces live in the sticky header shell, not on a second bar');
+  assert.match(header, /data-access-nav="trip">My Trip<\/a><a href="' \+ hrefOf\('cart\.html'\) \+ '" data-access-nav="bag">My Bag<\/a><a href="' \+ hrefOf\('about-you\.html'\) \+ '" data-access-nav="profile">My Profile<\/a><button type="button" class="hd-access-out" data-access-out>Sign out<\/button>/);
   assert.match(shell, /<p class="prep-eyebrow">Private<\/p>/);
 });

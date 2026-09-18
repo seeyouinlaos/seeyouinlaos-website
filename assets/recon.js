@@ -18,8 +18,9 @@
   var access = document.createElement('p');
   access.className = 'hd-access'; access.setAttribute('data-access', ''); access.setAttribute('data-state', 'out');
   access.innerHTML = '<span>Not signed in</span><span class="hd-access-do"><a href="invitation.html?open=1">Open your invitation</a></span>';
+  header.appendChild(access);   /* ONE sticky shell (Owner, 18 Sep 2026): the access row travels inside the header */
   var space = document.querySelector('.hd-space');
-  document.body.prepend(header, access);
+  document.body.prepend(header);
   if (space) space.remove();
 
   /* sync content offset with the real header height (target ≈117px desktop) */

@@ -276,13 +276,20 @@ function renderAccess() {
   ensureStyle();
   const header = document.querySelector('header.hd'); if (!header) return;
   let el = document.querySelector('[data-access]');
-  if (!el) { el = document.createElement('p'); el.className = 'hd-access'; el.setAttribute('data-access', ''); header.insertAdjacentElement('afterend', el); }
+  if (!el) { el = document.createElement('p'); el.className = 'hd-access'; el.setAttribute('data-access', ''); }
+  /* ONE sticky shell: the line lives INSIDE the header so header + account access scroll together */
+  if (el.parentElement !== header) { if (typeof header.appendChild === 'function') header.appendChild(el); else if (header.insertAdjacentElement) header.insertAdjacentElement('beforeend', el); }
   const a = AUTH.get(), ok = !!(a && AUTH.valid());
   el.setAttribute('data-state', ok ? 'in' : 'out');
   el.innerHTML = ok
-    ? '<span class="on">Signed in · ' + esc(a.preferredName || a.fullName || 'you') + '</span><span class="hd-access-do"><a href="' + hrefOf('your-journey.html') + '">My Trip</a><button type="button" class="hd-access-out" data-access-out>Sign out</button></span>'
+    ? '<span class="on">Signed in · ' + esc(a.preferredName || a.fullName || 'you') + '</span><span class="hd-access-do"><a href="' + hrefOf('your-journey.html') + '" data-access-nav="trip">My Trip</a><a href="' + hrefOf('cart.html') + '" data-access-nav="bag">My Bag</a><a href="' + hrefOf('about-you.html') + '" data-access-nav="profile">My Profile</a><button type="button" class="hd-access-out" data-access-out>Sign out</button></span>'
     : '<span>Not signed in</span><span class="hd-access-do"><a href="' + gateUrl('') + '">Open your invitation</a></span>';
   const out = el.querySelector('[data-access-out]'); if (out) out.addEventListener('click', () => { GUEST.leave(); LOC.replace(hrefOf('invitation.html')); });
+  publishShellHeight(header);
+}
+/* the shell's real height, for everything that sticks below it (the step bar) and for anchor scrolling */
+function publishShellHeight(header) {
+  try { const h = header || document.querySelector('header.hd'); if (!h || !document.documentElement.style) return; document.documentElement.style.setProperty('--hd-h', h.offsetHeight + 'px'); if (!publishShellHeight.wired && typeof window.addEventListener === 'function') { publishShellHeight.wired = true; window.addEventListener('resize', () => publishShellHeight()); } } catch (e) {}
 }
 function esc(t) { return String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
 /* every link to a private surface leads to the invitation page while nobody is signed in */

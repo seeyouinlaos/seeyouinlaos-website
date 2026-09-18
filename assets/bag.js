@@ -44,19 +44,19 @@ B.bar=function(){
 if(document.querySelector('.jbar'))return;
 var css=document.createElement('style');
 css.textContent='.jbar{position:fixed;left:0;right:0;bottom:0;z-index:55;background:#FCFAF6;border-top:1px solid #DAD9D7;padding:12px 20px calc(12px + env(safe-area-inset-bottom));display:none;transform:translateY(100%);transition:transform .26s cubic-bezier(.4,0,.2,1)}'+
-'.jbar.on{display:block}.jbar.in{transform:none}body.jbar-on{padding-bottom:118px}'+
+'.jbar.on{display:block}.jbar.in{transform:none}body.jbar-on{padding-bottom:92px}'+
 '.jb-t{transition:opacity .2s}.jb-t.tick{opacity:.35}'+
 '@media (prefers-reduced-motion:reduce){.jbar,.jb-t{transition:none}}'+
 '.jb-in{max-width:640px;margin:0 auto;display:flex;align-items:baseline;gap:12px}'+
-'.jb-nav{max-width:640px;margin:8px auto 0;display:flex;gap:18px;align-items:baseline}.jb-nav a,.jb-nav button{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#6B6964;text-decoration:none;background:none;border:0;padding:4px 0;cursor:pointer;min-height:24px}.jb-nav a.on{color:#313131}.jb-top{margin-left:auto;color:#313131;visibility:hidden}.jb-top.show{visibility:visible}'+
+'.jb-nav{max-width:640px;margin:0 auto;display:flex;justify-content:flex-end;min-height:0}.jb-nav a,.jb-nav button{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#6B6964;text-decoration:none;background:none;border:0;padding:4px 0;cursor:pointer;min-height:24px}.jb-nav a.on{color:#313131}.jb-top{margin-left:auto;color:#313131;visibility:hidden}.jb-top.show{visibility:visible}'+
 '.jb-l{font-size:10px;letter-spacing:2.2px;text-transform:uppercase;color:#6B6964}'+
 '.jb-t{font-family:"PP Editorial Old",serif;font-size:19px;margin-left:auto}'+
 '.jb-a{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#313131;text-decoration:none;border-bottom:1px solid #313131;padding:6px 0 3px;margin-left:16px}';
 document.head.appendChild(css);
 var el=document.createElement('div');el.className='jbar';
 el.innerHTML='<div class="jb-in"><span class="jb-l">My Bag</span><span class="jb-t"></span><a class="jb-a" href="cart.html" data-bag-view>Open My Bag</a></div>'+
- /* ACCOUNT NAVIGATION (Owner, 17 Sep 2026): My Trip · My Bag · My Profile · Sign out stay reachable while scrolling — on this one layer, never a second bar */
- '<div class="jb-nav"><a href="your-journey.html" data-nav="trip">My Trip</a><a href="cart.html" data-nav="bag">My Bag</a><a href="about-you.html" data-nav="profile">My Profile</a><button type="button" data-nav="out">Sign out</button><button type="button" class="jb-top" data-nav="top" aria-label="Back to top">Top ↑</button></div>';
+ /* the account surfaces (My Trip · My Bag · My Profile · Sign out) live in the sticky header shell (Owner, 18 Sep 2026); this layer is the Bag summary and the way back to the top */
+ '<div class="jb-nav"><button type="button" class="jb-top" data-nav="top" aria-label="Back to top">Top ↑</button></div>';
 document.body.appendChild(el);
 /* the bag opens the bag; Review & Send is reached from there once the steps allow it */
 function dest(){return 'cart.html'}
