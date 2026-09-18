@@ -259,7 +259,7 @@ function build() {
 /* the private surfaces: the personal planner and its steps, the bag, the tickets, the room and transport
    planning pages (rates, live inventory, fares, adds). The Journey (journeys.html) is public editorial —
    its private fragments are marked data-private and stay out of a signed-out page (assets/invite-early.js). */
-const PRIVATE = /^(?:\.\/)?(your-journey|cart|tickets|room|transport|wedding|wedding-preparation|about-you|review)(?:\.html)?(?=$|[?#])/;
+const PRIVATE = /^(?:\.\/)?(your-journey|cart|tickets|room|transport|wedding|wedding-preparation|about-you|profile|review)(?:\.html)?(?=$|[?#])/;
 const LOC = typeof location !== 'undefined' ? location : { pathname: '/', search: '', hash: '', replace() {} };
 const cleanUrls = !/\.html$/i.test(LOC.pathname) && LOC.pathname.split('/').pop() !== '';
 const hrefOf = (file) => (cleanUrls ? file.replace(/\.html(?=[?#]|$)/, '') : file);
@@ -268,7 +268,9 @@ function isPrivate(href) { if (!href) return false; const h = String(href).trim(
 function safeNext(v) { return /^[a-z0-9-]+(?:\.html)?(?:\?[\w=&%.-]*)?(?:#[\w-]*)?$/i.test(v || '') ? v : ''; }
 function gateUrl(next) { return hrefOf('invitation.html') + '?open=1' + (safeNext(next) ? '&next=' + encodeURIComponent(next) : ''); }
 function toGate(next) { LOC.replace(gateUrl(next)); }
-/* the status line under every header: signed in · name · Your Journey | not signed in · Open your invitation.
+/* ACCOUNT ROW (Owner, 18 Sep 2026): MY TRIP · MY PROFILE · SIGN OUT under the sticky header — the bag icon IS My Bag (badge, always opens
+   My Bag), so the row never repeats it; My Profile is the account dashboard (profile.html), never a step of the gated flow.
+   the status line under every header: signed in · name · Your Journey | not signed in · Open your invitation.
    Its space is reserved before this module runs: the line sits in the markup of every page (assets/recon.js
    places it with the header it builds), styled by assets/aman.css — this only fills it, so nothing shifts. */
 function renderAccess() {
@@ -282,7 +284,7 @@ function renderAccess() {
   const a = AUTH.get(), ok = !!(a && AUTH.valid());
   el.setAttribute('data-state', ok ? 'in' : 'out');
   el.innerHTML = ok
-    ? '<span class="on">Signed in · ' + esc(a.preferredName || a.fullName || 'you') + '</span><span class="hd-access-do"><a href="' + hrefOf('your-journey.html') + '" data-access-nav="trip">My Trip</a><a href="' + hrefOf('cart.html') + '" data-access-nav="bag">My Bag</a><a href="' + hrefOf('about-you.html') + '" data-access-nav="profile">My Profile</a><button type="button" class="hd-access-out" data-access-out>Sign out</button></span>'
+    ? '<span class="on">Signed in · ' + esc(a.preferredName || a.fullName || 'you') + '</span><span class="hd-access-do"><a href="' + hrefOf('your-journey.html') + '" data-access-nav="trip">My Trip</a><a href="' + hrefOf('profile.html') + '" data-access-nav="profile">My Profile</a><button type="button" class="hd-access-out" data-access-out>Sign out</button></span>'
     : '<span>Not signed in</span><span class="hd-access-do"><a href="' + gateUrl('') + '">Open your invitation</a></span>';
   const out = el.querySelector('[data-access-out]'); if (out) out.addEventListener('click', () => { GUEST.leave(); LOC.replace(hrefOf('invitation.html')); });
   publishShellHeight(header);

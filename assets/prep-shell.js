@@ -35,7 +35,7 @@
     { n: '02', key: 'journey',    label: 'My Trip',               file: 'your-journey.html' },
     { n: '03', key: 'wedding',    label: 'The Wedding',           file: 'wedding.html' },
     { n: '04', key: 'preparation',label: 'Wedding Preparation',   file: 'wedding-preparation.html' },
-    { n: '05', key: 'about',      label: 'My Profile',             file: 'about-you.html' },
+    { n: '05', key: 'about',      label: 'About You',             file: 'about-you.html' },
     { n: '06', key: 'review',     label: 'Review & Send',         file: 'review.html' }
   ];
 
@@ -207,7 +207,6 @@
         if (window.SIYL_INVITE) toGate(); else document.addEventListener('siyl:invite-ready', toGate, { once: true });
       }
       bar.innerHTML = '<div class="prep-bar-in"><div class="prep-bar-l">' +
-        '<p class="prep-eyebrow">Private</p>' +
         '<p class="prep-step">Open your invitation to begin</p>' +
         '</div></div>';
       layer.classList.remove('on');
@@ -216,9 +215,11 @@
 
     var list = steps(), cur = list.filter(function (s) { return s.key === STEP.key; })[0];
     var others = G().others ? G().others() : [];
+    /* THE STEP HEADER, calm (Owner, 18 Sep 2026): 1 the step and its title · 2 the guest and their party · 3 the draft / sent
+     * state · 4 Save My Progress · 5 View all steps — one system on every step; no eyebrow, the operational state never
+     * outweighs the title */
     bar.innerHTML = '<div class="prep-bar-in">' +
       '<div class="prep-bar-l">' +
-        '<p class="prep-eyebrow">Private</p>' +
         '<p class="prep-step"><b>' + STEP.n + ' / 06</b>' + STEP.label + '</p>' +
         '<p class="prep-who"><b>' + esc(nameOf(m)) + '</b>' + (others.length ? ' · Your party · ' + esc(partyNames()) : '') + '</p>' +
         /* once Guest Relations has confirmed, a change made here is not a
@@ -228,10 +229,11 @@
             '<b>Changes here are not sent</b>' +
             '<a href="mailto:guest.relation.seeyouinlaos@gmail.com?subject=Journey%20' + encodeURIComponent(p.invitationId) + '">Write to Guest Relations to change anything</a></p>' : '') +
       '</div>' +
-      '<div class="prep-bar-r"><button type="button" class="prep-all" aria-expanded="' + (indexOpen ? 'true' : 'false') + '" aria-controls="prep-steps">View all steps</button></div>' +
       '</div>' +
-      /* DRAFT · SENT · CHANGES NOT YET SENT and SAVE MY PROGRESS on every step (Owner, 16 Sep 2026) — painted by the draft module */
-      '<div class="prep-save" data-prep-save></div>';
+      /* DRAFT · SENT · CHANGES NOT YET SENT and SAVE MY PROGRESS on every step (Owner, 16 Sep 2026) — painted by the draft module;
+       * View all steps closes the row */
+      '<div class="prep-bar-foot"><div class="prep-save" data-prep-save></div>' +
+      '<div class="prep-bar-r"><button type="button" class="prep-all" aria-expanded="' + (indexOpen ? 'true' : 'false') + '" aria-controls="prep-steps">View all steps</button></div></div>';
     bar.appendChild(layer);
     if (window.SIYL_DRAFT) SIYL_DRAFT.mount(bar.querySelector('[data-prep-save]'));
 

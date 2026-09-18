@@ -27,8 +27,8 @@
 const GR_EMAIL = 'guest.relation.seeyouinlaos@gmail.com';
 const MAX_BODY = 64 * 1024; // 64 KB — structured registrations are small
 
+/* ONE LIVE SITE (Owner, 18 Sep 2026): the Worker is the only runtime; the GitHub Pages mirror is retired and no longer an allowed origin */
 const ALLOWED_ORIGINS = [
-  'https://seeyouinlaos.github.io',
   'https://seeyouinlaos-website.suthep-hrg.workers.dev',
 ];
 function corsHeaders(request) {
@@ -36,7 +36,7 @@ function corsHeaders(request) {
   if (!ALLOWED_ORIGINS.includes(origin)) return {};
   return {
     'access-control-allow-origin': origin,
-    'access-control-allow-methods': 'GET, POST, OPTIONS',
+    'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
     /* the document endpoint authenticates with the invitation the client
      * already holds, so those headers must survive the preflight */
     'access-control-allow-headers': 'content-type, x-invitation, x-guest, x-kind, x-filename, x-siyl-auth',
@@ -127,6 +127,13 @@ export default {
     if (url.pathname === '/api/contact') {
       if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders(request) });
       return handleContact(request, env);
+    }
+    /* THE PROFILE PHOTO (Owner, 18 Sep 2026 · MY PROFILE): one small image per authenticated guest, stored under the
+       guest's own invitation in the register store — read, replaced and removed only with that guest's bearer; there is
+       no public URL, no listing, and the bytes never enter the repository. */
+    if (url.pathname === '/api/profile/photo') {
+      if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders(request) });
+      return handleProfilePhoto(request, env);
     }
     /* THE JOURNEY DRAFT (Owner, 16 Sep 2026 · FINAL QUICKFIX): ONE server-side draft per authenticated guest — the complete
        journey (contact, answers, bag, wedding, documents state, sent stamp) keyed by the invitation; the browser is a cache.
@@ -495,6 +502,37 @@ async function handleContact(request, env) {
   const contact = { invitationId: who.invitationId, guestId: who.guestId, email, phone, at: new Date().toISOString() };
   try { await env.REG_KV.put(contactKey(who.invitationId), JSON.stringify(contact), { metadata: { invitationId: who.invitationId, at: contact.at } }); } catch (e) { return json({ ok: false, error: 'contact could not be stored' }, 503, corsHeaders(request)); }
   return json({ ok: true, invitationId: who.invitationId, contact: { email, phone, at: contact.at } }, 200, corsHeaders(request));
+}
+/* the profile photo: GET returns the bytes to the owner (or 404), PUT/POST stores a JPEG · PNG · WebP of at most
+   MAX_PHOTO bytes (the client already reduces the picture to a small square), DELETE removes it — the guest's own only */
+const MAX_PHOTO = 1024 * 1024; // 1 MB — a reduced square portrait, never an original
+const PHOTO_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+const photoKey = (invitationId) => 'avatar:' + invitationId;
+async function handleProfilePhoto(request, env) {
+  const who = await identify(request, env);
+  if (!who) return json({ ok: false, error: 'unauthorised' }, 401, corsHeaders(request));
+  if (!env.REG_KV) return json({ ok: false, error: 'photo storage is not enabled yet', enabled: false }, 503, corsHeaders(request));
+  const key = photoKey(who.invitationId);
+  if (request.method === 'GET') {
+    let got = null; try { got = await env.REG_KV.getWithMetadata(key, { type: 'arrayBuffer' }); } catch (e) { got = null; }
+    if (!got || !got.value || !got.value.byteLength) return json({ ok: false, error: 'no photo' }, 404, corsHeaders(request));
+    const meta = got.metadata || {};
+    return new Response(got.value, { status: 200, headers: Object.assign({ 'content-type': PHOTO_TYPES.includes(meta.type) ? meta.type : 'image/jpeg',
+      'cache-control': 'private, no-store', 'x-photo-at': meta.at || '' }, corsHeaders(request)) });
+  }
+  if (request.method === 'DELETE') {
+    try { await env.REG_KV.delete(key); } catch (e) { return json({ ok: false, error: 'photo could not be removed' }, 503, corsHeaders(request)); }
+    return json({ ok: true, removed: true }, 200, corsHeaders(request));
+  }
+  if (request.method !== 'PUT' && request.method !== 'POST') return json({ ok: false, error: 'method not allowed' }, 405, corsHeaders(request));
+  const type = (request.headers.get('content-type') || '').split(';')[0].trim();
+  if (!PHOTO_TYPES.includes(type)) return json({ ok: false, error: 'unsupported file type' }, 415, corsHeaders(request));
+  const bytes = await request.arrayBuffer();
+  if (!bytes.byteLength) return json({ ok: false, error: 'empty file' }, 400, corsHeaders(request));
+  if (bytes.byteLength > MAX_PHOTO) return json({ ok: false, error: 'file too large' }, 413, corsHeaders(request));
+  const at = new Date().toISOString();
+  try { await env.REG_KV.put(key, bytes, { metadata: { type, at, guestId: who.guestId, bytes: bytes.byteLength } }); } catch (e) { return json({ ok: false, error: 'photo could not be stored' }, 503, corsHeaders(request)); }
+  return json({ ok: true, at, bytes: bytes.byteLength, type }, 200, corsHeaders(request));
 }
 /* THE IDENTITY CHAIN: authenticated guest → canonical guestId → the contact email persisted on the server → the recipient.
    The server-side contact wins; a valid email carried by the journey itself is accepted once and persisted (so the next

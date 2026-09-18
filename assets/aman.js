@@ -85,7 +85,8 @@
         '<a href="mailto:guest.relation.seeyouinlaos@gmail.com">guest.relation.seeyouinlaos@gmail.com</a>' +
         '<a href="invitation.html">Your invitation</a>' +
         '<a href="you.html">You &amp; your party</a>' +
-        '<a href="about-you.html">About you</a>' +
+        '<a href="profile.html">My Profile</a>' +
+        '<a href="about-you.html">About You</a>' +
         '<a href="wedding-preparation.html#dress-code">Dress code</a>' +
         '<a href="review.html">Review &amp; Send</a>' +
       '</div>';

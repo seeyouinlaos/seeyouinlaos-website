@@ -241,7 +241,7 @@ body.p-drawer-open .p-drawer { opacity: 1; }
 
 /* ============================================================ THE SHELL */
 .prep-bar { position: sticky; top: var(--hd-h, 0px); z-index: 59; background: var(--p-paper); border-bottom: 1px solid var(--p-line); }
-.prep-bar-in { box-sizing: border-box; max-width: var(--p-frame); margin: 0 auto; padding: var(--s4) var(--p-gut); display: flex; align-items: flex-start; gap: var(--s4); }
+.prep-bar-in { box-sizing: border-box; max-width: var(--p-frame); margin: 0 auto; padding: var(--s4) var(--p-gut) var(--s2); display: flex; align-items: flex-start; gap: var(--s4); }
 .prep-bar-l { min-width: 0; flex: 1; }
 /* Perceptual order in the bar: the STEP first, the party and person second,
    the context and the secondary control quietly behind both. */
@@ -251,7 +251,16 @@ body.p-drawer-open .p-drawer { opacity: 1; }
 .prep-who { font-family: var(--f-ui); font-size: 11.5px; line-height: 1.6; color: var(--p-mute); margin-top: var(--s2); }
 .prep-who b { font-weight: 400; color: var(--p-ink); }
 .prep-who button { display: inline-flex; align-items: flex-end; box-sizing: border-box; min-height: var(--p-tap); font: inherit; font-size: 10px; letter-spacing: 1.8px; text-transform: uppercase; color: var(--p-ink); background: none; border: 0; border-bottom: 1px solid var(--p-ink); padding: 0 0 2px; margin: calc(-1 * var(--s3)) 0 calc(-1 * var(--s3)) var(--s2); cursor: pointer; vertical-align: baseline; }
-.prep-bar-r { flex: none; }
+.prep-bar-r { flex: none; margin-left: auto; }
+/* the step header's closing row (Owner, 18 Sep 2026): the draft state and SAVE MY PROGRESS on the left, VIEW ALL STEPS on the right — one quiet line */
+.prep-bar-foot { box-sizing: border-box; max-width: var(--p-frame); margin: 0 auto; padding: 0 var(--p-gut) var(--s3); display: grid; grid-template-columns: 1fr auto; grid-template-areas: "state time" "save all"; align-items: center; gap: var(--s2) var(--s4); }
+.prep-bar-foot:has(.prep-send-upd) { grid-template-areas: "state time" "upd upd" "save all"; }
+.prep-bar-foot > .prep-save { display: contents; }   /* the draft module's four pieces take their places on the foot grid: the state and the saved time on one quiet line, SAVE MY PROGRESS and VIEW ALL STEPS on the next */
+.prep-bar-foot .prep-state { grid-area: state; }
+.prep-bar-foot .prep-send-upd { grid-area: upd; justify-self: start; }
+.prep-bar-foot .prep-save-btn { grid-area: save; justify-self: start; }
+.prep-bar-foot .prep-save-state { grid-area: time; justify-self: end; text-align: right; min-height: 0; white-space: nowrap; }
+.prep-bar-foot .prep-bar-r { grid-area: all; justify-self: end; margin: 0; }
 /* C · ANSWERING FOR — said in words, at reading size, on its own line.
    Not a colour, not a tab state: a guest who is completing something for
    another named person is told so every time the bar repaints. */
@@ -815,8 +824,8 @@ body.seatbar-on .jbar { display: none; }
 /* ---- the draft state and SAVE MY PROGRESS (Owner, 16 Sep 2026) ---- */
 .prep-save { box-sizing: border-box; max-width: var(--p-frame); margin: 0 auto; padding: 0 var(--p-gut) var(--s3); display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2) var(--s4); }
 .prep-state { margin: 0; font-family: var(--f-ui); font-size: 8.5px; letter-spacing: 1.6px; text-transform: uppercase; color: var(--p-mute); }
-.prep-state.is-sent b { color: var(--p-ink); font-weight: 500; }
-.prep-state.is-changed b { color: #8A5A55; font-weight: 500; }
+.prep-state.is-sent b { color: var(--p-ink); font-weight: 400; }
+.prep-state.is-changed b { color: #8A5A55; font-weight: 400; }
 .prep-state.is-draft b { font-weight: 400; }
 .prep-send-upd { font-family: var(--f-ui); font-size: 8.5px; letter-spacing: 1.6px; text-transform: uppercase; color: #F3EEE7; background: #313131; text-decoration: none; padding: 10px 14px; min-height: 36px; display: inline-flex; align-items: center; }
 .prep-save-btn { font-family: var(--f-ui); font-size: 8.5px; letter-spacing: 1.6px; text-transform: uppercase; color: var(--p-ink); background: none; border: 1px solid var(--p-ink); padding: 10px 14px; min-height: 36px; cursor: pointer; -webkit-tap-highlight-color: transparent; }

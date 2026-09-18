@@ -1,0 +1,157 @@
+[
+ {
+  "id": "4-sticky-row",
+  "ok": true,
+  "d": "Signed in · AdaMy TripMy ProfileSign out · trip=your-journey,profile=profile"
+ },
+ {
+  "id": "5-no-textual-my-bag",
+  "ok": true,
+  "d": "Signed in · AdaMy TripMy ProfileSign out"
+ },
+ {
+  "id": "3-bag-icon-is-my-bag",
+  "ok": true,
+  "d": "cart.html|My Bag"
+ },
+ {
+  "id": "calm-step-header",
+  "ok": true,
+  "d": "{\"text\":\"01 / 06Your Invitation Ada · Your party · Ada & Ben MY TRIP · SAVED AS DRAFT SAVE MY PROGRESS VIEW ALL STEPS\",\"eyebrow\":false,\"order\":\"prep-step>prep-who>prep-state>prep-save-btn>prep-all\",\"h\":156}"
+ },
+ {
+  "id": "1-profile-no-redirect-nothing-complete",
+  "ok": true,
+  "d": "{\"url\":\"http://127.0.0.1:8788/profile\",\"h1\":\"My Profile\",\"gate\":false,\"identity\":true} · need 25 first invitation.html#p-email"
+ },
+ {
+  "id": "7-readiness-untouched-by-profile",
+  "ok": true,
+  "d": "25 → 25"
+ },
+ {
+  "id": "2-state-nothing-complete",
+  "ok": true,
+  "d": "SAVED AS DRAFT Your trip is not sent yet 25 things are still needed, first: Email address (01 · Your Invitation). CONTINUE YOUR TRIP OPEN MY TRIP"
+ },
+ {
+  "id": "6a-about-you-still-gated",
+  "ok": true,
+  "d": "{\"url\":\"http://127.0.0.1:8788/invitation?from=about#p-email\",\"gate\":\"05 · About You opens once this is complete.\"}"
+ },
+ {
+  "id": "3-bag-icon-opens-cart",
+  "ok": true,
+  "d": "http://127.0.0.1:8788/cart"
+ },
+ {
+  "id": "2-state-partly-complete",
+  "ok": true,
+  "d": "HOW WE REACH YOU ada.test@example.org +66 81 000 0000 EDIT CONTACT DETAILS"
+ },
+ {
+  "id": "8-held-room-on-profile",
+  "ok": true,
+  "d": "21 – 24 FEB U Sathorn Bangkok 21 – 24 February 2027 · Superior Room With Garden View YOUR PLACE IS HELD · ROOM B · YOU · 1 PLACE AVAILABLE USD 192 · your cost VIEW DETAILS CHANGE IN MY BAG · badge 1"
+ },
+ {
+  "id": "8-no-second-total",
+  "ok": true,
+  "d": "the profile carries no total of its own"
+ },
+ {
+  "id": "2-state-complete",
+  "ok": true,
+  "d": "SAVED AS DRAFT Your trip is not sent yet Everything needed is complete. Send it to Guest Relations whenever you are read · COMPLETE About You Your food allergy answer, a few questions the kitchens and th"
+ },
+ {
+  "id": "8-seats-and-tickets",
+  "ok": true,
+  "d": "seat:ceremony:SEAT TICKET · VOW CEREMONY HELD IN YOUR NAME Seat E5 Sunday, | seat:dinner:SEAT TICKET · WEDDING DINNER HELD IN YOUR NAME Seat A5 Sunda · SUNDAY, 28 FEBRUARY 2027 · 15:30 Vow Ceremony Souphattra Heritage, Vientiane · E5 · Right block · row 5 SEAT E5 · HELD I"
+ },
+ {
+  "id": "6b-about-you-is-step-05",
+  "ok": true,
+  "d": "05 / 06About You Ada · Your party · Ada & Ben MY TRIP · SAVED AS DRAFT SAVE MY PROGRESS SAVED · 12:4 · h1 About You"
+ },
+ {
+  "id": "6c-review-opens-when-about-complete",
+  "ok": true,
+  "d": "http://127.0.0.1:8788/review"
+ },
+ {
+  "id": "6d-review-locked-when-about-incomplete",
+  "ok": true,
+  "d": "http://127.0.0.1:8788/about-you?from=review#photo"
+ },
+ {
+  "id": "1-profile-no-redirect-with-missing-step",
+  "ok": true,
+  "d": "http://127.0.0.1:8788/profile"
+ },
+ {
+  "id": "photo-none-yet",
+  "ok": true,
+  "d": "GET 404"
+ },
+ {
+  "id": "photo-upload",
+  "ok": true,
+  "d": "Photo saved · 18 September 2026. · url(\"blob:http://127.0.0.1:8788/d8148818"
+ },
+ {
+  "id": "photo-stored-jpeg-private",
+  "ok": true,
+  "d": "GET 200 image/jpeg"
+ },
+ {
+  "id": "photo-survives-reload",
+  "ok": true,
+  "d": "CHANGE PHOTO REMOVE PHOTO · bg url(\"blob:http://127.0.0.1:8788/f6fca938-a8fc-413e"
+ },
+ {
+  "id": "photo-not-visible-to-another-guest",
+  "ok": true,
+  "d": "T003 GET 404"
+ },
+ {
+  "id": "photo-removed",
+  "ok": true,
+  "d": "GET 404"
+ },
+ {
+  "id": "photo-limits",
+  "ok": true,
+  "d": "415,413,401"
+ },
+ {
+  "id": "9-sign-out",
+  "ok": true,
+  "d": "http://127.0.0.1:8788/invitation · auth null"
+ },
+ {
+  "id": "profile-private-when-signed-out",
+  "ok": true,
+  "d": "http://127.0.0.1:8788/invitation?open=1&next=profile"
+ },
+ {
+  "id": "8-fixed-arrangement-not-in-bag",
+  "ok": true,
+  "d": "BANGKOK · 21 – 24 FEBRUARY 2027 Sathorn Penthouse Bangkok Room A · Elegant 6BR Sathon Penthouse · 3 nights · You · Suthep ARRANGED FOR YOU FIXED ARRANGEMENT · N · {\"bag\":0,\"total\":0,\"badge\":\"\"}"
+ },
+ {
+  "id": "width-320",
+  "ok": true,
+  "d": "no horizontal overflow: profile true · my trip true"
+ },
+ {
+  "id": "width-834",
+  "ok": true,
+  "d": "no horizontal overflow: profile true · my trip true"
+ },
+ {
+  "id": "width-1440",
+  "ok": true,
+  "d": "no horizontal overflow: profile true · my trip true"
+ }
+]

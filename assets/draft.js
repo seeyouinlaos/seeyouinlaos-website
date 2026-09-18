@@ -187,7 +187,7 @@
     words: function () {
       var s = state.submission;
       if (!s || s.submissionStatus === 'draft') return { key: 'draft', label: 'Saved as draft', line: 'My Trip · saved as draft', cta: null };
-      if (s.hasUnsentChanges) return { key: 'changed', label: 'Changes saved · not yet sent to Guest Relations', line: 'CHANGES SAVED · NOT YET SENT TO GUEST RELATIONS', cta: 'Send Updated Trip' };
+      if (s.hasUnsentChanges) return { key: 'changed', label: 'Changes saved · not yet sent to Guest Relations', line: 'Changes saved · not yet sent to Guest Relations', cta: 'Send Updated Trip' };
       return { key: 'sent', label: 'Sent to Guest Relations', line: 'Sent to Guest Relations · Reference ' + s.submissionId, cta: null };
     },
     /* the SAVE MY PROGRESS control: paint it into a host element */

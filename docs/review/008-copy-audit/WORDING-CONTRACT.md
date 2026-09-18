@@ -4,7 +4,7 @@ Authority: PROJECT_MASTER_BRIEF.md §9 (information architecture), §10 (Bag and
 
 ## The one rule
 
-**Surface names are proper names; prose is second person.** The five private surfaces and the one public surface are always written with their capitalised name (My Trip, My Bag, My Profile, Review & Send, Arranged for you, The Journey). In sentences a guest reads about themselves the same things are "your trip", "your bag", "your profile". "Journey" (lower case) is reserved for the shared, editorial trip that everyone travels — the thing The Journey tells; the guest's own plan is a **trip**.
+**Surface names are proper names; prose is second person.** The private surfaces and the one public surface are always written with their capitalised name (My Trip, My Bag, My Profile, About You, Review & Send, Arranged for you, The Journey). In sentences a guest reads about themselves the same things are "your trip", "your bag", "your profile". "Journey" (lower case) is reserved for the shared, editorial trip that everyone travels — the thing The Journey tells; the guest's own plan is a **trip**.
 
 ## Names
 
@@ -12,10 +12,12 @@ Authority: PROJECT_MASTER_BRIEF.md §9 (information architecture), §10 (Bag and
 |---|---|---|---|
 | The editorial story of the whole trip (public) | **The Journey** · in prose "the journey" | journeys.html, menus, footers, "Back to The Journey" | Your Journey (public), itinerary (as a label), Journey planner |
 | The guest's private workspace | **My Trip** · in prose "your trip" | your-journey.html h1, step 02, bar, menu, header access link | Your Journey, your journey (private prose), Journey planner, journey (for the guest's own plan) |
+| The account row under the sticky header (Owner, 18 Sep 2026) | **MY TRIP · MY PROFILE · SIGN OUT** — the bag icon IS My Bag (badge, always opens My Bag) | every page, inside header.hd | a textual My Bag on the account row |
 | Fixed / prearranged items | **Arranged for you** (tracked label) · card line "Fixed arrangement · not part of your bag" | My Trip, My Bag, Review & Send, both emails | Reserved for…, hosted (unless the payer fact is hosted), USD 0 for a fixed item |
 | The guest's removable selections | **My Bag** · in prose "your bag" | cart.html h1, bar label, menu, footer, header icon aria-label | Your Journey (bag icon), Your bag (label), Journey bag, cart, basket |
 | The final review and transmission | **Review & Send** | step 06, cart link, menus | Review your journey, Review your journey → opens…, Submit |
-| The guest's own information | **My Profile** · in prose "your profile" | about-you.html h1, step 05, bar, menu | About You (as the step name; the page may keep its questions), Account |
+| The guest's answers (step 05) | **About You** · canonical "05 / 06 · About You" | about-you.html h1, step 05, bar, menu, the profile's "Edit About You" | My Profile (as the step name — retired 18 Sep 2026), Account |
+| The guest's account dashboard | **My Profile** · in prose "your profile" | profile.html h1, the sticky account row (MY TRIP · MY PROFILE · SIGN OUT), menu | About You (for the account), Account, Dashboard |
 | The people who receive the trip | **Guest Relations** | everywhere | the team, the Owner, the hosts (for operational contact), support |
 | The guest's cost line | **Your cost** (per item) · **Your total** (the Bag) · **USD 0** when empty | product pages, My Bag, Review & Send, emails | Journey cost, journey costs, Your Costs (plural label), price (as a label for the guest's share) |
 

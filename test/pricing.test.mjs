@@ -619,7 +619,7 @@ test('ABOUT YOU is one required question, six favourites and one required acknow
   /* three layers, and a correction never destroys the invitation's own value — every entry is signed by the guest */
   assert.match(g, /r\.history\.push\(\{ field: field, from: from, to: v, at: stamp\(\), by: me\.guestId \}\)/);
   const about = readFileSync(join(ROOT, 'about-you.html'), 'utf8');
-  assert.match(about, /<h1 class="t-d1">My Profile<\/h1>/);
+  assert.match(about, /<h1 class="t-d1">About You<\/h1>/);
   assert.match(about, /G\.PROFILE\.forEach/);
   assert.match(about, /id="allergy-text" data-allergy-text aria-required="true"/);
   assert.doesNotMatch(about, /Who are you answering for\?/);

@@ -1,0 +1,239 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>My Profile · See You In Laos</title>
+<style>
+@font-face{font-family:'PP Editorial Old';src:url('assets/fonts/PPEditorialOld-Ultralight.otf') format('opentype');font-weight:200;font-display:swap}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;font-weight:300;font-size:14px;line-height:1.6}
+.hd{display:grid;grid-template-columns:44px 1fr 44px;align-items:center;padding:14px 20px}
+.hb{width:44px;height:44px;display:flex;flex-direction:column;justify-content:center;gap:5px;background:none;border:0;cursor:pointer}.hb i{display:block;width:20px;height:1.4px;background:#313131}
+.bd{font-family:'PP Editorial Old',serif;font-weight:200;font-size:19px;text-align:center}.bd .dot{color:#8A5A55}
+.bag{width:44px;height:44px;display:flex;align-items:center;justify-content:center;position:relative;color:#313131;text-decoration:none}.bag .bgi{display:block}
+.bb{position:absolute;top:1px;right:0;min-width:14px;height:14px;padding:0 3px;background:#313131;color:#F3EEE7;font-size:8.5px;line-height:1;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;display:none;align-items:center;justify-content:center;box-shadow:0 0 0 2px #F3EEE7;border-radius:1px}
+/* MY PROFILE — the account dashboard's own grammar, on the preparation tokens: a round portrait, framed 5:4 cards on a rail (a grid from tablet width), ticket cards */
+.pf-id-row{display:flex;gap:20px;align-items:center;min-width:0}
+.pf-avatar{flex:none;width:96px;height:96px;border-radius:50%;background:#E7E3DB center/cover no-repeat;display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:inset 0 0 0 1px #DAD9D7}
+.pf-avatar .pf-ini{font-family:'PP Editorial Old',serif;font-weight:200;font-size:34px;line-height:1;color:#313131;letter-spacing:.02em}
+.pf-avatar.has .pf-ini{display:none}
+.pf-id-body{min-width:0;flex:1}
+.pf-id-body>*+*{margin-top:4px}
+.pf-note{color:#6B6964}
+.pf-rail{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding-bottom:4px;scrollbar-width:none}   /* measured (Aman): 318 of 342 inside the 24 px gutters, the next card peeks */
+.pf-rail::-webkit-scrollbar{display:none}
+.pf-rail>*{flex:0 0 calc(100% - 24px);max-width:340px;scroll-snap-align:start}
+.pf-card{display:flex;flex-direction:column;background:#FCFAF6;border:1px solid #DAD9D7;min-width:0}
+.pf-card.on{border-color:#313131}
+.pf-card .pf-img{display:block;width:100%;aspect-ratio:5/4;background:#E7E3DB center/cover no-repeat}
+.pf-card .pf-body{padding:16px 20px 20px;display:flex;flex-direction:column;gap:6px;flex:1;min-width:0}
+.pf-card .pf-body .t-h1{font-size:20px}
+.pf-card .pf-body .p-actions{margin-top:auto;padding-top:10px}
+.pf-cost{font-family:'PP Editorial Old',serif;font-weight:200;font-size:20px;line-height:1.2;color:#313131}
+.pf-tickets{display:grid;gap:16px}
+.pf-rows>p+p{margin-top:6px}
+.pf-rows .t-l1{display:inline-block;min-width:11em;line-height:1.6}
+@media(min-width:768px){.pf-rail{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px;overflow:visible}.pf-rail>*{flex:none;max-width:none}.pf-tickets{grid-template-columns:1fr 1fr}}
+@media(min-width:1024px){.pf-rail{grid-template-columns:repeat(3,1fr)}}
+</style>
+<link rel="stylesheet" href="assets/aman.css?v=3f5163d8"><link rel="stylesheet" href="assets/prep.css?v=aec95d5d"></head><body class="prep p-in">
+<header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="cart.html" aria-label="My Bag"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a><p class="hd-access" data-access data-state="out"><span>Not signed in</span><span class="hd-access-do"><a href="invitation.html?open=1">Open your invitation</a></span></p></header>
+<main class="prep-page" id="profile">
+<div class="prep-head">
+  <p class="t-l1" id="pf-own">My Profile</p>
+  <h1 class="t-d1">My Profile</h1>
+  <p class="t-b1 measure">Your account: who you are, how we reach you, and everything arranged in your name. Your trip itself is planned in My Trip; nothing here is a step.</p>
+</div>
+<div id="page"></div>
+</main>
+<script src="assets/bag.js?v=2a0c8152"></script>
+<script src="assets/shop-menu.js?v=75d5662d"></script>
+<script src="assets/aman.js?v=f5b4795c"></script>
+<script src="assets/rooms-data.js?v=08d91b2d"></script>
+<script src="assets/pricing.js?v=e864296d"></script>
+<script src="assets/guest.js?v=9be17c3a"></script>
+<script src="assets/draft.js?v=c2cce49e"></script>
+<script src="assets/temple.js?v=dfa289bc"></script>
+<script src="assets/rooms.js?v=6ad9f395"></script>
+<script src="assets/arranged.js?v=9786c070"></script>
+<script src="assets/stay.js?v=e1950ee9"></script>
+<script src="assets/seatlabels.js?v=4994e1f4"></script>
+<script src="assets/seating.js?v=76c2abde"></script>
+<script src="assets/confirm.js?v=15cc65d2"></script>
+<script src="assets/transport-data.js?v=f54e56e9"></script>
+<script src="assets/journey.js?v=e5c9ee3c"></script>
+<script src="assets/docs.js?v=7c1c7bfd"></script>
+<script src="assets/avatar.js?v=c80ea099"></script>
+<script type="module" src="assets/invite.mjs?v=e4f02808"></script>
+<script>
+/* ============================================================================
+   MY PROFILE (Owner, 18 Sep 2026) — the guest's account dashboard.
+   NOT a step of the gated flow: this page never mounts the step shell, never
+   redirects to a missing item and never counts towards readiness. It reads
+   what the other surfaces hold — identity, contact, the arrangements in the
+   guest's name (fixed arrangements, held rooms, travel, experiences, the
+   wedding and the seats), the tickets, the trip status, About You (step 05)
+   and the travel documents — and links to the surface where each is changed.
+   My Bag stays the one cart: nothing here adds, removes or re-totals a line.
+   ========================================================================== */
+(function(){
+var G=window.SIYL_GUEST,B=window.SIYL_BAG,J=window.SIYL_JOURNEY,P=window.SIYL_PRICE,ST=window.SIYL_STAY,U=window.SIYL_UNITS,S=window.SIYL_SEATS,C=window.SIYL_CONFIRM,D=window.SIYL_DOCS,DR=window.SIYL_DRAFT,T=window.SIYL_TEMPLE,AV=window.SIYL_AVATAR,A=window.SIYL_ARRANGED,page=document.getElementById('page');
+if(!G||!page)return;
+function esc(t){return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function gated(fn){if(window.SIYL_INVITE){SIYL_INVITE.require(fn)}
+else document.addEventListener('siyl:invite-ready',function(){SIYL_INVITE.require(fn)},{once:true})}
+function money(n){return 'USD '+Number(n).toLocaleString('en-US')}
+/* a moment in words — never an ISO stamp */
+function when(iso){try{var d=new Date(iso);if(isNaN(d))return '';return d.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})+' at '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}catch(e){return ''}}
+function day(iso){try{var d=new Date(iso);if(isNaN(d))return '';return d.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}catch(e){return ''}}
+/* ACCESS: the account is private — without a session the guest goes to the invitation page */
+gated(function(){});
+
+/* ---- imagery: the one source map of every property, the transport photography, the wedding venue ---- */
+function roomImg(stayKey,slug){var R=window.SIYL_ROOMS,st=R&&R[stayKey];if(!st||!st.rooms)return '';var r=st.rooms.filter(function(x){return x.slug===slug})[0];if(!r)return '';return r.cardImg||(r.gallery&&r.gallery.length?r.gallery[0][0]:'')||''}
+function hrefImg(href){var m=/stay=([^&#]+)&room=([^&#]+)/.exec(href||'');return m?roomImg(decodeURIComponent(m[1]),decodeURIComponent(m[2])):''}
+function lineImg(x){var t=B.thumb(x);if(t)return t;if(x.stay&&x.room)return roomImg(x.stay,x.room);var at=P&&P.locate?P.locate(x.id):null;if(at&&x.room)return roomImg(at.key,x.room);return ''}
+var IMG={ceremony:'assets/images/souphattra/heritage-courtyard-front.jpg',dinner:'assets/images/event/053-wedding-dinner-courtyard-from-above.jpg',temple:'assets/images/alms/ritual-dawn-01.jpg'};
+
+/* ---- the links every card offers: the surface where the item is changed, never a control of its own ---- */
+function segOf(x){return J.SEGMENTS.filter(function(s){return s.ids.indexOf(x.id)>=0})[0]||null}
+function detailHref(x){
+  if(x.stay&&x.room)return 'room.html?stay='+x.stay+'&room='+x.room;
+  if(x.id==='1872'||x.id==='tea1872')return '1872.html';
+  if(x.exp)return 'experience.html?id='+encodeURIComponent(x.exp);
+  if(x.interest&&x.id!=='airbnb-2br')return 'marsilea.html';
+  if(x.id==='sangkhathan')return 'wedding.html#sangkhathan';
+  if(window.SIYL_TRANSPORT&&window.SIYL_TRANSPORT[x.id])return 'transport.html?id='+x.id;
+  var at=P.locate(x.id);
+  if(at&&x.room)return 'room.html?stay='+at.key+'&room='+x.room;
+  return 'journeys.html#j-'+P.windowOf(x.id)}
+function group(x){var m=J.meta(x);if(x.id==='sangkhathan'||m.cat==='Wedding programme')return 'wedding';if(m.cat==='Accommodation')return 'stay';if(m.cat==='Transportation')return 'travel';return 'experience'}
+/* the state of a selection, in the words of the wording contract — a send and a confirmation come only from Guest Relations */
+function sentState(){var s=DR&&DR.submission?DR.submission():null;if(C&&C.state()==='confirmed')return 'confirmed';if(s&&s.submissionStatus!=='draft'&&!s.hasUnsentChanges)return 'sent';return 'selected'}
+function stateWords(x){
+  var st=sentState();
+  if(x.interest)return {t:'Interest · Marsilea Spa confirms the time',on:true};
+  if(x.request)return {t:st==='confirmed'?'Confirmed by Guest Relations':st==='sent'?'Request sent':'Request · sent with your trip',on:st!=='selected'};
+  if(group(x)==='stay'){if(!ST.held(x))return {t:'Room still to choose',open:true};var w=ST.unitWords(x);return {t:st==='confirmed'?'Confirmed by Guest Relations'+(w?' · '+w:''):'Your place is held'+(w?' · '+w:''),on:true}}
+  return {t:st==='confirmed'?'Confirmed by Guest Relations':st==='sent'?'Sent to Guest Relations':'Selected · in My Bag',on:true}}
+function cost(x){if(x.interest)return 'Paid at the spa';if(x.complimentary)return 'Complimentary';if(x.price==null)return 'Amount on request';return money((x.price||0)*(x.qty||1))+' · your cost'}
+function card(o){
+  return '<article class="pf-card'+(o.on?' on':'')+'"'+(o.data?' data-profile-item="'+esc(o.data)+'"':'')+'>'+
+    '<span class="pf-img"'+(o.img?' style="background-image:url('+esc(o.img)+')"':'')+' role="img" aria-label="'+esc(o.name)+'"></span>'+
+    '<div class="pf-body">'+
+      '<p class="t-l1">'+esc(o.when)+'</p>'+
+      '<h3 class="t-h1">'+esc(o.name)+'</h3>'+
+      (o.meta?'<p class="t-b2">'+esc(o.meta)+'</p>':'')+
+      '<p class="t-l1'+(o.open?' open':o.on!==false?' on':'')+'">'+esc(o.state)+'</p>'+
+      (o.cost?'<p class="pf-cost">'+esc(o.cost)+'</p>':'')+
+      (o.note?'<p class="t-l1">'+esc(o.note)+'</p>':'')+
+      '<div class="p-actions">'+(o.links||[]).map(function(l){return '<a class="p-link'+(l.mute?' mute':'')+'" href="'+esc(l.href)+'">'+esc(l.text)+'</a>'}).join('')+'</div>'+
+    '</div></article>'}
+function rail(cards){return '<div class="pf-rail">'+cards.join('')+'</div>'}
+function empty(text,href,link){return '<div class="p-card flat"><p class="t-b1 measure">'+esc(text)+'</p>'+(href?'<div class="p-actions"><a class="p-link" href="'+esc(href)+'">'+esc(link)+'</a></div>':'')+'</div>'}
+
+/* ---- the sections ---- */
+function identity(me,p){
+  var pref=G.nameOf(me.guestId),full=G.value(me.guestId,'fullName')||me.fullName||pref,others=G.others(),role=me.hostRole==='BRIDE'?'Host · Bride':me.hostRole==='GROOM'?'Host · Groom':'Guest';
+  var ini=(pref||full||'').split(/\s+/).map(function(w){return w.charAt(0)}).slice(0,2).join('').toUpperCase();
+  return '<section class="prep-sec" id="identity"><p class="t-l1">Your account</p><div class="p-card pf-id" data-profile-identity>'+
+    '<div class="pf-id-row"><span class="pf-avatar" data-avatar role="img" aria-label="Your profile photo"><span class="pf-ini" aria-hidden="true">'+esc(ini)+'</span></span>'+
+    '<div class="pf-id-body"><p class="t-l1 on">'+esc(role)+' · Personal invitation</p><h2 class="t-h1">'+esc(pref)+'</h2>'+(full&&full!==pref?'<p class="t-b2">'+esc(full)+'</p>':'')+
+    '<p class="t-b2">'+(others.length?'Your party · '+esc(G.partyNames()):'Travelling on your own invitation')+'</p></div></div>'+
+    '<div class="p-actions" data-photo-actions><button type="button" class="p-link" data-photo-add>Add a photo</button></div>'+
+    '<p class="t-b2 pf-note" data-photo-note role="status" aria-live="polite">A small square photo, kept privately with your invitation. JPEG, PNG or WebP, up to 12 MB.</p>'+
+    '<input type="file" accept="'+esc(AV?AV.ACCEPT:'image/*')+'" data-photo-input hidden>'+
+    '<div class="p-actions"><a class="p-link mute" href="invitation.html">Open your invitation</a><button type="button" class="p-link mute" data-signout>Sign out</button></div>'+
+  '</div></section>'}
+function contact(){
+  var e=G.contact('email'),ph=G.contact('phone');
+  return '<section class="prep-sec" id="contact"><p class="t-l1">Contact</p><div class="p-card" data-profile-contact><p class="t-l1'+(e&&ph?' on':' open')+'">'+(e&&ph?'How we reach you':'Contact details still needed')+'</p>'+
+    '<p class="t-b1">'+(e?esc(e):'Email address still needed')+'<br>'+(ph?esc(ph):'Mobile number still needed')+'</p>'+
+    '<div class="p-actions"><a class="p-link" href="invitation.html#contact">Edit contact details</a></div></div></section>'}
+function arrangements(me){
+  var id=me.guestId,lines=J.sorted(B.get()),stays=[],travel=[],exps=[],h='';
+  /* the fixed arrangements first — arranged for the guest, no amount, never part of the bag */
+  (A&&A.ready()?A.items():[]).forEach(function(a){stays.push(card({data:'fixed:'+a.stage,img:hrefImg(a.href),when:a.place+' · '+a.when,name:a.property,meta:[a.name,a.category,a.nights].filter(Boolean).join(' · ')+(a.who?' · '+a.who:''),state:'Arranged for you',on:true,note:'Fixed arrangement · not part of your bag',links:a.href?[{href:a.href,text:'View details',mute:true}]:[]}))});
+  lines.forEach(function(x){
+    var g=group(x);if(g==='wedding')return;
+    var sw=stateWords(x),cls=x.cls&&P.classOf?P.classOf(x.id,x.cls):null;
+    var o={data:'line:'+x.id,img:lineImg(x),when:J.when(x)||'',name:x.name,meta:[cls&&cls.short,x.meta].filter(Boolean).join(' · '),state:sw.t,on:!!sw.on,open:!!sw.open,cost:cost(x),links:[{href:detailHref(x),text:'View details'},{href:'cart.html',text:'Change in My Bag',mute:true}]};
+    (g==='stay'?stays:g==='travel'?travel:exps).push(card(o))});
+  h+='<section class="prep-sec" id="stays"><p class="t-l1">Your arrangements</p><h2 class="t-h2">Stays</h2>'+(stays.length?rail(stays):empty('No stay is chosen yet. Rooms are chosen in My Trip.','your-journey.html','Open My Trip'))+'</section>';
+  h+='<section class="prep-sec" id="travel"><h2 class="t-h2">Travel</h2>'+(travel.length?rail(travel):empty('No flight or train is in your trip yet.','your-journey.html','Open My Trip'))+'</section>';
+  h+='<section class="prep-sec" id="experiences"><h2 class="t-h2">Experiences</h2>'+(exps.length?rail(exps):empty('No experience is chosen yet.','your-journey.html','Open My Trip'))+'</section>';
+  return h}
+function wedding(me,p){
+  var id=me.guestId,cards=[],temple=T?T.attendanceOf(id):null,ready=S&&S.ready(),hosts=!!(p&&p.hosts);
+  function seat(ev){if(!ready)return {t:'Reading your seat…',on:false};if(hosts)return {t:'Front centre · hosts',on:true};var sid=S.seatOf(ev,id);if(!sid)return {t:'No seat held yet',open:true};return {t:'Seat '+S.label(sid)+' · Held in your name',on:true,d:S.describe(sid)}}
+  cards.push(card({data:'wedding:temple',img:IMG.temple,when:'Sunday, 28 February 2027 · 09:00',name:'Temple morning',meta:'Wat Ong Teu, Vientiane',state:temple==='yes'?'Joining':temple==='no'?'Not joining':'Not answered yet',on:temple==='yes',open:temple==null,links:[{href:'wedding.html',text:'View details'}]}));
+  var c=seat('ceremony'),d=seat('dinner');
+  cards.push(card({data:'wedding:ceremony',img:IMG.ceremony,when:'Sunday, 28 February 2027 · 15:30',name:'Vow Ceremony',meta:'Souphattra Heritage, Vientiane'+(c.d?' · '+c.d:''),state:c.t,on:!!c.on,open:!!c.open,links:[{href:'wedding.html',text:'View details'},{href:'tickets.html',text:'Seat ticket',mute:true}]}));
+  cards.push(card({data:'wedding:dinner',img:IMG.dinner,when:'Sunday, 28 February 2027 · 19:30',name:'Wedding Dinner',meta:'Souphattra Heritage, Vientiane · poolside'+(d.d?' · '+d.d:''),state:d.t,on:!!d.on,open:!!d.open,links:[{href:'wedding.html',text:'View details'},{href:'tickets.html',text:'Seat ticket',mute:true}]}));
+  J.sorted(B.get()).filter(function(x){return group(x)==='wedding'}).forEach(function(x){var sw=stateWords(x);cards.push(card({data:'line:'+x.id,img:lineImg(x)||IMG.temple,when:J.when(x)||'Sunday, 28 February 2027',name:x.name,meta:x.meta||'',state:sw.t,on:!!sw.on,cost:cost(x),links:[{href:detailHref(x),text:'View details'},{href:'cart.html',text:'Change in My Bag',mute:true}]}))});
+  return '<section class="prep-sec" id="wedding"><h2 class="t-h2">The Wedding</h2>'+rail(cards)+'</section>'}
+function tickets(me,p){
+  var id=me.guestId,h='',hosts=!!(p&&p.hosts),n=0;
+  var NAMES={ceremony:'Vow Ceremony',dinner:'Wedding Dinner'};
+  if(S&&S.ready())['ceremony','dinner'].forEach(function(ev){var sid=S.seatOf(ev,id);if(!sid&&!hosts)return;n++;
+    h+='<div class="p-ticket on" data-profile-ticket="seat:'+ev+'"><div class="p-ticket-head"><p class="t-l1">Seat ticket · '+esc(NAMES[ev])+'</p><p class="t-l1 on"><i class="prep-tick" aria-hidden="true"></i>'+(hosts?'Front centre':'Held in your name')+'</p></div>'+
+      '<h3 class="t-h1">'+(hosts?'Front centre':'Seat '+esc(S.label(sid)))+'</h3><p class="t-b2">Sunday, 28 February 2027 · '+(ev==='ceremony'?'15:30':'19:30')+(hosts?'':' · '+esc(S.describe(sid)))+'</p>'+
+      '<div class="p-actions"><a class="p-link" href="tickets.html">Open your tickets</a></div></div>'});
+  var ORDER=window.SIYL_TRANSPORT_ORDER||['train','mu9646','c86','return'];
+  ORDER.forEach(function(l){var x=B.get().filter(function(y){return y.id===l})[0];if(!x)return;n++;var sw=stateWords(x),cls=x.cls&&P.classOf?P.classOf(x.id,x.cls):null;
+    h+='<div class="p-ticket'+(sw.on?' on':'')+'" data-profile-ticket="pass:'+esc(l)+'"><div class="p-ticket-head"><p class="t-l1">Travel pass</p><p class="t-l1 on"><i class="prep-tick" aria-hidden="true"></i>'+esc(sw.t)+'</p></div>'+
+      '<h3 class="t-h1">'+esc(x.name)+'</h3><p class="t-b2">'+esc([J.when(x),cls&&cls.short,x.meta].filter(Boolean).join(' · '))+'</p>'+
+      '<div class="p-actions"><a class="p-link" href="tickets.html">Open your tickets</a></div></div>'});
+  return '<section class="prep-sec" id="tickets"><p class="t-l1">Tickets &amp; passes</p><h2 class="t-h2">Your tickets</h2>'+(n?'<div class="pf-tickets">'+h+'</div>':empty('No ticket yet. A seat ticket appears the moment a seat is held in your name; a travel pass for every leg you choose.','tickets.html','Open your tickets'))+
+    '<p class="t-b2 measure-w" style="margin-top:var(--s4)">A travel pass records your selection; Guest Relations confirms each arrangement with you personally and issues the carrier’s ticket.</p></section>'}
+function status(p){
+  var s=DR&&DR.submission?DR.submission():null,r=G.readiness(),label,title,body,acts='';
+  if(C&&C.state()==='confirmed'){label='<p class="t-l1 on">Confirmed by Guest Relations</p>';title='Your arrangements are confirmed';body='Confirmed on '+when(C.confirmedAt())+'.'+(s&&s.submissionId?' Reference '+esc(s.submissionId)+'.':'')+' To change anything, write to Guest Relations.';acts='<a class="p-link" href="review.html">Open Review &amp; Send</a>'}
+  else if(s&&s.submissionStatus!=='draft'&&s.hasUnsentChanges){label='<p class="t-l1 open">Changes saved · not yet sent to Guest Relations</p>';title='Your trip has changes to send';body='Guest Relations holds the version sent on '+when(s.lastSentAt||s.submittedAt)+'. Reference '+esc(s.submissionId)+'.';acts='<a class="p-act" href="review.html">Send Updated Trip</a>'}
+  else if(s&&s.submissionStatus!=='draft'){label='<p class="t-l1 on">Sent to Guest Relations · Under review</p>';title='Guest Relations has your trip';body='Sent on '+when(s.lastSentAt||s.submittedAt)+'. Reference '+esc(s.submissionId)+'. Guest Relations reviews your selections personally and confirms each arrangement with you.';acts='<a class="p-link" href="review.html">Open Review &amp; Send</a>'}
+  else{label='<p class="t-l1">Saved as draft</p>';title='Your trip is not sent yet';body=r.ok?'Everything needed is complete. Send it to Guest Relations whenever you are ready.':(r.need.length===1?'One thing is still needed: ':r.need.length+' things are still needed, first: ')+esc(r.first.label)+' ('+esc(r.first.n)+' · '+esc(r.first.stepLabel)+').';acts=r.ok?'<a class="p-act" href="review.html">Review &amp; Send</a>':'<a class="p-act" href="'+esc(G.nextHref())+'">Continue your trip</a>'}
+  return '<section class="prep-sec" id="status"><p class="t-l1">Trip status</p><div class="p-card" data-profile-status>'+label+'<h3 class="t-h1">'+title+'</h3><p class="t-b2 measure">'+body+'</p><div class="p-actions">'+acts+'<a class="p-link mute" href="your-journey.html">Open My Trip</a></div></div></section>'}
+function about(me){
+  var miss=G.aboutMissing?G.aboutMissing():[],ok=!miss.length;
+  return '<section class="prep-sec" id="about"><p class="t-l1">Step 05</p><div class="p-card'+(ok?' on':'')+'" data-profile-about><p class="t-l1'+(ok?' on':' open')+'">'+(ok?'Complete':(miss.length===1?'One answer still needed':miss.length+' answers still needed'))+'</p><h3 class="t-h1">About You</h3>'+
+    '<p class="t-b2 measure">Your food allergy answer, a few questions the kitchens and the hosts read, the photography acknowledgement and your travel documents. Review &amp; Send opens once it is complete.</p>'+
+    (ok?'':'<p class="t-b2">'+miss.slice(0,3).map(function(m){return esc(m.label)}).join(' · ')+(miss.length>3?' · …':'')+'</p>')+
+    '<div class="p-actions"><a class="p-link" href="about-you.html">Edit About You</a></div></div></section>'}
+function documents(me){
+  var id=me.guestId,rows='';
+  if(D)D.KINDS.forEach(function(k){var d=D.get(id,k.key),st=D.state(id,k.key);rows+='<p class="t-b2"><span class="t-l1'+(d?' on':'')+'">'+esc(k.label)+'</span> '+esc(st)+(d?' · '+esc(d.filename||'')+(d.receivedAt?' · '+day(d.receivedAt):''):' · can be added later')+'</p>'});
+  var c=D?D.consent(id):null,decided=D&&D.consentDecided(id);
+  rows+='<p class="t-b2"><span class="t-l1'+(decided?' on':'')+'">Publication choice</span> '+(decided?(c?'Given':'Declined'):'Optional · not answered')+'</p>';
+  return '<section class="prep-sec" id="documents"><p class="t-l1">Documents</p><div class="p-card" data-profile-documents><p class="t-l1">Travel documents</p><div class="pf-rows">'+rows+'</div>'+
+    '<div class="p-actions"><a class="p-link" href="about-you.html#documents">Add or change documents</a></div></div></section>'}
+
+/* ---- the photo: shown from memory, changed through the guest's own session ---- */
+function paintAvatar(){
+  var el=page.querySelector('[data-avatar]'),acts=page.querySelector('[data-photo-actions]');if(!el||!AV)return;
+  AV.load().then(function(url){
+    if(url){el.style.backgroundImage='url('+url+')';el.classList.add('has');if(acts)acts.innerHTML='<button type="button" class="p-link" data-photo-add>Change photo</button><button type="button" class="p-link mute" data-photo-remove>Remove photo</button>'}
+    else{el.style.backgroundImage='';el.classList.remove('has');if(acts)acts.innerHTML='<button type="button" class="p-link" data-photo-add>Add a photo</button>'}
+    wirePhoto()})}
+function wirePhoto(){
+  var input=page.querySelector('[data-photo-input]'),note=page.querySelector('[data-photo-note]');if(!input)return;
+  page.querySelectorAll('[data-photo-add]').forEach(function(b){b.onclick=function(){input.value='';input.click()}});
+  page.querySelectorAll('[data-photo-remove]').forEach(function(b){b.onclick=function(){b.disabled=true;note.textContent='Removing…';AV.remove().then(function(r){note.textContent=r.ok?'Photo removed.':'The photo could not be removed just now — please try again.';paintAvatar()})}});
+  input.onchange=function(){var f=input.files&&input.files[0];if(!f)return;note.textContent='Saving your photo…';AV.upload(f).then(function(r){note.textContent=r.ok?'Photo saved · '+day(r.at)+'.':AV.refusal(r);paintAvatar()})}}
+
+function render(){
+  var p=G.party(),me=G.me();
+  if(!p||!me){
+    page.innerHTML='<div class="p-card"><p class="t-l1">'+(G.stale()?'Once more':'Your invitation')+'</p><h2 class="t-h1">'+(G.stale()?'Open your invitation once more':'Open your invitation')+'</h2>'+
+      '<p class="t-b1 measure">Your profile belongs to your invitation, so we open it first.</p>'+
+      '<p style="margin-top:16px"><button type="button" class="p-act" id="open">Open my invitation</button></p></div>';
+    document.getElementById('open').addEventListener('click',function(){gated(render)});return}
+  document.getElementById('pf-own').textContent='My Profile · '+G.nameOf();
+  page.innerHTML=identity(me,p)+contact()+status(p)+arrangements(me)+wedding(me,p)+tickets(me,p)+about(me)+documents(me);
+  var out=page.querySelector('[data-signout]');if(out)out.addEventListener('click',function(){var I=window.SIYL_INVITE;if(I&&I.leave)I.leave();var a=document.querySelector('[data-access-out]');if(a)a.click();else location.replace('invitation.html')});
+  paintAvatar();
+  B.badge();
+}
+['siyl:bag','siyl:guest','siyl:seats','siyl:units','siyl:confirm','siyl:draft','siyl:docs','siyl:temple','siyl:invite-ready'].forEach(function(ev){document.addEventListener(ev,render)});
+document.addEventListener('siyl:auth',function(){render();if(S)S.load(true);if(U)U.load(true);if(C)C.load(true);if(AV)AV.load(true).then(paintAvatar)});
+render();
+if(G.party()){if(S)S.load();if(U)U.load();if(C)C.load()}
+if(B.bar)B.bar();
+})();
+</script>
+</body></html>

@@ -1,0 +1,90 @@
+/* ============================================================================
+   THE PROFILE PHOTO (Owner, 18 Sep 2026 · MY PROFILE) — one small portrait per
+   guest, kept on the server under the guest's own invitation and read back only
+   with that guest's bearer. The browser reduces the picture to a square of at
+   most 512 px before it is sent (JPEG, well under the 1 MB the Worker accepts),
+   so an original photograph never leaves the device. No public URL exists: the
+   image is fetched with the session and shown from memory, never written to
+   localStorage and never placed in the repository.
+     SIYL_AVATAR.load()            -> Promise<objectURL | null>   (cached per invitation)
+     SIYL_AVATAR.upload(file)      -> Promise<{ ok, error? }>
+     SIYL_AVATAR.remove()          -> Promise<{ ok }>
+     SIYL_AVATAR.ACCEPT · MAX_IN   the file types offered and the largest original accepted
+   Events: siyl:avatar after a change.
+   ========================================================================== */
+(function () {
+  'use strict';
+  var API = !(location.hostname === 'seeyouinlaos-website.suthep-hrg.workers.dev' || /^(localhost|127\.0\.0\.1)$/.test(location.hostname))
+    ? 'https://seeyouinlaos-website.suthep-hrg.workers.dev/api/profile/photo'
+    : '/api/profile/photo';
+  var SIDE = 512, MAX_IN = 12 * 1024 * 1024, MAX_OUT = 1024 * 1024;
+  var ACCEPT = 'image/jpeg,image/png,image/webp,image/heic,image/heif';
+  var cache = { inv: '', url: null, none: false };
+
+  function auth() { try { return JSON.parse(localStorage.getItem('siyl.auth') || 'null'); } catch (e) { return null; } }
+  function headers(extra) { var a = auth(); var h = Object.assign({}, extra || {}); if (a && a.bearer) h['x-siyl-auth'] = a.bearer; return h; }
+  function announce() { try { document.dispatchEvent(new CustomEvent('siyl:avatar')); } catch (e) {} }
+  function forget() { if (cache.url) { try { URL.revokeObjectURL(cache.url); } catch (e) {} } cache = { inv: '', url: null, none: false }; }
+
+  /* the picture reduced to a centred square — drawn on a canvas, so the bytes sent are always ours */
+  function reduce(file) {
+    return new Promise(function (resolve, reject) {
+      var src = URL.createObjectURL(file), img = new Image();
+      img.onload = function () {
+        try {
+          var w = img.naturalWidth, h = img.naturalHeight, s = Math.min(w, h), side = Math.min(SIDE, s);
+          var c = document.createElement('canvas'); c.width = side; c.height = side;
+          var x = c.getContext('2d'); x.drawImage(img, (w - s) / 2, (h - s) / 2, s, s, 0, 0, side, side);
+          URL.revokeObjectURL(src);
+          c.toBlob(function (blob) { if (!blob) reject(new Error('decode')); else resolve(blob); }, 'image/jpeg', 0.86);
+        } catch (e) { URL.revokeObjectURL(src); reject(e); }
+      };
+      img.onerror = function () { URL.revokeObjectURL(src); reject(new Error('decode')); };
+      img.src = src;
+    });
+  }
+
+  window.SIYL_AVATAR = {
+    ACCEPT: ACCEPT, MAX_IN: MAX_IN, SIDE: SIDE,
+    /* the stored photo as an object URL for this session, or null when there is none */
+    load: function (force) {
+      var a = auth(); if (!a || !a.bearer || !a.invitationId) { forget(); return Promise.resolve(null); }
+      if (!force && cache.inv === a.invitationId && (cache.url || cache.none)) return Promise.resolve(cache.url);
+      forget(); cache.inv = a.invitationId;
+      return fetch(API, { headers: headers(), cache: 'no-store' }).then(function (r) {
+        if (r.status === 404) { cache.none = true; return null; }
+        if (!r.ok) throw new Error('read');
+        return r.blob().then(function (b) { cache.url = URL.createObjectURL(b); return cache.url; });
+      }).catch(function () { cache.none = true; return null; });
+    },
+    current: function () { return cache.url; },
+    upload: function (file) {
+      if (!file) return Promise.resolve({ ok: false, error: 'no file' });
+      if (file.size > MAX_IN) return Promise.resolve({ ok: false, error: 'too large' });
+      if (!/^image\//.test(file.type || '')) return Promise.resolve({ ok: false, error: 'not an image' });
+      return reduce(file).then(function (blob) {
+        if (blob.size > MAX_OUT) return { ok: false, error: 'too large' };
+        return fetch(API, { method: 'PUT', headers: headers({ 'content-type': 'image/jpeg' }), body: blob }).then(function (r) { return r.json().catch(function () { return { ok: false }; }).then(function (j) {
+          if (!r.ok || !j.ok) return { ok: false, error: (j && j.error) || 'not stored', status: r.status };
+          forget(); cache.inv = (auth() || {}).invitationId || ''; cache.url = URL.createObjectURL(blob); announce(); return { ok: true, at: j.at };
+        }); });
+      }).catch(function (e) { return { ok: false, error: e && e.message === 'decode' ? 'not an image' : 'failed' }; });
+    },
+    remove: function () {
+      return fetch(API, { method: 'DELETE', headers: headers() }).then(function (r) { return r.ok ? r.json() : { ok: false }; }).then(function (j) {
+        if (!j || !j.ok) return { ok: false };
+        forget(); cache.inv = (auth() || {}).invitationId || ''; cache.none = true; announce(); return { ok: true };
+      }).catch(function () { return { ok: false }; });
+    },
+    /* the words for a refusal, for the guest */
+    refusal: function (r) {
+      if (!r || r.ok) return '';
+      if (r.error === 'too large') return 'That picture is too large. Please choose one under 12 MB.';
+      if (r.error === 'not an image' || r.error === 'unsupported file type') return 'Please choose a photograph (JPEG, PNG or WebP).';
+      if (r.status === 401) return 'Please open your invitation once more, then try again.';
+      if (r.status === 503) return 'We cannot keep a photo on the website just now. Nothing was stored — please try again later.';
+      return 'The photo could not be saved. Nothing was stored — please try again.';
+    }
+  };
+  document.addEventListener('siyl:signout', forget);
+})();

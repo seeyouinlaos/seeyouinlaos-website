@@ -103,7 +103,7 @@ test('CLIENT · the draft module: autosave on every change, pull on sign-in, Sav
   assert.match(d, /\['siyl:guest', 'siyl:bag', 'siyl:temple', 'siyl:docs'\]\.forEach\(function \(ev\) \{ document\.addEventListener\(ev, function \(\) \{ D\.touch\(\); \}\); \}\);/, 'autosave');
   assert.match(d, /document\.addEventListener\('siyl:auth', pullOnce\)/); assert.match(d, /if \(reason === 'save'\) \{/); assert.match(d, /the saved copy differs/);
   assert.match(d, /closest\('\[data-continue\]'\)/); assert.match(d, /Save My Progress</); assert.match(d, /'Saving…'/); assert.match(d, /'Not saved · try again'/); assert.match(d, /'Saved · ' \+ t/);
-  assert.match(d, /CHANGES SAVED · NOT YET SENT TO GUEST RELATIONS/); assert.match(d, /'Send Updated Trip'/); assert.match(d, /'Sent to Guest Relations · Reference ' \+ s\.submissionId/); assert.match(d, /saved as draft/);
+  assert.match(d, /Changes saved · not yet sent to Guest Relations/); assert.match(d, /'Send Updated Trip'/); assert.match(d, /'Sent to Guest Relations · Reference ' \+ s\.submissionId/); assert.match(d, /saved as draft/);
   assert.match(sh, /SIYL_DRAFT\.mount\(bar\.querySelector\('\[data-prep-save\]'\)\)/);
   for (const f of ['about-you.html', 'cart.html', 'invitation.html', 'review.html', 'tickets.html', 'transport.html', 'wedding-preparation.html', 'wedding.html', 'your-journey.html', 'room.html', 'journeys.html']) assert.match(src(f), /assets\/draft\.js/, f + ' loads the draft module');
   assert.match(rv, /var fl=await SIYL_DRAFT\.flush\('send'\);/); assert.match(rv, /id="srvstate"/);

@@ -152,7 +152,7 @@ test('FLOW · 06 opens only when 01–05 are complete; readiness lists every mis
   G.setPhotoAck(false);
   const r = G.readiness();
   assert.equal(r.ok, false);
-  deq(r.need.map((n) => [n.n, n.stepLabel, n.href]), [['05', 'My Profile', 'about-you.html#photo']]);
+  deq(r.need.map((n) => [n.n, n.stepLabel, n.href]), [['05', 'About You', 'about-you.html#photo']]);
   assert.equal(G.nextHref(), 'about-you.html#photo');
   assert.equal(stepOf(G, 'about').state, 'attention');
   assert.equal(stepOf(G, 'review').state, 'locked');

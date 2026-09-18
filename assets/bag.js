@@ -62,7 +62,7 @@ document.body.appendChild(el);
 function dest(){return 'cart.html'}
 var here=location.pathname.split('/').pop().replace(/\.html$/,'');
 el.querySelectorAll('[data-nav]').forEach(function(a){var k=a.getAttribute('data-nav');
-  if((k==='trip'&&here==='your-journey')||(k==='bag'&&here==='cart')||(k==='profile'&&here==='about-you'))a.classList.add('on');
+  if((k==='trip'&&here==='your-journey')||(k==='bag'&&here==='cart')||(k==='profile'&&here==='profile'))a.classList.add('on');
   if(k==='out')a.addEventListener('click',function(){var I=window.SIYL_INVITE;if(I&&I.leave){I.leave()}else{document.querySelector('[data-access-out]')&&document.querySelector('[data-access-out]').click()}});
   if(k==='top')a.addEventListener('click',function(){window.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'})})});
 function topShow(){var t=el.querySelector('.jb-top');if(t)t.classList.toggle('show',window.scrollY>innerHeight)}

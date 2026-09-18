@@ -653,9 +653,9 @@ test('allergy declared without kitchen detail blocks completion (§30)', () => {
   const reg = baseReg(inv);
   reg.guests[0].allergy = 'yes';
   reg.guests[0].allergyDetail = '';
-  assert.ok(validateRegistration(reg, ctx(inv)).some((e) => /allergy under My Profile/.test(e)));
+  assert.ok(validateRegistration(reg, ctx(inv)).some((e) => /allergy under About You/.test(e)));
   reg.guests[0].allergyDetail = 'Peanuts — strictly no traces';
-  assert.ok(!validateRegistration(reg, ctx(inv)).some((e) => /allergy under My Profile/.test(e)));
+  assert.ok(!validateRegistration(reg, ctx(inv)).some((e) => /allergy under About You/.test(e)));
 });
 
 test('post wedding architecture: canonical China train price, rest pending, no China vehicle', () => {

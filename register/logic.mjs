@@ -290,10 +290,10 @@ export function validateRegistration(reg, ctx) {
     }
   }
   // allergy safety (§30): a declared allergy without kitchen detail is not a
-  // submittable safety record — the guest is sent back to My Profile.
+  // submittable safety record — the guest is sent back to About You (step 05).
   for (const g of reg.guests || []) {
     if (g.attending !== false && g.allergy === 'yes' && !(g.allergyDetail && g.allergyDetail.trim())) {
-      errors.push('please tell the kitchens about ' + (g.preferredName || 'each guest') + '\u2019s allergy under My Profile');
+      errors.push('please tell the kitchens about ' + (g.preferredName || 'each guest') + '\u2019s allergy under About You');
     }
   }
   // dress code: each wedding moment with required attire needs its own explicit

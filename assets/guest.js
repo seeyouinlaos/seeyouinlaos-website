@@ -323,7 +323,7 @@
       { key: 'journey', n: '02', label: 'My Trip', href: 'your-journey.html', required: true },
       { key: 'wedding', n: '03', label: 'The Wedding', href: 'wedding.html', required: true },
       { key: 'preparation', n: '04', label: 'Wedding Preparation', href: 'wedding-preparation.html', required: true },
-      { key: 'about', n: '05', label: 'My Profile', href: 'about-you.html', required: true },
+      { key: 'about', n: '05', label: 'About You', href: 'about-you.html', required: true },
       { key: 'review', n: '06', label: 'Review & Send', href: 'review.html', required: true }
     ],
     STATE_LABEL: { complete: '✓ Complete', current: 'Current', attention: 'Needs attention', locked: 'Locked' },

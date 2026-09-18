@@ -94,7 +94,7 @@ test('the journey page derives SELECTED from the bag and offers no second select
 
 test('ABOUT YOU: step 05 is required — the allergy answer and the photography acknowledgement; favourites and documents stay optional', () => {
   const g = src('assets/guest.js');
-  assert.match(g, /key: 'about', n: '05', label: 'My Profile', href: 'about-you\.html', required: true/);
+  assert.match(g, /key: 'about', n: '05', label: 'About You', href: 'about-you\.html', required: true/);
   assert.match(g, /var ALLERGY = \{ key: 'allergy', n: '01', q: 'Do you have any food allergies\?', required: true/);
   assert.match(g, /key: 'drink', n: '04', q: 'Favourite drink'/);
   assert.match(g, /key: 'film', n: '06', q: 'Favourite film'/); assert.match(g, /key: 'music', n: '07', q: 'Favourite music'/);
