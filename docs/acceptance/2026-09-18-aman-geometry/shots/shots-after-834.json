@@ -1,0 +1,334 @@
+[
+ {
+  "name": "home",
+  "w": 834,
+  "overflow": false
+ },
+ {
+  "name": "home-full",
+  "w": 834,
+  "overflow": false
+ },
+ {
+  "name": "signed-out-shell",
+  "w": 834,
+  "shell": {
+   "scrollY": 3480,
+   "header": {
+    "top": 0,
+    "bottom": 80,
+    "h": 80
+   },
+   "access": {
+    "top": 48,
+    "bottom": 80
+   },
+   "links": [
+    {
+     "t": "Open your invitation",
+     "top": 49,
+     "bottom": 73,
+     "visible": true
+    }
+   ],
+   "underShell": "BUTTON.venue-item"
+  }
+ },
+ {
+  "name": "signed-out-scrolled",
+  "w": 834,
+  "overflow": false
+ },
+ {
+  "name": "home-rail",
+  "w": 834,
+  "overflow": false
+ },
+ {
+  "name": "home-pair",
+  "w": 834,
+  "overflow": false
+ },
+ {
+  "name": "destinations",
+  "w": 834,
+  "overflow": false
+ },
+ {
+  "name": "destinations-full",
+  "w": 834,
+  "overflow": false
+ },
+ {
+  "name": "stays",
+  "w": 834,
+  "overflow": false
+ },
+ {
+  "name": "stays-full",
+  "w": 834,
+  "overflow": false
+ },
+ {
+  "name": "stays-rail",
+  "w": 834,
+  "overflow": false
+ },
+ {
+  "name": "the-journey",
+  "w": 834,
+  "overflow": false
+ },
+ {
+  "name": "the-journey-full",
+  "w": 834,
+  "overflow": false
+ },
+ {
+  "name": "the-journey-cards",
+  "w": 834,
+  "overflow": false
+ },
+ {
+  "name": "wedding",
+  "w": 834,
+  "overflow": false
+ },
+ {
+  "name": "wedding-full",
+  "w": 834,
+  "overflow": false
+ },
+ {
+  "name": "room-detail",
+  "w": 834,
+  "overflow": false
+ },
+ {
+  "name": "room-detail-full",
+  "w": 834,
+  "overflow": false
+ },
+ {
+  "name": "room-detail-others",
+  "w": 834,
+  "overflow": false
+ },
+ {
+  "name": "my-trip",
+  "w": 834,
+  "overflow": false
+ },
+ {
+  "name": "my-trip-full",
+  "w": 834,
+  "overflow": false
+ },
+ {
+  "name": "signed-in-shell",
+  "w": 834,
+  "shell": {
+   "scrollY": 6208,
+   "header": {
+    "top": 0,
+    "bottom": 80,
+    "h": 80
+   },
+   "access": {
+    "top": 48,
+    "bottom": 80
+   },
+   "links": [
+    {
+     "t": "My Trip",
+     "top": 49,
+     "bottom": 73,
+     "visible": true
+    },
+    {
+     "t": "My Bag",
+     "top": 49,
+     "bottom": 73,
+     "visible": true
+    },
+    {
+     "t": "My Profile",
+     "top": 49,
+     "bottom": 73,
+     "visible": true
+    },
+    {
+     "t": "Sign out",
+     "top": 49,
+     "bottom": 72,
+     "visible": true
+    }
+   ],
+   "underShell": "DIV.prep-bar-in"
+  }
+ },
+ {
+  "name": "signed-in-scrolled",
+  "w": 834,
+  "overflow": false
+ },
+ {
+  "name": "room-detail-signed-in",
+  "w": 834,
+  "overflow": false
+ },
+ {
+  "name": "signed-in-room-shell",
+  "w": 834,
+  "shell": {
+   "scrollY": 3277,
+   "header": {
+    "top": 0,
+    "bottom": 80,
+    "h": 80
+   },
+   "access": {
+    "top": 48,
+    "bottom": 80
+   },
+   "links": [
+    {
+     "t": "My Trip",
+     "top": 49,
+     "bottom": 73,
+     "visible": true
+    },
+    {
+     "t": "My Bag",
+     "top": 49,
+     "bottom": 73,
+     "visible": true
+    },
+    {
+     "t": "My Profile",
+     "top": 49,
+     "bottom": 73,
+     "visible": true
+    },
+    {
+     "t": "Sign out",
+     "top": 49,
+     "bottom": 72,
+     "visible": true
+    }
+   ],
+   "underShell": "P.oe"
+  }
+ },
+ {
+  "name": "signed-in-room-scrolled",
+  "w": 834,
+  "overflow": false
+ },
+ {
+  "name": "my-bag",
+  "w": 834,
+  "overflow": false
+ },
+ {
+  "name": "review",
+  "w": 834,
+  "overflow": false
+ },
+ {
+  "name": "signed-in-review-shell",
+  "w": 834,
+  "shell": {
+   "scrollY": 6244,
+   "header": {
+    "top": 0,
+    "bottom": 80,
+    "h": 80
+   },
+   "access": {
+    "top": 48,
+    "bottom": 80
+   },
+   "links": [
+    {
+     "t": "My Trip",
+     "top": 49,
+     "bottom": 73,
+     "visible": true
+    },
+    {
+     "t": "My Bag",
+     "top": 49,
+     "bottom": 73,
+     "visible": true
+    },
+    {
+     "t": "My Profile",
+     "top": 49,
+     "bottom": 73,
+     "visible": true
+    },
+    {
+     "t": "Sign out",
+     "top": 49,
+     "bottom": 72,
+     "visible": true
+    }
+   ],
+   "underShell": "DIV.prep-bar-in"
+  }
+ },
+ {
+  "name": "signed-in-review-scrolled",
+  "w": 834,
+  "overflow": false
+ },
+ {
+  "name": "signed-in-journey-shell",
+  "w": 834,
+  "shell": {
+   "scrollY": 6870,
+   "header": {
+    "top": 0,
+    "bottom": 80,
+    "h": 80
+   },
+   "access": {
+    "top": 48,
+    "bottom": 80
+   },
+   "links": [
+    {
+     "t": "My Trip",
+     "top": 49,
+     "bottom": 73,
+     "visible": true
+    },
+    {
+     "t": "My Bag",
+     "top": 49,
+     "bottom": 73,
+     "visible": true
+    },
+    {
+     "t": "My Profile",
+     "top": 49,
+     "bottom": 73,
+     "visible": true
+    },
+    {
+     "t": "Sign out",
+     "top": 49,
+     "bottom": 72,
+     "visible": true
+    }
+   ],
+   "underShell": "SPAN.vt"
+  }
+ },
+ {
+  "name": "signed-in-journey-scrolled",
+  "w": 834,
+  "overflow": false
+ }
+]

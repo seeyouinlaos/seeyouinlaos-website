@@ -1,0 +1,117 @@
+[
+ {
+  "name": "home",
+  "w": 834,
+  "overflow": false
+ },
+ {
+  "name": "home-full",
+  "w": 834,
+  "overflow": false
+ },
+ {
+  "name": "signed-out-shell",
+  "w": 834,
+  "shell": {
+   "scrollY": 3509,
+   "header": {
+    "top": 0,
+    "bottom": 92,
+    "h": 92
+   },
+   "access": {
+    "top": -3417,
+    "bottom": -3380
+   },
+   "links": [
+    {
+     "t": "Open your invitation",
+     "top": -3408,
+     "bottom": -3390,
+     "visible": false
+    }
+   ],
+   "underShell": "BUTTON.venue-item"
+  }
+ },
+ {
+  "name": "signed-out-scrolled",
+  "w": 834,
+  "overflow": false
+ },
+ {
+  "name": "home-rail",
+  "w": 834,
+  "overflow": false
+ },
+ {
+  "name": "home-pair",
+  "w": 834,
+  "overflow": false
+ },
+ {
+  "name": "destinations",
+  "w": 834,
+  "overflow": false
+ },
+ {
+  "name": "destinations-full",
+  "w": 834,
+  "overflow": false
+ },
+ {
+  "name": "stays",
+  "w": 834,
+  "overflow": false
+ },
+ {
+  "name": "stays-full",
+  "w": 834,
+  "overflow": false
+ },
+ {
+  "name": "stays-rail",
+  "w": 834,
+  "overflow": false
+ },
+ {
+  "name": "the-journey",
+  "w": 834,
+  "overflow": false
+ },
+ {
+  "name": "the-journey-full",
+  "w": 834,
+  "overflow": false
+ },
+ {
+  "name": "the-journey-cards",
+  "w": 834,
+  "overflow": false
+ },
+ {
+  "name": "wedding",
+  "w": 834,
+  "overflow": false
+ },
+ {
+  "name": "wedding-full",
+  "w": 834,
+  "overflow": false
+ },
+ {
+  "name": "room-detail",
+  "w": 834,
+  "overflow": false
+ },
+ {
+  "name": "room-detail-full",
+  "w": 834,
+  "overflow": false
+ },
+ {
+  "name": "room-detail-others",
+  "w": 834,
+  "overflow": false
+ }
+]

@@ -303,3 +303,25 @@ test('CODEX RELEASE-2 · a browser upgraded from an older release (a revision, n
   assert.equal(drink(w.localStorage.getItem('siyl.guest')), 'B', 'the independent edit is kept'); assert.equal(w.localStorage.getItem('siyl.bag'), '[]', 'the removal elsewhere stands');
   assert.equal(D.state().notice, null, 'nothing was lost'); assert.ok(bodies.length >= 2 && drink(bodies[bodies.length - 1].keys['siyl.guest']) === 'B', 'the kept edit was sent again');
 });
+
+test('CODEX RELEASE-3 · an upgraded browser with UNSENT edits and no merge base: the server is read first; if it still holds the known revision that copy becomes the base, and if it has moved on the Bag follows the server while the typed answer is kept and sent again', async () => {
+  const baseKeys = { 'siyl.bag': '[{"id":"train"}]', 'siyl.guest': '{"contact":{"email":"a@b.c"},"guests":{"g":{"profile":{"drink":"A"}}}}' };
+  const drink = (v) => { try { return JSON.parse(v).guests.g.profile.drink; } catch (e) { return null; } };
+  const run = async (serverRev) => {
+    const bodies = [], gets = [];
+    const server = serverRev === 'R1' ? { keys: baseKeys, updatedAt: 'R1', savedAt: 'R1' } : { keys: { 'siyl.bag': '[]', 'siyl.guest': baseKeys['siyl.guest'] }, updatedAt: 'R2', savedAt: 'R2' };
+    const fetch = (url, init) => {
+      if (!/\/api\/draft/.test(String(url))) return Promise.resolve({ status: 200, json: async () => ({ ok: true }) });
+      if (init && init.method === 'PUT') { const b = JSON.parse(init.body); bodies.push(b); if (b.baseUpdatedAt !== server.updatedAt) return Promise.resolve({ status: 409, json: async () => ({ ok: false, error: 'stale', draft: server, submission: null }) }); server.updatedAt = 'R3'; server.savedAt = 'R3'; Object.assign(server.keys, b.keys); return Promise.resolve({ status: 200, json: async () => ({ ok: true, updatedAt: 'R3', savedAt: 'R3', submission: null }) }); }
+      gets.push(1); return Promise.resolve({ status: 200, json: async () => ({ ok: true, draft: server, submission: null }) });
+    };
+    const local = { ...baseKeys, 'siyl.guest': baseKeys['siyl.guest'].replace('"A"', '"B"') };            /* the unsent answer B, typed before the upgrade */
+    const w = page({ auth: PEGGY, fetch, modules: ['assets/bag.js', 'assets/guest.js', 'assets/draft.js'], seed: { ...local, 'siyl.draft.meta': JSON.stringify({ invitationId: PEGGY.invitationId, serverUpdatedAt: 'R1', dirty: true }) } });
+    await new Promise((r) => setTimeout(r, 60));
+    return { w, bodies, gets, drinkLocal: drink(w.localStorage.getItem('siyl.guest')), bag: w.localStorage.getItem('siyl.bag'), notice: w.SIYL_DRAFT.state().notice, base: w.localStorage.getItem('siyl.draft.base') };
+  };
+  const same = await run('R1');
+  assert.ok(same.gets.length >= 1, 'the server is read before the push'); assert.equal(same.bodies[0] && same.bodies[0].baseUpdatedAt, 'R1', 'the push names the known revision'); assert.equal(drink(JSON.parse(same.base)['siyl.guest']), 'B', 'after the accepted push the base is what was sent'); assert.equal(same.drinkLocal, 'B', 'the unsent answer stands'); assert.ok(same.bodies.length >= 1 && drink(same.bodies[0].keys['siyl.guest']) === 'B', 'and was sent');
+  const moved = await run('R2');
+  assert.equal(moved.bag, '[]', 'the removal elsewhere stands'); assert.equal(moved.drinkLocal, 'B', 'the typed answer is kept'); assert.ok(moved.bodies.some((b) => b.baseUpdatedAt === 'R2' && drink(b.keys['siyl.guest']) === 'B'), 'and sent again on the new revision');
+});

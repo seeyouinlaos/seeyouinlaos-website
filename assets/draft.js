@@ -29,7 +29,7 @@
   /* THE THREE-WAY MERGE (Codex P1-2): for each key — unchanged here → the server's; changed here while the server still holds
    * the base → this device's independent edit (kept and pushed again); changed on both sides → the server's, and the guest is
    * told. A removal elsewhere therefore never comes back, and an independent answer typed here is never thrown away. */
-  function merge(local, baseKeys, server) {
+  function merge(local, baseKeys, server, baseKnown) {
     var out = {}, keep = [], lost = [];
     KEYS.forEach(function (k) {
       var L = local[k], Bk = baseKeys[k], S = server[k];
@@ -37,6 +37,9 @@
       if (L === undefined || L === Bk) { if (S !== undefined) out[k] = S; return; }          /* unchanged here: the server's */
       if (S === undefined || S === Bk) { out[k] = L; keep.push(k); return; }                  /* independent local edit: kept */
       if (S === L) { out[k] = S; return; }                                                    /* both made the same change */
+      /* NO BASE (a browser upgraded from an older release with unsent edits — Codex release review): the Bag follows the server
+         (a removal elsewhere never comes back and is named), every other key keeps what was typed here and is sent again */
+      if (baseKnown === false && Bk === undefined) { if (k === 'siyl.bag') { out[k] = S; lost.push(k); } else { out[k] = L; keep.push(k); } return; }
       out[k] = S; lost.push(k);                                                               /* both changed: the server's */
     });
     return { keys: out, keep: keep, lost: lost };
@@ -85,7 +88,7 @@
           if (d && d.status === 409 && d.error === 'stale' && d.draft && d.draft.keys) {
             /* the merge reads THIS MOMENT's keys, not the request's snapshot (Codex final review): an answer typed while
                the save was in flight is a local edit against the same base and is kept, never rolled back to the old value */
-            var m3 = merge(snapshot(), base(), d.draft.keys);
+            var m3 = merge(snapshot(), base(), d.draft.keys, localStorage.getItem(BASE) !== null);
             apply(m3.keys); setBase(d.draft.keys); state.submission = d.submission || state.submission;
             setMeta({ invitationId: a.invitationId, serverUpdatedAt: d.draft.updatedAt, dirty: m3.keep.length > 0, lastSavedAt: d.draft.savedAt, lastError: null });
             state.at = d.draft.savedAt; state.error = null;
@@ -124,7 +127,18 @@
       var m = meta();
       /* a device that has synced before and holds unsent changes pushes them first (merged on the server); a device that
          has never read the server copy for this guest reads it first — its cache never overwrites the journey */
-      if (m.invitationId === a.invitationId && m.dirty && m.serverUpdatedAt) { state.ready = true; return D.push('auto').then(function () { return D.refresh(); }); }
+      if (m.invitationId === a.invitationId && m.dirty && m.serverUpdatedAt) {
+        state.ready = true;
+        /* a browser upgraded with unsent edits and no merge base reads the server first: if the server still holds the
+           revision this device knows, that copy IS the base — the push that follows then merges three ways as it should */
+        if (localStorage.getItem(BASE) === null) {
+          return fetch(API, { headers: headers() }).then(function (r) { return r.json(); }).catch(function () { return null; }).then(function (g) {
+            if (g && g.ok && g.draft && g.draft.keys && g.draft.updatedAt === m.serverUpdatedAt) setBase(g.draft.keys);
+            return D.push('auto').then(function () { return D.refresh(); });
+          });
+        }
+        return D.push('auto').then(function () { return D.refresh(); });
+      }
       if (m.invitationId === a.invitationId && m.dirty) pending = true;
       return fetch(API, { headers: headers() }).then(function (r) { return r.json(); }).then(function (g) {
         if (!g || !g.ok) return g;
