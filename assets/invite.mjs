@@ -135,7 +135,7 @@ function migrateLegacy(legacy, partyId, guestId) {
     /* the profile: only what this guest wrote in their own name; the retired
      * questions (comfort, anything, access) are not carried */
     if (mine && mine.profile) {
-      const keep = ['coffeetea', 'flavor', 'drink', 'avoid'];
+      const keep = ['coffeetea', 'flavor', 'drink'];   /* `avoid` (Question 5) retired 19 Sep 2026 */
       const wroteSelf = !(mine.history || []).some((h) => /^profile\./.test(h.field) && h.by && h.by !== guestId);
       if (wroteSelf) { keep.forEach((k) => { if (mine.profile[k]) out.guests[guestId].profile[k] = mine.profile[k]; }); note.moved.push('profile'); }
       else note.moved.push('profile:skipped-written-by-another');

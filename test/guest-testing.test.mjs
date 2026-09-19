@@ -68,6 +68,9 @@ test('COST SAVING → FULL EXPERIENCE: a preset is revised by a preset, a manual
   J.SEGMENTS.forEach((s) => J.skip(s.key, cs.selfArranged.includes(s.key), 'cost'));
   assert.equal(lineOf(w, 'wedstay').id, 'airbnb-2br'); assert.equal(J.skippedBy('train'), 'cost');
   const plan = J.fullExperience();
+  assert.equal(J.isSkipped('train'), true, 'computing the plan changes nothing (release 013: the plan is pure); the lift is applied on confirm');
+  assert.deepEqual(JSON.parse(JSON.stringify(plan.unskip)).includes('train'), true, 'the plan names the preset decline it lifts');
+  plan.unskip.forEach((k) => J.skip(k, false));
   plan.remove.forEach((id) => B.remove(id)); plan.add.forEach((it) => B.put(it));
   assert.equal(lineOf(w, 'wedstay').id, 'wedstay', 'the Cost Saving residence gave way to the approved wedding stay');
   assert.equal(J.isSkipped('train'), false, 'a preset decline was lifted');
@@ -97,7 +100,7 @@ test('ABOUT YOU: step 05 is required — the allergy answer and the photography 
   assert.match(g, /key: 'about', n: '05', label: 'About You', href: 'about-you\.html', required: true/);
   assert.match(g, /var ALLERGY = \{ key: 'allergy', n: '01', q: 'Do you have any food allergies\?', required: true/);
   assert.match(g, /key: 'drink', n: '04', q: 'Favourite drink'/);
-  assert.match(g, /key: 'film', n: '06', q: 'Favourite film'/); assert.match(g, /key: 'music', n: '07', q: 'Favourite music'/);
+  assert.match(g, /key: 'film', n: '05', q: 'Favourite film'/); assert.match(g, /key: 'music', n: '06', q: 'Favourite music'/);   /* Question 5 ("rather avoid") retired 19 Sep 2026 */
   assert.match(g, /aboutMissing: function \(\) \{[\s\S]*?if \(!this\.photoAck\(\)\) out\.push/, 'the acknowledgement holds the step');
   assert.match(g, /if \(key === 'about'\) return this\.applicable\('about'\) \? this\.aboutMissing\(\) : \[\];/, 'documents and consent never hold the step; a guest not joining the trip owes no hospitality answer');
   const inv = src('invitation.html');

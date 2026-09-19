@@ -50,10 +50,27 @@ export class Drafts {
     if (!invitationId) return json({ ok: false, error: 'invitation required' }, 400);
 
     /* reads are serialised with writes too: a seed can never interleave with a save */
-    if (op === 'get') { return await this.state.blockConcurrencyWhile(async () => { try { return json({ ok: true, draft: await this.current(invitationId) }); } catch (e) { return json({ ok: false, error: e && e.seed ? 'draft store unavailable' : 'draft could not be read', retry: true }, 503); } }); }
+    if (op === 'get') { return await this.state.blockConcurrencyWhile(async () => { try { return json({ ok: true, draft: await this.current(invitationId), epoch: (await this.storage.get('epoch')) || null }); } catch (e) { return json({ ok: false, error: e && e.seed ? 'draft store unavailable' : 'draft could not be read', retry: true }, 503); } }); }
+
+    /* THE CLEAN RESET (Owner, 19 Sep 2026): the actor forgets the draft and is marked seeded, so the (deleted) KV mirror can
+       never bring an older copy back; the Worker calls this for every invitation the register knows, after the GR check */
+    if (op === 'reset') {
+      return await this.state.blockConcurrencyWhile(async () => {
+        const d = await this.storage.get('draft'), had = !!d;
+        if (!(body && body.dryRun === false)) return json({ ok: true, dryRun: true, invitationId, had, draft: body && body.snapshot ? (d || null) : undefined });
+        /* THE EPOCH IS THE ACTOR'S OWN (Codex pre-deploy review, 19 Sep 2026): a write that does not carry it is refused here, in
+           the same serialised step as every other write — even while the sweep is still running, even when KV cannot be read */
+        const epoch = String(body.epoch || '');
+        if (!epoch) return json({ ok: false, error: 'epoch required' }, 400);
+        await this.storage.delete('draft'); await this.storage.put('seeded', true); await this.storage.put('epoch', epoch);
+        return json({ ok: true, dryRun: false, invitationId, had, cleared: had, draft: d || null, epoch });
+      });
+    }
 
     if (op === 'put') {
       return await this.state.blockConcurrencyWhile(async () => {
+        const epoch = (await this.storage.get('epoch')) || null;
+        if (epoch && body.seenReset !== epoch) return json({ ok: false, error: 'reset', resetAt: epoch }, 409);
         let prev; try { prev = await this.current(invitationId); } catch (e) { return json({ ok: false, error: e && e.seed ? 'draft store unavailable' : 'draft could not be read', retry: true }, 503); }
         const incoming = {};
         for (const k of DRAFT_KEYS) if (body.keys && typeof body.keys[k] === 'string') incoming[k] = body.keys[k];

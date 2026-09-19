@@ -30,7 +30,7 @@ const EVENTS = [
 ];
 /* MY FAVORITE FLAVOR (Owner, 18 Sep 2026): one of six; an older record's snack answer counts only when it is one of the six */
 const FLAVORS = ['Coffee', 'Milk', 'Butter', 'Pandan', 'Matcha Green Tea', 'Strawberry Milk'];
-const PROFILE = [['coffeetea', 'Coffee or tea'], ['flavor', 'My Favorite Flavor'], ['drink', 'Favourite drink'], ['avoid', 'Rather avoid'], ['film', 'Favourite film'], ['music', 'Favourite music']];
+const PROFILE = [['coffeetea', 'Coffee or tea'], ['flavor', 'My Favorite Flavor'], ['drink', 'Favourite drink'], ['film', 'Favourite film'], ['music', 'Favourite music']];
 function profileValue(profile, k) {
   const p = profile || {};
   if (k !== 'flavor') return p[k] || '';

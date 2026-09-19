@@ -22,6 +22,7 @@ assets/images/incoming/
 src/*.private.json
 src/*.private.csv
 src/*.private.txt
+src/*.private.tsv
 
 # internal governance docs (contain budget/vendor figures) — never in the public repo
 docs/DECISION-REGISTER.md

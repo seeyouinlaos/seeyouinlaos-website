@@ -66,8 +66,8 @@ function grAuthorised(request, env) {
   for (let i = 0; i < secret.length; i++) diff |= given.charCodeAt(i) ^ secret.charCodeAt(i);
   return diff === 0;
 }
-const GR_SEATING_OPS = ['config', 'state', 'assign', 'unassign', 'plan', 'rekey'];
-const GR_ROOMS_OPS = ['plan', 'migrate', 'assign', 'unassign'];
+const GR_SEATING_OPS = ['config', 'state', 'assign', 'unassign', 'plan', 'rekey', 'reset'];
+const GR_ROOMS_OPS = ['plan', 'migrate', 'assign', 'unassign', 'reset'];
 
 export default {
   async fetch(request, env) {
@@ -144,6 +144,26 @@ export default {
         try { const raw = await request.text(); const b = JSON.parse(raw); const h = new Headers(request.headers); if (b && typeof b.bearer === 'string') h.set('x-siyl-auth', b.bearer); delete b.bearer; return handleDraft(new Request(request.url, { method: 'PUT', headers: h, body: JSON.stringify(b) }), env); } catch (e) { return json({ ok: false, error: 'invalid JSON' }, 400); }
       }
       return handleDraft(request, env);
+    }
+    /* THE CLEAN RESET (Owner, 19 Sep 2026): every guest-generated transactional state, in one Guest-Relations-protected
+       operation — dry run by default, execution only with the exact confirmation words */
+    if (url.pathname === '/api/gr/reset') {
+      if (!env.GR_TOKEN) return json({ ok: false, error: 'not enabled' }, 503);
+      if (!grAuthorised(request, env)) return json({ ok: false, error: 'unauthorised' }, 401);
+      if (request.method !== 'POST') return json({ ok: false, error: 'method not allowed' }, 405);
+      return handleGrReset(request, env);
+    }
+    /* GUEST RELATIONS: one guest's stored submission record as it was sent (the source of both emails) — the GR token only */
+    if (url.pathname === '/api/gr/record') {
+      if (!env.GR_TOKEN) return json({ ok: false, error: 'not enabled' }, 503);
+      if (!grAuthorised(request, env)) return json({ ok: false, error: 'unauthorised' }, 401);
+      if (!env.REG_KV) return json({ ok: false, error: 'no store' }, 503);
+      const inv = String(url.searchParams.get('invitation') || '').trim();
+      if (!/^INV-[A-Z0-9-]+$/.test(inv)) return json({ ok: false, error: 'invitation required' }, 400);
+      let rec = null; try { rec = JSON.parse(await env.REG_KV.get('reg:' + inv) || 'null'); } catch (e) { rec = null; }
+      if (!rec) return json({ ok: true, invitationId: inv, record: null });
+      const { mail, ...record } = rec;   /* the provider answers stay in the summary the listing gives */
+      return json({ ok: true, invitationId: inv, record, guestMail: composeGuestMail(rec), ownerMail: composeOwnerMail(rec, url.origin + '/api/status?invitation=' + encodeURIComponent(inv)) });
     }
     /* GUEST RELATIONS: every guest's canonical current data (draft, submission, rooms, seats, mail) — the GR token only */
     if (url.pathname === '/api/gr/journeys') {
@@ -415,9 +435,10 @@ async function handleDraft(request, env) {
   if (!who) return json({ ok: false, error: 'unauthorised' }, 401, corsHeaders(request));
   if (!env.REG_KV) return json({ ok: false, error: 'no store' }, 503, corsHeaders(request));
   if (request.method === 'GET') {
-    let d; try { d = await storedDraft(env, who.invitationId, true); } catch (e) { return json({ ok: false, error: 'draft store unavailable', retry: true }, 503, corsHeaders(request)); }
+    let d, actorEpoch = null; try { const r = env.DRAFTS ? await draftOp(env, who.invitationId, 'get') : null; if (r) { if (!r.ok) throw new Error(r.error || 'draft could not be read'); d = r.draft || null; actorEpoch = r.epoch || null; } else d = await storedDraft(env, who.invitationId, true); } catch (e) { return json({ ok: false, error: 'draft store unavailable', retry: true }, 503, corsHeaders(request)); }
     const submission = await submissionFor(env, who, d);
-    return json({ ok: true, invitationId: who.invitationId, guestId: who.guestId, draft: d ? { keys: d.keys, updatedAt: d.updatedAt, savedAt: d.savedAt, clientUpdatedAt: d.clientUpdatedAt || null } : null, submission }, 200, corsHeaders(request));
+    let resetAt = actorEpoch; if (!resetAt) { try { resetAt = await resetEpoch(env); } catch (e) { return json({ ok: false, error: 'draft store unavailable', retry: true }, 503, corsHeaders(request)); } }
+    return json({ ok: true, invitationId: who.invitationId, guestId: who.guestId, draft: d ? { keys: d.keys, updatedAt: d.updatedAt, savedAt: d.savedAt, clientUpdatedAt: d.clientUpdatedAt || null } : null, submission, ...(resetAt ? { resetAt } : {}) }, 200, corsHeaders(request));
   }
   if (request.method !== 'PUT' && request.method !== 'POST') return json({ ok: false, error: 'method not allowed' }, 405, corsHeaders(request));
   let body; try { const raw = await request.text(); if (raw.length > MAX_BODY) return json({ ok: false, error: 'payload too large' }, 413, corsHeaders(request)); body = JSON.parse(raw); } catch (e) { return json({ ok: false, error: 'invalid JSON' }, 400, corsHeaders(request)); }
@@ -430,9 +451,14 @@ async function handleDraft(request, env) {
      pass the same base revision. A stale device (an older `baseUpdatedAt`, or none against a stored draft) is refused with the
      current draft; its independent edits are merged on the device against the base it last read (assets/draft.js). */
   const base = body && typeof body.baseUpdatedAt === 'string' ? body.baseUpdatedAt : null;
+  /* THE CLEAN RESET (Owner, 19 Sep 2026): a device that has not read the server since the reset cannot write — its cached
+     journey would come back as the draft. It learns the epoch from the read, clears, and reads again (assets/draft.js). */
+  let epoch; try { epoch = await resetEpoch(env); } catch (e) { return json({ ok: false, error: 'draft store unavailable', retry: true }, 503, corsHeaders(request)); }   /* fail closed: a store that cannot be read is not "no reset" */
+  if (epoch && (!body || body.seenReset !== epoch)) return json({ ok: false, error: 'reset', resetAt: epoch }, 409, corsHeaders(request));
   let d = null;
   if (env.DRAFTS) {
-    const r = await draftOp(env, who.invitationId, 'put', { keys: incoming, baseUpdatedAt: base, clientUpdatedAt: body && body.clientUpdatedAt || null, reason: body && body.reason || null, guestId: who.guestId, fixedStages: fixedStagesOf(who.guestId) });
+    const r = await draftOp(env, who.invitationId, 'put', { keys: incoming, baseUpdatedAt: base, clientUpdatedAt: body && body.clientUpdatedAt || null, reason: body && body.reason || null, guestId: who.guestId, fixedStages: fixedStagesOf(who.guestId), seenReset: body && body.seenReset || null });
+    if (r.status === 409 && r.error === 'reset') return json({ ok: false, error: 'reset', resetAt: r.resetAt }, 409, corsHeaders(request));
     if (r.status === 409) { const submission = await submissionFor(env, who, r.draft); return json({ ok: false, error: 'stale', invitationId: who.invitationId, draft: { keys: r.draft.keys, updatedAt: r.draft.updatedAt, savedAt: r.draft.savedAt }, submission }, 409, corsHeaders(request)); }
     if (!r.ok) return json({ ok: false, error: r.error || 'draft could not be stored', ...(r.retry ? { retry: true } : {}) }, r.status === 400 ? 400 : 503, corsHeaders(request));
     d = r.draft;
@@ -451,6 +477,89 @@ async function handleDraft(request, env) {
   try { const g = JSON.parse(keys['siyl.guest'] || 'null'); const c = g && g.contact; if (c && (validEmail(c.email) || c.phone)) { const prev = await storedContact(env, who.invitationId) || {}; const email = validEmail(c.email) || prev.email || '', phone = (c.phone || '').trim().slice(0, 40) || prev.phone || ''; if (email !== (prev.email || '') || phone !== (prev.phone || '')) await env.REG_KV.put(contactKey(who.invitationId), JSON.stringify({ invitationId: who.invitationId, guestId: who.guestId, email, phone, at: now, from: 'draft' })); } } catch (e) { /* the draft stands */ }
   const submission = await submissionFor(env, who, d);
   return json({ ok: true, invitationId: who.invitationId, savedAt: now, updatedAt: now, submission }, 200, corsHeaders(request));
+}
+/* ---- THE CLEAN RESET (Owner, 19 Sep 2026 · hardened after the Codex pre-deploy review) ------------------------------
+   Every guest starts as though they had never used the private planning system: every room occupancy the engine stores
+   (the FIXED allocation is configuration, never stored), every seat hold, every draft actor, and the KV records a guest
+   generated — draft mirrors, contacts, profile photos, submissions and their history. Invitations, codes, the register,
+   the seating geometry and its open / frozen state, the inventory definitions and the fixed arrangement are never touched.
+   Three modes, all Guest-Relations-only:
+     · dry run (default)  what would go — counts and ids — nothing written;
+     · snapshot            the same, with every stored value (KV values with their metadata, binary as base64; the engine's
+                           occupancy records; the seat holds; the drafts) — the caller writes and verifies its private
+                           backup from this, BEFORE anything is deleted; the answer carries a digest of the key set;
+     · execute             `dryRun: false`, the exact words `confirm: "RESET ALL GUEST STATE"` and the snapshot's `digest`:
+                           refused when the key set changed since the snapshot (snapshot again). The order fences writes
+                           in flight: every draft actor takes the epoch first (a write without it is refused inside the
+                           actor, KV or no KV), then the epoch is published in KV, then the engine, the ledger and the KV
+                           records are cleared. Nothing is read from the answer to recover — the backup already exists. */
+const RESET_WORDS = 'RESET ALL GUEST STATE';
+const RESET_PREFIXES = ['draft:', 'contact:', 'avatar:', 'reg:'];
+/* the epoch: a failed read is a failed read, never "no reset" (fail closed) */
+async function resetEpoch(env) { if (!env.REG_KV) return null; return (await env.REG_KV.get('reset:epoch')) || null; }
+async function digestOf(keys) { const data = new TextEncoder().encode(keys.slice().sort().join('\n')); const h = await crypto.subtle.digest('SHA-256', data); return [...new Uint8Array(h)].map((b) => b.toString(16).padStart(2, '0')).join(''); }
+function b64(buf) { const bytes = new Uint8Array(buf); let bin = ''; for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000)); return btoa(bin); }
+async function handleGrReset(request, env) {
+  if (!env.REG_KV) return json({ ok: false, error: 'no store' }, 503);
+  let body = {}; try { body = await request.json(); } catch (e) { body = {}; }
+  const execute = body && body.dryRun === false;
+  if (execute && body.confirm !== RESET_WORDS) return json({ ok: false, error: 'the confirmation words are missing' }, 400);
+  if (execute && !(body.digest && /^[a-f0-9]{64}$/.test(String(body.digest)))) return json({ ok: false, error: 'the snapshot digest is missing — snapshot first, keep the backup, then execute' }, 400);
+  const snapshot = !execute && body && body.snapshot === true;
+  const origin = new URL(request.url).origin;
+  const at = new Date().toISOString();
+  const out = { ok: true, mode: execute ? 'execute' : snapshot ? 'snapshot' : 'dry-run', dryRun: !execute, at, rooms: null, seating: null, drafts: { actors: 0, had: 0, cleared: 0, ids: [] }, kv: { keys: [], deleted: 0 }, backup: snapshot ? {} : undefined, digest: null };
+  const grHeaders = { 'content-type': 'application/json', 'x-gr-verified': 'yes' };
+  /* the key set: every invitation the register knows, plus every mirror or record key in KV */
+  const invs = new Set();
+  const entries = await loadIndex(env, origin, true);
+  for (const e of Object.values(entries || {})) if (e && e.i) invs.add(e.i);
+  const keys = [];
+  for (const prefix of RESET_PREFIXES) {
+    let cursor; do { const l = await env.REG_KV.list({ prefix, cursor }); for (const k of l.keys) { keys.push(k.name); const inv = k.name.slice(prefix.length).split(':')[0]; if (inv) invs.add(inv); } cursor = l.list_complete ? null : l.cursor; } while (cursor);
+  }
+  keys.sort(); out.kv.keys = keys;
+  const roomsStub = env.ROOMS ? env.ROOMS.get(env.ROOMS.idFromName('rooms')) : null;
+  const seatStub = env.SEATING ? env.SEATING.get(env.SEATING.idFromName('seating')) : null;
+  const readRooms = async () => roomsStub ? (await roomsStub.fetch(new Request('https://rooms/api/rooms/reset', { method: 'POST', headers: grHeaders, body: JSON.stringify({ dryRun: true, snapshot }) }))).json() : null;
+  const readSeats = async () => seatStub ? (await seatStub.fetch(new Request('https://seating/api/seating/reset', { method: 'POST', headers: grHeaders, body: JSON.stringify({ dryRun: true, snapshot }) }))).json() : null;
+  /* the digest binds an execution to the state that was snapshotted: the KV keys, the occupancies, the holds, the actors with a draft */
+  const rooms0 = await readRooms(), seats0 = await readSeats();
+  const draftIds = [];
+  if (env.DRAFTS) for (const inv of [...invs].sort()) { const r = await draftOp(env, inv, 'reset', { dryRun: true, snapshot }); out.drafts.actors++; if (r && r.had) { out.drafts.had++; draftIds.push(inv); if (snapshot && r.draft) out.backup['do:draft:' + inv] = r.draft; } }
+  out.drafts.ids = draftIds;
+  const signature = keys.concat((rooms0 && rooms0.rows || []).map((r) => 'occ:' + r.key + '|' + r.label + '|' + r.guestId), (seats0 && seats0.rows || []).map((r) => 'hold:' + r.event + ':' + r.seatId + ':' + r.guestId), draftIds.map((i) => 'draft-actor:' + i));
+  out.digest = await digestOf(signature);
+  out.rooms = rooms0 ? { occupancies: rooms0.occupancies, fixed: rooms0.fixed, rows: (rooms0.rows || []).map((r) => ({ key: r.key, label: r.label, guestId: r.guestId })) } : null;
+  out.seating = seats0 ? { holds: seats0.holds, rows: (seats0.rows || []).map((r) => ({ event: r.event, seatId: r.seatId, guestId: r.guestId, invitationId: r.invitationId })) } : null;
+  if (snapshot) {
+    for (const r of (rooms0 && rooms0.rows || [])) out.backup[r.storageKey] = r.value;
+    for (const r of (seats0 && seats0.rows || [])) out.backup[r.storageKey] = r.value;
+    for (const k of keys) {
+      /* lossless: the bytes as base64 with the metadata; a value that cannot be read stops the snapshot (nothing is deleted on a snapshot anyway) */
+      const got = await env.REG_KV.getWithMetadata(k, { type: 'arrayBuffer' });
+      if (got === null || got.value === null) { out.backup[k] = null; continue; }
+      out.backup[k] = { base64: b64(got.value), metadata: got.metadata || null, bytes: got.value.byteLength };
+    }
+    return json(out);
+  }
+  if (!execute) return json(out);
+  if (body.digest !== out.digest) return json({ ok: false, error: 'the state changed since the snapshot — snapshot again', digest: out.digest, snapshotDigest: body.digest }, 409);
+  /* 1 · every draft actor takes the epoch and forgets its draft — one serialised step each; a write in flight without the epoch is refused there */
+  if (env.DRAFTS) for (const inv of [...invs].sort()) { const r = await draftOp(env, inv, 'reset', { dryRun: false, epoch: at }); if (r && r.cleared) out.drafts.cleared++; }
+  /* 2 · the epoch every device honours, published before anything else goes */
+  await env.REG_KV.put('reset:epoch', at, { metadata: { at, actor: String(body.actor || 'guest-relations').slice(0, 64), digest: out.digest } });
+  out.epoch = at;
+  /* 3 · the engine and the ledger */
+  if (roomsStub) out.rooms = await (await roomsStub.fetch(new Request('https://rooms/api/rooms/reset', { method: 'POST', headers: grHeaders, body: JSON.stringify({ dryRun: false }) }))).json();
+  if (seatStub) out.seating = await (await seatStub.fetch(new Request('https://seating/api/seating/reset', { method: 'POST', headers: grHeaders, body: JSON.stringify({ dryRun: false }) }))).json();
+  /* 4 · the KV records */
+  for (const k of keys) { await env.REG_KV.delete(k); out.kv.deleted++; }
+  /* 5 · what is left, read again */
+  const rooms1 = await readRooms(), seats1 = await readSeats();
+  let kvLeft = 0; for (const prefix of RESET_PREFIXES) { const l = await env.REG_KV.list({ prefix }); kvLeft += l.keys.length; }
+  out.remaining = { occupancies: rooms1 ? rooms1.occupancies : null, holds: seats1 ? seats1.holds : null, kvKeys: kvLeft };
+  return json(out);
 }
 /* ---- GUEST RELATIONS: the canonical current data of every guest with a draft or a submission ---- */
 async function handleGrJourneys(request, env) {

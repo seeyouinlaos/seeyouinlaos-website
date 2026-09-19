@@ -22,6 +22,7 @@
   var API = (location.hostname === 'seeyouinlaos-website.suthep-hrg.workers.dev' || /^(localhost|127\.0\.0\.1)$/.test(location.hostname)) ? '/api/draft' : ORIGIN + '/api/draft';
   var META = 'siyl.draft.meta';   /* { invitationId, serverUpdatedAt, dirty, lastSavedAt, lastError } */
   var BASE = 'siyl.draft.base';   /* the keys as last read from / written to the server — the base of the three-way merge */
+  var RESET = 'siyl.draft.reset'; /* the server's reset epoch this device has honoured (THE CLEAN RESET, Owner, 19 Sep 2026) */
   var state = { phase: 'idle', at: null, error: null, submission: null, applying: false, ready: false, notice: null };   /* ready: the server copy has been read once for this sign-in; notice: a conflict the guest should see until their next own change */
   var timer = null, inflight = null, pulled = '', pending = false, queued = null;
   function base() { try { return JSON.parse(localStorage.getItem(BASE) || 'null') || {}; } catch (e) { return {}; } }
@@ -103,6 +104,29 @@
   }
 
   function auth() { try { return JSON.parse(localStorage.getItem('siyl.auth') || 'null'); } catch (e) { return null; } }
+  /* THE CLEAN RESET (Owner, 19 Sep 2026 · hardened after the Codex pre-deploy review): when the server names a reset epoch
+     this device has not honoured yet, a device that had synchronised BEFORE it (a merge base or a server revision from before
+     the epoch) drops the whole journey it cached — every key, the merge base and the meta; nothing of the old record is
+     carried into the new era, not even a key touched while the copy was being read (a room joined meanwhile comes back from
+     the engine, which is the truth). A device that never synchronised (no base, no server revision) is a fresh one: what it
+     typed is post-reset and stays. The server refuses any write that does not carry the epoch, so no cache can push an older
+     trip back. Returns true when it cleared. */
+  function honourReset(epoch) {
+    if (!epoch) return false;
+    var seen = ''; try { seen = localStorage.getItem(RESET) || ''; } catch (e) { seen = ''; }
+    if (seen === epoch) return false;
+    var m = meta(), synced = localStorage.getItem(BASE) !== null || !!m.serverUpdatedAt || !!m.lastSavedAt;
+    var older = synced && (!m.serverUpdatedAt || m.serverUpdatedAt < epoch);
+    var cleared = false;
+    if (older) {
+      KEYS.forEach(function (k) { if (localStorage.getItem(k) !== null) { localStorage.removeItem(k); cleared = true; } });
+      try { localStorage.removeItem(BASE); localStorage.removeItem(META); } catch (e) {}
+    }
+    try { localStorage.setItem(RESET, epoch); } catch (e) {}
+    if (cleared) { state.notice = null; state.applying = true; try { ['siyl:guest', 'siyl:bag', 'siyl:temple', 'siyl:docs'].forEach(function (ev) { try { document.dispatchEvent(new CustomEvent(ev)); } catch (e) {} }); } finally { state.applying = false; } }
+    return cleared;
+  }
+  function seenReset() { try { return localStorage.getItem(RESET) || null; } catch (e) { return null; } }
   function meta() { try { return JSON.parse(localStorage.getItem(META) || 'null') || {}; } catch (e) { return {}; } }
   function setMeta(patch) { var m = Object.assign(meta(), patch); try { localStorage.setItem(META, JSON.stringify(m)); } catch (e) {} return m; }
   function snapshot() { var out = {}; KEYS.forEach(function (k) { var v = localStorage.getItem(k); if (v !== null) out[k] = v; }); return out; }
@@ -144,11 +168,17 @@
       var keys = snapshot(); if (!Object.keys(keys).length) return Promise.resolve({ ok: false, error: 'nothing to save' });
       state.phase = 'saving'; state.error = null; announce();
       var m = setMeta({ invitationId: a.invitationId, dirty: true });
-      var body = { invitationId: a.invitationId, keys: keys, clientUpdatedAt: new Date().toISOString(), reason: reason || 'auto', baseUpdatedAt: m.serverUpdatedAt || null };
+      var body = { invitationId: a.invitationId, keys: keys, clientUpdatedAt: new Date().toISOString(), reason: reason || 'auto', baseUpdatedAt: m.serverUpdatedAt || null, seenReset: seenReset() };
       var req = fetch(API, { method: 'PUT', headers: headers(), body: JSON.stringify(body) })
         .then(function (r) { return r.json().then(function (d) { d.status = r.status; return d; }); })
         .then(function (d) {
           if (!same(s)) return { ok: false, error: 'session changed' };
+          /* THE SERVER WAS RESET after this device last read it: the cached journey goes, the server copy is read again */
+          if (d && d.status === 409 && d.error === 'reset' && d.resetAt) {
+            honourReset(d.resetAt);
+            inflight = null; state.phase = 'idle'; state.ready = false; pending = false; pulled = '';
+            return D.pull().then(function () { return { ok: false, error: 'reset', applied: true }; });
+          }
           /* STALE DEVICE (Owner, 17 Sep 2026 · Codex P1-2): the server holds a newer revision — merged three ways against the base
              this device last read: a removal elsewhere stands, an independent edit made here is kept and sent again */
           if (d && d.status === 409 && d.error === 'stale' && d.draft && d.draft.keys) {
@@ -215,6 +245,7 @@
       return fetch(API, { headers: headers() }).then(function (r) { return r.json(); }).then(function (g) {
         if (!same(s)) return null;
         if (!g || !g.ok) return g;
+        if (g.resetAt && honourReset(g.resetAt)) { before = snapshot(); m = meta(); pending = false; }
         state.submission = g.submission || null;
         if (g.draft && g.draft.keys) {
           var local = snapshot(), localEmpty = !Object.keys(local).length;
@@ -310,6 +341,6 @@
   /* Continue buttons flush the draft on their way */
   document.addEventListener('click', function (e) { var b = e.target && e.target.closest ? e.target.closest('[data-continue]') : null; if (b) D.flush('continue'); }, true);
   /* the page-hide beacon: only from a device that has read the server copy (a never-synced cache must not overwrite the journey) */
-  if (typeof window.addEventListener === 'function') window.addEventListener('pagehide', function () { var m = meta(); if (m.dirty && m.serverUpdatedAt && state.ready && signedIn() && navigator.sendBeacon) { try { var a = auth(); navigator.sendBeacon(API + '?beacon=1', new Blob([JSON.stringify({ invitationId: a.invitationId, keys: snapshot(), clientUpdatedAt: new Date().toISOString(), reason: 'auto', baseUpdatedAt: m.serverUpdatedAt || null, bearer: a.bearer })], { type: 'application/json' })); } catch (e) {} } });
+  if (typeof window.addEventListener === 'function') window.addEventListener('pagehide', function () { var m = meta(); if (m.dirty && m.serverUpdatedAt && state.ready && signedIn() && navigator.sendBeacon) { try { var a = auth(); navigator.sendBeacon(API + '?beacon=1', new Blob([JSON.stringify({ invitationId: a.invitationId, keys: snapshot(), clientUpdatedAt: new Date().toISOString(), reason: 'auto', baseUpdatedAt: m.serverUpdatedAt || null, seenReset: seenReset(), bearer: a.bearer })], { type: 'application/json' })); } catch (e) {} } });
   try { pullOnce(); } catch (e) {}
 })();

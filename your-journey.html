@@ -9,7 +9,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 .bag{width:44px;height:44px;display:flex;align-items:center;justify-content:center;position:relative;color:#313131;text-decoration:none}.bag .bgi{display:block}
 .bb{position:absolute;top:1px;right:0;min-width:14px;height:14px;padding:0 3px;background:#313131;color:#F3EEE7;font-size:8.5px;line-height:1;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;display:none;align-items:center;justify-content:center;box-shadow:0 0 0 2px #F3EEE7;border-radius:1px}
 </style>
-<link rel="stylesheet" href="assets/aman.css?v=98576b60"><link rel="stylesheet" href="assets/prep.css?v=69e32263"></head><body>
+<link rel="stylesheet" href="assets/aman.css?v=98576b60"><link rel="stylesheet" href="assets/prep.css?v=cd2143af"></head><body>
 <header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="cart.html" aria-label="My Bag"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main class="prep-page" id="your-journey">
 <div class="prep-head">
@@ -39,8 +39,8 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/aman.js?v=aba68a3c"></script>
 <script src="assets/rooms-data.js?v=c8052faf"></script>
 <script src="assets/pricing.js?v=e864296d"></script>
-<script src="assets/guest.js?v=dab9e334"></script>
-<script src="assets/draft.js?v=cb55a2c7"></script>
+<script src="assets/guest.js?v=fca1c304"></script>
+<script src="assets/draft.js?v=353f596a"></script>
 <script src="assets/confirm.js?v=f35e0aa8"></script>
 <script src="assets/temple.js?v=a5a16527"></script>
 <script src="assets/rooms.js?v=5d4c69a5"></script>
@@ -52,9 +52,9 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/vendor/qrcode.js?v=18ae399f"></script>
 <script src="assets/travelpass.js?v=ab2f5112"></script>
 <script src="assets/transport-data.js?v=f54e56e9"></script>
-<script src="assets/journey.js?v=092bda16"></script>
+<script src="assets/journey.js?v=2b2b6ac3"></script>
 <script src="assets/prep-shell.js?v=85f4a5a0"></script>
-<script type="module" src="assets/invite.mjs?v=3dc5396d"></script>
+<script type="module" src="assets/invite.mjs?v=29231ccf"></script>
 <script>
 /* ============================================================================
    02 · YOUR JOURNEY — the guest's own journey, in true chronology.
@@ -343,13 +343,13 @@ if(!open.length&&any){
       ? 'Every stage is chosen. Review &amp; Send shares your trip with Guest Relations.'
       : 'The stages below you are arranging yourself. Review &amp; Send shares the rest with Guest Relations.')+'</p>'+
     (SIYL_BAG.has('airbnb-2br')?'<p class="t-b2 measure-w">The private residence is an independent stay: the wedding programme is yours as it stands, and arrival, departure, transfers and personal logistics are arranged by you.</p>':'')+
-    selfList+'<p class="t-b2">You can still change how the journey is composed:</p>'+modes+'</div>';
+    fxSummary()+selfList+'<p class="t-b2">You can still change how the journey is composed:</p>'+modes+'</div>';
 }else if(!open.length){box.innerHTML='';}
 else{
   box.innerHTML='<div class="p-card"><p class="t-l1 open">'+esc(J.statusLine())+'</p>'+
     '<h2 class="t-h1">Start with our suggested trip</h2>'+
     '<p class="t-b2 measure-w">Choose how you would like to travel and stay at each stage below — or let the trip complete itself, and change any stage afterwards.</p>'+
-    modes+selfList+'</div>'}
+    fxSummary()+modes+selfList+'</div>'}
 var fb=document.getElementById('fxb');if(fb)fb.addEventListener('click',function(){fxOpen('full')});
 var cb=document.getElementById('csb');if(cb)cb.addEventListener('click',function(){fxOpen('cost')})}
 /* the scope controls: a destination toggles; all / none are one tap; a change releases what no longer belongs (own resources only) */
@@ -395,7 +395,35 @@ function reconcileScope(){
 
 /* ---- COMPLETE / ESSENTIAL JOURNEY: one confirmation, inside the shell's own
  * detail layer. Swiping between the two Essential cards commits nothing. */
-var FXMODE='full',CSOPTS=[],CSPICK=0;
+var FXMODE='full',CSOPTS=[],CSPICK=0,FX_DONE=null;
+/* COMPLETE TRIP · THE PREVIEW (Owner, 19 Sep 2026): exactly what confirming selects, stage by stage, before anything is
+   held — the suggested product and its amount; a replacement named as such when the suggested room is full; a stage with
+   no place left said plainly; a stage the guest chose or declined, or the hosts' arrangement, left as it is. Nothing is
+   selected by looking. */
+var FX_PLAN=null;
+/* the signature of a plan: stage · why · product · amount — the confirm compares the previewed one with the one it would apply */
+function fxSig(plan){return plan.plan.map(function(x){var it=x.items&&x.items[0];return x.seg.key+':'+x.why+':'+(x.room?x.room.slug:'')+':'+(it?it.id+'@'+(it.price==null?'':it.price):'')}).join('|')}
+function fxPreview(changed){
+var box=document.getElementById('csel');if(!box)return;
+var plan=J.fullExperience(),rows='';FX_PLAN={sig:fxSig(plan),at:Date.now()};
+plan.plan.forEach(function(x){
+  var seg=x.seg,label='<span class="fxw">'+esc(seg.when)+' · '+esc(seg.place)+'</span>';
+  if(x.why==='kept'){rows+='<li class="fxr fxr-kept">'+label+'<b>'+esc(x.how==='arranged'?'Arranged for you':x.how==='declined'?'Not joining — as you decided':'As you chose')+'</b><span class="fxn">stays exactly as it is</span></li>';return}
+  if(x.why==='sold-out'){rows+='<li class="fxr fxr-open">'+label+'<b>No room left</b><span class="fxn">Guest Relations will find an arrangement with you — nothing is invented here.</span></li>';return}
+  var it=x.items[0]||{},amount=it.price!=null?P.money(it.price)+(it.room?' per person':''):(it.complimentary?'Complimentary':'');
+  var name=(x.room?x.room.name+' · ':'')+esc(it.name||'');
+  rows+='<li class="fxr'+(x.why==='fallback'?' fxr-fb':'')+'">'+label+'<b>'+name+(amount?' <span class="fxa">'+esc(amount)+'</span>':'')+'</b>'+
+    (x.why==='fallback'?'<span class="fxn">The suggested '+esc(x.wanted&&x.wanted.name||'room')+' is full — this is the nearest room with a place. You can change it afterwards.</span>':'')+'</li>'});
+box.innerHTML=(changed?'<p class="t-b2 measure-w" data-fx-changed><b>Availability changed while you were looking.</b> This is the trip as it can be selected now — please look again before adding it.</p>':'')+
+  '<p class="t-l1" style="margin-top:4px">What the complete trip selects</p><ul class="fxl">'+rows+'</ul>'+
+  (plan.plan.length?'':'<p class="t-b2">Every stage of your trip already has an answer.</p>')}
+function fxSummary(){
+if(!FX_DONE)return '';
+var name=function(k){var s2=J.SEGMENTS.filter(function(z){return z.key===k})[0];return s2?s2.when+' · '+s2.place:k};
+var h='<p class="t-b2 measure-w" data-fx-summary><b>The complete trip filled '+FX_DONE.filled.length+(FX_DONE.filled.length===1?' stage':' stages')+' for you'+(FX_DONE.kept.length?', and left '+FX_DONE.kept.length+' as you had '+(FX_DONE.kept.length===1?'it':'them'):'')+'.</b>'+
+  (FX_DONE.fallback.length?' Replaced because the suggested room was full: '+FX_DONE.fallback.map(name).join(' · ')+'.':'')+
+  (FX_DONE.open.length?' Still open — no room left: '+FX_DONE.open.map(name).join(' · ')+'.':'')+' Every stage below shows what was selected; change any of them.</p>';
+return h}
 function csHtml(opts){
 var cards=opts.map(function(o){
   var av='';
@@ -436,9 +464,10 @@ if(!o)return;
 g.disabled=!o.available;
 g.textContent=o.available?'Use this Essential option':'Not available';
 document.getElementById('fxp').textContent=o.note+' Every other stage of the journey becomes self-arranged: you organise and fund your own travel to and from Vientiane.'}
+var FX_OPEN=false,FX_DECIDING=false;
 function fxOpen(mode){
-if(!mode){if(SH)SH.closeDrawer();return}
-FXMODE=mode;
+if(!mode){FX_OPEN=false;if(SH)SH.closeDrawer();return}
+FXMODE=mode;FX_OPEN=mode==='full';
 var cost=mode==='cost';
 var h='<p class="t-l1">'+(cost?'Essential trip':'Complete trip')+'</p>'+
   '<h2 class="t-h1" style="margin-top:8px">'+(cost?'Two ways to stay for the wedding.':'Complete the remaining trip.')+'</h2>'+
@@ -449,6 +478,7 @@ var h='<p class="t-l1">'+(cost?'Essential trip':'Complete trip')+'</p>'+
 if(!SH)return;
 SH.drawer(h,function(){
   document.getElementById('fxc').addEventListener('click',function(){fxOpen(null)});
+  if(!cost)fxPreview();
   if(cost)csBuild();
   document.getElementById('fxg').addEventListener('click',fxConfirm);
   var g=document.getElementById('fxg');if(g)g.focus()})}
@@ -465,6 +495,14 @@ async function holdStays(items){
 async function fxConfirm(){
 var mode=FXMODE,pick=CSOPTS[CSPICK];
 if(mode==='cost'&&(!pick||!pick.available))return;
+/* the complete trip decides with the drawer still open: the engine is read again, the plan compared with the one shown —
+   a change is said in place and nothing is applied; only an unchanged plan closes the drawer and is added */
+if(mode!=='cost'){
+  var fxg=document.getElementById('fxg');if(fxg){fxg.disabled=true;fxg.textContent='Checking availability…'}
+  FX_DECIDING=true;try{if(U&&U.load)await U.load(true)}finally{FX_DECIDING=false}
+  var planNow=J.fullExperience();
+  if(!FX_PLAN||fxSig(planNow)!==FX_PLAN.sig){fxPreview(true);if(fxg){fxg.disabled=false;fxg.textContent='Add the complete trip'}return}
+}
 fxOpen(null);
 gated(async function(){
   if(mode==='cost'){
@@ -478,10 +516,17 @@ gated(async function(){
     J.SEGMENTS.forEach(function(s2){J.skip(s2.key,plan.selfArranged.indexOf(s2.key)>=0,'cost')});
     plan.add.filter(function(it){return !it.room||it.interest}).forEach(function(it){it.qty=1;SIYL_BAG.put(it)});
   }else{
+    /* THE CONFIRM APPLIES THE PLAN THAT WAS SHOWN (Codex pre-deploy review): compared above on a fresh engine read; the same
+       plan is computed here again and applied */
     var plan2=J.fullExperience();
+    /* a stage the Essential trip had declined is open to the complete trip again — applied now, never while previewing */
+    plan2.unskip.forEach(function(k){J.skip(k,false)});
     plan2.remove.forEach(function(id){if(!plan2.add.some(function(it){return it.id===id&&it.room}))SIYL_BAG.remove(id)});
     var left=await holdStays(plan2.add);
     left.forEach(function(it){var seg=J.SEGMENTS.filter(function(s2){return s2.ids.indexOf(it.id)>=0})[0];if(seg&&!(J.soldOutStages||[]).some(function(x){return x.key===seg.key}))(J.soldOutStages=J.soldOutStages||[]).push(seg)});
+    /* what the complete trip did, said in the panel: filled · replaced · left open (the stage cards carry the products themselves) */
+    FX_DONE={at:new Date().toISOString(),filled:plan2.plan.filter(function(x){return x.why==='suggested'||x.why==='fallback'}).filter(function(x){return !left.some(function(it){return x.seg.ids.indexOf(it.id)>=0})}).map(function(x){return x.seg.key}),
+      fallback:plan2.plan.filter(function(x){return x.why==='fallback'}).map(function(x){return x.seg.key}),open:(J.soldOutStages||[]).map(function(x){return x.key}),kept:plan2.kept.slice()};
   }
   render();
   var d=document.getElementById('dec');if(d)d.scrollIntoView({behavior:'smooth',block:'center'});
@@ -496,6 +541,8 @@ box.innerHTML='<div class="p-card" style="margin-top:var(--s5)"><p class="t-l1 o
 box.scrollIntoView({behavior:'smooth',block:'center'})}
 document.addEventListener('siyl:bag',function(){var b=document.getElementById('csnote');if(b)b.innerHTML=''});
 
+/* the engine's answer while the drawer is OPEN redraws the preview (never while a confirm is deciding — the drawer is closed then) */
+document.addEventListener('siyl:units',function(){if(FX_OPEN&&!FX_DECIDING&&FXMODE==='full'&&document.getElementById('csel')&&document.querySelector('.fxl'))fxPreview(false)});
 document.addEventListener('siyl:bag',render);
 document.addEventListener('siyl:confirm',render);
 document.addEventListener('siyl:temple',render);

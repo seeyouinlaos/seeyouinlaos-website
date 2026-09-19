@@ -98,7 +98,7 @@ test('FLOW · step 03 is every event, and the Sangkhathan while attending the te
 test('FLOW · step 05: allergy NO completes; YES needs details; every visible question must be answered (Owner, 15 Sep 2026); photography must be acknowledged; documents never block', () => {
   const w = page({ auth: PEGGY });
   const G = w.SIYL_GUEST, D = w.SIYL_DOCS;
-  const QS = ['profile:coffeetea', 'profile:flavor', 'profile:drink', 'profile:avoid', 'profile:film', 'profile:music'];
+  const QS = ['profile:coffeetea', 'profile:flavor', 'profile:drink', 'profile:film', 'profile:music'];
   deq(G.missingFor('about').map((m) => m.key), ['allergy', ...QS, 'photo']);
   G.setAllergy('yes');
   deq(G.missingFor('about').slice(0, 2).map((m) => [m.key, m.href]), [['allergy-details', 'about-you.html#allergy-details'], ['profile:coffeetea', 'about-you.html#q-coffeetea']]);
@@ -113,7 +113,7 @@ test('FLOW · step 05: allergy NO completes; YES needs details; every visible qu
   G.setPhotoAck(true);
   assert.equal(G.done('about'), false, 'five questions still open hold the step');
   assert.equal(G.mayEnter('review'), false);
-  for (const [k, v] of [['flavor', 'Pandan'], ['drink', 'Water'], ['avoid', 'Nothing'], ['film', 'In the Mood for Love'], ['music', 'Jazz']]) G.setProfile('g-peggy', k, v);
+  for (const [k, v] of [['flavor', 'Pandan'], ['drink', 'Water'], ['film', 'In the Mood for Love'], ['music', 'Jazz']]) G.setProfile('g-peggy', k, v);
   assert.equal(G.done('about'), true, 'no document, no consent needed');
   G.setAllergy('no');
   assert.equal(G.allergyDetails(), '', 'NO never keeps stale details');
@@ -121,8 +121,8 @@ test('FLOW · step 05: allergy NO completes; YES needs details; every visible qu
   assert.equal(D.consentDecided('g-peggy'), false, 'the publication consent is a separate optional choice');
   assert.equal(G.photoAck().textVersion, G.PHOTO_VERSION);
   /* the retired questions are truly gone */
-  deq(G.PROFILE.map((q) => q.key), ['coffeetea', 'flavor', 'drink', 'avoid', 'film', 'music']);
-  deq(G.PROFILE.map((q) => q.n), ['02', '03', '04', '05', '06', '07'], 'sequential numbering after the allergy question');
+  deq(G.PROFILE.map((q) => q.key), ['coffeetea', 'flavor', 'drink', 'film', 'music']);
+  deq(G.PROFILE.map((q) => q.n), ['02', '03', '04', '05', '06'], 'sequential numbering after the allergy question (Question 5 "rather avoid" retired 19 Sep 2026)');
   assert.equal(G.ALLERGY.n, '01');
   for (const f of ['assets/guest.js', 'about-you.html', 'review.html']) {
     const s = src(f);

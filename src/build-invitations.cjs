@@ -131,6 +131,8 @@ async function main() {
         else if (how === 'remaining') counts.codesRetainedByRemainingGuest++;
         else if (how === 'new') counts.newCodes++;
       }
+      /* a cancelled guest's code is RETIRED: the row stays (the id is never reused), the code and the link are blank */
+      if (!active) token = '';
       tokens[g.guestId] = token;
       const status = !activeParty(p) ? (p.status || 'CANCELLED') : (g.status || 'ACTIVE');
       rows.push([g.guestId, invitationId, p.invitationId, quote(p.partyName), quote(g.preferredName || g.fullName), token, token ? '/register/?invite=' + token : '', status].join(','));

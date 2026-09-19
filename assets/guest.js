@@ -61,9 +61,10 @@
      * `treat` is kept in the record's history and never read as a flavour unless it is one of the six */
     { key: 'flavor', n: '03', q: 'My Favorite Flavor', hint: 'Choose one.', required: true, type: 'choice', choices: ['Coffee', 'Milk', 'Butter', 'Pandan', 'Matcha Green Tea', 'Strawberry Milk'] },
     { key: 'drink', n: '04', q: 'Favourite drink', hint: 'The one you would choose without looking at the menu.', required: true },
-    { key: 'avoid', n: '05', q: 'Anything you would rather avoid?', hint: 'A taste, a scent, a habit — anything at all. "Nothing" is an answer.', required: true },
-    { key: 'film', n: '06', q: 'Favourite film', hint: 'The one you could happily watch again.', required: true },
-    { key: 'music', n: '07', q: 'Favourite music', hint: 'A song, an album, an artist you never skip.', required: true }
+    /* QUESTION 5 REMOVED (Owner, 19 Sep 2026): "Anything you would rather avoid?" (`avoid`) is obsolete — an older answer
+     * under that key stays in a draft's record untouched, is never rendered and never required */
+    { key: 'film', n: '05', q: 'Favourite film', hint: 'The one you could happily watch again.', required: true },
+    { key: 'music', n: '06', q: 'Favourite music', hint: 'A song, an album, an artist you never skip.', required: true }
   ];
   /* REQUIRED: the guest knows that photography and filming take place. It is
    * an acknowledgement — never a consent to publication, which stays a

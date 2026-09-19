@@ -214,7 +214,7 @@ test('MY FAVORITE FLAVOR · one choice of six; nothing else is accepted; the ret
   const w3 = page({ auth: PEGGY, seed: { 'siyl.guest': { guests: { [id]: { submitted: {}, profile: { treat: 'Mango sticky rice' }, history: [] } } } } });
   assert.equal(w3.SIYL_GUEST.profile(id, 'flavor'), ''); assert.ok(w3.SIYL_GUEST.aboutMissing().some((m) => m.key === 'profile:flavor'));
   /* the page renders the six as one radiogroup; the draft keeps the key */
-  assert.match(src('about-you.html'), /role="radiogroup" aria-label="'\+esc\(q\.q\)\+'" data-choice="'\+q\.key\+'"/); assert.match(src('about-you.html'), /role="radio" aria-checke/); assert.match(src('assets/invite.mjs'), /\['coffeetea', 'flavor', 'drink', 'avoid'\]/);
+  assert.match(src('about-you.html'), /role="radiogroup" aria-label="'\+esc\(q\.q\)\+'" data-choice="'\+q\.key\+'"/); assert.match(src('about-you.html'), /role="radio" aria-checke/); assert.match(src('assets/invite.mjs'), /\['coffeetea', 'flavor', 'drink'\]/);
   for (const f of ['about-you.html', 'review.html', 'profile.html', 'assets/i18n/siyl-i18n.js', 'src/mail-templates.js']) assert.doesNotMatch(src(f), /Favorite Snack|favourite snack/i, f + ' has no snack');
 });
 

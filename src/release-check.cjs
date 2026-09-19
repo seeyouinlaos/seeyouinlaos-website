@@ -544,8 +544,9 @@ gate('P7', 'Dress Code imagery real (23 — resort-01 retired by the owner), no 
     const head = fs.readFileSync(file).subarray(0, 4096).toString('latin1');
     if (head.indexOf('moov') < 0) problems.push(d.src + ': moov atom not at the start (faststart)');
     if (ffprobe) {
-      const r = spawnSync(ffprobe, ['-v', 'error', '-show_entries', 'stream=codec_type,codec_name,pix_fmt', '-of', 'csv=p=0', file], { encoding: 'utf8' });
-      const streams = (r.stdout || '').trim().split('\n').filter(Boolean);
+      /* the streams by field NAME (ffprobe's csv order is the stream's own, not the -show_entries order) */
+      const r = spawnSync(ffprobe, ['-v', 'error', '-show_entries', 'stream=codec_type,codec_name,pix_fmt', '-of', 'json', file], { encoding: 'utf8' });
+      let streams = []; try { streams = (JSON.parse(r.stdout || '{}').streams || []).map((x) => (x.codec_type || '') + ',' + (x.codec_name || '') + ',' + (x.pix_fmt || '')); } catch (e) { streams = []; }
       if (!streams.some((x) => /^video,h264,yuv420p$/.test(x))) problems.push(d.src + ': not H.264 yuv420p (' + streams.join(' · ') + ')');
       if (streams.some((x) => /^audio/.test(x))) problems.push(d.src + ': carries an audio stream');
     }

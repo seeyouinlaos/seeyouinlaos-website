@@ -842,3 +842,14 @@ body.seatbar-on .jbar { display: none; }
 .prep-save-btn[disabled] { opacity: .55; cursor: default; }
 .prep-save-state { margin: 0; font-family: var(--f-ui); font-size: 8.5px; letter-spacing: 1.6px; text-transform: uppercase; color: var(--p-mute); min-height: 1em; }
 .prep-save-state.is-failed { color: #8A5A55; }
+
+/* COMPLETE TRIP · THE PREVIEW (Owner, 19 Sep 2026): what confirming selects, one row per stage of the guest's trip —
+   the stage, the product with its amount, and a plain note when a room is replaced or a stage has no place left */
+.fxl { list-style: none; margin: 8px 0 0; padding: 0; border-top: 1px solid var(--p-hair); }
+.fxr { display: grid; gap: 2px; padding: 12px 0; border-bottom: 1px solid var(--p-hair); }
+.fxr .fxw { font-family: var(--f-ui); font-weight: 400; font-size: 10.5px; line-height: 1.6; letter-spacing: 2px; text-transform: uppercase; color: var(--p-mute); }
+.fxr b { font-family: var(--f-ui); font-weight: 400; font-size: 15px; line-height: 1.45; color: var(--p-ink); }
+.fxr .fxa { font-weight: 300; color: var(--p-mute); white-space: nowrap; }
+.fxr .fxn { font-family: var(--f-ui); font-weight: 300; font-size: 13px; line-height: 1.5; color: var(--p-mute); }
+.fxr-kept b, .fxr-open b { color: var(--p-mute); }
+.fxr-fb b { color: var(--p-ink); }

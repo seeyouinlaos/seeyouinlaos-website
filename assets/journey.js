@@ -224,18 +224,25 @@
      * journey it is still the one canonical configuration; the total is what
      * the retained choices come to. Lines that are not stages (1872, a spa
      * interest) are never touched. */
+    /* COMPLETE TRIP (Owner, 19 Sep 2026 · deterministic and visible): the plan is PURE — computing it changes nothing, so
+     * the preview can show exactly what confirming would do — and it says, per stage of the guest's own trip, WHY:
+     *   kept      the guest chose or declined this stage by hand, or the hosts' fixed arrangement stands
+     *   suggested the product approved for the whole journey (a FLAT leg, or the approved room with a place free)
+     *   fallback  the approved room is full — the nearest rate with a place is named as the replacement, never silently
+     *   sold out  nothing of this stage has a place left — said, never invented (no self-arranged answer is fabricated)
+     * `unskip` lists the stages a preset declined earlier (Essential trip) that the complete trip fills again — applied only
+     * when the guest confirms. */
     fullExperience: function () {
-      var P = window.SIYL_PRICE, out = [], self = this, keep = [];
-      if (!P) return { remove: [], add: [], kept: [] };
+      var P = window.SIYL_PRICE, out = [], self = this, keep = [], plan = [], unskip = [], soldOut = [];
+      if (!P) return { remove: [], add: [], kept: [], plan: [], unskip: [], soldOut: [] };
       var U0 = window.SIYL_UNITS;
       SEG.forEach(function (seg) {
-        if (U0 && U0.ready && U0.ready() && U0.fixed && U0.fixed(seg.key)) { keep.push(seg.key); return; }   /* arranged for the guest: neither removed nor added */
-        if (self.manual(seg)) { keep.push(seg.key); return; }
-        if (self.isSkipped(seg.key)) self.skip(seg.key, false);
+        if (U0 && U0.ready && U0.ready() && U0.fixed && U0.fixed(seg.key)) { keep.push(seg.key); plan.push({ seg: seg, why: 'kept', how: 'arranged' }); return; }   /* arranged for the guest: neither removed nor added */
+        if (self.manual(seg)) { keep.push(seg.key); plan.push({ seg: seg, why: 'kept', how: self.isSkipped(seg.key) ? 'declined' : 'chosen' }); return; }
+        if (self.isSkipped(seg.key)) unskip.push(seg.key);
       });
       /* one guest, one place: the room engine decides what still has a place
        * for this guest, so Full Experience can never select a full category */
-      var qty = 1;
       var free = function (win) {
         return function (slug) {
           var U = window.SIYL_UNITS;
@@ -243,16 +250,25 @@
           return U.fits(win, slug);
         };
       };
-      this.soldOutStages = [];
       var fill = SEG.filter(function (seg) { return keep.indexOf(seg.key) < 0 && self.relevant(seg); });   /* a preset fills the guest's own trip only */
       fill.forEach(function (seg) {
         var id = seg.ids[0];
-        if (P.FLAT[id]) { P.items(id).forEach(function (it) { it.by = 'full'; out.push(it); }); return; }
+        if (P.FLAT[id]) { var flat = P.items(id).map(function (it) { it.by = 'full'; out.push(it); return it; }); plan.push({ seg: seg, why: 'suggested', items: flat }); return; }
+        var wish = (window.SIYL_FULL_EXPERIENCE || {})[id] || null;
         var room = P.approved(id, free(id));
-        if (room) { P.items(id, room.slug).forEach(function (it) { it.by = 'full'; out.push(it); }); return; }
+        if (room) {
+          var items = P.items(id, room.slug).map(function (it) { it.by = 'full'; out.push(it); return it; });
+          var wanted = null;
+          if (wish && wish !== room.slug) { var at = P.locate(id); wanted = (at && at.stay.rooms.filter(function (r) { return r.slug === wish; })[0]) || { slug: wish, name: wish }; }
+          plan.push({ seg: seg, why: wanted ? 'fallback' : 'suggested', items: items, room: room, wanted: wanted });
+          return;
+        }
         /* nothing left in this stage at all — say so rather than pretend */
-        self.soldOutStages.push(seg);
+        soldOut.push(seg); plan.push({ seg: seg, why: 'sold-out' });
       });
+      /* chronological, as the trip reads */
+      plan.sort(function (a, b) { return SEG.indexOf(a.seg) - SEG.indexOf(b.seg); });
+      this.soldOutStages = soldOut;
       return {
         /* every id a FILLED stage can be answered by, alternatives included —
          * a stage the guest chose by hand is not on this list */
@@ -261,7 +277,10 @@
           return a;
         }, []),
         add: out,
-        kept: keep
+        kept: keep,
+        plan: plan,
+        unskip: unskip,
+        soldOut: soldOut
       };
     },
 

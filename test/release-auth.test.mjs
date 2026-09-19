@@ -17,10 +17,12 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const index = JSON.parse(src('register/auth-index.json')), records = JSON.parse(src('register/invitations.enc.json'));
 const PRIVATE = path.join(ROOT, 'src/invitation-tokens.private.csv');
 
+/* GUEST LIST 007 (Owner, 19 Sep 2026): the register is built from the CONTACTS sheet — 85 active guests in 63 parties, 9 cancelled */
+const ACTIVE = 85, CANCELLED = 9;
 test('REGISTER · the shipped index and bundle: one entry per active guest, every invitation INV-<guestId>, no guest twice, no id of a cancelled guest', () => {
   const entries = Object.values(index.entries);
-  assert.equal(index.v, 2); assert.equal(entries.length, 47); assert.equal(records.length, 47);
-  const guests = entries.map((e) => e.g); assert.equal(new Set(guests).size, 47, 'no guest is reachable by two entries');
+  assert.equal(index.v, 2); assert.equal(entries.length, ACTIVE); assert.equal(records.length, ACTIVE);
+  const guests = entries.map((e) => e.g); assert.equal(new Set(guests).size, ACTIVE, 'no guest is reachable by two entries');
   for (const e of entries) { assert.equal(e.i, 'INV-' + e.g); assert.match(e.p, /^INV-\d{3}$/); }
   assert.equal(entries.filter((e) => e.h === 1).length, 2, 'exactly the two hosts carry the hosts flag');
   for (const k of Object.keys(index.entries)) assert.match(k, /^[a-f0-9]{64}$/, 'the index keys are one-way digests');
@@ -28,11 +30,11 @@ test('REGISTER · the shipped index and bundle: one entry per active guest, ever
   assert.doesNotMatch(src('register/auth-index.json') + src('register/invitations.enc.json'), /\b[a-z0-9]{16}\b(?![a-f0-9])/, 'nothing code-shaped in the shipped files');
 });
 
-test('REGISTER · (private register present) every active code opens exactly its guest and its bearer maps to that guest; the two cancelled guests have nothing', { skip: !fs.existsSync(PRIVATE) }, async () => {
+test('REGISTER · (private register present) every active code opens exactly its guest and its bearer maps to that guest; the cancelled guests have nothing', { skip: !fs.existsSync(PRIVATE) }, async () => {
   const rows = fs.readFileSync(PRIVATE, 'utf8').split(/\r?\n/).slice(1).filter(Boolean).map((l) => l.split(','));
   const active = rows.filter((r) => r[7] === 'ACTIVE'), cancelled = rows.filter((r) => r[7] !== 'ACTIVE');
-  assert.equal(active.length, 47); assert.equal(cancelled.length, 2);
-  assert.equal(new Set(active.map((r) => r[5])).size, 47, 'unique codes');
+  assert.equal(active.length, ACTIVE); assert.equal(cancelled.length, CANCELLED);
+  assert.equal(new Set(active.map((r) => r[5])).size, ACTIVE, 'unique codes');
   for (const r of cancelled) assert.equal(r[5], '', 'a cancelled guest holds no code');
   let checked = 0;
   for (const r of active) {
@@ -42,7 +44,7 @@ test('REGISTER · (private register present) every active code opens exactly its
     assert.ok(e, r[0] + ' bearer indexed'); assert.equal(e.g, r[0]); assert.equal(e.i, 'INV-' + r[0]); assert.equal(e.p, r[2]);
     checked++;
   }
-  assert.equal(checked, 47);
+  assert.equal(checked, ACTIVE);
   /* a code of one guest opens no other guest's record */
   const a = await lookupByToken(active[0][5], records), b = await lookupByToken(active[1][5], records);
   assert.notEqual(a.guestId, b.guestId);

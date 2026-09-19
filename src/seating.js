@@ -352,6 +352,22 @@ export class Seating {
     }
 
     /* the operations output: every seat, its state, who holds it */
+    /* THE CLEAN RESET (Owner, 19 Sep 2026): every seat hold of every event goes — a guest's own choice and a Guest Relations
+       assignment alike (the plan starts again from nobody); the geometry, the open / frozen state and the pool are
+       configuration and stay. `dryRun` names what would go without writing. */
+    if (op === 'reset') {
+      if (!gr) return json({ ok: false, error: 'unauthorised' }, 401);
+      const body = await safeJson(request);
+      return await this.state.blockConcurrencyWhile(async () => {
+        const rows = [];
+        for (const event of EVENTS) for (const [seatId, h] of Object.entries(await this.holds(event))) rows.push({ event, seatId, guestId: h.guestId, invitationId: h.invitationId, ...(body && body.snapshot ? { storageKey: HOLD + event + ':' + seatId, value: h } : {}) });
+        if (!(body && body.dryRun === false)) return json({ ok: true, dryRun: true, holds: rows.length, rows });
+        for (const r of rows) await this.storage.delete(HOLD + r.event + ':' + r.seatId);
+        let remaining = 0; for (const event of EVENTS) remaining += Object.keys(await this.holds(event)).length;
+        return json({ ok: true, dryRun: false, cleared: rows.length, rows, remaining, at: new Date().toISOString() });
+      });
+    }
+
     if (op === 'plan') {
       const cfg = await this.config();
       const out = { ok: true, open: !!cfg.open, frozen: !!cfg.frozen, updatedAt: cfg.updatedAt || null, capacity: CAPACITY, events: {} };

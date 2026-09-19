@@ -219,6 +219,21 @@ export class Rooms {
     /* ---- Guest Relations only ---- */
     if (!gr) return json({ ok: false, error: 'unknown rooms operation' }, 404);
 
+    /* THE CLEAN RESET (Owner, 19 Sep 2026): every guest-generated occupancy goes — every `occ:` record, whoever wrote it and
+       however it got there (a join, a migration, an assignment); the FIXED allocation is configuration, never stored, never
+       touched. `dryRun` names what would go without writing. */
+    if (op === 'reset') {
+      const body = await safeJson(request);
+      return await this.state.blockConcurrencyWhile(async () => {
+        const map = await this.storage.list({ prefix: OCC });
+        const rows = [...map.entries()].map(([k, v]) => { const p = k.slice(OCC.length).split('|'); return { key: p[0], label: p[1], guestId: p[2], ...(body && body.snapshot ? { storageKey: k, value: v } : {}) }; });
+        if (!(body && body.dryRun === false)) return json({ ok: true, dryRun: true, occupancies: rows.length, rows, fixed: FIXED.length });
+        for (const k of map.keys()) await this.storage.delete(k);
+        const left = await this.storage.list({ prefix: OCC });
+        return json({ ok: true, dryRun: false, cleared: rows.length, rows, remaining: left.size, fixed: FIXED.length, at: new Date().toISOString() });
+      });
+    }
+
     if (op === 'plan') {
       const occ = await this.occupancies();
       const out = { ok: true, places: PLACES, units: {} };

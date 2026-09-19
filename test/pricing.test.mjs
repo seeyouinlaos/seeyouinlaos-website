@@ -613,7 +613,7 @@ test('ABOUT YOU is one required question, six favourites and one required acknow
   const g = readFileSync(join(ROOT, 'assets/guest.js'), 'utf8');
   const block = g.slice(g.indexOf('var PROFILE = ['), g.indexOf('var PHOTO_TEXT ='));
   const keys = [...block.matchAll(/\{ key: '([a-z]+)'/g)].map((m) => m[1]);
-  assert.deepEqual(keys, ['coffeetea', 'flavor', 'drink', 'avoid', 'film', 'music']);
+  assert.deepEqual(keys, ['coffeetea', 'flavor', 'drink', 'film', 'music']);
   /* My Favorite Flavor (Owner, 18 Sep 2026): one choice of exactly six, in this order */
   assert.match(block, /key: 'flavor', n: '03', q: 'My Favorite Flavor', hint: 'Choose one\.', required: true, type: 'choice', choices: \['Coffee', 'Milk', 'Butter', 'Pandan', 'Matcha Green Tea', 'Strawberry Milk'\]/);
   assert.doesNotMatch(block, /q: 'My Favorite Snack'|key: 'treat'/, 'the snack question is retired');
