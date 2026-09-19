@@ -1,0 +1,17 @@
+PASS journey-galleries-320 — {"over":0,"ratios":[1.25],"bkk":{"frames":17,"index":0,"label":"Sathorn Penthouse Bangkok · The house at golden hour","counter":"1 / 17","w":272,"h":218,"phRatio":1.25,"loaded":2,"pending":15,"arrows":true,"tabbable":tru
+PASS journey-galleries-390 — {"over":0,"ratios":[1.25],"bkk":{"frames":17,"index":0,"label":"Sathorn Penthouse Bangkok · The house at golden hour","counter":"1 / 17","w":342,"h":274,"phRatio":1.25,"loaded":2,"pending":15,"arrows":true,"tabbable":tru
+PASS journey-galleries-834 — {"over":0,"ratios":[1.5],"bkk":{"frames":17,"index":0,"label":"Sathorn Penthouse Bangkok · The house at golden hour","counter":"1 / 17","w":300,"h":200,"phRatio":1.5,"loaded":2,"pending":15,"arrows":true,"tabbable":true,
+PASS journey-galleries-1440 — {"over":0,"ratios":[1.5],"bkk":{"frames":17,"index":0,"label":"Sathorn Penthouse Bangkok · The house at golden hour","counter":"1 / 17","w":420,"h":280,"phRatio":1.5,"loaded":2,"pending":15,"arrows":true,"tabbable":true,
+PASS gallery-grammar-390 — {"s0":{"i":0,"f":17,"p":15,"l":"Sathorn Penthouse Bangkok · The house at golden hour"},"s1":{"i":1,"c":"2 / 17","l":"Sathorn Penthouse Bangkok · The house from above the trees"},"s3":16,"s5":1,"s6":{"i":16,"p":0},"stable
+PASS gallery-grammar-1440 — {"s0":{"i":0,"f":17,"p":15,"l":"Sathorn Penthouse Bangkok · The house at golden hour"},"s1":{"i":1,"c":"2 / 17","l":"Sathorn Penthouse Bangkok · The house from above the trees"},"s3":16,"s5":1,"s6":{"i":16,"p":0},"stable
+PASS swipe-chromium-390 — {"before":0,"after":1,"url":true,"geometry":[342,274,342,274],"over":0}
+PASS swipe-iphone-safari — {"before":0,"after":1,"url":true,"geometry":[342,274,342,274],"over":0}
+PASS iphone-experience-page — Le Du Kaan on iPhone Safari: overflow 0
+PASS no-broken-image — {"stay":{"n":43,"bad":[]},"exp":{"n":158,"bad":[]}}
+PASS restaurant-pages-no-food — bkk-thongsmith:4 bkk-tangjaiyang:1 bkk-ledukaan:4 bkk-barus:2 bkk-suhring:4 vte-laoderm:5 vte-3merchants:2 bkk-alati:3
+PASS rejected-frames-not-served — the tray martini, the cocktails, the bowls and the dish collages answer 404
+PASS cafes-rail — Dior · Café LV | Time Space Cafe | Moo Yoo Rose House | Whispering Cafe | Cafe Madeleine | Harudot | Sona Cafe and Bar | Kaogee Le Triomphe | Lacuna VTE
+PASS width-320 — no overflow · {"riverside":true,"seven":true,"pend":true}
+PASS width-834 — no overflow · {"riverside":true,"seven":true,"pend":true}
+PASS console-errors — no script or console error on any visited page
+16/16 checks passed
