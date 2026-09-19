@@ -42,4 +42,28 @@ Coverage added:
 
 ## Pass 2 — `pass-2.md`
 
-The confirming pass on the complete diff after the fix (see the file for the verdict).
+The confirming pass on the complete diff after 012-1. Codex's structured envelope failed to parse; its prose verdict named two
+orderings, both reproduced, both classified **VALID P1** and fixed (012-2). "Stage lookup without SIYL_JOURNEY and with the engine
+still loading worked in the targeted check" — the rest of the diff raised nothing further.
+
+**012-2a · A device whose engine view is older than the guest's switch could release the current hold.** Device 2 read the
+engine while Souphattra was held; device 1 switched to the Riverside; device 2 pressed Remove on its Souphattra line: its
+(stale) view said the stage's hold was Souphattra, so `ST.remove` called `leave(stage)`, and the Worker released every place
+of the stage — the Riverside. Fix at the engine: a release names its window. `src/rooms.js` `leave` takes an optional
+`window` and releases only the guest's places in that window (`released: []` and the fresh view when it holds nothing there);
+`assets/rooms.js` `U.leave(stage, win)` sends it; `assets/stay.js` `remove(win)` always names its window. The stage-wide release
+(no window) stays exactly as it was for the planner's own reconciliation (`your-journey.html` — CODEX 011-7). Device 2 then
+reads the truth from the answer (the Riverside is held) and its sync writes the held line: never nothing, never both.
+
+**012-2b · A delayed draft copy replayed onto a fresh choice carried the other hotel's line back.** The copy read before the
+choice had no stay line, the server's copy (another device) carried Souphattra, the guest chose the Riverside while the read
+was in flight: the Bag replay (`assets/draft.js`, which knows no stages) keeps both. Fix: `ST.settle()` — the leftover rule
+alone (a line of a hotel the engine does not hold while it holds another hotel of the same stage leaves) — runs on every
+`siyl:bag` change, re-entrancy guarded; nothing else of the sync runs there (no line is brought back, no unit rewritten), so the
+planner's reconciliation order (011-7) is unchanged. The full `sync()` still runs on every engine event as before.
+
+Coverage: `test/release-012.test.mjs` "a stale device's Remove releases only its own window; a replayed draft copy never keeps
+two hotels" — the engine's windowed release (nothing released for the wrong window, the stage-wide release untouched), two
+sandbox devices against one engine (device 2's Remove after device 1's switch: the Riverside hold stays, device 2 ends with the
+held line, USD 60), the replay reproduced through `SIYL_DRAFT._replay` (both lines) and settled on the `siyl:bag` event (one
+line), and the 011-7 order preserved (a Bag removal alone brings nothing back; the engine sync does).

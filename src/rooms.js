@@ -186,7 +186,11 @@ export class Rooms {
           const stage = key ? stageOf(key) : String(body && body.stage || '');
           if (!stage) return json({ ok: false, error: 'invalid release' }, 400);
           /* a fixed guest releases only their own chosen hold; the fixed allocation is never stored, never released */
-          const had = await this.mineIn(stage, guestId);
+          /* A RELEASE NAMES ITS WINDOW (Codex confirming pass, release 012): a device that still shows the Souphattra it removed
+             must not release the Riverside the guest holds meanwhile — with `window` only the places of that window go; the
+             stage-wide release (no window) stays for the planner's own reconciliation */
+          const win = String(body && body.window || '').trim();
+          const had = (await this.mineIn(stage, guestId)).filter((o) => !win || String(o.key).split('/')[0] === win);
           for (const o of had) await this.storage.delete(this.keyOf(o.key, o.label, o.guestId));
           return json({ ok: true, released: had.map((o) => ({ key: o.key, label: o.label })), ...(await this.view(identity)) });
         }

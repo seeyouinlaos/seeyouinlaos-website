@@ -65,16 +65,22 @@ My Bag, Review & Send; one stay per window (a Riverside hold and a Souphattra ho
 
 ## 5 · Tests and E2E
 
-- `test/release-012.test.mjs` (6): the stay media record, The Journey galleries, the media taxonomy (the builder refuses a dish),
+- `test/release-012.test.mjs` (8): the stay media record, The Journey galleries, the media taxonomy (the builder refuses a dish),
   the restaurant audit (Thong Smith · Tang Jai Yang · Le Du Kaan · Bar Us · the retired frames unreferenced and off disk · the
-  inventory in step), the café audit, the Riverside Hotel end to end. `npm test` **360 / 360**; release-check with gate M1.
-- `docs/acceptance/2026-09-19-release-012/e2e.mjs` (21): the galleries at 320 / 390 / 834 / 1440 (every accommodation card,
+  inventory in step), the café audit, the Riverside Hotel end to end, and — after the Codex passes (`docs/review/013-codex-release-012/`)
+  — ONE WEDDING STAY: every switch direction among Souphattra, the private residence and the Riverside against the in-memory
+  engine (one Bag line, one total, one hold, readiness clean), the leftover-line paths (remove · sync · decline), a stale
+  device's Remove releasing only its own window, a replayed draft copy settled against the engine. `npm test` **362 / 362**;
+  release-check with gate M1.
+- `docs/acceptance/2026-09-19-release-012/e2e.mjs` (25, `stage/`): the galleries at 320 / 390 / 834 / 1440 (every accommodation card,
   the transport galleries, the ratios, no overflow), the grammar on the Bangkok card at 390 and 1440 (arrows, previous on the
   first frame → the last, Home, →, End, the counter, the three hotel names, lazy frames, no layout shift), swipe on Chromium
   touch and iPhone Safari (WebKit), every frame of both records answering 200, the eight audited restaurant pages carrying no
   dish, the rejected Bar Us frames answering 404, the Cafés rail, the Riverside Hotel from The Journey to the room page to My
-  Trip, My Bag and the engine, THE HOUSES at 320 and 834, no console error.
-- The release 011 suites re-run on the same build: see `stage/`.
+  Trip, My Bag and the engine, the hotel switch through the real pages (the Souphattra card and room page name the Riverside
+  they replace, one line USD 145, one hold, and back), THE HOUSES at 320 and 834, no console error.
+- The release 011, P0 Empty Bag and account-IA suites re-run on fresh stages of the same build: `stage/SUMMARY.txt`
+  (52 / 52 · 49 / 49 · 33 / 33).
 
 ## 6 · The Bangkok destination clip
 

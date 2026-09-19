@@ -140,11 +140,14 @@
         .then(function (d) { if (d && d.units) { view = d; announce(); } else U.load(true); return d; })
         .catch(function () { return { ok: false, error: 'unreachable' }; });
     },
-    leave: function (stage) {
+    /* release the guest's place(s) in a stage — or, with `win`, only in that window of the stage (a stale device never
+       releases the other hotel the guest holds meanwhile) */
+    leave: function (stage, win) {
       var a = auth();
       if (!a || !a.guestId) return Promise.resolve({ ok: false, error: 'not signed in' });
+      var body = { invitationId: a.invitationId, guestId: a.guestId, stage: stage }; if (win) body.window = win;
       return fetch(API + '/leave', { method: 'POST', headers: headers(true),
-        body: JSON.stringify({ invitationId: a.invitationId, guestId: a.guestId, stage: stage }) })
+        body: JSON.stringify(body) })
         .then(function (r) { return r.json(); })
         .then(function (d) { if (d && d.units) { view = d; announce(); } else U.load(true); return d; })
         .catch(function () { return { ok: false, error: 'unreachable' }; });

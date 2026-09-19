@@ -117,12 +117,27 @@
       /* a leftover line: the engine holds ANOTHER hotel of this stage for the guest — the line goes, the current hold stays (Codex, release 012) */
       var m = u.ready() ? u.mine(stageOf(win)) : null;
       if (m && String(m.key).split('/')[0] !== win) { done(); return Promise.resolve({ ok: true }); }
-      /* the release is the engine's: only a released place leaves the bag; an idempotent second remove finds nothing to release */
-      return u.leave(stageOf(win)).then(function (d) {
+      /* the release is the engine's, and it names THIS window: only a released place leaves the bag; an idempotent second
+         remove finds nothing to release; a stale view never releases another hotel the guest holds meanwhile */
+      return u.leave(stageOf(win), win).then(function (d) {
         if (d && d.ok === false && d.error === 'fixed host allocation') return { ok: false, error: 'fixed' };
         if (d && d.ok === false) return d;   /* unreachable / refused: nothing changed, the line stays, the guest is told */
         done(); return { ok: true };
       });
+    },
+    /* a Bag line of a hotel the engine does not hold while it holds ANOTHER hotel of the same stage for the guest */
+    leftover: function (x) {
+      var u = U(), p = P(); if (!x || !x.room || x.interest || !u || !u.ready() || !p) return false;
+      var win = p.windowOf(x.id), m = u.mine(stageOf(win));
+      return !!(m && String(m.key).split('/')[0] !== win);
+    },
+    /* the leftover rule alone, on a Bag change made without the engine (a draft copy replayed, another tab): nothing else of
+       the sync runs here — no line is brought back, no unit rewritten — the planner's own reconciliation keeps its order */
+    settle: function () {
+      var u = U(), b = B(); if (!u || !u.ready() || !b || !b.authed()) return false;
+      var bag = b.get(), kept = bag.filter(function (x) { return !ST.leftover(x); });
+      if (kept.length === bag.length) return false;
+      b.set(kept); return true;
     },
     /* the engine and the bag agree: a place the engine holds is in the bag;
      * a line the engine does not hold is marked so the guest chooses a room */
@@ -135,11 +150,7 @@
       var kept = bag.filter(function (x) { return !fixedUnits.some(function (f) { return p.windowOf(x.id) === f.win && (!x.room || x.room === f.slug); }); });
       /* a line of a hotel the engine does not hold while it holds ANOTHER hotel of the same stage is a leftover (an older
          draft, another device): the stage is answered by the held one, the leftover leaves the Bag and the total */
-      kept = kept.filter(function (x) {
-        if (!x.room || x.interest) return true;
-        var win = p.windowOf(x.id), m = u.mine(stageOf(win));
-        return !(m && String(m.key).split('/')[0] !== win);
-      });
+      kept = kept.filter(function (x) { return !ST.leftover(x); });
       if (kept.length !== bag.length) { bag = kept; changed = true; }
       bag.forEach(function (x) {
         if (!x.room || x.interest) return;
@@ -217,5 +228,9 @@
   };
 
   document.addEventListener('siyl:units', function () { ST.sync(); });
+  /* the Bag changed without the engine (a draft copy replayed, another tab): the engine remains the truth — a leftover of
+     another hotel in a held stage leaves at once (Codex confirming pass, release 012); a second pass finds nothing to change */
+  var settling = false;
+  document.addEventListener('siyl:bag', function () { if (settling) return; settling = true; try { ST.settle(); } finally { settling = false; } });
   if (U() && U().ready()) ST.sync();
 })();
