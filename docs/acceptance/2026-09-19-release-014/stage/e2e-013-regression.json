@@ -132,7 +132,7 @@
  {
   "id": "reset-snapshot-carries-every-value",
   "ok": true,
-  "d": "{\"values\":24,\"digest\":\"52aae69b5968\",\"sameAsTheDryRunBefore\":true}"
+  "d": "{\"values\":24,\"digest\":\"aa1f7434f9dd\",\"sameAsTheDryRunBefore\":true}"
  },
  {
   "id": "reset-refuses-a-stale-snapshot",
@@ -147,7 +147,7 @@
  {
   "id": "reset-device-honours-the-epoch",
   "ok": true,
-  "d": "{\"cached\":10,\"after\":{\"contactLocal\":false,\"contactServer\":false,\"guestKey\":null,\"bag\":0,\"skips\":0,\"epoch\":\"2026-09-19T19:58:26.189Z\",\"serverBag\":null,\"serverSkip\":null,\"resetAt\":\"2026-09-19T19:58:26.189Z\",\"submission\":\"draft\",\"holds\":0}} (the old trip never came back — not on the device, not on the"
+  "d": "{\"cached\":10,\"after\":{\"contactLocal\":false,\"contactServer\":false,\"guestKey\":null,\"bag\":0,\"skips\":0,\"epoch\":\"2026-09-19T21:25:52.151Z\",\"serverBag\":null,\"serverSkip\":null,\"resetAt\":\"2026-09-19T21:25:52.151Z\",\"submission\":\"draft\",\"holds\":0}} (the old trip never came back — not on the device, not on the"
  },
  {
   "id": "reset-no-submission-remains",

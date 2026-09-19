@@ -94,7 +94,7 @@ Already active property assets (unchanged): courtyard front, arches, balconies, 
 
 Bag thumbnails: Pre-Wedding / Wedding Stay lines use the selected room's first gallery image (already live). STATUS: **COMPLETE**.
 
-### Alternative Stay · Private Residence Vientiane (`022 - Hotel - Airbnb Guest House Vientiane`)
+### Guest House complimentary · Vientiane (formerly "Private Residence"; `022 - Hotel - Airbnb Guest House Vientiane`)
 FOUND: 8 `.avif` (living room, entry, balcony, temple-roof view, window chair, plant corner, café-like bench (uncertain place → not used), map graphic → not used) + `About this space.txt`.
 USED: 6 (`guesthouse-01…06.jpg`, renamed from `airbnb-01…06.jpg` in release 014). VISUALLY VERIFIED: YES · STATUS: **COMPLETE**
 
@@ -155,7 +155,7 @@ Lines persisted in a guest's bag before this pass (no `img` stored) resolve thro
 COMPLETE
 - Van transfer · MU9632 · C642 (+ Kunming lounge) · MU5924/MU741
 - Souphattra: all seven room categories (3 / 4 / 7 / 3 / 3 / 5 / 7 images)
-- Private Residence (6) · Sathorn Penthouse (11) · Wanxiang Yueju (4 × 6)
+- Guest House complimentary (6) · Sathorn Penthouse (11) · Wanxiang Yueju (4 × 6)
 - Lijiang: 270° Viewing (6) · 270° Private Courtyard (5) · Private Soup Pool (6) · Manor · Starry Sky (9)
 - Journey Bag thumbnails: every line
 
@@ -219,7 +219,7 @@ and cannot be added to a journey.
 | Heritage Executive | selectable | 4 · FOUND | USD 155 | live |
 | The Heritage | selectable | 3 · FOUND | USD 145 | live |
 
-Sathorn Penthouse (USD 270, 11 images) · Private Residence (complimentary, 6
+Sathorn Penthouse (USD 270, 11 images) · Guest House complimentary (complimentary, 6
 images) · Siam Kempinski Deluxe Balcony King (USD 380, 8 images) unchanged.
 
 ## OWNER DECISION REQUIRED

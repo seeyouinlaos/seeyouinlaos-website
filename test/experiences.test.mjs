@@ -95,7 +95,7 @@ test('detail content exists where the source carries it; discovery places carry 
     const e = byId[x.id];
     if (e.sheet === 'FULL') {
       assert.ok(x.intro && x.sections && x.sections.length >= 5, x.id + ' full record structured');
-      assert.ok(x.practical && x.practical.price && x.practical.hours, x.id + ' practical fields');
+      assert.ok(x.practical && x.practical.price && (x.practical.hours || x.practical.sourceHours), x.id + ' practical fields');
     } else if (e.sheet === 'DETAIL') {
       /* Edit 5 (Owner, 18 Sep 2026): the Operations Master carries a description and the practical facts, not the full structured record */
       assert.ok(x.teaser && Array.isArray(x.detail) && x.detail.length >= 1 && x.detail.every((p) => p.length > 40), x.id + ' description from the source');
@@ -135,7 +135,8 @@ test('SÜHRING — the full source record is rendered, the price per person by O
   assert.match(s.sections[3].p.join(' '), /grandmother Christa/);
   assert.equal(s.practical.price, 'USD 180 per person');
   assert.equal(s.practical.when, 'Dinner · Sunday, 21 February 2027 · the first evening in Bangkok');
-  assert.ok(s.practical.hours.some((h) => /Thursday to Sunday/.test(h)) && s.practical.hours.some((h) => /12:30 pm to 13:00 pm \(last seating\)/.test(h)) && s.practical.hours.some((h) => /Closed on Monday and Tuesday/.test(h)), 'the house\'s own hours stay verbatim');
+  assert.equal(s.practical.hours, undefined, 'no meal-hours copy beside the dated dinner (Owner, 19 Sep 2026)');
+  assert.deepEqual(s.practical.sourceHours, ['Lunch', 'Thursday to Sunday', '12:30 pm to 13:00 pm (last seating)', 'Closed on Monday and Tuesday'], 'the sheet record stays as the source, verbatim');
   assert.equal(s.maps, 'https://maps.app.goo.gl/2b4whggW3YCnxN6u5?g_st=ic');
   assert.equal(s.link, 'https://www.restaurantsuhring.com/menu.html');
   assert.deepEqual(s.select, { id: 'suhring', price: 180, unit: 'per person' });

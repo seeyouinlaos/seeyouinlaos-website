@@ -187,18 +187,18 @@ test('D2 · the Guest House complimentary is a USD 0 line of the wedding window,
   }
 });
 
-/* THE ESSENTIAL TRIP (Owner, 19 Sep 2026): the wedding stay alone — a DEFINED chain of the real products of the
- * Operations Master, tried in this order when the one before cannot take the whole party; the Guest House
- * complimentary is its last option, never a mode of its own. Price never decides; capacity does. */
-test('the Essential trip is the wedding stay alone — a chain of existing products at the single pricing source, the Guest House complimentary last (Owner, 19 Sep 2026)', async () => {
+/* THE ESSENTIAL TRIP (Owner, 19 Sep 2026): its composition is NOT defined by the Owner — the Operations Master carries no
+ * Essential package and the product invents none: the slot is structurally ready (approved false, no stages) and is not
+ * offered. The chain rule (a DEFINED chain of real products, tried in order when the one before cannot take the whole
+ * party; price never decides) is proven on the Complete trip's wedding-stay chain, which ends with the same alternatives. */
+test('the Essential trip is not invented: shipped without a composition and not offered; the wedding-stay chain of the Complete trip is a chain of existing products at the single pricing source, the Guest House complimentary last (Owner, 19 Sep 2026)', async () => {
   const { SEED } = await import('../src/inventory-seed.js');
   const { stageOf } = await import('../src/rooms.js');
-  assert.deepEqual(sandbox.window.SIYL_PACKAGE_ORDER, ['complete', 'essential'], 'two packages, offered in this order — no third mode');
+  assert.deepEqual(sandbox.window.SIYL_PACKAGE_ORDER, ['complete'], 'one package is offered — the Essential trip waits for the Owner\'s definition; no third mode');
   assert.deepEqual(Object.keys(K), ['complete', 'essential']);
-  assert.equal(K.essential.name, 'Essential trip');
-  assert.deepEqual(Object.keys(K.essential.stages), ['wedstay'], 'every other stage stays the guest\'s own decision');
-  const chain = K.essential.stages.wedstay;
-  assert.deepEqual(chain, ['wedstay/heritage', 'wedstay/heritage-executive', 'wedstay/heritage-grand-premier', 'riverside/superior-window', 'guesthouse/guest-house']);
+  assert.equal(K.essential.name, 'Essential trip'); assert.equal(K.essential.approved, false); assert.deepEqual(K.essential.stages, {}, 'nothing invented');
+  const chain = K.complete.stages.wedstay.slice(-3).length ? K.complete.stages.wedstay : [];
+  assert.deepEqual(chain.slice(-3), ['wedstay/souphattra-presidential', 'riverside/superior-window', 'guesthouse/guest-house'], 'the wedding-stay chain ends with the Riverside and the complimentary house');
   /* every option is a real product: priced by the one source, held by the room engine, answering the same stage */
   const amounts = chain.map((key) => {
     const [win, slug] = key.split('/');
@@ -210,7 +210,7 @@ test('the Essential trip is the wedding stay alone — a chain of existing produ
     assert.ok(['wedstay', 'riverside', 'guesthouse'].includes(lines[0].id), key + ' is not a wedding-stay line');
     return lines[0].price;
   });
-  assert.deepEqual(amounts, [145, 155, 170, 60, 0], 'the entry category first, its neighbours, the Riverside, then the complimentary house');
+  assert.deepEqual(amounts, [170, 155, 145, 240, 250, 290, 750, 60, 0], 'the approved default first, then the house from its more affordable neighbours outwards, then the Riverside, then the complimentary house');
   assert.equal(P.quote('wedstay', 'heritage').pay, 1, 'the Souphattra rooms pay one night of two');
   assert.equal(P.quote('riverside', 'superior-window').pay, 2, 'the Riverside pays both nights');
   assert.equal(P.items('guesthouse', 'guest-house')[0].complimentary, true, 'the last option is the complimentary house');

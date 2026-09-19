@@ -336,7 +336,7 @@ test('a package falls back along its DEFINED chain by capacity, never by price; 
    THE PACKAGES — configuration with a DEFINED chain, previewed as a PURE plan:
    two peer packages and individual selection; no mode, no arrangement.
    ========================================================================== */
-test('A · there are exactly TWO packages, offered in this order — the complete trip (all ten stages) and the essential trip (the wedding stay alone); every option is a real product; individual selection is the third way and not a package (Owner, 19 Sep 2026)', () => {
+test('A · the package mechanics (with the fixture Essential package of test/sandbox.mjs — the shipped Essential trip has no composition and is not offered): two packages in this order, the complete trip (all ten stages) and the fixture (the wedding stay); every option is a real product; individual selection is the third way and not a package (Owner, 19 Sep 2026)', () => {
   const w = page({ auth: PEGGY });
   const J = w.SIYL_JOURNEY, PK = w.SIYL_PACKAGES, P = w.SIYL_PRICE;
   assert.deepEqual(plain(J.packageOrder()), ['complete', 'essential']);

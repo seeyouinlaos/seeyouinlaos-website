@@ -51,7 +51,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/vendor/qrcode.js?v=18ae399f"></script>
 <script src="assets/travelpass.js?v=ab2f5112"></script>
 <script src="assets/transport-data.js?v=f54e56e9"></script>
-<script src="assets/packages-data.js?v=9818dd90"></script><script src="assets/journey.js?v=df71141b"></script>
+<script src="assets/packages-data.js?v=b23046ba"></script><script src="assets/journey.js?v=7c0e0d0d"></script>
 <script src="assets/prep-shell.js?v=830ee417"></script>
 <script type="module" src="assets/invite.mjs?v=29231ccf"></script>
 <script>
@@ -410,7 +410,7 @@ function reconcileScope(){
 }
 
 /* ---- COMPLETE / ESSENTIAL JOURNEY: one confirmation, inside the shell's own
- * detail layer. Swiping between the two Essential cards commits nothing. */
+ * detail layer. Only a package whose composition the Owner has defined is offered as a card. */
 var FXMODE=null,FX_DONE=null,FX_PLAN=null,FX_OPEN=false,FX_DECIDING=false;
 /* THE PREVIEW (Owner, 19 Sep 2026): exactly what confirming a package selects, stage by stage, before anything is held —
    the default and its amount; a replacement named as such when the default cannot take the party; a stage that goes on the

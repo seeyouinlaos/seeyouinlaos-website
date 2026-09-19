@@ -49,7 +49,7 @@ if (!LIVE) {
     await trip(p); await p.evaluate(() => { SIYL_GUEST.setScope({ all: true }); }); await trip(p);
     const st = await p.evaluate(() => ({ text: document.body.innerText, bag: SIYL_BAG.get().length, total: SIYL_BAG.total(), mine: Object.keys((SIYL_UNITS.view() || {}).mine || {}), fixed: (SIYL_UNITS.view() || {}).fixed, arranged: typeof window.SIYL_ARRANGED, packs: document.querySelectorAll('.p-pack').length, counts: (document.querySelector('[data-counts]') || {}).innerText || '' }));
     await shot(p, '390-host-my-trip-zero');
-    note('host-starts-at-zero', st.bag === 0 && st.total === 0 && st.mine.length === 0 && st.fixed === undefined && st.arranged === 'undefined' && !/Arranged for you|Fixed arrangement/.test(st.text) && st.packs === 2 && /10 still open/.test(st.counts), JSON.stringify({ bag: st.bag, mine: st.mine, packs: st.packs, counts: st.counts }));
+    note('host-starts-at-zero', st.bag === 0 && st.total === 0 && st.mine.length === 0 && st.fixed === undefined && st.arranged === 'undefined' && !/Arranged for you|Fixed arrangement/.test(st.text) && st.packs === 1 && /10 still open/.test(st.counts), JSON.stringify({ bag: st.bag, mine: st.mine, packs: st.packs, counts: st.counts }) + ' (one package card: the Complete trip; the Essential trip is not offered until the Owner defines it)');
     await p.goto(O + '/room.html?stay=sathorn&room=penthouse', { waitUntil: 'load' }); await p.waitForTimeout(2200);
     const pent = await p.evaluate(() => ({ a: !!document.querySelector('[data-join="bkk-stay|penthouse|A"]'), units: document.querySelectorAll('[data-units="bkk-stay|penthouse"] .p-unit').length, av: (document.querySelector('[data-av="bkk-stay"]') || {}).textContent || '', reserved: document.querySelectorAll('.p-unit.reserved').length }));
     note('penthouse-room-a-open-to-everyone', pent.a && pent.units === 6 && /6 rooms · 12 places available/.test(pent.av) && pent.reserved === 0, JSON.stringify(pent));
@@ -213,20 +213,20 @@ if (!LIVE) {
     for (const s of ['starry-sky', 'boundless', 'private-soup-view', 'manor-suite', 'view-suite-270', 'soup-pool-270', 'private-courtyard-270', 'viewing-270', 'snow-mountain-viewing']) await clearCategory('ljg/' + s);
   }
 
-  /* ===== 6 · THE ESSENTIAL TRIP (T001, Vientiane only): one stage, the entry category, the same card, nothing else touched ===== */
+  /* ===== 6 · THE ESSENTIAL TRIP is not invented (T001, Vientiane only): the Owner has not defined its composition — one package card is offered (the Complete trip), no Essential card, nothing fabricated; the Complete trip limited to Vientiane holds the wedding-stay chain's default ===== */
   {
     const p = await fresh(390); await signIn(p, 'T001'); await contact(p, 'ada.test@example.org');
     await trip(p); await p.evaluate(() => { SIYL_GUEST.setScope({ none: true }); SIYL_GUEST.setScope({ vientiane: true }); }); await trip(p);
-    const cards = await p.evaluate(() => [...document.querySelectorAll('.p-pack')].map((e) => ({ kind: e.getAttribute('data-package'), title: (e.querySelector('.t-l1') || {}).innerText, btn: !!e.querySelector('[data-package-preview]') })));
-    note('two-package-cards-same-presentation', cards.length === 2 && cards[0].kind === 'complete' && cards[1].kind === 'essential' && cards.every((c) => c.btn) && /^essential trip$/i.test(cards[1].title), JSON.stringify(cards));
+    const cards = await p.evaluate(() => ({ cards: [...document.querySelectorAll('.p-pack')].map((e) => ({ kind: e.getAttribute('data-package'), btn: !!e.querySelector('[data-package-preview]') })), order: SIYL_JOURNEY.packageOrder(), essential: SIYL_PACKAGES.essential && { approved: SIYL_PACKAGES.essential.approved, stages: Object.keys(SIYL_PACKAGES.essential.stages || {}) }, text: document.body.innerText }));
+    note('one-package-card-essential-not-invented', cards.cards.length === 1 && cards.cards[0].kind === 'complete' && cards.cards[0].btn && cards.order.join() === 'complete' && cards.essential && cards.essential.approved === false && cards.essential.stages.length === 0 && !/Essential trip/i.test(cards.text), JSON.stringify({ cards: cards.cards, order: cards.order, essential: cards.essential }));
     await shot(p, '390-package-cards');
-    await p.click('[data-package-preview="essential"]'); await p.waitForTimeout(1500);
+    await p.click('[data-package-preview="complete"]'); await p.waitForTimeout(1500);
     const pv = await p.evaluate(() => ({ rows: [...document.querySelectorAll('.fxl .fxr')].map((e) => e.innerText.replace(/\s+/g, ' ')), total: (document.querySelector('[data-fx-total]') || {}).innerText || '' }));
-    await shot(p, '390-essential-preview');
-    note('essential-preview-is-the-wedding-stay', pv.rows.length === 1 && /The Heritage/i.test(pv.rows[0]) && /Souphattra/i.test(pv.rows[0]) && /USD 145/.test(pv.rows[0]) && /USD 145 per person/.test(pv.total) && /1 stage/.test(pv.total), JSON.stringify(pv));
+    await shot(p, '390-complete-vientiane-preview');
+    note('complete-trip-vientiane-only-preview', pv.rows.length === 2 && /Heritage Grand Premier/i.test(pv.rows[1]) && /USD 170/.test(pv.rows[1]) && /USD 510 per person/.test(pv.total) && /2 stages/.test(pv.total), JSON.stringify(pv));
     await p.click('#fxg'); await p.waitForTimeout(6000);
     const m = await mine(p); const st = await p.evaluate(() => ({ bag: SIYL_BAG.get().map((x) => x.id + ':' + x.room), counts: SIYL_JOURNEY.counts(), summary: (document.querySelector('[data-fx-summary]') || {}).innerText || '' }));
-    note('essential-holds-the-heritage-only', m.mine && m.mine.wedstay && m.mine.wedstay.key === 'wedstay/heritage' && Object.keys(m.mine).length === 1 && st.bag.join() === 'wedstay:heritage' && st.counts.confirmed === 1 && st.counts.open === 1 && /Essential trip selected 1 stage for you/.test(st.summary), JSON.stringify({ mine: m.mine, ...st }));
+    note('complete-trip-vientiane-only-holds-two-stays', m.mine && m.mine.wedstay && m.mine.wedstay.key === 'wedstay/heritage-grand-premier' && m.mine.prewed && Object.keys(m.mine).length === 2 && st.bag.sort().join() === 'prewed:heritage-grand-premier,wedstay:heritage-grand-premier' && st.counts.confirmed === 2 && st.counts.open === 0 && /Complete trip selected 2 stages for you/.test(st.summary), JSON.stringify({ mine: m.mine, ...st }));
     await p.context().close(); await resetGuest('T001'); await resetGuest('T002'); await resetGuest('T003');
     await gr('/api/rooms/reset', { dryRun: false, actor: 'e2e-014' }, 'POST');
   }

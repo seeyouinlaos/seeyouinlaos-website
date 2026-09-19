@@ -36,7 +36,9 @@ window.SIYL_EXP = [
       price: 'USD 180 per person',
       priceNote: 'For each participating guest, as decided by the hosts.',
       when: 'Dinner · Sunday, 21 February 2027 · the first evening in Bangkok',
-      hours: ['Lunch', 'Thursday to Sunday', '12:30 pm to 13:00 pm (last seating)', 'Closed on Monday and Tuesday']
+      /* the sheet record's opening-hour lines (a lunch service) are kept as the source but NOT shown beside the dated dinner
+         (Owner, 19 Sep 2026: the dated assignment wins; no invented hours, no misleading meal-hours copy on the card) */
+      sourceHours: ['Lunch', 'Thursday to Sunday', '12:30 pm to 13:00 pm (last seating)', 'Closed on Monday and Tuesday']
     },
     select: { id: 'suhring', price: 180, unit: 'per person' } },
   { id: 'bkk-diorlv', roles: ['cafe'], row: 'Day 02 · 22.02.2027', chapter: 'bkk', day: '22 FEB 2027', name: 'Dior · Café LV', where: 'Bangkok', cats: 'Fashion · Design · Café', img: 'assets/images/experiences/bkk-dior-02.jpg', gallery: ['assets/images/experiences/bkk-dior-01.jpg', 'assets/images/experiences/bkk-lv-cafe-01.jpg'], teaser: 'A luxury design café stop — couture interiors, French pastry and contemporary calm.' },

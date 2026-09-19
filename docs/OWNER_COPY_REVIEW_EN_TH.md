@@ -1,5 +1,8 @@
 # OWNER COPY REVIEW — EN / TH
 
+> **Historical record.** This review describes the product as it stood on its date. Release 014 (19 Sep 2026) superseded parts of it: no Fixed Arrangement, the Private Residence is now the Guest House complimentary (six shared places, `guesthouse/guest-house`), C86 USD 105, the packages are configuration (`assets/packages-data.js`). The current truth is `docs/acceptance/2026-09-19-release-014/README.md`.
+
+
 | | |
 |---|---|
 | **SOURCE BASELINE** | `3e65a7c` (production, deployed) |

@@ -247,7 +247,8 @@
        does not cover are never touched. The party's need is the number of members: a unit must take them all.
        ====================================================================== */
     packages: function () { return window.SIYL_PACKAGES || {}; },
-    packageOrder: function () { return window.SIYL_PACKAGE_ORDER || Object.keys(this.packages()); },
+    /* the packages OFFERED: those in the Owner's order whose composition is defined (a package without stages is never a card) */
+    packageOrder: function () { var P = this.packages(); return (window.SIYL_PACKAGE_ORDER || Object.keys(P)).filter(function (k) { return P[k] && P[k].approved !== false && Object.keys(P[k].stages || {}).length; }); },
     /* the places the guest's party needs in one unit */
     partySize: function () {
       var G = window.SIYL_GUEST, p = G && G.party ? G.party() : null, n = p && Array.isArray(p.members) ? p.members.length : 0;

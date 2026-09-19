@@ -32,7 +32,7 @@
  {
   "id": "scope-persists",
   "ok": true,
-  "d": "{\"s2\":{\"scope\":\"Bangkok · Vientiane\",\"stages\":[\"s-bkk-stay\",\"s-train\",\"s-prewed\",\"s-wedstay\"]},\"srvScope\":{\"bangkok\":true,\"vientiane\":true,\"china\":false,\"none\":false,\"at\":\"2026-09-19T20:00:56.305Z\",\"by\":\"T001\"}}"
+  "d": "{\"s2\":{\"scope\":\"Bangkok · Vientiane\",\"stages\":[\"s-bkk-stay\",\"s-train\",\"s-prewed\",\"s-wedstay\"]},\"srvScope\":{\"bangkok\":true,\"vientiane\":true,\"china\":false,\"none\":false,\"at\":\"2026-09-19T21:28:04.367Z\",\"by\":\"T001\"}}"
  },
  {
   "id": "not-joining-untouched",
@@ -107,7 +107,7 @@
  {
   "id": "decline-path-sent",
   "ok": true,
-  "d": "{\"ok\":true,\"received\":true,\"receivedAt\":\"2026-09-19T20:02:13.801Z\",\"confirmed\":false,\"confirmedAt\":null}"
+  "d": "{\"ok\":true,\"received\":true,\"receivedAt\":\"2026-09-19T21:29:22.046Z\",\"confirmed\":false,\"confirmedAt\":null}"
  },
  {
   "id": "partial-attendance-review",

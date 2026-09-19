@@ -2,7 +2,10 @@
    SEE YOU IN LAOS — THE PACKAGES (Owner instruction, 19 Sep 2026).
 
    Three ways to plan: COMPLETE TRIP (the full hosted journey, all ten stages A–J), ESSENTIAL TRIP (the wedding-focused
-   package) and INDIVIDUAL SELECTION. There is no fourth mode: nothing is arranged for anyone in advance.
+   package — its COMPOSITION IS NOT YET DEFINED by the Owner: the Operations Master of 19 Sep 2026 carries no Essential
+   package and the earlier website composition was the website's own invention; the slot below is structurally ready and
+   is NOT offered as a card until the Owner names its stages) and INDIVIDUAL SELECTION. There is no fourth mode: nothing
+   is arranged for anyone in advance.
 
    A package is CONFIGURATION, never an inference: for every stage it covers, the DEFAULT product and the DEFINED FALLBACK
    CHAIN — the real products of the Operations Master, in the order they are tried when the default cannot take the guest's
@@ -37,14 +40,13 @@
     essential: {
       key: 'essential',
       name: 'Essential trip',
-      short: 'The wedding stay in Vientiane — the more affordable way to be with us for the wedding',
-      /* the wedding stay alone (27 Feb – 01 Mar): the entry category of the wedding house first, then its neighbours, then
-         the Riverside Hotel, then the Guest House complimentary — every other stage stays the guest's own decision */
-      stages: {
-        wedstay: ['wedstay/heritage', 'wedstay/heritage-executive', 'wedstay/heritage-grand-premier', 'riverside/superior-window', 'guesthouse/guest-house']
-      }
+      short: 'The wedding-focused package',
+      /* NOT OFFERED (Owner rule: never invent a package's contents). The Owner defines the stages and the chains here — the
+         same shape as `complete` — and adds 'essential' to SIYL_PACKAGE_ORDER; nothing else in the product changes. */
+      approved: false,
+      stages: {}
     }
   };
-  /* the order the packages are offered in */
-  window.SIYL_PACKAGE_ORDER = ['complete', 'essential'];
+  /* the order the packages are OFFERED in — only a package whose composition the Owner has defined */
+  window.SIYL_PACKAGE_ORDER = ['complete'];
 })();

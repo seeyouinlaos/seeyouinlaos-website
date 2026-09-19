@@ -31,6 +31,10 @@ const shop = () => {
     new Function('window', 'document', 'localStorage', 'CustomEvent', 'SIYL_BAG', 'SIYL_PRICE', 'SIYL_ROOMS', 'SIYL_STOCK', src(f))(window, document, localStorage, window.CustomEvent, window.SIYL_BAG, window.SIYL_PRICE, window.SIYL_ROOMS, undefined);
   }
   window.SIYL_BAG.badge = () => {};
+  /* A PACKAGE UNDER TEST (release 014): the shipped Essential trip has no composition (the Owner has not defined it); the
+     mechanics are proven with this one-stage fixture, as in test/sandbox.mjs */
+  window.SIYL_PACKAGES.essential = { key: 'essential', name: 'Essential trip', short: 'a package under test', approved: true, fixture: true, stages: { wedstay: ['wedstay/heritage', 'wedstay/heritage-executive', 'wedstay/heritage-grand-premier', 'riverside/superior-window', 'guesthouse/guest-house'] } };
+  window.SIYL_PACKAGE_ORDER = ['complete', 'essential'];
   return window;
 };
 const stageOf = (w, key) => w.SIYL_JOURNEY.SEGMENTS.find((s) => s.key === key);
