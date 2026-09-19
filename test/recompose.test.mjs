@@ -87,7 +87,7 @@ test('the shared journey selection appears once on every surface', () => {
   const yj = read('your-journey.html'), rv = read('review.html');
   /* one Bangkok line, one fare line, one C86 line: a change REPLACES */
   assert.match(yj, /ST\.select\('bkk-stay',bt\.getAttribute\('data-choose'\)\)/, 'a new Bangkok choice goes through the one stay engine: place held, line replaced');
-  assert.match(read('assets/stay.js'), /p\.ids\(win\)\.forEach\(function \(id\) \{ b\.remove\(id\); \}\);\s*p\.items\(win, slug\)/, 'a change REPLACES, never duplicates');
+  assert.match(read('assets/stay.js'), /this\.stageIds\(win\)\.forEach\(function \(id\) \{ b\.remove\(id\); \}\);\s*p\.items\(win, slug\)/, 'a change REPLACES, never duplicates — every hotel of the stage (Codex 012-1)');
   assert.match(yj, /if\(SIYL_BAG\.has\(id\)\)return;/, 'a flat product is never added twice');
   /* the journey block on Review is filtered from the bag, one guest, never composed per party */
   assert.match(rv, /\.filter\(function\(x\)\{return !\(window\.SIYL_JOURNEY&&SIYL_JOURNEY\.isWedding\(x\)\)\}\)/);

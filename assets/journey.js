@@ -110,13 +110,20 @@
       if (!B) return Promise.resolve(finish());
       var lines = B.get().filter(function (x) { return seg.ids.indexOf(x.id) >= 0; });
       if (!lines.length) return Promise.resolve(finish());
-      var stay = lines.filter(function (x) { return x.room && !x.interest; })[0];
-      if (seg.cat === 'Accommodation' && stay && ST) {
-        return ST.remove(P ? P.windowOf(stay.id) : stay.id).then(function (r) {
-          if (r && r.ok === false && r.error !== 'fixed') return r;     /* the engine could not release: nothing changes, the guest is told */
-          lines.forEach(function (x) { B.remove(x.id); });
-          return finish();
-        });
+      var stays = lines.filter(function (x) { return x.room && !x.interest; });
+      if (seg.cat === 'Accommodation' && stays.length && ST) {
+        /* every room line of the stage goes through the engine, one after the other: a leftover line simply leaves, the
+           held one releases its place (Codex, release 012) */
+        var i = 0;
+        var next = function () {
+          if (i >= stays.length) { lines.forEach(function (x) { B.remove(x.id); }); return finish(); }
+          var stay = stays[i++];
+          return ST.remove(P ? P.windowOf(stay.id) : stay.id).then(function (r) {
+            if (r && r.ok === false && r.error !== 'fixed') return r;     /* the engine could not release: nothing changes, the guest is told */
+            return next();
+          });
+        };
+        return next();
       }
       lines.forEach(function (x) { B.remove(x.id); });
       return Promise.resolve(finish());

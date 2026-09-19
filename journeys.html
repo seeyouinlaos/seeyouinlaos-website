@@ -131,8 +131,8 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:26px;margin:40
 <script src="assets/stay-media.js?v=70e104c7"></script>
 <script src="assets/pricing.js?v=e864296d"></script>
 <script src="assets/rooms.js?v=1b24382b"></script>
-<script src="assets/stay.js?v=33ea56d6"></script>
-<script src="assets/journey.js?v=13519ab1"></script>
+<script src="assets/stay.js?v=2183bc69"></script>
+<script src="assets/journey.js?v=092bda16"></script>
 <script type="module" src="assets/invite.mjs?v=3dc5396d"></script>
 <script>
 /* ---------------- THE JOURNEY GALLERIES (Owner, release 012 · 19 Sep 2026): one grammar for every card — the transport
@@ -430,8 +430,11 @@ if(line){
     '<button type="button" class="stlink" data-stay-remove="'+win+'">Remove</button></div>'+
     (picking?'<p class="chgnote" style="margin:12px 0 0">Tap another room above — it replaces '+room+' in your trip; nothing else changes.</p>':'');
 }else{
+  /* the other hotel of the same stage, when the trip holds one: one selection per stage — choosing here replaces it */
+  var sib=ST.sibling?ST.sibling(win):null;var esc=function(t){return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')};
   act.innerHTML='<div class="stbtns"><button type="button" class="add" data-stay-add="'+win+'">'+(picking?'Cancel':'Add to My Bag')+'</button></div>'+
-    (picking?'<p class="chgnote" style="margin:12px 0 0">Choose a room for this stay — tap one of the rooms above.</p>':(opts.length?'':'<p class="chgnote" style="margin:12px 0 0">No room of this stay can be chosen at the moment — Guest Relations will find an arrangement with you.</p>'));
+    (picking?'<p class="chgnote" style="margin:12px 0 0">Choose a room for this stay — tap one of the rooms above.</p>':(opts.length?'':'<p class="chgnote" style="margin:12px 0 0">No room of this stay can be chosen at the moment — Guest Relations will find an arrangement with you.</p>'))+
+    (sib?'<p class="chgnote" style="margin:12px 0 0">Your trip currently holds '+esc(String(sib.meta||'').split(' · ').pop())+' at '+esc(ST.houseOf(sib))+' for this stay — choosing a room here replaces it.</p>':'');
 }
 act.querySelectorAll('[data-stay-add]').forEach(function(b){b.addEventListener('click',function(){
   if(box.getAttribute('data-picking')==='1'){renderRows(box,false);paintAll();return}

@@ -72,10 +72,30 @@
         });
       });
     },
-    /* the line, from the one pricing source, with the place it holds */
+    /* ONE SELECTION PER STAGE (Codex, release 012): the Wedding Stay is answered by Souphattra, the private residence OR the
+     * Riverside Hotel — the engine holds one place per stage, so the Bag carries one line per stage. Every Bag id of every
+     * window that answers the same stage as `win`, read from the stay data and the engine's stage map (never a list kept here). */
+    stageIds: function (win) {
+      var p = P(), st = stageOf(win), wins = [win], out = [];
+      var R = window.SIYL_ROOMS || {};
+      Object.keys(R).forEach(function (k) { (R[k].windows || []).forEach(function (w) { if (wins.indexOf(w.id) < 0) wins.push(w.id); }); });
+      var J = window.SIYL_JOURNEY;
+      if (J && J.SEGMENTS) J.SEGMENTS.forEach(function (seg) { if (seg.ids.indexOf(win) >= 0) seg.ids.forEach(function (id) { if (wins.indexOf(id) < 0) wins.push(id); }); });
+      wins.forEach(function (w) { if (stageOf(w) !== st) return; (p ? p.ids(w) : [w]).forEach(function (id) { if (out.indexOf(id) < 0) out.push(id); }); });
+      return out;
+    },
+    /* the house a line belongs to, by its name (a window's bag name may carry the window's own words) */
+    houseOf: function (line) { var R = window.SIYL_ROOMS || {}; return (line && line.stay && R[line.stay] && R[line.stay].name) || (line && line.name) || ''; },
+    /* the other hotel's line in this window's stage, if the Bag carries one (the room page and the Journey say it is replaced) */
+    sibling: function (win) {
+      var p = P(), b = B(); if (!p || !b) return null;
+      var own = p.ids(win), ids = this.stageIds(win);
+      return b.get().filter(function (x) { return ids.indexOf(x.id) >= 0 && own.indexOf(x.id) < 0; })[0] || null;
+    },
+    /* the line, from the one pricing source, with the place it holds — it replaces whatever answered the stage before */
     write: function (win, slug, label) {
       var p = P(), b = B();
-      p.ids(win).forEach(function (id) { b.remove(id); });
+      this.stageIds(win).forEach(function (id) { b.remove(id); });
       p.items(win, slug).forEach(function (it) { it.qty = 1; if (label) { it.unit = label; it.unitName = ST.nameFor(win, slug, label); } b.put(it); });
     },
     nameFor: function (win, slug, label) {
@@ -94,6 +114,9 @@
       var line = this.line(win);
       var done = function () { p.ids(win).forEach(function (id) { b.remove(id); }); };
       if (!u || !line || !line.room || line.interest || !u.tracked(win, line.room)) { done(); return Promise.resolve({ ok: true }); }
+      /* a leftover line: the engine holds ANOTHER hotel of this stage for the guest — the line goes, the current hold stays (Codex, release 012) */
+      var m = u.ready() ? u.mine(stageOf(win)) : null;
+      if (m && String(m.key).split('/')[0] !== win) { done(); return Promise.resolve({ ok: true }); }
       /* the release is the engine's: only a released place leaves the bag; an idempotent second remove finds nothing to release */
       return u.leave(stageOf(win)).then(function (d) {
         if (d && d.ok === false && d.error === 'fixed host allocation') return { ok: false, error: 'fixed' };
@@ -110,6 +133,13 @@
          it leaves the Bag (and the total); a hotel the hosts chose themselves in the same stage stays (Owner, Edit 5 · 18 Sep 2026) */
       var fixedUnits = u.fixedStages().map(function (st) { var f = u.fixedUnit(st); return { win: f.key.split('/')[0], slug: f.key.split('/').slice(1).join('/') }; });
       var kept = bag.filter(function (x) { return !fixedUnits.some(function (f) { return p.windowOf(x.id) === f.win && (!x.room || x.room === f.slug); }); });
+      /* a line of a hotel the engine does not hold while it holds ANOTHER hotel of the same stage is a leftover (an older
+         draft, another device): the stage is answered by the held one, the leftover leaves the Bag and the total */
+      kept = kept.filter(function (x) {
+        if (!x.room || x.interest) return true;
+        var win = p.windowOf(x.id), m = u.mine(stageOf(win));
+        return !(m && String(m.key).split('/')[0] !== win);
+      });
       if (kept.length !== bag.length) { bag = kept; changed = true; }
       bag.forEach(function (x) {
         if (!x.room || x.interest) return;

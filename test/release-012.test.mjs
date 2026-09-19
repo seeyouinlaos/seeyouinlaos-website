@@ -133,3 +133,56 @@ test('RIVERSIDE HOTEL · package D3 everywhere: the inventory (6 rooms · 2 plac
   assert.match(src('journeys.html'), /<div class="p" id="j-riverside">/); assert.match(src('journeys.html'), /href="room\.html\?stay=riverside&amp;room=superior-window">View the hotel<\/a>/);
   assert.match(src('room.html'), /Photography to follow/, 'the room page keeps the frame when a stay has no photograph');
 });
+
+/* CODEX 012-1 (final pass, 19 Sep 2026) · ONE SELECTION PER STAGE. The Wedding Stay is answered by Souphattra, the private
+   residence or the Riverside Hotel: the engine holds one place per stage, so the Bag carries one line per stage — switching
+   hotels never leaves the previous priced line behind, a leftover line never releases the current hold, the total is the
+   chosen hotel's alone, readiness never names a stale room. */
+test('ONE WEDDING STAY · switching among Souphattra, the residence and the Riverside Hotel in every direction: one Bag line, one total, one engine hold, readiness clean; a leftover line leaves without touching the current hold', async () => {
+  const { roomsFetch } = await import('./sandbox.mjs');
+  const me = { invitationId: PEGGY.invitationId, guestId: PEGGY.guestId, partyId: PEGGY.partyId, hosts: false };
+  const rooms = new Rooms(doState());
+  const w = page({ auth: PEGGY, fetch: await roomsFetch(rooms, me) }); await w.SIYL_UNITS.load(true);
+  const B = w.SIYL_BAG, ST = w.SIYL_STAY, U = w.SIYL_UNITS, G = w.SIYL_GUEST, J = w.SIYL_JOURNEY, P = w.SIYL_PRICE;
+  G.setContact('email', 'guest@example.com'); G.setContact('phone', '+66 81 234 5678'); G.setScope({ vientiane: true });
+  const HOTELS = [['wedstay', 'heritage', 145], ['riverside', 'superior-window', 60], ['airbnb-2br', 'private-residence', 0]];
+  const stageLines = () => B.get().filter((x) => J.SEGMENTS.find((s) => s.key === 'wedstay').ids.includes(x.id));
+  const taken = (key) => (U.view().units[key] || []).reduce((n, u) => n + (u.taken || 0), 0);
+  assert.deepEqual(JSON.parse(JSON.stringify(ST.stageIds('riverside'))).sort(), ['airbnb-2br', 'riverside', 'wedstay', 'wedstay-n1', 'wedstay-n2'].sort(), 'every id that answers the stage, the legacy rows included');
+  for (const [w1, s1, t1] of HOTELS) for (const [w2, s2, t2] of HOTELS) {
+    if (w1 === w2) continue;
+    B.set([]); await ST.remove(w1); await ST.remove(w2);
+    assert.equal((await ST.select(w1, s1)).ok, true, w1 + ' first');
+    assert.equal(stageLines().length, 1); assert.equal(B.total(), t1);
+    assert.equal(ST.sibling(w2) && ST.sibling(w2).id, P.ids(w1)[0], 'the other hotel\'s page knows what it replaces');
+    assert.equal((await ST.select(w2, s2)).ok, true, w1 + ' → ' + w2);
+    const lines = stageLines();
+    assert.equal(lines.length, 1, w1 + ' → ' + w2 + ': one line'); assert.equal(lines[0].id, w2); assert.equal(B.total(), t2, w1 + ' → ' + w2 + ': the total is the chosen hotel\'s alone');
+    assert.deepEqual(JSON.parse(JSON.stringify(U.view().mine)), { wedstay: { key: w2 + '/' + s2, label: U.view().mine.wedstay.label } }, 'one engine hold');
+    assert.equal(taken(w1 + '/' + s1), 0, w1 + ' released'); assert.equal(taken(w2 + '/' + s2), 1, w2 + ' held');
+    assert.equal(ST.held(lines[0]), true); assert.deepEqual(JSON.parse(JSON.stringify(G.staleFor())), [], 'nothing held outside the trip');
+    assert.equal(G.missingFor('journey').some((m) => /^room:/.test(m.key)), false, w1 + ' → ' + w2 + ': readiness names no stale room');
+  }
+  /* a leftover line (an older draft, another device): the engine holds the Riverside, the Bag also carries Souphattra */
+  B.set([]); await ST.remove('wedstay'); await ST.remove('riverside');
+  assert.equal((await ST.select('riverside', 'superior-window')).ok, true);
+  P.items('wedstay', 'heritage').forEach((it) => { it.qty = 1; it.unit = 'A'; B.put(it); });
+  assert.equal(stageLines().length, 2); assert.equal(B.total(), 205, 'the state Codex reproduced');
+  /* removing the leftover line does NOT release the Riverside hold */
+  assert.deepEqual(JSON.parse(JSON.stringify(await ST.remove('wedstay'))), { ok: true });
+  assert.equal(stageLines().length, 1); assert.equal(stageLines()[0].id, 'riverside'); assert.equal(B.total(), 60);
+  assert.equal(U.view().mine.wedstay.key, 'riverside/superior-window', 'the current hold stays'); assert.equal(taken('riverside/superior-window'), 1);
+  /* the same leftover is dropped by the engine sync on any page load */
+  P.items('wedstay', 'heritage').forEach((it) => { it.qty = 1; it.unit = 'A'; B.put(it); }); assert.equal(stageLines().length, 2);
+  ST.sync(); assert.equal(stageLines().length, 1); assert.equal(stageLines()[0].id, 'riverside'); assert.equal(B.total(), 60, 'sync keeps the held hotel only');
+  /* Not joining the stage with a leftover present: the leftover leaves, the held place is released, the stage is declined */
+  P.items('wedstay', 'heritage').forEach((it) => { it.qty = 1; it.unit = 'A'; B.put(it); });
+  const d = await J.decline(J.SEGMENTS.find((s) => s.key === 'wedstay')); assert.deepEqual(JSON.parse(JSON.stringify(d)), { ok: true });
+  assert.equal(stageLines().length, 0); assert.deepEqual(JSON.parse(JSON.stringify(U.view().mine)), {}, 'the engine holds nothing'); assert.equal(taken('riverside/superior-window'), 0);
+  assert.equal(J.isSkipped('wedstay'), true);
+  /* the surfaces say what is replaced */
+  assert.match(src('room.html'), /var ids = ST && ST\.stageIds \? ST\.stageIds\(w\.id\) : P\.ids\(w\.id\);/, 'the room page reads the stage');
+  assert.match(src('room.html'), /\(elsewhere \? ' at ' \+ ST\.houseOf\(other\) : ''\) \+ ' for this stay — adding this room replaces it\.'/);
+  assert.equal(ST.houseOf(P.items('wedstay', 'heritage')[0]), 'Souphattra Heritage Vientiane', 'the house is named, never the window'); assert.equal(ST.houseOf(P.items('riverside', 'superior-window')[0]), 'Riverside Hotel Vientiane');
+  assert.match(src('journeys.html'), /var sib=ST\.sibling\?ST\.sibling\(win\):null;/); assert.match(src('journeys.html'), /for this stay — choosing a room here replaces it\./);
+});

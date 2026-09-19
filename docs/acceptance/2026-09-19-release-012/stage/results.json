@@ -1,0 +1,127 @@
+[
+ {
+  "id": "journey-galleries-320",
+  "ok": true,
+  "d": "{\"over\":0,\"ratios\":[1.25],\"bkk\":{\"frames\":17,\"index\":0,\"label\":\"Sathorn Penthouse Bangkok · The house at golden hour\",\"counter\":\"1 / 17\",\"w\":272,\"h\":218,\"phRatio\":1.25,\"loaded\":2,\"pending\":15,\"arrows\":true,\"tabbable\":true,\"pend\":false},\"train\":9}"
+ },
+ {
+  "id": "journey-galleries-390",
+  "ok": true,
+  "d": "{\"over\":0,\"ratios\":[1.25],\"bkk\":{\"frames\":17,\"index\":0,\"label\":\"Sathorn Penthouse Bangkok · The house at golden hour\",\"counter\":\"1 / 17\",\"w\":342,\"h\":274,\"phRatio\":1.25,\"loaded\":2,\"pending\":15,\"arrows\":true,\"tabbable\":true,\"pend\":false},\"train\":9}"
+ },
+ {
+  "id": "journey-galleries-834",
+  "ok": true,
+  "d": "{\"over\":0,\"ratios\":[1.5],\"bkk\":{\"frames\":17,\"index\":0,\"label\":\"Sathorn Penthouse Bangkok · The house at golden hour\",\"counter\":\"1 / 17\",\"w\":300,\"h\":200,\"phRatio\":1.5,\"loaded\":2,\"pending\":15,\"arrows\":true,\"tabbable\":true,\"pend\":false},\"train\":9}"
+ },
+ {
+  "id": "journey-galleries-1440",
+  "ok": true,
+  "d": "{\"over\":0,\"ratios\":[1.5],\"bkk\":{\"frames\":17,\"index\":0,\"label\":\"Sathorn Penthouse Bangkok · The house at golden hour\",\"counter\":\"1 / 17\",\"w\":420,\"h\":280,\"phRatio\":1.5,\"loaded\":2,\"pending\":15,\"arrows\":true,\"tabbable\":true,\"pend\":false},\"train\":9}"
+ },
+ {
+  "id": "gallery-grammar-390",
+  "ok": true,
+  "d": "{\"s0\":{\"i\":0,\"f\":17,\"p\":15,\"l\":\"Sathorn Penthouse Bangkok · The house at golden hour\"},\"s1\":{\"i\":1,\"c\":\"2 / 17\",\"l\":\"Sathorn Penthouse Bangkok · The house from above the trees\"},\"s3\":16,\"s5\":1,\"s6\":{\"i\":16,\"p\":0},\"stable\":true,\"hotels\":[\"Sathorn Penthouse Bangkok\",\"U Sathorn Bangkok\",\"Shama Yen-Akat"
+ },
+ {
+  "id": "gallery-grammar-1440",
+  "ok": true,
+  "d": "{\"s0\":{\"i\":0,\"f\":17,\"p\":15,\"l\":\"Sathorn Penthouse Bangkok · The house at golden hour\"},\"s1\":{\"i\":1,\"c\":\"2 / 17\",\"l\":\"Sathorn Penthouse Bangkok · The house from above the trees\"},\"s3\":16,\"s5\":1,\"s6\":{\"i\":16,\"p\":0},\"stable\":true,\"hotels\":[\"Sathorn Penthouse Bangkok\",\"U Sathorn Bangkok\",\"Shama Yen-Akat"
+ },
+ {
+  "id": "swipe-chromium-390",
+  "ok": true,
+  "d": "{\"before\":0,\"after\":1,\"url\":true,\"geometry\":[342,274,342,274],\"over\":0}"
+ },
+ {
+  "id": "swipe-iphone-safari",
+  "ok": true,
+  "d": "{\"before\":0,\"after\":1,\"url\":true,\"geometry\":[342,274,342,274],\"over\":0}"
+ },
+ {
+  "id": "iphone-experience-page",
+  "ok": true,
+  "d": "Le Du Kaan on iPhone Safari: overflow 0"
+ },
+ {
+  "id": "no-broken-image",
+  "ok": true,
+  "d": "{\"stay\":{\"n\":43,\"bad\":[]},\"exp\":{\"n\":158,\"bad\":[]}}"
+ },
+ {
+  "id": "restaurant-pages-no-food",
+  "ok": true,
+  "d": "bkk-thongsmith:4 bkk-tangjaiyang:1 bkk-ledukaan:4 bkk-barus:2 bkk-suhring:4 vte-laoderm:5 vte-3merchants:2 bkk-alati:3"
+ },
+ {
+  "id": "rejected-frames-not-served",
+  "ok": true,
+  "d": "the tray martini, the cocktails, the bowls and the dish collages answer 404"
+ },
+ {
+  "id": "cafes-rail",
+  "ok": true,
+  "d": "Dior · Café LV | Time Space Cafe | Moo Yoo Rose House | Whispering Cafe | Cafe Madeleine | Harudot | Sona Cafe and Bar | Kaogee Le Triomphe | Lacuna VTE"
+ },
+ {
+  "id": "riverside-journey-card",
+  "ok": true,
+  "d": "PHOTOGRAPHY TO FOLLOW 27 FEB – 01 MAR · ACCOMMODATION · VIENTIANE Riverside Hotel Vientiane 27 February – 01 March 2027 · 2 nights: 27 → 28 February and 28 February → 01 March · the third address for "
+ },
+ {
+  "id": "riverside-room-page",
+  "ok": true,
+  "d": "{\"url\":\"http://127.0.0.1:8788/room?stay=riverside&room=superior-window\",\"h1\":\"Superior Room With Window\",\"pend\":true,\"size\":true,\"join\":6,\"price\":\"USD 60 TOTAL PER PERSON\"}"
+ },
+ {
+  "id": "riverside-my-trip-and-bag",
+  "ok": true,
+  "d": "{\"held\":{\"wedstay\":{\"key\":\"riverside/superior-window\",\"label\":\"A\"}},\"bag\":[\"riverside:Riverside Hotel Vientiane:60\"],\"total\":60}"
+ },
+ {
+  "id": "riverside-my-bag",
+  "ok": true,
+  "d": "MY BAG · ADA My Bag What you have chosen so far, with your cost. Change or remove anything here; your trip and Review & Send follow at once. ACCOMMODATION 27 FEB – 01 MAR Riverside Hotel Vientiane 27 "
+ },
+ {
+  "id": "switch-journey-card-names-the-riverside",
+  "ok": true,
+  "d": "ADD TO MY BAG Your trip currently holds Superior Room With Window at Riverside Hotel Vientiane for this stay — choosing a room here replaces it."
+ },
+ {
+  "id": "switch-room-page-names-the-riverside",
+  "ok": true,
+  "d": "Your trip currently holds Superior Room With Window at Riverside Hotel Vientiane for this stay — adding this room replaces it."
+ },
+ {
+  "id": "switch-one-line-one-hold",
+  "ok": true,
+  "d": "{\"sw\":{\"bag\":[\"wedstay:145\"],\"total\":145,\"missing\":[],\"stale\":0},\"mine\":{\"wedstay\":{\"key\":\"wedstay/heritage\",\"label\":\"A\"}}}"
+ },
+ {
+  "id": "switch-back-names-souphattra",
+  "ok": true,
+  "d": "Your trip currently holds The Heritage at Souphattra Heritage Vientiane for this stay — adding this room replaces it."
+ },
+ {
+  "id": "switch-back-one-line",
+  "ok": true,
+  "d": "{\"back\":{\"bag\":[\"riverside:60\"],\"total\":60},\"mine\":{\"wedstay\":{\"key\":\"riverside/superior-window\",\"label\":\"A\"}}}"
+ },
+ {
+  "id": "width-320",
+  "ok": true,
+  "d": "no overflow · {\"riverside\":true,\"seven\":true,\"pend\":true}"
+ },
+ {
+  "id": "width-834",
+  "ok": true,
+  "d": "no overflow · {\"riverside\":true,\"seven\":true,\"pend\":true}"
+ },
+ {
+  "id": "console-errors",
+  "ok": true,
+  "d": "no script or console error on any visited page"
+ }
+]

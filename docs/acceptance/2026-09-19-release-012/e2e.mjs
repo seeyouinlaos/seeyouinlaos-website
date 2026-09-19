@@ -117,9 +117,27 @@ if (!LIVE) {
   await shot(p, '390-my-trip-riverside');
   await p.goto(O + '/cart.html', { waitUntil: 'load' }); await p.waitForTimeout(1500); const cart = await p.$eval('main', (e) => e.innerText.replace(/\s+/g, ' '));
   note('riverside-my-bag', /Riverside Hotel Vientiane/.test(cart) && /USD 60/.test(cart) && /Room A/i.test(cart), cart.slice(0, 200));
-  /* a Souphattra choice for the same window replaces the Riverside hold */
-  const j = await api(p, '/api/rooms/join', { method: 'POST', body: JSON.stringify({ invitationId: 'INV-T001', guestId: 'T001', key: 'wedstay/heritage', label: 'A', name: 'Ada' }) });
-  note('riverside-one-stay-per-window', j.status === 200 && j.body.mine.wedstay.key === 'wedstay/heritage' && j.body.units['riverside/superior-window'][0].taken === 0, JSON.stringify(j.body.mine));
+  /* CODEX 012-1 · switching hotels through the pages: the Souphattra card on The Journey and the Souphattra room page say what
+     they replace, the choice leaves ONE Bag line (USD 145, never 205), the engine holds Souphattra alone, readiness names no
+     stale room; and back again through the Riverside room page */
+  await p.goto(O + '/journeys.html#j-wedstay', { waitUntil: 'load' }); await p.waitForTimeout(1800);
+  const jn = await p.$eval('[data-stayact="wedstay"]', (e) => e.innerText.replace(/\s+/g, ' '));
+  note('switch-journey-card-names-the-riverside', /Your trip currently holds Superior Room With Window at Riverside Hotel Vientiane for this stay — choosing a room here replaces it\./.test(jn), jn.slice(0, 200));
+  await p.goto(O + '/room.html?stay=souphattra&room=heritage', { waitUntil: 'load' }); await p.waitForTimeout(2200);
+  const swapNote = await p.evaluate(() => [...document.querySelectorAll('[data-swap]')].filter((e) => !e.hidden).map((e) => e.textContent).join(' | '));
+  note('switch-room-page-names-the-riverside', /Your trip currently holds Superior Room With Window at Riverside Hotel Vientiane for this stay — adding this room replaces it\./.test(swapNote), swapNote.slice(0, 200));
+  await p.click('[data-join="wedstay|heritage|A"]'); await p.waitForTimeout(2400);
+  const j = await api(p, '/api/rooms?invitation=INV-T001', { method: 'GET' });
+  await p.goto(O + '/your-journey.html', { waitUntil: 'load' }); await p.waitForTimeout(2200);
+  const sw = await p.evaluate(() => ({ bag: SIYL_BAG.get().map((x) => x.id + ':' + x.price), total: SIYL_BAG.total(), missing: SIYL_GUEST.missingFor('journey').map((m) => m.key).filter((k) => /^room:/.test(k)), stale: SIYL_GUEST.staleFor().length }));
+  note('switch-one-line-one-hold', sw.bag.length === 1 && sw.bag[0] === 'wedstay:145' && sw.total === 145 && sw.missing.length === 0 && sw.stale === 0 && j.body.mine.wedstay.key === 'wedstay/heritage' && j.body.units['riverside/superior-window'][0].taken === 0 && j.body.units['wedstay/heritage'][0].taken === 1, JSON.stringify({ sw, mine: j.body.mine }).slice(0, 240));
+  await p.goto(O + '/room.html?stay=riverside&room=superior-window', { waitUntil: 'load' }); await p.waitForTimeout(2200);
+  const swapBack = await p.evaluate(() => [...document.querySelectorAll('[data-swap]')].filter((e) => !e.hidden).map((e) => e.textContent).join(' | '));
+  note('switch-back-names-souphattra', /Your trip currently holds The Heritage at Souphattra Heritage Vientiane for this stay — adding this room replaces it\./.test(swapBack), swapBack.slice(0, 200));
+  await p.click('[data-join="riverside|superior-window|A"]'); await p.waitForTimeout(2400);
+  const back = await p.evaluate(() => ({ bag: SIYL_BAG.get().map((x) => x.id + ':' + x.price), total: SIYL_BAG.total() }));
+  const j2 = await api(p, '/api/rooms?invitation=INV-T001', { method: 'GET' });
+  note('switch-back-one-line', back.bag.length === 1 && back.bag[0] === 'riverside:60' && back.total === 60 && j2.body.mine.wedstay.key === 'riverside/superior-window' && j2.body.units['wedstay/heritage'][0].taken === 0, JSON.stringify({ back, mine: j2.body.mine }).slice(0, 200));
   for (const stage of ['wedstay']) await api(p, '/api/rooms/leave', { method: 'POST', body: JSON.stringify({ invitationId: 'INV-T001', guestId: 'T001', stage }) });
   await p.evaluate(() => { ['siyl.bag', 'siyl.skip', 'siyl.skip.by', 'siyl.guest'].forEach((k) => localStorage.removeItem(k)); });
   await p.context().close();

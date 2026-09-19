@@ -1,0 +1,6 @@
+e2e-012 (fresh stage, after Codex 012-1): 25/25
+e2e-011 (fresh stage): 52/52
+e2e-p0-empty-bag (fresh stage): 49/49
+e2e-account-ia (fresh stage): 33/33
+unit suite: 361/361
+release-check: PASSED (gates incl. M1, C1, V1, I1)

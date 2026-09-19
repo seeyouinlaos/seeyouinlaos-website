@@ -103,8 +103,8 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:24px;margin:44
 <script src="assets/rooms-data.js?v=c8052faf"></script>
 <script src="assets/pricing.js?v=e864296d"></script>
 <script src="assets/rooms.js?v=1b24382b"></script>
-<script src="assets/stay.js?v=33ea56d6"></script>
-<script src="assets/journey.js?v=13519ab1"></script>
+<script src="assets/stay.js?v=2183bc69"></script>
+<script src="assets/journey.js?v=092bda16"></script>
 <script type="module" src="assets/invite.mjs?v=3dc5396d"></script>
 <script>
 (function () {
@@ -307,8 +307,9 @@ function mine(w) {
   var line = SIYL_BAG.get().filter(function (x) { return ids.indexOf(x.id) >= 0; })[0];
   return line && line.meta && line.meta.indexOf(room.name) >= 0 ? line : null;
 }
+/* what the trip holds for this STAGE — this window's line, or the other hotel's line of the same stage (one selection per stage) */
 function held(w) {
-  var ids = P.ids(w.id);
+  var ids = ST && ST.stageIds ? ST.stageIds(w.id) : P.ids(w.id);
   return SIYL_BAG.get().filter(function (x) { return ids.indexOf(x.id) >= 0; })[0] || null;
 }
 var U = window.SIYL_UNITS, ST = window.SIYL_STAY;
@@ -333,7 +334,11 @@ function paint() {
       b.classList.remove('sel');
       if (chg) chg.hidden = true;
       if (swap) {
-        if (other) { swap.hidden = false; swap.textContent = 'Your trip currently holds ' + String(other.meta).split(' · ').pop() + ' for this stay — adding this room replaces it.'; }
+        if (other) {
+          /* the other hotel of the same stage is named with its house: one selection per stage, the new room replaces it */
+          var elsewhere = P.ids(w.id).indexOf(other.id) < 0;
+          swap.hidden = false; swap.textContent = 'Your trip currently holds ' + String(other.meta).split(' · ').pop() + (elsewhere ? ' at ' + ST.houseOf(other) : '') + ' for this stay — adding this room replaces it.';
+        }
         else swap.hidden = true;
       }
     }
