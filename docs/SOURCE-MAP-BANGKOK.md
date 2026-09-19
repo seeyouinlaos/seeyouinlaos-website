@@ -29,3 +29,12 @@ Folder: https://drive.google.com/drive/folders/1ztaTrcKATnPjN0N0ycMT2JijCPaZSVJs
 | IMG_3868.jpeg | assets/images/shama/king-studio-shower-dressing.jpg | Gallery 6 — the shower and the dressing corner |
 
 Heroes were chosen by looking at the photographs, not by file number.
+
+## The destination card's clip (release 013 · 19 Sep 2026)
+
+| Owner original | Served derivative | Facts |
+|---|---|---|
+| `copy_247B8DD5-3003-4095-8108-FE35E850AF5D.mov` (Drive `1IcZINAoYyc5iG6vpTkf0JhmcTaLbBRXr` in `001 - City - Bangkok`; HEVC 720×1280, 30 fps, 15.07 s, AAC, 10,339,106 bytes; uploaded by the Owner to the session on 19 Sep 2026) | `assets/video/bangkok-card.mp4` | H.264 main · yuv420p · 720×1280 · no audio · `+faststart` · CRF 24 · 2,529,071 bytes — `ffmpeg -an -c:v libx264 -profile:v main -level 4.0 -pix_fmt yuv420p -preset slow -crf 24 -movflags +faststart -vf scale=720:1280` |
+
+Declared on the index destination card (`data-video`); the photograph `001-bangkok-chao-phraya-skyline.jpg` stays its poster
+and geometry. Never a Drive hotlink. Gate V1 verifies the file on every release check.
