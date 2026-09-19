@@ -1,0 +1,26 @@
+{
+ "at": "2026-09-19T10:36:27.356Z",
+ "dryRun": {
+  "mode": "dry-run",
+  "rooms": {
+   "occupancies": 0,
+   "fixed": 2,
+   "rows": []
+  },
+  "seating": {
+   "holds": 0,
+   "rows": []
+  },
+  "drafts": {
+   "actors": 85,
+   "had": 0
+  },
+  "kvKeys": []
+ },
+ "guestHolds": 0,
+ "fixedPlaces": 2,
+ "seatHolds": 0,
+ "seatingOpen": true,
+ "seatingFrozen": false,
+ "journeysWithState": 0
+}

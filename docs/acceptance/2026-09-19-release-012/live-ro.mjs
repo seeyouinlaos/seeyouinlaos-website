@@ -43,8 +43,9 @@ note('houses-live', houses.riverside && houses.seven && houses.pend, JSON.string
 await p.goto(O + '/journeys.html#j-riverside', { waitUntil: 'load' }); await p.waitForTimeout(1500); const rcard = await p.$eval('#j-riverside', (e) => e.innerText.replace(/\s+/g, ' '));
 note('riverside-journey-live', /Riverside Hotel Vientiane/.test(rcard) && /Photography to follow/i.test(rcard) && !/USD/.test(rcard), rcard.slice(0, 160) + ' (signed out: no price)');
 await p.goto(O + '/room.html?stay=riverside&room=superior-window', { waitUntil: 'load' }); await p.waitForTimeout(2000); note('riverside-room-gated-live', /invitation/.test(p.url()), p.url());
-await p.goto(O + '/index.html', { waitUntil: 'load' }); await p.waitForTimeout(1000); const card = await p.evaluate(() => { const a = document.querySelector('.aslide .am[href*="bangkok"]'); return { video: !!(a && a.querySelector('video')), dataVideo: !!(a && a.getAttribute('data-video')) }; });
-note('bangkok-card-live', !card.video && !card.dataVideo, 'the photograph; no clip declared (the converted MP4 is not reachable from this session)');
+await p.goto(O + '/index.html', { waitUntil: 'load' }); await p.waitForTimeout(1000); const card = await p.evaluate(() => { const a = document.querySelector('.aslide .am[href*="bangkok"]'); return { video: !!(a && a.querySelector('video')), dataVideo: a ? a.getAttribute('data-video') : null }; });
+/* since release 013 the card declares the Owner's clip (proven by the 013 live script); before it, the photograph alone */
+note('bangkok-card-live', !card.dataVideo || card.dataVideo === 'assets/video/bangkok-card.mp4', card.dataVideo ? 'the Owner\'s clip over the photograph (release 013)' : 'the photograph; no clip declared');
 await p.goto(O + '/journeys.html', { waitUntil: 'load' }); await p.waitForTimeout(1500); await p.screenshot({ path: path.join(OUT, '390-journey.png'), fullPage: false });
 await p.context().close();
 const wk = await webkit.launch(); const ip = await (await wk.newContext(devices['iPhone 13'])).newPage(); await ip.goto(O + '/journeys.html', { waitUntil: 'load' }); await ip.waitForTimeout(1800);

@@ -1,0 +1,72 @@
+[
+ {
+  "id": "one-site-retired-pages",
+  "ok": true,
+  "d": "_config.yml, register-landing.html, CNAME, .nojekyll → 404"
+ },
+ {
+  "id": "github-pages-404",
+  "ok": true,
+  "d": "https://seeyouinlaos.github.io/seeyouinlaos-website/ → 404"
+ },
+ {
+  "id": "edit5-images",
+  "ok": true,
+  "d": "IGNIV 404 · the four venues 200"
+ },
+ {
+  "id": "real-register-only",
+  "ok": true,
+  "d": "85 entries, no synthetic id"
+ },
+ {
+  "id": "api-private",
+  "ok": true,
+  "d": "/api/draft with a made-up bearer → 401"
+ },
+ {
+  "id": "width-320",
+  "ok": true,
+  "d": "eight public pages: no horizontal overflow, one header band, nothing beneath the logo"
+ },
+ {
+  "id": "width-390",
+  "ok": true,
+  "d": "eight public pages: no horizontal overflow, one header band, nothing beneath the logo"
+ },
+ {
+  "id": "width-834",
+  "ok": true,
+  "d": "eight public pages: no horizontal overflow, one header band, nothing beneath the logo"
+ },
+ {
+  "id": "width-1440",
+  "ok": true,
+  "d": "eight public pages: no horizontal overflow, one header band, nothing beneath the logo"
+ },
+ {
+  "id": "edit5-experiences-live",
+  "ok": true,
+  "d": "Le Du Kaan,Lao National Museum,Traditional Lao Silk Residence,Lao Art Museum"
+ },
+ {
+  "id": "bangkok-card-live",
+  "ok": true,
+  "d": "{\"video\":true,\"bg\":true,\"ratio\":1.25,\"dataVideo\":\"assets/video/bangkok-card.mp4\"} — the Owner's clip over the photograph (release 013)"
+ },
+ {
+  "id": "private-gated-live",
+  "ok": true,
+  "d": "https://seeyouinlaos-website.suthep-hrg.workers.dev/invitation?open=1&next=your-journey"
+ },
+ {
+  "id": "iphone-safari-home",
+  "ok": true,
+  "d": "{\"ov\":0,\"h\":56,\"brand\":true}"
+ },
+ {
+  "id": "console-errors",
+  "ok": true,
+  "d": "no script or console error on any visited live page"
+ }
+]

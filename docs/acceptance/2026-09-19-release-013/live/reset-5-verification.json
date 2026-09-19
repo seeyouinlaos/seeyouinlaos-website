@@ -1,0 +1,27 @@
+{
+ "at": "2026-09-19T10:34:39.140Z",
+ "version": "f6222653",
+ "roomsUnits": 129,
+ "guestGeneratedRoomOccupancy": 0,
+ "fixedHostPlaces": [
+  "bkk-stay/penthouse/A:G048",
+  "bkk-stay/penthouse/A:G049"
+ ],
+ "seatHoldsCeremonyDinner": 0,
+ "seatingOpen": true,
+ "seatingFrozen": false,
+ "seatingCapacity": {
+  "ceremony": {
+   "guestSeats": 50,
+   "left": 20,
+   "right": 30,
+   "fixed": 2
+  },
+  "dinner": {
+   "guestSeats": 50,
+   "top": 25,
+   "bottom": 25,
+   "totalPeople": 50
+  }
+ }
+}

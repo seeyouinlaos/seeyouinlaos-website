@@ -1,0 +1,26 @@
+[33m200[39m {
+  "ok": true,
+  "mode": "dry-run",
+  "dryRun": true,
+  "at": "2026-09-19T10:34:08.686Z",
+  "rooms": {
+    "occupancies": 0,
+    "fixed": 2,
+    "rows": []
+  },
+  "seating": {
+    "holds": 0,
+    "rows": []
+  },
+  "drafts": {
+    "actors": 85,
+    "had": 0,
+    "cleared": 0,
+    "ids": []
+  },
+  "kv": {
+    "keys": [],
+    "deleted": 0
+  },
+  "digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

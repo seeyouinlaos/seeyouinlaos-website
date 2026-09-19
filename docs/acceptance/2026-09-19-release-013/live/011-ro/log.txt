@@ -1,0 +1,15 @@
+PASS one-site-retired-pages — _config.yml, register-landing.html, CNAME, .nojekyll → 404
+PASS github-pages-404 — https://seeyouinlaos.github.io/seeyouinlaos-website/ → 404
+PASS edit5-images — IGNIV 404 · the four venues 200
+PASS real-register-only — 85 entries, no synthetic id
+PASS api-private — /api/draft with a made-up bearer → 401
+PASS width-320 — eight public pages: no horizontal overflow, one header band, nothing beneath the logo
+PASS width-390 — eight public pages: no horizontal overflow, one header band, nothing beneath the logo
+PASS width-834 — eight public pages: no horizontal overflow, one header band, nothing beneath the logo
+PASS width-1440 — eight public pages: no horizontal overflow, one header band, nothing beneath the logo
+PASS edit5-experiences-live — Le Du Kaan,Lao National Museum,Traditional Lao Silk Residence,Lao Art Museum
+PASS bangkok-card-live — {"video":true,"bg":true,"ratio":1.25,"dataVideo":"assets/video/bangkok-card.mp4"} — the Owner's clip over the photograph (release 013)
+PASS private-gated-live — https://seeyouinlaos-website.suthep-hrg.workers.dev/invitation?open=1&next=your-journey
+PASS iphone-safari-home — {"ov":0,"h":56,"brand":true}
+PASS console-errors — no script or console error on any visited live page
+14/14 checks passed

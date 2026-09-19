@@ -1,0 +1,21 @@
+PASS stay-media-live — sathornPenthouse uSathorn shamaYenAkat souphattra privateResidence riverside wanxiang luyeBaisha kempinski · 43 frames
+PASS experience-galleries-live — 158 frames · kinds: dining-room interior atmosphere venue exterior architecture counter
+PASS no-broken-image-live — 201 distinct frames answer 200
+PASS rejected-frames-404-live — bkk-barus-01.jpg:404 bkk-barus-02.jpg:404 bkk-barus-03.jpg:404 bkk-barus-04.jpg:404 bkk-barus-05.jpg:404 bkk-thongsmith-01.jpg:404 bkk-tangjaiyang-01.jpg:404 bkk-ledukaan-05.jpg:404
+PASS real-register-only — 85 entries (the repository's register), no synthetic code
+PASS api-private — /api/draft with a made-up bearer → 401
+PASS journey-galleries-live-390 — {"j-bkk-stay":"17@1.25","j-prewed":"8@1.25","j-wedstay":"8@1.25","j-residence":"4@1.25","j-riverside":"0@1.25","j-kmg":"4@1.25","j-ljg":"3@1.25","j-kempinski":"7@1.25"}
+PASS journey-grammar-live-390 — {"before":"1 / 17","next":"2 / 17","end":"17 / 17","label":"Shama Yen-Akat Bangkok · The dining corner","size":[342,274,342,274]}
+PASS no-overflow-live-390 — seven pages: no horizontal overflow
+PASS journey-galleries-live-1440 — {"j-bkk-stay":"17@1.5","j-prewed":"8@1.5","j-wedstay":"8@1.5","j-residence":"4@1.5","j-riverside":"0@1.5","j-kmg":"4@1.5","j-ljg":"3@1.5","j-kempinski":"7@1.5"}
+PASS journey-grammar-live-1440 — {"before":"1 / 17","next":"2 / 17","end":"17 / 17","label":"Shama Yen-Akat Bangkok · The dining corner","size":[420,280,420,280]}
+PASS no-overflow-live-1440 — seven pages: no horizontal overflow
+PASS restaurant-pages-live — {"bkk-thongsmith":["bkk-thongsmith-03.jpg","bkk-thongsmith-06.jpg","bkk-thongsmith-04.jpg","bkk-thongsmith-07.jpg"],"bkk-tangjaiyang":["bkk-tjy-02.jpg"],"bkk-ledukaan":["bkk-ledukaan-01.jpg","bkk-ledukaan-02.jpg","bkk-le
+PASS cafes-rail-live — Dior · Café LV | Time Space Cafe | Moo Yoo Rose House | Whispering Cafe | Cafe Madeleine | Harudot | Sona Cafe and Bar | Kaogee Le Triomphe | Lacuna VTE
+PASS houses-live — {"riverside":true,"seven":true,"pend":true,"cards":10}
+PASS riverside-journey-live — PHOTOGRAPHY TO FOLLOW 27 FEB – 01 MAR · ACCOMMODATION · VIENTIANE Riverside Hotel Vientiane 27 February – 01 March 2027 · 2 nights: 27 → 28 February and 28 Febr (signed out: no price)
+PASS riverside-room-gated-live — https://seeyouinlaos-website.suthep-hrg.workers.dev/invitation?open=1&next=room%3Fstay%3Driverside%26room%3Dsuperior-window
+PASS bangkok-card-live — the Owner's clip over the photograph (release 013)
+PASS iphone-safari-live — {"sw":{"before":0,"ov":0,"w":342},"after":{"index":0,"url":"/journeys"}} (no overflow, no navigation away on a swipe gesture)
+PASS console-errors — no script or console error on any visited live page
+20/20 checks passed

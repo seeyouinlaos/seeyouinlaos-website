@@ -1,0 +1,47 @@
+[
+ {
+  "id": "clip-poster-first",
+  "ok": true,
+  "d": "{\"state\":\"loading\",\"bg\":true,\"src\":\"assets/video/bangkok-card.mp4\",\"w\":318,\"h\":254,\"video\":true} (the photograph is on screen before the clip)"
+ },
+ {
+  "id": "clip-plays-at-the-cards-geometry",
+  "ok": true,
+  "d": "{\"state\":\"playing\",\"bg\":true,\"w\":318,\"h\":254,\"ratio\":1.25,\"video\":true,\"playing\":true,\"t\":3.48,\"muted\":true,\"inline\":true,\"loop\":true,\"controls\":false,\"opacity\":\"1\",\"poster\":\"assets/images/city/001-bangkok-chao-phraya-skyline.jpg\",\"srcOk\":true}"
+ },
+ {
+  "id": "clip-reduced-motion-photograph",
+  "ok": true,
+  "d": "{\"state\":\"still\",\"bg\":true,\"w\":318,\"h\":254,\"ratio\":1.25,\"video\":false,\"playing\":false,\"t\":null,\"muted\":false,\"inline\":false,\"loop\":false,\"controls\":false,\"opacity\":null,\"poster\":null,\"srcOk\":false}"
+ },
+ {
+  "id": "clip-blocked-source-photograph",
+  "ok": true,
+  "d": "{\"state\":\"still\",\"bg\":true,\"w\":318,\"h\":254,\"ratio\":1.25,\"video\":false,\"playing\":false,\"t\":null,\"muted\":false,\"inline\":false,\"loop\":false,\"controls\":false,\"opacity\":null,\"poster\":null,\"srcOk\":false}"
+ },
+ {
+  "id": "clip-iphone-safari",
+  "ok": true,
+  "d": "{\"state\":\"playing\",\"bg\":true,\"video\":true,\"playing\":true,\"inline\":true,\"muted\":true,\"ratio\":1.25,\"ov\":0} (plays inline and muted, or the photograph stays — never black)"
+ },
+ {
+  "id": "width-320",
+  "ok": true,
+  "d": "no horizontal overflow"
+ },
+ {
+  "id": "width-834",
+  "ok": true,
+  "d": "no horizontal overflow"
+ },
+ {
+  "id": "width-1440",
+  "ok": true,
+  "d": "no horizontal overflow"
+ },
+ {
+  "id": "console-errors",
+  "ok": true,
+  "d": "no script or console error"
+ }
+]

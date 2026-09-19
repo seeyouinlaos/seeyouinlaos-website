@@ -1,0 +1,87 @@
+[
+ {
+  "id": "register-live-is-the-repository",
+  "ok": true,
+  "d": "85 entries, 2 hosts, byte-equal to the repository"
+ },
+ {
+  "id": "bundle-live-is-the-repository",
+  "ok": true,
+  "d": "85 encrypted invitations"
+ },
+ {
+  "id": "clip-live-is-the-repository",
+  "ok": true,
+  "d": "2529071 bytes, faststart"
+ },
+ {
+  "id": "api-private",
+  "ok": true,
+  "d": "/api/draft with a made-up bearer → 401"
+ },
+ {
+  "id": "reset-route-guest-relations-only",
+  "ok": true,
+  "d": "no token → 401 on /api/gr/reset and /api/gr/record"
+ },
+ {
+  "id": "github-pages-404",
+  "ok": true,
+  "d": "github.io 404 · _config.yml 404 · CNAME 404"
+ },
+ {
+  "id": "clip-plays-live",
+  "ok": true,
+  "d": "{\"state\":\"playing\",\"playing\":true,\"muted\":true,\"inline\":true,\"loop\":true,\"controls\":false,\"opacity\":\"1\",\"w\":318,\"h\":254,\"ratio\":1.25,\"src\":\"https://seeyouinlaos-website.suthep-hrg.workers.dev/assets/video/bangkok-card.mp4\"}"
+ },
+ {
+  "id": "clip-reduced-motion-live",
+  "ok": true,
+  "d": "{\"state\":\"still\",\"video\":false,\"bg\":true}"
+ },
+ {
+  "id": "aman-header-live",
+  "ok": true,
+  "d": "{\"h\":56,\"text\":\"see you in laos.\",\"under\":false,\"order\":true,\"brandCentred\":true} (menu · wordmark · bag, no account row)"
+ },
+ {
+  "id": "private-gated-live",
+  "ok": true,
+  "d": "https://seeyouinlaos-website.suthep-hrg.workers.dev/invitation?open=1&next=your-journey"
+ },
+ {
+  "id": "about-you-gated-live",
+  "ok": true,
+  "d": "https://seeyouinlaos-website.suthep-hrg.workers.dev/invitation?open=1&next=about-you"
+ },
+ {
+  "id": "width-320",
+  "ok": true,
+  "d": "six public pages: no horizontal overflow"
+ },
+ {
+  "id": "width-834",
+  "ok": true,
+  "d": "six public pages: no horizontal overflow"
+ },
+ {
+  "id": "width-1440",
+  "ok": true,
+  "d": "six public pages: no horizontal overflow"
+ },
+ {
+  "id": "clip-iphone-safari-live",
+  "ok": true,
+  "d": "{\"state\":\"playing\",\"bg\":true,\"playing\":true,\"inline\":true,\"muted\":true,\"ov\":0} (plays inline and muted, or the photograph stays — never black)"
+ },
+ {
+  "id": "console-errors",
+  "ok": true,
+  "d": "no script or console error on any visited live page"
+ },
+ {
+  "id": "reset-verified-zero-live",
+  "ok": true,
+  "d": "{\"dryRun\":{\"rooms\":0,\"seats\":0,\"drafts\":0,\"kv\":0,\"actors\":85},\"plan\":{\"guestHolds\":0,\"fixedPlaces\":2},\"seatHolds\":0,\"seatingOpen\":true,\"journeysWithState\":0}"
+ }
+]

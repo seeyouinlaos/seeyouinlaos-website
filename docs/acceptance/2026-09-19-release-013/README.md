@@ -71,3 +71,42 @@ this build — `stage/SUMMARY.txt`.
   a readiness item); THE CLEAN RESET on the stage (populated → dry run wrote nothing → the words → execute → zero holds,
   zero seats, zero drafts, zero records, the fixed places and the open seating stand → a device that cached ten lines
   honours the epoch: nothing on the device, the server or the engine; no submission remains); widths and console.
+
+## 4 · Live — the canonical Worker (19 Sep 2026)
+
+- **Release path**: `main` fast-forwarded to `release-013` (`3973d80`) and pushed at 10:27:49 UTC; the Owner's Workers Build
+  deployed it as version **`f6222653-c4c1-474e-b779-760960f08ab1`** at 10:29:30 UTC. No manual deploy, no infrastructure change
+  (`node src/infra-guard.cjs --live`: FREEZE intact — https 200 cloudflare, `/api/draft` 401, GitHub Pages 404).
+  Rollback: version `9043319e` (main `c516674`, release 012) — note that a rollback of the code does not undo the reset.
+- **Parity** (`parity-f6222653.json`): **243 / 243** served files byte-identical to `main`, plus the clip (2,529,071 bytes),
+  the register (85 entries, 2 hosts) and both encrypted bundles checked by sha256.
+- **THE CLEAN RESET, executed once** (the Owner's command, brief §2), through `node src/gr.cjs`:
+  1. `reset-1-dry-run.json` (10:30:51 UTC): 7 guest-generated room occupancies (all by the hosts' own accounts while
+     testing: G048 × 6 hotels, G049 × the private residence), the 2 FIXED penthouse places, 1 seat hold (G048, dinner
+     D-B-13), 2 draft actors with a draft of 85 (INV-G048, INV-G049), 13 guest KV keys (3 drafts · 3 contacts · 7 submission
+     records incl. history for the hosts' test journeys); nothing written.
+  2. `reset-2-snapshot.txt` (10:31:41 UTC): every value that would go — 23 values (2 actor drafts, 7 occupancy records, 1 hold,
+     13 KV values with their bytes and metadata) — written to `src/reset-backup-2026-09-19T10-31-41-650Z.private.json`
+     (169 KB, git-ignored, read back and verified) with the digest of that exact state.
+  3. `reset-3-execute.json` (10:31:52 UTC, epoch **2026-09-19T10:31:52.628Z**): bound to the digest and the words — 7
+     occupancies cleared (0 remaining, the 2 fixed places stand), 1 seat cleared (0 remaining), 85 actors took the epoch
+     and 2 drafts cleared, 13 KV keys deleted (the answer's `remaining.kvKeys: 13` was KV's list lagging the deletes —
+     `kv key list` two minutes later: one key, `reset:epoch`; every deleted key answers 404).
+  4. `reset-4-dry-run-after.json` (10:34:08 UTC): **0 · 0 · 0 · 0** (occupancies, seats, drafts with state, guest KV keys),
+     the fixed places 2, actors 85.
+  5. `reset-5-verification.json` — independently through the read APIs: rooms plan 129 units, **guest-generated occupancy 0**,
+     fixed host places `bkk-stay/penthouse/A` for G048 and G049, **seat holds 0**, seating open and not frozen with its
+     capacity intact, `/api/status` for the hosts `received: false`, Guest Relations' journeys listing empty.
+- **Read-only live acceptance**: `live-ro.log` (013) **17 / 17** — the register and the bundle byte-equal to the repository
+  (85, 2 hosts), the clip byte-equal and playing on the card in Chromium and on iPhone Safari (muted · inline · looped, the
+  photograph as poster and under reduced motion), the API private, `/api/gr/reset` and `/api/gr/record` 401 without the
+  token, GitHub Pages 404, the Aman header, the private pages gated, no overflow at 320 / 834 / 1440, no console error,
+  and the GR verification of the reset (zero; `reset-verification.json`). Release 012 `live-ro` **20 / 20**, release 011
+  `live-ro` **14 / 14** (`012-ro/`, `011-ro/`; their Bangkok-card checks now accept the shipped clip). The 013 E2E's public
+  sections in LIVE mode **9 / 9** (`e2e-013-live/`).
+- **Nothing was written on live by a test**: no synthetic guest, no hold, no draft, no seat, no email; the reset itself was
+  the one Owner-authorised write. The signed-in flows (the eight scopes, the whole-trip decline, the complete trip, parity,
+  Haruthai, the reset on a populated state) are proven on fresh stages of the identical bundle (`stage/`).
+- **Codex**: the final review is INCOMPLETE — the quota refused the second post-implementation call ("try again at
+  Sep 24th, 2026 10:19 PM"); pass 0 (pre-deploy) complete and fixed, pass 1 interim and fixed
+  (docs/review/014-codex-release-013). Not represented as passed.

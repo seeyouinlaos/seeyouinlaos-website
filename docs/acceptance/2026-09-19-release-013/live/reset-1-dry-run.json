@@ -1,0 +1,86 @@
+[33m200[39m {
+  "ok": true,
+  "mode": "dry-run",
+  "dryRun": true,
+  "at": "2026-09-19T10:30:51.859Z",
+  "rooms": {
+    "occupancies": 7,
+    "fixed": 2,
+    "rows": [
+      {
+        "key": "airbnb-2br/private-residence",
+        "label": "A",
+        "guestId": "G049"
+      },
+      {
+        "key": "bkk-stay/u-sathorn-superior-garden",
+        "label": "A",
+        "guestId": "G048"
+      },
+      {
+        "key": "kempinski/deluxe-balcony-king",
+        "label": "A",
+        "guestId": "G048"
+      },
+      {
+        "key": "kmg/smart-family",
+        "label": "A",
+        "guestId": "G048"
+      },
+      {
+        "key": "ljg/soup-pool-270",
+        "label": "A",
+        "guestId": "G048"
+      },
+      {
+        "key": "prewed/souphattra-presidential",
+        "label": "A",
+        "guestId": "G048"
+      },
+      {
+        "key": "wedstay/souphattra-presidential",
+        "label": "A",
+        "guestId": "G048"
+      }
+    ]
+  },
+  "seating": {
+    "holds": 1,
+    "rows": [
+      {
+        "event": "dinner",
+        "seatId": "D-B-13",
+        "guestId": "G048",
+        "invitationId": "INV-G048"
+      }
+    ]
+  },
+  "drafts": {
+    "actors": 85,
+    "had": 2,
+    "cleared": 0,
+    "ids": [
+      "INV-G048",
+      "INV-G049"
+    ]
+  },
+  "kv": {
+    "keys": [
+      "contact:INV-G001",
+      "contact:INV-G048",
+      "contact:INV-G049",
+      "draft:INV-G001",
+      "draft:INV-G048",
+      "draft:INV-G049",
+      "reg:INV-G048",
+      "reg:INV-G048:prev:2026-09-15T14:20:31.936Z",
+      "reg:INV-G048:prev:2026-09-16T15:52:46.758Z",
+      "reg:INV-G048:prev:2026-09-16T15:54:38.708Z",
+      "reg:INV-G049",
+      "reg:INV-G049:prev:2026-09-16T15:32:17.398Z",
+      "reg:INV-G049:prev:2026-09-18T22:32:24.216Z"
+    ],
+    "deleted": 0
+  },
+  "digest": "70e10ee686a4c4e8d0e15fb385f054b4f775ef574d602b710775862c2fd0bfc3"
+}

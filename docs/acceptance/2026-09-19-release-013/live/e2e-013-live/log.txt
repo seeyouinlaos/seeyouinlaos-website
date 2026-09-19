@@ -1,0 +1,10 @@
+PASS clip-poster-first — {"state":"loading","bg":true,"src":"assets/video/bangkok-card.mp4","w":318,"h":254,"video":true} (the photograph is on screen before the clip)
+PASS clip-plays-at-the-cards-geometry — {"state":"playing","bg":true,"w":318,"h":254,"ratio":1.25,"video":true,"playing":true,"t":3.48,"muted":true,"inline":true,"loop":true,"controls":false,"opacity":"1","poster":"assets/images/city/001-bangkok-chao-phraya-sk
+PASS clip-reduced-motion-photograph — {"state":"still","bg":true,"w":318,"h":254,"ratio":1.25,"video":false,"playing":false,"t":null,"muted":false,"inline":false,"loop":false,"controls":false,"opacity":null,"poster":null,"srcOk":false}
+PASS clip-blocked-source-photograph — {"state":"still","bg":true,"w":318,"h":254,"ratio":1.25,"video":false,"playing":false,"t":null,"muted":false,"inline":false,"loop":false,"controls":false,"opacity":null,"poster":null,"srcOk":false}
+PASS clip-iphone-safari — {"state":"playing","bg":true,"video":true,"playing":true,"inline":true,"muted":true,"ratio":1.25,"ov":0} (plays inline and muted, or the photograph stays — never black)
+PASS width-320 — no horizontal overflow
+PASS width-834 — no horizontal overflow
+PASS width-1440 — no horizontal overflow
+PASS console-errors — no script or console error
+9/9 checks passed
