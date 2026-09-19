@@ -96,7 +96,7 @@ any folder on this Mac — it goes live in one commit (`assets/video/bangkok-car
 - **Release path**: `main` fast-forwarded to `release-012` (`e4746a3`) and pushed at 06:10:08 UTC; the Owner's Cloudflare
   Workers Build deployed it as version **`96792d74-81ed-4e8d-a408-7f84a4464d68`** at 06:12:38 UTC (no manual deploy; no
   infrastructure change; `node src/infra-guard.cjs --live`: FREEZE intact — https 200 cloudflare, `/api/draft` 401, GitHub Pages 404).
-  Rollback: version `a7802771` (main `705da49`, release 011).
+  Rollback: version `a7802771` (main `705da49`, release 011). The proof commit `99e2119` (docs only) was built as `9043319e` at 06:21:11 UTC — parity re-proven 243 / 243 (`parity-9043319e.json`).
 - **Parity** (`parity.mjs` → `parity-96792d74.json`): **243 / 243** served files byte-identical to `main` — the 24 pages, the 15
   modules and stylesheets of the release, both register files (47 real entries, no synthetic code), all 201 gallery frames of
   both records (43 hotel frames + 158 experience frames), the new Social Club frame among them.
