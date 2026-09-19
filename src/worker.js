@@ -95,6 +95,7 @@ export default {
         const who = await identify(request, env);
         if (who) headers.set('x-siyl-identity', JSON.stringify(who));
         else if (op === 'join' || op === 'leave') return json({ ok: false, error: 'unauthorised' }, 401, corsHeaders(request));
+        if ((op === 'join' || op === 'leave') && await resetLocked(env)) return json({ ok: false, error: 'the room engine is being reset — try again in a moment', retry: true }, 503, corsHeaders(request));
       }
       const stub = env.ROOMS.get(env.ROOMS.idFromName('rooms'));
       const res = await stub.fetch(new Request(request, { headers }));
@@ -198,6 +199,7 @@ export default {
         const who = await identify(request, env);
         if (who) headers.set('x-siyl-identity', JSON.stringify(who));
         else if (op === 'select' || op === 'release') return json({ ok: false, error: 'unauthorised' }, 401, corsHeaders(request));
+        if ((op === 'select' || op === 'release') && await resetLocked(env)) return json({ ok: false, error: 'the seating ledger is being reset — try again in a moment', retry: true }, 503, corsHeaders(request));
       }
       const forwarded = new Request(request, { headers });
       const stub = env.SEATING.get(env.SEATING.idFromName('seating'));
@@ -521,45 +523,64 @@ async function handleGrReset(request, env) {
   keys.sort(); out.kv.keys = keys;
   const roomsStub = env.ROOMS ? env.ROOMS.get(env.ROOMS.idFromName('rooms')) : null;
   const seatStub = env.SEATING ? env.SEATING.get(env.SEATING.idFromName('seating')) : null;
-  const readRooms = async () => roomsStub ? (await roomsStub.fetch(new Request('https://rooms/api/rooms/reset', { method: 'POST', headers: grHeaders, body: JSON.stringify({ dryRun: true, snapshot }) }))).json() : null;
-  const readSeats = async () => seatStub ? (await seatStub.fetch(new Request('https://seating/api/seating/reset', { method: 'POST', headers: grHeaders, body: JSON.stringify({ dryRun: true, snapshot }) }))).json() : null;
-  /* the digest binds an execution to the state that was snapshotted: the KV keys, the occupancies, the holds, the actors with a draft */
+  const readRooms = async () => roomsStub ? (await roomsStub.fetch(new Request('https://rooms/api/rooms/reset', { method: 'POST', headers: grHeaders, body: JSON.stringify({ dryRun: true, snapshot: true }) }))).json() : null;
+  const readSeats = async () => seatStub ? (await seatStub.fetch(new Request('https://seating/api/seating/reset', { method: 'POST', headers: grHeaders, body: JSON.stringify({ dryRun: true, snapshot: true }) }))).json() : null;
+  /* the digest binds an execution to the state that was snapshotted — the VALUES, not only the keys: every KV value's bytes,
+     every occupancy and hold record, every draft's revision (Codex final review) */
   const rooms0 = await readRooms(), seats0 = await readSeats();
-  const draftIds = [];
-  if (env.DRAFTS) for (const inv of [...invs].sort()) { const r = await draftOp(env, inv, 'reset', { dryRun: true, snapshot }); out.drafts.actors++; if (r && r.had) { out.drafts.had++; draftIds.push(inv); if (snapshot && r.draft) out.backup['do:draft:' + inv] = r.draft; } }
+  const draftIds = [], signature = [];
+  if (env.DRAFTS) for (const inv of [...invs].sort()) { const r = await draftOp(env, inv, 'reset', { dryRun: true, snapshot: true }); out.drafts.actors++; if (r && r.had) { out.drafts.had++; draftIds.push(inv); signature.push('draft-actor:' + inv + '@' + (r.draft && r.draft.updatedAt || '')); if (snapshot && r.draft) out.backup['do:draft:' + inv] = r.draft; } }
   out.drafts.ids = draftIds;
-  const signature = keys.concat((rooms0 && rooms0.rows || []).map((r) => 'occ:' + r.key + '|' + r.label + '|' + r.guestId), (seats0 && seats0.rows || []).map((r) => 'hold:' + r.event + ':' + r.seatId + ':' + r.guestId), draftIds.map((i) => 'draft-actor:' + i));
+  for (const r of (rooms0 && rooms0.rows || [])) signature.push('occ:' + r.key + '|' + r.label + '|' + r.guestId + '@' + JSON.stringify(r.value || null));
+  for (const r of (seats0 && seats0.rows || [])) signature.push('hold:' + r.event + ':' + r.seatId + ':' + r.guestId + '@' + JSON.stringify(r.value || null));
+  const kvValues = {};
+  for (const k of keys) {
+    /* lossless: the bytes as base64 with the metadata; a value that cannot be read is a failed snapshot, never a silent gap */
+    const got = await env.REG_KV.getWithMetadata(k, { type: 'arrayBuffer' });
+    if (got === null || got.value === null) { signature.push('kv:' + k + '@missing'); kvValues[k] = null; continue; }
+    const v = { base64: b64(got.value), metadata: got.metadata || null, bytes: got.value.byteLength };
+    kvValues[k] = v; signature.push('kv:' + k + '@' + await digestOf([v.base64]));
+  }
   out.digest = await digestOf(signature);
   out.rooms = rooms0 ? { occupancies: rooms0.occupancies, fixed: rooms0.fixed, rows: (rooms0.rows || []).map((r) => ({ key: r.key, label: r.label, guestId: r.guestId })) } : null;
   out.seating = seats0 ? { holds: seats0.holds, rows: (seats0.rows || []).map((r) => ({ event: r.event, seatId: r.seatId, guestId: r.guestId, invitationId: r.invitationId })) } : null;
   if (snapshot) {
     for (const r of (rooms0 && rooms0.rows || [])) out.backup[r.storageKey] = r.value;
     for (const r of (seats0 && seats0.rows || [])) out.backup[r.storageKey] = r.value;
-    for (const k of keys) {
-      /* lossless: the bytes as base64 with the metadata; a value that cannot be read stops the snapshot (nothing is deleted on a snapshot anyway) */
-      const got = await env.REG_KV.getWithMetadata(k, { type: 'arrayBuffer' });
-      if (got === null || got.value === null) { out.backup[k] = null; continue; }
-      out.backup[k] = { base64: b64(got.value), metadata: got.metadata || null, bytes: got.value.byteLength };
-    }
+    for (const k of keys) out.backup[k] = kvValues[k];
     return json(out);
   }
   if (!execute) return json(out);
   if (body.digest !== out.digest) return json({ ok: false, error: 'the state changed since the snapshot — snapshot again', digest: out.digest, snapshotDigest: body.digest }, 409);
-  /* 1 · every draft actor takes the epoch and forgets its draft — one serialised step each; a write in flight without the epoch is refused there */
-  if (env.DRAFTS) for (const inv of [...invs].sort()) { const r = await draftOp(env, inv, 'reset', { dryRun: false, epoch: at }); if (r && r.cleared) out.drafts.cleared++; }
-  /* 2 · the epoch every device honours, published before anything else goes */
-  await env.REG_KV.put('reset:epoch', at, { metadata: { at, actor: String(body.actor || 'guest-relations').slice(0, 64), digest: out.digest } });
-  out.epoch = at;
-  /* 3 · the engine and the ledger */
-  if (roomsStub) out.rooms = await (await roomsStub.fetch(new Request('https://rooms/api/rooms/reset', { method: 'POST', headers: grHeaders, body: JSON.stringify({ dryRun: false }) }))).json();
-  if (seatStub) out.seating = await (await seatStub.fetch(new Request('https://seating/api/seating/reset', { method: 'POST', headers: grHeaders, body: JSON.stringify({ dryRun: false }) }))).json();
-  /* 4 · the KV records */
-  for (const k of keys) { await env.REG_KV.delete(k); out.kv.deleted++; }
+  /* 0 · the gate: while the sweep runs, no guest write reaches the engine or the ledger (the Worker refuses join / leave /
+       select / release with 503 retry); a lock older than five minutes is stale (a sweep that never finished) and ignored */
+  await env.REG_KV.put('reset:lock', at, { metadata: { at } });
+  try {
+    /* 1 · every draft actor takes the epoch and forgets its draft — one serialised step each; a write in flight without the epoch is refused there */
+    if (env.DRAFTS) for (const inv of [...invs].sort()) { const r = await draftOp(env, inv, 'reset', { dryRun: false, epoch: at }); if (r && r.cleared) out.drafts.cleared++; }
+    /* 2 · the epoch every device honours, published before anything else goes */
+    await env.REG_KV.put('reset:epoch', at, { metadata: { at, actor: String(body.actor || 'guest-relations').slice(0, 64), digest: out.digest } });
+    out.epoch = at;
+    /* 3 · the engine and the ledger */
+    if (roomsStub) out.rooms = await (await roomsStub.fetch(new Request('https://rooms/api/rooms/reset', { method: 'POST', headers: grHeaders, body: JSON.stringify({ dryRun: false }) }))).json();
+    if (seatStub) out.seating = await (await seatStub.fetch(new Request('https://seating/api/seating/reset', { method: 'POST', headers: grHeaders, body: JSON.stringify({ dryRun: false }) }))).json();
+    /* 4 · the KV records */
+    for (const k of keys) { await env.REG_KV.delete(k); out.kv.deleted++; }
+  } finally {
+    await env.REG_KV.delete('reset:lock');
+  }
   /* 5 · what is left, read again */
   const rooms1 = await readRooms(), seats1 = await readSeats();
   let kvLeft = 0; for (const prefix of RESET_PREFIXES) { const l = await env.REG_KV.list({ prefix }); kvLeft += l.keys.length; }
   out.remaining = { occupancies: rooms1 ? rooms1.occupancies : null, holds: seats1 ? seats1.holds : null, kvKeys: kvLeft };
   return json(out);
+}
+/* the sweep's gate on guest writes to the engine and the ledger (never on reads, never on Guest Relations) */
+async function resetLocked(env) {
+  if (!env.REG_KV) return false;
+  let at = null; try { at = await env.REG_KV.get('reset:lock'); } catch (e) { return true; }   /* a store that cannot be read: hold the write, it is retried */
+  if (!at) return false;
+  return Date.now() - Date.parse(at) < 5 * 60 * 1000;
 }
 /* ---- GUEST RELATIONS: the canonical current data of every guest with a draft or a submission ---- */
 async function handleGrJourneys(request, env) {
