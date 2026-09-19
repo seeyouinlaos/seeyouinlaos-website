@@ -1,0 +1,48 @@
+[33m200[39m {
+  "ok": true,
+  "mode": "execute",
+  "dryRun": false,
+  "at": "2026-09-19T20:28:40.485Z",
+  "rooms": {
+    "ok": true,
+    "dryRun": false,
+    "cleared": 0,
+    "rows": [],
+    "waitlistCleared": 0,
+    "remaining": 0,
+    "waitlistRemaining": 0,
+    "fixed": 0,
+    "at": "2026-09-19T20:28:46.242Z"
+  },
+  "seating": {
+    "ok": true,
+    "dryRun": false,
+    "cleared": 0,
+    "rows": [],
+    "remaining": 0,
+    "at": "2026-09-19T20:28:46.263Z"
+  },
+  "drafts": {
+    "actors": 85,
+    "had": 1,
+    "cleared": 1,
+    "ids": [
+      "INV-G049"
+    ]
+  },
+  "kv": {
+    "keys": [
+      "contact:INV-G049",
+      "draft:INV-G049"
+    ],
+    "deleted": 2
+  },
+  "digest": "8c4c41683f4f5cde8d3d8427527f9cf13890e6689387f2abd21fca96460110c5",
+  "epoch": "2026-09-19T20:28:40.485Z",
+  "remaining": {
+    "occupancies": 0,
+    "waitlisted": 0,
+    "holds": 0,
+    "kvKeys": 2
+  }
+}

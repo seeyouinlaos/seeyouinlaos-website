@@ -12,7 +12,7 @@ Both were attempted through the installed plugin (`openai-codex` 1.0.6 · codex-
 Per the Owner's rule the work continued, the blocker is recorded here, **Codex is not represented as passed**, and
 READY TO SEND stays **NO** until a Codex final review of the deployed build succeeds (or the Owner waives it). The
 review scope for that run is in PLAN.md §Final review. Substitute evidence (not Codex): the adversarial verification
-workflow of independent Claude subagents recorded in `adversarial-verification.md`, the unit suite, the stage E2E
+workflow of independent Claude subagents recorded in `adversarial-verification.md` (58 findings, decided and fixed before the deploy), the unit suite, the stage E2E
 suites and the read-only live acceptance under `docs/acceptance/2026-09-19-release-014/`.
 
 Earlier deferred Codex runs still owed: release-012 pass 3 (docs/review/013-codex-release-012) and release-013 pass 1

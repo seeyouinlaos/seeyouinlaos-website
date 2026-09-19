@@ -16,17 +16,17 @@ live acceptance, the reset execution record and the parity proof. The Codex reco
 ## 2 · Proofs
 | Proof | Where | Result |
 |---|---|---|
-| Unit suite (`npm test`) | `test/release-014.test.mjs` (15) + every earlier suite rewritten to the model | __UNIT__ |
-| Release gates (`npm run release-check`) | gates 2b and P9 rewritten (no reservation, party capacity, waiting list) | __GATES__ |
-| Stage E2E 014 | `e2e.mjs` → `stage/` | __E2E014__ |
-| Stage E2E 013 / 012 / 011 / P0 / IA (regression, obsolete sections ported) | `../2026-09-19-release-013/e2e.mjs` … | __E2EREG__ |
-| Adversarial verification (substitute for the refused Codex review) | `../../review/015-codex-release-014/adversarial-verification.md` | __ADV__ |
-| Deploy (push to `main` → Workers Build) + parity | `live/parity-<version>.json` | __DEPLOY__ |
-| THE FINAL CLEAN RESET (dry run → snapshot → execute → zero) | `live/reset-*.json` | __RESET__ |
-| Read-only live acceptance | `live-ro.mjs` → `live/live-ro.json` | __LIVE__ |
+| Unit suite (`npm test`) | `test/release-014.test.mjs` (15) + every earlier suite rewritten to the model | **390 / 390 passed** (release-014: 16; release-013 now in the list) |
+| Release gates (`npm run release-check`) | gates 2b and P9 rewritten (no reservation, party capacity, waiting list) | **RELEASE CHECK PASSED** (25 gates incl. I1 infra freeze intact) |
+| Stage E2E 014 | `e2e.mjs` → `stage/` | **44 / 44 passed** (`stage/e2e-014.json`, screenshots, the four parity mails) |
+| Stage E2E 013 / 012 / 011 / P0 / IA (regression, obsolete sections ported) | `../2026-09-19-release-013/e2e.mjs` … | **013 35/35 · 012 25/25 · 011 52/52 · P0 52/52 · IA 35/35** (`stage/e2e-*-regression.json`) |
+| Adversarial verification (substitute for the refused Codex review) | `../../review/015-codex-release-014/adversarial-verification.md` | 6 lenses · 58 findings · every one decided by hand and fixed where real (the refute stage was cut by the subagent session limit); NOT a Codex review |
+| Deploy (push to `main` → Workers Build) + parity | `live/parity-<version>.json` | main `1c9e107` (PR #8, merge of `7e6d939`+`…`) → Workers Build version **49ee4e0d** at 2026-09-19T20:15:46Z · parity **259 / 259 files identical** (`live/parity-49ee4e0d.json`) · `infra-guard --live` intact |
+| THE FINAL CLEAN RESET (dry run → snapshot → execute → zero) | `live/reset-*.json` | executed ONCE after the deploy, epoch **2026-09-19T20:28:40.485Z** (dry run: 0 holds · 0 waiting · 0 seats · 1 draft · 2 KV keys → snapshot `src/reset-backup-2026-09-19T20-28-31-782Z.private.json`, 3 values → execute → dry run after: 0 · 0 · 0 · 0 · 0 → GR verification: 149 units, 0 occupancy, 0 party places, 0 waitlisted, 0 seats, seating open, 0 journeys with state) — `live/reset-1..5` |
+| Read-only live acceptance | `live-ro.mjs` → `live/live-ro.json` | **21 / 21 passed** (`live/live-ro.json`, screenshots) — read-only, no code used |
 
 ## 3 · Codex
-__CODEX__
+Refused by quota at 15:15 (pre) and 16:34 (final) — "try again at Sep 24th, 2026 10:19 PM". Not represented as passed. READY TO SEND = **NO** until the Codex final review of the deployed build (`docs/review/015-codex-release-014/PLAN.md` §Final review) succeeds or the Owner waives it.
 
 ## 4 · Owner decisions taken (documented assumptions)
 1. Essential trip = the wedding stay alone (27 Feb – 01 Mar), the entry category first — the instruction named it "the wedding-focused package" without a stage list.
