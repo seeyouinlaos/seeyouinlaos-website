@@ -77,7 +77,7 @@ this build — `stage/SUMMARY.txt`.
 - **Release path**: `main` fast-forwarded to `release-013` (`3973d80`) and pushed at 10:27:49 UTC; the Owner's Workers Build
   deployed it as version **`f6222653-c4c1-474e-b779-760960f08ab1`** at 10:29:30 UTC. No manual deploy, no infrastructure change
   (`node src/infra-guard.cjs --live`: FREEZE intact — https 200 cloudflare, `/api/draft` 401, GitHub Pages 404).
-  Rollback: version `9043319e` (main `c516674`, release 012) — note that a rollback of the code does not undo the reset.
+  Rollback: version `9043319e` (main `c516674`, release 012) — note that a rollback of the code does not undo the reset. The proof commit `5a3dfa5` (docs only) was built as `51348baa` at 10:46:26 UTC — parity re-proven 243 / 243, the zero state re-read (0 · 2 fixed · 0 · 0 · 0).
 - **Parity** (`parity-f6222653.json`): **243 / 243** served files byte-identical to `main`, plus the clip (2,529,071 bytes),
   the register (85 entries, 2 hosts) and both encrypted bundles checked by sha256.
 - **THE CLEAN RESET, executed once** (the Owner's command, brief §2), through `node src/gr.cjs`:
