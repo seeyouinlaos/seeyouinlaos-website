@@ -158,6 +158,8 @@
     KEYS: KEYS,
     state: function () { return state; },
     _merge: merge, _replay: replayKey,
+    /* the reset rule, for every other channel that learns the epoch (the contact) */
+    honourReset: honourReset, seenReset: seenReset,
     submission: function () { return state.submission; },
     /* PUSH: this device's complete draft to the server. reason: 'auto' | 'save' | 'continue' | 'send' */
     push: function (reason) {

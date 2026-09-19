@@ -235,12 +235,15 @@
       write(st);
       this.pushContact();
     },
+    /* THE CLEAN RESET (Owner, 19 Sep 2026): the contact travels with the epoch this device honoured; a refused write (the
+       server was reset since) clears the cached journey through the draft module's rule and pushes nothing back */
     pushContact: function () {
       var a = auth(), st = read(), c = st.contact || {};
       if (!a || !a.bearer || typeof fetch !== 'function') return Promise.resolve(null);
-      var body = { invitationId: a.invitationId, email: c.email || '', phone: c.phone || '' };
+      var D = window.SIYL_DRAFT, seen = null; try { seen = localStorage.getItem('siyl.draft.reset') || null; } catch (e) { seen = null; }
+      var body = { invitationId: a.invitationId, email: c.email || '', phone: c.phone || '', seenReset: seen };
       return fetch(CONTACT_API, { method: 'PUT', headers: { 'content-type': 'application/json', 'x-siyl-auth': a.bearer }, body: JSON.stringify(body) })
-        .then(function (r) { return r.json(); }).then(function (d) { if (d && d.ok) { var s2 = read(); s2.contactSyncedAt = d.contact && d.contact.at || stamp(); localStorage.setItem(KEY, JSON.stringify(s2)); } return d; }).catch(function () { return null; });
+        .then(function (r) { return r.json(); }).then(function (d) { if (d && d.error === 'reset' && d.resetAt && D && D.honourReset) { D.honourReset(d.resetAt); return d; } if (d && d.ok) { var s2 = read(); s2.contactSyncedAt = d.contact && d.contact.at || stamp(); localStorage.setItem(KEY, JSON.stringify(s2)); } return d; }).catch(function () { return null; });
     },
     /* the server copy: fills an empty draft on this device (a signed-in guest on a new phone sees their own email);
        a draft this device already holds that the server lacks is pushed */
@@ -249,6 +252,9 @@
       if (!a || !a.bearer || typeof fetch !== 'function') return Promise.resolve(null);
       return fetch(CONTACT_API, { headers: { 'x-siyl-auth': a.bearer } }).then(function (r) { return r.json(); }).then(function (d) {
         if (!d || !d.ok) return d;
+        /* the epoch first: a device that synchronised before the reset drops its cached journey (the contact with it) before
+           anything of it could be pushed back */
+        var D = window.SIYL_DRAFT; if (d.resetAt && D && D.honourReset) D.honourReset(d.resetAt);
         var st = read(), c = st.contact || {}, srv = d.contact || null, changed = false;
         if (srv) { ['email', 'phone'].forEach(function (f) { if (!c[f] && srv[f]) { c[f] = srv[f]; changed = true; } }); }
         if (changed) { st.contact = c; write(st); }

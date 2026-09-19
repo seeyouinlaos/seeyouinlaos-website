@@ -621,13 +621,17 @@ async function handleContact(request, env) {
   const who = await identify(request, env);
   if (!who) return json({ ok: false, error: 'unauthorised' }, 401, corsHeaders(request));
   if (!env.REG_KV) return json({ ok: false, error: 'no store' }, 503, corsHeaders(request));
+  /* THE CLEAN RESET (Owner, 19 Sep 2026): the contact channel honours the epoch as the draft does — the read names it, a
+     write without it is refused, a store that cannot be read fails closed */
+  let epoch; try { epoch = await resetEpoch(env); } catch (e) { return json({ ok: false, error: 'contact store unavailable', retry: true }, 503, corsHeaders(request)); }
   if (request.method === 'GET') {
     const c = await storedContact(env, who.invitationId);
-    return json({ ok: true, invitationId: who.invitationId, contact: c ? { email: c.email || '', phone: c.phone || '', at: c.at } : null }, 200, corsHeaders(request));
+    return json({ ok: true, invitationId: who.invitationId, contact: c ? { email: c.email || '', phone: c.phone || '', at: c.at } : null, ...(epoch ? { resetAt: epoch } : {}) }, 200, corsHeaders(request));
   }
   if (request.method !== 'PUT' && request.method !== 'POST') return json({ ok: false, error: 'method not allowed' }, 405, corsHeaders(request));
   let body; try { body = await request.json(); } catch (e) { return json({ ok: false, error: 'invalid JSON' }, 400, corsHeaders(request)); }
   if (body && body.invitationId && String(body.invitationId) !== who.invitationId) return json({ ok: false, error: 'not your invitation' }, 403, corsHeaders(request));
+  if (epoch && body.seenReset !== epoch) return json({ ok: false, error: 'reset', resetAt: epoch }, 409, corsHeaders(request));
   const prev = await storedContact(env, who.invitationId) || {};
   const email = body && typeof body.email === 'string' ? body.email.trim().slice(0, 254) : prev.email || '';
   const phone = body && typeof body.phone === 'string' ? body.phone.trim().slice(0, 40) : prev.phone || '';

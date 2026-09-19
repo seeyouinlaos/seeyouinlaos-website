@@ -131,6 +131,11 @@ test('THE CLEAN RESET · the dry run names everything and writes nothing; the sn
   const direct = await h.actors['INV-G001'].a.fetch(new Request('https://drafts/put', { method: 'POST', body: JSON.stringify({ invitationId: 'INV-G001', keys: { 'siyl.bag': '[{"id":"train"}]' } }) }));
   assert.equal(direct.status, 409); assert.equal((await direct.json()).error, 'reset');
   assert.equal((await call(h, '/api/draft', h.peggy)).d.draft, null, 'the old trip did not come back');
+  /* the contact channel: the read names the epoch, a write without it is refused, with it the contact is stored again */
+  const cg = await call(h, '/api/contact', h.peggy); assert.equal(cg.d.contact, null); assert.equal(cg.d.resetAt, run.d.epoch, 'the contact read carries the epoch');
+  const cp = await call(h, '/api/contact', h.peggy, { invitationId: 'INV-G001', email: 'old@example.org', phone: '+66 81 000 0000' }, 'PUT'); assert.equal(cp.status, 409); assert.equal(cp.d.error, 'reset');
+  assert.equal((await call(h, '/api/contact', h.peggy)).d.contact, null, 'the old contact did not come back');
+  assert.equal((await call(h, '/api/contact', h.peggy, { invitationId: 'INV-G001', email: 'new@example.org', phone: '+66 81 000 0000', seenReset: run.d.epoch }, 'PUT')).status, 200);
   const fresh = await call(h, '/api/draft', h.peggy, { invitationId: 'INV-G001', keys: { 'siyl.skip': '[]' }, seenReset: run.d.epoch }, 'PUT'); assert.equal(fresh.status, 200);
   const bc = await h.w.fetch(req('/api/draft?beacon=1', {}, { invitationId: 'INV-G001', keys: { 'siyl.skip': '[]' }, baseUpdatedAt: fresh.d.updatedAt, bearer: h.peggy }), h.env); assert.equal(bc.status, 409, 'the beacon needs the epoch too');
   /* the CLI: three steps, the backup verified before the words may be given */
@@ -201,6 +206,17 @@ test('THE CLEAN RESET · a device that synchronised before the epoch drops its w
   assert.equal(w3.localStorage.getItem('siyl.skip'), '["ljg"]', 'a fresh device keeps its answer'); assert.equal(w3.localStorage.getItem('siyl.draft.reset'), server.resetAt);
   assert.ok(server.puts.length >= 1, 'and its draft becomes the server\'s'); assert.ok(server.puts.every((x) => x.seenReset === server.resetAt)); assert.equal(server.draft.keys['siyl.skip'], '["ljg"]');
   assert.match(src('assets/draft.js'), /seenReset: seenReset\(\), bearer: a\.bearer/, 'the beacon carries the epoch');
+  /* the contact channel on the device: a pull that learns the epoch clears the cached journey before it could push the old contact back */
+  const contactServer = { resetAt: '2026-09-19T12:00:00.000Z', contact: null, puts: [] };
+  const w4 = page({ auth: PEGGY, modules: MODS.concat(['assets/draft.js']), fetch: async (u, i) => {
+    if (/\/api\/contact/.test(String(u))) { if (!i || !i.method || i.method === 'GET') return { json: async () => ({ ok: true, contact: contactServer.contact, resetAt: contactServer.resetAt }) }; const body = JSON.parse(i.body); contactServer.puts.push(body); if (body.seenReset !== contactServer.resetAt) return { json: async () => ({ ok: false, error: 'reset', resetAt: contactServer.resetAt }) }; contactServer.contact = { email: body.email, phone: body.phone, at: 'x' }; return { json: async () => ({ ok: true, contact: contactServer.contact }) }; }
+    return fetchImpl(u, i); },
+    seed: { 'siyl.guest': { contact: { email: 'old@example.org', phone: '+66 81 000 0000' } }, 'siyl.draft.meta': { invitationId: PEGGY.invitationId, serverUpdatedAt: '2026-09-18T10:00:00.000Z', dirty: false }, 'siyl.draft.base': { 'siyl.guest': '{}' } } });
+  await w4.SIYL_GUEST.pullContact();
+  assert.equal(w4.localStorage.getItem('siyl.guest'), null, 'the cached contact went with the journey'); assert.equal(contactServer.puts.length, 0, 'nothing was pushed back'); assert.equal(w4.localStorage.getItem('siyl.draft.reset'), contactServer.resetAt);
+  /* a contact typed after the reset travels with the epoch and is stored */
+  w4.SIYL_GUEST.setContact('email', 'new@example.org'); await new Promise((r) => setTimeout(r, 20));
+  assert.equal(contactServer.puts[contactServer.puts.length - 1].seenReset, contactServer.resetAt); assert.equal(contactServer.contact && contactServer.contact.email, 'new@example.org');
 });
 
 test('QUESTION 5 REMOVED · "Anything you would rather avoid?" is on no surface: the model, About You, Review, the emails; an old answer under `avoid` is tolerated and never required; the flavour question is intact', () => {
