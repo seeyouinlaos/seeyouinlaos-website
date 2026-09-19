@@ -19,6 +19,29 @@ Four [high], four [medium]; every one classified and every valid one fixed befor
 | 7 | The confirm could apply a different trip from the preview (a room filling between looking and adding) | VALID P2 | The confirm decides with the drawer open: the engine is read again, the plan compared with the one shown (stage · why · product · amount); a change is said in place ("Availability changed while you were looking") and nothing is applied; the preview also redraws on engine answers while open. E2E: a room freed meanwhile → the preview redrawn, nothing held, the second look applied. |
 | 8 | Private guest identities in the alias comments of a tracked file | VALID P2 (privacy) | Opaque ids only in `src/guestlist-from-contacts.cjs`; the explanations live in the ignored private report. The one commit on the unmerged branch that carried the names was amended and the branch force-pushed (`main` untouched, no history rewritten there). |
 
-## Pass 1 — post-implementation, on the complete diff (`pass-1.md`)
+## Pass 1 — post-implementation, on the complete diff (`pass-1.md`) — INCOMPLETE (quota)
 
-See the file; findings classified below when it ran.
+The first call (11:33 CEST) returned no structured verdict — Codex's interim words named two gaps: *"its digest tracks keys
+rather than saved values, and only draft writes are fenced during execution"*. Both were treated as VALID P1 and fixed:
+- the digest now covers the **values** — every KV value's bytes (hashed), every occupancy and hold record, every draft's
+  revision — so a draft saved after the snapshot refuses the execution even with the same keys (test);
+- a `reset:lock` (five minutes, ignored when stale) makes the Worker refuse guest `join` / `leave` / `select` / `release`
+  with 503 `retry` while the sweep runs (test: a join and a seat select racing the sweep are refused; writes open again
+  after it; a stale lock never blocks guests for good).
+
+The second call (11:47 CEST) was refused by the Codex quota: **"try again at Sep 24th, 2026 10:19 PM"**. The final verdict
+is therefore NOT delivered by Codex; per the Owner's rule it is not represented as passed, and READY TO SEND stays NO
+until Codex has run on the live code (or the Owner waives it). What was reviewed and by whom:
+- pass 0 (complete): Codex — eight findings, all fixed, with tests;
+- pass 1 (interim): Codex — two gaps, both fixed, with tests;
+- the rest of the pass-1 scope (the register, the complete trip binding, the video, Question 5, `/api/gr/record`):
+  the release's own review, recorded here, plus 362 unit tests and five E2E suites on fresh stages.
+
+Codex's open question, answered here: *the Cloudflare subrequest budget for 85 invitations*. `handleGrReset` makes, in
+execute mode: 1 assets read + 4 KV lists + 2 actor reads + 85 draft-actor snapshot reads + ~13 KV value reads + 1 lock put +
+85 draft-actor resets + 1 epoch put + 2 actor resets + ~13 KV deletes + 1 lock delete + 2 actor reads + 4 KV lists ≈ 300
+subrequests — within the 1,000 of the Workers Paid plan the Durable Objects already require (the free plan's 50 would not
+fit; this account runs DOs). The live run is a single request; its answer carries `remaining` counts read after the sweep.
+
+To run when the quota returns (24 Sep 2026, 22:19 CEST): `codex-companion.mjs adversarial-review "--wait --base <the
+release-012 proof commit c516674> …"` on `main` with the scope of the second call; classify, fix, confirming pass.
