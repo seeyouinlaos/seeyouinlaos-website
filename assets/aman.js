@@ -25,7 +25,7 @@
     ['Stays', 'accommodation.html', [
       ['Sathorn Penthouse Bangkok', 'room.html?stay=sathorn&room=penthouse'],
       ['Souphattra Heritage Vientiane', 'journeys.html#j-prewed'],
-      ['Private Residence Vientiane', 'room.html?stay=airbnb&room=private-residence'],
+      ['Guest House complimentary', 'room.html?stay=guesthouse&room=guest-house'],
       ['Riverside Hotel Vientiane', 'room.html?stay=riverside&room=superior-window'],
       ['Wanxiang Yueju Kunming', 'journeys.html#j-kmg'],
       ['Luye Baisha Lijiang', 'journeys.html#j-ljg'],
@@ -36,7 +36,7 @@
       ['Vientiane', 'experiences.html#laos'],
       ['Kunming &amp; Lijiang', 'experiences.html#china'],
       ['1872 · Champagne Afternoon Tea', '1872.html'],
-      ['Sühring · Lunch in Bangkok', 'experience.html?id=bkk-suhring']
+      ['Sühring · Dinner in Bangkok', 'experience.html?id=bkk-suhring']
     ]],
     ['Wellness', 'marsilea.html', null],
     ['The Wedding', 'voyage.html', [

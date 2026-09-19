@@ -59,19 +59,24 @@ gate(2, 'Inventory display decision recorded',
   if (!/export const PLACES = 2;/.test(engine)) inv.push('a room unit is not two guest places');
   if (!/HOLD THE NEW PLACE FIRST/.test(engine) || !/AND ONLY THEN LET THE OLD ONE GO/.test(engine)) inv.push('a change is not join-then-release');
   if (!/if \(invitationId !== identity\.invitationId \|\| guestId !== identity\.guestId\) return json\(\{ ok: false, error: 'not your guest' \}, 403\);/.test(engine)) inv.push('a place can be held for another guest');
-  /* THE MASTER'S RESERVATIONS (Owner, 16 Sep 2026): the seed's held / heldFor are the Master's Status column — the first `held`
-     physical rooms of a category are RESERVED for `heldFor`; a Bride & Groom room is the hosts' alone, a Family room is nobody's
-     through the website; every other room is open to any authenticated guest. The total stays the physical count; the availability
-     (free places, rooms with a place left) is derived from the OPEN units only — never from a separate counter. */
+  /* NO RESERVATIONS, NO FIXED ARRANGEMENT (Owner, 19 Sep 2026 · release 014): nothing is held for anyone in advance — not for
+     the Bride & Groom, not for the family; every unit is open to every authenticated guest and the hosts start at zero. PARTY
+     CAPACITY: a unit takes the whole party or none of it (`need`, the party members already there counting). THE WAITING LIST
+     is the engine's own line per stage. The availability object is derived from the units — never from a separate counter. */
   if (!/if \(!identity\) return \{ ok: false, error: 'unauthorised' \};/.test(engine)) inv.push('an anonymous request can hold a place');
-  if (!/if \(unit\.reservedFor === 'Bride & Groom'\) return identity\.hosts \? \{ ok: true \} : \{ ok: false, error: 'reserved · bride & groom' \};/.test(engine)) inv.push('a Bride & Groom room is not the hosts\' alone');
-  if (!/if \(unit\.reservedFor\) return \{ ok: false, error: 'reserved · ' \+ String\(unit\.reservedFor\)\.toLowerCase\(\) \};/.test(engine)) inv.push('a Family room can be taken through the website');
-  if (!/reservedFor: i < \(s\.held \|\| 0\) && s\.heldFor \? s\.heldFor : null/.test(engine)) inv.push('the reserved rooms are not the Master\'s held count');
+  if (/reservedFor === 'Bride & Groom'|reserved · bride & groom|heldFor/.test(engine)) inv.push('the engine still reserves a room for someone');
+  if (!/export const FIXED = \[\];/.test(seed) || /heldFor:|held: [1-9]/.test(seed)) inv.push('the seed still holds a room for someone in advance');
+  if (!/error: 'full for your party', need, free: freeForMe \}, 409\)/.test(engine)) inv.push('a party can be partially booked');
+  if (!/const partyHere = identity\.partyId \? occ\.filter/.test(engine)) inv.push('a party member already in the unit does not count for the party');
+  if (!/op === 'wait' \|\| op === 'unwait'/.test(engine) || !/wl:/.test(engine) || !/r\.position = pos\[r\.stage\];/.test(engine)) inv.push('the engine has no waiting list with deterministic positions');
+  if (!/await this\.resolveWait\(stage, guestId\);/.test(engine)) inv.push('a place held does not resolve the waiting-list entry');
+  if (!/for \(const k of wmap\.keys\(\)\) await this\.storage\.delete\(k\);/.test(engine)) inv.push('the clean reset does not clear the waiting list');
   /* ONE CANONICAL AVAILABILITY OBJECT (Owner, 16 Sep 2026 · final quickfix): source − Owner reservations − real bookings; soldOut = remainingPlaces === 0; the client renders it, never recomputes */
   if (!/export function availabilityOf\(key, list\)/.test(engine) || !/remainingRooms, remainingPlaces, soldOut: remainingPlaces === 0,/.test(engine)) inv.push('the engine has no canonical availability object');
-  if (!/ownerReservedRooms: reservedU\.length, ownerReservedPlaces:/.test(engine) || !/guestOccupiedRooms: guestU\.filter\(\(u\) => u\.taken > 0\)\.length, guestOccupiedPlaces:/.test(engine)) inv.push('the availability object lacks the reserved / occupied split');
+  if (!/ownerReservedRooms: 0, ownerReservedPlaces: 0,/.test(engine) || !/guestOccupiedRooms: list\.filter\(\(u\) => u\.taken > 0\)\.length, guestOccupiedPlaces:/.test(engine) || !/largestFree: list\.reduce/.test(engine)) inv.push('the availability object lacks the occupied split, the zero reservation or the largest free unit');
   if (!/var free = s\.remainingPlaces, rooms = s\.remainingRooms;/.test(client) || !/s\.soldOut === true; \}/.test(client)) inv.push('the client does not render the engine\'s availability object');
-  if (!/if \(!this\.tracked\(win, slug\) \|\| this\.fits\(win, slug\)\) return '';\s*if \(this\.reserved\(win, slug\)\) return 'Reserved';\s*if \(this\.soldOut\(win, slug\)\) return 'Sold out';/.test(client)) inv.push('"Fully booked" is not the engine\'s sold-out word alone');
+  if (!/if \(!this\.tracked\(win, slug\) \|\| this\.canTake\(win, slug\)\) return '';\s*if \(this\.soldOut\(win, slug\)\) return 'Sold out';/.test(client)) inv.push('"Sold out" is not the engine\'s sold-out word alone');
+  if (!/fitsParty: function \(win, slug, u, need\)/.test(client) || !/unitForParty: function \(win, slug, need\)/.test(client)) inv.push('the client offers units that cannot take the whole party');
   if (/capacity: 38|capacity: 27/.test(seed)) inv.push('the retired U Sathorn / Shama counts (38 / 27) are still in the seed');
   if (!/'bkk-stay\/u-sathorn-superior-garden':\s*\{ unit: 'room', capacity: 6,/.test(seed) || !/'bkk-stay\/shama-king-studio-balcony':\s*\{ unit: 'room', capacity: 6,/.test(seed)) inv.push('U Sathorn / Shama are not six rooms as the Master says');
   if (!/This room was just filled\. Please choose another room\./.test(stay)) inv.push('the oversell refusal does not carry the Owner\'s words');
@@ -79,7 +84,7 @@ gate(2, 'Inventory display decision recorded',
   if (!/'bkk-stay\/penthouse':\s*\{ unit: 'room', capacity: 6, occupancy: 2/.test(seedSrc)) inv.push('the six-bedroom Penthouse is not six units of two places');
   /* the client must never decide an allocation for itself */
   if (/capacity\s*[:=]\s*\d/.test(client)) inv.push('assets/rooms.js carries its own capacity numbers');
-  if (!/u\.join\(win, slug, unit\.label\)\.then/.test(stay)) inv.push('a stay is written before the place is held');
+  if (!/u\.join\(win, slug, unit\.label, need \|\| 1\)\.then/.test(stay)) inv.push('a stay is written before the place is held, or without the party\'s size');
   if (!/retired — use \/api\/rooms/.test(worker)) inv.push('the retired category ledger still answers');
   if (fs.existsSync(path.join(ROOT, 'assets/inventory.js'))) inv.push('the retired inventory client is still shipped');
   const keys = (seed.match(/^\s*'[a-z0-9-]+\/[a-z0-9-]+':/gm) || []).length;
@@ -315,7 +320,7 @@ gate('P3', 'MASTER-02 programme truth (four events, no active Alms, no pool in v
   if (!/const who = await identify\(request, env\);/.test(w) || !/who\.invitationId !== String\(invitationId\)\.trim\(\)/.test(w)) bad.push('the register route must verify the bearer against the invitation');
   if (!/headers\.delete\('x-gr-verified'\); headers\.delete\('x-siyl-identity'\);/.test(w)) bad.push('a client could claim an identity');
   if (!/else if \(op === 'select' \|\| op === 'release'\) return json\(\{ ok: false, error: 'unauthorised' \}, 401/.test(w)) bad.push('a seat write without a bearer must be refused');
-  if (!/else if \(op === 'join' \|\| op === 'leave'\) return json\(\{ ok: false, error: 'unauthorised' \}, 401/.test(w)) bad.push('a room write without a bearer must be refused');
+  if (!/else if \(op === 'join' \|\| op === 'leave' \|\| op === 'wait' \|\| op === 'unwait'\) return json\(\{ ok: false, error: 'unauthorised' \}, 401/.test(w)) bad.push('a room or waiting-list write without a bearer must be refused');
   if (!/export async function identify/.test(au) || !/x-siyl-auth/.test(au)) bad.push('the identity module is missing');
   if (!/if \(!identity\) return json\(\{ ok: false, error: 'unauthorised' \}, 401\);/.test(read('src/seating.js'))) bad.push('the seating object must refuse an unidentified write');
   /* one readiness engine, and every surface reads it */

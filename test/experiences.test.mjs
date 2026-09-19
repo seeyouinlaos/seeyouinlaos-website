@@ -118,7 +118,8 @@ test('SÜHRING — canonical entity, Bangkok, restaurant, source category, Drive
   const s = EXP.find((x) => x.id === 'bkk-suhring'), e = byId['bkk-suhring'];
   assert.ok(s && e);
   assert.equal(s.where, 'Bangkok');
-  assert.deepEqual(s.roles, ['lunch']);
+  assert.deepEqual(s.roles, ['dinner'], 'the current Operations Master (19 Sep 2026): Day 01 · 21.02.2027 · Dinner');
+  assert.equal(s.row, 'Day 01 · 21.02.2027'); assert.equal(s.day, '21 FEB 2027');
   assert.match(s.cats, /German fine dining/);
   assert.equal(e.drive, '090 - Restaurant - Suhring');
   assert.deepEqual(e.driveIds, ['12BzWDhI4pN5reUWdsgbgMiD4tCWp5I4N']);
@@ -127,13 +128,14 @@ test('SÜHRING — canonical entity, Bangkok, restaurant, source category, Drive
   assert.equal(GAL['bkk-suhring'].images.length, e.used);
 });
 
-test('SÜHRING — the full source record is rendered, the price per person by Owner decision, the hours verbatim', () => {
+test('SÜHRING — the full source record is rendered, the price per person by Owner decision, the hours verbatim, the dinner dated 21 February', () => {
   const s = EXP.find((x) => x.id === 'bkk-suhring');
   assert.equal(s.sheet, 'FULL');
   assert.deepEqual(s.sections.map((k) => k.k), ['The philosophy', 'The founders', 'The foundation', 'The first mentor', 'Contemporary heritage']);
   assert.match(s.sections[3].p.join(' '), /grandmother Christa/);
   assert.equal(s.practical.price, 'USD 180 per person');
-  assert.deepEqual(s.practical.hours, ['Lunch', 'Thursday to Sunday', '12:30 pm to 13:00 pm (last seating)', 'Closed on Monday and Tuesday']);
+  assert.equal(s.practical.when, 'Dinner · Sunday, 21 February 2027 · the first evening in Bangkok');
+  assert.ok(s.practical.hours.some((h) => /Thursday to Sunday/.test(h)) && s.practical.hours.some((h) => /12:30 pm to 13:00 pm \(last seating\)/.test(h)) && s.practical.hours.some((h) => /Closed on Monday and Tuesday/.test(h)), 'the house\'s own hours stay verbatim');
   assert.equal(s.maps, 'https://maps.app.goo.gl/2b4whggW3YCnxN6u5?g_st=ic');
   assert.equal(s.link, 'https://www.restaurantsuhring.com/menu.html');
   assert.deepEqual(s.select, { id: 'suhring', price: 180, unit: 'per person' });
@@ -207,13 +209,13 @@ test('SÜHRING — never described as a confirmed reservation, a confirmed table
 /* ONE FOOTER, TWO BUILDERS (15 Sep 2026): the public pages build their footer in assets/recon.js, the
    private pages in assets/shop-menu.js — the two lists must be the same list, and both must feature
    Sühring beside 1872 and the way to the tickets. */
-test('FOOTER · recon.js and shop-menu.js list exactly the same links; Sühring · Lunch and Your tickets are in both', () => {
+test('FOOTER · recon.js and shop-menu.js list exactly the same links; Sühring · Dinner and Your tickets are in both', () => {
   const links = (f) => { const seg = src(f); const foot = seg.slice(seg.indexOf('sfoot-in'), seg.indexOf('sf-legal')); return [...foot.matchAll(/<a href="([^"]+)">([^<]+)<\/a>/g)].map((m) => m[1] + ' · ' + m[2]); };
   const a = links('assets/recon.js'), b = links('assets/shop-menu.js');
   assert.deepEqual(a, b, 'the two footers diverged');
-  assert.ok(a.includes('experience.html?id=bkk-suhring · Sühring · Lunch'), 'Sühring is featured');
+  assert.ok(a.includes('experience.html?id=bkk-suhring · Sühring · Dinner'), 'Sühring is featured');
   assert.ok(a.includes('tickets.html · Your tickets'), 'the tickets are in the footer');
-  assert.ok(a.indexOf('1872.html · 1872 · Afternoon Tea') + 1 === a.indexOf('experience.html?id=bkk-suhring · Sühring · Lunch'), 'Sühring stands directly beside 1872');
+  assert.ok(a.indexOf('1872.html · 1872 · Afternoon Tea') + 1 === a.indexOf('experience.html?id=bkk-suhring · Sühring · Dinner'), 'Sühring stands directly beside 1872');
   /* every page that builds a footer builds it from one of the two */
   for (const f of ['index.html', 'destination.html', 'accommodation.html', 'experiences.html', 'experience.html', 'voyage.html']) assert.match(src(f), /assets\/recon\.js/, f);
   for (const f of ['cart.html', 'tickets.html', 'journeys.html', 'transport.html', 'room.html', '1872.html', 'tea.html', 'marsilea.html', 'invitation.html', 'your-journey.html', 'wedding.html', 'wedding-preparation.html', 'about-you.html', 'review.html']) assert.match(src(f), /assets\/shop-menu\.js/, f);

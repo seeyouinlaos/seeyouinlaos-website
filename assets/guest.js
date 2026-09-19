@@ -104,7 +104,7 @@
       if (!me) return null;
       return { invitationId: a.invitationId, guestId: me.guestId, partyId: a.partyId || '', partyName: a.partyName || '',
                guests: [me], members: Array.isArray(a.members) ? a.members : [me],
-               /* the hosts (explicit flag, never inferred): ceremony place is the fixed front centre */
+               /* the hosts (explicit flag, never inferred): their ceremony place is the front centre */
                hosts: a.hosts === true,
                /* the Sangkhathan: 'ELIGIBLE' | 'NONE' | 'UNRESOLVED' — never inferred */
                sangkhathan: a.sangkhathan === 'ELIGIBLE' || a.sangkhathan === 'NONE' ? a.sangkhathan : 'UNRESOLVED' };
@@ -405,7 +405,7 @@
         J.SEGMENTS.forEach(function (seg) {
           if (J.relevant && !J.relevant(seg)) return;   /* a stage of a destination the guest is not joining asks nothing */
           var st = J.state(seg);
-          if (st === 'arranged') return;                  /* the Owner's fixed arrangement is already the answer */
+          if (st === 'waitlisted') return;                /* a stage on the waiting list is answered — visibly unresolved, never a missing item (Owner, 19 Sep 2026) */
           if (st === 'open') { out.push({ key: 'stage:' + seg.key, label: seg.when + ' · ' + seg.place + ' — choose or say you are not joining', href: 'your-journey.html#s-' + seg.key }); return; }
           /* a chosen stay is complete only once the guest holds a place in a room of it */
           if (st === 'selected' && seg.cat === 'Accommodation' && U && U.ready()) {
@@ -463,6 +463,13 @@
           if (relevant) return;
           if (seg && seg.ids.some(function (id) { return seen[id]; })) return;   /* already named through its Bag line */
           out.push({ key: 'release:room:' + stage, label: (seg ? seg.when + ' · ' + seg.place : stage) + ' — a room is still held for a stage outside your trip', href: 'your-journey.html#scope' });
+        });
+        /* a waiting-list place for a stage outside the trip is given back as well (release 014) */
+        var waits = U.view().waitlist || {};
+        Object.keys(waits).forEach(function (stage) {
+          var seg = J.SEGMENTS.filter(function (s) { return s.key === stage; })[0];
+          if (!seg || J.relevant(seg)) return;
+          out.push({ key: 'release:wait:' + stage, label: seg.when + ' · ' + seg.place + ' — still on the waiting list for a stage outside your trip', href: 'your-journey.html#scope' });
         });
       }
       /* a seat while the ledger is open to the guest; a frozen ledger is Guest Relations' to change — the decline is sent, the seat is theirs to release */

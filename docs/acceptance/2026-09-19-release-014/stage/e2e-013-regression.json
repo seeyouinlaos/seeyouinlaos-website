@@ -1,0 +1,177 @@
+[
+ {
+  "id": "clip-poster-first",
+  "ok": true,
+  "d": "{\"state\":\"loading\",\"bg\":true,\"src\":\"assets/video/bangkok-card.mp4\",\"w\":318,\"h\":254,\"video\":true} (the photograph is on screen before the clip)"
+ },
+ {
+  "id": "clip-plays-at-the-cards-geometry",
+  "ok": true,
+  "d": "{\"state\":\"playing\",\"bg\":true,\"w\":318,\"h\":254,\"ratio\":1.25,\"video\":true,\"playing\":true,\"t\":3.49,\"muted\":true,\"inline\":true,\"loop\":true,\"controls\":false,\"opacity\":\"1\",\"poster\":\"assets/images/city/001-bangkok-chao-phraya-skyline.jpg\",\"srcOk\":true}"
+ },
+ {
+  "id": "clip-reduced-motion-photograph",
+  "ok": true,
+  "d": "{\"state\":\"still\",\"bg\":true,\"w\":318,\"h\":254,\"ratio\":1.25,\"video\":false,\"playing\":false,\"t\":null,\"muted\":false,\"inline\":false,\"loop\":false,\"controls\":false,\"opacity\":null,\"poster\":null,\"srcOk\":false}"
+ },
+ {
+  "id": "clip-blocked-source-photograph",
+  "ok": true,
+  "d": "{\"state\":\"still\",\"bg\":true,\"w\":318,\"h\":254,\"ratio\":1.25,\"video\":false,\"playing\":false,\"t\":null,\"muted\":false,\"inline\":false,\"loop\":false,\"controls\":false,\"opacity\":null,\"poster\":null,\"srcOk\":false}"
+ },
+ {
+  "id": "clip-iphone-safari",
+  "ok": true,
+  "d": "{\"state\":\"playing\",\"bg\":true,\"video\":true,\"playing\":true,\"inline\":true,\"muted\":true,\"ratio\":1.25,\"ov\":0} (plays inline and muted, or the photograph stays — never black)"
+ },
+ {
+  "id": "scope-none",
+  "ok": true,
+  "d": "{\"rel\":[],\"excluded\":10,\"visible\":0,\"wedding\":false,\"words\":\"Not joining this trip\",\"need\":0}"
+ },
+ {
+  "id": "scope-bangkok",
+  "ok": true,
+  "d": "{\"rel\":[\"bkk-stay\"],\"excluded\":9,\"visible\":1,\"wedding\":false,\"words\":\"Bangkok\",\"need\":8}"
+ },
+ {
+  "id": "scope-vientiane",
+  "ok": true,
+  "d": "{\"rel\":[\"prewed\",\"wedstay\"],\"excluded\":8,\"visible\":2,\"wedding\":true,\"words\":\"Vientiane\",\"need\":14}"
+ },
+ {
+  "id": "scope-china",
+  "ok": true,
+  "d": "{\"rel\":[\"kmg\",\"c86\",\"ljg\",\"return\"],\"excluded\":6,\"visible\":4,\"wedding\":false,\"words\":\"China\",\"need\":11}"
+ },
+ {
+  "id": "scope-bangkok+vientiane",
+  "ok": true,
+  "d": "{\"rel\":[\"bkk-stay\",\"train\",\"prewed\",\"wedstay\"],\"excluded\":6,\"visible\":4,\"wedding\":true,\"words\":\"Bangkok · Vientiane\",\"need\":16}"
+ },
+ {
+  "id": "scope-bangkok+china",
+  "ok": true,
+  "d": "{\"rel\":[\"bkk-stay\",\"kmg\",\"c86\",\"ljg\",\"return\",\"kempinski\"],\"excluded\":4,\"visible\":6,\"wedding\":false,\"words\":\"Bangkok · China\",\"need\":13}"
+ },
+ {
+  "id": "scope-vientiane+china",
+  "ok": true,
+  "d": "{\"rel\":[\"prewed\",\"wedstay\",\"mu9646\",\"kmg\",\"c86\",\"ljg\",\"return\"],\"excluded\":3,\"visible\":7,\"wedding\":true,\"words\":\"Vientiane · China\",\"need\":19}"
+ },
+ {
+  "id": "scope-all",
+  "ok": true,
+  "d": "{\"rel\":[\"bkk-stay\",\"train\",\"prewed\",\"wedstay\",\"mu9646\",\"kmg\",\"c86\",\"ljg\",\"return\",\"kempinski\"],\"excluded\":0,\"visible\":10,\"wedding\":true,\"words\":\"Bangkok · Vientiane · China\",\"need\":22}"
+ },
+ {
+  "id": "complete-trip-fixture",
+  "ok": true,
+  "d": "the suggested Kunming room italian A holds two other guests"
+ },
+ {
+  "id": "complete-trip-plan-pure",
+  "ok": true,
+  "d": "[\"bkk-stay:default:bkk-stay/penthouse\",\"train:default:train\",\"prewed:default:prewed/heritage-grand-premier\",\"wedstay:default:wedstay/heritage-grand-premier\",\"mu9646:default:mu9646\",\"kmg:fallback:kmg/light-french←kmg/italian\",\"c86:default:c86\",\"ljg:default:ljg/viewing-270\",\"return:default:return\",\"ke"
+ },
+ {
+  "id": "complete-trip-preview-lists-every-stage",
+  "ok": true,
+  "d": "21 – 24 FEB · BANGKOK Room A · Sathorn Penthouse · Sathorn Penthouse Bangkok USD 255 per person | 24 – 25 FEB · BANGKOK → VIENTIANE Special Express No. 25 USD 100 | 25 – 27 FEB · VIENTIANE Room A · Heritage Grand Premier · Pre-Wedding Stay · Souphattra Heritag (nothing held by looking)"
+ },
+ {
+  "id": "complete-trip-confirm-bound-to-preview",
+  "ok": true,
+  "d": "{\"note\":true,\"rows\":10,\"fb\":0,\"held\":0} (a room freed meanwhile: the preview is drawn again with the change said, nothing was applied)"
+ },
+ {
+  "id": "complete-trip-fills-every-open-stage",
+  "ok": true,
+  "d": "{\"bag\":[\"bkk-stay:penthouse\",\"c86\",\"kempinski:deluxe-balcony-king\",\"kmg:italian\",\"ljg:viewing-270\",\"mu9646\",\"prewed:heritage-grand-premier\",\"return\",\"train\",\"wedstay:heritage-grand-premier\"],\"total\":2175,\"holds\":6,\"kmg\":\"kmg/italian\",\"summary\":\"Complete trip selected 10 stages for you. Every stage b"
+ },
+ {
+  "id": "complete-trip-idempotent",
+  "ok": true,
+  "d": "bkk-stay:same train:same prewed:same wedstay:same mu9646:same kmg:same c86:same ljg:same return:same kempinski:same (every stage is already the package's own: nothing would change)"
+ },
+ {
+  "id": "review-shows-the-whole-trip",
+  "ok": true,
+  "d": "all ten stages incl. Vientiane → Kunming (MU9646) and the Sathorn Penthouse; the flavour; no Question 5"
+ },
+ {
+  "id": "parity-review-record-emails",
+  "ok": true,
+  "d": "{\"sel\":10,\"missGuest\":[],\"missOwner\":[]}"
+ },
+ {
+  "id": "haruthai-starts-at-zero",
+  "ok": true,
+  "d": "{\"state\":\"open\",\"bag\":0,\"total\":0,\"need\":[\"stage:bkk-stay\",\"stage:train\",\"stage:prewed\"]}"
+ },
+ {
+  "id": "reset-dry-run",
+  "ok": true,
+  "d": "{\"rooms\":12,\"seats\":2,\"drafts\":3,\"kv\":7}"
+ },
+ {
+  "id": "reset-dry-run-wrote-nothing",
+  "ok": true,
+  "d": "12 guest holds after the dry run"
+ },
+ {
+  "id": "reset-needs-the-exact-words",
+  "ok": true,
+  "d": "400 the confirmation words are missing"
+ },
+ {
+  "id": "reset-needs-the-snapshot-digest",
+  "ok": true,
+  "d": "400 the snapshot digest is missing — snapshot first, keep the backup, then execute"
+ },
+ {
+  "id": "reset-snapshot-carries-every-value",
+  "ok": true,
+  "d": "{\"values\":24,\"digest\":\"52aae69b5968\",\"sameAsTheDryRunBefore\":true}"
+ },
+ {
+  "id": "reset-refuses-a-stale-snapshot",
+  "ok": true,
+  "d": "409 the state changed since the snapshot — snapshot again"
+ },
+ {
+  "id": "reset-executed-zero",
+  "ok": true,
+  "d": "{\"cleared\":12,\"seats\":2,\"drafts\":3,\"kv\":7,\"occ\":0,\"fixed\":0,\"held\":0,\"open\":true}"
+ },
+ {
+  "id": "reset-device-honours-the-epoch",
+  "ok": true,
+  "d": "{\"cached\":10,\"after\":{\"contactLocal\":false,\"contactServer\":false,\"guestKey\":null,\"bag\":0,\"skips\":0,\"epoch\":\"2026-09-19T19:58:26.189Z\",\"serverBag\":null,\"serverSkip\":null,\"resetAt\":\"2026-09-19T19:58:26.189Z\",\"submission\":\"draft\",\"holds\":0}} (the old trip never came back — not on the device, not on the"
+ },
+ {
+  "id": "reset-no-submission-remains",
+  "ok": true,
+  "d": "{\"ok\":true,\"received\":false,\"receivedAt\":null,\"confirmed\":false,\"confirmedAt\":null}"
+ },
+ {
+  "id": "width-320",
+  "ok": true,
+  "d": "no horizontal overflow"
+ },
+ {
+  "id": "width-834",
+  "ok": true,
+  "d": "no horizontal overflow"
+ },
+ {
+  "id": "width-1440",
+  "ok": true,
+  "d": "no horizontal overflow"
+ },
+ {
+  "id": "console-errors",
+  "ok": true,
+  "d": "no script or console error"
+ }
+]

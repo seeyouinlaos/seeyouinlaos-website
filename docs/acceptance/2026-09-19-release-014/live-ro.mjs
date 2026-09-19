@@ -1,0 +1,66 @@
+/* RELEASE 014 · READ-ONLY LIVE ACCEPTANCE (Owner, 19 Sep 2026). Public surfaces of the live Worker only — nothing is
+   written, no code is used, no guest state is touched.
+     node docs/acceptance/2026-09-19-release-014/live-ro.mjs <origin> <outDir>
+   Checks: the served bundle has no fixed-arrangement or Private Residence residue; The Journey shows the Guest House
+   complimentary and the photographed Riverside Hotel; THE HOUSES; the dated venues and their pages; the tea on 24 February;
+   C86 USD 105 on the public source; the private APIs refuse; the register files carry no name and no code; widths; console. */
+import fs from 'node:fs'; import path from 'node:path';
+import { chromium } from '/Users/thongantang/.npm-global/lib/node_modules/playwright/index.mjs';
+const O = (process.argv[2] || 'https://seeyouinlaos-website.suthep-hrg.workers.dev').replace(/\/$/, ''), OUT = process.argv[3] || 'docs/acceptance/2026-09-19-release-014/live'; fs.mkdirSync(OUT, { recursive: true });
+const R = []; const note = (id, ok, d) => { R.push({ id, ok: !!ok, d: String(d).slice(0, 300) }); console.log((ok ? 'PASS ' : 'FAIL ') + id + ' — ' + String(d).slice(0, 220)); };
+const get = async (p) => { const r = await fetch(O + p, { cache: 'no-store' }); return { status: r.status, text: await r.text(), type: r.headers.get('content-type') || '' }; };
+
+/* 1 · the served sources */
+const files = {}; for (const f of ['assets/journey.js', 'assets/packages-data.js', 'assets/rooms.js', 'assets/stay.js', 'assets/rooms-data.js', 'assets/pricing.js', 'assets/experiences.js', 'assets/stay-media.js', 'assets/experience-galleries.js', 'your-journey.html', 'cart.html', 'review.html', 'profile.html', 'journeys.html', 'accommodation.html', 'room.html', 'experiences.html', 'experience.html', 'tea.html']) files[f] = await get('/' + f);
+note('served-sources', Object.values(files).every((r) => r.status === 200), Object.entries(files).filter(([, r]) => r.status !== 200).map(([f, r]) => f + ':' + r.status).join(' ') || 'every source answers 200');
+const all = Object.entries(files).map(([f, r]) => [f, r.text.replace(/\/\*[\s\S]*?\*\//g, '')]);
+const residue = all.filter(([, t]) => /SIYL_ARRANGED|arranged\.js|Arranged for you|Fixed arrangement|Private Residence|private-residence|airbnb-2br|privateResidence|fullExperience\(|costSavingOptions|Photography to follow/.test(t)).map(([f]) => f);
+note('no-deleted-concept-live', residue.length === 0, residue.join(', ') || 'no fixed arrangement, no Private Residence, no cost-saving mode, no Photography-to-follow in any served source');
+note('packages-live', /SIYL_PACKAGES/.test(files['assets/packages-data.js'].text) && /complete/.test(files['assets/packages-data.js'].text) && /essential/.test(files['assets/packages-data.js'].text) && /'guesthouse\/guest-house'/.test(files['assets/packages-data.js'].text) && /packagePlan: function/.test(files['assets/journey.js'].text) && /waitlisted: function/.test(files['assets/journey.js'].text), 'the package configuration and the planner are served');
+note('c86-105-live', /'c86':\s*\{ price: 105/.test(files['assets/pricing.js'].text) && /USD 105 per person<\/p><button class="add" data-private data-add='\{"id":"c86"/.test(files['journeys.html'].text) && !/'c86':\s*\{ price: 85/.test(files['assets/pricing.js'].text), 'the one price source says 105');
+note('guest-house-live', /guesthouse: \{\s*name: 'Guest House complimentary'/.test(files['assets/rooms-data.js'].text) && /id="j-guesthouse"/.test(files['journeys.html'].text) && /"guestHouse":\{"name":"Guest House complimentary/.test(files['assets/stay-media.js'].text) && /<h3>Guest House complimentary<\/h3>/.test(files['accommodation.html'].text), 'the guest house on the data, The Journey, the media record and THE HOUSES');
+const exp = {}; new Function('window', files['assets/experiences.js'].text)(exp); new Function('window', files['assets/experience-galleries.js'].text)(exp);
+const by = Object.fromEntries(exp.SIYL_EXP.map((x) => [x.id, x]));
+note('dated-venues-live', by['bkk-suhring'] && by['bkk-suhring'].roles.join() === 'dinner' && by['bkk-suhring'].row === 'Day 01 · 21.02.2027' && by['bkk-baanphraya'] && by['bkk-baanphraya'].row === 'Day 03 · 23.02.2027' && by['bkk-cannubi'] && by['bkk-cannubi'].row === 'Day 15 · 07.03.2027' && by['bkk-petitsplats'] && by['bkk-petitsplats'].row === 'Day 16 · 08.03.2027' && by['bkk-harudot'].roles.join() === 'cafe,experience' && by['bkk-commons'].roles.join() === 'place' && by['bkk-thongsmith'].row === 'city' && /'1872': '24 FEB'/.test(files['assets/journey.js'].text) && /afternoon of 24 February/.test(files['tea.html'].text), 'Sühring 21.02 dinner · Baan Phraya 23.02 · Cannubi + Harudot 07.03 · Petits Plats 08.03 · the tea 24.02');
+const galleries = ['bkk-baanphraya', 'bkk-cannubi'].map((id) => [id, exp.SIYL_EXP_GALLERY[id]]);
+let imgOk = true; for (const [, g] of galleries) for (const im of g.images) { const r = await fetch(O + '/' + im.src, { method: 'HEAD' }); if (r.status !== 200 || /food|drink/.test(im.kind)) imgOk = false; }
+const rv = {}; new Function('window', files['assets/stay-media.js'].text)(rv); let rvOk = rv.SIYL_STAY_MEDIA.riverside.images.length === 7; for (const im of rv.SIYL_STAY_MEDIA.riverside.images) { const r = await fetch(O + '/' + im.src, { method: 'HEAD' }); if (r.status !== 200) rvOk = false; }
+note('new-media-live', imgOk && rvOk && galleries.every(([, g]) => g && g.images.length >= 4), 'Baan Phraya ' + galleries[0][1].images.length + ' · Cannubi ' + galleries[1][1].images.length + ' · Riverside ' + rv.SIYL_STAY_MEDIA.riverside.images.length + ' frames, every file served, no dish');
+/* 2 · private things stay private */
+const priv = {}; for (const p of ['/api/draft', '/api/rooms/mine', '/api/gr/reset', '/api/gr/record?invitation=INV-G001', '/src/guestlist.private.json', '/src/invitation-tokens.private.csv', '/src/worker.js', '/register/data.mjs']) { const r = await fetch(O + p, { method: p.startsWith('/api/gr') || p === '/api/rooms/mine' ? 'POST' : 'GET', headers: { 'x-siyl-auth': 'synthetic-bearer-that-does-not-exist', 'content-type': 'application/json' }, body: p.startsWith('/api/gr') || p === '/api/rooms/mine' ? '{}' : undefined }); priv[p] = r.status; }
+note('private-refused-live', priv['/api/draft'] === 401 && priv['/api/rooms/mine'] === 401 && priv['/api/gr/reset'] === 401 && priv['/api/gr/record?invitation=INV-G001'] === 401 && [priv['/src/guestlist.private.json'], priv['/src/invitation-tokens.private.csv'], priv['/src/worker.js'], priv['/register/data.mjs']].every((s) => s === 404 || s === 302 || s === 403), JSON.stringify(priv));
+const enc = await get('/register/invitations.enc.json'), idx = await get('/register/auth-index.json');
+const encJ = JSON.parse(enc.text), idxJ = JSON.parse(idx.text);
+const n = Array.isArray(encJ.invitations) ? encJ.invitations.length : Object.keys(encJ.invitations || encJ).length;
+note('register-served-encrypted', enc.status === 200 && idx.status === 200 && n >= 80 && !/@|girlfriend|"fullName"|"preferredName"|"phone"|"email"/.test(enc.text + idx.text), n + ' encrypted invitations, no plaintext field, code or address');
+const rooms = await get('/api/rooms'); const rj = JSON.parse(rooms.text);
+note('rooms-public-view-live', rooms.status === 200 && rj.ok && rj.units && rj.units['guesthouse/guest-house'] && rj.units['guesthouse/guest-house'][0].places === 6 && !rj.units['airbnb-2br/private-residence'] && rj.waitlist === undefined && Object.values(rj.units).flat().every((u) => (u.occupants || []).every((o) => !o.name && !o.guestId)) && rj.summary['bkk-stay/penthouse'].ownerReservedPlaces === 0 && rj.summary['ljg/viewing-270'].sourceRooms === 6 && rj.summary['kempinski/deluxe-balcony-king'].sourceRooms === 6, 'guest house 6 places · no reservation · Lijiang and Kempinski 6 rooms · no name, no line for the public');
+/* 3 · the pages */
+const b = await chromium.launch(); const errors = [];
+const fresh = async (w) => { const ctx = await b.newContext({ viewport: { width: w, height: 844 }, deviceScaleFactor: 2, isMobile: w <= 390, hasTouch: w <= 390 }); const p = await ctx.newPage(); p.on('pageerror', (e) => errors.push(w + ' ' + p.url() + ' ' + e.message)); p.on('console', (m) => { if (m.type() === 'error' && !/404|409|Failed to load resource/.test(m.text())) errors.push(w + ' ' + p.url() + ' ' + m.text()); }); return p; };
+for (const w of [390, 1440]) {
+  const p = await fresh(w); await p.goto(O + '/journeys.html', { waitUntil: 'load' }); await p.waitForTimeout(1800);
+  const cards = await p.evaluate(() => { const g = (id) => { const box = document.querySelector('#' + id + ' .pgal'); return box ? { frames: +box.getAttribute('data-frames'), text: document.querySelector('#' + id).innerText.replace(/\s+/g, ' ').slice(0, 160) } : null; }; return { gh: g('j-guesthouse'), rv: g('j-riverside'), res: !!document.querySelector('#j-residence') }; });
+  note('journey-cards-live-' + w, cards.gh && cards.gh.frames === 4 && /Guest House complimentary/.test(cards.gh.text) && /six shared places/.test(cards.gh.text) && !/up to 4/.test(cards.gh.text) && cards.rv && cards.rv.frames === 7 && !/Photography to follow/.test(cards.rv.text) && !cards.res, JSON.stringify(cards));
+  await p.screenshot({ path: path.join(OUT, w + '-journey.png') });
+  const over = []; for (const f of ['journeys.html', 'accommodation.html', 'experiences.html', 'experience.html?id=bkk-suhring', 'experience.html?id=bkk-cannubi', 'experience.html?id=bkk-baanphraya', 'tea.html']) { await p.goto(O + '/' + f, { waitUntil: 'load' }); await p.waitForTimeout(900); const ov = await p.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth); if (ov > 1) over.push(f + ':' + ov); }
+  note('no-overflow-live-' + w, over.length === 0, over.join(' ') || 'seven pages: no horizontal overflow'); await p.context().close();
+}
+const p = await fresh(390);
+await p.goto(O + '/experiences.html', { waitUntil: 'load' }); await p.waitForTimeout(1500);
+const rails = await p.evaluate(() => { const ids = (sel) => [...document.querySelectorAll(sel + ' [data-exp-id]')].map((e) => e.getAttribute('data-exp-id')); return { bkkRest: ids('[data-rails="bkk"] [data-rail="bkk:breakfast"]'), retRest: ids('[data-rails="bkk-return"] [data-rail="bkk-return:breakfast"]'), retExp: ids('[data-rails="bkk-return"] [data-rail="bkk-return:experience"]'), bkkCafe: ids('[data-rails="bkk"] [data-rail="bkk:cafe"]') }; });
+note('venue-rails-live', rails.bkkRest.includes('bkk-suhring') && rails.bkkRest.includes('bkk-baanphraya') && !rails.bkkRest.includes('bkk-commons') && rails.retRest.includes('bkk-cannubi') && rails.retRest.includes('bkk-petitsplats') && rails.retExp.includes('bkk-harudot') && rails.bkkCafe.includes('bkk-harudot'), JSON.stringify(rails));
+await p.screenshot({ path: path.join(OUT, '390-experiences.png') });
+await p.goto(O + '/experience.html?id=bkk-suhring', { waitUntil: 'load' }); await p.waitForTimeout(1200);
+const su = await p.evaluate(() => ({ head: (document.querySelector('.x-head .a-eyebrow') || {}).innerText || '', sel: (document.querySelector('#sel h2') || {}).innerText || '' }));
+note('suhring-dinner-live', /dinner/i.test(su.head) && /21 FEB 2027/.test(su.head) && /Dinner at Sühring/.test(su.sel), JSON.stringify(su));
+await p.screenshot({ path: path.join(OUT, '390-suhring.png') });
+await p.goto(O + '/experience.html?id=bkk-cannubi', { waitUntil: 'load' }); await p.waitForTimeout(1500); const ca = await p.evaluate(() => ({ imgs: document.querySelectorAll('.x-gal img').length, star: /One MICHELIN Star/.test(document.body.innerText) })); note('cannubi-live', ca.imgs >= 1 && ca.star, JSON.stringify(ca)); await p.screenshot({ path: path.join(OUT, '390-cannubi.png') });
+await p.goto(O + '/accommodation.html', { waitUntil: 'load' }); await p.waitForTimeout(1200); const houses = await p.evaluate(() => ({ gh: /Guest House complimentary/.test(document.body.innerText), pr: /Private Residence|Photography to follow/.test(document.body.innerText), rv: !!document.querySelector('a.am[style*="riverside/facade.jpg"]') })); note('houses-live', houses.gh && !houses.pr && houses.rv, JSON.stringify(houses)); await p.screenshot({ path: path.join(OUT, '390-houses.png') });
+await p.goto(O + '/room.html?stay=guesthouse&room=guest-house', { waitUntil: 'load' }); await p.waitForTimeout(2000); note('guest-house-room-gated-live', /invitation/.test(p.url()), p.url());
+await p.goto(O + '/your-journey.html', { waitUntil: 'load' }); await p.waitForTimeout(2000); note('my-trip-gated-live', /invitation/.test(p.url()), p.url());
+await p.context().close();
+note('console-errors-live', errors.length === 0, errors.slice(0, 3).join(' | ') || 'no script or console error');
+await b.close();
+fs.writeFileSync(path.join(OUT, 'live-ro.json'), JSON.stringify(R, null, 1));
+const fails = R.filter((r) => !r.ok); console.log((R.length - fails.length) + '/' + R.length + ' checks passed' + (fails.length ? ' · FAILED: ' + fails.map((f) => f.id).join(', ') : '')); process.exit(fails.length ? 1 : 0);

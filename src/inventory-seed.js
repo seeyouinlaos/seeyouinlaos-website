@@ -17,14 +17,11 @@
      'guest' — a whole-property or per-person product (the Sathorn Penthouse,
                the hosted residence, priced and held per person).
 
-   `held` / `heldFor` are the Master's reservations (Accommodation_Details,
-   row "Status", and the Owner's allocation of 16 Sep 2026): the first `held`
-   physical rooms of the category are RESERVED for `heldFor` — the Bride &
-   Groom (only the hosts may take them) or the Family (Guest Relations assign
-   them; the website offers them to nobody). A reserved room is never counted
-   as available to a guest, never carries a Choose button, and is shown as
-   RESERVED. The Penthouse: six bedrooms, Room A the hosts' — five rooms and
-   ten places bookable (the Master's "Rooms avaible 5").
+   NO RESERVATIONS, NO FIXED ARRANGEMENT (Owner, 19 Sep 2026): `held` is 0
+   everywhere and nothing is kept for anyone in advance — not for the Bride &
+   Groom, not for the family. Every room of every category is bookable through
+   the room engine by whoever chooses it first; the hosts start at zero like
+   every guest. The Penthouse: six bedrooms, twelve places, all bookable.
 
    ROOM ALLOCATION (Owner, 15 Sep 2026): the physical room count IS the
    inventory. One physical room = one persistent allocation unit = two
@@ -41,14 +38,10 @@
    the test suite import it — there is no second copy anywhere.
    ========================================================================== */
 
-/* THE HOSTS' FIXED ALLOCATION (Owner, 16 Sep 2026 · ROOM A HOTFIX): Room A of the Sathorn Penthouse is occupied by BOTH
-   hosts — a fixed Owner allocation the engine counts before anything else: capacity 2, occupied 2, remaining 0, never
-   bookable, never released by a guest booking, never released by either host for the other. The guest ids are the
-   hosts' (the shipped auth index carries the same ids with the hosts flag); the names are the hosts' first names. */
-export const FIXED = [
-  { key: 'bkk-stay/penthouse', label: 'A', guestId: 'G048', invitationId: 'INV-G048', name: 'Haruthai' },
-  { key: 'bkk-stay/penthouse', label: 'A', guestId: 'G049', invitationId: 'INV-G049', name: 'Suthep' },
-];
+/* NO FIXED ALLOCATION (Owner, 19 Sep 2026): the Sathorn Penthouse Room A preselection for the hosts came from planning data,
+   never from a booking; it is deleted. Every guest — the hosts included — starts from zero and books like everyone else.
+   `held` / `heldFor` on a seed entry are retired notes of the old category ledger; the room engine ignores them. */
+export const FIXED = [];
 export const SEED = {
   /* ---------------------------------------------------------- Bangkok, before */
   /* Three approved Bangkok addresses share the window; a guest holds one of
@@ -58,7 +51,7 @@ export const SEED = {
    * The Master (Owner, 16 Sep 2026, 17:17 UTC): U Sathorn 6 rooms, Shama 6 rooms
    * — the earlier 38 / 27 are retired; six physical rooms, twelve places each. */
   'bkk-stay/penthouse':
-    { unit: 'room', capacity: 6, occupancy: 2, held: 1, heldFor: 'Bride & Groom', name: 'Sathorn Penthouse', stay: 'Sathorn Penthouse Bangkok' },
+    { unit: 'room', capacity: 6, occupancy: 2, held: 0, name: 'Sathorn Penthouse', stay: 'Sathorn Penthouse Bangkok' },
   'bkk-stay/u-sathorn-superior-garden':
     { unit: 'room', capacity: 6, occupancy: 2, held: 0, name: 'Superior Room With Garden View', stay: 'U Sathorn Bangkok' },
   'bkk-stay/shama-king-studio-balcony':
@@ -71,7 +64,7 @@ export const SEED = {
   'prewed/noble-courtyard':          { unit: 'room', capacity: 1,  occupancy: 2, held: 0, name: 'Noble Courtyard Suite' },
   'prewed/grand-majestic':           { unit: 'room', capacity: 2,  occupancy: 2, held: 0, name: 'Grand Majestic Suite' },   /* opened to everyone (Owner, Edit 5 · 18 Sep 2026) */
   'prewed/souphattra-majestic':      { unit: 'room', capacity: 1,  occupancy: 2, held: 0, name: 'Souphattra Majestic Suite' },
-  'prewed/souphattra-presidential':  { unit: 'room', capacity: 1,  occupancy: 4, held: 1, name: 'Souphattra Presidential', heldFor: 'Bride & Groom' },
+  'prewed/souphattra-presidential':  { unit: 'room', capacity: 1,  occupancy: 4, held: 0, name: 'Souphattra Presidential' },
 
   /* ---------------------------------------------- Vientiane · Wedding Stay */
   'wedstay/heritage':                { unit: 'room', capacity: 5,  occupancy: 2, held: 0, name: 'The Heritage' },
@@ -80,12 +73,14 @@ export const SEED = {
   'wedstay/noble-courtyard':         { unit: 'room', capacity: 1,  occupancy: 2, held: 0, name: 'Noble Courtyard Suite' },
   'wedstay/grand-majestic':          { unit: 'room', capacity: 2,  occupancy: 2, held: 0, name: 'Grand Majestic Suite' },   /* opened to everyone (Owner, Edit 5 · 18 Sep 2026) */
   'wedstay/souphattra-majestic':     { unit: 'room', capacity: 1,  occupancy: 2, held: 0, name: 'Souphattra Majestic Suite' },
-  'wedstay/souphattra-presidential': { unit: 'room', capacity: 1,  occupancy: 4, held: 1, name: 'Souphattra Presidential', heldFor: 'Bride & Groom' },
+  'wedstay/souphattra-presidential': { unit: 'room', capacity: 1,  occupancy: 4, held: 0, name: 'Souphattra Presidential' },
 
-  /* the complimentary alternative for the same wedding window — held in GUESTS,
-     because it is one residence shared by whoever is given it */
-  'airbnb-2br/private-residence':
-    { unit: 'guest', capacity: 4, held: 0, name: 'Private Residence', stay: 'Private Residence · Vientiane' },   /* Owner, Edit 5 (18 Sep 2026): up to four guests */
+  /* D2 · GUEST HOUSE COMPLIMENTARY (Operations Master 003_Accommodation_Details; Owner, 19 Sep 2026): the complimentary
+     alternative for the same wedding window — ONE shared unit of SIX bookable guest places (a queen bed and the sofas; who
+     sleeps where is the friends' own arrangement, never the website's). Held in GUESTS, visible by first name to every
+     authenticated guest. Never "Private Residence" — that label was invented. */
+  'guesthouse/guest-house':
+    { unit: 'guest', capacity: 6, held: 0, name: 'Guest House complimentary', stay: 'Guest House complimentary · Vientiane' },
 
   /* the Riverside Hotel (Owner, release 012 · Operations Master of 18 Sep 2026, package D3): six rooms, two places each,
      for the same wedding window — one stay per window, so a hold here releases a Souphattra hold and vice versa */
@@ -107,19 +102,19 @@ export const SEED = {
   'kmg/light-french':   { unit: 'room', capacity: 1, occupancy: 2, held: 0, name: 'Light French Suite' },
 
   /* ------------------------------------------------------------ Lijiang */
-  'ljg/starry-sky':            { unit: 'room', capacity: 4, occupancy: 2, held: 0, name: 'Luye Starry Sky Suite · Immersive View' },
-  'ljg/boundless':             { unit: 'room', capacity: 4, occupancy: 2, held: 0, name: 'Boundless Floor-to-Ceiling Glass Sunlit Suite' },
-  'ljg/private-soup-view':     { unit: 'room', capacity: 4, occupancy: 2, held: 0, name: 'Snow Mountain Private Soup Viewing Suite' },
-  'ljg/manor-suite':           { unit: 'room', capacity: 4, occupancy: 2, held: 0, name: 'Snow Mountain Manor Suite' },
-  'ljg/view-suite-270':        { unit: 'room', capacity: 4, occupancy: 2, held: 0, name: '270° Snow Mountain View Suite' },   /* opened to everyone (Owner, Edit 5 · 18 Sep 2026) */
-  'ljg/soup-pool-270':         { unit: 'room', capacity: 4, occupancy: 2, held: 0, name: '270° Snow Mountain View Room Private Soup Pool' },
-  'ljg/private-courtyard-270': { unit: 'room', capacity: 4, occupancy: 2, held: 0, name: '270° Private Courtyard Snow Mountain View' },
-  'ljg/viewing-270':           { unit: 'room', capacity: 4, occupancy: 2, held: 0, name: '270° Snow Mountain Viewing Room' },
-  'ljg/snow-mountain-viewing': { unit: 'room', capacity: 4, occupancy: 2, held: 0, name: 'Snow Mountain Viewing Room' },
+  'ljg/starry-sky':            { unit: 'room', capacity: 6, occupancy: 2, held: 0, name: 'Luye Starry Sky Suite · Immersive View' },
+  'ljg/boundless':             { unit: 'room', capacity: 6, occupancy: 2, held: 0, name: 'Boundless Floor-to-Ceiling Glass Sunlit Suite' },
+  'ljg/private-soup-view':     { unit: 'room', capacity: 6, occupancy: 2, held: 0, name: 'Snow Mountain Private Soup Viewing Suite' },
+  'ljg/manor-suite':           { unit: 'room', capacity: 6, occupancy: 2, held: 0, name: 'Snow Mountain Manor Suite' },
+  'ljg/view-suite-270':        { unit: 'room', capacity: 6, occupancy: 2, held: 0, name: '270° Snow Mountain View Suite' },   /* opened to everyone (Owner, Edit 5 · 18 Sep 2026) */
+  'ljg/soup-pool-270':         { unit: 'room', capacity: 6, occupancy: 2, held: 0, name: '270° Snow Mountain View Room Private Soup Pool' },
+  'ljg/private-courtyard-270': { unit: 'room', capacity: 6, occupancy: 2, held: 0, name: '270° Private Courtyard Snow Mountain View' },
+  'ljg/viewing-270':           { unit: 'room', capacity: 6, occupancy: 2, held: 0, name: '270° Snow Mountain Viewing Room' },
+  'ljg/snow-mountain-viewing': { unit: 'room', capacity: 6, occupancy: 2, held: 0, name: 'Snow Mountain Viewing Room' },
 
   /* ------------------------------------------------------ Bangkok, closing */
   'kempinski/deluxe-balcony-king':
-    { unit: 'room', capacity: 4, occupancy: 2, held: 0, name: 'Deluxe Balcony King' }
+    { unit: 'room', capacity: 6, occupancy: 2, held: 0, name: 'Deluxe Balcony King' }
 };
 
 /* how many units a party of `guests` consumes in this category */

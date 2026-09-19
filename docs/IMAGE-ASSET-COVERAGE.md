@@ -96,7 +96,7 @@ Bag thumbnails: Pre-Wedding / Wedding Stay lines use the selected room's first g
 
 ### Alternative Stay · Private Residence Vientiane (`022 - Hotel - Airbnb Guest House Vientiane`)
 FOUND: 8 `.avif` (living room, entry, balcony, temple-roof view, window chair, plant corner, café-like bench (uncertain place → not used), map graphic → not used) + `About this space.txt`.
-USED: 6 (`airbnb-01…06.jpg`). VISUALLY VERIFIED: YES · STATUS: **COMPLETE**
+USED: 6 (`guesthouse-01…06.jpg`, renamed from `airbnb-01…06.jpg` in release 014). VISUALLY VERIFIED: YES · STATUS: **COMPLETE**
 
 ### Sathorn Penthouse Bangkok (`020`)
 FOUND: 11 files 000–010 (3 exteriors, living ×2, lounge, balcony, study, 3 bedrooms). USED: all 11 (8 interiors already live + `exterior-street.jpg`, `exterior-golden-hour.jpg` added; elevated exterior = `journey/penthouse-02.jpg`). Whole-home product — no sub-categories. STATUS: **COMPLETE**
@@ -128,7 +128,7 @@ VISUALLY VERIFIED: YES · STATUS: **PARTIAL** — the four room photographs are 
 | Special Express No. 25 | `transport/train-no25-srt-train.jpg` | COMPLETE |
 | Pre-Wedding Vientiane · Souphattra | selected room, first gallery image | COMPLETE |
 | Wedding Stay · Souphattra | selected room, first gallery image | COMPLETE |
-| Private Residence | `airbnb/airbnb-01.jpg` | COMPLETE |
+| Guest House complimentary | `guesthouse/guesthouse-01.jpg` | COMPLETE |
 | MU9632 | `transport/mu9632-business-1.jpg` | COMPLETE |
 | Wanxiang Yueju | `journey/kunming-01.jpg` | COMPLETE |
 | C642 | `transport/c642-train-snow-mountain.jpg` | COMPLETE |
@@ -233,7 +233,7 @@ images) · Siam Kempinski Deluxe Balcony King (USD 380, 8 images) unchanged.
    rate** (live amounts kept, nothing overwritten):
    270° Snow Mountain Viewing — live USD 70 · sheet 100;
    270° Private Courtyard Snow Mountain View — live USD 100 · sheet 105;
-   Special Express No. 25 — live USD 75 · sheet 90; C642 — live USD 85 · sheet 105.
+   Special Express No. 25 — live USD 75 · sheet 90; C642 — USD 105 (the current Operations Master, release 014).
 3. **Image genuinely missing:** Luye Baisha · Snow Mountain Viewing Room (USD 75) —
    no category photography in Drive `024`; the row and the room page keep the clean
    "Photography to follow" treatment.
@@ -258,7 +258,7 @@ State after this pass:
 | Voyage · Temple Ceremony | `event/052-temple-ceremony-bride.jpg` | owner-supplied 08 Sep 2026 (the bride, black and white) — replaces the placeholder |
 | Destinations · Vientiane | `002-vientiane-pha-that-luang.jpg`, `002-vientiane-lane-xang.jpg` | real Vientiane |
 | Destinations · China | `004-lijiang-naxi-rooftops.jpg`, `004-lijiang-black-dragon-pool.jpg` | real Lijiang |
-| Stays index | penthouse · souphattra · airbnb · kunming · lijiang · kempinski own folders | one house, one photograph from its own folder |
+| Stays index | penthouse · souphattra · guesthouse · kunming · lijiang · kempinski own folders | one house, one photograph from its own folder |
 
 Rule unchanged: **a correct placeholder beats a wrong real image.** No image is
 assigned from its filename alone.

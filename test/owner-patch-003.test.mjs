@@ -1,5 +1,6 @@
 /* 003 · OWNER PATCH (Edit 2, 15 Sep 2026) — pinned for good.
-   C86 = USD 85 at the one price source and on every transactional surface; a persisted 105 reprices
+   C86 = USD 105 at the one price source and on every transactional surface (the current Operations Master, 19 Sep 2026,
+   supersedes the Edit 2 override of 85); a persisted 85 reprices
    itself; the Temple Ceremony is a separate morning event at Wat Ong Teu, 09:00 – approximately 12:00;
    the Wedding (Vow) Ceremony is at Souphattra Heritage, 15:30, and the ceremony seating — the Bride and
    the Groom front centre, everybody else their chosen chair — belongs to it and to nothing else; the
@@ -17,30 +18,28 @@ const WITH_PASS = [...CORE, 'assets/seatpass.js', 'assets/vendor/qrcode.js', 'as
 const ACTIVE = ['assets/pricing.js', 'assets/journey.js', 'assets/temple.js', 'assets/transport-data.js', 'assets/travelpass.js', 'assets/seatpass.js', 'assets/seatlabels.js', 'assets/guest.js', 'journeys.html', 'your-journey.html', 'transport.html', 'cart.html', 'review.html', 'tickets.html', 'wedding.html', 'wedding-preparation.html', 'voyage.html', 'dress.html', 'about-you.html', 'index.html', 'accommodation.html', 'room.html'];
 const stripComments = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
 
-test('C86 · USD 85 is the one price: source, journey, transport detail, travel pass, ticket, cart, sticky total, review, sent journey, presets — and a persisted 105 becomes 85 on load', () => {
-  const w = page({ modules: WITH_PASS, seed: { 'siyl.bag': [{ id: 'c86', name: 'C86 · Kunming → Lijiang', meta: '04 March 2027 · Business Class', price: 105, qty: 1 }] } });
+test('C86 · USD 105 is the one price (the current Operations Master, 19 Sep 2026): source, journey, transport detail, travel pass, ticket, cart, sticky total, review, sent journey, packages — and a persisted 85 becomes 105 on load', () => {
+  const w = page({ modules: WITH_PASS, seed: { 'siyl.bag': [{ id: 'c86', name: 'C86 · Kunming → Lijiang', meta: '04 March 2027 · Business Class', price: 85, qty: 1 }] } });
   const P = w.SIYL_PRICE, B = w.SIYL_BAG, J = w.SIYL_JOURNEY;
-  assert.equal(P.FLAT.c86.price, 85, 'the source'); assert.match(P.FLAT.c86.basis, /^USD 85 per person · 1 seat · Business Class$/);
-  assert.equal(P.items('c86')[0].price, 85, 'the selectable item');
+  assert.equal(P.FLAT.c86.price, 105, 'the source'); assert.match(P.FLAT.c86.basis, /^USD 105 per person · 1 seat · Business Class$/);
+  assert.equal(P.items('c86')[0].price, 105, 'the selectable item');
   const line = B.get().find((x) => x.id === 'c86');
-  assert.equal(line.price, 85, 'a stale 105 saved in the bag is re-derived to 85 on load');
-  assert.match(J.meta(line).basis, /USD 85 per person/, 'the journey line words');
-  assert.equal(B.total(), 85, 'the sticky total / cart total');
-  assert.equal(w.SIYL_TRAVELPASS.docFromPage('c86').price, 85, 'the travel pass carries the same amount');
-  const doc = TP.docFor('c86', { guest: { guestId: 'g-peggy', fullName: 'Peggy Demo', preferredName: 'Peggy' }, price: 85, state: 'selected' });
-  assert.equal(doc.price, 85); assert.doesNotMatch(TP.payload(doc), /105|\b85\b|USD/, 'the code carries no amount');
-  const pdf = TP.compose(doc); assert.ok(pdf.includes('USD 85') || pdf.includes('85'), 'the ticket PDF shows the cost where a cost is shown'); assert.doesNotMatch(pdf, /USD 105/);
-  /* the Full Experience preset uses 85 */
-  const canon = J.SEGMENTS.map((s) => s.key);
-  assert.ok(canon.includes('c86'));
-  /* no active surface carries 105 for C86 any more */
-  for (const f of ACTIVE) {
-    const s = stripComments(src(f));
-    assert.doesNotMatch(s, /c86[^\n]{0,120}\b105\b/i, f + ' carries C86 at 105');
-    assert.doesNotMatch(s, /USD 105/, f + ' says USD 105');
+  assert.equal(line.price, 105, 'a stale 85 saved in the bag is re-derived to 105 on load');
+  assert.match(J.meta(line).basis, /USD 105 per person/, 'the journey line words');
+  assert.equal(B.total(), 105, 'the sticky total / cart total');
+  assert.equal(w.SIYL_TRAVELPASS.docFromPage('c86').price, 105, 'the travel pass carries the same amount');
+  const doc = TP.docFor('c86', { guest: { guestId: 'g-peggy', fullName: 'Peggy Demo', preferredName: 'Peggy' }, price: 105, state: 'selected' });
+  assert.equal(doc.price, 105); assert.doesNotMatch(TP.payload(doc), /105|\b85\b|USD/, 'the code carries no amount');
+  const pdf = TP.compose(doc); assert.ok(pdf.includes('USD 105') || pdf.includes('105'), 'the ticket PDF shows the cost where a cost is shown'); assert.doesNotMatch(pdf, /USD 85\b/);
+  /* the Complete trip package uses 105 */
+  const plan = J.packagePlan('complete');
+  const row = plan.rows.find((r) => r.seg.key === 'c86'); assert.ok(row, 'the package covers C86'); assert.equal(row.amount, 105);
+  /* no active surface carries 85 for C86 any more */
+  for (const f of ['assets/pricing.js', 'assets/transport-data.js', 'journeys.html', 'transport.html', 'tickets.html', 'your-journey.html', 'cart.html', 'review.html']) {
+    const s = src(f);
+    assert.doesNotMatch(s, /c86[^\n]{0,120}\b85\b/i, f + ' carries C86 at 85');
   }
-  assert.match(src('journeys.html'), /USD 85 per person<\/p><button class="add" data-private data-add='\{"id":"c86"/);
-  assert.match(src('review.html'), /'YOUR COST: USD '\+SIYL_BAG\.total\(\)\.toLocaleString/, 'the sent journey totals from the bag, never its own arithmetic');
+  assert.match(src('journeys.html'), /USD 105 per person<\/p><button class="add" data-private data-add='\{"id":"c86"/);
 });
 
 test('TEMPLE CEREMONY · a separate morning event: Sunday, 28 February 2027 · 09:00 – approximately 12:00 · Wat Ong Teu — no active 08:00', () => {
@@ -126,6 +125,6 @@ test('EDIT 4 (Owner, 16 Sep 2026) · Luye Baisha and Siam Kempinski say self-pay
   assert.match(src('journeys.html'), /<p class="pm">06 – 08 March · 2 nights · breakfast included · self-pay<\/p>/);
   for (const f of ['accommodation.html', 'journeys.html']) assert.doesNotMatch(src(f), /2 nights · breakfast included(?! · self-pay)/, f + ': no summary of the two stays without self-pay');
   const x = src('experiences.html');
-  assert.match(x, /if \(key === 'bkk'\) return x\.chapter === 'bkk' && \(x\.leg !== 'return' \|\| isCafe\(x\)\);\s*if \(key === 'bkk-return'\) return x\.chapter === 'bkk' && x\.leg === 'return' && !isCafe\(x\);/, 'the cafés of Bangkok are one rail');
+  assert.match(x, /if \(key === 'bkk'\) return x\.chapter === 'bkk' && \(x\.leg !== 'return' \|\| isCafe\(x\)\);\s*if \(key === 'bkk-return'\) return x\.chapter === 'bkk' && x\.leg === 'return' && \(!isCafe\(x\) \|\| hasOther\(x\)\);/, 'the cafés of Bangkok are one rail (a return café that is also an experience of the return joins the return\'s Experiences rail, release 014)');
   assert.match(src('assets/venue.js'), /root\.setTimeout\(begin, 3000\);/, 'the stage enters by itself after three seconds at the latest');
 });

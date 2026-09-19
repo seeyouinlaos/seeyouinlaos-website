@@ -1,5 +1,5 @@
 /* ACCOUNT IA · E2E on the isolated stage worker (Owner correction, 18 Sep 2026). Synthetic guests only (T001 Ada, T003 Cleo,
-   G048 the fixed host pair). The nine checks the Owner named, the profile photo round trip, the calm step header.
+   G048 the synthetic host pair). The nine checks the Owner named, the profile photo round trip, the calm step header.
      node docs/acceptance/2026-09-18-account-ia/e2e.mjs <scratchpad> <outDir> [origin]
    The stage worker must be up (stage-up.sh). Codes are read from the scratchpad's synth-codes.json and never printed. */
 import fs from 'node:fs'; import path from 'node:path'; import zlib from 'node:zlib';
@@ -121,13 +121,23 @@ await A.goto(O + '/profile.html', { waitUntil: 'load' }); await A.waitForTimeout
 const auth = await A.evaluate(() => localStorage.getItem('siyl.auth')); note('9-sign-out', /invitation/.test(A.url()) && !auth, A.url() + ' · auth ' + auth);
 await A.goto(O + '/profile.html', { waitUntil: 'load' }); await A.waitForTimeout(1800); note('profile-private-when-signed-out', /invitation/.test(A.url()) && /next=profile/.test(A.url()), A.url());
 
-/* ===== E · the fixed host pair: the arrangement on the profile, never in the bag (the stage only — no synthetic host exists live) ===== */
+/* superseded by release 014 (Owner, 19 Sep 2026): no fixed arrangement */
+/* ===== E · the synthetic host pair: nothing arranged on the profile — only real holds are listed, the bag is USD 0 with nothing chosen (the stage only — no synthetic host exists live) ===== */
 if (!LIVE) {
 const H = await fresh(); await signIn(H, 'G048'); await H.goto(O + '/profile.html', { waitUntil: 'load' }); await H.waitForTimeout(3000);
-const fixed = await H.$eval('[data-profile-item="fixed:bkk-stay"]', (e) => ({ text: e.innerText.replace(/\s+/g, ' '), img: getComputedStyle(e.querySelector('.pf-img')).backgroundImage })).catch(() => null);
-const hb = await H.evaluate(() => ({ bag: JSON.parse(localStorage.getItem('siyl.bag') || '[]').length, total: SIYL_BAG.total(), badge: (document.querySelector('[data-bag-badge]') || {}).textContent }));
-note('8-fixed-arrangement-not-in-bag', !!fixed && /Arranged for you/i.test(fixed.text) && /Fixed arrangement · not part of your bag/i.test(fixed.text) && !/USD/.test(fixed.text) && /url\(/.test(fixed.img) && hb.bag === 0 && hb.total === 0 && hb.badge === '', (fixed ? fixed.text.slice(0, 160) : 'no card') + ' · ' + JSON.stringify(hb));
-await shot(H, '390-profile-host'); await H.context().close();
+const profileState = (p) => p.evaluate(() => ({ fixed: document.querySelectorAll('[data-profile-item^="fixed:"]').length, stays: [...document.querySelectorAll('#stays [data-profile-item]')].map((e) => e.getAttribute('data-profile-item')), words: /Arranged for you|Fixed arrangement/i.test(document.body.innerText), empty: /No stay is chosen yet/.test((document.querySelector('#stays') || {}).innerText || ''), bag: JSON.parse(localStorage.getItem('siyl.bag') || '[]').length, total: SIYL_BAG.total(), badge: (document.querySelector('[data-bag-badge]') || {}).textContent }));
+const pf0 = await profileState(H);
+note('8-no-arrangement-on-the-profile-014', pf0.fixed === 0 && pf0.stays.length === 0 && !pf0.words && pf0.empty && pf0.bag === 0 && pf0.total === 0 && pf0.badge === '', JSON.stringify(pf0));
+/* a real hold is the only kind of stay the profile lists: the host chooses U Sathorn Room A like anyone — one line card with its photograph and its cost, no arrangement words */
+await contact(H, 'bride.test@example.org'); await selectRoom(H, 'u-sathorn-superior-garden', 'A'); await H.goto(O + '/profile.html', { waitUntil: 'load' }); await H.waitForTimeout(3000);
+const pf1 = await profileState(H); const line = await H.$eval('#stays [data-profile-item="line:bkk-stay"]', (e) => ({ text: e.innerText.replace(/\s+/g, ' '), img: getComputedStyle(e.querySelector('.pf-img')).backgroundImage })).catch(() => null);
+note('8-profile-lists-only-real-holds-014', pf1.fixed === 0 && pf1.stays.join(',') === 'line:bkk-stay' && !pf1.words && !!line && /U Sathorn|Superior Room With Garden View/.test(line.text) && /USD/.test(line.text) && !/Arranged for you|Fixed arrangement/i.test(line.text) && /url\(/.test(line.img) && pf1.bag === 1 && pf1.total > 0, JSON.stringify({ pf1, line: line && line.text.slice(0, 120) }).slice(0, 300));
+await shot(H, '390-profile-host');
+/* Remove in My Bag releases it like anyone's: the profile lists nothing again, the engine holds nothing, the bag is USD 0 */
+await H.goto(O + '/cart.html', { waitUntil: 'load' }); await H.waitForSelector('[data-remove="bkk-stay"]', { timeout: 20000 }); await H.click('[data-remove="bkk-stay"]'); await H.waitForFunction(() => !!document.querySelector('.cart-empty'), null, { timeout: 20000 }); await H.waitForTimeout(1600);
+await H.goto(O + '/profile.html', { waitUntil: 'load' }); await H.waitForTimeout(3000); const pf2 = await profileState(H); const hm = await api(H, '/api/rooms/mine', { method: 'POST', body: '{}' });
+note('8-remove-leaves-nothing-014', pf2.fixed === 0 && pf2.stays.length === 0 && pf2.empty && pf2.bag === 0 && pf2.total === 0 && pf2.badge === '' && hm.status === 200 && !!hm.body && !hm.body.mine['bkk-stay'] && hm.body.fixed === undefined, JSON.stringify({ pf2, mine: hm.body && hm.body.mine, fixed: hm.body && hm.body.fixed }));
+await H.context().close();
 }
 
 /* ===== F · the widths: the profile and the step header at 320 · 834 · 1440 ===== */

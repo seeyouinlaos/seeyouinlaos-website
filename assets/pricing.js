@@ -53,10 +53,12 @@
     'mu9646': { price: 275, cat: 'Transportation', name: 'MU9646 · Vientiane → Kunming',
                 meta: '01 March 2027 · Business Class', img: 'assets/images/transport/mu9632-business-1.jpg',
                 basis: 'USD 275 per person · 1 seat · Business Class' },
-    /* C86 (Owner decision, Edit 2 · 15 Sep 2026): USD 85 per person — supersedes the earlier USD 105 */
-    'c86':    { price: 85, cat: 'Transportation', name: 'C86 · Kunming → Lijiang',
+    /* C86 · USD 105 per person — the CURRENT Operations Master (Overview, Accommodation and Rooming, Budget "Approve by
+     * Suthep, 18.09.2026") wins over the earlier website override of 85 (Owner instruction, 19 Sep 2026: the current master
+     * is the source of truth for every price) */
+    'c86':    { price: 105, cat: 'Transportation', name: 'C86 · Kunming → Lijiang',
                 meta: '04 March 2027 · Business Class', img: 'assets/images/transport/c642-train-snow-mountain.jpg',
-                basis: 'USD 85 per person · 1 seat · Business Class' },
+                basis: 'USD 105 per person · 1 seat · Business Class' },
     'return': { price: 200, cat: 'Transportation', name: 'MU5924 + MU741 · Lijiang → Bangkok',
                 meta: '06 March 2027 · Economy flexible', img: 'assets/images/transport/mu5924-economy-cabin-1.jpg',
                 basis: 'USD 200 per person · 1 seat · Economy flexible · via Kunming' },
@@ -65,7 +67,7 @@
      * per-person line. The request is arranged through the Journey workflow —
      * never a confirmed reservation, no availability promised. */
     'suhring': { price: 180, cat: 'Restaurant', name: 'Sühring',
-                meta: 'Lunch · German fine dining · Bangkok', img: 'assets/images/experiences/bkk-suhring-01.jpg',
+                meta: 'Dinner · 21 February 2027 · German fine dining · Bangkok', img: 'assets/images/experiences/bkk-suhring-01.jpg',
                 basis: 'USD 180 per person · a table requested through Guest Relations · a request, not a reservation' },
     '1872':   { price: 180, cat: 'Experience', unit: 'experience',
                 basis: 'USD 180 per experience · for two guests' },
@@ -196,7 +198,7 @@
       var bagName = (room && room.property) || at.win.bagName;
       var q = this.quote(at.win.id, room.slug);
       if (room.interest || q.total == null) {
-        var complimentary = at.key === 'airbnb';
+        var complimentary = at.key === 'guesthouse';
         return [{ id: at.win.id, name: bagName, meta: at.win.dates + ' · ' + (room.status || room.name),
                   interest: !complimentary, complimentary: complimentary,
                   price: complimentary ? 0 : undefined,
@@ -383,6 +385,13 @@
    * A bag saved while the retired two-row wedding model was live holds
    * wedstay-n1 / wedstay-n2. Collapse it to the ONE Wedding Stay line for the
    * same room, so nobody is left with two complimentary rows. */
+  /* the retired complimentary residence line of release 013: a Bag saved before release 014 loses it on load — the only
+     complimentary line that exists now is the Guest House; the guest chooses it anew through the engine */
+  (function retireResidence() {
+    var B = window.SIYL_BAG; if (!B) return;
+    var bag = B.get(), kept = bag.filter(function (x) { return !(x && x.complimentary && x.id !== 'guesthouse'); });
+    if (kept.length !== bag.length) B.set(kept);
+  })();
   (function collapseLegacyWeddingStay() {
     var B = window.SIYL_BAG;
     if (!B || !window.SIYL_ROOMS) return;

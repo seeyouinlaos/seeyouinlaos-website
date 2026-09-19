@@ -311,7 +311,7 @@
     "alt": "The stepped concrete terraces of The Commons with trees and lit kitchens",
     "drive": "1oVAuMOR5bWdQ7-qfUk-u811b-Sj8d4uS",
     "file": "IMG_3585.jpeg",
-    "kind": "architecture"
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/bkk-commons-02.jpg",
@@ -320,7 +320,7 @@
     "alt": "People sitting on the open terraces between the columns",
     "drive": "1vZzwU4tRr8dPpDzZ_MHMdoPodCcvavVl",
     "file": "IMG_3586.webp",
-    "kind": "architecture"
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/bkk-commons-03.jpg",
@@ -329,7 +329,7 @@
     "alt": "Tables under the atrium with the stairs rising behind",
     "drive": "1xHOOYO_zrtxeER31Wrq7sT12JCF8qe9z",
     "file": "IMG_3596.webp",
-    "kind": "interior"
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/bkk-commons-04.jpg",
@@ -338,7 +338,7 @@
     "alt": "Looking down through the atrium to the market floor",
     "drive": "1LuK66yxDxfpfv6VSrLqRVQ3tg1Fy7yPo",
     "file": "IMG_3600.webp",
-    "kind": "architecture"
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/bkk-commons-05.jpg",
@@ -347,7 +347,7 @@
     "alt": "The wide entrance steps planted with greenery",
     "drive": "1MKIzIqF7xZfS-5oyy9ggn1dVG6O4_eOV",
     "file": "IMG_3594.webp",
-    "kind": "architecture"
+    "kind": "venue"
    }
   ]
  },
@@ -1732,6 +1732,103 @@
     "drive": "1mS1zTEXZUMWHg2Ppv0yLUIVAwRbxO5tS",
     "file": "IMG_4112.jpeg",
     "kind": "venue"
+   }
+  ]
+ },
+ "bkk-baanphraya": {
+  "slug": "bkk-baanphraya",
+  "folder": "Baan Phraya (Owner Drive folder, 19 Sep 2026)",
+  "folderId": "1m1mvGNZW4gsMPbSGJy-mgFbKiN5Wdxjd",
+  "frame": "3/2",
+  "images": [
+   {
+    "src": "assets/images/experiences/bkk-baanphraya-01.jpg",
+    "w": 1333,
+    "h": 1000,
+    "alt": "The courtyard and the stairs of the century-old riverside house",
+    "drive": "1CHujOn1c9-splS9ZWLBcgqH5pjYPOqH2",
+    "file": "CcF1CVKDoS1iKcyyu28N.jpg.webp",
+    "kind": "exterior"
+   },
+   {
+    "src": "assets/images/experiences/bkk-baanphraya-02.jpg",
+    "w": 1499,
+    "h": 1000,
+    "alt": "The bar and the dining room under the painted ceiling",
+    "drive": "1GKYQV2AJglzQOj9gnGQGzeHgO-nBZQM3",
+    "file": "EGPe2M7GoXm5qVoV4Rna.jpg.webp",
+    "kind": "interior"
+   },
+   {
+    "src": "assets/images/experiences/bkk-baanphraya-03.jpg",
+    "w": 1080,
+    "h": 1350,
+    "alt": "A marble table laid by lamplight",
+    "drive": "1bBbmu5F_GgRnE5OvPTt212Fz-bh1_lQA",
+    "file": "SnapInsta.to_777382051_18616163584028090_8786793858455874467_n.jpg",
+    "kind": "dining-room"
+   },
+   {
+    "src": "assets/images/experiences/bkk-baanphraya-04.jpg",
+    "w": 1440,
+    "h": 1795,
+    "alt": "The teak staircase from above",
+    "drive": "1onQlQa0L_psK4YbT7TmYOcMHN5hzNelF",
+    "file": "SnapInsta.to_483201232_18488882269028090_1999400562091392011_n.jpg",
+    "kind": "architecture"
+   }
+  ]
+ },
+ "bkk-cannubi": {
+  "slug": "bkk-cannubi",
+  "folder": "Cannubi by Umberto Bombana (Owner Drive folder, 19 Sep 2026)",
+  "folderId": "1Byl3QKNULwmK7FTAvxFvIbythEBR1INE",
+  "frame": "4/5",
+  "images": [
+   {
+    "src": "assets/images/experiences/bkk-cannubi-01.jpg",
+    "w": 1600,
+    "h": 2000,
+    "alt": "The dining room towards the garden window",
+    "drive": "16HSY2adIIIRGRdC5GMN6Ir7OBqNqc9kR",
+    "file": "SnapInsta.to_525742970_122174795426445452_383894996253243251_n.jpg",
+    "kind": "interior"
+   },
+   {
+    "src": "assets/images/experiences/bkk-cannubi-02.jpg",
+    "w": 1600,
+    "h": 2000,
+    "alt": "Tables before the red canvas",
+    "drive": "1mXLHXLU79O2yX61U0CtD5NYPO0IE5DcD",
+    "file": "SnapInsta.to_730463935_1071359491885019_4123959233836529838_n.jpg",
+    "kind": "dining-room"
+   },
+   {
+    "src": "assets/images/experiences/bkk-cannubi-03.jpg",
+    "w": 1600,
+    "h": 1200,
+    "alt": "The private dining room",
+    "drive": "1FA4mBdJy8_sD3kYNuOAPnQvzNLG-UveR",
+    "file": "dusit-thani-bangkok-dining-cannubi-by-umberto-bombana-private-dining-room-long-table-2048x1536.jpg",
+    "kind": "dining-room"
+   },
+   {
+    "src": "assets/images/experiences/bkk-cannubi-04.jpg",
+    "w": 1600,
+    "h": 2000,
+    "alt": "A table being set by the window",
+    "drive": "1IqQ7JNCaakzT3JH1RlfieHAXBOSQZE8-",
+    "file": "SnapInsta.to_753169844_122221731716445452_2503419568741857560_n.jpg",
+    "kind": "atmosphere"
+   },
+   {
+    "src": "assets/images/experiences/bkk-cannubi-05.jpg",
+    "w": 1600,
+    "h": 1999,
+    "alt": "The wine cellar of more than 350 labels",
+    "drive": "1Gq_8u3-9iTIhBhZiHkK_CJX9dEIwswCb",
+    "file": "SnapInsta.to_683844230_1017242783963357_8135421017441544190_n.jpg",
+    "kind": "design"
    }
   ]
  }

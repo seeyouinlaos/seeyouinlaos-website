@@ -48,12 +48,12 @@
   </section>
 
   <section class="a-sec" id="bkk" aria-label="Experiences in Bangkok">
-    <div class="a-head x-city"><p class="a-eyebrow">01 · Thailand</p><h2>Bangkok</h2><p>22 – 24 February 2027 · the city days before the train. Restaurants, cafés, one exhibition, one museum, the malls and the bars — as the hosts planned them, day by day.</p></div>
+    <div class="a-head x-city"><p class="a-eyebrow">01 · Thailand</p><h2>Bangkok</h2><p>21 – 24 February 2027 · the city days before the train. Restaurants, cafés, one exhibition, one museum, the malls and the bars — as the hosts planned them, day by day.</p></div>
     <div data-rails="bkk"></div>
   </section>
 
   <section class="a-sec" id="bkk-return" aria-label="Experiences in Bangkok on the return">
-    <div class="a-head x-city"><p class="a-eyebrow">01 · Thailand · the return</p><h2>Bangkok, 6 – 8 March</h2><p>Two last days at the Siam Kempinski before the flight home.</p></div>
+    <div class="a-head x-city"><p class="a-eyebrow">01 · Thailand · the return</p><h2>Bangkok, 6 – 8 March</h2><p>Two last days at the Siam Kempinski before the flight home — brunch, a café, one dinner with a MICHELIN Star, and a last table on the final evening.</p></div>
     <div data-rails="bkk-return"></div>
   </section>
 
@@ -81,7 +81,7 @@
     <div class="ac">
       <p class="a-eyebrow">Gift Experience · Bangkok</p>
       <h2>Champagne Afternoon Tea at 1872</h2>
-      <p>One table, two guests, an afternoon that belongs to no schedule. One of the two experiences on this journey you can add to My Bag — the other is a table at Sühring.</p>
+      <p>One table, two guests — the afternoon of 24 February, before the night train. One of the two experiences on this journey you can add to My Bag — the other is the dinner at Sühring on 21 February.</p>
       <a class="a-link" href="1872.html">Discover 1872</a>
     </div>
   </section>
@@ -114,8 +114,8 @@
   </section>
 
 </main>
-<script src="assets/experiences.js?v=2f0e26eb"></script>
-<script src="assets/experience-galleries.js?v=500246d3"></script>
+<script src="assets/experiences.js?v=ffe40f76"></script>
+<script src="assets/experience-galleries.js?v=9a7226c3"></script>
 <script>
 /* the discovery rails come from the owner's canonical dataset, one rail per
    role of the Operations Master (lunch and dinner tables, cafés, experiences,
@@ -154,22 +154,31 @@
     /* the cafés of Bangkok are one section (Owner, Edit 4 · 16 Sep 2026): a café of the return days — Harudot —
        sits in the existing Cafés rail, never in a rail of its own; the return section keeps its other places */
     var isCafe = function (x) { return (x.roles || []).indexOf('cafe') >= 0; };
+    var hasOther = function (x) { return (x.roles || []).some(function (k) { return k !== 'cafe'; }); };
     var key = box.getAttribute('data-rails'), all = (window.SIYL_EXP || []).filter(function (x) {
       if (key === 'bkk') return x.chapter === 'bkk' && (x.leg !== 'return' || isCafe(x));
-      if (key === 'bkk-return') return x.chapter === 'bkk' && x.leg === 'return' && !isCafe(x);
+      if (key === 'bkk-return') return x.chapter === 'bkk' && x.leg === 'return' && (!isCafe(x) || hasOther(x));
       return x.chapter === key;
     });
+    /* a café of the return that is also an EXPERIENCE of the return (Harudot, 07.03 — the current Operations Master,
+       19 Sep 2026) sits as a café in the Bangkok Cafés rail and as an experience in the return's Experiences rail */
+    var rolesFor = function (x) {
+      var rs = x.roles || [];
+      if (key === 'bkk' && x.leg === 'return') return rs.filter(function (k) { return k === 'cafe'; });
+      if (key === 'bkk-return') return rs.filter(function (k) { return k !== 'cafe'; });
+      return rs;
+    };
     var seen = {};
     box.innerHTML = RAILS.map(function (r) {
-      var list = all.filter(function (x) { return (x.roles || []).some(function (k) { return r[1].indexOf(k) >= 0; }); });
+      var list = all.filter(function (x) { return rolesFor(x).some(function (k) { return r[1].indexOf(k) >= 0; }); });
       if (!list.length) return '';
       return rail(r[0], list, key + ':' + r[1][0]);
     }).join('');
   });
 })();
 </script>
-<script src="assets/recon.js?v=d36b39ba"></script>
+<script src="assets/recon.js?v=cde45016"></script>
 <script type="module" src="assets/invite.mjs?v=29231ccf"></script>
-<script src="assets/aman.js?v=aba68a3c"></script>
+<script src="assets/aman.js?v=67d37d1b"></script>
 </body>
 </html>

@@ -9,7 +9,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 .bag{width:44px;height:44px;display:flex;align-items:center;justify-content:center;position:relative;color:#313131;text-decoration:none}.bag .bgi{display:block}
 .bb{position:absolute;top:1px;right:0;min-width:14px;height:14px;padding:0 3px;background:#313131;color:#F3EEE7;font-size:8.5px;line-height:1;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;display:none;align-items:center;justify-content:center;box-shadow:0 0 0 2px #F3EEE7;border-radius:1px}
 </style>
-<link rel="stylesheet" href="assets/aman.css?v=98576b60"><link rel="stylesheet" href="assets/prep.css?v=cd2143af"></head><body>
+<link rel="stylesheet" href="assets/aman.css?v=98576b60"><link rel="stylesheet" href="assets/prep.css?v=4b294be8"></head><body>
 <header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="cart.html" aria-label="My Bag"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main class="prep-page" id="review">
 <div class="prep-head">
@@ -76,12 +76,12 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <div id="foot"></div>
 </main>
 <script src="assets/bag.js?v=2a0c8152"></script>
-<script src="assets/shop-menu.js?v=75d5662d"></script>
-<script src="assets/aman.js?v=aba68a3c"></script>
-<script src="assets/rooms-data.js?v=c8052faf"></script>
-<script src="assets/pricing.js?v=e864296d"></script>
-<script src="assets/guest.js?v=80cbd010"></script>
-<script src="assets/draft.js?v=f7b62db2"></script>
+<script src="assets/shop-menu.js?v=659ff077"></script>
+<script src="assets/aman.js?v=67d37d1b"></script>
+<script src="assets/rooms-data.js?v=7ee0852c"></script>
+<script src="assets/pricing.js?v=0aa9aef3"></script>
+<script src="assets/guest.js?v=de7f0d74"></script>
+<script src="assets/draft.js?v=7ab9ca64"></script>
 <script src="assets/docs.js?v=7c1c7bfd"></script>
 <script src="assets/confirm.js?v=f35e0aa8"></script>
 <script src="assets/seatlabels.js?v=4994e1f4"></script>
@@ -90,12 +90,11 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/vendor/qrcode.js?v=18ae399f"></script>
 <script src="assets/travelpass.js?v=ab2f5112"></script>
 <script src="assets/temple.js?v=a5a16527"></script>
-<script src="assets/rooms.js?v=5d4c69a5"></script>
-<script src="assets/arranged.js?v=d4ba78b8"></script>
-<script src="assets/stay.js?v=835263c1"></script>
+<script src="assets/rooms.js?v=e0d4bbbf"></script>
+<script src="assets/stay.js?v=3690f59b"></script>
 <script src="assets/transport-data.js?v=f54e56e9"></script>
-<script src="assets/journey.js?v=2b2b6ac3"></script>
-<script src="assets/prep-shell.js?v=85f4a5a0"></script>
+<script src="assets/packages-data.js?v=9818dd90"></script><script src="assets/journey.js?v=df71141b"></script>
+<script src="assets/prep-shell.js?v=830ee417"></script>
 <script type="module" src="assets/invite.mjs?v=29231ccf"></script>
 <script>
 /* ============================================================================
@@ -271,7 +270,7 @@ function detailHref(x){
 if(x.stay&&x.room)return 'room.html?stay='+x.stay+'&room='+x.room;
 if(x.id==='1872')return '1872.html';
 if(x.exp)return 'experience.html?id='+encodeURIComponent(x.exp);
-if(x.interest&&x.id!=='airbnb-2br')return 'marsilea.html';
+if(x.interest&&x.id!=='guesthouse')return 'marsilea.html';
 if(window.SIYL_TRANSPORT&&window.SIYL_TRANSPORT[x.id])return 'transport.html?id='+x.id;
 var P=window.SIYL_PRICE,at=P&&P.locate(x.id);
 if(at&&x.room)return 'room.html?stay='+at.key+'&room='+x.room;
@@ -289,11 +288,11 @@ return '<div class="p-line"><a class="p-line-img" href="'+href+'" aria-label="Op
 '<div class="p-line-body"><p class="t-l1">'+(when2?when2:'')+(m.cat?' · '+m.cat:'')+'</p>'+
 '<h3 class="t-h2"><a href="'+href+'">'+esc(x.name)+'</a></h3><p class="t-b2">'+esc(x.meta||'')+'</p>'+
 (unit?'<p class="t-l1 on">'+esc(unit)+'</p>':'')+
-(x.complimentary?'<p class="t-b2">Complimentary. An independent stay: the wedding programme is included as it stands; arrival, departure and transfers are arranged by you.</p>':'')+
+(x.complimentary?'<p class="t-b2">Complimentary. A shared guest house of six places: the wedding programme is included as it stands; arrival, departure and transfers are arranged by you.</p>':'')+
 (J&&J.quantityLine(x)?'<p class="t-b2">'+esc(J.quantityLine(x))+'</p>':'')+((x.request||!(J&&J.quantityLine(x)))&&m.basis?'<p class="t-b2">'+esc(m.basis)+'</p>':'')+
 (x.note?'<p class="t-l1 on">'+esc(x.note)+(x.noteBy?' · '+esc(x.noteBy):'')+'</p>':'')+
 (x.breakfast?'<p class="t-l1">'+esc(x.breakfast)+'</p>':'')+'</div>'+
-(x.interest?'<p class="p-line-amt"><span class="t-l1">Interest · request</span></p>':'<p class="p-line-amt">USD '+((x.price||0)).toLocaleString('en-US')+'</p>')+'</div>'}).join('')}
+(x.interest?'<p class="p-line-amt"><span class="t-l1">Interest · request</span></p>':x.complimentary?'<p class="p-line-amt"><span class="t-l1">Complimentary</span></p>':'<p class="p-line-amt">USD '+((x.price||0)).toLocaleString('en-US')+'</p>')+'</div>'}).join('')}
 document.getElementById('tt').textContent='USD '+SIYL_BAG.total().toLocaleString('en-US');
 paintReady();
 SIYL_BAG.badge()}
@@ -417,7 +416,10 @@ function fingerprint(o){if(!o)return '';var c=JSON.parse(JSON.stringify(o));dele
 function sentSnapshot(){try{return JSON.parse(localStorage.getItem('siyl.sent')||'null')}catch(e){return null}}
 function rememberSent(at){var o=snapshotNow();if(!o)return;o.at=at;try{localStorage.setItem('siyl.sent',JSON.stringify(o))}catch(e){}}
 
-function paintArranged(){var el=document.getElementById('arranged');if(el)el.innerHTML=window.SIYL_ARRANGED?SIYL_ARRANGED.html():''}
+/* THE WAITING LIST on Review (Owner, 19 Sep 2026): a stage no room could take yet — named with its position, no amount */
+function paintArranged(){var el=document.getElementById('arranged');if(!el)return;var U=window.SIYL_UNITS,J=window.SIYL_JOURNEY;if(!U||!U.ready||!U.ready()||!J){el.innerHTML='';return}
+  var rows=J.SEGMENTS.filter(function(s){return J.relevant(s)&&J.state(s)==='waitlisted'});
+  el.innerHTML=rows.length?'<div class="p-card"><p class="t-l1 open">Waiting list</p>'+rows.map(function(s){var w=U.waitlisted(s.key);return '<p class="t-b1"><b>'+esc(s.when+' · '+s.place)+'</b> — number '+(w&&w.position||'?')+' on the waiting list'+(w&&w.size>1?' for '+w.size+' places':'')+' · no room yet, no cost until it is resolved</p>'}).join('')+'<p class="t-b2 measure-w">Guest Relations will find an arrangement with you. Your trip can be sent as it stands.</p></div>':''}
 function paintBlocks(){paintArranged();paintYou();paintAbout();paintWedding();paintDocs();paintReady();paintState();
   if(window.SIYL_PREP)SIYL_PREP.foot(document.getElementById('foot'))}
 document.addEventListener('siyl:confirm',function(){render();paintBlocks()});   /* the passes say Sent / Confirmed */
@@ -425,7 +427,8 @@ document.addEventListener('siyl:seats',paintBlocks);
 document.addEventListener('siyl:units',function(){render();paintBlocks()});
 if(window.SIYL_CONFIRM)SIYL_CONFIRM.load();
 if(window.SIYL_SEATS)SIYL_SEATS.load();
-document.addEventListener('siyl:auth',function(){if(window.SIYL_CONFIRM)SIYL_CONFIRM.load(true);if(window.SIYL_SEATS)SIYL_SEATS.load(true)});
+if(window.SIYL_UNITS)SIYL_UNITS.load();   /* the waiting list and the held rooms come from the engine (release 014) */
+document.addEventListener('siyl:auth',function(){if(window.SIYL_CONFIRM)SIYL_CONFIRM.load(true);if(window.SIYL_SEATS)SIYL_SEATS.load(true);if(window.SIYL_UNITS)SIYL_UNITS.load(true)});
 document.addEventListener('siyl:bag',function(){render();paintBlocks()});
 document.addEventListener('siyl:temple',paintBlocks);
 document.addEventListener('siyl:guest',paintBlocks);
@@ -453,7 +456,8 @@ L.push('- '+x.name+' · '+(x.meta||'')+
 (x.note?' · '+x.note.toUpperCase()+(x.noteBy?' ('+x.noteBy+')':''):'')+
 (x.request?' · RESTAURANT REQUEST (USD 180 per person; to be arranged through Guest Relations; not a reservation)':'')+
 (x.interest?' · INTEREST ONLY (not part of your total, payable at the spa)':' · USD '+(x.price||0)))});
-if(window.SIYL_JOURNEY){var op=SIYL_JOURNEY.open(),sk=SIYL_JOURNEY.SEGMENTS.filter(function(g){return SIYL_JOURNEY.state(g)==='declined'});
+if(window.SIYL_JOURNEY){var op=SIYL_JOURNEY.open(),sk=SIYL_JOURNEY.SEGMENTS.filter(function(g){return SIYL_JOURNEY.relevant(g)&&SIYL_JOURNEY.state(g)==='declined'}),wl=SIYL_JOURNEY.SEGMENTS.filter(function(g){return SIYL_JOURNEY.relevant(g)&&SIYL_JOURNEY.state(g)==='waitlisted'});
+if(wl.length){L.push('','WAITING LIST:');wl.forEach(function(g){var n=SIYL_JOURNEY.waitPosition(g);L.push('- '+g.when+' · '+g.cat+' · '+g.place+(n?' · number '+n:'')+' · no room yet, no cost until it is resolved')})}
 if(sk.length){L.push('','NOT JOINING:');sk.forEach(function(g){L.push('- '+g.when+' · '+g.cat+' · '+g.place)})}
 if(op.length){L.push('','DECISION STILL OPEN:');op.forEach(function(g){L.push('- '+g.when+' · '+g.cat+' · '+g.place)})}}
 if(window.SIYL_TEMPLE){var t=SIYL_TEMPLE.operational();

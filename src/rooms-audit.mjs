@@ -33,7 +33,7 @@ const jsonOut = args.includes('--json') ? args[args.indexOf('--json') + 1] : nul
 const gr = process.env.GR_TOKEN || (fs.existsSync(path.join(ROOT, 'src/gr-token.private.txt')) ? fs.readFileSync(path.join(ROOT, 'src/gr-token.private.txt'), 'utf8').trim() : '');
 
 /* the property behind a window (the seed names the stay only where a window holds several) */
-const PROPERTY = { 'bkk-stay': null, prewed: 'Souphattra Heritage Vientiane', wedstay: 'Souphattra Heritage Vientiane', 'airbnb-2br': 'Private Residence · Vientiane', kmg: 'Kunming', ljg: 'Lijiang', kempinski: 'Siam Kempinski Bangkok' };
+const PROPERTY = { 'bkk-stay': null, prewed: 'Souphattra Heritage Vientiane', wedstay: 'Souphattra Heritage Vientiane', guesthouse: 'Guest House complimentary · Vientiane', kmg: 'Kunming', ljg: 'Lijiang', kempinski: 'Siam Kempinski Bangkok' };
 
 let plan = null;
 if (gr) {

@@ -1,0 +1,63 @@
+SEE YOU IN LAOS — GUEST RELATIONS
+
+New trip received
+
+Guest: Cleo Test
+Party: Cleo
+Email: cleo.test@example.org
+Mobile: +66 81 000 0000
+Reference: SYL-T003-7DD979DF
+Status: Initial submission
+Sent: 19 September 2026 · 21:55
+Where they join us: Vientiane · China
+
+TRAVEL
+· MU9646 · Vientiane → Kunming — 01 March 2027 · Business Class — USD 275
+· C86 · Kunming → Lijiang — 04 March 2027 · Business Class — USD 105
+· MU5924 + MU741 · Lijiang → Bangkok — 06 March 2027 · Economy flexible — USD 200
+
+WAITING LIST
+· Lijiang — number 1 — to resolve
+
+STAYS
+· Pre-Wedding Stay · Souphattra Heritage — 25 – 27 February 2027 — Heritage Grand Premier — Room A — USD 340
+· Wedding Stay · Souphattra Heritage — 27 February – 01 March 2027 — Heritage Grand Premier — Room A — USD 170 (Second night · Hosted by Haruthai & Suthep)
+· Wanxiang Yueju · Kunming — 01 – 04 March 2027 — Italian Style Suite — Room A — USD 150
+
+WEDDING PARTICIPATION
+· Temple Ceremony (09:00 – approximately 12:00 · Wat Ong Teu, Vientiane): Not joining
+· Coffee & Cake (From 12:00 · Souphattra Heritage): Joining
+· Wedding Ceremony (15:30 · Souphattra Heritage): Joining
+· Wedding Dinner (19:30 · Souphattra Heritage · poolside): Joining
+· Sangkhathan: Not applicable
+
+SEATS
+· Wedding Ceremony: Seat F7
+· Wedding Dinner: Seat A8
+
+ABOUT YOU
+· Food allergies: None
+· Coffee or tea: Oolong
+· My Favorite Flavor: Pandan
+· Favourite drink: Lime
+· Favourite film: Film
+· Favourite music: Music
+· Dress code: Reviewed
+· Photography & film: Reviewed
+
+DOCUMENTS
+· Passport: Not provided
+· Flight information: Not provided
+· Publication of photographs: Not answered
+Still needed: Passport, Flight information
+
+COST
+USD 1,240
+
+INTERNAL REFERENCE
+Guest: T003
+Invitation: INV-T003
+Ceremony seat record: C-R-07-03
+Dinner seat record: D-T-08
+Submission: SYL-T003-7DD979DF · version 1
+Status: http://127.0.0.1:8788/api/status?invitation=INV-T003

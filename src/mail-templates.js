@@ -11,7 +11,6 @@
    term; the internal references Guest Relations may need sit in one muted
    section at the end of their email.
    ========================================================================== */
-import { FIXED } from './inventory-seed.js';
 
 export const SITE = 'https://seeyouinlaos-website.suthep-hrg.workers.dev';
 export const GR_EMAIL = 'guest.relation.seeyouinlaos@gmail.com';
@@ -21,7 +20,7 @@ const SERIF = "Georgia, 'Times New Roman', Times, serif", SANS = "'Helvetica Neu
 /* ---- facts of the journey (the same words as the website) ---- */
 const STAGES = ['bkk-stay', 'train', 'prewed', 'wedstay', 'mu9646', 'kmg', 'c86', 'ljg', 'return', 'kempinski'];
 const TRAVEL = new Set(['train', 'mu9646', 'c86', 'return']);
-const STAGE_OF_STAY = { 'bkk-stay': 'bkk-stay', prewed: 'prewed', wedstay: 'wedstay', 'airbnb-2br': 'wedstay', riverside: 'wedstay', kmg: 'kmg', ljg: 'ljg', kempinski: 'kempinski' };
+const STAGE_OF_STAY = { 'bkk-stay': 'bkk-stay', prewed: 'prewed', wedstay: 'wedstay', guesthouse: 'wedstay', riverside: 'wedstay', kmg: 'kmg', ljg: 'ljg', kempinski: 'kempinski' };
 const EVENTS = [
   { key: 'temple', label: 'Temple Ceremony', when: '09:00 – approximately 12:00', place: 'Wat Ong Teu, Vientiane' },
   { key: 'coffee', label: 'Coffee & Cake', when: 'From 12:00', place: 'Souphattra Heritage' },
@@ -37,7 +36,6 @@ function profileValue(profile, k) {
   if (FLAVORS.includes(p.flavor)) return p.flavor;
   return FLAVORS.includes(p.treat) ? p.treat : '';
 }
-const HOST_IDS = new Set(FIXED.map((f) => f.guestId));
 
 /* the seat label the guest knows (assets/seatlabels.js, the same pure mapping): C-L-rr-01 → A rr … D-T-nn → A nn */
 export function seatLabel(seatId) {
@@ -72,19 +70,22 @@ export function journeyModel(record) {
   const contact = { email: (record.recipient && record.recipient.email) || (r.contact && r.contact.email) || (gr.contact && gr.contact.email) || (legacy && legacy.contact && legacy.contact.email) || '',
     phone: (record.recipient && record.recipient.phone) || (r.contact && r.contact.phone) || (gr.contact && gr.contact.phone) || (legacy && legacy.contact && legacy.contact.phone) || '' };
   const rooms0 = record.rooms || null;
-  /* the fixed UNITS (never a product of any kind, never in a total — Codex P1-3); a hotel the hosts chose themselves in the same
-     stage is their own selection and stays (Owner, Edit 5 · 18 Sep 2026) */
-  const fixedUnits = Object.values(rooms0 || {}).filter((m) => m && m.fixed).map((m) => ({ win: String(m.key || '').split('/')[0], slug: String(m.key || '').split('/').slice(1).join('/') }));
-  const isFixedLine = (x) => fixedUnits.some((f) => x && String(x.id) === f.win && (!x.room || String(x.room) === f.slug));
-  const fixedStages = fixedUnits.length ? fixedUnits.map((f) => STAGE_OF_STAY[f.win] || f.win) : [];
-  const lines = (Array.isArray(r.selections) ? r.selections : (Array.isArray(r.shared) ? r.shared : [])).filter((x) => !isFixedLine(x));
+  /* NO FIXED ARRANGEMENT (Owner, 19 Sep 2026): every line is the guest's own selection — but the engine is the truth of a
+     stage: a line for a stage the engine has WAITLISTED for this guest (a stale device, a replayed draft) is not a stay and
+     not a cost; the total is recomputed without it */
+  const engineWaits = Object.entries(record.rooms || {}).filter(([, m]) => m && m.waitlisted).map(([k, m]) => m.stage || k);
+  const lines0 = (Array.isArray(r.selections) ? r.selections : (Array.isArray(r.shared) ? r.shared : []));
+  const lines = lines0.filter((x) => !(x && STAGE_OF_STAY[x.id] && engineWaits.includes(STAGE_OF_STAY[x.id])));
+  const dropped = lines0.length !== lines.length;
   const order = (x) => { const i = STAGES.indexOf(x.id); return i < 0 ? 50 : i; };
   const sorted = lines.slice().sort((a, b) => order(a) - order(b));
   const rooms = record.rooms || null;
-  const roomOf = (x) => { const st = STAGE_OF_STAY[x.id]; const m = rooms && rooms[st]; if (m && m.room && !m.fixed) return m.room; return x.unitName || (x.unit ? 'Room ' + x.unit : ''); };
-  /* ARRANGED FOR YOU: the fixed rooms the engine holds for this guest — never a Bag line, never an amount */
-  const arranged = Object.entries(rooms || {}).filter(([, m]) => m && m.fixed).map(([k, m]) => ({ stage: m.stage || k.replace(/\/fixed$/, ''), name: m.stay || m.name, room: m.room, category: m.stay ? m.name : '' }));
-  const stays = sorted.filter((x) => (x.stay || STAGE_OF_STAY[x.id])).map((x) => ({ name: x.name, dates: (x.meta || '').split(' · ')[0], category: (x.meta || '').split(' · ').slice(1).join(' · '), room: roomOf(x), price: x.price, rate: x.rate, nights: x.nights, note: x.note ? x.note + (x.noteBy ? ' · ' + x.noteBy : '') : '', breakfast: x.breakfast || '', interest: !!x.interest }));
+  const roomOf = (x) => { const st = STAGE_OF_STAY[x.id]; const m = rooms && rooms[st]; if (m && m.room && !m.waitlisted) return m.room; return x.unitName || (x.unit ? 'Room ' + x.unit : ''); };
+  /* THE WAITING LIST (Owner, 19 Sep 2026): a stage no defined option could take — named with its position, never an amount */
+  const STAGE_WORDS = { 'bkk-stay': 'Bangkok · Before the Wedding', prewed: 'Vientiane · Pre-Wedding Stay', wedstay: 'Vientiane · Wedding Stay', kmg: 'Kunming', ljg: 'Lijiang', kempinski: 'Bangkok · Siam Kempinski' };
+  const waitlisted = Object.entries(rooms || {}).filter(([, m]) => m && m.waitlisted).map(([k, m]) => ({ stage: m.stage || k, name: STAGE_WORDS[m.stage || k] || (m.stage || k), position: m.position, size: m.size || 1 }));
+  const arranged = [];
+  const stays = sorted.filter((x) => (x.stay || STAGE_OF_STAY[x.id])).map((x) => ({ name: x.name, dates: (x.meta || '').split(' · ')[0], category: (x.meta || '').split(' · ').slice(1).join(' · '), room: roomOf(x), price: x.price, complimentary: !!x.complimentary, rate: x.rate, nights: x.nights, note: x.note ? x.note + (x.noteBy ? ' · ' + x.noteBy : '') : '', breakfast: x.breakfast || '', interest: !!x.interest }));
   const travel = sorted.filter((x) => TRAVEL.has(x.id) || (x.cls && !x.stay)).map((x) => ({ name: x.name, meta: x.meta || '', price: x.price }));
   const experiences = sorted.filter((x) => !stays.some((s) => s.name === x.name) && !travel.some((t) => t.name === x.name) && x.id !== 'sangkhathan').map((x) => ({ name: x.name, meta: x.meta || '', price: x.price }));
   const sang = lines.find((x) => x.id === 'sangkhathan');
@@ -98,7 +99,9 @@ export function journeyModel(record) {
   /* the seats: the engine's map for this guest */
   const m = r.seats && typeof r.seats === 'object' ? r.seats : null;
   const seatId = (ev) => away ? null : ((m && m[ev] && (m[ev][guestId] || (typeof m[ev] === 'string' ? m[ev] : null))) || (legacy && legacy[ev + 'Seat']) || null);
-  const hosts = HOST_IDS.has(guestId);
+  /* the hosts are known from the record's authenticated identity (the Worker stores the register's host flag on the
+     record) — never from a room, never from anything the client submitted */
+  const hosts = record.hosts === true;
   const labelOf = (ev) => { if (away) return ''; const id = seatId(ev); if (id) return seatLabel(id) || (legacy && legacy[ev + 'SeatLabel']) || id; return (legacy && legacy[ev + 'SeatLabel']) || (ev === 'ceremony' && hosts ? 'Front centre' : ''); };
   const seats = { ceremony: { id: seatId('ceremony'), label: labelOf('ceremony'), when: '15:30', place: 'Souphattra Heritage' },
     dinner: { id: seatId('dinner'), label: labelOf('dinner'), when: '19:30', place: 'Souphattra Heritage · poolside' } };
@@ -113,9 +116,9 @@ export function journeyModel(record) {
   const docs = r.documents && Array.isArray(r.documents.guests) && r.documents.guests[0] && Array.isArray(r.documents.guests[0].documents) ? r.documents.guests[0].documents.map((d) => ({ label: d.label || d.kind, state: d.state || '' })) : [];
   const publication = r.documents && Array.isArray(r.documents.guests) && r.documents.guests[0] ? r.documents.guests[0].publication || '' : '';
   const stated = r.totalUsd != null ? r.totalUsd : (r.total != null ? r.total : null);
-  const total = stated == null ? null : (fixedStages.length ? lines.reduce((t, x) => t + (Number(x.price) || 0) * (Number(x.qty) || 1), 0) : stated);
+  const total = stated == null ? null : (dropped ? lines.reduce((t, x) => t + (Number(x.price) || 0) * (Number(x.qty) || 1), 0) : stated);
   const upd = record.kind === 'update' && (record.version || 1) > 1;
-  return { guestId, fullName, firstName, partyName, contact, stays, arranged, travel, experiences, wedding, sangkhathan, seats, profile, allergy, allergyDetails, acks, docs, publication, total, hosts,
+  return { guestId, fullName, firstName, partyName, contact, stays, arranged, waitlisted, travel, experiences, wedding, sangkhathan, seats, profile, allergy, allergyDetails, acks, docs, publication, total, hosts,
     /* WHERE THEY JOIN US (Owner, 18 Sep 2026): the guest's participation scope as sent — the words the guest chose, or a decline */
     scope: typeof gr.scopeWords === 'string' && gr.scopeWords ? gr.scopeWords : (gr.scope && gr.scope.none ? 'Not joining this trip' : ''),
     notJoining: !!(gr.scope && gr.scope.none),
@@ -164,8 +167,8 @@ function shell(title, inner, eyebrow) {
 function journeySections(M, forOwner) {
   let s = '';
   if (M.travel.length) s += section('Travel', M.travel.map((t) => item(t.name, esc(t.meta), forOwner || t.price != null ? money(t.price) : '')).join(''));
-  if (M.arranged.length) s += section('Arranged for you', M.arranged.map((a) => item(a.name, esc(a.room) + (a.category ? ' · ' + esc(a.category) : '') + '<br>Fixed arrangement · not part of your bag', '')).join(''));
-  if (M.stays.length) s += section('Stays', M.stays.map((x) => item(x.name, esc(x.dates) + (x.category ? '<br>' + esc(x.category) : '') + (x.room ? '<br><span style="color:' + INK + ';">' + esc(x.room) + '</span>' : '') + (x.breakfast ? '<br>' + esc(x.breakfast) : '') + (x.note ? '<br>' + esc(x.note) : ''), x.price != null ? money(x.price) : '')).join(''));
+  if (M.waitlisted && M.waitlisted.length) s += section('Waiting list', M.waitlisted.map((w) => item(w.name, 'No room could be confirmed yet · you are number ' + w.position + ' on the waiting list' + (w.size > 1 ? ' for ' + w.size + ' places' : '') + (forOwner ? '' : '<br>Guest Relations will find an arrangement with you'), '')).join(''));
+  if (M.stays.length) s += section('Stays', M.stays.map((x) => item(x.name, esc(x.dates) + (x.category ? '<br>' + esc(x.category) : '') + (x.room ? '<br><span style="color:' + INK + ';">' + esc(x.room) + '</span>' : '') + (x.breakfast ? '<br>' + esc(x.breakfast) : '') + (x.note ? '<br>' + esc(x.note) : ''), x.complimentary ? 'Complimentary' : x.price != null ? money(x.price) : '')).join(''));
   if (M.experiences.length) s += section('Experiences', M.experiences.map((e) => item(e.name, esc(e.meta), e.price != null ? money(e.price) : '')).join(''));
   s += section('Wedding', kvTable(M.wedding.map((e) => kvRow(e.label, e.answer || '—', e.when + ' · ' + e.place)).concat(M.sangkhathan ? [kvRow('Sangkhathan', M.sangkhathan, 'A personal offering · USD 15 per participating guest')] : [])));
   const seatRows = [];
@@ -205,8 +208,8 @@ export function composeGuestMail(record) {
   T.push('SEE YOU IN LAOS — MY TRIP', '', M.upd ? 'Your trip has been updated' : 'Your trip has been received', '', 'Dear ' + M.firstName + ',', '', intro, '',
     'Reference: ' + M.reference, (M.upd ? 'Updated: ' : 'Sent: ') + whenWords(M.sentAt), M.scope ? 'Where you join us: ' + M.scope : '', '');
   if (M.travel.length) { T.push('TRAVEL'); M.travel.forEach((t) => T.push('· ' + t.name + ' — ' + t.meta + (t.price != null ? ' — ' + money(t.price) : ''))); T.push(''); }
-  if (M.arranged.length) { T.push('ARRANGED FOR YOU'); M.arranged.forEach((a) => T.push('· ' + a.name + ' — ' + a.room + (a.category ? ' — ' + a.category : '') + ' — fixed arrangement, not part of your bag')); T.push(''); }
-  if (M.stays.length) { T.push('STAYS'); M.stays.forEach((x) => T.push('· ' + x.name + ' — ' + x.dates + (x.category ? ' — ' + x.category : '') + (x.room ? ' — ' + x.room : '') + (x.price != null ? ' — ' + money(x.price) : '') + (x.note ? ' (' + x.note + ')' : ''))); T.push(''); }
+  if (M.waitlisted && M.waitlisted.length) { T.push('WAITING LIST'); M.waitlisted.forEach((w) => T.push('· ' + w.name + ' — no room could be confirmed yet · number ' + w.position + ' on the waiting list' + (w.size > 1 ? ' for ' + w.size + ' places' : ''))); T.push(''); }
+  if (M.stays.length) { T.push('STAYS'); M.stays.forEach((x) => T.push('· ' + x.name + ' — ' + x.dates + (x.category ? ' — ' + x.category : '') + (x.room ? ' — ' + x.room : '') + (x.complimentary ? ' — Complimentary' : x.price != null ? ' — ' + money(x.price) : '') + (x.note ? ' (' + x.note + ')' : ''))); T.push(''); }
   if (M.experiences.length) { T.push('EXPERIENCES'); M.experiences.forEach((e) => T.push('· ' + e.name + ' — ' + e.meta + (e.price != null ? ' — ' + money(e.price) : ''))); T.push(''); }
   T.push('WEDDING'); M.wedding.forEach((e) => T.push('· ' + e.label + ' · ' + e.when + ' · ' + e.place + ': ' + (e.answer || '—'))); if (M.sangkhathan) T.push('· Sangkhathan: ' + M.sangkhathan); T.push('');
   if (M.seats.ceremony.label || M.seats.dinner.label) { T.push('YOUR SEATS'); if (M.seats.ceremony.label) T.push('· Wedding Ceremony · Souphattra Heritage · 15:30: ' + (/^Front/.test(M.seats.ceremony.label) ? M.seats.ceremony.label : 'Seat ' + M.seats.ceremony.label)); if (M.seats.dinner.label) T.push('· Wedding Dinner · Souphattra Heritage · 19:30: Seat ' + M.seats.dinner.label); T.push(''); }
@@ -239,7 +242,7 @@ export function composeOwnerMail(record, statusUrl) {
   if (M.upd) T.push('Latest version received ' + whenWords(M.sentAt) + ' (replaces the version first sent ' + whenWords(M.firstSentAt) + ')', '');
   T.push('Guest: ' + M.fullName, M.partyName ? 'Party: ' + M.partyName : '', 'Email: ' + (M.contact.email || '—'), 'Mobile: ' + (M.contact.phone || '—'), 'Reference: ' + M.reference, 'Status: ' + (M.upd ? 'Updated trip' : 'Initial submission'), (M.upd ? 'Updated: ' : 'Sent: ') + whenWords(M.sentAt), M.scope ? 'Where they join us: ' + M.scope : '', '');
   if (M.travel.length) { T.push('TRAVEL'); M.travel.forEach((t) => T.push('· ' + t.name + ' — ' + t.meta + ' — ' + money(t.price))); T.push(''); }
-  if (M.arranged.length) { T.push('ARRANGED FOR YOU'); M.arranged.forEach((a) => T.push('· ' + a.name + ' — ' + a.room + (a.category ? ' — ' + a.category : '') + ' — fixed arrangement')); T.push(''); }
+  if (M.waitlisted && M.waitlisted.length) { T.push('WAITING LIST'); M.waitlisted.forEach((w) => T.push('· ' + w.name + ' — number ' + w.position + (w.size > 1 ? ' for ' + w.size + ' places' : '') + ' — to resolve')); T.push(''); }
   if (M.stays.length) { T.push('STAYS'); M.stays.forEach((x) => T.push('· ' + x.name + ' — ' + x.dates + (x.category ? ' — ' + x.category : '') + (x.room ? ' — ' + x.room : '') + ' — ' + money(x.price) + (x.note ? ' (' + x.note + ')' : ''))); T.push(''); }
   if (M.experiences.length) { T.push('EXPERIENCES'); M.experiences.forEach((e) => T.push('· ' + e.name + ' — ' + e.meta + ' — ' + money(e.price))); T.push(''); }
   T.push('WEDDING PARTICIPATION'); M.wedding.forEach((e) => T.push('· ' + e.label + ' (' + e.when + ' · ' + e.place + '): ' + (e.answer || '—'))); if (M.sangkhathan) T.push('· Sangkhathan: ' + M.sangkhathan); T.push('');

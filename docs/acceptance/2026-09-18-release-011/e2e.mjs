@@ -1,5 +1,5 @@
 /* RELEASE 011 · FINAL INTEGRATED GUEST RELEASE — E2E on the isolated stage worker (Owner, 18 Sep 2026). Synthetic guests
-   only (T001 Ada, T002 Ben, T003 Cleo, G048 / G049 the fixed host pair); codes are read from the scratchpad and never printed.
+   only (T001 Ada, T002 Ben, T003 Cleo, G048 / G049 the synthetic host pair); codes are read from the scratchpad and never printed.
      node docs/acceptance/2026-09-18-release-011/e2e.mjs <scratchpad> <outDir> [origin]
    The stage worker must be up (stage-up.sh, a fresh state). Chromium for the flows, WebKit (iPhone) for the overlay scroll. */
 import fs from 'node:fs'; import path from 'node:path'; import { execFileSync } from 'node:child_process';
@@ -166,22 +166,23 @@ await trip(A); await A.click('[data-scope="bangkok"]'); await A.waitForTimeout(1
 const ch = { stages: await visibleStages(A), steps: await steps(A), need: await need(A) };
 note('partial-china-only', JSON.stringify(ch.stages) === JSON.stringify(['kmg', 'c86', 'ljg', 'return']) && ch.steps.includes('wedding:na') && ch.steps.includes('preparation:na') && ch.need.keys.filter((k) => /^stage:/.test(k)).length === 4, JSON.stringify(ch).slice(0, 240));
 
-/* ===== 7 · HARUTHAI (G048): the fixed room, never required, another address possible ===== */
-if (LIVE) note('haruthai-live', true, 'no synthetic host pair exists on the live register: the fixed-arrangement flow is proven on the stage (stage/e2e.json); the live host record is never used by a test');
+/* superseded by release 014 (Owner, 19 Sep 2026): no fixed arrangement */
+/* ===== 7 · HARUTHAI (G048): the host starts at zero — ten open stages, no Room A, every Bangkok address open, a choice held and released like anyone's ===== */
+if (LIVE) note('haruthai-live', true, 'no synthetic host pair exists on the live register: the host-at-zero flow is proven on the stage (stage/e2e.json); the live host record is never used by a test');
 const H = LIVE ? null : await fresh(); if (!LIVE) { await signIn(H, 'G048'); await contact(H, 'bride.test@example.org'); await trip(H);
-const h0 = { words: await stageWords(H, 'bkk-stay'), need: await need(H), scope: await H.evaluate(() => SIYL_GUEST.scopeWords()), bag: await H.evaluate(() => SIYL_BAG.total()), rail: await H.$$eval('#s-bkk-stay [data-choose]', (l) => l.map((e) => e.getAttribute('data-choose'))) };
-note('haruthai-arranged-not-required', /Arranged for you/i.test(h0.words) && /Room A/.test(h0.words) && !/USD/.test(h0.words.split(/Another address/i)[0]) && !h0.need.keys.some((k) => /bkk-stay/.test(k)) && h0.scope === 'Bangkok · Vientiane · China' && h0.bag === 0 && h0.rail.length >= 1 && !h0.rail.includes('penthouse') && /Another address, if you prefer/i.test(h0.words), JSON.stringify(h0).slice(0, 300));
+const h0 = { words: await stageWords(H, 'bkk-stay'), need: await need(H), scope: await H.evaluate(() => SIYL_GUEST.scopeWords()), bag: await H.evaluate(() => SIYL_BAG.total()), rail: await H.$$eval('#s-bkk-stay [data-choose]', (l) => l.map((e) => e.getAttribute('data-choose'))), stages: await visibleStages(H), states: await H.evaluate(() => SIYL_JOURNEY.SEGMENTS.map((s) => s.key + ':' + SIYL_JOURNEY.state(s))), arranged: await H.evaluate(() => ({ items: document.querySelectorAll('[data-arranged-item]').length, global: typeof window.SIYL_ARRANGED, words: /Arranged for you|Fixed arrangement/i.test(document.body.innerText) })) };
+note('haruthai-starts-at-zero-014', h0.stages.length === 10 && h0.states.every((s) => /:open$/.test(s)) && !/Arranged for you|Fixed arrangement|Another address|Room A/i.test(h0.words) && h0.need.keys.filter((k) => /^stage:/.test(k)).length === 10 && h0.need.keys.includes('stage:bkk-stay') && h0.scope === 'Bangkok · Vientiane · China' && h0.bag === 0 && h0.rail.length === 3 && h0.rail.includes('penthouse') && h0.arranged.items === 0 && h0.arranged.global === 'undefined' && !h0.arranged.words, JSON.stringify(h0).slice(0, 300));
 await shot(H, '390-haruthai-my-trip');
 for (const k of ['train', 'prewed', 'wedstay', 'mu9646', 'kmg', 'c86', 'ljg', 'return', 'kempinski']) { if (await H.$('#s-' + k + ' [data-skip="' + k + '"]')) { await H.click('#s-' + k + ' [data-skip="' + k + '"]'); await H.waitForTimeout(700); } }
-const h1 = await need(H); note('haruthai-journey-complete-with-arrangement-alone', h1.ok || !h1.keys.some((k) => /^stage:|^room:/.test(k)), JSON.stringify(h1).slice(0, 200));
+const h1 = await need(H); note('haruthai-readiness-names-the-open-stage-014', h1.keys.filter((k) => /^stage:|^room:/.test(k)).join(',') === 'stage:bkk-stay', JSON.stringify(h1).slice(0, 200));
 await H.click('#s-bkk-stay [data-choose="u-sathorn-superior-garden"]'); await H.waitForTimeout(2500);
-const h2 = { mine: (await engineMine(H)).mine, fixed: (await engineMine(H)).fixed, bag: await H.evaluate(() => SIYL_BAG.get().map((x) => x.id + ':' + x.room)), total: await H.evaluate(() => SIYL_BAG.total()), words: await stageWords(H, 'bkk-stay') };
-note('haruthai-another-address', h2.mine && h2.mine['bkk-stay'] && /u-sathorn/.test(h2.mine['bkk-stay'].key) && h2.fixed && h2.fixed['bkk-stay'] && h2.bag.includes('bkk-stay:u-sathorn-superior-garden') && h2.total > 0 && /Arranged for you/i.test(h2.words), JSON.stringify({ mine: h2.mine, fixed: h2.fixed, bag: h2.bag, total: h2.total }));
+const m2 = await engineMine(H); const h2 = { mine: m2.mine, fixed: m2.fixed, bag: await H.evaluate(() => SIYL_BAG.get().map((x) => x.id + ':' + x.room)), total: await H.evaluate(() => SIYL_BAG.total()), words: await stageWords(H, 'bkk-stay'), need: await need(H) };
+note('haruthai-chooses-like-anyone-014', !!(h2.mine && h2.mine['bkk-stay']) && /u-sathorn/.test(h2.mine['bkk-stay'].key) && h2.fixed === undefined && h2.bag.includes('bkk-stay:u-sathorn-superior-garden') && h2.total > 0 && /Current selection/i.test(h2.words) && !/Arranged for you|Fixed arrangement/i.test(h2.words) && !h2.need.keys.some((k) => /^stage:|^room:/.test(k)), JSON.stringify({ mine: h2.mine, fixed: h2.fixed, bag: h2.bag, total: h2.total, need: h2.need.keys }).slice(0, 300));
 await H.click('#s-bkk-stay [data-rm="bkk-stay"]'); await H.waitForTimeout(2500);
-const h3 = { mine: (await engineMine(H)).mine, fixed: (await engineMine(H)).fixed, bag: await H.evaluate(() => SIYL_BAG.get().length), words: await stageWords(H, 'bkk-stay') };
-note('haruthai-remove-keeps-arrangement', !(h3.mine && h3.mine['bkk-stay']) && h3.fixed && h3.fixed['bkk-stay'] && h3.bag === 0 && /Arranged for you/i.test(h3.words) && /Room A/.test(h3.words), JSON.stringify(h3).slice(0, 240));
+const m3 = await engineMine(H); const h3 = { mine: m3.mine, fixed: m3.fixed, bag: await H.evaluate(() => SIYL_BAG.get().length), total: await H.evaluate(() => SIYL_BAG.total()), words: await stageWords(H, 'bkk-stay'), rail: await H.$$eval('#s-bkk-stay [data-choose]', (l) => l.map((e) => e.getAttribute('data-choose'))), state: await H.evaluate(() => SIYL_JOURNEY.state(SIYL_JOURNEY.SEGMENTS.find((s) => s.key === 'bkk-stay'))) };
+note('haruthai-remove-releases-014', !(h3.mine && h3.mine['bkk-stay']) && h3.fixed === undefined && h3.bag === 0 && h3.total === 0 && h3.state === 'open' && !/Arranged for you|Fixed arrangement|Room A/i.test(h3.words) && h3.rail.length === 3 && h3.rail.includes('penthouse'), JSON.stringify(h3).slice(0, 240));
 await H.goto(O + '/cart.html', { waitUntil: 'load' }); await H.waitForTimeout(1500); const hc = await H.$eval('main', (e) => e.innerText.replace(/\s+/g, ' ').trim());
-note('haruthai-bag-usd-0', /USD 0/.test(hc) && /Arranged for you/i.test(hc) && !/Remove/i.test(hc.split(/Arranged for you/i)[1] || 'Remove'), hc.slice(0, 200)); }
+note('haruthai-bag-usd-0', /No selections yet · USD 0/.test(hc) && !/arrang/i.test(hc) && !/Remove/.test(hc), hc.slice(0, 200)); }
 
 /* ===== 9 · VIEW ALL STEPS on iPhone Safari (WebKit) and in Chromium at 320 / 390 / 834 ===== */
 const wk = await webkit.launch();

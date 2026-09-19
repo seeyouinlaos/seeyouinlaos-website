@@ -50,7 +50,7 @@ export { Seating } from './seating.js';
 export { Rooms } from './rooms.js';
 export { Drafts } from './drafts.js';
 import { identify, owns, loadIndex } from './auth.js';
-import { SEED, FIXED } from './inventory-seed.js';
+import { SEED } from './inventory-seed.js';
 import { stageOf } from './rooms.js';
 import { composeGuestMail, composeOwnerMail } from './mail-templates.js';
 
@@ -94,8 +94,8 @@ export default {
       } else {
         const who = await identify(request, env);
         if (who) headers.set('x-siyl-identity', JSON.stringify(who));
-        else if (op === 'join' || op === 'leave') return json({ ok: false, error: 'unauthorised' }, 401, corsHeaders(request));
-        if ((op === 'join' || op === 'leave') && await resetLocked(env)) return json({ ok: false, error: 'the room engine is being reset — try again in a moment', retry: true }, 503, corsHeaders(request));
+        else if (op === 'join' || op === 'leave' || op === 'wait' || op === 'unwait') return json({ ok: false, error: 'unauthorised' }, 401, corsHeaders(request));
+        if ((op === 'join' || op === 'leave' || op === 'wait' || op === 'unwait') && await resetLocked(env)) return json({ ok: false, error: 'the room engine is being reset — try again in a moment', retry: true }, 503, corsHeaders(request));
       }
       const stub = env.ROOMS.get(env.ROOMS.idFromName('rooms'));
       const res = await stub.fetch(new Request(request, { headers }));
@@ -324,15 +324,7 @@ async function handleRegister(request, env) {
   //    failure and the client falls back to the clearly-labelled emergency
   //    channel — success is never simulated. The record carries the submission
   //    id; the provider's answer is written to it after the emails (step 2).
-  /* THE FIXED ARRANGEMENT NEVER REACHES A SUBMISSION AS A PRODUCT (Codex P1-3): a legacy Bag line of a fixed stage is
-     removed at this boundary and the canonical total recomputed — the record, the emails and Guest Relations read the
-     normalised selections; the guest's text stays as sent. */
-  const fixedStages = fixedStagesOf(who.guestId);
-  if (registration && fixedStages.length) {
-    for (const k of ['selections', 'shared']) { if (Array.isArray(registration[k])) { const w = withoutFixed(registration[k], fixedStages); if (w.changed) { registration[k] = w.list; registration.normalised = (registration.normalised || []).concat(k + ': fixed arrangement removed'); } } }
-    const lines = Array.isArray(registration.selections) ? registration.selections : (Array.isArray(registration.shared) ? registration.shared : null);
-    if (lines) { const t = totalOf(lines); if (registration.totalUsd !== undefined && registration.totalUsd !== t) { registration.totalUsd = t; registration.normalised = (registration.normalised || []).concat('totalUsd recomputed'); } if (registration.total !== undefined && registration.total !== t) { registration.total = t; } }
-  }
+  /* NO FIXED ARRANGEMENT (Owner, 19 Sep 2026): nothing is stripped from a submission — every line is the guest's own selection */
   /* THE RECIPIENT (Owner, 16 Sep 2026 · EMAIL FIRST): the authenticated guest → the contact persisted on the server under
      their invitation → the confirmation email. A journey without a valid email is not accepted: the guest is sent back to
      the email field; the email they add is persisted server-side and Review & Send is open again. */
@@ -350,7 +342,7 @@ async function handleRegister(request, env) {
       const now = new Date().toISOString();
       record = { invitationId, submittedAt: isUpdate ? existing.submittedAt : submittedAt, submissionId, version, kind: isUpdate ? 'update' : 'initial',
         firstSentAt: isUpdate ? (existing.firstSentAt || existing.submittedAt) : submittedAt, lastSentAt: now, updatedAt: now,
-        guestId: who.guestId, registration, text, rooms, recipient, draftFingerprint, mail: null };
+        guestId: who.guestId, hosts: !!who.hosts, registration, text, rooms, recipient, draftFingerprint, mail: null };
       const prev = await env.REG_KV.get(regKey);
       await env.REG_KV.put(regKey, JSON.stringify(record), { metadata: { invitationId, submittedAt: record.submittedAt, submissionId, version, lastSentAt: now } });
       if (prev) {
@@ -393,15 +385,7 @@ async function storedDraft(env, invitationId, strict) {
   if (env.DRAFTS) { try { const r = await draftOp(env, invitationId, 'get'); if (!r.ok) throw new Error(r.error || 'draft could not be read'); return r.draft || null; } catch (e) { if (strict) throw e; return null; } }
   if (!env.REG_KV) return null; try { return JSON.parse(await env.REG_KV.get(draftKey(invitationId)) || 'null'); } catch (e) { return null; }
 }
-/* the units a guest's fixed arrangements occupy — never Bag lines (src/inventory-seed.js FIXED). The fixed UNIT is what
-   never becomes a product; another hotel chosen in the same stage is the guest's own selection (Owner, Edit 5 · 18 Sep 2026) */
-function fixedStagesOf(guestId) { return FIXED.filter((f) => f.guestId === guestId).map((f) => f.key); }
-/* a Bag / selections array without the lines that ARE the guest's fixed unit (its window with the fixed room, or with no room yet) */
-function withoutFixed(list, fixedKeys) {
-  if (!Array.isArray(list) || !fixedKeys.length) return { list, changed: false };
-  const isFixed = (x) => fixedKeys.some((k) => { const win = k.split('/')[0], slug = k.split('/').slice(1).join('/'); return x && String(x.id) === win && (!x.room || String(x.room) === slug); });
-  const kept = list.filter((x) => !isFixed(x)); return { list: kept, changed: kept.length !== list.length };
-}
+/* NO FIXED ARRANGEMENT (Owner, 19 Sep 2026): nothing is stripped from a draft — every Bag line is the guest's own selection */
 const totalOf = (list) => (Array.isArray(list) ? list : []).reduce((t, x) => t + (Number(x && x.price) || 0) * (Number(x && x.qty) || 1), 0);
 function draftContent(keys) {
   const out = {};
@@ -420,7 +404,9 @@ async function engineSeats(env, who) {
 async function journeyFingerprint(env, who, draft) {
   const d = draft === undefined ? await storedDraft(env, who.invitationId) : draft;
   const [rooms, seats] = await Promise.all([engineRooms(env, who), engineSeats(env, who)]);
-  return sha256Hex(JSON.stringify({ draft: draftContent(d && d.keys), rooms, seats }));
+  /* the fingerprint is the guest's OWN journey: a waiting-list position moves when others leave the line — not a change of theirs */
+  const own = rooms ? Object.fromEntries(Object.entries(rooms).map(([k, v]) => [k, v && v.waitlisted ? { stage: v.stage, waitlisted: true, size: v.size } : v])) : rooms;
+  return sha256Hex(JSON.stringify({ draft: draftContent(d && d.keys), rooms: own, seats }));
 }
 function submissionStateOf(record, hasUnsentChanges) {
   if (!record || !record.submissionId) return { submissionStatus: 'draft', submissionId: null, submittedAt: null, lastSentAt: null, version: 0, hasUnsentChanges: false };
@@ -448,7 +434,7 @@ async function handleDraft(request, env) {
   const incoming = {};
   for (const k of DRAFT_KEYS) if (body && body.keys && typeof body.keys[k] === 'string') incoming[k] = body.keys[k];
   if (!Object.keys(incoming).length) return json({ ok: false, error: 'nothing to save' }, 400, corsHeaders(request));
-  /* THE WRITE IS THE ACTOR'S (Codex P1-1): the revision comparison, the fixed-line strip, the merge over the stored keys and
+  /* THE WRITE IS THE ACTOR'S (Codex P1-1): the revision comparison, the merge over the stored keys and
      the write happen inside one serialised step per invitation — two devices, or two overlapping autosaves, can never both
      pass the same base revision. A stale device (an older `baseUpdatedAt`, or none against a stored draft) is refused with the
      current draft; its independent edits are merged on the device against the base it last read (assets/draft.js). */
@@ -459,7 +445,7 @@ async function handleDraft(request, env) {
   if (epoch && (!body || body.seenReset !== epoch)) return json({ ok: false, error: 'reset', resetAt: epoch }, 409, corsHeaders(request));
   let d = null;
   if (env.DRAFTS) {
-    const r = await draftOp(env, who.invitationId, 'put', { keys: incoming, baseUpdatedAt: base, clientUpdatedAt: body && body.clientUpdatedAt || null, reason: body && body.reason || null, guestId: who.guestId, fixedStages: fixedStagesOf(who.guestId), seenReset: body && body.seenReset || null });
+    const r = await draftOp(env, who.invitationId, 'put', { keys: incoming, baseUpdatedAt: base, clientUpdatedAt: body && body.clientUpdatedAt || null, reason: body && body.reason || null, guestId: who.guestId, seenReset: body && body.seenReset || null });
     if (r.status === 409 && r.error === 'reset') return json({ ok: false, error: 'reset', resetAt: r.resetAt }, 409, corsHeaders(request));
     if (r.status === 409) { const submission = await submissionFor(env, who, r.draft); return json({ ok: false, error: 'stale', invitationId: who.invitationId, draft: { keys: r.draft.keys, updatedAt: r.draft.updatedAt, savedAt: r.draft.savedAt }, submission }, 409, corsHeaders(request)); }
     if (!r.ok) return json({ ok: false, error: r.error || 'draft could not be stored', ...(r.retry ? { retry: true } : {}) }, r.status === 400 ? 400 : 503, corsHeaders(request));
@@ -468,7 +454,6 @@ async function handleDraft(request, env) {
     /* no actor bound (a reduced test environment): the same rules, one request at a time */
     const prevDraft = await storedDraft(env, who.invitationId);
     if (prevDraft && prevDraft.updatedAt && base !== prevDraft.updatedAt) { const submission = await submissionFor(env, who, prevDraft); return json({ ok: false, error: 'stale', invitationId: who.invitationId, draft: { keys: prevDraft.keys, updatedAt: prevDraft.updatedAt, savedAt: prevDraft.savedAt }, submission }, 409, corsHeaders(request)); }
-    if (typeof incoming['siyl.bag'] === 'string') { try { const w = withoutFixed(JSON.parse(incoming['siyl.bag']), fixedStagesOf(who.guestId)); if (w.changed) incoming['siyl.bag'] = JSON.stringify(w.list); } catch (e) { /* stored as sent */ } }
     const keys = Object.assign({}, prevDraft && prevDraft.keys || {}, incoming);
     let now = new Date().toISOString(); if (prevDraft && prevDraft.updatedAt && now <= prevDraft.updatedAt) now = new Date(Date.parse(prevDraft.updatedAt) + 1).toISOString();
     d = { invitationId: who.invitationId, guestId: who.guestId, keys, updatedAt: now, savedAt: now, clientUpdatedAt: body && body.clientUpdatedAt || null, reason: body && body.reason || null };
@@ -484,7 +469,7 @@ async function handleDraft(request, env) {
    Every guest starts as though they had never used the private planning system: every room occupancy the engine stores
    (the FIXED allocation is configuration, never stored), every seat hold, every draft actor, and the KV records a guest
    generated — draft mirrors, contacts, profile photos, submissions and their history. Invitations, codes, the register,
-   the seating geometry and its open / frozen state, the inventory definitions and the fixed arrangement are never touched.
+   the seating geometry and its open / frozen state and the inventory definitions are never touched.
    Three modes, all Guest-Relations-only:
      · dry run (default)  what would go — counts and ids — nothing written;
      · snapshot            the same, with every stored value (KV values with their metadata, binary as base64; the engine's
@@ -532,6 +517,7 @@ async function handleGrReset(request, env) {
   if (env.DRAFTS) for (const inv of [...invs].sort()) { const r = await draftOp(env, inv, 'reset', { dryRun: true, snapshot: true }); out.drafts.actors++; if (r && r.had) { out.drafts.had++; draftIds.push(inv); signature.push('draft-actor:' + inv + '@' + (r.draft && r.draft.updatedAt || '')); if (snapshot && r.draft) out.backup['do:draft:' + inv] = r.draft; } }
   out.drafts.ids = draftIds;
   for (const r of (rooms0 && rooms0.rows || [])) signature.push('occ:' + r.key + '|' + r.label + '|' + r.guestId + '@' + JSON.stringify(r.value || null));
+  for (const w of (rooms0 && rooms0.waits || [])) signature.push('wl:' + w.stage + '|' + w.guestId + '@' + JSON.stringify(w.value || null));
   for (const r of (seats0 && seats0.rows || [])) signature.push('hold:' + r.event + ':' + r.seatId + ':' + r.guestId + '@' + JSON.stringify(r.value || null));
   const kvValues = {};
   for (const k of keys) {
@@ -542,10 +528,11 @@ async function handleGrReset(request, env) {
     kvValues[k] = v; signature.push('kv:' + k + '@' + await digestOf([v.base64]));
   }
   out.digest = await digestOf(signature);
-  out.rooms = rooms0 ? { occupancies: rooms0.occupancies, fixed: rooms0.fixed, rows: (rooms0.rows || []).map((r) => ({ key: r.key, label: r.label, guestId: r.guestId })) } : null;
+  out.rooms = rooms0 ? { occupancies: rooms0.occupancies, fixed: 0, waitlisted: rooms0.waitlisted || 0, rows: (rooms0.rows || []).map((r) => ({ key: r.key, label: r.label, guestId: r.guestId })), waits: (rooms0.waits || []).map((w) => ({ stage: w.stage, guestId: w.guestId })) } : null;
   out.seating = seats0 ? { holds: seats0.holds, rows: (seats0.rows || []).map((r) => ({ event: r.event, seatId: r.seatId, guestId: r.guestId, invitationId: r.invitationId })) } : null;
   if (snapshot) {
     for (const r of (rooms0 && rooms0.rows || [])) out.backup[r.storageKey] = r.value;
+    for (const w of (rooms0 && rooms0.waits || [])) out.backup[w.storageKey] = w.value;
     for (const r of (seats0 && seats0.rows || [])) out.backup[r.storageKey] = r.value;
     for (const k of keys) out.backup[k] = kvValues[k];
     return json(out);
@@ -572,7 +559,7 @@ async function handleGrReset(request, env) {
   /* 5 · what is left, read again */
   const rooms1 = await readRooms(), seats1 = await readSeats();
   let kvLeft = 0; for (const prefix of RESET_PREFIXES) { const l = await env.REG_KV.list({ prefix }); kvLeft += l.keys.length; }
-  out.remaining = { occupancies: rooms1 ? rooms1.occupancies : null, holds: seats1 ? seats1.holds : null, kvKeys: kvLeft };
+  out.remaining = { occupancies: rooms1 ? rooms1.occupancies : null, waitlisted: rooms1 ? rooms1.waitlisted : null, holds: seats1 ? seats1.holds : null, kvKeys: kvLeft };
   return json(out);
 }
 /* the sweep's gate on guest writes to the engine and the ledger (never on reads, never on Guest Relations) */
@@ -743,10 +730,10 @@ async function engineRooms(env, who) {
     const v = await r.json();
     if (!v || !v.ok || !v.mine) return null;
     const out = {};
-    const entry = (m, stage) => { const s = SEED[m.key]; return { stage, key: m.key, label: m.label, name: s ? s.name : m.key, stay: s && s.stay ? s.stay : null, room: s && s.unit === 'guest' ? s.name : 'Room ' + m.label, ...(m.fixed ? { fixed: true } : {}) }; };
+    const entry = (m, stage) => { const s = SEED[m.key]; return { stage, key: m.key, label: m.label, name: s ? s.name : m.key, stay: s && s.stay ? s.stay : null, room: s && s.unit === 'guest' ? s.name : 'Room ' + m.label }; };
     for (const [stage, m] of Object.entries(v.mine)) out[stage] = entry(m, stage);
-    /* the Owner's fixed arrangement: under its stage when the guest holds nothing else there, beside it (stage/fixed) when they do (Owner, Edit 5) */
-    for (const [stage, m] of Object.entries(v.fixed || {})) out[out[stage] ? stage + '/fixed' : stage] = entry(m, stage);
+    /* THE WAITING LIST (Owner, 19 Sep 2026): a stage the guest waits for, with the position — no product, no amount */
+    for (const [stage, w] of Object.entries(v.waitlist || {})) if (!out[stage]) out[stage] = { stage, waitlisted: true, position: w.position, since: w.at, size: w.size || 1 };
     return out;
   } catch (e) { return null; }
 }

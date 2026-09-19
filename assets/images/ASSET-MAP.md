@@ -65,7 +65,7 @@ is used as a property image and no property photograph is used as a city hero.
 | Journey | Destination | Properties |
 |---|---|---|
 | 01 Thailand | Bangkok | Elegant 6BR Sathorn Penthouse · Siam Kempinski Hotel Bangkok |
-| 02 Laos | Vientiane | Souphattra Heritage Vientiane (room categories) · Private Residence (alternative stay) |
+| 02 Laos | Vientiane | Souphattra Heritage Vientiane (room categories) · Guest House complimentary (the shared house of six places, formerly labelled a private residence — release 014) |
 | 03 China | Kunming | Wanxiang Yueju Designer Homestay |
 | 03 China | Lijiang | Luye Baisha · Rizhao Jinshan |
 
@@ -147,7 +147,7 @@ assets this pass (all visually verified before assignment):
 | kempinski/room-bedroom-balcony · room-balcony-view · room-sitting-corner · room-bathroom.jpg | 025 | IMG_3453/3455/3456/3457.jpeg | Balcony room photography (category not sub-foldered) | Deluxe Balcony King gallery |
 | kempinski/lounge.jpg | 025 | kempinski_009.jpg | Lobby lounge | Kempinski gallery |
 | penthouse/exterior-street.jpg · exterior-golden-hour.jpg | 020 | 000 / 002 exterior | The house | Penthouse gallery |
-| airbnb/airbnb-04/05/06.jpg | 022 | 9988be88 · d3c3878c · 99eb7d96 (.avif) | Residence views | Private Residence gallery |
+| guesthouse/guesthouse-04/05/06.jpg (formerly airbnb/airbnb-04/05/06.jpg) | 022 | 9988be88 · d3c3878c · 99eb7d96 (.avif) | Guest house views | Guest House complimentary gallery (renamed 19 Sep 2026, release 014) |
 
 Rejected in this pass (opened, not used): `ddebdfd6….png` (composited cabin render), `000_…Station_Model_Clean_Background.png` (render), `bc01_f01_factorydesign….webp` (CGI), `431402a2….png` (attendants), `…PlanespottersNet….jpg` (copyright banner), `yhr99….jpg` (Klook watermark), the five 007 website screenshots (carousel chrome), root `000_Transport_Special_Express_No_25_Bangkok_Nong_Khai.jpg` (mountain valley — still wrong).
 
@@ -347,3 +347,26 @@ The one source map: `assets/rooms-data.js` → `SIYL_STAY_IMAGES` (hero · card 
 | experiences/vte-laoartmuseum-04.jpg | Owner · Drive folder `176 - Experience - Lao Art Museum` (`19ZR1IFqAfnkuceGydMYaEmMx9jGqEb9k`) | Drive file `1D9SKdh9c2LJjRFD0hEVFqqZvMe_encRp` · IMG_4115.jpeg | A carved wooden face (720 × 960) | vte-laoartmuseum — Edit 5, 18 Sep 2026 |
 | experiences/vte-laoartmuseum-05.jpg | Owner · Drive folder `176 - Experience - Lao Art Museum` (`19ZR1IFqAfnkuceGydMYaEmMx9jGqEb9k`) | Drive file `1q8bA9a5g309V6QZMQkZu6q2viNf0ebZ0` · IMG_4114.jpeg | A carved bust in the gallery (1500 × 2000) | vte-laoartmuseum — Edit 5, 18 Sep 2026 |
 | experiences/vte-laoartmuseum-06.jpg | Owner · Drive folder `176 - Experience - Lao Art Museum` (`19ZR1IFqAfnkuceGydMYaEmMx9jGqEb9k`) | Drive file `1mS1zTEXZUMWHg2Ppv0yLUIVAwRbxO5tS` · IMG_4112.jpeg | The Lao Art Museum from outside (447 × 447) | vte-laoartmuseum — Edit 5, 18 Sep 2026 |
+
+## 19 SEP release 014 — the Owner's three Drive folders (Riverside Hotel · Baan Phraya · Cannubi by Umberto Bombana)
+
+Every frame below is the Owner's own file, optimised to ≤ 1600 px (JPEG q84). Not placed: every dish / plate photograph (the media taxonomy — See You In Laos is not a food blog), the two 600 px Baan Phraya files, the Authors' Lounge frame (another house), the 905 px Dusit offer banners, the Riverside "5 minutes walk" poster and the duplicate dining-room views; the Baan Phraya lamplit-table frame (SnapInsta 777382051) also sits misfiled in the Cannubi folder and is used once, for Baan Phraya. Petits Plats Bangkok (08.03 dinner) has no Drive folder and stands without a photograph.
+
+| File | Source | Drive file | Content (px) | Used by |
+|---|---|---|---|---|
+| riverside/facade.jpg | Owner · Drive folder `Riverside Hotel Vientiane` (`1QsTmfzTVZScHWwPyFG3C5MbvL8XKmBgX`) | Drive file `1bDEhMdM1JO6ofYNka7gMRJgeJm0eMP5_` · _unnamed.webp | The hotel facade on the riverside street (1360 × 907) · kind exterior | riverside — release 014, 19 Sep 2026 |
+| riverside/entrance.jpg | Owner · Drive folder `Riverside Hotel Vientiane` (`1QsTmfzTVZScHWwPyFG3C5MbvL8XKmBgX`) | Drive file `1AHzNP7OkK2YTbSBeQVx_p0NPNeQdXF2p` · riverside-palace-hotel (1).jpg | The entrance and the garden mural (1400 × 788) · kind exterior | riverside — release 014, 19 Sep 2026 |
+| riverside/lobby.jpg | Owner · Drive folder `Riverside Hotel Vientiane` (`1QsTmfzTVZScHWwPyFG3C5MbvL8XKmBgX`) | Drive file `19CMyhHDO-TtE8YdmfAEWPZiynkzEgYCn` · unnamed (5).webp | The lobby and its terrazzo floor (1360 × 907) · kind lobby | riverside — release 014, 19 Sep 2026 |
+| riverside/reception.jpg | Owner · Drive folder `Riverside Hotel Vientiane` (`1QsTmfzTVZScHWwPyFG3C5MbvL8XKmBgX`) | Drive file `1qg9D8IygO2j622LCDvZM6QYFE0bAlJUR` · lobby (2).jpg | The reception (1400 × 786) · kind lobby | riverside — release 014, 19 Sep 2026 |
+| riverside/breakfast-room.jpg | Owner · Drive folder `Riverside Hotel Vientiane` (`1QsTmfzTVZScHWwPyFG3C5MbvL8XKmBgX`) | Drive file `1Nxu3EoiULGDo9o4AtqLxTha_00_ow-Ep` · riverside-palace-hotel (6).jpg | The breakfast room (1400 × 786) · kind facilities | riverside — release 014, 19 Sep 2026 |
+| riverside/terrace.jpg | Owner · Drive folder `Riverside Hotel Vientiane` (`1QsTmfzTVZScHWwPyFG3C5MbvL8XKmBgX`) | Drive file `1Gw-40dM-8E7BVdzmb5Rcz6tC_XaKWVf5` · unnamed (1).webp | A terrace over the rooftops (1360 × 907) · kind grounds | riverside — release 014, 19 Sep 2026 |
+| riverside/superior-room.jpg | Owner · Drive folder `Riverside Hotel Vientiane` (`1QsTmfzTVZScHWwPyFG3C5MbvL8XKmBgX`) | Drive file `17NwbRe987GSk0Q3YLlMa7vP5s3TD6R3A` · unnamed (3).webp | A Superior Room With Window (1360 × 907) · kind room | riverside — release 014, 19 Sep 2026 |
+| experiences/bkk-baanphraya-01.jpg | Owner · Drive folder `Baan Phraya` (`1m1mvGNZW4gsMPbSGJy-mgFbKiN5Wdxjd`) | Drive file `1CHujOn1c9-splS9ZWLBcgqH5pjYPOqH2` · CcF1CVKDoS1iKcyyu28N.jpg.webp | The courtyard and the stairs of the century-old riverside house (1333 × 1000) · kind exterior | bkk-baanphraya — release 014, 19 Sep 2026 |
+| experiences/bkk-baanphraya-02.jpg | Owner · Drive folder `Baan Phraya` (`1m1mvGNZW4gsMPbSGJy-mgFbKiN5Wdxjd`) | Drive file `1GKYQV2AJglzQOj9gnGQGzeHgO-nBZQM3` · EGPe2M7GoXm5qVoV4Rna.jpg.webp | The bar and the dining room under the painted ceiling (1499 × 1000) · kind interior | bkk-baanphraya — release 014, 19 Sep 2026 |
+| experiences/bkk-baanphraya-03.jpg | Owner · Drive folder `Baan Phraya` (`1m1mvGNZW4gsMPbSGJy-mgFbKiN5Wdxjd`) | Drive file `1bBbmu5F_GgRnE5OvPTt212Fz-bh1_lQA` · SnapInsta.to_777382051_18616163584028090_8786793858455874467 | A marble table laid by lamplight (1080 × 1350) · kind dining-room | bkk-baanphraya — release 014, 19 Sep 2026 |
+| experiences/bkk-baanphraya-04.jpg | Owner · Drive folder `Baan Phraya` (`1m1mvGNZW4gsMPbSGJy-mgFbKiN5Wdxjd`) | Drive file `1onQlQa0L_psK4YbT7TmYOcMHN5hzNelF` · SnapInsta.to_483201232_18488882269028090_1999400562091392011 | The teak staircase from above (1440 × 1795) · kind architecture | bkk-baanphraya — release 014, 19 Sep 2026 |
+| experiences/bkk-cannubi-01.jpg | Owner · Drive folder `Cannubi by Umberto Bombana` (`1Byl3QKNULwmK7FTAvxFvIbythEBR1INE`) | Drive file `16HSY2adIIIRGRdC5GMN6Ir7OBqNqc9kR` · SnapInsta.to_525742970_122174795426445452_383894996253243251 | The dining room towards the garden window (1600 × 2000) · kind interior | bkk-cannubi — release 014, 19 Sep 2026 |
+| experiences/bkk-cannubi-02.jpg | Owner · Drive folder `Cannubi by Umberto Bombana` (`1Byl3QKNULwmK7FTAvxFvIbythEBR1INE`) | Drive file `1mXLHXLU79O2yX61U0CtD5NYPO0IE5DcD` · SnapInsta.to_730463935_1071359491885019_4123959233836529838_ | Tables before the red canvas (1600 × 2000) · kind dining-room | bkk-cannubi — release 014, 19 Sep 2026 |
+| experiences/bkk-cannubi-03.jpg | Owner · Drive folder `Cannubi by Umberto Bombana` (`1Byl3QKNULwmK7FTAvxFvIbythEBR1INE`) | Drive file `1FA4mBdJy8_sD3kYNuOAPnQvzNLG-UveR` · dusit-thani-bangkok-dining-cannubi-by-umberto-bombana-privat | The private dining room (1600 × 1200) · kind dining-room | bkk-cannubi — release 014, 19 Sep 2026 |
+| experiences/bkk-cannubi-04.jpg | Owner · Drive folder `Cannubi by Umberto Bombana` (`1Byl3QKNULwmK7FTAvxFvIbythEBR1INE`) | Drive file `1IqQ7JNCaakzT3JH1RlfieHAXBOSQZE8-` · SnapInsta.to_753169844_122221731716445452_250341956874185756 | A table being set by the window (1600 × 2000) · kind atmosphere | bkk-cannubi — release 014, 19 Sep 2026 |
+| experiences/bkk-cannubi-05.jpg | Owner · Drive folder `Cannubi by Umberto Bombana` (`1Byl3QKNULwmK7FTAvxFvIbythEBR1INE`) | Drive file `1Gq_8u3-9iTIhBhZiHkK_CJX9dEIwswCb` · SnapInsta.to_683844230_1017242783963357_8135421017441544190_ | The wine cellar of more than 350 labels (1600 × 1999) · kind design | bkk-cannubi — release 014, 19 Sep 2026 |

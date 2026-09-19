@@ -69,9 +69,9 @@
 <body>
 <div class="hd-space" aria-hidden="true"></div>
 <main class="x-wrap" id="x"></main>
-<script src="assets/experiences.js?v=2f0e26eb"></script>
-<script src="assets/experience-galleries.js?v=500246d3"></script>
-<script src="assets/pricing.js?v=e864296d"></script>
+<script src="assets/experiences.js?v=ffe40f76"></script>
+<script src="assets/experience-galleries.js?v=9a7226c3"></script>
+<script src="assets/pricing.js?v=0aa9aef3"></script>
 <script src="assets/bag.js?v=2a0c8152"></script>
 <script src="assets/gallery.js?v=85069204"></script>
 <script>
@@ -91,7 +91,7 @@
   document.title = x.name + ' · See You In Laos';
   var roles = (x.roles || []).map(function (r) { return ROLE[r] || r; }).join(' · ');
   var ctx = [];
-  if (x.row && x.row !== 'city' && x.sheet !== 'FULL') ctx.push("From the hosts' itinerary · " + x.row);
+  if (x.row && x.row !== 'city' && (x.sheet !== 'FULL' || /^Day /.test(x.row))) ctx.push("From the hosts' itinerary · " + x.row);
   if (x.row === 'city') ctx.push(x.chapter === 'bkk' ? 'From the hosts’ Bangkok days' : 'From the hosts’ Vientiane portrait');   /* Le Du Kaan is a Bangkok address of the city days (release 012) */
   if (x.sheet === 'FULL') ctx.push('From the hosts’ notes on the place');
   var h = '';
@@ -116,10 +116,12 @@
   }
   /* practical information — only the fields the source actually carries */
   var pr = x.practical || {};
-  if (pr.price || pr.hours || x.maps || x.link) {
+  if (pr.price || pr.hours || pr.when || pr.dress || x.maps || x.link) {
     h += '<section class="x-sec"><p class="a-eyebrow">Practical information</p><div class="x-kv">' +
       (pr.price ? '<div data-private><span class="k">Price</span><span class="v"><span class="price">' + esc(pr.price) + '</span>' + (pr.priceNote ? '<small>' + esc(pr.priceNote) + '</small>' : '') + '</span></div>' : '') +
+      (pr.when ? '<div><span class="k">When</span><span class="v">' + esc(pr.when) + '</span></div>' : '') +
       (pr.hours ? '<div><span class="k">Opening hours</span><span class="v">' + pr.hours.map(esc).join('<br>') + '</span></div>' : '') +
+      (pr.dress ? '<div><span class="k">Dress code</span><span class="v">' + esc(pr.dress) + '</span></div>' : '') +
       ((x.maps || x.link) ? '<div><span class="k">Where</span><span class="v"><span class="x-links" style="margin-top:0">' +
         (x.maps ? '<a class="a-link" href="' + esc(x.maps) + '" target="_blank" rel="noopener">Map</a>' : '') +
         (x.link ? '<a class="a-link" href="' + esc(x.link) + '" target="_blank" rel="noopener">Website</a>' : '') + '</span></span></div>' : '') +
@@ -128,7 +130,8 @@
   /* the Journey action — one place carries it, by Owner decision: the Afternoon
    * Tea pattern, priced per participating guest by the one calculation source */
   if (x.select) {
-    h += '<section class="x-sel" id="sel"><p class="a-eyebrow">My Bag</p><h2>Lunch at ' + esc(x.name) + '</h2>' +
+    var meal = (x.roles || []).indexOf('dinner') >= 0 ? 'Dinner' : (x.roles || []).indexOf('breakfast') >= 0 ? 'Breakfast' : 'Lunch';
+    h += '<section class="x-sel" id="sel"><p class="a-eyebrow">My Bag</p><h2>' + meal + ' at ' + esc(x.name) + (x.practical && x.practical.when ? ' <span class="a-eyebrow" style="display:block;margin-top:6px">' + esc(x.practical.when) + '</span>' : '') + '</h2>' +
       '<p class="price" data-private>USD ' + x.select.price + ' <span class="a-eyebrow" style="display:inline">' + esc(x.select.unit) + '</span></p>' +
       '<p>Optional. Adding ' + esc(x.name) + ' places a restaurant request in your bag for the guests who take part; Guest Relations arrange the table. It is a request, not a reservation — availability is not guaranteed by this page. No date or time to choose here.</p>' +
       '<div id="selbox" data-private></div>' +
@@ -178,8 +181,8 @@
   document.addEventListener('siyl:auth', paintSel);
 })();
 </script>
-<script src="assets/recon.js?v=d36b39ba"></script>
-<script src="assets/aman.js?v=aba68a3c"></script>
+<script src="assets/recon.js?v=cde45016"></script>
+<script src="assets/aman.js?v=67d37d1b"></script>
 <script type="module" src="assets/invite.mjs?v=29231ccf"></script>
 </body>
 </html>
