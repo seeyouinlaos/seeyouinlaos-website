@@ -26,6 +26,7 @@
       ['Sathorn Penthouse Bangkok', 'room.html?stay=sathorn&room=penthouse'],
       ['Souphattra Heritage Vientiane', 'journeys.html#j-prewed'],
       ['Private Residence Vientiane', 'room.html?stay=airbnb&room=private-residence'],
+      ['Riverside Hotel Vientiane', 'room.html?stay=riverside&room=superior-window'],
       ['Wanxiang Yueju Kunming', 'journeys.html#j-kmg'],
       ['Luye Baisha Lijiang', 'journeys.html#j-ljg'],
       ['Siam Kempinski Bangkok', 'journeys.html#j-kempinski']

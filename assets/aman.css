@@ -206,6 +206,9 @@ input:focus-visible, .siyl-inv input:focus { outline: 1px solid var(--a-ink); ou
   .aslide.on .am[href] { cursor: pointer; }
 }
 a.am { display: block; text-decoration: none; }
+/* a house without Owner photography yet keeps the frame and says so (the Riverside Hotel, release 012) */
+.am.am-pend { display: flex; align-items: center; justify-content: center; background: #E7E3DB; }
+.am.am-pend span { font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--a-mute); }
 /* the card clip sits under the veil at the photograph's geometry; the
    photograph (the card background) is the poster and shows until the clip
    is actually playing — then a fade, never a jump */

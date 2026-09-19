@@ -509,6 +509,19 @@ gate('P7', 'Dress Code imagery real (23 — resort-01 retired by the owner), no 
   gate('C1', 'Asset fingerprints current on every page', r.status === 0, (r.stdout || '').trim().replace(/^ASSET VERSIONS: /, ''));
 }
 
+/* GATE M1 — THE MEDIA RECORDS (Owner, release 012 · 19 Sep 2026): the stay media record (hotel taxonomy, every frame of the hotel it
+ * names, from the Owner's Drive) is what assets/stay-media.js carries, and the experience galleries carry a kind on every frame and
+ * never a dish — both builders refuse a record that breaks the rule. */
+{
+  const { spawnSync } = require('child_process');
+  const a = spawnSync('node', [path.join(__dirname, 'build-stay-media.cjs'), '--check'], { encoding: 'utf8' });
+  const tmp = fs.readFileSync(path.join(ROOT, 'assets/experience-galleries.js'), 'utf8');
+  const b = spawnSync('node', [path.join(__dirname, 'build-experience-galleries.cjs')], { encoding: 'utf8' });
+  const same = fs.readFileSync(path.join(ROOT, 'assets/experience-galleries.js'), 'utf8') === tmp;
+  gate('M1', 'Media records: hotel taxonomy on The Journey, no dish for a restaurant, café or bar; the modules current', a.status === 0 && b.status === 0 && same,
+    [a.status !== 0 && (a.stderr || a.stdout).trim(), b.status !== 0 && (b.stderr || b.stdout).trim(), !same && 'assets/experience-galleries.js was stale'].filter(Boolean).join(' · ') || ((a.stdout || '').trim() + ' · ' + (b.stdout || '').trim()));
+}
+
 /* GATE V1 — card clips (Owner, 18 Sep 2026 · Bangkok destination card): every data-video a page declares is a
  * same-origin H.264 MP4 under assets/video/ — present, small (≤ 4.5 MB), no audio, yuv420p, moov first — never a
  * hotlink; the photograph the card frames stays its poster (the module falls back to it). ffprobe verifies the

@@ -80,7 +80,7 @@ to use these folders; sources are documented here for accountability.
 ## Venue folders under 06_Design_Branding root (1CSJtMKw2XuQf8YwFyq9UkjFHAIdHoVcJ) — 05 Sep 2026, all visually inspected
 | Drive folder / file | Inspected content | Web derivative | Card |
 |---|---|---|---|
-| Bar BKK/Bar Us/SnapInsta…785758983 | Martini with olives on silver tray | bkk-barus-01.jpg | Bar Us |
+| 152 - Bar - Bar Us | The bar room and the counter (release 012: the tray-martini and every cocktail close-up excluded — Haruthai) | bkk-barus-06.jpg · bkk-barus-07.jpg | Bar Us |
 | Bar BKK/BKK Social Club/IMG_3560 | Art-deco bar room, arched brass panels, marble bar | bkk-social-01.jpg | BKK Social Club |
 | Restaurant BKK/Phra Nakhon/IMG_3550 | Riverfront garden pavilion, city towers behind | bkk-phranakorn-01.jpg | Phra Nakhon |
 | Restaurant BKK/Thong Smith/SnapInsta…786628851 | Boat-noodle bowls, lime squeeze | bkk-thongsmith-01.jpg | Thong Smith |

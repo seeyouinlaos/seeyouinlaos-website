@@ -45,18 +45,13 @@
    "12BzWDhI4pN5reUWdsgbgMiD4tCWp5I4N"
   ],
   "sourceImages": 13,
-  "used": 9,
+  "used": 4,
   "primary": "assets/images/experiences/bkk-suhring-01.jpg",
   "gallery": [
    "assets/images/experiences/bkk-suhring-01.jpg",
-   "assets/images/experiences/bkk-suhring-02.jpg",
-   "assets/images/experiences/bkk-suhring-03.jpg",
    "assets/images/experiences/bkk-suhring-04.jpg",
-   "assets/images/experiences/bkk-suhring-05.jpg",
-   "assets/images/experiences/bkk-suhring-06.jpg",
-   "assets/images/experiences/bkk-suhring-07.jpg",
-   "assets/images/experiences/bkk-suhring-08.jpg",
-   "assets/images/experiences/bkk-suhring-09.jpg"
+   "assets/images/experiences/bkk-suhring-09.jpg",
+   "assets/images/experiences/bkk-suhring-03.jpg"
   ],
   "note": "price unit set by the Owner 13 Sep 2026: per participating guest, in the journey total (assets/pricing.js FLAT.suhring)",
   "price": "USD 180 per person",
@@ -85,17 +80,14 @@
    "1oBn04Bq8QBQglAzOrtKFtxRtD_AYzweS"
   ],
   "sourceImages": 29,
-  "used": 10,
-  "primary": "assets/images/experiences/bkk-dior-01.jpg",
+  "used": 7,
+  "primary": "assets/images/experiences/bkk-dior-02.jpg",
   "gallery": [
-   "assets/images/experiences/bkk-dior-01.jpg",
    "assets/images/experiences/bkk-dior-02.jpg",
    "assets/images/experiences/bkk-dior-03.jpg",
-   "assets/images/experiences/bkk-dior-04.jpg",
-   "assets/images/experiences/bkk-dior-05.jpg",
-   "assets/images/experiences/bkk-dior-06.jpg",
    "assets/images/experiences/bkk-dior-07.jpg",
-   "assets/images/experiences/bkk-dior-08.jpg",
+   "assets/images/experiences/bkk-dior-06.jpg",
+   "assets/images/experiences/bkk-dior-04.jpg",
    "assets/images/experiences/bkk-dior-09.jpg",
    "assets/images/experiences/bkk-dior-10.jpg"
   ],
@@ -185,15 +177,13 @@
    "1KR9jSayFoSFpF2MU5UFWmL1JMzQBLbcM"
   ],
   "sourceImages": 16,
-  "used": 8,
+  "used": 6,
   "primary": "assets/images/experiences/bkk-phranakorn-01.jpg",
   "gallery": [
    "assets/images/experiences/bkk-phranakorn-01.jpg",
    "assets/images/experiences/bkk-phranakorn-02.jpg",
    "assets/images/experiences/bkk-phranakorn-03.jpg",
    "assets/images/experiences/bkk-phranakorn-04.jpg",
-   "assets/images/experiences/bkk-phranakorn-05.jpg",
-   "assets/images/experiences/bkk-phranakorn-06.jpg",
    "assets/images/experiences/bkk-phranakorn-07.jpg",
    "assets/images/experiences/bkk-phranakorn-08.jpg"
   ],
@@ -218,14 +208,12 @@
    "1okcUolhoXPF4AFgvMyUtXl1KhA3PweG7"
   ],
   "sourceImages": 6,
-  "used": 5,
+  "used": 3,
   "primary": "assets/images/experiences/bkk-social-01.jpg",
   "gallery": [
    "assets/images/experiences/bkk-social-01.jpg",
    "assets/images/experiences/bkk-social-02.jpg",
-   "assets/images/experiences/bkk-social-03.jpg",
-   "assets/images/experiences/bkk-social-04.jpg",
-   "assets/images/experiences/bkk-social-05.jpg"
+   "assets/images/experiences/bkk-social-06.jpg"
   ],
   "note": "",
   "price": null,
@@ -249,14 +237,13 @@
    "1CWga0shs9DwbiV6_CdaRglsJr1qoDsVk"
   ],
   "sourceImages": 13,
-  "used": 7,
-  "primary": "assets/images/experiences/bkk-timespace-01.jpg",
+  "used": 6,
+  "primary": "assets/images/experiences/bkk-timespace-03.jpg",
   "gallery": [
+   "assets/images/experiences/bkk-timespace-03.jpg",
    "assets/images/experiences/bkk-timespace-01.jpg",
    "assets/images/experiences/bkk-timespace-02.jpg",
-   "assets/images/experiences/bkk-timespace-03.jpg",
    "assets/images/experiences/bkk-timespace-04.jpg",
-   "assets/images/experiences/bkk-timespace-05.jpg",
    "assets/images/experiences/bkk-timespace-06.jpg",
    "assets/images/experiences/bkk-timespace-07.jpg"
   ],
@@ -271,7 +258,8 @@
   "name": "Moo Yoo Rose House",
   "city": "Bangkok",
   "roles": [
-   "lunch"
+   "lunch",
+   "cafe"
   ],
   "overview": "Day 03 · 23.02.2027",
   "sheet": "NONE",
@@ -281,17 +269,15 @@
    "11o7gpVurZ77HD_oA7uwhkxgx29GXB5pj"
   ],
   "sourceImages": 11,
-  "used": 6,
+  "used": 4,
   "primary": "assets/images/experiences/bkk-mooyoo-01.jpg",
   "gallery": [
    "assets/images/experiences/bkk-mooyoo-01.jpg",
    "assets/images/experiences/bkk-mooyoo-02.jpg",
    "assets/images/experiences/bkk-mooyoo-03.jpg",
-   "assets/images/experiences/bkk-mooyoo-04.jpg",
-   "assets/images/experiences/bkk-mooyoo-05.jpg",
-   "assets/images/experiences/bkk-mooyoo-06.jpg"
+   "assets/images/experiences/bkk-mooyoo-04.jpg"
   ],
-  "note": "",
+  "note": " Café role from the Cafe column of Restaurant_Experience,Cafe,Bar_Details (release 012 café audit).",
   "price": null,
   "hours": null,
   "maps": null,
@@ -312,14 +298,13 @@
    "1-VbMyD1NenCR9aClWC--rNwo9dgLsdkl"
   ],
   "sourceImages": 7,
-  "used": 5,
-  "primary": "assets/images/experiences/whispering-01.jpg",
+  "used": 4,
+  "primary": "assets/images/experiences/whispering-03.jpg",
   "gallery": [
+   "assets/images/experiences/whispering-03.jpg",
    "assets/images/experiences/whispering-01.jpg",
    "assets/images/experiences/whispering-02.jpg",
-   "assets/images/experiences/whispering-03.jpg",
-   "assets/images/experiences/whispering-04.jpg",
-   "assets/images/experiences/whispering-05.jpg"
+   "assets/images/experiences/whispering-04.jpg"
   ],
   "note": "five files are 670×1006 web copies",
   "price": null,
@@ -437,14 +422,9 @@
    "1POkw60vcuEBBrm8mUnpL6cbVB3eLXqUP"
   ],
   "sourceImages": 7,
-  "used": 7,
-  "primary": "assets/images/experiences/bkk-barus-01.jpg",
+  "used": 2,
+  "primary": "assets/images/experiences/bkk-barus-06.jpg",
   "gallery": [
-   "assets/images/experiences/bkk-barus-01.jpg",
-   "assets/images/experiences/bkk-barus-02.jpg",
-   "assets/images/experiences/bkk-barus-03.jpg",
-   "assets/images/experiences/bkk-barus-04.jpg",
-   "assets/images/experiences/bkk-barus-05.jpg",
    "assets/images/experiences/bkk-barus-06.jpg",
    "assets/images/experiences/bkk-barus-07.jpg"
   ],
@@ -469,17 +449,13 @@
    "1ISGuUGvABhEDXLswY5PyVxUaecNPRAGB"
   ],
   "sourceImages": 8,
-  "used": 8,
+  "used": 4,
   "primary": "assets/images/experiences/bkk-ledukaan-01.jpg",
   "gallery": [
    "assets/images/experiences/bkk-ledukaan-01.jpg",
    "assets/images/experiences/bkk-ledukaan-02.jpg",
    "assets/images/experiences/bkk-ledukaan-03.jpg",
-   "assets/images/experiences/bkk-ledukaan-04.jpg",
-   "assets/images/experiences/bkk-ledukaan-05.jpg",
-   "assets/images/experiences/bkk-ledukaan-06.jpg",
-   "assets/images/experiences/bkk-ledukaan-07.jpg",
-   "assets/images/experiences/bkk-ledukaan-08.jpg"
+   "assets/images/experiences/bkk-ledukaan-04.jpg"
   ],
   "note": "Edit 5 (18 Sep 2026): replaces IGNIV; description and hours from H&S_Wedding_Operations_Master; no price in the source",
   "price": null,
@@ -503,15 +479,12 @@
    "1TQ86m75xxXNF8mF4XxGU86LuVyCYRK3K"
   ],
   "sourceImages": 12,
-  "used": 7,
-  "primary": "assets/images/experiences/bkk-thongsmith-01.jpg",
+  "used": 4,
+  "primary": "assets/images/experiences/bkk-thongsmith-03.jpg",
   "gallery": [
-   "assets/images/experiences/bkk-thongsmith-01.jpg",
-   "assets/images/experiences/bkk-thongsmith-02.jpg",
    "assets/images/experiences/bkk-thongsmith-03.jpg",
-   "assets/images/experiences/bkk-thongsmith-04.jpg",
-   "assets/images/experiences/bkk-thongsmith-05.jpg",
    "assets/images/experiences/bkk-thongsmith-06.jpg",
+   "assets/images/experiences/bkk-thongsmith-04.jpg",
    "assets/images/experiences/bkk-thongsmith-07.jpg"
   ],
   "note": "4 AI renders in 083 (3 \"Codex Image\", 1 uuid png) excluded by the image rule; takeaway-bag WebP is the MASTER jpg twice",
@@ -594,15 +567,13 @@
    "1bzDBL08eokfpWg396goVP9rof2TkSyCo"
   ],
   "sourceImages": 6,
-  "used": 6,
+  "used": 4,
   "primary": "assets/images/experiences/bkk-madeleine-01.jpg",
   "gallery": [
    "assets/images/experiences/bkk-madeleine-01.jpg",
+   "assets/images/experiences/bkk-madeleine-06.jpg",
    "assets/images/experiences/bkk-madeleine-02.jpg",
-   "assets/images/experiences/bkk-madeleine-03.jpg",
-   "assets/images/experiences/bkk-madeleine-04.jpg",
-   "assets/images/experiences/bkk-madeleine-05.jpg",
-   "assets/images/experiences/bkk-madeleine-06.jpg"
+   "assets/images/experiences/bkk-madeleine-05.jpg"
   ],
   "note": "",
   "price": null,
@@ -625,13 +596,10 @@
    "1UwGn0EMMQHtR-ye1mixHsfdk8lo7kWuP"
   ],
   "sourceImages": 5,
-  "used": 4,
-  "primary": "assets/images/experiences/bkk-tjy-01.jpg",
+  "used": 1,
+  "primary": "assets/images/experiences/bkk-tjy-02.jpg",
   "gallery": [
-   "assets/images/experiences/bkk-tjy-01.jpg",
-   "assets/images/experiences/bkk-tjy-02.jpg",
-   "assets/images/experiences/bkk-tjy-03.jpg",
-   "assets/images/experiences/bkk-tjy-04.jpg"
+   "assets/images/experiences/bkk-tjy-02.jpg"
   ],
   "note": "folder number 090 is used twice in Drive (Suhring, Tang Jai Yang)",
   "price": null,
@@ -654,14 +622,13 @@
    "1YeDCs42Lh6jTWVjYYXz4NYOmBzr2h1LH"
   ],
   "sourceImages": 5,
-  "used": 5,
-  "primary": "assets/images/experiences/bkk-harudot-01.jpg",
+  "used": 4,
+  "primary": "assets/images/experiences/bkk-harudot-03.jpg",
   "gallery": [
-   "assets/images/experiences/bkk-harudot-01.jpg",
-   "assets/images/experiences/bkk-harudot-02.jpg",
    "assets/images/experiences/bkk-harudot-03.jpg",
    "assets/images/experiences/bkk-harudot-04.jpg",
-   "assets/images/experiences/bkk-harudot-05.jpg"
+   "assets/images/experiences/bkk-harudot-02.jpg",
+   "assets/images/experiences/bkk-harudot-01.jpg"
   ],
   "note": "new on the website (Overview Day 14 · Mall / Park / Other)",
   "price": null,
@@ -684,14 +651,12 @@
    "1ubARYdx6AIfRZIPYB-Vw841mEYMyQftY"
   ],
   "sourceImages": 7,
-  "used": 5,
+  "used": 3,
   "primary": "assets/images/experiences/bkk-alati-01.jpg",
   "gallery": [
    "assets/images/experiences/bkk-alati-01.jpg",
-   "assets/images/experiences/bkk-alati-02.jpg",
-   "assets/images/experiences/bkk-alati-03.jpg",
-   "assets/images/experiences/bkk-alati-04.jpg",
-   "assets/images/experiences/bkk-alati-05.jpg"
+   "assets/images/experiences/bkk-alati-05.jpg",
+   "assets/images/experiences/bkk-alati-02.jpg"
   ],
   "note": "new on the website (Overview Day 15 lunch)",
   "price": null,
@@ -1060,14 +1025,11 @@
    "1S83scuK1HkkcQOs0Ee_oU7DVXgzIYpH1"
   ],
   "sourceImages": 6,
-  "used": 5,
+  "used": 2,
   "primary": "assets/images/experiences/vte-3merchants-01.jpg",
   "gallery": [
    "assets/images/experiences/vte-3merchants-01.jpg",
-   "assets/images/experiences/vte-3merchants-02.jpg",
-   "assets/images/experiences/vte-3merchants-03.jpg",
-   "assets/images/experiences/vte-3merchants-04.jpg",
-   "assets/images/experiences/vte-3merchants-05.jpg"
+   "assets/images/experiences/vte-3merchants-02.jpg"
   ],
   "note": "",
   "price": null,
@@ -1091,14 +1053,12 @@
    "1F0QdQQ76CbxD2SJwp0MCr2FsoG3_uwnp"
   ],
   "sourceImages": 6,
-  "used": 5,
+  "used": 3,
   "primary": "assets/images/experiences/vte-sona-01.jpg",
   "gallery": [
    "assets/images/experiences/vte-sona-01.jpg",
-   "assets/images/experiences/vte-sona-02.jpg",
    "assets/images/experiences/vte-sona-03.jpg",
-   "assets/images/experiences/vte-sona-04.jpg",
-   "assets/images/experiences/vte-sona-05.jpg"
+   "assets/images/experiences/vte-sona-02.jpg"
   ],
   "note": "",
   "price": null,
@@ -1151,15 +1111,14 @@
    "1rRyPggjLcDJ0bof4D6ksKEC0CDAMwn8I"
   ],
   "sourceImages": 7,
-  "used": 6,
-  "primary": "assets/images/experiences/vte-lacuna-01.jpg",
+  "used": 5,
+  "primary": "assets/images/experiences/vte-lacuna-03.jpg",
   "gallery": [
-   "assets/images/experiences/vte-lacuna-01.jpg",
-   "assets/images/experiences/vte-lacuna-02.jpg",
    "assets/images/experiences/vte-lacuna-03.jpg",
    "assets/images/experiences/vte-lacuna-04.jpg",
+   "assets/images/experiences/vte-lacuna-01.jpg",
    "assets/images/experiences/vte-lacuna-05.jpg",
-   "assets/images/experiences/vte-lacuna-06.jpg"
+   "assets/images/experiences/vte-lacuna-02.jpg"
   ],
   "note": "",
   "price": null,
@@ -1212,17 +1171,14 @@
    "1p8h9R4LFHjeip6fobqyDVmocGcYDzJ7F"
   ],
   "sourceImages": 21,
-  "used": 8,
-  "primary": "assets/images/experiences/vte-laoderm-01.jpg",
+  "used": 5,
+  "primary": "assets/images/experiences/vte-laoderm-02.jpg",
   "gallery": [
-   "assets/images/experiences/vte-laoderm-01.jpg",
    "assets/images/experiences/vte-laoderm-02.jpg",
    "assets/images/experiences/vte-laoderm-03.jpg",
-   "assets/images/experiences/vte-laoderm-04.jpg",
+   "assets/images/experiences/vte-laoderm-08.jpg",
    "assets/images/experiences/vte-laoderm-05.jpg",
-   "assets/images/experiences/vte-laoderm-06.jpg",
-   "assets/images/experiences/vte-laoderm-07.jpg",
-   "assets/images/experiences/vte-laoderm-08.jpg"
+   "assets/images/experiences/vte-laoderm-07.jpg"
   ],
   "note": "also the Welcome Dinner venue (Overview Day 07); promotional captioned frames excluded",
   "price": null,

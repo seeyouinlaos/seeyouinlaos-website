@@ -232,6 +232,43 @@
       ]
     },
 
+    /* RIVERSIDE HOTEL VIENTIANE (Owner, release 012 · H&S_Wedding_Operations_Master of 18 Sep 2026): package D3 — the third
+     * address for the wedding window beside the Souphattra Heritage and the Private Residence. Accommodation_Details column
+     * D3: "Superior Room With Window", 22 sq.m., 1 bed, floors 2 – 7, check-in 27.02.2027, check-out 01.03.2027 (2 nights),
+     * 6 rooms, "Price per Person" 30 = the per-person, per-night share (60 per room / night, 120 per room for the window);
+     * Budget: "Riverside Hotel · Superior Room With Window · 30.00 · Open · Approve by Suthep, 20.08.2026". Both nights are
+     * the guest's (Overview Day 07 and Day 08: Self-Pay — the hosted second night is the Souphattra's rule). The
+     * Overview's "25 USD" column disagrees with the Accommodation_Details and Budget figure of 30: the room sheet is the
+     * rate source (as for every other stay) and the conflict is reported. The Owner's Drive carries NO Riverside Hotel
+     * photograph (no folder): the stay carries no image and nothing is invented — the frame stays the house surface. */
+    riverside: {
+      name: 'Riverside Hotel Vientiane',
+      place: 'Vientiane, Laos',
+      breakfast: 'Breakfast included',
+      windows: [{ id: 'riverside', label: 'Wedding Stay', dates: '27 February – 01 March 2027', nights: '2 nights', n: 2, pay: 2,
+        window: 'fixed', nightsList: ['27 → 28 February', '28 February → 01 March'],
+        bagName: 'Riverside Hotel Vientiane', bagImg: null }],
+      includes: [
+        'Two nights, 27 → 28 February and 28 February → 1 March, for the wedding window — both nights are your own.',
+        'Daily buffet breakfast included.',
+        'Six minutes on foot from Wat Ong Teu; the Mekong riverside park, Nam Phou Fountain and Chao Anouvong Park within a few hundred metres.',
+        'Airport transfers, meals other than breakfast and anything charged to the room are your own.'
+      ],
+      rooms: [
+        { slug: 'superior-window', name: 'Superior Room With Window', cat: 'Superior room',
+          desc: 'A comfortable 22 sq.m. room with a window, on floors 2 – 7 of a 46-room hotel a short walk from the Mekong.',
+          gallery: [],
+          facts: [['Size', '22 sq.m.'], ['Bed', 'Extra-long bed'], ['Occupancy', '2 adults'], ['Location', 'Floors 2 – 7'], ['Breakfast', 'Daily buffet breakfast included']],
+          story: 'The Riverside Hotel Vientiane is a three-star house of forty-six rooms with a lift throughout, six minutes on foot from the sixteenth-century Wat Ong Teu and within reach of the Mekong riverside park. The Superior Room With Window is twenty-two square metres with air conditioning, a flat-screen television with satellite channels, an extra-long bed, a wardrobe and a private bathroom with bidet, hair dryer and bath sheets. A daily buffet breakfast is served, there is a rooftop bar, and the Nam Phou Fountain is five hundred and fifty metres away; Patuxai a twenty-five-minute walk.',
+          groups: [['The room', ['22 sq.m. with a window', 'Floors 2 – 7, lift throughout', 'Air conditioning', 'Extra-long bed', 'Wardrobe', 'Flat-screen television with satellite channels']],
+            ['Bathroom', ['Private bathroom', 'Bidet and sink', 'Hair dryer', 'Bath sheets']],
+            ['Food & drink', ['Daily buffet breakfast included', 'Rooftop bar', 'Lobby bar', 'Room service', 'Restaurant']],
+            ['Service', ['Front desk safe and lockers', 'Concierge and tour / ticket service', 'Luggage storage', 'Currency exchange', 'Porter', 'Free parking', 'Airport pick-up and drop-off — additional charge', 'Wi-Fi in public areas']]],
+          amenities: ['Air conditioning', 'Extra-long bed', 'Flat-screen TV', 'Wardrobe', 'Private bathroom', 'Hair dryer', 'Lift', 'Free parking'],
+          rate: 30 }
+      ]
+    },
+
     /* BANGKOK · BEFORE THE WEDDING — three approved properties in one window.
      * Exactly one can be active at a time, the way a room category is chosen
      * inside any other stay. Each carries its own property name, its own

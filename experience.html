@@ -7,7 +7,7 @@
 <meta name="robots" content="noindex">
 <title>Experience · See You In Laos</title>
 <link rel="stylesheet" href="assets/recon.css?v=05778142">
-<link rel="stylesheet" href="assets/aman.css?v=1a481b30">
+<link rel="stylesheet" href="assets/aman.css?v=98576b60">
 <style>
 /* ONE place: its photographs, its words, and — where the hosts offer it — the
    Journey action. Same grammar as every editorial page; nothing new is invented. */
@@ -69,8 +69,8 @@
 <body>
 <div class="hd-space" aria-hidden="true"></div>
 <main class="x-wrap" id="x"></main>
-<script src="assets/experiences.js?v=f64e2712"></script>
-<script src="assets/experience-galleries.js?v=54a4d319"></script>
+<script src="assets/experiences.js?v=2f0e26eb"></script>
+<script src="assets/experience-galleries.js?v=500246d3"></script>
 <script src="assets/pricing.js?v=e864296d"></script>
 <script src="assets/bag.js?v=2a0c8152"></script>
 <script src="assets/gallery.js?v=85069204"></script>
@@ -92,7 +92,7 @@
   var roles = (x.roles || []).map(function (r) { return ROLE[r] || r; }).join(' · ');
   var ctx = [];
   if (x.row && x.row !== 'city' && x.sheet !== 'FULL') ctx.push("From the hosts' itinerary · " + x.row);
-  if (x.row === 'city') ctx.push('From the hosts’ Vientiane portrait');
+  if (x.row === 'city') ctx.push(x.chapter === 'bkk' ? 'From the hosts’ Bangkok days' : 'From the hosts’ Vientiane portrait');   /* Le Du Kaan is a Bangkok address of the city days (release 012) */
   if (x.sheet === 'FULL') ctx.push('From the hosts’ notes on the place');
   var h = '';
   h += '<section class="x-gal">' + (window.SIYL_XGAL ? SIYL_XGAL.html(x) : '') + '</section>';
@@ -179,7 +179,7 @@
 })();
 </script>
 <script src="assets/recon.js?v=d36b39ba"></script>
-<script src="assets/aman.js?v=42ea411e"></script>
+<script src="assets/aman.js?v=aba68a3c"></script>
 <script type="module" src="assets/invite.mjs?v=3dc5396d"></script>
 </body>
 </html>

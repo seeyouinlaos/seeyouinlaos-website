@@ -43,7 +43,7 @@ const OCC = 'occ:';
 const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
 /* a window (the first segment of a key) belongs to one stage of the journey */
-const STAGE_OF = { 'bkk-stay': 'bkk-stay', prewed: 'prewed', wedstay: 'wedstay', 'airbnb-2br': 'wedstay', kmg: 'kmg', ljg: 'ljg', kempinski: 'kempinski' };
+const STAGE_OF = { 'bkk-stay': 'bkk-stay', prewed: 'prewed', wedstay: 'wedstay', 'airbnb-2br': 'wedstay', riverside: 'wedstay', kmg: 'kmg', ljg: 'ljg', kempinski: 'kempinski' };
 export function stageOf(key) { const w = String(key || '').split('/')[0]; return STAGE_OF[w] || w; }
 
 /* the persistent units of one category — pure, deterministic, seed-derived */

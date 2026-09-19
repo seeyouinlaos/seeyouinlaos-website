@@ -89,7 +89,7 @@
 
   /* ---------- FEATURE / MEASURE: the room page on the same axes ---------- */
   .gal { max-width: none; margin: 0; }
-  .gal .ph, .trk .ph { aspect-ratio: 3 / 2; }
+  .gal .ph, .trk .ph, .pgal.stay .ph { aspect-ratio: 3 / 2; }
   .intro { max-width: 34em; margin: 0; padding: 52px 0 4px; }
   .wrap { max-width: 42em; margin: 0; padding: 0; }
   .facts { margin-top: 6px; }

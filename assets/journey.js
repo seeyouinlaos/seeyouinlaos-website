@@ -23,7 +23,7 @@
       label: 'Pre-Wedding Vientiane', ids: ['prewed'], anchor: 'j-prewed' },
     /* ONE wedding stay selection, or the alternative private residence */
     { key: 'wedstay', when: '27 FEB – 01 MAR', cat: 'Accommodation', place: 'Vientiane',
-      label: 'Wedding Stay', ids: ['wedstay', 'airbnb-2br'], anchor: 'j-wedstay' },
+      label: 'Wedding Stay', ids: ['wedstay', 'airbnb-2br', 'riverside'], anchor: 'j-wedstay' },
     { key: 'mu9646', when: '01 MAR', cat: 'Transportation', place: 'Vientiane → Kunming',
       label: 'MU9646', ids: ['mu9646'], anchor: 'j-mu9646' },
     { key: 'kmg', when: '01 – 04 MAR', cat: 'Accommodation', place: 'Kunming',

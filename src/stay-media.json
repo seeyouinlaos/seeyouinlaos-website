@@ -1,0 +1,330 @@
+{
+ "_taxonomy": {
+  "hotel": [
+   "exterior",
+   "architecture",
+   "lobby",
+   "room",
+   "suite",
+   "pool",
+   "grounds",
+   "facilities"
+  ],
+  "rule": "A Journey accommodation gallery is composed only from these kinds, of the hotel it names, from the Owner's Drive folder recorded in `source`; the first frame is the hotel's exterior, architecture, pool or grounds — never an arbitrary first file of a folder.",
+  "lead": "the first frame shows the house (exterior · architecture · pool · grounds · lobby) whenever the Owner's photography has one; a record may declare `lead` with `leadWhy` where the identity of the place is a room (a residence)"
+ },
+ "sathornPenthouse": {
+  "name": "Sathorn Penthouse Bangkok",
+  "city": "Bangkok",
+  "images": [
+   {
+    "src": "assets/images/penthouse/exterior-golden-hour.jpg",
+    "kind": "exterior",
+    "caption": "The house at golden hour",
+    "source": "Owner Drive 020 - Hotel - Sathorn Penthouse Bangkok"
+   },
+   {
+    "src": "assets/images/penthouse/exterior-elevated.jpg",
+    "kind": "architecture",
+    "caption": "The house from above the trees",
+    "source": "Owner Drive 020 - Hotel - Sathorn Penthouse Bangkok"
+   },
+   {
+    "src": "assets/images/penthouse/exterior-street.jpg",
+    "kind": "exterior",
+    "caption": "The street elevation",
+    "source": "Owner Drive 020 - Hotel - Sathorn Penthouse Bangkok"
+   },
+   {
+    "src": "assets/images/journey/penthouse-01.jpg",
+    "kind": "room",
+    "caption": "The double-height living room",
+    "source": "Owner Drive 020 - Hotel - Sathorn Penthouse Bangkok"
+   },
+   {
+    "src": "assets/images/penthouse/living-above.jpg",
+    "kind": "room",
+    "caption": "The living room from the mezzanine",
+    "source": "Owner Drive 020 - Hotel - Sathorn Penthouse Bangkok"
+   },
+   {
+    "src": "assets/images/penthouse/bedroom-skyline.jpg",
+    "kind": "room",
+    "caption": "A bedroom towards the skyline",
+    "source": "Owner Drive 020 - Hotel - Sathorn Penthouse Bangkok"
+   },
+   {
+    "src": "assets/images/penthouse/balcony-garden.jpg",
+    "kind": "grounds",
+    "caption": "The balcony and the garden",
+    "source": "Owner Drive 020 - Hotel - Sathorn Penthouse Bangkok"
+   }
+  ]
+ },
+ "uSathorn": {
+  "name": "U Sathorn Bangkok",
+  "city": "Bangkok",
+  "images": [
+   {
+    "src": "assets/images/usathorn/pool-pavilion-day.jpg",
+    "kind": "pool",
+    "caption": "The courtyard pool by day",
+    "source": "Owner Drive 026 - Hotel - U Sathorn Bangkok (16 Sep 2026)"
+   },
+   {
+    "src": "assets/images/usathorn/pool-pavilion-dusk.jpg",
+    "kind": "pool",
+    "caption": "The pool pavilion at dusk",
+    "source": "Owner Drive 026 - Hotel - U Sathorn Bangkok (16 Sep 2026)"
+   },
+   {
+    "src": "assets/images/usathorn/driveway-sunset.jpg",
+    "kind": "exterior",
+    "caption": "The driveway at sunset",
+    "source": "Owner Drive 026 - Hotel - U Sathorn Bangkok (16 Sep 2026)"
+   },
+   {
+    "src": "assets/images/usathorn/entrance-u-garden.jpg",
+    "kind": "grounds",
+    "caption": "The entrance and the U garden",
+    "source": "Owner Drive 026 - Hotel - U Sathorn Bangkok (16 Sep 2026)"
+   },
+   {
+    "src": "assets/images/usathorn/lobby.jpg",
+    "kind": "lobby",
+    "caption": "The lobby",
+    "source": "Owner Drive 026 - Hotel - U Sathorn Bangkok (16 Sep 2026)"
+   },
+   {
+    "src": "assets/images/usathorn/aerial.jpg",
+    "kind": "architecture",
+    "caption": "The house from the air",
+    "source": "Owner Drive 026 - Hotel - U Sathorn Bangkok (16 Sep 2026)"
+   },
+   {
+    "src": "assets/images/usathorn/superior-garden-bed-terrace.jpg",
+    "kind": "room",
+    "caption": "The Superior Room and its garden terrace",
+    "source": "Owner Drive 026 - Hotel - U Sathorn Bangkok (16 Sep 2026)"
+   }
+  ]
+ },
+ "shamaYenAkat": {
+  "name": "Shama Yen-Akat Bangkok",
+  "city": "Bangkok",
+  "images": [
+   {
+    "src": "assets/images/shama/king-studio-balcony.jpg",
+    "kind": "room",
+    "caption": "The King Studio from the entrance",
+    "source": "Owner Drive 027 - Hotel - Shama Yen-Akat Bangkok"
+   },
+   {
+    "src": "assets/images/shama/king-studio-balcony-doors.jpg",
+    "kind": "room",
+    "caption": "The balcony doors",
+    "source": "Owner Drive 027 - Hotel - Shama Yen-Akat Bangkok"
+   },
+   {
+    "src": "assets/images/shama/king-studio-dining.jpg",
+    "kind": "room",
+    "caption": "The dining corner",
+    "source": "Owner Drive 027 - Hotel - Shama Yen-Akat Bangkok"
+   }
+  ]
+ },
+ "souphattra": {
+  "name": "Souphattra Heritage Vientiane",
+  "city": "Vientiane",
+  "images": [
+   {
+    "src": "assets/images/souphattra/heritage-courtyard-front.jpg",
+    "kind": "exterior",
+    "caption": "The courtyard front and the pool",
+    "source": "Owner Drive 021 - Hotel - Souphattra Heritage Vientiane"
+   },
+   {
+    "src": "assets/images/souphattra/heritage-arches-dusk.jpg",
+    "kind": "architecture",
+    "caption": "The arches at dusk",
+    "source": "Owner Drive 021 - Hotel - Souphattra Heritage Vientiane"
+   },
+   {
+    "src": "assets/images/souphattra/heritage-courtyard-pool.jpg",
+    "kind": "pool",
+    "caption": "The courtyard pool",
+    "source": "Owner Drive 021 - Hotel - Souphattra Heritage Vientiane"
+   },
+   {
+    "src": "assets/images/souphattra/heritage-courtyard-aerial.jpg",
+    "kind": "architecture",
+    "caption": "The courtyard from the air",
+    "source": "Owner Drive 021 - Hotel - Souphattra Heritage Vientiane"
+   },
+   {
+    "src": "assets/images/souphattra/heritage-balconies.jpg",
+    "kind": "architecture",
+    "caption": "The balconies",
+    "source": "Owner Drive 021 - Hotel - Souphattra Heritage Vientiane"
+   },
+   {
+    "src": "assets/images/souphattra/heritage-entry.jpg",
+    "kind": "lobby",
+    "caption": "The entry",
+    "source": "Owner Drive 021 - Hotel - Souphattra Heritage Vientiane"
+   },
+   {
+    "src": "assets/images/souphattra/heritage-courtyard-terrace.jpg",
+    "kind": "grounds",
+    "caption": "The courtyard terrace",
+    "source": "Owner Drive 021 - Hotel - Souphattra Heritage Vientiane"
+   },
+   {
+    "src": "assets/images/souphattra/heritage-room.jpg",
+    "kind": "room",
+    "caption": "A Heritage room",
+    "source": "Owner Drive 021 - Hotel - Souphattra Heritage Vientiane"
+   }
+  ]
+ },
+ "privateResidence": {
+  "name": "Private Residence · Vientiane",
+  "city": "Vientiane",
+  "images": [
+   {
+    "src": "assets/images/airbnb/airbnb-01.jpg",
+    "kind": "room",
+    "caption": "Living and dining",
+    "source": "Owner Drive 022 - Hotel - Airbnb Guest House Vientiane"
+   },
+   {
+    "src": "assets/images/airbnb/airbnb-02.jpg",
+    "kind": "room",
+    "caption": "The entry",
+    "source": "Owner Drive 022 - Hotel - Airbnb Guest House Vientiane"
+   },
+   {
+    "src": "assets/images/airbnb/airbnb-03.jpg",
+    "kind": "grounds",
+    "caption": "The balcony",
+    "source": "Owner Drive 022 - Hotel - Airbnb Guest House Vientiane"
+   },
+   {
+    "src": "assets/images/airbnb/airbnb-04.jpg",
+    "kind": "grounds",
+    "caption": "Towards the temple roofs",
+    "source": "Owner Drive 022 - Hotel - Airbnb Guest House Vientiane"
+   }
+  ],
+  "lead": "room",
+  "leadWhy": "a residence, not a hotel: its living room is the house; the balcony frames are window views"
+ },
+ "riverside": {
+  "name": "Riverside Hotel Vientiane",
+  "city": "Vientiane",
+  "images": [],
+  "note": "No photograph of the Riverside Hotel exists in the Owner's Drive (no hotel folder, 19 Sep 2026): the frame reads Photography to follow — nothing is invented, nothing is substituted."
+ },
+ "wanxiang": {
+  "name": "Wanxiang Yueju · Kunming",
+  "city": "Kunming",
+  "images": [
+   {
+    "src": "assets/images/journey/kunming-wanxiang-yueju-entrance.jpg",
+    "kind": "exterior",
+    "caption": "The entrance at night",
+    "source": "Owner Drive 023 - Hotel - Wanxiang Yueju Kunming"
+   },
+   {
+    "src": "assets/images/journey/kunming-01.jpg",
+    "kind": "suite",
+    "caption": "A designer suite",
+    "source": "Owner Drive 023 - Hotel - Wanxiang Yueju Kunming"
+   },
+   {
+    "src": "assets/images/journey/kunming-02.jpg",
+    "kind": "suite",
+    "caption": "The mezzanine suite",
+    "source": "Owner Drive 023 - Hotel - Wanxiang Yueju Kunming"
+   },
+   {
+    "src": "assets/images/journey/kunming-03.jpg",
+    "kind": "suite",
+    "caption": "The bath and the city",
+    "source": "Owner Drive 023 - Hotel - Wanxiang Yueju Kunming"
+   }
+  ]
+ },
+ "luyeBaisha": {
+  "name": "Luye Baisha · Lijiang",
+  "city": "Lijiang",
+  "images": [
+   {
+    "src": "assets/images/journey/lijiang-01.jpg",
+    "kind": "room",
+    "caption": "A room towards the valley",
+    "source": "Owner Drive 024 - Hotel - Luye Baisha Lijiang"
+   },
+   {
+    "src": "assets/images/journey/lijiang-02.jpg",
+    "kind": "facilities",
+    "caption": "The private pool below Jade Dragon Snow Mountain",
+    "source": "Owner Drive 024 - Hotel - Luye Baisha Lijiang"
+   },
+   {
+    "src": "assets/images/journey/lijiang-03.jpg",
+    "kind": "room",
+    "caption": "The sitting room towards the mountain",
+    "source": "Owner Drive 024 - Hotel - Luye Baisha Lijiang"
+   }
+  ]
+ },
+ "kempinski": {
+  "name": "Siam Kempinski Bangkok",
+  "city": "Bangkok",
+  "images": [
+   {
+    "src": "assets/images/kempinski/facade-garden.jpg",
+    "kind": "exterior",
+    "caption": "The facade and the garden",
+    "source": "Owner Drive 025 - Hotel - Siam Kempinski Bangkok"
+   },
+   {
+    "src": "assets/images/journey/kempinski-01.jpg",
+    "kind": "grounds",
+    "caption": "The lagoon courtyard from above",
+    "source": "Owner Drive 025 - Hotel - Siam Kempinski Bangkok"
+   },
+   {
+    "src": "assets/images/journey/kempinski-03.jpg",
+    "kind": "lobby",
+    "caption": "The lobby",
+    "source": "Owner Drive 025 - Hotel - Siam Kempinski Bangkok"
+   },
+   {
+    "src": "assets/images/kempinski/lobby-palms.jpg",
+    "kind": "lobby",
+    "caption": "The lobby palms",
+    "source": "Owner Drive 025 - Hotel - Siam Kempinski Bangkok"
+   },
+   {
+    "src": "assets/images/kempinski/lobby-staircase.jpg",
+    "kind": "architecture",
+    "caption": "The grand staircase",
+    "source": "Owner Drive 025 - Hotel - Siam Kempinski Bangkok"
+   },
+   {
+    "src": "assets/images/kempinski/lounge.jpg",
+    "kind": "facilities",
+    "caption": "The lounge",
+    "source": "Owner Drive 025 - Hotel - Siam Kempinski Bangkok"
+   },
+   {
+    "src": "assets/images/kempinski/room-bedroom-balcony.jpg",
+    "kind": "room",
+    "caption": "The Deluxe Balcony King room",
+    "source": "Owner Drive 025 - Hotel - Siam Kempinski Bangkok"
+   }
+  ]
+ }
+}

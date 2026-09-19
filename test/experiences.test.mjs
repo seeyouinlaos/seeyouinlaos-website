@@ -84,10 +84,10 @@ test('no photograph path is used twice, and no photograph belongs to another pla
 test('the generated gallery module is exactly what the source record produces', () => {
   const out = execFileSync('node', ['-e', `
     const fs=require('fs');const src=JSON.parse(fs.readFileSync('src/experience-galleries.json','utf8'));const out={};
-    for (const id of Object.keys(src)) { const g=src[id]; out[id]={frame:g.frame,images:g.images.map(im=>{const o={src:im.src,w:im.w,h:im.h,alt:im.alt};if(im.pos)o.pos=im.pos;return o;})}; }
+    for (const id of Object.keys(src)) { if (id.startsWith('_')) continue; const g=src[id]; out[id]={frame:g.frame,images:g.images.map(im=>{const o={src:im.src,w:im.w,h:im.h,alt:im.alt,kind:im.kind};if(im.pos)o.pos=im.pos;return o;})}; }
     process.stdout.write(JSON.stringify(out));`], { cwd: ROOT }).toString();
   assert.deepEqual(GAL, JSON.parse(out));
-  for (const id of Object.keys(GJSON)) for (const im of GJSON[id].images) assert.ok(im.drive && im.file, id + ' source traceability');
+  for (const id of Object.keys(GJSON)) { if (id.startsWith('_')) continue; for (const im of GJSON[id].images) assert.ok(im.drive && im.file && im.kind, id + ' source traceability and kind'); }
 });
 
 test('detail content exists where the source carries it; discovery places carry no invented practical fields', () => {
@@ -123,7 +123,7 @@ test('SÜHRING — canonical entity, Bangkok, restaurant, source category, Drive
   assert.equal(e.drive, '090 - Restaurant - Suhring');
   assert.deepEqual(e.driveIds, ['12BzWDhI4pN5reUWdsgbgMiD4tCWp5I4N']);
   assert.equal(e.sourceImages, 13);
-  assert.ok(GAL['bkk-suhring'].images.length >= 5, 'multiple authorised photographs');
+  assert.ok(GAL['bkk-suhring'].images.length >= 3, 'multiple authorised photographs — the dining rooms and the founders; the five dish close-ups left in the release 012 media audit');
   assert.equal(GAL['bkk-suhring'].images.length, e.used);
 });
 
@@ -137,7 +137,7 @@ test('SÜHRING — the full source record is rendered, the price per person by O
   assert.equal(s.maps, 'https://maps.app.goo.gl/2b4whggW3YCnxN6u5?g_st=ic');
   assert.equal(s.link, 'https://www.restaurantsuhring.com/menu.html');
   assert.deepEqual(s.select, { id: 'suhring', price: 180, unit: 'per person' });
-  assert.ok(GAL['bkk-suhring'].images.length >= 5 && GAL['bkk-suhring'].images.length === byId['bkk-suhring'].used, 'the authorised gallery stays');
+  assert.ok(GAL['bkk-suhring'].images.length >= 3 && GAL['bkk-suhring'].images.length === byId['bkk-suhring'].used, 'the authorised gallery stays (its rooms, never its dishes)');
 });
 
 /* the shop sandbox: the same modules the pages load, an in-memory localStorage */

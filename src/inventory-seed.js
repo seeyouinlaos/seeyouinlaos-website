@@ -87,6 +87,11 @@ export const SEED = {
   'airbnb-2br/private-residence':
     { unit: 'guest', capacity: 4, held: 0, name: 'Private Residence', stay: 'Private Residence · Vientiane' },   /* Owner, Edit 5 (18 Sep 2026): up to four guests */
 
+  /* the Riverside Hotel (Owner, release 012 · Operations Master of 18 Sep 2026, package D3): six rooms, two places each,
+     for the same wedding window — one stay per window, so a hold here releases a Souphattra hold and vice versa */
+  'riverside/superior-window':
+    { unit: 'room', capacity: 6, occupancy: 2, held: 0, name: 'Superior Room With Window', stay: 'Riverside Hotel Vientiane' },
+
   /* ------------------------------------------------------------ Kunming */
   'kmg/left-bank':      { unit: 'room', capacity: 1, occupancy: 4, held: 0, name: 'Left Bank French-Style King Room' },
   'kmg/penang':         { unit: 'room', capacity: 1, occupancy: 4, held: 0, name: 'Penang Forest Nanyang-Style Deluxe Suite' },

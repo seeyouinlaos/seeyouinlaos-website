@@ -1,4 +1,36 @@
 {
+ "_taxonomy": {
+  "restaurant": [
+   "interior",
+   "architecture",
+   "exterior",
+   "dining-room",
+   "design",
+   "atmosphere"
+  ],
+  "cafe": [
+   "interior",
+   "architecture",
+   "exterior",
+   "counter",
+   "atmosphere"
+  ],
+  "bar": [
+   "interior",
+   "architecture",
+   "exterior",
+   "counter",
+   "atmosphere"
+  ],
+  "experience": [
+   "venue"
+  ],
+  "never": [
+   "food",
+   "drink"
+  ],
+  "rule": "See You In Laos is not a food blog (Owner, 19 Sep 2026): a restaurant, café or bar is shown by its interior, design, architecture, exterior, dining room, counter or atmosphere — never by an isolated dish, plate, bowl, dessert or glass. The category of a place follows its roles (bar → bar; cafe → cafe; a meal role → restaurant; experience / place → venue context). Every frame carries its kind; src/build-experience-galleries.cjs refuses a record that breaks the rule."
+ },
  "bkk-suhring": {
   "slug": "bkk-suhring",
   "folder": "090 - Restaurant - Suhring",
@@ -11,23 +43,8 @@
     "h": 1446,
     "alt": "A table by the window, the villa garden and palms outside",
     "drive": "1DqoPrfiGpqcLYsEXW08siiYtlwHG2DiN",
-    "file": "IMG_3915.jpeg"
-   },
-   {
-    "src": "assets/images/experiences/bkk-suhring-02.jpg",
-    "w": 1334,
-    "h": 2000,
-    "alt": "A tartlet of caviar and salmon roe on a white pierced plate",
-    "drive": "1HgIrT4L1WpS_GuVqmynPYfE7RhVEbDdx",
-    "file": "IMG_3905.jpeg"
-   },
-   {
-    "src": "assets/images/experiences/bkk-suhring-03.jpg",
-    "w": 969,
-    "h": 1449,
-    "alt": "Thomas and Mathias Sühring at the kitchen pass",
-    "drive": "1Zc4T6gfRAX5mdSdc3OAK0wzFZ6-J2qL0",
-    "file": "IMG_3910.jpeg"
+    "file": "IMG_3915.jpeg",
+    "kind": "dining-room"
    },
    {
     "src": "assets/images/experiences/bkk-suhring-04.jpg",
@@ -35,39 +52,8 @@
     "h": 1321,
     "alt": "The dining room at Sühring, white tablecloths and rattan chairs before a wall of garden green",
     "drive": "1cwqgudSp3KgfxJYupWLqX4nd3i1u477t",
-    "file": "IMG_3911.jpeg"
-   },
-   {
-    "src": "assets/images/experiences/bkk-suhring-05.jpg",
-    "w": 975,
-    "h": 1449,
-    "alt": "A spoon finishing a plate of three small courses on a white dish",
-    "drive": "1xe6DFAQ7XJAYI3X0P1x6hvtlt0gavVHn",
-    "file": "IMG_3914.jpeg"
-   },
-   {
-    "src": "assets/images/experiences/bkk-suhring-06.jpg",
-    "w": 971,
-    "h": 1446,
-    "alt": "A green herb tartlet with a truffle crisp",
-    "drive": "11CT9Wu8UiRxz-QYq37fPgRBQS1NPRVO1",
-    "file": "IMG_3912.jpeg"
-   },
-   {
-    "src": "assets/images/experiences/bkk-suhring-07.jpg",
-    "w": 975,
-    "h": 1451,
-    "alt": "A hand plating a course of beef with a spoon",
-    "drive": "1ZEHWa9Ow7SB0qEec7UZm7Ocarhv54GQ-",
-    "file": "IMG_3907.jpeg"
-   },
-   {
-    "src": "assets/images/experiences/bkk-suhring-08.jpg",
-    "w": 1822,
-    "h": 1324,
-    "alt": "A dessert of red sorbet, a caramel wafer and two dark cherries",
-    "drive": "1GvDrVqwzQQQr2rWEeNcITAy-FjY1-26N",
-    "file": "IMG_3906.jpeg"
+    "file": "IMG_3911.jpeg",
+    "kind": "interior"
    },
    {
     "src": "assets/images/experiences/bkk-suhring-09.jpg",
@@ -75,7 +61,17 @@
     "h": 1319,
     "alt": "The private dining room under a dark timber ceiling",
     "drive": "15uH_GpaBzkF3SBn276BJPGd0ySwkLGPr",
-    "file": "IMG_3917.jpeg"
+    "file": "IMG_3917.jpeg",
+    "kind": "dining-room"
+   },
+   {
+    "src": "assets/images/experiences/bkk-suhring-03.jpg",
+    "w": 969,
+    "h": 1449,
+    "alt": "Thomas and Mathias Sühring at the kitchen pass",
+    "drive": "1Zc4T6gfRAX5mdSdc3OAK0wzFZ6-J2qL0",
+    "file": "IMG_3910.jpeg",
+    "kind": "atmosphere"
    }
   ]
  },
@@ -92,7 +88,8 @@
     "alt": "The Louis Vuitton façade in Bangkok dressed with giant monogram flowers",
     "drive": "1zRxUVfEze4TtTTpvW_1Gc0Ew6bWHitYQ",
     "file": "IMG_3536.jpeg",
-    "pos": "50% 40%"
+    "pos": "50% 40%",
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/bkk-lvvisionary-02.jpg",
@@ -100,7 +97,8 @@
     "h": 1700,
     "alt": "A kaleidoscope corridor of mirrored monogram panels",
     "drive": "1Rv3_8XX7SzGvac7zL_QWm-tfCSneUyw4",
-    "file": "IMG_3538.jpeg"
+    "file": "IMG_3538.jpeg",
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/bkk-lvvisionary-03.jpg",
@@ -108,7 +106,8 @@
     "h": 1700,
     "alt": "Vintage trunks suspended under a ceiling of stars",
     "drive": "1UG6isUny8Dio8D0HLNwFgharQeUGqbE4",
-    "file": "IMG_3539.jpeg"
+    "file": "IMG_3539.jpeg",
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/bkk-lvvisionary-04.jpg",
@@ -116,7 +115,8 @@
     "h": 1280,
     "alt": "The archive room, walls of framed documents around historic trunks",
     "drive": "1Y_BtkBNuP7I5NN7HqnrOLl5RFt1lkbbV",
-    "file": "IMG_3541.jpeg"
+    "file": "IMG_3541.jpeg",
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/bkk-lvvisionary-05.jpg",
@@ -124,7 +124,8 @@
     "h": 1700,
     "alt": "A row of historic trunks in the archive room",
     "drive": "1FCw6bxTr4hJzOlzBeyD0bRsMEYlbggs1",
-    "file": "IMG_3543.jpeg"
+    "file": "IMG_3543.jpeg",
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/bkk-lvvisionary-06.jpg",
@@ -132,7 +133,8 @@
     "h": 1700,
     "alt": "A monogram bag inside a ring of light",
     "drive": "1y4YqITQWdYQSaWQspI88pRsSzcHsfXo9",
-    "file": "IMG_3545.jpeg"
+    "file": "IMG_3545.jpeg",
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/bkk-lvvisionary-07.jpg",
@@ -140,7 +142,8 @@
     "h": 1700,
     "alt": "A wall of violet metallic bags framing a lit vitrine",
     "drive": "1lEB81sPhT-DCCKjCyVtUfrhOMj45HdAW",
-    "file": "IMG_3547.jpeg"
+    "file": "IMG_3547.jpeg",
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/bkk-lvvisionary-08.jpg",
@@ -148,7 +151,8 @@
     "h": 1700,
     "alt": "A Kusama pumpkin beside the metallic bag wall",
     "drive": "1V-BpbLlUFw8_Iu0jabHBntoHK_knEULq",
-    "file": "IMG_3548.jpeg"
+    "file": "IMG_3548.jpeg",
+    "kind": "venue"
    }
   ]
  },
@@ -164,7 +168,8 @@
     "h": 900,
     "alt": "The museum courtyard at dusk, stone spheres on the terrace",
     "drive": "1hoM_4OHRdheUkBXvJaYFx_kmWHILBx0z",
-    "file": "IMG_3502.jpeg"
+    "file": "IMG_3502.jpeg",
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/bkk-dib-02.jpg",
@@ -172,7 +177,8 @@
     "h": 1045,
     "alt": "The white cone of the museum reflected in still water",
     "drive": "1cYMNKrar24wZtfqowErvZ8Sm1q0A0N80",
-    "file": "IMG_3509.webp"
+    "file": "IMG_3509.webp",
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/bkk-dib-03.jpg",
@@ -180,7 +186,8 @@
     "h": 1350,
     "alt": "The sawtooth roofline and cone mirrored in the pool",
     "drive": "1DsqleGxdJVgaqU8bPgKoWPiySCMzSBoP",
-    "file": "IMG_3511.webp"
+    "file": "IMG_3511.webp",
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/bkk-dib-04.jpg",
@@ -188,7 +195,8 @@
     "h": 1567,
     "alt": "Polished stone spheres on the terrace",
     "drive": "1MvK9oGm5jIo2iQ-AxkYol5aruKWb9Ky7",
-    "file": "IMG_3510.webp"
+    "file": "IMG_3510.webp",
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/bkk-dib-05.jpg",
@@ -196,7 +204,8 @@
     "h": 1900,
     "alt": "A white stair rising to a single doorway against the evening sky",
     "drive": "1maLMW2Pi4h_mMmLDhyNA_Z4bc1fTT9Xn",
-    "file": "IMG_3504.webp"
+    "file": "IMG_3504.webp",
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/bkk-dib-06.jpg",
@@ -204,7 +213,8 @@
     "h": 1267,
     "alt": "The curved white façade under a clear sky",
     "drive": "1_mgECKJyt-cP-7sMulrIoM1PjgkBHOu1",
-    "file": "IMG_3507.webp"
+    "file": "IMG_3507.webp",
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/bkk-dib-07.jpg",
@@ -212,7 +222,8 @@
     "h": 1125,
     "alt": "The curved walkway and courtyard from the upper level",
     "drive": "1AF69wjrADmfnUMWQ-oN1Si15AUQSHKzP",
-    "file": "IMG_3505.png"
+    "file": "IMG_3505.png",
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/bkk-dib-08.jpg",
@@ -220,7 +231,8 @@
     "h": 1050,
     "alt": "The museum seen through the courtyard colonnade",
     "drive": "1d1Ys5I-RKZYnnfILm0xIit_UnWox5sn1",
-    "file": "IMG_3506.jpeg"
+    "file": "IMG_3506.jpeg",
+    "kind": "venue"
    }
   ]
  },
@@ -236,7 +248,8 @@
     "h": 1334,
     "alt": "The riverside garden pavilion through the entrance gate",
     "drive": "1bOKQcqWMHpfFp0yV8ySv5sc18qqPCzHj",
-    "file": "HS_RESTAURANT_PHRANAKHON_01_GARDEN.jpg"
+    "file": "HS_RESTAURANT_PHRANAKHON_01_GARDEN.jpg",
+    "kind": "exterior"
    },
    {
     "src": "assets/images/experiences/bkk-phranakorn-02.jpg",
@@ -244,7 +257,8 @@
     "h": 1125,
     "alt": "The terrace tables at sunset beside the Chao Phraya",
     "drive": "1AwlnPRST7tD1krkU5jOREiMnXn-SGJgD",
-    "file": "Phra-Nakhon-Restaurant-Capella-Bangkok-Triple-Crown-May2026-PR-Global.webp"
+    "file": "Phra-Nakhon-Restaurant-Capella-Bangkok-Triple-Crown-May2026-PR-Global.webp",
+    "kind": "atmosphere"
    },
    {
     "src": "assets/images/experiences/bkk-phranakorn-03.jpg",
@@ -252,7 +266,8 @@
     "h": 1688,
     "alt": "A table under the trees with the river and the city behind",
     "drive": "1Qa4i5EY3ldKUDGVzEkg9DA6o0okYkGq-",
-    "file": "SnapInsta_717338228.jpg"
+    "file": "SnapInsta_717338228.jpg",
+    "kind": "exterior"
    },
    {
     "src": "assets/images/experiences/bkk-phranakorn-04.jpg",
@@ -260,23 +275,8 @@
     "h": 1688,
     "alt": "Rattan chairs and a set table among the garden planting",
     "drive": "1CRB-xJPqOQHtxwFURqWwfSiyEGh7zXgO",
-    "file": "SnapInsta_761764784.jpg"
-   },
-   {
-    "src": "assets/images/experiences/bkk-phranakorn-05.jpg",
-    "w": 1350,
-    "h": 1688,
-    "alt": "Thai dishes, soups and a whole fish laid out on the table",
-    "drive": "1FBtpbssgrD5aFzvbfqYalovLYfdQ-5Sh",
-    "file": "SnapInsta_762864039.jpg"
-   },
-   {
-    "src": "assets/images/experiences/bkk-phranakorn-06.jpg",
-    "w": 670,
-    "h": 1006,
-    "alt": "A plated dish on a dark stone table",
-    "drive": "1OtGgNXLSBVe1f1lPHKSc3l5dNMW_nHkO",
-    "file": "IMG_3554.jpeg"
+    "file": "SnapInsta_761764784.jpg",
+    "kind": "interior"
    },
    {
     "src": "assets/images/experiences/bkk-phranakorn-07.jpg",
@@ -284,7 +284,8 @@
     "h": 670,
     "alt": "The open kitchen behind its marble counter",
     "drive": "1zdU8RpJZshM-AzbaxWC2mG--ZPX5e8tk",
-    "file": "IMG_3551.jpeg"
+    "file": "IMG_3551.jpeg",
+    "kind": "interior"
    },
    {
     "src": "assets/images/experiences/bkk-phranakorn-08.jpg",
@@ -292,7 +293,8 @@
     "h": 670,
     "alt": "Riverside tables laid under white parasols",
     "drive": "1VTOkfZMFx6-sknKgWpaBk6H7QO1UAELc",
-    "file": "IMG_3553.jpeg"
+    "file": "IMG_3553.jpeg",
+    "kind": "exterior"
    }
   ]
  },
@@ -308,7 +310,8 @@
     "h": 1334,
     "alt": "The stepped concrete terraces of The Commons with trees and lit kitchens",
     "drive": "1oVAuMOR5bWdQ7-qfUk-u811b-Sj8d4uS",
-    "file": "IMG_3585.jpeg"
+    "file": "IMG_3585.jpeg",
+    "kind": "architecture"
    },
    {
     "src": "assets/images/experiences/bkk-commons-02.jpg",
@@ -316,7 +319,8 @@
     "h": 944,
     "alt": "People sitting on the open terraces between the columns",
     "drive": "1vZzwU4tRr8dPpDzZ_MHMdoPodCcvavVl",
-    "file": "IMG_3586.webp"
+    "file": "IMG_3586.webp",
+    "kind": "architecture"
    },
    {
     "src": "assets/images/experiences/bkk-commons-03.jpg",
@@ -324,7 +328,8 @@
     "h": 926,
     "alt": "Tables under the atrium with the stairs rising behind",
     "drive": "1xHOOYO_zrtxeER31Wrq7sT12JCF8qe9z",
-    "file": "IMG_3596.webp"
+    "file": "IMG_3596.webp",
+    "kind": "interior"
    },
    {
     "src": "assets/images/experiences/bkk-commons-04.jpg",
@@ -332,7 +337,8 @@
     "h": 944,
     "alt": "Looking down through the atrium to the market floor",
     "drive": "1LuK66yxDxfpfv6VSrLqRVQ3tg1Fy7yPo",
-    "file": "IMG_3600.webp"
+    "file": "IMG_3600.webp",
+    "kind": "architecture"
    },
    {
     "src": "assets/images/experiences/bkk-commons-05.jpg",
@@ -340,7 +346,8 @@
     "h": 811,
     "alt": "The wide entrance steps planted with greenery",
     "drive": "1MKIzIqF7xZfS-5oyy9ggn1dVG6O4_eOV",
-    "file": "IMG_3594.webp"
+    "file": "IMG_3594.webp",
+    "kind": "architecture"
    }
   ]
  },
@@ -348,47 +355,16 @@
   "slug": "bkk-thongsmith",
   "folder": "083 + 089 - Restaurant - Thong Smith",
   "folderId": "1ZwzSEFFboxxTosgz-N2qUpQ1t-j8JXkl + 1TQ86m75xxXNF8mF4XxGU86LuVyCYRK3K",
-  "frame": "4/5",
+  "frame": "3/2",
   "images": [
-   {
-    "src": "assets/images/experiences/bkk-thongsmith-01.jpg",
-    "w": 1500,
-    "h": 2000,
-    "alt": "A hand squeezing lime over a bowl of boat noodles",
-    "drive": "1eOuywJ85OigIMgV_nDWfAobT5n7M6k0k",
-    "file": "SnapInsta_786628851.jpg"
-   },
-   {
-    "src": "assets/images/experiences/bkk-thongsmith-02.jpg",
-    "w": 1500,
-    "h": 2000,
-    "alt": "Blue-and-white bowls of noodles and crispy pork skins on terrazzo",
-    "drive": "116dmQCXDzOScMiH-6Z6DG5KRWhKr1U30",
-    "file": "SnapInsta_784389230.jpg"
-   },
    {
     "src": "assets/images/experiences/bkk-thongsmith-03.jpg",
     "w": 1364,
     "h": 908,
     "alt": "The terrace under red parasols and old trees",
     "drive": "1U1VdHb-zeSfPP22SWBxYah-bC4joOtWG",
-    "file": "481925229.jpg"
-   },
-   {
-    "src": "assets/images/experiences/bkk-thongsmith-04.jpg",
-    "w": 1364,
-    "h": 908,
-    "alt": "The Thong Smith entrance and its garden seating",
-    "drive": "1jkYbw00j3ggdntYGbJV_XJnWkO770_IL",
-    "file": "480956137.jpg"
-   },
-   {
-    "src": "assets/images/experiences/bkk-thongsmith-05.jpg",
-    "w": 1500,
-    "h": 2000,
-    "alt": "Chopsticks lifting beef from a bowl of dark broth",
-    "drive": "1MMCk0ox1YTq32CSstC863fSP29XQnPzm",
-    "file": "SnapInsta_784166048.jpg"
+    "file": "481925229.jpg",
+    "kind": "interior"
    },
    {
     "src": "assets/images/experiences/bkk-thongsmith-06.jpg",
@@ -396,7 +372,17 @@
     "h": 1800,
     "alt": "A window table looking onto the greenery outside",
     "drive": "1CblZBznetf93uq3ZMEkD7b2WjcVI0ZSp",
-    "file": "539715278.jpg"
+    "file": "539715278.jpg",
+    "kind": "interior"
+   },
+   {
+    "src": "assets/images/experiences/bkk-thongsmith-04.jpg",
+    "w": 1364,
+    "h": 908,
+    "alt": "The Thong Smith entrance and its garden seating",
+    "drive": "1jkYbw00j3ggdntYGbJV_XJnWkO770_IL",
+    "file": "480956137.jpg",
+    "kind": "exterior"
    },
    {
     "src": "assets/images/experiences/bkk-thongsmith-07.jpg",
@@ -404,7 +390,8 @@
     "h": 2000,
     "alt": "The neon Thong Smith sign above the shopfront",
     "drive": "1HedK7udar3zj7aHtEPs6geUm67SuGLo3",
-    "file": "SnapInsta_785836760.jpg"
+    "file": "SnapInsta_785836760.jpg",
+    "kind": "exterior"
    }
   ]
  },
@@ -412,39 +399,16 @@
   "slug": "bkk-tjy",
   "folder": "090 - Restaurant - Tang Jai Yang",
   "folderId": "1UwGn0EMMQHtR-ye1mixHsfdk8lo7kWuP",
-  "frame": "4/5",
+  "frame": "1/1",
   "images": [
-   {
-    "src": "assets/images/experiences/bkk-tjy-01.jpg",
-    "w": 1082,
-    "h": 1353,
-    "alt": "Charcoal-roast pork with noodles on a jade plate",
-    "drive": "1bo50WM2Fdk2bdDIxEdlHu1oPF-Lu-MNm",
-    "file": "IMG_3644.jpeg"
-   },
    {
     "src": "assets/images/experiences/bkk-tjy-02.jpg",
     "w": 1100,
     "h": 1100,
     "alt": "The mint-green dining room with bentwood chairs",
     "drive": "1Vyo17wk-xvBZNjuylPJ2xDD5jgE4y2y0",
-    "file": "IMG_3645.jpeg"
-   },
-   {
-    "src": "assets/images/experiences/bkk-tjy-03.jpg",
-    "w": 1082,
-    "h": 1353,
-    "alt": "Chopsticks lifting a slice of roast pork, rice and dumplings behind",
-    "drive": "1qDc0qyhgimtCerxkuu_jMgakxs_ZIo3b",
-    "file": "IMG_3641.jpeg"
-   },
-   {
-    "src": "assets/images/experiences/bkk-tjy-04.jpg",
-    "w": 1080,
-    "h": 1350,
-    "alt": "Roast pork over egg noodles with greens, tea cups behind",
-    "drive": "1UvhphEb30ykE7vmB52QAB0gvAHPqBvDr",
-    "file": "IMG_3642.jpeg"
+    "file": "IMG_3645.jpeg",
+    "kind": "interior"
    }
   ]
  },
@@ -460,7 +424,17 @@
     "h": 1920,
     "alt": "A long table set in the ALATi dining room",
     "drive": "1WH9jNpp_vwyFg2WAaI9DQCPfhEhE7wXX",
-    "file": "ALATi - Siam Kempinski_002.webp"
+    "file": "ALATi - Siam Kempinski_002.webp",
+    "kind": "dining-room"
+   },
+   {
+    "src": "assets/images/experiences/bkk-alati-05.jpg",
+    "w": 1287,
+    "h": 1608,
+    "alt": "The dining room beneath red-berried branches",
+    "drive": "1LA_0aWPALhKvBzMS_45dF28G4qT-i0DH",
+    "file": "ALATi - Siam Kempinski_008.jpg",
+    "kind": "interior"
    },
    {
     "src": "assets/images/experiences/bkk-alati-02.jpg",
@@ -468,31 +442,8 @@
     "h": 1316,
     "alt": "A guest at a garden table under parasols",
     "drive": "1267bT6bv1XIcpsP4MRhpsGX3Gp3J-6iK",
-    "file": "ALATi - Siam Kempinski_007.jpg"
-   },
-   {
-    "src": "assets/images/experiences/bkk-alati-03.jpg",
-    "w": 683,
-    "h": 1024,
-    "alt": "Bresaola and burrata on a patterned plate by the pool window",
-    "drive": "1Sju41dK7cK2ZPTO-kwCmaVJtIY86pbzN",
-    "file": "ALATi - Siam Kempinski_004.avif"
-   },
-   {
-    "src": "assets/images/experiences/bkk-alati-04.jpg",
-    "w": 1317,
-    "h": 1646,
-    "alt": "Pastries, fruit and champagne at brunch",
-    "drive": "1DoljhUgtNPdxbvUkaJJjyULRPlIrmlkk",
-    "file": "ALATi - Siam Kempinski_006.jpg"
-   },
-   {
-    "src": "assets/images/experiences/bkk-alati-05.jpg",
-    "w": 1287,
-    "h": 1608,
-    "alt": "The brunch table beneath red-berried branches",
-    "drive": "1LA_0aWPALhKvBzMS_45dF28G4qT-i0DH",
-    "file": "ALATi - Siam Kempinski_008.jpg"
+    "file": "ALATi - Siam Kempinski_007.jpg",
+    "kind": "atmosphere"
    }
   ]
  },
@@ -508,39 +459,8 @@
     "h": 1118,
     "alt": "The pâtisserie counter and green espresso bar",
     "drive": "1jJa24SQM5VYp8iIjVfNJq_54YqvHtRmU",
-    "file": "IMG_3626.jpeg"
-   },
-   {
-    "src": "assets/images/experiences/bkk-madeleine-02.jpg",
-    "w": 670,
-    "h": 1006,
-    "alt": "The Café Madeleine façade behind tropical planting",
-    "drive": "1A6KdTGQE2KuraCKY627qblD4CSBdU0xa",
-    "file": "IMG_3632.jpeg"
-   },
-   {
-    "src": "assets/images/experiences/bkk-madeleine-03.jpg",
-    "w": 1530,
-    "h": 860,
-    "alt": "Madeleines dipped in chocolate, raspberry and coconut",
-    "drive": "11fDTyD5mkZxK0agLjw2uUCZ4lyScSPgs",
-    "file": "IMG_3627.jpeg"
-   },
-   {
-    "src": "assets/images/experiences/bkk-madeleine-04.jpg",
-    "w": 1530,
-    "h": 861,
-    "alt": "A hazelnut tart and éclairs from above",
-    "drive": "1lOGvWvJbxiJIP1MS8F_NykAHb9SZ0Zol",
-    "file": "IMG_3628.jpeg"
-   },
-   {
-    "src": "assets/images/experiences/bkk-madeleine-05.jpg",
-    "w": 670,
-    "h": 1006,
-    "alt": "The terrace beside the entrance",
-    "drive": "1o6KspC86z4Fwz4zvg3MvbpbRXR01N5zk",
-    "file": "IMG_3633.jpeg"
+    "file": "IMG_3626.jpeg",
+    "kind": "counter"
    },
    {
     "src": "assets/images/experiences/bkk-madeleine-06.jpg",
@@ -548,7 +468,26 @@
     "h": 1006,
     "alt": "Cakes in the glass display",
     "drive": "1z1QcSXIcUFdPl0ArZnmWQbYK9j4lqtzi",
-    "file": "IMG_3635.jpeg"
+    "file": "IMG_3635.jpeg",
+    "kind": "counter"
+   },
+   {
+    "src": "assets/images/experiences/bkk-madeleine-02.jpg",
+    "w": 670,
+    "h": 1006,
+    "alt": "The Café Madeleine façade behind tropical planting",
+    "drive": "1A6KdTGQE2KuraCKY627qblD4CSBdU0xa",
+    "file": "IMG_3632.jpeg",
+    "kind": "exterior"
+   },
+   {
+    "src": "assets/images/experiences/bkk-madeleine-05.jpg",
+    "w": 670,
+    "h": 1006,
+    "alt": "The terrace beside the entrance",
+    "drive": "1o6KspC86z4Fwz4zvg3MvbpbRXR01N5zk",
+    "file": "IMG_3633.jpeg",
+    "kind": "exterior"
    }
   ]
  },
@@ -565,7 +504,8 @@
     "alt": "The white sculptural pavilion of Curvy.Dining on its lawn",
     "drive": "1k0Tmswl_0gFXtyJGGH0bIQq0qOxSSiMK",
     "file": "IMG_3514.jpeg",
-    "pos": "50% 60%"
+    "pos": "50% 60%",
+    "kind": "architecture"
    },
    {
     "src": "assets/images/experiences/bkk-curvy-02.jpg",
@@ -573,7 +513,8 @@
     "h": 1621,
     "alt": "The ribbed white interior and its counter under the oculus",
     "drive": "1TS9yaNbp0Ui6BoATOG2dO0ZlA4z1YK1R",
-    "file": "IMG_3520.jpeg"
+    "file": "IMG_3520.jpeg",
+    "kind": "interior"
    },
    {
     "src": "assets/images/experiences/bkk-curvy-03.jpg",
@@ -581,7 +522,8 @@
     "h": 1621,
     "alt": "The oculus, white fins against a blue sky",
     "drive": "1tUJoneQvTJceHNbli4NwkaR0lL0uSiB7",
-    "file": "IMG_3515.jpeg"
+    "file": "IMG_3515.jpeg",
+    "kind": "architecture"
    },
    {
     "src": "assets/images/experiences/bkk-curvy-04.jpg",
@@ -589,7 +531,8 @@
     "h": 1621,
     "alt": "Nested white arches inside the pavilion",
     "drive": "1kIa7o1GcNwq_ey5MzwKl4Um8Peqjaiw0",
-    "file": "IMG_3517.jpeg"
+    "file": "IMG_3517.jpeg",
+    "kind": "architecture"
    },
    {
     "src": "assets/images/experiences/bkk-curvy-05.jpg",
@@ -597,7 +540,8 @@
     "h": 720,
     "alt": "The pavilion and its stepping stones across the lawn",
     "drive": "1PqB1oi4dtIKq_ayAOSnx7bapY8SbTdRB",
-    "file": "IMG_3522.jpeg"
+    "file": "IMG_3522.jpeg",
+    "kind": "exterior"
    },
    {
     "src": "assets/images/experiences/bkk-curvy-06.jpg",
@@ -605,7 +549,8 @@
     "h": 1621,
     "alt": "The curved white columns from the garden",
     "drive": "1d3dk_Z_v51IVUxsUs2a6GvxH85V-HuTa",
-    "file": "IMG_3516.jpeg"
+    "file": "IMG_3516.jpeg",
+    "kind": "exterior"
    }
   ]
  },
@@ -616,20 +561,13 @@
   "frame": "4/5",
   "images": [
    {
-    "src": "assets/images/experiences/bkk-dior-01.jpg",
-    "w": 619,
-    "h": 825,
-    "alt": "A marigold pastry on a green table in the Dior garden",
-    "drive": "1cJ98U1FtGGnQCOvbVNxBVhcBH2ZF8edb",
-    "file": "IMG_3531.webp"
-   },
-   {
     "src": "assets/images/experiences/bkk-dior-02.jpg",
     "w": 1365,
     "h": 1706,
     "alt": "The gold-panelled Dior café salon, medallion chairs at the window",
     "drive": "1zN8nO36cQIeNzlQR33WoG5s1t_SUQDj8",
-    "file": "SnapInsta_470894129.jpg"
+    "file": "SnapInsta_470894129.jpg",
+    "kind": "interior"
    },
    {
     "src": "assets/images/experiences/bkk-dior-03.jpg",
@@ -637,31 +575,8 @@
     "h": 825,
     "alt": "Rattan lanterns above the carved gold walls",
     "drive": "1dEWjy_9yVODnrhXT8maD96KS16xCc1wG",
-    "file": "IMG_3524.webp"
-   },
-   {
-    "src": "assets/images/experiences/bkk-dior-04.jpg",
-    "w": 619,
-    "h": 825,
-    "alt": "A garden table under a scalloped parasol",
-    "drive": "1ttercJQGJgexU6tkkjiz7uVjaIWCmhE2",
-    "file": "IMG_3526.webp"
-   },
-   {
-    "src": "assets/images/experiences/bkk-dior-05.jpg",
-    "w": 619,
-    "h": 825,
-    "alt": "A marigold pastry on an octagonal plate",
-    "drive": "1VuhBYUYDAnvLiHHqix2ba5MHuASLFjIs",
-    "file": "IMG_3528.webp"
-   },
-   {
-    "src": "assets/images/experiences/bkk-dior-06.jpg",
-    "w": 1500,
-    "h": 2000,
-    "alt": "Le Café Louis Vuitton, banquettes before the library wall",
-    "drive": "1M0Nvrko_M60RYUHCR1RtJK9WDkhd98Qn",
-    "file": "IMG_3487.jpeg"
+    "file": "IMG_3524.webp",
+    "kind": "interior"
    },
    {
     "src": "assets/images/experiences/bkk-dior-07.jpg",
@@ -669,15 +584,26 @@
     "h": 1125,
     "alt": "The Louis Vuitton café dining room",
     "drive": "1h4Kjx76SfCGIMK16ey5vwnc_Rezy1Q5j",
-    "file": "IMG_3484.jpeg"
+    "file": "IMG_3484.jpeg",
+    "kind": "interior"
    },
    {
-    "src": "assets/images/experiences/bkk-dior-08.jpg",
-    "w": 1440,
-    "h": 1800,
-    "alt": "A strawberry cream cake with a quilted pattern",
-    "drive": "1-eQ-HAxAvSO4GWr5KJaayQ3C_94KopkZ",
-    "file": "IMG_3481.jpeg"
+    "src": "assets/images/experiences/bkk-dior-06.jpg",
+    "w": 1500,
+    "h": 2000,
+    "alt": "Le Café Louis Vuitton, banquettes before the library wall",
+    "drive": "1M0Nvrko_M60RYUHCR1RtJK9WDkhd98Qn",
+    "file": "IMG_3487.jpeg",
+    "kind": "interior"
+   },
+   {
+    "src": "assets/images/experiences/bkk-dior-04.jpg",
+    "w": 619,
+    "h": 825,
+    "alt": "A garden table under a scalloped parasol",
+    "drive": "1ttercJQGJgexU6tkkjiz7uVjaIWCmhE2",
+    "file": "IMG_3526.webp",
+    "kind": "exterior"
    },
    {
     "src": "assets/images/experiences/bkk-dior-09.jpg",
@@ -685,7 +611,8 @@
     "h": 2000,
     "alt": "The Louis Vuitton façade with its sculpted canopies",
     "drive": "19VpysgVy_tXW2Eo8dDTvHZtyKaWcTKue",
-    "file": "IMG_3490.jpeg"
+    "file": "IMG_3490.jpeg",
+    "kind": "exterior"
    },
    {
     "src": "assets/images/experiences/bkk-dior-10.jpg",
@@ -693,7 +620,8 @@
     "h": 2000,
     "alt": "A stack of monogram trunks in the store",
     "drive": "1aEpxJolsDia19q9OdjhM7clUjt7hoWM5",
-    "file": "IMG_3494.jpeg"
+    "file": "IMG_3494.jpeg",
+    "kind": "interior"
    }
   ]
  },
@@ -704,28 +632,13 @@
   "frame": "4/5",
   "images": [
    {
-    "src": "assets/images/experiences/bkk-harudot-01.jpg",
-    "w": 1500,
-    "h": 2000,
-    "alt": "The sculpted façade of Harudot with its red spiral stair",
-    "drive": "1AeYs5VfTi0-VkgEsXZdv_UBNcnQ-fqIO",
-    "file": "SnapInsta_793161138.jpg"
-   },
-   {
-    "src": "assets/images/experiences/bkk-harudot-02.jpg",
-    "w": 1500,
-    "h": 2000,
-    "alt": "The coffee bar under the Harudot lettering",
-    "drive": "1r4w5y3HoHYw-bvmjKbArGG7AXnRMTuuW",
-    "file": "SnapInsta_793070071.jpg"
-   },
-   {
     "src": "assets/images/experiences/bkk-harudot-03.jpg",
     "w": 1122,
     "h": 1403,
     "alt": "The terracotta interior and curved counter",
     "drive": "1Wlt0wa-sxtrgPdWnG2_cmPdg6D3uSFlw",
-    "file": "SnapInsta_791510151.jpg"
+    "file": "SnapInsta_791510151.jpg",
+    "kind": "interior"
    },
    {
     "src": "assets/images/experiences/bkk-harudot-04.jpg",
@@ -733,15 +646,26 @@
     "h": 2000,
     "alt": "A stair in rose plaster leading down to the café",
     "drive": "1HjL2xkR_ri1x5DL8Q-w-dFQw0miDSDRj",
-    "file": "SnapInsta_795430136.jpg"
+    "file": "SnapInsta_795430136.jpg",
+    "kind": "interior"
    },
    {
-    "src": "assets/images/experiences/bkk-harudot-05.jpg",
+    "src": "assets/images/experiences/bkk-harudot-02.jpg",
     "w": 1500,
     "h": 2000,
-    "alt": "Coffee, cake and a cocktail on a small white table",
-    "drive": "1ii6Egf6clFe3vX3E3mJhNHU_cA_UNpVS",
-    "file": "SnapInsta_794141161.jpg"
+    "alt": "The coffee bar under the Harudot lettering",
+    "drive": "1r4w5y3HoHYw-bvmjKbArGG7AXnRMTuuW",
+    "file": "SnapInsta_793070071.jpg",
+    "kind": "counter"
+   },
+   {
+    "src": "assets/images/experiences/bkk-harudot-01.jpg",
+    "w": 1500,
+    "h": 2000,
+    "alt": "The sculpted façade of Harudot with its red spiral stair",
+    "drive": "1AeYs5VfTi0-VkgEsXZdv_UBNcnQ-fqIO",
+    "file": "SnapInsta_793161138.jpg",
+    "kind": "exterior"
    }
   ]
  },
@@ -757,7 +681,8 @@
     "h": 2000,
     "alt": "The white stair and the lake garden of Moo Yoo",
     "drive": "1rUbKoe-q3Rbjjmy6ViXSU5oq-LW9qGa1",
-    "file": "IMG_3566.jpeg"
+    "file": "IMG_3566.jpeg",
+    "kind": "architecture"
    },
    {
     "src": "assets/images/experiences/bkk-mooyoo-02.jpg",
@@ -765,7 +690,8 @@
     "h": 2000,
     "alt": "The boardwalk curving along the lake to the white house",
     "drive": "1PEDdXviTbPl5HMVvZC7IURyvcc-nHOoN",
-    "file": "IMG_3569.jpeg"
+    "file": "IMG_3569.jpeg",
+    "kind": "exterior"
    },
    {
     "src": "assets/images/experiences/bkk-mooyoo-03.jpg",
@@ -773,7 +699,8 @@
     "h": 1080,
     "alt": "A courtyard open to the sky with a single stone",
     "drive": "11AjquRbzSyahjX0Amqw42Xh5smqtVVQs",
-    "file": "IMG_3571.jpeg"
+    "file": "IMG_3571.jpeg",
+    "kind": "architecture"
    },
    {
     "src": "assets/images/experiences/bkk-mooyoo-04.jpg",
@@ -781,23 +708,8 @@
     "h": 1080,
     "alt": "A curved window framing the lake",
     "drive": "1SyTQh74yxHOoBZqBc4J64eTSWuLsHzdB",
-    "file": "IMG_3572.jpeg"
-   },
-   {
-    "src": "assets/images/experiences/bkk-mooyoo-05.jpg",
-    "w": 1080,
-    "h": 1620,
-    "alt": "Brunch plates and a layered iced drink",
-    "drive": "1eKvj9GvBYyXNRj5NQ-Th45ow68q47G_-",
-    "file": "IMG_3573.jpeg"
-   },
-   {
-    "src": "assets/images/experiences/bkk-mooyoo-06.jpg",
-    "w": 1080,
-    "h": 1080,
-    "alt": "Three cups of ice cream on a Moo Yoo tray",
-    "drive": "1keHcC19ZncIxdJBgVEfYMhUXHvv2itM8",
-    "file": "IMG_3575.jpeg"
+    "file": "IMG_3572.jpeg",
+    "kind": "architecture"
    }
   ]
  },
@@ -808,12 +720,22 @@
   "frame": "4/5",
   "images": [
    {
+    "src": "assets/images/experiences/bkk-timespace-03.jpg",
+    "w": 1440,
+    "h": 1920,
+    "alt": "The interior, a round window and light-coloured chairs",
+    "drive": "1CH0qPVRLmRDmXU4kdmXhL6LH8UkA5ds7",
+    "file": "SnapInsta_703172996.jpg",
+    "kind": "interior"
+   },
+   {
     "src": "assets/images/experiences/bkk-timespace-01.jpg",
     "w": 1439,
     "h": 1920,
     "alt": "A tree growing through the concrete café, people at the tables below",
     "drive": "1Woao-JXLi65qVhn7JkYl3ksUsurmJO4o",
-    "file": "SnapInsta_713004191.webp"
+    "file": "SnapInsta_713004191.webp",
+    "kind": "exterior"
    },
    {
     "src": "assets/images/experiences/bkk-timespace-02.jpg",
@@ -821,15 +743,8 @@
     "h": 1920,
     "alt": "The concrete building and its old tree from the steps",
     "drive": "1prMCGpVz0Kky9vo0hHg8he6_LtLZZSIb",
-    "file": "SnapInsta_703173025.jpg"
-   },
-   {
-    "src": "assets/images/experiences/bkk-timespace-03.jpg",
-    "w": 1440,
-    "h": 1920,
-    "alt": "The interior, a round window and light-coloured chairs",
-    "drive": "1CH0qPVRLmRDmXU4kdmXhL6LH8UkA5ds7",
-    "file": "SnapInsta_703172996.jpg"
+    "file": "SnapInsta_703173025.jpg",
+    "kind": "exterior"
    },
    {
     "src": "assets/images/experiences/bkk-timespace-04.jpg",
@@ -837,15 +752,8 @@
     "h": 1920,
     "alt": "The glass wall beside the pond and reeds",
     "drive": "1RZ57xArkxrINuzwgiXD6RPvbqwf52u3_",
-    "file": "SnapInsta_703156052.jpg"
-   },
-   {
-    "src": "assets/images/experiences/bkk-timespace-05.jpg",
-    "w": 1440,
-    "h": 1920,
-    "alt": "Coffee, a muffin and pink flowers at the water",
-    "drive": "1xEYvOB8JE8Hz6UyR2AdgZcCRGKOnOmcq",
-    "file": "SnapInsta_703646584.jpg"
+    "file": "SnapInsta_703156052.jpg",
+    "kind": "architecture"
    },
    {
     "src": "assets/images/experiences/bkk-timespace-06.jpg",
@@ -853,7 +761,8 @@
     "h": 1920,
     "alt": "A window table looking over the pond",
     "drive": "1UZBLtvBEGEnl5JRGUY2jlgM410ifApV8",
-    "file": "SnapInsta_702531146.jpg"
+    "file": "SnapInsta_702531146.jpg",
+    "kind": "interior"
    },
    {
     "src": "assets/images/experiences/bkk-timespace-07.jpg",
@@ -861,7 +770,8 @@
     "h": 1920,
     "alt": "Small white tables standing in the pond",
     "drive": "1Mie6N2eiwsg1d0TI-ZKiyLhb8wRcozdm",
-    "file": "SnapInsta_701184667.jpg"
+    "file": "SnapInsta_701184667.jpg",
+    "kind": "atmosphere"
    }
   ]
  },
@@ -872,12 +782,22 @@
   "frame": "4/5",
   "images": [
    {
+    "src": "assets/images/experiences/whispering-03.jpg",
+    "w": 670,
+    "h": 1006,
+    "alt": "The timber hall with its long table and spiral stair",
+    "drive": "176PVFW5D9g5-eqlJ3QHQFnmC1dbCjuog",
+    "file": "WhisperingBKKLiving040-670x1006.JPG",
+    "kind": "interior"
+   },
+   {
     "src": "assets/images/experiences/whispering-01.jpg",
     "w": 670,
     "h": 1006,
     "alt": "The white farmhouse façade with an olive tree",
     "drive": "1ttLK9uMrS5gVVZ_6IasM185-q6SW7CBR",
-    "file": "WhisperingBKKLiving06-670x1006.JPG"
+    "file": "WhisperingBKKLiving06-670x1006.JPG",
+    "kind": "exterior"
    },
    {
     "src": "assets/images/experiences/whispering-02.jpg",
@@ -885,15 +805,8 @@
     "h": 1333,
     "alt": "The weathered doors of Whispering Land between planted urns",
     "drive": "1muHyCYFrfi6DW13hmvRgT7a-N8C6cfSf",
-    "file": "470174067.jpg"
-   },
-   {
-    "src": "assets/images/experiences/whispering-03.jpg",
-    "w": 670,
-    "h": 1006,
-    "alt": "The timber hall with its long table and spiral stair",
-    "drive": "176PVFW5D9g5-eqlJ3QHQFnmC1dbCjuog",
-    "file": "WhisperingBKKLiving040-670x1006.JPG"
+    "file": "470174067.jpg",
+    "kind": "exterior"
    },
    {
     "src": "assets/images/experiences/whispering-04.jpg",
@@ -901,15 +814,8 @@
     "h": 1006,
     "alt": "Cakes under glass cloches",
     "drive": "1CxRKAX0iYBXJ7h8viPMt-zbi_y3nlkkV",
-    "file": "WhisperingCafe027-670x1006.JPG"
-   },
-   {
-    "src": "assets/images/experiences/whispering-05.jpg",
-    "w": 670,
-    "h": 1006,
-    "alt": "Dressing poured over a garden salad",
-    "drive": "1N2oLTOLBygH78MmrYGSeP-bsHi12PpFI",
-    "file": "WhisperingCafe0372-670x1006.JPG"
+    "file": "WhisperingCafe027-670x1006.JPG",
+    "kind": "counter"
    }
   ]
  },
@@ -920,20 +826,13 @@
   "frame": "4/5",
   "images": [
    {
-    "src": "assets/images/experiences/vte-laoderm-01.jpg",
-    "w": 2000,
-    "h": 2000,
-    "alt": "A Lao Derm sharing plate of grilled meat, vegetables and jeow",
-    "drive": "12A0CAjBGe_UW2t5n2X-Yfx4ImTBqEThi",
-    "file": "IMG_3238.jpeg"
-   },
-   {
     "src": "assets/images/experiences/vte-laoderm-02.jpg",
     "w": 2000,
     "h": 2000,
     "alt": "The long table under the arches towards the lit bar",
     "drive": "1IfB_tUGDcYLSZVNIcwzBse5sXkZt5vHi",
-    "file": "IMG_3241.jpeg"
+    "file": "IMG_3241.jpeg",
+    "kind": "dining-room"
    },
    {
     "src": "assets/images/experiences/vte-laoderm-03.jpg",
@@ -941,39 +840,8 @@
     "h": 1333,
     "alt": "A hostess in sinh walking the dining room",
     "drive": "1Bi9DTJ27MU6cidtwl5vGN7AsaqLLjEcU",
-    "file": "IMG_3239.jpeg"
-   },
-   {
-    "src": "assets/images/experiences/vte-laoderm-04.jpg",
-    "w": 2000,
-    "h": 2000,
-    "alt": "Hands spooning a Lao salad, sticky rice and jeow beside",
-    "drive": "1B2lK5qyJXhI6kDFjWauCD6sMTU2EzBWe",
-    "file": "IMG_3245.jpeg"
-   },
-   {
-    "src": "assets/images/experiences/vte-laoderm-05.jpg",
-    "w": 2000,
-    "h": 2000,
-    "alt": "The bar under crystal chandeliers",
-    "drive": "1BNN5h5MEIpK2LhQcvrUo5N0ob2LuLXQb",
-    "file": "IMG_3254.jpeg"
-   },
-   {
-    "src": "assets/images/experiences/vte-laoderm-06.jpg",
-    "w": 2000,
-    "h": 1333,
-    "alt": "Bowls of Lao dishes shared from above",
-    "drive": "19EeF7Oqe7Fm_CqXGddmxKRnQxEAvDUnr",
-    "file": "IMG_3244.jpeg"
-   },
-   {
-    "src": "assets/images/experiences/vte-laoderm-07.jpg",
-    "w": 1333,
-    "h": 2000,
-    "alt": "A bartender at the amber-lit bar",
-    "drive": "1_Cxszz1CihZ0cBzh5x31wuu8w96dCueZ",
-    "file": "IMG_3246.jpeg"
+    "file": "IMG_3239.jpeg",
+    "kind": "interior"
    },
    {
     "src": "assets/images/experiences/vte-laoderm-08.jpg",
@@ -981,7 +849,26 @@
     "h": 1500,
     "alt": "A set table in the dining room, green shutters behind",
     "drive": "1JlHF3_hGkDTgFZHMLDPQMsc1cUWd2PT7",
-    "file": "IMG_3253.jpeg"
+    "file": "IMG_3253.jpeg",
+    "kind": "dining-room"
+   },
+   {
+    "src": "assets/images/experiences/vte-laoderm-05.jpg",
+    "w": 2000,
+    "h": 2000,
+    "alt": "The bar under crystal chandeliers",
+    "drive": "1BNN5h5MEIpK2LhQcvrUo5N0ob2LuLXQb",
+    "file": "IMG_3254.jpeg",
+    "kind": "interior"
+   },
+   {
+    "src": "assets/images/experiences/vte-laoderm-07.jpg",
+    "w": 1333,
+    "h": 2000,
+    "alt": "A bartender at the amber-lit bar",
+    "drive": "1_Cxszz1CihZ0cBzh5x31wuu8w96dCueZ",
+    "file": "IMG_3246.jpeg",
+    "kind": "interior"
    }
   ]
  },
@@ -997,7 +884,8 @@
     "h": 1334,
     "alt": "The thatched riverside terrace and palms at River Moon",
     "drive": "19lpZB9xK7Khppyk-8EZHOtgH1pRd7023",
-    "file": "IMG_3653.jpeg"
+    "file": "IMG_3653.jpeg",
+    "kind": "exterior"
    },
    {
     "src": "assets/images/experiences/vte-rivermoon-02.jpg",
@@ -1005,7 +893,8 @@
     "h": 2000,
     "alt": "The deck over the Mekong at sunset",
     "drive": "12vhdM3Jyau6xLlkCwXV0Hr-rTYGKAcy8",
-    "file": "IMG_3646.jpeg"
+    "file": "IMG_3646.jpeg",
+    "kind": "atmosphere"
    },
    {
     "src": "assets/images/experiences/vte-rivermoon-03.jpg",
@@ -1013,7 +902,8 @@
     "h": 1334,
     "alt": "Tables on the timber deck under parasols",
     "drive": "1g3-QdB9xyclGaOv2W5ZxW6Ch8saNOa69",
-    "file": "IMG_3652.jpeg"
+    "file": "IMG_3652.jpeg",
+    "kind": "atmosphere"
    },
    {
     "src": "assets/images/experiences/vte-rivermoon-04.jpg",
@@ -1021,7 +911,8 @@
     "h": 2000,
     "alt": "Garden tables on the lawn under the trees",
     "drive": "1qdfECKZ0unYYeIShYFsxapD6zEaALG_Q",
-    "file": "IMG_3648.jpeg"
+    "file": "IMG_3648.jpeg",
+    "kind": "exterior"
    },
    {
     "src": "assets/images/experiences/vte-rivermoon-05.jpg",
@@ -1029,7 +920,8 @@
     "h": 2000,
     "alt": "Thatched pavilions along the water",
     "drive": "1KSlMi18RpmTjz4HyYMgcM5CiBljOFPET",
-    "file": "IMG_3656.jpeg"
+    "file": "IMG_3656.jpeg",
+    "kind": "exterior"
    },
    {
     "src": "assets/images/experiences/vte-rivermoon-06.jpg",
@@ -1037,7 +929,8 @@
     "h": 1334,
     "alt": "Guests at garden tables under string lights",
     "drive": "1mgUx3Tqqs1sSFup9B9y4m8RsCA4wSqST",
-    "file": "IMG_3654.jpeg"
+    "file": "IMG_3654.jpeg",
+    "kind": "exterior"
    }
   ]
  },
@@ -1053,7 +946,8 @@
     "h": 1440,
     "alt": "The dining room through its lattice screens",
     "drive": "1cAd36NZ7ug8ZezaKoVLWJhDy_T-agXqS",
-    "file": "SnapInsta_623888625.jpg"
+    "file": "SnapInsta_623888625.jpg",
+    "kind": "interior"
    },
    {
     "src": "assets/images/experiences/vte-3merchants-02.jpg",
@@ -1061,31 +955,8 @@
     "h": 1440,
     "alt": "A painted mural behind teal velvet seating",
     "drive": "1lPenusoWtklX6fu93K1z-uOLH02uvrox",
-    "file": "SnapInsta_626348508.jpg"
-   },
-   {
-    "src": "assets/images/experiences/vte-3merchants-03.jpg",
-    "w": 1365,
-    "h": 1365,
-    "alt": "A table of dishes on a teal banquette",
-    "drive": "1v-qOb4Db9Z_U4aPS393nUKlaAp_zBrO9",
-    "file": "IMG_3715.jpeg"
-   },
-   {
-    "src": "assets/images/experiences/vte-3merchants-04.jpg",
-    "w": 1365,
-    "h": 1365,
-    "alt": "A curry-sauced course on a blue ceramic plate",
-    "drive": "19tHlxCOyWshJ_NN53ZfHOPXRzu-xUNNc",
-    "file": "IMG_3713.jpeg"
-   },
-   {
-    "src": "assets/images/experiences/vte-3merchants-05.jpg",
-    "w": 1440,
-    "h": 1440,
-    "alt": "A cocktail served under a cloud of smoke",
-    "drive": "1al-E-cqFqrm2HhWXnV1d2IROvGk36rGg",
-    "file": "SnapInsta_624943586.jpg"
+    "file": "SnapInsta_626348508.jpg",
+    "kind": "interior"
    }
   ]
  },
@@ -1101,7 +972,8 @@
     "h": 961,
     "alt": "The blue façade and sign of Kaogee Le Triomphe",
     "drive": "1Tpynngpsi7R-Pt-cX9AWd1U_y6t2RrGI",
-    "file": "SnapInsta_656278157.jpg"
+    "file": "SnapInsta_656278157.jpg",
+    "kind": "exterior"
    },
    {
     "src": "assets/images/experiences/vte-kaogee-02.jpg",
@@ -1109,7 +981,8 @@
     "h": 963,
     "alt": "Rattan chairs on the cobbled terrace",
     "drive": "1ZD0Tn3sf2jpvU7y12CrrvrTuak2hdAWY",
-    "file": "IMG_4091.jpeg"
+    "file": "IMG_4091.jpeg",
+    "kind": "exterior"
    },
    {
     "src": "assets/images/experiences/vte-kaogee-03.jpg",
@@ -1117,7 +990,8 @@
     "h": 961,
     "alt": "The café terrace under the trees",
     "drive": "1rOVobxNrE_vSYWLtXDTDggZk2YQj9x9K",
-    "file": "IMG_4092.jpeg"
+    "file": "IMG_4092.jpeg",
+    "kind": "atmosphere"
    },
    {
     "src": "assets/images/experiences/vte-kaogee-04.jpg",
@@ -1125,7 +999,8 @@
     "h": 963,
     "alt": "Tables in the courtyard under a parasol",
     "drive": "12KoDc8yQSiTTMMqJDxBqayYDegw4DG_K",
-    "file": "IMG_4093.jpeg"
+    "file": "IMG_4093.jpeg",
+    "kind": "atmosphere"
    }
   ]
  },
@@ -1136,28 +1011,13 @@
   "frame": "4/5",
   "images": [
    {
-    "src": "assets/images/experiences/vte-lacuna-01.jpg",
-    "w": 1440,
-    "h": 1800,
-    "alt": "The white courtyard, parasols and rattan chairs",
-    "drive": "1PJwmcGM6SFCAqvN89kdT-jJGApBRmAfd",
-    "file": "SnapInsta_656416850.jpg"
-   },
-   {
-    "src": "assets/images/experiences/vte-lacuna-02.jpg",
-    "w": 896,
-    "h": 1195,
-    "alt": "The white villa of Lacuna under a cloudy sky",
-    "drive": "1nzdyjNW1qe93OYZ309amjyP_qPGko_sa",
-    "file": "IMG_3257.png"
-   },
-   {
     "src": "assets/images/experiences/vte-lacuna-03.jpg",
     "w": 1440,
     "h": 1920,
     "alt": "The interior with sheer curtains and low tables",
     "drive": "1zsEBLrZwbO8QJgVawjvJ0z52TM4d3W-k",
-    "file": "SnapInsta_537502520.jpg"
+    "file": "SnapInsta_537502520.jpg",
+    "kind": "interior"
    },
    {
     "src": "assets/images/experiences/vte-lacuna-04.jpg",
@@ -1165,7 +1025,17 @@
     "h": 1800,
     "alt": "The Lacuna window with plants behind",
     "drive": "13r5fTPoJOYsFJPVfhilkOgEMygyAIcUm",
-    "file": "SnapInsta_655118520.jpg"
+    "file": "SnapInsta_655118520.jpg",
+    "kind": "interior"
+   },
+   {
+    "src": "assets/images/experiences/vte-lacuna-01.jpg",
+    "w": 1440,
+    "h": 1800,
+    "alt": "The white courtyard, parasols and rattan chairs",
+    "drive": "1PJwmcGM6SFCAqvN89kdT-jJGApBRmAfd",
+    "file": "SnapInsta_656416850.jpg",
+    "kind": "atmosphere"
    },
    {
     "src": "assets/images/experiences/vte-lacuna-05.jpg",
@@ -1173,15 +1043,17 @@
     "h": 1800,
     "alt": "A garden table under the parasol",
     "drive": "1qjXWwjqDjbCXq9W2rCbYpDtskeE0VJYz",
-    "file": "SnapInsta_669777786.jpg"
+    "file": "SnapInsta_669777786.jpg",
+    "kind": "atmosphere"
    },
    {
-    "src": "assets/images/experiences/vte-lacuna-06.jpg",
-    "w": 1440,
-    "h": 1920,
-    "alt": "A strawberry cream cake",
-    "drive": "1p-bmhtiQ-lRaWivXSDRKIXZ7Dx16-cki",
-    "file": "SnapInsta_631359743.jpg"
+    "src": "assets/images/experiences/vte-lacuna-02.jpg",
+    "w": 896,
+    "h": 1195,
+    "alt": "The white villa of Lacuna under a cloudy sky",
+    "drive": "1nzdyjNW1qe93OYZ309amjyP_qPGko_sa",
+    "file": "IMG_3257.png",
+    "kind": "exterior"
    }
   ]
  },
@@ -1197,15 +1069,8 @@
     "h": 2000,
     "alt": "The bar counter and back-bar shelves at Sona",
     "drive": "1Z2goS7t3oSU2G_q0M48aeMePfBlP-aO-",
-    "file": "SaveDouyin_6.jpeg"
-   },
-   {
-    "src": "assets/images/experiences/vte-sona-02.jpg",
-    "w": 1333,
-    "h": 2000,
-    "alt": "The arched window with its striped chairs",
-    "drive": "1uqE4mFOeAOOORdsG54As1NBV00jgjr8K",
-    "file": "SaveDouyin_2.jpeg"
+    "file": "SaveDouyin_6.jpeg",
+    "kind": "interior"
    },
    {
     "src": "assets/images/experiences/vte-sona-03.jpg",
@@ -1213,23 +1078,17 @@
     "h": 2000,
     "alt": "The corridor to the bar, curtain and arch",
     "drive": "1kA5s6j3tF62Ql6FQAZzvZ5BKLr6Mhy7A",
-    "file": "SaveDouyin_4.jpeg"
+    "file": "SaveDouyin_4.jpeg",
+    "kind": "interior"
    },
    {
-    "src": "assets/images/experiences/vte-sona-04.jpg",
-    "w": 1440,
-    "h": 1800,
-    "alt": "Salmon toasts and a cocktail",
-    "drive": "1zpj0sCvXx9jNI4xKJnEic7QmkKh5eF4P",
-    "file": "SnapInsta_471684174.jpg"
-   },
-   {
-    "src": "assets/images/experiences/vte-sona-05.jpg",
-    "w": 922,
-    "h": 1152,
-    "alt": "A coupe cocktail on a pink table",
-    "drive": "1qEtnD1ym1-a-eCmMInBcm31_dxsoTuF-",
-    "file": "IMG_3695.jpeg"
+    "src": "assets/images/experiences/vte-sona-02.jpg",
+    "w": 1333,
+    "h": 2000,
+    "alt": "The arched window with its striped chairs",
+    "drive": "1uqE4mFOeAOOORdsG54As1NBV00jgjr8K",
+    "file": "SaveDouyin_2.jpeg",
+    "kind": "exterior"
    }
   ]
  },
@@ -1245,7 +1104,8 @@
     "h": 1500,
     "alt": "The mall atrium and its lit galleries",
     "drive": "1DqD_1FRhlEeSrIfiImdN4dfYluWhC63F",
-    "file": "IMG_3181.jpeg"
+    "file": "IMG_3181.jpeg",
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/vte-kokkok-02.jpg",
@@ -1253,7 +1113,8 @@
     "h": 2000,
     "alt": "The Food World hall under neon ceiling lights",
     "drive": "1Cn9lGaK4uzbKBrxGRny5bKG7l4_uSnJ_",
-    "file": "IMG_3173.jpeg"
+    "file": "IMG_3173.jpeg",
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/vte-kokkok-03.jpg",
@@ -1261,7 +1122,8 @@
     "h": 1500,
     "alt": "A gilded gate with red lanterns",
     "drive": "1Zs5xzAyQrGzfHyfp6MP4gONSpNkDtI0R",
-    "file": "IMG_3179.jpeg"
+    "file": "IMG_3179.jpeg",
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/vte-kokkok-04.jpg",
@@ -1269,7 +1131,8 @@
     "h": 1500,
     "alt": "A café counter in the food hall",
     "drive": "1y5CT8e3JXD8L4m5T4l-nXGD52aeqH57r",
-    "file": "IMG_3178.jpeg"
+    "file": "IMG_3178.jpeg",
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/vte-kokkok-05.jpg",
@@ -1277,7 +1140,8 @@
     "h": 2000,
     "alt": "Food stalls seen from above",
     "drive": "1akpjEyx7-Q8WNxkQP7scsL7D6DsshWgP",
-    "file": "IMG_3184.jpeg"
+    "file": "IMG_3184.jpeg",
+    "kind": "venue"
    }
   ]
  },
@@ -1293,7 +1157,8 @@
     "h": 1125,
     "alt": "The mirrored bar of BKK Social Club",
     "drive": "1ytNjl1TQT0e3GzmhXlbCfPtKUOhVXzJk",
-    "file": "IMG_3559.jpeg"
+    "file": "IMG_3559.jpeg",
+    "kind": "interior"
    },
    {
     "src": "assets/images/experiences/bkk-social-02.jpg",
@@ -1301,31 +1166,17 @@
     "h": 667,
     "alt": "Brass arches and the marble bar",
     "drive": "1icFM0wJ5fb9obqRnrzxdOaudYqVAnRHy",
-    "file": "IMG_3560.jpeg"
+    "file": "IMG_3560.jpeg",
+    "kind": "interior"
    },
    {
-    "src": "assets/images/experiences/bkk-social-03.jpg",
-    "w": 1000,
-    "h": 667,
-    "alt": "A cocktail on the marble counter",
-    "drive": "1981lzG247ITtbXf7d0s1Sv2su835KvPl",
-    "file": "IMG_3562.jpeg"
-   },
-   {
-    "src": "assets/images/experiences/bkk-social-04.jpg",
-    "w": 1000,
-    "h": 1333,
-    "alt": "A glass over ice on a dark table",
-    "drive": "1V2i3c4UFlFH6ADYml7z0AiRn9ELEM165",
-    "file": "IMG_3693.jpeg"
-   },
-   {
-    "src": "assets/images/experiences/bkk-social-05.jpg",
-    "w": 1000,
-    "h": 667,
-    "alt": "Canapés served on a silver tray",
-    "drive": "1tP8zvWAXb41vVRv6C8e9tN_zVCBACZEk",
-    "file": "IMG_3563.jpeg"
+    "src": "assets/images/experiences/bkk-social-06.jpg",
+    "w": 739,
+    "h": 493,
+    "alt": "The bar room, arches and the counter",
+    "drive": "1PXb9JMCWq4xOqMoCVxjUkV0dz-XMSou5",
+    "file": "IMG_3564.jpeg",
+    "kind": "interior"
    }
   ]
  },
@@ -1341,7 +1192,8 @@
     "h": 1920,
     "alt": "The reception desk of Let's Relax",
     "drive": "1czH7fFKq_q3N41KG8xjxz45-jyFfTxZr",
-    "file": "IMG_4076.jpeg"
+    "file": "IMG_4076.jpeg",
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/bkk-letsrelax-02.jpg",
@@ -1349,7 +1201,8 @@
     "h": 1920,
     "alt": "Massage mats in a timber-panelled room",
     "drive": "1YSIkA6ZFtvnmghgdMm8EsFUgexL0IB-K",
-    "file": "IMG_4077.jpeg"
+    "file": "IMG_4077.jpeg",
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/bkk-letsrelax-03.jpg",
@@ -1357,7 +1210,8 @@
     "h": 1920,
     "alt": "Reclining chairs behind sheer curtains",
     "drive": "1OXe39bnhFJ6fpQLyOMeaLGON_j0nzoev",
-    "file": "IMG_4078.jpeg"
+    "file": "IMG_4078.jpeg",
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/bkk-letsrelax-04.jpg",
@@ -1365,7 +1219,8 @@
     "h": 1920,
     "alt": "The foot bath counter",
     "drive": "1QWpf6W2cbXFgiEEju9rlafc98YfnYCjT",
-    "file": "IMG_4079.jpeg"
+    "file": "IMG_4079.jpeg",
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/bkk-letsrelax-05.jpg",
@@ -1373,7 +1228,8 @@
     "h": 1920,
     "alt": "The waiting lounge",
     "drive": "1I1B5KSlsRNx0h5AyBte13PC1Kqgcb_wW",
-    "file": "IMG_4080.jpeg"
+    "file": "IMG_4080.jpeg",
+    "kind": "venue"
    }
   ]
  },
@@ -1389,7 +1245,8 @@
     "h": 1800,
     "alt": "The treetop pavilion in the park canopy of Dusit Central Park",
     "drive": "1yZ4-pI8rfjjmbjWsyPVLfsISHNVcNI5B",
-    "file": "IMG_4084.jpeg"
+    "file": "IMG_4084.jpeg",
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/bkk-dusit-02.jpg",
@@ -1397,7 +1254,8 @@
     "h": 1800,
     "alt": "The Bangkok skyline from Dusit Central Park",
     "drive": "1O0evCe_hs_SURLbM1y17gBC2Q2-UKuVV",
-    "file": "IMG_4083.jpeg"
+    "file": "IMG_4083.jpeg",
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/bkk-dusit-03.jpg",
@@ -1405,7 +1263,8 @@
     "h": 1800,
     "alt": "The raised walkway through the trees",
     "drive": "153FvXhPgdO8UHEMBfkYOl-ji6XKUfWlM",
-    "file": "IMG_4082.jpeg"
+    "file": "IMG_4082.jpeg",
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/bkk-dusit-04.jpg",
@@ -1413,7 +1272,8 @@
     "h": 1264,
     "alt": "The atrium of the mall",
     "drive": "1gu0R_GBmvAqDxcrPIjFUM5hB2xe1-rjJ",
-    "file": "IMG_3711.jpeg"
+    "file": "IMG_3711.jpeg",
+    "kind": "venue"
    }
   ]
  },
@@ -1429,7 +1289,8 @@
     "h": 2000,
     "alt": "The green façade seen from the courtyard",
     "drive": "1m6CRUk5Vi2m5A0Nzkp2zw_Z25_mH9FYU",
-    "file": "IMG_3578.webp"
+    "file": "IMG_3578.webp",
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/bkk-emquartier-02.jpg",
@@ -1437,7 +1298,8 @@
     "h": 1755,
     "alt": "The spiral gardens of EmQuartier",
     "drive": "1O1YwjUMxg_5iZMwUvGI0GXRlaXms7mA-",
-    "file": "IMG_3580.jpeg"
+    "file": "IMG_3580.jpeg",
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/bkk-emquartier-03.jpg",
@@ -1445,7 +1307,8 @@
     "h": 2000,
     "alt": "The helix walkway under the glass roof",
     "drive": "1h_Mh90T_LrlVHQpRwvk0yRLD7fhchGlf",
-    "file": "IMG_3579.webp"
+    "file": "IMG_3579.webp",
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/bkk-emquartier-04.jpg",
@@ -1453,7 +1316,8 @@
     "h": 844,
     "alt": "The curved façade at night",
     "drive": "1ARktiaP7g--iYFw8rjzduSZxaC_NQuXh",
-    "file": "IMG_3581.jpeg"
+    "file": "IMG_3581.jpeg",
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/bkk-emquartier-05.jpg",
@@ -1461,7 +1325,8 @@
     "h": 880,
     "alt": "A gold storefront on the street",
     "drive": "1rnowGUA_jtNN4kLjyv8_sST8aAyGwMIJ",
-    "file": "IMG_3582.jpeg"
+    "file": "IMG_3582.jpeg",
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/bkk-emquartier-06.jpg",
@@ -1469,7 +1334,8 @@
     "h": 880,
     "alt": "The garden terrace at dusk",
     "drive": "1GhIJoK7uYiEJj5FaAo611ZR-qnXHUTod",
-    "file": "IMG_3584.jpeg"
+    "file": "IMG_3584.jpeg",
+    "kind": "venue"
    }
   ]
  },
@@ -1485,7 +1351,8 @@
     "h": 1012,
     "alt": "ICONSIAM on the Chao Phraya riverfront",
     "drive": "1aE3jDMqAW1DWR2SvIESUDltTipL4nyNG",
-    "file": "ICONSIAM1.jpg"
+    "file": "ICONSIAM1.jpg",
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/bkk-iconsiam-02.jpg",
@@ -1493,7 +1360,8 @@
     "h": 611,
     "alt": "The golden arches at the entrance",
     "drive": "1S3UaWNofFbmxKyyyx4c37v0b9Yhs5T-z",
-    "file": "IMG_3495.jpeg"
+    "file": "IMG_3495.jpeg",
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/bkk-iconsiam-03.jpg",
@@ -1501,7 +1369,8 @@
     "h": 613,
     "alt": "The indoor waterfall hall",
     "drive": "1hfalk1biJmovqEzP_U7oyFkvX92o_54a",
-    "file": "IMG_3497.png"
+    "file": "IMG_3497.png",
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/bkk-iconsiam-04.jpg",
@@ -1509,7 +1378,8 @@
     "h": 500,
     "alt": "The SookSiam floating-market floor",
     "drive": "1jhRvbhZ_PsOBdoA6SVp9M3XtbrnrMGSR",
-    "file": "IMG_3499.jpeg"
+    "file": "IMG_3499.jpeg",
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/bkk-iconsiam-05.jpg",
@@ -1517,7 +1387,8 @@
     "h": 724,
     "alt": "Escalators in the gold atrium",
     "drive": "1gRt-1krCiisqjyfLg7aqtHyv-p6AF1QF",
-    "file": "ICONSIAM5.jpg"
+    "file": "ICONSIAM5.jpg",
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/bkk-iconsiam-06.jpg",
@@ -1525,7 +1396,8 @@
     "h": 700,
     "alt": "The façade at dusk",
     "drive": "1MOFh6BjC_6FEzcOIFmQYlgPGp-HTb4Zk",
-    "file": "iconsiam01.jpg"
+    "file": "iconsiam01.jpg",
+    "kind": "venue"
    }
   ]
  },
@@ -1541,7 +1413,8 @@
     "h": 700,
     "alt": "Patuxai in daylight, palms and white benches along the avenue",
     "drive": "(city folder)",
-    "file": "patuxai-vientiane.webp"
+    "file": "patuxai-vientiane.webp",
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/vte-patuxai-02.jpg",
@@ -1549,7 +1422,8 @@
     "h": 798,
     "alt": "The view from the terraces of Patuxai over the fountain park and Lane Xang Avenue",
     "drive": "(city folder)",
-    "file": "Vientiane-Titelbild.jpg"
+    "file": "Vientiane-Titelbild.jpg",
+    "kind": "venue"
    }
   ]
  },
@@ -1565,7 +1439,8 @@
     "h": 700,
     "alt": "The red roofs of the night market from above, the Mekong at dusk behind",
     "drive": "(city folder)",
-    "file": "nachtmarkt-vientiane.webp"
+    "file": "nachtmarkt-vientiane.webp",
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/vte-nightmarket-02.jpg",
@@ -1573,7 +1448,8 @@
     "h": 700,
     "alt": "The Mekong promenade at sunset, people gathered along the river",
     "drive": "(city folder)",
-    "file": "sonnenuntergang-mekong-vientiane.webp"
+    "file": "sonnenuntergang-mekong-vientiane.webp",
+    "kind": "venue"
    }
   ]
  },
@@ -1589,7 +1465,8 @@
     "h": 1280,
     "alt": "Cherry blossom over tiled roofs and a temple canopy in Kunming",
     "drive": "(Kunming folder)",
-    "file": "589877577"
+    "file": "589877577",
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/kmg-blossom-02.jpg",
@@ -1597,7 +1474,8 @@
     "h": 1280,
     "alt": "Blossom against the eaves of a Kunming temple",
     "drive": "(Kunming folder)",
-    "file": "589902725"
+    "file": "589902725",
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/kmg-blossom-03.jpg",
@@ -1605,7 +1483,8 @@
     "h": 1280,
     "alt": "Blossom framed by a tiled roof edge",
     "drive": "(Kunming folder)",
-    "file": "602440631"
+    "file": "602440631",
+    "kind": "venue"
    }
   ]
  },
@@ -1613,55 +1492,16 @@
   "slug": "bkk-barus",
   "folder": "152 - Bar - Bar Us",
   "folderId": "1POkw60vcuEBBrm8mUnpL6cbVB3eLXqUP",
-  "frame": "4/5",
+  "frame": "3/2",
   "images": [
-   {
-    "src": "assets/images/experiences/bkk-barus-01.jpg",
-    "w": 1500,
-    "h": 2000,
-    "alt": "A martini on a steel tray, olives on the side",
-    "drive": "15HTZthAvxk6mjhd1Jtsucf0hy9Z-qRfb",
-    "file": "SnapInsta.to_785758983_18045062849807894_7654570346690610228_n.jpg"
-   },
-   {
-    "src": "assets/images/experiences/bkk-barus-02.jpg",
-    "w": 1023,
-    "h": 1364,
-    "alt": "A martini handed across the bar",
-    "drive": "1tFixLwt0Iu8_D1Jxnb0zDnzHROx6njle",
-    "file": "SnapInsta.to_785146320_18045062807807894_8114864575154599587_n.jpg"
-   },
-   {
-    "src": "assets/images/experiences/bkk-barus-03.jpg",
-    "w": 1500,
-    "h": 2000,
-    "alt": "A cherry dropped into a cocktail",
-    "drive": "16LVMqf2mn9RF8kqCXCftmTfpc4PrZwg1",
-    "file": "SnapInsta.to_788601061_18045062753807894_8860957775268523969_n.jpg"
-   },
-   {
-    "src": "assets/images/experiences/bkk-barus-04.jpg",
-    "w": 1500,
-    "h": 2000,
-    "alt": "A martini on the tray, glasses behind",
-    "drive": "1RuU_cAASbSHBdVUtvG1yvy9mc5e451ic",
-    "file": "SnapInsta.to_786452935_18045062837807894_1887592924517011607_n.jpg"
-   },
-   {
-    "src": "assets/images/experiences/bkk-barus-05.jpg",
-    "w": 1500,
-    "h": 2000,
-    "alt": "Three martinis in a row",
-    "drive": "1sX4tYMsaOAxCUDEaJewcoPtcstyn_glf",
-    "file": "SnapInsta.to_786242154_18045062744807894_1398321008176205229_n.jpg"
-   },
    {
     "src": "assets/images/experiences/bkk-barus-06.jpg",
     "w": 2000,
     "h": 1069,
     "alt": "The dark counter of Bar Us",
     "drive": "12NMjc1EX1ahlpqrzbGvPL32hP-KcK9On",
-    "file": "IMG_3601.jpeg"
+    "file": "IMG_3601.jpeg",
+    "kind": "interior"
    },
    {
     "src": "assets/images/experiences/bkk-barus-07.jpg",
@@ -1669,7 +1509,8 @@
     "h": 959,
     "alt": "The bar wall of Bar Us",
     "drive": "1oDWeaJ3csUDQh-Lr2Jj414okhxqffuwH",
-    "file": "IMG_3602.jpeg"
+    "file": "IMG_3602.jpeg",
+    "kind": "counter"
    }
   ]
  },
@@ -1677,7 +1518,7 @@
   "slug": "bkk-ledukaan",
   "folder": "092 - Restaurant - Le Du Kaan",
   "folderId": "1ISGuUGvABhEDXLswY5PyVxUaecNPRAGB",
-  "frame": "4/5",
+  "frame": "3/2",
   "images": [
    {
     "src": "assets/images/experiences/bkk-ledukaan-01.jpg",
@@ -1685,7 +1526,8 @@
     "h": 1334,
     "alt": "The dining room of Le Du Kaan on the 56th floor",
     "drive": "1CyG-yBVIlQMXX4lEzfWGq0aQ-EF605Zp",
-    "file": "IMG_4033.jpeg"
+    "file": "IMG_4033.jpeg",
+    "kind": "interior"
    },
    {
     "src": "assets/images/experiences/bkk-ledukaan-02.jpg",
@@ -1693,7 +1535,8 @@
     "h": 1334,
     "alt": "The rooftop bar at dusk",
     "drive": "1cvFVW1CYKQC2EA7z32X7786Z85bV_LDl",
-    "file": "IMG_4032.jpeg"
+    "file": "IMG_4032.jpeg",
+    "kind": "architecture"
    },
    {
     "src": "assets/images/experiences/bkk-ledukaan-03.jpg",
@@ -1701,7 +1544,8 @@
     "h": 1334,
     "alt": "The indoor dining area",
     "drive": "1baFrsNKBgBac7wbEE865yGenJ6-CLxy1",
-    "file": "IMG_4031.jpeg"
+    "file": "IMG_4031.jpeg",
+    "kind": "dining-room"
    },
    {
     "src": "assets/images/experiences/bkk-ledukaan-04.jpg",
@@ -1709,39 +1553,8 @@
     "h": 1333,
     "alt": "The Bangkok skyline at sunset from the terrace",
     "drive": "1A1WWpafGQawO6OVMVS3uCDT-TXEZs8Fm",
-    "file": "IMG_4034.jpeg"
-   },
-   {
-    "src": "assets/images/experiences/bkk-ledukaan-05.jpg",
-    "w": 993,
-    "h": 1126,
-    "alt": "Dishes of the Thai menu",
-    "drive": "1d4U1pg5ui8kK0ohTz9dJxa4tlP2fYNTn",
-    "file": "IMG_4037.png"
-   },
-   {
-    "src": "assets/images/experiences/bkk-ledukaan-06.jpg",
-    "w": 1044,
-    "h": 764,
-    "alt": "Dishes of the Thai menu",
-    "drive": "1W_T--SkbdQkE46_ZjLnT2wQ8dq7LHVL6",
-    "file": "IMG_4038.png"
-   },
-   {
-    "src": "assets/images/experiences/bkk-ledukaan-07.jpg",
-    "w": 859,
-    "h": 739,
-    "alt": "Chef Thitid “Ton” Tassanakajohn",
-    "drive": "1_4XmwznnNKGVz7PaqcROa60ax629FzRX",
-    "file": "Chef Ton.png"
-   },
-   {
-    "src": "assets/images/experiences/bkk-ledukaan-08.jpg",
-    "w": 957,
-    "h": 696,
-    "alt": "Head Chef Chatchawan “Bank” Varahajeerakul",
-    "drive": "1UbueCOQu5YCxuUOSZudz7oT85P__z5n0",
-    "file": "z5n0__Chef Bank.png"
+    "file": "IMG_4034.jpeg",
+    "kind": "atmosphere"
    }
   ]
  },
@@ -1757,7 +1570,8 @@
     "h": 2000,
     "alt": "The façade of the Lao National Museum",
     "drive": "1MHx4vyiOhddmVE4lb8uydp1UgFxEBrwQ",
-    "file": "IMG_4100.jpeg"
+    "file": "IMG_4100.jpeg",
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/vte-laonationalmuseum-02.jpg",
@@ -1765,7 +1579,8 @@
     "h": 1080,
     "alt": "The museum building from the avenue",
     "drive": "1O1qjH6P0fK1D3fxo_7obE1C-YmN_o-TX",
-    "file": "IMG_4102.webp"
+    "file": "IMG_4102.webp",
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/vte-laonationalmuseum-03.jpg",
@@ -1773,7 +1588,8 @@
     "h": 2000,
     "alt": "Display cases in the gallery",
     "drive": "1bk7PFSwlfeAggENCysIrrz_6toJPF3yW",
-    "file": "IMG_4101.jpeg"
+    "file": "IMG_4101.jpeg",
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/vte-laonationalmuseum-04.jpg",
@@ -1781,7 +1597,8 @@
     "h": 1200,
     "alt": "Artefacts in the collection",
     "drive": "1iRRzyB4M3ZHvOuHd5CwlgEM1NlY7sODe",
-    "file": "IMG_4099.jpeg"
+    "file": "IMG_4099.jpeg",
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/vte-laonationalmuseum-05.jpg",
@@ -1789,7 +1606,8 @@
     "h": 1200,
     "alt": "An artefact of the collection",
     "drive": "1l8gedPf62fKBgs-rTE-RiF0g4jFw912-",
-    "file": "IMG_4098.jpeg"
+    "file": "IMG_4098.jpeg",
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/vte-laonationalmuseum-06.jpg",
@@ -1797,7 +1615,8 @@
     "h": 1500,
     "alt": "A model stupa in the hall",
     "drive": "1lvVakbdaHuKyt7GNUo8uutSod_gD4i5e",
-    "file": "IMG_4103.jpeg"
+    "file": "IMG_4103.jpeg",
+    "kind": "venue"
    }
   ]
  },
@@ -1813,7 +1632,8 @@
     "h": 2000,
     "alt": "The courtyard of the Hor Kham Residence",
     "drive": "1C39OnNDm-wRFDZpI3Y84zYYcnZbfjbEl",
-    "file": "IMG_3671.jpeg"
+    "file": "IMG_3671.jpeg",
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/vte-silkresidence-02.jpg",
@@ -1821,7 +1641,8 @@
     "h": 2000,
     "alt": "The residence and its garden pools",
     "drive": "1JvsXYFDRXFmNZsmdmTKdmVNzw1gUc7vg",
-    "file": "IMG_3675.jpeg"
+    "file": "IMG_3675.jpeg",
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/vte-silkresidence-03.jpg",
@@ -1829,7 +1650,8 @@
     "h": 450,
     "alt": "Traditional textiles in the Heritage Hall",
     "drive": "1wmZm6aCXy90ad_V6a59YZLSJYueGtLU3",
-    "file": "IMG_4104.gif"
+    "file": "IMG_4104.gif",
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/vte-silkresidence-04.jpg",
@@ -1837,7 +1659,8 @@
     "h": 300,
     "alt": "Traditional costumes on display",
     "drive": "1JR0FE8G1MmHlq9scUVP25yB0z-m0bkxs",
-    "file": "IMG_4105.gif"
+    "file": "IMG_4105.gif",
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/vte-silkresidence-05.jpg",
@@ -1845,7 +1668,8 @@
     "h": 300,
     "alt": "A silk garment in the exhibition",
     "drive": "1clbIEzjLCgV0Bzj4Ud_E3nLn9HSF8RMX",
-    "file": "IMG_4106.gif"
+    "file": "IMG_4106.gif",
+    "kind": "venue"
    }
   ]
  },
@@ -1861,7 +1685,8 @@
     "h": 1100,
     "alt": "Gilded pillars inside the Lao Art Museum",
     "drive": "1jMKKl4rbKK902K27lee6qJ6AYPhJSsU1",
-    "file": "IMG_4111.jpeg"
+    "file": "IMG_4111.jpeg",
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/vte-laoartmuseum-02.jpg",
@@ -1869,7 +1694,8 @@
     "h": 2000,
     "alt": "A carved wooden figure",
     "drive": "15sNzPFyHlaCcANAXYkYpqgYZUvfNdNPW",
-    "file": "IMG_4110.jpeg"
+    "file": "IMG_4110.jpeg",
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/vte-laoartmuseum-03.jpg",
@@ -1877,7 +1703,8 @@
     "h": 1500,
     "alt": "Buddha figures in the collection",
     "drive": "125mooFRgh_0NZnHnUquIJHGsDt3qjxl4",
-    "file": "IMG_4109.jpeg"
+    "file": "IMG_4109.jpeg",
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/vte-laoartmuseum-04.jpg",
@@ -1885,7 +1712,8 @@
     "h": 960,
     "alt": "A carved wooden face",
     "drive": "1D9SKdh9c2LJjRFD0hEVFqqZvMe_encRp",
-    "file": "IMG_4115.jpeg"
+    "file": "IMG_4115.jpeg",
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/vte-laoartmuseum-05.jpg",
@@ -1893,7 +1721,8 @@
     "h": 2000,
     "alt": "A carved bust in the gallery",
     "drive": "1q8bA9a5g309V6QZMQkZu6q2viNf0ebZ0",
-    "file": "IMG_4114.jpeg"
+    "file": "IMG_4114.jpeg",
+    "kind": "venue"
    },
    {
     "src": "assets/images/experiences/vte-laoartmuseum-06.jpg",
@@ -1901,7 +1730,8 @@
     "h": 447,
     "alt": "The Lao Art Museum from outside",
     "drive": "1mS1zTEXZUMWHg2Ppv0yLUIVAwRbxO5tS",
-    "file": "IMG_4112.jpeg"
+    "file": "IMG_4112.jpeg",
+    "kind": "venue"
    }
   ]
  }
