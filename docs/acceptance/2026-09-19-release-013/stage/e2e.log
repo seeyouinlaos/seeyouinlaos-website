@@ -1,5 +1,5 @@
 PASS clip-poster-first — {"state":"loading","bg":true,"src":"assets/video/bangkok-card.mp4","w":318,"h":254,"video":true} (the photograph is on screen before the clip)
-PASS clip-plays-at-the-cards-geometry — {"state":"playing","bg":true,"w":318,"h":254,"ratio":1.25,"video":true,"playing":true,"t":3.49,"muted":true,"inline":true,"loop":true,"controls":false,"opacity":"1","poster":"assets/images/city/001-bangkok-chao-phraya-sk
+PASS clip-plays-at-the-cards-geometry — {"state":"playing","bg":true,"w":318,"h":254,"ratio":1.25,"video":true,"playing":true,"t":3.48,"muted":true,"inline":true,"loop":true,"controls":false,"opacity":"1","poster":"assets/images/city/001-bangkok-chao-phraya-sk
 PASS clip-reduced-motion-photograph — {"state":"still","bg":true,"w":318,"h":254,"ratio":1.25,"video":false,"playing":false,"t":null,"muted":false,"inline":false,"loop":false,"controls":false,"opacity":null,"poster":null,"srcOk":false}
 PASS clip-blocked-source-photograph — {"state":"still","bg":true,"w":318,"h":254,"ratio":1.25,"video":false,"playing":false,"t":null,"muted":false,"inline":false,"loop":false,"controls":false,"opacity":null,"poster":null,"srcOk":false}
 PASS clip-iphone-safari — {"state":"playing","bg":true,"video":true,"playing":true,"inline":true,"muted":true,"ratio":1.25,"ov":0} (plays inline and muted, or the photograph stays — never black)
@@ -24,10 +24,10 @@ PASS reset-dry-run — {"rooms":7,"seats":2,"drafts":3,"kv":7}
 PASS reset-dry-run-wrote-nothing — 7 guest holds after the dry run
 PASS reset-needs-the-exact-words — 400 the confirmation words are missing
 PASS reset-needs-the-snapshot-digest — 400 the snapshot digest is missing — snapshot first, keep the backup, then execute
-PASS reset-snapshot-carries-every-value — {"values":19,"digest":"36709832f0b6","sameAsTheDryRunBefore":true}
+PASS reset-snapshot-carries-every-value — {"values":19,"digest":"1cd1003bd0b0","sameAsTheDryRunBefore":true}
 PASS reset-refuses-a-stale-snapshot — 409 the state changed since the snapshot — snapshot again
 PASS reset-executed-zero — {"cleared":7,"seats":2,"drafts":3,"kv":7,"occ":0,"fixed":2,"held":0,"open":true}
-PASS reset-device-honours-the-epoch — {"cached":10,"after":{"bag":0,"skips":0,"epoch":"2026-09-19T10:03:27.093Z","serverBag":null,"serverSkip":null,"resetAt":"2026-09-19T10:03:27.093Z","submission":"draft","holds":0}} (the old trip never came back — not on t
+PASS reset-device-honours-the-epoch — {"cached":10,"after":{"contactLocal":false,"contactServer":false,"guestKey":null,"bag":0,"skips":0,"epoch":"2026-09-19T10:16:41.850Z","serverBag":null,"serverSkip":null,"resetAt":"2026-09-19T10:16:41.850Z","submission":"
 PASS reset-no-submission-remains — {"ok":true,"received":false,"receivedAt":null,"confirmed":false,"confirmedAt":null}
 PASS width-320 — no horizontal overflow
 PASS width-834 — no horizontal overflow

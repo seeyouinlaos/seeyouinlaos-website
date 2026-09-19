@@ -50,7 +50,13 @@ this build — `stage/SUMMARY.txt`.
   private backup file first) and stamps `reset:epoch`. The draft read carries `resetAt`; a write without `seenReset` equal to
   it is refused (409 `reset`); each device clears the journey it cached before the read once (a key still equal to the
   snapshot — the Bag by its lines, since the engine sync rewrites unit labels while reading — goes; an edit typed meanwhile
-  stays), then reads again. `node src/gr.cjs reset` / `reset --confirm "RESET ALL GUEST STATE"`.
+  stays), then reads again. `node src/gr.cjs reset` / `reset --snapshot` / `reset --confirm "RESET ALL GUEST STATE" --backup <file>`.
+  Hardened after the Codex pre-deploy review (docs/review/014-codex-release-013): the epoch lives in every draft actor
+  (a write without it is refused there, KV or no KV), the epoch is published before anything else goes, a lock holds guest
+  engine and ledger writes during the sweep, the execution is bound to a verified snapshot whose digest covers the values,
+  a device that synchronised before the epoch drops its whole cached journey (a fresh device keeps what it typed), and —
+  found by the release's own device check on the stage — the contact channel honours the epoch too (the read names it, a
+  write without it is refused, the device clears before the old contact could be pushed back).
 
 ## 3 · Tests
 
