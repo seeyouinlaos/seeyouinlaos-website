@@ -1,0 +1,262 @@
+[
+ {
+  "id": "header-320",
+  "ok": true,
+  "d": "{\"h\":56,\"text\":\"see you in laos.\",\"under\":false,\"order\":true,\"brandCentred\":true,\"overflow\":false,\"hero\":0}"
+ },
+ {
+  "id": "header-390",
+  "ok": true,
+  "d": "{\"h\":56,\"text\":\"see you in laos.\",\"under\":false,\"order\":true,\"brandCentred\":true,\"overflow\":false,\"hero\":0}"
+ },
+ {
+  "id": "header-834",
+  "ok": true,
+  "d": "{\"h\":56,\"text\":\"see you in laos.\",\"under\":false,\"order\":true,\"brandCentred\":true,\"overflow\":false,\"hero\":30}"
+ },
+ {
+  "id": "header-1440",
+  "ok": true,
+  "d": "{\"h\":52,\"text\":\"see you in laos.\",\"under\":false,\"order\":true,\"brandCentred\":true,\"overflow\":false,\"hero\":30}"
+ },
+ {
+  "id": "scope-first",
+  "ok": true,
+  "d": "{\"need\":{\"ok\":false,\"n\":13,\"first\":\"your-journey.html#scope\",\"keys\":[\"scope\",\"event:temple\",\"event:coffee\",\"event:vows\",\"event:dinner\",\"dress\",\"allergy\",\"profile:coffeetea\",\"profile:flavor\",\"profile:drink\",\"profile:film\",\"profile:music\",\"photo\"]},\"scope\":\"FIRS"
+ },
+ {
+  "id": "scope-bangkok-vientiane",
+  "ok": true,
+  "d": "{\"stages\":[\"bkk-stay\",\"train\",\"prewed\",\"wedstay\"],\"words\":\"Where you join us · Bangkok · Vientiane\",\"excluded\":\"NOT PART OF YOUR TRIP · CHINA 01 MAR · Vientiane → Kunming · 01 – 04 MAR · Kunming · 04 MAR · Kunming → Lijiang · 04 – 06 MAR · Lijiang · 06 MAR · Lijiang → Bangkok · 06 – 08 MAR · Bangkok"
+ },
+ {
+  "id": "scope-persists",
+  "ok": true,
+  "d": "{\"s2\":{\"scope\":\"Bangkok · Vientiane\",\"stages\":[\"s-bkk-stay\",\"s-train\",\"s-prewed\",\"s-wedstay\"]},\"srvScope\":{\"bangkok\":true,\"vientiane\":true,\"china\":false,\"none\":false,\"at\":\"2026-09-19T20:00:56.305Z\",\"by\":\"T001\"}}"
+ },
+ {
+  "id": "not-joining-untouched",
+  "ok": true,
+  "d": "{\"words\":\"02 · 24 – 25 FEB Bangkok → Vientiane Transportation NOT JOINING THIS STAGE Special Express No. 25 You said you are not joining this stage. Nothing is held or charged for it. RECONSIDER THIS STAGE\",\"state\":\"declined\",\"need\":{\"ok\":f"
+ },
+ {
+  "id": "reconsider-returns-undecided",
+  "ok": true,
+  "d": "{\"state\":\"open\",\"need\":{\"ok\":false,\"n\":16,\"first\":\"your-journey.html#s-bkk-stay\",\"keys\":[\"stage:bkk-stay\",\"stage:train\",\"stage:prewed\",\"stage:wedstay\",\"event:temple\",\"event:coffee\",\"event:vows\",\"event:dinner\",\"dress\",\"allergy\",\"profile:coffeetea\",\"profile:flavor\",\"profile:drink\",\"profile:film\",\"prof"
+ },
+ {
+  "id": "not-joining-selected-travel",
+  "ok": true,
+  "d": "{\"before\":{\"bag\":[\"train\"],\"state\":\"selected\"},\"after\":{\"bag\":[],\"state\":\"declined\",\"total\":0}}"
+ },
+ {
+  "id": "not-joining-held-room-releases-atomically",
+  "ok": true,
+  "d": "{\"before\":{\"mine\":{\"bkk-stay\":{\"key\":\"bkk-stay/u-sathorn-superior-garden\",\"label\":\"B\"}},\"bag\":[\"bkk-stay:u-sathorn-superior-garden\"]},\"after\":{\"mine\":{},\"bag\":[],\"state\":\"declined\"}}"
+ },
+ {
+  "id": "tickets-follow-attendance",
+  "ok": true,
+  "d": "{\"before\":{\"mine\":{\"prewed\":{\"key\":\"prewed/heritage\",\"label\":\"A\"}},\"seats\":[\"ceremony:C-R-06-02\",\"dinner:D-T-06\"]},\"after\":{\"mine\":{},\"seats\":[],\"stages\":[\"bkk-stay\",\"kmg\",\"c86\",\"ljg\",\"return\",\"kempinski\"],\"steps\":[\"you:complete\",\"journey:attention\",\"wedding:na\",\"preparation:na\",\"about:locked\",\"revi"
+ },
+ {
+  "id": "tickets-page-no-vientiane",
+  "ok": true,
+  "d": "YOUR TICKETS · CLEO Your tickets Every ticket of your trip, exactly as it stands: your seat tickets for the wedding day and a travel pass for each leg you have chosen. Each carries its own reference a"
+ },
+ {
+  "id": "wedding-page-not-joining",
+  "ok": true,
+  "d": "03 · The Wedding opens once this is complete. FOR YOU · CLEO My Trip Choose what feels right at each stage — from Bangkok to Vientiane, on to Yunnan and home again, in the order it happens. Every choi"
+ },
+ {
+  "id": "other-guest-untouched",
+  "ok": true,
+  "d": "{\"prewed\":{\"key\":\"prewed/heritage\",\"label\":\"B\"}}"
+ },
+ {
+  "id": "reentrancy-one-release-each",
+  "ok": true,
+  "d": "{\"mine\":{},\"seats\":[],\"bag\":[],\"need\":{\"ok\":false,\"n\":13,\"first\":\"your-journey.html#s-bkk-stay\",\"keys\":[\"stage:bkk-stay\",\"stage:kmg\",\"stage:c86\",\"stage:ljg\",\"stage:return\",\"stage:kempinski\",\"allergy\",\"profile:coffeetea\",\"profile:flavor\",\"profile:drink\",\"profile:film\",\"profile:music\",\"photo\"]},\"count"
+ },
+ {
+  "id": "failed-release-named-then-released",
+  "ok": true,
+  "d": "{\"f1\":{\"mine\":{\"prewed\":{\"key\":\"prewed/heritage\",\"label\":\"A\"}},\"card\":\"NOT RELEASED YET We could not release Pre-Wedding Stay · Souphattra Heritage jus\",\"need\":[\"release:prewed\"]},\"f2\":{\"mine\":{},\"card\":false,\"bag\":[]}}"
+ },
+ {
+  "id": "decline-path-nothing-else-asked",
+  "ok": true,
+  "d": "{\"stages\":[],\"steps\":[\"you:complete\",\"journey:complete\",\"wedding:na\",\"preparation:na\",\"about:na\",\"review:attention\"],\"need\":{\"ok\":true,\"n\":0,\"first\":null,\"keys\":[]},\"words\":\"Not joining this trip\",\"mine\":{}}"
+ },
+ {
+  "id": "decline-path-steps-read-not-joining",
+  "ok": true,
+  "d": "01 Your Invitation Name, email and mobile number COMPLETE 02 My Trip Not joining this trip COMPLETE 03 The Wedding Not joining this trip NOT JOINING 04 Wedding Preparation Not joining this trip NOT JOINING 05 About You N"
+ },
+ {
+  "id": "decline-path-review",
+  "ok": true,
+  "d": "CLEO · NOTHING IS PAID ON THIS WEBSITE Review & Send Everything you have told us, in one place. Nothing here is new: it is what you chose and what you answered. Sending shares it with Guest Relations  · send true"
+ },
+ {
+  "id": "decline-path-no-wedding-attendance-sent",
+  "ok": true,
+  "d": "{\"temple\":\"Not joining\",\"coffee\":\"Not joining\",\"vows\":\"Not joining\",\"dinner\":\"Not joining\"} · WEDDING PARTICIPATION: - CLEO: · Temple Ceremony: NOT JOINING · Coffee & Cake: NOT JOINING · Vow Ceremony: NOT JOINING · Wedding Dinner: NOT JOINING · Sangkhathan: NOT APP"
+ },
+ {
+  "id": "decline-path-sent",
+  "ok": true,
+  "d": "{\"ok\":true,\"received\":true,\"receivedAt\":\"2026-09-19T20:02:13.801Z\",\"confirmed\":false,\"confirmedAt\":null}"
+ },
+ {
+  "id": "partial-attendance-review",
+  "ok": true,
+  "d": "{\"need\":{\"ok\":true,\"n\":0,\"first\":null,\"keys\":[]},\"steps\":[\"you:complete\",\"journey:complete\",\"wedding:complete\",\"preparation:complete\",\"about:complete\",\"review:attention\"]} · ADA · NOTHING IS PAID ON THIS WEBSITE Review & Send Everything you have told us, in one place. Nothing here is new: it i"
+ },
+ {
+  "id": "flavor-single-select",
+  "ok": true,
+  "d": "{\"fl\":{\"q\":\" COMPLETE A little more about you The little things you love are often the ones \",\"picks\":[\"Coffee\",\"Milk\",\"Butter\",\"Pandan\",\"Matcha Green Tea\",\"Strawberry Milk\"],\"on\":[\"Matcha Green Tea\"],\"role\":\"radiogroup\",\"snack\":false},\"fl2\":{\"on\":[\"Butter\"],\""
+ },
+ {
+  "id": "flavor-on-review",
+  "ok": true,
+  "d": "SWERED Coffee or tea Oolong ANSWERED My Favorite Flavor Butter ANSWERED Favourite dri"
+ },
+ {
+  "id": "flavor-and-scope-in-payload",
+  "ok": true,
+  "d": "{\"flavor\":\"Butter\",\"scope\":\"Bangkok · Vientiane\"}"
+ },
+ {
+  "id": "partial-china-only",
+  "ok": true,
+  "d": "{\"stages\":[\"kmg\",\"c86\",\"ljg\",\"return\"],\"steps\":[\"you:complete\",\"journey:attention\",\"wedding:na\",\"preparation:na\",\"about:complete\",\"review:locked\"],\"need\":{\"ok\":false,\"n\":4,\"first\":\"your-journey.html#s-kmg\",\"keys\":[\"stage:kmg\",\"stage:c86\",\"s"
+ },
+ {
+  "id": "haruthai-starts-at-zero-014",
+  "ok": true,
+  "d": "{\"words\":\"01 · 21 – 24 FEB Bangkok Accommodation PREFERRED Sathorn Penthouse Bangkok Elegant 6BR Sathon Penthouse 21 – 24 February · 3 nights Breakfast not included · self-pay USD 255 TOTAL PER PERSON · YOUR COST 6 ROOMS · 12 PLACES AVAILABLE SELECT THIS STAY VIEW DETAILS ALTERNATIVE U Sathorn Bangk"
+ },
+ {
+  "id": "haruthai-readiness-names-the-open-stage-014",
+  "ok": true,
+  "d": "{\"ok\":false,\"n\":13,\"first\":\"your-journey.html#s-bkk-stay\",\"keys\":[\"stage:bkk-stay\",\"event:temple\",\"event:coffee\",\"event:vows\",\"event:dinner\",\"dress\",\"allergy\",\"profile:coffeetea\",\"profile:flavor\",\"pro"
+ },
+ {
+  "id": "haruthai-chooses-like-anyone-014",
+  "ok": true,
+  "d": "{\"mine\":{\"bkk-stay\":{\"key\":\"bkk-stay/u-sathorn-superior-garden\",\"label\":\"A\"}},\"bag\":[\"bkk-stay:u-sathorn-superior-garden\"],\"total\":192,\"need\":[\"event:temple\",\"event:coffee\",\"event:vows\",\"event:dinner\",\"dress\",\"allergy\",\"profile:coffeetea\",\"profile:flavor\",\"profile:drink\",\"profile:film\",\"profile:musi"
+ },
+ {
+  "id": "haruthai-remove-releases-014",
+  "ok": true,
+  "d": "{\"mine\":{},\"bag\":0,\"total\":0,\"words\":\"01 · 21 – 24 FEB Bangkok Accommodation PREFERRED Sathorn Penthouse Bangkok Elegant 6BR Sathon Penthouse 21 – 24 February · 3 nights Breakfast not included · self-pay USD 255 TOTAL PER PERSON · YOUR COST"
+ },
+ {
+  "id": "haruthai-bag-usd-0",
+  "ok": true,
+  "d": "MY BAG · BRIDETEST My Bag What you have chosen so far, with your cost. Change or remove anything here; your trip and Review & Send follow at once. YOUR BAG IS EMPTY No selections yet · USD 0 Anything "
+ },
+ {
+  "id": "overlay-iphone-safari-390x600",
+  "ok": true,
+  "d": "{\"y0\":420,\"first\":{\"o\":{\"open\":true,\"bodyOverflow\":\"hidden\",\"top\":212,\"h\":388,\"vh\":600,\"scrollable\":true,\"sh\":769,\"ch\":386,\"pos\":\"fixed\",\"overscroll\":\"contain\"},\"after\":{\"panelTop\":383,\"pageY\":420,\"last\":{\"bottom\":449,\"vh\":600}},\"closed\":{\"open\":false,\"bodyOverflow\":\"visible\",\"pageY\":420},\"touch\":{\""
+ },
+ {
+  "id": "overlay-from-my-bag",
+  "ok": true,
+  "d": "My Bag has no step shell — the overlay belongs to the steps"
+ },
+ {
+  "id": "overlay-chromium-320",
+  "ok": true,
+  "d": "{\"y0\":420,\"first\":{\"o\":{\"open\":true,\"bodyOverflow\":\"hidden\",\"top\":212,\"h\":348,\"vh\":560,\"scrollable\":true,\"sh\":819,\"ch\":346,\"pos\":\"fixed\",\"overscroll\":\"contain\"},\"after\":{\"panelTop\":473,\"pageY\":420,\"last\":{\"bottom\":409,\"vh\":560}},\"closed\":{\"open\":false,\"bodyOverflow\":\"visible\",\"pageY\":420},\"touch\":nu"
+ },
+ {
+  "id": "overlay-chromium-390",
+  "ok": true,
+  "d": "{\"y0\":420,\"first\":{\"o\":{\"open\":true,\"bodyOverflow\":\"hidden\",\"top\":212,\"h\":348,\"vh\":560,\"scrollable\":true,\"sh\":769,\"ch\":346,\"pos\":\"fixed\",\"overscroll\":\"contain\"},\"after\":{\"panelTop\":423,\"pageY\":420,\"last\":{\"bottom\":409,\"vh\":560}},\"closed\":{\"open\":false,\"bodyOverflow\":\"visible\",\"pageY\":420},\"touch\":nu"
+ },
+ {
+  "id": "overlay-chromium-834",
+  "ok": true,
+  "d": "{\"y0\":420,\"first\":{\"o\":{\"open\":true,\"bodyOverflow\":\"hidden\",\"top\":211,\"h\":489,\"vh\":700,\"scrollable\":true,\"sh\":749,\"ch\":487,\"pos\":\"fixed\",\"overscroll\":\"contain\"},\"after\":{\"panelTop\":262,\"pageY\":420,\"last\":{\"bottom\":549,\"vh\":700}},\"closed\":{\"open\":false,\"bodyOverflow\":\"visible\",\"pageY\":420},\"touch\":nu"
+ },
+ {
+  "id": "edit5-experiences-list",
+  "ok": true,
+  "d": "Le Du Kaan,Lao National Museum,Traditional Lao Silk Residence,Lao Art Museum"
+ },
+ {
+  "id": "edit5-bkk-ledukaan",
+  "ok": true,
+  "d": "{\"h1\":\"Le Du Kaan\",\"about\":true,\"hours\":true,\"imgs\":[true,true,true,true],\"bg\":0,\"overflow\":false}"
+ },
+ {
+  "id": "edit5-vte-laonationalmuseum",
+  "ok": true,
+  "d": "{\"h1\":\"Lao National Museum\",\"about\":true,\"hours\":true,\"imgs\":[true,true,true,true,true,false],\"bg\":0,\"overflow\":false}"
+ },
+ {
+  "id": "edit5-vte-silkresidence",
+  "ok": true,
+  "d": "{\"h1\":\"Traditional Lao Silk Residence\",\"about\":true,\"hours\":true,\"imgs\":[true,true,true,true,true],\"bg\":0,\"overflow\":false}"
+ },
+ {
+  "id": "edit5-vte-laoartmuseum",
+  "ok": true,
+  "d": "{\"h1\":\"Lao Art Museum\",\"about\":true,\"hours\":true,\"imgs\":[true,true,true,true,true,false],\"bg\":0,\"overflow\":false}"
+ },
+ {
+  "id": "edit5-igniv-gone",
+  "ok": true,
+  "d": "EXPERIENCES This place is not on the list. The places we would take you ourselves are all on one page. ALL EXPERIENCES"
+ },
+ {
+  "id": "bangkok-card-photograph",
+  "ok": true,
+  "d": "{\"video\":true,\"bg\":true,\"w\":318,\"h\":254,\"ratio\":1.25} (the shipped clip mounted over the photograph)"
+ },
+ {
+  "id": "clip-poster-first-then-plays",
+  "ok": true,
+  "d": "{\"state\":\"playing\",\"playing\":true,\"video\":true,\"poster\":\"assets/images/city/001-bangkok-chao-phraya-skyline.jpg\",\"muted\":true,\"inline\":true,\"loop\":true,\"paused\":false,\"ratio\":1.25,\"opacity\":\"1\"}"
+ },
+ {
+  "id": "clip-reduced-motion-photograph",
+  "ok": true,
+  "d": "{\"state\":\"still\",\"playing\":false,\"video\":false,\"poster\":null,\"muted\":null,\"inline\":null,\"loop\":null,\"paused\":null,\"ratio\":1.25,\"opacity\":null}"
+ },
+ {
+  "id": "clip-failure-photograph",
+  "ok": true,
+  "d": "{\"state\":\"still\",\"playing\":false,\"video\":false,\"poster\":null,\"muted\":null,\"inline\":null,\"loop\":null,\"paused\":null,\"ratio\":1.25,\"opacity\":null}"
+ },
+ {
+  "id": "width-320-no-overflow",
+  "ok": true,
+  "d": "no horizontal overflow on ten pages"
+ },
+ {
+  "id": "width-390-no-overflow",
+  "ok": true,
+  "d": "no horizontal overflow on ten pages"
+ },
+ {
+  "id": "width-834-no-overflow",
+  "ok": true,
+  "d": "no horizontal overflow on ten pages"
+ },
+ {
+  "id": "width-1440-no-overflow",
+  "ok": true,
+  "d": "no horizontal overflow on ten pages"
+ },
+ {
+  "id": "console-errors",
+  "ok": true,
+  "d": "no script or console errors on any visited page · expected HTTP answers logged by the browser: esponded with a status of 409 (Conflict), Failed to load resource: net::ERR_FAILED, sponded with a status of 404 (Not Found)"
+ }
+]
