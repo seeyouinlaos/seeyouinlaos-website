@@ -1,0 +1,222 @@
+[
+ {
+  "id": "stage-clean",
+  "ok": true,
+  "d": "{\"ok\":true,\"dryRun\":false,\"cleared\":0,\"rows\":[],\"waitlistCleared\":0,\"remaining\":0,\"waitlistRemaining\":0,\"fixed\":0,\"at\":\"2026-09-19T19:52:19.160Z\"}"
+ },
+ {
+  "id": "host-starts-at-zero",
+  "ok": true,
+  "d": "{\"bag\":0,\"mine\":[],\"packs\":2,\"counts\":\"10 still open — of the 10 stages of your trip.\"}"
+ },
+ {
+  "id": "penthouse-room-a-open-to-everyone",
+  "ok": true,
+  "d": "{\"a\":true,\"units\":6,\"av\":\"6 rooms · 12 places available\",\"reserved\":0}"
+ },
+ {
+  "id": "host-chooses-room-a-like-any-guest",
+  "ok": true,
+  "d": "{\"bkk-stay\":{\"key\":\"bkk-stay/penthouse\",\"label\":\"A\"}}"
+ },
+ {
+  "id": "party-fixture",
+  "ok": true,
+  "d": "Ada holds The Heritage A (wedding stay)"
+ },
+ {
+  "id": "party-of-two-sees-only-units-that-fit",
+  "ok": true,
+  "d": "{\"party\":2,\"need\":\"2\",\"aBtn\":false,\"aWords\":\"Room A Ada · 1 place available · not enough for your party of 2\",\"bBtn\":true}"
+ },
+ {
+  "id": "party-hold-goes-to-a-unit-that-fits",
+  "ok": true,
+  "d": "{\"bkk-stay\":{\"key\":\"bkk-stay/penthouse\",\"label\":\"A\"},\"wedstay\":{\"key\":\"wedstay/heritage\",\"label\":\"B\"}}"
+ },
+ {
+  "id": "partner-may-join-the-room-her-party-holds",
+  "ok": true,
+  "d": "{\"words\":\"Room B BrideTest · 1 place kept for you JOIN THIS ROOM\",\"btn\":true}"
+ },
+ {
+  "id": "party-shares-one-room",
+  "ok": true,
+  "d": "Room B BrideTest · You · Full YOUR ROOM"
+ },
+ {
+  "id": "guest-house-six-places-complimentary",
+  "ok": true,
+  "d": "{\"price\":\"Complimentary\",\"per\":\"Complimentary · six shared places · Guest Relations arranges the rest\",\"dots\":6,\"av\":\"6 places available\"}"
+ },
+ {
+  "id": "guest-house-place-held-usd-0",
+  "ok": true,
+  "d": "{\"mine\":{\"wedstay\":{\"key\":\"guesthouse/guest-house\",\"label\":\"A\"}},\"bag\":{\"lines\":[\"guesthouse:0:c\"],\"total\":0,\"bar\":\"\"}}"
+ },
+ {
+  "id": "guest-house-occupants-named-to-guests",
+  "ok": true,
+  "d": "Guest House complimentary Cleo · 5 places available JOIN THE HOUSE"
+ },
+ {
+  "id": "guest-house-public-sees-no-name",
+  "ok": true,
+  "d": "{\"names\":false,\"units\":0}"
+ },
+ {
+  "id": "one-selection-per-stage-riverside-replaces-guest-house",
+  "ok": true,
+  "d": "{\"mine\":{\"wedstay\":{\"key\":\"riverside/superior-window\",\"label\":\"A\"}},\"bag\":[\"riverside\"]}"
+ },
+ {
+  "id": "complete-trip-fixture",
+  "ok": true,
+  "d": "Guest Relations filled the Penthouse and every Kunming category with synthetic occupants"
+ },
+ {
+  "id": "complete-trip-plan-pure",
+  "ok": true,
+  "d": "[\"bkk-stay:fallback:bkk-stay/u-sathorn-superior-garden\",\"train:default:train\",\"prewed:default:prewed/heritage-grand-premier\",\"wedstay:default:wedstay/heritage-grand-premier\",\"mu9646:default:mu9646\",\"kmg:waitlist:\",\"c86:default:c86\",\"ljg:default:ljg/viewing-270\",\"return:default:return\",\"kempinski:def"
+ },
+ {
+  "id": "complete-trip-preview-names-fallback-and-waiting-list",
+  "ok": true,
+  "d": "{\"fb\":1,\"wl\":1,\"total\":\"USD 1,962 per person for 10 stages · 1 replacement · 1 on the waiting list (no cost until resolved).\",\"held\":0}"
+ },
+ {
+  "id": "complete-trip-confirm-bound-to-preview",
+  "ok": true,
+  "d": "{\"note\":true,\"wl\":0,\"held\":0} (a Kunming room freed meanwhile: the preview is drawn again, nothing applied)"
+ },
+ {
+  "id": "complete-trip-preview-back-to-waiting-list",
+  "ok": true,
+  "d": "{\"note\":true,\"wl\":1}"
+ },
+ {
+  "id": "complete-trip-fills-nine-stages-and-waits-for-one",
+  "ok": true,
+  "d": "{\"bag\":9,\"open\":0,\"need\":[\"event:temple\",\"event:coffee\",\"event:vows\",\"event:dinner\",\"dress\",\"allergy\",\"profile:coffeetea\",\"profile:flavor\",\"profile:drink\",\"profile:film\",\"profile:music\",\"photo\"],\"mine\":[\"bkk-stay\",\"kempinski\",\"ljg\",\"prewed\",\"wedstay\"],\"wait\":{\"kmg\":{\"at\":\"2026-09-19T19:53:43.387Z\",\""
+ },
+ {
+  "id": "complete-trip-idempotent",
+  "ok": true,
+  "d": "bkk-stay:same train:same prewed:same wedstay:same mu9646:same kmg:waitlist c86:same ljg:same return:same kempinski:same"
+ },
+ {
+  "id": "profile-shows-the-waiting-list-position",
+  "ok": true,
+  "d": "KUNMING · 01 – 04 MAR Wanxiang Yueju Waiting list · number 1 for 2 places ON THE WAITING LIST NO ROOM YET · NO COST UNTIL IT IS RESOLVED · GUEST RELATIONS WILL "
+ },
+ {
+  "id": "review-shows-the-waiting-list",
+  "ok": true,
+  "d": "WAITING LIST 01 – 04 MAR · Kunming — number 1 on the waiting list for 2 places · no room yet, no cost until it is resolved Guest Relations will find an arrangem · send open: true"
+ },
+ {
+  "id": "waiting-list-card-offers-the-choice",
+  "ok": true,
+  "d": "{\"card\":true,\"choose\":true,\"unwait\":true}"
+ },
+ {
+  "id": "a-freed-room-resolves-the-waiting-list",
+  "ok": true,
+  "d": "{\"canChoose\":{\"btn\":true,\"cta\":false},\"kmg\":{\"key\":\"kmg/italian\",\"label\":\"A\"},\"wait\":{}}"
+ },
+ {
+  "id": "trip-complete-after-the-waiting-list",
+  "ok": true,
+  "d": "{\"counts\":{\"relevant\":10,\"confirmed\":10,\"waitlisted\":0,\"declined\":0,\"open\":0,\"excluded\":0,\"resolved\":10,\"bagItems\":10,\"bagTotal\":2112},\"card\":false,\"bag\":10,\"total\":2112}"
+ },
+ {
+  "id": "parity-record-emails-complete-trip",
+  "ok": true,
+  "d": "{\"sent\":{\"clicked\":true},\"status\":200,\"hosts\":false,\"sel\":10,\"missGuest\":[],\"missOwner\":[]}"
+ },
+ {
+  "id": "waiting-list-fixture",
+  "ok": true,
+  "d": "every Lijiang room holds synthetic occupants (6 rooms per category — the current master)"
+ },
+ {
+  "id": "complete-trip-vientiane-china-waits-for-lijiang",
+  "ok": true,
+  "d": "{\"rows\":7,\"wl\":[\"04 – 06 MAR · LIJIANG Waiting list No room of this stage can take your party (one place). You will be placed on the waiting list — no cost until it is resolved.\"],\"wait\":{\"ljg\":{\"at\":\"2026-09-19T19:54:39.202Z\",\"position\":1,\"size\":1,\"wanted\":[\"ljg/viewing-270\",\"ljg/snow-mountain-view"
+ },
+ {
+  "id": "parity-waiting-list-in-record-and-emails",
+  "ok": true,
+  "d": "{\"sent\":{\"clicked\":true},\"rooms\":{\"stage\":\"ljg\",\"waitlisted\":true,\"position\":1,\"since\":\"2026-09-19T19:54:39.202Z\",\"size\":1},\"guest\":true,\"owner\":true}"
+ },
+ {
+  "id": "leaving-the-waiting-list",
+  "ok": true,
+  "d": "{\"state\":\"open\",\"counts\":{\"relevant\":7,\"confirmed\":6,\"waitlisted\":0,\"declined\":0,\"open\":1,\"excluded\":3,\"resolved\":6,\"bagItems\":6,\"bagTotal\":1240}}"
+ },
+ {
+  "id": "two-package-cards-same-presentation",
+  "ok": true,
+  "d": "[{\"kind\":\"complete\",\"title\":\"COMPLETE TRIP\",\"btn\":true},{\"kind\":\"essential\",\"title\":\"ESSENTIAL TRIP\",\"btn\":true}]"
+ },
+ {
+  "id": "essential-preview-is-the-wedding-stay",
+  "ok": true,
+  "d": "{\"rows\":[\"27 FEB – 01 MAR · VIENTIANE Room A · The Heritage · Wedding Stay · Souphattra Heritage USD 145 per person\"],\"total\":\"USD 145 per person for 1 stage.\"}"
+ },
+ {
+  "id": "essential-holds-the-heritage-only",
+  "ok": true,
+  "d": "{\"mine\":{\"wedstay\":{\"key\":\"wedstay/heritage\",\"label\":\"A\"}},\"bag\":[\"wedstay:heritage\"],\"counts\":{\"relevant\":2,\"confirmed\":1,\"waitlisted\":0,\"declined\":0,\"open\":1,\"excluded\":8,\"resolved\":1,\"bagItems\":1,\"bagTotal\":145},\"summary\":\"Essential trip selected 1 stage for you. Every stage below shows what was "
+ },
+ {
+  "id": "suhring-is-the-dinner-of-21-february",
+  "ok": true,
+  "d": "{\"head\":\"BANGKOK · DINNER · 21 FEB 2027\",\"ctx\":\"FROM THE HOSTS' ITINERARY · DAY 01 · 21.02.2027\\nFROM THE HOSTS’ NOTES ON THE PLACE\",\"sel\":\"Dinner at Sühring\\nDINNER · SUNDAY, 21 FEBRUARY 2027 · THE FIRST EVENING IN BANGKOK\",\"when\":true}"
+ },
+ {
+  "id": "venues-in-their-rails",
+  "ok": true,
+  "d": "{\"bkkRest\":[\"bkk-curvy\",\"bkk-suhring\",\"bkk-phranakorn\",\"bkk-timespace\",\"bkk-mooyoo\",\"bkk-baanphraya\",\"bkk-ledukaan\",\"bkk-thongsmith\",\"bkk-tangjaiyang\"],\"bkkCafe\":[\"bkk-diorlv\",\"bkk-timespace\",\"bkk-mooyoo\",\"bkk-whispering\",\"bkk-madeleine\",\"bkk-harudot\"],\"bkkExp\":[\"bkk-lvvisionary\",\"bkk-dib\",\"bkk-lets"
+ },
+ {
+  "id": "cannubi-page",
+  "ok": true,
+  "d": "{\"imgs\":5,\"dress\":true}"
+ },
+ {
+  "id": "baan-phraya-page",
+  "ok": true,
+  "d": "{\"imgs\":4}"
+ },
+ {
+  "id": "the-houses-guest-house-and-riverside",
+  "ok": true,
+  "d": "{\"gh\":true,\"pr\":false,\"rv\":true,\"rvHref\":[\"invitation?open=1&next=room.html%3Fstay%3Driverside%26room%3Dsuperior-window\"]}"
+ },
+ {
+  "id": "no-horizontal-overflow-320",
+  "ok": true,
+  "d": "no overflow"
+ },
+ {
+  "id": "no-horizontal-overflow-834",
+  "ok": true,
+  "d": "no overflow"
+ },
+ {
+  "id": "no-horizontal-overflow-1440",
+  "ok": true,
+  "d": "no overflow"
+ },
+ {
+  "id": "iphone-safari-package-drawer",
+  "ok": true,
+  "d": "{\"rows\":10,\"ov\":0,\"go\":true,\"minTap\":44}"
+ },
+ {
+  "id": "console-errors",
+  "ok": true,
+  "d": "no script or console error"
+ }
+]

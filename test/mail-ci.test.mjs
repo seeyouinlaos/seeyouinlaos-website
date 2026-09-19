@@ -63,5 +63,39 @@ test('the Guest Relations email · operational detail retained, internal ids in 
   }
   const i = o.text.indexOf('INTERNAL REFERENCE'); assert.ok(i > 0); assert.ok(o.text.indexOf('C-R-05-02') > i && o.text.indexOf('INV-G777') > i, 'the internal ids come after everything else');
   assert.match(o.html, /Guest Relations<\/p>/, 'the eyebrow says whose email it is');
-  const M = journeyModel(rec()); assert.equal(M.hosts, false); assert.equal(journeyModel(rec({ guestId: 'G049' })).seats.ceremony.label, 'Front centre', 'a host without a ceremony seat sits front centre');
+  const M = journeyModel(rec()); assert.equal(M.hosts, false, 'a record the Worker stored without the host flag is a guest');
+  assert.equal(journeyModel(rec({ hosts: true, guestId: 'G048' })).seats.ceremony.label, 'Front centre', 'a host (record.hosts) without a ceremony seat sits front centre');
+});
+
+/* THE HOSTS (Owner, 19 Sep 2026): no fixed arrangement, no special guest id — host-ness is the record's `hosts`, stored by the
+   Worker from the authenticated identity (the register's host flag); it decides one thing in the mail: the ceremony place. */
+test('the hosts · record.hosts is the only source of Front centre; a held seat still wins; the emails read it as a place, never a seat number', () => {
+  const host = rec({ hosts: true, guestId: 'G048' });   /* no seat in the ceremony map for this guest */
+  const M = journeyModel(host);
+  assert.equal(M.hosts, true); assert.equal(M.seats.ceremony.id, null); assert.equal(M.seats.ceremony.label, 'Front centre'); assert.equal(M.seats.dinner.label, '', 'no dinner seat is invented for a host');
+  const g = composeGuestMail(host);
+  for (const body of [g.html, g.text]) { assert.match(body, /Wedding Ceremony/); assert.match(body, /Front centre/); assert.doesNotMatch(body, /Seat Front|Seat E5|Seat A5/, 'a place, never a seat number'); assert.doesNotMatch(body, /Arranged for you|Fixed arrangement/i); }
+  assert.match(g.text, /YOUR SEATS\n· Wedding Ceremony · Souphattra Heritage · 15:30: Front centre\n\n/, 'the seats section carries the ceremony place only — no dinner seat row');
+  const o = composeOwnerMail(host, 'https://x/api/status?invitation=INV-G777');
+  assert.match(o.text, /· Wedding Ceremony: Front centre/); assert.match(o.text, /· Wedding Dinner: no seat held/);
+  /* a host who holds a ceremony seat is shown that seat — the flag only fills the gap */
+  const seated = journeyModel(rec({ hosts: true }));
+  assert.equal(seated.hosts, true); assert.equal(seated.seats.ceremony.id, 'C-R-05-02'); assert.equal(seated.seats.ceremony.label, 'E5');
+});
+
+test('the hosts · a record WITHOUT hosts gets no Front centre — no guest id is a host any more, and a registration cannot claim it', () => {
+  /* the former host ids are guests like everyone else once the record carries no host flag */
+  for (const guestId of ['G048', 'G049', 'G001']) {
+    const r = rec({ guestId });
+    const M = journeyModel(r);
+    assert.equal(M.hosts, false, guestId + ' is not a host by id'); assert.equal(M.seats.ceremony.id, null); assert.equal(M.seats.ceremony.label, '', guestId + ' has no ceremony place without a seat');
+    const g = composeGuestMail(r);
+    for (const body of [g.html, g.text]) { assert.doesNotMatch(body, /Front centre/i); assert.doesNotMatch(body, /Your seats|YOUR SEATS/, 'no seat section without a seat'); }
+    assert.match(composeOwnerMail(r, 'https://x/api/status?invitation=INV-G777').text, /· Wedding Ceremony: no seat held/);
+  }
+  assert.equal(journeyModel(rec({ hosts: false, guestId: 'G049' })).seats.ceremony.label, '', 'hosts: false as the Worker stores it for a guest');
+  /* host-ness is the Worker's stored flag from the authenticated identity — never a field the client writes into its registration */
+  const claimed = rec({ guestId: 'G049', registration: { ...REG, guestRecord: { ...REG.guestRecord, hosts: true } } });
+  assert.equal(journeyModel(claimed).hosts, false, 'a registration payload cannot make a guest a host');
+  assert.equal(journeyModel(claimed).seats.ceremony.label, '', 'no Front centre from a client-side claim');
 });

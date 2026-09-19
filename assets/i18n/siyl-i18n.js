@@ -900,7 +900,15 @@
   E("Reserved", "Reserviert", "สงวนไว้", "予約済み");
   E("Reserved for the wedding family", "Reserviert für die Hochzeitsfamilie", "สงวนไว้สำหรับครอบครัวเจ้าภาพ", "ご親族のために確保");
   E("Alternative stay", "Alternative Unterkunft", "ที่พักทางเลือก", "もう一つの滞在");
-  E("Private Residence", "Private Residenz", "เรสซิเดนซ์ส่วนตัว", "プライベートレジデンス");
+  E("Guest House complimentary", "Gästehaus, kostenfrei", "เกสต์เฮาส์ ไม่มีค่าใช้จ่าย", "ゲストハウス（無料）");
+  E("Guest house", "Gästehaus", "เกสต์เฮาส์", "ゲストハウス");
+  E("Guest house · shared", "Gästehaus · geteilt", "เกสต์เฮาส์ · ใช้ร่วมกัน", "ゲストハウス・シェア");
+  E("Six shared places", "Sechs geteilte Plätze", "หกที่ ใช้ร่วมกัน", "シェア6名分");
+  E("Complimentary · six shared places", "Kostenfrei · sechs geteilte Plätze", "ไม่มีค่าใช้จ่าย · หกที่ใช้ร่วมกัน", "無料・シェア6名分");
+  E("View the guest house", "Das Gästehaus ansehen", "ดูเกสต์เฮาส์", "ゲストハウスを見る");
+  E("Waiting list", "Warteliste", "รายชื่อรอ", "キャンセル待ち");
+  E("Complete trip", "Die ganze Reise", "ทริปเต็ม", "フルトリップ");
+  E("Essential trip", "Die Reise im Kern", "ทริปหลัก", "エッセンシャルトリップ");
 
   /* ---- MY WEDDING ---- */
   E("The Vow Ceremony is the shared heart of the wedding day. Around it, choose the additional moments that feel right for you.",
@@ -1519,10 +1527,6 @@
     "und fragt es in eurem Gästebereich an. Eine kleine Zahl kostenfreier Alternativ-Unterkünfte ist ebenfalls verfügbar, persönlich koordiniert — Guest Relations hilft gern bei Zimmern, Verfügbarkeit oder allem Individuellen.",
     "แล้วส่งคำขอในส่วนสำหรับแขก ยังมีที่พักทางเลือกไม่มีค่าใช้จ่ายจำนวนเล็กน้อย ประสานงานเป็นการส่วนตัว ฝ่ายดูแลแขกยินดีช่วยทุกเรื่อง",
     "ゲストエリアでリクエストを。数に限りある無料のオルタナティブステイもあり、個別に調整——お部屋も空きも、どんなご相談もゲストリレーションズへ。");
-  E("A warm private residence in central Vientiane, secured for the wedding stay and hosted for a limited number of guests. Guest Relations coordinates the arrangements personally.",
-    "Eine warme private Residenz im Zentrum von Vientiane, für den Hochzeitsaufenthalt gesichert und für eine begrenzte Zahl von Gästen übernommen. Guest Relations koordiniert alles persönlich.",
-    "เรสซิเดนซ์ส่วนตัวอันอบอุ่นใจกลางเวียงจันทน์ จัดเตรียมไว้สำหรับช่วงงานแต่งและรองรับแขกจำนวนจำกัด ฝ่ายดูแลแขกประสานงานเป็นการส่วนตัว",
-    "ビエンチャン中心部のあたたかなプライベートレジデンス。挙式滞在のために確保し、限られたゲストをご招待。手配はゲストリレーションズが直接調整します。");
   E("Your second hotel night is complimentary — part of the hospitality of your hosts. Room rates and requests live in your private Guest Area. This is a registration request. Guest Relations will confirm your arrangements separately.",
     "Eure zweite Hotelnacht ist kostenfrei — Teil der Gastfreundschaft eurer Gastgeber. Beiträge und Anfragen leben in eurem privaten Gästebereich. Dies ist eine Registrierungsanfrage; Guest Relations bestätigt eure Arrangements separat.",
     "คืนที่สองของโรงแรมไม่มีค่าใช้จ่าย เป็นส่วนหนึ่งของไมตรีจากเจ้าภาพ อัตราและคำขออยู่ในพื้นที่ส่วนตัวของคุณ นี่คือคำขอลงทะเบียน ฝ่ายดูแลแขกจะยืนยันแยกต่างหาก",
@@ -1629,10 +1633,7 @@
     "เส้นทางวาดเป็นเส้นเชิงสัญลักษณ์บนแผนที่จริง · กรุงเทพฯ → หนองคาย โดยรถไฟตู้นอน · เวียงจันทน์ → คุนหมิง และลี่เจียง → กรุงเทพฯ โดยเครื่องบิน",
     "実際の地図の上に旅の線を模式的に描いています・バンコク→ノーンカーイは夜行列車・ビエンチャン→昆明、麗江→バンコクは飛行機");
   E("Limited availability · personally coordinated by Guest Relations", "Begrenzt verfügbar · persönlich koordiniert von Guest Relations", "จำนวนจำกัด · ฝ่ายดูแลแขกประสานงานเป็นการส่วนตัว", "数に限りあり・ゲストリレーションズが直接調整");
-  E("A limited number of complimentary private residence stays are also available.", "Eine begrenzte Zahl kostenfreier Privatresidenz-Aufenthalte ist ebenfalls verfügbar.", "ยังมีที่พักเรสซิเดนซ์ส่วนตัวไม่มีค่าใช้จ่ายจำนวนจำกัด", "数に限りある無料のプライベートレジデンス滞在もございます。");
   E("One unit only", "Nur eine Einheit", "มีเพียงยูนิตเดียว", "一戸のみ");
-  E("Private residence", "Private Residenz", "เรสซิเดนซ์ส่วนตัว", "プライベートレジデンス");
-  E("Sleeps up to 4", "Für bis zu 4 Personen", "รองรับได้ถึง 4 ท่าน", "最大4名まで");
   E("Two bedrooms", "Zwei Schlafzimmer", "สองห้องนอน", "ベッドルーム2室");
   E("Two bedrooms · king and twin", "Zwei Schlafzimmer · King und Twin", "สองห้องนอน · คิงและทวิน", "ベッドルーム2室・キングとツイン");
   E("Private bathrooms", "Eigene Bäder", "ห้องน้ำในตัว", "専用バスルーム");

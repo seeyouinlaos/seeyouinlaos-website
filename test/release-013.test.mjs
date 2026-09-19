@@ -1,6 +1,6 @@
 /* RELEASE 013 (Owner, 19 Sep 2026) — FINAL CONSOLIDATED REPAIR + CLEAN-STATE TEST RUN.
    · THE CLEAN RESET: one Guest-Relations-protected operation — dry run by default, execution only with the exact words —
-     clears every guest-generated occupancy (never the FIXED allocation), every seat hold (never the geometry), every draft
+     clears every guest-generated occupancy (release 014: there is no fixed allocation any more), every seat hold (never the geometry), every draft
      actor and every guest KV record, returns the backup, stamps the epoch; the draft read carries the epoch; a write that
      does not carry it is refused; a device honours it once, keeping only an edit made while the copy was being read.
    · QUESTION 5 ("Anything you would rather avoid?") is gone from every surface; the flavour stays as shipped.
@@ -13,7 +13,6 @@ import { page, src, doState, PEGGY } from './sandbox.mjs';
 import { Rooms } from '../src/rooms.js';
 import { Drafts } from '../src/drafts.js';
 import { Seating, validateGeometry, seatsOf } from '../src/seating.js';
-import { FIXED } from '../src/inventory-seed.js';
 import { SEAT_FIXTURE } from './fixtures.mjs';
 import { composeGuestMail } from '../src/mail-templates.js';
 
@@ -27,7 +26,7 @@ function kv() { const m = new Map(); const enc = (v) => (v instanceof ArrayBuffe
   put: async (k, v, o) => { m.set(k, { v, meta: o && o.metadata }); }, delete: async (k) => { m.delete(k); }, list: async ({ prefix }) => ({ keys: [...m.keys()].filter((n) => n.startsWith(prefix || '')).map((name) => ({ name })), list_complete: true }) }; }
 const storageStub = () => { const m = new Map(); return { async get(k) { return m.has(k) ? m.get(k) : undefined; }, async put(k, v) { m.set(k, v); }, async delete(k) { m.delete(k); }, async list({ prefix }) { const out = new Map(); for (const [k, v] of m) if (k.startsWith(prefix)) out.set(k, v); return out; } }; };
 
-/* the Worker with every store in memory: a host (the FIXED penthouse), Peggy and Sam with holds, seats, drafts, contacts and a submission */
+/* the Worker with every store in memory: a host (no fixed room any more — release 014), Peggy and Sam with holds, seats, drafts, contacts and a submission */
 async function harness() {
   const w = (await import('../src/worker.js')).default;
   const host = await bearerOf('demo-host-g048'), peggy = await bearerOf('demo-peggy-g001'), sam = await bearerOf('demo-sam-g777');
@@ -46,7 +45,7 @@ const call = (h, path, bearer, body, method) => h.w.fetch(req(path, bearer ? { '
 const gr = (h, path, body) => h.w.fetch(req(path, { 'x-gr-token': GR }, body || {}, 'POST'), h.env).then(async (r) => ({ status: r.status, d: await r.json() }));
 
 async function populate(h) {
-  /* rooms: Peggy holds Souphattra prewed A and the Riverside; Sam holds a Kunming room; the host chose U Sathorn beside the fixed penthouse */
+  /* rooms: Peggy holds Souphattra prewed A and the Riverside; Sam holds a Kunming room; the host chose U Sathorn like any guest */
   for (const [b, key] of [[h.peggy, 'prewed/heritage'], [h.peggy, 'riverside/superior-window'], [h.sam, 'kmg/smart-family'], [h.host, 'bkk-stay/u-sathorn-superior-garden']]) {
     const who = { INV: null }; const r = await call(h, '/api/rooms/join', b, { invitationId: b === h.peggy ? 'INV-G001' : b === h.sam ? 'INV-G777' : 'INV-G048', guestId: b === h.peggy ? 'G001' : b === h.sam ? 'G777' : 'G048', key, label: 'A', name: 'x' });
     assert.equal(r.status, 200, key + ' held');
@@ -68,23 +67,23 @@ async function populate(h) {
 }
 const counts = async (h) => {
   const plan = (await gr(h, '/api/rooms/plan', {})).d; let occ = 0, fixed = 0;
-  for (const units of Object.values(plan.units)) for (const u of units) for (const o of (u.occupants || [])) { if (u.reservedFor && /Bride/.test(u.reservedFor) && FIXED.some((f) => f.guestId === o.guestId)) fixed++; else occ++; }
+  for (const units of Object.values(plan.units)) for (const u of units) for (const o of (u.occupants || [])) occ++;   /* release 014: no unit is reserved, nothing is fixed */
   const seats = (await gr(h, '/api/seating/plan', {})).d; let held = 0; const walk = (o) => { if (Array.isArray(o)) { o.forEach(walk); return; } if (o && typeof o === 'object') { if (o.guestId && o.seatId) held++; Object.values(o).forEach((v) => { if (v && typeof v === 'object') walk(v); }); } }; walk(seats.events || {});
   const keys = [...h.env.REG_KV.m.keys()].filter((k) => /^(draft|contact|avatar|reg):/.test(k));
   return { occ, fixed, held, keys: keys.length, open: seats.open, frozen: seats.frozen };
 };
 
-test('THE CLEAN RESET · the dry run names everything and writes nothing; the snapshot carries every value (binary as base64 with its metadata) and a digest; the execution needs the words AND the digest, takes the epoch into every actor first, clears every guest-generated occupancy, seat, draft and record, keeps the FIXED allocation and the seating geometry; a write in flight without the epoch is refused even with KV down; a second run finds nothing', async () => {
+test('THE CLEAN RESET · the dry run names everything and writes nothing; the snapshot carries every value (binary as base64 with its metadata) and a digest; the execution needs the words AND the digest, takes the epoch into every actor first, clears every guest-generated occupancy, seat, draft and record, keeps the seating geometry; a write in flight without the epoch is refused even with KV down; a second run finds nothing', async () => {
   const h = await harness(); await populate(h);
   const before = await counts(h);
-  assert.deepEqual(before, { occ: 4, fixed: 2, held: 2, keys: 9, open: true, frozen: false }, 'the populated state: four guest holds beside the two fixed places, two seats, nine guest records (drafts, contacts, a submission and its history, a photo)');
+  assert.deepEqual(before, { occ: 4, fixed: 0, held: 2, keys: 9, open: true, frozen: false }, 'the populated state: four guest holds, two seats, nine guest records (drafts, contacts, a submission and its history, a photo)');
   /* nobody but Guest Relations */
   assert.equal((await call(h, '/api/gr/reset', h.host, { dryRun: true })).status, 401, 'a host bearer is not the GR token');
   assert.equal((await h.w.fetch(req('/api/gr/reset', {}, { dryRun: true }), h.env)).status, 401);
   /* 1 · the dry run */
   const dry = await gr(h, '/api/gr/reset', { dryRun: true });
   assert.equal(dry.status, 200); assert.equal(dry.d.mode, 'dry-run'); assert.equal(dry.d.dryRun, true);
-  assert.equal(dry.d.rooms.occupancies, 4); assert.equal(dry.d.rooms.fixed, 2); assert.equal(dry.d.seating.holds, 2); assert.equal(dry.d.drafts.had, 3); assert.equal(dry.d.kv.keys.length, 9); assert.match(dry.d.digest, /^[a-f0-9]{64}$/); assert.equal(dry.d.backup, undefined);
+  assert.equal(dry.d.rooms.occupancies, 4); assert.equal(dry.d.rooms.fixed, 0); assert.equal(dry.d.rooms.waitlisted, 0); assert.equal(dry.d.seating.holds, 2); assert.equal(dry.d.drafts.had, 3); assert.equal(dry.d.kv.keys.length, 9); assert.match(dry.d.digest, /^[a-f0-9]{64}$/); assert.equal(dry.d.backup, undefined);
   assert.deepEqual(await counts(h), before, 'the dry run wrote nothing');
   /* 2 · the snapshot: every value, lossless */
   const snap = await gr(h, '/api/gr/reset', { dryRun: true, snapshot: true });
@@ -109,13 +108,13 @@ test('THE CLEAN RESET · the dry run names everything and writes nothing; the sn
   const run = await gr(h, '/api/gr/reset', { dryRun: false, confirm: 'RESET ALL GUEST STATE', digest: snap2.d.digest, actor: 'test' });
   assert.equal(run.status, 200); assert.equal(run.d.mode, 'execute'); assert.equal(run.d.dryRun, false); assert.ok(run.d.epoch);
   assert.equal(run.d.rooms.cleared, 5); assert.equal(run.d.rooms.remaining, 0); assert.equal(run.d.seating.cleared, 2); assert.equal(run.d.seating.remaining, 0);
-  assert.equal(run.d.drafts.cleared, 3); assert.equal(run.d.kv.deleted, 9); assert.deepEqual(run.d.remaining, { occupancies: 0, holds: 0, kvKeys: 0 });
+  assert.equal(run.d.drafts.cleared, 3); assert.equal(run.d.kv.deleted, 9); assert.deepEqual(run.d.remaining, { occupancies: 0, waitlisted: 0, holds: 0, kvKeys: 0 });
   assert.equal(run.d.backup, undefined, 'the execution returns no values — the backup exists before it');
   const after = await counts(h);
-  assert.deepEqual(after, { occ: 0, fixed: 2, held: 0, keys: 0, open: true, frozen: false }, 'ZERO guest-generated state; the fixed places and the seating configuration stand');
+  assert.deepEqual(after, { occ: 0, fixed: 0, held: 0, keys: 0, open: true, frozen: false }, 'ZERO guest-generated state; the seating configuration stands');
   assert.equal(h.env.REG_KV.m.get('reset:epoch').v, run.d.epoch, 'the epoch is stored');
-  /* the hosts' view: the fixed arrangement, nothing of their own */
-  const hv = (await call(h, '/api/rooms/mine', h.host, {})).d; assert.deepEqual(JSON.parse(JSON.stringify(hv.mine)), {}); assert.equal(hv.fixed['bkk-stay'].key, 'bkk-stay/penthouse');
+  /* the hosts' view: nothing of their own, nothing arranged (release 014) */
+  const hv = (await call(h, '/api/rooms/mine', h.host, {})).d; assert.deepEqual(JSON.parse(JSON.stringify(hv.mine)), {}); assert.equal(hv.fixed, undefined);
   /* a second run: nothing left */
   const again = await gr(h, '/api/gr/reset', { dryRun: true }); assert.equal(again.d.rooms.occupancies, 0); assert.equal(again.d.seating.holds, 0); assert.equal(again.d.drafts.had, 0); assert.equal(again.d.kv.keys.length, 0);
   /* the actors never re-seed from a mirror; the read carries the actor's epoch */
@@ -158,7 +157,7 @@ test('THE CLEAN RESET · a write racing the sweep: the actor takes the epoch bef
   assert.ok(putDuringSweep, 'the racing write happened during the sweep'); assert.equal(putDuringSweep.status, 409); assert.equal(putDuringSweep.d.error, 'reset');
   assert.ok(joinDuringSweep && seatDuringSweep, 'the racing engine and ledger writes happened during the sweep'); assert.equal(joinDuringSweep.status, 503); assert.equal(joinDuringSweep.d.retry, true); assert.equal(seatDuringSweep.status, 503);
   assert.equal((await call(h, '/api/draft', h.peggy)).d.draft, null, 'nothing of it was stored');
-  assert.deepEqual(await counts(h), { occ: 0, fixed: 2, held: 0, keys: 0, open: true, frozen: false });
+  assert.deepEqual(await counts(h), { occ: 0, fixed: 0, held: 0, keys: 0, open: true, frozen: false });
   assert.equal(h.env.REG_KV.m.has('reset:lock'), false, 'the gate is lifted after the sweep');
   const afterJoin = await call(h, '/api/rooms/join', h.sam, { invitationId: 'INV-G777', guestId: 'G777', key: 'ljg/viewing-270', label: 'A', name: 'x' }); assert.equal(afterJoin.status, 200, 'and writes are open again');
   /* the digest covers VALUES: a draft saved after the snapshot (same keys) refuses the execution */

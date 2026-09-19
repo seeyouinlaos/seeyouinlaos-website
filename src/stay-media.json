@@ -187,30 +187,30 @@
    }
   ]
  },
- "privateResidence": {
-  "name": "Private Residence · Vientiane",
+ "guestHouse": {
+  "name": "Guest House complimentary · Vientiane",
   "city": "Vientiane",
   "images": [
    {
-    "src": "assets/images/airbnb/airbnb-01.jpg",
+    "src": "assets/images/guesthouse/guesthouse-01.jpg",
     "kind": "room",
     "caption": "Living and dining",
     "source": "Owner Drive 022 - Hotel - Airbnb Guest House Vientiane"
    },
    {
-    "src": "assets/images/airbnb/airbnb-02.jpg",
+    "src": "assets/images/guesthouse/guesthouse-02.jpg",
     "kind": "room",
     "caption": "The entry",
     "source": "Owner Drive 022 - Hotel - Airbnb Guest House Vientiane"
    },
    {
-    "src": "assets/images/airbnb/airbnb-03.jpg",
+    "src": "assets/images/guesthouse/guesthouse-03.jpg",
     "kind": "grounds",
     "caption": "The balcony",
     "source": "Owner Drive 022 - Hotel - Airbnb Guest House Vientiane"
    },
    {
-    "src": "assets/images/airbnb/airbnb-04.jpg",
+    "src": "assets/images/guesthouse/guesthouse-04.jpg",
     "kind": "grounds",
     "caption": "Towards the temple roofs",
     "source": "Owner Drive 022 - Hotel - Airbnb Guest House Vientiane"
@@ -222,8 +222,51 @@
  "riverside": {
   "name": "Riverside Hotel Vientiane",
   "city": "Vientiane",
-  "images": [],
-  "note": "No photograph of the Riverside Hotel exists in the Owner's Drive (no hotel folder, 19 Sep 2026): the frame reads Photography to follow — nothing is invented, nothing is substituted."
+  "images": [
+   {
+    "src": "assets/images/riverside/facade.jpg",
+    "kind": "exterior",
+    "caption": "The hotel facade on the riverside street",
+    "source": "Owner Drive folder 1QsTmfzTVZScHWwPyFG3C5MbvL8XKmBgX (Riverside Hotel, 19 Sep 2026) · file 1bDEhMdM1JO6ofYNka7gMRJgeJm0eMP5_ · _unnamed.webp"
+   },
+   {
+    "src": "assets/images/riverside/entrance.jpg",
+    "kind": "exterior",
+    "caption": "The entrance and the garden mural",
+    "source": "Owner Drive folder 1QsTmfzTVZScHWwPyFG3C5MbvL8XKmBgX (Riverside Hotel, 19 Sep 2026) · file 1AHzNP7OkK2YTbSBeQVx_p0NPNeQdXF2p · riverside-palace-hotel (1).jpg"
+   },
+   {
+    "src": "assets/images/riverside/lobby.jpg",
+    "kind": "lobby",
+    "caption": "The lobby and its terrazzo floor",
+    "source": "Owner Drive folder 1QsTmfzTVZScHWwPyFG3C5MbvL8XKmBgX (Riverside Hotel, 19 Sep 2026) · file 19CMyhHDO-TtE8YdmfAEWPZiynkzEgYCn · unnamed (5).webp"
+   },
+   {
+    "src": "assets/images/riverside/reception.jpg",
+    "kind": "lobby",
+    "caption": "The reception",
+    "source": "Owner Drive folder 1QsTmfzTVZScHWwPyFG3C5MbvL8XKmBgX (Riverside Hotel, 19 Sep 2026) · file 1qg9D8IygO2j622LCDvZM6QYFE0bAlJUR · lobby (2).jpg"
+   },
+   {
+    "src": "assets/images/riverside/breakfast-room.jpg",
+    "kind": "facilities",
+    "caption": "The breakfast room",
+    "source": "Owner Drive folder 1QsTmfzTVZScHWwPyFG3C5MbvL8XKmBgX (Riverside Hotel, 19 Sep 2026) · file 1Nxu3EoiULGDo9o4AtqLxTha_00_ow-Ep · riverside-palace-hotel (6).jpg"
+   },
+   {
+    "src": "assets/images/riverside/terrace.jpg",
+    "kind": "grounds",
+    "caption": "A terrace over the rooftops",
+    "source": "Owner Drive folder 1QsTmfzTVZScHWwPyFG3C5MbvL8XKmBgX (Riverside Hotel, 19 Sep 2026) · file 1Gw-40dM-8E7BVdzmb5Rcz6tC_XaKWVf5 · unnamed (1).webp"
+   },
+   {
+    "src": "assets/images/riverside/superior-room.jpg",
+    "kind": "room",
+    "caption": "A Superior Room With Window",
+    "source": "Owner Drive folder 1QsTmfzTVZScHWwPyFG3C5MbvL8XKmBgX (Riverside Hotel, 19 Sep 2026) · file 17NwbRe987GSk0Q3YLlMa7vP5s3TD6R3A · unnamed (3).webp"
+   }
+  ],
+  "note": "The Owner's Riverside Hotel Drive folder (19 Sep 2026) replaced the release-012 'Photography to follow' frame."
  },
  "wanxiang": {
   "name": "Wanxiang Yueju · Kunming",

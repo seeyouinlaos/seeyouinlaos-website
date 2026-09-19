@@ -35,9 +35,9 @@
   "name": "Sühring",
   "city": "Bangkok",
   "roles": [
-   "lunch"
+   "dinner"
   ],
-  "overview": "Experience, Restaurant, Cafe_Details · Suhring",
+  "overview": "Day 01 · 21.02.2027",
   "sheet": "FULL",
   "selectable": true,
   "drive": "090 - Restaurant - Suhring",
@@ -53,7 +53,7 @@
    "assets/images/experiences/bkk-suhring-09.jpg",
    "assets/images/experiences/bkk-suhring-03.jpg"
   ],
-  "note": "price unit set by the Owner 13 Sep 2026: per participating guest, in the journey total (assets/pricing.js FLAT.suhring)",
+  "note": "price unit set by the Owner 13 Sep 2026: per participating guest, in the journey total (assets/pricing.js FLAT.suhring) · dated by the current Operations Master (19 Sep 2026): Day 01 · 21.02.2027 · Dinner",
   "price": "USD 180 per person",
   "hours": [
    "Lunch",
@@ -381,8 +381,7 @@
   "name": "The Commons Thonglor",
   "city": "Bangkok",
   "roles": [
-   "place",
-   "dinner"
+   "place"
   ],
   "overview": "Day 03 · 23.02.2027",
   "sheet": "NONE",
@@ -401,9 +400,38 @@
    "assets/images/experiences/bkk-commons-04.jpg",
    "assets/images/experiences/bkk-commons-05.jpg"
   ],
-  "note": "nine of ten files are 630 px WebP",
+  "note": "nine of ten files are 630 px WebP · the 23.02 dinner is Baan Phraya (19 Sep 2026); The Commons stays the mall of the day",
   "price": null,
   "hours": null,
+  "maps": null,
+  "link": null
+ },
+ {
+  "id": "bkk-baanphraya",
+  "name": "Baan Phraya",
+  "city": "Bangkok · the River of Kings",
+  "roles": [
+   "dinner"
+  ],
+  "overview": "Day 03 · 23.02.2027",
+  "sheet": "DETAIL",
+  "selectable": false,
+  "drive": "Baan Phraya (Owner Drive folder, 19 Sep 2026)",
+  "driveIds": [
+   "1m1mvGNZW4gsMPbSGJy-mgFbKiN5Wdxjd"
+  ],
+  "sourceImages": 8,
+  "used": 4,
+  "primary": "assets/images/experiences/bkk-baanphraya-01.jpg",
+  "gallery": [
+   "assets/images/experiences/bkk-baanphraya-01.jpg",
+   "assets/images/experiences/bkk-baanphraya-02.jpg",
+   "assets/images/experiences/bkk-baanphraya-03.jpg",
+   "assets/images/experiences/bkk-baanphraya-04.jpg"
+  ],
+  "note": "the 23.02 dinner (replaces The Commons); 8 source files: 4 used (courtyard, bar room, lamplit table, staircase), 2 dish photographs and a 600 px file excluded, the Authors' Lounge frame excluded as another house",
+  "price": null,
+  "hours": "Pre-dinner drinks 5 pm – 6 pm · Dinner 6 pm – 11 pm",
   "maps": null,
   "link": null
  },
@@ -470,7 +498,7 @@
   "roles": [
    "lunch"
   ],
-  "overview": "Day 04 · 24.02.2027",
+  "overview": "city",
   "sheet": "NONE",
   "selectable": false,
   "drive": "083 - Restaurant - Thong Smith Bangkok + 089 - Restaurant - Thong Smith",
@@ -487,7 +515,7 @@
    "assets/images/experiences/bkk-thongsmith-04.jpg",
    "assets/images/experiences/bkk-thongsmith-07.jpg"
   ],
-  "note": "4 AI renders in 083 (3 \"Codex Image\", 1 uuid png) excluded by the image rule; takeaway-bag WebP is the MASTER jpg twice",
+  "note": "4 AI renders in 083 (3 \"Codex Image\", 1 uuid png) excluded by the image rule; takeaway-bag WebP is the MASTER jpg twice · the 24.02 lunch cell reads the Aman afternoon tea (19 Sep 2026): kept as an undated Bangkok-days address",
   "price": null,
   "hours": null,
   "maps": null,
@@ -612,9 +640,10 @@
   "name": "Harudot",
   "city": "Bangkok",
   "roles": [
-   "cafe"
+   "cafe",
+   "experience"
   ],
-  "overview": "Day 14 · 06.03.2027",
+  "overview": "Day 03 · 23.02.2027 · Day 15 · 07.03.2027",
   "sheet": "NONE",
   "selectable": false,
   "drive": "123 - Cafe - Harudot Bangkok",
@@ -630,7 +659,7 @@
    "assets/images/experiences/bkk-harudot-02.jpg",
    "assets/images/experiences/bkk-harudot-01.jpg"
   ],
-  "note": "new on the website (Overview Day 14 · Mall / Park / Other)",
+  "note": "new on the website (Overview Day 14 · Mall / Park / Other) · the café of 23.02 and the experience of 07.03 (replaces Siam Paragon; 19 Sep 2026)",
   "price": null,
   "hours": null,
   "maps": null,
@@ -659,6 +688,58 @@
    "assets/images/experiences/bkk-alati-02.jpg"
   ],
   "note": "new on the website (Overview Day 15 lunch)",
+  "price": null,
+  "hours": null,
+  "maps": null,
+  "link": null
+ },
+ {
+  "id": "bkk-cannubi",
+  "name": "Cannubi by Umberto Bombana",
+  "city": "Dusit Thani Bangkok",
+  "roles": [
+   "dinner"
+  ],
+  "overview": "Day 15 · 07.03.2027",
+  "sheet": "DETAIL",
+  "selectable": false,
+  "drive": "Cannubi by Umberto Bombana (Owner Drive folder, 19 Sep 2026)",
+  "driveIds": [
+   "1Byl3QKNULwmK7FTAvxFvIbythEBR1INE"
+  ],
+  "sourceImages": 11,
+  "used": 5,
+  "primary": "assets/images/experiences/bkk-cannubi-01.jpg",
+  "gallery": [
+   "assets/images/experiences/bkk-cannubi-01.jpg",
+   "assets/images/experiences/bkk-cannubi-02.jpg",
+   "assets/images/experiences/bkk-cannubi-03.jpg",
+   "assets/images/experiences/bkk-cannubi-04.jpg",
+   "assets/images/experiences/bkk-cannubi-05.jpg"
+  ],
+  "note": "the 07.03 dinner (replaces Petits Plats there); 11 source files: 5 used, 4 dish photographs excluded, one 905 px offer banner excluded, one misfiled Baan Phraya frame (SnapInsta 777382051) excluded",
+  "price": null,
+  "hours": "Wednesday to Sunday · Lunch 12:00 – 14:30 (last order 14:00) · Dinner 18:00 – 22:00",
+  "maps": null,
+  "link": null
+ },
+ {
+  "id": "bkk-petitsplats",
+  "name": "Petits Plats Bangkok",
+  "city": "Bangkok",
+  "roles": [
+   "dinner"
+  ],
+  "overview": "Day 16 · 08.03.2027",
+  "sheet": "NONE",
+  "selectable": false,
+  "drive": "— (no Drive folder, 19 Sep 2026)",
+  "driveIds": [],
+  "sourceImages": 0,
+  "used": 0,
+  "primary": null,
+  "gallery": [],
+  "note": "the 08.03 dinner (replaces the in-flight dinner); no photograph and no description in the Owner's records — the card stands without an image",
   "price": null,
   "hours": null,
   "maps": null,

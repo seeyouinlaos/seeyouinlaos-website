@@ -326,6 +326,9 @@
     if (f) setTimeout(function () { f.focus(); }, 60);
   }
   function closeDrawer() {
+    /* every close path — the Close control, the scrim, Escape, a page's own call — is announced (a page that awaits an engine
+       answer inside the drawer stops when the guest has closed it: release 014) */
+    try { document.dispatchEvent(new CustomEvent('siyl:drawer-close')); } catch (e) {}
     if (!document.body.classList.contains('p-drawer-open')) return;
     document.body.classList.remove('p-drawer-open');
     unlockScroll();

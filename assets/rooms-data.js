@@ -77,23 +77,23 @@
   }
 
   /* ==========================================================================
-     THE OWNER-APPROVED FULL EXPERIENCE.
+     THE OWNER-APPROVED DEFAULTS OF THE COMPLETE TRIP (assets/packages-data.js carries the package itself, release 014).
 
-     Full Experience is not "the most expensive room in every house". It is the
+     The Complete trip is not "the most expensive room in every house". It is the
      configuration the Owner selected and reviewed on 09 September 2026: one
      named room per accommodation stage, plus the four transport products.
 
        21 – 24 FEB  Sathorn Penthouse                    85 × 3 = 255
-       24 – 25 FEB  Special Express No. 25                       75
+       24 – 25 FEB  Special Express No. 25                      100
        25 – 27 FEB  Heritage Grand Premier              170 × 2 = 340
        27 FEB – 01 MAR  Heritage Grand Premier          170 × 1 = 170
-       01 MAR       MU9632 Business                             275
+       01 MAR       MU9646 Business                             275
        01 – 04 MAR  Italian Style Suite                  50 × 3 = 150
-       04 MAR       C642 Business                                85
+       04 MAR       C86 Business                                105
        04 – 06 MAR  270° Snow Mountain Viewing Room     100 × 2 = 200
        06 MAR       MU5924 + MU741 Economy flexible             200
        06 – 08 MAR  Deluxe Balcony King                 190 × 2 = 380
-                                                       = USD 2,130
+                                                       = USD 2,175   (the current Operations Master, 19 Sep 2026)
 
      The total is NEVER written down. It is the sum of whatever the engine
      actually selects, so that when the shared ledger says a preferred room is
@@ -210,44 +210,49 @@
       ]
     },
 
-    airbnb: {
-      name: 'Alternative Stay · Vientiane',
+    /* GUEST HOUSE COMPLIMENTARY (Owner, 19 Sep 2026 · package D2 of the Operations Master: "Guest House complimenatry",
+     * Complimentary · 0 USD, 27.02 – 01.03.2027). ONE shared house of SIX bookable places: every place is taken
+     * individually through the room engine (unit 'A' of 'guesthouse/guest-house'), a party takes as many places as it
+     * has members, and signed-in guests see who already shares the house by first name. No bed algorithm, no
+     * "Private Residence" (that label was invented), no price. */
+    guesthouse: {
+      name: 'Guest House complimentary',
       place: 'Vientiane, Laos',
-      windows: [{ id: 'airbnb-2br', label: 'Wedding Stay', dates: '27 February – 01 March 2027', nights: '2 nights', n: 2,
-        bagName: 'Private Residence · Vientiane', bagImg: 'assets/images/airbnb/airbnb-01.jpg' }],
+      windows: [{ id: 'guesthouse', label: 'Wedding Stay', dates: '27 February – 01 March 2027', nights: '2 nights', n: 2,
+        bagName: 'Guest House complimentary · Vientiane', bagImg: 'assets/images/guesthouse/guesthouse-01.jpg' }],
       includes: [
         'Two nights, 27 → 28 February and 28 February → 1 March, for the wedding window.',
-        'Complimentary — nothing to pay. Up to four guests in total; places are held as they are taken.',
+        'Complimentary — nothing to pay. Six shared places in the house; each place is held as it is taken.',
         'Guest Relations coordinates the keys, the arrival and the return personally.',
         'Breakfast, meals and transport in Vientiane are your own.'
       ],
       rooms: [
-        { slug: 'private-residence', name: 'Private Residence', cat: 'Alternative stay',
-          desc: 'A warm two-bedroom residence in central Vientiane, secured for the wedding stay and hosted for up to four guests. Guest Relations coordinates the arrangements personally.',
-          gallery: [['assets/images/airbnb/airbnb-01.jpg', 'Living and dining'], ['assets/images/airbnb/airbnb-02.jpg', 'The entry'], ['assets/images/airbnb/airbnb-03.jpg', 'The balcony'], ['assets/images/airbnb/airbnb-04.jpg', 'Towards the temple roofs'], ['assets/images/airbnb/airbnb-05.jpg', 'By the window'], ['assets/images/airbnb/airbnb-06.jpg', 'A corner of the living room']],
-          facts: [['Type', 'Private residence'], ['Bedrooms', 'Two bedrooms'], ['Occupancy', 'Up to 4 guests'], ['Location', 'Downtown Vientiane · 300 m to the Mekong Night Market · 800 m to Wat Sisaket']],
-          story: 'A two-bedroom residence in downtown Vientiane, three hundred metres from the Mekong night market and eight hundred from Wat Sisaket. It is offered complimentary for the wedding window to up to four guests, and Guest Relations arranges the keys, the arrival and everything around it personally.',
+        { slug: 'guest-house', name: 'Guest House complimentary', cat: 'Guest house',
+          desc: 'A warm two-bedroom guest house in central Vientiane, secured for the wedding stay and shared by up to six guests. Guest Relations coordinates the arrangements personally.',
+          gallery: [['assets/images/guesthouse/guesthouse-01.jpg', 'Living and dining'], ['assets/images/guesthouse/guesthouse-02.jpg', 'The entry'], ['assets/images/guesthouse/guesthouse-03.jpg', 'The balcony'], ['assets/images/guesthouse/guesthouse-04.jpg', 'Towards the temple roofs'], ['assets/images/guesthouse/guesthouse-05.jpg', 'By the window'], ['assets/images/guesthouse/guesthouse-06.jpg', 'A corner of the living room']],
+          facts: [['Type', 'Guest house · shared'], ['Bedrooms', 'Two bedrooms'], ['Places', 'Six shared places'], ['Location', 'Downtown Vientiane · 300 m to the Mekong Night Market · 800 m to Wat Sisaket']],
+          story: 'A two-bedroom guest house in downtown Vientiane, three hundred metres from the Mekong night market and eight hundred from Wat Sisaket. It is offered complimentary for the wedding window as six shared places — you see who is already staying when you choose yours — and Guest Relations arranges the keys, the arrival and everything around it personally.',
           amenities: ['WiFi', 'Air conditioning', 'Hot water', 'Washer & laundry area', 'Refrigerator', 'Kettle & kitchenette', 'Hair dryer', 'Free parking'],
-          price: null, status: 'Complimentary · up to 4 guests', interest: true }
+          price: null, status: 'Complimentary · six shared places', interest: true, complimentary: true }
       ]
     },
 
     /* RIVERSIDE HOTEL VIENTIANE (Owner, release 012 · H&S_Wedding_Operations_Master of 18 Sep 2026): package D3 — the third
-     * address for the wedding window beside the Souphattra Heritage and the Private Residence. Accommodation_Details column
+     * address for the wedding window beside the Souphattra Heritage and the Guest House complimentary. Accommodation_Details column
      * D3: "Superior Room With Window", 22 sq.m., 1 bed, floors 2 – 7, check-in 27.02.2027, check-out 01.03.2027 (2 nights),
      * 6 rooms, "Price per Person" 30 = the per-person, per-night share (60 per room / night, 120 per room for the window);
      * Budget: "Riverside Hotel · Superior Room With Window · 30.00 · Open · Approve by Suthep, 20.08.2026". Both nights are
-     * the guest's (Overview Day 07 and Day 08: Self-Pay — the hosted second night is the Souphattra's rule). The
-     * Overview's "25 USD" column disagrees with the Accommodation_Details and Budget figure of 30: the room sheet is the
-     * rate source (as for every other stay) and the conflict is reported. The Owner's Drive carries NO Riverside Hotel
-     * photograph (no folder): the stay carries no image and nothing is invented — the frame stays the house surface. */
+     * the guest's (Overview Day 07 and Day 08: Self-Pay — the hosted second night is the Souphattra's rule). The current
+     * Operations Master (19 Sep 2026) says 30 in the Overview as well — the release-012 conflict (25) is gone. Photography (release 014, 19 Sep 2026): the
+     * Owner's Riverside Hotel Drive folder (1QsTmfzTVZScHWwPyFG3C5MbvL8XKmBgX) — seven frames, provenance in
+     * src/stay-media.json and assets/images/ASSET-MAP.md. */
     riverside: {
       name: 'Riverside Hotel Vientiane',
       place: 'Vientiane, Laos',
       breakfast: 'Breakfast included',
       windows: [{ id: 'riverside', label: 'Wedding Stay', dates: '27 February – 01 March 2027', nights: '2 nights', n: 2, pay: 2,
         window: 'fixed', nightsList: ['27 → 28 February', '28 February → 01 March'],
-        bagName: 'Riverside Hotel Vientiane', bagImg: null }],
+        bagName: 'Riverside Hotel Vientiane', bagImg: 'assets/images/riverside/facade.jpg' }],
       includes: [
         'Two nights, 27 → 28 February and 28 February → 1 March, for the wedding window — both nights are your own.',
         'Daily buffet breakfast included.',
@@ -257,7 +262,7 @@
       rooms: [
         { slug: 'superior-window', name: 'Superior Room With Window', cat: 'Superior room',
           desc: 'A comfortable 22 sq.m. room with a window, on floors 2 – 7 of a 46-room hotel a short walk from the Mekong.',
-          gallery: [],
+          gallery: [['assets/images/riverside/facade.jpg', 'The hotel facade on the riverside street'], ['assets/images/riverside/superior-room.jpg', 'A Superior Room With Window'], ['assets/images/riverside/lobby.jpg', 'The lobby and its terrazzo floor'], ['assets/images/riverside/reception.jpg', 'The reception'], ['assets/images/riverside/breakfast-room.jpg', 'The breakfast room'], ['assets/images/riverside/terrace.jpg', 'A terrace over the rooftops'], ['assets/images/riverside/entrance.jpg', 'The entrance and the garden mural']],
           facts: [['Size', '22 sq.m.'], ['Bed', 'Extra-long bed'], ['Occupancy', '2 adults'], ['Location', 'Floors 2 – 7'], ['Breakfast', 'Daily buffet breakfast included']],
           story: 'The Riverside Hotel Vientiane is a three-star house of forty-six rooms with a lift throughout, six minutes on foot from the sixteenth-century Wat Ong Teu and within reach of the Mekong riverside park. The Superior Room With Window is twenty-two square metres with air conditioning, a flat-screen television with satellite channels, an extra-long bed, a wardrobe and a private bathroom with bidet, hair dryer and bath sheets. A daily buffet breakfast is served, there is a rooftop bar, and the Nam Phou Fountain is five hundred and fifty metres away; Patuxai a twenty-five-minute walk.',
           groups: [['The room', ['22 sq.m. with a window', 'Floors 2 – 7, lift throughout', 'Air conditioning', 'Extra-long bed', 'Wardrobe', 'Flat-screen television with satellite channels']],

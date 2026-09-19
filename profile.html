@@ -32,32 +32,31 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 @media(min-width:768px){.pf-rail{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px;overflow:visible}.pf-rail>*{flex:none;max-width:none}.pf-tickets{grid-template-columns:1fr 1fr}}
 @media(min-width:1024px){.pf-rail{grid-template-columns:repeat(3,1fr)}}
 </style>
-<link rel="stylesheet" href="assets/aman.css?v=98576b60"><link rel="stylesheet" href="assets/prep.css?v=cd2143af"></head><body class="prep p-in">
+<link rel="stylesheet" href="assets/aman.css?v=98576b60"><link rel="stylesheet" href="assets/prep.css?v=4b294be8"></head><body class="prep p-in">
 <header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="cart.html" aria-label="My Bag"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main class="prep-page" id="profile">
 <div class="prep-head">
   <p class="t-l1" id="pf-own">My Profile</p>
   <h1 class="t-d1">My Profile</h1>
-  <p class="t-b1 measure">Your account: who you are, how we reach you, and everything arranged in your name. Your trip itself is planned in My Trip; nothing here is a step.</p>
+  <p class="t-b1 measure">Your account: who you are, how we reach you, and everything chosen in your name. Your trip itself is planned in My Trip; nothing here is a step.</p>
 </div>
 <div id="page"></div>
 </main>
 <script src="assets/bag.js?v=2a0c8152"></script>
-<script src="assets/shop-menu.js?v=75d5662d"></script>
-<script src="assets/aman.js?v=aba68a3c"></script>
-<script src="assets/rooms-data.js?v=c8052faf"></script>
-<script src="assets/pricing.js?v=e864296d"></script>
-<script src="assets/guest.js?v=80cbd010"></script>
-<script src="assets/draft.js?v=f7b62db2"></script>
+<script src="assets/shop-menu.js?v=659ff077"></script>
+<script src="assets/aman.js?v=67d37d1b"></script>
+<script src="assets/rooms-data.js?v=7ee0852c"></script>
+<script src="assets/pricing.js?v=0aa9aef3"></script>
+<script src="assets/guest.js?v=de7f0d74"></script>
+<script src="assets/draft.js?v=7ab9ca64"></script>
 <script src="assets/temple.js?v=a5a16527"></script>
-<script src="assets/rooms.js?v=5d4c69a5"></script>
-<script src="assets/arranged.js?v=d4ba78b8"></script>
-<script src="assets/stay.js?v=835263c1"></script>
+<script src="assets/rooms.js?v=e0d4bbbf"></script>
+<script src="assets/stay.js?v=3690f59b"></script>
 <script src="assets/seatlabels.js?v=4994e1f4"></script>
 <script src="assets/seating.js?v=5c7e6b3d"></script>
 <script src="assets/confirm.js?v=f35e0aa8"></script>
 <script src="assets/transport-data.js?v=f54e56e9"></script>
-<script src="assets/journey.js?v=2b2b6ac3"></script>
+<script src="assets/packages-data.js?v=9818dd90"></script><script src="assets/journey.js?v=df71141b"></script>
 <script src="assets/docs.js?v=7c1c7bfd"></script>
 <script src="assets/avatar.js?v=80828084"></script>
 <script type="module" src="assets/invite.mjs?v=29231ccf"></script>
@@ -67,13 +66,13 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
    NOT a step of the gated flow: this page never mounts the step shell, never
    redirects to a missing item and never counts towards readiness. It reads
    what the other surfaces hold — identity, contact, the arrangements in the
-   guest's name (fixed arrangements, held rooms, travel, experiences, the
+   guest's name (held rooms, the waiting list, travel, experiences, the
    wedding and the seats), the tickets, the trip status, About You (step 05)
    and the travel documents — and links to the surface where each is changed.
    My Bag stays the one cart: nothing here adds, removes or re-totals a line.
    ========================================================================== */
 (function(){
-var G=window.SIYL_GUEST,B=window.SIYL_BAG,J=window.SIYL_JOURNEY,P=window.SIYL_PRICE,ST=window.SIYL_STAY,U=window.SIYL_UNITS,S=window.SIYL_SEATS,C=window.SIYL_CONFIRM,D=window.SIYL_DOCS,DR=window.SIYL_DRAFT,T=window.SIYL_TEMPLE,AV=window.SIYL_AVATAR,A=window.SIYL_ARRANGED,page=document.getElementById('page');
+var G=window.SIYL_GUEST,B=window.SIYL_BAG,J=window.SIYL_JOURNEY,P=window.SIYL_PRICE,ST=window.SIYL_STAY,U=window.SIYL_UNITS,S=window.SIYL_SEATS,C=window.SIYL_CONFIRM,D=window.SIYL_DOCS,DR=window.SIYL_DRAFT,T=window.SIYL_TEMPLE,AV=window.SIYL_AVATAR,page=document.getElementById('page');
 if(!G||!page)return;
 function esc(t){return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 function gated(fn){if(window.SIYL_INVITE){SIYL_INVITE.require(fn)}
@@ -97,7 +96,7 @@ function detailHref(x){
   if(x.stay&&x.room)return 'room.html?stay='+x.stay+'&room='+x.room;
   if(x.id==='1872'||x.id==='tea1872')return '1872.html';
   if(x.exp)return 'experience.html?id='+encodeURIComponent(x.exp);
-  if(x.interest&&x.id!=='airbnb-2br')return 'marsilea.html';
+  if(x.interest&&x.id!=='guesthouse')return 'marsilea.html';
   if(x.id==='sangkhathan')return 'wedding.html#sangkhathan';
   if(window.SIYL_TRANSPORT&&window.SIYL_TRANSPORT[x.id])return 'transport.html?id='+x.id;
   var at=P.locate(x.id);
@@ -148,8 +147,9 @@ function contact(){
     '<div class="p-actions"><a class="p-link" href="invitation.html#contact">Edit contact details</a></div></div></section>'}
 function arrangements(me){
   var id=me.guestId,lines=J.sorted(B.get()),stays=[],travel=[],exps=[],h='';
-  /* the fixed arrangements first — arranged for the guest, no amount, never part of the bag */
-  (A&&A.ready()?A.items():[]).forEach(function(a){stays.push(card({data:'fixed:'+a.stage,img:hrefImg(a.href),when:a.place+' · '+a.when,name:a.property,meta:[a.name,a.category,a.nights].filter(Boolean).join(' · ')+(a.who?' · '+a.who:''),state:'Arranged for you',on:true,note:'Fixed arrangement · not part of your bag',links:a.href?[{href:a.href,text:'View details',mute:true}]:[]}))});
+  /* THE WAITING LIST (Owner, 19 Sep 2026): a stage no room could take yet — its position, no amount, never part of the bag */
+  if(U&&U.ready&&U.ready()&&U.waitlisted)J.SEGMENTS.forEach(function(seg){if(!J.relevant(seg)||J.state(seg)!=='waitlisted')return;var w=U.waitlisted(seg.key);
+    stays.push(card({data:'waitlist:'+seg.key,img:'',when:seg.place+' · '+seg.when,name:seg.label,meta:'Waiting list · number '+(w&&w.position||'?')+(w&&w.size>1?' for '+w.size+' places':''),state:'On the waiting list',open:true,note:'No room yet · no cost until it is resolved · Guest Relations will find an arrangement with you',links:[{href:'your-journey.html#s-'+seg.key,text:'Open in My Trip',mute:true}]}))});
   lines.forEach(function(x){
     var g=group(x);if(g==='wedding')return;
     if(J.lineRelevant&&G.scopeAnswered&&G.scopeAnswered()&&!J.lineRelevant(x))return;   /* a line of a destination the guest is not joining is not an arrangement */

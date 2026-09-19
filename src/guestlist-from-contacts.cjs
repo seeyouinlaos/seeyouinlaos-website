@@ -22,7 +22,8 @@
  *   · an existing guest the sheet no longer invites is kept with status CANCELLED (the code is retired, nothing forgotten);
  *   · the hosts are the Document Owner rows: G048 Haruthai (BRIDE) · G049 Suthep (GROOM) · party INV-001 — the FIXED
  *     allocation in src/inventory-seed.js names these ids;
- *   · rows that cannot be invited by name are REPORTED, never invented: a blank name, "her daughter", "No".
+ *   · rows that cannot be invited by name are REPORTED, never invented: a blank name, "her daughter", "No",
+ *     a relationship placeholder such as "Aob's girlfriend" (19 Sep 2026) or a "." surname.
  * Nothing here prints a code, an email, a phone number or a birthdate.
  */
 const fs = require('fs');
@@ -66,6 +67,10 @@ function main() {
     if (!first && !nick) { skipped.push([r.ID, 'no name on the row', '']); continue; }
     if (/^no( name)?$/i.test(first) && (!nick || /^no( name)?$/i.test(nick))) { skipped.push([r.ID, '"No" — the sheet\'s word for no partner', '']); continue; }
     if (/^her daughter$/i.test(first)) { skipped.push([r.ID, 'not named ("her daughter") — the Owner names the guest, then the code is made', r.Surname]); continue; }
+    /* a relationship placeholder is not a name (the 19 Sep 2026 sheet: "Aob's girlfriend" with the surname "."): no code is
+       made for a guest the Owner has not named — reported, never invented, never a duplicate of the named partner */
+    if (/(^|\s)(girlfriend|boyfriend|wife|husband|partner|fianc[ée]e?|daughter|son|friend|guest|plus one)$/i.test(first) && /['’]s\s|^(her|his|their)\s/i.test(first)) { skipped.push([r.ID, 'a placeholder, not a name ("' + first + '") — the Owner names the guest, then the code is made', r.Surname]); continue; }
+    if (/^[.\-–—?]+$/.test(String(r.Surname || '').trim()) && !nick) { skipped.push([r.ID, 'a placeholder surname ("' + r.Surname + '") — the Owner names the guest, then the code is made', first]); continue; }
     /* the preferred name: the nickname, else the first name as written (a parenthesis is not a name; a double first name stays whole) */
     let preferredName = nick || first.replace(/\(.*?\)/g, '').replace(/\s+/g, ' ').trim();
     const fullName = [first.replace(/\s+/g, ' ').trim(), r.Surname].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim() || preferredName;

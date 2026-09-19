@@ -18,6 +18,7 @@
 (function () {
   'use strict';
   var KEYS = ['siyl.guest', 'siyl.bag', 'siyl.temple', 'siyl.docs', 'siyl.sent', 'siyl.skip', 'siyl.skip.by'];
+  var LOCAL_ONLY = ['siyl.wait'];   /* the device's memory of the waiting list (assets/rooms.js) — dropped with the journey, never synced */
   var ORIGIN = 'https://seeyouinlaos-website.suthep-hrg.workers.dev';
   var API = (location.hostname === 'seeyouinlaos-website.suthep-hrg.workers.dev' || /^(localhost|127\.0\.0\.1)$/.test(location.hostname)) ? '/api/draft' : ORIGIN + '/api/draft';
   var META = 'siyl.draft.meta';   /* { invitationId, serverUpdatedAt, dirty, lastSavedAt, lastError } */
@@ -120,7 +121,7 @@
     var cleared = false;
     if (older) {
       KEYS.forEach(function (k) { if (localStorage.getItem(k) !== null) { localStorage.removeItem(k); cleared = true; } });
-      try { localStorage.removeItem(BASE); localStorage.removeItem(META); } catch (e) {}
+      try { localStorage.removeItem(BASE); localStorage.removeItem(META); LOCAL_ONLY.forEach(function (k) { localStorage.removeItem(k); }); } catch (e) {}
     }
     try { localStorage.setItem(RESET, epoch); } catch (e) {}
     if (cleared) { state.notice = null; state.applying = true; try { ['siyl:guest', 'siyl:bag', 'siyl:temple', 'siyl:docs'].forEach(function (ev) { try { document.dispatchEvent(new CustomEvent(ev)); } catch (e) {} }); } finally { state.applying = false; } }

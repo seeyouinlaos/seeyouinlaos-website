@@ -18,7 +18,9 @@ window.SIYL_EXP = [
    * (assets/pricing.js FLAT.suhring). Optional, selectable through the Journey
    * like the Afternoon Tea — a restaurant request arranged through the
    * Journey workflow, never a confirmed reservation. */
-  { id: 'bkk-suhring', roles: ['lunch'], row: 'Experience, Restaurant, Cafe_Details · Suhring', sheet: 'FULL', chapter: 'bkk', featured: true, day: 'Bangkok days', name: 'Sühring', where: 'Bangkok', cats: 'German fine dining · Lunch',
+  /* DATED (the current Operations Master, 19 Sep 2026): Day 01 · 21.02.2027 · DINNER — the first evening in Bangkok
+   * (the Overview's Dinner cell; the sheet record's opening hours are the restaurant's own and are kept below) */
+  { id: 'bkk-suhring', roles: ['dinner'], row: 'Day 01 · 21.02.2027', sheet: 'FULL', chapter: 'bkk', featured: true, day: '21 FEB 2027', name: 'Sühring', where: 'Bangkok', cats: 'German fine dining · Dinner',
     maps: 'https://maps.app.goo.gl/2b4whggW3YCnxN6u5?g_st=ic', link: 'https://www.restaurantsuhring.com/menu.html',
     img: 'assets/images/experiences/bkk-suhring-01.jpg',
     teaser: 'Where German tradition meets modern artistry — a villa, two brothers, and countless memories.',
@@ -33,6 +35,7 @@ window.SIYL_EXP = [
     practical: {
       price: 'USD 180 per person',
       priceNote: 'For each participating guest, as decided by the hosts.',
+      when: 'Dinner · Sunday, 21 February 2027 · the first evening in Bangkok',
       hours: ['Lunch', 'Thursday to Sunday', '12:30 pm to 13:00 pm (last seating)', 'Closed on Monday and Tuesday']
     },
     select: { id: 'suhring', price: 180, unit: 'per person' } },
@@ -48,7 +51,21 @@ window.SIYL_EXP = [
     teaser: 'Whispering Land: Provence-inspired architecture with Scandinavian restraint — French-style doors, natural light, garden and mature planting, vintage furniture and calm, adaptable spaces.' },
   { id: 'bkk-dib', roles: ['experience'], row: 'Day 03 · 23.02.2027', chapter: 'bkk', featured: true, day: '23 FEB 2027', name: 'Dib Bangkok', where: 'Bangkok', cats: 'Art · Architecture · Design', img: 'assets/images/experiences/bkk-dib-01.jpg', teaser: "Bangkok's museum of contemporary art — bold architecture and public space by the expressway." },
   { id: 'bkk-emquartier', roles: ['place'], row: 'Day 03 · 23.02.2027', chapter: 'bkk', day: '23 FEB 2027', name: 'EmQuartier', where: 'Bangkok', cats: 'City · Design · Shopping', img: 'assets/images/experiences/bkk-emquartier-01.jpg', teaser: 'Sukhumvit’s design quarter — cascading gardens, galleries of shops and city energy.' },
-  { id: 'bkk-commons', roles: ['place','dinner'], row: 'Day 03 · 23.02.2027', chapter: 'bkk', day: '23 FEB 2027', name: 'The Commons Thonglor', where: 'Bangkok', cats: 'Food · Design · Social', img: 'assets/images/experiences/bkk-commons-01.jpg', teaser: "Thonglor's vertical village — one evening, many kitchens, easy drinks in between." },
+  { id: 'bkk-commons', roles: ['place'], row: 'Day 03 · 23.02.2027', chapter: 'bkk', day: '23 FEB 2027', name: 'The Commons Thonglor', where: 'Bangkok', cats: 'Food · Design · Social', img: 'assets/images/experiences/bkk-commons-01.jpg', teaser: "Thonglor's vertical village — many kitchens, easy drinks in between." },
+  /* BAAN PHRAYA — Day 03 · 23.02.2027 · DINNER (the current Operations Master, 19 Sep 2026: replaces The Commons in the
+   * Dinner cell). Every word below is the Owner's "Experience, Restaurant, Cafe_Details" record for Baan Phraya. */
+  { id: 'bkk-baanphraya', roles: ['dinner'], row: 'Day 03 · 23.02.2027', chapter: 'bkk', featured: true, day: '23 FEB 2027', name: 'Baan Phraya', where: 'Bangkok · the River of Kings', cats: 'Thai fine dining · Heritage house',
+    img: 'assets/images/experiences/bkk-baanphraya-01.jpg',
+    teaser: 'A beautifully restored century-old riverside residence, once home to Thai nobility — the refined Thai cooking of Chef Phatchara “Pom” Pirapak.',
+    detail: [
+      'Set along the River of Kings, Baan Phraya returns as a beautifully restored century-old residence that honours its history as a gathering place for Thai nobility and distinguished guests. Once home to Phraya Mahai Savan and Khunying Luean Mahai Savan, the house now celebrates its legacy through the refined cooking of Chef Phatchara “Pom” Pirapak, who revives regional and royal recipes with a quiet contemporary touch.',
+      'With Baan Phraya’s noble history and heritage as her muse, Chef Pom reimagines and revitalises forgotten Thai delicacies with a contemporary twist, fusing traditional cooking techniques with thoughtful sourcing and a commitment to sustainability.',
+      'Baan Phraya is easily accessible from Charoen Nakorn Road with a dedicated parking area — or by the hotel’s shuttle boat across the river.'
+    ],
+    practical: {
+      hours: ['Pre-dinner drinks 5 pm – 6 pm', 'Dinner 6 pm – 11 pm', 'Set menu THB 3,800 per person · wine pairing THB 2,800 · non-alcoholic pairing THB 1,400 (the house’s own prices, subject to service charge and VAT)'],
+      dress: 'Elegant attire and proper footwear; gentlemen in long trousers and closed shoes — no sleeveless shirts.'
+    } },
   { id: 'bkk-barus', roles: ['bar'], row: 'Day 03 · 23.02.2027', chapter: 'bkk', day: '23 FEB 2027', name: 'Bar Us', where: 'Bangkok', cats: 'Bar · Evening · Design', maps: 'https://maps.app.goo.gl/2KLduE51ybg4qAqd9?g_st=ic', img: 'assets/images/experiences/bkk-barus-06.jpg', teaser: 'An intimate evening alternative — a small bar of precision and warmth.' },
   { id: 'bkk-ledukaan', roles: ['dinner'], row: 'city', chapter: 'bkk', day: 'Bangkok days', name: 'Le Du Kaan', where: 'Bangkok', cats: 'Thai fine dining · Rooftop · Bar',
     img: 'assets/images/experiences/bkk-ledukaan-01.jpg',
@@ -59,14 +76,36 @@ window.SIYL_EXP = [
       'The outdoor bar serves cocktails and mocktails inspired by Thailand’s four regions, with a sommelier-curated wine selection. Nestled on the 56th floor of EA Rooftop at The Empire, with a choice of indoor dining and an expansive outdoor terrace and rooftop bar over the Bangkok skyline.'
     ],
     practical: { hours: ['Lunch 11:30 – 14:30 (last order 14:00)', 'Dinner 17:00 – 22:30 (last order 22:00)', 'Bar 17:00 – 01:00 (last order 23:45)'] } },
-  { id: 'bkk-thongsmith', roles: ['lunch'], row: 'Day 04 · 24.02.2027', chapter: 'bkk', day: '24 FEB 2027', name: 'Thong Smith', where: 'Bangkok', cats: 'Thai · Boat Noodles', img: 'assets/images/experiences/bkk-thongsmith-03.jpg', teaser: 'Siamese boat noodles, elevated — a Bangkok classic done beautifully.' },
+  /* THONG SMITH: the 24.02 lunch cell now reads the Aman afternoon tea (the current Operations Master, 19 Sep 2026) — the
+   * place stays a Bangkok-days address of the hosts' notes, no longer dated */
+  { id: 'bkk-thongsmith', roles: ['lunch'], row: 'city', chapter: 'bkk', day: 'Bangkok days', name: 'Thong Smith', where: 'Bangkok', cats: 'Thai · Boat Noodles', img: 'assets/images/experiences/bkk-thongsmith-03.jpg', teaser: 'Siamese boat noodles, elevated — a Bangkok classic done beautifully.' },
   { id: 'bkk-letsrelax', roles: ['experience'], row: 'Day 04 · 24.02.2027', chapter: 'bkk', day: '24 FEB 2027', name: "Let's Relax", where: 'Bangkok', cats: 'Wellness · Spa', img: 'assets/images/experiences/bkk-letsrelax-01.jpg', teaser: 'A quiet hour of Thai wellness before the journey continues.' },
   { id: 'bkk-dusit', roles: ['place'], row: 'Day 04 · 24.02.2027', chapter: 'bkk', day: '24 FEB 2027', name: 'Dusit Central Park', where: 'Bangkok', cats: 'City · Park · Design · Lifestyle', img: 'assets/images/experiences/bkk-dusit-01.jpg', teaser: 'The new green heart above Silom — architecture, park levels and city views.' },
   { id: 'bkk-madeleine', roles: ['cafe'], row: 'Day 04 · 24.02.2027', chapter: 'bkk', day: '24 FEB 2027', name: 'Cafe Madeleine', where: 'Four Seasons Hotel Bangkok', cats: 'Pâtisserie · Hotel · Café', img: 'assets/images/experiences/bkk-madeleine-01.jpg', teaser: "Refined hotel pâtisserie — French pastry in the Four Seasons' calm." },
   { id: 'bkk-tangjaiyang', roles: ['dinner'], row: 'Day 04 · 24.02.2027', chapter: 'bkk', day: '24 FEB 2027', name: 'Tang Jai Yang', where: 'Bangkok', cats: 'Cantonese · Charcoal · Dining', maps: 'https://maps.app.goo.gl/6otfQcm4bqsTuWZ16?g_st=ic', img: 'assets/images/experiences/bkk-tjy-02.jpg', teaser: 'Cantonese charcoal barbecue — smoke, lacquer and generations of craft.' },
-  /* THAILAND · BANGKOK · THE RETURN · 06 – 08 MAR 2027 (Overview Day 14 – 15) */
-  { id: 'bkk-harudot', roles: ['cafe'], row: 'Day 14 · 06.03.2027', chapter: 'bkk', leg: 'return', day: '06 MAR 2027', name: 'Harudot', where: 'Bangkok', cats: 'Café · Architecture · Design', img: 'assets/images/experiences/bkk-harudot-03.jpg', teaser: 'A café of rose plaster and spiral stairs — architecture first, coffee close behind.' },
-  { id: 'bkk-alati', roles: ['lunch'], row: 'Day 15 · 07.03.2027', chapter: 'bkk', leg: 'return', day: '07 MAR 2027', name: 'ALATi', where: 'Siam Kempinski Hotel Bangkok', cats: 'Lunch · Brunch · Hotel', img: 'assets/images/experiences/bkk-alati-01.jpg', teaser: 'Brunch at the Siam Kempinski — the last Bangkok table of the journey, the day before the flight home.' },
+  /* THAILAND · BANGKOK · THE RETURN · 06 – 08 MAR 2027 (Overview Day 14 – 16) */
+  /* HARUDOT (the current Operations Master, 19 Sep 2026): the café of Day 03 · 23.02.2027 and the EXPERIENCE of Day 15 ·
+   * 07.03.2027 (it replaces Siam Paragon in the Experience cell of the return); the Owner's approved photographs stand */
+  { id: 'bkk-harudot', roles: ['cafe', 'experience'], row: 'Day 03 · 23.02.2027 · Day 15 · 07.03.2027', chapter: 'bkk', leg: 'return', day: '23 FEB · 07 MAR 2027', name: 'Harudot', where: 'Bangkok', cats: 'Café · Architecture · Design', img: 'assets/images/experiences/bkk-harudot-03.jpg', teaser: 'A café of rose plaster and spiral stairs — architecture first, coffee close behind.' },
+  { id: 'bkk-alati', roles: ['lunch'], row: 'Day 15 · 07.03.2027', chapter: 'bkk', leg: 'return', day: '07 MAR 2027', name: 'ALATi', where: 'Siam Kempinski Hotel Bangkok', cats: 'Lunch · Brunch · Hotel', img: 'assets/images/experiences/bkk-alati-01.jpg', teaser: 'Brunch at the Siam Kempinski — the last Bangkok lunch of the journey, the day before the flight home.' },
+  /* CANNUBI BY UMBERTO BOMBANA — Day 15 · 07.03.2027 · DINNER (the current Operations Master, 19 Sep 2026: replaces Petits
+   * Plats in the Dinner cell). Every word below is the Owner's "Experience, Restaurant, Cafe_Details" record. */
+  { id: 'bkk-cannubi', roles: ['dinner'], row: 'Day 15 · 07.03.2027', chapter: 'bkk', leg: 'return', featured: true, day: '07 MAR 2027', name: 'Cannubi by Umberto Bombana', where: 'Dusit Thani Bangkok', cats: 'Italian fine dining · One MICHELIN Star',
+    img: 'assets/images/experiences/bkk-cannubi-01.jpg',
+    teaser: 'Named after the famed Barolo hill in Piemonte — the one Italian restaurant in Thailand with a MICHELIN Star, and a cellar of more than 350 labels.',
+    detail: [
+      'Named after the famed Barolo hill in Piemonte, Cannubi by Umberto Bombana has been awarded One MICHELIN Star in the MICHELIN Guide Thailand, making it the one and only Italian restaurant in Thailand to receive this distinction.',
+      'This intimate and elegant restaurant features a fully curated cellar of more than 350 wine labels, each selected for its character and quality. The set menu is designed for a refined evening of Italian dishes crafted with care by Executive Italian Chef Andrea Susto, who follows the culinary philosophy of the celebrated Chef Umberto Bombana, the King of White Truffle.'
+    ],
+    practical: {
+      hours: ['Wednesday to Sunday', 'Lunch 12:00 – 14:30 (last order 14:00)', 'Dinner 18:00 – 22:00', 'Eight-course set menu THB 5,500 per person (the house’s own price, subject to service charge and VAT)'],
+      dress: 'Casual — diners are respectfully requested to refrain from wearing t-shirts, shorts or sandals.'
+    } },
+  /* PETITS PLATS BANGKOK — Day 16 · 08.03.2027 · DINNER (the current Operations Master, 19 Sep 2026: the last evening, before
+   * the flight home; it replaces the in-flight dinner). The Owner's records carry no photograph and no description of the
+   * place: the card stands without an image, nothing is invented. */
+  { id: 'bkk-petitsplats', roles: ['dinner'], row: 'Day 16 · 08.03.2027', chapter: 'bkk', leg: 'return', day: '08 MAR 2027', name: 'Petits Plats Bangkok', where: 'Bangkok', cats: 'Dinner · The last evening',
+    teaser: 'The last dinner of the journey — a Bangkok table on the evening before the flight home.' },
   /* LAOS · VIENTIANE — the city portrait (owner Vientiane folder, Sep 2026):
    * GOLD & SACRED → CITY & ARCHITECTURE → MEKONG & EVENING → BEYOND THE CENTRE */
   { id: 'vte-thatluang', roles: ['experience'], row: 'Day 05 · 25.02.2027', chapter: 'laos', featured: true, day: 'Gold & sacred', name: 'Pha That Luang', where: 'Vientiane', cats: 'Heritage · Architecture · Culture', maps: 'https://maps.app.goo.gl/hehafVRBrdPt7L9Y6?g_st=ic',

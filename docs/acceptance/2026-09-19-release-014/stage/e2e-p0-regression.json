@@ -1,0 +1,266 @@
+{
+ "at": "2026-09-19T20:07:35.485Z",
+ "origin": "http://127.0.0.1:8788",
+ "results": [
+  {
+   "id": "A1-select",
+   "ok": true,
+   "d": "[\"bkk-stay:u-sathorn-superior-garden:B:192\"] bar USD 192"
+  },
+  {
+   "id": "A1-change",
+   "ok": true,
+   "d": "[\"bkk-stay:u-sathorn-superior-garden:C:192\"]"
+  },
+  {
+   "id": "A1-remove-empty",
+   "ok": true,
+   "d": "bag [] · bar My Bag USD 0 · YOUR BAG IS EMPTY No selections yet · USD 0 Anything you cho"
+  },
+  {
+   "id": "A1-save",
+   "ok": true,
+   "d": "Saved · 22:05"
+  },
+  {
+   "id": "A1-reload",
+   "ok": true,
+   "d": "[]"
+  },
+  {
+   "id": "A1-signout-signin",
+   "ok": true,
+   "d": "[]"
+  },
+  {
+   "id": "A1-review-total",
+   "ok": true,
+   "d": "USD 0"
+  },
+  {
+   "id": "A2-select",
+   "ok": true,
+   "d": "[\"bkk-stay:u-sathorn-superior-garden:B:192\"] bar USD 192"
+  },
+  {
+   "id": "A2-change",
+   "ok": true,
+   "d": "[\"bkk-stay:u-sathorn-superior-garden:C:192\"]"
+  },
+  {
+   "id": "A2-remove-empty",
+   "ok": true,
+   "d": "bag [] · bar My Bag USD 0 · YOUR BAG IS EMPTY No selections yet · USD 0 Anything you cho"
+  },
+  {
+   "id": "A2-save",
+   "ok": true,
+   "d": "Saved · 22:05"
+  },
+  {
+   "id": "A2-reload",
+   "ok": true,
+   "d": "[]"
+  },
+  {
+   "id": "A2-signout-signin",
+   "ok": true,
+   "d": "[]"
+  },
+  {
+   "id": "A2-review-total",
+   "ok": true,
+   "d": "USD 0"
+  },
+  {
+   "id": "A3-select",
+   "ok": true,
+   "d": "[\"bkk-stay:u-sathorn-superior-garden:B:192\"] bar USD 192"
+  },
+  {
+   "id": "A3-change",
+   "ok": true,
+   "d": "[\"bkk-stay:u-sathorn-superior-garden:C:192\"]"
+  },
+  {
+   "id": "A3-remove-empty",
+   "ok": true,
+   "d": "bag [] · bar My Bag USD 0 · YOUR BAG IS EMPTY No selections yet · USD 0 Anything you cho"
+  },
+  {
+   "id": "A3-save",
+   "ok": true,
+   "d": "Saved · 22:06"
+  },
+  {
+   "id": "A3-reload",
+   "ok": true,
+   "d": "[]"
+  },
+  {
+   "id": "A3-signout-signin",
+   "ok": true,
+   "d": "[]"
+  },
+  {
+   "id": "A3-review-total",
+   "ok": true,
+   "d": "USD 0"
+  },
+  {
+   "id": "B-second-session-empty",
+   "ok": true,
+   "d": "[]"
+  },
+  {
+   "id": "B-A-sees-B-room",
+   "ok": true,
+   "d": "[\"bkk-stay:shama-king-studio-balcony:A:120\"]"
+  },
+  {
+   "id": "B-removed",
+   "ok": true,
+   "d": "[]"
+  },
+  {
+   "id": "B-stale-device-refused",
+   "ok": true,
+   "d": "{\"before\":1,\"phase\":\"saved\",\"after\":0,\"words\":\"Saved · 22:06\"}"
+  },
+  {
+   "id": "B-independent-edit-kept",
+   "ok": true,
+   "d": "{\"device\":{\"phase\":\"saved\",\"drink\":\"Stale-device answer\",\"bag\":0},\"serverDrink\":\"Stale-device answer\",\"serverBag\":\"[]\"}"
+  },
+  {
+   "id": "B-server-empty",
+   "ok": true,
+   "d": "server bag []"
+  },
+  {
+   "id": "B-engine-released",
+   "ok": true,
+   "d": "{}"
+  },
+  {
+   "id": "C-host-bag-zero",
+   "ok": true,
+   "d": "[] bar USD 0"
+  },
+  {
+   "id": "C-host-starts-at-zero-014",
+   "ok": true,
+   "d": "{\"items\":0,\"words\":false,\"global\":\"undefined\",\"fixed\":false,\"state\":\"open\",\"mine\":{}}"
+  },
+  {
+   "id": "C-host-rail-open-014",
+   "ok": true,
+   "d": "{\"choices\":[\"penthouse\",\"u-sathorn-superior-garden\",\"shama-king-studio-balcony\"],\"remove\":false,\"words\":false}"
+  },
+  {
+   "id": "C-host-penthouse-open-014",
+   "ok": true,
+   "d": "{\"text\":\"Choose this room\",\"disabled\":false}"
+  },
+  {
+   "id": "C-host-chooses-like-anyone-014",
+   "ok": true,
+   "d": "[\"bkk-stay:penthouse:A:255\"] {\"bkk-stay\":{\"key\":\"bkk-stay/penthouse\",\"label\":\"A\"}}"
+  },
+  {
+   "id": "C-host-cart-real-line-014",
+   "ok": true,
+   "d": "{\"arranged\":0,\"words\":false,\"empty\":false,\"removes\":1,\"penthouse\":true,\"total\":\"USD 255\"}"
+  },
+  {
+   "id": "C-host-remove-releases-014",
+   "ok": true,
+   "d": "[] {}"
+  },
+  {
+   "id": "C-host-engine-nothing-held-014",
+   "ok": true,
+   "d": "200 released [] fixed undefined penthouse A taken 0 reservedFor null"
+  },
+  {
+   "id": "C-host-review",
+   "ok": true,
+   "d": "{\"page\":\"/review\",\"arranged\":0,\"words\":false,\"total\":\"USD 0\",\"bar\":\"USD 0\"}"
+  },
+  {
+   "id": "C-host-bag-still-zero",
+   "ok": true,
+   "d": "[]"
+  },
+  {
+   "id": "C-others-untouched",
+   "ok": true,
+   "d": "penthouse 6/12"
+  },
+  {
+   "id": "D-first-place",
+   "ok": true,
+   "d": "200"
+  },
+  {
+   "id": "D-last-place-race",
+   "ok": true,
+   "d": "winner 1 · refused 1"
+  },
+  {
+   "id": "D-sold-out-words",
+   "ok": true,
+   "d": "{\"soldOut\":true,\"remainingPlaces\":0}"
+  },
+  {
+   "id": "D-hold-elsewhere",
+   "ok": true,
+   "d": "200"
+  },
+  {
+   "id": "D-failed-change-keeps-old",
+   "ok": true,
+   "d": "{\"key\":\"prewed/heritage\",\"label\":\"A\"}"
+  },
+  {
+   "id": "D-offline-remove-settles",
+   "ok": true,
+   "d": "{\"btn\":\"Remove\",\"note\":\"Nothing was changed — we could not reach Guest Relations just now. Please try again.\",\"bag\":1}"
+  },
+  {
+   "id": "E-empty-bag-can-send",
+   "ok": true,
+   "d": "{\"total\":\"USD 0\",\"ready\":true}"
+  },
+  {
+   "id": "E-sent",
+   "ok": true,
+   "d": "{\"submissionStatus\":\"sent\",\"submissionId\":\"SYL-T001-E019DA0C\",\"submittedAt\":\"2026-09-19T20:07:25.452Z\",\"lastSentAt\":\"2026-09-19T20:07:25.457Z\",\"version\":1,\"hasU"
+  },
+  {
+   "id": "E-changes-not-sent",
+   "ok": true,
+   "d": "changes-not-sent"
+  },
+  {
+   "id": "E-send-updated-button",
+   "ok": true,
+   "d": "Send Updated Trip"
+  },
+  {
+   "id": "E-updated-same-reference",
+   "ok": true,
+   "d": "{\"submissionStatus\":\"sent\",\"submissionId\":\"SYL-T001-E019DA0C\",\"submittedAt\":\"2026-09-19T20:07:25.452Z\",\"lastSentAt\":\"2026-09-19T20:07:31.558Z\",\"version\":2,\"hasU"
+  },
+  {
+   "id": "E-reload-same",
+   "ok": true,
+   "d": "SYL-T001-E019DA0C v2"
+  },
+  {
+   "id": "Z-cleanup",
+   "ok": true,
+   "d": "noble 2 · usathorn 12 · penthouse 12 (nothing is arranged in advance — release 014)"
+  }
+ ]
+}

@@ -853,3 +853,12 @@ body.seatbar-on .jbar { display: none; }
 .fxr .fxn { font-family: var(--f-ui); font-weight: 300; font-size: 13px; line-height: 1.5; color: var(--p-mute); }
 .fxr-kept b, .fxr-open b { color: var(--p-mute); }
 .fxr-fb b { color: var(--p-ink); }
+
+/* THE PACKAGES (Owner, 19 Sep 2026): Complete trip and Essential trip are peer cards — the same card, the same hierarchy,
+   the same interaction; one column on the phone, two side by side from tablet width */
+.p-packs { display: grid; gap: var(--s4); margin-top: var(--s5); }
+@media (min-width: 720px) { .p-packs { grid-template-columns: 1fr 1fr; } }
+.p-pack { display: flex; flex-direction: column; gap: var(--s2); margin: 0; }
+.p-pack .t-h1 { font-size: 20px; line-height: 1.3; }
+.p-pack .p-price { margin-top: var(--s2); }
+.p-pack .p-actions { margin-top: auto; padding-top: var(--s3); }

@@ -86,7 +86,7 @@ test('the journey is the authoritative chronology, never insertion order', () =>
 test('the shared journey selection appears once on every surface', () => {
   const yj = read('your-journey.html'), rv = read('review.html');
   /* one Bangkok line, one fare line, one C86 line: a change REPLACES */
-  assert.match(yj, /ST\.select\('bkk-stay',bt\.getAttribute\('data-choose'\)\)/, 'a new Bangkok choice goes through the one stay engine: place held, line replaced');
+  assert.match(yj, /ST\.select\('bkk-stay',bt\.getAttribute\('data-choose'\),null,ST\.need\(\)\)/, 'a new Bangkok choice goes through the one stay engine with the party\'s size: places held, line replaced');
   assert.match(read('assets/stay.js'), /this\.stageIds\(win\)\.forEach\(function \(id\) \{ b\.remove\(id\); \}\);\s*p\.items\(win, slug\)/, 'a change REPLACES, never duplicates — every hotel of the stage (Codex 012-1)');
   assert.match(yj, /if\(SIYL_BAG\.has\(id\)\)return;/, 'a flat product is never added twice');
   /* the journey block on Review is filtered from the bag, one guest, never composed per party */
@@ -127,7 +127,7 @@ test('MU9646 and C86 are preserved exactly, with decision-critical benefits only
   const p = read('assets/pricing.js');
   assert.match(p, /slug: 'business'[\s\S]{0,120}price: 275/);
   assert.match(p, /slug: 'economy-flexible'[\s\S]{0,120}price: 155/);
-  assert.match(p, /'c86':\s*\{ price: 85/);   /* Owner decision, Edit 2 · 15 Sep 2026 (supersedes 105) */
+  assert.match(p, /'c86':\s*\{ price: 105/);   /* the current Operations Master (release 014, 19 Sep 2026) supersedes the Edit 2 override of 85 */
   assert.match(yj, /dep:\['10:15','Kunming'\],arr:\['13:44','Lijiang'\],dur:'3h 29m · direct',cls:'Business Class'/);
   const c86 = yj.slice(yj.indexOf("c86:{"), yj.indexOf("'return':{"));
   assert.ok((c86.match(/ben:\[([^\]]+)\]/)[1].split("','").length) <= 4, 'C86 carries at most four benefits in the selector');

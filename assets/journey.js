@@ -21,9 +21,9 @@
       label: 'Special Express No. 25', ids: ['train'], anchor: 'j-train' },
     { key: 'prewed', when: '25 – 27 FEB', cat: 'Accommodation', place: 'Vientiane',
       label: 'Pre-Wedding Vientiane', ids: ['prewed'], anchor: 'j-prewed' },
-    /* ONE wedding stay selection, or the alternative private residence */
+    /* ONE wedding stay selection: the Souphattra, the Guest House complimentary or the Riverside */
     { key: 'wedstay', when: '27 FEB – 01 MAR', cat: 'Accommodation', place: 'Vientiane',
-      label: 'Wedding Stay', ids: ['wedstay', 'airbnb-2br', 'riverside'], anchor: 'j-wedstay' },
+      label: 'Wedding Stay', ids: ['wedstay', 'guesthouse', 'riverside'], anchor: 'j-wedstay' },
     { key: 'mu9646', when: '01 MAR', cat: 'Transportation', place: 'Vientiane → Kunming',
       label: 'MU9646', ids: ['mu9646'], anchor: 'j-mu9646' },
     { key: 'kmg', when: '01 – 04 MAR', cat: 'Accommodation', place: 'Kunming',
@@ -43,8 +43,10 @@
    * (27 FEB – 01 MAR) and before the flight to Kunming. A wedding line
    * therefore sorts between wedstay (3) and mu9646 (4); it is never appended
    * to the end of the journey because it happens to have been added last. */
-  var AT = { '1872': 0.5, 'sangkhathan': 3.5 };
-  var AT_WHEN = { '1872': '21 – 24 FEB', 'sangkhathan': '28 FEB', 'suhring': 'BANGKOK DAYS' };
+  var AT = { '1872': 0.5, tea1872: 0.5, 'sangkhathan': 3.5 };
+  /* the dated extras (the current Operations Master, 19 Sep 2026): the Aman tea on the afternoon of 24 February, the
+     Sühring dinner on the first evening, 21 February */
+  var AT_WHEN = { '1872': '24 FEB', tea1872: '24 FEB', 'sangkhathan': '28 FEB', 'suhring': '21 FEB' };
 
   /* the wedding programme, in the order the day itself runs. Only items that
    * exist as products carry an id; the day is described, not invented. */
@@ -105,10 +107,24 @@
      * first — a room through the engine, a line through the Bag — and the stage is then declined. From an untouched stage
      * it is the same one action. Resolves once the stage reads as declined. */
     decline: function (seg) {
-      var self = this, B = window.SIYL_BAG, ST = window.SIYL_STAY, P = window.SIYL_PRICE;
+      var self = this, B = window.SIYL_BAG, ST = window.SIYL_STAY, P = window.SIYL_PRICE, U = window.SIYL_UNITS;
       var finish = function () { self.skip(seg.key, true, 'manual'); return { ok: true }; };
       if (!B) return Promise.resolve(finish());
+      /* a stage the guest waits for: the waiting-list place is given back first (the engine's), then the stage is declined */
+      if (U && U.unwait && U.waitlisted && (!U.ready || !U.ready() || U.waitlisted(seg.key)) && seg.cat === 'Accommodation' && !self._unwaited) {
+        /* the engine decides (an unread engine is asked too — the line must never linger behind a decline) */
+        self._unwaited = true;
+        var clear = function (x) { self._unwaited = false; return x; };
+        return U.unwait(seg.key).then(function (r) {
+          if (r && r.ok === false && r.error !== 'invalid stage') return clear(r);
+          return Promise.resolve(self.decline(seg)).then(clear, function (e) { clear(); throw e; });
+        }, function () { return clear({ ok: false, error: 'unreachable' }); });
+      }
       var lines = B.get().filter(function (x) { return seg.ids.indexOf(x.id) >= 0; });
+      /* a party member who holds nothing here but whose party keeps a place for them gives it back through the engine */
+      if (!lines.length && seg.cat === 'Accommodation' && U && U.ready && U.ready() && U.partyPlaceIn && U.partyPlaceIn(seg.key) && U.leave) {
+        return U.leave(seg.key).then(function () { return finish(); }, function () { return finish(); });
+      }
       if (!lines.length) return Promise.resolve(finish());
       var stays = lines.filter(function (x) { return x.room && !x.interest; });
       if (seg.cat === 'Accommodation' && stays.length && ST) {
@@ -119,7 +135,7 @@
           if (i >= stays.length) { lines.forEach(function (x) { B.remove(x.id); }); return finish(); }
           var stay = stays[i++];
           return ST.remove(P ? P.windowOf(stay.id) : stay.id).then(function (r) {
-            if (r && r.ok === false && r.error !== 'fixed') return r;     /* the engine could not release: nothing changes, the guest is told */
+            if (r && r.ok === false) return r;     /* the engine could not release: nothing changes, the guest is told */
             return next();
           });
         };
@@ -133,7 +149,7 @@
      * The wording comes from SIYL_PRICE: one calculation, one vocabulary. */
     meta: function (x) {
       var P = window.SIYL_PRICE;
-      if (x.interest && x.id !== 'airbnb-2br') return { cat: 'Wellness', basis: 'Interest · Marsilea Spa confirms the time · payable at the spa', unit: 'treatment' };
+      if (x.interest && x.id !== 'guesthouse') return { cat: 'Wellness', basis: 'Interest · Marsilea Spa confirms the time · payable at the spa', unit: 'treatment' };
       if (!P) return { cat: '', basis: '', unit: 'guest' };
       var f = P.FLAT[x.id];
       if (f) {
@@ -152,6 +168,7 @@
       var m = this.meta(x), q = x.qty || 1;
       if (x.interest) return '';
       if (x.price == null) return '';
+      if (x.complimentary) return 'Complimentary';
       if (m.unit === 'experience') {
         return q + (q === 1 ? ' experience · for two guests' : ' experiences · for ' + (q * 2) + ' guests');
       }
@@ -202,12 +219,12 @@
       return this.isSkipped(seg.key) && this.skippedBy(seg.key) === 'manual';
     },
 
-    /* answered = selected, or the guest said they are not joining this stage, or the Owner arranged it (the hosts' fixed room) */
+    /* answered = selected, or the guest said they are not joining this stage, or the guest waits for it (the waiting list) */
     state: function (seg) {
       var has = window.SIYL_BAG && SIYL_BAG.get().some(function (x) { return seg.ids.indexOf(x.id) >= 0; });
       if (has) return 'selected';
       if (this.isSkipped(seg.key)) return 'declined';
-      var U = window.SIYL_UNITS; if (U && U.ready && U.ready() && U.fixed && U.fixed(seg.key)) return 'arranged';
+      if (this.waitlisted(seg)) return 'waitlisted';
       return 'open';
     },
     /* the stages still to answer — of the guest's own trip only */
@@ -215,189 +232,124 @@
       var self = this;
       return SEG.filter(function (s) { return self.relevant(s) && self.state(s) === 'open'; });
     },
-    /* FULL EXPERIENCE — the complete journey, with one rule above it (Owner,
-     * 13 Sep 2026): AN EXPLICIT CHOICE OF THE GUEST OUTRANKS THE PRESET.
-     * Confirming it fills every stage that is still open — or was filled by a
-     * preset such as Cost Saving — with the room, cabin or seat approved for
-     * the complete journey, and leaves untouched every stage the guest chose
-     * by hand (U Sathorn stays U Sathorn) or declined by hand. From an empty
-     * journey it is still the one canonical configuration; the total is what
-     * the retained choices come to. Lines that are not stages (1872, a spa
-     * interest) are never touched. */
-    /* COMPLETE TRIP (Owner, 19 Sep 2026 · deterministic and visible): the plan is PURE — computing it changes nothing, so
-     * the preview can show exactly what confirming would do — and it says, per stage of the guest's own trip, WHY:
-     *   kept      the guest chose or declined this stage by hand, or the hosts' fixed arrangement stands
-     *   suggested the product approved for the whole journey (a FLAT leg, or the approved room with a place free)
-     *   fallback  the approved room is full — the nearest rate with a place is named as the replacement, never silently
-     *   sold out  nothing of this stage has a place left — said, never invented (no self-arranged answer is fabricated)
-     * `unskip` lists the stages a preset declined earlier (Essential trip) that the complete trip fills again — applied only
-     * when the guest confirms. */
-    fullExperience: function () {
-      var P = window.SIYL_PRICE, out = [], self = this, keep = [], plan = [], unskip = [], soldOut = [];
-      if (!P) return { remove: [], add: [], kept: [], plan: [], unskip: [], soldOut: [] };
-      var U0 = window.SIYL_UNITS;
-      SEG.forEach(function (seg) {
-        if (U0 && U0.ready && U0.ready() && U0.fixed && U0.fixed(seg.key)) { keep.push(seg.key); plan.push({ seg: seg, why: 'kept', how: 'arranged' }); return; }   /* arranged for the guest: neither removed nor added */
-        if (self.manual(seg)) { keep.push(seg.key); plan.push({ seg: seg, why: 'kept', how: self.isSkipped(seg.key) ? 'declined' : 'chosen' }); return; }
-        if (self.isSkipped(seg.key)) unskip.push(seg.key);
-      });
-      /* one guest, one place: the room engine decides what still has a place
-       * for this guest, so Full Experience can never select a full category */
-      var free = function (win) {
-        return function (slug) {
-          var U = window.SIYL_UNITS;
-          if (!U || !U.ready()) return true;      /* engine unread — do not block */
-          return U.fits(win, slug);
-        };
-      };
-      var fill = SEG.filter(function (seg) { return keep.indexOf(seg.key) < 0 && self.relevant(seg); });   /* a preset fills the guest's own trip only */
-      fill.forEach(function (seg) {
-        var id = seg.ids[0];
-        if (P.FLAT[id]) { var flat = P.items(id).map(function (it) { it.by = 'full'; out.push(it); return it; }); plan.push({ seg: seg, why: 'suggested', items: flat }); return; }
-        var wish = (window.SIYL_FULL_EXPERIENCE || {})[id] || null;
-        var room = P.approved(id, free(id));
-        if (room) {
-          var items = P.items(id, room.slug).map(function (it) { it.by = 'full'; out.push(it); return it; });
-          var wanted = null;
-          if (wish && wish !== room.slug) { var at = P.locate(id); wanted = (at && at.stay.rooms.filter(function (r) { return r.slug === wish; })[0]) || { slug: wish, name: wish }; }
-          plan.push({ seg: seg, why: wanted ? 'fallback' : 'suggested', items: items, room: room, wanted: wanted });
-          return;
-        }
-        /* nothing left in this stage at all — say so rather than pretend */
-        soldOut.push(seg); plan.push({ seg: seg, why: 'sold-out' });
-      });
-      /* chronological, as the trip reads */
-      plan.sort(function (a, b) { return SEG.indexOf(a.seg) - SEG.indexOf(b.seg); });
-      this.soldOutStages = soldOut;
-      return {
-        /* every id a FILLED stage can be answered by, alternatives included —
-         * a stage the guest chose by hand is not on this list */
-        remove: fill.reduce(function (a, seg) {
-          seg.ids.forEach(function (id) { P.ids(id).forEach(function (x) { if (a.indexOf(x) < 0) a.push(x); }); });
-          return a;
-        }, []),
-        add: out,
-        kept: keep,
-        plan: plan,
-        unskip: unskip,
-        soldOut: soldOut
-      };
-    },
-
     /* ======================================================================
-       COST SAVING EXPERIENCE — the reduced journey, with TWO ways to spend
-       the wedding window in Vientiane and nothing else changed between them:
-
-         A · HOTEL          the lowest-priced eligible and AVAILABLE Souphattra
-                            category for 27 FEB – 01 MAR. A normal hotel stay
-                            inside the wedding programme, with Guest Relations
-                            support during the Vientiane wedding stay.
-         B · RESIDENCE      the complimentary private residence, USD 0, up to
-                            four guests. An independent stay: the wedding
-                            programme is included, everything around it is not.
-
-       Both mean the same reduced journey — every other stage is self-arranged.
-       Neither is a second Full Experience. The ledger decides availability;
-       nothing here invents capacity, and swiping between the two commits
-       nothing.
+       THE PACKAGES (Owner instruction, 19 Sep 2026): COMPLETE TRIP and ESSENTIAL TRIP are two real packages, defined in
+       assets/packages-data.js — for every stage a package covers, the default product and the DEFINED fallback chain.
+       A plan is PURE: computing it changes nothing. It says, per relevant stage the package covers, exactly what confirming
+       would do:
+         default    the package's default product, and it takes the party
+         fallback   the default cannot take the party (full, or not enough places together) — the next DEFINED option
+                    that can; price never decides, capacity does
+         waitlist   no option of the chain can take the party — the guest is placed on the waiting list of the stage
+         same       the guest already holds exactly what the package selects — nothing changes
+       and, for each, what it REPLACES: the guest's current selection in the stage (a package is a package — it replaces
+       conflicting individual choices for the stages it covers) or a "not joining" the guest had said. Stages the package
+       does not cover are never touched. The party's need is the number of members: a unit must take them all.
        ====================================================================== */
-    costSavingOptions: function (qty) {
-      var P = window.SIYL_PRICE, U = window.SIYL_UNITS;
-      var guests = 1;
-      var ready = !!(U && U.ready());
-      var free = function (win) {
-        return function (slug) { return ready ? U.fits(win, slug) : true; };
-      };
-      var out = [];
-
-      /* A · the cheapest hotel room that is genuinely there */
-      var room = P ? P.cheapest('wedstay', free('wedstay')) : null;
-      var hotel = {
-        key: 'hotel',
-        eyebrow: 'Cost Saving · Hotel',
-        available: !!room,
-        room: room,
-        stayName: 'Souphattra Heritage Vientiane',
-        dates: '27 February – 01 March 2027',
-        note: 'A hotel stay inside the wedding programme, with Guest Relations support during the Vientiane Wedding Stay.',
-        service: [
-          'Two nights: 27 → 28 February and 28 February → 01 March',
-          'First night: your room rate · second night: hosted by Haruthai & Suthep',
-          'Breakfast included',
-          'Guest Relations support during the Vientiane Wedding Stay'
-        ]
-      };
-      if (room) {
-        var q = P.quote('wedstay', room.slug);
-        hotel.name = room.name;
-        hotel.amount = P.money(q.total);
-        hotel.amountNote = 'per person · 2 nights';
-        hotel.items = P.items('wedstay', room.slug);
-        hotel.stock = ready ? { win: 'wedstay', slug: room.slug } : null;
-      } else {
-        hotel.name = 'No room available';
-        hotel.amount = 'Sold out';
-        hotel.amountNote = 'every eligible category is taken';
-        hotel.items = [];
-      }
-      out.push(hotel);
-
-      /* B · the complimentary residence, if a place is still free */
-      var fits = ready ? U.fits('airbnb-2br', 'private-residence') : true;
-      out.push({
-        key: 'residence',
-        eyebrow: 'Cost Saving · Complimentary',
-        available: fits,
-        name: 'Private Residence',
-        stayName: 'Downtown Vientiane',
-        dates: '27 February – 01 March 2027',
-        amount: 'Complimentary',
-        amountNote: fits ? 'Complimentary · up to 4 guests' : 'no place left',
-        items: P ? P.items('airbnb-2br', 'private-residence') : [],
-        stock: ready ? { win: 'airbnb-2br', slug: 'private-residence' } : null,
-        note: 'An independent stay. The wedding programme is yours as it stands; everything around it you arrange yourself.',
-        service: [
-          'Two nights: 27 → 28 February and 28 February → 01 March',
-          'Wedding programme participation included as it stands',
-          'Arrival, departure and transfers arranged by you',
-          'No individual Guest Relations travel or accommodation support'
-        ]
+    packages: function () { return window.SIYL_PACKAGES || {}; },
+    packageOrder: function () { return window.SIYL_PACKAGE_ORDER || Object.keys(this.packages()); },
+    /* the places the guest's party needs in one unit */
+    partySize: function () {
+      var G = window.SIYL_GUEST, p = G && G.party ? G.party() : null, n = p && Array.isArray(p.members) ? p.members.length : 0;
+      /* a page without the guest module (the room page, The Journey) reads the party from the session itself */
+      if (!n) { try { var a = JSON.parse(localStorage.getItem('siyl.auth') || 'null'); n = a && Array.isArray(a.members) ? a.members.length : 1; } catch (e) { n = 1; } }
+      return Math.max(1, Math.min(6, n || 1));
+    },
+    packagePlan: function (kind) {
+      var P = window.SIYL_PRICE, U = window.SIYL_UNITS, B = window.SIYL_BAG, self = this;
+      var pk = this.packages()[kind];
+      var out = { kind: kind, name: pk ? pk.name : kind, rows: [], add: [], remove: [], unskip: [], waitlist: [], total: 0, ready: !!(U && U.ready && U.ready()), need: this.partySize() };
+      if (!P || !pk) return out;
+      var need = out.need;
+      var lineOf = function (seg) { return B ? B.get().filter(function (x) { return seg.ids.indexOf(x.id) >= 0; })[0] || null : null; };
+      SEG.forEach(function (seg) {
+        var def = pk.stages[seg.key];
+        if (!def || !self.relevant(seg)) return;                      /* not covered, or not part of this guest's trip */
+        var cur = lineOf(seg), declined = self.isSkipped(seg.key);
+        var row = { seg: seg, current: cur, wasDeclined: declined && !cur, replaces: null, why: '', items: [], key: null, unit: null, wanted: null, tried: [] };
+        if (typeof def === 'string') {
+          /* a flat product (a transport leg): one product, always available */
+          row.items = P.items(def).map(function (it) { it.qty = 1; it.by = kind; return it; });
+          row.key = def; row.why = cur && cur.id === def && (cur.cls || null) === (row.items[0] && row.items[0].cls || null) ? 'same' : 'default';
+        } else {
+          var chain = def.slice(), chosen = null, idx = -1;
+          for (var i = 0; i < chain.length && !chosen; i++) {
+            var win = chain[i].split('/')[0], slug = chain[i].split('/').slice(1).join('/');
+            row.tried.push(chain[i]);
+            if (!U || !U.ready || !U.ready()) { chosen = { win: win, slug: slug, label: null }; idx = i; break; }   /* engine unread: the default, decided again on confirm */
+            if (!U.tracked(win, slug)) { chosen = { win: win, slug: slug, label: null }; idx = i; break; }
+            /* a place the guest already holds in this very category is theirs — the package never moves them to another room */
+            var held = U.mineFor(win, slug);
+            var u = held ? held : U.unitForParty(win, slug, need);
+            if (u) { chosen = { win: win, slug: slug, label: u.label }; idx = i; }
+          }
+          row.wanted = chain[0];
+          /* a room the guest already holds in this stage is never traded for the waiting list: it stays as chosen */
+          var heldHere = !chosen && cur && cur.room && !cur.interest && U && U.ready && U.ready() && U.mine && U.mine(seg.key);
+          if (heldHere) { row.why = 'same'; row.key = heldHere.key; row.unit = heldHere.label; row.items = P.items(heldHere.key.split('/')[0], heldHere.key.split('/').slice(1).join('/')).map(function (it) { it.qty = 1; return it; }); row.kept = true; }
+          else if (!chosen) { row.why = 'waitlist'; row.key = null; }
+          else {
+            row.key = chosen.win + '/' + chosen.slug; row.unit = chosen.label;
+            row.items = P.items(chosen.win, chosen.slug).map(function (it) { it.qty = 1; it.by = kind; return it; });
+            var same = !!(cur && cur.id === chosen.win && cur.room === chosen.slug && (!U || !U.ready || !U.ready() || (U.mineFor(chosen.win, chosen.slug) && (!chosen.label || U.mineFor(chosen.win, chosen.slug).label === chosen.label))));
+            row.why = same ? 'same' : (idx === 0 ? 'default' : 'fallback');
+          }
+        }
+        if (row.why !== 'same' && cur) row.replaces = cur;
+        if (row.why === 'waitlist') { out.waitlist.push(seg.key); if (cur) out.remove.push(cur.id); }
+        else if (row.why !== 'same') { row.items.forEach(function (it) { out.add.push(it); }); if (cur && cur.id !== row.items[0].id) out.remove.push(cur.id); }
+        if (declined) out.unskip.push(seg.key);
+        row.amount = row.items.reduce(function (t, it) { return t + (it.price || 0) * (it.qty || 1); }, 0);
+        out.total += row.why === 'waitlist' ? 0 : row.amount;
+        out.rows.push(row);
       });
+      out.rows.sort(function (a, b) { return SEG.indexOf(a.seg) - SEG.indexOf(b.seg); });
+      /* the summary counts the preview shows */
+      out.counts = { stages: out.rows.length, defaults: out.rows.filter(function (r) { return r.why === 'default'; }).length, fallbacks: out.rows.filter(function (r) { return r.why === 'fallback'; }).length, waitlisted: out.waitlist.length, replaced: out.rows.filter(function (r) { return r.replaces; }).length, same: out.rows.filter(function (r) { return r.why === 'same'; }).length };
       return out;
     },
+    /* the signature of a plan: stage · why · product · unit · amount — the confirm compares the previewed one with the one it would apply */
+    planSignature: function (plan) { return plan.rows.map(function (r) { return r.seg.key + ':' + r.why + ':' + (r.key || '') + ':' + (r.unit || '') + ':' + r.amount + ':' + (r.replaces ? r.replaces.id + '/' + (r.replaces.room || '') + '/' + (r.replaces.unit || '') : '') + ':' + (r.wasDeclined ? 'd' : ''); }).join('|') + '#' + plan.need; },
+    /* the stages a package covers that are part of the guest's trip */
+    packageStages: function (kind) { var pk = this.packages()[kind], self = this; return pk ? SEG.filter(function (s) { return pk.stages[s.key] && self.relevant(s); }) : []; },
 
-    /* the journey Cost Saving produces once an option is chosen */
-    costSavingPlan: function (option) {
-      var self = this;
-      /* the Essential trip is the Vientiane wedding stay: a guest who is not joining Vientiane gets no line from it, and a
-         stage outside the guest's destinations is neither filled nor marked self-arranged (Codex final pass, 18 Sep 2026) */
-      var vte = joinsAll(['vientiane']);
-      return {
-        /* a preset's lines say so, so a later preset may revise them */
-        add: vte ? ((option && option.items) || []).map(function (it) { var c = {}; for (var k in it) c[k] = it[k]; c.by = 'cost'; return c; }) : [],
-        remove: SEG.reduce(function (a, s) {
-          s.ids.forEach(function (id) {
-            (window.SIYL_PRICE ? window.SIYL_PRICE.ids(id) : [id]).forEach(function (x) {
-              if (a.indexOf(x) < 0) a.push(x);
-            });
-          });
-          return a;
-        }, []),
-        selfArranged: SEG.filter(function (s) { return s.key !== 'wedstay' && self.relevant(s); }).map(function (s) { return s.key; })
-      };
+    /* ======================================================================
+       THE CANONICAL COUNTS (Owner, 19 Sep 2026): one derived state, tested by its invariants —
+         relevant = confirmed + waitlisted + declined + open;  excluded is outside relevant;
+         bagItems = the Bag's actual lines;  bagTotal = their chargeable sum (a waitlisted stage contributes nothing)
+       ====================================================================== */
+    counts: function () {
+      var self = this, B = window.SIYL_BAG, c = { relevant: 0, confirmed: 0, waitlisted: 0, declined: 0, open: 0, excluded: 0, resolved: 0, bagItems: 0, bagTotal: 0 };
+      SEG.forEach(function (seg) {
+        if (!self.relevant(seg)) { c.excluded++; return; }
+        c.relevant++;
+        var st = self.state(seg);
+        if (st === 'selected') c.confirmed++; else if (st === 'waitlisted') c.waitlisted++; else if (st === 'declined') c.declined++; else c.open++;
+      });
+      c.resolved = c.confirmed + c.waitlisted + c.declined;
+      /* bagTotal = the chargeable lines of the guest's own trip (a line outside the scope is named by readiness and released; it is not a cost) */
+      if (B) { var lines = B.get(); c.bagItems = lines.length; c.bagTotal = lines.filter(function (x) { return self.lineRelevant(x); }).reduce(function (t, x) { return t + (x.price || 0) * (x.qty || 1); }, 0); }
+      return c;
     },
-
-    /* stages the guest has said they are arranging themselves */
-    selfArranged: function () {
-      var self = this;
-      return SEG.filter(function (s) { return self.state(s) === 'declined'; });
-    },
+    /* the stage the guest waits for, as the engine knows it */
+    /* the engine's word; before it has answered, the device's memory of the line (assets/rooms.js) — a waitlisted stage is answered, never "still to choose" */
+    waitlisted: function (seg) { var U = window.SIYL_UNITS; return !!(U && U.waitlisted && U.waitlisted(seg.key)); },
+    waitPosition: function (seg) { var U = window.SIYL_UNITS, w = U && U.waitlisted ? U.waitlisted(seg.key) : null; return w ? w.position : null; },
 
     /* quiet editorial status line — never a progress meter */
     statusLine: function () {
-      var n = this.open().length;
-      if (!n) return 'Your trip is ready.';
-      return n === 1 ? 'One detail left to choose.' : n + ' details to choose.';
+      var c = this.counts();
+      if (!c.open) return c.waitlisted ? (c.waitlisted === 1 ? 'One stage on the waiting list.' : c.waitlisted + ' stages on the waiting list.') : 'Your trip is ready.';
+      return c.open === 1 ? 'One detail left to choose.' : c.open + ' details to choose.';
+    },
+    /* the words of the trip's composition, derived — never a count invented to fill a sentence */
+    countsWords: function () {
+      var c = this.counts(), w = [];
+      if (c.confirmed) w.push(c.confirmed + (c.confirmed === 1 ? ' stage chosen' : ' stages chosen'));
+      if (c.waitlisted) w.push(c.waitlisted + ' on the waiting list');
+      if (c.declined) w.push(c.declined + ' not joining');
+      if (c.open) w.push(c.open + ' still open');
+      return w.join(' · ') + (c.relevant ? ' — of the ' + c.relevant + (c.relevant === 1 ? ' stage' : ' stages') + ' of your trip' : '');
     }
   };
 })();

@@ -38,7 +38,7 @@ export const HARUTHAI = session({ guestId: 'g-haruthai', partyId: 'INV-DEMO-001'
 export const SUTHEP = session({ guestId: 'g-suthep', partyId: 'INV-DEMO-001', partyName: 'Haruthai & Suthep', fullName: 'Suthep Demo', preferredName: 'Suthep', members: HS, hosts: true, hostRole: 'GROOM' });
 export const LIN = session({ guestId: 'g-lin', partyId: 'INV-DEMO-003', partyName: 'Lin', fullName: 'Lin Demo', preferredName: 'Lin', members: [{ guestId: 'g-lin', preferredName: 'Lin' }] });
 
-export const CORE = ['assets/bag.js', 'assets/rooms-data.js', 'assets/pricing.js', 'assets/guest.js', 'assets/temple.js', 'assets/docs.js', 'assets/confirm.js', 'assets/seatlabels.js', 'assets/seating.js', 'assets/rooms.js', 'assets/arranged.js', 'assets/stay.js', 'assets/transport-data.js', 'assets/journey.js'];
+export const CORE = ['assets/bag.js', 'assets/rooms-data.js', 'assets/pricing.js', 'assets/guest.js', 'assets/temple.js', 'assets/docs.js', 'assets/confirm.js', 'assets/seatlabels.js', 'assets/seating.js', 'assets/rooms.js', 'assets/stay.js', 'assets/transport-data.js', 'assets/packages-data.js', 'assets/journey.js'];
 
 export function page(opts = {}) {
   const store = new Map(), listeners = {};

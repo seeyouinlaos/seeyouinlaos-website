@@ -211,7 +211,7 @@ export const ACCOMMODATIONS = [
     status: 'Complimentary · limited availability',
     blurb: 'A warm private residence in central Vientiane, secured for the wedding stay and hosted for a limited number of guests. Guest Relations coordinates the arrangements personally.',
     amenities: ['WiFi', 'Air conditioning', 'Hot water', 'Washer & laundry area', 'Refrigerator', 'Kettle & kitchenette', 'Hair dryer', 'Free parking'],
-    images: ['assets/images/airbnb/airbnb-01.jpg', 'assets/images/airbnb/airbnb-02.jpg', 'assets/images/airbnb/airbnb-03.jpg']
+    images: ['assets/images/guesthouse/guesthouse-01.jpg', 'assets/images/guesthouse/guesthouse-02.jpg', 'assets/images/guesthouse/guesthouse-03.jpg']
   },
 ];
 
@@ -373,7 +373,7 @@ export const POST_WEDDING = [
    * BUSINESS CLASS · USD 105 pp (the 11 Sep USD 85 superseded). C642 (16:39 →
    * 21:06) is retired and is never restored. Priority ticketing; wireless
    * charging, drinks/snacks and comfort amenities subject to availability. */
-  { id: 'kmg-ljg', type: 'Train', label: 'Kunming → Lijiang', date: '04 MAR 2027', when: '4 March 2027', sub: 'Train C86 · 10:15 → 13:44 · direct 3h29 · Business Class', contribution: 85, perGuest: true },
+  { id: 'kmg-ljg', type: 'Train', label: 'Kunming → Lijiang', date: '04 MAR 2027', when: '4 March 2027', sub: 'Train C86 · 10:15 → 13:44 · direct 3h29 · Business Class', contribution: 105, perGuest: true },
   { id: 'lijiang-stay', type: 'Stay', label: 'Luye Baisha · Rizhao Jinshan', date: '04 – 06 MAR 2027', when: '4 – 6 March 2027',
     sub: 'Lijiang · Snow Mountain Viewing Room',
     /* OWNER OVERRIDE (06 SEP): room variants carry per-person amounts for the

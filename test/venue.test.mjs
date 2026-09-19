@@ -151,9 +151,9 @@ test('MOTION · one system, three timings, physical easing; reduced motion keeps
   assert.doesNotMatch(v, /\d+vh|position: sticky|min-height: (?:[2-9]\d{2}|\d{4,})px/, 'no viewport-height spacer, no sticky reservoir, no reservoir of 200 px or more in the venue styles (the detail keeps 120 px while a photograph cross-fades)');
 });
 
-test('NAVIGATION · the public menu and both footers are unchanged by the venue work: Sühring · Lunch and 1872 stay, the two footer lists stay equal', () => {
+test('NAVIGATION · the public menu and both footers are unchanged by the venue work: Sühring · Dinner and 1872 stay, the two footer lists stay equal', () => {
   const recon = src('assets/recon.js'), shop = src('assets/shop-menu.js');
   const links = (s) => [...s.slice(s.indexOf('sfoot-in'), s.indexOf('sf-legal')).matchAll(/<a href="([^"]+)">([^<]+)<\/a>/g)].map((m) => m[1] + '|' + m[2]);
-  assert.deepEqual(links(recon), links(shop)); assert.ok(links(recon).some((l) => /Sühring · Lunch/.test(l)) && links(recon).some((l) => /1872/.test(l)));
-  assert.match(src('assets/aman.js'), /Sühring · Lunch in Bangkok/);
+  assert.deepEqual(links(recon), links(shop)); assert.ok(links(recon).some((l) => /Sühring · Dinner/.test(l)) && links(recon).some((l) => /1872/.test(l)));
+  assert.match(src('assets/aman.js'), /Sühring · Dinner in Bangkok/);
 });

@@ -7,7 +7,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { bearerOf, authIdOf } from '../register/crypto.mjs';
-import { page, src, PEGGY, STEFFIE, HARUTHAI } from './sandbox.mjs';
+import { page, src, plain, doState, roomsFetch, PEGGY, STEFFIE, HARUTHAI } from './sandbox.mjs';
+import { Rooms } from '../src/rooms.js';
 
 const profile = src('profile.html'), shell = src('assets/prep-shell.js'), guest = src('assets/guest.js'), inv = src('assets/invite.mjs'), bag = src('assets/bag.js'), worker = src('src/worker.js'), avatar = src('assets/avatar.js');
 const PRIVATE_PAGES = ['profile.html', 'your-journey.html', 'cart.html', 'tickets.html', 'about-you.html', 'review.html', 'wedding.html', 'wedding-preparation.html', 'invitation.html', 'room.html', 'transport.html'];
@@ -76,10 +77,30 @@ test('7 · MY PROFILE never affects readiness: it writes nothing the engine read
   assert.match(avatar, /localStorage\.getItem\('siyl\.auth'\)/); assert.doesNotMatch(avatar, /localStorage\.setItem/, 'the photo is never written to the browser store');
 });
 
-test('8 · the overview reflects selections and holds without duplicating a fixed arrangement into the Bag', () => {
-  assert.match(profile, /\(A&&A\.ready\(\)\?A\.items\(\):\[\]\)\.forEach/, 'fixed arrangements come from the one arranged renderer');
-  assert.match(profile, /note:'Fixed arrangement · not part of your bag'/); assert.match(profile, /state:'Arranged for you'/);
+/* ---- the dashboard, rendered: profile.html's own script run in the sandbox against a #page element the test reads. The
+ * rooms engine (src/rooms.js) answers as the server would for this guest; every other network read fails open ---- */
+const ID = (g) => ({ invitationId: g.invitationId, guestId: g.guestId, partyId: g.partyId, hosts: !!g.hosts });
+async function dashboard(rooms, who, setup) {
+  const rf = await roomsFetch(rooms, ID(who));
+  const w = page({ auth: who, path: 'profile.html', fetch: (url, init) => (/\/api\/rooms/.test(String(url)) ? rf(url, init) : Promise.reject(new Error('no network in tests'))) });
+  const el = { innerHTML: '', querySelector: () => null, querySelectorAll: () => [] }, own = { textContent: '' };
+  w.document.getElementById = (id) => (id === 'page' ? el : id === 'pf-own' ? own : null);
+  w.SIYL_BAG.bar = null;                                                                            /* the sticky Bag summary wants a real DOM; it is not the overview */
+  await w.SIYL_UNITS.load(true);
+  if (setup) await setup(w);
+  const vm = await import('node:vm');
+  vm.runInContext(profile.slice(profile.lastIndexOf('<script>') + 8, profile.lastIndexOf('</script>')), w, { filename: 'profile.html' });
+  await w.SIYL_UNITS.load(true);                                                                     /* the engine read the page waits for: siyl:units renders again */
+  return { w, el, own };
+}
+
+test('8 · the overview reflects selections, holds and the waiting list — nothing is arranged for anyone, the Bag is read and never totalled here (Owner, 19 Sep 2026)', async () => {
+  /* the source: no arranged renderer, no fixed-arrangement card; the waiting list and the held place are the engine's answer for this guest */
+  const code = profile.replace(/\/\*[\s\S]*?\*\//g, '');
+  assert.doesNotMatch(code, /SIYL_ARRANGED|arranged\.js|A&&A\.ready\(\)|Arranged for you|Fixed arrangement|not part of your bag/, 'the deleted concept is gone from the dashboard');
   assert.match(profile, /lines=J\.sorted\(B\.get\(\)\)/, 'the selections are the bag lines, read only');
+  assert.match(profile, /if\(!J\.relevant\(seg\)\|\|J\.state\(seg\)!=='waitlisted'\)return;var w=U\.waitlisted\(seg\.key\)/, 'a waiting-list card per waitlisted stage of the guest\'s own trip, from the engine');
+  assert.match(profile, /data:'waitlist:'\+seg\.key/); assert.match(profile, /'Waiting list · number '\+\(w&&w\.position\|\|'\?'\)/); assert.match(profile, /state:'On the waiting list'/);
   assert.match(profile, /ST\.held\(x\)/); assert.match(profile, /'Your place is held'\+\(w\?' · '\+w:''\)/, 'a held room says so in the contract words');
   assert.match(profile, /S\.seatOf\(ev,id\)/); assert.match(profile, /'Seat '\+S\.label\(sid\)\+' · Held in your name'/);
   assert.match(profile, /'Selected · in My Bag'/); assert.match(profile, /'Sent to Guest Relations'/); assert.match(profile, /'Confirmed by Guest Relations'/);
@@ -87,6 +108,36 @@ test('8 · the overview reflects selections and holds without duplicating a fixe
   assert.doesNotMatch(profile, /B\.total\(\)/, 'no total of its own — My Bag is the one cart');
   const words = profile.slice(profile.indexOf('<script>'));
   for (const bad of ['engine', 'ledger', 'payload', 'registration', 'fingerprint', 'invitationId', 'ISO', 'KV']) assert.ok(!new RegExp("'[^']*\\b" + bad + "\\b[^']*'").test(words.replace(/\/\*[\s\S]*?\*\//g, '')), 'no system word in a guest string: ' + bad);
+
+  /* the page, rendered: Peggy (a party of two) holds a Heritage room for the wedding stay and waits for Kunming */
+  const rooms = new Rooms(doState()); let held = null;
+  const p = await dashboard(rooms, PEGGY, async (w) => {
+    held = await w.SIYL_STAY.select('wedstay', 'heritage', null, 2); assert.equal(held.ok, true); assert.ok(held.unit, 'a unit that takes the party of two');
+    assert.equal((await w.SIYL_UNITS.wait('kmg', 2, ['kmg/italian'])).ok, true);
+  });
+  const J = p.w.SIYL_JOURNEY, B = p.w.SIYL_BAG, seg = (k) => J.SEGMENTS.find((s) => s.key === k), html = p.el.innerHTML;
+  assert.equal(J.state(seg('wedstay')), 'selected'); assert.equal(J.state(seg('kmg')), 'waitlisted'); assert.equal(J.waitPosition(seg('kmg')), 1);
+  const cards = html.match(/<article class="pf-card[^"]*" data-profile-item="[^"]+">[\s\S]*?<\/article>/g) || [];
+  const item = (d) => cards.find((c) => c.includes('data-profile-item="' + d + '"'));
+  const wl = item('waitlist:kmg'); assert.ok(wl, 'the waiting-list card of the one waitlisted stage');
+  assert.match(wl, /Wanxiang Yueju/); assert.match(wl, /Waiting list · number 1 for 2 places/); assert.match(wl, /On the waiting list/); assert.match(wl, /href="your-journey\.html#s-kmg"/);
+  assert.doesNotMatch(wl, /USD|pf-cost/, 'a waiting-list stage carries no amount');
+  const st = item('line:wedstay'); assert.ok(st, 'the held stay is a card of the Stays rail');
+  assert.match(st, new RegExp('Your place is held · Room ' + held.unit + ' · You'), 'the held place in the contract words, the unit the engine gave');
+  assert.match(st, /USD [\d,]+ · your cost/);
+  assert.equal(cards.filter((c) => /data-profile-item="waitlist:/.test(c)).length, 1, 'one waiting-list card — the one stage');
+  assert.equal(cards.filter((c) => /data-profile-item="line:/.test(c)).length, B.get().length, 'a card per Bag line and no other arrangement');
+  assert.doesNotMatch(html, /Arranged for you|Fixed arrangement|not part of your bag/);
+  assert.equal(B.get().length, 1, 'the Bag carries the one actual selection: a waiting-list stage adds no line');
+  const c = J.counts(); assert.equal(c.confirmed, 1); assert.equal(c.waitlisted, 1); assert.equal(c.bagItems, 1); assert.equal(c.bagTotal, B.total()); assert.ok(B.total() > 0);
+  assert.equal(c.relevant, c.confirmed + c.waitlisted + c.declined + c.open);
+  /* the hosts start at zero like every guest: no room, no arrangement, nothing in the Bag */
+  const h = await dashboard(rooms, HARUTHAI);
+  assert.deepEqual(plain(h.w.SIYL_UNITS.view().mine), {}); assert.deepEqual(plain(h.w.SIYL_UNITS.view().waitlist), {});
+  assert.match(h.el.innerHTML, /No stay is chosen yet\. Rooms are chosen in My Trip\./);
+  assert.doesNotMatch(h.el.innerHTML, /data-profile-item="(line|waitlist):/);
+  assert.equal(h.w.SIYL_BAG.get().length, 0); assert.equal(h.w.SIYL_BAG.total(), 0);
+  assert.ok(h.w.SIYL_UNITS.view().units['bkk-stay/penthouse'].every((u) => u.reservedFor === null && u.taken === 0), 'no room is anyone\'s before a booking');
 });
 
 test('9 · Sign out is visible and functional: the header control leaves the session and returns to the invitation; the dashboard offers it too', () => {
