@@ -67,3 +67,30 @@ two hotels" — the engine's windowed release (nothing released for the wrong wi
 sandbox devices against one engine (device 2's Remove after device 1's switch: the Riverside hold stays, device 2 ends with the
 held line, USD 60), the replay reproduced through `SIYL_DRAFT._replay` (both lines) and settled on the `siyl:bag` event (one
 line), and the 011-7 order preserved (a Bag removal alone brings nothing back; the engine sync does).
+
+## Pass 3 — deferred (Codex quota), answered by the release's own adversarial pass
+
+The third (confirming) pass was requested at 04:59 UTC on 19 Sep 2026 and refused by the Codex quota ("try again at
+10:56 AM"). Per the Owner's standing rule (release 009: the quota must not idle the work; the confirming pass runs when the
+quota returns), the five questions put to Codex were answered here, with tests, before the deploy; the Codex confirming pass
+follows on the live code when the quota returns and any finding becomes a follow-up fix.
+
+1. *Can a stale device still release another window's hold?* `ST.remove` (the room page, The Journey, My Trip, My Bag, the
+   `rm` parameter), `J.decline` → `ST.remove`: every release names its window. The one stage-wide release left is the
+   planner's reconciliation of an engine hold OUTSIDE the trip (`your-journey.html`, CODEX 011-7): there the stage itself is not
+   part of the trip, so every hold of the stage — whichever hotel, whichever device chose it — must go. Correct by design.
+2. *Can `settle()` drop a legitimate line?* It drops nothing: it only asks the engine again when the Bag looks like two hotels
+   in one stage, and the full `sync()` decides on the fresh view. A host whose stage has a FIXED allocation and who chose
+   another hotel: `view.mine[stage]` is that hotel, its line is not a leftover; the private residence held by the engine:
+   the same; the engine not ready or the guest signed out: nothing runs. Hardening added after the second pass: the first
+   version of `settle()` dropped on this device's copy of the view — a device whose view was older than the switch elsewhere
+   could have dropped the held hotel's line; now it re-reads first (test: the stale device keeps the held hotel).
+3. *Loops / fighting the draft module?* `settle()` reads the engine at most once at a time; the sync after the read changes
+   the Bag at most once (the leftover gone or the held line back), after which nothing looks like two hotels and the next
+   `siyl:bag` reads nothing. The draft module marks the corrected Bag dirty and pushes it once; the other device's replay
+   keeps its own live edit only and settles the same way against the same engine. No ping-pong: both devices converge on the
+   engine's one hold.
+4. *Two lines of one stage anywhere else?* `ST.write` clears every id of the stage before it writes; `holdStays`, the Cost
+   Saving and Full Experience plans, the `rm` parameter and the cart all go through `ST.select` / `ST.remove`; the only Bag
+   writes that bypass the engine are the draft replay (settled) and the stage skip lists (no lines).
+5. The rest of the diff: unchanged since pass 2, which raised nothing beyond the two orderings.

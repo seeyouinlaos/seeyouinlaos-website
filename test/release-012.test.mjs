@@ -221,12 +221,21 @@ test('ONE WEDDING STAY · a stale device\'s Remove releases only its own window;
   const souphattra = d1.SIYL_PRICE.items('wedstay', 'heritage')[0], riverside = d1.SIYL_BAG.get()[0];
   const replayed = JSON.parse(D._replay('siyl.bag', '[]', JSON.stringify([riverside]), JSON.stringify([souphattra])));
   assert.deepEqual(replayed.map((x) => x.id).sort(), ['riverside', 'wedstay'], 'the replay alone would carry both');
+  const settled = () => new Promise((res) => setTimeout(res, 30));
   d1.localStorage.setItem('siyl.bag', JSON.stringify(replayed)); d1.document.dispatchEvent(new d1.CustomEvent('siyl:bag'));
-  assert.deepEqual(JSON.parse(JSON.stringify(d1.SIYL_BAG.get().map((x) => x.id))), ['riverside'], 'the Bag change is reconciled with the engine at once: the leftover left'); assert.equal(d1.SIYL_BAG.total(), 60);
-  assert.match(src('assets/stay.js'), /document\.addEventListener\('siyl:bag', function \(\) \{ if \(settling\) return; settling = true; try \{ ST\.settle\(\); \} finally \{ settling = false; \} \}\);/);
-  /* the Bag change runs the leftover rule alone: a held stay removed behind the engine's back is NOT brought back here (the
-     planner's reconciliation keeps its order — CODEX 011-7) */
-  d1.SIYL_BAG.remove('riverside'); assert.equal(d1.SIYL_BAG.get().length, 0, 'no line comes back on a Bag change'); assert.equal(d1.SIYL_UNITS.mine('wedstay').key, 'riverside/superior-window');
+  assert.equal(d1.SIYL_BAG.get().length, 2, 'nothing is dropped on this device\'s copy of the engine'); await settled();
+  assert.deepEqual(JSON.parse(JSON.stringify(d1.SIYL_BAG.get().map((x) => x.id))), ['riverside'], 'the engine was read again and the sync settled it: the leftover left'); assert.equal(d1.SIYL_BAG.total(), 60);
+  /* the same replay on a device whose engine view is OLDER than the switch (it still shows Souphattra): the fresh read wins —
+     the held Riverside line is kept, never dropped on the stale copy */
+  const d3 = page({ auth: PEGGY, fetch: await roomsFetch(rooms, me) }); await d3.SIYL_UNITS.load(true); d3.SIYL_STAY.sync();
+  d3.SIYL_UNITS._set(Object.assign({}, d3.SIYL_UNITS.view(), { mine: { wedstay: { key: 'wedstay/heritage', label: 'A' } } }));
+  d3.localStorage.setItem('siyl.bag', JSON.stringify(replayed)); d3.document.dispatchEvent(new d3.CustomEvent('siyl:bag'));
+  assert.equal(d3.SIYL_BAG.get().length, 2); await settled();
+  assert.deepEqual(JSON.parse(JSON.stringify(d3.SIYL_BAG.get().map((x) => x.id))), ['riverside'], 'the stale device keeps the held hotel, drops the leftover'); assert.equal(d3.SIYL_UNITS.mine('wedstay').key, 'riverside/superior-window');
+  assert.match(src('assets/stay.js'), /document\.addEventListener\('siyl:bag', function \(\) \{ ST\.settle\(\); \}\);/);
+  /* a Bag change that does not look like two hotels in one stage reads nothing and changes nothing: a held stay removed behind
+     the engine's back is NOT brought back here (the planner's reconciliation keeps its order — CODEX 011-7) */
+  d1.SIYL_BAG.remove('riverside'); assert.equal(d1.SIYL_STAY.settle(), false); await settled(); assert.equal(d1.SIYL_BAG.get().length, 0, 'no line comes back on a Bag change'); assert.equal(d1.SIYL_UNITS.mine('wedstay').key, 'riverside/superior-window');
   d1.SIYL_STAY.sync(); assert.equal(d1.SIYL_BAG.get()[0].id, 'riverside', 'the engine sync brings the held line back, as before');
   assert.match(src('assets/stay.js'), /return u\.leave\(stageOf\(win\), win\)\.then/, 'a Remove names its window'); assert.match(src('src/rooms.js'), /const win = String\(body && body\.window \|\| ''\)\.trim\(\);/);
 });

@@ -25,6 +25,7 @@
   function U() { return window.SIYL_UNITS; }
   function B() { return window.SIYL_BAG; }
   function stageOf(win) { var u = U(); return u ? u.stageOf(win + '/x') : win; }
+  var settling = null;   /* the one engine read a settle() has in flight */
 
   var ST = window.SIYL_STAY = {
     /* the journey line of a window, if any */
@@ -131,13 +132,14 @@
       var win = p.windowOf(x.id), m = u.mine(stageOf(win));
       return !!(m && String(m.key).split('/')[0] !== win);
     },
-    /* the leftover rule alone, on a Bag change made without the engine (a draft copy replayed, another tab): nothing else of
-       the sync runs here — no line is brought back, no unit rewritten — the planner's own reconciliation keeps its order */
+    /* a Bag change made without the engine (a draft copy replayed, another tab) that LOOKS like two hotels in one stage: the
+       engine is read again and the sync decides on the fresh view — never on this device's copy, which may be older than
+       the guest's switch elsewhere. Nothing is dropped or brought back here; one read at a time. */
     settle: function () {
       var u = U(), b = B(); if (!u || !u.ready() || !b || !b.authed()) return false;
-      var bag = b.get(), kept = bag.filter(function (x) { return !ST.leftover(x); });
-      if (kept.length === bag.length) return false;
-      b.set(kept); return true;
+      if (!b.get().some(function (x) { return ST.leftover(x); })) return false;
+      if (!settling) settling = u.load(true).then(function () { settling = null; }, function () { settling = null; });
+      return true;
     },
     /* the engine and the bag agree: a place the engine holds is in the bag;
      * a line the engine does not hold is marked so the guest chooses a room */
@@ -230,7 +232,6 @@
   document.addEventListener('siyl:units', function () { ST.sync(); });
   /* the Bag changed without the engine (a draft copy replayed, another tab): the engine remains the truth — a leftover of
      another hotel in a held stage leaves at once (Codex confirming pass, release 012); a second pass finds nothing to change */
-  var settling = false;
-  document.addEventListener('siyl:bag', function () { if (settling) return; settling = true; try { ST.settle(); } finally { settling = false; } });
+  document.addEventListener('siyl:bag', function () { ST.settle(); });
   if (U() && U().ready()) ST.sync();
 })();
