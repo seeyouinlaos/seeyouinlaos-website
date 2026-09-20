@@ -40,20 +40,25 @@
     essential: {
       key: 'essential',
       name: 'Essential trip',
-      short: 'Your Vientiane stays — the Souphattra Heritage, 25 February to 1 March',
-      /* THE OWNER'S DEFINITION (20 Sep 2026): Package C (Pre-Wedding Stay, 25 – 27 Feb) + D1 (Wedding Stay, 27 Feb – 01 Mar) at
-         the Souphattra Heritage Vientiane; the default room HERITAGE EXECUTIVE (the master's rooming sheet: Heritage Executive
-         King, 1 king bed 1.9 m, 37 – 44 sq.m., 2 adults · 1 child); when it cannot take the party, the next compatible
-         category of the SAME house in the house's order — its more affordable neighbour first, then outwards — and, when no
-         Souphattra category can take the party, the WAITING LIST. Never the Guest House, never the Riverside, never another
-         house. The amount is each room's own (pricing.js): the Pre-Wedding window's two nights, the Wedding window's one
-         payable night. */
+      short: 'For guests joining us for the wedding in Vientiane — 27 February to 1 March',
+      /* THE OWNER'S BOOKING MODEL (20 Sep 2026, the correction): the Overview (002) defines the journey — its stages by letter
+         (A · B · C · D …) and, where a stage has alternatives, the alternatives by number (A1 · A2 · A3 are three stays for stage
+         A; D1 · D2 · D3 are three stays for stage D, the WEDDING EVENT accommodation). The Accommodation Details (003) are the
+         product record only — a Souphattra room category labelled "C + D1" there is USABLE in stages C and D1; the label never
+         composes a package. The Essential trip answers one need — "I am coming for the wedding: where do I stay?" — so it covers
+         stage D alone: the Wedding Stay, 27 February – 01 March 2027. Its preselection is D1, the Souphattra Heritage, the
+         HERITAGE EXECUTIVE (King, 37 – 44 sq.m., 2 adults · 1 child); when that category cannot take the party, the next
+         Souphattra category in the house's order; when no Souphattra category can, the WAITING LIST — never a silent move to
+         D2 or D3. D2 (the Guest House complimentary) and D3 (the Riverside Hotel) are the guest's own alternatives for the
+         same stage, chosen on The Journey. Stage C (the Pre-Wedding Stay) is NOT part of the Essential trip. The amount is the
+         chosen room's own (pricing.js: the Wedding window's one payable night, the second hosted — the Executive USD 155). */
       approved: true,
-      source: 'H&S_Wedding_Operations_Master · Overview Day 05 – 08 (Package C · D1) · Accommodation and Rooming (Heritage Executive) · the Owner\'s instruction of 20 Sep 2026',
+      source: 'H&S_Wedding_Operations_Master · 002_Overview (stage D · Wedding Stay 27.02 – 01.03.2027 · alternatives D1 / D2 / D3) · 003_Accommodation_Details (the Heritage Executive as the product) · the Owner\'s instruction of 20 Sep 2026',
       stages: {
-        prewed: ['prewed/heritage-executive', 'prewed/heritage', 'prewed/heritage-grand-premier', 'prewed/noble-courtyard', 'prewed/grand-majestic', 'prewed/souphattra-majestic', 'prewed/souphattra-presidential'],
         wedstay: ['wedstay/heritage-executive', 'wedstay/heritage', 'wedstay/heritage-grand-premier', 'wedstay/noble-courtyard', 'wedstay/grand-majestic', 'wedstay/souphattra-majestic', 'wedstay/souphattra-presidential']
-      }
+      },
+      /* the guest's own alternatives for the covered stage (the Overview's D2 · D3) — shown, never applied by the package */
+      alternatives: { wedstay: { words: 'Prefer another stay? The Wedding Stay can be changed to the Guest House complimentary or the Riverside Hotel on The Journey.', href: 'journeys.html#j-guesthouse' } }
     }
   };
   /* the order the packages are OFFERED in — only a package whose composition the Owner has defined */

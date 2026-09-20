@@ -5,7 +5,7 @@
    Sections: no fixed arrangement (the hosts start at zero) · party capacity on the room page · the Guest House
    complimentary (six shared places, occupants named to signed-in guests, complimentary line, one selection per stage) ·
    the Complete trip (preview with a named fallback and a waiting-list stage, confirm, summary, Profile and Review carry the
-   waiting list, a freed room lets the guest choose, leaving the line) · the Essential trip (the Owner's definition of 20 Sep 2026: A–L) · the return flight MU5922 + MU741 · confirmation parity (record ·
+   waiting list, a freed room lets the guest choose, leaving the line) · the Essential trip (the Owner's booking model of 20 Sep 2026: stage D alone, D1 preselected, D2 / D3 the guest's — A–O) · the return flight MU5922 + MU741 · confirmation parity (record ·
    guest email · Guest Relations email: the waiting list, no arranged section, the hosts' flag) · the dated venues · widths,
    iPhone Safari and the console. LIVE=1 runs the read-only public sections only (venues, widths, console). */
 import fs from 'node:fs'; import path from 'node:path';
@@ -217,51 +217,66 @@ if (!LIVE) {
     for (const s of ['starry-sky', 'boundless', 'private-soup-view', 'manor-suite', 'view-suite-270', 'soup-pool-270', 'private-courtyard-270', 'viewing-270', 'snow-mountain-viewing']) await clearCategory('ljg/' + s);
   }
 
-  /* ===== 6 · THE ESSENTIAL TRIP (the Owner's definition of 20 Sep 2026 — Package C + D1 at the Souphattra Heritage, the Heritage Executive first; T001, Vientiane only):
-     A the card at zero state · B available → the Heritage Executive, previewed then held · I/J/K the switches Essential → Individual → Complete → Essential ·
-     C/D sold out → the next category of the house at its actual price (more affordable, then dearer) · G the engine changes between preview and confirm → recomputed, nothing applied ·
-     F no Souphattra category can take the party → the WAITING LIST (position on My Trip · Profile · Review) · H the Complete trip unchanged · E the party rule (G048 + G049) ===== */
+  /* ===== 6 · THE ESSENTIAL TRIP (the Owner's booking model, 20 Sep 2026 — stage D alone: the Wedding Stay 27 Feb – 01 Mar; D1 preselected = the Souphattra Heritage, the Heritage Executive;
+     D2 the Guest House complimentary and D3 the Riverside Hotel are the guest's own alternatives; D1 exhausted → the waiting list, never a silent move to D2 / D3; stage C is never auto-added — T001, Vientiane only):
+     A the card at zero state (1 stage · USD 155 · the alternatives named) · B the preview and the confirm (one row, no C, no USD 465) · K/E/F the guest's own switches: Essential → an individual Souphattra room → D2 → D3 ·
+     I/J Essential → Complete → Essential (C untouched) · C/D sold out → the next Souphattra category at its actual price · G the engine changes between preview and confirm → recomputed, nothing applied ·
+     H every Souphattra category full → the WAITING LIST at USD 0 with the position on My Trip, Profile and Review; D2 / D3 stay the guest's — chosen by hand, the line resolves · the Complete trip unchanged · the party rule (G048 + G049) ===== */
   {
     const SOUPHATTRA = ['heritage-executive', 'heritage', 'heritage-grand-premier', 'noble-courtyard', 'grand-majestic', 'souphattra-majestic', 'souphattra-presidential'];
     const labelsOf = async (key) => { const plan = await gr('/api/rooms/plan'); return (plan.body && plan.body.units && plan.body.units[key] || []).map((u) => u.label); };
-    const essential = (p) => p.evaluate(() => { const pl = SIYL_JOURNEY.packagePlan('essential'); return { ready: pl.ready, need: pl.need, rows: pl.rows.map((r) => r.seg.key + ':' + r.why + ':' + (r.key || '') + ':' + (r.unit || '') + ':' + r.amount), tried: pl.rows.map((r) => r.tried || []), total: pl.total, waitlist: pl.waitlist, bag: SIYL_BAG.get().length, replaced: pl.counts.replaced }; });
-    const previewRows = (p) => p.evaluate(() => ({ rows: [...document.querySelectorAll('.fxl .fxr')].map((e) => e.innerText.replace(/\s+/g, ' ').trim()), fb: document.querySelectorAll('.fxl .fxr-fb').length, wl: document.querySelectorAll('.fxl .fxr-open').length, total: (document.querySelector('[data-fx-total]') || {}).innerText || '', changed: !!document.querySelector('[data-fx-changed]'), held: SIYL_BAG.get().length }));
+    const essential = (p) => p.evaluate(() => { const pl = SIYL_JOURNEY.packagePlan('essential'); return { ready: pl.ready, need: pl.need, rows: pl.rows.map((r) => r.seg.key + ':' + r.why + ':' + (r.key || '') + ':' + (r.unit || '') + ':' + r.amount), tried: pl.rows.map((r) => r.tried || []), total: pl.total, waitlist: pl.waitlist, bag: SIYL_BAG.get().length, replaced: pl.counts.replaced, stages: pl.counts.stages }; });
+    const previewRows = (p) => p.evaluate(() => ({ rows: [...document.querySelectorAll('.fxl .fxr')].map((e) => e.innerText.replace(/\s+/g, ' ').trim()), fb: document.querySelectorAll('.fxl .fxr-fb').length, wl: document.querySelectorAll('.fxl .fxr-open').length, total: (document.querySelector('[data-fx-total]') || {}).innerText || '', changed: !!document.querySelector('[data-fx-changed]'), held: SIYL_BAG.get().length, alt: (document.querySelector('[data-fx-alt="wedstay"]') || {}).innerText || '', altHref: (document.querySelector('[data-fx-alt="wedstay"] a') || {}).getAttribute ? document.querySelector('[data-fx-alt="wedstay"] a').getAttribute('href') : '' }));
+    const bagOf = (p) => p.evaluate(() => ({ bag: SIYL_BAG.get().map((x) => x.id + ':' + x.room).sort(), total: SIYL_BAG.total(), counts: SIYL_JOURNEY.counts(), summary: (document.querySelector('[data-fx-summary]') || {}).innerText || '' }));
+    const NO_C = (t) => !/25 – 27 FEB|Pre-Wedding|USD 465|2 stages/i.test(t);
     await resetGuest('T002'); await resetGuest('T003'); await gr('/api/rooms/reset', { dryRun: false, actor: 'e2e-014' }, 'POST');   /* the earlier sections' guests leave first: the house starts empty */
     const p = await fresh(390); await signIn(p, 'T001'); await contact(p, 'ada.test@example.org');
     await trip(p); await p.evaluate(() => { SIYL_GUEST.setScope({ none: true }); SIYL_GUEST.setScope({ vientiane: true }); }); await trip(p);
-    /* A · the zero-state guest sees the Essential card beside the Complete card — the same presentation, one preview action each */
-    const cards = await p.evaluate(() => ({ cards: [...document.querySelectorAll('.p-pack')].map((e) => ({ kind: e.getAttribute('data-package'), btn: !!e.querySelector('[data-package-preview]'), text: e.innerText.replace(/\s+/g, ' ') })), order: SIYL_JOURNEY.packageOrder(), def: { approved: SIYL_PACKAGES.essential.approved, stages: Object.keys(SIYL_PACKAGES.essential.stages), wed: SIYL_PACKAGES.essential.stages.wedstay, pre: SIYL_PACKAGES.essential.stages.prewed } }));
+    /* A · the zero-state guest sees the Essential card beside the Complete card — one stage (D), USD 155, the alternatives named; nothing of C, nothing of 465 */
+    const cards = await p.evaluate(() => ({ cards: [...document.querySelectorAll('.p-pack')].map((e) => ({ kind: e.getAttribute('data-package'), btn: !!e.querySelector('[data-package-preview]'), text: e.innerText.replace(/\s+/g, ' '), alt: (e.querySelector('[data-package-alt="wedstay"]') || {}).innerText || '' })), order: SIYL_JOURNEY.packageOrder(), def: { approved: SIYL_PACKAGES.essential.approved, stages: Object.keys(SIYL_PACKAGES.essential.stages), wed: SIYL_PACKAGES.essential.stages.wedstay } }));
     const ess = cards.cards.find((c) => c.kind === 'essential');
-    note('A-essential-card-offered-at-zero-state', cards.cards.length === 2 && cards.cards[0].kind === 'complete' && ess && ess.btn && cards.order.join() === 'complete,essential' && cards.def.approved === true && cards.def.stages.join() === 'prewed,wedstay' && cards.def.wed.join() === SOUPHATTRA.map((s) => 'wedstay/' + s).join() && cards.def.pre.join() === SOUPHATTRA.map((s) => 'prewed/' + s).join() && /Essential trip/i.test(ess.text) && /Souphattra Heritage/i.test(ess.text) && /2 stages of your trip · Vientiane/.test(ess.text) && /USD 465 per person/i.test(ess.text) && /Preview essential trip/i.test(ess.text), JSON.stringify({ cards: cards.cards.map((c) => c.kind + ':' + c.btn), def: cards.def.stages, text: ess && ess.text.slice(0, 160) }));
+    note('A-essential-card-stage-D-only', cards.cards.length === 2 && cards.cards[0].kind === 'complete' && ess && ess.btn && cards.order.join() === 'complete,essential' && cards.def.approved === true && cards.def.stages.join() === 'wedstay' && cards.def.wed.join() === SOUPHATTRA.map((s) => 'wedstay/' + s).join() && /Essential trip/i.test(ess.text) && /27 February to 1 March/i.test(ess.text) && /1 stage of your trip · Vientiane/i.test(ess.text) && /USD 155 per person/i.test(ess.text) && /Guest House complimentary or the Riverside Hotel/i.test(ess.alt) && NO_C(ess.text), JSON.stringify({ cards: cards.cards.map((c) => c.kind + ':' + c.btn), def: cards.def.stages, text: ess && ess.text.slice(0, 200) }));
     await shot(p, '390-package-cards');
     const zero = await essential(p);
-    note('B-available-plan-is-the-heritage-executive', zero.ready && zero.rows.length === 2 && /^prewed:default:prewed\/heritage-executive:[A-Z]+:310$/.test(zero.rows[0]) && /^wedstay:default:wedstay\/heritage-executive:[A-Z]+:155$/.test(zero.rows[1]) && zero.total === 465 && zero.waitlist.length === 0 && zero.bag === 0, JSON.stringify(zero.rows) + ' need ' + zero.need);
-    /* B · the preview names the hotel, the category, the dates and the cost of each stage; the confirm holds exactly that */
+    note('B-plan-is-D1-heritage-executive-alone', zero.ready && zero.rows.length === 1 && /^wedstay:default:wedstay\/heritage-executive:[A-Z]+:155$/.test(zero.rows[0]) && zero.total === 155 && zero.stages === 1 && zero.waitlist.length === 0 && zero.bag === 0, JSON.stringify(zero.rows) + ' total ' + zero.total + ' need ' + zero.need);
+    /* B · the preview: one row — the hotel, the category, the dates, two nights with one hosted, preselected, USD 155; the alternatives with a way to them; the confirm holds exactly that */
     await p.click('[data-package-preview="essential"]'); await p.waitForTimeout(1500);
     const pv = await previewRows(p);
     await shot(p, '390-essential-preview');
-    note('B-preview-hotel-category-dates-cost', pv.rows.length === 2 && /25 – 27 FEB · Vientiane/i.test(pv.rows[0]) && /Heritage Executive · Pre-Wedding Stay · Souphattra Heritage/i.test(pv.rows[0]) && /USD 310 per person/.test(pv.rows[0]) && /27 FEB – 01 MAR · Vientiane/i.test(pv.rows[1]) && /Heritage Executive · Wedding Stay · Souphattra Heritage/i.test(pv.rows[1]) && /USD 155 per person/.test(pv.rows[1]) && /USD 465 per person/.test(pv.total) && /2 stages/.test(pv.total) && pv.fb === 0 && pv.wl === 0 && pv.held === 0 && !/Riverside|Guest House/i.test(pv.rows.join(' ')), JSON.stringify(pv));
+    note('B-preview-one-row-D1-with-alternatives', pv.rows.length === 1 && /27 FEB – 01 MAR · Vientiane/i.test(pv.rows[0]) && /Heritage Executive · Wedding Stay · Souphattra Heritage/i.test(pv.rows[0]) && /USD 155 per person/.test(pv.rows[0]) && /2 nights · one night hosted by Haruthai & Suthep · preselected for you/i.test(pv.rows[0]) && /USD 155 per person/.test(pv.total) && /for 1 stage\./.test(pv.total) && pv.fb === 0 && pv.wl === 0 && pv.held === 0 && /Guest House complimentary or the Riverside Hotel/i.test(pv.alt) && /journeys\.html#j-guesthouse/.test(pv.altHref) && NO_C(pv.rows.join(' ') + ' ' + pv.total), JSON.stringify(pv));
     await p.click('#fxg'); await p.waitForTimeout(6000);
-    let m = await mine(p); let st = await p.evaluate(() => ({ bag: SIYL_BAG.get().map((x) => x.id + ':' + x.room).sort(), total: SIYL_BAG.total(), counts: SIYL_JOURNEY.counts(), summary: (document.querySelector('[data-fx-summary]') || {}).innerText || '' }));
+    let m = await mine(p); let st = await bagOf(p);
     await shot(p, '390-essential-done');
-    note('B-confirm-holds-the-heritage-executive-twice', m.mine && m.mine.prewed && m.mine.prewed.key === 'prewed/heritage-executive' && m.mine.wedstay && m.mine.wedstay.key === 'wedstay/heritage-executive' && Object.keys(m.mine).length === 2 && !(m.waitlist && Object.keys(m.waitlist).length) && st.bag.join() === 'prewed:heritage-executive,wedstay:heritage-executive' && st.total === 465 && st.counts.confirmed === 2 && st.counts.open === 0 && /Essential trip selected 2 stages for you/.test(st.summary), JSON.stringify({ mine: m.mine, ...st }));
-    /* K · Essential → Individual: the guest changes the wedding stay by hand on the room page; one hold per stage, the package's line gives way */
+    note('B-confirm-holds-the-executive-for-the-wedding-stay-only', m.mine && m.mine.wedstay && m.mine.wedstay.key === 'wedstay/heritage-executive' && Object.keys(m.mine).length === 1 && !m.mine.prewed && !(m.waitlist && Object.keys(m.waitlist).length) && st.bag.join() === 'wedstay:heritage-executive' && st.total === 155 && st.counts.confirmed === 1 && st.counts.open === 1 && /Essential trip selected 1 stage for you/.test(st.summary), JSON.stringify({ mine: m.mine, ...st }));
+    /* K · Essential → an individual Souphattra room: the guest changes the wedding stay by hand on the room page; one hold per stage */
     await p.goto(O + '/room.html?stay=souphattra&room=heritage', { waitUntil: 'load' }); await p.waitForTimeout(2200);
     await p.click('.cta[data-avwin="wedstay"]'); await p.waitForTimeout(2600);
-    m = await mine(p); st = await p.evaluate(() => ({ bag: SIYL_BAG.get().map((x) => x.id + ':' + x.room).sort(), total: SIYL_BAG.total() }));
-    note('K-essential-to-individual-one-hold-per-stage', m.mine.wedstay && m.mine.wedstay.key === 'wedstay/heritage' && m.mine.prewed.key === 'prewed/heritage-executive' && Object.keys(m.mine).length === 2 && st.bag.join() === 'prewed:heritage-executive,wedstay:heritage' && st.total === 455, JSON.stringify({ mine: m.mine, ...st }));
-    /* I · Essential → Complete: the Complete trip's Vientiane defaults replace both stays — named as replacements, previewed, held; nothing is held twice */
+    m = await mine(p); st = await bagOf(p);
+    note('K-essential-to-individual-souphattra-room', m.mine.wedstay && m.mine.wedstay.key === 'wedstay/heritage' && Object.keys(m.mine).length === 1 && st.bag.join() === 'wedstay:heritage' && st.total === 145, JSON.stringify({ mine: m.mine, bag: st.bag, total: st.total }));
+    /* E · D1 → D2: the Guest House complimentary, chosen by the guest — the Souphattra place released, USD 0 */
+    await p.goto(O + '/room.html?stay=guesthouse&room=guest-house', { waitUntil: 'load' }); await p.waitForTimeout(2200);
+    await p.click('.cta[data-avwin="guesthouse"]'); await p.waitForTimeout(2600);
+    m = await mine(p); st = await bagOf(p);
+    note('E-guest-changes-D1-to-D2-guest-house', m.mine.wedstay && m.mine.wedstay.key === 'guesthouse/guest-house' && Object.keys(m.mine).length === 1 && st.bag.join() === 'guesthouse:guest-house' && st.total === 0 && st.counts.confirmed === 1, JSON.stringify({ mine: m.mine, bag: st.bag, total: st.total }));
+    /* F · D2 → D3: the Riverside Hotel, chosen by the guest — one line for stage D, its own price */
+    await p.goto(O + '/room.html?stay=riverside&room=superior-window', { waitUntil: 'load' }); await p.waitForTimeout(2200);
+    await p.click('.cta[data-avwin="riverside"]'); await p.waitForTimeout(2600);
+    m = await mine(p); st = await bagOf(p);
+    const gh = await p.evaluate(() => (SIYL_UNITS.units('guesthouse', 'guest-house')[0] || {}).free);
+    note('F-guest-changes-to-D3-riverside', m.mine.wedstay && m.mine.wedstay.key === 'riverside/superior-window' && Object.keys(m.mine).length === 1 && st.bag.join() === 'riverside:superior-window' && st.total === 60 && gh === 6, JSON.stringify({ mine: m.mine, bag: st.bag, total: st.total, guestHouseFree: gh }));
+    /* I · Essential → Complete (Vientiane): the Complete trip's defaults for C and D replace the Riverside and fill C — named, previewed, held */
     await trip(p); await p.click('[data-package-preview="complete"]'); await p.waitForTimeout(1500);
     const pvc = await previewRows(p);
     await p.click('#fxg'); await p.waitForTimeout(6000);
-    m = await mine(p); st = await p.evaluate(() => ({ bag: SIYL_BAG.get().map((x) => x.id + ':' + x.room).sort(), total: SIYL_BAG.total(), counts: SIYL_JOURNEY.counts() }));
-    note('I-essential-to-complete-clean-switch', pvc.rows.length === 2 && pvc.rows.every((r) => /Heritage Grand Premier/i.test(r) && /Replaces your current/.test(r)) && /replaces 2 of your current selections/.test(pvc.total) && m.mine.prewed.key === 'prewed/heritage-grand-premier' && m.mine.wedstay.key === 'wedstay/heritage-grand-premier' && Object.keys(m.mine).length === 2 && st.bag.join() === 'prewed:heritage-grand-premier,wedstay:heritage-grand-premier' && st.total === 510 && st.counts.confirmed === 2, JSON.stringify({ pv: pvc.total, mine: m.mine, ...st }));
-    /* J · Complete → Essential: back to the Heritage Executive, both stays replaced, one hold per stage */
+    m = await mine(p); st = await bagOf(p);
+    note('I-essential-to-complete-clean-switch', pvc.rows.length === 2 && pvc.rows.every((r) => /Heritage Grand Premier/i.test(r)) && pvc.rows.some((r) => /Replaces your current Riverside/i.test(r)) && /replaces 1 of your current selections/.test(pvc.total) && m.mine.prewed.key === 'prewed/heritage-grand-premier' && m.mine.wedstay.key === 'wedstay/heritage-grand-premier' && Object.keys(m.mine).length === 2 && st.bag.join() === 'prewed:heritage-grand-premier,wedstay:heritage-grand-premier' && st.total === 510 && st.counts.confirmed === 2, JSON.stringify({ pv: pvc.total, mine: m.mine, bag: st.bag, total: st.total }));
+    /* J · Complete → Essential: the wedding stay back to the Heritage Executive; the pre-wedding stay (C) is NOT the Essential trip's — untouched */
     await p.click('[data-package-preview="essential"]'); await p.waitForTimeout(1500);
     const pve = await previewRows(p);
     await p.click('#fxg'); await p.waitForTimeout(6000);
-    m = await mine(p); st = await p.evaluate(() => ({ bag: SIYL_BAG.get().map((x) => x.id + ':' + x.room).sort(), total: SIYL_BAG.total(), again: SIYL_JOURNEY.packagePlan('essential').rows.map((r) => r.why) }));
-    note('J-complete-to-essential-clean-switch', pve.rows.length === 2 && pve.rows.every((r) => /Heritage Executive/i.test(r) && /Replaces your current/.test(r)) && m.mine.prewed.key === 'prewed/heritage-executive' && m.mine.wedstay.key === 'wedstay/heritage-executive' && Object.keys(m.mine).length === 2 && st.bag.join() === 'prewed:heritage-executive,wedstay:heritage-executive' && st.total === 465 && st.again.join() === 'same,same', JSON.stringify({ mine: m.mine, ...st }));
+    m = await mine(p); st = await bagOf(p);
+    const again = await p.evaluate(() => SIYL_JOURNEY.packagePlan('essential').rows.map((r) => r.why));
+    note('J-complete-to-essential-leaves-C-untouched', pve.rows.length === 1 && /Heritage Executive/i.test(pve.rows[0]) && /Replaces your current/.test(pve.rows[0]) && NO_C(pve.rows.join(' ') + pve.total) && m.mine.prewed.key === 'prewed/heritage-grand-premier' && m.mine.wedstay.key === 'wedstay/heritage-executive' && Object.keys(m.mine).length === 2 && st.bag.join() === 'prewed:heritage-grand-premier,wedstay:heritage-executive' && st.total === 340 + 155 && again.join() === 'same', JSON.stringify({ mine: m.mine, bag: st.bag, total: st.total, again }));
     await p.context().close(); await resetGuest('T001');
     /* C · the Heritage Executive sold out for the wedding window → the next category of the SAME house, The Heritage (USD 145 — more affordable, at its actual price; price never decided) */
     const EXEC = await labelsOf('wedstay/heritage-executive'), HER = await labelsOf('wedstay/heritage'), GP = await labelsOf('wedstay/heritage-grand-premier');
@@ -269,45 +284,48 @@ if (!LIVE) {
     const p2 = await fresh(390); await signIn(p2, 'T001'); await contact(p2, 'ada.test@example.org');
     await trip(p2); await p2.evaluate(() => { SIYL_GUEST.setScope({ none: true }); SIYL_GUEST.setScope({ vientiane: true }); }); await trip(p2);
     const c1 = await essential(p2);
-    note('C-sold-out-falls-to-the-heritage', c1.ready && /^prewed:default:prewed\/heritage-executive:/.test(c1.rows[0]) && /^wedstay:fallback:wedstay\/heritage:[A-Z]+:145$/.test(c1.rows[1]) && c1.tried[1].join() === 'wedstay/heritage-executive,wedstay/heritage' && c1.total === 455 && c1.waitlist.length === 0, JSON.stringify(c1.rows) + ' tried ' + JSON.stringify(c1.tried[1]));
+    note('C-sold-out-falls-to-the-heritage', c1.ready && c1.rows.length === 1 && /^wedstay:fallback:wedstay\/heritage:[A-Z]+:145$/.test(c1.rows[0]) && c1.tried[0].join() === 'wedstay/heritage-executive,wedstay/heritage' && c1.total === 145 && c1.waitlist.length === 0, JSON.stringify(c1.rows) + ' tried ' + JSON.stringify(c1.tried[0]));
     await p2.click('[data-package-preview="essential"]'); await p2.waitForTimeout(1500);
     const pv1 = await previewRows(p2);
     await shot(p2, '390-essential-fallback-heritage');
-    note('C-preview-says-the-replacement', pv1.fb === 1 && /The Heritage · Wedding Stay · Souphattra Heritage/i.test(pv1.rows[1]) && /USD 145 per person/.test(pv1.rows[1]) && /cannot take your party — this is the next option that can/.test(pv1.rows[1]) && /USD 455 per person/.test(pv1.total) && /1 replacement/.test(pv1.total) && !/Riverside|Guest House/i.test(pv1.rows.join(' ')), JSON.stringify(pv1));
-    /* G · the engine changes between the preview and the confirm (an Executive room frees): nothing is applied, the preview is drawn again with the default */
+    note('C-preview-says-the-replacement', pv1.fb === 1 && /The Heritage · Wedding Stay · Souphattra Heritage/i.test(pv1.rows[0]) && /USD 145 per person/.test(pv1.rows[0]) && /cannot take your party — this is the next option that can/.test(pv1.rows[0]) && /USD 145 per person/.test(pv1.total) && /1 replacement/.test(pv1.total) && !/Riverside|Guest House/i.test(pv1.rows.join(' ')) && NO_C(pv1.total), JSON.stringify(pv1));
+    /* G · the engine changes between the preview and the confirm (an Executive room frees): nothing is applied, the preview is drawn again with the preselection */
     await gr('/api/rooms/unassign', { key: 'wedstay/heritage-executive', guestId: 'Zwedstayheritageexecutive' + EXEC[0] + '0', actor: 'e2e-014' });
     await gr('/api/rooms/unassign', { key: 'wedstay/heritage-executive', guestId: 'Zwedstayheritageexecutive' + EXEC[0] + '1', actor: 'e2e-014' });
     await p2.click('#fxg'); await p2.waitForTimeout(2500);
     const g1 = await previewRows(p2); const gm1 = await mine(p2);
-    note('G-inventory-change-recomputes-nothing-applied', g1.changed && g1.fb === 0 && g1.held === 0 && /Heritage Executive · Wedding Stay/i.test(g1.rows[1]) && /USD 465 per person/.test(g1.total) && Object.keys(gm1.mine || {}).length === 0, JSON.stringify({ changed: g1.changed, fb: g1.fb, total: g1.total, held: g1.held }));
+    note('G-inventory-change-recomputes-nothing-applied', g1.changed && g1.fb === 0 && g1.held === 0 && /Heritage Executive · Wedding Stay/i.test(g1.rows[0]) && /USD 155 per person/.test(g1.total) && Object.keys(gm1.mine || {}).length === 0, JSON.stringify({ changed: g1.changed, fb: g1.fb, total: g1.total, held: g1.held }));
     await fillCategory('wedstay/heritage-executive', [EXEC[0]], 2);
     await p2.click('#fxg'); await p2.waitForTimeout(2500);
     const g2 = await previewRows(p2);
-    note('G-preview-back-to-the-fallback', g2.changed && g2.fb === 1 && /USD 455 per person/.test(g2.total), JSON.stringify({ changed: g2.changed, fb: g2.fb, total: g2.total }));
+    note('G-preview-back-to-the-fallback', g2.changed && g2.fb === 1 && /USD 145 per person/.test(g2.total), JSON.stringify({ changed: g2.changed, fb: g2.fb, total: g2.total }));
     await p2.click('#fxg'); await p2.waitForTimeout(6000);
-    m = await mine(p2); st = await p2.evaluate(() => ({ bag: SIYL_BAG.get().map((x) => x.id + ':' + x.room).sort(), total: SIYL_BAG.total(), summary: (document.querySelector('[data-fx-summary]') || {}).innerText || '' }));
-    note('C-confirm-holds-the-heritage-at-its-actual-price', m.mine.wedstay && m.mine.wedstay.key === 'wedstay/heritage' && m.mine.prewed.key === 'prewed/heritage-executive' && st.bag.join() === 'prewed:heritage-executive,wedstay:heritage' && st.total === 455 && /Replaced because the suggested room could not take your party: 27 FEB – 01 MAR · Vientiane/.test(st.summary), JSON.stringify({ mine: m.mine, ...st }));
+    m = await mine(p2); st = await bagOf(p2);
+    note('C-confirm-holds-the-heritage-at-its-actual-price', m.mine.wedstay && m.mine.wedstay.key === 'wedstay/heritage' && Object.keys(m.mine).length === 1 && st.bag.join() === 'wedstay:heritage' && st.total === 145 && /Replaced because the suggested room could not take your party: 27 FEB – 01 MAR · Vientiane/.test(st.summary), JSON.stringify({ mine: m.mine, bag: st.bag, total: st.total }));
     await p2.context().close(); await resetGuest('T001');
-    /* D · The Heritage sold out too → the Heritage Grand Premier (USD 170 — dearer than the default, at its actual price) — the chain continues in the hotel's order */
+    /* D · The Heritage sold out too → the Heritage Grand Premier (USD 170 — dearer than the preselection, at its actual price) — the chain continues in the hotel's order */
     note('D-fixture-heritage-sold-out', await fillCategory('wedstay/heritage', HER, 2), 'Guest Relations filled the five Heritage rooms of the wedding window');
     const p3 = await fresh(390); await signIn(p3, 'T001'); await contact(p3, 'ada.test@example.org');
     await trip(p3); await p3.evaluate(() => { SIYL_GUEST.setScope({ none: true }); SIYL_GUEST.setScope({ vientiane: true }); }); await trip(p3);
     const d1 = await essential(p3);
-    note('D-chain-continues-to-the-grand-premier-dearer', d1.ready && /^wedstay:fallback:wedstay\/heritage-grand-premier:[A-Z]+:170$/.test(d1.rows[1]) && d1.tried[1].join() === 'wedstay/heritage-executive,wedstay/heritage,wedstay/heritage-grand-premier' && d1.total === 480, JSON.stringify(d1.rows) + ' tried ' + JSON.stringify(d1.tried[1]));
-    /* F · every category of the Souphattra full for the wedding window → the WAITING LIST: never the Riverside, never the Guest House; USD 0 for the stage; the position visible on My Trip, Profile and Review */
+    note('D-chain-continues-to-the-grand-premier-dearer', d1.ready && /^wedstay:fallback:wedstay\/heritage-grand-premier:[A-Z]+:170$/.test(d1.rows[0]) && d1.tried[0].join() === 'wedstay/heritage-executive,wedstay/heritage,wedstay/heritage-grand-premier' && d1.total === 170, JSON.stringify(d1.rows) + ' tried ' + JSON.stringify(d1.tried[0]));
+    /* H · every category of the Souphattra full for the wedding window → the WAITING LIST for D1: never a silent move to D2 or D3; USD 0; the position visible on My Trip, Profile and Review; D2 and D3 remain the guest's to choose */
     let filledRest = true; for (const s of ['heritage-grand-premier', 'noble-courtyard', 'grand-majestic', 'souphattra-majestic', 'souphattra-presidential']) { const ls = await labelsOf('wedstay/' + s); if (!ls.length || !(await fillCategory('wedstay/' + s, ls, 2))) filledRest = false; }
-    note('F-fixture-souphattra-full', filledRest, 'Guest Relations filled every remaining Souphattra category of the wedding window');
+    note('H-fixture-souphattra-full', filledRest, 'Guest Relations filled every remaining Souphattra category of the wedding window');
     await trip(p3);
     const f1 = await essential(p3);
-    note('F-no-souphattra-room-plans-the-waiting-list', f1.ready && /^prewed:default:prewed\/heritage-executive:/.test(f1.rows[0]) && f1.rows[1] === 'wedstay:waitlist:::0' && f1.tried[1].join() === SOUPHATTRA.map((s) => 'wedstay/' + s).join() && !f1.tried[1].some((k) => /riverside|guesthouse/.test(k)) && f1.waitlist.join() === 'wedstay' && f1.total === 310, JSON.stringify(f1.rows) + ' tried ' + f1.tried[1].length);
+    const d23 = await p3.evaluate(() => ({ gh: SIYL_UNITS.unitForParty('guesthouse', 'guest-house', SIYL_JOURNEY.partySize()) ? 'fits' : 'no', rv: SIYL_UNITS.unitForParty('riverside', 'superior-window', SIYL_JOURNEY.partySize()) ? 'fits' : 'no' }));
+    note('H-D1-exhausted-plans-the-waiting-list-not-D2-D3', f1.ready && f1.rows.length === 1 && f1.rows[0] === 'wedstay:waitlist:::0' && f1.tried[0].join() === SOUPHATTRA.map((s) => 'wedstay/' + s).join() && !f1.tried[0].some((k) => /riverside|guesthouse/.test(k)) && f1.waitlist.join() === 'wedstay' && f1.total === 0 && d23.gh === 'fits' && d23.rv === 'fits', JSON.stringify(f1.rows) + ' tried ' + f1.tried[0].length + ' · D2/D3 could take the party: ' + JSON.stringify(d23));
     await p3.click('[data-package-preview="essential"]'); await p3.waitForTimeout(1500);
     const pvf = await previewRows(p3);
     await shot(p3, '390-essential-waiting-list-preview');
-    note('F-preview-names-the-waiting-list', pvf.wl === 1 && /Waiting list/.test(pvf.rows[1]) && /waiting list — no cost until it is resolved/.test(pvf.rows[1]) && /USD 310 per person/.test(pvf.total) && /1 on the waiting list/.test(pvf.total) && !/Riverside|Guest House/i.test(pvf.rows.join(' ')), JSON.stringify(pvf));
+    note('H-preview-names-the-waiting-list-and-the-alternatives', pvf.wl === 1 && pvf.rows.length === 1 && /Waiting list/.test(pvf.rows[0]) && /waiting list — no cost until it is resolved/.test(pvf.rows[0]) && /No cost until the waiting list is resolved/.test(pvf.total) && /1 on the waiting list/.test(pvf.total) && !/Riverside|Guest House/i.test(pvf.rows.join(' ')) && /Guest House complimentary or the Riverside Hotel/i.test(pvf.alt), JSON.stringify(pvf));
     await p3.click('#fxg'); await p3.waitForTimeout(6000);
-    m = await mine(p3); st = await p3.evaluate(() => ({ bag: SIYL_BAG.get().map((x) => x.id + ':' + x.room).sort(), total: SIYL_BAG.total(), counts: SIYL_JOURNEY.counts(), summary: (document.querySelector('[data-fx-summary]') || {}).innerText || '', card: (document.querySelector('[data-waitlisted="wedstay"]') || {}).innerText || '', unwait: !!document.querySelector('[data-waitlisted="wedstay"] [data-unwait="wedstay"]') }));
+    m = await mine(p3); st = await p3.evaluate(() => ({ bag: SIYL_BAG.get().map((x) => x.id + ':' + x.room).sort(), total: SIYL_BAG.total(), counts: SIYL_JOURNEY.counts(), summary: (document.querySelector('[data-fx-summary]') || {}).innerText || '', card: (document.querySelector('[data-waitlisted="wedstay"]') || {}).innerText || '', unwait: !!document.querySelector('[data-waitlisted="wedstay"] [data-unwait="wedstay"]'), choose: !!document.querySelector('[data-waitlisted="wedstay"] a[href*="journeys.html#j-wedstay"]') }));
     await shot(p3, '390-essential-waiting-list-my-trip');
-    note('F-confirm-waits-with-a-visible-position', m.mine.prewed && m.mine.prewed.key === 'prewed/heritage-executive' && !m.mine.wedstay && m.waitlist && m.waitlist.wedstay && m.waitlist.wedstay.position === 1 && st.bag.join() === 'prewed:heritage-executive' && st.total === 310 && st.counts.waitlisted === 1 && st.counts.confirmed === 1 && st.counts.open === 0 && /On the waiting list: 27 FEB – 01 MAR · Vientiane/.test(st.summary) && /number 1/i.test(st.card) && st.unwait, JSON.stringify({ mine: m.mine, wait: m.waitlist, card: st.card.replace(/\s+/g, ' ').slice(0, 120) }));
+    note('H-confirm-waits-with-a-visible-position', Object.keys(m.mine || {}).length === 0 && m.waitlist && m.waitlist.wedstay && m.waitlist.wedstay.position === 1 && st.bag.length === 0 && st.total === 0 && st.counts.waitlisted === 1 && st.counts.confirmed === 0 && st.counts.open === 1 && /placed you on the waiting list/.test(st.summary) && /On the waiting list: 27 FEB – 01 MAR · Vientiane/.test(st.summary) && /number 1/i.test(st.card) && /Guest House complimentary or the Riverside Hotel/i.test(st.card) && st.unwait && st.choose, JSON.stringify({ mine: m.mine, wait: m.waitlist, card: st.card.replace(/\s+/g, ' ').slice(0, 120), choose: st.choose }));
+    /* the pre-wedding stay (C) is the guest's own question — Ada is not joining it; the journey step is then answered and the other steps open */
+    await p3.evaluate(async () => { await SIYL_JOURNEY.decline(SIYL_JOURNEY.SEGMENTS.find((x) => x.key === 'prewed')); }); await p3.waitForTimeout(800);
     await p3.goto(O + '/profile.html', { waitUntil: 'load' }); await p3.waitForTimeout(2200);
     const prof = await p3.evaluate(() => ({ card: (document.querySelector('[data-profile-item="waitlist:wedstay"]') || {}).innerText || '' }));
     await wedding(p3, 'yes', 'yes'); await prep(p3);
@@ -316,22 +334,28 @@ if (!LIVE) {
     await p3.goto(O + '/review.html', { waitUntil: 'load' }); await p3.waitForTimeout(2500);
     const rev = await p3.evaluate(() => ({ arranged: (document.querySelector('#arranged') || {}).innerText || '', text: (document.querySelector('main') || document.body).innerText.replace(/\s+/g, ' ') }));
     await shot(p3, '390-essential-waiting-list-review');
-    note('F-profile-and-review-carry-the-position', /waiting list/i.test(prof.card) && /number 1/i.test(prof.card) && /Waiting list/i.test(rev.arranged) && /Vientiane/.test(rev.arranged) && /number 1/i.test(rev.arranged) && /Heritage Executive/i.test(rev.text) && !/Riverside|Guest House/i.test(rev.arranged), JSON.stringify({ prof: prof.card.replace(/\s+/g, ' ').slice(0, 120), rev: rev.arranged.replace(/\s+/g, ' ').slice(0, 120) }));
-    /* H · the Complete trip is unchanged by the Essential definition: its Vientiane chain still ends with the Riverside and the Guest House, and with the Souphattra full it falls to the Riverside */
-    const h1 = await p3.evaluate(() => { const pl = SIYL_JOURNEY.packagePlan('complete'); const c = SIYL_PACKAGES.complete.stages.wedstay; return { row: pl.rows.filter((r) => r.seg.key === 'wedstay').map((r) => r.why + ':' + (r.key || ''))[0], tail: c.slice(-2), len: c.length, first: c[0] }; });
-    note('H-complete-trip-unchanged', h1.first === 'wedstay/heritage-grand-premier' && h1.len === 9 && h1.tail.join() === 'riverside/superior-window,guesthouse/guest-house' && h1.row === 'fallback:riverside/superior-window', JSON.stringify(h1));
+    note('H-profile-and-review-carry-the-position', /waiting list/i.test(prof.card) && /number 1/i.test(prof.card) && /Waiting list/i.test(rev.arranged) && /Vientiane/.test(rev.arranged) && /number 1/i.test(rev.arranged) && !/Riverside|Guest House/i.test(rev.arranged), JSON.stringify({ prof: prof.card.replace(/\s+/g, ' ').slice(0, 120), rev: rev.arranged.replace(/\s+/g, ' ').slice(0, 120) }));
+    /* E' · from the waiting list the guest chooses D2 by hand: the Guest House takes the party, the line resolves — the guest's decision, never the package's */
+    await p3.goto(O + '/room.html?stay=guesthouse&room=guest-house', { waitUntil: 'load' }); await p3.waitForTimeout(2200);
+    await p3.click('.cta[data-avwin="guesthouse"]'); await p3.waitForTimeout(2600);
+    m = await mine(p3);
+    note('E-from-the-waiting-list-the-guest-chooses-D2', m.mine.wedstay && m.mine.wedstay.key === 'guesthouse/guest-house' && !(m.waitlist && m.waitlist.wedstay), JSON.stringify({ mine: m.mine, wait: m.waitlist }));
+    /* the Complete trip is unchanged by the Essential definition: its Vientiane chain still ends with the Riverside and the Guest House, and with the Souphattra full it falls to the Riverside */
+    await trip(p3);
+    const h1 = await p3.evaluate(() => { const pl = SIYL_JOURNEY.packagePlan('complete'); const c = SIYL_PACKAGES.complete.stages.wedstay; return { row: pl.rows.filter((r) => r.seg.key === 'wedstay').map((r) => r.why + ':' + (r.key || ''))[0], tail: c.slice(-2), len: c.length, first: c[0], pre: pl.rows.some((r) => r.seg.key === 'prewed') }; });
+    note('complete-trip-unchanged', h1.first === 'wedstay/heritage-grand-premier' && h1.len === 9 && h1.tail.join() === 'riverside/superior-window,guesthouse/guest-house' && h1.row === 'fallback:riverside/superior-window' && h1.pre, JSON.stringify(h1));
     await p3.context().close(); await resetGuest('T001');
     for (const s of SOUPHATTRA) await clearCategory('wedstay/' + s);
-    /* E · the party rule (G048 + G049, one party of two): one stranger in every Executive room — the party fits none of them; the chain continues to The Heritage; the confirm keeps the partner's place */
-    note('E-fixture-one-place-per-executive-room', await fillCategory('wedstay/heritage-executive', EXEC, 1), 'one synthetic occupant in each of the thirteen Executive rooms');
+    /* the party rule (G048 + G049, one party of two): one stranger in every Executive room — the party fits none of them; the chain continues to The Heritage; the confirm keeps the partner's place */
+    note('party-fixture-one-place-per-executive-room', await fillCategory('wedstay/heritage-executive', EXEC, 1), 'one synthetic occupant in each of the thirteen Executive rooms');
     const p4 = await fresh(390); await signIn(p4, 'G048'); await contact(p4, 'host.test@example.org');
     await trip(p4); await p4.evaluate(() => { SIYL_GUEST.setScope({ none: true }); SIYL_GUEST.setScope({ vientiane: true }); }); await trip(p4);
     const e1 = await essential(p4);
-    note('E-party-does-not-fit-continues-the-chain', e1.need === 2 && /^wedstay:fallback:wedstay\/heritage:[A-Z]+:145$/.test(e1.rows[1]) && e1.tried[1].join() === 'wedstay/heritage-executive,wedstay/heritage' && /^prewed:default:prewed\/heritage-executive:/.test(e1.rows[0]), JSON.stringify(e1.rows) + ' need ' + e1.need);
+    note('party-does-not-fit-continues-the-chain', e1.need === 2 && e1.rows.length === 1 && /^wedstay:fallback:wedstay\/heritage:[A-Z]+:145$/.test(e1.rows[0]) && e1.tried[0].join() === 'wedstay/heritage-executive,wedstay/heritage', JSON.stringify(e1.rows) + ' need ' + e1.need);
     await p4.click('[data-package-preview="essential"]'); await p4.waitForTimeout(1500); await p4.click('#fxg'); await p4.waitForTimeout(6000);
     m = await mine(p4);
     const occ = await p4.evaluate(() => { const v = SIYL_UNITS.view(); const u = SIYL_UNITS.units('wedstay', 'heritage').find((x) => x.label === (v.mine.wedstay || {}).label); return u ? u.occupants.map((o) => o.name + (o.placeholder ? '*' : '')) : []; });
-    note('E-confirm-holds-the-whole-party', m.mine.wedstay && m.mine.wedstay.key === 'wedstay/heritage' && occ.length === 2 && occ.some((n) => /\*$/.test(n)), JSON.stringify({ wedstay: m.mine.wedstay, occ }));
+    note('party-confirm-holds-the-whole-party', m.mine.wedstay && m.mine.wedstay.key === 'wedstay/heritage' && occ.length === 2 && occ.some((n) => /\*$/.test(n)), JSON.stringify({ wedstay: m.mine.wedstay, occ }));
     await p4.context().close(); await resetGuest('G048'); await resetGuest('G049');
     await clearCategory('wedstay/heritage-executive');
     await resetGuest('T002'); await resetGuest('T003');

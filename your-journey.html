@@ -37,7 +37,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/bag.js?v=2a0c8152"></script>
 <script src="assets/shop-menu.js?v=659ff077"></script>
 <script src="assets/aman.js?v=67d37d1b"></script>
-<script src="assets/rooms-data.js?v=944536a1"></script>
+<script src="assets/rooms-data.js?v=0a1f0c6c"></script>
 <script src="assets/pricing.js?v=f647d273"></script>
 <script src="assets/guest.js?v=de7f0d74"></script>
 <script src="assets/draft.js?v=7ab9ca64"></script>
@@ -51,7 +51,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/vendor/qrcode.js?v=18ae399f"></script>
 <script src="assets/travelpass.js?v=ed68e022"></script>
 <script src="assets/transport-data.js?v=a5d732d4"></script>
-<script src="assets/packages-data.js?v=881ddb48"></script><script src="assets/journey.js?v=2ea34944"></script>
+<script src="assets/packages-data.js?v=05982d0a"></script><script src="assets/journey.js?v=2ea34944"></script>
 <script src="assets/prep-shell.js?v=830ee417"></script>
 <script type="module" src="assets/invite.mjs?v=29231ccf"></script>
 <script>
@@ -236,8 +236,10 @@ function weddingHtml(){
    no product, no cost; the guest may choose another stay, leave the list, or say they are not joining */
 function waitStage(seg){
   var pos=J.waitPosition(seg),w=U&&U.waitlisted?U.waitlisted(seg.key):null;
+  /* the line was joined for the rooms a package offered — the stage's other alternatives (the Overview's D2 · D3) stay the guest's own choice and are named */
+  var alt='';J.packageOrder().forEach(function(k){var pk=J.packages()[k];var a=pk&&pk.alternatives&&pk.alternatives[seg.key];if(a&&!alt&&w&&Array.isArray(w.wanted)&&pk.stages[seg.key]&&w.wanted.join()===pk.stages[seg.key].join())alt=' '+esc(a.words)});
   return '<div class="p-card" data-waitlisted="'+seg.key+'"><p class="t-l1 open">On the waiting list'+(pos?' · number '+pos:'')+'</p><h3 class="t-h1">'+esc(seg.label)+'</h3>'+
-    '<p class="t-b2 measure">No room of this stage could take your party'+(w&&w.size>1?' ('+w.size+' places together)':'')+' when you added the package. Nothing is held or charged for it; Guest Relations will find an arrangement with you, and any room that frees up here is yours to choose.</p>'+
+    '<p class="t-b2 measure">None of the rooms offered for this stage could take your party'+(w&&w.size>1?' ('+w.size+' places together)':'')+' when you added the package. Nothing is held or charged for it; Guest Relations will find an arrangement with you, and any room that frees up here is yours to choose.'+alt+'</p>'+
     actions(['<a class="p-act" href="journeys.html#'+seg.anchor+'">Choose a stay</a>','<button type="button" class="p-link mute" data-unwait="'+seg.key+'">Leave the waiting list</button>','<button type="button" class="p-link mute" data-skip="'+seg.key+'">Not joining this stage</button>'])+'</div>'}
 function stageHtml(seg,i){
   var st=J.state(seg),line=lineOf(seg);
@@ -342,9 +344,10 @@ function packageCard(kind){
   if(plan.ready&&plan.counts.fallbacks)notes.push(plan.counts.fallbacks===1?'1 stage with a replacement':plan.counts.fallbacks+' stages with a replacement');
   if(plan.ready&&plan.counts.waitlisted)notes.push(plan.counts.waitlisted===1?'1 stage on the waiting list':plan.counts.waitlisted+' stages on the waiting list');
   if(plan.counts.replaced)notes.push(plan.counts.replaced===1?'replaces 1 current selection':'replaces '+plan.counts.replaced+' current selections');
+  var alt=pk.alternatives&&Object.keys(pk.alternatives).filter(function(k){return stages.some(function(s){return s.key===k})}).map(function(k){return '<p class="t-b2" data-package-alt="'+k+'">'+esc(pk.alternatives[k].words)+'</p>'}).join('')||'';
   return '<article class="p-card p-pack" data-package="'+kind+'"><p class="t-l1">'+esc(pk.name)+'</p><h3 class="t-h1">'+esc(pk.short)+'</h3>'+
     '<p class="t-b2">'+words+' of your trip · '+stages.map(function(x){return x.place}).filter(function(v,i,a){return a.indexOf(v)===i}).join(' · ')+'</p>'+
-    '<p class="p-price">'+amount+'</p>'+(notes.length?'<p class="t-b2">'+esc(notes.join(' · '))+'</p>':'')+
+    '<p class="p-price">'+amount+'</p>'+(notes.length?'<p class="t-b2">'+esc(notes.join(' · '))+'</p>':'')+alt+
     actions(['<button type="button" class="p-act" data-package-preview="'+kind+'">Preview '+esc(pk.name.toLowerCase())+'</button>'])+'</article>'}
 function renderDecisions(){
 var box=document.getElementById('dec');if(!box)return;
@@ -417,7 +420,7 @@ var FXMODE=null,FX_DONE=null,FX_PLAN=null,FX_OPEN=false,FX_DECIDING=false;
    waiting list said plainly; what the package replaces of the guest's own choices. Nothing is selected by looking. */
 function fxWhy(r){
   var nm=function(key){if(!key)return '';var win=key.split('/')[0],slug=key.split('/').slice(1).join('/');var at=P.locate(win);var room=at&&at.stay.rooms.filter(function(x){return x.slug===slug})[0];return room?(room.name+' · '+(room.property||at.stay.name)):key};
-  if(r.why==='waitlist')return 'No room of this stage can take your party ('+(J.partySize()===1?'one place':J.partySize()+' places together')+'). You will be placed on the waiting list — no cost until it is resolved.';
+  if(r.why==='waitlist')return 'None of the rooms this package offers for this stage can take your party ('+(J.partySize()===1?'one place':J.partySize()+' places together')+'). You will be placed on the waiting list — no cost until it is resolved.';
   if(r.why==='fallback')return 'The suggested '+esc(nm(r.wanted))+' cannot take your party — this is the next option that can. You can change it afterwards.';
   if(r.why==='same')return 'Already yours — nothing changes here.';
   return ''}
@@ -432,19 +435,22 @@ plan.rows.forEach(function(r){
   var name=r.why==='waitlist'?'Waiting list':((r.unit?esc(un?U.unitName(un):('Room '+r.unit))+' · ':'')+(cat&&cat!==it.name&&!it.complimentary?esc(cat)+' · ':'')+esc(it.name||''));
   var rep=r.replaces?'<span class="fxn">Replaces your current '+esc(r.replaces.name)+(r.replaces.meta?' ('+esc(String(r.replaces.meta).split(' · ').pop())+')':'')+'.</span>':(r.wasDeclined?'<span class="fxn">You had said you are not joining this stage — the package includes it.</span>':'');
   var why=fxWhy(r);
-  rows+='<li class="fxr'+(r.why==='fallback'?' fxr-fb':'')+(r.why==='waitlist'?' fxr-open':'')+(r.why==='same'?' fxr-kept':'')+'">'+label+'<b>'+name+(amount?' <span class="fxa">'+esc(amount)+'</span>':'')+'</b>'+(why?'<span class="fxn">'+why+'</span>':'')+rep+'</li>'});
+  var nights=it.room&&it.nights?('<span class="fxn">'+it.nights+(it.nights===1?' night':' nights')+(it.pay<it.nights?' · '+(it.nights-it.pay===1?'one night':(it.nights-it.pay)+' nights')+' hosted by Haruthai & Suthep':'')+(r.why==='default'?' · preselected for you':'')+'</span>'):'';
+  rows+='<li class="fxr'+(r.why==='fallback'?' fxr-fb':'')+(r.why==='waitlist'?' fxr-open':'')+(r.why==='same'?' fxr-kept':'')+'">'+label+'<b>'+name+(amount?' <span class="fxa">'+esc(amount)+'</span>':'')+'</b>'+nights+(why?'<span class="fxn">'+why+'</span>':'')+rep+'</li>'});
 var c=plan.counts;
+var pkAlt=J.packages()[FXMODE]&&J.packages()[FXMODE].alternatives||{};
+var alts=Object.keys(pkAlt).filter(function(k){return plan.rows.some(function(r){return r.seg.key===k})}).map(function(k){return '<p class="t-b2 measure-w" data-fx-alt="'+k+'">'+esc(pkAlt[k].words)+(pkAlt[k].href?' <a class="p-link" href="'+esc(pkAlt[k].href)+'">Choose another option</a>':'')+'</p>'}).join('');
 box.innerHTML=(changed?'<p class="t-b2 measure-w" data-fx-changed><b>'+(unreachable?'The rooms could not be read just now.':'Availability changed while you were looking.')+'</b> '+(unreachable?'Nothing was added — please try again in a moment.':'This is the package as it can be selected now — please look again before adding it.')+'</p>':'')+
   (plan.ready?'':'<p class="t-b2 measure-w" data-fx-loading>Reading the rooms…</p>')+
   '<p class="t-l1" style="margin-top:4px">What '+esc(plan.name.toLowerCase())+' selects</p><ul class="fxl">'+rows+'</ul>'+
   '<p class="t-b2 measure-w" data-fx-total><b>'+(plan.total?money(plan.total)+' per person':(c.waitlisted&&c.waitlisted===c.stages?'No cost until the waiting list is resolved':'Complimentary'))+'</b> for '+c.stages+(c.stages===1?' stage':' stages')+
   (c.fallbacks?' · '+c.fallbacks+(c.fallbacks===1?' replacement':' replacements'):'')+(c.waitlisted?' · '+c.waitlisted+' on the waiting list (no cost until resolved)':'')+(c.replaced?' · replaces '+c.replaced+' of your current selections':'')+'.</p>'+
-  (plan.rows.length&&plan.rows.some(function(r){return r.why!=='same'})?'':'<p class="t-b2">Every stage this package covers is already yours — adding it changes nothing.</p>');
+  (plan.rows.length&&plan.rows.some(function(r){return r.why!=='same'})?'':'<p class="t-b2">Every stage this package covers is already yours — adding it changes nothing.</p>')+alts;
 var g=document.getElementById('fxg');if(g)g.disabled=!plan.ready}
 function fxSummary(){
 if(!FX_DONE)return '';
 var name=function(k){var s2=J.SEGMENTS.filter(function(z){return z.key===k})[0];return s2?s2.when+' · '+s2.place:k};
-return '<p class="t-b2 measure-w" data-fx-summary><b>'+esc(FX_DONE.name)+(FX_DONE.filled.length||FX_DONE.waitlisted.length?' selected '+FX_DONE.filled.length+(FX_DONE.filled.length===1?' stage':' stages')+' for you.':' changed nothing — every stage it covers was already yours.')+'</b>'+
+return '<p class="t-b2 measure-w" data-fx-summary><b>'+esc(FX_DONE.name)+(FX_DONE.filled.length?' selected '+FX_DONE.filled.length+(FX_DONE.filled.length===1?' stage':' stages')+' for you.':(FX_DONE.waitlisted.length?' placed you on the waiting list.':' changed nothing — every stage it covers was already yours.'))+'</b>'+
   (FX_DONE.fallback.length?' Replaced because the suggested room could not take your party: '+FX_DONE.fallback.map(name).join(' · ')+'.':'')+
   (FX_DONE.waitlisted.length?' On the waiting list: '+FX_DONE.waitlisted.map(name).join(' · ')+'.':'')+
   (FX_DONE.left.length?' Could not be held just now: '+FX_DONE.left.map(name).join(' · ')+' — as it was before.':'')+' Every stage below shows what was selected; change any of them.</p>'}

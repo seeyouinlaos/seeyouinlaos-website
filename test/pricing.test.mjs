@@ -191,14 +191,14 @@ test('D2 · the Guest House complimentary is a USD 0 line of the wedding window,
  * windows, the Heritage Executive first, then the next compatible category of the SAME house in the house's order, then the
  * waiting list; never the Guest House, never the Riverside. Price never decides; capacity does. The Complete trip's
  * wedding-stay chain is unchanged and still ends with the alternatives. */
-test('the Essential trip is the Owner\'s: Package C + D1 at the Souphattra Heritage, the Heritage Executive first, the same house only, then the waiting list; the Complete trip\'s wedding-stay chain is unchanged (Owner, 20 Sep 2026)', async () => {
+test('the Essential trip is the Owner\'s (corrected 20 Sep 2026): stage D alone, D1 preselected — the Souphattra Heritage, the Heritage Executive first, the same house only, then the waiting list — never C; the Complete trip\'s wedding-stay chain is unchanged (Owner, 20 Sep 2026)', async () => {
   const { SEED } = await import('../src/inventory-seed.js');
   const { stageOf } = await import('../src/rooms.js');
   assert.deepEqual(sandbox.window.SIYL_PACKAGE_ORDER, ['complete', 'essential'], 'two packages, offered in this order — no third mode');
   assert.deepEqual(Object.keys(K), ['complete', 'essential']);
-  assert.equal(K.essential.name, 'Essential trip'); assert.equal(K.essential.approved, true); assert.match(K.essential.source, /Package C · D1/);
-  assert.deepEqual(Object.keys(K.essential.stages), ['prewed', 'wedstay'], 'C = the Pre-Wedding Stay, D1 = the Wedding Stay');
-  for (const st of ['prewed', 'wedstay']) {
+  assert.equal(K.essential.name, 'Essential trip'); assert.equal(K.essential.approved, true); assert.match(K.essential.source, /002_Overview \(stage D · Wedding Stay/); assert.doesNotMatch(K.essential.source, /C · D1/);
+  assert.deepEqual(Object.keys(K.essential.stages), ['wedstay'], 'D = the Wedding Stay alone (the Owner, 20 Sep 2026): C is not part of the Essential trip');
+  for (const st of ['wedstay']) {
     const ch = K.essential.stages[st];
     assert.equal(ch[0], st + '/heritage-executive', 'the Heritage Executive first');
     assert.deepEqual(ch, [st + '/heritage-executive', st + '/heritage', st + '/heritage-grand-premier', st + '/noble-courtyard', st + '/grand-majestic', st + '/souphattra-majestic', st + '/souphattra-presidential'], 'the same house only, its more affordable neighbour first, then outwards');

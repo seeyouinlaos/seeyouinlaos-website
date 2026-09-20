@@ -271,10 +271,10 @@ test('a package falls back along its DEFINED chain by capacity, never by price; 
   /* the old planner is gone */
   for (const k of ['fullExperience', 'costSavingOptions', 'costSavingPlan', 'selfArranged', 'soldOutStages']) assert.equal(J[k], undefined, 'SIYL_JOURNEY.' + k + ' must not exist');
   assert.ok(!/soldOutStages|fullExperience|costSaving|selfArranged|'arranged'/.test(readFileSync(join(ROOT, 'assets/journey.js'), 'utf8')), 'assets/journey.js still carries the old planner');
-  /* everything free: the essential trip's default, Room A of the Heritage Executive (the Owner, 20 Sep 2026), for a party of two — the wedding stay USD 155 and the pre-wedding stay USD 310 */
+  /* everything free: the essential trip's preselection, Room A of the Heritage Executive (D1 — the Owner, 20 Sep 2026), for a party of two — the wedding stay USD 155, and nothing of stage C */
   assert.equal(J.partySize(), 2);
   let plan = J.packagePlan('essential');
-  assert.deepEqual(plain([row(plan).why, row(plan).key, row(plan).unit, row(plan).amount, plan.total, plan.waitlist]), ['default', 'wedstay/heritage-executive', 'A', 155, 465, []]);
+  assert.deepEqual(plain([row(plan).why, row(plan).key, row(plan).unit, row(plan).amount, plan.total, plan.waitlist, plan.rows.length]), ['default', 'wedstay/heritage-executive', 'A', 155, 155, [], 1]);
   /* one place taken in EVERY unit of the wedding-stay chain (Executive 13, The Heritage 5, Grand Premier 3, Noble Courtyard 1, Grand Majestic 2, Souphattra Majestic 1, the Presidential 1): a party of two fits nowhere — a party of one everywhere */
   const chain = plain(w.SIYL_PACKAGES.essential.stages.wedstay);
   assert.deepEqual(chain, ['wedstay/heritage-executive', 'wedstay/heritage', 'wedstay/heritage-grand-premier', 'wedstay/noble-courtyard', 'wedstay/grand-majestic', 'wedstay/souphattra-majestic', 'wedstay/souphattra-presidential']);
@@ -286,13 +286,14 @@ test('a package falls back along its DEFINED chain by capacity, never by price; 
   assert.equal(row(plan).why, 'waitlist', 'no option of the chain takes two places together');
   assert.deepEqual(plain(row(plan).tried), chain, 'every option was tried, in the defined order');
   assert.equal(row(plan).wanted, 'wedstay/heritage-executive'); assert.equal(row(plan).key, null); assert.equal(row(plan).unit, null);
-  assert.deepEqual(plain(plan.waitlist), ['wedstay']); assert.equal(plan.total, 310, 'a waitlisted stage costs nothing — the pre-wedding stay stands');
-  assert.deepEqual(plain(plan.counts), { stages: 2, defaults: 1, fallbacks: 0, waitlisted: 1, replaced: 0, same: 0 });
+  assert.deepEqual(plain(plan.waitlist), ['wedstay']); assert.equal(plan.total, 0, 'a waitlisted stage costs nothing');
+  assert.deepEqual(plain(plan.counts), { stages: 1, defaults: 0, fallbacks: 0, waitlisted: 1, replaced: 0, same: 0 });
+  assert.ok(!plan.rows.some((r) => r.key && /riverside|guesthouse/.test(r.key)), 'D1 exhausted never moves the guest to D2 or D3 by itself');
   assert.equal(U.unitForParty('wedstay', 'heritage-executive', 2), null); assert.equal(U.unitForParty('wedstay', 'heritage-executive', 1).label, 'A');
   assert.equal(U.soldOut('wedstay', 'heritage-executive'), false, 'places remain — for one; sold out is the engine\'s word for none');
   const w2 = page({ auth: LIN, fetch: await roomsFetch(rooms, lin) }); await w2.SIYL_UNITS.load(true); w2.SIYL_GUEST.setScope({ vientiane: true });
   const solo = w2.SIYL_JOURNEY.packagePlan('essential');
-  assert.deepEqual(plain([solo.need, row(solo).why, row(solo).key, row(solo).unit, solo.total]), [1, 'default', 'wedstay/heritage-executive', 'A', 465], 'a party of one takes the default');
+  assert.deepEqual(plain([solo.need, row(solo).why, row(solo).key, row(solo).unit, solo.total]), [1, 'default', 'wedstay/heritage-executive', 'A', 155], 'a party of one takes the default');
   /* Peggy takes her place in the line — number 1; the stage is ANSWERED, at USD 0; Lin behind her — number 2 */
   const rw = await U.wait('wedstay', plan.need, row(plan).tried);
   assert.equal(rw.ok, true);
@@ -337,7 +338,7 @@ test('a package falls back along its DEFINED chain by capacity, never by price; 
    THE PACKAGES — configuration with a DEFINED chain, previewed as a PURE plan:
    two peer packages and individual selection; no mode, no arrangement.
    ========================================================================== */
-test('A · the package mechanics: two packages in this order, the complete trip (all ten stages) and the essential trip (Package C + D1 at the Souphattra Heritage — the Owner, 20 Sep 2026); every option is a real product; individual selection is the third way and not a package', () => {
+test('A · the package mechanics: two packages in this order, the complete trip (all ten stages) and the essential trip (stage D alone, D1 preselected at the Souphattra Heritage — the Owner, 20 Sep 2026); every option is a real product; individual selection is the third way and not a package', () => {
   const w = page({ auth: PEGGY });
   const J = w.SIYL_JOURNEY, PK = w.SIYL_PACKAGES, P = w.SIYL_PRICE;
   assert.deepEqual(plain(J.packageOrder()), ['complete', 'essential']);
@@ -348,12 +349,11 @@ test('A · the package mechanics: two packages in this order, the complete trip 
   const keys = plain(J.SEGMENTS.map((s) => s.key));
   assert.deepEqual(keys, ['bkk-stay', 'train', 'prewed', 'wedstay', 'mu9646', 'kmg', 'c86', 'ljg', 'return', 'kempinski']);
   assert.deepEqual(Object.keys(PK.complete.stages), keys);
-  /* the essential trip covers the two Vientiane stays (Package C + D1): the Heritage Executive first, then the house's own categories in the hotel's order — never the Riverside, never the Guest House */
-  assert.deepEqual(Object.keys(PK.essential.stages), ['prewed', 'wedstay']);
+  /* the essential trip covers the Wedding Stay alone (stage D): D1 preselected — the Heritage Executive first, then the house's own categories in the hotel's order — never the Riverside, never the Guest House, never stage C */
+  assert.deepEqual(Object.keys(PK.essential.stages), ['wedstay']);
   const SOUPHATTRA = ['heritage-executive', 'heritage', 'heritage-grand-premier', 'noble-courtyard', 'grand-majestic', 'souphattra-majestic', 'souphattra-presidential'];
-  assert.deepEqual(plain(PK.essential.stages.prewed), SOUPHATTRA.map((s) => 'prewed/' + s));
   assert.deepEqual(plain(PK.essential.stages.wedstay), SOUPHATTRA.map((s) => 'wedstay/' + s));
-  assert.equal(PK.essential.approved, true); assert.match(PK.essential.source, /Package C · D1/);
+  assert.equal(PK.essential.approved, true); assert.match(PK.essential.source, /stage D/); assert.equal(PK.essential.stages.prewed, undefined, 'C is never auto-added');
   /* every room option is stock-controlled and answers its own stage; every transport option is a priced flat product; no option twice */
   for (const pk of Object.values(PK)) for (const [stage, def] of Object.entries(pk.stages)) {
     if (typeof def === 'string') { assert.equal(def, stage); assert.ok(P.FLAT[def] && P.FLAT[def].price > 0, def + ' is not a priced product'); continue; }
@@ -368,36 +368,34 @@ test('A · the package mechanics: two packages in this order, the complete trip 
   assert.deepEqual(plain(PK.complete.stages.wedstay.slice(-2)), ['riverside/superior-window', 'guesthouse/guest-house']);
   assert.equal(PK.complete.stages.wedstay.length, 9, 'every wedding-window option of the house and the two alternatives');
   /* the page hooks */
-  assert.deepEqual(plain(J.packageStages('essential').map((s) => s.key)), ['prewed', 'wedstay']);
+  assert.deepEqual(plain(J.packageStages('essential').map((s) => s.key)), ['wedstay']);
   assert.equal(J.packageStages('complete').length, 10);
   assert.deepEqual(plain(J.packagePlan('nothing').rows), [], 'an unknown package plans nothing');
   for (const k of ['fullExperience', 'costSavingOptions', 'costSavingPlan', 'selfArranged']) assert.equal(J[k], undefined, 'SIYL_JOURNEY.' + k + ' is gone');
 });
 
-test('B/C · the essential trip\'s default is the Heritage Executive, USD 155 a night — the pre-wedding stay of two nights and the WEDDING STAY window of one payable night, the second hosted by Haruthai & Suthep; a plan is pure', () => {
+test('B/C · the essential trip\'s preselection is D1, the Heritage Executive, USD 155 — the WEDDING STAY window of one payable night, the second hosted by Haruthai & Suthep; nothing of stage C; a plan is pure', () => {
   const w = page({ auth: PEGGY });   /* no engine: the default, decided again on confirm */
   w.SIYL_GUEST.setScope({ vientiane: true });
   const J = w.SIYL_JOURNEY, P = w.SIYL_PRICE, B = w.SIYL_BAG;
   const plan = J.packagePlan('essential');
   assert.equal(plan.ready, false, 'the engine is unread');
   assert.equal(plan.need, 2);
-  assert.equal(plan.rows.length, 2);
-  const [pre, row] = plan.rows;
-  assert.deepEqual(plain([pre.seg.key, pre.why, pre.key, pre.unit, pre.amount, pre.replaces, pre.wasDeclined]), ['prewed', 'default', 'prewed/heritage-executive', null, 310, null, false]);
+  assert.equal(plan.rows.length, 1);
+  const [row] = plan.rows;
   assert.deepEqual(plain([row.seg.key, row.why, row.key, row.unit, row.amount, row.replaces, row.wasDeclined]), ['wedstay', 'default', 'wedstay/heritage-executive', null, 155, null, false]);
   assert.equal(row.items.length, 1);
   const it = row.items[0];
   assert.equal(it.id, 'wedstay'); assert.equal(it.room, 'heritage-executive'); assert.equal(it.price, 155); assert.equal(it.by, 'essential'); assert.equal(it.qty, 1);
-  /* it is the WEDDING STAY window: one payable night, the second hosted; the pre-wedding stay is two payable nights */
+  /* it is the WEDDING STAY window: one payable night, the second hosted */
   assert.equal(it.pay, 1); assert.equal(it.nights, 2);
-  assert.equal(pre.items[0].pay, 2); assert.equal(pre.items[0].nights, 2); assert.equal(pre.items[0].room, 'heritage-executive');
-  assert.equal(plan.total, 465); assert.deepEqual(plain(plan.add.map((x) => x.id)), ['prewed', 'wedstay']); assert.deepEqual(plain(plan.remove), []); assert.deepEqual(plain(plan.waitlist), []);
+  assert.equal(plan.total, 155, 'USD 155 — never 465 (C + D1)'); assert.deepEqual(plain(plan.add.map((x) => x.id)), ['wedstay']); assert.deepEqual(plain(plan.remove), []); assert.deepEqual(plain(plan.waitlist), []);
   const q = P.quote('wedstay', 'heritage-executive');
   assert.equal(q.hosted, 1); assert.match(q.contribution, /second night hosted by Haruthai & Suthep/);
   assert.equal(P.cheapest('wedstay').slug, 'heritage', 'the entry category of the house is its most affordable — and NOT the default: the Owner named the Heritage Executive; price never decides');
   /* computing a plan changes nothing */
   assert.deepEqual(plain(B.get()), []); assert.equal(B.total(), 0); assert.equal(J.state(J.SEGMENTS.find((s) => s.key === 'wedstay')), 'open');
-  assert.match(J.planSignature(plan), /^prewed:default:prewed\/heritage-executive::310:/); assert.match(J.planSignature(plan), /wedstay:default:wedstay\/heritage-executive::155:/); assert.equal(J.planSignature(plan), J.planSignature(J.packagePlan('essential')), 'a pure plan has one signature');
+  assert.match(J.planSignature(plan), /^wedstay:default:wedstay\/heritage-executive::155:/); assert.equal(J.planSignature(plan), J.planSignature(J.packagePlan('essential')), 'a pure plan has one signature');
 });
 
 /* the pricing modules alone, outside the page sandbox — for the price helpers a package never consults */
@@ -559,8 +557,8 @@ test('M/N · the complete trip REPLACES whichever wedding stay was taken — the
   /* the signature: what was previewed is what is applied — the same plan again reads the same, another package does not */
   assert.equal(J.planSignature(plan), J.planSignature(J.packagePlan('complete')));
   assert.notEqual(J.planSignature(plan), J.planSignature(J.packagePlan('essential')));
-  /* the essential trip never touches the other eight stages */
-  assert.deepEqual(plain(J.packagePlan('essential').rows.map((r) => r.seg.key)), ['prewed', 'wedstay']);
+  /* the essential trip never touches the other nine stages */
+  assert.deepEqual(plain(J.packagePlan('essential').rows.map((r) => r.seg.key)), ['wedstay']);
 });
 
 test('the hosts have no special room and the Bag carries only actual selections (Owner, 19 Sep 2026): Haruthai starts at zero like every guest, sees every unit open, books through the engine, holds ONE place per stage; the trip stands at USD 0 with nothing chosen', async () => {

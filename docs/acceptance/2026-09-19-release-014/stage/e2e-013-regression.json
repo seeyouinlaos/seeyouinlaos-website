@@ -7,7 +7,7 @@
  {
   "id": "clip-plays-at-the-cards-geometry",
   "ok": true,
-  "d": "{\"state\":\"playing\",\"bg\":true,\"w\":318,\"h\":254,\"ratio\":1.25,\"video\":true,\"playing\":true,\"t\":3.49,\"muted\":true,\"inline\":true,\"loop\":true,\"controls\":false,\"opacity\":\"1\",\"poster\":\"assets/images/city/001-bangkok-chao-phraya-skyline.jpg\",\"srcOk\":true}"
+  "d": "{\"state\":\"playing\",\"bg\":true,\"w\":318,\"h\":254,\"ratio\":1.25,\"video\":true,\"playing\":true,\"t\":3.48,\"muted\":true,\"inline\":true,\"loop\":true,\"controls\":false,\"opacity\":\"1\",\"poster\":\"assets/images/city/001-bangkok-chao-phraya-skyline.jpg\",\"srcOk\":true}"
  },
  {
   "id": "clip-reduced-motion-photograph",
@@ -77,7 +77,7 @@
  {
   "id": "complete-trip-preview-lists-every-stage",
   "ok": true,
-  "d": "21 – 24 FEB · BANGKOK Room A · Sathorn Penthouse · Sathorn Penthouse Bangkok USD 255 per person | 24 – 25 FEB · BANGKOK → VIENTIANE Special Express No. 25 USD 100 | 25 – 27 FEB · VIENTIANE Room A · Heritage Grand Premier · Pre-Wedding Stay · Souphattra Heritag (nothing held by looking)"
+  "d": "21 – 24 FEB · BANGKOK Room A · Sathorn Penthouse · Sathorn Penthouse Bangkok USD 255 per person 3 nights · preselected for you | 24 – 25 FEB · BANGKOK → VIENTIANE Special Express No. 25 USD 100 | 25 – 27 FEB · VIENTIANE Room A · Heritage Grand Premier · Pre-We (nothing held by looking)"
  },
  {
   "id": "complete-trip-confirm-bound-to-preview",
@@ -132,7 +132,7 @@
  {
   "id": "reset-snapshot-carries-every-value",
   "ok": true,
-  "d": "{\"values\":24,\"digest\":\"04f9d1bfdfec\",\"sameAsTheDryRunBefore\":true}"
+  "d": "{\"values\":24,\"digest\":\"c3c8c3df06cb\",\"sameAsTheDryRunBefore\":true}"
  },
  {
   "id": "reset-refuses-a-stale-snapshot",
@@ -147,7 +147,7 @@
  {
   "id": "reset-device-honours-the-epoch",
   "ok": true,
-  "d": "{\"cached\":10,\"after\":{\"contactLocal\":false,\"contactServer\":false,\"guestKey\":null,\"bag\":0,\"skips\":0,\"epoch\":\"2026-09-20T04:07:25.071Z\",\"serverBag\":null,\"serverSkip\":null,\"resetAt\":\"2026-09-20T04:07:25.071Z\",\"submission\":\"draft\",\"holds\":0}} (the old trip never came back — not on the device, not on the"
+  "d": "{\"cached\":10,\"after\":{\"contactLocal\":false,\"contactServer\":false,\"guestKey\":null,\"bag\":0,\"skips\":0,\"epoch\":\"2026-09-20T05:29:36.414Z\",\"serverBag\":null,\"serverSkip\":null,\"resetAt\":\"2026-09-20T05:29:36.414Z\",\"submission\":\"draft\",\"holds\":0}} (the old trip never came back — not on the device, not on the"
  },
  {
   "id": "reset-no-submission-remains",

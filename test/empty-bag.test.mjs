@@ -167,10 +167,9 @@ test('CLIENT · a package plan is pure and touches only actual selections: Compl
   /* THE WAITING LIST: every option of the Essential chain is full for a party of two */
   const chain = plain(guest.SIYL_PACKAGES.essential.stages.wedstay); assert.deepEqual(chain, ['wedstay/heritage-executive', 'wedstay/heritage', 'wedstay/heritage-grand-premier', 'wedstay/noble-courtyard', 'wedstay/grand-majestic', 'wedstay/souphattra-majestic', 'wedstay/souphattra-presidential']);
   await fillAll(rooms, chain); await guest.SIYL_UNITS.load(true);
-  const pe = J.packagePlan('essential'); assert.equal(pe.rows.length, 2); const row = pe.rows[1];
+  const pe = J.packagePlan('essential'); assert.equal(pe.rows.length, 1); const row = pe.rows[0];
   assert.equal(row.seg.key, 'wedstay'); assert.equal(row.why, 'waitlist'); assert.equal(row.key, null); assert.deepEqual(plain(row.items), []); assert.equal(row.amount, 0); assert.deepEqual(plain(row.tried), chain);
-  assert.equal(pe.rows[0].seg.key, 'prewed'); assert.equal(pe.rows[0].why, 'default');
-  assert.deepEqual(plain(pe.waitlist), ['wedstay']); assert.deepEqual(plain(pe.add.map((x) => x.id)), ['prewed']); assert.equal(pe.total, 310); assert.equal(pe.counts.waitlisted, 1);
+  assert.deepEqual(plain(pe.waitlist), ['wedstay']); assert.deepEqual(plain(pe.add), []); assert.equal(pe.total, 0); assert.equal(pe.counts.waitlisted, 1);
   /* confirming places the guest in the line — no product, no amount, and the stage is answered */
   const seg = segOf(guest, 'wedstay'); assert.equal(J.state(seg), 'open');
   const wr = await guest.SIYL_UNITS.wait('wedstay', pe.need, row.tried); assert.equal(wr.ok, true);
@@ -182,8 +181,8 @@ test('CLIENT · a package plan is pure and touches only actual selections: Compl
   /* a room frees up and takes the party: the plan offers it, the hold resolves the line */
   for (const gid of ['G-FILL-1', 'G-FILL-2']) await rooms.fetch(new Request('https://x/api/rooms/unassign', { method: 'POST', headers: { 'x-gr-verified': 'yes' }, body: JSON.stringify({ guestId: gid, key: 'wedstay/heritage-executive' }) }));
   await guest.SIYL_UNITS.load(true);
-  const pe2 = J.packagePlan('essential'); assert.equal(pe2.rows[1].why, 'default'); assert.equal(pe2.rows[1].key, 'wedstay/heritage-executive'); assert.equal(pe2.rows[1].unit, 'A');
-  const sel = await guest.SIYL_STAY.select('wedstay', 'heritage-executive', pe2.rows[1].unit, pe2.need); assert.equal(sel.ok, true);
+  const pe2 = J.packagePlan('essential'); assert.equal(pe2.rows[0].why, 'default'); assert.equal(pe2.rows[0].key, 'wedstay/heritage-executive'); assert.equal(pe2.rows[0].unit, 'A');
+  const sel = await guest.SIYL_STAY.select('wedstay', 'heritage-executive', pe2.rows[0].unit, pe2.need); assert.equal(sel.ok, true);
   assert.equal(guest.SIYL_UNITS.waitlisted('wedstay'), null, 'a place held resolves the waiting-list entry'); assert.equal(J.state(seg), 'selected');
   assert.equal(guest.SIYL_BAG.get().length, 1); assert.equal(guest.SIYL_BAG.total(), guest.SIYL_PRICE.quote('wedstay', 'heritage-executive').total);
   /* NOT JOINING a waitlisted stage leaves the line first (the engine's), then declines */
