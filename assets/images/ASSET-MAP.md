@@ -95,7 +95,6 @@ under 021; the verified green-door and courtyard assignments are unchanged.
 
 | Production asset | Drive | Source folder | Source file | Verified subject | Used for | Status |
 |---|---|---|---|---|---|---|
-| city/005-nong-khai-friendship-bridge.jpg | B | 005 - City - Nong Khai | 517575839_…_n.jpg | Friendship Bridge at dusk over the Mekong | Special Train Journey crossing (Thailand day-by-day) | ACTIVE — new |
 
 Rejected in this pass: 006 transport folder currently holds a booking-system
 screenshot, .webloc link files and AI-styled renders — no usable verified train
