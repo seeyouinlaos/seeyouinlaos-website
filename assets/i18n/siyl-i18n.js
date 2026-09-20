@@ -731,6 +731,7 @@
   E("The Mekong promenade in Vientiane at sunset", "Die Mekong-Promenade in Vientiane bei Sonnenuntergang", "ทางเดินริมแม่น้ำโขงในเวียงจันทน์ยามพระอาทิตย์ตก", "夕暮れのビエンチャン、メコン川沿いの遊歩道");
   E("The Thai–Lao Friendship Bridge at Nong Khai", "Die thailändisch-laotische Freundschaftsbrücke bei Nong Khai", "สะพานมิตรภาพไทย–ลาว ที่หนองคาย", "ノーンカーイのタイ・ラオス友好橋");
   E("The reclining Buddha beside Pha That Luang, Vientiane", "Der liegende Buddha neben Pha That Luang, Vientiane", "พระพุทธไสยาสน์ข้างพระธาตุหลวง เวียงจันทน์", "ビエンチャン、タートルアン脇の涅槃仏");
+  E("The cloister of Wat Si Saket, Vientiane — the Buddhas in their niches", "Der Kreuzgang des Wat Si Saket, Vientiane — die Buddhas in ihren Nischen", "ระเบียงคดวัดสีสะเกด เวียงจันทน์ — พระพุทธรูปในซุ้ม", "ビエンチャン、ワット・シーサケートの回廊 — 壁龕の仏像");
   E("The map of Laos — Vientiane on the Mekong", "Die Karte von Laos — Vientiane am Mekong", "แผนที่ลาว — เวียงจันทน์ริมแม่น้ำโขง", "ラオスの地図 — メコンのビエンチャン");
   E("Laos · Vientiane on the Mekong · the reclining Buddha beside Pha That Luang", "Laos · Vientiane am Mekong · der liegende Buddha neben Pha That Luang", "ลาว · เวียงจันทน์ริมแม่น้ำโขง · พระพุทธไสยาสน์ข้างพระธาตุหลวง", "ラオス · メコンのビエンチャン · タートルアン脇の涅槃仏");
   E("Vientiane, on the Mekong · the reclining Buddha beside Pha That Luang", "Vientiane am Mekong · der liegende Buddha neben Pha That Luang", "เวียงจันทน์ริมแม่น้ำโขง · พระพุทธไสยาสน์ข้างพระธาตุหลวง", "メコンのビエンチャン · タートルアン脇の涅槃仏");
