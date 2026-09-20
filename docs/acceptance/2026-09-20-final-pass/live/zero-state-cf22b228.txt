@@ -1,0 +1,38 @@
+# READ-ONLY DRY RUNS (aggregates only) — before and after the final-pass deploy cf22b228; NOTHING RESET
+before {
+ "at": "2026-09-20T15:27:47.070Z",
+ "rooms.occupancies": 12,
+ "rooms.waitlisted": 0,
+ "seating": {
+  "holds": 1
+ },
+ "drafts": {
+  "actors": 104,
+  "had": 5,
+  "cleared": 0
+ },
+ "kv": {
+  "deleted": 0
+ },
+ "kv.keys": 13,
+ "digest": "b69c10a76fa6628b4373eaf0c0ca9fa0d6e4a6c9186009eaaa14efd2b0b0d15f"
+}
+after {
+ "at": "2026-09-20T15:33:36.215Z",
+ "rooms.occupancies": 12,
+ "rooms.waitlisted": 0,
+ "seating": {
+  "holds": 1
+ },
+ "drafts": {
+  "actors": 104,
+  "had": 5,
+  "cleared": 0
+ },
+ "kv": {
+  "deleted": 0
+ },
+ "kv.keys": 13,
+ "digest": "8a118d4351137714e8abd231c814f03a69f895d32d44a7645090c5219a45bae7"
+}
+identical except the timestamp: False

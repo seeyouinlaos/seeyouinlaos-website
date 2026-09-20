@@ -1,0 +1,127 @@
+[
+ {
+  "id": "served-sources",
+  "ok": true,
+  "d": "every source answers 200"
+ },
+ {
+  "id": "no-deleted-concept-live",
+  "ok": true,
+  "d": "no fixed arrangement, no Private Residence, no cost-saving mode, no Photography-to-follow in any served source"
+ },
+ {
+  "id": "packages-live",
+  "ok": true,
+  "d": "the package configuration and the planner are served"
+ },
+ {
+  "id": "c86-105-live",
+  "ok": true,
+  "d": "the one price source says 105"
+ },
+ {
+  "id": "guest-house-live",
+  "ok": true,
+  "d": "the guest house on the data, The Journey, the media record and THE HOUSES"
+ },
+ {
+  "id": "essential-trip-live",
+  "ok": true,
+  "d": "Essential = stage D alone · D1 preselected, the Heritage Executive first · seven Souphattra categories · D2 / D3 named as the guest's alternatives · no C · the Complete trip unchanged (nine wedding-window options)"
+ },
+ {
+  "id": "return-flight-live",
+  "ok": true,
+  "d": "MU5922 10:00 → 11:00 · Kunming 2 h 20 m · MU741 13:20 → 14:55 · 06 March 2027 — no MU5920 / MU5924 in any served source (the image file names excepted)"
+ },
+ {
+  "id": "guest-register-live",
+  "ok": true,
+  "d": "104 entries · ids only · 2 hosts · 104 encrypted records, no plaintext field name · /api/contact 401 without a bearer · the personal-details fields served"
+ },
+ {
+  "id": "highlights-live",
+  "ok": true,
+  "d": "Highlights row (Aman · Sühring · Baan Phraya · Cannubi) · rail #highlights · USD 294/234 · 114 · 165 · 1872 at 180 · highlight.js and the Cannubi clip served"
+ },
+ {
+  "id": "dated-venues-live",
+  "ok": true,
+  "d": "Sühring 21.02 dinner · Baan Phraya 23.02 · Cannubi + Harudot 07.03 · Petits Plats 08.03 · the tea 24.02"
+ },
+ {
+  "id": "new-media-live",
+  "ok": true,
+  "d": "Baan Phraya 4 · Cannubi 5 · Riverside 7 frames, every file served, no dish"
+ },
+ {
+  "id": "private-refused-live",
+  "ok": true,
+  "d": "{\"/api/draft\":401,\"/api/rooms/mine\":200,\"/api/gr/reset\":401,\"/api/gr/record?invitation=INV-G001\":401,\"/src/guestlist.private.json\":404,\"/src/invitation-tokens.private.csv\":404,\"/src/worker.js\":404,\"/register/data.mjs\":302} (a made-up bearer reads nothing: mine {} · waitlist {})"
+ },
+ {
+  "id": "register-served-encrypted",
+  "ok": true,
+  "d": "104 encrypted invitations, no plaintext field, code or address"
+ },
+ {
+  "id": "rooms-public-view-live",
+  "ok": true,
+  "d": "guest house 6 places · no reservation · Lijiang and Kempinski 6 rooms · no name, no line for the public"
+ },
+ {
+  "id": "journey-cards-live-390",
+  "ok": true,
+  "d": "{\"gh\":{\"frames\":4,\"text\":\"‹ › LIVING AND DINING 1 / 4 27 FEB – 01 MAR · ACCOMMODATION · VIENTIANE Guest House complimentary 27 February – 01 March\"},\"rv\":{\"frames\":7,\"text\":\"‹ › THE HOTEL FACADE ON THE RIVERSIDE STREET 1 / 7 27 FEB – 01 MAR · ACCOMMODATI\"},\"res\":false}"
+ },
+ {
+  "id": "no-overflow-live-390",
+  "ok": true,
+  "d": "seven pages: no horizontal overflow"
+ },
+ {
+  "id": "journey-cards-live-1440",
+  "ok": true,
+  "d": "{\"gh\":{\"frames\":4,\"text\":\"‹ › LIVING AND DINING 1 / 4 27 FEB – 01 MAR · ACCOMMODATION · VIENTIANE Guest House complimentary 27 February – 01 March\"},\"rv\":{\"frames\":7,\"text\":\"‹ › THE HOTEL FACADE ON THE RIVERSIDE STREET 1 / 7 27 FEB – 01 MAR · ACCOMMODATI\"},\"res\":false}"
+ },
+ {
+  "id": "no-overflow-live-1440",
+  "ok": true,
+  "d": "seven pages: no horizontal overflow"
+ },
+ {
+  "id": "venue-rails-live",
+  "ok": true,
+  "d": "{\"bkkRest\":[\"bkk-curvy\",\"bkk-suhring\",\"bkk-phranakorn\",\"bkk-timespace\",\"bkk-mooyoo\",\"bkk-baanphraya\",\"bkk-ledukaan\",\"bkk-thongsmith\",\"bkk-tangjaiyang\"],\"retRest\":[\"bkk-alati\",\"bkk-cannubi\",\"bkk-petitsplats\"],\"retExp\":[\"bkk-harudot\"],\"bkkCafe\":[\"bkk-diorlv\",\"bkk-timespace\",\"bkk-mooyoo\",\"bkk-whisperin"
+ },
+ {
+  "id": "suhring-dinner-live",
+  "ok": true,
+  "d": "{\"head\":\"BANGKOK · DINNER · 21 FEB 2027\",\"sel\":\"Dinner at Sühring\\nDINNER · SUNDAY, 21 FEBRUARY 2027 · THE FIRST EVENING IN BANGKOK\"}"
+ },
+ {
+  "id": "cannubi-live",
+  "ok": true,
+  "d": "{\"imgs\":5,\"star\":true}"
+ },
+ {
+  "id": "houses-live",
+  "ok": true,
+  "d": "{\"gh\":true,\"pr\":false,\"rv\":true}"
+ },
+ {
+  "id": "guest-house-room-gated-live",
+  "ok": true,
+  "d": "https://seeyouinlaos-website.suthep-hrg.workers.dev/invitation?open=1&next=room%3Fstay%3Dguesthouse%26room%3Dguest-house"
+ },
+ {
+  "id": "my-trip-gated-live",
+  "ok": true,
+  "d": "https://seeyouinlaos-website.suthep-hrg.workers.dev/invitation?open=1&next=your-journey"
+ },
+ {
+  "id": "console-errors-live",
+  "ok": true,
+  "d": "no script or console error"
+ }
+]
