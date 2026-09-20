@@ -25,7 +25,8 @@ for (const w of [320, 390, 834, 1440]) {
   const p = await fresh(w); await p.goto(O + '/journeys.html', { waitUntil: 'load' }); await p.waitForTimeout(1500);
   const states = {}; for (const id of [...STAGES, ...TRANSPORT]) states[id] = await galState(p, id);
   const over = await p.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
-  const okStages = STAGES.every((id) => states[id] && !states[id].pend && states[id].frames >= 2 && states[id].arrows && states[id].tabbable && states[id].index === 0 && /1 \/ \d+/.test(states[id].counter));
+  /* the Owner's ruling of 21 Sep 2026: Luye Baisha's house frame is the peak over the Baisha rooftops alone (its room photographs belong to the Snow Mountain Viewing Room) — one frame, no arrows, no counter */
+  const okStages = STAGES.every((id) => states[id] && !states[id].pend && (id === 'j-ljg' ? states[id].frames === 1 && !states[id].arrows : states[id].frames >= 2 && states[id].arrows && states[id].tabbable && states[id].index === 0 && /1 \/ \d+/.test(states[id].counter)));
   const okTransport = TRANSPORT.every((id) => states[id] && states[id].frames >= 3 && states[id].arrows);
   const ratios = STAGES.map((id) => states[id].phRatio);
   const wantRatio = w >= 768 ? 1.5 : 1.25;   /* the desktop media column is 3:2 (as the photograph was), the phone card 5:4 */
@@ -78,7 +79,7 @@ await wk.close();
   await p.goto(O + '/experiences.html', { waitUntil: 'load' }); await p.waitForTimeout(800);
   const res2 = await p.evaluate(async () => { const out = []; const srcs = [...new Set([].concat(...Object.values(window.SIYL_EXP_GALLERY).map((g) => g.images.map((i) => i.src))))]; for (const s of srcs) { const r = await fetch(s, { method: 'HEAD' }); if (r.status !== 200) out.push(s + ':' + r.status); } return { n: srcs.length, bad: out }; });
   /* superseded by release 014 (Owner, 19 Sep 2026): the stay record is 50 frames (the residence's 4 leave, the Guest House complimentary's 4 and the Riverside Hotel's 7 arrive); the experience record is 167 (Baan Phraya 4 and Cannubi 5 arrive) */
-  note('no-broken-image', res.bad.length === 0 && res2.bad.length === 0 && res.n === 50 && res2.n === 167, JSON.stringify({ stay: res, exp: res2 }).slice(0, 200)); await p.context().close(); }
+  note('no-broken-image', res.bad.length === 0 && res2.bad.length === 0 && res.n === 48 && res2.n === 167, JSON.stringify({ stay: res, exp: res2 }).slice(0, 200)); await p.context().close(); }
 
 /* ===== 5 · the restaurant media audit on the served pages ===== */
 { const p = await fresh(390); const FOOD = /dish|bowl|noodle|plate|dessert|cake|cocktail|martini|pastry|brunch|tartlet|sorbet|canap|salad|pork|beef/i;
