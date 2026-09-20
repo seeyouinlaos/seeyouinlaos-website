@@ -91,7 +91,7 @@
        01 – 04 MAR  Italian Style Suite                  50 × 3 = 150
        04 MAR       C86 Business                                105
        04 – 06 MAR  270° Snow Mountain Viewing Room     100 × 2 = 200
-       06 MAR       MU5924 + MU741 Economy flexible             200
+       06 MAR       MU5922 + MU741 Economy flexible             200
        06 – 08 MAR  Deluxe Balcony King                 190 × 2 = 380
                                                        = USD 2,175   (the current Operations Master, 19 Sep 2026)
 

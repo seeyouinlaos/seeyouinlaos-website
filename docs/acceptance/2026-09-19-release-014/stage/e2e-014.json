@@ -2,12 +2,12 @@
  {
   "id": "stage-clean",
   "ok": true,
-  "d": "{\"ok\":true,\"dryRun\":false,\"cleared\":0,\"rows\":[],\"waitlistCleared\":0,\"remaining\":0,\"waitlistRemaining\":0,\"fixed\":0,\"at\":\"2026-09-19T21:37:22.996Z\"}"
+  "d": "{\"ok\":true,\"dryRun\":false,\"cleared\":0,\"rows\":[],\"waitlistCleared\":0,\"remaining\":0,\"waitlistRemaining\":0,\"fixed\":0,\"at\":\"2026-09-20T03:58:27.096Z\"}"
  },
  {
   "id": "host-starts-at-zero",
   "ok": true,
-  "d": "{\"bag\":0,\"mine\":[],\"packs\":1,\"counts\":\"10 still open — of the 10 stages of your trip.\"} (one package card: the Complete trip; the Essential trip is not offered until the Owner defines it)"
+  "d": "{\"bag\":0,\"mine\":[],\"packs\":2,\"counts\":\"10 still open — of the 10 stages of your trip.\"} (one package card: the Complete trip; the Essential trip is not offered until the Owner defines it)"
  },
  {
   "id": "penthouse-room-a-open-to-everyone",
@@ -97,7 +97,7 @@
  {
   "id": "complete-trip-fills-nine-stages-and-waits-for-one",
   "ok": true,
-  "d": "{\"bag\":9,\"open\":0,\"need\":[\"event:temple\",\"event:coffee\",\"event:vows\",\"event:dinner\",\"dress\",\"allergy\",\"profile:coffeetea\",\"profile:flavor\",\"profile:drink\",\"profile:film\",\"profile:music\",\"photo\"],\"mine\":[\"bkk-stay\",\"kempinski\",\"ljg\",\"prewed\",\"wedstay\"],\"wait\":{\"kmg\":{\"at\":\"2026-09-19T21:38:47.233Z\",\""
+  "d": "{\"bag\":9,\"open\":0,\"need\":[\"event:temple\",\"event:coffee\",\"event:vows\",\"event:dinner\",\"dress\",\"allergy\",\"profile:coffeetea\",\"profile:flavor\",\"profile:drink\",\"profile:film\",\"profile:music\",\"photo\"],\"mine\":[\"bkk-stay\",\"kempinski\",\"ljg\",\"prewed\",\"wedstay\"],\"wait\":{\"kmg\":{\"at\":\"2026-09-20T04:00:01.115Z\",\""
  },
  {
   "id": "complete-trip-idempotent",
@@ -142,12 +142,12 @@
  {
   "id": "complete-trip-vientiane-china-waits-for-lijiang",
   "ok": true,
-  "d": "{\"rows\":7,\"wl\":[\"04 – 06 MAR · LIJIANG Waiting list No room of this stage can take your party (one place). You will be placed on the waiting list — no cost until it is resolved.\"],\"wait\":{\"ljg\":{\"at\":\"2026-09-19T21:39:43.083Z\",\"position\":1,\"size\":1,\"wanted\":[\"ljg/viewing-270\",\"ljg/snow-mountain-view"
+  "d": "{\"rows\":7,\"wl\":[\"04 – 06 MAR · LIJIANG Waiting list No room of this stage can take your party (one place). You will be placed on the waiting list — no cost until it is resolved.\"],\"wait\":{\"ljg\":{\"at\":\"2026-09-20T04:00:59.423Z\",\"position\":1,\"size\":1,\"wanted\":[\"ljg/viewing-270\",\"ljg/snow-mountain-view"
  },
  {
   "id": "parity-waiting-list-in-record-and-emails",
   "ok": true,
-  "d": "{\"sent\":{\"clicked\":true},\"rooms\":{\"stage\":\"ljg\",\"waitlisted\":true,\"position\":1,\"since\":\"2026-09-19T21:39:43.083Z\",\"size\":1},\"guest\":true,\"owner\":true}"
+  "d": "{\"sent\":{\"clicked\":true},\"rooms\":{\"stage\":\"ljg\",\"waitlisted\":true,\"position\":1,\"since\":\"2026-09-20T04:00:59.423Z\",\"size\":1},\"guest\":true,\"owner\":true}"
  },
  {
   "id": "leaving-the-waiting-list",
@@ -155,19 +155,144 @@
   "d": "{\"state\":\"open\",\"counts\":{\"relevant\":7,\"confirmed\":6,\"waitlisted\":0,\"declined\":0,\"open\":1,\"excluded\":3,\"resolved\":6,\"bagItems\":6,\"bagTotal\":1240}}"
  },
  {
-  "id": "one-package-card-essential-not-invented",
+  "id": "A-essential-card-offered-at-zero-state",
   "ok": true,
-  "d": "{\"cards\":[{\"kind\":\"complete\",\"btn\":true}],\"order\":[\"complete\"],\"essential\":{\"approved\":false,\"stages\":[]}}"
+  "d": "{\"cards\":[\"complete:true\",\"essential:true\"],\"def\":[\"prewed\",\"wedstay\"],\"text\":\"ESSENTIAL TRIP Your Vientiane stays — the Souphattra Heritage, 25 February to 1 March 2 stages of your trip · Vientiane USD 465 PER PERSON PREVIEW ESSENTIAL TRI\"}"
  },
  {
-  "id": "complete-trip-vientiane-only-preview",
+  "id": "B-available-plan-is-the-heritage-executive",
   "ok": true,
-  "d": "{\"rows\":[\"25 – 27 FEB · VIENTIANE Room B · Heritage Grand Premier · Pre-Wedding Stay · Souphattra Heritage USD 340 per person\",\"27 FEB – 01 MAR · VIENTIANE Room B · Heritage Grand Premier · Wedding Stay · Souphattra Heritage USD 170 per person\"],\"total\":\"USD 510 per person for 2 stages.\"}"
+  "d": "[\"prewed:default:prewed/heritage-executive:A:310\",\"wedstay:default:wedstay/heritage-executive:A:155\"] need 2"
  },
  {
-  "id": "complete-trip-vientiane-only-holds-two-stays",
+  "id": "B-preview-hotel-category-dates-cost",
   "ok": true,
-  "d": "{\"mine\":{\"prewed\":{\"key\":\"prewed/heritage-grand-premier\",\"label\":\"B\"},\"wedstay\":{\"key\":\"wedstay/heritage-grand-premier\",\"label\":\"B\"}},\"bag\":[\"prewed:heritage-grand-premier\",\"wedstay:heritage-grand-premier\"],\"counts\":{\"relevant\":2,\"confirmed\":2,\"waitlisted\":0,\"declined\":0,\"open\":0,\"excluded\":8,\"resol"
+  "d": "{\"rows\":[\"25 – 27 FEB · VIENTIANE Room A · Heritage Executive · Pre-Wedding Stay · Souphattra Heritage USD 310 per person\",\"27 FEB – 01 MAR · VIENTIANE Room A · Heritage Executive · Wedding Stay · Souphattra Heritage USD 155 per person\"],\"fb\":0,\"wl\":0,\"total\":\"USD 465 per person for 2 stages.\",\"chan"
+ },
+ {
+  "id": "B-confirm-holds-the-heritage-executive-twice",
+  "ok": true,
+  "d": "{\"mine\":{\"prewed\":{\"key\":\"prewed/heritage-executive\",\"label\":\"A\"},\"wedstay\":{\"key\":\"wedstay/heritage-executive\",\"label\":\"A\"}},\"bag\":[\"prewed:heritage-executive\",\"wedstay:heritage-executive\"],\"total\":465,\"counts\":{\"relevant\":2,\"confirmed\":2,\"waitlisted\":0,\"declined\":0,\"open\":0,\"excluded\":8,\"resolved\""
+ },
+ {
+  "id": "K-essential-to-individual-one-hold-per-stage",
+  "ok": true,
+  "d": "{\"mine\":{\"prewed\":{\"key\":\"prewed/heritage-executive\",\"label\":\"A\"},\"wedstay\":{\"key\":\"wedstay/heritage\",\"label\":\"A\"}},\"bag\":[\"prewed:heritage-executive\",\"wedstay:heritage\"],\"total\":455}"
+ },
+ {
+  "id": "I-essential-to-complete-clean-switch",
+  "ok": true,
+  "d": "{\"pv\":\"USD 510 per person for 2 stages · replaces 2 of your current selections.\",\"mine\":{\"prewed\":{\"key\":\"prewed/heritage-grand-premier\",\"label\":\"A\"},\"wedstay\":{\"key\":\"wedstay/heritage-grand-premier\",\"label\":\"A\"}},\"bag\":[\"prewed:heritage-grand-premier\",\"wedstay:heritage-grand-premier\"],\"total\":510,\""
+ },
+ {
+  "id": "J-complete-to-essential-clean-switch",
+  "ok": true,
+  "d": "{\"mine\":{\"prewed\":{\"key\":\"prewed/heritage-executive\",\"label\":\"A\"},\"wedstay\":{\"key\":\"wedstay/heritage-executive\",\"label\":\"A\"}},\"bag\":[\"prewed:heritage-executive\",\"wedstay:heritage-executive\"],\"total\":465,\"again\":[\"same\",\"same\"]}"
+ },
+ {
+  "id": "C-fixture-executive-sold-out",
+  "ok": true,
+  "d": "Guest Relations filled the thirteen Heritage Executive rooms of the wedding window with synthetic occupants"
+ },
+ {
+  "id": "C-sold-out-falls-to-the-heritage",
+  "ok": true,
+  "d": "[\"prewed:default:prewed/heritage-executive:A:310\",\"wedstay:fallback:wedstay/heritage:A:145\"] tried [\"wedstay/heritage-executive\",\"wedstay/heritage\"]"
+ },
+ {
+  "id": "C-preview-says-the-replacement",
+  "ok": true,
+  "d": "{\"rows\":[\"25 – 27 FEB · VIENTIANE Room A · Heritage Executive · Pre-Wedding Stay · Souphattra Heritage USD 310 per person\",\"27 FEB – 01 MAR · VIENTIANE Room A · The Heritage · Wedding Stay · Souphattra Heritage USD 145 per person The suggested Heritage Executive · Souphattra Heritage Vientiane canno"
+ },
+ {
+  "id": "G-inventory-change-recomputes-nothing-applied",
+  "ok": true,
+  "d": "{\"changed\":true,\"fb\":0,\"total\":\"USD 465 per person for 2 stages.\",\"held\":0}"
+ },
+ {
+  "id": "G-preview-back-to-the-fallback",
+  "ok": true,
+  "d": "{\"changed\":true,\"fb\":1,\"total\":\"USD 455 per person for 2 stages · 1 replacement.\"}"
+ },
+ {
+  "id": "C-confirm-holds-the-heritage-at-its-actual-price",
+  "ok": true,
+  "d": "{\"mine\":{\"prewed\":{\"key\":\"prewed/heritage-executive\",\"label\":\"A\"},\"wedstay\":{\"key\":\"wedstay/heritage\",\"label\":\"A\"}},\"bag\":[\"prewed:heritage-executive\",\"wedstay:heritage\"],\"total\":455,\"summary\":\"Essential trip selected 2 stages for you. Replaced because the suggested room could not take your party: 2"
+ },
+ {
+  "id": "D-fixture-heritage-sold-out",
+  "ok": true,
+  "d": "Guest Relations filled the five Heritage rooms of the wedding window"
+ },
+ {
+  "id": "D-chain-continues-to-the-grand-premier-dearer",
+  "ok": true,
+  "d": "[\"prewed:default:prewed/heritage-executive:A:310\",\"wedstay:fallback:wedstay/heritage-grand-premier:A:170\"] tried [\"wedstay/heritage-executive\",\"wedstay/heritage\",\"wedstay/heritage-grand-premier\"]"
+ },
+ {
+  "id": "F-fixture-souphattra-full",
+  "ok": true,
+  "d": "Guest Relations filled every remaining Souphattra category of the wedding window"
+ },
+ {
+  "id": "F-no-souphattra-room-plans-the-waiting-list",
+  "ok": true,
+  "d": "[\"prewed:default:prewed/heritage-executive:A:310\",\"wedstay:waitlist:::0\"] tried 7"
+ },
+ {
+  "id": "F-preview-names-the-waiting-list",
+  "ok": true,
+  "d": "{\"rows\":[\"25 – 27 FEB · VIENTIANE Room A · Heritage Executive · Pre-Wedding Stay · Souphattra Heritage USD 310 per person\",\"27 FEB – 01 MAR · VIENTIANE Waiting list No room of this stage can take your party (2 places together). You will be placed on the waiting list — no cost until it is resolved.\"]"
+ },
+ {
+  "id": "F-confirm-waits-with-a-visible-position",
+  "ok": true,
+  "d": "{\"mine\":{\"prewed\":{\"key\":\"prewed/heritage-executive\",\"label\":\"A\"}},\"wait\":{\"wedstay\":{\"at\":\"2026-09-20T04:03:07.717Z\",\"position\":1,\"size\":2,\"wanted\":[\"wedstay/heritage-executive\",\"wedstay/heritage\",\"wedstay/heritage-grand-premier\",\"wedstay/noble-courtyard\",\"wedstay/grand-majestic\",\"wedstay/souphattr"
+ },
+ {
+  "id": "F-profile-and-review-carry-the-position",
+  "ok": true,
+  "d": "{\"prof\":\"VIENTIANE · 27 FEB – 01 MAR Wedding Stay Waiting list · number 1 for 2 places ON THE WAITING LIST NO ROOM YET · NO COST \",\"rev\":\"WAITING LIST 27 FEB – 01 MAR · Vientiane — number 1 on the waiting list for 2 places · no room yet, no cost until it is \"}"
+ },
+ {
+  "id": "H-complete-trip-unchanged",
+  "ok": true,
+  "d": "{\"row\":\"fallback:riverside/superior-window\",\"tail\":[\"riverside/superior-window\",\"guesthouse/guest-house\"],\"len\":9,\"first\":\"wedstay/heritage-grand-premier\"}"
+ },
+ {
+  "id": "E-fixture-one-place-per-executive-room",
+  "ok": true,
+  "d": "one synthetic occupant in each of the thirteen Executive rooms"
+ },
+ {
+  "id": "E-party-does-not-fit-continues-the-chain",
+  "ok": true,
+  "d": "[\"prewed:default:prewed/heritage-executive:A:310\",\"wedstay:fallback:wedstay/heritage:A:145\"] need 2"
+ },
+ {
+  "id": "E-confirm-holds-the-whole-party",
+  "ok": true,
+  "d": "{\"wedstay\":{\"key\":\"wedstay/heritage\",\"label\":\"A\"},\"occ\":[\"BrideTest\",\"Your party*\"]}"
+ },
+ {
+  "id": "flight-my-trip-mu5922-mu741",
+  "ok": true,
+  "d": "{\"seg\":\"MU5922 + MU741\",\"stale\":false}"
+ },
+ {
+  "id": "flight-journeys-card",
+  "ok": true,
+  "d": "‹ › ECONOMY CLASS · CHINA EASTERN 1 / 5 06 MAR · TRANSPORTATION · LIJIANG → BANGKOK MU5922 + MU741 · Lijiang → Bangkok 06 March · 10:00 → 14:55 · via Kunming · "
+ },
+ {
+  "id": "flight-transport-page-legs",
+  "ok": true,
+  "d": "MU5922 10:00 → 11:00 · Kunming 2 h 20 m · MU741 13:20 → 14:55"
+ },
+ {
+  "id": "flight-no-stale-number-on-any-surface",
+  "ok": true,
+  "d": "MU5920 / MU5924 absent from My Trip · The Journey · the transport page · Review · Profile · My Bag · the Travel Pass"
  },
  {
   "id": "suhring-is-the-dinner-of-21-february",

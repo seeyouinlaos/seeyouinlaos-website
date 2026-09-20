@@ -1,5 +1,5 @@
 {
- "at": "2026-09-19T21:34:43.943Z",
+ "at": "2026-09-20T04:16:17.738Z",
  "origin": "http://127.0.0.1:8788",
  "results": [
   {
@@ -20,7 +20,7 @@
   {
    "id": "A1-save",
    "ok": true,
-   "d": "Saved · 23:32"
+   "d": "Saved · 06:14"
   },
   {
    "id": "A1-reload",
@@ -55,7 +55,7 @@
   {
    "id": "A2-save",
    "ok": true,
-   "d": "Saved · 23:32"
+   "d": "Saved · 06:14"
   },
   {
    "id": "A2-reload",
@@ -90,7 +90,7 @@
   {
    "id": "A3-save",
    "ok": true,
-   "d": "Saved · 23:33"
+   "d": "Saved · 06:14"
   },
   {
    "id": "A3-reload",
@@ -125,7 +125,7 @@
   {
    "id": "B-stale-device-refused",
    "ok": true,
-   "d": "{\"before\":1,\"phase\":\"saved\",\"after\":0,\"words\":\"Saved · 23:33\"}"
+   "d": "{\"before\":1,\"phase\":\"saved\",\"after\":0,\"words\":\"Saved · 06:15\"}"
   },
   {
    "id": "B-independent-edit-kept",
@@ -235,7 +235,7 @@
   {
    "id": "E-sent",
    "ok": true,
-   "d": "{\"submissionStatus\":\"sent\",\"submissionId\":\"SYL-T001-DD9989DA\",\"submittedAt\":\"2026-09-19T21:34:33.885Z\",\"lastSentAt\":\"2026-09-19T21:34:33.890Z\",\"version\":1,\"hasU"
+   "d": "{\"submissionStatus\":\"sent\",\"submissionId\":\"SYL-T001-9FEDA95C\",\"submittedAt\":\"2026-09-20T04:16:07.661Z\",\"lastSentAt\":\"2026-09-20T04:16:07.666Z\",\"version\":1,\"hasU"
   },
   {
    "id": "E-changes-not-sent",
@@ -250,12 +250,12 @@
   {
    "id": "E-updated-same-reference",
    "ok": true,
-   "d": "{\"submissionStatus\":\"sent\",\"submissionId\":\"SYL-T001-DD9989DA\",\"submittedAt\":\"2026-09-19T21:34:33.885Z\",\"lastSentAt\":\"2026-09-19T21:34:40.026Z\",\"version\":2,\"hasU"
+   "d": "{\"submissionStatus\":\"sent\",\"submissionId\":\"SYL-T001-9FEDA95C\",\"submittedAt\":\"2026-09-20T04:16:07.661Z\",\"lastSentAt\":\"2026-09-20T04:16:13.795Z\",\"version\":2,\"hasU"
   },
   {
    "id": "E-reload-same",
    "ok": true,
-   "d": "SYL-T001-DD9989DA v2"
+   "d": "SYL-T001-9FEDA95C v2"
   },
   {
    "id": "Z-cleanup",

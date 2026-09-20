@@ -41,10 +41,10 @@
       from: { code: 'KMG', name: 'Kunming', place: 'Kunming Railway Station', time: '10:15', date: '04 Mar 2027' },
       to: { code: 'LJG', name: 'Lijiang', place: 'Lijiang Railway Station', time: '13:44', date: '04 Mar 2027' },
       duration: '3h 29m · direct', dates: '04 March 2027', route: 'Kunming → Lijiang', cls: 'Business Class' },
-    'return': { id: 'return', code: 'MU5924', kind: 'flight', title: 'MU5924 + MU741 · Lijiang → Bangkok', operator: 'China Eastern Airlines',
-      from: { code: 'LJG', name: 'Lijiang', place: 'MU5924 · then MU741', time: '10:35', date: '06 Mar 2027' },
-      to: { code: 'BKK', name: 'Bangkok', place: 'via Kunming · 1 h 30 m', time: '14:55', date: '06 Mar 2027' },
-      duration: '5h 20m door to door · 1h 30m in Kunming', dates: '06 March 2027', route: 'Lijiang → Kunming → Bangkok', cls: 'Economy flexible' }
+    'return': { id: 'return', code: 'MU5922', kind: 'flight', title: 'MU5922 + MU741 · Lijiang → Bangkok', operator: 'China Eastern Airlines',
+      from: { code: 'LJG', name: 'Lijiang', place: 'MU5922 · then MU741', time: '10:00', date: '06 Mar 2027' },
+      to: { code: 'BKK', name: 'Bangkok', place: 'via Kunming · 2 h 20 m', time: '14:55', date: '06 Mar 2027' },
+      duration: '5h 55m door to door · 2h 20m in Kunming', dates: '06 March 2027', route: 'Lijiang → Kunming → Bangkok', cls: 'Economy flexible' }
   };
   var ORDER = ['train', 'mu9646', 'c86', 'return'];
   var STATE_WORDS = { selected: 'Selected · in My Bag', sent: 'Sent to Guest Relations', confirmed: 'Confirmed by Guest Relations' };

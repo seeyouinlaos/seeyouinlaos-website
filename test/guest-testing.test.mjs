@@ -31,10 +31,6 @@ const shop = () => {
     new Function('window', 'document', 'localStorage', 'CustomEvent', 'SIYL_BAG', 'SIYL_PRICE', 'SIYL_ROOMS', 'SIYL_STOCK', src(f))(window, document, localStorage, window.CustomEvent, window.SIYL_BAG, window.SIYL_PRICE, window.SIYL_ROOMS, undefined);
   }
   window.SIYL_BAG.badge = () => {};
-  /* A PACKAGE UNDER TEST (release 014): the shipped Essential trip has no composition (the Owner has not defined it); the
-     mechanics are proven with this one-stage fixture, as in test/sandbox.mjs */
-  window.SIYL_PACKAGES.essential = { key: 'essential', name: 'Essential trip', short: 'a package under test', approved: true, fixture: true, stages: { wedstay: ['wedstay/heritage', 'wedstay/heritage-executive', 'wedstay/heritage-grand-premier', 'riverside/superior-window', 'guesthouse/guest-house'] } };
-  window.SIYL_PACKAGE_ORDER = ['complete', 'essential'];
   return window;
 };
 const stageOf = (w, key) => w.SIYL_JOURNEY.SEGMENTS.find((s) => s.key === key);
@@ -87,28 +83,29 @@ test('COMPLETE TRIP · a package is a package: it replaces a conflicting manual 
   confirm(w2, plan2); assert.equal(linesOf(w2, 'bkk-stay').length, 1); assert.equal(lineOf(w2, 'bkk-stay').room, 'penthouse'); assert.equal(plan2.total, plan.total, 'the package\'s total is the package\'s whole composition — a kept stage counted once, as any other'); assert.equal(B2.total(), plan2.total);
 });
 
-test('ESSENTIAL TRIP · covers only the Wedding Stay: a hand-picked U Sathorn and a "not joining" of the train are never touched; ESSENTIAL → COMPLETE: a package is revised by a package, the decline is lifted on confirm and not before, a matching Kunming choice is kept, one line per stage', async () => {
+test('ESSENTIAL TRIP · covers the two Vientiane stays (Package C + D1 — the Owner, 20 Sep 2026): a hand-picked U Sathorn and a "not joining" of the train are never touched; ESSENTIAL → COMPLETE: a package is revised by a package, the decline is lifted on confirm and not before, a matching Kunming choice is kept, one line per stage', async () => {
   const w = shop(); const P = w.SIYL_PRICE, J = w.SIYL_JOURNEY, B = w.SIYL_BAG;
   P.items('bkk-stay', 'u-sathorn-superior-garden').forEach((it) => B.put(it));         /* by hand */
   P.items('kmg', 'italian').forEach((it) => B.put(it));                                  /* by hand — and the complete trip's own default */
   assert.deepEqual(plain(await J.decline(stageOf(w, 'train'))), { ok: true }); assert.equal(J.state(stageOf(w, 'train')), 'declined');   /* the guest's own word */
-  assert.deepEqual(plain(J.packageStages('essential').map((s) => s.key)), ['wedstay'], 'the essential trip is the wedding stay alone');
+  assert.deepEqual(plain(J.packageStages('essential').map((s) => s.key)), ['prewed', 'wedstay'], 'the essential trip is the pre-wedding stay and the wedding stay at the Souphattra Heritage');
   const es = J.packagePlan('essential');
-  assert.equal(es.rows.length, 1); assert.equal(es.rows[0].why, 'default'); assert.equal(es.rows[0].key, 'wedstay/heritage', 'the entry category of the wedding house first');
-  assert.equal(es.total, P.quote('wedstay', 'heritage').total); assert.deepEqual(plain(es.unskip), [], 'the train is not covered: its decline is not lifted'); assert.deepEqual(plain(es.remove), []);
+  assert.equal(es.rows.length, 2); assert.equal(es.rows[0].why, 'default'); assert.equal(es.rows[0].key, 'prewed/heritage-executive'); assert.equal(es.rows[1].why, 'default'); assert.equal(es.rows[1].key, 'wedstay/heritage-executive', 'the Heritage Executive first — the Owner\'s default room');
+  assert.equal(es.total, P.quote('prewed', 'heritage-executive').total + P.quote('wedstay', 'heritage-executive').total); assert.deepEqual(plain(es.unskip), [], 'the train is not covered: its decline is not lifted'); assert.deepEqual(plain(es.remove), []);
   confirm(w, es);
-  assert.equal(lineOf(w, 'wedstay').room, 'heritage'); assert.equal(lineOf(w, 'bkk-stay').room, 'u-sathorn-superior-garden', 'a stage the package does not cover stays exactly as it was');
+  assert.equal(lineOf(w, 'wedstay').room, 'heritage-executive'); assert.equal(lineOf(w, 'prewed').room, 'heritage-executive'); assert.equal(lineOf(w, 'bkk-stay').room, 'u-sathorn-superior-garden', 'a stage the package does not cover stays exactly as it was');
   assert.equal(lineOf(w, 'kmg').room, 'italian'); assert.equal(J.isSkipped('train'), true, 'and so does a "not joining"'); assert.equal(lineOf(w, 'train'), undefined);
-  assert.equal(B.total(), P.quote('bkk-stay', 'u-sathorn-superior-garden').total + P.quote('kmg', 'italian').total + P.quote('wedstay', 'heritage').total);
-  let c = invariants(w); assert.equal(c.confirmed, 3); assert.equal(c.declined, 1); assert.equal(c.open, 6);
-  /* the complete trip over it: the wedding stay is revised (heritage → heritage-grand-premier, named), U Sathorn is replaced,
+  assert.equal(B.total(), P.quote('bkk-stay', 'u-sathorn-superior-garden').total + P.quote('kmg', 'italian').total + P.quote('prewed', 'heritage-executive').total + P.quote('wedstay', 'heritage-executive').total);
+  let c = invariants(w); assert.equal(c.confirmed, 4); assert.equal(c.declined, 1); assert.equal(c.open, 5);
+  /* the complete trip over it: both Vientiane stays are revised (heritage-executive → heritage-grand-premier, named), U Sathorn is replaced,
      Kunming is kept, the declined train is included — its decline lifted on confirm, never by looking */
   const cp = J.packagePlan('complete');
   assert.equal(J.isSkipped('train'), true, 'computing the plan lifts nothing');
-  const ws = rowOf(cp, 'wedstay'); assert.equal(ws.why, 'default'); assert.equal(ws.key, 'wedstay/heritage-grand-premier'); assert.equal(ws.replaces && ws.replaces.room, 'heritage', 'the package names the wedding stay it replaces');
+  const ws = rowOf(cp, 'wedstay'); assert.equal(ws.why, 'default'); assert.equal(ws.key, 'wedstay/heritage-grand-premier'); assert.equal(ws.replaces && ws.replaces.room, 'heritage-executive', 'the package names the wedding stay it replaces');
+  assert.equal(rowOf(cp, 'prewed').replaces.room, 'heritage-executive');
   assert.equal(rowOf(cp, 'bkk-stay').replaces.room, 'u-sathorn-superior-garden'); assert.equal(rowOf(cp, 'kmg').why, 'same', 'the hand-picked Italian Style Suite is what the package selects — kept');
   const tr = rowOf(cp, 'train'); assert.equal(tr.wasDeclined, true); assert.equal(tr.why, 'default'); assert.deepEqual(plain(cp.unskip), ['train'], 'the plan names the decline it lifts');
-  assert.equal(cp.counts.replaced, 2); assert.equal(cp.counts.same, 1);
+  assert.equal(cp.counts.replaced, 3); assert.equal(cp.counts.same, 1);
   confirm(w, cp);
   assert.equal(lineOf(w, 'wedstay').room, 'heritage-grand-premier', 'the essential wedding stay gave way to the complete trip\'s default');
   assert.equal(J.isSkipped('train'), false); assert.ok(lineOf(w, 'train'), 'the train is selected'); assert.equal(J.state(stageOf(w, 'train')), 'selected');
@@ -117,52 +114,61 @@ test('ESSENTIAL TRIP · covers only the Wedding Stay: a hand-picked U Sathorn an
   assert.equal(B.total(), cp.total, 'the Bag total is the complete trip\'s — the kept Kunming line counted once'); c = invariants(w); assert.equal(c.confirmed, 10); assert.equal(c.open, 0); assert.equal(c.declined, 0);
 });
 
-test('PARTY CAPACITY · capacity decides, never price: when every Heritage room has one place left, Peggy & Steffie\'s essential trip falls to the next defined option and says so; confirming holds the unit for the party; a full room is refused, a half room is refused to a party of two; one hold per stage', async () => {
+test('PARTY CAPACITY · capacity decides, never price: when every Heritage Executive room has one place left, Peggy & Steffie\'s essential trip falls to the next category of the Souphattra (The Heritage — more affordable, at its actual price) and says so; with The Heritage gone too, to the Grand Premier (dearer, at its actual price); confirming holds the unit for the party; a full room is refused, a half room is refused to a party of two; one hold per stage', async () => {
   const rooms = new Rooms(doState());
-  /* five strangers, one in each Heritage room of the wedding window: five single places, none for a party of two */
-  for (let i = 0; i < 5; i++) { const g = { invitationId: 'INV-G90' + i, guestId: 'g-G90' + i, partyId: 'INV-G90' + i, hosts: false }; assert.equal((await hold(rooms, g, 'wedstay/heritage', 'ABCDE'[i])).status, 200); }
+  /* thirteen strangers, one in each Heritage Executive room of the wedding window: thirteen single places, none for a party of two */
+  const EXEC = unitsOf('wedstay/heritage-executive'); assert.equal(EXEC.length, 13);
+  for (let i = 0; i < EXEC.length; i++) { const g = { invitationId: 'INV-G90' + i, guestId: 'g-G90' + i, partyId: 'INV-G90' + i, hosts: false }; assert.equal((await hold(rooms, g, 'wedstay/heritage-executive', EXEC[i].label)).status, 200); }
   const me = idOf(PEGGY);
   const w = page({ auth: PEGGY, fetch: await roomsFetch(rooms, me) }); await w.SIYL_UNITS.load(true);
   const J = w.SIYL_JOURNEY, U = w.SIYL_UNITS, ST = w.SIYL_STAY, B = w.SIYL_BAG, G = w.SIYL_GUEST, P = w.SIYL_PRICE;
   G.setScope({ vientiane: true });
-  assert.equal(J.partySize(), 2, 'Peggy & Steffie: two places together'); assert.equal(U.summary('wedstay', 'heritage').remainingPlaces, 5, 'five places remain — none of them two together'); assert.equal(U.summary('wedstay', 'heritage').largestFree, 1);
-  assert.equal(U.unitForParty('wedstay', 'heritage', 2), null); assert.equal(U.soldOut('wedstay', 'heritage'), false, 'not sold out — full for this party');
+  assert.equal(J.partySize(), 2, 'Peggy & Steffie: two places together'); assert.equal(U.summary('wedstay', 'heritage-executive').remainingPlaces, 13, 'thirteen places remain — none of them two together'); assert.equal(U.summary('wedstay', 'heritage-executive').largestFree, 1);
+  assert.equal(U.unitForParty('wedstay', 'heritage-executive', 2), null); assert.equal(U.soldOut('wedstay', 'heritage-executive'), false, 'not sold out — full for this party');
   const plan = J.packagePlan('essential'); assert.equal(plan.ready, true); assert.equal(plan.need, 2);
-  const r = plan.rows[0];
-  assert.equal(r.why, 'fallback'); assert.equal(r.wanted, 'wedstay/heritage'); assert.equal(r.key, 'wedstay/heritage-executive', 'the next DEFINED option — not the cheapest, not the dearest'); assert.equal(r.unit, 'A');
-  assert.deepEqual(plain(r.tried), ['wedstay/heritage', 'wedstay/heritage-executive']); assert.equal(r.amount, P.quote('wedstay', 'heritage-executive').total);
-  assert.deepEqual(plain(plan.counts), { stages: 1, defaults: 0, fallbacks: 1, waitlisted: 0, replaced: 0, same: 0 }); assert.deepEqual(plain(plan.waitlist), []);
+  assert.equal(plan.rows[0].seg.key, 'prewed'); assert.equal(plan.rows[0].why, 'default'); assert.equal(plan.rows[0].key, 'prewed/heritage-executive', 'the pre-wedding window is untouched by the strangers');
+  const r = plan.rows[1];
+  assert.equal(r.why, 'fallback'); assert.equal(r.wanted, 'wedstay/heritage-executive'); assert.equal(r.key, 'wedstay/heritage', 'the next category of the SAME house in the hotel\'s order — more affordable than the default, and not because it is'); assert.equal(r.unit, 'A');
+  assert.deepEqual(plain(r.tried), ['wedstay/heritage-executive', 'wedstay/heritage']); assert.equal(r.amount, P.quote('wedstay', 'heritage').total); assert.equal(r.amount, 145, 'the actual price of the room taken');
+  assert.deepEqual(plain(plan.counts), { stages: 2, defaults: 1, fallbacks: 1, waitlisted: 0, replaced: 0, same: 0 }); assert.deepEqual(plain(plan.waitlist), []);
   /* confirmed as the page does it: the unit the preview named, for the whole party */
-  assert.deepEqual(plain(await ST.select('wedstay', 'heritage-executive', r.unit, plan.need)), { ok: true, unit: 'A' });
-  assert.deepEqual(plain(U.view().mine), { wedstay: { key: 'wedstay/heritage-executive', label: 'A' } }, 'one hold per stage');
-  assert.equal(B.get().length, 1); assert.equal(B.get()[0].id, 'wedstay'); assert.equal(B.get()[0].room, 'heritage-executive'); assert.equal(B.get()[0].unit, 'A'); assert.equal(B.total(), r.amount);
+  assert.deepEqual(plain(await ST.select('wedstay', 'heritage', r.unit, plan.need)), { ok: true, unit: 'A' });
+  assert.deepEqual(plain(U.view().mine), { wedstay: { key: 'wedstay/heritage', label: 'A' } }, 'one hold per stage');
+  assert.equal(B.get().length, 1); assert.equal(B.get()[0].id, 'wedstay'); assert.equal(B.get()[0].room, 'heritage'); assert.equal(B.get()[0].unit, 'A'); assert.equal(B.total(), r.amount);
   assert.equal(ST.held(B.get()[0]), true); assert.equal(G.missingFor('journey').some((m) => /wedstay/.test(m.key)), false, 'the wedding stay is answered and held');
   invariants(w);
   /* Steffie belongs in the same room: the place her party holds counts for her */
   const w2 = page({ auth: STEFFIE, fetch: await roomsFetch(rooms, idOf(STEFFIE)) }); await w2.SIYL_UNITS.load(true);
-  const unitA = w2.SIYL_UNITS.units('wedstay', 'heritage-executive')[0];
+  const unitA = w2.SIYL_UNITS.units('wedstay', 'heritage')[0];
   assert.deepEqual(plain(unitA.occupants), [{ name: 'Peggy', mine: false, party: true }, { name: 'Your party', mine: false, party: true, placeholder: true }], 'the first name of who is there, that she is Steffie\'s party, and the place kept for Steffie');
-  assert.equal(w2.SIYL_UNITS.fitsParty('wedstay', 'heritage-executive', unitA, 2), true); assert.equal(w2.SIYL_UNITS.unitForParty('wedstay', 'heritage-executive', 2).label, 'A');
-  assert.deepEqual(plain(await w2.SIYL_STAY.select('wedstay', 'heritage-executive', undefined, 2)), { ok: true, unit: 'A' });
+  assert.equal(w2.SIYL_UNITS.fitsParty('wedstay', 'heritage', unitA, 2), true); assert.equal(w2.SIYL_UNITS.unitForParty('wedstay', 'heritage', 2).label, 'A');
+  assert.deepEqual(plain(await w2.SIYL_STAY.select('wedstay', 'heritage', undefined, 2)), { ok: true, unit: 'A' });
   /* a full room is refused; a room with one place is refused to a party of two — 409, and the guest keeps what they had */
   const lin = idOf(LIN);
-  let x = await hold(rooms, lin, 'wedstay/heritage-executive', 'A'); assert.equal(x.status, 409); assert.equal(x.d.ok, false); assert.equal(x.d.error, 'full');
-  x = await hold(rooms, lin, 'wedstay/heritage', 'A', 2); assert.equal(x.status, 409); assert.equal(x.d.error, 'full for your party'); assert.equal(x.d.need, 2); assert.equal(x.d.free, 1);
+  let x = await hold(rooms, lin, 'wedstay/heritage', 'A'); assert.equal(x.status, 409); assert.equal(x.d.ok, false); assert.equal(x.d.error, 'full');
+  x = await hold(rooms, lin, 'wedstay/heritage-executive', 'A', 2); assert.equal(x.status, 409); assert.equal(x.d.error, 'full for your party'); assert.equal(x.d.need, 2); assert.equal(x.d.free, 1);
   assert.deepEqual(plain(x.d.mine), {}, 'nothing was held for the refused guest');
+  /* The Heritage gone too (one stranger in each of Rooms B – E): a party of two falls on to the Grand Premier — dearer than the default, at its actual price; never the Riverside, never the Guest House */
+  for (const l of ['B', 'C', 'D', 'E']) { const g = { invitationId: 'INV-G91' + l, guestId: 'g-G91' + l, partyId: 'INV-G91' + l, hosts: false }; assert.equal((await hold(rooms, g, 'wedstay/heritage', l)).status, 200); }
+  const TWO = session({ guestId: 'g-two', partyId: 'INV-DEMO-002', partyName: 'The Two', fullName: 'Two Demo', preferredName: 'Two', members: [1, 2].map((n) => ({ guestId: 'g-two-' + n, preferredName: 'Guest ' + n })) });
+  const w4 = page({ auth: TWO, fetch: await roomsFetch(rooms, idOf(TWO)) }); await w4.SIYL_UNITS.load(true); w4.SIYL_GUEST.setScope({ vientiane: true });
+  const r4 = w4.SIYL_JOURNEY.packagePlan('essential').rows[1];
+  assert.deepEqual(plain([r4.why, r4.wanted, r4.key, r4.unit, r4.amount, r4.tried]), ['fallback', 'wedstay/heritage-executive', 'wedstay/heritage-grand-premier', 'A', 170, ['wedstay/heritage-executive', 'wedstay/heritage', 'wedstay/heritage-grand-premier']]);
+  assert.equal(r4.amount, P.quote('wedstay', 'heritage-grand-premier').total);
   /* the words the guest reads are the engine's */
   const w3 = page({ auth: LIN, fetch: await roomsFetch(rooms, lin) }); await w3.SIYL_UNITS.load(true);
   assert.equal(w3.SIYL_STAY.refusal({ ok: false, error: 'full for your party' }), 'This room cannot take your whole party. Please choose another room.');
   assert.equal(w3.SIYL_STAY.refusal({ ok: false, error: 'full' }), 'This room was just filled. Please choose another room.');
-  assert.equal(w3.SIYL_UNITS.unitWords(w3.SIYL_UNITS.units('wedstay', 'heritage-executive')[0]), 'Peggy · Steffie · Full');
+  assert.equal(w3.SIYL_UNITS.unitWords(w3.SIYL_UNITS.units('wedstay', 'heritage')[0]), 'Peggy · Steffie · Full');
 });
 
-test('THE WAITING LIST · no defined option can take a party of six but the Guest House, and one of its six places is taken: the essential trip puts the stage on the waiting list — USD 0, answered for readiness, number 1; a second guest is number 2, leaving the line renumbers, a place held resolves it, a guest holding a place cannot wait, "not joining" leaves the line first', async () => {
+test('THE WAITING LIST · no category of the Souphattra can take a party of six together (the Guest House and the Riverside are not the essential trip\'s): the essential trip puts the stage on the waiting list — USD 0, answered for readiness, number 1; a second guest is number 2, leaving the line renumbers, a place held resolves it, a guest holding a place cannot wait, "not joining" leaves the line first', async () => {
   const rooms = new Rooms(doState());
   const lin = idOf(LIN); assert.equal((await hold(rooms, lin, 'guesthouse/guest-house', 'A')).status, 200, 'Lin takes one of the six shared places');
   /* a party larger than a room spreads over the rooms of a category (release 014): so every hotel category of the chain is
      left with fewer than six free places by strangers — no option of the chain can take six together */
   const strangerAt = (k, n) => ({ invitationId: 'INV-Z' + k.replace(/\W/g, '') + n, guestId: 'Z' + k.replace(/\W/g, '') + n, partyId: 'INV-Z' + k.replace(/\W/g, '') + n, hosts: false, name: 'Z' });
-  for (const [k, fill] of [['wedstay/heritage', 5], ['wedstay/heritage-executive', 21], ['wedstay/heritage-grand-premier', 1], ['riverside/superior-window', 7]]) {
+  for (const [k, fill] of [['wedstay/heritage', 5], ['wedstay/heritage-executive', 21], ['wedstay/heritage-grand-premier', 1]]) {   /* the Noble Courtyard, the Grand Majestic, the Souphattra Majestic and the Presidential have fewer than six places by themselves */
     let n = 0; for (const u of unitsOf(k)) { if (k === 'wedstay/heritage' && u.label === 'B') continue;   /* Room B stays free for the step below */
       for (let i = 0; i < u.places && n < fill; i++) { n++; assert.equal((await hold(rooms, strangerAt(k, n), k, u.label)).status, 200); } }
   }
@@ -176,10 +182,11 @@ test('THE WAITING LIST · no defined option can take a party of six but the Gues
   assert.equal(U.stageOf('guesthouse/x'), 'wedstay'); assert.equal(U.label('guesthouse', 'guest-house'), '5 places available');
   const it = w.SIYL_PRICE.items('guesthouse', 'guest-house')[0]; assert.equal(it.id, 'guesthouse'); assert.equal(it.price, 0); assert.equal(it.complimentary, true); assert.equal(it.interest, false); assert.match(it.name, /^Guest House complimentary/);
   /* the plan: every option of the chain tried, none takes six together */
-  const plan = J.packagePlan('essential'); const r = plan.rows[0];
-  assert.equal(r.why, 'waitlist'); assert.equal(r.key, null); assert.equal(r.unit, null); assert.deepEqual(plain(r.items), []);
-  assert.deepEqual(plain(r.tried), ['wedstay/heritage', 'wedstay/heritage-executive', 'wedstay/heritage-grand-premier', 'riverside/superior-window', 'guesthouse/guest-house'], 'the whole defined chain, in its order');
-  assert.deepEqual(plain(plan.waitlist), ['wedstay']); assert.equal(plan.total, 0, 'a waitlisted stage costs nothing'); assert.equal(plan.counts.waitlisted, 1);
+  const plan = J.packagePlan('essential'); const r = plan.rows[1]; assert.equal(r.seg.key, 'wedstay');
+  assert.equal(r.why, 'waitlist'); assert.equal(r.key, null); assert.equal(r.unit, null); assert.deepEqual(plain(r.items), []); assert.equal(r.amount, 0);
+  assert.deepEqual(plain(r.tried), ['wedstay/heritage-executive', 'wedstay/heritage', 'wedstay/heritage-grand-premier', 'wedstay/noble-courtyard', 'wedstay/grand-majestic', 'wedstay/souphattra-majestic', 'wedstay/souphattra-presidential'], 'the whole house, in the hotel\'s order — never the Riverside, never the Guest House');
+  assert.equal(plan.rows[0].why, 'default', 'the pre-wedding window takes the six across the Executive rooms');
+  assert.deepEqual(plain(plan.waitlist), ['wedstay']); assert.equal(plan.total, w.SIYL_PRICE.quote('prewed', 'heritage-executive').total, 'a waitlisted stage costs nothing'); assert.equal(plan.counts.waitlisted, 1);
   assert.equal(J.state(seg), 'open', 'nothing changed by looking');
   /* confirmed as the page does it: the waiting list of the stage, with the party's size and what was tried */
   const wr = await U.wait('wedstay', plan.need, r.tried); assert.equal(wr.ok, true); assert.equal(wr.waited, 'wedstay');

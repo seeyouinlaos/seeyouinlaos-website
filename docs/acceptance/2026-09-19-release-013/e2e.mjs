@@ -109,7 +109,7 @@ if (!LIVE) {
     await p.goto(O + '/review.html', { waitUntil: 'load' }); await p.waitForTimeout(2500);
     const review = await p.evaluate(() => ({ text: document.querySelector('main').innerText.replace(/\s+/g, ' '), send: !!document.querySelector('#send:not([disabled])') }));
     await shot(p, '390-review-complete-trip');
-    const stageNames = ['Special Express No. 25', 'Pre-Wedding', 'Wedding Stay', 'MU9646', 'Wanxiang', 'C86', 'Luye Baisha', 'MU5924', 'Kempinski', 'Sathorn Penthouse'];
+    const stageNames = ['Special Express No. 25', 'Pre-Wedding', 'Wedding Stay', 'MU9646', 'Wanxiang', 'C86', 'Luye Baisha', 'MU5922', 'Kempinski', 'Sathorn Penthouse'];
     const missingOnReview = stageNames.filter((n) => !review.text.includes(n));
     note('review-shows-the-whole-trip', missingOnReview.length === 0 && /Matcha Green Tea/.test(review.text) && !/rather avoid/i.test(review.text), missingOnReview.length ? 'missing on Review: ' + missingOnReview.join(', ') : 'all ten stages incl. Vientiane → Kunming (MU9646) and the Sathorn Penthouse; the flavour; no Question 5');
     const sent = await p.evaluate(async () => { const btn = document.querySelector('#send'); if (!btn || btn.disabled) return { clicked: false }; btn.click(); await new Promise((r) => setTimeout(r, 7000)); return { clicked: true, words: (document.querySelector('main') || {}).innerText.replace(/\s+/g, ' ').slice(0, 200) }; });

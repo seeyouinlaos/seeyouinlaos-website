@@ -63,7 +63,7 @@ FOUND (009, 15 files incl. 3 duplicates): `IMG_3433.jpeg` / `yunnan-bullet-train
 FOUND (011): `499753922_….jpg` (Business Class lounge entrance, Kunming) → USED; `yhr99ytcb1z6wkjv7rxb.jpg` — Klook watermark → NOT USED.
 VISUALLY VERIFIED: YES · STATUS: **COMPLETE**
 
-### MU5924 + MU741 · Lijiang → Bangkok · Economy
+### MU5922 + MU741 · Lijiang → Bangkok · Economy (the cabin frames keep their `mu5924-*` file names; the flight identity is MU5922 + MU741 since 20 Sep 2026)
 SOURCE FOLDER: `010 - Transport - Flight - Lijiang to Bangkok - MU5924 + MU741 Economy Class`
 FOUND (8): `China-Eastern-A330-200-Economy-Class-Review-7/8.jpeg` (cabin, seats — top watermark cropped) → USED; `China-Eastern-Economy-Class-Kurzstrecke-Kabine.jpg` → USED; `…Review-25.jpeg` (meal) → USED; `37035165776….jpg` (seatback IFE) → USED; `…Review-22.jpeg` (passengers in aisle) → NOT USED (identifiable people); `…Review-41.jpeg` (dark cabin) → NOT USED (quality); `b-6506-…PlanespottersNet….jpg` — photographer copyright banner → NOT USED.
 VISUALLY VERIFIED: YES · STATUS: **COMPLETE**
@@ -133,7 +133,7 @@ VISUALLY VERIFIED: YES · STATUS: **PARTIAL** — the four room photographs are 
 | Wanxiang Yueju | `journey/kunming-01.jpg` | COMPLETE |
 | C642 | `transport/c642-train-snow-mountain.jpg` | COMPLETE |
 | Luye Baisha | `journey/lijiang-01.jpg` | COMPLETE |
-| MU5924 + MU741 | `transport/mu5924-economy-cabin-1.jpg` | COMPLETE |
+| MU5922 + MU741 | `transport/mu5924-economy-cabin-1.jpg` | COMPLETE |
 | Siam Kempinski | `journey/kempinski-01.jpg` | COMPLETE |
 | 1872 Afternoon Tea | `1872/tea-1.jpg` (Drive 053 verified earlier) | COMPLETE |
 | Marsilea Spa interest lines | menu imagery (owner PDF) | COMPLETE |
@@ -153,7 +153,7 @@ Lines persisted in a guest's bag before this pass (no `img` stored) resolve thro
 ## COMPLETE / PARTIAL / MISSING — the owner's action list
 
 COMPLETE
-- Van transfer · MU9632 · C642 (+ Kunming lounge) · MU5924/MU741
+- Van transfer · MU9632 · C642 (+ Kunming lounge) · MU5924/MU741 (now MU5922/MU741)
 - Souphattra: all seven room categories (3 / 4 / 7 / 3 / 3 / 5 / 7 images)
 - Guest House complimentary (6) · Sathorn Penthouse (11) · Wanxiang Yueju (4 × 6)
 - Lijiang: 270° Viewing (6) · 270° Private Courtyard (5) · Private Soup Pool (6) · Manor · Starry Sky (9)

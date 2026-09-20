@@ -391,7 +391,7 @@ export const POST_WEDDING = [
    * coordinated return (China Eastern, 06 Mar · project Actual USD 154, not
    * guest-payable), own arrangement, or Guest Relations support. */
   { id: 'ljg-bkk', type: 'Flight', label: 'Lijiang → Bangkok', date: '06 MAR 2027', when: '6 March 2027',
-    sub: 'China Eastern MU5924 LJG → KMG 10:35 → 11:45 · transfer 1h30 · MU741 KMG → BKK 13:15 → 14:55 · 5h20 · Economy flexible',
+    sub: 'China Eastern MU5922 LJG → KMG 10:00 → 11:00 · transfer 2h20 · MU741 KMG → BKK 13:20 → 14:55 · 5h55 · Economy flexible',
     /* OWNER OVERRIDE (06 SEP): priced guest component USD 200 pp. */
     contribution: 200, perGuest: true, onward: true },
 ];

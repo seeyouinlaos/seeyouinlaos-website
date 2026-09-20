@@ -1109,7 +1109,7 @@ function journeyBlocks() {
         'Three nights Wanxiang Yueju, Kunming · USD 50 pp/night',
         'Train C86 Kunming → Lijiang · Business Class · USD 85 pp',
         'Two nights Luye Baisha · Rizhao Jinshan, Lijiang · room variant from USD 70 pp',
-        'MU5924 + MU741 Lijiang → Bangkok · Economy flexible · USD 200 pp'] },
+        'MU5922 + MU741 Lijiang → Bangkok · Economy flexible · USD 200 pp'] },
     { id: 'kempinski', no: '06', name: 'Bangkok after China', dates: RETURN_STAY.dates,
       on: S.kempinski === 'with',
       variant: RETURN_STAY.name + ' · ' + RETURN_STAY.room,

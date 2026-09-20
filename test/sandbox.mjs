@@ -67,15 +67,6 @@ export function page(opts = {}) {
   if (opts.auth !== null) sb.localStorage.setItem('siyl.auth', JSON.stringify(opts.auth === undefined ? PEGGY : opts.auth));
   if (opts.seed) Object.entries(opts.seed).forEach(([k, v]) => sb.localStorage.setItem(k, typeof v === 'string' ? v : JSON.stringify(v)));
   for (const f of opts.modules || CORE) vm.runInContext(src(f), sb, { filename: f });
-  /* A PACKAGE UNDER TEST (release 014): the shipped Essential trip has NO composition yet — the Owner has not defined it and
-     the product invents none (assets/packages-data.js: approved false, stages {}). The planner, the preview, the confirm, the
-     waiting list and the counts are proven with THIS fixture, a second package of one stage; pass `essential: false` to see
-     the product exactly as shipped. */
-  if (opts.essential !== false && sb.SIYL_PACKAGES) {
-    sb.SIYL_PACKAGES.essential = { key: 'essential', name: 'Essential trip', short: 'The wedding stay in Vientiane — a package under test', approved: true, fixture: true,
-      stages: { wedstay: ['wedstay/heritage', 'wedstay/heritage-executive', 'wedstay/heritage-grand-premier', 'riverside/superior-window', 'guesthouse/guest-house'] } };
-    sb.SIYL_PACKAGE_ORDER = ['complete', 'essential'];
-  }
   sb.events = listeners;
   return sb;
 }

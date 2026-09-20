@@ -20,7 +20,7 @@ test('LEGS: the four transport legs, from the source facts — codes, times, dat
   const fl = T.LEGS.mu9646; assert.equal(fl.kind, 'flight'); assert.equal(fl.from.code, 'VTE'); assert.equal(fl.to.code, 'KMG'); assert.equal(fl.from.time, '15:50'); assert.equal(fl.to.time, '18:25');
   assert.equal(T.classOf('mu9646', 'business'), 'Business Class'); assert.equal(T.classOf('mu9646', 'economy-flexible'), 'Economy Flexible'); assert.equal(T.classOf('mu9646', ''), 'Business Class');
   const c86 = T.LEGS.c86; assert.equal(c86.kind, 'train'); assert.equal(c86.from.code, 'KMG'); assert.equal(c86.to.code, 'LJG'); assert.equal(c86.from.time, '10:15'); assert.equal(c86.to.time, '13:44'); assert.equal(c86.cls, 'Business Class');
-  const rt = T.LEGS['return']; assert.equal(rt.kind, 'flight'); assert.equal(rt.from.code, 'LJG'); assert.equal(rt.to.code, 'BKK'); assert.equal(rt.from.time, '10:35'); assert.equal(rt.to.time, '14:55'); assert.equal(rt.cls, 'Economy flexible');
+  const rt = T.LEGS['return']; assert.equal(rt.kind, 'flight'); assert.equal(rt.from.code, 'LJG'); assert.equal(rt.to.code, 'BKK'); assert.equal(rt.from.time, '10:00'); assert.equal(rt.to.time, '14:55'); assert.equal(rt.cls, 'Economy flexible'); assert.equal(rt.code, 'MU5922'); assert.match(rt.title, /^MU5922 \+ MU741/); assert.match(rt.to.place, /2 h 20 m/);   /* the Owner-confirmed return flights, 20 Sep 2026 */
   assert.equal(T.isLeg('wedstay'), false); assert.equal(T.isLeg('c86'), true);
   /* nothing invented: no airport names the source does not carry */
   assert.doesNotMatch(src('assets/travelpass.js'), /Suvarnabhumi|Changshui|Sanyi|Wattay|Don Mueang/);
@@ -31,7 +31,7 @@ test('REFERENCE: deterministic per guest · leg · class, never the access code,
   assert.equal(a, b); assert.match(a, /^SYL-C86-[23456789BCDFGHJKMNPQRSTVWXZ]{4}$/);
   assert.notEqual(T.ref('g-peggy', 'c86', ''), T.ref('g-steffie', 'c86', ''), 'each guest their own');
   assert.notEqual(T.ref('g-peggy', 'mu9646', 'business'), T.ref('g-peggy', 'mu9646', 'economy-flexible'), 'a class change is a new pass');
-  assert.match(T.ref('g-peggy', 'mu9646', 'business'), /^SYL-MU9646-/); assert.match(T.ref('g-peggy', 'train', ''), /^SYL-TN25-/); assert.match(T.ref('g-peggy', 'return', ''), /^SYL-MU5924-/);
+  assert.match(T.ref('g-peggy', 'mu9646', 'business'), /^SYL-MU9646-/); assert.match(T.ref('g-peggy', 'train', ''), /^SYL-TN25-/); assert.match(T.ref('g-peggy', 'return', ''), /^SYL-MU5922-/);
   assert.equal(T.ref('g-peggy', 'wedstay', ''), null); assert.equal(T.ref('', 'c86', ''), null);
 });
 

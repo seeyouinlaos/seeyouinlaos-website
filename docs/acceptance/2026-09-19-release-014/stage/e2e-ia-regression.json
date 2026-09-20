@@ -77,7 +77,7 @@
  {
   "id": "6b-about-you-is-step-05",
   "ok": true,
-  "d": "05 / 06About You Ada · Your party · Ada & Ben MY TRIP · SAVED AS DRAFT SAVE MY PROGRESS SAVED · 23:3 · h1 About You"
+  "d": "05 / 06About You Ada · Your party · Ada & Ben MY TRIP · SAVED AS DRAFT SAVE MY PROGRESS SAVED · 06:1 · h1 About You"
  },
  {
   "id": "6c-review-opens-when-about-complete",
@@ -102,7 +102,7 @@
  {
   "id": "photo-upload",
   "ok": true,
-  "d": "Photo saved · 19 September 2026. · url(\"blob:http://127.0.0.1:8788/694a63e1"
+  "d": "Photo saved · 20 September 2026. · url(\"blob:http://127.0.0.1:8788/b4871870"
  },
  {
   "id": "photo-stored-jpeg-private",
@@ -112,7 +112,7 @@
  {
   "id": "photo-survives-reload",
   "ok": true,
-  "d": "CHANGE PHOTO REMOVE PHOTO · bg url(\"blob:http://127.0.0.1:8788/c6d7c7aa-53fe-4d82"
+  "d": "CHANGE PHOTO REMOVE PHOTO · bg url(\"blob:http://127.0.0.1:8788/1f7f7f15-c749-4553"
  },
  {
   "id": "photo-not-visible-to-another-guest",

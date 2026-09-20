@@ -33,7 +33,7 @@
     { key: 'ljg', when: '04 – 06 MAR', cat: 'Accommodation', place: 'Lijiang',
       label: 'Luye Baisha', ids: ['ljg'], anchor: 'j-ljg' },
     { key: 'return', when: '06 MAR', cat: 'Transportation', place: 'Lijiang → Bangkok',
-      label: 'MU5924 + MU741', ids: ['return'], anchor: 'j-return' },
+      label: 'MU5922 + MU741', ids: ['return'], anchor: 'j-return' },
     { key: 'kempinski', when: '06 – 08 MAR', cat: 'Accommodation', place: 'Bangkok',
       label: 'Siam Kempinski Bangkok', ids: ['kempinski'], anchor: 'j-kempinski', bookend: 'close' }
   ];

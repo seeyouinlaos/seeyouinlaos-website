@@ -1,11 +1,11 @@
 /* ============================================================================
    SEE YOU IN LAOS — THE PACKAGES (Owner instruction, 19 Sep 2026).
 
-   Three ways to plan: COMPLETE TRIP (the full hosted journey, all ten stages A–J), ESSENTIAL TRIP (the wedding-focused
-   package — its COMPOSITION IS NOT YET DEFINED by the Owner: the Operations Master of 19 Sep 2026 carries no Essential
-   package and the earlier website composition was the website's own invention; the slot below is structurally ready and
-   is NOT offered as a card until the Owner names its stages) and INDIVIDUAL SELECTION. There is no fourth mode: nothing
-   is arranged for anyone in advance.
+   Three ways to plan: COMPLETE TRIP (the full hosted journey, all ten stages A–J), ESSENTIAL TRIP (the Vientiane wedding
+   accommodation — the Owner's definition of 20 Sep 2026: Package C + D1 of the Operations Master, the Souphattra Heritage
+   Vientiane for both Vientiane windows, the Heritage Executive first, then the next compatible category of the SAME house
+   in the house's order, and the waiting list when no Souphattra category can take the party — never another house) and
+   INDIVIDUAL SELECTION. There is no fourth mode: nothing is arranged for anyone in advance.
 
    A package is CONFIGURATION, never an inference: for every stage it covers, the DEFAULT product and the DEFINED FALLBACK
    CHAIN — the real products of the Operations Master, in the order they are tried when the default cannot take the guest's
@@ -40,13 +40,22 @@
     essential: {
       key: 'essential',
       name: 'Essential trip',
-      short: 'The wedding-focused package',
-      /* NOT OFFERED (Owner rule: never invent a package's contents). The Owner defines the stages and the chains here — the
-         same shape as `complete` — and adds 'essential' to SIYL_PACKAGE_ORDER; nothing else in the product changes. */
-      approved: false,
-      stages: {}
+      short: 'Your Vientiane stays — the Souphattra Heritage, 25 February to 1 March',
+      /* THE OWNER'S DEFINITION (20 Sep 2026): Package C (Pre-Wedding Stay, 25 – 27 Feb) + D1 (Wedding Stay, 27 Feb – 01 Mar) at
+         the Souphattra Heritage Vientiane; the default room HERITAGE EXECUTIVE (the master's rooming sheet: Heritage Executive
+         King, 1 king bed 1.9 m, 37 – 44 sq.m., 2 adults · 1 child); when it cannot take the party, the next compatible
+         category of the SAME house in the house's order — its more affordable neighbour first, then outwards — and, when no
+         Souphattra category can take the party, the WAITING LIST. Never the Guest House, never the Riverside, never another
+         house. The amount is each room's own (pricing.js): the Pre-Wedding window's two nights, the Wedding window's one
+         payable night. */
+      approved: true,
+      source: 'H&S_Wedding_Operations_Master · Overview Day 05 – 08 (Package C · D1) · Accommodation and Rooming (Heritage Executive) · the Owner\'s instruction of 20 Sep 2026',
+      stages: {
+        prewed: ['prewed/heritage-executive', 'prewed/heritage', 'prewed/heritage-grand-premier', 'prewed/noble-courtyard', 'prewed/grand-majestic', 'prewed/souphattra-majestic', 'prewed/souphattra-presidential'],
+        wedstay: ['wedstay/heritage-executive', 'wedstay/heritage', 'wedstay/heritage-grand-premier', 'wedstay/noble-courtyard', 'wedstay/grand-majestic', 'wedstay/souphattra-majestic', 'wedstay/souphattra-presidential']
+      }
     }
   };
   /* the order the packages are OFFERED in — only a package whose composition the Owner has defined */
-  window.SIYL_PACKAGE_ORDER = ['complete'];
+  window.SIYL_PACKAGE_ORDER = ['complete', 'essential'];
 })();

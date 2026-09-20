@@ -175,23 +175,18 @@ test('WAITING LIST · on the client it is an answered stage at USD 0: readiness 
 });
 
 /* ────────────────────────────── 4 · THE PACKAGES ────────────────────────────── */
-test('PACKAGES · configuration, not inference: the Complete trip covers all ten stages with real products; the Essential trip is NOT invented — shipped without a composition, not offered, structurally ready (the tests prove the mechanics with a fixture package)', () => {
-  /* the product exactly as shipped */
-  const shipped = page({ auth: PEGGY, essential: false });
-  assert.deepEqual(plain(shipped.SIYL_PACKAGE_ORDER), ['complete'], 'one package is offered');
-  assert.equal(shipped.SIYL_PACKAGES.essential.approved, false); assert.deepEqual(plain(shipped.SIYL_PACKAGES.essential.stages), {}, 'nothing invented for the Essential trip');
-  assert.deepEqual(plain(shipped.SIYL_JOURNEY.packageOrder()), ['complete'], 'no Essential card'); assert.deepEqual(plain(shipped.SIYL_JOURNEY.packageStages('essential')), []); assert.deepEqual(plain(shipped.SIYL_JOURNEY.packagePlan('essential').rows), []);
-  assert.doesNotMatch(src('assets/packages-data.js').replace(/\/\*[\s\S]*?\*\//g, ''), /essential[\s\S]{0,400}wedstay\//, 'no chain is shipped under the Essential trip');
-  /* the mechanics, with the fixture package of test/sandbox.mjs */
+test('PACKAGES · configuration, not inference: the Complete trip covers all ten stages with real products; the Essential trip is the Owner\'s (20 Sep 2026): Package C + D1 at the Souphattra Heritage, the Heritage Executive first, the same house only', () => {
   const w = page({ auth: PEGGY });
   const P = w.SIYL_PACKAGES, J = w.SIYL_JOURNEY, R = w.SIYL_ROOMS;
-  assert.deepEqual(plain(w.SIYL_PACKAGE_ORDER), ['complete', 'essential']); assert.equal(P.essential.fixture, true);
+  assert.deepEqual(plain(w.SIYL_PACKAGE_ORDER), ['complete', 'essential']); assert.deepEqual(plain(J.packageOrder()), ['complete', 'essential'], 'both packages are offered');
+  assert.equal(P.essential.approved, true); assert.match(P.essential.source, /Package C · D1/);
   assert.deepEqual(plain(Object.keys(P.complete.stages).sort()), plain(J.SEGMENTS.map((s) => s.key).sort()));
-  assert.deepEqual(plain(Object.keys(P.essential.stages)), ['wedstay']);
+  assert.deepEqual(plain(Object.keys(P.essential.stages)), ['prewed', 'wedstay'], 'C = the Pre-Wedding Stay, D1 = the Wedding Stay');
+  for (const st of ['prewed', 'wedstay']) { const ch = plain(P.essential.stages[st]); assert.equal(ch[0], st + '/heritage-executive'); assert.ok(ch.every((k) => k.startsWith(st + '/')), 'the Souphattra only'); assert.equal(ch.length, 7); }
   const keys = new Set(); for (const k of Object.keys(R)) for (const win of R[k].windows) for (const r of R[k].rooms) keys.add(win.id + '/' + r.slug);
   for (const pk of Object.values(P)) for (const v of Object.values(pk.stages)) if (Array.isArray(v)) for (const x of v) { assert.ok(keys.has(x), x + ' is a room of the data'); assert.ok(SEED[x], x + ' is in the seed'); }
   assert.equal(P.complete.stages.wedstay[P.complete.stages.wedstay.length - 1], 'guesthouse/guest-house', 'the guest house is the last option of the wedding stay chain');
-  assert.equal(P.essential.stages.wedstay[0], 'wedstay/heritage', 'the fixture package starts at the entry category of the wedding house');
+  assert.equal(P.essential.stages.wedstay[0], 'wedstay/heritage-executive', 'the Essential trip starts at the Heritage Executive (the Owner, 20 Sep 2026)');
   /* the Owner-approved defaults of 09 Sep 2026 (rooms-data SIYL_FULL_EXPERIENCE, read by pricing.approved) head every chain */
   for (const [win, slug] of Object.entries(plain(w.SIYL_FULL_EXPERIENCE))) assert.equal(P.complete.stages[win][0], win + '/' + slug, win + ' default');
 });
@@ -240,9 +235,10 @@ test('PACKAGES · a package REPLACES a conflicting manual selection, keeps a mat
   assert.equal(bkk.why, 'same', 'the Penthouse stays as chosen'); assert.equal(bkk.replaces, null);
   assert.equal(ljg.wasDeclined, true); assert.deepEqual(plain(plan.unskip), ['ljg']);
   const ess = J.packagePlan('essential');
-  assert.deepEqual(plain(ess.rows.map((r) => r.seg.key)), ['wedstay']); assert.equal(ess.rows[0].key, 'wedstay/heritage'); assert.equal(ess.total, 145);
-  assert.deepEqual(plain(ess.unskip), [], 'Essential touches nothing outside the wedding stay');
-  assert.equal(J.packageStages('essential').length, 1);
+  assert.deepEqual(plain(ess.rows.map((r) => r.seg.key)), ['prewed', 'wedstay']); assert.equal(ess.rows[1].key, 'wedstay/heritage-executive'); assert.equal(ess.rows[0].key, 'prewed/heritage-executive'); assert.equal(ess.total, 310 + 155, 'two nights of the Pre-Wedding window, the one payable night of the Wedding window');
+  assert.ok(ess.rows[1].replaces, 'the Noble Courtyard is replaced by the Heritage Executive');
+  assert.deepEqual(plain(ess.unskip), [], 'Essential touches nothing outside Vientiane');
+  assert.equal(J.packageStages('essential').length, 2);
   /* Essential is Vientiane's: a guest not joining Vientiane is offered nothing by it */
   G.setScope({ bangkok: true, vientiane: false, china: false });
   assert.deepEqual(plain(J.packageStages('essential')), []); assert.deepEqual(plain(J.packagePlan('essential').rows), []);

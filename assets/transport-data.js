@@ -247,21 +247,24 @@
       id: 'return',
       cat: 'Transportation',
       operator: 'China Eastern Airlines',
-      name: 'MU5924 + MU741 · Lijiang → Bangkok',
+      /* THE RETURN FLIGHTS (Owner / Haruthai confirmed, 20 Sep 2026, with the airline's own search as evidence): MU5922 + MU741 via
+         Kunming on 06.03.2027, 10:00 → 14:55 — every earlier flight number for this leg is superseded; the amount stays the
+         approved USD 200 */
+      name: 'MU5922 + MU741 · Lijiang → Bangkok',
       place: 'Lijiang → Kunming → Bangkok',
       dates: '06 March 2027',
       anchor: 'j-return',
-      story: 'The way home, in two hops and one morning. Out of Lijiang just ' +
-        'after ten, ninety minutes on the ground in Kunming, and into Bangkok ' +
-        'early in the afternoon — with two closing nights still to come.',
+      story: 'The way home, in two hops and one morning. Out of Lijiang at ' +
+        'ten, two hours and twenty minutes on the ground in Kunming, and into ' +
+        'Bangkok early in the afternoon — with two closing nights still to come.',
       facts: [
-        ['Flights', 'MU5924, then MU741 · China Eastern Airlines'],
+        ['Flights', 'MU5922, then MU741 · China Eastern Airlines'],
         ['Route', 'Lijiang (LJG) → Kunming (KMG) → Bangkok (BKK)'],
         ['Date', '06 March 2027'],
-        ['First leg', 'MU5924 · Boeing 737 · 10:35 → 11:45 · 1 h 10 m'],
-        ['Transfer', 'Kunming · 1 h 30 m'],
-        ['Second leg', 'MU741 · Boeing 738 · 13:15 → 14:55 · 2 h 40 m'],
-        ['Door to door', '10:35 → 14:55 · 5 h 20 m'],
+        ['First leg', 'MU5922 · Boeing 737 · 10:00 → 11:00 · 1 h'],
+        ['Transfer', 'Kunming · 2 h 20 m'],
+        ['Second leg', 'MU741 · Boeing 738 · 13:20 → 14:55 · 2 h 35 m'],
+        ['Door to door', '10:00 → 14:55 · 5 h 55 m'],
         ['Class', 'Economy flexible · 1 seat per guest']
       ],
       groups: [
@@ -276,11 +279,11 @@
           'Conditional ticket refund before departure',
           'Changes are made through Guest Relations, never on this website']],
         ['The transfer', [
-          'One hour thirty minutes in Kunming between the two flights',
+          'Two hours and twenty minutes in Kunming between the two flights',
           'Both flights are operated by China Eastern Airlines']]
       ],
       included: [
-        'One Economy flexible seat on MU5924, Lijiang to Kunming.',
+        'One Economy flexible seat on MU5922, Lijiang to Kunming.',
         'One Economy flexible seat on MU741, Kunming to Bangkok.',
         'Two pieces of checked baggage.'
       ],
