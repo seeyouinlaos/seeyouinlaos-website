@@ -1155,7 +1155,9 @@ test('the retired imagery and the pool-side dinner narrative are gone', () => {
   const dinnerImages = vy.match(/053-wedding-dinner-[a-z-]+\.jpg/g) || [];
   assert.ok(new Set(dinnerImages).size >= 4, 'several images from the Wedding Dinner set, not one: ' + dinnerImages.join(', '));
   assert.match(vy, /053-wedding-dinner-courtyard-from-above\.jpg/, 'the lead image is the poolside from above');
-  assert.match(vy, /053-wedding-dinner-sharing-menu\.jpg[\s\S]{0,600}053-wedding-dinner-sharing-menu-table\.jpg/, 'the sharing menu is shown as a pair');
+  /* the Owner's own long-table photographs (21 Sep 2026) are the pair; the sharing-menu pair is retired from the page */
+  assert.match(vy, /053-wedding-dinner-long-table-settings\.jpg[\s\S]{0,600}053-wedding-dinner-long-table-from-above\.jpg/, 'the long table is shown as a pair');
+  assert.doesNotMatch(vy, /053-wedding-dinner-sharing-menu(-table)?\.jpg/, 'the dim-sum pair is gone from the page');
   for (const f of dinnerImages) assert.ok(existsSync(join(ROOT, 'assets/images/event', f)), f + ' is not in the asset set');
   assert.ok(!existsSync(join(ROOT, 'assets/images/event/053-wedding-dinner-courtyard-garden.jpg')), 'the fountain file (not from the Wedding Dinner folder) is retired');
   assert.match(vy, /souphattra\/heritage-room\.jpg/);
