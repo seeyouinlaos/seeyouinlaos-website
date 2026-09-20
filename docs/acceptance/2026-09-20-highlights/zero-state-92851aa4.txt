@@ -1,0 +1,19 @@
+{
+ "at": "2026-09-20T12:41:56.806Z",
+ "mode": "dry-run",
+ "rooms": {
+  "occupancies": 12,
+  "waitlisted": 0
+ },
+ "seating": {
+  "holds": 1
+ },
+ "drafts": {
+  "had": 2,
+  "actors": 104
+ },
+ "kv": {
+  "keys": 7
+ },
+ "note": "REAL GUEST ACTIVITY PRESENT after the code distribution \u2014 dry run only, nothing reset, ids withheld"
+}

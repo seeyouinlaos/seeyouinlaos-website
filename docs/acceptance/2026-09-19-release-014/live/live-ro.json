@@ -40,6 +40,11 @@
   "d": "104 entries · ids only · 2 hosts · 104 encrypted records, no plaintext field name · /api/contact 401 without a bearer · the personal-details fields served"
  },
  {
+  "id": "highlights-live",
+  "ok": true,
+  "d": "Highlights row (Aman · Sühring · Baan Phraya · Cannubi) · rail #highlights · USD 294/234 · 114 · 165 · 1872 at 180 · highlight.js and the Cannubi clip served"
+ },
+ {
   "id": "dated-venues-live",
   "ok": true,
   "d": "Sühring 21.02 dinner · Baan Phraya 23.02 · Cannubi + Harudot 07.03 · Petits Plats 08.03 · the tea 24.02"
