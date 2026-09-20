@@ -72,5 +72,7 @@ hosts stay `G048` (Bride) · `G049` (Groom) in `INV-001`; singles remain singles
 | Unit suite (`npm test`) | **401 / 401** (`test/personal-details.test.mjs` 4 new · `test/release-auth.test.mjs` re-pinned to 104 / 6 · `test/auth.test.mjs` index keys `c` / `k`) |
 | Release gates | RELEASE CHECK PASSED (I1 infra freeze intact) |
 | Stage E2E 014 (+ §6c the personal details: fields · save · Worker · profile · a fresh device · the couple's two records · a cross-guest write refused · 320 / 834 widths) and the regression suites | **014 79 / 79 · 013 35 / 35 · 012 25 / 25 · 011 52 / 52 · P0 52 / 52 · IA 35 / 35** (`../2026-09-19-release-014/stage/`) |
-| Read-only live acceptance (`guest-register-live` added) | see the final report |
-| Production zero state | the reset's dry run after the deploy (nothing executed) — see `../2026-09-19-release-014/live/` |
+| Deploy (push to `main` → Workers Build) | main `7d0a41b` → version **`a079d2e5`** (10:23:34Z, 20 Sep 2026) · parity 259 / 259 · infra freeze intact · the deployed register identical to the repository (`register-audit`: 104 unique codes · 0 missing · 0 duplicate · 0 auth errors) |
+| Read-only live acceptance (`guest-register-live` added) | **24 / 24** on `a079d2e5` |
+| Production zero state | the reset's dry run after the deploy, nothing executed: 0 holds · 0 waiting · 0 seats · 0 drafts · 0 KV keys (`../2026-09-19-release-014/live/zero-state-2026-09-20-a079d2e5.txt`) |
+| Codex | **PENDING — EXTERNAL QUOTA LIMIT** (until 24 Sep 2026 22:19 CEST); not represented as passed; the scope is recorded in `../../review/015-codex-release-014/PLAN.md` |

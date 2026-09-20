@@ -27,12 +27,17 @@
  {
   "id": "essential-trip-live",
   "ok": true,
-  "d": "Essential = C + D1 · Heritage Executive first · seven Souphattra categories per window · the Complete trip unchanged (nine wedding-window options)"
+  "d": "Essential = stage D alone · D1 preselected, the Heritage Executive first · seven Souphattra categories · D2 / D3 named as the guest's alternatives · no C · the Complete trip unchanged (nine wedding-window options)"
  },
  {
   "id": "return-flight-live",
   "ok": true,
   "d": "MU5922 10:00 → 11:00 · Kunming 2 h 20 m · MU741 13:20 → 14:55 · 06 March 2027 — no MU5920 / MU5924 in any served source (the image file names excepted)"
+ },
+ {
+  "id": "guest-register-live",
+  "ok": true,
+  "d": "104 entries · ids only · 2 hosts · 104 encrypted records, no plaintext field name · /api/contact 401 without a bearer · the personal-details fields served"
  },
  {
   "id": "dated-venues-live",
@@ -52,7 +57,7 @@
  {
   "id": "register-served-encrypted",
   "ok": true,
-  "d": "85 encrypted invitations, no plaintext field, code or address"
+  "d": "104 encrypted invitations, no plaintext field, code or address"
  },
  {
   "id": "rooms-public-view-live",
