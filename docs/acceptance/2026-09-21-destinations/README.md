@@ -20,3 +20,16 @@ Bangkok on the Owner's tablet) — the chapter frame is positioned and clipped n
 
 Proofs: unit 414 / 414 · RELEASE CHECK PASSED (V1: four clips) · stage 390 / 834 / 1440: every clip playing inside its frame,
 clip · gallery · rule on one edge, no overflow, no broken image, no error (`stage/`) · the deploy that follows.
+
+## Second pass (Owner, 21 Sep 2026): Bangkok and Vientiane from their Drive folders · the map scaled properly
+- Bangkok (folder 001 - City - Bangkok): **the clip unchanged**; the gallery = all six photographs of the folder (the ICONSIAM
+  skyline, the river express boat, Mahanakhon and the Skytrain, the train below the monorail, the train through the wires, the
+  alley). The folder's .mov (10 MB) is the clip's source and was not touched.
+- Vientiane (folder 002 - City - Vientiane): the clip unchanged (no clip in the folder); the gallery = all nine photographs of the
+  folder (the Sacred Heart cathedral ×2, the street, the reclining Buddha, Patuxai, a temple at dusk, Pha That Luang ×2, the storm
+  sky) + the four approved city frames already on the site (Pha That Luang by day, Lane Xang, the Mekong at sunset, the morning
+  street) — 13; the struck Patuxai-twilight and rooftop frames stay out.
+- Kunming: the map of Yunnan is no longer a cropped carousel slide — it stands in its own square frame after the gallery, the
+  same width as the clip, filled edge to edge.
+Proofs: unit 414 / 414 · RELEASE CHECK PASSED · stage 390 / 1440: four clips playing (Bangkok = bangkok-card.mp4), galleries
+6 · 13 · 6 · 7, the map 342 × 342 / 1000 × 1000 on the clip's edge, no overflow, no broken image (`stage/`).

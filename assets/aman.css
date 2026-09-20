@@ -587,6 +587,9 @@ html[data-session="in"] [data-private-cta] { display: none !important; }
   .a-dest-text { padding-top: 34px; }
 }
 .refgal .aslide .am img[data-contain] { object-fit: contain; background: #E7E3DB; }
+.a-dest-map { margin: 26px var(--a-gut) 0; aspect-ratio: 1 / 1; background: #E7E3DB; }
+.a-dest-map img { width: 100%; height: 100%; object-fit: cover; display: block; }
+@media (min-width: 900px) { .a-dest-map { max-width: 1000px; margin-left: auto; margin-right: auto; } }
 .a-dest .refgal .atrk, .a-dest .refgal .arow, .a-dest .acar .atrk { width: 100%; max-width: none; margin-left: 0; margin-right: 0; padding-left: 0; padding-right: 0; scroll-padding-left: 0; }
 @media (min-width: 900px) { .a-dest > .refgal, .a-dest > .a-galcap { max-width: 1000px; padding: 0; } }
 .a-galcap { padding: 0 var(--a-gut); margin-top: 12px; font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--a-mute); }
