@@ -612,7 +612,11 @@
           /* the Owner-designated photograph for this room (08 Sep 2026): Jade
            * Dragon Snow Mountain over the Baisha rooftops. Canonical — used for
            * this room only, everywhere the room appears. */
-          gallery: [[LJG + 'snow-mountain-viewing-1.jpg', 'Jade Dragon Snow Mountain over the rooftops']],
+          /* 20 Sep 2026: the Owner's Lijiang folders (024 · 001–009) carry no photograph of this category itself — the one approved
+             frame is the VIEW, and it is labelled as the view so nobody mistakes it for the room; a room photograph joins the day the
+             Owner supplies one (never another category's room in its place) */
+          gallery: [[LJG + 'snow-mountain-viewing-1.jpg', 'The view from the room · Jade Dragon Snow Mountain over the Baisha rooftops (the room itself is not yet photographed)']],
+          viewOnly: true,
           facts: [['Size', '50 sq.m.'], ['Bed', '1 King Bed (2m wide)'], ['Occupancy', '2 Adults'], ['Location', 'Floor 2nd floor']],
           story: 'Fifty square metres facing the peak: a starry-sky terrace, a private hot-spring soup pool and a fireplace for the cold end of the day.',
           amenities: ['Air conditioning', 'Air purifier', 'Audio equipment', 'Balcony', 'Bathrobe', 'Bathtub or shower', 'Butler service', 'Coffee maker / teapot', 'Electric kettle', 'Fireplace', 'Free Wi-Fi', 'Heating', 'Iron and ironing board', 'Minibar', 'Private hot springs', 'Projector', 'Safe in room', 'Slippers', 'Smart door lock', 'Smart room controls', 'Smart toilet', 'Sofa', 'Terrace'],

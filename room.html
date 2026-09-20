@@ -92,20 +92,21 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:24px;margin:44
 .note{font-size:11px;color:#6B6964;margin-top:16px;line-height:1.7}
 .backrow{text-align:center;margin-top:34px}
 .backrow a{font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:#313131;text-decoration:none;border-bottom:1px solid #313131;padding:8px 0 3px;display:inline-block;min-height:44px}
-</style><link rel="stylesheet" href="assets/prep.css?v=4b294be8">
-<link rel="stylesheet" href="assets/desktop.css?v=f66b6e82"><link rel="stylesheet" href="assets/aman.css?v=98576b60"></head><body>
+</style><link rel="stylesheet" href="assets/prep.css?v=fdbe73d1">
+<link rel="stylesheet" href="assets/desktop.css?v=f66b6e82"><link rel="stylesheet" href="assets/aman.css?v=839bfbe0"></head><body>
 <header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="cart.html" aria-label="My Bag"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main id="m"></main>
 <script src="assets/bag.js?v=2a0c8152"></script>
 <script src="assets/draft.js?v=7ab9ca64"></script>
 <script src="assets/shop-menu.js?v=1ff891bc"></script>
 <script src="assets/aman.js?v=bbc20559"></script>
-<script src="assets/rooms-data.js?v=0a1f0c6c"></script>
+<script src="assets/rooms-data.js?v=519ace48"></script>
 <script src="assets/pricing.js?v=d324fef7"></script>
 <script src="assets/rooms.js?v=e0d4bbbf"></script>
 <script src="assets/stay.js?v=3690f59b"></script>
 <script src="assets/packages-data.js?v=05982d0a"></script><script src="assets/journey.js?v=6551e59a"></script>
-<script type="module" src="assets/invite.mjs?v=df9c0807"></script>
+<script src="assets/wizard.js?v=30b710a5"></script>
+<script type="module" src="assets/invite.mjs?v=4c7def86"></script>
 <script>
 (function () {
 'use strict';
@@ -360,11 +361,13 @@ function paint() {
       var gone = !line && !(need > 1 && U.unitForParty ? U.unitForParty(w.id, room.slug, need) : U.fits(w.id, room.slug));
       b.disabled = gone;
       if (gone) b.textContent = U.soldOut(w.id, room.slug) ? (U.ctaWords(w.id, room.slug) || 'Sold out') : (room.complimentary ? 'Not enough places for your party of ' + need : 'No room for your party of ' + need);
-      if (box && ST) { box.innerHTML = ST.unitsHtml(w.id, room.slug); ST.wire(box, function (r) { paint(); if (!r.ok) { av.hidden = false; av.textContent = ST.refusal(r); av.classList.add('low'); } }); }
+      if (box && ST) { box.innerHTML = ST.unitsHtml(w.id, room.slug); ST.wire(box, function (r) { paint(); if (!r.ok) { av.hidden = false; av.textContent = ST.refusal(r); av.classList.add('low'); } else wizardDone(w); }); }
     } else if (av) { av.hidden = true; b.disabled = false; if (box) box.innerHTML = ''; }
   });
 }
 function need() { return ST && ST.need ? ST.need() : 1; }
+/* THE BOOKING CONTEXT (Owner, 20 Sep 2026): opened from 02 / 06, a room chosen here returns the guest to My Trip by itself */
+function wizardDone(w) { var Wz = window.SIYL_WIZARD; if (Wz && Wz.active) Wz.done(Wz.stageOfWindow(w.id)); }
 document.querySelectorAll('[data-win]').forEach(function (b) {
   b.addEventListener('click', function () {
     var w = stay.windows[parseInt(b.getAttribute('data-win'), 10)];
@@ -375,6 +378,7 @@ document.querySelectorAll('[data-win]').forEach(function (b) {
       paint();
       var av = document.querySelector('[data-av="' + w.id + '"]');
       if (!r.ok && av) { av.hidden = false; av.textContent = ST.refusal(r); av.classList.add('low'); }
+      if (r.ok) wizardDone(w);
     });
   });
 });
@@ -382,7 +386,7 @@ document.querySelectorAll('[data-chg]').forEach(function (b) {
   b.addEventListener('click', function () {
     /* the collection this room belongs to, with the current choice visible */
     var w = stay.windows[parseInt(b.getAttribute('data-chg'), 10)];
-    location.href = 'journeys.html?change=' + w.id + '#j-' + w.id;
+    var to = 'journeys.html?change=' + w.id + '#j-' + w.id; location.href = window.SIYL_WIZARD ? SIYL_WIZARD.href(to) : to;
   });
 });
 document.addEventListener('siyl:bag', paint);

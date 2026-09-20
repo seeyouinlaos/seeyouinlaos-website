@@ -13,6 +13,16 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 .pf-avatar{flex:none;width:96px;height:96px;border-radius:50%;background:#E7E3DB center/cover no-repeat;display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:inset 0 0 0 1px #DAD9D7}
 .pf-avatar .pf-ini{font-family:'PP Editorial Old',serif;font-weight:200;font-size:34px;line-height:1;color:#313131;letter-spacing:.02em}
 .pf-avatar.has .pf-ini{display:none}
+/* ADD PROFILE PHOTO (Owner, 20 Sep 2026): the portrait itself is the obvious tap target — a dashed ring and a camera mark until a
+   photo is there; then the photo, with a small "change" mark. The uploader behind it is the existing one (assets/avatar.js). */
+.pf-avatar{cursor:pointer;transition:box-shadow .2s;border:0;padding:0;font:inherit;color:#313131}
+.pf-avatar:not(.has){box-shadow:inset 0 0 0 1px #DAD9D7,0 0 0 1px #DAD9D7;background-image:repeating-conic-gradient(#EFEBE4 0 15deg,#E7E3DB 15deg 30deg)}
+.pf-avatar:not(.has)::after{content:'';position:absolute;right:-2px;bottom:-2px;width:30px;height:30px;border-radius:50%;background:#313131 url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23F3EEE7' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'><path d='M4 8h3l2-2h6l2 2h3v11H4z'/><circle cx='12' cy='13' r='3.2'/></svg>") center/16px no-repeat;box-shadow:0 0 0 2px #F3EEE7}
+.pf-avatar.has::after{content:'';position:absolute;right:-2px;bottom:-2px;width:26px;height:26px;border-radius:50%;background:#F3EEE7 url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23313131' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'><path d='M4 8h3l2-2h6l2 2h3v11H4z'/><circle cx='12' cy='13' r='3.2'/></svg>") center/14px no-repeat;box-shadow:0 0 0 1px #DAD9D7}
+.pf-avatar{position:relative;overflow:visible}.pf-avatar>img,.pf-avatar .pf-ini{position:relative}
+.pf-avatar:focus-visible{outline:2px solid #313131;outline-offset:3px}
+.pf-photo-cta{display:inline-flex;align-items:center;gap:10px;background:#313131;color:#F3EEE7;border:0;padding:14px 18px;font:inherit;font-size:10.5px;letter-spacing:2.2px;text-transform:uppercase;cursor:pointer;min-height:44px}
+.pf-photo-cta::before{content:'';width:14px;height:14px;background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23F3EEE7' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'><path d='M4 8h3l2-2h6l2 2h3v11H4z'/><circle cx='12' cy='13' r='3.2'/></svg>") center/contain no-repeat}
 .pf-id-body{min-width:0;flex:1}
 .pf-id-body>*+*{margin-top:4px}
 .pf-note{color:#6B6964}
@@ -32,7 +42,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 @media(min-width:768px){.pf-rail{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px;overflow:visible}.pf-rail>*{flex:none;max-width:none}.pf-tickets{grid-template-columns:1fr 1fr}}
 @media(min-width:1024px){.pf-rail{grid-template-columns:repeat(3,1fr)}}
 </style>
-<link rel="stylesheet" href="assets/aman.css?v=98576b60"><link rel="stylesheet" href="assets/prep.css?v=4b294be8"></head><body class="prep p-in">
+<link rel="stylesheet" href="assets/aman.css?v=839bfbe0"><link rel="stylesheet" href="assets/prep.css?v=fdbe73d1"></head><body class="prep p-in">
 <header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="cart.html" aria-label="My Bag"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main class="prep-page" id="profile">
 <div class="prep-head">
@@ -45,21 +55,21 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/bag.js?v=2a0c8152"></script>
 <script src="assets/shop-menu.js?v=1ff891bc"></script>
 <script src="assets/aman.js?v=bbc20559"></script>
-<script src="assets/rooms-data.js?v=0a1f0c6c"></script>
+<script src="assets/rooms-data.js?v=519ace48"></script>
 <script src="assets/pricing.js?v=d324fef7"></script>
-<script src="assets/guest.js?v=60bd4fb9"></script>
+<script src="assets/guest.js?v=53122cca"></script>
 <script src="assets/draft.js?v=7ab9ca64"></script>
 <script src="assets/temple.js?v=a5a16527"></script>
 <script src="assets/rooms.js?v=e0d4bbbf"></script>
 <script src="assets/stay.js?v=3690f59b"></script>
 <script src="assets/seatlabels.js?v=4994e1f4"></script>
-<script src="assets/seating.js?v=5c7e6b3d"></script>
+<script src="assets/seating.js?v=3b392bf0"></script>
 <script src="assets/confirm.js?v=f35e0aa8"></script>
 <script src="assets/transport-data.js?v=a5d732d4"></script>
 <script src="assets/packages-data.js?v=05982d0a"></script><script src="assets/journey.js?v=6551e59a"></script>
 <script src="assets/docs.js?v=7c1c7bfd"></script>
-<script src="assets/avatar.js?v=80828084"></script>
-<script type="module" src="assets/invite.mjs?v=df9c0807"></script>
+<script src="assets/avatar.js?v=4f4d9416"></script>
+<script type="module" src="assets/invite.mjs?v=4c7def86"></script>
 <script>
 /* ============================================================================
    MY PROFILE (Owner, 18 Sep 2026) — the guest's account dashboard.
@@ -88,7 +98,7 @@ gated(function(){});
 function roomImg(stayKey,slug){var R=window.SIYL_ROOMS,st=R&&R[stayKey];if(!st||!st.rooms)return '';var r=st.rooms.filter(function(x){return x.slug===slug})[0];if(!r)return '';return r.cardImg||(r.gallery&&r.gallery.length?r.gallery[0][0]:'')||''}
 function hrefImg(href){var m=/stay=([^&#]+)&room=([^&#]+)/.exec(href||'');return m?roomImg(decodeURIComponent(m[1]),decodeURIComponent(m[2])):''}
 function lineImg(x){var t=B.thumb(x);if(t)return t;if(x.stay&&x.room)return roomImg(x.stay,x.room);var at=P&&P.locate?P.locate(x.id):null;if(at&&x.room)return roomImg(at.key,x.room);return ''}
-var IMG={ceremony:'assets/images/souphattra/heritage-courtyard-front.jpg',dinner:'assets/images/event/053-wedding-dinner-courtyard-from-above.jpg',temple:'assets/images/alms/ritual-dawn-01.jpg'};
+var IMG={ceremony:'assets/images/souphattra/heritage-courtyard-front.jpg',dinner:'assets/images/event/053-wedding-dinner-courtyard-from-above.jpg',temple:'assets/images/alms/ritual-dawn-01.jpg',coffee:'assets/images/event/051-coffee-and-cake-patisserie.jpg'};
 
 /* ---- the links every card offers: the surface where the item is changed, never a control of its own ---- */
 function segOf(x){return J.SEGMENTS.filter(function(s){return s.ids.indexOf(x.id)>=0})[0]||null}
@@ -132,11 +142,11 @@ function identity(me,p){
   var pref=G.nameOf(me.guestId),full=G.value(me.guestId,'fullName')||me.fullName||pref,others=G.others(),role=me.hostRole==='BRIDE'?'Host · Bride':me.hostRole==='GROOM'?'Host · Groom':'Guest';
   var ini=(pref||full||'').split(/\s+/).map(function(w){return w.charAt(0)}).slice(0,2).join('').toUpperCase();
   return '<section class="prep-sec" id="identity"><p class="t-l1">Your account</p><div class="p-card pf-id" data-profile-identity>'+
-    '<div class="pf-id-row"><span class="pf-avatar" data-avatar role="img" aria-label="Your profile photo"><span class="pf-ini" aria-hidden="true">'+esc(ini)+'</span></span>'+
+    '<div class="pf-id-row"><button type="button" class="pf-avatar" data-avatar data-photo-add aria-label="Add your profile photo"><span class="pf-ini" aria-hidden="true">'+esc(ini)+'</span></button>'+
     '<div class="pf-id-body"><p class="t-l1 on">'+esc(role)+' · Personal invitation</p><h2 class="t-h1">'+esc(pref)+'</h2>'+(full&&full!==pref?'<p class="t-b2">'+esc(full)+'</p>':'')+
     '<p class="t-b2">'+(others.length?'Your party · '+esc(G.partyNames()):'Travelling on your own invitation')+'</p></div></div>'+
-    '<div class="p-actions" data-photo-actions><button type="button" class="p-link" data-photo-add>Add a photo</button></div>'+
-    '<p class="t-b2 pf-note" data-photo-note role="status" aria-live="polite">A small square photo, kept privately with your invitation. JPEG, PNG or WebP, up to 12 MB.</p>'+
+    '<div class="p-actions" data-photo-actions><button type="button" class="pf-photo-cta" data-photo-add>Add profile photo</button></div>'+
+    '<p class="t-b2 pf-note" data-photo-note role="status" aria-live="polite">Your portrait is yours alone — shown beside your name on the wedding seat plan to the other guests, kept privately with your invitation. JPEG, PNG or WebP, up to 12 MB.</p>'+
     '<input type="file" accept="'+esc(AV?AV.ACCEPT:'image/*')+'" data-photo-input hidden>'+
     '<div class="p-actions"><a class="p-link mute" href="invitation.html">Open your invitation</a><button type="button" class="p-link mute" data-signout>Sign out</button></div>'+
   '</div></section>'}
@@ -174,10 +184,15 @@ function wedding(me,p){
   function seat(ev){if(!ready)return {t:'Reading your seat…',on:false};if(hosts)return {t:'Front centre · hosts',on:true};var sid=S.seatOf(ev,id);if(!sid)return {t:'No seat held yet',open:true};return {t:'Seat '+S.label(sid)+' · Held in your name',on:true,d:S.describe(sid)}}
   cards.push(card({data:'wedding:temple',img:IMG.temple,when:'Sunday, 28 February 2027 · 09:00',name:'Temple morning',meta:'Wat Ong Teu, Vientiane',state:temple==='yes'?'Joining':temple==='no'?'Not joining':'Not answered yet',on:temple==='yes',open:temple==null,links:[{href:'wedding.html',text:'View details'}]}));
   var c=seat('ceremony'),d=seat('dinner');
+  /* COFFEE & CAKE (Owner, 20 Sep 2026): the complimentary part of the day as its own item — the approved programme's time (from 12:00, the return from the temple), hosted, no inventory, no seat, no cost */
+  var coffee=T?T.eventOf(id,'coffee'):null;
+  cards.push(card({data:'wedding:coffee',img:IMG.coffee,when:'Sunday, 28 February 2027 · from 12:00',name:'Coffee & Cake',meta:'Souphattra Heritage, Vientiane · on the return from the temple',state:coffee==='yes'?'Joining':coffee==='no'?'Not joining':'Not answered yet',on:coffee==='yes',open:coffee==null,cost:'Complimentary',links:[{href:'wedding.html',text:'View details'}]}));
   cards.push(card({data:'wedding:ceremony',img:IMG.ceremony,when:'Sunday, 28 February 2027 · 15:30',name:'Vow Ceremony',meta:'Souphattra Heritage, Vientiane'+(c.d?' · '+c.d:''),state:c.t,on:!!c.on,open:!!c.open,links:[{href:'wedding.html',text:'View details'},{href:'tickets.html',text:'Seat ticket',mute:true}]}));
   cards.push(card({data:'wedding:dinner',img:IMG.dinner,when:'Sunday, 28 February 2027 · 19:30',name:'Wedding Dinner',meta:'Souphattra Heritage, Vientiane · poolside'+(d.d?' · '+d.d:''),state:d.t,on:!!d.on,open:!!d.open,links:[{href:'wedding.html',text:'View details'},{href:'tickets.html',text:'Seat ticket',mute:true}]}));
   J.sorted(B.get()).filter(function(x){return group(x)==='wedding'}).forEach(function(x){var sw=stateWords(x);cards.push(card({data:'line:'+x.id,img:lineImg(x)||IMG.temple,when:J.when(x)||'Sunday, 28 February 2027',name:x.name,meta:x.meta||'',state:sw.t,on:!!sw.on,cost:cost(x),links:[{href:detailHref(x),text:'View details'},{href:'cart.html',text:'Change in My Bag',mute:true}]}))});
-  return '<section class="prep-sec" id="wedding"><h2 class="t-h2">The Wedding</h2>'+rail(cards)+'</section>'}
+  /* WHO SITS WHERE (Owner, 20 Sep 2026): the dinner roll call — portraits, first names, seats — for the signed-in guest */
+  var who=(ready&&S.railHtml&&!hosts&&G.joins('vientiane'))?S.railHtml('dinner',S.view?S.view():null,{guestId:id}):'';
+  return '<section class="prep-sec" id="wedding"><h2 class="t-h2">The Wedding</h2>'+rail(cards)+who+'</section>'}
 function tickets(me,p){
   var id=me.guestId,h='',hosts=!!(p&&p.hosts),n=0;
   var NAMES={ceremony:'Vow Ceremony',dinner:'Wedding Dinner'};
@@ -219,8 +234,8 @@ function documents(me){
 function paintAvatar(){
   var el=page.querySelector('[data-avatar]'),acts=page.querySelector('[data-photo-actions]');if(!el||!AV)return;
   AV.load().then(function(url){
-    if(url){el.style.backgroundImage='url('+url+')';el.classList.add('has');if(acts)acts.innerHTML='<button type="button" class="p-link" data-photo-add>Change photo</button><button type="button" class="p-link mute" data-photo-remove>Remove photo</button>'}
-    else{el.style.backgroundImage='';el.classList.remove('has');if(acts)acts.innerHTML='<button type="button" class="p-link" data-photo-add>Add a photo</button>'}
+    if(url){el.style.backgroundImage='url('+url+')';el.classList.add('has');el.setAttribute('aria-label','Change your profile photo');if(acts)acts.innerHTML='<button type="button" class="p-link" data-photo-add>Change photo</button><button type="button" class="p-link mute" data-photo-remove>Remove photo</button>'}
+    else{el.style.backgroundImage='';el.classList.remove('has');el.setAttribute('aria-label','Add your profile photo');if(acts)acts.innerHTML='<button type="button" class="pf-photo-cta" data-photo-add>Add profile photo</button>'}
     wirePhoto()})}
 function wirePhoto(){
   var input=page.querySelector('[data-photo-input]'),note=page.querySelector('[data-photo-note]');if(!input)return;
@@ -237,6 +252,7 @@ function render(){
     document.getElementById('open').addEventListener('click',function(){gated(render)});return}
   document.getElementById('pf-own').textContent='My Profile · '+G.nameOf();
   page.innerHTML=identity(me,p)+contact()+status(p)+arrangements(me)+wedding(me,p)+tickets(me,p)+about(me)+documents(me);
+  if(S&&S.wireRail)S.wireRail(page);
   var out=page.querySelector('[data-signout]');if(out)out.addEventListener('click',function(){var I=window.SIYL_INVITE;if(I&&I.leave)I.leave();var a=document.querySelector('[data-access-out]');if(a)a.click();else location.replace('invitation.html')});
   paintAvatar();
   B.badge();

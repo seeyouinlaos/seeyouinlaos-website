@@ -1,0 +1,29 @@
+# READ-ONLY DRY RUN (aggregates only, nothing reset) — before the final-pass deploy
+{
+ "at": "2026-09-20T15:27:47.070Z",
+ "rooms.occupancies": 12,
+ "rooms.guests": 3,
+ "rooms.waitlisted": 0,
+ "seating": {
+  "holds": 1
+ },
+ "drafts": {
+  "actors": 104,
+  "had": 5,
+  "cleared": 0
+ },
+ "kv": {
+  "deleted": 0
+ },
+ "keys": [
+  "ok",
+  "mode",
+  "dryRun",
+  "at",
+  "rooms",
+  "seating",
+  "drafts",
+  "kv",
+  "digest"
+ ]
+}

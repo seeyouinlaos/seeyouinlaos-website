@@ -295,9 +295,16 @@ function renderAccess() {
   const a = AUTH.get(), ok = !!(a && AUTH.valid());
   el.setAttribute('data-state', ok ? 'in' : 'out');
   el.innerHTML = ok
-    ? '<span class="a-macct-who">Signed in · ' + esc(a.preferredName || a.fullName || 'you') + '</span><nav class="a-macct-nav" aria-label="Your account"><a href="' + hrefOf('your-journey.html') + '" data-access-nav="trip">My Trip</a><a href="' + hrefOf('profile.html') + '" data-access-nav="profile">My Profile</a><button type="button" class="a-macct-out" data-access-out>Sign out</button></nav>'
+    ? '<span class="a-macct-who">Signed in · ' + esc(a.preferredName || a.fullName || 'you') + '</span><nav class="a-macct-nav" aria-label="Your account"><a href="' + hrefOf('your-journey.html') + '" data-access-nav="trip">My Trip</a><a href="' + hrefOf('profile.html') + '" data-access-nav="profile">My Profile</a>' + (window.SIYL_DRAFT ? '<button type="button" class="a-macct-save" data-access-save>Save my progress</button>' : '') + '<button type="button" class="a-macct-out" data-access-out>Sign out</button></nav><p class="a-macct-state t-b2" data-access-saved aria-live="polite"></p>'
     : '<span class="a-macct-who">Not signed in</span><nav class="a-macct-nav" aria-label="Your account"><a href="' + gateUrl('') + '" data-access-nav="in">Open your invitation</a></nav>';
   const out = el.querySelector('[data-access-out]'); if (out) out.addEventListener('click', () => { GUEST.leave(); LOC.replace(hrefOf('invitation.html')); });
+  /* SAVE MY PROGRESS in the account menu (Owner, 20 Sep 2026): the one existing save (assets/draft.js flush) — the state in words beside it */
+  const save = el.querySelector('[data-access-save]'), saved = el.querySelector('[data-access-saved]');
+  if (save && window.SIYL_DRAFT) {
+    const paintSaved = () => { const D = window.SIYL_DRAFT, st = D.state ? D.state() : {}; const t = st.at ? new Date(st.at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : ''; if (saved) saved.textContent = st.phase === 'saving' ? 'Saving…' : st.phase === 'failed' ? 'Not saved · try again' : (st.phase === 'saved' && t) ? 'Saved · ' + t : (D.words ? D.words().line : ''); };
+    save.addEventListener('click', () => { try { const f = document.activeElement; if (f && /^(INPUT|TEXTAREA|SELECT)$/.test(f.tagName)) { f.dispatchEvent(new Event('change', { bubbles: true })); f.blur(); } } catch (e) {} window.SIYL_DRAFT.flush('menu'); });
+    document.addEventListener('siyl:draft', paintSaved); paintSaved();
+  }
   /* a stale access row of the older shell, if a cached page still carries one */
   const old = document.querySelector('header.hd [data-access]'); if (old && old.parentElement && typeof old.parentElement.removeChild === 'function') old.parentElement.removeChild(old);
   publishShellHeight(header);

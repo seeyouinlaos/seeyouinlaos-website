@@ -1,0 +1,182 @@
+[
+ {
+  "id": "flow-start-my-trip",
+  "ok": true,
+  "d": "{\"open\":10,\"packs\":2,\"step\":true}"
+ },
+ {
+  "id": "flow-bangkok-subview",
+  "ok": true,
+  "d": "{\"url\":\"/room?stay=sathorn&room=u-sathorn-superior-garden&ctx=trip&stage=bkk-stay\",\"step\":\"02 / 06My Trip Cleo MY TRIP · SAVED AS DRAFT SAVE MY PROGRES\",\"back\":[\"Return to My Trip → your-journey.html#s-bkk-stay\"],\"dbg\":[\"http://127.0.0.1:8788/your-journey\",\"http://127.0.0.1:8788/room?stay=sathorn&room=u-sathorn-superior-garden&ctx=trip&stage=bkk-stay\"]}"
+ },
+ {
+  "id": "flow-bangkok-returns-to-02",
+  "ok": true,
+  "d": "{\"url\":\"/your-journey?done=bkk-stay#s-bkk-stay\",\"note\":\"SELECTED · IN YOUR TRIP\\nNEXT: SPECIAL EXPRESS NO. 25\",\"bag\":[\"bkk-stay:u-sathorn-superior-garden:A\"],\"holds\":[\"bkk-stay\"]}"
+ },
+ {
+  "id": "flow-train-stays-in-02",
+  "ok": true,
+  "d": "[\"bkk-stay:u-sathorn-superior-garden:A\",\"train:\"]"
+ },
+ {
+  "id": "flow-vientiane-room-subview-returns",
+  "ok": true,
+  "d": "{\"back\":[\"Return to My Trip → your-journey.html#s-wedstay\"],\"url\":\"/your-journey?done=wedstay#s-wedstay\",\"holds\":[\"bkk-stay\",\"wedstay\"]}"
+ },
+ {
+  "id": "flow-prewed-pick-returns",
+  "ok": true,
+  "d": "{\"url\":\"/your-journey?done=prewed#s-prewed\",\"holds\":[\"bkk-stay\",\"prewed\",\"wedstay\"],\"picking\":7}"
+ },
+ {
+  "id": "flow-flight-stays-in-02",
+  "ok": true,
+  "d": "[\"bkk-stay:u-sathorn-superior-garden:A\",\"mu9646:business\",\"prewed:heritage-executive:A\",\"train:\",\"wedstay:heritage-executive:A\"]"
+ },
+ {
+  "id": "flow-kmg-room-returns",
+  "ok": true,
+  "d": "{\"url\":\"/your-journey?done=kmg#s-kmg\",\"note\":\"SELECTED · IN YOUR TRIP\\nNEXT: C86\"}"
+ },
+ {
+  "id": "flow-ljg-room-returns",
+  "ok": true,
+  "d": "{\"url\":\"/your-journey?done=ljg#s-ljg\",\"note\":\"SELECTED · IN YOUR TRIP\\nNEXT: MU5922 + MU741\"}"
+ },
+ {
+  "id": "flow-kempinski-room-returns",
+  "ok": true,
+  "d": "{\"url\":\"/your-journey?done=kempinski#s-kempinski\",\"note\":\"SELECTED · IN YOUR TRIP\\nEVERY STAGE OF YOUR TRIP IS ANSWERED\"}"
+ },
+ {
+  "id": "flow-all-ten-resolved-continue-to-wedding",
+  "ok": true,
+  "d": "{\"open\":[],\"n\":10,\"total\":2067,\"holds\":[\"bkk-stay\",\"kempinski\",\"kmg\",\"ljg\",\"prewed\",\"wedstay\"],\"cont\":\"CONTINUE TO THE WEDDING\"}"
+ },
+ {
+  "id": "history-room-a-then-b-one-hold",
+  "ok": true,
+  "d": "{\"A\":{\"key\":\"wedstay/heritage\",\"label\":\"A\"},\"backA\":{\"url\":\"/room?stay=souphattra&room=heritage&ctx=trip&stage=wedstay\",\"cur\":\"Current selection · Room A · You · 1 place available\",\"bag\":[\"heritage:A\"]},\"B\":{\"key\":\"wedstay/heritage\",\"label\":\"B\"},\"backB\":{\"cur\":\"Current selection · Room B · You · 1 place available\",\"bag\":[\"heritage:B\"]},\"mBack\":{\"key\":\"wedstay/heritage\",\"label\":\"B\"},\"fwd\":{\"url\":\"/your-journey?done=wedstay\",\"step\":true,\"bag\":[\"heritage:B\"]}}"
+ },
+ {
+  "id": "flow-continue-to-wedding",
+  "ok": true,
+  "d": "http://127.0.0.1:8788/wedding"
+ },
+ {
+  "id": "seat-confirm-is-the-primary-action",
+  "ok": true,
+  "d": "{\"seat\":{\"id\":\"D-T-01\",\"label\":\"A1\"},\"pend\":{\"bar\":true,\"contOpacity\":\"0.35\",\"contPE\":\"none\",\"confirmText\":\"CONFIRM SEAT\"},\"confirmed\":\" SEAT HELD Your dinner seat is held in your name A1 Long tab\",\"contOpacity\":\"1\"}"
+ },
+ {
+  "id": "photography-and-film-copy",
+  "ok": true,
+  "d": "REQUIRED Photography & film Photography and filming take place during the wedding day, and selected photographs and films may be published on our wedding website and social media. COMPLETE · 20 SEPT 2"
+ },
+ {
+  "id": "flow-review-sendable",
+  "ok": true,
+  "d": "{\"url\":\"/review\",\"send\":true,\"total\":2057,\"n\":10}"
+ },
+ {
+  "id": "profile-coffee-cake-photo-cta-rail",
+  "ok": true,
+  "d": "{\"coffee\":\"SUNDAY, 28 FEBRUARY 2027 · FROM 12:00\\n\\nCoffee & Cake\\n\\nSouphattra Heritage, Vientiane · on the return from the temple\\n\\nJOINING\\n\\nComplimentary\\n\\nVIEW DETAILS\",\"photoCta\":\"ADD PROFILE PHOTO\",\"avatarBtn\":\"BUTTON\",\"rail\":true,\"stays\":6,\"travel\":4}"
+ },
+ {
+  "id": "save-my-progress-in-the-menu",
+  "ok": true,
+  "d": "{\"save\":{\"btn\":true,\"text\":\"SAVE MY PROGRESS\"},\"saved\":\"Saved · 17:12\"}"
+ },
+ {
+  "id": "who-sits-where-name-photo-seat",
+  "ok": true,
+  "d": "{\"up\":200,\"seen\":{\"name\":\"Ada\",\"seat\":\"A2\",\"photo\":true,\"initials\":\"\",\"of\":\"T001\"},\"map\":\"Dinner seat A2, taken by Ada\"}"
+ },
+ {
+  "id": "who-sits-where-follows-a-move",
+  "ok": true,
+  "d": "{\"rows\":[\"You@A1\",\"Ada@A3\"],\"old\":\"Dinner seat A2, available\",\"hasNew\":true,\"hasOld\":false}"
+ },
+ {
+  "id": "who-sits-where-privacy",
+  "ok": true,
+  "d": "{\"ini\":{\"photo\":true,\"name\":\"Ada\"},\"named\":false,\"anon\":401,\"leaks\":false}"
+ },
+ {
+  "id": "dress-galleries-320-dress",
+  "ok": true,
+  "d": "{\"g\":[\"6/6\",\"6/6\",\"5/5\"],\"last\":{\"idx\":5,\"n\":6,\"count\":\"6 / 6\",\"visible\":true,\"lastVisible\":true,\"ov\":0}}"
+ },
+ {
+  "id": "dress-galleries-320-wedding-preparation",
+  "ok": true,
+  "d": "{\"g\":[\"6/6\",\"6/6\",\"5/5\"],\"last\":{\"idx\":5,\"n\":6,\"count\":\"6 / 6\",\"visible\":true,\"lastVisible\":true,\"ov\":0}}"
+ },
+ {
+  "id": "dress-galleries-390-dress",
+  "ok": true,
+  "d": "{\"g\":[\"6/6\",\"6/6\",\"5/5\"],\"last\":{\"idx\":5,\"n\":6,\"count\":\"6 / 6\",\"visible\":true,\"lastVisible\":true,\"ov\":0}}"
+ },
+ {
+  "id": "dress-galleries-390-wedding-preparation",
+  "ok": true,
+  "d": "{\"g\":[\"6/6\",\"6/6\",\"5/5\"],\"last\":{\"idx\":5,\"n\":6,\"count\":\"6 / 6\",\"visible\":true,\"lastVisible\":true,\"ov\":0}}"
+ },
+ {
+  "id": "dress-galleries-834-dress",
+  "ok": true,
+  "d": "{\"g\":[\"6/6\",\"6/6\",\"5/5\"],\"last\":{\"idx\":5,\"n\":6,\"count\":\"6 / 6\",\"visible\":true,\"lastVisible\":true,\"ov\":0}}"
+ },
+ {
+  "id": "dress-galleries-834-wedding-preparation",
+  "ok": true,
+  "d": "{\"g\":[\"6/6\",\"6/6\",\"5/5\"],\"last\":{\"idx\":5,\"n\":6,\"count\":\"6 / 6\",\"visible\":true,\"lastVisible\":true,\"ov\":0}}"
+ },
+ {
+  "id": "dress-galleries-1440-dress",
+  "ok": true,
+  "d": "{\"g\":[\"6/6\",\"6/6\",\"5/5\"],\"last\":{\"idx\":3,\"n\":6,\"count\":\"4 / 6\",\"visible\":true,\"lastVisible\":true,\"ov\":0}}"
+ },
+ {
+  "id": "dress-galleries-1440-wedding-preparation",
+  "ok": true,
+  "d": "{\"g\":[\"6/6\",\"6/6\",\"5/5\"],\"last\":{\"idx\":3,\"n\":6,\"count\":\"4 / 6\",\"visible\":true,\"lastVisible\":true,\"ov\":0}}"
+ },
+ {
+  "id": "highlight-dress-codes",
+  "ok": true,
+  "d": "{\"bp\":\"DRESS CODE · BAAN PHRAYA\\n\\nElegant attire\\n\\nElegant attire and\",\"ca\":\"DRESS CODE · CANNUBI BY UMBERTO BOMBANA\\n\\nSmart casual\\n\\nSmart\",\"su\":0}"
+ },
+ {
+  "id": "global-journey-unchanged",
+  "ok": true,
+  "d": "{\"g\":{\"bar\":false,\"back\":\"BACK TO THE JOURNEY\",\"href\":\"journeys.html#j-prewed\"},\"stay\":{\"url\":\"/room\",\"cta\":\"REMOVE FROM MY BAG\"}}"
+ },
+ {
+  "id": "train-ticket-spacing-320",
+  "ok": true,
+  "d": "{\"gapImg\":593,\"gapBody\":16,\"ov\":0}"
+ },
+ {
+  "id": "train-ticket-spacing-390",
+  "ok": true,
+  "d": "{\"gapImg\":505,\"gapBody\":16,\"ov\":0}"
+ },
+ {
+  "id": "train-ticket-spacing-834",
+  "ok": true,
+  "d": "{\"gapImg\":24,\"gapBody\":24,\"ov\":0}"
+ },
+ {
+  "id": "train-ticket-spacing-1440",
+  "ok": true,
+  "d": "{\"gapImg\":24,\"gapBody\":24,\"ov\":0}"
+ },
+ {
+  "id": "console-errors",
+  "ok": true,
+  "d": "no script or console error"
+ }
+]

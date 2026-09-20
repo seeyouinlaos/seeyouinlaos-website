@@ -50,8 +50,23 @@
     });
   }
 
+  /* WHO SITS WHERE (Owner, 20 Sep 2026): other guests' portraits by their opaque guest id, read with this session's bearer,
+     cached per guest for the page; null when a guest has none (the initials stand) */
+  var others = {};
+  function ofGuest(guestId) {
+    var s = session(); if (!s || !/^[A-Z]\d{3}$/.test(String(guestId || ''))) return Promise.resolve(null);
+    var a = auth(); if (a && a.guestId === guestId) return window.SIYL_AVATAR.load();
+    if (others[guestId] !== undefined) return Promise.resolve(others[guestId]);
+    var p = fetch(API + '?of=' + encodeURIComponent(guestId), { headers: headersFor(s), cache: 'no-store' }).then(function (r) {
+      if (!same(s) || r.status === 404 || !r.ok) { others[guestId] = null; return null; }
+      return r.blob().then(function (b) { if (!same(s)) return null; others[guestId] = URL.createObjectURL(b); return others[guestId]; });
+    }).catch(function () { others[guestId] = null; return null; });
+    others[guestId] = p; return p;
+  }
+  document.addEventListener('siyl:signout', function () { others = {}; });
   window.SIYL_AVATAR = {
     ACCEPT: ACCEPT, MAX_IN: MAX_IN, SIDE: SIDE,
+    of: ofGuest,
     /* the stored photo as an object URL for this session, or null when there is none */
     load: function (force) {
       var s = session(); if (!s) { forget(); return Promise.resolve(null); }

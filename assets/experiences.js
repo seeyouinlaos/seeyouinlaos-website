@@ -82,6 +82,7 @@ window.SIYL_EXP = [
       house: 'A century-old residence, restored with care — once home to Phraya Mahai Savan and Khunying Luean Mahai Savan.',
       menuTitle: 'The eight-course Thai set menu',
       menuNote: 'THB 3,800 per person — the Owner’s rounded website price is USD 114. The house adds 10% service charge and applicable government tax. The wine pairing (THB 2,800) and the non-alcoholic pairing (THB 1,400) are the house’s own and are not booked here. Signature drinks rooted in Thai botanicals open the evening on the outdoor terrace.',
+      dressTitle: 'Elegant attire',
       menu: ['Crispy pineapple wafer with peanut and tamarind', 'Thai honeycomb biscuit, Thai herbs and eggplant custard infused with Thai rice liqueur', 'Savory Icevine leaves with roasted rice and coriander', 'Gulf of Siam banana prawn tartare with Isan herbs and roasted rice', 'Prachuap Khiri Khan squid in galangal-infused coconut broth with aromatic herbs and pink peppercorns', 'Marinated bamboo fish with herbs grilled in a coconut shell, house-made pickled papaya', 'Pressed watermelon, Nakornprathom bitter orange', 'Grilled Surat Thani River prawn with its tomalley, young tamarind and chilli paste', 'Charred free-range Kao Yai duck green curry with sour grape and heart of palm', 'Mulberry honey granita from Chainat, jasmine flower, bitter orange and talipot palm', 'Roasted silver banana with pandanus ice cream, crispy baby rice and coconut emulsion'],
       contact: { phone: '+66 (0) 2 659 9000', email: 'mobkk-baanphraya@mohg.com' }
     },
@@ -130,6 +131,7 @@ window.SIYL_EXP = [
       house: 'Named after the famous Cannubi hill in Barolo, Piemonte — a cellar of more than 350 wine labels.',
       menuTitle: 'The set menu · Autumn',
       menuNote: 'THB 5,500 per person — the Owner’s rounded website price is USD 165. The set menu is designed for one person and is the same for everyone at the table; prices are subject to 7% VAT and 10% service charge. The wine and non-alcoholic pairings are the house’s own and are not booked here. Allergies and dietary preferences: please tell Guest Relations early.',
+      dressTitle: 'Smart casual',
       menu: ['Pumpkin variations', 'Red sea bream carpaccio · Oscietra caviar · olive oil & ponzu dressing', 'Spaghettino “Felicetti” · marinated tuna tartare · tuna heart bottarga', 'Wagyu oxtail ravioli · mushroom sauce · chestnut & parsley emulsion — or homemade chitarra pasta · “Carabineros” prawn · crustacean sauce (supplement)', 'Roasted beef tenderloin & braised cheeks · morel mushroom & beef jus — or charcoaled Brittany blue lobster · pickled cherry tomatoes · lobster jus (supplement)', 'Homemade grape sorbet · sea berry & crispy pastry', '“Cioccolato” · 55% chocolate fondant · raspberry sorbet · “Pistocchi” ganache cake', 'Piccola pasticceria'],
       clip: 'assets/video/cannubi-card.mp4',
       contact: { phone: '+66 2200 9000', where: 'L Floor · Dusit Thani Bangkok' }

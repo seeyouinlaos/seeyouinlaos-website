@@ -561,3 +561,20 @@ a.am { display: block; text-decoration: none; }
    paint by assets/invite-early.js); the way in takes its place while nobody is signed in ---- */
 html:not([data-session="in"]) [data-private] { display: none !important; }
 html[data-session="in"] [data-private-cta] { display: none !important; }
+/* SAVE MY PROGRESS in the account block (Owner, 20 Sep 2026): the existing save, one line of state beneath */
+.a-macct-nav .a-macct-save { color: var(--a-ink); }
+.a-macct-state { margin: 8px 0 0; font-size: 11px; color: var(--a-mute); min-height: 1.2em; }
+.a-macct-state:empty { display: none; }
+
+/* THE REFERENCE GALLERY (Owner, 20 Sep 2026): the dress references as the one carousel — every photograph the same 3:4 card,
+   covered from the top, never stretched; one and a peek on a phone, two on a tablet, three on a desktop; every reference reachable */
+.refgal { margin-top: 18px; }
+.refgal .atrk { padding-left: 0; scroll-padding-left: 0; }
+.refgal .aslide { flex: 0 0 72%; margin: 0; }
+.refgal .aslide .am { aspect-ratio: 3 / 4; background: #E7E3DB; }
+.refgal .aslide .am::after { display: none; }
+.refgal .aslide .am img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 12%; display: block; }
+.refgal .arow { margin-left: 0; margin-right: 0; padding: 0; }
+.refgal .refgal-count { font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 10px; letter-spacing: 2px; color: var(--a-mute); white-space: nowrap; }
+@media (min-width: 768px) { .refgal .aslide { flex: 0 0 calc(50% - 8px); } }
+@media (min-width: 900px) { .refgal .atrk { gap: 16px; max-width: none; margin: 0; } .refgal .aslide { flex: 0 0 calc(33.333% - 11px); } .refgal .arow { max-width: none; margin-top: 18px; } }

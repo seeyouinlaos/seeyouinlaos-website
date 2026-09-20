@@ -45,7 +45,7 @@ test('3 · the bag icon IS My Bag: on every private page the header icon opens c
 });
 
 test('4 · the account navigation reads MY TRIP · MY PROFILE · SIGN OUT, inside the menu drawer (Owner, 18 Sep 2026 · Aman header: nothing beneath the logo)', () => {
-  assert.match(inv, /data-access-nav="trip">My Trip<\/a><a href="' \+ hrefOf\('profile\.html'\) \+ '" data-access-nav="profile">My Profile<\/a><button type="button" class="a-macct-out" data-access-out>Sign out<\/button>/);
+  assert.match(inv, /data-access-nav="trip">My Trip<\/a><a href="' \+ hrefOf\('profile\.html'\) \+ '" data-access-nav="profile">My Profile<\/a>' \+ \(window\.SIYL_DRAFT \? '<button type="button" class="a-macct-save" data-access-save>Save my progress<\/button>' : ''\) \+ '<button type="button" class="a-macct-out" data-access-out>Sign out<\/button>/);
   assert.match(inv, /let el = inMenu \|\| document\.querySelector\('\[data-account\]'\);/, 'the block lives in the drawer'); assert.doesNotMatch(inv, /insertAdjacentElement\('afterend'/, 'nothing is inserted under the header');
   assert.match(inv, /\(your-journey\|cart\|tickets\|room\|transport\|wedding\|wedding-preparation\|about-you\|profile\|review\)/, 'profile.html is a private surface: signed out it leads to the invitation');
 });

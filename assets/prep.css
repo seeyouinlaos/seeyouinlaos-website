@@ -819,7 +819,8 @@ body.seatbar-on .jbar { display: none; }
 .cart-pass { margin: 0 0 var(--s4); }
 @media (min-width: 560px) { .cart-pass { margin-left: 88px; } }
 /* the ticket inside a stage card: full width under the image and the words */
-.p-sum-ticket { padding: 0 var(--s5) var(--s5); min-width: 0; }
+/* the ticket panel breathes below the photograph and the summary (Owner, 20 Sep 2026: it used to sit on the image's edge on a desktop) */
+.p-sum-ticket { padding: var(--s4) var(--s5) var(--s5); min-width: 0; }
 .p-sum-ticket .p-ticket, .p-product > .p-ticket { --p-notch: var(--p-card); }
 .p-sum.on .p-sum-ticket .p-ticket { --p-notch: var(--p-paper); }
 .p-sum-ticket:empty { display: none; }
@@ -827,7 +828,7 @@ body.seatbar-on .jbar { display: none; }
 .p-sum-ticket .p-actions, .p-ticket .p-actions { display: flex; flex-wrap: wrap; gap: var(--s3) var(--s5); align-items: center; }
 .p-ticket .p-actions .p-act { width: 100%; min-width: 0; }
 @media (min-width: 768px) {
-  .p-sum-ticket { grid-column: 1 / -1; padding: 0 var(--s6) var(--s6); }
+  .p-sum-ticket { grid-column: 1 / -1; padding: var(--s5) var(--s6) var(--s6); }
   .p-ticket .p-actions .p-act { width: auto; min-width: 240px; }
 }
 
@@ -862,3 +863,29 @@ body.seatbar-on .jbar { display: none; }
 .p-pack .t-h1 { font-size: 20px; line-height: 1.3; }
 .p-pack .p-price { margin-top: var(--s2); }
 .p-pack .p-actions { margin-top: auto; padding-top: var(--s3); }
+
+/* THE BOOKING CONTEXT (Owner, 20 Sep 2026): landing back on My Trip after a selection made in a sub-view — the stage says so,
+   the next open stage sits right below it; the card is marked once, quietly */
+.p-wizard-note { margin-top: 10px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; }
+.p-wizard-note > span { display: inline-flex; align-items: center; gap: 8px; }
+.p-wizard-note a { color: var(--p-ink); }
+.p-stage.p-wizard-landed { animation: p-wizard-land 1.6s var(--p-ease, ease) 1; }
+@keyframes p-wizard-land { 0% { background: rgba(49, 49, 49, .05); } 100% { background: transparent; } }
+body.p-calm .p-stage.p-wizard-landed { animation: none; }
+
+/* WHO SITS WHERE (Owner, 20 Sep 2026): the roll call beside the seat plan — small portraits (photo or initials), first name, seat */
+.p-seatrail { margin-top: var(--s4); border-top: 1px solid var(--p-line); padding-top: var(--s3); }
+.p-seatrail ul { list-style: none; margin: 10px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px 16px; }
+.p-seatrail li { display: flex; align-items: center; gap: 10px; min-height: 40px; }
+.p-seatrail li .n { font-size: 13px; line-height: 1.3; color: var(--p-ink); flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.p-seatrail li .s { font-family: var(--f-ui); font-size: 10px; letter-spacing: 1.8px; text-transform: uppercase; color: var(--p-mute); flex: none; }
+.p-seatrail li.me .n { font-weight: 500; }
+.p-seatava { position: relative; width: 34px; height: 34px; border-radius: 50%; background: #E7E3DB; flex: none; overflow: hidden; display: inline-flex; align-items: center; justify-content: center; }
+.p-seatava i { font-style: normal; font-family: var(--f-ui); font-size: 11px; letter-spacing: 1px; color: var(--p-ink); }
+.p-seatava img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.p-seatava.has-photo i { visibility: hidden; }
+
+/* CONFIRM SEAT is the one next action while a chair is selected but not yet held (Owner, 20 Sep 2026): the step's continue
+   waits, quietly, until the seat is confirmed */
+body.seatbar-on .prep-foot [data-continue] { opacity: .35; pointer-events: none; }
+body.seatbar-on .prep-foot .prep-foot-note { display: none; }

@@ -652,7 +652,11 @@ async function handleProfilePhoto(request, env) {
   const who = await identify(request, env);
   if (!who) return json({ ok: false, error: 'unauthorised' }, 401, corsHeaders(request));
   if (!env.REG_KV) return json({ ok: false, error: 'photo storage is not enabled yet', enabled: false }, 503, corsHeaders(request));
-  const key = photoKey(who.invitationId);
+  /* WHO SITS WHERE (Owner, 20 Sep 2026): an authenticated guest may read ANOTHER guest's portrait by its opaque guest id (the
+     seat plan shows it beside the name) — read only, never a write, never without a session */
+  const of = request.method === 'GET' ? String(new URL(request.url).searchParams.get('of') || '').trim() : '';
+  if (of && !/^[A-Z]\d{3}$/.test(of)) return json({ ok: false, error: 'unknown guest' }, 404, corsHeaders(request));
+  const key = photoKey(of ? 'INV-' + of : who.invitationId);
   if (request.method === 'GET') {
     let got = null; try { got = await env.REG_KV.getWithMetadata(key, { type: 'arrayBuffer' }); } catch (e) { got = null; }
     if (!got || !got.value || !got.value.byteLength) return json({ ok: false, error: 'no photo' }, 404, corsHeaders(request));

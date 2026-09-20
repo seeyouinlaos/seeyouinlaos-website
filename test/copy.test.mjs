@@ -62,7 +62,7 @@ test('COPY · one voice for the shell and the bar: the six step labels, the bar 
   for (const label of ['Your Invitation', 'My Trip', 'The Wedding', 'Wedding Preparation', 'About You', 'Review & Send']) { assert.match(shell, new RegExp("label: '" + label.replace(/[&]/g, '&') + "'")); assert.match(guest, new RegExp("label: '" + label + "'")); }
   assert.match(bar, /data-nav="top"/); assert.doesNotMatch(bar, /data-nav="trip"/, 'the account surfaces live in the menu drawer, not on a second bar');
   /* THE ACCOUNT IN THE MENU (Owner, 18 Sep 2026 · Aman header): My Trip · My Profile · Sign out in the drawer — the bag icon is My Bag, the drawer never repeats it */
-  assert.match(header, /data-access-nav="trip">My Trip<\/a><a href="' \+ hrefOf\('profile\.html'\) \+ '" data-access-nav="profile">My Profile<\/a><button type="button" class="a-macct-out" data-access-out>Sign out<\/button>/);
+  assert.match(header, /data-access-nav="trip">My Trip<\/a><a href="' \+ hrefOf\('profile\.html'\) \+ '" data-access-nav="profile">My Profile<\/a>' \+ \(window\.SIYL_DRAFT \? '<button type="button" class="a-macct-save" data-access-save>Save my progress<\/button>' : ''\) \+ '<button type="button" class="a-macct-out" data-access-out>Sign out<\/button>/);
   assert.doesNotMatch(header, /data-access-nav="bag"/, 'no textual My Bag in the account block');
   assert.doesNotMatch(shell, /prep-eyebrow/, 'the step header carries no eyebrow: step · guest · state · Save · View all steps');
 });

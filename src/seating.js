@@ -192,6 +192,9 @@ export class Seating {
         const row = { ...s, state };
         if (state === 'yours') { row.guestId = h.guestId; row.allocated = h.state === 'allocated'; out.mine[event][h.guestId] = s.seatId; }
         if (h && identity && h.name) row.name = h.name;
+        /* WHO SITS WHERE (Owner, 20 Sep 2026): an authenticated guest also learns the holder's opaque guest id — the key of their
+           profile portrait (/api/profile/photo?of=) — never an invitation id, never a code */
+        if (h && identity && h.guestId) row.holder = h.guestId;
         return row;
       });
       out[event] = event === 'ceremony'

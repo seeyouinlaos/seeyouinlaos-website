@@ -1,0 +1,10 @@
+# Stage E2E batch, 20 Sep 2026 (the stage worker reset before each suite; synthetic guests only)
+e2e-fp-final exit=0 36/36 
+e2e-hl-fp exit=0 20/20 
+e2e-014-fp exit=0 79/79 
+e2e-013-fp exit=0 35/35 
+e2e-012-fp exit=0 25/25 
+e2e-011-fp exit=0 52/52 
+e2e-p0-fp exit=0 52/52 
+e2e-ia-fp exit=0 35/35 
+BATCH DONE

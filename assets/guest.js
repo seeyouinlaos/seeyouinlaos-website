@@ -70,7 +70,7 @@
    * an acknowledgement — never a consent to publication, which stays a
    * separate, optional, withdrawable choice (assets/docs.js). */
   var PHOTO_TEXT = 'I understand and acknowledge this.';
-  var PHOTO_VERSION = '2026-09-14';
+  var PHOTO_VERSION = '2026-09-20';   /* the acknowledgement's words: 20 Sep 2026 — filming and the possible publication named together */
 
   var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
   function validEmail(v) { return EMAIL_RE.test(String(v || '').trim()); }

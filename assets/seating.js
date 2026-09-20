@@ -259,6 +259,30 @@
     },
 
     /* draw one event into a container and wire the choice */
+    /* WHO SITS WHERE (Owner, 20 Sep 2026): the held chairs of an event as a compact rail — a small portrait (the guest's own
+       photo where there is one, initials where not), the first name, the seat — for an authenticated guest only; the plan
+       stays the map, this is the roll call beside it. Read from the same view; nothing is stored here. */
+    railHtml: function (event, v, opts) {
+      opts = opts || {};
+      if (!v || !v.named || !v[event]) return '';
+      var list = event === 'ceremony' ? [].concat.apply([], ((v.ceremony && v.ceremony.rows) || []).map(function (r) { return r.seats; })) : ((v.dinner && v.dinner.sides) ? v.dinner.sides.T.concat(v.dinner.sides.B) : []);
+      var held = list.filter(function (s) { return s && (s.state === 'yours' || s.state === 'party' || s.state === 'taken') && (s.name || s.guestId || s.holder); });
+      if (!held.length) return '';
+      held.sort(function (a, b) { return S.label(a.seatId).localeCompare(S.label(b.seatId), undefined, { numeric: true }); });
+      var me = opts.guestId || null;
+      return '<div class="p-seatrail" data-seatrail="' + esc(event) + '"><p class="t-l1">Who sits where · ' + held.length + (held.length === 1 ? ' seat' : ' seats') + ' held</p><ul>' + held.map(function (s) {
+        var gid = s.holder || s.guestId || '', name = s.state === 'yours' && (!me || s.guestId === me) ? 'You' : (s.name || 'A guest'), ini = String(s.name || 'G').trim().split(/\s+/).map(function (w) { return w.charAt(0); }).slice(0, 2).join('').toUpperCase();
+        return '<li' + (s.state === 'yours' ? ' class="me"' : '') + ' data-seat-of="' + esc(gid) + '"><span class="p-seatava" data-ava="' + esc(gid) + '" role="img" aria-label="' + esc(s.name || 'Guest') + '"><i aria-hidden="true">' + esc(ini) + '</i></span><span class="n">' + esc(name) + '</span><span class="s">' + esc(S.label(s.seatId)) + '</span></li>';
+      }).join('') + '</ul></div>';
+    },
+    /* the portraits of the rail, read with this session — a photo replaces the initials as it arrives */
+    wireRail: function (container) {
+      var AV = window.SIYL_AVATAR; if (!AV || !AV.of || !container) return;
+      container.querySelectorAll('[data-ava]').forEach(function (el) {
+        var gid = el.getAttribute('data-ava'); if (!gid) return;
+        AV.of(gid).then(function (url) { if (!url || !el.isConnected) return; var img = document.createElement('img'); img.alt = ''; img.src = url; img.addEventListener('error', function () { img.remove(); }); el.classList.add('has-photo'); el.appendChild(img); });
+      });
+    },
     render: function (container, event, opts) {
       opts = opts || {};
       if (!container || !view || !view[event]) { if (container) container.innerHTML = ''; return; }
@@ -266,7 +290,9 @@
       container.innerHTML = '<div class="p-seatwrap' + (wide ? ' wide' : '') + '">' + S.svg(event, view, opts) + '</div>' +
         '<p class="t-l1 p-seathint" hidden>Swipe or scroll sideways to see the whole plan</p>' + S.legend(opts) +
         (event === 'dinner' && S.poolNote() ? '<p class="t-b2 p-poolnote">' + esc(S.poolNote()) + '</p>' : '') +
-        (view && view.named ? '<p class="t-b2 p-poolnote">First names show who already sits where.</p>' : '');
+        (view && view.named ? '<p class="t-b2 p-poolnote">First names show who already sits where.</p>' : '') +
+        S.railHtml(event, view, opts);
+      S.wireRail(container);
       container.classList.toggle('is-choosing', !!opts.selectable && opts.choosing !== false);
       /* on a narrow screen the plan keeps its chairs at a real size and
        * scrolls sideways — the guest is told so, in words */

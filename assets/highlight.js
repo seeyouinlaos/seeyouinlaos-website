@@ -128,6 +128,8 @@
         '<a class="x-cta" href="cart.html" data-sel-state="added">Open My Bag</a><button type="button" class="cancel" id="hl-cancel">Continue reading</button>');
       document.getElementById('hl-cancel').addEventListener('click', close);
       var cur = document.querySelector('[data-sel-state="current"]'); if (cur) try { cur.focus({ preventScroll: true }); } catch (e) {}
+      /* THE BOOKING CONTEXT (20 Sep 2026): opened from 02 / 06, the confirmed table returns the guest to My Trip by itself */
+      var Wz = window.SIYL_WIZARD; if (Wz && Wz.active) { var ov = document.getElementById('hl-ov'); var a = ov && ov.querySelector('a.x-cta'); if (a) { a.textContent = 'Continue My Trip'; a.setAttribute('href', 'your-journey.html?done=extras#extras'); } Wz.done('extras'); }
     },
     close: close
   };
