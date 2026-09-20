@@ -20,3 +20,5 @@ Profile → saved → reload → persists → a fresh device reads it → auth/C
 account block, Review & Send, the tickets read the correction → Ben, the same party, sees Ada by her first name, corrects his own
 name, Ada's untouched → a forged identity in the body ignored, the partner's invitation refused) · regression final-pass 36/36 ·
 IA 35/35 · 014 79/79 · 013 35/35 · P0 52/52 · Highlights 20/20 (`stage/regression.txt`).
+
+Deploy: main `9aceda2` → Workers Build version **`fb08605b`** (20:03:32Z, 20 Sep 2026 UTC) · parity 257 / 257 · infra freeze intact · the deployed register identical (104 unique codes · 0 duplicate · 0 auth errors) · live-ro 25 / 25 · `/api/contact` read and write without a bearer → 401 · production dry runs before / after (aggregates only, nothing reset): 33 room occupancies · 12 seat holds · 11 drafts of 104 actors · 38 KV keys — identical.
