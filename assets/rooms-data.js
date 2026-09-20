@@ -22,7 +22,7 @@
   'use strict';
   var RM = 'assets/images/rooms/';
   var KMG = 'assets/images/kunming/';
-  var LJG = 'assets/images/lijiang/';
+  var LJG = 'assets/images/lijiang/', JNY = 'assets/images/journey/';
   var PENT = 'assets/images/penthouse/';
   /* ONE SOURCE MAP for the Bangkok accommodation imagery (Owner, 16 Sep 2026 · image quality quickfix): the hero of the
    * detail page, the card of every rail and overview (Your Journey, the journeys page, "Other rooms at …", THE HOUSES),
@@ -562,7 +562,7 @@
       place: 'Baisha, Lijiang · Rizhao Jinshan',
       breakfast: 'Breakfast included',
       windows: [{ id: 'ljg', label: 'After the Wedding', dates: '04 – 06 March 2027', nights: '2 nights', n: 2,
-        bagName: 'Luye Baisha · Lijiang', bagImg: 'assets/images/journey/lijiang-01.jpg' }],
+        bagName: 'Luye Baisha · Lijiang', bagImg: 'assets/images/lijiang/snow-mountain-viewing-1.jpg' }],
       includes: [
         'Two nights, 4 → 5 and 5 → 6 March, below Jade Dragon Snow Mountain.',
         'Breakfast included on both mornings.',
@@ -609,14 +609,13 @@
           rate: 105 },
         { slug: 'snow-mountain-viewing', name: 'Snow Mountain Viewing Room', cat: 'Snow mountain room',
           desc: 'Snow Mountain Viewing Room — 50 sq.m., 1 king bed (2m wide), 2 adults. Floor 2nd floor.',
-          /* the Owner-designated photograph for this room (08 Sep 2026): Jade
-           * Dragon Snow Mountain over the Baisha rooftops. Canonical — used for
-           * this room only, everywhere the room appears. */
-          /* 20 Sep 2026: the Owner's Lijiang folders (024 · 001–009) carry no photograph of this category itself — the one approved
-             frame is the VIEW, and it is labelled as the view so nobody mistakes it for the room; a room photograph joins the day the
-             Owner supplies one (never another category's room in its place) */
-          gallery: [[LJG + 'snow-mountain-viewing-1.jpg', 'The view from the room · Jade Dragon Snow Mountain over the Baisha rooftops (the room itself is not yet photographed)']],
-          viewOnly: true,
+          /* the Owner's ruling of 21 Sep 2026: the three room photographs that stood for the house on The Journey (the bedroom
+             towards the valley, the private soup pool, the sitting room and its fireplace towards the mountain) ARE this room —
+             they are its gallery; the peak over the Baisha rooftops is the house's own frame (assets/stay-media.js). */
+          gallery: [
+          [JNY + 'lijiang-01.jpg', 'The room towards the valley'],
+          [JNY + 'lijiang-02.jpg', 'The private soup pool below Jade Dragon Snow Mountain'],
+          [JNY + 'lijiang-03.jpg', 'The sitting room and the fireplace towards the mountain']],
           facts: [['Size', '50 sq.m.'], ['Bed', '1 King Bed (2m wide)'], ['Occupancy', '2 Adults'], ['Location', 'Floor 2nd floor']],
           story: 'Fifty square metres facing the peak: a starry-sky terrace, a private hot-spring soup pool and a fireplace for the cold end of the day.',
           amenities: ['Air conditioning', 'Air purifier', 'Audio equipment', 'Balcony', 'Bathrobe', 'Bathtub or shower', 'Butler service', 'Coffee maker / teapot', 'Electric kettle', 'Fireplace', 'Free Wi-Fi', 'Heating', 'Iron and ironing board', 'Minibar', 'Private hot springs', 'Projector', 'Safe in room', 'Slippers', 'Smart door lock', 'Smart room controls', 'Smart toilet', 'Sofa', 'Terrace'],

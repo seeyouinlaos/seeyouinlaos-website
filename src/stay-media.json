@@ -303,22 +303,10 @@
   "city": "Lijiang",
   "images": [
    {
-    "src": "assets/images/journey/lijiang-01.jpg",
-    "kind": "room",
-    "caption": "A room towards the valley",
-    "source": "Owner Drive 024 - Hotel - Luye Baisha Lijiang"
-   },
-   {
-    "src": "assets/images/journey/lijiang-02.jpg",
-    "kind": "facilities",
-    "caption": "The private pool below Jade Dragon Snow Mountain",
-    "source": "Owner Drive 024 - Hotel - Luye Baisha Lijiang"
-   },
-   {
-    "src": "assets/images/journey/lijiang-03.jpg",
-    "kind": "room",
-    "caption": "The sitting room towards the mountain",
-    "source": "Owner Drive 024 - Hotel - Luye Baisha Lijiang"
+    "src": "assets/images/lijiang/snow-mountain-viewing-1.jpg",
+    "kind": "grounds",
+    "caption": "Jade Dragon Snow Mountain over the Baisha rooftops",
+    "source": "Owner Drive 024 - Hotel - Luye Baisha Lijiang · the Owner's designated frame (08 Sep 2026); the house's own picture by the Owner's ruling of 21 Sep 2026"
    }
   ]
  },

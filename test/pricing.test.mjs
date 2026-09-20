@@ -808,16 +808,18 @@ test('no rule is ever drawn through the word BLUE', () => {
   assert.match(link, /border-bottom: 1px solid/);
 });
 
-test('Snow Mountain Viewing Room carries its own canonical photograph, used nowhere else', () => {
+test('Snow Mountain Viewing Room carries its own three room photographs (the Owner\'s ruling of 21 Sep 2026), used by no other room; the peak over the rooftops is the house\'s own frame, never a room\'s', () => {
   const room = R.lijiang.rooms.find((r) => r.slug === 'snow-mountain-viewing');
-  assert.equal(room.gallery.length, 1);
-  assert.equal(room.gallery[0][0], 'assets/images/lijiang/snow-mountain-viewing-1.jpg');
+  assert.deepEqual(room.gallery.map((g) => g[0]), ['assets/images/journey/lijiang-01.jpg', 'assets/images/journey/lijiang-02.jpg', 'assets/images/journey/lijiang-03.jpg']);
+  assert.ok(room.gallery.every((g) => /room|pool|sitting room/i.test(g[1])), 'every caption names the room'); assert.equal(room.viewOnly, undefined);
   const everyOther = Object.values(R).flatMap((s) => s.rooms).filter((r) => r !== room).flatMap((r) => r.gallery.map((g) => g[0]));
-  assert.ok(!everyOther.includes(room.gallery[0][0]), 'not borrowed by another room');
-  for (const f of ['index.html', 'destination.html', 'accommodation.html', 'experiences.html', 'voyage.html']) {
-    assert.doesNotMatch(readFileSync(join(ROOT, f), 'utf8'), /snow-mountain-viewing-1|snow-mountain-rooftops/, f + ' uses the room photograph as scenery');
-  }
-  assert.equal(P.items('ljg', 'snow-mountain-viewing')[0].img, room.gallery[0][0], 'the bag line carries the same image');
+  for (const g of room.gallery) assert.ok(!everyOther.includes(g[0]), g[0] + ' not borrowed by another room');
+  assert.ok(!Object.values(R).flatMap((s) => s.rooms).some((r) => r.gallery.some((g) => /snow-mountain-viewing-1/.test(g[0]))), 'the view stands for no room');
+  const media = {}; new Function('window', readFileSync(join(ROOT, 'assets/stay-media.js'), 'utf8'))(media);
+  assert.deepEqual(media.SIYL_STAY_MEDIA.luyeBaisha.images.map((i) => i.src), ['assets/images/lijiang/snow-mountain-viewing-1.jpg'], 'the house on The Journey: the peak over the Baisha rooftops');
+  assert.equal(R.lijiang.windows[0].bagImg, 'assets/images/lijiang/snow-mountain-viewing-1.jpg');
+  assert.match(readFileSync(join(ROOT, 'accommodation.html'), 'utf8'), /href="journeys\.html#j-ljg" style="background-image:url\(assets\/images\/lijiang\/snow-mountain-viewing-1\.jpg\)"/);
+  assert.equal(P.items('ljg', 'snow-mountain-viewing')[0].img, room.gallery[0][0], 'the bag line carries the room');
 });
 
 
