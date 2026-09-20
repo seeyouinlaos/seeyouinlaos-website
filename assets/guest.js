@@ -153,13 +153,18 @@
       return '';
     },
     value: function (id, field) {
+      var me = this.me();
+      /* the guest's own correction of their name (First Name · Last Name in the personal details) reads everywhere */
+      if (me && (!id || id === me.guestId) && (field === 'fullName' || field === 'preferredName')) {
+        if (this.contact('firstName') || this.contact('lastName')) { var fn = this.nameField('firstName'), ln = this.nameField('lastName'); return field === 'preferredName' ? (fn || ln) : [fn, ln].filter(Boolean).join(' '); }
+      }
       var r = this.rec(id);
       if (r.submitted && r.submitted[field] != null) return r.submitted[field];
       return this.source(id, field);
     },
     edited: function (id, field) {
-      var r = this.rec(id);
-      return !!(r.submitted && r.submitted[field] != null && String(r.submitted[field]) !== String(this.source(id, field)));
+      var v = this.value(id, field);
+      return v != null && String(v) !== '' && String(v) !== String(this.source(id, field));
     },
     set: function (id, field, v) {
       var me = this.me(); if (!me) return;
@@ -228,6 +233,9 @@
        Phone Number · Email Address · Private Mailing Address (structured). Each field belongs to the signed-in person alone
        (one code = one person = one record); the couple partner has their own. CONxxx and COUPLxxx are never fields here. */
     PERSONAL: [
+      /* THE GUEST'S OWN NAME (Owner, 21 Sep 2026): editable, prefilled from the invitation; a correction changes the words,
+         never the identity (guestId · CONxxx · COUPLxxx · the code) */
+      { key: 'firstName', label: 'First Name', name: true }, { key: 'lastName', label: 'Last Name', name: true },
       { key: 'birthdate', label: 'Date of Birth' }, { key: 'nationality', label: 'Nationality' }, { key: 'phone', label: 'Phone Number' }, { key: 'email', label: 'Email Address' },
       { key: 'address1', label: 'Street and house number', group: 'address' }, { key: 'address2', label: 'Address line 2', group: 'address', optional: true }, { key: 'postal', label: 'Postal / ZIP code', group: 'address' },
       { key: 'city', label: 'City', group: 'address' }, { key: 'region', label: 'State / Province / Region', group: 'address', optional: true }, { key: 'country', label: 'Country', group: 'address' }
@@ -239,9 +247,20 @@
     birthdateWords: function () { var v = this.contact('birthdate'); var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v); if (!m) return v || ''; var M = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']; return String(parseInt(m[3], 10)) + ' ' + M[parseInt(m[2], 10) - 1] + ' ' + m[1]; },
     validBirthdate: function (v) { var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(v || '').trim()); if (!m) return false; var y = +m[1]; var d = new Date(Date.UTC(y, +m[2] - 1, +m[3])); return y >= 1900 && y <= new Date().getUTCFullYear() && d.getUTCMonth() === +m[2] - 1 && d.getUTCDate() === +m[3] && d.getTime() < Date.now(); },
     /* the fields still empty — asked for, never blocking the journey */
-    personalMissing: function () { var self = this; return this.PERSONAL.filter(function (f) { return !f.optional && !self.contact(f.key); }).map(function (f) { return { key: f.key, label: f.label, href: 'invitation.html#p-' + f.key }; }); },
+    personalMissing: function () { var self = this; return this.PERSONAL.filter(function (f) { return !f.optional && !f.name && !self.contact(f.key); }).map(function (f) { return { key: f.key, label: f.label, href: 'invitation.html#p-' + f.key }; }); },
     /* the guest list's own data, taken once into empty fields of this guest's record — prefilled to review, never overwriting
        what the guest or the server already holds; recorded in the history as the list's */
+    /* the invitation's name as First Name · Last Name: the preferred name first (the register's), the rest of the full name last */
+    nameParts: function () {
+      var me = this.me(); if (!me) return { first: '', last: '' };
+      var full = String(me.fullName || '').trim(), pref = String(me.preferredName || '').trim();
+      var first = pref || full.split(/\s+/)[0] || '', last = full;
+      if (first && full.indexOf(first) === 0) last = full.slice(first.length).trim(); else if (first && full.indexOf(' ' + first + ' ') >= 0) last = full.replace(' ' + first + ' ', ' ').trim();
+      if (last === full && first && full === first) last = '';
+      return { first: first, last: last };
+    },
+    /* the two name fields as the guest sees them: their own correction, else the invitation's words — nothing is written until the guest edits */
+    nameField: function (key) { var v = this.contact(key); if (v) return v; var np = this.nameParts(); return key === 'firstName' ? np.first : key === 'lastName' ? np.last : ''; },
     prefillFromInvitation: function () {
       var me = this.me(), a = auth(); if (!me || !a || !a.profile || typeof a.profile !== 'object') return false;
       var st = read(), c = st.contact || {}, pr = a.profile, changed = false, me2 = me.guestId;
@@ -265,6 +284,19 @@
       st.history.push({ field: 'contact.' + f, from: from, to: v, at: stamp(), by: me.guestId });
       write(st);
       this.pushContact();
+      if (f === 'firstName' || f === 'lastName') this.renameHolds();
+    },
+    /* a corrected name reaches the chairs the guest already holds (the roll call reads the ledger's name): each held seat is
+       re-selected under the same identity with the new first name — the seat, the party and the identity unchanged */
+    renameHolds: function () {
+      var a = auth(), self = this; if (!a || !a.bearer || typeof fetch !== 'function') return Promise.resolve(null);
+      var base = CONTACT_API.replace(/\/api\/contact$/, '/api/seating'), name = String(this.nameOf() || '').slice(0, 24);
+      var H = { 'content-type': 'application/json', 'x-siyl-auth': a.bearer };
+      return fetch(base + '/mine', { method: 'POST', headers: H, body: '{}' }).then(function (r) { return r.json(); }).then(function (d) {
+        var mine = (d && d.mine) || {}, jobs = [];
+        Object.keys(mine).forEach(function (ev) { var seatId = mine[ev] && mine[ev][a.guestId]; if (seatId) jobs.push(fetch(base + '/select', { method: 'POST', headers: H, body: JSON.stringify({ invitationId: a.invitationId, guestId: a.guestId, event: ev, seatId: seatId, name: name }) }).catch(function () { return null; })); });
+        return Promise.all(jobs).then(function () { try { document.dispatchEvent(new CustomEvent('siyl:seats')); } catch (e) {} return jobs.length; });
+      }).catch(function () { return null; });
     },
     /* THE CLEAN RESET (Owner, 19 Sep 2026): the contact travels with the epoch this device honoured; a refused write (the
        server was reset since) clears the cached journey through the draft module's rule and pushes nothing back */
@@ -594,7 +626,8 @@
           guestId: me.guestId,
           name: this.nameOf(me.guestId),
           source: { fullName: me.fullName, preferredName: me.preferredName },
-          submitted: r.submitted || {},
+          /* the guest's own correction of their name travels as submitted (the invitation's words stay the source) */
+          submitted: (function (sub, self) { var out = Object.assign({}, sub || {}); var fv = self.value(me.guestId, 'fullName'), pv = self.value(me.guestId, 'preferredName'); if (fv && fv !== (me.fullName || '')) out.fullName = fv; if (pv && pv !== (me.preferredName || me.fullName || '')) out.preferredName = pv; return out; })(r.submitted, this),
           profile: r.profile || {},
           allergy: r.allergy || null,
           photo: r.photo || null,

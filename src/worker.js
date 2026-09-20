@@ -611,8 +611,10 @@ async function storedContact(env, invitationId) {
 async function personOf(env, origin, who) {
   try { const entries = await loadIndex(env, origin, false); const e = Object.values(entries || {}).find((x) => x && x.i === who.invitationId && x.g === who.guestId); return { contactId: e && typeof e.c === 'string' ? e.c : null, couple: e && typeof e.k === 'string' ? e.k : null }; } catch (e) { return { contactId: null, couple: null }; }
 }
-const PERSONAL_KEYS = ['birthdate', 'nationality', 'address1', 'address2', 'postal', 'city', 'region', 'country'];
-const PERSONAL_MAX = { birthdate: 10, nationality: 80, address1: 160, address2: 160, postal: 20, city: 80, region: 80, country: 80 };
+/* THE GUEST'S OWN NAME (Owner, 21 Sep 2026): First Name · Last Name are the guest's to correct — profile data under the same
+   invitation, never the identity (guestId · CONxxx · COUPLxxx stay the register's; no code, no auth changes) */
+const PERSONAL_KEYS = ['firstName', 'lastName', 'birthdate', 'nationality', 'address1', 'address2', 'postal', 'city', 'region', 'country'];
+const PERSONAL_MAX = { firstName: 80, lastName: 80, birthdate: 10, nationality: 80, address1: 160, address2: 160, postal: 20, city: 80, region: 80, country: 80 };
 const validBirthdate = (v) => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(v || '')); if (!m) return false; const d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3])); return +m[1] >= 1900 && d.getUTCMonth() === +m[2] - 1 && d.getUTCDate() === +m[3] && d.getTime() < Date.now(); };
 const publicContact = (c) => { const out = { email: c.email || '', phone: c.phone || '' }; for (const k of PERSONAL_KEYS) out[k] = c[k] || ''; return out; };
 async function handleContact(request, env) {

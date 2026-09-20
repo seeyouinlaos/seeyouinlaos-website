@@ -1,0 +1,47 @@
+[
+ {
+  "id": "profile-name-fields-editable-prefilled",
+  "ok": true,
+  "d": "{\"first\":\"Ada\",\"last\":\"Test\",\"editable\":true,\"head\":\"MY PROFILE · ADA\\n\\nMy Profile\\n\\nYour account: who you are, how we reach you, and e\"}"
+ },
+ {
+  "id": "profile-surname-saved",
+  "ok": true,
+  "d": "{\"last\":\"Acker\",\"corrected\":true,\"full\":\"Ada Acker\",\"first\":\"Ada\",\"ident\":\"A\\n\\nGUEST · PERSONAL INVITATION\\n\\nAda\\n\\nAda Acker\\n\\nYour party · Ada & Ben\"}"
+ },
+ {
+  "id": "name-persists-after-reload-and-on-the-server",
+  "ok": true,
+  "d": "{\"f2\":{\"last\":\"Acker\",\"full\":\"Ada Acker\"},\"srv\":{\"ln\":\"Acker\",\"fn\":\"\",\"email\":true}}"
+ },
+ {
+  "id": "identity-and-state-unchanged",
+  "ok": true,
+  "d": "{\"same\":{\"auth\":true,\"bag\":true,\"holds\":true,\"seat\":true,\"temple\":true},\"bag\":[\"wedstay:heritage-executive:A\"],\"holds\":[\"wedstay\"],\"seat\":{\"ceremony\":{\"T001\":\"C-L-01-01\"},\"dinner\":{\"T001\":\"D-T-01\"}}}"
+ },
+ {
+  "id": "fresh-device-reads-the-correction",
+  "ok": true,
+  "d": "{\"last\":\"Acker\",\"full\":\"Ada Acker\"}"
+ },
+ {
+  "id": "surfaces-read-the-corrected-name",
+  "ok": true,
+  "d": "{\"trip\":\"Ada · Your party · Ada & Ben\",\"acct\":\"SIGNED IN · ADA\",\"rev\":{\"url\":\"/review\",\"name\":true,\"corrected\":true,\"old\":false,\"need\":[]},\"tix\":{\"name\":true,\"old\":false},\"card\":\"SEAT HELD Your dinner seat Souphattra Heritage · poolside · \",\"rail\":[\"You@A1\"]}"
+ },
+ {
+  "id": "couple-isolation",
+  "ok": true,
+  "d": "{\"benSees\":{\"row\":\"Ada\",\"own\":\"Ben Test\",\"ownFirst\":\"Ben\",\"ada\":\"Ada\"},\"benAfter\":{\"own\":\"Ben Zimmer\",\"ada\":\"Ada\"},\"ada\":\"Acker\",\"ben\":\"Zimmer\"}"
+ },
+ {
+  "id": "identity-never-from-the-body",
+  "ok": true,
+  "d": "{\"forged\":200,\"inv\":\"INV-T001\",\"other\":403}"
+ },
+ {
+  "id": "console-errors",
+  "ok": true,
+  "d": "no script or console error"
+ }
+]

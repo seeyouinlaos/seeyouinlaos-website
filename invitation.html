@@ -17,7 +17,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/bag.js?v=2a0c8152"></script>
 <script src="assets/shop-menu.js?v=1ff891bc"></script>
 <script src="assets/aman.js?v=bbc20559"></script>
-<script src="assets/guest.js?v=53122cca"></script>
+<script src="assets/guest.js?v=a0616298"></script>
 <script src="assets/draft.js?v=7ab9ca64"></script>
 <script src="assets/temple.js?v=a5a16527"></script>
 <script src="assets/confirm.js?v=f35e0aa8"></script>
@@ -29,7 +29,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/transport-data.js?v=a5d732d4"></script>
 <script src="assets/packages-data.js?v=05982d0a"></script><script src="assets/journey.js?v=6551e59a"></script>
 <script src="assets/prep-shell.js?v=830ee417"></script>
-<script type="module" src="assets/invite.mjs?v=4c7def86"></script>
+<script type="module" src="assets/invite.mjs?v=c557d97c"></script>
 <script>
 /* ============================================================================
    01 · YOUR INVITATION — the onboarding of the private journey (Owner, 14 Sep
@@ -73,7 +73,7 @@ var h='<div class="prep-head">'+HERO+
 
 /* WHO AM I */
 h+='<section class="prep-sec" id="you"><p class="t-l1">Your name</p><h2 class="t-h2">'+esc(G.value(me.guestId,'fullName')||me.fullName)+'</h2>'+
-   '<p class="t-b2 measure-w">From your invitation'+(others.length?' · Your party · '+esc(G.partyNames())+'. Each of you has your own invitation and your own code; nothing here is answered for anyone else.':'')+'</p></section>';
+   '<p class="t-b2 measure-w">'+(G.edited(me.guestId,'fullName')?'Corrected by you':'From your invitation')+' · <a class="p-link" href="#p-firstName">correct your name</a>'+(others.length?' · Your party · '+esc(G.partyNames())+'. Each of you has your own invitation and your own code; nothing here is answered for anyone else.':'')+'</p></section>';
 
 /* CONTACT — required, validated */
 h+='<section class="prep-sec" id="contact"><div class="p-block-h"><h2 class="t-h2">Your contact details</h2><p class="t-l1'+(complete?' on':' open')+'" id="contact-state">'+(complete?'<i class="prep-tick" aria-hidden="true"></i> Complete':'Required')+'</p></div>'+
@@ -92,7 +92,11 @@ var fld=function(key,label,type,extra,hint){var v=G.contact(key);return '<div cl
 h+='<section class="prep-sec" id="personal"><div class="p-block-h"><h2 class="t-h2">Your personal details</h2><p class="t-l1'+(miss.length?' open':' on')+'" id="personal-state">'+(miss.length?miss.length+' still needed':'<i class="prep-tick" aria-hidden="true"></i> Complete')+'</p></div>'+
    '<p class="t-b1 measure">Please review what we have and correct anything that is not right. These details are yours alone'+(others.length?' — '+esc(G.partyNames())+' review their own on their own invitation':'')+'.</p>'+
    '<div class="p-card" style="margin-top:var(--s4)">'+
-   '<div class="p-field" style="margin-top:0"><label class="t-l1" for="p-birthdate">Date of Birth</label><input id="p-birthdate" type="date" min="1900-01-01" max="'+new Date().toISOString().slice(0,10)+'" autocomplete="bday" value="'+esc(bd)+'" data-c="birthdate" aria-invalid="'+(bd&&!okB?'true':'false')+'">'+
+   /* THE GUEST'S OWN NAME (Owner, 21 Sep 2026): First Name · Last Name, prefilled from the invitation, the guest's to correct;
+      the identity beneath (the code, the person id, the couple) never changes with the words */
+   '<div class="p-field" style="margin-top:0"><label class="t-l1" for="p-firstName">First Name</label><input id="p-firstName" type="text" autocomplete="given-name" value="'+esc(G.nameField('firstName'))+'" data-c="firstName"></div>'+
+   '<div class="p-field"><label class="t-l1" for="p-lastName">Last Name</label><input id="p-lastName" type="text" autocomplete="family-name" value="'+esc(G.nameField('lastName'))+'" data-c="lastName"><p class="t-b2">As on your passport. Your invitation, your code and your arrangements stay exactly as they are.</p></div>'+
+   '<div class="p-field"><label class="t-l1" for="p-birthdate">Date of Birth</label><input id="p-birthdate" type="date" min="1900-01-01" max="'+new Date().toISOString().slice(0,10)+'" autocomplete="bday" value="'+esc(bd)+'" data-c="birthdate" aria-invalid="'+(bd&&!okB?'true':'false')+'">'+
    '<p class="t-b2" id="e-birthdate" role="status">'+(bd&&!okB?'<span class="t-l1 open">Please check the date</span>':'')+'</p></div>'+
    fld('nationality','Nationality','text','autocomplete="off" placeholder="Thai, German"','One or more, as on your passports — for example “Thai, German”.')+
    '<p class="t-l1" style="margin-top:var(--s4)">Private Mailing Address</p><p class="t-b2 measure-w">'+esc(G.ADDRESS_WORDS)+'</p>'+

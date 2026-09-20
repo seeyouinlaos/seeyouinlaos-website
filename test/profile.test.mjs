@@ -71,7 +71,9 @@ test('6 · ABOUT YOU stays step 05 and still gates Review & Send', () => {
 });
 
 test('7 · MY PROFILE never affects readiness: it writes nothing the engine reads and lists nothing as required', () => {
-  assert.doesNotMatch(profile, /G\.set(Contact|Allergy|PhotoAck|DressAck|Profile)\(|T\.set(Attendance|Event|Offering)\(|B\.(add|put|remove|set|qty)\(|D\.send\(|localStorage\.setItem/, 'the dashboard reads; it changes nothing the steps own');
+  assert.doesNotMatch(profile, /G\.set(Allergy|PhotoAck|DressAck|Profile)\(|T\.set(Attendance|Event|Offering)\(|B\.(add|put|remove|set|qty)\(|D\.send\(|localStorage\.setItem/, 'the dashboard reads; it changes nothing the steps own');
+  /* THE GUEST'S OWN NAME (Owner, 21 Sep 2026): the one thing the profile writes — First Name · Last Name through the contact record, never a readiness input */
+  assert.deepEqual([...profile.matchAll(/data-c="([a-zA-Z]+)"/g)].map((m) => m[1]), ['firstName', 'lastName'], 'the profile edits the name and nothing else');
   assert.match(profile, /G\.readiness\(\)/, 'it reads the one engine for the trip status');
   assert.match(profile, /href="about-you\.html">Edit About You<\/a>/, 'About You is edited on its own step');
   assert.match(avatar, /localStorage\.getItem\('siyl\.auth'\)/); assert.doesNotMatch(avatar, /localStorage\.setItem/, 'the photo is never written to the browser store');

@@ -57,7 +57,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/aman.js?v=bbc20559"></script>
 <script src="assets/rooms-data.js?v=82a1706f"></script>
 <script src="assets/pricing.js?v=d324fef7"></script>
-<script src="assets/guest.js?v=53122cca"></script>
+<script src="assets/guest.js?v=a0616298"></script>
 <script src="assets/draft.js?v=7ab9ca64"></script>
 <script src="assets/temple.js?v=a5a16527"></script>
 <script src="assets/rooms.js?v=e0d4bbbf"></script>
@@ -69,7 +69,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/packages-data.js?v=05982d0a"></script><script src="assets/journey.js?v=6551e59a"></script>
 <script src="assets/docs.js?v=7c1c7bfd"></script>
 <script src="assets/avatar.js?v=4f4d9416"></script>
-<script type="module" src="assets/invite.mjs?v=4c7def86"></script>
+<script type="module" src="assets/invite.mjs?v=c557d97c"></script>
 <script>
 /* ============================================================================
    MY PROFILE (Owner, 18 Sep 2026) — the guest's account dashboard.
@@ -160,6 +160,10 @@ function contact(){
     '<p class="t-b1">'+(e?esc(e):'Email address still needed')+'<br>'+(ph?esc(ph):'Mobile number still needed')+'</p>'+
     '<div class="p-actions"><a class="p-link" href="invitation.html#contact">Edit contact details</a></div></div>'+
     '<div class="p-card" data-profile-personal style="margin-top:var(--s3)"><p class="t-l1'+(missing.length?' open':' on')+'">'+(missing.length?'Personal details · '+missing.length+' still needed':'Personal details')+'</p>'+
+    /* THE GUEST'S OWN NAME (Owner, 21 Sep 2026): First Name · Last Name editable here, saved under the same identity — the code,
+       the person id and the couple never change with the words */
+    '<div class="p-field" data-personal="firstName"><label class="t-l1" for="pf-firstName">First Name</label><input id="pf-firstName" type="text" autocomplete="given-name" value="'+esc(G.nameField('firstName'))+'" data-c="firstName"></div>'+
+    '<div class="p-field" data-personal="lastName"><label class="t-l1" for="pf-lastName">Last Name</label><input id="pf-lastName" type="text" autocomplete="family-name" value="'+esc(G.nameField('lastName'))+'" data-c="lastName"><p class="t-b2">'+(G.edited(me.guestId,'fullName')?'Corrected by you · ':'')+'As on your passport. Your invitation, your code and your arrangements stay exactly as they are.</p></div>'+
     row('Date of Birth',bd,'birthdate')+row('Nationality',nat,'nationality')+row('Phone Number',ph,'phone')+row('Email Address',e,'email')+row('Private Mailing Address',addr,'address')+
     (ids?'<p class="t-b2 mute" data-personal="ids">Your record · '+esc(ids)+' · kept by Guest Relations</p>':'')+
     '<div class="p-actions"><a class="p-link" href="invitation.html#personal">Review your personal details</a></div></div></section>'}
@@ -253,6 +257,7 @@ function render(){
   document.getElementById('pf-own').textContent='My Profile · '+G.nameOf();
   page.innerHTML=identity(me,p)+contact()+status(p)+arrangements(me)+wedding(me,p)+tickets(me,p)+about(me)+documents(me);
   if(S&&S.wireRail)S.wireRail(page);
+  page.querySelectorAll('input[data-c]').forEach(function(i){var save=function(){G.setContact(i.getAttribute('data-c'),i.value.trim())};i.addEventListener('change',function(){var f=i.id;save();render();var n=document.getElementById(f);if(n)try{n.focus({preventScroll:true})}catch(e){}});i.addEventListener('blur',save)});
   var out=page.querySelector('[data-signout]');if(out)out.addEventListener('click',function(){var I=window.SIYL_INVITE;if(I&&I.leave)I.leave();var a=document.querySelector('[data-access-out]');if(a)a.click();else location.replace('invitation.html')});
   paintAvatar();
   B.badge();

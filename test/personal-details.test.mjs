@@ -39,8 +39,9 @@ const withProfile = (s, profile, ids) => ({ ...s, ...(profile ? { profile } : {}
 
 test('THE MODEL · five personal fields of the signed-in person; the sheet\'s record is prefilled once into empty fields only, never over the guest\'s own words; asked for, never a lock on the journey; CON/COUPL are context, not fields', () => {
   const w = page({ auth: withProfile(PEGGY, PROFILE, { contactId: 'CON003', couple: 'COUPL002' }) }); const G = w.SIYL_GUEST;
-  assert.deepEqual(plain(G.PERSONAL.map((f) => f.key)), ['birthdate', 'nationality', 'phone', 'email', 'address1', 'address2', 'postal', 'city', 'region', 'country']);
-  assert.deepEqual(plain(G.PERSONAL.filter((f) => !f.optional).map((f) => f.label)), ['Date of Birth', 'Nationality', 'Phone Number', 'Email Address', 'Street and house number', 'Postal / ZIP code', 'City', 'Country']);
+  assert.deepEqual(plain(G.PERSONAL.map((f) => f.key)), ['firstName', 'lastName', 'birthdate', 'nationality', 'phone', 'email', 'address1', 'address2', 'postal', 'city', 'region', 'country']);
+  assert.ok(G.PERSONAL.filter((f) => f.name).every((f) => !f.optional) && G.personalMissing().every((m) => !/Name/.test(m.key)), 'the name fields are never "still needed" — the invitation\'s words stand until corrected');
+  assert.deepEqual(plain(G.PERSONAL.filter((f) => !f.optional && !f.name).map((f) => f.label)), ['Date of Birth', 'Nationality', 'Phone Number', 'Email Address', 'Street and house number', 'Postal / ZIP code', 'City', 'Country']);
   assert.match(G.ADDRESS_WORDS, /^Please share the address where you can reliably receive personal mail\./); assert.doesNotMatch(G.ADDRESS_WORDS, /gift|surprise/i, 'the purpose is correspondence — no gift is promised');
   assert.equal(G.me().contactId, 'CON003'); assert.equal(G.me().couple, 'COUPL002');
   assert.ok(!G.PERSONAL.some((f) => /contact|couple|con|guest/i.test(f.key)), 'the person id and the couple id are never editable fields');

@@ -1,0 +1,8 @@
+# Stage E2E, 21 Sep 2026 (guest-name pass)
+e2e-guest-name 9/9
+e2e-fp-name exit=0 36/36 
+e2e-ia-name exit=0 35/35 
+e2e-014-name exit=0 79/79 
+e2e-013-name exit=0 35/35 
+e2e-p0-name exit=0 52/52 
+e2e-hl-name exit=0 20/20 
