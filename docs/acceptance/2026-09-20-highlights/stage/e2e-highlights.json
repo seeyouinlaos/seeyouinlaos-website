@@ -1,0 +1,102 @@
+[
+ {
+  "id": "menu-highlights-row",
+  "ok": true,
+  "d": "{\"rows\":[\"Destinations\",\"The Journey\",\"Stays\",\"Experiences\",\"Highlights\",\"Wellness\",\"The Wedding\",\"My Trip\"],\"sub\":[\"1872.html · 1872 · Champagne Afternoon Tea · Aman\",\"experience.html?id=bkk-suhring · Sühring · Three MICHELIN Stars\",\"experience.html?id=bkk-baanphraya · Baan Phraya · Thai heritage\","
+ },
+ {
+  "id": "experiences-highlights-rail",
+  "ok": true,
+  "d": "[\"bkk-suhring\",\"bkk-baanphraya\",\"1872\",\"bkk-cannubi\"] served 4"
+ },
+ {
+  "id": "suhring-highlight-page",
+  "ok": true,
+  "d": "{\"dist\":\"THREE MICHELIN STARS\",\"menu\":13,\"radios\":[\"Erlebnis · the complete menu THB 9,800 USD 294\",\"Erlebnis · the shorter sequence THB 7,800 USD 234\"],\"held\":0}"
+ },
+ {
+  "id": "suhring-preview-then-confirm",
+  "ok": true,
+  "d": "{\"before\":{\"held\":0,\"sheet\":true},\"after\":{\"lines\":[\"suhring:erlebnis:294\"],\"total\":294}}"
+ },
+ {
+  "id": "suhring-change-menu-replaces",
+  "ok": true,
+  "d": "{\"lines\":[\"suhring:erlebnis-short:234\"],\"total\":234}"
+ },
+ {
+  "id": "suhring-cross-device",
+  "ok": true,
+  "d": "[\"suhring:erlebnis-short:234\"]"
+ },
+ {
+  "id": "suhring-remove",
+  "ok": true,
+  "d": "{\"lines\":[],\"total\":0}"
+ },
+ {
+  "id": "baanphraya-highlight-and-booking",
+  "ok": true,
+  "d": "{\"dist\":\"TIMELESS THAI HERITAGE · THE RIVER OF KINGS\",\"menu\":11,\"price\":\"USD 114 PER PERSON · YOUR COST\",\"bag\":{\"lines\":[\"suhring:erlebnis:294\",\"baanphraya::114\"],\"total\":408}}"
+ },
+ {
+  "id": "cannubi-highlight-and-booking",
+  "ok": true,
+  "d": "{\"dist\":\"ONE MICHELIN STAR · THE MICHELIN GUIDE THAILAND 2026\",\"menu\":8,\"price\":\"USD 165 PER PERSON · YOUR COST\",\"clip\":\"assets/video/cannubi-card.mp4\",\"state\":\"loading\",\"video\":true,\"bag\":{\"lines\":[\"suhring:erlebnis:294\",\"baanphraya::114\",\"cannubi::165\"],\"total\":573}}"
+ },
+ {
+  "id": "aman-1872-still-bookable",
+  "ok": true,
+  "d": "{\"lines\":[\"suhring:erlebnis:294\",\"baanphraya::114\",\"cannubi::165\",\"tea1872::180\"],\"total\":753}"
+ },
+ {
+  "id": "my-bag-four-highlights-one-total",
+  "ok": true,
+  "d": "{\"n\":4,\"total\":753,\"req\":true,\"t\":true}"
+ },
+ {
+  "id": "review-carries-the-highlights",
+  "ok": true,
+  "d": "{\"url\":\"/review\",\"total\":753,\"send\":true,\"found\":[\"Sühring\",\"Baan Phraya\",\"Cannubi\",\"1872\"]}"
+ },
+ {
+  "id": "signed-out-highlight",
+  "ok": true,
+  "d": "{\"sel\":0,\"way\":true,\"priceHidden\":true}"
+ },
+ {
+  "id": "sathorn-inset-320",
+  "ok": true,
+  "d": "[[\"Sathorn Penthouse \",21,21,21,21,21,21,21,21,1,200],[\"U Sathorn Bangkok\",21,21,21,21,21,21,21,21,1,200],[\"Shama Yen-Akat Ban\",21,21,21,21,21,21,21,21,1,200]] overflow 0"
+ },
+ {
+  "id": "sathorn-inset-390",
+  "ok": true,
+  "d": "[[\"Sathorn Penthouse \",21,21,21,21,21,21,21,21,1,270],[\"U Sathorn Bangkok\",21,21,21,21,21,21,21,21,1,270],[\"Shama Yen-Akat Ban\",21,21,21,21,21,21,21,21,1,270]] overflow 0"
+ },
+ {
+  "id": "sathorn-inset-834",
+  "ok": true,
+  "d": "[[\"Sathorn Penthouse \",21,21,21,21,21,21,21,21,1,197],[\"U Sathorn Bangkok\",21,21,21,21,21,21,21,21,1,197],[\"Shama Yen-Akat Ban\",21,21,21,21,21,21,21,21,1,197]] overflow 0"
+ },
+ {
+  "id": "sathorn-inset-1440",
+  "ok": true,
+  "d": "[[\"Sathorn Penthouse \",21,21,21,21,21,21,21,21,1,273],[\"U Sathorn Bangkok\",21,21,21,21,21,21,21,21,1,273],[\"Shama Yen-Akat Ban\",21,21,21,21,21,21,21,21,1,273]] overflow 0"
+ },
+ {
+  "id": "no-horizontal-overflow-320",
+  "ok": true,
+  "d": "no overflow"
+ },
+ {
+  "id": "no-horizontal-overflow-834",
+  "ok": true,
+  "d": "no overflow"
+ },
+ {
+  "id": "console-errors",
+  "ok": true,
+  "d": "no script or console error"
+ }
+]

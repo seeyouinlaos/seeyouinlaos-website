@@ -8,9 +8,9 @@ Party: Cleo
 Email: cleo.test@example.org
 Mobile: +66 81 000 0000
 
-Reference: SYL-T003-08D9E265
+Reference: SYL-T003-D099763E
 Status: Initial submission
-Sent: 20 September 2026 · 11:57
+Sent: 20 September 2026 · 14:18
 Where they join us: Vientiane · China
 
 TRAVEL
@@ -61,5 +61,5 @@ Guest: T003
 Invitation: INV-T003
 Ceremony seat record: C-R-07-03
 Dinner seat record: D-T-08
-Submission: SYL-T003-08D9E265 · version 1
+Submission: SYL-T003-D099763E · version 1
 Status: http://127.0.0.1:8788/api/status?invitation=INV-T003

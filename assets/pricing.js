@@ -62,13 +62,25 @@
     'return': { price: 200, cat: 'Transportation', name: 'MU5922 + MU741 · Lijiang → Bangkok',
                 meta: '06 March 2027 · Economy flexible', img: 'assets/images/transport/mu5924-economy-cabin-1.jpg',
                 basis: 'USD 200 per person · 1 seat · Economy flexible · via Kunming' },
-    /* SÜHRING (Owner decision 13 Sep 2026): an optional restaurant REQUEST,
-     * USD 180 per participating guest, in the journey total like every other
-     * per-person line. The request is arranged through the Journey workflow —
-     * never a confirmed reservation, no availability promised. */
-    'suhring': { price: 180, cat: 'Restaurant', name: 'Sühring',
-                meta: 'Dinner · 21 February 2027 · German fine dining · Bangkok', img: 'assets/images/experiences/bkk-suhring-01.jpg',
-                basis: 'USD 180 per person · a table requested through Guest Relations · a request, not a reservation' },
+    /* THE HIGHLIGHTS (Owner, 20 Sep 2026): the premium tables are optional restaurant REQUESTS — one line per guest, the
+     * chosen menu's own price, in the journey total like every other per-person line. The request is arranged through the
+     * Journey workflow — never a confirmed reservation, no availability promised. The USD amounts are the Owner's rounded
+     * website prices of the houses' menu prices; beverages, pairings and supplements are not products here, and the houses'
+     * service charge and tax are theirs (the basis says so). */
+    'suhring': { price: 294, cat: 'Restaurant', name: 'Sühring',
+                meta: 'Dinner · 21 February 2027 · Three MICHELIN Stars · Bangkok', img: 'assets/images/experiences/bkk-suhring-01.jpg',
+                basis: 'USD 294 per person · the Erlebnis menu (THB 9,800) · beverages not included · a table requested through Guest Relations · a request, not a reservation',
+                /* the two menu prices of the house's own menu card (the Owner's upload): the complete Erlebnis and the shorter sequence */
+                menus: [
+                  { slug: 'erlebnis', name: 'Erlebnis · the complete menu', thb: 'THB 9,800', price: 294, preferred: true, basis: 'USD 294 per person · Erlebnis, the complete menu (THB 9,800) · beverages not included · a request, not a reservation' },
+                  { slug: 'erlebnis-short', name: 'Erlebnis · the shorter sequence', thb: 'THB 7,800', price: 234, basis: 'USD 234 per person · Erlebnis, the shorter sequence (THB 7,800) · beverages not included · a request, not a reservation' }
+                ] },
+    'baanphraya': { price: 114, cat: 'Restaurant', name: 'Baan Phraya',
+                meta: 'Dinner · 23 February 2027 · Thai heritage · the River of Kings · Bangkok', img: 'assets/images/experiences/bkk-baanphraya-01.jpg',
+                basis: 'USD 114 per person · the eight-course Thai set menu (THB 3,800; the house adds 10% service charge and government tax) · a table requested through Guest Relations · a request, not a reservation' },
+    'cannubi': { price: 165, cat: 'Restaurant', name: 'Cannubi by Umberto Bombana',
+                meta: 'Dinner · 07 March 2027 · One MICHELIN Star · Dusit Thani Bangkok', img: 'assets/images/experiences/bkk-cannubi-01.jpg',
+                basis: 'USD 165 per person · the set menu (THB 5,500; the house adds 7% VAT and 10% service charge) · a table requested through Guest Relations · a request, not a reservation' },
     '1872':   { price: 180, cat: 'Experience', unit: 'experience',
                 basis: 'USD 180 per experience · for two guests' },
     /* The Sangkhathan is NOT an admission, a ticket or a hosted wedding cost.
@@ -177,6 +189,9 @@
      * replaces the first in the journey, the way a room category does. */
     CLASSES: CLASSES,
     classesOf: function (id) { return CLASSES[id] || []; },
+    /* the menus of a house (the Highlights): the chosen one, else the preferred, else the first */
+    menusOf: function (id) { var f = FLAT[id]; return f && f.menus ? f.menus : []; },
+    menuOf: function (id, slug) { var list = this.menusOf(id); return list.filter(function (m) { return m.slug === slug; })[0] || list.filter(function (m) { return m.preferred; })[0] || list[0] || null; },
     classOf: function (id, slug) {
       var list = CLASSES[id] || [];
       return list.filter(function (c) { return c.slug === slug; })[0] ||
@@ -188,6 +203,8 @@
       if (c) return [{ id: windowId, name: c.name, meta: c.meta, price: c.price,
                        img: c.img, cls: c.slug }];
       var f = FLAT[windowId];
+      /* a house with several menus (Sühring): the chosen menu's own price and name travel on the line — one line per house */
+      if (f && f.name && f.menus) { var m = this.menuOf(windowId, slug); return [{ id: windowId, name: f.name, meta: f.meta + ' · ' + m.name, price: m.price, img: f.img, menu: m.slug }]; }
       if (f && f.name) return [{ id: windowId, name: f.name, meta: f.meta, price: f.price, img: f.img }];
       var at = locate(windowId);
       if (!at) return [];
@@ -349,14 +366,16 @@
     var next = bag.map(function (x) {
       if (!x || !x.id || x.stay || x.room || x.interest || x.complimentary) return x;
       if (!FLAT[x.id] && !CLASSES[x.id]) return x;
-      var fresh = window.SIYL_PRICE.items(x.id, x.cls)[0];
+      /* a house with several menus (the Highlights, 20 Sep 2026): the menu the guest chose is re-priced as that menu */
+      var fresh = window.SIYL_PRICE.items(x.id, x.menu || x.cls)[0];
       if (!fresh || fresh.price == null) return x;
-      var same = x.price === fresh.price && x.name === fresh.name && x.meta === fresh.meta && (x.cls || null) === (fresh.cls || null);
+      var same = x.price === fresh.price && x.name === fresh.name && x.meta === fresh.meta && (x.cls || null) === (fresh.cls || null) && (x.menu || null) === (fresh.menu || null);
       if (same) return x;
       changed = true;
       var out = {}; Object.keys(x).forEach(function (k) { out[k] = x[k]; });
       out.name = fresh.name; out.meta = fresh.meta; out.price = fresh.price; out.img = fresh.img || x.img;
       if (fresh.cls) out.cls = fresh.cls; else delete out.cls;
+      if (fresh.menu) out.menu = fresh.menu; else delete out.menu;
       return out;
     });
     if (changed) B.set(next);

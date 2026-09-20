@@ -344,9 +344,9 @@ test('THE CURRENT MASTER · the dated venues: 21.02 Sühring dinner; the Aman te
   const ids = w.SIYL_EXP.map((x) => x.id); assert.equal(new Set(ids).size, ids.length, 'no duplicate place');
   assert.equal(w.SIYL_EXP.filter((x) => /suhring|sühring/i.test(x.id + x.name)).length, 1);
   for (const id of ['bkk-baanphraya', 'bkk-cannubi']) { const g = w.SIYL_EXP_GALLERY[id]; assert.ok(g && g.images.length >= 4, id + ' gallery'); for (const im of g.images) { assert.ok(existsSync(im.src), im.src); assert.ok(!/food|drink/.test(im.kind), im.src + ' is never a dish'); } assert.equal(g.images[0].src, by[id].img); }
-  assert.match(src('assets/journey.js'), /AT_WHEN = \{ '1872': '24 FEB', tea1872: '24 FEB', 'sangkhathan': '28 FEB', 'suhring': '21 FEB' \}/);
+  assert.match(src('assets/journey.js'), /AT_WHEN = \{ '1872': '24 FEB', tea1872: '24 FEB', 'sangkhathan': '28 FEB', 'suhring': '21 FEB', baanphraya: '23 FEB', cannubi: '07 MAR' \}/);
   assert.match(src('tea.html'), /on the afternoon of 24 February/);
-  assert.match(src('assets/pricing.js'), /meta: 'Dinner · 21 February 2027 · German fine dining · Bangkok'/);
+  assert.match(src('assets/pricing.js'), /meta: 'Dinner · 21 February 2027 · Three MICHELIN Stars · Bangkok'/);
 });
 
 /* ────────────────────────────── 9 · THE REGISTER ────────────────────────────── */

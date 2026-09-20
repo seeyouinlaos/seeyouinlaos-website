@@ -12,12 +12,11 @@ window.SIYL_EXP = [
   { id: 'bkk-curvy', roles: ['lunch'], row: 'Day 02 · 22.02.2027', chapter: 'bkk', day: '22 FEB 2027', name: 'Curvy.Dining', where: 'Bangkok', cats: 'Dining · Design', img: 'assets/images/experiences/bkk-curvy-01.jpg', teaser: 'A design-led Bangkok dining room where Thai flavours meet modern European form.' },
   /* SÜHRING — the one place with a full record in the Owner's sheet
    * "Experience, Restaurant, Cafe_Details" (Suhring): every text below is that
-   * record, structured, nothing added. The price is the source cell "$180.00";
-   * the Owner set its unit on 13 Sep 2026: USD 180 PER PERSON, multiplied by
-   * the participating guests through the one calculation source
-   * (assets/pricing.js FLAT.suhring). Optional, selectable through the Journey
-   * like the Afternoon Tea — a restaurant request arranged through the
-   * Journey workflow, never a confirmed reservation. */
+   * record, structured, nothing added. THE PRICE (Owner, 20 Sep 2026 — the Highlight): the house's own menu card, the
+   * Erlebnis at THB 9,800 (USD 294) or the shorter sequence at THB 7,800 (USD 234), per person, from the one calculation
+   * source (assets/pricing.js FLAT.suhring.menus); the earlier source cell "$180.00" is superseded. Optional, selectable
+   * through the Journey like the Afternoon Tea — a restaurant request arranged through the Journey workflow, never a
+   * confirmed reservation. */
   /* DATED (the current Operations Master, 19 Sep 2026): Day 01 · 21.02.2027 · DINNER — the first evening in Bangkok
    * (the Overview's Dinner cell; the sheet record's opening hours are the restaurant's own and are kept below) */
   { id: 'bkk-suhring', roles: ['dinner'], row: 'Day 01 · 21.02.2027', sheet: 'FULL', chapter: 'bkk', featured: true, day: '21 FEB 2027', name: 'Sühring', where: 'Bangkok', cats: 'German fine dining · Dinner',
@@ -32,15 +31,27 @@ window.SIYL_EXP = [
       { k: 'The first mentor', t: 'Our inspiration.', p: ['Our grandmother Christa, herself a trained chef, was our first mentor. She showed us that food could be both humble and refined. On her farm just outside Berlin, she taught us the beauty of the seasons and of the ingredients she grew.', 'Driven by her passion for cooking, she created a warm, welcoming environment where everyday family meals became cherished, lasting memories. That philosophy has stayed with us ever since, and it shapes every menu we write.'] },
       { k: 'Contemporary heritage', t: 'The kitchen.', p: ['Today, we draw inspiration from cherished family recipes, childhood memories, and years of travel. Our cooking reinterprets the rich traditions of German cuisine with a contemporary twist, emphasizing technique, refinement, and a deep respect for the ingredients we work with.'] }
     ],
+    /* THE HIGHLIGHT (Owner, 20 Sep 2026): the premium table of the first evening — Three MICHELIN Stars, the house's own menu
+       card (the Owner's upload) as the source of the menu and its two prices; supplements, pairings and caviar are the house's
+       own and never products here */
+    highlight: {
+      distinction: 'Three MICHELIN Stars',
+      line: 'Modern German cuisine by Thomas and Mathias Sühring',
+      house: 'A restored 1970s villa — refined, yet with the warmth of a home.',
+      menuTitle: 'Erlebnis · the menu',
+      menuNote: 'The house’s current menu card. The complete Erlebnis is THB 9,800; the shorter sequence THB 7,800. Beverages are not included in the menu price; all prices are in Thai Baht and subject to 10% service charge and 7% VAT. Wine and non-alcoholic pairings, the caviar classics and the Wagyu supplement are the house’s own — Guest Relations can note a wish.',
+      menu: ['Leek & truffle', 'Brathering & chervil', 'Striped jack & horseradish', '“Himmel und Erde”', 'Enleta & Doktorenhof “Aprikose”', 'Sweet shrimp · tomato · tarragon', 'Scallop & king crab · turnip · almond', 'Golden eye snapper · mussel · verbena', 'Lobster · summer squash · dill', 'Duck · persimmon · cru de cacao — or Kagoshima Wagyu A5 · carrot · oxtail (supplement)', 'Sorrel · apple · buttermilk', 'Schwarzwälder Kirschtorte', 'Oma Christa’s Eierlikör & feines Gebäck'],
+      contact: { address: ['No. 10, Yen Akat Soi 3', 'Chongnonsi, Yannawa', '10120 Bangkok, Thailand'], phone: '+66 (0) 2107 2777', email: 'reservation@restaurantsuhring.com' }
+    },
     practical: {
-      price: 'USD 180 per person',
-      priceNote: 'For each participating guest, as decided by the hosts.',
+      price: 'USD 294 · USD 234 per person',
+      priceNote: 'The Erlebnis menu at THB 9,800 or the shorter sequence at THB 7,800 — the Owner’s rounded website prices. Beverages not included.',
       when: 'Dinner · Sunday, 21 February 2027 · the first evening in Bangkok',
       /* the sheet record's opening-hour lines (a lunch service) are kept as the source but NOT shown beside the dated dinner
          (Owner, 19 Sep 2026: the dated assignment wins; no invented hours, no misleading meal-hours copy on the card) */
       sourceHours: ['Lunch', 'Thursday to Sunday', '12:30 pm to 13:00 pm (last seating)', 'Closed on Monday and Tuesday']
     },
-    select: { id: 'suhring', price: 180, unit: 'per person' } },
+    select: { id: 'suhring', unit: 'per person' } },
   { id: 'bkk-diorlv', roles: ['cafe'], row: 'Day 02 · 22.02.2027', chapter: 'bkk', day: '22 FEB 2027', name: 'Dior · Café LV', where: 'Bangkok', cats: 'Fashion · Design · Café', img: 'assets/images/experiences/bkk-dior-02.jpg', gallery: ['assets/images/experiences/bkk-dior-01.jpg', 'assets/images/experiences/bkk-lv-cafe-01.jpg'], teaser: 'A luxury design café stop — couture interiors, French pastry and contemporary calm.' },
   { id: 'bkk-lvvisionary', roles: ['experience'], row: 'Day 02 · 22.02.2027', chapter: 'bkk', featured: true, day: '22 FEB 2027', name: 'Louis Vuitton Visionary Journeys', where: 'Bangkok', cats: 'Exhibition · Design · Fashion', img: 'assets/images/experiences/bkk-lvvisionary-01.jpg', teaser: 'The house opens its world: an exhibition of craft, travel and imagination staged as architecture.' },
   { id: 'bkk-iconsiam', roles: ['place'], row: 'Day 02 · 22.02.2027', chapter: 'bkk', featured: true, day: '22 FEB 2027', name: 'ICONSIAM', where: 'Bangkok', cats: 'Riverfront · City · Design · Shopping', img: 'assets/images/experiences/bkk-iconsiam-01.jpg', teaser: 'The riverfront landmark — architecture, design floors and the Chao Phraya at golden hour.' },
@@ -64,10 +75,23 @@ window.SIYL_EXP = [
       'With Baan Phraya’s noble history and heritage as her muse, Chef Pom reimagines and revitalises forgotten Thai delicacies with a contemporary twist, fusing traditional cooking techniques with thoughtful sourcing and a commitment to sustainability.',
       'Baan Phraya is easily accessible from Charoen Nakorn Road with a dedicated parking area — or by the hotel’s shuttle boat across the river.'
     ],
+    /* THE HIGHLIGHT (Owner, 20 Sep 2026): the house's own menu (the Mandarin Oriental upload) — every dish below is the card's */
+    highlight: {
+      distinction: 'Timeless Thai heritage · the River of Kings',
+      line: 'Chef Phatchara “Pom” Pirapak revives regional and royal Thai recipes with a contemporary touch',
+      house: 'A century-old residence, restored with care — once home to Phraya Mahai Savan and Khunying Luean Mahai Savan.',
+      menuTitle: 'The eight-course Thai set menu',
+      menuNote: 'THB 3,800 per person — the Owner’s rounded website price is USD 114. The house adds 10% service charge and applicable government tax. The wine pairing (THB 2,800) and the non-alcoholic pairing (THB 1,400) are the house’s own and are not booked here. Signature drinks rooted in Thai botanicals open the evening on the outdoor terrace.',
+      menu: ['Crispy pineapple wafer with peanut and tamarind', 'Thai honeycomb biscuit, Thai herbs and eggplant custard infused with Thai rice liqueur', 'Savory Icevine leaves with roasted rice and coriander', 'Gulf of Siam banana prawn tartare with Isan herbs and roasted rice', 'Prachuap Khiri Khan squid in galangal-infused coconut broth with aromatic herbs and pink peppercorns', 'Marinated bamboo fish with herbs grilled in a coconut shell, house-made pickled papaya', 'Pressed watermelon, Nakornprathom bitter orange', 'Grilled Surat Thani River prawn with its tomalley, young tamarind and chilli paste', 'Charred free-range Kao Yai duck green curry with sour grape and heart of palm', 'Mulberry honey granita from Chainat, jasmine flower, bitter orange and talipot palm', 'Roasted silver banana with pandanus ice cream, crispy baby rice and coconut emulsion'],
+      contact: { phone: '+66 (0) 2 659 9000', email: 'mobkk-baanphraya@mohg.com' }
+    },
     practical: {
-      hours: ['Pre-dinner drinks 5 pm – 6 pm', 'Dinner 6 pm – 11 pm', 'Set menu THB 3,800 per person · wine pairing THB 2,800 · non-alcoholic pairing THB 1,400 (the house’s own prices, subject to service charge and VAT)'],
-      dress: 'Elegant attire and proper footwear; gentlemen in long trousers and closed shoes — no sleeveless shirts.'
-    } },
+      price: 'USD 114 per person',
+      priceNote: 'The eight-course Thai set menu, THB 3,800 — the house adds 10% service charge and applicable government tax.',
+      hours: ['Pre-dinner drink 17:00 – 18:00 · the outdoor terrace', 'Dinner 18:00 – 23:00 · Friday to Tuesday'],
+      dress: 'Elegant attire and proper footwear; gentlemen in long trousers and closed shoes — sleeveless shirts for gentlemen are not permitted.'
+    },
+    select: { id: 'baanphraya', unit: 'per person' } },
   { id: 'bkk-barus', roles: ['bar'], row: 'Day 03 · 23.02.2027', chapter: 'bkk', day: '23 FEB 2027', name: 'Bar Us', where: 'Bangkok', cats: 'Bar · Evening · Design', maps: 'https://maps.app.goo.gl/2KLduE51ybg4qAqd9?g_st=ic', img: 'assets/images/experiences/bkk-barus-06.jpg', teaser: 'An intimate evening alternative — a small bar of precision and warmth.' },
   { id: 'bkk-ledukaan', roles: ['dinner'], row: 'city', chapter: 'bkk', day: 'Bangkok days', name: 'Le Du Kaan', where: 'Bangkok', cats: 'Thai fine dining · Rooftop · Bar',
     img: 'assets/images/experiences/bkk-ledukaan-01.jpg',
@@ -99,10 +123,24 @@ window.SIYL_EXP = [
       'Named after the famed Barolo hill in Piemonte, Cannubi by Umberto Bombana has been awarded One MICHELIN Star in the MICHELIN Guide Thailand, making it the one and only Italian restaurant in Thailand to receive this distinction.',
       'This intimate and elegant restaurant features a fully curated cellar of more than 350 wine labels, each selected for its character and quality. The set menu is designed for a refined evening of Italian dishes crafted with care by Executive Italian Chef Andrea Susto, who follows the culinary philosophy of the celebrated Chef Umberto Bombana, the King of White Truffle.'
     ],
+    /* THE HIGHLIGHT (Owner, 20 Sep 2026): the house's Autumn menu (the Owner's upload from the Cannubi Drive folder) */
+    highlight: {
+      distinction: 'One MICHELIN Star · The MICHELIN Guide Thailand 2026',
+      line: 'Executive Italian Chef Andrea Susto, in the culinary philosophy of Chef Umberto Bombana',
+      house: 'Named after the famous Cannubi hill in Barolo, Piemonte — a cellar of more than 350 wine labels.',
+      menuTitle: 'The set menu · Autumn',
+      menuNote: 'THB 5,500 per person — the Owner’s rounded website price is USD 165. The set menu is designed for one person and is the same for everyone at the table; prices are subject to 7% VAT and 10% service charge. The wine and non-alcoholic pairings are the house’s own and are not booked here. Allergies and dietary preferences: please tell Guest Relations early.',
+      menu: ['Pumpkin variations', 'Red sea bream carpaccio · Oscietra caviar · olive oil & ponzu dressing', 'Spaghettino “Felicetti” · marinated tuna tartare · tuna heart bottarga', 'Wagyu oxtail ravioli · mushroom sauce · chestnut & parsley emulsion — or homemade chitarra pasta · “Carabineros” prawn · crustacean sauce (supplement)', 'Roasted beef tenderloin & braised cheeks · morel mushroom & beef jus — or charcoaled Brittany blue lobster · pickled cherry tomatoes · lobster jus (supplement)', 'Homemade grape sorbet · sea berry & crispy pastry', '“Cioccolato” · 55% chocolate fondant · raspberry sorbet · “Pistocchi” ganache cake', 'Piccola pasticceria'],
+      clip: 'assets/video/cannubi-card.mp4',
+      contact: { phone: '+66 2200 9000', where: 'L Floor · Dusit Thani Bangkok' }
+    },
     practical: {
-      hours: ['Wednesday to Sunday', 'Lunch 12:00 – 14:30 (last order 14:00)', 'Dinner 18:00 – 22:00', 'Eight-course set menu THB 5,500 per person (the house’s own price, subject to service charge and VAT)'],
-      dress: 'Casual — diners are respectfully requested to refrain from wearing t-shirts, shorts or sandals.'
-    } },
+      price: 'USD 165 per person',
+      priceNote: 'The set menu, THB 5,500 — the house adds 7% VAT and 10% service charge.',
+      hours: ['Wednesday to Sunday', 'Lunch 12:00 – 14:30 (last order 14:00)', 'Dinner 18:00 – 22:00 (last order 21:30)', 'L Floor'],
+      dress: 'Smart casual — diners are respectfully requested not to wear t-shirts, shorts or sandals.'
+    },
+    select: { id: 'cannubi', unit: 'per person' } },
   /* PETITS PLATS BANGKOK — Day 16 · 08.03.2027 · DINNER (the current Operations Master, 19 Sep 2026: the last evening, before
    * the flight home; it replaces the in-flight dinner). The Owner's records carry no photograph and no description of the
    * place: the card stands without an image, nothing is invented. */

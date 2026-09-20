@@ -53,8 +53,8 @@
    "assets/images/experiences/bkk-suhring-09.jpg",
    "assets/images/experiences/bkk-suhring-03.jpg"
   ],
-  "note": "price unit set by the Owner 13 Sep 2026: per participating guest, in the journey total (assets/pricing.js FLAT.suhring) · dated by the current Operations Master (19 Sep 2026): Day 01 · 21.02.2027 · Dinner",
-  "price": "USD 180 per person",
+  "note": "THE HIGHLIGHT (Owner, 20 Sep 2026): the house's menu card — the Erlebnis THB 9,800 (USD 294) or the shorter sequence THB 7,800 (USD 234), per person, beverages not included; the earlier source cell $180 is superseded · dated by the current Operations Master: Day 01 · 21.02.2027 · dinner",
+  "price": "USD 294 · USD 234 per person",
   "hours": [
    "Lunch",
    "Thursday to Sunday",
@@ -415,7 +415,7 @@
   ],
   "overview": "Day 03 · 23.02.2027",
   "sheet": "DETAIL",
-  "selectable": false,
+  "selectable": true,
   "drive": "Baan Phraya (Owner Drive folder, 19 Sep 2026)",
   "driveIds": [
    "1m1mvGNZW4gsMPbSGJy-mgFbKiN5Wdxjd"
@@ -429,8 +429,8 @@
    "assets/images/experiences/bkk-baanphraya-03.jpg",
    "assets/images/experiences/bkk-baanphraya-04.jpg"
   ],
-  "note": "the 23.02 dinner (replaces The Commons); 8 source files: 4 used (courtyard, bar room, lamplit table, staircase), 2 dish photographs and a 600 px file excluded, the Authors' Lounge frame excluded as another house",
-  "price": null,
+  "note": "the 23.02 dinner (replaces The Commons); 8 source files: 4 used (courtyard, bar room, lamplit table, staircase), 2 dish photographs and a 600 px file excluded, the Authors' Lounge frame excluded as another house · THE HIGHLIGHT (Owner, 20 Sep 2026): the eight-course Thai set menu THB 3,800 = USD 114 per person, bookable as a request; pairings not products; the house adds 10% service charge and government tax",
+  "price": "USD 114 per person",
   "hours": "Pre-dinner drinks 5 pm – 6 pm · Dinner 6 pm – 11 pm",
   "maps": null,
   "link": null
@@ -702,7 +702,7 @@
   ],
   "overview": "Day 15 · 07.03.2027",
   "sheet": "DETAIL",
-  "selectable": false,
+  "selectable": true,
   "drive": "Cannubi by Umberto Bombana (Owner Drive folder, 19 Sep 2026)",
   "driveIds": [
    "1Byl3QKNULwmK7FTAvxFvIbythEBR1INE"
@@ -717,8 +717,8 @@
    "assets/images/experiences/bkk-cannubi-04.jpg",
    "assets/images/experiences/bkk-cannubi-05.jpg"
   ],
-  "note": "the 07.03 dinner (replaces Petits Plats there); 11 source files: 5 used, 4 dish photographs excluded, one 905 px offer banner excluded, one misfiled Baan Phraya frame (SnapInsta 777382051) excluded",
-  "price": null,
+  "note": "the 07.03 dinner (replaces Petits Plats there); 11 source files: 5 used, 4 dish photographs excluded, one 905 px offer banner excluded, one misfiled Baan Phraya frame (SnapInsta 777382051) excluded · THE HIGHLIGHT (Owner, 20 Sep 2026): the set menu THB 5,500 = USD 165 per person, bookable as a request; pairings not products; the house adds 7% VAT and 10% service charge; the 2.0 MB Cannubi-only clip (fresh pasta) became assets/video/cannubi-card.mp4, the 5.97 MB clip filed in both folders was not used",
+  "price": "USD 165 per person",
   "hours": "Wednesday to Sunday · Lunch 12:00 – 14:30 (last order 14:00) · Dinner 18:00 – 22:00",
   "maps": null,
   "link": null

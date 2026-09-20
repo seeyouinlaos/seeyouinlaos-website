@@ -183,7 +183,7 @@ test('PRICING · one guest, one price: Sangkhathan USD 15 for this guest only, n
   assert.equal(T.offeringOf_('g-peggy'), null, 'not attending: the offering goes, and is asked again on return');
   assert.equal(B.has('sangkhathan'), false);
   assert.equal(P.FLAT.train.price, 100); assert.match(P.FLAT.train.basis, /USD 100 per person/);
-  assert.equal(P.FLAT.suhring.price, 180); assert.equal(P.FLAT.sangkhathan.price, 15);
+  assert.equal(P.FLAT.suhring.price, 294); assert.equal(P.FLAT.baanphraya.price, 114); assert.equal(P.FLAT.cannubi.price, 165); assert.equal(P.FLAT.sangkhathan.price, 15);
   P.items('train').forEach((it) => { it.qty = 1; B.put(it); });
   assert.equal(B.total(), 100);
   assert.doesNotMatch(src('wedding.html'), /Total for your party|USD 30|We would like to take part/);
@@ -201,7 +201,7 @@ test('PRICING · the total is one number on every surface: sticky bar, cart, You
   const B = w.SIYL_BAG, P = w.SIYL_PRICE;
   P.items('train').forEach((it) => { it.qty = 1; B.put(it); });
   P.items('suhring').forEach((it) => { it.qty = 1; it.request = true; B.put(it); });
-  assert.equal(B.total(), 280);
+  assert.equal(B.total(), 100 + 294);
   assert.equal(B.get().length, 2, 'one line per product');
   P.items('train').forEach((it) => { it.qty = 1; B.put(it); });
   assert.equal(B.get().length, 2, 'a duplicate is impossible');

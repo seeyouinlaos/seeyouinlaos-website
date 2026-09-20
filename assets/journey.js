@@ -43,10 +43,12 @@
    * (27 FEB – 01 MAR) and before the flight to Kunming. A wedding line
    * therefore sorts between wedstay (3) and mu9646 (4); it is never appended
    * to the end of the journey because it happens to have been added last. */
-  var AT = { '1872': 0.5, tea1872: 0.5, 'sangkhathan': 3.5 };
+  /* the Highlights (20 Sep 2026): Sühring on the first evening (before the Bangkok stay, 0.1), Baan Phraya in the Bangkok days
+     (0.3), the Aman tea on the last afternoon (0.5), Cannubi on the return, after the flight home (8.5) */
+  var AT = { suhring: 0.1, baanphraya: 0.3, '1872': 0.5, tea1872: 0.5, 'sangkhathan': 3.5, cannubi: 8.5 };
   /* the dated extras (the current Operations Master, 19 Sep 2026): the Aman tea on the afternoon of 24 February, the
      Sühring dinner on the first evening, 21 February */
-  var AT_WHEN = { '1872': '24 FEB', tea1872: '24 FEB', 'sangkhathan': '28 FEB', 'suhring': '21 FEB' };
+  var AT_WHEN = { '1872': '24 FEB', tea1872: '24 FEB', 'sangkhathan': '28 FEB', 'suhring': '21 FEB', baanphraya: '23 FEB', cannubi: '07 MAR' };
 
   /* the wedding programme, in the order the day itself runs. Only items that
    * exist as products carry an id; the day is described, not invented. */
@@ -76,7 +78,7 @@
   var SCOPE_OF = { 'bkk-stay': ['bangkok'], train: ['bangkok', 'vientiane'], prewed: ['vientiane'], wedstay: ['vientiane'], mu9646: ['vientiane', 'china'],
     kmg: ['china'], c86: ['china'], ljg: ['china'], 'return': ['china'], kempinski: ['bangkok', 'china'] };
   /* the lines that are not stages: the Bangkok experiences, the Vientiane offering and the spa interest */
-  var EXTRA_SCOPE = { '1872': ['bangkok'], tea1872: ['bangkok'], suhring: ['bangkok'], sangkhathan: ['vientiane'] };
+  var EXTRA_SCOPE = { '1872': ['bangkok'], tea1872: ['bangkok'], suhring: ['bangkok'], baanphraya: ['bangkok'], cannubi: ['bangkok'], sangkhathan: ['vientiane'] };
   function scope() { var G = window.SIYL_GUEST; return G && G.scope ? G.scope() : null; }
   function joinsAll(dests) { var s = scope(); if (!s) return true; if (s.none) return false; return dests.every(function (d) { return s[d]; }); }
 
@@ -156,7 +158,9 @@
         /* a product with approved classes states the basis of the class the
          * guest actually chose — never the preferred class's */
         var c = x.cls && P.classOf ? P.classOf(x.id, x.cls) : null;
-        return { cat: f.cat, basis: (c && c.basis) || f.basis, unit: f.unit || 'guest' };
+        /* a house with several menus (the Highlights, 20 Sep 2026): the basis of the menu the guest chose */
+        var mn = x.menu && P.menuOf ? P.menuOf(x.id, x.menu) : null;
+        return { cat: f.cat, basis: (c && c.basis) || (mn && mn.basis) || f.basis, unit: f.unit || 'guest' };
       }
       var at = P.locate(x.id);
       if (at) return { cat: 'Accommodation', basis: P.lineBasis(x), unit: 'guest' };

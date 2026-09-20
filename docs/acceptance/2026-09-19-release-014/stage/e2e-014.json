@@ -2,7 +2,7 @@
  {
   "id": "stage-clean",
   "ok": true,
-  "d": "{\"ok\":true,\"dryRun\":false,\"cleared\":0,\"rows\":[],\"waitlistCleared\":0,\"remaining\":0,\"waitlistRemaining\":0,\"fixed\":0,\"at\":\"2026-09-20T09:54:17.533Z\"}"
+  "d": "{\"ok\":true,\"dryRun\":false,\"cleared\":0,\"rows\":[],\"waitlistCleared\":0,\"remaining\":0,\"waitlistRemaining\":0,\"fixed\":0,\"at\":\"2026-09-20T12:15:41.973Z\"}"
  },
  {
   "id": "host-starts-at-zero",
@@ -97,7 +97,7 @@
  {
   "id": "complete-trip-fills-nine-stages-and-waits-for-one",
   "ok": true,
-  "d": "{\"bag\":9,\"open\":0,\"need\":[\"event:temple\",\"event:coffee\",\"event:vows\",\"event:dinner\",\"dress\",\"allergy\",\"profile:coffeetea\",\"profile:flavor\",\"profile:drink\",\"profile:film\",\"profile:music\",\"photo\"],\"mine\":[\"bkk-stay\",\"kempinski\",\"ljg\",\"prewed\",\"wedstay\"],\"wait\":{\"kmg\":{\"at\":\"2026-09-20T09:55:51.647Z\",\""
+  "d": "{\"bag\":9,\"open\":0,\"need\":[\"event:temple\",\"event:coffee\",\"event:vows\",\"event:dinner\",\"dress\",\"allergy\",\"profile:coffeetea\",\"profile:flavor\",\"profile:drink\",\"profile:film\",\"profile:music\",\"photo\"],\"mine\":[\"bkk-stay\",\"kempinski\",\"ljg\",\"prewed\",\"wedstay\"],\"wait\":{\"kmg\":{\"at\":\"2026-09-20T12:17:14.954Z\",\""
  },
  {
   "id": "complete-trip-idempotent",
@@ -142,12 +142,12 @@
  {
   "id": "complete-trip-vientiane-china-waits-for-lijiang",
   "ok": true,
-  "d": "{\"rows\":7,\"wl\":[\"04 – 06 MAR · LIJIANG Waiting list None of the rooms this package offers for this stage can take your party (one place). You will be placed on the waiting list — no cost until it is resolved.\"],\"wait\":{\"ljg\":{\"at\":\"2026-09-20T09:56:50.076Z\",\"position\":1,\"size\":1,\"wanted\":[\"ljg/viewi"
+  "d": "{\"rows\":7,\"wl\":[\"04 – 06 MAR · LIJIANG Waiting list None of the rooms this package offers for this stage can take your party (one place). You will be placed on the waiting list — no cost until it is resolved.\"],\"wait\":{\"ljg\":{\"at\":\"2026-09-20T12:18:13.101Z\",\"position\":1,\"size\":1,\"wanted\":[\"ljg/viewi"
  },
  {
   "id": "parity-waiting-list-in-record-and-emails",
   "ok": true,
-  "d": "{\"sent\":{\"clicked\":true},\"rooms\":{\"stage\":\"ljg\",\"waitlisted\":true,\"position\":1,\"since\":\"2026-09-20T09:56:50.076Z\",\"size\":1},\"guest\":true,\"owner\":true}"
+  "d": "{\"sent\":{\"clicked\":true},\"rooms\":{\"stage\":\"ljg\",\"waitlisted\":true,\"position\":1,\"since\":\"2026-09-20T12:18:13.101Z\",\"size\":1},\"guest\":true,\"owner\":true}"
  },
  {
   "id": "leaving-the-waiting-list",
@@ -257,7 +257,7 @@
  {
   "id": "H-confirm-waits-with-a-visible-position",
   "ok": true,
-  "d": "{\"mine\":{},\"wait\":{\"wedstay\":{\"at\":\"2026-09-20T09:59:07.992Z\",\"position\":1,\"size\":2,\"wanted\":[\"wedstay/heritage-executive\",\"wedstay/heritage\",\"wedstay/heritage-grand-premier\",\"wedstay/noble-courtyard\",\"wedstay/grand-majestic\",\"wedstay/souphattra-majestic\",\"wedstay/souphattra-presidential\"]}},\"card\":"
+  "d": "{\"mine\":{},\"wait\":{\"wedstay\":{\"at\":\"2026-09-20T12:20:29.971Z\",\"position\":1,\"size\":2,\"wanted\":[\"wedstay/heritage-executive\",\"wedstay/heritage\",\"wedstay/heritage-grand-premier\",\"wedstay/noble-courtyard\",\"wedstay/grand-majestic\",\"wedstay/souphattra-majestic\",\"wedstay/souphattra-presidential\"]}},\"card\":"
  },
  {
   "id": "H-profile-and-review-carry-the-position",
@@ -327,7 +327,7 @@
  {
   "id": "couple-members-are-two-records",
   "ok": true,
-  "d": "{\"again\":{\"bd\":\"1990-05-17\",\"city\":\"Berlin\"},\"partner\":{\"bd\":\"\",\"city\":\"\"},\"ben\":{\"email\":\"ben.test@example.org\",\"phone\":\"+66 81 000 0000\",\"birthdate\":\"\",\"nationality\":\"\",\"address1\":\"\",\"address2\":\"\",\"postal\":\"\",\"city\":\"\",\"region\":\"\",\"country\":\"\",\"at\":\"2026-09-20T09:55:39.198Z\"}}"
+  "d": "{\"again\":{\"bd\":\"1990-05-17\",\"city\":\"Berlin\"},\"partner\":{\"bd\":\"\",\"city\":\"\"},\"ben\":{\"email\":\"ben.test@example.org\",\"phone\":\"+66 81 000 0000\",\"birthdate\":\"\",\"nationality\":\"\",\"address1\":\"\",\"address2\":\"\",\"postal\":\"\",\"city\":\"\",\"region\":\"\",\"country\":\"\",\"at\":\"2026-09-20T12:17:02.597Z\"}}"
  },
  {
   "id": "no-cross-guest-write",

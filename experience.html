@@ -55,6 +55,22 @@
 .x-qty b { font-family: 'PP Editorial Old', Georgia, serif; font-weight: 200; font-size: 22px; min-width: 28px; text-align: center; }
 .x-amt { margin-left: auto; font-family: 'PP Editorial Old', Georgia, serif; font-weight: 200; font-size: 19px; }
 .x-back { padding: 0 var(--a-gut); margin: 44px 0 0; }
+/* THE HIGHLIGHTS (Owner, 20 Sep 2026): the distinction above the name, the house's line and its menu — the same grammar,
+   one more register of prominence; the booking module (assets/highlight.js) draws the table section */
+.x-dist { font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--a-ink); margin: 0 0 12px; display: flex; align-items: center; gap: 12px; }
+.x-dist::before { content: ''; width: 22px; height: 1px; background: var(--a-ink); }
+.x-line { font-family: 'PP Editorial Old', Georgia, serif; font-weight: 200; font-size: 19px; line-height: 1.4; color: var(--a-ink); max-width: 30em; margin: 0 0 14px; }
+.x-house { font-size: 13.5px; line-height: 1.85; color: #4A4A4A; max-width: 32em; }
+.x-menu { list-style: none; margin: 18px 0 0; padding: 0; border-top: 1px solid var(--a-line); }
+.x-menu li { padding: 13px 0; border-bottom: 1px solid var(--a-line); font-size: 13.5px; line-height: 1.7; color: var(--a-ink); }
+.x-menu li::first-letter { text-transform: uppercase; }
+.x-menunote { font-size: 12.5px; line-height: 1.75; color: #4A4A4A; max-width: 34em; margin-top: 16px; }
+.x-clip { margin: 0 var(--a-gut) 34px; max-width: 760px; }
+.x-clip .am { position: relative; aspect-ratio: 4 / 5; background: #E7E3DB center/cover no-repeat; overflow: hidden; }
+.x-contact { font-size: 13.5px; line-height: 1.75; }
+.x-contact a { color: var(--a-ink); overflow-wrap: anywhere; }
+.x-kv .v { overflow-wrap: anywhere; }
+@media (min-width: 900px) { .x-clip { margin: 0 auto 44px; } .x-clip .am { aspect-ratio: 16 / 10; } }
 .x-none { padding: 80px var(--a-gut); max-width: 760px; }
 @media (min-width: 900px) {
   .x-gal { margin-bottom: 44px; }
@@ -69,11 +85,13 @@
 <body>
 <div class="hd-space" aria-hidden="true"></div>
 <main class="x-wrap" id="x"></main>
-<script src="assets/experiences.js?v=ecbe21ea"></script>
+<script src="assets/experiences.js?v=aa68399d"></script>
 <script src="assets/experience-galleries.js?v=9a7226c3"></script>
-<script src="assets/pricing.js?v=f647d273"></script>
+<script src="assets/pricing.js?v=d324fef7"></script>
 <script src="assets/bag.js?v=2a0c8152"></script>
+<script src="assets/draft.js?v=7ab9ca64"></script>
 <script src="assets/gallery.js?v=85069204"></script>
+<script src="assets/highlight.js?v=507d8c7b"></script>
 <script>
 (function () {
   var ROLE = { breakfast: 'Breakfast', lunch: 'Lunch', dinner: 'Dinner', cafe: 'Café', experience: 'Experience', place: 'Shopping & places', bar: 'Bar' };
@@ -96,9 +114,13 @@
   if (x.sheet === 'FULL') ctx.push('From the hosts’ notes on the place');
   var h = '';
   h += '<section class="x-gal">' + (window.SIYL_XGAL ? SIYL_XGAL.html(x) : '') + '</section>';
+  var hl = x.highlight || null;
   h += '<header class="x-head"><p class="a-eyebrow">' + esc(x.where) + (roles ? ' · ' + esc(roles) : '') + (x.day ? ' · ' + esc(x.day) : '') + '</p>' +
+       (hl && hl.distinction ? '<p class="x-dist" data-distinction>' + esc(hl.distinction) + '</p>' : '') +
        '<h1>' + esc(x.name) + '</h1>' +
+       (hl && hl.line ? '<p class="x-line">' + esc(hl.line) + '</p>' : '') +
        '<p class="x-lede">' + esc(x.intro || x.teaser || '') + '</p>' +
+       (hl && hl.house ? '<p class="x-house">' + esc(hl.house) + '</p>' : '') +
        (ctx.length ? '<p class="x-ctx">' + ctx.map(esc).join('<br>') + '</p>' : '') + '</header>';
   /* discovery entries: the hosts' own paragraphs where they wrote some */
   if (x.detail && x.detail.length) {
@@ -114,14 +136,22 @@
           (s.by ? '<p class="by">— ' + esc(s.by) + '</p>' : '') + '</div></div>';
       }).join('') + '</div></section>';
   }
+  /* the Highlight's own clip (a same-origin, silent H.264 card clip — the photograph stays the poster) and its menu */
+  if (hl && hl.clip) h += '<div class="x-clip"><div class="am" data-clip style="background-image:url(' + esc(x.img) + ')" role="img" aria-label="' + esc(x.name) + '"></div></div>';
+  if (hl && hl.menu && hl.menu.length) {
+    h += '<section class="x-sec" data-menu><p class="a-eyebrow">The menu</p><h2>' + esc(hl.menuTitle || 'The menu') + '</h2><ul class="x-menu">' + hl.menu.map(function (d) { return '<li>' + esc(d) + '</li>'; }).join('') + '</ul>' +
+      (hl.menuNote ? '<p class="x-menunote">' + esc(hl.menuNote) + '</p>' : '') + '</section>';
+  }
   /* practical information — only the fields the source actually carries */
   var pr = x.practical || {};
-  if (pr.price || pr.hours || pr.when || pr.dress || x.maps || x.link) {
+  var ct = hl && hl.contact || null;
+  if (pr.price || pr.hours || pr.when || pr.dress || x.maps || x.link || ct) {
     h += '<section class="x-sec"><p class="a-eyebrow">Practical information</p><div class="x-kv">' +
       (pr.price ? '<div data-private><span class="k">Price</span><span class="v"><span class="price">' + esc(pr.price) + '</span>' + (pr.priceNote ? '<small>' + esc(pr.priceNote) + '</small>' : '') + '</span></div>' : '') +
       (pr.when ? '<div><span class="k">When</span><span class="v">' + esc(pr.when) + '</span></div>' : '') +
       (pr.hours ? '<div><span class="k">Opening hours</span><span class="v">' + pr.hours.map(esc).join('<br>') + '</span></div>' : '') +
       (pr.dress ? '<div><span class="k">Dress code</span><span class="v">' + esc(pr.dress) + '</span></div>' : '') +
+      (ct ? '<div><span class="k">The house</span><span class="v x-contact">' + (ct.address ? ct.address.map(esc).join('<br>') + '<br>' : '') + (ct.where ? esc(ct.where) + '<br>' : '') + (ct.phone ? '<a href="tel:' + esc(ct.phone.replace(/[^+\d]/g, '')) + '">' + esc(ct.phone) + '</a><br>' : '') + (ct.email ? '<a href="mailto:' + esc(ct.email) + '">' + esc(ct.email) + '</a>' : '') + '</span></div>' : '') +
       ((x.maps || x.link) ? '<div><span class="k">Where</span><span class="v"><span class="x-links" style="margin-top:0">' +
         (x.maps ? '<a class="a-link" href="' + esc(x.maps) + '" target="_blank" rel="noopener">Map</a>' : '') +
         (x.link ? '<a class="a-link" href="' + esc(x.link) + '" target="_blank" rel="noopener">Website</a>' : '') + '</span></span></div>' : '') +
@@ -129,7 +159,9 @@
   }
   /* the Journey action — one place carries it, by Owner decision: the Afternoon
    * Tea pattern, priced per participating guest by the one calculation source */
-  if (x.select) {
+  if (x.select && hl && window.SIYL_HIGHLIGHT) {
+    h += SIYL_HIGHLIGHT.html(x);
+  } else if (x.select) {
     var meal = (x.roles || []).indexOf('dinner') >= 0 ? 'Dinner' : (x.roles || []).indexOf('breakfast') >= 0 ? 'Breakfast' : 'Lunch';
     h += '<section class="x-sel" id="sel"><p class="a-eyebrow">My Bag</p><h2>' + meal + ' at ' + esc(x.name) + (x.practical && x.practical.when ? ' <span class="a-eyebrow" style="display:block;margin-top:6px">' + esc(x.practical.when) + '</span>' : '') + '</h2>' +
       '<p class="price" data-private>USD ' + x.select.price + ' <span class="a-eyebrow" style="display:inline">' + esc(x.select.unit) + '</span></p>' +
@@ -139,6 +171,8 @@
   }
   h += '<p class="x-back"><a class="a-link" href="experiences.html#' + esc(x.chapter) + '">All experiences</a></p>';
   root.innerHTML = h;
+  /* the Highlight's clip: the same-origin card clip of the data record (assets/experiences.js), mounted by the shared card-video module */
+  var clipFrame = root.querySelector('[data-clip]'); if (clipFrame && hl && hl.clip) { clipFrame.setAttribute('data-video', hl.clip); if (window.SIYL_AMAN && SIYL_AMAN.video) SIYL_AMAN.video.wire(root); }
   if (window.SIYL_XGAL) document.querySelectorAll('[data-xgal]').forEach(SIYL_XGAL.wire);
   document.querySelectorAll('[data-acc]').forEach(function (b) {
     b.addEventListener('click', function () {
@@ -149,9 +183,10 @@
 
   /* selection: the Journey Bag is the one truth — has() decides the state, the
    * invitation gate decides who may add. ONE GUEST = ONE PRICE (Owner, 14 Sep
-   * 2026): the request is this guest's own, USD 180, never multiplied. */
+   * 2026): the request is this guest's own, one price, never multiplied. */
   function money(n) { return 'USD ' + Number(n).toLocaleString('en-US'); }
   function paintSel() {
+    if (x.select && hl && window.SIYL_HIGHLIGHT) { SIYL_HIGHLIGHT.paint(x); return; }
     var box = document.getElementById('selbox'); if (!box || !window.SIYL_BAG) return;
     /* the price and the add exist for a signed-in guest only (Owner, 16 Sep 2026): signed out nothing is rendered here */
     if (document.documentElement.getAttribute('data-session') !== 'in') { box.innerHTML = ''; return; }
@@ -181,8 +216,8 @@
   document.addEventListener('siyl:auth', paintSel);
 })();
 </script>
-<script src="assets/recon.js?v=cde45016"></script>
-<script src="assets/aman.js?v=67d37d1b"></script>
+<script src="assets/recon.js?v=0e3f9951"></script>
+<script src="assets/aman.js?v=bbc20559"></script>
 <script type="module" src="assets/invite.mjs?v=df9c0807"></script>
 </body>
 </html>

@@ -38,6 +38,14 @@
       ['1872 · Champagne Afternoon Tea', '1872.html'],
       ['Sühring · Dinner in Bangkok', 'experience.html?id=bkk-suhring']
     ]],
+    /* THE HIGHLIGHTS (Owner, 20 Sep 2026): the premium tables and the afternoon tea, one row of their own — Aman never
+       hidden in a submenu again; each stays in Experiences as well */
+    ['Highlights', 'experiences.html#highlights', [
+      ['1872 · Champagne Afternoon Tea · Aman', '1872.html'],
+      ['Sühring · Three MICHELIN Stars', 'experience.html?id=bkk-suhring'],
+      ['Baan Phraya · Thai heritage', 'experience.html?id=bkk-baanphraya'],
+      ['Cannubi by Umberto Bombana · One MICHELIN Star', 'experience.html?id=bkk-cannubi']
+    ]],
     ['Wellness', 'marsilea.html', null],
     ['The Wedding', 'voyage.html', [
       ['Temple Ceremony', 'voyage.html#temple'],

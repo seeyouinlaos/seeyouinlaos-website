@@ -537,6 +537,8 @@ gate('P7', 'Dress Code imagery real (23 — resort-01 retired by the owner), no 
     const h = read(f);
     for (const m of h.matchAll(/data-video="([^"]*)"/g)) decl.push({ page: f, src: m[1] });
   }
+  /* the Highlights' clips (20 Sep 2026) are declared in the data record and set on the frame at render: the same rules */
+  for (const m of read('assets/experiences.js').matchAll(/clip: '([^']*)'/g)) decl.push({ page: 'assets/experiences.js', src: m[1] });
   const problems = [];
   const { spawnSync } = require('child_process');
   const ffprobe = ['/opt/homebrew/bin/ffprobe', '/usr/local/bin/ffprobe', 'ffprobe'].find((c) => spawnSync(c, ['-version'], { encoding: 'utf8' }).status === 0);

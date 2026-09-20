@@ -109,9 +109,10 @@ test('detail content exists where the source carries it; discovery places carry 
   }
 });
 
-test('selectable status matches the inventory: Sühring alone, by Owner decision', () => {
+test('selectable status matches the inventory: the three Highlight tables — Sühring, Baan Phraya, Cannubi (Owner, 20 Sep 2026)', () => {
   for (const x of EXP) assert.equal(!!x.select, byId[x.id].selectable, x.id + ' selectable');
-  assert.deepEqual(EXP.filter((x) => x.select).map((x) => x.id), ['bkk-suhring']);
+  assert.deepEqual(EXP.filter((x) => x.select).map((x) => x.id), ['bkk-suhring', 'bkk-baanphraya', 'bkk-cannubi']);
+  for (const x of EXP.filter((x) => x.select)) assert.ok(x.highlight && x.highlight.distinction && x.highlight.menu.length >= 8, x.id + ' is a Highlight with its menu');
 });
 
 test('SÜHRING — canonical entity, Bangkok, restaurant, source category, Drive folder, multiple photographs', () => {
@@ -133,13 +134,14 @@ test('SÜHRING — the full source record is rendered, the price per person by O
   assert.equal(s.sheet, 'FULL');
   assert.deepEqual(s.sections.map((k) => k.k), ['The philosophy', 'The founders', 'The foundation', 'The first mentor', 'Contemporary heritage']);
   assert.match(s.sections[3].p.join(' '), /grandmother Christa/);
-  assert.equal(s.practical.price, 'USD 180 per person');
+  assert.equal(s.practical.price, 'USD 294 · USD 234 per person', 'the house\'s two menu prices, the Owner\'s rounded website amounts (20 Sep 2026)');
   assert.equal(s.practical.when, 'Dinner · Sunday, 21 February 2027 · the first evening in Bangkok');
   assert.equal(s.practical.hours, undefined, 'no meal-hours copy beside the dated dinner (Owner, 19 Sep 2026)');
   assert.deepEqual(s.practical.sourceHours, ['Lunch', 'Thursday to Sunday', '12:30 pm to 13:00 pm (last seating)', 'Closed on Monday and Tuesday'], 'the sheet record stays as the source, verbatim');
   assert.equal(s.maps, 'https://maps.app.goo.gl/2b4whggW3YCnxN6u5?g_st=ic');
   assert.equal(s.link, 'https://www.restaurantsuhring.com/menu.html');
-  assert.deepEqual(s.select, { id: 'suhring', price: 180, unit: 'per person' });
+  assert.deepEqual(s.select, { id: 'suhring', unit: 'per person' }, 'the price lives in the one calculation source (its menus)');
+  assert.equal(s.highlight.distinction, 'Three MICHELIN Stars'); assert.equal(s.highlight.line, 'Modern German cuisine by Thomas and Mathias Sühring');
   assert.ok(GAL['bkk-suhring'].images.length >= 3 && GAL['bkk-suhring'].images.length === byId['bkk-suhring'].used, 'the authorised gallery stays (its rooms, never its dishes)');
 });
 
@@ -157,21 +159,24 @@ const shop = () => {
 };
 const addSuhring = (W, n) => { const it = W.SIYL_PRICE.items('suhring')[0]; it.qty = n; it.request = true; it.exp = 'bkk-suhring'; W.SIYL_BAG.put(it); return it; };
 
-test('SÜHRING — USD 180 is priced PER PERSON by the one calculation source', () => {
+test('SÜHRING — the Erlebnis menu is priced PER PERSON by the one calculation source: USD 294 (THB 9,800) or USD 234 (THB 7,800), the chosen menu on the line (Owner, 20 Sep 2026)', () => {
   const { W } = shop(); const P = W.SIYL_PRICE;
-  assert.equal(P.FLAT.suhring.price, 180);
+  assert.equal(P.FLAT.suhring.price, 294);
   assert.equal(P.FLAT.suhring.cat, 'Restaurant');
-  assert.match(P.FLAT.suhring.basis, /USD 180 per person/);
+  assert.match(P.FLAT.suhring.basis, /USD 294 per person/); assert.match(P.FLAT.suhring.basis, /beverages not included/);
+  assert.deepEqual(P.menusOf('suhring').map((m) => [m.slug, m.price, m.thb]), [['erlebnis', 294, 'THB 9,800'], ['erlebnis-short', 234, 'THB 7,800']]);
   assert.equal(P.quote('suhring').unit, 'guest');
   const line = P.items('suhring')[0];
-  assert.equal(line.price, 180); assert.equal(line.name, 'Sühring');
+  assert.equal(line.price, 294); assert.equal(line.name, 'Sühring'); assert.equal(line.menu, 'erlebnis'); assert.match(line.meta, /Erlebnis · the complete menu$/);
+  const short = P.items('suhring', 'erlebnis-short')[0]; assert.equal(short.price, 234); assert.equal(short.menu, 'erlebnis-short');
   assert.equal(W.SIYL_JOURNEY.meta({ ...line, qty: 2, request: true }).cat, 'Restaurant');
-  assert.equal(W.SIYL_JOURNEY.quantityLine({ ...line, qty: 1 }), 'USD 180 per person · your cost');
+  assert.match(W.SIYL_JOURNEY.meta({ ...short, qty: 1, request: true }).basis, /USD 234 per person/, 'the basis of the menu the guest chose');
+  assert.equal(W.SIYL_JOURNEY.quantityLine({ ...line, qty: 1 }), 'USD 294 per person · your cost');
 });
 
-test('SÜHRING — one guest, one price: USD 180 for this guest; removal reverses it', () => {
+test('SÜHRING — one guest, one price: USD 294 for this guest; removal reverses it', () => {
   const { W } = shop(); const B = W.SIYL_BAG;
-  addSuhring(W, 1); assert.equal(B.total(), 180);
+  addSuhring(W, 1); assert.equal(B.total(), 294);
   B.remove('suhring'); assert.equal(B.total(), 0); assert.ok(!B.has('suhring'));
 });
 
@@ -180,22 +185,21 @@ test('SÜHRING — no duplicate addition, reload preserves the selection', () =>
   addSuhring(W, 1); addSuhring(W, 1);
   /* the page guards with has(), and put() replaces in place — never a second line */
   assert.ok(B.has('suhring')); assert.equal(B.get().length, 1);
-  assert.match(src('experience.html'), /if \(SIYL_BAG\.has\(s\.id\)\) \{ paintSel\(\); return; \}/);
-  assert.match(src('experience.html'), /it\.qty = 1; it\.request = true; it\.exp = x\.id;\s*SIYL_BAG\.put\(it\);/);
+  assert.match(src('assets/highlight.js'), /window\.SIYL_BAG\.put\(line\)/, 'the Highlight confirm puts — one line per house, a menu change replaces');
+  assert.match(src('assets/highlight.js'), /it\.qty = 1; it\.request = true; it\.exp = x\.id;/);
   /* reload = the same storage read by a fresh engine */
   const again = shop(); for (const [k, v] of store) again.store.set(k, v);
-  assert.ok(again.W.SIYL_BAG.has('suhring')); assert.equal(again.W.SIYL_BAG.get()[0].qty, 1); assert.equal(again.W.SIYL_BAG.total(), 180);
+  assert.ok(again.W.SIYL_BAG.has('suhring')); assert.equal(again.W.SIYL_BAG.get()[0].qty, 1); assert.equal(again.W.SIYL_BAG.total(), 294);
 });
 
 test('SÜHRING — Your Journey and Review & Send carry the request with its calculated amount', () => {
   const yj = src('your-journey.html'), rv = src('review.html'), page = src('experience.html');
   assert.doesNotMatch(yj, /Participating guests|data-q=/, 'no participant stepper: one guest, one request');
   assert.match(yj, /if\(x\.exp\)return 'experience\.html\?id='/);
-  assert.match(rv, /RESTAURANT REQUEST \(USD 180 per person; to be arranged through Guest Relations; not a reservation\)/);
+  assert.match(rv, /RESTAURANT REQUEST \(USD '\+\(x\.price\|\|0\)\+' per person; to be arranged through Guest Relations; not a reservation\)/, 'the line\'s own amount, never a hard-coded one');
   assert.doesNotMatch(rv, /not in the journey total/);
-  assert.match(page, /data-sel-state="current" aria-current="true">Current selection · /);
-  assert.match(page, /Add to My Bag · ' \+ money\(s\.price\)/);
-  assert.match(page, /it\.qty = 1; it\.request = true; it\.exp = x\.id;/);
+  assert.match(src('assets/highlight.js'), /data-sel-state="current" aria-current="true">Current selection · /);
+  assert.match(page, /SIYL_HIGHLIGHT\.html\(x\)/); assert.match(page, /SIYL_HIGHLIGHT\.paint\(x\)/);
 });
 
 test('SÜHRING — never described as a confirmed reservation, a confirmed table or guaranteed availability', () => {

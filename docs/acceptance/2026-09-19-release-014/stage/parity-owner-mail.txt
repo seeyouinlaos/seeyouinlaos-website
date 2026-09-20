@@ -8,9 +8,9 @@ Party: Ada & Ben
 Email: ben.test@example.org
 Mobile: +66 81 000 0000
 
-Reference: SYL-T002-D5B626CE
+Reference: SYL-T002-18CA7B01
 Status: Initial submission
-Sent: 20 September 2026 · 11:56
+Sent: 20 September 2026 · 14:17
 Where they join us: Bangkok · Vientiane · China
 
 TRAVEL
@@ -62,5 +62,5 @@ Guest: T002
 Invitation: INV-T002
 Ceremony seat record: C-R-07-02
 Dinner seat record: D-T-07
-Submission: SYL-T002-D5B626CE · version 1
+Submission: SYL-T002-18CA7B01 · version 1
 Status: http://127.0.0.1:8788/api/status?invitation=INV-T002
