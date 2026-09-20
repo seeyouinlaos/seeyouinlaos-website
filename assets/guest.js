@@ -96,7 +96,8 @@
       var a = auth();
       if (!a || !a.guestId || !a.bearer || a.invitationId !== 'INV-' + a.guestId) return null;
       return { guestId: a.guestId, fullName: a.fullName || '', preferredName: a.preferredName || a.fullName || '',
-               hostRole: a.hostRole === 'BRIDE' || a.hostRole === 'GROOM' ? a.hostRole : null };
+               hostRole: a.hostRole === 'BRIDE' || a.hostRole === 'GROOM' ? a.hostRole : null,
+               contactId: typeof a.contactId === 'string' ? a.contactId : '', couple: typeof a.couple === 'string' ? a.couple : '' };
     },
     /* the invitation as the surfaces read it: one guest, their party as context */
     party: function () {
@@ -223,6 +224,36 @@
       write(st);
     },
     contact: function (f) { var st = read(); return (st.contact || {})[f] || ''; },
+    /* THE PERSONAL DETAILS (Owner, 20 Sep 2026): the guest's own — Date of Birth · Nationality (one or several, as written) ·
+       Phone Number · Email Address · Private Mailing Address (structured). Each field belongs to the signed-in person alone
+       (one code = one person = one record); the couple partner has their own. CONxxx and COUPLxxx are never fields here. */
+    PERSONAL: [
+      { key: 'birthdate', label: 'Date of Birth' }, { key: 'nationality', label: 'Nationality' }, { key: 'phone', label: 'Phone Number' }, { key: 'email', label: 'Email Address' },
+      { key: 'address1', label: 'Street and house number', group: 'address' }, { key: 'address2', label: 'Address line 2', group: 'address', optional: true }, { key: 'postal', label: 'Postal / ZIP code', group: 'address' },
+      { key: 'city', label: 'City', group: 'address' }, { key: 'region', label: 'State / Province / Region', group: 'address', optional: true }, { key: 'country', label: 'Country', group: 'address' }
+    ],
+    ADDRESS_WORDS: 'Please share the address where you can reliably receive personal mail. We may use it for wedding correspondence, invitations and occasional post related to your trip with us, including after the trip.',
+    /* the address as one line, for the record and the profile */
+    addressWords: function () { var c = this; var parts = [c.contact('address1'), c.contact('address2'), [c.contact('postal'), c.contact('city')].filter(Boolean).join(' '), c.contact('region'), c.contact('country')].filter(Boolean); return parts.join(', '); },
+    addressComplete: function () { return !!(this.contact('address1') && this.contact('postal') && this.contact('city') && this.contact('country')); },
+    birthdateWords: function () { var v = this.contact('birthdate'); var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v); if (!m) return v || ''; var M = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']; return String(parseInt(m[3], 10)) + ' ' + M[parseInt(m[2], 10) - 1] + ' ' + m[1]; },
+    validBirthdate: function (v) { var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(v || '').trim()); if (!m) return false; var y = +m[1]; var d = new Date(Date.UTC(y, +m[2] - 1, +m[3])); return y >= 1900 && y <= new Date().getUTCFullYear() && d.getUTCMonth() === +m[2] - 1 && d.getUTCDate() === +m[3] && d.getTime() < Date.now(); },
+    /* the fields still empty — asked for, never blocking the journey */
+    personalMissing: function () { var self = this; return this.PERSONAL.filter(function (f) { return !f.optional && !self.contact(f.key); }).map(function (f) { return { key: f.key, label: f.label, href: 'invitation.html#p-' + f.key }; }); },
+    /* the guest list's own data, taken once into empty fields of this guest's record — prefilled to review, never overwriting
+       what the guest or the server already holds; recorded in the history as the list's */
+    prefillFromInvitation: function () {
+      var me = this.me(), a = auth(); if (!me || !a || !a.profile || typeof a.profile !== 'object') return false;
+      var st = read(), c = st.contact || {}, pr = a.profile, changed = false, me2 = me.guestId;
+      var take = function (k, v) { v = String(v == null ? '' : v).trim(); if (!v || c[k]) return; c[k] = v; st.history = st.history || []; st.history.push({ field: 'contact.' + k, from: '', to: v, at: stamp(), by: 'guest-list' }); changed = true; };
+      if (a.guestId === me2) {
+        if (validEmail(pr.email)) take('email', pr.email); if (pr.phone) take('phone', pr.phone);
+        if (this.validBirthdate(pr.birthdate)) take('birthdate', pr.birthdate); if (pr.nationality) take('nationality', pr.nationality);
+        if (pr.address && typeof pr.address === 'object') ['line1', 'line2', 'postal', 'city', 'region', 'country'].forEach(function (k) { if (pr.address[k]) take(k === 'line1' ? 'address1' : k === 'line2' ? 'address2' : k, pr.address[k]); });
+      }
+      if (changed) { st.contact = c; write(st); this.pushContact(); }
+      return changed;
+    },
     setContact: function (f, v) {
       var me = this.me(); if (!me) return;
       var st = read();
@@ -242,6 +273,7 @@
       if (!a || !a.bearer || typeof fetch !== 'function') return Promise.resolve(null);
       var D = window.SIYL_DRAFT, seen = null; try { seen = localStorage.getItem('siyl.draft.reset') || null; } catch (e) { seen = null; }
       var body = { invitationId: a.invitationId, email: c.email || '', phone: c.phone || '', seenReset: seen };
+      this.PERSONAL.forEach(function (f) { if (f.key !== 'email' && f.key !== 'phone') body[f.key] = c[f.key] || ''; });
       return fetch(CONTACT_API, { method: 'PUT', headers: { 'content-type': 'application/json', 'x-siyl-auth': a.bearer }, body: JSON.stringify(body) })
         .then(function (r) { return r.json(); }).then(function (d) { if (d && d.error === 'reset' && d.resetAt && D && D.honourReset) { D.honourReset(d.resetAt); return d; } if (d && d.ok) { var s2 = read(); s2.contactSyncedAt = d.contact && d.contact.at || stamp(); localStorage.setItem(KEY, JSON.stringify(s2)); } return d; }).catch(function () { return null; });
     },
@@ -256,9 +288,12 @@
            anything of it could be pushed back */
         var D = window.SIYL_DRAFT; if (d.resetAt && D && D.honourReset) D.honourReset(d.resetAt);
         var st = read(), c = st.contact || {}, srv = d.contact || null, changed = false;
-        if (srv) { ['email', 'phone'].forEach(function (f) { if (!c[f] && srv[f]) { c[f] = srv[f]; changed = true; } }); }
+        var keys = self.PERSONAL.map(function (f) { return f.key; });
+        if (srv) { keys.forEach(function (f) { if (!c[f] && srv[f]) { c[f] = srv[f]; changed = true; } }); }
         if (changed) { st.contact = c; write(st); }
-        if ((c.email && !(srv && srv.email)) || (c.phone && !(srv && srv.phone))) self.pushContact();
+        if (keys.some(function (f) { return c[f] && !(srv && srv[f]); })) self.pushContact();
+        /* the guest list's data fills what is still empty — once, for review */
+        self.prefillFromInvitation();
         return d;
       }).catch(function () { return null; });
     },
@@ -547,7 +582,9 @@
         partyId: p.partyId,
         partyName: p.partyName,
         party: { label: this.partyLabel(), names: this.partyNames(), members: (p.members || []).map(function (m) { return m.guestId; }) },
-        contact: { email: this.contact('email'), phone: this.contact('phone') },
+        contact: { email: this.contact('email'), phone: this.contact('phone'), birthdate: this.contact('birthdate'), nationality: this.contact('nationality'),
+          address: { line1: this.contact('address1'), line2: this.contact('address2'), postal: this.contact('postal'), city: this.contact('city'), region: this.contact('region'), country: this.contact('country'), words: this.addressWords() } },
+        ...(me.contactId ? { contactId: me.contactId } : {}), ...(me.couple ? { couple: me.couple } : {}),
         scope: this.scope(),
         scopeWords: this.scopeWords(),
         dress: { all: !!this.dressAck(), acknowledged: this.dressAck() ? [me.guestId] : [], missing: this.dressAck() ? [] : [me.guestId] },

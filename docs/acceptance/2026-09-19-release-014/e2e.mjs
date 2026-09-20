@@ -382,6 +382,38 @@ if (!LIVE) {
     note('flight-no-stale-number-on-any-surface', staleHits.length === 0, staleHits.join(' ') || 'MU5920 / MU5924 absent from My Trip · The Journey · the transport page · Review · Profile · My Bag · the Travel Pass');
     await p.context().close(); await resetGuest('T001');
   }
+  /* ===== 6c · THE PERSONAL DETAILS (the Owner's go-live instruction, 20 Sep 2026): Date of Birth · Nationality · Phone Number · Email Address · Private Mailing Address on the invitation page,
+     persisted on the Worker under the guest's own invitation, shown on the profile, carried to Guest Relations; a couple's two members are two records (T001 Ada · T002 Ben, one party) ===== */
+  {
+    const p = await fresh(390); await signIn(p, 'T001'); await contact(p, 'ada.test@example.org');
+    await p.goto(O + '/invitation.html', { waitUntil: 'load' }); await p.waitForTimeout(1500);
+    const form = await p.evaluate(() => ({ ids: ['p-birthdate', 'p-nationality', 'p-phone', 'p-email', 'p-address1', 'p-address2', 'p-postal', 'p-city', 'p-region', 'p-country'].map((id) => !!document.getElementById(id)), date: (document.getElementById('p-birthdate') || {}).type, words: (document.querySelector('#personal') || {}).innerText || '', ids2: document.querySelectorAll('input[data-c="contactId"], input[data-c="couple"]').length }));
+    note('personal-fields-on-the-invitation-page', form.ids.every(Boolean) && form.date === 'date' && /Date of Birth/i.test(form.words) && /Nationality/i.test(form.words) && /Private Mailing Address/i.test(form.words) && /Please share the address where you can reliably receive personal mail/i.test(form.words) && !/gift/i.test(form.words) && form.ids2 === 0, JSON.stringify({ ids: form.ids, date: form.date, noIdInputs: form.ids2 === 0 }));
+    for (const [id, v] of [['p-birthdate', '1990-05-17'], ['p-nationality', 'Thai, German'], ['p-address1', 'Musterstraße 1'], ['p-postal', '10115'], ['p-city', 'Berlin'], ['p-region', 'Berlin'], ['p-country', 'Germany']]) { await p.fill('#' + id, v); await p.dispatchEvent('#' + id, 'change'); await p.waitForTimeout(250); }
+    await p.waitForTimeout(1500);
+    const srv = await api(p, '/api/contact');
+    const local = await p.evaluate(() => ({ bd: SIYL_GUEST.contact('birthdate'), nat: SIYL_GUEST.contact('nationality'), addr: SIYL_GUEST.addressWords(), missing: SIYL_GUEST.personalMissing().length, ready: SIYL_GUEST.missingFor('you').length }));
+    note('personal-details-saved-locally-and-on-the-worker', local.bd === '1990-05-17' && local.nat === 'Thai, German' && local.addr === 'Musterstraße 1, 10115 Berlin, Berlin, Germany' && local.missing === 0 && local.ready === 0 && srv.status === 200 && srv.body.contact && srv.body.contact.birthdate === '1990-05-17' && srv.body.contact.nationality === 'Thai, German' && srv.body.contact.country === 'Germany' && srv.body.contact.email === 'ada.test@example.org', JSON.stringify({ local, server: srv.body && srv.body.contact }));
+    await shot(p, '390-invitation-personal-details');
+    await p.goto(O + '/profile.html', { waitUntil: 'load' }); await p.waitForTimeout(2000);
+    const prof = await p.evaluate(() => ({ card: (document.querySelector('[data-profile-personal]') || {}).innerText || '' }));
+    await shot(p, '390-profile-personal-details');
+    note('profile-shows-the-personal-details', /17 May 1990/.test(prof.card) && /Thai, German/.test(prof.card) && /Musterstraße 1, 10115 Berlin, Berlin, Germany/.test(prof.card) && /ada\.test@example\.org/.test(prof.card) && !/Still needed/.test(prof.card), prof.card.replace(/\s+/g, ' ').slice(0, 200));
+    /* a fresh device of the same guest reads the server copy; the partner's device reads nothing of it */
+    const p2 = await fresh(390); await signIn(p2, 'T001'); await p2.goto(O + '/profile.html', { waitUntil: 'load' }); await p2.waitForTimeout(2500);
+    const again = await p2.evaluate(() => ({ bd: SIYL_GUEST.contact('birthdate'), city: SIYL_GUEST.contact('city') }));
+    const p3 = await fresh(390); await signIn(p3, 'T002'); await p3.goto(O + '/profile.html', { waitUntil: 'load' }); await p3.waitForTimeout(2500);
+    const partner = await p3.evaluate(() => ({ bd: SIYL_GUEST.contact('birthdate'), city: SIYL_GUEST.contact('city'), nat: SIYL_GUEST.contact('nationality'), card: (document.querySelector('[data-profile-personal]') || {}).innerText || '' }));
+    const ben = await api(p3, '/api/contact');
+    note('couple-members-are-two-records', again.bd === '1990-05-17' && again.city === 'Berlin' && partner.bd === '' && partner.city === '' && partner.nat === '' && /Still needed/.test(partner.card) && ben.status === 200 && (!ben.body.contact || !ben.body.contact.birthdate), JSON.stringify({ again, partner: { bd: partner.bd, city: partner.city }, ben: ben.body && ben.body.contact }));
+    /* a write under the partner's invitation is refused */
+    const forged = await api(p3, '/api/contact', { method: 'PUT', body: JSON.stringify({ invitationId: 'INV-T001', birthdate: '1980-01-01', seenReset: (ben.body && ben.body.resetAt) || null }) });
+    const still = await api(p2, '/api/contact');
+    note('no-cross-guest-write', forged.status === 403 && still.body.contact.birthdate === '1990-05-17', JSON.stringify({ forged: forged.status, ada: still.body.contact.birthdate }));
+    for (const w of [320, 834]) { const q = await fresh(w); await signIn(q, 'T001'); await q.goto(O + '/invitation.html', { waitUntil: 'load' }); await q.waitForTimeout(1200); const ov = await q.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth); note('invitation-personal-no-overflow-' + w, ov <= 1, 'overflow ' + ov); await q.context().close(); }
+    await p.context().close(); await p2.context().close(); await p3.context().close(); await resetGuest('T001'); await resetGuest('T002');
+  }
+
 }
 
 /* ===== 7 · THE DATED VENUES (public): Sühring a dinner on 21 February; the tea on 24 February; Baan Phraya, Cannubi, Petits Plats, Harudot in their rails ===== */

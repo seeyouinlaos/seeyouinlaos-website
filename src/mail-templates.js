@@ -68,7 +68,10 @@ export function journeyModel(record) {
   const firstName = (g0.source && g0.source.preferredName) || g0.name || (legacy && legacy.name) || fullName.split(' ')[0];
   const partyName = gr.partyName || r.partyName || '';
   const contact = { email: (record.recipient && record.recipient.email) || (r.contact && r.contact.email) || (gr.contact && gr.contact.email) || (legacy && legacy.contact && legacy.contact.email) || '',
-    phone: (record.recipient && record.recipient.phone) || (r.contact && r.contact.phone) || (gr.contact && gr.contact.phone) || (legacy && legacy.contact && legacy.contact.phone) || '' };
+    phone: (record.recipient && record.recipient.phone) || (r.contact && r.contact.phone) || (gr.contact && gr.contact.phone) || (legacy && legacy.contact && legacy.contact.phone) || '',
+    /* THE PERSONAL DETAILS (Owner, 20 Sep 2026) — Guest Relations' email only, never the guest's */
+    birthdate: (r.contact && r.contact.birthdate) || '', nationality: (r.contact && r.contact.nationality) || '', address: (r.contact && r.contact.address && r.contact.address.words) || '' };
+  const personId = [r.contactId, r.couple].filter(Boolean).join(' · ');
   const rooms0 = record.rooms || null;
   /* NO FIXED ARRANGEMENT (Owner, 19 Sep 2026): every line is the guest's own selection — but the engine is the truth of a
      stage: a line for a stage the engine has WAITLISTED for this guest (a stale device, a replayed draft) is not a stay and
@@ -118,7 +121,7 @@ export function journeyModel(record) {
   const stated = r.totalUsd != null ? r.totalUsd : (r.total != null ? r.total : null);
   const total = stated == null ? null : (dropped ? lines.reduce((t, x) => t + (Number(x.price) || 0) * (Number(x.qty) || 1), 0) : stated);
   const upd = record.kind === 'update' && (record.version || 1) > 1;
-  return { guestId, fullName, firstName, partyName, contact, stays, arranged, waitlisted, travel, experiences, wedding, sangkhathan, seats, profile, allergy, allergyDetails, acks, docs, publication, total, hosts,
+  return { guestId, fullName, firstName, partyName, contact, personId, stays, arranged, waitlisted, travel, experiences, wedding, sangkhathan, seats, profile, allergy, allergyDetails, acks, docs, publication, total, hosts,
     /* WHERE THEY JOIN US (Owner, 18 Sep 2026): the guest's participation scope as sent — the words the guest chose, or a decline */
     scope: typeof gr.scopeWords === 'string' && gr.scopeWords ? gr.scopeWords : (gr.scope && gr.scope.none ? 'Not joining this trip' : ''),
     notJoining: !!(gr.scope && gr.scope.none),
@@ -228,7 +231,8 @@ export function composeOwnerMail(record, statusUrl) {
   let inner = '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td>' +
     h1(M.upd ? 'Trip updated' : 'New trip received') + '</td></tr>' +
     (M.upd ? '<tr><td>' + label('Updated trip') + para('Latest version received ' + esc(whenWords(M.sentAt)) + '. It replaces the version first sent ' + esc(whenWords(M.firstSentAt)) + '.') + '</td></tr>' : '') +
-    '<tr><td>' + kvTable([kvRow('Guest', M.fullName), M.partyName ? kvRow('Party', M.partyName) : '', kvRow('Email', M.contact.email || '—'), kvRow('Mobile', M.contact.phone || '—'),
+    '<tr><td>' + kvTable([kvRow('Guest', M.fullName), M.partyName ? kvRow('Party', M.partyName) : '', M.personId ? kvRow('Person', M.personId) : '', kvRow('Email', M.contact.email || '—'), kvRow('Mobile', M.contact.phone || '—'),
+      M.contact.birthdate ? kvRow('Date of birth', M.contact.birthdate) : '', M.contact.nationality ? kvRow('Nationality', M.contact.nationality) : '', M.contact.address ? kvRow('Mailing address', M.contact.address) : '',
       kvRow('Reference', M.reference), kvRow('Status', M.upd ? 'Updated trip' : 'Initial submission'), kvRow(M.upd ? 'Updated' : 'Sent', whenWords(M.sentAt)), M.scope ? kvRow('Where they join us', M.scope) : ''].filter(Boolean)) + '</td></tr>' + gap(14) + rule() +
     journeySections(M, true);
   if (docsRows.length) inner += section('Documents', kvTable(docsRows) + (missing.length ? '<p style="margin:10px 0 0;font-family:' + SANS + ';font-size:13px;color:' + INK + ';">Still needed: ' + esc(missing.join(', ')) + '</p>' : ''));
@@ -240,7 +244,7 @@ export function composeOwnerMail(record, statusUrl) {
   const T = [];
   T.push('SEE YOU IN LAOS — GUEST RELATIONS', '', M.upd ? 'Trip updated' : 'New trip received', '');
   if (M.upd) T.push('Latest version received ' + whenWords(M.sentAt) + ' (replaces the version first sent ' + whenWords(M.firstSentAt) + ')', '');
-  T.push('Guest: ' + M.fullName, M.partyName ? 'Party: ' + M.partyName : '', 'Email: ' + (M.contact.email || '—'), 'Mobile: ' + (M.contact.phone || '—'), 'Reference: ' + M.reference, 'Status: ' + (M.upd ? 'Updated trip' : 'Initial submission'), (M.upd ? 'Updated: ' : 'Sent: ') + whenWords(M.sentAt), M.scope ? 'Where they join us: ' + M.scope : '', '');
+  T.push('Guest: ' + M.fullName, M.partyName ? 'Party: ' + M.partyName : '', M.personId ? 'Person: ' + M.personId : '', 'Email: ' + (M.contact.email || '—'), 'Mobile: ' + (M.contact.phone || '—'), M.contact.birthdate ? 'Date of birth: ' + M.contact.birthdate : '', M.contact.nationality ? 'Nationality: ' + M.contact.nationality : '', M.contact.address ? 'Mailing address: ' + M.contact.address : '', 'Reference: ' + M.reference, 'Status: ' + (M.upd ? 'Updated trip' : 'Initial submission'), (M.upd ? 'Updated: ' : 'Sent: ') + whenWords(M.sentAt), M.scope ? 'Where they join us: ' + M.scope : '', '');
   if (M.travel.length) { T.push('TRAVEL'); M.travel.forEach((t) => T.push('· ' + t.name + ' — ' + t.meta + ' — ' + money(t.price))); T.push(''); }
   if (M.waitlisted && M.waitlisted.length) { T.push('WAITING LIST'); M.waitlisted.forEach((w) => T.push('· ' + w.name + ' — number ' + w.position + (w.size > 1 ? ' for ' + w.size + ' places' : '') + ' — to resolve')); T.push(''); }
   if (M.stays.length) { T.push('STAYS'); M.stays.forEach((x) => T.push('· ' + x.name + ' — ' + x.dates + (x.category ? ' — ' + x.category : '') + (x.room ? ' — ' + x.room : '') + ' — ' + money(x.price) + (x.note ? ' (' + x.note + ')' : ''))); T.push(''); }

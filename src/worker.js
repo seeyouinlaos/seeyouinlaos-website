@@ -343,6 +343,8 @@ async function handleRegister(request, env) {
       record = { invitationId, submittedAt: isUpdate ? existing.submittedAt : submittedAt, submissionId, version, kind: isUpdate ? 'update' : 'initial',
         firstSentAt: isUpdate ? (existing.firstSentAt || existing.submittedAt) : submittedAt, lastSentAt: now, updatedAt: now,
         guestId: who.guestId, hosts: !!who.hosts, registration, text, rooms, recipient, draftFingerprint, mail: null };
+      /* THE PERMANENT PERSON ID (Owner, 20 Sep 2026): CONxxx and COUPLxxx are the register's — stamped from the auth index, never taken from the body */
+      if (registration && typeof registration === 'object') { const person = await personOf(env, new URL(request.url).origin, who); if (person.contactId) registration.contactId = person.contactId; else delete registration.contactId; if (person.couple) registration.couple = person.couple; else delete registration.couple; }
       const prev = await env.REG_KV.get(regKey);
       await env.REG_KV.put(regKey, JSON.stringify(record), { metadata: { invitationId, submittedAt: record.submittedAt, submissionId, version, lastSentAt: now } });
       if (prev) {
@@ -578,14 +580,14 @@ async function handleGrJourneys(request, env) {
   for (const prefix of ['draft:', 'reg:']) { let cursor; do { const l = await env.REG_KV.list({ prefix, cursor }); for (const k of l.keys) { const inv = k.name.slice(prefix.length); if (!inv.includes(':')) invs.add(inv); } cursor = l.list_complete ? null : l.cursor; } while (cursor); }
   const out = [];
   for (const inv of [...invs].sort()) {
-    const e = byInv[inv] || null, who = e ? { invitationId: inv, guestId: e.g, partyId: e.p, hosts: e.h === 1 } : { invitationId: inv, guestId: inv.replace(/^INV-/, ''), partyId: null, hosts: false };
+    const e = byInv[inv] || null, who = e ? { invitationId: inv, guestId: e.g, partyId: e.p, hosts: e.h === 1, contactId: e.c || null, couple: e.k || null } : { invitationId: inv, guestId: inv.replace(/^INV-/, ''), partyId: null, hosts: false };
     const d = await storedDraft(env, inv); let rec = null; try { rec = JSON.parse(await env.REG_KV.get('reg:' + inv) || 'null'); } catch (x) { rec = null; }
     const content = draftContent(d && d.keys), g = content['siyl.guest'] || {}, sub = await submissionFor(env, who, d);
     const [rooms, seats] = await Promise.all([engineRooms(env, who), engineSeats(env, who)]);
     const contact = await storedContact(env, inv);
-    out.push({ invitationId: inv, guestId: who.guestId, partyId: who.partyId, hosts: who.hosts, name: rec ? guestNameOf(rec) : null,
+    out.push({ invitationId: inv, guestId: who.guestId, partyId: who.partyId, hosts: who.hosts, contactId: who.contactId || null, couple: who.couple || null, name: rec ? guestNameOf(rec) : null,
       status: sub.submissionStatus, submissionId: sub.submissionId, version: sub.version, submittedAt: sub.submittedAt, lastSentAt: sub.lastSentAt, hasUnsentChanges: sub.hasUnsentChanges,
-      draftUpdatedAt: d ? d.updatedAt : null, contact: contact ? { email: contact.email, phone: contact.phone } : (g.contact || null),
+      draftUpdatedAt: d ? d.updatedAt : null, contact: contact ? publicContact(contact) : (g.contact || null),
       bag: content['siyl.bag'] || null, wedding: content['siyl.temple'] || null, aboutYou: g.guests ? Object.values(g.guests).map((x) => ({ submitted: x.submitted, profile: x.profile })) : null, documents: content['siyl.docs'] || null,
       rooms, seats, mail: rec ? (rec.mailSummary || null) : null, text: rec ? rec.text : null });
   }
@@ -604,6 +606,15 @@ async function storedContact(env, invitationId) {
   try { const raw = await env.REG_KV.get(contactKey(invitationId)); return raw ? JSON.parse(raw) : null; } catch (e) { return null; }
 }
 /* the authenticated guest's contact: GET reads it, PUT/POST stores it — the guest's own invitation only */
+/* the register's person id (CONxxx) and couple state (COUPLxxx · SIGL) of an authenticated guest — read from the served index entry
+   of their own invitation (the auth authority itself is frozen: this reads beside it, never through a client body) */
+async function personOf(env, origin, who) {
+  try { const entries = await loadIndex(env, origin, false); const e = Object.values(entries || {}).find((x) => x && x.i === who.invitationId && x.g === who.guestId); return { contactId: e && typeof e.c === 'string' ? e.c : null, couple: e && typeof e.k === 'string' ? e.k : null }; } catch (e) { return { contactId: null, couple: null }; }
+}
+const PERSONAL_KEYS = ['birthdate', 'nationality', 'address1', 'address2', 'postal', 'city', 'region', 'country'];
+const PERSONAL_MAX = { birthdate: 10, nationality: 80, address1: 160, address2: 160, postal: 20, city: 80, region: 80, country: 80 };
+const validBirthdate = (v) => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(v || '')); if (!m) return false; const d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3])); return +m[1] >= 1900 && d.getUTCMonth() === +m[2] - 1 && d.getUTCDate() === +m[3] && d.getTime() < Date.now(); };
+const publicContact = (c) => { const out = { email: c.email || '', phone: c.phone || '' }; for (const k of PERSONAL_KEYS) out[k] = c[k] || ''; return out; };
 async function handleContact(request, env) {
   const who = await identify(request, env);
   if (!who) return json({ ok: false, error: 'unauthorised' }, 401, corsHeaders(request));
@@ -613,7 +624,7 @@ async function handleContact(request, env) {
   let epoch; try { epoch = await resetEpoch(env); } catch (e) { return json({ ok: false, error: 'contact store unavailable', retry: true }, 503, corsHeaders(request)); }
   if (request.method === 'GET') {
     const c = await storedContact(env, who.invitationId);
-    return json({ ok: true, invitationId: who.invitationId, contact: c ? { email: c.email || '', phone: c.phone || '', at: c.at } : null, ...(epoch ? { resetAt: epoch } : {}) }, 200, corsHeaders(request));
+    return json({ ok: true, invitationId: who.invitationId, contact: c ? { ...publicContact(c), at: c.at } : null, ...(epoch ? { resetAt: epoch } : {}) }, 200, corsHeaders(request));
   }
   if (request.method !== 'PUT' && request.method !== 'POST') return json({ ok: false, error: 'method not allowed' }, 405, corsHeaders(request));
   let body; try { body = await request.json(); } catch (e) { return json({ ok: false, error: 'invalid JSON' }, 400, corsHeaders(request)); }
@@ -623,9 +634,14 @@ async function handleContact(request, env) {
   const email = body && typeof body.email === 'string' ? body.email.trim().slice(0, 254) : prev.email || '';
   const phone = body && typeof body.phone === 'string' ? body.phone.trim().slice(0, 40) : prev.phone || '';
   if (email && !validEmail(email)) return json({ ok: false, error: 'invalid email', field: 'email' }, 422, corsHeaders(request));
-  const contact = { invitationId: who.invitationId, guestId: who.guestId, email, phone, at: new Date().toISOString() };
+  /* THE PERSONAL DETAILS (Owner, 20 Sep 2026): the guest's own — stored with the contact under the guest's own invitation;
+     the identity (guestId · CONxxx · COUPLxxx) is never taken from the body */
+  const personal = {};
+  for (const k of PERSONAL_KEYS) personal[k] = body && typeof body[k] === 'string' ? body[k].trim().slice(0, PERSONAL_MAX[k] || 120) : (prev[k] || '');
+  if (personal.birthdate && !validBirthdate(personal.birthdate)) return json({ ok: false, error: 'invalid date of birth', field: 'birthdate' }, 422, corsHeaders(request));
+  const contact = { invitationId: who.invitationId, guestId: who.guestId, email, phone, ...personal, at: new Date().toISOString() };
   try { await env.REG_KV.put(contactKey(who.invitationId), JSON.stringify(contact), { metadata: { invitationId: who.invitationId, at: contact.at } }); } catch (e) { return json({ ok: false, error: 'contact could not be stored' }, 503, corsHeaders(request)); }
-  return json({ ok: true, invitationId: who.invitationId, contact: { email, phone, at: contact.at } }, 200, corsHeaders(request));
+  return json({ ok: true, invitationId: who.invitationId, contact: { ...publicContact(contact), at: contact.at } }, 200, corsHeaders(request));
 }
 /* the profile photo: GET returns the bytes to the owner (or 404), PUT/POST stores a JPEG · PNG · WebP of at most
    MAX_PHOTO bytes (the client already reduces the picture to a small square), DELETE removes it — the guest's own only */

@@ -17,7 +17,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/bag.js?v=2a0c8152"></script>
 <script src="assets/shop-menu.js?v=659ff077"></script>
 <script src="assets/aman.js?v=67d37d1b"></script>
-<script src="assets/guest.js?v=de7f0d74"></script>
+<script src="assets/guest.js?v=60bd4fb9"></script>
 <script src="assets/draft.js?v=7ab9ca64"></script>
 <script src="assets/temple.js?v=a5a16527"></script>
 <script src="assets/confirm.js?v=f35e0aa8"></script>
@@ -29,7 +29,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/transport-data.js?v=a5d732d4"></script>
 <script src="assets/packages-data.js?v=05982d0a"></script><script src="assets/journey.js?v=2ea34944"></script>
 <script src="assets/prep-shell.js?v=830ee417"></script>
-<script type="module" src="assets/invite.mjs?v=29231ccf"></script>
+<script type="module" src="assets/invite.mjs?v=df9c0807"></script>
 <script>
 /* ============================================================================
    01 · YOUR INVITATION — the onboarding of the private journey (Owner, 14 Sep
@@ -83,6 +83,23 @@ h+='<section class="prep-sec" id="contact"><div class="p-block-h"><h2 class="t-h
    '<p class="t-b2" id="e-email" role="status">'+(okE?'<span class="t-l1 on">Looks right</span>':(email?'<span class="t-l1 open">Please check the address</span>':''))+'</p></div>'+
    '<div class="p-field"><label class="t-l1" for="p-phone">Mobile number <span aria-hidden="true">· required</span></label><input id="p-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+66 …" value="'+esc(phone)+'" data-c="phone" aria-required="true" aria-invalid="'+(phone&&!okP?'true':'false')+'" aria-describedby="e-phone">'+
    '<p class="t-b2" id="e-phone" role="status">'+(okP?'<span class="t-l1 on">Looks right</span>':(phone?'<span class="t-l1 open">Please include the country code — digits, spaces and + are fine</span>':'With the country code, in any format.'))+'</p></div>'+
+   '</div></section>';
+
+/* THE PERSONAL DETAILS (Owner, 20 Sep 2026): the signed-in person's own — what the guest list knows is prefilled to review and
+   correct; asked for, never a lock on the journey. The person id and the couple id are the register's, never edited here. */
+var bd=G.contact('birthdate'),okB=!bd||G.validBirthdate(bd),nat=G.contact('nationality'),miss=G.personalMissing(),ids=[me.contactId,me.couple].filter(Boolean).join(' · ');
+var fld=function(key,label,type,extra,hint){var v=G.contact(key);return '<div class="p-field"><label class="t-l1" for="p-'+key+'">'+label+'</label><input id="p-'+key+'" type="'+(type||'text')+'" '+(extra||'')+' value="'+esc(v)+'" data-c="'+key+'">'+(hint?'<p class="t-b2">'+hint+'</p>':'')+'</div>'};
+h+='<section class="prep-sec" id="personal"><div class="p-block-h"><h2 class="t-h2">Your personal details</h2><p class="t-l1'+(miss.length?' open':' on')+'" id="personal-state">'+(miss.length?miss.length+' still needed':'<i class="prep-tick" aria-hidden="true"></i> Complete')+'</p></div>'+
+   '<p class="t-b1 measure">Please review what we have and correct anything that is not right. These details are yours alone'+(others.length?' — '+esc(G.partyNames())+' review their own on their own invitation':'')+'.</p>'+
+   '<div class="p-card" style="margin-top:var(--s4)">'+
+   '<div class="p-field" style="margin-top:0"><label class="t-l1" for="p-birthdate">Date of Birth</label><input id="p-birthdate" type="date" min="1900-01-01" max="'+new Date().toISOString().slice(0,10)+'" autocomplete="bday" value="'+esc(bd)+'" data-c="birthdate" aria-invalid="'+(bd&&!okB?'true':'false')+'">'+
+   '<p class="t-b2" id="e-birthdate" role="status">'+(bd&&!okB?'<span class="t-l1 open">Please check the date</span>':'')+'</p></div>'+
+   fld('nationality','Nationality','text','autocomplete="off" placeholder="Thai, German"','One or more, as on your passports — for example “Thai, German”.')+
+   '<p class="t-l1" style="margin-top:var(--s4)">Private Mailing Address</p><p class="t-b2 measure-w">'+esc(G.ADDRESS_WORDS)+'</p>'+
+   fld('address1','Street and house number','text','autocomplete="address-line1"')+fld('address2','Address line 2 <span class="mute">· optional</span>','text','autocomplete="address-line2"')+
+   fld('postal','Postal / ZIP code','text','autocomplete="postal-code" inputmode="text"')+fld('city','City','text','autocomplete="address-level2"')+
+   fld('region','State / Province / Region <span class="mute">· where applicable</span>','text','autocomplete="address-level1"')+fld('country','Country','text','autocomplete="country-name"')+
+   (ids?'<p class="t-b2 mute" style="margin-top:var(--s3)" data-personal-ids>Your record with Guest Relations · '+esc(ids)+'</p>':'')+
    '</div></section>';
 
 /* WHAT HAPPENS NEXT — the six steps as they stand, nothing ahead shown as done */

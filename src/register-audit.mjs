@@ -82,17 +82,19 @@ if (errors.length) console.log('ERRORS:\n- ' + errors.join('\n- '));
 
 /* ---- the Owner distribution file: one line per guest, ready to send individually — private, gitignored ---- */
 if (process.argv.includes('--export')) {
-  const out = ['guestId,fullName,preferredName,partyId,partyName,invitationId,status,accessCode,personalLink'];
+  /* the Owner's permanent person id (CONxxx) and couple id (COUPLxxx · SIGL) lead every line (20 Sep 2026), with the sending route the sheet names */
+  const out = ['contactId,coupleId,guestId,fullName,preferredName,partyId,partyName,invitationId,status,sendingRoute,accessCode,personalLink'];
   const txt = ['SEE YOU IN LAOS — INVITATION CODES · one per active guest · PRIVATE · never share this file, send each guest only their own line', ''];
-  for (const { p, g } of active) {
+  const byContact = [...active].sort((x, y) => String(x.g.contactId || 'zzz').localeCompare(String(y.g.contactId || 'zzz')));
+  for (const { p, g } of byContact) {
     const r = byGuest.get(g.guestId);
-    out.push([g.guestId, g.fullName, g.preferredName, p.invitationId, p.partyName || '', r.invitationId, 'ACTIVE', r.token, r.link].map((v) => '"' + String(v || '').replace(/"/g, '""') + '"').join(','));
-    txt.push(g.fullName + ' (' + g.preferredName + ') · party ' + (p.partyName || p.invitationId) + ' · invitation ' + r.invitationId);
+    out.push([g.contactId || '', g.couple || '', g.guestId, g.fullName, g.preferredName, p.invitationId, p.partyName || '', r.invitationId, 'ACTIVE', g.route || '', r.token, r.link].map((v) => '"' + String(v || '').replace(/"/g, '""') + '"').join(','));
+    txt.push((g.contactId ? g.contactId + ' · ' : '') + g.fullName + ' (' + g.preferredName + ') · ' + (g.couple || 'SIGL') + ' · party ' + (p.partyName || p.invitationId) + ' · invitation ' + r.invitationId + (g.route ? ' · send via ' + g.route : ''));
     txt.push('  Your invitation code: ' + r.token);
     txt.push('  Your personal link:   ' + r.link);
     txt.push('');
   }
-  for (const { p, g } of inactive) out.push([g.guestId, g.fullName, g.preferredName, p.invitationId, p.partyName || '', '', 'CANCELLED', '', ''].map((v) => '"' + String(v || '').replace(/"/g, '""') + '"').join(','));
+  for (const { p, g } of inactive) out.push([g.contactId || '', g.couple || '', g.guestId, g.fullName, g.preferredName, p.invitationId, p.partyName || '', '', 'CANCELLED', '', '', ''].map((v) => '"' + String(v || '').replace(/"/g, '""') + '"').join(','));
   fs.writeFileSync(path.join(ROOT, 'src/invitation-distribution.private.csv'), out.join('\n') + '\n');
   fs.writeFileSync(path.join(ROOT, 'src/invitation-distribution.private.txt'), txt.join('\n'));
   console.log('EXPORT                         src/invitation-distribution.private.csv + .txt (gitignored) · ' + active.length + ' guests');

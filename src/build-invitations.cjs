@@ -137,6 +137,7 @@ async function main() {
       const status = !activeParty(p) ? (p.status || 'CANCELLED') : (g.status || 'ACTIVE');
       rows.push([g.guestId, invitationId, p.invitationId, quote(p.partyName), quote(g.preferredName || g.fullName), token, token ? '/register/?invite=' + token : '', status].join(','));
       csvNames.push(g.preferredName, g.fullName);
+      if (g.profile) for (const v of Object.values(g.profile)) csvNames.push(typeof v === 'string' ? v : (v && v.line1) || '');
       if (!active) continue;   /* a cancelled guest keeps no working code and ships nowhere */
 
       const members = p.guests.filter((x) => activeGuest(p, x)).map((x) => ({ guestId: x.guestId, preferredName: x.preferredName || x.fullName }));
@@ -145,6 +146,11 @@ async function main() {
         partyId: p.invitationId, partyName: p.partyName, partyLead: p.partyLead,
         fullName: g.fullName, preferredName: g.preferredName || g.fullName,
         members,
+        /* the Owner's permanent person id and couple id (20 Sep 2026) — system-controlled, never editable on the site */
+        ...(g.contactId ? { contactId: g.contactId } : {}), ...(g.couple ? { couple: g.couple } : {}),
+        /* what the guest list knows of the person (birth date · nationality · phone · email · address) — prefilled for the
+           guest to review and correct in their own profile; readable only with the guest's own code */
+        ...(g.profile && Object.keys(g.profile).length ? { profile: g.profile } : {}),
         ...(g.hostRole === 'BRIDE' || g.hostRole === 'GROOM' ? { hostRole: g.hostRole } : {}),
         ...(p.hosts === true ? { hosts: true } : {}),
         /* the Sangkhathan is the guest's own choice; eligibility stays explicit
@@ -156,7 +162,9 @@ async function main() {
       const salt = crypto.randomBytes(16).toString('hex');
       const iv = crypto.randomBytes(12).toString('hex');
       records.push({ id: await tokenId(token), salt, iv, ct: await encryptInvitation(token, salt, iv, payload) });
-      index[await authIdOf(await bearerOf(token))] = { i: invitationId, g: g.guestId, p: p.invitationId, ...(p.hosts === true ? { h: 1 } : {}) };
+      /* the person id and the couple id travel in the index too (opaque register ids, no name, no code): the Worker stamps them
+         on every record from here, never from a client body */
+      index[await authIdOf(await bearerOf(token))] = { i: invitationId, g: g.guestId, p: p.invitationId, ...(p.hosts === true ? { h: 1 } : {}), ...(g.contactId ? { c: g.contactId } : {}), ...(g.couple ? { k: g.couple } : {}) };
     }
   }
 

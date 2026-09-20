@@ -35,11 +35,22 @@ const TSV = args.find((a) => a.endsWith('.tsv')) || path.join(ROOT, 'src', 'cont
 const LIST = path.join(ROOT, 'src', 'guestlist.private.json');
 const REPORT = path.join(ROOT, 'src', 'guestlist-from-contacts.report.private.txt');
 
-/* THE ALIASES: sheet rows whose spelling or nickname differs from the register (the 16 Sep 2026 reconciliation, confirmed by
-   the party partner) — opaque ids only here; the private report explains each one */
-const ALIAS = { CON006: 'G004', CON010: 'G007', CON011: 'G008', CON023: 'G032', CON052: 'G041', CON053: 'G042', CON012: 'G009', CON013: 'G045', CON064: 'G015', CON086: 'G034' };
-
+/* THE PERMANENT PERSON ID (Owner, 20 Sep 2026): CONxxx is one person for ever — never renumbered, never recycled. The register
+   remembers it per guest (`contactId`) and matches by it first. The sheet was renumbered between the 19 Sep and the 20 Sep
+   reads, so the earlier row-keyed alias table is gone: the aliases below are keyed by the PERSON as the sheet spells them
+   (nickname + surname, or the full name) — the 16 Sep 2026 reconciliation, confirmed by the party partner. */
 const norm = (s) => String(s || '').normalize('NFKD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim();
+const ALIAS_BY_PERSON = { 'ozhan arslan': 'G004', 'paddy kongkeow': 'G007', 'arisa shimizu': 'G008', 'beauty boontawee': 'G032', 'pandharee boontawee': 'G032', 'jum sohee': 'G041', 'jum': 'G041',
+  'sim ruangjirachuporn': 'G042', 'apichet ruangjirachuporn': 'G042', 'ket mccrink': 'G009', 'surangkana mccrink': 'G009', 'fio kueffner': 'G045', 'fiona kueffner': 'G045', 'lee singhaveerasamorn': 'G015', 'wanlee singhaveerasamorn': 'G015',
+  'whan asadontirauyudh': 'G034', 'pimvadee asadontirauyudh': 'G034',
+  /* 20 Sep 2026: guests the earlier sheet had retired and the current sheet names again under a corrected spelling — the same
+     person keeps the same id (their retired code is replaced by a new one, never reused) */
+  'preeyaporn chaichankarnchang': 'G027', 'ju chaichankarnchang': 'G027', 'pornpan laolerkuthai': 'G031', 'mimi laolerkuthai': 'G031', 'papitchaya yuenyao': 'G046', 'new yuenyao': 'G046' };
+/* the sheet's words for "no name": never a name, never invented */
+const NO_NAME = (v) => /^no( name)?$/i.test(String(v || '').trim());
+/* the profile the sheet knows (prefilled for the guest to review and correct — the guest's own record, per person) */
+const isoDate = (v) => { const m = String(v || '').trim().match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/); if (m) return m[3] + '-' + m[2].padStart(2, '0') + '-' + m[1].padStart(2, '0'); const iso = String(v || '').trim().match(/^(\d{4})-(\d{2})-(\d{2})$/); return iso ? iso[0] : ''; };
+const profileOf = (r) => { const p = {}; const bd = isoDate(r.Birthdate); if (bd) p.birthdate = bd; if (r.Nationality) p.nationality = String(r.Nationality).replace(/\s*[\/,]\s*/g, ', ').trim(); if (r.Phone) p.phone = String(r.Phone).trim(); if (r.Email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(r.Email).trim())) p.email = String(r.Email).trim(); if (r.Address) p.address = { line1: String(r.Address).replace(/\s+/g, ' ').trim() }; return p; };
 const firstWord = (s) => norm(String(s || '').replace(/\(.*?\)/g, '')).split(' ')[0] || '';
 
 function readTsv(file) {
@@ -53,6 +64,7 @@ function main() {
   const old = JSON.parse(fs.readFileSync(LIST, 'utf8'));
   const oldGuests = []; for (const p of old) for (const g of p.guests) oldGuests.push({ ...g, partyId: p.invitationId, partyName: p.partyName, hosts: !!p.hosts, giving: p.givingEligibility || '' });
   const byId = Object.fromEntries(oldGuests.map((g) => [g.guestId, g]));
+  const byContact = Object.fromEntries(oldGuests.filter((g) => g.contactId).map((g) => [g.contactId, g]));
   const usedOld = new Set();
   const notes = [];   /* the private report lines */
   const skipped = [];
@@ -62,10 +74,11 @@ function main() {
   for (const r of rows) {
     if (!r.ID) continue;
     if (!isGuestRow(r)) { if (r.Firstname || r.Nickname) skipped.push([r.ID, 'no guest role', r.Firstname || r.Nickname]); continue; }
-    const first = String(r.Firstname || '').trim(), nick = String(r.Nickname || '').trim();
+    const first = NO_NAME(r.Firstname) ? '' : String(r.Firstname || '').trim(), nick = NO_NAME(r.Nickname) ? '' : String(r.Nickname || '').trim();
+    const surname = NO_NAME(r.Surname) ? '' : String(r.Surname || '').trim();
+    if (NO_NAME(r.Firstname) && nick) notes.push(r.ID + ' · the sheet carries no first name ("' + r.Firstname + '") — the nickname stands, nothing invented');
     if (/not attend/i.test(r.Notes || '')) { skipped.push([r.ID, 'Not Attend (the sheet\'s note)', nick || first]); continue; }
-    if (!first && !nick) { skipped.push([r.ID, 'no name on the row', '']); continue; }
-    if (/^no( name)?$/i.test(first) && (!nick || /^no( name)?$/i.test(nick))) { skipped.push([r.ID, '"No" — the sheet\'s word for no partner', '']); continue; }
+    if (!first && !nick) { skipped.push([r.ID, NO_NAME(r.Firstname) ? '"' + r.Firstname + '" — the sheet\'s word for a partner not yet named' + (/^COUPL/.test(r.Couple) ? ' (party ' + r.Couple + ' kept for the named member; the Owner names the guest, then the code is made)' : '') : 'no name on the row', '']); continue; }
     if (/^her daughter$/i.test(first)) { skipped.push([r.ID, 'not named ("her daughter") — the Owner names the guest, then the code is made', r.Surname]); continue; }
     /* a relationship placeholder is not a name (the 19 Sep 2026 sheet: "Aob's girlfriend" with the surname "."): no code is
        made for a guest the Owner has not named — reported, never invented, never a duplicate of the named partner */
@@ -73,13 +86,18 @@ function main() {
     if (/^[.\-–—?]+$/.test(String(r.Surname || '').trim()) && !nick) { skipped.push([r.ID, 'a placeholder surname ("' + r.Surname + '") — the Owner names the guest, then the code is made', first]); continue; }
     /* the preferred name: the nickname, else the first name as written (a parenthesis is not a name; a double first name stays whole) */
     let preferredName = nick || first.replace(/\(.*?\)/g, '').replace(/\s+/g, ' ').trim();
-    const fullName = [first.replace(/\s+/g, ' ').trim(), r.Surname].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim() || preferredName;
-    /* the same person twice on the sheet (the same first name and surname): one invitation, the duplicate reported */
-    if (r.Surname && invited.some((g) => norm(g.fullName) === norm(fullName))) { skipped.push([r.ID, 'duplicate of an earlier row (same name) — one invitation', fullName]); continue; }
-    /* the existing guest, if any */
-    let match = ALIAS[r.ID] ? byId[ALIAS[r.ID]] : null, how = match ? 'alias' : '';
+    const fullName = [(first || nick).replace(/\s+/g, ' ').trim(), surname].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim() || preferredName;
+    /* the same person twice on the sheet (the same first name and surname, or the same Instagram handle): one invitation — the
+       first row is the person, the later row is REPORTED with its id for the Owner; what the later row knows and the first
+       does not (a phone, an email) is kept for the same person, nothing else merged */
+    /* a shared email, phone or Instagram alone never makes two rows one person (a family shares a route); the same full name does */
+    const twin = surname ? invited.find((g) => norm(g.fullName) === norm(fullName)) : null;
+    if (twin) { const extra = profileOf(r); const took = []; for (const k of Object.keys(extra)) if (!twin.profile[k]) { twin.profile[k] = extra[k]; took.push(k); } skipped.push([r.ID, 'the same person as ' + twin.row.ID + ' (same name' + (r.Instagram && norm(twin.row.Instagram) === norm(r.Instagram) ? ', same Instagram' : '') + ') — one identity, one code; ' + (took.length ? 'took from this row: ' + took.join(', ') : 'nothing new on this row'), fullName]); continue; }
+    /* the existing guest, if any: the permanent person id first, then the person aliases, then the names */
+    let match = byContact[r.ID] || null, how = match ? 'contact id' : '';
+    if (!match) { const keys = [norm(nick + ' ' + surname), norm(first + ' ' + surname), norm(fullName), nick && !surname ? norm(nick) : '']; for (const k of keys) if (k && ALIAS_BY_PERSON[k] && byId[ALIAS_BY_PERSON[k]]) { match = byId[ALIAS_BY_PERSON[k]]; how = 'alias'; break; } }
     if (!match) {
-      const fn = firstWord(first), sn = norm(r.Surname), pn = norm(preferredName), full = norm(fullName);
+      const fn = firstWord(first || nick), sn = norm(surname), pn = norm(preferredName), full = norm(fullName);
       const cands = oldGuests.filter((g) => !usedOld.has(g.guestId));
       match = cands.find((g) => norm(g.fullName) === full) || null; if (match) how = 'full name';
       if (!match && sn) { match = cands.find((g) => norm(g.fullName) === norm(first) + ' ' + sn || (firstWord(g.fullName) === fn && norm(g.fullName).endsWith(' ' + sn))) || null; if (match) how = 'first name + surname'; }
@@ -91,7 +109,7 @@ function main() {
     /* the hosts keep the names the website already speaks with ("hosted by Haruthai & Suthep", the FIXED allocation) */
     if (r.Role === 'Document Owner' && match) preferredName = match.preferredName;
     if (match && norm(match.preferredName) !== norm(preferredName)) notes.push(r.ID + ' · preferred name follows the sheet: ' + match.preferredName + ' → ' + preferredName + ' (' + match.guestId + ')');
-    invited.push({ row: r, guestId: match ? match.guestId : null, how, preferredName, fullName, partyKey: /^COUPL/.test(r.Couple) ? r.Couple : 'SINGLE:' + r.ID,
+    invited.push({ row: r, guestId: match ? match.guestId : null, how, preferredName, fullName, contactId: r.ID, couple: /^COUPL/.test(r.Couple) ? r.Couple : 'SIGL', profile: profileOf(r), route: String(r['Sending Invitation'] || '').trim(), partyKey: /^COUPL/.test(r.Couple) ? r.Couple : 'SINGLE:' + r.ID,
       hostRole: r.Role === 'Document Owner' ? (match && match.hostRole) || (/haruthai/i.test(first) ? 'BRIDE' : 'GROOM') : null, hosts: r.Role === 'Document Owner' });
   }
   /* new ids after the highest existing one */
@@ -117,7 +135,7 @@ function main() {
     const partyName = hosts ? 'Haruthai & Suthep' : p.members.map((m) => m.preferredName).join(' & ');
     const lead = hosts ? (p.members.find((m) => m.hostRole === 'BRIDE') || p.members[0]).guestId : p.members[0].guestId;
     outParties.push({ invitationId, partyName, partyLead: lead,
-      guests: p.members.map((m) => ({ guestId: m.guestId, fullName: m.fullName, preferredName: m.preferredName, ...(m.hostRole ? { hostRole: m.hostRole } : {}) })),
+      guests: p.members.map((m) => ({ guestId: m.guestId, fullName: m.fullName, preferredName: m.preferredName, contactId: m.contactId, couple: m.couple, ...(m.route ? { route: m.route } : {}), ...(Object.keys(m.profile).length ? { profile: m.profile } : {}), ...(m.hostRole ? { hostRole: m.hostRole } : {}) })),
       givingEligibility: (oldParty && oldParty.givingEligibility) || 'PAIR', ...(hosts ? { hosts: true } : {}) });
   }
   /* guests no longer invited: kept, cancelled */
@@ -125,7 +143,7 @@ function main() {
   for (const g of gone) {
     let p = outParties.find((x) => x.invitationId === g.partyId);
     if (!p) { p = { invitationId: g.partyId, partyName: g.partyName, partyLead: g.guestId, guests: [], givingEligibility: g.giving || 'PAIR', status: 'CANCELLED' }; outParties.push(p); }
-    p.guests.push({ guestId: g.guestId, fullName: g.fullName, preferredName: g.preferredName, ...(g.hostRole ? { hostRole: g.hostRole } : {}), status: g.status === 'CANCELLED' ? 'CANCELLED' : 'CANCELLED' });
+    p.guests.push({ guestId: g.guestId, fullName: g.fullName, preferredName: g.preferredName, ...(g.contactId ? { contactId: g.contactId } : {}), ...(g.hostRole ? { hostRole: g.hostRole } : {}), status: 'CANCELLED' });
   }
   outParties.sort((a, b) => a.invitationId.localeCompare(b.invitationId));
   /* the hosts' ids are the FIXED allocation's */
@@ -141,8 +159,10 @@ function main() {
   for (const g of invited) rep.push('  ' + g.row.ID + ' · ' + g.preferredName + ' · ' + g.fullName + ' · ' + g.guestId + ' · ' + g.how + ' · ' + g.partyKey);
   rep.push('', 'NO LONGER INVITED (cancelled, code retired)'); for (const g of gone) rep.push('  ' + g.guestId + ' · ' + g.preferredName + ' · ' + g.fullName + ' · party ' + g.partyId);
   rep.push('', 'NOT INVITED BY THIS RUN (the Owner decides)'); for (const s of skipped) rep.push('  ' + s.join(' · '));
-  rep.push('', 'ALIASES (sheet row → register guest, why)');
-  for (const [row, gid] of Object.entries(ALIAS)) { const r = rows.find((x) => x.ID === row), g = byId[gid]; rep.push('  ' + row + ' ' + (r ? (r.Nickname || r.Firstname) + ' ' + (r.Surname || '') : '?') + ' → ' + gid + ' ' + (g ? g.fullName + ' (' + g.preferredName + ')' : '?')); }
+  rep.push('', 'ALIASES (person as the sheet spells them → register guest)');
+  for (const [k, gid] of Object.entries(ALIAS_BY_PERSON)) { const g = byId[gid]; rep.push('  ' + k + ' → ' + gid + ' ' + (g ? g.fullName + ' (' + g.preferredName + ')' : '?')); }
+  rep.push('', 'PARTIES (couple id → members)'); for (const [key, p] of parties) rep.push('  ' + key + ' · ' + p.members.map((m) => m.contactId + ' ' + m.preferredName + ' (' + m.guestId + ')').join(' + '));
+  rep.push('', 'PROFILE DATA ON THE SHEET (counts): birthdate ' + invited.filter((g) => g.profile.birthdate).length + ' · nationality ' + invited.filter((g) => g.profile.nationality).length + ' · phone ' + invited.filter((g) => g.profile.phone).length + ' · email ' + invited.filter((g) => g.profile.email).length + ' · address ' + invited.filter((g) => g.profile.address).length);
   rep.push(''); for (const n of notes) rep.push('  NOTE ' + n);
   fs.writeFileSync(REPORT, rep.join('\n') + '\n');
   console.log(JSON.stringify(counts));
@@ -150,6 +170,7 @@ function main() {
   if (!flag('write')) { console.log('report only — nothing written to the list'); return; }
   const stamp = new Date().toISOString().slice(0, 10);
   const backup = path.join(ROOT, 'src', 'guestlist.' + stamp + '-before-007.backup.private.json');
+  /* the parties keep their ids across runs; the profile fields are the sheet's — the guest corrects them on the site */
   if (!fs.existsSync(backup)) fs.copyFileSync(LIST, backup);
   fs.writeFileSync(LIST, JSON.stringify(outParties, null, 2) + '\n');
   console.log('written: src/guestlist.private.json (backup ' + path.basename(backup) + ')');

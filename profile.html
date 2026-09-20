@@ -47,7 +47,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/aman.js?v=67d37d1b"></script>
 <script src="assets/rooms-data.js?v=0a1f0c6c"></script>
 <script src="assets/pricing.js?v=f647d273"></script>
-<script src="assets/guest.js?v=de7f0d74"></script>
+<script src="assets/guest.js?v=60bd4fb9"></script>
 <script src="assets/draft.js?v=7ab9ca64"></script>
 <script src="assets/temple.js?v=a5a16527"></script>
 <script src="assets/rooms.js?v=e0d4bbbf"></script>
@@ -59,7 +59,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/packages-data.js?v=05982d0a"></script><script src="assets/journey.js?v=2ea34944"></script>
 <script src="assets/docs.js?v=7c1c7bfd"></script>
 <script src="assets/avatar.js?v=80828084"></script>
-<script type="module" src="assets/invite.mjs?v=29231ccf"></script>
+<script type="module" src="assets/invite.mjs?v=df9c0807"></script>
 <script>
 /* ============================================================================
    MY PROFILE (Owner, 18 Sep 2026) — the guest's account dashboard.
@@ -142,9 +142,17 @@ function identity(me,p){
   '</div></section>'}
 function contact(){
   var e=G.contact('email'),ph=G.contact('phone');
+  /* THE PERSONAL DETAILS (Owner, 20 Sep 2026): the signed-in person's own — reviewed and corrected on the invitation page; the
+     person id and the couple id are the register's, shown as context only, never editable */
+  var me=G.me()||{},bd=G.birthdateWords(),nat=G.contact('nationality'),addr=G.addressWords(),missing=G.personalMissing(),ids=[me.contactId,me.couple].filter(Boolean).join(' · ');
+  var row=function(label,value,key){return '<div class="p-kv" data-personal="'+esc(key)+'"><span class="t-l1">'+esc(label)+'</span><p class="t-b1'+(value?'':' mute')+'">'+(value?esc(value):'Still needed')+'</p></div>'};
   return '<section class="prep-sec" id="contact"><p class="t-l1">Contact</p><div class="p-card" data-profile-contact><p class="t-l1'+(e&&ph?' on':' open')+'">'+(e&&ph?'How we reach you':'Contact details still needed')+'</p>'+
     '<p class="t-b1">'+(e?esc(e):'Email address still needed')+'<br>'+(ph?esc(ph):'Mobile number still needed')+'</p>'+
-    '<div class="p-actions"><a class="p-link" href="invitation.html#contact">Edit contact details</a></div></div></section>'}
+    '<div class="p-actions"><a class="p-link" href="invitation.html#contact">Edit contact details</a></div></div>'+
+    '<div class="p-card" data-profile-personal style="margin-top:var(--s3)"><p class="t-l1'+(missing.length?' open':' on')+'">'+(missing.length?'Personal details · '+missing.length+' still needed':'Personal details')+'</p>'+
+    row('Date of Birth',bd,'birthdate')+row('Nationality',nat,'nationality')+row('Phone Number',ph,'phone')+row('Email Address',e,'email')+row('Private Mailing Address',addr,'address')+
+    (ids?'<p class="t-b2 mute" data-personal="ids">Your record · '+esc(ids)+' · kept by Guest Relations</p>':'')+
+    '<div class="p-actions"><a class="p-link" href="invitation.html#personal">Review your personal details</a></div></div></section>'}
 function arrangements(me){
   var id=me.guestId,lines=J.sorted(B.get()),stays=[],travel=[],exps=[],h='';
   /* THE WAITING LIST (Owner, 19 Sep 2026): a stage no room could take yet — its position, no amount, never part of the bag */

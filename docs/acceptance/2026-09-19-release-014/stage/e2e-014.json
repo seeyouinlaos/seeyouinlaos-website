@@ -2,7 +2,7 @@
  {
   "id": "stage-clean",
   "ok": true,
-  "d": "{\"ok\":true,\"dryRun\":false,\"cleared\":0,\"rows\":[],\"waitlistCleared\":0,\"remaining\":0,\"waitlistRemaining\":0,\"fixed\":0,\"at\":\"2026-09-20T05:20:21.059Z\"}"
+  "d": "{\"ok\":true,\"dryRun\":false,\"cleared\":0,\"rows\":[],\"waitlistCleared\":0,\"remaining\":0,\"waitlistRemaining\":0,\"fixed\":0,\"at\":\"2026-09-20T09:54:17.533Z\"}"
  },
  {
   "id": "host-starts-at-zero",
@@ -97,7 +97,7 @@
  {
   "id": "complete-trip-fills-nine-stages-and-waits-for-one",
   "ok": true,
-  "d": "{\"bag\":9,\"open\":0,\"need\":[\"event:temple\",\"event:coffee\",\"event:vows\",\"event:dinner\",\"dress\",\"allergy\",\"profile:coffeetea\",\"profile:flavor\",\"profile:drink\",\"profile:film\",\"profile:music\",\"photo\"],\"mine\":[\"bkk-stay\",\"kempinski\",\"ljg\",\"prewed\",\"wedstay\"],\"wait\":{\"kmg\":{\"at\":\"2026-09-20T05:21:55.028Z\",\""
+  "d": "{\"bag\":9,\"open\":0,\"need\":[\"event:temple\",\"event:coffee\",\"event:vows\",\"event:dinner\",\"dress\",\"allergy\",\"profile:coffeetea\",\"profile:flavor\",\"profile:drink\",\"profile:film\",\"profile:music\",\"photo\"],\"mine\":[\"bkk-stay\",\"kempinski\",\"ljg\",\"prewed\",\"wedstay\"],\"wait\":{\"kmg\":{\"at\":\"2026-09-20T09:55:51.647Z\",\""
  },
  {
   "id": "complete-trip-idempotent",
@@ -142,12 +142,12 @@
  {
   "id": "complete-trip-vientiane-china-waits-for-lijiang",
   "ok": true,
-  "d": "{\"rows\":7,\"wl\":[\"04 – 06 MAR · LIJIANG Waiting list None of the rooms this package offers for this stage can take your party (one place). You will be placed on the waiting list — no cost until it is resolved.\"],\"wait\":{\"ljg\":{\"at\":\"2026-09-20T05:22:53.400Z\",\"position\":1,\"size\":1,\"wanted\":[\"ljg/viewi"
+  "d": "{\"rows\":7,\"wl\":[\"04 – 06 MAR · LIJIANG Waiting list None of the rooms this package offers for this stage can take your party (one place). You will be placed on the waiting list — no cost until it is resolved.\"],\"wait\":{\"ljg\":{\"at\":\"2026-09-20T09:56:50.076Z\",\"position\":1,\"size\":1,\"wanted\":[\"ljg/viewi"
  },
  {
   "id": "parity-waiting-list-in-record-and-emails",
   "ok": true,
-  "d": "{\"sent\":{\"clicked\":true},\"rooms\":{\"stage\":\"ljg\",\"waitlisted\":true,\"position\":1,\"since\":\"2026-09-20T05:22:53.400Z\",\"size\":1},\"guest\":true,\"owner\":true}"
+  "d": "{\"sent\":{\"clicked\":true},\"rooms\":{\"stage\":\"ljg\",\"waitlisted\":true,\"position\":1,\"since\":\"2026-09-20T09:56:50.076Z\",\"size\":1},\"guest\":true,\"owner\":true}"
  },
  {
   "id": "leaving-the-waiting-list",
@@ -257,7 +257,7 @@
  {
   "id": "H-confirm-waits-with-a-visible-position",
   "ok": true,
-  "d": "{\"mine\":{},\"wait\":{\"wedstay\":{\"at\":\"2026-09-20T05:25:11.266Z\",\"position\":1,\"size\":2,\"wanted\":[\"wedstay/heritage-executive\",\"wedstay/heritage\",\"wedstay/heritage-grand-premier\",\"wedstay/noble-courtyard\",\"wedstay/grand-majestic\",\"wedstay/souphattra-majestic\",\"wedstay/souphattra-presidential\"]}},\"card\":"
+  "d": "{\"mine\":{},\"wait\":{\"wedstay\":{\"at\":\"2026-09-20T09:59:07.992Z\",\"position\":1,\"size\":2,\"wanted\":[\"wedstay/heritage-executive\",\"wedstay/heritage\",\"wedstay/heritage-grand-premier\",\"wedstay/noble-courtyard\",\"wedstay/grand-majestic\",\"wedstay/souphattra-majestic\",\"wedstay/souphattra-presidential\"]}},\"card\":"
  },
  {
   "id": "H-profile-and-review-carry-the-position",
@@ -308,6 +308,41 @@
   "id": "flight-no-stale-number-on-any-surface",
   "ok": true,
   "d": "MU5920 / MU5924 absent from My Trip · The Journey · the transport page · Review · Profile · My Bag · the Travel Pass"
+ },
+ {
+  "id": "personal-fields-on-the-invitation-page",
+  "ok": true,
+  "d": "{\"ids\":[true,true,true,true,true,true,true,true,true,true],\"date\":\"date\",\"noIdInputs\":true}"
+ },
+ {
+  "id": "personal-details-saved-locally-and-on-the-worker",
+  "ok": true,
+  "d": "{\"local\":{\"bd\":\"1990-05-17\",\"nat\":\"Thai, German\",\"addr\":\"Musterstraße 1, 10115 Berlin, Berlin, Germany\",\"missing\":0,\"ready\":0},\"server\":{\"email\":\"ada.test@example.org\",\"phone\":\"+66 81 000 0000\",\"birthdate\":\"1990-05-17\",\"nationality\":\"Thai, German\",\"address1\":\"Musterstraße 1\",\"address2\":\"\",\"postal\":\""
+ },
+ {
+  "id": "profile-shows-the-personal-details",
+  "ok": true,
+  "d": "PERSONAL DETAILS DATE OF BIRTH 17 May 1990 NATIONALITY Thai, German PHONE NUMBER +66 81 000 0000 EMAIL ADDRESS ada.test@example.org PRIVATE MAILING ADDRESS Musterstraße 1, 10115 Berlin, Berlin, German"
+ },
+ {
+  "id": "couple-members-are-two-records",
+  "ok": true,
+  "d": "{\"again\":{\"bd\":\"1990-05-17\",\"city\":\"Berlin\"},\"partner\":{\"bd\":\"\",\"city\":\"\"},\"ben\":{\"email\":\"ben.test@example.org\",\"phone\":\"+66 81 000 0000\",\"birthdate\":\"\",\"nationality\":\"\",\"address1\":\"\",\"address2\":\"\",\"postal\":\"\",\"city\":\"\",\"region\":\"\",\"country\":\"\",\"at\":\"2026-09-20T09:55:39.198Z\"}}"
+ },
+ {
+  "id": "no-cross-guest-write",
+  "ok": true,
+  "d": "{\"forged\":403,\"ada\":\"1990-05-17\"}"
+ },
+ {
+  "id": "invitation-personal-no-overflow-320",
+  "ok": true,
+  "d": "overflow 0"
+ },
+ {
+  "id": "invitation-personal-no-overflow-834",
+  "ok": true,
+  "d": "overflow 0"
  },
  {
   "id": "suhring-is-the-dinner-of-21-february",

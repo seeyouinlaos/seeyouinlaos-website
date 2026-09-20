@@ -67,6 +67,11 @@ const AUTH = {
       members: (inv.members || []).map((m) => ({ guestId: m.guestId, preferredName: m.preferredName })),
       /* the Sangkhathan is offered to this guest, or not — explicit source truth */
       sangkhathan: inv.sangkhathan === 'ELIGIBLE' || inv.sangkhathan === 'NONE' ? inv.sangkhathan : 'UNRESOLVED',
+      /* the Owner's permanent person id and couple id — read-only context, never editable on the site */
+      ...(inv.contactId ? { contactId: String(inv.contactId) } : {}), ...(inv.couple ? { couple: String(inv.couple) } : {}),
+      /* what the guest list knows of this person (birth date · nationality · phone · email · address): prefilled once
+         into the guest's own profile for review — this guest's record, decrypted with this guest's own code */
+      ...(inv.profile && typeof inv.profile === 'object' ? { profile: inv.profile } : {}),
       /* what the Worker checks on every write — never the code itself */
       bearer,
       at: new Date().toISOString(),

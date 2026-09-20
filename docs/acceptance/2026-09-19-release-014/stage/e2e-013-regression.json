@@ -7,7 +7,7 @@
  {
   "id": "clip-plays-at-the-cards-geometry",
   "ok": true,
-  "d": "{\"state\":\"playing\",\"bg\":true,\"w\":318,\"h\":254,\"ratio\":1.25,\"video\":true,\"playing\":true,\"t\":3.48,\"muted\":true,\"inline\":true,\"loop\":true,\"controls\":false,\"opacity\":\"1\",\"poster\":\"assets/images/city/001-bangkok-chao-phraya-skyline.jpg\",\"srcOk\":true}"
+  "d": "{\"state\":\"playing\",\"bg\":true,\"w\":318,\"h\":254,\"ratio\":1.25,\"video\":true,\"playing\":true,\"t\":3.49,\"muted\":true,\"inline\":true,\"loop\":true,\"controls\":false,\"opacity\":\"1\",\"poster\":\"assets/images/city/001-bangkok-chao-phraya-skyline.jpg\",\"srcOk\":true}"
  },
  {
   "id": "clip-reduced-motion-photograph",
@@ -132,7 +132,7 @@
  {
   "id": "reset-snapshot-carries-every-value",
   "ok": true,
-  "d": "{\"values\":24,\"digest\":\"c3c8c3df06cb\",\"sameAsTheDryRunBefore\":true}"
+  "d": "{\"values\":24,\"digest\":\"20e1bc2d2ed6\",\"sameAsTheDryRunBefore\":true}"
  },
  {
   "id": "reset-refuses-a-stale-snapshot",
@@ -147,7 +147,7 @@
  {
   "id": "reset-device-honours-the-epoch",
   "ok": true,
-  "d": "{\"cached\":10,\"after\":{\"contactLocal\":false,\"contactServer\":false,\"guestKey\":null,\"bag\":0,\"skips\":0,\"epoch\":\"2026-09-20T05:29:36.414Z\",\"serverBag\":null,\"serverSkip\":null,\"resetAt\":\"2026-09-20T05:29:36.414Z\",\"submission\":\"draft\",\"holds\":0}} (the old trip never came back — not on the device, not on the"
+  "d": "{\"cached\":10,\"after\":{\"contactLocal\":false,\"contactServer\":false,\"guestKey\":null,\"bag\":0,\"skips\":0,\"epoch\":\"2026-09-20T10:04:17.174Z\",\"serverBag\":null,\"serverSkip\":null,\"resetAt\":\"2026-09-20T10:04:17.174Z\",\"submission\":\"draft\",\"holds\":0}} (the old trip never came back — not on the device, not on the"
  },
  {
   "id": "reset-no-submission-remains",
