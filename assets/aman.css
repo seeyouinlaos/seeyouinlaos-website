@@ -569,6 +569,9 @@ html[data-session="in"] [data-private-cta] { display: none !important; }
 /* THE REFERENCE GALLERY (Owner, 20 Sep 2026): the dress references as the one carousel — every photograph the same 3:4 card,
    covered from the top, never stretched; one and a peek on a phone, two on a tablet, three on a desktop; every reference reachable */
 .refgal { margin-top: 18px; }
+.a-sec > .dgal, .a-sec > .refgal { padding: 0 var(--a-gut); }
+.a-galcap { padding: 0 var(--a-gut); margin-top: 12px; font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--a-mute); }
+@media (min-width: 900px) { .a-sec > .refgal, .a-galcap { max-width: 1000px; margin-left: auto; margin-right: auto; } }
 .refgal .atrk { padding-left: 0; scroll-padding-left: 0; }
 .refgal .aslide { flex: 0 0 72%; margin: 0; }
 .refgal .aslide .am { aspect-ratio: 3 / 4; background: #E7E3DB; }
