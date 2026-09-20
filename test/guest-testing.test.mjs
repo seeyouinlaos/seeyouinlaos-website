@@ -337,7 +337,8 @@ test('WORDING: no 1 + 1 seating, no blue dress, dinner poolside, China card is t
   assert.match(src('wedding.html'), /temple:'Lao Traditional Dress'/);
   for (const f of ['assets/journey.js', 'assets/temple.js', 'voyage.html', 'index.html', 'review.html', 'wedding.html']) assert.doesNotMatch(src(f), /courtyard garden/i, f);
   assert.match(src('assets/journey.js'), /Souphattra Heritage Vientiane · poolside/); assert.match(src('voyage.html'), /19:30 · Poolside/);
-  assert.match(src('index.html'), /destination\.html#china" style="background-image:url\(assets\/images\/city\/004-lijiang-black-dragon-pool\.jpg\)/);
+  /* 21 Sep 2026: the Owner's clip of Impression Lijiang on the China card, its own poster frame beneath (gate V1) */
+  assert.match(src('index.html'), /destination\.html#china" data-video="assets\/video\/china-card\.mp4" style="background-image:url\(assets\/images\/city\/004-lijiang-card-poster\.jpg\)/);
   assert.match(src('assets/images/ASSET-MAP.md'), /1XBVp6qIwUSWfHpw4w3S0CH-apvsej154/, 'the Drive source is traceable');
   /* the "After the Wedding" card carries the Owner's Lijiang old-town file (13 Sep 2026) */
   assert.match(src('index.html'), /journeys\.html#j-mu9646" style="background-image:url\(assets\/images\/city\/004-lijiang-old-town-roofs-jade-dragon\.jpg\)/);
