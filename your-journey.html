@@ -9,7 +9,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 .bag{width:44px;height:44px;display:flex;align-items:center;justify-content:center;position:relative;color:#313131;text-decoration:none}.bag .bgi{display:block}
 .bb{position:absolute;top:1px;right:0;min-width:14px;height:14px;padding:0 3px;background:#313131;color:#F3EEE7;font-size:8.5px;line-height:1;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;display:none;align-items:center;justify-content:center;box-shadow:0 0 0 2px #F3EEE7;border-radius:1px}
 </style>
-<link rel="stylesheet" href="assets/aman.css?v=bb5ab77f"><link rel="stylesheet" href="assets/prep.css?v=b18897cc"></head><body>
+<link rel="stylesheet" href="assets/aman.css?v=bb5ab77f"><link rel="stylesheet" href="assets/prep.css?v=902f99a1"></head><body>
 <header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="cart.html" aria-label="My Bag"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main class="prep-page" id="your-journey">
 <div class="prep-head">
@@ -417,7 +417,7 @@ function wireScope(sc){
 /* WHAT NO LONGER BELONGS LEAVES (Owner, 18 Sep 2026): a room held in a stage the guest is not joining is released through the
    engine, a Bag line of such a stage is removed, a seat for a wedding the guest is not attending is released — the guest's own
    resources only, through the existing paths, never another guest's. Idempotent: it releases only what is there. */
-var RECON='',RECON_FAILED=[],RECONCILING=false,RECON_AGAIN=false;
+var RECON='',RECON_FAILED=[],RECONCILING=false,RECON_AGAIN=false,SEAT_RELEASING={};   /* a seat release in flight is never sent twice (a second pass while the ledger's answer is on its way) */
 function scopeTag(){var G=window.SIYL_GUEST,s=G&&G.me()?G.scope():null;return s?JSON.stringify([s.bangkok,s.vientianePreWedding,s.vientianeWedding,s.china,s.none]):''}
 function reconcileScope(){
   var G=window.SIYL_GUEST,S=window.SIYL_SEATS,U=window.SIYL_UNITS,s=G&&G.me()?G.scope():null;if(!s)return;
@@ -442,7 +442,7 @@ function reconcileScope(){
     jobs.push(track(seg.place+' (waiting list)',U.unwait(stage)))})}
   /* the seats: the ledger is read first when this page has not read it yet — a seat is released only when it is the guest's own,
      and only while the ledger is open (a frozen ledger is Guest Relations' to change: the decline is sent, the seat is theirs to release) */
-  if(!G.joins('vientianeWedding')&&S){var me=G.me();var rel2=function(){var inner=[];if(!S.open()||S.frozen())return Promise.resolve([]);['ceremony','dinner'].forEach(function(ev){if(S.seatOf(ev,me.guestId))inner.push(track((ev==='ceremony'?'your ceremony seat':'your dinner seat'),S.release(ev,me.guestId)))});return Promise.all(inner)};
+  if(!G.joins('vientianeWedding')&&S){var me=G.me();var rel2=function(){var inner=[];if(!S.open()||S.frozen())return Promise.resolve([]);['ceremony','dinner'].forEach(function(ev){if(S.seatOf(ev,me.guestId)&&!SEAT_RELEASING[ev]){SEAT_RELEASING[ev]=true;inner.push(track((ev==='ceremony'?'your ceremony seat':'your dinner seat'),S.release(ev,me.guestId)).then(function(r){delete SEAT_RELEASING[ev];return r}))}});return Promise.all(inner)};
     jobs.push(S.ready()?rel2():S.load(true).then(function(v){if(v)return rel2();failed.push('your seats');return null}))}
   if(!G.joins('vientianeWedding')&&SIYL_BAG.has&&SIYL_BAG.has('sangkhathan')){SIYL_BAG.remove('sangkhathan')}
   var finish=function(){RECON_FAILED=failed;RECONCILING=false;render();if(RECON_AGAIN){RECON_AGAIN=false;RECON='';reconcileScope()}};

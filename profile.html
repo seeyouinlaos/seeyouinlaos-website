@@ -41,8 +41,32 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 .pf-rows .t-l1{display:inline-block;min-width:11em;line-height:1.6}
 @media(min-width:768px){.pf-rail{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px;overflow:visible}.pf-rail>*{flex:none;max-width:none}.pf-tickets{grid-template-columns:1fr 1fr}}
 @media(min-width:1024px){.pf-rail{grid-template-columns:repeat(3,1fr)}}
+/* THE RETURN PAGE (Owner, 21 Sep 2026): the countdown, the community, the journey in numbers — editorial, quiet, alive */
+.pf-count{padding:8px 0 0}
+.pf-num{display:flex;align-items:baseline;gap:14px;margin:10px 0 8px;font-family:'PP Editorial Old',serif;font-weight:200;color:#313131}
+.pf-num-v{font-size:96px;line-height:.9;letter-spacing:-1px;font-variant-numeric:tabular-nums}
+.pf-num-u{font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;font-size:10px;letter-spacing:2.2px;text-transform:uppercase;color:#6B6964}
+.t-l1.mute{color:#6B6964}
+.pf-people{display:flex;gap:18px;overflow-x:auto;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;padding:14px 0 6px;scrollbar-width:none;margin:0 -24px;padding-left:24px;padding-right:24px}
+.pf-people::-webkit-scrollbar{display:none}
+.pf-person{flex:0 0 auto;width:64px;display:flex;flex-direction:column;align-items:center;gap:8px;scroll-snap-align:start;opacity:0;transform:translateY(6px);transition:opacity .6s ease,transform .6s ease;transition-delay:calc(var(--i,0)*35ms)}
+.pf-people.is-in .pf-person{opacity:1;transform:none}
+.pf-ava{position:relative;width:56px;height:56px;border-radius:50%;background:#E7E3DB;overflow:hidden;display:inline-flex;align-items:center;justify-content:center;border:1px solid #DAD9D7}
+.pf-ava i{font-style:normal;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;font-size:13px;letter-spacing:1.5px;color:#313131}
+.pf-ava img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.pf-ava.has-photo i{visibility:hidden}
+.pf-person-n{font-size:10px;letter-spacing:1.4px;text-transform:uppercase;color:#313131;max-width:64px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pf-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:0;border-top:1px solid #DAD9D7;margin-top:12px}
+.pf-stat{padding:22px 0 20px;border-bottom:1px solid #DAD9D7;min-width:0}
+.pf-stat:nth-child(odd){padding-right:16px}
+.pf-stat:nth-child(even){padding-left:16px;border-left:1px solid #DAD9D7}
+.pf-stat .pf-num{margin:0 0 6px}
+.pf-stat .pf-num-v{font-size:56px}
+.pf-stat .t-b2.mute{color:#6B6964;margin-top:2px;font-size:12px}
+@media(min-width:768px){.pf-people{margin:0;padding-left:0;padding-right:0;flex-wrap:wrap;overflow:visible}.pf-grid{grid-template-columns:repeat(4,1fr)}.pf-stat:nth-child(odd){padding-right:20px}.pf-stat:nth-child(even){padding-left:20px}.pf-stat:nth-child(4n+3){padding-left:20px;border-left:1px solid #DAD9D7}.pf-stat:nth-child(4n+1){border-left:0;padding-left:0}.pf-num-v{font-size:120px}.pf-stat .pf-num-v{font-size:64px}}
+@media(prefers-reduced-motion:reduce){.pf-person{opacity:1;transform:none;transition:none}}
 </style>
-<link rel="stylesheet" href="assets/aman.css?v=bb5ab77f"><link rel="stylesheet" href="assets/prep.css?v=b18897cc"></head><body class="prep p-in">
+<link rel="stylesheet" href="assets/aman.css?v=bb5ab77f"><link rel="stylesheet" href="assets/prep.css?v=902f99a1"></head><body class="prep p-in">
 <header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="cart.html" aria-label="My Bag"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main class="prep-page" id="profile">
 <div class="prep-head">
@@ -70,6 +94,9 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/journey.js?v=aeb36786"></script>
 <script src="assets/docs.js?v=7c1c7bfd"></script>
 <script src="assets/avatar.js?v=4f4d9416"></script>
+<script src="assets/stay-media.js?v=ad379eca"></script>
+<script src="assets/experiences.js?v=a951b183"></script>
+<script src="assets/community.js?v=6291949f"></script>
 <script type="module" src="assets/invite.mjs?v=c557d97c"></script>
 <script>
 /* ============================================================================
@@ -256,15 +283,22 @@ function render(){
       '<p style="margin-top:16px"><button type="button" class="p-act" id="open">Open my invitation</button></p></div>';
     document.getElementById('open').addEventListener('click',function(){gated(render)});return}
   document.getElementById('pf-own').textContent='My Profile · '+G.nameOf();
-  page.innerHTML=identity(me,p)+contact()+status(p)+arrangements(me)+wedding(me,p)+tickets(me,p)+about(me)+documents(me);
+  /* THE RETURN PAGE (Owner, 21 Sep 2026): the countdown, the community and the journey in numbers stand between the account and the arrangements */
+  var CM=window.SIYL_COMMUNITY;
+  page.innerHTML=identity(me,p)+contact()+(CM?CM.countdownHtml()+CM.communityHtml(CM.data(),me)+CM.numbersHtml():'')+status(p)+arrangements(me)+wedding(me,p)+tickets(me,p)+about(me)+documents(me);
   if(S&&S.wireRail)S.wireRail(page);
+  if(CM){CM.wire(page);CM.paintPortraits(page);if(!CM.data())CM.load()}
   page.querySelectorAll('input[data-c]').forEach(function(i){var save=function(){G.setContact(i.getAttribute('data-c'),i.value.trim())};i.addEventListener('change',function(){var f=i.id;save();render();var n=document.getElementById(f);if(n)try{n.focus({preventScroll:true})}catch(e){}});i.addEventListener('blur',save)});
   var out=page.querySelector('[data-signout]');if(out)out.addEventListener('click',function(){var I=window.SIYL_INVITE;if(I&&I.leave)I.leave();var a=document.querySelector('[data-access-out]');if(a)a.click();else location.replace('invitation.html')});
   paintAvatar();
   B.badge();
 }
 ['siyl:bag','siyl:guest','siyl:seats','siyl:units','siyl:confirm','siyl:draft','siyl:docs','siyl:temple','siyl:invite-ready'].forEach(function(ev){document.addEventListener(ev,render)});
-document.addEventListener('siyl:auth',function(){render();if(S)S.load(true);if(U)U.load(true);if(C)C.load(true);if(AV)AV.load(true).then(paintAvatar)});
+/* the community arrives or changes: only its own section is redrawn — a "Photo saved" note or a field being typed elsewhere on the page is never wiped */
+document.addEventListener('siyl:community',function(){var CM=window.SIYL_COMMUNITY,old=document.getElementById('community'),me=G.me();if(!CM||!old||!me)return;var t=document.createElement('div');t.innerHTML=CM.communityHtml(CM.data(),me);var fresh=t.firstElementChild;if(!fresh)return;old.replaceWith(fresh);CM.wire(fresh);CM.paintPortraits(fresh)});
+document.addEventListener('siyl:auth',function(){render();if(S)S.load(true);if(U)U.load(true);if(C)C.load(true);if(AV)AV.load(true).then(paintAvatar);if(window.SIYL_COMMUNITY)SIYL_COMMUNITY.load(true)});
+/* a portrait changed on this device: the community's own tile follows (the read is the same authenticated one) */
+document.addEventListener('siyl:avatar',function(){if(window.SIYL_COMMUNITY)SIYL_COMMUNITY.load(true)});
 render();
 if(G.party()){if(S)S.load();if(U)U.load();if(C)C.load()}
 if(B.bar)B.bar();

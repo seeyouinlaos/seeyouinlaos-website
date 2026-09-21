@@ -1,0 +1,92 @@
+[
+ {
+  "id": "community-empty-state",
+  "ok": true,
+  "d": "{\"state\":\"0\",\"text\":\"WHO’S JOINING US\\n\\nNobody has sent their trip yet — yours could be the first.\"}"
+ },
+ {
+  "id": "community-first-guest-with-portrait",
+  "ok": true,
+  "d": "{\"up\":200,\"s\":{\"clicked\":true,\"after\":\"SENT TO GUEST RELATIONS\"},\"c1\":{\"state\":\"1\",\"h2\":\"1 guest has joined so far\",\"people\":[{\"id\":\"T003\",\"name\":\"CLEO\",\"photo\":true,\"initials\":\"\"}],\"recent\":\"Cleo\"}}"
+ },
+ {
+  "id": "community-returning-guest-sees-who-joined",
+  "ok": true,
+  "d": "{\"adaSent\":\"NOT JOINING\",\"c2\":{\"state\":\"1\",\"people\":[{\"id\":\"T003\",\"name\":\"CLEO\",\"photo\":true,\"initials\":\"\"}]}} (a decline is a response, not a joining guest)"
+ },
+ {
+  "id": "community-two-guests-initials-and-portrait",
+  "ok": true,
+  "d": "{\"state\":\"2\",\"people\":[{\"id\":\"T002\",\"name\":\"BEN\",\"photo\":false,\"initials\":\"B\"},{\"id\":\"T003\",\"name\":\"CLEO\",\"photo\":true,\"initials\":\"\"}],\"priv\":false}"
+ },
+ {
+  "id": "community-api-identity-only",
+  "ok": true,
+  "d": "{\"count\":2,\"keys\":\"guestId,joinedAt,name,photo\"}"
+ },
+ {
+  "id": "profile-functions-preserved",
+  "ok": true,
+  "d": "{\"photo\":true,\"changePhoto\":true,\"first\":true,\"last\":true,\"email\":true,\"docs\":true,\"pub\":true,\"bag\":\"USD 0\",\"order\":[\"identity\",\"contact\",\"countdown\",\"community\",\"numbers\",\"status\",\"stays\",\"travel\",\"experiences\",\"wedding\",\"tickets\",\"about\",\"documents\"]}"
+ },
+ {
+  "id": "countdown-days-from-the-clock",
+  "ok": true,
+  "d": "{\"phase\":\"before\",\"to\":153,\"shown\":\"104\",\"expect\":153,\"lead\":\"THE JOURNEY BEGINS IN\",\"tail\":\"21 FEBRUARY 2027 · BANGKOK\",\"after\":\"153\"}"
+ },
+ {
+  "id": "journey-in-numbers-counted",
+  "ok": true,
+  "d": "[\"countries:3\",\"cities:4\",\"stays:9\",\"nights:15\",\"days:16\",\"trains:2\",\"flights:3\",\"restaurants:16\",\"cafes:9\",\"bars:3\",\"museums:5\",\"temples:3\"]"
+ },
+ {
+  "id": "countdown-numbers-reduced-motion",
+  "ok": true,
+  "d": "{\"shown\":\"153\",\"to\":\"153\",\"people\":\"1\",\"stat\":\"03\"}"
+ },
+ {
+  "id": "name-copy-no-strikethrough-320",
+  "ok": true,
+  "d": "{\"display\":\"inline\",\"h\":36,\"lh\":22,\"lines\":5,\"border\":\"1px\",\"paraH\":108,\"text\":\"From your invitation · CORRECT YOUR NAME · Your party · Ada & Ben. Each of you has your ow\"} (an inline word — one line box, or two where the words wrap at 320; its underline stays with its own words)"
+ },
+ {
+  "id": "name-copy-no-strikethrough-390",
+  "ok": true,
+  "d": "{\"display\":\"inline\",\"h\":14,\"lh\":22,\"lines\":4,\"border\":\"1px\",\"paraH\":87,\"text\":\"From your invitation · CORRECT YOUR NAME · Your party · Ada & Ben. Each of you has your ow\"} (an inline word — one line box, or two where the words wrap at 320; its underline stays with its own words)"
+ },
+ {
+  "id": "name-copy-no-strikethrough-834",
+  "ok": true,
+  "d": "{\"display\":\"inline\",\"h\":14,\"lh\":22,\"lines\":2,\"border\":\"1px\",\"paraH\":43,\"text\":\"From your invitation · CORRECT YOUR NAME · Your party · Ada & Ben. Each of you has your ow\"} (an inline word — one line box, or two where the words wrap at 320; its underline stays with its own words)"
+ },
+ {
+  "id": "name-copy-no-strikethrough-1440",
+  "ok": true,
+  "d": "{\"display\":\"inline\",\"h\":14,\"lh\":22,\"lines\":2,\"border\":\"1px\",\"paraH\":43,\"text\":\"From your invitation · CORRECT YOUR NAME · Your party · Ada & Ben. Each of you has your ow\"} (an inline word — one line box, or two where the words wrap at 320; its underline stays with its own words)"
+ },
+ {
+  "id": "profile-width-320",
+  "ok": true,
+  "d": "{\"ov\":0,\"railScrolls\":false,\"railW\":320,\"bagH\":80,\"padB\":92,\"lastBottom\":7702,\"docH\":8765,\"statFont\":\"56px\",\"statW\":56,\"cellW\":136}"
+ },
+ {
+  "id": "profile-width-390",
+  "ok": true,
+  "d": "{\"ov\":0,\"railScrolls\":false,\"railW\":390,\"bagH\":80,\"padB\":92,\"lastBottom\":7090,\"docH\":8133,\"statFont\":\"56px\",\"statW\":56,\"cellW\":171}"
+ },
+ {
+  "id": "profile-width-834",
+  "ok": true,
+  "d": "{\"ov\":0,\"railScrolls\":false,\"railW\":754,\"bagH\":79,\"padB\":92,\"lastBottom\":6846,\"docH\":7889,\"statFont\":\"64px\",\"statW\":64,\"cellW\":189}"
+ },
+ {
+  "id": "profile-width-1440",
+  "ok": true,
+  "d": "{\"ov\":0,\"railScrolls\":false,\"railW\":860,\"bagH\":79,\"padB\":92,\"lastBottom\":6742,\"docH\":7403,\"statFont\":\"64px\",\"statW\":64,\"cellW\":215}"
+ },
+ {
+  "id": "console-errors",
+  "ok": true,
+  "d": "no script or console error"
+ }
+]

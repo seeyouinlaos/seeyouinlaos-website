@@ -141,6 +141,11 @@ body.prep button, body.prep input, body.prep textarea, body.prep select { font-f
 .p-link:hover { opacity: .6; }
 .p-link:active { opacity: .4; }
 .p-link:focus-visible { outline: 1px solid var(--p-ink); outline-offset: 3px; }
+/* A LINK INSIDE RUNNING PROSE (the Owner's iPhone, 21 Sep 2026): the tap-height inline-flex box above is for action rows.
+   Inside a paragraph its 44 px box sits below the baseline and its bottom border ran through the next wrapped line of
+   text ("Suthep & Haruthai. Each of you has…"). In prose the link is an inline word with its own underline — never taller
+   than the line it sits in. */
+.t-b1 .p-link, .t-b2 .p-link, .p-prose .p-link { display: inline; min-height: 0; padding: 0 0 1px; line-height: inherit; vertical-align: baseline; }
 .p-link.mute { color: var(--p-mute); border-bottom-color: #C9C4BA; }
 
 /* ----------------------------------------------------------- 3 SELECTION */

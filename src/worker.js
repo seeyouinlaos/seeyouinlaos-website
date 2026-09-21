@@ -178,6 +178,16 @@ export default {
       if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders(request) });
       return handleStatus(request, env);
     }
+    /* WHO'S JOINING US (Owner, 21 Sep 2026 · My Profile): the wedding community as the server knows it — every guest whose
+       trip has been SENT and who is joining (a declined response is a response, not a joining guest). For an authenticated
+       guest only. Identity information alone: the opaque guest id, the first name as the guest currently spells it, whether a
+       portrait exists (read through GET /api/profile/photo?of=… with the guest's own bearer), the day the trip was first sent.
+       Nothing else — no contact, no code, no booking, no document. Nothing is written. */
+    if (url.pathname === '/api/community') {
+      if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders(request) });
+      if (request.method !== 'GET') return json({ ok: false, error: 'method not allowed' }, 405, corsHeaders(request));
+      return handleCommunity(request, env);
+    }
     /* THE CONFIRMATION (F): Guest Relations only, idempotent, never self-service */
     if (url.pathname === '/api/confirm') {
       if (request.method !== 'POST') return json({ ok: false, error: 'method not allowed' }, 405);
@@ -855,6 +865,41 @@ async function handleMailRetry(request, env) {
 /* ---- F · status and confirmation --------------------------------------- */
 const INV_RE = /^INV-[A-Za-z0-9_-]{1,32}$/;
 
+async function listAll(kv, prefix) {
+  const out = []; let cursor = undefined;
+  for (let i = 0; i < 20; i++) {
+    const page = await kv.list(cursor ? { prefix, cursor } : { prefix });
+    (page && page.keys || []).forEach((k) => out.push(k.name));
+    if (!page || page.list_complete !== false || !page.cursor) break;
+    cursor = page.cursor;
+  }
+  return out;
+}
+const firstWord = (v) => String(v || '').trim().split(/\s+/)[0] || '';
+async function handleCommunity(request, env) {
+  const who = await identify(request, env);
+  if (!who) return json({ ok: false, error: 'unauthorised' }, 401, corsHeaders(request));
+  if (!env.REG_KV) return json({ ok: false, error: 'not enabled', enabled: false }, 503, corsHeaders(request));
+  const [regKeys, avatarKeys] = await Promise.all([listAll(env.REG_KV, 'reg:'), listAll(env.REG_KV, 'avatar:')]);
+  const photos = new Set(avatarKeys.map((k) => k.slice('avatar:'.length)));
+  const guests = [];
+  for (const key of regKeys) {
+    let rec = null; try { rec = JSON.parse(await env.REG_KV.get(key) || 'null'); } catch (e) { rec = null; }
+    if (!rec || !rec.registration || !rec.guestId) continue;
+    const gr = rec.registration.guestRecord || {};
+    if (gr.scope && gr.scope.none) continue;                       /* responded, not joining */
+    if (rec.hosts) continue;                                      /* the hosts are the hosts, not the guest count */
+    const invitationId = rec.invitationId || key.slice('reg:'.length);
+    let contact = null; try { contact = JSON.parse(await env.REG_KV.get(contactKey(invitationId)) || 'null'); } catch (e) { contact = null; }
+    const g0 = Array.isArray(gr.guests) && gr.guests[0] ? gr.guests[0] : {};
+    const name = firstWord(contact && contact.firstName) || firstWord(g0.submitted && g0.submitted.preferredName) || firstWord(g0.source && g0.source.preferredName) || firstWord(g0.name) || 'Guest';
+    const at = rec.firstSentAt || rec.submittedAt || null;
+    guests.push({ guestId: String(rec.guestId), name: name.slice(0, 24), photo: photos.has(invitationId), joinedAt: at ? String(at).slice(0, 10) : null, _t: at ? Date.parse(at) || 0 : 0 });
+  }
+  guests.sort((a, b) => (b._t - a._t) || a.name.localeCompare(b.name));
+  const out = guests.map(({ _t, ...g }) => g);
+  return json({ ok: true, count: out.length, guests: out, at: new Date().toISOString() }, 200, Object.assign({ 'cache-control': 'private, max-age=60' }, corsHeaders(request)));
+}
 async function handleStatus(request, env) {
   const url = new URL(request.url);
   const invitationId = url.searchParams.get('invitation') || '';
