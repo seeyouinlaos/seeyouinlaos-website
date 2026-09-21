@@ -1,0 +1,2 @@
+{"status":200,"policy":{"journeyEnd":"2027-03-08","days":30,"purgeFrom":"2027-04-07","prefix":"doc/"},"at":"2026-09-21T23:00:35.936Z","due":false,"dryRun":true,"objects":0,"invitations":0,"deleted":0,"audits":[],"note":"before 7 April 2027 nothing is deleted; the documents stand under the authenticated rules"}
+guest bearer on the report: [33m401[39m · POST: [33m405[39m
