@@ -301,12 +301,44 @@
  "luyeBaisha": {
   "name": "Luye Baisha · Lijiang",
   "city": "Lijiang",
+  "lead": "room",
+  "leadWhy": "the Owner's photography of the house is its rooms — no exterior, lobby or grounds frame of the hotel itself exists; a mountain or village view is destination photography and never stands for the hotel (Owner, 21 Sep 2026 · the accommodation media rule)",
   "images": [
    {
-    "src": "assets/images/lijiang/snow-mountain-viewing-1.jpg",
-    "kind": "grounds",
-    "caption": "Jade Dragon Snow Mountain over the Baisha rooftops",
-    "source": "Owner Drive 024 - Hotel - Luye Baisha Lijiang · the Owner's designated frame (08 Sep 2026); the house's own picture by the Owner's ruling of 21 Sep 2026"
+    "src": "assets/images/lijiang/view270-1.jpg",
+    "kind": "room",
+    "caption": "The 270° Snow Mountain Viewing room at dusk",
+    "source": "Owner Drive 024 - Hotel - Luye Baisha Lijiang"
+   },
+   {
+    "src": "assets/images/journey/lijiang-01.jpg",
+    "kind": "room",
+    "caption": "The Snow Mountain Viewing Room towards the valley",
+    "source": "Owner Drive 024 - Hotel - Luye Baisha Lijiang"
+   },
+   {
+    "src": "assets/images/lijiang/courtyard-2.jpg",
+    "kind": "room",
+    "caption": "The private courtyard room",
+    "source": "Owner Drive 024 - Hotel - Luye Baisha Lijiang"
+   },
+   {
+    "src": "assets/images/lijiang/souppool-1.jpg",
+    "kind": "room",
+    "caption": "The private soup pool room",
+    "source": "Owner Drive 024 - Hotel - Luye Baisha Lijiang"
+   },
+   {
+    "src": "assets/images/lijiang/starry-1.jpg",
+    "kind": "suite",
+    "caption": "The Starry Sky suite",
+    "source": "Owner Drive 024 - Hotel - Luye Baisha Lijiang"
+   },
+   {
+    "src": "assets/images/journey/lijiang-03.jpg",
+    "kind": "room",
+    "caption": "The sitting room and the fireplace",
+    "source": "Owner Drive 024 - Hotel - Luye Baisha Lijiang"
    }
   ]
  },

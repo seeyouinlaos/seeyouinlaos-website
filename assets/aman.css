@@ -248,7 +248,12 @@ a.am { display: block; text-decoration: none; }
   content: none; position: absolute; left: 0; right: 0; bottom: 0; height: 62%;
   background: linear-gradient(to top, rgba(18,16,14,.62) 0%, rgba(18,16,14,.34) 42%, rgba(18,16,14,0) 100%);
 }
-.a-hero .am { position: relative; }
+.a-hero .am { position: relative; overflow: hidden; }
+/* THE HERO SLIDESHOW (Owner, 21 Sep 2026): each later photograph is a layer over the courtyard, the same frame, the same
+   cover crop (its own focal point), a 1000 ms crossfade; nothing else moves. Reduced motion: the courtyard stays. */
+.a-hero-slide { position: absolute; inset: 0; background: center/cover no-repeat; opacity: 0; transition: opacity 1000ms ease-in-out; will-change: opacity; pointer-events: none; }
+.a-hero-slide.is-on { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .a-hero-slide { transition: none; } }
 
 /* LEDE — a text-led pause: no image, no button, one underlined link */
 .a-lede { padding: 0 var(--a-gut); max-width: 640px; }

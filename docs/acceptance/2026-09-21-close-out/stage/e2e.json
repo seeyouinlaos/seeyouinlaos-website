@@ -1,0 +1,132 @@
+[
+ {
+  "id": "hero-320",
+  "ok": true,
+  "d": "{\"g0\":{\"slides\":\"5\",\"w\":272,\"h\":272,\"ahTop\":352},\"g1\":{\"idx\":\"1\",\"src\":\"/hero/home-hero-02.jpg\\\")\",\"opacity\":\"1\",\"transition\":\"1s\",\"w\":272,\"h\":272,\"ahTop\":352,\"pos\":\"50% 55%\"}} (the same frame, the words unmoved, slide 2 after ~5 s)"
+ },
+ {
+  "id": "hero-390",
+  "ok": true,
+  "d": "{\"g0\":{\"slides\":\"5\",\"w\":342,\"h\":342,\"ahTop\":422},\"g1\":{\"idx\":\"1\",\"src\":\"/hero/home-hero-02.jpg\\\")\",\"opacity\":\"1\",\"transition\":\"1s\",\"w\":342,\"h\":342,\"ahTop\":422,\"pos\":\"50% 55%\"}} (the same frame, the words unmoved, slide 2 after ~5 s)"
+ },
+ {
+  "id": "hero-834",
+  "ok": true,
+  "d": "{\"g0\":{\"slides\":\"5\",\"w\":746,\"h\":420,\"ahTop\":530},\"g1\":{\"idx\":\"1\",\"src\":\"/hero/home-hero-02.jpg\\\")\",\"opacity\":\"1\",\"transition\":\"1s\",\"w\":746,\"h\":420,\"ahTop\":530,\"pos\":\"50% 55%\"}} (the same frame, the words unmoved, slide 2 after ~5 s)"
+ },
+ {
+  "id": "hero-1440",
+  "ok": true,
+  "d": "{\"g0\":{\"slides\":\"5\",\"w\":1052,\"h\":592,\"ahTop\":698},\"g1\":{\"idx\":\"1\",\"src\":\"/hero/home-hero-02.jpg\\\")\",\"opacity\":\"1\",\"transition\":\"1s\",\"w\":1052,\"h\":592,\"ahTop\":698,\"pos\":\"50% 55%\"}} (the same frame, the words unmoved, slide 2 after ~5 s)"
+ },
+ {
+  "id": "hero-loop-five-slides",
+  "ok": true,
+  "d": "{\"seq\":[\"0\",\"1\",\"2\",\"3\",\"4\",\"0\"],\"srcs\":[\"home-hero-02.jpg\",\"home-hero-03.jpg\",\"home-hero-04.jpg\",\"home-hero-05.jpg\"]} (the courtyard · IMG_2584 · 2585 · 2586 · 2587 · the courtyard)"
+ },
+ {
+  "id": "hero-hidden-tab-pauses-no-catch-up",
+  "ok": true,
+  "d": "{\"before\":\"1\",\"hidden\":{\"state\":\"paused\",\"idx\":\"1\"},\"back\":{\"state\":\"playing\",\"idx\":\"1\"}} (16 s hidden = three slides due; at most one shown)"
+ },
+ {
+  "id": "hero-reduced-motion-still",
+  "ok": true,
+  "d": "{\"state\":\"still\",\"idx\":\"0\",\"on\":0}"
+ },
+ {
+  "id": "accommodation-media-own-frames-only",
+  "ok": true,
+  "d": "{\"rails\":3,\"rows\":36,\"galleryFrames\":16,\"bad\":[],\"ljg\":\"lijiang/view270-1.jpg\"}"
+ },
+ {
+  "id": "the-houses-luye-baisha-room",
+  "ok": true,
+  "d": "[[\"j-prewed\",\"souphattra/heritage-courtyard-pool.jpg\"],[\"j-kmg\",\"journey/kunming-wanxiang-yueju-entrance.jpg\"],[\"j-ljg\",\"lijiang/view270-1.jpg\"],[\"j-kempinski\",\"kempinski/facade-garden.jpg\"]]"
+ },
+ {
+  "id": "A-wedding-guest-house",
+  "ok": true,
+  "d": "{\"s0\":[\"wedstay\"],\"s1\":{\"stages\":[\"wedstay\"],\"bag\":[\"guesthouse:guest-house:0\"],\"total\":0,\"done\":true,\"counts\":{\"relevant\":1,\"confirmed\":1,\"waitlisted\":0,\"declined\":0,\"open\":0,\"excluded\":9,\"resolved\":1,\"bagItems\":1,\"bagTotal\":0}},\"line\":{\"id\":\"guesthouse\",\"price\":0,\"complimentary\":true,\"nights\":2,\"rate\":0,\"total\":0,\"card\":\"04 · 27 FEB – 01 MAR Vientiane Accommodation CURRENT SELECTION Guest House complimentary · Vientiane 27 February – 01 March 2027 · Complimentary · six shared places Complimentary · a shared guest house of six places; who sleeps where is arranged among you at the house GUEST HOUSE COMPLIMENTARY · YOU · 5 PLACES AVAILABLE Complimentary COMPLIMENTARY · ONE OF SIX PLACES VIEW DETAILS CHANGE CHANGE ROOM REMOVE NOT JOINING THIS STAGE\",\"cost\":\"USD 0\"}}"
+ },
+ {
+  "id": "B-wedding-souphattra-heritage-145",
+  "ok": true,
+  "d": "{\"q\":{\"rate\":145,\"nights\":2,\"pay\":1,\"hosted\":1,\"total\":145,\"contribution\":\"First night your room rate at USD 145 per person / night · second night hosted by Haruthai & Suthep\"},\"bag\":[\"wedstay:heritage:145\"],\"bag2\":[\"wedstay:heritage-grand-premier:170\"],\"total3\":145}"
+ },
+ {
+  "id": "B-one-hold-for-stage-D",
+  "ok": true,
+  "d": "{\"wedstay\":{\"key\":\"wedstay/heritage\",\"label\":\"A\"}}"
+ },
+ {
+  "id": "C-china-only-f-g-h",
+  "ok": true,
+  "d": "{\"c0\":[\"kmg\",\"c86\",\"ljg\"],\"need1\":[\"stage:c86\",\"allergy\",\"profile:coffeetea\",\"profile:flavor\",\"profile:drink\",\"profile:film\",\"profile:music\",\"photo\"],\"c2\":{\"bag\":[\"kmg:italian:150\",\"ljg:viewing-270:200\",\"c86::105\"],\"total\":455,\"done\":true}}"
+ },
+ {
+  "id": "D-join-all-a-to-j",
+  "ok": true,
+  "d": "{\"stages\":[\"bkk-stay\",\"train\",\"prewed\",\"wedstay\",\"mu9646\",\"kmg\",\"c86\",\"ljg\",\"return\",\"kempinski\"],\"packs\":0,\"words\":\"Bangkok · Vientiane · China\",\"ov\":\"01 Your Invitation Name, email and mobile number COMPLETE 02 My Trip 10 items to complete CURRENT 21 – 24 FEB · Bangkok \",\"rv\":\"/your-journey\"}"
+ },
+ {
+  "id": "E-not-joining-clears-everything",
+  "ok": true,
+  "d": "{\"stages\":[],\"bag\":[],\"mine\":{},\"steps\":[\"you:complete\",\"journey:complete\",\"wedding:na\",\"preparation:na\",\"about:na\",\"review:attention\"]}"
+ },
+ {
+  "id": "E-send-my-response-then-not-joining",
+  "ok": true,
+  "d": "{\"before\":{\"url\":\"/review\",\"btn\":\"SEND MY RESPONSE\",\"off\":false},\"after\":\"NOT JOINING\"}"
+ },
+ {
+  "id": "E-reconsider-and-partner-untouched",
+  "ok": true,
+  "d": "{\"re\":{\"scope\":null,\"q\":true},\"benMine\":{\"wedstay\":{\"key\":\"wedstay/heritage-executive\",\"label\":\"A\"}},\"benScope\":false}"
+ },
+ {
+  "id": "server-422-china-without-the-train",
+  "ok": true,
+  "d": "{\"ok\":false,\"error\":\"incomplete\",\"message\":\"Your trip is not complete yet.\",\"missing\":[{\"key\":\"stage:c86\",\"label\":\"stage G\",\"step\":\"journey\",\"href\":\"your-journey.html#s-c86\"}],\"unresolved\":[{\"key\":\"c86\",\"letter\":\"G\",\"sta"
+ },
+ {
+  "id": "server-202-china-with-the-train",
+  "ok": true,
+  "d": "{\"status\":202,\"kind\":\"initial\"}"
+ },
+ {
+  "id": "server-422-wedding-seat-missing",
+  "ok": true,
+  "d": "{\"ok\":false,\"error\":\"incomplete\",\"message\":\"Your trip is not complete yet.\",\"missing\":[{\"key\":\"stage:wedstay\",\"label\":\"stage D\",\"step\":\"journey\",\"href\":\"your-journey.html#s-wedstay\"},{\"key\":\"seat:ceremony\",\"label\":\"Cerem"
+ },
+ {
+  "id": "server-202-wedding-with-the-seats",
+  "ok": true,
+  "d": "{\"join\":200,\"status\":202,\"kind\":\"update\"}"
+ },
+ {
+  "id": "passport-picker-honest-no-store",
+  "ok": true,
+  "d": "{\"accept\":\"image/jpeg,image/png,image/heic,image/heif,image/webp,application/pdf\",\"add\":\"ADD PASSPORT\",\"err\":\"We cannot accept documents on the website yet. Nothing was sent and nothing was stored. Your trip can still be sent — Gu\",\"stored\":false,\"direct\":503,\"noRead\":405}"
+ },
+ {
+  "id": "name-editing-propagates-identity-kept",
+  "ok": true,
+  "d": "{\"prof\":{\"full\":\"Adelheid Acker\",\"name\":\"Adelheid\"},\"ids\":{\"guestId\":\"T001\",\"invitationId\":\"INV-T001\",\"partyId\":\"INV-T01\",\"contactId\":null,\"couple\":null,\"name\":\"Ada\"},\"tripLabel\":\"FOR YOU · ADELHEID\",\"holderName\":[\"Adelheid\",\"Adelheid\"],\"holderPage\":true,\"review\":true,\"sent\":true,\"send\":{\"url\":\"/review\",\"btn\":\"SEND UPDATED TRIP\",\"off\":false},\"recStatus\":200,\"ben\":{\"first\":\"Ben\",\"name\":\"Ben\",\"party\":\"Ada & Ben\"},\"rec\":\"{\\\"guestId\\\":\\\"T001\\\",\\\"name\\\":\\\"Adelheid\\\",\\\"source\\\":{\\\"fullName\\\":\\\"Ada Test\\\",\\\"preferredName\\\":\\\"Ada\\\"},\\\"submitted\\\":{\\\"fullName\\\":\\\"Adelheid Acker\\\",\\\"preferredName\\\":\\\"Adelheid\\\"},\"}"
+ },
+ {
+  "id": "lijiang-film-preserved",
+  "ok": true,
+  "d": "{\"state\":\"playing\",\"play\":true,\"sound\":true,\"inline\":true,\"loop\":true,\"t\":3.5693476623667593,\"paused\":false,\"opacity\":\"1\",\"src\":\"lijiang-impression.mp4\",\"ready\":4}"
+ },
+ {
+  "id": "destination-galleries-aligned",
+  "ok": true,
+  "d": "{\"content\":24,\"rails\":[24,24,24,24],\"arrows\":4,\"counters\":4,\"ov\":0}"
+ },
+ {
+  "id": "console-errors",
+  "ok": true,
+  "d": "no script or console error"
+ }
+]

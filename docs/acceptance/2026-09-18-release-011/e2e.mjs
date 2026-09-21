@@ -116,7 +116,7 @@ await trip(C); await C.evaluate(() => { const b = SIYL_BAG.get().filter((x) => x
 const counts = { leave: 0, release: 0, renders: 0 }; const onReq = (r) => { const u = r.url(); if (/\/api\/rooms\/leave/.test(u)) counts.leave++; if (/\/api\/seating\/release/.test(u)) counts.release++; }; C.on('request', onReq);
 await toggleVientiane(C, 2500); C.off('request', onReq);
 const re = { mine: (await engineMine(C)).mine, seats: seatsOf((await api(C, '/api/seating', { method: 'GET' })).body), bag: await C.evaluate(() => SIYL_BAG.get().map((x) => x.id)), need: await need(C), counts, failed: !!(await C.$('[data-scope-failed]')) };
-note('reentrancy-one-release-each', jr.status === 200 && !(re.mine && re.mine.prewed) && re.seats.length === 0 && !re.bag.includes('sangkhathan') && !re.need.keys.some((k) => /^release:/.test(k)) && re.counts.leave === 1 && re.counts.release === (LIVE ? 0 : 2) && !re.failed, JSON.stringify(re));
+note('reentrancy-one-release-each', jr.status === 200 && !(re.mine && re.mine.prewed) && re.seats.length === 0 && !re.bag.includes('sangkhathan') && !re.need.keys.some((k) => /^release:/.test(k)) && re.counts.leave === 1 && re.counts.release === (LIVE ? 0 : 2) && !re.failed, JSON.stringify({ counts: re.counts, failed: re.failed, mine: re.mine, seats: re.seats, bag: re.bag, releaseKeys: re.need.keys.filter((k) => /^release/.test(k)) }));
 
 /* ===== 4b · A RELEASE THAT FAILS (Codex 011-1): the room stays, it is named, Review & Send waits, Release again resolves it ===== */
 await trip(C); await toggleVientiane(C, 1200);

@@ -30,11 +30,11 @@ test('ONE SOURCE MAP · hero, card and gallery per property, files present, no c
   assert.equal(M.uSathorn.hero, 'assets/images/usathorn/pool-pavilion-dusk.jpg'); assert.equal(M.uSathorn.card, 'assets/images/usathorn/pool-pavilion-day.jpg');
   for (const f of ['driveway-sunset', 'entrance-u-garden', 'lobby', 'superior-garden-entry']) assert.ok(M.uSathorn.gallery.some((g) => g[0].endsWith(f + '.jpg')), f);
   /* every rail reads the card from the map */
-  assert.match(src('journeys.html'), /var img=r\.cardImg\|\|\(r\.gallery\.length\?r\.gallery\[0\]\[0\]:''\);/);
-  assert.match(src('journeys.html'), /img=r\.cardImg\|\|\(r\.gallery\.length\?r\.gallery\[0\]\[0\]:''\);\n/);
-  assert.match(src('your-journey.html'), /img=r\.cardImg\|\|\(r\.gallery\.length\?r\.gallery\[0\]\[0\]:''\)/);
-  assert.match(src('room.html'), /\(r\.cardImg \|\| r\.gallery\[0\]\[0\]\)/);
-  assert.match(src('assets/pricing.js'), /room\.cardImg \|\| \(room\.gallery && room\.gallery\.length && room\.gallery\[0\]\[0\]\)/);
+  /* every rail reads the card through the one resolver (SIYL_STAY_ART, 21 Sep 2026), which reads the map */
+  assert.match(src('journeys.html'), /var img=window\.SIYL_STAY_ART\?SIYL_STAY_ART\.card\(sk,r\.slug\):'';/);
+  assert.match(src('your-journey.html'), /img=window\.SIYL_STAY_ART\?SIYL_STAY_ART\.card\('sathorn',r\.slug\):''/);
+  assert.match(src('room.html'), /SIYL_STAY_ART\.card\(stayKey, r\.slug\)/);
+  assert.match(src('assets/pricing.js'), /SIYL_STAY_ART\.bag\(at\.key, room \? room\.slug : '', at\.win\.id\)/);
 });
 
 test('THE HOUSES · the Penthouse, U Sathorn and Shama each with the map\'s image; no missing image on any card', () => {

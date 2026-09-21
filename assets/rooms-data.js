@@ -563,7 +563,7 @@
       place: 'Baisha, Lijiang · Rizhao Jinshan',
       breakfast: 'Breakfast included',
       windows: [{ id: 'ljg', label: 'After the Wedding', dates: '04 – 06 March 2027', nights: '2 nights', n: 2,
-        bagName: 'Luye Baisha · Lijiang', bagImg: 'assets/images/lijiang/snow-mountain-viewing-1.jpg' }],
+        bagName: 'Luye Baisha · Lijiang', bagImg: 'assets/images/lijiang/view270-1.jpg' }],
       includes: [
         'Two nights, 4 → 5 and 5 → 6 March, below Jade Dragon Snow Mountain.',
         'Breakfast included on both mornings.',
@@ -732,6 +732,65 @@
           rate: 190 }
       ]
     }
+  };
+
+  /* ==========================================================================
+     THE ACCOMMODATION MEDIA RULE (Owner, 21 Sep 2026 · the close-out pass) — code level, deterministic.
+     A hotel is a hotel: a recommendation, a card, a Bag line or THE HOUSES may show ONLY media explicitly approved for
+     that exact property — the property's own folder(s) as recorded here and in src/stay-media.json. Nothing is ever
+     inferred from a name ("Lijiang", "Baisha", "Snow Mountain", "Bangkok" …), from a filename, from a city, from the
+     destination or Highlights photography, from the nearest available frame, or from another hotel. A path outside the
+     property's approved set resolves to '' — the intentional no-photo state — never to a second source.
+     ========================================================================== */
+  var STAY_FOLDERS = {
+    sathorn:    ['assets/images/penthouse/', 'assets/images/usathorn/', 'assets/images/shama/', 'assets/images/journey/penthouse-'],
+    souphattra: ['assets/images/souphattra/', 'assets/images/rooms/'],   /* assets/images/rooms/ = the Souphattra's own room categories (its Drive folder) */
+    guesthouse: ['assets/images/guesthouse/'],
+    riverside:  ['assets/images/riverside/'],
+    kunming:    ['assets/images/kunming/', 'assets/images/journey/kunming-'],
+    lijiang:    ['assets/images/lijiang/', 'assets/images/journey/lijiang-'],
+    kempinski:  ['assets/images/kempinski/', 'assets/images/journey/kempinski-']
+  };
+  /* the stay-media records (assets/stay-media.js) that belong to each property */
+  var STAY_MEDIA_KEYS = { sathorn: ['sathornPenthouse', 'uSathorn', 'shamaYenAkat'], souphattra: ['souphattra'], guesthouse: ['guestHouse'], riverside: ['riverside'], kunming: ['wanxiang'], lijiang: ['luyeBaisha'], kempinski: ['kempinski'] };
+  /* a frame the property may never show, whatever folder it sits in: destination photography by kind (the peak, the village, the city) */
+  var NEVER = /snow-mountain-viewing-1\.jpg$|\/city\/|\/experiences\/|\/1872\/|\/marsilea\/|\/hero\/|\/event\/|\/venue\/|\/temple\/|\/dress|\/train\/|\/transport\/|\/timeline\/|\/alms\//;
+  function inFolder(stayKey, src) {
+    var list = STAY_FOLDERS[stayKey]; if (!list || !src || NEVER.test(src)) return false;
+    for (var i = 0; i < list.length; i++) if (String(src).indexOf(list[i]) === 0) return true;
+    return false;
+  }
+  var ART = window.SIYL_STAY_ART = {
+    FOLDERS: STAY_FOLDERS, MEDIA_KEYS: STAY_MEDIA_KEYS, NEVER: NEVER,
+    /* the explicit approved set of one property: its media record's frames, its rooms' galleries and cards, its windows' Bag frames — each inside its own folders */
+    approved: function (stayKey) {
+      var st = window.SIYL_ROOMS[stayKey]; if (!st) return [];
+      var out = [], seen = {}, add = function (src) { if (src && inFolder(stayKey, src) && !seen[src]) { seen[src] = true; out.push(src); } };
+      var M = window.SIYL_STAY_MEDIA || {};
+      (STAY_MEDIA_KEYS[stayKey] || []).forEach(function (k) { ((M[k] && M[k].images) || []).forEach(function (im) { add(im.src); }); });
+      (st.rooms || []).forEach(function (r) { add(r.cardImg); (r.gallery || []).forEach(function (g) { add(g[0]); }); });
+      (st.windows || []).forEach(function (w) { add(w.bagImg); });
+      return out;
+    },
+    ok: function (stayKey, src) { return !!src && inFolder(stayKey, src) && this.approved(stayKey).indexOf(src) >= 0; },
+    /* the card of one room: its own card frame, else the first frame of its own gallery — never anything else */
+    card: function (stayKey, slug) {
+      var st = window.SIYL_ROOMS[stayKey]; if (!st) return '';
+      var r = (st.rooms || []).filter(function (x) { return x.slug === slug; })[0]; if (!r) return '';
+      var c = r.cardImg || (r.gallery && r.gallery.length ? r.gallery[0][0] : '');
+      return this.ok(stayKey, c) ? c : '';
+    },
+    /* the house's frame: the window's Bag frame, else the media record's first frame — of this property alone */
+    house: function (stayKey, windowId) {
+      var st = window.SIYL_ROOMS[stayKey]; if (!st) return '';
+      var w = (st.windows || []).filter(function (x) { return !windowId || x.id === windowId; })[0];
+      if (w && this.ok(stayKey, w.bagImg)) return w.bagImg;
+      var M = window.SIYL_STAY_MEDIA || {}, keys = STAY_MEDIA_KEYS[stayKey] || [];
+      for (var i = 0; i < keys.length; i++) { var im = M[keys[i]] && M[keys[i]].images && M[keys[i]].images[0]; if (im && this.ok(stayKey, im.src)) return im.src; }
+      return '';
+    },
+    /* the Bag line's frame: the room's card, else the house's */
+    bag: function (stayKey, slug, windowId) { return this.card(stayKey, slug) || this.house(stayKey, windowId); }
   };
 
   /* Merchandising (Owner rule, 07 Sep 2026): comparable paid options are

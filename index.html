@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex">
 <title>See You In Laos</title>
 <link rel="stylesheet" href="assets/recon.css?v=05778142">
-<link rel="stylesheet" href="assets/aman.css?v=9bab15ca">
+<link rel="stylesheet" href="assets/aman.css?v=bb5ab77f">
 <link rel="stylesheet" href="assets/motion.css?v=7c751ed1">
 <link rel="stylesheet" href="assets/venue.css?v=3970b0b0">
 </head>
@@ -16,7 +16,15 @@
 
   <!-- HERO — the photograph establishes place; the words stay quiet -->
   <section class="a-hero">
-    <div class="am" style="background-image:url(assets/images/hero/home-hero-courtyard.jpg)" role="img" aria-label="The courtyard at Souphattra Heritage, Vientiane, at dusk"></div>
+    <div class="am" style="background-image:url(assets/images/hero/home-hero-courtyard.jpg)" role="img" aria-label="The courtyard at Souphattra Heritage, Vientiane, at dusk" data-hero-show>
+      <!-- THE HERO SLIDESHOW (Owner, 21 Sep 2026): the same frame, only the photograph changes — the courtyard stays the first
+           picture (the .am background, on screen at once); four proposal frames follow, one calm crossfade every 5 s, then the
+           courtyard again. The crop of each portrait frame is its own (data-pos). No controls, no dots, no captions. -->
+      <span class="a-hero-slide" data-src="assets/images/hero/home-hero-02.jpg" data-pos="50% 55%" aria-hidden="true"></span>
+      <span class="a-hero-slide" data-src="assets/images/hero/home-hero-03.jpg" data-pos="50% 30%" aria-hidden="true"></span>
+      <span class="a-hero-slide" data-src="assets/images/hero/home-hero-04.jpg" data-pos="50% 36%" aria-hidden="true"></span>
+      <span class="a-hero-slide" data-src="assets/images/hero/home-hero-05.jpg" data-pos="50% 38%" aria-hidden="true"></span>
+    </div>
     <div class="ah">
       <p class="a-eyebrow">Sunday, 28 February 2027 · Vientiane, Laos</p>
       <h1>One invitation.<br>Three countries. One journey.</h1>
@@ -150,6 +158,7 @@
 <script src="assets/recon.js?v=0e3f9951"></script>
 <script type="module" src="assets/invite.mjs?v=c557d97c"></script>
 <script src="assets/aman.js?v=2a339178"></script>
+<script src="assets/hero-show.js?v=df321b9e"></script>
 <script src="assets/motion.js?v=ed2a636b"></script>
 <script src="assets/venue-data.js?v=cc43eeb0"></script>
 <script src="assets/venue.js?v=f82fc53a"></script>
