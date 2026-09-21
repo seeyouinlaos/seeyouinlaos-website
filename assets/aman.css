@@ -607,7 +607,8 @@ html[data-session="in"] [data-private-cta] { display: none !important; }
 /* THE EDITORIAL CLIP WITH SOUND (Owner, 21 Sep 2026): the frame is the chapter's frame; the film covers it (the poster beneath,
    never a black plane); two small controls at the foot — Play / Pause and Sound on / Mute — in the website's own language */
 .a-clip { position: relative; overflow: hidden; }
-.a-clip video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; background: transparent; }
+.a-clip video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; background: transparent; opacity: 1; pointer-events: none; z-index: 1; }
+.a-clip::before, .a-clip::after { display: none; }
 .a-clip-ctl { position: absolute; left: 14px; right: 14px; bottom: 14px; display: flex; gap: 8px; align-items: center; z-index: 2; }
 .a-clip-btn { appearance: none; -webkit-appearance: none; display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 14px 0 12px; border: 1px solid rgba(243,238,231,.55); border-radius: 999px; background: rgba(49,49,49,.42); color: #F3EEE7; font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); touch-action: manipulation; }
 .a-clip-btn:focus-visible { outline: 1px solid #F3EEE7; outline-offset: 3px; }
@@ -621,6 +622,8 @@ html[data-session="in"] [data-private-cta] { display: none !important; }
 @media (min-width: 900px) { .a-clip-ctl { left: 20px; right: 20px; bottom: 20px; } .a-clip-btn { height: 38px; } }
 /* THE DESTINATION GALLERY'S LEFT EDGE (Owner, 21 Sep 2026): the track never carries the shared carousel's gutter — the first
    photograph rests on the chapter's own left edge, the words' edge; stated last, as shorthand, so no earlier rule can leak in */
-.a-dest .refgal .atrk, .a-dest .acar .atrk { width: 100%; max-width: none; margin: 0; padding: 0; scroll-padding: 0; scroll-padding-left: 0; }
+.a-dest .refgal .atrk, .a-dest .acar .atrk { width: 100% !important; max-width: none !important; margin: 0 !important; padding: 0 !important; scroll-padding: 0 !important; scroll-padding-left: 0 !important; transform: none; }
+.a-dest > .refgal, .a-dest > .acar { margin-left: var(--a-gut); margin-right: var(--a-gut); padding: 0 !important; max-width: none; }
+@media (min-width: 900px) { .a-dest > .refgal, .a-dest > .acar { max-width: 1000px; margin-left: auto; margin-right: auto; } }
 .a-dest .refgal .aslide:first-child { margin-left: 0; scroll-margin-left: 0; }
 .a-dest .refgal .aslide { scroll-snap-align: start; margin: 0; }

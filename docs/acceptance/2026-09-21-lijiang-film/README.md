@@ -29,3 +29,22 @@
   swipe / scroll moves the counter and keeps the active card on the edge.
 
 Proofs: unit 414 / 414 · RELEASE CHECK PASSED (V1: the four silent card clips) · `stage/` screenshots · the deploy that follows.
+
+## Second pass (Owner, 21 Sep 2026): the picture did not move · the galleries still inset on the iPhone
+- **Root cause of audio-with-frozen-picture:** the film's `<video>` carried the silent card-clip module's class `am-clip`,
+  whose shared rule is `opacity: 0` until that module adds `.am-playing` — the film played (currentTime advancing, sound on)
+  at opacity 0 behind the frame's poster. Verified on production before the fix (`opacity: "0"`, `t: 2`, `paused: false`).
+  Fix: the film uses its own class (`.a-clip video { opacity: 1; z-index: 1 }`, no pseudo-element over it); the controls
+  alone sit above. Control state now comes from the element (`playing` / `pause` / `waiting` / `timeupdate`, PLAYING only
+  when not paused, not ended and past the first frame), with a 3-second no-advance watchdog that says PLAY.
+- **Asset (unchanged, verified deployed):** H.264 High@4.0 (avc1) yuv420p 1024 × 436 30 fps + AAC-LC stereo (mp4a), faststart —
+  Safari-safe; served `video/mp4`, byte ranges honoured.
+- **Frames advance:** canvas signatures of the rendered video at two timestamps differ in Chromium and WebKit (iPhone
+  emulation); a paused film keeps one frame; loop returns from 47.6 s to the start; controls read PAUSE only while playing.
+- **Galleries:** the extra inset on the iPhone is the shared carousel track's own gutter (`.atrk { padding: 0 var(--a-gut) }`,
+  `.acar .atrk { width: calc(100% − 2·gut); margin: auto }`) that the stylesheet override did not defeat on that engine. Now the
+  chapter's track geometry is stated (a) `!important` at the end of the sheet and (b) **inline by `refgal.js`** on the track and
+  the controls row (padding · margin 0, width 100 %, scroll-padding 0), and (c) measured after layout: if the first photograph
+  still does not rest on the words' edge, the difference is taken out. Rendered at 390: eyebrow · title · body · first
+  photograph · controls row all at x = 24 for Bangkok, Vientiane, Kunming, Lijiang (320: 24 · 834: 44 · 1440: 220), Chromium
+  and WebKit; next photograph peeking, gap kept, swipe / arrows / counter / rail intact, no overflow.

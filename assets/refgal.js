@@ -34,7 +34,17 @@
     /* the count follows the active slide */
     var count = row.querySelector('.refgal-count');
     var paintCount = function () { var on = trk.querySelector('.aslide.on'); var i = on ? Array.prototype.indexOf.call(trk.children, on) : 0; count.textContent = (i + 1) + ' / ' + imgs.length; };
+    /* THE DESTINATION CHAPTER (Owner, 21 Sep 2026): the first photograph rests on the words' edge — the track carries no gutter
+       of its own on any engine; stated inline so no shared carousel rule can inset it */
+    if (rail.closest && car.closest('.a-dest')) { ['paddingLeft', 'paddingRight', 'marginLeft', 'marginRight'].forEach(function (k) { trk.style[k] = '0px'; }); trk.style.width = '100%'; trk.style.maxWidth = 'none'; trk.style.scrollPaddingLeft = '0px'; trk.style.scrollPadding = '0px'; row.style.paddingLeft = '0px'; row.style.paddingRight = '0px'; row.style.maxWidth = 'none'; row.style.marginLeft = '0px'; row.style.marginRight = '0px'; }
     if (window.SIYL_AMAN && SIYL_AMAN.wire) SIYL_AMAN.wire(car);
+    if (car.closest('.a-dest')) {
+      try { trk.scrollLeft = 0; } catch (e) {}
+      /* measured, not assumed: the first photograph must rest on the chapter's words' edge — if an engine still insets it, the difference is taken out */
+      var settle = function () { var txt = car.closest('.a-dest').querySelector('.a-dest-text'); var s0 = trk.querySelector('.aslide'); if (!txt || !s0 || trk.scrollLeft > 0) return; var d = Math.round(txt.getBoundingClientRect().left - s0.getBoundingClientRect().left); if (d !== 0 && Math.abs(d) <= 64) { trk.style.marginLeft = (parseFloat(trk.style.marginLeft) || 0) + d + 'px'; } };
+      if (window.requestAnimationFrame) requestAnimationFrame(function () { requestAnimationFrame(settle); }); else setTimeout(settle, 50);
+      window.addEventListener('load', settle);
+    }
     var mo = new MutationObserver(paintCount); mo.observe(trk, { attributes: true, subtree: true, attributeFilter: ['class'] });
     paintCount();
   }

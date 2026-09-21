@@ -31,8 +31,11 @@
       var src = v.getAttribute('data-src'); if (src && !v.querySelector('source') && !v.src) v.src = src;
       v.preload = 'auto'; try { v.load(); } catch (e) {}
     }
+    var lastT = -1, lastTick = 0;
     function paint() {
-      var playing = !v.paused && !v.ended;
+      /* PLAYING only when the element is genuinely playing (not paused, not ended, past the first frame or advancing) */
+      var playing = !v.paused && !v.ended && v.readyState >= 2;
+      frame.classList.toggle('is-playing', playing);
       frame.setAttribute('data-clip-state', playing ? 'playing' : 'paused');
       frame.setAttribute('data-clip-audio', v.muted ? 'off' : 'on');
       if (play) { play.setAttribute('aria-label', playing ? 'Pause the film' : 'Play the film'); play.setAttribute('aria-pressed', playing ? 'true' : 'false'); play.querySelector('.t').textContent = playing ? 'Pause' : 'Play'; }
@@ -60,7 +63,10 @@
       if (v.paused && !manual) start(true);
       paint();
     });
-    ['play', 'pause', 'playing', 'volumechange', 'ended'].forEach(function (ev) { v.addEventListener(ev, paint); });
+    ['play', 'pause', 'playing', 'waiting', 'stalled', 'volumechange', 'ended', 'loadeddata', 'canplay'].forEach(function (ev) { v.addEventListener(ev, paint); });
+    /* the picture must move: the time advances while playing; if it does not for 3 s the controls say PLAY and a tap restarts the decoder */
+    v.addEventListener('timeupdate', function () { lastT = v.currentTime; lastTick = Date.now(); paint(); });
+    setInterval(function () { if (!v.paused && !v.ended && lastTick && Date.now() - lastTick > 3000 && v.currentTime === lastT) { frame.setAttribute('data-clip-state', 'stalled'); frame.classList.remove('is-playing'); if (play) { play.setAttribute('aria-label', 'Play the film'); play.querySelector('.t').textContent = 'Play'; } } }, 1500);
 
     if ('IntersectionObserver' in window) {
       var near = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { attach(); near.disconnect(); } }); }, { rootMargin: '400px 0px' });
