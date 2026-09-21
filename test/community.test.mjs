@@ -33,6 +33,7 @@ test('WHO\'S JOINING US · the Worker: an authenticated read only; every guest w
   m.set('reg:INV-G048', { v: reg('INV-G048', 'G048', { name: 'Haruthai', hosts: true }) });                       /* a host */
   m.set('avatar:INV-G012', { v: new Uint8Array([1, 2, 3]).buffer, meta: { type: 'image/jpeg', at: 'x' } });
   m.set('draft:INV-G099', { v: JSON.stringify({ keys: {} }) });                                                    /* a draft alone is no answer */
+  m.set('reg:INV-G010:prev:2026-09-17T10:00:00.000Z', { v: reg('INV-G010', 'G010', { name: 'Peggy', at: '2026-09-17T10:00:00.000Z' }) });   /* an earlier version of a sent trip — never a second guest */
   r = await get(h, h.peggy); assert.equal(r.status, 200); assert.equal(r.d.count, 3);
   assert.deepEqual(r.d.guests, [{ guestId: 'G011', name: 'Linnea', photo: false, joinedAt: '2026-09-20' }, { guestId: 'G012', name: 'Samuel', photo: true, joinedAt: '2026-09-19' }, { guestId: 'G010', name: 'Peggy', photo: false, joinedAt: '2026-09-18' }], 'the contact\'s first name wins, then the submitted one, then the invitation\'s; newest first');
   const text = JSON.stringify(r.d); for (const bad of ['@example.org', '+66', 'birthdate', 'Acker', 'wedstay', 'heritage', 'INV-', 'selections', 'email']) assert.ok(!text.includes(bad), 'never ' + bad);

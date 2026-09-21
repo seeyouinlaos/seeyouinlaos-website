@@ -884,6 +884,7 @@ async function handleCommunity(request, env) {
   const photos = new Set(avatarKeys.map((k) => k.slice('avatar:'.length)));
   const guests = [];
   for (const key of regKeys) {
+    if (key.indexOf(':prev:') >= 0) continue;                       /* the bounded history of earlier versions — the current record alone counts */
     let rec = null; try { rec = JSON.parse(await env.REG_KV.get(key) || 'null'); } catch (e) { rec = null; }
     if (!rec || !rec.registration || !rec.guestId) continue;
     const gr = rec.registration.guestRecord || {};
