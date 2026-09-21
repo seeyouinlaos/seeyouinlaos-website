@@ -96,6 +96,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/avatar.js?v=4f4d9416"></script>
 <script src="assets/stay-media.js?v=ad379eca"></script>
 <script src="assets/experiences.js?v=a951b183"></script>
+<script src="assets/wedding-dinner.js?v=4b41682a"></script>
 <script src="assets/community.js?v=6291949f"></script>
 <script type="module" src="assets/invite.mjs?v=c557d97c"></script>
 <script>
@@ -126,7 +127,7 @@ gated(function(){});
 function roomImg(stayKey,slug){return window.SIYL_STAY_ART?SIYL_STAY_ART.card(stayKey,slug):''}
 function hrefImg(href){var m=/stay=([^&#]+)&room=([^&#]+)/.exec(href||'');return m?roomImg(decodeURIComponent(m[1]),decodeURIComponent(m[2])):''}
 function lineImg(x){var t=B.thumb(x);if(t)return t;if(x.stay&&x.room)return roomImg(x.stay,x.room);var at=P&&P.locate?P.locate(x.id):null;if(at&&x.room)return roomImg(at.key,x.room);return ''}
-var IMG={ceremony:'assets/images/souphattra/heritage-courtyard-front.jpg',dinner:'assets/images/event/053-wedding-dinner-courtyard-from-above.jpg',temple:'assets/images/alms/ritual-dawn-01.jpg',coffee:'assets/images/event/051-coffee-and-cake-patisserie.jpg'};
+var IMG={ceremony:'assets/images/souphattra/heritage-courtyard-front.jpg',dinner:(window.SIYL_WEDDING_DINNER?SIYL_WEDDING_DINNER.lead:'assets/images/event/056-wedding-dinner-01-poolside-from-above.jpg'),temple:'assets/images/alms/ritual-dawn-01.jpg',coffee:'assets/images/event/051-coffee-and-cake-patisserie.jpg'};
 
 /* ---- the links every card offers: the surface where the item is changed, never a control of its own ---- */
 function segOf(x){return J.SEGMENTS.filter(function(s){return s.ids.indexOf(x.id)>=0})[0]||null}

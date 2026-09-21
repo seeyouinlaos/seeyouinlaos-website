@@ -84,16 +84,14 @@
           { single: one(E + '052-ceremony-green-gateway.jpg', 1334, 2000, 'The arched gateway to the green door'), drive: '19ViN_ey9MDoGI9tiDUG4bL3nUgqZjGbc' },
           { single: one(E + '052-vow-ceremony-green-door.jpg', 1334, 2000, 'The carved medallion on the green door'), drive: '17a4zLdwEnyLa8MEbItyB_l1-9rptNyiK' }
         ] },
+      /* THE WEDDING DINNER on the map is an INDEX ENTRY (Owner, 21 Sep 2026 · the consolidation): the place, the time, the seating
+         of the one long table, and the way to the one detail (#dinner) — no photographs here; the dinner's photographs live in the
+         one record, assets/wedding-dinner.js, and are shown once, in the detail's gallery */
       { id: 'dinner', n: '05', label: 'Wedding Dinner · Poolside', title: 'Wedding Dinner · Poolside', when: 'Sunday, 28 February 2027 · 19:30',
         marks: [{ x: 39.5, y: 37, w: 20.5, h: 32, anchor: { x: 49.7, y: 43.5 }, tall: { x: 48.5, y: 57 } }],   /* the centre pool / poolside area */
-        story: 'The long table beside the water: run A poolside, run B opposite the pool. A Chinese sharing menu, and the night to follow.',
-        href: 'voyage.html#dinner', cta: 'The Wedding Dinner',
-        photos: [
-          { single: one(E + '053-wedding-dinner-courtyard-from-above.jpg', 1100, 1467, 'The pool terrace from above: the water, the loungers, the hedges'), drive: '13-Z8XT1YrDeUpTTsERIOcpSTSVtzpoKg' },
-          { pic: pic('pool-terrace-oblique', [1000, 1600], 1600, 900, 'The pool terrace from the upper floor: umbrellas, loungers, the fountain and the balconies'), drive: '13o95npqGfPMooOpwRqd2kcpB_l83nYJO' },
-          { single: one(E + '053-wedding-dinner-courtyard-wide.jpg', 2000, 1334, 'The pool with the heritage houses on every side'), drive: '18OlWqYGHQoaC4LDhcYvVg15WfMW7f9W0' },
-          { single: one(E + '053-wedding-dinner-sharing-menu.jpg', 1920, 1920, 'Bamboo steamers of dim sum — the Chinese sharing menu'), drive: '1fkK2P-Hi4Lhw5CygcQS6rlxA3XkF2K5n' }
-        ] },
+        story: 'The long table beside the water: run A poolside, run B opposite the pool. The dinner itself — the evening, the menu, the photographs — is above, under 04.',
+        href: '#dinner', cta: 'The Wedding Dinner', index: true,
+        photos: [] },
       { id: 'pool', n: '06', label: 'Swimming pool', title: 'The swimming pool', when: 'Every day of the stay', marks: null,
         story: 'The pool at the centre of the courtyard, hedged on every side, loungers along the deck — and the dinner beside it on the wedding night.',
         photos: [

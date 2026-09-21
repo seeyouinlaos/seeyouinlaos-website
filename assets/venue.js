@@ -97,10 +97,11 @@
 
   function detailHtml(z, i) {
     var photo = z.photos[i || 0];
-    return '<div class="venue-detail-in" data-motion="reveal">' +
+    return '<div class="venue-detail-in' + (z.index ? ' venue-index' : '') + '" data-motion="reveal">' +
       '<p class="a-eyebrow venue-when">' + esc(z.when) + '</p>' +
       '<h3 id="venue-detail-h" class="venue-title">' + esc(z.title) + '</h3>' +
-      '<div class="venue-photo photo-reveal" data-photo="' + (i || 0) + '">' + pictureHtml(photo, '(min-width: 900px) 520px, 100vw', 'venue-photo-img is-in') + '</div>' +
+      /* an index entry (the wedding dinner) carries no photograph of its own: the place is named and the way to its one detail is given */
+      (photo ? '<div class="venue-photo photo-reveal" data-photo="' + (i || 0) + '">' + pictureHtml(photo, '(min-width: 900px) 520px, 100vw', 'venue-photo-img is-in') + '</div>' : '') +
       (z.photos.length > 1 ? '<div class="venue-thumbs media-gallery" role="group" aria-label="Photographs of ' + esc(z.title) + '">' + z.photos.map(function (p, k) {
         var q = { src: thumbOf(p), alt: p.pic ? p.pic.alt : p.single.alt };
         return '<button type="button" class="venue-thumb" data-photo="' + k + '" aria-pressed="' + (k === (i || 0) ? 'true' : 'false') + '" aria-label="' + esc(q.alt) + '"><img src="' + q.src + '" alt="" loading="lazy" decoding="async" width="96" height="72"></button>';
@@ -171,6 +172,7 @@
       try { doc.dispatchEvent(new root.CustomEvent('siyl:venue', { detail: { zone: id } })); } catch (e) {}
     }
     function showPhoto(z, k, scope) {
+      if (!z.photos || !z.photos[k]) return;
       if (k === photoIndex) return; photoIndex = k;
       var box = scope.querySelector('.venue-photo'), oldImg = box.querySelector('picture, img');
       var tmp = doc.createElement('div'); tmp.innerHTML = pictureHtml(z.photos[k], '(min-width: 900px) 520px, 100vw', 'venue-photo-img'); var fresh = tmp.firstChild;

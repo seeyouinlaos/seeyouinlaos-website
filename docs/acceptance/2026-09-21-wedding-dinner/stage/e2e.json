@@ -1,0 +1,67 @@
+[
+ {
+  "id": "one-detail-320",
+  "ok": true,
+  "d": "{\"anchors\":1,\"titles\":1,\"eyebrow\":\"SUNDAY, 28 FEBRUARY 2027 · 19:30 · POOLSIDE\",\"dress\":true,\"slides\":13,\"count\":\"1 / 13\",\"arrows\":2,\"rail\":true,\"playPause\":0,\"firstLeft\":24,\"contentLeft\":24,\"ov\":0,\"has\":[true,true,true]}"
+ },
+ {
+  "id": "controls-320",
+  "ok": true,
+  "d": "{\"afterNext\":\"2 / 13\",\"end\":{\"count\":\"13 / 13\",\"lastOn\":true,\"lastVisible\":true,\"visible\":true,\"src\":\"053-wedding-dinner-sharing-menu.jpg\",\"lastSrc\":\"053-wedding-dinner-sharing-menu.jpg\",\"ov\":0},\"swipe\":{\"count\":\"12 / 13\",\"snap\":\"x mandatory\",\"overflow\":\"auto\"}}"
+ },
+ {
+  "id": "venue-index-entry-320",
+  "ok": true,
+  "d": "{\"vz\":{\"photo\":false,\"text\":\"SUNDAY, 28 FEBRUARY 2027 · 19:30 Wedding Dinner · Poolside The long table beside the water: run A poolside, run B opposite the pool. The dinner itself — the evening, the menu, the photographs — is abo\",\"cta\":\"#dinner\",\"index\":true},\"after\":{\"hash\":\"#dinner\",\"top\":0}}"
+ },
+ {
+  "id": "one-detail-390",
+  "ok": true,
+  "d": "{\"anchors\":1,\"titles\":1,\"eyebrow\":\"SUNDAY, 28 FEBRUARY 2027 · 19:30 · POOLSIDE\",\"dress\":true,\"slides\":13,\"count\":\"1 / 13\",\"arrows\":2,\"rail\":true,\"playPause\":0,\"firstLeft\":24,\"contentLeft\":24,\"ov\":0,\"has\":[true,true,true]}"
+ },
+ {
+  "id": "controls-390",
+  "ok": true,
+  "d": "{\"afterNext\":\"2 / 13\",\"end\":{\"count\":\"13 / 13\",\"lastOn\":true,\"lastVisible\":true,\"visible\":true,\"src\":\"053-wedding-dinner-sharing-menu.jpg\",\"lastSrc\":\"053-wedding-dinner-sharing-menu.jpg\",\"ov\":0},\"swipe\":{\"count\":\"12 / 13\",\"snap\":\"x mandatory\",\"overflow\":\"auto\"}}"
+ },
+ {
+  "id": "venue-index-entry-390",
+  "ok": true,
+  "d": "{\"vz\":{\"photo\":false,\"text\":\"SUNDAY, 28 FEBRUARY 2027 · 19:30 Wedding Dinner · Poolside The long table beside the water: run A poolside, run B opposite the pool. The dinner itself — the evening, the menu, the photographs — is abo\",\"cta\":\"#dinner\",\"index\":true},\"after\":{\"hash\":\"#dinner\",\"top\":0}}"
+ },
+ {
+  "id": "one-detail-834",
+  "ok": true,
+  "d": "{\"anchors\":1,\"titles\":1,\"eyebrow\":\"SUNDAY, 28 FEBRUARY 2027 · 19:30 · POOLSIDE\",\"dress\":true,\"slides\":13,\"count\":\"1 / 13\",\"arrows\":2,\"rail\":true,\"playPause\":0,\"firstLeft\":44,\"contentLeft\":44,\"ov\":0,\"has\":[true,true,true]}"
+ },
+ {
+  "id": "controls-834",
+  "ok": true,
+  "d": "{\"afterNext\":\"2 / 13\",\"end\":{\"count\":\"13 / 13\",\"lastOn\":true,\"lastVisible\":true,\"visible\":true,\"src\":\"053-wedding-dinner-sharing-menu.jpg\",\"lastSrc\":\"053-wedding-dinner-sharing-menu.jpg\",\"ov\":0},\"swipe\":null}"
+ },
+ {
+  "id": "venue-index-entry-834",
+  "ok": true,
+  "d": "{\"vz\":{\"photo\":false,\"text\":\"SUNDAY, 28 FEBRUARY 2027 · 19:30 Wedding Dinner · Poolside The long table beside the water: run A poolside, run B opposite the pool. The dinner itself — the evening, the menu, the photographs — is abo\",\"cta\":\"#dinner\",\"index\":true},\"after\":{\"hash\":\"#dinner\",\"top\":0}}"
+ },
+ {
+  "id": "one-detail-1440",
+  "ok": true,
+  "d": "{\"anchors\":1,\"titles\":1,\"eyebrow\":\"SUNDAY, 28 FEBRUARY 2027 · 19:30 · POOLSIDE\",\"dress\":true,\"slides\":13,\"count\":\"1 / 13\",\"arrows\":2,\"rail\":true,\"playPause\":0,\"firstLeft\":220,\"contentLeft\":194,\"ov\":0,\"has\":[true,true,true]}"
+ },
+ {
+  "id": "controls-1440",
+  "ok": true,
+  "d": "{\"afterNext\":\"2 / 13\",\"end\":{\"count\":\"11 / 13\",\"lastOn\":false,\"lastVisible\":true,\"visible\":true,\"src\":\"056-wedding-dinner-10-lilies-at-night.jpg\",\"lastSrc\":\"053-wedding-dinner-sharing-menu.jpg\",\"ov\":0},\"swipe\":null}"
+ },
+ {
+  "id": "venue-index-entry-1440",
+  "ok": true,
+  "d": "{\"vz\":{\"photo\":false,\"text\":\"SUNDAY, 28 FEBRUARY 2027 · 19:30 Wedding Dinner · Poolside The long table beside the water: run A poolside, run B opposite the pool. The dinner itself — the evening, the menu, the photographs — is abo\",\"cta\":\"#dinner\",\"index\":true},\"after\":{\"hash\":\"#dinner\",\"top\":-14}}"
+ },
+ {
+  "id": "console-errors",
+  "ok": true,
+  "d": "no script or console error"
+ }
+]

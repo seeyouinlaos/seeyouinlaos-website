@@ -96,6 +96,7 @@
 .venue-thumb[aria-pressed="true"]::after { border-color: var(--a-ink); }
 .venue-thumb:hover { opacity: .9; }
 .venue-thumb:focus-visible { outline: 2px solid var(--a-ink); outline-offset: 2px; }
+.venue-index .venue-story { margin-top: 18px; }   /* an index entry without a photograph: the words stand a little lower under the title */
 .venue-story { font-size: 13.5px; line-height: 1.9; color: #4A4A4A; margin: 0 0 16px; max-width: 32em; }
 
 /* ---- the phone: the section flows in document order — heading → aerial 32 px, aerial → legend 24 px, section → next section 56 px;

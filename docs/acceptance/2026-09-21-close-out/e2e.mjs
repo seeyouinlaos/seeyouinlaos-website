@@ -199,7 +199,8 @@ if (!LIVE) {
     await about(p, 'Pandan');
     const before = await p.evaluate(() => { const a = JSON.parse(localStorage.getItem('siyl.auth')); return { guestId: a.guestId, invitationId: a.invitationId, partyId: a.partyId, contactId: a.contactId || null, couple: a.couple || null, name: SIYL_GUEST.nameOf() }; });
     await p.goto(O + '/profile.html', { waitUntil: 'load' }); await p.waitForTimeout(1500);
-    await p.fill('input[data-c="firstName"]', 'Adelheid'); await p.dispatchEvent('input[data-c="firstName"]', 'change'); await p.fill('input[data-c="lastName"]', 'Acker'); await p.dispatchEvent('input[data-c="lastName"]', 'change'); await p.waitForTimeout(2500);
+    await p.fill('input[data-c="firstName"]', 'Adelheid'); await p.dispatchEvent('input[data-c="firstName"]', 'change'); await p.waitForTimeout(1200);   /* the page re-renders on a change: the next field is filled on the fresh input */
+    await p.fill('input[data-c="lastName"]', 'Acker'); await p.dispatchEvent('input[data-c="lastName"]', 'change'); await p.waitForTimeout(2500);
     const prof = await p.evaluate(() => ({ full: SIYL_GUEST.value(SIYL_GUEST.me().guestId, 'fullName'), name: SIYL_GUEST.nameOf(), text: document.body.innerText.replace(/\s+/g, ' ') }));
     const after = await p.evaluate(() => { const a = JSON.parse(localStorage.getItem('siyl.auth')); return { guestId: a.guestId, invitationId: a.invitationId, partyId: a.partyId, contactId: a.contactId || null, couple: a.couple || null }; });
     await trip(p); const tripLabel = await p.evaluate(() => (document.querySelector('[data-party-label]') || {}).innerText || '');

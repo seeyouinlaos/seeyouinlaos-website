@@ -26,7 +26,7 @@ test('DATA · seven places in the Owner\'s order; the Owner\'s final mapping of 
   assert.deepEqual(marked, ['lobby×1', 'rooms×3', 'coffee×1', 'ceremony×1', 'dinner×1'], 'the Owner\'s seven labels: top left → Lobby, top right / lower right / lower centre → Rooms, left centre → Wedding Ceremony, centre pool → Dinner, lower left → Coffee & Cake · Breakfast');
   assert.equal(DATA.zones.reduce((n, z) => n + (z.marks ? z.marks.length : 0), 0), 7, 'seven labels on the photograph');
   for (const z of DATA.zones) {
-    assert.ok(z.n && z.title && z.when && z.story && z.photos.length >= 2, z.id + ' is complete');
+    assert.ok(z.n && z.title && z.when && z.story && (z.index ? z.photos.length === 0 && z.href === '#dinner' : z.photos.length >= 2), z.id + ' is complete' + (z.index ? ' (an index entry: no photograph of its own, the way to the one detail)' : ''));
     for (const m of (z.marks || [])) {
       assert.ok(m.x >= 0 && m.y >= 0 && m.x + m.w <= 100 && m.y + m.h <= 100, z.id + ' inside the frame');
       assert.ok(m.anchor.x >= m.x && m.anchor.x <= m.x + m.w && m.anchor.y >= m.y && m.anchor.y <= m.y + m.h, z.id + ' label on its own area');
@@ -119,6 +119,7 @@ test('MARKUP · every label and legend item is a button with a name and a presse
   for (const z of DATA.zones) {
     const d = H.detail(z, 0);
     assert.match(d, /<h3 id="venue-detail-h" class="venue-title">/); assert.match(d, /<p class="venue-story">/);
+    if (z.index) { assert.doesNotMatch(d, /venue-photo|venue-thumb/, z.id + ': an index entry carries no photograph'); assert.match(d, /class="venue-detail-in venue-index"/); assert.match(d, /href="#dinner">The Wedding Dinner<\/a>/); continue; }
     assert.match(d, /loading="lazy" decoding="async"/); assert.match(d, /width="\d+" height="\d+"/, 'intrinsic size: no layout shift');
     if (z.photos.length > 1) { assert.match(d, /role="group" aria-label="Photographs of /); assert.match(d, /<button type="button" class="venue-thumb" data-photo="0" aria-pressed="true" aria-label="/); }
   }
@@ -142,7 +143,7 @@ test('MOTION · one system, three timings, physical easing; reduced motion keeps
   assert.match(v, /\.m-reduced \.venue-label \{ opacity: 1; \}/); assert.match(v, /\.m-reduced \.venue-outline \{ stroke-dashoffset: 0; \}/);
   assert.doesNotMatch(v + c, /bounce|spin|rotate\(|confetti|perspective\(/i, 'no bouncing, spinning, 3D or confetti');
   const vy = src('voyage.html');
-  assert.equal((vy.match(/data-motion="reveal"/g) || []).length, 9, 'the story sections, the dinner gallery and the duos of the wedding page reveal (21 Sep 2026: the two dinner pairs became the one gallery)');
+  assert.equal((vy.match(/data-motion="reveal"/g) || []).length, 8, 'the story sections and the duos of the wedding page reveal (21 Sep 2026: the one dinner gallery stands without a reveal — never a hidden, paused-looking state)');
   for (const f of ['index.html', 'voyage.html', 'accommodation.html']) { const s = src(f); assert.match(s, /<section class="a-sec venue" id="venue" aria-labelledby="venue-h" data-venue><\/section>/, f); assert.match(s, /assets\/venue-data\.js(?:\?v=[0-9a-f]{8})?"><\/script>\s*<script src="assets\/venue\.js(?:\?v=[0-9a-f]{8})?"/, f); assert.match(s, /assets\/motion\.css/); }
   assert.doesNotMatch(vy, /heritage-courtyard-wide\.jpg\)" role="img" aria-label="Poolside at Souphattra Heritage Vientiane, the heritage houses/, 'the wide band gave way to the stage');
   /* the homepage (Owner, 16 Sep 2026 — the mobile venue fix): the wordless 300 px band of the aerial gave way to the stage with the seven labels, the legend and the detail; on a phone the section flows in document order */
