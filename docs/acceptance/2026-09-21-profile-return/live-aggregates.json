@@ -1,0 +1,50 @@
+{
+ "before": {
+  "at": "2026-09-21T11:28:36.618Z",
+  "room occupancies": 32,
+  "by stage": {
+   "bkk-stay": 4,
+   "guesthouse": 1,
+   "kempinski": 3,
+   "kmg": 6,
+   "ljg": 5,
+   "prewed": 6,
+   "wedstay": 7
+  },
+  "waitlisted": 0,
+  "seat holds": 12,
+  "drafts": 14,
+  "draft actors": 104,
+  "kv keys": 46,
+  "kv prefixes": {
+   "avatar": 5,
+   "contact": 14,
+   "draft": 14,
+   "reg": 13
+  }
+ },
+ "after": {
+  "at": "2026-09-21T12:54:46.499Z",
+  "room occupancies": 32,
+  "by stage": {
+   "bkk-stay": 4,
+   "guesthouse": 1,
+   "kempinski": 3,
+   "kmg": 6,
+   "ljg": 5,
+   "prewed": 6,
+   "wedstay": 7
+  },
+  "waitlisted": 0,
+  "seat holds": 12,
+  "drafts": 14,
+  "draft actors": 104,
+  "kv keys": 46,
+  "kv prefixes": {
+   "avatar": 5,
+   "contact": 14,
+   "draft": 14,
+   "reg": 13
+  }
+ }
+}

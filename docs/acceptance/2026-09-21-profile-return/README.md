@@ -55,3 +55,17 @@ Inside the running sentence "From your invitation · CORRECT YOUR NAME · Your p
 baseline and its bottom border was drawn through the next wrapped line of prose. Fix (`assets/prep.css`): a link inside
 `.t-b1` / `.t-b2` prose is `display: inline; min-height: 0; padding: 0 0 1px; line-height: inherit` — an inline word with
 its own underline, one line tall (two where the words wrap at 320). Verified in WebKit at 320 / 390 and at 834 / 1440.
+
+## Live (21 Sep 2026)
+
+Commits `fc97bdb` (the page) and `545930c` (the current record alone counts — `reg:<inv>:prev:<time>` is the bounded
+history of earlier versions, 8 of the 13 live `reg:` keys, never a second guest) → Workers Build → version
+`96ce4e0f-3741-4bca-a5f0-50a652128a3e` (12:43:56Z) on the one Worker. Parity 262/262, live-ro 25/25, infra freeze intact.
+Production community today (a read-only Guest Relations classification of the five current records, counts only):
+**3 guests joining, all three with a portrait; 2 hosts (not counted); 0 declined** — so the live page reads "3 guests have
+joined so far". `/api/community` unauthenticated 401, POST 405; My Profile signed out hands over to the invitation; the
+in-prose link rule is live in WebKit (`display: inline`, no min-height). Production aggregates read-only before (11:28Z)
+and after (12:54Z): 32 room occupancies (the same by stage) · 0 waitlisted · 12 seat holds · 14 drafts / 104 actors ·
+46 KV keys — **unchanged**; no reset, no synthetic registration, photo or activity on the live Worker.
+
+Codex: PENDING — EXTERNAL QUOTA LIMIT (usage limit until 24 Sep 2026 22:18 CEST; the probe refused).
