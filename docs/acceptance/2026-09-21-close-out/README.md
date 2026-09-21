@@ -87,3 +87,17 @@ and record are untouched.
 
 The Lijiang film (`[data-clip]`: Play · Pause · Sound, playsinline, loop, the frames visible) and the destination galleries
 at 390 (content edge 24 = every gallery 24, arrows, counters) verified unchanged in the close-out E2E.
+
+## Live (21 Sep 2026)
+
+Commit `f2969b9` pushed to `main` → Workers Build → version `64100a96-66b7-426a-b6b3-ea22ca90d08b` (09:38:47Z) on the one Worker
+`seeyouinlaos-website` (https://seeyouinlaos-website.suthep-hrg.workers.dev). Parity 262/262 (`live/parity.json`), live-ro
+25/25 (`live/live-ro.json`), infra freeze intact (GitHub Pages 404). Live, read-only: the hero markup and module served, the
+four frames 200 image/jpeg; in real WebKit (iPhone 13) slide 2 after ~5 s in the same 342 × 342 frame, at 1440 likewise
+(`live/live-iphone-hero-*.jpg`, `live/live-1440-hero-2.jpg`); `SIYL_STAY_ART` served, the Luye Baisha record leads with
+its room, the mountain frame 404, THE HOUSES and the Journey gallery show the room (`live/live-journeys-ljg.jpg`);
+`/api/document` unauthenticated 401, GET 405. Production aggregates read-only before (08:36Z) and after (09:41Z),
+`live-aggregates.json`: 32 room occupancies (the same by stage) · 0 waitlisted · 12 seat holds · 13 drafts / 104 actors ·
+44 KV keys — **unchanged**; no reset, no synthetic activity on the live Worker.
+
+Codex: PENDING — EXTERNAL QUOTA LIMIT (usage limit until 24 Sep 2026 22:19 CEST; the probe refused twice).
