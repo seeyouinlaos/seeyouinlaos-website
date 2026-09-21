@@ -61,6 +61,10 @@ if (kv !== M.kv.map((k) => k.binding + ':' + k.id).sort().join(',')) bad('KV bin
 const r2 = (cfg.r2_buckets || []).map((b) => b.binding + ':' + b.bucket_name).sort().join(',');
 if (r2 !== (M.r2 || []).map((b) => b.binding + ':' + b.bucket).sort().join(',')) bad('R2 bindings changed: ' + (r2 || 'none') + ' (frozen: ' + (M.r2 || []).map((b) => b.binding + ':' + b.bucket).join(',') + ')');
 if ((M.r2 || []).some((b) => b.public !== false)) bad('an R2 bucket is documented as public (frozen: private only)');
+const crons = ((cfg.triggers || {}).crons || []).slice().sort().join(',');
+if (crons !== (M.crons || []).slice().sort().join(',')) bad('scheduled triggers changed: ' + (crons || 'none') + ' (frozen: ' + ((M.crons || []).join(',') || 'none') + ')');
+const ret = ((M.r2 || [])[0] || {}).retention || {};
+if (ret.purgeFrom && !/const DOC_RETENTION = Object\.freeze\(\{ journeyEnd: '2027-03-08', days: 30, purgeFrom: '2027-04-07', prefix: 'doc\/' \}\);/.test(fs.readFileSync(path.join(ROOT, 'src/worker.js'), 'utf8'))) bad('the Worker\'s DOC_RETENTION does not match the documented policy (' + JSON.stringify(ret) + ')');
 const dos = ((cfg.durable_objects || {}).bindings || []).map((d) => d.name + ':' + d.class_name).sort().join(',');
 if (dos !== M.durableObjects.map((d) => d.name + ':' + d.class).sort().join(',')) bad('Durable Object bindings changed: ' + (dos || 'none'));
 const mig = (cfg.migrations || []).map((m) => m.tag + ':' + [].concat(m.new_sqlite_classes || [], m.new_classes || []).join('+')).join(',');

@@ -45,6 +45,10 @@ header.hd::after {
   bottom: 0; height: 1px; background: var(--a-line); opacity: .8;
 }
 header.hd { border-bottom: 0 !important; }
+/* THE ANCHOR UNDER THE STICKY HEADER (Owner, 21 Sep 2026 · the iPad): a same-page link — the venue's way to #dinner, the
+   anchor rail — lands its section below the header band, never beneath it: the header's ~56 px, the 14 px a revealing
+   section still travels at the moment of the jump, and a quiet gap. Native anchor navigation, no script scroll. */
+html { scroll-padding-top: calc(92px + env(safe-area-inset-top, 0px)); }   /* the step pages set their own (prep.css, loaded after) */
 
 /* ------------------------------------------------------------ full-screen menu
    Single column · large breathing room · hairline rows · chevron where a

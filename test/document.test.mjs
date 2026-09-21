@@ -67,8 +67,9 @@ test('NO GUEST READ ROUTE · GET / HEAD on /api/document 405; the stored key is 
       assert.equal((await h.w.fetch(new Request(ORIGIN + p, { method: 'POST', headers: { 'x-gr-token': 'gr-secret' } }), h.env)).status, 405, p + ': read only');
     }
     const worker = src('src/worker.js').replace(/\/\*[\s\S]*?\*\//g, '');
-    assert.doesNotMatch(worker.slice(0, worker.indexOf('async function handleGrDocuments')), /DOCS\.(get|list|head)\(/, 'no guest-facing code reads the store');
-    assert.doesNotMatch(worker, /DOCS\.delete\(/, 'the Worker never deletes a document');
+    const guestFacing = worker.slice(0, worker.indexOf('async function handleGrDocuments')).replace(/const DOC_RETENTION[\s\S]*?async function handleGrRetention[\s\S]*?\n\}\n/, '');   /* the retention purge and its Guest Relations report are not guest-facing */
+    assert.doesNotMatch(guestFacing, /DOCS\.(get|list|head)\(/, 'no guest-facing code reads the store');
+    assert.doesNotMatch(guestFacing, /DOCS\.delete\(/, 'no request of a guest, and no Guest Relations request, deletes a document — only the retention clock (test/retention.test.mjs)');
   } finally { h.done(); }
 });
 
@@ -100,7 +101,7 @@ test('WITHOUT THE STORE (a Worker without the binding): 503 · enabled:false, no
     const r = await send(h, h.peggy, {}); assert.equal(r.status, 503); assert.equal(r.d.enabled, false); assert.equal(r.d.error, 'document storage is not enabled yet');
     const wj = readFileSync(join(ROOT, 'wrangler.jsonc'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
     assert.match(wj, /"r2_buckets": \[\s*\{ "binding": "DOCS", "bucket_name": "siyl-docs" \}\s*\]/, 'ONE private bucket, bound as DOCS, on the one Worker'); assert.equal((wj.match(/"binding": "DOCS"/g) || []).length, 1);
-    const M = JSON.parse(readFileSync(join(ROOT, 'infra/PRODUCTION.json'), 'utf8')); assert.deepEqual(M.r2, [{ binding: 'DOCS', bucket: 'siyl-docs', public: false, retention: 'OWNER CONFIRMATION REQUIRED — no automatic deletion' }], 'the frozen manifest documents it: private, retention the Owner\'s decision');
+    const M = JSON.parse(readFileSync(join(ROOT, 'infra/PRODUCTION.json'), 'utf8')); assert.deepEqual({ ...M.r2[0], retention: undefined }, { binding: 'DOCS', bucket: 'siyl-docs', public: false, retention: undefined }, 'the frozen manifest documents it: private'); assert.deepEqual([M.r2[0].retention.journeyEnd, M.r2[0].retention.days, M.r2[0].retention.purgeFrom], ['2027-03-08', 30, '2027-04-07'], 'the Owner\'s retention decision (21 Sep 2026): thirty days after the journey ends — 7 April 2027');
     assert.match(src('src/infra-guard.cjs'), /R2 bindings changed/, 'the guard pins the binding');
     assert.match(src('about-you.html'), /We cannot accept documents on the website yet\. Nothing was sent and nothing was stored\. Your trip can still be sent — Guest Relations will ask you for this directly\./);
     assert.match(src('assets/docs.js'), /var ACCEPT = 'image\/jpeg,image\/png,image\/heic,image\/heif,image\/webp,application\/pdf';/); assert.match(src('assets/docs.js'), /MAX: 12 \* 1024 \* 1024/);

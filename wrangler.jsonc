@@ -32,6 +32,11 @@
   "r2_buckets": [
     { "binding": "DOCS", "bucket_name": "siyl-docs" }
   ],
+  /* THE DOCUMENT RETENTION CLOCK (Owner, 21 Sep 2026 · OWNER-INFRA-CHANGE): the one
+     scheduled trigger of the one Worker, daily at 03:00 UTC. It does nothing before
+     7 April 2027; from that date it purges the doc/ objects of DOCS and nothing else
+     (src/worker.js · DOC_RETENTION · purgeDocuments). */
+  "triggers": { "crons": ["0 3 * * *"] },
 
   // THE SHARED INVENTORY LEDGER. One Durable Object instance holds the stock of
   // every room category in every window. Cloudflare routes every request for

@@ -58,3 +58,14 @@ test('EVERY OTHER SURFACE is a teaser or a link — never a second presentation;
   for (const m of WD.media) { assert.ok(!stay.has(m.src), m.src + ' is not a hotel frame'); assert.ok(W.SIYL_STAY_ART.approved('souphattra').indexOf(m.src) < 0, m.src + ' is never a Souphattra accommodation frame'); }
   for (const p of W.SIYL_STAY_ART.approved('souphattra')) assert.doesNotMatch(p, /wedding-dinner|\/venue\//, 'the hotel never draws the dinner\'s photographs');
 });
+
+test('THE WAY FROM THE VENUE (Owner\'s iPad, 21 Sep 2026): the index entry\'s call is a native same-page link to the one #dinner — no preventDefault, no second route; the page carries a scroll padding for the sticky header so the anchor lands below it, never beneath; the target is revealed at once on the tap; the guard only ever brings the same target into view; one #dinner id on the page', () => {
+  const v = src('assets/venue.js'), css = src('assets/aman.css'), html = src('voyage.html');
+  assert.match(v, /<a class="a-link"' \+ \(z\.swap \? ' data-cta-swap' : ''\) \+ ' href="' \+ esc\(z\.href\) \+ '">/, 'a real anchor with the real href');
+  const guard = v.slice(v.indexOf("frag.querySelectorAll('a.a-link[href^=\"#\"]')"), v.indexOf('if (announce && changed)'));
+  assert.ok(guard.length > 100, 'the guard stands beside the link'); assert.doesNotMatch(guard, /preventDefault|location\.assign|location\.replace|reload|open\(/, 'native navigation is never replaced');
+  assert.match(guard, /t\.classList\.add\('is-in'\)/, 'the target is revealed at once'); assert.match(guard, /scrollIntoView\(\{ block: 'start' \}\)/, 'the fallback brings the same target into view'); assert.match(guard, /root\.location\.hash = '#' \+ id/, 'the fallback sets the same fragment');
+  assert.match(css, /html \{ scroll-padding-top: calc\(92px \+ env\(safe-area-inset-top, 0px\)\); \}/, 'the header band (~56 px) + the 14 px reveal travel + a quiet gap');
+  assert.equal((html.match(/id="dinner"/g) || []).length, 1, 'one #dinner'); assert.equal((html.match(/data-wedding-dinner(?![-\w])/g) || []).length, 1, 'one full detail');
+  assert.doesNotMatch(src('assets/venue.css'), /\.venue-detail-in \{[^}]*pointer-events: none/, 'the living detail never blocks the tap'); assert.match(src('assets/venue.css'), /\.venue-detail-in\.is-leaving \{[^}]*pointer-events: none/, 'only the leaving one is out of the way');
+});

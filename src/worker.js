@@ -113,8 +113,9 @@ export default {
      * receipt that did not happen. There is deliberately NO public read route:
      * Guest Relations reads through /api/gr/documents · /api/gr/document (the
      * GR token). The bucket is bound (siyl-docs, private, 21 Sep 2026); the
-     * retention period still needs the Owner's confirmation — until then
-     * nothing is ever deleted. */
+     * retention is the Owner's decision of 21 Sep 2026: kept until 7 April
+     * 2027 (thirty days after the journey ends on 8 March), then purged by
+     * the Worker's one scheduled trigger — see DOC_RETENTION. */
     if (url.pathname === '/api/document') {
       if (request.method === 'OPTIONS') {
         return new Response(null, { status: 204, headers: corsHeaders(request) });
@@ -172,11 +173,12 @@ export default {
     /* GUEST RELATIONS · THE DOCUMENTS (Owner, 21 Sep 2026): one guest's stored documents — the metadata of one invitation
        (never a listing of everyone), and one object streamed through the Worker by its exact key. The GR token only; the
        same boundary as the record. A guest has no read route at all. Nothing of the body or the token is logged. */
-    if (url.pathname === '/api/gr/documents' || url.pathname === '/api/gr/document') {
+    if (url.pathname === '/api/gr/documents' || url.pathname === '/api/gr/document' || url.pathname === '/api/gr/documents/retention') {
       if (!env.GR_TOKEN) return json({ ok: false, error: 'not enabled' }, 503);
       if (!grAuthorised(request, env)) return json({ ok: false, error: 'unauthorised' }, 401);
       if (request.method !== 'GET') return json({ ok: false, error: 'method not allowed' }, 405);
       if (!env.DOCS) return json({ ok: false, error: 'document storage is not enabled yet', enabled: false }, 503);
+      if (url.pathname === '/api/gr/documents/retention') return handleGrRetention(env);   /* the policy and what stands under it — read only, never a deletion */
       return url.pathname === '/api/gr/documents' ? handleGrDocuments(url, env) : handleGrDocument(url, env);
     }
     /* GUEST RELATIONS: every guest's canonical current data (draft, submission, rooms, seats, mail) — the GR token only */
@@ -262,7 +264,51 @@ export default {
 
     return env.ASSETS.fetch(request);
   },
+  /* THE DOCUMENT RETENTION CLOCK (Owner, 21 Sep 2026): the one scheduled trigger of the one Worker. Before the approved
+     date it does nothing at all; from that date it purges the private passport / travel documents — the doc/ objects of
+     the DOCS bucket and nothing else — and writes one audit record of counts. Idempotent: a second run finds nothing. */
+  async scheduled(event, env, ctx) {
+    const at = new Date(event && event.scheduledTime ? event.scheduledTime : Date.now());
+    const run = purgeDocuments(env, at, { dryRun: false, actor: 'cron' });
+    if (ctx && ctx.waitUntil) ctx.waitUntil(run);
+    return run;
+  },
 };
+
+/* ---- THE DOCUMENT RETENTION POLICY (Owner, 21 Sep 2026 · FINAL) ------------------------------------------------------
+ * The journey ends on 8 March 2027. Passport and travel documents are kept for thirty days after it and deleted from
+ * 7 April 2027. The policy reaches ONLY the private document objects (the doc/ prefix of the DOCS bucket) and the audit
+ * of their purge; it never touches a profile photo, a contact, an invitation, an identity, a booking, a room, a seat, a
+ * draft, a registration record, the community, or any other object. Deterministic (one date, UTC), auditable (one
+ * record per run that deleted something, counts only), idempotent (a purge of nothing writes nothing). */
+const DOC_RETENTION = Object.freeze({ journeyEnd: '2027-03-08', days: 30, purgeFrom: '2027-04-07', prefix: 'doc/' });
+const docPurgeDue = (at) => new Date(at).toISOString().slice(0, 10) >= DOC_RETENTION.purgeFrom;
+async function purgeDocuments(env, at, opts) {
+  const o = opts || {}, when = new Date(at || Date.now()).toISOString();
+  const out = { ok: true, policy: DOC_RETENTION, at: when, due: docPurgeDue(when), dryRun: o.dryRun !== false, objects: 0, byInvitation: {}, deleted: 0, invitations: 0 };
+  if (!env.DOCS) return { ...out, ok: false, error: 'document storage is not enabled yet' };
+  let cursor;
+  try {
+    do {
+      const l = await env.DOCS.list({ prefix: DOC_RETENTION.prefix, cursor });
+      for (const obj of l.objects || []) {
+        if (!obj.key.startsWith(DOC_RETENTION.prefix)) continue;   /* the prefix, and nothing beside it */
+        out.objects++; const inv = obj.key.split('/')[1] || '?'; out.byInvitation[inv] = (out.byInvitation[inv] || 0) + 1;
+        if (out.due && !out.dryRun) { await env.DOCS.delete(obj.key); out.deleted++; }
+      }
+      cursor = l.truncated ? l.cursor : null;
+    } while (cursor);
+  } catch (e) { return { ...out, ok: false, error: 'document store unavailable' }; }
+  out.invitations = Object.keys(out.byInvitation).length;
+  /* the audit: one record when something was deleted — counts, the date, the actor; no key, no name, no byte */
+  if (out.deleted && env.REG_KV) { try { await env.REG_KV.put('docpurge:' + when, JSON.stringify({ at: when, actor: String(o.actor || 'cron'), purgeFrom: DOC_RETENTION.purgeFrom, deleted: out.deleted, invitations: out.invitations }), { metadata: { at: when, deleted: out.deleted } }); } catch (e) { /* the purge stands; the record is the next run's */ } }
+  return out;
+}
+async function handleGrRetention(env) {
+  const r = await purgeDocuments(env, new Date(), { dryRun: true });
+  let audits = []; try { if (env.REG_KV) { const l = await env.REG_KV.list({ prefix: 'docpurge:' }); audits = l.keys.map((k) => ({ at: k.name.slice('docpurge:'.length), ...(k.metadata || {}) })); } } catch (e) { audits = []; }
+  return json({ ...r, dryRun: true, audits, note: r.due ? 'the purge date has passed: the scheduled run deletes what is listed here' : 'before 7 April 2027 nothing is deleted; the documents stand under the authenticated rules' }, r.ok ? 200 : 503, { 'cache-control': 'private, no-store' });
+}
 
 const MAX_DOC = 12 * 1024 * 1024; // 12 MB — a passport photograph, not a film
 const DOC_TYPES = ['image/jpeg', 'image/png', 'image/heic', 'image/heif', 'image/webp', 'application/pdf'];

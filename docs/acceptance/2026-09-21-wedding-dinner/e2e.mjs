@@ -41,10 +41,45 @@ for (const w of [320, 390, 834, 1440]) {
   /* the venue map's dinner: an index entry without a photograph, its way to #dinner on the same page */
   const vz = await p.evaluate(async () => { const btn = [...document.querySelectorAll('.venue-item')].find((b) => /Wedding Dinner/.test(b.innerText)); if (!btn) return { none: true }; btn.click(); await new Promise((r) => setTimeout(r, 700)); const d = document.querySelector('#venue-detail') || document.querySelector('.venue-detail-in'); const det = d ? d.innerText.replace(/\s+/g, ' ') : ''; return { photo: !!(d && d.querySelector('.venue-photo, .venue-thumb')), text: det.slice(0, 200), cta: d ? (d.querySelector('a.a-link') || {}).getAttribute('href') : null, index: !!(d && d.querySelector('.venue-index')) }; });
   if (!vz.none) { await p.click('#venue-detail a.a-link, .venue-detail-in a.a-link').catch(() => {}); await p.waitForTimeout(900); }
-  const after = await p.evaluate(() => ({ hash: location.hash, top: Math.round(document.querySelector('#dinner').getBoundingClientRect().top) }));
-  note('venue-index-entry-' + w, !vz.none && !vz.photo && vz.index && /Wedding Dinner · Poolside/.test(vz.text) && /run A poolside, run B opposite the pool/.test(vz.text) && vz.cta === '#dinner' && after.hash === '#dinner' && Math.abs(after.top) < 160, JSON.stringify({ vz, after }));
+  const after = await p.evaluate(() => ({ hash: location.hash, top: Math.round(document.querySelector('#dinner').getBoundingClientRect().top), header: Math.round(document.querySelector('header.hd').getBoundingClientRect().bottom) }));
+  note('venue-index-entry-' + w, !vz.none && !vz.photo && vz.index && /Wedding Dinner · Poolside/.test(vz.text) && /run A poolside, run B opposite the pool/.test(vz.text) && vz.cta === '#dinner' && after.hash === '#dinner' && after.top >= after.header && after.top < 200, JSON.stringify({ vz, after }) + ' (the section lands below the sticky header, never beneath it)');
   await p.context().close();
 }
+/* ===== THE WAY FROM THE VENUE TO THE ONE DETAIL — the real user action (Owner's iPad, 21 Sep 2026) =====
+   A load The Wedding · B scroll to the venue's Wedding Dinner index entry · C tap THE WEDDING DINNER · D the URL carries #dinner
+   · E the canonical #dinner is reached and visible below the sticky header · F exactly one #dinner · G exactly one full detail.
+   WebKit with touch at 390 (iPhone) and 834 × 1194 (iPad portrait), Chromium at 1440; then the direct load of voyage.html#dinner;
+   then Back returns to the venue. */
+const tapFlow = async (eng, w, h, label) => {
+  const ctx = await eng.newContext(Object.assign({ viewport: { width: w, height: h } }, eng === wk ? { hasTouch: true, isMobile: w < 500 } : {})); const p = await ctx.newPage(); p.on('pageerror', (e) => errors.set(label + ':' + e.message, 1));
+  await p.goto(O + '/voyage.html', { waitUntil: 'load' }); await p.waitForTimeout(1200);                                              /* A */
+  await p.evaluate(() => document.querySelector('.venue-legend').scrollIntoView({ block: 'center' })); await p.waitForTimeout(600);   /* B */
+  if (eng === wk) await p.tap('.venue-item[data-zone="dinner"]'); else await p.click('.venue-item[data-zone="dinner"]'); await p.waitForTimeout(1000);
+  await p.evaluate(() => document.querySelector('#venue-detail a.a-link').scrollIntoView({ block: 'center' })); await p.waitForTimeout(500);
+  const cta = await p.evaluate(() => { const a = document.querySelector('#venue-detail a.a-link'); const r = a.getBoundingClientRect(); const top = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2); return { href: a.getAttribute('href'), text: a.innerText, w: Math.round(r.width), h: Math.round(r.height), hit: top === a || a.contains(top), pe: getComputedStyle(a).pointerEvents, wrapperOpacity: getComputedStyle(a.parentElement).opacity, leaving: document.querySelectorAll('#venue-detail .is-leaving').length }; });
+  await shot(p, label + '-before-tap');
+  const y0 = await p.evaluate(() => scrollY);
+  if (eng === wk) await p.tap('#venue-detail a.a-link'); else await p.click('#venue-detail a.a-link');                                /* C */
+  await p.waitForTimeout(1500);
+  const after = await p.evaluate(() => { const d = document.querySelector('#dinner'); const r = d.getBoundingClientRect(); const hd = document.querySelector('header.hd').getBoundingClientRect().bottom; const title = d.querySelector('h2'); const tr = title.getBoundingClientRect(); return { hash: location.hash, moved: Math.abs(scrollY - 0) > 0, y: Math.round(scrollY), top: Math.round(r.top), header: Math.round(hd), titleTop: Math.round(tr.top), titleVisible: tr.top >= hd && tr.bottom <= innerHeight, opacity: getComputedStyle(d).opacity, anchors: document.querySelectorAll('#dinner').length, details: document.querySelectorAll('[data-wedding-dinner]').length, galleries: document.querySelectorAll('[data-wedding-dinner-media]').length, slides: document.querySelectorAll('[data-wedding-dinner-media] .aslide').length, titles: [...document.querySelectorAll('h2')].filter((x) => /^Wedding Dinner$/.test(x.innerText.trim())).length, venueIndex: !!document.querySelector('#venue-detail .venue-index') }; });
+  await shot(p, label + '-after-tap');
+  note('tap-' + label, cta.href === '#dinner' && /the wedding dinner/i.test(cta.text) && cta.hit && cta.h >= 40 && cta.pe === 'auto' && cta.leaving === 0 && after.hash === '#dinner' && after.y !== y0 && after.top >= after.header && after.top < 220 && after.titleVisible && after.opacity === '1' && after.anchors === 1 && after.details === 1 && after.galleries === 1 && after.slides === 13 && after.titles === 1 && after.venueIndex, JSON.stringify({ cta, y0, after }));
+  /* Back: the venue again, the fragment gone — native history, no reload trap */
+  await p.goBack({ waitUntil: 'commit' }).catch(() => {}); await p.waitForTimeout(900);
+  const back = await p.evaluate(() => ({ hash: location.hash, venueNear: Math.abs(document.querySelector('#venue-detail').getBoundingClientRect().top) < innerHeight * 1.5 }));
+  note('back-' + label, back.hash === '' && back.venueNear, JSON.stringify(back));
+  /* the direct load of the canonical anchor after a fresh page load */
+  await p.goto(O + '/voyage.html#dinner', { waitUntil: 'load' }); await p.waitForTimeout(1500);
+  const direct = await p.evaluate(() => { const d = document.querySelector('#dinner'); const r = d.getBoundingClientRect(); const hd = document.querySelector('header.hd').getBoundingClientRect().bottom; const tr = d.querySelector('h2').getBoundingClientRect(); return { hash: location.hash, top: Math.round(r.top), header: Math.round(hd), titleVisible: tr.top >= hd && tr.bottom <= innerHeight, opacity: getComputedStyle(d).opacity, anchors: document.querySelectorAll('#dinner').length }; });
+  await shot(p, label + '-direct');
+  note('direct-' + label, direct.hash === '#dinner' && direct.top >= direct.header && direct.top < 220 && direct.titleVisible && direct.opacity === '1' && direct.anchors === 1, JSON.stringify(direct));
+  await ctx.close();
+};
+await tapFlow(wk, 390, 844, 'webkit-390');
+await tapFlow(wk, 834, 1194, 'webkit-834x1194');
+await tapFlow(wk, 1194, 834, 'webkit-1194x834');
+await tapFlow(b, 1440, 900, 'chromium-1440');
+
 note('console-errors', errors.size === 0, [...errors.keys()].slice(0, 3).join(' | ') || 'no script or console error');
 fs.writeFileSync(path.join(OUT, 'e2e.json'), JSON.stringify(R, null, 1));
 await b.close(); await wk.close();

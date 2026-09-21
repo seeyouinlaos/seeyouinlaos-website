@@ -104,11 +104,11 @@ test('A DOCUMENT IS ITS OWN OBJECT: the passport stored once stands through a fa
   assert.equal(h.env.DOCS.m.size, 2, 'both objects stand — the Owner\'s retention decision, never the Worker\'s');
   assert.equal((await h.doc(h.steffie, B)).status, 401, 'the partner cannot replace it'); stillA('the partner\'s attempt');
   const worker = src('src/worker.js');
-  assert.doesNotMatch(worker, /DOCS\.delete\(/, 'no document is ever deleted by the Worker');
+  assert.equal((worker.match(/DOCS\.delete\(/g) || []).length, 1, 'ONE document delete in the Worker: the retention purge'); assert.match(worker, /if \(out\.due && !out\.dryRun\) \{ await env\.DOCS\.delete\(obj\.key\); out\.deleted\+\+; \}/, 'and only when the approved date has come — see test/retention.test.mjs');
   const ttls = worker.match(/expirationTtl[^\n]*/g) || []; assert.equal(ttls.length, 1, 'one expiry in the Worker'); assert.match(worker.slice(worker.indexOf('expirationTtl') - 400, worker.indexOf('expirationTtl')), /:prev:/, 'and it is the registration history mirror, never an upload');
   assert.doesNotMatch(worker.slice(worker.indexOf('async function handleProfilePhoto'), worker.indexOf('async function handleProfilePhoto') + 4000), /expirationTtl|expiration/, 'the photo never expires');
   assert.doesNotMatch(worker.slice(worker.indexOf('async function handleDocument'), worker.indexOf('async function handleDocument') + 4000), /expirationTtl|expiration/, 'a document never expires');
-  assert.doesNotMatch(worker, /async scheduled\(|scheduled\s*\(/, 'no scheduled cleanup');
+  assert.match(worker.slice(worker.indexOf('async scheduled('), worker.indexOf('async scheduled(') + 400), /purgeDocuments\(env, at, \{ dryRun: false, actor: 'cron' \}\)/, 'the one scheduled handler runs the document purge and nothing else'); assert.doesNotMatch(worker.slice(worker.indexOf('async function purgeDocuments'), worker.indexOf('async function handleGrRetention')), /REG_KV\.delete|avatar|contact:|draft:|reg:|ROOMS|SEATING|DRAFTS/, 'the purge never names a photo, a contact, a draft, a registration, a room, a seat');
   const deletes = worker.match(/REG_KV\.delete\([^)]*\)/g) || [];
   assert.deepEqual(deletes.sort(), ['REG_KV.delete(\'reset:lock\')', 'REG_KV.delete(k)', 'REG_KV.delete(key)'].sort(), 'the only KV deletes: the guest\'s own photo removal, the explicit Guest Relations clean reset and its lock');
   assert.match(worker, /const photoKey = \(invitationId\) => 'avatar:' \+ invitationId;/, 'the photo key is the invitation — never a name, a booking, a version, a session');

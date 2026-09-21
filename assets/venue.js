@@ -166,6 +166,21 @@
       root.requestAnimationFrame(function () { frag.classList.add('is-in'); });
       if (old) (M() ? M().after('fast', function () { if (old.parentNode) old.parentNode.removeChild(old); }) : old.remove());
       frag.querySelectorAll('.venue-thumb').forEach(function (b) { b.addEventListener('click', function () { showPhoto(z, Number(b.getAttribute('data-photo')), frag); }); });
+      /* THE WAY TO THE ONE DETAIL (Owner, 21 Sep 2026 · the iPad): the index entry's call is a real same-page link — the browser
+         navigates to #dinner itself (the fragment, the history, back and forward stay native). Two things stand beside that:
+         the target is revealed at once, so it is never a blank frame the moment the page arrives (its reveal transform is
+         what put it 14 px under the header); and if the browser did not move the page at all (a tap the device swallowed),
+         the same target is brought into view by hand — never a second route, never a reload. */
+      frag.querySelectorAll('a.a-link[href^="#"]').forEach(function (a) { a.addEventListener('click', function () {
+        var id = (a.getAttribute('href') || '').slice(1), t = id && doc.getElementById(id); if (!t) return;
+        t.classList.add('is-in');
+        var y0 = root.pageYOffset, h0 = root.location.hash;
+        root.setTimeout(function () {
+          var r = t.getBoundingClientRect(), hd = doc.querySelector('header.hd'), top = hd ? hd.getBoundingClientRect().bottom : 0;
+          if (root.location.hash !== '#' + id && root.pageYOffset === y0 && h0 !== '#' + id) { try { root.location.hash = '#' + id; } catch (e) {} }
+          if (r.top < top - 1 || r.top > root.innerHeight * 0.6) { try { t.scrollIntoView({ block: 'start' }); } catch (e) {} }
+        }, 120);
+      }); });
       if (announce && changed) live.textContent = z.title + '. ' + z.when + '.';
       /* the plan highlights the real area of the place; a place without a marker keeps the whole photograph */
       if (!marksOf(z).length) stage.setAttribute('data-active', '');

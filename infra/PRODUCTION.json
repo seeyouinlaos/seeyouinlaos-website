@@ -11,7 +11,8 @@
   "cloudflarePages": "not used",
   "assets": { "binding": "ASSETS", "directory": "." },
   "kv": [{ "binding": "REG_KV", "id": "090270d0da434a8b8f49933cb604beb3" }],
-  "r2": [{ "binding": "DOCS", "bucket": "siyl-docs", "public": false, "retention": "OWNER CONFIRMATION REQUIRED — no automatic deletion" }],
+  "r2": [{ "binding": "DOCS", "bucket": "siyl-docs", "public": false, "retention": { "decided": "2026-09-21", "journeyEnd": "2027-03-08", "days": 30, "purgeFrom": "2027-04-07", "scope": "doc/ objects of DOCS only — never a profile photo, a contact, an identity, a booking, a room, a seat, a draft, a registration record", "mechanism": "the Worker's scheduled trigger (crons) · purgeDocuments · audit records docpurge:<iso> in REG_KV" } }],
+  "crons": ["0 3 * * *"],
   "durableObjects": [
     { "name": "INVENTORY", "class": "Inventory" },
     { "name": "SEATING", "class": "Seating" },
