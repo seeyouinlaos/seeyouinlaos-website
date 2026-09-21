@@ -76,3 +76,15 @@ nothing written back until the guest answers again. `siyl.package` metadata is n
   834 / 1440, the console (40 checks).
 - The earlier suites (final-pass, guest-name, highlights, 014, 013, 012, 011, P0, account IA) re-pinned to the graph;
   the package sections of 013 / 014 replaced (013: the whole trip chosen by hand — the parity fixture stands).
+
+## Live (21 Sep 2026)
+
+Commit `bad717b` pushed to `main` → Workers Build → version `9e6cbb37-e3d6-49c5-8ca3-302409e90e5a` (06:01:54Z) on the
+one Worker `seeyouinlaos-website` (https://seeyouinlaos-website.suthep-hrg.workers.dev). Parity 257/257 (`live/parity.json`),
+live-ro 25/25 (`live/`), infra freeze intact (GitHub Pages 404). The graph is served, the sheets are on My Trip, no
+package word on any served surface, `assets/packages-data.js` answers 404, the Journeys page carries stage D in the
+Owner's order. Production aggregates read-only before and after (`live-aggregates.json`): 32 room occupancies (the
+same by stage), 0 waitlisted, 12 seat holds, 13 drafts / 104 actors, 44 KV keys — **unchanged**; no reset, no hold,
+seat, draft, submission, profile, photo or code touched; no synthetic activity on the live Worker.
+
+Codex: PENDING — EXTERNAL QUOTA LIMIT (usage limit until 24 Sep 2026 22:19 CEST; the probe refused).
