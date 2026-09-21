@@ -73,8 +73,8 @@ test('the legacy normalisation layer is gone from the design system', () => {
 
 test('the journey is the authoritative chronology, never insertion order', () => {
   const yj = read('your-journey.html');
-  assert.match(yj, /J\.SEGMENTS\.forEach\(function\(seg,i\)\{if\(!J\.relevant\(seg\)\)return;h\+=stageHtml\(seg,i\);if\(seg\.key==='wedstay'&&G\.joins\('vientiane'\)\)h\+=weddingHtml\(\)\}\)/,
-    'stages render from the chronology — the relevant ones, with THE WEDDING inside the Wedding Stay for a guest who joins in Vientiane (participation, 18 Sep 2026)');
+  assert.match(yj, /J\.SEGMENTS\.forEach\(function\(seg,i\)\{if\(!J\.relevant\(seg\)\)return;var sh=J\.sheetOf\(seg\);[^\n]*h\+=stageHtml\(seg,i\);if\(seg\.key==='wedstay'&&G\.joins\('vientianeWedding'\)\)h\+=weddingHtml\(\)\}\)/,
+    'stages render from the chronology — the relevant ones under their sheet, with THE WEDDING inside the Wedding Stay for a guest who joins the wedding (the graph, 21 Sep 2026)');
   const j = read('assets/journey.js');
   const keys = [...j.slice(j.indexOf('var SEG = ['), j.indexOf('/* Chronological position')).matchAll(/\{ key: '([a-z0-9-]+)'/g)].map((m) => m[1]);
   assert.deepEqual(keys, ['bkk-stay', 'train', 'prewed', 'wedstay', 'mu9646', 'kmg', 'c86', 'ljg', 'return', 'kempinski']);

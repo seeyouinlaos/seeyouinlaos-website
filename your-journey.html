@@ -9,7 +9,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 .bag{width:44px;height:44px;display:flex;align-items:center;justify-content:center;position:relative;color:#313131;text-decoration:none}.bag .bgi{display:block}
 .bb{position:absolute;top:1px;right:0;min-width:14px;height:14px;padding:0 3px;background:#313131;color:#F3EEE7;font-size:8.5px;line-height:1;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;display:none;align-items:center;justify-content:center;box-shadow:0 0 0 2px #F3EEE7;border-radius:1px}
 </style>
-<link rel="stylesheet" href="assets/aman.css?v=9bab15ca"><link rel="stylesheet" href="assets/prep.css?v=fdbe73d1"></head><body>
+<link rel="stylesheet" href="assets/aman.css?v=9bab15ca"><link rel="stylesheet" href="assets/prep.css?v=b18897cc"></head><body>
 <header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="cart.html" aria-label="My Bag"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main class="prep-page" id="your-journey">
 <div class="prep-head">
@@ -37,12 +37,13 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/bag.js?v=2a0c8152"></script>
 <script src="assets/shop-menu.js?v=1ff891bc"></script>
 <script src="assets/aman.js?v=2a339178"></script>
-<script src="assets/rooms-data.js?v=82a1706f"></script>
+<script src="assets/rooms-data.js?v=342e1a0c"></script>
 <script src="assets/pricing.js?v=d324fef7"></script>
-<script src="assets/guest.js?v=a0616298"></script>
+<script src="assets/stage-graph.js?v=92ac36af"></script>
+<script src="assets/guest.js?v=34df3d2a"></script>
 <script src="assets/draft.js?v=7ab9ca64"></script>
 <script src="assets/confirm.js?v=f35e0aa8"></script>
-<script src="assets/temple.js?v=a5a16527"></script>
+<script src="assets/temple.js?v=100faabd"></script>
 <script src="assets/rooms.js?v=e0d4bbbf"></script>
 <script src="assets/stay.js?v=3690f59b"></script>
 <script src="assets/seatlabels.js?v=4994e1f4"></script>
@@ -51,7 +52,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/vendor/qrcode.js?v=18ae399f"></script>
 <script src="assets/travelpass.js?v=ed68e022"></script>
 <script src="assets/transport-data.js?v=a5d732d4"></script>
-<script src="assets/packages-data.js?v=05982d0a"></script><script src="assets/journey.js?v=6551e59a"></script>
+<script src="assets/journey.js?v=aeb36786"></script>
 <script src="assets/wizard.js?v=30b710a5"></script>
 <script src="assets/prep-shell.js?v=830ee417"></script>
 <script type="module" src="assets/invite.mjs?v=c557d97c"></script>
@@ -106,8 +107,8 @@ function transportCard(seg,line){
   var t=TC[seg.key],f=P.FLAT[seg.key],sel=!!line,TP=window.SIYL_TRAVELPASS;
   /* the ticket (Owner, 15 Sep 2026): the route, the times, the class, the guest, the pass and its code */
   var ticket=TP?TP.card(seg.key,{selected:sel,price:money(f.price)+' <span class="t-l1">'+t.basis+'</span>',
-      actions:sel?[TP.button(seg.key,true),'<a class="p-link mute" href="transport.html?id='+seg.key+'">View details</a>','<button type="button" class="p-link mute" data-rm="'+seg.key+'">Remove</button>','<button type="button" class="p-link mute" data-skip="'+seg.key+'">Not joining this stage</button>'].join('')
-                 :['<button type="button" class="p-act" data-choose-flat="'+seg.key+'">Select this travel</button>','<a class="p-link mute" href="transport.html?id='+seg.key+'">View details</a>','<button type="button" class="p-link mute" data-skip="'+seg.key+'">Not joining this stage</button>'].join('')}):'';
+      actions:(sel?[TP.button(seg.key,true),'<a class="p-link mute" href="transport.html?id='+seg.key+'">View details</a>','<button type="button" class="p-link mute" data-rm="'+seg.key+'">Remove</button>']
+                 :['<button type="button" class="p-act" data-choose-flat="'+seg.key+'">Select this travel</button>','<a class="p-link mute" href="transport.html?id='+seg.key+'">View details</a>']).concat(mandatory(seg)?[]:['<button type="button" class="p-link mute" data-skip="'+seg.key+'">Not joining this stage</button>']).join('')}):'';
   return '<div class="p-sum'+(sel?' on':'')+'">'+
     '<span class="p-sum-img" style="background-image:url('+t.img+')" role="img" aria-label="'+esc(f.name)+'"></span>'+
     '<div class="p-sum-body">'+
@@ -148,14 +149,18 @@ function staySummary(seg,x){
         ST.unitsHtml(win,x.room)+'<p class="t-b2 p-rooms-note" role="status" aria-live="polite"></p></div>':'')+
       '</div></div>'}
 
+function mandatory(seg){var GR=window.SIYL_GRAPH;return !!(GR&&GR.MANDATORY&&GR.MANDATORY.indexOf(seg.key)>=0)}
 function openStage(seg,declined){
-  var isStay=seg.cat==='Accommodation';
+  var isStay=seg.cat==='Accommodation',must=mandatory(seg);
+  if(declined&&must)return '<div class="p-card"><p class="t-l1 open">Part of China</p><h3 class="t-h1">'+esc(seg.label)+'</h3>'+
+    '<p class="t-b2 measure">The train from Kunming to Lijiang is part of the China stages — it is chosen, never skipped. Choose it to complete China.</p>'+
+    actions(['<button type="button" class="p-act" data-choose-flat="'+seg.key+'">Select this travel</button>','<a class="p-link mute" href="transport.html?id='+seg.key+'">View details</a>'])+'</div>';
   if(declined)return '<div class="p-card"><p class="t-l1">Not joining this stage</p><h3 class="t-h1">'+esc(seg.label)+'</h3>'+
     '<p class="t-b2 measure">You said you are not joining this stage. Nothing is held or charged for it.</p>'+
     actions(['<button type="button" class="p-link" data-unskip="'+seg.key+'">Reconsider this stage</button>'])+'</div>';
   return '<div class="p-card"><p class="t-l1 open">Still to choose</p><h3 class="t-h1">'+esc(seg.label)+'</h3>'+
-    '<p class="t-b2 measure">'+(isStay?'Choose your room for this stay, or tell us you are not joining this stage.':'Choose your travel for this stage, or tell us you are not joining it.')+'</p>'+
-    actions(['<a class="p-act" href="journeys.html#'+seg.anchor+'">'+(isStay?'Choose your stay':'Choose your travel')+'</a>','<button type="button" class="p-link mute" data-skip="'+seg.key+'">Not joining this stage</button>'])+'</div>'}
+    '<p class="t-b2 measure">'+(isStay?'Choose your room for this stay, or tell us you are not joining this stage.':(must?'Choose your travel for this stage — it is part of China.':'Choose your travel for this stage, or tell us you are not joining it.'))+'</p>'+
+    actions(['<a class="p-act" href="journeys.html#'+seg.anchor+'">'+(isStay?'Choose your stay':'Choose your travel')+'</a>'].concat(must?[]:['<button type="button" class="p-link mute" data-skip="'+seg.key+'">Not joining this stage</button>']))+'</div>'}
 
 /* THE BANGKOK ADDRESSES — three, one of them yours, on the accepted rail */
 function bkkHtml(){
@@ -237,10 +242,8 @@ function weddingHtml(){
    no product, no cost; the guest may choose another stay, leave the list, or say they are not joining */
 function waitStage(seg){
   var pos=J.waitPosition(seg),w=U&&U.waitlisted?U.waitlisted(seg.key):null;
-  /* the line was joined for the rooms a package offered — the stage's other alternatives (the Overview's D2 · D3) stay the guest's own choice and are named */
-  var alt='';J.packageOrder().forEach(function(k){var pk=J.packages()[k];var a=pk&&pk.alternatives&&pk.alternatives[seg.key];if(a&&!alt&&w&&Array.isArray(w.wanted)&&pk.stages[seg.key]&&w.wanted.join()===pk.stages[seg.key].join())alt=' '+esc(a.words)});
   return '<div class="p-card" data-waitlisted="'+seg.key+'"><p class="t-l1 open">On the waiting list'+(pos?' · number '+pos:'')+'</p><h3 class="t-h1">'+esc(seg.label)+'</h3>'+
-    '<p class="t-b2 measure">None of the rooms offered for this stage could take your party'+(w&&w.size>1?' ('+w.size+' places together)':'')+' when you added the package. Nothing is held or charged for it; Guest Relations will find an arrangement with you, and any room that frees up here is yours to choose.'+alt+'</p>'+
+    '<p class="t-b2 measure">No room of this stage could take your party'+(w&&w.size>1?' ('+w.size+' places together)':'')+' when you chose. Nothing is held or charged for it — USD 0 until it is resolved; Guest Relations will find an arrangement with you, and any room that frees up here is yours to choose.</p>'+
     actions(['<a class="p-act" href="journeys.html#'+seg.anchor+'">Choose a stay</a>','<button type="button" class="p-link mute" data-unwait="'+seg.key+'">Leave the waiting list</button>','<button type="button" class="p-link mute" data-skip="'+seg.key+'">Not joining this stage</button>'])+'</div>'}
 function stageHtml(seg,i){
   var st=J.state(seg),line=lineOf(seg);
@@ -254,29 +257,61 @@ function stageHtml(seg,i){
   else h+=line?staySummary(seg,line):openStage(seg,false);
   return h+'</section>'}
 
-/* WHERE WILL YOU JOIN US (Owner, 18 Sep 2026): the first decision of the trip. Three destinations, any combination; "I'll join
-   all"; "I won't be joining this trip" — exclusive. What follows is composed from the answer. */
+/* WHERE WILL YOU JOIN US (Owner, 21 Sep 2026 · the global My Trip rebuild): the first decision. FOUR participation sheets —
+   Bangkok · Vientiane before the wedding · Vientiane the wedding · China — any combination; "I'll join all"; "I won't be
+   joining this trip" (exclusive, its own short path). What follows is composed from the answer through the one stage graph. */
+var PENDING=null;   /* a change that would release real resources waits for the guest's confirmation: { scope, releases } */
 function scopeHtml(){
-  var G=window.SIYL_GUEST,s=G.scope(),me=G.me();
-  var dest=G.DESTINATIONS.map(function(d){var on=!!(s&&!s.none&&s[d.key]);
-    return '<button type="button" class="p-sel'+(on?' on':'')+'" data-scope="'+d.key+'" aria-pressed="'+(on?'true':'false')+'"><span class="p-sel-t">'+esc(d.label)+'</span><span class="p-sel-s">'+esc(d.when)+'</span></button>'}).join('');
-  var all=!!(s&&!s.none&&s.bangkok&&s.vientiane&&s.china),none=!!(s&&s.none);
+  var G=window.SIYL_GUEST,s=G.scope(),C=window.SIYL_CONFIRM,me=G.me();
+  var cards=G.DESTINATIONS.map(function(d){var on=!!(s&&!s.none&&s[d.key]);
+    return '<button type="button" class="p-sel p-sheet'+(on?' on':'')+'" data-scope="'+d.key+'" aria-pressed="'+(on?'true':'false')+'"><span class="p-sel-t">'+esc(d.label)+'</span><span class="p-sel-s">'+esc(d.when)+'</span></button>'}).join('');
+  var all=!!(s&&G.joinsAll()),none=!!(s&&s.none),sent=!!(C&&C.state&&C.state()!=='none');
+  if(none){
+    return '<div class="p-card on" data-scope-card data-not-joining><p class="t-l1 on">'+(sent?'Not joining · your response was sent':'Not joining this trip')+'</p>'+
+      '<h2 class="t-h1">We’ll miss you.</h2>'+
+      '<p class="t-b1 measure">We’re sorry you won’t be able to join us.</p>'+
+      '<p class="t-b2 measure">Haruthai &amp; Suthep would be very happy to celebrate with you. If your plans change, you’re always welcome to reconsider.</p>'+
+      '<p class="t-b2 measure">If anything changes, please contact Guest Relations.</p>'+
+      (RECON_FAILED.length?'<div class="p-card flat" style="margin-top:var(--s4)" data-scope-failed><p class="t-l1 open">Not released yet</p><p class="t-b2 measure">We could not release '+esc(RECON_FAILED.join(', '))+' just now. It stays yours until it is released, and your response waits for it.</p><div class="p-actions"><button type="button" class="p-act quiet" data-scope-retry>Release again</button></div></div>':'')+
+      actions([sent?'<span class="p-act quiet is-current" aria-current="true">Not joining</span>':'<a class="p-act" href="review.html#send" data-decline-send>Send my response</a>','<button type="button" class="p-link mute" data-scope-reconsider>I’d like to reconsider</button>'])+
+      (sent?'<p class="t-b2 measure" style="margin-top:var(--s3)">No open trip requirements. Guest Relations has your response.</p>':'')+'</div>'}
+  var preview=PENDING?releasePreviewHtml():'';
   return '<div class="p-card'+(s?' on':'')+'" data-scope-card><p class="t-l1'+(s?' on':' open')+'">'+(s?'Where you join us · '+esc(G.scopeWords()):'First, one answer')+'</p>'+
     '<h2 class="t-h1">Where will you join us?</h2>'+
-    '<p class="t-b2 measure">Choose every destination you will be part of. The stages below are composed from your answer — nothing is asked for a place you are not joining.</p>'+
-    '<div class="p-selrow p-scope" role="group" aria-label="Destinations">'+dest+'</div>'+
+    '<p class="t-b2 measure">Choose every part of the journey you will be with us for. Each part opens its own sheet below with exactly what it needs from you — nothing is asked for a part you are not joining.</p>'+
+    '<div class="p-selrow p-scope p-sheets" role="group" aria-label="Where will you join us">'+cards+'</div>'+
     '<div class="p-actions" style="margin-top:var(--s4)"><button type="button" class="p-link'+(all?' on':'')+'" data-scope-all aria-pressed="'+(all?'true':'false')+'">I’ll join all</button>'+
-    '<button type="button" class="p-link mute'+(none?' on':'')+'" data-scope-none aria-pressed="'+(none?'true':'false')+'">I won’t be joining this trip</button></div>'+
-    (RECON_FAILED.length?'<div class="p-card flat" style="margin-top:var(--s4)" data-scope-failed><p class="t-l1 open">Not released yet</p><p class="t-b2 measure">We could not release '+esc(RECON_FAILED.join(', '))+' just now. Nothing else changed — it stays yours until it is released, and Review &amp; Send waits for it.</p><div class="p-actions"><button type="button" class="p-act quiet" data-scope-retry>Release again</button></div></div>':'')+
-    (none?'<p class="t-b2 measure" style="margin-top:var(--s4)">You are not joining this trip. Nothing else is needed here — Review &amp; Send lets Guest Relations know, and you can change your answer at any time.</p>':'')+'</div>'}
-/* the destinations the guest is not joining: one quiet card, never a stage to decline one by one */
+    '<button type="button" class="p-link mute" data-scope-none aria-pressed="false">I won’t be joining this trip</button></div>'+preview+
+    (RECON_FAILED.length?'<div class="p-card flat" style="margin-top:var(--s4)" data-scope-failed><p class="t-l1 open">Not released yet</p><p class="t-b2 measure">We could not release '+esc(RECON_FAILED.join(', '))+' just now. Nothing else changed — it stays yours until it is released, and Review &amp; Send waits for it.</p><div class="p-actions"><button type="button" class="p-act quiet" data-scope-retry>Release again</button></div></div>':'')+'</div>'}
+/* WHAT A CHANGE WOULD RELEASE (Owner, 21 Sep 2026): before a scope is taken away, the guest's OWN resources that would leave
+   are named — rooms held, waiting-list places, lines, seats — and released only on confirmation; never another guest's. */
+function releasesFor(next){
+  var G=window.SIYL_GUEST,GR=window.SIYL_GRAPH,S=window.SIYL_SEATS,me=G.me(),out=[];
+  if(!GR)return out;
+  var seen={};
+  SIYL_BAG.get().forEach(function(x){var seg=J.SEGMENTS.filter(function(z){return z.ids.indexOf(x.id)>=0})[0];
+    var rel=seg?GR.isRelevant(seg.key,next):(x.id==='sangkhathan'?!!next.vientianeWedding:(x.interest?!!(next.vientianeWedding||next.vientianePreWedding):(/^(1872|tea1872|suhring|baanphraya|cannubi)$/.test(x.id)?!!next.bangkok:true)));
+    if(rel)return;seen[seg?seg.key:x.id]=true;
+    out.push({kind:x.room&&!x.interest?'room':'line',key:x.id,label:(seg?seg.when+' · ':'')+(x.name||x.id)+(x.room&&ST&&ST.unitWords&&ST.unitWords(x)?' · '+ST.unitWords(x):'')})});
+  if(U&&U.ready&&U.ready()&&U.view()){var mine=U.view().mine||{};Object.keys(mine).forEach(function(stage){var seg=J.SEGMENTS.filter(function(z){return z.key===stage||z.ids.indexOf(stage)>=0})[0];if(!seg||seen[seg.key]||GR.isRelevant(seg.key,next))return;out.push({kind:'room',key:stage,label:seg.when+' · '+seg.place+' — a room held in your name'})});
+    var waits=U.view().waitlist||{};Object.keys(waits).forEach(function(stage){var seg=J.SEGMENTS.filter(function(z){return z.key===stage})[0];if(!seg||GR.isRelevant(seg.key,next))return;out.push({kind:'wait',key:stage,label:seg.when+' · '+seg.place+' — your waiting-list place'})})}
+  if(!next.vientianeWedding&&S&&S.ready&&S.ready()&&S.open()&&!S.frozen()&&me)['ceremony','dinner'].forEach(function(ev){if(S.seatOf(ev,me.guestId))out.push({kind:'seat',key:ev,label:(ev==='ceremony'?'Your ceremony seat':'Your dinner seat')+' · '+esc(S.label?S.label(S.seatOf(ev,me.guestId)):'')})});
+  return out}
+function releasePreviewHtml(){
+  var G=window.SIYL_GUEST,n=PENDING.scope,joined=G.DESTINATIONS.filter(function(d){return n[d.key]}).map(function(d){return d.label});
+  var lead=n.none?'You would be marked as not joining the trip.':(PENDING.gone.length?'You would no longer be joining '+esc(PENDING.gone.join(' · '))+'.':'You would join us for '+esc(joined.join(' · '))+' only.');
+  return '<div class="p-card flat" style="margin-top:var(--s4)" data-release-preview><p class="t-l1 open">Before this changes</p>'+
+    '<p class="t-b1 measure">'+lead+' These would be released — yours alone, nothing of anyone else’s:</p>'+
+    '<ul class="p-list">'+PENDING.releases.map(function(r){return '<li class="t-b2">'+esc(r.label)+'</li>'}).join('')+'</ul>'+
+    actions(['<button type="button" class="p-act" data-release-confirm>'+(n.none?'Yes, I won’t be joining':'Yes, change where I join')+'</button>','<button type="button" class="p-link mute" data-release-cancel>Keep everything as it is</button>'])+'</div>'}
+/* the stages not part of the trip: one quiet card, never a stage to decline one by one */
 function excludedHtml(){
   var G=window.SIYL_GUEST,s=G.scope();if(!s||s.none)return '';
   var ex=J.excludedSegments();if(!ex.length)return '';
   var places=G.DESTINATIONS.filter(function(d){return !s[d.key]}).map(function(d){return d.label});
   return '<section class="p-stage" id="s-excluded"><div class="p-card flat"><p class="t-l1">Not part of your trip · '+esc(places.join(' · '))+'</p>'+
     '<p class="t-b2 measure-w">'+ex.map(function(x){return esc(x.when+' · '+x.place)}).join(' · ')+'</p>'+
-    '<p class="t-b2 measure">Nothing is asked, held or charged for these stages. <a class="p-link mute" href="#scope" data-scope-edit>Change where you join us</a></p></div></section>'}
+    '<p class="t-b2 measure">Nothing is asked, held or charged for these stages. <a class="p-link mute" href="#scope" data-scope-edit>Change where I’ll join</a></p></div></section>'}
 
 function extraLine(x){
   var m=J.meta(x),href=detailHref(x);
@@ -293,7 +328,7 @@ function render(){
   var s=G&&G.me()?G.scope():null;
   if(s&&s.none){box.innerHTML='';}
   else if(!s&&G&&G.me()){box.innerHTML='<div class="p-card flat"><p class="t-b2 measure">Your stages appear here once you have said where you will join us.</p></div>';}
-  else{J.SEGMENTS.forEach(function(seg,i){if(!J.relevant(seg))return;h+=stageHtml(seg,i);if(seg.key==='wedstay'&&G.joins('vientiane'))h+=weddingHtml()});h+=excludedHtml();box.innerHTML=h;}
+  else{var GR=window.SIYL_GRAPH,sheet='';J.SEGMENTS.forEach(function(seg,i){if(!J.relevant(seg))return;var sh=J.sheetOf(seg);if(sh&&sh!==sheet){sheet=sh;var def=GR&&GR.SHEETS?GR.SHEETS.filter(function(z){return z.key===sh})[0]:null;if(def)h+='<div class="p-sheet-h" data-sheet="'+esc(sh)+'"><p class="t-l1 on">'+esc(def.label)+'</p><p class="t-b2">'+esc(def.when)+'</p></div>'}h+=stageHtml(seg,i);if(seg.key==='wedstay'&&G.joins('vientianeWedding'))h+=weddingHtml()});h+=excludedHtml();box.innerHTML=h;}
   /* the extras: every line outside the ten stages — the tea, the Highlight tables (requests, dated on the timeline) and anything unplaced */
   var extras=b.filter(function(x){return J.order(x)===99||x.id==='1872'||x.request||x.exp}).filter(function(x){return !J.isWedding(x)&&!J.SEGMENTS.some(function(s){return s.ids.indexOf(x.id)>=0})});
   var ex=document.getElementById('extras');ex.hidden=!extras.length;
@@ -333,49 +368,49 @@ function wire(){
   document.querySelectorAll('[data-rooms-for]').forEach(function(bt){bt.addEventListener('click',function(){ROOMFOR=bt.getAttribute('data-rooms-for');render();var t=document.querySelector('[data-rooms-box="'+ROOMFOR+'"]');if(t)t.scrollIntoView({behavior:'smooth',block:'center'})})});
   document.querySelectorAll('[data-rooms-box]').forEach(function(bx){ST.wire(bx,function(r){if(r.ok){ROOMFOR=null;render();var t=document.getElementById('stay-'+bx.getAttribute('data-rooms-box'));if(t){t.classList.add('p-reveal')}}else{render();var again=document.querySelector('[data-rooms-box="'+bx.getAttribute('data-rooms-box')+'"]');say(again,ST.refusal(r))}})})}
 
-/* THE PACKAGES AND THE TRIP'S STATE (Owner, 19 Sep 2026): two peer package cards — the same card, the same hierarchy, the
-   same interaction — and the counts of the trip as they are, derived from one state; never a progress meter, never a
-   number invented to fill a sentence */
-function packageCard(kind){
-  var pk=J.packages()[kind];if(!pk)return '';
-  var stages=J.packageStages(kind);if(!stages.length)return '';
-  var plan=J.packagePlan(kind);
-  var words=stages.length===1?'1 stage':stages.length+' stages';
-  var amount=plan.ready?(plan.total?money(plan.total)+' <span class="t-l1">per person</span>':'<span class="t-l1">'+(plan.counts&&plan.counts.waitlisted&&plan.counts.waitlisted===plan.counts.stages?'No cost until the waiting list is resolved':'Complimentary')+'</span>'):'<span class="t-l1">Checking availability…</span>';
-  var notes=[];
-  if(plan.ready&&plan.counts.fallbacks)notes.push(plan.counts.fallbacks===1?'1 stage with a replacement':plan.counts.fallbacks+' stages with a replacement');
-  if(plan.ready&&plan.counts.waitlisted)notes.push(plan.counts.waitlisted===1?'1 stage on the waiting list':plan.counts.waitlisted+' stages on the waiting list');
-  if(plan.counts.replaced)notes.push(plan.counts.replaced===1?'replaces 1 current selection':'replaces '+plan.counts.replaced+' current selections');
-  var alt=pk.alternatives&&Object.keys(pk.alternatives).filter(function(k){return stages.some(function(s){return s.key===k})}).map(function(k){return '<p class="t-b2" data-package-alt="'+k+'">'+esc(pk.alternatives[k].words)+'</p>'}).join('')||'';
-  return '<article class="p-card p-pack" data-package="'+kind+'"><p class="t-l1">'+esc(pk.name)+'</p><h3 class="t-h1">'+esc(pk.short)+'</h3>'+
-    '<p class="t-b2">'+words+' of your trip · '+stages.map(function(x){return x.place}).filter(function(v,i,a){return a.indexOf(v)===i}).join(' · ')+'</p>'+
-    '<p class="p-price">'+amount+'</p>'+(notes.length?'<p class="t-b2">'+esc(notes.join(' · '))+'</p>':'')+alt+
-    actions(['<button type="button" class="p-act" data-package-preview="'+kind+'">Preview '+esc(pk.name.toLowerCase())+'</button>'])+'</article>'}
+/* YOUR CURRENT TRIP (Owner, 21 Sep 2026): the trip's state as it is — every relevant stage answered or not — derived from the
+   one graph; never a progress meter, never a package, never a number invented to fill a sentence */
 function renderDecisions(){
 var box=document.getElementById('dec');if(!box)return;
 var G=window.SIYL_GUEST;if(!G||!G.me()||!G.scopeAnswered()||G.notJoining()){box.innerHTML='';return}
-var c=J.counts(),cards=J.packageOrder().map(packageCard).join('');
-var packs=cards?'<div class="p-packs">'+cards+'</div>':'';
+var c=J.counts();
 var guesthouse=SIYL_BAG.has('guesthouse')?'<p class="t-b2 measure-w">The Guest House is a shared stay of six places: who sleeps where is arranged among you at the house; the wedding programme is yours as it stands.</p>':'';
 if(!c.open&&c.relevant){
   box.innerHTML='<div class="p-card"><p class="t-l1 '+(c.waitlisted?'open':'on')+'">'+esc(J.statusLine())+'</p>'+
     '<h2 class="t-h1">'+(c.waitlisted?'Every stage has an answer — '+(c.waitlisted===1?'one is':c.waitlisted+' are')+' on the waiting list':'Every stage has an answer')+'</h2>'+
     '<p class="t-b2 measure-w" data-counts>'+esc(J.countsWords())+'.</p>'+
-    (c.waitlisted?'<p class="t-b2 measure-w">A stage on the waiting list has no room yet and costs nothing until it is resolved. Review &amp; Send shares your trip as it stands; Guest Relations will find an arrangement with you.</p>':'<p class="t-b2 measure-w">Review &amp; Send shares your trip with Guest Relations.</p>')+
-    guesthouse+fxSummary()+(packs?'<p class="t-b2">You can still compose the journey as a package:</p>'+packs:'')+'</div>';
+    (c.waitlisted?'<p class="t-b2 measure-w">A stage on the waiting list has no room yet and costs nothing until it is resolved. Review &amp; Send shares your trip as it stands; Guest Relations will find an arrangement with you.</p>':'<p class="t-b2 measure-w">Your current trip is below, stage by stage. Review &amp; Send shares it with Guest Relations.</p>')+
+    guesthouse+actions(['<a class="p-link mute" href="#scope" data-scope-edit>Change where I’ll join</a>'])+'</div>';
 }else if(!c.relevant){box.innerHTML='';}
 else{
   box.innerHTML='<div class="p-card"><p class="t-l1 open">'+esc(J.statusLine())+'</p>'+
-    '<h2 class="t-h1">Plan your trip</h2>'+
-    '<p class="t-b2 measure-w">Choose a package — previewed before anything is held — or choose how you travel and stay at each stage below.</p>'+
-    '<p class="t-b2 measure-w" data-counts>'+esc(J.countsWords())+'.</p>'+fxSummary()+packs+'</div>'}
-box.querySelectorAll('[data-package-preview]').forEach(function(b){b.addEventListener('click',function(){fxOpen(b.getAttribute('data-package-preview'))})})}
-/* the scope controls: a destination toggles; all / none are one tap; a change releases what no longer belongs (own resources only) */
+    '<h2 class="t-h1">Your current trip</h2>'+
+    '<p class="t-b2 measure-w">Each part you join has its own sheet below. Choose how you stay and travel at every stage of it — a stage is answered when it is chosen, on the waiting list, or you have said you are not joining it.</p>'+
+    '<p class="t-b2 measure-w" data-counts>'+esc(J.countsWords())+'.</p>'+actions(['<a class="p-link mute" href="#scope" data-scope-edit>Change where I’ll join</a>'])+'</div>'}
+box.querySelectorAll('[data-scope-edit]').forEach(function(ed){ed.addEventListener('click',function(e){e.preventDefault();var t=document.getElementById('scope');if(t)t.scrollIntoView({behavior:'smooth',block:'start'})})})}
+/* the scope controls: a sheet toggles; all / none are one tap; a change that would release something of the guest's own is
+   previewed first and applied only on confirmation; a change that releases nothing is immediate */
+function nextScope(patch){var G=window.SIYL_GUEST,s=G.scope()||{},keys=G.SCOPE_KEYS,cur={};keys.forEach(function(k){cur[k]=!!s[k]});cur.none=!!s.none;
+  if(patch.all)keys.forEach(function(k){cur[k]=true});if(patch.all||Object.keys(patch).some(function(k){return keys.indexOf(k)>=0&&patch[k]}))cur.none=false;
+  if(patch.none){keys.forEach(function(k){cur[k]=false});cur.none=true}
+  keys.forEach(function(k){if(typeof patch[k]==='boolean')cur[k]=patch[k]});return cur}
+function applyScope(patch){
+  var G=window.SIYL_GUEST,S=window.SIYL_SEATS,next=nextScope(patch);
+  /* the seats are read before the preview is composed: a seat held for the wedding is the guest's to see before it goes */
+  if(!next.vientianeWedding&&G.joins('vientianeWedding')&&S&&S.ready&&!S.ready()&&S.load){S.load(true).then(function(){applyScopeNow(patch,next)},function(){applyScopeNow(patch,next)});return}
+  applyScopeNow(patch,next)}
+function applyScopeNow(patch,next){
+  var G=window.SIYL_GUEST,rel=releasesFor(next);
+  if(rel.length){var gone=G.DESTINATIONS.filter(function(d){return G.joins(d.key)&&!next[d.key]}).map(function(d){return d.label});PENDING={scope:next,patch:patch,releases:rel,gone:gone};render();var pv=document.querySelector('[data-release-preview]');if(pv)pv.scrollIntoView({behavior:'smooth',block:'center'});return}
+  PENDING=null;G.setScope(patch);reconcileScope()}
 function wireScope(sc){
   var G=window.SIYL_GUEST;
-  sc.querySelectorAll('[data-scope]').forEach(function(b){b.addEventListener('click',function(){var k=b.getAttribute('data-scope'),p={};p[k]=b.getAttribute('aria-pressed')!=='true';G.setScope(p);reconcileScope()})});
-  var all=sc.querySelector('[data-scope-all]');if(all)all.addEventListener('click',function(){G.setScope({all:true});reconcileScope()});
-  var none=sc.querySelector('[data-scope-none]');if(none)none.addEventListener('click',function(){G.setScope({none:true});reconcileScope()});
+  sc.querySelectorAll('[data-scope]').forEach(function(b){b.addEventListener('click',function(){var k=b.getAttribute('data-scope'),p={};p[k]=b.getAttribute('aria-pressed')!=='true';applyScope(p)})});
+  var all=sc.querySelector('[data-scope-all]');if(all)all.addEventListener('click',function(){applyScope({all:true})});
+  var none=sc.querySelector('[data-scope-none]');if(none)none.addEventListener('click',function(){applyScope({none:true})});
+  var re=sc.querySelector('[data-scope-reconsider]');if(re)re.addEventListener('click',function(){PENDING=null;G.clearScope();render();var t=document.getElementById('scope');if(t)t.scrollIntoView({behavior:'smooth',block:'start'})});
+  var ok=sc.querySelector('[data-release-confirm]');if(ok)ok.addEventListener('click',function(){var pd=PENDING;PENDING=null;if(!pd)return;ok.disabled=true;ok.textContent='One moment…';G.setScope(pd.patch);reconcileScope()});
+  var no=sc.querySelector('[data-release-cancel]');if(no)no.addEventListener('click',function(){PENDING=null;render()});
   var ed=sc.querySelector('[data-scope-edit]');if(ed)ed.addEventListener('click',function(e){e.preventDefault();var t=document.getElementById('scope');if(t)t.scrollIntoView({behavior:'smooth',block:'start'})});
   var again=sc.querySelector('[data-scope-retry]');if(again)again.addEventListener('click',function(){again.disabled=true;again.textContent='One moment…';RECON='';reconcileScope()});
 }
@@ -383,10 +418,10 @@ function wireScope(sc){
    engine, a Bag line of such a stage is removed, a seat for a wedding the guest is not attending is released — the guest's own
    resources only, through the existing paths, never another guest's. Idempotent: it releases only what is there. */
 var RECON='',RECON_FAILED=[],RECONCILING=false,RECON_AGAIN=false;
-function scopeTag(){var G=window.SIYL_GUEST,s=G&&G.me()?G.scope():null;return s?JSON.stringify([s.bangkok,s.vientiane,s.china,s.none]):''}
+function scopeTag(){var G=window.SIYL_GUEST,s=G&&G.me()?G.scope():null;return s?JSON.stringify([s.bangkok,s.vientianePreWedding,s.vientianeWedding,s.china,s.none]):''}
 function reconcileScope(){
   var G=window.SIYL_GUEST,S=window.SIYL_SEATS,U=window.SIYL_UNITS,s=G&&G.me()?G.scope():null;if(!s)return;
-  var tag=JSON.stringify([s.bangkok,s.vientiane,s.china,s.none]);
+  var tag=JSON.stringify([s.bangkok,s.vientianePreWedding,s.vientianeWedding,s.china,s.none]);
   /* ONE RECONCILIATION AT A TIME (Codex confirming pass, 18 Sep 2026): the guard is set before any mutation — a Bag removal
      re-renders synchronously and render() must not re-enter; an answer changed while one runs is reconciled afterwards */
   if(RECONCILING){RECON_AGAIN=true;return}
@@ -407,128 +442,12 @@ function reconcileScope(){
     jobs.push(track(seg.place+' (waiting list)',U.unwait(stage)))})}
   /* the seats: the ledger is read first when this page has not read it yet — a seat is released only when it is the guest's own,
      and only while the ledger is open (a frozen ledger is Guest Relations' to change: the decline is sent, the seat is theirs to release) */
-  if(!G.joins('vientiane')&&S){var me=G.me();var rel2=function(){var inner=[];if(!S.open()||S.frozen())return Promise.resolve([]);['ceremony','dinner'].forEach(function(ev){if(S.seatOf(ev,me.guestId))inner.push(track((ev==='ceremony'?'your ceremony seat':'your dinner seat'),S.release(ev,me.guestId)))});return Promise.all(inner)};
+  if(!G.joins('vientianeWedding')&&S){var me=G.me();var rel2=function(){var inner=[];if(!S.open()||S.frozen())return Promise.resolve([]);['ceremony','dinner'].forEach(function(ev){if(S.seatOf(ev,me.guestId))inner.push(track((ev==='ceremony'?'your ceremony seat':'your dinner seat'),S.release(ev,me.guestId)))});return Promise.all(inner)};
     jobs.push(S.ready()?rel2():S.load(true).then(function(v){if(v)return rel2();failed.push('your seats');return null}))}
-  if(!G.joins('vientiane')&&SIYL_BAG.has&&SIYL_BAG.has('sangkhathan')){SIYL_BAG.remove('sangkhathan')}
+  if(!G.joins('vientianeWedding')&&SIYL_BAG.has&&SIYL_BAG.has('sangkhathan')){SIYL_BAG.remove('sangkhathan')}
   var finish=function(){RECON_FAILED=failed;RECONCILING=false;render();if(RECON_AGAIN){RECON_AGAIN=false;RECON='';reconcileScope()}};
   Promise.all(jobs).then(finish,finish);
 }
-
-/* ---- COMPLETE / ESSENTIAL JOURNEY: one confirmation, inside the shell's own
- * detail layer. Only a package whose composition the Owner has defined is offered as a card. */
-var FXMODE=null,FX_DONE=null,FX_PLAN=null,FX_OPEN=false,FX_DECIDING=false;
-/* THE PREVIEW (Owner, 19 Sep 2026): exactly what confirming a package selects, stage by stage, before anything is held —
-   the default and its amount; a replacement named as such when the default cannot take the party; a stage that goes on the
-   waiting list said plainly; what the package replaces of the guest's own choices. Nothing is selected by looking. */
-function fxWhy(r){
-  var nm=function(key){if(!key)return '';var win=key.split('/')[0],slug=key.split('/').slice(1).join('/');var at=P.locate(win);var room=at&&at.stay.rooms.filter(function(x){return x.slug===slug})[0];return room?(room.name+' · '+(room.property||at.stay.name)):key};
-  if(r.why==='waitlist')return 'None of the rooms this package offers for this stage can take your party ('+(J.partySize()===1?'one place':J.partySize()+' places together')+'). You will be placed on the waiting list — no cost until it is resolved.';
-  if(r.why==='fallback')return 'The suggested '+esc(nm(r.wanted))+' cannot take your party — this is the next option that can. You can change it afterwards.';
-  if(r.why==='same')return 'Already yours — nothing changes here.';
-  return ''}
-function fxPreview(changed,unreachable){
-var box=document.getElementById('csel');if(!box||!FXMODE)return;
-var plan=J.packagePlan(FXMODE),rows='';FX_PLAN={sig:J.planSignature(plan),kind:FXMODE,at:Date.now()};
-plan.rows.forEach(function(r){
-  var seg=r.seg,label='<span class="fxw">'+esc(seg.when)+' · '+esc(seg.place)+'</span>';
-  var it=r.items[0]||{},amount=r.why==='waitlist'?'':(r.amount?money(r.amount)+(it.room?' per person':''):(it.complimentary?'Complimentary':''));
-  var cat=it.room&&it.meta?String(it.meta).split(' · ').pop():'';
-  var un=r.unit&&r.key&&U&&U.units?U.units(r.key.split('/')[0],r.key.split('/').slice(1).join('/')).filter(function(x){return x.label===r.unit})[0]:null;
-  var name=r.why==='waitlist'?'Waiting list':((r.unit?esc(un?U.unitName(un):('Room '+r.unit))+' · ':'')+(cat&&cat!==it.name&&!it.complimentary?esc(cat)+' · ':'')+esc(it.name||''));
-  var rep=r.replaces?'<span class="fxn">Replaces your current '+esc(r.replaces.name)+(r.replaces.meta?' ('+esc(String(r.replaces.meta).split(' · ').pop())+')':'')+'.</span>':(r.wasDeclined?'<span class="fxn">You had said you are not joining this stage — the package includes it.</span>':'');
-  var why=fxWhy(r);
-  var nights=it.room&&it.nights?('<span class="fxn">'+it.nights+(it.nights===1?' night':' nights')+(it.pay<it.nights?' · '+(it.nights-it.pay===1?'one night':(it.nights-it.pay)+' nights')+' hosted by Haruthai & Suthep':'')+(r.why==='default'?' · preselected for you':'')+'</span>'):'';
-  rows+='<li class="fxr'+(r.why==='fallback'?' fxr-fb':'')+(r.why==='waitlist'?' fxr-open':'')+(r.why==='same'?' fxr-kept':'')+'">'+label+'<b>'+name+(amount?' <span class="fxa">'+esc(amount)+'</span>':'')+'</b>'+nights+(why?'<span class="fxn">'+why+'</span>':'')+rep+'</li>'});
-var c=plan.counts;
-var pkAlt=J.packages()[FXMODE]&&J.packages()[FXMODE].alternatives||{};
-var alts=Object.keys(pkAlt).filter(function(k){return plan.rows.some(function(r){return r.seg.key===k})}).map(function(k){return '<p class="t-b2 measure-w" data-fx-alt="'+k+'">'+esc(pkAlt[k].words)+(pkAlt[k].href?' <a class="p-link" href="'+esc(pkAlt[k].href)+'">Choose another option</a>':'')+'</p>'}).join('');
-box.innerHTML=(changed?'<p class="t-b2 measure-w" data-fx-changed><b>'+(unreachable?'The rooms could not be read just now.':'Availability changed while you were looking.')+'</b> '+(unreachable?'Nothing was added — please try again in a moment.':'This is the package as it can be selected now — please look again before adding it.')+'</p>':'')+
-  (plan.ready?'':'<p class="t-b2 measure-w" data-fx-loading>Reading the rooms…</p>')+
-  '<p class="t-l1" style="margin-top:4px">What '+esc(plan.name.toLowerCase())+' selects</p><ul class="fxl">'+rows+'</ul>'+
-  '<p class="t-b2 measure-w" data-fx-total><b>'+(plan.total?money(plan.total)+' per person':(c.waitlisted&&c.waitlisted===c.stages?'No cost until the waiting list is resolved':'Complimentary'))+'</b> for '+c.stages+(c.stages===1?' stage':' stages')+
-  (c.fallbacks?' · '+c.fallbacks+(c.fallbacks===1?' replacement':' replacements'):'')+(c.waitlisted?' · '+c.waitlisted+' on the waiting list (no cost until resolved)':'')+(c.replaced?' · replaces '+c.replaced+' of your current selections':'')+'.</p>'+
-  (plan.rows.length&&plan.rows.some(function(r){return r.why!=='same'})?'':'<p class="t-b2">Every stage this package covers is already yours — adding it changes nothing.</p>')+alts;
-var g=document.getElementById('fxg');if(g)g.disabled=!plan.ready}
-function fxSummary(){
-if(!FX_DONE)return '';
-var name=function(k){var s2=J.SEGMENTS.filter(function(z){return z.key===k})[0];return s2?s2.when+' · '+s2.place:k};
-return '<p class="t-b2 measure-w" data-fx-summary><b>'+esc(FX_DONE.name)+(FX_DONE.filled.length?' selected '+FX_DONE.filled.length+(FX_DONE.filled.length===1?' stage':' stages')+' for you.':(FX_DONE.waitlisted.length?' placed you on the waiting list.':' changed nothing — every stage it covers was already yours.'))+'</b>'+
-  (FX_DONE.fallback.length?' Replaced because the suggested room could not take your party: '+FX_DONE.fallback.map(name).join(' · ')+'.':'')+
-  (FX_DONE.waitlisted.length?' On the waiting list: '+FX_DONE.waitlisted.map(name).join(' · ')+'.':'')+
-  (FX_DONE.left.length?' Could not be held just now: '+FX_DONE.left.map(name).join(' · ')+' — as it was before.':'')+' Every stage below shows what was selected; change any of them.</p>'}
-function fxOpen(kind){
-if(!kind){FX_OPEN=false;FXMODE=null;FX_PLAN=null;if(SH)SH.closeDrawer();return}
-var pk=J.packages()[kind];if(!pk)return;
-FXMODE=kind;FX_OPEN=true;
-var h='<p class="t-l1">'+esc(pk.name)+'</p>'+
-  '<h2 class="t-h1" style="margin-top:8px">'+esc(pk.short)+'</h2>'+
-  '<p class="t-b1 measure" id="fxp" style="margin-top:12px">A package is a package: for every stage it covers, the room, cabin or seat defined for it — or the next defined option that can take your party — replaces what you had chosen there. Stages it does not cover stay exactly as they are. Nothing is held until you add it.</p>'+
-  '<div id="csel" style="margin-top:16px"></div>'+
-  '<div class="p-actions" style="display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;margin-top:24px"><button type="button" class="p-link mute" id="fxc">Cancel</button>'+
-  '<button type="button" class="p-act" id="fxg">Add the '+esc(pk.name.toLowerCase())+'</button></div>';
-if(!SH)return;
-SH.drawer(h,function(){
-  document.getElementById('fxc').addEventListener('click',function(){fxOpen(null)});
-  document.getElementById('fxg').addEventListener('click',fxConfirm);
-  if(U&&U.load)U.load(true).then(function(){if(FX_OPEN&&FXMODE===kind)fxPreview(false)});
-  fxPreview(false)})}
-/* the shell closed the drawer (Escape, the scrim, Close): the package mode ends with it — a confirm deciding meanwhile applies nothing */
-document.addEventListener('siyl:drawer-close',function(){FX_OPEN=false;FXMODE=null;FX_PLAN=null});
-/* the engine's answer while the drawer is OPEN redraws the preview (never while a confirm is deciding) */
-document.addEventListener('siyl:units',function(){if(FX_OPEN&&!FX_DECIDING&&FXMODE&&document.getElementById('csel')&&document.querySelector('.fxl'))fxPreview(false)});
-/* the party's stays are held one after the other, in the guest's own name, in the units the plan named — a unit that
-   filled meanwhile is left open and said so */
-async function holdPlanRows(rows,need){
-  var left=[];
-  for(var i=0;i<rows.length;i++){var r=rows[i];
-    if(r.why==='same'||r.why==='waitlist')continue;
-    var it=r.items[0];if(!it)continue;
-    if(!it.room||it.interest){it.qty=1;SIYL_BAG.put(it);continue}
-    var win=P.windowOf(it.id);
-    var res=await ST.select(win,it.room,r.unit||undefined,need);
-    if(!res.ok)left.push(r)}
-  return left}
-async function fxConfirm(){
-var kind=FXMODE;if(!kind)return;
-/* THE CONFIRM APPLIES THE PLAN THAT WAS SHOWN: the engine is read again with the drawer open; a changed plan is drawn again
-   with the change said and nothing is applied; only an unchanged plan closes the drawer and is added */
-var fxg=document.getElementById('fxg');if(fxg){fxg.disabled=true;fxg.textContent='Checking availability…'}
-var fresh=null;FX_DECIDING=true;try{if(U&&U.load)fresh=await U.load(true)}finally{FX_DECIDING=false}
-/* the guest said no meanwhile (Cancel, Escape, the scrim): nothing is applied */
-if(!FX_OPEN||FXMODE!==kind||!document.getElementById('fxg'))return;
-var plan=J.packagePlan(kind);
-/* an engine that could not be read again is a changed plan: shown again, never applied on the old view */
-if(!fresh||!plan.ready||!FX_PLAN||FX_PLAN.kind!==kind||J.planSignature(plan)!==FX_PLAN.sig){fxPreview(true,!fresh);if(fxg){fxg.disabled=!plan.ready||!fresh;fxg.textContent='Add the '+esc(plan.name.toLowerCase())}return}
-fxOpen(null);
-gated(async function(){
-  /* 1 · a "not joining" of a covered stage is lifted; 2 · the current lines of covered stages that the package replaces go —
-     a held room through the engine (the release names its window) */
-  plan.unskip.forEach(function(k){J.skip(k,false)});
-  /* a held ROOM that a package room replaces is not released here: the engine holds the new place first and only then lets
-     the old one go (a refused hold leaves the guest's own room as it was); a flat line is simply replaced; a held room in a
-     stage that goes on the waiting list is released, as the preview said — and only a released room lets the line be taken */
-  var notReleased={};
-  for(var i=0;i<plan.rows.length;i++){var r=plan.rows[i];if(!r.replaces||r.why==='same')continue;
-    var heldRoom=!!(r.replaces.room&&!r.replaces.interest&&P.locate(r.replaces.id));
-    if(heldRoom){if(r.why==='waitlist'){var rel=await ST.remove(P.windowOf(r.replaces.id));if(!rel||rel.ok===false)notReleased[r.seg.key]=true}}
-    else if(r.why==='waitlist'||!r.items[0]||r.items[0].id!==r.replaces.id){SIYL_BAG.remove(r.replaces.id)}}
-  /* 3 · the package's products, held one by one in the units the preview named */
-  var left=await holdPlanRows(plan.rows,plan.need);
-  /* 4 · the stages no option could take: the waiting list — the engine's answer decides what is said afterwards */
-  var waited=[],notWaited=[];
-  for(var j=0;j<plan.waitlist.length;j++){var wk=plan.waitlist[j];
-    if(notReleased[wk]||!U||!U.wait){notWaited.push(wk);continue}
-    var wr=await U.wait(wk,plan.need,(plan.rows.filter(function(x){return x.seg.key===wk})[0]||{}).tried||[]);
-    if(wr&&wr.ok!==false)waited.push(wk);else notWaited.push(wk)}
-  /* a stage the package could not hold keeps the answer it had: a lifted "not joining" is put back */
-  left.forEach(function(l){if(l.wasDeclined)J.skip(l.seg.key,true,'manual')});
-  FX_DONE={name:plan.name,at:new Date().toISOString(),
-    filled:plan.rows.filter(function(x){return x.why!=='waitlist'&&x.why!=='same'&&!left.some(function(l){return l.seg.key===x.seg.key})}).map(function(x){return x.seg.key}),
-    fallback:plan.rows.filter(function(x){return x.why==='fallback'&&!left.some(function(l){return l.seg.key===x.seg.key})}).map(function(x){return x.seg.key}),
-    waitlisted:waited,left:left.map(function(l){return l.seg.key}).concat(notWaited)};
-  render();
-  var d=document.getElementById('dec');if(d)d.scrollIntoView({behavior:'smooth',block:'center'});
-})}
 
 /* a change the engine refused. It lives in its own block, not inside the
  * decisions panel, because render() rewrites that panel on every bag event */
@@ -539,7 +458,6 @@ box.innerHTML='<div class="p-card" style="margin-top:var(--s5)"><p class="t-l1 o
 box.scrollIntoView({behavior:'smooth',block:'center'})}
 document.addEventListener('siyl:bag',function(){var b=document.getElementById('csnote');if(b)b.innerHTML=''});
 
-/* the engine's answer while the drawer is OPEN redraws the preview (never while a confirm is deciding — the drawer is closed then) */
 document.addEventListener('siyl:bag',render);
 document.addEventListener('siyl:confirm',render);
 document.addEventListener('siyl:temple',render);

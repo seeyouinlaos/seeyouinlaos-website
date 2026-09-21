@@ -14,10 +14,8 @@ sandbox.window.document = sandbox.document;
 new Function('window', 'document', readFileSync(join(ROOT, 'assets/rooms-data.js'), 'utf8'))(sandbox.window, sandbox.document);
 new Function('window', 'document', readFileSync(join(ROOT, 'assets/pricing.js'), 'utf8'))(sandbox.window, sandbox.document);
 new Function('window', 'document', readFileSync(join(ROOT, 'assets/transport-data.js'), 'utf8'))(sandbox.window, sandbox.document);
-new Function('window', 'document', readFileSync(join(ROOT, 'assets/packages-data.js'), 'utf8'))(sandbox.window, sandbox.document);
 const P = sandbox.window.SIYL_PRICE;
 const R = sandbox.window.SIYL_ROOMS;
-const K = sandbox.window.SIYL_PACKAGES;
 /* a source read the way the guest reads it — comments are not surfaces */
 const stripComments = (src) => src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '').replace(/<!--[\s\S]*?-->/g, '');
 
@@ -177,7 +175,7 @@ test('D2 · the Guest House complimentary is a USD 0 line of the wedding window,
   assert.equal(P.locate('airbnb-2br'), null);
   assert.deepEqual(P.items('airbnb-2br', 'private-residence'), []);
   assert.equal(SEED['airbnb-2br/private-residence'], undefined);
-  for (const f of ['assets/pricing.js', 'assets/rooms-data.js', 'assets/packages-data.js', 'assets/journey.js', 'assets/stay.js',
+  for (const f of ['assets/pricing.js', 'assets/rooms-data.js', 'assets/stage-graph.js', 'assets/journey.js', 'assets/stay.js',
                    'assets/rooms.js', 'assets/bag.js', 'assets/stay-media.js', 'src/inventory-seed.js', 'src/rooms.js', 'src/worker.js',
                    'src/mail-templates.js', 'journeys.html', 'your-journey.html', 'review.html', 'cart.html', 'room.html',
                    'accommodation.html', 'profile.html']) {
@@ -191,53 +189,12 @@ test('D2 · the Guest House complimentary is a USD 0 line of the wedding window,
  * windows, the Heritage Executive first, then the next compatible category of the SAME house in the house's order, then the
  * waiting list; never the Guest House, never the Riverside. Price never decides; capacity does. The Complete trip's
  * wedding-stay chain is unchanged and still ends with the alternatives. */
-test('the Essential trip is the Owner\'s (corrected 20 Sep 2026): stage D alone, D1 preselected — the Souphattra Heritage, the Heritage Executive first, the same house only, then the waiting list — never C; the Complete trip\'s wedding-stay chain is unchanged (Owner, 20 Sep 2026)', async () => {
-  const { SEED } = await import('../src/inventory-seed.js');
-  const { stageOf } = await import('../src/rooms.js');
-  assert.deepEqual(sandbox.window.SIYL_PACKAGE_ORDER, ['complete', 'essential'], 'two packages, offered in this order — no third mode');
-  assert.deepEqual(Object.keys(K), ['complete', 'essential']);
-  assert.equal(K.essential.name, 'Essential trip'); assert.equal(K.essential.approved, true); assert.match(K.essential.source, /002_Overview \(stage D · Wedding Stay/); assert.doesNotMatch(K.essential.source, /C · D1/);
-  assert.deepEqual(Object.keys(K.essential.stages), ['wedstay'], 'D = the Wedding Stay alone (the Owner, 20 Sep 2026): C is not part of the Essential trip');
-  for (const st of ['wedstay']) {
-    const ch = K.essential.stages[st];
-    assert.equal(ch[0], st + '/heritage-executive', 'the Heritage Executive first');
-    assert.deepEqual(ch, [st + '/heritage-executive', st + '/heritage', st + '/heritage-grand-premier', st + '/noble-courtyard', st + '/grand-majestic', st + '/souphattra-majestic', st + '/souphattra-presidential'], 'the same house only, its more affordable neighbour first, then outwards');
-    assert.ok(ch.every((k) => k.startsWith(st + '/') && SEED[k] && stageOf(k) === st), 'every option a Souphattra room of the window');
-    assert.ok(!ch.some((k) => /riverside|guesthouse/.test(k)), 'never another house');
-  }
-  const chain = K.complete.stages.wedstay;
-  assert.deepEqual(chain.slice(-3), ['wedstay/souphattra-presidential', 'riverside/superior-window', 'guesthouse/guest-house'], 'the wedding-stay chain ends with the Riverside and the complimentary house');
-  /* every option is a real product: priced by the one source, held by the room engine, answering the same stage */
-  const amounts = chain.map((key) => {
-    const [win, slug] = key.split('/');
-    assert.ok(SEED[key], key + ' is not in the room engine');
-    assert.equal(stageOf(key), 'wedstay', key + ' answers another stage');
-    const lines = P.items(win, slug);
-    assert.equal(lines.length, 1, key + ' is one line');
-    assert.equal(lines[0].room, slug, key + ' must select the named room');
-    assert.ok(['wedstay', 'riverside', 'guesthouse'].includes(lines[0].id), key + ' is not a wedding-stay line');
-    return lines[0].price;
-  });
-  assert.deepEqual(amounts, [170, 155, 145, 240, 250, 290, 750, 60, 0], 'the approved default first, then the house from its more affordable neighbours outwards, then the Riverside, then the complimentary house');
-  assert.equal(P.quote('wedstay', 'heritage').pay, 1, 'the Souphattra rooms pay one night of two');
-  assert.equal(P.quote('riverside', 'superior-window').pay, 2, 'the Riverside pays both nights');
-  assert.equal(P.items('guesthouse', 'guest-house')[0].complimentary, true, 'the last option is the complimentary house');
-  /* the chain is a rule of the configuration, not of price: it is neither ascending nor descending */
-  assert.notDeepEqual(amounts, [...amounts].sort((a, b) => a - b));
-  assert.notDeepEqual(amounts, [...amounts].sort((a, b) => b - a));
-  /* the Complete trip covers all ten stages, opens the wedding stay with the approved room and ends with the same alternatives */
-  assert.deepEqual(Object.keys(K.complete.stages), ['bkk-stay', 'train', 'prewed', 'wedstay', 'mu9646', 'kmg', 'c86', 'ljg', 'return', 'kempinski']);
-  assert.equal(K.complete.stages.wedstay[0], 'wedstay/' + sandbox.window.SIYL_FULL_EXPERIENCE.wedstay);
-  assert.deepEqual(K.complete.stages.wedstay.slice(-2), ['riverside/superior-window', 'guesthouse/guest-house']);
-  for (const key of K.complete.stages.wedstay) assert.equal(stageOf(key), 'wedstay');
-  /* the retired planner never comes back */
-  const journey = stripComments(readFileSync(join(ROOT, 'assets/journey.js'), 'utf8'));
-  assert.doesNotMatch(journey, /fullExperience\s*[:(]|costSavingOptions|costSavingPlan|selfArranged|soldOutStages/, 'the old planner API is gone');
-  assert.match(journey, /packagePlan/, 'the package plan is the one planner');
-  const trip = stripComments(readFileSync(join(ROOT, 'your-journey.html'), 'utf8'));
-  assert.doesNotMatch(trip, /id="fxb"|id="csb"|Every stage you have already chosen stays exactly as you chose it/);
+test('THE PACKAGES ARE GONE (Owner, 21 Sep 2026): no package data, no package order, no package word in the pricing, the journey or the pages; the Wedding Stay prices one night of two in every Souphattra category', () => {
+  assert.equal(sandbox.window.SIYL_PACKAGES, undefined); assert.equal(sandbox.window.SIYL_PACKAGE_ORDER, undefined);
+  for (const f of ['assets/pricing.js', 'assets/journey.js', 'assets/guest.js', 'your-journey.html', 'review.html', 'profile.html', 'cart.html']) assert.doesNotMatch(stripComments(readFileSync(join(ROOT, f), 'utf8')), /SIYL_PACKAGES|packagePlan|packages-data|Complete trip|Essential trip/, f);
+  for (const slug of R.souphattra.rooms.map((r) => r.slug)) { const q = P.quote('wedstay', slug); assert.equal(q.pay, 1); assert.equal(q.total, q.rate, slug + ': one nightly rate for the two wedding nights'); }
+  assert.equal(P.quote('wedstay', 'heritage').total, 145, 'the default, The Heritage'); assert.equal(R.souphattra.rooms[0].slug, 'heritage');
 });
-
 test('D · the Wedding Stay is ONE payable item, never two complimentary rows', () => {
   const bag = pick('wedstay', 'heritage');
   assert.equal(bag.length, 1, 'exactly one Wedding Stay line');
@@ -438,9 +395,10 @@ test('the private journey has one shell, one design system and a hard boundary',
   assert.match(shell, /aria-modal', 'true'/);
 });
 
-test('rooms are merchandised highest rate first', () => {
+test('rooms are merchandised highest rate first — the Souphattra alone from The Heritage upward, its default first (Owner, 21 Sep 2026)', () => {
   for (const k of Object.keys(R)) {
     const rates = R[k].rooms.map((r) => (r.rate == null ? -1 : r.rate));
+    if (k === 'souphattra') { assert.deepEqual(rates, [...rates].sort((a, b) => a - b), 'the Souphattra ascends'); assert.equal(R[k].rooms[0].slug, 'heritage'); continue; }
     assert.deepEqual(rates, [...rates].sort((a, b) => b - a), k + ' is not premium-first');
   }
 });
@@ -824,8 +782,8 @@ test('Snow Mountain Viewing Room carries its own three room photographs (the Own
 
 
 /* ==========================================================================
-   THE COMPLETE TRIP'S DEFAULTS ARE ONE CONFIGURATION — the same ten products
-   whatever the guest arrived from. The Guest House complimentary is the LAST
+   THE OWNER'S PREFERRED ROOMS ARE ONE CONFIGURATION (SIYL_PRICE.approved) — once
+   a package's defaults; the packages left on 21 Sep 2026, the preference stays a fact of the pricing. The Guest House complimentary is the LAST
    fallback of the wedding stay's chain (Owner, 19 Sep 2026), never its default
    and never a mode of its own.
    ========================================================================== */
@@ -833,29 +791,7 @@ const STAGES = ['bkk-stay', 'train', 'prewed', 'wedstay', 'mu9646', 'kmg', 'c86'
 const fullExperience = (available) =>
   STAGES.flatMap((w) => (P.FLAT[w] ? P.items(w) : P.items(w, P.approved(w, available && available(w)).slug)));
 
-test('the Complete trip\'s defaults are ONE canonical configuration, from any starting point', () => {
-  const canonical = fullExperience();
-  assert.equal(canonical.length, 10);
-  assert.equal(total(canonical), 2175);
-  /* stage 04 is a Souphattra room at one payable night — never the
-     complimentary Guest House that answers the same stage as the chain's last fallback */
-  const wed = canonical.find((x) => x.id === 'wedstay');
-  assert.ok(wed, 'the wedding stage is answered by a Souphattra room');
-  assert.equal(wed.price, 170);
-  assert.equal(wed.room, 'heritage-grand-premier');
-  assert.ok(!canonical.some((x) => x.id === 'guesthouse' || x.complimentary), 'no complimentary line among the defaults');
-  assert.ok(!canonical.some((x) => x.id === 'riverside'), 'the Riverside is a fallback, not a default');
-  /* the defaults are the packages' first options, stage by stage */
-  for (const w of ['bkk-stay', 'prewed', 'wedstay', 'kmg', 'ljg', 'kempinski']) {
-    assert.equal(K.complete.stages[w][0], w + '/' + P.approved(w).slug, w + ' default');
-  }
-  /* and no reserved inventory anywhere in it — nothing is arranged for anyone in advance */
-  for (const w of ['prewed', 'wedstay', 'kmg', 'ljg']) assert.ok(!P.approved(w).reserved);
-});
-
-/* OWNER-APPROVED 09 September 2026. Full Experience is a named configuration,
-   not "the most expensive room in every house". */
-test('the ten Owner-approved Complete trip defaults sum to USD 2,175 (train USD 100 since 14 Sep 2026, C86 USD 105 — the current Operations Master, 19 Sep 2026)', () => {
+test('the ten Owner-preferred rooms and transports (SIYL_PRICE.approved — no package, 21 Sep 2026) sum to USD 2,175 (train USD 100 since 14 Sep 2026, C86 USD 105 — the current Operations Master, 19 Sep 2026)', () => {
   const expect = {
     'bkk-stay':  { room: 'penthouse',              rate: 85,  pay: 3, amount: 255 },
     train:       {                                             amount: 100 },

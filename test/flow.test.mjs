@@ -65,7 +65,9 @@ test('FLOW · step 02 needs every stage answered AND a place in every chosen roo
   assert.equal(stepOf(G, 'journey').missing.length, J.SEGMENTS.length, 'ten stages to answer (every destination joined)');
   assert.equal(stepOf(G, 'journey').missing[0].href, 'your-journey.html#s-bkk-stay');
   J.SEGMENTS.forEach((s) => J.skip(s.key, true));
-  assert.equal(G.done('journey'), true, 'not joining is an answer');
+  assert.equal(G.done('journey'), false, 'not joining is an answer — except for the mandatory Kunming → Lijiang train inside China (the graph, 21 Sep 2026)');
+  deq(stepOf(G, 'journey').missing.map((m) => m.key), ['stage:c86']); w.SIYL_PRICE.items('c86').forEach((it) => w.SIYL_BAG.put(it));
+  assert.equal(G.done('journey'), true, 'the train chosen: every stage answered');
   J.skip('wedstay', false);
   const r = await ST.select('wedstay', 'heritage');
   assert.equal(r.ok, true); assert.equal(r.unit, 'A');
@@ -145,7 +147,7 @@ test('FLOW · 06 opens only when 01–05 are complete; readiness lists every mis
   const w = page({ auth: PEGGY });
   const G = w.SIYL_GUEST, J = w.SIYL_JOURNEY;
   completeExceptJourney(w);
-  J.SEGMENTS.forEach((s) => J.skip(s.key, true));
+  J.SEGMENTS.forEach((s) => J.skip(s.key, true)); w.SIYL_PRICE.items('c86').forEach((it) => w.SIYL_BAG.put(it));
   assert.equal(G.mayEnter('review'), true);
   assert.equal(G.readiness().ok, true);
   assert.equal(G.nextHref(), 'review.html');
@@ -262,91 +264,3 @@ test('CART · one guest sees only their own cart; remove updates the authoritati
   assert.equal(w4.SIYL_BAG.authed(), false);
 });
 
-test('CART · a package holds the guest\'s own places in the guest\'s own name, keeps a matching choice, replaces a conflicting one, never selects a room that cannot take the party, and waitlists a stage no option can take (Owner, 19 Sep 2026)', async () => {
-  const rooms = new Rooms(doState());
-  const w = await livePage(PEGGY, rooms);
-  const J = w.SIYL_JOURNEY, ST = w.SIYL_STAY, B = w.SIYL_BAG, P = w.SIYL_PRICE, U = w.SIYL_UNITS, G = w.SIYL_GUEST;
-  const seg = (k) => J.SEGMENTS.find((s) => s.key === k);
-  assert.equal(J.partySize(), 2, 'Peggy & Steffie: a unit must take both');
-  /* Peggy's own hand first: the wedding stay matches the package's default (kept), the pre-wedding stay does not (replaced), Kunming was declined (reversed) */
-  assert.equal((await ST.select('wedstay', 'heritage-grand-premier')).unit, 'A');
-  assert.equal((await ST.select('prewed', 'heritage-executive')).unit, 'A');
-  J.skip('kmg', true);
-  /* elsewhere: Lin takes one place of the only Italian Style Suite — one place left cannot take a party of two; every Kempinski room already has one guest — no room of the only option takes two together */
-  const lin = await livePage(LIN, rooms);
-  assert.equal((await lin.SIYL_STAY.select('kmg', 'italian')).ok, true);
-  for (const L of 'ABCDEF') await rooms.storage.put('occ:kempinski/deluxe-balcony-king|' + L + '|g-guest-' + L, { invitationId: 'INV-guest-' + L, partyId: 'INV-DEMO-1' + L, name: 'Guest ' + L, at: '2026-09-19T00:00:00.000Z' });
-  await U.load(true);
-  const before = { bag: plain(B.get()), occ: plain(await rooms.occupancies()), skipped: J.isSkipped('kmg') };
-  const plan = J.packagePlan('complete');
-  /* the plan is PURE: computing it holds nothing, writes nothing, lifts nothing */
-  deq(B.get(), before.bag); deq(await rooms.occupancies(), before.occ); assert.equal(J.isSkipped('kmg'), before.skipped);
-  assert.equal(plan.ready, true); assert.equal(plan.need, 2);
-  const row = (k) => plan.rows.find((r) => r.seg.key === k);
-  deq(plan.rows.map((r) => [r.seg.key, r.why, r.key, r.unit]), [
-    ['bkk-stay', 'default', 'bkk-stay/penthouse', 'A'], ['train', 'default', 'train', null],
-    ['prewed', 'default', 'prewed/heritage-grand-premier', 'A'], ['wedstay', 'same', 'wedstay/heritage-grand-premier', 'A'],
-    ['mu9646', 'default', 'mu9646', null], ['kmg', 'fallback', 'kmg/light-french', 'A'], ['c86', 'default', 'c86', null],
-    ['ljg', 'default', 'ljg/viewing-270', 'A'], ['return', 'default', 'return', null], ['kempinski', 'waitlist', null, null],
-  ], 'all ten stages: the default where it takes the party, the same where the guest already holds it, the next defined option where it cannot, the waiting list where none can');
-  assert.equal(row('wedstay').replaces, null, 'a matching choice is kept, not re-held');
-  assert.equal(row('prewed').replaces.room, 'heritage-executive', 'a conflicting choice is named as replaced');
-  assert.equal(row('kmg').wasDeclined, true); deq(plan.unskip, ['kmg']);
-  deq(row('kmg').tried, ['kmg/italian', 'kmg/light-french'], 'capacity decides: the full default is tried and passed over');
-  deq(plan.waitlist, ['kempinski']); deq(row('kempinski').tried, ['kempinski/deluxe-balcony-king']);
-  assert.equal(plan.total, plan.rows.filter((r) => r.why !== 'waitlist').reduce((t, r) => t + r.amount, 0), 'a waitlisted stage costs nothing');
-  deq(plan.counts, { stages: 10, defaults: 7, fallbacks: 1, waitlisted: 1, replaced: 1, same: 1 });
-  assert.ok(plan.add.every((it) => it.qty === 1 && it.by === 'complete'));
-  /* nothing is reserved for anyone: the Presidential is a room like any other, last in the chain, never skipped for a reservation */
-  assert.equal(U.reserved(), false);
-  assert.ok(J.packages().complete.stages.wedstay.includes('wedstay/souphattra-presidential'));
-  assert.ok(U.units('wedstay', 'souphattra-presidential').every((u) => u.reservedFor === null && u.eligible === true));
-  /* THE CONFIRM, as the page applies the plan it showed (your-journey.html fxConfirm): the engine read again, the same plan */
-  const heldAt = (await rooms.occupancies()).find((o) => o.key === 'wedstay/heritage-grand-premier' && o.guestId === 'g-peggy').at;
-  await U.load(true);
-  assert.equal(J.planSignature(J.packagePlan('complete')), J.planSignature(plan), 'unchanged availability: the plan shown is the plan applied');
-  plan.unskip.forEach((k) => J.skip(k, false));
-  for (const r of plan.rows) {
-    if (!r.replaces || r.why === 'same') continue;
-    if (r.replaces.room && !r.replaces.interest && P.locate(r.replaces.id)) assert.equal((await ST.remove(P.windowOf(r.replaces.id))).ok, true); else B.remove(r.replaces.id);
-  }
-  for (const r of plan.rows) {
-    if (r.why === 'same' || r.why === 'waitlist') continue;
-    const it = r.items[0];
-    if (!it.room || it.interest) { it.qty = 1; B.put(it); continue; }
-    const res = await ST.select(P.windowOf(it.id), it.room, r.unit || undefined, plan.need);
-    assert.equal(res.ok, true, r.seg.key + ' is held'); assert.equal(res.unit, r.unit);
-  }
-  for (const k of plan.waitlist) assert.equal((await U.wait(k, plan.need, row(k).tried)).ok, true);
-  /* every stage answered: nine held or chosen, one on the waiting list */
-  assert.equal(J.open().length, 0);
-  assert.equal(ST.line('prewed').room, 'heritage-grand-premier'); assert.equal(ST.line('prewed').unit, 'A');
-  assert.equal(ST.line('wedstay').room, 'heritage-grand-premier'); assert.equal(ST.line('wedstay').unit, 'A');
-  assert.equal((await rooms.occupancies()).find((o) => o.key === 'wedstay/heritage-grand-premier' && o.guestId === 'g-peggy').at, heldAt, 'the kept place is the same hold, untouched');
-  assert.equal(ST.line('kmg').room, 'light-french', 'never the room that cannot take the party');
-  assert.equal(U.mineFor('kmg', 'italian'), null);
-  assert.equal(J.isSkipped('kmg'), false);
-  assert.equal(U.mine('kempinski'), null); assert.equal(B.has('kempinski'), false, 'a waitlisted stage is no Bag line');
-  assert.equal(U.waitlisted('kempinski').position, 1); assert.equal(U.waitlisted('kempinski').size, 2);
-  assert.equal(J.state(seg('kempinski')), 'waitlisted'); assert.equal(J.waitPosition(seg('kempinski')), 1);
-  /* the places are the guest's own, in the guest's own name — one per stage, none for anyone else */
-  const mine = (await rooms.occupancies()).filter((o) => o.guestId === 'g-peggy');
-  deq(mine.map((o) => [o.key, o.label, o.name]).sort(), [['bkk-stay/penthouse', 'A', 'Peggy'], ['kmg/light-french', 'A', 'Peggy'], ['ljg/viewing-270', 'A', 'Peggy'], ['prewed/heritage-grand-premier', 'A', 'Peggy'], ['wedstay/heritage-grand-premier', 'A', 'Peggy']]);
-  assert.equal((await rooms.occupancies()).filter((o) => o.guestId === 'g-steffie').length, 0, 'Steffie books her own places');
-  deq(Object.keys(U.view().mine).sort(), ['bkk-stay', 'kmg', 'ljg', 'prewed', 'wedstay']);
-  /* the Bag carries the actual selections only, one line per stage, one guest per line; the preview's total is the Bag's total */
-  assert.equal(B.get().length, 9); assert.ok(B.get().every((x) => x.qty === 1));
-  assert.equal(B.total(), plan.total);
-  /* the canonical counts and their invariants */
-  const c = J.counts();
-  deq(c, { relevant: 10, confirmed: 9, waitlisted: 1, declined: 0, open: 0, excluded: 0, resolved: 10, bagItems: 9, bagTotal: plan.total });
-  assert.equal(c.relevant, c.confirmed + c.waitlisted + c.declined + c.open);
-  assert.equal(J.statusLine(), 'One stage on the waiting list.');
-  assert.equal(J.countsWords(), '9 stages chosen · 1 on the waiting list — of the 10 stages of your trip');
-  /* readiness: a waitlisted stage is answered, never a missing item; the package's places are held, so step 02 is complete */
-  completeExceptJourney(w);
-  assert.equal(G.done('journey'), true);
-  assert.equal(G.mayEnter('review'), true);
-  /* the second package plan now finds everything it covers already the guest's own — nothing to change */
-  assert.equal(J.packagePlan('complete').rows.every((r) => r.why === 'same' || r.why === 'waitlist'), true);
-});

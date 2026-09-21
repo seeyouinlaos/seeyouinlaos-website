@@ -514,6 +514,25 @@ gate('P7', 'Dress Code imagery real (23 — resort-01 retired by the owner), no 
   gate('C1', 'Asset fingerprints current on every page', r.status === 0, (r.stdout || '').trim().replace(/^ASSET VERSIONS: /, ''));
 }
 
+/* GATE G1 — THE ONE STAGE GRAPH (Owner, 21 Sep 2026 · the global My Trip rebuild): src/stage-graph.js is the one source of the
+ * scopes, the stages, their relevance and what "complete" means; assets/stage-graph.js is generated from it (src/build-stage-graph.cjs)
+ * and must be byte-current, so the pages and the Worker can never disagree. No package data, no package word on a guest surface. */
+{
+  const { spawnSync } = require('child_process');
+  const r = spawnSync('node', [path.join(__dirname, 'build-stage-graph.cjs'), '--check'], { encoding: 'utf8' });
+  const problems = [];
+  if (r.status !== 0) problems.push('assets/stage-graph.js is stale — run node src/build-stage-graph.cjs');
+  if (fs.existsSync(path.join(ROOT, 'assets/packages-data.js'))) problems.push('assets/packages-data.js still exists');
+  const shown = (f) => read(f).replace(/\/\*[\s\S]*?\*\//g, '');
+  for (const f of ['your-journey.html', 'review.html', 'profile.html', 'cart.html', 'tickets.html', 'about-you.html', 'wedding.html', 'wedding-preparation.html', 'journeys.html', 'assets/journey.js', 'assets/guest.js', 'src/worker.js', 'src/mail-templates.js']) {
+    if (/packages-data|SIYL_PACKAGES|packagePlan|Complete Trip|Essential Trip|Complete trip|Essential trip/.test(shown(f))) problems.push(f + ' still carries a package');
+  }
+  for (const f of fs.readdirSync(ROOT).filter((n) => /\.html$/.test(n))) { const h = read(f); if (/assets\/guest\.js/.test(h) && !/assets\/stage-graph\.js/.test(h)) problems.push(f + ' loads guest.js without the graph'); }
+  if (!/import \{ completion as graphCompletion/.test(read('src/worker.js')) || !/if \(!done\.canSend\) \{/.test(read('src/worker.js'))) problems.push('the Worker does not validate a submission with the graph');
+  gate('G1', 'One stage graph: the generated client copy is current, the Worker validates with it, no package survives', problems.length === 0,
+    problems.length ? problems.join(' · ') : (r.stdout || '').trim());
+}
+
 /* GATE M1 — THE MEDIA RECORDS (Owner, release 012 · 19 Sep 2026): the stay media record (hotel taxonomy, every frame of the hotel it
  * names, from the Owner's Drive) is what assets/stay-media.js carries, and the experience galleries carry a kind on every frame and
  * never a dish — both builders refuse a record that breaks the rule. */

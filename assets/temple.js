@@ -213,8 +213,8 @@
        for a reconsideration; they are never sent as attendance). Read from the guest record, which owns the scope. */
     participation: function () {
       var G = window.SIYL_GUEST;
-      if (!G || !G.scopeAnswered || !G.scopeAnswered() || G.joins('vientiane')) return '';
-      return G.notJoining() ? 'Not joining this trip' : 'Not joining Vientiane';
+      if (!G || !G.scopeAnswered || !G.scopeAnswered() || G.joins('vientianeWedding')) return '';
+      return G.notJoining() ? 'Not joining this trip' : 'Not joining the wedding';
     },
     operational: function () {
       var self = this;

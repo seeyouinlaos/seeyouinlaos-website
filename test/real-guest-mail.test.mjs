@@ -7,6 +7,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { bearerOf, authIdOf } from '../register/crypto.mjs';
 import { src } from './sandbox.mjs';
+import { complete } from './complete.mjs';
 
 const ORIGIN = 'https://seeyouinlaos-website.suthep-hrg.workers.dev';
 function req(path, headers = {}, body, method) { return new Request(ORIGIN + path, { method: method || (body ? 'POST' : 'GET'), headers: { 'content-type': 'application/json', ...headers }, body: body ? JSON.stringify(body) : undefined }); }
@@ -33,7 +34,7 @@ async function harness() {
 test('REAL PATH · the journey-shop payload: the guest email at registration.contact reaches the guest, the name and the seats are read from the real shape, the record carries the recipient and the flat mail summary', async () => {
   const h = await harness();
   try {
-    const r = await h.w.fetch(req('/api/register', { 'x-siyl-auth': h.sam }, { invitationId: 'INV-G777', registration: REAL('sam.example@example.org'), text: TEXT }), h.env);
+    const r = await h.w.fetch(req('/api/register', { 'x-siyl-auth': h.sam }, { invitationId: 'INV-G777', registration: complete(REAL('sam.example@example.org'), { scope: { vientianeWedding: true } }), text: TEXT }), h.env);
     assert.equal(r.status, 202); const d = await r.json();
     assert.equal(d.mail.guest.accepted, true); assert.equal(d.mail.guest.to, 's…@example.org'); assert.equal(d.mail.owner.accepted, true);
     assert.deepEqual(d.mailSummary, { ownerMailStatus: 'accepted', ownerMessageId: '<msg-1@brevo>', guestMailStatus: 'accepted', guestMessageId: '<msg-2@brevo>', guestTo: 's…@example.org', mailLastError: null, at: d.mailSummary.at });
@@ -56,7 +57,7 @@ test('REAL PATH · the journey-shop payload: the guest email at registration.con
 test('REAL PATH · a journey without an email is refused (422, the words for the email field, nothing stored, nothing mailed); the contact route persists the email under the guest\'s own invitation; the journey is then accepted with the server contact as the recipient; another guest cannot write it', async () => {
   const h = await harness();
   try {
-    const r = await h.w.fetch(req('/api/register', { 'x-siyl-auth': h.sam }, { invitationId: 'INV-G777', registration: REAL(''), text: TEXT }), h.env);
+    const r = await h.w.fetch(req('/api/register', { 'x-siyl-auth': h.sam }, { invitationId: 'INV-G777', registration: complete(REAL('')), text: TEXT }), h.env);
     assert.equal(r.status, 422); const d = await r.json();
     assert.equal(d.error, 'email required'); assert.equal(d.message, 'Please add your email address so we can send your confirmation.'); assert.equal(d.field, 'email');
     assert.equal(h.store.m.has('reg:INV-G777'), false); assert.equal(h.calls.length, 0);
@@ -69,13 +70,13 @@ test('REAL PATH · a journey without an email is refused (422, the words for the
     const put = await h.w.fetch(req('/api/contact', { 'x-siyl-auth': h.sam }, { invitationId: 'INV-G777', email: 'sam.example@example.org', phone: '+66 81 000 0000' }, 'PUT'), h.env);
     assert.equal(put.status, 200); assert.equal(JSON.parse(h.store.m.get('contact:INV-G777').v).guestId, 'G777');
     /* the same journey (still without an email in it) is accepted — the recipient is the server contact */
-    const r2 = await h.w.fetch(req('/api/register', { 'x-siyl-auth': h.sam }, { invitationId: 'INV-G777', registration: REAL(''), text: TEXT }), h.env);
+    const r2 = await h.w.fetch(req('/api/register', { 'x-siyl-auth': h.sam }, { invitationId: 'INV-G777', registration: complete(REAL('')), text: TEXT }), h.env);
     assert.equal(r2.status, 202); const d2 = await r2.json();
     assert.equal(d2.mail.guest.accepted, true); assert.equal(h.calls[1].body.to[0].email, 'sam.example@example.org');
     assert.deepEqual(JSON.parse(h.store.m.get('reg:INV-G777').v).recipient, { email: 'sam.example@example.org', phone: '+66 81 000 0000', source: 'server contact' });
     /* the server contact wins over a different email typed on this device — one canonical recipient */
     h.calls.length = 0;
-    await h.w.fetch(req('/api/register', { 'x-siyl-auth': h.sam }, { invitationId: 'INV-G777', registration: REAL('other.device@example.org'), text: TEXT }), h.env);
+    await h.w.fetch(req('/api/register', { 'x-siyl-auth': h.sam }, { invitationId: 'INV-G777', registration: complete(REAL('other.device@example.org')), text: TEXT }), h.env);
     assert.equal(h.calls[1].body.to[0].email, 'sam.example@example.org');
   } finally { h.done(); }
 });

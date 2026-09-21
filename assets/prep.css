@@ -162,8 +162,16 @@ body.prep button, body.prep input, body.prep textarea, body.prep select { font-f
 .p-sel[aria-pressed="true"] .p-sel-r { color: var(--p-paper); }
 .p-selrow { display: flex; flex-wrap: wrap; gap: var(--s3); }
 .p-selrow > .p-sel { width: auto; flex: 1 1 auto; min-width: 160px; justify-content: center; }
-/* WHERE WILL YOU JOIN US (Owner, 18 Sep 2026): the three destinations as selection controls, the dates beneath each name */
-.p-scope > .p-sel { flex-direction: column; align-items: flex-start; gap: 4px; min-width: 0; flex: 1 1 calc(33.333% - var(--s3)); padding: var(--s3) var(--s4); text-align: left; }
+/* WHERE WILL YOU JOIN US (Owner, 21 Sep 2026): the FOUR participation sheets as selection controls, the dates beneath each
+   name — two by two from tablet width, one per row on a phone; the shared spacing tokens keep the air between the sheets */
+.p-scope > .p-sel { flex-direction: column; align-items: flex-start; gap: 4px; min-width: 0; flex: 1 1 calc(50% - var(--s3)); padding: var(--s4) var(--s4); text-align: left; }
+.p-sheets { gap: var(--s4); margin-top: var(--s5); }
+#scope:not(:empty) + #dec:not(:empty) { margin-top: var(--s7); }
+#dec:not(:empty) + .prep-col:not(:empty) { margin-top: var(--s5); }
+.p-sheet-h { margin-top: var(--s8); padding-bottom: var(--s4); }
+.p-sheet-h + .p-stage { border-top-color: var(--p-ink); }
+.p-sheet-h .t-b2 { margin-top: var(--s1); }
+.p-card [data-release-preview] .p-list, .p-list { margin: var(--s4) 0 0; padding-left: 1.1em; display: grid; gap: var(--s2); }
 .p-scope .p-sel-t { font-family: var(--f-ed); font-weight: 200; font-size: 19px; letter-spacing: 0; text-transform: none; line-height: 1.15; }
 .p-scope .p-sel-s { font-size: 9.5px; letter-spacing: 1.4px; text-transform: uppercase; opacity: .75; line-height: 1.4; }
 @media (max-width: 519px) { .p-scope > .p-sel { flex-basis: 100%; } }
@@ -266,7 +274,7 @@ body.p-drawer-open .p-drawer { opacity: 1; }
 .prep-bar-foot .prep-state { grid-area: state; }
 .prep-bar-foot .prep-send-upd { grid-area: upd; justify-self: start; }
 .prep-bar-foot .prep-save-btn { grid-area: save; justify-self: start; }
-.prep-bar-foot .prep-save-state { grid-area: time; justify-self: end; text-align: right; min-height: 0; white-space: nowrap; }
+.prep-bar-foot .prep-save-state { grid-area: time; justify-self: end; text-align: right; min-height: 0; white-space: normal; max-width: 100%; }   /* the out-of-date sentence wraps on a phone instead of widening the page (21 Sep 2026) */
 .prep-bar-foot .prep-bar-r { grid-area: all; justify-self: end; margin: 0; }
 /* C · ANSWERING FOR — said in words, at reading size, on its own line.
    Not a colour, not a tab state: a guest who is completing something for

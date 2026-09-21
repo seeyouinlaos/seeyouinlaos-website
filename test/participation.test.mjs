@@ -42,15 +42,25 @@ function answerTheRest(w) {
 }
 
 const ALL = ['bkk-stay', 'train', 'prewed', 'wedstay', 'mu9646', 'kmg', 'c86', 'ljg', 'return', 'kempinski'];
+/* THE STAGE GRAPH (Owner, 21 Sep 2026): Bangkok → A + J; Pre-Wedding → C; the Wedding → D; China → F + G + H; B only with Bangkok and
+   the Pre-Wedding; E only with the Wedding and China; I only with China and Bangkok; G mandatory inside China */
 const MATRIX = [
   { name: 'none', patch: { none: true }, stages: [], words: 'Not joining this trip', wedding: false, about: false },
-  { name: 'Bangkok', patch: { bangkok: true }, stages: ['bkk-stay'], words: 'Bangkok', wedding: false, about: true },
+  { name: 'Bangkok', patch: { bangkok: true }, stages: ['bkk-stay', 'kempinski'], words: 'Bangkok', wedding: false, about: true },
+  { name: 'Pre-Wedding', patch: { vientianePreWedding: true }, stages: ['prewed'], words: 'Vientiane · Before the Wedding', wedding: false, about: true },
+  { name: 'Wedding', patch: { vientianeWedding: true }, stages: ['wedstay'], words: 'Vientiane · The Wedding', wedding: true, about: true },
   { name: 'Vientiane', patch: { vientiane: true }, stages: ['prewed', 'wedstay'], words: 'Vientiane', wedding: true, about: true },
-  { name: 'China', patch: { china: true }, stages: ['kmg', 'c86', 'ljg', 'return'], words: 'China', wedding: false, about: true },
-  { name: 'Bangkok + Vientiane', patch: { bangkok: true, vientiane: true }, stages: ['bkk-stay', 'train', 'prewed', 'wedstay'], words: 'Bangkok · Vientiane', wedding: true, about: true },
-  { name: 'Vientiane + China', patch: { vientiane: true, china: true }, stages: ['prewed', 'wedstay', 'mu9646', 'kmg', 'c86', 'ljg', 'return'], words: 'Vientiane · China', wedding: true, about: true },
+  { name: 'China', patch: { china: true }, stages: ['kmg', 'c86', 'ljg'], words: 'China', wedding: false, about: true },
+  { name: 'Bangkok + Pre-Wedding', patch: { bangkok: true, vientianePreWedding: true }, stages: ['bkk-stay', 'train', 'prewed', 'kempinski'], words: 'Bangkok · Vientiane · Before the Wedding', wedding: false, about: true },
+  { name: 'Bangkok + Wedding', patch: { bangkok: true, vientianeWedding: true }, stages: ['bkk-stay', 'wedstay', 'kempinski'], words: 'Bangkok · Vientiane · The Wedding', wedding: true, about: true },
+  { name: 'Bangkok + Vientiane', patch: { bangkok: true, vientiane: true }, stages: ['bkk-stay', 'train', 'prewed', 'wedstay', 'kempinski'], words: 'Bangkok · Vientiane', wedding: true, about: true },
+  { name: 'Wedding + China', patch: { vientianeWedding: true, china: true }, stages: ['wedstay', 'mu9646', 'kmg', 'c86', 'ljg'], words: 'Vientiane · The Wedding · China', wedding: true, about: true },
+  { name: 'Vientiane + China', patch: { vientiane: true, china: true }, stages: ['prewed', 'wedstay', 'mu9646', 'kmg', 'c86', 'ljg'], words: 'Vientiane · China', wedding: true, about: true },
+  { name: 'China + Bangkok', patch: { bangkok: true, china: true }, stages: ['bkk-stay', 'kmg', 'c86', 'ljg', 'return', 'kempinski'], words: 'Bangkok · China', wedding: false, about: true },
   { name: 'all', patch: { all: true }, stages: ALL, words: 'Bangkok · Vientiane · China', wedding: true, about: true },
 ];
+/* a stage is answered by a choice, a waiting-list place or "not joining this stage" — the mandatory Kunming → Lijiang train by a choice alone */
+const answerAll = (w, keys) => { const J = w.SIYL_JOURNEY, P = w.SIYL_PRICE, B = w.SIYL_BAG; for (const k of keys) { if (k === 'c86') P.items('c86').forEach((it) => B.put(it)); else J.skip(k, true, 'manual'); } };
 
 test('SCOPE · a guest has no scope until they answer; the question comes before every stage; any combination is valid and "I won\'t be joining" is exclusive', () => {
   const w = page({ auth: PEGGY }); const G = w.SIYL_GUEST, J = w.SIYL_JOURNEY;
@@ -60,11 +70,11 @@ test('SCOPE · a guest has no scope until they answer; the question comes before
   assert.equal(J.relevantSegments().length, 10, 'before the answer no stage disappears — the planner shows the question instead of the stages'); assert.equal(J.excludedSegments().length, 0);
   assert.match(src('your-journey.html'), /Your stages appear here once you have said where you will join us\./, 'the planner asks first');
   G.setScope({ bangkok: true }); assert.equal(G.joins('bangkok'), true); assert.equal(G.joins('china'), false); assert.equal(G.notJoining(), false);
-  G.setScope({ china: true }); deq(G.scope(), { ...G.scope(), bangkok: true, vientiane: false, china: true, none: false });
+  G.setScope({ china: true }); deq(G.scope(), { ...G.scope(), bangkok: true, vientianePreWedding: false, vientianeWedding: false, china: true, none: false });
   G.setScope({ none: true }); assert.equal(G.notJoining(), true); assert.equal(G.joiningAny(), false); assert.equal(G.joins('bangkok'), false, 'not joining clears every destination');
   G.setScope({ vientiane: true }); assert.equal(G.notJoining(), false, 'a destination clears "not joining"'); assert.equal(G.joins('vientiane'), true); assert.equal(G.joins('bangkok'), false);
   G.setScope({ all: true }); assert.equal(G.joinsAll(), true);
-  const st = json(w, 'siyl.guest'), id = G.me().guestId; assert.ok(st.scope && st.scope.at && st.scope.by === id, 'the answer is in the guest record — the draft carries it'); assert.ok(st.guests[id].history.some((h) => h.field === 'scope' && h.to === 'bangkok+vientiane+china'), 'and its history');
+  const st = json(w, 'siyl.guest'), id = G.me().guestId; assert.ok(st.scope && st.scope.at && st.scope.by === id, 'the answer is in the guest record — the draft carries it'); assert.ok(st.guests[id].history.some((h) => h.field === 'scope' && h.to === 'bangkok+vientianePreWedding+vientianeWedding+china'), 'and its history');
 });
 
 test('MATRIX · relevant stages, readiness, step states and words for every combination', () => {
@@ -76,16 +86,16 @@ test('MATRIX · relevant stages, readiness, step states and words for every comb
     assert.equal(G.scopeWords(), c.words, c.name + ' · words');
     const missing = G.missingFor('journey');
     deq(missing.map((m) => m.key), c.stages.map((k) => 'stage:' + k), c.name + ' · only the relevant stages are asked');
-    for (const m of missing) assert.match(m.label, /choose or say you are not joining/);
-    /* answer them all by declining: step 02 is complete with nothing in the Bag */
-    for (const k of c.stages) J.skip(k, true, 'manual');
+    for (const m of missing) assert.match(m.label, m.key === 'stage:c86' ? /choose your travel, it is part of China/ : /choose or say you are not joining/);
+    /* answer them all: every stage declined, the mandatory train chosen — step 02 is complete; the Bag carries the train alone */
+    answerAll(w, c.stages);
     assert.equal(G.done('journey'), true, c.name + ' · every relevant stage answered');
-    assert.equal(w.SIYL_BAG.total(), 0);
+    assert.equal(w.SIYL_BAG.total(), c.stages.includes('c86') ? 105 : 0, c.name + ' · only the mandatory train is chargeable');
     assert.equal(G.applicable('wedding'), c.wedding, c.name + ' · the wedding applies only in Vientiane'); assert.equal(G.applicable('preparation'), c.wedding);
     assert.equal(G.applicable('about'), c.about, c.name + ' · About You applies to anyone joining');
     const states = G.steps().map((s) => s.state);
     deq(states, ['complete', 'complete', c.wedding ? 'complete' : 'na', c.wedding ? 'complete' : 'na', c.about ? 'complete' : 'na', 'attention'], c.name + ' · step states');
-    if (!c.wedding) assert.equal(stepOf(G, 'wedding').note, c.name === 'none' ? 'Not joining this trip' : 'Not joining Vientiane', c.name + ' · the excluded step says why');
+    if (!c.wedding) assert.equal(stepOf(G, 'wedding').note, c.name === 'none' ? 'Not joining this trip' : 'Not joining the wedding', c.name + ' · the excluded step says why');
     if (!c.wedding) assert.equal(stepOf(G, 'wedding').stateLabel, 'Not joining');
     assert.equal(G.mayEnter('review'), true, c.name + ' · Review & Send opens'); assert.equal(G.readiness().ok, true, c.name + ' · ready');
     const op = G.operational(); assert.equal(op.scopeWords, c.words); assert.equal(!!(op.scope && op.scope.none), c.name === 'none');
@@ -117,11 +127,11 @@ test('PARTIAL ATTENDANCE · Bangkok only: the wedding steps read Not joining and
   answerTheRest(w); G.setScope({ bangkok: true });
   assert.equal(J.lineRelevant({ id: 'train' }), false, 'the night train needs Bangkok and Vientiane'); assert.equal(J.lineRelevant({ id: 'bkk-stay', room: 'u-sathorn-superior-garden' }), true);
   assert.equal(J.lineRelevant({ id: '1872' }), true); assert.equal(J.lineRelevant({ id: 'sangkhathan' }), false); assert.equal(J.lineRelevant({ id: 'mu9646' }), false); assert.equal(J.lineRelevant({ id: 'airbnb-2br', interest: true }), false, 'a Vientiane interest is not theirs');
-  J.skip('bkk-stay', true, 'manual');
+  J.skip('bkk-stay', true, 'manual'); J.skip('kempinski', true, 'manual');
   assert.equal(G.readiness().ok, true); deq(G.steps().map((s) => s.state), ['complete', 'complete', 'na', 'na', 'complete', 'attention']);
   /* widening the scope re-opens what now applies — nothing is lost, nothing is invented */
   G.setScope({ vientiane: true });
-  deq(G.missingFor('journey').map((m) => m.key), ['stage:train', 'stage:prewed', 'stage:wedstay'], 'the new stages are asked; the declined Bangkok stay stays declined');
+  deq(G.missingFor('journey').map((m) => m.key), ['stage:train', 'stage:prewed', 'stage:wedstay'], 'the new stages are asked; the declined Bangkok stays stay declined');
   assert.equal(G.applicable('wedding'), true); assert.equal(G.done('wedding'), true, 'the wedding answers given earlier still stand');
   assert.equal(B.total(), 0);
 });
@@ -170,8 +180,8 @@ test('TICKETS FOLLOW ATTENDANCE · a guest who leaves Vientiane releases only th
   deq(v.mine, { prewed: { key: 'prewed/heritage', label: 'A' } }, 'Steffie keeps her place'); assert.equal(v.units['prewed/heritage'][0].taken, 1);
   assert.equal(peggy.SIYL_GUEST.applicable('wedding'), false); deq(peggy.SIYL_GUEST.missingFor('preparation'), []);
   /* the pages: the wedding, the preparation and the tickets say Not joining and offer no seat, no pass, no offering outside the scope */
-  for (const f of ['wedding.html', 'wedding-preparation.html']) assert.match(src(f), /scopeAnswered\(\)&&!G0?\.joins\('vientiane'\)/, f + ' reads the scope');
-  assert.match(src('tickets.html'), /J\.lineRelevant/, 'passes are the relevant lines'); assert.match(src('tickets.html'), /joins\('vientiane'\)/, 'seats only in Vientiane');
+  for (const f of ['wedding.html', 'wedding-preparation.html']) assert.match(src(f), /scopeAnswered\(\)&&!G0?\.joins\('vientianeWedding'\)/, f + ' reads the wedding sheet');
+  assert.match(src('tickets.html'), /J\.lineRelevant/, 'passes are the relevant lines'); assert.match(src('tickets.html'), /joins\('vientianeWedding'\)/, 'seats only at the wedding');
   assert.match(src('your-journey.html'), /function reconcileScope\(/, 'the planner releases what is outside the scope through the existing APIs');
   assert.match(src('your-journey.html'), /ST\.remove\(/); assert.doesNotMatch(src('your-journey.html'), /\/api\/rooms\/(assign|unassign|plan)/, 'never Guest Relations operations');
 });
@@ -200,7 +210,7 @@ test('HARUTHAI · the hosts start at zero (Owner, 19 Sep 2026): no stage is arra
   /* the Bag carries only actual selections: USD 0 with nothing chosen — and the Bangkok stay is a question for a host like every other stage */
   answerTheRest(w); assert.equal(B.total(), 0); deq(B.get(), []);
   assert.ok(G.missingFor('journey').some((m) => m.key === 'stage:bkk-stay'), 'the Bangkok stay is asked of the hosts too');
-  for (const k of ALL.filter((x) => x !== 'bkk-stay')) J.skip(k, true, 'manual');
+  answerAll(w, ALL.filter((x) => x !== 'bkk-stay'));
   deq(G.missingFor('journey').map((m) => m.key), ['stage:bkk-stay'], 'nothing answers the stage by itself');
   assert.equal(G.done('journey'), false); assert.equal(G.mayEnter('review'), false); assert.equal(G.readiness().ok, false, 'Review & Send waits for the host\'s own answer');
   /* Room A is whoever chose it first's — two guests, not the hosts by right */
@@ -212,10 +222,10 @@ test('HARUTHAI · the hosts start at zero (Owner, 19 Sep 2026): no stage is arra
   /* a host chooses like every guest: the first room with a place, a real hold in her own name, a real Bag line, a real price */
   deq(await ST.select('bkk-stay', 'penthouse'), { ok: true, unit: 'B' }, 'the first room with a place — Room A is full');
   deq(U.mine('bkk-stay'), { key: 'bkk-stay/penthouse', label: 'B' }); assert.equal(J.state(seg(J, 'bkk-stay')), 'selected');
-  assert.equal(B.get().length, 1); assert.equal(B.get()[0].id, 'bkk-stay'); assert.equal(B.get()[0].room, 'penthouse'); assert.equal(B.get()[0].unit, 'B'); assert.equal(B.get()[0].unitName, 'Room B');
-  assert.ok(B.get()[0].price > 0, 'charged like every guest'); assert.equal(B.total(), B.get()[0].price);
+  const bk = B.get().find((x) => x.id === 'bkk-stay'); assert.equal(B.get().length, 2, 'the Penthouse and the mandatory Kunming → Lijiang train'); assert.equal(bk.room, 'penthouse'); assert.equal(bk.unit, 'B'); assert.equal(bk.unitName, 'Room B');
+  assert.ok(bk.price > 0, 'charged like every guest'); assert.equal(B.total(), bk.price + 105);
   assert.equal(G.done('journey'), true); assert.equal(G.mayEnter('review'), true); assert.equal(G.readiness().ok, true, 'complete because the place is held — not because of who she is');
-  ST.sync(); assert.equal(B.get().length, 1, 'the sync keeps the chosen room');
+  ST.sync(); assert.equal(B.get().length, 2, 'the sync keeps the chosen room (and the train line)');
   /* Suthep, of the same party, starts at zero too: he is offered the room Haruthai is in and holds a place of his own in it */
   const s = await livePage(SUTHEP, rooms); const SU = s.SIYL_UNITS, SJ = s.SIYL_JOURNEY;
   assert.equal(SU.fixed('bkk-stay'), false); assert.equal(SU.mine('bkk-stay'), null); assert.equal(SJ.state(seg(SJ, 'bkk-stay')), 'open'); deq(s.SIYL_BAG.get(), []);
@@ -224,7 +234,7 @@ test('HARUTHAI · the hosts start at zero (Owner, 19 Sep 2026): no stage is arra
   const roomB = SU.units('bkk-stay', 'penthouse')[1]; assert.equal(roomB.taken, 2); assert.equal(roomB.full, true); assert.equal(SU.unitWords(roomB), 'Haruthai · You · Full');
   assert.equal(SJ.state(seg(SJ, 'bkk-stay')), 'selected'); assert.equal(s.SIYL_BAG.get()[0].unit, 'B'); assert.ok(s.SIYL_BAG.total() > 0);
   /* and it may go again — nothing is left behind, the stage is a question once more */
-  const rm = await ST.remove('bkk-stay'); assert.equal(rm.ok, true); deq(B.get(), []); assert.equal(B.total(), 0); assert.equal(U.mine('bkk-stay'), null); assert.equal(U.fixed('bkk-stay'), false); assert.equal(J.state(seg(J, 'bkk-stay')), 'open');
+  const rm = await ST.remove('bkk-stay'); assert.equal(rm.ok, true); deq(B.get().map((x) => x.id), ['c86'], 'the train line alone remains'); assert.equal(B.total(), 105); assert.equal(U.mine('bkk-stay'), null); assert.equal(U.fixed('bkk-stay'), false); assert.equal(J.state(seg(J, 'bkk-stay')), 'open');
   assert.equal(G.done('journey'), false); assert.equal(G.readiness().ok, false); deq(G.missingFor('journey').map((m) => m.key), ['stage:bkk-stay']);
   const v = await (await rooms.fetch(new Request('https://x/api/rooms/read', { method: 'POST', headers: { 'x-siyl-identity': JSON.stringify(identity(SUTHEP)) }, body: '{}' }))).json();
   deq(v.mine, { 'bkk-stay': { key: 'bkk-stay/penthouse', label: 'B' } }, 'Suthep keeps his own place'); assert.equal(v.units['bkk-stay/penthouse'][1].taken, 1); assert.equal(v.units['bkk-stay/penthouse'][0].taken, 2, 'Peggy and Steffie keep Room A'); assert.equal('fixed' in v, false);
@@ -275,7 +285,7 @@ test('CODEX 011-1 · a release that fails keeps the stage held AND named: readin
   const rooms = new Rooms(doState());
   const w = await livePage(PEGGY, rooms); const G = w.SIYL_GUEST, J = w.SIYL_JOURNEY, B = w.SIYL_BAG, ST = w.SIYL_STAY, U = w.SIYL_UNITS;
   answerTheRest(w); G.setScope({ all: true });
-  assert.equal((await ST.select('prewed', 'heritage')).ok, true); for (const k of ALL.filter((x) => x !== 'prewed')) J.skip(k, true, 'manual');
+  assert.equal((await ST.select('prewed', 'heritage')).ok, true); answerAll(w, ALL.filter((x) => x !== 'prewed'));
   assert.equal(G.readiness().ok, true);
   /* the guest leaves Vientiane; the engine cannot be reached for the release */
   G.setScope({ vientiane: false });
@@ -287,7 +297,8 @@ test('CODEX 011-1 · a release that fails keeps the stage held AND named: readin
   /* and the same for "I won't be joining this trip" */
   G.setScope({ none: true }); assert.equal(G.readiness().ok, false); assert.ok(G.missingFor('journey').some((m) => m.key === 'release:prewed'));
   /* the engine comes back: released, and the trip is ready */
-  w.fetch = realFetch; assert.equal((await ST.remove('prewed')).ok, true); assert.equal(G.staleFor().length, 0); assert.equal(G.readiness().ok, true);
+  w.fetch = realFetch; assert.equal((await ST.remove('prewed')).ok, true);
+  deq(G.staleFor().map((m) => m.key), ['release:c86'], 'the chosen train is outside a declined trip too'); B.remove('c86'); assert.equal(G.staleFor().length, 0); assert.equal(G.readiness().ok, true);
   /* the seats too: a held seat outside Vientiane is named while it lasts */
   const seats = { mine: { ceremony: { [PEGGY.guestId]: 'C-R-05-02' }, dinner: {} }, open: true, frozen: false, configured: { ceremony: true, dinner: true } };
   w.SIYL_SEATS = { ready: () => true, seatOf: (ev, id) => (seats.mine[ev] || {})[id] || null, open: () => true, frozen: () => false, configured: () => true, view: () => seats, mine: () => seats.mine };
@@ -307,7 +318,7 @@ test('CODEX 011-2 · a guest not joining Vientiane sends no wedding attendance: 
   op = T.operational();
   assert.equal(op.participation, 'Not joining this trip'); deq(op.guests[0].events, { temple: 'Not joining', coffee: 'Not joining', vows: 'Not joining', dinner: 'Not joining' });
   assert.equal(op.guests[0].temple, 'Not attending'); assert.equal(op.guests[0].sangkhathan, false); assert.equal(op.guests[0].sangkhathanState, 'Not applicable'); assert.equal(op.offerings, 0); deq(op.guests[0].open, []);
-  G.setScope({ bangkok: true }); assert.equal(T.operational().participation, 'Not joining Vientiane'); assert.equal(T.operational().guests[0].events.vows, 'Not joining');
+  G.setScope({ bangkok: true }); assert.equal(T.operational().participation, 'Not joining the wedding'); assert.equal(T.operational().guests[0].events.vows, 'Not joining');
   /* the offering line follows: the temple module's own sync never brings it back on a later page load (Codex confirming pass) */
   deq(T.offeringGuests(), []); w.SIYL_BAG.put({ id: 'sangkhathan', name: 'Sangkhathan', price: 15, qty: 1 }); T.sync(); assert.equal(w.SIYL_BAG.has('sangkhathan'), false, 'the line leaves with the scope');
   /* the answers themselves stay on the device for a reconsideration */
@@ -324,53 +335,16 @@ test('CODEX 011-2 · a guest not joining Vientiane sends no wedding attendance: 
   }
 });
 
-test('CODEX 011-3 · the Essential trip is Vientiane\'s: for a guest not joining Vientiane packagePlan("essential") covers no stage and adds nothing, and no card is offered; a plan never touches a stage outside the trip or one the package does not cover — and moves on capacity, never price', async () => {
-  const w = page({ auth: PEGGY }); const G = w.SIYL_GUEST, J = w.SIYL_JOURNEY, B = w.SIYL_BAG;
+test('CODEX 011-3 · THE PACKAGES ARE GONE (Owner, 21 Sep 2026): no package API, no package data, no package word on any guest surface; a Bangkok-only guest is asked nothing of Vientiane', () => {
+  const w = page({ auth: PEGGY }); const G = w.SIYL_GUEST, J = w.SIYL_JOURNEY;
   answerTheRest(w); G.setScope({ bangkok: true });
-  deq(Object.keys(J.packages().essential.stages), ['wedstay'], 'the Essential trip is the Wedding Stay alone — stage D of the Overview (the Owner, 20 Sep 2026); C is never auto-added');
-  deq(J.packages().essential.stages.wedstay, ['wedstay/heritage-executive', 'wedstay/heritage', 'wedstay/heritage-grand-premier', 'wedstay/noble-courtyard', 'wedstay/grand-majestic', 'wedstay/souphattra-majestic', 'wedstay/souphattra-presidential'], 'its defined chain: the Heritage Executive, then the house in the hotel\'s order — never the Riverside, never the Guest House');
-  deq(J.packageOrder(), ['complete', 'essential']);
-  deq(J.packageStages('essential'), [], 'no stage of it is part of a Bangkok-only trip');
-  const plan = J.packagePlan('essential');
-  deq(plan.rows, []); deq(plan.add, [], 'nothing of Vientiane is added'); deq(plan.remove, []); deq(plan.unskip, []); deq(plan.waitlist, []); assert.equal(plan.total, 0); assert.equal(plan.need, 2, 'Peggy and Steffie');
-  deq(plan.counts, { stages: 0, defaults: 0, fallbacks: 0, waitlisted: 0, replaced: 0, same: 0 }); assert.equal(J.planSignature(plan), '#' + plan.need, 'nothing but the party size');
-  /* a plan is pure: nothing moved, nothing marked */
-  deq(B.get(), []); assert.equal(J.isSkipped('bkk-stay'), false); assert.equal(J.state(seg(J, 'bkk-stay')), 'open'); deq(J.counts(), { relevant: 1, confirmed: 0, waitlisted: 0, declined: 0, open: 1, excluded: 9, resolved: 0, bagItems: 0, bagTotal: 0 });
-  /* the page offers no card for a package that covers no stage of the trip; the old planner is gone */
-  assert.match(src('your-journey.html'), /function packageCard\(kind\)\{\n\s*var pk=J\.packages\(\)\[kind\];if\(!pk\)return '';\n\s*var stages=J\.packageStages\(kind\);if\(!stages\.length\)return '';/, 'no card without a stage of the trip');
-  assert.match(src('your-journey.html'), /data-package="'\+kind\+'"/); assert.match(src('your-journey.html'), /data-package-preview="'\+kind\+'"/);
-  for (const f of ['your-journey.html', 'assets/journey.js', 'assets/packages-data.js', 'cart.html', 'review.html']) assert.doesNotMatch(src(f), /id="csb"|id="fxb"|Cost Saving|self-arranged|selfArranged|costSavingPlan|costSavingOptions|fullExperience|soldOutStages|Every stage you have already chosen stays exactly as you chose it/, f + ' has no old planner');
-  /* joining Vientiane: the plan is the wedding stay and only the wedding stay — the other stages of the trip, chosen or declined, are never touched; a pre-wedding stay chosen by hand (stage C) is neither replaced nor counted */
-  G.setScope({ vientiane: true }); J.skip('bkk-stay', true, 'manual'); J.skip('train', true, 'manual'); B.put({ id: 'prewed', name: 'Pre-Wedding Vientiane', price: 290, qty: 1, stay: 'souphattra', room: 'heritage' });
-  deq(J.packageStages('essential').map((s) => s.key), ['wedstay']);
-  const plan2 = J.packagePlan('essential');
-  assert.equal(plan2.ready, false, 'no engine on this page: the default is planned, decided again on confirm');
-  deq(plan2.rows.map((r) => [r.seg.key, r.why, r.key, r.unit, r.wasDeclined, r.replaces, r.wanted, r.tried]), [['wedstay', 'default', 'wedstay/heritage-executive', null, false, null, 'wedstay/heritage-executive', ['wedstay/heritage-executive']]]);
-  assert.equal(plan2.add.length, 1); assert.equal(plan2.add[0].id, 'wedstay'); assert.equal(plan2.add[0].room, 'heritage-executive'); assert.equal(plan2.add[0].by, 'essential'); assert.equal(plan2.add[0].qty, 1);
-  deq(plan2.remove, [], 'the pre-wedding line stays'); deq(plan2.unskip, [], 'the declined Bangkok stay and train stay declined'); deq(plan2.waitlist, []);
-  assert.ok(plan2.total > 0); assert.equal(plan2.total, plan2.add[0].price); assert.equal(plan2.total, 155, 'the wedding stay alone — never 465'); assert.match(J.planSignature(plan2), new RegExp('^wedstay:default:wedstay/heritage-executive::' + plan2.total + ':'));
-  deq(plan2.counts, { stages: 1, defaults: 1, fallbacks: 0, waitlisted: 0, replaced: 0, same: 0 });
-  assert.equal(J.isSkipped('bkk-stay'), true); assert.equal(J.isSkipped('train'), true); deq(B.get().map((x) => x.id), ['prewed'], 'pure again');
-  /* the one stage it covers: a "not joining" there is reversed, a current wedding-stay line is what it replaces */
-  J.skip('wedstay', true, 'manual'); const plan3 = J.packagePlan('essential'); deq(plan3.unskip, ['wedstay']); assert.equal(plan3.rows[0].wasDeclined, true); deq(plan3.remove, []);
-  J.skip('wedstay', false); B.put({ id: 'riverside', name: 'Riverside Hotel Vientiane', price: 100, qty: 1, stay: 'riverside', room: 'superior-window' });
-  const plan4 = J.packagePlan('essential'); assert.equal(plan4.rows[0].replaces.id, 'riverside'); deq(plan4.remove, ['riverside']); assert.equal(plan4.counts.replaced, 1); deq(plan4.unskip, []);
-  /* with the engine: the unit is named; when no room of the default can take the WHOLE party the chain moves to the next category of the house — here a more affordable one, at its actual price — because capacity decides, never price */
-  const rooms = new Rooms(doState());
-  const live = await livePage(PEGGY, rooms); answerTheRest(live); live.SIYL_GUEST.setScope({ vientiane: true });
-  const p5 = live.SIYL_JOURNEY.packagePlan('essential'); assert.equal(p5.ready, true); assert.equal(p5.rows.length, 1); deq([p5.rows[0].why, p5.rows[0].key, p5.rows[0].unit], ['default', 'wedstay/heritage-executive', 'A']);
-  for (const [i, u] of unitsOf('wedstay/heritage-executive').entries()) {
-    const g = session({ guestId: 'g-fill-' + i, partyId: 'INV-FILL-' + i, partyName: 'Guest ' + i, fullName: 'Guest ' + i, preferredName: 'Guest ' + i, members: [{ guestId: 'g-fill-' + i, preferredName: 'Guest ' + i }] });
-    const j = await rooms.fetch(new Request('https://x/api/rooms/join', { method: 'POST', headers: { 'x-siyl-identity': JSON.stringify(identity(g)) }, body: JSON.stringify({ invitationId: g.invitationId, guestId: g.guestId, key: 'wedstay/heritage-executive', label: u.label, name: g.preferredName }) }));
-    assert.equal(j.status, 200);
+  for (const k of ['packages', 'packageOrder', 'packagePlan', 'planSignature', 'packageStages']) assert.equal(J[k], undefined, 'SIYL_JOURNEY.' + k + ' no longer exists');
+  assert.equal(w.SIYL_PACKAGES, undefined); assert.equal(fs.existsSync(path.join(ROOT, 'assets/packages-data.js')), false, 'assets/packages-data.js is deleted');
+  for (const f of ['your-journey.html', 'review.html', 'profile.html', 'cart.html', 'tickets.html', 'about-you.html', 'wedding.html', 'wedding-preparation.html', 'journeys.html', 'assets/journey.js', 'assets/guest.js']) {
+    assert.doesNotMatch(src(f), /packages-data|SIYL_PACKAGES|packagePlan|Complete Trip|Essential Trip|Complete trip|Essential trip/, f + ' carries no package');
   }
-  await live.SIYL_UNITS.load(true);
-  assert.equal(live.SIYL_UNITS.summary('wedstay', 'heritage-executive').remainingPlaces, 13, 'thirteen single places remain — none of them room for two');
-  const p6 = live.SIYL_JOURNEY.packagePlan('essential');
-  deq([p6.rows[0].why, p6.rows[0].key, p6.rows[0].unit, p6.rows[0].wanted, p6.rows[0].tried], ['fallback', 'wedstay/heritage', 'A', 'wedstay/heritage-executive', ['wedstay/heritage-executive', 'wedstay/heritage']]);
-  assert.ok(p6.rows[0].amount < p5.rows[0].amount, 'the replacement costs less — its actual price, and price never decided'); deq(p6.counts, { stages: 1, defaults: 0, fallbacks: 1, waitlisted: 0, replaced: 0, same: 0 }); deq(p6.waitlist, []);
-  const lin = await livePage(LIN, rooms); answerTheRest(lin); lin.SIYL_GUEST.setScope({ vientiane: true });
-  const p7 = lin.SIYL_JOURNEY.packagePlan('essential'); assert.equal(p7.need, 1); deq([p7.rows[0].why, p7.rows[0].key, p7.rows[0].unit], ['default', 'wedstay/heritage-executive', 'A'], 'a party of one still fits the default');
+  deq(J.relevantSegments().map((x) => x.key), ['bkk-stay', 'kempinski'], 'the Bangkok sheet: the stay and the closing stay');
+  deq(G.missingFor('journey').map((m) => m.key), ['stage:bkk-stay', 'stage:kempinski'], 'nothing of Vientiane or China is asked');
 });
 
 test('CODEX 011-4 · a decision made while the first copy is being read wins: the server\'s older value for that key is what was being fetched, never a competing edit', async () => {
@@ -401,11 +375,11 @@ test('CODEX 011-5 · both emails carry My Favorite Flavor — and a migrated rec
 
 test('CODEX 011-6 · one reconciliation at a time: the guard is set before any mutation, a Bag removal re-rendering synchronously never re-enters, an answer changed meanwhile is reconciled afterwards; the offering line leaves only when it is in the Bag', () => {
   const yj = src('your-journey.html');
-  const fn = yj.slice(yj.indexOf('function reconcileScope(){'), yj.indexOf('/* ---- COMPLETE / ESSENTIAL JOURNEY'));
+  const fn = yj.slice(yj.indexOf('function reconcileScope(){'), yj.indexOf('/* a change the engine refused.'));
   assert.match(fn, /if\(RECONCILING\)\{RECON_AGAIN=true;return\}\n\s*RECONCILING=true;RECON=tag;RECON_AGAIN=false;\n\s*var jobs=\[\],failed=\[\];/, 'the guard and the tag are set before the first mutation');
   assert.ok(fn.indexOf('RECONCILING=true') < fn.indexOf('SIYL_BAG.remove('), 'no Bag removal before the guard');
   assert.match(fn, /var finish=function\(\)\{RECON_FAILED=failed;RECONCILING=false;render\(\);if\(RECON_AGAIN\)\{RECON_AGAIN=false;RECON='';reconcileScope\(\)\}\};\n\s*Promise\.all\(jobs\)\.then\(finish,finish\);/, 'the guard clears when every release has answered, then a queued answer runs once');
-  assert.match(fn, /if\(!G\.joins\('vientiane'\)&&SIYL_BAG\.has&&SIYL_BAG\.has\('sangkhathan'\)\)\{SIYL_BAG\.remove\('sangkhathan'\)\}/, 'the offering line is removed only when it exists — never on the earlier answer alone');
+  assert.match(fn, /if\(!G\.joins\('vientianeWedding'\)&&SIYL_BAG\.has&&SIYL_BAG\.has\('sangkhathan'\)\)\{SIYL_BAG\.remove\('sangkhathan'\)\}/, 'the offering line is removed only when it exists — never on the earlier answer alone');
   assert.match(yj, /&&!RECONCILING&&G\.staleFor&&G\.staleFor\(\)\.length&&RECON!==scopeTag\(\)\)reconcileScope\(\)/, 'render() never starts a reconciliation while one runs');
 });
 
@@ -444,12 +418,12 @@ test('CODEX 011-8 · a frozen seating ledger never blocks a truthful decline: th
   answerTheRest(w); G.setScope({ bangkok: true });
   const seats = { mine: { ceremony: { [id]: 'C-R-05-02' }, dinner: { [id]: 'D-T-05' } }, open: true, frozen: true };
   w.SIYL_SEATS = { ready: () => true, seatOf: (ev, g) => (seats.mine[ev] || {})[g] || null, open: () => seats.open, frozen: () => seats.frozen, configured: () => true, view: () => seats, mine: () => seats.mine };
-  for (const k of ['bkk-stay']) w.SIYL_JOURNEY.skip(k, true, 'manual');
+  for (const k of ['bkk-stay', 'kempinski']) w.SIYL_JOURNEY.skip(k, true, 'manual');
   assert.equal(G.staleFor().length, 0, 'frozen: no blocker'); assert.equal(G.readiness().ok, true);
   seats.frozen = false; assert.equal(G.staleFor().length, 2, 'open: both seats are named until released'); assert.equal(G.readiness().ok, false);
   seats.open = false; assert.equal(G.staleFor().length, 0, 'closed: no blocker');
   assert.match(src('your-journey.html'), /if\(!S\.open\(\)\|\|S\.frozen\(\)\)return Promise\.resolve\(\[\]\);/, 'the planner does not even try while the ledger is not the guest\'s to change');
-  assert.equal(w.SIYL_TEMPLE.operational().participation, 'Not joining Vientiane', 'what is sent says so');
+  assert.equal(w.SIYL_TEMPLE.operational().participation, 'Not joining the wedding', 'what is sent says so');
 });
 
 test('CODEX 011-9 · the live edit is replayed onto the fetched copy — a removal made elsewhere never comes back, a line added here is added, a field changed here is changed, the rest is the server\'s', async () => {

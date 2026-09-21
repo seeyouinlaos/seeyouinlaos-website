@@ -42,7 +42,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 @media(min-width:768px){.pf-rail{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px;overflow:visible}.pf-rail>*{flex:none;max-width:none}.pf-tickets{grid-template-columns:1fr 1fr}}
 @media(min-width:1024px){.pf-rail{grid-template-columns:repeat(3,1fr)}}
 </style>
-<link rel="stylesheet" href="assets/aman.css?v=9bab15ca"><link rel="stylesheet" href="assets/prep.css?v=fdbe73d1"></head><body class="prep p-in">
+<link rel="stylesheet" href="assets/aman.css?v=9bab15ca"><link rel="stylesheet" href="assets/prep.css?v=b18897cc"></head><body class="prep p-in">
 <header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="cart.html" aria-label="My Bag"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main class="prep-page" id="profile">
 <div class="prep-head">
@@ -55,18 +55,19 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/bag.js?v=2a0c8152"></script>
 <script src="assets/shop-menu.js?v=1ff891bc"></script>
 <script src="assets/aman.js?v=2a339178"></script>
-<script src="assets/rooms-data.js?v=82a1706f"></script>
+<script src="assets/rooms-data.js?v=342e1a0c"></script>
 <script src="assets/pricing.js?v=d324fef7"></script>
-<script src="assets/guest.js?v=a0616298"></script>
+<script src="assets/stage-graph.js?v=92ac36af"></script>
+<script src="assets/guest.js?v=34df3d2a"></script>
 <script src="assets/draft.js?v=7ab9ca64"></script>
-<script src="assets/temple.js?v=a5a16527"></script>
+<script src="assets/temple.js?v=100faabd"></script>
 <script src="assets/rooms.js?v=e0d4bbbf"></script>
 <script src="assets/stay.js?v=3690f59b"></script>
 <script src="assets/seatlabels.js?v=4994e1f4"></script>
 <script src="assets/seating.js?v=3b392bf0"></script>
 <script src="assets/confirm.js?v=f35e0aa8"></script>
 <script src="assets/transport-data.js?v=a5d732d4"></script>
-<script src="assets/packages-data.js?v=05982d0a"></script><script src="assets/journey.js?v=6551e59a"></script>
+<script src="assets/journey.js?v=aeb36786"></script>
 <script src="assets/docs.js?v=7c1c7bfd"></script>
 <script src="assets/avatar.js?v=4f4d9416"></script>
 <script type="module" src="assets/invite.mjs?v=c557d97c"></script>
@@ -184,7 +185,7 @@ function arrangements(me){
   return h}
 function wedding(me,p){
   var id=me.guestId,cards=[],temple=T?T.attendanceOf(id):null,ready=S&&S.ready(),hosts=!!(p&&p.hosts);
-  if(G.scopeAnswered&&G.scopeAnswered()&&!G.joins('vientiane'))return '<section class="prep-sec" id="wedding"><h2 class="t-h2">The Wedding</h2>'+empty(G.notJoining()?'You are not joining this trip, so the wedding days are not part of your arrangements.':'You are not joining Vientiane, so the wedding days are not part of your arrangements.','your-journey.html#scope','Change where you join us')+'</section>';
+  if(G.scopeAnswered&&G.scopeAnswered()&&!G.joins('vientianeWedding'))return '<section class="prep-sec" id="wedding"><h2 class="t-h2">The Wedding</h2>'+empty(G.notJoining()?'You are not joining this trip, so the wedding days are not part of your arrangements.':'You are not joining the wedding, so the wedding days are not part of your arrangements.','your-journey.html#scope','Change where you join us')+'</section>';
   function seat(ev){if(!ready)return {t:'Reading your seat…',on:false};if(hosts)return {t:'Front centre · hosts',on:true};var sid=S.seatOf(ev,id);if(!sid)return {t:'No seat held yet',open:true};return {t:'Seat '+S.label(sid)+' · Held in your name',on:true,d:S.describe(sid)}}
   cards.push(card({data:'wedding:temple',img:IMG.temple,when:'Sunday, 28 February 2027 · 09:00',name:'Temple morning',meta:'Wat Ong Teu, Vientiane',state:temple==='yes'?'Joining':temple==='no'?'Not joining':'Not answered yet',on:temple==='yes',open:temple==null,links:[{href:'wedding.html',text:'View details'}]}));
   var c=seat('ceremony'),d=seat('dinner');
@@ -195,12 +196,12 @@ function wedding(me,p){
   cards.push(card({data:'wedding:dinner',img:IMG.dinner,when:'Sunday, 28 February 2027 · 19:30',name:'Wedding Dinner',meta:'Souphattra Heritage, Vientiane · poolside'+(d.d?' · '+d.d:''),state:d.t,on:!!d.on,open:!!d.open,links:[{href:'wedding.html',text:'View details'},{href:'tickets.html',text:'Seat ticket',mute:true}]}));
   J.sorted(B.get()).filter(function(x){return group(x)==='wedding'}).forEach(function(x){var sw=stateWords(x);cards.push(card({data:'line:'+x.id,img:lineImg(x)||IMG.temple,when:J.when(x)||'Sunday, 28 February 2027',name:x.name,meta:x.meta||'',state:sw.t,on:!!sw.on,cost:cost(x),links:[{href:detailHref(x),text:'View details'},{href:'cart.html',text:'Change in My Bag',mute:true}]}))});
   /* WHO SITS WHERE (Owner, 20 Sep 2026): the dinner roll call — portraits, first names, seats — for the signed-in guest */
-  var who=(ready&&S.railHtml&&!hosts&&G.joins('vientiane'))?S.railHtml('dinner',S.view?S.view():null,{guestId:id}):'';
+  var who=(ready&&S.railHtml&&!hosts&&G.joins('vientianeWedding'))?S.railHtml('dinner',S.view?S.view():null,{guestId:id}):'';
   return '<section class="prep-sec" id="wedding"><h2 class="t-h2">The Wedding</h2>'+rail(cards)+who+'</section>'}
 function tickets(me,p){
   var id=me.guestId,h='',hosts=!!(p&&p.hosts),n=0;
   var NAMES={ceremony:'Vow Ceremony',dinner:'Wedding Dinner'};
-  var vte=!(G.scopeAnswered&&G.scopeAnswered())||G.joins('vientiane');
+  var vte=!(G.scopeAnswered&&G.scopeAnswered())||G.joins('vientianeWedding');
   if(S&&S.ready()&&vte)['ceremony','dinner'].forEach(function(ev){var sid=S.seatOf(ev,id);if(!sid&&!hosts)return;n++;
     h+='<div class="p-ticket on" data-profile-ticket="seat:'+ev+'"><div class="p-ticket-head"><p class="t-l1">Seat ticket · '+esc(NAMES[ev])+'</p><p class="t-l1 on"><i class="prep-tick" aria-hidden="true"></i>'+(hosts?'Front centre':'Held in your name')+'</p></div>'+
       '<h3 class="t-h1">'+(hosts?'Front centre':'Seat '+esc(S.label(sid)))+'</h3><p class="t-b2">Sunday, 28 February 2027 · '+(ev==='ceremony'?'15:30':'19:30')+(hosts?'':' · '+esc(S.describe(sid)))+'</p>'+

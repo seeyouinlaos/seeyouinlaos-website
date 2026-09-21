@@ -1,0 +1,202 @@
+[
+ {
+  "id": "four-sheets-before-the-answer",
+  "ok": true,
+  "d": "{\"on\":[],\"cards\":4,\"stages\":[],\"heads\":[],\"wedding\":false,\"words\":\"\",\"counts\":\"\",\"packs\":0,\"current\":false}"
+ },
+ {
+  "id": "sheet-bangkok",
+  "ok": true,
+  "d": "{\"on\":[\"bangkok\"],\"stages\":[\"bkk-stay\",\"kempinski\"],\"heads\":[\"BANGKOK\",\"BACK TO BANGKOK\"],\"wedding\":false,\"words\":\"Bangkok\"}"
+ },
+ {
+  "id": "sheet-prewedding",
+  "ok": true,
+  "d": "{\"on\":[\"vientianePreWedding\"],\"stages\":[\"prewed\"],\"heads\":[\"VIENTIANE · BEFORE THE WEDDING\"],\"wedding\":false,\"words\":\"Vientiane · Before the Wedding\"}"
+ },
+ {
+  "id": "sheet-wedding",
+  "ok": true,
+  "d": "{\"on\":[\"vientianeWedding\"],\"stages\":[\"wedstay\"],\"heads\":[\"VIENTIANE · THE WEDDING\"],\"wedding\":true,\"words\":\"Vientiane · The Wedding\"}"
+ },
+ {
+  "id": "sheet-china",
+  "ok": true,
+  "d": "{\"on\":[\"china\"],\"stages\":[\"kmg\",\"c86\",\"ljg\"],\"heads\":[\"CHINA\"],\"wedding\":false,\"words\":\"China\"}"
+ },
+ {
+  "id": "sheet-bangkok+prewedding",
+  "ok": true,
+  "d": "{\"on\":[\"bangkok\",\"vientianePreWedding\"],\"stages\":[\"bkk-stay\",\"train\",\"prewed\",\"kempinski\"],\"heads\":[\"BANGKOK\",\"VIENTIANE · BEFORE THE WEDDING\",\"BACK TO BANGKOK\"],\"wedding\":false,\"words\":\"Bangkok · Vientiane · Before the Wedding\"}"
+ },
+ {
+  "id": "sheet-bangkok+wedding",
+  "ok": true,
+  "d": "{\"on\":[\"bangkok\",\"vientianeWedding\"],\"stages\":[\"bkk-stay\",\"wedstay\",\"kempinski\"],\"heads\":[\"BANGKOK\",\"VIENTIANE · THE WEDDING\",\"BACK TO BANGKOK\"],\"wedding\":true,\"words\":\"Bangkok · Vientiane · The Wedding\"}"
+ },
+ {
+  "id": "sheet-wedding+china",
+  "ok": true,
+  "d": "{\"on\":[\"vientianeWedding\",\"china\"],\"stages\":[\"wedstay\",\"mu9646\",\"kmg\",\"c86\",\"ljg\"],\"heads\":[\"VIENTIANE · THE WEDDING\",\"CHINA\"],\"wedding\":true,\"words\":\"Vientiane · The Wedding · China\"}"
+ },
+ {
+  "id": "sheet-china+bangkok",
+  "ok": true,
+  "d": "{\"on\":[\"bangkok\",\"china\"],\"stages\":[\"bkk-stay\",\"kmg\",\"c86\",\"ljg\",\"return\",\"kempinski\"],\"heads\":[\"BANGKOK\",\"CHINA\",\"BACK TO BANGKOK\"],\"wedding\":false,\"words\":\"Bangkok · China\"}"
+ },
+ {
+  "id": "join-all-selects-every-sheet",
+  "ok": true,
+  "d": "{\"on\":[\"bangkok\",\"vientianePreWedding\",\"vientianeWedding\",\"china\"],\"heads\":[\"BANGKOK\",\"VIENTIANE · BEFORE THE WEDDING\",\"VIENTIANE · THE WEDDING\",\"CHINA\",\"BACK TO BANGKOK\"],\"counts\":\"10 still open — of the 10 stages of your trip.\"}"
+ },
+ {
+  "id": "mandatory-train-cannot-be-skipped",
+  "ok": true,
+  "d": "{\"g\":{\"skipBtn\":false,\"otherSkip\":true,\"choose\":true},\"need\":[\"stage:c86\"]}"
+ },
+ {
+  "id": "mandatory-train-chosen",
+  "ok": true,
+  "d": "{\"state\":\"selected\",\"bag\":[\"c86\"],\"total\":105}"
+ },
+ {
+  "id": "every-stage-answered-no-package",
+  "ok": true,
+  "d": "{\"ok\":true,\"counts\":{\"relevant\":10,\"confirmed\":1,\"waitlisted\":0,\"declined\":9,\"open\":0,\"excluded\":0,\"resolved\":10,\"bagItems\":1,\"bagTotal\":105},\"dec\":\"YOUR TRIP IS READY. Every stage has an answer 1 stage chosen · 9 not joining — of the 10 stages of your trip. Your current trip is below, stage by stage. Review\"}"
+ },
+ {
+  "id": "release-preview-names-own-resources",
+  "ok": true,
+  "d": "{\"items\":[\"27 FEB – 01 MAR · Wedding Stay · Souphattra Heritage · Room A · You · 1 place available\",\"01 MAR · MU9646 · Vientiane → Kunming\",\"Your ceremony seat · E6\",\"Your dinner seat · A6\"],\"mine\":[\"prewed\",\"wedstay\"]}"
+ },
+ {
+  "id": "keep-everything-cancels",
+  "ok": true,
+  "d": "{\"mine\":[\"prewed\",\"wedstay\"],\"bag\":[\"prewed\",\"wedstay\",\"mu9646\"]}"
+ },
+ {
+  "id": "confirm-releases-only-the-wedding",
+  "ok": true,
+  "d": "{\"mine\":[\"prewed\"],\"seats\":[],\"bag\":[\"prewed\"],\"on\":[\"bangkok\",\"vientianePreWedding\",\"china\"],\"ben\":{\"wedstay\":{\"key\":\"wedstay/heritage\",\"label\":\"B\"}}}"
+ },
+ {
+  "id": "decline-previews-own-resources",
+  "ok": true,
+  "d": "BEFORE THIS CHANGES You would be marked as not joining the trip. These would be released — yours alone, nothing of anyone else’s: 27 FEB – 01 MAR · Wedding Stay · Souphattra Heritage · Room A · You · "
+ },
+ {
+  "id": "we-will-miss-you",
+  "ok": true,
+  "d": "{\"steps\":[\"you:complete\",\"journey:complete\",\"wedding:na\",\"preparation:na\",\"about:na\",\"review:attention\"],\"send\":\"SEND MY RESPONSE\",\"card\":\"NOT JOINING THIS TRIP We’ll miss you. We’re sorry you won’t be able to join us. Haruthai & Suthep would be very happy to\"}"
+ },
+ {
+  "id": "partner-unaffected-by-a-decline",
+  "ok": true,
+  "d": "{\"ada\":[],\"ben\":{\"wedstay\":{\"key\":\"wedstay/heritage-executive\",\"label\":\"A\"}},\"benScope\":true}"
+ },
+ {
+  "id": "send-my-response",
+  "ok": true,
+  "d": "{\"before\":{\"btn\":\"SEND MY RESPONSE\",\"off\":false,\"ready\":true},\"after\":\"NOT JOINING\",\"err\":\"\"}"
+ },
+ {
+  "id": "not-joining-after-the-send",
+  "ok": true,
+  "d": "NOT JOINING · YOUR RESPONSE WAS SENT We’ll miss you. We’re sorry you won’t be able to join us. Haruthai & Suthep would be very happy to celebrate with you. If y"
+ },
+ {
+  "id": "reconsider-asks-the-question-again",
+  "ok": true,
+  "d": "{\"scope\":null,\"on\":[]}"
+ },
+ {
+  "id": "ids-untouched",
+  "ok": true,
+  "d": "{\"guestId\":\"T001\",\"partyId\":\"INV-T01\",\"invitationId\":\"INV-T001\"}"
+ },
+ {
+  "id": "seat-missing-blocks-send",
+  "ok": true,
+  "d": "{\"g0\":{\"ok\":false,\"n\":2,\"first\":\"wedding-preparation.html#seats\",\"keys\":[\"seat:ceremony\",\"seat:dinner\"]},\"url\":\"http://127.0.0.1:8788/wedding-preparation?from=review#seats\"}"
+ },
+ {
+  "id": "worker-refuses-without-the-seat",
+  "ok": true,
+  "d": "{\"ok\":false,\"error\":\"incomplete\",\"message\":\"Your trip is not complete yet.\",\"missing\":[{\"key\":\"seat:ceremony\",\"label\":\"Ceremony seat\",\"step\":\"preparation\",\"href\":\"wedding-preparation.html#seats\"},{\"key\":\"seat:dinner\",\"label\":\"Dinner seat\",\""
+ },
+ {
+  "id": "seat-confirmed-enables-send",
+  "ok": true,
+  "d": "{\"ok\":true,\"n\":0,\"first\":null,\"keys\":[]}"
+ },
+ {
+  "id": "wedding-stay-totals",
+  "ok": true,
+  "d": "{\"gh\":0,\"her\":145,\"rv\":60,\"back\":0}"
+ },
+ {
+  "id": "worker-422-declined-mandatory-train",
+  "ok": true,
+  "d": "{\"ok\":false,\"error\":\"incomplete\",\"message\":\"Your trip is not complete yet.\",\"missing\":[{\"key\":\"stage:c86\",\"label\":\"Kunming → Lijiang — the train is part of China\",\"step\":\"journey\",\"href\":\"your-journey"
+ },
+ {
+  "id": "worker-422-claimed-stay-not-held",
+  "ok": true,
+  "d": "{\"ok\":false,\"error\":\"incomplete\",\"message\":\"Your trip is not complete yet.\",\"missing\":[{\"key\":\"stage:kmg\",\"label\":\"stage F\",\"step\":\"journey\",\"href\":\"your-journey.html#s-kmg\"}],\"unresolved\":[{\"key\":\"km"
+ },
+ {
+  "id": "worker-accepts-a-complete-china-trip",
+  "ok": true,
+  "d": "{\"status\":202,\"kind\":\"initial\",\"received\":true}"
+ },
+ {
+  "id": "former-essential-is-the-wedding-with-d1",
+  "ok": true,
+  "d": "{\"scope\":{\"bangkok\":false,\"vientianePreWedding\":false,\"vientianeWedding\":true,\"china\":false,\"none\":false,\"at\":\"2026-09-19T10:00:00.000Z\",\"by\":\"T001\",\"migrated\":true},\"stages\":[\"wedstay\"],\"bag\":[\"wedstay:heritage-executive:C:155\"],\"mine\":{\"wedstay\":{\"key\":\"wedstay/heritage-executive\",\"label\":\"C\"}}}"
+ },
+ {
+  "id": "former-complete-keeps-every-line",
+  "ok": true,
+  "d": "{\"bag\":[\"c86\",\"train\",\"wedstay\"],\"total\":360,\"counts\":{\"relevant\":10,\"confirmed\":3,\"waitlisted\":0,\"declined\":0,\"open\":7,\"excluded\":0,\"resolved\":3,\"bagItems\":3,\"bagTotal\":360}}"
+ },
+ {
+  "id": "waiting-list-answers-the-stage-at-usd-0",
+  "ok": true,
+  "d": "{\"filled\":108,\"sold\":{\"soldOut\":true,\"ljgAll\":true},\"w\":{\"ok\":true,\"state\":\"waitlisted\",\"counts\":{\"relevant\":5,\"confirmed\":4,\"waitlisted\":1,\"declined\":0,\"open\":0,\"excluded\":5,\"resolved\":5,\"bagItems\":4,\"bagTotal\":530},\"total\":530}}"
+ },
+ {
+  "id": "waiting-list-in-record-and-emails",
+  "ok": true,
+  "d": "{\"after\":\"SENT TO GUEST RELATIONS\",\"err\":\"\",\"ljg\":{\"stage\":\"ljg\",\"waitlisted\":true,\"position\":1,\"since\":\"2026-09-21T04:56:52.490Z\",\"size\":1}}"
+ },
+ {
+  "id": "journeys-wedding-stay-order-and-words",
+  "ok": true,
+  "d": "{\"order\":[\"j-wedstay\",\"j-riverside\",\"j-guesthouse\"],\"wed\":\"‹ › THE COURTYARD FRONT AND THE POOL 1 / 8 27 FEB – 01 MAR · ACCOMMODATION · VIENTIANE Wedding Stay · Souphattra Heritage 27 February – 01 March 2027 · 2 nights: 27 → 28 February and 28 February → 01 March · 27 February is the transition from the Pre-Wedding Stay · breakfast included · three addresses for this window: the Souphattra Herita"
+ },
+ {
+  "id": "width-320",
+  "ok": true,
+  "d": "{\"ov\":0,\"gap\":48,\"gaps\":[16,16,16],\"cards\":4,\"w\":320}"
+ },
+ {
+  "id": "width-390",
+  "ok": true,
+  "d": "{\"ov\":0,\"gap\":48,\"gaps\":[16,16,16],\"cards\":4,\"w\":390}"
+ },
+ {
+  "id": "width-834",
+  "ok": true,
+  "d": "{\"ov\":0,\"gap\":48,\"gaps\":[16,16,16],\"cards\":4,\"w\":834}"
+ },
+ {
+  "id": "width-1440",
+  "ok": true,
+  "d": "{\"ov\":0,\"gap\":48,\"gaps\":[16,16,16],\"cards\":4,\"w\":1440}"
+ },
+ {
+  "id": "console-errors",
+  "ok": true,
+  "d": "no script or console error"
+ }
+]

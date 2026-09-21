@@ -42,20 +42,26 @@ for (const w of [320, 390, 834, 1440]) { const p = await fresh(w); await p.goto(
   note('header-' + w, h.h <= 64 && !h.under && h.order && h.brandCentred && !h.overflow && h.text === 'see you in laos.', JSON.stringify(h));
   if (w === 390) await shot(p, '390-header-home'); await p.context().close(); }
 
+/* THE GLOBAL MY TRIP REBUILD (Owner, 21 Sep 2026): Vientiane is TWO participation sheets (before the wedding · the wedding); a change that
+   would release the guest's own resources is previewed and applied only on confirmation */
+const VTE = ['vientianePreWedding', 'vientianeWedding'];
+const toggle = async (p, key, ms) => { await p.click('[data-scope="' + key + '"]'); await p.waitForTimeout(700); if (await p.$('[data-release-confirm]')) { await p.click('[data-release-confirm]'); } await p.waitForTimeout(ms || 1200); };
+const toggleVientiane = async (p, ms) => { for (const k of VTE) await toggle(p, k, ms); };
+
 /* ===== 2 · PARTICIPATION on My Trip (T001 Ada): the question first, then the relevant stages ===== */
 const A = await fresh(); await signIn(A, 'T001'); await contact(A, 'ada.test@example.org'); await trip(A);
 const s0 = { need: await need(A), scope: await A.$eval('#scope', (e) => e.innerText.replace(/\s+/g, ' ').trim()), stages: await visibleStages(A), note: await A.$eval('#chrono', (e) => e.innerText.replace(/\s+/g, ' ').trim()) };
 note('scope-first', s0.need.first === 'your-journey.html#scope' && /Where will you join us|First, one answer/i.test(s0.scope) && s0.stages.length === 0 && /once you have said where you will join us/i.test(s0.note), JSON.stringify(s0).slice(0, 260));
 await shot(A, '390-scope-question');
-await A.click('[data-scope="bangkok"]'); await A.waitForTimeout(900); await A.click('[data-scope="vientiane"]'); await A.waitForTimeout(1200);
-const s1 = { stages: await visibleStages(A), words: await A.$eval('[data-scope-card] .t-l1', (e) => e.textContent.trim()), excluded: await A.$eval('[data-scope-edit]', (e) => e.closest('.p-card').innerText.replace(/\s+/g, ' ')).catch(() => ''), need: await need(A), steps: await steps(A) };
-note('scope-bangkok-vientiane', JSON.stringify(s1.stages) === JSON.stringify(['bkk-stay', 'train', 'prewed', 'wedstay']) && /Bangkok · Vientiane/.test(s1.words) && /Not part of your trip/i.test(s1.excluded) && /Kunming|Lijiang|China/i.test(s1.excluded) && s1.need.keys.filter((k) => /^stage:/.test(k)).join(',') === 'stage:bkk-stay,stage:train,stage:prewed,stage:wedstay', JSON.stringify(s1).slice(0, 300));
+await A.click('[data-scope="bangkok"]'); await A.waitForTimeout(900); await toggleVientiane(A, 1200);
+const s1 = { stages: await visibleStages(A), words: await A.$eval('[data-scope-card] .t-l1', (e) => e.textContent.trim()), excluded: await A.$eval('#s-excluded', (e) => e.innerText.replace(/\s+/g, ' ')).catch(() => ''), need: await need(A), steps: await steps(A) };
+note('scope-bangkok-vientiane', JSON.stringify(s1.stages) === JSON.stringify(['bkk-stay', 'train', 'prewed', 'wedstay', 'kempinski']) && /Bangkok · Vientiane/.test(s1.words) && /Not part of your trip/i.test(s1.excluded) && /Kunming|Lijiang|China/i.test(s1.excluded) && s1.need.keys.filter((k) => /^stage:/.test(k)).join(',') === 'stage:bkk-stay,stage:train,stage:prewed,stage:wedstay,stage:kempinski', JSON.stringify(s1).slice(0, 300));
 await shot(A, '390-scope-partial');
 /* the question persists: reload, and the server draft carries it */
 await A.evaluate(() => SIYL_DRAFT && SIYL_DRAFT.save && SIYL_DRAFT.save()); await A.waitForTimeout(1500); await trip(A);
 const s2 = await A.evaluate(() => ({ scope: SIYL_GUEST.scopeWords(), stages: [...document.querySelectorAll('#chrono [id^="s-"]')].map((e) => e.id).filter((k) => k !== 's-wedding' && k !== 's-excluded') }));
 const srv = await api(A, '/api/draft'); const srvScope = (() => { try { return JSON.parse(srv.body.draft.keys['siyl.guest']).scope; } catch (e) { return null; } })();
-note('scope-persists', s2.scope === 'Bangkok · Vientiane' && s2.stages.length === 4 && srvScope && srvScope.bangkok && srvScope.vientiane && !srvScope.china, JSON.stringify({ s2, srvScope }));
+note('scope-persists', s2.scope === 'Bangkok · Vientiane' && s2.stages.length === 5 && srvScope && srvScope.bangkok && srvScope.vientianePreWedding && srvScope.vientianeWedding && !srvScope.china, JSON.stringify({ s2, srvScope }));
 
 /* ===== 3 · NOT JOINING THIS STAGE · one direct action ===== */
 /* from an untouched stage */
@@ -88,7 +94,7 @@ if (!LIVE) for (const [ev, seatId] of [['ceremony', 'C-R-06-02'], ['dinner', 'D-
 await trip(C); await C.evaluate(() => SIYL_STAY.sync()); await C.waitForTimeout(800);
 const t0 = { mine: (await engineMine(C)).mine, seats: (await api(C, '/api/seating', { method: 'GET' })).body, bag: await C.evaluate(() => SIYL_BAG.get().map((x) => x.id)) };
 const seatsOf = (v) => { try { const out = []; for (const ev of ['ceremony', 'dinner']) { const m = v && v.mine && v.mine[ev]; if (m && m.T003) out.push(ev + ':' + m.T003); } return out; } catch (e) { return []; } };
-await C.click('[data-scope="vientiane"]'); await C.waitForTimeout(3000);
+await toggleVientiane(C, 2200);
 const t1 = { mine: (await engineMine(C)).mine, seats: (await api(C, '/api/seating', { method: 'GET' })).body, bag: await C.evaluate(() => SIYL_BAG.get().map((x) => x.id)), stages: await visibleStages(C), steps: await steps(C), words: await C.evaluate(() => SIYL_GUEST.scopeWords()) };
 note('tickets-follow-attendance', joinC.status === 200 && t0.mine && t0.mine.prewed && seatsOf(t0.seats).length === (LIVE ? 0 : 2) && !(t1.mine && t1.mine.prewed) && seatsOf(t1.seats).length === 0 && !t1.bag.includes('prewed') && !t1.stages.includes('prewed') && !t1.stages.includes('wedstay') && t1.steps.includes('wedding:na') && t1.steps.includes('preparation:na') && t1.words === 'Bangkok · China', JSON.stringify({ before: { mine: t0.mine, seats: seatsOf(t0.seats) }, after: { mine: t1.mine, seats: seatsOf(t1.seats), stages: t1.stages, steps: t1.steps } }).slice(0, 300));
 await C.goto(O + '/tickets.html', { waitUntil: 'load' }); await C.waitForTimeout(1500); const tk = await C.$eval('main', (e) => e.innerText.replace(/\s+/g, ' ').trim());
@@ -98,26 +104,26 @@ note('wedding-page-not-joining', /Not joining|Nothing to answer/i.test(wd) && !(
 await shot(C, '390-wedding-not-joining');
 /* another guest's resources never moved: Ben (T002) holds Heritage B throughout */
 const B2 = await fresh(); await signIn(B2, 'T002'); const jb = await api(B2, '/api/rooms/join', { method: 'POST', body: JSON.stringify({ invitationId: 'INV-T002', guestId: 'T002', key: 'prewed/heritage', label: 'B', name: 'Ben' }) });
-await trip(C); await C.click('[data-scope="vientiane"]'); await C.waitForTimeout(1500); await C.click('[data-scope="vientiane"]'); await C.waitForTimeout(2500);
+await trip(C); await toggleVientiane(C, 1200); await toggleVientiane(C, 1800);
 const benAfter = (await engineMine(B2)).mine; note('other-guest-untouched', jb.status === 200 && benAfter && benAfter.prewed && benAfter.prewed.label === 'B', JSON.stringify(benAfter));
 
 /* ===== 4a · RE-ENTRANCY (Codex 011-6) and an engine-only hold (Codex 011-7): a Sangkhathan line, two seats and a room held in the engine alone, then Vientiane is left — one release each, no storm ===== */
-await trip(C); await C.click('[data-scope="vientiane"]'); await C.waitForTimeout(1500);
+await trip(C); await toggleVientiane(C, 1200);
 const jr = await api(C, '/api/rooms/join', { method: 'POST', body: JSON.stringify({ invitationId: 'INV-T003', guestId: 'T003', key: 'prewed/heritage', label: 'A', name: 'Cleo' }) });
 if (!LIVE) for (const [ev, seatId] of [['ceremony', 'C-R-06-02'], ['dinner', 'D-T-06']]) await api(C, '/api/seating/select', { method: 'POST', body: JSON.stringify({ invitationId: 'INV-T003', guestId: 'T003', event: ev, seatId, name: 'Cleo' }) });
 await C.evaluate(() => { SIYL_TEMPLE.setAttendance(SIYL_GUEST.me().guestId, 'yes'); SIYL_TEMPLE.setOffering(SIYL_GUEST.me().guestId, 'yes'); SIYL_BAG.put({ id: 'sangkhathan', name: 'Sangkhathan', price: 15, qty: 1 }); });
 await trip(C); await C.evaluate(() => { const b = SIYL_BAG.get().filter((x) => x.id !== 'prewed'); SIYL_BAG.set(b); });   /* the room stays the engine's alone (a stale draft) */
 const counts = { leave: 0, release: 0, renders: 0 }; const onReq = (r) => { const u = r.url(); if (/\/api\/rooms\/leave/.test(u)) counts.leave++; if (/\/api\/seating\/release/.test(u)) counts.release++; }; C.on('request', onReq);
-await C.click('[data-scope="vientiane"]'); await C.waitForTimeout(4000); C.off('request', onReq);
+await toggleVientiane(C, 2500); C.off('request', onReq);
 const re = { mine: (await engineMine(C)).mine, seats: seatsOf((await api(C, '/api/seating', { method: 'GET' })).body), bag: await C.evaluate(() => SIYL_BAG.get().map((x) => x.id)), need: await need(C), counts, failed: !!(await C.$('[data-scope-failed]')) };
 note('reentrancy-one-release-each', jr.status === 200 && !(re.mine && re.mine.prewed) && re.seats.length === 0 && !re.bag.includes('sangkhathan') && !re.need.keys.some((k) => /^release:/.test(k)) && re.counts.leave === 1 && re.counts.release === (LIVE ? 0 : 2) && !re.failed, JSON.stringify(re));
 
 /* ===== 4b · A RELEASE THAT FAILS (Codex 011-1): the room stays, it is named, Review & Send waits, Release again resolves it ===== */
-await trip(C); await C.click('[data-scope="vientiane"]'); await C.waitForTimeout(1500);
+await trip(C); await toggleVientiane(C, 1200);
 const jc2 = await api(C, '/api/rooms/join', { method: 'POST', body: JSON.stringify({ invitationId: 'INV-T003', guestId: 'T003', key: 'prewed/heritage', label: 'A', name: 'Cleo' }) });
 await trip(C); await C.evaluate(() => SIYL_STAY.sync()); await C.waitForTimeout(600);
 await C.route('**/api/rooms/leave', (r) => r.abort());
-await C.click('[data-scope="vientiane"]'); await C.waitForTimeout(3000);
+await toggleVientiane(C, 2200);
 const f1 = { mine: (await engineMine(C)).mine, card: await C.$eval('[data-scope-failed]', (e) => e.innerText.replace(/\s+/g, ' ')).catch(() => ''), retry: !!(await C.$('[data-scope-retry]')), need: await need(C), bag: await C.evaluate(() => SIYL_BAG.get().map((x) => x.id)) };
 await C.unroute('**/api/rooms/leave');
 await C.click('[data-scope-retry]'); await C.waitForTimeout(3000);
@@ -143,13 +149,13 @@ await shot(C, '390-decline-path-sent');
 
 /* ===== 6 · PARTIAL ATTENDANCE (Ada): Bangkok + Vientiane answered, review shows the words, China asks nothing ===== */
 await trip(A); const pa0 = await visibleStages(A);
-for (const k of ['prewed', 'wedstay']) { await A.click('#s-' + k + ' [data-skip="' + k + '"]'); await A.waitForTimeout(1000); }
+for (const k of ['prewed', 'wedstay', 'kempinski']) { await A.click('#s-' + k + ' [data-skip="' + k + '"]'); await A.waitForTimeout(1000); }
 await wedding(A, 'no', LIVE ? 'no' : 'yes'); await prep(A);
 if (!LIVE) for (const [ev, seatId] of [['ceremony', 'C-R-05-02'], ['dinner', 'D-T-05']]) await api(A, '/api/seating/select', { method: 'POST', body: JSON.stringify({ invitationId: 'INV-T001', guestId: 'T001', event: ev, seatId, name: 'Ada' }) });
 await about(A, 'Matcha Green Tea');
 const pa1 = { need: await need(A), steps: await steps(A) };
 await A.goto(O + '/review.html', { waitUntil: 'load' }); await A.waitForTimeout(2000); const rva = await A.$eval('main', (e) => e.innerText.replace(/\s+/g, ' ').trim());
-note('partial-attendance-review', pa0.length === 4 && pa1.need.ok && /Where you join us/i.test(rva) && /Bangkok · Vientiane/.test(rva) && !/Kunming|Lijiang/.test(rva.split('Where you join us')[1] || '') && /My Favorite Flavor/i.test(rva) && /Matcha Green Tea/.test(rva), JSON.stringify(pa1).slice(0, 200) + ' · ' + rva.slice(0, 120));
+note('partial-attendance-review', pa0.length === 5 && pa1.need.ok && /Where you join us/i.test(rva) && /Bangkok · Vientiane/.test(rva) && !/Kunming|Lijiang/.test(rva.split('Where you join us')[1] || '') && /My Favorite Flavor/i.test(rva) && /Matcha Green Tea/.test(rva), JSON.stringify(pa1).slice(0, 200) + ' · ' + rva.slice(0, 120));
 await shot(A, '390-review-partial');
 /* ===== 8 · MY FAVORITE FLAVOR (Ada) ===== */
 await A.goto(O + '/about-you.html', { waitUntil: 'load' }); await A.waitForTimeout(1500);
@@ -161,10 +167,10 @@ await shot(A, '390-flavor');
 await A.goto(O + '/review.html', { waitUntil: 'load' }); await A.waitForTimeout(2000); const pf = await A.$eval('main', (e) => e.innerText.replace(/\s+/g, ' ')); note('flavor-on-review', /My Favorite Flavor/i.test(pf) && /Butter/.test(pf) && !/Matcha Green Tea/.test(pf), (pf.match(/.{0,40}Favorite Flavor.{0,30}/i) || [''])[0]);
 const payload = await A.evaluate(() => { const g = SIYL_GUEST.operational(); return { flavor: g.guests[0].profile.flavor, scope: g.scopeWords }; }); note('flavor-and-scope-in-payload', payload.flavor === 'Butter' && payload.scope === 'Bangkok · Vientiane', JSON.stringify(payload));
 
-/* China only, from the same guest: only the four China stages, the wedding steps read Not joining */
-await trip(A); await A.click('[data-scope="bangkok"]'); await A.waitForTimeout(1200); await A.click('[data-scope="vientiane"]'); await A.waitForTimeout(1200); await A.click('[data-scope="china"]'); await A.waitForTimeout(1800);
+/* China only, from the same guest: only the three China stages (F G H — the return flight needs Bangkok too), the wedding steps read Not joining */
+await trip(A); await toggle(A, 'bangkok', 1200); await toggleVientiane(A, 1200); await toggle(A, 'china', 1800);
 const ch = { stages: await visibleStages(A), steps: await steps(A), need: await need(A) };
-note('partial-china-only', JSON.stringify(ch.stages) === JSON.stringify(['kmg', 'c86', 'ljg', 'return']) && ch.steps.includes('wedding:na') && ch.steps.includes('preparation:na') && ch.need.keys.filter((k) => /^stage:/.test(k)).length === 4, JSON.stringify(ch).slice(0, 240));
+note('partial-china-only', JSON.stringify(ch.stages) === JSON.stringify(['kmg', 'c86', 'ljg']) && ch.steps.includes('wedding:na') && ch.steps.includes('preparation:na') && ch.need.keys.filter((k) => /^stage:/.test(k)).length === 3, JSON.stringify(ch).slice(0, 240));
 
 /* superseded by release 014 (Owner, 19 Sep 2026): no fixed arrangement */
 /* ===== 7 · HARUTHAI (G048): the host starts at zero — ten open stages, no Room A, every Bangkok address open, a choice held and released like anyone's ===== */
@@ -173,16 +179,17 @@ const H = LIVE ? null : await fresh(); if (!LIVE) { await signIn(H, 'G048'); awa
 const h0 = { words: await stageWords(H, 'bkk-stay'), need: await need(H), scope: await H.evaluate(() => SIYL_GUEST.scopeWords()), bag: await H.evaluate(() => SIYL_BAG.total()), rail: await H.$$eval('#s-bkk-stay [data-choose]', (l) => l.map((e) => e.getAttribute('data-choose'))), stages: await visibleStages(H), states: await H.evaluate(() => SIYL_JOURNEY.SEGMENTS.map((s) => s.key + ':' + SIYL_JOURNEY.state(s))), arranged: await H.evaluate(() => ({ items: document.querySelectorAll('[data-arranged-item]').length, global: typeof window.SIYL_ARRANGED, words: /Arranged for you|Fixed arrangement/i.test(document.body.innerText) })) };
 note('haruthai-starts-at-zero-014', h0.stages.length === 10 && h0.states.every((s) => /:open$/.test(s)) && !/Arranged for you|Fixed arrangement|Another address|Room A/i.test(h0.words) && h0.need.keys.filter((k) => /^stage:/.test(k)).length === 10 && h0.need.keys.includes('stage:bkk-stay') && h0.scope === 'Bangkok · Vientiane · China' && h0.bag === 0 && h0.rail.length === 3 && h0.rail.includes('penthouse') && h0.arranged.items === 0 && h0.arranged.global === 'undefined' && !h0.arranged.words, JSON.stringify(h0).slice(0, 300));
 await shot(H, '390-haruthai-my-trip');
-for (const k of ['train', 'prewed', 'wedstay', 'mu9646', 'kmg', 'c86', 'ljg', 'return', 'kempinski']) { if (await H.$('#s-' + k + ' [data-skip="' + k + '"]')) { await H.click('#s-' + k + ' [data-skip="' + k + '"]'); await H.waitForTimeout(700); } }
+for (const k of ['train', 'prewed', 'wedstay', 'mu9646', 'kmg', 'c86', 'ljg', 'return', 'kempinski']) { if (k === 'c86') { await H.click('#s-c86 [data-choose-flat="c86"]'); await H.waitForTimeout(900); continue; }   /* the mandatory train is chosen, never declined (21 Sep 2026) */
+  if (await H.$('#s-' + k + ' [data-skip="' + k + '"]')) { await H.click('#s-' + k + ' [data-skip="' + k + '"]'); await H.waitForTimeout(700); } }
 const h1 = await need(H); note('haruthai-readiness-names-the-open-stage-014', h1.keys.filter((k) => /^stage:|^room:/.test(k)).join(',') === 'stage:bkk-stay', JSON.stringify(h1).slice(0, 200));
 await H.click('#s-bkk-stay [data-choose="u-sathorn-superior-garden"]'); await H.waitForTimeout(2500);
 const m2 = await engineMine(H); const h2 = { mine: m2.mine, fixed: m2.fixed, bag: await H.evaluate(() => SIYL_BAG.get().map((x) => x.id + ':' + x.room)), total: await H.evaluate(() => SIYL_BAG.total()), words: await stageWords(H, 'bkk-stay'), need: await need(H) };
-note('haruthai-chooses-like-anyone-014', !!(h2.mine && h2.mine['bkk-stay']) && /u-sathorn/.test(h2.mine['bkk-stay'].key) && h2.fixed === undefined && h2.bag.includes('bkk-stay:u-sathorn-superior-garden') && h2.total > 0 && /Current selection/i.test(h2.words) && !/Arranged for you|Fixed arrangement/i.test(h2.words) && !h2.need.keys.some((k) => /^stage:|^room:/.test(k)), JSON.stringify({ mine: h2.mine, fixed: h2.fixed, bag: h2.bag, total: h2.total, need: h2.need.keys }).slice(0, 300));
+note('haruthai-chooses-like-anyone-014', !!(h2.mine && h2.mine['bkk-stay']) && /u-sathorn/.test(h2.mine['bkk-stay'].key) && h2.fixed === undefined && h2.bag.includes('bkk-stay:u-sathorn-superior-garden') && h2.total > 105 && /Current selection/i.test(h2.words) && !/Arranged for you|Fixed arrangement/i.test(h2.words) && !h2.need.keys.some((k) => /^stage:|^room:/.test(k)), JSON.stringify({ mine: h2.mine, fixed: h2.fixed, bag: h2.bag, total: h2.total, need: h2.need.keys }).slice(0, 300));
 await H.click('#s-bkk-stay [data-rm="bkk-stay"]'); await H.waitForTimeout(2500);
 const m3 = await engineMine(H); const h3 = { mine: m3.mine, fixed: m3.fixed, bag: await H.evaluate(() => SIYL_BAG.get().length), total: await H.evaluate(() => SIYL_BAG.total()), words: await stageWords(H, 'bkk-stay'), rail: await H.$$eval('#s-bkk-stay [data-choose]', (l) => l.map((e) => e.getAttribute('data-choose'))), state: await H.evaluate(() => SIYL_JOURNEY.state(SIYL_JOURNEY.SEGMENTS.find((s) => s.key === 'bkk-stay'))) };
-note('haruthai-remove-releases-014', !(h3.mine && h3.mine['bkk-stay']) && h3.fixed === undefined && h3.bag === 0 && h3.total === 0 && h3.state === 'open' && !/Arranged for you|Fixed arrangement|Room A/i.test(h3.words) && h3.rail.length === 3 && h3.rail.includes('penthouse'), JSON.stringify(h3).slice(0, 240));
+note('haruthai-remove-releases-014', !(h3.mine && h3.mine['bkk-stay']) && h3.fixed === undefined && h3.bag === 1 && h3.total === 105 && h3.state === 'open' && !/Arranged for you|Fixed arrangement|Room A/i.test(h3.words) && h3.rail.length === 3 && h3.rail.includes('penthouse'), JSON.stringify(h3).slice(0, 240));
 await H.goto(O + '/cart.html', { waitUntil: 'load' }); await H.waitForTimeout(1500); const hc = await H.$eval('main', (e) => e.innerText.replace(/\s+/g, ' ').trim());
-note('haruthai-bag-usd-0', /No selections yet · USD 0/.test(hc) && !/arrang/i.test(hc) && !/Remove/.test(hc), hc.slice(0, 200)); }
+note('haruthai-bag-c86-only', /C86 · Kunming → Lijiang/.test(hc) && /USD 105/.test(hc) && !/arrang/i.test(hc) && !/Sathorn|Penthouse|Souphattra/.test(hc), hc.slice(0, 200) + ' (the mandatory train alone — the Bangkok stay given back, 21 Sep 2026)'); }
 
 /* ===== 9 · VIEW ALL STEPS on iPhone Safari (WebKit) and in Chromium at 320 / 390 / 834 ===== */
 const wk = await webkit.launch();

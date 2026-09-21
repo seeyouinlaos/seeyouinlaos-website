@@ -6,6 +6,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { bearerOf, authIdOf } from '../register/crypto.mjs';
 import { src, doState } from './sandbox.mjs';
+import { complete } from './complete.mjs';
 import { Rooms } from '../src/rooms.js';
 import { Drafts } from '../src/drafts.js';
 
@@ -60,7 +61,7 @@ test('ONE LOGICAL JOURNEY · the first send sets the reference; a change afterwa
     const put = async (keys) => { const cur = await (await h.w.fetch(req('/api/draft', { 'x-siyl-auth': h.sam }), h.env)).json(); return (await h.w.fetch(req('/api/draft', { 'x-siyl-auth': h.sam }, { invitationId: 'INV-G777', keys, baseUpdatedAt: cur.draft ? cur.draft.updatedAt : null }, 'PUT'), h.env)).json(); };
     const state = async () => (await (await h.w.fetch(req('/api/draft', { 'x-siyl-auth': h.sam }), h.env)).json()).submission;
     await put({ 'siyl.guest': GUEST({ coffeetea: 'Oolong' }), 'siyl.bag': JSON.stringify([{ id: 'train' }]) });
-    const r1 = await h.w.fetch(req('/api/register', { 'x-siyl-auth': h.sam }, { invitationId: 'INV-G777', registration: REG('sam.example@example.org'), text: TEXT }), h.env);
+    const r1 = await h.w.fetch(req('/api/register', { 'x-siyl-auth': h.sam }, { invitationId: 'INV-G777', registration: complete(REG('sam.example@example.org')), text: TEXT }), h.env);
     assert.equal(r1.status, 202); const d1 = await r1.json();
     assert.equal(d1.kind, 'initial'); assert.equal(d1.version, 1); assert.match(d1.submissionId, /^SYL-G777-[0-9A-F]{8}$/); assert.equal(d1.submission.submissionStatus, 'sent'); assert.equal(d1.submission.hasUnsentChanges, false);
     assert.match(h.calls[0].body.subject, /^Trip received — Sam Example/); assert.match(h.calls[1].body.subject, /^Your trip has been received — /);
@@ -72,7 +73,7 @@ test('ONE LOGICAL JOURNEY · the first send sets the reference; a change afterwa
     const p2 = await put({ 'siyl.guest': GUEST({ coffeetea: 'Espresso' }), 'siyl.bag': JSON.stringify([{ id: 'train' }]) });
     assert.equal(p2.submission.submissionStatus, 'changes-not-sent'); assert.equal(p2.submission.hasUnsentChanges, true); assert.equal(p2.submission.submissionId, d1.submissionId);
     /* Send Updated Journey */
-    const r2 = await h.w.fetch(req('/api/register', { 'x-siyl-auth': h.sam }, { invitationId: 'INV-G777', registration: REG('sam.example@example.org', { registration_submitted_at: '2026-09-16T10:30:00.000Z' }), text: TEXT + '\n- Espresso' }), h.env);
+    const r2 = await h.w.fetch(req('/api/register', { 'x-siyl-auth': h.sam }, { invitationId: 'INV-G777', registration: complete(REG('sam.example@example.org', { registration_submitted_at: '2026-09-16T10:30:00.000Z' })), text: TEXT + '\n- Espresso' }), h.env);
     const d2 = await r2.json();
     assert.equal(d2.kind, 'update'); assert.equal(d2.version, 2); assert.equal(d2.submissionId, d1.submissionId, 'the same logical journey'); assert.equal(d2.submission.hasUnsentChanges, false); assert.equal(d2.submission.submissionStatus, 'sent');
     assert.match(h.calls[2].body.subject, /^Trip updated — Sam Example · SYL-G777-/); assert.match(h.calls[3].body.subject, /^Your trip has been updated — SYL-G777-/);

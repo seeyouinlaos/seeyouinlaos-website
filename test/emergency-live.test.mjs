@@ -6,6 +6,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { bearerOf, authIdOf } from '../register/crypto.mjs';
 import { src, doState } from './sandbox.mjs';
+import { complete } from './complete.mjs';
 import { Rooms } from '../src/rooms.js';
 
 const ORIGIN = 'https://seeyouinlaos-website.suthep-hrg.workers.dev';
@@ -29,8 +30,8 @@ async function harness(provider) {
 test('EMAIL · the journey is stored first with a submission id, then Guest Relations and the guest are mailed through the provider; the answer carries both message ids and no code', async () => {
   const h = await harness('brevo');
   try {
-    const r = await h.w.fetch(req('/api/register', { 'x-siyl-auth': h.peggy }, { invitationId: 'INV-G001', registration: REG, text: TEXT }), h.env);
-    assert.equal(r.status, 202); const d = await r.json();
+    const r = await h.w.fetch(req('/api/register', { 'x-siyl-auth': h.peggy }, { invitationId: 'INV-G001', registration: complete(REG, { scope: { vientianeWedding: true } }), text: TEXT }), h.env);
+    assert.equal(r.status, 202, JSON.stringify(await r.clone().json()).slice(0, 300)); const d = await r.json();
     assert.equal(d.ok, true); assert.equal(d.stored, true); assert.equal(d.mailed, true); assert.match(d.submissionId, /^SYL-G001-[0-9A-F]{8}$/);
     assert.equal(d.mail.owner.provider, 'brevo'); assert.equal(d.mail.owner.accepted, true); assert.match(d.mail.owner.id, /^<msg-1@brevo>$/);
     assert.equal(d.mail.guest.accepted, true); assert.match(d.mail.guest.id, /^<msg-2@brevo>$/); assert.equal(d.mail.guest.to, 'p…@example.com');
@@ -63,7 +64,7 @@ test('EMAIL · THE PERSISTED ROOM (Owner, 16 Sep 2026): both emails name the roo
       assert.equal(j.status, 200);
     }
     /* the client claims another room in its text — the emails carry the engine's */
-    const r = await h.w.fetch(req('/api/register', { 'x-siyl-auth': h.peggy }, { invitationId: 'INV-G001', registration: REG, text: TEXT + '\n- The Heritage · Room A' }), h.env);
+    const r = await h.w.fetch(req('/api/register', { 'x-siyl-auth': h.peggy }, { invitationId: 'INV-G001', registration: complete(REG, { scope: { vientianeWedding: true } }), text: TEXT + '\n- The Heritage · Room A' }), h.env);
     assert.equal(r.status, 202);
     const rec = JSON.parse(h.store.m.get('reg:INV-G001').v);
     assert.deepEqual(rec.rooms, { wedstay: { stage: 'wedstay', key: 'wedstay/heritage', label: 'B', name: 'The Heritage', stay: null, room: 'Room B' }, 'bkk-stay': { stage: 'bkk-stay', key: 'bkk-stay/penthouse', label: 'C', name: 'Sathorn Penthouse', stay: 'Sathorn Penthouse Bangkok', room: 'Room C' } }, 'each record line names its stage (Edit 5: a fixed arrangement may stand beside a chosen hold)');
@@ -71,7 +72,7 @@ test('EMAIL · THE PERSISTED ROOM (Owner, 16 Sep 2026): both emails name the roo
     /* the engine's rooms reach both emails through the stays (the journey-shop shape names the stay lines; this fixture carries none, so the record's rooms are proven on the stored record above) */
     assert.doesNotMatch(owner + guest, /room engine|persisted allocation/, 'no system words in an email');
     delete h.env.ROOMS; h.calls.length = 0;
-    await h.w.fetch(req('/api/register', { 'x-siyl-auth': h.peggy }, { invitationId: 'INV-G001', registration: REG, text: TEXT }), h.env);
+    await h.w.fetch(req('/api/register', { 'x-siyl-auth': h.peggy }, { invitationId: 'INV-G001', registration: complete(REG), text: TEXT }), h.env);
     assert.equal(JSON.parse(h.store.m.get('reg:INV-G001').v).rooms, null, 'without an engine the record says so — the email stays silent');
     assert.match(src('src/worker.js'), /const rooms = await engineRooms\(env, who\);/, 'the rooms are read on the server, from the engine');
   } finally { h.done(); }
@@ -80,7 +81,7 @@ test('EMAIL · THE PERSISTED ROOM (Owner, 16 Sep 2026): both emails name the roo
 test('EMAIL · a provider that refuses (or none configured) never loses the booking: stored, mailed false, the error named; the retry mails the stored journey again and creates no submission; another guest cannot retry it', async () => {
   const h = await harness('refuse');
   try {
-    const r = await h.w.fetch(req('/api/register', { 'x-siyl-auth': h.peggy }, { invitationId: 'INV-G001', registration: REG, text: TEXT }), h.env);
+    const r = await h.w.fetch(req('/api/register', { 'x-siyl-auth': h.peggy }, { invitationId: 'INV-G001', registration: complete(REG), text: TEXT }), h.env);
     const d = await r.json(); assert.equal(r.status, 202); assert.equal(d.stored, true); assert.equal(d.mailed, false); assert.equal(d.mail.guest.accepted, false); assert.equal(d.mail.guest.error, 'sender not validated'); assert.ok(h.store.m.has('reg:INV-G001'));
     const keysBefore = [...h.store.m.keys()].length, at = JSON.parse(h.store.m.get('reg:INV-G001').v).submittedAt;
     /* the retry, by the guest's own bearer: the same record, both emails again, no new record */
@@ -94,7 +95,7 @@ test('EMAIL · a provider that refuses (or none configured) never loses the book
   } finally { h.done(); }
   const n = await harness('none');
   try {
-    const r = await n.w.fetch(req('/api/register', { 'x-siyl-auth': n.peggy }, { invitationId: 'INV-G001', registration: REG, text: TEXT }), n.env);
+    const r = await n.w.fetch(req('/api/register', { 'x-siyl-auth': n.peggy }, { invitationId: 'INV-G001', registration: complete(REG), text: TEXT }), n.env);
     const d = await r.json(); assert.equal(d.stored, true); assert.equal(d.mailed, false); assert.equal(d.mail.owner.provider, 'none'); assert.match(d.mail.owner.error, /no email provider configured/); assert.equal(n.calls.length, 0);
   } finally { n.done(); }
   /* the client: the saved-but-not-mailed words and the retry that never re-submits */

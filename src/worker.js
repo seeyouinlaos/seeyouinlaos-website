@@ -53,6 +53,7 @@ import { identify, owns, loadIndex } from './auth.js';
 import { SEED } from './inventory-seed.js';
 import { stageOf } from './rooms.js';
 import { composeGuestMail, composeOwnerMail } from './mail-templates.js';
+import { completion as graphCompletion, normalizeScope as graphScope, isRelevant as graphRelevant, STAGES as GRAPH_STAGES, STAGE_IDS as GRAPH_IDS } from './stage-graph.js';
 
 /* ---- the Guest Relations gate (F + G) ------------------------------------
  * A secret set with `wrangler secret put GR_TOKEN`, compared in constant
@@ -335,6 +336,14 @@ async function handleRegister(request, env) {
   /* THE PERSISTED ROOMS (Owner, 16 Sep 2026): the rooms this guest holds are read from the room engine on the server —
      the emails name the room the engine persists, never a room the client claims */
   const rooms = await engineRooms(env, who);
+  /* THE ONE VALIDATOR (Owner, 21 Sep 2026 · the global My Trip rebuild): the same graph the pages read decides here whether the
+     trip is complete — every relevant stage answered (a hold or a waiting-list place the engine persists, a chosen transport,
+     an explicit "not joining this stage" where the stage allows it), the wedding's answers, the seats while seating is open,
+     About You. A guest not joining the trip sends a complete response with nothing else. An incomplete trip is refused. */
+  const done = await completionOf(env, who, registration, rooms);
+  if (!done.canSend) {
+    return json({ ok: false, error: 'incomplete', message: 'Your trip is not complete yet.', missing: done.missing, unresolved: done.unresolved }, 422, corsHeaders(request));
+  }
   let record = null;
   if (env.REG_KV) {
     try {
@@ -399,6 +408,56 @@ function draftContent(keys) {
   return out;
 }
 async function sha256Hex(text) { const d = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text)); return [...new Uint8Array(d)].map((b) => b.toString(16).padStart(2, '0')).join(''); }
+/* the trip as the server can prove it, in the graph's words (see src/stage-graph.js · completion) */
+async function completionOf(env, who, registration, rooms) {
+  const reg = registration && typeof registration === 'object' ? registration : {};
+  const gr = reg.guestRecord && typeof reg.guestRecord === 'object' ? reg.guestRecord : {};
+  const claimed = reg.stages && typeof reg.stages === 'object' ? reg.stages : {};
+  const lines = Array.isArray(reg.selections) ? reg.selections : [];
+  const lineOf = (ids) => lines.find((x) => x && ids.includes(String(x.id)));
+  const scope = graphScope(gr.scope, { prewed: claimed.prewed || 'open' });
+  const stages = {};
+  GRAPH_STAGES.forEach((st) => {
+    const ids = GRAPH_IDS[st.key] || [st.key];
+    const said = String(claimed[st.key] || 'open');
+    const line = lineOf(ids);
+    if (st.kind === 'stay' && rooms) {
+      /* a stay is answered by the engine's own record: a room held or a waiting-list place in this guest's name */
+      const held = ids.map((id) => rooms[id]).find(Boolean);
+      if (held) stages[st.key] = held.waitlisted ? 'waitlisted' : 'selected';
+      else if (line && line.interest) stages[st.key] = 'selected';
+      else stages[st.key] = said === 'declined' ? 'declined' : 'open';
+    } else if (st.kind === 'stay') {
+      stages[st.key] = ['selected', 'waitlisted', 'declined'].includes(said) ? said : 'open';   /* the engine could not be read: the sent state stands */
+    } else {
+      stages[st.key] = line ? 'selected' : (said === 'declined' ? 'declined' : 'open');
+    }
+  });
+  /* the wedding, in the record's words */
+  const tc = reg.templeCeremony && Array.isArray(reg.templeCeremony.guests) ? (reg.templeCeremony.guests.find((g) => g && g.guestId === who.guestId) || reg.templeCeremony.guests[0]) : null;
+  const word = (v) => v === 'Joining' ? 'yes' : v === 'Not joining' ? 'no' : null;
+  const events = {}; ['temple', 'coffee', 'vows', 'dinner'].forEach((k) => { events[k] = tc && tc.events ? word(String(tc.events[k] || '')) : null; });
+  const sangkhathan = !tc ? null : (tc.sangkhathanState === 'Decision required' ? null : !!tc.sangkhathan);
+  const seatView = await engineSeatView(env, who);
+  const seats = seatView && seatView.mine ? { ceremony: (seatView.mine.ceremony || {})[who.guestId] || null, dinner: (seatView.mine.dinner || {})[who.guestId] || null } : {};
+  const about = [];
+  const allergy = gr.allergy || {};
+  if (allergy.answer !== 'no' && !(allergy.answer === 'yes' && String(allergy.details || '').trim())) about.push({ key: 'allergy', label: 'Food allergies', href: 'about-you.html#allergy' });
+  if (!gr.photo) about.push({ key: 'photo', label: 'Photography acknowledgement', href: 'about-you.html#photo' });
+  /* a room or a waiting-list place the engine still holds for a stage outside the trip must have been released first */
+  const stale = scope ? Object.keys(rooms || {}).filter((stage) => GRAPH_IDS[stage] && !graphRelevant(stage, scope)).map((stage) => ({ key: 'release:' + stage, label: 'A place still held for a stage outside your trip', href: 'your-journey.html#scope' })) : [];
+  return graphCompletion({
+    scope, stages, stale,
+    contact: { missing: [] },
+    wedding: { events, sangkhathan, dress: !!(gr.dress && gr.dress.all), hosts: !!who.hosts,
+      seating: seatView ? { open: !!seatView.open, frozen: !!seatView.frozen, configured: seatView.configured || {}, seats } : { open: false } },
+    about: { missing: scope && scope.none ? [] : about },
+  });
+}
+async function engineSeatView(env, who) {
+  if (!env.SEATING || !who) return null;
+  try { const stub = env.SEATING.get(env.SEATING.idFromName('seating')); const r = await stub.fetch(new Request('https://seating/api/seating/mine?invitation=' + encodeURIComponent(who.invitationId), { headers: { 'x-siyl-identity': JSON.stringify(who) } })); const v = await r.json(); return v && v.ok ? v : null; } catch (e) { return null; }
+}
 async function engineSeats(env, who) {
   if (!env.SEATING || !who) return null;
   try { const stub = env.SEATING.get(env.SEATING.idFromName('seating')); const r = await stub.fetch(new Request('https://seating/api/seating/mine?invitation=' + encodeURIComponent(who.invitationId), { headers: { 'x-siyl-identity': JSON.stringify(who) } })); const v = await r.json(); return v && v.mine ? v.mine : null; } catch (e) { return null; }

@@ -23,7 +23,7 @@
       label: 'Pre-Wedding Vientiane', ids: ['prewed'], anchor: 'j-prewed' },
     /* ONE wedding stay selection: the Souphattra, the Guest House complimentary or the Riverside */
     { key: 'wedstay', when: '27 FEB – 01 MAR', cat: 'Accommodation', place: 'Vientiane',
-      label: 'Wedding Stay', ids: ['wedstay', 'guesthouse', 'riverside'], anchor: 'j-wedstay' },
+      label: 'Wedding Stay', ids: ['wedstay', 'riverside', 'guesthouse'], anchor: 'j-wedstay' },
     { key: 'mu9646', when: '01 MAR', cat: 'Transportation', place: 'Vientiane → Kunming',
       label: 'MU9646', ids: ['mu9646'], anchor: 'j-mu9646' },
     { key: 'kmg', when: '01 – 04 MAR', cat: 'Accommodation', place: 'Kunming',
@@ -72,15 +72,13 @@
       note: 'Complimentary — hosted by Haruthai & Suthep.', anchor: 'voyage.html#dinner' }
   ];
 
-  /* WHERE WILL YOU JOIN US (Owner, 18 Sep 2026): every stage belongs to the destinations it serves. A stay belongs to its
-   * city; a transport leg needs both ends; the Kempinski nights after China need both Bangkok and China. A stage whose
-   * destinations the guest does not join is not part of their trip: it is never asked, never counted, never held. */
-  var SCOPE_OF = { 'bkk-stay': ['bangkok'], train: ['bangkok', 'vientiane'], prewed: ['vientiane'], wedstay: ['vientiane'], mu9646: ['vientiane', 'china'],
-    kmg: ['china'], c86: ['china'], ljg: ['china'], 'return': ['china'], kempinski: ['bangkok', 'china'] };
-  /* the lines that are not stages: the Bangkok experiences, the Vientiane offering and the spa interest */
-  var EXTRA_SCOPE = { '1872': ['bangkok'], tea1872: ['bangkok'], suhring: ['bangkok'], baanphraya: ['bangkok'], cannubi: ['bangkok'], sangkhathan: ['vientiane'] };
+  /* WHERE WILL YOU JOIN US (Owner, 21 Sep 2026 · the global My Trip rebuild): the ONE stage graph (assets/stage-graph.js)
+   * says which stage belongs to which scope and when a connector is required. A stage whose scope the guest does not join
+   * is not part of their trip: never asked, never counted, never held. */
+  var EXTRA_SCOPE = { '1872': ['bangkok'], tea1872: ['bangkok'], suhring: ['bangkok'], baanphraya: ['bangkok'], cannubi: ['bangkok'], sangkhathan: ['vientianeWedding'] };
   function scope() { var G = window.SIYL_GUEST; return G && G.scope ? G.scope() : null; }
   function joinsAll(dests) { var s = scope(); if (!s) return true; if (s.none) return false; return dests.every(function (d) { return s[d]; }); }
+  function relevantKey(key) { var GR = window.SIYL_GRAPH; if (GR && GR.isRelevant) return GR.isRelevant(key, scope()); return joinsAll([]); }
 
   function skipped() {
     try { return JSON.parse(localStorage.getItem(SKIP) || '[]'); } catch (e) { return []; }
@@ -92,9 +90,12 @@
 
   window.SIYL_JOURNEY = {
     SEGMENTS: SEG,
-    SCOPE_OF: SCOPE_OF,
+    /* the sheet a stage sits under on My Trip (the graph's) */
+    sheetOf: function (seg) { var GR = window.SIYL_GRAPH, st = GR && GR.stageOf ? GR.stageOf(seg.key) : null; return st ? st.sheet : ''; },
     /* is this stage part of the guest's trip (an unanswered scope keeps every stage, so nothing disappears before the guest has spoken) */
-    relevant: function (seg) { return joinsAll(SCOPE_OF[seg.key] || []); },
+    relevant: function (seg) { return relevantKey(seg.key); },
+    /* the state of every stage, as the graph reads it */
+    states: function () { var self = this, out = {}; SEG.forEach(function (s) { out[s.key] = self.state(s); }); return out; },
     relevantSegments: function () { var self = this; return SEG.filter(function (s) { return self.relevant(s); }); },
     excludedSegments: function () { var self = this; return SEG.filter(function (s) { return !self.relevant(s); }); },
     /* is a Bag line part of the guest's trip: by its stage, else by what it is */
@@ -102,7 +103,7 @@
       var seg = SEG.filter(function (s) { return s.ids.indexOf(x.id) >= 0; })[0];
       if (seg) return this.relevant(seg);
       if (EXTRA_SCOPE[x.id]) return joinsAll(EXTRA_SCOPE[x.id]);
-      if (x.interest) return joinsAll(['vientiane']);
+      if (x.interest) return joinsAll(['vientianeWedding']) || joinsAll(['vientianePreWedding']);
       return true;
     },
     /* NOT JOINING THIS STAGE, in one action (Owner, 18 Sep 2026): whatever the guest holds or chose in the stage is released
@@ -236,23 +237,8 @@
       var self = this;
       return SEG.filter(function (s) { return self.relevant(s) && self.state(s) === 'open'; });
     },
-    /* ======================================================================
-       THE PACKAGES (Owner instruction, 19 Sep 2026): COMPLETE TRIP and ESSENTIAL TRIP are two real packages, defined in
-       assets/packages-data.js — for every stage a package covers, the default product and the DEFINED fallback chain.
-       A plan is PURE: computing it changes nothing. It says, per relevant stage the package covers, exactly what confirming
-       would do:
-         default    the package's default product, and it takes the party
-         fallback   the default cannot take the party (full, or not enough places together) — the next DEFINED option
-                    that can; price never decides, capacity does
-         waitlist   no option of the chain can take the party — the guest is placed on the waiting list of the stage
-         same       the guest already holds exactly what the package selects — nothing changes
-       and, for each, what it REPLACES: the guest's current selection in the stage (a package is a package — it replaces
-       conflicting individual choices for the stages it covers) or a "not joining" the guest had said. Stages the package
-       does not cover are never touched. The party's need is the number of members: a unit must take them all.
-       ====================================================================== */
-    packages: function () { return window.SIYL_PACKAGES || {}; },
-    /* the packages OFFERED: those in the Owner's order whose composition is defined (a package without stages is never a card) */
-    packageOrder: function () { var P = this.packages(); return (window.SIYL_PACKAGE_ORDER || Object.keys(P)).filter(function (k) { return P[k] && P[k].approved !== false && Object.keys(P[k].stages || {}).length; }); },
+    /* THE PACKAGES ARE GONE (Owner, 21 Sep 2026): one booking model for every guest — the scopes, the stage graph, each
+       required component chosen. The party's need for one unit stays the engine's fact. */
     /* the places the guest's party needs in one unit */
     partySize: function () {
       var G = window.SIYL_GUEST, p = G && G.party ? G.party() : null, n = p && Array.isArray(p.members) ? p.members.length : 0;
@@ -260,64 +246,6 @@
       if (!n) { try { var a = JSON.parse(localStorage.getItem('siyl.auth') || 'null'); n = a && Array.isArray(a.members) ? a.members.length : 1; } catch (e) { n = 1; } }
       return Math.max(1, Math.min(6, n || 1));
     },
-    packagePlan: function (kind) {
-      var P = window.SIYL_PRICE, U = window.SIYL_UNITS, B = window.SIYL_BAG, self = this;
-      var pk = this.packages()[kind];
-      var out = { kind: kind, name: pk ? pk.name : kind, rows: [], add: [], remove: [], unskip: [], waitlist: [], total: 0, ready: !!(U && U.ready && U.ready()), need: this.partySize() };
-      if (!P || !pk) return out;
-      var need = out.need;
-      var lineOf = function (seg) { return B ? B.get().filter(function (x) { return seg.ids.indexOf(x.id) >= 0; })[0] || null : null; };
-      SEG.forEach(function (seg) {
-        var def = pk.stages[seg.key];
-        if (!def || !self.relevant(seg)) return;                      /* not covered, or not part of this guest's trip */
-        var cur = lineOf(seg), declined = self.isSkipped(seg.key);
-        var row = { seg: seg, current: cur, wasDeclined: declined && !cur, replaces: null, why: '', items: [], key: null, unit: null, wanted: null, tried: [] };
-        if (typeof def === 'string') {
-          /* a flat product (a transport leg): one product, always available */
-          row.items = P.items(def).map(function (it) { it.qty = 1; it.by = kind; return it; });
-          row.key = def; row.why = cur && cur.id === def && (cur.cls || null) === (row.items[0] && row.items[0].cls || null) ? 'same' : 'default';
-        } else {
-          var chain = def.slice(), chosen = null, idx = -1;
-          for (var i = 0; i < chain.length && !chosen; i++) {
-            var win = chain[i].split('/')[0], slug = chain[i].split('/').slice(1).join('/');
-            row.tried.push(chain[i]);
-            if (!U || !U.ready || !U.ready()) { chosen = { win: win, slug: slug, label: null }; idx = i; break; }   /* engine unread: the default, decided again on confirm */
-            if (!U.tracked(win, slug)) { chosen = { win: win, slug: slug, label: null }; idx = i; break; }
-            /* a place the guest already holds in this very category is theirs — the package never moves them to another room */
-            var held = U.mineFor(win, slug);
-            var u = held ? held : U.unitForParty(win, slug, need);
-            if (u) { chosen = { win: win, slug: slug, label: u.label }; idx = i; }
-          }
-          row.wanted = chain[0];
-          /* a room the guest already holds in this stage is never traded for the waiting list: it stays as chosen */
-          var heldHere = !chosen && cur && cur.room && !cur.interest && U && U.ready && U.ready() && U.mine && U.mine(seg.key);
-          if (heldHere) { row.why = 'same'; row.key = heldHere.key; row.unit = heldHere.label; row.items = P.items(heldHere.key.split('/')[0], heldHere.key.split('/').slice(1).join('/')).map(function (it) { it.qty = 1; return it; }); row.kept = true; }
-          else if (!chosen) { row.why = 'waitlist'; row.key = null; }
-          else {
-            row.key = chosen.win + '/' + chosen.slug; row.unit = chosen.label;
-            row.items = P.items(chosen.win, chosen.slug).map(function (it) { it.qty = 1; it.by = kind; return it; });
-            var same = !!(cur && cur.id === chosen.win && cur.room === chosen.slug && (!U || !U.ready || !U.ready() || (U.mineFor(chosen.win, chosen.slug) && (!chosen.label || U.mineFor(chosen.win, chosen.slug).label === chosen.label))));
-            row.why = same ? 'same' : (idx === 0 ? 'default' : 'fallback');
-          }
-        }
-        if (row.why !== 'same' && cur) row.replaces = cur;
-        if (row.why === 'waitlist') { out.waitlist.push(seg.key); if (cur) out.remove.push(cur.id); }
-        else if (row.why !== 'same') { row.items.forEach(function (it) { out.add.push(it); }); if (cur && cur.id !== row.items[0].id) out.remove.push(cur.id); }
-        if (declined) out.unskip.push(seg.key);
-        row.amount = row.items.reduce(function (t, it) { return t + (it.price || 0) * (it.qty || 1); }, 0);
-        out.total += row.why === 'waitlist' ? 0 : row.amount;
-        out.rows.push(row);
-      });
-      out.rows.sort(function (a, b) { return SEG.indexOf(a.seg) - SEG.indexOf(b.seg); });
-      /* the summary counts the preview shows */
-      out.counts = { stages: out.rows.length, defaults: out.rows.filter(function (r) { return r.why === 'default'; }).length, fallbacks: out.rows.filter(function (r) { return r.why === 'fallback'; }).length, waitlisted: out.waitlist.length, replaced: out.rows.filter(function (r) { return r.replaces; }).length, same: out.rows.filter(function (r) { return r.why === 'same'; }).length };
-      return out;
-    },
-    /* the signature of a plan: stage · why · product · unit · amount — the confirm compares the previewed one with the one it would apply */
-    planSignature: function (plan) { return plan.rows.map(function (r) { return r.seg.key + ':' + r.why + ':' + (r.key || '') + ':' + (r.unit || '') + ':' + r.amount + ':' + (r.replaces ? r.replaces.id + '/' + (r.replaces.room || '') + '/' + (r.replaces.unit || '') : '') + ':' + (r.wasDeclined ? 'd' : ''); }).join('|') + '#' + plan.need; },
-    /* the stages a package covers that are part of the guest's trip */
-    packageStages: function (kind) { var pk = this.packages()[kind], self = this; return pk ? SEG.filter(function (s) { return pk.stages[s.key] && self.relevant(s); }) : []; },
-
     /* ======================================================================
        THE CANONICAL COUNTS (Owner, 19 Sep 2026): one derived state, tested by its invariants —
          relevant = confirmed + waitlisted + declined + open;  excluded is outside relevant;

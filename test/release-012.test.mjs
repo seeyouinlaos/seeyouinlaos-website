@@ -60,9 +60,9 @@ test('THE JOURNEY · every accommodation card is a stay gallery from the record 
   assert.deepEqual(gal, { 'j-bkk-stay': 'sathornPenthouse,uSathorn,shamaYenAkat', 'j-prewed': 'souphattra', 'j-wedstay': 'souphattra', 'j-guesthouse': 'guestHouse', 'j-riverside': 'riverside', 'j-kmg': 'wanxiang', 'j-ljg': 'luyeBaisha', 'j-kempinski': 'kempinski' });
   for (const keys of Object.values(gal)) for (const k of keys.split(',')) assert.ok(STAY[k], k + ' is a hotel of the record');
   assert.equal((j.match(/<div class="pgal" data-gal="/g) || []).length, 4, 'the four transport galleries stay (the train, MU9646, C86, the return)');
-  assert.match(j, /three addresses for this window: the Souphattra Heritage, the Guest House complimentary and the Riverside Hotel/);
+  assert.match(j, /three addresses for this window: the Souphattra Heritage, the Riverside Hotel and the Guest House complimentary below/, 'Souphattra · Riverside · Guest House (Owner, 21 Sep 2026)');
   /* D2 · Guest House complimentary (Owner, 19 Sep 2026): its card names the house, its status, six shared places, the room page; the invented label is gone */
-  assert.match(j, /<div class="p" id="j-guesthouse">[^]*?<p class="pn">Guest House complimentary<\/p>[^]*?<p class="st">Complimentary · six shared places<\/p><a class="vw" data-cta-swap href="room\.html\?stay=guesthouse&amp;room=guest-house">View the guest house<\/a>/);
+  assert.match(j, /<div class="p" id="j-guesthouse">[^]*?<p class="pn">Guest House complimentary<\/p>[^]*?<p class="pp" data-private>USD 0 · Complimentary<\/p><p class="pb" data-private>Both nights hosted by Haruthai &amp; Suthep · six shared places · nothing to pay<\/p><a class="vw" data-cta-swap href="room\.html\?stay=guesthouse&amp;room=guest-house">View the guest house<\/a>/);
   assert.doesNotMatch(j, /Private Residence|j-residence|privateResidence|airbnb-2br|up to 4/, 'no "Private Residence", no "up to 4" on The Journey');
   /* one grammar: frames name their hotel in a multi-hotel window; arrows, keyboard, lazy frames, the empty frame */
   assert.match(j, /out\.push\(\[im\.src,\(multi\?h\.name\+' · ':''\)\+im\.caption,h\.name,im\.kind\]\)/, 'a multi-hotel gallery names the hotel on every frame');
@@ -133,7 +133,7 @@ test('RIVERSIDE HOTEL · package D3 everywhere: the inventory (6 rooms · 2 plac
   assert.equal(rvGallery.length > 0, rvFrames.length > 0, 'the room page shows the house exactly when the Owner has photographed it');
   const q = P.quote('riverside', 'superior-window'); assert.equal(q.total, 60); assert.equal(q.nights, 2); assert.equal(q.pay, 2); assert.equal(q.hosted, 0); assert.equal(q.breakfast, 'Breakfast included'); assert.match(q.nightsList.join(' '), /27 → 28 February.*28 February → 01 March/);
   const it = P.items('riverside', 'superior-window')[0]; assert.equal(it.price, 60); assert.equal(it.name, 'Riverside Hotel Vientiane'); assert.equal(it.img, rvGallery.length ? rvGallery[0] : null, 'the Bag line carries the lead frame of the record, or none');
-  assert.deepEqual(JSON.parse(JSON.stringify(J.SEGMENTS.find((s) => s.key === 'wedstay').ids)), ['wedstay', 'guesthouse', 'riverside'], 'one wedding-window stage, three addresses');
+  assert.deepEqual(JSON.parse(JSON.stringify(J.SEGMENTS.find((s) => s.key === 'wedstay').ids)), ['wedstay', 'riverside', 'guesthouse'], 'one wedding-window stage, three addresses (Souphattra · Riverside · Guest House, Owner 21 Sep 2026)');
   assert.equal(w.SIYL_UNITS.stageOf('riverside/superior-window'), 'wedstay'); assert.equal(w.SIYL_UNITS.stageOf('guesthouse/guest-house'), 'wedstay');
   for (const f of ['src/rooms.js', 'src/mail-templates.js', 'assets/rooms.js']) { assert.match(src(f), /riverside: 'wedstay'/, f + ' stage map'); assert.match(src(f), /guesthouse: 'wedstay'/, f + ' stage map · the guest house'); }
   /* the engine: a Riverside hold and a Souphattra hold are the same stage — one replaces the other */

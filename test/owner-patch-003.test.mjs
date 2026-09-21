@@ -18,7 +18,7 @@ const WITH_PASS = [...CORE, 'assets/seatpass.js', 'assets/vendor/qrcode.js', 'as
 const ACTIVE = ['assets/pricing.js', 'assets/journey.js', 'assets/temple.js', 'assets/transport-data.js', 'assets/travelpass.js', 'assets/seatpass.js', 'assets/seatlabels.js', 'assets/guest.js', 'journeys.html', 'your-journey.html', 'transport.html', 'cart.html', 'review.html', 'tickets.html', 'wedding.html', 'wedding-preparation.html', 'voyage.html', 'dress.html', 'about-you.html', 'index.html', 'accommodation.html', 'room.html'];
 const stripComments = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
 
-test('C86 · USD 105 is the one price (the current Operations Master, 19 Sep 2026): source, journey, transport detail, travel pass, ticket, cart, sticky total, review, sent journey, packages — and a persisted 85 becomes 105 on load', () => {
+test('C86 · USD 105 is the one price (the current Operations Master, 19 Sep 2026): source, journey, transport detail, travel pass, ticket, cart, sticky total, review, sent journey, the stage graph — and a persisted 85 becomes 105 on load', () => {
   const w = page({ modules: WITH_PASS, seed: { 'siyl.bag': [{ id: 'c86', name: 'C86 · Kunming → Lijiang', meta: '04 March 2027 · Business Class', price: 85, qty: 1 }] } });
   const P = w.SIYL_PRICE, B = w.SIYL_BAG, J = w.SIYL_JOURNEY;
   assert.equal(P.FLAT.c86.price, 105, 'the source'); assert.match(P.FLAT.c86.basis, /^USD 105 per person · 1 seat · Business Class$/);
@@ -31,9 +31,8 @@ test('C86 · USD 105 is the one price (the current Operations Master, 19 Sep 202
   const doc = TP.docFor('c86', { guest: { guestId: 'g-peggy', fullName: 'Peggy Demo', preferredName: 'Peggy' }, price: 105, state: 'selected' });
   assert.equal(doc.price, 105); assert.doesNotMatch(TP.payload(doc), /105|\b85\b|USD/, 'the code carries no amount');
   const pdf = TP.compose(doc); assert.ok(pdf.includes('USD 105') || pdf.includes('105'), 'the ticket PDF shows the cost where a cost is shown'); assert.doesNotMatch(pdf, /USD 85\b/);
-  /* the Complete trip package uses 105 */
-  const plan = J.packagePlan('complete');
-  const row = plan.rows.find((r) => r.seg.key === 'c86'); assert.ok(row, 'the package covers C86'); assert.equal(row.amount, 105);
+  /* the stage graph: C86 is the mandatory stage of China at 105 (no package, 21 Sep 2026) */
+  assert.ok(w.SIYL_GRAPH && w.SIYL_GRAPH.MANDATORY.includes('c86'), 'the Kunming → Lijiang train is mandatory inside China'); assert.equal(P.items('c86')[0].price, 105);
   /* no active surface carries 85 for C86 any more */
   for (const f of ['assets/pricing.js', 'assets/transport-data.js', 'journeys.html', 'transport.html', 'tickets.html', 'your-journey.html', 'cart.html', 'review.html']) {
     const s = src(f);

@@ -14,6 +14,7 @@ import { Drafts } from '../src/drafts.js';
 import { Seating } from '../src/seating.js';
 import { composeOwnerMail, composeGuestMail } from '../src/mail-templates.js';
 import { doState } from './sandbox.mjs';
+import { complete } from './complete.mjs';
 
 const ORIGIN = 'https://seeyouinlaos-website.suthep-hrg.workers.dev';
 function req(path, headers = {}, body, method) { return new Request(ORIGIN + path, { method: method || (body ? 'POST' : 'GET'), headers: { 'content-type': 'application/json', ...headers }, body: body ? JSON.stringify(body) : undefined }); }
@@ -96,7 +97,7 @@ test('THE WORKER · the personal details are stored with the contact under the g
   const p2 = await call(h, '/api/contact', h.peggy); assert.equal(p2.d.contact.birthdate, '1990-05-17'); assert.equal(p2.d.contact.city, 'Hamburg');
   /* the record: CON/COUPL stamped from the index, the body's forgery overwritten; the Guest Relations email carries the details, the guest's email does not */
   const reg = { channel: 'journey-shop', guestId: 'G001', totalUsd: 0, contactId: 'CON999', couple: 'COUPL999', contact: { email: 'peggy@example.org', phone: '+49 170 1', birthdate: '1990-05-17', nationality: 'Thai, German', address: { words: 'Musterstraße 1, 10115 Hamburg, Germany' } }, selections: [], guestRecord: { guests: [{ guestId: 'G001', name: 'Peggy', source: { fullName: 'Peggy Berger', preferredName: 'Peggy' }, profile: {} }] } };
-  const sent = await call(h, '/api/register', h.peggy, { invitationId: 'INV-G001', registration: reg, text: 'SEE YOU IN LAOS — test' });
+  const sent = await call(h, '/api/register', h.peggy, { invitationId: 'INV-G001', registration: complete(reg), text: 'SEE YOU IN LAOS — test' });
   assert.ok(sent.status === 200 || sent.status === 202, JSON.stringify(sent.d).slice(0, 200));   /* 202: stored, no mail provider in the harness */
   const rec = JSON.parse(h.env.REG_KV.m.get('reg:INV-G001').v);
   assert.equal(rec.registration.contactId, 'CON003', 'the index\'s person id'); assert.equal(rec.registration.couple, 'COUPL002');

@@ -95,8 +95,8 @@ export function journeyModel(record) {
   /* the wedding answers */
   const tc = r.templeCeremony && Array.isArray(r.templeCeremony.guests) && r.templeCeremony.guests[0] || null;
   const answerOf = (k) => { const v = tc && tc.events && tc.events[k]; if (!v) return legacy && legacy.events && legacy.events[k] ? String(legacy.events[k]) : ''; return String(v); };
-  /* a guest not joining Vientiane is not at the wedding: every moment reads Not joining, no offering, no seat (Codex final pass, 18 Sep 2026) */
-  const away = !!((gr.scope && gr.scope.at && !gr.scope.vientiane) || (gr.scope && gr.scope.none) || (tc && /^Not joining/.test(String(tc.participation || ''))) || (r.templeCeremony && /^Not joining/.test(String(r.templeCeremony.participation || ''))));
+  /* a guest not joining the wedding (the wedding sheet; a legacy record's Vientiane answer) is not at the wedding: every moment reads Not joining, no offering, no seat (Codex final pass, 18 Sep 2026) */
+  const away = !!((gr.scope && gr.scope.at && !(gr.scope.vientianeWedding != null ? gr.scope.vientianeWedding : gr.scope.vientiane)) || (gr.scope && gr.scope.none) || (tc && /^Not joining/.test(String(tc.participation || ''))) || (r.templeCeremony && /^Not joining/.test(String(r.templeCeremony.participation || ''))));
   const wedding = EVENTS.map((e) => ({ ...e, answer: away ? 'Not joining' : answerOf(e.key) }));
   const sangkhathan = away ? '' : (sang ? 'Yes · USD 15' : (tc && tc.sangkhathanState ? tc.sangkhathanState : ''));
   /* the seats: the engine's map for this guest */

@@ -175,76 +175,6 @@ test('WAITING LIST · on the client it is an answered stage at USD 0: readiness 
 });
 
 /* ────────────────────────────── 4 · THE PACKAGES ────────────────────────────── */
-test('PACKAGES · configuration, not inference: the Complete trip covers all ten stages with real products; the Essential trip is the Owner\'s (20 Sep 2026, corrected): stage D alone — the Wedding Stay — D1 preselected (the Souphattra Heritage, the Heritage Executive first), the same house only, never C', () => {
-  const w = page({ auth: PEGGY });
-  const P = w.SIYL_PACKAGES, J = w.SIYL_JOURNEY, R = w.SIYL_ROOMS;
-  assert.deepEqual(plain(w.SIYL_PACKAGE_ORDER), ['complete', 'essential']); assert.deepEqual(plain(J.packageOrder()), ['complete', 'essential'], 'both packages are offered');
-  assert.equal(P.essential.approved, true); assert.match(P.essential.source, /002_Overview \(stage D/); assert.doesNotMatch(P.essential.source, /Package C · D1/);
-  assert.deepEqual(plain(Object.keys(P.complete.stages).sort()), plain(J.SEGMENTS.map((s) => s.key).sort()));
-  assert.deepEqual(plain(Object.keys(P.essential.stages)), ['wedstay'], 'D = the Wedding Stay — and nothing else: C is not auto-added because the same house is usable there');
-  for (const st of ['wedstay']) { const ch = plain(P.essential.stages[st]); assert.equal(ch[0], st + '/heritage-executive'); assert.ok(ch.every((k) => k.startsWith(st + '/')), 'the Souphattra only'); assert.equal(ch.length, 7); }
-  const keys = new Set(); for (const k of Object.keys(R)) for (const win of R[k].windows) for (const r of R[k].rooms) keys.add(win.id + '/' + r.slug);
-  for (const pk of Object.values(P)) for (const v of Object.values(pk.stages)) if (Array.isArray(v)) for (const x of v) { assert.ok(keys.has(x), x + ' is a room of the data'); assert.ok(SEED[x], x + ' is in the seed'); }
-  assert.equal(P.complete.stages.wedstay[P.complete.stages.wedstay.length - 1], 'guesthouse/guest-house', 'the guest house is the last option of the wedding stay chain');
-  assert.equal(P.essential.stages.wedstay[0], 'wedstay/heritage-executive', 'the Essential trip starts at the Heritage Executive (the Owner, 20 Sep 2026)');
-  /* the Owner-approved defaults of 09 Sep 2026 (rooms-data SIYL_FULL_EXPERIENCE, read by pricing.approved) head every chain */
-  for (const [win, slug] of Object.entries(plain(w.SIYL_FULL_EXPERIENCE))) assert.equal(P.complete.stages[win][0], win + '/' + slug, win + ' default');
-});
-
-test('PACKAGES · the Complete trip plan: defaults when free; the next of the CHAIN (never the cheapest) when the default cannot take the party; the waiting list when nothing can; the total is the sum of what is planned', async () => {
-  const rooms = new Rooms(doState());
-  const w = await guestPage(rooms, PEG, PEGGY);
-  const U = w.SIYL_UNITS, J = w.SIYL_JOURNEY, G = w.SIYL_GUEST;
-  G.setScope({ bangkok: true, vientiane: true, china: true });
-  await U.load(true);
-  let plan = J.packagePlan('complete');
-  assert.equal(plan.rows.length, 10); assert.ok(plan.rows.every((r) => r.why === 'default'));
-  assert.equal(plan.total, 255 + 100 + 340 + 170 + 275 + 150 + 105 + 200 + 200 + 380, 'USD 2,175 with C86 at 105');
-  assert.equal(plan.need, 2);
-  /* the Penthouse takes everyone but one place: a party of two does not fit → the next of the chain is U Sathorn (64/night), not the cheapest Shama (40) */
-  for (const u of unitsOf('bkk-stay/penthouse')) for (let i = 0; i < u.places - (u.label === 'F' ? 1 : 0); i++) assert.equal((await join(rooms, stranger('p' + u.label + i), 'bkk-stay/penthouse', u.label, 1)).status, 200);
-  await U.load(true);
-  plan = J.packagePlan('complete');
-  const bkk = plan.rows.find((r) => r.seg.key === 'bkk-stay');
-  assert.equal(bkk.why, 'fallback'); assert.equal(bkk.key, 'bkk-stay/u-sathorn-superior-garden'); assert.equal(bkk.wanted, 'bkk-stay/penthouse');
-  assert.equal(bkk.amount, 64 * 3);
-  /* the whole Kunming chain full for two: the stage goes on the waiting list at USD 0 */
-  for (const k of w.SIYL_PACKAGES.complete.stages.kmg) await fill(rooms, k);
-  await U.load(true);
-  plan = J.packagePlan('complete');
-  const kmg = plan.rows.find((r) => r.seg.key === 'kmg');
-  assert.equal(kmg.why, 'waitlist'); assert.deepEqual(plain(plan.waitlist), ['kmg']);
-  assert.equal(plan.counts.waitlisted, 1); assert.equal(plan.counts.fallbacks, 1);
-  assert.equal(plan.total, 64 * 3 + 100 + 340 + 170 + 275 + 0 + 105 + 200 + 200 + 380);
-  assert.equal(typeof J.planSignature(plan), 'string'); assert.notEqual(J.planSignature(plan), J.planSignature(J.packagePlan('essential')));
-});
-
-test('PACKAGES · a package REPLACES a conflicting manual selection, keeps a matching one, reverses a decline — and Essential leaves every other stage the guest\'s own', async () => {
-  const rooms = new Rooms(doState());
-  const w = await guestPage(rooms, PEG, PEGGY);
-  const U = w.SIYL_UNITS, J = w.SIYL_JOURNEY, G = w.SIYL_GUEST, ST = w.SIYL_STAY;
-  G.setScope({ bangkok: true, vientiane: true, china: true });
-  await U.load(true);
-  assert.equal((await ST.select('wedstay', 'noble-courtyard', null, 2)).ok, true, 'a manual wedding-stay choice');
-  assert.equal((await ST.select('bkk-stay', 'penthouse', null, 2)).ok, true, 'the package default, chosen by hand');
-  J.decline(J.SEGMENTS.find((s) => s.key === 'ljg'));
-  await U.load(true);
-  const plan = J.packagePlan('complete');
-  const wed = plan.rows.find((r) => r.seg.key === 'wedstay'), bkk = plan.rows.find((r) => r.seg.key === 'bkk-stay'), ljg = plan.rows.find((r) => r.seg.key === 'ljg');
-  assert.equal(wed.why, 'default'); assert.ok(wed.replaces, 'the Noble Courtyard is replaced by the Grand Premier'); assert.equal(wed.key, 'wedstay/heritage-grand-premier');
-  assert.equal(bkk.why, 'same', 'the Penthouse stays as chosen'); assert.equal(bkk.replaces, null);
-  assert.equal(ljg.wasDeclined, true); assert.deepEqual(plain(plan.unskip), ['ljg']);
-  const ess = J.packagePlan('essential');
-  assert.deepEqual(plain(ess.rows.map((r) => r.seg.key)), ['wedstay']); assert.equal(ess.rows[0].key, 'wedstay/heritage-executive'); assert.equal(ess.total, 155, 'the one payable night of the Wedding window — never 465 (C + D1)');
-  assert.ok(ess.rows[0].replaces, 'the Noble Courtyard is replaced by the Heritage Executive');
-  assert.deepEqual(plain(ess.unskip), [], 'Essential touches nothing outside the Wedding Stay');
-  assert.equal(J.packageStages('essential').length, 1);
-  /* Essential is Vientiane's: a guest not joining Vientiane is offered nothing by it */
-  G.setScope({ bangkok: true, vientiane: false, china: false });
-  assert.deepEqual(plain(J.packageStages('essential')), []); assert.deepEqual(plain(J.packagePlan('essential').rows), []);
-});
-
-/* ────────────────────────────── 5 · CANONICAL COUNTS ────────────────────────────── */
 test('COUNTS · relevant = confirmed + waitlisted + declined + open; excluded are the stages outside the scope; bagItems are the lines; bagTotal the chargeable confirmed lines', async () => {
   const rooms = new Rooms(doState());
   await fill(rooms, 'ljg/viewing-270');
@@ -253,18 +183,18 @@ test('COUNTS · relevant = confirmed + waitlisted + declined + open; excluded ar
   const check = (c) => { assert.equal(c.relevant, c.confirmed + c.waitlisted + c.declined + c.open, 'the invariant'); assert.equal(c.resolved, c.confirmed + c.waitlisted + c.declined); assert.equal(c.relevant + c.excluded, 10); };
   G.setScope({ vientiane: true, china: true });
   await U.load(true);
-  let c = J.counts(); check(c); assert.equal(c.excluded, 3, 'Bangkok stay, train, closing Kempinski'); assert.equal(c.open, 7); assert.equal(c.bagItems, 0);
+  let c = J.counts(); check(c); assert.equal(c.excluded, 4, 'Bangkok stay, train, the return flight, closing Kempinski (the graph, 21 Sep 2026)'); assert.equal(c.open, 6); assert.equal(c.bagItems, 0);
   assert.equal((await ST.select('guesthouse', 'guest-house', null, 2)).ok, true, 'the guest house — complimentary');
   B.put({ id: 'mu9646', name: 'MU9646', price: 275, qty: 1 });
   J.decline(J.SEGMENTS.find((s) => s.key === 'prewed'));
   assert.equal((await U.wait('ljg', 2, ['ljg/viewing-270'])).ok, true);
   await U.load(true);
   c = J.counts(); check(c);
-  assert.equal(c.confirmed, 2); assert.equal(c.waitlisted, 1); assert.equal(c.declined, 1); assert.equal(c.open, 3);
+  assert.equal(c.confirmed, 2); assert.equal(c.waitlisted, 1); assert.equal(c.declined, 1); assert.equal(c.open, 2);
   assert.equal(c.bagItems, 2, 'the guest house line and the flight'); assert.equal(c.bagTotal, 275, 'the complimentary line and the waiting list are USD 0');
   assert.equal(B.total(), c.bagTotal);
   const words = J.countsWords();
-  assert.match(words, /2 stages chosen/); assert.match(words, /1 on the waiting list/); assert.match(words, /1 not joining/); assert.match(words, /3 still open/);
+  assert.match(words, /2 stages chosen/); assert.match(words, /1 on the waiting list/); assert.match(words, /1 not joining/); assert.match(words, /2 still open/);
 });
 
 /* ────────────────────────────── 6 · D2 · THE GUEST HOUSE ────────────────────────────── */
@@ -287,7 +217,7 @@ test('GUEST HOUSE COMPLIMENTARY · one shared unit of six places, complimentary,
   const w = page({ auth: PEGGY, modules: WITH_MEDIA });
   const R = w.SIYL_ROOMS.guesthouse, P = w.SIYL_PRICE;
   assert.equal(R.name, 'Guest House complimentary'); assert.equal(R.windows[0].id, 'guesthouse'); assert.equal(R.rooms[0].slug, 'guest-house'); assert.equal(R.rooms[0].complimentary, true);
-  assert.deepEqual(plain(w.SIYL_JOURNEY.SEGMENTS.find((s) => s.key === 'wedstay').ids), ['wedstay', 'guesthouse', 'riverside']);
+  assert.deepEqual(plain(w.SIYL_JOURNEY.SEGMENTS.find((s) => s.key === 'wedstay').ids), ['wedstay', 'riverside', 'guesthouse']);
   const line = P.items('guesthouse', 'guest-house')[0];
   assert.equal(line.price, 0); assert.equal(line.complimentary, true); assert.equal(line.name, 'Guest House complimentary · Vientiane');
   for (const f of ['assets/rooms-data.js', 'journeys.html', 'accommodation.html', 'room.html', 'your-journey.html', 'review.html', 'cart.html', 'profile.html', 'assets/journey.js', 'assets/pricing.js', 'assets/aman.js', 'assets/stay-media.js', 'src/inventory-seed.js', 'src/mail-templates.js', 'src/worker.js']) {

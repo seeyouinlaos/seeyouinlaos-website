@@ -18,6 +18,7 @@ import { Seating, validateGeometry, seatsOf, RULES, CAPACITY } from '../src/seat
 import { SEAT_FIXTURE } from './fixtures.mjs';
 import { page as sandboxPage, json, src, PEGGY as PEGGY_S, STEFFIE as STEFFIE_S, LIN as LIN_S } from './sandbox.mjs';
 import { authIdOf } from '../register/crypto.mjs';
+import { complete } from './complete.mjs';
 
 const PEGGY = 'g-peggy', STEFFIE = 'g-steffie';
 const ID_PEGGY = { invitationId: 'INV-g-peggy', guestId: PEGGY, partyId: 'INV-DEMO-002', hosts: false };
@@ -140,15 +141,15 @@ test('F · status: none → received (after a stored registration) → confirmed
   assert.deepEqual([r.received, r.confirmed], [false, false]);
   /* a registration lands (the register route stores it; the mail call fails harmlessly here) */
   globalThis.fetch = async () => new Response('', { status: 500 });
-  const body = JSON.stringify({ invitationId: 'INV-002', text: 'SEE YOU IN LAOS — JOURNEY SELECTION', registration: { guestId: 'g-peggy', registration_submitted_at: '2026-09-11T10:00:00.000Z' } });
+  const body = JSON.stringify({ invitationId: 'INV-002', text: 'SEE YOU IN LAOS — JOURNEY SELECTION', registration: complete({ guestId: 'g-peggy', registration_submitted_at: '2026-09-11T10:00:00.000Z' }) });
   assert.equal((await w.fetch(req('/api/register', { method: 'POST', body }), env)).status, 401, 'no bearer, no send');
   assert.equal((await w.fetch(req('/api/register', { method: 'POST', headers: { 'x-siyl-auth': STEFFIE_S.bearer }, body }), env)).status, 401, 'another guest cannot send this journey');
   assert.equal((await w.fetch(req('/api/register', { method: 'POST', headers: { 'x-siyl-auth': PEGGY_S.bearer }, body }), env)).status, 401, 'the invitation must be the guest\'s own');
-  const own = JSON.stringify({ invitationId: 'INV-g-peggy', text: 'SEE YOU IN LAOS — JOURNEY SELECTION', registration: { guestId: 'g-peggy', registration_submitted_at: '2026-09-11T10:00:00.000Z' } });
+  const own = JSON.stringify({ invitationId: 'INV-g-peggy', text: 'SEE YOU IN LAOS — JOURNEY SELECTION', registration: complete({ guestId: 'g-peggy', registration_submitted_at: '2026-09-11T10:00:00.000Z' }) });
   assert.equal((await w.fetch(req('/api/register', { method: 'POST', headers: { 'x-siyl-auth': STEFFIE_S.bearer }, body: own }), env)).status, 401, 'a party member cannot send it either');
   /* EMAIL FIRST (Owner, 16 Sep 2026): a journey without an email address is refused — back to the email field */
   assert.equal((await w.fetch(req('/api/register', { method: 'POST', headers: { 'x-siyl-auth': PEGGY_S.bearer }, body: own }), env)).status, 422, 'no email, no journey');
-  const withMail = JSON.stringify({ invitationId: 'INV-g-peggy', text: 'SEE YOU IN LAOS — JOURNEY SELECTION', registration: { guestId: 'g-peggy', contact: { email: 'p.sandbox@example.org', phone: '' }, registration_submitted_at: '2026-09-11T10:00:00.000Z' } });
+  const withMail = JSON.stringify({ invitationId: 'INV-g-peggy', text: 'SEE YOU IN LAOS — JOURNEY SELECTION', registration: complete({ guestId: 'g-peggy', contact: { email: 'p.sandbox@example.org', phone: '' }, registration_submitted_at: '2026-09-11T10:00:00.000Z' }) });
   r = await (await w.fetch(req('/api/register', { method: 'POST', headers: { 'x-siyl-auth': PEGGY_S.bearer }, body: withMail }), env)).json();
   assert.equal(r.ok, true);
   assert.equal(r.status, 'UNDER_REVIEW', 'sending never confirms');

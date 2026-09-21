@@ -41,7 +41,7 @@ const other = (id, name) => ({ ...LIN, guestId: 'g-' + id, invitationId: 'INV-g-
 
 /* the guest surfaces and scripts whose words the guest reads (block comments stripped: a note about the retired concept is not the concept) */
 const SURFACES = ['your-journey.html', 'profile.html', 'review.html', 'cart.html', 'journeys.html', 'room.html', 'accommodation.html',
-  'assets/rooms.js', 'assets/stay.js', 'assets/journey.js', 'assets/packages-data.js', 'assets/guest.js', 'assets/rooms-data.js',
+  'assets/rooms.js', 'assets/stay.js', 'assets/journey.js', 'assets/stage-graph.js', 'assets/guest.js', 'assets/rooms-data.js',
   'src/rooms.js', 'src/inventory-seed.js', 'src/worker.js', 'src/mail-templates.js'];
 const code = (f) => src(f).replace(/\/\*[\s\S]*?\*\//g, '');
 
@@ -107,7 +107,7 @@ test('NO RESERVATIONS, NO FIXED ARRANGEMENT (Owner, 15 Sep 2026 · reaffirmed 19
     assert.doesNotMatch(t, /Reserved for (bride|family)|held for you|This category is reserved|Reserved · Bride/i, f + ' carries no reservation wording');
     assert.doesNotMatch(t, /Private Residence|private-residence|airbnb-2br|up to (4|four)\b/i, f + ' never says Private Residence');
   }
-  for (const f of ['src/rooms.js', 'assets/rooms.js', 'assets/stay.js', 'assets/packages-data.js']) assert.doesNotMatch(code(f), /\.hosts\b|hostRole|Haruthai|Suthep/, f + ' special-cases nobody');
+  for (const f of ['src/rooms.js', 'assets/rooms.js', 'assets/stay.js']) assert.doesNotMatch(code(f), /\.hosts\b|hostRole|Haruthai|Suthep/, f + ' special-cases nobody');
   const hostsFn = src('assets/pricing.js').match(/hosts: function \(\) \{[^}]*\}/)[0];
   assert.doesNotMatch(hostsFn, /Haruthai|Suthep|preferredName|fullName/, 'no name decides anything in the calculation source');
 });

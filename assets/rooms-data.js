@@ -77,11 +77,11 @@
   }
 
   /* ==========================================================================
-     THE OWNER-APPROVED DEFAULTS OF THE COMPLETE TRIP (assets/packages-data.js carries the package itself, release 014).
+     THE OWNER'S PREFERRED ROOMS (reviewed 09 September 2026; once the defaults of a package that no longer exists — the packages left on 21 Sep 2026).
 
-     The Complete trip is not "the most expensive room in every house". It is the
-     configuration the Owner selected and reviewed on 09 September 2026: one
-     named room per accommodation stage, plus the four transport products.
+     Not "the most expensive room in every house": the configuration the Owner
+     selected and reviewed on 09 September 2026, one named room per accommodation
+     stage. Read by SIYL_PRICE.premium only.
 
        21 – 24 FEB  Sathorn Penthouse                    85 × 3 = 255
        24 – 25 FEB  Special Express No. 25                      100
@@ -156,21 +156,35 @@
         'A limited number of complimentary alternative stays are also available.'
       ],
       rooms: [
-        { slug: 'souphattra-presidential', name: 'Souphattra Presidential', cat: 'Suite',
-          desc: 'The largest suite of the house: two bedrooms, private bathrooms and a shared living space under a high ceiling.',
-          gallery: [[RM + 'souphattra-presidential-1.jpg', 'The main bedroom'], [RM + 'souphattra-presidential-2.jpg', 'The second bedroom'], [RM + 'souphattra-presidential-3.jpg', 'The living space'], [RM + 'souphattra-presidential-4.jpg', 'The sitting corner'], [RM + 'souphattra-presidential-5.jpg', 'The bathroom'], [RM + 'souphattra-presidential-6.jpg', 'Sofa detail'], [RM + 'souphattra-presidential-7.jpg', 'The bathtub']],
-          facts: [['Size', '118 sq.m.'], ['Bed', 'Two bedrooms · 1 king bed and twin beds'], ['Occupancy', '6 adults · 2 children'], ['Location', '2nd floor · one unit only'], ['Bathrooms', 'Two private bathrooms']],
-          story: 'Only one Presidential exists in the house. Two bedrooms, each with its own bathroom — a king in one, twins in the other — open onto a separate living area and a shared co-living space beneath a high ceiling. A pantry and a dining table make it the suite a family gathers in rather than passes through.',
-          groups: soupGroups(['118 sq.m., the only one in the house', 'Two bedrooms, each with its own private bathroom', 'King bed and twin beds', 'Separate living area and shared co-living space', 'High ceiling', 'Pantry and dining table'], null, null),
-          amenities: ['Two bedrooms', 'Private bathrooms', 'Separate living area', 'Shared living space', 'Pantry', 'Dining table', 'High ceiling'],
-          rate: 750, legacyNote: 'Master once marked: bride & groom' }   /* no reservation (Owner, 15 Sep 2026): available until booked */,
-        { slug: 'souphattra-majestic', name: 'Souphattra Majestic Suite', cat: 'Suite',
-          desc: 'The house suite: a separate living area, pantry and bar, and a long balcony over the pool.',
-          gallery: [[RM + 'souphattra-majestic-suite-1.jpg', 'Bedroom towards the balcony'], [RM + 'souphattra-majestic-suite-2.jpg', 'The living area'], [RM + 'souphattra-majestic-suite-4.jpg', 'The bedroom'], [RM + 'souphattra-majestic-suite-3.jpg', 'The bathroom'], [RM + 'souphattra-majestic-suite-5.jpg', 'The bed']],
-          facts: [['Size', '84 sq.m.'], ['Bed', '1 king bed'], ['Occupancy', '2 adults · 2 children'], ['Location', '3rd floor · one suite only'], ['View', 'Pool and garden panorama']],
-          story: 'Eighty-four square metres at the summit of the resort. A separate living area with its own pantry and bar sits beside the bedroom, and the balcony runs the length of the suite with the pool and the garden below it. Lao contemporary lines under French colonial ceilings — the room the house was built around.',
-          groups: soupGroups(['84 sq.m. on the top floor', 'Separate living area', 'Pantry and bar', 'Spacious balcony over the pool and garden', 'High ceilings · Lao contemporary and French colonial design'], null, null),
-          amenities: ['Separate living area', 'Pantry', 'Bar', 'Large balcony', 'Pool and garden views', 'High ceilings', 'Nespresso machine', 'Coffee & tea facilities', 'Mini bar', 'WiFi'], rate: 290 },
+        /* the categories in ascending order — the default room is the first: The Heritage (Owner, 21 Sep 2026) */
+        { slug: 'heritage', name: 'The Heritage', cat: 'Heritage Room',
+          desc: 'Colonial French elegance in 31 square metres, with a private balcony over the garden.',
+          gallery: [[RM + 'the-heritage-1.jpg', 'Dressing corridor and wardrobe'], [RM + 'the-heritage-2.jpg', 'The bedroom'], [RM + 'the-heritage-3.jpg', 'The bathroom']],
+          facts: [['Size', '31 sq.m.'], ['Bed', '1 king bed (2.1 m)'], ['Occupancy', '2 adults · 1 child'], ['Location', 'Floors 1 – 3'], ['View', 'Courtyard, garden and pool']],
+          story: 'Thirty-one square metres of colonial French elegance with a private balcony over the garden — the room the house is named for. Two guests, top-tier comfort, and a minibar replenished at no charge for the length of the stay.',
+          groups: soupGroups(['31 sq.m.', 'Private balcony', 'Courtyard, garden and pool views', 'Sofa, wardrobe, desk and coffee table', 'Cribs can be provided; extra beds cannot be added'], null, null),
+          amenities: HERITAGE_AMENITIES, rate: 145 },
+        { slug: 'heritage-executive', name: 'Heritage Executive', cat: 'Heritage Room',
+          desc: 'French colonial rooms with a balcony over the garden, and the flexibility a family needs.',
+          gallery: [[RM + 'heritage-executive-1.jpg', 'The bedroom'], [RM + 'heritage-executive-2.jpg', 'Bedroom and balcony'], [RM + 'heritage-executive-3.jpg', 'The bathroom'], [RM + 'heritage-executive-4.jpg', 'Bedroom towards the balcony']],
+          facts: [['Size', '37 – 44 sq.m.'], ['Bed', '1 king bed (1.9 m) or 3 twin beds'], ['Occupancy', '2 adults · 1 child'], ['Location', 'Floors 1 – 3'], ['Family', 'Cribs and extra beds can be added · connecting door']],
+          story: 'Thirty-seven to forty-four square metres of colonial French rooms with a balcony over the garden. It is the one category in the house that takes both a crib and an extra bed, and it has a connecting door — the room families ask for.',
+          groups: soupGroups(['37 – 44 sq.m.', 'Balcony over the garden', 'Connecting door', 'Cribs and extra beds can be added', 'Sofa, wardrobe, desk and coffee table'], null, null),
+          amenities: HERITAGE_AMENITIES, rate: 155 },
+        { slug: 'heritage-grand-premier', name: 'Heritage Grand Premier', cat: 'Heritage Room',
+          desc: 'A larger heritage room, with a private balcony over the garden and the pool.',
+          gallery: [[RM + 'heritage-grand-premier-1.jpg', 'The bedroom'], [RM + 'heritage-grand-premier-2.jpg', 'The sitting area'], [RM + 'heritage-grand-premier-3.jpg', 'Bedroom towards the balcony'], [RM + 'heritage-grand-premier-4.jpg', 'The sitting corner'], [RM + 'heritage-grand-premier-5.jpg', 'Sofa detail'], [RM + 'heritage-grand-premier-6.jpg', 'The balcony daybed'], [RM + 'heritage-grand-premier-7.jpg', 'The balcony']],
+          facts: [['Size', '49 sq.m.'], ['Bed', '1 king bed'], ['Occupancy', '2 adults · 1 child sharing bedding'], ['Location', 'Floors 1 – 3'], ['View', 'Garden, pool and courtyard']],
+          story: 'The largest of the heritage rooms at forty-nine square metres, with a private balcony and chairs set out on it, facing the garden and the pool. The minibar is replenished for you throughout the stay, and afternoon tea comes with the room.',
+          groups: soupGroups(['49 sq.m.', 'Private balcony with chairs', 'Garden, pool and courtyard views', 'Sofa, wardrobe, desk and coffee table'], null, ['Minibar — complimentary, replenished throughout your stay', 'Afternoon tea', 'Bottled water and soft drinks — complimentary', 'Nespresso machine, coffee and tea', 'Electric kettle', 'Fresh fruit']),
+          amenities: ['Private balcony', 'Garden and pool views', 'Nespresso machine', 'Coffee & tea facilities', 'Mini bar', 'Smart TV', 'WiFi', 'Bathroom amenities'], rate: 170 },
+        { slug: 'noble-courtyard', name: 'Noble Courtyard Suite', cat: 'Suite',
+          desc: 'A 63 square metre retreat with a King bed, two bathrooms, a separate living area and a private balcony overlooking the garden and pool.',
+          gallery: [[RM + 'noble-courtyard-1.jpg', 'The bedroom'], [RM + 'noble-courtyard-2.jpg', 'Bedroom and desk'], [RM + 'noble-courtyard-3.jpg', 'The living area']],
+          facts: [['Size', '63 sq.m.'], ['Bed', '1 king bed'], ['Occupancy', '2 adults · 1 child'], ['Location', 'Ground floor · central greenery · one suite only'], ['Bathrooms', 'Two bathrooms and two shower rooms']],
+          story: 'Sixty-three square metres arranged for two people who like their own space: a king bed, a separate living area with a sofa and a Smart TV, and — unusually — two bathrooms and two shower rooms, one each. It sits on the ground floor in the middle of the garden, with the balcony opening onto the greenery and the pool.',
+          groups: soupGroups(['63 sq.m. on the ground floor', 'Separate living area with sofa and Smart TV', 'Two bathrooms and two shower rooms', 'Private balcony over the garden and pool', 'Set in the central greenery'], null, null),
+          amenities: ['Bathrobe', 'Bathtub', 'Coffee & tea making facilities', 'Hair dryer', 'Mini bar', 'Nespresso machine', 'Safe deposit box', 'Shower', 'Slippers', 'Smart TV', 'Wardrobe', 'WiFi access'], rate: 240 },
         { slug: 'grand-majestic', name: 'Grand Majestic Suite', cat: 'Suite',
           desc: 'French colonial and Laotian design: a living room under a high ceiling, and a slower kind of morning.',
           gallery: [[RM + 'grand-majestic-suite-1.jpg', 'The bedroom'], [RM + 'grand-majestic-suite-2.jpg', 'The bathroom'], [RM + 'grand-majestic-suite-3.jpg', 'Living and dining']],
@@ -179,34 +193,21 @@
           groups: soupGroups(['66 – 75 sq.m.', 'Separate living room', 'High ceiling', 'Pantry', 'Private balcony', 'Sofa, wardrobe, desk and coffee table'], null, null),
           amenities: ['Living room', 'High ceiling', 'Pantry', 'Private balcony', 'Smart TV', 'Mini bar', 'WiFi'],
           rate: 250, legacyNote: 'Master once marked: family' }   /* no reservation (Owner, 15 Sep 2026): available until booked */,
-        { slug: 'noble-courtyard', name: 'Noble Courtyard Suite', cat: 'Suite',
-          desc: 'A 63 square metre retreat with a King bed, two bathrooms, a separate living area and a private balcony overlooking the garden and pool.',
-          gallery: [[RM + 'noble-courtyard-1.jpg', 'The bedroom'], [RM + 'noble-courtyard-2.jpg', 'Bedroom and desk'], [RM + 'noble-courtyard-3.jpg', 'The living area']],
-          facts: [['Size', '63 sq.m.'], ['Bed', '1 king bed'], ['Occupancy', '2 adults · 1 child'], ['Location', 'Ground floor · central greenery · one suite only'], ['Bathrooms', 'Two bathrooms and two shower rooms']],
-          story: 'Sixty-three square metres arranged for two people who like their own space: a king bed, a separate living area with a sofa and a Smart TV, and — unusually — two bathrooms and two shower rooms, one each. It sits on the ground floor in the middle of the garden, with the balcony opening onto the greenery and the pool.',
-          groups: soupGroups(['63 sq.m. on the ground floor', 'Separate living area with sofa and Smart TV', 'Two bathrooms and two shower rooms', 'Private balcony over the garden and pool', 'Set in the central greenery'], null, null),
-          amenities: ['Bathrobe', 'Bathtub', 'Coffee & tea making facilities', 'Hair dryer', 'Mini bar', 'Nespresso machine', 'Safe deposit box', 'Shower', 'Slippers', 'Smart TV', 'Wardrobe', 'WiFi access'], rate: 240 },
-        { slug: 'heritage-grand-premier', name: 'Heritage Grand Premier', cat: 'Heritage Room',
-          desc: 'A larger heritage room, with a private balcony over the garden and the pool.',
-          gallery: [[RM + 'heritage-grand-premier-1.jpg', 'The bedroom'], [RM + 'heritage-grand-premier-2.jpg', 'The sitting area'], [RM + 'heritage-grand-premier-3.jpg', 'Bedroom towards the balcony'], [RM + 'heritage-grand-premier-4.jpg', 'The sitting corner'], [RM + 'heritage-grand-premier-5.jpg', 'Sofa detail'], [RM + 'heritage-grand-premier-6.jpg', 'The balcony daybed'], [RM + 'heritage-grand-premier-7.jpg', 'The balcony']],
-          facts: [['Size', '49 sq.m.'], ['Bed', '1 king bed'], ['Occupancy', '2 adults · 1 child sharing bedding'], ['Location', 'Floors 1 – 3'], ['View', 'Garden, pool and courtyard']],
-          story: 'The largest of the heritage rooms at forty-nine square metres, with a private balcony and chairs set out on it, facing the garden and the pool. The minibar is replenished for you throughout the stay, and afternoon tea comes with the room.',
-          groups: soupGroups(['49 sq.m.', 'Private balcony with chairs', 'Garden, pool and courtyard views', 'Sofa, wardrobe, desk and coffee table'], null, ['Minibar — complimentary, replenished throughout your stay', 'Afternoon tea', 'Bottled water and soft drinks — complimentary', 'Nespresso machine, coffee and tea', 'Electric kettle', 'Fresh fruit']),
-          amenities: ['Private balcony', 'Garden and pool views', 'Nespresso machine', 'Coffee & tea facilities', 'Mini bar', 'Smart TV', 'WiFi', 'Bathroom amenities'], rate: 170 },
-        { slug: 'heritage-executive', name: 'Heritage Executive', cat: 'Heritage Room',
-          desc: 'French colonial rooms with a balcony over the garden, and the flexibility a family needs.',
-          gallery: [[RM + 'heritage-executive-1.jpg', 'The bedroom'], [RM + 'heritage-executive-2.jpg', 'Bedroom and balcony'], [RM + 'heritage-executive-3.jpg', 'The bathroom'], [RM + 'heritage-executive-4.jpg', 'Bedroom towards the balcony']],
-          facts: [['Size', '37 – 44 sq.m.'], ['Bed', '1 king bed (1.9 m) or 3 twin beds'], ['Occupancy', '2 adults · 1 child'], ['Location', 'Floors 1 – 3'], ['Family', 'Cribs and extra beds can be added · connecting door']],
-          story: 'Thirty-seven to forty-four square metres of colonial French rooms with a balcony over the garden. It is the one category in the house that takes both a crib and an extra bed, and it has a connecting door — the room families ask for.',
-          groups: soupGroups(['37 – 44 sq.m.', 'Balcony over the garden', 'Connecting door', 'Cribs and extra beds can be added', 'Sofa, wardrobe, desk and coffee table'], null, null),
-          amenities: HERITAGE_AMENITIES, rate: 155 },
-        { slug: 'heritage', name: 'The Heritage', cat: 'Heritage Room',
-          desc: 'Colonial French elegance in 31 square metres, with a private balcony over the garden.',
-          gallery: [[RM + 'the-heritage-1.jpg', 'Dressing corridor and wardrobe'], [RM + 'the-heritage-2.jpg', 'The bedroom'], [RM + 'the-heritage-3.jpg', 'The bathroom']],
-          facts: [['Size', '31 sq.m.'], ['Bed', '1 king bed (2.1 m)'], ['Occupancy', '2 adults · 1 child'], ['Location', 'Floors 1 – 3'], ['View', 'Courtyard, garden and pool']],
-          story: 'Thirty-one square metres of colonial French elegance with a private balcony over the garden — the room the house is named for. Two guests, top-tier comfort, and a minibar replenished at no charge for the length of the stay.',
-          groups: soupGroups(['31 sq.m.', 'Private balcony', 'Courtyard, garden and pool views', 'Sofa, wardrobe, desk and coffee table', 'Cribs can be provided; extra beds cannot be added'], null, null),
-          amenities: HERITAGE_AMENITIES, rate: 145 }
+        { slug: 'souphattra-majestic', name: 'Souphattra Majestic Suite', cat: 'Suite',
+          desc: 'The house suite: a separate living area, pantry and bar, and a long balcony over the pool.',
+          gallery: [[RM + 'souphattra-majestic-suite-1.jpg', 'Bedroom towards the balcony'], [RM + 'souphattra-majestic-suite-2.jpg', 'The living area'], [RM + 'souphattra-majestic-suite-4.jpg', 'The bedroom'], [RM + 'souphattra-majestic-suite-3.jpg', 'The bathroom'], [RM + 'souphattra-majestic-suite-5.jpg', 'The bed']],
+          facts: [['Size', '84 sq.m.'], ['Bed', '1 king bed'], ['Occupancy', '2 adults · 2 children'], ['Location', '3rd floor · one suite only'], ['View', 'Pool and garden panorama']],
+          story: 'Eighty-four square metres at the summit of the resort. A separate living area with its own pantry and bar sits beside the bedroom, and the balcony runs the length of the suite with the pool and the garden below it. Lao contemporary lines under French colonial ceilings — the room the house was built around.',
+          groups: soupGroups(['84 sq.m. on the top floor', 'Separate living area', 'Pantry and bar', 'Spacious balcony over the pool and garden', 'High ceilings · Lao contemporary and French colonial design'], null, null),
+          amenities: ['Separate living area', 'Pantry', 'Bar', 'Large balcony', 'Pool and garden views', 'High ceilings', 'Nespresso machine', 'Coffee & tea facilities', 'Mini bar', 'WiFi'], rate: 290 },
+        { slug: 'souphattra-presidential', name: 'Souphattra Presidential', cat: 'Suite',
+          desc: 'The largest suite of the house: two bedrooms, private bathrooms and a shared living space under a high ceiling.',
+          gallery: [[RM + 'souphattra-presidential-1.jpg', 'The main bedroom'], [RM + 'souphattra-presidential-2.jpg', 'The second bedroom'], [RM + 'souphattra-presidential-3.jpg', 'The living space'], [RM + 'souphattra-presidential-4.jpg', 'The sitting corner'], [RM + 'souphattra-presidential-5.jpg', 'The bathroom'], [RM + 'souphattra-presidential-6.jpg', 'Sofa detail'], [RM + 'souphattra-presidential-7.jpg', 'The bathtub']],
+          facts: [['Size', '118 sq.m.'], ['Bed', 'Two bedrooms · 1 king bed and twin beds'], ['Occupancy', '6 adults · 2 children'], ['Location', '2nd floor · one unit only'], ['Bathrooms', 'Two private bathrooms']],
+          story: 'Only one Presidential exists in the house. Two bedrooms, each with its own bathroom — a king in one, twins in the other — open onto a separate living area and a shared co-living space beneath a high ceiling. A pantry and a dining table make it the suite a family gathers in rather than passes through.',
+          groups: soupGroups(['118 sq.m., the only one in the house', 'Two bedrooms, each with its own private bathroom', 'King bed and twin beds', 'Separate living area and shared co-living space', 'High ceiling', 'Pantry and dining table'], null, null),
+          amenities: ['Two bedrooms', 'Private bathrooms', 'Separate living area', 'Shared living space', 'Pantry', 'Dining table', 'High ceiling'],
+          rate: 750, legacyNote: 'Master once marked: bride & groom' }   /* no reservation (Owner, 15 Sep 2026): available until booked */
       ]
     },
 
@@ -738,6 +739,10 @@
    * step with the rates. Rooms without a rate follow, reserved rooms keep
    * their place in the list but are never selectable. */
   Object.keys(window.SIYL_ROOMS).forEach(function (k) {
+    /* THE SOUPHATTRA (Owner, 21 Sep 2026 · the global My Trip rebuild): every category shown from The Heritage upward —
+     * Heritage 145 · Heritage Executive 155 · Heritage Grand Premier 170 · Noble Courtyard 240 · Grand Majestic Suite 250 ·
+     * Souphattra Majestic Suite 290 · Souphattra Presidential 750 — the default room, The Heritage, first */
+    if (k === 'souphattra') { window.SIYL_ROOMS[k].rooms.sort(function (a, b) { return (a.rate == null ? 1e9 : a.rate) - (b.rate == null ? 1e9 : b.rate); }); return; }
     window.SIYL_ROOMS[k].rooms.sort(function (a, b) {
       return (b.rate == null ? -1 : b.rate) - (a.rate == null ? -1 : a.rate);
     });

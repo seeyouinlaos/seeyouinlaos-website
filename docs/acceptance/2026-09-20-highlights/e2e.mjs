@@ -117,7 +117,7 @@ if (!LIVE) {
     note('my-bag-four-highlights-one-total', dup === 1 && cart.n === 4 && cart.total === 753 && /Sühring/.test(cart.text) && /Baan Phraya/.test(cart.text) && /Cannubi/.test(cart.text) && /1872/.test(cart.text) && /USD 753/.test(cart.text) && /Requested through Guest Relations/i.test(cart.text), JSON.stringify({ n: cart.n, total: cart.total, req: /Requested through Guest Relations/i.test(cart.text), t: /USD 753/.test(cart.text) }));
     /* Review & Send: the four requests with their amounts and the one total */
     await trip(p); await p.evaluate(() => { SIYL_GUEST.setScope({ bangkok: true }); }); await trip(p);
-    await p.evaluate(async () => { for (const k of ['bkk-stay', 'train']) { const s = SIYL_JOURNEY.SEGMENTS.find((x) => x.key === k); if (s && SIYL_JOURNEY.relevant(s)) await SIYL_JOURNEY.decline(s); } });
+    await p.evaluate(async () => { for (const k of ['bkk-stay', 'train', 'kempinski']) { const s = SIYL_JOURNEY.SEGMENTS.find((x) => x.key === k); if (s && SIYL_JOURNEY.relevant(s)) await SIYL_JOURNEY.decline(s); } });
     await wedding(p, 'no', 'no'); await prep(p); await about(p, 'Pandan');
     await p.goto(O + '/review.html', { waitUntil: 'load' }); await p.waitForTimeout(2500);
     const rev = await p.evaluate(() => ({ url: location.pathname, text: document.body.innerText.replace(/\s+/g, ' '), total: SIYL_BAG.total(), send: !!document.querySelector('#send:not([disabled])') }));

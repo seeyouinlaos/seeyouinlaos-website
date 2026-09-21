@@ -55,53 +55,38 @@ const resetGuest = async (id) => { const p = await fresh(); await signIn(p, id);
 if (!LIVE) {
   for (const id of ['T001', 'T002', 'T003', 'G048']) await resetGuest(id);
 
-  /* ===== 2 · THE EIGHT PARTICIPATION SCOPES (T001 Ada): the stages that exist, the ones that are not part of the trip, readiness, the Bag, the wedding ===== */
+  /* ===== 2 · THE PARTICIPATION SCOPES OF THE ONE GRAPH (T001 Ada): the stages that exist, the ones that are not part of the trip, readiness, the Bag, the wedding ===== */
   {
     const p = await fresh(390); await signIn(p, 'T001'); await contact(p, 'ada.test@example.org');
-    const SC = [['none', { none: true }, []], ['bangkok', { bangkok: true }, ['bkk-stay']], ['vientiane', { vientiane: true }, ['prewed', 'wedstay']], ['china', { china: true }, ['kmg', 'c86', 'ljg', 'return']], ['bangkok+vientiane', { bangkok: true, vientiane: true }, ['bkk-stay', 'train', 'prewed', 'wedstay']], ['bangkok+china', { bangkok: true, china: true }, ['bkk-stay', 'kmg', 'c86', 'ljg', 'return', 'kempinski']], ['vientiane+china', { vientiane: true, china: true }, ['prewed', 'wedstay', 'mu9646', 'kmg', 'c86', 'ljg', 'return']], ['all', { all: true }, ['bkk-stay', 'train', 'prewed', 'wedstay', 'mu9646', 'kmg', 'c86', 'ljg', 'return', 'kempinski']]];
+    /* THE STAGE GRAPH (Owner, 21 Sep 2026): Bangkok → A + J; the Pre-Wedding → C; the Wedding → D; China → F + G + H; B only with Bangkok + Pre-Wedding; E only with the Wedding + China; I only with China + Bangkok */
+    const SC = [['none', { none: true }, []], ['bangkok', { bangkok: true }, ['bkk-stay', 'kempinski']], ['prewedding', { vientianePreWedding: true }, ['prewed']], ['wedding', { vientianeWedding: true }, ['wedstay']], ['vientiane', { vientiane: true }, ['prewed', 'wedstay']], ['china', { china: true }, ['kmg', 'c86', 'ljg']], ['bangkok+prewedding', { bangkok: true, vientianePreWedding: true }, ['bkk-stay', 'train', 'prewed', 'kempinski']], ['bangkok+wedding', { bangkok: true, vientianeWedding: true }, ['bkk-stay', 'wedstay', 'kempinski']], ['bangkok+vientiane', { bangkok: true, vientiane: true }, ['bkk-stay', 'train', 'prewed', 'wedstay', 'kempinski']], ['wedding+china', { vientianeWedding: true, china: true }, ['wedstay', 'mu9646', 'kmg', 'c86', 'ljg']], ['bangkok+china', { bangkok: true, china: true }, ['bkk-stay', 'kmg', 'c86', 'ljg', 'return', 'kempinski']], ['vientiane+china', { vientiane: true, china: true }, ['prewed', 'wedstay', 'mu9646', 'kmg', 'c86', 'ljg']], ['all', { all: true }, ['bkk-stay', 'train', 'prewed', 'wedstay', 'mu9646', 'kmg', 'c86', 'ljg', 'return', 'kempinski']]];
     for (const [name, patch, expect] of SC) {
       await trip(p); await p.evaluate((patch) => { SIYL_GUEST.setScope({ none: true }); SIYL_GUEST.setScope(patch); }, patch); await p.waitForTimeout(600); await trip(p);
-      const st = await p.evaluate(() => { const J = SIYL_JOURNEY, G = SIYL_GUEST; return { rel: J.relevantSegments().map((s) => s.key), excl: J.excludedSegments().map((s) => s.key), joins: ['bangkok', 'vientiane', 'china'].filter((d) => G.joins(d)), none: G.notJoining(), wedding: !!(G.applicable && G.applicable('wedding')), seats: !!(G.applicable && G.applicable('preparation')), need: G.readiness().need.map((x) => x.key), words: G.scopeWords(), bag: SIYL_BAG.get().length }; });
+      const st = await p.evaluate(() => { const J = SIYL_JOURNEY, G = SIYL_GUEST; return { rel: J.relevantSegments().map((s) => s.key), excl: J.excludedSegments().map((s) => s.key), joins: ['bangkok', 'vientianePreWedding', 'vientianeWedding', 'china'].filter((d) => G.joins(d)), none: G.notJoining(), wedding: !!(G.applicable && G.applicable('wedding')), seats: !!(G.applicable && G.applicable('preparation')), need: G.readiness().need.map((x) => x.key), words: G.scopeWords(), bag: SIYL_BAG.get().length }; });
       const vis = await visibleStages(p);
       const roomNeeds = st.need.filter((k) => /^(room|release):/.test(k));
-      const ok = JSON.stringify(st.rel) === JSON.stringify(expect) && st.excl.length === 10 - expect.length && JSON.stringify(vis.filter((k) => expect.includes(k))) === JSON.stringify(expect) && !vis.some((k) => st.excl.includes(k)) && roomNeeds.length === 0 && st.bag === 0 && (name === 'none' ? st.none : !st.none) && (name.includes('vientiane') || name === 'all' ? st.wedding && st.seats : !st.wedding);
+      const ok = JSON.stringify(st.rel) === JSON.stringify(expect) && st.excl.length === 10 - expect.length && JSON.stringify(vis.filter((k) => expect.includes(k))) === JSON.stringify(expect) && !vis.some((k) => st.excl.includes(k)) && roomNeeds.length === 0 && st.bag === 0 && (name === 'none' ? st.none : !st.none) && (/vientiane|(^|\+)wedding|^all$/.test(name) ? st.wedding && st.seats : !st.wedding);
       note('scope-' + name, ok, JSON.stringify({ rel: st.rel, excluded: st.excl.length, visible: vis.length, wedding: st.wedding, words: st.words, need: st.need.length }));
       if (name === 'bangkok+china') await shot(p, '390-scope-bangkok-china');
     }
     await p.evaluate(() => { SIYL_GUEST.setScope({ all: true }); }); await p.context().close();
   }
 
-  /* ===== 3 · THE COMPLETE TRIP (T002 Ben): the preview says what it selects; a full suggested room is a named replacement; the confirm fills every open stage; the panel says what it did; the plan is deterministic ===== */
+  /* ===== 3 · THE WHOLE TRIP BY HAND (T002 Ben, 21 Sep 2026 — no package): join all, choose every stage's room and travel through the one engine and the Bag; ten stages answered; then the parity fixture ===== */
   {
     const p = await fresh(390); await signIn(p, 'T002'); await contact(p, 'ben.test@example.org');
     await trip(p); await p.evaluate(() => { SIYL_GUEST.setScope({ all: true }); }); await trip(p);
-    /* the suggested Kunming room (SIYL_FULL_EXPERIENCE.kmg) is filled by two other guests → Ben's preview names the fallback */
-    /* release 014: the package's default Kunming room is the first of the Complete trip's chain (assets/packages-data.js) */
-    const wish = await p.evaluate(() => SIYL_PACKAGES.complete.stages.kmg[0].split('/')[1]);
-    const p1 = await fresh(); await signIn(p1, 'T001'); const j1 = await api(p1, '/api/rooms/join', { method: 'POST', body: JSON.stringify({ invitationId: 'INV-T001', guestId: 'T001', key: 'kmg/' + wish, label: 'A', name: 'Ada' }) }); await p1.context().close();
-    const p3 = await fresh(); await signIn(p3, 'T003'); const j3 = await api(p3, '/api/rooms/join', { method: 'POST', body: JSON.stringify({ invitationId: 'INV-T003', guestId: 'T003', key: 'kmg/' + wish, label: 'A', name: 'Cleo' }) }); await p3.context().close();
-    note('complete-trip-fixture', j1.status === 200 && j3.status === 200, 'the suggested Kunming room ' + wish + ' A holds two other guests');
-    await trip(p);
-    const plan = await p.evaluate(() => { const pl = SIYL_JOURNEY.packagePlan('complete'); return { rows: pl.rows.map((x) => x.seg.key + ':' + x.why + (x.key ? ':' + x.key : '') + (x.why === 'fallback' ? '←' + x.wanted : '')), unskip: pl.unskip, add: pl.add.map((it) => it.id), skippedAfter: SIYL_JOURNEY.SEGMENTS.filter((s) => SIYL_JOURNEY.isSkipped(s.key)).length, bagAfter: SIYL_BAG.get().length }; });
-    note('complete-trip-plan-pure', plan.rows.length === 10 && plan.bagAfter === 0 && plan.skippedAfter === 0 && plan.rows.some((r) => /^kmg:fallback:/.test(r)) && plan.rows.filter((r) => /:default/.test(r)).length === 9, JSON.stringify(plan.rows));
-    await p.click('[data-package-preview="complete"]'); await p.waitForTimeout(1200);
-    const preview = await p.evaluate(() => ({ rows: [...document.querySelectorAll('.fxl .fxr')].map((e) => e.innerText.replace(/\s+/g, ' ').trim()), fb: [...document.querySelectorAll('.fxl .fxr-fb')].length, held: SIYL_BAG.get().length }));
-    await shot(p, '390-complete-trip-preview');
-    note('complete-trip-preview-lists-every-stage', preview.rows.length === 10 && preview.fb === 1 && preview.rows.some((r) => /cannot take your party — this is the next option that can/.test(r)) && preview.rows.some((r) => /Special Express No\. 25/.test(r)) && preview.rows.some((r) => /MU9646|Vientiane → Kunming/i.test(r)) && preview.held === 0, preview.rows.join(' | ').slice(0, 260) + ' (nothing held by looking)');
-    /* the engine changes while the drawer is open (a room fills): the confirm applies nothing and shows the change */
-    const p4 = await fresh(); await signIn(p4, 'T003'); await api(p4, '/api/rooms/leave', { method: 'POST', body: JSON.stringify({ invitationId: 'INV-T003', guestId: 'T003', stage: 'kmg' }) }); await p4.context().close();
-    await p.click('#fxg'); await p.waitForTimeout(2500);
-    const changed = await p.evaluate(() => ({ note: !!document.querySelector('[data-fx-changed]'), rows: document.querySelectorAll('.fxl .fxr').length, fb: document.querySelectorAll('.fxl .fxr-fb').length, held: SIYL_BAG.get().length }));
-    note('complete-trip-confirm-bound-to-preview', changed.note && changed.rows === 10 && changed.fb === 0 && changed.held === 0, JSON.stringify(changed) + ' (a room freed meanwhile: the preview is drawn again with the change said, nothing was applied)');
-    await shot(p, '390-complete-trip-changed');
-    await p.click('#fxg'); await p.waitForTimeout(9000);
-    const after = await p.evaluate(() => ({ bag: SIYL_BAG.get().map((x) => x.id + (x.room ? ':' + x.room : '')).sort(), total: SIYL_BAG.total(), need: SIYL_GUEST.readiness().need.map((x) => x.key), summary: (document.querySelector('[data-fx-summary]') || {}).innerText || '', open: SIYL_JOURNEY.open().length }));
+    const before = await p.evaluate(() => ({ sheets: document.querySelectorAll('[data-scope][aria-pressed="true"]').length, stages: document.querySelectorAll('.p-stage[id^="s-"]:not(#s-wedding):not(#s-excluded)').length, heads: [...document.querySelectorAll('.p-sheet-h .t-l1')].map((e) => e.innerText.trim()), packs: document.querySelectorAll('.p-pack, [data-package]').length, counts: (document.querySelector('[data-counts]') || {}).innerText || '' }));
+    await shot(p, '390-join-all-sheets');
+    note('join-all-ten-stages-under-five-sheets', before.sheets === 4 && before.stages === 10 && before.heads.length === 5 && before.packs === 0 && /10 still open/.test(before.counts), JSON.stringify(before));
+    const chosen = await p.evaluate(async () => { const ST = SIYL_STAY, P = SIYL_PRICE, B = SIYL_BAG, out = [];
+      for (const [win, slug] of [['bkk-stay', 'penthouse'], ['prewed', 'heritage-grand-premier'], ['wedstay', 'heritage-grand-premier'], ['kmg', 'italian'], ['ljg', 'viewing-270'], ['kempinski', 'deluxe-balcony-king']]) { const r = await ST.select(win, slug); out.push(win + ':' + (r && r.ok ? r.unit : 'x')); }
+      for (const id of ['train', 'mu9646', 'c86', 'return']) P.items(id).forEach((it) => B.put(it));
+      return { out, bag: B.get().map((x) => x.id + (x.room ? ':' + x.room : '')).sort(), total: B.total(), need: SIYL_GUEST.readiness().need.map((x) => x.key), open: SIYL_JOURNEY.counts().open }; });
     const mine = (await api(p, '/api/rooms/mine', { method: 'POST', body: '{}' })).body.mine;
-    await shot(p, '390-complete-trip-done');
-    note('complete-trip-fills-every-open-stage', after.bag.length === 10 && after.open === 0 && !after.need.some((k) => /^(room|release):/.test(k)) && Object.keys(mine).length === 6 && mine.kmg && mine.kmg.key === 'kmg/' + wish && /Complete trip selected 10 stages for you/.test(after.summary) && !/Replaced because/.test(after.summary), JSON.stringify({ bag: after.bag, total: after.total, holds: Object.keys(mine).length, kmg: mine.kmg && mine.kmg.key, summary: after.summary.slice(0, 120) }) + ' (the suggested room, free again, is what the second look showed and what was applied)');
-    /* determinism: the same plan computed again names the same products (the rooms now held are "kept as chosen") */
-    const again = await p.evaluate(() => { const pl = SIYL_JOURNEY.packagePlan('complete'); return { rows: pl.rows.map((x) => x.seg.key + ':' + x.why), add: pl.add.map((it) => it.id).sort() }; });
-    note('complete-trip-idempotent', again.rows.length === 10 && again.rows.every((r) => /:same$/.test(r)) && again.add.length === 0, again.rows.join(' ') + ' (every stage is already the package\'s own: nothing would change)');
+    await trip(p); await shot(p, '390-whole-trip-chosen');
+    const after = chosen;
+    note('every-stage-chosen-by-hand', after.bag.length === 10 && after.open === 0 && !after.need.some((k) => /^(room|release|stage):/.test(k)) && Object.keys(mine).length === 6 && after.total === 2175, JSON.stringify({ chosen: after.out, total: after.total, open: after.open, need: after.need }));
     /* the parity fixture: every step answered, then Review & Send */
     await wedding(p, 'yes', 'yes'); await prep(p);
     for (const [ev, seatId] of [['ceremony', 'C-R-07-02'], ['dinner', 'D-T-07']]) { const sr = await api(p, '/api/seating/select', { method: 'POST', body: JSON.stringify({ invitationId: 'INV-T002', guestId: 'T002', event: ev, seatId, name: 'Ben' }) }); if (sr.status !== 200) note('seat-' + ev, false, JSON.stringify(sr.body)); }
@@ -137,7 +122,7 @@ if (!LIVE) {
   {
     const before = await gr('/api/gr/reset', { dryRun: true });
     const plan0 = await gr('/api/rooms/plan'); let occ0 = 0; for (const units of Object.values(plan0.body.units)) for (const u of units) for (const o of (u.occupants || [])) if (!(u.reservedFor && /Bride/.test(u.reservedFor))) occ0++;
-    note('reset-dry-run', before.status === 200 && before.body.dryRun === true && before.body.rooms.occupancies >= 7 && before.body.seating.holds >= 1 && before.body.drafts.had >= 2 && before.body.kv.keys.length >= 5 && occ0 === before.body.rooms.occupancies, JSON.stringify({ rooms: before.body.rooms.occupancies, seats: before.body.seating.holds, drafts: before.body.drafts.had, kv: before.body.kv.keys.length }));
+    note('reset-dry-run', before.status === 200 && before.body.dryRun === true && before.body.rooms.occupancies >= 6 && before.body.seating.holds >= 1 && before.body.drafts.had >= 2 && before.body.kv.keys.length >= 5 && occ0 === before.body.rooms.occupancies, JSON.stringify({ rooms: before.body.rooms.occupancies, seats: before.body.seating.holds, drafts: before.body.drafts.had, kv: before.body.kv.keys.length }));
     const still = await gr('/api/rooms/plan'); let occ1 = 0; for (const units of Object.values(still.body.units)) for (const u of units) for (const o of (u.occupants || [])) if (!(u.reservedFor && /Bride/.test(u.reservedFor))) occ1++;
     note('reset-dry-run-wrote-nothing', occ1 === occ0, occ1 + ' guest holds after the dry run');
     /* a device that holds Ben's old trip in its cache, signed in, before the reset */

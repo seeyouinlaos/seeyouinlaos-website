@@ -1,0 +1,169 @@
+/* ============================================================================
+   THE STAGE GRAPH — the ONE booking model (Owner, 21 Sep 2026 · the global My Trip rebuild).
+
+   No packages. Four participation scopes, ten stages, three connectors:
+
+     BANGKOK                         → A (the opening Bangkok stay) + J (the closing Bangkok stay)
+     VIENTIANE · BEFORE THE WEDDING  → C (the Pre-Wedding Stay)
+     VIENTIANE · THE WEDDING         → D (the Wedding Stay: Souphattra · Riverside · Guest House)
+     CHINA                           → F (Kunming) + G (Kunming → Lijiang, mandatory) + H (Lijiang)
+
+     B (Bangkok → Vientiane)  required only with BANGKOK + VIENTIANE · BEFORE THE WEDDING
+     E (Vientiane → Kunming)  required only with VIENTIANE · THE WEDDING + CHINA
+     I (Lijiang → Bangkok)    required only with CHINA + BANGKOK
+
+   This file is the canonical source for My Trip, View All Steps, the counters, Needs Attention, Continue, Review & Send and
+   the Worker's acceptance of a submission. It is pure: no DOM, no storage, no network. The browser copy assets/stage-graph.js
+   is GENERATED from this file by src/build-stage-graph.cjs (gate G1 keeps it current) — never edited by hand.
+   ========================================================================== */
+
+export const SCOPES = [
+  { key: 'bangkok', label: 'Bangkok', when: '21 – 24 February + 6 – 8 March', short: 'Bangkok' },
+  { key: 'vientianePreWedding', label: 'Vientiane · Before the Wedding', when: '25 – 27 February', short: 'Vientiane · before' },
+  { key: 'vientianeWedding', label: 'Vientiane · The Wedding', when: '27 February – 1 March', short: 'Vientiane · the wedding' },
+  { key: 'china', label: 'China', when: '1 – 6 March', short: 'China' }
+];
+export const SCOPE_KEYS = SCOPES.map((s) => s.key);
+
+/* the ten stages in the order they happen; `scope` = the scope a stage belongs to; `connector` = the two scopes a leg joins */
+export const STAGES = [
+  { key: 'bkk-stay', letter: 'A', scope: 'bangkok', kind: 'stay', sheet: 'bangkok' },
+  { key: 'train', letter: 'B', connector: ['bangkok', 'vientianePreWedding'], kind: 'transport', sheet: 'vientianePreWedding' },
+  { key: 'prewed', letter: 'C', scope: 'vientianePreWedding', kind: 'stay', sheet: 'vientianePreWedding' },
+  { key: 'wedstay', letter: 'D', scope: 'vientianeWedding', kind: 'stay', sheet: 'vientianeWedding' },
+  { key: 'mu9646', letter: 'E', connector: ['vientianeWedding', 'china'], kind: 'transport', sheet: 'china' },
+  { key: 'kmg', letter: 'F', scope: 'china', kind: 'stay', sheet: 'china' },
+  { key: 'c86', letter: 'G', scope: 'china', kind: 'transport', mandatory: true, sheet: 'china' },
+  { key: 'ljg', letter: 'H', scope: 'china', kind: 'stay', sheet: 'china' },
+  { key: 'return', letter: 'I', connector: ['china', 'bangkok'], kind: 'transport', sheet: 'bangkokReturn' },
+  { key: 'kempinski', letter: 'J', scope: 'bangkok', kind: 'stay', sheet: 'bangkokReturn' }
+];
+export const STAGE_KEYS = STAGES.map((s) => s.key);
+export const LETTER = Object.fromEntries(STAGES.map((s) => [s.letter, s.key]));
+/* the engine's stage names that answer a stage (the wedding stay has three houses) */
+export const STAGE_IDS = { 'bkk-stay': ['bkk-stay'], train: ['train'], prewed: ['prewed'], wedstay: ['wedstay', 'riverside', 'guesthouse'], mu9646: ['mu9646'], kmg: ['kmg'], c86: ['c86'], ljg: ['ljg'], return: ['return'], kempinski: ['kempinski'] };
+/* a stage that can never be declined inside its scope: the internal China transport */
+export const MANDATORY = STAGES.filter((s) => s.mandatory).map((s) => s.key);
+/* the sheets My Trip shows, in order: the scope a stage sits under (the closing Bangkok stages under their own heading) */
+export const SHEETS = [
+  { key: 'bangkok', scope: 'bangkok', label: 'Bangkok', when: '21 – 24 February' },
+  { key: 'vientianePreWedding', scope: 'vientianePreWedding', label: 'Vientiane · Before the Wedding', when: '25 – 27 February' },
+  { key: 'vientianeWedding', scope: 'vientianeWedding', label: 'Vientiane · The Wedding', when: '27 February – 1 March' },
+  { key: 'china', scope: 'china', label: 'China', when: '1 – 6 March' },
+  { key: 'bangkokReturn', scope: 'bangkok', label: 'Back to Bangkok', when: '6 – 8 March' }
+];
+
+/* ---- the scope ----------------------------------------------------------- */
+export function emptyScope() { return { bangkok: false, vientianePreWedding: false, vientianeWedding: false, china: false, none: false }; }
+export function isAnswered(scope) { return !!(scope && (scope.none || SCOPE_KEYS.some((k) => scope[k]))); }
+export function joinsAll(scope) { return !!(scope && !scope.none && SCOPE_KEYS.every((k) => scope[k])); }
+/* the stored answer as the model reads it. A legacy answer (bangkok · vientiane · china, before 21 Sep 2026) is derived from
+   the guest's REAL state — deterministic, non-destructive, idempotent:
+     vientianeWedding    = legacy vientiane
+     vientianePreWedding = legacy vientiane, unless the Pre-Wedding Stay was explicitly declined (the former Essential trip)
+                           — a selected or waitlisted Pre-Wedding Stay always keeps it
+   `facts.prewed` is the stage's state: 'selected' | 'waitlisted' | 'declined' | 'open'. */
+export function normalizeScope(raw, facts) {
+  if (!raw || typeof raw !== 'object') return null;
+  const f = facts || {};
+  const out = emptyScope();
+  if (raw.none === true) { out.none = true; return finish(out, raw); }
+  const legacy = !('vientianeWedding' in raw) && !('vientianePreWedding' in raw) && ('vientiane' in raw);
+  if (legacy) {
+    out.bangkok = !!raw.bangkok; out.china = !!raw.china;
+    const v = !!raw.vientiane;
+    out.vientianeWedding = v;
+    out.vientianePreWedding = v && (f.prewed === 'selected' || f.prewed === 'waitlisted' ? true : f.prewed === 'declined' ? false : true);
+  } else {
+    SCOPE_KEYS.forEach((k) => { out[k] = !!raw[k]; });
+  }
+  if (!SCOPE_KEYS.some((k) => out[k])) { /* nothing joined and not "none": unanswered */ return null; }
+  return finish(out, raw);
+  function finish(o, r) { if (r.at) o.at = r.at; if (r.by) o.by = r.by; o.migrated = legacyOf(r); return o; }
+  function legacyOf(r) { return !('vientianeWedding' in r) && !('vientianePreWedding' in r) && ('vientiane' in r); }
+}
+
+/* ---- relevance ----------------------------------------------------------- */
+export function stageOf(key) { return STAGES.find((s) => s.key === key) || null; }
+export function isRelevant(key, scope) {
+  const st = stageOf(key); if (!st) return false;
+  if (!scope) return true;                       /* an unanswered scope keeps every stage in view */
+  if (scope.none) return false;
+  if (st.connector) return st.connector.every((k) => !!scope[k]);
+  return !!scope[st.scope];
+}
+export function relevantStages(scope) { return STAGES.filter((s) => isRelevant(s.key, scope)).map((s) => s.key); }
+export function relevantLetters(scope) { return STAGES.filter((s) => isRelevant(s.key, scope)).map((s) => s.letter).join(''); }
+/* the scopes a guest's REAL state implies (the migration of a former package guest): a stage selected, held or waitlisted
+   names its scope; a connector alone names nothing */
+export function scopeFromStates(states) {
+  const out = emptyScope();
+  STAGES.forEach((s) => { const v = states && states[s.key]; if (!s.scope) return; if (v === 'selected' || v === 'waitlisted') out[s.scope] = true; });
+  return out;
+}
+
+/* ---- resolution ---------------------------------------------------------- */
+/* a stage's answer: selected (a product, a held room), waitlisted (the engine's list), declined (the guest's explicit
+   "not joining this stage" — never for a mandatory stage), open (nothing yet). Nothing selected is never an answer. */
+export function resolved(key, state) {
+  if (state === 'selected' || state === 'waitlisted') return true;
+  if (state === 'declined') return MANDATORY.indexOf(key) < 0;
+  return false;
+}
+
+/* ---- the ONE completion ---------------------------------------------------
+   input = {
+     scope,                       the normalized scope (null = unanswered)
+     stages: { key: state },      state per stage: 'selected' | 'waitlisted' | 'declined' | 'open'
+     stale: [ ... ],              things still held outside the trip (each blocks until released)
+     contact: { missing: [...] }, step 01
+     wedding: {                   step 03 + 04, read only when VIENTIANE · THE WEDDING is joined
+       events: { temple, coffee, vows, dinner }   'yes' | 'no' | null
+       sangkhathan: 'yes' | 'no' | null | 'n/a'
+       dress: true | false,                        the dress-code acknowledgement
+       seating: { open, frozen, configured: { ceremony, dinner }, seats: { ceremony, dinner } },
+       hosts: true | false
+     },
+     about: { missing: [...] },   step 05, read for every joining guest
+     sent: true | false           a journey already with Guest Relations
+   }
+   output = { answered, notJoining, relevant, resolved, unresolved, missing, canSend, next } — one truth for every surface */
+export function completion(input) {
+  const i = input || {};
+  const scope = i.scope || null;
+  const out = { answered: isAnswered(scope), notJoining: !!(scope && scope.none), relevant: [], resolved: [], unresolved: [], missing: [], canSend: false, next: null, wedding: { required: false, missing: [] } };
+  const miss = (key, label, step, href) => { out.missing.push({ key, label, step, href }); };
+  if (!out.answered) { miss('scope', 'Where will you join us?', 'journey', 'your-journey.html#scope'); out.next = out.missing[0]; return out; }
+  (i.contact && i.contact.missing || []).forEach((m) => miss(m.key || 'contact', m.label || 'Your contact details', 'you', m.href || 'invitation.html#contact'));
+  (i.stale || []).forEach((s) => miss(s.key || 'release', s.label || 'Something still held outside your trip', 'journey', s.href || 'your-journey.html#scope'));
+  if (out.notJoining) { out.canSend = out.missing.length === 0; out.next = out.missing[0] || null; return out; }
+  const states = i.stages || {};
+  STAGES.forEach((s) => {
+    if (!isRelevant(s.key, scope)) return;
+    out.relevant.push(s.key);
+    const st = states[s.key] || 'open';
+    if (resolved(s.key, st)) out.resolved.push(s.key);
+    else {
+      const why = st === 'declined' ? 'mandatory' : 'open';
+      out.unresolved.push({ key: s.key, letter: s.letter, state: st, why });
+      miss('stage:' + s.key, s.key === 'c86' && why === 'mandatory' ? 'Kunming → Lijiang — the train is part of China' : 'stage ' + s.letter, 'journey', 'your-journey.html#s-' + s.key);
+    }
+  });
+  if (scope.vientianeWedding) {
+    out.wedding.required = true;
+    const w = i.wedding || {};
+    const ev = w.events || {};
+    ['temple', 'coffee', 'vows', 'dinner'].forEach((k) => { if (ev[k] !== 'yes' && ev[k] !== 'no') { out.wedding.missing.push('event:' + k); miss('event:' + k, k + ' — attending or not', 'wedding', 'wedding.html#ev-' + k); } });
+    if (ev.temple === 'yes' && w.sangkhathan === null) { out.wedding.missing.push('sangkhathan'); miss('sangkhathan', 'Sangkhathan — yes or no', 'wedding', 'wedding.html#sangkhathan'); }
+    if (w.dress !== true) { out.wedding.missing.push('dress'); miss('dress', 'Dress code acknowledgement', 'preparation', 'wedding-preparation.html#ack'); }
+    const S = w.seating || {};
+    if (S.open && !S.frozen) {
+      if (ev.vows === 'yes' && !w.hosts && S.configured && S.configured.ceremony && !(S.seats && S.seats.ceremony)) { out.wedding.missing.push('seat:ceremony'); miss('seat:ceremony', 'Ceremony seat', 'preparation', 'wedding-preparation.html#seats'); }
+      if (ev.dinner === 'yes' && S.configured && S.configured.dinner && !(S.seats && S.seats.dinner)) { out.wedding.missing.push('seat:dinner'); miss('seat:dinner', 'Dinner seat', 'preparation', 'wedding-preparation.html#seats'); }
+    }
+  }
+  (i.about && i.about.missing || []).forEach((m) => miss(m.key || 'about', m.label || 'About You', 'about', m.href || 'about-you.html'));
+  out.canSend = out.missing.length === 0;
+  out.next = out.missing[0] || null;
+  return out;
+}

@@ -184,48 +184,74 @@
      * SERVER-SIDE (Owner, 16 Sep 2026 · EMAIL FIRST): the email and mobile number are persisted on the Worker under the
      * guest's invitation (/api/contact) — the recipient of the confirmation email and the same on every device. This
      * browser's draft is written first; the server copy follows; a device with an empty draft loads the server copy. */
-    /* ---- WHERE WILL YOU JOIN US (Owner, 18 Sep 2026) ----------------------
-     * The participation scope is the guest's first decision and the source of
-     * truth for everything after it: which stages exist for them, what
-     * readiness asks, which holds and tickets can stand, what Review & Send
-     * expects. A guest may join any combination of the three destinations;
-     * "I won't be joining this trip" is exclusive. The hosts join everything
-     * by definition — their scope reads as all three until they say otherwise. */
-    DESTINATIONS: [
-      { key: 'bangkok', label: 'Bangkok', when: '21 – 24 February · 6 – 8 March 2027' },
-      { key: 'vientiane', label: 'Vientiane', when: '25 February – 1 March 2027 · the wedding' },
-      { key: 'china', label: 'China', when: '1 – 6 March 2027 · Kunming and Lijiang' }
-    ],
+    /* ---- WHERE WILL YOU JOIN US (Owner, 21 Sep 2026 · the global My Trip rebuild) ----------------------
+     * FOUR participation scopes — BANGKOK · VIENTIANE BEFORE THE WEDDING · VIENTIANE THE WEDDING · CHINA — any combination;
+     * "I'll join all"; "I won't be joining this trip" (exclusive). The scope is the first decision and the source of truth for
+     * everything after it, through the ONE stage graph (assets/stage-graph.js): which stages exist, what readiness asks, what
+     * Review & Send expects. A legacy answer (bangkok · vientiane · china) is read through the graph's normalisation: the
+     * wedding scope from "vientiane", the pre-wedding scope from the guest's REAL Pre-Wedding Stay (declined → not joined) —
+     * deterministic, idempotent, never a rebooking. The hosts join everything by definition. */
+    DESTINATIONS: (window.SIYL_GRAPH ? window.SIYL_GRAPH.SCOPES : [
+      { key: 'bangkok', label: 'Bangkok', when: '21 – 24 February + 6 – 8 March' },
+      { key: 'vientianePreWedding', label: 'Vientiane · Before the Wedding', when: '25 – 27 February' },
+      { key: 'vientianeWedding', label: 'Vientiane · The Wedding', when: '27 February – 1 March' },
+      { key: 'china', label: 'China', when: '1 – 6 March' }
+    ]).map(function (d) { return { key: d.key, label: d.label, when: d.when }; }),
+    SCOPE_KEYS: ['bangkok', 'vientianePreWedding', 'vientianeWedding', 'china'],
+    /* the state of the Pre-Wedding Stage as this device knows it — the one fact a legacy answer is read with */
+    prewedFact: function () {
+      var B = window.SIYL_BAG, U = window.SIYL_UNITS;
+      try { if (B && B.get().some(function (x) { return x.id === 'prewed'; })) return 'selected'; } catch (e) {}
+      try { if (U && U.waitlisted && U.waitlisted('prewed')) return 'waitlisted'; } catch (e) {}
+      try { if ((JSON.parse(localStorage.getItem('siyl.skip') || '[]')).indexOf('prewed') >= 0) return 'declined'; } catch (e) {}
+      return 'open';
+    },
     scope: function () {
-      var st = read(), s = st.scope, p = this.party();
-      if (s && s.at && (s.none || s.bangkok || s.vientiane || s.china)) return { bangkok: !!s.bangkok && !s.none, vientiane: !!s.vientiane && !s.none, china: !!s.china && !s.none, none: !!s.none, at: s.at, by: s.by || 'guest' };
-      if (p && p.hosts) return { bangkok: true, vientiane: true, china: true, none: false, at: null, by: 'hosts' };
+      var st = read(), s = st.scope, p = this.party(), G = window.SIYL_GRAPH, self = this;
+      var norm = function (raw) {
+        if (G && G.normalizeScope) return G.normalizeScope(raw, { prewed: self.prewedFact() });
+        if (!raw) return null; var o = { bangkok: !!raw.bangkok, vientianePreWedding: !!(raw.vientianePreWedding != null ? raw.vientianePreWedding : raw.vientiane), vientianeWedding: !!(raw.vientianeWedding != null ? raw.vientianeWedding : raw.vientiane), china: !!raw.china, none: !!raw.none };
+        if (o.none) { o.bangkok = o.vientianePreWedding = o.vientianeWedding = o.china = false; return o; } return (o.bangkok || o.vientianePreWedding || o.vientianeWedding || o.china) ? o : null;
+      };
+      if (s && s.at) { var o = norm(s); if (o) { o.at = s.at; o.by = s.by || 'guest'; return o; } }
+      if (p && p.hosts) return { bangkok: true, vientianePreWedding: true, vientianeWedding: true, china: true, none: false, at: null, by: 'hosts' };
       return null;
     },
     scopeAnswered: function () { return !!this.scope(); },
-    joins: function (dest) { var s = this.scope(); return !!(s && !s.none && s[dest]); },
-    joiningAny: function () { var s = this.scope(); return !!(s && !s.none && (s.bangkok || s.vientiane || s.china)); },
+    /* joins(scope) — `vientiane` is the legacy name for "any Vientiane part" (readers that only need to know the guest comes to Vientiane) */
+    joins: function (dest) { var s = this.scope(); if (!s || s.none) return false; if (dest === 'vientiane') return !!(s.vientianeWedding || s.vientianePreWedding); return !!s[dest]; },
+    joiningAny: function () { var s = this.scope(), self = this; return !!(s && !s.none && self.SCOPE_KEYS.some(function (k) { return s[k]; })); },
     notJoining: function () { var s = this.scope(); return !!(s && s.none); },
-    joinsAll: function () { var s = this.scope(); return !!(s && !s.none && s.bangkok && s.vientiane && s.china); },
+    joinsAll: function () { var s = this.scope(), self = this; return !!(s && !s.none && self.SCOPE_KEYS.every(function (k) { return s[k]; })); },
     scopeWords: function () {
       var s = this.scope(); if (!s) return '';
       if (s.none) return 'Not joining this trip';
-      var names = this.DESTINATIONS.filter(function (d) { return s[d.key]; }).map(function (d) { return d.label; });
-      return names.length === 3 ? 'Bangkok · Vientiane · China' : names.join(' · ');
+      if (this.joinsAll()) return 'Bangkok · Vientiane · China';
+      /* both Vientiane sheets read as one word: Vientiane */
+      var both = s.vientianePreWedding && s.vientianeWedding;
+      var names = this.DESTINATIONS.filter(function (d) { return s[d.key] && !(both && d.key === 'vientianeWedding'); }).map(function (d) { return both && d.key === 'vientianePreWedding' ? 'Vientiane' : d.label; });
+      return names.join(' · ');
     },
-    /* setScope({ bangkok: true }) toggles one destination (clearing "not joining"); setScope({ none: true }) declines the whole
-     * trip (clearing the destinations); setScope({ all: true }) joins every destination */
+    /* clearScope() — "I'd like to reconsider": the answer is withdrawn and the question asked again; nothing else changes */
+    clearScope: function () {
+      var me = this.me(); if (!me) return; var st = read(); if (!st.scope) return;
+      st.guests = st.guests || {}; st.guests[me.guestId] = st.guests[me.guestId] || { submitted: {}, profile: {}, history: [] };
+      var r = st.guests[me.guestId]; r.history = r.history || []; r.history.push({ field: 'scope', from: st.scope.none ? 'none' : 'answered', to: null, at: stamp(), by: me.guestId });
+      delete st.scope; write(st);
+    },
+    /* setScope({ china: true }) toggles one scope (clearing "not joining"); setScope({ none: true }) declines the whole
+     * trip (clearing the scopes); setScope({ all: true }) joins every scope */
     setScope: function (patch) {
       var me = this.me(); if (!me || !patch) return;
-      var st = read(), cur = Object.assign({ bangkok: false, vientiane: false, china: false, none: false }, st.scope || {});
-      if (!(st.scope && st.scope.at) && this.party() && this.party().hosts) cur = { bangkok: true, vientiane: true, china: true, none: false };
-      if (patch.all === true) cur = { bangkok: true, vientiane: true, china: true, none: false };
-      else if (patch.none === true) cur = { bangkok: false, vientiane: false, china: false, none: true };
-      else { ['bangkok', 'vientiane', 'china'].forEach(function (k) { if (typeof patch[k] === 'boolean') cur[k] = patch[k]; }); if (cur.bangkok || cur.vientiane || cur.china) cur.none = false; }
+      var st = read(), keys = this.SCOPE_KEYS, base = this.scope() || {}, cur = { bangkok: !!base.bangkok, vientianePreWedding: !!base.vientianePreWedding, vientianeWedding: !!base.vientianeWedding, china: !!base.china, none: !!base.none };
+      if (patch.all === true) cur = { bangkok: true, vientianePreWedding: true, vientianeWedding: true, china: true, none: false };
+      else if (patch.none === true) cur = { bangkok: false, vientianePreWedding: false, vientianeWedding: false, china: false, none: true };
+      else { if (typeof patch.vientiane === 'boolean') { cur.vientianePreWedding = patch.vientiane; cur.vientianeWedding = patch.vientiane; }   /* the legacy word: both Vientiane sheets */
+        keys.forEach(function (k) { if (typeof patch[k] === 'boolean') cur[k] = patch[k]; }); if (keys.some(function (k) { return cur[k]; })) cur.none = false; }
       cur.at = stamp(); cur.by = me.guestId;
       st.scope = cur;
       st.guests = st.guests || {}; st.guests[me.guestId] = st.guests[me.guestId] || { submitted: {}, profile: {}, history: [] };
-      var r = st.guests[me.guestId]; r.history = r.history || []; r.history.push({ field: 'scope', from: null, to: cur.none ? 'none' : ['bangkok', 'vientiane', 'china'].filter(function (k) { return cur[k]; }).join('+'), at: cur.at, by: me.guestId });
+      var r = st.guests[me.guestId]; r.history = r.history || []; r.history.push({ field: 'scope', from: null, to: cur.none ? 'none' : keys.filter(function (k) { return cur[k]; }).join('+'), at: cur.at, by: me.guestId });
       write(st);
     },
     contact: function (f) { var st = read(); return (st.contact || {})[f] || ''; },
@@ -469,11 +495,13 @@
            destination the guest is not joining blocks Review & Send until it is released — a failed release is never sent */
         out = out.concat(this.staleFor());
         if (this.notJoining()) return out;
+        var GR = window.SIYL_GRAPH;
         J.SEGMENTS.forEach(function (seg) {
-          if (J.relevant && !J.relevant(seg)) return;   /* a stage of a destination the guest is not joining asks nothing */
+          if (J.relevant && !J.relevant(seg)) return;   /* a stage of a scope the guest is not joining asks nothing */
           var st = J.state(seg);
           if (st === 'waitlisted') return;                /* a stage on the waiting list is answered — visibly unresolved, never a missing item (Owner, 19 Sep 2026) */
-          if (st === 'open') { out.push({ key: 'stage:' + seg.key, label: seg.when + ' · ' + seg.place + ' — choose or say you are not joining', href: 'your-journey.html#s-' + seg.key }); return; }
+          /* the ONE graph decides what counts as an answer: a declined mandatory stage (Kunming → Lijiang inside China) is not one */
+          if (st === 'open' || (GR && GR.resolved && !GR.resolved(seg.key, st))) { out.push({ key: 'stage:' + seg.key, label: seg.when + ' · ' + seg.place + (st === 'declined' ? ' — this train is part of China: choose it' : (GR && GR.MANDATORY && GR.MANDATORY.indexOf(seg.key) >= 0 ? ' — choose your travel, it is part of China' : ' — choose or say you are not joining')), href: 'your-journey.html#s-' + seg.key }); return; }
           /* a chosen stay is complete only once the guest holds a place in a room of it */
           if (st === 'selected' && seg.cat === 'Accommodation' && U && U.ready()) {
             var line = B.get().filter(function (x) { return seg.ids.indexOf(x.id) >= 0; })[0];
@@ -540,15 +568,15 @@
         });
       }
       /* a seat while the ledger is open to the guest; a frozen ledger is Guest Relations' to change — the decline is sent, the seat is theirs to release */
-      if (S && S.ready && S.ready() && S.open() && !S.frozen() && me && !this.joins('vientiane')) ['ceremony', 'dinner'].forEach(function (ev) {
-        if (S.seatOf(ev, me.guestId)) out.push({ key: 'release:seat:' + ev, label: (ev === 'ceremony' ? 'Ceremony' : 'Dinner') + ' seat — still held although you are not joining Vientiane', href: 'your-journey.html#scope' });
+      if (S && S.ready && S.ready() && S.open() && !S.frozen() && me && !this.joins('vientianeWedding')) ['ceremony', 'dinner'].forEach(function (ev) {
+        if (S.seatOf(ev, me.guestId)) out.push({ key: 'release:seat:' + ev, label: (ev === 'ceremony' ? 'Ceremony' : 'Dinner') + ' seat — still held although you are not joining the wedding', href: 'your-journey.html#scope' });
       });
       return out;
     },
     /* does a step apply to this guest at all — the scope decides: the wedding steps need Vientiane, About You needs a guest who joins something */
     applicable: function (key) {
       if (!this.scopeAnswered()) return true;
-      if (key === 'wedding' || key === 'preparation') return this.joins('vientiane');
+      if (key === 'wedding' || key === 'preparation') return this.joins('vientianeWedding');
       if (key === 'about') return !this.notJoining();
       return true;
     },
@@ -581,7 +609,7 @@
         if (p && !applies && d.key !== currentKey) state = 'na';
         var note = '';
         if (!p) note = 'Open your invitation';
-        else if (!applies) note = self.notJoining() ? 'Not joining this trip' : 'Not joining Vientiane';
+        else if (!applies) note = self.notJoining() ? 'Not joining this trip' : 'Not joining the wedding';
         else if (d.key === 'review') note = done ? (C && C.state() === 'confirmed' ? 'Confirmed by Guest Relations' : 'Received by Guest Relations') : (may ? 'Ready to send' : 'Available once steps 01–05 are complete');
         else if (done) note = ({ you: 'Name, email and mobile number', journey: self.notJoining() ? 'Not joining this trip' : 'Every stage answered', wedding: 'Every part of the day answered', preparation: 'Dress code and seats', about: 'Allergies and photography answered' })[d.key] || '';
         else if (!may) note = 'Complete the earlier steps first';
