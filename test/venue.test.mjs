@@ -142,7 +142,7 @@ test('MOTION · one system, three timings, physical easing; reduced motion keeps
   assert.match(v, /\.m-reduced \.venue-label \{ opacity: 1; \}/); assert.match(v, /\.m-reduced \.venue-outline \{ stroke-dashoffset: 0; \}/);
   assert.doesNotMatch(v + c, /bounce|spin|rotate\(|confetti|perspective\(/i, 'no bouncing, spinning, 3D or confetti');
   const vy = src('voyage.html');
-  assert.equal((vy.match(/data-motion="reveal"/g) || []).length, 10, 'the story sections and duos of the wedding page reveal');
+  assert.equal((vy.match(/data-motion="reveal"/g) || []).length, 9, 'the story sections, the dinner gallery and the duos of the wedding page reveal (21 Sep 2026: the two dinner pairs became the one gallery)');
   for (const f of ['index.html', 'voyage.html', 'accommodation.html']) { const s = src(f); assert.match(s, /<section class="a-sec venue" id="venue" aria-labelledby="venue-h" data-venue><\/section>/, f); assert.match(s, /assets\/venue-data\.js(?:\?v=[0-9a-f]{8})?"><\/script>\s*<script src="assets\/venue\.js(?:\?v=[0-9a-f]{8})?"/, f); assert.match(s, /assets\/motion\.css/); }
   assert.doesNotMatch(vy, /heritage-courtyard-wide\.jpg\)" role="img" aria-label="Poolside at Souphattra Heritage Vientiane, the heritage houses/, 'the wide band gave way to the stage');
   /* the homepage (Owner, 16 Sep 2026 — the mobile venue fix): the wordless 300 px band of the aerial gave way to the stage with the seven labels, the legend and the detail; on a phone the section flows in document order */

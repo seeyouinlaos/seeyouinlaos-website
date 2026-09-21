@@ -1152,12 +1152,12 @@ test('the retired imagery and the pool-side dinner narrative are gone', () => {
    * Haruthai-pass placeholder, which waited for a long-table photograph that
    * the Owner's set does not contain. The stay is still shown as a room. */
   assert.doesNotMatch(vy, /am-placeholder|Photograph to follow/);
-  const dinnerImages = vy.match(/053-wedding-dinner-[a-z-]+\.jpg/g) || [];
-  assert.ok(new Set(dinnerImages).size >= 4, 'several images from the Wedding Dinner set, not one: ' + dinnerImages.join(', '));
-  assert.match(vy, /053-wedding-dinner-courtyard-from-above\.jpg/, 'the lead image is the poolside from above');
-  /* the Owner's own long-table photographs (21 Sep 2026) are the pair; the sharing-menu pair is retired from the page */
-  assert.match(vy, /053-wedding-dinner-long-table-settings\.jpg[\s\S]{0,600}053-wedding-dinner-long-table-from-above\.jpg/, 'the long table is shown as a pair');
-  assert.doesNotMatch(vy, /053-wedding-dinner-sharing-menu(-table)?\.jpg/, 'the dim-sum pair is gone from the page');
+  /* 21 Sep 2026: the wedding dinner's photographs are the Drive folder 056 - Event - Wedding Dinner, every one of them, in the one gallery; the lead frame is its poolside from above */
+  const dinnerImages = vy.match(/056-wedding-dinner-[a-z0-9-]+\.jpg/g) || [];
+  assert.equal(new Set(dinnerImages).size, 11, 'all eleven photographs of the folder: ' + dinnerImages.join(', '));
+  assert.match(vy, /id="dinner"[\s\S]{0,300}056-wedding-dinner-01-poolside-from-above\.jpg/, 'the lead image is the poolside from above');
+  assert.doesNotMatch(vy, /053-wedding-dinner-/, 'the earlier dinner frames are gone from the page');
+  assert.match(vy, /<div class="dgal" aria-label="The wedding dinner">/); assert.match(vy, /<script src="assets\/refgal\.js/);
   for (const f of dinnerImages) assert.ok(existsSync(join(ROOT, 'assets/images/event', f)), f + ' is not in the asset set');
   assert.ok(!existsSync(join(ROOT, 'assets/images/event/053-wedding-dinner-courtyard-garden.jpg')), 'the fountain file (not from the Wedding Dinner folder) is retired');
   assert.match(vy, /souphattra\/heritage-room\.jpg/);
