@@ -38,3 +38,17 @@ from accommodation media: no frame of the record is a Souphattra accommodation f
 
 Tests: `test/wedding-dinner.test.mjs` (3), `test/venue.test.mjs` and `test/pricing.test.mjs` re-pinned; E2E
 `docs/acceptance/2026-09-21-wedding-dinner/e2e.mjs` (WebKit iPhone 13 at 320 / 390, Chromium at 834 / 1440).
+
+## Live (21 Sep 2026)
+
+Commit `60ff00c` → Workers Build → version `e455c666-f40c-48ca-9445-64c559621ce4` (17:30:12Z) on the one Worker. Parity 262/262,
+live-ro 25/25, infra freeze intact. In real WebKit (iPhone 13) on production: one `#dinner`, one "Wedding Dinner" title,
+the eyebrow "Sunday, 28 February 2027 · 19:30 · Poolside", the one carousel with 13 slides ("1 / 13", two arrows, no
+play/pause), the candlelit table and the dim sum among them, no overflow; the venue map's dinner is an index entry without a
+photograph whose link is `#dinner` (`live/live-iphone-*.jpg`). Production aggregates read-only before (16:33Z) and after
+(17:36Z), `live-aggregates.json`: 32 room occupancies (the same by stage) · 0 waitlisted · 12 seat holds unchanged; drafts
+14 → 15, contact 14 → 15, avatar 6 → 7, reg 14 → 15 — one real guest sent a trip with a portrait between the two readings
+(real activity, not this pass: nothing in this pass authenticates as a guest on the live Worker; no reset, no synthetic
+activity).
+
+Codex: PENDING — EXTERNAL QUOTA LIMIT (usage limit until 24 Sep 2026 22:19 CEST; the probe refused).
