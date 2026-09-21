@@ -1,0 +1,22 @@
+{
+ "docsNoToken": 401,
+ "docNoToken": 401,
+ "docsWrongToken": 401,
+ "docsSyntheticInvitation": {
+  "status": 200,
+  "count": 0,
+  "ok": true
+ },
+ "docsNoInvitation": 400,
+ "docBadKey": 400,
+ "docMissing": 404,
+ "documentGuestGet": 405,
+ "documentPostNoAuth": 401,
+ "communityNoSession": 401,
+ "photoNoSession": 401,
+ "registerRoles": "INV-G048:B,INV-G049:G",
+ "heroFocal": 5,
+ "heroDataPos": false,
+ "heroCss": true,
+ "r2Public": 401
+}
