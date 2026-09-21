@@ -14,32 +14,41 @@ async function harness() {
   const w = (await import('../src/worker.js')).default;
   const peggy = await bearerOf('demo-peggy-comm'), steffie = await bearerOf('demo-steffie-comm');
   const entries = {}; entries[await authIdOf(peggy)] = { i: 'INV-G001', g: 'G001', p: 'INV-002', c: 'CON003', k: 'COUPL002' }; entries[await authIdOf(steffie)] = { i: 'INV-G002', g: 'G002', p: 'INV-002', c: 'CON004', k: 'COUPL002' };
+  /* the couple, by the register's role — never by a name */
+  entries['a'.repeat(64)] = { i: 'INV-G049', g: 'G049', p: 'INV-001', h: 1, r: 'G', c: 'CON001', k: 'COUPL001' }; entries['b'.repeat(64)] = { i: 'INV-G048', g: 'G048', p: 'INV-001', h: 1, r: 'B', c: 'CON002', k: 'COUPL001' };
   const store = kv(); const env = { ASSETS: await assetsFor(entries), REG_KV: store, GR_TOKEN: 'gr-secret' };
   return { w, env, store, peggy, steffie };
 }
 const get = (h, bearer, path) => h.w.fetch(new Request(ORIGIN + (path || '/api/community'), { headers: bearer ? { 'x-siyl-auth': bearer } : {} }), h.env).then(async (r) => ({ status: r.status, d: await r.json().catch(() => null), h: r.headers }));
 
-test('WHO\'S JOINING US · the Worker: an authenticated read only; every guest whose trip was sent and who is joining — first names as currently spelled, a portrait flag, the day; declines and the hosts are not guests; newest first; nothing private; nothing written', async () => {
+test('WHO\'S JOINING US · the Worker: an authenticated read only; the Groom and the Bride always first (by the register\'s role, named as they spell themselves, a day only when a trip was genuinely sent); then every guest whose trip was sent and who is joining — first names as currently spelled, a portrait flag, the day; declines are not guests; the hosts are never counted as guests; newest first; nothing private; nothing written', async () => {
   const h = await harness();
   assert.equal((await get(h, null)).status, 401);
   assert.equal((await h.w.fetch(new Request(ORIGIN + '/api/community', { method: 'POST', headers: { 'x-siyl-auth': h.peggy } }), h.env)).status, 405);
-  let r = await get(h, h.peggy); assert.equal(r.status, 200); assert.deepEqual(r.d, { ...r.d, ok: true, count: 0, guests: [] }, 'empty is a real state');
+  let r = await get(h, h.peggy); assert.equal(r.status, 200);
+  assert.deepEqual(r.d.guests, [{ guestId: 'G049', name: 'Suthep', photo: false, joinedAt: null, role: 'Groom' }, { guestId: 'G048', name: 'Haruthai', photo: false, joinedAt: null, role: 'Bride' }], 'before anyone has sent a trip the couple already stands there — no record, no day, the first names every page prints');
+  assert.equal(r.d.count, 2); assert.equal(r.d.couple, 2);
   const m = h.store.m;
   m.set('reg:INV-G010', { v: reg('INV-G010', 'G010', { name: 'Peggy', at: '2026-09-18T10:00:00.000Z' }) });
   m.set('reg:INV-G011', { v: reg('INV-G011', 'G011', { name: 'Lin', at: '2026-09-20T12:00:00.000Z', submitted: { preferredName: 'Linnea' } }) });
   m.set('reg:INV-G012', { v: reg('INV-G012', 'G012', { name: 'Sam', at: '2026-09-19T08:00:00.000Z' }) });
   m.set('contact:INV-G012', { v: JSON.stringify({ email: 's@example.org', phone: '+66', firstName: 'Samuel', lastName: 'Acker', birthdate: '1990-05-17' }) });
   m.set('reg:INV-G013', { v: reg('INV-G013', 'G013', { name: 'Nora', scope: { none: true } }) });                /* responded: not joining */
-  m.set('reg:INV-G048', { v: reg('INV-G048', 'G048', { name: 'Haruthai', hosts: true }) });                       /* a host */
+  m.set('reg:INV-G048', { v: reg('INV-G048', 'G048', { name: 'Haruthai', hosts: true, at: '2026-09-15T09:00:00.000Z' }) });   /* the Bride's own record: she keeps her place, gains her day, is never a guest */
+  m.set('contact:INV-G049', { v: JSON.stringify({ email: 'g@example.org', phone: '+66', firstName: 'Thep', lastName: 'T' }) });   /* the Groom as he spells himself */
+  m.set('avatar:INV-G049', { v: new Uint8Array([9]).buffer, meta: { type: 'image/jpeg', at: 'x' } });
   m.set('avatar:INV-G012', { v: new Uint8Array([1, 2, 3]).buffer, meta: { type: 'image/jpeg', at: 'x' } });
   m.set('draft:INV-G099', { v: JSON.stringify({ keys: {} }) });                                                    /* a draft alone is no answer */
   m.set('reg:INV-G010:prev:2026-09-17T10:00:00.000Z', { v: reg('INV-G010', 'G010', { name: 'Peggy', at: '2026-09-17T10:00:00.000Z' }) });   /* an earlier version of a sent trip — never a second guest */
-  r = await get(h, h.peggy); assert.equal(r.status, 200); assert.equal(r.d.count, 3);
-  assert.deepEqual(r.d.guests, [{ guestId: 'G011', name: 'Linnea', photo: false, joinedAt: '2026-09-20' }, { guestId: 'G012', name: 'Samuel', photo: true, joinedAt: '2026-09-19' }, { guestId: 'G010', name: 'Peggy', photo: false, joinedAt: '2026-09-18' }], 'the contact\'s first name wins, then the submitted one, then the invitation\'s; newest first');
+  r = await get(h, h.peggy); assert.equal(r.status, 200); assert.equal(r.d.count, 5, 'the count is the visible population: the couple and three guests'); assert.equal(r.d.couple, 2);
+  assert.deepEqual(r.d.guests.slice(0, 2), [{ guestId: 'G049', name: 'Thep', photo: true, joinedAt: null, role: 'Groom' }, { guestId: 'G048', name: 'Haruthai', photo: false, joinedAt: '2026-09-15', role: 'Bride' }], 'Groom then Bride; his portrait and his own spelling; her genuine day');
+  assert.deepEqual(r.d.guests.slice(2), [{ guestId: 'G011', name: 'Linnea', photo: false, joinedAt: '2026-09-20' }, { guestId: 'G012', name: 'Samuel', photo: true, joinedAt: '2026-09-19' }, { guestId: 'G010', name: 'Peggy', photo: false, joinedAt: '2026-09-18' }], 'the contact\'s first name wins, then the submitted one, then the invitation\'s; newest first');
   const text = JSON.stringify(r.d); for (const bad of ['@example.org', '+66', 'birthdate', 'Acker', 'wedstay', 'heritage', 'INV-', 'selections', 'email']) assert.ok(!text.includes(bad), 'never ' + bad);
   assert.match(r.h.get('cache-control') || '', /private/);
   const before = [...m.keys()].sort().join(); await get(h, h.steffie); assert.equal([...m.keys()].sort().join(), before, 'a read writes nothing');
-  assert.equal((await get(h, h.steffie)).d.count, 3, 'the partner reads the same community — identity information only');
+  assert.equal((await get(h, h.steffie)).d.count, 5, 'the partner reads the same community — identity information only');
+  assert.doesNotMatch(src('src/worker.js'), /===\s*['"]Suthep['"]|===\s*['"]Haruthai['"]/, 'the couple is chosen by role, never by a name match');
+  assert.match(src('register/auth-index.json'), /"i":"INV-G049","g":"G049","p":"INV-001","h":1,"r":"G"/); assert.match(src('register/auth-index.json'), /"i":"INV-G048","g":"G048","p":"INV-001","h":1,"r":"B"/, 'the register names the roles'); assert.equal((src('register/auth-index.json').match(/"r":/g) || []).length, 2, 'two roles, no more');
 });
 
 test('THE COUNTDOWN · days to 21 February 2027 from the clock; the wedding once the journey has begun; never negative; the hours are never a clock', () => {
@@ -83,8 +92,14 @@ test('WHO\'S JOINING US · the page: the count, the names, initials where no pho
   assert.match(C.communityHtml(null), /data-community="loading"/);
   assert.match(C.communityHtml({ ok: true, count: 0, guests: [] }), /data-community="0"/); assert.match(C.communityHtml({ ok: true, count: 0, guests: [] }), /yours could be the first/);
   const d = { ok: true, count: 2, guests: [{ guestId: 'G011', name: 'Linnea', photo: false, joinedAt: '2026-09-20' }, { guestId: PEGGY.guestId, name: 'Peggy', photo: true, joinedAt: '2026-09-18' }] };
-  const h = C.communityHtml(d); assert.match(h, /data-community="2"/); assert.match(h, /2 guests have joined so far/); assert.match(h, /You are among them/); assert.match(h, /data-ava="G011"[^>]*aria-label="Linnea"><i aria-hidden="true">L<\/i>/, 'initials until a portrait arrives'); assert.match(h, /Recently joined/); assert.doesNotMatch(h, /@|\+66|INV-/);
+  const h = C.communityHtml(d); assert.match(h, /data-community="2"/); assert.match(h, /2 guests have joined so far/, 'without the couple the guest wording stands'); assert.match(h, /You are among them/); assert.match(h, /data-ava="G011"[^>]*aria-label="Linnea"><i aria-hidden="true">L<\/i>/, 'initials until a portrait arrives'); assert.match(h, /Recently joined/); assert.doesNotMatch(h, /@|\+66|INV-/);
   const one = C.communityHtml({ ok: true, count: 1, guests: [{ guestId: 'G011', name: 'Linnea', photo: false, joinedAt: null }] }); assert.match(one, /1 guest has joined so far/);
+  const c = C.communityHtml({ ok: true, count: 4, couple: 2, guests: [{ guestId: 'G049', name: 'Suthep', photo: true, joinedAt: null, role: 'Groom' }, { guestId: 'G048', name: 'Haruthai', photo: false, joinedAt: null, role: 'Bride' }, { guestId: 'G011', name: 'Linnea', photo: false, joinedAt: '2026-09-20' }, { guestId: PEGGY.guestId, name: 'Peggy', photo: true, joinedAt: '2026-09-18' }] }, PEGGY);
+  assert.match(c, /data-community="4" data-couple="2"/); assert.match(c, /4 of us are joining so far/, 'one inclusive wording when the couple stands in the count'); assert.doesNotMatch(c, /guests have joined/);
+  assert.match(c, /data-person="G049" data-role="Groom"[^]*?<span class="pf-person-n">Suthep<\/span><span class="pf-person-r">Groom<\/span>/); assert.match(c, /data-person="G048" data-role="Bride"[^]*?<span class="pf-person-n">Haruthai<\/span><span class="pf-person-r">Bride<\/span>/, 'SUTHEP · GROOM and HARUTHAI · BRIDE (uppercase by the stylesheet)');
+  assert.ok(c.indexOf('data-person="G049"') < c.indexOf('data-person="G048"') && c.indexOf('data-person="G048"') < c.indexOf('data-person="G011"'), 'the couple first');
+  assert.match(c, /Recently joined<\/p><p class="t-b1">Linnea · Peggy<\/p>/, 'RECENTLY JOINED lists genuine days only, newest first — the couple without a day is not in it'); assert.match(c, /You are among them/);
+  assert.match(src('profile.html'), /\.pf-person-r\{[^}]*text-transform:uppercase/);
   assert.match(src('profile.html'), /CM\.countdownHtml\(\)\+CM\.communityHtml\(CM\.data\(\),me\)\+CM\.numbersHtml\(\)/, 'the three stand between the account and the arrangements'); assert.match(src('profile.html'), /<script src="assets\/community\.js/);
   assert.match(src('assets/community.js'), /AV\.of\(gid\)/, 'portraits through SIYL_AVATAR.of — the existing authenticated read'); assert.doesNotMatch(src('assets/community.js'), /photo\?of=|api\/profile\/photo/, 'no photo URL of its own');
   assert.match(src('assets/community.js'), /prefers-reduced-motion: reduce/); assert.match(src('profile.html'), /@media\(prefers-reduced-motion:reduce\)\{\.pf-person\{opacity:1;transform:none;transition:none\}\}/);

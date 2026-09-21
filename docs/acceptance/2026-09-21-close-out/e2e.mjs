@@ -175,7 +175,7 @@ if (!LIVE) {
     await p.context().close();
   }
 
-  /* ===== 5 · THE PASSPORT PICKER (WebKit): the file input with the accepted types; a photograph chosen; the stage (like the live Worker today) has no document store → the honest answer, nothing stored, the trip still sendable ===== */
+  /* ===== 5 · THE PASSPORT PICKER (WebKit): the file input with the accepted types; a photograph chosen; since the four-point close-out (21 Sep 2026) the store is bound (DOCS) → RECEIVED only after the object is stored, the trip still sendable; no guest read route ===== */
   {
     const p = await fresh(390); await signIn(p, 'T003'); await contact(p, 'cleo.test@example.org'); await trip(p); await clean(p); await trip(p); await toggle(p, 'vientianeWedding', 1000); await p.evaluate(async () => { await SIYL_STAY.select('guesthouse', 'guest-house'); }); await wedding(p, 'no', 'yes'); await prep(p);
     await p.goto(O + '/about-you.html', { waitUntil: 'load' }); await p.waitForSelector('[data-doc][data-k="passport"] input[type=file]', { state: 'attached', timeout: 20000 }); await p.waitForTimeout(800);
@@ -187,7 +187,7 @@ if (!LIVE) {
     await shot(p, '390-passport-picker-honest');
     const direct = await p.evaluate(async () => { const a = JSON.parse(localStorage.getItem('siyl.auth')); const r = await fetch('/api/document', { method: 'POST', headers: { 'x-siyl-auth': a.bearer, 'x-invitation': a.invitationId, 'x-guest': a.guestId, 'x-kind': 'passport', 'content-type': 'image/png' }, body: new Uint8Array([137, 80, 78, 71, 1, 2, 3]) }); return { status: r.status, body: await r.json().catch(() => null) }; });
     const noRead = await p.evaluate(async () => { const a = JSON.parse(localStorage.getItem('siyl.auth')); const r = await fetch('/api/document', { headers: { 'x-siyl-auth': a.bearer } }); return r.status; });
-    note('passport-picker-honest-no-store', pk.row && pk.accept === 'image/jpeg,image/png,image/heic,image/heif,image/webp,application/pdf' && /Add passport/i.test(pk.add) && /Optional/i.test(pk.state) && reqs.includes('POST') && /cannot accept documents on the website yet/i.test(after.err) && !after.stored && after.ready === 0 && direct.status === 503 && direct.body && direct.body.enabled === false && noRead === 405, JSON.stringify({ accept: pk.accept, add: pk.add, err: after.err.slice(0, 120), stored: after.stored, direct: direct.status, noRead }));
+    note('passport-picker-received-with-store', pk.row && pk.accept === 'image/jpeg,image/png,image/heic,image/heif,image/webp,application/pdf' && /Add passport/i.test(pk.add) && /Optional/i.test(pk.state) && reqs.includes('POST') && after.err === '' && after.stored && /Received/i.test(after.state) && after.ready === 0 && direct.status === 201 && direct.body && direct.body.status === 'RECEIVED' && noRead === 405, JSON.stringify({ accept: pk.accept, add: pk.add, err: after.err.slice(0, 120), stored: after.stored, state: after.state.slice(0, 80), direct: direct.status, noRead }));
     await p.context().close();
   }
 

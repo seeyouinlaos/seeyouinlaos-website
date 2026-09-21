@@ -11,6 +11,7 @@
   "cloudflarePages": "not used",
   "assets": { "binding": "ASSETS", "directory": "." },
   "kv": [{ "binding": "REG_KV", "id": "090270d0da434a8b8f49933cb604beb3" }],
+  "r2": [{ "binding": "DOCS", "bucket": "siyl-docs", "public": false, "retention": "OWNER CONFIRMATION REQUIRED — no automatic deletion" }],
   "durableObjects": [
     { "name": "INVENTORY", "class": "Inventory" },
     { "name": "SEATING", "class": "Seating" },

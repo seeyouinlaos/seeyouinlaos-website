@@ -88,7 +88,8 @@ test('AUTH · the deployed index carries digests and ids only: no code, no name,
   const keys = Object.keys(idx.entries);
   assert.ok(keys.length >= 40 && keys.every((k) => /^[0-9a-f]{64}$/.test(k)));
   for (const e of Object.values(idx.entries)) {
-    assert.deepEqual(Object.keys(e).filter((k) => k !== 'h').sort(), ['c', 'g', 'i', 'k', 'p'], 'ids only: the invitation, the guest, the party, the person id and the couple state (20 Sep 2026)');
+    assert.deepEqual(Object.keys(e).filter((k) => k !== 'h' && k !== 'r').sort(), ['c', 'g', 'i', 'k', 'p'], 'ids only: the invitation, the guest, the party, the person id and the couple state (20 Sep 2026); h marks the hosts, r the couple\'s role (21 Sep 2026)');
+    if (e.r !== undefined) assert.ok(e.h === 1 && (e.r === 'B' || e.r === 'G'), 'a role only on a host, only B or G');
     assert.match(e.c, /^CON\d{3}$/); assert.match(e.k, /^(COUPL\d{3}|SIGL)$/);
     assert.equal(e.i, 'INV-' + e.g, 'every invitation is the guest\'s own');
     assert.match(e.p, /^INV-\d{3}$/, 'the party id is the former invitation id');

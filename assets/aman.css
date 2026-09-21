@@ -252,6 +252,7 @@ a.am { display: block; text-decoration: none; }
 /* THE HERO SLIDESHOW (Owner, 21 Sep 2026): each later photograph is a layer over the courtyard, the same frame, the same
    cover crop (its own focal point), a 1000 ms crossfade; nothing else moves. Reduced motion: the courtyard stays. */
 .a-hero-slide { position: absolute; inset: 0; background: center/cover no-repeat; opacity: 0; transition: opacity 1000ms ease-in-out; will-change: opacity; pointer-events: none; }
+.a-hero .am, .a-hero-slide { background-position: var(--fp-p, center); }   /* THE FOCAL POINT per viewport class (21 Sep 2026): the phone's */
 .a-hero-slide.is-on { opacity: 1; }
 @media (prefers-reduced-motion: reduce) { .a-hero-slide { transition: none; } }
 
@@ -632,3 +633,26 @@ html[data-session="in"] [data-private-cta] { display: none !important; }
 @media (min-width: 900px) { .a-dest > .refgal, .a-dest > .acar { max-width: 1000px; margin-left: auto; margin-right: auto; } }
 .a-dest .refgal .aslide:first-child { margin-left: 0; scroll-margin-left: 0; }
 .a-dest .refgal .aslide { scroll-snap-align: start; margin: 0; }
+
+/* ------------------------------------------------- THE HERO FRAME PER VIEWPORT CLASS (Owner, 21 Sep 2026)
+   The phone keeps its square (verified good). A tablet held upright — 768 × 1024, 810 × 1080, 820 × 1180, 834 × 1194 —
+   frames 4:5; a tablet on its side — 1024 × 768, 1080 × 810, 1180 × 820, 1194 × 834 — and the desktop frame 3:2, bounded
+   and centred with whitespace around it. The 16:9 banner is gone: it cut the couple out of every portrait frame. Each
+   frame's focal point is its own per class (--fp-tp · --fp-tl · --fp-d on the layer); the geometry is pure CSS from the
+   viewport, so a frame never moves once painted (no layout shift), and a photograph is only positioned — never stretched,
+   distorted, extended or blur-filled. These rules stand after every earlier hero rule on purpose. */
+@media (min-width: 768px) and (orientation: portrait) {
+  .a-hero .am { aspect-ratio: 4 / 5; max-width: 720px; margin-left: auto; margin-right: auto; }
+  .a-hero .ah { max-width: 720px; margin-left: auto; margin-right: auto; }   /* the words begin at the frame's own left edge */
+  .a-hero .am, .a-hero-slide { background-position: var(--fp-tp, var(--fp-p, center)); }
+}
+@media (min-width: 768px) and (orientation: landscape) {
+  .a-hero .am { aspect-ratio: 3 / 2; max-width: 880px; margin-left: auto; margin-right: auto; }
+  .a-hero .ah { max-width: 880px; margin-left: auto; margin-right: auto; }
+  .a-hero .am, .a-hero-slide { background-position: var(--fp-tl, var(--fp-p, center)); }
+}
+@media (min-width: 1200px) {
+  .a-hero .am { aspect-ratio: 3 / 2; max-width: 1000px; margin-left: auto; margin-right: auto; }
+  .a-hero .ah { max-width: 1000px; margin-left: auto; margin-right: auto; }
+  .a-hero .am, .a-hero-slide { background-position: var(--fp-d, var(--fp-p, center)); }
+}

@@ -14,7 +14,7 @@ import { ROOT, src } from './sandbox.mjs';
 const ORIGIN = 'https://seeyouinlaos-website.suthep-hrg.workers.dev';
 async function assetsFor(entries) { const index = JSON.stringify({ v: 2, entries }); return { fetch: async (r) => new URL(r.url).pathname === '/register/auth-index.json' ? new Response(index, { headers: { 'content-type': 'application/json' } }) : new Response('not found', { status: 404 }) }; }
 function kv() { const m = new Map(); return { m, get: async (k) => (m.has(k) ? m.get(k).v : null), put: async (k, v, o) => { m.set(k, { v, meta: o && o.metadata }); }, list: async ({ prefix }) => ({ keys: [...m.keys()].filter((n) => n.startsWith(prefix)).map((name) => ({ name })) }), delete: async (k) => { m.delete(k); } }; }
-function r2() { const m = new Map(); return { m, put: async (k, bytes, o) => { m.set(k, { bytes: new Uint8Array(bytes), ...o }); }, get: async (k) => (m.has(k) ? m.get(k) : null) }; }
+function r2() { const m = new Map(); return { m, put: async (k, bytes, o) => { m.set(k, { key: k, bytes: new Uint8Array(bytes), size: bytes.byteLength, ...o }); }, get: async (k) => (m.has(k) ? { ...m.get(k), body: new Blob([m.get(k).bytes]).stream() } : null), list: async ({ prefix }) => ({ objects: [...m.values()].filter((o) => o.key.startsWith(prefix || '')).map((o) => ({ key: o.key, size: o.size, uploaded: new Date('2026-09-21T00:00:00Z'), httpMetadata: o.httpMetadata, customMetadata: o.customMetadata })), truncated: false }) }; }
 async function harness(withDocs) {
   const w = (await import('../src/worker.js')).default;
   const peggy = await bearerOf('demo-peggy-doc'), steffie = await bearerOf('demo-steffie-doc');
@@ -54,22 +54,54 @@ test('STORE · with the private object store bound: 201 RECEIVED, the key under 
   } finally { h.done(); }
 });
 
-test('NO READ ROUTE · GET / HEAD on /api/document 405; the stored key is no URL of the Worker (404/redirect, never bytes); no Guest Relations read route exists yet', async () => {
+test('NO GUEST READ ROUTE · GET / HEAD on /api/document 405; the stored key is no URL of the Worker (never bytes); the Guest Relations routes answer the GR token only — a guest\'s bearer is refused, no token is refused', async () => {
   const h = await harness(true);
   try {
     const r = await send(h, h.peggy, {}); assert.equal(r.status, 201);
     for (const m of ['GET', 'HEAD', 'PUT', 'DELETE']) { const x = await h.w.fetch(new Request(ORIGIN + '/api/document', { method: m, headers: { 'x-siyl-auth': h.peggy } }), h.env); assert.equal(x.status, 405, m); }
     for (const p of ['/' + r.d.key, '/api/document/' + encodeURIComponent(r.d.key), '/api/documents', '/doc/INV-G001/G001/passport/']) { const x = await h.w.fetch(new Request(ORIGIN + p, { headers: { 'x-siyl-auth': h.peggy } }), h.env); assert.ok(x.status !== 200 || !/image|pdf/.test(x.headers.get('content-type') || ''), p + ' never serves the bytes'); }
-    const gr = await h.w.fetch(new Request(ORIGIN + '/api/gr/document?key=' + encodeURIComponent(r.d.key), { headers: { 'x-gr-token': 'gr-secret' } }), h.env); assert.notEqual(gr.status, 200, 'no Guest Relations read route is defined (an Owner decision)');
-    assert.doesNotMatch(src('src/worker.js').replace(/\/\*[\s\S]*?\*\//g, ''), /DOCS\.(get|list|head)\(/, 'the Worker never reads the store');
+    for (const p of ['/api/gr/document?key=' + encodeURIComponent(r.d.key), '/api/gr/documents?invitation=INV-G001']) {
+      assert.equal((await h.w.fetch(new Request(ORIGIN + p, { headers: { 'x-siyl-auth': h.peggy } }), h.env)).status, 401, p + ': a guest cannot use the Guest Relations route');
+      assert.equal((await h.w.fetch(new Request(ORIGIN + p), h.env)).status, 401, p + ': no token');
+      assert.equal((await h.w.fetch(new Request(ORIGIN + p, { headers: { 'x-gr-token': 'wrong' } }), h.env)).status, 401, p + ': a wrong token');
+      assert.equal((await h.w.fetch(new Request(ORIGIN + p, { method: 'POST', headers: { 'x-gr-token': 'gr-secret' } }), h.env)).status, 405, p + ': read only');
+    }
+    const worker = src('src/worker.js').replace(/\/\*[\s\S]*?\*\//g, '');
+    assert.doesNotMatch(worker.slice(0, worker.indexOf('async function handleGrDocuments')), /DOCS\.(get|list|head)\(/, 'no guest-facing code reads the store');
+    assert.doesNotMatch(worker, /DOCS\.delete\(/, 'the Worker never deletes a document');
   } finally { h.done(); }
 });
 
-test('WITHOUT THE STORE (the live configuration today): 503 · enabled:false, nothing stored, and the guest surface says so — never a false receipt; the client picker accepts the same types; nothing passport-like is in the repository', async () => {
+test('GUEST RELATIONS RETRIEVAL (Owner, 21 Sep 2026): the metadata of ONE invitation (never everyone), newest first; one object streamed through the Worker by its exact key — the bytes, the type, a download name, private no-store; a prefix or a wildcard is refused; a missing key is 404; no body and no token in any log', async () => {
+  const h = await harness(true);
+  try {
+    const a = await send(h, h.peggy, {}); const b = await send(h, h.peggy, { 'content-type': 'application/pdf', 'x-filename': 'passport.pdf' }, new TextEncoder().encode('%PDF-1.4 ' + 'x'.repeat(300)));
+    const f = await send(h, h.peggy, { 'x-kind': 'flight', 'x-filename': 'ticket.png', 'content-type': 'image/png' }, new Uint8Array([0x89, 0x50, 0x4e, 0x47, 1, 2, 3]));
+    const gr = (p) => h.w.fetch(new Request(ORIGIN + p, { headers: { 'x-gr-token': 'gr-secret' } }), h.env);
+    let r = await gr('/api/gr/documents?invitation=INV-G001'); assert.equal(r.status, 200); assert.equal(r.headers.get('cache-control'), 'private, no-store'); const d = await r.json();
+    assert.equal(d.count, 3); assert.deepEqual(d.documents.map((x) => x.key).sort(), [a.d.key, b.d.key, f.d.key].sort());
+    const pdf = d.documents.find((x) => x.key === b.d.key); assert.deepEqual({ ...pdf, receivedAt: '' }, { key: b.d.key, guestId: 'G001', kind: 'passport', filename: 'passport.pdf', type: 'application/pdf', bytes: 309, receivedAt: '', sha256: b.d.sha256 });
+    assert.ok(!JSON.stringify(d).includes('%PDF') && !JSON.stringify(d).includes('JFIF'), 'metadata only — never a byte');
+    assert.equal((await gr('/api/gr/documents?invitation=INV-G002').then((x) => x.json())).count, 0, 'the partner\'s invitation has nothing — documents belong to the guest');
+    assert.equal((await gr('/api/gr/documents')).status, 400, 'no invitation, no listing of everyone'); assert.equal((await gr('/api/gr/documents?invitation=INV-')).status, 400);
+    r = await gr('/api/gr/document?key=' + encodeURIComponent(a.d.key)); assert.equal(r.status, 200); assert.equal(r.headers.get('content-type'), 'image/jpeg'); assert.equal(r.headers.get('cache-control'), 'private, no-store'); assert.match(r.headers.get('content-disposition'), /^attachment; filename="passport\.jpg"$/); assert.equal(r.headers.get('x-document-sha256'), a.d.sha256);
+    const bytes = new Uint8Array(await r.arrayBuffer()); assert.equal(bytes.length, JPEG.length); assert.equal(Buffer.compare(Buffer.from(bytes), Buffer.from(JPEG)), 0, 'the exact bytes, streamed');
+    r = await gr('/api/gr/document?key=' + encodeURIComponent(b.d.key)); assert.equal(r.status, 200); assert.equal(r.headers.get('content-type'), 'application/pdf');
+    for (const bad of ['doc/INV-G001/', 'doc/INV-G001/G001/passport/', 'doc/INV-G001/G001/passport/*', a.d.key + '/../x', '', 'reg:INV-G001']) assert.equal((await gr('/api/gr/document?key=' + encodeURIComponent(bad))).status, 400, 'refused: ' + JSON.stringify(bad));
+    assert.equal((await gr('/api/gr/document?key=' + encodeURIComponent(a.d.key.replace(/[0-9a-f]{12}$/, '000000000000')))).status, 404);
+    assert.ok(!h.logs.some((l) => /JFIF|%PDF|base64|gr-secret/.test(l)), 'no body, no token in a log');
+    assert.equal(h.env.DOCS.m.size, 3, 'a read changes nothing');
+  } finally { h.done(); }
+});
+
+test('WITHOUT THE STORE (a Worker without the binding): 503 · enabled:false, nothing stored, and the guest surface says so — never a false receipt; WITH IT (the live configuration, 21 Sep 2026): ONE private bucket bound as DOCS, documented in the frozen manifest with no public access and no deletion; the client picker accepts the same types; nothing passport-like is in the repository', async () => {
   const h = await harness(false);
   try {
     const r = await send(h, h.peggy, {}); assert.equal(r.status, 503); assert.equal(r.d.enabled, false); assert.equal(r.d.error, 'document storage is not enabled yet');
-    assert.doesNotMatch(readFileSync(join(ROOT, 'wrangler.jsonc'), 'utf8'), /"DOCS"|r2_buckets/, 'the DOCS binding is not configured on the one Worker');
+    const wj = readFileSync(join(ROOT, 'wrangler.jsonc'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+    assert.match(wj, /"r2_buckets": \[\s*\{ "binding": "DOCS", "bucket_name": "siyl-docs" \}\s*\]/, 'ONE private bucket, bound as DOCS, on the one Worker'); assert.equal((wj.match(/"binding": "DOCS"/g) || []).length, 1);
+    const M = JSON.parse(readFileSync(join(ROOT, 'infra/PRODUCTION.json'), 'utf8')); assert.deepEqual(M.r2, [{ binding: 'DOCS', bucket: 'siyl-docs', public: false, retention: 'OWNER CONFIRMATION REQUIRED — no automatic deletion' }], 'the frozen manifest documents it: private, retention the Owner\'s decision');
+    assert.match(src('src/infra-guard.cjs'), /R2 bindings changed/, 'the guard pins the binding');
     assert.match(src('about-you.html'), /We cannot accept documents on the website yet\. Nothing was sent and nothing was stored\. Your trip can still be sent — Guest Relations will ask you for this directly\./);
     assert.match(src('assets/docs.js'), /var ACCEPT = 'image\/jpeg,image\/png,image\/heic,image\/heif,image\/webp,application\/pdf';/); assert.match(src('assets/docs.js'), /MAX: 12 \* 1024 \* 1024/);
     assert.match(src('about-you.html'), /<input type="file" accept="'\+D\.ACCEPT\+'" hidden>/, 'the iPhone picker: the file input with the accepted types');

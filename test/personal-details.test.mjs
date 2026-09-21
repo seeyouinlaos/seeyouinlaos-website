@@ -116,7 +116,7 @@ test('THE REGISTER MODEL · the builder carries the person id, the couple id and
   const entries = Object.values(idx.entries);
   assert.ok(entries.length >= 100, 'the deployed index carries every active guest');
   assert.ok(entries.every((e) => /^CON\d{3}$/.test(e.c) && /^(COUPL\d{3}|SIGL)$/.test(e.k)), 'every entry names a permanent person id and a couple state');
-  assert.ok(entries.every((e) => Object.keys(e).every((k) => ['i', 'g', 'p', 'h', 'c', 'k'].includes(k))), 'nothing else in the index');
+  assert.ok(entries.every((e) => Object.keys(e).every((k) => ['i', 'g', 'p', 'h', 'c', 'k', 'r'].includes(k))), 'nothing else in the index (r = the couple\'s role, 21 Sep 2026)'); assert.equal(entries.filter((e) => e.r).length, 2, 'two roles: the Bride and the Groom'); assert.ok(entries.filter((e) => e.r).every((e) => e.h === 1), 'a role only on a host');
   assert.equal(new Set(entries.map((e) => e.c)).size, entries.length, 'one person id per code'); assert.equal(new Set(entries.map((e) => e.g)).size, entries.length, 'one guest id per code');
   const hosts = entries.filter((e) => e.h === 1).map((e) => e.g).sort(); assert.deepEqual(hosts, ['G048', 'G049']);
   const couples = {}; for (const e of entries) if (e.k !== 'SIGL') (couples[e.k] = couples[e.k] || []).push(e.g);

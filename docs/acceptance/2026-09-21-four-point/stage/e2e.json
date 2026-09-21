@@ -1,0 +1,242 @@
+[
+ {
+  "id": "couple-always-present-before-anyone",
+  "ok": true,
+  "d": "{\"state\":\"2\",\"h2\":\"2 of us are joining so far\",\"people\":[{\"id\":\"G049\",\"name\":\"SUTHEP\",\"photo\":false,\"role\":\"GROOM\"},{\"id\":\"G048\",\"name\":\"HARUTHAI\",\"photo\":false,\"role\":\"BRIDE\"}],\"recent\":\"\",\"text\":\"WHO’S JOINING US\\n\\n2 of us are joining so far\\n\\nHaruthai & Suthep, and everyone whose trip has reached Guest Relations — new faces as they arrive.\\n\\nS\\nSUTHEP\\nGROOM\\nH\\nHARUTHAI\\nBRIDE\"}"
+ },
+ {
+  "id": "couple-api-by-role-no-fake-record",
+  "ok": true,
+  "d": "{\"ok\":true,\"count\":2,\"guests\":[{\"guestId\":\"G049\",\"name\":\"Suthep\",\"photo\":false,\"joinedAt\":null,\"role\":\"Groom\"},{\"guestId\":\"G048\",\"name\":\"Haruthai\",\"photo\":false,\"joinedAt\":null,\"role\":\"Bride\"}],\"couple\":2,\"at\":\"2026-09-21T18:33:00.369Z\"}"
+ },
+ {
+  "id": "couple-no-synthetic-registration",
+  "ok": true,
+  "d": "{\"status\":200,\"hostRecords\":0} (no registration, no firstSentAt was written for the couple)"
+ },
+ {
+  "id": "couple-then-guest-inclusive-wording",
+  "ok": true,
+  "d": "{\"s\":{\"clicked\":true,\"after\":\"SENT TO GUEST RELATIONS\"},\"c1\":{\"state\":\"3\",\"h2\":\"3 of us are joining so far\",\"people\":[{\"id\":\"G049\",\"name\":\"SUTHEP\",\"photo\":false,\"role\":\"GROOM\"},{\"id\":\"G048\",\"name\":\"HARUTHAI\",\"photo\":false,\"role\":\"BRIDE\"},{\"id\":\"T003\",\"name\":\"CLEO\",\"photo\":true,\"role\":\"\"}],\"recent\":\"Cleo\"}}"
+ },
+ {
+  "id": "photo-uploaded",
+  "ok": true,
+  "d": "{\"status\":200,\"len\":76,\"head\":\"137,80,78,71,13,10,26,10\",\"at\":\"2026-09-21T18:33:34.187Z\"}"
+ },
+ {
+  "id": "photo-stands-after-name-edit",
+  "ok": true,
+  "d": "{\"status\":200,\"len\":76,\"head\":\"137,80,78,71,13,10,26,10\",\"at\":\"2026-09-21T18:33:34.187Z\"}"
+ },
+ {
+  "id": "photo-stands-after-contact-edit",
+  "ok": true,
+  "d": "{\"status\":200,\"len\":76,\"head\":\"137,80,78,71,13,10,26,10\",\"at\":\"2026-09-21T18:33:34.187Z\"}"
+ },
+ {
+  "id": "photo-stands-after-save-my-progress",
+  "ok": true,
+  "d": "{\"status\":200,\"len\":76,\"head\":\"137,80,78,71,13,10,26,10\",\"at\":\"2026-09-21T18:33:34.187Z\"}"
+ },
+ {
+  "id": "trip-sent-v1",
+  "ok": true,
+  "d": "{\"clicked\":true,\"after\":\"SENT TO GUEST RELATIONS\"}"
+ },
+ {
+  "id": "photo-stands-after-trip-sent",
+  "ok": true,
+  "d": "{\"status\":200,\"len\":76,\"head\":\"137,80,78,71,13,10,26,10\",\"at\":\"2026-09-21T18:33:34.187Z\"}"
+ },
+ {
+  "id": "trip-sent-v2",
+  "ok": true,
+  "d": "{\"clicked\":true,\"after\":\"SEND UPDATED TRIP\"}"
+ },
+ {
+  "id": "photo-stands-after-trip-updated",
+  "ok": true,
+  "d": "{\"status\":200,\"len\":76,\"head\":\"137,80,78,71,13,10,26,10\",\"at\":\"2026-09-21T18:33:34.187Z\"}"
+ },
+ {
+  "id": "version-incremented-photo-not-in-record",
+  "ok": true,
+  "d": "{\"version\":2}"
+ },
+ {
+  "id": "photo-stands-after-sign-out-and-in",
+  "ok": true,
+  "d": "{\"status\":200,\"len\":76,\"head\":\"137,80,78,71,13,10,26,10\",\"at\":\"2026-09-21T18:33:34.187Z\"}"
+ },
+ {
+  "id": "photo-stands-on-a-second-device",
+  "ok": true,
+  "d": "{\"status\":200,\"len\":76,\"head\":\"137,80,78,71,13,10,26,10\",\"at\":\"2026-09-21T18:33:34.187Z\"}"
+ },
+ {
+  "id": "photo-visible-in-account-card",
+  "ok": true,
+  "d": "{\"card\":true}"
+ },
+ {
+  "id": "photo-stands-after-failed-replacement",
+  "ok": true,
+  "d": "{\"status\":200,\"len\":76,\"head\":\"137,80,78,71,13,10,26,10\",\"at\":\"2026-09-21T18:33:34.187Z\"}"
+ },
+ {
+  "id": "failed-replacement-keeps-photo",
+  "ok": true,
+  "d": "{\"bad\":415}"
+ },
+ {
+  "id": "photo-stands-after-partner-delete",
+  "ok": true,
+  "d": "{\"status\":200,\"len\":76,\"head\":\"137,80,78,71,13,10,26,10\",\"at\":\"2026-09-21T18:33:34.187Z\"}"
+ },
+ {
+  "id": "partner-delete-is-her-own-key",
+  "ok": true,
+  "d": "{\"ok\":true,\"removed\":true}"
+ },
+ {
+  "id": "partner-reads-portrait-by-id",
+  "ok": true,
+  "d": "{\"status\":200,\"len\":76,\"head\":\"137,80,78,71,13,10,26,10\",\"at\":\"2026-09-21T18:33:34.187Z\"}"
+ },
+ {
+  "id": "only-remove-removes",
+  "ok": true,
+  "d": "{\"removed\":\"A\\n\\nGUEST · PERSONAL INVITATION\\n\\nAdaline\\n\\nAdaline Tester\\n\\nYour party · Adaline & \",\"gone\":{\"status\":404}}"
+ },
+ {
+  "id": "hero-phone-320x568",
+  "ok": true,
+  "d": "{\"g0\":{\"w\":272,\"h\":272,\"x\":24,\"ahX\":24,\"ahTop\":352,\"ratio\":1,\"state\":\"playing\",\"slides\":\"5\",\"ov\":0},\"pos\":[\"50% 50%\",\"50% 55%\",\"50% 30%\",\"50% 36%\",\"50% 38%\"],\"stable\":true,\"clean\":true}"
+ },
+ {
+  "id": "hero-phone-375x667",
+  "ok": true,
+  "d": "{\"g0\":{\"w\":327,\"h\":327,\"x\":24,\"ahX\":24,\"ahTop\":407,\"ratio\":1,\"state\":\"playing\",\"slides\":\"5\",\"ov\":0},\"pos\":[\"50% 50%\",\"50% 55%\",\"50% 30%\",\"50% 36%\",\"50% 38%\"],\"stable\":true,\"clean\":true}"
+ },
+ {
+  "id": "hero-phone-390x844",
+  "ok": true,
+  "d": "{\"g0\":{\"w\":342,\"h\":342,\"x\":24,\"ahX\":24,\"ahTop\":422,\"ratio\":1,\"state\":\"playing\",\"slides\":\"5\",\"ov\":0},\"pos\":[\"50% 50%\",\"50% 55%\",\"50% 30%\",\"50% 36%\",\"50% 38%\"],\"stable\":true,\"clean\":true}"
+ },
+ {
+  "id": "hero-phone-430x932",
+  "ok": true,
+  "d": "{\"g0\":{\"w\":382,\"h\":382,\"x\":24,\"ahX\":24,\"ahTop\":462,\"ratio\":1,\"state\":\"playing\",\"slides\":\"5\",\"ov\":0},\"pos\":[\"50% 50%\",\"50% 55%\",\"50% 30%\",\"50% 36%\",\"50% 38%\"],\"stable\":true,\"clean\":true}"
+ },
+ {
+  "id": "hero-tablet-portrait-768x1024",
+  "ok": true,
+  "d": "{\"g0\":{\"w\":680,\"h\":850,\"x\":44,\"ahX\":44,\"ahTop\":960,\"ratio\":0.8,\"state\":\"playing\",\"slides\":\"5\",\"ov\":0},\"pos\":[\"50% 50%\",\"50% 50%\",\"50% 30%\",\"50% 34%\",\"50% 36%\"],\"stable\":true,\"clean\":true}"
+ },
+ {
+  "id": "hero-tablet-portrait-810x1080",
+  "ok": true,
+  "d": "{\"g0\":{\"w\":720,\"h\":900,\"x\":45,\"ahX\":45,\"ahTop\":1010,\"ratio\":0.8,\"state\":\"playing\",\"slides\":\"5\",\"ov\":0},\"pos\":[\"50% 50%\",\"50% 50%\",\"50% 30%\",\"50% 34%\",\"50% 36%\"],\"stable\":true,\"clean\":true}"
+ },
+ {
+  "id": "hero-tablet-portrait-820x1180",
+  "ok": true,
+  "d": "{\"g0\":{\"w\":720,\"h\":900,\"x\":50,\"ahX\":50,\"ahTop\":1010,\"ratio\":0.8,\"state\":\"playing\",\"slides\":\"5\",\"ov\":0},\"pos\":[\"50% 50%\",\"50% 50%\",\"50% 30%\",\"50% 34%\",\"50% 36%\"],\"stable\":true,\"clean\":true}"
+ },
+ {
+  "id": "hero-tablet-portrait-834x1194",
+  "ok": true,
+  "d": "{\"g0\":{\"w\":720,\"h\":900,\"x\":57,\"ahX\":57,\"ahTop\":1010,\"ratio\":0.8,\"state\":\"playing\",\"slides\":\"5\",\"ov\":0},\"pos\":[\"50% 50%\",\"50% 50%\",\"50% 30%\",\"50% 34%\",\"50% 36%\"],\"stable\":true,\"clean\":true}"
+ },
+ {
+  "id": "hero-tablet-landscape-1024x768",
+  "ok": true,
+  "d": "{\"g0\":{\"w\":880,\"h\":587,\"x\":72,\"ahX\":72,\"ahTop\":693,\"ratio\":1.5,\"state\":\"playing\",\"slides\":\"5\",\"ov\":0},\"pos\":[\"50% 50%\",\"50% 50%\",\"50% 24%\",\"50% 30%\",\"50% 34%\"],\"stable\":true,\"clean\":true}"
+ },
+ {
+  "id": "hero-tablet-landscape-1080x810",
+  "ok": true,
+  "d": "{\"g0\":{\"w\":880,\"h\":587,\"x\":100,\"ahX\":100,\"ahTop\":693,\"ratio\":1.5,\"state\":\"playing\",\"slides\":\"5\",\"ov\":0},\"pos\":[\"50% 50%\",\"50% 50%\",\"50% 24%\",\"50% 30%\",\"50% 34%\"],\"stable\":true,\"clean\":true}"
+ },
+ {
+  "id": "hero-tablet-landscape-1180x820",
+  "ok": true,
+  "d": "{\"g0\":{\"w\":880,\"h\":587,\"x\":150,\"ahX\":150,\"ahTop\":693,\"ratio\":1.5,\"state\":\"playing\",\"slides\":\"5\",\"ov\":0},\"pos\":[\"50% 50%\",\"50% 50%\",\"50% 24%\",\"50% 30%\",\"50% 34%\"],\"stable\":true,\"clean\":true}"
+ },
+ {
+  "id": "hero-tablet-landscape-1194x834",
+  "ok": true,
+  "d": "{\"g0\":{\"w\":880,\"h\":587,\"x\":157,\"ahX\":157,\"ahTop\":693,\"ratio\":1.5,\"state\":\"playing\",\"slides\":\"5\",\"ov\":0},\"pos\":[\"50% 50%\",\"50% 50%\",\"50% 24%\",\"50% 30%\",\"50% 34%\"],\"stable\":true,\"clean\":true}"
+ },
+ {
+  "id": "hero-desktop-1440x900",
+  "ok": true,
+  "d": "{\"g0\":{\"w\":1000,\"h\":667,\"x\":220,\"ahX\":220,\"ahTop\":773,\"ratio\":1.5,\"state\":\"playing\",\"slides\":\"5\",\"ov\":0},\"pos\":[\"50% 50%\",\"50% 50%\",\"50% 24%\",\"50% 30%\",\"50% 34%\"],\"stable\":true,\"clean\":true}"
+ },
+ {
+  "id": "hero-ipad-loop-no-shift",
+  "ok": true,
+  "d": "{\"seq\":[\"0\",\"1\",\"2\"],\"boxes\":[\"720x900\",\"720x900\",\"720x900\"]}"
+ },
+ {
+  "id": "passport-add-control",
+  "ok": true,
+  "d": "{\"state\":\"OPTIONAL · NOT ADDED\",\"add\":\"ADD PASSPORT\",\"accept\":\"image/jpeg,image/png,image/heic,image/heif,image/webp,application/pdf\"}"
+ },
+ {
+  "id": "passport-received-after-store",
+  "ok": true,
+  "d": "{\"state\":\"RECEIVED\",\"add\":\"REPLACE\",\"key\":\"doc/INV-T003/T003/passport/2026-09-21T18:35:23.035Z-c5ec9c39a57d\",\"bytes\":914}"
+ },
+ {
+  "id": "passport-in-the-store",
+  "ok": true,
+  "d": "{\"ok\":true,\"invitationId\":\"INV-T003\",\"count\":1,\"documents\":[{\"key\":\"doc/INV-T003/T003/passport/2026-09-21T18:35:23.035Z-c5ec9c39a57d\",\"guestId\":\"T003\",\"kind\":\"passport\",\"filename\":\"IMG_0001.jpeg\",\"type\":\"image/jpeg\",\"bytes\":914,\"receivedAt\":\"2026-09-21T18:35:23.035Z\",\"sha256\":\"c5ec9c39a57de5aa731c72db04eb63817607321fddf34563ad8bcac01a62222e\"}]}"
+ },
+ {
+  "id": "passport-pdf-replacement-keeps-earlier-object",
+  "ok": true,
+  "d": "[[\"passport\",\"application/pdf\",1215],[\"passport\",\"image/jpeg\",914]]"
+ },
+ {
+  "id": "passport-refusals-keep-the-receipt",
+  "ok": true,
+  "d": "{\"err1\":\"We can take a JPEG, PNG, HEIC, WebP or PDF.\",\"err2\":\"That file is larger than 12 MB. A photograph of the page is usually enough.\",\"count\":2}"
+ },
+ {
+  "id": "passport-persists-through-everything",
+  "ok": true,
+  "d": "{\"st1\":\"RECEIVED\",\"st2\":\"RECEIVED\",\"st3\":\"RECEIVED\",\"count\":2,\"version\":3}"
+ },
+ {
+  "id": "passport-on-my-profile",
+  "ok": true,
+  "d": "TRAVEL DOCUMENTS PASSPORT Replaced · passport.pdf · 21 September 2026 FLIGHT INFORMATION Not provided · can be added later PUBLICATION CHOICE Optional · not ans"
+ },
+ {
+  "id": "passport-ownership-and-no-guest-read",
+  "ok": true,
+  "d": "{\"f1\":401,\"f2\":401,\"f3\":401,\"guestRead\":{\"/api/gr/document?key=d\":\"401 application/json\",\"/api/gr/documents?invi\":\"401 application/json\",\"/doc/INV-T003/T003/pas\":\"404 \",\"/api/document\":\"405 application/json\"}} (the partner of the same party, an unrelated guest, a mismatched pair: all refused; no guest read route)"
+ },
+ {
+  "id": "passport-nothing-forged",
+  "ok": true,
+  "d": "{\"t003\":2}"
+ },
+ {
+  "id": "gr-retrieval-streams-exact-bytes",
+  "ok": true,
+  "d": "{\"status\":200,\"type\":\"application/pdf\",\"bytes\":1215,\"disposition\":\"attachment; filename=\\\"passport.pdf\\\"\"}"
+ },
+ {
+  "id": "gr-retrieval-token-only-no-public-url",
+  "ok": true,
+  "d": "{\"noToken\":401,\"wrong\":401,\"pub\":\"404 \"}"
+ },
+ {
+  "id": "console-errors",
+  "ok": true,
+  "d": "no script or console error"
+ }
+]

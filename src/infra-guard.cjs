@@ -58,6 +58,9 @@ if (Array.isArray(cfg.routes) && cfg.routes.length || cfg.route) bad('routes add
 if (!cfg.assets || cfg.assets.binding !== M.assets.binding || cfg.assets.directory !== M.assets.directory) bad('assets binding changed (frozen: ' + M.assets.binding + ' · ' + M.assets.directory + ')');
 const kv = (cfg.kv_namespaces || []).map((k) => k.binding + ':' + k.id).sort().join(',');
 if (kv !== M.kv.map((k) => k.binding + ':' + k.id).sort().join(',')) bad('KV bindings changed: ' + (kv || 'none') + ' (frozen: ' + M.kv.map((k) => k.binding + ':' + k.id).join(',') + ')');
+const r2 = (cfg.r2_buckets || []).map((b) => b.binding + ':' + b.bucket_name).sort().join(',');
+if (r2 !== (M.r2 || []).map((b) => b.binding + ':' + b.bucket).sort().join(',')) bad('R2 bindings changed: ' + (r2 || 'none') + ' (frozen: ' + (M.r2 || []).map((b) => b.binding + ':' + b.bucket).join(',') + ')');
+if ((M.r2 || []).some((b) => b.public !== false)) bad('an R2 bucket is documented as public (frozen: private only)');
 const dos = ((cfg.durable_objects || {}).bindings || []).map((d) => d.name + ':' + d.class_name).sort().join(',');
 if (dos !== M.durableObjects.map((d) => d.name + ':' + d.class).sort().join(',')) bad('Durable Object bindings changed: ' + (dos || 'none'));
 const mig = (cfg.migrations || []).map((m) => m.tag + ':' + [].concat(m.new_sqlite_classes || [], m.new_classes || []).join('+')).join(',');

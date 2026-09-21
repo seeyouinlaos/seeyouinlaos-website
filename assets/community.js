@@ -117,14 +117,17 @@
     var a = auth();
     if (!d) return '<section class="prep-sec pf-community" id="community" data-community="loading"><p class="t-l1">Who’s joining us</p><div class="p-card flat"><p class="t-b2 measure">Reading who has joined…</p></div></section>';
     var list = d.guests || [], n = d.count || list.length;
+    var couple = list.filter(function (g) { return g.role; }), guests = list.filter(function (g) { return !g.role; });
     if (!n) return '<section class="prep-sec pf-community" id="community" data-community="0"><p class="t-l1">Who’s joining us</p><div class="p-card flat"><p class="t-b1 measure">Nobody has sent their trip yet — yours could be the first.</p></div></section>';
-    var recent = list.slice(0, 6);
+    /* RECENTLY JOINED: only a real day — the day a trip was first sent; the couple stands in the community without one */
+    var recent = list.filter(function (g) { return g.joinedAt; }).sort(function (x, y) { return (y.joinedAt > x.joinedAt ? 1 : y.joinedAt < x.joinedAt ? -1 : 0); }).slice(0, 6);
     var meIn = a && list.some(function (g) { return g.guestId === a.guestId; });
-    return '<section class="prep-sec pf-community" id="community" data-community="' + n + '"><p class="t-l1">Who’s joining us</p>' +
-      '<h2 class="t-h2">' + n + (n === 1 ? ' guest has' : ' guests have') + ' joined so far</h2>' +
-      '<p class="t-b2 measure">' + (meIn ? 'You are among them. ' : '') + 'Everyone whose trip has reached Guest Relations — new faces as they arrive.</p>' +
+    var line = couple.length ? (n === 1 ? '1 of us is joining so far' : n + ' of us are joining so far') : (n === 1 ? '1 guest has joined so far' : n + ' guests have joined so far');
+    return '<section class="prep-sec pf-community" id="community" data-community="' + n + '" data-couple="' + couple.length + '"><p class="t-l1">Who’s joining us</p>' +
+      '<h2 class="t-h2">' + line + '</h2>' +
+      '<p class="t-b2 measure">' + (meIn ? 'You are among them. ' : '') + (couple.length ? 'Haruthai &amp; Suthep, and everyone whose trip has reached Guest Relations — new faces as they arrive.' : 'Everyone whose trip has reached Guest Relations — new faces as they arrive.') + '</p>' +
       '<div class="pf-people' + (shown.people ? ' is-in' : '') + '" data-people>' + list.map(function (g, i) {
-        return '<div class="pf-person" data-person="' + esc(g.guestId) + '" style="--i:' + i + '"><span class="pf-ava" data-ava="' + esc(g.guestId) + '" role="img" aria-label="' + esc(g.name) + '"><i aria-hidden="true">' + esc(initials(g.name)) + '</i></span><span class="pf-person-n">' + esc(g.name) + '</span></div>';
+        return '<div class="pf-person' + (g.role ? ' is-couple' : '') + '" data-person="' + esc(g.guestId) + '"' + (g.role ? ' data-role="' + esc(g.role) + '"' : '') + ' style="--i:' + i + '"><span class="pf-ava" data-ava="' + esc(g.guestId) + '" role="img" aria-label="' + esc(g.name) + (g.role ? ' · ' + esc(g.role) : '') + '"><i aria-hidden="true">' + esc(initials(g.name)) + '</i></span><span class="pf-person-n">' + esc(g.name) + '</span>' + (g.role ? '<span class="pf-person-r">' + esc(g.role) + '</span>' : '') + '</div>';
       }).join('') + '</div>' +
       (recent.length ? '<p class="t-l1 mute" style="margin-top:var(--s5)">Recently joined</p><p class="t-b1">' + recent.map(function (g) { return esc(g.name); }).join(' · ') + '</p>' : '') +
       '</section>';

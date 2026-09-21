@@ -26,7 +26,7 @@
     function ready(n, cb) {
       if (loaded[n]) { cb(); return; }
       var im = new Image();
-      im.onload = im.onerror = function () { loaded[n] = true; var l = layers[n - 1]; l.style.backgroundImage = 'url(' + src(n) + ')'; l.style.backgroundPosition = l.getAttribute('data-pos') || 'center'; cb(); };
+      im.onload = im.onerror = function () { loaded[n] = true; var l = layers[n - 1]; l.style.backgroundImage = 'url(' + src(n) + ')'; /* the focal point is the stylesheet's, per viewport class (--fp-*) */ cb(); };
       im.src = src(n);
     }
     function show(n) {

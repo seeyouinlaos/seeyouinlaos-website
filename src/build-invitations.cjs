@@ -164,7 +164,7 @@ async function main() {
       records.push({ id: await tokenId(token), salt, iv, ct: await encryptInvitation(token, salt, iv, payload) });
       /* the person id and the couple id travel in the index too (opaque register ids, no name, no code): the Worker stamps them
          on every record from here, never from a client body */
-      index[await authIdOf(await bearerOf(token))] = { i: invitationId, g: g.guestId, p: p.invitationId, ...(p.hosts === true ? { h: 1 } : {}), ...(g.contactId ? { c: g.contactId } : {}), ...(g.couple ? { k: g.couple } : {}) };
+      index[await authIdOf(await bearerOf(token))] = { i: invitationId, g: g.guestId, p: p.invitationId, ...(p.hosts === true ? { h: 1 } : {}), ...(g.hostRole === 'BRIDE' ? { r: 'B' } : g.hostRole === 'GROOM' ? { r: 'G' } : {}),   /* the couple's role (21 Sep 2026): the Worker names the Bride and the Groom from the register, never from a name match; the index still carries no name */ ...(g.contactId ? { c: g.contactId } : {}), ...(g.couple ? { k: g.couple } : {}) };
     }
   }
 

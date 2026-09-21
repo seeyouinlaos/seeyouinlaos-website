@@ -110,9 +110,11 @@ export default {
      * any public URL: they go straight to the private object store bound as
      * DOCS. When that binding is absent the endpoint says so honestly (503) and
      * the guest surface keeps the document as NOT PROVIDED — it never claims a
-     * receipt that did not happen. There is deliberately NO public read route.
-     * Owner decision still required: the storage bucket and the retention
-     * period. Both are configuration, not code. */
+     * receipt that did not happen. There is deliberately NO public read route:
+     * Guest Relations reads through /api/gr/documents · /api/gr/document (the
+     * GR token). The bucket is bound (siyl-docs, private, 21 Sep 2026); the
+     * retention period still needs the Owner's confirmation — until then
+     * nothing is ever deleted. */
     if (url.pathname === '/api/document') {
       if (request.method === 'OPTIONS') {
         return new Response(null, { status: 204, headers: corsHeaders(request) });
@@ -166,6 +168,16 @@ export default {
       if (!rec) return json({ ok: true, invitationId: inv, record: null });
       const { mail, ...record } = rec;   /* the provider answers stay in the summary the listing gives */
       return json({ ok: true, invitationId: inv, record, guestMail: composeGuestMail(rec), ownerMail: composeOwnerMail(rec, url.origin + '/api/status?invitation=' + encodeURIComponent(inv)) });
+    }
+    /* GUEST RELATIONS · THE DOCUMENTS (Owner, 21 Sep 2026): one guest's stored documents — the metadata of one invitation
+       (never a listing of everyone), and one object streamed through the Worker by its exact key. The GR token only; the
+       same boundary as the record. A guest has no read route at all. Nothing of the body or the token is logged. */
+    if (url.pathname === '/api/gr/documents' || url.pathname === '/api/gr/document') {
+      if (!env.GR_TOKEN) return json({ ok: false, error: 'not enabled' }, 503);
+      if (!grAuthorised(request, env)) return json({ ok: false, error: 'unauthorised' }, 401);
+      if (request.method !== 'GET') return json({ ok: false, error: 'method not allowed' }, 405);
+      if (!env.DOCS) return json({ ok: false, error: 'document storage is not enabled yet', enabled: false }, 503);
+      return url.pathname === '/api/gr/documents' ? handleGrDocuments(url, env) : handleGrDocument(url, env);
     }
     /* GUEST RELATIONS: every guest's canonical current data (draft, submission, rooms, seats, mail) — the GR token only */
     if (url.pathname === '/api/gr/journeys') {
@@ -300,6 +312,36 @@ async function handleDocument(request, env) {
   // RECEIVED means received. Never reviewed, verified or approved.
   return json({ ok: true, status: 'RECEIVED', key, sha256: digest, receivedAt, bytes: bytes.byteLength },
     201, corsHeaders(request));
+}
+
+/* the metadata of one invitation's documents: key · kind · guest · filename · type · bytes · received — never the bytes */
+const DOC_KEY = /^doc\/(INV-[A-Za-z0-9_-]{1,32})\/([A-Za-z0-9_-]{1,32})\/(passport|flight)\/[0-9TZ:.-]+-[0-9a-f]{12}$/;
+async function handleGrDocuments(url, env) {
+  const inv = String(url.searchParams.get('invitation') || '').trim();
+  if (!/^INV-[A-Za-z0-9_-]{1,32}$/.test(inv)) return json({ ok: false, error: 'invitation required' }, 400);
+  const documents = []; let cursor;
+  try {
+    do {
+      const l = await env.DOCS.list({ prefix: 'doc/' + inv + '/', cursor, include: ['httpMetadata', 'customMetadata'] });
+      for (const o of l.objects || []) {
+        const cm = o.customMetadata || {}, hm = o.httpMetadata || {};
+        documents.push({ key: o.key, guestId: cm.guestId || o.key.split('/')[2] || '', kind: cm.kind || o.key.split('/')[3] || '', filename: cm.filename || '', type: hm.contentType || '', bytes: o.size, receivedAt: cm.receivedAt || (o.uploaded ? new Date(o.uploaded).toISOString() : ''), sha256: cm.sha256 || '' });
+      }
+      cursor = l.truncated ? l.cursor : null;
+    } while (cursor);
+  } catch (e) { return json({ ok: false, error: 'document store unavailable' }, 503); }
+  documents.sort((a, b) => (a.receivedAt < b.receivedAt ? 1 : a.receivedAt > b.receivedAt ? -1 : 0));
+  return json({ ok: true, invitationId: inv, count: documents.length, documents }, 200, { 'cache-control': 'private, no-store' });
+}
+/* one object, streamed through the Worker: the exact key only (its shape is pinned — no prefix, no wildcard, no listing) */
+async function handleGrDocument(url, env) {
+  const key = String(url.searchParams.get('key') || '');
+  if (!DOC_KEY.test(key)) return json({ ok: false, error: 'a document key is required' }, 400);
+  let obj = null; try { obj = await env.DOCS.get(key); } catch (e) { return json({ ok: false, error: 'document store unavailable' }, 503); }
+  if (!obj) return json({ ok: false, error: 'no such document' }, 404);
+  const cm = obj.customMetadata || {}, type = (obj.httpMetadata && obj.httpMetadata.contentType) || 'application/octet-stream';
+  const name = String(cm.filename || key.split('/').pop() || 'document').replace(/[^\w.-]+/g, '_').slice(0, 120);
+  return new Response(obj.body, { status: 200, headers: { 'content-type': DOC_TYPES.includes(type) ? type : 'application/octet-stream', 'content-length': String(obj.size), 'content-disposition': 'attachment; filename="' + name + '"', 'cache-control': 'private, no-store', 'x-content-type-options': 'nosniff', 'x-document-received': cm.receivedAt || '', 'x-document-sha256': cm.sha256 || '' } });
 }
 
 async function handleRegister(request, env) {
@@ -882,24 +924,44 @@ async function handleCommunity(request, env) {
   if (!env.REG_KV) return json({ ok: false, error: 'not enabled', enabled: false }, 503, corsHeaders(request));
   const [regKeys, avatarKeys] = await Promise.all([listAll(env.REG_KV, 'reg:'), listAll(env.REG_KV, 'avatar:')]);
   const photos = new Set(avatarKeys.map((k) => k.slice('avatar:'.length)));
-  const guests = [];
+  const readRec = async (key) => { try { return JSON.parse(await env.REG_KV.get(key) || 'null'); } catch (e) { return null; } };
+  const nameOf = async (invitationId, rec, fallback) => {
+    let contact = null; try { contact = JSON.parse(await env.REG_KV.get(contactKey(invitationId)) || 'null'); } catch (e) { contact = null; }
+    const gr = (rec && rec.registration && rec.registration.guestRecord) || {};
+    const g0 = Array.isArray(gr.guests) && gr.guests[0] ? gr.guests[0] : {};
+    return (firstWord(contact && contact.firstName) || firstWord(g0.submitted && g0.submitted.preferredName) || firstWord(g0.source && g0.source.preferredName) || firstWord(g0.name) || fallback).slice(0, 24);
+  };
+  const guests = [], records = {};
   for (const key of regKeys) {
     if (key.indexOf(':prev:') >= 0) continue;                       /* the bounded history of earlier versions — the current record alone counts */
-    let rec = null; try { rec = JSON.parse(await env.REG_KV.get(key) || 'null'); } catch (e) { rec = null; }
+    const rec = await readRec(key);
     if (!rec || !rec.registration || !rec.guestId) continue;
+    const invitationId = rec.invitationId || key.slice('reg:'.length);
+    records[invitationId] = rec;
     const gr = rec.registration.guestRecord || {};
     if (gr.scope && gr.scope.none) continue;                       /* responded, not joining */
-    if (rec.hosts) continue;                                      /* the hosts are the hosts, not the guest count */
-    const invitationId = rec.invitationId || key.slice('reg:'.length);
-    let contact = null; try { contact = JSON.parse(await env.REG_KV.get(contactKey(invitationId)) || 'null'); } catch (e) { contact = null; }
-    const g0 = Array.isArray(gr.guests) && gr.guests[0] ? gr.guests[0] : {};
-    const name = firstWord(contact && contact.firstName) || firstWord(g0.submitted && g0.submitted.preferredName) || firstWord(g0.source && g0.source.preferredName) || firstWord(g0.name) || 'Guest';
+    if (rec.hosts) continue;                                      /* the couple stands apart, below — never counted as a guest */
     const at = rec.firstSentAt || rec.submittedAt || null;
-    guests.push({ guestId: String(rec.guestId), name: name.slice(0, 24), photo: photos.has(invitationId), joinedAt: at ? String(at).slice(0, 10) : null, _t: at ? Date.parse(at) || 0 : 0 });
+    guests.push({ guestId: String(rec.guestId), name: await nameOf(invitationId, rec, 'Guest'), photo: photos.has(invitationId), joinedAt: at ? String(at).slice(0, 10) : null, _t: at ? Date.parse(at) || 0 : 0 });
   }
   guests.sort((a, b) => (b._t - a._t) || a.name.localeCompare(b.name));
-  const out = guests.map(({ _t, ...g }) => g);
-  return json({ ok: true, count: out.length, guests: out, at: new Date().toISOString() }, 200, Object.assign({ 'cache-control': 'private, max-age=60' }, corsHeaders(request)));
+  /* THE BRIDE AND THE GROOM (Owner, 21 Sep 2026): the couple is the anchor of the community and is always visible — resolved from
+     the register's own roles (the auth index: h = the hosts, r = B / G), never from a name, never from a submission of their own.
+     Their day is the day their trip was first sent, when it was — otherwise none: nothing is invented for RECENTLY JOINED. */
+  /* THE COUPLE (21 Sep 2026): chosen by the register's role (h + r), never by a name; named as they spell themselves, else by the two first names printed on every page */
+  const COUPLE_FIRST_NAMES = { B: 'Haruthai', G: 'Suthep' };
+  const couple = [];
+  try {
+    const entries = await loadIndex(env, new URL(request.url).origin);
+    for (const e of Object.values(entries || {})) {
+      if (!e || e.h !== 1 || (e.r !== 'B' && e.r !== 'G')) continue;
+      const role = e.r === 'B' ? 'Bride' : 'Groom', rec = records[e.i] || null, at = rec ? (rec.firstSentAt || rec.submittedAt || null) : null;
+      couple.push({ guestId: String(e.g), name: await nameOf(e.i, rec, COUPLE_FIRST_NAMES[e.r]), photo: photos.has(e.i), joinedAt: at ? String(at).slice(0, 10) : null, role });
+    }
+  } catch (err) { /* the register unreadable: the guests stand alone */ }
+  couple.sort((a, b) => (a.role === 'Groom' ? 0 : 1) - (b.role === 'Groom' ? 0 : 1));
+  const out = couple.concat(guests.map(({ _t, ...g }) => g));
+  return json({ ok: true, count: out.length, guests: out, couple: couple.length, at: new Date().toISOString() }, 200, Object.assign({ 'cache-control': 'private, max-age=60' }, corsHeaders(request)));
 }
 async function handleStatus(request, env) {
   const url = new URL(request.url);

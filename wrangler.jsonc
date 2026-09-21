@@ -25,6 +25,14 @@
   // (Brevo account of 16 Sep 2026: the sender validated there is the Owner's own address; replies go to Guest Relations).
   "vars": { "MAIL_FROM": "suthep.hrg@gmail.com" },
 
+  /* THE DOCUMENT STORE (Owner, 21 Sep 2026 · OWNER-INFRA-CHANGE): ONE private R2
+     bucket bound as DOCS — passports and flight documents, written by the guest
+     they belong to, read only by Guest Relations through the Worker. No public
+     access (no r2.dev URL, no custom domain), no other binding touched. */
+  "r2_buckets": [
+    { "binding": "DOCS", "bucket_name": "siyl-docs" }
+  ],
+
   // THE SHARED INVENTORY LEDGER. One Durable Object instance holds the stock of
   // every room category in every window. Cloudflare routes every request for
   // the id "ledger" to the same actor and runs them one at a time, which is
