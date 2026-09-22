@@ -1,0 +1,72 @@
+[
+ {
+  "id": "countdown-iphone-320",
+  "ok": true,
+  "d": "{\"expect\":{\"w\":159,\"j\":152},\"m0\":{\"sec\":[24,2104,272,339],\"wNum\":[24,2161,120,86],\"wText\":\"0\",\"inClass\":false},\"m2\":{\"wText\":\"143\",\"jText\":\"70\",\"jNumOpacity\":\"0.35338\"},\"m3\":{\"sec\":[24,148,272,339],\"w\":[24,156,272,167],\"j\":[24,350,272,138],\"wNum\":[24,187,120,86],\"jNum\":[24,398,54,40],\"wText\":\"159\",\"jText\":\"152\",\"wSize\":96,\"jSize\":44,\"grid\":\"block\",\"ov\":0},\"stable\":true}"
+ },
+ {
+  "id": "countdown-once-iphone-320",
+  "ok": true,
+  "d": "{\"wText\":\"159\",\"jText\":\"152\",\"inClass\":true}"
+ },
+ {
+  "id": "countdown-iphone-390",
+  "ok": true,
+  "d": "{\"expect\":{\"w\":159,\"j\":152},\"m0\":{\"sec\":[24,1841,342,318],\"wNum\":[24,1897,120,86],\"wText\":\"0\",\"inClass\":false},\"m2\":{\"wText\":\"145\",\"jText\":\"70\",\"jNumOpacity\":\"0.359123\"},\"m3\":{\"sec\":[24,296,342,318],\"w\":[24,304,342,146],\"j\":[24,477,342,138],\"wNum\":[24,335,120,86],\"jNum\":[24,525,54,40],\"wText\":\"159\",\"jText\":\"152\",\"wSize\":96,\"jSize\":44,\"grid\":\"block\",\"ov\":0},\"stable\":true}"
+ },
+ {
+  "id": "countdown-once-iphone-390",
+  "ok": true,
+  "d": "{\"wText\":\"159\",\"jText\":\"152\",\"inClass\":true}"
+ },
+ {
+  "id": "countdown-ipad-portrait",
+  "ok": true,
+  "d": "{\"expect\":{\"w\":159,\"j\":152},\"m0\":{\"sec\":[40,1763,754,183],\"wNum\":[40,1820,161,115],\"wText\":\"0\",\"inClass\":false},\"m2\":{\"wText\":\"143\",\"jText\":\"64\",\"jNumOpacity\":\"0.336008\"},\"m3\":{\"sec\":[40,539,754,183],\"w\":[40,547,419,175],\"j\":[495,593,299,130],\"wNum\":[40,578,161,115],\"jNum\":[532,620,65,47],\"wText\":\"159\",\"jText\":\"152\",\"wSize\":128,\"jSize\":52,\"grid\":\"grid\",\"ov\":0},\"stable\":true}"
+ },
+ {
+  "id": "countdown-once-ipad-portrait",
+  "ok": true,
+  "d": "{\"wText\":\"159\",\"jText\":\"152\",\"inClass\":true}"
+ },
+ {
+  "id": "countdown-ipad-landscape",
+  "ok": true,
+  "d": "{\"expect\":{\"w\":159,\"j\":152},\"m0\":{\"sec\":[47,1759,860,183],\"wNum\":[47,1816,161,115],\"wText\":\"0\",\"inClass\":false},\"m2\":{\"wText\":\"143\",\"jText\":\"63\",\"jNumOpacity\":\"0.341821\"},\"m3\":{\"sec\":[47,357,860,183],\"w\":[47,365,481,175],\"j\":[564,411,343,130],\"wNum\":[47,396,161,115],\"jNum\":[601,438,65,47],\"wText\":\"159\",\"jText\":\"152\",\"wSize\":128,\"jSize\":52,\"grid\":\"grid\",\"ov\":0},\"stable\":true}"
+ },
+ {
+  "id": "countdown-once-ipad-landscape",
+  "ok": true,
+  "d": "{\"wText\":\"159\",\"jText\":\"152\",\"inClass\":true}"
+ },
+ {
+  "id": "countdown-desktop",
+  "ok": true,
+  "d": "{\"expect\":{\"w\":159,\"j\":152},\"m0\":{\"sec\":[136,1759,860,205],\"wNum\":[136,1816,192,137],\"wText\":\"0\",\"inClass\":false},\"m2\":{\"wText\":\"143\",\"jText\":\"64\",\"jNumOpacity\":\"0.179241\"},\"m3\":{\"sec\":[136,379,860,205],\"w\":[136,387,474,197],\"j\":[658,452,338,132],\"wNum\":[136,418,192,137],\"jNum\":[707,479,70,50],\"wText\":\"159\",\"jText\":\"152\",\"wSize\":152,\"jSize\":56,\"grid\":\"grid\",\"ov\":0},\"stable\":true}"
+ },
+ {
+  "id": "countdown-once-desktop",
+  "ok": true,
+  "d": "{\"wText\":\"159\",\"jText\":\"152\",\"inClass\":true}"
+ },
+ {
+  "id": "countdown-reduced-motion",
+  "ok": true,
+  "d": "{\"c0\":{\"inClass\":true,\"wText\":\"159\",\"jText\":\"152\",\"eyebrowOpacity\":\"1\"},\"sameBox\":true}"
+ },
+ {
+  "id": "countdown-states",
+  "ok": true,
+  "d": "{\"journey-start\":{\"wedding\":\"before\",\"journey\":\"today\",\"w\":\"THE WEDDING · IN 7 DAYS SUNDAY, 28 FEBRUARY 2027 · VIENTIANE, LAOS\",\"j\":\"THE JOURNEY BEGINS Today SUNDAY, 21 FEBRUARY 2027 · BANGKOK, THAILAND\",\"zero\":false,\"negative\":false},\"journey-day\":{\"wedding\":\"before\",\"journey\":\"journey\",\"w\":\"THE WEDDING · IN 4 DAYS SUNDAY, 28 FEBRUARY 2027 · VIENTIANE, LAOS\",\"j\":\"THE JOURNEY · DAY 4 OF 16 DAYS 21 FEBRUARY – 8 MARCH 2027 · THAILAND · LAOS · CHINA\",\"zero\":false,\"negative\":false},\"wedding-day\":{\"wedding\":\"today\",\"journey\":\"journey\",\"w\":\"THE WEDDING Today SUNDAY, 28 FEBRUARY 2027 · VIENTIANE, LAOS\",\"j\":\"THE JOURNEY · DAY 8 OF 16 DAYS 21 FEBRUARY – 8 MARCH 2027 · THAILAND · LAOS · CHINA\",\"zero\":false,\"negative\":false},\"after-wedding\":{\"wedding\":\"after\",\"journey\":\"journey\",\"w\":\"THE WEDDING Married SUNDAY, 28 FEBRUARY 2027 · VIENTIANE, LAOS\",\"j\":\"THE JOURNEY · DAY 11 OF 16 DAYS 21 FEBRUARY – 8 MARCH 2027 · THAILAND · LAOS · CHINA\",\"zero\":false,\"negative\":false},\"after-journey\":{\"wedding\":\"after\",\"journey\":\"after\",\"w\":\"THE WEDDING Married SUNDAY, 28 FEBRUARY 2027 · VIENTIANE, LAOS\",\"j\":\"THE JOURNEY 16 DAYS 21 FEBRUARY – 8 MARCH 2027 · THAILAND · LAOS · CHINA\",\"zero\":false,\"negative\":false"
+ },
+ {
+  "id": "profile-order-preserved",
+  "ok": true,
+  "d": "{\"order\":[\"identity\",\"contact\",\"countdown\",\"community\",\"numbers\",\"status\",\"stays\",\"travel\",\"experiences\",\"wedding\",\"tickets\",\"about\",\"documents\"],\"bag\":true,\"community\":\"2 of us are joining so far\"}"
+ },
+ {
+  "id": "console-errors",
+  "ok": true,
+  "d": "no script or console error"
+ }
+]

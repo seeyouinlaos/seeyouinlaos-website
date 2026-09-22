@@ -58,6 +58,8 @@ export function page(opts = {}) {
     CustomEvent: class { constructor(type, init) { this.type = type; this.detail = init && init.detail; } },
     setTimeout: (fn) => fn(),
     requestAnimationFrame: (fn) => fn(),
+    /* reduced motion, when a test asks for it (22 Sep 2026): the pages read the media query once, at load */
+    matchMedia: (q) => ({ matches: !!opts.reducedMotion && /prefers-reduced-motion: reduce/.test(q), addEventListener() {}, addListener() {} }),
     fetch: opts.fetch || (() => Promise.reject(new Error('no network in tests'))),
   };
   sb.window = sb; sb.globalThis = sb;

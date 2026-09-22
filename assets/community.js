@@ -40,12 +40,40 @@
     if (toEnd >= 0) return { phase: 'after', n: 1 - toStart, unit: 'of 16 days', lead: 'The journey continues · day', tail: 'Until 8 March 2027 · Bangkok' };
     return { phase: 'done', n: 16, unit: 'days', lead: 'The journey', tail: '21 February – 8 March 2027 · Thailand · Laos · China' };
   }
+  /* WEDDING FIRST (Owner, 22 Sep 2026): two countdowns, one hierarchy. THE WEDDING — Sunday, 28 February 2027, Vientiane — is the
+     primary count; THE JOURNEY BEGINS — Sunday, 21 February 2027, Bangkok — the secondary. Both from the same local-day clock as
+     countdown() above, never negative, never a clock; each has its own states: before · today · (the journey under way, day NN of
+     16) · after. The numbers are computed every render — nothing here is a written date count. */
+  var DAYS_LONG = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  function countdowns(now) {
+    now = now || new Date();
+    var start = local.apply(null, JOURNEY.start), wed = local.apply(null, JOURNEY.wedding), end = local.apply(null, JOURNEY.end);
+    var toStart = daysBetween(now, start), toWed = daysBetween(now, wed), toEnd = daysBetween(now, end), total = daysBetween(start, end) + 1;
+    var wedding = toWed > 0 ? { state: 'before', n: toWed, unit: toWed === 1 ? 'day' : 'days', eyebrow: 'The wedding · in', word: null, tail: 'Sunday, 28 February 2027 · Vientiane, Laos' }
+      : toWed === 0 ? { state: 'today', n: 0, unit: '', eyebrow: 'The wedding', word: 'Today', tail: 'Sunday, 28 February 2027 · Vientiane, Laos' }
+      : { state: 'after', n: 0, unit: '', eyebrow: 'The wedding', word: 'Married', tail: 'Sunday, 28 February 2027 · Vientiane, Laos' };
+    var journey = toStart > 0 ? { state: 'before', n: toStart, unit: toStart === 1 ? 'day' : 'days', eyebrow: 'The journey begins · in', word: null, tail: 'Sunday, 21 February 2027 · Bangkok, Thailand' }
+      : toStart === 0 ? { state: 'today', n: 0, unit: '', eyebrow: 'The journey begins', word: 'Today', tail: 'Sunday, 21 February 2027 · Bangkok, Thailand' }
+      : toEnd >= 0 ? { state: 'journey', n: 1 - toStart, unit: 'of ' + total + ' days', eyebrow: 'The journey · day', word: null, tail: '21 February – 8 March 2027 · Thailand · Laos · China' }
+      : { state: 'after', n: total, unit: 'days', eyebrow: 'The journey', word: null, tail: '21 February – 8 March 2027 · Thailand · Laos · China' };
+    return { wedding: wedding, journey: journey, phase: countdown(now).phase };
+  }
+  /* one count as the page writes it: the eyebrow, the numeral (or its word), the date line — the numeral's box is sized by the
+     final value from the first paint (an invisible copy of it beneath the live digits), so the count-up never moves the layout */
+  function countHtml(key, c, role) {
+    var shownHere = !!shown['cd-' + key];
+    var numeral = c.word
+      ? '<p class="pf-num pf-num-word" data-key="cd-' + key + '"><span class="pf-num-v">' + esc(c.word) + '</span></p>'
+      : '<p class="pf-num" data-count-to="' + c.n + '" data-key="cd-' + key + '"' + (shownHere ? ' data-counted="1"' : '') + '><span class="pf-num-v pf-num-fixed"><span class="pf-num-size" aria-hidden="true">' + c.n + '</span><span class="pf-num-live">' + (calm || shownHere ? c.n : 0) + '</span></span><span class="pf-num-u">' + esc(c.unit) + '</span></p>';
+    return '<div class="pf-cd pf-cd-' + role + '" data-cd="' + key + '" data-cd-state="' + esc(c.state) + '">' +
+      '<p class="t-l1 pf-cd-eyebrow">' + esc(c.eyebrow) + '</p>' + numeral +
+      '<p class="t-l1 mute pf-cd-tail">' + esc(c.tail) + '</p></div>';
+  }
   function countdownHtml(now) {
-    var c = countdown(now);
-    return '<section class="prep-sec pf-count" id="countdown" data-countdown="' + c.phase + '" aria-label="' + esc(c.lead + ' ' + c.n + ' ' + c.unit) + '">' +
-      '<p class="t-l1">' + esc(c.lead) + '</p>' +
-      '<p class="pf-num" data-count-to="' + c.n + '" data-key="countdown"' + (shown.countdown ? ' data-counted="1"' : '') + '><span class="pf-num-v">' + (calm || shown.countdown ? c.n : 0) + '</span><span class="pf-num-u">' + esc(c.unit) + '</span></p>' +
-      '<p class="t-l1 mute">' + esc(c.tail) + '</p></section>';
+    var c = countdowns(now);
+    var label = (c.wedding.word ? 'The wedding ' + c.wedding.word.toLowerCase() : 'The wedding in ' + c.wedding.n + ' ' + c.wedding.unit) + ' · ' + (c.journey.word ? 'The journey begins ' + c.journey.word.toLowerCase() : c.journey.state === 'before' ? 'The journey begins in ' + c.journey.n + ' ' + c.journey.unit : 'The journey, day ' + c.journey.n + ' ' + c.journey.unit);
+    return '<section class="prep-sec pf-count' + (calm || shown.cd ? ' is-in' : '') + '" id="countdown" data-countdown="' + esc(c.phase) + '" data-wedding="' + esc(c.wedding.state) + '" data-journey="' + esc(c.journey.state) + '" data-cd-reveal aria-label="' + esc(label) + '">' +
+      countHtml('wedding', c.wedding, 'primary') + countHtml('journey', c.journey, 'secondary') + '</section>';
   }
 
   /* ---------------------------------------------------- THE JOURNEY IN NUMBERS */
@@ -143,20 +171,21 @@
 
   /* --------------------------------------------------------- THE MOVEMENT */
   function countUp(el) {
-    var to = Number(el.getAttribute('data-count-to') || 0), v = el.querySelector('.pf-num-v'), padded = el.closest('.pf-stat') !== null;
+    var to = Number(el.getAttribute('data-count-to') || 0), v = el.querySelector('.pf-num-live') || el.querySelector('.pf-num-v'), padded = el.closest('.pf-stat') !== null;
     if (el.getAttribute('data-key')) shown[el.getAttribute('data-key')] = true;
     if (!v) return; if (calm || to === 0) { v.textContent = padded ? pad2(to) : String(to); return; }
+    var key = el.getAttribute('data-key') || '', delay = key === 'cd-journey' ? 450 : key === 'cd-wedding' ? 120 : 0;   /* the wedding counts first, the journey a beat later */
     var t0 = null, dur = 900; function tick(t) { if (!t0) t0 = t; var k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 3), n = Math.round(to * e); v.textContent = padded ? pad2(n) : String(n); if (k < 1) requestAnimationFrame(tick); }
-    requestAnimationFrame(tick);
+    if (delay) setTimeout(function () { requestAnimationFrame(tick); }, delay); else requestAnimationFrame(tick);
   }
   function wire(root) {
     root = root || document;
     var nums = [].slice.call(root.querySelectorAll('[data-count-to]:not([data-counted])'));
-    var people = root.querySelector('[data-people]');
-    if (!('IntersectionObserver' in window) || calm) { nums.forEach(function (el) { el.setAttribute('data-counted', '1'); countUp(el); }); if (people) { people.classList.add('is-in'); shown.people = true; } return; }
-    var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (!e.isIntersecting) return; var el = e.target; io.unobserve(el); if (el.hasAttribute('data-count-to')) { el.setAttribute('data-counted', '1'); countUp(el); } else { el.classList.add('is-in'); shown.people = true; } }); }, { threshold: 0.25 });
-    nums.forEach(function (el) { io.observe(el); }); if (people && !people.classList.contains('is-in')) io.observe(people);
+    var people = root.querySelector('[data-people]'), cd = root.querySelector('[data-cd-reveal]');
+    if (!('IntersectionObserver' in window) || calm) { nums.forEach(function (el) { el.setAttribute('data-counted', '1'); countUp(el); }); if (people) { people.classList.add('is-in'); shown.people = true; } if (cd) { cd.classList.add('is-in'); shown.cd = true; } return; }
+    var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (!e.isIntersecting) return; var el = e.target; io.unobserve(el); if (el.hasAttribute('data-count-to')) { el.setAttribute('data-counted', '1'); countUp(el); } else if (el.hasAttribute('data-cd-reveal')) { el.classList.add('is-in'); shown.cd = true; } else { el.classList.add('is-in'); shown.people = true; } }); }, { threshold: 0.25 });
+    nums.forEach(function (el) { io.observe(el); }); if (people && !people.classList.contains('is-in')) io.observe(people); if (cd && !cd.classList.contains('is-in')) io.observe(cd);
   }
-  window.SIYL_COMMUNITY = { load: load, data: function () { return data; }, countdown: countdown, countdownHtml: countdownHtml, numbers: numbers, numbersHtml: numbersHtml, communityHtml: communityHtml, paintPortraits: paintPortraits, wire: wire, JOURNEY: JOURNEY };
+  window.SIYL_COMMUNITY = { load: load, data: function () { return data; }, countdown: countdown, countdowns: countdowns, countdownHtml: countdownHtml, numbers: numbers, numbersHtml: numbersHtml, communityHtml: communityHtml, paintPortraits: paintPortraits, wire: wire, JOURNEY: JOURNEY };
   document.addEventListener('siyl:signout', function () { data = null; });
 })();

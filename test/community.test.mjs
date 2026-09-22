@@ -64,7 +64,7 @@ test('THE COUNTDOWN · days to 21 February 2027 from the clock; the wedding once
   const d = C.countdown(at(2027, 4, 1)); assert.equal(d.phase, 'done'); assert.equal(d.n, 16);
   for (const t of [at(2026, 1, 1), at(2027, 2, 21), at(2027, 2, 28), at(2027, 3, 8), at(2028, 1, 1)]) assert.ok(C.countdown(t).n >= 0, 'never negative');
   assert.doesNotMatch(src('assets/community.js'), /\b15[0-9]\b\s*(days|,)/, 'no remaining-days value is written into the code'); assert.doesNotMatch(src('assets/community.js'), /setInterval/, 'no ticking clock');
-  const html = C.countdownHtml(at(2026, 9, 21)); assert.match(html, /data-countdown="before"/); assert.match(html, /data-count-to="153"/); assert.match(html, /The journey begins in/); assert.match(html, /21 February 2027 · Bangkok/);
+  const html = C.countdownHtml(at(2026, 9, 21)); assert.match(html, /data-countdown="before"/); assert.match(html, /data-count-to="153"/); assert.match(html, /The journey begins · in/); assert.match(html, /21 February 2027 · Bangkok/); assert.match(html, /data-count-to="160"/, 'the wedding count, 22 Sep 2026: wedding first');
 });
 
 test('THE JOURNEY IN NUMBERS · every number counted from the canonical data on the page; nothing invented; a category that cannot be counted is absent', () => {

@@ -42,7 +42,30 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 @media(min-width:768px){.pf-rail{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px;overflow:visible}.pf-rail>*{flex:none;max-width:none}.pf-tickets{grid-template-columns:1fr 1fr}}
 @media(min-width:1024px){.pf-rail{grid-template-columns:repeat(3,1fr)}}
 /* THE RETURN PAGE (Owner, 21 Sep 2026): the countdown, the community, the journey in numbers — editorial, quiet, alive */
+/* WEDDING FIRST (Owner, 22 Sep 2026): the wedding count is the focus, the journey count stands beside it, smaller and quiet —
+   one editorial composition, not two cards. Every numeral keeps its final width from the first paint (min-width in ch, tabular
+   numerals): the count-up never moves the page. */
 .pf-count{padding:8px 0 0}
+.pf-cd{position:relative;min-width:0}
+.pf-num-fixed{position:relative;display:inline-block}.pf-num-size{visibility:hidden}.pf-num-live{position:absolute;left:0;top:0;white-space:nowrap}
+.pf-cd-eyebrow{color:#313131}
+.pf-cd-tail{margin-top:2px}
+.pf-cd-secondary{margin-top:26px;padding-top:20px;border-top:1px solid #DAD9D7}
+.pf-cd-secondary .pf-num{margin:6px 0 6px;gap:10px}
+.pf-cd-secondary .pf-num-v{font-size:44px;letter-spacing:-.4px}
+.pf-cd-secondary .pf-cd-eyebrow,.pf-cd-secondary .pf-cd-tail{color:#6B6964}
+.pf-num-word .pf-num-v{font-size:64px;letter-spacing:-.4px;min-width:0}
+.pf-cd-secondary .pf-num-word .pf-num-v{font-size:34px}
+/* the choreography: the eyebrow, then the numeral rising into its value, then the date line — the wedding first, the journey a
+   beat later; once, when the section comes into view; a re-render never replays it; reduced motion shows the final state at once */
+.pf-count .pf-cd-eyebrow,.pf-count .pf-num,.pf-count .pf-cd-tail{opacity:0;transform:translate3d(0,10px,0);transition:opacity .6s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1);will-change:opacity,transform}
+.pf-count .pf-num{transform:translate3d(0,16px,0) scale(.985);transform-origin:left bottom}
+.pf-count.is-in .pf-cd-eyebrow,.pf-count.is-in .pf-num,.pf-count.is-in .pf-cd-tail{opacity:1;transform:none;will-change:auto}
+.pf-count.is-in .pf-cd-primary .pf-cd-eyebrow{transition-delay:0s}.pf-count.is-in .pf-cd-primary .pf-num{transition-delay:.12s}.pf-count.is-in .pf-cd-primary .pf-cd-tail{transition-delay:.34s}
+.pf-count.is-in .pf-cd-secondary .pf-cd-eyebrow{transition-delay:.45s}.pf-count.is-in .pf-cd-secondary .pf-num{transition-delay:.57s}.pf-count.is-in .pf-cd-secondary .pf-cd-tail{transition-delay:.78s}
+@media(prefers-reduced-motion:reduce){.pf-count .pf-cd-eyebrow,.pf-count .pf-num,.pf-count .pf-cd-tail{opacity:1;transform:none;transition:none;will-change:auto}}
+@media(min-width:768px){.pf-count{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);column-gap:36px;align-items:end}.pf-cd-secondary{margin-top:0;padding-top:0;border-top:0;padding-left:36px;border-left:1px solid #DAD9D7;padding-bottom:6px}.pf-cd-primary .pf-num-v{font-size:128px}.pf-cd-secondary .pf-num-v{font-size:52px}.pf-num-word .pf-num-v{font-size:84px}.pf-cd-secondary .pf-num-word .pf-num-v{font-size:40px}}
+@media(min-width:1200px){.pf-cd-primary .pf-num-v{font-size:152px}.pf-cd-secondary .pf-num-v{font-size:56px}.pf-count{column-gap:48px}.pf-cd-secondary{padding-left:48px}}
 .pf-num{display:flex;align-items:baseline;gap:14px;margin:10px 0 8px;font-family:'PP Editorial Old',serif;font-weight:200;color:#313131}
 .pf-num-v{font-size:96px;line-height:.9;letter-spacing:-1px;font-variant-numeric:tabular-nums}
 .pf-num-u{font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;font-size:10px;letter-spacing:2.2px;text-transform:uppercase;color:#6B6964}
@@ -101,7 +124,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/experiences.js?v=bb798534"></script>
 <script src="assets/discover.js?v=566d844e"></script>
 <script src="assets/wedding-dinner.js?v=4b41682a"></script>
-<script src="assets/community.js?v=628c6882"></script>
+<script src="assets/community.js?v=2fe5f838"></script>
 <script type="module" src="assets/invite.mjs?v=c557d97c"></script>
 <script>
 /* ============================================================================
