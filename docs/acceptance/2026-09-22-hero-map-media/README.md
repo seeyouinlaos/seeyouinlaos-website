@@ -96,3 +96,22 @@ the deleted church frames, the film's streams and budget, the card gallery's con
 localization — the new labels carry DE · TH · JA — V1 card clips, C1 fingerprints, I1 infrastructure).
 Stage E2E `docs/acceptance/2026-09-22-hero-map-media/e2e.mjs`: **20 / 20** at 390 · 834 × 1194 · 1194 × 834 · 1440, with the
 screenshots in `stage/` (and `live/` for production).
+
+## The proof (live)
+
+Implementation commit `baa75e2` · Worker version **39c53510-4e19-4fe0-bc5f-faadd9a3325b** (Workers Build on push to `main`,
+live 105 s after the push).
+
+- **The suite on production: 20 / 20** — the hero (`SIYL_HERO.HOLD === 3000`, 3.0–3.3 s measured between two turns it makes by
+  itself, five dots named *Photograph n of 5*, each selecting its own photograph, the clock restarting on a choice, the arrow
+  keys, the dots over the picture and clear of the words, the frame still 1000 × 667 with no sideways scroll, reduced motion
+  still and answerable); the map at all four viewports (the table in §3, `contain`, ratio 0.855, inside the viewport, no
+  overflow); Vientiane (nine frames, the two church files answering **404**, the new film playing muted, the label changed);
+  After the Wedding (nine frames, chevrons, wrap 1 → 2 … 9 → 1, "1 / 9", the keyboard, the swipe that turns without following
+  the link, all nine files 200, and nothing turning by itself over 5 s). Screenshots at 390 · 834 × 1194 · 1194 × 834 · 1440 in
+  `live/`, the stage's in `stage/`.
+- **Parity** 294 / 294 · **release-014 live read-only walk** 25 / 25 · **infrastructure guard (live)** intact.
+- **Production data untouched**: the read-only aggregate before and after the deploy is identical — rooms 36 → 36, seating
+  12 → 12, drafts 15 → 15, KV registration keys 56 → 56, digest `9d6851af9fbe…` → `9d6851af9fbe…`, profile photos 8 → 8. The
+  13A/13B seat question is still open and untouched.
+- **Codex review**: PENDING — EXTERNAL QUOTA LIMIT.

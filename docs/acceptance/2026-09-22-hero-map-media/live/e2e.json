@@ -1,0 +1,102 @@
+[
+  {
+    "id": "hero-dots-one-per-slide",
+    "ok": true,
+    "d": "{\"dots\":5,\"slides\":\"5\",\"idx\":\"0\",\"on\":\"0\",\"labels\":[\"Photograph 1 of 5\",\"Photograph 2 of 5\",\"Photograph 3 of 5\",\"Photograph 4 of 5\",\"Photograph 5 of 5\"],\"current\":[\"true\",\"\",\"\",\"\",\"\"],\"role\":\"group\",\"tag\":\"BUTTON\"}"
+  },
+  {
+    "id": "hero-advances-every-3s",
+    "ok": true,
+    "d": "{\"hold\":3000,\"msBetweenTurns\":3167,\"afterAuto\":{\"idx\":\"2\",\"dot\":\"2\"}} (the hold is 3000 ms)"
+  },
+  {
+    "id": "hero-dot-selects-its-own-photograph",
+    "ok": true,
+    "d": "[{\"idx\":\"3\",\"dot\":\"3\"},{\"idx\":\"0\",\"dot\":\"0\"},{\"idx\":\"4\",\"dot\":\"4\"},{\"idx\":\"2\",\"dot\":\"2\"}]"
+  },
+  {
+    "id": "hero-manual-choice-restarts-the-clock",
+    "ok": true,
+    "d": "{\"at2200\":\"2\",\"at3800\":\"3\"}"
+  },
+  {
+    "id": "hero-dots-keyboard",
+    "ok": true,
+    "d": "{\"from\":3,\"right\":4,\"left\":3}"
+  },
+  {
+    "id": "hero-dots-over-the-photograph-never-the-words",
+    "ok": true,
+    "d": "{\"amW\":1000,\"amH\":667,\"ahTop\":773,\"dotsBottom\":759,\"amBottom\":773,\"overlap\":14,\"ov\":0}"
+  },
+  {
+    "id": "hero-reduced-motion-still-but-answerable",
+    "ok": true,
+    "d": "{\"calm\":{\"state\":\"still\",\"idx\":\"0\",\"on\":0,\"dots\":5},\"after\":{\"idx\":\"2\",\"on\":1},\"still\":\"2\"}"
+  },
+  {
+    "id": "map-390",
+    "ok": true,
+    "d": "{\"w\":165,\"h\":193,\"ratio\":0.855,\"size\":\"contain\",\"duoW\":390,\"share\":0.42,\"inView\":true,\"ov\":0}"
+  },
+  {
+    "id": "map-834x1194",
+    "ok": true,
+    "d": "{\"w\":633,\"h\":740,\"ratio\":0.855,\"size\":\"contain\",\"duoW\":760,\"share\":0.83,\"inView\":true,\"ov\":0}"
+  },
+  {
+    "id": "map-1194x834",
+    "ok": true,
+    "d": "{\"w\":494,\"h\":578,\"ratio\":0.855,\"size\":\"contain\",\"duoW\":1180,\"share\":0.42,\"inView\":true,\"ov\":0}"
+  },
+  {
+    "id": "map-1440",
+    "ok": true,
+    "d": "{\"w\":494,\"h\":578,\"ratio\":0.855,\"size\":\"contain\",\"duoW\":1180,\"share\":0.42,\"inView\":true,\"ov\":0}"
+  },
+  {
+    "id": "vientiane-current-drive-media",
+    "ok": true,
+    "d": "{\"n\":9,\"first\":\"002-vientiane-10-aerial-dusk.jpg\",\"church\":[\"002-vientiane-01-cathedral-nave.jpg:404\",\"002-vientiane-02-sacred-heart.jpg:404\"],\"count\":\"1 / 9\",\"bad\":[]}"
+  },
+  {
+    "id": "vientiane-new-film-plays",
+    "ok": true,
+    "d": "{\"status\":200,\"state\":\"playing\",\"muted\":true,\"playing\":true,\"label\":\"A night of Vientiane — the train at the platform, the neon streets of the evening\"}"
+  },
+  {
+    "id": "after-wedding-390",
+    "ok": true,
+    "d": "{\"g0\":{\"n\":9,\"count\":\"1 / 9\",\"navs\":2,\"shown\":[\"004-lijiang-aw-01.jpg\"],\"title\":\"After the Wedding\",\"dates\":\"1 – 8 MARCH 2027\",\"more\":\"journeys.html#j-mu9646\",\"ov\":0},\"g1\":{\"i\":\"1\",\"count\":\"2 / 9\"},\"g2\":{\"i\":\"8\",\"count\":\"9 / 9\",\"src\":\"004-lijiang-aw-09.jpg\"},\"g3\":\"0\"}"
+  },
+  {
+    "id": "after-wedding-834x1194",
+    "ok": true,
+    "d": "{\"g0\":{\"n\":9,\"count\":\"1 / 9\",\"navs\":2,\"shown\":[\"004-lijiang-aw-01.jpg\"],\"title\":\"After the Wedding\",\"dates\":\"1 – 8 MARCH 2027\",\"more\":\"journeys.html#j-mu9646\",\"ov\":0},\"g1\":{\"i\":\"1\",\"count\":\"2 / 9\"},\"g2\":{\"i\":\"8\",\"count\":\"9 / 9\",\"src\":\"004-lijiang-aw-09.jpg\"},\"g3\":\"0\"}"
+  },
+  {
+    "id": "after-wedding-1194x834",
+    "ok": true,
+    "d": "{\"g0\":{\"n\":9,\"count\":\"1 / 9\",\"navs\":2,\"shown\":[\"004-lijiang-aw-01.jpg\"],\"title\":\"After the Wedding\",\"dates\":\"1 – 8 MARCH 2027\",\"more\":\"journeys.html#j-mu9646\",\"ov\":0},\"g1\":{\"i\":\"1\",\"count\":\"2 / 9\"},\"g2\":{\"i\":\"8\",\"count\":\"9 / 9\",\"src\":\"004-lijiang-aw-09.jpg\"},\"g3\":\"0\"}"
+  },
+  {
+    "id": "after-wedding-1440",
+    "ok": true,
+    "d": "{\"g0\":{\"n\":9,\"count\":\"1 / 9\",\"navs\":2,\"shown\":[\"004-lijiang-aw-01.jpg\"],\"title\":\"After the Wedding\",\"dates\":\"1 – 8 MARCH 2027\",\"more\":\"journeys.html#j-mu9646\",\"ov\":0},\"g1\":{\"i\":\"1\",\"count\":\"2 / 9\"},\"g2\":{\"i\":\"8\",\"count\":\"9 / 9\",\"src\":\"004-lijiang-aw-09.jpg\"},\"g3\":\"0\"}"
+  },
+  {
+    "id": "after-wedding-keyboard-files-and-no-autoplay",
+    "ok": true,
+    "d": "{\"k\":\"2\",\"k2\":\"1\",\"files\":9,\"autoplay\":\"1→1\"}"
+  },
+  {
+    "id": "after-wedding-swipe-turns-and-never-follows-the-link",
+    "ok": true,
+    "d": "{\"i\":\"1\",\"url\":\"/\"}"
+  },
+  {
+    "id": "console-errors",
+    "ok": true,
+    "d": "no script or console error"
+  }
+]
