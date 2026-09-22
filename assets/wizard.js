@@ -71,7 +71,7 @@
     var v = (document.currentScript && (document.currentScript.getAttribute('src').split('?v=')[1] || '')) || '';
     var need = [];
     if (!document.querySelector('link[href^="assets/prep.css"]')) { var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = 'assets/prep.css'; document.head.appendChild(l); }
-    if (!window.SIYL_GUEST) need.push('assets/guest.js');
+    if (!window.SIYL_GUEST) { if (!window.SIYL_QUESTIONNAIRE) need.push('assets/questionnaire.js'); need.push('assets/guest.js'); }   /* the schema before the guest record (22 Sep 2026) */
     need.push('assets/prep-shell.js');
     var load = function (i) {
       if (i >= need.length) { W.decorate(document); return; }

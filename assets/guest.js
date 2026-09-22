@@ -53,19 +53,11 @@
    * and the readiness engine names the exact unanswered question. Only the
    * travel documents stay optional. The three retired questions of the party
    * model are gone. Sequential numbering after the removals. */
-  var ALLERGY = { key: 'allergy', n: '01', q: 'Do you have any food allergies?', required: true,
-    details: 'Please tell us which — the kitchens read this.' };
-  var PROFILE = [
-    { key: 'coffeetea', n: '02', q: 'Coffee or tea', hint: 'And how you like it.', required: true },
-    /* MY FAVORITE FLAVOR (Owner, 18 Sep 2026): one choice of six — replaces the free-text snack question; an older answer under
-     * `treat` is kept in the record's history and never read as a flavour unless it is one of the six */
-    { key: 'flavor', n: '03', q: 'My Favorite Flavor', hint: 'Choose one.', required: true, type: 'choice', choices: ['Coffee', 'Milk', 'Butter', 'Pandan', 'Matcha Green Tea', 'Strawberry Milk'] },
-    { key: 'drink', n: '04', q: 'Favourite drink', hint: 'The one you would choose without looking at the menu.', required: true },
-    /* QUESTION 5 REMOVED (Owner, 19 Sep 2026): "Anything you would rather avoid?" (`avoid`) is obsolete — an older answer
-     * under that key stays in a draft's record untouched, is never rendered and never required */
-    { key: 'film', n: '05', q: 'Favourite film', hint: 'The one you could happily watch again.', required: true },
-    { key: 'music', n: '06', q: 'Favourite music', hint: 'A song, an album, an artist you never skip.', required: true }
-  ];
+  /* THE QUESTIONNAIRE (Owner, 22 Sep 2026): one canonical schema — src/questionnaire.js, the generated copy assets/questionnaire.js
+   * (window.SIYL_QUESTIONNAIRE) loaded before this file on every guest page; the Worker validates SEND against the same file */
+  var Q = window.SIYL_QUESTIONNAIRE;
+  if (!Q) throw new Error('assets/questionnaire.js must load before guest.js');
+  var ALLERGY = Q.ALLERGY, PROFILE = Q.PROFILE, FINALE = Q.FINALE;
   /* REQUIRED: the guest knows that photography and filming take place. It is
    * an acknowledgement — never a consent to publication, which stays a
    * separate, optional, withdrawable choice (assets/docs.js). */
@@ -86,6 +78,8 @@
   var G = window.SIYL_GUEST = {
     ALLERGY: ALLERGY,
     PROFILE: PROFILE,
+    FINALE: FINALE,
+    GENRES: Q.GENRES,
     PHOTO_TEXT: PHOTO_TEXT,
     PHOTO_VERSION: PHOTO_VERSION,
     validEmail: validEmail,
@@ -369,6 +363,7 @@
     /* ---- about you --------------------------------------------------- */
     profile: function (id, key) {
       var r = this.rec(id), q = PROFILE.filter(function (x) { return x.key === key; })[0], v = (r.profile || {})[key] || '';
+      if (q && q.type === 'multi') return Q.profileValue(r.profile, q);   /* the genres: an array of the Owner's choices, never a string */
       if (q && q.choices) { if (q.choices.indexOf(v) >= 0) return v; var old = (r.profile || {}).treat; return q.choices.indexOf(old) >= 0 ? old : ''; }   /* a choice is one of the six or nothing */
       return v;
     },
@@ -376,21 +371,30 @@
       var me = this.me(); if (!me) return;
       id = id || me.guestId; if (id !== me.guestId) return;
       var q = PROFILE.filter(function (x) { return x.key === key; })[0];
-      if (q && q.choices && v && q.choices.indexOf(v) < 0) return;   /* a choice question takes one of its choices, or nothing */
+      if (q && q.type === 'multi') { v = (Array.isArray(v) ? v : (typeof v === 'string' && v ? [v] : [])).filter(function (c) { return q.choices.indexOf(c) >= 0; }); }   /* the genres: only the Owner's choices, in their order; one word is a set of one */
+      else if (q && q.choices && v && q.choices.indexOf(v) < 0) return;   /* a choice question takes one of its choices, or nothing */
       var st = read();
       st.guests = st.guests || {};
       st.guests[id] = st.guests[id] || { submitted: {}, profile: {}, history: [] };
       var r = st.guests[id], from = r.profile[key] || '';
-      if (from === (v || '')) return;
+      var same = q && q.type === 'multi' ? JSON.stringify(Array.isArray(from) ? from : []) === JSON.stringify(v) : from === (v || '');
+      if (same) return;
       r.profile[key] = v;
       r.history = r.history || [];
-      r.history.push({ field: 'profile.' + key, from: from, to: v, at: stamp(), by: me.guestId });
+      r.history.push({ field: 'profile.' + key, from: Array.isArray(from) ? from.join(', ') : from, to: Array.isArray(v) ? v.join(', ') : v, at: stamp(), by: me.guestId });
       write(st);
     },
     profileAnswered: function (id) {
       var r = this.rec(id), n = 0;
-      PROFILE.forEach(function (q) { if ((r.profile || {})[q.key]) n++; });
+      PROFILE.forEach(function (q) { if (Q.profileAnswered(r.profile, q)) n++; });
       return n;
+    },
+    /* one genre in or out of the guest's own set (the multi question) */
+    toggleGenre: function (id, genre) {
+      var cur = this.profile(id, 'genres') || [], q = PROFILE.filter(function (x) { return x.key === 'genres'; })[0];
+      var next = cur.indexOf(genre) >= 0 ? cur.filter(function (g) { return g !== genre; }) : q.choices.filter(function (g) { return cur.indexOf(g) >= 0 || g === genre; });
+      this.setProfile(id, 'genres', next);
+      return next;
     },
     /* the allergy: 'yes' | 'no' | null; the details only matter for 'yes' */
     allergy: function () { var r = this.rec(); return r.allergy && (r.allergy.answer === 'yes' || r.allergy.answer === 'no') ? r.allergy.answer : null; },
@@ -429,8 +433,7 @@
     /* every visible question, unanswered → named, with the way to its box */
     profileMissing: function () {
       var me = this.me(), self = this; if (!me) return [];
-      return PROFILE.filter(function (q) { return q.required && !String(self.profile(me.guestId, q.key) || '').trim(); })
-        .map(function (q) { return { key: 'profile:' + q.key, label: q.n + ' · ' + q.q, href: 'about-you.html#q-' + q.key }; });
+      return Q.profileMissing(this.rec(me.guestId).profile);   /* the one schema decides what is required (src/questionnaire.js) */
     },
     aboutMissing: function () {
       var out = this.allergyMissing().concat(this.profileMissing());
@@ -517,6 +520,8 @@
         if (!this.applicable('wedding')) return [];
         T.EVENTS.forEach(function (e) { if (T.eventOf(me.guestId, e.key) === null) out.push({ key: 'event:' + e.key, label: e.label + ' — attending or not', href: 'wedding.html#ev-' + e.key }); });
         if (T.attendingOf(me.guestId) && T.canOffer(me.guestId) && T.offeringOf_(me.guestId) === null) out.push({ key: 'sangkhathan', label: 'Sangkhathan — yes or no', href: 'wedding.html#sangkhathan' });
+        /* A WISH FROM THE BRIDE & GROOM (Owner, 22 Sep 2026): the final act of the wedding night — required, never preselected */
+        if (T.finaleOf && T.finaleOf(me.guestId) === null) out.push({ key: 'finale', label: FINALE.eyebrow + ' — the pool jump or BARON', href: 'wedding.html#finale' });
         return out;
       }
       if (key === 'preparation') {

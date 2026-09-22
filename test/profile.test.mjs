@@ -29,7 +29,7 @@ test('2 · the profile is reachable at every readiness state: the engine lists n
   const states = [];
   for (const fill of [0, 1, 2]) {
     const w = page({ auth: PEGGY }); const G = w.SIYL_GUEST, T = w.SIYL_TEMPLE, id = G.me().guestId;
-    if (fill >= 1) { G.setContact('email', 'guest@example.com'); G.setContact('phone', '+66 81 234 5678'); T.setAttendance(id, 'no'); ['coffee', 'vows', 'dinner'].forEach((k) => T.setEvent(id, k, 'yes')); }
+    if (fill >= 1) { G.setContact('email', 'guest@example.com'); G.setContact('phone', '+66 81 234 5678'); T.setAttendance(id, 'no'); ['coffee', 'vows', 'dinner'].forEach((k) => T.setEvent(id, k, 'yes')); T.setFinale(id, 'pool'); }
     if (fill >= 2) { G.setDressAck(true); G.setAllergy('no'); G.setPhotoAck(true); G.PROFILE.forEach((q) => G.setProfile(id, q.key, q.choices ? q.choices[0] : 'Answered')); }
     const r = G.readiness();
     assert.ok(!r.need.some((n) => /profile/.test(n.href) || /My Profile/.test(n.stepLabel)), 'no requirement points at the profile');
@@ -61,7 +61,7 @@ test('6 · ABOUT YOU stays step 05 and still gates Review & Send', () => {
   assert.match(guest, /\{ key: 'about', n: '05', label: 'About You', href: 'about-you\.html', required: true \}/);
   assert.match(src('about-you.html'), /<title>About You · See You In Laos<\/title>/); assert.match(src('about-you.html'), /<h1 class="t-d1">About You<\/h1>/); assert.match(src('about-you.html'), /05 \/ 06 · About You/);
   const w = page({ auth: PEGGY }); const G = w.SIYL_GUEST, T = w.SIYL_TEMPLE, id = G.me().guestId;
-  G.setContact('email', 'guest@example.com'); G.setContact('phone', '+66 81 234 5678'); T.setAttendance(id, 'no'); ['coffee', 'vows', 'dinner'].forEach((k) => T.setEvent(id, k, 'yes')); G.setDressAck(true);
+  G.setContact('email', 'guest@example.com'); G.setContact('phone', '+66 81 234 5678'); T.setAttendance(id, 'no'); ['coffee', 'vows', 'dinner'].forEach((k) => T.setEvent(id, k, 'yes')); T.setFinale(id, 'pool'); G.setDressAck(true);
   assert.equal(G.mayEnter('review'), false, 'About You incomplete: Review & Send is locked');
   assert.ok(G.readiness().need.some((n) => n.stepLabel === 'About You' && n.n === '05'), 'the missing items name step 05 · About You');
   assert.ok(G.missingFor('about').length > 0);

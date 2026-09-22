@@ -220,8 +220,8 @@ test('THE CLEAN RESET · a device that synchronised before the epoch drops its w
 
 test('QUESTION 5 REMOVED · "Anything you would rather avoid?" is on no surface: the model, About You, Review, the emails; an old answer under `avoid` is tolerated and never required; the flavour question is intact', () => {
   const w = page({ auth: PEGGY }); const G = w.SIYL_GUEST;
-  assert.deepEqual(JSON.parse(JSON.stringify(G.PROFILE.map((q) => q.key))), ['coffeetea', 'flavor', 'drink', 'film', 'music']);
-  assert.deepEqual(JSON.parse(JSON.stringify(G.PROFILE.map((q) => q.n))), ['02', '03', '04', '05', '06'], 'the numbering closes the gap');
+  assert.deepEqual(JSON.parse(JSON.stringify(G.PROFILE.map((q) => q.key))), ['coffeetea', 'flavor', 'drink', 'film', 'genres', 'music']);
+  assert.deepEqual(JSON.parse(JSON.stringify(G.PROFILE.map((q) => q.n))), ['02', '03', '04', '05', '06', '07'], 'the numbering closes the gap (the genres 06, the song line 07 · 22 Sep 2026)');
   assert.ok(!G.PROFILE.some((q) => /avoid/i.test(q.q)));
   const fl = G.PROFILE.find((q) => q.key === 'flavor'); assert.deepEqual(JSON.parse(JSON.stringify(fl.choices)), ['Coffee', 'Milk', 'Butter', 'Pandan', 'Matcha Green Tea', 'Strawberry Milk']); assert.equal(fl.type, 'choice');
   /* an old draft with the retired answer: nothing crashes, nothing is required of it, the step completes without it */

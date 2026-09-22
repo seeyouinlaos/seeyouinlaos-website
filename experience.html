@@ -31,6 +31,16 @@
 .x-acc .in { display: none; padding: 0 0 22px; }
 .x-acc .in.on { display: block; }
 .x-acc .in .by { font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 10px; letter-spacing: 2.2px; text-transform: uppercase; color: var(--a-mute); }
+.x-when { font-family: 'PP Editorial Old', Georgia, serif; font-weight: 200; font-style: italic; font-size: 16px; line-height: 1.4; color: var(--a-mute); margin: -6px 0 12px; }
+.x-visits .x-kv > div { grid-template-columns: minmax(160px, 1fr) 1fr; }
+/* THE FILMS WITH SOUND (BARON): tall phone films and one square, each its own frame with the shared clip controls */
+.x-films-note { color: var(--a-mute); }
+.x-films-grid { display: grid; grid-template-columns: 1fr; gap: 14px; margin-top: 18px; }
+.x-film { position: relative; width: 100%; background: #1a1614 center/cover no-repeat; overflow: hidden; }
+.x-film.is-tall { aspect-ratio: 9 / 16; }
+.x-film.is-square { aspect-ratio: 1 / 1; }
+@media (min-width: 600px) { .x-films-grid { grid-template-columns: 1fr 1fr; } .x-film.is-square { grid-column: 1 / -1; aspect-ratio: 16 / 10; } }
+@media (min-width: 900px) { .x-films-grid { grid-template-columns: 1fr 1fr 1fr; align-items: start; } .x-film.is-square { grid-column: auto; aspect-ratio: 1 / 1; } }
 .x-kv { display: grid; grid-template-columns: 1fr; gap: 0; border-top: 1px solid var(--a-line); margin-top: 22px; }
 .x-kv > div { display: grid; grid-template-columns: 112px 1fr; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--a-line); align-items: baseline; }
 .x-kv .k { font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 10px; letter-spacing: 2.2px; text-transform: uppercase; color: var(--a-mute); }
@@ -88,17 +98,19 @@
 <body>
 <div class="hd-space" aria-hidden="true"></div>
 <main class="x-wrap" id="x"></main>
-<script src="assets/experiences.js?v=a951b183"></script>
-<script src="assets/experience-galleries.js?v=9a7226c3"></script>
+<script src="assets/experiences.js?v=bb798534"></script>
+<script src="assets/experience-galleries.js?v=dcad2119"></script>
 <script src="assets/pricing.js?v=678b5c38"></script>
 <script src="assets/bag.js?v=2a0c8152"></script>
-<script src="assets/wizard.js?v=30b710a5"></script>
+<script src="assets/wizard.js?v=1454929a"></script>
 <script src="assets/draft.js?v=7ab9ca64"></script>
 <script src="assets/gallery.js?v=85069204"></script>
 <script src="assets/highlight.js?v=b733ceb2"></script>
+<script src="assets/discover.js?v=566d844e"></script>
+<script src="assets/clip.js?v=1f0282b7"></script>
 <script>
 (function () {
-  var ROLE = { breakfast: 'Breakfast', lunch: 'Lunch', dinner: 'Dinner', cafe: 'Café', experience: 'Experience', place: 'Shopping & places', bar: 'Bar' };
+  var D = window.SIYL_DISCOVER;
   function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
   var id = new URLSearchParams(location.search).get('id') || '';
   var x = (window.SIYL_EXP || []).filter(function (e) { return e.id === id; })[0];
@@ -111,7 +123,8 @@
     return;
   }
   document.title = x.name + ' · See You In Laos';
-  var roles = (x.roles || []).map(function (r) { return ROLE[r] || r; }).join(' · ');
+  var roles = D.LABEL[D.categoryOf(x)] || '';   /* the category: what the place IS (Owner, 22 Sep 2026) */
+  var when = D.dateWords(x), vis = D.visits(x);
   var ctx = [];
   if (x.row && x.row !== 'city' && (x.sheet !== 'FULL' || /^Day /.test(x.row))) ctx.push("From the hosts' itinerary · " + x.row);
   if (x.row === 'city') ctx.push(x.chapter === 'bkk' ? 'From the hosts’ Bangkok days' : 'From the hosts’ Vientiane portrait');   /* Le Du Kaan is a Bangkok address of the city days (release 012) */
@@ -119,13 +132,25 @@
   var h = '';
   h += '<section class="x-gal">' + (window.SIYL_XGAL ? SIYL_XGAL.html(x) : '') + '</section>';
   var hl = x.highlight || null;
-  h += '<header class="x-head"><p class="a-eyebrow">' + esc(x.where) + (roles ? ' · ' + esc(roles) : '') + (x.day ? ' · ' + esc(x.day) : '') + '</p>' +
+  h += '<header class="x-head"><p class="a-eyebrow">' + esc(x.where) + (roles ? ' · ' + esc(roles) : '') + '</p>' + (when ? '<p class="x-when">' + esc(when) + '</p>' : '') +
        (hl && hl.distinction ? '<p class="x-dist" data-distinction>' + esc(hl.distinction) + '</p>' : '') +
        '<h1>' + esc(x.name) + '</h1>' +
        (hl && hl.line ? '<p class="x-line">' + esc(hl.line) + '</p>' : '') +
        '<p class="x-lede">' + esc(x.intro || x.teaser || '') + '</p>' +
        (hl && hl.house ? '<p class="x-house">' + esc(hl.house) + '</p>' : '') +
        (ctx.length ? '<p class="x-ctx">' + ctx.map(esc).join('<br>') + '</p>' : '') + '</header>';
+  /* the itinerary: the day(s) this place is visited and what happens there — the date, never a clock (Owner, 22 Sep 2026) */
+  if (vis.length) h += '<section class="x-sec x-visits" data-visits><p class="a-eyebrow">On the itinerary</p><div class="x-kv">' + vis.map(function (v) { return '<div><span class="k">' + esc(D.dateWords({ visits: [v] })) + '</span><span class="v">' + esc(v.what || '') + '</span></div>'; }).join('') + '</div></section>';
+  /* THE FILMS WITH SOUND (BARON, 22 Sep 2026): the club's own clips — Play / Pause · Sound on / Mute (assets/clip.js): they start
+     muted where the browser insists and with sound where it allows; the guest's tap on SOUND ON is what brings the music */
+  if (x.clips && x.clips.length) {
+    h += '<section class="x-sec x-films" data-films><p class="a-eyebrow">The night, on film</p><h2>' + esc(x.name) + ' — with the sound on</h2><p class="x-films-note">Three short films from the club. Tap Sound on for the music.</p><div class="x-films-grid">' + x.clips.map(function (c, i) {
+      return '<div class="am a-clip x-film' + (c.w >= c.h ? ' is-square' : ' is-tall') + '" data-clip="' + esc(x.id) + '-' + (i + 1) + '" data-clip-state="paused" data-clip-audio="off" style="background-image:url(' + esc(c.poster) + ')">' +
+        '<video class="a-clip-video" playsinline loop preload="metadata" poster="' + esc(c.poster) + '" data-src="' + esc(c.src) + '" aria-label="' + esc(c.alt) + '"></video>' +
+        '<div class="a-clip-ctl"><button type="button" class="a-clip-btn" data-clip-play aria-label="Play the film" aria-pressed="false"><i class="ic-play" aria-hidden="true"></i><i class="ic-pause" aria-hidden="true"></i><span class="t">Play</span></button>' +
+        '<button type="button" class="a-clip-btn" data-clip-sound aria-label="Sound on" aria-pressed="false"><i class="ic-sound" aria-hidden="true"></i><span class="t">Sound on</span></button></div></div>';
+    }).join('') + '</div></section>';
+  }
   /* discovery entries: the hosts' own paragraphs where they wrote some */
   if (x.detail && x.detail.length) {
     h += '<section class="x-sec"><p class="a-eyebrow">About</p>' + x.detail.map(function (p) { return '<p>' + esc(p) + '</p>'; }).join('') + '</section>';
@@ -152,12 +177,13 @@
   if (hl && pr.dress) h += '<section class="x-sec x-dress" data-dress><p class="a-eyebrow">Dress code · ' + esc(x.name) + '</p><h2>' + esc(hl.dressTitle || 'The dress code') + '</h2><p>' + esc(pr.dress) + '</p><p class="x-dresslink"><a class="a-link" href="dress.html">The dress codes of the journey</a></p></section>';
   /* practical information — only the fields the source actually carries */
   var ct = hl && hl.contact || null;
-  if (pr.price || pr.hours || pr.when || pr.dress || x.maps || x.link || ct) {
+  if (pr.price || pr.hours || pr.when || pr.dress || pr.address || x.maps || x.link || ct) {
     h += '<section class="x-sec"><p class="a-eyebrow">Practical information</p><div class="x-kv">' +
       (pr.price ? '<div data-private><span class="k">Price</span><span class="v"><span class="price">' + esc(pr.price) + '</span>' + (pr.priceNote ? '<small>' + esc(pr.priceNote) + '</small>' : '') + '</span></div>' : '') +
       (pr.when ? '<div><span class="k">When</span><span class="v">' + esc(pr.when) + '</span></div>' : '') +
       (pr.hours ? '<div><span class="k">Opening hours</span><span class="v">' + pr.hours.map(esc).join('<br>') + '</span></div>' : '') +
       (pr.dress ? '<div><span class="k">Dress code</span><span class="v">' + esc(pr.dress) + '</span></div>' : '') +
+      (pr.address ? '<div><span class="k">Address</span><span class="v">' + pr.address.map(esc).join('<br>') + '</span></div>' : '') +
       (ct ? '<div><span class="k">The house</span><span class="v x-contact">' + (ct.address ? ct.address.map(esc).join('<br>') + '<br>' : '') + (ct.where ? esc(ct.where) + '<br>' : '') + (ct.phone ? '<a href="tel:' + esc(ct.phone.replace(/[^+\d]/g, '')) + '">' + esc(ct.phone) + '</a><br>' : '') + (ct.email ? '<a href="mailto:' + esc(ct.email) + '">' + esc(ct.email) + '</a>' : '') + '</span></div>' : '') +
       ((x.maps || x.link) ? '<div><span class="k">Where</span><span class="v"><span class="x-links" style="margin-top:0">' +
         (x.maps ? '<a class="a-link" href="' + esc(x.maps) + '" target="_blank" rel="noopener">Map</a>' : '') +
@@ -179,8 +205,9 @@
   h += '<p class="x-back"><a class="a-link" href="experiences.html#' + esc(x.chapter) + '">All experiences</a></p>';
   root.innerHTML = h;
   /* the Highlight's clip: the same-origin card clip of the data record (assets/experiences.js), mounted by the shared card-video module */
-  var clipFrame = root.querySelector('[data-clip]'); if (clipFrame && hl && hl.clip) { clipFrame.setAttribute('data-video', hl.clip); if (window.SIYL_AMAN && SIYL_AMAN.video) SIYL_AMAN.video.wire(root); }
+  var clipFrame = root.querySelector('.x-clip [data-clip]'); if (clipFrame && hl && hl.clip) { clipFrame.setAttribute('data-video', hl.clip); if (window.SIYL_AMAN && SIYL_AMAN.video) SIYL_AMAN.video.wire(root); }
   if (window.SIYL_XGAL) document.querySelectorAll('[data-xgal]').forEach(SIYL_XGAL.wire);
+  if (window.SIYL_CLIP) SIYL_CLIP.init();   /* the films with sound, once they are in the page */
   document.querySelectorAll('[data-acc]').forEach(function (b) {
     b.addEventListener('click', function () {
       var on = b.getAttribute('aria-expanded') === 'true', box = document.getElementById(b.getAttribute('aria-controls'));

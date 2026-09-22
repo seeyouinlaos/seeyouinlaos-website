@@ -29,7 +29,7 @@ function completeExceptJourney(w, opts = {}) {
   const G = w.SIYL_GUEST, T = w.SIYL_TEMPLE, id = G.me().guestId;
   G.setScope({ all: true });   /* WHERE WILL YOU JOIN US (Owner, 18 Sep 2026): the first decision — every destination here */
   G.setContact('email', 'guest@example.com'); G.setContact('phone', '+66 81 234 5678');
-  T.setAttendance(id, opts.temple || 'no'); ['coffee', 'vows', 'dinner'].forEach((k) => T.setEvent(id, k, opts.dinner === false && k === 'dinner' ? 'no' : 'yes'));
+  T.setAttendance(id, opts.temple || 'no'); ['coffee', 'vows', 'dinner'].forEach((k) => T.setEvent(id, k, opts.dinner === false && k === 'dinner' ? 'no' : 'yes')); T.setFinale(id, 'pool');
   if (opts.temple === 'yes') T.setOffering(id, opts.offering || 'no');
   G.setDressAck(true);
   G.setAllergy('no'); G.setPhotoAck(true);
@@ -85,10 +85,12 @@ test('FLOW · step 02 needs every stage answered AND a place in every chosen roo
 test('FLOW · step 03 is every event, and the Sangkhathan while attending the temple; 04 is the dress code and the seats of the events attended', () => {
   const w = page({ auth: PEGGY });
   const G = w.SIYL_GUEST, T = w.SIYL_TEMPLE, id = 'g-peggy';
-  deq(G.missingFor('wedding').map((m) => m.href), ['wedding.html#ev-temple', 'wedding.html#ev-coffee', 'wedding.html#ev-vows', 'wedding.html#ev-dinner']);
+  deq(G.missingFor('wedding').map((m) => m.href), ['wedding.html#ev-temple', 'wedding.html#ev-coffee', 'wedding.html#ev-vows', 'wedding.html#ev-dinner', 'wedding.html#finale'], 'the four events and A WISH FROM THE BRIDE & GROOM (22 Sep 2026)');
   T.setAttendance(id, 'yes'); ['coffee', 'vows', 'dinner'].forEach((k) => T.setEvent(id, k, 'yes'));
-  deq(G.missingFor('wedding').map((m) => m.href), ['wedding.html#sangkhathan'], 'attending the temple, the Sangkhathan is a required yes/no');
+  deq(G.missingFor('wedding').map((m) => m.href), ['wedding.html#sangkhathan', 'wedding.html#finale'], 'attending the temple, the Sangkhathan is a required yes/no; the final act stays required');
   T.setOffering(id, 'no');
+  assert.equal(G.done('wedding'), false, 'the final act is never defaulted');
+  assert.equal(T.finaleOf(id), null); T.setFinale(id, 'baron'); assert.equal(T.finaleOf(id), 'baron');
   assert.equal(G.done('wedding'), true);
   T.setAttendance(id, 'no');
   assert.equal(G.done('wedding'), true, 'not attending: nothing to decide');
@@ -100,7 +102,7 @@ test('FLOW · step 03 is every event, and the Sangkhathan while attending the te
 test('FLOW · step 05: allergy NO completes; YES needs details; every visible question must be answered (Owner, 15 Sep 2026); photography must be acknowledged; documents never block', () => {
   const w = page({ auth: PEGGY });
   const G = w.SIYL_GUEST, D = w.SIYL_DOCS;
-  const QS = ['profile:coffeetea', 'profile:flavor', 'profile:drink', 'profile:film', 'profile:music'];
+  const QS = ['profile:coffeetea', 'profile:flavor', 'profile:drink', 'profile:film', 'profile:genres'];   /* the genres are required, the song line optional (22 Sep 2026) */
   deq(G.missingFor('about').map((m) => m.key), ['allergy', ...QS, 'photo']);
   G.setAllergy('yes');
   deq(G.missingFor('about').slice(0, 2).map((m) => [m.key, m.href]), [['allergy-details', 'about-you.html#allergy-details'], ['profile:coffeetea', 'about-you.html#q-coffeetea']]);
@@ -115,16 +117,19 @@ test('FLOW · step 05: allergy NO completes; YES needs details; every visible qu
   G.setPhotoAck(true);
   assert.equal(G.done('about'), false, 'five questions still open hold the step');
   assert.equal(G.mayEnter('review'), false);
-  for (const [k, v] of [['flavor', 'Pandan'], ['drink', 'Water'], ['film', 'In the Mood for Love'], ['music', 'Jazz']]) G.setProfile('g-peggy', k, v);
-  assert.equal(G.done('about'), true, 'no document, no consent needed');
+  for (const [k, v] of [['flavor', 'Pandan'], ['drink', 'Water'], ['film', 'In the Mood for Love']]) G.setProfile('g-peggy', k, v);
+  assert.equal(G.done('about'), false, 'the music genres are still open');
+  G.setProfile('g-peggy', 'genres', ['Jazz', 'Latin']); deq(G.profile('g-peggy', 'genres'), ['Jazz', 'Latin']);
+  assert.equal(G.done('about'), true, 'no document, no consent, no song line needed');
   G.setAllergy('no');
   assert.equal(G.allergyDetails(), '', 'NO never keeps stale details');
   assert.equal(G.done('about'), true);
   assert.equal(D.consentDecided('g-peggy'), false, 'the publication consent is a separate optional choice');
   assert.equal(G.photoAck().textVersion, G.PHOTO_VERSION);
   /* the retired questions are truly gone */
-  deq(G.PROFILE.map((q) => q.key), ['coffeetea', 'flavor', 'drink', 'film', 'music']);
-  deq(G.PROFILE.map((q) => q.n), ['02', '03', '04', '05', '06'], 'sequential numbering after the allergy question (Question 5 "rather avoid" retired 19 Sep 2026)');
+  deq(G.PROFILE.map((q) => q.key), ['coffeetea', 'flavor', 'drink', 'film', 'genres', 'music']);
+  deq(G.PROFILE.map((q) => q.n), ['02', '03', '04', '05', '06', '07'], 'sequential numbering after the allergy question (Question 5 "rather avoid" retired 19 Sep 2026; the genres 06, the song line 07 optional)');
+  deq(G.PROFILE.map((q) => !!q.required), [true, true, true, true, true, false]);
   assert.equal(G.ALLERGY.n, '01');
   for (const f of ['assets/guest.js', 'about-you.html', 'review.html']) {
     const s = src(f);
@@ -133,12 +138,13 @@ test('FLOW · step 05: allergy NO completes; YES needs details; every visible qu
   }
   assert.match(src('assets/guest.js'), /I understand and acknowledge this\./); assert.match(src('about-you.html'), /G\.PHOTO_TEXT/);
   assert.match(src('about-you.html'), /Optional · not added/, 'documents stay optional');
-  /* no contradictory OPTIONAL label on a required question */
+  /* the label of a question is the schema's word (22 Sep 2026): Required on a required question, Optional only on the optional song line */
   const about = src('about-you.html');
-  assert.doesNotMatch(about, /q\.n\+' · Optional'|placeholder="Optional"|<p class="t-l1">Optional<\/p><h2 class="t-h2">A little more/);
-  assert.match(about, /aria-required="true" aria-invalid="'\+\(ok\?'false':'true'\)\+'"/);
-  assert.match(about, /Complete':'Required'/);
-  assert.match(src('assets/guest.js'), /\{ key: 'flavor', n: '03', q: 'My Favorite Flavor', hint: 'Choose one\.', required: true, type: 'choice', choices: \['Coffee', 'Milk', 'Butter', 'Pandan', 'Matcha Green Tea', 'Strawberry Milk'\] \}/);
+  assert.doesNotMatch(about, /q\.n\+' · Optional'|<p class="t-l1">Optional<\/p><h2 class="t-h2">A little more/);
+  assert.match(about, /aria-required="'\+\(q\.required\?'true':'false'\)\+'" aria-invalid="'\+\(ok\|\|!q\.required\?'false':'true'\)\+'"/);
+  assert.match(about, /Complete':\(q\.required\?'Required':'Optional'\)/);
+  assert.match(src('src/questionnaire.js'), /\{ key: 'flavor', n: '03', q: 'My Favorite Flavor', hint: 'Choose one\.', required: true, type: 'choice', choices: \['Coffee', 'Milk', 'Butter', 'Pandan', 'Matcha Green Tea', 'Strawberry Milk'\] \}/);
+  assert.match(src('assets/guest.js'), /var ALLERGY = Q\.ALLERGY, PROFILE = Q\.PROFILE, FINALE = Q\.FINALE;/, 'guest.js reads the one schema');
   /* Review names an unanswered question with the way to it */
   assert.match(src('review.html'), /about-you\.html#q-'\+q\.key/);
 });

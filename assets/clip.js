@@ -8,6 +8,7 @@
    · Leaving the viewport pauses, returning resumes where it was — never from 0.
    · A manual PAUSE wins for the page session: the viewport never restarts it;
      only PLAY does. After PLAY the viewport logic runs as before.
+   · One film at a time: a frame that starts pauses every other frame on the page.
    · Reduced motion: no autoplay — the poster and PLAY.
    · The source is attached only as the frame approaches (no preload far away).
    ========================================================================== */
@@ -41,9 +42,12 @@
       if (play) { play.setAttribute('aria-label', playing ? 'Pause the film' : 'Play the film'); play.setAttribute('aria-pressed', playing ? 'true' : 'false'); play.querySelector('.t').textContent = playing ? 'Pause' : 'Play'; }
       if (sound) { sound.setAttribute('aria-label', v.muted ? 'Sound on' : 'Mute'); sound.setAttribute('aria-pressed', v.muted ? 'false' : 'true'); sound.querySelector('.t').textContent = v.muted ? 'Sound on' : 'Mute'; }
     }
-    /* start: with sound where the browser allows it, muted where it does not */
+    /* start: with sound where the browser allows it, muted where it does not.
+       ONE FILM AT A TIME (22 Sep 2026 · the BARON films): a frame that starts silences the others — never two sound tracks over
+       each other; a frame paused this way starts again by its own PLAY or by coming back into view */
     function start(userGesture) {
       attach();
+      try { document.dispatchEvent(new CustomEvent('siyl:clip-start', { detail: { frame: frame } })); } catch (e) {}
       v.muted = !wantSound;
       var p = v.play();
       if (p && p.catch) p.catch(function () {
@@ -54,6 +58,7 @@
     }
     function stop() { try { v.pause(); } catch (e) {} paint(); }
 
+    document.addEventListener('siyl:clip-start', function (e) { if (e.detail && e.detail.frame !== frame && !v.paused) stop(); });
     if (play) play.addEventListener('click', function () {
       if (!v.paused && !v.ended) { manual = true; remember(id, true); stop(); }
       else { manual = false; remember(id, false); start(true); }
@@ -61,6 +66,7 @@
     if (sound) sound.addEventListener('click', function () {
       wantSound = v.muted; v.muted = !v.muted;
       if (v.paused && !manual) start(true);
+      else if (!v.muted) { try { document.dispatchEvent(new CustomEvent('siyl:clip-start', { detail: { frame: frame } })); } catch (e) {} }   /* sound on: the other films fall silent */
       paint();
     });
     ['play', 'pause', 'playing', 'waiting', 'stalled', 'volumechange', 'ended', 'loadeddata', 'canplay'].forEach(function (ev) { v.addEventListener(ev, paint); });

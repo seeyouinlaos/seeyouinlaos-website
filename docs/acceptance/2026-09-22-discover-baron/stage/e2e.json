@@ -1,0 +1,97 @@
+[
+ {
+  "id": "discover-taxonomy-and-dates",
+  "ok": true,
+  "d": "{\"rails\":[\"RESTAURANTS · 10 [10]\",\"CAFÉS · 7 [7]\",\"BARS & NIGHTLIFE · 3 [3]\",\"EXPERIENCES · 3 [3]\",\"SHOPPING & PLACES · 5 [5]\",\"RESTAURANTS · 4 [4]\",\"CAFÉS · 3 [3]\",\"BARS & NIGHTLIFE · 3 [3]\",\"EXPERIENCES · 9 [9]\",\"SHOPPING & PLACES · 2 [2]\",\"EXPERIENCES · 1 [1]\"],\"dup\":[],\"harudot\":[\"bkk:cafe:BANGKOK · CAFÉ · Tuesday, 23 February · Sunday, 7 March 2027\"],\"bkkCafe\":[\"bkk-diorlv@2027-02-22\",\"bkk-mooyoo@2027-02-23\",\"bkk-timespace@2027-02-23\",\"bkk-whispering@2027-02-23\",\"bkk-harudot@2027-02-23\",\"bkk-madeleine@2027-02-24\",\"bkk-cafecraft@2027-03-07\"],\"laosNight\":[\"vte-sona@2027-02-25 VIENTIANE · BAR\",\"vte-selene@2027-02-27 VIENTIANE · BAR\",\"vte-baron@2027-02-28 VIENTIANE · CLUB\"],\"laosExp\":[\"vte-thatluang\",\"vte-silkresidence\",\"vte-ongteu\"],\"gone\":[],\"china\":[\"cn-blossom\"],\"returnRail\":false,\"highlight\":[\"bkk-suhring\",\"bkk-baanphraya\",\"1872\",\"bkk-cannubi\",\"vte-baron\"],\"anyTime\":false,\"ov\":0}"
+ },
+ {
+  "id": "baron-page-320",
+  "ok": true,
+  "d": "{\"head\":\"VIENTIANE · CLUB\",\"date\":\"Sunday, 28 February 2027\",\"title\":\"BARON Vientiane\",\"dist\":\"THE WEDDING NIGHT · VIP AFTER PARTY\",\"gal\":7,\"visits\":\"ON THE ITINERARY\\n\\nSUNDAY, 28 FEBRUARY 2027\\nVIP After Party\",\"address\":true,\"ov\":0,\"films\":[[272,484,true,\"PLAY:36/MUTE:36\"],[272,484,true,\"PLAY:36/MUTE:36\"],[272,272,true,\"PLAY:36/MUTE:36\"]],\"leak\":[],\"sound\":{\"before\":{\"muted\":false,\"paused\":false},\"toggled\":true,\"muted\":false,\"paused\":false,\"audio\":\"on\",\"state\":\"playing\",\"src\":true,\"t\":2.181310060424173,\"othersPaused\":true},\"pause\":{\"paused\":true,\"state\":\"paused\",\"label\":\"PLAY\"}}"
+ },
+ {
+  "id": "baron-page-390",
+  "ok": true,
+  "d": "{\"head\":\"VIENTIANE · CLUB\",\"date\":\"Sunday, 28 February 2027\",\"title\":\"BARON Vientiane\",\"dist\":\"THE WEDDING NIGHT · VIP AFTER PARTY\",\"gal\":7,\"visits\":\"ON THE ITINERARY\\n\\nSUNDAY, 28 FEBRUARY 2027\\nVIP After Party\",\"address\":true,\"ov\":0,\"films\":[[342,608,true,\"PLAY:36/MUTE:36\"],[342,608,true,\"PLAY:36/MUTE:36\"],[342,342,true,\"PLAY:36/MUTE:36\"]],\"leak\":[],\"sound\":{\"before\":{\"muted\":false,\"paused\":false},\"toggled\":true,\"muted\":false,\"paused\":false,\"audio\":\"on\",\"state\":\"playing\",\"src\":true,\"t\":2.305187194965623,\"othersPaused\":true},\"pause\":{\"paused\":true,\"state\":\"paused\",\"label\":\"PLAY\"}}"
+ },
+ {
+  "id": "baron-page-834",
+  "ok": true,
+  "d": "{\"head\":\"VIENTIANE · CLUB\",\"date\":\"Sunday, 28 February 2027\",\"title\":\"BARON Vientiane\",\"dist\":\"THE WEDDING NIGHT · VIP AFTER PARTY\",\"gal\":7,\"visits\":\"ON THE ITINERARY\\n\\nSUNDAY, 28 FEBRUARY 2027\\nVIP After Party\",\"address\":true,\"ov\":0,\"films\":[[329,585,true,\"PLAY:36/MUTE:36\"],[329,585,true,\"PLAY:36/MUTE:36\"],[672,420,true,\"PLAY:36/MUTE:36\"]],\"leak\":[],\"sound\":{\"before\":{\"muted\":false,\"paused\":true},\"toggled\":true,\"muted\":false,\"paused\":false,\"audio\":\"on\",\"state\":\"playing\",\"src\":true,\"t\":1.7581188326554287,\"othersPaused\":true},\"pause\":{\"paused\":true,\"state\":\"paused\",\"label\":\"PLAY\"}}"
+ },
+ {
+  "id": "baron-page-1194",
+  "ok": true,
+  "d": "{\"head\":\"VIENTIANE · CLUB\",\"date\":\"Sunday, 28 February 2027\",\"title\":\"BARON Vientiane\",\"dist\":\"THE WEDDING NIGHT · VIP AFTER PARTY\",\"gal\":7,\"visits\":\"ON THE ITINERARY\\n\\nSUNDAY, 28 FEBRUARY 2027\\nVIP After Party\",\"address\":true,\"ov\":0,\"films\":[[244,434,true,\"PLAY:38/MUTE:38\"],[244,434,true,\"PLAY:38/MUTE:38\"],[244,244,true,\"PLAY:38/MUTE:38\"]],\"leak\":[],\"sound\":{\"before\":{\"muted\":true,\"paused\":false},\"toggled\":true,\"muted\":false,\"paused\":false,\"audio\":\"on\",\"state\":\"playing\",\"src\":true,\"t\":1.7275989167366699,\"othersPaused\":true},\"pause\":{\"paused\":true,\"state\":\"paused\",\"label\":\"PLAY\"}}"
+ },
+ {
+  "id": "baron-page-1440",
+  "ok": true,
+  "d": "{\"head\":\"VIENTIANE · CLUB\",\"date\":\"Sunday, 28 February 2027\",\"title\":\"BARON Vientiane\",\"dist\":\"THE WEDDING NIGHT · VIP AFTER PARTY\",\"gal\":7,\"visits\":\"ON THE ITINERARY\\n\\nSUNDAY, 28 FEBRUARY 2027\\nVIP After Party\",\"address\":true,\"ov\":0,\"films\":[[244,434,true,\"PLAY:38/MUTE:38\"],[244,434,true,\"PLAY:38/MUTE:38\"],[244,244,true,\"PLAY:38/MUTE:38\"]],\"leak\":[],\"sound\":{\"before\":{\"muted\":false,\"paused\":false},\"toggled\":true,\"muted\":false,\"paused\":false,\"audio\":\"on\",\"state\":\"playing\",\"src\":true,\"t\":2.455206,\"othersPaused\":true},\"pause\":{\"paused\":true,\"state\":\"paused\",\"label\":\"PLAY\"}}"
+ },
+ {
+  "id": "finale-nothing-preselected",
+  "ok": true,
+  "d": "{\"pressed\":[\"false\",\"false\"],\"state\":\"open\",\"words\":\"05 · AFTER THE DINNER · A WISH FROM THE BRIDE & GROOM How will you end the wedding night with us? When the last course is cleared and the speeches are done, the night is not over. We would love to know where we will find you — choose one; it is our wish that nobody sits this out. CLEO · YOU Join the Bride & Groom for the pool jump Black tie, loosened. When the couple go in, so do their friends — the courtyard pool at Souphattra Heritage, a towel waiting on every lounger. Join the Bride & Groom at BARON Vientiane · VIP after party The club on the second floor above Starbucks: the couple’s VIP after party, the DJ, the floor, music until the last of us leaves. REQUIRED · NOT DECIDED\"}"
+ },
+ {
+  "id": "client-readiness-names-finale",
+  "ok": true,
+  "d": "{\"ok\":false,\"keys\":[\"finale\",\"dress\",\"seat:ceremony\",\"seat:dinner\",\"allergy\",\"profile:coffeetea\",\"profile:flavor\",\"profile:drink\",\"profile:film\",\"profile:genres\",\"photo\"],\"hrefs\":[\"wedding.html#finale\",\"wedding-preparation.html#ack\",\"wedding-preparation.html#seats\",\"wedding-preparation.html#seats\",\"about-you.html#allergy\",\"about-you.html#q-coffeetea\",\"about-you.html#q-flavor\",\"about-you.html#q-drink\",\"about-you.html#q-film\",\"about-you.html#q-genres\",\"about-you.html#photo\"]}"
+ },
+ {
+  "id": "finale-baron-chosen",
+  "ok": true,
+  "d": "{\"pressed\":[\"pool=false\",\"baron=true\"],\"state\":\"baron\",\"stored\":\"baron\"}"
+ },
+ {
+  "id": "genres-nothing-preselected-song-optional",
+  "ok": true,
+  "d": "{\"genres\":[\"false\",\"false\",\"false\",\"false\",\"false\",\"false\",\"false\",\"false\",\"false\",\"false\",\"false\",\"false\",\"false\"],\"count\":\"CHOOSE AT LEAST ONE\",\"state\":\"06 · REQUIRED\",\"music\":\"07 · OPTIONAL\",\"n\":13}"
+ },
+ {
+  "id": "client-readiness-names-genres",
+  "ok": true,
+  "d": "{\"ok\":false,\"keys\":[\"profile:genres\"],\"hrefs\":[\"about-you.html#q-genres\"]}"
+ },
+ {
+  "id": "server-refuses-unanswered",
+  "ok": true,
+  "d": "{\"status\":422,\"missing\":[\"finale\",\"profile:genres\"],\"stored\":false,\"draftSame\":true}"
+ },
+ {
+  "id": "genres-multi-select",
+  "ok": true,
+  "d": "{\"on\":[\"Jazz\",\"Pop\",\"Latin\"],\"count\":\"3 GENRES CHOSEN\",\"state\":\"06 ·  COMPLETE\",\"stored\":[\"Jazz\",\"Pop\",\"Latin\"]}"
+ },
+ {
+  "id": "send-accepted-with-answers",
+  "ok": true,
+  "d": "{\"s\":{\"clicked\":true,\"after\":\"SENT TO GUEST RELATIONS\",\"err\":\"\"},\"finale\":\"BARON Vientiane · VIP after party\",\"genres\":[\"Jazz\",\"Pop\",\"Latin\"]}"
+ },
+ {
+  "id": "answers-persist-across-devices",
+  "ok": true,
+  "d": "{\"persisted\":{\"genres\":[\"Jazz\",\"Pop\",\"Latin\"],\"finale\":\"baron\"},\"f2\":\"baron\"}"
+ },
+ {
+  "id": "pool-jump-chosen-and-sent",
+  "ok": true,
+  "d": "{\"sb\":{\"clicked\":true,\"after\":\"SENT TO GUEST RELATIONS\",\"err\":\"\"},\"finale\":\"The pool jump\"}"
+ },
+ {
+  "id": "passport-never-blocks",
+  "ok": true,
+  "d": "no document uploaded, both trips sent"
+ },
+ {
+  "id": "journey-in-numbers-recomputed",
+  "ok": true,
+  "d": "{\"countries\":{\"n\":\"3\",\"label\":\"COUNTRIES\"},\"cities\":{\"n\":\"4\",\"label\":\"CITIES\"},\"stays\":{\"n\":\"9\",\"label\":\"HOUSES & HOTELS\"},\"nights\":{\"n\":\"15\",\"label\":\"NIGHTS\"},\"days\":{\"n\":\"16\",\"label\":\"DAYS\"},\"trains\":{\"n\":\"2\",\"label\":\"TRAINS\"},\"flights\":{\"n\":\"3\",\"label\":\"FLIGHTS\"},\"restaurants\":{\"n\":\"14\",\"label\":\"RESTAURANTS\"},\"cafes\":{\"n\":\"10\",\"label\":\"CAFÉS\"},\"bars\":{\"n\":\"6\",\"label\":\"BARS & NIGHTLIFE\"},\"museums\":{\"n\":\"4\",\"label\":\"MUSEUMS\"},\"temples\":{\"n\":\"2\",\"label\":\"TEMPLES & STUPAS\"}}"
+ },
+ {
+  "id": "console-errors",
+  "ok": true,
+  "d": "no script or console error"
+ }
+]

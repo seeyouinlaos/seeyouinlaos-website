@@ -36,7 +36,7 @@ async function livePage(auth, rooms, seed) {
 function answerTheRest(w) {
   const G = w.SIYL_GUEST, T = w.SIYL_TEMPLE, id = G.me().guestId;
   G.setContact('email', 'guest@example.com'); G.setContact('phone', '+66 81 234 5678');
-  T.setAttendance(id, 'no'); ['coffee', 'vows', 'dinner'].forEach((k) => T.setEvent(id, k, 'yes'));
+  T.setAttendance(id, 'no'); ['coffee', 'vows', 'dinner'].forEach((k) => T.setEvent(id, k, 'yes')); T.setFinale(id, 'pool');
   G.setDressAck(true); G.setAllergy('no'); G.setPhotoAck(true);
   G.PROFILE.forEach((q) => G.setProfile(id, q.key, q.choices ? q.choices[0] : 'Answered'));
 }
@@ -311,7 +311,7 @@ test('CODEX 011-1 · a release that fails keeps the stage held AND named: readin
 
 test('CODEX 011-2 · a guest not joining Vientiane sends no wedding attendance: every moment reads Not joining, no offering, no seat — in the payload and both emails', () => {
   const w = page({ auth: PEGGY }); const G = w.SIYL_GUEST, T = w.SIYL_TEMPLE, id = PEGGY.guestId;
-  answerTheRest(w); T.setAttendance(id, 'yes'); T.setOffering(id, 'yes'); ['coffee', 'vows', 'dinner'].forEach((k) => T.setEvent(id, k, 'yes'));
+  answerTheRest(w); T.setAttendance(id, 'yes'); T.setOffering(id, 'yes'); ['coffee', 'vows', 'dinner'].forEach((k) => T.setEvent(id, k, 'yes')); T.setFinale(id, 'baron');
   G.setScope({ all: true });
   let op = T.operational(); assert.equal(op.guests[0].events.dinner, 'Joining'); assert.equal(op.participation, 'Joining Vientiane');
   G.setScope({ none: true });

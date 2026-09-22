@@ -902,3 +902,12 @@ body.p-calm .p-stage.p-wizard-landed { animation: none; }
    waits, quietly, until the seat is confirmed */
 body.seatbar-on .prep-foot [data-continue] { opacity: .35; pointer-events: none; }
 body.seatbar-on .prep-foot .prep-foot-note { display: none; }
+
+/* A WISH FROM THE BRIDE & GROOM (Owner, 22 Sep 2026): the two final acts of the wedding night as selection controls — the act
+   in the editorial face, its line beneath; one pressed, never both, never one in advance */
+.pf-finale { display: grid; gap: var(--s3); margin-top: var(--s3); }
+.pf-finale-opt { display: block; text-align: left; width: 100%; padding: 16px 18px; white-space: normal; height: auto; min-height: 0; line-height: 1.4; }
+.pf-finale-l { display: block; font-family: var(--f-ed); font-weight: 200; font-size: 18px; line-height: 1.3; letter-spacing: .2px; text-transform: none; }
+.pf-finale-c { display: block; margin-top: 6px; font-family: var(--f-ui); font-size: 12.5px; line-height: 1.7; letter-spacing: 0; text-transform: none; color: #4A4A4A; }
+.pf-finale-opt[aria-pressed="true"] .pf-finale-c { color: inherit; }
+@media (min-width: 900px) { .pf-finale { grid-template-columns: 1fr 1fr; } }

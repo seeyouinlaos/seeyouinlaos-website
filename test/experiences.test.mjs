@@ -25,7 +25,7 @@ const EXP = W.SIYL_EXP, GAL = W.SIYL_EXP_GALLERY;
 const INV = JSON.parse(src('src/experience-inventory.json'));
 const GJSON = JSON.parse(src('src/experience-galleries.json'));
 const byId = Object.fromEntries(INV.map((e) => [e.id, e]));
-const ROLES = ['breakfast', 'lunch', 'dinner', 'cafe', 'experience', 'place', 'bar'];
+const ROLES = ['breakfast', 'lunch', 'dinner', 'cafe', 'experience', 'place', 'bar', 'club'];   /* club: BARON, the wedding night (22 Sep 2026) */
 
 test('every place on the website is in the canonical inventory, and every inventory row is on the website', () => {
   const ids = EXP.map((x) => x.id);
@@ -102,6 +102,10 @@ test('detail content exists where the source carries it; discovery places carry 
       assert.ok(x.practical && Array.isArray(x.practical.hours) && x.practical.hours.length, x.id + ' hours from the source');
       assert.equal(!!x.practical.price, !!e.price, x.id + ' a price only where the source carries one');
       assert.ok(!x.sections && !x.intro, x.id + ' no invented structured record');
+    } else if (e.sheet === 'OWNER') {
+      /* BARON (Owner, 22 Sep 2026): the Owner's own words and address — a detail and the practical facts the Owner gave (when · dress · address), no invented hours or price */
+      assert.ok(x.teaser && Array.isArray(x.detail) && x.detail.length >= 1, x.id + ' the Owner\'s description');
+      assert.ok(x.practical && x.practical.when && x.practical.address && !x.practical.hours && !x.practical.price, x.id + ' only the practical facts the Owner gave');
     } else {
       assert.ok(!x.sections && !x.practical, x.id + ' no invented detail record');
       assert.ok(x.teaser, x.id + ' teaser');

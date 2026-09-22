@@ -533,6 +533,21 @@ gate('P7', 'Dress Code imagery real (23 — resort-01 retired by the owner), no 
     problems.length ? problems.join(' · ') : (r.stdout || '').trim());
 }
 
+/* GATE Q1 — THE ONE QUESTIONNAIRE (Owner, 22 Sep 2026): src/questionnaire.js is the one schema of what the guest is asked and what is
+ * REQUIRED before SEND; assets/questionnaire.js is generated from it and must be byte-current; every page that loads guest.js loads
+ * it; the Worker validates About You and the final act with it. */
+{
+  const { spawnSync } = require('child_process');
+  const r = spawnSync('node', [path.join(__dirname, 'build-questionnaire.cjs'), '--check'], { encoding: 'utf8' });
+  const problems = [];
+  if (r.status !== 0) problems.push('assets/questionnaire.js is stale — run node src/build-questionnaire.cjs');
+  for (const f of fs.readdirSync(ROOT).filter((n) => /\.html$/.test(n))) { const h = read(f); if (/assets\/guest\.js/.test(h) && !/assets\/questionnaire\.js/.test(h)) problems.push(f + ' loads guest.js without the questionnaire'); }
+  if (!/import \{ profileMissing as questionnaireMissing, finaleOf/.test(read('src/worker.js'))) problems.push('the Worker does not validate About You and the final act with the questionnaire');
+  if (!/w\.finale !== 'pool' && w\.finale !== 'baron'/.test(read('src/stage-graph.js'))) problems.push('the graph does not require the final act');
+  gate('Q1', 'One questionnaire: the generated client copy is current, every page loads it, the Worker requires what it requires', problems.length === 0,
+    problems.length ? problems.join(' · ') : (r.stdout || '').trim());
+}
+
 /* GATE M1 — THE MEDIA RECORDS (Owner, release 012 · 19 Sep 2026): the stay media record (hotel taxonomy, every frame of the hotel it
  * names, from the Owner's Drive) is what assets/stay-media.js carries, and the experience galleries carry a kind on every frame and
  * never a dish — both builders refuse a record that breaks the rule. */

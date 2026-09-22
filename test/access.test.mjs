@@ -147,9 +147,9 @@ test('ACCESS · the pages: the bag, the tickets, the room and transport planning
 });
 
 test('EDIT 3 · Harudot is a café; the dress references share one 3:4 card, covered from the top, never stretched', () => {
-  /* release 014 (the current Operations Master, 19 Sep 2026): Harudot is the café of 23.02 AND the experience of 07.03 */
-  assert.match(src('assets/experiences.js'), /\{ id: 'bkk-harudot', roles: \['cafe', 'experience'\]/);
-  assert.match(src('src/experience-inventory.json'), /"id": "bkk-harudot",\n  "name": "Harudot",\n  "city": "Bangkok",\n  "roles": \[\n   "cafe",\n   "experience"\n  \]/);
+  /* the taxonomy (Owner, 22 Sep 2026): Harudot is a CAFÉ — one card, its two days (23.02 and 07.03); never an experience */
+  assert.match(src('assets/experiences.js'), /\{ id: 'bkk-harudot', category: 'cafe', roles: \['cafe'\], visits: \[\{ day: 3, date: '2027-02-23'[^\]]*\{ day: 15, date: '2027-03-07'/);
+  assert.match(src('src/experience-inventory.json'), /"id": "bkk-harudot",\n  "name": "Harudot",\n  "city": "Bangkok",\n  "roles": \[\n   "cafe"\n  \]/);
   const css = src('assets/prep.css');
   assert.match(css, /\.p-rail > img \{ display: block; flex: 0 0 72%; width: 72%; max-width: 300px; height: auto; aspect-ratio: 3 \/ 4; object-fit: cover; object-position: 50% 12%;/);
   assert.doesNotMatch(css, /\.p-rail > img \{[^}]*object-fit: contain/);

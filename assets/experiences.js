@@ -7,9 +7,14 @@
  * charged and nothing is booked — the ONE exception is a place that carries a
  * `select` block: it is offered through the Journey selection, as a request.
  * Paths are site-root-relative; the register page prefixes '../'. */
+/* THE TAXONOMY (Owner, 22 Sep 2026): a place's CATEGORY says what the place IS — restaurant · cafe · bar · club · experience ·
+ * place — never what happens there (lunch at a café does not make it a restaurant; drinks at a café do not make a second bar).
+ * One canonical identity per venue, one Discover appearance. `roles` holds the one category role (a restaurant's the meal the
+ * itinerary uses it for). `visits` is the chronology: every itinerary day the place is visited (the approved overview of the
+ * Operations Master), with the day's sequence (`seq`, the schedule's clock, never shown) — a place visited twice keeps one card. */
 window.SIYL_EXP = [
   /* THAILAND · BANGKOK · 22–24 FEB 2027 */
-  { id: 'bkk-curvy', roles: ['lunch'], row: 'Day 02 · 22.02.2027', chapter: 'bkk', day: '22 FEB 2027', name: 'Curvy.Dining', where: 'Bangkok', cats: 'Dining · Design', img: 'assets/images/experiences/bkk-curvy-01.jpg', teaser: 'A design-led Bangkok dining room where Thai flavours meet modern European form.' },
+  { id: 'bkk-curvy', category: 'restaurant', roles: ['lunch'], visits: [{ day: 2, date: '2027-02-22', seq: 1000, what: 'Lunch' }], row: 'Day 02 · 22.02.2027', chapter: 'bkk', day: '22 FEB 2027', name: 'Curvy.Dining', where: 'Bangkok', cats: 'Dining · Design', img: 'assets/images/experiences/bkk-curvy-01.jpg', teaser: 'A design-led Bangkok dining room where Thai flavours meet modern European form.' },
   /* SÜHRING — the one place with a full record in the Owner's sheet
    * "Experience, Restaurant, Cafe_Details" (Suhring): every text below is that
    * record, structured, nothing added. THE PRICE (Owner, 20 Sep 2026 — the Highlight): the house's own menu card, the
@@ -19,7 +24,7 @@ window.SIYL_EXP = [
    * confirmed reservation. */
   /* DATED (the current Operations Master, 19 Sep 2026): Day 01 · 21.02.2027 · DINNER — the first evening in Bangkok
    * (the Overview's Dinner cell; the sheet record's opening hours are the restaurant's own and are kept below) */
-  { id: 'bkk-suhring', roles: ['dinner'], row: 'Day 01 · 21.02.2027', sheet: 'FULL', chapter: 'bkk', featured: true, day: '21 FEB 2027', name: 'Sühring', where: 'Bangkok', cats: 'German fine dining · Dinner',
+  { id: 'bkk-suhring', category: 'restaurant', roles: ['dinner'], visits: [{ day: 1, date: '2027-02-21', seq: 1900, what: 'Dinner' }], row: 'Day 01 · 21.02.2027', sheet: 'FULL', chapter: 'bkk', featured: true, day: '21 FEB 2027', name: 'Sühring', where: 'Bangkok', cats: 'German fine dining · Dinner',
     maps: 'https://maps.app.goo.gl/2b4whggW3YCnxN6u5?g_st=ic', link: 'https://www.restaurantsuhring.com/menu.html',
     img: 'assets/images/experiences/bkk-suhring-01.jpg',
     teaser: 'Where German tradition meets modern artistry — a villa, two brothers, and countless memories.',
@@ -52,22 +57,22 @@ window.SIYL_EXP = [
       sourceHours: ['Lunch', 'Thursday to Sunday', '12:30 pm to 13:00 pm (last seating)', 'Closed on Monday and Tuesday']
     },
     select: { id: 'suhring', unit: 'per person' } },
-  { id: 'bkk-diorlv', roles: ['cafe'], row: 'Day 02 · 22.02.2027', chapter: 'bkk', day: '22 FEB 2027', name: 'Dior · Café LV', where: 'Bangkok', cats: 'Fashion · Design · Café', img: 'assets/images/experiences/bkk-dior-02.jpg', gallery: ['assets/images/experiences/bkk-dior-01.jpg', 'assets/images/experiences/bkk-lv-cafe-01.jpg'], teaser: 'A luxury design café stop — couture interiors, French pastry and contemporary calm.' },
-  { id: 'bkk-lvvisionary', roles: ['experience'], row: 'Day 02 · 22.02.2027', chapter: 'bkk', featured: true, day: '22 FEB 2027', name: 'Louis Vuitton Visionary Journeys', where: 'Bangkok', cats: 'Exhibition · Design · Fashion', img: 'assets/images/experiences/bkk-lvvisionary-01.jpg', teaser: 'The house opens its world: an exhibition of craft, travel and imagination staged as architecture.' },
-  { id: 'bkk-iconsiam', roles: ['place'], row: 'Day 02 · 22.02.2027', chapter: 'bkk', featured: true, day: '22 FEB 2027', name: 'ICONSIAM', where: 'Bangkok', cats: 'Riverfront · City · Design · Shopping', img: 'assets/images/experiences/bkk-iconsiam-01.jpg', teaser: 'The riverfront landmark — architecture, design floors and the Chao Phraya at golden hour.' },
-  { id: 'bkk-phranakorn', roles: ['dinner'], row: 'Day 02 · 22.02.2027', chapter: 'bkk', day: '22 FEB 2027', name: 'Phra Nakhon', where: 'Bangkok', cats: 'Thai dining · Riverside', img: 'assets/images/experiences/bkk-phranakorn-01.jpg', teaser: 'A Bangkok dining destination for contemporary Thai cooking.' },
-  { id: 'bkk-socialclub', roles: ['bar'], row: 'Day 02 · 22.02.2027', chapter: 'bkk', day: '22 FEB 2027', name: 'BKK Social Club', where: 'Bangkok', cats: 'Bar · Design · Evening', img: 'assets/images/experiences/bkk-social-01.jpg', teaser: "One of the city's great bars — Buenos Aires glamour, considered drinks, late light." },
-  { id: 'bkk-timespace', roles: ['lunch','cafe'], row: 'Day 03 · 23.02.2027', chapter: 'bkk', day: '23 FEB 2027', name: 'Time Space Cafe', where: 'Bangkok', cats: 'Café · Design', img: 'assets/images/experiences/bkk-timespace-03.jpg', teaser: 'Coffee and bakery in a room built around light and pause.' },
-  { id: 'bkk-mooyoo', roles: ['lunch', 'cafe'], row: 'Day 03 · 23.02.2027', chapter: 'bkk', day: '23 FEB 2027', name: 'Moo Yoo Rose House', where: 'Bangkok', cats: 'House · Garden · Café', img: 'assets/images/experiences/bkk-mooyoo-01.jpg', teaser: 'A house of roses — a visual café where Italian fusion meets Thai sweetness.' },
-  { id: 'bkk-whispering', roles: ['cafe'], row: 'Day 03 · 23.02.2027', chapter: 'bkk', featured: true, day: '23 FEB 2027', name: 'Whispering Cafe', where: 'Sam Phran · Nakhon Pathom', cats: 'Architecture · Garden · Landscape · Day escape',
+  { id: 'bkk-diorlv', category: 'cafe', roles: ['cafe'], visits: [{ day: 2, date: '2027-02-22', seq: 1245, what: 'Coffee' }], row: 'Day 02 · 22.02.2027', chapter: 'bkk', day: '22 FEB 2027', name: 'Dior · Café LV', where: 'Bangkok', cats: 'Fashion · Design · Café', img: 'assets/images/experiences/bkk-dior-02.jpg', gallery: ['assets/images/experiences/bkk-dior-01.jpg', 'assets/images/experiences/bkk-lv-cafe-01.jpg'], teaser: 'A luxury design café stop — couture interiors, French pastry and contemporary calm.' },
+  { id: 'bkk-lvvisionary', category: 'experience', roles: ['experience'], visits: [{ day: 2, date: '2027-02-22', seq: 1400, what: 'Exhibition' }], row: 'Day 02 · 22.02.2027', chapter: 'bkk', featured: true, day: '22 FEB 2027', name: 'Louis Vuitton Visionary Journeys', where: 'Bangkok', cats: 'Exhibition · Design · Fashion', img: 'assets/images/experiences/bkk-lvvisionary-01.jpg', teaser: 'The house opens its world: an exhibition of craft, travel and imagination staged as architecture.' },
+  { id: 'bkk-iconsiam', category: 'place', roles: ['place'], visits: [{ day: 2, date: '2027-02-22', seq: 1415, what: 'Afternoon' }], row: 'Day 02 · 22.02.2027', chapter: 'bkk', featured: true, day: '22 FEB 2027', name: 'ICONSIAM', where: 'Bangkok', cats: 'Riverfront · City · Design · Shopping', img: 'assets/images/experiences/bkk-iconsiam-01.jpg', teaser: 'The riverfront landmark — architecture, design floors and the Chao Phraya at golden hour.' },
+  { id: 'bkk-phranakorn', category: 'restaurant', roles: ['dinner'], visits: [{ day: 2, date: '2027-02-22', seq: 1900, what: 'Dinner' }], row: 'Day 02 · 22.02.2027', chapter: 'bkk', day: '22 FEB 2027', name: 'Phra Nakhon', where: 'Bangkok', cats: 'Thai dining · Riverside', img: 'assets/images/experiences/bkk-phranakorn-01.jpg', teaser: 'A Bangkok dining destination for contemporary Thai cooking.' },
+  { id: 'bkk-socialclub', category: 'bar', roles: ['bar'], visits: [{ day: 2, date: '2027-02-22', seq: 2110, what: 'Drinks' }], row: 'Day 02 · 22.02.2027', chapter: 'bkk', day: '22 FEB 2027', name: 'BKK Social Club', where: 'Bangkok', cats: 'Bar · Design · Evening', img: 'assets/images/experiences/bkk-social-01.jpg', teaser: "One of the city's great bars — Buenos Aires glamour, considered drinks, late light." },
+  { id: 'bkk-timespace', category: 'cafe', roles: ['cafe'], visits: [{ day: 3, date: '2027-02-23', seq: 1315, what: 'Coffee' }], row: 'Day 03 · 23.02.2027', chapter: 'bkk', day: '23 FEB 2027', name: 'Time Space Cafe', where: 'Bangkok', cats: 'Café · Design', img: 'assets/images/experiences/bkk-timespace-03.jpg', teaser: 'Coffee and bakery in a room built around light and pause.' },
+  { id: 'bkk-mooyoo', category: 'cafe', roles: ['cafe'], visits: [{ day: 3, date: '2027-02-23', seq: 1145, what: 'Brunch' }], row: 'Day 03 · 23.02.2027', chapter: 'bkk', day: '23 FEB 2027', name: 'Moo Yoo Rose House', where: 'Bangkok', cats: 'House · Garden · Café', img: 'assets/images/experiences/bkk-mooyoo-01.jpg', teaser: 'A house of roses — a visual café where Italian fusion meets Thai sweetness.' },
+  { id: 'bkk-whispering', category: 'cafe', roles: ['cafe'], visits: [{ day: 3, date: '2027-02-23', seq: 1515, what: 'Coffee' }], row: 'Day 03 · 23.02.2027', chapter: 'bkk', featured: true, day: '23 FEB 2027', name: 'Whispering Cafe', where: 'Sam Phran · Nakhon Pathom', cats: 'Architecture · Garden · Landscape · Day escape',
     img: 'assets/images/experiences/whispering-03.jpg',
     teaser: 'Whispering Land: Provence-inspired architecture with Scandinavian restraint — French-style doors, natural light, garden and mature planting, vintage furniture and calm, adaptable spaces.' },
-  { id: 'bkk-dib', roles: ['experience'], row: 'Day 03 · 23.02.2027', chapter: 'bkk', featured: true, day: '23 FEB 2027', name: 'Dib Bangkok', where: 'Bangkok', cats: 'Art · Architecture · Design', img: 'assets/images/experiences/bkk-dib-01.jpg', teaser: "Bangkok's museum of contemporary art — bold architecture and public space by the expressway." },
-  { id: 'bkk-emquartier', roles: ['place'], row: 'Day 03 · 23.02.2027', chapter: 'bkk', day: '23 FEB 2027', name: 'EmQuartier', where: 'Bangkok', cats: 'City · Design · Shopping', img: 'assets/images/experiences/bkk-emquartier-01.jpg', teaser: 'Sukhumvit’s design quarter — cascading gardens, galleries of shops and city energy.' },
-  { id: 'bkk-commons', roles: ['place'], row: 'Day 03 · 23.02.2027', chapter: 'bkk', day: '23 FEB 2027', name: 'The Commons Thonglor', where: 'Bangkok', cats: 'Food · Design · Social', img: 'assets/images/experiences/bkk-commons-01.jpg', teaser: "Thonglor's vertical village — many kitchens, easy drinks in between." },
+  { id: 'bkk-dib', category: 'experience', roles: ['experience'], visits: [{ day: 3, date: '2027-02-23', seq: 1715, what: 'Art museum' }], row: 'Day 03 · 23.02.2027', chapter: 'bkk', featured: true, day: '23 FEB 2027', name: 'Dib Bangkok', where: 'Bangkok', cats: 'Art · Architecture · Design', img: 'assets/images/experiences/bkk-dib-01.jpg', teaser: "Bangkok's museum of contemporary art — bold architecture and public space by the expressway." },
+  { id: 'bkk-emquartier', category: 'place', roles: ['place'], visits: [{ day: 3, date: '2027-02-23', seq: 1800, what: 'Shopping' }], row: 'Day 03 · 23.02.2027', chapter: 'bkk', day: '23 FEB 2027', name: 'EmQuartier', where: 'Bangkok', cats: 'City · Design · Shopping', img: 'assets/images/experiences/bkk-emquartier-01.jpg', teaser: 'Sukhumvit’s design quarter — cascading gardens, galleries of shops and city energy.' },
+  { id: 'bkk-commons', category: 'place', roles: ['place'], visits: [{ day: 3, date: '2027-02-23', seq: 2045, what: 'Evening' }], row: 'Day 03 · 23.02.2027', chapter: 'bkk', day: '23 FEB 2027', name: 'The Commons Thonglor', where: 'Bangkok', cats: 'Food · Design · Social', img: 'assets/images/experiences/bkk-commons-01.jpg', teaser: "Thonglor's vertical village — many kitchens, easy drinks in between." },
   /* BAAN PHRAYA — Day 03 · 23.02.2027 · DINNER (the current Operations Master, 19 Sep 2026: replaces The Commons in the
    * Dinner cell). Every word below is the Owner's "Experience, Restaurant, Cafe_Details" record for Baan Phraya. */
-  { id: 'bkk-baanphraya', roles: ['dinner'], row: 'Day 03 · 23.02.2027', chapter: 'bkk', featured: true, day: '23 FEB 2027', name: 'Baan Phraya', where: 'Bangkok · the River of Kings', cats: 'Thai fine dining · Heritage house',
+  { id: 'bkk-baanphraya', category: 'restaurant', roles: ['dinner'], visits: [{ day: 3, date: '2027-02-23', seq: 1845, what: 'Dinner' }], row: 'Day 03 · 23.02.2027', chapter: 'bkk', featured: true, day: '23 FEB 2027', name: 'Baan Phraya', where: 'Bangkok · the River of Kings', cats: 'Thai fine dining · Heritage house',
     img: 'assets/images/experiences/bkk-baanphraya-01.jpg',
     teaser: 'A beautifully restored century-old riverside residence, once home to Thai nobility — the refined Thai cooking of Chef Phatchara “Pom” Pirapak.',
     detail: [
@@ -93,8 +98,8 @@ window.SIYL_EXP = [
       dress: 'Elegant attire and proper footwear; gentlemen in long trousers and closed shoes — sleeveless shirts for gentlemen are not permitted.'
     },
     select: { id: 'baanphraya', unit: 'per person' } },
-  { id: 'bkk-barus', roles: ['bar'], row: 'Day 03 · 23.02.2027', chapter: 'bkk', day: '23 FEB 2027', name: 'Bar Us', where: 'Bangkok', cats: 'Bar · Evening · Design', maps: 'https://maps.app.goo.gl/2KLduE51ybg4qAqd9?g_st=ic', img: 'assets/images/experiences/bkk-barus-06.jpg', teaser: 'An intimate evening alternative — a small bar of precision and warmth.' },
-  { id: 'bkk-ledukaan', roles: ['dinner'], row: 'city', chapter: 'bkk', day: 'Bangkok days', name: 'Le Du Kaan', where: 'Bangkok', cats: 'Thai fine dining · Rooftop · Bar',
+  { id: 'bkk-barus', category: 'bar', roles: ['bar'], visits: [{ day: 3, date: '2027-02-23', seq: 2130, what: 'Drinks' }], row: 'Day 03 · 23.02.2027', chapter: 'bkk', day: '23 FEB 2027', name: 'Bar Us', where: 'Bangkok', cats: 'Bar · Evening · Design', maps: 'https://maps.app.goo.gl/2KLduE51ybg4qAqd9?g_st=ic', img: 'assets/images/experiences/bkk-barus-06.jpg', teaser: 'An intimate evening alternative — a small bar of precision and warmth.' },
+  { id: 'bkk-ledukaan', category: 'restaurant', roles: ['dinner'], visits: [], row: 'city', chapter: 'bkk', day: 'Bangkok days', name: 'Le Du Kaan', where: 'Bangkok', cats: 'Thai fine dining · Rooftop · Bar',
     img: 'assets/images/experiences/bkk-ledukaan-01.jpg',
     teaser: 'A culinary journey through Thailand — the casual dining concept of Michelin-starred Chef Thitid “Ton” Tassanakajohn, on the 56th floor of The Empire.',
     detail: [
@@ -105,19 +110,19 @@ window.SIYL_EXP = [
     practical: { hours: ['Lunch 11:30 – 14:30 (last order 14:00)', 'Dinner 17:00 – 22:30 (last order 22:00)', 'Bar 17:00 – 01:00 (last order 23:45)'] } },
   /* THONG SMITH: the 24.02 lunch cell now reads the Aman afternoon tea (the current Operations Master, 19 Sep 2026) — the
    * place stays a Bangkok-days address of the hosts' notes, no longer dated */
-  { id: 'bkk-thongsmith', roles: ['lunch'], row: 'city', chapter: 'bkk', day: 'Bangkok days', name: 'Thong Smith', where: 'Bangkok', cats: 'Thai · Boat Noodles', img: 'assets/images/experiences/bkk-thongsmith-03.jpg', teaser: 'Siamese boat noodles, elevated — a Bangkok classic done beautifully.' },
-  { id: 'bkk-letsrelax', roles: ['experience'], row: 'Day 04 · 24.02.2027', chapter: 'bkk', day: '24 FEB 2027', name: "Let's Relax", where: 'Bangkok', cats: 'Wellness · Spa', img: 'assets/images/experiences/bkk-letsrelax-01.jpg', teaser: 'A quiet hour of Thai wellness before the journey continues.' },
-  { id: 'bkk-dusit', roles: ['place'], row: 'Day 04 · 24.02.2027', chapter: 'bkk', day: '24 FEB 2027', name: 'Dusit Central Park', where: 'Bangkok', cats: 'City · Park · Design · Lifestyle', img: 'assets/images/experiences/bkk-dusit-01.jpg', teaser: 'The new green heart above Silom — architecture, park levels and city views.' },
-  { id: 'bkk-madeleine', roles: ['cafe'], row: 'Day 04 · 24.02.2027', chapter: 'bkk', day: '24 FEB 2027', name: 'Cafe Madeleine', where: 'Four Seasons Hotel Bangkok', cats: 'Pâtisserie · Hotel · Café', img: 'assets/images/experiences/bkk-madeleine-01.jpg', teaser: "Refined hotel pâtisserie — French pastry in the Four Seasons' calm." },
-  { id: 'bkk-tangjaiyang', roles: ['dinner'], row: 'Day 04 · 24.02.2027', chapter: 'bkk', day: '24 FEB 2027', name: 'Tang Jai Yang', where: 'Bangkok', cats: 'Cantonese · Charcoal · Dining', maps: 'https://maps.app.goo.gl/6otfQcm4bqsTuWZ16?g_st=ic', img: 'assets/images/experiences/bkk-tjy-02.jpg', teaser: 'Cantonese charcoal barbecue — smoke, lacquer and generations of craft.' },
+  { id: 'bkk-thongsmith', category: 'restaurant', roles: ['lunch'], visits: [{ day: 4, date: '2027-02-24', seq: 1300, what: 'Lunch' }], row: 'Day 04 · 24.02.2027', chapter: 'bkk', day: '24 FEB 2027', name: 'Thong Smith', where: 'Bangkok', cats: 'Thai · Boat Noodles', img: 'assets/images/experiences/bkk-thongsmith-03.jpg', teaser: 'Siamese boat noodles, elevated — a Bangkok classic done beautifully.' },
+  { id: 'bkk-letsrelax', category: 'experience', roles: ['experience'], visits: [{ day: 4, date: '2027-02-24', seq: 1500, what: 'Spa' }], row: 'Day 04 · 24.02.2027', chapter: 'bkk', day: '24 FEB 2027', name: "Let's Relax", where: 'Bangkok', cats: 'Wellness · Spa', img: 'assets/images/experiences/bkk-letsrelax-01.jpg', teaser: 'A quiet hour of Thai wellness before the journey continues.' },
+  { id: 'bkk-dusit', category: 'place', roles: ['place'], visits: [{ day: 4, date: '2027-02-24', seq: 1400, what: 'Afternoon' }], row: 'Day 04 · 24.02.2027', chapter: 'bkk', day: '24 FEB 2027', name: 'Dusit Central Park', where: 'Bangkok', cats: 'City · Park · Design · Lifestyle', img: 'assets/images/experiences/bkk-dusit-01.jpg', teaser: 'The new green heart above Silom — architecture, park levels and city views.' },
+  { id: 'bkk-madeleine', category: 'cafe', roles: ['cafe'], visits: [{ day: 4, date: '2027-02-24', seq: 1630, what: 'Coffee' }], row: 'Day 04 · 24.02.2027', chapter: 'bkk', day: '24 FEB 2027', name: 'Cafe Madeleine', where: 'Four Seasons Hotel Bangkok', cats: 'Pâtisserie · Hotel · Café', img: 'assets/images/experiences/bkk-madeleine-01.jpg', teaser: "Refined hotel pâtisserie — French pastry in the Four Seasons' calm." },
+  { id: 'bkk-tangjaiyang', category: 'restaurant', roles: ['dinner'], visits: [{ day: 4, date: '2027-02-24', seq: 1730, what: 'Dinner' }], row: 'Day 04 · 24.02.2027', chapter: 'bkk', day: '24 FEB 2027', name: 'Tang Jai Yang', where: 'Bangkok', cats: 'Cantonese · Charcoal · Dining', maps: 'https://maps.app.goo.gl/6otfQcm4bqsTuWZ16?g_st=ic', img: 'assets/images/experiences/bkk-tjy-02.jpg', teaser: 'Cantonese charcoal barbecue — smoke, lacquer and generations of craft.' },
   /* THAILAND · BANGKOK · THE RETURN · 06 – 08 MAR 2027 (Overview Day 14 – 16) */
   /* HARUDOT (the current Operations Master, 19 Sep 2026): the café of Day 03 · 23.02.2027 and the EXPERIENCE of Day 15 ·
    * 07.03.2027 (it replaces Siam Paragon in the Experience cell of the return); the Owner's approved photographs stand */
-  { id: 'bkk-harudot', roles: ['cafe', 'experience'], row: 'Day 03 · 23.02.2027 · Day 15 · 07.03.2027', chapter: 'bkk', leg: 'return', day: '23 FEB · 07 MAR 2027', name: 'Harudot', where: 'Bangkok', cats: 'Café · Architecture · Design', img: 'assets/images/experiences/bkk-harudot-03.jpg', teaser: 'A café of rose plaster and spiral stairs — architecture first, coffee close behind.' },
-  { id: 'bkk-alati', roles: ['lunch'], row: 'Day 15 · 07.03.2027', chapter: 'bkk', leg: 'return', day: '07 MAR 2027', name: 'ALATi', where: 'Siam Kempinski Hotel Bangkok', cats: 'Lunch · Brunch · Hotel', img: 'assets/images/experiences/bkk-alati-01.jpg', teaser: 'Brunch at the Siam Kempinski — the last Bangkok lunch of the journey, the day before the flight home.' },
+  { id: 'bkk-harudot', category: 'cafe', roles: ['cafe'], visits: [{ day: 3, date: '2027-02-23', seq: 1600, what: 'Coffee' }, { day: 15, date: '2027-03-07', seq: 1600, what: 'Coffee' }], row: 'Day 03 · 23.02.2027 · Day 15 · 07.03.2027', chapter: 'bkk', day: '23 FEB · 07 MAR 2027', name: 'Harudot', where: 'Bangkok', cats: 'Café · Architecture · Design', img: 'assets/images/experiences/bkk-harudot-03.jpg', teaser: 'A café of rose plaster and spiral stairs — architecture first, coffee close behind.' },
+  { id: 'bkk-alati', category: 'restaurant', roles: ['lunch'], visits: [{ day: 15, date: '2027-03-07', seq: 1300, what: 'Sunday brunch' }], row: 'Day 15 · 07.03.2027', chapter: 'bkk', leg: 'return', day: '07 MAR 2027', name: 'ALATi', where: 'Siam Kempinski Hotel Bangkok', cats: 'Lunch · Brunch · Hotel', img: 'assets/images/experiences/bkk-alati-01.jpg', teaser: 'Brunch at the Siam Kempinski — the last Bangkok lunch of the journey, the day before the flight home.' },
   /* CANNUBI BY UMBERTO BOMBANA — Day 15 · 07.03.2027 · DINNER (the current Operations Master, 19 Sep 2026: replaces Petits
    * Plats in the Dinner cell). Every word below is the Owner's "Experience, Restaurant, Cafe_Details" record. */
-  { id: 'bkk-cannubi', roles: ['dinner'], row: 'Day 15 · 07.03.2027', chapter: 'bkk', leg: 'return', featured: true, day: '07 MAR 2027', name: 'Cannubi by Umberto Bombana', where: 'Dusit Thani Bangkok', cats: 'Italian fine dining · One MICHELIN Star',
+  { id: 'bkk-cannubi', category: 'restaurant', roles: ['dinner'], visits: [{ day: 15, date: '2027-03-07', seq: 1900, what: 'Dinner' }], row: 'Day 15 · 07.03.2027', chapter: 'bkk', leg: 'return', featured: true, day: '07 MAR 2027', name: 'Cannubi by Umberto Bombana', where: 'Dusit Thani Bangkok', cats: 'Italian fine dining · One MICHELIN Star',
     img: 'assets/images/experiences/bkk-cannubi-01.jpg',
     teaser: 'Named after the famed Barolo hill in Piemonte — the one Italian restaurant in Thailand with a MICHELIN Star, and a cellar of more than 350 labels.',
     detail: [
@@ -146,56 +151,49 @@ window.SIYL_EXP = [
   /* PETITS PLATS BANGKOK — Day 16 · 08.03.2027 · DINNER (the current Operations Master, 19 Sep 2026: the last evening, before
    * the flight home; it replaces the in-flight dinner). The Owner's records carry no photograph and no description of the
    * place: the card stands without an image, nothing is invented. */
-  { id: 'bkk-petitsplats', roles: ['dinner'], row: 'Day 16 · 08.03.2027', chapter: 'bkk', leg: 'return', day: '08 MAR 2027', name: 'Petits Plats Bangkok', where: 'Bangkok', cats: 'Dinner · The last evening',
+  { id: 'bkk-petitsplats', category: 'restaurant', roles: ['dinner'], visits: [{ day: 16, date: '2027-03-08', seq: 1900, what: 'Dinner' }], row: 'Day 16 · 08.03.2027', chapter: 'bkk', leg: 'return', day: '08 MAR 2027', name: 'Petits Plats Bangkok', where: 'Bangkok', cats: 'French bistro · Dinner · The last evening', img: 'assets/images/experiences/bkk-petitsplats-01.jpg',
     teaser: 'The last dinner of the journey — a Bangkok table on the evening before the flight home.' },
+  /* THE RETURN, DAY 15 · 07.03.2027 (the Operations Master overview, approved 05.09.2026): the café, the mall and the bar of the
+     last Sunday — no photographs in the Owner's records; the cards stand without an image */
+  { id: 'bkk-cafecraft', category: 'cafe', roles: ['cafe'], visits: [{ day: 15, date: '2027-03-07', seq: 1500, what: 'Coffee' }], row: 'Day 15 · 07.03.2027', chapter: 'bkk', leg: 'return', day: '07 MAR 2027', name: 'Café Craft by CHANINTR', where: 'Bangkok', cats: 'Café · Design', teaser: 'The afternoon coffee of the last Sunday — a design house’s café in the heart of the city.' },
+  { id: 'bkk-siamparagon', category: 'place', roles: ['place'], visits: [{ day: 15, date: '2027-03-07', seq: 1700, what: 'Shopping' }], row: 'Day 15 · 07.03.2027', chapter: 'bkk', leg: 'return', day: '07 MAR 2027', name: 'Siam Paragon', where: 'Bangkok', cats: 'Shopping · Siam', teaser: 'The last afternoon in the city — the grand mall at Siam, beside the Kempinski.' },
+  { id: 'bkk-firefly', category: 'bar', roles: ['bar'], visits: [{ day: 15, date: '2027-03-07', seq: 2100, what: 'Drinks' }], row: 'Day 15 · 07.03.2027', chapter: 'bkk', leg: 'return', day: '07 MAR 2027', name: 'Firefly Bar, Siam Kempinski', where: 'Bangkok', cats: 'Bar · The last night', teaser: 'The last night of the journey — a bar at the Siam Kempinski, after the dinner at Cannubi.' },
   /* LAOS · VIENTIANE — the city portrait (owner Vientiane folder, Sep 2026):
    * GOLD & SACRED → CITY & ARCHITECTURE → MEKONG & EVENING → BEYOND THE CENTRE */
-  { id: 'vte-thatluang', roles: ['experience'], row: 'Day 05 · 25.02.2027', chapter: 'laos', featured: true, day: 'Gold & sacred', name: 'Pha That Luang', where: 'Vientiane', cats: 'Heritage · Architecture · Culture', maps: 'https://maps.app.goo.gl/hehafVRBrdPt7L9Y6?g_st=ic',
+  { id: 'vte-thatluang', category: 'experience', roles: ['experience'], visits: [{ day: 5, date: '2027-02-25', seq: 945, what: 'Morning' }], row: 'Day 05 · 25.02.2027', chapter: 'laos', featured: true, day: 'Gold & sacred', name: 'Pha That Luang', where: 'Vientiane', cats: 'Stupa · Heritage · Culture', maps: 'https://maps.app.goo.gl/hehafVRBrdPt7L9Y6?g_st=ic',
     img: 'assets/images/experiences/vte-thatluang-01.jpg',
     teaser: "The golden stupa — Laos' national symbol, radiant in the morning.",
     detail: [
       'The great golden stupa is the national symbol of Laos — about 3.5 kilometres from the centre, its gilded spire visible long before you arrive.',
       'Give it an unhurried hour: the cloistered courtyard, the reclining Buddha beside the stupa, and gold that shifts with every change of light.',
     ] },
-  { id: 'vte-patuxai', roles: ['experience'], row: 'city', chapter: 'laos', featured: true, day: 'City & architecture', name: 'Patuxai', where: 'Vientiane', cats: 'Monument · Architecture · City',
+  { id: 'vte-patuxai', category: 'experience', roles: ['experience'], visits: [], row: 'city', chapter: 'laos', featured: true, day: 'City & architecture', name: 'Patuxai', where: 'Vientiane', cats: 'Monument · Architecture · City',
     img: 'assets/images/experiences/vte-patuxai-01.jpg',
     teaser: "Vientiane's triumphal arch — palm-lined, unhurried, and worth the climb for the view down the avenue.",
     detail: [
       'Raised in the late 1950s and 1960s, the arch answers Paris with Lao form — naga finials, lotus mouldings and a crown of five towers above the city’s grandest avenue.',
       'Climb it: the upper terraces look straight over the fountain park and down Lane Xang Avenue — our second photograph is that view. Morning and late afternoon bring the kindest light.',
     ] },
-  { id: 'vte-nightmarket', roles: ['experience','place'], row: 'Day 06 · 26.02.2027', chapter: 'laos', featured: true, day: 'Mekong & evening', name: 'Vientiane Night Market', where: 'Vientiane', cats: 'Night market · Riverfront · Local life', maps: 'https://maps.app.goo.gl/X2jTe6DyVCc7qd21A?g_st=ic',
+  { id: 'vte-nightmarket', category: 'place', roles: ['place'], visits: [{ day: 6, date: '2027-02-26', seq: 1810, what: 'Evening' }], row: 'Day 06 · 26.02.2027', chapter: 'laos', featured: true, day: 'Mekong & evening', name: 'Vientiane Night Market', where: 'Vientiane', cats: 'Night market · Riverfront · Local life', maps: 'https://maps.app.goo.gl/X2jTe6DyVCc7qd21A?g_st=ic',
     img: 'assets/images/experiences/vte-nightmarket-01.jpg',
     teaser: 'Red roofs along the Mekong at dusk — lanterns, stalls and the city out for the evening.',
     detail: [
       'Every evening the red-roofed stalls open along Chao Anouvong Park — clothes, crafts and small food, with the Mekong turning to colour behind them.',
       'Come for the promenade as much as the market: at sunset the riverfront fills with families, runners and food carts, and the far bank is already Thailand.',
     ] },
-  { id: 'vte-sisaket', roles: ['experience'], row: 'city', chapter: 'laos', day: 'Gold & sacred', name: 'Wat Si Saket', where: 'Vientiane', cats: 'Temple · Heritage · Museum',
-    img: 'assets/images/experiences/vte-sisaket-01.jpg',
-    teaser: 'The oldest temple in Vientiane — thousands of Buddhas in a quiet cloister that survived when the city did not.',
-    detail: ['The only temple left standing after the siege of 1827, its cloister walls hold niche after niche of Buddha figures — photography stays outside the ordination hall.'] },
-  { id: 'vte-simuang', roles: ['experience'], row: 'city', chapter: 'laos', day: 'Gold & sacred', name: 'Wat Si Muang', where: 'Vientiane', cats: 'Temple · Local life · Sacred',
-    img: 'assets/images/experiences/vte-simuang-01.jpg',
-    teaser: "Vientiane's most beloved working temple — colour, incense and the shrine of the city pillar.",
-    detail: ['This is where Vientiane itself comes to pray — marigolds, daily blessings and the city pillar shrine, a short walk from Wat Si Saket.'] },
-  { id: 'vte-haphrakeo', roles: ['experience'], row: 'city', chapter: 'laos', day: 'Gold & sacred', name: 'Ha Phrakeo Museum', where: 'Vientiane', cats: 'Museum · Heritage · Garden',
+  { id: 'vte-haphrakeo', category: 'experience', roles: ['experience'], visits: [], row: 'city', chapter: 'laos', day: 'Gold & sacred', name: 'Ha Phrakeo Museum', where: 'Vientiane', cats: 'Museum · Heritage · Garden',
     img: 'assets/images/experiences/vte-haphrakeo-01.jpg',
     teaser: 'The former royal temple built for the Emerald Buddha — now a calm museum of Lao Buddhist art.',
     detail: ['The Emerald Buddha itself left for Bangkok centuries ago; what remains is a garden, a carved terrace and one of the country’s finest collections of Buddha figures.'] },
-  { id: 'vte-palace', roles: ['experience'], row: 'city', chapter: 'laos', day: 'City & architecture', name: 'Presidential Palace', where: 'Vientiane', cats: 'Landmark · Architecture',
+  { id: 'vte-palace', category: 'experience', roles: ['experience'], visits: [], row: 'city', chapter: 'laos', day: 'City & architecture', name: 'Presidential Palace', where: 'Vientiane', cats: 'Landmark · Architecture',
     img: 'assets/images/experiences/vte-palace-01.jpg',
     teaser: 'French-colonial grandeur behind gilded gates — best admired from the avenue.',
     detail: ['The palace is not open to visitors, and doesn’t need to be — it reads best from outside the fence, palms and flag above the white façade, with Ha Phrakeo directly next door.'] },
-  { id: 'vte-thatdam', roles: ['experience'], row: 'city', chapter: 'laos', day: 'City & architecture', name: 'That Dam', where: 'Vientiane', cats: 'Stupa · Legend · City',
-    img: 'assets/images/experiences/vte-thatdam-01.jpg',
-    teaser: 'The Black Stupa — centuries of quiet legend holding a city roundabout.',
-    detail: ['Unrestored and slightly overgrown, it stands mid-roundabout among cafés and embassies — a five-minute pause that feels older than everything around it.'] },
-  { id: 'vte-buddhapark', roles: ['experience'], row: 'city', chapter: 'laos', day: 'Beyond the centre', name: 'Buddha Park', where: 'Xieng Khuan · Vientiane', cats: 'Sculpture park · Riverside · Day escape',
+  { id: 'vte-buddhapark', category: 'experience', roles: ['experience'], visits: [], row: 'city', chapter: 'laos', day: 'Beyond the centre', name: 'Buddha Park', where: 'Xieng Khuan · Vientiane', cats: 'Sculpture park · Riverside · Day escape',
     img: 'assets/images/experiences/vte-buddhapark-01.jpg',
     teaser: 'A riverside sculpture garden of giants, about an hour from the city.',
     detail: ['Some twenty kilometres downstream, Hindu and Buddhist figures crowd a green meadow — the great reclining Buddha above all. An easy half-day escape, and a favourite with children.'] },
-  { id: 'vte-laonationalmuseum', roles: ['experience'], row: 'city', chapter: 'laos', day: 'Museums', name: 'Lao National Museum', where: 'Vientiane', cats: 'Museum · History · Heritage',
+  { id: 'vte-laonationalmuseum', category: 'experience', roles: ['experience'], visits: [], row: 'city', chapter: 'laos', day: 'Museums', name: 'Lao National Museum', where: 'Vientiane', cats: 'Museum · History · Heritage',
     img: 'assets/images/experiences/vte-laonationalmuseum-01.jpg',
     teaser: 'The national collection of Lao history and culture — first opened in 1980 in the former French Governor’s Residence, since 2017 in a new building six kilometres from the centre.',
     detail: [
@@ -203,7 +201,7 @@ window.SIYL_EXP = [
       'The museum is one of the main institutes responsible for researching, protecting, conserving, storing and promoting the historical and cultural heritage of Laos. In 2017 it moved to a new building, built between 2013 and 2017, six kilometres from the centre of Vientiane — with room for artefact storage, conservation work, the protection of historical documents and the display of the Lao historical and cultural collections from prehistory to the present.'
     ],
     practical: { price: 'Admission: 30,000 KIP per person (foreign visitors) · 5,000 KIP (Lao nationals)', hours: ['Monday – Friday 8:00 – 16:00', 'Saturday – Sunday 9:00 – 16:00'] } },
-  { id: 'vte-silkresidence', roles: ['experience'], row: 'city', chapter: 'laos', day: 'Museums', name: 'Traditional Lao Silk Residence', where: 'Vientiane', cats: 'Museum · Textiles · Craft',
+  { id: 'vte-silkresidence', category: 'experience', roles: ['experience'], visits: [{ day: 5, date: '2027-02-25', seq: 1400, what: 'Afternoon' }], row: 'Day 05 · 25.02.2027', chapter: 'laos', day: 'Museums', name: 'Traditional Lao Silk Residence', where: 'Vientiane', cats: 'Museum · Textiles · Craft',
     img: 'assets/images/experiences/vte-silkresidence-01.jpg',
     teaser: 'Textile Treasures of Laos — heirloom silks and living weaving traditions, shown in the Hor Kham Residence next to the Presidential Office.',
     detail: [
@@ -212,7 +210,7 @@ window.SIYL_EXP = [
       'Set within the Hor Kham Residence, a blend of French Indochinese influence and serene gardens, natural light streams through floor-to-ceiling windows onto the silks. A branch of Naked Espresso on site serves locally sourced coffee. Photography is permitted without flash.'
     ],
     practical: { price: '50,000 LAK per person (about USD 2.23)', hours: ['Open daily 9:00 – 17:00'] } },
-  { id: 'vte-laoartmuseum', roles: ['experience'], row: 'city', chapter: 'laos', day: 'Museums', name: 'Lao Art Museum', where: 'Vientiane', cats: 'Museum · Art · Craft',
+  { id: 'vte-laoartmuseum', category: 'experience', roles: ['experience'], visits: [], row: 'city', chapter: 'laos', day: 'Museums', name: 'Lao Art Museum', where: 'Vientiane', cats: 'Museum · Art · Craft',
     img: 'assets/images/experiences/vte-laoartmuseum-01.jpg',
     teaser: 'A newly established landmark for the artistic and cultural heritage of Laos — wood carvings, traditional paintings and crafted Lao products.',
     detail: [
@@ -220,18 +218,39 @@ window.SIYL_EXP = [
     ],
     practical: { price: 'Entry 220,000 LAK (about USD 10 – 15) for foreign visitors · electric cart or shuttle an additional 50,000 – 120,000 LAK', hours: ['Open 08:30 – 16:00'] } },
   /* LAOS · VIENTIANE — tables & days · 25 FEB – 01 MAR 2027 */
-  { id: 'vte-rivermoon', roles: ['lunch'], row: 'Day 05 · 25.02.2027', chapter: 'laos', featured: true, day: '25 FEB 2027', name: 'River Moon', where: 'Vientiane', cats: 'Riverside · Landscape · Dining', maps: 'https://maps.app.goo.gl/NMbPP5kvLKurozJJ8?g_st=ic', img: 'assets/images/experiences/vte-rivermoon-01.jpg', teaser: "Lao and Thai barbecue at the water's edge — riverside landscape and slow midday." },
-  { id: 'vte-3merchants', roles: ['dinner'], row: 'Day 05 · 25.02.2027', chapter: 'laos', day: '25 FEB 2027', name: '3 Merchants Restaurant', where: 'Vientiane', cats: 'Indochinese · Dining', maps: 'https://maps.app.goo.gl/q3nJqc74P1hn6mkf6?g_st=ic',
+  { id: 'vte-rivermoon', category: 'restaurant', roles: ['lunch'], visits: [{ day: 5, date: '2027-02-25', seq: 1200, what: 'Lunch' }], row: 'Day 05 · 25.02.2027', chapter: 'laos', featured: true, day: '25 FEB 2027', name: 'River Moon', where: 'Vientiane', cats: 'Riverside · Landscape · Dining', maps: 'https://maps.app.goo.gl/NMbPP5kvLKurozJJ8?g_st=ic', img: 'assets/images/experiences/vte-rivermoon-01.jpg', teaser: "Lao and Thai barbecue at the water's edge — riverside landscape and slow midday." },
+  { id: 'vte-3merchants', category: 'restaurant', roles: ['dinner'], visits: [{ day: 5, date: '2027-02-25', seq: 1810, what: 'Dinner' }], row: 'Day 05 · 25.02.2027', chapter: 'laos', day: '25 FEB 2027', name: '3 Merchants Restaurant', where: 'Vientiane', cats: 'Indochinese · Dining', maps: 'https://maps.app.goo.gl/q3nJqc74P1hn6mkf6?g_st=ic',
     img: 'assets/images/experiences/vte-3merchants-01.jpg', teaser: 'A refined Vientiane dining room we love — calm, contemporary and generous.' },
-  { id: 'vte-sona', roles: ['cafe','bar'], row: 'Day 05 · 25.02.2027', chapter: 'laos', day: '25 FEB 2027', name: 'Sona Cafe and Bar', where: 'Vientiane', cats: 'Bar · Evening', maps: 'https://maps.app.goo.gl/hDGyqmbPwYTEmvr89?g_st=ic',
+  { id: 'vte-sona', category: 'bar', roles: ['bar'], visits: [{ day: 5, date: '2027-02-25', seq: 2030, what: 'Drinks' }], row: 'Day 05 · 25.02.2027', chapter: 'laos', day: '25 FEB 2027', name: 'Sona Cafe and Bar', where: 'Vientiane', cats: 'Bar · Evening · Vientiane', maps: 'https://maps.app.goo.gl/hDGyqmbPwYTEmvr89?g_st=ic',
     img: 'assets/images/experiences/vte-sona-01.jpg', teaser: 'An easy Vientiane evening — coffee turned to drinks as the city softens.' },
-  { id: 'vte-kaogee', roles: ['lunch','cafe'], row: 'Day 06 · 26.02.2027', chapter: 'laos', day: '26 FEB 2027', name: 'Kaogee Le Triomphe', where: 'Vientiane', cats: 'Local · Bakery · Café',
+  { id: 'vte-kaogee', category: 'cafe', roles: ['cafe'], visits: [{ day: 6, date: '2027-02-26', seq: 1240, what: 'Lunch' }], row: 'Day 06 · 26.02.2027', chapter: 'laos', day: '26 FEB 2027', name: 'Kaogee Le Triomphe', where: 'Vientiane', cats: 'Local · Bakery · Café',
     img: 'assets/images/experiences/vte-kaogee-01.jpg', teaser: 'The classic Vientiane café moment — kaogee baguettes and good coffee near the Patuxay.' },
-  { id: 'vte-lacuna', roles: ['cafe'], row: 'Day 06 · 26.02.2027', chapter: 'laos', day: '26 FEB 2027', name: 'Lacuna VTE', where: 'Vientiane', cats: 'Café · Design', maps: 'https://maps.app.goo.gl/tzMFhWFGAWjE2ALs8?g_st=ic', img: 'assets/images/experiences/vte-lacuna-03.jpg', teaser: 'A quiet design café — considered coffee in a considered room.' },
-  { id: 'vte-kokkok', roles: ['place'], row: 'Day 06 · 26.02.2027', chapter: 'laos', day: '26 FEB 2027', name: 'KokKok Mega Mall Patuxay', where: 'Vientiane', cats: 'City · Shopping', maps: 'https://maps.app.goo.gl/TKSjr5kc2P6vWvWSA?g_st=ic', img: 'assets/images/experiences/vte-kokkok-01.jpg', teaser: 'A modern city stop by the Patuxay.' },
-  { id: 'vte-laoderm', roles: ['dinner'], row: 'Day 06 · 26.02.2027 · Day 07 Welcome Dinner', chapter: 'laos', day: '26 FEB 2027', name: 'Lao Derm', where: 'Vientiane', cats: 'Lao · Dining', maps: 'https://maps.app.goo.gl/cSn9mzR38QdKGsk49?g_st=ic', img: 'assets/images/experiences/vte-laoderm-02.jpg', teaser: 'An evening alternative — classic Lao dining, warm and unhurried.' },
+  { id: 'vte-lacuna', category: 'cafe', roles: ['cafe'], visits: [{ day: 6, date: '2027-02-26', seq: 1500, what: 'Coffee' }, { day: 6, date: '2027-02-26', seq: 2100, what: 'Evening drinks' }], row: 'Day 06 · 26.02.2027', chapter: 'laos', day: '26 FEB 2027', name: 'Lacuna VTE', where: 'Vientiane', cats: 'Café · Design', maps: 'https://maps.app.goo.gl/tzMFhWFGAWjE2ALs8?g_st=ic', img: 'assets/images/experiences/vte-lacuna-03.jpg', teaser: 'A quiet design café — considered coffee in a considered room.' },
+  { id: 'vte-kokkok', category: 'place', roles: ['place'], visits: [{ day: 6, date: '2027-02-26', seq: 1350, what: 'Afternoon' }], row: 'Day 06 · 26.02.2027', chapter: 'laos', day: '26 FEB 2027', name: 'KokKok Mega Mall Patuxay', where: 'Vientiane', cats: 'City · Shopping', maps: 'https://maps.app.goo.gl/TKSjr5kc2P6vWvWSA?g_st=ic', img: 'assets/images/experiences/vte-kokkok-01.jpg', teaser: 'A modern city stop by the Patuxay.' },
+  { id: 'vte-laoderm', category: 'restaurant', roles: ['dinner'], visits: [{ day: 6, date: '2027-02-26', seq: 1900, what: 'Dinner' }, { day: 7, date: '2027-02-27', seq: 1900, what: 'Welcome Dinner' }], row: 'Day 06 · 26.02.2027 · Day 07 Welcome Dinner', chapter: 'laos', day: '26 FEB 2027', name: 'Lao Derm', where: 'Vientiane', cats: 'Lao · Dining', maps: 'https://maps.app.goo.gl/cSn9mzR38QdKGsk49?g_st=ic', img: 'assets/images/experiences/vte-laoderm-02.jpg', teaser: 'An evening alternative — classic Lao dining, warm and unhurried.' },
+  /* THE VIENTIANE TABLES THE OVERVIEW NAMES (the Operations Master overview, approved 05.09.2026): the dinner of 26 February
+     and the lunch of the arrival day, the hotel's café and the sky bar of the welcome evening — no photographs in the Owner's
+     records; the cards stand without an image */
+  { id: 'vte-camon', category: 'restaurant', roles: ['dinner'], visits: [{ day: 6, date: '2027-02-26', seq: 1915, what: 'Dinner' }, { day: 7, date: '2027-02-27', seq: 1230, what: 'Lunch' }], row: 'Day 06 · 26.02.2027 · Day 07 · 27.02.2027', chapter: 'laos', day: '26 · 27 FEB 2027', name: 'Cam On Restaurant', where: 'Vientiane', cats: 'Vietnamese · Dinner · Lunch', teaser: 'A Vientiane table for two evenings of the week — dinner after the night market, lunch on the day the guests arrive.' },
+  { id: 'vte-lecafe', category: 'cafe', roles: ['cafe'], visits: [{ day: 7, date: '2027-02-27', seq: 1500, what: 'Coffee' }], row: 'Day 07 · 27.02.2027', chapter: 'laos', day: '27 FEB 2027', name: 'Le Café at Souphattra Heritage', where: 'Vientiane', cats: 'Café · The house', teaser: 'The café of the house itself — coffee in the courtyard on the afternoon the guests arrive.' },
+  { id: 'vte-selene', category: 'bar', roles: ['bar'], visits: [{ day: 7, date: '2027-02-27', seq: 2100, what: 'Drinks' }], row: 'Day 07 · 27.02.2027', chapter: 'laos', day: '27 FEB 2027', name: 'Selene Sky Bar', where: 'Vientiane', cats: 'Sky bar · Evening', teaser: 'A drink above the city on the welcome evening, after the dinner at Lao Derm.' },
+  /* THE WEDDING MORNING (Owner, 22 Sep 2026): Wat Ong Teu, where the day begins — the Alms Giving Ceremony of Sunday, 28 February 2027;
+     the photograph is the temple's own approved frame (Drive folder 050 · DSC07779), the one the Temple Ceremony already shows */
+  { id: 'vte-ongteu', category: 'experience', roles: ['experience'], visits: [{ day: 8, date: '2027-02-28', seq: 900, what: 'Alms Giving Ceremony' }], row: 'Day 08 · 28.02.2027', chapter: 'laos', featured: true, day: '28 FEB 2027', name: 'Wat Ong Teu', where: 'Vientiane', cats: 'Temple · The wedding morning · Sacred', img: 'assets/images/experiences/vte-ongteu-01.jpg', teaser: 'The temple where the wedding day begins — the morning alms giving, novices with their bowls, the city still quiet.', detail: ['The wedding day opens here at nine: an unhurried Buddhist morning at Wat Ong Teu, with time to take part in the giving that begins the day. Afterwards the guests return together to Souphattra Heritage for coffee and cake.', 'One of the oldest temples of Vientiane, a few minutes on foot from the riverside — the day’s first chapter, and the quietest.'] },
+  /* BARON VIENTIANE (Owner, 22 Sep 2026): the club of the wedding night — the VIP after party, the release after the formal day.
+     Approved media: the Owner's BARON folder (seven photographs, three films with sound). A club, never a bar card. */
+  { id: 'vte-baron', category: 'club', roles: ['club'], visits: [{ day: 8, date: '2027-02-28', seq: 2230, what: 'VIP After Party' }], row: 'Day 08 · 28.02.2027', sheet: 'OWNER', chapter: 'laos', featured: true, day: '28 FEB 2027', name: 'BARON Vientiane', where: 'Vientiane', cats: 'Club · The wedding night · After party', maps: 'https://maps.google.com/?q=BARON+Vientiane', img: 'assets/images/experiences/vte-baron-01.jpg',
+    teaser: 'When the speeches are over and the last course is cleared: the wedding night carries on at BARON — the couple’s VIP after party, music until late.',
+    detail: ['After the dinner by the pool the night is not over. BARON, on the second floor above Starbucks in the centre of Vientiane, is where the wedding turns into a party: the DJ, the floor, the friends who came from three countries, one last dance before the journey moves on.', 'The couple’s VIP after party — no ticket, no list, just come as you are from the dinner. The music plays until the last guests leave.'],
+    practical: { when: 'Sunday, 28 February 2027 · after the Wedding Dinner', dress: 'As you come from the dinner — Black Tie, loosened', address: ['BARON Vientiane', '2nd floor above Starbucks', 'Vientiane, Laos'] },
+    highlight: { distinction: 'The wedding night · VIP after party', line: 'The release after the formal day — music, movement, the friends who came from three countries.', house: 'A club on the second floor above Starbucks, in the centre of Vientiane' },
+    clips: [
+      { src: 'assets/video/baron-01.mp4', poster: 'assets/video/baron-01-poster.jpg', w: 720, h: 1280, alt: 'On the floor at BARON — the crowd under the lights' },
+      { src: 'assets/video/baron-02.mp4', poster: 'assets/video/baron-02-poster.jpg', w: 720, h: 1280, alt: 'The DJ set at BARON' },
+      { src: 'assets/video/baron-03.mp4', poster: 'assets/video/baron-03-poster.jpg', w: 720, h: 720, alt: 'The night at BARON, in one take' }
+    ] },
   /* CHINA · KUNMING · LIJIANG */
-  { id: 'cn-blossom', roles: ['experience'], row: 'Day 09 – 10 · 01.–02.03.2027', chapter: 'china', featured: true, day: 'Seasonal', name: 'Kunming Cherry Blossoms', where: 'Kunming · Yunnan', cats: 'Nature · Garden · Seasonal · Photography',
+  { id: 'cn-blossom', category: 'experience', roles: ['experience'], visits: [{ day: 9, date: '2027-03-01', seq: 1000, what: 'Cherry blossoms' }, { day: 10, date: '2027-03-02', seq: 1000, what: 'Cherry blossoms' }], row: 'Day 09 – 10 · 01.–02.03.2027', chapter: 'china', featured: true, day: 'Seasonal', name: 'Kunming Cherry Blossoms', where: 'Kunming · Yunnan', cats: 'Nature · Garden · Seasonal · Photography',
     img: 'assets/images/experiences/kmg-blossom-01.jpg',
     teaser: "In spring, Kunming's gardens shift into layers of pink blossom, water, stone paths and traditional architecture.",
     detail: [

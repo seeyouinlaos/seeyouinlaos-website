@@ -107,6 +107,19 @@
       write(st);
     },
 
+    /* ---- A WISH FROM THE BRIDE & GROOM (Owner, 22 Sep 2026): the final act of the wedding night — 'pool' | 'baron' | null,
+     * the guest's own, never preselected, never defaulted; required before SEND (src/questionnaire.js) ---- */
+    finaleOf: function (id) {
+      var v = ((read().by || {})[id] || {}).finale;
+      return v === 'pool' || v === 'baron' ? v : null;
+    },
+    setFinale: function (id, v) {
+      if (!mine(id)) return false;
+      var st = read(); st.by = st.by || {}; st.by[id] = st.by[id] || {};
+      if (v === 'pool' || v === 'baron') st.by[id].finale = v; else delete st.by[id].finale;
+      st.by[id].at = new Date().toISOString(); st.by[id].by = by();
+      write(st); return true;
+    },
     /* ---- PER NAMED GUEST. The party-wide reading is derived, never stored. */
     attendanceOf: function (id) {
       var v = (read().by || {})[id];
@@ -240,7 +253,10 @@
             : elig === 'NONE' ? 'Not eligible'
             : elig !== 'ELIGIBLE' ? 'Not available yet'
             : o === 'yes' ? 'Selected' : o === 'no' ? 'Not selected' : 'Decision required',
-          participation: away || 'Joining Vientiane'
+          participation: away || 'Joining Vientiane',
+          /* the final act, in the record's words (the Worker reads the key or the words) */
+          finale: away ? 'Not applicable' : (self.finaleOf(g.guestId) === 'pool' ? 'The pool jump' : self.finaleOf(g.guestId) === 'baron' ? 'BARON Vientiane · VIP after party' : 'Not decided'),
+          finaleKey: away ? null : self.finaleOf(g.guestId)
         };
       });
       var n = away ? 0 : this.offerings();

@@ -155,6 +155,9 @@ export function completion(input) {
     const ev = w.events || {};
     ['temple', 'coffee', 'vows', 'dinner'].forEach((k) => { if (ev[k] !== 'yes' && ev[k] !== 'no') { out.wedding.missing.push('event:' + k); miss('event:' + k, k + ' — attending or not', 'wedding', 'wedding.html#ev-' + k); } });
     if (ev.temple === 'yes' && w.sangkhathan === null) { out.wedding.missing.push('sangkhathan'); miss('sangkhathan', 'Sangkhathan — yes or no', 'wedding', 'wedding.html#sangkhathan'); }
+    /* A WISH FROM THE BRIDE & GROOM (Owner, 22 Sep 2026): the final act of the wedding night — the pool jump or BARON — required of
+       every guest who joins the wedding, never preselected, never defaulted (the words: src/questionnaire.js FINALE) */
+    if (w.finale !== 'pool' && w.finale !== 'baron') { out.wedding.missing.push('finale'); miss('finale', 'A wish from the Bride & Groom — the pool jump or BARON', 'wedding', 'wedding.html#finale'); }
     if (w.dress !== true) { out.wedding.missing.push('dress'); miss('dress', 'Dress code acknowledgement', 'preparation', 'wedding-preparation.html#ack'); }
     const S = w.seating || {};
     if (S.open && !S.frozen) {

@@ -23,7 +23,9 @@ const load = () => { const w = {}; new Function('window', src('assets/experience
 const W = load();
 const REC = JSON.parse(src('src/experience-galleries.json')), STAY = JSON.parse(src('src/stay-media.json'));
 const rolesOf = Object.fromEntries(W.SIYL_EXP.map((x) => [x.id, x.roles]));
-const catOf = (id) => { const r = rolesOf[id] || []; return r.includes('bar') ? 'bar' : r.includes('cafe') ? 'cafe' : r.some((x) => /lunch|dinner|breakfast/.test(x)) ? 'restaurant' : 'experience'; };
+const categoryOf = Object.fromEntries(W.SIYL_EXP.map((x) => [x.id, x.category]));
+/* the taxonomy (22 Sep 2026): the category is the record's own field; a shopping place shows its venue context as an experience does */
+const catOf = (id) => { const c = categoryOf[id]; return c === 'place' ? 'experience' : c; };
 
 test('STAY MEDIA · the record is the module; every frame is a hotel kind of the hotel it names, on disk, captioned, sourced; the lead shows the house; the Riverside Hotel\'s frames are read from the record (the Owner\'s folder, never a fixed count); the Guest House complimentary replaces the "Private Residence"', () => {
   assert.equal(execFileSync('node', ['src/build-stay-media.cjs', '--check'], { cwd: process.cwd() }).toString().trim(), 'STAY MEDIA: current (9 hotels)');
@@ -80,7 +82,8 @@ test('MEDIA TAXONOMY · every experience frame carries its kind; no restaurant, 
     const cat = catOf(id), allowed = tax[cat];
     for (const im of g.images) { assert.ok(im.kind, id + ' kind'); assert.ok(!tax.never.includes(im.kind), id + ' never a ' + im.kind); assert.ok(allowed.includes(im.kind), id + ' ' + im.kind + ' is a ' + cat + ' kind'); assert.ok(existsSync(im.src), im.src); }
     assert.deepEqual(gal[id].images.map((im) => im.kind), g.images.map((im) => im.kind), id + ' module carries the kinds');
-    if (cat !== 'experience') assert.ok(['interior', 'dining-room', 'counter', 'architecture', 'exterior', 'design'].includes(g.images[0].kind), id + ' leads with the place, not ' + g.images[0].kind);
+    if (cat !== 'experience' && cat !== 'club') assert.ok(['interior', 'dining-room', 'counter', 'architecture', 'exterior', 'design'].includes(g.images[0].kind), id + ' leads with the place, not ' + g.images[0].kind);
+    if (cat === 'club') assert.ok(['atmosphere', 'stage', 'interior'].includes(g.images[0].kind), id + ' leads with the night');
   }
   /* the builder refuses a dish */
   const bad = JSON.parse(JSON.stringify(REC)); bad['bkk-thongsmith'].images[0].kind = 'food';
@@ -113,14 +116,15 @@ test('RESTAURANT MEDIA AUDIT · Thong Smith, Tang Jai Yang and Le Du Kaan show t
   for (const f of readdirSync('assets/images/experiences')) assert.ok(frames.has(f) || leads.has(f) || f === 'vte-oathhouse.jpg', f + ' orphan');
 });
 
-test('CAFÉ CATEGORY AUDIT · the eight Café entries of Restaurant_Experience,Cafe,Bar_Details carry the cafe role; the Cafés rail is exactly them', () => {
-  /* the Cafe column of the details tab (8) plus Kaogee Le Triomphe, which the Overview's Cafe column (Day 06) and the Owner's folder "128 - Cafe - Kaogee Le Triomphe" carry as a café beside its restaurant listing */
-  const sourceCafes = { 'bkk-diorlv': 'Dior and LV Cafe', 'bkk-timespace': 'Time Space Cafe', 'bkk-mooyoo': 'Moo Yoo Rose House', 'bkk-whispering': 'Whispering Cafe', 'bkk-madeleine': 'Cafe Madeleine', 'bkk-harudot': 'Harudot', 'vte-sona': 'Sona Cafe and Bar', 'vte-lacuna': 'Lacuna VTE', 'vte-kaogee': 'Kaogee Le Triomphe' };
-  for (const id of Object.keys(sourceCafes)) assert.ok(rolesOf[id].includes('cafe'), sourceCafes[id] + ' is a café on the website');
-  const websiteCafes = W.SIYL_EXP.filter((x) => x.roles.includes('cafe')).map((x) => x.id).sort();
+test('CAFÉ CATEGORY AUDIT · the cafés of the source carry the cafe category — one each, never a lunch or a bar beside it (the taxonomy, 22 Sep 2026); Sona is the bar it is; the Cafés rail is the cafe category', () => {
+  /* the Cafe column of the details tab plus Kaogee Le Triomphe (the Overview's Cafe column, Day 06) and the two cafés the overview named on 07.03 and 27.02 */
+  const sourceCafes = { 'bkk-diorlv': 'Dior and LV Cafe', 'bkk-timespace': 'Time Space Cafe', 'bkk-mooyoo': 'Moo Yoo Rose House', 'bkk-whispering': 'Whispering Cafe', 'bkk-madeleine': 'Cafe Madeleine', 'bkk-harudot': 'Harudot', 'vte-lacuna': 'Lacuna VTE', 'vte-kaogee': 'Kaogee Le Triomphe', 'bkk-cafecraft': 'Café Craft by CHANINTR', 'vte-lecafe': 'Le Café at Souphattra Heritage' };
+  for (const id of Object.keys(sourceCafes)) assert.deepEqual(rolesOf[id], ['cafe'], sourceCafes[id] + ' is a café on the website, and only that');
+  const websiteCafes = W.SIYL_EXP.filter((x) => x.category === 'cafe').map((x) => x.id).sort();
   assert.deepEqual(websiteCafes, Object.keys(sourceCafes).sort(), 'no café beyond the source, none missing');
-  assert.match(src('experiences.html'), /\['Cafés', \['cafe'\]\]/, 'the rail is the cafe role');
-  assert.ok(rolesOf['bkk-mooyoo'].includes('lunch'), 'Moo Yoo stays a lunch place too (Overview Day 03)');
+  assert.deepEqual(rolesOf['vte-sona'], ['bar'], 'Sona Cafe and Bar is the bar it is (Owner, 22 Sep 2026) — never a second café card');
+  assert.deepEqual(rolesOf['bkk-mooyoo'], ['cafe'], 'Moo Yoo is a café — lunch there does not make it a restaurant');
+  assert.match(src('assets/discover.js'), /\{ key: 'cafe', title: 'Cafés', cats: \['cafe'\] \}/, 'the rail is the cafe category');
 });
 
 test('RIVERSIDE HOTEL · package D3 everywhere: the inventory (6 rooms · 2 places, the wedding window), the pricing (USD 30 × 2 nights), the journey ids (wedstay · guesthouse · riverside), the stage maps, the engine, the emails, the menu, THE HOUSES, the room page; the photography read from the record', async () => {

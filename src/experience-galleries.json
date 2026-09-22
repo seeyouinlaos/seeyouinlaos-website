@@ -29,7 +29,15 @@
    "food",
    "drink"
   ],
-  "rule": "See You In Laos is not a food blog (Owner, 19 Sep 2026): a restaurant, café or bar is shown by its interior, design, architecture, exterior, dining room, counter or atmosphere — never by an isolated dish, plate, bowl, dessert or glass. The category of a place follows its roles (bar → bar; cafe → cafe; a meal role → restaurant; experience / place → venue context). Every frame carries its kind; src/build-experience-galleries.cjs refuses a record that breaks the rule."
+  "rule": "See You In Laos is not a food blog (Owner, 19 Sep 2026): a restaurant, café or bar is shown by its interior, design, architecture, exterior, dining room, counter or atmosphere — never by an isolated dish, plate, bowl, dessert or glass. The category of a place follows its roles (club → club; bar → bar; cafe → cafe; a meal role → restaurant; experience / place → venue context). Every frame carries its kind; src/build-experience-galleries.cjs refuses a record that breaks the rule.",
+  "club": [
+   "interior",
+   "architecture",
+   "exterior",
+   "counter",
+   "atmosphere",
+   "stage"
+  ]
  },
  "bkk-suhring": {
   "slug": "bkk-suhring",
@@ -1829,6 +1837,130 @@
     "drive": "1Gq_8u3-9iTIhBhZiHkK_CJX9dEIwswCb",
     "file": "SnapInsta.to_683844230_1017242783963357_8135421017441544190_n.jpg",
     "kind": "design"
+   }
+  ]
+ },
+ "bkk-petitsplats": {
+  "slug": "bkk-petitsplats",
+  "folder": "Petits Plats Bangkok (Owner folder)",
+  "folderId": "12W_HGO-5KHEbGXiw86FlHdzRUtlWSuNs",
+  "frame": "4/5",
+  "images": [
+   {
+    "src": "assets/images/experiences/bkk-petitsplats-01.jpg",
+    "w": 1440,
+    "h": 1440,
+    "alt": "The dining room — green banquettes, white linen, the framed wall",
+    "drive": "1TluXjRoBGau4LHVgBKG5UU857hFG-xrT",
+    "file": "IMG_2730.JPG",
+    "kind": "dining-room"
+   },
+   {
+    "src": "assets/images/experiences/bkk-petitsplats-02.jpg",
+    "w": 1440,
+    "h": 1800,
+    "alt": "The room from above — pop art on every wall, the tables laid",
+    "drive": "1UQMjxtEd8NU5ow1Ycfbwch3-OMovmszS",
+    "file": "IMG_2732.JPG",
+    "kind": "interior"
+   },
+   {
+    "src": "assets/images/experiences/bkk-petitsplats-03.jpg",
+    "w": 1439,
+    "h": 1919,
+    "alt": "The wine wall — bottles held in a black lattice",
+    "drive": "1vh7gJgDfEFoY3BHuO42xbpcj8n_TwRnH",
+    "file": "IMG_2733.JPG",
+    "kind": "design"
+   },
+   {
+    "src": "assets/images/experiences/bkk-petitsplats-04.jpg",
+    "w": 1440,
+    "h": 1800,
+    "alt": "The chef at the pass, a pan on the flame",
+    "drive": "1Ro7MDvrKFWomQ5pMN3hcsl_3ba1Q9Kjl",
+    "file": "IMG_2729.JPG",
+    "kind": "atmosphere"
+   },
+   {
+    "src": "assets/images/experiences/bkk-petitsplats-05.jpg",
+    "w": 1290,
+    "h": 1290,
+    "alt": "A corner of the dining room under the gallery wall",
+    "drive": "1BRH1CEH_KpjlQYrzz02KqBRtYrjc-OVe",
+    "file": "IMG_2731.JPG",
+    "kind": "dining-room"
+   }
+  ]
+ },
+ "vte-baron": {
+  "slug": "vte-baron",
+  "folder": "BARON Vientiane (Owner folder)",
+  "folderId": "1EUYKKbv78a3_zIkWFZG1y8KhxDV08H0b",
+  "frame": "4/5",
+  "images": [
+   {
+    "src": "assets/images/experiences/vte-baron-01.jpg",
+    "w": 1508,
+    "h": 2000,
+    "alt": "The DJ booth at BARON, the crowd behind",
+    "drive": "1hBUhQRPGK_20po4ixWPY785kIsuMBATC",
+    "file": "IMG_2720.JPG",
+    "kind": "atmosphere"
+   },
+   {
+    "src": "assets/images/experiences/vte-baron-02.jpg",
+    "w": 1508,
+    "h": 2000,
+    "alt": "The BARON sign held up over the floor",
+    "drive": "1xBIREuV4_N5XB-4_DANxqUcXfes39vWy",
+    "file": "IMG_2726.JPG",
+    "kind": "atmosphere"
+   },
+   {
+    "src": "assets/images/experiences/vte-baron-03.jpg",
+    "w": 1508,
+    "h": 2000,
+    "alt": "The DJ at the decks",
+    "drive": "1vYBqyUBICkULL6y6YbQD76mZTI5XfJrx",
+    "file": "IMG_2728.JPG",
+    "kind": "stage"
+   },
+   {
+    "src": "assets/images/experiences/vte-baron-04.jpg",
+    "w": 1508,
+    "h": 2000,
+    "alt": "The floor under red light",
+    "drive": "1Di1dnzkkV3WFWE1CNPXoCc4AzBlhmU-d",
+    "file": "IMG_2721.JPG",
+    "kind": "atmosphere"
+   },
+   {
+    "src": "assets/images/experiences/vte-baron-05.jpg",
+    "w": 1365,
+    "h": 1820,
+    "alt": "Dancing, arms up, the night in full swing",
+    "drive": "1LUtrP4IONkl08yr4vn90KBkyMuOVwUY2",
+    "file": "IMG_2722.JPG",
+    "kind": "atmosphere"
+   },
+   {
+    "src": "assets/images/experiences/vte-baron-06.jpg",
+    "w": 1508,
+    "h": 2000,
+    "alt": "The crowd under the lights",
+    "drive": "1YVoWZe1TbQFNh29NQLnqgJ3hkbE40thg",
+    "file": "IMG_2723.JPG",
+    "kind": "atmosphere"
+   },
+   {
+    "src": "assets/images/experiences/vte-baron-07.jpg",
+    "w": 1508,
+    "h": 2000,
+    "alt": "At the console, the set under way",
+    "drive": "1ujHB2YAUIN3j50AVyhvZU8GqfVpvCi1H",
+    "file": "IMG_2727.JPG",
+    "kind": "stage"
    }
   ]
  }

@@ -9,7 +9,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 .bag{width:44px;height:44px;display:flex;align-items:center;justify-content:center;position:relative;color:#313131;text-decoration:none}.bag .bgi{display:block}
 .bb{position:absolute;top:1px;right:0;min-width:14px;height:14px;padding:0 3px;background:#313131;color:#F3EEE7;font-size:8.5px;line-height:1;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;display:none;align-items:center;justify-content:center;box-shadow:0 0 0 2px #F3EEE7;border-radius:1px}
 </style>
-<link rel="stylesheet" href="assets/aman.css?v=9aead576"><link rel="stylesheet" href="assets/prep.css?v=902f99a1"></head><body>
+<link rel="stylesheet" href="assets/aman.css?v=9aead576"><link rel="stylesheet" href="assets/prep.css?v=9afcd03d"></head><body>
 <header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="cart.html" aria-label="My Bag"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main class="prep-page" id="about-you">
 <div class="prep-head">
@@ -25,10 +25,11 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/aman.js?v=2a339178"></script>
 <script src="assets/rooms-data.js?v=2f46c2d6"></script>
 <script src="assets/pricing.js?v=678b5c38"></script>
-<script src="assets/stage-graph.js?v=92ac36af"></script>
-<script src="assets/guest.js?v=34df3d2a"></script>
+<script src="assets/stage-graph.js?v=3619a3d0"></script>
+<script src="assets/questionnaire.js?v=9b3f29c0"></script>
+<script src="assets/guest.js?v=2f688b53"></script>
 <script src="assets/draft.js?v=7ab9ca64"></script>
-<script src="assets/temple.js?v=100faabd"></script>
+<script src="assets/temple.js?v=200ee67c"></script>
 <script src="assets/rooms.js?v=e0d4bbbf"></script>
 <script src="assets/seatlabels.js?v=4994e1f4"></script>
 <script src="assets/seating.js?v=3b392bf0"></script>
@@ -57,13 +58,20 @@ else document.addEventListener('siyl:invite-ready',function(){SIYL_INVITE.requir
 function when(iso){try{return new Date(iso).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}catch(e){return ''}}
 function size(n){return n>=1048576?(n/1048576).toFixed(1)+' MB':Math.max(1,Math.round(n/1024))+' KB'}
 
+var QN=window.SIYL_QUESTIONNAIRE;
+function answered(id,q){return QN.profileAnswered(G.rec(id).profile,q)}
 function field(id,q){
-  var v=G.profile(id,q.key),ok=!!String(v||'').trim();
-  /* every visible question is required (Owner, 15 Sep 2026): its state says so, its box never silently counts as done */
-  var head='<div class="p-field'+(ok?' on':'')+'" id="q-'+q.key+'"><p class="t-l1'+(ok?' on':' open')+'" data-q-state="'+q.key+'">'+q.n+' · '+(ok?'<i class="prep-tick" aria-hidden="true"></i> Complete':'Required')+'</p><h3 class="t-h2">'+q.q+'</h3><p class="t-b2">'+q.hint+'</p>';
+  var v=G.profile(id,q.key),ok=answered(id,q);
+  /* what is required is the schema's word (src/questionnaire.js, Owner 22 Sep 2026): its state says so, its box never silently counts as done;
+     an optional question says Optional and never blocks */
+  var state=ok?'<i class="prep-tick" aria-hidden="true"></i> Complete':(q.required?'Required':'Optional');
+  var head='<div class="p-field'+(ok?' on':'')+'" id="q-'+q.key+'"><p class="t-l1'+(ok?' on':(q.required?' open':''))+'" data-q-state="'+q.key+'">'+q.n+' · '+state+'</p><h3 class="t-h2">'+q.q+'</h3><p class="t-b2">'+q.hint+'</p>';
+  /* THE MUSIC (Owner, 22 Sep 2026): the genres as one multi-select — as many as the guest likes, at least one; nothing pressed until the guest presses */
+  if(q.type==='multi')return head+'<div class="p-selrow p-choice p-multi" role="group" aria-label="'+esc(q.q)+'" data-multi="'+q.key+'" data-g="'+esc(id)+'">'+q.choices.map(function(c){var on=(v||[]).indexOf(c)>=0;return '<button type="button" class="p-sel" role="checkbox" aria-checked="'+(on?'true':'false')+'" aria-pressed="'+(on?'true':'false')+'" data-pick="'+esc(c)+'">'+esc(c)+'</button>'}).join('')+'</div>'+
+    '<p class="t-l1'+(ok?' on':' open')+'" data-multi-count="'+q.key+'">'+((v||[]).length?(v.length===1?'1 genre chosen':v.length+' genres chosen'):'Choose at least one')+'</p></div>';
   /* a choice question (My Favorite Flavor, Owner, 18 Sep 2026): the six choices as the one selection control, exactly one pressed */
   if(q.choices)return head+'<div class="p-selrow p-choice" role="radiogroup" aria-label="'+esc(q.q)+'" data-choice="'+q.key+'" data-g="'+esc(id)+'">'+q.choices.map(function(c){var on=v===c;return '<button type="button" class="p-sel" role="radio" aria-checked="'+(on?'true':'false')+'" aria-pressed="'+(on?'true':'false')+'" data-pick="'+esc(c)+'">'+esc(c)+'</button>'}).join('')+'</div></div>';
-  return head+'<textarea data-q="'+q.key+'" data-g="'+esc(id)+'" placeholder="Your answer" aria-label="'+esc(q.q)+'" aria-required="true" aria-invalid="'+(ok?'false':'true')+'">'+esc(v)+'</textarea></div>'}
+  return head+'<textarea data-q="'+q.key+'" data-g="'+esc(id)+'" placeholder="'+(q.required?'Your answer':'Optional')+'" aria-label="'+esc(q.q)+'" aria-required="'+(q.required?'true':'false')+'" aria-invalid="'+(ok||!q.required?'false':'true')+'">'+esc(v)+'</textarea></div>'}
 
 function docRow(id,k){
   var r=D.get(id,k.key);
@@ -101,7 +109,7 @@ h+='<section class="prep-sec" id="allergy"><p class="t-l1">01 · Required</p><h2
    '</div></section>';
 
 /* 02–07 · A LITTLE MORE ABOUT YOU — every question answered (Owner, 15 Sep 2026) */
-var favDone=G.PROFILE.every(function(q){return !!String(G.profile(id,q.key)||'').trim()});
+var favDone=G.PROFILE.every(function(q){return !q.required||answered(id,q)});
 h+='<section class="prep-sec" id="favourites"><p class="t-l1'+(favDone?' on':'')+'" id="fav-state">'+(favDone?'<i class="prep-tick" aria-hidden="true"></i> Complete':'Required')+'</p><h2 class="t-h2">A little more about you</h2>'+
    '<p class="t-b1 measure">The little things you love are often the ones that matter most. A word or two for each is enough.</p>';
 G.PROFILE.forEach(function(q){h+=field(id,q)});
@@ -144,21 +152,30 @@ page.querySelectorAll('[data-allergy]').forEach(function(b){b.addEventListener('
 var at=page.querySelector('[data-allergy-text]');
 if(at){var save=function(){G.setAllergy('yes',at.value.trim())};at.addEventListener('change',function(){save();render();var t=document.getElementById('allergy-text');if(t)try{t.focus({preventScroll:true})}catch(e){}});at.addEventListener('blur',save)}
 /* a choice: one tap sets it, the states follow at once (the field's, the section's, the shell's) */
+page.querySelectorAll('[data-multi]').forEach(function(grp){grp.querySelectorAll('[data-pick]').forEach(function(b){b.addEventListener('click',function(){
+  var key=grp.getAttribute('data-multi'),val=b.getAttribute('data-pick');var next=G.toggleGenre(grp.getAttribute('data-g'),val);mark();
+  grp.querySelectorAll('[data-pick]').forEach(function(x){var on=next.indexOf(x.getAttribute('data-pick'))>=0;x.setAttribute('aria-checked',on?'true':'false');x.setAttribute('aria-pressed',on?'true':'false')});
+  var f=grp.closest('.p-field'),st=f&&f.querySelector('[data-q-state]'),cnt=f&&f.querySelector('[data-multi-count]'),ok=next.length>0;
+  if(f)f.classList.toggle('on',ok);if(st){st.className='t-l1'+(ok?' on':' open');st.innerHTML=st.textContent.split(' · ')[0]+' · '+(ok?'<i class="prep-tick" aria-hidden="true"></i> Complete':'Required')}
+  if(cnt){cnt.className='t-l1'+(ok?' on':' open');cnt.textContent=next.length?(next.length===1?'1 genre chosen':next.length+' genres chosen'):'Choose at least one'}
+  var all=G.PROFILE.every(function(q){return !q.required||answered(id,q)}),fs=document.getElementById('fav-state');
+  if(fs){fs.className='t-l1'+(all?' on':'');fs.innerHTML=all?'<i class="prep-tick" aria-hidden="true"></i> Complete':'Required'}
+  if(window.SIYL_PREP)SIYL_PREP.foot(document.getElementById('foot'))})})});
 page.querySelectorAll('[data-choice]').forEach(function(grp){grp.querySelectorAll('[data-pick]').forEach(function(b){b.addEventListener('click',function(){
   var key=grp.getAttribute('data-choice'),val=b.getAttribute('data-pick');G.setProfile(grp.getAttribute('data-g'),key,val);mark();
   grp.querySelectorAll('[data-pick]').forEach(function(x){var on=x===b;x.setAttribute('aria-checked',on?'true':'false');x.setAttribute('aria-pressed',on?'true':'false')});
   var f=grp.closest('.p-field'),st=f&&f.querySelector('[data-q-state]');if(f)f.classList.add('on');
   if(st){st.className='t-l1 on';st.innerHTML=st.textContent.split(' · ')[0]+' · <i class="prep-tick" aria-hidden="true"></i> Complete'}
-  var all=G.PROFILE.every(function(q){return !!String(G.profile(id,q.key)||'').trim()}),fs=document.getElementById('fav-state');
+  var all=G.PROFILE.every(function(q){return !q.required||answered(id,q)}),fs=document.getElementById('fav-state');
   if(fs){fs.className='t-l1'+(all?' on':'');fs.innerHTML=all?'<i class="prep-tick" aria-hidden="true"></i> Complete':'Required'}
   if(window.SIYL_PREP)SIYL_PREP.foot(document.getElementById('foot'))})})});
 page.querySelectorAll('textarea[data-q]').forEach(function(t){
   /* an answer updates the readiness at once — the field's state, the section's, the shell's — without losing the caret */
   t.addEventListener('change',function(){G.setProfile(t.getAttribute('data-g'),t.getAttribute('data-q'),t.value.trim());mark();
-    var ok=!!t.value.trim(),f=t.closest('.p-field'),st=f&&f.querySelector('[data-q-state]');
-    if(f)f.classList.toggle('on',ok);t.setAttribute('aria-invalid',ok?'false':'true');
-    if(st){st.className='t-l1'+(ok?' on':' open');st.innerHTML=st.textContent.split(' · ')[0]+' · '+(ok?'<i class="prep-tick" aria-hidden="true"></i> Complete':'Required')}
-    var all=G.PROFILE.every(function(q){return !!String(G.profile(id,q.key)||'').trim()}),fs=document.getElementById('fav-state');
+    var ok=!!t.value.trim(),f=t.closest('.p-field'),st=f&&f.querySelector('[data-q-state]'),req=t.getAttribute('aria-required')==='true';
+    if(f)f.classList.toggle('on',ok);t.setAttribute('aria-invalid',ok||!req?'false':'true');
+    if(st){st.className='t-l1'+(ok?' on':(req?' open':''));st.innerHTML=st.textContent.split(' · ')[0]+' · '+(ok?'<i class="prep-tick" aria-hidden="true"></i> Complete':(req?'Required':'Optional'))}
+    var all=G.PROFILE.every(function(q){return !q.required||answered(id,q)}),fs=document.getElementById('fav-state');
     if(fs){fs.className='t-l1'+(all?' on':'');fs.innerHTML=all?'<i class="prep-tick" aria-hidden="true"></i> Complete':'Required'}
     if(window.SIYL_PREP)SIYL_PREP.foot(document.getElementById('foot'))})});
 var pa=page.querySelector('[data-photo-ack]');

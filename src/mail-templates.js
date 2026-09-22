@@ -29,10 +29,11 @@ const EVENTS = [
 ];
 /* MY FAVORITE FLAVOR (Owner, 18 Sep 2026): one of six; an older record's snack answer counts only when it is one of the six */
 const FLAVORS = ['Coffee', 'Milk', 'Butter', 'Pandan', 'Matcha Green Tea', 'Strawberry Milk'];
-const PROFILE = [['coffeetea', 'Coffee or tea'], ['flavor', 'My Favorite Flavor'], ['drink', 'Favourite drink'], ['film', 'Favourite film'], ['music', 'Favourite music']];
+const PROFILE = [['coffeetea', 'Coffee or tea'], ['flavor', 'My Favorite Flavor'], ['drink', 'Favourite drink'], ['film', 'Favourite film'], ['genres', 'Your music (genres)'], ['music', 'A song, an album, an artist']];
 function profileValue(profile, k) {
   const p = profile || {};
-  if (k !== 'flavor') return p[k] || '';
+  if (k === 'genres') return Array.isArray(p.genres) ? p.genres.join(' · ') : '';   /* the structured answer, listed — the record keeps the array (Owner, 22 Sep 2026) */
+  if (k !== 'flavor') return (typeof p[k] === 'string' ? p[k] : '') || '';
   if (FLAVORS.includes(p.flavor)) return p.flavor;
   return FLAVORS.includes(p.treat) ? p.treat : '';
 }
@@ -98,6 +99,8 @@ export function journeyModel(record) {
   /* a guest not joining the wedding (the wedding sheet; a legacy record's Vientiane answer) is not at the wedding: every moment reads Not joining, no offering, no seat (Codex final pass, 18 Sep 2026) */
   const away = !!((gr.scope && gr.scope.at && !(gr.scope.vientianeWedding != null ? gr.scope.vientianeWedding : gr.scope.vientiane)) || (gr.scope && gr.scope.none) || (tc && /^Not joining/.test(String(tc.participation || ''))) || (r.templeCeremony && /^Not joining/.test(String(r.templeCeremony.participation || ''))));
   const wedding = EVENTS.map((e) => ({ ...e, answer: away ? 'Not joining' : answerOf(e.key) }));
+  /* A WISH FROM THE BRIDE & GROOM (Owner, 22 Sep 2026): the final act, in the record's words */
+  const finale = away ? '' : String((tc && (tc.finale || (tc.finaleKey === 'pool' ? 'The pool jump' : tc.finaleKey === 'baron' ? 'BARON Vientiane · VIP after party' : ''))) || '');
   const sangkhathan = away ? '' : (sang ? 'Yes · USD 15' : (tc && tc.sangkhathanState ? tc.sangkhathanState : ''));
   /* the seats: the engine's map for this guest */
   const m = r.seats && typeof r.seats === 'object' ? r.seats : null;
@@ -121,7 +124,7 @@ export function journeyModel(record) {
   const stated = r.totalUsd != null ? r.totalUsd : (r.total != null ? r.total : null);
   const total = stated == null ? null : (dropped ? lines.reduce((t, x) => t + (Number(x.price) || 0) * (Number(x.qty) || 1), 0) : stated);
   const upd = record.kind === 'update' && (record.version || 1) > 1;
-  return { guestId, fullName, firstName, partyName, contact, personId, stays, arranged, waitlisted, travel, experiences, wedding, sangkhathan, seats, profile, allergy, allergyDetails, acks, docs, publication, total, hosts,
+  return { guestId, fullName, firstName, partyName, contact, personId, stays, arranged, waitlisted, travel, experiences, wedding, finale, sangkhathan, seats, profile, allergy, allergyDetails, acks, docs, publication, total, hosts,
     /* WHERE THEY JOIN US (Owner, 18 Sep 2026): the guest's participation scope as sent — the words the guest chose, or a decline */
     scope: typeof gr.scopeWords === 'string' && gr.scopeWords ? gr.scopeWords : (gr.scope && gr.scope.none ? 'Not joining this trip' : ''),
     notJoining: !!(gr.scope && gr.scope.none),
@@ -173,7 +176,7 @@ function journeySections(M, forOwner) {
   if (M.waitlisted && M.waitlisted.length) s += section('Waiting list', M.waitlisted.map((w) => item(w.name, 'No room could be confirmed yet · you are number ' + w.position + ' on the waiting list' + (w.size > 1 ? ' for ' + w.size + ' places' : '') + (forOwner ? '' : '<br>Guest Relations will find an arrangement with you'), '')).join(''));
   if (M.stays.length) s += section('Stays', M.stays.map((x) => item(x.name, esc(x.dates) + (x.category ? '<br>' + esc(x.category) : '') + (x.room ? '<br><span style="color:' + INK + ';">' + esc(x.room) + '</span>' : '') + (x.breakfast ? '<br>' + esc(x.breakfast) : '') + (x.note ? '<br>' + esc(x.note) : ''), x.complimentary ? 'Complimentary' : x.price != null ? money(x.price) : '')).join(''));
   if (M.experiences.length) s += section('Experiences', M.experiences.map((e) => item(e.name, esc(e.meta), e.price != null ? money(e.price) : '')).join(''));
-  s += section('Wedding', kvTable(M.wedding.map((e) => kvRow(e.label, e.answer || '—', e.when + ' · ' + e.place)).concat(M.sangkhathan ? [kvRow('Sangkhathan', M.sangkhathan, 'A personal offering · USD 15 per participating guest')] : [])));
+  s += section('Wedding', kvTable(M.wedding.map((e) => kvRow(e.label, e.answer || '—', e.when + ' · ' + e.place)).concat(M.finale ? [kvRow('After the dinner', M.finale, 'A wish from Haruthai & Suthep')] : []).concat(M.sangkhathan ? [kvRow('Sangkhathan', M.sangkhathan, 'A personal offering · USD 15 per participating guest')] : [])));
   const seatRows = [];
   if (M.seats.ceremony.label) seatRows.push(seat('Wedding Ceremony', M.seats.ceremony.place, M.seats.ceremony.when, /^Front/.test(M.seats.ceremony.label) ? M.seats.ceremony.label : 'Seat ' + M.seats.ceremony.label));
   if (M.seats.dinner.label) seatRows.push(seat('Wedding Dinner', M.seats.dinner.place, M.seats.dinner.when, 'Seat ' + M.seats.dinner.label));
@@ -214,7 +217,7 @@ export function composeGuestMail(record) {
   if (M.waitlisted && M.waitlisted.length) { T.push('WAITING LIST'); M.waitlisted.forEach((w) => T.push('· ' + w.name + ' — no room could be confirmed yet · number ' + w.position + ' on the waiting list' + (w.size > 1 ? ' for ' + w.size + ' places' : ''))); T.push(''); }
   if (M.stays.length) { T.push('STAYS'); M.stays.forEach((x) => T.push('· ' + x.name + ' — ' + x.dates + (x.category ? ' — ' + x.category : '') + (x.room ? ' — ' + x.room : '') + (x.complimentary ? ' — Complimentary' : x.price != null ? ' — ' + money(x.price) : '') + (x.note ? ' (' + x.note + ')' : ''))); T.push(''); }
   if (M.experiences.length) { T.push('EXPERIENCES'); M.experiences.forEach((e) => T.push('· ' + e.name + ' — ' + e.meta + (e.price != null ? ' — ' + money(e.price) : ''))); T.push(''); }
-  T.push('WEDDING'); M.wedding.forEach((e) => T.push('· ' + e.label + ' · ' + e.when + ' · ' + e.place + ': ' + (e.answer || '—'))); if (M.sangkhathan) T.push('· Sangkhathan: ' + M.sangkhathan); T.push('');
+  T.push('WEDDING'); M.wedding.forEach((e) => T.push('· ' + e.label + ' · ' + e.when + ' · ' + e.place + ': ' + (e.answer || '—'))); if (M.finale) T.push('· After the dinner: ' + M.finale); if (M.sangkhathan) T.push('· Sangkhathan: ' + M.sangkhathan); T.push('');
   if (M.seats.ceremony.label || M.seats.dinner.label) { T.push('YOUR SEATS'); if (M.seats.ceremony.label) T.push('· Wedding Ceremony · Souphattra Heritage · 15:30: ' + (/^Front/.test(M.seats.ceremony.label) ? M.seats.ceremony.label : 'Seat ' + M.seats.ceremony.label)); if (M.seats.dinner.label) T.push('· Wedding Dinner · Souphattra Heritage · 19:30: Seat ' + M.seats.dinner.label); T.push(''); }
   if (M.allergy || M.profile.length || M.acks.length) { T.push('ABOUT YOU'); if (M.allergy) T.push('· Food allergies: ' + (M.allergy === 'yes' ? (M.allergyDetails || 'Yes') : 'None')); M.profile.forEach((p) => T.push('· ' + p.label + ': ' + p.value)); M.acks.forEach(([k, v]) => T.push('· ' + k + ': ' + v)); T.push(''); }
   if (M.total != null) T.push('YOUR COST', money(M.total), 'Nothing is paid on the website. Guest Relations confirms each arrangement with you personally.', 'Tak Bat, the morning alms-giving, is a personal offering and not part of your trip cost. The Sangkhathan is an optional personal offering.', '');
@@ -249,7 +252,7 @@ export function composeOwnerMail(record, statusUrl) {
   if (M.waitlisted && M.waitlisted.length) { T.push('WAITING LIST'); M.waitlisted.forEach((w) => T.push('· ' + w.name + ' — number ' + w.position + (w.size > 1 ? ' for ' + w.size + ' places' : '') + ' — to resolve')); T.push(''); }
   if (M.stays.length) { T.push('STAYS'); M.stays.forEach((x) => T.push('· ' + x.name + ' — ' + x.dates + (x.category ? ' — ' + x.category : '') + (x.room ? ' — ' + x.room : '') + ' — ' + money(x.price) + (x.note ? ' (' + x.note + ')' : ''))); T.push(''); }
   if (M.experiences.length) { T.push('EXPERIENCES'); M.experiences.forEach((e) => T.push('· ' + e.name + ' — ' + e.meta + ' — ' + money(e.price))); T.push(''); }
-  T.push('WEDDING PARTICIPATION'); M.wedding.forEach((e) => T.push('· ' + e.label + ' (' + e.when + ' · ' + e.place + '): ' + (e.answer || '—'))); if (M.sangkhathan) T.push('· Sangkhathan: ' + M.sangkhathan); T.push('');
+  T.push('WEDDING PARTICIPATION'); M.wedding.forEach((e) => T.push('· ' + e.label + ' (' + e.when + ' · ' + e.place + '): ' + (e.answer || '—'))); if (M.finale) T.push('· After the dinner: ' + M.finale); if (M.sangkhathan) T.push('· Sangkhathan: ' + M.sangkhathan); T.push('');
   T.push('SEATS', '· Wedding Ceremony: ' + (M.seats.ceremony.label ? (/^Front/.test(M.seats.ceremony.label) ? M.seats.ceremony.label : 'Seat ' + M.seats.ceremony.label) : 'no seat held'), '· Wedding Dinner: ' + (M.seats.dinner.label ? 'Seat ' + M.seats.dinner.label : 'no seat held'), '');
   T.push('ABOUT YOU', '· Food allergies: ' + (M.allergy ? (M.allergy === 'yes' ? (M.allergyDetails || 'Yes') : 'None') : '—')); M.profile.forEach((p) => T.push('· ' + p.label + ': ' + p.value)); M.acks.forEach(([k, v]) => T.push('· ' + k + ': ' + v)); T.push('');
   if (M.docs.length || M.publication) { T.push('DOCUMENTS'); M.docs.forEach((d) => T.push('· ' + d.label + ': ' + d.state)); if (M.publication) T.push('· Publication of photographs: ' + M.publication); if (missing.length) T.push('Still needed: ' + missing.join(', ')); T.push(''); }

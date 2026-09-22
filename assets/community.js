@@ -80,17 +80,17 @@
       if (Object.keys(flights).length) out.push({ key: 'flights', n: Object.keys(flights).length, label: 'Flights', note: Object.keys(flights).join(' · ') });
     }
     if (E) {
-      var list = Object.keys(E).map(function (k) { return E[k]; }), has = function (x, r) { return (x.roles || []).indexOf(r) >= 0; };
-      var rest = list.filter(function (x) { return has(x, 'dinner') || has(x, 'lunch'); }).length;
-      var cafes = list.filter(function (x) { return has(x, 'cafe'); }).length;
-      var bars = list.filter(function (x) { return has(x, 'bar'); }).length;
-      var museums = list.filter(function (x) { return /Museum/.test(x.cats || ''); }).length;
-      var temples = list.filter(function (x) { return /Temple|Stupa/.test(x.cats || ''); }).length;
-      if (rest) out.push({ key: 'restaurants', n: rest, label: 'Restaurants', note: 'lunches and dinners' });
-      if (cafes) out.push({ key: 'cafes', n: cafes, label: 'Cafés', note: '' });
-      if (bars) out.push({ key: 'bars', n: bars, label: 'Bars', note: '' });
-      if (museums) out.push({ key: 'museums', n: museums, label: 'Museums', note: 'Vientiane' });
-      if (temples) out.push({ key: 'temples', n: temples, label: 'Temples & stupas', note: 'Vientiane' });
+      /* THE TAXONOMY (Owner, 22 Sep 2026): a place counts once, in the one category it IS — a café at which lunch happens is a
+         café, a bar is a bar, the club of the wedding night is nightlife; the temple of the wedding morning and the great stupa
+         are the temples; four museums. The counting lives in assets/discover.js (one reading for every page). */
+      var D = window.SIYL_DISCOVER, c = D ? D.counts() : null;
+      if (c) {
+        if (c.restaurants) out.push({ key: 'restaurants', n: c.restaurants, label: 'Restaurants', note: 'lunches and dinners' });
+        if (c.cafes) out.push({ key: 'cafes', n: c.cafes, label: 'Cafés', note: '' });
+        if (c.nightlife) out.push({ key: 'bars', n: c.nightlife, label: 'Bars & nightlife', note: 'and the club of the wedding night' });
+        if (c.museums) out.push({ key: 'museums', n: c.museums, label: 'Museums', note: 'Vientiane' });
+        if (c.temples) out.push({ key: 'temples', n: c.temples, label: 'Temples & stupas', note: 'Vientiane' });
+      }
     }
     return out;
   }

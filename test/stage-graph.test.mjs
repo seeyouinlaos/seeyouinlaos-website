@@ -24,7 +24,7 @@ async function livePage(auth, rooms) { const w = page({ auth, fetch: await rooms
 function answerTheRest(w) {
   const G = w.SIYL_GUEST, T = w.SIYL_TEMPLE, id = G.me().guestId;
   G.setContact('email', 'guest@example.com'); G.setContact('phone', '+66 81 234 5678');
-  T.setAttendance(id, 'no'); ['coffee', 'vows', 'dinner'].forEach((k) => T.setEvent(id, k, 'yes'));
+  T.setAttendance(id, 'no'); ['coffee', 'vows', 'dinner'].forEach((k) => T.setEvent(id, k, 'yes')); T.setFinale(id, 'pool');
   G.setDressAck(true); G.setAllergy('no'); G.setPhotoAck(true);
   G.PROFILE.forEach((q) => G.setProfile(id, q.key, q.choices ? q.choices[0] : 'Answered'));
 }
@@ -76,7 +76,7 @@ test('MIGRATION · a legacy answer (bangkok · vientiane · china · none) reads
 });
 
 /* ───────────────────────────── THE MATRIX A – T (the validator) ───────────────────────────── */
-const WED = { events: { temple: 'no', coffee: 'yes', vows: 'yes', dinner: 'yes' }, sangkhathan: null, dress: true, hosts: false, seating: { open: false } };
+const WED = { events: { temple: 'no', coffee: 'yes', vows: 'yes', dinner: 'yes' }, sangkhathan: null, finale: 'pool', dress: true, hosts: false, seating: { open: false } };   /* the final act answered (22 Sep 2026) */
 const OK = { contact: { missing: [] }, about: { missing: [] } };
 test('A · Wedding + Guest House: D alone, USD 0, complete', () => { const c = completion({ ...OK, scope: SC({ vientianeWedding: true }), stages: { wedstay: 'selected' }, wedding: WED }); deq(c.relevant, ['wedstay']); assert.equal(c.canSend, true); });
 test('B · Wedding + Souphattra Heritage: total USD 145 for two nights, not 290', () => { const w = page({ auth: PEGGY }); const q = w.SIYL_PRICE.quote('wedstay', 'heritage'); assert.equal(q.total, 145); assert.equal(q.nights, 2); assert.notEqual(q.total, 290); });
@@ -186,6 +186,8 @@ async function harness() {
   return { w, env, sam, rooms };
 }
 const BASE = (extra) => ({ channel: 'journey-shop', guestId: 'G777', partyId: 'INV-777', selections: [], totalUsd: 0, contact: { email: 'sam.example@example.org', phone: '+66 81 000 0000' }, guestRecord: { guests: [{ guestId: 'G777', name: 'Sam', source: { fullName: 'Sam Example', preferredName: 'Sam' } }], contact: { email: 'sam.example@example.org', phone: '+66 81 000 0000' } }, registration_submitted_at: '2026-09-21T10:00:00.000Z', ...extra });
+/* the About You answers the questionnaire requires (22 Sep 2026), beside the allergy and the photo acknowledgement */
+const ABOUT = { guests: [{ guestId: 'G777', name: 'Sam', source: { fullName: 'Sam Example', preferredName: 'Sam' }, profile: { coffeetea: 'Tea', flavor: 'Pandan', drink: 'Water', film: 'Ran', genres: ['Jazz'] } }], allergy: { answer: 'no' }, photo: { at: 'x' } };
 const TEXT = 'SEE YOU IN LAOS — JOURNEY SELECTION\nInvitation: INV-G777 · Sam';
 test('WORKER · the same validator on the server: an incomplete trip is refused (422 · incomplete, the missing items named), nothing stored; a stay is answered by the engine\'s own hold, never the client\'s word; a declined mandatory train is refused; a complete trip and a decline are accepted', async () => {
   const h = await harness();
@@ -193,20 +195,20 @@ test('WORKER · the same validator on the server: an incomplete trip is refused 
   /* no scope */
   let r = await send(BASE()); assert.equal(r.status, 422); assert.equal(r.d.error, 'incomplete'); assert.equal(r.d.missing[0].key, 'scope'); assert.equal(h.env.REG_KV.m.has('reg:INV-G777'), false, 'nothing stored');
   /* Bangkok, nothing answered */
-  r = await send(BASE({ guestRecord: { scope: SC({ bangkok: true, at: 'x' }), allergy: { answer: 'no' }, photo: { at: 'x' } } })); assert.equal(r.status, 422); deq(r.d.unresolved.map((u) => u.key), ['bkk-stay', 'kempinski']);
+  r = await send(BASE({ guestRecord: { ...ABOUT, scope: SC({ bangkok: true, at: 'x' }) } })); assert.equal(r.status, 422); deq(r.d.unresolved.map((u) => u.key), ['bkk-stay', 'kempinski']);
   /* the client claims a stay it does not hold */
-  r = await send(BASE({ stages: { 'bkk-stay': 'selected', kempinski: 'declined' }, guestRecord: { scope: SC({ bangkok: true, at: 'x' }), allergy: { answer: 'no' }, photo: { at: 'x' } } })); assert.equal(r.status, 422); deq(r.d.unresolved.map((u) => u.key), ['bkk-stay'], 'the engine holds nothing: the claim does not count');
+  r = await send(BASE({ stages: { 'bkk-stay': 'selected', kempinski: 'declined' }, guestRecord: { ...ABOUT, scope: SC({ bangkok: true, at: 'x' }) } })); assert.equal(r.status, 422); deq(r.d.unresolved.map((u) => u.key), ['bkk-stay'], 'the engine holds nothing: the claim does not count');
   /* China with the train declined */
-  r = await send(BASE({ stages: { kmg: 'declined', c86: 'declined', ljg: 'declined' }, guestRecord: { scope: SC({ china: true, at: 'x' }), allergy: { answer: 'no' }, photo: { at: 'x' } } })); assert.equal(r.status, 422); deq(r.d.unresolved, [{ key: 'c86', letter: 'G', state: 'declined', why: 'mandatory' }]);
+  r = await send(BASE({ stages: { kmg: 'declined', c86: 'declined', ljg: 'declined' }, guestRecord: { ...ABOUT, scope: SC({ china: true, at: 'x' }) } })); assert.equal(r.status, 422); deq(r.d.unresolved, [{ key: 'c86', letter: 'G', state: 'declined', why: 'mandatory' }]);
   /* the wedding without its answers */
-  r = await send(BASE({ stages: { wedstay: 'declined' }, guestRecord: { scope: SC({ vientianeWedding: true, at: 'x' }), allergy: { answer: 'no' }, photo: { at: 'x' } } })); assert.equal(r.status, 422); assert.ok(r.d.missing.some((m) => m.key === 'event:dinner')); assert.ok(r.d.missing.some((m) => m.key === 'dress'));
+  r = await send(BASE({ stages: { wedstay: 'declined' }, guestRecord: { ...ABOUT, scope: SC({ vientianeWedding: true, at: 'x' }) } })); assert.equal(r.status, 422); assert.ok(r.d.missing.some((m) => m.key === 'event:dinner')); assert.ok(r.d.missing.some((m) => m.key === 'dress'));
   /* a real hold answers the stay */
   const me = { invitationId: 'INV-G777', guestId: 'G777', partyId: 'INV-777', hosts: false };
   const j = await h.rooms.fetch(new Request('https://x/api/rooms/join', { method: 'POST', headers: { 'x-siyl-identity': JSON.stringify(me) }, body: JSON.stringify({ invitationId: 'INV-G777', guestId: 'G777', key: 'bkk-stay/penthouse', label: 'A', name: 'Sam' }) })); assert.equal(j.status, 200);
-  r = await send(BASE({ stages: { kempinski: 'declined' }, selections: [{ id: 'bkk-stay', price: 255, qty: 1, stay: 'sathorn', room: 'penthouse', unit: 'A' }], totalUsd: 255, guestRecord: { scope: SC({ bangkok: true, at: 'x' }), allergy: { answer: 'no' }, photo: { at: 'x' } } }));
+  r = await send(BASE({ stages: { kempinski: 'declined' }, selections: [{ id: 'bkk-stay', price: 255, qty: 1, stay: 'sathorn', room: 'penthouse', unit: 'A' }], totalUsd: 255, guestRecord: { ...ABOUT, scope: SC({ bangkok: true, at: 'x' }) } }));
   assert.equal(r.status, 202, JSON.stringify(r.d).slice(0, 200)); assert.ok(r.d.submissionId); assert.equal(JSON.parse(h.env.REG_KV.m.get('reg:INV-G777').v).rooms['bkk-stay'].label, 'A');
   /* a hold outside the trip blocks: the guest now says China only while the Penthouse is still held */
-  r = await send(BASE({ stages: { kmg: 'declined', ljg: 'declined' }, selections: [{ id: 'c86', price: 105, qty: 1 }], guestRecord: { scope: SC({ china: true, at: 'x' }), allergy: { answer: 'no' }, photo: { at: 'x' } } })); assert.equal(r.status, 422); assert.equal(r.d.missing[0].key, 'release:bkk-stay');
+  r = await send(BASE({ stages: { kmg: 'declined', ljg: 'declined' }, selections: [{ id: 'c86', price: 105, qty: 1 }], guestRecord: { ...ABOUT, scope: SC({ china: true, at: 'x' }) } })); assert.equal(r.status, 422); assert.equal(r.d.missing[0].key, 'release:bkk-stay');
   /* the decline: complete on its own once the hold is gone */
   const l = await h.rooms.fetch(new Request('https://x/api/rooms/leave', { method: 'POST', headers: { 'x-siyl-identity': JSON.stringify(me) }, body: JSON.stringify({ invitationId: 'INV-G777', guestId: 'G777', key: 'bkk-stay/penthouse' }) })); assert.equal(l.status, 200);
   r = await send(BASE({ guestRecord: { scope: SC({ none: true, at: 'x' }) } })); assert.equal(r.status, 202, JSON.stringify(r.d).slice(0, 200)); assert.equal(r.d.kind, 'update', 'the earlier submission is kept — version 2, never deleted');

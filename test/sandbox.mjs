@@ -38,7 +38,7 @@ export const HARUTHAI = session({ guestId: 'g-haruthai', partyId: 'INV-DEMO-001'
 export const SUTHEP = session({ guestId: 'g-suthep', partyId: 'INV-DEMO-001', partyName: 'Haruthai & Suthep', fullName: 'Suthep Demo', preferredName: 'Suthep', members: HS, hosts: true, hostRole: 'GROOM' });
 export const LIN = session({ guestId: 'g-lin', partyId: 'INV-DEMO-003', partyName: 'Lin', fullName: 'Lin Demo', preferredName: 'Lin', members: [{ guestId: 'g-lin', preferredName: 'Lin' }] });
 
-export const CORE = ['assets/bag.js', 'assets/rooms-data.js', 'assets/pricing.js', 'assets/guest.js', 'assets/temple.js', 'assets/docs.js', 'assets/confirm.js', 'assets/seatlabels.js', 'assets/seating.js', 'assets/rooms.js', 'assets/stay.js', 'assets/transport-data.js', 'assets/stage-graph.js', 'assets/journey.js'];
+export const CORE = ['assets/bag.js', 'assets/rooms-data.js', 'assets/pricing.js', 'assets/questionnaire.js', 'assets/guest.js', 'assets/temple.js', 'assets/docs.js', 'assets/confirm.js', 'assets/seatlabels.js', 'assets/seating.js', 'assets/rooms.js', 'assets/stay.js', 'assets/transport-data.js', 'assets/stage-graph.js', 'assets/journey.js'];
 
 export function page(opts = {}) {
   const store = new Map(), listeners = {};
@@ -66,7 +66,9 @@ export function page(opts = {}) {
   vm.createContext(sb);
   if (opts.auth !== null) sb.localStorage.setItem('siyl.auth', JSON.stringify(opts.auth === undefined ? PEGGY : opts.auth));
   if (opts.seed) Object.entries(opts.seed).forEach(([k, v]) => sb.localStorage.setItem(k, typeof v === 'string' ? v : JSON.stringify(v)));
-  for (const f of opts.modules || CORE) vm.runInContext(src(f), sb, { filename: f });
+  /* THE QUESTIONNAIRE (22 Sep 2026): guest.js reads its schema from the generated copy — loaded first wherever guest.js is asked for */
+  const mods = (opts.modules || CORE).slice(); if (mods.includes('assets/guest.js') && !mods.includes('assets/questionnaire.js')) mods.splice(mods.indexOf('assets/guest.js'), 0, 'assets/questionnaire.js');
+  for (const f of mods) vm.runInContext(src(f), sb, { filename: f });
   sb.events = listeners;
   return sb;
 }

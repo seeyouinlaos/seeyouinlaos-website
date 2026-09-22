@@ -54,6 +54,7 @@ import { SEED } from './inventory-seed.js';
 import { stageOf } from './rooms.js';
 import { composeGuestMail, composeOwnerMail } from './mail-templates.js';
 import { completion as graphCompletion, normalizeScope as graphScope, isRelevant as graphRelevant, STAGES as GRAPH_STAGES, STAGE_IDS as GRAPH_IDS } from './stage-graph.js';
+import { profileMissing as questionnaireMissing, finaleOf } from './questionnaire.js';   /* the one questionnaire: what About You and the wedding night require (Owner, 22 Sep 2026) */
 
 /* ---- the Guest Relations gate (F + G) ------------------------------------
  * A secret set with `wrangler secret put GR_TOKEN`, compared in constant
@@ -536,18 +537,22 @@ async function completionOf(env, who, registration, rooms) {
   const word = (v) => v === 'Joining' ? 'yes' : v === 'Not joining' ? 'no' : null;
   const events = {}; ['temple', 'coffee', 'vows', 'dinner'].forEach((k) => { events[k] = tc && tc.events ? word(String(tc.events[k] || '')) : null; });
   const sangkhathan = !tc ? null : (tc.sangkhathanState === 'Decision required' ? null : !!tc.sangkhathan);
+  const finale = tc ? finaleOf(tc.finaleKey || tc.finale) : null;   /* the final act, from the record's key or its words */
   const seatView = await engineSeatView(env, who);
   const seats = seatView && seatView.mine ? { ceremony: (seatView.mine.ceremony || {})[who.guestId] || null, dinner: (seatView.mine.dinner || {})[who.guestId] || null } : {};
   const about = [];
   const allergy = gr.allergy || {};
   if (allergy.answer !== 'no' && !(allergy.answer === 'yes' && String(allergy.details || '').trim())) about.push({ key: 'allergy', label: 'Food allergies', href: 'about-you.html#allergy' });
   if (!gr.photo) about.push({ key: 'photo', label: 'Photography acknowledgement', href: 'about-you.html#photo' });
+  /* the questionnaire's required answers — the sender's own guest record (src/questionnaire.js is the one schema) */
+  const g0 = Array.isArray(gr.guests) ? (gr.guests.find((g) => g && g.guestId === who.guestId) || gr.guests[0] || {}) : {};
+  questionnaireMissing(g0.profile).forEach((m) => about.push(m));
   /* a room or a waiting-list place the engine still holds for a stage outside the trip must have been released first */
   const stale = scope ? Object.keys(rooms || {}).filter((stage) => GRAPH_IDS[stage] && !graphRelevant(stage, scope)).map((stage) => ({ key: 'release:' + stage, label: 'A place still held for a stage outside your trip', href: 'your-journey.html#scope' })) : [];
   return graphCompletion({
     scope, stages, stale,
     contact: { missing: [] },
-    wedding: { events, sangkhathan, dress: !!(gr.dress && gr.dress.all), hosts: !!who.hosts,
+    wedding: { events, sangkhathan, finale, dress: !!(gr.dress && gr.dress.all), hosts: !!who.hosts,
       seating: seatView ? { open: !!seatView.open, frozen: !!seatView.frozen, configured: seatView.configured || {}, seats } : { open: false } },
     about: { missing: scope && scope.none ? [] : about },
   });

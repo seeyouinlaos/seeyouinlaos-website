@@ -68,7 +68,7 @@ test('THE COUNTDOWN · days to 21 February 2027 from the clock; the wedding once
 });
 
 test('THE JOURNEY IN NUMBERS · every number counted from the canonical data on the page; nothing invented; a category that cannot be counted is absent', () => {
-  const w = page({ auth: PEGGY, modules: ['assets/rooms-data.js', 'assets/stay-media.js', 'assets/transport-data.js', 'assets/experiences.js', 'assets/stage-graph.js', 'assets/community.js'] });
+  const w = page({ auth: PEGGY, modules: ['assets/rooms-data.js', 'assets/stay-media.js', 'assets/transport-data.js', 'assets/experiences.js', 'assets/discover.js', 'assets/stage-graph.js', 'assets/community.js'] });
   const N = plain(w.SIYL_COMMUNITY.numbers()); const by = {}; N.forEach((x) => { by[x.key] = x; });
   const M = w.SIYL_STAY_MEDIA, E = Object.values(w.SIYL_EXP), T = w.SIYL_TRANSPORT;
   assert.equal(by.countries.n, 3); assert.equal(by.countries.note, 'Thailand · Laos · China');
@@ -77,10 +77,16 @@ test('THE JOURNEY IN NUMBERS · every number counted from the canonical data on 
   assert.equal(by.nights.n, 3 + 2 + 2 + 3 + 2 + 2 + 1, 'the six stays of the journey and the night on the train'); assert.equal(by.days.n, 16); assert.match(by.days.note, /21 February – 8 March 2027/);
   assert.equal(by.trains.n, Object.values(T).filter((t) => /railway/i.test(t.operator)).length); assert.equal(by.trains.n, 2);
   assert.equal(by.flights.n, 3); assert.equal(by.flights.note, 'MU9646 · MU5922 · MU741');
-  const has = (x, r) => (x.roles || []).includes(r);
-  assert.equal(by.restaurants.n, E.filter((x) => has(x, 'dinner') || has(x, 'lunch')).length); assert.equal(by.cafes.n, E.filter((x) => has(x, 'cafe')).length); assert.equal(by.bars.n, E.filter((x) => has(x, 'bar')).length);
-  assert.equal(by.museums.n, E.filter((x) => /Museum/.test(x.cats)).length); assert.equal(by.temples.n, E.filter((x) => /Temple|Stupa/.test(x.cats)).length);
-  assert.ok(by.restaurants.n >= 10 && by.cafes.n >= 5 && by.bars.n >= 2 && by.museums.n >= 3, JSON.stringify({ r: by.restaurants.n, c: by.cafes.n, b: by.bars.n, m: by.museums.n }));
+  /* THE TAXONOMY (Owner, 22 Sep 2026): one place, one category, counted once — never lunch + café for one house, never café + bar for one bar */
+  const cat = (x) => x.category;
+  assert.equal(by.restaurants.n, E.filter((x) => cat(x) === 'restaurant').length); assert.equal(by.cafes.n, E.filter((x) => cat(x) === 'cafe').length); assert.equal(by.bars.n, E.filter((x) => cat(x) === 'bar' || cat(x) === 'club').length);
+  assert.equal(by.museums.n, E.filter((x) => cat(x) === 'experience' && /Museum/.test(x.cats)).length); assert.equal(by.temples.n, E.filter((x) => cat(x) === 'experience' && /Temple|Stupa/.test(x.cats)).length);
+  assert.deepEqual({ r: by.restaurants.n, c: by.cafes.n, b: by.bars.n, m: by.museums.n, t: by.temples.n }, { r: 14, c: 10, b: 6, m: 4, t: 2 }, 'the real totals of the corrected dataset: 14 restaurants (Petits Plats and Cam On in, Time Space / Moo Yoo / Kaogee out) · 10 cafés · 6 bars & nightlife (BARON, Selene, Firefly in; Sona once) · 4 museums (Wat Si Saket gone) · 2 temples & stupas (Wat Ong Teu, Pha That Luang)');
+  assert.equal(by.bars.label, 'Bars & nightlife');
+  const names = (c) => E.filter((x) => cat(x) === c).map((x) => x.name);
+  assert.ok(names('restaurant').includes('Petits Plats Bangkok') && !names('restaurant').includes('Time Space Cafe') && !names('restaurant').includes('Moo Yoo Rose House') && !names('restaurant').includes('Kaogee Le Triomphe'));
+  assert.ok(names('cafe').includes('Harudot') && names('cafe').includes('Time Space Cafe') && names('cafe').includes('Moo Yoo Rose House') && names('cafe').includes('Kaogee Le Triomphe') && !names('cafe').includes('Sona Cafe and Bar'));
+  assert.ok(names('bar').includes('Sona Cafe and Bar') && names('club').includes('BARON Vientiane') && names('experience').includes('Wat Ong Teu') && !E.some((x) => /That Dam|Wat Si Saket|Wat Si Muang/.test(x.name)));
   assert.equal(by.michelin, undefined, 'Michelin stars: only one record carries a structured star (Cannubi) — not shown rather than guessed');
   assert.equal(N.length, 12); assert.ok(N.every((x) => Number.isInteger(x.n) && x.n > 0 && x.label));
   const bare = page({ auth: PEGGY, modules: ['assets/community.js'] }); assert.deepEqual(plain(bare.SIYL_COMMUNITY.numbers()), [], 'no data on the page, no numbers'); assert.equal(bare.SIYL_COMMUNITY.numbersHtml(), '');

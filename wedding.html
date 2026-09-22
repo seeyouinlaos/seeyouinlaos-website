@@ -9,7 +9,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 .bag{width:44px;height:44px;display:flex;align-items:center;justify-content:center;position:relative;color:#313131;text-decoration:none}.bag .bgi{display:block}
 .bb{position:absolute;top:1px;right:0;min-width:14px;height:14px;padding:0 3px;background:#313131;color:#F3EEE7;font-size:8.5px;line-height:1;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;display:none;align-items:center;justify-content:center;box-shadow:0 0 0 2px #F3EEE7;border-radius:1px}
 </style>
-<link rel="stylesheet" href="assets/aman.css?v=9aead576"><link rel="stylesheet" href="assets/prep.css?v=902f99a1"></head><body>
+<link rel="stylesheet" href="assets/aman.css?v=9aead576"><link rel="stylesheet" href="assets/prep.css?v=9afcd03d"></head><body>
 <header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="cart.html" aria-label="My Bag"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main class="prep-page" id="wedding">
 <div class="prep-head">
@@ -25,10 +25,11 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/aman.js?v=2a339178"></script>
 <script src="assets/rooms-data.js?v=2f46c2d6"></script>
 <script src="assets/pricing.js?v=678b5c38"></script>
-<script src="assets/stage-graph.js?v=92ac36af"></script>
-<script src="assets/guest.js?v=34df3d2a"></script>
+<script src="assets/stage-graph.js?v=3619a3d0"></script>
+<script src="assets/questionnaire.js?v=9b3f29c0"></script>
+<script src="assets/guest.js?v=2f688b53"></script>
 <script src="assets/draft.js?v=7ab9ca64"></script>
-<script src="assets/temple.js?v=100faabd"></script>
+<script src="assets/temple.js?v=200ee67c"></script>
 <script src="assets/rooms.js?v=e0d4bbbf"></script>
 <script src="assets/journey.js?v=aeb36786"></script>
 <script src="assets/confirm.js?v=f35e0aa8"></script>
@@ -104,6 +105,18 @@ function personRow(me,e){
     '</div>'+
     (v===null?'<p class="t-l1 open">Required · not decided</p>':'')+
     '</div>'}
+/* A WISH FROM THE BRIDE & GROOM (Owner, 22 Sep 2026): the final act of the wedding night — the pool jump or BARON — chosen by
+ * every guest for themselves; required, never preselected, never defaulted (src/questionnaire.js FINALE) */
+function finaleSection(me){
+  var F=G.FINALE,id=me.guestId,v=T.finaleOf(id);
+  return '<section class="prep-sec" id="finale" data-finale-state="'+(v||'open')+'">'+
+    '<p class="t-l1">05 · After the dinner · '+esc(F.eyebrow)+'</p>'+
+    '<h2 class="t-h2">'+esc(F.q)+'</h2>'+
+    '<p class="t-b1 measure">'+esc(F.lede)+'</p>'+
+    '<div class="p-card flat" data-g="'+esc(id)+'"><p class="t-l1 on">'+esc(G.nameOf(id))+' · you</p>'+
+    '<div class="pf-finale">'+F.options.map(function(o){return '<button type="button" class="p-sel pf-finale-opt" aria-pressed="'+(v===o.key)+'" data-finale="'+o.key+'"><span class="pf-finale-l">'+esc(o.line)+'</span><span class="pf-finale-c">'+esc(o.copy)+'</span></button>'}).join('')+'</div>'+
+    (v===null?'<p class="t-l1 open">Required · not decided</p>':'<p class="t-l1 on"><i class="prep-tick" aria-hidden="true"></i> '+esc(F.words[v])+'</p>')+
+    '</div></section>'}
 /* SANGKHATHAN — the guest's own YES / NO, USD 15 for this guest only (Owner,
  * 14 Sep 2026). Explicit eligibility; available while attending the temple. */
 function sangSection(p,me){
@@ -156,8 +169,11 @@ function render(){
        personRow(me,e)+
        (e.key==='temple'?sangSection(p,me):'')+
        '</section>'});
+  h+=finaleSection(me);
   h+=seatsSection(p,me);
   page.innerHTML=h;
+  page.querySelectorAll('#finale [data-finale]').forEach(function(b){
+    b.addEventListener('click',function(){T.setFinale(me.guestId,b.getAttribute('data-finale'));render();var again=page.querySelector('#finale [data-finale="'+b.getAttribute('data-finale')+'"]');if(again)try{again.focus({preventScroll:true})}catch(x){}})});
 
   page.querySelectorAll('[data-g]').forEach(function(card){
     var id=card.getAttribute('data-g'),key=card.getAttribute('data-e');

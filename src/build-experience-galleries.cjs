@@ -14,15 +14,14 @@ const path = require('path');
 const ROOT = path.join(__dirname, '..');
 const src = JSON.parse(fs.readFileSync(path.join(ROOT, 'src/experience-galleries.json'), 'utf8'));
 const TAX = src._taxonomy;
-/* the category of a place follows its roles on the website (assets/experiences.js) */
-const rolesOf = {};
-for (const m of fs.readFileSync(path.join(ROOT, 'assets/experiences.js'), 'utf8').matchAll(/\{ id: '([a-z0-9-]+)', roles: \[([^\]]*)\]/g)) rolesOf[m[1]] = m[2].replace(/['\s]/g, '').split(',').filter(Boolean);
+/* THE TAXONOMY (Owner, 22 Sep 2026): the category of a place is its own field on the website record (assets/experiences.js) —
+ * restaurant · cafe · bar · club · experience · place — what the place IS, never what happens there */
+const categoryOfId = {};
+for (const m of fs.readFileSync(path.join(ROOT, 'assets/experiences.js'), 'utf8').matchAll(/\{ id: '([a-z0-9-]+)', category: '([a-z]+)'/g)) categoryOfId[m[1]] = m[2];
 function categoryOf(id) {
-  const r = rolesOf[id] || [];
-  if (r.includes('bar')) return 'bar';
-  if (r.includes('cafe')) return 'cafe';
-  if (r.some((x) => x === 'lunch' || x === 'dinner' || x === 'breakfast')) return 'restaurant';
-  return 'experience';
+  const c = categoryOfId[id];
+  if (!c) throw new Error('no category on the website record of ' + id);
+  return c === 'place' ? 'experience' : c;   /* a shopping place shows its venue context, as an experience does */
 }
 const out = {}, problems = [];
 for (const id of Object.keys(src)) {

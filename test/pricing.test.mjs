@@ -685,14 +685,14 @@ test('the dress code carries three codes and 18 owner references, acknowledged b
 });
 
 test('ABOUT YOU is one required question, six favourites and one required acknowledgement', () => {
-  const g = readFileSync(join(ROOT, 'assets/guest.js'), 'utf8');
-  const block = g.slice(g.indexOf('var PROFILE = ['), g.indexOf('var PHOTO_TEXT ='));
+  const g = readFileSync(join(ROOT, 'assets/guest.js'), 'utf8'), qs = readFileSync(join(ROOT, 'src/questionnaire.js'), 'utf8');
+  const block = qs.slice(qs.indexOf('export const PROFILE = ['), qs.indexOf('/* A WISH FROM THE BRIDE & GROOM'));
   const keys = [...block.matchAll(/\{ key: '([a-z]+)'/g)].map((m) => m[1]);
-  assert.deepEqual(keys, ['coffeetea', 'flavor', 'drink', 'film', 'music']);
+  assert.deepEqual(keys, ['coffeetea', 'flavor', 'drink', 'film', 'genres', 'music'], 'the one schema (22 Sep 2026): five required, the song line optional');
   /* My Favorite Flavor (Owner, 18 Sep 2026): one choice of exactly six, in this order */
   assert.match(block, /key: 'flavor', n: '03', q: 'My Favorite Flavor', hint: 'Choose one\.', required: true, type: 'choice', choices: \['Coffee', 'Milk', 'Butter', 'Pandan', 'Matcha Green Tea', 'Strawberry Milk'\]/);
   assert.doesNotMatch(block, /q: 'My Favorite Snack'|key: 'treat'/, 'the snack question is retired');
-  assert.match(g, /var ALLERGY = \{ key: 'allergy'/);
+  assert.match(qs, /export const ALLERGY = \{ key: 'allergy'/); assert.match(g, /var ALLERGY = Q\.ALLERGY/);
   assert.doesNotMatch(g, /var ACCESS =|key: 'comfort'|key: 'anything'|key: 'dietary'/);
   /* three layers, and a correction never destroys the invitation's own value — every entry is signed by the guest */
   assert.match(g, /r\.history\.push\(\{ field: field, from: from, to: v, at: stamp\(\), by: me\.guestId \}\)/);

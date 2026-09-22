@@ -123,7 +123,9 @@ test('EDIT 4 (Owner, 16 Sep 2026) · Luye Baisha and Siam Kempinski say self-pay
   assert.match(src('journeys.html'), /<p class="pm">04 – 06 March · 2 nights · breakfast included · self-pay<\/p>/);
   assert.match(src('journeys.html'), /<p class="pm">06 – 08 March · 2 nights · breakfast included · self-pay<\/p>/);
   for (const f of ['accommodation.html', 'journeys.html']) assert.doesNotMatch(src(f), /2 nights · breakfast included(?! · self-pay)/, f + ': no summary of the two stays without self-pay');
+  /* the taxonomy (22 Sep 2026): Bangkok is one chapter with one Cafés rail in the order of the days — Harudot once, in it */
   const x = src('experiences.html');
-  assert.match(x, /if \(key === 'bkk'\) return x\.chapter === 'bkk' && \(x\.leg !== 'return' \|\| isCafe\(x\)\);\s*if \(key === 'bkk-return'\) return x\.chapter === 'bkk' && x\.leg === 'return' && \(!isCafe\(x\) \|\| hasOther\(x\)\);/, 'the cafés of Bangkok are one rail (a return café that is also an experience of the return joins the return\'s Experiences rail, release 014)');
+  assert.match(x, /box\.innerHTML = D\.rails\(key\)\.map\(function \(r\) \{ return rail\(r, key\); \}\)\.join\(''\);/, 'one rail per category of the chapter, from the one taxonomy');
+  assert.doesNotMatch(x, /data-rails="bkk-return"/, 'no rail of the return on its own');
   assert.match(src('assets/venue.js'), /root\.setTimeout\(begin, 3000\);/, 'the stage enters by itself after three seconds at the latest');
 });

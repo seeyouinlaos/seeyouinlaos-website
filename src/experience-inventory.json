@@ -6,7 +6,7 @@
   "roles": [
    "lunch"
   ],
-  "overview": "Day 02 · 22.02.2027",
+  "overview": "Day 02 \u00b7 22.02.2027",
   "sheet": "NONE",
   "selectable": false,
   "drive": "121 - Cafe - Curvy.Dining Bangkok",
@@ -28,16 +28,17 @@
   "price": null,
   "hours": null,
   "maps": null,
-  "link": null
+  "link": null,
+  "category": "restaurant"
  },
  {
   "id": "bkk-suhring",
-  "name": "Sühring",
+  "name": "S\u00fchring",
   "city": "Bangkok",
   "roles": [
    "dinner"
   ],
-  "overview": "Day 01 · 21.02.2027",
+  "overview": "Day 01 \u00b7 21.02.2027",
   "sheet": "FULL",
   "selectable": true,
   "drive": "090 - Restaurant - Suhring",
@@ -53,8 +54,8 @@
    "assets/images/experiences/bkk-suhring-09.jpg",
    "assets/images/experiences/bkk-suhring-03.jpg"
   ],
-  "note": "THE HIGHLIGHT (Owner, 20 Sep 2026): the house's menu card — the Erlebnis THB 9,800 (USD 294) or the shorter sequence THB 7,800 (USD 234), per person, beverages not included; the earlier source cell $180 is superseded · dated by the current Operations Master: Day 01 · 21.02.2027 · dinner",
-  "price": "USD 294 · USD 234 per person",
+  "note": "THE HIGHLIGHT (Owner, 20 Sep 2026): the house's menu card \u2014 the Erlebnis THB 9,800 (USD 294) or the shorter sequence THB 7,800 (USD 234), per person, beverages not included; the earlier source cell $180 is superseded \u00b7 dated by the current Operations Master: Day 01 \u00b7 21.02.2027 \u00b7 dinner",
+  "price": "USD 294 \u00b7 USD 234 per person",
   "hours": [
    "Lunch",
    "Thursday to Sunday",
@@ -62,16 +63,17 @@
    "Closed on Monday and Tuesday"
   ],
   "maps": "https://maps.app.goo.gl/2b4whggW3YCnxN6u5?g_st=ic",
-  "link": "https://www.restaurantsuhring.com/menu.html"
+  "link": "https://www.restaurantsuhring.com/menu.html",
+  "category": "restaurant"
  },
  {
   "id": "bkk-diorlv",
-  "name": "Dior · Café LV",
+  "name": "Dior \u00b7 Caf\u00e9 LV",
   "city": "Bangkok",
   "roles": [
    "cafe"
   ],
-  "overview": "Day 02 · 22.02.2027",
+  "overview": "Day 02 \u00b7 22.02.2027",
   "sheet": "NONE",
   "selectable": false,
   "drive": "122 - Cafe - Dior Bangkok + 124 - Cafe - LV Cafe Bangkok",
@@ -91,11 +93,12 @@
    "assets/images/experiences/bkk-dior-09.jpg",
    "assets/images/experiences/bkk-dior-10.jpg"
   ],
-  "note": "one card for two houses; two Dior WebP under 35 KB and two duplicate 619×825 copies excluded",
+  "note": "one card for two houses; two Dior WebP under 35 KB and two duplicate 619\u00d7825 copies excluded",
   "price": null,
   "hours": null,
   "maps": null,
-  "link": null
+  "link": null,
+  "category": "cafe"
  },
  {
   "id": "bkk-lvvisionary",
@@ -104,7 +107,7 @@
   "roles": [
    "experience"
   ],
-  "overview": "Day 02 · 22.02.2027",
+  "overview": "Day 02 \u00b7 22.02.2027",
   "sheet": "NONE",
   "selectable": false,
   "drive": "172 - Experience - Louis Vuitton Visionary Journeys Bangkok",
@@ -128,7 +131,8 @@
   "price": null,
   "hours": null,
   "maps": null,
-  "link": null
+  "link": null,
+  "category": "experience"
  },
  {
   "id": "bkk-iconsiam",
@@ -137,7 +141,7 @@
   "roles": [
    "place"
   ],
-  "overview": "Day 02 · 22.02.2027",
+  "overview": "Day 02 \u00b7 22.02.2027",
   "sheet": "NONE",
   "selectable": false,
   "drive": "222 - Mall - ICONSIAM Bangkok",
@@ -155,11 +159,12 @@
    "assets/images/experiences/bkk-iconsiam-05.jpg",
    "assets/images/experiences/bkk-iconsiam-06.jpg"
   ],
-  "note": "IMG_3496 (dusk aerial) not used — the night aerial was rejected on 05 Sep; one Google Doc \"ICONSIAM\" not used",
+  "note": "IMG_3496 (dusk aerial) not used \u2014 the night aerial was rejected on 05 Sep; one Google Doc \"ICONSIAM\" not used",
   "price": null,
   "hours": null,
   "maps": null,
-  "link": null
+  "link": null,
+  "category": "place"
  },
  {
   "id": "bkk-phranakorn",
@@ -168,7 +173,7 @@
   "roles": [
    "dinner"
   ],
-  "overview": "Day 02 · 22.02.2027",
+  "overview": "Day 02 \u00b7 22.02.2027",
   "sheet": "NONE",
   "selectable": false,
   "drive": "081 - Restaurant - Phra Nakhon Bangkok + 088 - Restaurant - Phra Nakhon",
@@ -191,7 +196,8 @@
   "price": null,
   "hours": null,
   "maps": null,
-  "link": null
+  "link": null,
+  "category": "restaurant"
  },
  {
   "id": "bkk-socialclub",
@@ -200,7 +206,7 @@
   "roles": [
    "bar"
   ],
-  "overview": "Day 02 · 22.02.2027",
+  "overview": "Day 02 \u00b7 22.02.2027",
   "sheet": "NONE",
   "selectable": false,
   "drive": "150 - Bar - BKK Social Club Bangkok",
@@ -219,17 +225,17 @@
   "price": null,
   "hours": null,
   "maps": null,
-  "link": null
+  "link": null,
+  "category": "bar"
  },
  {
   "id": "bkk-timespace",
   "name": "Time Space Cafe",
   "city": "Bangkok",
   "roles": [
-   "lunch",
    "cafe"
   ],
-  "overview": "Day 03 · 23.02.2027",
+  "overview": "Day 03 \u00b7 23.02.2027",
   "sheet": "NONE",
   "selectable": false,
   "drive": "126 - Cafe - Time Space Cafe Bangkok",
@@ -247,21 +253,21 @@
    "assets/images/experiences/bkk-timespace-06.jpg",
    "assets/images/experiences/bkk-timespace-07.jpg"
   ],
-  "note": "three 7–8 MB files could not be fetched through the Drive connector (session expired twice) — not opened",
+  "note": "three 7\u20138 MB files could not be fetched through the Drive connector (session expired twice) \u2014 not opened",
   "price": null,
   "hours": null,
   "maps": null,
-  "link": null
+  "link": null,
+  "category": "cafe"
  },
  {
   "id": "bkk-mooyoo",
   "name": "Moo Yoo Rose House",
   "city": "Bangkok",
   "roles": [
-   "lunch",
    "cafe"
   ],
-  "overview": "Day 03 · 23.02.2027",
+  "overview": "Day 03 \u00b7 23.02.2027",
   "sheet": "NONE",
   "selectable": false,
   "drive": "125 - Cafe - Moo Yoo Rose House Bangkok",
@@ -277,20 +283,21 @@
    "assets/images/experiences/bkk-mooyoo-03.jpg",
    "assets/images/experiences/bkk-mooyoo-04.jpg"
   ],
-  "note": " Café role from the Cafe column of Restaurant_Experience,Cafe,Bar_Details (release 012 café audit).",
+  "note": " Caf\u00e9 role from the Cafe column of Restaurant_Experience,Cafe,Bar_Details (release 012 caf\u00e9 audit).",
   "price": null,
   "hours": null,
   "maps": null,
-  "link": null
+  "link": null,
+  "category": "cafe"
  },
  {
   "id": "bkk-whispering",
   "name": "Whispering Cafe",
-  "city": "Sam Phran · Nakhon Pathom",
+  "city": "Sam Phran \u00b7 Nakhon Pathom",
   "roles": [
    "cafe"
   ],
-  "overview": "Day 03 · 23.02.2027",
+  "overview": "Day 03 \u00b7 23.02.2027",
   "sheet": "NONE",
   "selectable": false,
   "drive": "127 - Cafe - Whispering Cafe Bangkok",
@@ -306,11 +313,12 @@
    "assets/images/experiences/whispering-02.jpg",
    "assets/images/experiences/whispering-04.jpg"
   ],
-  "note": "five files are 670×1006 web copies",
+  "note": "five files are 670\u00d71006 web copies",
   "price": null,
   "hours": null,
   "maps": null,
-  "link": null
+  "link": null,
+  "category": "cafe"
  },
  {
   "id": "bkk-dib",
@@ -319,7 +327,7 @@
   "roles": [
    "experience"
   ],
-  "overview": "Day 03 · 23.02.2027",
+  "overview": "Day 03 \u00b7 23.02.2027",
   "sheet": "NONE",
   "selectable": false,
   "drive": "170 - Experience - Dib Bangkok",
@@ -339,11 +347,12 @@
    "assets/images/experiences/bkk-dib-07.jpg",
    "assets/images/experiences/bkk-dib-08.jpg"
   ],
-  "note": "10 of the 19 files (001–010_Couple_Monk.jpeg) are the couple's alms-giving series, not Dib — misfiled, excluded here; 002 and 007 are mapped to their correct wedding role (Temple Ceremony · Morning Alms-Giving) on voyage.html since 14 Sep 2026 (assets/images/ASSET-MAP.md)",
+  "note": "10 of the 19 files (001\u2013010_Couple_Monk.jpeg) are the couple's alms-giving series, not Dib \u2014 misfiled, excluded here; 002 and 007 are mapped to their correct wedding role (Temple Ceremony \u00b7 Morning Alms-Giving) on voyage.html since 14 Sep 2026 (assets/images/ASSET-MAP.md)",
   "price": null,
   "hours": null,
   "maps": null,
-  "link": null
+  "link": null,
+  "category": "experience"
  },
  {
   "id": "bkk-emquartier",
@@ -352,7 +361,7 @@
   "roles": [
    "place"
   ],
-  "overview": "Day 03 · 23.02.2027",
+  "overview": "Day 03 \u00b7 23.02.2027",
   "sheet": "NONE",
   "selectable": false,
   "drive": "221 - Mall - EmQuartier Bangkok",
@@ -374,7 +383,8 @@
   "price": null,
   "hours": null,
   "maps": null,
-  "link": null
+  "link": null,
+  "category": "place"
  },
  {
   "id": "bkk-commons",
@@ -383,7 +393,7 @@
   "roles": [
    "place"
   ],
-  "overview": "Day 03 · 23.02.2027",
+  "overview": "Day 03 \u00b7 23.02.2027",
   "sheet": "NONE",
   "selectable": false,
   "drive": "082 - Restaurant - The Commons Thonglor Bangkok",
@@ -400,20 +410,21 @@
    "assets/images/experiences/bkk-commons-04.jpg",
    "assets/images/experiences/bkk-commons-05.jpg"
   ],
-  "note": "nine of ten files are 630 px WebP · the 23.02 dinner is Baan Phraya (19 Sep 2026); The Commons stays the mall of the day",
+  "note": "nine of ten files are 630 px WebP \u00b7 the 23.02 dinner is Baan Phraya (19 Sep 2026); The Commons stays the mall of the day",
   "price": null,
   "hours": null,
   "maps": null,
-  "link": null
+  "link": null,
+  "category": "place"
  },
  {
   "id": "bkk-baanphraya",
   "name": "Baan Phraya",
-  "city": "Bangkok · the River of Kings",
+  "city": "Bangkok \u00b7 the River of Kings",
   "roles": [
    "dinner"
   ],
-  "overview": "Day 03 · 23.02.2027",
+  "overview": "Day 03 \u00b7 23.02.2027",
   "sheet": "DETAIL",
   "selectable": true,
   "drive": "Baan Phraya (Owner Drive folder, 19 Sep 2026)",
@@ -429,11 +440,12 @@
    "assets/images/experiences/bkk-baanphraya-03.jpg",
    "assets/images/experiences/bkk-baanphraya-04.jpg"
   ],
-  "note": "the 23.02 dinner (replaces The Commons); 8 source files: 4 used (courtyard, bar room, lamplit table, staircase), 2 dish photographs and a 600 px file excluded, the Authors' Lounge frame excluded as another house · THE HIGHLIGHT (Owner, 20 Sep 2026): the eight-course Thai set menu THB 3,800 = USD 114 per person, bookable as a request; pairings not products; the house adds 10% service charge and government tax",
+  "note": "the 23.02 dinner (replaces The Commons); 8 source files: 4 used (courtyard, bar room, lamplit table, staircase), 2 dish photographs and a 600 px file excluded, the Authors' Lounge frame excluded as another house \u00b7 THE HIGHLIGHT (Owner, 20 Sep 2026): the eight-course Thai set menu THB 3,800 = USD 114 per person, bookable as a request; pairings not products; the house adds 10% service charge and government tax",
   "price": "USD 114 per person",
-  "hours": "Pre-dinner drinks 5 pm – 6 pm · Dinner 6 pm – 11 pm",
+  "hours": "Pre-dinner drinks 5 pm \u2013 6 pm \u00b7 Dinner 6 pm \u2013 11 pm",
   "maps": null,
-  "link": null
+  "link": null,
+  "category": "restaurant"
  },
  {
   "id": "bkk-barus",
@@ -442,10 +454,10 @@
   "roles": [
    "bar"
   ],
-  "overview": "Day 03 · 23.02.2027",
+  "overview": "Day 03 \u00b7 23.02.2027",
   "sheet": "NONE",
   "selectable": false,
-  "drive": "Bar Us Bangkok (Owner Drive folder, Edit 5 · 18 Sep 2026)",
+  "drive": "Bar Us Bangkok (Owner Drive folder, Edit 5 \u00b7 18 Sep 2026)",
   "driveIds": [
    "1POkw60vcuEBBrm8mUnpL6cbVB3eLXqUP"
   ],
@@ -456,11 +468,12 @@
    "assets/images/experiences/bkk-barus-06.jpg",
    "assets/images/experiences/bkk-barus-07.jpg"
   ],
-  "note": "Edit 5: the Owner’s Drive folder replaces the single Instagram frame; the tray martini stays the lead",
+  "note": "Edit 5: the Owner\u2019s Drive folder replaces the single Instagram frame; the tray martini stays the lead",
   "price": null,
   "hours": null,
   "maps": "https://maps.app.goo.gl/2KLduE51ybg4qAqd9?g_st=ic",
-  "link": null
+  "link": null,
+  "category": "bar"
  },
  {
   "id": "bkk-ledukaan",
@@ -469,7 +482,7 @@
   "roles": [
    "dinner"
   ],
-  "overview": "Day 03 · 23.02.2027",
+  "overview": "city",
   "sheet": "DETAIL",
   "selectable": false,
   "drive": "Le Du Kaan (Owner Drive folder, Edit 5)",
@@ -487,9 +500,10 @@
   ],
   "note": "Edit 5 (18 Sep 2026): replaces IGNIV; description and hours from H&S_Wedding_Operations_Master; no price in the source",
   "price": null,
-  "hours": "Lunch 11:30 – 14:30 · Dinner 17:00 – 22:30 · Bar 17:00 – 01:00",
+  "hours": "Lunch 11:30 \u2013 14:30 \u00b7 Dinner 17:00 \u2013 22:30 \u00b7 Bar 17:00 \u2013 01:00",
   "maps": null,
-  "link": null
+  "link": null,
+  "category": "restaurant"
  },
  {
   "id": "bkk-thongsmith",
@@ -498,7 +512,7 @@
   "roles": [
    "lunch"
   ],
-  "overview": "city",
+  "overview": "Day 04 \u00b7 24.02.2027",
   "sheet": "NONE",
   "selectable": false,
   "drive": "083 - Restaurant - Thong Smith Bangkok + 089 - Restaurant - Thong Smith",
@@ -515,11 +529,12 @@
    "assets/images/experiences/bkk-thongsmith-04.jpg",
    "assets/images/experiences/bkk-thongsmith-07.jpg"
   ],
-  "note": "4 AI renders in 083 (3 \"Codex Image\", 1 uuid png) excluded by the image rule; takeaway-bag WebP is the MASTER jpg twice · the 24.02 lunch cell reads the Aman afternoon tea (19 Sep 2026): kept as an undated Bangkok-days address",
+  "note": "4 AI renders in 083 (3 \"Codex Image\", 1 uuid png) excluded by the image rule; takeaway-bag WebP is the MASTER jpg twice \u00b7 the 24.02 lunch cell reads the Aman afternoon tea (19 Sep 2026): kept as an undated Bangkok-days address",
   "price": null,
   "hours": null,
   "maps": null,
-  "link": null
+  "link": null,
+  "category": "restaurant"
  },
  {
   "id": "bkk-letsrelax",
@@ -528,7 +543,7 @@
   "roles": [
    "experience"
   ],
-  "overview": "Day 04 · 24.02.2027",
+  "overview": "Day 04 \u00b7 24.02.2027",
   "sheet": "NONE",
   "selectable": false,
   "drive": "171 - Experience - Lets Relax Bangkok",
@@ -549,7 +564,8 @@
   "price": null,
   "hours": null,
   "maps": null,
-  "link": null
+  "link": null,
+  "category": "experience"
  },
  {
   "id": "bkk-dusit",
@@ -558,7 +574,7 @@
   "roles": [
    "place"
   ],
-  "overview": "Day 04 · 24.02.2027",
+  "overview": "Day 04 \u00b7 24.02.2027",
   "sheet": "NONE",
   "selectable": false,
   "drive": "220 - Mall - Dusit Central Park Bangkok",
@@ -574,11 +590,12 @@
    "assets/images/experiences/bkk-dusit-03.jpg",
    "assets/images/experiences/bkk-dusit-04.jpg"
   ],
-  "note": "IMG_3625 (600×800 png) excluded",
+  "note": "IMG_3625 (600\u00d7800 png) excluded",
   "price": null,
   "hours": null,
   "maps": null,
-  "link": null
+  "link": null,
+  "category": "place"
  },
  {
   "id": "bkk-madeleine",
@@ -587,7 +604,7 @@
   "roles": [
    "cafe"
   ],
-  "overview": "Day 04 · 24.02.2027",
+  "overview": "Day 04 \u00b7 24.02.2027",
   "sheet": "NONE",
   "selectable": false,
   "drive": "120 - Cafe - Cafe Madeleine Bangkok",
@@ -607,7 +624,8 @@
   "price": null,
   "hours": null,
   "maps": null,
-  "link": null
+  "link": null,
+  "category": "cafe"
  },
  {
   "id": "bkk-tangjaiyang",
@@ -616,7 +634,7 @@
   "roles": [
    "dinner"
   ],
-  "overview": "Day 04 · 24.02.2027",
+  "overview": "Day 04 \u00b7 24.02.2027",
   "sheet": "NONE",
   "selectable": false,
   "drive": "090 - Restaurant - Tang Jai Yang",
@@ -633,17 +651,17 @@
   "price": null,
   "hours": null,
   "maps": "https://maps.app.goo.gl/6otfQcm4bqsTuWZ16?g_st=ic",
-  "link": null
+  "link": null,
+  "category": "restaurant"
  },
  {
   "id": "bkk-harudot",
   "name": "Harudot",
   "city": "Bangkok",
   "roles": [
-   "cafe",
-   "experience"
+   "cafe"
   ],
-  "overview": "Day 03 · 23.02.2027 · Day 15 · 07.03.2027",
+  "overview": "Day 03 \u00b7 23.02.2027 \u00b7 Day 15 \u00b7 07.03.2027",
   "sheet": "NONE",
   "selectable": false,
   "drive": "123 - Cafe - Harudot Bangkok",
@@ -659,11 +677,12 @@
    "assets/images/experiences/bkk-harudot-02.jpg",
    "assets/images/experiences/bkk-harudot-01.jpg"
   ],
-  "note": "new on the website (Overview Day 14 · Mall / Park / Other) · the café of 23.02 and the experience of 07.03 (replaces Siam Paragon; 19 Sep 2026)",
+  "note": "CAF\u00c9 only (Owner, 22 Sep 2026): the caf\u00e9 of 23.02 and of 07.03 \u2014 one card, two days; the earlier \"experience of 07.03\" reading is withdrawn (the overview itself says \"Harudot Cafe in the Category Cafe\")",
   "price": null,
   "hours": null,
   "maps": null,
-  "link": null
+  "link": null,
+  "category": "cafe"
  },
  {
   "id": "bkk-alati",
@@ -672,7 +691,7 @@
   "roles": [
    "lunch"
   ],
-  "overview": "Day 15 · 07.03.2027",
+  "overview": "Day 15 \u00b7 07.03.2027",
   "sheet": "NONE",
   "selectable": false,
   "drive": "080 - Restaurant - ALATi Kempinski Bangkok",
@@ -691,7 +710,8 @@
   "price": null,
   "hours": null,
   "maps": null,
-  "link": null
+  "link": null,
+  "category": "restaurant"
  },
  {
   "id": "bkk-cannubi",
@@ -700,7 +720,7 @@
   "roles": [
    "dinner"
   ],
-  "overview": "Day 15 · 07.03.2027",
+  "overview": "Day 15 \u00b7 07.03.2027",
   "sheet": "DETAIL",
   "selectable": true,
   "drive": "Cannubi by Umberto Bombana (Owner Drive folder, 19 Sep 2026)",
@@ -717,11 +737,12 @@
    "assets/images/experiences/bkk-cannubi-04.jpg",
    "assets/images/experiences/bkk-cannubi-05.jpg"
   ],
-  "note": "the 07.03 dinner (replaces Petits Plats there); 11 source files: 5 used, 4 dish photographs excluded, one 905 px offer banner excluded, one misfiled Baan Phraya frame (SnapInsta 777382051) excluded · THE HIGHLIGHT (Owner, 20 Sep 2026): the set menu THB 5,500 = USD 165 per person, bookable as a request; pairings not products; the house adds 7% VAT and 10% service charge; the 2.0 MB Cannubi-only clip (fresh pasta) became assets/video/cannubi-card.mp4, the 5.97 MB clip filed in both folders was not used",
+  "note": "the 07.03 dinner (replaces Petits Plats there); 11 source files: 5 used, 4 dish photographs excluded, one 905 px offer banner excluded, one misfiled Baan Phraya frame (SnapInsta 777382051) excluded \u00b7 THE HIGHLIGHT (Owner, 20 Sep 2026): the set menu THB 5,500 = USD 165 per person, bookable as a request; pairings not products; the house adds 7% VAT and 10% service charge; the 2.0 MB Cannubi-only clip (fresh pasta) became assets/video/cannubi-card.mp4, the 5.97 MB clip filed in both folders was not used",
   "price": "USD 165 per person",
-  "hours": "Wednesday to Sunday · Lunch 12:00 – 14:30 (last order 14:00) · Dinner 18:00 – 22:00",
+  "hours": "Wednesday to Sunday \u00b7 Lunch 12:00 \u2013 14:30 (last order 14:00) \u00b7 Dinner 18:00 \u2013 22:00",
   "maps": null,
-  "link": null
+  "link": null,
+  "category": "restaurant"
  },
  {
   "id": "bkk-petitsplats",
@@ -730,20 +751,98 @@
   "roles": [
    "dinner"
   ],
-  "overview": "Day 16 · 08.03.2027",
+  "overview": "Day 16 \u00b7 08.03.2027",
   "sheet": "NONE",
   "selectable": false,
-  "drive": "— (no Drive folder, 19 Sep 2026)",
+  "drive": "Petits Plats Bangkok (Owner folder, 22 Sep 2026)",
+  "driveIds": [
+   "12W_HGO-5KHEbGXiw86FlHdzRUtlWSuNs"
+  ],
+  "sourceImages": 6,
+  "used": 5,
+  "primary": "assets/images/experiences/bkk-petitsplats-01.jpg",
+  "gallery": [
+   "assets/images/experiences/bkk-petitsplats-01.jpg",
+   "assets/images/experiences/bkk-petitsplats-02.jpg",
+   "assets/images/experiences/bkk-petitsplats-03.jpg",
+   "assets/images/experiences/bkk-petitsplats-04.jpg",
+   "assets/images/experiences/bkk-petitsplats-05.jpg"
+  ],
+  "note": "the 08.03 dinner (the last evening); the Owner's own folder (five photographs and one film \u2014 the film not used, no still of a dish); reconciled 22 Sep 2026",
+  "price": null,
+  "hours": null,
+  "maps": null,
+  "link": null,
+  "category": "restaurant"
+ },
+ {
+  "id": "bkk-cafecraft",
+  "name": "Caf\u00e9 Craft by CHANINTR",
+  "city": "Bangkok",
+  "roles": [
+   "cafe"
+  ],
+  "overview": "Day 15 \u00b7 07.03.2027",
+  "sheet": "NONE",
+  "selectable": false,
+  "drive": "\u2014 (no Drive folder)",
   "driveIds": [],
   "sourceImages": 0,
   "used": 0,
   "primary": null,
   "gallery": [],
-  "note": "the 08.03 dinner (replaces the in-flight dinner); no photograph and no description in the Owner's records — the card stands without an image",
+  "note": "named by the Operations Master overview (approved 05.09.2026), no photograph in the Owner's records \u2014 the card stands without an image (22 Sep 2026)",
   "price": null,
   "hours": null,
   "maps": null,
-  "link": null
+  "link": null,
+  "category": "cafe"
+ },
+ {
+  "id": "bkk-siamparagon",
+  "name": "Siam Paragon",
+  "city": "Bangkok",
+  "roles": [
+   "place"
+  ],
+  "overview": "Day 15 \u00b7 07.03.2027",
+  "sheet": "NONE",
+  "selectable": false,
+  "drive": "\u2014 (no Drive folder)",
+  "driveIds": [],
+  "sourceImages": 0,
+  "used": 0,
+  "primary": null,
+  "gallery": [],
+  "note": "named by the Operations Master overview (approved 05.09.2026), no photograph in the Owner's records \u2014 the card stands without an image (22 Sep 2026)",
+  "price": null,
+  "hours": null,
+  "maps": null,
+  "link": null,
+  "category": "place"
+ },
+ {
+  "id": "bkk-firefly",
+  "name": "Firefly Bar, Siam Kempinski",
+  "city": "Bangkok",
+  "roles": [
+   "bar"
+  ],
+  "overview": "Day 15 \u00b7 07.03.2027",
+  "sheet": "NONE",
+  "selectable": false,
+  "drive": "\u2014 (no Drive folder)",
+  "driveIds": [],
+  "sourceImages": 0,
+  "used": 0,
+  "primary": null,
+  "gallery": [],
+  "note": "named by the Operations Master overview (approved 05.09.2026), no photograph in the Owner's records \u2014 the card stands without an image (22 Sep 2026)",
+  "price": null,
+  "hours": null,
+  "maps": null,
+  "link": null,
+  "category": "bar"
  },
  {
   "id": "vte-thatluang",
@@ -752,7 +851,7 @@
   "roles": [
    "experience"
   ],
-  "overview": "Day 05 · 25.02.2027",
+  "overview": "Day 05 \u00b7 25.02.2027",
   "sheet": "NONE",
   "selectable": false,
   "drive": "002 - City - Vientiane (city portrait)",
@@ -767,7 +866,8 @@
   "price": null,
   "hours": null,
   "maps": "https://maps.app.goo.gl/hehafVRBrdPt7L9Y6?g_st=ic",
-  "link": null
+  "link": null,
+  "category": "experience"
  },
  {
   "id": "vte-patuxai",
@@ -794,17 +894,17 @@
   "price": null,
   "hours": null,
   "maps": null,
-  "link": null
+  "link": null,
+  "category": "experience"
  },
  {
   "id": "vte-nightmarket",
   "name": "Vientiane Night Market",
   "city": "Vientiane",
   "roles": [
-   "experience",
    "place"
   ],
-  "overview": "Day 06 · 26.02.2027",
+  "overview": "Day 06 \u00b7 26.02.2027",
   "sheet": "NONE",
   "selectable": false,
   "drive": "002 - City - Vientiane (city portrait)",
@@ -822,55 +922,8 @@
   "price": null,
   "hours": null,
   "maps": "https://maps.app.goo.gl/X2jTe6DyVCc7qd21A?g_st=ic",
-  "link": null
- },
- {
-  "id": "vte-sisaket",
-  "name": "Wat Si Saket",
-  "city": "Vientiane",
-  "roles": [
-   "experience"
-  ],
-  "overview": "city",
-  "sheet": "NONE",
-  "selectable": false,
-  "drive": "002 - City - Vientiane (city portrait)",
-  "driveIds": [],
-  "sourceImages": 1,
-  "used": 1,
-  "primary": "assets/images/experiences/vte-sisaket-01.jpg",
-  "gallery": [
-   "assets/images/experiences/vte-sisaket-01.jpg"
-  ],
-  "note": "",
-  "price": null,
-  "hours": null,
-  "maps": null,
-  "link": null
- },
- {
-  "id": "vte-simuang",
-  "name": "Wat Si Muang",
-  "city": "Vientiane",
-  "roles": [
-   "experience"
-  ],
-  "overview": "city",
-  "sheet": "NONE",
-  "selectable": false,
-  "drive": "002 - City - Vientiane (city portrait)",
-  "driveIds": [],
-  "sourceImages": 1,
-  "used": 1,
-  "primary": "assets/images/experiences/vte-simuang-01.jpg",
-  "gallery": [
-   "assets/images/experiences/vte-simuang-01.jpg"
-  ],
-  "note": "",
-  "price": null,
-  "hours": null,
-  "maps": null,
-  "link": null
+  "link": null,
+  "category": "place"
  },
  {
   "id": "vte-haphrakeo",
@@ -894,7 +947,8 @@
   "price": null,
   "hours": null,
   "maps": null,
-  "link": null
+  "link": null,
+  "category": "experience"
  },
  {
   "id": "vte-palace",
@@ -918,36 +972,13 @@
   "price": null,
   "hours": null,
   "maps": null,
-  "link": null
- },
- {
-  "id": "vte-thatdam",
-  "name": "That Dam",
-  "city": "Vientiane",
-  "roles": [
-   "experience"
-  ],
-  "overview": "city",
-  "sheet": "NONE",
-  "selectable": false,
-  "drive": "002 - City - Vientiane (city portrait)",
-  "driveIds": [],
-  "sourceImages": 1,
-  "used": 1,
-  "primary": "assets/images/experiences/vte-thatdam-01.jpg",
-  "gallery": [
-   "assets/images/experiences/vte-thatdam-01.jpg"
-  ],
-  "note": "",
-  "price": null,
-  "hours": null,
-  "maps": null,
-  "link": null
+  "link": null,
+  "category": "experience"
  },
  {
   "id": "vte-buddhapark",
   "name": "Buddha Park",
-  "city": "Xieng Khuan · Vientiane",
+  "city": "Xieng Khuan \u00b7 Vientiane",
   "roles": [
    "experience"
   ],
@@ -966,7 +997,8 @@
   "price": null,
   "hours": null,
   "maps": null,
-  "link": null
+  "link": null,
+  "category": "experience"
  },
  {
   "id": "vte-laonationalmuseum",
@@ -975,7 +1007,7 @@
   "roles": [
    "experience"
   ],
-  "overview": "Museums · Vientiane",
+  "overview": "city",
   "sheet": "DETAIL",
   "selectable": false,
   "drive": "Lao National Museum (Owner Drive folder, Edit 5)",
@@ -995,9 +1027,10 @@
   ],
   "note": "Edit 5 (18 Sep 2026): description, admission and hours from H&S_Wedding_Operations_Master",
   "price": "30,000 KIP per person (foreign visitors)",
-  "hours": "Monday – Friday 8:00 – 12:00 and 13:00 – 16:00",
+  "hours": "Monday \u2013 Friday 8:00 \u2013 12:00 and 13:00 \u2013 16:00",
   "maps": null,
-  "link": null
+  "link": null,
+  "category": "experience"
  },
  {
   "id": "vte-silkresidence",
@@ -1006,7 +1039,7 @@
   "roles": [
    "experience"
   ],
-  "overview": "Museums · Vientiane",
+  "overview": "Day 05 \u00b7 25.02.2027",
   "sheet": "DETAIL",
   "selectable": false,
   "drive": "Traditional Lao Silk Residence (Owner Drive folder, Edit 5)",
@@ -1025,9 +1058,10 @@
   ],
   "note": "Edit 5 (18 Sep 2026): description, admission and hours from H&S_Wedding_Operations_Master",
   "price": "50,000 LAK per person (about USD 2.23)",
-  "hours": "Open daily 9:00 – 17:00",
+  "hours": "Open daily 9:00 \u2013 17:00",
   "maps": null,
-  "link": null
+  "link": null,
+  "category": "experience"
  },
  {
   "id": "vte-laoartmuseum",
@@ -1036,7 +1070,7 @@
   "roles": [
    "experience"
   ],
-  "overview": "Museums · Vientiane",
+  "overview": "city",
   "sheet": "DETAIL",
   "selectable": false,
   "drive": "Lao Art Museum (Owner Drive folder, Edit 5)",
@@ -1055,10 +1089,11 @@
    "assets/images/experiences/vte-laoartmuseum-06.jpg"
   ],
   "note": "Edit 5 (18 Sep 2026): description, entry and hours from H&S_Wedding_Operations_Master",
-  "price": "220,000 LAK (about USD 10 – 15) for foreign visitors",
-  "hours": "08:30 – 16:00",
+  "price": "220,000 LAK (about USD 10 \u2013 15) for foreign visitors",
+  "hours": "08:30 \u2013 16:00",
   "maps": null,
-  "link": null
+  "link": null,
+  "category": "experience"
  },
  {
   "id": "vte-rivermoon",
@@ -1067,7 +1102,7 @@
   "roles": [
    "lunch"
   ],
-  "overview": "Day 05 · 25.02.2027",
+  "overview": "Day 05 \u00b7 25.02.2027",
   "sheet": "NONE",
   "selectable": false,
   "drive": "086 - Restaurant - River Moon Vientiane",
@@ -1089,7 +1124,8 @@
   "price": null,
   "hours": null,
   "maps": "https://maps.app.goo.gl/NMbPP5kvLKurozJJ8?g_st=ic",
-  "link": null
+  "link": null,
+  "category": "restaurant"
  },
  {
   "id": "vte-3merchants",
@@ -1098,7 +1134,7 @@
   "roles": [
    "dinner"
   ],
-  "overview": "Day 05 · 25.02.2027",
+  "overview": "Day 05 \u00b7 25.02.2027",
   "sheet": "NONE",
   "selectable": false,
   "drive": "084 - Restaurant - 3 Merchants Vientiane",
@@ -1116,17 +1152,17 @@
   "price": null,
   "hours": null,
   "maps": "https://maps.app.goo.gl/q3nJqc74P1hn6mkf6?g_st=ic",
-  "link": null
+  "link": null,
+  "category": "restaurant"
  },
  {
   "id": "vte-sona",
   "name": "Sona Cafe and Bar",
   "city": "Vientiane",
   "roles": [
-   "cafe",
    "bar"
   ],
-  "overview": "Day 05 · 25.02.2027",
+  "overview": "Day 05 \u00b7 25.02.2027",
   "sheet": "NONE",
   "selectable": false,
   "drive": "151 - Bar - Sona Cafe and Bar Vientiane",
@@ -1145,17 +1181,17 @@
   "price": null,
   "hours": null,
   "maps": "https://maps.app.goo.gl/hDGyqmbPwYTEmvr89?g_st=ic",
-  "link": null
+  "link": null,
+  "category": "bar"
  },
  {
   "id": "vte-kaogee",
   "name": "Kaogee Le Triomphe",
   "city": "Vientiane",
   "roles": [
-   "lunch",
    "cafe"
   ],
-  "overview": "Day 06 · 26.02.2027",
+  "overview": "Day 06 \u00b7 26.02.2027",
   "sheet": "NONE",
   "selectable": false,
   "drive": "128 - Cafe - Kaogee Le Triomphe Vientiane",
@@ -1175,7 +1211,8 @@
   "price": null,
   "hours": null,
   "maps": null,
-  "link": null
+  "link": null,
+  "category": "cafe"
  },
  {
   "id": "vte-lacuna",
@@ -1184,7 +1221,7 @@
   "roles": [
    "cafe"
   ],
-  "overview": "Day 06 · 26.02.2027",
+  "overview": "Day 06 \u00b7 26.02.2027",
   "sheet": "NONE",
   "selectable": false,
   "drive": "129 - Cafe - Lacuna VTE Vientiane",
@@ -1205,7 +1242,8 @@
   "price": null,
   "hours": null,
   "maps": "https://maps.app.goo.gl/tzMFhWFGAWjE2ALs8?g_st=ic",
-  "link": null
+  "link": null,
+  "category": "cafe"
  },
  {
   "id": "vte-kokkok",
@@ -1214,7 +1252,7 @@
   "roles": [
    "place"
   ],
-  "overview": "Day 06 · 26.02.2027",
+  "overview": "Day 06 \u00b7 26.02.2027",
   "sheet": "NONE",
   "selectable": false,
   "drive": "223 - Mall - KokKok Mega Mall Vientiane",
@@ -1231,11 +1269,12 @@
    "assets/images/experiences/vte-kokkok-04.jpg",
    "assets/images/experiences/vte-kokkok-05.jpg"
   ],
-  "note": "phone originals 2.7–5.9 MB",
+  "note": "phone originals 2.7\u20135.9 MB",
   "price": null,
   "hours": null,
   "maps": "https://maps.app.goo.gl/TKSjr5kc2P6vWvWSA?g_st=ic",
-  "link": null
+  "link": null,
+  "category": "place"
  },
  {
   "id": "vte-laoderm",
@@ -1244,7 +1283,7 @@
   "roles": [
    "dinner"
   ],
-  "overview": "Day 06 · 26.02.2027 · Day 07 Welcome Dinner",
+  "overview": "Day 06 \u00b7 26.02.2027 \u00b7 Day 07 Welcome Dinner",
   "sheet": "NONE",
   "selectable": false,
   "drive": "085 - Restaurant - Lao Derm Vientiane",
@@ -1265,16 +1304,146 @@
   "price": null,
   "hours": null,
   "maps": "https://maps.app.goo.gl/cSn9mzR38QdKGsk49?g_st=ic",
-  "link": null
+  "link": null,
+  "category": "restaurant"
+ },
+ {
+  "id": "vte-camon",
+  "name": "Cam On Restaurant",
+  "city": "Vientiane",
+  "roles": [
+   "dinner"
+  ],
+  "overview": "Day 06 \u00b7 26.02.2027 \u00b7 Day 07 \u00b7 27.02.2027",
+  "sheet": "NONE",
+  "selectable": false,
+  "drive": "\u2014 (no Drive folder)",
+  "driveIds": [],
+  "sourceImages": 0,
+  "used": 0,
+  "primary": null,
+  "gallery": [],
+  "note": "named by the Operations Master overview (approved 05.09.2026), no photograph in the Owner's records \u2014 the card stands without an image (22 Sep 2026)",
+  "price": null,
+  "hours": null,
+  "maps": null,
+  "link": null,
+  "category": "restaurant"
+ },
+ {
+  "id": "vte-lecafe",
+  "name": "Le Caf\u00e9 at Souphattra Heritage",
+  "city": "Vientiane",
+  "roles": [
+   "cafe"
+  ],
+  "overview": "Day 07 \u00b7 27.02.2027",
+  "sheet": "NONE",
+  "selectable": false,
+  "drive": "\u2014 (no Drive folder)",
+  "driveIds": [],
+  "sourceImages": 0,
+  "used": 0,
+  "primary": null,
+  "gallery": [],
+  "note": "named by the Operations Master overview (approved 05.09.2026), no photograph in the Owner's records \u2014 the card stands without an image (22 Sep 2026)",
+  "price": null,
+  "hours": null,
+  "maps": null,
+  "link": null,
+  "category": "cafe"
+ },
+ {
+  "id": "vte-selene",
+  "name": "Selene Sky Bar",
+  "city": "Vientiane",
+  "roles": [
+   "bar"
+  ],
+  "overview": "Day 07 \u00b7 27.02.2027",
+  "sheet": "NONE",
+  "selectable": false,
+  "drive": "\u2014 (no Drive folder)",
+  "driveIds": [],
+  "sourceImages": 0,
+  "used": 0,
+  "primary": null,
+  "gallery": [],
+  "note": "named by the Operations Master overview (approved 05.09.2026), no photograph in the Owner's records \u2014 the card stands without an image (22 Sep 2026)",
+  "price": null,
+  "hours": null,
+  "maps": null,
+  "link": null,
+  "category": "bar"
+ },
+ {
+  "id": "vte-ongteu",
+  "name": "Wat Ong Teu",
+  "city": "Vientiane",
+  "roles": [
+   "experience"
+  ],
+  "overview": "Day 08 \u00b7 28.02.2027",
+  "sheet": "NONE",
+  "selectable": false,
+  "drive": "050 - Event - Temple Ceremony - Wat Ong Teu Vientiane",
+  "driveIds": [
+   "1N-LCD10lVQrR6bqh9BxqRKsuhdYtO7Wl"
+  ],
+  "sourceImages": 8,
+  "used": 1,
+  "primary": "assets/images/experiences/vte-ongteu-01.jpg",
+  "gallery": [
+   "assets/images/experiences/vte-ongteu-01.jpg"
+  ],
+  "note": "the temple of the Alms Giving Ceremony, Sunday 28.02.2027 09:00 (Operations Master, Day 08); the frame is DSC07779 of the temple's own folder \u2014 the one the Temple Ceremony shows",
+  "price": null,
+  "hours": null,
+  "maps": null,
+  "link": null,
+  "category": "experience"
+ },
+ {
+  "id": "vte-baron",
+  "name": "BARON Vientiane",
+  "city": "Vientiane",
+  "roles": [
+   "club"
+  ],
+  "overview": "Day 08 \u00b7 28.02.2027",
+  "sheet": "OWNER",
+  "selectable": false,
+  "drive": "BARON Vientiane (Owner folder, 22 Sep 2026)",
+  "driveIds": [
+   "1EUYKKbv78a3_zIkWFZG1y8KhxDV08H0b"
+  ],
+  "sourceImages": 10,
+  "used": 7,
+  "primary": "assets/images/experiences/vte-baron-01.jpg",
+  "gallery": [
+   "assets/images/experiences/vte-baron-01.jpg",
+   "assets/images/experiences/vte-baron-02.jpg",
+   "assets/images/experiences/vte-baron-03.jpg",
+   "assets/images/experiences/vte-baron-04.jpg",
+   "assets/images/experiences/vte-baron-05.jpg",
+   "assets/images/experiences/vte-baron-06.jpg",
+   "assets/images/experiences/vte-baron-07.jpg"
+  ],
+  "note": "the club of the wedding night \u2014 the VIP after party (Owner, 22 Sep 2026): seven photographs and three films with sound (assets/video/baron-01..03.mp4)",
+  "price": null,
+  "hours": null,
+  "maps": "https://maps.google.com/?q=BARON+Vientiane",
+  "link": null,
+  "category": "club"
  },
  {
   "id": "cn-blossom",
   "name": "Kunming Cherry Blossoms",
-  "city": "Kunming · Yunnan",
+  "city": "Kunming \u00b7 Yunnan",
   "roles": [
    "experience"
   ],
-  "overview": "Day 09 – 10 · 01.–02.03.2027",
+  "overview": "Day 09 \u2013 10 \u00b7 01.\u201302.03.2027",
   "sheet": "NONE",
   "selectable": false,
   "drive": "003 - City - Kunming",
@@ -1293,6 +1462,7 @@
   "price": null,
   "hours": null,
   "maps": null,
-  "link": null
+  "link": null,
+  "category": "experience"
  }
 ]

@@ -14,12 +14,17 @@ export function complete(reg, o = {}) {
   const selections = Array.isArray(r.selections) ? r.selections.slice() : [];
   /* a transport counts only as a line of the Bag: the mandatory Kunming → Lijiang train travels as one when China is joined */
   if (scope.china && !selections.some((x) => x && x.id === 'c86')) selections.push({ id: 'c86', name: 'C86', price: 105, cat: 'Transportation' });
+  /* THE QUESTIONNAIRE (22 Sep 2026): the required About You answers, filled where a test does not care about them */
+  const ANSWERS = { coffeetea: 'Tea', flavor: 'Pandan', drink: 'Water', film: 'In the Mood for Love', genres: ['Pop'] };
+  const base = Array.isArray(gr0.guests) ? gr0.guests : (Array.isArray(r.guests) && r.guests.length ? r.guests.map((g) => ({ guestId: g.guestId, name: g.name, fullName: g.fullName })) : [{ guestId: r.guestId || 'guest', name: 'Guest' }]);
+  const guests = base.map((g) => Object.assign({}, g, { profile: Object.assign({}, ANSWERS, g && g.profile || {}) }));
   const gr = Object.assign({}, gr0, {
+    guests,
     scope,
     dress: gr0.dress || { all: true, acknowledged: [r.guestId], missing: [] },
     allergy: gr0.allergy || { answer: 'no', details: '' },
     photo: gr0.photo || { at: '2026-09-21T00:00:00.000Z', by: r.guestId || 'guest' },
   });
-  const tc = r.templeCeremony || (scope.vientianeWedding ? { guests: [{ guestId: r.guestId, events: { temple: 'Not joining', coffee: 'Not joining', vows: 'Joining', dinner: 'Joining' }, temple: 'Not attending', attending: false, sangkhathan: false, sangkhathanState: 'Not applicable', participation: 'Joining Vientiane' }], participation: 'Joining Vientiane' } : null);
+  const tc = r.templeCeremony || (scope.vientianeWedding ? { guests: [{ guestId: r.guestId, events: { temple: 'Not joining', coffee: 'Not joining', vows: 'Joining', dinner: 'Joining' }, finale: 'The pool jump', finaleKey: 'pool', temple: 'Not attending', attending: false, sangkhathan: false, sangkhathanState: 'Not applicable', participation: 'Joining Vientiane' }], participation: 'Joining Vientiane' } : null);
   return Object.assign(r, { guestRecord: gr, stages, selections, templeCeremony: tc });
 }

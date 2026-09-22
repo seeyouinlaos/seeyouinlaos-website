@@ -261,16 +261,16 @@ test('THE CURRENT MASTER · C86 USD 105 at the one price source; Lijiang and Kem
   assert.doesNotMatch(src('accommodation.html'), /Photography to follow/);
 });
 
-test('THE CURRENT MASTER · the dated venues: 21.02 Sühring dinner; the Aman tea on 24.02; 23.02 Baan Phraya (The Commons the mall); 07.03 Cannubi and Harudot; 08.03 Petits Plats; Thong Smith undated; no duplicates', () => {
+test('THE CURRENT MASTER · the dated venues: 21.02 Sühring dinner; the Aman tea on 24.02; 23.02 Baan Phraya (The Commons the mall); 07.03 Cannubi and Harudot (a café, its second day); 08.03 Petits Plats with its own photographs; Thong Smith dated by the schedule (24.02); no duplicates', () => {
   const w = {}; new Function('window', src('assets/experiences.js'))(w); new Function('window', src('assets/experience-galleries.js'))(w);
   const by = Object.fromEntries(w.SIYL_EXP.map((x) => [x.id, x]));
   assert.deepEqual(by['bkk-suhring'].roles, ['dinner']); assert.equal(by['bkk-suhring'].row, 'Day 01 · 21.02.2027'); assert.equal(by['bkk-suhring'].day, '21 FEB 2027');
   assert.deepEqual(by['bkk-baanphraya'].roles, ['dinner']); assert.equal(by['bkk-baanphraya'].row, 'Day 03 · 23.02.2027'); assert.match(by['bkk-baanphraya'].detail.join(' '), /Phraya Mahai Savan/);
   assert.deepEqual(by['bkk-commons'].roles, ['place'], 'The Commons is no longer a dinner');
-  assert.deepEqual(by['bkk-harudot'].roles, ['cafe', 'experience']); assert.match(by['bkk-harudot'].row, /23\.02\.2027/); assert.match(by['bkk-harudot'].row, /07\.03\.2027/);
+  assert.deepEqual(by['bkk-harudot'].roles, ['cafe'], 'a café only (Owner, 22 Sep 2026)'); assert.equal(by['bkk-harudot'].category, 'cafe'); assert.match(by['bkk-harudot'].row, /23\.02\.2027/); assert.match(by['bkk-harudot'].row, /07\.03\.2027/); assert.deepEqual(by['bkk-harudot'].visits.map((v) => v.date), ['2027-02-23', '2027-03-07'], 'one card, two days');
   assert.deepEqual(by['bkk-cannubi'].roles, ['dinner']); assert.equal(by['bkk-cannubi'].row, 'Day 15 · 07.03.2027'); assert.equal(by['bkk-cannubi'].leg, 'return'); assert.match(by['bkk-cannubi'].detail.join(' '), /One MICHELIN Star/);
-  assert.deepEqual(by['bkk-petitsplats'].roles, ['dinner']); assert.equal(by['bkk-petitsplats'].row, 'Day 16 · 08.03.2027'); assert.equal(by['bkk-petitsplats'].img, undefined, 'no photograph is invented');
-  assert.equal(by['bkk-thongsmith'].row, 'city', 'replaced in the 24.02 lunch cell by the tea');
+  assert.deepEqual(by['bkk-petitsplats'].roles, ['dinner']); assert.equal(by['bkk-petitsplats'].row, 'Day 16 · 08.03.2027'); assert.equal(by['bkk-petitsplats'].img, 'assets/images/experiences/bkk-petitsplats-01.jpg', 'the Owner\'s own photographs (22 Sep 2026)'); assert.equal(w.SIYL_EXP_GALLERY['bkk-petitsplats'].images.length, 5);
+  assert.equal(by['bkk-thongsmith'].row, 'Day 04 · 24.02.2027', 'the 13:00 lunch of the Day 04 schedule (the tea holds the overview cell)');
   const ids = w.SIYL_EXP.map((x) => x.id); assert.equal(new Set(ids).size, ids.length, 'no duplicate place');
   assert.equal(w.SIYL_EXP.filter((x) => /suhring|sühring/i.test(x.id + x.name)).length, 1);
   for (const id of ['bkk-baanphraya', 'bkk-cannubi']) { const g = w.SIYL_EXP_GALLERY[id]; assert.ok(g && g.images.length >= 4, id + ' gallery'); for (const im of g.images) { assert.ok(existsSync(im.src), im.src); assert.ok(!/food|drink/.test(im.kind), im.src + ' is never a dish'); } assert.equal(g.images[0].src, by[id].img); }
