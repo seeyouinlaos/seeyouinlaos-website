@@ -125,3 +125,30 @@ sentence is translated whole instead of in fragments) and C1 (fingerprints curre
 
 **Live:** `docs/acceptance/2026-09-22-stay-deadline/live-ro.mjs` reads production read-only —
 no code entered, no guest signed in, nothing written — and asserts both signals at four widths.
+
+---
+
+## 7 · Live — the proof at `6756fc0`
+
+Deployed by the Owner's release path (push to `main` → Cloudflare Workers Build), serving
+`assets/availability.js?v=de498f15` 100 s after the push.
+
+- **`live-ro.mjs` 11/11** at 390 · 834×1194 · 1194×834 · 1440, read-only: no code entered, no
+  guest signed in, nothing written. Both signals present and in order; the bar carries the date
+  and no link; the object's ring, line and dot are `rgb(116, 7, 14)`; one CTA to `invitation.html`;
+  the property link to `accommodation.html#residence`; exactly two links; no overflow; no console error.
+- Production reads **5 / 6 REMAINING · "One place has gone."** — a real guest already holds one of
+  the six places, so the live object arrived in the approved state by itself. Screenshots in `live/`.
+- **Parity 294/294** · **release-014 live-ro 25/25** · **infrastructure freeze intact**
+  (one Worker · workers.dev · GitHub Pages disabled).
+- **Production data untouched** — the read-only aggregate is identical before and after the deploy:
+  37 occupancies · 0 waitlisted · 12 seat holds · 104 draft actors (15 with drafts).
+
+### The whole run
+
+| | |
+|---|---|
+| unit | **484/484** (`test/availability.test.mjs` 8, new) |
+| gates | **28/28** (`RELEASE CHECK PASSED`) |
+| stage E2E | **256/256** — stay-deadline 24 · release-014 35 · release-013 36 · four-point 48 · account-IA 35 · profile-return 18 · stage-graph 40 · hero-map-media 20 |
+| live | 11 + 25 + parity 294 |
