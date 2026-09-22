@@ -731,6 +731,8 @@
   E("The Mekong promenade in Vientiane at sunset", "Die Mekong-Promenade in Vientiane bei Sonnenuntergang", "ทางเดินริมแม่น้ำโขงในเวียงจันทน์ยามพระอาทิตย์ตก", "夕暮れのビエンチャン、メコン川沿いの遊歩道");
   E("The Thai–Lao Friendship Bridge at Nong Khai", "Die thailändisch-laotische Freundschaftsbrücke bei Nong Khai", "สะพานมิตรภาพไทย–ลาว ที่หนองคาย", "ノーンカーイのタイ・ラオス友好橋");
   E("The reclining Buddha beside Pha That Luang, Vientiane", "Der liegende Buddha neben Pha That Luang, Vientiane", "พระพุทธไสยาสน์ข้างพระธาตุหลวง เวียงจันทน์", "ビエンチャン、タートルアン脇の涅槃仏");
+  /* THE ACCOMMODATION DEADLINE (Owner, 22 Sep 2026): the first page's quiet line and the stay the guest may extend */
+  E("Accommodation planning", "Unterkunftsplanung", "การวางแผนที่พัก", "宿泊のご計画");
   /* THE 22 SEP 2026 MEDIA PASS: the Vientiane film and its card, the hero dots, and the After the Wedding card gallery.
      The Wat Si Saket cloister label is retired with the clip it described. */
   E("A night of Vientiane — the train at the platform, the neon streets of the evening", "Eine Nacht in Vientiane — der Zug am Bahnsteig, die Neonstraßen des Abends", "ค่ำคืนในเวียงจันทน์ — ขบวนรถไฟที่ชานชาลา ถนนนีออนยามเย็น", "ビエンチャンの夜——ホームの列車、ネオンの灯る夕べの街路");

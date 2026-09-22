@@ -751,3 +751,38 @@ html[data-session="in"] [data-private-cta] { display: none !important; }
 .aslide:not(.on) .cg-nav, .aslide:not(.on) .cg-count { opacity: 0; pointer-events: none; }
 @media (prefers-reduced-motion: reduce) { .cg-frame { transition: none; } }
 @media (min-width: 768px) { .cg-nav { width: 56px; height: 78px; } .cg-nav i { width: 15px; height: 15px; } }
+
+
+/* ============================================================================
+   THE ACCOMMODATION BAR (Owner, 22 Sep 2026 · the first page)
+   Journey information, not a booking banner: the site's own label type, a hair-
+   line above and below, the count in the editorial serif, one quiet link. It
+   never colours itself red, never pulses and never grows on a phone.
+   ========================================================================== */
+.a-staybar { padding-left: var(--a-gut); padding-right: var(--a-gut); }
+.a-staybar[data-stay-bar]:empty { display: none; }
+.sbar-in {
+  max-width: var(--a-frame); margin: 0 auto; padding: 16px 0;
+  border-top: 1px solid var(--a-line); border-bottom: 1px solid var(--a-line);
+  display: grid; grid-template-columns: 1fr; row-gap: 10px; align-items: center;
+}
+.sbar-eyebrow { color: var(--a-mute); margin: 0 0 6px; }
+.sbar-line { font-family: 'PP Editorial Old', Georgia, serif; font-weight: 200; font-size: 21px; line-height: 1.25; letter-spacing: .2px; margin: 0; color: var(--a-ink); }
+.sbar-places { margin: 6px 0 0; color: var(--a-mute); }
+.sbar-count {
+  margin: 0; font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 11px;
+  letter-spacing: 2px; text-transform: uppercase; color: var(--a-mute);
+}
+.sbar-cta {
+  justify-self: start; font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 11px;
+  letter-spacing: 2px; text-transform: uppercase; color: var(--a-ink);
+  text-decoration: none; border-bottom: 1px solid var(--a-ink); padding-bottom: 3px;
+}
+.sbar-cta:hover { opacity: .72; }
+.a-staybar[data-stay-phase="closed"] .sbar-line { color: var(--a-mute); }
+@media (min-width: 768px) {
+  .sbar-in { grid-template-columns: minmax(0, 1fr) auto auto; column-gap: 32px; row-gap: 0; padding: 20px 0; }
+  .sbar-line { font-size: 24px; }
+  .sbar-count { text-align: right; }
+  .sbar-cta { justify-self: end; }
+}

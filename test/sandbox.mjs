@@ -96,12 +96,22 @@ export async function roomsFetch(rooms, identity) {
 /* an in-memory Durable Object state */
 export function doState() {
   const map = new Map();
+  /* THE ONE ACTOR (22 Sep 2026): Cloudflare runs a Durable Object's blockConcurrencyWhile turns ONE AT A TIME — the harness
+     must keep that promise, or a test of "two guests asking for the last place together" would only be testing the harness.
+     Every turn is queued behind the one before it, exactly as the platform serialises them. */
+  let turn = Promise.resolve(), inside = false;
   return {
     storage: {
       get: async (k) => map.get(k), put: async (k, v) => { map.set(k, JSON.parse(JSON.stringify(v))); }, delete: async (k) => map.delete(k),
       list: async ({ prefix }) => new Map([...map].filter(([k]) => k.startsWith(prefix))),
     },
-    blockConcurrencyWhile: async (fn) => fn(),
+    /* a nested call is the same turn (the platform runs it inline); only a NEW turn queues behind the one before it */
+    blockConcurrencyWhile: (fn) => {
+      if (inside) return Promise.resolve().then(fn);
+      const next = turn.then(() => { inside = true; return fn(); }).finally(() => { inside = false; });
+      turn = next.then(() => undefined, () => undefined);
+      return next;
+    },
     _map: map,
   };
 }

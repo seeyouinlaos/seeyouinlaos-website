@@ -320,7 +320,11 @@ gate('P3', 'MASTER-02 programme truth (four events, no active Alms, no pool in v
   if (!/const who = await identify\(request, env\);/.test(w) || !/who\.invitationId !== String\(invitationId\)\.trim\(\)/.test(w)) bad.push('the register route must verify the bearer against the invitation');
   if (!/headers\.delete\('x-gr-verified'\); headers\.delete\('x-siyl-identity'\);/.test(w)) bad.push('a client could claim an identity');
   if (!/else if \(op === 'select' \|\| op === 'release'\) return json\(\{ ok: false, error: 'unauthorised' \}, 401/.test(w)) bad.push('a seat write without a bearer must be refused');
-  if (!/else if \(op === 'join' \|\| op === 'leave' \|\| op === 'wait' \|\| op === 'unwait'\) return json\(\{ ok: false, error: 'unauthorised' \}, 401/.test(w)) bad.push('a room or waiting-list write without a bearer must be refused');
+  /* every guest write on the room engine — a place, the waiting list and, since 22 Sep 2026, the paid extension — is refused
+     without a bearer, and the list itself is the one guard (no op may be forgotten in a second place) */
+  if (!/const GUEST_ROOMS_WRITES = \['join', 'leave', 'wait', 'unwait', 'extend', 'unextend'\];/.test(w)) bad.push('the guest room writes must be one named list');
+  if (!/else if \(GUEST_ROOMS_WRITES\.includes\(op\)\) return json\(\{ ok: false, error: 'unauthorised' \}, 401/.test(w)) bad.push('a room, waiting-list or extension write without a bearer must be refused');
+  if (!/if \(!identity\) return json\(\{ ok: false, error: 'unauthorised' \}, 401\);/.test(read('src/rooms.js'))) bad.push('the room engine must refuse an unidentified write');
   if (!/export async function identify/.test(au) || !/x-siyl-auth/.test(au)) bad.push('the identity module is missing');
   if (!/if \(!identity\) return json\(\{ ok: false, error: 'unauthorised' \}, 401\);/.test(read('src/seating.js'))) bad.push('the seating object must refuse an unidentified write');
   /* one readiness engine, and every surface reads it */
@@ -531,6 +535,28 @@ gate('P7', 'Dress Code imagery real (23 — resort-01 retired by the owner), no 
   if (!/import \{ completion as graphCompletion/.test(read('src/worker.js')) || !/if \(!done\.canSend\) \{/.test(read('src/worker.js'))) problems.push('the Worker does not validate a submission with the graph');
   gate('G1', 'One stage graph: the generated client copy is current, the Worker validates with it, no package survives', problems.length === 0,
     problems.length ? problems.join(' · ') : (r.stdout || '').trim());
+}
+
+/* GATE S1 — THE ONE STAY PLAN (Owner, 22 Sep 2026): src/stay-plan.js is the one rule for the complimentary allocation's
+ * deadline and for the paid extension (hotel, nights, rate, dates); assets/stay-plan.js is generated from it and must be
+ * byte-current; the engine enforces the deadline and prices the extension with it; every page that reads the room engine
+ * carries it, so a guest-facing number can never be typed twice. */
+{
+  const { spawnSync } = require('child_process');
+  const r = spawnSync('node', [path.join(__dirname, 'build-stay-plan.cjs'), '--check'], { encoding: 'utf8' });
+  const problems = [];
+  if (r.status !== 0) problems.push('assets/stay-plan.js is stale — run node src/build-stay-plan.cjs');
+  const rooms = read('src/rooms.js');
+  if (!/import \{ COMPLIMENTARY, EXTENSION, deadlineState, extensionQuote, validNights \} from '\.\/stay-plan\.js';/.test(rooms)) problems.push('the room engine does not read the one stay plan');
+  if (!/error: 'complimentary closed'/.test(rooms)) problems.push('the engine does not close a new complimentary claim after the deadline');
+  if (!/const quote = extensionQuote\(nights\);/.test(rooms) || !/error: 'price changed'/.test(rooms)) problems.push('the engine must price the extension and refuse a changed amount');
+  for (const f of fs.readdirSync(ROOT).filter((n) => /\.html$/.test(n))) { const h = read(f); if (/assets\/rooms\.js/.test(h) && !/assets\/stay-plan\.js/.test(h)) problems.push(f + ' reads the room engine without the stay plan'); }
+  const plan = read('src/stay-plan.js');
+  if (!/deadline: '2026-11-30'/.test(plan)) problems.push('the deadline is not the Owner\'s 30 November 2026');
+  if (!/rate: 30,/.test(plan) || !/maxNights: 4,/.test(plan)) problems.push('the extension rule (USD 30 a night, at most four) is not the Owner\'s');
+  if (!/'stayext\/riverside-superior':/.test(read('src/inventory-seed.js'))) problems.push('the extension has no stock of its own');
+  gate('S1', 'One stay plan: the deadline, the six complimentary places and the paid extension come from one rule', problems.length === 0,
+    problems.length ? problems.join(' · ') : (r.stdout || '').trim() + ' · deadline 30 Nov 2026 · extension USD 30/night, max 4');
 }
 
 /* GATE Q1 — THE ONE QUESTIONNAIRE (Owner, 22 Sep 2026): src/questionnaire.js is the one schema of what the guest is asked and what is

@@ -911,3 +911,39 @@ body.seatbar-on .prep-foot .prep-foot-note { display: none; }
 .pf-finale-c { display: block; margin-top: 6px; font-family: var(--f-ui); font-size: 12.5px; line-height: 1.7; letter-spacing: 0; text-transform: none; color: #4A4A4A; }
 .pf-finale-opt[aria-pressed="true"] .pf-finale-c { color: inherit; }
 @media (min-width: 900px) { .pf-finale { grid-template-columns: 1fr 1fr; } }
+
+
+/* ============================================================================
+   YOUR STAY · THE EXTENSION BAR (Owner, 22 Sep 2026 · My Profile)
+   One horizontal bar, one dropdown, nothing that looks like a travel portal:
+   the label at the left, the selector at the right, the hotel and the rate in
+   the small type beneath. On a phone it stacks without changing anything the
+   guest does.
+   ========================================================================== */
+.pf-stay-row { display: flex; justify-content: space-between; gap: var(--s3); align-items: baseline; }
+.pf-stay-row span + span { color: var(--p-mute); text-align: right; }
+.pf-extbar {
+  margin-top: var(--s4); padding: var(--s3) 0;
+  border-top: 1px solid var(--p-line); border-bottom: 1px solid var(--p-line);
+  display: grid; grid-template-columns: 1fr; row-gap: var(--s2); align-items: center;
+}
+.pf-extbar > .t-l1 { margin: 0; }
+.pf-extnote { grid-column: 1 / -1; margin: 0; }
+.pf-extsel { justify-self: stretch; }
+.pf-extsel select {
+  -webkit-appearance: none; appearance: none; width: 100%; min-height: 44px;
+  font-family: var(--f-ui); font-size: 14px; letter-spacing: .4px;
+  color: var(--p-ink); background: transparent; border: 1px solid var(--p-line); border-radius: 0;
+  padding: 10px 34px 10px 12px; cursor: pointer;
+  background-image: linear-gradient(45deg, transparent 50%, var(--p-ink) 50%), linear-gradient(135deg, var(--p-ink) 50%, transparent 50%);
+  background-position: calc(100% - 18px) 50%, calc(100% - 13px) 50%; background-size: 5px 5px, 5px 5px; background-repeat: no-repeat;
+}
+.pf-extsel select:focus-visible { outline: 2px solid var(--p-ink); outline-offset: 2px; }
+.pf-extsel select:disabled { opacity: .55; cursor: default; }
+.pf-hide { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.pf-review { margin-top: var(--s3); }
+.pf-staymsg { margin-top: var(--s3); color: var(--p-mute); }
+@media (min-width: 700px) {
+  .pf-extbar { grid-template-columns: 1fr minmax(200px, 260px); column-gap: var(--s4); row-gap: var(--s2); }
+  .pf-extsel { justify-self: end; width: 100%; }
+}

@@ -94,7 +94,7 @@ if (!LIVE) {
     await p.goto(O + '/room.html?stay=guesthouse&room=guest-house', { waitUntil: 'load' }); await p.waitForTimeout(2200);
     const gh = await p.evaluate(() => ({ price: (document.querySelector('.buy .price') || {}).textContent || '', per: (document.querySelector('.buy .per') || {}).textContent || '', dots: document.querySelectorAll('[data-units="guesthouse|guest-house"] .p-places i').length, btn: !!document.querySelector('[data-join="guesthouse|guest-house|A"]'), av: (document.querySelector('[data-av="guesthouse"]') || {}).textContent || '', text: document.body.innerText }));
     await shot(p, '390-guest-house-room-page');
-    note('guest-house-six-places-complimentary', gh.price === 'Complimentary' && /six shared places/.test(gh.per) && gh.dots === 6 && gh.btn && /6 places available/.test(gh.av) && !/Private Residence|up to 4/i.test(gh.text), JSON.stringify({ price: gh.price, per: gh.per, dots: gh.dots, av: gh.av }));
+    note('guest-house-six-places-complimentary', gh.price === 'Complimentary' && /six shared places/.test(gh.per) && gh.dots === 6 && gh.btn && /6 of 6 places remaining/.test(gh.av) && !/Private Residence|up to 4/i.test(gh.text), JSON.stringify({ price: gh.price, per: gh.per, dots: gh.dots, av: gh.av }));
     await p.click('.cta[data-avwin="guesthouse"]'); await p.waitForTimeout(2600);
     const m = await mine(p);
     const bag = await p.evaluate(() => ({ lines: SIYL_BAG.get().map((x) => x.id + ':' + x.price + ':' + (x.complimentary ? 'c' : '')), total: SIYL_BAG.total(), bar: (document.querySelector('[data-bag-total]') || document.querySelector('.bagbar') || {}).innerText || '' }));

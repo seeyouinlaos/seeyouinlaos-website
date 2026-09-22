@@ -1,0 +1,148 @@
+/* ============================================================================
+   THE STAY PLAN — the ONE rule for the complimentary stay and its extension
+   (Owner, 22 Sep 2026).
+
+   TWO COMPONENTS, NEVER ONE:
+
+     BASE STAY   the Guest House complimentary of the wedding window
+                 (`guesthouse/guest-house`) — SIX guest places, the only
+                 complimentary accommodation, USD 0, the included nights and
+                 nothing more. It cannot be extended: the house is the house.
+
+     EXTENSION   the designated paid hotel (`stayext/riverside-superior`, the
+                 Riverside Hotel Vientiane) for ONE to FOUR nights after the
+                 included stay ends — USD 30 a night, breakfast included. The
+                 guest chooses only how many nights; the hotel, the dates, the
+                 price and the availability are the server's.
+
+   THE DEADLINE. A limited free allocation needs a fair cut-off: a place in the
+   Guest House may be claimed until the end of 30 NOVEMBER 2026, or until the
+   six places are gone — whichever comes first. After that the complimentary
+   option is closed even if a place is technically free again (a release after
+   the deadline is an administrative decision, never a silent reopening).
+
+   The paid extension is NOT bound by that date: an existing stay may add,
+   change or drop paid nights afterwards, as long as the hotel still has a room
+   for the dates and the server confirms the price.
+
+   This file is pure — no DOM, no storage, no network, no clock of its own (the
+   caller passes `now`). The browser copy assets/stay-plan.js is GENERATED from
+   it by src/build-stay-plan.cjs (gate S1 keeps it current) — never edited by
+   hand. The capacity itself is never written here: it is the inventory seed's,
+   read from the engine, so one number can never disagree with another.
+   ========================================================================== */
+
+/* ---- the complimentary stay ---------------------------------------------- */
+export const COMPLIMENTARY = {
+  key: 'guesthouse/guest-house',
+  stage: 'wedstay',
+  name: 'Guest House complimentary',
+  where: 'Vientiane',
+  dates: '27 February – 01 March 2027',
+  nights: 2,
+  price: 0,
+  /* the last day a place may be claimed — the end of this day, the guest's own day */
+  deadline: '2026-11-30',
+  deadlineWords: '30 November 2026'
+};
+
+/* ---- the paid extension --------------------------------------------------- */
+export const EXTENSION = {
+  key: 'stayext/riverside-superior',
+  stage: 'stayext',
+  hotel: 'Riverside Hotel Vientiane',
+  room: 'Superior Room With Window',
+  where: 'Vientiane',
+  rate: 30,                       /* USD a night */
+  currency: 'USD',
+  breakfast: 'Breakfast included',
+  maxNights: 4,
+  /* the extension begins the day the included stay ends — never a date the guest must work out */
+  from: '2027-03-01'
+};
+export const NIGHT_OPTIONS = [1, 2, 3, 4];
+
+/* ---- dates, in the site's own words --------------------------------------- */
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+function parseDay(iso) { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso || '')); return m ? { y: +m[1], mo: +m[2], d: +m[3] } : null; }
+function toUTC(p) { return Date.UTC(p.y, p.mo - 1, p.d); }
+function fromUTC(ms) { const d = new Date(ms); return { y: d.getUTCFullYear(), mo: d.getUTCMonth() + 1, d: d.getUTCDate() }; }
+function iso(p) { return p.y + '-' + String(p.mo).padStart(2, '0') + '-' + String(p.d).padStart(2, '0'); }
+function dayWords(p, withYear) { return String(p.d).padStart(2, '0') + ' ' + MONTHS[p.mo - 1] + (withYear ? ' ' + p.y : ''); }
+
+/* the nights an extension of `n` covers: 01 → 02 March, 02 → 03 March … */
+export function extensionDates(nights) {
+  const n = clampNights(nights);
+  const start = parseDay(EXTENSION.from), list = [];
+  for (let i = 0; i < n; i++) {
+    const a = fromUTC(toUTC(start) + i * 86400000), b = fromUTC(toUTC(start) + (i + 1) * 86400000);
+    list.push(dayWords(a) + ' → ' + dayWords(b));
+  }
+  const end = fromUTC(toUTC(start) + n * 86400000);
+  return { from: EXTENSION.from, to: iso(end), nights: n, nightsList: list, words: dayWords(start) + ' – ' + dayWords(end, true) };
+}
+
+export function clampNights(nights) {
+  const n = Math.floor(Number(nights));
+  if (!(n >= 1)) return 1;
+  return Math.min(EXTENSION.maxNights, n);
+}
+export function validNights(nights) { const n = Number(nights); return Number.isInteger(n) && n >= 1 && n <= EXTENSION.maxNights; }
+
+/* THE AUTHORITATIVE QUOTE. The same function answers on the server and in the
+ * browser, so a preview can never read differently from the confirmation — and
+ * the server's answer is still the one that is stored. */
+export function extensionQuote(nights) {
+  const n = clampNights(nights);
+  const d = extensionDates(n);
+  return {
+    key: EXTENSION.key, hotel: EXTENSION.hotel, room: EXTENSION.room, where: EXTENSION.where,
+    nights: n, rate: EXTENSION.rate, currency: EXTENSION.currency, total: n * EXTENSION.rate,
+    breakfast: EXTENSION.breakfast, from: d.from, to: d.to, nightsList: d.nightsList, dates: d.words,
+    nightsWords: n === 1 ? '1 additional night' : n + ' additional nights'
+  };
+}
+
+/* ---- the deadline --------------------------------------------------------- */
+/* the guest's own day: a date is compared as a day, never as a timestamp, so a
+ * guest in Vientiane and a guest in Berlin read the same state on the same date */
+function dayOf(now) {
+  const d = now instanceof Date ? now : new Date(now || Date.now());
+  return { y: d.getFullYear(), mo: d.getMonth() + 1, d: d.getDate() };
+}
+export function daysUntilDeadline(now) {
+  const today = toUTC(dayOf(now)), end = toUTC(parseDay(COMPLIMENTARY.deadline));
+  return Math.round((end - today) / 86400000);
+}
+/* 'open' (days > 0) · 'last-day' (the 30th itself) · 'closed' (after it) */
+export function deadlineState(now) {
+  const days = daysUntilDeadline(now);
+  const phase = days > 0 ? 'open' : days === 0 ? 'last-day' : 'closed';
+  return {
+    phase, days: Math.max(0, days), deadline: COMPLIMENTARY.deadline, deadlineWords: COMPLIMENTARY.deadlineWords,
+    open: phase !== 'closed',
+    words: phase === 'closed' ? 'Accommodation planning closed'
+      : phase === 'last-day' ? 'Last day'
+      : days === 1 ? '1 day remaining' : days + ' days remaining'
+  };
+}
+/* may a NEW complimentary place be claimed at this moment? A guest who already
+ * holds one keeps it whatever the date says. */
+export function mayClaimComplimentary(now, remaining) {
+  const d = deadlineState(now);
+  if (!d.open) return { ok: false, reason: 'closed', state: d };
+  if (typeof remaining === 'number' && remaining <= 0) return { ok: false, reason: 'full', state: d };
+  return { ok: true, reason: null, state: d };
+}
+/* the words a surface shows for the complimentary allocation — one sentence,
+ * factual, never scarcity marketing */
+export function complimentaryWords(remaining, max, now) {
+  const d = deadlineState(now);
+  if (!d.open) return { state: 'closed', headline: 'Complimentary accommodation planning closed', detail: 'Planning closed on ' + COMPLIMENTARY.deadlineWords + '.' };
+  if (!(remaining > 0)) return { state: 'full', headline: 'Complimentary stay fully allocated', detail: 'All ' + max + ' places are taken.' };
+  return {
+    state: remaining === 1 ? 'one-left' : 'available',
+    headline: remaining + ' of ' + max + ' places remaining',
+    detail: 'Available until ' + COMPLIMENTARY.deadlineWords + ' or until fully allocated.'
+  };
+}

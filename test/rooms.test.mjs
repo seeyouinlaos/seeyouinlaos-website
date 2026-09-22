@@ -94,7 +94,7 @@ test('ROOMS · guest 1 joins A → 1/2; guest 2 joins A → 2/2 with both first 
   assert.equal(r.status, 200); assert.equal(unit(r.d, key, 'A').taken, 1); assert.equal(unit(r.d, key, 'A').free, 1);
   assert.deepEqual(r.d.mine, { wedstay: { key, label: 'A' } }, 'mine = the places she chose — a host starts at zero and books like every guest');
   assert.equal(r.d.fixed, undefined, 'no fixed arrangement exists (Owner, 19 Sep 2026)'); assert.equal('fixed' in r.d, false);
-  assert.deepEqual(Object.keys(r.d).sort(), ['joined', 'mine', 'ok', 'places', 'summary', 'units', 'waiting', 'waitlist'], 'the view: units, summary, mine, waitlist, waiting, places — and the place just joined');
+  assert.deepEqual(Object.keys(r.d).sort(), ['complimentary', 'extension', 'extensionAvailable', 'joined', 'mine', 'ok', 'places', 'summary', 'units', 'waiting', 'waitlist'], 'the view: units, summary, mine, waitlist, waiting, places, the complimentary allocation and the guest\'s own extension (22 Sep 2026) — and the place just joined');
   r = await call(rooms, 'read', null, SUT);
   const seen = unit(r.d, key, 'A');
   assert.deepEqual(seen.occupants.map((o) => [o.name, o.mine, o.party]), [['Haruthai', false, true]], 'Suthep sees Haruthai in Room A, as his party');
@@ -272,7 +272,8 @@ test('WAITING LIST · a guest no room can take waits for the STAGE: one entry, p
   r = await wait(rooms, STE, 'ljg', 2, ['ljg/viewing-270'], 'Steffie');
   assert.deepEqual(Object.fromEntries(Object.entries(r.d.waitlist).map(([s, w]) => [s, w.position])), { kmg: 2, ljg: 1 }); assert.deepEqual(r.d.waiting, { kmg: 2, ljg: 1 });
   r = await call(rooms, 'mine', null, STE);
-  assert.deepEqual(r.d, { ok: true, mine: {}, waitlist: r.d.waitlist }); assert.deepEqual(Object.keys(r.d.waitlist).sort(), ['kmg', 'ljg'], '`mine` carries the holds and the waits, nothing else');
+  assert.deepEqual(r.d, { ok: true, mine: {}, waitlist: r.d.waitlist, extension: null, complimentary: r.d.complimentary }); assert.deepEqual(Object.keys(r.d.waitlist).sort(), ['kmg', 'ljg'], '`mine` carries the holds, the waits, the guest\'s own extension and the complimentary allocation — nothing else');
+  assert.equal(r.d.complimentary.key, 'guesthouse/guest-house'); assert.equal(r.d.complimentary.max, 6, 'the six places are the seed\'s, never a number typed into a page');
 });
 
 test('WAITING LIST · a place held resolves the line: a join clears the guest\'s wait of that stage and no other; a Guest Relations assignment resolves it too; the plan lists the line with its positions; the clean reset clears every hold AND every wait — a client cannot', async () => {

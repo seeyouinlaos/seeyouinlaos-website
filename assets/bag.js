@@ -18,7 +18,10 @@ has:function(id){return this.get().some(function(x){return x.id===id})},
 remove:function(id){this.set(this.get().filter(function(x){return x.id!==id}))},
 qty:function(id,d){var b=this.get(),f=b.find(function(x){return x.id===id});
 if(f){f.qty=Math.max(1,f.qty+d);this.set(b)}},
-total:function(){return this.get().reduce(function(t,x){return t+(x.price||0)*x.qty},0)},
+/* THE ONE TOTAL (Owner, 22 Sep 2026): the guest's own lines, plus the paid stay extension the room engine holds for them —
+ * a confirmed cost of this journey, never a preview. Nothing else is added here, and a line is never counted twice. */
+total:function(){return this.get().reduce(function(t,x){return t+(x.price||0)*x.qty},0)+this.extensionCost()},
+extensionCost:function(){var U=window.SIYL_UNITS,e=U&&U.extension?U.extension():null;return e&&e.confirmed?(Number(e.total)||0):0},
 /* display-only: thumbnails for bag lines persisted before the transport imagery existed */
 THUMBS:{train:'assets/images/transport/train-no25-srt-train.jpg',mu9632:'assets/images/transport/mu9632-business-1.jpg',c642:'assets/images/transport/c642-train-snow-mountain.jpg','return':'assets/images/transport/mu5924-economy-cabin-1.jpg'},
 thumb:function(x){return x.img||this.THUMBS[x.id]||''},

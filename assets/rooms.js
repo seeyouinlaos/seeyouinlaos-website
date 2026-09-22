@@ -25,7 +25,7 @@
   var API = (location.hostname === 'seeyouinlaos-website.suthep-hrg.workers.dev' || /^(localhost|127\.0\.0\.1)$/.test(location.hostname)) ? '/api/rooms' : ORIGIN + '/api/rooms';
 
   var view = null, loading = null, lastError = null;
-  var STAGE_OF = { 'bkk-stay': 'bkk-stay', prewed: 'prewed', wedstay: 'wedstay', guesthouse: 'wedstay', riverside: 'wedstay', kmg: 'kmg', ljg: 'ljg', kempinski: 'kempinski' };
+  var STAGE_OF = { 'bkk-stay': 'bkk-stay', prewed: 'prewed', wedstay: 'wedstay', guesthouse: 'wedstay', riverside: 'wedstay', stayext: 'stayext', kmg: 'kmg', ljg: 'ljg', kempinski: 'kempinski' };
 
   function auth() { try { return JSON.parse(localStorage.getItem('siyl.auth') || 'null'); } catch (e) { return null; } }
   function headers(json) {
@@ -147,6 +147,10 @@
       if (!s) return '';
       var list = this.units(win, slug), mine = this.mineFor(win, slug);
       if (mine) return 'Your place is held · ' + this.unitName(list.filter(function (u) { return u.label === mine.label; })[0] || { kind: 'room', label: mine.label });
+      /* THE COMPLIMENTARY ALLOCATION (Owner, 22 Sep 2026): the six places are counted in the Owner's own words — how many are
+         left of how many, "fully allocated" when they are gone, "closed" once the planning date has passed. Factual only. */
+      var P = window.SIYL_STAY_PLAN;
+      if (P && keyOf(win, slug) === P.COMPLIMENTARY.key) return P.complimentaryWords(s.remainingPlaces, s.sourcePlaces, new Date()).headline;
       var free = s.remainingPlaces, rooms = s.remainingRooms;
       if (s.soldOut || free <= 0) return 'Sold out';
       if (s.kind === 'property') return free === 1 ? '1 place available' : free + ' places available';
@@ -204,6 +208,34 @@
         .then(function (d) { if (d && d.units) { seq++; view = d; rememberWaits(d); announce(); } else U.load(true); return d; })
         .catch(function () { return { ok: false, error: 'unreachable' }; });
     },
+    /* ---- THE COMPLIMENTARY ALLOCATION AND THE PAID EXTENSION (Owner, 22 Sep 2026) ----
+       Both are the engine's answer, never this file's arithmetic: how many of the six places are left, whether the deadline
+       has passed, and the guest's own extension with the hotel, the dates and the amount the server priced. */
+    complimentary: function () { return view && view.complimentary ? view.complimentary : null; },
+    extension: function () { return view && view.extension ? view.extension : null; },
+    extensionAvailable: function () { return !view ? true : view.extensionAvailable !== false; },
+    /* ask the server for `nights` (1–4). `expect` is the amount the guest has just read: the server refuses to confirm a
+       different one rather than charge it quietly. An answer updates the guest's own extension — never a second booking. */
+    extend: function (nights, expect) {
+      var a = auth();
+      if (!a || !a.guestId) return Promise.resolve({ ok: false, error: 'not signed in' });
+      var body = { invitationId: a.invitationId, guestId: a.guestId, nights: nights, name: firstName() };
+      if (expect != null) body.expect = expect;
+      return fetch(API + '/extend', { method: 'POST', headers: headers(true), body: JSON.stringify(body) })
+        .then(function (r) { return r.json().then(function (d) { d.status = r.status; return d; }); })
+        .then(function (d) { if (d && d.units) { seq++; view = d; rememberWaits(d); announce(); } else U.load(true); return d; })
+        .catch(function () { return { ok: false, error: 'unreachable' }; });
+    },
+    /* remove ONLY the extension — the complimentary stay underneath it is never touched */
+    unextend: function () {
+      var a = auth();
+      if (!a || !a.guestId) return Promise.resolve({ ok: false, error: 'not signed in' });
+      return fetch(API + '/unextend', { method: 'POST', headers: headers(true), body: JSON.stringify({ invitationId: a.invitationId, guestId: a.guestId }) })
+        .then(function (r) { return r.json().then(function (d) { d.status = r.status; return d; }); })
+        .then(function (d) { if (d && d.units) { seq++; view = d; rememberWaits(d); announce(); } else U.load(true); return d; })
+        .catch(function () { return { ok: false, error: 'unreachable' }; });
+    },
+
     /* release the guest's place(s) in a stage — or, with `win`, only in that window of the stage (a stale device never
        releases the other hotel the guest holds meanwhile) */
     leave: function (stage, win) {

@@ -1,0 +1,87 @@
+[
+  {
+    "id": "bar-390",
+    "ok": true,
+    "d": "{\"phase\":\"open\",\"days\":69,\"text\":\"Accommodation planning Closes 30 November 2026 6 of 6 places remaining 69 DAYS REMAINING PLAN YOUR STAY\",\"cta\":\"invitation.html\",\"ctaWords\":\"PLAN YOUR STAY\",\"h\":169,\"ov\":0}"
+  },
+  {
+    "id": "bar-834x1194",
+    "ok": true,
+    "d": "{\"phase\":\"open\",\"days\":69,\"text\":\"Accommodation planning Closes 30 November 2026 6 of 6 places remaining 69 DAYS REMAINING PLAN YOUR STAY\",\"cta\":\"invitation.html\",\"ctaWords\":\"PLAN YOUR STAY\",\"h\":125,\"ov\":0}"
+  },
+  {
+    "id": "bar-1194x834",
+    "ok": true,
+    "d": "{\"phase\":\"open\",\"days\":69,\"text\":\"Accommodation planning Closes 30 November 2026 6 of 6 places remaining 69 DAYS REMAINING PLAN YOUR STAY\",\"cta\":\"invitation.html\",\"ctaWords\":\"PLAN YOUR STAY\",\"h\":125,\"ov\":0}"
+  },
+  {
+    "id": "bar-1440",
+    "ok": true,
+    "d": "{\"phase\":\"open\",\"days\":69,\"text\":\"Accommodation planning Closes 30 November 2026 6 of 6 places remaining 69 DAYS REMAINING PLAN YOUR STAY\",\"cta\":\"invitation.html\",\"ctaWords\":\"PLAN YOUR STAY\",\"h\":125,\"ov\":0}"
+  },
+  {
+    "id": "complimentary-count-is-the-engine",
+    "ok": true,
+    "d": "{\"max\":6,\"free0\":6,\"after\":{\"remaining\":5,\"taken\":1,\"mine\":true,\"phase\":\"open\"}}"
+  },
+  {
+    "id": "complimentary-states",
+    "ok": true,
+    "d": "{\"label\":\"Your place is held · Guest House complimentary\",\"free\":5,\"max\":6,\"available\":\"4 of 6 places remaining\",\"one\":\"1 of 6 places remaining\",\"full\":\"Complimentary stay fully allocated\",\"closed\":\"Complimentary accommodation planning closed\",\"detail\":\"Available until 30 November 2026 or until fully allocated.\"}"
+  },
+  {
+    "id": "profile-stay-and-bar",
+    "ok": true,
+    "d": "{\"text\":\"YOUR STAY COMPLIMENTARY STAY Guest House complimentary 27 February – 01 March 2027 · 2 nights Confirmed USD 0 The included nights of the wedding stay. Additional nights are arranged at Riverside Hotel Vientiane. EXTEND YOUR STAY Additional nights Select additional nights 1 night 2 nights 3 nights 4 nights Riverside Hotel Vientiane · USD 30 a night · Breakfast included\",\"options\":[\"Select additional nights\",\"1 night\",\"2 nights\",\"3 nights\",\"4 nights\"],\"value\":\"\",\"hasReview\":false,\"hasRemove\":false}"
+  },
+  {
+    "id": "extension-review-does-not-book",
+    "ok": true,
+    "d": "{\"review\":{\"text\":\"YOUR EXTENSION 2 additional nights 01 March – 03 March 2027 Riverside Hotel Vientiane USD 60 total Breakfast included CONFIRM EXTENSION CANCEL\",\"confirm\":true},\"heldPlaces\":0}"
+  },
+  {
+    "id": "extension-confirmed",
+    "ok": true,
+    "d": "{\"value\":\"2\",\"ext\":{\"n\":2,\"total\":60,\"hotel\":\"Riverside Hotel Vientiane\",\"dates\":\"01 March – 03 March 2027\"},\"base\":{\"key\":\"guesthouse/guest-house\",\"label\":\"A\"}}"
+  },
+  {
+    "id": "extension-amounts-and-single-booking",
+    "ok": true,
+    "d": "[{\"n\":1,\"total\":30,\"places\":1},{\"n\":3,\"total\":90,\"places\":1},{\"n\":4,\"total\":120,\"places\":1}] (1 → 30 · 3 → 90 · 4 → 120 · always ONE room held)"
+  },
+  {
+    "id": "extension-removed-base-intact",
+    "ok": true,
+    "d": "{\"asked\":true,\"ext\":null,\"base\":{\"key\":\"guesthouse/guest-house\",\"label\":\"A\"}}"
+  },
+  {
+    "id": "server-authoritative",
+    "ok": true,
+    "d": "{\"bad\":[\"400:invalid nights\",\"400:invalid nights\",\"400:invalid nights\",\"400:invalid nights\"],\"stale\":\"price changed\",\"quote\":60,\"ok\":60,\"dates\":\"01 March – 03 March 2027\"}"
+  },
+  {
+    "id": "paid-extension-independent",
+    "ok": true,
+    "d": "{\"wedstay\":null,\"ext\":2}"
+  },
+  {
+    "id": "phone-extension-bar",
+    "ok": true,
+    "d": "{\"stacked\":true,\"selW\":342,\"tap\":44,\"ov\":0} (the bar stacks, the selector stays a finger-sized target)"
+  },
+  {
+    "id": "bar-cta-follows-the-guest",
+    "ok": true,
+    "d": "{\"href\":\"profile.html#your-stay\",\"words\":\"YOUR STAY\"}"
+  },
+  {
+    "id": "stage-left-clean",
+    "ok": true,
+    "d": "{\"ext\":null,\"wedstay\":null,\"remaining\":6}"
+  },
+  {
+    "id": "console-errors",
+    "ok": true,
+    "d": "no script or console error"
+  }
+]
