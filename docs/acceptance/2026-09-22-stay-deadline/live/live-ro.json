@@ -1,0 +1,37 @@
+[
+  {
+    "id": "live-bar-390",
+    "ok": true,
+    "d": "{\"phase\":\"open\",\"days\":69,\"text\":\"Accommodation planning Closes 30 November 2026 5 of 6 places remaining 69 DAYS REMAINING PLAN YOUR STAY\",\"cta\":\"invitation.html\",\"ov\":0}"
+  },
+  {
+    "id": "live-bar-834x1194",
+    "ok": true,
+    "d": "{\"phase\":\"open\",\"days\":69,\"text\":\"Accommodation planning Closes 30 November 2026 5 of 6 places remaining 69 DAYS REMAINING PLAN YOUR STAY\",\"cta\":\"invitation.html\",\"ov\":0}"
+  },
+  {
+    "id": "live-bar-1194x834",
+    "ok": true,
+    "d": "{\"phase\":\"open\",\"days\":69,\"text\":\"Accommodation planning Closes 30 November 2026 5 of 6 places remaining 69 DAYS REMAINING PLAN YOUR STAY\",\"cta\":\"invitation.html\",\"ov\":0}"
+  },
+  {
+    "id": "live-bar-1440",
+    "ok": true,
+    "d": "{\"phase\":\"open\",\"days\":69,\"text\":\"Accommodation planning Closes 30 November 2026 5 of 6 places remaining 69 DAYS REMAINING PLAN YOUR STAY\",\"cta\":\"invitation.html\",\"ov\":0}"
+  },
+  {
+    "id": "live-complimentary-is-the-engine",
+    "ok": true,
+    "d": "{\"max\":6,\"remaining\":5,\"taken\":1,\"phase\":\"open\",\"days\":69,\"extensionStock\":12}"
+  },
+  {
+    "id": "live-extension-writes-need-a-bearer",
+    "ok": true,
+    "d": "{\"extend\":401,\"unextend\":401}"
+  },
+  {
+    "id": "live-console-errors",
+    "ok": true,
+    "d": "no script error"
+  }
+]

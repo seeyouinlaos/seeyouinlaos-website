@@ -77,3 +77,21 @@ extension still open, every amount, the change that updates one booking, the fai
 untouched extension, and the one total.
 Gates **28 / 28** (new **S1** — one stay plan, the generated copy current, the engine reading it, every page carrying it).
 Stage E2E `docs/acceptance/2026-09-22-stay-deadline/e2e.mjs` **17 / 17** at 390 · 834 × 1194 · 1194 × 834 · 1440.
+
+## The proof (live)
+
+Implementation commit `75ff7cc` · Worker version **b5c7e9c2-f91d-4b78-a26f-dd70701a908a** (Workers Build on push to `main`,
+live 105 s after the push).
+
+- **Read-only on production** (`live-ro.mjs`, 7 / 7 — no code entered, no guest signed in, nothing booked): the bar reads
+  *Accommodation planning · Closes 30 November 2026 · **5 of 6 places remaining** · 69 DAYS REMAINING · PLAN YOUR STAY* at
+  390 · 834 × 1194 · 1194 × 834 · 1440 with no overflow and no urgency language; `/api/rooms` answers
+  `complimentary { key: guesthouse/guest-house, max: 6, remaining: 5, taken: 1, phase: open, days: 69 }` — the number on the
+  page is the engine's, live — and the extension stock (12 places over six rooms) stands beside it; `extend` and `unextend`
+  without a bearer are **401**.
+- **The authenticated flow** is proved on the stage with synthetic guests only (17 / 17), as the Owner's rule requires: no
+  synthetic booking, registration or upload is ever made on production.
+- **Parity** 294 / 294 · **release-014 live read-only walk** 25 / 25 · **infrastructure guard (live)** intact.
+- **Production data untouched**: the read-only aggregate before and after the deploy is identical — rooms 36 → 36, seating
+  12 → 12, drafts 15 → 15, KV registration keys 56 → 56, digest `9bf077a96ecd…` → `9bf077a96ecd…`, profile photos 8 → 8.
+- **Codex review**: PENDING — EXTERNAL QUOTA LIMIT.
