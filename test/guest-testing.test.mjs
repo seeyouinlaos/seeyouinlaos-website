@@ -169,9 +169,11 @@ test('WORDING: no 1 + 1 seating, no blue dress, dinner poolside, China card is t
   /* 21 Sep 2026: the Owner's clip of Impression Lijiang on the China card, its own poster frame beneath (gate V1) */
   assert.match(src('index.html'), /destination\.html#china" data-video="assets\/video\/china-card\.mp4" style="background-image:url\(assets\/images\/city\/004-lijiang-card-poster\.jpg\)/);
   assert.match(src('assets/images/ASSET-MAP.md'), /1XBVp6qIwUSWfHpw4w3S0CH-apvsej154/, 'the Drive source is traceable');
-  /* the "After the Wedding" card carries the Owner's Lijiang old-town file (13 Sep 2026) */
-  assert.match(src('index.html'), /journeys\.html#j-mu9646" style="background-image:url\(assets\/images\/city\/004-lijiang-old-town-roofs-jade-dragon\.jpg\)/);
-  assert.match(src('assets/images/ASSET-MAP.md'), /1lI07I8yTBcCtiEevBdduf1Pf7eGkbRS4/);
+  /* the "After the Wedding" card is the Owner's whole Lijiang 02 folder, one card gallery of nine (22 Sep 2026) */
+  assert.match(src('index.html'), /<div class="cg am" data-cardgal /);
+  assert.equal((src('index.html').match(/assets\/images\/city\/004-lijiang-aw-\d\d\.jpg/g) || []).length, 9, 'nine frames in the card');
+  assert.match(src('index.html'), /journeys\.html#j-mu9646" tabindex="0"><img src="assets\/images\/city\/004-lijiang-aw-01\.jpg"/, 'each frame keeps the journey link; the first is fetched at once');
+  assert.match(src('assets/images/ASSET-MAP.md'), /1k9cliGiXWyHIp8tHsppcCb-bFw523LD6/, 'the Drive folder is traceable');
   /* the first three tradition references, in the Owner's order */
   for (const f of ['wedding-preparation.html', 'dress.html']) {
     const order = [...src(f).matchAll(/images\/dress\/tradition-0(\d)\.jpg/g)].map((m) => m[1]).join('');

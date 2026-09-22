@@ -1,7 +1,7 @@
 /* THE FINAL CONSOLIDATED CLOSE-OUT PASS — E2E on the isolated stage worker (Owner, 21 Sep 2026). REAL WebKit / iPhone 13 for every
    phone-width page (the desktop widths in Chromium). Synthetic guests only (T001 Ada · T002 Ben, one party · T003 Cleo); codes read from
    the scratchpad, never printed.   node docs/acceptance/2026-09-21-close-out/e2e.mjs <scratchpad> <outDir> [origin]
-   Sections: the hero slideshow (five slides, the courtyard first, ~5 s, crossfade, the same frame at 320 · 390 · 834 · 1440, reduced
+   Sections: the hero slideshow (five slides, the courtyard first, 3 s since 22 Sep 2026, crossfade, the same frame at 320 · 390 · 834 · 1440, reduced
    motion, a hidden tab) · the accommodation media (every recommendation's frame is its property's own; Luye Baisha = its room) · the
    mobile booking smoke test A – E (Guest House · Souphattra · China only · Join all · Decline, with a partner) · the server-side
    completion gate (422) · the passport picker and the honest answer of the live configuration · first / last name editing and its
@@ -53,15 +53,15 @@ const steps = (p) => p.evaluate(() => ({ trip: SIYL_JOURNEY.counts(), steps: SIY
 for (const w of [320, 390, 834, 1440]) {
   const p = await fresh(w); await p.goto(O + '/index.html', { waitUntil: 'load' }); await p.waitForTimeout(800);
   const g0 = await p.evaluate(() => { const am = document.querySelector('.a-hero .am'), ah = document.querySelector('.a-hero .ah'); const r = am.getBoundingClientRect(); return { slides: am.getAttribute('data-hero-slides'), idx: am.getAttribute('data-hero-index'), state: am.getAttribute('data-hero-state'), w: Math.round(r.width), h: Math.round(r.height), top: Math.round(r.top), ahTop: Math.round(ah.getBoundingClientRect().top), bg: /home-hero-courtyard/.test(am.style.backgroundImage), layers: document.querySelectorAll('.a-hero-slide').length, on: document.querySelectorAll('.a-hero-slide.is-on').length, ov: document.documentElement.scrollWidth - document.documentElement.clientWidth, h1: (document.querySelector('.a-hero h1') || {}).innerText || '' }; });
-  await shot(p, w + '-hero-1'); await p.waitForTimeout(6200);
+  await shot(p, w + '-hero-1'); await p.waitForTimeout(4200);   /* the 3 s hold plus the 1 s crossfade (Owner, 22 Sep 2026) */
   const g1 = await p.evaluate(() => { const am = document.querySelector('.a-hero .am'), ah = document.querySelector('.a-hero .ah'); const r = am.getBoundingClientRect(); const on = document.querySelector('.a-hero-slide.is-on'); return { idx: am.getAttribute('data-hero-index'), state: am.getAttribute('data-hero-state'), w: Math.round(r.width), h: Math.round(r.height), top: Math.round(r.top), ahTop: Math.round(ah.getBoundingClientRect().top), on: document.querySelectorAll('.a-hero-slide.is-on').length, onSrc: on ? on.style.backgroundImage : '', opacity: on ? getComputedStyle(on).opacity : '', transition: on ? getComputedStyle(on).transitionDuration : '', bgSize: on ? getComputedStyle(on).backgroundSize : '', pos: on ? getComputedStyle(on).backgroundPosition : '', ov: document.documentElement.scrollWidth - document.documentElement.clientWidth }; });
   await shot(p, w + '-hero-2');
-  note('hero-' + w, g0.slides === '5' && g0.idx === '0' && g0.state === 'playing' && g0.bg && g0.layers === 4 && g0.on === 0 && g0.ov <= 1 && /One invitation/.test(g0.h1) && g1.idx === '1' && g1.on === 1 && /home-hero-02/.test(g1.onSrc) && g1.opacity === '1' && g1.transition === '1s' && g1.bgSize === 'cover' && g1.w === g0.w && g1.h === g0.h && g1.top === g0.top && g1.ahTop === g0.ahTop && g1.ov <= 1, JSON.stringify({ g0: { slides: g0.slides, w: g0.w, h: g0.h, ahTop: g0.ahTop }, g1: { idx: g1.idx, src: g1.onSrc.slice(-24), opacity: g1.opacity, transition: g1.transition, w: g1.w, h: g1.h, ahTop: g1.ahTop, pos: g1.pos } }) + ' (the same frame, the words unmoved, slide 2 after ~5 s)');
+  note('hero-' + w, g0.slides === '5' && g0.idx === '0' && g0.state === 'playing' && g0.bg && g0.layers === 4 && g0.on === 0 && g0.ov <= 1 && /One invitation/.test(g0.h1) && g1.idx === '1' && g1.on === 1 && /home-hero-02/.test(g1.onSrc) && g1.opacity === '1' && g1.transition === '1s' && g1.bgSize === 'cover' && g1.w === g0.w && g1.h === g0.h && g1.top === g0.top && g1.ahTop === g0.ahTop && g1.ov <= 1, JSON.stringify({ g0: { slides: g0.slides, w: g0.w, h: g0.h, ahTop: g0.ahTop }, g1: { idx: g1.idx, src: g1.onSrc.slice(-24), opacity: g1.opacity, transition: g1.transition, w: g1.w, h: g1.h, ahTop: g1.ahTop, pos: g1.pos } }) + ' (the same frame, the words unmoved, slide 2 after 3 s)');
   await p.context().close();
 }
 {
   /* the full loop at 390 (WebKit): 0 → 1 → 2 → 3 → 4 → 0, the same picture never twice in a row; reduced motion; a hidden tab */
-  const p = await fresh(390); await p.goto(O + '/index.html', { waitUntil: 'load' }); const seq = []; for (let i = 0; i < 6; i++) { seq.push(await p.evaluate(() => document.querySelector('.a-hero .am').getAttribute('data-hero-index'))); await p.waitForTimeout(5200); }
+  const p = await fresh(390); await p.goto(O + '/index.html', { waitUntil: 'load' }); const seq = []; for (let i = 0; i < 6; i++) { seq.push(await p.evaluate(() => document.querySelector('.a-hero .am').getAttribute('data-hero-index'))); await p.waitForTimeout(3300); }
   const srcs = await p.evaluate(() => [...document.querySelectorAll('.a-hero-slide')].map((e) => e.getAttribute('data-src').split('/').pop()));
   note('hero-loop-five-slides', seq.join('') === '012340' && srcs.join() === 'home-hero-02.jpg,home-hero-03.jpg,home-hero-04.jpg,home-hero-05.jpg', JSON.stringify({ seq, srcs }) + ' (the courtyard · IMG_2584 · 2585 · 2586 · 2587 · the courtyard)');
   /* a hidden tab: the clock stops; on return at most the one frame that was due, then the normal cadence — never a jump */
@@ -72,7 +72,7 @@ for (const w of [320, 390, 834, 1440]) {
   await p.evaluate(() => { Object.defineProperty(document, 'hidden', { configurable: true, get: () => false }); document.dispatchEvent(new Event('visibilitychange')); }); await p.waitForTimeout(600);
   const back = await p.evaluate(() => ({ state: document.querySelector('.a-hero .am').getAttribute('data-hero-state'), idx: document.querySelector('.a-hero .am').getAttribute('data-hero-index') }));
   const step = (a, b) => (Number(b) - Number(a) + 5) % 5;
-  note('hero-hidden-tab-pauses-no-catch-up', hidden.state === 'paused' && step(before, hidden.idx) <= 1 && back.state === 'playing' && step(before, back.idx) <= 1, JSON.stringify({ before, hidden, back }) + ' (16 s hidden = three slides due; at most one shown)');
+  note('hero-hidden-tab-pauses-no-catch-up', hidden.state === 'paused' && step(before, hidden.idx) <= 1 && back.state === 'playing' && step(before, back.idx) <= 1, JSON.stringify({ before, hidden, back }) + ' (16 s hidden = five slides due; at most one shown)');
   await p.context().close();
   const q = await fresh(390, { reducedMotion: 'reduce' }); await q.goto(O + '/index.html', { waitUntil: 'load' }); await q.waitForTimeout(6500);
   const calm = await q.evaluate(() => ({ state: document.querySelector('.a-hero .am').getAttribute('data-hero-state'), idx: document.querySelector('.a-hero .am').getAttribute('data-hero-index'), on: document.querySelectorAll('.a-hero-slide.is-on').length }));

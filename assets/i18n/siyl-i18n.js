@@ -731,7 +731,29 @@
   E("The Mekong promenade in Vientiane at sunset", "Die Mekong-Promenade in Vientiane bei Sonnenuntergang", "ทางเดินริมแม่น้ำโขงในเวียงจันทน์ยามพระอาทิตย์ตก", "夕暮れのビエンチャン、メコン川沿いの遊歩道");
   E("The Thai–Lao Friendship Bridge at Nong Khai", "Die thailändisch-laotische Freundschaftsbrücke bei Nong Khai", "สะพานมิตรภาพไทย–ลาว ที่หนองคาย", "ノーンカーイのタイ・ラオス友好橋");
   E("The reclining Buddha beside Pha That Luang, Vientiane", "Der liegende Buddha neben Pha That Luang, Vientiane", "พระพุทธไสยาสน์ข้างพระธาตุหลวง เวียงจันทน์", "ビエンチャン、タートルアン脇の涅槃仏");
-  E("The cloister of Wat Si Saket, Vientiane — the Buddhas in their niches", "Der Kreuzgang des Wat Si Saket, Vientiane — die Buddhas in ihren Nischen", "ระเบียงคดวัดสีสะเกด เวียงจันทน์ — พระพุทธรูปในซุ้ม", "ビエンチャン、ワット・シーサケートの回廊 — 壁龕の仏像");
+  /* THE 22 SEP 2026 MEDIA PASS: the Vientiane film and its card, the hero dots, and the After the Wedding card gallery.
+     The Wat Si Saket cloister label is retired with the clip it described. */
+  E("A night of Vientiane — the train at the platform, the neon streets of the evening", "Eine Nacht in Vientiane — der Zug am Bahnsteig, die Neonstraßen des Abends", "ค่ำคืนในเวียงจันทน์ — ขบวนรถไฟที่ชานชาลา ถนนนีออนยามเย็น", "ビエンチャンの夜——ホームの列車、ネオンの灯る夕べの街路");
+  E("After the Wedding — nine photographs of Kunming, Lijiang and the way home", "Nach der Hochzeit — neun Fotografien von Kunming, Lijiang und dem Weg nach Hause", "หลังงานแต่งงาน — ภาพถ่ายเก้าภาพของคุนหมิง ลี่เจียง และเส้นทางกลับบ้าน", "結婚式のあと——昆明、麗江、そして帰路の写真九枚");
+  E("The photographs of this page", "Die Fotografien dieser Seite", "ภาพถ่ายของหน้านี้", "このページの写真");
+  E("The previous photograph", "Vorheriges Foto", "ภาพก่อนหน้า", "前の写真");
+  E("The next photograph", "Nächstes Foto", "ภาพถัดไป", "次の写真");
+  E("Vientiane from the air at dusk — the avenue to Patuxai and the lit fountain", "Vientiane aus der Luft in der Dämmerung — die Allee zum Patuxai und der erleuchtete Brunnen", "เวียงจันทน์จากมุมสูงยามพลบ — ถนนสู่ประตูชัยและน้ำพุที่ส่องไฟ", "たそがれのビエンチャン空撮——パトゥーサイへの大通りと灯る噴水");
+  E("Patuxai and its park from directly above", "Der Patuxai und sein Park aus der Vogelperspektive", "ประตูชัยและสวนโดยรอบมองจากด้านบน", "真上から見たパトゥーサイと公園");
+  E("A Naxi woman before the carved doors of the old town", "Eine Naxi-Frau vor den geschnitzten Türen der Altstadt", "หญิงชาวนาซีหน้าประตูไม้แกะสลักของเมืองเก่า", "旧市街の彫刻扉の前に立つナシ族の女性");
+  E("The dried goods and the greens of the Lijiang market", "Trockenwaren und Grünzeug auf dem Markt von Lijiang", "ของแห้งและผักสดในตลาดลี่เจียง", "麗江の市場の乾物と青菜");
+  E("The market square of Lijiang below Jade Dragon Snow Mountain", "Der Marktplatz von Lijiang unterhalb des Jadedrachen-Schneebergs", "ลานตลาดลี่เจียงใต้ภูเขาหิมะมังกรหยก", "玉龍雪山の下、麗江の市場広場");
+  E("A man carrying his basket through the market", "Ein Mann trägt seinen Korb über den Markt", "ชายผู้แบกตะกร้าเดินผ่านตลาด", "背負い籠を担いで市場を行く男性");
+  E("A basket of garlic scapes against the old brick wall", "Ein Korb Knoblauchsprossen an der alten Ziegelmauer", "ตะกร้าต้นกระเทียมพิงกำแพงอิฐเก่า", "古い煉瓦壁に置かれた、ニンニクの芽の籠");
+  E("Naxi dress on the wooden gallery above the tiled roofs", "Naxi-Tracht auf der hölzernen Galerie über den Ziegeldächern", "ชุดชาวนาซีบนระเบียงไม้เหนือหลังคากระเบื้อง", "瓦屋根を見下ろす木の回廊に立つナシ族の装い");
+  E("The roofs of Lijiang old town below the snow mountain", "Die Dächer der Altstadt von Lijiang unterhalb des Schneebergs", "หลังคาเมืองเก่าลี่เจียงใต้ภูเขาหิมะ", "雪山の下に広がる麗江旧市街の屋根");
+  E("The snow peaks and the glacier of Jade Dragon Snow Mountain", "Die Schneegipfel und der Gletscher des Jadedrachen-Schneebergs", "ยอดเขาหิมะและธารน้ำแข็งของภูเขาหิมะมังกรหยก", "玉龍雪山の雪嶺と氷河");
+  E("Jade Dragon Snow Mountain in the last light, above a temple roof", "Der Jadedrachen-Schneeberg im letzten Licht, über einem Tempeldach", "ภูเขาหิมะมังกรหยกในแสงสุดท้าย เหนือหลังคาวิหาร", "夕映えの玉龍雪山、寺の屋根の上に");
+  E("Photograph 1 of 5", "Foto 1 von 5", "ภาพที่ 1 จาก 5", "写真 1 / 5");
+  E("Photograph 2 of 5", "Foto 2 von 5", "ภาพที่ 2 จาก 5", "写真 2 / 5");
+  E("Photograph 3 of 5", "Foto 3 von 5", "ภาพที่ 3 จาก 5", "写真 3 / 5");
+  E("Photograph 4 of 5", "Foto 4 von 5", "ภาพที่ 4 จาก 5", "写真 4 / 5");
+  E("Photograph 5 of 5", "Foto 5 von 5", "ภาพที่ 5 จาก 5", "写真 5 / 5");
   E("Impression Lijiang — the open-air stage below Jade Dragon Snow Mountain", "Impression Lijiang — die Freilichtbühne unter dem Jadedrachen-Schneeberg", "อิมเพรสชัน ลี่เจียง — เวทีกลางแจ้งใต้ภูเขาหิมะมังกรหยก", "印象麗江 — 玉龍雪山のふもとの野外舞台");
   E("The map of Laos — Vientiane on the Mekong", "Die Karte von Laos — Vientiane am Mekong", "แผนที่ลาว — เวียงจันทน์ริมแม่น้ำโขง", "ラオスの地図 — メコンのビエンチャン");
   E("Laos · Vientiane on the Mekong · the reclining Buddha beside Pha That Luang", "Laos · Vientiane am Mekong · der liegende Buddha neben Pha That Luang", "ลาว · เวียงจันทน์ริมแม่น้ำโขง · พระพุทธไสยาสน์ข้างพระธาตุหลวง", "ラオス · メコンのビエンチャン · タートルアン脇の涅槃仏");

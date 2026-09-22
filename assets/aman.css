@@ -660,3 +660,94 @@ html[data-session="in"] [data-private-cta] { display: none !important; }
   .a-hero .ah { max-width: 1000px; margin-left: auto; margin-right: auto; }
   .a-hero .am, .a-hero-slide { background-position: var(--fp-d, var(--fp-p, center)); }
 }
+
+
+/* ============================================================================
+   THE HERO CONTROLS · THE MAP · THE CARD GALLERY (Owner, 22 Sep 2026)
+   Three quiet additions to the first page, in the site's own language: the
+   dots that say how many photographs the hero holds, a map that is read rather
+   than decorated, and the After the Wedding card turned into a gallery the
+   guest moves by hand. Nothing here moves on its own; nothing shifts the page.
+   ========================================================================== */
+
+/* ---- THE HERO FRAME AND ITS DOTS -----------------------------------------
+   The wrapper is the photograph's own width (the frame keeps every one of its
+   rules); the dots are laid over the foot of the picture, centred, small, and
+   legible on a bright photograph as on a dark one. They never take space, so
+   they cannot move the words below them. */
+.a-hero-frame { position: relative; width: 100%; }
+.a-hero-dots {
+  position: absolute; left: 0; right: 0; bottom: 10px; z-index: 2;
+  display: flex; justify-content: center; align-items: center; gap: 2px;
+  pointer-events: none;   /* the buttons take the taps, the row itself never does */
+}
+.a-hero-dot {
+  pointer-events: auto; -webkit-appearance: none; appearance: none;
+  width: 30px; height: 30px; padding: 0; margin: 0; border: 0; background: none;
+  display: inline-flex; align-items: center; justify-content: center; cursor: pointer;
+}
+.a-hero-dot i {
+  display: block; width: 6px; height: 6px; border-radius: 50%;
+  background: rgba(255,255,255,.55); box-shadow: 0 0 0 1px rgba(0,0,0,.18), 0 1px 3px rgba(0,0,0,.28);
+  transition: background-color 220ms ease, transform 220ms ease;
+}
+.a-hero-dot.is-on i { background: #FFFFFF; transform: scale(1.34); }
+.a-hero-dot:hover i { background: rgba(255,255,255,.82); }
+.a-hero-dot:focus { outline: none; }
+.a-hero-dot:focus-visible i { box-shadow: 0 0 0 2px rgba(255,255,255,.9), 0 0 0 4px rgba(0,0,0,.35); }
+@media (prefers-reduced-motion: reduce) { .a-hero-dot i { transition: none; } }
+@media (min-width: 768px) { .a-hero-dots { bottom: 14px; gap: 4px; } }
+
+/* ---- THE MAP OF LAOS ------------------------------------------------------
+   The map carries its own proportions (838 × 980), so the drawing meets both
+   edges of the frame it is given instead of floating in an empty block; the
+   photograph beside it takes the same height. On a tablet held upright the duo
+   stacks and the map has the whole column, capped so it stays a page and not a
+   poster. Nothing is cropped, stretched or distorted at any width. */
+.a-duo .am.a-map { aspect-ratio: 838 / 980; background-size: contain; background-color: #E7E3DB; }
+.a-duo .am.a-map + .am { aspect-ratio: auto; height: 100%; min-height: 160px; }
+@media (min-width: 768px) and (max-width: 1199px) and (orientation: portrait) {
+  .a-duo { grid-template-columns: minmax(0, 1fr); row-gap: 18px; max-width: 760px; margin-left: auto; margin-right: auto; }
+  .a-duo .am.a-map { justify-self: center; width: min(100%, calc(62vh * 838 / 980)); }
+  .a-duo .am.a-map + .am { aspect-ratio: 3 / 2; height: auto; }
+}
+@media (min-width: 768px) and (orientation: landscape) {
+  .a-duo .am.a-map { justify-self: center; width: min(100%, calc(76vh * 838 / 980)); }
+}
+
+/* ---- THE CARD GALLERY (After the Wedding) --------------------------------
+   The card's frame is unchanged; the photographs cross-fade inside it. The
+   chevrons are two fine lines with a generous invisible target around them —
+   quiet at rest, present the moment the card is touched, hovered or focused —
+   and the count sits at the foot in the site's small label type. */
+.cg { position: relative; overflow: hidden; touch-action: pan-y; }
+.cg-frame { position: absolute; inset: 0; opacity: 0; transition: opacity 420ms ease; pointer-events: none; }
+.cg-frame.is-on { opacity: 1; pointer-events: auto; }
+.cg-frame a { display: block; width: 100%; height: 100%; }
+.cg-frame img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.cg-nav {
+  position: absolute; top: 50%; transform: translateY(-50%); z-index: 3;
+  width: 46px; height: 64px; padding: 0; border: 0; background: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  opacity: .62; transition: opacity 220ms ease;
+}
+.cg-prev { left: 0; } .cg-next { right: 0; }
+.cg-nav i {
+  display: block; width: 13px; height: 13px;
+  border-top: 1px solid #FFFFFF; border-right: 1px solid #FFFFFF;
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,.45));
+}
+.cg-prev i { transform: rotate(-135deg); margin-left: 3px; }
+.cg-next i { transform: rotate(45deg); margin-right: 3px; }
+.cg-nav:hover, .cg:hover .cg-nav, .cg:focus-within .cg-nav { opacity: 1; }
+.cg-nav:focus { outline: none; }
+.cg-nav:focus-visible i { box-shadow: 0 0 0 2px rgba(255,255,255,.75); }
+.cg .cg-count {
+  position: absolute; right: 12px; bottom: 10px; z-index: 3; margin: 0;
+  font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 10px; line-height: 1;
+  letter-spacing: 2px; color: #FFFFFF; opacity: .86; text-shadow: 0 1px 4px rgba(0,0,0,.55);
+}
+/* a card that is not the rail's active slide wears the pale veil — its controls stay out of the way until it is chosen */
+.aslide:not(.on) .cg-nav, .aslide:not(.on) .cg-count { opacity: 0; pointer-events: none; }
+@media (prefers-reduced-motion: reduce) { .cg-frame { transition: none; } }
+@media (min-width: 768px) { .cg-nav { width: 56px; height: 78px; } .cg-nav i { width: 15px; height: 15px; } }

@@ -126,9 +126,9 @@ const completeTrip = async (p, id, email, flavor) => { await contact(p, email); 
     note('hero-' + cls + '-' + w + 'x' + h, g0.slides === '5' && g0.state === 'playing' && g0.ratio === ratio && g0.ov <= 1 && stable && clean && pos.join('|') === focal.join('|') && (cls === 'phone' || g0.ahX === g0.x), JSON.stringify({ g0, pos, stable, clean }));
     await ctx.close();
   }
-  /* the loop still runs at 834 (WebKit): 0 → 1 → 2 in ~11 s, the frame the same box throughout */
+  /* the loop still runs at 834 (WebKit): 0 → 1 → 2 at the Owner's 3 s pace (22 Sep 2026), the frame the same box throughout */
   const p = await (await wk.newContext({ viewport: { width: 834, height: 1194 } })).newPage(); await p.goto(O + '/index.html', { waitUntil: 'load' }); const seq = [], boxes = [];
-  for (let i = 0; i < 3; i++) { seq.push(await p.evaluate(() => document.querySelector('.a-hero .am').getAttribute('data-hero-index'))); boxes.push(await p.evaluate(() => { const r = document.querySelector('.a-hero .am').getBoundingClientRect(); return Math.round(r.width) + 'x' + Math.round(r.height); })); await p.waitForTimeout(5300); }
+  for (let i = 0; i < 3; i++) { seq.push(await p.evaluate(() => document.querySelector('.a-hero .am').getAttribute('data-hero-index'))); boxes.push(await p.evaluate(() => { const r = document.querySelector('.a-hero .am').getBoundingClientRect(); return Math.round(r.width) + 'x' + Math.round(r.height); })); await p.waitForTimeout(3300); }
   note('hero-ipad-loop-no-shift', seq.join('') === '012' && new Set(boxes).size === 1 && boxes[0] === '720x900', JSON.stringify({ seq, boxes }));
   await p.context().close();
 }

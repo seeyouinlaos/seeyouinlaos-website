@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex">
 <title>See You In Laos</title>
 <link rel="stylesheet" href="assets/recon.css?v=05778142">
-<link rel="stylesheet" href="assets/aman.css?v=9aead576">
+<link rel="stylesheet" href="assets/aman.css?v=58cfe52c">
 <link rel="stylesheet" href="assets/motion.css?v=7c751ed1">
 <link rel="stylesheet" href="assets/venue.css?v=14ce913f">
 </head>
@@ -16,10 +16,13 @@
 
   <!-- HERO — the photograph establishes place; the words stay quiet -->
   <section class="a-hero">
+    <!-- THE HERO FRAME (22 Sep 2026): a quiet wrapper of the photograph's own width — the pagination dots are placed against
+         its foot by assets/hero-show.js, over the image, never over the words. The frame itself is unchanged. -->
+    <div class="a-hero-frame">
     <div class="am" style="background-image:url(assets/images/hero/home-hero-courtyard.jpg);--fp-p:50% 50%;--fp-tp:50% 50%;--fp-tl:50% 50%;--fp-d:50% 50%" role="img" aria-label="The courtyard at Souphattra Heritage, Vientiane, at dusk" data-hero-show>
       <!-- THE HERO SLIDESHOW (Owner, 21 Sep 2026): the same frame, only the photograph changes — the courtyard stays the first
-           picture (the .am background, on screen at once); four proposal frames follow, one calm crossfade every 5 s, then the
-           courtyard again. No controls, no dots, no captions.
+           picture (the .am background, on screen at once); four proposal frames follow, one calm crossfade every 3 s, then the
+           courtyard again. The dots below the photograph (built by the module) are the only control; no captions.
            THE FRAME PER VIEWPORT CLASS (21 Sep 2026): the phone keeps its square; a tablet held upright frames 4:5, a tablet on
            its side and the desktop frame 3:2 — never the 16:9 banner that cut the couple. Each frame carries its own focal point
            per class (- -fp-p phone · - -fp-tp tablet portrait · - -fp-tl tablet landscape · - -fp-d desktop); the photograph is
@@ -28,6 +31,7 @@
       <span class="a-hero-slide" data-src="assets/images/hero/home-hero-03.jpg" style="--fp-p:50% 30%;--fp-tp:50% 30%;--fp-tl:50% 24%;--fp-d:50% 24%" aria-hidden="true"></span>
       <span class="a-hero-slide" data-src="assets/images/hero/home-hero-04.jpg" style="--fp-p:50% 36%;--fp-tp:50% 34%;--fp-tl:50% 30%;--fp-d:50% 30%" aria-hidden="true"></span>
       <span class="a-hero-slide" data-src="assets/images/hero/home-hero-05.jpg" style="--fp-p:50% 38%;--fp-tp:50% 36%;--fp-tl:50% 34%;--fp-d:50% 34%" aria-hidden="true"></span>
+    </div>
     </div>
     <div class="ah">
       <p class="a-eyebrow">Sunday, 28 February 2027 · Vientiane, Laos</p>
@@ -63,7 +67,7 @@
         </div>
       </article>
       <article class="aslide">
-        <a class="am" href="destination.html#vientiane" data-video="assets/video/vientiane-card.mp4" style="background-image:url(assets/images/city/002-vientiane-card-poster.jpg)" role="img" aria-label="The cloister of Wat Si Saket, Vientiane — the Buddhas in their niches"></a>
+        <a class="am" href="destination.html#vientiane" data-video="assets/video/vientiane-card.mp4" style="background-image:url(assets/images/city/002-vientiane-card-poster.jpg)" role="img" aria-label="A night of Vientiane — the train at the platform, the neon streets of the evening"></a>
         <div class="ac">
           <p class="an">02 · Laos</p>
           <h3>Vientiane</h3>
@@ -128,7 +132,20 @@
         </div>
       </article>
       <article class="aslide">
-        <a class="am" href="journeys.html#j-mu9646" style="background-image:url(assets/images/city/004-lijiang-old-town-roofs-jade-dragon.jpg)" role="img" aria-label="The tiled roofs of Lijiang old town below Jade Dragon Snow Mountain"></a>
+        <!-- AFTER THE WEDDING (Owner, 22 Sep 2026): the whole of the Owner's folder 004 - City - Lijiang 02 — nine photographs in
+             one card gallery (assets/cardgal.js): the chevrons, a swipe, the arrow keys, "1 / 9", the last frame wrapping to the
+             first. No autoplay: the guest turns the page. The card keeps its title, its dates, its words and Discover more. -->
+        <div class="cg am" data-cardgal aria-roledescription="carousel" aria-label="After the Wedding — nine photographs of Kunming, Lijiang and the way home">
+          <div class="cg-frame is-on"><a href="journeys.html#j-mu9646" tabindex="0"><img src="assets/images/city/004-lijiang-aw-01.jpg" alt="A Naxi woman before the carved doors of the old town" fetchpriority="low" decoding="async"></a></div>
+          <div class="cg-frame"><a href="journeys.html#j-mu9646" tabindex="-1"><img data-src="assets/images/city/004-lijiang-aw-02.jpg" alt="The dried goods and the greens of the Lijiang market" loading="lazy" decoding="async"></a></div>
+          <div class="cg-frame"><a href="journeys.html#j-mu9646" tabindex="-1"><img data-src="assets/images/city/004-lijiang-aw-03.jpg" alt="The market square of Lijiang below Jade Dragon Snow Mountain" loading="lazy" decoding="async"></a></div>
+          <div class="cg-frame"><a href="journeys.html#j-mu9646" tabindex="-1"><img data-src="assets/images/city/004-lijiang-aw-04.jpg" alt="A man carrying his basket through the market" loading="lazy" decoding="async"></a></div>
+          <div class="cg-frame"><a href="journeys.html#j-mu9646" tabindex="-1"><img data-src="assets/images/city/004-lijiang-aw-05.jpg" alt="A basket of garlic scapes against the old brick wall" loading="lazy" decoding="async"></a></div>
+          <div class="cg-frame"><a href="journeys.html#j-mu9646" tabindex="-1"><img data-src="assets/images/city/004-lijiang-aw-06.jpg" alt="Naxi dress on the wooden gallery above the tiled roofs" loading="lazy" decoding="async"></a></div>
+          <div class="cg-frame"><a href="journeys.html#j-mu9646" tabindex="-1"><img data-src="assets/images/city/004-lijiang-aw-07.jpg" alt="The roofs of Lijiang old town below the snow mountain" loading="lazy" decoding="async"></a></div>
+          <div class="cg-frame"><a href="journeys.html#j-mu9646" tabindex="-1"><img data-src="assets/images/city/004-lijiang-aw-08.jpg" alt="The snow peaks and the glacier of Jade Dragon Snow Mountain" loading="lazy" decoding="async"></a></div>
+          <div class="cg-frame"><a href="journeys.html#j-mu9646" tabindex="-1"><img data-src="assets/images/city/004-lijiang-aw-09.jpg" alt="Jade Dragon Snow Mountain in the last light, above a temple roof" loading="lazy" decoding="async"></a></div>
+        </div>
         <div class="ac">
           <p class="an">1 – 8 March 2027</p>
           <h3>After the Wedding</h3>
@@ -145,7 +162,10 @@
 
   <!-- DUO — two supporting photographs, deliberately secondary -->
   <section class="a-sec a-duo">
-    <div class="am" style="background-image:url(assets/images/city/laos-map.jpg);background-size:contain;background-color:#E7E3DB" role="img" aria-label="The map of Laos — Vientiane on the Mekong"></div>
+    <!-- THE MAP OF LAOS (Owner, 22 Sep 2026): the map is read, not decorated — its frame carries the map's own proportions so the
+         drawing fills the width it is given (no empty bands beside it), and on a tablet held upright the two photographs stack so
+         the map has the whole column. -->
+    <div class="am a-map" style="background-image:url(assets/images/city/laos-map.jpg)" role="img" aria-label="The map of Laos — Vientiane on the Mekong"></div>
     <div class="am" style="background-image:url(assets/images/city/002-vientiane-reclining-buddha.jpg)" role="img" aria-label="The reclining Buddha beside Pha That Luang, Vientiane"></div>
     <p class="cap">Laos · Vientiane on the Mekong · the reclining Buddha beside Pha That Luang</p>
   </section>
@@ -162,7 +182,8 @@
 <script src="assets/recon.js?v=0e3f9951"></script>
 <script type="module" src="assets/invite.mjs?v=c557d97c"></script>
 <script src="assets/aman.js?v=2a339178"></script>
-<script src="assets/hero-show.js?v=6dbeb302"></script>
+<script src="assets/hero-show.js?v=f9ef7eeb"></script>
+<script src="assets/cardgal.js?v=9eeb4660"></script>
 <script src="assets/motion.js?v=ed2a636b"></script>
 <script src="assets/venue-data.js?v=ece86877"></script>
 <script src="assets/venue.js?v=5e70519d"></script>
