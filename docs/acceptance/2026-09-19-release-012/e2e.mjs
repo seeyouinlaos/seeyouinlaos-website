@@ -78,8 +78,8 @@ await wk.close();
   const res = await p.evaluate(async () => { const out = []; const srcs = [...new Set([].concat(...Object.values(window.SIYL_STAY_MEDIA).map((h) => h.images.map((i) => i.src))))]; for (const s of srcs) { const r = await fetch(s, { method: 'HEAD' }); if (r.status !== 200) out.push(s + ':' + r.status); } return { n: srcs.length, bad: out }; });
   await p.goto(O + '/experiences.html', { waitUntil: 'load' }); await p.waitForTimeout(800);
   const res2 = await p.evaluate(async () => { const out = []; const srcs = [...new Set([].concat(...Object.values(window.SIYL_EXP_GALLERY).map((g) => g.images.map((i) => i.src))))]; for (const s of srcs) { const r = await fetch(s, { method: 'HEAD' }); if (r.status !== 200) out.push(s + ':' + r.status); } return { n: srcs.length, bad: out }; });
-  /* superseded by release 014 (Owner, 19 Sep 2026): the stay record is 50 frames (the residence's 4 leave, the Guest House complimentary's 4 and the Riverside Hotel's 7 arrive); the experience record is 167 (Baan Phraya 4 and Cannubi 5 arrive) */
-  note('no-broken-image', res.bad.length === 0 && res2.bad.length === 0 && res.n === 53 && res2.n === 179, JSON.stringify({ stay: res, exp: res2 }).slice(0, 200)); await p.context().close(); }
+  /* superseded by release 014 (Owner, 19 Sep 2026): the stay record is 50 frames (the residence's 4 leave, the Guest House complimentary's 4 and the Riverside Hotel's 7 arrive); the experience record is 167 (Baan Phraya 4 and Cannubi 5 arrive); 22 Sep 2026: 199 — the seven venues' own photographs and the Dior / LV split */
+  note('no-broken-image', res.bad.length === 0 && res2.bad.length === 0 && res.n === 53 && res2.n === 199, JSON.stringify({ stay: res, exp: res2 }).slice(0, 200)); await p.context().close(); }
 
 /* ===== 5 · the restaurant media audit on the served pages ===== */
 { const p = await fresh(390); const FOOD = /dish|bowl|noodle|plate|dessert|cake|cocktail|martini|pastry|brunch|tartlet|sorbet|canap|salad|pork|beef/i;

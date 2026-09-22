@@ -121,7 +121,7 @@ test('ABOUT YOU: step 05 is required — the allergy answer and the photography 
   assert.match(g, /key: 'about', n: '05', label: 'About You', href: 'about-you\.html', required: true/);
   assert.match(q, /export const ALLERGY = \{ key: 'allergy', n: '01', q: 'Do you have any food allergies\?', required: true/);
   assert.match(q, /key: 'drink', n: '04', q: 'Favourite drink'/);
-  assert.match(q, /key: 'film', n: '05', q: 'Favourite film'/); assert.match(q, /key: 'genres', n: '06', q: 'Your music'[^}]*required: true, type: 'multi'/); assert.match(q, /key: 'music', n: '07', q: 'A song, an album, an artist you never skip'[^}]*required: false/);   /* Question 5 ("rather avoid") retired 19 Sep 2026; the genres required, the song line optional (22 Sep 2026) */
+  assert.match(q, /key: 'film', n: '05', q: 'Favourite film'/); assert.match(q, /key: 'genres', n: '06', q: 'Thai favorite'[^}]*required: true, type: 'multi'/); assert.match(q, /key: 'music', n: '07', q: 'A song, an album, an artist you never skip'[^}]*required: false/);   /* Question 5 ("rather avoid") retired 19 Sep 2026; the genres required, the song line optional (22 Sep 2026) */
   assert.match(g, /aboutMissing: function \(\) \{[\s\S]*?if \(!this\.photoAck\(\)\) out\.push/, 'the acknowledgement holds the step');
   assert.match(g, /if \(key === 'about'\) return this\.applicable\('about'\) \? this\.aboutMissing\(\) : \[\];/, 'documents and consent never hold the step; a guest not joining the trip owes no hospitality answer');
   const inv = src('invitation.html');

@@ -562,77 +562,6 @@
    }
   ]
  },
- "bkk-diorlv": {
-  "slug": "bkk-dior",
-  "folder": "122 - Cafe - Dior Bangkok + 124 - Cafe - LV Cafe Bangkok",
-  "folderId": "1T8LtqEK358_5mdEC-y_Uu5HnZ8Jnyv4h + 1oBn04Bq8QBQglAzOrtKFtxRtD_AYzweS",
-  "frame": "4/5",
-  "images": [
-   {
-    "src": "assets/images/experiences/bkk-dior-02.jpg",
-    "w": 1365,
-    "h": 1706,
-    "alt": "The gold-panelled Dior café salon, medallion chairs at the window",
-    "drive": "1zN8nO36cQIeNzlQR33WoG5s1t_SUQDj8",
-    "file": "SnapInsta_470894129.jpg",
-    "kind": "interior"
-   },
-   {
-    "src": "assets/images/experiences/bkk-dior-03.jpg",
-    "w": 619,
-    "h": 825,
-    "alt": "Rattan lanterns above the carved gold walls",
-    "drive": "1dEWjy_9yVODnrhXT8maD96KS16xCc1wG",
-    "file": "IMG_3524.webp",
-    "kind": "interior"
-   },
-   {
-    "src": "assets/images/experiences/bkk-dior-07.jpg",
-    "w": 2000,
-    "h": 1125,
-    "alt": "The Louis Vuitton café dining room",
-    "drive": "1h4Kjx76SfCGIMK16ey5vwnc_Rezy1Q5j",
-    "file": "IMG_3484.jpeg",
-    "kind": "interior"
-   },
-   {
-    "src": "assets/images/experiences/bkk-dior-06.jpg",
-    "w": 1500,
-    "h": 2000,
-    "alt": "Le Café Louis Vuitton, banquettes before the library wall",
-    "drive": "1M0Nvrko_M60RYUHCR1RtJK9WDkhd98Qn",
-    "file": "IMG_3487.jpeg",
-    "kind": "interior"
-   },
-   {
-    "src": "assets/images/experiences/bkk-dior-04.jpg",
-    "w": 619,
-    "h": 825,
-    "alt": "A garden table under a scalloped parasol",
-    "drive": "1ttercJQGJgexU6tkkjiz7uVjaIWCmhE2",
-    "file": "IMG_3526.webp",
-    "kind": "exterior"
-   },
-   {
-    "src": "assets/images/experiences/bkk-dior-09.jpg",
-    "w": 1500,
-    "h": 2000,
-    "alt": "The Louis Vuitton façade with its sculpted canopies",
-    "drive": "19VpysgVy_tXW2Eo8dDTvHZtyKaWcTKue",
-    "file": "IMG_3490.jpeg",
-    "kind": "exterior"
-   },
-   {
-    "src": "assets/images/experiences/bkk-dior-10.jpg",
-    "w": 1500,
-    "h": 2000,
-    "alt": "A stack of monogram trunks in the store",
-    "drive": "1aEpxJolsDia19q9OdjhM7clUjt7hoWM5",
-    "file": "IMG_3494.jpeg",
-    "kind": "interior"
-   }
-  ]
- },
  "bkk-harudot": {
   "slug": "bkk-harudot",
   "folder": "123 - Cafe - Harudot Bangkok",
@@ -1961,6 +1890,321 @@
     "drive": "1ujHB2YAUIN3j50AVyhvZU8GqfVpvCi1H",
     "file": "IMG_2727.JPG",
     "kind": "stage"
+   }
+  ]
+ },
+ "bkk-dior": {
+  "slug": "bkk-dior",
+  "folder": "122 - Cafe - Dior Bangkok",
+  "folderId": "1T8LtqEK358_5mdEC-y_Uu5HnZ8Jnyv4h",
+  "frame": "4/5",
+  "images": [
+   {
+    "src": "assets/images/experiences/bkk-dior-02.jpg",
+    "w": 1365,
+    "h": 1706,
+    "alt": "The gold cannage salon of Café Dior, medallion chairs at the window",
+    "drive": "1zN8nO36cQIeNzlQR33WoG5s1t_SUQDj8",
+    "file": "SnapInsta_470894129.jpg",
+    "kind": "interior"
+   },
+   {
+    "src": "assets/images/experiences/bkk-dior-03.jpg",
+    "w": 619,
+    "h": 825,
+    "alt": "The carved DIOR wall and the rattan lanterns above the tables",
+    "drive": "1dEWjy_9yVODnrhXT8maD96KS16xCc1wG",
+    "file": "IMG_3524.webp",
+    "kind": "interior"
+   },
+   {
+    "src": "assets/images/experiences/bkk-dior-04.jpg",
+    "w": 619,
+    "h": 825,
+    "alt": "A garden table under a scalloped parasol at the maison",
+    "drive": "1ttercJQGJgexU6tkkjiz7uVjaIWCmhE2",
+    "file": "IMG_3526.webp",
+    "kind": "exterior"
+   }
+  ]
+ },
+ "bkk-lvcafe": {
+  "slug": "bkk-lvcafe",
+  "folder": "124 - Cafe - LV Cafe Bangkok",
+  "folderId": "1oBn04Bq8QBQglAzOrtKFtxRtD_AYzweS",
+  "frame": "4/5",
+  "images": [
+   {
+    "src": "assets/images/experiences/bkk-lvcafe-02.jpg",
+    "w": 2000,
+    "h": 1125,
+    "alt": "The round dining room of Le Café Louis Vuitton behind its curtain wall",
+    "drive": "1h4Kjx76SfCGIMK16ey5vwnc_Rezy1Q5j",
+    "file": "IMG_3484.jpeg",
+    "kind": "interior"
+   },
+   {
+    "src": "assets/images/experiences/bkk-lvcafe-01.jpg",
+    "w": 1500,
+    "h": 2000,
+    "alt": "Banquettes before the library wall at Le Café Louis Vuitton",
+    "drive": "1M0Nvrko_M60RYUHCR1RtJK9WDkhd98Qn",
+    "file": "IMG_3487.jpeg",
+    "kind": "interior"
+   },
+   {
+    "src": "assets/images/experiences/bkk-lvcafe-03.jpg",
+    "w": 1500,
+    "h": 2000,
+    "alt": "The sculpted Louis Vuitton façade at Gaysorn Amarin",
+    "drive": "19VpysgVy_tXW2Eo8dDTvHZtyKaWcTKue",
+    "file": "IMG_3490.jpeg",
+    "kind": "exterior"
+   },
+   {
+    "src": "assets/images/experiences/bkk-lvcafe-04.jpg",
+    "w": 1500,
+    "h": 2000,
+    "alt": "A stack of monogram trunks in the maison beside the café",
+    "drive": "1aEpxJolsDia19q9OdjhM7clUjt7hoWM5",
+    "file": "IMG_3494.jpeg",
+    "kind": "interior"
+   }
+  ]
+ },
+ "bkk-cafecraft": {
+  "slug": "bkk-cafecraft",
+  "folder": "131 - Cafe - Cafe Craft by CHANINTR",
+  "folderId": "1nCcRkh44-OQMUMp0F0A8ZFXYRxC5joLq",
+  "frame": "4/5",
+  "images": [
+   {
+    "src": "assets/images/experiences/bkk-cafecraft-01.jpg",
+    "w": 1000,
+    "h": 1500,
+    "alt": "The pale oak room of Café Craft, black chairs at round tables",
+    "drive": "1lWLyHjClod36XyjgDCPk9TKZh4esKV7U",
+    "file": "IMG_4301.webp",
+    "kind": "interior"
+   },
+   {
+    "src": "assets/images/experiences/bkk-cafecraft-02.jpg",
+    "w": 1000,
+    "h": 1500,
+    "alt": "The long table under the paper lantern, the timber screen behind",
+    "drive": "1skWJihrPyS5_UWbxMhsuCrVH9VvIHM5n",
+    "file": "IMG_4302.webp",
+    "kind": "interior"
+   }
+  ]
+ },
+ "bkk-firefly": {
+  "slug": "bkk-firefly",
+  "folder": "154 - Bar - Firefly Bar",
+  "folderId": "1LCCnMXVkMkPnyhmprr0OHPyEHJBCLAqt",
+  "frame": "3/2",
+  "images": [
+   {
+    "src": "assets/images/experiences/bkk-firefly-01.jpg",
+    "w": 2000,
+    "h": 1121,
+    "alt": "The green marble bar of Firefly, the chequerboard floor before it",
+    "drive": "1U_wBRBxFHJFjLqa4H8ajLA8c3aXA3ES3",
+    "file": "IMG_4307.jpeg",
+    "kind": "counter"
+   },
+   {
+    "src": "assets/images/experiences/bkk-firefly-02.jpg",
+    "w": 2000,
+    "h": 1122,
+    "alt": "The lounge at Firefly, the painted panel above the banquettes",
+    "drive": "1hotLeFpuqKYFwwBVjsRKySr-x1tiRf27",
+    "file": "IMG_4306.jpeg",
+    "kind": "interior"
+   },
+   {
+    "src": "assets/images/experiences/bkk-firefly-03.jpg",
+    "w": 2000,
+    "h": 1120,
+    "alt": "The chandelier over the low tables of the bar",
+    "drive": "1lR5TdRIvODVtd8Qf0yjT5PIwE6sFqJ5x",
+    "file": "IMG_4308.jpeg",
+    "kind": "interior"
+   },
+   {
+    "src": "assets/images/experiences/bkk-firefly-04.jpg",
+    "w": 2000,
+    "h": 1123,
+    "alt": "The back bar of Firefly under its gilded ceiling",
+    "drive": "1TZ_agLzDyaVe1NMfuVct38JOJ82Zy5FG",
+    "file": "IMG_4309.jpeg",
+    "kind": "counter"
+   }
+  ]
+ },
+ "bkk-siamparagon": {
+  "slug": "bkk-siamparagon",
+  "folder": "226 - Mall - Siam Paragon",
+  "folderId": "1QxgoS2aWXC2DWKh_c6Y0fTYOz06JhW8r",
+  "frame": "4/5",
+  "images": [
+   {
+    "src": "assets/images/experiences/bkk-siamparagon-01.jpg",
+    "w": 1723,
+    "h": 1723,
+    "alt": "Siam Paragon at dusk, the lit façade above the forecourt",
+    "drive": "1oP4rai7vwE_ujv-MMd8rV15DTFT7v6N2",
+    "file": "IMG_4310.webp",
+    "kind": "venue"
+   },
+   {
+    "src": "assets/images/experiences/bkk-siamparagon-02.jpg",
+    "w": 2000,
+    "h": 999,
+    "alt": "The luxury avenue of the mall, Louis Vuitton and Tiffany along it",
+    "drive": "157Q_QBUm0Uq4wIwsaG94QiwLEt9clRZH",
+    "file": "IMG_4311.jpeg",
+    "kind": "venue"
+   },
+   {
+    "src": "assets/images/experiences/bkk-siamparagon-03.jpg",
+    "w": 1072,
+    "h": 1045,
+    "alt": "The sculpted hall over the escalators",
+    "drive": "1vp5VKv2R6iAS8KCFVSJUj-IQ5RzYf-jq",
+    "file": "IMG_4312.jpeg",
+    "kind": "venue"
+   },
+   {
+    "src": "assets/images/experiences/bkk-siamparagon-04.jpg",
+    "w": 1920,
+    "h": 1280,
+    "alt": "The garden hall under the honeycomb roof",
+    "drive": "1MMdfMqeBaaSW1hDrzP67Ved6VM_UiecU",
+    "file": "IMG_4314.jpeg",
+    "kind": "venue"
+   }
+  ]
+ },
+ "vte-camon": {
+  "slug": "vte-camon",
+  "folder": "097 - Restaurant - Cam On Restaurant",
+  "folderId": "1PkPZxgrH9-RVegM0LNkOw8TVozD0ejZ7",
+  "frame": "4/5",
+  "images": [
+   {
+    "src": "assets/images/experiences/vte-camon-01.jpg",
+    "w": 1241,
+    "h": 1536,
+    "alt": "The red shopfront of Cam On under the bougainvillea",
+    "drive": "1fZjKKluQcbGViBGITnb7DhGcI5at53Jp",
+    "file": "IMG_4251.jpeg",
+    "kind": "exterior"
+   },
+   {
+    "src": "assets/images/experiences/vte-camon-02.jpg",
+    "w": 1241,
+    "h": 1241,
+    "alt": "The yellow dining room and the painted mural above the tables",
+    "drive": "1EIJSrccnNVpB8voFR4Lk7BMcVaVv4Nz3",
+    "file": "IMG_4255.jpeg",
+    "kind": "dining-room"
+   }
+  ]
+ },
+ "vte-lecafe": {
+  "slug": "vte-lecafe",
+  "folder": "130 - Cafe - Le Cafe",
+  "folderId": "1KvH_yBzmFYbVAYppbFgOCSg0m8-L3LVB",
+  "frame": "4/5",
+  "images": [
+   {
+    "src": "assets/images/experiences/vte-lecafe-01.jpg",
+    "w": 1920,
+    "h": 1920,
+    "alt": "The arched entrance of Le Café at Souphattra Heritage",
+    "drive": "1gNok2ZNVevQM_C1p--UqTp7vxjXrHEWh",
+    "file": "IMG_4260.jpeg",
+    "kind": "architecture"
+   },
+   {
+    "src": "assets/images/experiences/vte-lecafe-02.jpg",
+    "w": 1920,
+    "h": 1920,
+    "alt": "The colonnade terrace beside the water basins",
+    "drive": "1Q6RYXAODs7H-KTE18t8eVzACbiyOUnoM",
+    "file": "IMG_4262.jpeg",
+    "kind": "exterior"
+   }
+  ]
+ },
+ "vte-selene": {
+  "slug": "vte-selene",
+  "folder": "153 - Bar - Selene Sky Bar",
+  "folderId": "14s46H44ZY51udx9TA6ts5QyAxN7snjUK",
+  "frame": "4/5",
+  "images": [
+   {
+    "src": "assets/images/experiences/vte-selene-01.jpg",
+    "w": 1024,
+    "h": 1024,
+    "alt": "The round bar of Selene under the arch, the city beyond",
+    "drive": "1IDrd_BdNib5GSzM0zHnPFJTILbsqqnlk",
+    "file": "IMG_4273.jpeg",
+    "kind": "counter"
+   },
+   {
+    "src": "assets/images/experiences/vte-selene-02.jpg",
+    "w": 1024,
+    "h": 1024,
+    "alt": "The rooftop terrace at dusk, the lamps lit along it",
+    "drive": "1sWrkmwU3eRFoV-IDvtqzpxAd6Ga4RIti",
+    "file": "IMG_4275.jpeg",
+    "kind": "exterior"
+   },
+   {
+    "src": "assets/images/experiences/vte-selene-03.jpg",
+    "w": 2000,
+    "h": 1334,
+    "alt": "The bar at sunset, a shaker in hand above the rooftop",
+    "drive": "1aQHiY5_hfDWu_cOD6sxfNFCcxv2dq7zu",
+    "file": "IMG_4265.jpeg",
+    "kind": "atmosphere"
+   },
+   {
+    "src": "assets/images/experiences/vte-selene-04.jpg",
+    "w": 2000,
+    "h": 1334,
+    "alt": "The Selene lettering on the white wall of the terrace",
+    "drive": "1_g2JwGSpI5bsEs3LKVKSc7OkTKMagPq7",
+    "file": "IMG_4266.jpeg",
+    "kind": "interior"
+   }
+  ]
+ },
+ "vte-ongteu": {
+  "slug": "vte-ongteu",
+  "folder": "050 - Event - Temple Ceremony - Wat Ong Teu Vientiane",
+  "folderId": "1N-LCD10lVQrR6bqh9BxqRKsuhdYtO7Wl",
+  "frame": "3/2",
+  "images": [
+   {
+    "src": "assets/images/experiences/vte-ongteu-01.jpg",
+    "w": 2000,
+    "h": 1333,
+    "alt": "The morning at Wat Ong Teu — novices with their alms bowls, a guest kneeling in greeting",
+    "drive": "19hHoRBmy4SXvS_wUsQVx4yjpp58OVa2t",
+    "file": "DSC07779.jpeg",
+    "kind": "venue"
+   },
+   {
+    "src": "assets/images/experiences/vte-ongteu-02.jpg",
+    "w": 768,
+    "h": 1365,
+    "alt": "The line of novices with their bowls in the temple courtyard",
+    "drive": "1dTl7bL3vlCR1-pNg-hl119xFZSkCFDdR",
+    "file": "DSC07777.JPEG",
+    "kind": "venue"
    }
   ]
  }

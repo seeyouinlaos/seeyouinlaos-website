@@ -118,7 +118,8 @@ test('RESTAURANT MEDIA AUDIT · Thong Smith, Tang Jai Yang and Le Du Kaan show t
 
 test('CAFÉ CATEGORY AUDIT · the cafés of the source carry the cafe category — one each, never a lunch or a bar beside it (the taxonomy, 22 Sep 2026); Sona is the bar it is; the Cafés rail is the cafe category', () => {
   /* the Cafe column of the details tab plus Kaogee Le Triomphe (the Overview's Cafe column, Day 06) and the two cafés the overview named on 07.03 and 27.02 */
-  const sourceCafes = { 'bkk-diorlv': 'Dior and LV Cafe', 'bkk-timespace': 'Time Space Cafe', 'bkk-mooyoo': 'Moo Yoo Rose House', 'bkk-whispering': 'Whispering Cafe', 'bkk-madeleine': 'Cafe Madeleine', 'bkk-harudot': 'Harudot', 'vte-lacuna': 'Lacuna VTE', 'vte-kaogee': 'Kaogee Le Triomphe', 'bkk-cafecraft': 'Café Craft by CHANINTR', 'vte-lecafe': 'Le Café at Souphattra Heritage' };
+  /* TWO HOUSES (Owner, 22 Sep 2026): the source's "Cafe Dior / LV Cafe" is two places, each its own café card */
+  const sourceCafes = { 'bkk-dior': 'Dior Café', 'bkk-lvcafe': 'LV Café', 'bkk-timespace': 'Time Space Cafe', 'bkk-mooyoo': 'Moo Yoo Rose House', 'bkk-whispering': 'Whispering Cafe', 'bkk-madeleine': 'Cafe Madeleine', 'bkk-harudot': 'Harudot', 'vte-lacuna': 'Lacuna VTE', 'vte-kaogee': 'Kaogee Le Triomphe', 'bkk-cafecraft': 'Café Craft by CHANINTR', 'vte-lecafe': 'Le Café at Souphattra Heritage' };
   for (const id of Object.keys(sourceCafes)) assert.deepEqual(rolesOf[id], ['cafe'], sourceCafes[id] + ' is a café on the website, and only that');
   const websiteCafes = W.SIYL_EXP.filter((x) => x.category === 'cafe').map((x) => x.id).sort();
   assert.deepEqual(websiteCafes, Object.keys(sourceCafes).sort(), 'no café beyond the source, none missing');

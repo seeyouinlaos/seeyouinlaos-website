@@ -32,7 +32,9 @@ export const PROFILE = [
   { key: 'film', n: '05', q: 'Favourite film', hint: 'The one you could happily watch again.', required: true, type: 'text' },
   /* THE MUSIC (Owner, 22 Sep 2026): the genres are the required, structured answer — as many as the guest likes, at least one;
    * the song / artist line stays, optional, for the DJ's notes */
-  { key: 'genres', n: '06', q: 'Your music', hint: 'The wedding playlist is built from your answers — choose every genre you would dance to.', required: true, type: 'multi', min: 1, choices: GENRES },
+  /* THE LABEL (Owner, 22 Sep 2026): question 06 reads "Thai favorite" — the Owner's wording, exactly as given; the question itself
+   * (the required, structured genre multi-select, its choices, its persistence and the words both emails print) is untouched */
+  { key: 'genres', n: '06', q: 'Thai favorite', hint: 'The wedding playlist is built from your answers — choose every genre you would dance to.', required: true, type: 'multi', min: 1, choices: GENRES },
   { key: 'music', n: '07', q: 'A song, an album, an artist you never skip', hint: 'Optional — for the DJ’s notes.', required: false, type: 'text' }
 ];
 

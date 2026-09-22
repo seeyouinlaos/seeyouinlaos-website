@@ -62,7 +62,7 @@ const completeTrip = async (p, id, email) => { await contact(p, email); await tr
   });
   await p.evaluate(() => document.querySelector('[data-rail="bkk:cafe"]').scrollIntoView()); await p.waitForTimeout(600); await shot(p, '390-discover-cafes');
   await p.evaluate(() => document.querySelector('[data-rail="laos:nightlife"]').scrollIntoView()); await p.waitForTimeout(600); await shot(p, '390-discover-nightlife');
-  note('discover-taxonomy-and-dates', r.dup.length === 0 && r.harudot.length === 1 && /^bkk:cafe:BANGKOK · CAFÉ · Tuesday, 23 February · Sunday, 7 March 2027$/.test(r.harudot[0]) && r.bkkCafe.join() === 'bkk-diorlv@2027-02-22,bkk-mooyoo@2027-02-23,bkk-timespace@2027-02-23,bkk-whispering@2027-02-23,bkk-harudot@2027-02-23,bkk-madeleine@2027-02-24,bkk-cafecraft@2027-03-07' && r.laosNight.join('|') === 'vte-sona@2027-02-25 VIENTIANE · BAR|vte-selene@2027-02-27 VIENTIANE · BAR|vte-baron@2027-02-28 VIENTIANE · CLUB' && r.laosExp.join() === 'vte-thatluang,vte-silkresidence,vte-ongteu' && r.gone.length === 0 && r.china.join() === 'cn-blossom' && !r.returnRail && r.highlight.join() === 'bkk-suhring,bkk-baanphraya,1872,bkk-cannubi,vte-baron' && !r.anyTime && r.ov <= 1, JSON.stringify(r));
+  note('discover-taxonomy-and-dates', r.dup.length === 0 && r.harudot.length === 1 && /^bkk:cafe:BANGKOK · CAFÉ · Tuesday, 23 February · Sunday, 7 March 2027$/.test(r.harudot[0]) && r.bkkCafe.join() === 'bkk-dior@2027-02-22,bkk-lvcafe@2027-02-22,bkk-mooyoo@2027-02-23,bkk-timespace@2027-02-23,bkk-whispering@2027-02-23,bkk-harudot@2027-02-23,bkk-madeleine@2027-02-24,bkk-cafecraft@2027-03-07' && r.laosNight.join('|') === 'vte-sona@2027-02-25 VIENTIANE · BAR|vte-selene@2027-02-27 VIENTIANE · BAR|vte-baron@2027-02-28 VIENTIANE · CLUB' && r.laosExp.join() === 'vte-thatluang,vte-silkresidence,vte-ongteu' && r.gone.length === 0 && r.china.join() === 'cn-blossom' && !r.returnRail && r.highlight.join() === 'bkk-suhring,bkk-baanphraya,1872,bkk-cannubi,vte-baron' && !r.anyTime && r.ov <= 1, JSON.stringify(r));
   await p.context().close();
 }
 
@@ -137,7 +137,7 @@ for (const [w, h, eng] of [[320, 568, 'wk'], [390, 844, 'wk'], [834, 1194, 'wk']
   const ada = await fresh(390); await signIn(ada, 'T001'); await contact(ada, 'ada.test@example.org'); await profile(ada);
   const n = await ada.evaluate(() => Object.fromEntries([...document.querySelectorAll('#numbers [data-stat]')].map((e) => [e.getAttribute('data-stat'), { n: e.querySelector('[data-count-to]').getAttribute('data-count-to'), label: (e.querySelector('.pf-num-l, .t-l1') || {}).innerText || '' }])));
   await ada.evaluate(() => document.querySelector('#numbers').scrollIntoView()); await ada.waitForTimeout(1200); await shot(ada, '390-numbers');
-  note('journey-in-numbers-recomputed', n.restaurants && n.restaurants.n === '14' && n.cafes.n === '10' && n.bars.n === '6' && /Bars & nightlife/i.test(n.bars.label) && n.museums.n === '4' && n.temples.n === '2' && n.countries.n === '3' && n.cities.n === '4' && n.nights.n === '15' && n.days.n === '16' && n.trains.n === '2' && n.flights.n === '3', JSON.stringify(n));
+  note('journey-in-numbers-recomputed', n.restaurants && n.restaurants.n === '14' && n.cafes.n === '11' && n.bars.n === '6' && /Bars & nightlife/i.test(n.bars.label) && n.museums.n === '4' && n.temples.n === '2' && n.countries.n === '3' && n.cities.n === '4' && n.nights.n === '15' && n.days.n === '16' && n.trains.n === '2' && n.flights.n === '3', JSON.stringify(n));
   await ada.context().close();
 }
 

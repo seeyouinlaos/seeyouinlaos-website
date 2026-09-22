@@ -20,9 +20,13 @@ test('THE TAXONOMY · one category per place (what it IS), one role, no duplicat
   for (const x of X) { assert.ok(['restaurant', 'cafe', 'bar', 'club', 'experience', 'place'].includes(x.category), x.id + ' category'); assert.equal(x.roles.length, 1, x.id + ' one role'); assert.ok(x.visits === undefined || Array.isArray(x.visits), x.id + ' visits'); }
   const R = { restaurant: ['breakfast', 'lunch', 'dinner'], cafe: ['cafe'], bar: ['bar'], club: ['club'], experience: ['experience'], place: ['place'] };
   for (const x of X) assert.ok(R[x.category].includes(x.roles[0]), x.id + ': the role ' + x.roles[0] + ' is not a ' + x.category + ' role');
-  for (const [id, cat, where] of [['bkk-harudot', 'cafe', 'bkk/Cafés'], ['bkk-timespace', 'cafe', 'bkk/Cafés'], ['bkk-mooyoo', 'cafe', 'bkk/Cafés'], ['vte-kaogee', 'cafe', 'laos/Cafés'], ['vte-sona', 'bar', 'laos/Bars & nightlife'], ['vte-nightmarket', 'place', 'laos/Shopping & places'], ['vte-ongteu', 'experience', 'laos/Experiences'], ['vte-baron', 'club', 'laos/Bars & nightlife'], ['bkk-petitsplats', 'restaurant', 'bkk/Restaurants']]) {
+  for (const [id, cat, where] of [['bkk-dior', 'cafe', 'bkk/Cafés'], ['bkk-lvcafe', 'cafe', 'bkk/Cafés'], ['bkk-harudot', 'cafe', 'bkk/Cafés'], ['bkk-timespace', 'cafe', 'bkk/Cafés'], ['bkk-mooyoo', 'cafe', 'bkk/Cafés'], ['vte-kaogee', 'cafe', 'laos/Cafés'], ['vte-sona', 'bar', 'laos/Bars & nightlife'], ['vte-nightmarket', 'place', 'laos/Shopping & places'], ['vte-ongteu', 'experience', 'laos/Experiences'], ['vte-baron', 'club', 'laos/Bars & nightlife'], ['bkk-petitsplats', 'restaurant', 'bkk/Restaurants']]) {
     assert.equal(by[id].category, cat, id); assert.deepEqual(everywhere(id), [where], id + ' renders exactly once, in ' + where);
   }
+  assert.equal(by['bkk-diorlv'], undefined, 'the combined Dior · Café LV card is retired'); assert.ok(!X.some((x) => /Café LV|Dior · /.test(x.name)));
+  assert.equal(by['bkk-dior'].name, 'Dior Café'); assert.equal(by['bkk-lvcafe'].name, 'LV Café');
+  assert.deepEqual(by['bkk-dior'].visits, by['bkk-lvcafe'].visits, 'both keep the visit of Day 02 · 22.02.2027');
+  assert.deepEqual(by['bkk-dior'].visits, [{ day: 2, date: '2027-02-22', seq: 1245, what: 'Coffee' }]);
   for (const gone of ['vte-thatdam', 'vte-sisaket', 'vte-simuang']) { assert.equal(by[gone], undefined, gone + ' is gone'); assert.ok(!existsSync(join(ROOT, 'assets/images/experiences/' + gone + '-01.jpg')), gone + ' photograph retired'); }
   assert.ok(!X.some((x) => /That Dam|Wat Si Saket|Wat Si Muang/.test(x.name)));
   /* every place renders exactly once across every chapter */
@@ -34,7 +38,7 @@ test('THE TAXONOMY · one category per place (what it IS), one role, no duplicat
 
 test('THE DATES · every itinerary-linked card names its date(s) as words, never a time; each rail is in the order of the days, same-day places in the schedule\'s sequence; a place visited twice is one card with both days; undated places close the rail', () => {
   const laosRails = Object.fromEntries(rendered('laos').map((r) => [r.title, r.ids])), bkkRails = Object.fromEntries(rendered('bkk').map((r) => [r.title, r.ids]));
-  assert.deepEqual(bkkRails['Cafés'], ['bkk-diorlv', 'bkk-mooyoo', 'bkk-timespace', 'bkk-whispering', 'bkk-harudot', 'bkk-madeleine', 'bkk-cafecraft'], 'Dior (22.02) · Moo Yoo 11:45 · Time Space 13:15 · Whispering 15:15 · Harudot (23.02) · Madeleine (24.02) · Café Craft (07.03)');
+  assert.deepEqual(bkkRails['Cafés'], ['bkk-dior', 'bkk-lvcafe', 'bkk-mooyoo', 'bkk-timespace', 'bkk-whispering', 'bkk-harudot', 'bkk-madeleine', 'bkk-cafecraft'], 'Dior Café and LV Café (both 22.02, two locations since 22 Sep 2026) · Moo Yoo 11:45 · Time Space 13:15 · Whispering 15:15 · Harudot (23.02) · Madeleine (24.02) · Café Craft (07.03)');
   assert.deepEqual(bkkRails['Restaurants'], ['bkk-suhring', 'bkk-curvy', 'bkk-phranakorn', 'bkk-baanphraya', 'bkk-thongsmith', 'bkk-tangjaiyang', 'bkk-alati', 'bkk-cannubi', 'bkk-petitsplats', 'bkk-ledukaan'], 'Sühring 21.02 first … Petits Plats 08.03, the undated Le Du Kaan last');
   assert.deepEqual(laosRails['Bars & nightlife'], ['vte-sona', 'vte-selene', 'vte-baron'], 'Sona 25.02 · Selene 27.02 · BARON 28.02');
   assert.deepEqual(laosRails['Experiences'].slice(0, 3), ['vte-thatluang', 'vte-silkresidence', 'vte-ongteu'], 'Pha That Luang 25.02 09:45 · the Silk Residence 25.02 · Wat Ong Teu 28.02; the undated portrait after');
@@ -74,7 +78,18 @@ test('PETITS PLATS BANGKOK · one restaurant, Bangkok, 08.03.2027 (the last dinn
   assert.equal(t.img, 'assets/images/experiences/vte-ongteu-01.jpg'); assert.ok(existsSync(join(ROOT, t.img)));
   const inv = JSON.parse(src('src/experience-inventory.json')); const ti = inv.find((e) => e.id === 'vte-ongteu'); assert.equal(ti.drive, '050 - Event - Temple Ceremony - Wat Ong Teu Vientiane'); assert.match(ti.note, /DSC07779/);
   assert.match(src('voyage.html'), /Wat Ong Teu, Vientiane/, 'the same temple the ceremony names');
-  for (const id of ['bkk-cafecraft', 'bkk-siamparagon', 'bkk-firefly', 'vte-camon', 'vte-lecafe', 'vte-selene']) { assert.ok(by[id], id); assert.equal(by[id].img, undefined, id + ' stands without a photograph (none approved)'); assert.equal(GAL[id], undefined); assert.ok(by[id].visits.length >= 1, id + ' dated'); }
+  /* THE SEVEN VENUES (Owner, 22 Sep 2026): each has the photographs of its own Drive folder — never a fallback, never another house's */
+  const FOLDER = { 'bkk-cafecraft': '1nCcRkh44-OQMUMp0F0A8ZFXYRxC5joLq', 'bkk-siamparagon': '1QxgoS2aWXC2DWKh_c6Y0fTYOz06JhW8r', 'bkk-firefly': '1LCCnMXVkMkPnyhmprr0OHPyEHJBCLAqt', 'vte-camon': '1PkPZxgrH9-RVegM0LNkOw8TVozD0ejZ7', 'vte-lecafe': '1KvH_yBzmFYbVAYppbFgOCSg0m8-L3LVB', 'vte-selene': '14s46H44ZY51udx9TA6ts5QyAxN7snjUK', 'vte-ongteu': '1N-LCD10lVQrR6bqh9BxqRKsuhdYtO7Wl', 'bkk-dior': '1T8LtqEK358_5mdEC-y_Uu5HnZ8Jnyv4h', 'bkk-lvcafe': '1oBn04Bq8QBQglAzOrtKFtxRtD_AYzweS' };
+  const REC = JSON.parse(src('src/experience-galleries.json'));
+  for (const [id, folderId] of Object.entries(FOLDER)) {
+    assert.ok(by[id], id); assert.ok(by[id].img && existsSync(join(ROOT, by[id].img)), id + ' lead on disk');
+    assert.ok(GAL[id] && GAL[id].images.length >= 2, id + ' gallery'); assert.equal(GAL[id].images[0].src, by[id].img, id + ' leads with its lead');
+    assert.equal(REC[id].folderId, folderId, id + ' from its own Drive folder');
+    for (const im of GAL[id].images) { assert.ok(im.src.startsWith('assets/images/experiences/' + REC[id].slug + '-'), im.src + ' carries ' + id + '\'s own slug'); assert.ok(existsSync(join(ROOT, im.src)), im.src); assert.ok(!['food', 'drink'].includes(im.kind), im.src + ' is never a dish or a glass'); }
+    assert.ok(by[id].visits.length >= 1, id + ' dated');
+  }
+  /* no frame of these venues appears in any other record */
+  for (const [id, g] of Object.entries(GAL)) for (const im of g.images) { const owner = Object.keys(FOLDER).find((k) => im.src.includes('/' + REC[k].slug + '-')); if (owner) assert.equal(owner, id, im.src + ' belongs to ' + owner + ', not ' + id); }
   assert.equal(by['vte-lacuna'].category, 'cafe'); assert.deepEqual(by['vte-lacuna'].visits.map((v) => v.what), ['Coffee', 'Evening drinks'], 'Lacuna: one café card, its evening noted — never a second bar card');
   /* the photographs on disk: every one a frame of a record or a lead; every record's frame on disk */
   const onDisk = readdirSync(join(ROOT, 'assets/images/experiences')).filter((f) => /\.jpg$/.test(f));
@@ -82,11 +97,11 @@ test('PETITS PLATS BANGKOK · one restaurant, Bangkok, 08.03.2027 (the last dinn
   for (const f of onDisk) assert.ok(known.has(f) || f === 'vte-oathhouse.jpg', f + ' is a frame of a record'); for (const f of known) assert.ok(onDisk.includes(f), f + ' on disk');
 });
 
-test('THE JOURNEY IN NUMBERS · counted from unique places: 14 restaurants · 10 cafés · 6 bars & nightlife · 4 museums · 2 temples & stupas — no house counted twice, nothing gone still counted', () => {
-  assert.deepEqual(D.counts(), { restaurants: 14, cafes: 10, nightlife: 6, museums: 4, temples: 2 });
+test('THE JOURNEY IN NUMBERS · counted from unique places: 14 restaurants · 11 cafés · 6 bars & nightlife · 4 museums · 2 temples & stupas — no house counted twice, nothing gone still counted', () => {
+  assert.deepEqual(D.counts(), { restaurants: 14, cafes: 11, nightlife: 6, museums: 4, temples: 2 }, 'recomputed from the canonical records — eleven cafés since Dior and LV became two places');
   const names = (c) => X.filter((x) => x.category === c).map((x) => x.name).sort();
   assert.deepEqual(names('restaurant'), ['3 Merchants Restaurant', 'ALATi', 'Baan Phraya', 'Cam On Restaurant', 'Cannubi by Umberto Bombana', 'Curvy.Dining', 'Lao Derm', 'Le Du Kaan', 'Petits Plats Bangkok', 'Phra Nakhon', 'River Moon', 'Sühring', 'Tang Jai Yang', 'Thong Smith']);
-  assert.deepEqual(names('cafe'), ['Cafe Madeleine', 'Café Craft by CHANINTR', 'Dior · Café LV', 'Harudot', 'Kaogee Le Triomphe', 'Lacuna VTE', 'Le Café at Souphattra Heritage', 'Moo Yoo Rose House', 'Time Space Cafe', 'Whispering Cafe']);
+  assert.deepEqual(names('cafe'), ['Cafe Madeleine', 'Café Craft by CHANINTR', 'Dior Café', 'Harudot', 'Kaogee Le Triomphe', 'LV Café', 'Lacuna VTE', 'Le Café at Souphattra Heritage', 'Moo Yoo Rose House', 'Time Space Cafe', 'Whispering Cafe']);
   assert.deepEqual(names('bar').concat(names('club')), ['BKK Social Club', 'Bar Us', 'Firefly Bar, Siam Kempinski', 'Selene Sky Bar', 'Sona Cafe and Bar', 'BARON Vientiane']);
   assert.match(src('assets/community.js'), /var D = window\.SIYL_DISCOVER, c = D \? D\.counts\(\) : null;/, 'the numbers read the one taxonomy'); assert.match(src('profile.html'), /<script src="assets\/discover\.js/);
 });
