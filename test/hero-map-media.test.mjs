@@ -35,7 +35,7 @@ test('THE MAP OF LAOS · read, not decorated: the frame carries the map\'s own 8
   assert.match(tp.slice(0, 500), /\.a-duo \{ grid-template-columns: minmax\(0, 1fr\);/, 'upright: one column, the map at full width');
   assert.match(tp.slice(0, 500), /width: min\(100%, calc\(62vh \* 838 \/ 980\)\)/, 'and capped by the height of the screen, never by a device name');
   assert.match(css, /@media \(min-width: 768px\) and \(orientation: landscape\) \{\s*\.a-duo \.am\.a-map \{ justify-self: center; width: min\(100%, calc\(76vh \* 838 \/ 980\)\); \}/);
-  assert.doesNotMatch(css.slice(css.indexOf('.a-duo .am.a-map')), /background-size: cover|object-fit: fill|transform: scale/, 'never cropped, never stretched');
+  assert.doesNotMatch(css.slice(css.indexOf('.a-duo .am.a-map'), css.indexOf('THE CARD GALLERY')), /background-size: cover|object-fit: fill|transform: scale/, 'never cropped, never stretched');
   /* the file the rules are built on */
   const map = join(ROOT, 'assets/images/city/laos-map.jpg');
   assert.ok(existsSync(map));
@@ -105,6 +105,6 @@ test('AFTER THE WEDDING · the whole Lijiang 02 folder in one card gallery: nine
   assert.match(css, /\.cg-nav i \{[\s\S]{0,140}border-top: 1px solid #FFFFFF; border-right: 1px solid #FFFFFF;/);
   assert.match(css, /\.cg-nav \{[\s\S]{0,260}opacity: \.62;/);
   assert.match(css, /\.cg \.cg-count \{[\s\S]{0,200}font-size: 10px;/);
-  assert.doesNotMatch(css.slice(css.indexOf('.cg-nav {')), /border-radius: 50%|box-shadow: 0 2px 8px/, 'no heavy circles, no glossy buttons');
+  assert.doesNotMatch(css.slice(css.indexOf('.cg-nav {'), css.indexOf('THE ACCOMMODATION BAR')), /border-radius: 50%|box-shadow: 0 2px 8px/, 'no heavy circles, no glossy buttons');
   assert.match(css, /\.cg \{ position: relative; overflow: hidden; touch-action: pan-y; \}/, 'a horizontal gesture belongs to the gallery, a vertical one to the page');
 });

@@ -230,16 +230,24 @@ test('THE EXTENSION FAILS SAFELY · when the hotel has no room left the guest is
 });
 
 test('THE SURFACES · the front page counts the days and follows the guest; My Profile shows the confirmed stay first and offers exactly 1 · 2 · 3 · 4 nights, with a review, a change and a discreet removal', () => {
-  const bar = src('assets/stay-bar.js'), prof = src('profile.html'), idx = src('index.html'), rooms = src('assets/rooms.js');
-  /* the bar */
+  const bar = src('assets/stay-bar.js'), prof = src('profile.html'), idx = src('index.html'), rooms = src('assets/rooms.js'), av = src('assets/availability.js');
+  /* TWO DECISION SIGNALS, NEVER MERGED (Owner approved, 23 Sep 2026): the bar carries the DATE alone, the object beneath it
+     carries the live count, the property and the one action — in that order, with one call to action between them. */
   assert.match(idx, /<section class="a-sec a-staybar" aria-label="Accommodation planning" data-stay-bar><\/section>/);
+  assert.match(idx, /<section class="a-sec a-avail" aria-label="Complimentary Wedding Stay · availability" data-availability><\/section>/);
+  assert.ok(idx.indexOf('data-stay-bar') < idx.indexOf('data-availability'), 'planning and its closing date first, the object after it');
   assert.match(idx, /<script src="assets\/stay-plan\.js(\?v=[0-9a-f]{8})?"><\/script>/);
   assert.match(idx, /<script src="assets\/stay-bar\.js(\?v=[0-9a-f]{8})?"><\/script>/);
+  assert.match(idx, /<script src="assets\/availability\.js(\?v=[0-9a-f]{8})?"><\/script>/);
   assert.match(bar, /P\.deadlineState\(new Date\(\)\)/, 'the count is computed from today, never written into the page');
   assert.match(bar, /closed \? 'Accommodation planning closed'/, 'after the deadline the state replaces the count');
   assert.doesNotMatch(bar, /Hurry|Book now|Almost gone|Last chance/i);
-  assert.match(bar, /s\.hasStay \? \{ href: 'profile\.html#your-stay'/, 'a guest with a stay is taken to My Profile');
-  assert.match(bar, /\(closed \|\| full\) \? \{ href: 'accommodation\.html', words: 'See the rooms' \}/, 'closed or full is never a dead end');
+  assert.doesNotMatch(bar, /places remaining|data-stay-cta/, 'the first signal states the date alone — the count and the action belong to the object');
+  /* the object: the engine's count, and one action that follows the guest */
+  assert.match(av, /U\.complimentary\(\)/, 'the count is the engine\'s');
+  assert.match(av, /if \(mine\) return \{ href: 'profile\.html#your-stay'/, 'a guest with a stay is taken to My Profile');
+  assert.match(av, /if \(signedIn\(\)\) return \{ href: 'your-journey\.html#stays'/, 'a signed-in guest is never sent back through the invitation');
+  assert.match(av, /return \{ href: 'invitation\.html', words: 'Open your invitation' \}/, 'and a visitor is offered the invitation');
   /* My Profile */
   assert.match(prof, /<section class="prep-sec" id="your-stay">/);
   assert.match(prof, /Extend your stay/);

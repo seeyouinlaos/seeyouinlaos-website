@@ -733,6 +733,24 @@
   E("The reclining Buddha beside Pha That Luang, Vientiane", "Der liegende Buddha neben Pha That Luang, Vientiane", "พระพุทธไสยาสน์ข้างพระธาตุหลวง เวียงจันทน์", "ビエンチャン、タートルアン脇の涅槃仏");
   /* THE ACCOMMODATION DEADLINE (Owner, 22 Sep 2026): the first page's quiet line and the stay the guest may extend */
   E("Accommodation planning", "Unterkunftsplanung", "การวางแผนที่พัก", "宿泊のご計画");
+  /* THE AVAILABILITY OBJECT (Owner approved, 23 Sep 2026): the front page's second signal — what remains of the six
+     complimentary places, and the one action. Every sentence is one text node, so each is translated whole. */
+  E("Complimentary Wedding Stay · availability", "Kostenfreier Hochzeitsaufenthalt · Verfügbarkeit", "ที่พักงานแต่งงานโดยไม่มีค่าใช้จ่าย · จำนวนที่ว่าง", "ウェディング・ステイ（無料）の空き状況");
+  E("Wedding Stay · Limited availability", "Hochzeitsaufenthalt · Begrenzte Verfügbarkeit", "ที่พักงานแต่งงาน · จำนวนจำกัด", "ウェディング・ステイ——残りわずか");
+  E("Remaining", "Verbleibend", "คงเหลือ", "残り");
+  E("All six places are open.", "Alle sechs Plätze sind frei.", "ยังว่างครบทั้งหกที่", "六つの枠すべてが空いています。");
+  E("One place has gone.", "Ein Platz ist vergeben.", "มีผู้จองแล้วหนึ่งที่", "一つの枠が埋まりました。");
+  E("Every place has gone.", "Alle Plätze sind vergeben.", "เต็มทุกที่แล้ว", "すべての枠が埋まりました。");
+  E("Complimentary Wedding Stay", "Kostenfreier Hochzeitsaufenthalt", "ที่พักงานแต่งงานโดยไม่มีค่าใช้จ่าย", "ウェディング・ステイ（無料）");
+  E("Private Residence · Vientiane", "Private Residenz · Vientiane", "บ้านพักส่วนตัว · เวียงจันทน์", "プライベート・レジデンス（ビエンチャン）");
+  E("Your invitation shows what is still available for you.", "Ihre Einladung zeigt, was für Sie noch verfügbar ist.", "บัตรเชิญของท่านจะแสดงสิ่งที่ยังว่างสำหรับท่าน", "ご招待状に、いまお選びいただけるものが表示されます。");
+  E("Open your invitation", "Einladung öffnen", "เปิดบัตรเชิญของท่าน", "ご招待状を開く");
+  E("Continue your trip", "Reise fortsetzen", "ไปต่อที่การเดินทางของท่าน", "旅の続きへ");
+  E("Your stay", "Ihr Aufenthalt", "ที่พักของท่าน", "ご滞在について");
+  E("Explore the Private Residence", "Die private Residenz ansehen", "ชมบ้านพักส่วนตัว", "プライベート・レジデンスを見る");
+  E("Now", "Jetzt", "ตอนนี้", "現在");
+  E("30 Nov", "30. Nov.", "30 พ.ย.", "11月30日");
+  E("Accommodation planning closed", "Unterkunftsplanung abgeschlossen", "ปิดการวางแผนที่พักแล้ว", "宿泊のご計画は締め切りました");
   /* THE 22 SEP 2026 MEDIA PASS: the Vientiane film and its card, the hero dots, and the After the Wedding card gallery.
      The Wat Si Saket cloister label is retired with the clip it described. */
   E("A night of Vientiane — the train at the platform, the neon streets of the evening", "Eine Nacht in Vientiane — der Zug am Bahnsteig, die Neonstraßen des Abends", "ค่ำคืนในเวียงจันทน์ — ขบวนรถไฟที่ชานชาลา ถนนนีออนยามเย็น", "ビエンチャンの夜——ホームの列車、ネオンの灯る夕べの街路");

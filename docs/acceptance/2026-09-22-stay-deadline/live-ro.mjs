@@ -19,14 +19,30 @@ const page = async (w, h) => { const ctx = await (w <= 430 ? wk : b).newContext(
 for (const [w, h, name] of [[390, 844, '390'], [834, 1194, '834x1194'], [1194, 834, '1194x834'], [1440, 900, '1440']]) {
   const p = await page(w, h);
   await p.goto(O + '/index.html', { waitUntil: 'load' }); await p.waitForTimeout(1800);
-  const bar = await p.evaluate(() => { const el = document.querySelector('[data-stay-bar]'); if (!el) return null; const a = el.querySelector('[data-stay-cta]');
-    return { phase: el.getAttribute('data-stay-phase'), days: +el.getAttribute('data-stay-days'), text: el.innerText.replace(/\s+/g, ' ').trim(), cta: a && a.getAttribute('href'), ov: document.documentElement.scrollWidth - document.documentElement.clientWidth }; });
+  await p.evaluate(() => { const el = document.querySelector('[data-availability]'); if (el) el.scrollIntoView({ block: 'center' }); });
+  await p.waitForTimeout(2400);
+  const two = await p.evaluate(() => {
+    const el = document.querySelector('[data-stay-bar]'), av = document.querySelector('[data-availability]');
+    if (!el || !av) return null;
+    const cta = av.querySelector('[data-av-cta]'), ex = av.querySelector('[data-av-explore]'), arc = av.querySelector('.av-arc');
+    return { phase: el.getAttribute('data-stay-phase'), days: +el.getAttribute('data-stay-days'), text: el.innerText.replace(/\s+/g, ' ').trim(),
+      barLinks: el.querySelectorAll('a').length, order: el.getBoundingClientRect().bottom <= av.getBoundingClientRect().top + 2,
+      remaining: +av.getAttribute('data-av-remaining'), max: +av.getAttribute('data-av-max'), state: av.getAttribute('data-av-state'),
+      avText: av.innerText.replace(/\s+/g, ' ').trim(), arc: arc ? getComputedStyle(arc).stroke : '',
+      cta: cta && cta.getAttribute('href'), explore: ex && ex.getAttribute('href'), avLinks: av.querySelectorAll('a').length,
+      ov: document.documentElement.scrollWidth - document.documentElement.clientWidth }; });
   const days = Math.round((Date.UTC(2026, 10, 30) - Date.UTC(new Date().getFullYear(), new Date().getMonth(), new Date().getDate())) / 86400000);
-  note('live-bar-' + name, !!bar && bar.days === Math.max(0, days) && bar.phase === (days > 0 ? 'open' : days === 0 ? 'last-day' : 'closed') &&
-    /30 November 2026/.test(bar.text) && /of 6 places remaining/.test(bar.text) && bar.cta === 'invitation.html' && bar.ov <= 1 &&
-    !/hurry|book now|almost gone|last chance/i.test(bar.text), JSON.stringify(bar));
-  await p.evaluate(() => document.querySelector('[data-stay-bar]').scrollIntoView({ block: 'center' })); await p.waitForTimeout(400);
-  await p.screenshot({ path: path.join(OUT, name + '-deadline-bar.jpg'), type: 'jpeg', quality: 72 });
+  /* the first signal: the date alone */
+  note('live-bar-' + name, !!two && two.days === Math.max(0, days) && two.phase === (days > 0 ? 'open' : days === 0 ? 'last-day' : 'closed') &&
+    /30 November 2026/.test(two.text) && !/places remaining/i.test(two.text) && two.barLinks === 0 && two.ov <= 1 &&
+    !/hurry|book now|almost gone|last chance/i.test(two.text), JSON.stringify({ phase: two && two.phase, days: two && two.days, text: two && two.text, links: two && two.barLinks }));
+  /* the second signal: the engine's count, the one accent, one action, the quiet property link */
+  note('live-availability-' + name, !!two && two.order && two.max === 6 && two.remaining >= 0 && two.remaining <= 6 &&
+    new RegExp(two.remaining + ' / ' + two.max).test(two.avText) && /Wedding Stay · Limited availability/i.test(two.avText) &&
+    /Private Residence · Vientiane/.test(two.avText) && /availability may close earlier/.test(two.avText) &&
+    two.arc === 'rgb(116, 7, 14)' && two.cta === 'invitation.html' && two.explore === 'accommodation.html#residence' &&
+    two.avLinks === 2 && two.state === 'settled' && !/hurry|book now|almost gone|last chance/i.test(two.avText), JSON.stringify(two));
+  await p.screenshot({ path: path.join(OUT, name + '-two-signals.jpg'), type: 'jpeg', quality: 72 });
   await p.context().close();
 }
 {

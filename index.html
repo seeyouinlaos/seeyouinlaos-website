@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex">
 <title>See You In Laos</title>
 <link rel="stylesheet" href="assets/recon.css?v=05778142">
-<link rel="stylesheet" href="assets/aman.css?v=ef6459b5">
+<link rel="stylesheet" href="assets/aman.css?v=55fc287e">
 <link rel="stylesheet" href="assets/motion.css?v=7c751ed1">
 <link rel="stylesheet" href="assets/venue.css?v=14ce913f">
 </head>
@@ -39,10 +39,14 @@
     </div>
   </section>
 
-  <!-- ACCOMMODATION PLANNING (Owner, 22 Sep 2026): one quiet line of journey information — the complimentary accommodation is
-       planned by 30 November 2026; the days are counted from today by assets/stay-bar.js, the places left come from the room
-       engine, and the call follows the guest (a stay already confirmed opens My Profile). Never urgency marketing. -->
+  <!-- TWO DECISION SIGNALS, NEVER MERGED (Owner approved, 23 Sep 2026)
+       1 · ACCOMMODATION PLANNING — the date the whole planning window closes: one quiet editorial line, the days counted from
+           today by assets/stay-bar.js. It states how long the planning lasts, and nothing else.
+       2 · THE AVAILABILITY OBJECT — the live scarcity of the complimentary Private Residence, drawn by assets/availability.js:
+           the ring of what remains, the line of where the allocation stands, the invitation, and the way to see the house.
+       The sequence is deliberate: planning → closing date → availability → property → invitation. -->
   <section class="a-sec a-staybar" aria-label="Accommodation planning" data-stay-bar></section>
+  <section class="a-sec a-avail" aria-label="Complimentary Wedding Stay · availability" data-availability></section>
 
   <!-- LEDE — a text pause, one underlined link, no button -->
   <section class="a-sec a-lede">
@@ -191,7 +195,8 @@
 <script src="assets/cardgal.js?v=9eeb4660"></script>
 <script src="assets/stay-plan.js?v=7406b493"></script>
 <script src="assets/rooms.js?v=6cedafd4"></script>
-<script src="assets/stay-bar.js?v=7dc5cb30"></script>
+<script src="assets/stay-bar.js?v=14462f10"></script>
+<script src="assets/availability.js?v=de498f15"></script>
 <script src="assets/motion.js?v=ed2a636b"></script>
 <script src="assets/venue-data.js?v=ece86877"></script>
 <script src="assets/venue.js?v=5e70519d"></script>
