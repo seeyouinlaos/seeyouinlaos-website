@@ -75,3 +75,22 @@ Stage E2E: discover-baron 19 / 19 (taxonomy, dates, rail order, the genres by re
 profile-return, countdown, four-point, close-out, account-ia, wedding-dinner. Live: parity, the release-014 read-only walk, the
 infrastructure guard, and the read-only aggregates before and after the deploy (no guest record, booking, seat, upload or
 answer touched by this pass).
+
+## The proof (live)
+
+Implementation commit `1f74a93` · Worker version **90a139ec-ea44-47db-98ca-33da28af2eff** (Workers Build on push to `main`,
+2026-09-22 16:51 UTC).
+
+- **Served dataset**: 51 canonical places, `bkk-diorlv` gone, `bkk-dior` and `bkk-lvcafe` present; the journey in numbers on the
+  live Worker reads `{restaurants: 14, cafes: 11, nightlife: 6, museums: 4, temples: 2}`.
+- **Question 06 live**: `key: 'genres', n: '06', q: 'Thai favorite', … required: true, type: 'multi'` — the structure, the
+  choices and the emails unchanged.
+- **media-proof.mjs** on the stage 19 / 19 and on production 19 / 19: each of the nine venues' pages loads only frames of its own
+  slug, every frame answers 200, no foreign or fallback image (screenshots at 390 and 1440 in `stage/` and `live/`).
+- **Parity** 294 / 294 · **release-014 live read-only walk** 25 / 25 · **infrastructure guard (live)** intact
+  (one Worker, workers.dev, GitHub Pages 404).
+- **Production data untouched**: the read-only aggregate before and after the deploy is byte-identical —
+  rooms 36 → 36, seating 12 → 12, drafts 15 → 15, KV registration keys 53 → 53, digest `73acb186d926…` → `73acb186d926…`,
+  profile photos 7 → 7. Nothing was written, reset or deleted.
+- **Codex review**: PENDING — EXTERNAL QUOTA LIMIT (the CLI answers "You've hit your usage limit … try again at Sep 24th,
+  2026 10:19 PM").
