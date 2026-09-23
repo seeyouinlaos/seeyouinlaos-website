@@ -1,35 +1,35 @@
 /* ============================================================================
-   THE AVAILABILITY OBJECT (Owner approved, 23 Sep 2026 · the first page).
+   THE AVAILABILITY OBJECT (Owner approved 23 Sep 2026 · compact composition
+   restored the same day, by the Owner's correction).
 
-   ONE object that turns two live facts into something the eye reads in a second:
-   how many complimentary places of the Private Residence are still free, and
-   how far along the way to the planning date we already are.
+   ONE COMPACT EDITORIAL INSTRUMENT embedded in the first page — never a section
+   of its own, never a landing page, never a booking portal. It says two
+   different things, and neither is said twice:
+
+     THE RING says HOW MANY PLACES ARE LEFT — the engine's count, drawn as an
+     arc and read as "5 / 6" on ONE line, with REMAINING small beneath it.
+     THE LINE says HOW MUCH OF THE PLANNING WINDOW HAS RUN — real calendar time
+     from 23 September 2026 to the end of 30 November 2026, never the allocation.
 
      WEDDING STAY · LIMITED AVAILABILITY
-              ◜ 5 / 6 ◝            the ring: what remains, drawn once
-                REMAINING
-              One place
-              has gone.
-     Complimentary Wedding Stay
-     Private Residence · Vientiane
-        NOW ──●────── 30 NOV       the line: where the allocation stands
+     ╭─────╮   One place
+     │ 5/6 │   has gone.
+     ╰─────╯   Complimentary Wedding Stay
+       REM     while places remain.
+     Now ●──────────────────── 30 Nov
      Your invitation shows what is still available for you.
-              OPEN YOUR INVITATION →
-              Explore the Private Residence →
-     69 days remaining · availability may close earlier
+     OPEN YOUR INVITATION →      See the Guest House →
+     68 days remaining · availability may close earlier
 
-   NOTHING HERE IS TYPED TWICE. The count, the ring, the dot's position, the
-   words and the days all derive from the room engine (assets/rooms.js) and the
-   one stay plan (assets/stay-plan.js). If a place is taken while the page is
-   open, the object follows.
+   THE NAMES ARE THE PROJECT'S OWN (Owner, 23 Sep 2026): the house is the
+   "Guest House complimentary" the booking engine knows. "Private Residence" was
+   never approved terminology and appears nowhere in this component.
+
+   NOTHING IS TYPED TWICE. The count is the room engine's; the days, both ends
+   of the window and the share of it already run are the one stay plan's.
 
    THE ONE ACCENT is Cherry #74070E — the wordmark's own full stop: the ring's
-   arc, the line it draws, the dot, its single ripple. Nothing else is coloured.
-
-   MOTION: one entrance on the first viewport entry — the ring draws, the count
-   resolves, the line draws, the dot arrives, one ripple, the actions last;
-   about 1.5 s in all. Then the object is calm: an extremely quiet breath on the
-   dot, never a blink, never an alert, and nothing at all under reduced motion.
+   arc, the calendar line, the dot, its single ripple. Used with restraint.
    ========================================================================== */
 (function () {
   'use strict';
@@ -38,24 +38,24 @@
   function calm() { try { return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); } catch (e) { return false; } }
   function signedIn() { try { var a = JSON.parse(localStorage.getItem('siyl.auth') || 'null'); return !!(a && a.guestId); } catch (e) { return false; } }
 
-  var R = 54, C = 2 * Math.PI * R;   /* the ring's radius and circumference, in its own viewBox units */
+  var R = 26, C = 2 * Math.PI * R;   /* the small ring's radius and circumference, in its own 60-unit viewBox */
 
   /* ---- the facts ---------------------------------------------------------
-     `remaining` / `max` are the engine's (never a number written into a page);
-     the days and the date are the one stay plan's. */
+     the count is the engine's (never a number written into a page); the days,
+     both ends of the window and the share already run are the one plan's. */
   function facts() {
     var P = plan(), U = window.SIYL_UNITS;
     if (!P) return null;
     var c = U && U.complimentary ? U.complimentary() : null;
     if (!c || !c.max) return null;
-    var d = P.deadlineState(new Date());
-    var taken = Math.max(0, c.max - c.remaining);
+    var w = P.planningWindow(new Date());
     return {
-      max: c.max, remaining: c.remaining, taken: taken,
-      /* the line: how far the allocation has run along the way to the date — kept off both ends so the dot is always on the line */
-      position: Math.min(0.92, Math.max(0.08, c.max ? taken / c.max : 0)),
-      phase: d.phase, days: d.days, deadlineWords: P.COMPLIMENTARY.deadlineWords,
-      closed: !d.open, full: c.remaining <= 0, mine: !!c.mine
+      max: c.max, remaining: c.remaining, taken: Math.max(0, c.max - c.remaining),
+      /* THE LINE IS CALENDAR TIME, never the allocation — the ring already says what is left */
+      elapsed: w.progress,
+      startWords: w.startWords, endWords: w.endWords,
+      phase: w.phase, days: w.days, deadlineWords: P.COMPLIMENTARY.deadlineWords,
+      closed: !w.open, full: c.remaining <= 0, mine: !!c.mine
     };
   }
   /* the one line that changes with the count — the Owner's sentence, spoken by the data.
@@ -80,30 +80,40 @@
     if (signedIn()) return { href: 'your-journey.html#stays', words: 'Continue your trip' };
     return { href: 'invitation.html', words: 'Open your invitation' };
   }
+  /* the far end of the calendar line, short enough to sit beside it: "30 November 2026" → "30 Nov" */
+  function endLabel(words) { var m = /^(\d{1,2})\s+([A-Za-z]{3})/.exec(String(words || '')); return m ? m[1] + ' ' + m[2] : String(words || ''); }
 
   function html(f) {
-    var a = action(), arc = f.max ? f.remaining / f.max : 0;
+    var a = action(), arc = f.max ? f.remaining / f.max : 0, p = Math.min(1, Math.max(0, f.elapsed));
     return '' +
       '<div class="av-in">' +
         '<p class="t-l1 av-eyebrow">Wedding Stay · Limited availability</p>' +
-        '<div class="av-ring" role="img" aria-label="' + esc(f.remaining + ' of ' + f.max + ' complimentary places remaining') + '">' +
-          '<svg viewBox="0 0 128 128" aria-hidden="true" focusable="false">' +
-            '<circle class="av-track" cx="64" cy="64" r="' + R + '"></circle>' +
-            '<circle class="av-arc" cx="64" cy="64" r="' + R + '" stroke-dasharray="' + C.toFixed(2) + '" stroke-dashoffset="' + (C * (1 - arc)).toFixed(2) + '" style="--av-c:' + C.toFixed(2) + ';--av-o:' + (C * (1 - arc)).toFixed(2) + '"></circle>' +
-          '</svg>' +
-          '<span class="av-count"><b>' + f.remaining + '</b> / ' + f.max + '<i>Remaining</i></span>' +
+        '<div class="av-row">' +
+          '<div class="av-ring" role="img" aria-label="' + esc(f.remaining + ' of ' + f.max + ' complimentary places remaining') + '">' +
+            '<svg viewBox="0 0 60 60" aria-hidden="true" focusable="false">' +
+              '<circle class="av-track" cx="30" cy="30" r="' + R + '"></circle>' +
+              '<circle class="av-arc" cx="30" cy="30" r="' + R + '" stroke-dasharray="' + C.toFixed(2) + '" stroke-dashoffset="' + (C * (1 - arc)).toFixed(2) + '" style="--av-c:' + C.toFixed(2) + ';--av-o:' + (C * (1 - arc)).toFixed(2) + '"></circle>' +
+            '</svg>' +
+            /* 5 / 6 on ONE line, the slash given room; REMAINING small beneath it */
+            '<span class="av-count"><span class="av-num"><b>' + f.remaining + '</b><s>/</s><b>' + f.max + '</b></span><i>Remaining</i></span>' +
+          '</div>' +
+          '<div class="av-words">' +
+            '<p class="av-head">' + esc(headline(f)) + '</p>' +
+            '<p class="t-b2 av-sub">Complimentary Wedding Stay<br>while places remain.</p>' +
+          '</div>' +
         '</div>' +
-        '<p class="av-head">' + esc(headline(f)) + '</p>' +
-        '<p class="t-b2 av-sub">Complimentary Wedding Stay<br>Private Residence · Vientiane</p>' +
-        '<div class="av-line" aria-hidden="true">' +
+        '<div class="av-line">' +
           '<span class="t-l1 av-end">Now</span>' +
-          '<span class="av-rail"><i class="av-run" style="--av-p:' + f.position.toFixed(3) + '"></i>' +
-            '<i class="av-dot" style="--av-p:' + f.position.toFixed(3) + '"><b></b></i></span>' +
-          '<span class="t-l1 av-end">30 Nov</span>' +
+          '<span class="av-rail" role="img" aria-label="' + esc(f.startWords + ' to ' + f.endWords + ' · ' + Math.round(p * 100) + ' per cent of the planning window has passed') + '">' +
+            '<i class="av-run" style="--av-p:' + p.toFixed(4) + '"></i>' +
+            '<i class="av-dot" style="--av-p:' + p.toFixed(4) + '"><b></b></i></span>' +
+          '<span class="t-l1 av-end">' + esc(endLabel(f.endWords)) + '</span>' +
         '</div>' +
-        '<p class="t-b1 av-say">Your invitation shows what is still available for you.</p>' +
-        '<p class="av-act"><a class="av-cta" href="' + esc(a.href) + '" data-av-cta>' + esc(a.words) + ' <span aria-hidden="true">&rarr;</span></a></p>' +
-        '<p class="av-act av-second"><a class="av-explore" href="accommodation.html#residence" data-av-explore>Explore the Private Residence <span aria-hidden="true">&rarr;</span></a></p>' +
+        '<p class="t-b2 av-say">Your invitation shows what is still available for you.</p>' +
+        '<p class="av-act">' +
+          '<a class="av-cta" href="' + esc(a.href) + '" data-av-cta>' + esc(a.words) + ' <span aria-hidden="true">&rarr;</span></a>' +
+          '<a class="av-explore" href="accommodation.html#residence" data-av-explore>See the Guest House <span aria-hidden="true">&rarr;</span></a>' +
+        '</p>' +
         '<p class="t-b2 av-foot">' + esc(footnote(f)) + '</p>' +
       '</div>';
   }
@@ -114,8 +124,7 @@
     host.setAttribute('data-av-played', '1');
     if (calm()) { host.setAttribute('data-av-state', 'settled'); return; }
     host.setAttribute('data-av-state', 'in');
-    /* the ring draws, the count resolves, the line draws, the dot arrives, one ripple, the actions last */
-    setTimeout(function () { host.setAttribute('data-av-state', 'settled'); }, 1700);
+    setTimeout(function () { host.setAttribute('data-av-state', 'settled'); }, 1500);
   }
   function watch(host) {
     if (calm() || !('IntersectionObserver' in window)) { play(host); return; }
@@ -134,6 +143,7 @@
     host.setAttribute('data-av-remaining', String(f.remaining));
     host.setAttribute('data-av-max', String(f.max));
     host.setAttribute('data-av-phase', f.phase);
+    host.setAttribute('data-av-elapsed', f.elapsed.toFixed(4));
     host.innerHTML = html(f);
     if (played || calm()) host.setAttribute('data-av-state', 'settled');
     else { host.setAttribute('data-av-state', 'ready'); watch(host); }

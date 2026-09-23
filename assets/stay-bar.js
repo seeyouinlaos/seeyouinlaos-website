@@ -7,14 +7,22 @@
    the deadline. Nothing here is typed twice: no number, no date, no state.
 
      ACCOMMODATION PLANNING
-     Closes 30 November 2026
-     · 182 days remaining ·            → the last day: "Last day"
-                                       → afterwards: "Accommodation planning closed"
+     Closes 30 November 2026            182 DAYS REMAINING
+     ─────────●──────────────────       → the last day: "Last day"
+                                        → afterwards: "Accommodation planning closed"
 
    The count is computed from today, recomputed when the day turns, and never
    negative. This bar carries the DATE alone (Owner, 23 Sep 2026): the places
    remaining, the invitation and the property live in the availability object
    below it, so the guest reads two distinct signals and meets one action.
+
+   THE PROGRESS RULE (Owner, 23 Sep 2026) is one hairline: the neutral track of
+   the page, the part already run in Cherry, one small Cherry point where today
+   stands. It is the SAME calendar calculation the availability object's line
+   uses (assets/stay-plan.js · planningWindow) — 23 September 2026 to the end of
+   30 November 2026 — so the two never disagree. It is a rule, not a widget: no
+   chrome, no label of its own, no second countdown.
+
    Presentation only: no storage, no booking, no timer of its own beyond the
    turn of the day.
    ========================================================================== */
@@ -28,11 +36,13 @@
      availability object beneath it (assets/availability.js); the two signals are never merged and never compete for the tap. */
   function render(host) {
     var P = plan(); if (!P || !host) return;
-    var d = P.deadlineState(new Date());
-    var closed = !d.open;
-    var count = closed ? 'Accommodation planning closed' : (d.phase === 'last-day' ? 'Last day' : d.words);
-    host.setAttribute('data-stay-phase', closed ? 'closed' : d.phase);
-    host.setAttribute('data-stay-days', String(d.days));
+    var w = P.planningWindow(new Date());
+    var closed = !w.open;
+    var count = closed ? 'Accommodation planning closed' : (w.phase === 'last-day' ? 'Last day' : w.words);
+    var p = Math.min(1, Math.max(0, w.progress));
+    host.setAttribute('data-stay-phase', closed ? 'closed' : w.phase);
+    host.setAttribute('data-stay-days', String(w.days));
+    host.setAttribute('data-stay-elapsed', p.toFixed(4));
     host.innerHTML =
       '<div class="sbar-in">' +
         '<div class="sbar-words">' +
@@ -40,6 +50,11 @@
           '<p class="sbar-line">' + (closed ? esc(count) : 'Closes ' + esc(P.COMPLIMENTARY.deadlineWords)) + '</p>' +
         '</div>' +
         (closed ? '' : '<p class="sbar-count" data-stay-count aria-live="polite">' + esc(count) + '</p>') +
+        /* the one hairline: the same calendar window the availability object draws, never a second metric */
+        '<span class="sbar-rail" data-stay-rail role="img" aria-label="' + esc(w.startWords + ' to ' + w.endWords + ' · ' + Math.round(p * 100) + ' per cent of the planning window has passed') + '">' +
+          '<i class="sbar-run" style="--sb-p:' + p.toFixed(4) + '"></i>' +
+          '<i class="sbar-dot" style="--sb-p:' + p.toFixed(4) + '"></i>' +
+        '</span>' +
       '</div>';
   }
 

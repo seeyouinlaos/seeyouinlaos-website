@@ -780,80 +780,98 @@ html[data-session="in"] [data-private-cta] { display: none !important; }
 }
 .sbar-cta:hover { opacity: .72; }
 .a-staybar[data-stay-phase="closed"] .sbar-line { color: var(--a-mute); }
+/* THE PLANNING RULE (Owner, 23 Sep 2026): one hairline of calendar time under the date — the page's own neutral track,
+   the part already run in Cherry, one small Cherry point where today stands. A rule, never a widget: no chrome, no label,
+   no second countdown, and no height of its own beyond the line. */
+.sbar-rail { position: relative; display: block; grid-column: 1 / -1; height: 1px; margin: 12px 0 0; background: var(--a-line); }
+.sbar-run { position: absolute; left: 0; top: 0; height: 1px; width: calc(var(--sb-p) * 100%); background: #74070E; display: block; }
+.sbar-dot { position: absolute; top: 50%; left: calc(var(--sb-p) * 100%); width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #74070E; display: block; }
+.a-staybar[data-stay-phase="closed"] .sbar-run, .a-staybar[data-stay-phase="closed"] .sbar-dot { background: var(--a-mute); }
 @media (min-width: 768px) {
-  .sbar-in { grid-template-columns: minmax(0, 1fr) auto auto; column-gap: 32px; row-gap: 0; padding: 20px 0; }
+  .sbar-in { grid-template-columns: minmax(0, 1fr) auto; column-gap: 32px; row-gap: 0; padding: 20px 0; }
   .sbar-line { font-size: 24px; }
   .sbar-count { text-align: right; }
   .sbar-cta { justify-self: end; }
+  .sbar-rail { margin-top: 14px; }
 }
 
 
 /* ============================================================================
-   THE AVAILABILITY OBJECT (Owner approved, 23 Sep 2026 · the first page)
-   The wordmark's own full stop, doing work: Cherry #74070E is the only accent —
-   the ring's arc, the line it draws, the dot and its single ripple. Everything
-   else is the page's ink and ground. One entrance, then calm.
+   THE AVAILABILITY OBJECT (Owner approved 23 Sep 2026 · compact composition
+   restored the same day). ONE editorial instrument inside the page, not a
+   section of its own: a small ring beside its status, a hairline of calendar
+   time under them, one sentence, one action. Cherry #74070E is the only accent
+   it adds, and it never grows just because the screen did.
    ========================================================================== */
+/* THE TWO SIGNALS ARE ONE SEQUENCE (Owner, 23 Sep 2026): the object sits directly under the date it belongs to — a
+   section's full rhythm between them would read as two unrelated announcements, and the pair would eat the phone. */
 .a-avail { padding-left: var(--a-gut); padding-right: var(--a-gut); }
 .a-avail[data-availability]:empty { display: none; }
+.a-staybar { margin-bottom: 0; }
+.a-staybar + .a-avail { margin-top: calc(var(--a-rhythm) * .34); }
 .av-in {
   --cherry: #74070E;              /* H&S Cherry · the single accent of this object */
   --av-ink: #211F1C;              /* H&S Ink · the object's own numerals and sentence */
-  max-width: 560px; margin: 0 auto; padding: 8px 0 4px; text-align: center;
+  --av-ring: 74px;                /* the instrument, never the hero */
+  --av-col: 460px;                /* the column the instrument reads in — the page may be wider, it is not */
+  /* the object shares the page's frame, so its left edge is the date's left edge above it */
+  max-width: var(--a-frame); margin: 0 auto; padding: 0; text-align: left;
 }
-.av-eyebrow { color: var(--a-mute); margin: 0 0 28px; }
+.av-eyebrow { color: var(--a-mute); margin: 0 0 12px; }
 
-/* ---- the ring: what remains -------------------------------------------- */
-.av-ring { position: relative; width: 132px; height: 132px; margin: 0 auto; }
+/* ---- the row: the ring, and what it means, side by side ------------------ */
+.av-row { display: flex; align-items: center; gap: 16px; max-width: var(--av-col); }
+.av-ring { position: relative; flex: 0 0 auto; width: var(--av-ring); height: var(--av-ring); }
 .av-ring svg { width: 100%; height: 100%; display: block; transform: rotate(-90deg); }
-.av-track { fill: none; stroke: var(--a-line); stroke-width: 1.5; }
-.av-arc { fill: none; stroke: var(--cherry); stroke-width: 2; stroke-linecap: round; }
-.av-count {
-  position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
-  font-family: 'PP Editorial Old', Georgia, serif; font-weight: 200; font-size: 27px; line-height: 1; color: var(--av-ink);
+.av-track { fill: none; stroke: var(--a-line); stroke-width: 1.4; }
+.av-arc { fill: none; stroke: var(--cherry); stroke-width: 1.8; stroke-linecap: round; }
+.av-count { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+/* 5 / 6 on ONE line — the slash given room so the count is never read as one number */
+.av-num {
+  display: flex; align-items: baseline; justify-content: center;
+  font-family: 'PP Editorial Old', Georgia, serif; font-weight: 200; font-size: 19px; line-height: 1; color: var(--av-ink);
 }
-.av-count b { font-weight: 200; }
+.av-num b { font-weight: 200; }
+.av-num s { text-decoration: none; margin: 0 3.5px; font-size: 15px; color: var(--a-mute); }
 .av-count i {
-  display: block; margin-top: 7px; font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-style: normal;
-  font-size: 9.5px; letter-spacing: 2.2px; text-transform: uppercase; color: var(--a-mute);
+  display: block; margin-top: 4px; font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-style: normal;
+  font-size: 6.5px; letter-spacing: 1.3px; text-transform: uppercase; color: var(--a-mute); white-space: nowrap;
 }
-
-/* ---- the words ---------------------------------------------------------- */
+.av-words { min-width: 0; }
 .av-head {
-  font-family: 'PP Editorial Old', Georgia, serif; font-weight: 200; font-size: 30px; line-height: 1.2; letter-spacing: .2px;
-  color: var(--av-ink); margin: 26px 0 0; text-wrap: balance; white-space: pre-line;
+  font-family: 'PP Editorial Old', Georgia, serif; font-weight: 200; font-size: 21px; line-height: 1.16; letter-spacing: .2px;
+  color: var(--av-ink); margin: 0; white-space: pre-line;
 }
-.av-sub { margin: 14px 0 0; color: var(--a-mute); line-height: 1.6; }
+.av-sub { margin: 7px 0 0; color: var(--a-mute); line-height: 1.5; }
 
-/* ---- the line: where the allocation stands ------------------------------ */
-.av-line { display: flex; align-items: center; gap: 14px; margin: 30px auto 0; max-width: 420px; }
+/* ---- the hairline: where today stands in the planning window ------------- */
+.av-line { display: flex; align-items: center; gap: 10px; margin: 16px 0 0; max-width: var(--av-col); }
 .av-end { color: var(--a-mute); white-space: nowrap; }
 .av-rail { position: relative; flex: 1 1 auto; height: 1px; background: var(--a-line); }
 .av-run { position: absolute; left: 0; top: 0; height: 1px; width: calc(var(--av-p) * 100%); background: var(--cherry); transform-origin: left center; display: block; }
-.av-dot { position: absolute; top: 50%; left: calc(var(--av-p) * 100%); width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; display: block; }
+.av-dot { position: absolute; top: 50%; left: calc(var(--av-p) * 100%); width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; display: block; }
 .av-dot::before { content: ''; position: absolute; inset: 0; border-radius: 50%; background: var(--cherry); }
 .av-dot b { position: absolute; inset: 0; border-radius: 50%; border: 1px solid var(--cherry); opacity: 0; display: block; }
 
-/* ---- what to do --------------------------------------------------------- */
-.av-say { margin: 28px auto 0; max-width: 34em; color: var(--av-ink); }
-.av-act { margin: 22px 0 0; }
+/* ---- what to do ---------------------------------------------------------- */
+.av-say { margin: 16px 0 0; max-width: var(--av-col); color: var(--av-ink); }
+.av-act { margin: 14px 0 0; display: flex; align-items: baseline; column-gap: 20px; row-gap: 9px; flex-wrap: wrap; }
 .av-cta {
-  font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 11px; letter-spacing: 2.4px; text-transform: uppercase;
-  color: var(--av-ink); text-decoration: none; border-bottom: 1px solid var(--av-ink); padding-bottom: 4px;
+  font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 10.5px; letter-spacing: 2.2px; text-transform: uppercase;
+  color: var(--av-ink); text-decoration: none; border-bottom: 1px solid var(--av-ink); padding-bottom: 3px; white-space: nowrap;
 }
 .av-cta:hover { opacity: .72; }
-.av-second { margin-top: 16px; }
 .av-explore {
-  font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 11px; letter-spacing: 1.6px;
-  color: var(--a-mute); text-decoration: none; border-bottom: 1px solid transparent; padding-bottom: 2px;
+  font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 10.5px; letter-spacing: 1.4px;
+  color: var(--a-mute); text-decoration: none; border-bottom: 1px solid transparent; padding-bottom: 2px; white-space: nowrap;
 }
 .av-explore:hover { color: var(--av-ink); border-bottom-color: var(--a-line); }
-.av-foot { margin: 26px 0 0; color: var(--a-mute); }
+.av-foot { margin: 14px 0 0; color: var(--a-mute); }
 
-/* ---- the entrance: once ------------------------------------------------- */
+/* ---- the entrance: once, and short --------------------------------------- */
 .a-avail[data-av-state="ready"] .av-arc,
 .a-avail[data-av-state="in"] .av-arc { stroke-dashoffset: var(--av-c); }
-.a-avail[data-av-state="in"] .av-arc { transition: stroke-dashoffset 900ms cubic-bezier(.19,1,.22,1); stroke-dashoffset: var(--av-o); }
+.a-avail[data-av-state="in"] .av-arc { transition: stroke-dashoffset 760ms cubic-bezier(.19,1,.22,1); stroke-dashoffset: var(--av-o); }
 .a-avail[data-av-state="ready"] .av-count,
 .a-avail[data-av-state="ready"] .av-head,
 .a-avail[data-av-state="ready"] .av-sub,
@@ -863,19 +881,19 @@ html[data-session="in"] [data-private-cta] { display: none !important; }
 .a-avail[data-av-state="ready"] .av-run,
 .a-avail[data-av-state="in"] .av-run { transform: scaleX(0); }
 .a-avail[data-av-state="ready"] .av-dot { opacity: 0; transform: scale(.4); }
-.a-avail[data-av-state="in"] .av-count { animation: av-rise 420ms cubic-bezier(.19,1,.22,1) 250ms both; }
-.a-avail[data-av-state="in"] .av-head { animation: av-rise 420ms cubic-bezier(.19,1,.22,1) 360ms both; }
-.a-avail[data-av-state="in"] .av-sub  { animation: av-rise 420ms cubic-bezier(.19,1,.22,1) 440ms both; }
-.a-avail[data-av-state="in"] .av-run  { animation: av-draw 520ms cubic-bezier(.19,1,.22,1) 560ms both; }
-.a-avail[data-av-state="in"] .av-dot  { animation: av-pop 280ms cubic-bezier(.19,1,.22,1) 980ms both; }
-.a-avail[data-av-state="in"] .av-dot b { animation: av-ripple 760ms cubic-bezier(.19,1,.22,1) 1180ms both; }
-.a-avail[data-av-state="in"] .av-say  { animation: av-rise 420ms cubic-bezier(.19,1,.22,1) 1120ms both; }
-.a-avail[data-av-state="in"] .av-act  { animation: av-rise 420ms cubic-bezier(.19,1,.22,1) 1240ms both; }
-.a-avail[data-av-state="in"] .av-foot { animation: av-rise 420ms cubic-bezier(.19,1,.22,1) 1340ms both; }
-@keyframes av-rise { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: none; } }
+.a-avail[data-av-state="in"] .av-count { animation: av-rise 380ms cubic-bezier(.19,1,.22,1) 220ms both; }
+.a-avail[data-av-state="in"] .av-head { animation: av-rise 380ms cubic-bezier(.19,1,.22,1) 300ms both; }
+.a-avail[data-av-state="in"] .av-sub  { animation: av-rise 380ms cubic-bezier(.19,1,.22,1) 380ms both; }
+.a-avail[data-av-state="in"] .av-run  { animation: av-draw 460ms cubic-bezier(.19,1,.22,1) 480ms both; }
+.a-avail[data-av-state="in"] .av-dot  { animation: av-pop 260ms cubic-bezier(.19,1,.22,1) 840ms both; }
+.a-avail[data-av-state="in"] .av-dot b { animation: av-ripple 700ms cubic-bezier(.19,1,.22,1) 1000ms both; }
+.a-avail[data-av-state="in"] .av-say  { animation: av-rise 380ms cubic-bezier(.19,1,.22,1) 960ms both; }
+.a-avail[data-av-state="in"] .av-act  { animation: av-rise 380ms cubic-bezier(.19,1,.22,1) 1060ms both; }
+.a-avail[data-av-state="in"] .av-foot { animation: av-rise 380ms cubic-bezier(.19,1,.22,1) 1160ms both; }
+@keyframes av-rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 @keyframes av-draw { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 @keyframes av-pop { from { opacity: 0; transform: scale(.4); } to { opacity: 1; transform: none; } }
-@keyframes av-ripple { from { opacity: .5; transform: scale(1); } to { opacity: 0; transform: scale(3.4); } }
+@keyframes av-ripple { from { opacity: .5; transform: scale(1); } to { opacity: 0; transform: scale(3); } }
 /* calm afterwards: one quiet breath on the dot, far apart, never a blink */
 .a-avail[data-av-state="settled"] .av-dot b { animation: av-breath 9s ease-in-out 3s infinite both; }
 @keyframes av-breath { 0%, 74% { opacity: 0; transform: scale(1); } 84% { opacity: .16; transform: scale(2.1); } 100% { opacity: 0; transform: scale(2.6); } }
@@ -885,10 +903,19 @@ html[data-session="in"] [data-private-cta] { display: none !important; }
   .a-avail .av-arc { stroke-dashoffset: var(--av-o) !important; }
   .a-avail .av-dot b { animation: none !important; opacity: 0 !important; }
 }
+/* a very narrow phone: the instrument shrinks and the gap closes before it ever stacks */
+@media (max-width: 359px) {
+  .av-in { --av-ring: 64px; }
+  .av-row { gap: 12px; }
+  .av-head { font-size: 19px; }
+  .av-num { font-size: 17px; }
+  .av-act { gap: 14px; }
+}
+/* more width is not a reason to grow: the object keeps its weight, the line gets a little air */
 @media (min-width: 768px) {
-  .av-in { padding: 12px 0 6px; }
-  .av-ring { width: 148px; height: 148px; }
-  .av-count { font-size: 31px; }
-  .av-head { font-size: 34px; }
-  .av-line { max-width: 460px; }
+  .av-in { --av-ring: 82px; --av-col: 520px; }
+  .av-row { gap: 20px; }
+  .av-num { font-size: 21px; }
+  .av-head { font-size: 23px; }
+  .av-line { margin-top: 18px; }
 }

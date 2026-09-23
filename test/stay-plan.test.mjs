@@ -239,7 +239,8 @@ test('THE SURFACES · the front page counts the days and follows the guest; My P
   assert.match(idx, /<script src="assets\/stay-plan\.js(\?v=[0-9a-f]{8})?"><\/script>/);
   assert.match(idx, /<script src="assets\/stay-bar\.js(\?v=[0-9a-f]{8})?"><\/script>/);
   assert.match(idx, /<script src="assets\/availability\.js(\?v=[0-9a-f]{8})?"><\/script>/);
-  assert.match(bar, /P\.deadlineState\(new Date\(\)\)/, 'the count is computed from today, never written into the page');
+  assert.match(bar, /P\.planningWindow\(new Date\(\)\)/, 'the count and the hairline are computed from today, never written into the page');
+  assert.match(bar, /data-stay-rail/, 'and the date carries its own calendar hairline (Owner, 23 Sep 2026)');
   assert.match(bar, /closed \? 'Accommodation planning closed'/, 'after the deadline the state replaces the count');
   assert.doesNotMatch(bar, /Hurry|Book now|Almost gone|Last chance/i);
   assert.doesNotMatch(bar, /places remaining|data-stay-cta/, 'the first signal states the date alone — the count and the action belong to the object');

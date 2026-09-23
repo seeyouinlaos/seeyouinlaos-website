@@ -83,7 +83,18 @@ for (const [w, h, name] of [[390, 844, '390'], [834, 1194, '834x1194'], [1194, 8
       barText: bar.innerText.replace(/\s+/g, ' ').trim(), barCta: bar.querySelectorAll('a').length,
       order: br.bottom <= ar.top + 2 && (bar.compareDocumentPosition(av) & Node.DOCUMENT_POSITION_FOLLOWING) > 0,
       avState: av.getAttribute('data-av-state'), remaining: +av.getAttribute('data-av-remaining'), max: +av.getAttribute('data-av-max'),
+      avElapsed: +av.getAttribute('data-av-elapsed'), barElapsed: +bar.getAttribute('data-stay-elapsed'), barRail: !!bar.querySelector('[data-stay-rail]'),
       avText: av.innerText.replace(/\s+/g, ' ').trim(),
+      /* THE COMPACT COMPOSITION: the ring beside its status, the whole object a small part of the screen */
+      avShare: +((av.getBoundingClientRect().height / window.innerHeight) * 100).toFixed(1),
+      ring: Math.round(av.querySelector('.av-ring').getBoundingClientRect().width),
+      sideBySide: (function () { const r = av.querySelector('.av-ring').getBoundingClientRect(), w = av.querySelector('.av-words').getBoundingClientRect();
+        return w.left > r.right - 1 && Math.abs((w.top + w.height / 2) - (r.top + r.height / 2)) < r.height; })(),
+      /* 5 / 6 ON ONE LINE: three boxes beside one another, never three stacked */
+      oneLine: (function () { const k = [...av.querySelector('.av-num').children].map((e) => e.getBoundingClientRect());
+        return k.every((b, i) => i === 0 || (b.left >= k[i - 1].right - 1 && b.top < k[i - 1].bottom && b.bottom > k[i - 1].top)); })(),
+      count: av.querySelector('.av-num').innerText.replace(/\s+/g, ' ').trim(),
+      aligned: Math.abs(av.querySelector('.av-eyebrow').getBoundingClientRect().left - bar.querySelector('.sbar-eyebrow').getBoundingClientRect().left) <= 1,
       arc: arc ? getComputedStyle(arc).stroke : '', run: run ? getComputedStyle(run).backgroundColor : '', dot: dot ? getComputedStyle(dot, '::before').backgroundColor : '',
       ctaHref: cta ? cta.getAttribute('href') : null, ctaWords: cta ? cta.innerText.replace(/\s+/g, ' ').trim() : '',
       exHref: ex ? ex.getAttribute('href') : null, exWords: ex ? ex.innerText.replace(/\s+/g, ' ').trim() : '',
@@ -99,21 +110,33 @@ for (const [w, h, name] of [[390, 844, '390'], [834, 1194, '834x1194'], [1194, 8
   /* the first signal: the date alone — no count, no action */
   note('bar-date-only-' + name, !!two && two.barPhase === (daysNow > 0 ? 'open' : daysNow === 0 ? 'last-day' : 'closed') && two.barDays === Math.max(0, daysNow) &&
     /Accommodation planning/i.test(two.barText) && /30 November 2026/.test(two.barText) && /days remaining|Last day|closed/i.test(two.barText) &&
-    !/places remaining/i.test(two.barText) && two.barCta === 0 &&
+    !/places remaining/i.test(two.barText) && two.barCta === 0 && two.barRail &&
     !/hurry|book now|almost gone|last chance/i.test(two.barText), JSON.stringify({ phase: two && two.barPhase, days: two && two.barDays, text: two && two.barText, links: two && two.barCta }));
   /* the second signal: the engine's own count, the one accent, the one action, the quiet property link */
-  note('availability-object-' + name, !!two && two.order && two.max === 6 && two.remaining >= 0 && two.remaining <= 6 &&
-    /Wedding Stay · Limited availability/i.test(two.avText) && new RegExp(two.remaining + ' / ' + two.max).test(two.avText) && /REMAINING/i.test(two.avText) &&
-    /Complimentary Wedding Stay/.test(two.avText) && /Private Residence · Vientiane/.test(two.avText) && /Now/.test(two.avText) && /30 Nov/.test(two.avText) &&
+  note('availability-object-' + name, !!two && two.order && two.aligned && two.max === 6 && two.remaining >= 0 && two.remaining <= 6 &&
+    /Wedding Stay · Limited availability/i.test(two.avText) && two.count === two.remaining + ' / ' + two.max && two.oneLine &&
+    /REMAINING/i.test(two.avText) && two.sideBySide && two.ring <= 82 &&
+    /Complimentary Wedding Stay/.test(two.avText) && /while places remain\./.test(two.avText) &&
+    !/Private Residence/i.test(two.avText) && !/Vientiane/.test(two.avText) &&
+    /Now/.test(two.avText) && /30 Nov/.test(two.avText) &&
     /Your invitation shows what is still available for you\./.test(two.avText) && /availability may close earlier/.test(two.avText) &&
     two.arc === cherry && two.run === cherry && two.dot === cherry &&
     two.ctaHref === 'invitation.html' && /OPEN YOUR INVITATION/i.test(two.ctaWords) &&
-    two.exHref === 'accommodation.html#residence' && /Explore the Private Residence/i.test(two.exWords) &&
+    two.exHref === 'accommodation.html#residence' && /See the Guest House/i.test(two.exWords) &&
     two.exSize <= two.ctaSize && /rgba\(0, 0, 0, 0\)|transparent/.test(two.exBorder.split('|')[0]) &&
     /rgba\(0, 0, 0, 0\)|transparent/.test(two.exBorder.split('|')[1]) && two.exColor !== two.ctaColor &&
     !/rgba\(0, 0, 0, 0\)|transparent/.test(two.ctaRule) &&
     two.links === 2 && two.ov <= 1 && two.avState === 'settled' &&
     !/hurry|book now|almost gone|last chance|only \d+ left/i.test(two.avText), JSON.stringify(two));
+  /* THE COMPACT TEST (Owner, 23 Sep 2026): the object is a part of the page, never most of the screen */
+  note('availability-stays-compact-' + name, !!two && two.avShare <= 42, 'the object takes ' + (two && two.avShare) + ' % of the ' + h + ' px screen · ring ' + (two && two.ring) + ' px');
+  /* THE LINE IS CALENDAR TIME (Owner, 23 Sep 2026): the elapsed share of real days between 23 September 2026 and the END of
+     30 November 2026 — computed here from today's date, never read back from the page, and never the allocation. */
+  const t0 = Date.UTC(2026, 8, 23), t1 = Date.UTC(2026, 10, 30) + 86400000;
+  const now = new Date(); const tNow = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+  const elapsed = +(Math.min(1, Math.max(0, (tNow - t0) / (t1 - t0)))).toFixed(4);
+  note('timeline-is-the-calendar-' + name, !!two && two.avElapsed === elapsed && two.barElapsed === elapsed,
+    JSON.stringify({ expected: elapsed, object: two && two.avElapsed, bar: two && two.barElapsed, occupancy: two && +(((two.max - two.remaining) / two.max).toFixed(4)) }));
   await shot(p, name + '-two-signals');
   await p.context().close();
 }
@@ -149,6 +172,33 @@ for (const [w, h, name] of [[390, 844, '390'], [834, 1194, '834x1194'], [1194, 8
   const again = await p2.evaluate(() => document.querySelector('[data-availability]').getAttribute('data-av-state'));
   note('availability-entrance-plays-once', before === 'ready' && during === 'in' && settled === 'settled' && again === 'settled', JSON.stringify({ before, during, settled, again }));
   await p2.context().close();
+
+  /* THE LINE MOVES WITH THE CLOCK, NOT WITH THE COUNT (Owner, 23 Sep 2026): the same page, opened on a day in the middle of
+     the planning window, draws the dot at the calendar share of that day — while the engine's count is whatever it is. */
+  {
+    const ctx2 = await b.newContext({ viewport: { width: 1194, height: 834 } });
+    await ctx2.addInitScript(() => {
+      const fixed = new Date('2026-10-12T12:00:00');
+      const Real = Date;
+      // eslint-disable-next-line no-global-assign
+      Date = class extends Real { constructor(...a) { super(...(a.length ? a : [fixed])); } static now() { return fixed.getTime(); } };
+    });
+    const pc = await ctx2.newPage();
+    await pc.goto(O + '/index.html', { waitUntil: 'load' }); await pc.waitForTimeout(2400);
+    const travelled = await pc.evaluate(() => {
+      const av = document.querySelector('[data-availability]'), bar = document.querySelector('[data-stay-bar]');
+      return { elapsed: +av.getAttribute('data-av-elapsed'), bar: +bar.getAttribute('data-stay-elapsed'),
+        remaining: +av.getAttribute('data-av-remaining'), max: +av.getAttribute('data-av-max'),
+        run: getComputedStyle(av.querySelector('.av-run')).width, rail: getComputedStyle(av.querySelector('.av-rail')).width,
+        days: bar.getAttribute('data-stay-days') };
+    });
+    const expect = +(19 / 69).toFixed(4);   /* 23 Sep → 12 Oct, of a window that ends with 30 November */
+    const drawn = parseFloat(travelled.run) / parseFloat(travelled.rail);
+    note('timeline-follows-the-clock-not-the-count', travelled.elapsed === expect && travelled.bar === expect &&
+      Math.abs(drawn - expect) < 0.01 && travelled.elapsed !== (travelled.max - travelled.remaining) / travelled.max &&
+      +travelled.days === 49, JSON.stringify(Object.assign({ expect, drawn: +drawn.toFixed(4) }, travelled)));
+    await ctx2.close();
+  }
 
   /* a guest already inside their journey is never sent back through the invitation */
   const p3 = await fresh(1194, 834); await signIn(p3, 'T002'); await clear(p3, 'T002');

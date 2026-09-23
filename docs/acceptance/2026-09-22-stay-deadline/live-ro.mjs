@@ -28,18 +28,31 @@ for (const [w, h, name] of [[390, 844, '390'], [834, 1194, '834x1194'], [1194, 8
     return { phase: el.getAttribute('data-stay-phase'), days: +el.getAttribute('data-stay-days'), text: el.innerText.replace(/\s+/g, ' ').trim(),
       barLinks: el.querySelectorAll('a').length, order: el.getBoundingClientRect().bottom <= av.getBoundingClientRect().top + 2,
       remaining: +av.getAttribute('data-av-remaining'), max: +av.getAttribute('data-av-max'), state: av.getAttribute('data-av-state'),
+      avElapsed: +av.getAttribute('data-av-elapsed'), barElapsed: +el.getAttribute('data-stay-elapsed'), barRail: !!el.querySelector('[data-stay-rail]'),
+      avShare: +((av.getBoundingClientRect().height / window.innerHeight) * 100).toFixed(1),
+      ring: Math.round(av.querySelector('.av-ring').getBoundingClientRect().width),
+      count: av.querySelector('.av-num').innerText.replace(/\s+/g, ' ').trim(),
+      oneLine: (function () { const k = [...av.querySelector('.av-num').children].map((e) => e.getBoundingClientRect());
+        return k.every((b, i) => i === 0 || (b.left >= k[i - 1].right - 1 && b.top < k[i - 1].bottom && b.bottom > k[i - 1].top)); })(),
+      sideBySide: (function () { const r = av.querySelector('.av-ring').getBoundingClientRect(), w = av.querySelector('.av-words').getBoundingClientRect();
+        return w.left > r.right - 1 && Math.abs((w.top + w.height / 2) - (r.top + r.height / 2)) < r.height; })(),
       avText: av.innerText.replace(/\s+/g, ' ').trim(), arc: arc ? getComputedStyle(arc).stroke : '',
       cta: cta && cta.getAttribute('href'), explore: ex && ex.getAttribute('href'), avLinks: av.querySelectorAll('a').length,
       ov: document.documentElement.scrollWidth - document.documentElement.clientWidth }; });
   const days = Math.round((Date.UTC(2026, 10, 30) - Date.UTC(new Date().getFullYear(), new Date().getMonth(), new Date().getDate())) / 86400000);
   /* the first signal: the date alone */
   note('live-bar-' + name, !!two && two.days === Math.max(0, days) && two.phase === (days > 0 ? 'open' : days === 0 ? 'last-day' : 'closed') &&
-    /30 November 2026/.test(two.text) && !/places remaining/i.test(two.text) && two.barLinks === 0 && two.ov <= 1 &&
+    /30 November 2026/.test(two.text) && !/places remaining/i.test(two.text) && two.barLinks === 0 && two.barRail && two.ov <= 1 &&
     !/hurry|book now|almost gone|last chance/i.test(two.text), JSON.stringify({ phase: two && two.phase, days: two && two.days, text: two && two.text, links: two && two.barLinks }));
   /* the second signal: the engine's count, the one accent, one action, the quiet property link */
+  const t0 = Date.UTC(2026, 8, 23), t1 = Date.UTC(2026, 10, 30) + 86400000, nd = new Date();
+  const elapsed = +(Math.min(1, Math.max(0, (Date.UTC(nd.getFullYear(), nd.getMonth(), nd.getDate()) - t0) / (t1 - t0)))).toFixed(4);
   note('live-availability-' + name, !!two && two.order && two.max === 6 && two.remaining >= 0 && two.remaining <= 6 &&
-    new RegExp(two.remaining + ' / ' + two.max).test(two.avText) && /Wedding Stay · Limited availability/i.test(two.avText) &&
-    /Private Residence · Vientiane/.test(two.avText) && /availability may close earlier/.test(two.avText) &&
+    two.count === two.remaining + ' / ' + two.max && two.oneLine && two.sideBySide && two.ring <= 82 && two.avShare <= 42 &&
+    /Wedding Stay · Limited availability/i.test(two.avText) && /Complimentary Wedding Stay/.test(two.avText) &&
+    /while places remain\./.test(two.avText) && !/Private Residence/i.test(two.avText) &&
+    /availability may close earlier/.test(two.avText) &&
+    two.avElapsed === elapsed && two.barElapsed === elapsed &&
     two.arc === 'rgb(116, 7, 14)' && two.cta === 'invitation.html' && two.explore === 'accommodation.html#residence' &&
     two.avLinks === 2 && two.state === 'settled' && !/hurry|book now|almost gone|last chance/i.test(two.avText), JSON.stringify(two));
   await p.screenshot({ path: path.join(OUT, name + '-two-signals.jpg'), type: 'jpeg', quality: 72 });

@@ -46,6 +46,18 @@ export const COMPLIMENTARY = {
   deadlineWords: '30 November 2026'
 };
 
+/* ---- the planning window ---------------------------------------------------
+   The deadline above says WHEN the planning ends; this says how long the whole
+   window is, so a surface can draw where today stands between its two ends.
+   It is CALENDAR TIME and nothing else: how many places are left is the ring's
+   business (the engine's count), and one fact is never drawn twice. */
+export const PLANNING = {
+  start: '2026-09-23',            /* the day the window was opened to the guests */
+  startWords: '23 September 2026',
+  end: COMPLIMENTARY.deadline,    /* the end of 30 November 2026 — the same date, never a second one */
+  endWords: COMPLIMENTARY.deadlineWords
+};
+
 /* ---- the paid extension --------------------------------------------------- */
 export const EXTENSION = {
   key: 'stayext/riverside-superior',
@@ -124,6 +136,28 @@ export function deadlineState(now) {
     words: phase === 'closed' ? 'Accommodation planning closed'
       : phase === 'last-day' ? 'Last day'
       : days === 1 ? '1 day remaining' : days + ' days remaining'
+  };
+}
+/* WHERE TODAY STANDS IN THE PLANNING WINDOW (Owner, 23 Sep 2026): 0 before it
+ * opens, 1 at the end of the deadline day, and the elapsed share of real days
+ * in between — the deadline day itself counts, so the window ends at the end of
+ * 30 November. Never the allocation: capacity is the ring's to say. */
+export function planningProgress(now) {
+  const today = toUTC(dayOf(now));
+  const start = toUTC(parseDay(PLANNING.start));
+  /* the window closes at the END of the deadline day: one more day than the difference */
+  const end = toUTC(parseDay(PLANNING.end)) + 86400000;
+  if (today <= start) return 0;
+  if (today >= end) return 1;
+  return (today - start) / (end - start);
+}
+/* the whole window, as a surface needs it: the two ends in words and where today stands */
+export function planningWindow(now) {
+  const d = deadlineState(now);
+  return {
+    start: PLANNING.start, startWords: PLANNING.startWords,
+    end: PLANNING.end, endWords: PLANNING.endWords,
+    progress: planningProgress(now), phase: d.phase, days: d.days, open: d.open, words: d.words
   };
 }
 /* may a NEW complimentary place be claimed at this moment? A guest who already

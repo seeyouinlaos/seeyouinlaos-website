@@ -1,5 +1,11 @@
 # THE AVAILABILITY OBJECT — Owner approved, 23 September 2026
 
+> **CORRECTION PASS, same day.** The first build grew into a full-page section that dominated the
+> phone. The visual composition has been reverted to the compact instrument, and two semantic
+> errors were corrected with it: the timeline now represents **calendar time**, not consumed
+> capacity, and the invented label **"Private Residence" is gone** — the house is the project's own
+> **Guest House complimentary**. The live logic and the real engine data are untouched.
+
 **Status: IMPLEMENTED, NOT REDESIGNED.** The Owner's instruction was to build the approved
 component exactly, with one correction: every blue element becomes the House Cherry
 **#74070E** — the wordmark's own full stop.
@@ -8,56 +14,61 @@ component exactly, with one correction: every blue element becomes the House Che
 
 ## 1 · What the front page now says, in order
 
-Two decision signals, **never merged**, in the Owner's sequence:
+Two decision signals, **never merged**, in the Owner's sequence — and both compact:
 
 ```
-   ACCOMMODATION PLANNING                        ← the first signal: the DATE alone
-   Closes 30 November 2026            68 DAYS REMAINING
+   Accommodation planning                          ← the first signal: the DATE alone
+   Closes 30 November 2026        68 DAYS REMAINING
+   ●─────────────────────────────────────────────  ← one hairline of calendar time
 
-              WEDDING STAY · LIMITED AVAILABILITY  ← the second signal: the live COUNT
-                        ◜ 5 / 6 ◝
-                         REMAINING
-                        One place
-                        has gone.
-              Complimentary Wedding Stay
-              Private Residence · Vientiane
-                  Now ━━●━━━━━━━━ 30 Nov
-        Your invitation shows what is still available for you.
-                   OPEN YOUR INVITATION →           ← the one call to action
-                 Explore the Private Residence →    ← quiet, subordinate, never a button
-          68 days remaining · availability may close earlier
+   Wedding Stay · Limited availability             ← the second signal: the live COUNT
+   ╭─────╮  One place
+   │ 5/6 │  has gone.
+   ╰─────╯  Complimentary Wedding Stay
+    REM.    while places remain.
+   Now ●────────────────────────────── 30 Nov      ← the SAME calendar window
+   Your invitation shows what is still available for you.
+   OPEN YOUR INVITATION →   See the Guest House →  ← one call, one quiet link
+   68 days remaining · availability may close earlier
 ```
 
-The accommodation bar (`assets/stay-bar.js`) was **reduced to the date alone**: its places
-line and its link moved into the object, so the two signals never compete for the same tap.
-`accommodation.html` gained one attribute — `id="residence"` on the Guest House card — so the
-property link opens the existing public editorial page. Nothing else on that page changed, and
-it still shows no price, no remaining inventory, no allocation and no booking control
-(**PUBLIC STATE RULE**).
+The object is **one editorial instrument embedded in the page** — never a section of its own. It
+has no viewport-height treatment, no oversized padding, no centred stack, no large gaps; the ring
+sits beside its status, the calendar hairline directly under them, and both signals share the
+page's frame so the object starts exactly where the date above it starts.
 
-## 2 · Every number is the engine's
+## 2 · The ring says the count — "5 / 6" on ONE line
 
-`assets/availability.js` writes nothing of its own. The count and the ring come from the room
-engine (`SIYL_UNITS.complimentary()` → the Durable Object's `complimentary` view); the days and
-the date come from the one stay plan (`assets/stay-plan.js`, generated from `src/stay-plan.js`).
-Until the engine has answered, the object renders **nothing at all** rather than a number it
-invented. If a place is taken while the page is open, the object follows (`siyl:units`).
+The three parts of the count (`5`, `/`, `6`) are one baseline row with 3.5 px of air on each side
+of the slash, so it can never be read as "56". `REMAINING` sits small beneath it, inside the ring.
+The ring is **74 px on a phone, 82 px from 768 px up, 64 px below 360 px** — a fraction of the
+previous build, and it never grows because the screen did.
 
 | what the guest sees | where it comes from |
 |---|---|
-| `5 / 6` and the ring's arc | `complimentary.remaining` / `complimentary.max` |
-| "One place has gone." | derived from `max - remaining` |
-| the dot on the NOW → 30 NOV line | the share of the allocation already taken, clamped to 8–92 % so the dot is always on the line |
+| `5 / 6` and the arc | the room engine: `complimentary.remaining` / `complimentary.max` |
+| "One place has gone." | derived from `max − remaining` |
+| the dot on the Now → 30 Nov line | **calendar time** (below) |
 | "68 days remaining" · "Last day" · "Accommodation planning closed" | `deadlineState(new Date())` |
-| the action | the guest's own state (see below) |
+| the action | the guest's own state (§4) |
 
-**One open assumption, for the Owner to confirm.** The timeline dot maps *allocation consumed*
-onto the NOW → 30 NOV axis. There is no start date for the planning window anywhere in the
-approved data, so a time-based position could not be derived; the dot therefore answers "how
-far has the allocation run", not "how far has the calendar run". Say the word and it becomes a
-calendar position the moment a window-opening date exists.
+## 3 · The line says the calendar — not the capacity
 
-## 3 · The action follows the guest
+Corrected. `src/stay-plan.js` now carries the window beside the deadline it ends on:
+
+```js
+export const PLANNING = { start: '2026-09-23', end: COMPLIMENTARY.deadline /* 2026-11-30 */ };
+export function planningProgress(now) { … }   // 0 before it opens, 1 at the END of 30 November
+```
+
+- **start** 23 September 2026 · **end** the end of 30 November 2026 (the deadline day is *inside*
+  the window, so 30 November reads 98.6 %, and 1 December reads 100 %).
+- The dot is the elapsed share of **real days**, computed from today — never hard-coded, never
+  clamped to a made-up range, never `taken / max`. On 12 October it is 19/69 = 27.5 %.
+- **The same calculation drives the planning bar's hairline**, so the two elements can never
+  disagree. Capacity is said once, by the ring; time is said once, by the line.
+
+## 4 · The action follows the guest
 
 | the guest | the call | where it goes |
 |---|---|---|
@@ -65,90 +76,80 @@ calendar position the moment a window-opening date exists.
 | signed in, no complimentary place | CONTINUE YOUR TRIP → | `your-journey.html#stays` |
 | signed in, holding a place | YOUR STAY → | `profile.html#your-stay` |
 
-An authenticated guest is **never** forced back through the invitation login.
+An authenticated guest is **never** forced back through the invitation login. Beside the call, one
+quiet subordinate link — *See the Guest House →* — opens the existing public editorial card
+(`accommodation.html#residence`), which still shows no price, no remaining inventory, no allocation
+and no booking control (**PUBLIC STATE RULE**).
 
-## 4 · The one accent, and the motion
+## 5 · The house is the project's own
 
-Cherry **#74070E** draws the ring's arc, the line it runs along, the dot and the dot's single
-ripple. Nothing else in the object is coloured: the numerals and the sentence are the page's own
-Ink, the ground is the page's own Ivory. The object's stylesheet block contains exactly two
-hexadecimal colours — `#74070E` and `#211F1C` — and the unit suite pins that.
+**"Private Residence" is removed.** It was never approved terminology. The object says:
 
-The entrance plays **once**, on the first time the object enters the viewport (threshold .35):
+> Complimentary Wedding Stay
+> while places remain.
 
-| step | begins |
-|---|---|
-| the ring draws | 0 ms (900 ms `stroke-dashoffset`) |
-| the count resolves | 250 ms |
-| the sentence | 360 ms |
-| the property line | 440 ms |
-| the line draws | 560 ms |
-| the dot arrives | 980 ms |
-| one ripple | 1180 ms |
-| the sentence, the actions, the foot | 1120 / 1240 / 1340 ms |
+— and no second property or location label. The property link names the canonical house, and the
+booking engine's own naming (`Guest House complimentary`, `guesthouse/guest-house`) is untouched.
+Removed from: the component, the DE/TH/JA dictionary, and the page comment. The historical string
+in `assets/i18n/catalog-public.json` predates this work (commit `6405a73`) and was **not** touched,
+per the instruction not to rename unrelated historical text.
 
-— finished inside ~1.6 s, then calm: one extremely quiet breath on the dot every 9 s, never a
-blink and never an alert. Under `prefers-reduced-motion: reduce` the object simply *is*, already
-finished, with `animation: none !important` throughout. It never replays, and re-rendering after
-a live change does not replay it.
+## 5b · The one accent, and the motion
 
-## 5 · What is **not** there
+Cherry **#74070E** draws the ring's arc, the calendar line, the dot, its single ripple — and the
+planning bar's hairline. Nothing else is coloured; the object's stylesheet block contains exactly
+two hexadecimal colours, `#74070E` and `#211F1C`, and the unit suite pins that. The amount of
+Cherry did not grow with the correction.
 
-No card, no badge, no warning banner, no warning icon, no countdown clock, no ticking second,
-no pop-up, no red background, no gradient, no commercial hotel-booking chrome, no second
-progress-bar concept, no competing call to action — and none of "Hurry", "Book now", "Almost
-gone", "Last chance", "Only n left". The unit suite asserts each of these by name.
+The entrance still plays **once**, on the first sight of the object, now shortened to fit the
+compact composition: the ring draws (760 ms), the count at 220 ms, the sentence 300, the property
+line 380, the hairline 480, the dot 840, one ripple 1000, the sentence, actions and foot 960 /
+1060 / 1160 ms — finished inside ~1.4 s, then calm, with one very quiet breath on the dot every
+9 s. Under `prefers-reduced-motion: reduce` the object simply *is*, already finished. No looping
+ring, no added animation.
 
-## 6 · The proof
+### What is still **not** there
 
-**Unit — `test/availability.test.mjs`, 8 tests** (registered in `npm test`; whole suite green):
-the count is the engine's; the words per state; the date and the three phases; the dot never
-leaves the line; the one call and where it goes; Cherry as the only added colour; the entrance,
-its length and reduced motion; the two signals in the Owner's order with one action between them.
+No card, no badge, no warning banner or icon, no countdown clock, no ticking second, no pop-up, no
+red ground, no gradient, no hotel-booking chrome, no second progress-bar concept, no competing call
+to action — and none of "Hurry", "Book now", "Almost gone", "Last chance", "Only n left".
 
-**Served — `docs/acceptance/2026-09-22-stay-deadline/e2e.mjs`, section 1 + 1b**, on the stage
-(port 8788) at 390 · 834×1194 · 1194×834 · 1440: the bar carries the date alone and no link; the
-object stands below it; the engine's count, the Cherry ring, the Cherry line, the Cherry dot;
-one CTA to `invitation.html`; the property link to `accommodation.html#residence`, smaller than
-the CTA, with no border and no background; exactly two links in the object; no horizontal
-overflow; the entrance plays once and settles; reduced motion arrives settled with no animation;
-a signed-in guest's call never points at the invitation.
+## 6 · The proof of the correction
 
-**The approved state, photographed.** One synthetic guest on the stage took one complimentary
-place; the object was photographed as the visitor sees it — **5 / 6 REMAINING · "One place has
-gone."** — and the place was given straight back (engine: `remaining 5 → 6`, `taken 1 → 0`).
-Screenshots in `stage/`.
+**Unit — `test/availability.test.mjs`, 11 tests** (whole suite **487/487**): the count is the
+engine's; the ring reads `5 / 6` as three boxes in one baseline row with the slash given room and
+never exceeds 82 px; the compact composition (row, column, page frame, narrow-phone shrink, no
+`min-height`/`vh`, no centred stack); **the calendar line** — the window's two ends, 0 before it
+opens, 1 after the deadline, 19/69 on 12 October, and the same value whatever the count is; the
+planning bar's hairline drawn from the same rule; the canonical house and the absence of the
+invented label; the words per state; the one call and where it goes; Cherry as the only added
+colour; the entrance, its length and reduced motion; the two signals in order.
 
-**Gates:** all 28 pass, including L1 (the object's sentences are in the DE/TH/JA dictionary —
-the headline is one text node with a real line break kept by `white-space: pre-line`, so each
-sentence is translated whole instead of in fragments) and C1 (fingerprints current).
+**Served — `docs/acceptance/2026-09-22-stay-deadline/e2e.mjs` §1 + §1b, 33/33**, on the stage at
+390 · 834×1194 · 1194×834 · 1440. Per viewport:
 
-**Live:** `docs/acceptance/2026-09-22-stay-deadline/live-ro.mjs` reads production read-only —
-no code entered, no guest signed in, nothing written — and asserts both signals at four widths.
+| check | 390 | 834×1194 | 1194×834 | 1440 |
+|---|---|---|---|---|
+| the object's share of the screen | **37.6 %** | 23.2 % | 33.2 % | 30.8 % |
+| ring | **74 px** | 82 px | 82 px | 82 px |
+| `5 / 6` on one line | ✓ | ✓ | ✓ | ✓ |
+| ring and status side by side | ✓ | ✓ | ✓ | ✓ |
+| aligned with the date above it | ✓ | ✓ | ✓ | ✓ |
+| object's line = bar's hairline = today's calendar share | ✓ | ✓ | ✓ | ✓ |
+| "Private Residence" anywhere | **absent** | absent | absent | absent |
 
----
+and, decisively, **`timeline-follows-the-clock-not-the-count`**: the same page opened with the
+browser's clock set to **12 October 2026** draws the dot at `116.031 px` of a `421.328 px` rail —
+**0.2754**, exactly 19/69 — while the engine's count is 6 / 6 and the bar reads 49 days. Capacity
+0 %, calendar 27.54 %: the two can no longer be confused.
 
-## 7 · Live — the proof at `6756fc0`
+**Regression, each suite on a freshly wiped stage — 265/265:** stay-deadline 33 · release-014 35 ·
+release-013 36 · four-point 48 · account-IA 35 · profile-return 18 · stage-graph 40 ·
+hero-map-media 20.
 
-Deployed by the Owner's release path (push to `main` → Cloudflare Workers Build), serving
-`assets/availability.js?v=de498f15` 100 s after the push.
+**Gates:** 28/28 (`RELEASE CHECK PASSED`), including L1 with the dictionary following the new
+wording — "while places remain." and "See the Guest House" in DE/TH/JA, the invented label removed.
 
-- **`live-ro.mjs` 11/11** at 390 · 834×1194 · 1194×834 · 1440, read-only: no code entered, no
-  guest signed in, nothing written. Both signals present and in order; the bar carries the date
-  and no link; the object's ring, line and dot are `rgb(116, 7, 14)`; one CTA to `invitation.html`;
-  the property link to `accommodation.html#residence`; exactly two links; no overflow; no console error.
-- Production reads **5 / 6 REMAINING · "One place has gone."** — a real guest already holds one of
-  the six places, so the live object arrived in the approved state by itself. Screenshots in `live/`.
-- **Parity 294/294** · **release-014 live-ro 25/25** · **infrastructure freeze intact**
-  (one Worker · workers.dev · GitHub Pages disabled).
-- **Production data untouched** — the read-only aggregate is identical before and after the deploy:
-  37 occupancies · 0 waitlisted · 12 seat holds · 104 draft actors (15 with drafts).
+Screenshots: `stage/*-two-signals.jpg` (as a visitor sees it) and `stage/*-compact-5of6.jpg` (with
+one place taken by a synthetic guest, released again immediately).
 
-### The whole run
-
-| | |
-|---|---|
-| unit | **484/484** (`test/availability.test.mjs` 8, new) |
-| gates | **28/28** (`RELEASE CHECK PASSED`) |
-| stage E2E | **256/256** — stay-deadline 24 · release-014 35 · release-013 36 · four-point 48 · account-IA 35 · profile-return 18 · stage-graph 40 · hero-map-media 20 |
-| live | 11 + 25 + parity 294 |
