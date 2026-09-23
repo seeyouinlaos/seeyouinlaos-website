@@ -126,8 +126,12 @@ export function journeyModel(record) {
   const publication = r.documents && Array.isArray(r.documents.guests) && r.documents.guests[0] ? r.documents.guests[0].publication || '' : '';
   const stated = r.totalUsd != null ? r.totalUsd : (r.total != null ? r.total : null);
   const linesTotal = lines.reduce((t, x) => t + (Number(x.price) || 0) * (Number(x.qty) || 1), 0);
-  const total0 = stated == null ? null : (dropped ? linesTotal : stated);
-  /* THE AMOUNT is the guest's own lines: with the paid extension withdrawn (Owner, 23 Sep 2026) there is nothing to add. */
+  /* A WITHDRAWN COMPONENT IS NOT CHARGED (Owner, 23 Sep 2026): a record sent before the paid extension was withdrawn still
+     names it under `rooms.stayext` and its stated figure still includes it. Such a record is recomputed from the lines it
+     carries — exactly as a record whose stage went to the waiting list is — so no guest is billed for something the website
+     no longer offers. Every other stated amount is the device's own one calculation and is left alone. */
+  const withdrawn = !!(record.rooms && record.rooms.stayext);
+  const total0 = stated == null ? null : ((dropped || withdrawn) ? linesTotal : stated);
   const total = total0;
   const upd = record.kind === 'update' && (record.version || 1) > 1;
   return { guestId, fullName, firstName, partyName, contact, personId, stays, arranged, waitlisted, travel, experiences, wedding, finale, sangkhathan, seats, profile, allergy, allergyDetails, acks, docs, publication, total, hosts,

@@ -79,8 +79,13 @@ test('THE WORKER · no extension write is routed and no extension component is s
   assert.doesNotMatch(w, /'extend'|'unextend'|out\.stayext/);
   /* the emails compose no extended stay, and add nothing to the amount */
   const m = code('src/mail-templates.js');
-  assert.doesNotMatch(m, /rooms\.stayext|'Extended stay'/);
+  /* the emails may RECOGNISE a record sent before the withdrawal, only to refuse charging for it; they may never COMPOSE one */
+  assert.doesNotMatch(m, /'Extended stay'|stays\.push\(\{ name: ext/);
   assert.match(m, /const total = total0;/, 'the amount is the guest\'s own lines, with nothing added');
+  /* A RECORD SENT BEFORE THE WITHDRAWAL still names the extension and its figure still includes it: such a record is
+     recomputed from the lines it carries, so no guest is billed for something the website no longer offers. */
+  assert.match(m, /const withdrawn = !!\(record\.rooms && record\.rooms\.stayext\);/);
+  assert.match(m, /const total0 = stated == null \? null : \(\(dropped \|\| withdrawn\) \? linesTotal : stated\);/);
 });
 
 test('THE GUEST\'S SURFACES · no control, no line, no placeholder, and no hotel is named', () => {

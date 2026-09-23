@@ -558,7 +558,8 @@ gate('P7', 'Dress Code imagery real (23 — resort-01 retired by the owner), no 
   if (/'stayext\//.test(code('src/inventory-seed.js'))) problems.push('the withdrawn extension still has stock');
   if (!/'riverside\/superior-window':/.test(code('src/inventory-seed.js'))) problems.push('the Riverside WEDDING-STAY alternative was removed by mistake');
   if (/'extend'|'unextend'/.test(code('src/worker.js'))) problems.push('the Worker still routes an extension write');
-  if (/rooms\.stayext/.test(code('src/mail-templates.js'))) problems.push('the emails still compose an extended stay');
+  /* the emails may still RECOGNISE a record sent before the withdrawal (to refuse charging for it); they may never COMPOSE one */
+  if (/'Extended stay'|stays\.push\(\{ name: ext/.test(code('src/mail-templates.js'))) problems.push('the emails still compose an extended stay');
   for (const f of ['profile.html', 'cart.html', 'review.html']) {
     const h = code(f);
     if (/Extend your stay|data-ext-select|data-ext-confirm|extensionLine|SIYL_BAG\.lines\(\)/.test(h)) problems.push(f + ' still offers the withdrawn extension');
