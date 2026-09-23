@@ -44,7 +44,7 @@ async function harness({ auth = null, page = '/destination.html' } = {}) {
 test('ACCESS · which surfaces are private, and the way to the invitation page with a way back', { skip: !hasSTM && 'run with --experimental-vm-modules' }, async () => {
   const { sb } = await harness();
   const I = sb.SIYL_INVITE;
-  for (const h of ['your-journey.html', 'cart.html', 'tickets.html', 'room.html?stay=souphattra&room=heritage', 'transport.html?id=c86', 'wedding.html', 'wedding-preparation.html', 'about-you.html', 'review.html', '/cart.html', './tickets.html', 'your-journey', 'cart?x=1', 'room?stay=sathorn&room=penthouse', 'transport']) assert.equal(I.private(h), true, h + ' is private');
+  for (const h of ['your-journey.html', 'cart.html', 'tickets.html', 'room.html?stay=souphattra&room=heritage', 'transport.html?id=c86', 'wedding.html', 'wedding-preparation.html', 'about-you.html', 'review.html', '/cart.html', './tickets.html', 'your-journey', 'cart?x=1', 'room?stay=sathorn&room=u-sathorn-superior-garden', 'transport']) assert.equal(I.private(h), true, h + ' is private');
   for (const h of ['index.html', 'destination.html', 'journeys.html', 'journeys.html#j-wedstay', 'experiences.html', 'experience.html?id=bkk-suhring', 'accommodation.html', 'voyage.html', 'marsilea.html', '1872.html', 'tea.html', 'dress.html', 'invitation.html', 'invitation.html?open=1', 'https://example.org/journeys.html', 'mailto:x@y', '#top', '']) assert.equal(I.private(h), false, h + ' is public (The Journey is public editorial)');
   assert.equal(I.gateUrl('cart.html'), 'invitation.html?open=1&next=cart.html');
   assert.equal(I.gateUrl('journeys.html#j-wedstay'), 'invitation.html?open=1&next=journeys.html%23j-wedstay');
@@ -116,7 +116,8 @@ test('ACCESS · the pages: the bag, the tickets, the room and transport planning
   assert.match(src('1872.html'), /<p class="price" data-private>USD 180<\/p><p class="per" data-private>For two guests<\/p>/);
   assert.match(src('experiences.html'), /Guest Relations<span data-private>, the Erlebnis menu from USD 234 per person<\/span>/, 'the Highlight\'s amounts are private (20 Sep 2026)');
   assert.match(src('voyage.html'), /Optional<span data-private> · USD 15 per guest<\/span>/); assert.equal((src('voyage.html').match(/data-cta-swap href="journeys\.html#j-wedstay"/g) || []).length, 2);
-  assert.equal((src('accommodation.html').match(/<a class="a-more" data-cta-swap href="room\.html\?stay=/g) || []).length, 4);   /* the Penthouse, U Sathorn, Shama, the residence (16 Sep 2026) — the Riverside Hotel was retired 23 Sep 2026 (release 012) */
+  assert.equal((src('accommodation.html').match(/<a class="a-more" data-cta-swap href="room\.html\?stay=/g) || []).length, 3);   /* U Sathorn, Shama, the residence (16 Sep 2026) — the Riverside Hotel was retired 23 Sep 2026 (release 012), the Sathorn Penthouse deleted 24 Sep 2026 (Edit 6) */
+  assert.doesNotMatch(src('accommodation.html'), /room=penthouse|Sathorn Penthouse/, 'the Sathorn Penthouse is deleted (Owner, 24 Sep 2026 · Edit 6)');
   for (const f of ['index.html', 'destination.html', 'accommodation.html', 'marsilea.html', 'dress.html']) assert.doesNotMatch(src(f), /USD \d/, f + ' carries no amount');
   assert.match(src('assets/aman.js'), /\['The Journey', 'journeys\.html', \[/); assert.match(src('assets/recon.js'), /<a href="journeys\.html">The Journey<\/a>/); assert.match(src('assets/shop-menu.js'), /<a href="journeys\.html">The Journey<\/a>/);
   assert.match(src('assets/prep-shell.js'), /if \(!\/\^invitation\(\\\.html\)\?\$\/\.test\(location\.pathname\.split\('\/'\)\.pop\(\)\)\) \{\s*var toGate = function \(\) \{ if \(window\.SIYL_INVITE && SIYL_INVITE\.require\) SIYL_INVITE\.require\(function \(\) \{\}\); \};/, 'the private shell hands over');

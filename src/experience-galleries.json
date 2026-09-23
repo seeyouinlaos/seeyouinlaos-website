@@ -2184,26 +2184,106 @@
  },
  "vte-ongteu": {
   "slug": "vte-ongteu",
-  "folder": "050 - Event - Temple Ceremony - Wat Ong Teu Vientiane",
-  "folderId": "1N-LCD10lVQrR6bqh9BxqRKsuhdYtO7Wl",
+  "folder": "195 - Experience - Wat Ong Teu",
+  "folderId": "1NJGHVmgIvwoOawNM3gwH_m1Fh25tBpQn",
   "frame": "3/2",
   "images": [
    {
     "src": "assets/images/experiences/vte-ongteu-01.jpg",
-    "w": 2000,
-    "h": 1333,
-    "alt": "The morning at Wat Ong Teu — novices with their alms bowls, a guest kneeling in greeting",
-    "drive": "19hHoRBmy4SXvS_wUsQVx4yjpp58OVa2t",
-    "file": "DSC07779.jpeg",
+    "w": 1920,
+    "h": 1440,
+    "alt": "Wat Ong Teu — the gilded façade of the sim",
+    "drive": "15TBiS7BFwbI3T8AJESgR7-I8K3ZkkC8z",
+    "file": "IMG_4316.jpeg",
     "kind": "venue"
    },
    {
     "src": "assets/images/experiences/vte-ongteu-02.jpg",
-    "w": 768,
-    "h": 1365,
-    "alt": "The line of novices with their bowls in the temple courtyard",
-    "drive": "1dTl7bL3vlCR1-pNg-hl119xFZSkCFDdR",
-    "file": "DSC07777.JPEG",
+    "w": 2000,
+    "h": 1150,
+    "alt": "The long red roofs of the temple and its courtyard",
+    "drive": "1kG7itjOdMbyzZFhszG64j2Qr8z5EQamK",
+    "file": "IMG_4315.jpeg",
+    "kind": "venue"
+   },
+   {
+    "src": "assets/images/experiences/vte-ongteu-03.jpg",
+    "w": 1500,
+    "h": 2000,
+    "alt": "Inside the sim — the great Buddha between the red and gold columns",
+    "drive": "1mSLlhKFz9oRARWrsc6bm48g6FH6fC8rj",
+    "file": "IMG_3659.jpeg",
+    "kind": "venue"
+   },
+   {
+    "src": "assets/images/experiences/vte-ongteu-04.jpg",
+    "w": 1500,
+    "h": 2000,
+    "alt": "A carved and gilded temple door",
+    "drive": "161pgQ5xYdGkG85-dwINhXr3t6VX5fr_k",
+    "file": "IMG_3658.jpeg",
+    "kind": "venue"
+   }
+  ]
+ },
+ "vte-laodress": {
+  "slug": "vte-laodress",
+  "folder": "196 - Experience - Lao Traditional Dress Rental",
+  "folderId": "1YzeS_UGJJeTNMXS2mgRhqC9ZToc5xtxZ",
+  "frame": "4/5",
+  "images": [
+   {
+    "src": "assets/images/experiences/vte-laodress-01.jpg",
+    "w": 1200,
+    "h": 1600,
+    "alt": "The rental studio — rails of Lao silk attire",
+    "drive": "1gHJS1gpz3O57q1EJNfaMOuAQETaKa3OJ",
+    "file": "IMG_4327.jpeg",
+    "kind": "venue"
+   },
+   {
+    "src": "assets/images/experiences/vte-laodress-02.jpg",
+    "w": 960,
+    "h": 1280,
+    "alt": "A couple dressed in Lao silk in the studio",
+    "drive": "1CtvZvnzUvajIMp1bXZqwjbN_cDEPw-Pz",
+    "file": "IMG_4331.jpeg",
+    "kind": "venue"
+   },
+   {
+    "src": "assets/images/experiences/vte-laodress-03.jpg",
+    "w": 1500,
+    "h": 2000,
+    "alt": "Three men in traditional Lao silk shirts and sashes",
+    "drive": "1Nm-oFn_H4MP9TrOA1hgFazWaFa0kGaza",
+    "file": "IMG_4328.jpeg",
+    "kind": "venue"
+   },
+   {
+    "src": "assets/images/experiences/vte-laodress-04.jpg",
+    "w": 1200,
+    "h": 1600,
+    "alt": "A sinh and silk sash beside a temple wall",
+    "drive": "1ZkWNnGfWTQAuUuKzsV-SFzXV6nspCDz6",
+    "file": "IMG_4330.jpeg",
+    "kind": "venue"
+   },
+   {
+    "src": "assets/images/experiences/vte-laodress-05.jpg",
+    "w": 832,
+    "h": 1254,
+    "alt": "Lao silk and a paper parasol before a golden stupa",
+    "drive": "1DuAL570kyq3NPjY6mvC8i6ZaCqtjKpOa",
+    "file": "IMG_4332.jpeg",
+    "kind": "venue"
+   },
+   {
+    "src": "assets/images/experiences/vte-laodress-06.jpg",
+    "w": 1109,
+    "h": 1475,
+    "alt": "A traditional Lao silk shirt in the street",
+    "drive": "1QrqP_1LExRO1aPjFU7gQbhj-T8PxakOD",
+    "file": "IMG_4326.jpeg",
     "kind": "venue"
    }
   ]

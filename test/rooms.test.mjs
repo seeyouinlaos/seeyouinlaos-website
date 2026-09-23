@@ -44,9 +44,12 @@ test('ROOMS · 1 room = 2 places; 5 rooms = 10 places; units are persistent labe
   assert.deepEqual(unitsOf('wedstay/heritage'), five, 'the same identities on every derivation');
   const one = unitsOf('prewed/souphattra-presidential');
   assert.equal(one.length, 1); assert.equal(one[0].places, 2, 'the Presidential is one room of two guest places');
-  /* the six-bedroom Penthouse (Owner, 15 Sep 2026): Room A – F, twelve places */
-  assert.deepEqual(unitsOf('bkk-stay/penthouse').map((u) => u.label), ['A', 'B', 'C', 'D', 'E', 'F']);
-  assert.equal(unitsOf('bkk-stay/penthouse').reduce((n, u) => n + u.places, 0), 12);
+  /* U Sathorn Bangkok (the Master, 16 Sep 2026): six rooms, Room A – F, twelve places */
+  assert.deepEqual(unitsOf('bkk-stay/u-sathorn-superior-garden').map((u) => u.label), ['A', 'B', 'C', 'D', 'E', 'F']);
+  assert.equal(unitsOf('bkk-stay/u-sathorn-superior-garden').reduce((n, u) => n + u.places, 0), 12);
+  /* SATHORN PENTHOUSE BANGKOK IS DELETED (Owner, 24 Sep 2026 · Edit 6): no stock, no units */
+  assert.equal(SEED['bkk-stay/penthouse'], undefined, 'the Sathorn Penthouse is not a product'); assert.deepEqual(unitsOf('bkk-stay/penthouse'), []);
+  assert.deepEqual(Object.keys(SEED).filter((k) => k.startsWith('bkk-stay/')), ['bkk-stay/u-sathorn-superior-garden', 'bkk-stay/shama-king-studio-balcony'], 'two Bangkok addresses');
   /* D2 · GUEST HOUSE COMPLIMENTARY (Owner, 19 Sep 2026): one shared house = one unit A of kind property with SIX places — never "Private Residence", never "up to 4" */
   const house = unitsOf('guesthouse/guest-house');
   assert.equal(house.length, 1);
@@ -74,18 +77,18 @@ test('ROOMS · nothing is reserved (Owner, 19 Sep 2026): no unit is anyone\'s in
   const fam = unitsOf('wedstay/grand-majestic');
   assert.deepEqual(fam.map((u) => u.reservedFor), [null, null]); assert.equal(mayJoin(fam[0], HAR).ok, true); assert.equal(mayJoin(fam[0], LIN).ok, true);
   assert.equal(mayJoin(unitsOf('wedstay/heritage')[0], LIN).ok, true);
-  /* the Penthouse: six bedrooms A – F, every one open to every guest — the hosts included, first come first served; never a Room G */
-  const pent = unitsOf('bkk-stay/penthouse');
-  assert.deepEqual(pent.map((u) => u.label), ['A', 'B', 'C', 'D', 'E', 'F']); assert.deepEqual(pent.map((u) => u.reservedFor), [null, null, null, null, null, null]);
-  assert.equal(mayJoin(pent[0], PEG).ok, true, 'Room A is nobody\'s before it is booked'); assert.equal(mayJoin(pent[0], HAR).ok, true); assert.equal(mayJoin(pent[1], PEG).ok, true);
-  assert.equal(unitOf('bkk-stay/penthouse', 'G'), null, 'there is no Room G');
+  /* U Sathorn: six rooms A – F, every one open to every guest — the hosts included, first come first served; never a Room G */
+  const usat = unitsOf('bkk-stay/u-sathorn-superior-garden');
+  assert.deepEqual(usat.map((u) => u.label), ['A', 'B', 'C', 'D', 'E', 'F']); assert.deepEqual(usat.map((u) => u.reservedFor), [null, null, null, null, null, null]);
+  assert.equal(mayJoin(usat[0], PEG).ok, true, 'Room A is nobody\'s before it is booked'); assert.equal(mayJoin(usat[0], HAR).ok, true); assert.equal(mayJoin(usat[1], PEG).ok, true);
+  assert.equal(unitOf('bkk-stay/u-sathorn-superior-garden', 'G'), null, 'there is no Room G'); assert.equal(unitOf('bkk-stay/penthouse', 'A'), null, 'the deleted Penthouse has no Room A');
   /* Kunming: the Solarium and Lijiang: the 270° View Suite are open to everyone (Owner, Edit 5 · 18 Sep 2026) */
   assert.equal(unitsOf('kmg/solarium')[0].reservedFor, null); assert.equal(unitsOf('kmg/standard-single')[0].reservedFor, null);
   assert.deepEqual(unitsOf('ljg/view-suite-270').map((u) => u.reservedFor), [null, null, null, null, null, null]);
   /* the stages of the journey: the Guest House is the wedding stage, as the hotel is (the Riverside was retired 23 Sep 2026) */
   assert.deepEqual(STAGES, ['bkk-stay', 'prewed', 'wedstay', 'kmg', 'ljg', 'kempinski']);
   assert.equal(stageOf('guesthouse/guest-house'), 'wedstay', 'the Guest House is the wedding stage'); assert.equal(stageOf('wedstay/heritage'), 'wedstay');
-  assert.equal(stageOf('bkk-stay/penthouse'), 'bkk-stay'); assert.equal(stageOf('prewed/heritage'), 'prewed');
+  assert.equal(stageOf('bkk-stay/u-sathorn-superior-garden'), 'bkk-stay'); assert.equal(stageOf('bkk-stay/shama-king-studio-balcony'), 'bkk-stay'); assert.equal(stageOf('prewed/heritage'), 'prewed');
 });
 
 test('ROOMS · guest 1 joins A → 1/2; guest 2 joins A → 2/2 with both first names; guest 3 cannot; no `fixed` map anywhere; a unit takes the whole party or none of it (Owner, 19 Sep 2026)', async () => {
@@ -185,10 +188,11 @@ test('ROOMS · a write is the identity\'s own: another guest, another invitation
   assert.equal(r.status, 409, 'a full room refuses a host like anyone'); assert.equal(r.d.error, 'full'); assert.equal(r.d.mine.wedstay, undefined);
   r = await call(rooms, 'join', { invitationId: HAR.invitationId, guestId: HAR.guestId, key: 'wedstay/grand-majestic', label: 'A', name: 'x' }, HAR);
   assert.equal(r.status, 200, 'the Grand Majestic is open to everyone (Owner, Edit 5 · 18 Sep 2026)'); assert.equal(unit(r.d, 'wedstay/souphattra-presidential', 'A').taken, 1, 'one place per stage: her Presidential place goes');
-  /* the Penthouse: Room A is nobody's in advance — Peggy takes it; nothing reserved, twelve places, eleven free */
-  r = await call(rooms, 'join', { invitationId: PEG.invitationId, guestId: PEG.guestId, key: 'bkk-stay/penthouse', label: 'A', name: 'Peggy' }, PEG);
-  assert.equal(r.status, 200, 'Penthouse Room A is open'); assert.deepEqual(r.d.mine['bkk-stay'], { key: 'bkk-stay/penthouse', label: 'A' });
-  const s = r.d.summary['bkk-stay/penthouse'];
+  /* U Sathorn: Room A is nobody's in advance — Peggy takes it; nothing reserved, twelve places, eleven free */
+  r = await call(rooms, 'join', { invitationId: PEG.invitationId, guestId: PEG.guestId, key: 'bkk-stay/u-sathorn-superior-garden', label: 'A', name: 'Peggy' }, PEG);
+  assert.equal(r.status, 200, 'U Sathorn Room A is open'); assert.deepEqual(r.d.mine['bkk-stay'], { key: 'bkk-stay/u-sathorn-superior-garden', label: 'A' });
+  const s = r.d.summary['bkk-stay/u-sathorn-superior-garden'];
+  assert.equal(r.d.summary['bkk-stay/penthouse'], undefined, 'the deleted Penthouse has no summary');
   assert.equal(s.units, 6); assert.equal(s.places, 12); assert.equal(s.reserved, 0); assert.equal(s.reservedFor, null); assert.equal(s.rooms, 6); assert.equal(s.free, 11, 'twelve bookable places, one taken'); assert.equal(s.largestFree, 2); assert.equal(s.soldOut, false);
   r = await call(rooms, 'leave', { invitationId: STE.invitationId, guestId: STE.guestId, stage: 'wedstay' }, PEG);
   assert.equal(r.status, 403);

@@ -23,15 +23,13 @@
   var RM = 'assets/images/rooms/';
   var KMG = 'assets/images/kunming/';
   var LJG = 'assets/images/lijiang/', JNY = 'assets/images/journey/';
-  var PENT = 'assets/images/penthouse/';
   /* ONE SOURCE MAP for the Bangkok accommodation imagery (Owner, 16 Sep 2026 · image quality quickfix): the hero of the
    * detail page, the card of every rail and overview (Your Journey, the journeys page, "Other rooms at …", THE HOUSES),
    * the gallery — one assignment per property, read everywhere. U Sathorn: the Owner's Drive folder of 16 Sep 2026
    * (14 images, all U Sathorn Bangkok: the pool pavilion at dusk and by day, the driveway, the U garden, the lobby, the
-   * aerial, the garden-view room). Shama and the Penthouse keep their own photography. */
+   * aerial, the garden-view room). Shama keeps its own photography. The Sathorn Penthouse was deleted (Edit 6, 24 Sep 2026). */
   var USA = 'assets/images/usathorn/', SHA = 'assets/images/shama/';
   var STAY_IMAGES = window.SIYL_STAY_IMAGES = {
-    sathornPenthouse: { hero: 'assets/images/journey/penthouse-01.jpg', card: PENT + 'exterior-golden-hour.jpg', houses: PENT + 'exterior-golden-hour.jpg' },
     uSathorn: { hero: USA + 'pool-pavilion-dusk.jpg', card: USA + 'pool-pavilion-day.jpg', houses: USA + 'pool-pavilion-day.jpg',
       gallery: [[USA + 'pool-pavilion-dusk.jpg', 'The pool pavilion at dusk'], [USA + 'pool-pavilion-day.jpg', 'The courtyard pool by day'], [USA + 'driveway-sunset.jpg', 'The driveway at sunset'],
         [USA + 'entrance-u-garden.jpg', 'The entrance and the U garden'], [USA + 'lobby.jpg', 'The lobby'],
@@ -83,7 +81,7 @@
      selected and reviewed on 09 September 2026, one named room per accommodation
      stage. Read by SIYL_PRICE.premium only.
 
-       21 – 24 FEB  Sathorn Penthouse                    85 × 3 = 255
+       21 – 24 FEB  (the Sathorn Penthouse — deleted, Edit 6, 24 Sep 2026: the stage falls to SIYL_PRICE.premium)
        24 – 25 FEB  Special Express No. 25                      100
        25 – 27 FEB  Heritage Grand Premier              170 × 2 = 340
        27 FEB – 01 MAR  Heritage Grand Premier          170 × 1 = 170
@@ -100,7 +98,6 @@
      gone the substitute — and the new total — are both real.
      ======================================================================== */
   window.SIYL_FULL_EXPERIENCE = {
-    'bkk-stay':  'penthouse',
     prewed:      'heritage-grand-premier',
     wedstay:     'heritage-grand-premier',
     kmg:         'italian',
@@ -118,7 +115,7 @@
        *   Accommodation_Details, row "Price Per Room per NIght" = 290 and row
        *   "Price per Person" = 145 for The Heritage → 145 is the PER PERSON,
        *   PER NIGHT share of the room rate (the same construction as the
-       *   Sathorn Penthouse, 340 per room / night ÷ 4 = 85 per person / night).
+       *   former Bangkok penthouse, 340 per room / night ÷ 4 = 85 per person / night).
        *   Accommodation_Details, row "Number of Night" = "2+2
        *   (25.02.–27.02. + 27.02.–01.03.2027)" → two consecutive two-night
        *   windows, no uncovered night on 27 February.
@@ -247,52 +244,16 @@
       place: 'Bangkok',
       breakfast: 'Breakfast not included · self-pay',
       windows: [{ id: 'bkk-stay', label: 'Before the Wedding', dates: '21 – 24 February 2027', nights: '3 nights', n: 3,
-        bagName: 'Sathorn Penthouse Bangkok', bagImg: 'assets/images/journey/penthouse-01.jpg' }],
-      /* the three Bangkok addresses each say what THEY include (room.includes);
+        bagName: 'Bangkok · Before the Wedding', bagImg: USA + 'pool-pavilion-day.jpg' }],
+      /* the two Bangkok addresses each say what THEY include (room.includes);
        * the group carries only what is true for every one of them */
       includes: [
         'Three nights, 21 → 22, 22 → 23 and 23 → 24 February.',
         'Arrival 21 February 2027: personal pickup by Haruthai — hosted.'
       ],
       rooms: [
-        { slug: 'penthouse', name: 'Sathorn Penthouse', cat: 'Whole home · six bedrooms', cardImg: STAY_IMAGES.sathornPenthouse.card,
-          desc: 'The shared days in Bangkok before travelling on to Laos — one penthouse for the whole party, capacity 12 adults.',
-          /* eleven UNIQUE photographs from Drive 020 (000–010). The former slide 2
-           * was the same living-room frame as slide 1 at a smaller size; it is
-           * replaced by the elevated exterior (Drive 001), which was missing. */
-          gallery: [
-            ['assets/images/journey/penthouse-01.jpg', 'The double-height living room'],
-            [PENT + 'living-above.jpg', 'The living room from the mezzanine'],
-            [PENT + 'lounge-corner.jpg', 'A lounge corner'],
-            [PENT + 'bedroom-corner.jpg', 'Corner bedroom with skyline view'],
-            [PENT + 'bedroom-skyline.jpg', 'Bedroom towards the skyline'],
-            [PENT + 'bedroom-courtyard.jpg', 'Bedroom towards the courtyard'],
-            [PENT + 'study-nook.jpg', 'The study nook'],
-            [PENT + 'balcony-garden.jpg', 'The balcony'],
-            [PENT + 'exterior-street.jpg', 'The house from the street'],
-            [PENT + 'exterior-elevated.jpg', 'The house from above'],
-            [PENT + 'exterior-golden-hour.jpg', 'The house at golden hour']],
-          facts: [['Size', '162 sq.m.'], ['Home', 'Six bedrooms · 5 king beds, 1 queen bed'], ['Capacity', '12 adults'], ['Floor', '4th and 5th floor · private elevator'], ['Stay', '21 – 24 February 2027 · 3 nights'], ['Arrival', '21 February · personal pickup by Haruthai']],
-          story: 'A whole house rather than a hotel floor: 162 square metres across the fourth and fifth storeys, six bedrooms, a double-height living room and a garden balcony. A private elevator with its own security system opens directly into the living floor. The kitchen is a real one, the Wi-Fi is measured at 710 Mbps, and there is a Casiotone in the corner for whoever gets there first.',
-          groups: [['Space', ['162 sq.m. over the 4th and 5th floors', 'Six bedrooms · 5 king beds, 1 queen bed', 'Double-height living room', 'Dining area and dining table', 'Terrace and balcony with garden furniture', 'Air conditioning, heating and portable fans']],
-            ['Kitchen', ['Fully equipped kitchen', 'Refrigerator and freezer', 'Oven, stove and microwave', 'Nespresso coffee machine', 'Electric kettle, toaster, blender and rice cooker', 'Pots, pans, dishes, cutlery and wine glasses']],
-            ['Entertainment', ['65" Smart TVs', 'Harman Kardon sound system', 'Piano · Casiotone keyboard', 'Books, reading material and board games']],
-            ['Work & connectivity', ['Free high-speed Wi-Fi · 710 Mbps, speed-verified', 'Ethernet connection', 'Dedicated workspace']],
-            ['Laundry & care', ['Washing machine and drying rack', 'Iron and ironing board', 'Clothes hangers and blackout blinds', 'Hair dryer, shampoo, shower gel and hot water', 'Towels, bed linen and a safe']],
-            ['Family', ['Travel crib', 'High chair', 'Corner protectors', 'Children’s books and toys']],
-            ['Access & safety', ['Private entrance and private elevator with security system', 'Self check-in by keybox', 'Free parking on the premises', 'Smoke and carbon-monoxide alarms', 'Fire extinguisher and first-aid kit']]],
-          amenities: null, rate: 85,
-          includes: [
-            'Three nights, 21 → 22, 22 → 23 and 23 → 24 February, in one house for the whole party.',
-            'Arrival 21 February 2027: personal pickup by Haruthai — hosted.',
-            'Self check-in by keybox, private entrance and private elevator.',
-            'Free parking on the premises.',
-            'Breakfast is NOT included — a breakfast place near the house is suggested and is self-pay.',
-            'Meals cooked in the house, groceries and anything bought in Bangkok are your own.'
-          ],
-          property: 'Sathorn Penthouse Bangkok', place: 'Sathorn, Bangkok',
-          card: 'Elegant 6BR Sathon Penthouse',
-          breakfast: 'Breakfast not included · self-pay', role: 'Preferred' },
+        /* SATHORN PENTHOUSE BANGKOK IS DELETED (Owner, 24 Sep 2026 · Edit 6): the room record, its gallery, its price and
+           its story are gone; nothing replaces it. U Sathorn and Shama are untouched. */
 
         /* 026 — U Sathorn Bangkok. Five photographs from the owner's folder,
          * inspected before assignment: the hero is the one frame that carries
@@ -706,7 +667,7 @@
      property's approved set resolves to '' — the intentional no-photo state — never to a second source.
      ========================================================================== */
   var STAY_FOLDERS = {
-    sathorn:    ['assets/images/penthouse/', 'assets/images/usathorn/', 'assets/images/shama/', 'assets/images/journey/penthouse-'],
+    sathorn:    ['assets/images/usathorn/', 'assets/images/shama/'],
     souphattra: ['assets/images/souphattra/', 'assets/images/rooms/'],   /* assets/images/rooms/ = the Souphattra's own room categories (its Drive folder) */
     guesthouse: ['assets/images/guesthouse/'],
     kunming:    ['assets/images/kunming/', 'assets/images/journey/kunming-'],
@@ -714,7 +675,7 @@
     kempinski:  ['assets/images/kempinski/', 'assets/images/journey/kempinski-']
   };
   /* the stay-media records (assets/stay-media.js) that belong to each property */
-  var STAY_MEDIA_KEYS = { sathorn: ['sathornPenthouse', 'uSathorn', 'shamaYenAkat'], souphattra: ['souphattra'], guesthouse: ['guestHouse'], kunming: ['wanxiang'], lijiang: ['luyeBaisha'], kempinski: ['kempinski'] };
+  var STAY_MEDIA_KEYS = { sathorn: ['uSathorn', 'shamaYenAkat'], souphattra: ['souphattra'], guesthouse: ['guestHouse'], kunming: ['wanxiang'], lijiang: ['luyeBaisha'], kempinski: ['kempinski'] };
   /* a frame the property may never show, whatever folder it sits in: destination photography by kind (the peak, the village, the city) */
   var NEVER = /snow-mountain-viewing-1\.jpg$|\/city\/|\/experiences\/|\/1872\/|\/marsilea\/|\/hero\/|\/event\/|\/venue\/|\/temple\/|\/dress|\/train\/|\/transport\/|\/timeline\/|\/alms\//;
   function inFolder(stayKey, src) {

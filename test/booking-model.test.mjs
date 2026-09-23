@@ -85,9 +85,11 @@ test('G/H · D1 full for the party → the waiting list is the guest\'s own choi
   assert.deepEqual(unitsOf('riverside/superior-window'), [], 'the retired Riverside has no units');
 });
 
-test('M/N · A1 / A2 / A3 are alternatives within stage A, D1 / D2 / D3 alternatives within stage D — one stage each in the journey, one hold per stage, never three stages', () => {
+test('M/N · A1 / A2 are alternatives within stage A (the Sathorn Penthouse deleted, Edit 6 · 24 Sep 2026), D1 / D2 alternatives within stage D — one stage each in the journey, one hold per stage, never three stages', () => {
   const w = page({ auth: PEGGY }); const J = w.SIYL_JOURNEY;
-  const A = ['bkk-stay/penthouse', 'bkk-stay/u-sathorn-superior-garden', 'bkk-stay/shama-king-studio-balcony'];
+  const A = ['bkk-stay/u-sathorn-superior-garden', 'bkk-stay/shama-king-studio-balcony'];
+  assert.deepEqual(Object.keys(SEED).filter((k) => stageOf(k) === 'bkk-stay'), A, 'stage A is exactly these two alternatives');
+  assert.equal(SEED['bkk-stay/penthouse'], undefined, 'the Sathorn Penthouse is deleted');
   const D = ['wedstay/heritage', 'guesthouse/guest-house'];
   for (const k of A) { assert.ok(SEED[k], k); assert.equal(stageOf(k), 'bkk-stay', k + ' is an alternative of stage A'); }
   for (const k of D) { assert.ok(SEED[k], k); assert.equal(stageOf(k), 'wedstay', k + ' is an alternative of stage D'); }

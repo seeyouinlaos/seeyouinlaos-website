@@ -51,14 +51,14 @@ test('nothing is reserved for anyone in the seed (Owner, 19 Sep 2026 · no fixed
     assert.equal(sellable(key), s.capacity, key + ': the whole category is sellable');
     assert.equal(unitsOf(key).every((u) => u.reservedFor === null), true, key + ' has no reserved unit');
   }
-  /* the rooms the old ledger kept back — the Presidential, the Penthouse's Room A, the Grand Majestic, the Solarium, the 270° suite — are open to everyone */
-  for (const k of ['prewed/souphattra-presidential', 'wedstay/souphattra-presidential', 'bkk-stay/penthouse', 'prewed/grand-majestic', 'wedstay/grand-majestic', 'kmg/solarium', 'ljg/view-suite-270']) assert.equal(sellable(k), SEED[k].capacity, k + ' is open to everyone');
+  /* the rooms the old ledger kept back — the Presidential, the Bangkok Room A (U Sathorn since the Sathorn Penthouse was deleted, Edit 6), the Grand Majestic, the Solarium, the 270° suite — are open to everyone */
+  for (const k of ['prewed/souphattra-presidential', 'wedstay/souphattra-presidential', 'bkk-stay/u-sathorn-superior-garden', 'prewed/grand-majestic', 'wedstay/grand-majestic', 'kmg/solarium', 'ljg/view-suite-270']) assert.equal(sellable(k), SEED[k].capacity, k + ' is open to everyone');
   /* who may join: any authenticated guest, any unit — a host like a guest */
   const guest = identity(PEGGY), host = identity(HARUTHAI, true);
-  assert.deepEqual(mayJoin(unitOf('bkk-stay/penthouse', 'A'), null), { ok: false, error: 'unauthorised' });
-  assert.deepEqual(mayJoin(unitOf('bkk-stay/penthouse', 'A'), guest), { ok: true }, 'the Penthouse\'s Room A is open to a guest');
+  assert.deepEqual(mayJoin(unitOf('bkk-stay/u-sathorn-superior-garden', 'A'), null), { ok: false, error: 'unauthorised' });
+  assert.deepEqual(mayJoin(unitOf('bkk-stay/u-sathorn-superior-garden', 'A'), guest), { ok: true }, 'U Sathorn\'s Room A is open to a guest');
   assert.deepEqual(mayJoin(unitOf('wedstay/souphattra-presidential', 'A'), guest), { ok: true }, 'the Presidential is open to a guest');
-  assert.deepEqual(mayJoin(unitOf('bkk-stay/penthouse', 'A'), host), { ok: true }, 'a host books like every guest');
+  assert.deepEqual(mayJoin(unitOf('bkk-stay/u-sathorn-superior-garden', 'A'), host), { ok: true }, 'a host books like every guest');
   assert.deepEqual(mayJoin(null, host), { ok: false, error: 'unknown room' });
   /* the seed is the only place a number lives; nothing there names anyone as a reservation; the arranged script is gone */
   const seedSrc = readFileSync(join(ROOT, 'src/inventory-seed.js'), 'utf8');
@@ -79,12 +79,14 @@ test('a party consumes rooms, not seats — ceil(guests ÷ occupancy)', () => {
   assert.equal(unitsFor('kmg/left-bank', 5), 2);
 });
 
-test('the six-bedroom Penthouse is six rooms of two places; the Guest House complimentary (D2) is ONE unit of SIX places held in GUESTS; the wedding window is ONE stage (Owner, 19 Sep 2026)', () => {
-  assert.equal(SEED['bkk-stay/penthouse'].unit, 'room');
-  assert.equal(SEED['bkk-stay/penthouse'].capacity, 6);
-  assert.equal(SEED['bkk-stay/penthouse'].occupancy, 2);
-  assert.equal(unitsFor('bkk-stay/penthouse', 4), 2);
-  assert.deepEqual(unitsOf('bkk-stay/penthouse').map((u) => [u.label, u.kind, u.places]), [['A', 'room', 2], ['B', 'room', 2], ['C', 'room', 2], ['D', 'room', 2], ['E', 'room', 2], ['F', 'room', 2]], 'Room A – F, twelve places, never a Room G');
+test('a six-room Bangkok category (U Sathorn — the Sathorn Penthouse deleted, Edit 6) is six rooms of two places; the Guest House complimentary (D2) is ONE unit of SIX places held in GUESTS; the wedding window is ONE stage (Owner, 19 Sep 2026)', () => {
+  assert.equal(SEED['bkk-stay/penthouse'], undefined, 'the Sathorn Penthouse is deleted (Edit 6, 24 Sep 2026)');
+  assert.deepEqual(Object.keys(SEED).filter((k) => k.startsWith('bkk-stay/')).sort(), ['bkk-stay/shama-king-studio-balcony', 'bkk-stay/u-sathorn-superior-garden']);
+  assert.equal(SEED['bkk-stay/u-sathorn-superior-garden'].unit, 'room');
+  assert.equal(SEED['bkk-stay/u-sathorn-superior-garden'].capacity, 6);
+  assert.equal(SEED['bkk-stay/u-sathorn-superior-garden'].occupancy, 2);
+  assert.equal(unitsFor('bkk-stay/u-sathorn-superior-garden', 4), 2);
+  assert.deepEqual(unitsOf('bkk-stay/u-sathorn-superior-garden').map((u) => [u.label, u.kind, u.places]), [['A', 'room', 2], ['B', 'room', 2], ['C', 'room', 2], ['D', 'room', 2], ['E', 'room', 2], ['F', 'room', 2]], 'Room A – F, twelve places, never a Room G');
   /* the Presidential is ONE room of TWO places, like every room */
   assert.deepEqual(unitsOf('wedstay/souphattra-presidential').map((u) => [u.label, u.places]), [['A', 2]]);
   /* D2 · the guest house: one shared unit of six bookable places, held in GUESTS */
@@ -180,9 +182,12 @@ test('the Owner\'s preferred rooms (SIYL_FULL_EXPERIENCE, read by SIYL_PRICE.pre
   sandbox.window.document = sandbox.document;
   new Function('window', 'document', readFileSync(join(ROOT, 'assets/rooms-data.js'), 'utf8'))(sandbox.window, sandbox.document);
   const FE = sandbox.window.SIYL_FULL_EXPERIENCE;
-  assert.deepEqual(FE, { 'bkk-stay': 'penthouse', prewed: 'heritage-grand-premier',
+  /* no preferred Bangkok room since the Sathorn Penthouse was deleted (Edit 6, 24 Sep 2026): that stage falls to SIYL_PRICE.premium */
+  assert.deepEqual(FE, { prewed: 'heritage-grand-premier',
     wedstay: 'heritage-grand-premier', kmg: 'italian', ljg: 'viewing-270',
     kempinski: 'deluxe-balcony-king' });
+  assert.equal(FE['bkk-stay'], undefined);
+  assert.ok(sellable('bkk-stay/u-sathorn-superior-garden') > 0, 'the premium Bangkok fallback has stock behind it');
   for (const [win, slug] of Object.entries(FE)) {
     const key = `${win}/${slug}`;
     assert.ok(SEED[key], key + ' is not stock-controlled');
@@ -332,8 +337,8 @@ test('the hosts have no special room and the Bag carries only actual selections 
   const v = U.view();
   assert.deepEqual(plain(v.mine), {}, 'nothing is held before booking'); assert.equal(v.fixed, undefined, 'the view knows no fixed arrangement');
   assert.ok(Object.values(v.units).every((list) => list.every((u) => u.eligible === true && u.reservedFor === null && u.taken === 0)), 'every unit of every category is open to the hosts, none is theirs in advance');
-  assert.deepEqual(plain(v.units['bkk-stay/penthouse'].map((u) => [u.label, u.free])), [['A', 2], ['B', 2], ['C', 2], ['D', 2], ['E', 2], ['F', 2]]);
-  assert.equal(v.summary['bkk-stay/penthouse'].ownerReservedRooms, 0); assert.equal(v.summary['wedstay/souphattra-presidential'].reservedFor, null); assert.equal(v.summary['wedstay/souphattra-presidential'].free, 2);
+  assert.deepEqual(plain(v.units['bkk-stay/u-sathorn-superior-garden'].map((u) => [u.label, u.free])), [['A', 2], ['B', 2], ['C', 2], ['D', 2], ['E', 2], ['F', 2]]);
+  assert.equal(v.summary['bkk-stay/u-sathorn-superior-garden'].ownerReservedRooms, 0); assert.equal(v.summary['wedstay/souphattra-presidential'].reservedFor, null); assert.equal(v.summary['wedstay/souphattra-presidential'].free, 2);
   /* the inert names of the old rule */
   assert.equal(U.fixed(), false); assert.equal(U.fixedUnit(), null); assert.deepEqual(plain(U.fixedStages()), []); assert.equal(U.reserved(), false);
   assert.equal(ST.fixed(), false); assert.equal(ST.fixedSlug(), ''); assert.equal(w.SIYL_ARRANGED, undefined); assert.equal(w.SIYL_PRICE.reservedFor(), null);
@@ -344,23 +349,23 @@ test('the hosts have no special room and the Bag carries only actual selections 
   for (const seg of J.SEGMENTS) assert.equal(J.state(seg), 'open', seg.key + ' is open — never "arranged"');
   assert.equal(J.statusLine(), '10 details to choose.');
   assert.equal(J.countsWords(), '10 still open — of the 10 stages of your trip');
-  /* the couple book their own places like everyone else: Room A of the Penthouse, then a change of room — ONE hold per stage */
-  assert.deepEqual(plain(await ST.select('bkk-stay', 'penthouse', undefined, 2)), { ok: true, unit: 'A' });
-  assert.deepEqual(plain(U.mine('bkk-stay')), { key: 'bkk-stay/penthouse', label: 'A' });
-  assert.equal(B.total(), 255); assert.deepEqual(plain(B.get().map((x) => [x.id, x.unit, x.unitName])), [['bkk-stay', 'A', 'Room A']]);
-  assert.deepEqual(plain(await ST.select('bkk-stay', 'penthouse', 'C', 2)), { ok: true, unit: 'C' });
-  assert.deepEqual(plain(U.mine('bkk-stay')), { key: 'bkk-stay/penthouse', label: 'C' });
-  assert.deepEqual(plain(U.units('bkk-stay', 'penthouse').map((u) => u.taken)), [0, 0, 2, 0, 0, 0], 'the old place — and the place kept for her party there — was released once the new one was held; the new room keeps a place for her party');
+  /* the couple book their own places like everyone else: Room A of U Sathorn, then a change of room — ONE hold per stage */
+  assert.deepEqual(plain(await ST.select('bkk-stay', 'u-sathorn-superior-garden', undefined, 2)), { ok: true, unit: 'A' });
+  assert.deepEqual(plain(U.mine('bkk-stay')), { key: 'bkk-stay/u-sathorn-superior-garden', label: 'A' });
+  assert.equal(B.total(), 192);   /* U Sathorn · USD 64 × 3 nights */ assert.deepEqual(plain(B.get().map((x) => [x.id, x.unit, x.unitName])), [['bkk-stay', 'A', 'Room A']]);
+  assert.deepEqual(plain(await ST.select('bkk-stay', 'u-sathorn-superior-garden', 'C', 2)), { ok: true, unit: 'C' });
+  assert.deepEqual(plain(U.mine('bkk-stay')), { key: 'bkk-stay/u-sathorn-superior-garden', label: 'C' });
+  assert.deepEqual(plain(U.units('bkk-stay', 'u-sathorn-superior-garden').map((u) => u.taken)), [0, 0, 2, 0, 0, 0], 'the old place — and the place kept for her party there — was released once the new one was held; the new room keeps a place for her party');
   assert.deepEqual(plain(B.get().map((x) => [x.id, x.unit])), [['bkk-stay', 'C']]);
-  c = plain(J.counts()); assert.deepEqual([c.confirmed, c.open, c.bagItems, c.bagTotal], [1, 9, 1, 255]);
+  c = plain(J.counts()); assert.deepEqual([c.confirmed, c.open, c.bagItems, c.bagTotal], [1, 9, 1, 192]);
   /* Suthep sees Haruthai by first name, and the unit she holds is the one suggested to him */
   const w2 = page({ auth: SUTHEP, fetch: await roomsFetch(rooms, identity(SUTHEP, true)) }); await w2.SIYL_UNITS.load(true);
-  assert.deepEqual(plain(w2.SIYL_UNITS.units('bkk-stay', 'penthouse')[2].occupants), [{ name: 'Haruthai', mine: false, party: true }, { name: 'Your party', mine: false, party: true, placeholder: true }], 'Haruthai, and the place she keeps for him');
-  assert.equal(w2.SIYL_UNITS.suggest('bkk-stay', 'penthouse').label, 'C', 'the unit a party member already holds is suggested');
-  assert.equal(w2.SIYL_UNITS.unitForParty('bkk-stay', 'penthouse', 2).label, 'C', 'and it takes the party: the member already there counts');
+  assert.deepEqual(plain(w2.SIYL_UNITS.units('bkk-stay', 'u-sathorn-superior-garden')[2].occupants), [{ name: 'Haruthai', mine: false, party: true }, { name: 'Your party', mine: false, party: true, placeholder: true }], 'Haruthai, and the place she keeps for him');
+  assert.equal(w2.SIYL_UNITS.suggest('bkk-stay', 'u-sathorn-superior-garden').label, 'C', 'the unit a party member already holds is suggested');
+  assert.equal(w2.SIYL_UNITS.unitForParty('bkk-stay', 'u-sathorn-superior-garden', 2).label, 'C', 'and it takes the party: the member already there counts');
   /* without an identity the engine says counts only — no name, no id, nothing fixed */
   const anon = await (await rooms.fetch(new Request('https://x/api/rooms/'))).json();
-  assert.equal(anon.fixed, undefined); assert.deepEqual(anon.mine, {}); assert.deepEqual(anon.units['bkk-stay/penthouse'][2].occupants, [{}, {}], 'two places taken (hers, and the one kept for her party) — nothing about whom'); assert.equal(anon.units['bkk-stay/penthouse'][2].eligible, false);
+  assert.equal(anon.fixed, undefined); assert.deepEqual(anon.mine, {}); assert.deepEqual(anon.units['bkk-stay/u-sathorn-superior-garden'][2].occupants, [{}, {}], 'two places taken (hers, and the one kept for her party) — nothing about whom'); assert.equal(anon.units['bkk-stay/u-sathorn-superior-garden'][2].eligible, false);
   /* the record carries the host flag; the mail takes host-ness from it, never from a room */
   assert.match(readFileSync(join(ROOT, 'src/worker.js'), 'utf8'), /hosts: !!who\.hosts/, 'the Worker stores hosts on every record');
   const mail = readFileSync(join(ROOT, 'src/mail-templates.js'), 'utf8');

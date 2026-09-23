@@ -43,28 +43,29 @@ test('ENGINE · nothing is held for anyone in advance (Owner, 19 Sep 2026): a ho
   const h = await call(rooms, 'read', null, HOST);
   assert.equal(h.status, 200); assert.equal(h.d.fixed, undefined, 'no fixed map for the hosts'); assert.deepEqual(h.d.mine, {}); assert.deepEqual(h.d.waitlist, {}); assert.deepEqual(h.d.waiting, {});
   for (const list of Object.values(h.d.units)) for (const u of list) { assert.equal(u.reservedFor, null); assert.equal(u.eligible, true); assert.equal(u.taken, 0); assert.equal(u.full, false); assert.equal(u.free, u.places); }
-  const pent = h.d.units['bkk-stay/penthouse']; assert.equal(pent.length, 6); assert.ok(pent.every((u) => u.places === 2)); assert.equal(h.d.summary['bkk-stay/penthouse'].remainingPlaces, 12); assert.equal(h.d.summary['bkk-stay/penthouse'].ownerReservedRooms, 0);
+  const usat = h.d.units['bkk-stay/u-sathorn-superior-garden']; assert.equal(usat.length, 6); assert.ok(usat.every((u) => u.places === 2)); assert.equal(h.d.summary['bkk-stay/u-sathorn-superior-garden'].remainingPlaces, 12); assert.equal(h.d.summary['bkk-stay/u-sathorn-superior-garden'].ownerReservedRooms, 0);
+  assert.equal(h.d.units['bkk-stay/penthouse'], undefined, 'the deleted Sathorn Penthouse has no units'); assert.equal(h.d.summary['bkk-stay/penthouse'], undefined);
   assert.equal(h.d.summary['guesthouse/guest-house'].places, 6); assert.equal(h.d.summary['guesthouse/guest-house'].kind, 'property');
-  /* the host books Room A of the Penthouse — a hold like any guest's, no marker */
-  const j = await call(rooms, 'join', { invitationId: HOST.invitationId, guestId: HOST.guestId, key: 'bkk-stay/penthouse', label: 'A', name: 'Suthep' }, HOST);
-  assert.equal(j.status, 200); assert.deepEqual(j.d.mine, { 'bkk-stay': { key: 'bkk-stay/penthouse', label: 'A' } }); assert.equal(j.d.fixed, undefined); assert.equal(j.d.mine['bkk-stay'].fixed, undefined);
-  assert.equal(j.d.summary['bkk-stay/penthouse'].remainingPlaces, 11);
-  assert.deepEqual(j.d.units['bkk-stay/penthouse'][0].occupants, [{ name: 'Suthep', mine: true, party: true, guestId: 'G049' }]);
+  /* the host books Room A of U Sathorn — a hold like any guest's, no marker */
+  const j = await call(rooms, 'join', { invitationId: HOST.invitationId, guestId: HOST.guestId, key: 'bkk-stay/u-sathorn-superior-garden', label: 'A', name: 'Suthep' }, HOST);
+  assert.equal(j.status, 200); assert.deepEqual(j.d.mine, { 'bkk-stay': { key: 'bkk-stay/u-sathorn-superior-garden', label: 'A' } }); assert.equal(j.d.fixed, undefined); assert.equal(j.d.mine['bkk-stay'].fixed, undefined);
+  assert.equal(j.d.summary['bkk-stay/u-sathorn-superior-garden'].remainingPlaces, 11);
+  assert.deepEqual(j.d.units['bkk-stay/u-sathorn-superior-garden'][0].occupants, [{ name: 'Suthep', mine: true, party: true, guestId: 'G049' }]);
   /* no room is the hosts': a guest joins the host's Room A, and the room is then full */
-  const j2 = await call(rooms, 'join', { invitationId: PEGGY.invitationId, guestId: PEGGY.guestId, key: 'bkk-stay/penthouse', label: 'A', name: 'Peggy' }, ident(PEGGY));
-  assert.equal(j2.status, 200); assert.deepEqual(j2.d.mine['bkk-stay'], { key: 'bkk-stay/penthouse', label: 'A' });
-  assert.deepEqual(j2.d.units['bkk-stay/penthouse'][0].occupants.map((o) => o.name).sort(), ['Peggy', 'Suthep']); assert.equal(j2.d.units['bkk-stay/penthouse'][0].full, true);
-  assert.equal(j2.d.units['bkk-stay/penthouse'][0].reservedFor, null, 'the couple\'s presence reserves nothing');
+  const j2 = await call(rooms, 'join', { invitationId: PEGGY.invitationId, guestId: PEGGY.guestId, key: 'bkk-stay/u-sathorn-superior-garden', label: 'A', name: 'Peggy' }, ident(PEGGY));
+  assert.equal(j2.status, 200); assert.deepEqual(j2.d.mine['bkk-stay'], { key: 'bkk-stay/u-sathorn-superior-garden', label: 'A' });
+  assert.deepEqual(j2.d.units['bkk-stay/u-sathorn-superior-garden'][0].occupants.map((o) => o.name).sort(), ['Peggy', 'Suthep']); assert.equal(j2.d.units['bkk-stay/u-sathorn-superior-garden'][0].full, true);
+  assert.equal(j2.d.units['bkk-stay/u-sathorn-superior-garden'][0].reservedFor, null, 'the couple\'s presence reserves nothing');
   /* the last place was filled: the next guest is refused and holds nothing */
-  const j3 = await call(rooms, 'join', { invitationId: LIN.invitationId, guestId: LIN.guestId, key: 'bkk-stay/penthouse', label: 'A', name: 'Lin' }, ident(LIN));
+  const j3 = await call(rooms, 'join', { invitationId: LIN.invitationId, guestId: LIN.guestId, key: 'bkk-stay/u-sathorn-superior-garden', label: 'A', name: 'Lin' }, ident(LIN));
   assert.equal(j3.status, 409); assert.equal(j3.d.error, 'full'); assert.deepEqual(j3.d.mine, {});
   /* ONE hold per stage: the host's second choice in the same stage releases the first */
-  const j4 = await call(rooms, 'join', { invitationId: HOST.invitationId, guestId: HOST.guestId, key: 'bkk-stay/u-sathorn-superior-garden', label: 'B', name: 'Suthep' }, HOST);
-  assert.equal(j4.status, 200); assert.deepEqual(j4.d.mine, { 'bkk-stay': { key: 'bkk-stay/u-sathorn-superior-garden', label: 'B' } });
-  assert.deepEqual(j4.d.units['bkk-stay/penthouse'][0].occupants.map((o) => o.name), ['Peggy']); assert.equal(j4.d.summary['bkk-stay/penthouse'].remainingPlaces, 11);
+  const j4 = await call(rooms, 'join', { invitationId: HOST.invitationId, guestId: HOST.guestId, key: 'bkk-stay/shama-king-studio-balcony', label: 'B', name: 'Suthep' }, HOST);
+  assert.equal(j4.status, 200); assert.deepEqual(j4.d.mine, { 'bkk-stay': { key: 'bkk-stay/shama-king-studio-balcony', label: 'B' } });
+  assert.deepEqual(j4.d.units['bkk-stay/u-sathorn-superior-garden'][0].occupants.map((o) => o.name), ['Peggy']); assert.equal(j4.d.summary['bkk-stay/u-sathorn-superior-garden'].remainingPlaces, 11);
   /* eligibility asks only for an identity */
-  assert.equal(mayJoin(unitOf('bkk-stay/penthouse', 'A'), ident(LIN)).ok, true); assert.equal(mayJoin(unitOf('bkk-stay/penthouse', 'A'), null).ok, false);
-  const anon = await call(rooms, 'read', null, null); assert.deepEqual(anon.d.mine, {}); assert.ok(anon.d.units['bkk-stay/penthouse'][0].occupants.every((o) => o.name === undefined), 'no name without a session');
+  assert.equal(mayJoin(unitOf('bkk-stay/u-sathorn-superior-garden', 'A'), ident(LIN)).ok, true); assert.equal(mayJoin(unitOf('bkk-stay/u-sathorn-superior-garden', 'A'), null).ok, false);
+  const anon = await call(rooms, 'read', null, null); assert.deepEqual(anon.d.mine, {}); assert.ok(anon.d.units['bkk-stay/u-sathorn-superior-garden'][0].occupants.every((o) => o.name === undefined), 'no name without a session');
 });
 
 test('CLIENT · THE BAG = actual selections only: nothing chosen is USD 0 with no line, on a host\'s device exactly as on a guest\'s; the fixed API is inert and no arranged renderer exists; a place the engine holds becomes a Bag line with its amount through the sync, once; a line whose place is not held keeps no unit', async () => {
@@ -76,27 +77,47 @@ test('CLIENT · THE BAG = actual selections only: nothing chosen is USD 0 with n
     B.set([]);
     U._set(await rooms.view(ident(who)));
     ST.sync(); assert.deepEqual(plain(B.get()), []); assert.equal(B.total(), 0);
-    assert.equal(U.fixed('bkk-stay'), false); assert.deepEqual(plain(U.fixedStages()), []); assert.equal(U.fixedUnit('bkk-stay'), null); assert.equal(U.reserved('bkk-stay', 'penthouse'), false);
+    assert.equal(U.fixed('bkk-stay'), false); assert.deepEqual(plain(U.fixedStages()), []); assert.equal(U.fixedUnit('bkk-stay'), null); assert.equal(U.reserved('bkk-stay', 'u-sathorn-superior-garden'), false);
     assert.equal(ST.fixed('bkk-stay'), false); assert.equal(ST.fixedSlug('bkk-stay'), '');
     assert.equal(J.state(segOf(w, 'bkk-stay')), 'open', 'nothing is arranged: the stage is open');
     const c0 = J.counts(); assert.equal(c0.bagItems, 0); assert.equal(c0.bagTotal, 0); assert.equal(c0.confirmed, 0); assert.equal(c0.relevant, c0.confirmed + c0.waitlisted + c0.declined + c0.open);
     assert.ok(G.missingFor('journey').some((m) => m.key === 'stage:bkk-stay'), 'the Bangkok stay is asked of the hosts as of everyone');
-    /* the engine holds Room A of the Penthouse for this guest (another device, a migration): the line comes back from the one pricing source, with its amount */
-    const j = await call(rooms, 'join', { invitationId: who.invitationId, guestId: who.guestId, key: 'bkk-stay/penthouse', label: 'A', name: who.preferredName }, ident(who)); assert.equal(j.status, 200);
+    /* the engine holds Room A of U Sathorn for this guest (another device, a migration): the line comes back from the one pricing source, with its amount */
+    const j = await call(rooms, 'join', { invitationId: who.invitationId, guestId: who.guestId, key: 'bkk-stay/u-sathorn-superior-garden', label: 'A', name: who.preferredName }, ident(who)); assert.equal(j.status, 200);
     U._set(await rooms.view(ident(who)));
     ST.sync();
     const bag = B.get(); assert.equal(bag.length, 1); const x = bag[0];
-    assert.equal(x.id, 'bkk-stay'); assert.equal(x.room, 'penthouse'); assert.equal(x.unit, 'A'); assert.equal(x.unitName, 'Room A'); assert.equal(x.price, P.quote('bkk-stay', 'penthouse').total); assert.ok(x.price > 0, 'a hold has its amount');
+    assert.equal(x.id, 'bkk-stay'); assert.equal(x.room, 'u-sathorn-superior-garden'); assert.equal(x.unit, 'A'); assert.equal(x.unitName, 'Room A'); assert.equal(x.price, P.quote('bkk-stay', 'u-sathorn-superior-garden').total); assert.ok(x.price > 0, 'a hold has its amount');
     assert.equal(B.total(), x.price); assert.equal(J.state(segOf(w, 'bkk-stay')), 'selected'); assert.equal(ST.held(x), true); assert.equal(ST.unitWords(x), 'Room A · You · 1 place available');
     const c1 = J.counts(); assert.equal(c1.bagItems, 1); assert.equal(c1.bagTotal, x.price); assert.equal(c1.confirmed, 1);
     ST.sync(); assert.equal(B.get().length, 1, 'the sync is idempotent'); assert.equal(B.total(), x.price);
     lines[who.guestId] = JSON.stringify(x);
     /* the place is released elsewhere: the line stays the guest's own but carries no unit and asks for a room — nothing is invented */
-    await call(rooms, 'leave', { invitationId: who.invitationId, guestId: who.guestId, key: 'bkk-stay/penthouse' }, ident(who));
+    await call(rooms, 'leave', { invitationId: who.invitationId, guestId: who.guestId, key: 'bkk-stay/u-sathorn-superior-garden' }, ident(who));
     U._set(await rooms.view(ident(who))); ST.sync();
     assert.equal(B.get().length, 1); assert.equal(B.get()[0].unit, null); assert.equal(ST.held(B.get()[0]), false); assert.ok(G.missingFor('journey').some((m) => m.key === 'room:bkk-stay'), 'the room is to choose');
   }
   assert.equal(lines[SUTHEP.guestId], lines[PEGGY.guestId], 'the host\'s line is a guest\'s line — same product, same amount, same room');
+});
+
+test('CLIENT · THE DELETED SATHORN PENTHOUSE (Owner, 24 Sep 2026 · Edit 6): a saved Bag line naming it leaves the Bag and the total after the sync — with or without an engine hold on it — and is never turned into another Bangkok room', async () => {
+  for (const hold of [false, true]) {
+    const saved = [{ id: 'bkk-stay', name: 'Sathorn Penthouse Bangkok', meta: '21 – 24 February 2027 · Sathorn Penthouse', price: 255, qty: 1, stay: 'sathorn', room: 'penthouse', unit: 'A', unitName: 'Room A' }, { id: 'train', name: 'Special Express No. 25', meta: '24 – 25 February 2027 · First Class Sleeper', price: 100, qty: 1 }];
+    const w = page({ auth: PEGGY, seed: { 'siyl.guest': JSON.stringify({ scope: { bangkok: true, vientiane: true, china: true, none: false, at: '2026-09-24T10:00:00.000Z', by: 'g-peggy' }, guests: {} }), 'siyl.bag': JSON.stringify(saved) } });
+    const U = w.SIYL_UNITS, ST = w.SIYL_STAY, B = w.SIYL_BAG, J = w.SIYL_JOURNEY;
+    const v = await new Rooms(doState()).view(ident(PEGGY));
+    /* the engine cannot hold the deleted key any more (join answers 404); a hold left from before the deletion is simulated in the view */
+    if (hold) v.mine = { ...v.mine, 'bkk-stay': { key: 'bkk-stay/penthouse', label: 'A' } };
+    U._set(v); ST.sync();
+    const why = hold ? ' (engine hold on the deleted key)' : ' (no engine hold)';
+    const lines = plain(B.get());
+    assert.equal(lines.filter((x) => x.id === 'bkk-stay').length, 0, 'the Penthouse line is gone from the Bag' + why);
+    assert.ok(!lines.some((x) => x.room === 'penthouse'), 'no line names the deleted room' + why);
+    assert.ok(!lines.some((x) => /u-sathorn|shama/.test(x.room || '') || /U Sathorn|Shama/.test(x.name || '')), 'no Bangkok line is invented in its place' + why);
+    assert.deepEqual(lines.map((x) => x.id), ['train'], 'every other line is kept' + why);
+    assert.equal(B.total(), 100, 'the total excludes the 255' + why);
+    assert.equal(J.state(segOf(w, 'bkk-stay')), 'open', 'the Bangkok stage asks for a choice again' + why);
+  }
 });
 
 test('CLIENT · a hold is a Bag line with its amount and the guest\'s to give back: Select holds the place first and writes the line; ONE selection per stage; the Guest House complimentary is a line at USD 0 whose occupancy others see; Remove releases through the engine and is idempotent (USD 0); a full room and a room too small for the party are refused with words that name no arrangement', async () => {
@@ -105,18 +126,18 @@ test('CLIENT · a hold is a Bag line with its amount and the guest\'s to give ba
   G.setScope({ all: true }); await U.load(); assert.equal(U.ready(), true);
   B.set([]); assert.equal(B.total(), 0);
   /* SELECT: the place, then the line */
-  const s = await ST.select('bkk-stay', 'penthouse'); assert.deepEqual(plain(s), { ok: true, unit: 'A' });
-  assert.deepEqual((await rooms.view(ident(PEGGY))).mine, { 'bkk-stay': { key: 'bkk-stay/penthouse', label: 'A' } });
-  assert.equal(B.get().length, 1); assert.equal(B.get()[0].unit, 'A'); assert.equal(B.get()[0].price, P.quote('bkk-stay', 'penthouse').total); assert.equal(B.total(), B.get()[0].price);
-  /* ONE selection per stage: another address of the same stage replaces the line and the hold */
-  const s2 = await ST.select('bkk-stay', 'u-sathorn-superior-garden'); assert.equal(s2.ok, true);
+  const s = await ST.select('bkk-stay', 'u-sathorn-superior-garden'); assert.deepEqual(plain(s), { ok: true, unit: 'A' });
   assert.deepEqual((await rooms.view(ident(PEGGY))).mine, { 'bkk-stay': { key: 'bkk-stay/u-sathorn-superior-garden', label: 'A' } });
-  assert.equal(B.get().length, 1); assert.equal(B.get()[0].room, 'u-sathorn-superior-garden'); assert.equal(B.total(), P.quote('bkk-stay', 'u-sathorn-superior-garden').total);
+  assert.equal(B.get().length, 1); assert.equal(B.get()[0].unit, 'A'); assert.equal(B.get()[0].price, P.quote('bkk-stay', 'u-sathorn-superior-garden').total); assert.equal(B.total(), B.get()[0].price);
+  /* ONE selection per stage: another address of the same stage replaces the line and the hold */
+  const s2 = await ST.select('bkk-stay', 'shama-king-studio-balcony'); assert.equal(s2.ok, true);
+  assert.deepEqual((await rooms.view(ident(PEGGY))).mine, { 'bkk-stay': { key: 'bkk-stay/shama-king-studio-balcony', label: 'A' } });
+  assert.equal(B.get().length, 1); assert.equal(B.get()[0].room, 'shama-king-studio-balcony'); assert.equal(B.total(), P.quote('bkk-stay', 'shama-king-studio-balcony').total);
   /* THE GUEST HOUSE COMPLIMENTARY: a Bag line at USD 0, one of six shared places, in the wedding stage */
   const g = await ST.select('guesthouse', 'guest-house', null, 2); assert.deepEqual(plain(g), { ok: true, unit: 'A' });
   const gh = B.get().filter((x) => x.id === 'guesthouse')[0]; assert.ok(gh, 'the Guest House is a Bag line');
   assert.equal(gh.price, 0); assert.equal(gh.complimentary, true); assert.equal(gh.interest, false); assert.equal(gh.unit, 'A'); assert.equal(gh.unitName, 'Guest House complimentary'); assert.equal(gh.name, 'Guest House complimentary · Vientiane'); assert.doesNotMatch(gh.meta + gh.name, /Private Residence|up to 4/);
-  assert.equal(B.get().length, 2); assert.equal(B.total(), P.quote('bkk-stay', 'u-sathorn-superior-garden').total, 'a complimentary line adds nothing');
+  assert.equal(B.get().length, 2); assert.equal(B.total(), P.quote('bkk-stay', 'shama-king-studio-balcony').total, 'a complimentary line adds nothing');
   assert.equal(J.state(segOf(w, 'wedstay')), 'selected'); const c = J.counts(); assert.equal(c.bagItems, 2); assert.equal(c.confirmed, 2); assert.equal(c.bagTotal, B.total());
   assert.deepEqual((await rooms.view(ident(PEGGY))).mine.wedstay, { key: 'guesthouse/guest-house', label: 'A' });
   const lin = await rooms.view(ident(LIN)); assert.deepEqual(lin.units['guesthouse/guest-house'][0].occupants.map((o) => o.name), ['Peggy', 'Reserved'], 'who shares the house is visible by first name — and the place kept for her party as reserved'); assert.equal(lin.units['guesthouse/guest-house'][0].free, 4);
@@ -202,24 +223,24 @@ test('WORKER · a stale device cannot resurrect a removed item: a PUT that names
 
 test('WORKER · a host\'s draft is stored exactly as sent — nothing is stripped, no line of any stage is the Worker\'s to remove; the guest\'s email lists the room the engine holds under STAYS with its amount and has no Arranged section; host-ness comes from the record\'s `hosts`, never from a room', async () => {
   const h = await harness();
-  const bag = [{ id: 'bkk-stay', name: 'Sathorn Penthouse Bangkok', meta: '21 – 24 February 2027 · Sathorn Penthouse', price: 255, qty: 1, stay: 'sathorn', room: 'penthouse', unit: 'A', unitName: 'Room A' }, { id: 'train', name: 'Special Express No. 25', meta: '24 – 25 February 2027 · First Class Sleeper', price: 100, qty: 1 }];
+  const bag = [{ id: 'bkk-stay', name: 'U Sathorn Bangkok', meta: '21 – 24 February 2027 · Superior Room With Garden View', price: 192, qty: 1, stay: 'sathorn', room: 'u-sathorn-superior-garden', unit: 'A', unitName: 'Room A' }, { id: 'train', name: 'Special Express No. 25', meta: '24 – 25 February 2027 · First Class Sleeper', price: 100, qty: 1 }];
   const r = await h.w.fetch(req('/api/draft', { 'x-siyl-auth': h.host }, { invitationId: 'INV-G049', keys: { 'siyl.bag': JSON.stringify(bag) } }, 'PUT'), h.env);
   assert.equal(r.status, 200);
   const stored = JSON.parse(JSON.parse(h.env.REG_KV.m.get('draft:INV-G049').v).keys['siyl.bag']);
   assert.deepEqual(stored, bag, 'the host\'s Bag is stored as sent — the Bangkok stay is a selection like any other');
-  assert.equal(stored.reduce((t, x) => t + x.price * x.qty, 0), 355);
+  assert.equal(stored.reduce((t, x) => t + x.price * x.qty, 0), 292);
   const back = await (await h.w.fetch(req('/api/draft', { 'x-siyl-auth': h.host }), h.env)).json(); assert.deepEqual(JSON.parse(back.draft.keys['siyl.bag']).map((x) => x.id), ['bkk-stay', 'train']);
   /* the email model: the held room is a stay with its amount; no Arranged section; the hosts' only distinction is the ceremony's front centre, read from `hosts` */
   const rec = { invitationId: 'INV-G049', guestId: 'G049', hosts: true, submissionId: 'SYL-G049-TEST0001', kind: 'initial', version: 1, submittedAt: '2026-09-19T10:00:00.000Z', lastSentAt: '2026-09-19T10:00:00.000Z',
-    registration: { channel: 'journey-shop', guestId: 'G049', totalUsd: 355, contact: { email: 'groom.test@example.org', phone: '+66' }, selections: bag, guestRecord: { guests: [{ guestId: 'G049', name: 'Suthep', source: { fullName: 'Suthep Test', preferredName: 'Suthep' } }] } },
-    rooms: { 'bkk-stay': { stage: 'bkk-stay', key: 'bkk-stay/penthouse', label: 'A', name: 'Sathorn Penthouse', stay: 'Sathorn Penthouse Bangkok', room: 'Room A' } }, recipient: { email: 'groom.test@example.org', phone: '+66' } };
-  const M = journeyModel(rec); assert.deepEqual(M.arranged, []); assert.equal(M.hosts, true); assert.equal(M.total, 355); assert.deepEqual(M.waitlisted, []);
-  assert.deepEqual(M.stays.map((s) => [s.name, s.room, s.price]), [['Sathorn Penthouse Bangkok', 'Room A', 255]]); assert.deepEqual(M.travel.map((t) => [t.name, t.price]), [['Special Express No. 25', 100]]); assert.deepEqual(M.experiences, []);
+    registration: { channel: 'journey-shop', guestId: 'G049', totalUsd: 292, contact: { email: 'groom.test@example.org', phone: '+66' }, selections: bag, guestRecord: { guests: [{ guestId: 'G049', name: 'Suthep', source: { fullName: 'Suthep Test', preferredName: 'Suthep' } }] } },
+    rooms: { 'bkk-stay': { stage: 'bkk-stay', key: 'bkk-stay/u-sathorn-superior-garden', label: 'A', name: 'Superior Room With Garden View', stay: 'U Sathorn Bangkok', room: 'Room A' } }, recipient: { email: 'groom.test@example.org', phone: '+66' } };
+  const M = journeyModel(rec); assert.deepEqual(M.arranged, []); assert.equal(M.hosts, true); assert.equal(M.total, 292); assert.deepEqual(M.waitlisted, []);
+  assert.deepEqual(M.stays.map((s) => [s.name, s.room, s.price]), [['U Sathorn Bangkok', 'Room A', 192]]); assert.deepEqual(M.travel.map((t) => [t.name, t.price]), [['Special Express No. 25', 100]]); assert.deepEqual(M.experiences, []);
   assert.equal(M.seats.ceremony.label, 'Front centre', 'a host without a seat: front centre, from record.hosts'); assert.equal(journeyModel({ ...rec, hosts: false }).seats.ceremony.label, '', 'a guest without a seat: no label — the room says nothing about who the hosts are');
   const g = composeGuestMail(rec), o = composeOwnerMail(rec, 'https://x/s');
-  for (const t of [g.text, g.html, o.text, o.html]) { assert.doesNotMatch(t, /Arranged for you|ARRANGED FOR YOU|fixed arrangement|Fixed arrangement|not part of your bag|Waiting list|WAITING LIST/); assert.match(t, /Sathorn Penthouse Bangkok/); assert.match(t, /Room A/); assert.match(t, /USD 255/); assert.match(t, /USD 355/); }
-  assert.match(g.text, /STAYS\n· Sathorn Penthouse Bangkok — 21 – 24 February 2027 — Sathorn Penthouse — Room A — USD 255/);
-  assert.match(g.text, /YOUR COST\nUSD 355/); assert.match(o.text, /COST\nUSD 355/);
+  for (const t of [g.text, g.html, o.text, o.html]) { assert.doesNotMatch(t, /Arranged for you|ARRANGED FOR YOU|fixed arrangement|Fixed arrangement|not part of your bag|Waiting list|WAITING LIST/); assert.match(t, /U Sathorn Bangkok/); assert.match(t, /Room A/); assert.match(t, /USD 192/); assert.match(t, /USD 292/); }
+  assert.match(g.text, /STAYS\n· U Sathorn Bangkok — 21 – 24 February 2027 — Superior Room With Garden View — Room A — USD 192/);
+  assert.match(g.text, /YOUR COST\nUSD 292/); assert.match(o.text, /COST\nUSD 292/);
   assert.match(g.text, /· Wedding Ceremony · Souphattra Heritage · 15:30: Front centre/); assert.doesNotMatch(composeGuestMail({ ...rec, hosts: false }).text, /Front centre/);
 });
 
@@ -265,36 +286,36 @@ test('CODEX P1-2 · the three-way merge on the device: a removal elsewhere stand
 
 test('WORKER · a submission is stored as sent (Owner, 19 Sep 2026): a host\'s Bag lines reach the record unchanged with the guest\'s own total, the record carries `hosts` and the engine\'s holds without any `fixed` flag, a waitlisted stage is recorded with its position and adds nothing; both emails list the held room under STAYS with its amount, the waiting list with its position, and no Arranged section', async () => {
   const h = await harness();
-  /* the engine, before the send: the host holds Room A of the Penthouse like any guest, and waits for Kunming with a party of two */
+  /* the engine, before the send: the host holds Room A of U Sathorn like any guest, and waits for Kunming with a party of two */
   const me = { invitationId: 'INV-G049', guestId: 'G049', partyId: 'INV-001', hosts: true };
-  assert.equal((await call(h.rooms, 'join', { invitationId: 'INV-G049', guestId: 'G049', key: 'bkk-stay/penthouse', label: 'A', name: 'Suthep' }, me)).status, 200);
+  assert.equal((await call(h.rooms, 'join', { invitationId: 'INV-G049', guestId: 'G049', key: 'bkk-stay/u-sathorn-superior-garden', label: 'A', name: 'Suthep' }, me)).status, 200);
   assert.equal((await call(h.rooms, 'wait', { invitationId: 'INV-G049', guestId: 'G049', stage: 'kmg', size: 2, wanted: ['kmg/italian', 'kmg/light-french'], name: 'Suthep' }, me)).status, 200);
-  /* the one validator: the hosts join Bangkok and China here — the Penthouse held, Kunming on the waiting list, Lijiang not joined, the mandatory C86 a line (Owner, 21 Sep 2026) */
-  const sent = complete({ channel: 'journey-shop', guestId: 'G049', totalUsd: 460, contact: { email: 'groom.test@example.org', phone: '+66' },
-    selections: [{ id: 'bkk-stay', name: 'Sathorn Penthouse Bangkok', meta: '21 – 24 February 2027 · Sathorn Penthouse', price: 255, qty: 1, stay: 'sathorn', room: 'penthouse', unit: 'A', unitName: 'Room A' }, { id: 'train', name: 'Special Express No. 25', meta: '24 – 25 February 2027 · First Class Sleeper', price: 100, qty: 1 }, { id: 'c86', name: 'C86', meta: '04 March 2027 · Business', price: 105, qty: 1 }],
+  /* the one validator: the hosts join Bangkok and China here — U Sathorn held, Kunming on the waiting list, Lijiang not joined, the mandatory C86 a line (Owner, 21 Sep 2026) */
+  const sent = complete({ channel: 'journey-shop', guestId: 'G049', totalUsd: 397, contact: { email: 'groom.test@example.org', phone: '+66' },
+    selections: [{ id: 'bkk-stay', name: 'U Sathorn Bangkok', meta: '21 – 24 February 2027 · Superior Room With Garden View', price: 192, qty: 1, stay: 'sathorn', room: 'u-sathorn-superior-garden', unit: 'A', unitName: 'Room A' }, { id: 'train', name: 'Special Express No. 25', meta: '24 – 25 February 2027 · First Class Sleeper', price: 100, qty: 1 }, { id: 'c86', name: 'C86', meta: '04 March 2027 · Business', price: 105, qty: 1 }],
     guestRecord: { guests: [{ guestId: 'G049', name: 'Suthep', source: { fullName: 'Suthep Test', preferredName: 'Suthep' } }] } }, { scope: { bangkok: true, china: true } });
   const calls = []; const realFetch = globalThis.fetch;
   globalThis.fetch = async (url, init) => { if (/api\.brevo\.com/.test(String(url))) { calls.push(JSON.parse(init.body)); return new Response(JSON.stringify({ messageId: '<m@brevo>' }), { status: 201, headers: { 'content-type': 'application/json' } }); } return realFetch(url, init); };
   try {
     h.env.BREVO_API_KEY = 'x';
-    const r = await h.w.fetch(req('/api/register', { 'x-siyl-auth': h.host }, { invitationId: 'INV-G049', registration: sent, text: 'SEE YOU IN LAOS — JOURNEY SELECTION\n- Sathorn Penthouse · Room A · USD 255\n- Special Express No. 25 · USD 100\n- C86 · USD 105' }), h.env);
+    const r = await h.w.fetch(req('/api/register', { 'x-siyl-auth': h.host }, { invitationId: 'INV-G049', registration: sent, text: 'SEE YOU IN LAOS — JOURNEY SELECTION\n- U Sathorn Bangkok · Room A · USD 192\n- Special Express No. 25 · USD 100\n- C86 · USD 105' }), h.env);
     assert.equal(r.status, 202, JSON.stringify(await r.clone().json()).slice(0, 300));
     const rec = JSON.parse(h.env.REG_KV.m.get('reg:INV-G049').v);
-    assert.deepEqual(rec.registration.selections, sent.selections, 'the lines reach the record exactly as sent'); assert.equal(rec.registration.totalUsd, 460); assert.equal(rec.registration.normalised, undefined, 'nothing is recomputed, nothing stripped');
+    assert.deepEqual(rec.registration.selections, sent.selections, 'the lines reach the record exactly as sent'); assert.equal(rec.registration.totalUsd, 397); assert.equal(rec.registration.normalised, undefined, 'nothing is recomputed, nothing stripped');
     assert.equal(rec.hosts, true, 'the record carries host-ness from the identity');
-    assert.deepEqual(rec.rooms['bkk-stay'], { stage: 'bkk-stay', key: 'bkk-stay/penthouse', label: 'A', name: 'Sathorn Penthouse', stay: 'Sathorn Penthouse Bangkok', room: 'Room A' }); assert.equal(rec.rooms['bkk-stay'].fixed, undefined);
+    assert.deepEqual(rec.rooms['bkk-stay'], { stage: 'bkk-stay', key: 'bkk-stay/u-sathorn-superior-garden', label: 'A', name: 'Superior Room With Garden View', stay: 'U Sathorn Bangkok', room: 'Room A' }); assert.equal(rec.rooms['bkk-stay'].fixed, undefined);
     assert.equal(rec.rooms.kmg.waitlisted, true); assert.equal(rec.rooms.kmg.position, 1); assert.equal(rec.rooms.kmg.size, 2); assert.equal(rec.rooms.kmg.key, undefined, 'a waiting-list stage names no room');
     assert.equal(Object.keys(rec.rooms).length, 2, 'only what the engine holds or lists — no arranged stage');
     assert.equal(calls.length, 2, 'Guest Relations and the guest');
     for (const c of calls) {
-      assert.match(c.textContent, /USD 255/); assert.match(c.textContent, /USD 460/); assert.match(c.textContent, /Sathorn Penthouse Bangkok/); assert.match(c.textContent, /Room A/);
+      assert.match(c.textContent, /USD 192/); assert.match(c.textContent, /USD 397/); assert.match(c.textContent, /U Sathorn Bangkok/); assert.match(c.textContent, /Room A/);
       assert.match(c.textContent, /WAITING LIST\n· Kunming — /); assert.match(c.textContent, /number 1/); assert.match(c.textContent, /for 2 places/);
       assert.doesNotMatch(c.textContent + c.htmlContent, /ARRANGED FOR YOU|Arranged for you|fixed arrangement|Fixed arrangement|not part of your bag/);
       assert.match(c.htmlContent, /Waiting list/); assert.match(c.htmlContent, /Stays/);
     }
     /* the guest's email, composed again from the stored record: the same facts */
-    const g = composeGuestMail(rec); assert.match(g.text, /STAYS\n· Sathorn Penthouse Bangkok — 21 – 24 February 2027 — Sathorn Penthouse — Room A — USD 255/); assert.match(g.text, /WAITING LIST\n· Kunming — no room could be confirmed yet · number 1 on the waiting list for 2 places/); assert.match(g.text, /YOUR COST\nUSD 460/);
-    const o = composeOwnerMail(rec, 'https://x/s'); assert.match(o.text, /WAITING LIST\n· Kunming — number 1 for 2 places — to resolve/); assert.match(o.text, /COST\nUSD 460/);
+    const g = composeGuestMail(rec); assert.match(g.text, /STAYS\n· U Sathorn Bangkok — 21 – 24 February 2027 — Superior Room With Garden View — Room A — USD 192/); assert.match(g.text, /WAITING LIST\n· Kunming — no room could be confirmed yet · number 1 on the waiting list for 2 places/); assert.match(g.text, /YOUR COST\nUSD 397/);
+    const o = composeOwnerMail(rec, 'https://x/s'); assert.match(o.text, /WAITING LIST\n· Kunming — number 1 for 2 places — to resolve/); assert.match(o.text, /COST\nUSD 397/);
     /* the draft read after the send says sent, and the stored draft is untouched by the send */
     const d = await (await h.w.fetch(req('/api/draft', { 'x-siyl-auth': h.host }), h.env)).json(); assert.equal(d.submission.submissionStatus, 'sent'); assert.equal(d.submission.version, 1);
   } finally { globalThis.fetch = realFetch; }

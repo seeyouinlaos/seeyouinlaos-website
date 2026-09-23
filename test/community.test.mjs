@@ -73,7 +73,7 @@ test('THE JOURNEY IN NUMBERS · every number counted from the canonical data on 
   const M = w.SIYL_STAY_MEDIA, E = Object.values(w.SIYL_EXP), T = w.SIYL_TRANSPORT;
   assert.equal(by.countries.n, 3); assert.equal(by.countries.note, 'Thailand · Laos · China');
   assert.equal(by.cities.n, new Set(Object.keys(M).map((k) => M[k].city).filter(Boolean)).size); assert.equal(by.cities.n, 4);
-  assert.equal(by.stays.n, Object.keys(M).filter((k) => k !== '_taxonomy').length); /* one house fewer since the Riverside was retired (Owner, 23 Sep 2026) */ assert.equal(by.stays.n, 8);
+  assert.equal(by.stays.n, Object.keys(M).filter((k) => k !== '_taxonomy').length); /* one house fewer since the Riverside was retired (Owner, 23 Sep 2026), another since the Sathorn Penthouse was deleted (Owner, 24 Sep 2026 · Edit 6) */ assert.equal(by.stays.n, 7); assert.equal(M.sathornPenthouse, undefined, 'the Sathorn Penthouse is not counted');
   assert.equal(by.nights.n, 3 + 2 + 2 + 3 + 2 + 2 + 1, 'the six stays of the journey and the night on the train'); assert.equal(by.days.n, 16); assert.match(by.days.note, /21 February – 8 March 2027/);
   assert.equal(by.trains.n, Object.values(T).filter((t) => /railway/i.test(t.operator)).length); assert.equal(by.trains.n, 2);
   assert.equal(by.flights.n, 3); assert.equal(by.flights.note, 'MU9646 · MU5922 · MU741');

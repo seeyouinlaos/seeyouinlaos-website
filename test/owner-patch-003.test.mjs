@@ -4,7 +4,7 @@
    itself; the Temple Ceremony is a separate morning event at Wat Ong Teu, 09:00 – approximately 12:00;
    the Wedding (Vow) Ceremony is at Souphattra Heritage, 15:30, and the ceremony seating — the Bride and
    the Groom front centre, everybody else their chosen chair — belongs to it and to nothing else; the
-   Sathorn Penthouse is USD 85 per person / night, 3 nights, USD 255. */
+   Sathorn Penthouse (once USD 85 per person / night, 3 nights, USD 255) is deleted (Owner, 24 Sep 2026 · Edit 6). */
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
@@ -108,13 +108,12 @@ test('WEDDING (VOW) CEREMONY · Souphattra Heritage · Sunday, 28 February 2027 
   assert.ok(!w.SIYL_GUEST.missingFor('preparation').map((m) => m.key).includes('seat:ceremony'), 'attending the temple but not the vows: no ceremony seat is asked for');
 });
 
-test('SATHORN PENTHOUSE · USD 85 per person / night · 3 nights · USD 255 — no active USD 90', () => {
+test('SATHORN PENTHOUSE · DELETED (Owner, 24 Sep 2026 · Edit 6): no room record, no USD 85 / USD 255 price, no quote that names it — and no active USD 90', () => {
   const w = page({ auth: PEGGY });
-  const q = w.SIYL_PRICE.quote('bkk-stay', 'penthouse');
-  assert.equal(q.rate, 85); assert.equal(q.pay, 3); assert.equal(q.total, 255);
-  const R = w.SIYL_ROOMS; const room = Object.values(R).flatMap((s) => s.rooms || []).find((r) => r.slug === 'penthouse');
-  assert.equal(room.rate, 85);
-  for (const f of ACTIVE) assert.doesNotMatch(stripComments(src(f)), /USD 90 per person|rate: 90\b/, f + ' carries the retired USD 90 rate');
+  const R = w.SIYL_ROOMS; assert.equal(Object.values(R).flatMap((s) => s.rooms || []).find((r) => r.slug === 'penthouse'), undefined, 'the room record is gone');
+  assert.deepEqual([...R.sathorn.rooms.map((r) => r.slug)], ['u-sathorn-superior-garden', 'shama-king-studio-balcony'], 'Bangkok has exactly the two approved addresses');
+  const q = w.SIYL_PRICE.quote('bkk-stay', 'penthouse'); assert.notEqual(q && q.roomSlug, 'penthouse'); assert.doesNotMatch(JSON.stringify(q || {}), /Penthouse/, 'no quote names the deleted product');
+  for (const f of ACTIVE) { const t = stripComments(src(f)); assert.doesNotMatch(t, /USD 90 per person|rate: 90\b/, f + ' carries the retired USD 90 rate'); assert.doesNotMatch(t, /Sathorn Penthouse|slug: 'penthouse'/, f + ' names the deleted Sathorn Penthouse'); }
 });
 
 test('EDIT 4 (Owner, 16 Sep 2026) · Luye Baisha and Siam Kempinski say self-pay everywhere the stay summary appears; Harudot sits in the existing Bangkok Cafés rail, never in a rail of its own; the stage never stays invisible', () => {

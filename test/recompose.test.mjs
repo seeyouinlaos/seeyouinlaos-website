@@ -104,13 +104,14 @@ test('retired products never reach the active journey', () => {
   assert.match(bag, /mu9632:\{id:'mu9646'/, 'the retired flight migrates to MU9646');
 });
 
-test('the Bangkok choice is exactly three addresses, one active, in the accepted vocabulary', () => {
+test('the Bangkok choice is exactly two addresses (the Sathorn Penthouse deleted, Owner 24 Sep 2026 · Edit 6), one active, in the accepted vocabulary', () => {
   const yj = read('your-journey.html');
   assert.match(yj, /SIYL_ROOMS\.sathorn/);
   const rooms = read('assets/rooms-data.js');
   const sathorn = rooms.slice(rooms.indexOf('sathorn: {'), rooms.indexOf('kunming: {'));
   assert.deepEqual([...sathorn.matchAll(/property: '([^']+)'/g)].map((m) => m[1]),
-    ['Sathorn Penthouse Bangkok', 'U Sathorn Bangkok', 'Shama Yen-Akat Bangkok']);
+    ['U Sathorn Bangkok', 'Shama Yen-Akat Bangkok']);
+  assert.doesNotMatch(sathorn, /slug: 'penthouse'|property: 'Sathorn Penthouse Bangkok'/, 'no Penthouse room record');
   assert.match(yj, /Select this stay/);
   assert.match(yj, /Current selection/);
   assert.doesNotMatch(yj, /CHOOSE THIS ADDRESS|Choose this address|SEE THE ROOMS|See the rooms/i);

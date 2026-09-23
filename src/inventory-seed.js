@@ -14,14 +14,14 @@
    `unit` is what a guest consumes:
      'room'  — a category of physical rooms. A party of n guests consumes
                ceil(n / occupancy) rooms.
-     'guest' — a whole-property or per-person product (the Sathorn Penthouse,
-               the hosted residence, priced and held per person).
+     'guest' — a whole-property or per-person product (the hosted residence,
+               priced and held per person).
 
    NO RESERVATIONS, NO FIXED ARRANGEMENT (Owner, 19 Sep 2026): `held` is 0
    everywhere and nothing is kept for anyone in advance — not for the Bride &
    Groom, not for the family. Every room of every category is bookable through
    the room engine by whoever chooses it first; the hosts start at zero like
-   every guest. The Penthouse: six bedrooms, twelve places, all bookable.
+   every guest.
 
    ROOM ALLOCATION (Owner, 15 Sep 2026): the physical room count IS the
    inventory. One physical room = one persistent allocation unit = two
@@ -38,20 +38,17 @@
    the test suite import it — there is no second copy anywhere.
    ========================================================================== */
 
-/* NO FIXED ALLOCATION (Owner, 19 Sep 2026): the Sathorn Penthouse Room A preselection for the hosts came from planning data,
+/* NO FIXED ALLOCATION (Owner, 19 Sep 2026): the Room A preselection for the hosts came from planning data,
    never from a booking; it is deleted. Every guest — the hosts included — starts from zero and books like everyone else.
    `held` / `heldFor` on a seed entry are retired notes of the old category ledger; the room engine ignores them. */
 export const FIXED = [];
 export const SEED = {
   /* ---------------------------------------------------------- Bangkok, before */
-  /* Three approved Bangkok addresses share the window; a guest holds one of
-   * them. The penthouse is one home of SIX bedrooms (Owner, 15 Sep 2026):
-   * six allocation units, Room A – F, twelve guest places — never more. The
-   * two hotels are counted in rooms of two, as every other hotel here is.
-   * The Master (Owner, 16 Sep 2026, 17:17 UTC): U Sathorn 6 rooms, Shama 6 rooms
-   * — the earlier 38 / 27 are retired; six physical rooms, twelve places each. */
-  'bkk-stay/penthouse':
-    { unit: 'room', capacity: 6, occupancy: 2, held: 0, name: 'Sathorn Penthouse', stay: 'Sathorn Penthouse Bangkok' },
+  /* Two approved Bangkok addresses share the window; a guest holds one of
+   * them. The Master (Owner, 16 Sep 2026, 17:17 UTC): U Sathorn 6 rooms, Shama 6 rooms
+   * — the earlier 38 / 27 are retired; six physical rooms, twelve places each.
+   * SATHORN PENTHOUSE BANGKOK IS DELETED (Owner, 24 Sep 2026 · Edit 6): 'bkk-stay/penthouse' is not a website
+   * product any more — no stock, no card, no gallery, no Bag line; nothing replaces it. */
   'bkk-stay/u-sathorn-superior-garden':
     { unit: 'room', capacity: 6, occupancy: 2, held: 0, name: 'Superior Room With Garden View', stay: 'U Sathorn Bangkok' },
   'bkk-stay/shama-king-studio-balcony':

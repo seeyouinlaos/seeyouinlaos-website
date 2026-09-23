@@ -60,17 +60,17 @@ test('NO RESERVATIONS, NO FIXED ARRANGEMENT (Owner, 15 Sep 2026 · reaffirmed 19
   const E = engine();
   const v0 = await E.call('read', null, asId(HARUTHAI));
   assert.deepEqual(v0.mine, {}, 'the hosts start at zero'); assert.deepEqual(v0.waitlist, {});
-  for (const key of ['bkk-stay/penthouse', 'prewed/souphattra-presidential', 'wedstay/souphattra-presidential']) {
+  for (const key of ['bkk-stay/u-sathorn-superior-garden', 'prewed/souphattra-presidential', 'wedstay/souphattra-presidential']) {
     const a = v0.units[key][0];
     assert.equal(a.taken, 0, key + ' Room A is nobody\'s before a booking'); assert.deepEqual(a.occupants, []); assert.equal(a.full, false); assert.equal(a.eligible, true); assert.equal(a.reservedFor, null);
     assert.equal(v0.summary[key].reserved, 0, key); assert.equal(v0.summary[key].reservedFor, null); assert.equal(v0.summary[key].ownerReservedRooms, 0); assert.equal(v0.summary[key].ownerReservedPlaces, 0);
     const p = await join(E, PEGGY, key, 'A'); assert.equal(p.status, 200, key + ' Room A is Peggy\'s the moment she books it');
     assert.deepEqual(p.units[key][0].occupants.map((o) => [o.name, o.mine]), [['Peggy', true]]);
   }
-  /* the Penthouse Room A is a room like any other: a host joins the guest already there; the second host finds it full */
-  const h = await join(E, HARUTHAI, 'bkk-stay/penthouse', 'A'); assert.equal(h.status, 200); assert.equal(h.units['bkk-stay/penthouse'][0].full, true);
-  const s = await join(E, SUTHEP, 'bkk-stay/penthouse', 'A'); assert.equal(s.status, 409); assert.equal(s.ok, false); assert.equal(s.error, 'full', 'a host is refused a full room like any guest — never 403, never a reservation');
-  assert.equal((await join(E, SUTHEP, 'bkk-stay/penthouse', 'B')).status, 200, 'and books the next room like any guest');
+  /* U Sathorn Room A (the six-room Bangkok category since the Sathorn Penthouse was deleted, Edit 6) is a room like any other: a host joins the guest already there; the second host finds it full */
+  const h = await join(E, HARUTHAI, 'bkk-stay/u-sathorn-superior-garden', 'A'); assert.equal(h.status, 200); assert.equal(h.units['bkk-stay/u-sathorn-superior-garden'][0].full, true);
+  const s = await join(E, SUTHEP, 'bkk-stay/u-sathorn-superior-garden', 'A'); assert.equal(s.status, 409); assert.equal(s.ok, false); assert.equal(s.error, 'full', 'a host is refused a full room like any guest — never 403, never a reservation');
+  assert.equal((await join(E, SUTHEP, 'bkk-stay/u-sathorn-superior-garden', 'B')).status, 200, 'and books the next room like any guest');
   /* the wedding window is ONE stage whether spent in the hotel, the Guest House or the Riverside */
   assert.deepEqual(STAGES, ['bkk-stay', 'prewed', 'wedstay', 'kmg', 'ljg', 'kempinski']);
   assert.equal(stageOf('guesthouse/guest-house'), 'wedstay'); assert.equal(stageOf('wedstay/heritage'), 'wedstay');
@@ -85,7 +85,7 @@ test('NO RESERVATIONS, NO FIXED ARRANGEMENT (Owner, 15 Sep 2026 · reaffirmed 19
   const U = w.SIYL_UNITS, ST = w.SIYL_STAY, J = w.SIYL_JOURNEY, B = w.SIYL_BAG;
   await U.load(true); assert.equal(U.ready(), true); ST.sync();
   assert.equal(w.SIYL_ARRANGED, undefined, 'window.SIYL_ARRANGED does not exist');
-  assert.equal(U.fixed('bkk-stay'), false); assert.equal(U.fixedUnit('bkk-stay'), null); assert.deepEqual(plain(U.fixedStages()), []); assert.equal(U.reserved('bkk-stay', 'penthouse'), false); assert.equal(U.reserved('wedstay', 'souphattra-presidential'), false);
+  assert.equal(U.fixed('bkk-stay'), false); assert.equal(U.fixedUnit('bkk-stay'), null); assert.deepEqual(plain(U.fixedStages()), []); assert.equal(U.reserved('bkk-stay', 'u-sathorn-superior-garden'), false); assert.equal(U.reserved('wedstay', 'souphattra-presidential'), false);
   assert.equal(ST.fixed('bkk-stay'), false); assert.equal(ST.fixedSlug('bkk-stay'), '');
   assert.equal(U.mine('bkk-stay'), null, 'no Sathorn room is the hosts\' before they book it'); assert.deepEqual(plain(U.view().mine), {});
   assert.deepEqual(plain(B.get()), [], 'the Bag carries only actual selections'); assert.equal(B.total(), 0);
@@ -93,8 +93,8 @@ test('NO RESERVATIONS, NO FIXED ARRANGEMENT (Owner, 15 Sep 2026 · reaffirmed 19
   const c = J.counts();
   assert.equal(c.confirmed, 0); assert.equal(c.bagItems, 0); assert.equal(c.bagTotal, 0); assert.equal(c.relevant, c.confirmed + c.waitlisted + c.declined + c.open);
   /* the unit chooser: six rooms, six Choose buttons — Room A included; no room reads Reserved */
-  const html = ST.unitsHtml('bkk-stay', 'penthouse');
-  assert.equal((html.match(/data-join="bkk-stay\|penthouse\|[A-F]"/g) || []).length, 6, 'six rooms, six Choose buttons'); assert.match(html, /data-join="bkk-stay\|penthouse\|A"/);
+  const html = ST.unitsHtml('bkk-stay', 'u-sathorn-superior-garden');
+  assert.equal((html.match(/data-join="bkk-stay\|u-sathorn-superior-garden\|[A-F]"/g) || []).length, 6, 'six rooms, six Choose buttons'); assert.match(html, /data-join="bkk-stay\|u-sathorn-superior-garden\|A"/);
   assert.doesNotMatch(html, /Reserved|data-reserved|Arranged|Fixed/i); assert.equal((html.match(/Choose this room/g) || []).length, 6);
   const gh = ST.unitsHtml('guesthouse', 'guest-house');
   assert.match(gh, /Guest House complimentary/); assert.match(gh, /6 places available/); assert.match(gh, /data-join="guesthouse\|guest-house\|A"/); assert.doesNotMatch(gh, /Private Residence|up to 4/i);
@@ -116,8 +116,9 @@ test('PHYSICAL ROOM COUNT IS AUTHORITATIVE · 1 room → 1 unit → 2 places; 5 
   assert.equal(PLACES, 2);
   const one = unitsOf('prewed/souphattra-presidential'); assert.equal(one.length, 1); assert.deepEqual(one.map((u) => u.label), ['A']); assert.equal(one[0].places, 2);
   const five = unitsOf('wedstay/heritage'); assert.equal(five.length, 5); assert.deepEqual(five.map((u) => u.label), ['A', 'B', 'C', 'D', 'E']); assert.equal(five.reduce((n, u) => n + u.places, 0), 10);
-  /* the Owner's six-room Penthouse: exactly Room A – F, exactly twelve guest places */
-  const pent = unitsOf('bkk-stay/penthouse'); assert.equal(pent.length, 6); assert.deepEqual(pent.map((u) => u.label), ['A', 'B', 'C', 'D', 'E', 'F']); assert.equal(pent.reduce((n, u) => n + u.places, 0), 12);
+  /* a six-room category (U Sathorn Bangkok — the Sathorn Penthouse deleted, Edit 6): exactly Room A – F, exactly twelve guest places */
+  const pent = unitsOf('bkk-stay/u-sathorn-superior-garden');
+  assert.equal(SEED['bkk-stay/penthouse'], undefined, 'the Sathorn Penthouse is deleted (Edit 6, 24 Sep 2026)'); assert.equal(pent.length, 6); assert.deepEqual(pent.map((u) => u.label), ['A', 'B', 'C', 'D', 'E', 'F']); assert.equal(pent.reduce((n, u) => n + u.places, 0), 12);
   assert.ok(!pent.some((u) => u.label === 'G')); assert.ok(pent.every((u) => u.kind === 'room' && u.places === 2));
   const thirteen = unitsOf('wedstay/heritage-executive'); assert.equal(thirteen.length, 13); assert.equal(thirteen.reduce((n, u) => n + u.places, 0), 26);
   /* the Light French Suite and the Snow Mountain Viewing Room: Pax "2 Adults" in Accommodation_Details → two places each (final release, 15 Sep 2026) */
@@ -155,8 +156,8 @@ test('BOOKING · one occupant → 1 place available; two → FULL; a third guest
   assert.equal(plain.units[key][0].taken, 2); assert.deepEqual(plain.units[key][0].occupants, [{}, {}]);
 });
 
-test('CAPACITY · the six-room Penthouse fills at twelve and never beyond; Room A is nobody\'s before a booking and the hosts fill the rooms like any guest; a thirteenth guest waits in line and takes the first place freed; counters are derived from the units, never a separate stock', async () => {
-  const E = engine(), key = 'bkk-stay/penthouse';
+test('CAPACITY · the six-room U Sathorn category fills at twelve and never beyond; Room A is nobody\'s before a booking and the hosts fill the rooms like any guest; a thirteenth guest waits in line and takes the first place freed; counters are derived from the units, never a separate stock', async () => {
+  const E = engine(), key = 'bkk-stay/u-sathorn-superior-garden';
   /* twelve guests — a guest first, then the hosts among the rest — two per room */
   const guests = [PEGGY, HARUTHAI, SUTHEP, STEFFIE, LIN, other('6'), other('7'), other('8'), other('9'), other('10'), other('11'), other('12')];
   /* before anyone books: six physical rooms, twelve places, all of them available to any guest — nothing reserved, nothing fixed */
@@ -228,11 +229,11 @@ test('THE WORDS · category lines are derived from the physical rooms the engine
   assert.equal(U.unitWords(U.units('wedstay', 'heritage')[2]), '2 places · Available');
   /* a category full of real bookings: SOLD OUT — remainingPlaces === 0 and nothing else; never RESERVED, never "booked" */
   assert.equal(U.label('wedstay', 'souphattra-presidential'), 'Sold out'); assert.equal(U.soldOut('wedstay', 'souphattra-presidential'), true); assert.equal(U.fits('wedstay', 'souphattra-presidential'), false); assert.equal(U.ctaWords('wedstay', 'souphattra-presidential'), 'Sold out');
-  assert.equal(U.reserved('wedstay', 'souphattra-presidential'), false); assert.equal(U.reserved('bkk-stay', 'penthouse'), false);
+  assert.equal(U.reserved('wedstay', 'souphattra-presidential'), false); assert.equal(U.reserved('bkk-stay', 'u-sathorn-superior-garden'), false);
   assert.equal(U.unitWords(U.units('wedstay', 'souphattra-presidential')[0]), 'Ada · Ben · Full');
-  /* the Penthouse: every room counts as available — Room A is nobody's */
-  assert.equal(U.label('bkk-stay', 'penthouse'), '6 rooms · 12 places available'); assert.equal(U.unitWords(U.units('bkk-stay', 'penthouse')[0]), '2 places · Available'); assert.equal(U.fits('bkk-stay', 'penthouse'), true); assert.equal(U.ctaWords('bkk-stay', 'penthouse'), '');
-  assert.deepEqual(plain(U.count('bkk-stay', 'penthouse')), { rooms: 6, places: 12, reserved: 0, free: 12, open: 6 });
+  /* U Sathorn: every room counts as available — Room A is nobody's */
+  assert.equal(U.label('bkk-stay', 'u-sathorn-superior-garden'), '6 rooms · 12 places available'); assert.equal(U.unitWords(U.units('bkk-stay', 'u-sathorn-superior-garden')[0]), '2 places · Available'); assert.equal(U.fits('bkk-stay', 'u-sathorn-superior-garden'), true); assert.equal(U.ctaWords('bkk-stay', 'u-sathorn-superior-garden'), '');
+  assert.deepEqual(plain(U.count('bkk-stay', 'u-sathorn-superior-garden')), { rooms: 6, places: 12, reserved: 0, free: 12, open: 6 });
   /* D2 · the Guest House complimentary: six shared places, one taken, the first name visible */
   const gh = U.units('guesthouse', 'guest-house')[0];
   assert.equal(U.label('guesthouse', 'guest-house'), '5 places available'); assert.equal(U.unitName(gh), 'Guest House complimentary'); assert.equal(U.unitWords(gh), 'Steffie · 5 places available');
@@ -248,7 +249,7 @@ test('THE WORDS · category lines are derived from the physical rooms the engine
   const j = await U.join('wedstay', 'heritage', 'C'); assert.equal(j.ok, true); assert.equal(j.status, 200);
   assert.equal(U.label('wedstay', 'heritage'), 'Your place is held · Room C'); assert.deepEqual(plain(U.mine('wedstay')), { key: 'wedstay/heritage', label: 'C' }); assert.equal(U.mineFor('wedstay', 'heritage').label, 'C'); assert.equal(U.mineFor('wedstay', 'souphattra-presidential'), null);
   assert.equal(U.unitWords(U.units('wedstay', 'heritage')[2]), 'You · 1 place available');
-  assert.equal(U.label('bkk-stay', 'penthouse'), '6 rooms · 12 places available', 'another stage is untouched');
+  assert.equal(U.label('bkk-stay', 'u-sathorn-superior-garden'), '6 rooms · 12 places available', 'another stage is untouched');
   /* THE WAITING LIST: a stage no room could take — one entry, positioned; a stage where a place is held refuses the line */
   const refused = await U.wait('wedstay', 2, ['wedstay/souphattra-presidential']); assert.equal(refused.ok, false); assert.equal(refused.status, 409); assert.equal(refused.error, 'a place is held in this stage');
   const waited = await U.wait('kmg', 2, ['kmg/solarium']); assert.equal(waited.ok, true);

@@ -16,7 +16,7 @@
    * answer the stage (a stage can be answered by an alternative product). */
   var SEG = [
     { key: 'bkk-stay', when: '21 – 24 FEB', cat: 'Accommodation', place: 'Bangkok',
-      label: 'Sathorn Penthouse Bangkok', ids: ['bkk-stay'], anchor: 'j-bkk-stay', bookend: 'open' },
+      label: 'Bangkok · Before the Wedding', ids: ['bkk-stay'], anchor: 'j-bkk-stay', bookend: 'open' },
     { key: 'train', when: '24 – 25 FEB', cat: 'Transportation', place: 'Bangkok → Vientiane',
       label: 'Special Express No. 25', ids: ['train'], anchor: 'j-train' },
     { key: 'prewed', when: '25 – 27 FEB', cat: 'Accommodation', place: 'Vientiane',

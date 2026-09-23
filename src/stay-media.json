@@ -13,54 +13,6 @@
   "rule": "A Journey accommodation gallery is composed only from these kinds, of the hotel it names, from the Owner's Drive folder recorded in `source`; the first frame is the hotel's exterior, architecture, pool or grounds — never an arbitrary first file of a folder.",
   "lead": "the first frame shows the house (exterior · architecture · pool · grounds · lobby) whenever the Owner's photography has one; a record may declare `lead` with `leadWhy` where the identity of the place is a room (a residence)"
  },
- "sathornPenthouse": {
-  "name": "Sathorn Penthouse Bangkok",
-  "city": "Bangkok",
-  "images": [
-   {
-    "src": "assets/images/penthouse/exterior-golden-hour.jpg",
-    "kind": "exterior",
-    "caption": "The house at golden hour",
-    "source": "Owner Drive 020 - Hotel - Sathorn Penthouse Bangkok"
-   },
-   {
-    "src": "assets/images/penthouse/exterior-elevated.jpg",
-    "kind": "architecture",
-    "caption": "The house from above the trees",
-    "source": "Owner Drive 020 - Hotel - Sathorn Penthouse Bangkok"
-   },
-   {
-    "src": "assets/images/penthouse/exterior-street.jpg",
-    "kind": "exterior",
-    "caption": "The street elevation",
-    "source": "Owner Drive 020 - Hotel - Sathorn Penthouse Bangkok"
-   },
-   {
-    "src": "assets/images/journey/penthouse-01.jpg",
-    "kind": "room",
-    "caption": "The double-height living room",
-    "source": "Owner Drive 020 - Hotel - Sathorn Penthouse Bangkok"
-   },
-   {
-    "src": "assets/images/penthouse/living-above.jpg",
-    "kind": "room",
-    "caption": "The living room from the mezzanine",
-    "source": "Owner Drive 020 - Hotel - Sathorn Penthouse Bangkok"
-   },
-   {
-    "src": "assets/images/penthouse/bedroom-skyline.jpg",
-    "kind": "room",
-    "caption": "A bedroom towards the skyline",
-    "source": "Owner Drive 020 - Hotel - Sathorn Penthouse Bangkok"
-   },
-   {
-    "src": "assets/images/penthouse/balcony-garden.jpg",
-    "kind": "grounds",
-    "caption": "The balcony and the garden",
-    "source": "Owner Drive 020 - Hotel - Sathorn Penthouse Bangkok"
-   }
-  ]
- },
  "uSathorn": {
   "name": "U Sathorn Bangkok",
   "city": "Bangkok",

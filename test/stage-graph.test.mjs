@@ -137,11 +137,11 @@ test('S · former Essential: D1 preserved, the scope is the wedding', () => {
   assert.equal(JSON.parse(w.localStorage.getItem('siyl.guest')).scope.vientiane, true, 'read-time normalization: nothing was written'); assert.equal(G.applicable('wedding'), true);
 });
 test('T · former Complete: every real selection preserved; no package metadata drives the UI', () => {
-  const bag = [{ id: 'bkk-stay', price: 255, qty: 1, stay: 'sathorn', room: 'penthouse', unit: 'A' }, { id: 'train', price: 100, qty: 1 }, { id: 'prewed', price: 340, qty: 1, stay: 'souphattra', room: 'heritage-grand-premier', unit: 'B' }, { id: 'wedstay', price: 170, qty: 1, stay: 'souphattra', room: 'heritage-grand-premier', unit: 'B' }, { id: 'mu9646', price: 275, qty: 1 }, { id: 'kmg', price: 150, qty: 1, stay: 'wanxiang', room: 'italian', unit: 'A' }, { id: 'c86', price: 105, qty: 1 }, { id: 'ljg', price: 200, qty: 1, stay: 'luyeBaisha', room: 'viewing-270', unit: 'A' }, { id: 'return', price: 200, qty: 1 }, { id: 'kempinski', price: 380, qty: 1, stay: 'kempinski', room: 'deluxe-balcony-king', unit: 'A' }];
+  const bag = [{ id: 'bkk-stay', price: 192, qty: 1, stay: 'sathorn', room: 'u-sathorn-superior-garden', unit: 'A' }, { id: 'train', price: 100, qty: 1 }, { id: 'prewed', price: 340, qty: 1, stay: 'souphattra', room: 'heritage-grand-premier', unit: 'B' }, { id: 'wedstay', price: 170, qty: 1, stay: 'souphattra', room: 'heritage-grand-premier', unit: 'B' }, { id: 'mu9646', price: 275, qty: 1 }, { id: 'kmg', price: 150, qty: 1, stay: 'wanxiang', room: 'italian', unit: 'A' }, { id: 'c86', price: 105, qty: 1 }, { id: 'ljg', price: 200, qty: 1, stay: 'luyeBaisha', room: 'viewing-270', unit: 'A' }, { id: 'return', price: 200, qty: 1 }, { id: 'kempinski', price: 380, qty: 1, stay: 'kempinski', room: 'deluxe-balcony-king', unit: 'A' }];
   const w = page({ auth: PEGGY, seed: { 'siyl.guest': JSON.stringify({ scope: { bangkok: true, vientiane: true, china: true, none: false, at: '2026-09-19T10:00:00.000Z', by: 'g-peggy' }, guests: {} }), 'siyl.bag': JSON.stringify(bag), 'siyl.package': JSON.stringify({ kind: 'complete', sig: 'x' }) } });
   const G = w.SIYL_GUEST, J = w.SIYL_JOURNEY;
   assert.equal(G.joinsAll(), true); assert.equal(J.relevantSegments().length, 10); deq(J.SEGMENTS.map((s) => J.state(s)), Array(10).fill('selected'));
-  deq(w.SIYL_BAG.get().map((x) => x.id), bag.map((x) => x.id), 'all ten lines as they were'); assert.equal(w.SIYL_BAG.total(), 2175);
+  deq(w.SIYL_BAG.get().map((x) => x.id), bag.map((x) => x.id), 'all ten lines as they were'); assert.equal(w.SIYL_BAG.total(), 2112);
   for (const k of ['packages', 'packagePlan', 'planSignature']) assert.equal(J[k], undefined); assert.doesNotMatch(src('your-journey.html'), /siyl\.package|data-package/, 'no package metadata is read by the page');
 });
 
@@ -205,13 +205,13 @@ test('WORKER · the same validator on the server: an incomplete trip is refused 
   r = await send(BASE({ stages: { wedstay: 'declined' }, guestRecord: { ...ABOUT, scope: SC({ vientianeWedding: true, at: 'x' }) } })); assert.equal(r.status, 422); assert.ok(r.d.missing.some((m) => m.key === 'event:dinner')); assert.ok(r.d.missing.some((m) => m.key === 'dress'));
   /* a real hold answers the stay */
   const me = { invitationId: 'INV-G777', guestId: 'G777', partyId: 'INV-777', hosts: false };
-  const j = await h.rooms.fetch(new Request('https://x/api/rooms/join', { method: 'POST', headers: { 'x-siyl-identity': JSON.stringify(me) }, body: JSON.stringify({ invitationId: 'INV-G777', guestId: 'G777', key: 'bkk-stay/penthouse', label: 'A', name: 'Sam' }) })); assert.equal(j.status, 200);
-  r = await send(BASE({ stages: { kempinski: 'declined' }, selections: [{ id: 'bkk-stay', price: 255, qty: 1, stay: 'sathorn', room: 'penthouse', unit: 'A' }], totalUsd: 255, guestRecord: { ...ABOUT, scope: SC({ bangkok: true, at: 'x' }) } }));
+  const j = await h.rooms.fetch(new Request('https://x/api/rooms/join', { method: 'POST', headers: { 'x-siyl-identity': JSON.stringify(me) }, body: JSON.stringify({ invitationId: 'INV-G777', guestId: 'G777', key: 'bkk-stay/u-sathorn-superior-garden', label: 'A', name: 'Sam' }) })); assert.equal(j.status, 200);
+  r = await send(BASE({ stages: { kempinski: 'declined' }, selections: [{ id: 'bkk-stay', price: 192, qty: 1, stay: 'sathorn', room: 'u-sathorn-superior-garden', unit: 'A' }], totalUsd: 192, guestRecord: { ...ABOUT, scope: SC({ bangkok: true, at: 'x' }) } }));
   assert.equal(r.status, 202, JSON.stringify(r.d).slice(0, 200)); assert.ok(r.d.submissionId); assert.equal(JSON.parse(h.env.REG_KV.m.get('reg:INV-G777').v).rooms['bkk-stay'].label, 'A');
-  /* a hold outside the trip blocks: the guest now says China only while the Penthouse is still held */
+  /* a hold outside the trip blocks: the guest now says China only while the U Sathorn room is still held */
   r = await send(BASE({ stages: { kmg: 'declined', ljg: 'declined' }, selections: [{ id: 'c86', price: 105, qty: 1 }], guestRecord: { ...ABOUT, scope: SC({ china: true, at: 'x' }) } })); assert.equal(r.status, 422); assert.equal(r.d.missing[0].key, 'release:bkk-stay');
   /* the decline: complete on its own once the hold is gone */
-  const l = await h.rooms.fetch(new Request('https://x/api/rooms/leave', { method: 'POST', headers: { 'x-siyl-identity': JSON.stringify(me) }, body: JSON.stringify({ invitationId: 'INV-G777', guestId: 'G777', key: 'bkk-stay/penthouse' }) })); assert.equal(l.status, 200);
+  const l = await h.rooms.fetch(new Request('https://x/api/rooms/leave', { method: 'POST', headers: { 'x-siyl-identity': JSON.stringify(me) }, body: JSON.stringify({ invitationId: 'INV-G777', guestId: 'G777', key: 'bkk-stay/u-sathorn-superior-garden' }) })); assert.equal(l.status, 200);
   r = await send(BASE({ guestRecord: { scope: SC({ none: true, at: 'x' }) } })); assert.equal(r.status, 202, JSON.stringify(r.d).slice(0, 200)); assert.equal(r.d.kind, 'update', 'the earlier submission is kept — version 2, never deleted');
   /* the helper every other worker test sends through is itself complete */
   r = await send(complete(BASE())); assert.equal(r.status, 202);

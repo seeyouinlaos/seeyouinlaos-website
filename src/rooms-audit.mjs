@@ -60,8 +60,6 @@ console.log(pad('WINDOW', 11) + pad('PROPERTY', 32) + pad('ROOM TYPE', 44) + pad
 for (const r of rows) console.log(pad(r.window, 11) + pad(r.property, 32) + pad(r.roomType.slice(0, 42), 44) + pad(r.sourceRoomCount, 8) + pad(r.unitsCreated, 7) + pad(r.capacityPerUnit, 5) + pad(r.totalPlaces, 8) + pad(r.reservedUnits, 6) + pad(r.occupancy, 5) + pad(r.remaining, 7) + r.labels + (r.ok ? '' : '  ← MISMATCH'));
 console.log('\nOCCUPANCY SOURCE: ' + (plan ? 'the deployed engine at ' + ORIGIN : 'the seed only (no GR token)'));
 console.log('CATEGORIES: ' + rows.length + ' · UNITS: ' + rows.reduce((n, r) => n + r.unitsCreated, 0) + ' · PLACES: ' + rows.reduce((n, r) => n + r.totalPlaces, 0) + ' · OCCUPIED: ' + rows.reduce((n, r) => n + r.occupancy, 0));
-const pent = rows.find((r) => r.roomType === 'Sathorn Penthouse');
-console.log('PENTHOUSE: ' + pent.unitsCreated + ' units (' + pent.labels + ') · ' + pent.totalPlaces + ' places' + (pent.unitsCreated === 6 && pent.totalPlaces === 12 && pent.labels === 'ABCDEF' ? ' — as the Owner requires' : ' — NOT as the Owner requires'));
 console.log('RESERVATIONS: ' + rows.filter((r) => r.reservedUnits).map((r) => r.window + '/' + r.roomType + ' ' + r.reservedUnits + ' × ' + r.reservedFor).join(' · '));
 if (jsonOut) fs.writeFileSync(jsonOut, JSON.stringify({ at: new Date().toISOString(), origin: plan ? ORIGIN : null, rows, blockers }, null, 2));
 if (blockers.length) { console.log('\nRELEASE BLOCKERS:\n- ' + blockers.join('\n- ')); process.exit(1); }

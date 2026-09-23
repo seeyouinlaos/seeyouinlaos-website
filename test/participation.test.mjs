@@ -191,9 +191,10 @@ test('HARUTHAI · the hosts start at zero (Owner, 19 Sep 2026): no stage is arra
   /* the seed: no fixed allocation, no held stock, nobody named, no unit reserved; any authenticated guest may take any unit */
   deq(FIXED, [], 'FIXED is an empty export');
   for (const [key, s] of Object.entries(SEED)) { assert.equal(s.held, 0, key + ' holds nothing in advance'); assert.equal('heldFor' in s, false, key + ' names nobody'); }
-  for (const u of unitsOf('bkk-stay/penthouse')) assert.equal(u.reservedFor, null, 'Room ' + u.label + ' is nobody\'s');
-  deq(mayJoin(unitOf('bkk-stay/penthouse', 'A'), null), { ok: false, error: 'unauthorised' });
-  deq(mayJoin(unitOf('bkk-stay/penthouse', 'A'), identity(HARUTHAI)), { ok: true }); deq(mayJoin(unitOf('bkk-stay/penthouse', 'A'), identity(PEGGY)), { ok: true }, 'any authenticated guest, any unit');
+  for (const u of unitsOf('bkk-stay/u-sathorn-superior-garden')) assert.equal(u.reservedFor, null, 'Room ' + u.label + ' is nobody\'s');
+  deq(unitsOf('bkk-stay/penthouse'), [], 'the Sathorn Penthouse is deleted (Edit 6, 24 Sep 2026)'); assert.equal(SEED['bkk-stay/penthouse'], undefined);
+  deq(mayJoin(unitOf('bkk-stay/u-sathorn-superior-garden', 'A'), null), { ok: false, error: 'unauthorised' });
+  deq(mayJoin(unitOf('bkk-stay/u-sathorn-superior-garden', 'A'), identity(HARUTHAI)), { ok: true }); deq(mayJoin(unitOf('bkk-stay/u-sathorn-superior-garden', 'A'), identity(PEGGY)), { ok: true }, 'any authenticated guest, any unit');
   /* the concept is gone from the code: no arrangement module, no page loads one, no Worker strip, no mail section */
   assert.equal(fs.existsSync(path.join(ROOT, 'assets/arranged.js')), false, 'assets/arranged.js is deleted');
   for (const f of ['your-journey.html', 'cart.html', 'review.html', 'profile.html', 'assets/journey.js', 'assets/rooms.js', 'assets/stay.js', 'assets/guest.js', 'src/worker.js', 'src/drafts.js', 'src/mail-templates.js']) {
@@ -202,11 +203,11 @@ test('HARUTHAI · the hosts start at zero (Owner, 19 Sep 2026): no stage is arra
   const w = await livePage(HARUTHAI, rooms); const G = w.SIYL_GUEST, J = w.SIYL_JOURNEY, B = w.SIYL_BAG, ST = w.SIYL_STAY, U = w.SIYL_UNITS;
   assert.equal(w.SIYL_ARRANGED, undefined, 'window.SIYL_ARRANGED does not exist');
   assert.equal(G.scopeAnswered(), true, 'the hosts join everywhere by definition'); assert.equal(G.scopeWords(), 'Bangkok · Vientiane · China');
-  assert.equal(U.fixed('bkk-stay'), false); assert.equal(U.fixedUnit('bkk-stay'), null); deq(U.fixedStages(), []); assert.equal(ST.fixed('bkk-stay'), false); assert.equal(ST.fixedSlug('bkk-stay'), ''); assert.equal(U.reserved('bkk-stay', 'penthouse'), false);
+  assert.equal(U.fixed('bkk-stay'), false); assert.equal(U.fixedUnit('bkk-stay'), null); deq(U.fixedStages(), []); assert.equal(ST.fixed('bkk-stay'), false); assert.equal(ST.fixedSlug('bkk-stay'), ''); assert.equal(U.reserved('bkk-stay', 'u-sathorn-superior-garden'), false);
   assert.equal(U.mine('bkk-stay'), null); assert.equal(J.state(seg(J, 'bkk-stay')), 'open', 'never arranged'); assert.equal('fixed' in U.view(), false, 'the engine\'s view carries no fixed');
-  /* the penthouse before anyone books: six rooms, twelve places, nothing taken, every unit as open to the hosts as to anyone */
-  const s0 = U.summary('bkk-stay', 'penthouse'); assert.equal(s0.ownerReservedRooms, 0); assert.equal(s0.ownerReservedPlaces, 0); assert.equal(s0.remainingRooms, 6); assert.equal(s0.remainingPlaces, 12); assert.equal(s0.soldOut, false);
-  for (const u of U.units('bkk-stay', 'penthouse')) { assert.equal(u.taken, 0); assert.equal(u.free, 2); assert.equal(u.eligible, true); assert.equal(u.reservedFor, null); }
+  /* U Sathorn before anyone books: six rooms, twelve places, nothing taken, every unit as open to the hosts as to anyone */
+  const s0 = U.summary('bkk-stay', 'u-sathorn-superior-garden'); assert.equal(s0.ownerReservedRooms, 0); assert.equal(s0.ownerReservedPlaces, 0); assert.equal(s0.remainingRooms, 6); assert.equal(s0.remainingPlaces, 12); assert.equal(s0.soldOut, false);
+  for (const u of U.units('bkk-stay', 'u-sathorn-superior-garden')) { assert.equal(u.taken, 0); assert.equal(u.free, 2); assert.equal(u.eligible, true); assert.equal(u.reservedFor, null); }
   /* the Bag carries only actual selections: USD 0 with nothing chosen — and the Bangkok stay is a question for a host like every other stage */
   answerTheRest(w); assert.equal(B.total(), 0); deq(B.get(), []);
   assert.ok(G.missingFor('journey').some((m) => m.key === 'stage:bkk-stay'), 'the Bangkok stay is asked of the hosts too');
@@ -215,29 +216,29 @@ test('HARUTHAI · the hosts start at zero (Owner, 19 Sep 2026): no stage is arra
   assert.equal(G.done('journey'), false); assert.equal(G.mayEnter('review'), false); assert.equal(G.readiness().ok, false, 'Review & Send waits for the host\'s own answer');
   /* Room A is whoever chose it first's — two guests, not the hosts by right */
   for (const g of [PEGGY, STEFFIE]) {
-    const first = await rooms.fetch(new Request('https://x/api/rooms/join', { method: 'POST', headers: { 'x-siyl-identity': JSON.stringify(identity(g)) }, body: JSON.stringify({ invitationId: g.invitationId, guestId: g.guestId, key: 'bkk-stay/penthouse', label: 'A', name: g.preferredName }) }));
+    const first = await rooms.fetch(new Request('https://x/api/rooms/join', { method: 'POST', headers: { 'x-siyl-identity': JSON.stringify(identity(g)) }, body: JSON.stringify({ invitationId: g.invitationId, guestId: g.guestId, key: 'bkk-stay/u-sathorn-superior-garden', label: 'A', name: g.preferredName }) }));
     assert.equal(first.status, 200);
   }
-  await U.load(true); assert.equal(U.units('bkk-stay', 'penthouse')[0].full, true, 'Room A is Peggy and Steffie\'s');
+  await U.load(true); assert.equal(U.units('bkk-stay', 'u-sathorn-superior-garden')[0].full, true, 'Room A is Peggy and Steffie\'s');
   /* a host chooses like every guest: the first room with a place, a real hold in her own name, a real Bag line, a real price */
-  deq(await ST.select('bkk-stay', 'penthouse'), { ok: true, unit: 'B' }, 'the first room with a place — Room A is full');
-  deq(U.mine('bkk-stay'), { key: 'bkk-stay/penthouse', label: 'B' }); assert.equal(J.state(seg(J, 'bkk-stay')), 'selected');
-  const bk = B.get().find((x) => x.id === 'bkk-stay'); assert.equal(B.get().length, 2, 'the Penthouse and the mandatory Kunming → Lijiang train'); assert.equal(bk.room, 'penthouse'); assert.equal(bk.unit, 'B'); assert.equal(bk.unitName, 'Room B');
+  deq(await ST.select('bkk-stay', 'u-sathorn-superior-garden'), { ok: true, unit: 'B' }, 'the first room with a place — Room A is full');
+  deq(U.mine('bkk-stay'), { key: 'bkk-stay/u-sathorn-superior-garden', label: 'B' }); assert.equal(J.state(seg(J, 'bkk-stay')), 'selected');
+  const bk = B.get().find((x) => x.id === 'bkk-stay'); assert.equal(B.get().length, 2, 'U Sathorn and the mandatory Kunming → Lijiang train'); assert.equal(bk.room, 'u-sathorn-superior-garden'); assert.equal(bk.unit, 'B'); assert.equal(bk.unitName, 'Room B');
   assert.ok(bk.price > 0, 'charged like every guest'); assert.equal(B.total(), bk.price + 105);
   assert.equal(G.done('journey'), true); assert.equal(G.mayEnter('review'), true); assert.equal(G.readiness().ok, true, 'complete because the place is held — not because of who she is');
   ST.sync(); assert.equal(B.get().length, 2, 'the sync keeps the chosen room (and the train line)');
   /* Suthep, of the same party, starts at zero too: he is offered the room Haruthai is in and holds a place of his own in it */
   const s = await livePage(SUTHEP, rooms); const SU = s.SIYL_UNITS, SJ = s.SIYL_JOURNEY;
   assert.equal(SU.fixed('bkk-stay'), false); assert.equal(SU.mine('bkk-stay'), null); assert.equal(SJ.state(seg(SJ, 'bkk-stay')), 'open'); deq(s.SIYL_BAG.get(), []);
-  assert.equal(SU.suggest('bkk-stay', 'penthouse').label, 'B'); deq(SU.units('bkk-stay', 'penthouse')[1].occupants.map((o) => [o.name, o.party, o.mine]), [['Haruthai', true, false]], 'his party\'s first name, visible');
-  deq(await s.SIYL_STAY.select('bkk-stay', 'penthouse'), { ok: true, unit: 'B' });
-  const roomB = SU.units('bkk-stay', 'penthouse')[1]; assert.equal(roomB.taken, 2); assert.equal(roomB.full, true); assert.equal(SU.unitWords(roomB), 'Haruthai · You · Full');
+  assert.equal(SU.suggest('bkk-stay', 'u-sathorn-superior-garden').label, 'B'); deq(SU.units('bkk-stay', 'u-sathorn-superior-garden')[1].occupants.map((o) => [o.name, o.party, o.mine]), [['Haruthai', true, false]], 'his party\'s first name, visible');
+  deq(await s.SIYL_STAY.select('bkk-stay', 'u-sathorn-superior-garden'), { ok: true, unit: 'B' });
+  const roomB = SU.units('bkk-stay', 'u-sathorn-superior-garden')[1]; assert.equal(roomB.taken, 2); assert.equal(roomB.full, true); assert.equal(SU.unitWords(roomB), 'Haruthai · You · Full');
   assert.equal(SJ.state(seg(SJ, 'bkk-stay')), 'selected'); assert.equal(s.SIYL_BAG.get()[0].unit, 'B'); assert.ok(s.SIYL_BAG.total() > 0);
   /* and it may go again — nothing is left behind, the stage is a question once more */
   const rm = await ST.remove('bkk-stay'); assert.equal(rm.ok, true); deq(B.get().map((x) => x.id), ['c86'], 'the train line alone remains'); assert.equal(B.total(), 105); assert.equal(U.mine('bkk-stay'), null); assert.equal(U.fixed('bkk-stay'), false); assert.equal(J.state(seg(J, 'bkk-stay')), 'open');
   assert.equal(G.done('journey'), false); assert.equal(G.readiness().ok, false); deq(G.missingFor('journey').map((m) => m.key), ['stage:bkk-stay']);
   const v = await (await rooms.fetch(new Request('https://x/api/rooms/read', { method: 'POST', headers: { 'x-siyl-identity': JSON.stringify(identity(SUTHEP)) }, body: '{}' }))).json();
-  deq(v.mine, { 'bkk-stay': { key: 'bkk-stay/penthouse', label: 'B' } }, 'Suthep keeps his own place'); assert.equal(v.units['bkk-stay/penthouse'][1].taken, 1); assert.equal(v.units['bkk-stay/penthouse'][0].taken, 2, 'Peggy and Steffie keep Room A'); assert.equal('fixed' in v, false);
+  deq(v.mine, { 'bkk-stay': { key: 'bkk-stay/u-sathorn-superior-garden', label: 'B' } }, 'Suthep keeps his own place'); assert.equal(v.units['bkk-stay/u-sathorn-superior-garden'][1].taken, 1); assert.equal(v.units['bkk-stay/u-sathorn-superior-garden'][0].taken, 2, 'Peggy and Steffie keep Room A'); assert.equal('fixed' in v, false);
   /* the emails: host-ness is the record's flag (never a room) — "Front centre" for a host without a ceremony seat; no arranged section for anyone */
   const rec = (hosts) => ({ invitationId: 'INV-G048', guestId: 'G048', hosts, submissionId: 'SYL-G048-00000001', kind: 'initial', version: 1, submittedAt: '2026-09-19T10:00:00.000Z', firstSentAt: '2026-09-19T10:00:00.000Z', lastSentAt: '2026-09-19T10:00:00.000Z',
     recipient: { email: 'host@example.com', phone: '+66 81 234 5678' }, rooms: null,
@@ -405,12 +406,12 @@ test('CODEX 011-7 · an engine hold outside the trip with no Bag line of its own
   const h = await livePage(SUTHEP, rooms); const HG = h.SIYL_GUEST, HU = h.SIYL_UNITS, HB = h.SIYL_BAG;
   assert.equal(HU.fixed('bkk-stay'), false); assert.equal(HU.mine('bkk-stay'), null); deq(HG.staleFor(), [], 'nothing held, nothing named');
   HG.setScope({ bangkok: false }); deq(HG.staleFor(), [], 'still nothing: no arrangement exists to be outside the trip');
-  HG.setScope({ bangkok: true }); deq(await h.SIYL_STAY.select('bkk-stay', 'penthouse'), { ok: true, unit: 'A' }, 'a host books like every guest'); HB.remove('bkk-stay'); assert.ok(HU.mine('bkk-stay'), 'the hold stands on its own');
+  HG.setScope({ bangkok: true }); deq(await h.SIYL_STAY.select('bkk-stay', 'u-sathorn-superior-garden'), { ok: true, unit: 'A' }, 'a host books like every guest'); HB.remove('bkk-stay'); assert.ok(HU.mine('bkk-stay'), 'the hold stands on its own');
   HG.setScope({ bangkok: false });
   assert.ok(HG.staleFor().some((m) => m.key === 'release:room:bkk-stay'), 'the host\'s hold is named like anyone\'s'); assert.ok(HG.missingFor('journey').some((m) => m.key === 'release:room:bkk-stay'));
   const hr = await HU.leave('bkk-stay'); assert.equal(hr.ok, true); assert.equal(HU.mine('bkk-stay'), null); deq(HG.staleFor(), []); assert.ok(!HG.missingFor('journey').some((m) => /^release:/.test(m.key)));
   const hv = await (await rooms.fetch(new Request('https://x/api/rooms/read', { method: 'POST', headers: { 'x-siyl-identity': JSON.stringify(identity(SUTHEP)) }, body: '{}' }))).json();
-  deq(hv.mine, {}, 'the engine holds nothing for the host'); assert.equal(hv.units['bkk-stay/penthouse'][0].taken, 0);
+  deq(hv.mine, {}, 'the engine holds nothing for the host'); assert.equal(hv.units['bkk-stay/u-sathorn-superior-garden'][0].taken, 0);
 });
 
 test('CODEX 011-8 · a frozen seating ledger never blocks a truthful decline: the seat is Guest Relations\' to release, the decline is sent', () => {

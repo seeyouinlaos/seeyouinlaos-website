@@ -54,12 +54,12 @@ test('EMAIL · the journey is stored first with a submission id, then Guest Rela
 test('EMAIL · THE PERSISTED ROOM (Owner, 16 Sep 2026): both emails name the room the engine holds for the guest — read on the server under the guest\'s own identity, never the client\'s claim; with no engine the line says "not read"', async () => {
   const h = await harness('brevo');
   try {
-    /* one engine, Peggy holds Heritage Room B in the wedding window and Room C of the Penthouse */
+    /* one engine, Peggy holds Heritage Room B in the wedding window and Room C of U Sathorn (the Sathorn Penthouse is deleted, Owner 24 Sep 2026 · Edit 6) */
     const rooms = new Rooms(doState());
     const stub = { fetch: (r) => rooms.fetch(r) };
     h.env.ROOMS = { idFromName: () => 'rooms', get: () => stub };
     const me = { invitationId: 'INV-G001', guestId: 'G001', partyId: 'INV-002', hosts: false };
-    for (const [key, label] of [['wedstay/heritage', 'B'], ['bkk-stay/penthouse', 'C']]) {
+    for (const [key, label] of [['wedstay/heritage', 'B'], ['bkk-stay/u-sathorn-superior-garden', 'C']]) {
       const j = await rooms.fetch(new Request('https://x/api/rooms/join', { method: 'POST', headers: { 'x-siyl-identity': JSON.stringify(me) }, body: JSON.stringify({ invitationId: 'INV-G001', guestId: 'G001', key, label, name: 'Peggy' }) }));
       assert.equal(j.status, 200);
     }
@@ -67,7 +67,7 @@ test('EMAIL · THE PERSISTED ROOM (Owner, 16 Sep 2026): both emails name the roo
     const r = await h.w.fetch(req('/api/register', { 'x-siyl-auth': h.peggy }, { invitationId: 'INV-G001', registration: complete(REG, { scope: { vientianeWedding: true } }), text: TEXT + '\n- The Heritage · Room A' }), h.env);
     assert.equal(r.status, 202);
     const rec = JSON.parse(h.store.m.get('reg:INV-G001').v);
-    assert.deepEqual(rec.rooms, { wedstay: { stage: 'wedstay', key: 'wedstay/heritage', label: 'B', name: 'The Heritage', stay: null, room: 'Room B' }, 'bkk-stay': { stage: 'bkk-stay', key: 'bkk-stay/penthouse', label: 'C', name: 'Sathorn Penthouse', stay: 'Sathorn Penthouse Bangkok', room: 'Room C' } }, 'each record line names its stage (Edit 5: a fixed arrangement may stand beside a chosen hold)');
+    assert.deepEqual(rec.rooms, { wedstay: { stage: 'wedstay', key: 'wedstay/heritage', label: 'B', name: 'The Heritage', stay: null, room: 'Room B' }, 'bkk-stay': { stage: 'bkk-stay', key: 'bkk-stay/u-sathorn-superior-garden', label: 'C', name: 'Superior Room With Garden View', stay: 'U Sathorn Bangkok', room: 'Room C' } }, 'each record line names its stage (Edit 5: a fixed arrangement may stand beside a chosen hold)');
     const owner = h.calls[0].body.textContent, guest = h.calls[1].body.textContent;
     /* the engine's rooms reach both emails through the stays (the journey-shop shape names the stay lines; this fixture carries none, so the record's rooms are proven on the stored record above) */
     assert.doesNotMatch(owner + guest, /room engine|persisted allocation/, 'no system words in an email');

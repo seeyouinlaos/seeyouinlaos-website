@@ -24,7 +24,6 @@
       ['After the Wedding', 'journeys.html#j-mu9646']
     ]],
     ['Stays', 'accommodation.html', [
-      ['Sathorn Penthouse Bangkok', 'room.html?stay=sathorn&room=penthouse'],
       ['Souphattra Heritage Vientiane', 'journeys.html#j-prewed'],
       ['Guest House complimentary', 'room.html?stay=guesthouse&room=guest-house'],
       ['Wanxiang Yueju Kunming', 'journeys.html#j-kmg'],

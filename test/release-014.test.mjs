@@ -46,12 +46,13 @@ test('NO FIXED ARRANGEMENT · the seed holds nothing for anyone; no unit is rese
   assert.deepEqual(FIXED, []);
   for (const [k, s] of Object.entries(SEED)) { assert.equal(s.held || 0, 0, k + ' held'); assert.equal(s.heldFor, undefined, k + ' heldFor'); }
   for (const k of Object.keys(SEED)) for (const u of unitsOf(k)) { assert.equal(u.reservedFor, null, k + ' ' + u.label); assert.equal(mayJoin(u, PEG).ok, true); assert.equal(mayJoin(u, HAR).ok, true); }
-  assert.equal(mayJoin(unitsOf('bkk-stay/penthouse')[0], null).ok, false, 'no identity, no place');
+  assert.equal(mayJoin(unitsOf('bkk-stay/u-sathorn-superior-garden')[0], null).ok, false, 'no identity, no place');
   const rooms = new Rooms(doState());
   const v = (await call(rooms, 'read', null, HAR)).d;
   assert.equal(v.fixed, undefined, 'no fixed map in the view'); assert.deepEqual(v.mine, {}); assert.deepEqual(v.waitlist, {});
-  assert.equal(unit(v, 'bkk-stay/penthouse', 'A').taken, 0, 'Room A of the Penthouse is nobody\'s before a booking');
-  assert.equal(v.summary['bkk-stay/penthouse'].remainingPlaces, 12, 'six bedrooms, twelve places, all bookable');
+  assert.equal(unit(v, 'bkk-stay/u-sathorn-superior-garden', 'A').taken, 0, 'Room A of U Sathorn is nobody\'s before a booking');
+  assert.equal(v.summary['bkk-stay/u-sathorn-superior-garden'].remainingPlaces, 12, 'six rooms, twelve places, all bookable');
+  assert.equal(v.summary['bkk-stay/penthouse'], undefined, 'the Sathorn Penthouse is deleted (Edit 6, 24 Sep 2026)');
 });
 
 test('NO FIXED ARRANGEMENT · no served page, module or email carries the concept', () => {

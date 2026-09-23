@@ -156,7 +156,14 @@
       var bag = b.get(), changed = false;
       /* a line of a hotel the engine does not hold while it holds ANOTHER hotel of the same stage is a leftover (an older
          draft, another device): the stage is answered by the held one, the leftover leaves the Bag and the total */
-      var kept = bag.filter(function (x) { return !ST.leftover(x); });
+      /* a line of a room the website no longer offers (the Sathorn Penthouse, deleted — Owner, 24 Sep 2026 · Edit 6) is not
+         a stay and not a cost: it leaves the Bag and the total, and the stage asks for a choice again */
+      var gone = function (x) {
+        if (!x || !x.room || x.interest) return false;
+        var at = p.locate(p.windowOf(x.id));
+        return !!(at && at.stay && Array.isArray(at.stay.rooms)) && !at.stay.rooms.some(function (r) { return r.slug === x.room; });
+      };
+      var kept = bag.filter(function (x) { return !ST.leftover(x) && !gone(x); });
       if (kept.length !== bag.length) { bag = kept; changed = true; }
       bag.forEach(function (x) {
         if (!x.room || x.interest) return;
@@ -171,6 +178,8 @@
       Object.keys(mine).forEach(function (stage) {
         var key = mine[stage].key, win = key.split('/')[0], slug = key.split('/').slice(1).join('/');
         var at = p.locate(win); if (!at) return;
+        /* a hold on a room the website no longer offers is never turned into another room's line */
+        if (!at.stay.rooms.some(function (r) { return r.slug === slug; })) return;
         if (ST.line(win)) return;
         var stageIds = [];
         (window.SIYL_JOURNEY ? SIYL_JOURNEY.SEGMENTS : []).forEach(function (seg) { if (seg.ids.indexOf(win) >= 0) seg.ids.forEach(function (id) { stageIds.push(id); }); });

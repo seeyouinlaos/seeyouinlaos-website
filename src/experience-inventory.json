@@ -1447,20 +1447,54 @@
   "overview": "Day 08 · 28.02.2027",
   "sheet": "NONE",
   "selectable": false,
-  "drive": "050 - Event - Temple Ceremony - Wat Ong Teu Vientiane",
+  "drive": "195 - Experience - Wat Ong Teu",
   "driveIds": [
-   "1N-LCD10lVQrR6bqh9BxqRKsuhdYtO7Wl"
+   "1NJGHVmgIvwoOawNM3gwH_m1Fh25tBpQn"
   ],
-  "sourceImages": 8,
-  "used": 2,
+  "sourceImages": 4,
+  "used": 4,
   "primary": "assets/images/experiences/vte-ongteu-01.jpg",
   "gallery": [
    "assets/images/experiences/vte-ongteu-01.jpg",
-   "assets/images/experiences/vte-ongteu-02.jpg"
+   "assets/images/experiences/vte-ongteu-02.jpg",
+   "assets/images/experiences/vte-ongteu-03.jpg",
+   "assets/images/experiences/vte-ongteu-04.jpg"
   ],
-  "note": "the temple of the Alms Giving Ceremony, Sunday 28.02.2027 09:00 (Operations Master, Day 08); the frames are DSC07779 (the lead — the one the Temple Ceremony shows) and DSC07777, both of the temple's own folder; the Alms-Giving semantics are untouched",
+  "note": "the temple of the Alms Giving Ceremony, Sunday 28.02.2027 09:00 (Operations Master, Day 08); Edit 6 (24 Sep 2026): the pictures are the Owner's replacement set, Drive folder 195 (IMG_4316 lead · IMG_4315 · IMG_3659 · IMG_3658); the Alms-Giving semantics are untouched",
   "price": null,
   "hours": null,
+  "maps": null,
+  "link": null,
+  "category": "experience"
+ },
+ {
+  "id": "vte-laodress",
+  "name": "Lao Traditional Dress Rental",
+  "city": "Vientiane",
+  "roles": [
+   "experience"
+  ],
+  "overview": "city",
+  "sheet": "DETAIL",
+  "selectable": false,
+  "drive": "196 - Experience - Lao Traditional Dress Rental",
+  "driveIds": [
+   "1YzeS_UGJJeTNMXS2mgRhqC9ZToc5xtxZ"
+  ],
+  "sourceImages": 6,
+  "used": 6,
+  "primary": "assets/images/experiences/vte-laodress-01.jpg",
+  "gallery": [
+   "assets/images/experiences/vte-laodress-01.jpg",
+   "assets/images/experiences/vte-laodress-02.jpg",
+   "assets/images/experiences/vte-laodress-03.jpg",
+   "assets/images/experiences/vte-laodress-04.jpg",
+   "assets/images/experiences/vte-laodress-05.jpg",
+   "assets/images/experiences/vte-laodress-06.jpg"
+  ],
+  "note": "Edit 6 (24 Sep 2026): description, price and hours from H&S_Wedding_Operations_Master (Experience column \"Lao Traditional Dress Rental\"); the attire of the wedding morning, Day 08 (Lao Traditional Dress)",
+  "price": "USD 15.00",
+  "hours": "Everyday 09:00 – 18:00",
   "maps": null,
   "link": null,
   "category": "experience"

@@ -139,7 +139,9 @@ test('8 · the overview reflects selections, holds and the waiting list — noth
   assert.match(h.el.innerHTML, /No stay is chosen yet\. Rooms are chosen in My Trip\./);
   assert.doesNotMatch(h.el.innerHTML, /data-profile-item="(line|waitlist):/);
   assert.equal(h.w.SIYL_BAG.get().length, 0); assert.equal(h.w.SIYL_BAG.total(), 0);
-  assert.ok(h.w.SIYL_UNITS.view().units['bkk-stay/penthouse'].every((u) => u.reservedFor === null && u.taken === 0), 'no room is anyone\'s before a booking');
+  /* the Sathorn Penthouse is deleted (Owner, 24 Sep 2026 · Edit 6): Bangkok is U Sathorn and Shama */
+  const HU = h.w.SIYL_UNITS.view().units; assert.equal(HU['bkk-stay/penthouse'], undefined, 'no Penthouse units');
+  for (const k of ['bkk-stay/u-sathorn-superior-garden', 'bkk-stay/shama-king-studio-balcony']) assert.ok(HU[k].length > 0 && HU[k].every((u) => u.reservedFor === null && u.taken === 0), k + ': no room is anyone\'s before a booking');
 });
 
 test('9 · Sign out is visible and functional: the header control leaves the session and returns to the invitation; the dashboard offers it too', () => {

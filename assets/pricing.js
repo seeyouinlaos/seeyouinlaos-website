@@ -391,13 +391,17 @@
     var bag = B.get(), changed = false;
     var next = bag.map(function (x) {
       if (!x.stay || !x.room || x.interest || x.complimentary) return x;
+      /* a line of a room the website no longer offers (the Sathorn Penthouse, deleted — Owner, 24 Sep 2026 · Edit 6) is
+         never re-quoted into another room: it leaves the Bag, and the stage asks for a choice again */
+      var at = locate(x.id);
+      if (at && !roomOf(at.stay, x.room)) { changed = true; return null; }
       var fresh = window.SIYL_PRICE.items(x.id, x.room)[0];
       if (!fresh || fresh.price == null) return x;
       if (x.price === fresh.price && x.pay === fresh.pay && x.name === fresh.name && !('fixed' in x)) return x;
       changed = true;
       fresh.qty = x.qty || 1;           /* the guest's own choice is preserved */
       return fresh;                     /* name, meta, amount and basis are re-derived */
-    });
+    }).filter(Boolean);
     if (changed) B.set(next);
   })();
 

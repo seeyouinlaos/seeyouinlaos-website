@@ -50,7 +50,8 @@ test('THE DATES · every itinerary-linked card names its date(s) as words, never
   const card = src('experiences.html').slice(src('experiences.html').indexOf('function card(x)'), src('experiences.html').indexOf('function rail('));
   assert.match(card, /'<p class="x-when">' \+ esc\(when\) \+ '<\/p>'/); assert.doesNotMatch(card, /seq|\d\d:\d\d/, 'never a time on the card');
   assert.match(src('experiences.html'), /\.aslide \.x-when \{ font-family: 'PP Editorial Old'/, 'the date treatment is the editorial serif, italic, muted');
-  const dated = X.filter((x) => x.visits && x.visits.length).length; assert.ok(dated >= 40 && X.length - dated <= 7, 'the itinerary dates every place the Operations Master schedules; the Vientiane portrait and one Bangkok address stay undated (' + (X.length - dated) + ')');
+  const dated = X.filter((x) => x.visits && x.visits.length).length; assert.ok(dated >= 40 && X.length - dated <= 8, 'the itinerary dates every place the Operations Master schedules; the Vientiane portrait, one Bangkok address and the Lao Traditional Dress Rental (Edit 6, 24 Sep 2026 · no visit) stay undated (' + (X.length - dated) + ')');
+  assert.deepEqual(by['vte-laodress'].visits, [], 'the Dress Rental carries no itinerary date'); assert.equal(D.dateWords(by['vte-laodress']), '');
 });
 
 test('BARON VIENTIANE · the club of the wedding night: once, a CLUB in Bars & nightlife, the highlight rail\'s closing card, its own approved photographs (seven, the Owner\'s folder) and three films with sound; nothing borrowed, nothing leaked into another gallery', () => {
@@ -70,16 +71,17 @@ test('BARON VIENTIANE · the club of the wedding night: once, a CLUB in Bars & n
   assert.match(src('assets/clip.js'), /v\.muted = !wantSound;/, 'the film starts with sound where the browser allows, muted where it does not — the guest\'s tap on SOUND ON is the rule'); assert.doesNotMatch(src('assets/clip.js'), /muted = true;\s*$/m);
 });
 
-test('PETITS PLATS BANGKOK · one restaurant, Bangkok, 08.03.2027 (the last dinner), five photographs of its own folder, never another house\'s; WAT ONG TEU · one experience, the temple of the Alms Giving Ceremony (Sunday 28.02.2027), its photograph from the temple\'s own folder; the six overview venues the Discover had missed stand without a photograph', () => {
+test('PETITS PLATS BANGKOK · one restaurant, Bangkok, 08.03.2027 (the last dinner), five photographs of its own folder, never another house\'s; WAT ONG TEU · one experience, the temple of the Alms Giving Ceremony (Sunday 28.02.2027), its four photographs from the temple\'s own folder (195, Edit 6); the six overview venues the Discover had missed stand without a photograph', () => {
   const p = by['bkk-petitsplats']; assert.equal(p.category, 'restaurant'); assert.equal(p.where, 'Bangkok'); assert.deepEqual(p.visits, [{ day: 16, date: '2027-03-08', seq: 1900, what: 'Dinner' }]);
   assert.equal(GAL['bkk-petitsplats'].images.length, 5); assert.equal(p.img, GAL['bkk-petitsplats'].images[0].src);
   const rec = JSON.parse(src('src/experience-galleries.json')); assert.equal(rec['bkk-petitsplats'].folderId, '12W_HGO-5KHEbGXiw86FlHdzRUtlWSuNs'); for (const im of rec['bkk-petitsplats'].images) { assert.match(im.file, /^IMG_27(29|30|31|32|33)\.JPG$/); assert.match(im.src, /^assets\/images\/experiences\/bkk-petitsplats-0[1-5]\.jpg$/); assert.ok(!['food', 'drink'].includes(im.kind)); }
   const t = by['vte-ongteu']; assert.equal(t.category, 'experience'); assert.equal(t.where, 'Vientiane'); assert.deepEqual(t.visits, [{ day: 8, date: '2027-02-28', seq: 900, what: 'Alms Giving Ceremony' }]); assert.match(t.cats, /Temple/);
   assert.equal(t.img, 'assets/images/experiences/vte-ongteu-01.jpg'); assert.ok(existsSync(join(ROOT, t.img)));
-  const inv = JSON.parse(src('src/experience-inventory.json')); const ti = inv.find((e) => e.id === 'vte-ongteu'); assert.equal(ti.drive, '050 - Event - Temple Ceremony - Wat Ong Teu Vientiane'); assert.match(ti.note, /DSC07779/);
+  const inv = JSON.parse(src('src/experience-inventory.json')); const ti = inv.find((e) => e.id === 'vte-ongteu'); assert.equal(ti.drive, '195 - Experience - Wat Ong Teu', 'Edit 6 (24 Sep 2026): the Owner\'s replacement set, folder 195'); assert.match(ti.note, /IMG_4316/); assert.equal(ti.primary, t.img);
+  assert.equal(GAL['vte-ongteu'].images.length, 4); assert.deepEqual(GAL['vte-ongteu'].images.map((im) => im.src), [1, 2, 3, 4].map((n) => 'assets/images/experiences/vte-ongteu-0' + n + '.jpg')); assert.deepEqual(rec['vte-ongteu'].images.map((im) => im.file), ['IMG_4316.jpeg', 'IMG_4315.jpeg', 'IMG_3659.jpeg', 'IMG_3658.jpeg'], 'the temple façade leads'); assert.equal(rec['vte-ongteu'].folder, '195 - Experience - Wat Ong Teu');
   assert.match(src('voyage.html'), /Wat Ong Teu, Vientiane/, 'the same temple the ceremony names');
   /* THE SEVEN VENUES (Owner, 22 Sep 2026): each has the photographs of its own Drive folder — never a fallback, never another house's */
-  const FOLDER = { 'bkk-cafecraft': '1nCcRkh44-OQMUMp0F0A8ZFXYRxC5joLq', 'bkk-siamparagon': '1QxgoS2aWXC2DWKh_c6Y0fTYOz06JhW8r', 'bkk-firefly': '1LCCnMXVkMkPnyhmprr0OHPyEHJBCLAqt', 'vte-camon': '1PkPZxgrH9-RVegM0LNkOw8TVozD0ejZ7', 'vte-lecafe': '1KvH_yBzmFYbVAYppbFgOCSg0m8-L3LVB', 'vte-selene': '14s46H44ZY51udx9TA6ts5QyAxN7snjUK', 'vte-ongteu': '1N-LCD10lVQrR6bqh9BxqRKsuhdYtO7Wl', 'bkk-dior': '1T8LtqEK358_5mdEC-y_Uu5HnZ8Jnyv4h', 'bkk-lvcafe': '1oBn04Bq8QBQglAzOrtKFtxRtD_AYzweS' };
+  const FOLDER = { 'bkk-cafecraft': '1nCcRkh44-OQMUMp0F0A8ZFXYRxC5joLq', 'bkk-siamparagon': '1QxgoS2aWXC2DWKh_c6Y0fTYOz06JhW8r', 'bkk-firefly': '1LCCnMXVkMkPnyhmprr0OHPyEHJBCLAqt', 'vte-camon': '1PkPZxgrH9-RVegM0LNkOw8TVozD0ejZ7', 'vte-lecafe': '1KvH_yBzmFYbVAYppbFgOCSg0m8-L3LVB', 'vte-selene': '14s46H44ZY51udx9TA6ts5QyAxN7snjUK', 'vte-ongteu': '1NJGHVmgIvwoOawNM3gwH_m1Fh25tBpQn', 'bkk-dior': '1T8LtqEK358_5mdEC-y_Uu5HnZ8Jnyv4h', 'bkk-lvcafe': '1oBn04Bq8QBQglAzOrtKFtxRtD_AYzweS' };
   const REC = JSON.parse(src('src/experience-galleries.json'));
   for (const [id, folderId] of Object.entries(FOLDER)) {
     assert.ok(by[id], id); assert.ok(by[id].img && existsSync(join(ROOT, by[id].img)), id + ' lead on disk');
