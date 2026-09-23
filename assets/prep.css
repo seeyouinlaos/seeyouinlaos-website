@@ -27,9 +27,13 @@
   --p-mute:   #6B6964;   /* final run 11 SEP 2026: 4.75:1 on ivory (was var(--p-mute) = 3.7:1) */
   --p-line:   #DAD9D7;
   --p-hair:   #EDEBE7;
-  --p-paper:  #F3EEE7;
+  --p-paper:  #F2ECE1;   /* Warm Ivory — the one ground of the site */
   --p-card:   #FCFAF6;
-  --p-accent: #8A5A55;
+  /* THE ONE ACCENT (Owner, 23 Sep 2026): the wordmark's Cherry full stop. Current · selected · progress · focus. */
+  --p-accent: #74070E;
+  --p-focus:  #74070E;
+  --p-ease:   cubic-bezier(.19, 1, .22, 1);
+  --p-t-state: 180ms;
 
   /* space — the only steps that exist */
   --s1: 4px;  --s2: 8px;  --s3: 12px; --s4: 16px;
@@ -946,4 +950,63 @@ body.seatbar-on .prep-foot .prep-foot-note { display: none; }
 @media (min-width: 700px) {
   .pf-extbar { grid-template-columns: 1fr minmax(200px, 260px); column-gap: var(--s4); row-gap: var(--s2); }
   .pf-extsel { justify-self: end; width: 100%; }
+}
+
+/* ============================================================================
+   THE CHERRY GRAMMAR ON THE GUEST'S OWN SURFACES (Owner, 23 Sep 2026).
+
+   My Trip, My Profile, My Bag and Review & Send are where the guest decides.
+   The same Cherry full stop that ends the wordmark marks WHERE THEY ARE, WHAT
+   THEY CHOSE and HOW FAR SOMETHING HAS RUN. Nothing here is recoloured for
+   emphasis: the amounts, the names, the prose and the structural hairlines stay
+   Ink, and the cards stay Ivory. Cherry keeps its value by being rare.
+   ========================================================================== */
+
+/* ---- E · FOCUS · one branded ring across every guest surface ------------- */
+:focus-visible { outline: 2px solid var(--p-focus); outline-offset: 3px; }
+.p-act:focus-visible, .p-link:focus-visible, .p-sel:focus-visible,
+.prep-all:focus-visible, .prep-srow:focus-visible, .p-seatprog-row:focus-visible,
+.pf-extsel select:focus-visible { outline: 2px solid var(--p-focus); outline-offset: 3px; }
+.prep-srow:focus-visible, .p-seatprog-row:focus-visible { outline-offset: -2px; }
+
+/* ---- A · CURRENT · the step the guest is on ----------------------------- */
+/* the numbered shell already names the step; the full stop says which one is open */
+.prep-srow[aria-current="step"] .prep-sn, .prep-step.is-current .prep-sn { position: relative; }
+.prep-srow[aria-current="step"] .prep-sn::after, .prep-step.is-current .prep-sn::after {
+  content: ''; position: absolute; right: -9px; top: .5em; width: 4px; height: 4px; border-radius: 50%; background: var(--p-accent);
+}
+
+/* ---- B · SELECTED · what the guest has chosen --------------------------- */
+/* a chosen option keeps its Ink fill; the full stop confirms it is the current one */
+.p-sel[aria-pressed="true"]::after, .p-sel.on::after {
+  content: ''; display: inline-block; width: 4px; height: 4px; border-radius: 50%;
+  background: var(--p-paper); margin-left: 7px; vertical-align: middle;
+}
+/* a line of the journey that is held, confirmed or chosen carries the point */
+.p-line-body > .t-l1.on::before, .pf-card.on .pf-body > .t-l1::before {
+  content: ''; display: inline-block; width: 4px; height: 4px; border-radius: 50%;
+  background: var(--p-accent); margin-right: 7px; vertical-align: middle;
+}
+/* the tick the site already uses becomes the full stop: one mark, one meaning */
+.p-link.on::before { content: ''; display: inline-block; width: 4px; height: 4px; border-radius: 50%; background: var(--p-accent); margin-right: 8px; vertical-align: middle; }
+.prep-tick { background: var(--p-accent); }
+
+/* ---- C · PROGRESS · a rule that has actually run ------------------------ */
+.p-rule-current { display: block; height: 1px; background: var(--p-accent); }
+
+/* ---- D · PUNCTUATION · the one action of a surface ---------------------- */
+/* the primary action is Ink, as it always was; it simply ends the way the wordmark does */
+.p-act { position: relative; }
+.p-act:not(.quiet)::after {
+  content: ''; position: absolute; right: 12px; top: 50%; width: 4px; height: 4px; margin-top: -2px;
+  border-radius: 50%; background: var(--p-accent); opacity: 0; transition: opacity var(--p-t-state) var(--p-ease);
+}
+.p-act:not(.quiet):hover::after, .p-act:not(.quiet):focus-visible::after { opacity: 1; }
+
+/* ---- the one motion grammar: a state settles, it never springs ---------- */
+.p-sel, .p-link, .pf-card, .prep-srow { transition: color var(--p-t-state) var(--p-ease), border-color var(--p-t-state) var(--p-ease), background-color var(--p-t-state) var(--p-ease); }
+@media (prefers-reduced-motion: reduce) {
+  /* later in the file at equal specificity, so stillness wins on source order alone — no override keyword needed */
+  .p-sel, .p-link, .pf-card, .prep-srow { transition: none; }
+  .p-act:not(.quiet)::after { transition: none; opacity: 1; }
 }

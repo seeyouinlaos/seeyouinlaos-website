@@ -28,7 +28,8 @@ const AV = src('assets/availability.js');
 const BAR = src('assets/stay-bar.js');
 const CSS = src('assets/aman.css');
 const INDEX = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
-const BLOCK = CSS.slice(CSS.indexOf('THE AVAILABILITY OBJECT (Owner approved'));
+/* the object's own block, bounded: the Cherry grammar that follows it in the one stylesheet is a different contract */
+const BLOCK = CSS.slice(CSS.indexOf('THE AVAILABILITY OBJECT (Owner approved'), CSS.indexOf('THE CHERRY GRAMMAR (Owner'));
 /* what the object RENDERS — the html() the page receives, without the file's own commentary */
 const RENDERED = AV.slice(AV.indexOf('function html(f)'), AV.indexOf('/* ---- the entrance'));
 

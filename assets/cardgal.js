@@ -37,7 +37,12 @@
     prev.innerHTML = '<i aria-hidden="true"></i>'; next.innerHTML = '<i aria-hidden="true"></i>';
     var count = document.createElement('p');
     count.className = 'cg-count'; count.setAttribute('aria-live', 'polite');
-    box.appendChild(prev); box.appendChild(next); box.appendChild(count);
+    /* A · CURRENT (Owner, 23 Sep 2026): the same Cherry full stop the hero uses — which photograph the guest is on,
+       read at a glance without counting. The count stays for the screen reader and for the exact position. */
+    var dots = document.createElement('span');
+    dots.className = 'cg-dots'; dots.setAttribute('aria-hidden', 'true');
+    for (var d = 0; d < n; d++) dots.appendChild(document.createElement('i'));
+    box.appendChild(prev); box.appendChild(next); box.appendChild(count); box.appendChild(dots);
 
     function paint() {
       for (var k = 0; k < n; k++) {
@@ -49,6 +54,7 @@
         if (on && im && im.getAttribute('data-src')) { im.src = im.getAttribute('data-src'); im.removeAttribute('data-src'); }
       }
       count.textContent = (i + 1) + ' / ' + n;
+      for (var q = 0; q < dots.children.length; q++) dots.children[q].classList.toggle('on', q === i);
       box.setAttribute('data-cardgal-index', String(i));
       /* the neighbour is fetched quietly, so the next turn is instant */
       var nx = slides[(i + 1) % n].querySelector('img');
