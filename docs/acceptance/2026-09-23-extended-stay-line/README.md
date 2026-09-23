@@ -1,3 +1,9 @@
+> **RETIRED, 23 September 2026 — the same day.** The Owner withdrew the self-service extension
+> entirely: a guest must not be shown a cheap alternative beside the stay chosen for them. The
+> feature described below no longer exists. This note is kept unchanged as the record of what was
+> built, why, and what the live state was at the time. The removal and its proof are in
+> `docs/acceptance/2026-09-23-extension-withdrawn/`.
+
 # THE EXTENDED STAY AS A LINE THE GUEST CAN SEE — Owner, 23 September 2026
 
 The paid nights lived in the room engine and were counted in the total, but no surface ever showed

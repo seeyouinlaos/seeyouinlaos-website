@@ -91,7 +91,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 @media(min-width:768px){.pf-people{margin:0;padding-left:0;padding-right:0;flex-wrap:wrap;overflow:visible}.pf-grid{grid-template-columns:repeat(4,1fr)}.pf-stat:nth-child(odd){padding-right:20px}.pf-stat:nth-child(even){padding-left:20px}.pf-stat:nth-child(4n+3){padding-left:20px;border-left:1px solid #DAD9D7}.pf-stat:nth-child(4n+1){border-left:0;padding-left:0}.pf-num-v{font-size:120px}.pf-stat .pf-num-v{font-size:64px}}
 @media(prefers-reduced-motion:reduce){.pf-person{opacity:1;transform:none;transition:none}}
 </style>
-<link rel="stylesheet" href="assets/aman.css?v=23823812"><link rel="stylesheet" href="assets/prep.css?v=97d5f222"></head><body class="prep p-in">
+<link rel="stylesheet" href="assets/aman.css?v=23823812"><link rel="stylesheet" href="assets/prep.css?v=8e13eba5"></head><body class="prep p-in">
 <header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="cart.html" aria-label="My Bag"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main class="prep-page" id="profile">
 <div class="prep-head">
@@ -101,7 +101,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 </div>
 <div id="page"></div>
 </main>
-<script src="assets/bag.js?v=02b5699b"></script>
+<script src="assets/bag.js?v=fe0c8b93"></script>
 <script src="assets/shop-menu.js?v=1ff891bc"></script>
 <script src="assets/aman.js?v=2a339178"></script>
 <script src="assets/rooms-data.js?v=2f46c2d6"></script>
@@ -111,14 +111,14 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/guest.js?v=2f688b53"></script>
 <script src="assets/draft.js?v=7ab9ca64"></script>
 <script src="assets/temple.js?v=200ee67c"></script>
-<script src="assets/stay-plan.js?v=991ec5c9"></script>
-<script src="assets/rooms.js?v=6cedafd4"></script>
+<script src="assets/stay-plan.js?v=f1b4f999"></script>
+<script src="assets/rooms.js?v=0d5a610a"></script>
 <script src="assets/stay.js?v=3690f59b"></script>
 <script src="assets/seatlabels.js?v=4994e1f4"></script>
 <script src="assets/seating.js?v=3b392bf0"></script>
 <script src="assets/confirm.js?v=f35e0aa8"></script>
 <script src="assets/transport-data.js?v=a5d732d4"></script>
-<script src="assets/journey.js?v=692e7054"></script>
+<script src="assets/journey.js?v=aeb36786"></script>
 <script src="assets/docs.js?v=7c1c7bfd"></script>
 <script src="assets/avatar.js?v=4f4d9416"></script>
 <script src="assets/stay-media.js?v=ad379eca"></script>
@@ -225,14 +225,16 @@ function contact(){
     (ids?'<p class="t-b2 mute" data-personal="ids">Your record · '+esc(ids)+' · kept by Guest Relations</p>':'')+
     '<div class="p-actions"><a class="p-link" href="invitation.html#personal">Review your personal details</a></div></div></section>'}
 /* ============================================================================
-   YOUR STAY (Owner, 22 Sep 2026): the confirmed stay first, and beneath it one
-   quiet bar to extend it. The complimentary house cannot be extended — the
-   nights a guest adds are always at the designated hotel, USD 30 with breakfast,
-   and they are a SEPARATE booking: changing or removing them never touches the
-   stay underneath. The engine answers for the hotel, the dates, the price and
-   the availability; this page only asks, reviews and shows.
+   YOUR STAY (Owner, 22 Sep 2026 · the self-service extension withdrawn 23 Sep 2026).
+
+   Every accommodation the guest has confirmed, in the order the stays happen,
+   in ONE card system and without photography: this section is a record, not a
+   rail. There is no longer anything to book here. The paid extra nights that
+   used to be offered beneath it (one to four at a designated hotel) were
+   withdrawn by the Owner: a guest must not be shown a cheap alternative beside
+   the stay chosen for them, and extra nights are arranged by Guest Relations
+   outside this engine. No control, no placeholder, no empty card is left.
    ========================================================================== */
-var stayPending=null,stayMsg='',stayBusy=false,stayRemoving=false,stayQuote=null;
 function SP(){return window.SIYL_STAY_PLAN}
 function stayHouse(){
   var m=U&&U.mine?U.mine('wedstay'):null; if(!m)return null;
@@ -249,32 +251,9 @@ function stayCard(o){
     (o.rows||[]).map(function(r){return '<p class="t-b1 pf-stay-row"><span>'+esc(r[0])+'</span><span>'+esc(r[1])+'</span></p>'}).join('')+
     (o.foot?'<p class="t-b2 mute">'+esc(o.foot)+'</p>':'')+'</div>';
 }
-function extBar(ext){
-  var P=SP(),cur=stayPending!=null?stayPending:(ext?ext.nights:0);
-  var opts=P.NIGHT_OPTIONS.map(function(n){return '<option value="'+n+'"'+(cur===n?' selected':'')+'>'+n+(n===1?' night':' nights')+'</option>'}).join('');
-  return '<div class="pf-extbar" data-ext-bar>'+
-    '<p class="t-l1">Extend your stay</p>'+
-    '<div class="pf-extsel"><label class="pf-hide" for="pf-ext">Additional nights</label>'+
-    '<select id="pf-ext" data-ext-select'+(stayBusy?' disabled':'')+'>'+
-    (cur?'':'<option value="" selected>Select additional nights</option>')+opts+'</select></div>'+
-    '<p class="t-b2 mute pf-extnote">'+esc(P.EXTENSION.hotel)+' · '+esc('USD '+P.EXTENSION.rate+' a night')+' · '+esc(P.EXTENSION.breakfast)+'</p>'+
-    '</div>';
-}
-function extReview(q,changed){
-  return '<div class="p-card pf-review" data-ext-review>'+
-    '<p class="t-l1 open">Your extension</p>'+
-    '<h3 class="t-h2">'+esc(q.nightsWords)+'</h3>'+
-    '<p class="t-b1">'+esc(q.dates)+'</p>'+
-    '<p class="t-b1">'+esc(q.hotel)+'</p>'+
-    '<p class="t-b1 pf-stay-row"><span>'+esc(q.currency+' '+q.total+' total')+'</span><span>'+esc(q.breakfast)+'</span></p>'+
-    (changed?'<p class="t-b2 open">The amount has changed since you chose — please confirm the price above.</p>':'')+
-    '<div class="p-actions"><button type="button" class="p-act" data-ext-confirm'+(stayBusy?' disabled':'')+'>'+(stayBusy?'Confirming…':'Confirm extension')+'</button>'+
-    '<button type="button" class="p-link mute" data-ext-cancel>Cancel</button></div></div>';
-}
-/* EVERY CONFIRMED STAY, IN THE ORDER THEY HAPPEN (Owner, 23 Sep 2026): Your stay is the whole accommodation of the journey —
-   each night the guest has confirmed, in ONE card system, read in strict chronological order by the day the stay begins.
-   No photography here: this section is a record, not a rail; the pictures belong to My Trip and My Bag. The extended stay is
-   the last card because it happens last, and it is the only one with a dropdown beneath it. */
+/* EVERY CONFIRMED STAY, IN THE ORDER THEY HAPPEN (Owner, 23 Sep 2026): each accommodation the guest has confirmed, read in
+   strict chronological order by the day the stay begins, in ONE card system. No photography here: this section is a record,
+   not a rail; the pictures belong to My Trip and My Bag. */
 function stayLines(){
   return J.sorted(B.get().filter(function(x){return group(x)==='stay'})).map(function(x){
     var comp=!!x.complimentary, cls=x.cls&&P.classOf?P.classOf(x.id,x.cls):null;
@@ -286,7 +265,7 @@ function stayLines(){
 }
 function yourStay(me){
   var P=SP(); if(!P||!U||!U.ready||!U.ready())return '';
-  var comp=U.complimentary?U.complimentary():null,house=stayHouse(),ext=U.extension?U.extension():null;
+  var comp=U.complimentary?U.complimentary():null,house=stayHouse();
   var stays=stayLines();
   var h='<section class="prep-sec" id="your-stay"><p class="t-l1">Your stay</p>';
   if(!stays.length){
@@ -301,59 +280,11 @@ function yourStay(me){
       kicker:st.complimentary?'Complimentary stay':'Your stay',name:st.name,
       meta:st.meta,
       rows:[['Your cost',st.cost]].concat(st.unit?[['Room',st.unit]]:[]),
-      foot:st.complimentary?'The included nights of the wedding stay. Additional nights are arranged at '+P.EXTENSION.hotel+'.':''});
+      /* the included nights, and nothing about extra ones: the website names no hotel for them (Owner, 23 Sep 2026) */
+      foot:st.complimentary?'The included nights of the wedding stay.':''});
   });
-  if(ext){
-    /* ONE RECORD, ONE WORDING (Owner, 23 Sep 2026): the words of this card are the words of the line in My Bag and on
-       Review & Send — the engine's dates, the nights and breakfast in one meta, the amount as the cost it is — and it
-       offers the same three actions as every other booking component of the journey. */
-    h+=stayCard({data:'extension',on:true,kicker:'Extended stay',name:ext.hotel,
-      meta:[ext.dates,ext.nightsWords,ext.breakfast].filter(Boolean).join(' · '),
-      rows:[['Your cost',ext.currency+' '+ext.total]],foot:''});
-    if(!stayRemoving)h+='<div class="p-actions" data-ext-actions>'+
-      '<button type="button" class="p-link" data-ext-change>Change</button>'+
-      '<button type="button" class="p-link mute" data-ext-remove>Remove</button>'+
-      '<a class="p-link mute" href="room.html?stay=riverside&room=superior-window">View details</a></div>';
-  }
-  /* the nights are added to the WEDDING STAY: the bar is offered only when there is one to extend */
-  if(house)h+=extBar(ext);
-  if(stayPending!=null&&stayPending!==(ext?ext.nights:0))h+=extReview(stayQuote||P.extensionQuote(stayPending),!!(stayQuote&&stayQuote.changed));
-  if(ext&&stayRemoving)h+='<div class="p-card pf-review"><p class="t-l1 open">Remove your extension?</p><p class="t-b1">The '+esc(ext.nightsWords)+' at '+esc(ext.hotel)+' will be released. Your '+((house&&house.complimentary)?'complimentary stay':'stay')+' stays exactly as it is.</p>'+
-    '<div class="p-actions"><button type="button" class="p-act" data-ext-remove-yes'+(stayBusy?' disabled':'')+'>'+(stayBusy?'Removing…':'Remove extension')+'</button><button type="button" class="p-link mute" data-ext-remove-no>Keep it</button></div></div>';
-  if(stayMsg)h+='<p class="t-b2 pf-staymsg" role="status" aria-live="polite">'+esc(stayMsg)+'</p>';
   return h+'</section>';
 }
-function wireStay(){
-  var sel=page.querySelector('[data-ext-select]');
-  if(sel)sel.onchange=function(){var v=parseInt(sel.value,10);stayMsg='';stayQuote=null;stayPending=v>0?v:null;render()};
-  var c=page.querySelector('[data-ext-confirm]');
-  if(c)c.onclick=function(){
-    var P=SP(),n=stayPending,q=stayQuote||P.extensionQuote(n);
-    stayBusy=true;stayMsg='';render();
-    U.extend(n,q.total).then(function(r){
-      stayBusy=false;
-      if(r&&r.ok){stayPending=null;stayQuote=null;stayMsg='Your extension is confirmed.';}
-      else if(r&&r.error==='price changed'&&r.quote){stayQuote=Object.assign({},r.quote,{changed:true});stayPending=r.quote.nights;stayMsg='';}
-      else if(r&&r.error==='extension unavailable'){stayPending=null;stayQuote=null;stayMsg='The hotel has no room for those nights just now. Your stay is unchanged — Guest Relations can help.';}
-      else {stayMsg='That could not be confirmed just now. Your stay is unchanged — please try again.';}
-      render()})};
-  var x=page.querySelector('[data-ext-cancel]');
-  if(x)x.onclick=function(){stayPending=null;stayQuote=null;stayMsg='';render()};
-  /* CHANGE is the one dropdown below the card — the same act as CHANGE in My Bag, which links here */
-  var ch=page.querySelector('[data-ext-change]');
-  if(ch)ch.onclick=function(){var el=page.querySelector('[data-ext-select]');if(!el)return;
-    el.scrollIntoView({block:'center',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
-    try{el.focus({preventScroll:true})}catch(e){el.focus()}};
-  var rm=page.querySelector('[data-ext-remove]');
-  if(rm)rm.onclick=function(){stayRemoving=true;stayMsg='';render()};
-  var no=page.querySelector('[data-ext-remove-no]');
-  if(no)no.onclick=function(){stayRemoving=false;render()};
-  var yes=page.querySelector('[data-ext-remove-yes]');
-  if(yes)yes.onclick=function(){stayBusy=true;render();U.unextend().then(function(r){stayBusy=false;stayRemoving=false;stayPending=null;stayQuote=null;stayMsg=r&&r.ok?'Your extension is removed. Your stay is unchanged.':'That could not be removed just now — please try again.';render()})};
-}
-/* THE EXTENDED STAY HAS ONE HOME ON THIS PAGE (Owner, 23 Sep 2026): Your stay, where it is confirmed, changed and removed.
-   The arrangements rail therefore reads the device's own lines — B.get(), not B.lines() — so the nights are never announced
-   twice on one page. Every other surface (My Bag, Review & Send, the total) reads B.lines() and shows them as a line. */
 function arrangements(me){
   var id=me.guestId,lines=J.sorted(B.get()),stays=[],travel=[],exps=[],h='';
   /* THE WAITING LIST (Owner, 19 Sep 2026): a stage no room could take yet — its position, no amount, never part of the bag */
@@ -446,7 +377,6 @@ function render(){
   var CM=window.SIYL_COMMUNITY;
   page.innerHTML=identity(me,p)+contact()+(CM?CM.countdownHtml()+CM.communityHtml(CM.data(),me)+CM.numbersHtml():'')+status(p)+yourStay(me)+arrangements(me)+wedding(me,p)+tickets(me,p)+about(me)+documents(me);
   if(S&&S.wireRail)S.wireRail(page);
-  wireStay();
   if(CM){CM.wire(page);CM.paintPortraits(page);if(!CM.data())CM.load()}
   page.querySelectorAll('input[data-c]').forEach(function(i){var save=function(){G.setContact(i.getAttribute('data-c'),i.value.trim())};i.addEventListener('change',function(){var f=i.id;save();render();var n=document.getElementById(f);if(n)try{n.focus({preventScroll:true})}catch(e){}});i.addEventListener('blur',save)});
   var out=page.querySelector('[data-signout]');if(out)out.addEventListener('click',function(){var I=window.SIYL_INVITE;if(I&&I.leave)I.leave();var a=document.querySelector('[data-access-out]');if(a)a.click();else location.replace('invitation.html')});

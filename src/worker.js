@@ -70,7 +70,7 @@ function grAuthorised(request, env) {
 }
 const GR_SEATING_OPS = ['config', 'state', 'assign', 'unassign', 'plan', 'rekey', 'reset'];
 /* the writes a signed-in guest may make on their own accommodation — the paid extension is one of them (Owner, 22 Sep 2026) */
-const GUEST_ROOMS_WRITES = ['join', 'leave', 'wait', 'unwait', 'extend', 'unextend'];
+const GUEST_ROOMS_WRITES = ['join', 'leave', 'wait', 'unwait'];
 const GR_ROOMS_OPS = ['plan', 'migrate', 'assign', 'unassign', 'reset'];
 
 export default {
@@ -920,13 +920,9 @@ async function engineRooms(env, who) {
     for (const [stage, m] of Object.entries(v.mine)) out[stage] = entry(m, stage);
     /* THE WAITING LIST (Owner, 19 Sep 2026): a stage the guest waits for, with the position — no product, no amount */
     for (const [stage, w] of Object.entries(v.waitlist || {})) if (!out[stage]) out[stage] = { stage, waitlisted: true, position: w.position, since: w.at, size: w.size || 1 };
-    /* THE PAID EXTENSION (Owner, 22 Sep 2026): its own component beside the stays — the hotel, the nights, the dates and the
-       amount exactly as the engine holds and prices them, so every confirmation reads the same numbers */
-    if (v.extension) {
-      const e = v.extension;
-      out.stayext = { stage: 'stayext', extension: true, key: e.key, label: e.label, name: e.room, room: e.room, stay: e.hotel,
-        nights: e.nights, rate: e.rate, currency: e.currency, total: e.total, breakfast: e.breakfast, dates: e.dates, from: e.from, to: e.to };
-    }
+    /* THE PAID EXTENSION IS WITHDRAWN (Owner, 23 Sep 2026): the record carried a `stayext` component beside the stays. The
+       self-service extension is gone, so nothing of the kind is written any more and no confirmation can name a hotel for
+       extra nights; Guest Relations arranges those outside this engine. */
     return out;
   } catch (e) { return null; }
 }

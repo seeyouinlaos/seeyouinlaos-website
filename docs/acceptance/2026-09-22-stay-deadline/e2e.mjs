@@ -55,10 +55,7 @@ const rooms = (p, op, body) => api(p, '/api/rooms/' + op, body ? { method: 'POST
 const ID = (g) => ({ invitationId: 'INV-' + g, guestId: g });
 
 /* every synthetic guest starts and ends with nothing held */
-const clear = async (p, g) => {
-  for (const stage of ['wedstay', 'stayext']) await rooms(p, 'leave', Object.assign({ stage }, ID(g)));
-  await rooms(p, 'unextend', ID(g));
-};
+const clear = async (p, g) => { await rooms(p, 'leave', Object.assign({ stage: 'wedstay' }, ID(g))); };
 
 /* ===== 1 · THE TWO DECISION SIGNALS ON THE FRONT PAGE, at every class =====
    The Owner's rule (23 Sep 2026): the accommodation-planning date and the live
@@ -237,117 +234,43 @@ for (const [w, h, name] of [[390, 844, '390'], [834, 1194, '834x1194'], [1194, 8
   await p.context().close();
 }
 
-/* ===== 3 · MY PROFILE: the stay, the bar, the review, the change, the removal ===== */
+/* ===== 3 · MY PROFILE: every confirmed stay, and NO self-service extension (Owner, 23 Sep 2026) ===== */
 {
   const p = await fresh(1194, 834); await signIn(p, 'T001');
-  await p.goto(O + '/profile.html', { waitUntil: 'load' }); await p.waitForTimeout(2400);
-  const base = await p.evaluate(() => {
+  await p.goto(O + '/profile.html', { waitUntil: 'load' }); await p.waitForTimeout(2600);
+  const stay = await p.evaluate(() => {
     const sec = document.querySelector('#your-stay'); if (!sec) return null;
-    const sel = sec.querySelector('[data-ext-select]');
     return { text: sec.innerText.replace(/\s+/g, ' ').trim(),
-      options: sel ? [...sel.options].map((o) => o.text) : null, value: sel ? sel.value : null,
-      hasReview: !!sec.querySelector('[data-ext-review]'), hasRemove: !!sec.querySelector('[data-ext-remove]') };
+      cards: [...sec.querySelectorAll('.pf-stay')].map((c) => (c.querySelector('h3') || {}).textContent || ''),
+      controls: sec.querySelectorAll('select, [data-ext-select], [data-ext-confirm], [data-ext-remove], [data-ext-review]').length,
+      images: sec.querySelectorAll('img, [style*="background-image"], .pf-img').length };
   });
-  note('profile-stay-and-bar', !!base && /Complimentary stay/i.test(base.text) && /Guest House complimentary/i.test(base.text) &&
-    /27 February – 01 March 2027/.test(base.text) && /Your cost Complimentary/.test(base.text) && /Extend your stay/i.test(base.text) &&
-    JSON.stringify(base.options) === JSON.stringify(['Select additional nights', '1 night', '2 nights', '3 nights', '4 nights']) &&
-    base.value === '' && !base.hasReview && !base.hasRemove, JSON.stringify(base));
-  await p.evaluate(() => document.querySelector('#your-stay').scrollIntoView({ block: 'center' })); await p.waitForTimeout(400);
+  note('profile-offers-no-self-service-extension', !!stay && stay.controls === 0 &&
+    !/Extend your stay|Extended stay|additional night|Riverside/i.test(stay.text) && stay.images === 0,
+    JSON.stringify({ controls: stay && stay.controls, images: stay && stay.images, cards: stay && stay.cards, text: (stay && stay.text || '').slice(0, 180) }));
+  /* the engine itself refuses the withdrawn operations to a signed-in guest */
+  const gone = {};
+  for (const op of ['extend', 'unextend']) gone[op] = (await rooms(p, op, Object.assign({ nights: 2 }, ID('T001')))).status;
+  note('the-engine-has-no-extend-operation', gone.extend === 404 && gone.unextend === 404, JSON.stringify(gone));
+  /* and the bag and the review carry nothing of the kind */
+  await p.goto(O + '/cart.html', { waitUntil: 'load' }); await p.waitForTimeout(2400);
+  const bag = await p.evaluate(() => ({ text: document.body.innerText.replace(/\s+/g, ' '), lines: [...document.querySelectorAll('.cart-line')].map((l) => l.getAttribute('data-line')) }));
+  note('the-bag-carries-no-extension-line', bag.lines.indexOf('stayext') < 0 && !/Extended stay|additional night/i.test(bag.text),
+    JSON.stringify({ lines: bag.lines }));
   await shot(p, '1194x834-profile-stay');
-
-  /* the review, before anything is booked */
-  await p.selectOption('[data-ext-select]', '2'); await p.waitForTimeout(500);
-  const review = await p.evaluate(() => {
-    const r = document.querySelector('[data-ext-review]');
-    return r ? { text: r.innerText.replace(/\s+/g, ' ').trim(), confirm: !!r.querySelector('[data-ext-confirm]') } : null;
-  });
-  const held0 = await rooms(p, 'read');
-  note('extension-review-does-not-book', !!review && /2 additional nights/.test(review.text) && /01 March – 03 March 2027/.test(review.text) &&
-    /Riverside Hotel Vientiane/.test(review.text) && /USD 60 total/.test(review.text) && /Breakfast included/.test(review.text) && review.confirm &&
-    held0.body.extension === null && held0.body.summary['stayext/riverside-superior'].guestOccupiedPlaces === 0,
-    JSON.stringify({ review, heldPlaces: held0.body.summary['stayext/riverside-superior'].guestOccupiedPlaces }));
-  await shot(p, '1194x834-extension-review');
-
-  /* the confirmation */
-  await p.click('[data-ext-confirm]'); await p.waitForTimeout(2200);
-  const done = await p.evaluate(() => {
-    const sec = document.querySelector('#your-stay');
-    const sel = sec.querySelector('[data-ext-select]');
-    return { text: sec.innerText.replace(/\s+/g, ' ').trim(), value: sel ? sel.value : null, hasRemove: !!sec.querySelector('[data-ext-remove]') };
-  });
-  const server = await rooms(p, 'read');
-  note('extension-confirmed', /Extended stay/i.test(done.text) && /Riverside Hotel Vientiane/.test(done.text) && /2 additional nights/.test(done.text) &&
-    /USD 60/.test(done.text) && /Breakfast included/.test(done.text) && done.value === '2' && done.hasRemove &&
-    server.body.extension && server.body.extension.nights === 2 && server.body.extension.total === 60 &&
-    server.body.mine.wedstay && server.body.mine.wedstay.key === 'guesthouse/guest-house',
-    JSON.stringify({ value: done.value, ext: server.body.extension && { n: server.body.extension.nights, total: server.body.extension.total, hotel: server.body.extension.hotel, dates: server.body.extension.dates }, base: server.body.mine.wedstay }));
-  await shot(p, '1194x834-extension-confirmed');
-
-  /* every amount, and a change that updates the one booking */
-  const amounts = [];
-  for (const n of [1, 3, 4]) {
-    await p.selectOption('[data-ext-select]', String(n)); await p.waitForTimeout(400);
-    await p.click('[data-ext-confirm]'); await p.waitForTimeout(1800);
-    const v = await rooms(p, 'read');
-    amounts.push({ n, total: v.body.extension && v.body.extension.total, places: v.body.summary['stayext/riverside-superior'].guestOccupiedPlaces });
-  }
-  note('extension-amounts-and-single-booking', JSON.stringify(amounts) === JSON.stringify([{ n: 1, total: 30, places: 1 }, { n: 3, total: 90, places: 1 }, { n: 4, total: 120, places: 1 }]),
-    JSON.stringify(amounts) + ' (1 → 30 · 3 → 90 · 4 → 120 · always ONE room held)');
-
-  /* the removal, and the base stay after it */
-  await p.click('[data-ext-remove]'); await p.waitForTimeout(500);
-  const ask = await p.evaluate(() => (document.querySelector('#your-stay').innerText || '').replace(/\s+/g, ' ').trim());
-  await shot(p, '1194x834-extension-remove');
-  await p.click('[data-ext-remove-yes]'); await p.waitForTimeout(2200);
-  const gone = await rooms(p, 'read');
-  const sec = await p.evaluate(() => (document.querySelector('#your-stay').innerText || '').replace(/\s+/g, ' ').trim());
-  note('extension-removed-base-intact', /Remove your extension\?/i.test(ask) && gone.body.extension === null &&
-    gone.body.mine.wedstay.key === 'guesthouse/guest-house' && gone.body.complimentary.mine === true &&
-    /Complimentary stay/i.test(sec) && !/Extended stay/i.test(sec), JSON.stringify({ asked: /Remove your extension\?/i.test(ask), ext: gone.body.extension, base: gone.body.mine.wedstay }));
   await p.context().close();
 }
 
-/* ===== 4 · THE SERVER IS AUTHORITATIVE ===== */
+/* ===== 4 · THE STAGE IS LEFT AS IT WAS FOUND ===== */
 {
-  const p = await fresh(1194, 834); await signIn(p, 'T002'); await clear(p, 'T002');
-  const bad = [];
-  for (const n of [0, 5, -1, 'two']) { const r = await rooms(p, 'extend', Object.assign({ nights: n }, ID('T002'))); bad.push(r.status + ':' + (r.body && r.body.error)); }
-  const stale = await rooms(p, 'extend', Object.assign({ nights: 2, expect: 45 }, ID('T002')));
-  const ok = await rooms(p, 'extend', Object.assign({ nights: 2, expect: 60 }, ID('T002')));
-  const read = await rooms(p, 'read');
-  note('server-authoritative', bad.every((x) => /^400:invalid nights$/.test(x)) && stale.status === 409 && stale.body.error === 'price changed' &&
-    stale.body.quote.total === 60 && ok.status === 200 && ok.body.extension.total === 60 && read.body.extension.hotel === 'Riverside Hotel Vientiane' &&
-    read.body.extension.from === '2027-03-01' && read.body.extension.to === '2027-03-03' && read.body.extension.breakfast === 'Breakfast included',
-    JSON.stringify({ bad, stale: stale.body.error, quote: stale.body.quote && stale.body.quote.total, ok: ok.body.extension.total, dates: read.body.extension.dates }));
-  /* a guest with no complimentary place may still extend — the paid hotel is independent */
-  note('paid-extension-independent', read.body.mine.wedstay === undefined && read.body.extension.nights === 2,
-    JSON.stringify({ wedstay: read.body.mine.wedstay || null, ext: read.body.extension.nights }));
-  await clear(p, 'T002');
-  await p.context().close();
-}
-
-/* ===== 5 · the phone, and the bar's call for a guest who has a stay ===== */
-{
-  const p = await fresh(390, 844); await signIn(p, 'T001');
-  await p.goto(O + '/profile.html', { waitUntil: 'load' }); await p.waitForTimeout(2400);
-  await p.evaluate(() => document.querySelector('#your-stay').scrollIntoView({ block: 'center' })); await p.waitForTimeout(400);
-  await shot(p, '390-profile-stay');
-  const stack = await p.evaluate(() => {
-    const bar = document.querySelector('.pf-extbar'), sel = document.querySelector('[data-ext-select]');
-    const rb = bar.getBoundingClientRect(), rs = sel.getBoundingClientRect();
-    return { stacked: rs.top > rb.top + 8, selW: Math.round(rs.width), tap: Math.round(rs.height), ov: document.documentElement.scrollWidth - document.documentElement.clientWidth };
-  });
-  note('phone-extension-bar', stack.stacked && stack.tap >= 40 && stack.ov <= 1, JSON.stringify(stack) + ' (the bar stacks, the selector stays a finger-sized target)');
-  await p.goto(O + '/index.html', { waitUntil: 'load' }); await p.waitForTimeout(1800);
-  await p.evaluate(() => document.querySelector('[data-availability]').scrollIntoView({ block: 'center' })); await p.waitForTimeout(2000);
-  const cta = await p.evaluate(() => { const a = document.querySelector('[data-av-cta]'); return { href: a && a.getAttribute('href'), words: a ? a.innerText.trim() : '', bar: document.querySelectorAll('[data-stay-bar] a').length }; });
-  note('availability-cta-follows-the-guest-with-a-stay', cta.href === 'profile.html#your-stay' && /your stay/i.test(cta.words) && cta.bar === 0, JSON.stringify(cta));
-  await shot(p, '390-two-signals-signed-in');
-  /* the stage is left as it was found */
+  const p = await fresh(1194, 834); await signIn(p, 'T001');
   await clear(p, 'T001');
   const end = await rooms(p, 'read');
-  note('stage-left-clean', end.body.extension === null && !end.body.mine.wedstay && end.body.complimentary.remaining === end.body.complimentary.max,
-    JSON.stringify({ ext: end.body.extension, wedstay: end.body.mine.wedstay || null, remaining: end.body.complimentary.remaining }));
+  note('stage-left-clean', !end.body.mine.wedstay && end.body.complimentary.remaining === end.body.complimentary.max &&
+    !('extension' in end.body) && !end.body.summary['stayext/riverside-superior'] && !!end.body.summary['riverside/superior-window'],
+    JSON.stringify({ wedstay: end.body.mine.wedstay || null, remaining: end.body.complimentary.remaining,
+      extensionInView: 'extension' in end.body, extensionStock: !!end.body.summary['stayext/riverside-superior'],
+      riversideWeddingStay: !!end.body.summary['riverside/superior-window'] }));
   await p.context().close();
 }
 

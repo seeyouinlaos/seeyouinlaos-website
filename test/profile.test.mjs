@@ -41,7 +41,7 @@ test('2 · the profile is reachable at every readiness state: the engine lists n
 
 test('3 · the bag icon IS My Bag: on every private page the header icon opens cart.html and carries the badge', () => {
   for (const f of PRIVATE_PAGES) { const s = src(f); assert.match(s, /<a class="bag" href="cart\.html" aria-label="My Bag"/, f); assert.match(s, /data-bag-badge/, f + ' badge'); }
-  assert.match(bag, /badge:function\(\)\{var n=authed\(\)\?this\.lines\(\)\.length:0,el=document\.querySelector\('\[data-bag-badge\]'\);/);
+  assert.match(bag, /badge:function\(\)\{var n=authed\(\)\?this\.get\(\)\.length:0,el=document\.querySelector\('\[data-bag-badge\]'\);/);
 });
 
 test('4 · the account navigation reads MY TRIP · MY PROFILE · SIGN OUT, inside the menu drawer (Owner, 18 Sep 2026 · Aman header: nothing beneath the logo)', () => {

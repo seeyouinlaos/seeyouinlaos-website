@@ -477,8 +477,8 @@ test('Review & Send: the Temple Ceremony is optional, the other three hosted', (
 
 test('THE WEDDING sits at 28 FEB in the chronology — the Sangkhathan is never last', () => {
   const journey = readFileSync(join(ROOT, 'assets/journey.js'), 'utf8');
-  /* the extended stay joined the chronology on 23 Sep 2026 at 3.6 — after the Wedding Stay it extends, before the flight on */
-  assert.match(journey, /var AT = \{ suhring: 0\.1, baanphraya: 0\.3, '1872': 0\.5, tea1872: 0\.5, 'sangkhathan': 3\.5, stayext: 3\.6, cannubi: 8\.5 \}/);
+  /* the extended stay left the chronology with the feature itself (Owner, 23 Sep 2026) */
+  assert.match(journey, /var AT = \{ suhring: 0\.1, baanphraya: 0\.3, '1872': 0\.5, tea1872: 0\.5, 'sangkhathan': 3\.5, cannubi: 8\.5 \}/);
   assert.match(journey, /'sangkhathan': '28 FEB'/);
   /* 3.5 lands between the Wedding Stay (index 3) and MU9646 (index 4) */
   const seg = journey.slice(journey.indexOf('var SEG = ['), journey.indexOf('/* Chronological position'));

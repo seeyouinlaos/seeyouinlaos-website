@@ -926,30 +926,9 @@ body.seatbar-on .prep-foot .prep-foot-note { display: none; }
    ========================================================================== */
 .pf-stay-row { display: flex; justify-content: space-between; gap: var(--s3); align-items: baseline; }
 .pf-stay-row span + span { color: var(--p-mute); text-align: right; }
-.pf-extbar {
-  margin-top: var(--s4); padding: var(--s3) 0;
-  border-top: 1px solid var(--p-line); border-bottom: 1px solid var(--p-line);
-  display: grid; grid-template-columns: 1fr; row-gap: var(--s2); align-items: center;
-}
-.pf-extbar > .t-l1 { margin: 0; }
-.pf-extnote { grid-column: 1 / -1; margin: 0; }
-.pf-extsel { justify-self: stretch; }
-.pf-extsel select {
-  -webkit-appearance: none; appearance: none; width: 100%; min-height: 44px;
-  font-family: var(--f-ui); font-size: 14px; letter-spacing: .4px;
-  color: var(--p-ink); background: transparent; border: 1px solid var(--p-line); border-radius: 0;
-  padding: 10px 34px 10px 12px; cursor: pointer;
-  background-image: linear-gradient(45deg, transparent 50%, var(--p-ink) 50%), linear-gradient(135deg, var(--p-ink) 50%, transparent 50%);
-  background-position: calc(100% - 18px) 50%, calc(100% - 13px) 50%; background-size: 5px 5px, 5px 5px; background-repeat: no-repeat;
-}
-.pf-extsel select:focus-visible { outline: 2px solid var(--p-ink); outline-offset: 2px; }
-.pf-extsel select:disabled { opacity: .55; cursor: default; }
+/* THE PAID EXTENSION'S CONTROL IS WITHDRAWN (Owner, 23 Sep 2026): the bar, its dropdown, its review card and its status
+   line are gone with the feature. .pf-hide stays: it is the site's generic visually-hidden helper. */
 .pf-hide { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
-.pf-review { margin-top: var(--s3); }
-.pf-staymsg { margin-top: var(--s3); color: var(--p-mute); }
-@media (min-width: 700px) {
-  .pf-extbar { grid-template-columns: 1fr minmax(200px, 260px); column-gap: var(--s4); row-gap: var(--s2); }
-  .pf-extsel { justify-self: end; width: 100%; }
 }
 
 /* ============================================================================
@@ -966,7 +945,7 @@ body.seatbar-on .prep-foot .prep-foot-note { display: none; }
 :focus-visible { outline: 2px solid var(--p-focus); outline-offset: 3px; }
 .p-act:focus-visible, .p-link:focus-visible, .p-sel:focus-visible,
 .prep-all:focus-visible, .prep-srow:focus-visible, .p-seatprog-row:focus-visible,
-.pf-extsel select:focus-visible { outline: 2px solid var(--p-focus); outline-offset: 3px; }
+
 .prep-srow:focus-visible, .p-seatprog-row:focus-visible { outline-offset: -2px; }
 
 /* ---- A · CURRENT · the step the guest is on ----------------------------- */

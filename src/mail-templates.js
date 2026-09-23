@@ -92,12 +92,9 @@ export function journeyModel(record) {
   const stays = sorted.filter((x) => (x.stay || STAGE_OF_STAY[x.id])).map((x) => ({ name: x.name, dates: (x.meta || '').split(' · ')[0], category: (x.meta || '').split(' · ').slice(1).join(' · '), room: roomOf(x), price: x.price, complimentary: !!x.complimentary, rate: x.rate, nights: x.nights, note: x.note ? x.note + (x.noteBy ? ' · ' + x.noteBy : '') : '', breakfast: x.breakfast || '', interest: !!x.interest }));
   const travel = sorted.filter((x) => TRAVEL.has(x.id) || (x.cls && !x.stay)).map((x) => ({ name: x.name, meta: x.meta || '', price: x.price }));
   const experiences = sorted.filter((x) => !stays.some((s) => s.name === x.name) && !travel.some((t) => t.name === x.name) && x.id !== 'sangkhathan').map((x) => ({ name: x.name, meta: x.meta || '', price: x.price }));
-  /* THE PAID EXTENSION (Owner, 22 Sep 2026): the nights the guest added to the designated hotel after the included stay — the
-     engine's record, never a line from the device; shown as its own stay, with its own amount, beside the complimentary one */
-  const ext = rooms && rooms.stayext && !rooms.stayext.waitlisted ? rooms.stayext : null;
-  if (ext) stays.push({ name: ext.stay || ext.name, dates: ext.dates || '', category: 'Extended stay', room: ext.room || '',
-    price: ext.total, nights: ext.nights, rate: ext.rate, breakfast: ext.breakfast || '', complimentary: false, extension: true,
-    note: ext.nights ? (ext.nights === 1 ? '1 additional night' : ext.nights + ' additional nights') : '' });
+  /* THE PAID EXTENSION IS WITHDRAWN (Owner, 23 Sep 2026): the emails used to carry an "Extended stay" beside the stays,
+     built from the engine's `rooms.stayext`. The self-service extension is gone, so no email names a hotel for extra
+     nights and the amount is the guest's own lines, nothing added. */
   const sang = lines.find((x) => x.id === 'sangkhathan');
   /* the wedding answers */
   const tc = r.templeCeremony && Array.isArray(r.templeCeremony.guests) && r.templeCeremony.guests[0] || null;
@@ -130,10 +127,8 @@ export function journeyModel(record) {
   const stated = r.totalUsd != null ? r.totalUsd : (r.total != null ? r.total : null);
   const linesTotal = lines.reduce((t, x) => t + (Number(x.price) || 0) * (Number(x.qty) || 1), 0);
   const total0 = stated == null ? null : (dropped ? linesTotal : stated);
-  /* THE PAID EXTENSION IN THE AMOUNT (Owner, 22 Sep 2026): a confirmed extension is a cost of this journey — and it is counted
-     ONCE. The extension is never a line of the journey, so with one the amount is recomputed from the lines plus the engine's
-     own figure, whatever number the device sent. */
-  const total = ext ? linesTotal + (Number(ext.total) || 0) : total0;
+  /* THE AMOUNT is the guest's own lines: with the paid extension withdrawn (Owner, 23 Sep 2026) there is nothing to add. */
+  const total = total0;
   const upd = record.kind === 'update' && (record.version || 1) > 1;
   return { guestId, fullName, firstName, partyName, contact, personId, stays, arranged, waitlisted, travel, experiences, wedding, finale, sangkhathan, seats, profile, allergy, allergyDetails, acks, docs, publication, total, hosts,
     /* WHERE THEY JOIN US (Owner, 18 Sep 2026): the guest's participation scope as sent — the words the guest chose, or a decline */

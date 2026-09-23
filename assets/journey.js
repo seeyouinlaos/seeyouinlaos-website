@@ -45,9 +45,7 @@
    * to the end of the journey because it happens to have been added last. */
   /* the Highlights (20 Sep 2026): Sühring on the first evening (before the Bangkok stay, 0.1), Baan Phraya in the Bangkok days
      (0.3), the Aman tea on the last afternoon (0.5), Cannubi on the return, after the flight home (8.5) */
-  /* THE EXTENDED STAY (Owner, 23 Sep 2026) begins the day the wedding stay ends: it sorts directly after the Wedding Stay
-     (27 FEB – 01 MAR, index 3) and before the flight to Kunming — chronologically after the Guest House complimentary. */
-  var AT = { suhring: 0.1, baanphraya: 0.3, '1872': 0.5, tea1872: 0.5, 'sangkhathan': 3.5, stayext: 3.6, cannubi: 8.5 };
+  var AT = { suhring: 0.1, baanphraya: 0.3, '1872': 0.5, tea1872: 0.5, 'sangkhathan': 3.5, cannubi: 8.5 };
   /* the dated extras (the current Operations Master, 19 Sep 2026): the Aman tea on the afternoon of 24 February, the
      Sühring dinner on the first evening, 21 February */
   var AT_WHEN = { '1872': '24 FEB', tea1872: '24 FEB', 'sangkhathan': '28 FEB', 'suhring': '21 FEB', baanphraya: '23 FEB', cannubi: '07 MAR' };
@@ -154,8 +152,6 @@
      * The wording comes from SIYL_PRICE: one calculation, one vocabulary. */
     meta: function (x) {
       var P = window.SIYL_PRICE;
-      /* a line may carry its own category and basis — the extended stay is the engine's record, not a product of the price list */
-      if (x.cat) return { cat: x.cat, basis: x.basis || '', unit: x.unit || 'guest' };
       if (x.interest && x.id !== 'guesthouse') return { cat: 'Wellness', basis: 'Interest · Marsilea Spa confirms the time · payable at the spa', unit: 'treatment' };
       if (!P) return { cat: '', basis: '', unit: 'guest' };
       var f = P.FLAT[x.id];
@@ -175,7 +171,6 @@
     /* "USD 100 per person" / "1 experience · for two guests" — one guest, one line */
     quantityLine: function (x) {
       var m = this.meta(x), q = x.qty || 1;
-      if (x.extension) return '';         /* the extended stay states its own basis: USD 30 a night, and the nights in its meta */
       if (x.interest) return '';
       if (x.price == null) return '';
       if (x.complimentary) return 'Complimentary';
@@ -187,7 +182,6 @@
 
     /* the bag reads like an itinerary: chronological position of a line */
     when: function (x) {
-      if (x.when) return x.when;          /* a line whose dates are the guest's own (the extended stay) says so itself */
       var seg = SEG.filter(function (s) { return s.ids.indexOf(x.id) >= 0; })[0];
       if (seg) return seg.when;
       return AT_WHEN[x.id] || '';

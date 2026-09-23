@@ -18,43 +18,15 @@ has:function(id){return this.get().some(function(x){return x.id===id})},
 remove:function(id){this.set(this.get().filter(function(x){return x.id!==id}))},
 qty:function(id,d){var b=this.get(),f=b.find(function(x){return x.id===id});
 if(f){f.qty=Math.max(1,f.qty+d);this.set(b)}},
-/* ============================================================================
- * THE EXTENDED STAY IS A LINE THE GUEST CAN SEE (Owner, 23 Sep 2026).
- *
- * The paid nights live in the room engine, never on the device — so they were
- * counted in the total but never shown, and the guest read an amount with no
- * line behind it. They are now a LINE OF THE BAG, derived from the engine's own
- * record: Accommodation, chronologically after the Guest House complimentary,
- * the hotel, the dates, the nights, breakfast and the amount.
- *
- * DERIVED, NEVER STORED. `get()` is what the device holds and what Review & Send
- * submits — untouched. `lines()` is what the guest is shown. The total is the sum
- * of `lines()`, so the extension is counted exactly ONCE by construction: there is
- * no second place that could add it again.
- * ========================================================================== */
-extension:function(){var U=window.SIYL_UNITS,e=U&&U.extension?U.extension():null;return e&&e.confirmed?e:null},
-extensionLine:function(){var e=this.extension();if(!e)return null;
-var d=function(iso){return String(iso||'').slice(8)},MON=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
-var mo=MON[(parseInt(String(e.from||'').slice(5,7),10)||3)-1];
-return {id:'stayext',name:e.hotel,
- meta:[e.dates,e.nightsWords,e.breakfast].filter(Boolean).join(' · '),
- price:Number(e.total)||0,qty:1,nights:e.nights,
- /* the journey knows where and when it belongs, and the line carries its own words */
- cat:'Accommodation',when:d(e.from)+' – '+d(e.to)+' '+mo,
- basis:'USD '+e.rate+' a night · your cost',
- /* the house is the Riverside the site already shows: VIEW DETAILS opens its own page */
- stay:'riverside',room:'superior-window',img:'assets/images/riverside/superior-room.jpg',
- extension:true}},
-/* what the guest is shown: their own lines, and the extension the engine holds for them */
-lines:function(){var e=this.extensionLine();return e?this.get().concat([e]):this.get()},
-/* THE ONE TOTAL (Owner, 22 Sep 2026 · one list since 23 Sep 2026): every line the guest can see, summed once. */
-total:function(){return this.lines().reduce(function(t,x){return t+(x.price||0)*x.qty},0)},
-extensionCost:function(){var e=this.extension();return e?(Number(e.total)||0):0},
+/* THE PAID EXTENSION IS WITHDRAWN (Owner, 23 Sep 2026): the bag used to show a derived line for the nights the engine held
+ * at the designated hotel, and `lines()` existed only to carry it. With the self-service extension gone the guest's own
+ * lines ARE the bag, and the total is their sum: one list again, nothing derived, nothing added. */
+total:function(){return this.get().reduce(function(t,x){return t+(x.price||0)*x.qty},0)},
 /* display-only: thumbnails for bag lines persisted before the transport imagery existed */
 THUMBS:{train:'assets/images/transport/train-no25-srt-train.jpg',mu9632:'assets/images/transport/mu9632-business-1.jpg',c642:'assets/images/transport/c642-train-snow-mountain.jpg','return':'assets/images/transport/mu5924-economy-cabin-1.jpg'},
 thumb:function(x){return x.img||this.THUMBS[x.id]||''},
 /* the badge counts the authenticated guest's own cart lines — nothing else */
-badge:function(){var n=authed()?this.lines().length:0,el=document.querySelector('[data-bag-badge]');
+badge:function(){var n=authed()?this.get().length:0,el=document.querySelector('[data-bag-badge]');
 if(el){var was=el.textContent;el.textContent=n>0?n:'';el.style.display=n>0?'flex':'none';if(was!==el.textContent&&n>0){el.classList.remove('bb-tick');void el.offsetWidth;el.classList.add('bb-tick')}}}};
 /* RETIRED PRODUCTS. C86 replaces C642 and MU9646 replaces MU9632 by Owner
  * order; the class is unchanged and the amount is re-derived from the one
@@ -98,7 +70,7 @@ el.querySelectorAll('[data-nav]').forEach(function(a){var k=a.getAttribute('data
   if(k==='top')a.addEventListener('click',function(){window.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'})})});
 function topShow(){var t=el.querySelector('.jb-top');if(t)t.classList.toggle('show',window.scrollY>innerHeight)}
 window.addEventListener('scroll',topShow,{passive:true});
-function sync(){var n=B.authed()?B.lines().length:0,t=el.querySelector('.jb-t'),v=B.money(B.total());
+function sync(){var n=B.authed()?B.get().length:0,t=el.querySelector('.jb-t'),v=B.money(B.total());
 if(t.textContent!==v){t.classList.add('tick');t.textContent=v;setTimeout(function(){t.classList.remove('tick')},200)}
 var view=el.querySelector('[data-bag-view]');view.setAttribute('href',dest());if(here==='cart'){view.hidden=true}
 /* the bar stands whenever a guest is signed in — an empty bag is a real state (USD 0), and the account access must not vanish with it */

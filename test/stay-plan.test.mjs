@@ -1,6 +1,6 @@
 /* ============================================================================
-   THE ACCOMMODATION DEADLINE · THE LIMITED COMPLIMENTARY STAY · THE PAID
-   EXTENSION (Owner, 22 Sep 2026).
+   THE ACCOMMODATION DEADLINE · THE LIMITED COMPLIMENTARY STAY
+   (Owner, 22 Sep 2026 · the paid extension withdrawn 23 Sep 2026).
 
    · The complimentary accommodation is planned by 30 NOVEMBER 2026: the front
      page counts the days from today, says "Last day" on the day itself and
@@ -10,16 +10,14 @@
      number, never one typed into a page: the remaining count is the engine's,
      the last place is decided inside the one actor, and a place given back
      before the deadline is free again.
-   · The extension is a SEPARATE booking component: one to four nights at the
-     designated hotel, USD 30 a night with breakfast, the dates derived from the
-     end of the included stay. Changing the number of nights updates the one
-     extension; removing it leaves the stay underneath exactly as it was.
+   · THERE IS NO SELF-SERVICE EXTENSION: the paid extra nights that used to be
+     bookable here were withdrawn by the Owner, and nothing may bring them back.
    ========================================================================== */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Rooms, stageOf } from '../src/rooms.js';
 import { SEED } from '../src/inventory-seed.js';
-import { COMPLIMENTARY, EXTENSION, NIGHT_OPTIONS, deadlineState, daysUntilDeadline, extensionQuote, extensionDates, validNights, complimentaryWords, mayClaimComplimentary } from '../src/stay-plan.js';
+import { COMPLIMENTARY, deadlineState, daysUntilDeadline, complimentaryWords, mayClaimComplimentary } from '../src/stay-plan.js';
 import { doState, src } from './sandbox.mjs';
 
 const G = (n, party) => ({ invitationId: 'INV-G' + n, guestId: 'G' + n, partyId: party || null, hosts: false });
@@ -30,8 +28,6 @@ function req(op, body, identity, gr) {
 }
 async function call(rooms, op, body, identity, gr) { const r = await rooms.fetch(req(op, body, identity, gr)); return { status: r.status, d: JSON.parse(await r.text()) }; }
 const join = (rooms, who, key, label, need) => call(rooms, 'join', { invitationId: who.invitationId, guestId: who.guestId, key, label, name: who.guestId, need: need || 1 }, who);
-const extend = (rooms, who, nights, expect) => call(rooms, 'extend', { invitationId: who.invitationId, guestId: who.guestId, nights, expect, name: who.guestId }, who);
-const unextend = (rooms, who) => call(rooms, 'unextend', { invitationId: who.invitationId, guestId: who.guestId }, who);
 const leave = (rooms, who, stage) => call(rooms, 'leave', { invitationId: who.invitationId, guestId: who.guestId, stage }, who);
 const day = (iso) => new Date(iso + 'T12:00:00');
 
@@ -61,29 +57,6 @@ test('THE DEADLINE · counted from today, never hard-coded and never negative: d
   assert.equal(mayClaimComplimentary(day('2026-10-01'), 3).ok, true);
   assert.equal(mayClaimComplimentary(day('2026-10-01'), 0).reason, 'full');
   assert.equal(mayClaimComplimentary(day('2026-12-01'), 3).reason, 'closed');
-});
-
-test('THE EXTENSION RULE · one to four nights at the designated hotel, USD 30 a night with breakfast, the dates derived from the end of the included stay', () => {
-  assert.deepEqual(NIGHT_OPTIONS, [1, 2, 3, 4]);
-  assert.equal(EXTENSION.rate, 30); assert.equal(EXTENSION.maxNights, 4); assert.equal(EXTENSION.hotel, 'Riverside Hotel Vientiane');
-  assert.equal(EXTENSION.from, '2027-03-01', 'the extension begins the day the included stay ends');
-  for (const [n, total] of [[1, 30], [2, 60], [3, 90], [4, 120]]) {
-    const q = extensionQuote(n);
-    assert.equal(q.nights, n); assert.equal(q.total, total); assert.equal(q.rate, 30); assert.equal(q.currency, 'USD');
-    assert.equal(q.breakfast, 'Breakfast included'); assert.equal(q.hotel, 'Riverside Hotel Vientiane');
-    assert.equal(q.nightsList.length, n, 'one line per night');
-  }
-  assert.equal(extensionQuote(1).nightsWords, '1 additional night');
-  assert.equal(extensionQuote(3).nightsWords, '3 additional nights');
-  assert.deepEqual([extensionDates(1).to, extensionDates(2).to, extensionDates(3).to, extensionDates(4).to], ['2027-03-02', '2027-03-03', '2027-03-04', '2027-03-05']);
-  assert.equal(extensionDates(2).words, '01 March – 03 March 2027');
-  for (const bad of [0, 5, -1, 2.5, null, undefined, 'two']) assert.equal(validNights(bad), false, String(bad) + ' is not a number of nights');
-  for (const ok of [1, 2, 3, 4]) assert.equal(validNights(ok), true);
-  /* the extension is its own stock and its own stage — never the wedding window's */
-  assert.ok(SEED[EXTENSION.key], 'the extension has stock of its own');
-  assert.equal(SEED[EXTENSION.key].stay, 'Riverside Hotel Vientiane · extension');
-  assert.equal(stageOf(EXTENSION.key), 'stayext');
-  assert.notEqual(stageOf(EXTENSION.key), stageOf(COMPLIMENTARY.key));
 });
 
 test('CAPACITY · six complimentary places, the seed\'s own number; the count is the engine\'s; the sixth guest takes the last place and the seventh is refused; a place given back before the deadline is free again', async () => {
@@ -151,82 +124,13 @@ test('THE DEADLINE ON THE SERVER · after 30 November 2026 a NEW complimentary c
     await leave(rooms, early, 'wedstay');
     const stillClosed = await join(rooms, late, COMPLIMENTARY.key, 'A');
     assert.equal(stillClosed.d.error, 'complimentary closed', 'a release after the deadline is an administrative decision, never a silent reopening');
-    /* the paid extension is not bound by that date */
-    const paid = await extend(rooms, late, 2);
-    assert.equal(paid.d.ok, true, 'paid nights may still be arranged after the deadline');
-    assert.equal(paid.d.extension.total, 60);
-    /* a paid room of the wedding window may also still be taken */
+    /* THE SELF-SERVICE EXTENSION IS WITHDRAWN (Owner, 23 Sep 2026): the engine answers nothing at all to it */
+    const paid = await call(rooms, 'extend', { invitationId: late.invitationId, guestId: late.guestId, nights: 2 }, late);
+    assert.equal(paid.status, 404, 'there is no extend operation any more');
+    /* a paid room of the wedding window may still be taken: the deadline closes the complimentary option only */
     const riverside = await join(rooms, late, 'riverside/superior-window', 'A');
     assert.equal(riverside.d.ok, true, 'the deadline closes the complimentary option only');
   } finally { globalThis.Date = RealDate; }
-});
-
-test('THE EXTENSION · 1 → USD 30 … 4 → USD 120, the hotel assigned automatically, the dates derived, the server authoritative; changing the nights updates the one extension and never duplicates it; removing it leaves the complimentary stay untouched', async () => {
-  const rooms = new Rooms(doState());
-  const g = G('940');
-  /* the guest's complimentary stay first */
-  const base = await join(rooms, g, COMPLIMENTARY.key, 'A');
-  assert.equal(base.d.ok, true);
-  assert.equal(base.d.extension, null, 'no extension until one is asked for');
-
-  for (const [n, total] of [[1, 30], [2, 60], [3, 90], [4, 120]]) {
-    const r = await extend(rooms, g, n);
-    assert.equal(r.d.ok, true);
-    assert.equal(r.d.extension.nights, n);
-    assert.equal(r.d.extension.total, total, n + ' nights = USD ' + total);
-    assert.equal(r.d.extension.hotel, 'Riverside Hotel Vientiane', 'the hotel is assigned, never chosen');
-    assert.equal(r.d.extension.breakfast, 'Breakfast included');
-    assert.equal(r.d.extension.from, '2027-03-01');
-    assert.equal(r.d.mine.wedstay.key, COMPLIMENTARY.key, 'the complimentary stay stands through every change');
-    /* one extension, never a second booking */
-    const places = r.d.summary[EXTENSION.key].guestOccupiedPlaces;
-    assert.equal(places, 1, 'one place held for this guest, whatever the number of nights');
-  }
-  /* an impossible number of nights is refused before anything is held */
-  for (const bad of [0, 5, 'two', null]) {
-    const r = await extend(rooms, g, bad);
-    assert.equal(r.status, 400); assert.equal(r.d.error, 'invalid nights');
-  }
-  /* the price the guest reviewed is the price that is confirmed */
-  const stale = await extend(rooms, g, 2, 45);
-  assert.equal(stale.status, 409); assert.equal(stale.d.error, 'price changed');
-  assert.equal(stale.d.quote.total, 60, 'the authoritative amount comes back for a new review');
-  assert.equal(stale.d.extension.nights, 4, 'and nothing was changed');
-  const honoured = await extend(rooms, g, 2, 60);
-  assert.equal(honoured.d.ok, true); assert.equal(honoured.d.extension.nights, 2);
-
-  /* removing the extension is only the extension */
-  const gone = await unextend(rooms, g);
-  assert.equal(gone.d.ok, true);
-  assert.equal(gone.d.extension, null);
-  assert.equal(gone.d.mine.wedstay.key, COMPLIMENTARY.key, 'the complimentary stay is untouched');
-  assert.equal(gone.d.complimentary.mine, true);
-  assert.equal(gone.d.summary[EXTENSION.key].guestOccupiedPlaces, 0, 'the room is given back');
-  /* removing it twice is not an error and still changes nothing else */
-  const again = await unextend(rooms, g);
-  assert.equal(again.d.ok, true); assert.equal(again.d.mine.wedstay.key, COMPLIMENTARY.key);
-});
-
-test('THE EXTENSION FAILS SAFELY · when the hotel has no room left the guest is told and their stay is unchanged; a party keeps its own bookings', async () => {
-  const rooms = new Rooms(doState());
-  const cap = SEED[EXTENSION.key].capacity * 2;   /* six rooms, two places each */
-  for (let i = 0; i < cap; i++) { const r = await extend(rooms, G(String(950 + i)), 1); assert.equal(r.d.ok, true, 'place ' + (i + 1)); }
-  const late = G('999');
-  await join(rooms, late, COMPLIMENTARY.key, 'A');
-  const full = await extend(rooms, late, 2);
-  assert.equal(full.status, 409);
-  assert.equal(full.d.error, 'extension unavailable');
-  assert.equal(full.d.extension, null, 'nothing half-booked');
-  assert.equal(full.d.mine.wedstay.key, COMPLIMENTARY.key, 'the base accommodation is preserved');
-  /* one guest of a party changes their own nights: the other keeps theirs */
-  const a = G('960', 'INV-P'), b = G('961', 'INV-P');
-  const r2 = new Rooms(doState());
-  await extend(r2, a, 2); await extend(r2, b, 3);
-  const changed = await extend(r2, a, 4);
-  assert.equal(changed.d.extension.nights, 4);
-  const bView = await call(r2, 'read', null, b);
-  assert.equal(bView.d.extension.nights, 3, 'the partner\'s own extension is untouched');
-  assert.equal(bView.d.summary[EXTENSION.key].guestOccupiedPlaces, 2, 'two people, two places');
 });
 
 test('THE SURFACES · the front page counts the days and follows the guest; My Profile shows the confirmed stay first and offers exactly 1 · 2 · 3 · 4 nights, with a review, a change and a discreet removal', () => {
@@ -251,30 +155,13 @@ test('THE SURFACES · the front page counts the days and follows the guest; My P
   assert.match(av, /return \{ href: 'invitation\.html', words: 'Open your invitation' \}/, 'and a visitor is offered the invitation');
   /* My Profile */
   assert.match(prof, /<section class="prep-sec" id="your-stay">/);
-  assert.match(prof, /Extend your stay/);
-  assert.match(prof, /P\.NIGHT_OPTIONS\.map/, 'the dropdown is the one rule\'s list — 1, 2, 3, 4');
-  assert.match(prof, /Select additional nights/, 'a neutral placeholder when nothing is booked');
-  assert.match(prof, /cur===n\?' selected':''/, 'an existing extension shows its own duration');
-  assert.match(prof, /data-ext-confirm/); assert.match(prof, /data-ext-remove/); assert.match(prof, /data-ext-review/);
-  assert.match(prof, /U\.extend\(n,q\.total\)/, 'the confirmation names the amount the guest read');
-  assert.match(prof, /U\.unextend\(\)/);
-  assert.doesNotMatch(prof, /\+1 night|\+2 nights/, 'no plus-one buttons — one dropdown');
+  /* THE SELF-SERVICE EXTENSION IS WITHDRAWN (Owner, 23 Sep 2026): no control, no dropdown, no placeholder, no empty card */
+  assert.doesNotMatch(prof, /Extend your stay|Select additional nights|NIGHT_OPTIONS|data-ext-|Extended stay/, 'My Profile still offers extra nights');
+  assert.doesNotMatch(prof, /Riverside/, 'and it names no hotel for them');
+  /* what survives is the record: every confirmed stay, in the order they happen, in one card system */
+  assert.match(prof, /function stayLines\(\)/);
+  assert.match(prof, /kicker:st\.complimentary\?'Complimentary stay':'Your stay'/);
   /* the engine's own words for the allocation reach every surface that shows the category */
   assert.match(rooms, /P\.complimentaryWords\(s\.remainingPlaces, s\.sourcePlaces, new Date\(\)\)\.headline/);
 });
 
-test('THE ONE TOTAL AND THE CONFIRMATION · a confirmed extension is a cost of the journey, counted once: the Bag adds the engine\'s figure, the emails name the extended stay beside the complimentary one and recompute the amount from the lines plus that figure', () => {
-  const bag = src('assets/bag.js'), mail = src('src/mail-templates.js'), worker = src('src/worker.js');
-  assert.match(bag, /extension:function\(\)\{var U=window\.SIYL_UNITS,e=U&&U\.extension\?U\.extension\(\):null;return e&&e\.confirmed\?e:null\}/, 'only a confirmed extension is a cost — never a preview');
-  /* ONE LIST SINCE 23 SEP 2026: the extension is a line the guest can see, and the total is the sum of the lines shown —
-     so it is counted once by construction. The device's own lines (and the submission) are untouched. [[test/bag-extension]] */
-  assert.match(bag, /lines:function\(\)\{var e=this\.extensionLine\(\);return e\?this\.get\(\)\.concat\(\[e\]\):this\.get\(\)\}/);
-  assert.match(bag, /total:function\(\)\{return this\.lines\(\)\.reduce\(function\(t,x\)\{return t\+\(x\.price\|\|0\)\*x\.qty\},0\)\}/);
-  /* the emails: its own stay line, and the amount recomputed so it can never be counted twice */
-  assert.match(mail, /const ext = rooms && rooms\.stayext && !rooms\.stayext\.waitlisted \? rooms\.stayext : null;/);
-  assert.match(mail, /category: 'Extended stay'/);
-  assert.match(mail, /const total = ext \? linesTotal \+ \(Number\(ext\.total\) \|\| 0\) : total0;/);
-  /* the record the Worker stores carries the engine's own extension, so Guest Relations and every confirmation read one truth */
-  assert.match(worker, /out\.stayext = \{ stage: 'stayext', extension: true, key: e\.key, label: e\.label, name: e\.room, room: e\.room, stay: e\.hotel,/);
-  assert.match(worker, /const GUEST_ROOMS_WRITES = \['join', 'leave', 'wait', 'unwait', 'extend', 'unextend'\];/, 'the extension is a guest write, verified by the bearer like every other');
-});

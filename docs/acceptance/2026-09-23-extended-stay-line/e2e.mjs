@@ -1,4 +1,17 @@
 /* ============================================================================
+   RETIRED, 23 September 2026 — the same day it was written.
+
+   This suite proved the paid extension as a visible line in My Bag, Review &
+   Send and My Profile. The Owner then WITHDREW the self-service extension
+   altogether: a guest must not be shown a cheap alternative beside the stay
+   chosen for them. The feature it tests no longer exists, so this file is NOT
+   run any more. It is kept unchanged as the record of what was built and why,
+   exactly as the acceptance note beside it is kept.
+
+   The contract that replaced it: test/no-self-service-extension.test.mjs and
+   gate S1, which hold the absence so the feature cannot return unnoticed.
+   ========================================================================== */
+/* ============================================================================
    THE EXTENDED STAY ACROSS THE FOUR SURFACES (Owner, 23 Sep 2026) — the served
    proof, on the stage, with one synthetic guest and nothing else.
 

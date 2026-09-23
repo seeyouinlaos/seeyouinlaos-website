@@ -42,7 +42,7 @@
 
 import { SEED } from './inventory-seed.js';
 import { displayName } from './auth.js';
-import { COMPLIMENTARY, EXTENSION, deadlineState, extensionQuote, validNights } from './stay-plan.js';
+import { COMPLIMENTARY, deadlineState } from './stay-plan.js';
 
 export const PLACES = 2;
 const OCC = 'occ:';
@@ -50,9 +50,9 @@ const WL = 'wl:';
 const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
 /* a window (the first segment of a key) belongs to one stage of the journey */
-/* THE EXTENSION IS ITS OWN STAGE (Owner, 22 Sep 2026): `stayext` is never part of the wedding window, so holding, changing or
-   dropping paid nights can never release the complimentary place underneath them */
-const STAGE_OF = { 'bkk-stay': 'bkk-stay', prewed: 'prewed', wedstay: 'wedstay', guesthouse: 'wedstay', riverside: 'wedstay', stayext: 'stayext', kmg: 'kmg', ljg: 'ljg', kempinski: 'kempinski' };
+/* ONE SELECTION PER STAGE: a hold in one window releases the hold in the same window. (The withdrawn paid extension had its
+   own stage so that changing it could never touch the wedding stay; with the feature gone, the stage is gone with it.) */
+const STAGE_OF = { 'bkk-stay': 'bkk-stay', prewed: 'prewed', wedstay: 'wedstay', guesthouse: 'wedstay', riverside: 'wedstay', kmg: 'kmg', ljg: 'ljg', kempinski: 'kempinski' };
 export function stageOf(key) { const w = String(key || '').split('/')[0]; return STAGE_OF[w] || w; }
 export const STAGES = ['bkk-stay', 'prewed', 'wedstay', 'kmg', 'ljg', 'kempinski'];
 
@@ -190,14 +190,7 @@ export class Rooms {
       open: dl.open && !!cs && cs.remainingPlaces > 0,
       mine: !!(identity && occ.some((o) => !o.placeholder && o.guestId === identity.guestId && o.key === COMPLIMENTARY.key))
     };
-    /* THE GUEST'S OWN EXTENSION: the nights the engine holds, priced by the one rule */
-    let extension = null;
-    if (identity) {
-      const own = occ.find((o) => !o.placeholder && o.guestId === identity.guestId && o.key === EXTENSION.key);
-      if (own) extension = { ...extensionQuote(own.nights || 1), label: own.label, at: own.at, confirmed: true };
-    }
-    const extensionAvailable = !!(summary[EXTENSION.key] && summary[EXTENSION.key].remainingPlaces > 0);
-    return { ok: true, units, summary, mine, waitlist, waiting, places: PLACES, complimentary, extension, extensionAvailable };
+    return { ok: true, units, summary, mine, waitlist, waiting, places: PLACES, complimentary };
   }
 
   async fetch(request) {
@@ -210,7 +203,7 @@ export class Rooms {
     if (op === 'read') return json(await this.view(identity));
     if (op === 'mine') {
       const v = await this.view(identity);
-      return json({ ok: true, mine: v.mine, waitlist: v.waitlist, extension: v.extension, complimentary: v.complimentary });
+      return json({ ok: true, mine: v.mine, waitlist: v.waitlist, complimentary: v.complimentary });
     }
 
     if (op === 'join' || op === 'leave' || op === 'wait' || op === 'unwait') {
@@ -342,58 +335,10 @@ export class Rooms {
       });
     }
 
-    /* ---- THE PAID EXTENSION (Owner, 22 Sep 2026) --------------------------
-       ONE room of the designated hotel for one to four nights AFTER the included
-       stay. The guest chooses only the number of nights: the hotel, the dates,
-       the price, the availability and the final amount are decided here, inside
-       the one actor, so two guests asking for the last room are answered one
-       after the other. Changing the number of nights UPDATES the guest's own
-       extension — it never creates a second one — and neither extending nor
-       dropping it touches any other stage the guest holds. */
-    if (op === 'extend' || op === 'unextend') {
-      if (!identity) return json({ ok: false, error: 'unauthorised' }, 401);
-      const body = await safeJson(request);
-      const invitationId = String(body && body.invitationId || '').trim();
-      const guestId = String(body && body.guestId || '').trim();
-      if (invitationId !== identity.invitationId || guestId !== identity.guestId) return json({ ok: false, error: 'not your guest' }, 403);
-      const name = displayName(body && body.name);
-      return await this.state.blockConcurrencyWhile(async () => {
-        const occ = await this.occupancies();
-        const own = occ.find((o) => !o.placeholder && o.guestId === guestId && o.key === EXTENSION.key) || null;
-
-        if (op === 'unextend') {
-          /* ONLY the extension goes. The complimentary stay, every other stage and every other guest stand. */
-          if (own) await this.storage.delete(this.keyOf(own.key, own.label, own.guestId));
-          return json({ ok: true, removed: own ? { key: own.key, label: own.label, nights: own.nights || null } : null, ...(await this.view(identity)) });
-        }
-
-        const nights = body && body.nights;
-        if (!validNights(nights)) return json({ ok: false, error: 'invalid nights', max: EXTENSION.maxNights }, 400);
-        const quote = extensionQuote(nights);
-        /* THE PRICE THE GUEST REVIEWED (Owner, 22 Sep 2026): a confirmation that names a different amount than the one on
-           screen is refused, with the authoritative quote — nothing is held, nothing is charged, the guest reviews again */
-        if (body && body.expect != null && Number(body.expect) !== quote.total) {
-          return json({ ok: false, error: 'price changed', quote, ...(await this.view(identity)) }, 409);
-        }
-
-        let label = own ? own.label : null;
-        if (!label) {
-          /* a room a party member already extends into first (they stay together), then the first room with a place free */
-          const list = unitsOf(EXTENSION.key);
-          const freeIn = (u) => u.places - occ.filter((o) => o.key === EXTENSION.key && o.label === u.label && o.guestId !== guestId).length;
-          const withParty = identity.partyId ? list.find((u) => freeIn(u) > 0 && occ.some((o) => o.key === EXTENSION.key && o.label === u.label && o.partyId === identity.partyId)) : null;
-          const pick = withParty || list.find((u) => freeIn(u) > 0);
-          if (!pick) return json({ ...(await this.view(identity)), ok: false, error: 'extension unavailable', message: 'The hotel has no room for those nights.' }, 409);
-          label = pick.label;
-        }
-        await this.storage.put(this.keyOf(EXTENSION.key, label, guestId), {
-          invitationId, partyId: identity.partyId || null, name, nights: quote.nights,
-          at: own && own.at ? own.at : new Date().toISOString(), changedAt: new Date().toISOString()
-        });
-        const view = await this.view(identity);
-        return json({ ok: true, extended: { ...quote, label }, changed: !!own, ...view });
-      });
-    }
+    /* THE PAID EXTENSION IS WITHDRAWN (Owner, 23 Sep 2026): the `extend` and `unextend` operations, the stock they held and
+       the one-to-four-nights workflow are gone from this engine. A guest cannot self-book extra nights, and the website names
+       no hotel for them: Guest Relations arranges them outside this engine. `riverside/superior-window` — the Riverside as a
+       WEDDING-STAY alternative — is a different product and is untouched. */
 
     /* ---- Guest Relations only ---- */
     if (!gr) return json({ ok: false, error: 'unknown rooms operation' }, 404);

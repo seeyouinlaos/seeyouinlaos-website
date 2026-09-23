@@ -87,12 +87,10 @@ export const SEED = {
   'riverside/superior-window':
     { unit: 'room', capacity: 6, occupancy: 2, held: 0, name: 'Superior Room With Window', stay: 'Riverside Hotel Vientiane' },
 
-  /* THE EXTENSION (Owner, 22 Sep 2026): the designated paid hotel for the nights AFTER the included wedding stay — the same
-     Riverside rooms, a separate window of stock because they are separate dates (01 March onwards) and a separate booking
-     component: changing or dropping an extension can never touch the complimentary stay underneath it. Six rooms, two places
-     each; USD 30 a night with breakfast (src/stay-plan.js holds the rule, this file the stock). */
-  'stayext/riverside-superior':
-    { unit: 'room', capacity: 6, occupancy: 2, held: 0, name: 'Superior Room With Window', stay: 'Riverside Hotel Vientiane · extension' },
+  /* THE PAID EXTENSION IS WITHDRAWN (Owner, 23 Sep 2026): 'stayext/riverside-superior' held the stock for nights after the
+     included wedding stay. A guest must not be offered a cheap alternative beside the stay chosen for them, so the
+     self-service extension is gone from this engine; extra nights are arranged by Guest Relations outside it. The window
+     above — 'riverside/superior-window', the Riverside as a WEDDING-STAY alternative — is a different product and stands. */
 
   /* ------------------------------------------------------------ Kunming */
   'kmg/left-bank':      { unit: 'room', capacity: 1, occupancy: 4, held: 0, name: 'Left Bank French-Style King Room' },
