@@ -82,9 +82,9 @@ test('ROOMS · nothing is reserved (Owner, 19 Sep 2026): no unit is anyone\'s in
   /* Kunming: the Solarium and Lijiang: the 270° View Suite are open to everyone (Owner, Edit 5 · 18 Sep 2026) */
   assert.equal(unitsOf('kmg/solarium')[0].reservedFor, null); assert.equal(unitsOf('kmg/standard-single')[0].reservedFor, null);
   assert.deepEqual(unitsOf('ljg/view-suite-270').map((u) => u.reservedFor), [null, null, null, null, null, null]);
-  /* the stages of the journey: the Guest House and the Riverside are the wedding stage, as the hotel is */
+  /* the stages of the journey: the Guest House is the wedding stage, as the hotel is (the Riverside was retired 23 Sep 2026) */
   assert.deepEqual(STAGES, ['bkk-stay', 'prewed', 'wedstay', 'kmg', 'ljg', 'kempinski']);
-  assert.equal(stageOf('guesthouse/guest-house'), 'wedstay', 'the Guest House is the wedding stage'); assert.equal(stageOf('riverside/superior-window'), 'wedstay'); assert.equal(stageOf('wedstay/heritage'), 'wedstay');
+  assert.equal(stageOf('guesthouse/guest-house'), 'wedstay', 'the Guest House is the wedding stage'); assert.equal(stageOf('wedstay/heritage'), 'wedstay');
   assert.equal(stageOf('bkk-stay/penthouse'), 'bkk-stay'); assert.equal(stageOf('prewed/heritage'), 'prewed');
 });
 
@@ -148,9 +148,11 @@ test('ROOMS · a change holds the new place first and releases the old one only 
   r = await call(rooms, 'join', { invitationId: PEG.invitationId, guestId: PEG.guestId, key: 'guesthouse/guest-house', label: 'A', name: 'Peggy' }, PEG);
   assert.equal(r.status, 200); assert.equal(unit(r.d, 'wedstay/heritage-executive', 'C').taken, 0); assert.equal(unit(r.d, 'guesthouse/guest-house', 'A').taken, 1);
   assert.deepEqual(r.d.mine.wedstay, { key: 'guesthouse/guest-house', label: 'A' });
-  /* … and so is the Riverside */
+  /* THE RIVERSIDE IS RETIRED (Owner, 23 Sep 2026): it has no stock, so it cannot be joined and the guest keeps the house they have */
   r = await call(rooms, 'join', { invitationId: PEG.invitationId, guestId: PEG.guestId, key: 'riverside/superior-window', label: 'A', name: 'Peggy' }, PEG);
-  assert.equal(r.status, 200); assert.equal(unit(r.d, 'guesthouse/guest-house', 'A').taken, 0); assert.deepEqual(r.d.mine.wedstay, { key: 'riverside/superior-window', label: 'A' });
+  assert.equal(r.status, 404, 'the retired Riverside cannot be booked');
+  const stillHouse = await call(rooms, 'read', null, PEG);
+  assert.deepEqual(stillHouse.d.mine.wedstay, { key: 'guesthouse/guest-house', label: 'A' }, 'the refusal left the guest\'s stay exactly as it was');
   /* a different stage is independent */
   r = await call(rooms, 'join', { invitationId: PEG.invitationId, guestId: PEG.guestId, key: 'prewed/heritage', label: 'A', name: 'Peggy' }, PEG);
   assert.equal(Object.keys(r.d.mine).sort().join(','), 'prewed,wedstay');

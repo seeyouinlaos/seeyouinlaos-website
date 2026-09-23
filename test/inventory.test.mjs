@@ -97,8 +97,8 @@ test('the six-bedroom Penthouse is six rooms of two places; the Guest House comp
   /* the invented label is gone from the ledger */
   assert.equal(SEED['airbnb-2br/private-residence'], undefined, 'the retired key is gone');
   assert.ok(!Object.keys(SEED).some((k) => /airbnb|private-residence/.test(k)));
-  /* the wedding window is ONE stage whether spent in the hotel, the Riverside or the Guest House */
-  assert.equal(stageOf('guesthouse/guest-house'), 'wedstay'); assert.equal(stageOf('riverside/superior-window'), 'wedstay'); assert.equal(stageOf('wedstay/heritage'), 'wedstay');
+  /* the wedding window is ONE stage whether spent in the hotel or the Guest House (the Riverside was retired 23 Sep 2026) */
+  assert.equal(stageOf('guesthouse/guest-house'), 'wedstay'); assert.equal(stageOf('wedstay/heritage'), 'wedstay');
   assert.deepEqual(STAGES, ['bkk-stay', 'prewed', 'wedstay', 'kmg', 'ljg', 'kempinski']);
   /* Lijiang every category six rooms, the Kempinski six — the current Operations Master */
   for (const k of Object.keys(SEED).filter((k) => k.startsWith('ljg/'))) assert.equal(SEED[k].capacity, 6, k);
@@ -258,9 +258,9 @@ test('F · the Guest House complimentary: Complimentary is the value, six shared
   assert.equal(U.label('guesthouse', 'guest-house'), '6 places available');
   assert.equal(U.unitWords(U.units('guesthouse', 'guest-house')[0]), '6 places · Available');
   assert.equal(U.unitName(U.units('guesthouse', 'guest-house')[0]), 'Guest House complimentary', 'a property is named, never "Room A"');
-  /* the wedding stay is ONE stage: the hotel, the Guest House or the Riverside */
-  assert.deepEqual(plain(wed.ids), ['wedstay', 'riverside', 'guesthouse']);
-  assert.deepEqual(plain(ST.stageIds('guesthouse')).sort(), ['guesthouse', 'riverside', 'wedstay', 'wedstay-n1', 'wedstay-n2']);
+  /* the wedding stay is ONE stage: the hotel or the Guest House */
+  assert.deepEqual(plain(wed.ids), ['wedstay', 'guesthouse']);
+  assert.deepEqual(plain(ST.stageIds('guesthouse')).sort(), ['guesthouse', 'wedstay', 'wedstay-n1', 'wedstay-n2']);
   /* chosen: a place in the house, in the guest's own name, USD 0 — a Bag line that is a real selection */
   assert.deepEqual(plain(await ST.select('guesthouse', 'guest-house', undefined, 2)), { ok: true, unit: 'A' });
   assert.deepEqual(plain(B.get().map((x) => [x.id, x.price, x.complimentary, x.unit, x.unitName])), [['guesthouse', 0, true, 'A', 'Guest House complimentary']]);

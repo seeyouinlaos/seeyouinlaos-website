@@ -170,9 +170,9 @@ if (!LIVE) {
     const g1 = await need(p); const r1 = await p.evaluate(() => ({ off: !!document.querySelector('#send.off'), ready: /Your trip can be sent/i.test(document.body.innerText) }));
     await shot(p, '390-seat-gate-open');
     note('seat-confirmed-enables-send', g1.ok && !r1.off && r1.ready, JSON.stringify(g1));
-    /* the wedding-stay total: the Guest House USD 0 — the Souphattra Heritage USD 145 for both nights, the Riverside USD 60 */
-    const totals = await p.evaluate(async () => { const out = {}; out.gh = SIYL_BAG.total(); await SIYL_STAY.select('wedstay', 'heritage'); out.her = SIYL_BAG.total(); await SIYL_STAY.select('riverside', 'superior-window'); out.rv = SIYL_BAG.total(); await SIYL_STAY.select('guesthouse', 'guest-house'); out.back = SIYL_BAG.total(); return out; });
-    note('wedding-stay-totals', totals.gh === 0 && totals.her === 145 && totals.rv === 60 && totals.back === 0, JSON.stringify(totals));
+    /* the wedding-stay total: the Guest House USD 0 — the Souphattra Heritage USD 145 for both nights (the Riverside was deleted on 23 Sep 2026) */
+    const totals = await p.evaluate(async () => { const out = {}; out.gh = SIYL_BAG.total(); await SIYL_STAY.select('wedstay', 'heritage'); out.her = SIYL_BAG.total(); await SIYL_STAY.select('guesthouse', 'guest-house'); out.back = SIYL_BAG.total(); return out; });
+    note('wedding-stay-totals', totals.gh === 0 && totals.her === 145 && totals.rv === undefined && totals.back === 0, JSON.stringify(totals));
     await p.context().close();
   }
 
@@ -236,9 +236,9 @@ if (!LIVE) {
   /* ===== 8 · THE JOURNEYS PAGE: the wedding stay's order and words ===== */
   {
     const p = await fresh(390); await signIn(p, 'T001'); await p.goto(O + '/journeys.html', { waitUntil: 'load' }); await p.waitForTimeout(2000);
-    const j = await p.evaluate(() => { const ids = [...document.querySelectorAll('.p[id^="j-"]')].map((e) => e.id); const t = (id) => (document.getElementById(id) || {}).innerText || ''; return { order: ids.filter((i) => /j-(wedstay|riverside|guesthouse)/.test(i)), wed: t('j-wedstay').replace(/\s+/g, ' '), rv: t('j-riverside').replace(/\s+/g, ' '), gh: t('j-guesthouse').replace(/\s+/g, ' ') }; });
+    const j = await p.evaluate(() => { const ids = [...document.querySelectorAll('.p[id^="j-"]')].map((e) => e.id); const t = (id) => (document.getElementById(id) || {}).innerText || ''; return { order: ids.filter((i) => /j-(wedstay|riverside|guesthouse)/.test(i)), wed: t('j-wedstay').replace(/\s+/g, ' '), rv: !!document.getElementById('j-riverside'), gh: t('j-guesthouse').replace(/\s+/g, ' ') }; });
     await p.evaluate(() => document.getElementById('j-wedstay').scrollIntoView()); await shot(p, '390-journeys-wedding-stays');
-    note('journeys-wedding-stay-order-and-words', j.order.join() === 'j-wedstay,j-riverside,j-guesthouse' && /From USD 145 total per person/.test(j.wed) && /from USD 145 per person \/ night/.test(j.wed) && /Second night complimentary · You pay for the first night only/.test(j.wed) && /USD 60 total per person · SELF-PAY/.test(j.rv) && /USD 30 per person \/ night/.test(j.rv) && /USD 0 · Complimentary/.test(j.gh) && /Both nights hosted/.test(j.gh), JSON.stringify(j).slice(0, 400));
+    note('journeys-wedding-stay-order-and-words', j.order.join() === 'j-wedstay,j-guesthouse' && j.rv === false && /From USD 145 total per person/.test(j.wed) && /from USD 145 per person \/ night/.test(j.wed) && /Second night complimentary · You pay for the first night only/.test(j.wed) && /USD 0 · Complimentary/.test(j.gh) && /Both nights hosted/.test(j.gh), JSON.stringify(j).slice(0, 400));
     await p.context().close();
   }
 }

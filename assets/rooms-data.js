@@ -238,47 +238,10 @@
       ]
     },
 
-    /* RIVERSIDE HOTEL VIENTIANE (Owner, release 012 · H&S_Wedding_Operations_Master of 18 Sep 2026): package D3 — the third
-     * address for the wedding window beside the Souphattra Heritage and the Guest House complimentary. Accommodation_Details column
-     * D3: "Superior Room With Window", 22 sq.m., 1 bed, floors 2 – 7, check-in 27.02.2027, check-out 01.03.2027 (2 nights),
-     * 6 rooms, "Price per Person" 30 = the per-person, per-night share (60 per room / night, 120 per room for the window);
-     * Budget: "Riverside Hotel · Superior Room With Window · 30.00 · Open · Approve by Suthep, 20.08.2026". Both nights are
-     * the guest's (Overview Day 07 and Day 08: Self-Pay — the hosted second night is the Souphattra's rule). The current
-     * Operations Master (19 Sep 2026) says 30 in the Overview as well — the release-012 conflict (25) is gone. Photography (release 014, 19 Sep 2026): the
-     * Owner's Riverside Hotel Drive folder (1QsTmfzTVZScHWwPyFG3C5MbvL8XKmBgX) — seven frames, provenance in
-     * src/stay-media.json and assets/images/ASSET-MAP.md. */
-    riverside: {
-      name: 'Riverside Hotel Vientiane',
-      place: 'Vientiane, Laos',
-      breakfast: 'Breakfast included',
-      windows: [{ id: 'riverside', label: 'Wedding Stay', dates: '27 February – 01 March 2027', nights: '2 nights', n: 2, pay: 2,
-        window: 'fixed', nightsList: ['27 → 28 February', '28 February → 01 March'],
-        bagName: 'Riverside Hotel Vientiane', bagImg: 'assets/images/riverside/facade.jpg' }],
-      includes: [
-        'Two nights, 27 → 28 February and 28 February → 1 March, for the wedding window — both nights are your own.',
-        'Daily buffet breakfast included.',
-        'Six minutes on foot from Wat Ong Teu; the Mekong riverside park, Nam Phou Fountain and Chao Anouvong Park within a few hundred metres.',
-        'Airport transfers, meals other than breakfast and anything charged to the room are your own.'
-      ],
-      rooms: [
-        { slug: 'superior-window', name: 'Superior Room With Window', cat: 'Superior room',
-          desc: 'A comfortable 22 sq.m. room with a window, on floors 2 – 7 of a 46-room hotel a short walk from the Mekong.',
-          gallery: [['assets/images/riverside/facade.jpg', 'The hotel facade on the riverside street'], ['assets/images/riverside/superior-room.jpg', 'A Superior Room With Window'], ['assets/images/riverside/lobby.jpg', 'The lobby and its terrazzo floor'], ['assets/images/riverside/reception.jpg', 'The reception'], ['assets/images/riverside/breakfast-room.jpg', 'The breakfast room'], ['assets/images/riverside/terrace.jpg', 'A terrace over the rooftops'], ['assets/images/riverside/entrance.jpg', 'The entrance and the garden mural']],
-          facts: [['Size', '22 sq.m.'], ['Bed', 'Extra-long bed'], ['Occupancy', '2 adults'], ['Location', 'Floors 2 – 7'], ['Breakfast', 'Daily buffet breakfast included']],
-          story: 'The Riverside Hotel Vientiane is a three-star house of forty-six rooms with a lift throughout, six minutes on foot from the sixteenth-century Wat Ong Teu and within reach of the Mekong riverside park. The Superior Room With Window is twenty-two square metres with air conditioning, a flat-screen television with satellite channels, an extra-long bed, a wardrobe and a private bathroom with bidet, hair dryer and bath sheets. A daily buffet breakfast is served, there is a rooftop bar, and the Nam Phou Fountain is five hundred and fifty metres away; Patuxai a twenty-five-minute walk.',
-          groups: [['The room', ['22 sq.m. with a window', 'Floors 2 – 7, lift throughout', 'Air conditioning', 'Extra-long bed', 'Wardrobe', 'Flat-screen television with satellite channels']],
-            ['Bathroom', ['Private bathroom', 'Bidet and sink', 'Hair dryer', 'Bath sheets']],
-            ['Food & drink', ['Daily buffet breakfast included', 'Rooftop bar', 'Lobby bar', 'Room service', 'Restaurant']],
-            ['Service', ['Front desk safe and lockers', 'Concierge and tour / ticket service', 'Luggage storage', 'Currency exchange', 'Porter', 'Free parking', 'Airport pick-up and drop-off — additional charge', 'Wi-Fi in public areas']]],
-          amenities: ['Air conditioning', 'Extra-long bed', 'Flat-screen TV', 'Wardrobe', 'Private bathroom', 'Hair dryer', 'Lift', 'Free parking'],
-          rate: 30 }
-      ]
-    },
+    /* RIVERSIDE HOTEL VIENTIANE IS COMPLETELY RETIRED (Owner, 23 Sep 2026): the property record, its windows, its price,
+       its card, its gallery and its story are gone. The house is not a website product any more and is not replaced; the
+       wedding window is the Souphattra Heritage and the Guest House complimentary. */
 
-    /* BANGKOK · BEFORE THE WEDDING — three approved properties in one window.
-     * Exactly one can be active at a time, the way a room category is chosen
-     * inside any other stay. Each carries its own property name, its own
-     * address and its own breakfast truth. */
     sathorn: {
       name: 'Bangkok · Before the Wedding',
       place: 'Bangkok',
@@ -746,13 +709,12 @@
     sathorn:    ['assets/images/penthouse/', 'assets/images/usathorn/', 'assets/images/shama/', 'assets/images/journey/penthouse-'],
     souphattra: ['assets/images/souphattra/', 'assets/images/rooms/'],   /* assets/images/rooms/ = the Souphattra's own room categories (its Drive folder) */
     guesthouse: ['assets/images/guesthouse/'],
-    riverside:  ['assets/images/riverside/'],
     kunming:    ['assets/images/kunming/', 'assets/images/journey/kunming-'],
     lijiang:    ['assets/images/lijiang/', 'assets/images/journey/lijiang-'],
     kempinski:  ['assets/images/kempinski/', 'assets/images/journey/kempinski-']
   };
   /* the stay-media records (assets/stay-media.js) that belong to each property */
-  var STAY_MEDIA_KEYS = { sathorn: ['sathornPenthouse', 'uSathorn', 'shamaYenAkat'], souphattra: ['souphattra'], guesthouse: ['guestHouse'], riverside: ['riverside'], kunming: ['wanxiang'], lijiang: ['luyeBaisha'], kempinski: ['kempinski'] };
+  var STAY_MEDIA_KEYS = { sathorn: ['sathornPenthouse', 'uSathorn', 'shamaYenAkat'], souphattra: ['souphattra'], guesthouse: ['guestHouse'], kunming: ['wanxiang'], lijiang: ['luyeBaisha'], kempinski: ['kempinski'] };
   /* a frame the property may never show, whatever folder it sits in: destination photography by kind (the peak, the village, the city) */
   var NEVER = /snow-mountain-viewing-1\.jpg$|\/city\/|\/experiences\/|\/1872\/|\/marsilea\/|\/hero\/|\/event\/|\/venue\/|\/temple\/|\/dress|\/train\/|\/transport\/|\/timeline\/|\/alms\//;
   function inFolder(stayKey, src) {

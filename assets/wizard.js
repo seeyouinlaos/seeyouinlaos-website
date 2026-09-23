@@ -25,7 +25,7 @@
   var SUBVIEWS = /^(room|journeys|transport|experience|1872|tea|marsilea)(\.html)?(?=[?#]|$)/;
 
   function esc(t) { return String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
-  /* the stage a Journey window belongs to (guesthouse and riverside are the wedding stay; a transport id is its own stage) */
+  /* the stage a Journey window belongs to (the guest house is the wedding stay; a transport id is its own stage) */
   function stageOfWindow(win) {
     var J = window.SIYL_JOURNEY; if (!J || !win) return win || '';
     var seg = J.SEGMENTS.filter(function (s) { return s.key === win || (s.ids || []).indexOf(win) >= 0; })[0];

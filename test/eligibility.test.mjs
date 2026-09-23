@@ -73,7 +73,7 @@ test('NO RESERVATIONS, NO FIXED ARRANGEMENT (Owner, 15 Sep 2026 · reaffirmed 19
   assert.equal((await join(E, SUTHEP, 'bkk-stay/penthouse', 'B')).status, 200, 'and books the next room like any guest');
   /* the wedding window is ONE stage whether spent in the hotel, the Guest House or the Riverside */
   assert.deepEqual(STAGES, ['bkk-stay', 'prewed', 'wedstay', 'kmg', 'ljg', 'kempinski']);
-  assert.equal(stageOf('guesthouse/guest-house'), 'wedstay'); assert.equal(stageOf('riverside/superior-window'), 'wedstay'); assert.equal(stageOf('wedstay/heritage'), 'wedstay');
+  assert.equal(stageOf('guesthouse/guest-house'), 'wedstay'); assert.equal(stageOf('wedstay/heritage'), 'wedstay');
   /* D2 · the Guest House complimentary: ONE shared unit of SIX places, kind property, named as the Owner names it; the invented key is gone */
   assert.deepEqual(unitsOf('guesthouse/guest-house').map((u) => [u.label, u.kind, u.places, u.name, u.reservedFor]), [['A', 'property', 6, 'Guest House complimentary', null]]);
   assert.deepEqual(unitsOf('airbnb-2br/private-residence'), [], 'there is no Private Residence');

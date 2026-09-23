@@ -16,7 +16,7 @@ const DESTINATION = imgsOf('destination.html');
 const HIGHLIGHTS = ['assets/experiences.js', 'assets/experience-galleries.js', 'experiences.html', 'experience.html'].filter((f) => existsSync(join(ROOT, f))).flatMap(imgsOf);
 
 test('every active accommodation resolves its frames from its own approved set — and only from there', () => {
-  assert.deepEqual(plain(STAYS).sort(), ['guesthouse', 'kempinski', 'kunming', 'lijiang', 'riverside', 'sathorn', 'souphattra']);
+  assert.deepEqual(plain(STAYS).sort(), ['guesthouse', 'kempinski', 'kunming', 'lijiang', 'sathorn', 'souphattra']);
   for (const k of STAYS) {
     const ok = A.approved(k); assert.ok(ok.length > 0, k + ' has an approved set');
     for (const p of ok) { assert.ok(A.FOLDERS[k].some((f) => p.startsWith(f)), k + ': ' + p + ' is inside the property\'s own folders'); assert.ok(existsSync(join(ROOT, p)), p + ' is on disk'); }

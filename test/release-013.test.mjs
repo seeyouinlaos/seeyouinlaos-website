@@ -45,8 +45,8 @@ const call = (h, path, bearer, body, method) => h.w.fetch(req(path, bearer ? { '
 const gr = (h, path, body) => h.w.fetch(req(path, { 'x-gr-token': GR }, body || {}, 'POST'), h.env).then(async (r) => ({ status: r.status, d: await r.json() }));
 
 async function populate(h) {
-  /* rooms: Peggy holds Souphattra prewed A and the Riverside; Sam holds a Kunming room; the host chose U Sathorn like any guest */
-  for (const [b, key] of [[h.peggy, 'prewed/heritage'], [h.peggy, 'riverside/superior-window'], [h.sam, 'kmg/smart-family'], [h.host, 'bkk-stay/u-sathorn-superior-garden']]) {
+  /* rooms: Peggy holds Souphattra prewed A and the Guest House; Sam holds a Kunming room; the host chose U Sathorn like any guest */
+  for (const [b, key] of [[h.peggy, 'prewed/heritage'], [h.peggy, 'guesthouse/guest-house'], [h.sam, 'kmg/smart-family'], [h.host, 'bkk-stay/u-sathorn-superior-garden']]) {
     const who = { INV: null }; const r = await call(h, '/api/rooms/join', b, { invitationId: b === h.peggy ? 'INV-G001' : b === h.sam ? 'INV-G777' : 'INV-G048', guestId: b === h.peggy ? 'G001' : b === h.sam ? 'G777' : 'G048', key, label: 'A', name: 'x' });
     assert.equal(r.status, 200, key + ' held');
   }
@@ -88,7 +88,7 @@ test('THE CLEAN RESET · the dry run names everything and writes nothing; the sn
   /* 2 · the snapshot: every value, lossless */
   const snap = await gr(h, '/api/gr/reset', { dryRun: true, snapshot: true });
   assert.equal(snap.d.mode, 'snapshot'); assert.equal(snap.d.digest, dry.d.digest, 'the same state, the same digest');
-  assert.deepEqual(Object.keys(snap.d.backup).sort(), ['avatar:INV-G777', 'contact:INV-G001', 'contact:INV-G048', 'contact:INV-G777', 'do:draft:INV-G001', 'do:draft:INV-G048', 'do:draft:INV-G777', 'draft:INV-G001', 'draft:INV-G048', 'draft:INV-G777', 'hold:ceremony:' + snap.d.seating.rows[0].seatId, 'hold:ceremony:' + snap.d.seating.rows[1].seatId, 'occ:bkk-stay/u-sathorn-superior-garden|A|G048', 'occ:kmg/smart-family|A|G777', 'occ:prewed/heritage|A|G001', 'occ:riverside/superior-window|A|G001', 'reg:INV-G001', 'reg:INV-G001:prev:2026-09-16T15:52:46.758Z'].sort(), 'every value that would go is in the snapshot');
+  assert.deepEqual(Object.keys(snap.d.backup).sort(), ['avatar:INV-G777', 'contact:INV-G001', 'contact:INV-G048', 'contact:INV-G777', 'do:draft:INV-G001', 'do:draft:INV-G048', 'do:draft:INV-G777', 'draft:INV-G001', 'draft:INV-G048', 'draft:INV-G777', 'hold:ceremony:' + snap.d.seating.rows[0].seatId, 'hold:ceremony:' + snap.d.seating.rows[1].seatId, 'occ:bkk-stay/u-sathorn-superior-garden|A|G048', 'occ:kmg/smart-family|A|G777', 'occ:prewed/heritage|A|G001', 'occ:guesthouse/guest-house|A|G001', 'reg:INV-G001', 'reg:INV-G001:prev:2026-09-16T15:52:46.758Z'].sort(), 'every value that would go is in the snapshot');
   const av = snap.d.backup['avatar:INV-G777']; assert.equal(av.bytes, 8); assert.deepEqual([...Buffer.from(av.base64, 'base64')], [0x89, 0x50, 0x4e, 0x47, 0, 255, 1, 2], 'the photo bytes, exactly'); assert.deepEqual(av.metadata, { type: 'image/png' });
   assert.equal(JSON.parse(Buffer.from(snap.d.backup['reg:INV-G001'].base64, 'base64').toString()).submissionId, 'SYL-G001-TEST');
   assert.ok(snap.d.backup['occ:prewed/heritage|A|G001'].at && snap.d.backup['occ:prewed/heritage|A|G001'].invitationId === 'INV-G001', 'the engine record with its timestamp and names');

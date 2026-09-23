@@ -29,7 +29,7 @@
    never a separate counter, and only real bookings consume it. Planning names in the Operations Master are never bookings.
 
    A guest holds at most one place per STAGE of the journey: the wedding window is one stage whether spent in the hotel,
-   the Riverside or the Guest House.
+   the Souphattra or the Guest House.
 
    PARTY CAPACITY (Owner, 19 Sep 2026 · the package model): a booking that must fit a party names `need` — the places the
    party still needs in the unit; a unit whose free places cannot take them is refused ("full for your party") and the
@@ -52,7 +52,7 @@ const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 /* a window (the first segment of a key) belongs to one stage of the journey */
 /* ONE SELECTION PER STAGE: a hold in one window releases the hold in the same window. (The withdrawn paid extension had its
    own stage so that changing it could never touch the wedding stay; with the feature gone, the stage is gone with it.) */
-const STAGE_OF = { 'bkk-stay': 'bkk-stay', prewed: 'prewed', wedstay: 'wedstay', guesthouse: 'wedstay', riverside: 'wedstay', kmg: 'kmg', ljg: 'ljg', kempinski: 'kempinski' };
+const STAGE_OF = { 'bkk-stay': 'bkk-stay', prewed: 'prewed', wedstay: 'wedstay', guesthouse: 'wedstay', kmg: 'kmg', ljg: 'ljg', kempinski: 'kempinski' };
 export function stageOf(key) { const w = String(key || '').split('/')[0]; return STAGE_OF[w] || w; }
 export const STAGES = ['bkk-stay', 'prewed', 'wedstay', 'kmg', 'ljg', 'kempinski'];
 
@@ -221,7 +221,7 @@ export class Rooms {
           if (!stage) return json({ ok: false, error: 'invalid release' }, 400);
 
           /* A RELEASE NAMES ITS WINDOW (Codex confirming pass, release 012): a device that still shows the Souphattra it removed
-             must not release the Riverside the guest holds meanwhile — with `window` only the places of that window go; the
+             must not release the other house the guest holds meanwhile — with `window` only the places of that window go; the
              stage-wide release (no window) stays for the planner's own reconciliation */
           const win = String(body && body.window || '').trim();
           const occ0 = await this.occupancies();
@@ -337,8 +337,9 @@ export class Rooms {
 
     /* THE PAID EXTENSION IS WITHDRAWN (Owner, 23 Sep 2026): the `extend` and `unextend` operations, the stock they held and
        the one-to-four-nights workflow are gone from this engine. A guest cannot self-book extra nights, and the website names
-       no hotel for them: Guest Relations arranges them outside this engine. `riverside/superior-window` — the Riverside as a
-       WEDDING-STAY alternative — is a different product and is untouched. */
+       no hotel for them: Guest Relations arranges them outside this engine. The Riverside Hotel Vientiane was retired
+       COMPLETELY the same day — neither of its products exists any more, and the wedding window is the Souphattra and the
+       Guest House. */
 
     /* ---- Guest Relations only ---- */
     if (!gr) return json({ ok: false, error: 'unknown rooms operation' }, 404);

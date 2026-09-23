@@ -267,10 +267,10 @@ for (const [w, h, name] of [[390, 844, '390'], [834, 1194, '834x1194'], [1194, 8
   await clear(p, 'T001');
   const end = await rooms(p, 'read');
   note('stage-left-clean', !end.body.mine.wedstay && end.body.complimentary.remaining === end.body.complimentary.max &&
-    !('extension' in end.body) && !end.body.summary['stayext/riverside-superior'] && !!end.body.summary['riverside/superior-window'],
+    !('extension' in end.body) && !end.body.summary['stayext/riverside-superior'] && !end.body.summary['riverside/superior-window'],
     JSON.stringify({ wedstay: end.body.mine.wedstay || null, remaining: end.body.complimentary.remaining,
       extensionInView: 'extension' in end.body, extensionStock: !!end.body.summary['stayext/riverside-superior'],
-      riversideWeddingStay: !!end.body.summary['riverside/superior-window'] }));
+      riversideStock: !!end.body.summary['riverside/superior-window'] }));
   await p.context().close();
 }
 

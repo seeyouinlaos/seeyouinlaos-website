@@ -20,7 +20,7 @@ const SERIF = "Georgia, 'Times New Roman', Times, serif", SANS = "'Helvetica Neu
 /* ---- facts of the journey (the same words as the website) ---- */
 const STAGES = ['bkk-stay', 'train', 'prewed', 'wedstay', 'mu9646', 'kmg', 'c86', 'ljg', 'return', 'kempinski'];
 const TRAVEL = new Set(['train', 'mu9646', 'c86', 'return']);
-const STAGE_OF_STAY = { 'bkk-stay': 'bkk-stay', prewed: 'prewed', wedstay: 'wedstay', guesthouse: 'wedstay', riverside: 'wedstay', kmg: 'kmg', ljg: 'ljg', kempinski: 'kempinski' };
+const STAGE_OF_STAY = { 'bkk-stay': 'bkk-stay', prewed: 'prewed', wedstay: 'wedstay', guesthouse: 'wedstay', kmg: 'kmg', ljg: 'ljg', kempinski: 'kempinski' };
 const EVENTS = [
   { key: 'temple', label: 'Temple Ceremony', when: '09:00 – approximately 12:00', place: 'Wat Ong Teu, Vientiane' },
   { key: 'coffee', label: 'Coffee & Cake', when: 'From 12:00', place: 'Souphattra Heritage' },

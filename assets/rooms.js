@@ -25,7 +25,7 @@
   var API = (location.hostname === 'seeyouinlaos-website.suthep-hrg.workers.dev' || /^(localhost|127\.0\.0\.1)$/.test(location.hostname)) ? '/api/rooms' : ORIGIN + '/api/rooms';
 
   var view = null, loading = null, lastError = null;
-  var STAGE_OF = { 'bkk-stay': 'bkk-stay', prewed: 'prewed', wedstay: 'wedstay', guesthouse: 'wedstay', riverside: 'wedstay', stayext: 'stayext', kmg: 'kmg', ljg: 'ljg', kempinski: 'kempinski' };
+  var STAGE_OF = { 'bkk-stay': 'bkk-stay', prewed: 'prewed', wedstay: 'wedstay', guesthouse: 'wedstay', stayext: 'stayext', kmg: 'kmg', ljg: 'ljg', kempinski: 'kempinski' };
 
   function auth() { try { return JSON.parse(localStorage.getItem('siyl.auth') || 'null'); } catch (e) { return null; } }
   function headers(json) {

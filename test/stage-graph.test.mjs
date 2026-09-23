@@ -38,7 +38,7 @@ test('THE ONE GRAPH · four scopes with stable ids; ten stages A – J with thei
   deq(STAGES.map((s) => s.letter).join(''), 'ABCDEFGHIJ'); deq(STAGES.map((s) => s.key), ['bkk-stay', 'train', 'prewed', 'wedstay', 'mu9646', 'kmg', 'c86', 'ljg', 'return', 'kempinski']);
   deq(STAGES.filter((s) => s.scope).map((s) => [s.letter, s.scope]), [['A', 'bangkok'], ['C', 'vientianePreWedding'], ['D', 'vientianeWedding'], ['F', 'china'], ['G', 'china'], ['H', 'china'], ['J', 'bangkok']]);
   deq(STAGES.filter((s) => s.connector).map((s) => [s.letter, s.connector]), [['B', ['bangkok', 'vientianePreWedding']], ['E', ['vientianeWedding', 'china']], ['I', ['china', 'bangkok']]]);
-  deq(MANDATORY, ['c86']); deq(STAGE_IDS.wedstay, ['wedstay', 'riverside', 'guesthouse']);
+  deq(MANDATORY, ['c86']); deq(STAGE_IDS.wedstay, ['wedstay', 'guesthouse']);
   deq(SHEETS.map((s) => s.key), ['bangkok', 'vientianePreWedding', 'vientianeWedding', 'china', 'bangkokReturn']);
   /* the client copy is generated from the one source and checked by the release gate */
   assert.ok(existsSync(join(ROOT, 'assets/stage-graph.js')));
@@ -80,7 +80,8 @@ const WED = { events: { temple: 'no', coffee: 'yes', vows: 'yes', dinner: 'yes' 
 const OK = { contact: { missing: [] }, about: { missing: [] } };
 test('A · Wedding + Guest House: D alone, USD 0, complete', () => { const c = completion({ ...OK, scope: SC({ vientianeWedding: true }), stages: { wedstay: 'selected' }, wedding: WED }); deq(c.relevant, ['wedstay']); assert.equal(c.canSend, true); });
 test('B · Wedding + Souphattra Heritage: total USD 145 for two nights, not 290', () => { const w = page({ auth: PEGGY }); const q = w.SIYL_PRICE.quote('wedstay', 'heritage'); assert.equal(q.total, 145); assert.equal(q.nights, 2); assert.notEqual(q.total, 290); });
-test('C · Wedding + Riverside: USD 60 total', () => { const w = page({ auth: PEGGY }); assert.equal(w.SIYL_PRICE.quote('riverside', 'superior-window').total, 60); });
+/* RIVERSIDE HOTEL VIENTIANE IS COMPLETELY RETIRED (Owner, 23 Sep 2026): it has no price because it is no longer a product */
+test('C · the retired Riverside Hotel has no quote at all', () => { const w = page({ auth: PEGGY }); assert.equal(w.SIYL_PRICE.quote('riverside', 'superior-window'), null); });
 test('D · Pre-Wedding only: C alone', () => { const c = completion({ ...OK, scope: SC({ vientianePreWedding: true }), stages: { prewed: 'selected' } }); deq(c.relevant, ['prewed']); assert.equal(c.wedding.required, false); assert.equal(c.canSend, true); });
 test('E · both Vientiane: C + D, no transport between', () => { const c = completion({ ...OK, scope: SC({ vientianePreWedding: true, vientianeWedding: true }), stages: { prewed: 'declined', wedstay: 'waitlisted' }, wedding: WED }); deq(c.relevant, ['prewed', 'wedstay']); assert.equal(c.canSend, true); });
 test('F · China only: F G H — G cannot be skipped', () => {

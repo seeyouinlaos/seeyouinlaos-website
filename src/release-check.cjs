@@ -556,7 +556,14 @@ gate('P7', 'Dress Code imagery real (23 — resort-01 retired by the owner), no 
   /* THE WITHDRAWAL (Owner, 23 Sep 2026): the self-service extension may not come back by any route */
   if (/op === 'extend'|extensionQuote|validNights|EXTENSION\./.test(rooms)) problems.push('the engine still carries the withdrawn extension');
   if (/'stayext\//.test(code('src/inventory-seed.js'))) problems.push('the withdrawn extension still has stock');
-  if (!/'riverside\/superior-window':/.test(code('src/inventory-seed.js'))) problems.push('the Riverside WEDDING-STAY alternative was removed by mistake');
+  /* RIVERSIDE HOTEL VIENTIANE IS COMPLETELY RETIRED (Owner, 23 Sep 2026): BOTH products are gone and neither may return */
+  if (/'riverside\/superior-window'|'stayext\/riverside-superior'/.test(code('src/inventory-seed.js'))) problems.push('a retired Riverside product still has stock');
+  for (const f of ['assets/rooms-data.js', 'assets/stay-media.js', 'src/stay-media.json', 'assets/stage-graph.js', 'src/stage-graph.js', 'assets/journey.js', 'assets/aman.js']) {
+    if (/riverside/i.test(code(f))) problems.push(f + ' still carries the retired Riverside Hotel');
+  }
+  for (const f of ['accommodation.html', 'journeys.html', 'voyage.html', 'profile.html', 'cart.html', 'review.html', 'your-journey.html', 'room.html']) {
+    if (/riverside/i.test(code(f))) problems.push(f + ' still shows the retired Riverside Hotel');
+  }
   if (/'extend'|'unextend'/.test(code('src/worker.js'))) problems.push('the Worker still routes an extension write');
   /* the emails may still RECOGNISE a record sent before the withdrawal (to refuse charging for it); they may never COMPOSE one */
   if (/'Extended stay'|stays\.push\(\{ name: ext/.test(code('src/mail-templates.js'))) problems.push('the emails still compose an extended stay');
@@ -568,8 +575,8 @@ gate('P7', 'Dress Code imagery real (23 — resort-01 retired by the owner), no 
   const plan = code('src/stay-plan.js');
   if (!/deadline: '2026-11-30'/.test(plan)) problems.push('the deadline is not the Owner\'s 30 November 2026');
   if (/EXTENSION|extensionQuote|NIGHT_OPTIONS/.test(plan)) problems.push('the one rule still declares the withdrawn extension');
-  gate('S1', 'One stay plan: the complimentary allocation and its deadline come from one rule, and no self-service extension survives', problems.length === 0,
-    problems.length ? problems.join(' · ') : (r.stdout || '').trim() + ' · deadline 30 Nov 2026 · no self-service extension · the Riverside wedding-stay alternative intact');
+  gate('S1', 'One stay plan: the complimentary allocation and its deadline come from one rule; no self-service extension, and no Riverside Hotel', problems.length === 0,
+    problems.length ? problems.join(' · ') : (r.stdout || '').trim() + ' · deadline 30 Nov 2026 · no self-service extension · Riverside Hotel Vientiane completely retired');
 }
 
 /* GATE Q1 — THE ONE QUESTIONNAIRE (Owner, 22 Sep 2026): src/questionnaire.js is the one schema of what the guest is asked and what is

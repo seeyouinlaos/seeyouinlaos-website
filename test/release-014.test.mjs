@@ -217,7 +217,7 @@ test('GUEST HOUSE COMPLIMENTARY · one shared unit of six places, complimentary,
   const w = page({ auth: PEGGY, modules: WITH_MEDIA });
   const R = w.SIYL_ROOMS.guesthouse, P = w.SIYL_PRICE;
   assert.equal(R.name, 'Guest House complimentary'); assert.equal(R.windows[0].id, 'guesthouse'); assert.equal(R.rooms[0].slug, 'guest-house'); assert.equal(R.rooms[0].complimentary, true);
-  assert.deepEqual(plain(w.SIYL_JOURNEY.SEGMENTS.find((s) => s.key === 'wedstay').ids), ['wedstay', 'riverside', 'guesthouse']);
+  assert.deepEqual(plain(w.SIYL_JOURNEY.SEGMENTS.find((s) => s.key === 'wedstay').ids), ['wedstay', 'guesthouse']);
   const line = P.items('guesthouse', 'guest-house')[0];
   assert.equal(line.price, 0); assert.equal(line.complimentary, true); assert.equal(line.name, 'Guest House complimentary · Vientiane');
   for (const f of ['assets/rooms-data.js', 'journeys.html', 'accommodation.html', 'room.html', 'your-journey.html', 'review.html', 'cart.html', 'profile.html', 'assets/journey.js', 'assets/pricing.js', 'assets/aman.js', 'assets/stay-media.js', 'src/inventory-seed.js', 'src/mail-templates.js', 'src/worker.js']) {
@@ -250,14 +250,15 @@ test('MAIL · the waiting list is a section of both emails without an amount; th
 });
 
 /* ────────────────────────────── 8 · THE CURRENT MASTER WINS ────────────────────────────── */
-test('THE CURRENT MASTER · C86 USD 105 at the one price source; Lijiang and Kempinski six rooms per category; Riverside photographed', () => {
+test('THE CURRENT MASTER · C86 USD 105 at the one price source; Lijiang and Kempinski six rooms per category; the retired Riverside absent from the photographed', () => {
   const w = page({ auth: PEGGY, modules: WITH_MEDIA });
   assert.equal(w.SIYL_PRICE.FLAT.c86.price, 105); assert.match(w.SIYL_PRICE.FLAT.c86.basis, /^USD 105 per person/);
   for (const [k, s] of Object.entries(SEED)) { if (k.startsWith('ljg/')) assert.equal(s.capacity, 6, k); if (k.startsWith('kempinski/')) assert.equal(s.capacity, 6, k); }
   assert.equal(SEED['prewed/souphattra-presidential'].capacity, 1); assert.equal(unitsOf('prewed/souphattra-presidential')[0].places, 2, 'one room of two places — the Owner\'s rule');
-  const rv = w.SIYL_STAY_MEDIA.riverside;
-  assert.equal(rv.images.length, 7); assert.equal(rv.images[0].kind, 'exterior'); for (const im of rv.images) assert.ok(existsSync(im.src), im.src);
-  assert.equal(w.SIYL_ROOMS.riverside.rooms[0].gallery.length, 7); assert.equal(w.SIYL_ROOMS.riverside.windows[0].bagImg, 'assets/images/riverside/facade.jpg');
+  /* RIVERSIDE HOTEL VIENTIANE IS COMPLETELY RETIRED (Owner, 23 Sep 2026): neither the media record nor the property record
+     knows the house any more, so there is no photography to pin — and nothing renders it. */
+  assert.equal(w.SIYL_STAY_MEDIA.riverside, undefined, 'the retired house has no media record');
+  assert.equal(w.SIYL_ROOMS.riverside, undefined, 'the retired house has no property record');
   assert.doesNotMatch(src('accommodation.html'), /Photography to follow/);
 });
 

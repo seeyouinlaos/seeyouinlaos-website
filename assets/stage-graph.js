@@ -8,7 +8,7 @@
 
      BANGKOK                         → A (the opening Bangkok stay) + J (the closing Bangkok stay)
      VIENTIANE · BEFORE THE WEDDING  → C (the Pre-Wedding Stay)
-     VIENTIANE · THE WEDDING         → D (the Wedding Stay: Souphattra · Riverside · Guest House)
+     VIENTIANE · THE WEDDING         → D (the Wedding Stay: Souphattra · Guest House)
      CHINA                           → F (Kunming) + G (Kunming → Lijiang, mandatory) + H (Lijiang)
 
      B (Bangkok → Vientiane)  required only with BANGKOK + VIENTIANE · BEFORE THE WEDDING
@@ -44,7 +44,7 @@ const STAGES = [
 const STAGE_KEYS = STAGES.map((s) => s.key);
 const LETTER = Object.fromEntries(STAGES.map((s) => [s.letter, s.key]));
 /* the engine's stage names that answer a stage (the wedding stay has three houses) */
-const STAGE_IDS = { 'bkk-stay': ['bkk-stay'], train: ['train'], prewed: ['prewed'], wedstay: ['wedstay', 'riverside', 'guesthouse'], mu9646: ['mu9646'], kmg: ['kmg'], c86: ['c86'], ljg: ['ljg'], return: ['return'], kempinski: ['kempinski'] };
+const STAGE_IDS = { 'bkk-stay': ['bkk-stay'], train: ['train'], prewed: ['prewed'], wedstay: ['wedstay', 'guesthouse'], mu9646: ['mu9646'], kmg: ['kmg'], c86: ['c86'], ljg: ['ljg'], return: ['return'], kempinski: ['kempinski'] };
 /* a stage that can never be declined inside its scope: the internal China transport */
 const MANDATORY = STAGES.filter((s) => s.mandatory).map((s) => s.key);
 /* the sheets My Trip shows, in order: the scope a stage sits under (the closing Bangkok stages under their own heading) */

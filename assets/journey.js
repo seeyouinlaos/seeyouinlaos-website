@@ -21,9 +21,9 @@
       label: 'Special Express No. 25', ids: ['train'], anchor: 'j-train' },
     { key: 'prewed', when: '25 – 27 FEB', cat: 'Accommodation', place: 'Vientiane',
       label: 'Pre-Wedding Vientiane', ids: ['prewed'], anchor: 'j-prewed' },
-    /* ONE wedding stay selection: the Souphattra, the Guest House complimentary or the Riverside */
+    /* ONE wedding stay selection: the Souphattra or the Guest House complimentary (the Riverside was retired 23 Sep 2026) */
     { key: 'wedstay', when: '27 FEB – 01 MAR', cat: 'Accommodation', place: 'Vientiane',
-      label: 'Wedding Stay', ids: ['wedstay', 'riverside', 'guesthouse'], anchor: 'j-wedstay' },
+      label: 'Wedding Stay', ids: ['wedstay', 'guesthouse'], anchor: 'j-wedstay' },
     { key: 'mu9646', when: '01 MAR', cat: 'Transportation', place: 'Vientiane → Kunming',
       label: 'MU9646', ids: ['mu9646'], anchor: 'j-mu9646' },
     { key: 'kmg', when: '01 – 04 MAR', cat: 'Accommodation', place: 'Kunming',

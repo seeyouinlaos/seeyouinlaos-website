@@ -4,7 +4,7 @@
    is the product record only: a Souphattra room category labelled "C + D1" there is USABLE in C and in D1 — the label never
    composes anything. There is no package: a guest says where they join us, the graph names the stages, the guest chooses each.
    Stage D: 1 SOUPHATTRA HERITAGE (every category from The Heritage USD 145 upward; two nights, the second complimentary —
-   the total is ONE nightly rate, never twice), 2 RIVERSIDE (USD 30 × 2 nights = USD 60, self-pay), 3 GUEST HOUSE (USD 0,
+   the total is ONE nightly rate, never twice) and 2 GUEST HOUSE (USD 0,
    complimentary, both nights hosted, six shared places). D1 exhausted → the waiting list, never a silent move to D2 / D3. */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -51,12 +51,12 @@ test('B/C/D · stage D, 1 SOUPHATTRA HERITAGE: every category from The Heritage 
   assert.equal(R.souphattra.windows.find((x) => x.id === 'wedstay').dates, '27 February – 01 March 2027');
   /* the journeys page: the order and the words */
   const jn = src('journeys.html');
-  assert.ok(jn.indexOf('id="j-wedstay"') < jn.indexOf('id="j-riverside"') && jn.indexOf('id="j-riverside"') < jn.indexOf('id="j-guesthouse"'), 'Souphattra · Riverside · Guest House');
-  assert.match(jn, /Second night complimentary · You pay for the first night only/); assert.match(jn, /USD 60 total per person · SELF-PAY/); assert.match(jn, /USD 0 · Complimentary<\/p><p class="pb" data-private>Both nights hosted by Haruthai &amp; Suthep/);
+  assert.ok(jn.indexOf('id="j-wedstay"') < jn.indexOf('id="j-guesthouse"'), 'Souphattra · Riverside · Guest House');
+  assert.match(jn, /Second night complimentary · You pay for the first night only/); assert.match(jn, /USD 0 · Complimentary<\/p><p class="pb" data-private>Both nights hosted by Haruthai &amp; Suthep/);
 });
 
-test('E/F · 2 RIVERSIDE: USD 30 × 2 nights = USD 60, self-pay; 3 GUEST HOUSE: USD 0, complimentary, six shared places — one line for stage D, the previous place released, the amount the chosen alternative\'s own', async () => {
-  for (const [win, slug, price] of [['riverside', 'superior-window', 60], ['guesthouse', 'guest-house', 0]]) {
+test('E/F · 2 GUEST HOUSE: USD 0, complimentary, six shared places — one line for stage D, the previous place released, the amount the chosen alternative\'s own', async () => {
+  for (const [win, slug, price] of [['guesthouse', 'guest-house', 0]]) {
     const rooms = new Rooms(doState());
     const w = wedding(page({ auth: LIN, fetch: await roomsFetch(rooms, identity(LIN)) })); await w.SIYL_UNITS.load(true);
     const J = w.SIYL_JOURNEY, ST = w.SIYL_STAY, B = w.SIYL_BAG, U = w.SIYL_UNITS, P = w.SIYL_PRICE;
@@ -67,7 +67,6 @@ test('E/F · 2 RIVERSIDE: USD 30 × 2 nights = USD 60, self-pay; 3 GUEST HOUSE: 
     assert.equal(lines.length, 1, 'one line for stage D'); assert.equal(lines[0].id, win); assert.equal(lines[0].room, slug); assert.equal(lines[0].price, price); assert.equal(B.total(), price);
     assert.deepEqual(plain(Object.keys(U.view().mine)), ['wedstay']); assert.equal(U.view().mine.wedstay.key, win + '/' + slug, 'the Heritage place is released, the alternative held');
     assert.equal(J.state(seg(J, 'wedstay')), 'selected'); assert.deepEqual(plain(w.SIYL_GUEST.missingFor('journey')), [], 'stage D answered');
-    if (win === 'riverside') { const q = P.quote('riverside', 'superior-window'); assert.equal(q.rate, 30); assert.equal(q.nights, 2); assert.equal(q.pay, 2); assert.equal(q.hosted, 0); assert.equal(q.total, 60); }
     if (win === 'guesthouse') { assert.equal(lines[0].complimentary, true); assert.equal(unitsOf('guesthouse/guest-house')[0].places, 6); }
   }
 });
@@ -82,18 +81,19 @@ test('G/H · D1 full for the party → the waiting list is the guest\'s own choi
   const wr = await U.wait('wedstay', J.partySize(), SOUPHATTRA.map((s) => 'wedstay/' + s)); assert.equal(wr.ok, true); assert.equal(U.waitlisted('wedstay').position, 1);
   assert.equal(J.state(seg(J, 'wedstay')), 'waitlisted'); assert.ok(!G.missingFor('journey').some((m) => m.key === 'stage:wedstay'), 'the waiting list answers the stage');
   assert.equal(B.total(), 0); assert.deepEqual(plain(U.view().mine), {}, 'nothing held — the line, not a room');
-  assert.equal(U.units('guesthouse', 'guest-house')[0].free, 6, 'D2: six places, untouched'); assert.equal(U.summary('riverside', 'superior-window').remainingPlaces, unitsOf('riverside/superior-window').reduce((a, u) => a + u.places, 0), 'D3: every place free');
+  assert.equal(U.units('guesthouse', 'guest-house')[0].free, 6, 'D2: six places, untouched'); /* THE RIVERSIDE IS RETIRED (Owner, 23 Sep 2026): stage D is the Souphattra and the Guest House, and the retired house has no stock at all */
+  assert.deepEqual(unitsOf('riverside/superior-window'), [], 'the retired Riverside has no units');
 });
 
 test('M/N · A1 / A2 / A3 are alternatives within stage A, D1 / D2 / D3 alternatives within stage D — one stage each in the journey, one hold per stage, never three stages', () => {
   const w = page({ auth: PEGGY }); const J = w.SIYL_JOURNEY;
   const A = ['bkk-stay/penthouse', 'bkk-stay/u-sathorn-superior-garden', 'bkk-stay/shama-king-studio-balcony'];
-  const D = ['wedstay/heritage', 'riverside/superior-window', 'guesthouse/guest-house'];
+  const D = ['wedstay/heritage', 'guesthouse/guest-house'];
   for (const k of A) { assert.ok(SEED[k], k); assert.equal(stageOf(k), 'bkk-stay', k + ' is an alternative of stage A'); }
   for (const k of D) { assert.ok(SEED[k], k); assert.equal(stageOf(k), 'wedstay', k + ' is an alternative of stage D'); }
   const keys = plain(J.SEGMENTS.map((s) => s.key));
   assert.equal(keys.filter((k) => k === 'bkk-stay').length, 1); assert.equal(keys.filter((k) => k === 'wedstay').length, 1);
   assert.ok(!keys.some((k) => /riverside|guesthouse|u-sathorn|shama/.test(k)), 'no alternative is a stage of its own');
   assert.equal(STAGES.filter((s) => /riverside|guesthouse/.test(s)).length, 0);
-  assert.deepEqual(plain(seg(J, 'wedstay').ids), ['wedstay', 'riverside', 'guesthouse'], 'stage D in the Owner\'s order: Souphattra · Riverside · Guest House');
+  assert.deepEqual(plain(seg(J, 'wedstay').ids), ['wedstay', 'guesthouse'], 'stage D in the Owner\'s order: Souphattra · Guest House');
 });

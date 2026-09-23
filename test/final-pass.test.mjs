@@ -83,7 +83,8 @@ test('THE SUB-VIEWS · room, journeys, transport, the Highlight and tea pages lo
   /* the stage of a window: guesthouse and riverside belong to the wedding stay */
   const w = page({ auth: PEGGY }); const J = w.SIYL_JOURNEY;
   const seg = (k) => J.SEGMENTS.filter((s) => s.key === k || (s.ids || []).includes(k))[0];
-  assert.equal(seg('guesthouse') && seg('guesthouse').key, 'wedstay'); assert.equal(seg('riverside') && seg('riverside').key, 'wedstay');
+  assert.equal(seg('guesthouse') && seg('guesthouse').key, 'wedstay'); /* the Riverside was retired on 23 Sep 2026: it answers no stage because it is no longer a product */
+  assert.equal(seg('riverside'), undefined);
 });
 
 /* ---- the Worker with the seating ledger and the photo store in memory ---- */

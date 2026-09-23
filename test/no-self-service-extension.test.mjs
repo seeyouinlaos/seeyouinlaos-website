@@ -39,8 +39,9 @@ async function call(rooms, op, body, identity) { const r = await rooms.fetch(req
 test('THE ENGINE · there is no extension stock, no extend operation and no extension in the view', async () => {
   /* the stock is gone, and the WEDDING-STAY Riverside is not */
   assert.equal(SEED['stayext/riverside-superior'], undefined, 'the withdrawn extension still has stock');
-  assert.ok(SEED['riverside/superior-window'], 'the Riverside wedding-stay alternative was removed by mistake');
-  assert.equal(SEED['riverside/superior-window'].stay, 'Riverside Hotel Vientiane');
+  /* RIVERSIDE HOTEL VIENTIANE IS NOW COMPLETELY RETIRED (Owner, 23 Sep 2026): the wedding-stay alternative went too */
+  assert.equal(SEED['riverside/superior-window'], undefined, 'the wedding-stay Riverside still has stock');
+  assert.equal(Object.keys(SEED).filter((k) => /riverside/i.test(k)).length, 0, 'no Riverside product has stock');
   assert.equal(Object.keys(SEED).filter((k) => /^stayext\//.test(k)).length, 0);
 
   const rooms = new Rooms(doState(), {});
@@ -125,7 +126,9 @@ test('THE RELEASE GATE holds the withdrawal, so it cannot come back unnoticed', 
   const g = read('src/release-check.cjs');
   assert.match(g, /the engine still carries the withdrawn extension/);
   assert.match(g, /the withdrawn extension still has stock/);
-  assert.match(g, /the Riverside WEDDING-STAY alternative was removed by mistake/);
+  assert.match(g, /a retired Riverside product still has stock/);
+  assert.match(g, /still carries the retired Riverside Hotel/);
+  assert.match(g, /still shows the retired Riverside Hotel/);
   assert.match(g, /the Worker still routes an extension write/);
   assert.match(g, /the emails still compose an extended stay/);
   assert.match(g, /still offers the withdrawn extension/);

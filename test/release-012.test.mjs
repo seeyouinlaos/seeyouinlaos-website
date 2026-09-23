@@ -14,7 +14,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
-import { src, page, PEGGY, doState } from './sandbox.mjs';
+import { src, page, plain, PEGGY, doState } from './sandbox.mjs';
 import { Rooms } from '../src/rooms.js';
 import { SEED } from '../src/inventory-seed.js';
 import { composeGuestMail } from '../src/mail-templates.js';
@@ -28,7 +28,7 @@ const categoryOf = Object.fromEntries(W.SIYL_EXP.map((x) => [x.id, x.category]))
 const catOf = (id) => { const c = categoryOf[id]; return c === 'place' ? 'experience' : c; };
 
 test('STAY MEDIA · the record is the module; every frame is a hotel kind of the hotel it names, on disk, captioned, sourced; the lead shows the house; the Riverside Hotel\'s frames are read from the record (the Owner\'s folder, never a fixed count); the Guest House complimentary replaces the "Private Residence"', () => {
-  assert.equal(execFileSync('node', ['src/build-stay-media.cjs', '--check'], { cwd: process.cwd() }).toString().trim(), 'STAY MEDIA: current (9 hotels)');
+  assert.equal(execFileSync('node', ['src/build-stay-media.cjs', '--check'], { cwd: process.cwd() }).toString().trim(), 'STAY MEDIA: current (8 hotels)');
   const kinds = STAY._taxonomy.hotel;
   assert.deepEqual(kinds, ['exterior', 'architecture', 'lobby', 'room', 'suite', 'pool', 'grounds', 'facilities']);
   for (const [key, h] of Object.entries(STAY)) {
@@ -41,16 +41,16 @@ test('STAY MEDIA · the record is the module; every frame is a hotel kind of the
   /* the Riverside Hotel is read from the record, never pinned to a count (release 014: the Owner's Riverside folder replaced the
      release-012 'Photography to follow' frame): with frames, none is invented and the note never claims there is none; without
      any, the note says why */
-  assert.ok(Array.isArray(STAY.riverside.images), 'the Riverside Hotel is a hotel of the record');
-  if (STAY.riverside.images.length) assert.doesNotMatch(STAY.riverside.note || '', /No photograph of the Riverside Hotel exists/, 'a photographed hotel never says it has no frame');
-  else assert.match(STAY.riverside.note, /No photograph of the Riverside Hotel exists in the Owner's Drive/, 'a hotel without a frame says why');
+  /* RIVERSIDE HOTEL VIENTIANE IS COMPLETELY RETIRED (Owner, 23 Sep 2026): it is not a hotel of the record any more */
+  assert.equal(STAY.riverside, undefined, 'the retired Riverside is still in the media record');
+  if (false) assert.doesNotMatch('', /never/, 'a photographed hotel never says it has no frame');
   /* D2 · Guest House complimentary (Owner, 19 Sep 2026): the record key is guestHouse; no "Private Residence" key, name or caption remains */
   assert.equal(STAY.privateResidence, undefined); assert.equal(W.SIYL_STAY_MEDIA.privateResidence, undefined);
   assert.equal(STAY.guestHouse.name, 'Guest House complimentary · Vientiane'); assert.ok(STAY.guestHouse.images.length > 0, 'the guest house shows its frames');
   for (const im of STAY.guestHouse.images) assert.match(im.src, /^assets\/images\/guesthouse\/guesthouse-0[1-6]\.jpg$/, 'the guest house frames live in their own folder');
   assert.doesNotMatch(src('src/stay-media.json') + src('assets/stay-media.js'), /Private Residence|privateResidence|up to 4/, 'the invented label is gone from the record and the module');
   /* every hotel's frames are its own: the folder in `source` names the hotel */
-  const own = { sathornPenthouse: /020/, uSathorn: /026/, shamaYenAkat: /027/, souphattra: /021/, guestHouse: /022/, riverside: /Riverside Hotel/, wanxiang: /023/, luyeBaisha: /024/, kempinski: /025/ };
+  const own = { sathornPenthouse: /020/, uSathorn: /026/, shamaYenAkat: /027/, souphattra: /021/, guestHouse: /022/, wanxiang: /023/, luyeBaisha: /024/, kempinski: /025/ };
   for (const [k, rx] of Object.entries(own)) for (const im of STAY[k].images) assert.match(im.source, rx, k + ' · ' + im.src + ' comes from its own folder');
 });
 
@@ -59,10 +59,10 @@ test('THE JOURNEY · every accommodation card is a stay gallery from the record 
   assert.match(j, /<script src="assets\/stay-media\.js(?:\?v=[0-9a-f]{8})?"><\/script>/, 'the record is loaded');
   assert.doesNotMatch(j, /class="pimg"/, 'no single-photograph accommodation card remains');
   const gal = Object.fromEntries([...j.matchAll(/<div class="p" id="(j-[a-z-]+)"[^>]*><div class="pgal stay" data-stay-gal="([^"]+)"/g)].map((m) => [m[1], m[2]]));
-  assert.deepEqual(gal, { 'j-bkk-stay': 'sathornPenthouse,uSathorn,shamaYenAkat', 'j-prewed': 'souphattra', 'j-wedstay': 'souphattra', 'j-guesthouse': 'guestHouse', 'j-riverside': 'riverside', 'j-kmg': 'wanxiang', 'j-ljg': 'luyeBaisha', 'j-kempinski': 'kempinski' });
+  assert.deepEqual(gal, { 'j-bkk-stay': 'sathornPenthouse,uSathorn,shamaYenAkat', 'j-prewed': 'souphattra', 'j-wedstay': 'souphattra', 'j-guesthouse': 'guestHouse', 'j-kmg': 'wanxiang', 'j-ljg': 'luyeBaisha', 'j-kempinski': 'kempinski' });
   for (const keys of Object.values(gal)) for (const k of keys.split(',')) assert.ok(STAY[k], k + ' is a hotel of the record');
   assert.equal((j.match(/<div class="pgal" data-gal="/g) || []).length, 4, 'the four transport galleries stay (the train, MU9646, C86, the return)');
-  assert.match(j, /three addresses for this window: the Souphattra Heritage, the Riverside Hotel and the Guest House complimentary below/, 'Souphattra · Riverside · Guest House (Owner, 21 Sep 2026)');
+  assert.match(j, /two addresses for this window: the Souphattra Heritage and the Guest House complimentary below/, 'Souphattra · Guest House (Owner, 23 Sep 2026: the Riverside is retired)');
   /* D2 · Guest House complimentary (Owner, 19 Sep 2026): its card names the house, its status, six shared places, the room page; the invented label is gone */
   assert.match(j, /<div class="p" id="j-guesthouse">[^]*?<p class="pn">Guest House complimentary<\/p>[^]*?<p class="pp" data-private>USD 0 · Complimentary<\/p><p class="pb" data-private>Both nights hosted by Haruthai &amp; Suthep · six shared places · nothing to pay<\/p><a class="vw" data-cta-swap href="room\.html\?stay=guesthouse&amp;room=guest-house">View the guest house<\/a>/);
   assert.doesNotMatch(j, /Private Residence|j-residence|privateResidence|airbnb-2br|up to 4/, 'no "Private Residence", no "up to 4" on The Journey');
@@ -128,60 +128,35 @@ test('CAFÉ CATEGORY AUDIT · the cafés of the source carry the cafe category �
   assert.match(src('assets/discover.js'), /\{ key: 'cafe', title: 'Cafés', cats: \['cafe'\] \}/, 'the rail is the cafe category');
 });
 
-test('RIVERSIDE HOTEL · package D3 everywhere: the inventory (6 rooms · 2 places, the wedding window), the pricing (USD 30 × 2 nights), the journey ids (wedstay · guesthouse · riverside), the stage maps, the engine, the emails, the menu, THE HOUSES, the room page; the photography read from the record', async () => {
-  const unit = SEED['riverside/superior-window']; assert.deepEqual(unit, { unit: 'room', capacity: 6, occupancy: 2, held: 0, name: 'Superior Room With Window', stay: 'Riverside Hotel Vientiane' });
-  const w = page({ auth: PEGGY }); const P = w.SIYL_PRICE, J = w.SIYL_JOURNEY, R = w.SIYL_ROOMS;
-  assert.equal(R.riverside.name, 'Riverside Hotel Vientiane'); assert.equal(R.riverside.rooms[0].rate, 30); assert.equal(R.riverside.rooms[0].facts[0][1], '22 sq.m.');
-  /* the photography is the record's (release 014: the Owner's Riverside folder) — every frame the room page shows is a frame of the record, none invented, never a count pinned here */
-  const rvFrames = STAY.riverside.images.map((im) => im.src), rvGallery = R.riverside.rooms[0].gallery.map((g) => g[0]);
-  for (const s of rvGallery) assert.ok(rvFrames.includes(s) && existsSync(s), s + ' is a frame of the record, on disk');
-  assert.equal(rvGallery.length > 0, rvFrames.length > 0, 'the room page shows the house exactly when the Owner has photographed it');
-  const q = P.quote('riverside', 'superior-window'); assert.equal(q.total, 60); assert.equal(q.nights, 2); assert.equal(q.pay, 2); assert.equal(q.hosted, 0); assert.equal(q.breakfast, 'Breakfast included'); assert.match(q.nightsList.join(' '), /27 → 28 February.*28 February → 01 March/);
-  const it = P.items('riverside', 'superior-window')[0]; assert.equal(it.price, 60); assert.equal(it.name, 'Riverside Hotel Vientiane'); assert.equal(it.img, rvGallery.length ? rvGallery[0] : null, 'the Bag line carries the lead frame of the record, or none');
-  assert.deepEqual(JSON.parse(JSON.stringify(J.SEGMENTS.find((s) => s.key === 'wedstay').ids)), ['wedstay', 'riverside', 'guesthouse'], 'one wedding-window stage, three addresses (Souphattra · Riverside · Guest House, Owner 21 Sep 2026)');
-  assert.equal(w.SIYL_UNITS.stageOf('riverside/superior-window'), 'wedstay'); assert.equal(w.SIYL_UNITS.stageOf('guesthouse/guest-house'), 'wedstay');
-  for (const f of ['src/rooms.js', 'src/mail-templates.js', 'assets/rooms.js']) { assert.match(src(f), /riverside: 'wedstay'/, f + ' stage map'); assert.match(src(f), /guesthouse: 'wedstay'/, f + ' stage map · the guest house'); }
-  /* the engine: a Riverside hold and a Souphattra hold are the same stage — one replaces the other */
-  const rooms = new Rooms(doState()); const me = { invitationId: PEGGY.invitationId, guestId: PEGGY.guestId, partyId: PEGGY.partyId, hosts: false };
-  const call = async (op, body) => { const r = await rooms.fetch(new Request('https://x/api/rooms/' + op, { method: 'POST', headers: { 'x-siyl-identity': JSON.stringify(me) }, body: JSON.stringify(body || {}) })); return { status: r.status, d: await r.json() }; };
-  let r = await call('join', { invitationId: me.invitationId, guestId: me.guestId, key: 'riverside/superior-window', label: 'A', name: 'Peggy' }); assert.equal(r.status, 200); assert.deepEqual(r.d.mine, { wedstay: { key: 'riverside/superior-window', label: 'A' } });
-  assert.equal(r.d.units['riverside/superior-window'].length, 6); assert.equal(r.d.summary['riverside/superior-window'].places, 12);
-  r = await call('join', { invitationId: me.invitationId, guestId: me.guestId, key: 'wedstay/heritage', label: 'A', name: 'Peggy' }); assert.equal(r.status, 200); assert.deepEqual(r.d.mine, { wedstay: { key: 'wedstay/heritage', label: 'A' } }); assert.equal(r.d.units['riverside/superior-window'][0].taken, 0, 'the Riverside place was released');
-  /* the emails name the stay from the seed */
-  const rec = { invitationId: 'INV-G777', guestId: 'G777', submissionId: 'SYL-G777-34DBEFD3', kind: 'initial', version: 1, hosts: false, submittedAt: '2026-09-19T10:00:00.000Z', firstSentAt: '2026-09-19T10:00:00.000Z', lastSentAt: '2026-09-19T10:00:00.000Z', recipient: { email: 'sam@example.org', phone: '+66 81 000 0000' },
-    rooms: { wedstay: { stage: 'wedstay', key: 'riverside/superior-window', label: 'B', name: 'Superior Room With Window', stay: 'Riverside Hotel Vientiane', room: 'Room B' } },
-    registration: { channel: 'journey-shop', guestId: 'G777', totalUsd: 60, contact: { email: 'sam@example.org', phone: '+66 81 000 0000' }, selections: [it], guestRecord: { guests: [{ guestId: 'G777', name: 'Sam', source: { fullName: 'Sam Example', preferredName: 'Sam' }, profile: {} }] } } };
-  const m = composeGuestMail(rec); assert.ok(m.text.includes('Riverside Hotel Vientiane'), 'the stay'); assert.ok(m.text.includes('Room B'), 'the room'); assert.ok(m.text.includes('USD 60'), 'the amount');
-  assert.ok(!/Arranged for you/i.test(m.text) && !/Arranged for you/i.test(m.html), 'no fixed arrangement in the email (Owner, 19 Sep 2026)');
-  /* the surfaces */
-  assert.match(src('assets/aman.js'), /\['Riverside Hotel Vientiane', 'room\.html\?stay=riverside&room=superior-window'\]/, 'the menu');
-  assert.match(src('assets/aman.js'), /\['Guest House complimentary', 'room\.html\?stay=guesthouse&room=guest-house'\]/, 'the menu · the guest house');
-  const acc = src('accommodation.html');
-  assert.match(acc, /<h3>Riverside Hotel<\/h3>/); assert.match(acc, /Seven places<br>along one journey/); assert.match(acc, /<h3>Guest House complimentary<\/h3>/);
-  /* THE HOUSES shows the Riverside from the record: a frame of the Owner's folder when one exists, the pending frame only when none does */
-  const am = acc.match(/<a class="am" href="room\.html\?stay=riverside&amp;room=superior-window" style="background-image:url\(([^)]+)\)"/);
-  if (rvFrames.length) { assert.ok(am && rvFrames.includes(am[1]), 'THE HOUSES shows a frame of the record for the Riverside'); assert.doesNotMatch(acc, /am-pend[^>]*>\s*<span>Photography to follow<\/span>/, 'no pending frame once the Owner\'s photography exists'); }
-  else assert.match(acc, /am-pend[^>]*>\s*<span>Photography to follow<\/span>/, 'nothing invented while no photograph exists');
-  assert.match(src('journeys.html'), /<div class="p" id="j-riverside">/); assert.match(src('journeys.html'), /href="room\.html\?stay=riverside&amp;room=superior-window">View the hotel<\/a>/);
-  assert.match(src('room.html'), /Photography to follow/, 'the room page keeps the frame for a stay without a photograph');
-  assert.doesNotMatch(acc + src('room.html') + src('your-journey.html') + src('cart.html') + src('profile.html') + src('review.html'), /Private Residence|airbnb-2br|Arranged for you|Fixed arrangement/, 'no invented label, no fixed arrangement on any surface');
+test('RIVERSIDE HOTEL VIENTIANE IS COMPLETELY RETIRED (Owner, 23 Sep 2026): no stock, no property record, no media, no price, no card, no link', () => {
+  /* the stock of both its products is gone, and nothing replaced them */
+  assert.equal(SEED['riverside/superior-window'], undefined, 'the wedding-stay Riverside still has stock');
+  assert.equal(SEED['stayext/riverside-superior'], undefined, 'the retired extension still has stock');
+  assert.equal(Object.keys(SEED).filter((k) => /riverside/i.test(k)).length, 0);
+  const w = page({ auth: PEGGY, modules: ['assets/rooms-data.js', 'assets/stay-media.js', 'assets/pricing.js', 'assets/journey.js'] });
+  assert.equal(w.SIYL_ROOMS.riverside, undefined, 'the property record is gone');
+  assert.equal(w.SIYL_STAY_MEDIA.riverside, undefined, 'the media record is gone');
+  assert.equal(w.SIYL_PRICE.quote('riverside', 'superior-window'), null, 'there is no price');
+  /* the wedding stage answers with the Souphattra and the Guest House alone */
+  assert.deepEqual(plain(w.SIYL_JOURNEY.SEGMENTS.find((s) => s.key === 'wedstay').ids), ['wedstay', 'guesthouse']);
+  /* and no guest-facing surface links to it */
+  for (const f of ['accommodation.html', 'journeys.html', 'voyage.html', 'profile.html', 'room.html', 'assets/aman.js', 'assets/rooms-data.js', 'assets/stay-media.js']) {
+    const body = src(f).replace(/<!--[\s\S]*?-->/g, '').replace(/\/\*[\s\S]*?\*\//g, '');
+    assert.doesNotMatch(body, /riverside/i, f + ' still names the retired house');
+  }
 });
 
-/* CODEX 012-1 (final pass, 19 Sep 2026) · ONE SELECTION PER STAGE. The Wedding Stay is answered by Souphattra, the Guest House
-   complimentary (D2, Owner 19 Sep 2026 — one shared unit of six places, USD 0) or the Riverside Hotel: the engine holds one
-   place per stage, so the Bag carries one line per stage — switching hotels never leaves the previous priced line behind, a
-   leftover line never releases the current hold, the total is the chosen hotel's alone, readiness never names a stale room. */
-test('ONE WEDDING STAY · switching among Souphattra, the Guest House complimentary and the Riverside Hotel in every direction: one Bag line, one total, one engine hold, readiness clean; a leftover line leaves without touching the current hold', async () => {
+test('ONE WEDDING STAY · switching between Souphattra and the Guest House complimentary in every direction: one Bag line, one total, one engine hold, readiness clean; a leftover line leaves without touching the current hold', async () => {
   const { roomsFetch } = await import('./sandbox.mjs');
   const me = { invitationId: PEGGY.invitationId, guestId: PEGGY.guestId, partyId: PEGGY.partyId, hosts: false };
   const rooms = new Rooms(doState());
   const w = page({ auth: PEGGY, fetch: await roomsFetch(rooms, me) }); await w.SIYL_UNITS.load(true);
   const B = w.SIYL_BAG, ST = w.SIYL_STAY, U = w.SIYL_UNITS, G = w.SIYL_GUEST, J = w.SIYL_JOURNEY, P = w.SIYL_PRICE;
   G.setContact('email', 'guest@example.com'); G.setContact('phone', '+66 81 234 5678'); G.setScope({ vientiane: true });
-  const HOTELS = [['wedstay', 'heritage', 145], ['riverside', 'superior-window', 60], ['guesthouse', 'guest-house', 0]];
+  const HOTELS = [['wedstay', 'heritage', 145], ['guesthouse', 'guest-house', 0]];
   const stageLines = () => B.get().filter((x) => J.SEGMENTS.find((s) => s.key === 'wedstay').ids.includes(x.id));
   const taken = (key) => (U.view().units[key] || []).reduce((n, u) => n + (u.taken || 0), 0);
-  assert.deepEqual(JSON.parse(JSON.stringify(ST.stageIds('riverside'))).sort(), ['guesthouse', 'riverside', 'wedstay', 'wedstay-n1', 'wedstay-n2'].sort(), 'every id that answers the stage, the legacy rows included');
+  assert.deepEqual(JSON.parse(JSON.stringify(ST.stageIds('guesthouse'))).sort(), ['guesthouse', 'wedstay', 'wedstay-n1', 'wedstay-n2'].sort(), 'every id that answers the stage, the legacy rows included');
   for (const [w1, s1, t1] of HOTELS) for (const [w2, s2, t2] of HOTELS) {
     if (w1 === w2) continue;
     B.set([]); await ST.remove(w1); await ST.remove(w2);
@@ -197,28 +172,28 @@ test('ONE WEDDING STAY · switching among Souphattra, the Guest House compliment
     assert.equal(ST.held(lines[0]), true); assert.deepEqual(JSON.parse(JSON.stringify(G.staleFor())), [], 'nothing held outside the trip');
     assert.equal(G.missingFor('journey').some((m) => /^room:/.test(m.key)), false, w1 + ' → ' + w2 + ': readiness names no stale room');
   }
-  /* a leftover line (an older draft, another device): the engine holds the Riverside, the Bag also carries Souphattra — the
+  /* a leftover line (an older draft, another device): the engine holds the Guest House, the Bag also carries Souphattra — the
      state is written behind the Bag's back (a Bag change is reconciled at once, see 012-2) */
-  B.set([]); await ST.remove('wedstay'); await ST.remove('riverside');
-  assert.equal((await ST.select('riverside', 'superior-window')).ok, true);
+  B.set([]); await ST.remove('wedstay'); await ST.remove('guesthouse');
+  assert.equal((await ST.select('guesthouse', 'guest-house')).ok, true);
   const leftover = () => { const it = P.items('wedstay', 'heritage')[0]; it.qty = 1; it.unit = 'A'; w.localStorage.setItem('siyl.bag', JSON.stringify(B.get().concat([it]))); };
-  leftover(); assert.equal(stageLines().length, 2); assert.equal(B.total(), 205, 'the state Codex reproduced');
-  /* removing the leftover line does NOT release the Riverside hold */
+  leftover(); assert.equal(stageLines().length, 2); assert.equal(B.total(), 145, 'the state Codex reproduced');
+  /* removing the leftover line does NOT release the Guest House hold */
   assert.deepEqual(JSON.parse(JSON.stringify(await ST.remove('wedstay'))), { ok: true });
-  assert.equal(stageLines().length, 1); assert.equal(stageLines()[0].id, 'riverside'); assert.equal(B.total(), 60);
-  assert.equal(U.view().mine.wedstay.key, 'riverside/superior-window', 'the current hold stays'); assert.equal(taken('riverside/superior-window'), 1);
+  assert.equal(stageLines().length, 1); assert.equal(stageLines()[0].id, 'guesthouse'); assert.equal(B.total(), 0);
+  assert.equal(U.view().mine.wedstay.key, 'guesthouse/guest-house', 'the current hold stays'); assert.equal(taken('guesthouse/guest-house'), 1);
   /* the same leftover is dropped by the engine sync on any page load */
   leftover(); assert.equal(stageLines().length, 2);
-  ST.sync(); assert.equal(stageLines().length, 1); assert.equal(stageLines()[0].id, 'riverside'); assert.equal(B.total(), 60, 'sync keeps the held hotel only');
+  ST.sync(); assert.equal(stageLines().length, 1); assert.equal(stageLines()[0].id, 'guesthouse'); assert.equal(B.total(), 0, 'sync keeps the held hotel only');
   /* Not joining the stage with a leftover present: the leftover leaves, the held place is released, the stage is declined */
   leftover(); assert.equal(stageLines().length, 2);
   const d = await J.decline(J.SEGMENTS.find((s) => s.key === 'wedstay')); assert.deepEqual(JSON.parse(JSON.stringify(d)), { ok: true });
-  assert.equal(stageLines().length, 0); assert.deepEqual(JSON.parse(JSON.stringify(U.view().mine)), {}, 'the engine holds nothing'); assert.equal(taken('riverside/superior-window'), 0);
+  assert.equal(stageLines().length, 0); assert.deepEqual(JSON.parse(JSON.stringify(U.view().mine)), {}, 'the engine holds nothing'); assert.equal(taken('guesthouse/guest-house'), 0);
   assert.equal(J.isSkipped('wedstay'), true);
   /* the surfaces say what is replaced */
   assert.match(src('room.html'), /var ids = ST && ST\.stageIds \? ST\.stageIds\(w\.id\) : P\.ids\(w\.id\);/, 'the room page reads the stage');
   assert.match(src('room.html'), /\(elsewhere \? ' at ' \+ ST\.houseOf\(other\) : ''\) \+ ' for this stay — adding this room replaces it\.'/);
-  assert.equal(ST.houseOf(P.items('wedstay', 'heritage')[0]), 'Souphattra Heritage Vientiane', 'the house is named, never the window'); assert.equal(ST.houseOf(P.items('riverside', 'superior-window')[0]), 'Riverside Hotel Vientiane'); assert.equal(ST.houseOf(P.items('guesthouse', 'guest-house')[0]), 'Guest House complimentary');
+  assert.equal(ST.houseOf(P.items('wedstay', 'heritage')[0]), 'Souphattra Heritage Vientiane', 'the house is named, never the window'); /* the retired Riverside has no product to name */ assert.equal(P.items('riverside', 'superior-window').length, 0); assert.equal(ST.houseOf(P.items('guesthouse', 'guest-house')[0]), 'Guest House complimentary');
   assert.match(src('journeys.html'), /var sib=ST\.sibling\?ST\.sibling\(win\):null;/); assert.match(src('journeys.html'), /for this stay — choosing a room here replaces it\./);
 });
 
@@ -231,11 +206,11 @@ test('ONE WEDDING STAY · a stale device\'s Remove releases only its own window;
   const rooms = new Rooms(doState());
   const call = async (op, body) => { const r = await rooms.fetch(new Request('https://x/api/rooms/' + op, { method: 'POST', headers: { 'x-siyl-identity': JSON.stringify(me) }, body: JSON.stringify(body || {}) })); return { status: r.status, d: await r.json() }; };
   /* (a) the engine: a release that names its window */
-  let r = await call('join', { invitationId: me.invitationId, guestId: me.guestId, key: 'riverside/superior-window', label: 'A', name: 'Peggy' }); assert.equal(r.status, 200);
+  let r = await call('join', { invitationId: me.invitationId, guestId: me.guestId, key: 'guesthouse/guest-house', label: 'A', name: 'Peggy' }); assert.equal(r.status, 200);
   r = await call('leave', { invitationId: me.invitationId, guestId: me.guestId, stage: 'wedstay', window: 'wedstay' });
-  assert.equal(r.status, 200); assert.deepEqual(r.d.released, [], 'nothing of the Souphattra window is held: nothing goes'); assert.equal(r.d.mine.wedstay.key, 'riverside/superior-window', 'the Riverside hold stays');
-  r = await call('leave', { invitationId: me.invitationId, guestId: me.guestId, stage: 'wedstay', window: 'riverside' });
-  assert.deepEqual(r.d.released, [{ key: 'riverside/superior-window', label: 'A' }]); assert.deepEqual(r.d.mine, {});
+  assert.equal(r.status, 200); assert.deepEqual(r.d.released, [], 'nothing of the Souphattra window is held: nothing goes'); assert.equal(r.d.mine.wedstay.key, 'guesthouse/guest-house', 'the Riverside hold stays');
+  r = await call('leave', { invitationId: me.invitationId, guestId: me.guestId, stage: 'wedstay', window: 'guesthouse' });
+  assert.deepEqual(r.d.released, [{ key: 'guesthouse/guest-house', label: 'A' }]); assert.deepEqual(r.d.mine, {});
   r = await call('join', { invitationId: me.invitationId, guestId: me.guestId, key: 'wedstay/heritage', label: 'A', name: 'Peggy' }); assert.equal(r.status, 200);
   r = await call('leave', { invitationId: me.invitationId, guestId: me.guestId, stage: 'wedstay' }); assert.equal(r.d.released.length, 1, 'without a window the stage-wide release stays as it was (the planner\'s reconciliation)');
   /* the two devices: both read the engine while Souphattra is held; device 1 switches to the Riverside; device 2 still shows Souphattra */
@@ -243,33 +218,33 @@ test('ONE WEDDING STAY · a stale device\'s Remove releases only its own window;
   const d2 = page({ auth: PEGGY, fetch: await roomsFetch(rooms, me) });
   assert.equal((await d1.SIYL_STAY.select('wedstay', 'heritage')).ok, true);
   await d2.SIYL_UNITS.load(true); d2.SIYL_STAY.sync(); assert.equal(d2.SIYL_BAG.get()[0].id, 'wedstay', 'device 2 carries the Souphattra line from the engine');
-  assert.equal((await d1.SIYL_STAY.select('riverside', 'superior-window')).ok, true); assert.equal(d1.SIYL_BAG.total(), 60);
+  assert.equal((await d1.SIYL_STAY.select('guesthouse', 'guest-house')).ok, true); assert.equal(d1.SIYL_BAG.total(), 0);
   assert.equal(d2.SIYL_UNITS.mine('wedstay').key, 'wedstay/heritage', 'device 2 has not read the engine since');
   const rm = await d2.SIYL_STAY.remove('wedstay'); assert.equal(rm.ok, true);
-  assert.equal(d2.SIYL_UNITS.mine('wedstay').key, 'riverside/superior-window', 'the release answered with the truth: the Riverside is still held');
-  assert.equal(d2.SIYL_BAG.get().length, 1); assert.equal(d2.SIYL_BAG.get()[0].id, 'riverside', 'device 2 now carries the held hotel, never nothing, never both'); assert.equal(d2.SIYL_BAG.total(), 60);
-  const v = await call('mine', {}); assert.equal(v.d.mine.wedstay.key, 'riverside/superior-window');
+  assert.equal(d2.SIYL_UNITS.mine('wedstay').key, 'guesthouse/guest-house', 'the release answered with the truth: the houseside is still held');
+  assert.equal(d2.SIYL_BAG.get().length, 1); assert.equal(d2.SIYL_BAG.get()[0].id, 'guesthouse', 'device 2 now carries the held hotel, never nothing, never both'); assert.equal(d2.SIYL_BAG.total(), 0);
+  const v = await call('mine', {}); assert.equal(v.d.mine.wedstay.key, 'guesthouse/guest-house');
   /* (b) the draft replay: the copy read before the choice had no stay line, the server's copy carries Souphattra, the device
      chose the Riverside meanwhile — the replay keeps both (the draft module knows no stages) and the engine sync settles it */
   const D = d1.SIYL_DRAFT || (() => { const w = page({ auth: PEGGY, modules: ['assets/bag.js', 'assets/rooms-data.js', 'assets/pricing.js', 'assets/draft.js'] }); return w.SIYL_DRAFT; })();
-  const souphattra = d1.SIYL_PRICE.items('wedstay', 'heritage')[0], riverside = d1.SIYL_BAG.get()[0];
-  const replayed = JSON.parse(D._replay('siyl.bag', '[]', JSON.stringify([riverside]), JSON.stringify([souphattra])));
-  assert.deepEqual(replayed.map((x) => x.id).sort(), ['riverside', 'wedstay'], 'the replay alone would carry both');
+  const souphattra = d1.SIYL_PRICE.items('wedstay', 'heritage')[0], house = d1.SIYL_BAG.get()[0];
+  const replayed = JSON.parse(D._replay('siyl.bag', '[]', JSON.stringify([house]), JSON.stringify([souphattra])));
+  assert.deepEqual(replayed.map((x) => x.id).sort(), ['guesthouse', 'wedstay'], 'the replay alone would carry both');
   const settled = () => new Promise((res) => setTimeout(res, 30));
   d1.localStorage.setItem('siyl.bag', JSON.stringify(replayed)); d1.document.dispatchEvent(new d1.CustomEvent('siyl:bag'));
   assert.equal(d1.SIYL_BAG.get().length, 2, 'nothing is dropped on this device\'s copy of the engine'); await settled();
-  assert.deepEqual(JSON.parse(JSON.stringify(d1.SIYL_BAG.get().map((x) => x.id))), ['riverside'], 'the engine was read again and the sync settled it: the leftover left'); assert.equal(d1.SIYL_BAG.total(), 60);
+  assert.deepEqual(JSON.parse(JSON.stringify(d1.SIYL_BAG.get().map((x) => x.id))), ['guesthouse'], 'the engine was read again and the sync settled it: the leftover left'); assert.equal(d1.SIYL_BAG.total(), 0);
   /* the same replay on a device whose engine view is OLDER than the switch (it still shows Souphattra): the fresh read wins —
      the held Riverside line is kept, never dropped on the stale copy */
   const d3 = page({ auth: PEGGY, fetch: await roomsFetch(rooms, me) }); await d3.SIYL_UNITS.load(true); d3.SIYL_STAY.sync();
   d3.SIYL_UNITS._set(Object.assign({}, d3.SIYL_UNITS.view(), { mine: { wedstay: { key: 'wedstay/heritage', label: 'A' } } }));
   d3.localStorage.setItem('siyl.bag', JSON.stringify(replayed)); d3.document.dispatchEvent(new d3.CustomEvent('siyl:bag'));
   assert.equal(d3.SIYL_BAG.get().length, 2); await settled();
-  assert.deepEqual(JSON.parse(JSON.stringify(d3.SIYL_BAG.get().map((x) => x.id))), ['riverside'], 'the stale device keeps the held hotel, drops the leftover'); assert.equal(d3.SIYL_UNITS.mine('wedstay').key, 'riverside/superior-window');
+  assert.deepEqual(JSON.parse(JSON.stringify(d3.SIYL_BAG.get().map((x) => x.id))), ['guesthouse'], 'the stale device keeps the held hotel, drops the leftover'); assert.equal(d3.SIYL_UNITS.mine('wedstay').key, 'guesthouse/guest-house');
   assert.match(src('assets/stay.js'), /document\.addEventListener\('siyl:bag', function \(\) \{ ST\.settle\(\); \}\);/);
   /* a Bag change that does not look like two hotels in one stage reads nothing and changes nothing: a held stay removed behind
      the engine's back is NOT brought back here (the planner's reconciliation keeps its order — CODEX 011-7) */
-  d1.SIYL_BAG.remove('riverside'); assert.equal(d1.SIYL_STAY.settle(), false); await settled(); assert.equal(d1.SIYL_BAG.get().length, 0, 'no line comes back on a Bag change'); assert.equal(d1.SIYL_UNITS.mine('wedstay').key, 'riverside/superior-window');
-  d1.SIYL_STAY.sync(); assert.equal(d1.SIYL_BAG.get()[0].id, 'riverside', 'the engine sync brings the held line back, as before');
+  d1.SIYL_BAG.remove('guesthouse'); assert.equal(d1.SIYL_STAY.settle(), false); await settled(); assert.equal(d1.SIYL_BAG.get().length, 0, 'no line comes back on a Bag change'); assert.equal(d1.SIYL_UNITS.mine('wedstay').key, 'guesthouse/guest-house');
+  d1.SIYL_STAY.sync(); assert.equal(d1.SIYL_BAG.get()[0].id, 'guesthouse', 'the engine sync brings the held line back, as before');
   assert.match(src('assets/stay.js'), /return u\.leave\(stageOf\(win\), win\)\.then/, 'a Remove names its window'); assert.match(src('src/rooms.js'), /const win = String\(body && body\.window \|\| ''\)\.trim\(\);/);
 });

@@ -19,7 +19,7 @@ const galState = (p, id) => p.evaluate((id) => { const box = document.querySelec
 
 /* ===== 1 · THE JOURNEY galleries at four widths ===== */
 /* superseded by release 014 (Owner, 19 Sep 2026): the Guest House complimentary card (#j-guesthouse) replaces the residence; the Riverside Hotel has photographs — no card is pending */
-const STAGES = ['j-bkk-stay', 'j-prewed', 'j-wedstay', 'j-guesthouse', 'j-riverside', 'j-kmg', 'j-ljg', 'j-kempinski'];
+const STAGES = ['j-bkk-stay', 'j-prewed', 'j-wedstay', 'j-guesthouse', 'j-kmg', 'j-ljg', 'j-kempinski'];
 const TRANSPORT = ['j-train', 'j-mu9646', 'j-c86', 'j-return'];
 for (const w of [320, 390, 834, 1440]) {
   const p = await fresh(w); await p.goto(O + '/journeys.html', { waitUntil: 'load' }); await p.waitForTimeout(1500);
@@ -79,7 +79,7 @@ await wk.close();
   await p.goto(O + '/experiences.html', { waitUntil: 'load' }); await p.waitForTimeout(800);
   const res2 = await p.evaluate(async () => { const out = []; const srcs = [...new Set([].concat(...Object.values(window.SIYL_EXP_GALLERY).map((g) => g.images.map((i) => i.src))))]; for (const s of srcs) { const r = await fetch(s, { method: 'HEAD' }); if (r.status !== 200) out.push(s + ':' + r.status); } return { n: srcs.length, bad: out }; });
   /* superseded by release 014 (Owner, 19 Sep 2026): the stay record is 50 frames (the residence's 4 leave, the Guest House complimentary's 4 and the Riverside Hotel's 7 arrive); the experience record is 167 (Baan Phraya 4 and Cannubi 5 arrive); 22 Sep 2026: 199 — the seven venues' own photographs and the Dior / LV split */
-  note('no-broken-image', res.bad.length === 0 && res2.bad.length === 0 && res.n === 53 && res2.n === 199, JSON.stringify({ stay: res, exp: res2 }).slice(0, 200)); await p.context().close(); }
+  note('no-broken-image', res.bad.length === 0 && res2.bad.length === 0 && res.n === 46 && res2.n === 199, JSON.stringify({ stay: res, exp: res2 }).slice(0, 200)); await p.context().close(); }
 
 /* ===== 5 · the restaurant media audit on the served pages ===== */
 { const p = await fresh(390); const FOOD = /dish|bowl|noodle|plate|dessert|cake|cocktail|martini|pastry|brunch|tartlet|sorbet|canap|salad|pork|beef/i;
@@ -105,43 +105,45 @@ if (!LIVE) {
   await p.goto(O + '/invitation.html', { waitUntil: 'load' }); await p.waitForSelector('input[data-c="email"]', { timeout: 20000 }); await p.fill('input[data-c="email"]', 'ada.test@example.org'); await p.dispatchEvent('input[data-c="email"]', 'change'); await p.fill('input[data-c="phone"]', '+66 81 000 0000'); await p.dispatchEvent('input[data-c="phone"]', 'change'); await p.waitForTimeout(1500);
   for (const stage of ['wedstay', 'prewed', 'bkk-stay']) await api(p, '/api/rooms/leave', { method: 'POST', body: JSON.stringify({ invitationId: 'INV-T001', guestId: 'T001', stage }) });
   await p.evaluate(() => { ['siyl.bag', 'siyl.skip', 'siyl.skip.by'].forEach((k) => localStorage.removeItem(k)); });
-  /* superseded by release 014 (Owner, 19 Sep 2026): the Riverside Hotel has photographs — the card's gallery and the room page carry them, "Photography to follow" is gone */
-  await p.goto(O + '/journeys.html#j-riverside', { waitUntil: 'load' }); await p.waitForTimeout(1500);
-  const card = await p.$eval('#j-riverside', (e) => e.innerText.replace(/\s+/g, ' ')); const cardGal = await galState(p, 'j-riverside');
-  note('riverside-journey-card', /Riverside Hotel Vientiane/.test(card) && !/Photography to follow/i.test(card) && !!cardGal && !cardGal.pend && cardGal.frames >= 1 && cardGal.loaded >= 1 && /USD 60 total per person/.test(card) && /USD 30 per person \/ night/.test(card), card.slice(0, 160) + ' · gallery ' + JSON.stringify({ frames: cardGal && cardGal.frames, loaded: cardGal && cardGal.loaded, pend: cardGal && cardGal.pend }));
-  await p.click('#j-riverside a[href*="stay=riverside"]'); await p.waitForLoadState('load'); await p.waitForTimeout(1800);
-  const room = await p.evaluate(() => ({ url: location.href, h1: (document.querySelector('main h1') || {}).textContent, pend: /Photography to follow/i.test(document.body.innerText), gallery: document.querySelectorAll('#gal .ph[style*="background-image"]').length, counter: (document.getElementById('gc') || {}).textContent || '', size: /22 sq\.m\./.test(document.body.innerText), join: [...document.querySelectorAll('[data-join]')].length, price: (document.body.innerText.match(/USD \d+[^\n]{0,40}/) || [''])[0] }));
-  note('riverside-room-page', /stay=riverside/.test(room.url) && /Superior Room With Window/.test(room.h1 || '') && !room.pend && room.gallery >= 1 && /^1 \/ \d+$/.test(room.counter) && room.size && room.join >= 1, JSON.stringify(room).slice(0, 220));
-  await shot(p, '390-riverside-room');
-  await p.click('[data-rooms-box="riverside"] [data-join$="|A"], [data-join$="|A"]'); await p.waitForTimeout(2200);
+  /* RIVERSIDE HOTEL VIENTIANE DELETED (Owner, 23 Sep 2026): the hotel is no longer a website product. What this section proved — a
+     stage-D alternative with a gallery and a room page, ONE selection per stage, switching through the pages — is now played on the
+     other alternative, the Guest House complimentary (guesthouse/guest-house), against the Souphattra Heritage */
+  await p.goto(O + '/journeys.html#j-guesthouse', { waitUntil: 'load' }); await p.waitForTimeout(1500);
+  const card = await p.$eval('#j-guesthouse', (e) => e.innerText.replace(/\s+/g, ' ')); const cardGal = await galState(p, 'j-guesthouse');
+  note('guesthouse-journey-card', /Guest House complimentary/.test(card) && !/Photography to follow/i.test(card) && !/Riverside/.test(card) && !!cardGal && !cardGal.pend && cardGal.frames >= 1 && cardGal.loaded >= 1 && /Complimentary/.test(card), card.slice(0, 160) + ' · gallery ' + JSON.stringify({ frames: cardGal && cardGal.frames, loaded: cardGal && cardGal.loaded, pend: cardGal && cardGal.pend }));
+  await p.click('#j-guesthouse a[href*="stay=guesthouse"]'); await p.waitForLoadState('load'); await p.waitForTimeout(1800);
+  const room = await p.evaluate(() => ({ url: location.href, h1: (document.querySelector('main h1') || {}).textContent, pend: /Photography to follow/i.test(document.body.innerText), gallery: document.querySelectorAll('#gal .ph[style*="background-image"]').length, counter: (document.getElementById('gc') || {}).textContent || '', riverside: /Riverside/.test(document.body.innerText), join: [...document.querySelectorAll('[data-join]')].length }));
+  note('guesthouse-room-page', /stay=guesthouse/.test(room.url) && /Guest House/.test(room.h1 || '') && !room.pend && !room.riverside && room.gallery >= 1 && /^1 \/ \d+$/.test(room.counter) && room.join >= 1, JSON.stringify(room).slice(0, 220));
+  await shot(p, '390-guesthouse-room');
+  await p.click('.cta[data-avwin="guesthouse"], [data-join="guesthouse|guest-house|A"]'); await p.waitForTimeout(2400);
   const held = await api(p, '/api/rooms/mine', { method: 'POST', body: '{}' });
   await p.goto(O + '/your-journey.html', { waitUntil: 'load' }); await p.waitForTimeout(2000); await p.evaluate(() => SIYL_GUEST.setScope({ all: true })); await p.waitForTimeout(800);
   const trip = await p.evaluate(() => ({ stage: (document.querySelector('#s-wedstay') || {}).innerText ? document.querySelector('#s-wedstay').innerText.replace(/\s+/g, ' ') : '', bag: SIYL_BAG.get().map((x) => x.id + ':' + x.name + ':' + x.price), total: SIYL_BAG.total(), state: SIYL_JOURNEY.state(SIYL_JOURNEY.SEGMENTS.find((s) => s.key === 'wedstay')) }));
-  note('riverside-my-trip-and-bag', held.body && held.body.mine && held.body.mine.wedstay && /riverside/.test(held.body.mine.wedstay.key) && trip.state === 'selected' && trip.bag.some((x) => /^riverside:Riverside Hotel Vientiane:60$/.test(x)) && trip.total === 60 && /Riverside Hotel Vientiane/.test(trip.stage), JSON.stringify({ held: held.body && held.body.mine, bag: trip.bag, total: trip.total }).slice(0, 220));
-  await shot(p, '390-my-trip-riverside');
+  note('guesthouse-my-trip-and-bag', held.body && held.body.mine && held.body.mine.wedstay && held.body.mine.wedstay.key === 'guesthouse/guest-house' && trip.state === 'selected' && trip.bag.some((x) => /^guesthouse:Guest House complimentary/.test(x)) && trip.total === 0 && /Guest House/.test(trip.stage) && !/Riverside/.test(trip.stage), JSON.stringify({ held: held.body && held.body.mine, bag: trip.bag, total: trip.total }).slice(0, 220));
+  await shot(p, '390-my-trip-guesthouse');
   await p.goto(O + '/cart.html', { waitUntil: 'load' }); await p.waitForTimeout(1500); const cart = await p.$eval('main', (e) => e.innerText.replace(/\s+/g, ' '));
-  note('riverside-my-bag', /Riverside Hotel Vientiane/.test(cart) && /USD 60/.test(cart) && /Room A/i.test(cart), cart.slice(0, 200));
+  note('guesthouse-my-bag', /Guest House complimentary/.test(cart) && /Complimentary/.test(cart) && !/Riverside/.test(cart), cart.slice(0, 200));
   /* CODEX 012-1 · switching hotels through the pages: the Souphattra card on The Journey and the Souphattra room page say what
-     they replace, the choice leaves ONE Bag line (USD 145, never 205), the engine holds Souphattra alone, readiness names no
-     stale room; and back again through the Riverside room page */
+     they replace, the choice leaves ONE Bag line (USD 145, never 145 + something), the engine holds Souphattra alone, readiness names no
+     stale room; and back again through the Guest House room page */
   await p.goto(O + '/journeys.html#j-wedstay', { waitUntil: 'load' }); await p.waitForTimeout(1800);
   const jn = await p.$eval('[data-stayact="wedstay"]', (e) => e.innerText.replace(/\s+/g, ' '));
-  note('switch-journey-card-names-the-riverside', /Your trip currently holds Superior Room With Window at Riverside Hotel Vientiane for this stay — choosing a room here replaces it\./.test(jn), jn.slice(0, 200));
+  note('switch-journey-card-names-the-guesthouse', /Your trip currently holds .* for this stay — choosing a room here replaces it\./.test(jn) && /Guest House/.test(jn), jn.slice(0, 200));
   await p.goto(O + '/room.html?stay=souphattra&room=heritage', { waitUntil: 'load' }); await p.waitForTimeout(2200);
   const swapNote = await p.evaluate(() => [...document.querySelectorAll('[data-swap]')].filter((e) => !e.hidden).map((e) => e.textContent).join(' | '));
-  note('switch-room-page-names-the-riverside', /Your trip currently holds Superior Room With Window at Riverside Hotel Vientiane for this stay — adding this room replaces it\./.test(swapNote), swapNote.slice(0, 200));
+  note('switch-room-page-names-the-guesthouse', /Your trip currently holds .* for this stay — adding this room replaces it\./.test(swapNote) && /Guest House/.test(swapNote), swapNote.slice(0, 200));
   await p.click('[data-join="wedstay|heritage|A"]'); await p.waitForTimeout(2400);
   const j = await api(p, '/api/rooms?invitation=INV-T001', { method: 'GET' });
   await p.goto(O + '/your-journey.html', { waitUntil: 'load' }); await p.waitForTimeout(2200);
   const sw = await p.evaluate(() => ({ bag: SIYL_BAG.get().map((x) => x.id + ':' + x.price), total: SIYL_BAG.total(), missing: SIYL_GUEST.missingFor('journey').map((m) => m.key).filter((k) => /^room:/.test(k)), stale: SIYL_GUEST.staleFor().length }));
-  note('switch-one-line-one-hold', sw.bag.length === 1 && sw.bag[0] === 'wedstay:145' && sw.total === 145 && sw.missing.length === 0 && sw.stale === 0 && j.body.mine.wedstay.key === 'wedstay/heritage' && j.body.units['riverside/superior-window'][0].taken === 0 && j.body.units['wedstay/heritage'][0].taken >= 1 && j.body.units['wedstay/heritage'][0].occupants.filter((o) => !o.placeholder).length === 1,   /* release 014: her place, and a place kept for her party member */ JSON.stringify({ sw, mine: j.body.mine }).slice(0, 240));
-  await p.goto(O + '/room.html?stay=riverside&room=superior-window', { waitUntil: 'load' }); await p.waitForTimeout(2200);
+  note('switch-one-line-one-hold', sw.bag.length === 1 && sw.bag[0] === 'wedstay:145' && sw.total === 145 && sw.missing.length === 0 && sw.stale === 0 && j.body.mine.wedstay.key === 'wedstay/heritage' && j.body.units['guesthouse/guest-house'][0].taken === 0 && j.body.units['riverside/superior-window'] === undefined && j.body.units['wedstay/heritage'][0].taken >= 1 && j.body.units['wedstay/heritage'][0].occupants.filter((o) => !o.placeholder).length === 1,   /* release 014: her place, and a place kept for her party member */ JSON.stringify({ sw, mine: j.body.mine }).slice(0, 240));
+  await p.goto(O + '/room.html?stay=guesthouse&room=guest-house', { waitUntil: 'load' }); await p.waitForTimeout(2200);
   const swapBack = await p.evaluate(() => [...document.querySelectorAll('[data-swap]')].filter((e) => !e.hidden).map((e) => e.textContent).join(' | '));
   note('switch-back-names-souphattra', /Your trip currently holds The Heritage at Souphattra Heritage Vientiane for this stay — adding this room replaces it\./.test(swapBack), swapBack.slice(0, 200));
-  await p.click('[data-join="riverside|superior-window|A"]'); await p.waitForTimeout(2400);
+  await p.click('.cta[data-avwin="guesthouse"], [data-join="guesthouse|guest-house|A"]'); await p.waitForTimeout(2400);
   const back = await p.evaluate(() => ({ bag: SIYL_BAG.get().map((x) => x.id + ':' + x.price), total: SIYL_BAG.total() }));
   const j2 = await api(p, '/api/rooms?invitation=INV-T001', { method: 'GET' });
-  note('switch-back-one-line', back.bag.length === 1 && back.bag[0] === 'riverside:60' && back.total === 60 && j2.body.mine.wedstay.key === 'riverside/superior-window' && j2.body.units['wedstay/heritage'][0].taken === 0, JSON.stringify({ back, mine: j2.body.mine }).slice(0, 200));
+  note('switch-back-one-line', back.bag.length === 1 && back.bag[0] === 'guesthouse:0' && back.total === 0 && j2.body.mine.wedstay.key === 'guesthouse/guest-house' && j2.body.units['wedstay/heritage'][0].taken === 0, JSON.stringify({ back, mine: j2.body.mine }).slice(0, 200));
   for (const stage of ['wedstay']) await api(p, '/api/rooms/leave', { method: 'POST', body: JSON.stringify({ invitationId: 'INV-T001', guestId: 'T001', stage }) });
   await p.evaluate(() => { ['siyl.bag', 'siyl.skip', 'siyl.skip.by', 'siyl.guest'].forEach((k) => localStorage.removeItem(k)); });
   await p.context().close();
@@ -149,10 +151,10 @@ if (!LIVE) {
 
 /* ===== 7 · THE HOUSES and widths ===== */
 for (const w of [320, 834]) { const p = await fresh(w); const over = [];
-  for (const f of ['journeys.html', 'accommodation.html', 'experiences.html', 'experience.html?id=bkk-thongsmith', 'experience.html?id=vte-laoderm', 'room.html?stay=riverside&room=superior-window']) { await p.goto(O + '/' + f, { waitUntil: 'load' }); await p.waitForTimeout(900); const ov = await p.evaluate(() => document.documentElement.scrollWidth - window.innerWidth); if (ov > 1) over.push(f + ':' + ov); }
-  /* superseded by release 014 (Owner, 19 Sep 2026): THE HOUSES carries the Riverside photograph and the Guest House complimentary — no pending card, no "Private Residence" */
-  const houses = await p.goto(O + '/accommodation.html', { waitUntil: 'load' }).then(() => p.waitForTimeout(900)).then(() => p.evaluate(() => ({ riverside: /Riverside Hotel/.test(document.body.innerText), seven: /Seven places/.test(document.body.innerText), pend: !!document.querySelector('.am.am-pend') || /Photography to follow/i.test(document.body.innerText), riversideImg: [...document.querySelectorAll('.am')].some((e) => /stay=riverside/.test(decodeURIComponent(e.getAttribute('href') || '')) && /images\/riverside\//.test(e.style.backgroundImage)), guesthouse: /Guest House complimentary/.test(document.body.innerText), residence: /Private Residence/i.test(document.body.innerText) })));
-  note('width-' + w, over.length === 0 && houses.riverside && houses.seven && !houses.pend && houses.riversideImg && houses.guesthouse && !houses.residence, (over.join(', ') || 'no overflow') + ' · ' + JSON.stringify(houses)); if (w === 834) await shot(p, '834-houses'); await p.context().close(); }
+  for (const f of ['journeys.html', 'accommodation.html', 'experiences.html', 'experience.html?id=bkk-thongsmith', 'experience.html?id=vte-laoderm', 'room.html?stay=guesthouse&room=guest-house']) { await p.goto(O + '/' + f, { waitUntil: 'load' }); await p.waitForTimeout(900); const ov = await p.evaluate(() => document.documentElement.scrollWidth - window.innerWidth); if (ov > 1) over.push(f + ':' + ov); }
+  /* RIVERSIDE DELETED (Owner, 23 Sep 2026): THE HOUSES names no Riverside anywhere — the Guest House complimentary stands, no pending card, no "Private Residence" */
+  const houses = await p.goto(O + '/accommodation.html', { waitUntil: 'load' }).then(() => p.waitForTimeout(900)).then(() => p.evaluate(() => ({ riverside: /Riverside Hotel/.test(document.body.innerText), seven: /Seven places/.test(document.body.innerText), pend: !!document.querySelector('.am.am-pend') || /Photography to follow/i.test(document.body.innerText), riversideCard: [...document.querySelectorAll('.am')].some((e) => /stay=riverside/.test(decodeURIComponent(e.getAttribute('href') || '')) || /images\/riverside\//.test(e.style.backgroundImage)), guesthouse: /Guest House complimentary/.test(document.body.innerText), residence: /Private Residence/i.test(document.body.innerText) })));
+  note('width-' + w, over.length === 0 && !houses.riverside && houses.seven && !houses.pend && !houses.riversideCard && houses.guesthouse && !houses.residence, (over.join(', ') || 'no overflow') + ' · ' + JSON.stringify(houses)); if (w === 834) await shot(p, '834-houses'); await p.context().close(); }
 note('console-errors', errors.length === 0, errors.slice(0, 3).join(' | ') || 'no script or console error on any visited page');
 await b.close(); fs.writeFileSync(path.join(OUT, 'results.json'), JSON.stringify(R, null, 1));
 const fails = R.filter((r) => !r.ok); console.log((R.length - fails.length) + '/' + R.length + ' checks passed' + (fails.length ? ' · FAILED: ' + fails.map((f) => f.id).join(', ') : '')); process.exit(fails.length ? 1 : 0);

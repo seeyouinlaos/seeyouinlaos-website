@@ -64,9 +64,9 @@ for (const [w, h, name] of [[390, 844, '390'], [834, 1194, '834x1194'], [1194, 8
   const engine = await p.evaluate(async () => { const r = await fetch('/api/rooms', { cache: 'no-store' }); return { status: r.status, d: await r.json() }; });
   const c = engine.d.complimentary || {};
   note('live-complimentary-is-the-engine', engine.status === 200 && c.key === 'guesthouse/guest-house' && c.max === 6 &&
-    typeof c.remaining === 'number' && c.remaining >= 0 && c.remaining <= 6 && c.phase === 'open' && !engine.d.summary['stayext/riverside-superior'] && !!engine.d.summary['riverside/superior-window'],
+    typeof c.remaining === 'number' && c.remaining >= 0 && c.remaining <= 6 && c.phase === 'open' && !engine.d.summary['stayext/riverside-superior'] && !engine.d.summary['riverside/superior-window'],
     JSON.stringify({ max: c.max, remaining: c.remaining, taken: c.taken, phase: c.phase, days: c.days, extensionStock: engine.d.summary['stayext/riverside-superior'] ? 'STILL THERE' : 'withdrawn',
-      riversideWeddingStay: engine.d.summary['riverside/superior-window'] ? 'intact' : 'MISSING' }));
+      riversideStock: engine.d.summary['riverside/superior-window'] ? 'STILL THERE' : 'retired' }));
   /* a write without a bearer is refused — nothing is booked by this suite */
   const refused = await p.evaluate(async () => {
     const out = {};

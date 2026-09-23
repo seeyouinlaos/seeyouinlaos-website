@@ -40,7 +40,8 @@ test('ONE SOURCE MAP · hero, card and gallery per property, files present, no c
 test('THE HOUSES · the Penthouse, U Sathorn and Shama each with the map\'s image; no missing image on any card', () => {
   const w = page({ auth: null }), M = w.SIYL_STAY_IMAGES, a = src('accommodation.html');
   const cards = [...a.matchAll(/<article class="aslide">\s*<a class="am" href="([^"]+)" style="background-image:url\(([^)]+)\)"/g)].map((m) => ({ href: m[1], img: m[2] }));
-  assert.ok(cards.length >= 8, cards.length + ' cards');
+  /* one card fewer since the Riverside Hotel was retired (Owner, 23 Sep 2026) */
+  assert.ok(cards.length >= 7, cards.length + ' cards');
   for (const c of cards) assert.ok(exists(c.img), c.img + ' exists');
   assert.equal(cards.find((c) => /room=penthouse/.test(c.href)).img, M.sathornPenthouse.houses);
   assert.equal(cards.find((c) => /room=u-sathorn-superior-garden/.test(c.href)).img, M.uSathorn.houses);

@@ -82,15 +82,10 @@ export const SEED = {
   'guesthouse/guest-house':
     { unit: 'guest', capacity: 6, held: 0, name: 'Guest House complimentary', stay: 'Guest House complimentary · Vientiane' },
 
-  /* the Riverside Hotel (Owner, release 012 · Operations Master of 18 Sep 2026, package D3): six rooms, two places each,
-     for the same wedding window — one stay per window, so a hold here releases a Souphattra hold and vice versa */
-  'riverside/superior-window':
-    { unit: 'room', capacity: 6, occupancy: 2, held: 0, name: 'Superior Room With Window', stay: 'Riverside Hotel Vientiane' },
-
-  /* THE PAID EXTENSION IS WITHDRAWN (Owner, 23 Sep 2026): 'stayext/riverside-superior' held the stock for nights after the
-     included wedding stay. A guest must not be offered a cheap alternative beside the stay chosen for them, so the
-     self-service extension is gone from this engine; extra nights are arranged by Guest Relations outside it. The window
-     above — 'riverside/superior-window', the Riverside as a WEDDING-STAY alternative — is a different product and stands. */
+  /* RIVERSIDE HOTEL VIENTIANE IS COMPLETELY RETIRED (Owner, 23 Sep 2026). Both its products are gone: the paid extension
+     ('stayext/riverside-superior', withdrawn earlier the same day) and the wedding-stay alternative
+     ('riverside/superior-window', six rooms, no holder at the time). The house is not a website product any more — no stock,
+     no page, no card, no gallery, no price — and is not replaced. The wedding window is the Souphattra and the Guest House. */
 
   /* ------------------------------------------------------------ Kunming */
   'kmg/left-bank':      { unit: 'room', capacity: 1, occupancy: 4, held: 0, name: 'Left Bank French-Style King Room' },

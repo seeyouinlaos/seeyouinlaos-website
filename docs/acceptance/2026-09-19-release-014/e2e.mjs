@@ -109,11 +109,11 @@ if (!LIVE) {
     const pub = await anon.evaluate(() => ({ names: /Cleo/.test(document.body.innerText), units: document.querySelectorAll('[data-units] .p-unit').length }));
     note('guest-house-public-sees-no-name', !pub.names, JSON.stringify(pub));
     await anon.context().close();
-    /* one selection per stage: the Riverside replaces the guest house — the place is released */
-    await p.goto(O + '/room.html?stay=riverside&room=superior-window', { waitUntil: 'load' }); await p.waitForTimeout(2200);
-    await p.click('.cta[data-avwin="riverside"]'); await p.waitForTimeout(2600);
+    /* one selection per stage: the Souphattra Heritage replaces the guest house — the place is released (the Riverside was deleted on 23 Sep 2026) */
+    await p.goto(O + '/room.html?stay=souphattra&room=heritage', { waitUntil: 'load' }); await p.waitForTimeout(2200);
+    await p.click('[data-join="wedstay|heritage|A"]'); await p.waitForTimeout(2600);
     const m2 = await mine(p); const bag2 = await p.evaluate(() => SIYL_BAG.get().map((x) => x.id));
-    note('one-selection-per-stage-riverside-replaces-guest-house', m2.mine && m2.mine.wedstay && m2.mine.wedstay.key === 'riverside/superior-window' && bag2.join() === 'riverside', JSON.stringify({ mine: m2.mine, bag: bag2 }));
+    note('one-selection-per-stage-souphattra-replaces-guest-house', m2.mine && m2.mine.wedstay && m2.mine.wedstay.key === 'wedstay/heritage' && bag2.join() === 'wedstay', JSON.stringify({ mine: m2.mine, bag: bag2 }));
     await p.context().close();
     await resetGuest('T003');
   }
@@ -197,7 +197,7 @@ if (!LIVE) {
   note('baan-phraya-page', bp.imgs >= 1 && /Phraya Mahai Savan/.test(bp.text) && /Day 03 · 23\.02\.2027/i.test(bp.text), JSON.stringify({ imgs: bp.imgs }));
   await p.goto(O + '/accommodation.html', { waitUntil: 'load' }); await p.waitForTimeout(1200);
   const houses = await p.evaluate(() => ({ gh: document.body.innerText.includes('Guest House complimentary'), pr: /Private Residence|Photography to follow/.test(document.body.innerText), rv: !!document.querySelector('a.am[style*="riverside/facade.jpg"]'), rvHref: [...document.querySelectorAll('a.am')].map((a) => a.getAttribute('href')).filter((h) => /riverside/.test(h || '')) }));
-  note('the-houses-guest-house-and-riverside', houses.gh && !houses.pr && houses.rv, JSON.stringify(houses));
+  note('the-houses-guest-house-and-no-riverside', houses.gh && !houses.pr && !houses.rv && houses.rvHref.length === 0, JSON.stringify(houses));   /* the Riverside was deleted on 23 Sep 2026 */
   await p.context().close();
 }
 

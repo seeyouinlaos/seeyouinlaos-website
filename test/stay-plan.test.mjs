@@ -127,9 +127,10 @@ test('THE DEADLINE ON THE SERVER · after 30 November 2026 a NEW complimentary c
     /* THE SELF-SERVICE EXTENSION IS WITHDRAWN (Owner, 23 Sep 2026): the engine answers nothing at all to it */
     const paid = await call(rooms, 'extend', { invitationId: late.invitationId, guestId: late.guestId, nights: 2 }, late);
     assert.equal(paid.status, 404, 'there is no extend operation any more');
-    /* a paid room of the wedding window may still be taken: the deadline closes the complimentary option only */
-    const riverside = await join(rooms, late, 'riverside/superior-window', 'A');
-    assert.equal(riverside.d.ok, true, 'the deadline closes the complimentary option only');
+    /* a paid room of the wedding window may still be taken: the deadline closes the complimentary option only
+       (the Riverside was retired on 23 Sep 2026, so the paid room of that window is the Souphattra) */
+    const paidRoom = await join(rooms, late, 'wedstay/heritage', 'A');
+    assert.equal(paidRoom.d.ok, true, 'the deadline closes the complimentary option only');
   } finally { globalThis.Date = RealDate; }
 });
 
