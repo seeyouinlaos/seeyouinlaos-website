@@ -118,3 +118,49 @@ but `unextend` lives on `SIYL_UNITS`, not on the stay helper — REMOVE silently
 and now pinned by name in the unit suite.
 
 Screenshots: `stage/` (the bag line at 1194×834 and 390, the review line, the profile card).
+
+---
+
+## 6 · Live — the proof at `7e55a2e`
+
+Deployed by the Owner's release path (push to `main` → Cloudflare Workers Build), serving
+`assets/bag.js?v=02b5699b` **80 s** after the push.
+Deployment **c00d60d4-7852-479c-bd14-713e6e83482b** (2026-09-23T07:30:16Z).
+
+### The one guest who holds paid nights (read-only, no code entered, nothing written)
+
+Production has **exactly one** holder of `stayext/riverside-superior` — guest **G064**. Her record,
+read through the Guest Relations route, figures only:
+
+| | |
+|---|---|
+| stored selections | **3** — `sangkhathan`, `guesthouse`, `prewed` |
+| their sum | **USD 305** |
+| selections naming the extension | **0** — it is never a stored line |
+| the engine's extension | `stayext` · **1 night** · **USD 30** · Riverside Hotel Vientiane · Superior Room With Window · **01 March – 02 March 2027** · Breakfast included |
+| 305 + 30, counted once | **USD 335** |
+| her stored `totalUsd` | **USD 335** |
+
+**This is the no-double-counting proof.** The amount she has always seen already contained the
+USD 30; the extension is not among her stored lines, so rendering it as a visible line adds a line
+and not an amount. Her chronology is exactly the Owner's sequence: Souphattra Heritage (`prewed`,
+25–27 Feb) → Guest House complimentary (27 Feb – 01 Mar) → Riverside (01 – 02 Mar).
+
+Her surfaces were **not** driven and nothing of hers was changed: change and removal are proved on
+the stage with synthetic guests (§5), where the total rises and falls by exactly the extension.
+
+### The rest of the live run
+
+- **`live-ro.mjs` 11/11** · **release-014 live-ro 25/25** · **parity 294/294**
+- **infrastructure freeze intact** — one Worker · workers.dev · GitHub Pages disabled
+- **production data unchanged** — identical before and after: 38 occupancies · 0 waitlisted ·
+  12 seat holds · 104 draft actors (15 with drafts)
+
+| | |
+|---|---|
+| unit | **495/495** (`test/bag-extension.test.mjs` 8, new) |
+| gates | **28/28** (`RELEASE CHECK PASSED`) |
+| stage E2E | **309/309** — extended-stay 12 · stay-deadline 33 · release-014 35 · release-013 36 · four-point 48 · account-IA 35 · profile-return 18 · stage-graph 40 · empty-bag 52 |
+| live | 11 + 25 + parity 294 |
+
+**Codex:** PENDING — EXTERNAL QUOTA LIMIT (attempted once; quota returns 24 Sep 2026 22:19).
