@@ -233,7 +233,9 @@ test('CART · the navigation matrix: bag icon → cart; cart → Your Journey / 
   assert.doesNotMatch(c, /assets\/prep-shell\.js/, 'the cart is not a numbered step');
   const bag = src('assets/bag.js');
   assert.match(bag, /function dest\(\)\{return 'cart\.html'\}/, 'the sticky bar opens My Bag (Owner, 17 Sep 2026); My Bag\'s own Review link follows the readiness engine'); assert.match(c, /ready0\.ok\?'<a class="p-link" href="review\.html">Review &amp; Send<\/a>'/);
-  assert.match(bag, /authed\(\)\?this\.get\(\)\.length:0/, 'the badge counts the guest\'s own lines only');
+  /* the badge counts what the bag SHOWS (Owner, 23 Sep 2026): the guest's own lines and the extended stay the engine holds
+     for them — the same list the bag lists, so the number on the icon and the lines behind it can never disagree. */
+  assert.match(bag, /authed\(\)\?this\.lines\(\)\.length:0/, 'the badge counts the lines the guest is shown');
   assert.match(src('assets/prep-shell.js'), /data-leave="another"/); assert.match(src('assets/prep-shell.js'), /data-leave="out"/);
 });
 

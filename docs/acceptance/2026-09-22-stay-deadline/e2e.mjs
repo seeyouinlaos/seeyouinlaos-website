@@ -249,7 +249,7 @@ for (const [w, h, name] of [[390, 844, '390'], [834, 1194, '834x1194'], [1194, 8
       hasReview: !!sec.querySelector('[data-ext-review]'), hasRemove: !!sec.querySelector('[data-ext-remove]') };
   });
   note('profile-stay-and-bar', !!base && /Complimentary stay/i.test(base.text) && /Guest House complimentary/i.test(base.text) &&
-    /27 February – 01 March 2027/.test(base.text) && /USD 0/.test(base.text) && /Extend your stay/i.test(base.text) &&
+    /27 February – 01 March 2027/.test(base.text) && /Your cost Complimentary/.test(base.text) && /Extend your stay/i.test(base.text) &&
     JSON.stringify(base.options) === JSON.stringify(['Select additional nights', '1 night', '2 nights', '3 nights', '4 nights']) &&
     base.value === '' && !base.hasReview && !base.hasRemove, JSON.stringify(base));
   await p.evaluate(() => document.querySelector('#your-stay').scrollIntoView({ block: 'center' })); await p.waitForTimeout(400);

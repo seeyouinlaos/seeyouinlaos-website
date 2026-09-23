@@ -265,8 +265,11 @@ test('THE SURFACES · the front page counts the days and follows the guest; My P
 
 test('THE ONE TOTAL AND THE CONFIRMATION · a confirmed extension is a cost of the journey, counted once: the Bag adds the engine\'s figure, the emails name the extended stay beside the complimentary one and recompute the amount from the lines plus that figure', () => {
   const bag = src('assets/bag.js'), mail = src('src/mail-templates.js'), worker = src('src/worker.js');
-  assert.match(bag, /extensionCost:function\(\)\{var U=window\.SIYL_UNITS,e=U&&U\.extension\?U\.extension\(\):null;return e&&e\.confirmed\?\(Number\(e\.total\)\|\|0\):0\}/, 'only a confirmed extension is a cost — never a preview');
-  assert.match(bag, /this\.get\(\)\.reduce\(function\(t,x\)\{return t\+\(x\.price\|\|0\)\*x\.qty\},0\)\+this\.extensionCost\(\)/);
+  assert.match(bag, /extension:function\(\)\{var U=window\.SIYL_UNITS,e=U&&U\.extension\?U\.extension\(\):null;return e&&e\.confirmed\?e:null\}/, 'only a confirmed extension is a cost — never a preview');
+  /* ONE LIST SINCE 23 SEP 2026: the extension is a line the guest can see, and the total is the sum of the lines shown —
+     so it is counted once by construction. The device's own lines (and the submission) are untouched. [[test/bag-extension]] */
+  assert.match(bag, /lines:function\(\)\{var e=this\.extensionLine\(\);return e\?this\.get\(\)\.concat\(\[e\]\):this\.get\(\)\}/);
+  assert.match(bag, /total:function\(\)\{return this\.lines\(\)\.reduce\(function\(t,x\)\{return t\+\(x\.price\|\|0\)\*x\.qty\},0\)\}/);
   /* the emails: its own stay line, and the amount recomputed so it can never be counted twice */
   assert.match(mail, /const ext = rooms && rooms\.stayext && !rooms\.stayext\.waitlisted \? rooms\.stayext : null;/);
   assert.match(mail, /category: 'Extended stay'/);
