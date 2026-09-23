@@ -68,3 +68,38 @@ profile-return 18 · stage-graph 40 · empty-bag 52. Each suite on a freshly wip
 No business semantics were touched: the booking model, the stage graph, inventory, capacity, the
 questionnaire, community, media, documents, guest identity and every amount are unchanged. The
 extended-stay pass of the same day is untouched apart from inheriting the tokens.
+
+---
+
+## 5 · Live — the proof at `ec3c529`
+
+Deployed by the Owner's release path (push to `main` → Cloudflare Workers Build), serving
+`assets/aman.css?v=23823812` **70 s** after the push.
+Deployment **b783b012-65b1-4162-b445-1a8367d14092** (2026-09-23T08:30:31Z).
+
+Read-only on production — no code entered, no guest signed in, nothing written — **6/6**:
+
+| | 390 | 834×1194 | 1194×834 | 1440 |
+|---|---|---|---|---|
+| ground | `#F2ECE1` | ✓ | ✓ | ✓ |
+| wordmark full stop | `rgb(116, 7, 14)` | ✓ | ✓ | ✓ |
+| hero active point | `rgb(116, 7, 14)` | ✓ | ✓ | ✓ |
+| gallery active point | `rgb(116, 7, 14)` | ✓ | ✓ | ✓ |
+| availability ring | `rgb(116, 7, 14)` | ✓ | ✓ | ✓ |
+| planning rule | `rgb(116, 7, 14)` | ✓ | ✓ | ✓ |
+| Cherry's share of the page | under 5 % | ✓ | ✓ | ✓ |
+| horizontal overflow | none | ✓ | ✓ | ✓ |
+
+Plus, live: **12 Discover rails** with an Ink track and a Cherry position marker, and the keyboard's
+own ring at `2px solid rgb(116, 7, 14)`.
+
+### The rest of the live run
+
+- **`live-ro.mjs` 11/11** · **release-014 live-ro 25/25** · **parity 294/294**
+- **infrastructure freeze intact** — one Worker · workers.dev · GitHub Pages disabled
+- **production data unchanged** — identical before and after: 38 occupancies · 0 waitlisted ·
+  12 seat holds · 104 draft actors (15 with drafts)
+- **the extended-stay pass is untouched:** the one holder of paid nights still reads
+  305 + 30 = **USD 335**, with zero stored selections naming the extension
+
+**Codex:** PENDING — EXTERNAL QUOTA LIMIT (attempted once; quota returns 24 Sep 2026 22:19).
