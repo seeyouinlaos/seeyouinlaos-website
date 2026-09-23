@@ -153,3 +153,46 @@ wording — "while places remain." and "See the Guest House" in DE/TH/JA, the in
 Screenshots: `stage/*-two-signals.jpg` (as a visitor sees it) and `stage/*-compact-5of6.jpg` (with
 one place taken by a synthetic guest, released again immediately).
 
+
+---
+
+## 7 · Live — the correction at `19dc482`
+
+Deployed by the Owner's release path (push to `main` → Cloudflare Workers Build), serving
+`assets/availability.js?v=9aaaf1f8` **80 s** after the push.
+Deployment **26e78c9d-e444-4456-8384-6dd2374fbedf** (2026-09-23T05:27:33Z).
+
+**`live-ro.mjs` 11/11**, read-only — no code entered, no guest signed in, nothing written:
+
+| | 390 | 834×1194 | 1194×834 | 1440 |
+|---|---|---|---|---|
+| the object's share of the screen | **37.6 %** | 23.2 % | 33.2 % | 30.8 % |
+| ring | **74 px** | 82 px | 82 px | 82 px |
+| the count | **5 / 6** on one line | 5 / 6 | 5 / 6 | 5 / 6 |
+| ring beside its status | ✓ | ✓ | ✓ | ✓ |
+| planning hairline present | ✓ | ✓ | ✓ | ✓ |
+| object's line = bar's hairline = today's calendar share | ✓ | ✓ | ✓ | ✓ |
+| "Private Residence" | **absent** | absent | absent | absent |
+
+Production reads **5 / 6 · "One place has gone."** — a real guest holds one of the six places, so
+the live object shows the approved state from the real engine. On 23 September the dot sits at the
+"Now" end because today *is* the day the planning window opens; the served date-travel proof shows
+it at 27.54 % on 12 October with the count unchanged.
+
+**Parity 294/294** · **release-014 live-ro 25/25** · **infrastructure freeze intact** (one Worker ·
+workers.dev · GitHub Pages disabled).
+**Production data untouched** — identical before and after: 38 occupancies · 0 waitlisted ·
+12 seat holds · 104 draft actors (15 with drafts).
+
+Screenshots of the live page at all four widths: `live/`.
+
+### The whole run
+
+| | |
+|---|---|
+| unit | **487/487** (`test/availability.test.mjs` 11, rewritten) |
+| gates | **28/28** (`RELEASE CHECK PASSED`) |
+| stage E2E | **265/265** — stay-deadline 33 · release-014 35 · release-013 36 · four-point 48 · account-IA 35 · profile-return 18 · stage-graph 40 · hero-map-media 20 |
+| live | 11 + 25 + parity 294 |
+
+**Codex:** PENDING — EXTERNAL QUOTA LIMIT (attempted once; quota returns 24 Sep 2026 22:19).
