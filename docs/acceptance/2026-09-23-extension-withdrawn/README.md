@@ -79,3 +79,58 @@ return: extension stock, an `extend` operation, an extension in the engine's vie
 write in the Worker, an "Extended stay" in the emails, or a control on any guest surface — and
 equally if `riverside/superior-window` is ever removed by mistake. Both read **code**, not comments,
 so the record of why the feature went may keep naming it.
+
+---
+
+## 6 · The one authorised production mutation
+
+Performed with the Guest Relations `unassign` route and the **canonical key**, which releases only
+holds whose stage is that key's stage:
+
+```
+POST /api/rooms/unassign  { guestId: 'G064', key: 'stayext/riverside-superior', actor: 'owner-withdrawal-23-sep-2026' }
+→ 200 { ok: true, released: [{ key: 'stayext/riverside-superior', label: 'A' }] }
+```
+
+| | before | after |
+|---|---|---|
+| holders of `stayext/riverside-superior` | `G064@A` | **none** |
+| G064's wedding stay | `guesthouse/guest-house` | **`guesthouse/guest-house`** |
+| G064's pre-wedding stay | `prewed/heritage` | **`prewed/heritage`** |
+| G064's selections | sangkhathan 15 · guesthouse 0 · prewed 290 | **unchanged** |
+| the sum of those lines | 305 | **305** |
+| `riverside/superior-window` | 0 occupants | **0 occupants, intact** |
+| total occupancies | 39 | **38** — exactly one released |
+
+Nothing was reset, no migration was run, no other guest record was touched.
+
+## 7 · Live — the proof at `e40d8b6` / `58c4ff5`
+
+Deployment **3fdee868-0609-49bd-b1c4-b5c43e1a8bfc** (2026-09-23T11:15:34Z).
+Read-only on production, no guest code entered, **4/4**:
+
+| check | result |
+|---|---|
+| the engine's withdrawn operations | `extend` → **404**, `unextend` → **404** |
+| the public read | no `extension`, no `extensionAvailable`, **no `stayext` stock**, `riverside/superior-window` **intact**, complimentary still `guesthouse/guest-house` max 6, deadline 30 Nov 2026 |
+| holders of the withdrawn product | **none**, and no `stayext/*` key exists at all |
+| G064 | holds `prewed/heritage` and `guesthouse/guest-house`; selections sangkhathan 15 · guesthouse 0 · prewed 290; **live website total USD 305** |
+
+Plus: **`live-ro.mjs` 11/11** · **release-014 live-ro 25/25** · **parity 294/294** ·
+**infrastructure freeze intact**.
+
+### Her submitted record, stated precisely
+
+G064's stored submission of **version 9** still reads `totalUsd 335` and still names `stayext` in
+its `rooms` snapshot. That is the record of what she sent before the withdrawal, and a submission is
+history: it was not rewritten. What was fixed instead is what such a record *produces* —
+`src/mail-templates.js` now recomputes the amount from the lines a record carries whenever it names
+a withdrawn component, so every regenerated email and Guest Relations composition reads **USD 305**,
+the same as the live website, and no guest is billed for something the website no longer offers.
+
+### Production data during the window
+
+The aggregate moved from 38 to 40 occupancies and 15 to 16 drafts. That was **not this pass**: a
+real guest (`G003`) claimed two Guest House complimentary places and saved a draft while the deploy
+was running. No `stayext` hold was created, nothing of G064's changed, and nothing was removed.
+Apart from the single authorised release above, this pass wrote nothing to production.
