@@ -32,12 +32,12 @@ async function fillAll(rooms, keys) {
   const d = await r.json(); assert.equal(d.refused.length, 0, 'every synthetic place was taken'); return occupants.length;
 }
 
-test('ENGINE · nothing is held for anyone in advance (Owner, 19 Sep 2026): a host reads an empty `mine`, no `fixed` map, every unit open with `reservedFor` null; a hold is one place per stage in `mine`; the hosts book like every guest, a full room refuses the next one, the Guest House is one unit of six places', async () => {
+test('ENGINE · nothing is held for anyone in advance (Owner, 19 Sep 2026): a host reads an empty `mine`, no `fixed` map, every unit open with `reservedFor` null; a hold is one place per stage in `mine`; the hosts book like every guest, a full room refuses the next one, the Guest House is one unit of four places', async () => {
   /* the seed: no allocation in advance, for nobody */
   assert.deepEqual(FIXED, []);
   for (const [key, s] of Object.entries(SEED)) { assert.equal(s.held, 0, key + ' holds nothing in advance'); assert.equal(s.heldFor, undefined, key + ' is held for nobody'); }
   assert.ok(allUnits().every((u) => u.reservedFor === null), 'no unit is reserved'); assert.equal(SEED['airbnb-2br/private-residence'], undefined, 'the invented Private Residence is gone');
-  assert.deepEqual(unitsOf('guesthouse/guest-house'), [{ key: 'guesthouse/guest-house', label: 'A', name: 'Guest House complimentary', kind: 'property', places: 6, reservedFor: null }]);
+  assert.deepEqual(unitsOf('guesthouse/guest-house'), [{ key: 'guesthouse/guest-house', label: 'A', name: 'Guest House complimentary', kind: 'property', places: 4, reservedFor: null }]);
   assert.deepEqual(STAGES, ['bkk-stay', 'prewed', 'wedstay', 'kmg', 'ljg', 'kempinski']);
   const rooms = new Rooms(doState());
   const h = await call(rooms, 'read', null, HOST);
@@ -45,7 +45,7 @@ test('ENGINE · nothing is held for anyone in advance (Owner, 19 Sep 2026): a ho
   for (const list of Object.values(h.d.units)) for (const u of list) { assert.equal(u.reservedFor, null); assert.equal(u.eligible, true); assert.equal(u.taken, 0); assert.equal(u.full, false); assert.equal(u.free, u.places); }
   const usat = h.d.units['bkk-stay/u-sathorn-superior-garden']; assert.equal(usat.length, 6); assert.ok(usat.every((u) => u.places === 2)); assert.equal(h.d.summary['bkk-stay/u-sathorn-superior-garden'].remainingPlaces, 12); assert.equal(h.d.summary['bkk-stay/u-sathorn-superior-garden'].ownerReservedRooms, 0);
   assert.equal(h.d.units['bkk-stay/penthouse'], undefined, 'the deleted Sathorn Penthouse has no units'); assert.equal(h.d.summary['bkk-stay/penthouse'], undefined);
-  assert.equal(h.d.summary['guesthouse/guest-house'].places, 6); assert.equal(h.d.summary['guesthouse/guest-house'].kind, 'property');
+  assert.equal(h.d.summary['guesthouse/guest-house'].places, 4); assert.equal(h.d.summary['guesthouse/guest-house'].remainingPlaces, 4, 'empty: 4 of 4 places remaining'); assert.equal(h.d.summary['guesthouse/guest-house'].kind, 'property');
   /* the host books Room A of U Sathorn — a hold like any guest's, no marker */
   const j = await call(rooms, 'join', { invitationId: HOST.invitationId, guestId: HOST.guestId, key: 'bkk-stay/u-sathorn-superior-garden', label: 'A', name: 'Suthep' }, HOST);
   assert.equal(j.status, 200); assert.deepEqual(j.d.mine, { 'bkk-stay': { key: 'bkk-stay/u-sathorn-superior-garden', label: 'A' } }); assert.equal(j.d.fixed, undefined); assert.equal(j.d.mine['bkk-stay'].fixed, undefined);
@@ -147,14 +147,14 @@ test('CLIENT · a hold is a Bag line with its amount and the guest\'s to give ba
   assert.deepEqual((await rooms.view(ident(PEGGY))).mine, { 'bkk-stay': { key: 'bkk-stay/u-sathorn-superior-garden', label: 'A' }, prewed: { key: 'prewed/heritage-executive', label: 'A' } });
   assert.equal(B.get().length, 2); assert.deepEqual(plain(B.get().filter((x) => x.id === 'prewed').map((x) => x.room)), ['heritage-executive']);
   const bagStays = bkk + P.quote('prewed', 'heritage-executive').total; assert.equal(B.total(), bagStays);
-  /* THE GUEST HOUSE COMPLIMENTARY: a Bag line at USD 0, one of six shared places, in the wedding stage */
+  /* THE GUEST HOUSE COMPLIMENTARY: a Bag line at USD 0, one of four shared places, in the wedding stage */
   const g = await ST.select('guesthouse', 'guest-house', null, 2); assert.deepEqual(plain(g), { ok: true, unit: 'A' });
   const gh = B.get().filter((x) => x.id === 'guesthouse')[0]; assert.ok(gh, 'the Guest House is a Bag line');
   assert.equal(gh.price, 0); assert.equal(gh.complimentary, true); assert.equal(gh.interest, false); assert.equal(gh.unit, 'A'); assert.equal(gh.unitName, 'Guest House complimentary'); assert.equal(gh.name, 'Guest House complimentary · Vientiane'); assert.doesNotMatch(gh.meta + gh.name, /Private Residence|up to 4/);
   assert.equal(B.get().length, 3); assert.equal(B.total(), bagStays, 'a complimentary line adds nothing');
   assert.equal(J.state(segOf(w, 'wedstay')), 'selected'); const c = J.counts(); assert.equal(c.bagItems, 3); assert.equal(c.confirmed, 3); assert.equal(c.bagTotal, B.total());
   assert.deepEqual((await rooms.view(ident(PEGGY))).mine.wedstay, { key: 'guesthouse/guest-house', label: 'A' });
-  const lin = await rooms.view(ident(LIN)); assert.deepEqual(lin.units['guesthouse/guest-house'][0].occupants.map((o) => o.name), ['Peggy', 'Reserved'], 'who shares the house is visible by first name — and the place kept for her party as reserved'); assert.equal(lin.units['guesthouse/guest-house'][0].free, 4);
+  const lin = await rooms.view(ident(LIN)); assert.deepEqual(lin.units['guesthouse/guest-house'][0].occupants.map((o) => o.name), ['Peggy', 'Reserved'], 'who shares the house is visible by first name — and the place kept for her party as reserved'); assert.equal(lin.units['guesthouse/guest-house'][0].free, 2, 'a party of two takes two of the four places');
   /* a Souphattra room in the same stage replaces the Guest House (one selection per stage) */
   const s3 = await ST.select('wedstay', 'heritage'); assert.equal(s3.ok, true);
   assert.equal(B.get().filter((x) => x.id === 'guesthouse').length, 0); assert.equal(B.get().filter((x) => x.id === 'wedstay').length, 1);

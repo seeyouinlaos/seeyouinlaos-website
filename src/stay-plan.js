@@ -5,7 +5,7 @@
    ONE COMPONENT (Owner, 23 Sep 2026):
 
      BASE STAY   the Guest House complimentary of the wedding window
-                 (`guesthouse/guest-house`) — SIX guest places, the only
+                 (`guesthouse/guest-house`) — FOUR guest places (one bedroom, Edit 7), the only
                  complimentary accommodation, USD 0, the included nights and
                  nothing more. It cannot be extended: the house is the house.
 
@@ -18,7 +18,7 @@
 
    THE DEADLINE. A limited free allocation needs a fair cut-off: a place in the
    Guest House may be claimed until the end of 30 NOVEMBER 2026, or until the
-   six places are gone — whichever comes first. After that the complimentary
+   four places are gone — whichever comes first. After that the complimentary
    option is closed even if a place is technically free again (a release after
    the deadline is an administrative decision, never a silent reopening).
 

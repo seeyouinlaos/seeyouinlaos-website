@@ -37,7 +37,7 @@ const RENDERED = AV.slice(AV.indexOf('function html(f)'), AV.indexOf('/* ---- th
 function object(opts = {}) {
   const w = page({ auth: opts.auth === undefined ? null : opts.auth, modules: MODS });
   w.SIYL_UNITS = {
-    complimentary: () => (opts.engine === null ? null : Object.assign({ max: 6, remaining: 6, mine: false }, opts.engine)),
+    complimentary: () => (opts.engine === null ? null : Object.assign({ max: 4, remaining: 4, mine: false }, opts.engine)),
     mine: () => opts.mine || null,
   };
   return w;
@@ -45,8 +45,8 @@ function object(opts = {}) {
 const day = (iso) => new Date(iso + 'T12:00:00');
 
 test('THE COUNT · the ring is the engine\'s answer, never a number written into a page', () => {
-  const f = object({ engine: { remaining: 5 } }).SIYL_AVAILABILITY.facts();
-  assert.equal(f.max, 6); assert.equal(f.remaining, 5); assert.equal(f.taken, 1);
+  const f = object({ engine: { remaining: 3 } }).SIYL_AVAILABILITY.facts();
+  assert.equal(f.max, 4); assert.equal(f.remaining, 3); assert.equal(f.taken, 1);
   assert.equal(object({ engine: null }).SIYL_AVAILABILITY.facts(), null, 'nothing is shown until the engine has answered');
   assert.match(AV, /U\.complimentary\(\)/, 'the count comes from the engine');
   assert.match(AV, /P\.planningWindow\(new Date\(\)\)/, 'the days and the window come from the one stay plan');
@@ -97,7 +97,7 @@ test('THE LINE IS CALENDAR TIME · 23 September 2026 to the end of 30 November 2
   assert.equal(Math.round(planningProgress(day('2026-10-12')) * 1000), Math.round((19 / 69) * 1000));
   /* THE OBJECT DRAWS THAT, AND ONLY THAT: the count may change, the line does not */
   const here = planningWindow(new Date()).progress;
-  for (const remaining of [6, 5, 3, 0]) {
+  for (const remaining of [4, 3, 1, 0]) {
     assert.equal(object({ engine: { remaining } }).SIYL_AVAILABILITY.facts().elapsed, here, remaining + ' places left — the line does not move');
   }
   assert.match(AV, /THE LINE IS CALENDAR TIME/);
@@ -131,10 +131,12 @@ test('THE HOUSE IS THE PROJECT\'S OWN · "Guest House complimentary", and the in
 
 test('THE WORDS · one sentence per state, and never the language of a sale', () => {
   const A = object().SIYL_AVAILABILITY;
-  const head = (remaining) => A.headline({ max: 6, remaining, taken: 6 - remaining, full: remaining <= 0 }).replace('\n', ' ');
-  assert.equal(head(6), 'All six places are open.');
-  assert.equal(head(5), 'One place has gone.');
-  assert.equal(head(4), '2 places have gone.');
+  /* the one bedroom of Edit 7 (Owner, 24 Sep 2026): four places, the engine's maximum */
+  const head = (remaining) => A.headline({ max: 4, remaining, taken: 4 - remaining, full: remaining <= 0 }).replace('\n', ' ');
+  assert.equal(head(4), 'All four places are open.');
+  assert.equal(head(3), 'One place has gone.');
+  assert.equal(head(2), '2 places have gone.');
+  assert.equal(head(1), '3 places have gone.');
   assert.equal(head(0), 'Every place has gone.');
   assert.equal(A.footnote({ closed: false, phase: 'open', days: 68 }), '68 days remaining · availability may close earlier');
   assert.equal(A.footnote({ closed: false, phase: 'open', days: 1 }), '1 day remaining · availability may close earlier');

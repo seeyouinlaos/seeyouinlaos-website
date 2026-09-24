@@ -9,7 +9,7 @@
      confirmation and puts a stage on the waiting list when no option of its chain can take the party.
    · CANONICAL COUNTS: relevant = confirmed + waitlisted + declined + open; bagItems = the actual lines; bagTotal = the
      chargeable confirmed lines only.
-   · D2 = GUEST HOUSE COMPLIMENTARY: one shared house of six places; never "Private Residence"; occupants visible.
+   · D2 = GUEST HOUSE COMPLIMENTARY: one shared house of four places (one bedroom, Edit 7); never "Private Residence"; occupants visible.
    · THE CURRENT MASTER WINS: C86 USD 105; Lijiang and Kempinski six rooms per category; the dated restaurant moves. */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -199,20 +199,20 @@ test('COUNTS · relevant = confirmed + waitlisted + declined + open; excluded ar
 });
 
 /* ────────────────────────────── 6 · D2 · THE GUEST HOUSE ────────────────────────────── */
-test('GUEST HOUSE COMPLIMENTARY · one shared unit of six places, complimentary, the wedding stage; occupants named to signed-in guests; never "Private Residence" or "up to 4"', async () => {
-  assert.deepEqual(SEED['guesthouse/guest-house'], { unit: 'guest', capacity: 6, held: 0, name: 'Guest House complimentary', stay: 'Guest House complimentary · Vientiane' });
+test('GUEST HOUSE COMPLIMENTARY · one shared unit of four places (one bedroom, Edit 7), complimentary, the wedding stage; occupants named to signed-in guests; never "Private Residence" or "up to 4"', async () => {
+  assert.deepEqual(SEED['guesthouse/guest-house'], { unit: 'guest', capacity: 4, held: 0, name: 'Guest House complimentary', stay: 'Guest House complimentary · Vientiane' });
   assert.equal(SEED['airbnb-2br/private-residence'], undefined);
-  const u = unitsOf('guesthouse/guest-house'); assert.equal(u.length, 1); assert.equal(u[0].kind, 'property'); assert.equal(u[0].places, 6);
+  const u = unitsOf('guesthouse/guest-house'); assert.equal(u.length, 1); assert.equal(u[0].kind, 'property'); assert.equal(u[0].places, 4);
   assert.equal(stageOf('guesthouse/guest-house'), 'wedstay'); assert.ok(STAGES.includes('wedstay'));
   const rooms = new Rooms(doState());
   assert.equal((await join(rooms, LINI, 'guesthouse/guest-house', 'A', 1, 'Lin')).status, 200);
   const r = await join(rooms, PEG, 'guesthouse/guest-house', 'A', 2, 'Peggy');
   assert.equal(r.status, 200); assert.deepEqual(plain(unit(r.d, 'guesthouse/guest-house', 'A').occupants.map((o) => o.name)), ['Lin', 'Peggy', 'Your party'], 'who shares the house, by first name — and the place kept for her party');
-  assert.equal(unit(r.d, 'guesthouse/guest-house', 'A').free, 3);
+  assert.equal(unit(r.d, 'guesthouse/guest-house', 'A').free, 1, 'Lin + Peggy + her kept place: one of four left');
   const asLin = unit((await call(rooms, 'read', null, LINI)).d, 'guesthouse/guest-house', 'A');
   assert.deepEqual(plain(asLin.occupants.map((o) => o.name)), ['Lin', 'Peggy', 'Reserved'], 'a stranger sees the kept place as reserved, never a name');
   const st = await join(rooms, STE, 'guesthouse/guest-house', 'A', 2, 'Steffie');
-  assert.equal(st.status, 200); assert.deepEqual(plain(unit(st.d, 'guesthouse/guest-house', 'A').occupants.map((o) => o.name)), ['Lin', 'Peggy', 'Steffie'], 'the partner takes the kept place'); assert.equal(unit(st.d, 'guesthouse/guest-house', 'A').free, 3);
+  assert.equal(st.status, 200); assert.deepEqual(plain(unit(st.d, 'guesthouse/guest-house', 'A').occupants.map((o) => o.name)), ['Lin', 'Peggy', 'Steffie'], 'the partner takes the kept place'); assert.equal(unit(st.d, 'guesthouse/guest-house', 'A').free, 1, 'the kept place was already counted');
   assert.equal(unit((await call(rooms, 'read', null, null)).d, 'guesthouse/guest-house', 'A').occupants[0].name, undefined, 'never to the public');
   /* the data and the pages */
   const w = page({ auth: PEGGY, modules: WITH_MEDIA });
@@ -223,7 +223,8 @@ test('GUEST HOUSE COMPLIMENTARY · one shared unit of six places, complimentary,
   assert.equal(line.price, 0); assert.equal(line.complimentary, true); assert.equal(line.name, 'Guest House complimentary · Vientiane');
   for (const f of ['assets/rooms-data.js', 'journeys.html', 'accommodation.html', 'room.html', 'your-journey.html', 'review.html', 'cart.html', 'profile.html', 'assets/journey.js', 'assets/pricing.js', 'assets/aman.js', 'assets/stay-media.js', 'src/inventory-seed.js', 'src/mail-templates.js', 'src/worker.js']) {
     const s = src(f).replace(/\/\*[\s\S]*?\*\//g, '');
-    assert.doesNotMatch(s, /Private Residence|private-residence|airbnb-2br|privateResidence|up to 4 guests|up to four guests/i, f + ' still says the old words');
+    /* "up to four guests" is the house's own true capacity since Edit 7 (Owner, 24 Sep 2026); the retired words are the invented residence and the six-place, two-bedroom house */
+    assert.doesNotMatch(s, /Private Residence|private-residence|airbnb-2br|privateResidence|up to 4 guests|up to six guests|two-bedroom|six shared places/i, f + ' still says the old words');
   }
   assert.match(src('journeys.html'), /id="j-guesthouse"[^>]*><div class="pgal stay" data-stay-gal="guestHouse"/);
   assert.match(src('accommodation.html'), /<h3>Guest House complimentary<\/h3>/);

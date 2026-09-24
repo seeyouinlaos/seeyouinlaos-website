@@ -738,7 +738,7 @@
   E("Complimentary Wedding Stay · availability", "Kostenfreier Hochzeitsaufenthalt · Verfügbarkeit", "ที่พักงานแต่งงานโดยไม่มีค่าใช้จ่าย · จำนวนที่ว่าง", "ウェディング・ステイ（無料）の空き状況");
   E("Wedding Stay · Limited availability", "Hochzeitsaufenthalt · Begrenzte Verfügbarkeit", "ที่พักงานแต่งงาน · จำนวนจำกัด", "ウェディング・ステイ——残りわずか");
   E("Remaining", "Verbleibend", "คงเหลือ", "残り");
-  E("All six places are open.", "Alle sechs Plätze sind frei.", "ยังว่างครบทั้งหกที่", "六つの枠すべてが空いています。");
+  E("All four places are open.", "Alle vier Plätze sind frei.", "ยังว่างครบทั้งสี่ที่", "四つの枠すべてが空いています。");
   E("One place has gone.", "Ein Platz ist vergeben.", "มีผู้จองแล้วหนึ่งที่", "一つの枠が埋まりました。");
   E("Every place has gone.", "Alle Plätze sind vergeben.", "เต็มทุกที่แล้ว", "すべての枠が埋まりました。");
   E("Complimentary Wedding Stay", "Kostenfreier Hochzeitsaufenthalt", "ที่พักงานแต่งงานโดยไม่มีค่าใช้จ่าย", "ウェディング・ステイ（無料）");
@@ -954,8 +954,9 @@
   E("Guest House complimentary", "Gästehaus, kostenfrei", "เกสต์เฮาส์ ไม่มีค่าใช้จ่าย", "ゲストハウス（無料）");
   E("Guest house", "Gästehaus", "เกสต์เฮาส์", "ゲストハウス");
   E("Guest house · shared", "Gästehaus · geteilt", "เกสต์เฮาส์ · ใช้ร่วมกัน", "ゲストハウス・シェア");
-  E("Six shared places", "Sechs geteilte Plätze", "หกที่ ใช้ร่วมกัน", "シェア6名分");
-  E("Complimentary · six shared places", "Kostenfrei · sechs geteilte Plätze", "ไม่มีค่าใช้จ่าย · หกที่ใช้ร่วมกัน", "無料・シェア6名分");
+  E("Four shared places", "Vier geteilte Plätze", "สี่ที่ ใช้ร่วมกัน", "シェア4名分");
+  E("Complimentary · four shared places", "Kostenfrei · vier geteilte Plätze", "ไม่มีค่าใช้จ่าย · สี่ที่ใช้ร่วมกัน", "無料・シェア4名分");
+  E("One bedroom", "Ein Schlafzimmer", "หนึ่งห้องนอน", "ベッドルーム1室");
   E("View the guest house", "Das Gästehaus ansehen", "ดูเกสต์เฮาส์", "ゲストハウスを見る");
   E("Waiting list", "Warteliste", "รายชื่อรอ", "キャンセル待ち");
   E("Complete trip", "Die ganze Reise", "ทริปเต็ม", "フルトリップ");

@@ -6,7 +6,8 @@
      page counts the days from today, says "Last day" on the day itself and
      never counts below zero; afterwards the planning is closed and the engine
      refuses a NEW claim — while every paid arrangement stays open.
-   · The complimentary allocation is SIX guest places, the inventory seed's own
+   · The complimentary allocation is FOUR guest places (one bedroom, Edit 7,
+     24 Sep 2026), the inventory seed's own
      number, never one typed into a page: the remaining count is the engine's,
      the last place is decided inside the one actor, and a place given back
      before the deadline is free again.
@@ -45,13 +46,15 @@ test('THE DEADLINE · counted from today, never hard-coded and never negative: d
     assert.equal(s.words, 'Accommodation planning closed');
   }
   /* the words the guest reads about the allocation — factual, never scarcity marketing */
-  assert.deepEqual(complimentaryWords(5, 6, day('2026-10-01')), { state: 'available', headline: '5 of 6 places remaining', detail: 'Available until 30 November 2026 or until fully allocated.' });
-  assert.equal(complimentaryWords(1, 6, day('2026-10-01')).state, 'one-left');
-  assert.equal(complimentaryWords(1, 6, day('2026-10-01')).headline, '1 of 6 places remaining');
-  assert.equal(complimentaryWords(0, 6, day('2026-10-01')).headline, 'Complimentary stay fully allocated');
-  assert.equal(complimentaryWords(4, 6, day('2026-12-02')).headline, 'Complimentary accommodation planning closed');
+  assert.deepEqual(complimentaryWords(4, 4, day('2026-10-01')), { state: 'available', headline: '4 of 4 places remaining', detail: 'Available until 30 November 2026 or until fully allocated.' });
+  assert.deepEqual(complimentaryWords(3, 4, day('2026-10-01')), { state: 'available', headline: '3 of 4 places remaining', detail: 'Available until 30 November 2026 or until fully allocated.' });
+  assert.equal(complimentaryWords(2, 4, day('2026-10-01')).headline, '2 of 4 places remaining');
+  assert.equal(complimentaryWords(1, 4, day('2026-10-01')).state, 'one-left');
+  assert.equal(complimentaryWords(1, 4, day('2026-10-01')).headline, '1 of 4 places remaining');
+  assert.deepEqual(complimentaryWords(0, 4, day('2026-10-01')), { state: 'full', headline: 'Complimentary stay fully allocated', detail: 'All 4 places are taken.' });
+  assert.equal(complimentaryWords(3, 4, day('2026-12-02')).headline, 'Complimentary accommodation planning closed');
   for (const w of ['Hurry', 'Almost gone', 'Book now', 'Last chance', 'Only']) {
-    for (const r of [5, 1, 0]) assert.doesNotMatch(JSON.stringify(complimentaryWords(r, 6, day('2026-10-01'))), new RegExp(w, 'i'), w + ' is not this site\'s language');
+    for (const r of [4, 3, 1, 0]) assert.doesNotMatch(JSON.stringify(complimentaryWords(r, 4, day('2026-10-01'))), new RegExp(w, 'i'), w + ' is not this site\'s language');
   }
   /* a claim is possible only while the date allows it and a place is free */
   assert.equal(mayClaimComplimentary(day('2026-10-01'), 3).ok, true);
@@ -59,32 +62,34 @@ test('THE DEADLINE · counted from today, never hard-coded and never negative: d
   assert.equal(mayClaimComplimentary(day('2026-12-01'), 3).reason, 'closed');
 });
 
-test('CAPACITY · six complimentary places, the seed\'s own number; the count is the engine\'s; the sixth guest takes the last place and the seventh is refused; a place given back before the deadline is free again', async () => {
-  assert.equal(SEED[COMPLIMENTARY.key].capacity, 6);
+test('CAPACITY · four complimentary places (one bedroom, Edit 7), the seed\'s own number; the count is the engine\'s; the fourth guest takes the last place and the fifth is refused; a place given back before the deadline is free again', async () => {
+  assert.equal(SEED[COMPLIMENTARY.key].capacity, 4);
   assert.equal(SEED[COMPLIMENTARY.key].unit, 'guest');
   const rooms = new Rooms(doState());
   const who = (n) => G(String(900 + n));
-  for (let i = 1; i <= 6; i++) {
+  const empty = await call(rooms, 'read', null, who(1));
+  assert.equal(empty.d.complimentary.max, 4); assert.equal(empty.d.complimentary.remaining, 4, 'empty: 4 of 4 places remaining');
+  for (let i = 1; i <= 4; i++) {
     const r = await join(rooms, who(i), COMPLIMENTARY.key, 'A');
     assert.equal(r.d.ok, true, 'guest ' + i + ' takes a place');
-    assert.equal(r.d.complimentary.remaining, 6 - i, 'the remaining count is the engine\'s');
-    assert.equal(r.d.complimentary.max, 6);
+    assert.equal(r.d.complimentary.remaining, 4 - i, 'the remaining count is the engine\'s');
+    assert.equal(r.d.complimentary.max, 4);
   }
-  const seventh = await join(rooms, who(7), COMPLIMENTARY.key, 'A');
-  assert.equal(seventh.status, 409); assert.equal(seventh.d.ok, false); assert.equal(seventh.d.error, 'full', 'never a seventh complimentary guest');
-  assert.equal(seventh.d.complimentary.remaining, 0);
-  assert.equal(seventh.d.complimentary.full, true);
+  const fifth = await join(rooms, who(5), COMPLIMENTARY.key, 'A');
+  assert.equal(fifth.status, 409); assert.equal(fifth.d.ok, false); assert.equal(fifth.d.error, 'full', 'never a fifth complimentary guest');
+  assert.equal(fifth.d.complimentary.remaining, 0);
+  assert.equal(fifth.d.complimentary.full, true);
   /* a guest cancels: the place is back in the allocation at once */
   await leave(rooms, who(3), 'wedstay');
-  const after = await call(rooms, 'read', null, who(7));
+  const after = await call(rooms, 'read', null, who(5));
   assert.equal(after.d.complimentary.remaining, 1, 'a released place is free again');
-  const now = await join(rooms, who(7), COMPLIMENTARY.key, 'A');
+  const now = await join(rooms, who(5), COMPLIMENTARY.key, 'A');
   assert.equal(now.d.ok, true, 'and may be taken while the planning is open');
 });
 
 test('CONCURRENCY · the last complimentary place is decided inside the one actor: two guests asking together, one is allocated and the other is told', async () => {
   const rooms = new Rooms(doState());
-  for (let i = 1; i <= 5; i++) await join(rooms, G(String(910 + i)), COMPLIMENTARY.key, 'A');
+  for (let i = 1; i <= 3; i++) await join(rooms, G(String(910 + i)), COMPLIMENTARY.key, 'A');
   const a = join(rooms, G('921'), COMPLIMENTARY.key, 'A'), b = join(rooms, G('922'), COMPLIMENTARY.key, 'A');
   const [ra, rb] = await Promise.all([a, b]);
   const wins = [ra, rb].filter((r) => r.d.ok).length, loses = [ra, rb].filter((r) => !r.d.ok && r.status === 409).length;
@@ -92,7 +97,7 @@ test('CONCURRENCY · the last complimentary place is decided inside the one acto
   assert.equal(loses, 1, 'the other is told, and nothing is oversold');
   const read = await call(rooms, 'read', null, G('923'));
   assert.equal(read.d.complimentary.remaining, 0);
-  assert.equal(read.d.summary[COMPLIMENTARY.key].guestOccupiedPlaces, 6, 'six places, never seven');
+  assert.equal(read.d.summary[COMPLIMENTARY.key].guestOccupiedPlaces, 4, 'four places, never five');
 });
 
 test('THE DEADLINE ON THE SERVER · after 30 November 2026 a NEW complimentary claim is refused, a guest who already holds a place keeps it, and the paid extension stays open', async () => {

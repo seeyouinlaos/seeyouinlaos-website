@@ -37,7 +37,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/bag.js?v=fe0c8b93"></script>
 <script src="assets/shop-menu.js?v=1ff891bc"></script>
 <script src="assets/aman.js?v=d6c4adb4"></script>
-<script src="assets/rooms-data.js?v=a4760c95"></script>
+<script src="assets/rooms-data.js?v=3a8a998e"></script>
 <script src="assets/pricing.js?v=eb8a9bf3"></script>
 <script src="assets/stage-graph.js?v=82a28623"></script>
 <script src="assets/questionnaire.js?v=817b4a6f"></script>
@@ -45,8 +45,8 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/draft.js?v=ac3ae4f8"></script>
 <script src="assets/confirm.js?v=ff2a54e0"></script>
 <script src="assets/temple.js?v=200ee67c"></script>
-<script src="assets/stay-plan.js?v=f1b4f999"></script>
-<script src="assets/rooms.js?v=82eee5c1"></script>
+<script src="assets/stay-plan.js?v=1d6cb33c"></script>
+<script src="assets/rooms.js?v=f2c427e2"></script>
 <script src="assets/stay.js?v=51b302df"></script>
 <script src="assets/seatlabels.js?v=4994e1f4"></script>
 <script src="assets/seating.js?v=e867530e"></script>
@@ -135,9 +135,9 @@ function occupancyHtml(win,slug,unit){
   return '<div class="p-occ" data-unit-line><p class="t-l1 on">'+head+'</p><p class="t-b2">'+line+'</p>'+(cat?'<p class="t-b2 mute">'+cat+'</p>':'')+'</div>'}
 /* THE STAY CARD: the category, the place the guest holds in it, the cost */
 function staySummary(seg,x){
-  var incl=x.complimentary?'Complimentary · a shared guest house of six places; who sleeps where is arranged among you at the house'
+  var incl=x.complimentary?'Complimentary · a shared guest house of four places; who sleeps where is arranged among you at the house'
     :(x.note?x.note+(x.noteBy?' · '+x.noteBy:''):(x.breakfast||''));
-  var basis=x.complimentary?'Complimentary · one of six places'
+  var basis=x.complimentary?'Complimentary · one of four places'
     :(x.rate!=null&&x.nights?money(x.rate)+' per person / night · '+x.nights+(x.nights===1?' night':' nights')+' · your cost':'per person');
   var win=P.windowOf(x.id),held=ST.held(x),unit=ST.unitOf(x),tracked=U&&U.ready()&&U.tracked(win,x.room);
   var choosing=(!held||ROOMFOR===seg.key)&&tracked;
@@ -393,7 +393,7 @@ function renderDecisions(){
 var box=document.getElementById('dec');if(!box)return;
 var G=window.SIYL_GUEST;if(!G||!G.me()||!G.scopeAnswered()||G.notJoining()){box.innerHTML='';return}
 var c=J.counts();
-var guesthouse=SIYL_BAG.has('guesthouse')?'<p class="t-b2 measure-w">The Guest House is a shared stay of six places: who sleeps where is arranged among you at the house; the wedding programme is yours as it stands.</p>':'';
+var guesthouse=SIYL_BAG.has('guesthouse')?'<p class="t-b2 measure-w">The Guest House is a shared stay of four places: who sleeps where is arranged among you at the house; the wedding programme is yours as it stands.</p>':'';
 if(!c.open&&c.relevant){
   box.innerHTML='<div class="p-card"><p class="t-l1 '+(c.waitlisted?'open':'on')+'">'+esc(J.statusLine())+'</p>'+
     '<h2 class="t-h1">'+(c.waitlisted?'Every stage has an answer — '+(c.waitlisted===1?'one is':c.waitlisted+' are')+' on the waiting list':'Every stage has an answer')+'</h2>'+

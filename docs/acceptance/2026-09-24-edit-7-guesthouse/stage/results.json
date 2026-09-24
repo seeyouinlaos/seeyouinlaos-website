@@ -1,0 +1,52 @@
+[
+ {
+  "id": "G1 empty Guest House = 4 of 4 (one unit, four places)",
+  "ok": true,
+  "d": "{\"places\":4,\"remaining\":4,\"units\":1}"
+ },
+ {
+  "id": "G2 guests one to four: 3 · 2 · 1 · 0 remaining, then Full",
+  "ok": true,
+  "d": "T001:ok→3 | T003:ok→2 | G049:ok→1 | T002:ok→0"
+ },
+ {
+  "id": "G3 a fifth guest cannot exceed capacity (the engine refuses)",
+  "ok": true,
+  "d": "{\"status\":409,\"error\":\"full\"}"
+ },
+ {
+  "id": "G4 every guest sees who is in the house (four names, Full)",
+  "ok": true,
+  "d": "[\"G\",\"T\",\"T\",\"T\"]"
+ },
+ {
+  "id": "G5 a release gives exactly one place back",
+  "ok": true,
+  "d": "{\"remaining\":1}"
+ },
+ {
+  "id": "G6 the count survives a reload and a second device (the engine is the one truth)",
+  "ok": true,
+  "d": "{\"remaining\":1}"
+ },
+ {
+  "id": "G7 all released: back to 4 of 4",
+  "ok": true,
+  "d": "{\"remaining\":4}"
+ },
+ {
+  "id": "G8-390 room page: one bedroom · four guests · four shared places · 4 of 4 · 4 places available; no six-place words; no overflow",
+  "ok": true,
+  "d": "{\"miss\":[],\"stale\":false,\"overflow\":false}"
+ },
+ {
+  "id": "G8-834 room page: one bedroom · four guests · four shared places · 4 of 4 · 4 places available; no six-place words; no overflow",
+  "ok": true,
+  "d": "{\"miss\":[],\"stale\":false,\"overflow\":false}"
+ },
+ {
+  "id": "G8-1440 room page: one bedroom · four guests · four shared places · 4 of 4 · 4 places available; no six-place words; no overflow",
+  "ok": true,
+  "d": "{\"miss\":[],\"stale\":false,\"overflow\":false}"
+ }
+]

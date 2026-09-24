@@ -122,7 +122,7 @@ test('the words "fixed two-night stay" are gone from every guest surface', () =>
 });
 
 /* D2 · GUEST HOUSE COMPLIMENTARY (Owner, 19 Sep 2026): the complimentary alternative for the wedding window is ONE
- * shared house of SIX bookable places, priced by the same source as every other stay — at USD 0. The former
+ * shared one-bedroom house of FOUR bookable places (Edit 7, 24 Sep 2026), priced by the same source as every other stay — at USD 0. The former
  * "Private Residence" (airbnb-2br/private-residence, "up to 4 guests") was an invented label and no longer exists. */
 test('D2 · the Guest House complimentary is a USD 0 line of the wedding window, composed like every other stay (Owner, 19 Sep 2026)', async () => {
   /* the one source map: stay key, window id, room slug, status, no price */
@@ -133,7 +133,7 @@ test('D2 · the Guest House complimentary is a USD 0 line of the wedding window,
   assert.deepEqual(R.guesthouse.rooms.map((r) => r.slug), ['guest-house']);
   const house = R.guesthouse.rooms[0];
   assert.equal(house.name, 'Guest House complimentary');
-  assert.equal(house.status, 'Complimentary · six shared places');
+  assert.equal(house.status, 'Complimentary · four shared places');
   assert.equal(house.price, null);
   assert.equal(house.interest, true);
   assert.equal(house.complimentary, true);
@@ -149,12 +149,12 @@ test('D2 · the Guest House complimentary is a USD 0 line of the wedding window,
   assert.equal(line.stay, 'guesthouse');
   assert.equal(line.room, 'guest-house');
   assert.equal(line.name, 'Guest House complimentary · Vientiane');
-  assert.match(line.meta, /27 February – 01 March 2027 · Complimentary · six shared places/);
+  assert.match(line.meta, /27 February – 01 March 2027 · Complimentary · four shared places/);
   assert.equal(line.img, 'assets/images/guesthouse/guesthouse-01.jpg');
   assert.equal(line.price, 0);
   assert.equal(line.complimentary, true);
   assert.equal(line.interest, false, 'a stay held in the room engine, not a spa interest');
-  assert.equal(total([{ ...line, qty: 2 }]), 0, 'never adds to Your Costs — six places, USD 0 each');
+  assert.equal(total([{ ...line, qty: 2 }]), 0, 'never adds to Your Costs — four places, USD 0 each');
   assert.equal(total([...pick('wedstay', 'heritage'), { ...line, qty: 1 }]), 145, 'a complimentary line moves no total');
   /* a complimentary line never also reads "Amount on request" — the price IS known: nothing */
   assert.equal(P.lineBasis(line), '');
@@ -163,18 +163,18 @@ test('D2 · the Guest House complimentary is a USD 0 line of the wedding window,
   assert.deepEqual(P.ids('guesthouse'), ['guesthouse']);
   assert.equal(P.windowOf('guesthouse'), 'guesthouse');
 
-  /* the engine: one shared unit A of SIX places for the wedding stage, reserved for nobody */
+  /* the engine: one shared unit A of FOUR places (one bedroom, Edit 7) for the wedding stage, reserved for nobody */
   const { SEED, FIXED } = await import('../src/inventory-seed.js');
   const { unitsOf, stageOf } = await import('../src/rooms.js');
   assert.deepEqual(FIXED, [], 'nothing is arranged for anyone in advance');
   const seed = SEED['guesthouse/guest-house'];
   assert.equal(seed.unit, 'guest');
-  assert.equal(seed.capacity, 6);
+  assert.equal(seed.capacity, 4);
   assert.equal(seed.held, 0);
   assert.equal(seed.heldFor, undefined);
   assert.equal(seed.name, 'Guest House complimentary');
   assert.equal(stageOf('guesthouse/guest-house'), 'wedstay', 'the same stage as the Souphattra rooms and the Riverside');
-  assert.deepEqual(unitsOf('guesthouse/guest-house'), [{ key: 'guesthouse/guest-house', label: 'A', name: 'Guest House complimentary', kind: 'property', places: 6, reservedFor: null }]);
+  assert.deepEqual(unitsOf('guesthouse/guest-house'), [{ key: 'guesthouse/guest-house', label: 'A', name: 'Guest House complimentary', kind: 'property', places: 4, reservedFor: null }]);
 
   /* the invented label is gone from the source map, the seed and every guest surface */
   assert.equal(R.airbnb, undefined);

@@ -150,7 +150,7 @@
       if (!s) return '';
       var list = this.units(win, slug), mine = this.mineFor(win, slug);
       if (mine) return 'Your place is held · ' + this.unitName(list.filter(function (u) { return u.label === mine.label; })[0] || { kind: 'room', label: mine.label });
-      /* THE COMPLIMENTARY ALLOCATION (Owner, 22 Sep 2026): the six places are counted in the Owner's own words — how many are
+      /* THE COMPLIMENTARY ALLOCATION (Owner, 22 Sep 2026): the four places (Edit 7, 24 Sep 2026) are counted in the Owner's own words — how many are
          left of how many, "fully allocated" when they are gone, "closed" once the planning date has passed. Factual only. */
       var P = window.SIYL_STAY_PLAN;
       if (P && keyOf(win, slug) === P.COMPLIMENTARY.key) return P.complimentaryWords(s.remainingPlaces, s.sourcePlaces, new Date()).headline;
@@ -212,7 +212,7 @@
         .catch(function () { return { ok: false, error: 'unreachable' }; });
     },
     /* ---- THE COMPLIMENTARY ALLOCATION (Owner, 22 Sep 2026) ----
-       The engine's answer, never this file's arithmetic: how many of the six places are left, and whether the date still
+       The engine's answer, never this file's arithmetic: how many of the four places are left, and whether the date still
        allows a new claim. */
     complimentary: function () { return view && view.complimentary ? view.complimentary : null; },
     /* THE PAID EXTENSION IS WITHDRAWN (Owner, 23 Sep 2026): this service used to answer `extension()` and to call

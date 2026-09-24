@@ -74,10 +74,10 @@ test('NO RESERVATIONS, NO FIXED ARRANGEMENT (Owner, 15 Sep 2026 · reaffirmed 19
   /* the wedding window is ONE stage whether spent in the hotel, the Guest House or the Riverside */
   assert.deepEqual(STAGES, ['bkk-stay', 'prewed', 'wedstay', 'kmg', 'ljg', 'kempinski']);
   assert.equal(stageOf('guesthouse/guest-house'), 'wedstay'); assert.equal(stageOf('wedstay/heritage'), 'wedstay');
-  /* D2 · the Guest House complimentary: ONE shared unit of SIX places, kind property, named as the Owner names it; the invented key is gone */
-  assert.deepEqual(unitsOf('guesthouse/guest-house').map((u) => [u.label, u.kind, u.places, u.name, u.reservedFor]), [['A', 'property', 6, 'Guest House complimentary', null]]);
+  /* D2 · the Guest House complimentary: ONE shared unit of FOUR places (one bedroom, Edit 7), kind property, named as the Owner names it; the invented key is gone */
+  assert.deepEqual(unitsOf('guesthouse/guest-house').map((u) => [u.label, u.kind, u.places, u.name, u.reservedFor]), [['A', 'property', 4, 'Guest House complimentary', null]]);
   assert.deepEqual(unitsOf('airbnb-2br/private-residence'), [], 'there is no Private Residence');
-  assert.ok(!('airbnb-2br/private-residence' in SEED)); assert.equal(SEED['guesthouse/guest-house'].capacity, 6);
+  assert.ok(!('airbnb-2br/private-residence' in SEED)); assert.equal(SEED['guesthouse/guest-house'].capacity, 4);
 
   /* the pages, signed in as a host on a fresh engine: nothing arranged, nothing fixed, nothing reserved — the Bag carries only actual selections and stands at USD 0 with nothing chosen */
   const E2 = engine();
@@ -97,7 +97,7 @@ test('NO RESERVATIONS, NO FIXED ARRANGEMENT (Owner, 15 Sep 2026 · reaffirmed 19
   assert.equal((html.match(/data-join="bkk-stay\|u-sathorn-superior-garden\|[A-F]"/g) || []).length, 6, 'six rooms, six Choose buttons'); assert.match(html, /data-join="bkk-stay\|u-sathorn-superior-garden\|A"/);
   assert.doesNotMatch(html, /Reserved|data-reserved|Arranged|Fixed/i); assert.equal((html.match(/Choose this room/g) || []).length, 6);
   const gh = ST.unitsHtml('guesthouse', 'guest-house');
-  assert.match(gh, /Guest House complimentary/); assert.match(gh, /6 places available/); assert.match(gh, /data-join="guesthouse\|guest-house\|A"/); assert.doesNotMatch(gh, /Private Residence|up to 4/i);
+  assert.match(gh, /Guest House complimentary/); assert.match(gh, /4 places available/); assert.match(gh, /data-join="guesthouse\|guest-house\|A"/); assert.doesNotMatch(gh, /Private Residence|up to 4/i);
 
   /* the words: the fixed arrangement, the reservation and the invented residence are gone from every guest surface and script */
   assert.ok(!fs.existsSync(path.join(ROOT, 'assets/arranged.js')), 'assets/arranged.js is deleted');
@@ -105,7 +105,9 @@ test('NO RESERVATIONS, NO FIXED ARRANGEMENT (Owner, 15 Sep 2026 · reaffirmed 19
     const t = code(f);
     assert.doesNotMatch(t, /arranged\.js|SIYL_ARRANGED|Arranged for you|Fixed arrangement|fixedStagesOf|withoutFixed/i, f + ' carries no fixed arrangement');
     assert.doesNotMatch(t, /Reserved for (bride|family)|held for you|This category is reserved|Reserved · Bride/i, f + ' carries no reservation wording');
-    assert.doesNotMatch(t, /Private Residence|private-residence|airbnb-2br|up to (4|four)\b/i, f + ' never says Private Residence');
+    /* "up to four" was the invented residence's capacity; since Edit 7 (Owner, 24 Sep 2026) the Guest House itself is one bedroom
+       shared by up to four guests, so the ban is on the invented residence, never on the house's own true number */
+    assert.doesNotMatch(t, /Private Residence|private-residence|airbnb-2br/i, f + ' never says Private Residence');
   }
   for (const f of ['src/rooms.js', 'assets/rooms.js', 'assets/stay.js']) assert.doesNotMatch(code(f), /\.hosts\b|hostRole|Haruthai|Suthep/, f + ' special-cases nobody');
   const hostsFn = src('assets/pricing.js').match(/hosts: function \(\) \{[^}]*\}/)[0];
@@ -199,7 +201,7 @@ test('CHANGE · atomic: the new place is held first, the old one released only t
   /* never counted twice: one place per stage across the hotel and the Guest House — the wedding window is one stage */
   const res = await join(E, HARUTHAI, 'guesthouse/guest-house', 'A');
   assert.equal(res.status, 200); assert.equal(res.units[key][1].taken, 0, 'the hotel place is released for the Guest House'); assert.deepEqual(res.mine, { wedstay: { key: 'guesthouse/guest-house', label: 'A' } });
-  assert.equal(res.units['guesthouse/guest-house'][0].places, 6); assert.equal(res.units['guesthouse/guest-house'][0].free, 5);
+  assert.equal(res.units['guesthouse/guest-house'][0].places, 4); assert.equal(res.units['guesthouse/guest-house'][0].free, 3);
   /* a refresh returns the authoritative occupancy */
   const again = await E.call('read', null, asId(PEGGY));
   assert.equal(again.units[key][2].taken, 2); assert.equal(again.units[key][2].full, true);
@@ -211,7 +213,7 @@ test('PRESETS · the approved rooms come from the open inventory; the Presidenti
   assert.ok(P.approved('prewed').slug); assert.ok(P.cheapest('prewed').slug);
 });
 
-test('THE WORDS · category lines are derived from the physical rooms the engine reports: rooms with a place left · unused places; a category full of real bookings says SOLD OUT (the engine\'s word, never a reservation); the Guest House counts its six shared places; a unit takes a whole party or not at all; "Your place is held" only for a real allocation; the waiting list has a position', async () => {
+test('THE WORDS · category lines are derived from the physical rooms the engine reports: rooms with a place left · unused places; a category full of real bookings says SOLD OUT (the engine\'s word, never a reservation); the Guest House counts its four shared places; a unit takes a whole party or not at all; "Your place is held" only for a real allocation; the waiting list has a position', async () => {
   const E = engine();
   const NOOR = other('noor', 'Noor'), ADA = other('ada', 'Ada'), BEN = other('ben', 'Ben');
   /* real bookings by other guests: the Heritage A half taken, B full; the Presidential full; Steffie (Peggy's party) in the Guest House */
@@ -234,10 +236,10 @@ test('THE WORDS · category lines are derived from the physical rooms the engine
   /* U Sathorn: every room counts as available — Room A is nobody's */
   assert.equal(U.label('bkk-stay', 'u-sathorn-superior-garden'), '6 rooms · 12 places available'); assert.equal(U.unitWords(U.units('bkk-stay', 'u-sathorn-superior-garden')[0]), '2 places · Available'); assert.equal(U.fits('bkk-stay', 'u-sathorn-superior-garden'), true); assert.equal(U.ctaWords('bkk-stay', 'u-sathorn-superior-garden'), '');
   assert.deepEqual(plain(U.count('bkk-stay', 'u-sathorn-superior-garden')), { rooms: 6, places: 12, reserved: 0, free: 12, open: 6 });
-  /* D2 · the Guest House complimentary: six shared places, one taken, the first name visible */
+  /* D2 · the Guest House complimentary: four shared places, one taken, the first name visible */
   const gh = U.units('guesthouse', 'guest-house')[0];
-  assert.equal(U.label('guesthouse', 'guest-house'), '5 places available'); assert.equal(U.unitName(gh), 'Guest House complimentary'); assert.equal(U.unitWords(gh), 'Steffie · 5 places available');
-  assert.deepEqual(plain(U.count('guesthouse', 'guest-house')), { rooms: 1, places: 6, reserved: 0, free: 5, open: 1 });
+  assert.equal(U.label('guesthouse', 'guest-house'), '3 places available'); assert.equal(U.unitName(gh), 'Guest House complimentary'); assert.equal(U.unitWords(gh), 'Steffie · 3 places available');
+  assert.deepEqual(plain(U.count('guesthouse', 'guest-house')), { rooms: 1, places: 4, reserved: 0, free: 3, open: 1 });
   assert.deepEqual(gh.occupants.map((o) => [o.name, o.party, o.mine]), [['Steffie', true, false]], 'a party member already in the house');
   /* PARTY CAPACITY: a unit takes the whole party (the members already in it count) or not at all */
   const heritage = U.units('wedstay', 'heritage');

@@ -76,7 +76,8 @@ export const SEED = {
      sleeps where is the friends' own arrangement, never the website's). Held in GUESTS, visible by first name to every
      authenticated guest. Never "Private Residence" — that label was invented. */
   'guesthouse/guest-house':
-    { unit: 'guest', capacity: 6, held: 0, name: 'Guest House complimentary', stay: 'Guest House complimentary · Vientiane' },
+    /* ONE BEDROOM, FOUR GUESTS (Owner, 24 Sep 2026 · Edit 7): four shared places — the one number every count derives from */
+    { unit: 'guest', capacity: 4, held: 0, name: 'Guest House complimentary', stay: 'Guest House complimentary · Vientiane' },
 
   /* RIVERSIDE HOTEL VIENTIANE IS COMPLETELY RETIRED (Owner, 23 Sep 2026). Both its products are gone: the paid extension
      ('stayext/riverside-superior', withdrawn earlier the same day) and the wedding-stay alternative

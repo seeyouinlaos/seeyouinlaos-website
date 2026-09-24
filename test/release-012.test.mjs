@@ -70,8 +70,8 @@ test('THE JOURNEY · every accommodation card is a stay gallery from the record 
   assert.doesNotMatch(j.replace(/<!--[\s\S]*?-->/g, ''), /shamaYenAkat|Shama/, 'The Journey names no Shama');
   assert.equal((j.match(/<div class="pgal" data-gal="/g) || []).length, 4, 'the four transport galleries stay (the train, MU9646, C86, the return)');
   assert.match(j, /two addresses for this window: the Souphattra Heritage and the Guest House complimentary below/, 'Souphattra · Guest House (Owner, 23 Sep 2026: the Riverside is retired)');
-  /* D2 · Guest House complimentary (Owner, 19 Sep 2026): its card names the house, its status, six shared places, the room page; the invented label is gone */
-  assert.match(j, /<div class="p" id="j-guesthouse">[^]*?<p class="pn">Guest House complimentary<\/p>[^]*?<p class="pp" data-private>USD 0 · Complimentary<\/p><p class="pb" data-private>Both nights hosted by Haruthai &amp; Suthep · six shared places · nothing to pay<\/p><a class="vw" data-cta-swap href="room\.html\?stay=guesthouse&amp;room=guest-house">View the guest house<\/a>/);
+  /* D2 · Guest House complimentary (Owner, 19 Sep 2026): its card names the house, its status, four shared places (one bedroom, Edit 7), the room page; the invented label is gone */
+  assert.match(j, /<div class="p" id="j-guesthouse">[^]*?<p class="pn">Guest House complimentary<\/p>[^]*?<p class="pp" data-private>USD 0 · Complimentary<\/p><p class="pb" data-private>Both nights hosted by Haruthai &amp; Suthep · four shared places · nothing to pay<\/p><a class="vw" data-cta-swap href="room\.html\?stay=guesthouse&amp;room=guest-house">View the guest house<\/a>/);
   assert.doesNotMatch(j, /Private Residence|j-residence|privateResidence|airbnb-2br|up to 4/, 'no "Private Residence", no "up to 4" on The Journey');
   /* one grammar: frames name their hotel in a multi-hotel window; arrows, keyboard, lazy frames, the empty frame */
   assert.match(j, /out\.push\(\[im\.src,\(multi\?h\.name\+' · ':''\)\+im\.caption,h\.name,im\.kind\]\)/, 'a multi-hotel gallery names the hotel on every frame');

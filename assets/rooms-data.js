@@ -217,18 +217,18 @@
         bagName: 'Guest House complimentary · Vientiane', bagImg: 'assets/images/guesthouse/guesthouse-01.jpg' }],
       includes: [
         'Two nights, 27 → 28 February and 28 February → 1 March, for the wedding window.',
-        'Complimentary — nothing to pay. Six shared places in the house; each place is held as it is taken.',
+        'Complimentary — nothing to pay. Four shared places in the house; each place is held as it is taken.',
         'Guest Relations coordinates the keys, the arrival and the return personally.',
         'Breakfast, meals and transport in Vientiane are your own.'
       ],
       rooms: [
         { slug: 'guest-house', name: 'Guest House complimentary', cat: 'Guest house',
-          desc: 'A warm two-bedroom guest house in central Vientiane, secured for the wedding stay and shared by up to six guests. Guest Relations coordinates the arrangements personally.',
+          desc: 'A warm one-bedroom guest house in central Vientiane, secured for the wedding stay and shared by up to four guests. Guest Relations coordinates the arrangements personally.',
           gallery: [['assets/images/guesthouse/guesthouse-01.jpg', 'Living and dining'], ['assets/images/guesthouse/guesthouse-02.jpg', 'The entry'], ['assets/images/guesthouse/guesthouse-03.jpg', 'The balcony'], ['assets/images/guesthouse/guesthouse-04.jpg', 'Towards the temple roofs'], ['assets/images/guesthouse/guesthouse-05.jpg', 'By the window'], ['assets/images/guesthouse/guesthouse-06.jpg', 'A corner of the living room']],
-          facts: [['Type', 'Guest house · shared'], ['Bedrooms', 'Two bedrooms'], ['Places', 'Six shared places'], ['Location', 'Downtown Vientiane · 300 m to the Mekong Night Market · 800 m to Wat Sisaket']],
-          story: 'A two-bedroom guest house in downtown Vientiane, three hundred metres from the Mekong night market and eight hundred from Wat Sisaket. It is offered complimentary for the wedding window as six shared places — you see who is already staying when you choose yours — and Guest Relations arranges the keys, the arrival and everything around it personally.',
+          facts: [['Type', 'Guest house · shared'], ['Bedrooms', 'One bedroom'], ['Places', 'Four shared places'], ['Location', 'Downtown Vientiane · 300 m to the Mekong Night Market · 800 m to Wat Sisaket']],
+          story: 'A one-bedroom guest house in downtown Vientiane, three hundred metres from the Mekong night market and eight hundred from Wat Sisaket. It is offered complimentary for the wedding window as four shared places — you see who is already staying when you choose yours — and Guest Relations arranges the keys, the arrival and everything around it personally.',
           amenities: ['WiFi', 'Air conditioning', 'Hot water', 'Washer & laundry area', 'Refrigerator', 'Kettle & kitchenette', 'Hair dryer', 'Free parking'],
-          price: null, status: 'Complimentary · six shared places', interest: true, complimentary: true }
+          price: null, status: 'Complimentary · four shared places', interest: true, complimentary: true }
       ]
     },
 

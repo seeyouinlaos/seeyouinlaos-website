@@ -63,7 +63,7 @@
      ONE text node, so the site's dictionary can translate it whole instead of in fragments that no grammar survives. */
   function headline(f) {
     if (f.full) return 'Every place\nhas gone.';
-    if (f.taken === 0) return 'All ' + (f.max === 6 ? 'six' : f.max) + ' places\nare open.';
+    if (f.taken === 0) return 'All ' + ({ 4: 'four', 6: 'six' }[f.max] || f.max) + ' places\nare open.';
     if (f.taken === 1) return 'One place\nhas gone.';
     return f.taken + ' places\nhave gone.';
   }

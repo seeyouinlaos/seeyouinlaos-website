@@ -79,7 +79,7 @@ test('a party consumes rooms, not seats — ceil(guests ÷ occupancy)', () => {
   assert.equal(unitsFor('kmg/left-bank', 5), 2);
 });
 
-test('a six-room Bangkok category (U Sathorn — the Sathorn Penthouse deleted, Edit 6; Shama Yen-Akat deleted, 24 Sep 2026) is six rooms of two places; the Guest House complimentary (D2) is ONE unit of SIX places held in GUESTS; the wedding window is ONE stage (Owner, 19 Sep 2026)', () => {
+test('a six-room Bangkok category (U Sathorn — the Sathorn Penthouse deleted, Edit 6; Shama Yen-Akat deleted, 24 Sep 2026) is six rooms of two places; the Guest House complimentary (D2) is ONE unit of FOUR places held in GUESTS (one bedroom, Edit 7); the wedding window is ONE stage (Owner, 19 Sep 2026)', () => {
   assert.equal(SEED['bkk-stay/penthouse'], undefined, 'the Sathorn Penthouse is deleted (Edit 6, 24 Sep 2026)');
   assert.equal(SEED['bkk-stay/shama-king-studio-balcony'], undefined, 'Shama Yen-Akat is deleted (24 Sep 2026)');
   assert.deepEqual(Object.keys(SEED).filter((k) => k.startsWith('bkk-stay/')).sort(), ['bkk-stay/u-sathorn-superior-garden']);
@@ -90,13 +90,15 @@ test('a six-room Bangkok category (U Sathorn — the Sathorn Penthouse deleted, 
   assert.deepEqual(unitsOf('bkk-stay/u-sathorn-superior-garden').map((u) => [u.label, u.kind, u.places]), [['A', 'room', 2], ['B', 'room', 2], ['C', 'room', 2], ['D', 'room', 2], ['E', 'room', 2], ['F', 'room', 2]], 'Room A – F, twelve places, never a Room G');
   /* the Presidential is ONE room of TWO places, like every room */
   assert.deepEqual(unitsOf('wedstay/souphattra-presidential').map((u) => [u.label, u.places]), [['A', 2]]);
-  /* D2 · the guest house: one shared unit of six bookable places, held in GUESTS */
+  /* D2 · the guest house: one bedroom, one shared unit of four bookable places, held in GUESTS (Owner, 24 Sep 2026 · Edit 7) */
   const gh = SEED['guesthouse/guest-house'];
-  assert.equal(gh.unit, 'guest'); assert.equal(gh.capacity, 6); assert.equal(gh.name, 'Guest House complimentary');
-  assert.deepEqual(unitsOf('guesthouse/guest-house'), [{ key: 'guesthouse/guest-house', label: 'A', name: 'Guest House complimentary', kind: 'property', places: 6, reservedFor: null }]);
-  assert.equal(unitsFor('guesthouse/guest-house', 6), 6);
-  assert.equal(unitsFor('guesthouse/guest-house', 7), 7, 'a seventh guest does not fit in six places');
-  assert.ok(unitsFor('guesthouse/guest-house', 7) > sellable('guesthouse/guest-house'));
+  assert.equal(gh.unit, 'guest'); assert.equal(gh.capacity, 4); assert.equal(gh.name, 'Guest House complimentary');
+  assert.deepEqual(unitsOf('guesthouse/guest-house'), [{ key: 'guesthouse/guest-house', label: 'A', name: 'Guest House complimentary', kind: 'property', places: 4, reservedFor: null }]);
+  assert.equal(sellable('guesthouse/guest-house'), 4, 'four sellable places');
+  assert.equal(unitsFor('guesthouse/guest-house', 4), 4);
+  assert.ok(unitsFor('guesthouse/guest-house', 4) <= sellable('guesthouse/guest-house'), 'four guests fit');
+  assert.equal(unitsFor('guesthouse/guest-house', 5), 5, 'a fifth guest does not fit in four places');
+  assert.ok(unitsFor('guesthouse/guest-house', 5) > sellable('guesthouse/guest-house'));
   /* the invented label is gone from the ledger */
   assert.equal(SEED['airbnb-2br/private-residence'], undefined, 'the retired key is gone');
   assert.ok(!Object.keys(SEED).some((k) => /airbnb|private-residence/.test(k)));
@@ -140,7 +142,7 @@ test('the engine is the only place a place is decided; the retired category ledg
   assert.match(worker, /retired — use \/api\/rooms/, 'the category ledger answers 410');
   assert.ok(!existsSync(join(ROOT, 'assets/inventory.js')), 'the retired client is gone');
 });
-test('the guest-facing Guest House matches the ledger: SIX shared places, complimentary, on every surface — never "Private Residence", never "up to 4" (Owner, 19 Sep 2026)', () => {
+test('the guest-facing Guest House matches the ledger: FOUR shared places (one bedroom, Edit 7), complimentary, on every surface — never "Private Residence", never "up to 4" (Owner, 19 Sep 2026)', () => {
   const sandbox = { window: {}, document: { addEventListener() {} } };
   sandbox.window.document = sandbox.document;
   new Function('window', 'document', readFileSync(join(ROOT, 'assets/rooms-data.js'), 'utf8'))(sandbox.window, sandbox.document);
@@ -153,12 +155,15 @@ test('the guest-facing Guest House matches the ledger: SIX shared places, compli
   const res = gh.rooms.find((r) => r.slug === 'guest-house');
   assert.ok(res, 'the room slug is guest-house');
   assert.equal(res.name, 'Guest House complimentary');
-  assert.equal(res.status, 'Complimentary · six shared places');
+  assert.equal(res.status, 'Complimentary · four shared places');
   assert.equal(res.price, null); assert.equal(res.interest, true); assert.equal(res.complimentary, true);
-  assert.equal(SEED['guesthouse/guest-house'].capacity, 6, 'the ledger holds six');
-  assert.match(JSON.stringify(res.facts), /Six shared places/, 'the room page must say six');
-  assert.match(res.story, /six shared places/);
-  assert.ok(!/Private Residence|[Uu]p to 4|four guests|up to four/.test(JSON.stringify(gh)), 'the invented label and the retired capacity are gone');
+  assert.equal(SEED['guesthouse/guest-house'].capacity, 4, 'the ledger holds four');
+  assert.match(JSON.stringify(res.facts), /Four shared places/, 'the room page must say four');
+  assert.match(JSON.stringify(res.facts), /One bedroom/, 'the room page must say one bedroom');
+  assert.match(res.story, /one-bedroom guest house/); assert.match(res.story, /four shared places/);
+  assert.match(res.desc, /one-bedroom guest house/); assert.match(res.desc, /up to four guests/);
+  assert.ok(!/Private Residence|[Uu]p to 4\b/.test(JSON.stringify(gh)), 'the invented label is gone');
+  assert.ok(!/\b[Ss]ix (shared )?places|up to six|two-bedroom|Two bedrooms/.test(JSON.stringify(gh)), 'the retired capacity (six places, two bedrooms) is gone');
   /* the photographs, in one folder */
   for (let i = 1; i <= 6; i++) assert.ok(existsSync(join(ROOT, `assets/images/guesthouse/guesthouse-0${i}.jpg`)), `guesthouse-0${i}.jpg`);
   assert.ok(res.gallery.length && res.gallery.every(([src]) => /^assets\/images\/guesthouse\/guesthouse-0[1-6]\.jpg$/.test(src)));
@@ -250,7 +255,7 @@ test('E · no room is held back from the Cost Saving hotel (Owner, 15 Sep 2026):
   assert.equal(P.cheapest('wedstay', () => false), null);
 });
 
-test('F · the Guest House complimentary: Complimentary is the value, six shared places seen by first name, USD 0 in the Bag as a real selection — never "Private Residence" (Owner, 19 Sep 2026)', async () => {
+test('F · the Guest House complimentary: Complimentary is the value, four shared places seen by first name, USD 0 in the Bag as a real selection — never "Private Residence" (Owner, 19 Sep 2026)', async () => {
   const rooms = new Rooms(doState());
   const me = identity(PEGGY), lin = identity(LIN);
   const w = page({ auth: PEGGY, fetch: await roomsFetch(rooms, me) }); await w.SIYL_UNITS.load(true);
@@ -258,11 +263,11 @@ test('F · the Guest House complimentary: Complimentary is the value, six shared
   w.SIYL_GUEST.setScope({ vientiane: true });
   const wed = J.SEGMENTS.find((s) => s.key === 'wedstay');
   const [line] = P.items('guesthouse', 'guest-house');
-  assert.deepEqual(plain(line), { id: 'guesthouse', name: 'Guest House complimentary · Vientiane', meta: '27 February – 01 March 2027 · Complimentary · six shared places', interest: false, complimentary: true, price: 0, stay: 'guesthouse', room: 'guest-house', img: 'assets/images/guesthouse/guesthouse-01.jpg' });
+  assert.deepEqual(plain(line), { id: 'guesthouse', name: 'Guest House complimentary · Vientiane', meta: '27 February – 01 March 2027 · Complimentary · four shared places', interest: false, complimentary: true, price: 0, stay: 'guesthouse', room: 'guest-house', img: 'assets/images/guesthouse/guesthouse-01.jpg' });
   assert.equal(P.lineBasis(line), '', 'a complimentary line never reads "Amount on request"');
   assert.equal(J.meta(line).cat, 'Accommodation');
-  assert.equal(U.label('guesthouse', 'guest-house'), '6 places available');
-  assert.equal(U.unitWords(U.units('guesthouse', 'guest-house')[0]), '6 places · Available');
+  assert.equal(U.label('guesthouse', 'guest-house'), '4 places available', 'empty: all four places');
+  assert.equal(U.unitWords(U.units('guesthouse', 'guest-house')[0]), '4 places · Available');
   assert.equal(U.unitName(U.units('guesthouse', 'guest-house')[0]), 'Guest House complimentary', 'a property is named, never "Room A"');
   /* the wedding stay is ONE stage: the hotel or the Guest House */
   assert.deepEqual(plain(wed.ids), ['wedstay', 'guesthouse']);
@@ -272,7 +277,7 @@ test('F · the Guest House complimentary: Complimentary is the value, six shared
   assert.deepEqual(plain(B.get().map((x) => [x.id, x.price, x.complimentary, x.unit, x.unitName])), [['guesthouse', 0, true, 'A', 'Guest House complimentary']]);
   assert.equal(B.total(), 0);
   assert.equal(U.label('guesthouse', 'guest-house'), 'Your place is held · Guest House complimentary');
-  assert.equal(U.unitWords(U.units('guesthouse', 'guest-house')[0]), 'You · Your party · 4 places available', 'her place, the place kept for Steffie, four left');
+  assert.equal(U.unitWords(U.units('guesthouse', 'guest-house')[0]), 'You · Your party · 2 places available', 'her place, the place kept for Steffie, two left');
   assert.deepEqual(plain(U.mine('wedstay')), { key: 'guesthouse/guest-house', label: 'A' });
   const c = plain(J.counts());
   assert.deepEqual([c.confirmed, c.open, c.bagItems, c.bagTotal], [1, 1, 1, 0], 'a complimentary line is a confirmed stage at USD 0');
@@ -280,7 +285,7 @@ test('F · the Guest House complimentary: Complimentary is the value, six shared
   assert.equal(w.SIYL_GUEST.missingFor('journey').some((m) => /^room:/.test(m.key)), false, 'the held place is complete');
   /* who already shares the house, by first name — to any other authenticated guest */
   const w2 = page({ auth: LIN, fetch: await roomsFetch(rooms, lin) }); await w2.SIYL_UNITS.load(true);
-  assert.equal(w2.SIYL_UNITS.unitWords(w2.SIYL_UNITS.units('guesthouse', 'guest-house')[0]), 'Peggy · Reserved · 4 places available', 'her first name, the place kept for her party as reserved');
+  assert.equal(w2.SIYL_UNITS.unitWords(w2.SIYL_UNITS.units('guesthouse', 'guest-house')[0]), 'Peggy · Reserved · 2 places available', 'her first name, the place kept for her party as reserved');
   assert.deepEqual(plain(w2.SIYL_UNITS.units('guesthouse', 'guest-house')[0].occupants), [{ name: 'Peggy', mine: false, party: false }, { name: 'Reserved', mine: false, party: false, placeholder: true }], 'a first name, never an email, a phone number, a code');
   /* the Souphattra replaces it: one line, one hold, the house's place given back */
   assert.equal((await ST.select('wedstay', 'heritage', undefined, 2)).ok, true);
@@ -290,37 +295,48 @@ test('F · the Guest House complimentary: Complimentary is the value, six shared
   for (const f of ['your-journey.html', 'review.html', 'cart.html', 'room.html', 'journeys.html', 'accommodation.html']) {
     const s = readFileSync(join(ROOT, f), 'utf8');
     assert.ok(!/Guest Relations support applies during the Vientiane wedding stay only/.test(s), f + ' still implies hotel-style service for the house');
-    assert.ok(!/up to 4 guests|Private Residence/.test(s), f + ' still says four, or names the invented residence');
+    assert.ok(!/up to 4 guests|Private Residence/.test(s), f + ' names the invented residence ("up to 4 guests" was its label)');
+    assert.ok(!/[Ss]ix shared places|guest house (of|with) six places|up to six|two-bedroom/.test(s), f + ' still says the retired six places');
   }
-  assert.equal(SEED['guesthouse/guest-house'].capacity, 6);
+  assert.equal(SEED['guesthouse/guest-house'].capacity, 4);
 });
 
-test('G · the Guest House takes SIX places: a party of seven cannot take it; the engine refuses a party that does not fit together ("full for your party" — nobody is partially booked), a single guest takes the last place, the seventh is refused "full"; a party counts for its own (Owner, 19 Sep 2026)', async () => {
+test('G · the Guest House takes FOUR places (one bedroom, Edit 7): a party of five cannot take it; the engine refuses a party that does not fit together ("full for your party" — nobody is partially booked), a single guest takes the last place, the fifth is refused "full"; a leave gives one place back; a party counts for its own (Owner, 19 Sep 2026 · 24 Sep 2026)', async () => {
   const KEY = 'guesthouse/guest-house';
-  assert.equal(unitsFor(KEY, 7), 7);
-  assert.ok(unitsFor(KEY, 7) > sellable(KEY));
-  assert.ok(unitsFor(KEY, 6) <= sellable(KEY));
+  assert.equal(unitsFor(KEY, 5), 5);
+  assert.ok(unitsFor(KEY, 5) > sellable(KEY));
+  assert.ok(unitsFor(KEY, 4) <= sellable(KEY));
   const rooms = new Rooms(doState()), call = caller(rooms), hold = holdAs(call);
   const me = identity(PEGGY), steffie = identity({ invitationId: PEGGY.invitationId, guestId: 'g-steffie', partyId: PEGGY.partyId }), lin = identity(LIN);
-  for (let n = 1; n <= 5; n++) assert.equal((await hold(other(n), KEY, 'A', 1)).status, 200, 'guest ' + n);
+  let r = await call(lin, 'read', null);
+  assert.equal(r.d.summary[KEY].places, 4); assert.equal(r.d.summary[KEY].remainingPlaces, 4, 'empty: 4 of 4 places remaining');
+  for (let n = 1; n <= 3; n++) {
+    r = await hold(other(n), KEY, 'A', 1);
+    assert.equal(r.status, 200, 'guest ' + n); assert.equal(r.d.summary[KEY].remainingPlaces, 4 - n, 'after guest ' + n + ': ' + (4 - n) + ' of 4 remaining');
+  }
   /* one place left: a party of two is refused as a whole */
-  let r = await call(me, 'join', { invitationId: me.invitationId, guestId: me.guestId, key: KEY, label: 'A', name: 'Peggy', need: 2 });
+  r = await call(me, 'join', { invitationId: me.invitationId, guestId: me.guestId, key: KEY, label: 'A', name: 'Peggy', need: 2 });
   assert.equal(r.status, 409); assert.equal(r.d.ok, false); assert.equal(r.d.error, 'full for your party'); assert.equal(r.d.need, 2); assert.equal(r.d.free, 1);
   assert.deepEqual(r.d.mine, {}, 'nobody is partially booked');
-  assert.equal(r.d.units[KEY][0].taken, 5);
-  /* a single guest takes the last place; the house is then sold out; the seventh is refused */
+  assert.equal(r.d.units[KEY][0].taken, 3);
+  /* a single guest takes the last place; the house is then sold out; the fifth is refused */
   r = await call(lin, 'join', { invitationId: lin.invitationId, guestId: lin.guestId, key: KEY, label: 'A', name: 'Lin', need: 1 });
   assert.equal(r.status, 200); assert.deepEqual(r.d.joined, { key: KEY, label: 'A' });
-  assert.deepEqual(r.d.units[KEY][0].occupants.map((o) => o.name), ['X', 'X', 'X', 'X', 'X', 'Lin'], 'a name is letters: the engine keeps only letters, marks, spaces and \' - . of what a client sends (release 014)');
-  assert.equal(r.d.units[KEY][0].full, true); assert.equal(r.d.summary[KEY].soldOut, true); assert.equal(r.d.summary[KEY].remainingPlaces, 0);
-  r = await hold(other(7), KEY, 'A', 1);
-  assert.equal(r.status, 409); assert.equal(r.d.error, 'full');
+  assert.deepEqual(r.d.units[KEY][0].occupants.map((o) => o.name), ['X', 'X', 'X', 'Lin'], 'a name is letters: the engine keeps only letters, marks, spaces and \' - . of what a client sends (release 014)');
+  assert.equal(r.d.units[KEY][0].full, true); assert.equal(r.d.summary[KEY].soldOut, true); assert.equal(r.d.summary[KEY].remainingPlaces, 0, 'after four guests: 0 of 4 remaining');
+  r = await hold(other(5), KEY, 'A', 1);
+  assert.equal(r.status, 409); assert.equal(r.d.error, 'full', 'the fifth guest is refused');
   /* the same guest again is not a second place */
   r = await call(lin, 'join', { invitationId: lin.invitationId, guestId: lin.guestId, key: KEY, label: 'A', name: 'Lin', need: 1 });
-  assert.equal(r.status, 200); assert.equal(r.d.units[KEY][0].taken, 6);
+  assert.equal(r.status, 200); assert.equal(r.d.units[KEY][0].taken, 4);
+  /* a leave gives exactly one place back, and the fifth guest may then take it */
+  r = await call(lin, 'leave', { invitationId: lin.invitationId, guestId: lin.guestId, key: KEY });
+  assert.equal(r.status, 200); assert.equal(r.d.units[KEY][0].taken, 3); assert.equal(r.d.summary[KEY].remainingPlaces, 1, 'a leave restores one place'); assert.equal(r.d.summary[KEY].soldOut, false);
+  r = await hold(other(5), KEY, 'A', 1);
+  assert.equal(r.status, 200, 'the freed place is taken by the next guest'); assert.equal(r.d.summary[KEY].remainingPlaces, 0);
   /* a party counts for its own: with two places left Peggy (need 2) holds hers, Steffie (need 2) finds her party already there and holds the last */
   const rooms2 = new Rooms(doState()), call2 = caller(rooms2), hold2 = holdAs(call2);
-  for (let n = 1; n <= 4; n++) assert.equal((await hold2(other(n), KEY, 'A', 1)).status, 200);
+  for (let n = 1; n <= 2; n++) assert.equal((await hold2(other(n), KEY, 'A', 1)).status, 200);
   r = await call2(me, 'join', { invitationId: me.invitationId, guestId: me.guestId, key: KEY, label: 'A', name: 'Peggy', need: 2 });
   assert.equal(r.status, 200); assert.equal(r.d.units[KEY][0].free, 0, 'the last place is kept for Steffie');
   r = await call2(steffie, 'join', { invitationId: steffie.invitationId, guestId: steffie.guestId, key: KEY, label: 'A', name: 'Steffie', need: 2 });

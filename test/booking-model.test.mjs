@@ -5,7 +5,7 @@
    composes anything. There is no package: a guest says where they join us, the graph names the stages, the guest chooses each.
    Stage D: 1 SOUPHATTRA HERITAGE (every category from The Heritage USD 145 upward; two nights, the second complimentary —
    the total is ONE nightly rate, never twice) and 2 GUEST HOUSE (USD 0,
-   complimentary, both nights hosted, six shared places). D1 exhausted → the waiting list, never a silent move to D2 / D3. */
+   complimentary, both nights hosted, four shared places — one bedroom, Edit 7). D1 exhausted → the waiting list, never a silent move to D2 / D3. */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { page, roomsFetch, doState, plain, src, PEGGY, LIN } from './sandbox.mjs';
@@ -55,7 +55,7 @@ test('B/C/D · stage D, 1 SOUPHATTRA HERITAGE: every category from The Heritage 
   assert.match(jn, /Second night complimentary · You pay for the first night only/); assert.match(jn, /USD 0 · Complimentary<\/p><p class="pb" data-private>Both nights hosted by Haruthai &amp; Suthep/);
 });
 
-test('E/F · 2 GUEST HOUSE: USD 0, complimentary, six shared places — one line for stage D, the previous place released, the amount the chosen alternative\'s own', async () => {
+test('E/F · 2 GUEST HOUSE: USD 0, complimentary, four shared places — one line for stage D, the previous place released, the amount the chosen alternative\'s own', async () => {
   for (const [win, slug, price] of [['guesthouse', 'guest-house', 0]]) {
     const rooms = new Rooms(doState());
     const w = wedding(page({ auth: LIN, fetch: await roomsFetch(rooms, identity(LIN)) })); await w.SIYL_UNITS.load(true);
@@ -67,7 +67,7 @@ test('E/F · 2 GUEST HOUSE: USD 0, complimentary, six shared places — one line
     assert.equal(lines.length, 1, 'one line for stage D'); assert.equal(lines[0].id, win); assert.equal(lines[0].room, slug); assert.equal(lines[0].price, price); assert.equal(B.total(), price);
     assert.deepEqual(plain(Object.keys(U.view().mine)), ['wedstay']); assert.equal(U.view().mine.wedstay.key, win + '/' + slug, 'the Heritage place is released, the alternative held');
     assert.equal(J.state(seg(J, 'wedstay')), 'selected'); assert.deepEqual(plain(w.SIYL_GUEST.missingFor('journey')), [], 'stage D answered');
-    if (win === 'guesthouse') { assert.equal(lines[0].complimentary, true); assert.equal(unitsOf('guesthouse/guest-house')[0].places, 6); }
+    if (win === 'guesthouse') { assert.equal(lines[0].complimentary, true); assert.equal(unitsOf('guesthouse/guest-house')[0].places, 4, 'D2 is one unit of four shared places'); }
   }
 });
 
@@ -81,7 +81,7 @@ test('G/H · D1 full for the party → the waiting list is the guest\'s own choi
   const wr = await U.wait('wedstay', J.partySize(), SOUPHATTRA.map((s) => 'wedstay/' + s)); assert.equal(wr.ok, true); assert.equal(U.waitlisted('wedstay').position, 1);
   assert.equal(J.state(seg(J, 'wedstay')), 'waitlisted'); assert.ok(!G.missingFor('journey').some((m) => m.key === 'stage:wedstay'), 'the waiting list answers the stage');
   assert.equal(B.total(), 0); assert.deepEqual(plain(U.view().mine), {}, 'nothing held — the line, not a room');
-  assert.equal(U.units('guesthouse', 'guest-house')[0].free, 6, 'D2: six places, untouched'); /* THE RIVERSIDE IS RETIRED (Owner, 23 Sep 2026): stage D is the Souphattra and the Guest House, and the retired house has no stock at all */
+  assert.equal(U.units('guesthouse', 'guest-house')[0].free, 4, 'D2: four places, untouched'); /* THE RIVERSIDE IS RETIRED (Owner, 23 Sep 2026): stage D is the Souphattra and the Guest House, and the retired house has no stock at all */
   assert.deepEqual(unitsOf('riverside/superior-window'), [], 'the retired Riverside has no units');
 });
 

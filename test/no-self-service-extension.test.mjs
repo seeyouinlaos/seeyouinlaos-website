@@ -12,7 +12,7 @@
    WHAT MUST SURVIVE, and is asserted here too:
    · `riverside/superior-window` — the Riverside as a WEDDING-STAY alternative.
      It carries the word "Riverside" and is a DIFFERENT canonical product.
-   · the Guest House complimentary: six places, the 30 November 2026 deadline.
+   · the Guest House complimentary: four places (one bedroom, Edit 7), the 30 November 2026 deadline.
    · the Souphattra, and every other stay and amount.
    ========================================================================== */
 import { test } from 'node:test';
@@ -57,9 +57,9 @@ test('THE ENGINE · there is no extension stock, no extend operation and no exte
   assert.equal('extensionAvailable' in v.d, false);
   const mine = await call(rooms, 'mine', null, a);
   assert.equal('extension' in mine.d, false);
-  /* and the complimentary allocation is exactly as it was */
+  /* and the complimentary allocation is the seed's own: four places since Edit 7 (Owner, 24 Sep 2026) */
   assert.equal(v.d.complimentary.key, 'guesthouse/guest-house');
-  assert.equal(v.d.complimentary.max, 6);
+  assert.equal(v.d.complimentary.max, 4, 'four places, one bedroom (Edit 7)'); assert.equal(v.d.complimentary.max, SEED['guesthouse/guest-house'].capacity, 'derived from the seed');
   assert.equal(COMPLIMENTARY.deadline, '2026-11-30');
 });
 

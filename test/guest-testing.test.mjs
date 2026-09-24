@@ -55,7 +55,7 @@ test('THE HOSTS START AT ZERO · no room is anyone\'s before booking: no fixed a
   assert.deepEqual(FIXED, []);
   for (const [key, s] of Object.entries(SEED)) { assert.equal(s.held, 0, key + ' holds nothing in advance'); assert.equal('heldFor' in s, false, key + ' is held for nobody'); }
   for (const u of allUnits()) assert.equal(u.reservedFor, null, u.key + ' ' + u.label + ' is reserved for nobody');
-  assert.deepEqual(plain(unitsOf('guesthouse/guest-house')), [{ key: 'guesthouse/guest-house', label: 'A', name: 'Guest House complimentary', kind: 'property', places: 6, reservedFor: null }]);
+  assert.deepEqual(plain(unitsOf('guesthouse/guest-house')), [{ key: 'guesthouse/guest-house', label: 'A', name: 'Guest House complimentary', kind: 'property', places: 4, reservedFor: null }]);
   assert.equal('bkk-stay/penthouse' in SEED, false, 'the Sathorn Penthouse is deleted (Owner, 24 Sep 2026 · Edit 6)'); assert.equal(unitsOf('bkk-stay/penthouse').length, 0);
   assert.equal(unitsOf('bkk-stay/u-sathorn-superior-garden').length, 6); assert.equal(unitsOf('wedstay/souphattra-presidential')[0].places, 2, 'the Presidential is one room of two places');
   assert.deepEqual(mayJoin(unitsOf('bkk-stay/u-sathorn-superior-garden')[0], null), { ok: false, error: 'unauthorised' }); assert.deepEqual(mayJoin(unitsOf('bkk-stay/u-sathorn-superior-garden')[0], idOf(LIN)), { ok: true }); assert.deepEqual(mayJoin(unitsOf('bkk-stay/u-sathorn-superior-garden')[0], idOf(HARUTHAI)), { ok: true }, 'the hosts are asked for nothing but an identity');

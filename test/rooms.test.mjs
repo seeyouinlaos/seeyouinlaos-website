@@ -36,7 +36,7 @@ const wait = (rooms, who, stage, size, wanted, name) => call(rooms, 'wait', { in
 const unwait = (rooms, who, stage) => call(rooms, 'unwait', { invitationId: who.invitationId, guestId: who.guestId, stage }, who);
 const tick = () => new Promise((r) => setTimeout(r, 3));   /* the line is positioned by time: a later entry is later */
 
-test('ROOMS · 1 room = 2 places; 5 rooms = 10 places; units are persistent labels A, B, C …; the Guest House complimentary is ONE property of SIX shared places (Owner, 19 Sep 2026)', () => {
+test('ROOMS · 1 room = 2 places; 5 rooms = 10 places; units are persistent labels A, B, C …; the Guest House complimentary is ONE property of FOUR shared places (Owner, 19 Sep 2026 · one bedroom, Edit 7, 24 Sep 2026)', () => {
   assert.equal(PLACES, 2);
   const five = unitsOf('wedstay/heritage');
   assert.deepEqual(five.map((u) => u.label), ['A', 'B', 'C', 'D', 'E']);
@@ -50,11 +50,11 @@ test('ROOMS · 1 room = 2 places; 5 rooms = 10 places; units are persistent labe
   /* SATHORN PENTHOUSE BANGKOK IS DELETED (Owner, 24 Sep 2026 · Edit 6): no stock, no units */
   assert.equal(SEED['bkk-stay/penthouse'], undefined, 'the Sathorn Penthouse is not a product'); assert.deepEqual(unitsOf('bkk-stay/penthouse'), []);
   assert.deepEqual(Object.keys(SEED).filter((k) => k.startsWith('bkk-stay/')), ['bkk-stay/u-sathorn-superior-garden'], 'one Bangkok address (Shama Yen-Akat deleted, 24 Sep 2026)'); assert.equal(SEED['bkk-stay/shama-king-studio-balcony'], undefined); assert.deepEqual(unitsOf('bkk-stay/shama-king-studio-balcony'), [], 'the deleted Shama has no units');
-  /* D2 · GUEST HOUSE COMPLIMENTARY (Owner, 19 Sep 2026): one shared house = one unit A of kind property with SIX places — never "Private Residence", never "up to 4" */
+  /* D2 · GUEST HOUSE COMPLIMENTARY (Owner, 19 Sep 2026): one shared house = one unit A of kind property with FOUR places (one bedroom, Edit 7) — never "Private Residence", never "up to 4" */
   const house = unitsOf('guesthouse/guest-house');
   assert.equal(house.length, 1);
-  assert.deepEqual(house[0], { key: 'guesthouse/guest-house', label: 'A', name: 'Guest House complimentary', kind: 'property', places: 6, reservedFor: null });
-  assert.equal(SEED['guesthouse/guest-house'].unit, 'guest'); assert.equal(SEED['guesthouse/guest-house'].capacity, 6);
+  assert.deepEqual(house[0], { key: 'guesthouse/guest-house', label: 'A', name: 'Guest House complimentary', kind: 'property', places: 4, reservedFor: null });
+  assert.equal(SEED['guesthouse/guest-house'].unit, 'guest'); assert.equal(SEED['guesthouse/guest-house'].capacity, 4);
   assert.equal(SEED['airbnb-2br/private-residence'], undefined, 'the invented "Private Residence" key no longer exists'); assert.deepEqual(unitsOf('airbnb-2br/private-residence'), []);
   assert.equal(unitsOf('kmg/light-french')[0].places, 2, 'the Light French Suite sleeps two adults (Accommodation_Details Pax)');
   /* the current Operations Master (19 Sep 2026): Lijiang six rooms per category, Kempinski six */
@@ -129,9 +129,9 @@ test('ROOMS · guest 1 joins A → 1/2; guest 2 joins A → 2/2 with both first 
   assert.equal((await call(rooms, 'join', { invitationId: LIN.invitationId, guestId: LIN.guestId, key: 'wedstay/heritage', label: 'A', name: 'Lin', need: 3 }, LIN)).status, 200, 'she may move again');
   r = await call(rooms, 'join', { invitationId: LIN.invitationId, guestId: LIN.guestId, key: 'wedstay/souphattra-majestic', label: 'A', name: 'Lin', need: 3 }, LIN);
   assert.equal(r.status, 409); assert.equal(r.d.error, 'full for your party'); assert.equal(r.d.need, 3, 'one room of two places cannot take three at all');
-  /* the Guest House takes a party among its six shared places — the same wedding stage, so the hotel place goes */
+  /* the Guest House takes a party among its four shared places — the same wedding stage, so the hotel place goes */
   r = await call(rooms, 'join', { invitationId: PEG.invitationId, guestId: PEG.guestId, key: 'guesthouse/guest-house', label: 'A', name: 'Peggy', need: 2 }, PEG);
-  assert.equal(r.status, 200); assert.equal(unit(r.d, 'guesthouse/guest-house', 'A').taken, 2, 'her place and the place kept for her party member'); assert.equal(unit(r.d, 'guesthouse/guest-house', 'A').free, 4);
+  assert.equal(r.status, 200); assert.equal(unit(r.d, 'guesthouse/guest-house', 'A').taken, 2, 'her place and the place kept for her party member'); assert.equal(unit(r.d, 'guesthouse/guest-house', 'A').free, 2);
   assert.deepEqual(unit(r.d, 'guesthouse/guest-house', 'A').occupants.map((o) => o.name), ['Peggy', 'Your party']);
   assert.deepEqual(r.d.mine.wedstay, { key: 'guesthouse/guest-house', label: 'A' }); assert.equal(unit(r.d, 'wedstay/heritage', 'B').taken, 1, 'Steffie stays in Room B');
 });
@@ -279,7 +279,7 @@ test('WAITING LIST · a guest no room can take waits for the STAGE: one entry, p
   assert.deepEqual(Object.fromEntries(Object.entries(r.d.waitlist).map(([s, w]) => [s, w.position])), { kmg: 2, ljg: 1 }); assert.deepEqual(r.d.waiting, { kmg: 2, ljg: 1 });
   r = await call(rooms, 'mine', null, STE);
   assert.deepEqual(r.d, { ok: true, mine: {}, waitlist: r.d.waitlist, complimentary: r.d.complimentary }); assert.deepEqual(Object.keys(r.d.waitlist).sort(), ['kmg', 'ljg'], '`mine` carries the holds, the waits, the guest\'s own extension and the complimentary allocation — nothing else');
-  assert.equal(r.d.complimentary.key, 'guesthouse/guest-house'); assert.equal(r.d.complimentary.max, 6, 'the six places are the seed\'s, never a number typed into a page');
+  assert.equal(r.d.complimentary.key, 'guesthouse/guest-house'); assert.equal(r.d.complimentary.max, 4, 'four places (one bedroom, Edit 7)'); assert.equal(r.d.complimentary.max, SEED['guesthouse/guest-house'].capacity, 'the four places are the seed\'s, never a number typed into a page');
 });
 
 test('WAITING LIST · a place held resolves the line: a join clears the guest\'s wait of that stage and no other; a Guest Relations assignment resolves it too; the plan lists the line with its positions; the clean reset clears every hold AND every wait — a client cannot', async () => {
