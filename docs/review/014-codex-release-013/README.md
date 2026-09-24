@@ -43,5 +43,11 @@ execute mode: 1 assets read + 4 KV lists + 2 actor reads + 85 draft-actor snapsh
 subrequests — within the 1,000 of the Workers Paid plan the Durable Objects already require (the free plan's 50 would not
 fit; this account runs DOs). The live run is a single request; its answer carries `remaining` counts read after the sweep.
 
-To run when the quota returns (24 Sep 2026, 22:19 CEST): `codex-companion.mjs adversarial-review "--wait --base <the
+**24 Sep 2026, 22:23 CEST — run when the quota returned (`pass-2.md`):** the first call was stopped by OpenAI's content
+filter after Codex had read the reset (its interim words named two windows between the digest check and the sweep, both
+examined in `pass-2.md`: P2 / P3, not fixed because the reset is never run again); the rephrased second call was refused
+by the quota again — *"try again at Sep 25th, 2026 1:34 AM"*. No further retry (Owner). The final Codex verdict is still
+NOT delivered.
+
+Original note — to run when the quota returns (24 Sep 2026, 22:19 CEST): `codex-companion.mjs adversarial-review "--wait --base <the
 release-012 proof commit c516674> …"` on `main` with the scope of the second call; classify, fix, confirming pass.

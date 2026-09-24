@@ -68,7 +68,7 @@ sandbox devices against one engine (device 2's Remove after device 1's switch: t
 held line, USD 60), the replay reproduced through `SIYL_DRAFT._replay` (both lines) and settled on the `siyl:bag` event (one
 line), and the 011-7 order preserved (a Bag removal alone brings nothing back; the engine sync does).
 
-## Pass 3 — deferred (Codex quota, twice — see `pass-3.md`), answered by the release's own adversarial pass
+## Pass 3 — deferred (Codex quota, three times — see `pass-3.md`; the 24 Sep run found the quota gone again), answered by the release's own adversarial pass
 
 The third (confirming) pass was requested at 04:59 UTC on 19 Sep 2026 and refused by the Codex quota ("try again at
 10:56 AM"). Per the Owner's standing rule (release 009: the quota must not idle the work; the confirming pass runs when the
