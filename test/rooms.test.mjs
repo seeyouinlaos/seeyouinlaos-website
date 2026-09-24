@@ -49,7 +49,7 @@ test('ROOMS · 1 room = 2 places; 5 rooms = 10 places; units are persistent labe
   assert.equal(unitsOf('bkk-stay/u-sathorn-superior-garden').reduce((n, u) => n + u.places, 0), 12);
   /* SATHORN PENTHOUSE BANGKOK IS DELETED (Owner, 24 Sep 2026 · Edit 6): no stock, no units */
   assert.equal(SEED['bkk-stay/penthouse'], undefined, 'the Sathorn Penthouse is not a product'); assert.deepEqual(unitsOf('bkk-stay/penthouse'), []);
-  assert.deepEqual(Object.keys(SEED).filter((k) => k.startsWith('bkk-stay/')), ['bkk-stay/u-sathorn-superior-garden', 'bkk-stay/shama-king-studio-balcony'], 'two Bangkok addresses');
+  assert.deepEqual(Object.keys(SEED).filter((k) => k.startsWith('bkk-stay/')), ['bkk-stay/u-sathorn-superior-garden'], 'one Bangkok address (Shama Yen-Akat deleted, 24 Sep 2026)'); assert.equal(SEED['bkk-stay/shama-king-studio-balcony'], undefined); assert.deepEqual(unitsOf('bkk-stay/shama-king-studio-balcony'), [], 'the deleted Shama has no units');
   /* D2 · GUEST HOUSE COMPLIMENTARY (Owner, 19 Sep 2026): one shared house = one unit A of kind property with SIX places — never "Private Residence", never "up to 4" */
   const house = unitsOf('guesthouse/guest-house');
   assert.equal(house.length, 1);
@@ -88,7 +88,7 @@ test('ROOMS · nothing is reserved (Owner, 19 Sep 2026): no unit is anyone\'s in
   /* the stages of the journey: the Guest House is the wedding stage, as the hotel is (the Riverside was retired 23 Sep 2026) */
   assert.deepEqual(STAGES, ['bkk-stay', 'prewed', 'wedstay', 'kmg', 'ljg', 'kempinski']);
   assert.equal(stageOf('guesthouse/guest-house'), 'wedstay', 'the Guest House is the wedding stage'); assert.equal(stageOf('wedstay/heritage'), 'wedstay');
-  assert.equal(stageOf('bkk-stay/u-sathorn-superior-garden'), 'bkk-stay'); assert.equal(stageOf('bkk-stay/shama-king-studio-balcony'), 'bkk-stay'); assert.equal(stageOf('prewed/heritage'), 'prewed');
+  assert.equal(stageOf('bkk-stay/u-sathorn-superior-garden'), 'bkk-stay'); assert.equal(stageOf('prewed/heritage'), 'prewed');
 });
 
 test('ROOMS · guest 1 joins A → 1/2; guest 2 joins A → 2/2 with both first names; guest 3 cannot; no `fixed` map anywhere; a unit takes the whole party or none of it (Owner, 19 Sep 2026)', async () => {

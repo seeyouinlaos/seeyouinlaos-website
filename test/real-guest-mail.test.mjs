@@ -13,6 +13,8 @@ const ORIGIN = 'https://seeyouinlaos-website.suthep-hrg.workers.dev';
 function req(path, headers = {}, body, method) { return new Request(ORIGIN + path, { method: method || (body ? 'POST' : 'GET'), headers: { 'content-type': 'application/json', ...headers }, body: body ? JSON.stringify(body) : undefined }); }
 async function assetsFor(entries) { const index = JSON.stringify({ v: 2, entries }); return { fetch: async (r) => new URL(r.url).pathname === '/register/auth-index.json' ? new Response(index, { headers: { 'content-type': 'application/json' } }) : new Response('nope', { status: 404 }) }; }
 function kv() { const m = new Map(); return { m, get: async (k) => (m.has(k) ? m.get(k).v : null), put: async (k, v, o) => { m.set(k, { v, meta: o && o.metadata }); }, list: async () => ({ keys: [...m.keys()].map((name) => ({ name })) }) }; }
+/* step 01's required personal details (Owner, 24 Sep 2026) — obviously synthetic */
+const STEP01 = { birthdate: '1990-01-01', nationality: 'Testland', address1: '1 Test Street', postal: '10000', city: 'Testcity', country: 'Testland' };
 const TEXT = 'SEE YOU IN LAOS — JOURNEY SELECTION\nInvitation: INV-G777 · Sam\n- Special Express No. 25 · USD 100';
 /* the shape review.html sends (journey-shop) */
 const REAL = (email) => ({ channel: 'journey-shop', guestId: 'G777', partyId: 'INV-777', selections: [{ id: 'train', name: 'Special Express No. 25', price: 100 }], totalUsd: 100,
@@ -34,6 +36,8 @@ async function harness() {
 test('REAL PATH · the journey-shop payload: the guest email at registration.contact reaches the guest, the name and the seats are read from the real shape, the record carries the recipient and the flat mail summary', async () => {
   const h = await harness();
   try {
+    /* STEP 01 IS REQUIRED ON THE SERVER (Owner, 24 Sep 2026): the guest's personal details are stored — the email is not yet */
+    assert.equal((await h.w.fetch(req('/api/contact', { 'x-siyl-auth': h.sam }, { invitationId: 'INV-G777', ...STEP01 }, 'PUT'), h.env)).status, 200);
     const r = await h.w.fetch(req('/api/register', { 'x-siyl-auth': h.sam }, { invitationId: 'INV-G777', registration: complete(REAL('sam.example@example.org'), { scope: { vientianeWedding: true } }), text: TEXT }), h.env);
     assert.equal(r.status, 202); const d = await r.json();
     assert.equal(d.mail.guest.accepted, true); assert.equal(d.mail.guest.to, 's…@example.org'); assert.equal(d.mail.owner.accepted, true);
@@ -49,6 +53,8 @@ test('REAL PATH · the journey-shop payload: the guest email at registration.con
     /* the email carried by the journey is persisted as the server contact — the next device reads it */
     const c = await (await h.w.fetch(req('/api/contact', { 'x-siyl-auth': h.sam }), h.env)).json();
     assert.equal(c.ok, true); assert.equal(c.contact.email, 'sam.example@example.org'); assert.equal(c.contact.phone, '+66 81 000 0000');
+    /* the journey's email is added to the stored contact — the personal details the guest stored before are kept (Owner, 24 Sep 2026) */
+    const kept = JSON.parse(h.store.m.get('contact:INV-G777').v); for (const [k, v] of Object.entries(STEP01)) assert.equal(kept[k], v, k + ' survives the journey\'s email');
     /* nothing of the fixtures in the real path */
     assert.doesNotMatch(src('src/worker.js'), /Peggy|INV-G001|controlled production mail test/);
   } finally { h.done(); }
@@ -69,6 +75,13 @@ test('REAL PATH · a journey without an email is refused (422, the words for the
     /* the guest adds the email — persisted server-side */
     const put = await h.w.fetch(req('/api/contact', { 'x-siyl-auth': h.sam }, { invitationId: 'INV-G777', email: 'sam.example@example.org', phone: '+66 81 000 0000' }, 'PUT'), h.env);
     assert.equal(put.status, 200); assert.equal(JSON.parse(h.store.m.get('contact:INV-G777').v).guestId, 'G777');
+    /* STEP 01 IS REQUIRED ON THE SERVER (Owner, 24 Sep 2026): a valid email and phone alone are not a complete step 01 — the
+       journey is refused with every missing required personal item named (address2 · region are optional), nothing stored */
+    const rp = await h.w.fetch(req('/api/register', { 'x-siyl-auth': h.sam }, { invitationId: 'INV-G777', registration: complete(REAL('')), text: TEXT }), h.env);
+    assert.equal(rp.status, 422); const dp = await rp.json(); assert.equal(dp.error, 'incomplete');
+    assert.deepEqual(dp.missing.filter((m) => m.step === 'you').map((m) => m.key), ['birthdate', 'nationality', 'address1', 'postal', 'city', 'country']);
+    assert.equal(h.store.m.has('reg:INV-G777'), false); assert.equal(h.calls.length, 0);
+    assert.equal((await h.w.fetch(req('/api/contact', { 'x-siyl-auth': h.sam }, { invitationId: 'INV-G777', ...STEP01 }, 'PUT'), h.env)).status, 200);
     /* the same journey (still without an email in it) is accepted — the recipient is the server contact */
     const r2 = await h.w.fetch(req('/api/register', { 'x-siyl-auth': h.sam }, { invitationId: 'INV-G777', registration: complete(REAL('')), text: TEXT }), h.env);
     assert.equal(r2.status, 202); const d2 = await r2.json();

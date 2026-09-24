@@ -103,9 +103,13 @@ test('the journey page derives SELECTED from the bag and offers no second select
   assert.match(yj, /\.concat\(mandatory\(seg\)\?\[\]:\['<button type="button" class="p-link mute" data-skip="'\+seg\.key\+'">Not joining this stage<\/button>'\]\)/, 'a stage that may be declined offers it — the mandatory Kunming → Lijiang train never');
   assert.match(yj, /on\?'<span class="p-act quiet is-current" aria-current="true">Current selection<\/span>'\s*:'<button type="button" class="p-act" data-cls="'\+c\.slug\+'">/, 'fares too — one selection language');
   assert.doesNotMatch(yj, /Change this day|Current fare|Current stay|Selected for your journey/, 'no second vocabulary');
-  /* THE PARTICIPATION SHEETS (Owner, 21 Sep 2026): four selectable cards, all / none, the We'll-miss-you card, a release preview before a
-     scope leaves; no package card, no package drawer; the counts derived, never invented */
-  assert.match(yj, /class="p-sel p-sheet'\+\(on\?' on':''\)\+'" data-scope="'\+d\.key\+'"/); assert.match(yj, /data-scope-all/); assert.match(yj, /data-scope-none/); assert.match(yj, /We’ll miss you\./); assert.match(yj, /data-decline-send>Send my response</); assert.match(yj, /data-scope-reconsider>I’d like to reconsider</);
+  /* THE PARTICIPATION CHECKBOXES (Owner, 24 Sep 2026 · replacing the sheets of 21 Sep): four independent checkbox rows and the decline
+     as a row of the same component, the We'll-miss-you block, a release preview before a scope leaves; no "I'll join all", no
+     "I'd like to reconsider"; no package card, no package drawer; the counts derived, never invented */
+  assert.match(yj, /class="p-opt'\+\(exclusive\?' p-opt-x':''\)\+\(on\?' is-on':''\)\+'" '\+attr\+' role="checkbox" aria-checked="'\+\(on\?'true':'false'\)\+'"/, 'one checkbox component');
+  assert.match(yj, /optHtml\('data-scope="'\+d\.key\+'"'/); assert.match(yj, /optHtml\('data-scope-none',none,'I won’t be joining this trip'/); assert.match(yj, /class="p-opt-or"/);
+  assert.doesNotMatch(yj, /data-scope-all|I’ll join all|I'll join all|p-sel p-sheet|>I’d like to reconsider</, 'the join-all control, the sheets and the reconsider button are gone');
+  assert.match(yj, /We’ll miss you\./); assert.match(yj, /data-decline-send>Send my response</);
   assert.match(yj, /data-release-preview/); assert.match(yj, /data-release-confirm/); assert.doesNotMatch(yj, /p-pack|data-package|packagePlan|fxConfirm|FX_PLAN|Complete trip|Essential trip/, 'the packages are gone');
   assert.match(yj, /data-counts>'\+esc\(J\.countsWords\(\)\)/); assert.match(yj, /'Not joining this stage'|Not joining this stage<\/p>/);
   assert.doesNotMatch(yj, /Every stage you have already chosen stays exactly as you chose it|Cost Saving|self-arranged|id="fxb"|id="csb"|fullExperience|costSaving|selfArranged|soldOutStages|Full Experience/, 'the retired planner and its words are gone');

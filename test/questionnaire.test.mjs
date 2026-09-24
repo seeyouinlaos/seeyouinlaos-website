@@ -64,6 +64,8 @@ async function harness() {
   const entries = {}; entries[await authIdOf(peggy)] = { i: 'INV-G001', g: 'G001', p: 'INV-002', c: 'CON003', k: 'COUPL002' };
   const index = JSON.stringify({ v: 2, entries });
   const env = { ASSETS: { fetch: async (r) => new URL(r.url).pathname === '/register/auth-index.json' ? new Response(index, { headers: { 'content-type': 'application/json' } }) : new Response('', { status: 404 }) }, REG_KV: kv(), GR_TOKEN: 'gr-secret' };
+  /* STEP 01 IS REQUIRED ON THE SERVER (Owner, 24 Sep 2026): the guest's stored contact carries the required personal details — synthetic */
+  await env.REG_KV.put('contact:INV-G001', JSON.stringify({ invitationId: 'INV-G001', guestId: 'G001', email: 'peggy@example.org', phone: '+49 170 000 0001', birthdate: '1990-01-01', nationality: 'Testland', address1: '1 Test Street', postal: '10000', city: 'Testcity', country: 'Testland', at: '2026-09-24T00:00:00.000Z' }));
   const send = (registration) => w.fetch(req('/api/register', { 'x-siyl-auth': peggy }, { invitationId: 'INV-G001', registration, text: 'SEE YOU IN LAOS — test' }), env).then(async (r) => ({ status: r.status, d: await r.json().catch(() => null) }));
   return { w, env, peggy, send };
 }

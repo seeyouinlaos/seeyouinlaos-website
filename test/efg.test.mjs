@@ -21,6 +21,8 @@ import { authIdOf } from '../register/crypto.mjs';
 import { complete } from './complete.mjs';
 
 const PEGGY = 'g-peggy', STEFFIE = 'g-steffie';
+/* step 01's required personal details (Owner, 24 Sep 2026) — obviously synthetic */
+const STEP01 = { birthdate: '1990-01-01', nationality: 'Testland', address1: '1 Test Street', postal: '10000', city: 'Testcity', country: 'Testland' };
 const ID_PEGGY = { invitationId: 'INV-g-peggy', guestId: PEGGY, partyId: 'INV-DEMO-002', hosts: false };
 const ID_STEFFIE = { invitationId: 'INV-g-steffie', guestId: STEFFIE, partyId: 'INV-DEMO-002', hosts: false };
 const ID_SERAY = { invitationId: 'INV-g-seray', guestId: 'g-seray', partyId: 'INV-DEMO-009', hosts: false };
@@ -147,8 +149,22 @@ test('F · status: none → received (after a stored registration) → confirmed
   assert.equal((await w.fetch(req('/api/register', { method: 'POST', headers: { 'x-siyl-auth': PEGGY_S.bearer }, body }), env)).status, 401, 'the invitation must be the guest\'s own');
   const own = JSON.stringify({ invitationId: 'INV-g-peggy', text: 'SEE YOU IN LAOS — JOURNEY SELECTION', registration: complete({ guestId: 'g-peggy', registration_submitted_at: '2026-09-11T10:00:00.000Z' }) });
   assert.equal((await w.fetch(req('/api/register', { method: 'POST', headers: { 'x-siyl-auth': STEFFIE_S.bearer }, body: own }), env)).status, 401, 'a party member cannot send it either');
-  /* EMAIL FIRST (Owner, 16 Sep 2026): a journey without an email address is refused — back to the email field */
-  assert.equal((await w.fetch(req('/api/register', { method: 'POST', headers: { 'x-siyl-auth': PEGGY_S.bearer }, body: own }), env)).status, 422, 'no email, no journey');
+  /* EMAIL FIRST (Owner, 16 Sep 2026): a journey without an email address is refused — back to the email field. The rest of
+     step 01 is on the server already (Owner, 24 Sep 2026: step 01 is required there too), so the refusal is for the email alone. */
+  const put = (fields) => w.fetch(req('/api/contact', { method: 'PUT', headers: { 'x-siyl-auth': PEGGY_S.bearer }, body: JSON.stringify(fields) }), env);
+  assert.equal((await put({ phone: '+41 79 000 00 00', ...STEP01 })).status, 200);
+  const noMail = await w.fetch(req('/api/register', { method: 'POST', headers: { 'x-siyl-auth': PEGGY_S.bearer }, body: own }), env);
+  assert.equal(noMail.status, 422, 'no email, no journey');
+  assert.equal((await noMail.json()).field, 'email', 'refused for the email');
+  /* STEP 01 REQUIRED (Owner, 24 Sep 2026): a valid email and phone are not enough — a required personal field missing on the
+     server refuses the journey with the step-01 item named; the optional address2 · region are never asked */
+  assert.equal((await put({ email: 'p.sandbox@example.org', nationality: '', address2: '', region: '' })).status, 200);
+  const partial = await w.fetch(req('/api/register', { method: 'POST', headers: { 'x-siyl-auth': PEGGY_S.bearer }, body: own }), env);
+  assert.equal(partial.status, 422, 'a required personal field missing, no journey');
+  const pj = await partial.json();
+  assert.equal(pj.error, 'incomplete');
+  assert.deepEqual(pj.missing.filter((m) => m.step === 'you').map((m) => m.key), ['nationality'], 'the missing step-01 item is named, nothing optional');
+  assert.equal((await put({ nationality: STEP01.nationality })).status, 200);
   const withMail = JSON.stringify({ invitationId: 'INV-g-peggy', text: 'SEE YOU IN LAOS — JOURNEY SELECTION', registration: complete({ guestId: 'g-peggy', contact: { email: 'p.sandbox@example.org', phone: '' }, registration_submitted_at: '2026-09-11T10:00:00.000Z' }) });
   r = await (await w.fetch(req('/api/register', { method: 'POST', headers: { 'x-siyl-auth': PEGGY_S.bearer }, body: withMail }), env)).json();
   assert.equal(r.ok, true);

@@ -79,9 +79,10 @@ test('a party consumes rooms, not seats — ceil(guests ÷ occupancy)', () => {
   assert.equal(unitsFor('kmg/left-bank', 5), 2);
 });
 
-test('a six-room Bangkok category (U Sathorn — the Sathorn Penthouse deleted, Edit 6) is six rooms of two places; the Guest House complimentary (D2) is ONE unit of SIX places held in GUESTS; the wedding window is ONE stage (Owner, 19 Sep 2026)', () => {
+test('a six-room Bangkok category (U Sathorn — the Sathorn Penthouse deleted, Edit 6; Shama Yen-Akat deleted, 24 Sep 2026) is six rooms of two places; the Guest House complimentary (D2) is ONE unit of SIX places held in GUESTS; the wedding window is ONE stage (Owner, 19 Sep 2026)', () => {
   assert.equal(SEED['bkk-stay/penthouse'], undefined, 'the Sathorn Penthouse is deleted (Edit 6, 24 Sep 2026)');
-  assert.deepEqual(Object.keys(SEED).filter((k) => k.startsWith('bkk-stay/')).sort(), ['bkk-stay/shama-king-studio-balcony', 'bkk-stay/u-sathorn-superior-garden']);
+  assert.equal(SEED['bkk-stay/shama-king-studio-balcony'], undefined, 'Shama Yen-Akat is deleted (24 Sep 2026)');
+  assert.deepEqual(Object.keys(SEED).filter((k) => k.startsWith('bkk-stay/')).sort(), ['bkk-stay/u-sathorn-superior-garden']);
   assert.equal(SEED['bkk-stay/u-sathorn-superior-garden'].unit, 'room');
   assert.equal(SEED['bkk-stay/u-sathorn-superior-garden'].capacity, 6);
   assert.equal(SEED['bkk-stay/u-sathorn-superior-garden'].occupancy, 2);

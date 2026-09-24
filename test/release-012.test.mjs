@@ -28,7 +28,7 @@ const categoryOf = Object.fromEntries(W.SIYL_EXP.map((x) => [x.id, x.category]))
 const catOf = (id) => { const c = categoryOf[id]; return c === 'place' ? 'experience' : c; };
 
 test('STAY MEDIA · the record is the module; every frame is a hotel kind of the hotel it names, on disk, captioned, sourced; the lead shows the house; the Riverside Hotel\'s frames are read from the record (the Owner\'s folder, never a fixed count); the Guest House complimentary replaces the "Private Residence"', () => {
-  assert.equal(execFileSync('node', ['src/build-stay-media.cjs', '--check'], { cwd: process.cwd() }).toString().trim(), 'STAY MEDIA: current (7 hotels)', 'the Sathorn Penthouse deleted (Edit 6, 24 Sep 2026): seven hotels');
+  assert.equal(execFileSync('node', ['src/build-stay-media.cjs', '--check'], { cwd: process.cwd() }).toString().trim(), 'STAY MEDIA: current (6 hotels)', 'the Sathorn Penthouse deleted (Edit 6) and Shama Yen-Akat deleted (24 Sep 2026): six hotels');
   const kinds = STAY._taxonomy.hotel;
   assert.deepEqual(kinds, ['exterior', 'architecture', 'lobby', 'room', 'suite', 'pool', 'grounds', 'facilities']);
   for (const [key, h] of Object.entries(STAY)) {
@@ -52,18 +52,22 @@ test('STAY MEDIA · the record is the module; every frame is a hotel kind of the
   /* every hotel's frames are its own: the folder in `source` names the hotel */
   /* SATHORN PENTHOUSE BANGKOK IS DELETED (Owner, 24 Sep 2026 · Edit 6): not a hotel of the record, not in the module */
   assert.equal(STAY.sathornPenthouse, undefined, 'the deleted Penthouse is still in the media record'); assert.equal(W.SIYL_STAY_MEDIA.sathornPenthouse, undefined);
-  const own = { uSathorn: /026/, shamaYenAkat: /027/, souphattra: /021/, guestHouse: /022/, wanxiang: /023/, luyeBaisha: /024/, kempinski: /025/ };
+  /* SHAMA YEN-AKAT BANGKOK IS DELETED (Owner, 24 Sep 2026): not a hotel of the record, not in the module, nothing replaces it */
+  assert.equal(STAY.shamaYenAkat, undefined, 'the deleted Shama is still in the media record'); assert.equal(W.SIYL_STAY_MEDIA.shamaYenAkat, undefined);
+  assert.doesNotMatch(src('src/stay-media.json') + src('assets/stay-media.js'), /Shama|images\/shama\//, 'no Shama frame, name or caption remains in the record or the module');
+  const own = { uSathorn: /026/, souphattra: /021/, guestHouse: /022/, wanxiang: /023/, luyeBaisha: /024/, kempinski: /025/ };
   for (const [k, rx] of Object.entries(own)) for (const im of STAY[k].images) assert.match(im.source, rx, k + ' · ' + im.src + ' comes from its own folder');
 });
 
-test('THE JOURNEY · every accommodation card is a stay gallery from the record — Bangkok Before the Wedding shows its two addresses (U Sathorn · Shama; the Penthouse deleted), the Wedding window its two (Souphattra · Guest House complimentary), the transport galleries stay', () => {
+test('THE JOURNEY · every accommodation card is a stay gallery from the record — Bangkok Before the Wedding shows its one address (U Sathorn; the Penthouse and Shama deleted), the Wedding window its two (Souphattra · Guest House complimentary), the transport galleries stay', () => {
   const j = src('journeys.html');
   assert.match(j, /<script src="assets\/stay-media\.js(?:\?v=[0-9a-f]{8})?"><\/script>/, 'the record is loaded');
   assert.doesNotMatch(j, /class="pimg"/, 'no single-photograph accommodation card remains');
   const gal = Object.fromEntries([...j.matchAll(/<div class="p" id="(j-[a-z-]+)"[^>]*><div class="pgal stay" data-stay-gal="([^"]+)"/g)].map((m) => [m[1], m[2]]));
-  assert.deepEqual(gal, { 'j-bkk-stay': 'uSathorn,shamaYenAkat', 'j-prewed': 'souphattra', 'j-wedstay': 'souphattra', 'j-guesthouse': 'guestHouse', 'j-kmg': 'wanxiang', 'j-ljg': 'luyeBaisha', 'j-kempinski': 'kempinski' });
+  assert.deepEqual(gal, { 'j-bkk-stay': 'uSathorn', 'j-prewed': 'souphattra', 'j-wedstay': 'souphattra', 'j-guesthouse': 'guestHouse', 'j-kmg': 'wanxiang', 'j-ljg': 'luyeBaisha', 'j-kempinski': 'kempinski' });
   for (const keys of Object.values(gal)) for (const k of keys.split(',')) assert.ok(STAY[k], k + ' is a hotel of the record');
   assert.doesNotMatch(j, /sathornPenthouse|Sathorn Penthouse/, 'The Journey names no Penthouse');
+  assert.doesNotMatch(j.replace(/<!--[\s\S]*?-->/g, ''), /shamaYenAkat|Shama/, 'The Journey names no Shama');
   assert.equal((j.match(/<div class="pgal" data-gal="/g) || []).length, 4, 'the four transport galleries stay (the train, MU9646, C86, the return)');
   assert.match(j, /two addresses for this window: the Souphattra Heritage and the Guest House complimentary below/, 'Souphattra · Guest House (Owner, 23 Sep 2026: the Riverside is retired)');
   /* D2 · Guest House complimentary (Owner, 19 Sep 2026): its card names the house, its status, six shared places, the room page; the invented label is gone */

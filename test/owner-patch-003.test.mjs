@@ -111,7 +111,7 @@ test('WEDDING (VOW) CEREMONY · Souphattra Heritage · Sunday, 28 February 2027 
 test('SATHORN PENTHOUSE · DELETED (Owner, 24 Sep 2026 · Edit 6): no room record, no USD 85 / USD 255 price, no quote that names it — and no active USD 90', () => {
   const w = page({ auth: PEGGY });
   const R = w.SIYL_ROOMS; assert.equal(Object.values(R).flatMap((s) => s.rooms || []).find((r) => r.slug === 'penthouse'), undefined, 'the room record is gone');
-  assert.deepEqual([...R.sathorn.rooms.map((r) => r.slug)], ['u-sathorn-superior-garden', 'shama-king-studio-balcony'], 'Bangkok has exactly the two approved addresses');
+  assert.deepEqual([...R.sathorn.rooms.map((r) => r.slug)], ['u-sathorn-superior-garden'], 'Bangkok has exactly the one approved address (Shama Yen-Akat deleted, 24 Sep 2026)');
   const q = w.SIYL_PRICE.quote('bkk-stay', 'penthouse'); assert.notEqual(q && q.roomSlug, 'penthouse'); assert.doesNotMatch(JSON.stringify(q || {}), /Penthouse/, 'no quote names the deleted product');
   for (const f of ACTIVE) { const t = stripComments(src(f)); assert.doesNotMatch(t, /USD 90 per person|rate: 90\b/, f + ' carries the retired USD 90 rate'); assert.doesNotMatch(t, /Sathorn Penthouse|slug: 'penthouse'/, f + ' names the deleted Sathorn Penthouse'); }
 });

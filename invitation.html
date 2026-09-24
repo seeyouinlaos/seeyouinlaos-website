@@ -9,7 +9,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 .bag{width:44px;height:44px;display:flex;align-items:center;justify-content:center;position:relative;color:#313131;text-decoration:none}.bag .bgi{display:block}
 .bb{position:absolute;top:1px;right:0;min-width:14px;height:14px;padding:0 3px;background:#313131;color:#F3EEE7;font-size:8.5px;line-height:1;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;display:none;align-items:center;justify-content:center;box-shadow:0 0 0 2px #F3EEE7;border-radius:1px}
 </style>
-<link rel="stylesheet" href="assets/aman.css?v=23823812"><link rel="stylesheet" href="assets/prep.css?v=8e13eba5"></head><body>
+<link rel="stylesheet" href="assets/aman.css?v=23823812"><link rel="stylesheet" href="assets/prep.css?v=02085183"></head><body>
 <header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="cart.html" aria-label="My Bag"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main class="prep-page" id="invitation">
 <div id="page"></div>
@@ -19,12 +19,12 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/aman.js?v=d6c4adb4"></script>
 <script src="assets/stage-graph.js?v=82a28623"></script>
 <script src="assets/questionnaire.js?v=2d3727a3"></script>
-<script src="assets/guest.js?v=2f688b53"></script>
+<script src="assets/guest.js?v=a947c48f"></script>
 <script src="assets/draft.js?v=7ab9ca64"></script>
 <script src="assets/temple.js?v=200ee67c"></script>
 <script src="assets/confirm.js?v=f35e0aa8"></script>
-<script src="assets/rooms-data.js?v=dedf7e07"></script>
-<script src="assets/pricing.js?v=f921de7c"></script>
+<script src="assets/rooms-data.js?v=a4760c95"></script>
+<script src="assets/pricing.js?v=eb8a9bf3"></script>
 <script src="assets/stay-plan.js?v=f1b4f999"></script>
 <script src="assets/rooms.js?v=dfa4781d"></script>
 <script src="assets/seatlabels.js?v=4994e1f4"></script>
@@ -49,7 +49,7 @@ function gated(fn){if(window.SIYL_INVITE){SIYL_INVITE.require(fn)}
 else document.addEventListener('siyl:invite-ready',function(){SIYL_INVITE.require(fn)},{once:true})}
 var HERO='<span class="p-media" style="background-image:url(assets/images/event/052-ceremony-green-gateway.jpg)" role="img" aria-label="The green gateway at Souphattra Heritage, Vientiane"></span>';
 var calm=!!(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-var wasComplete=null;
+var wasComplete=null,TRIED=false;   /* TRIED: the guest has pressed Continue with something missing */
 function render(){
 var p=G.party(),me=G.me();
 if(!p||!me){
@@ -79,33 +79,39 @@ h+='<section class="prep-sec" id="you"><p class="t-l1">Your name</p><h2 class="t
    '<p class="t-b2 measure-w">'+(G.edited(me.guestId,'fullName')?'Corrected by you':'From your invitation')+' · <a class="p-link" href="#p-firstName">correct your name</a>'+(others.length?' · Your party · '+esc(G.partyNames())+'. Each of you has your own invitation and your own code; nothing here is answered for anyone else.':'')+'</p></section>';
 
 /* CONTACT — required, validated */
-h+='<section class="prep-sec" id="contact"><div class="p-block-h"><h2 class="t-h2">Your contact details</h2><p class="t-l1'+(complete?' on':' open')+'" id="contact-state">'+(complete?'<i class="prep-tick" aria-hidden="true"></i> Complete':'Required')+'</p></div>'+
+h+='<section class="prep-sec" id="contact"><div class="p-block-h"><h2 class="t-h2">Your contact details</h2><p class="t-l1'+(okE&&okP?' on':' open')+'" id="contact-state">'+(okE&&okP?'<i class="prep-tick" aria-hidden="true"></i> Complete':'Required')+'</p></div>'+
    '<p class="t-b1 measure">How Guest Relations reaches you about your own arrangements. Both are required.</p>'+
    '<div class="p-card" style="margin-top:var(--s4)">'+
-   '<div class="p-field" style="margin-top:0"><label class="t-l1" for="p-email">Email <span aria-hidden="true">· required</span></label><input id="p-email" type="email" inputmode="email" autocomplete="email" value="'+esc(email)+'" data-c="email" aria-required="true" aria-invalid="'+(email&&!okE?'true':'false')+'" aria-describedby="e-email">'+
-   '<p class="t-b2" id="e-email" role="status">'+(okE?'<span class="t-l1 on">Looks right</span>':(email?'<span class="t-l1 open">Please check the address</span>':''))+'</p></div>'+
-   '<div class="p-field"><label class="t-l1" for="p-phone">Mobile number <span aria-hidden="true">· required</span></label><input id="p-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+66 …" value="'+esc(phone)+'" data-c="phone" aria-required="true" aria-invalid="'+(phone&&!okP?'true':'false')+'" aria-describedby="e-phone">'+
-   '<p class="t-b2" id="e-phone" role="status">'+(okP?'<span class="t-l1 on">Looks right</span>':(phone?'<span class="t-l1 open">Please include the country code — digits, spaces and + are fine</span>':'With the country code, in any format.'))+'</p></div>'+
+   '<div class="p-field" style="margin-top:0"><label class="t-l1" for="p-email">Email <span aria-hidden="true">· required</span></label><input id="p-email" type="email" inputmode="email" autocomplete="email" value="'+esc(email)+'" data-c="email" aria-required="true" aria-invalid="'+((email&&!okE)||(TRIED&&!okE)?'true':'false')+'" aria-describedby="e-email">'+
+   '<p class="t-b2" id="e-email" role="status">'+(okE?'<span class="t-l1 on">Looks right</span>':(email?'<span class="t-l1 open">Please check the address</span>':(TRIED?'<span class="t-l1 open">Required — please fill this in</span>':'')))+'</p></div>'+
+   '<div class="p-field"><label class="t-l1" for="p-phone">Mobile number <span aria-hidden="true">· required</span></label><input id="p-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+66 …" value="'+esc(phone)+'" data-c="phone" aria-required="true" aria-invalid="'+((phone&&!okP)||(TRIED&&!okP)?'true':'false')+'" aria-describedby="e-phone">'+
+   '<p class="t-b2" id="e-phone" role="status">'+(okP?'<span class="t-l1 on">Looks right</span>':(phone?'<span class="t-l1 open">Please include the country code — digits, spaces and + are fine</span>':(TRIED?'<span class="t-l1 open">Required — with the country code, in any format</span>':'With the country code, in any format.')))+'</p></div>'+
    '</div></section>';
 
 /* THE PERSONAL DETAILS (Owner, 20 Sep 2026): the signed-in person's own — what the guest list knows is prefilled to review and
-   correct; asked for, never a lock on the journey. The person id and the couple id are the register's, never edited here. */
-var bd=G.contact('birthdate'),okB=!bd||G.validBirthdate(bd),nat=G.contact('nationality'),miss=G.personalMissing(),ids=[me.contactId,me.couple].filter(Boolean).join(' · ');
-var fld=function(key,label,type,extra,hint){var v=G.contact(key);return '<div class="p-field"><label class="t-l1" for="p-'+key+'">'+label+'</label><input id="p-'+key+'" type="'+(type||'text')+'" '+(extra||'')+' value="'+esc(v)+'" data-c="'+key+'">'+(hint?'<p class="t-b2">'+hint+'</p>':'')+'</div>'};
+   correct; REQUIRED since 24 Sep 2026 (Owner) except where marked optional. The person id and the couple id are the register's, never edited here. */
+var bd=G.contact('birthdate'),okB=!bd||G.validBirthdate(bd),nat=G.contact('nationality'),miss=G.youMissing().filter(function(m){return m.key!=='email'&&m.key!=='phone'}),ids=[me.contactId,me.couple].filter(Boolean).join(' · ');
+/* REQUIRED MEANS REQUIRED (Owner, 24 Sep 2026): every field says whether it is required or optional; after an attempt to continue
+   with something missing, each missing field says so beside itself and the first one takes the focus */
+var ym=G.youMissing(),need={};ym.forEach(function(m){need[m.key]=m});
+var req=function(opt){return opt?' <span class="mute">· optional</span>':' <span aria-hidden="true">· required</span>'};
+var flag=function(key){return TRIED&&need[key]?'<p class="t-b2 p-need" id="n-'+key+'"><span class="t-l1 open">Required — '+(key==='birthdate'&&G.contact('birthdate')?'please check the date':'please fill this in')+'</span></p>':''};
+var inv=function(key){return ' aria-required="true" aria-invalid="'+(TRIED&&need[key]?'true':'false')+'"'+(TRIED&&need[key]?' aria-describedby="n-'+key+'"':'')};
+var fld=function(key,label,type,extra,hint,opt){var v=G.contact(key);return '<div class="p-field'+(TRIED&&need[key]?' is-needed':'')+'"><label class="t-l1" for="p-'+key+'">'+label+req(opt)+'</label><input id="p-'+key+'" type="'+(type||'text')+'" '+(extra||'')+(opt?'':inv(key))+' value="'+esc(v)+'" data-c="'+key+'">'+flag(key)+(hint?'<p class="t-b2">'+hint+'</p>':'')+'</div>'};
 h+='<section class="prep-sec" id="personal"><div class="p-block-h"><h2 class="t-h2">Your personal details</h2><p class="t-l1'+(miss.length?' open':' on')+'" id="personal-state">'+(miss.length?miss.length+' still needed':'<i class="prep-tick" aria-hidden="true"></i> Complete')+'</p></div>'+
    '<p class="t-b1 measure">Please review what we have and correct anything that is not right. These details are yours alone'+(others.length?' — '+esc(G.partyNames())+' review their own on their own invitation':'')+'.</p>'+
    '<div class="p-card" style="margin-top:var(--s4)">'+
    /* THE GUEST'S OWN NAME (Owner, 21 Sep 2026): First Name · Last Name, prefilled from the invitation, the guest's to correct;
       the identity beneath (the code, the person id, the couple) never changes with the words */
-   '<div class="p-field" style="margin-top:0"><label class="t-l1" for="p-firstName">First Name</label><input id="p-firstName" type="text" autocomplete="given-name" value="'+esc(G.nameField('firstName'))+'" data-c="firstName"></div>'+
-   '<div class="p-field"><label class="t-l1" for="p-lastName">Last Name</label><input id="p-lastName" type="text" autocomplete="family-name" value="'+esc(G.nameField('lastName'))+'" data-c="lastName"><p class="t-b2">As on your passport. Your invitation, your code and your arrangements stay exactly as they are.</p></div>'+
-   '<div class="p-field"><label class="t-l1" for="p-birthdate">Date of Birth</label><input id="p-birthdate" type="date" min="1900-01-01" max="'+new Date().toISOString().slice(0,10)+'" autocomplete="bday" value="'+esc(bd)+'" data-c="birthdate" aria-invalid="'+(bd&&!okB?'true':'false')+'">'+
-   '<p class="t-b2" id="e-birthdate" role="status">'+(bd&&!okB?'<span class="t-l1 open">Please check the date</span>':'')+'</p></div>'+
+   '<div class="p-field'+(TRIED&&need.firstName?' is-needed':'')+'" style="margin-top:0"><label class="t-l1" for="p-firstName">First Name'+req()+'</label><input id="p-firstName" type="text" autocomplete="given-name"'+inv('firstName')+' value="'+esc(G.nameField('firstName'))+'" data-c="firstName">'+flag('firstName')+'</div>'+
+   '<div class="p-field'+(TRIED&&need.lastName?' is-needed':'')+'"><label class="t-l1" for="p-lastName">Last Name'+req()+'</label><input id="p-lastName" type="text" autocomplete="family-name"'+inv('lastName')+' value="'+esc(G.nameField('lastName'))+'" data-c="lastName">'+flag('lastName')+'<p class="t-b2">As on your passport. Your invitation, your code and your arrangements stay exactly as they are.</p></div>'+
+   '<div class="p-field'+(TRIED&&need.birthdate?' is-needed':'')+'"><label class="t-l1" for="p-birthdate">Date of Birth'+req()+'</label><input id="p-birthdate" type="date" min="1900-01-01" max="'+new Date().toISOString().slice(0,10)+'" autocomplete="bday" value="'+esc(bd)+'" data-c="birthdate" aria-required="true" aria-invalid="'+((bd&&!okB)||(TRIED&&need.birthdate)?'true':'false')+'" aria-describedby="e-birthdate">'+
+   '<p class="t-b2" id="e-birthdate" role="status">'+(bd&&!okB?'<span class="t-l1 open">Please check the date</span>':(TRIED&&need.birthdate?'<span class="t-l1 open">Required — please fill this in</span>':''))+'</p></div>'+
    fld('nationality','Nationality','text','autocomplete="off" placeholder="Thai, German"','One or more, as on your passports — for example “Thai, German”.')+
    '<p class="t-l1" style="margin-top:var(--s4)">Private Mailing Address</p><p class="t-b2 measure-w">'+esc(G.ADDRESS_WORDS)+'</p>'+
-   fld('address1','Street and house number','text','autocomplete="address-line1"')+fld('address2','Address line 2 <span class="mute">· optional</span>','text','autocomplete="address-line2"')+
+   fld('address1','Street and house number','text','autocomplete="address-line1"')+fld('address2','Address line 2','text','autocomplete="address-line2"','',true)+
    fld('postal','Postal / ZIP code','text','autocomplete="postal-code" inputmode="text"')+fld('city','City','text','autocomplete="address-level2"')+
-   fld('region','State / Province / Region <span class="mute">· where applicable</span>','text','autocomplete="address-level1"')+fld('country','Country','text','autocomplete="country-name"')+
+   fld('region','State / Province / Region','text','autocomplete="address-level1"','Only where your address has one.',true)+fld('country','Country','text','autocomplete="country-name"')+
    (ids?'<p class="t-b2 mute" style="margin-top:var(--s3)" data-personal-ids>Your record with Guest Relations · '+esc(ids)+'</p>':'')+
    '</div></section>';
 
@@ -124,7 +130,7 @@ h+='<section class="prep-sec"><p class="t-l1">Another invitation?</p><h2 class="
 
 /* the one continuation — strict */
 h+='<div class="prep-foot"><span></span><button type="button" class="p-act'+(complete?'':' off')+'" id="go" aria-disabled="'+(complete?'false':'true')+'">Continue to My Trip</button>'+
-   '<p class="t-b2 prep-foot-note" role="status" aria-live="polite"'+(complete?' hidden':'')+'>Add your email address and mobile number to continue.</p></div>';
+   '<p class="t-b2 prep-foot-note" role="status" aria-live="polite"'+(complete?' hidden':'')+'>'+(ym.length===1?'One required detail is still missing: '+esc(ym[0].label)+'.':ym.length+' required details are still missing'+(TRIED?': '+esc(ym.map(function(m){return m.label}).join(' · '))+'.':'. Fields marked “required” must be filled in to continue.'))+'</p></div>';
 page.innerHTML=h;
 
 /* the completion: the check draws once, when the step becomes complete */
@@ -138,8 +144,10 @@ page.querySelectorAll('input[data-c]').forEach(function(i){
 page.querySelectorAll('[data-leave]').forEach(function(b){b.addEventListener('click',function(){if(P&&P.leave)P.leave(b.getAttribute('data-leave'))})});
 var go=document.getElementById('go');
 if(go)go.addEventListener('click',function(){
+  /* the fields in focus are saved first: what the guest just typed counts */
+  page.querySelectorAll('input[data-c]').forEach(function(i){G.setContact(i.getAttribute('data-c'),i.value.trim())});
   var missing=G.missingFor('you');
-  if(missing.length){var note=page.querySelector('.prep-foot-note');if(note){note.hidden=false;note.textContent='Before you continue: '+missing[0].label.toLowerCase()+'.'}go.classList.remove('p-shake');void go.offsetWidth;go.classList.add('p-shake');if(P)P.focusControl('#'+missing[0].href.split('#')[1]);return}
+  if(missing.length){TRIED=true;render();var g2=document.getElementById('go');if(g2){g2.classList.remove('p-shake');void g2.offsetWidth;g2.classList.add('p-shake')}if(P)P.focusControl('#'+missing[0].href.split('#')[1]);return}
   go.classList.add('is-done');go.setAttribute('aria-disabled','true');go.innerHTML='<i class="prep-tick big" aria-hidden="true"></i>Complete';
   setTimeout(function(){location.href=(P?P.hrefOf('your-journey.html'):'your-journey.html')},calm?0:520)});
 }

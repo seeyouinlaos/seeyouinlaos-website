@@ -207,7 +207,9 @@
         if (!raw) return null; var o = { bangkok: !!raw.bangkok, vientianePreWedding: !!(raw.vientianePreWedding != null ? raw.vientianePreWedding : raw.vientiane), vientianeWedding: !!(raw.vientianeWedding != null ? raw.vientianeWedding : raw.vientiane), china: !!raw.china, none: !!raw.none };
         if (o.none) { o.bangkok = o.vientianePreWedding = o.vientianeWedding = o.china = false; return o; } return (o.bangkok || o.vientianePreWedding || o.vientianeWedding || o.china) ? o : null;
       };
-      if (s && s.at) { var o = norm(s); if (o) { o.at = s.at; o.by = s.by || 'guest'; return o; } }
+      /* THE GUEST'S OWN ANSWER ALWAYS WINS (Owner, 24 Sep 2026): a stored answer with nothing selected is "not answered yet" —
+         never the hosts' first-view default, which once made deselecting the last stage re-select all four */
+      if (s && s.at) { var o = norm(s); if (o) { o.at = s.at; o.by = s.by || 'guest'; return o; } return null; }
       if (p && p.hosts) return { bangkok: true, vientianePreWedding: true, vientianeWedding: true, china: true, none: false, at: null, by: 'hosts' };
       return null;
     },
@@ -240,6 +242,8 @@
       var st = read(), keys = this.SCOPE_KEYS, base = this.scope() || {}, cur = { bangkok: !!base.bangkok, vientianePreWedding: !!base.vientianePreWedding, vientianeWedding: !!base.vientianeWedding, china: !!base.china, none: !!base.none };
       if (patch.all === true) cur = { bangkok: true, vientianePreWedding: true, vientianeWedding: true, china: true, none: false };
       else if (patch.none === true) cur = { bangkok: false, vientianePreWedding: false, vientianeWedding: false, china: false, none: true };
+      /* unticking "I won't be joining this trip" leaves the question unanswered — stored as such, never a default */
+      else if (patch.none === false) cur = { bangkok: false, vientianePreWedding: false, vientianeWedding: false, china: false, none: false };
       else { if (typeof patch.vientiane === 'boolean') { cur.vientianePreWedding = patch.vientiane; cur.vientianeWedding = patch.vientiane; }   /* the legacy word: both Vientiane sheets */
         keys.forEach(function (k) { if (typeof patch[k] === 'boolean') cur[k] = patch[k]; }); if (keys.some(function (k) { return cur[k]; })) cur.none = false; }
       cur.at = stamp(); cur.by = me.guestId;
@@ -356,6 +360,21 @@
       return out;
     },
     contactComplete: function () { return this.contactMissing().length === 0; },
+    /* STEP 01 IS COMPLETE ONLY WHEN IT IS (Owner, 24 Sep 2026): the email and the mobile number, valid, AND every personal detail
+       the form does not mark optional — First Name · Last Name · Date of Birth (a real date) · Nationality · Street and house
+       number · Postal / ZIP code · City · Country. Address line 2 and State / Province / Region stay optional. A draft may be
+       saved at any time; the step is never complete — and the next step never opens — while one of these is missing. */
+    youMissing: function () {
+      var self = this, out = this.contactMissing(), seen = {};
+      out.forEach(function (m) { seen[m.key] = true; });
+      this.PERSONAL.forEach(function (f) {
+        if (f.optional || seen[f.key]) return;
+        var v = f.name ? self.nameField(f.key) : self.contact(f.key);
+        if (!String(v || '').trim()) out.push({ key: f.key, label: f.label, href: 'invitation.html#p-' + f.key });
+        else if (f.key === 'birthdate' && !self.validBirthdate(v)) out.push({ key: f.key, label: 'Date of Birth (a valid date)', href: 'invitation.html#p-birthdate' });
+      });
+      return out;
+    },
     /* the retired party-level fields, kept as names for the record's history */
     partyField: function (f) { return this.contact(f); },
     setPartyField: function (f, v) { return this.setContact(f, v); },
@@ -489,7 +508,7 @@
       var p = this.party(), me = this.me();
       if (!p) return [{ key: 'invitation', label: 'Open your invitation', href: 'invitation.html' }];
       var out = [];
-      if (key === 'you') return this.contactMissing();
+      if (key === 'you') return this.youMissing();
       if (key === 'journey') {
         if (!J || !B) return [];
         /* the scope first: nothing else is asked until the guest has said where they join us; a guest who is not joining is asked nothing more here */

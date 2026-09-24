@@ -53,7 +53,7 @@ test('THE PHOTO STANDS through every unrelated write: a name and contact correct
     assert.ok([...h.env.REG_KV.m.keys()].filter((k) => k.startsWith('avatar:')).includes(key) && ![...h.env.REG_KV.m.keys()].some((k) => k.startsWith('avatar:INV-G001:') || /^avatar:.*(v\d|session|Margaret|Acker)/.test(k)), 'this one key, never a versioned or named copy, after ' + what);
   };
   const put = (bearer, body) => h.call('/api/contact', bearer, { seenReset: epoch, ...body }, 'PUT');
-  assert.equal((await put(h.peggy, { invitationId: 'INV-G001', email: 'peggy@example.org', phone: '+49 170 1', firstName: 'Margaret', lastName: 'Acker', birthdate: '1990-05-17' })).status, 200); await check('the name and contact correction');
+  assert.equal((await put(h.peggy, { invitationId: 'INV-G001', email: 'peggy@example.org', phone: '+49 170 1', firstName: 'Margaret', lastName: 'Acker', birthdate: '1990-05-17', nationality: 'Testland', address1: '1 Test Street', postal: '10000', country: 'Testland' })).status, 200); await check('the name and contact correction');
   assert.equal((await put(h.peggy, { invitationId: 'INV-G001', city: 'Hamburg' })).status, 200); await check('a partial contact write');
   assert.equal((await put(h.peggy, { invitationId: 'INV-G001', photo: null, avatar: '', profilePhoto: false })).status, 200); await check('a body that names a photo field as empty (ignored)');
   const dr = await h.call('/api/draft', h.peggy, { invitationId: 'INV-G001', keys: { 'siyl.bag': '[]', 'siyl.guest': '{"contact":{"email":"peggy@example.org"}}', 'siyl.avatar': '' }, seenReset: epoch }, 'PUT'); assert.equal(dr.status, 200, JSON.stringify(dr.d).slice(0, 120)); await check('Save my progress');
@@ -63,6 +63,8 @@ test('THE PHOTO STANDS through every unrelated write: a name and contact correct
   const free = seatsOf(validateGeometry(SEAT_FIXTURE).config, 'dinner').filter((s) => !s.family).map((s) => s.seatId);
   assert.equal((await h.call('/api/seating/select', h.peggy, { invitationId: 'INV-G001', guestId: 'G001', event: 'dinner', seatId: free[0], name: 'Margaret' })).d.ok, true); await check('a seat');
   assert.equal((await h.call('/api/seating/select', h.peggy, { invitationId: 'INV-G001', guestId: 'G001', event: 'dinner', seatId: free[1], name: 'Margaret' })).d.ok, true); await check('a seat change');
+  /* STEP 01 IS REQUIRED ON THE SERVER (Owner, 24 Sep 2026): the partial write's city completed the stored contact — every required field stands */
+  { const sc = JSON.parse(h.env.REG_KV.m.get('contact:INV-G001').v); for (const k of ['email', 'phone', 'birthdate', 'nationality', 'address1', 'postal', 'city', 'country']) assert.ok(sc[k], k + ' is stored'); }
   const s1 = await h.call('/api/register', h.peggy, { invitationId: 'INV-G001', registration: complete(regOf(1)), text: 'SEE YOU IN LAOS — test' }); assert.ok(s1.status === 200 || s1.status === 202, JSON.stringify(s1.d).slice(0, 200)); await check('the trip sent');
   const s2 = await h.call('/api/register', h.peggy, { invitationId: 'INV-G001', registration: complete(regOf(2)), text: 'SEE YOU IN LAOS — test 2' }); assert.ok(s2.status === 200 || s2.status === 202); await check('the trip sent again');
   const rec = JSON.parse(h.env.REG_KV.m.get('reg:INV-G001').v); assert.equal(rec.version, 2, 'version 2'); assert.equal([...h.env.REG_KV.m.keys()].filter((k) => k.startsWith('reg:INV-G001:prev:')).length, 1, 'the earlier version kept — never a cleanup');

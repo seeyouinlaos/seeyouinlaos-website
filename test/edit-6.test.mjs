@@ -29,9 +29,16 @@ function browser(...files) {
 
 test('SATHORN PENTHOUSE · no stock, no room, no media, no card, no link, no preferred room — nothing replaces it', () => {
   assert.equal(SEED['bkk-stay/penthouse'], undefined);
-  assert.deepEqual(Object.keys(SEED).filter((k) => k.startsWith('bkk-stay/')).sort(), ['bkk-stay/shama-king-studio-balcony', 'bkk-stay/u-sathorn-superior-garden']);
+  /* Bangkok is U Sathorn alone: Shama Yen-Akat was deleted too (Owner, 24 Sep 2026) — nothing replaces either */
+  assert.deepEqual(Object.keys(SEED).filter((k) => k.startsWith('bkk-stay/')).sort(), ['bkk-stay/u-sathorn-superior-garden']);
+  assert.equal(SEED['bkk-stay/shama-king-studio-balcony'], undefined, 'Shama Yen-Akat is deleted');
   const w = browser('assets/rooms-data.js');
-  assert.deepEqual([...w.SIYL_ROOMS.sathorn.rooms.map((r) => r.slug)], ['u-sathorn-superior-garden', 'shama-king-studio-balcony']);
+  assert.deepEqual([...w.SIYL_ROOMS.sathorn.rooms.map((r) => r.slug)], ['u-sathorn-superior-garden']);
+  assert.equal(w.SIYL_STAY_IMAGES.shamaYenAkat, undefined, 'no Shama image map');
+  assert.equal(JSON.parse(read('src/stay-media.json')).shamaYenAkat, undefined, 'no Shama media record');
+  for (const f of ['accommodation.html', 'journeys.html', 'room.html', 'your-journey.html', 'assets/rooms-data.js', 'assets/stay-media.js', 'src/inventory-seed.js', 'src/stay-media.json']) {
+    assert.ok(!/shama/i.test(code(f)), f + ' still names Shama Yen-Akat');
+  }
   assert.equal(w.SIYL_STAY_IMAGES.sathornPenthouse, undefined);
   assert.equal(w.SIYL_FULL_EXPERIENCE['bkk-stay'], undefined);
   assert.equal(JSON.parse(read('src/stay-media.json')).sathornPenthouse, undefined);

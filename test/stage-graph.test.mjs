@@ -9,7 +9,7 @@ import { readFileSync, existsSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { join } from 'node:path';
 import { completion, normalizeScope, isRelevant, relevantLetters, scopeFromStates, resolved, STAGES, SCOPES, SCOPE_KEYS, MANDATORY, SHEETS, STAGE_IDS } from '../src/stage-graph.js';
-import { page, roomsFetch, doState, plain, src, ROOT, PEGGY, STEFFIE, LIN } from './sandbox.mjs';
+import { page, roomsFetch, doState, plain, src, ROOT, PEGGY, STEFFIE, LIN, SUTHEP } from './sandbox.mjs';
 import { Rooms } from '../src/rooms.js';
 import { Drafts } from '../src/drafts.js';
 import { bearerOf, authIdOf } from '../register/crypto.mjs';
@@ -21,9 +21,12 @@ const seg = (J, key) => J.SEGMENTS.find((s) => s.key === key);
 const SC = (o) => Object.assign({ bangkok: false, vientianePreWedding: false, vientianeWedding: false, china: false, none: false }, o);
 const allDone = (keys, except) => { const st = {}; keys.forEach((k) => { st[k] = 'selected'; }); Object.assign(st, except || {}); return st; };
 async function livePage(auth, rooms) { const w = page({ auth, fetch: await roomsFetch(rooms, identity(auth)) }); await w.SIYL_UNITS.load(true); return w; }
+const STEP01 = { birthdate: '1990-01-01', nationality: 'Testland', address1: '1 Test Street', postal: '10000', city: 'Testcity', country: 'Testland' };
 function answerTheRest(w) {
   const G = w.SIYL_GUEST, T = w.SIYL_TEMPLE, id = G.me().guestId;
   G.setContact('email', 'guest@example.com'); G.setContact('phone', '+66 81 234 5678');
+  /* step 01's required personal details (Owner, 24 Sep 2026) — synthetic; the name is the invitation's */
+  Object.entries(STEP01).forEach(([k, v]) => G.setContact(k, v));
   T.setAttendance(id, 'no'); ['coffee', 'vows', 'dinner'].forEach((k) => T.setEvent(id, k, 'yes')); T.setFinale(id, 'pool');
   G.setDressAck(true); G.setAllergy('no'); G.setPhotoAck(true);
   G.PROFILE.forEach((q) => G.setProfile(id, q.key, q.choices ? q.choices[0] : 'Answered'));
@@ -118,6 +121,10 @@ test('Q · not joining skips every stage, USD 0, complete; a leftover resource b
   const held = completion({ ...OK, scope: SC({ none: true }), stale: [{ key: 'release:prewed', label: 'x' }] }); assert.equal(held.canSend, false); assert.equal(held.next.key, 'release:prewed');
   const w = page({ auth: PEGGY }); answerTheRest(w); w.SIYL_GUEST.setScope({ none: true }); assert.equal(w.SIYL_BAG.total(), 0); assert.equal(w.SIYL_GUEST.readiness().ok, true);
   deq(w.SIYL_GUEST.steps().map((s) => s.state), ['complete', 'complete', 'na', 'na', 'na', 'attention']);
+  /* STEP 01 REQUIRED (Owner, 24 Sep 2026): a declined trip still needs step 01 — a required personal field missing blocks it, the optional address line 2 · region never do */
+  const G = w.SIYL_GUEST; assert.equal(G.contact('address2') || '', ''); assert.equal(G.contact('region') || '', '');
+  G.setContact('city', ''); deq(G.missingFor('you').map((m) => m.key), ['city']); assert.equal(G.done('you'), false); assert.equal(G.readiness().ok, false);
+  G.setContact('city', STEP01.city); assert.equal(G.done('you'), true); assert.equal(G.readiness().ok, true);
 });
 test('R · a couple: one partner declining does not decline the other (the answer is the guest\'s own record; ids untouched)', async () => {
   const rooms = new Rooms(doState());
@@ -146,9 +153,19 @@ test('T · former Complete: every real selection preserved; no package metadata 
 });
 
 /* ───────────────────────────── THE PAGE ───────────────────────────── */
-test('MY TRIP · four independently selectable sheets, all / none; each selected scope its own sheet of stages; unselected scopes\' stages hidden; the mandatory train offers no decline; YOUR CURRENT TRIP without a package', () => {
+test('MY TRIP · four independent checkbox parts and one exclusive decline (no "join all"); each selected scope its own sheet of stages; unselected scopes\' stages hidden; the mandatory train offers no decline; YOUR CURRENT TRIP without a package', () => {
   const yj = src('your-journey.html');
-  assert.match(yj, /G\.DESTINATIONS\.map\(function\(d\)\{var on=!!\(s&&!s\.none&&s\[d\.key\]\);/, 'the four cards from the graph'); assert.match(yj, /data-scope-all/); assert.match(yj, /data-scope-none/);
+  /* WHICH PARTS OF THE JOURNEY ARE YOU JOINING (Owner, 24 Sep 2026): four checkbox rows from the graph, a divider, the decline row of the same component */
+  assert.match(yj, /<h2 class="t-h1">Which parts of the journey are you joining\?<\/h2>/);
+  assert.match(yj, /G\.DESTINATIONS\.map\(function\(d\)\{return optHtml\('data-scope="'\+d\.key\+'"',!!\(s&&!s\.none&&s\[d\.key\]\),d\.label,d\.when,false\)\}\)/, 'the four rows from the graph');
+  assert.match(yj, /'<button type="button" class="p-opt'\+\(exclusive\?' p-opt-x':''\)\+\(on\?' is-on':''\)\+'" '\+attr\+' role="checkbox" aria-checked="'\+\(on\?'true':'false'\)\+'">'/, 'a real checkbox, its state in aria-checked');
+  assert.match(yj, /<span class="p-opt-box" aria-hidden="true"><\/span>/, 'a visible box'); assert.match(yj, /'<span class="p-opt-state">'\+\(on\?'Selected':'Not selected'\)\+'<\/span>/, 'the state in words');
+  assert.match(yj, /'<p class="p-opt-or" aria-hidden="true"><span>or<\/span><\/p>'\+\s*optHtml\('data-scope-none',none,'I won’t be joining this trip','',true\)/, 'the decline beneath a divider, the same component');
+  assert.doesNotMatch(yj, /data-scope-all|I’ll join all|I'll join all|p-sel p-sheet|aria-pressed="'\+\(on/, '"I\'ll join all" and the old pressed sheets are gone');
+  assert.match(yj, /var status=none\?'Not joining this trip':\(n\?n\+' of 4 selected · '\+esc\(G\.scopeWords\(\)\):'Nothing selected yet'\);/, 'the status line');
+  assert.match(yj, /data-scope-status>'\+status\+'/);
+  assert.match(yj, /p\[k\]=b\.getAttribute\('aria-checked'\)!=='true';applyScope\(p\)/, 'each part toggles on its own');
+  assert.match(yj, /applyScope\(none\.getAttribute\('aria-checked'\)==='true'\?\{none:false\}:\{none:true\}\)/, 'the decline ticks and unticks');
   assert.match(yj, /<h2 class="t-h1">Your current trip<\/h2>/); assert.doesNotMatch(yj, /Complete trip|Essential trip|packageCard|p-pack|fxConfirm|FXMODE/);
   assert.match(yj, /var sh=J\.sheetOf\(seg\);if\(sh&&sh!==sheet\)/, 'a heading whenever the sheet changes'); assert.match(yj, /'<div class="p-sheet-h" data-sheet="'/);
   assert.match(yj, /if\(seg\.key==='wedstay'&&G\.joins\('vientianeWedding'\)\)h\+=weddingHtml\(\)/, 'the wedding under the wedding sheet only');
@@ -158,14 +175,26 @@ test('MY TRIP · four independently selectable sheets, all / none; each selected
   const w = page({ auth: PEGGY }); const G = w.SIYL_GUEST, J = w.SIYL_JOURNEY;
   deq(G.DESTINATIONS.map((d) => d.key), SCOPE_KEYS);
   G.setScope({ bangkok: true }); G.setScope({ china: true }); deq(J.relevantSegments().map((s) => J.sheetOf(s)), ['bangkok', 'china', 'china', 'china', 'bangkokReturn', 'bangkokReturn'], 'the stages under their sheets');
-  G.setScope({ all: true }); assert.equal(G.joinsAll(), true); G.setScope({ none: true }); deq(J.relevantSegments(), []); assert.equal(G.scopeWords(), 'Not joining this trip');
-  G.clearScope(); assert.equal(G.scope(), null, 'I\'d like to reconsider: the question again');
+  /* all four ticked one by one — there is no "select all" */
+  G.setScope({ vientianePreWedding: true }); G.setScope({ vientianeWedding: true }); assert.equal(G.joinsAll(), true);
+  /* the decline clears the four; any part clears the decline */
+  G.setScope({ none: true }); deq(J.relevantSegments(), []); assert.equal(G.scopeWords(), 'Not joining this trip'); assert.equal(G.notJoining(), true);
+  G.setScope({ china: true }); assert.equal(G.notJoining(), false); deq(SCOPE_KEYS.filter((k) => G.scope()[k]), ['china'], 'a part replaces the decline');
+  /* unticking the decline leaves the question unanswered — stored with a timestamp, all four false */
+  G.setScope({ none: true }); G.setScope({ none: false }); assert.equal(G.scope(), null, 'the question again');
+  const stored = JSON.parse(w.localStorage.getItem('siyl.guest')).scope; assert.ok(stored.at, 'stored with a timestamp'); deq(SCOPE_KEYS.map((k) => !!stored[k]).concat(!!stored.none), [false, false, false, false, false]);
+  /* THE HOSTS' BUG FIX (Owner, 24 Sep 2026): the first-view default (all four) applies only when nothing was ever stored — deselecting the last part leaves a host's question unanswered */
+  const hw = page({ auth: SUTHEP }); const HG = hw.SIYL_GUEST;
+  assert.equal(HG.joinsAll(), true, 'a host\'s first view: all four'); assert.equal(HG.scope().by, 'hosts');
+  SCOPE_KEYS.forEach((k) => HG.setScope({ [k]: false })); assert.equal(HG.scope(), null, 'the last part deselected: nothing re-appears selected');
 });
 
-test('DECLINE · the short path: We\'ll miss you, Send my response, Not joining after the send, I\'d like to reconsider; only the guest\'s own optional resources are previewed for release', () => {
+test('DECLINE · the short path: the decline row stays visible, beneath it We\'ll miss you and Send my response, Response sent after the send, re-selecting a part is the way back; only the guest\'s own optional resources are previewed for release', () => {
   const yj = src('your-journey.html'), rv = src('review.html');
-  assert.match(yj, /We’ll miss you\./); assert.match(yj, /We’re sorry you won’t be able to join us\./); assert.match(yj, /Haruthai &amp; Suthep would be very happy to celebrate with you\. If your plans change, you’re always welcome to reconsider\./); assert.match(yj, /If anything changes, please contact Guest Relations\./);
-  assert.match(yj, /data-decline-send>Send my response</); assert.match(yj, /aria-current="true">Not joining</); assert.match(yj, /data-scope-reconsider>I’d like to reconsider</);
+  assert.match(yj, /var after=none\?'<div class="p-opt-after" data-not-joining><h3 class="t-h2">We’ll miss you\.<\/h3>'/, 'beneath the component, which stays visible');
+  assert.match(yj, /We’re sorry you won’t be able to join us\./); assert.match(yj, /Haruthai &amp; Suthep would be very happy to celebrate with you — if your plans change, simply tick the parts you can join\./); assert.match(yj, /If anything changes after you have sent your response, please contact Guest Relations\./);
+  assert.match(yj, /data-decline-send>Send my response</); assert.match(yj, /aria-current="true">Response sent</);
+  assert.doesNotMatch(yj, /data-scope-reconsider|I’d like to reconsider/, 'the reconsider button is gone — re-selecting a part is the way back');
   assert.match(yj, /function releasesFor\(next\)/); assert.match(yj, /yours alone, nothing of anyone else’s/); assert.match(yj, /data-release-confirm/); assert.match(yj, /data-release-cancel>Keep everything as it is</);
   assert.match(yj, /if\(rel\.length\)\{[^\n]*PENDING=\{scope:next,patch:patch,releases:rel,gone:gone\};render\(\)/, 'a change that releases something is previewed, never applied at once');
   assert.match(rv, /nj\?'Send my response':'Send to Guest Relations'/); assert.match(rv, /\(G&&G\.notJoining&&G\.notJoining\(\)\)\?'Not joining':'Sent to Guest Relations'/); assert.match(rv, /'Send Updated Trip'/);
@@ -193,6 +222,9 @@ const TEXT = 'SEE YOU IN LAOS — JOURNEY SELECTION\nInvitation: INV-G777 · Sam
 test('WORKER · the same validator on the server: an incomplete trip is refused (422 · incomplete, the missing items named), nothing stored; a stay is answered by the engine\'s own hold, never the client\'s word; a declined mandatory train is refused; a complete trip and a decline are accepted', async () => {
   const h = await harness();
   const send = async (registration) => { const r = await h.w.fetch(req('/api/register', { 'x-siyl-auth': h.sam }, { invitationId: 'INV-G777', registration, text: TEXT }), h.env); return { status: r.status, d: await r.json() }; };
+  /* the stored server contact: a valid email and phone — the personal details of step 01 are not there yet (Owner, 24 Sep 2026) */
+  const contact = (extra) => h.env.REG_KV.put('contact:INV-G777', JSON.stringify({ invitationId: 'INV-G777', guestId: 'G777', email: 'sam.example@example.org', phone: '+66 81 000 0000', ...extra, at: '2026-09-24T00:00:00.000Z' }));
+  await contact({});
   /* no scope */
   let r = await send(BASE()); assert.equal(r.status, 422); assert.equal(r.d.error, 'incomplete'); assert.equal(r.d.missing[0].key, 'scope'); assert.equal(h.env.REG_KV.m.has('reg:INV-G777'), false, 'nothing stored');
   /* Bangkok, nothing answered */
@@ -206,7 +238,14 @@ test('WORKER · the same validator on the server: an incomplete trip is refused 
   /* a real hold answers the stay */
   const me = { invitationId: 'INV-G777', guestId: 'G777', partyId: 'INV-777', hosts: false };
   const j = await h.rooms.fetch(new Request('https://x/api/rooms/join', { method: 'POST', headers: { 'x-siyl-identity': JSON.stringify(me) }, body: JSON.stringify({ invitationId: 'INV-G777', guestId: 'G777', key: 'bkk-stay/u-sathorn-superior-garden', label: 'A', name: 'Sam' }) })); assert.equal(j.status, 200);
-  r = await send(BASE({ stages: { kempinski: 'declined' }, selections: [{ id: 'bkk-stay', price: 192, qty: 1, stay: 'sathorn', room: 'u-sathorn-superior-garden', unit: 'A' }], totalUsd: 192, guestRecord: { ...ABOUT, scope: SC({ bangkok: true, at: 'x' }) } }));
+  const held = () => send(BASE({ stages: { kempinski: 'declined' }, selections: [{ id: 'bkk-stay', price: 192, qty: 1, stay: 'sathorn', room: 'u-sathorn-superior-garden', unit: 'A' }], totalUsd: 192, guestRecord: { ...ABOUT, scope: SC({ bangkok: true, at: 'x' }) } }));
+  /* STEP 01 IS REQUIRED ON THE SERVER: the trip is answered, the email and phone are valid — the missing personal details refuse it, each named under step 01 */
+  r = await held(); assert.equal(r.status, 422); assert.equal(r.d.error, 'incomplete'); deq(r.d.unresolved, []);
+  deq(r.d.missing.map((m) => [m.key, m.step]), [['birthdate', 'you'], ['nationality', 'you'], ['address1', 'you'], ['postal', 'you'], ['city', 'you'], ['country', 'you']]); assert.equal(h.env.REG_KV.m.has('reg:INV-G777'), false, 'nothing stored');
+  await contact({ birthdate: '1990-02-31', nationality: 'Testland', address1: '1 Test Street', postal: '10000', city: 'Testcity', country: 'Testland' });
+  r = await held(); assert.equal(r.status, 422); deq(r.d.missing.map((m) => m.key), ['birthdate'], 'an invalid date of birth is not a date of birth');
+  await contact(STEP01);   /* address2 · region stay empty: optional */
+  r = await held();
   assert.equal(r.status, 202, JSON.stringify(r.d).slice(0, 200)); assert.ok(r.d.submissionId); assert.equal(JSON.parse(h.env.REG_KV.m.get('reg:INV-G777').v).rooms['bkk-stay'].label, 'A');
   /* a hold outside the trip blocks: the guest now says China only while the U Sathorn room is still held */
   r = await send(BASE({ stages: { kmg: 'declined', ljg: 'declined' }, selections: [{ id: 'c86', price: 105, qty: 1 }], guestRecord: { ...ABOUT, scope: SC({ china: true, at: 'x' }) } })); assert.equal(r.status, 422); assert.equal(r.d.missing[0].key, 'release:bkk-stay');

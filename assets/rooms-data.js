@@ -27,17 +27,14 @@
    * detail page, the card of every rail and overview (Your Journey, the journeys page, "Other rooms at …", THE HOUSES),
    * the gallery — one assignment per property, read everywhere. U Sathorn: the Owner's Drive folder of 16 Sep 2026
    * (14 images, all U Sathorn Bangkok: the pool pavilion at dusk and by day, the driveway, the U garden, the lobby, the
-   * aerial, the garden-view room). Shama keeps its own photography. The Sathorn Penthouse was deleted (Edit 6, 24 Sep 2026). */
-  var USA = 'assets/images/usathorn/', SHA = 'assets/images/shama/';
+   * aerial, the garden-view room). The Sathorn Penthouse (Edit 6) and Shama Yen-Akat Bangkok were deleted (24 Sep 2026). */
+  var USA = 'assets/images/usathorn/';
   var STAY_IMAGES = window.SIYL_STAY_IMAGES = {
     uSathorn: { hero: USA + 'pool-pavilion-dusk.jpg', card: USA + 'pool-pavilion-day.jpg', houses: USA + 'pool-pavilion-day.jpg',
       gallery: [[USA + 'pool-pavilion-dusk.jpg', 'The pool pavilion at dusk'], [USA + 'pool-pavilion-day.jpg', 'The courtyard pool by day'], [USA + 'driveway-sunset.jpg', 'The driveway at sunset'],
         [USA + 'entrance-u-garden.jpg', 'The entrance and the U garden'], [USA + 'lobby.jpg', 'The lobby'],
         [USA + 'superior-garden-bed-terrace.jpg', 'The room and its garden terrace'], [USA + 'superior-garden-bed-mirror.jpg', 'Towards the terrace doors'], [USA + 'superior-garden-desk-lawn.jpg', 'The desk and the lawn beyond'],
         [USA + 'terrace-frangipani.jpg', 'The terrace, under the frangipani'], [USA + 'superior-garden-depth.jpg', 'The length of the room'], [USA + 'superior-garden-entry.jpg', 'The entry and the television wall']] },
-    shamaYenAkat: { hero: SHA + 'king-studio-balcony.jpg', card: SHA + 'king-studio-balcony.jpg', houses: SHA + 'king-studio-balcony.jpg',
-      gallery: [[SHA + 'king-studio-balcony.jpg', 'The studio, from the entrance'], [SHA + 'king-studio-balcony-doors.jpg', 'The balcony doors'], [SHA + 'king-studio-dining.jpg', 'The dining corner'],
-        [SHA + 'king-studio-entry-vanity.jpg', 'The entry and the vanity'], [SHA + 'king-studio-bathroom.jpg', 'The bathroom'], [SHA + 'king-studio-shower-dressing.jpg', 'The shower and the dressing corner']] },
   };
   var KEM = 'assets/images/kempinski/';
   var HERITAGE_AMENITIES = ['Bathrobe', 'Bathtub', 'Coffee & tea facilities', 'Hair dryer', 'Mini bar',
@@ -245,7 +242,7 @@
       breakfast: 'Breakfast not included · self-pay',
       windows: [{ id: 'bkk-stay', label: 'Before the Wedding', dates: '21 – 24 February 2027', nights: '3 nights', n: 3,
         bagName: 'Bangkok · Before the Wedding', bagImg: USA + 'pool-pavilion-day.jpg' }],
-      /* the two Bangkok addresses each say what THEY include (room.includes);
+      /* the Bangkok address says what IT includes (room.includes);
        * the group carries only what is true for every one of them */
       includes: [
         'Three nights, 21 → 22, 22 → 23 and 23 → 24 February.',
@@ -253,7 +250,7 @@
       ],
       rooms: [
         /* SATHORN PENTHOUSE BANGKOK IS DELETED (Owner, 24 Sep 2026 · Edit 6): the room record, its gallery, its price and
-           its story are gone; nothing replaces it. U Sathorn and Shama are untouched. */
+           its story are gone; nothing replaces it. */
 
         /* 026 — U Sathorn Bangkok. Five photographs from the owner's folder,
          * inspected before assignment: the hero is the one frame that carries
@@ -278,31 +275,9 @@
             'Arrival 21 February 2027: personal pickup by Haruthai — hosted.',
             'Check-in at the lobby.',
             'Breakfast included.'
-          ] },
-
-        /* 027 — Shama Yen-Akat Bangkok. Six photographs from the owner's
-         * folder, inspected before assignment: the hero is the frame that holds
-         * the bed, the dining table and the balcony doors together, because
-         * that is the studio. Source mapping in docs/SOURCE-MAP-BANGKOK.md. */
-        { slug: 'shama-king-studio-balcony', name: 'King Studio With Balcony',
-          cat: 'Shama Yen-Akat Bangkok · serviced studio',
-          property: 'Shama Yen-Akat Bangkok', place: 'Yen Akat, Bangkok',
-          breakfast: 'Breakfast included',
-          desc: 'A serviced studio for two with its own balcony, a dining area and a kitchen corner of your own.',
-          cardImg: STAY_IMAGES.shamaYenAkat.card,
-          gallery: STAY_IMAGES.shamaYenAkat.gallery,
-          facts: [['Size', '36 sq.m.'], ['Occupancy', '2 adults'], ['Outlook', 'Balcony and terrace'],
-            ['Stay', '21 – 24 February 2027 · 3 nights'], ['Breakfast', 'Included']],
-          story: 'Thirty-six square metres with a balcony and a dining area — a studio to live in rather than a room to sleep in. Breakfast is included, the pool is indoors, and there is a café, a garden and a laundry room downstairs.',
-          groups: [['The studio', ['36 sq.m. · 2 adults', 'Balcony and terrace', 'Window', 'Non-smoking', 'Dining area', 'Private bathroom', 'Air conditioning', 'Free Wi-Fi']],
-            ['The building', ['Indoor swimming pool', 'Gym', 'Restaurant', 'Café', 'Garden', 'Laundry room', 'Coworking and business facilities', 'Concierge']]],
-          amenities: null, rate: 40, roomRate: 80,
-          includes: [
-            'Three nights, 21 → 22, 22 → 23 and 23 → 24 February — one studio per couple.',
-            'Arrival 21 February 2027: personal pickup by Haruthai — hosted.',
-            'Check-in at the lobby.',
-            'Breakfast included.'
           ] }
+        /* SHAMA YEN-AKAT BANGKOK IS DELETED (Owner, 24 Sep 2026): the room record, its gallery, its price and its story are
+           gone; nothing replaces it. U Sathorn is the one Bangkok address. */
       ]
     },
 
@@ -667,7 +642,7 @@
      property's approved set resolves to '' — the intentional no-photo state — never to a second source.
      ========================================================================== */
   var STAY_FOLDERS = {
-    sathorn:    ['assets/images/usathorn/', 'assets/images/shama/'],
+    sathorn:    ['assets/images/usathorn/'],
     souphattra: ['assets/images/souphattra/', 'assets/images/rooms/'],   /* assets/images/rooms/ = the Souphattra's own room categories (its Drive folder) */
     guesthouse: ['assets/images/guesthouse/'],
     kunming:    ['assets/images/kunming/', 'assets/images/journey/kunming-'],
@@ -675,7 +650,7 @@
     kempinski:  ['assets/images/kempinski/', 'assets/images/journey/kempinski-']
   };
   /* the stay-media records (assets/stay-media.js) that belong to each property */
-  var STAY_MEDIA_KEYS = { sathorn: ['uSathorn', 'shamaYenAkat'], souphattra: ['souphattra'], guesthouse: ['guestHouse'], kunming: ['wanxiang'], lijiang: ['luyeBaisha'], kempinski: ['kempinski'] };
+  var STAY_MEDIA_KEYS = { sathorn: ['uSathorn'], souphattra: ['souphattra'], guesthouse: ['guestHouse'], kunming: ['wanxiang'], lijiang: ['luyeBaisha'], kempinski: ['kempinski'] };
   /* a frame the property may never show, whatever folder it sits in: destination photography by kind (the peak, the village, the city) */
   var NEVER = /snow-mountain-viewing-1\.jpg$|\/city\/|\/experiences\/|\/1872\/|\/marsilea\/|\/hero\/|\/event\/|\/venue\/|\/temple\/|\/dress|\/train\/|\/transport\/|\/timeline\/|\/alms\//;
   function inFolder(stayKey, src) {

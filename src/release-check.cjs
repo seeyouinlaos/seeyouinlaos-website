@@ -78,10 +78,11 @@ gate(2, 'Inventory display decision recorded',
   if (!/if \(!this\.tracked\(win, slug\) \|\| this\.canTake\(win, slug\)\) return '';\s*if \(this\.soldOut\(win, slug\)\) return 'Sold out';/.test(client)) inv.push('"Sold out" is not the engine\'s sold-out word alone');
   if (!/fitsParty: function \(win, slug, u, need\)/.test(client) || !/unitForParty: function \(win, slug, need\)/.test(client)) inv.push('the client offers units that cannot take the whole party');
   if (/capacity: 38|capacity: 27/.test(seed)) inv.push('the retired U Sathorn / Shama counts (38 / 27) are still in the seed');
-  if (!/'bkk-stay\/u-sathorn-superior-garden':\s*\{ unit: 'room', capacity: 6,/.test(seed) || !/'bkk-stay\/shama-king-studio-balcony':\s*\{ unit: 'room', capacity: 6,/.test(seed)) inv.push('U Sathorn / Shama are not six rooms as the Master says');
+  if (!/'bkk-stay\/u-sathorn-superior-garden':\s*\{ unit: 'room', capacity: 6,/.test(seed) ) inv.push('U Sathorn / Shama are not six rooms as the Master says');
   if (!/This room was just filled\. Please choose another room\./.test(stay)) inv.push('the oversell refusal does not carry the Owner\'s words');
   const seedSrc = seed;
   if (/penthouse/i.test(seedSrc.replace(/\/\*[\s\S]*?\*\//g, ''))) inv.push('the deleted Sathorn Penthouse Bangkok (Edit 6, 24 Sep 2026) is back in the seed');
+  if (/shama/i.test(seedSrc.replace(/\/\*[\s\S]*?\*\//g, ''))) inv.push('the deleted Shama Yen-Akat Bangkok (24 Sep 2026) is back in the seed');
   /* the client must never decide an allocation for itself */
   if (/capacity\s*[:=]\s*\d/.test(client)) inv.push('assets/rooms.js carries its own capacity numbers');
   if (!/u\.join\(win, slug, unit\.label, need \|\| 1\)\.then/.test(stay)) inv.push('a stay is written before the place is held, or without the party\'s size');

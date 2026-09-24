@@ -103,7 +103,9 @@ test('Vientiane · the guest is told exactly which nights an amount buys', () =>
 
 test('every stay multiplies its rate by its payable nights — one rule, no exception', () => {
   assert.equal(P.quote('bkk-stay', 'u-sathorn-superior-garden').total, 64 * 3);
-  assert.equal(P.quote('bkk-stay', 'shama-king-studio-balcony').total, 40 * 3);
+  /* Shama Yen-Akat was DELETED (Owner, 24 Sep 2026): its stale slug never quotes its own USD 40 × 3 */
+  assert.notEqual(P.quote('bkk-stay', 'shama-king-studio-balcony').roomSlug, 'shama-king-studio-balcony');
+  assert.ok(P.items('bkk-stay', 'shama-king-studio-balcony').every((x) => x.room !== 'shama-king-studio-balcony' && x.price !== 120));
   assert.equal(P.quote('prewed', 'heritage').total, 145 * 2);
   assert.equal(P.quote('wedstay', 'heritage').total, 145 * 1);
   assert.equal(P.quote('kmg', 'left-bank').total, 87 * 3);
@@ -281,20 +283,19 @@ test('CHANGE is offered only where a genuine alternative exists', () => {
   assert.equal(P.hasVariants('ljg'), true);
   assert.equal(P.hasVariants('wedstay'), true);
   assert.equal(P.hasVariants('train'), false);
-  assert.equal(P.hasVariants('bkk-stay'), true);   /* three Bangkok addresses */
+  assert.equal(P.hasVariants('bkk-stay'), false);  /* one Bangkok address: U Sathorn (the Penthouse and Shama deleted, 24 Sep 2026) */
   assert.equal(P.hasVariants('kempinski'), false);
   assert.equal(P.hasVariants('mu9646'), true);    /* two approved fares */
 });
 
-test('Bangkok offers two approved addresses, one window, one active choice (the Sathorn Penthouse deleted, Edit 6)', () => {
+test('Bangkok offers one approved address, one window, one active choice (the Sathorn Penthouse deleted, Edit 6; Shama Yen-Akat deleted, 24 Sep 2026)', () => {
   const rooms = R.sathorn.rooms;
-  assert.equal(rooms.length, 2);
-  assert.deepEqual(rooms.map((r) => r.slug),
-    ['u-sathorn-superior-garden', 'shama-king-studio-balcony']);
+  assert.equal(rooms.length, 1);
+  assert.deepEqual(rooms.map((r) => r.slug), ['u-sathorn-superior-garden']);
   assert.ok(!rooms.some((r) => /penthouse/i.test(r.slug + ' ' + r.name)), 'the Sathorn Penthouse is deleted');
-  /* the Owner's rates, and the three-night guest price each one produces */
-  const want = { 'u-sathorn-superior-garden': [64, 192],
-                 'shama-king-studio-balcony': [40, 120] };
+  assert.ok(!rooms.some((r) => /shama/i.test(r.slug + ' ' + r.name + ' ' + r.property)), 'Shama Yen-Akat is deleted');
+  /* the Owner's rate, and the three-night guest price it produces */
+  const want = { 'u-sathorn-superior-garden': [64, 192] };
   rooms.forEach((r) => {
     const [rate, total] = want[r.slug];
     assert.equal(r.rate, rate, r.slug + ' rate');
@@ -305,37 +306,32 @@ test('Bangkok offers two approved addresses, one window, one active choice (the 
   });
   /* breakfast is a property truth, not a window truth */
   assert.match(P.items('bkk-stay', 'u-sathorn-superior-garden')[0].breakfast, /included/);
-  assert.match(P.items('bkk-stay', 'shama-king-studio-balcony')[0].breakfast, /included/);
   /* no preferred Bangkok room any more: the approved default falls to SIYL_PRICE.premium, the dearest open room */
   assert.equal(sandbox.window.SIYL_FULL_EXPERIENCE['bkk-stay'], undefined);
   assert.equal(P.approved('bkk-stay').slug, 'u-sathorn-superior-garden');
   assert.equal(P.approved('bkk-stay').slug, P.premium('bkk-stay').slug);
   /* each property shows its OWN photographs, and nothing is borrowed */
   assert.equal(rooms[0].gallery.length, 11);   /* the Owner's 16 Sep 2026 U Sathorn imagery: the hotel (5) and the room (6) */
-  assert.equal(rooms[1].gallery.length, 6);
   rooms[0].gallery.forEach(([f]) => {
     assert.match(f, /^assets\/images\/usathorn\//, 'U Sathorn borrowed ' + f);
     assert.ok(existsSync(join(ROOT, f)), f + ' missing on disk');
   });
-  rooms[1].gallery.forEach(([f]) => {
-    assert.match(f, /^assets\/images\/shama\//, 'Shama borrowed ' + f);
-    assert.ok(existsSync(join(ROOT, f)), f + ' missing on disk');
-  });
+  /* no Bangkok room shows a Shama frame */
+  assert.doesNotMatch(JSON.stringify(R.sathorn), /images\/shama\/|Shama/i, 'the deleted Shama Yen-Akat still speaks');
   /* and the placeholder is gone from the live Bangkok surfaces */
   const j = readFileSync(join(ROOT, 'journeys.html'), 'utf8');
   const bkk = j.slice(j.indexOf('id="j-bkk-stay"'), j.indexOf('id="j-train"'));
   assert.doesNotMatch(bkk, /Photography to follow/);
 });
 
-test('the two new Bangkok addresses carry their own shared inventory', async () => {
+test('the Bangkok address carries its own shared inventory — U Sathorn alone (Shama Yen-Akat deleted, 24 Sep 2026)', async () => {
   const { SEED } = await import('../src/inventory-seed.js');
-  /* the Master (Owner, 16 Sep 2026): six rooms each — the earlier 38 / 27 are retired */
+  /* the Master (Owner, 16 Sep 2026): six rooms — the earlier 38 / 27 are retired */
   assert.equal(SEED['bkk-stay/u-sathorn-superior-garden'].capacity, 6);
-  assert.equal(SEED['bkk-stay/shama-king-studio-balcony'].capacity, 6);
-  ['u-sathorn-superior-garden', 'shama-king-studio-balcony'].forEach((k) => {
-    assert.equal(SEED['bkk-stay/' + k].unit, 'room');
-    assert.equal(SEED['bkk-stay/' + k].occupancy, 2);
-  });
+  assert.equal(SEED['bkk-stay/u-sathorn-superior-garden'].unit, 'room');
+  assert.equal(SEED['bkk-stay/u-sathorn-superior-garden'].occupancy, 2);
+  assert.equal(SEED['bkk-stay/shama-king-studio-balcony'], undefined, 'Shama Yen-Akat is deleted from the seed');
+  assert.deepEqual(Object.keys(SEED).filter((k) => k.startsWith('bkk-stay/')), ['bkk-stay/u-sathorn-superior-garden']);
 });
 
 test('a journey chosen before the override keeps its place', () => {
@@ -344,23 +340,23 @@ test('a journey chosen before the override keeps its place', () => {
   assert.match(bag, /mu9632:\{id:'mu9646'/);
 });
 
-test('the four approved Full Experience compositions come out of component pricing', () => {
+test('the two approved Full Experience compositions come out of component pricing', () => {
   /* nothing is hard-coded: each total is the same ten components with two of
    * them swapped, exactly as the Owner listed them */
   const BASE = ['train', 'prewed', 'wedstay', 'kmg', 'c86', 'ljg', 'return', 'kempinski'];
   assert.equal(P.FLAT.c86.price, 105, 'C86 is USD 105 — the current Operations Master (Owner, 19 Sep 2026), superseding the Edit 2 override of 85');
   const base = 100 + 340 + 170 + 150 + P.FLAT.c86.price + 200 + 200 + 380;   /* 1,645 — the train USD 100 since 14 Sep 2026, C86 USD 105 */
   assert.equal(base, 1645);
-  /* the Sathorn Penthouse (255) was deleted (Edit 6, 24 Sep 2026): four compositions remain */
-  const bkk = { 'u-sathorn-superior-garden': 192, 'shama-king-studio-balcony': 120 };
+  /* the Sathorn Penthouse (255) was deleted (Edit 6, 24 Sep 2026) and Shama Yen-Akat (120) on 24 Sep 2026:
+     U Sathorn is the one Bangkok room, so two compositions remain (one per approved fare) */
+  const bkk = { 'u-sathorn-superior-garden': 192 };
   const fly = { business: 275, 'economy-flexible': 155 };
   const want = {
     'u-sathorn-superior-garden|business': 2112,
-    'shama-king-studio-balcony|business': 2040,
     'u-sathorn-superior-garden|economy-flexible': 1992,
-    'shama-king-studio-balcony|economy-flexible': 1920,
   };
-  assert.equal(Object.keys(want).length, 4);
+  assert.equal(Object.keys(want).length, 2);
+  assert.deepEqual(R.sathorn.rooms.map((r) => r.slug), Object.keys(bkk), 'every Bangkok room is composed, and only those');
   Object.keys(bkk).forEach((room) => Object.keys(fly).forEach((cls) => {
     const total = base + P.items('bkk-stay', room)[0].price + P.items('mu9646', cls)[0].price;
     assert.equal(total, want[room + '|' + cls], room + ' + ' + cls);
@@ -967,20 +963,21 @@ test('every room carries its own paragraph — no two rooms read the same', () =
 });
 
 test('Sathorn, Souphattra and Kempinski carry grouped, source-backed amenities', () => {
-  /* the Sathorn Penthouse was deleted (Edit 6, 24 Sep 2026): the two Bangkok rooms carry their own
-     grouped, source-backed facts, and not one of the penthouse's */
+  /* the Sathorn Penthouse was deleted (Edit 6, 24 Sep 2026) and Shama Yen-Akat (24 Sep 2026): the one Bangkok
+     room carries its own grouped, source-backed facts, and not one of the deleted rooms' */
   const bkk = Object.fromEntries(R.sathorn.rooms.map((r) => [r.slug, r]));
-  const us = bkk['u-sathorn-superior-garden'], sh = bkk['shama-king-studio-balcony'];
+  const us = bkk['u-sathorn-superior-garden'];
+  assert.equal(bkk['shama-king-studio-balcony'], undefined, 'Shama Yen-Akat is deleted');
   assert.equal(us.rate, 64);
-  assert.equal(sh.rate, 40);
-  for (const r of [us, sh]) assert.ok(r.groups.length >= 2, r.slug + ' is not grouped');
+  assert.ok(us.groups.length >= 2, us.slug + ' is not grouped');
   assert.match(JSON.stringify(us.facts), /32 sq\.m\./);
   assert.match(JSON.stringify(us.groups), /Outdoor swimming pool/);
-  assert.match(JSON.stringify(sh.groups), /36 sq\.m\./);
-  assert.match(JSON.stringify(sh.groups), /Indoor swimming pool/);
   const flat = JSON.stringify(R.sathorn);
   for (const fact of ['710 Mbps', 'Nespresso', 'Harman Kardon', 'Casiotone', 'Travel crib', 'keybox', '162 sq.m.']) {
     assert.ok(!flat.includes(fact), 'the deleted penthouse still speaks: ' + fact);
+  }
+  for (const fact of ['36 sq.m.', 'Indoor swimming pool', 'Shama']) {
+    assert.ok(!flat.includes(fact), 'the deleted Shama Yen-Akat still speaks: ' + fact);
   }
 
   for (const room of R.souphattra.rooms) {
@@ -1003,12 +1000,13 @@ test('every stay says what is included and what the guest arranges', () => {
   for (const k of Object.keys(R)) {
     assert.ok(R[k].includes && R[k].includes.length >= 2, k + ' has no inclusions');
   }
-  /* Bangkok: two addresses, two truths (the Sathorn Penthouse deleted, Edit 6, 24 Sep 2026) —
-     U Sathorn and Shama say ONE ROOM PER COUPLE, CHECK-IN AT THE LOBBY, BREAKFAST INCLUDED, and nothing borrowed */
+  /* Bangkok: one address, its own truth (the Sathorn Penthouse deleted, Edit 6; Shama Yen-Akat deleted, 24 Sep 2026) —
+     U Sathorn says ONE ROOM PER COUPLE, CHECK-IN AT THE LOBBY, BREAKFAST INCLUDED, and nothing borrowed */
   const byId = Object.fromEntries(R.sathorn.rooms.map(r => [r.slug, r]));
-  assert.deepEqual(Object.keys(byId), ['u-sathorn-superior-garden', 'shama-king-studio-balcony']);
+  assert.deepEqual(Object.keys(byId), ['u-sathorn-superior-garden']);
   assert.equal(byId['penthouse'], undefined, 'the Sathorn Penthouse is deleted');
-  for (const id of ['u-sathorn-superior-garden', 'shama-king-studio-balcony']) {
+  assert.equal(byId['shama-king-studio-balcony'], undefined, 'Shama Yen-Akat is deleted');
+  for (const id of ['u-sathorn-superior-garden']) {
     const t = byId[id].includes.join(' ');
     assert.match(t, /Breakfast included\./, id); assert.match(t, /Check-in at the lobby\./, id); assert.match(t, /per couple/, id);
     assert.doesNotMatch(t, /keybox|private entrance|private elevator|whole party|NOT included|groceries|Meals cooked|parking/, id + ' carries penthouse copy');
@@ -1020,7 +1018,6 @@ test('every stay says what is included and what the guest arranges', () => {
   assert.doesNotMatch(rh, /(?<![.\w])stay\.breakfast(?! ?\))/, 'the amount block never borrows the group breakfast line');
   assert.match(rh, /room\.breakfast \|\| stay\.breakfast/, 'breakfast is the room\'s own fact');
   assert.equal(byId['u-sathorn-superior-garden'].breakfast, 'Breakfast included');
-  assert.equal(byId['shama-king-studio-balcony'].breakfast, 'Breakfast included');
   assert.match(R.kempinski.includes.join(' '), /Breakfast included/);
   assert.match(R.souphattra.includes.join(' '), /no night between 25 February and 1 March is left uncovered/);
 });

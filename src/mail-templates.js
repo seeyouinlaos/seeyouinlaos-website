@@ -82,7 +82,7 @@ export function journeyModel(record) {
   /* A DELETED PRODUCT IS NOT CHARGED (Owner, 24 Sep 2026 · Edit 6): the Sathorn Penthouse Bangkok is not a website product any
      more. A record sent before the deletion still carries its line; the line is not a stay and not a cost, and the total is
      recomputed from the lines that remain — the submission itself is history and is never rewritten. */
-  const deleted = (x) => !!(x && x.stay === 'sathorn' && x.room === 'penthouse');
+  const deleted = (x) => !!(x && x.stay === 'sathorn' && (x.room === 'penthouse' || x.room === 'shama-king-studio-balcony'));   /* Shama Yen-Akat Bangkok, deleted 24 Sep 2026, likewise */
   const lines = lines0.filter((x) => !(x && STAGE_OF_STAY[x.id] && engineWaits.includes(STAGE_OF_STAY[x.id])) && !deleted(x));
   const dropped = lines0.length !== lines.length;
   const order = (x) => { const i = STAGES.indexOf(x.id); return i < 0 ? 50 : i; };

@@ -16,6 +16,9 @@ import { Rooms } from '../src/rooms.js';
 
 const deq = (a, b, m) => assert.deepEqual(plain(a), plain(b), m);
 const stepOf = (G, key) => G.steps().find((s) => s.key === key);
+/* STEP 01 REQUIRED FIELDS (Owner, 24 Sep 2026): synthetic personal details — every required field except the ones named */
+const PERSONAL_OK = { birthdate: '1990-01-01', nationality: 'Testland', address1: '1 Test Street', postal: '10000', city: 'Testcity', country: 'Testland' };
+const fillPersonal = (G, except = []) => Object.entries(PERSONAL_OK).forEach(([k, v]) => { if (!except.includes(k)) G.setContact(k, v); });
 const identity = (s) => ({ invitationId: s.invitationId, guestId: s.guestId, partyId: s.partyId, hosts: !!s.hosts });
 
 /* a page with a live (in-memory) room engine behind fetch */
@@ -28,7 +31,7 @@ async function livePage(auth, rooms, seed) {
 function completeExceptJourney(w, opts = {}) {
   const G = w.SIYL_GUEST, T = w.SIYL_TEMPLE, id = G.me().guestId;
   G.setScope({ all: true });   /* WHERE WILL YOU JOIN US (Owner, 18 Sep 2026): the first decision — every destination here */
-  G.setContact('email', 'guest@example.com'); G.setContact('phone', '+66 81 234 5678');
+  G.setContact('email', 'guest@example.com'); G.setContact('phone', '+66 81 234 5678'); fillPersonal(G);
   T.setAttendance(id, opts.temple || 'no'); ['coffee', 'vows', 'dinner'].forEach((k) => T.setEvent(id, k, opts.dinner === false && k === 'dinner' ? 'no' : 'yes')); T.setFinale(id, 'pool');
   if (opts.temple === 'yes') T.setOffering(id, opts.offering || 'no');
   G.setDressAck(true);
@@ -43,13 +46,35 @@ test('FLOW · steps are sequential: 02 is locked until 01 is complete, 06 until 
   deq(G.steps().map((s) => s.state), ['attention', 'locked', 'locked', 'locked', 'locked', 'locked']);
   deq(G.steps('you').map((s) => s.state), ['current', 'locked', 'locked', 'locked', 'locked', 'locked']);
   assert.equal(G.mayEnter('journey'), false); assert.equal(G.mayEnter('review'), false);
-  deq(G.missingFor('you').map((m) => [m.key, m.href]), [['email', 'invitation.html#p-email'], ['phone', 'invitation.html#p-phone']]);
+  const REQ = ['birthdate', 'nationality', 'address1', 'postal', 'city', 'country'];
+  deq(G.missingFor('you').map((m) => [m.key, m.href]), [['email', 'invitation.html#p-email'], ['phone', 'invitation.html#p-phone'], ...REQ.map((k) => [k, 'invitation.html#p-' + k])], 'every required personal field is named with its control; the invitation\'s name counts, address2/region are optional');
   assert.equal(G.firstMissing().href, 'invitation.html#p-email');
   assert.equal(G.nextHref(), 'invitation.html#p-email', 'VIEW goes to the first missing item, never past the gate');
-  G.setContact('email', 'not-an-email'); G.setContact('phone', '12');
+  G.setContact('email', 'not-an-email'); G.setContact('phone', '12'); fillPersonal(G);
   assert.equal(G.done('you'), false, 'both must be valid');
   G.setContact('email', 'peggy@example.com'); G.setContact('phone', '+49 (0)170 123 4567');
   assert.equal(G.done('you'), true);
+  /* STEP 01 REQUIRED FIELDS ARE REQUIRED (Owner, 24 Sep 2026): a missing required personal field keeps 01 open and 02 locked */
+  for (const k of REQ) {
+    G.setContact(k, '');
+    assert.equal(G.done('you'), false, k + ' is required');
+    deq(G.missingFor('you').map((m) => m.key), [k], k + ' is named alone');
+    assert.equal(G.mayEnter('journey'), false, 'missing ' + k + ': step 02 stays locked');
+    assert.equal(stepOf(G, 'journey').state, 'locked');
+    G.setContact(k, PERSONAL_OK[k]);
+  }
+  G.setContact('country', '   ');
+  assert.equal(G.done('you'), false, 'a blank country is not an answer');
+  G.setContact('country', 'Testland');
+  G.setContact('birthdate', '1990-02-30');
+  deq(G.missingFor('you').map((m) => [m.key, m.label]), [['birthdate', 'Date of Birth (a valid date)']], 'the date of birth must be a real date');
+  assert.equal(G.mayEnter('journey'), false);
+  G.setContact('birthdate', '1990-01-01');
+  /* First Name / Last Name: the invitation's name counts (nameField) */
+  assert.ok(G.nameField('firstName') && G.nameField('lastName'), 'the name comes from the invitation');
+  /* address line 2 and the region stay optional: empty, the step is still complete */
+  G.setContact('address2', ''); G.setContact('region', '');
+  assert.equal(G.done('you'), true, 'an empty address2 / region never blocks');
   assert.equal(G.mayEnter('journey'), true); assert.equal(G.mayEnter('wedding'), false);
   assert.equal(stepOf(G, 'you').stateLabel, '✓ Complete');
   assert.equal(stepOf(G, 'journey').stateLabel, 'Needs attention');

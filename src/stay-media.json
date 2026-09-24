@@ -61,30 +61,6 @@
    }
   ]
  },
- "shamaYenAkat": {
-  "name": "Shama Yen-Akat Bangkok",
-  "city": "Bangkok",
-  "images": [
-   {
-    "src": "assets/images/shama/king-studio-balcony.jpg",
-    "kind": "room",
-    "caption": "The King Studio from the entrance",
-    "source": "Owner Drive 027 - Hotel - Shama Yen-Akat Bangkok"
-   },
-   {
-    "src": "assets/images/shama/king-studio-balcony-doors.jpg",
-    "kind": "room",
-    "caption": "The balcony doors",
-    "source": "Owner Drive 027 - Hotel - Shama Yen-Akat Bangkok"
-   },
-   {
-    "src": "assets/images/shama/king-studio-dining.jpg",
-    "kind": "room",
-    "caption": "The dining corner",
-    "source": "Owner Drive 027 - Hotel - Shama Yen-Akat Bangkok"
-   }
-  ]
- },
  "souphattra": {
   "name": "Souphattra Heritage Vientiane",
   "city": "Vientiane",

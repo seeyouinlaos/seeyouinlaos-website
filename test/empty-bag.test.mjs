@@ -59,10 +59,17 @@ test('ENGINE · nothing is held for anyone in advance (Owner, 19 Sep 2026): a ho
   /* the last place was filled: the next guest is refused and holds nothing */
   const j3 = await call(rooms, 'join', { invitationId: LIN.invitationId, guestId: LIN.guestId, key: 'bkk-stay/u-sathorn-superior-garden', label: 'A', name: 'Lin' }, ident(LIN));
   assert.equal(j3.status, 409); assert.equal(j3.d.error, 'full'); assert.deepEqual(j3.d.mine, {});
-  /* ONE hold per stage: the host's second choice in the same stage releases the first */
-  const j4 = await call(rooms, 'join', { invitationId: HOST.invitationId, guestId: HOST.guestId, key: 'bkk-stay/shama-king-studio-balcony', label: 'B', name: 'Suthep' }, HOST);
-  assert.equal(j4.status, 200); assert.deepEqual(j4.d.mine, { 'bkk-stay': { key: 'bkk-stay/shama-king-studio-balcony', label: 'B' } });
-  assert.deepEqual(j4.d.units['bkk-stay/u-sathorn-superior-garden'][0].occupants.map((o) => o.name), ['Peggy']); assert.equal(j4.d.summary['bkk-stay/u-sathorn-superior-garden'].remainingPlaces, 11);
+  /* THE DELETED SHAMA (Owner, 24 Sep 2026): Bangkok has one alternative left — the engine knows no Shama room and holds nothing for it */
+  assert.equal(h.d.units['bkk-stay/shama-king-studio-balcony'], undefined, 'the deleted Shama has no units'); assert.equal(h.d.summary['bkk-stay/shama-king-studio-balcony'], undefined);
+  const js = await call(rooms, 'join', { invitationId: HOST.invitationId, guestId: HOST.guestId, key: 'bkk-stay/shama-king-studio-balcony', label: 'B', name: 'Suthep' }, HOST);
+  assert.equal(js.status, 404, 'no Shama room can be held'); assert.deepEqual((await call(rooms, 'read', null, HOST)).d.mine['bkk-stay'], { key: 'bkk-stay/u-sathorn-superior-garden', label: 'A' }, 'the U Sathorn hold stays');
+  /* ONE hold per stage: the host's second choice in the same stage releases the first (a stage that still has two alternatives) */
+  const j4a = await call(rooms, 'join', { invitationId: HOST.invitationId, guestId: HOST.guestId, key: 'prewed/heritage', label: 'A', name: 'Suthep' }, HOST);
+  assert.equal(j4a.status, 200); assert.deepEqual(j4a.d.mine.prewed, { key: 'prewed/heritage', label: 'A' });
+  const j4 = await call(rooms, 'join', { invitationId: HOST.invitationId, guestId: HOST.guestId, key: 'prewed/heritage-executive', label: 'B', name: 'Suthep' }, HOST);
+  assert.equal(j4.status, 200); assert.deepEqual(j4.d.mine, { 'bkk-stay': { key: 'bkk-stay/u-sathorn-superior-garden', label: 'A' }, prewed: { key: 'prewed/heritage-executive', label: 'B' } });
+  assert.deepEqual(j4.d.units['prewed/heritage'][0].occupants, [], 'the first choice is released'); assert.equal(j4.d.summary['prewed/heritage'].remainingPlaces, 10);
+  assert.deepEqual(j4.d.units['bkk-stay/u-sathorn-superior-garden'][0].occupants.map((o) => o.name).sort(), ['Peggy', 'Suthep'], 'another stage\'s hold is untouched');
   /* eligibility asks only for an identity */
   assert.equal(mayJoin(unitOf('bkk-stay/u-sathorn-superior-garden', 'A'), ident(LIN)).ok, true); assert.equal(mayJoin(unitOf('bkk-stay/u-sathorn-superior-garden', 'A'), null).ok, false);
   const anon = await call(rooms, 'read', null, null); assert.deepEqual(anon.d.mine, {}); assert.ok(anon.d.units['bkk-stay/u-sathorn-superior-garden'][0].occupants.every((o) => o.name === undefined), 'no name without a session');
@@ -129,16 +136,23 @@ test('CLIENT · a hold is a Bag line with its amount and the guest\'s to give ba
   const s = await ST.select('bkk-stay', 'u-sathorn-superior-garden'); assert.deepEqual(plain(s), { ok: true, unit: 'A' });
   assert.deepEqual((await rooms.view(ident(PEGGY))).mine, { 'bkk-stay': { key: 'bkk-stay/u-sathorn-superior-garden', label: 'A' } });
   assert.equal(B.get().length, 1); assert.equal(B.get()[0].unit, 'A'); assert.equal(B.get()[0].price, P.quote('bkk-stay', 'u-sathorn-superior-garden').total); assert.equal(B.total(), B.get()[0].price);
-  /* ONE selection per stage: another address of the same stage replaces the line and the hold */
-  const s2 = await ST.select('bkk-stay', 'shama-king-studio-balcony'); assert.equal(s2.ok, true);
-  assert.deepEqual((await rooms.view(ident(PEGGY))).mine, { 'bkk-stay': { key: 'bkk-stay/shama-king-studio-balcony', label: 'A' } });
-  assert.equal(B.get().length, 1); assert.equal(B.get()[0].room, 'shama-king-studio-balcony'); assert.equal(B.total(), P.quote('bkk-stay', 'shama-king-studio-balcony').total);
+  const bkk = P.quote('bkk-stay', 'u-sathorn-superior-garden').total;
+  /* THE DELETED SHAMA (Owner, 24 Sep 2026): Bangkok's one alternative left is U Sathorn — a Shama room cannot be selected and nothing changes */
+  await ST.select('bkk-stay', 'shama-king-studio-balcony');
+  assert.ok(!B.get().some((x) => /shama/i.test((x.room || '') + (x.name || '') + (x.meta || ''))), 'no Bag line names Shama'); assert.equal(bkk, 192, 'U Sathorn: USD 64 × 3 nights');
+  assert.deepEqual((await rooms.view(ident(PEGGY))).mine, { 'bkk-stay': { key: 'bkk-stay/u-sathorn-superior-garden', label: 'A' } }, 'the engine hold is untouched'); assert.equal(B.get().length, 1); assert.equal(B.get()[0].room, 'u-sathorn-superior-garden'); assert.equal(B.total(), bkk);
+  /* ONE selection per stage: another address of the same stage replaces the line and the hold (a stage that still has two alternatives) */
+  const s1 = await ST.select('prewed', 'heritage'); assert.equal(s1.ok, true);
+  const s2 = await ST.select('prewed', 'heritage-executive'); assert.equal(s2.ok, true);
+  assert.deepEqual((await rooms.view(ident(PEGGY))).mine, { 'bkk-stay': { key: 'bkk-stay/u-sathorn-superior-garden', label: 'A' }, prewed: { key: 'prewed/heritage-executive', label: 'A' } });
+  assert.equal(B.get().length, 2); assert.deepEqual(plain(B.get().filter((x) => x.id === 'prewed').map((x) => x.room)), ['heritage-executive']);
+  const bagStays = bkk + P.quote('prewed', 'heritage-executive').total; assert.equal(B.total(), bagStays);
   /* THE GUEST HOUSE COMPLIMENTARY: a Bag line at USD 0, one of six shared places, in the wedding stage */
   const g = await ST.select('guesthouse', 'guest-house', null, 2); assert.deepEqual(plain(g), { ok: true, unit: 'A' });
   const gh = B.get().filter((x) => x.id === 'guesthouse')[0]; assert.ok(gh, 'the Guest House is a Bag line');
   assert.equal(gh.price, 0); assert.equal(gh.complimentary, true); assert.equal(gh.interest, false); assert.equal(gh.unit, 'A'); assert.equal(gh.unitName, 'Guest House complimentary'); assert.equal(gh.name, 'Guest House complimentary · Vientiane'); assert.doesNotMatch(gh.meta + gh.name, /Private Residence|up to 4/);
-  assert.equal(B.get().length, 2); assert.equal(B.total(), P.quote('bkk-stay', 'shama-king-studio-balcony').total, 'a complimentary line adds nothing');
-  assert.equal(J.state(segOf(w, 'wedstay')), 'selected'); const c = J.counts(); assert.equal(c.bagItems, 2); assert.equal(c.confirmed, 2); assert.equal(c.bagTotal, B.total());
+  assert.equal(B.get().length, 3); assert.equal(B.total(), bagStays, 'a complimentary line adds nothing');
+  assert.equal(J.state(segOf(w, 'wedstay')), 'selected'); const c = J.counts(); assert.equal(c.bagItems, 3); assert.equal(c.confirmed, 3); assert.equal(c.bagTotal, B.total());
   assert.deepEqual((await rooms.view(ident(PEGGY))).mine.wedstay, { key: 'guesthouse/guest-house', label: 'A' });
   const lin = await rooms.view(ident(LIN)); assert.deepEqual(lin.units['guesthouse/guest-house'][0].occupants.map((o) => o.name), ['Peggy', 'Reserved'], 'who shares the house is visible by first name — and the place kept for her party as reserved'); assert.equal(lin.units['guesthouse/guest-house'][0].free, 4);
   /* a Souphattra room in the same stage replaces the Guest House (one selection per stage) */
@@ -148,6 +162,7 @@ test('CLIENT · a hold is a Bag line with its amount and the guest\'s to give ba
   /* REMOVE: the place is given back first, then the line goes; a second Remove finds nothing and stays ok */
   const r1 = await ST.remove('bkk-stay'); assert.deepEqual(plain(r1), { ok: true }); assert.equal(B.get().filter((x) => x.id === 'bkk-stay').length, 0); assert.equal((await rooms.view(ident(PEGGY))).mine['bkk-stay'], undefined);
   const r2 = await ST.remove('bkk-stay'); assert.deepEqual(plain(r2), { ok: true });
+  assert.deepEqual(plain(await ST.remove('prewed')), { ok: true }); assert.equal((await rooms.view(ident(PEGGY))).mine.prewed, undefined);
   const r3 = await ST.remove('wedstay'); assert.deepEqual(plain(r3), { ok: true }); assert.deepEqual(plain(B.get()), []); assert.equal(B.total(), 0); assert.deepEqual((await rooms.view(ident(PEGGY))).mine, {});
   /* A FULL ROOM IS REFUSED: two guests — a host among them, who is just a guest — fill the Noble Courtyard's one room */
   assert.equal((await call(rooms, 'join', { invitationId: LIN.invitationId, guestId: LIN.guestId, key: 'prewed/noble-courtyard', label: 'A', name: 'Lin' }, ident(LIN))).status, 200);
@@ -294,6 +309,8 @@ test('WORKER · a submission is stored as sent (Owner, 19 Sep 2026): a host\'s B
   const sent = complete({ channel: 'journey-shop', guestId: 'G049', totalUsd: 397, contact: { email: 'groom.test@example.org', phone: '+66' },
     selections: [{ id: 'bkk-stay', name: 'U Sathorn Bangkok', meta: '21 – 24 February 2027 · Superior Room With Garden View', price: 192, qty: 1, stay: 'sathorn', room: 'u-sathorn-superior-garden', unit: 'A', unitName: 'Room A' }, { id: 'train', name: 'Special Express No. 25', meta: '24 – 25 February 2027 · First Class Sleeper', price: 100, qty: 1 }, { id: 'c86', name: 'C86', meta: '04 March 2027 · Business', price: 105, qty: 1 }],
     guestRecord: { guests: [{ guestId: 'G049', name: 'Suthep', source: { fullName: 'Suthep Test', preferredName: 'Suthep' } }] } }, { scope: { bangkok: true, china: true } });
+  /* STEP 01 IS REQUIRED ON THE SERVER (Owner, 24 Sep 2026): the host's stored contact carries the required personal details — synthetic */
+  await h.env.REG_KV.put('contact:INV-G049', JSON.stringify({ invitationId: 'INV-G049', guestId: 'G049', email: 'groom.test@example.org', phone: '+66 80 000 0000', birthdate: '1990-01-01', nationality: 'Testland', address1: '1 Test Street', postal: '10000', city: 'Testcity', country: 'Testland', at: '2026-09-24T00:00:00.000Z' }));
   const calls = []; const realFetch = globalThis.fetch;
   globalThis.fetch = async (url, init) => { if (/api\.brevo\.com/.test(String(url))) { calls.push(JSON.parse(init.body)); return new Response(JSON.stringify({ messageId: '<m@brevo>' }), { status: 201, headers: { 'content-type': 'application/json' } }); } return realFetch(url, init); };
   try {

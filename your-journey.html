@@ -9,7 +9,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 .bag{width:44px;height:44px;display:flex;align-items:center;justify-content:center;position:relative;color:#313131;text-decoration:none}.bag .bgi{display:block}
 .bb{position:absolute;top:1px;right:0;min-width:14px;height:14px;padding:0 3px;background:#313131;color:#F3EEE7;font-size:8.5px;line-height:1;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;display:none;align-items:center;justify-content:center;box-shadow:0 0 0 2px #F3EEE7;border-radius:1px}
 </style>
-<link rel="stylesheet" href="assets/aman.css?v=23823812"><link rel="stylesheet" href="assets/prep.css?v=8e13eba5"></head><body>
+<link rel="stylesheet" href="assets/aman.css?v=23823812"><link rel="stylesheet" href="assets/prep.css?v=02085183"></head><body>
 <header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="cart.html" aria-label="My Bag"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main class="prep-page" id="your-journey">
 <div class="prep-head">
@@ -37,17 +37,17 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/bag.js?v=fe0c8b93"></script>
 <script src="assets/shop-menu.js?v=1ff891bc"></script>
 <script src="assets/aman.js?v=d6c4adb4"></script>
-<script src="assets/rooms-data.js?v=dedf7e07"></script>
-<script src="assets/pricing.js?v=f921de7c"></script>
+<script src="assets/rooms-data.js?v=a4760c95"></script>
+<script src="assets/pricing.js?v=eb8a9bf3"></script>
 <script src="assets/stage-graph.js?v=82a28623"></script>
 <script src="assets/questionnaire.js?v=2d3727a3"></script>
-<script src="assets/guest.js?v=2f688b53"></script>
+<script src="assets/guest.js?v=a947c48f"></script>
 <script src="assets/draft.js?v=7ab9ca64"></script>
 <script src="assets/confirm.js?v=f35e0aa8"></script>
 <script src="assets/temple.js?v=200ee67c"></script>
 <script src="assets/stay-plan.js?v=f1b4f999"></script>
 <script src="assets/rooms.js?v=dfa4781d"></script>
-<script src="assets/stay.js?v=d8c6eafb"></script>
+<script src="assets/stay.js?v=51b302df"></script>
 <script src="assets/seatlabels.js?v=4994e1f4"></script>
 <script src="assets/seating.js?v=3b392bf0"></script>
 <script src="assets/seatpass.js?v=528e9c24"></script>
@@ -259,31 +259,37 @@ function stageHtml(seg,i){
   else h+=line?staySummary(seg,line):openStage(seg,false);
   return h+'</section>'}
 
-/* WHERE WILL YOU JOIN US (Owner, 21 Sep 2026 · the global My Trip rebuild): the first decision. FOUR participation sheets —
-   Bangkok · Vientiane before the wedding · Vientiane the wedding · China — any combination; "I'll join all"; "I won't be
-   joining this trip" (exclusive, its own short path). What follows is composed from the answer through the one stage graph. */
+/* WHICH PARTS OF THE JOURNEY ARE YOU JOINING (Owner, 21 Sep 2026 · made one plain question 24 Sep 2026): FOUR independent
+   parts — Bangkok · Vientiane before the wedding · Vientiane the wedding · China — each a checkbox the guest ticks or unticks on
+   its own, and beneath a divider ONE exclusive answer, "I won't be joining this trip". Choosing it clears the four; choosing any
+   part clears it. There is no "select all": a guest joining everything ticks all four. Each row says its state in words
+   ("Selected" · "Not selected") beside a real check mark — never a colour or a dot alone. */
 var PENDING=null;   /* a change that would release real resources waits for the guest's confirmation: { scope, releases } */
+function optHtml(attr,on,title,sub,exclusive){
+  return '<button type="button" class="p-opt'+(exclusive?' p-opt-x':'')+(on?' is-on':'')+'" '+attr+' role="checkbox" aria-checked="'+(on?'true':'false')+'">'+
+    '<span class="p-opt-box" aria-hidden="true"></span>'+
+    '<span class="p-opt-body"><span class="p-opt-t">'+esc(title)+'</span>'+(sub?'<span class="p-opt-s">'+esc(sub)+'</span>':'')+'</span>'+
+    '<span class="p-opt-state">'+(on?'Selected':'Not selected')+'</span></button>'}
 function scopeHtml(){
-  var G=window.SIYL_GUEST,s=G.scope(),C=window.SIYL_CONFIRM,me=G.me();
-  var cards=G.DESTINATIONS.map(function(d){var on=!!(s&&!s.none&&s[d.key]);
-    return '<button type="button" class="p-sel p-sheet'+(on?' on':'')+'" data-scope="'+d.key+'" aria-pressed="'+(on?'true':'false')+'"><span class="p-sel-t">'+esc(d.label)+'</span><span class="p-sel-s">'+esc(d.when)+'</span></button>'}).join('');
-  var all=!!(s&&G.joinsAll()),none=!!(s&&s.none),sent=!!(C&&C.state&&C.state()!=='none');
-  if(none){
-    return '<div class="p-card on" data-scope-card data-not-joining><p class="t-l1 on">'+(sent?'Not joining · your response was sent':'Not joining this trip')+'</p>'+
-      '<h2 class="t-h1">We’ll miss you.</h2>'+
-      '<p class="t-b1 measure">We’re sorry you won’t be able to join us.</p>'+
-      '<p class="t-b2 measure">Haruthai &amp; Suthep would be very happy to celebrate with you. If your plans change, you’re always welcome to reconsider.</p>'+
-      '<p class="t-b2 measure">If anything changes, please contact Guest Relations.</p>'+
-      (RECON_FAILED.length?'<div class="p-card flat" style="margin-top:var(--s4)" data-scope-failed><p class="t-l1 open">Not released yet</p><p class="t-b2 measure">We could not release '+esc(RECON_FAILED.join(', '))+' just now. It stays yours until it is released, and your response waits for it.</p><div class="p-actions"><button type="button" class="p-act quiet" data-scope-retry>Release again</button></div></div>':'')+
-      actions([sent?'<span class="p-act quiet is-current" aria-current="true">Not joining</span>':'<a class="p-act" href="review.html#send" data-decline-send>Send my response</a>','<button type="button" class="p-link mute" data-scope-reconsider>I’d like to reconsider</button>'])+
-      (sent?'<p class="t-b2 measure" style="margin-top:var(--s3)">No open trip requirements. Guest Relations has your response.</p>':'')+'</div>'}
+  var G=window.SIYL_GUEST,s=G.scope(),C=window.SIYL_CONFIRM;
+  var none=!!(s&&s.none),sent=!!(C&&C.state&&C.state()!=='none');
+  var rows=G.DESTINATIONS.map(function(d){return optHtml('data-scope="'+d.key+'"',!!(s&&!s.none&&s[d.key]),d.label,d.when,false)}).join('');
+  var n=s&&!none?G.DESTINATIONS.filter(function(d){return s[d.key]}).length:0;
+  var status=none?'Not joining this trip':(n?n+' of 4 selected · '+esc(G.scopeWords()):'Nothing selected yet');
   var preview=PENDING?releasePreviewHtml():'';
-  return '<div class="p-card'+(s?' on':'')+'" data-scope-card><p class="t-l1'+(s?' on':' open')+'">'+(s?'Where you join us · '+esc(G.scopeWords()):'First, one answer')+'</p>'+
-    '<h2 class="t-h1">Where will you join us?</h2>'+
-    '<p class="t-b2 measure">Choose every part of the journey you will be with us for. Each part opens its own sheet below with exactly what it needs from you — nothing is asked for a part you are not joining.</p>'+
-    '<div class="p-selrow p-scope p-sheets" role="group" aria-label="Where will you join us">'+cards+'</div>'+
-    '<div class="p-actions" style="margin-top:var(--s4)"><button type="button" class="p-link'+(all?' on':'')+'" data-scope-all aria-pressed="'+(all?'true':'false')+'">I’ll join all</button>'+
-    '<button type="button" class="p-link mute" data-scope-none aria-pressed="false">I won’t be joining this trip</button></div>'+preview+
+  var after=none?'<div class="p-opt-after" data-not-joining><h3 class="t-h2">We’ll miss you.</h3>'+
+      '<p class="t-b1 measure">'+(sent?'Your response was sent.':'We’re sorry you won’t be able to join us.')+' Haruthai &amp; Suthep would be very happy to celebrate with you — if your plans change, simply tick the parts you can join.</p>'+
+      '<p class="t-b2 measure">If anything changes after you have sent your response, please contact Guest Relations.</p>'+
+      actions([sent?'<span class="p-act quiet is-current" aria-current="true">Response sent</span>':'<a class="p-act" href="review.html#send" data-decline-send>Send my response</a>'])+'</div>'
+    :(n?'<p class="t-b2 p-opt-next">Next: each part you selected opens below with what it needs from you. Untick a part to remove it.</p>'
+       :'<p class="t-b2 p-opt-next">Tick every part you will join — one, several or all four. Or choose “I won’t be joining this trip”.</p>');
+  return '<div class="p-card'+(s?' on':'')+'" data-scope-card'+(none?' data-scope-none-on':'')+'><p class="t-l1'+(s?' on':' open')+'" data-scope-status>'+status+'</p>'+
+    '<h2 class="t-h1">Which parts of the journey are you joining?</h2>'+
+    '<p class="t-b2 measure">Select every part you will be with us for. Each one can be selected or removed on its own; nothing is asked for a part you are not joining.</p>'+
+    '<div class="p-opts" role="group" aria-label="Which parts of the journey are you joining">'+rows+
+      '<p class="p-opt-or" aria-hidden="true"><span>or</span></p>'+
+      optHtml('data-scope-none',none,'I won’t be joining this trip','',true)+'</div>'+
+    preview+after+
     (RECON_FAILED.length?'<div class="p-card flat" style="margin-top:var(--s4)" data-scope-failed><p class="t-l1 open">Not released yet</p><p class="t-b2 measure">We could not release '+esc(RECON_FAILED.join(', '))+' just now. Nothing else changed — it stays yours until it is released, and Review &amp; Send waits for it.</p><div class="p-actions"><button type="button" class="p-act quiet" data-scope-retry>Release again</button></div></div>':'')+'</div>'}
 /* WHAT A CHANGE WOULD RELEASE (Owner, 21 Sep 2026): before a scope is taken away, the guest's OWN resources that would leave
    are named — rooms held, waiting-list places, lines, seats — and released only on confirmation; never another guest's. */
@@ -395,6 +401,7 @@ box.querySelectorAll('[data-scope-edit]').forEach(function(ed){ed.addEventListen
 function nextScope(patch){var G=window.SIYL_GUEST,s=G.scope()||{},keys=G.SCOPE_KEYS,cur={};keys.forEach(function(k){cur[k]=!!s[k]});cur.none=!!s.none;
   if(patch.all)keys.forEach(function(k){cur[k]=true});if(patch.all||Object.keys(patch).some(function(k){return keys.indexOf(k)>=0&&patch[k]}))cur.none=false;
   if(patch.none){keys.forEach(function(k){cur[k]=false});cur.none=true}
+  if(patch.none===false){keys.forEach(function(k){cur[k]=false});cur.none=false}   /* unticking the decline leaves the question unanswered */
   keys.forEach(function(k){if(typeof patch[k]==='boolean')cur[k]=patch[k]});return cur}
 function applyScope(patch){
   var G=window.SIYL_GUEST,S=window.SIYL_SEATS,next=nextScope(patch);
@@ -407,10 +414,8 @@ function applyScopeNow(patch,next){
   PENDING=null;G.setScope(patch);reconcileScope()}
 function wireScope(sc){
   var G=window.SIYL_GUEST;
-  sc.querySelectorAll('[data-scope]').forEach(function(b){b.addEventListener('click',function(){var k=b.getAttribute('data-scope'),p={};p[k]=b.getAttribute('aria-pressed')!=='true';applyScope(p)})});
-  var all=sc.querySelector('[data-scope-all]');if(all)all.addEventListener('click',function(){applyScope({all:true})});
-  var none=sc.querySelector('[data-scope-none]');if(none)none.addEventListener('click',function(){applyScope({none:true})});
-  var re=sc.querySelector('[data-scope-reconsider]');if(re)re.addEventListener('click',function(){PENDING=null;G.clearScope();render();var t=document.getElementById('scope');if(t)t.scrollIntoView({behavior:'smooth',block:'start'})});
+  sc.querySelectorAll('[data-scope]').forEach(function(b){b.addEventListener('click',function(){var k=b.getAttribute('data-scope'),p={};p[k]=b.getAttribute('aria-checked')!=='true';applyScope(p)})});
+  var none=sc.querySelector('[data-scope-none]');if(none)none.addEventListener('click',function(){applyScope(none.getAttribute('aria-checked')==='true'?{none:false}:{none:true})});
   var ok=sc.querySelector('[data-release-confirm]');if(ok)ok.addEventListener('click',function(){var pd=PENDING;PENDING=null;if(!pd)return;ok.disabled=true;ok.textContent='One moment…';G.setScope(pd.patch);reconcileScope()});
   var no=sc.querySelector('[data-release-cancel]');if(no)no.addEventListener('click',function(){PENDING=null;render()});
   var ed=sc.querySelector('[data-scope-edit]');if(ed)ed.addEventListener('click',function(e){e.preventDefault();var t=document.getElementById('scope');if(t)t.scrollIntoView({behavior:'smooth',block:'start'})});

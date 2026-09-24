@@ -14,6 +14,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
+import vm from 'node:vm';
 import { page, json, plain, src, roomsFetch, doState, session, PEGGY, STEFFIE, LIN, ROOT } from './sandbox.mjs';
 import { Rooms, unitsOf, unitOf, mayJoin } from '../src/rooms.js';
 import { SEED, FIXED } from '../src/inventory-seed.js';
@@ -22,6 +23,9 @@ import { composeGuestMail, composeOwnerMail, journeyModel } from '../src/mail-te
 const deq = (a, b, m) => assert.deepEqual(plain(a), plain(b), m);
 const stepOf = (G, key) => G.steps().find((s) => s.key === key);
 const identity = (s) => ({ invitationId: s.invitationId, guestId: s.guestId, partyId: s.partyId, hosts: !!s.hosts });
+/* STEP 01 REQUIRED FIELDS (Owner, 24 Sep 2026): the email, the phone AND every required personal detail — synthetic values */
+const PERSONAL_OK = { birthdate: '1990-01-01', nationality: 'Testland', address1: '1 Test Street', postal: '10000', city: 'Testcity', country: 'Testland' };
+const fillContact = (G) => { G.setContact('email', 'guest@example.com'); G.setContact('phone', '+66 81 234 5678'); Object.entries(PERSONAL_OK).forEach(([k, v]) => G.setContact(k, v)); };
 const seg = (J, key) => J.SEGMENTS.find((s) => s.key === key);
 /* the hosts' sessions: synthetic ids in the register's shape — the seed names nobody (src/inventory-seed.js FIXED is []) */
 const HS = [{ guestId: 'G048', preferredName: 'Haruthai' }, { guestId: 'G049', preferredName: 'Suthep' }];
@@ -35,7 +39,7 @@ async function livePage(auth, rooms, seed) {
 /* steps 01, 03, 04 and 05 answered — the journey and the scope are the test's */
 function answerTheRest(w) {
   const G = w.SIYL_GUEST, T = w.SIYL_TEMPLE, id = G.me().guestId;
-  G.setContact('email', 'guest@example.com'); G.setContact('phone', '+66 81 234 5678');
+  fillContact(G);
   T.setAttendance(id, 'no'); ['coffee', 'vows', 'dinner'].forEach((k) => T.setEvent(id, k, 'yes')); T.setFinale(id, 'pool');
   G.setDressAck(true); G.setAllergy('no'); G.setPhotoAck(true);
   G.PROFILE.forEach((q) => G.setProfile(id, q.key, q.choices ? q.choices[0] : 'Answered'));
@@ -65,7 +69,7 @@ const answerAll = (w, keys) => { const J = w.SIYL_JOURNEY, P = w.SIYL_PRICE, B =
 test('SCOPE · a guest has no scope until they answer; the question comes before every stage; any combination is valid and "I won\'t be joining" is exclusive', () => {
   const w = page({ auth: PEGGY }); const G = w.SIYL_GUEST, J = w.SIYL_JOURNEY;
   assert.equal(G.scope(), null); assert.equal(G.scopeAnswered(), false); assert.equal(G.scopeWords(), '');
-  G.setContact('email', 'guest@example.com'); G.setContact('phone', '+66 81 234 5678');
+  fillContact(G);
   deq(G.missingFor('journey'), [{ key: 'scope', label: 'Where will you join us?', href: 'your-journey.html#scope' }], 'the scope is the first and only question until answered');
   assert.equal(J.relevantSegments().length, 10, 'before the answer no stage disappears — the planner shows the question instead of the stages'); assert.equal(J.excludedSegments().length, 0);
   assert.match(src('your-journey.html'), /Your stages appear here once you have said where you will join us\./, 'the planner asks first');
@@ -104,7 +108,7 @@ test('MATRIX · relevant stages, readiness, step states and words for every comb
 
 test('FULL DECLINE PATH · INVITATION → NOT JOINING → REVIEW → SEND: after the code and the contact details nothing else is required', () => {
   const w = page({ auth: PEGGY }); const G = w.SIYL_GUEST;
-  G.setContact('email', 'guest@example.com'); G.setContact('phone', '+66 81 234 5678');
+  fillContact(G);
   assert.equal(G.mayEnter('review'), false);
   G.setScope({ none: true });
   deq(G.missingFor('journey'), []); deq(G.missingFor('wedding'), []); deq(G.missingFor('preparation'), []); deq(G.missingFor('about'), []);
@@ -488,4 +492,116 @@ test('CODEX 011-11 · the participation answer is one decision: a destination ch
   resolveGet({ ok: true, status: 200, json: async () => ({ ok: true, draft: { keys: { 'siyl.guest': JSON.stringify({ scope: { bangkok: true, vientiane: true, china: false, none: false, at: '2026-09-18T09:00:00.000Z', by: PEGGY.guestId } }) }, updatedAt: '2026-09-18T10:00:00.000Z', savedAt: '2026-09-18T10:00:00.000Z' } }) });
   await p2; await new Promise((r) => setTimeout(r, 0));
   assert.equal(w2.SIYL_GUEST.notJoining(), true); assert.equal(w2.SIYL_GUEST.joins('vientiane'), false, 'no destination survives beside the decline');
+});
+
+/* ============================================================================
+   THE PARTICIPATION CHECKBOXES (Owner, 24 Sep 2026) — driven through the page's own wiring.
+   your-journey.html's scopeHtml / wireScope / applyScope / nextScope / reconcileScope are taken verbatim from the page and run
+   against the client modules; every step clicks the rendered [data-scope=…] / [data-scope-none] button and reads back BOTH the
+   stored answer (siyl.guest → scope) and the re-rendered aria-checked. Four independent parts, the decline as a row of the same
+   component, no "I'll join all" — and a host deselecting the last part is left with nothing selected (the fixed cascade).
+   ========================================================================== */
+const KEYS = ['bangkok', 'vientianePreWedding', 'vientianeWedding', 'china'];
+const PAGE_FNS = ['esc', 'actions', 'optHtml', 'scopeHtml', 'releasesFor', 'releasePreviewHtml', 'nextScope', 'applyScope', 'applyScopeNow', 'wireScope', 'scopeTag', 'reconcileScope'];
+function pageFn(html, name) {
+  const at = html.search(new RegExp('\\nfunction ' + name + '\\(')); assert.ok(at >= 0, 'your-journey.html defines ' + name);
+  let i = html.indexOf('{', at), depth = 0;
+  for (; i < html.length; i++) { const ch = html[i]; if (ch === '{') depth++; else if (ch === '}' && --depth === 0) break; }
+  return html.slice(at + 1, i + 1);
+}
+const attrsOf = (tag) => Object.fromEntries([...tag.matchAll(/\s([\w-]+)(?:="([^"]*)")?/g)].map((m) => [m[1], m[2] === undefined ? '' : m[2]]));
+/* a page whose scope card is the real one: render() composes scopeHtml(), turns its buttons into clickable elements, wires them */
+function scopePage(auth, seed) {
+  const w = page({ auth, seed }), yj = src('your-journey.html');
+  const code = 'var P=window.SIYL_PRICE,J=window.SIYL_JOURNEY,ST=window.SIYL_STAY,U=window.SIYL_UNITS;var PENDING=null;' +
+    "var RECON='',RECON_FAILED=[],RECONCILING=false,RECON_AGAIN=false,SEAT_RELEASING={};\n" + PAGE_FNS.map((n) => pageFn(yj, n)).join('\n') +
+    '\nfunction render(){var html=scopeHtml(),els=[];(html.match(/<button[^>]*>/g)||[]).forEach(function(t){var a=__attrs(t),h={};' +
+    'els.push({attrs:a,disabled:false,textContent:"",getAttribute:function(k){return k in a?a[k]:null},addEventListener:function(ty,fn){(h[ty]=h[ty]||[]).push(fn)},click:function(){(h.click||[]).forEach(function(fn){fn({preventDefault:function(){}})})},scrollIntoView:function(){}})});' +
+    'var pick=function(sel){var m=/^\\[([\\w-]+)\\]$/.exec(sel);return els.filter(function(e){return m&&e.getAttribute(m[1])!==null})};' +
+    'var sc={querySelectorAll:pick,querySelector:function(s){return pick(s)[0]||null}};wireScope(sc);window.__card={html:html,els:els}}';
+  w.__attrs = attrsOf; w.document.getElementById = () => null;
+  vm.runInContext(code, w, { filename: 'your-journey.html#scope' });
+  w.render();
+  const flush = async () => { for (let k = 0; k < 6; k++) await new Promise((r) => setImmediate(r)); };
+  const el = (sel) => w.__card.els.find((e) => (sel === 'none' ? e.getAttribute('data-scope-none') !== null : e.getAttribute('data-scope') === sel));
+  const click = async (sel) => { const b = el(sel); assert.ok(b, 'a rendered ' + sel + ' button'); b.click(); await flush(); w.render(); };
+  const checked = () => Object.fromEntries([...KEYS, 'none'].map((k) => [k, el(k).getAttribute('aria-checked') === 'true']));
+  const stored = () => { const s = (json(w, 'siyl.guest') || {}).scope; return s ? Object.fromEntries([...KEYS, 'none'].map((k) => [k, !!s[k]])) : null; };
+  const status = () => (/data-scope-status>([^<]*)</.exec(w.__card.html) || [])[1];
+  return { w, click, checked, stored, status, html: () => w.__card.html, el };
+}
+const want = (on, none = false) => Object.fromEntries([...KEYS.map((k) => [k, on.includes(k)]), ['none', none]]);
+
+test('PARTICIPATION CHECKBOXES · the Owner\'s matrix through the rendered buttons: every part alone, the pairs, all four, deselect one, and the decline both ways', async () => {
+  const yj = src('your-journey.html');
+  assert.doesNotMatch(yj, /data-scope-all/, 'no "I\'ll join all" anywhere on the page');
+  const CASES = [
+    ['Bangkok only', ['bangkok'], '1 of 4 selected · Bangkok'],
+    ['Vientiane Before only', ['vientianePreWedding'], '1 of 4 selected · Vientiane · Before the Wedding'],
+    ['Vientiane Wedding only', ['vientianeWedding'], '1 of 4 selected · Vientiane · The Wedding'],
+    ['China only', ['china'], '1 of 4 selected · China'],
+    ['Bangkok + China', ['bangkok', 'china'], '2 of 4 selected · Bangkok · China'],
+    ['both Vientiane parts', ['vientianePreWedding', 'vientianeWedding'], '2 of 4 selected · Vientiane'],
+    ['all four', KEYS, '4 of 4 selected · Bangkok · Vientiane · China'],
+  ];
+  for (const [name, parts, words] of CASES) {
+    const p = scopePage(PEGGY);
+    assert.equal(p.stored(), null, name + ' · nothing stored at first'); deq(p.checked(), want([]), name + ' · nothing ticked at first'); assert.equal(p.status(), 'Nothing selected yet');
+    for (const [i, k] of parts.entries()) {
+      await p.click(k);
+      deq(p.stored(), want(parts.slice(0, i + 1)), name + ' · stored after ticking ' + k);
+      deq(p.checked(), want(parts.slice(0, i + 1)), name + ' · rendered after ticking ' + k);
+    }
+    assert.equal(p.status(), words, name + ' · status line');
+    assert.doesNotMatch(p.html(), /data-scope-all|join all/i, name + ' · no join-all control');
+    assert.match(p.html(), /class="p-opt p-opt-x" data-scope-none role="checkbox" aria-checked="false"/, name + ' · the decline is a row of the same component');
+    for (const k of KEYS) assert.match(p.html(), new RegExp('data-scope="' + k + '" role="checkbox" aria-checked="' + parts.includes(k) + '">[\\s\\S]*?<span class="p-opt-state">' + (parts.includes(k) ? 'Selected' : 'Not selected') + '</span>'), name + ' · ' + k + ' says its state in words');
+  }
+  /* deselect one part: the others are unchanged */
+  const d = scopePage(PEGGY);
+  for (const k of KEYS) await d.click(k);
+  await d.click('vientianePreWedding');
+  deq(d.stored(), want(['bangkok', 'vientianeWedding', 'china'])); deq(d.checked(), want(['bangkok', 'vientianeWedding', 'china']));
+  assert.equal(d.status(), '3 of 4 selected · Bangkok · Vientiane · The Wedding · China');
+  /* parts selected, then decline: the parts are cleared; "We'll miss you." with Send my response */
+  await d.click('none');
+  deq(d.stored(), want([], true), 'declining clears the four'); deq(d.checked(), want([], true));
+  assert.equal(d.status(), 'Not joining this trip');
+  assert.match(d.html(), /data-not-joining><h3 class="t-h2">We’ll miss you\.<\/h3>/); assert.match(d.html(), /data-decline-send>Send my response</);
+  assert.doesNotMatch(d.html(), /data-scope-reconsider/, 're-selecting a part is the way back');
+  assert.ok(d.el('bangkok'), 'the component stays visible when declined');
+  /* decline, then select a part: the decline is cleared */
+  await d.click('china');
+  deq(d.stored(), want(['china'])); deq(d.checked(), want(['china'])); assert.doesNotMatch(d.html(), /data-not-joining/);
+  /* decline straight away, then untick it: the question is unanswered — all four false, stored with a timestamp */
+  const u = scopePage(PEGGY);
+  await u.click('none');
+  deq(u.stored(), want([], true)); deq(u.checked(), want([], true));
+  await u.click('none');
+  deq(u.stored(), want([]), 'unticking the decline stores nothing selected'); assert.ok(json(u.w, 'siyl.guest').scope.at, 'with a timestamp');
+  deq(u.checked(), want([])); assert.equal(u.status(), 'Nothing selected yet');
+  assert.equal(u.w.SIYL_GUEST.scope(), null, 'unanswered'); assert.equal(u.w.SIYL_GUEST.scopeAnswered(), false);
+});
+
+test('PARTICIPATION CHECKBOXES · a HOST deselecting all four one by one is left with nothing selected — no part re-selects itself (the fixed cascade), and a re-render reads exactly what is stored', async () => {
+  const h = scopePage(HARUTHAI);
+  assert.equal(h.stored(), null, 'nothing stored yet');
+  deq(h.checked(), want(KEYS), 'the hosts\' first view: all four, as a default only');
+  assert.equal(h.status(), '4 of 4 selected · Bangkok · Vientiane · China');
+  const left = KEYS.slice();
+  for (const k of KEYS) {
+    await h.click(k); left.splice(left.indexOf(k), 1);
+    deq(h.stored(), want(left), 'stored after unticking ' + k);
+    deq(h.checked(), want(left), 'rendered after unticking ' + k + ' — nothing re-selected');
+  }
+  deq(h.checked(), want([])); assert.equal(h.status(), 'Nothing selected yet');
+  assert.equal(h.w.SIYL_GUEST.scope(), null, 'a stored answer with nothing selected is unanswered — never the hosts\' default again');
+  h.w.render(); deq(h.checked(), want([]), 'a re-render keeps it');
+  /* a fresh page on the same storage (a reload) reads exactly what is stored */
+  const again = scopePage(HARUTHAI, { 'siyl.guest': h.w.localStorage.getItem('siyl.guest') });
+  deq(again.checked(), want([]), 'after a reload: still nothing selected');
+  await again.click('china');
+  deq(again.stored(), want(['china'])); deq(again.checked(), want(['china']), 'a host ticks one part: that part alone');
+  const third = scopePage(HARUTHAI, { 'siyl.guest': again.w.localStorage.getItem('siyl.guest') });
+  deq(third.checked(), want(['china']), 'and it renders exactly as stored');
 });

@@ -551,9 +551,20 @@ async function completionOf(env, who, registration, rooms) {
   questionnaireMissing(g0.profile).forEach((m) => about.push(m));
   /* a room or a waiting-list place the engine still holds for a stage outside the trip must have been released first */
   const stale = scope ? Object.keys(rooms || {}).filter((stage) => GRAPH_IDS[stage] && !graphRelevant(stage, scope)).map((stage) => ({ key: 'release:' + stage, label: 'A place still held for a stage outside your trip', href: 'your-journey.html#scope' })) : [];
+  /* STEP 01 IS REQUIRED ON THE SERVER TOO (Owner, 24 Sep 2026): the contact and the personal details the form does not mark
+     optional, read from what the Worker itself stores for this invitation — never from the client's claim. The name stays the
+     invitation's unless the guest corrected it, so it is not asked here. */
+  const sc = await storedContact(env, who.invitationId) || {};
+  const contactMissing = [];
+  const blank = (v) => !String(v || '').trim();
+  if (!validEmail(sc.email || '')) contactMissing.push({ key: 'email', label: 'Email address', href: 'invitation.html#p-email' });
+  if (String(sc.phone || '').replace(/\D/g, '').length < 6) contactMissing.push({ key: 'phone', label: 'Mobile number', href: 'invitation.html#p-phone' });
+  if (!validBirthdate(sc.birthdate)) contactMissing.push({ key: 'birthdate', label: 'Date of Birth', href: 'invitation.html#p-birthdate' });
+  [['nationality', 'Nationality'], ['address1', 'Street and house number'], ['postal', 'Postal / ZIP code'], ['city', 'City'], ['country', 'Country']]
+    .forEach(([k, label]) => { if (blank(sc[k])) contactMissing.push({ key: k, label, href: 'invitation.html#p-' + k }); });
   return graphCompletion({
     scope, stages, stale,
-    contact: { missing: [] },
+    contact: { missing: contactMissing },
     wedding: { events, sangkhathan, finale, dress: !!(gr.dress && gr.dress.all), hosts: !!who.hosts,
       seating: seatView ? { open: !!seatView.open, frozen: !!seatView.frozen, configured: seatView.configured || {}, seats } : { open: false } },
     about: { missing: scope && scope.none ? [] : about },
@@ -627,7 +638,7 @@ async function handleDraft(request, env) {
   }
   const keys = d.keys, now = d.updatedAt;
   /* the contact inside the draft is the server contact too (the recipient of the confirmation) */
-  try { const g = JSON.parse(keys['siyl.guest'] || 'null'); const c = g && g.contact; if (c && (validEmail(c.email) || c.phone)) { const prev = await storedContact(env, who.invitationId) || {}; const email = validEmail(c.email) || prev.email || '', phone = (c.phone || '').trim().slice(0, 40) || prev.phone || ''; if (email !== (prev.email || '') || phone !== (prev.phone || '')) await env.REG_KV.put(contactKey(who.invitationId), JSON.stringify({ invitationId: who.invitationId, guestId: who.guestId, email, phone, at: now, from: 'draft' })); } } catch (e) { /* the draft stands */ }
+  try { const g = JSON.parse(keys['siyl.guest'] || 'null'); const c = g && g.contact; if (c && (validEmail(c.email) || c.phone)) { const prev = await storedContact(env, who.invitationId) || {}; const email = validEmail(c.email) || prev.email || '', phone = (c.phone || '').trim().slice(0, 40) || prev.phone || ''; if (email !== (prev.email || '') || phone !== (prev.phone || '')) await env.REG_KV.put(contactKey(who.invitationId), JSON.stringify({ ...prev, invitationId: who.invitationId, guestId: who.guestId, email, phone, at: now, from: 'draft' })); } } catch (e) { /* the draft stands */ }
   const submission = await submissionFor(env, who, d);
   return json({ ok: true, invitationId: who.invitationId, savedAt: now, updatedAt: now, submission }, 200, corsHeaders(request));
 }
@@ -857,7 +868,8 @@ async function resolveRecipient(env, who, registration) {
     const email = validEmail(e);
     if (!email) continue;
     const phone = (r.contact && r.contact.phone) || (r.guestRecord && r.guestRecord.contact && r.guestRecord.contact.phone) || '';
-    if (env.REG_KV) { try { await env.REG_KV.put(contactKey(who.invitationId), JSON.stringify({ invitationId: who.invitationId, guestId: who.guestId, email, phone, at: new Date().toISOString(), from: source })); } catch (e) { /* the send still goes to it */ } }
+    /* merged, never replaced: the personal details already stored stay with the contact (Owner, 24 Sep 2026 · step 01 is required) */
+    if (env.REG_KV) { try { const prev = await storedContact(env, who.invitationId) || {}; await env.REG_KV.put(contactKey(who.invitationId), JSON.stringify({ ...prev, invitationId: who.invitationId, guestId: who.guestId, email, phone: phone || prev.phone || '', at: new Date().toISOString(), from: source })); } catch (e) { /* the send still goes to it */ } }
     return { email, phone, source };
   }
   return { email: '', phone: '', source: 'none' };

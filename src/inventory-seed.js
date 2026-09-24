@@ -44,15 +44,14 @@
 export const FIXED = [];
 export const SEED = {
   /* ---------------------------------------------------------- Bangkok, before */
-  /* Two approved Bangkok addresses share the window; a guest holds one of
-   * them. The Master (Owner, 16 Sep 2026, 17:17 UTC): U Sathorn 6 rooms, Shama 6 rooms
+  /* ONE approved Bangkok address holds the window (SHAMA YEN-AKAT BANGKOK IS DELETED — Owner, 24 Sep 2026: no stock, no card,
+   * no price, no line; nothing replaces it); a guest holds a place in one of
+   * them. The Master (Owner, 16 Sep 2026, 17:17 UTC): U Sathorn 6 rooms
    * — the earlier 38 / 27 are retired; six physical rooms, twelve places each.
    * SATHORN PENTHOUSE BANGKOK IS DELETED (Owner, 24 Sep 2026 · Edit 6): 'bkk-stay/penthouse' is not a website
    * product any more — no stock, no card, no gallery, no Bag line; nothing replaces it. */
   'bkk-stay/u-sathorn-superior-garden':
     { unit: 'room', capacity: 6, occupancy: 2, held: 0, name: 'Superior Room With Garden View', stay: 'U Sathorn Bangkok' },
-  'bkk-stay/shama-king-studio-balcony':
-    { unit: 'room', capacity: 6, occupancy: 2, held: 0, name: 'King Studio With Balcony', stay: 'Shama Yen-Akat Bangkok' },
 
   /* ------------------------------------------ Vientiane · Pre-Wedding Stay */
   'prewed/heritage':                 { unit: 'room', capacity: 5,  occupancy: 2, held: 0, name: 'The Heritage' },

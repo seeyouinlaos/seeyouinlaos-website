@@ -21,6 +21,8 @@ async function harness(provider) {
   const peggy = await bearerOf('demo-peggy'), steffie = await bearerOf('demo-steffie');
   const entries = {}; entries[await authIdOf(peggy)] = { i: 'INV-G001', g: 'G001', p: 'INV-002' }; entries[await authIdOf(steffie)] = { i: 'INV-G002', g: 'G002', p: 'INV-002' };
   const store = kv(); const calls = [];
+  /* STEP 01 IS REQUIRED ON THE SERVER (Owner, 24 Sep 2026): the guest's stored contact carries the required personal details — synthetic */
+  await store.put('contact:INV-G001', JSON.stringify({ invitationId: 'INV-G001', guestId: 'G001', email: 'peggy.test@example.com', phone: '+49 170 000 0001', birthdate: '1990-01-01', nationality: 'Testland', address1: '1 Test Street', postal: '10000', city: 'Testcity', country: 'Testland', at: '2026-09-16T12:00:00.000Z' }));
   const env = { ASSETS: await assetsFor(entries), REG_KV: store, MAIL_FROM: 'guest.relation.seeyouinlaos@gmail.com', ...(provider === 'brevo' || provider === 'refuse' ? { BREVO_API_KEY: 'x' } : {}), ...(provider === 'resend' ? { RESEND_API_KEY: 'x' } : {}) };
   const realFetch = globalThis.fetch;
   globalThis.fetch = async (url, init) => { const u = String(url); if (/api\.brevo\.com|api\.resend\.com/.test(u)) { const body = JSON.parse(init.body); calls.push({ url: u, body, auth: init.headers['api-key'] || init.headers.authorization }); if (provider === 'refuse') return new Response(JSON.stringify({ message: 'sender not validated' }), { status: 400 }); return new Response(JSON.stringify(u.includes('brevo') ? { messageId: '<msg-' + calls.length + '@brevo>' } : { id: 'resend-' + calls.length }), { status: u.includes('brevo') ? 201 : 200 }); } return realFetch(url, init); };

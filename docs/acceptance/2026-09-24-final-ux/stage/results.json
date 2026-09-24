@@ -1,0 +1,152 @@
+[
+ {
+  "id": "A1 incomplete required fields → Continue stays on step 01, each missing field marked, the first focused",
+  "ok": true,
+  "d": "{\"url\":\"/invitation\",\"needed\":[\"p-birthdate\",\"p-nationality\",\"p-address1\",\"p-postal\",\"p-city\",\"p-country\"],\"invalid\":[\"p-birthdate\",\"p-nationality\",\"p-address1\",\"p-postal\",\"p-city\",\"p-country\"],\"note\":\"6 required details are still missing: Date of Birth · Nationality · Street and house number · Postal / ZIP code · City · Country.\",\"focus\":\"p-birthdate\",\"done\":false}"
+ },
+ {
+  "id": "A2 direct navigation to My Trip while step 01 is incomplete → sent back to step 01",
+  "ok": true,
+  "d": "http://127.0.0.1:8788/invitation?from=journey#p-birthdate"
+ },
+ {
+  "id": "A3 an incomplete draft is saved and restored after reload, still not complete",
+  "ok": true,
+  "d": "{\"email\":\"cleo.test@example.org\",\"phone\":\"+49 170 1234567\",\"done\":false}"
+ },
+ {
+  "id": "A4 with everything but the date of birth, step 01 still names the date of birth",
+  "ok": true,
+  "d": "[\"birthdate\"]"
+ },
+ {
+  "id": "A5 optional Address line 2 and Region empty → step 01 complete",
+  "ok": true,
+  "d": "{\"miss\":[],\"a2\":\"\",\"rg\":\"\"}"
+ },
+ {
+  "id": "A6 Continue now opens My Trip",
+  "ok": true,
+  "d": "http://127.0.0.1:8788/your-journey"
+ },
+ {
+  "id": "A7 the server contact holds the required fields the page validated",
+  "ok": true,
+  "d": "{\"email\":true,\"phone\":true,\"birthdate\":\"1990-01-01\",\"country\":\"Testland\"}"
+ },
+ {
+  "id": "B0 no \"I'll join all\" control; nothing selected reads \"Nothing selected yet\"",
+  "ok": true,
+  "d": "{\"ui\":{\"bangkok\":false,\"vientianePreWedding\":false,\"vientianeWedding\":false,\"china\":false,\"none\":false},\"st\":{\"bangkok\":false,\"vientianePreWedding\":false,\"vientianeWedding\":false,\"china\":false,\"none\":false},\"all\":false,\"status\":\"Nothing selected yet\"}"
+ },
+ {
+  "id": "B1 Bangkok only → UI and stored state agree, no other part moved",
+  "ok": true,
+  "d": "{\"ui\":{\"bangkok\":true,\"vientianePreWedding\":false,\"vientianeWedding\":false,\"china\":false,\"none\":false},\"st\":{\"bangkok\":true,\"vientianePreWedding\":false,\"vientianeWedding\":false,\"china\":false,\"none\":false},\"all\":false,\"status\":\"1 of 4 selected · Bangkok\"}"
+ },
+ {
+  "id": "B2 Vientiane · Before only → UI and stored state agree, no other part moved",
+  "ok": true,
+  "d": "{\"ui\":{\"bangkok\":false,\"vientianePreWedding\":true,\"vientianeWedding\":false,\"china\":false,\"none\":false},\"st\":{\"bangkok\":false,\"vientianePreWedding\":true,\"vientianeWedding\":false,\"china\":false,\"none\":false},\"all\":false,\"status\":\"1 of 4 selected · Vientiane · Before the Wedding\"}"
+ },
+ {
+  "id": "B3 Vientiane · The Wedding only → UI and stored state agree, no other part moved",
+  "ok": true,
+  "d": "{\"ui\":{\"bangkok\":false,\"vientianePreWedding\":false,\"vientianeWedding\":true,\"china\":false,\"none\":false},\"st\":{\"bangkok\":false,\"vientianePreWedding\":false,\"vientianeWedding\":true,\"china\":false,\"none\":false},\"all\":false,\"status\":\"1 of 4 selected · Vientiane · The Wedding\"}"
+ },
+ {
+  "id": "B4 China only → UI and stored state agree, no other part moved",
+  "ok": true,
+  "d": "{\"ui\":{\"bangkok\":false,\"vientianePreWedding\":false,\"vientianeWedding\":false,\"china\":true,\"none\":false},\"st\":{\"bangkok\":false,\"vientianePreWedding\":false,\"vientianeWedding\":false,\"china\":true,\"none\":false},\"all\":false,\"status\":\"1 of 4 selected · China\"}"
+ },
+ {
+  "id": "B5 Bangkok + China → UI and stored state agree, no other part moved",
+  "ok": true,
+  "d": "{\"ui\":{\"bangkok\":true,\"vientianePreWedding\":false,\"vientianeWedding\":false,\"china\":true,\"none\":false},\"st\":{\"bangkok\":true,\"vientianePreWedding\":false,\"vientianeWedding\":false,\"china\":true,\"none\":false},\"all\":false,\"status\":\"2 of 4 selected · Bangkok · China\"}"
+ },
+ {
+  "id": "B6 both Vientiane parts (after clearing Bangkok + China) → UI and stored state agree, no other part moved",
+  "ok": true,
+  "d": "{\"ui\":{\"bangkok\":false,\"vientianePreWedding\":true,\"vientianeWedding\":true,\"china\":false,\"none\":false},\"st\":{\"bangkok\":false,\"vientianePreWedding\":true,\"vientianeWedding\":true,\"china\":false,\"none\":false},\"all\":false,\"status\":\"2 of 4 selected · Vientiane\"}"
+ },
+ {
+  "id": "B7 all four → UI and stored state agree, no other part moved",
+  "ok": true,
+  "d": "{\"ui\":{\"bangkok\":true,\"vientianePreWedding\":true,\"vientianeWedding\":true,\"china\":true,\"none\":false},\"st\":{\"bangkok\":true,\"vientianePreWedding\":true,\"vientianeWedding\":true,\"china\":true,\"none\":false},\"all\":false,\"status\":\"4 of 4 selected · Bangkok · Vientiane · China\"}"
+ },
+ {
+  "id": "B8 deselect one part (Vientiane · Before) — the other three untouched → UI and stored state agree, no other part moved",
+  "ok": true,
+  "d": "{\"ui\":{\"bangkok\":true,\"vientianePreWedding\":false,\"vientianeWedding\":true,\"china\":true,\"none\":false},\"st\":{\"bangkok\":true,\"vientianePreWedding\":false,\"vientianeWedding\":true,\"china\":true,\"none\":false},\"all\":false,\"status\":\"3 of 4 selected · Bangkok · Vientiane · The Wedding · China\"}"
+ },
+ {
+  "id": "B9 parts selected → decline clears all four",
+  "ok": true,
+  "d": "{\"ui\":{\"bangkok\":false,\"vientianePreWedding\":false,\"vientianeWedding\":false,\"china\":false,\"none\":true},\"st\":{\"bangkok\":false,\"vientianePreWedding\":false,\"vientianeWedding\":false,\"china\":false,\"none\":true},\"all\":false,\"status\":\"Not joining this trip\"}"
+ },
+ {
+  "id": "B10 declined → selecting a part clears the decline",
+  "ok": true,
+  "d": "{\"ui\":{\"bangkok\":false,\"vientianePreWedding\":false,\"vientianeWedding\":false,\"china\":true,\"none\":false},\"st\":{\"bangkok\":false,\"vientianePreWedding\":false,\"vientianeWedding\":false,\"china\":true,\"none\":false},\"all\":false,\"status\":\"1 of 4 selected · China\"}"
+ },
+ {
+  "id": "B11 unticking the decline leaves the question unanswered (nothing selected, nothing declined)",
+  "ok": true,
+  "d": "{\"ui\":{\"bangkok\":false,\"vientianePreWedding\":false,\"vientianeWedding\":false,\"china\":false,\"none\":false},\"st\":{\"bangkok\":false,\"vientianePreWedding\":false,\"vientianeWedding\":false,\"china\":false,\"none\":false},\"all\":false,\"status\":\"Nothing selected yet\"}"
+ },
+ {
+  "id": "B12 save/reload restores exactly the same state (Bangkok + Vientiane · The Wedding)",
+  "ok": true,
+  "d": "{\"ui\":{\"bangkok\":true,\"vientianePreWedding\":false,\"vientianeWedding\":true,\"china\":false,\"none\":false},\"st\":{\"bangkok\":true,\"vientianePreWedding\":false,\"vientianeWedding\":true,\"china\":false,\"none\":false},\"all\":false,\"status\":\"2 of 4 selected · Bangkok · Vientiane · The Wedding\"}"
+ },
+ {
+  "id": "B13 another device of the same guest restores the same state from the server draft",
+  "ok": true,
+  "d": "{\"ui\":{\"bangkok\":true,\"vientianePreWedding\":false,\"vientianeWedding\":true,\"china\":false,\"none\":false},\"st\":{\"bangkok\":true,\"vientianePreWedding\":false,\"vientianeWedding\":true,\"china\":false,\"none\":false},\"all\":false,\"status\":\"2 of 4 selected · Bangkok · Vientiane · The Wedding\"}"
+ },
+ {
+  "id": "B14 HOST · deselecting the four parts one by one never re-selects them (the cascade is gone)",
+  "ok": true,
+  "d": "start {\"bangkok\":true,\"vientianePreWedding\":true,\"vientianeWedding\":true,\"china\":true,\"none\":false} · steps {\"bangkok\":false,\"vientianePreWedding\":true,\"vientianeWedding\":true,\"china\":true,\"none\":false} | {\"bangkok\":false,\"vientianePreWedding\":false,\"vientianeWedding\":true,\"china\":true,\"none\":false} | {\"bangkok\":false,\"vientianePreWedding\":false,\"vientianeWedding\":false,\"china\":true,\"none\":false} | {\"bangkok\":false,\"vientianePreWedding\":false,\"vientianeWedding\":false,\"china\":false,\"none\":false}"
+ },
+ {
+  "id": "B15 HOST · after reload the host still has nothing selected (the default does not return)",
+  "ok": true,
+  "d": "{\"ui\":{\"bangkok\":false,\"vientianePreWedding\":false,\"vientianeWedding\":false,\"china\":false,\"none\":false},\"st\":{\"bangkok\":false,\"vientianePreWedding\":false,\"vientianeWedding\":false,\"china\":false,\"none\":false},\"all\":false,\"status\":\"Nothing selected yet\"}"
+ },
+ {
+  "id": "C-390 five rows, one width, one left edge; selected rows show a check and \"Selected\", the rest \"Not selected\"; no 4px dot anywhere in the component; no overflow; tap targets ≥ 44 px",
+  "ok": true,
+  "d": "{\"n\":5,\"states\":[\"Selected\",\"Not selected\",\"Not selected\",\"Selected\",\"Not selected\"],\"boxes\":[true,false,false,true,false],\"widths\":[292],\"lefts\":[49],\"after\":[\"none\",\"none\",\"none\",\"none\",\"none\"],\"dots\":0,\"overflow\":false,\"minH\":64,\"linkOn\":0}"
+ },
+ {
+  "id": "C-1440 five rows, one width, one left edge; selected rows show a check and \"Selected\", the rest \"Not selected\"; no 4px dot anywhere in the component; no overflow; tap targets ≥ 44 px",
+  "ok": true,
+  "d": "{\"n\":5,\"states\":[\"Selected\",\"Not selected\",\"Not selected\",\"Selected\",\"Not selected\"],\"boxes\":[true,false,false,true,false],\"widths\":[794],\"lefts\":[169],\"after\":[\"none\",\"none\",\"none\",\"none\",\"none\"],\"dots\":0,\"overflow\":false,\"minH\":64,\"linkOn\":0}"
+ },
+ {
+  "id": "D1 Stays page: no Shama, no Penthouse, no Riverside; the count reads six",
+  "ok": true,
+  "d": "{\"shama\":false,\"pent\":false,\"river\":false,\"six\":true}"
+ },
+ {
+  "id": "D2 the room engine offers exactly one Bangkok product (U Sathorn)",
+  "ok": true,
+  "d": "[\"bkk-stay/u-sathorn-superior-garden\"]"
+ },
+ {
+  "id": "D3 the old Shama room page no longer shows the room",
+  "ok": true,
+  "d": "shown=false"
+ },
+ {
+  "id": "D4 a stale Shama Bag line leaves the Bag and is NOT turned into U Sathorn",
+  "ok": true,
+  "d": "{\"lines\":[],\"text\":false}"
+ },
+ {
+  "id": "E0 no page error on any page of the run",
+  "ok": true,
+  "d": "none"
+ }
+]

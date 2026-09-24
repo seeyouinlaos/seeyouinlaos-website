@@ -17,6 +17,8 @@ function kv() { const m = new Map(); return { m, get: async (k) => (m.has(k) ? m
 const TEXT = 'SEE YOU IN LAOS — JOURNEY SELECTION\nInvitation: INV-G777 · Sam';
 const REG = (email, extra) => ({ channel: 'journey-shop', guestId: 'G777', partyId: 'INV-777', selections: [{ id: 'train', name: 'Special Express No. 25', price: 100 }], totalUsd: 100, contact: { email, phone: '+66 81 000 0000' },
   guestRecord: { guests: [{ guestId: 'G777', name: 'Sam', source: { fullName: 'Sam Example', preferredName: 'Sam' } }], contact: { email, phone: '+66 81 000 0000' } }, seats: null, rooms: null, registration_submitted_at: '2026-09-16T10:00:00.000Z', ...(extra || {}) });
+/* step 01's required personal details (Owner, 24 Sep 2026) — obviously synthetic */
+const STEP01 = { birthdate: '1990-01-01', nationality: 'Testland', address1: '1 Test Street', postal: '10000', city: 'Testcity', country: 'Testland' };
 const GUEST = (answers) => JSON.stringify({ contact: { email: 'sam.example@example.org', phone: '+66 81 000 0000' }, guests: { G777: { submitted: {}, profile: answers, history: [{ at: 'x' }] } }, history: [{ at: 'y' }] });
 
 async function harness() {
@@ -35,11 +37,14 @@ async function harness() {
 test('DRAFT · one server-side draft per guest: PUT stores the complete keys under the guest\'s invitation (the contact inside becomes the server contact), GET on another device returns them; another guest cannot read or write it; nothing without a bearer', async () => {
   const h = await harness();
   try {
+    /* the guest's personal details are stored already (step 01, Owner 24 Sep 2026) — the draft's contact must add to them, never erase them */
+    await h.store.put('contact:INV-G777', JSON.stringify({ invitationId: 'INV-G777', guestId: 'G777', email: '', phone: '', ...STEP01, at: '2026-09-16T09:00:00.000Z' }));
     const keys = { 'siyl.guest': GUEST({ coffeetea: 'Oolong' }), 'siyl.bag': JSON.stringify([{ id: 'train', price: 100 }]), 'siyl.temple': JSON.stringify({ events: { temple: 'yes' } }), 'siyl.docs': JSON.stringify({ docs: {} }), 'siyl.skip': '[]' };
     const put = await h.w.fetch(req('/api/draft', { 'x-siyl-auth': h.sam }, { invitationId: 'INV-G777', keys, clientUpdatedAt: '2026-09-16T10:00:00.000Z', reason: 'save' }, 'PUT'), h.env);
     assert.equal(put.status, 200); const d = await put.json(); assert.equal(d.ok, true); assert.ok(d.savedAt); assert.equal(d.submission.submissionStatus, 'draft'); assert.equal(d.submission.hasUnsentChanges, false);
     const stored = JSON.parse(h.store.m.get('draft:INV-G777').v); assert.equal(stored.guestId, 'G777'); assert.deepEqual(stored.keys, keys);
     assert.equal(JSON.parse(h.store.m.get('contact:INV-G777').v).email, 'sam.example@example.org', 'the contact in the draft is the server contact');
+    { const sc = JSON.parse(h.store.m.get('contact:INV-G777').v); assert.equal(sc.phone, '+66 81 000 0000'); for (const [k, v] of Object.entries(STEP01)) assert.equal(sc[k], v, k + ' survives the draft\'s contact'); }
     /* device B */
     const get = await h.w.fetch(req('/api/draft', { 'x-siyl-auth': h.sam }), h.env); const g = await get.json();
     assert.equal(g.ok, true); assert.deepEqual(g.draft.keys, keys); assert.equal(g.draft.updatedAt, d.updatedAt); assert.equal(g.submission.submissionStatus, 'draft');
@@ -60,6 +65,8 @@ test('ONE LOGICAL JOURNEY · the first send sets the reference; a change afterwa
     /* every PUT names the revision it read (the client does the same) */
     const put = async (keys) => { const cur = await (await h.w.fetch(req('/api/draft', { 'x-siyl-auth': h.sam }), h.env)).json(); return (await h.w.fetch(req('/api/draft', { 'x-siyl-auth': h.sam }, { invitationId: 'INV-G777', keys, baseUpdatedAt: cur.draft ? cur.draft.updatedAt : null }, 'PUT'), h.env)).json(); };
     const state = async () => (await (await h.w.fetch(req('/api/draft', { 'x-siyl-auth': h.sam }), h.env)).json()).submission;
+    /* STEP 01 IS REQUIRED ON THE SERVER (Owner, 24 Sep 2026): the guest's stored contact is complete — synthetic */
+    await h.store.put('contact:INV-G777', JSON.stringify({ invitationId: 'INV-G777', guestId: 'G777', email: 'sam.example@example.org', phone: '+66 81 000 0000', ...STEP01, at: '2026-09-16T09:00:00.000Z' }));
     await put({ 'siyl.guest': GUEST({ coffeetea: 'Oolong' }), 'siyl.bag': JSON.stringify([{ id: 'train' }]) });
     const r1 = await h.w.fetch(req('/api/register', { 'x-siyl-auth': h.sam }, { invitationId: 'INV-G777', registration: complete(REG('sam.example@example.org')), text: TEXT }), h.env);
     assert.equal(r1.status, 202); const d1 = await r1.json();

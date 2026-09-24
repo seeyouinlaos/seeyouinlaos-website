@@ -59,6 +59,8 @@
         gated(function () {
           var u = U(), p = P(), b = B();
           if (!u || !p || !b) { resolve({ ok: false, error: 'unavailable' }); return; }
+          /* a room the website no longer offers is refused before anything changes: no hold, no line, the stage as it was */
+          if (!p.items(win, slug).length) { resolve({ ok: false, error: 'not offered' }); return; }
           var go = function () {
             if (!u.tracked(win, slug)) { self.write(win, slug, null); resolve({ ok: true, unit: null }); return; }
             var unit = label ? u.units(win, slug).filter(function (x) { return x.label === label; })[0]

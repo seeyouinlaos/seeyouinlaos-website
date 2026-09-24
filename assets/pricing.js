@@ -208,7 +208,9 @@
       if (f && f.name) return [{ id: windowId, name: f.name, meta: f.meta, price: f.price, img: f.img }];
       var at = locate(windowId);
       if (!at) return [];
-      var room = roomOf(at.stay, slug) || at.stay.rooms[0];
+      /* a room asked for by name that the website no longer offers yields no line — never another room's (Owner, 24 Sep 2026) */
+      var room = roomOf(at.stay, slug) || (slug ? null : at.stay.rooms[0]);
+      if (!room) return [];
       /* THE ACCOMMODATION MEDIA RULE (Owner, 21 Sep 2026): the line's frame comes from the one resolver — the property's own approved set or nothing */
       var img = window.SIYL_STAY_ART ? window.SIYL_STAY_ART.bag(at.key, room ? room.slug : '', at.win.id) : '';
       /* where a window offers whole properties rather than room categories,

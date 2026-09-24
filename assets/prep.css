@@ -186,6 +186,35 @@ body.prep button, body.prep input, body.prep textarea, body.prep select { font-f
 @media (max-width: 519px) { .p-scope > .p-sel { flex-basis: 100%; } }
 .p-link.on { color: var(--p-ink); border-bottom-color: var(--p-ink); font-weight: 500; }
 .p-link.on::before { content: '✓'; margin-right: 8px; }
+/* WHICH PARTS OF THE JOURNEY ARE YOU JOINING (Owner, 24 Sep 2026): the standard checkbox list — one row per part, full width,
+   one geometry for all five rows. A row says its state three ways at once: the box (empty, or filled with a check mark), the
+   outline (hairline, or a firm Ink edge) and the word ("Not selected" · "Selected"). Cherry fills only a ticked box — the
+   grammar's SELECTED — and is never the only sign. The exclusive answer sits beneath a divider that reads "or". */
+.p-opts { display: grid; gap: var(--s3); margin-top: var(--s5); }
+.p-opt {
+  display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; align-items: center; column-gap: var(--s4);
+  box-sizing: border-box; width: 100%; min-height: 64px; padding: var(--s4); margin: 0;
+  background: var(--p-card); border: 1px solid var(--p-line); color: var(--p-ink);
+  font: inherit; text-align: left; cursor: pointer; -webkit-tap-highlight-color: transparent;
+  transition: border-color var(--p-t-state) var(--p-ease), box-shadow var(--p-t-state) var(--p-ease);
+}
+.p-opt:hover { border-color: var(--p-ink); }
+.p-opt.is-on { border-color: var(--p-ink); box-shadow: inset 0 0 0 1px var(--p-ink); }
+.p-opt-box { width: 22px; height: 22px; box-sizing: border-box; border: 1.5px solid var(--p-ink); background: var(--p-card); display: grid; place-items: center; }
+.p-opt.is-on .p-opt-box { background: var(--p-accent); border-color: var(--p-accent); }
+.p-opt.is-on .p-opt-box::after { content: ''; width: 6px; height: 11px; border: solid var(--p-paper); border-width: 0 2px 2px 0; transform: translateY(-1px) rotate(45deg); }
+.p-opt-body { display: grid; gap: 4px; min-width: 0; }
+.p-opt-t { font-family: var(--f-ed); font-weight: 200; font-size: 19px; line-height: 1.15; letter-spacing: 0; }
+.p-opt-s { font-family: var(--f-ui); font-size: 9.5px; letter-spacing: 1.4px; text-transform: uppercase; line-height: 1.4; color: var(--p-mute); }
+.p-opt-state { font-family: var(--f-ui); font-size: 9.5px; letter-spacing: 1.4px; text-transform: uppercase; color: var(--p-mute); white-space: nowrap; }
+.p-opt.is-on .p-opt-state { color: var(--p-ink); font-weight: 500; }
+.p-opt-or { display: flex; align-items: center; gap: var(--s3); margin: var(--s2) 0; font-family: var(--f-ui); font-size: 9.5px; letter-spacing: 1.4px; text-transform: uppercase; color: var(--p-mute); }
+.p-opt-or::before, .p-opt-or::after { content: ''; flex: 1; height: 1px; background: var(--p-line); }
+.p-opt-next { margin-top: var(--s4); }
+.p-opt-after { margin-top: var(--s5); padding-top: var(--s5); border-top: 1px solid var(--p-line); }
+.p-opt-after .t-b1 { margin-top: var(--s3); }
+@media (max-width: 519px) { .p-opt { column-gap: var(--s3); padding: var(--s3) var(--s4); } .p-opt-t { font-size: 17px; } }
+@media (prefers-reduced-motion: reduce) { .p-opt { transition: none; } }
 
 /* ----------------------------------------------------------------- field */
 .p-field { margin-top: var(--s5); }
@@ -199,6 +228,9 @@ body.prep button, body.prep input, body.prep textarea, body.prep select { font-f
 .p-field.on textarea { border-color: var(--p-ink); }
 .p-field textarea[aria-invalid="true"]:not(:focus) { border-color: #C9C4BA; }
 .p-field input:focus, .p-field textarea:focus { outline: 0; border-color: var(--p-ink); }
+/* a required field still missing after an attempt to continue: the edge and the words beside it say so (Owner, 24 Sep 2026) */
+.p-field.is-needed input:not(:focus) { border-color: var(--p-accent); }
+.p-need { margin-top: var(--s1); }
 .p-check { display: flex; gap: var(--s3); align-items: flex-start; min-height: var(--p-tap); padding: var(--s2) 0; cursor: pointer; }
 .p-check input { width: 20px; height: 20px; margin-top: 3px; flex: none; accent-color: var(--p-ink); }
 
