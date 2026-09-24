@@ -35,7 +35,9 @@ export const PROFILE = [
   /* THE LABEL (Owner, 22 Sep 2026): question 06 reads "Thai favorite" — the Owner's wording, exactly as given; the question itself
    * (the required, structured genre multi-select, its choices, its persistence and the words both emails print) is untouched */
   { key: 'genres', n: '06', q: 'Thai favorite', hint: 'The wedding playlist is built from your answers — choose every genre you would dance to.', required: true, type: 'multi', min: 1, choices: GENRES },
-  { key: 'music', n: '07', q: 'A song, an album, an artist you never skip', hint: 'Optional — for the DJ’s notes.', required: false, type: 'text' }
+  /* THE KARAOKE QUESTION (Owner, 24 Sep 2026): the song line now asks for the guest's karaoke song — the same key, so every answer
+   * already given stays where it is */
+  { key: 'music', n: '07', q: 'What’s your favourite karaoke song — the one you’d love to sing along to?', hint: 'Optional — for the DJ’s notes.', required: false, type: 'text' }
 ];
 
 /* A WISH FROM THE BRIDE & GROOM — the final act of the wedding night (Owner, 22 Sep 2026) */

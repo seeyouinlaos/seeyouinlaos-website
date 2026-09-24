@@ -9,7 +9,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 .bag{width:44px;height:44px;display:flex;align-items:center;justify-content:center;position:relative;color:#313131;text-decoration:none}.bag .bgi{display:block}
 .bb{position:absolute;top:1px;right:0;min-width:14px;height:14px;padding:0 3px;background:#313131;color:#F3EEE7;font-size:8.5px;line-height:1;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;display:none;align-items:center;justify-content:center;box-shadow:0 0 0 2px #F3EEE7;border-radius:1px}
 </style>
-<link rel="stylesheet" href="assets/aman.css?v=23823812"><link rel="stylesheet" href="assets/prep.css?v=02085183"></head><body>
+<link rel="stylesheet" href="assets/aman.css?v=b099d186"><link rel="stylesheet" href="assets/prep.css?v=e192c878"></head><body>
 <header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="cart.html" aria-label="My Bag"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main class="prep-page" id="your-journey">
 <div class="prep-head">
@@ -40,16 +40,16 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/rooms-data.js?v=a4760c95"></script>
 <script src="assets/pricing.js?v=eb8a9bf3"></script>
 <script src="assets/stage-graph.js?v=82a28623"></script>
-<script src="assets/questionnaire.js?v=2d3727a3"></script>
-<script src="assets/guest.js?v=a947c48f"></script>
-<script src="assets/draft.js?v=7ab9ca64"></script>
-<script src="assets/confirm.js?v=f35e0aa8"></script>
+<script src="assets/questionnaire.js?v=817b4a6f"></script>
+<script src="assets/guest.js?v=958b1655"></script>
+<script src="assets/draft.js?v=ac3ae4f8"></script>
+<script src="assets/confirm.js?v=ff2a54e0"></script>
 <script src="assets/temple.js?v=200ee67c"></script>
 <script src="assets/stay-plan.js?v=f1b4f999"></script>
-<script src="assets/rooms.js?v=dfa4781d"></script>
+<script src="assets/rooms.js?v=82eee5c1"></script>
 <script src="assets/stay.js?v=51b302df"></script>
 <script src="assets/seatlabels.js?v=4994e1f4"></script>
-<script src="assets/seating.js?v=3b392bf0"></script>
+<script src="assets/seating.js?v=e867530e"></script>
 <script src="assets/seatpass.js?v=528e9c24"></script>
 <script src="assets/vendor/qrcode.js?v=18ae399f"></script>
 <script src="assets/travelpass.js?v=ed68e022"></script>
@@ -122,6 +122,17 @@ function transportCard(seg,line){
       '</div>'+
     '<div class="p-sum-ticket">'+ticket+'</div></div>'}
 
+/* THE ROOM THE GUEST HOLDS, IN PLAIN WORDS (Owner, 24 Sep 2026): which room of the category, how many sleeping places it has,
+   who already holds them (first names — the engine's own sharing view), how many are left, whether it is full — and what is
+   still left in the whole category. Read from the room engine's units and its category summary; no second count. */
+function occupancyHtml(win,slug,unit){
+  if(!unit)return '';
+  var names=unit.occupants.filter(function(o){return !o.placeholder}).map(function(o){return o.mine?'You':(o.name||'A guest')}),taken=unit.places-unit.free;
+  var prop=unit.kind==='property',sum=U.summary(win,slug);
+  var head=(prop?'Your place · ':'Your room · ')+esc(U.unitName(unit));
+  var line=unit.places+(unit.places===1?' sleeping place':' sleeping places')+' · '+(taken?taken+' taken ('+esc(names.join(' · ')||'kept for your party')+')':'none taken')+' · '+(unit.full?'Full':unit.free+(unit.free===1?' place available':' places available'));
+  var cat=sum?(prop?'':(sum.units===1?'The only room of this category':sum.units+' rooms in this category')+' · ')+(sum.remainingPlaces>0?sum.remainingPlaces+(sum.remainingPlaces===1?' place':' places')+' still available in '+(prop?'the house':'the category'):'nothing left in '+(prop?'the house':'the category')):'';
+  return '<div class="p-occ" data-unit-line><p class="t-l1 on">'+head+'</p><p class="t-b2">'+line+'</p>'+(cat?'<p class="t-b2 mute">'+cat+'</p>':'')+'</div>'}
 /* THE STAY CARD: the category, the place the guest holds in it, the cost */
 function staySummary(seg,x){
   var incl=x.complimentary?'Complimentary · a shared guest house of six places; who sleeps where is arranged among you at the house'
@@ -138,8 +149,8 @@ function staySummary(seg,x){
       '<p class="t-b2">'+esc(x.meta||'')+'</p>'+
       (incl?'<p class="t-b2"><b>'+esc(incl)+'</b></p>':'')+
       (x.breakfast&&x.note?'<p class="t-b2">'+esc(x.breakfast)+'</p>':'')+
-      (tracked?(held&&unit?'<p class="t-l1 on" data-unit-line>'+esc(U.unitName(unit))+' · '+esc(U.unitWords(unit))+'</p>'
-                          :'<p class="t-l1 open" data-unit-line>Choose your room below</p>'):'')+
+      (tracked?(held&&unit?occupancyHtml(win,x.room,unit)
+                          :'<p class="t-l1 open" data-unit-line>Choose your room below — you will see who is already in each room</p>'):'')+
       '<p class="p-price">'+(x.complimentary?'Complimentary':money((x.price||0)))+'<span class="t-l1">'+basis+'</span></p>'+
       actions(['<a class="p-link" href="'+detailHref(x)+'">View details</a>',
                '<a class="p-link" href="journeys.html?change='+seg.key+'#'+seg.anchor+'">Change</a>',
@@ -191,7 +202,7 @@ function bkkHtml(){
     '<button type="button" data-a="next" aria-label="Next address"></button></div></div></div>';
   if(line){var held=ST.held(line),unit=ST.unitOf(line),tracked=U&&U.ready()&&U.tracked(win,line.room),choosing=(!held||ROOMFOR==='bkk-stay')&&tracked;
     h+='<div class="p-card" id="stay-bkk-stay"><p class="t-l1 on">Current selection</p><h3 class="t-h1">'+esc(line.name)+'</h3><p class="t-b2">'+esc(line.meta||'')+'</p>'+
-      (tracked?(held&&unit?'<p class="t-l1 on" data-unit-line>'+esc(U.unitName(unit))+' · '+esc(U.unitWords(unit))+'</p>':'<p class="t-l1 open" data-unit-line>Choose your room below</p>'):'')+
+      (tracked?(held&&unit?occupancyHtml(win,line.room,unit):'<p class="t-l1 open" data-unit-line>Choose your room below — you will see who is already in each room</p>'):'')+
       actions(['<a class="p-link" href="'+detailHref(line)+'">View details</a>',(tracked&&held&&!choosing?'<button type="button" class="p-link" data-rooms-for="bkk-stay">Change room</button>':''),'<button type="button" class="p-link mute" data-rm="bkk-stay">Remove this stay</button>','<button type="button" class="p-link mute" data-skip="bkk-stay">Not joining this stage</button>'])+
       (choosing?'<div class="p-rooms" data-rooms-box="bkk-stay"><p class="t-l1" style="margin-top:var(--s4)">'+(held?'Your room · change it here':'Choose your room')+'</p>'+ST.unitsHtml(win,line.room)+'<p class="t-b2 p-rooms-note" role="status" aria-live="polite"></p></div>':'')+'</div>'}
   else h+=actions(['<button type="button" class="p-link mute" data-skip="bkk-stay">Not joining this stage</button>']);

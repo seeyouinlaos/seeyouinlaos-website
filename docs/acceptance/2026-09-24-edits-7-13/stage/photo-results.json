@@ -1,0 +1,32 @@
+[
+ {
+  "id": "10.1 on a second hostname the photo uploads to the page's own origin and is stored",
+  "ok": true,
+  "d": "{\"s1\":{\"status\":200,\"type\":\"image/jpeg\"},\"note\":\"Photo saved · 24 September 2026.\"}"
+ },
+ {
+  "id": "10.2 it is shown on My Profile at once",
+  "ok": true,
+  "d": "shown"
+ },
+ {
+  "id": "10.3 it survives a reload",
+  "ok": true,
+  "d": "shown after reload"
+ },
+ {
+  "id": "10.4 a new sign-in on a second device shows the same photo",
+  "ok": true,
+  "d": "shown on the second device"
+ },
+ {
+  "id": "10.5 not one request left for workers.dev (every call on the page's own origin)",
+  "ok": true,
+  "d": "cross-origin requests: 0"
+ },
+ {
+  "id": "10.6 the synthetic photo is removed again",
+  "ok": true,
+  "d": "delete 200"
+ }
+]

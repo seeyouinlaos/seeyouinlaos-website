@@ -755,6 +755,9 @@
      The Wat Si Saket cloister label is retired with the clip it described. */
   E("A night of Vientiane — the train at the platform, the neon streets of the evening", "Eine Nacht in Vientiane — der Zug am Bahnsteig, die Neonstraßen des Abends", "ค่ำคืนในเวียงจันทน์ — ขบวนรถไฟที่ชานชาลา ถนนนีออนยามเย็น", "ビエンチャンの夜——ホームの列車、ネオンの灯る夕べの街路");
   E("After the Wedding — nine photographs of Kunming, Lijiang and the way home", "Nach der Hochzeit — neun Fotografien von Kunming, Lijiang und dem Weg nach Hause", "หลังงานแต่งงาน — ภาพถ่ายเก้าภาพของคุนหมิง ลี่เจียง และเส้นทางกลับบ้าน", "結婚式のあと——昆明、麗江、そして帰路の写真九枚");
+  /* 24 SEP 2026 (item 12): Before the Wedding and The Wedding became the same card gallery */
+  E("Before the Wedding — eleven photographs of Bangkok and the night train north", "Vor der Hochzeit — elf Fotografien von Bangkok und dem Nachtzug nach Norden", "ก่อนงานแต่งงาน — ภาพถ่ายสิบเอ็ดภาพของกรุงเทพฯ และรถไฟกลางคืนขึ้นเหนือ", "結婚式のまえ——バンコクと北へ向かう夜行列車の写真十一枚");
+  E("The Wedding — twelve photographs of the wedding days in Vientiane", "Die Hochzeit — zwölf Fotografien der Hochzeitstage in Vientiane", "งานแต่งงาน — ภาพถ่ายสิบสองภาพของวันงานแต่งงานที่เวียงจันทน์", "結婚式——ヴィエンチャンでの結婚式の日々の写真十二枚");
   E("The photographs of this page", "Die Fotografien dieser Seite", "ภาพถ่ายของหน้านี้", "このページの写真");
   E("The previous photograph", "Vorheriges Foto", "ภาพก่อนหน้า", "前の写真");
   E("The next photograph", "Nächstes Foto", "ภาพถัดไป", "次の写真");

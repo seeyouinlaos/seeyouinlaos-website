@@ -56,7 +56,8 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:24px;margin:44
 .rail i{position:absolute;left:0;top:-1px;height:3px;background:#313131;width:40%;transition:transform .12s linear}
 .rnav .rc{font-family:'PP Editorial Old',serif;font-size:13px;letter-spacing:1px;margin-right:2px}
 .rnav button{background:none;border:0;width:36px;height:36px;font-size:20px;color:#313131;cursor:pointer;padding:0}
-.buy{background:#FCFAF6;margin-top:52px;padding:34px 26px 38px}
+.buy{background:#FCFAF6;margin-top:24px;padding:28px 26px 32px}
+.detail-h{margin:48px 24px 0;font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:#6B6964;font-family:inherit;font-weight:400;border-top:1px solid #DAD9D7;padding-top:18px}
 .buy h2{margin:0 0 4px;font-size:24px}
 .buy .win{border-top:1px solid #DAD9D7;padding:18px 0 22px;margin-top:16px}
 .buy .win:first-of-type{margin-top:20px}
@@ -92,18 +93,18 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:24px;margin:44
 .note{font-size:11px;color:#6B6964;margin-top:16px;line-height:1.7}
 .backrow{text-align:center;margin-top:34px}
 .backrow a{font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:#313131;text-decoration:none;border-bottom:1px solid #313131;padding:8px 0 3px;display:inline-block;min-height:44px}
-</style><link rel="stylesheet" href="assets/prep.css?v=02085183">
-<link rel="stylesheet" href="assets/desktop.css?v=f66b6e82"><link rel="stylesheet" href="assets/aman.css?v=23823812"></head><body>
+</style><link rel="stylesheet" href="assets/prep.css?v=e192c878">
+<link rel="stylesheet" href="assets/desktop.css?v=f66b6e82"><link rel="stylesheet" href="assets/aman.css?v=b099d186"></head><body>
 <header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="cart.html" aria-label="My Bag"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main id="m"></main>
 <script src="assets/bag.js?v=fe0c8b93"></script>
-<script src="assets/draft.js?v=7ab9ca64"></script>
+<script src="assets/draft.js?v=ac3ae4f8"></script>
 <script src="assets/shop-menu.js?v=1ff891bc"></script>
 <script src="assets/aman.js?v=d6c4adb4"></script>
 <script src="assets/rooms-data.js?v=a4760c95"></script>
 <script src="assets/pricing.js?v=eb8a9bf3"></script>
 <script src="assets/stay-plan.js?v=f1b4f999"></script>
-<script src="assets/rooms.js?v=dfa4781d"></script>
+<script src="assets/rooms.js?v=82eee5c1"></script>
 <script src="assets/stay.js?v=51b302df"></script>
 <script src="assets/journey.js?v=275f56b0"></script>
 <script src="assets/wizard.js?v=2ffbd144"></script>
@@ -157,6 +158,44 @@ if (room.gallery.length) {
 } else {
   h += '<div class="pend">Photography to follow</div>';
 }
+/* ---- BOOKING FIRST, DETAILS SECOND (Owner, 24 Sep 2026): the room, its amount and its one action — with the rooms of the
+ *      category and who already holds a place in them — stand directly under the photographs; the story, the facts, the
+ *      amenities and the other rooms follow as optional detail. (Formerly the last block of the page.) ---- */
+h += '<section class="buy" id="book"><p class="eyebrow" style="margin:0">Book this room · ' + esc(stay.place) + '</p>';
+stay.windows.forEach(function (w, wi) {
+  var q = P.quote(w.id, room.slug);
+  h += '<div class="win"><p class="wl">' + esc(w.label) + '</p><p class="wd">' + esc(w.dates) + '</p><p class="wn">' + esc(w.nights) + '</p>';
+  if (room.complimentary) {
+    /* THE GUEST HOUSE (Owner, 19 Sep 2026): complimentary, six shared places held through the room engine like any room —
+       the guest sees who already shares the house and takes as many places as the party has members */
+    h += '<p class="price">Complimentary</p><p class="per">' + esc(room.status) + ' · Guest Relations arranges the rest</p>';
+    h += '<p class="av" data-av="' + w.id + '" hidden></p>';
+    h += '<div class="rooms prep" data-rooms-box="' + w.id + '"></div>';
+    h += '<button class="cta" data-win="' + wi + '" data-avwin="' + w.id + '">Add to My Bag</button><span class="swap" data-swap="' + wi + '" hidden></span>';
+  } else if (room.interest) {
+    h += '<p class="price">' + esc(room.status) + '</p><p class="per">Guest Relations arranges the rest</p>';
+    h += '<button class="cta" data-win="' + wi + '">Add to My Bag</button>';
+  } else if (room.rate == null) {
+    /* real inventory without an approved guest amount — never an invented price */
+    h += '<p class="price">Amount on request</p><p class="per">Guest Relations confirms the amount</p>';
+    h += '<p class="enq">This room is part of the house but not yet released with an amount. Guest Relations will confirm it for you.</p>';
+  } else {
+    /* NO PRE-RESERVED ROOMS (Owner, 15 Sep 2026): every room is chosen like any other, available until booked.
+     * ONE presentation for every window: the amount, exactly what it covers,
+     * and the exact nights it covers. The nights are never left implicit. */
+    h += amountBlock(q);
+    if (q.note) h += '<p class="hn2">' + esc(q.note) + '<span>' + esc(q.noteBy) + '</span></p>';
+    if ((room.breakfast || stay.breakfast)) h += '<p class="bf">' + esc((room.breakfast || stay.breakfast)) + '</p>';
+    h += '<p class="av" data-av="' + w.id + '" hidden></p>';
+    /* the physical rooms of this category, each with its two places — the primary picture of availability */
+    h += '<div class="rooms prep" data-rooms-box="' + w.id + '"></div>';
+    h += '<button class="cta" data-win="' + wi + '" data-avwin="' + w.id + '">Add to My Bag</button><span class="swap" data-swap="' + wi + '" hidden></span>';
+    if (P.hasVariants(w.id)) h += '<button type="button" class="chg" data-chg="' + wi + '" hidden>Change selection</button>';
+  }
+  h += '</div>';
+});
+h += '<p class="note">Amounts are the total per person for the nights shown. Nothing is paid on this website — Guest Relations confirms every arrangement with you.</p></section>';
+h += '<h2 class="detail-h" id="details">Details</h2>';
 h += '<section class="intro"><p class="body">' + esc(room.desc) + '</p>';
 /* the room's own paragraph — what the guest is actually buying */
 if (room.story) h += '<p class="body story">' + esc(room.story) + '</p>';
@@ -225,41 +264,6 @@ if (others.length) {
   h += '</section>';
 }
 
-/* ---- commerce: fixed-window per-person amounts → Add to Your Journey ---- */
-h += '<section class="buy"><p class="eyebrow" style="margin:0 0 8px">Accommodation</p><h2>' + esc(room.name) + '</h2><p class="eyebrow" style="margin:0">' + esc(stay.place) + '</p>';
-stay.windows.forEach(function (w, wi) {
-  var q = P.quote(w.id, room.slug);
-  h += '<div class="win"><p class="wl">' + esc(w.label) + '</p><p class="wd">' + esc(w.dates) + '</p><p class="wn">' + esc(w.nights) + '</p>';
-  if (room.complimentary) {
-    /* THE GUEST HOUSE (Owner, 19 Sep 2026): complimentary, six shared places held through the room engine like any room —
-       the guest sees who already shares the house and takes as many places as the party has members */
-    h += '<p class="price">Complimentary</p><p class="per">' + esc(room.status) + ' · Guest Relations arranges the rest</p>';
-    h += '<p class="av" data-av="' + w.id + '" hidden></p>';
-    h += '<div class="rooms prep" data-rooms-box="' + w.id + '"></div>';
-    h += '<button class="cta" data-win="' + wi + '" data-avwin="' + w.id + '">Add to My Bag</button><span class="swap" data-swap="' + wi + '" hidden></span>';
-  } else if (room.interest) {
-    h += '<p class="price">' + esc(room.status) + '</p><p class="per">Guest Relations arranges the rest</p>';
-    h += '<button class="cta" data-win="' + wi + '">Add to My Bag</button>';
-  } else if (room.rate == null) {
-    /* real inventory without an approved guest amount — never an invented price */
-    h += '<p class="price">Amount on request</p><p class="per">Guest Relations confirms the amount</p>';
-    h += '<p class="enq">This room is part of the house but not yet released with an amount. Guest Relations will confirm it for you.</p>';
-  } else {
-    /* NO PRE-RESERVED ROOMS (Owner, 15 Sep 2026): every room is chosen like any other, available until booked.
-     * ONE presentation for every window: the amount, exactly what it covers,
-     * and the exact nights it covers. The nights are never left implicit. */
-    h += amountBlock(q);
-    if (q.note) h += '<p class="hn2">' + esc(q.note) + '<span>' + esc(q.noteBy) + '</span></p>';
-    if ((room.breakfast || stay.breakfast)) h += '<p class="bf">' + esc((room.breakfast || stay.breakfast)) + '</p>';
-    h += '<p class="av" data-av="' + w.id + '" hidden></p>';
-    /* the physical rooms of this category, each with its two places — the primary picture of availability */
-    h += '<div class="rooms prep" data-rooms-box="' + w.id + '"></div>';
-    h += '<button class="cta" data-win="' + wi + '" data-avwin="' + w.id + '">Add to My Bag</button><span class="swap" data-swap="' + wi + '" hidden></span>';
-    if (P.hasVariants(w.id)) h += '<button type="button" class="chg" data-chg="' + wi + '" hidden>Change selection</button>';
-  }
-  h += '</div>';
-});
-h += '<p class="note">Amounts are the total per person for the nights shown. Nothing is paid on this website — Guest Relations confirms every arrangement with you.</p></section>';
 h += '<p class="backrow"><a href="journeys.html#j-' + stay.windows[0].id + '">Back to The Journey</a></p>';
 
 document.getElementById('m').innerHTML = h;

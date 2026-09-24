@@ -99,6 +99,9 @@ test('THE WORKER · the same rule: a trip without the final act is refused (422,
   const { composeGuestMail, composeOwnerMail } = await import('../src/mail-templates.js');
   const gm = composeGuestMail(recPool), om = composeOwnerMail(recPool, ORIGIN + '/api/status?invitation=INV-G001');
   assert.match(gm.text, /After the dinner: The pool jump/); assert.match(gm.text, /Your music \(genres\): Jazz · Latin/); assert.match(om.text, /After the dinner: The pool jump/); assert.match(om.text, /Jazz · Latin/);
+  /* THE KARAOKE QUESTION (Owner, 24 Sep 2026): the same key, the new label in both emails */
+  const recSong = JSON.parse(JSON.stringify(recPool)); recSong.registration.guestRecord.guests[0].profile.music = 'Dancing Queen';
+  for (const m of [composeGuestMail(recSong), composeOwnerMail(recSong, ORIGIN + '/api/status?invitation=INV-G001')]) { assert.match(m.text, /Favourite karaoke song: Dancing Queen/); assert.doesNotMatch(m.text + m.html, /A song, an album, an artist/); }
 });
 
 test('THE REVIEW PAGE · a refused SEND says what is missing and where, and leaves the draft untouched (the other answers stand); the client checks readiness before it sends', () => {

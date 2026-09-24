@@ -764,6 +764,9 @@ body.seatbar-on .jbar { display: none; }
 .p-seatmap .seat-name { pointer-events: none; }
 /* the room allocation units */
 .p-units { margin-top: var(--s3); border-top: 1px solid var(--p-hair); }
+/* the room the guest holds, in plain words: room · places · who · left (Owner, 24 Sep 2026) */
+.p-occ { margin-top: var(--s3); }
+.p-occ .t-b2 { margin-top: 2px; }
 .p-unit { display: flex; align-items: center; gap: var(--s3); border-bottom: 1px solid var(--p-hair); padding: var(--s3) 0; transition: background-color var(--p-t-fast) var(--p-ease); }
 .p-unit > div { flex: 1; min-width: 0; }
 .p-unit .p-unit-name { font-family: var(--f-ed); font-weight: 200; font-size: 17px; color: var(--p-ink); }

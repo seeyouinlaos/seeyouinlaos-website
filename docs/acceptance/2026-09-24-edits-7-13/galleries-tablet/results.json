@@ -1,0 +1,7925 @@
+{
+ "before": {
+  "origin": "http://127.0.0.1:8795",
+  "at": "2026-09-24T00:41:43.588Z",
+  "verdict": {
+   "overflow": true,
+   "galleries": false,
+   "close": false
+  },
+  "runs": [
+   {
+    "viewport": "iphone-390x844",
+    "engine": "webkit",
+    "overflow": {
+     "scrollWidth": 390,
+     "innerWidth": 390,
+     "ok": true
+    },
+    "cards": [
+     {
+      "title": "Before the Wedding",
+      "gallery": false,
+      "count": 0,
+      "counter": null,
+      "next": null,
+      "swipe": null,
+      "wrap": null,
+      "frames": [
+       {
+        "src": "url(\"http://127.0.0.1:8795/assets/images/city/001-bangkok-skytrain-king-power-mahanakhon.jpg\")",
+        "naturalWidth": null,
+        "counter": null
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": false
+     },
+     {
+      "title": "The Wedding",
+      "gallery": false,
+      "count": 0,
+      "counter": null,
+      "next": null,
+      "swipe": null,
+      "wrap": null,
+      "frames": [
+       {
+        "src": "url(\"http://127.0.0.1:8795/assets/images/event/052-vow-ceremony-green-door.jpg\")",
+        "naturalWidth": null,
+        "counter": null
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": false
+     },
+     {
+      "title": "After the Wedding",
+      "gallery": true,
+      "count": 9,
+      "counter": "1 / 9",
+      "next": "2 / 9",
+      "swipe": "1 / 9",
+      "wrap": "1 / 9",
+      "frames": [
+       {
+        "src": "assets/images/city/004-lijiang-aw-01.jpg",
+        "naturalWidth": 1280,
+        "counter": "1 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-02.jpg",
+        "naturalWidth": 1024,
+        "counter": "2 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-03.jpg",
+        "naturalWidth": 1024,
+        "counter": "3 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-04.jpg",
+        "naturalWidth": 1025,
+        "counter": "4 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-05.jpg",
+        "naturalWidth": 1025,
+        "counter": "5 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-06.jpg",
+        "naturalWidth": 1080,
+        "counter": "6 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-07.jpg",
+        "naturalWidth": 862,
+        "counter": "7 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-08.jpg",
+        "naturalWidth": 862,
+        "counter": "8 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-09.jpg",
+        "naturalWidth": 862,
+        "counter": "9 / 9"
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": true
+     }
+    ],
+    "close": {
+     "innerWidth": 390,
+     "frame": {
+      "left": 24,
+      "right": 366
+     },
+     "duo": {
+      "box": {
+       "left": 24,
+       "right": 366
+      },
+      "map": {
+       "left": 24,
+       "right": 189,
+       "width": 165,
+       "height": 193,
+       "centre": 106.5
+      },
+      "photo": {
+       "left": 201,
+       "right": 366,
+       "width": 165,
+       "height": 193,
+       "centre": 283.5
+      },
+      "caption": {
+       "left": 24,
+       "right": 366,
+       "width": 342,
+       "height": 29,
+       "centre": 195
+      }
+     },
+     "close": {
+      "box": {
+       "left": 24,
+       "right": 366
+      },
+      "hr": {
+       "left": 24,
+       "right": 366,
+       "width": 342,
+       "height": 1,
+       "centre": 195
+      },
+      "eyebrow": {
+       "left": 24,
+       "right": 366,
+       "width": 342,
+       "height": 16.8,
+       "centre": 195
+      },
+      "eyebrowText": {
+       "left": 24,
+       "right": 144.3
+      },
+      "h2": {
+       "left": 24,
+       "right": 366,
+       "width": 342,
+       "height": 33.3,
+       "centre": 195
+      },
+      "h2Text": {
+       "left": 24,
+       "right": 190.3
+      },
+      "cta": {
+       "left": 24,
+       "right": 366,
+       "width": 342,
+       "height": 55.9,
+       "centre": 195
+      }
+     },
+     "checks": {
+      "closeOnFrame": true,
+      "duoOnFrame": true,
+      "hrOnFrame": true,
+      "ctaStartsOnFrame": true,
+      "eyebrowStartsOnFrame": true,
+      "h2StartsOnFrame": true,
+      "captionStartsOnFrame": true,
+      "imagesOnAxis": true
+     }
+    },
+    "errors": [],
+    "images": [
+     {
+      "url": "/assets/images/city/004-lijiang-aw-01.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-chao-phraya-skyline.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/002-vientiane-card-poster.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-card-poster.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/052-ceremony-green-gateway.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-skytrain-king-power-mahanakhon.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/052-vow-ceremony-green-door.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/laos-map.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/002-vientiane-reclining-buddha.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-02.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-03.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-04.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-05.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-06.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-07.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-08.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-09.jpg",
+      "status": 200
+     }
+    ],
+    "imageFailures": []
+   },
+   {
+    "viewport": "iphone-430x932",
+    "engine": "webkit",
+    "overflow": {
+     "scrollWidth": 430,
+     "innerWidth": 430,
+     "ok": true
+    },
+    "cards": [
+     {
+      "title": "Before the Wedding",
+      "gallery": false,
+      "count": 0,
+      "counter": null,
+      "next": null,
+      "swipe": null,
+      "wrap": null,
+      "frames": [
+       {
+        "src": "url(\"http://127.0.0.1:8795/assets/images/city/001-bangkok-skytrain-king-power-mahanakhon.jpg\")",
+        "naturalWidth": null,
+        "counter": null
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": false
+     },
+     {
+      "title": "The Wedding",
+      "gallery": false,
+      "count": 0,
+      "counter": null,
+      "next": null,
+      "swipe": null,
+      "wrap": null,
+      "frames": [
+       {
+        "src": "url(\"http://127.0.0.1:8795/assets/images/event/052-vow-ceremony-green-door.jpg\")",
+        "naturalWidth": null,
+        "counter": null
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": false
+     },
+     {
+      "title": "After the Wedding",
+      "gallery": true,
+      "count": 9,
+      "counter": "1 / 9",
+      "next": "2 / 9",
+      "swipe": "1 / 9",
+      "wrap": "1 / 9",
+      "frames": [
+       {
+        "src": "assets/images/city/004-lijiang-aw-01.jpg",
+        "naturalWidth": 1280,
+        "counter": "1 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-02.jpg",
+        "naturalWidth": 1024,
+        "counter": "2 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-03.jpg",
+        "naturalWidth": 1024,
+        "counter": "3 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-04.jpg",
+        "naturalWidth": 1025,
+        "counter": "4 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-05.jpg",
+        "naturalWidth": 1025,
+        "counter": "5 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-06.jpg",
+        "naturalWidth": 1080,
+        "counter": "6 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-07.jpg",
+        "naturalWidth": 862,
+        "counter": "7 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-08.jpg",
+        "naturalWidth": 862,
+        "counter": "8 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-09.jpg",
+        "naturalWidth": 862,
+        "counter": "9 / 9"
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": true
+     }
+    ],
+    "close": {
+     "innerWidth": 430,
+     "frame": {
+      "left": 24,
+      "right": 406
+     },
+     "duo": {
+      "box": {
+       "left": 24,
+       "right": 406
+      },
+      "map": {
+       "left": 24,
+       "right": 209,
+       "width": 185,
+       "height": 216.3,
+       "centre": 116.5
+      },
+      "photo": {
+       "left": 221,
+       "right": 406,
+       "width": 185,
+       "height": 216.3,
+       "centre": 313.5
+      },
+      "caption": {
+       "left": 24,
+       "right": 406,
+       "width": 382,
+       "height": 29,
+       "centre": 215
+      }
+     },
+     "close": {
+      "box": {
+       "left": 24,
+       "right": 406
+      },
+      "hr": {
+       "left": 24,
+       "right": 406,
+       "width": 382,
+       "height": 1,
+       "centre": 215
+      },
+      "eyebrow": {
+       "left": 24,
+       "right": 406,
+       "width": 382,
+       "height": 16.8,
+       "centre": 215
+      },
+      "eyebrowText": {
+       "left": 24,
+       "right": 144.3
+      },
+      "h2": {
+       "left": 24,
+       "right": 406,
+       "width": 382,
+       "height": 33.3,
+       "centre": 215
+      },
+      "h2Text": {
+       "left": 24,
+       "right": 190.3
+      },
+      "cta": {
+       "left": 24,
+       "right": 406,
+       "width": 382,
+       "height": 55.9,
+       "centre": 215
+      }
+     },
+     "checks": {
+      "closeOnFrame": true,
+      "duoOnFrame": true,
+      "hrOnFrame": true,
+      "ctaStartsOnFrame": true,
+      "eyebrowStartsOnFrame": true,
+      "h2StartsOnFrame": true,
+      "captionStartsOnFrame": true,
+      "imagesOnAxis": true
+     }
+    },
+    "errors": [],
+    "images": [
+     {
+      "url": "/assets/images/city/004-lijiang-aw-01.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-chao-phraya-skyline.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/002-vientiane-card-poster.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-card-poster.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-skytrain-king-power-mahanakhon.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/052-ceremony-green-gateway.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/052-vow-ceremony-green-door.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/laos-map.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/002-vientiane-reclining-buddha.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-02.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-03.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-04.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-05.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-06.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-07.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-08.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-09.jpg",
+      "status": 200
+     }
+    ],
+    "imageFailures": []
+   },
+   {
+    "viewport": "ipad-834x1194",
+    "engine": "webkit",
+    "overflow": {
+     "scrollWidth": 834,
+     "innerWidth": 834,
+     "ok": true
+    },
+    "cards": [
+     {
+      "title": "Before the Wedding",
+      "gallery": false,
+      "count": 0,
+      "counter": null,
+      "next": null,
+      "swipe": null,
+      "wrap": null,
+      "frames": [
+       {
+        "src": "url(\"http://127.0.0.1:8795/assets/images/city/001-bangkok-skytrain-king-power-mahanakhon.jpg\")",
+        "naturalWidth": null,
+        "counter": null
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": false
+     },
+     {
+      "title": "The Wedding",
+      "gallery": false,
+      "count": 0,
+      "counter": null,
+      "next": null,
+      "swipe": null,
+      "wrap": null,
+      "frames": [
+       {
+        "src": "url(\"http://127.0.0.1:8795/assets/images/event/052-vow-ceremony-green-door.jpg\")",
+        "naturalWidth": null,
+        "counter": null
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": false
+     },
+     {
+      "title": "After the Wedding",
+      "gallery": true,
+      "count": 9,
+      "counter": "1 / 9",
+      "next": "2 / 9",
+      "swipe": "1 / 9",
+      "wrap": "1 / 9",
+      "frames": [
+       {
+        "src": "assets/images/city/004-lijiang-aw-01.jpg",
+        "naturalWidth": 1280,
+        "counter": "1 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-02.jpg",
+        "naturalWidth": 1024,
+        "counter": "2 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-03.jpg",
+        "naturalWidth": 1024,
+        "counter": "3 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-04.jpg",
+        "naturalWidth": 1025,
+        "counter": "4 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-05.jpg",
+        "naturalWidth": 1025,
+        "counter": "5 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-06.jpg",
+        "naturalWidth": 1080,
+        "counter": "6 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-07.jpg",
+        "naturalWidth": 862,
+        "counter": "7 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-08.jpg",
+        "naturalWidth": 862,
+        "counter": "8 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-09.jpg",
+        "naturalWidth": 862,
+        "counter": "9 / 9"
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": true
+     }
+    ],
+    "close": {
+     "innerWidth": 834,
+     "frame": {
+      "left": 44,
+      "right": 790
+     },
+     "duo": {
+      "box": {
+       "left": 81,
+       "right": 753
+      },
+      "map": {
+       "left": 100.5,
+       "right": 733.5,
+       "width": 633,
+       "height": 740.3,
+       "centre": 417
+      },
+      "photo": {
+       "left": 81,
+       "right": 753,
+       "width": 672,
+       "height": 448,
+       "centre": 417
+      },
+      "caption": {
+       "left": 81,
+       "right": 753,
+       "width": 672,
+       "height": 14.5,
+       "centre": 417
+      }
+     },
+     "close": {
+      "box": {
+       "left": 44,
+       "right": 790
+      },
+      "hr": {
+       "left": 44,
+       "right": 790,
+       "width": 746,
+       "height": 1,
+       "centre": 417
+      },
+      "eyebrow": {
+       "left": 44,
+       "right": 790,
+       "width": 746,
+       "height": 16.8,
+       "centre": 417
+      },
+      "eyebrowText": {
+       "left": 44,
+       "right": 164.3
+      },
+      "h2": {
+       "left": 44,
+       "right": 434,
+       "width": 390,
+       "height": 33.3,
+       "centre": 239
+      },
+      "h2Text": {
+       "left": 44,
+       "right": 210.3
+      },
+      "cta": {
+       "left": 44,
+       "right": 464,
+       "width": 420,
+       "height": 55.9,
+       "centre": 254
+      }
+     },
+     "checks": {
+      "closeOnFrame": true,
+      "duoOnFrame": false,
+      "hrOnFrame": true,
+      "ctaStartsOnFrame": true,
+      "eyebrowStartsOnFrame": true,
+      "h2StartsOnFrame": true,
+      "captionStartsOnFrame": false,
+      "imagesOnAxis": true
+     }
+    },
+    "errors": [],
+    "images": [
+     {
+      "url": "/assets/images/city/004-lijiang-aw-01.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-chao-phraya-skyline.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/002-vientiane-card-poster.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-card-poster.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/052-ceremony-green-gateway.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-skytrain-king-power-mahanakhon.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/052-vow-ceremony-green-door.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/laos-map.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/002-vientiane-reclining-buddha.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-02.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-03.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-04.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-05.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-06.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-07.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-08.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-09.jpg",
+      "status": 200
+     }
+    ],
+    "imageFailures": []
+   },
+   {
+    "viewport": "ipad-820x1180",
+    "engine": "webkit",
+    "overflow": {
+     "scrollWidth": 820,
+     "innerWidth": 820,
+     "ok": true
+    },
+    "cards": [
+     {
+      "title": "Before the Wedding",
+      "gallery": false,
+      "count": 0,
+      "counter": null,
+      "next": null,
+      "swipe": null,
+      "wrap": null,
+      "frames": [
+       {
+        "src": "url(\"http://127.0.0.1:8795/assets/images/city/001-bangkok-skytrain-king-power-mahanakhon.jpg\")",
+        "naturalWidth": null,
+        "counter": null
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": false
+     },
+     {
+      "title": "The Wedding",
+      "gallery": false,
+      "count": 0,
+      "counter": null,
+      "next": null,
+      "swipe": null,
+      "wrap": null,
+      "frames": [
+       {
+        "src": "url(\"http://127.0.0.1:8795/assets/images/event/052-vow-ceremony-green-door.jpg\")",
+        "naturalWidth": null,
+        "counter": null
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": false
+     },
+     {
+      "title": "After the Wedding",
+      "gallery": true,
+      "count": 9,
+      "counter": "1 / 9",
+      "next": "2 / 9",
+      "swipe": "1 / 9",
+      "wrap": "1 / 9",
+      "frames": [
+       {
+        "src": "assets/images/city/004-lijiang-aw-01.jpg",
+        "naturalWidth": 1280,
+        "counter": "1 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-02.jpg",
+        "naturalWidth": 1024,
+        "counter": "2 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-03.jpg",
+        "naturalWidth": 1024,
+        "counter": "3 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-04.jpg",
+        "naturalWidth": 1025,
+        "counter": "4 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-05.jpg",
+        "naturalWidth": 1025,
+        "counter": "5 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-06.jpg",
+        "naturalWidth": 1080,
+        "counter": "6 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-07.jpg",
+        "naturalWidth": 862,
+        "counter": "7 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-08.jpg",
+        "naturalWidth": 862,
+        "counter": "8 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-09.jpg",
+        "naturalWidth": 862,
+        "counter": "9 / 9"
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": true
+     }
+    ],
+    "close": {
+     "innerWidth": 820,
+     "frame": {
+      "left": 44,
+      "right": 776
+     },
+     "duo": {
+      "box": {
+       "left": 74,
+       "right": 746
+      },
+      "map": {
+       "left": 97.2,
+       "right": 722.8,
+       "width": 625.6,
+       "height": 731.6,
+       "centre": 410
+      },
+      "photo": {
+       "left": 74,
+       "right": 746,
+       "width": 672,
+       "height": 448,
+       "centre": 410
+      },
+      "caption": {
+       "left": 74,
+       "right": 746,
+       "width": 672,
+       "height": 14.5,
+       "centre": 410
+      }
+     },
+     "close": {
+      "box": {
+       "left": 44,
+       "right": 776
+      },
+      "hr": {
+       "left": 44,
+       "right": 776,
+       "width": 732,
+       "height": 1,
+       "centre": 410
+      },
+      "eyebrow": {
+       "left": 44,
+       "right": 776,
+       "width": 732,
+       "height": 16.8,
+       "centre": 410
+      },
+      "eyebrowText": {
+       "left": 44,
+       "right": 164.3
+      },
+      "h2": {
+       "left": 44,
+       "right": 434,
+       "width": 390,
+       "height": 33.3,
+       "centre": 239
+      },
+      "h2Text": {
+       "left": 44,
+       "right": 210.3
+      },
+      "cta": {
+       "left": 44,
+       "right": 464,
+       "width": 420,
+       "height": 55.9,
+       "centre": 254
+      }
+     },
+     "checks": {
+      "closeOnFrame": true,
+      "duoOnFrame": false,
+      "hrOnFrame": true,
+      "ctaStartsOnFrame": true,
+      "eyebrowStartsOnFrame": true,
+      "h2StartsOnFrame": true,
+      "captionStartsOnFrame": false,
+      "imagesOnAxis": true
+     }
+    },
+    "errors": [],
+    "images": [
+     {
+      "url": "/assets/images/city/004-lijiang-aw-01.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-chao-phraya-skyline.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/002-vientiane-card-poster.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-card-poster.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/052-ceremony-green-gateway.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-skytrain-king-power-mahanakhon.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/052-vow-ceremony-green-door.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/laos-map.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/002-vientiane-reclining-buddha.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-02.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-03.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-04.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-05.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-06.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-07.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-08.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-09.jpg",
+      "status": 200
+     }
+    ],
+    "imageFailures": []
+   },
+   {
+    "viewport": "ipad-768x1024",
+    "engine": "webkit",
+    "overflow": {
+     "scrollWidth": 768,
+     "innerWidth": 768,
+     "ok": true
+    },
+    "cards": [
+     {
+      "title": "Before the Wedding",
+      "gallery": false,
+      "count": 0,
+      "counter": null,
+      "next": null,
+      "swipe": null,
+      "wrap": null,
+      "frames": [
+       {
+        "src": "url(\"http://127.0.0.1:8795/assets/images/city/001-bangkok-skytrain-king-power-mahanakhon.jpg\")",
+        "naturalWidth": null,
+        "counter": null
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": false
+     },
+     {
+      "title": "The Wedding",
+      "gallery": false,
+      "count": 0,
+      "counter": null,
+      "next": null,
+      "swipe": null,
+      "wrap": null,
+      "frames": [
+       {
+        "src": "url(\"http://127.0.0.1:8795/assets/images/event/052-vow-ceremony-green-door.jpg\")",
+        "naturalWidth": null,
+        "counter": null
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": false
+     },
+     {
+      "title": "After the Wedding",
+      "gallery": true,
+      "count": 9,
+      "counter": "1 / 9",
+      "next": "2 / 9",
+      "swipe": "1 / 9",
+      "wrap": "1 / 9",
+      "frames": [
+       {
+        "src": "assets/images/city/004-lijiang-aw-01.jpg",
+        "naturalWidth": 1280,
+        "counter": "1 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-02.jpg",
+        "naturalWidth": 1024,
+        "counter": "2 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-03.jpg",
+        "naturalWidth": 1024,
+        "counter": "3 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-04.jpg",
+        "naturalWidth": 1025,
+        "counter": "4 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-05.jpg",
+        "naturalWidth": 1025,
+        "counter": "5 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-06.jpg",
+        "naturalWidth": 1080,
+        "counter": "6 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-07.jpg",
+        "naturalWidth": 862,
+        "counter": "7 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-08.jpg",
+        "naturalWidth": 862,
+        "counter": "8 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-09.jpg",
+        "naturalWidth": 862,
+        "counter": "9 / 9"
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": true
+     }
+    ],
+    "close": {
+     "innerWidth": 768,
+     "frame": {
+      "left": 44,
+      "right": 724
+     },
+     "duo": {
+      "box": {
+       "left": 48,
+       "right": 720
+      },
+      "map": {
+       "left": 112.6,
+       "right": 655.4,
+       "width": 542.9,
+       "height": 634.9,
+       "centre": 384
+      },
+      "photo": {
+       "left": 48,
+       "right": 720,
+       "width": 672,
+       "height": 448,
+       "centre": 384
+      },
+      "caption": {
+       "left": 48,
+       "right": 720,
+       "width": 672,
+       "height": 14.5,
+       "centre": 384
+      }
+     },
+     "close": {
+      "box": {
+       "left": 44,
+       "right": 724
+      },
+      "hr": {
+       "left": 44,
+       "right": 724,
+       "width": 680,
+       "height": 1,
+       "centre": 384
+      },
+      "eyebrow": {
+       "left": 44,
+       "right": 724,
+       "width": 680,
+       "height": 16.8,
+       "centre": 384
+      },
+      "eyebrowText": {
+       "left": 44,
+       "right": 164.3
+      },
+      "h2": {
+       "left": 44,
+       "right": 434,
+       "width": 390,
+       "height": 33.3,
+       "centre": 239
+      },
+      "h2Text": {
+       "left": 44,
+       "right": 210.3
+      },
+      "cta": {
+       "left": 44,
+       "right": 464,
+       "width": 420,
+       "height": 55.9,
+       "centre": 254
+      }
+     },
+     "checks": {
+      "closeOnFrame": true,
+      "duoOnFrame": false,
+      "hrOnFrame": true,
+      "ctaStartsOnFrame": true,
+      "eyebrowStartsOnFrame": true,
+      "h2StartsOnFrame": true,
+      "captionStartsOnFrame": false,
+      "imagesOnAxis": true
+     }
+    },
+    "errors": [],
+    "images": [
+     {
+      "url": "/assets/images/city/004-lijiang-aw-01.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-chao-phraya-skyline.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/002-vientiane-card-poster.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-card-poster.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/052-ceremony-green-gateway.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-skytrain-king-power-mahanakhon.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/052-vow-ceremony-green-door.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/002-vientiane-reclining-buddha.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/laos-map.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-02.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-03.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-04.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-05.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-06.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-07.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-08.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-09.jpg",
+      "status": 200
+     }
+    ],
+    "imageFailures": []
+   },
+   {
+    "viewport": "ipad-1194x834",
+    "engine": "webkit",
+    "overflow": {
+     "scrollWidth": 1194,
+     "innerWidth": 1194,
+     "ok": true
+    },
+    "cards": [
+     {
+      "title": "Before the Wedding",
+      "gallery": false,
+      "count": 0,
+      "counter": null,
+      "next": null,
+      "swipe": null,
+      "wrap": null,
+      "frames": [
+       {
+        "src": "url(\"http://127.0.0.1:8795/assets/images/city/001-bangkok-skytrain-king-power-mahanakhon.jpg\")",
+        "naturalWidth": null,
+        "counter": null
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": false
+     },
+     {
+      "title": "The Wedding",
+      "gallery": false,
+      "count": 0,
+      "counter": null,
+      "next": null,
+      "swipe": null,
+      "wrap": null,
+      "frames": [
+       {
+        "src": "url(\"http://127.0.0.1:8795/assets/images/event/052-vow-ceremony-green-door.jpg\")",
+        "naturalWidth": null,
+        "counter": null
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": false
+     },
+     {
+      "title": "After the Wedding",
+      "gallery": true,
+      "count": 9,
+      "counter": "1 / 9",
+      "next": "2 / 9",
+      "swipe": "1 / 9",
+      "wrap": "1 / 9",
+      "frames": [
+       {
+        "src": "assets/images/city/004-lijiang-aw-01.jpg",
+        "naturalWidth": 1280,
+        "counter": "1 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-02.jpg",
+        "naturalWidth": 1024,
+        "counter": "2 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-03.jpg",
+        "naturalWidth": 1024,
+        "counter": "3 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-04.jpg",
+        "naturalWidth": 1025,
+        "counter": "4 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-05.jpg",
+        "naturalWidth": 1025,
+        "counter": "5 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-06.jpg",
+        "naturalWidth": 1080,
+        "counter": "6 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-07.jpg",
+        "naturalWidth": 862,
+        "counter": "7 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-08.jpg",
+        "naturalWidth": 862,
+        "counter": "8 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-09.jpg",
+        "naturalWidth": 862,
+        "counter": "9 / 9"
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": true
+     }
+    ],
+    "close": {
+     "innerWidth": 1194,
+     "frame": {
+      "left": 71,
+      "right": 1123
+     },
+     "duo": {
+      "box": {
+       "left": 71,
+       "right": 1123
+      },
+      "map": {
+       "left": 71,
+       "right": 565,
+       "width": 494,
+       "height": 577.7,
+       "centre": 318
+      },
+      "photo": {
+       "left": 629,
+       "right": 1123,
+       "width": 494,
+       "height": 577.7,
+       "centre": 876
+      },
+      "caption": {
+       "left": 71,
+       "right": 1123,
+       "width": 1052,
+       "height": 14.5,
+       "centre": 597
+      }
+     },
+     "close": {
+      "box": {
+       "left": 71,
+       "right": 1123
+      },
+      "hr": {
+       "left": 71,
+       "right": 1123,
+       "width": 1052,
+       "height": 1,
+       "centre": 597
+      },
+      "eyebrow": {
+       "left": 71,
+       "right": 1123,
+       "width": 1052,
+       "height": 16.8,
+       "centre": 597
+      },
+      "eyebrowText": {
+       "left": 71,
+       "right": 191.3
+      },
+      "h2": {
+       "left": 71,
+       "right": 551,
+       "width": 480,
+       "height": 41,
+       "centre": 311
+      },
+      "h2Text": {
+       "left": 71,
+       "right": 273.8
+      },
+      "cta": {
+       "left": 71,
+       "right": 491,
+       "width": 420,
+       "height": 55.9,
+       "centre": 281
+      }
+     },
+     "checks": {
+      "closeOnFrame": true,
+      "duoOnFrame": true,
+      "hrOnFrame": true,
+      "ctaStartsOnFrame": true,
+      "eyebrowStartsOnFrame": true,
+      "h2StartsOnFrame": true,
+      "captionStartsOnFrame": true,
+      "imagesOnAxis": true
+     }
+    },
+    "errors": [],
+    "images": [
+     {
+      "url": "/assets/images/city/004-lijiang-aw-01.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-chao-phraya-skyline.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/002-vientiane-card-poster.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-card-poster.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/052-ceremony-green-gateway.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-skytrain-king-power-mahanakhon.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/052-vow-ceremony-green-door.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/laos-map.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/002-vientiane-reclining-buddha.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-02.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-03.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-04.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-05.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-06.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-07.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-08.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-09.jpg",
+      "status": 200
+     }
+    ],
+    "imageFailures": []
+   },
+   {
+    "viewport": "ipad-1180x820",
+    "engine": "webkit",
+    "overflow": {
+     "scrollWidth": 1180,
+     "innerWidth": 1180,
+     "ok": true
+    },
+    "cards": [
+     {
+      "title": "Before the Wedding",
+      "gallery": false,
+      "count": 0,
+      "counter": null,
+      "next": null,
+      "swipe": null,
+      "wrap": null,
+      "frames": [
+       {
+        "src": "url(\"http://127.0.0.1:8795/assets/images/city/001-bangkok-skytrain-king-power-mahanakhon.jpg\")",
+        "naturalWidth": null,
+        "counter": null
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": false
+     },
+     {
+      "title": "The Wedding",
+      "gallery": false,
+      "count": 0,
+      "counter": null,
+      "next": null,
+      "swipe": null,
+      "wrap": null,
+      "frames": [
+       {
+        "src": "url(\"http://127.0.0.1:8795/assets/images/event/052-vow-ceremony-green-door.jpg\")",
+        "naturalWidth": null,
+        "counter": null
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": false
+     },
+     {
+      "title": "After the Wedding",
+      "gallery": true,
+      "count": 9,
+      "counter": "1 / 9",
+      "next": "2 / 9",
+      "swipe": "1 / 9",
+      "wrap": "1 / 9",
+      "frames": [
+       {
+        "src": "assets/images/city/004-lijiang-aw-01.jpg",
+        "naturalWidth": 1280,
+        "counter": "1 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-02.jpg",
+        "naturalWidth": 1024,
+        "counter": "2 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-03.jpg",
+        "naturalWidth": 1024,
+        "counter": "3 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-04.jpg",
+        "naturalWidth": 1025,
+        "counter": "4 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-05.jpg",
+        "naturalWidth": 1025,
+        "counter": "5 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-06.jpg",
+        "naturalWidth": 1080,
+        "counter": "6 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-07.jpg",
+        "naturalWidth": 862,
+        "counter": "7 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-08.jpg",
+        "naturalWidth": 862,
+        "counter": "8 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-09.jpg",
+        "naturalWidth": 862,
+        "counter": "9 / 9"
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": true
+     }
+    ],
+    "close": {
+     "innerWidth": 1180,
+     "frame": {
+      "left": 64,
+      "right": 1116
+     },
+     "duo": {
+      "box": {
+       "left": 64,
+       "right": 1116
+      },
+      "map": {
+       "left": 64,
+       "right": 558,
+       "width": 494,
+       "height": 577.7,
+       "centre": 311
+      },
+      "photo": {
+       "left": 622,
+       "right": 1116,
+       "width": 494,
+       "height": 577.7,
+       "centre": 869
+      },
+      "caption": {
+       "left": 64,
+       "right": 1116,
+       "width": 1052,
+       "height": 14.5,
+       "centre": 590
+      }
+     },
+     "close": {
+      "box": {
+       "left": 64,
+       "right": 1116
+      },
+      "hr": {
+       "left": 64,
+       "right": 1116,
+       "width": 1052,
+       "height": 1,
+       "centre": 590
+      },
+      "eyebrow": {
+       "left": 64,
+       "right": 1116,
+       "width": 1052,
+       "height": 16.8,
+       "centre": 590
+      },
+      "eyebrowText": {
+       "left": 64,
+       "right": 184.3
+      },
+      "h2": {
+       "left": 64,
+       "right": 544,
+       "width": 480,
+       "height": 41,
+       "centre": 304
+      },
+      "h2Text": {
+       "left": 64,
+       "right": 266.8
+      },
+      "cta": {
+       "left": 64,
+       "right": 484,
+       "width": 420,
+       "height": 55.9,
+       "centre": 274
+      }
+     },
+     "checks": {
+      "closeOnFrame": true,
+      "duoOnFrame": true,
+      "hrOnFrame": true,
+      "ctaStartsOnFrame": true,
+      "eyebrowStartsOnFrame": true,
+      "h2StartsOnFrame": true,
+      "captionStartsOnFrame": true,
+      "imagesOnAxis": true
+     }
+    },
+    "errors": [],
+    "images": [
+     {
+      "url": "/assets/images/city/004-lijiang-aw-01.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-chao-phraya-skyline.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/002-vientiane-card-poster.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-card-poster.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/052-ceremony-green-gateway.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-skytrain-king-power-mahanakhon.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/052-vow-ceremony-green-door.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/laos-map.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/002-vientiane-reclining-buddha.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-02.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-03.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-04.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-05.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-06.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-07.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-08.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-09.jpg",
+      "status": 200
+     }
+    ],
+    "imageFailures": []
+   },
+   {
+    "viewport": "ipad-1024x768",
+    "engine": "webkit",
+    "overflow": {
+     "scrollWidth": 1024,
+     "innerWidth": 1024,
+     "ok": true
+    },
+    "cards": [
+     {
+      "title": "Before the Wedding",
+      "gallery": false,
+      "count": 0,
+      "counter": null,
+      "next": null,
+      "swipe": null,
+      "wrap": null,
+      "frames": [
+       {
+        "src": "url(\"http://127.0.0.1:8795/assets/images/city/001-bangkok-skytrain-king-power-mahanakhon.jpg\")",
+        "naturalWidth": null,
+        "counter": null
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": false
+     },
+     {
+      "title": "The Wedding",
+      "gallery": false,
+      "count": 0,
+      "counter": null,
+      "next": null,
+      "swipe": null,
+      "wrap": null,
+      "frames": [
+       {
+        "src": "url(\"http://127.0.0.1:8795/assets/images/event/052-vow-ceremony-green-door.jpg\")",
+        "naturalWidth": null,
+        "counter": null
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": false
+     },
+     {
+      "title": "After the Wedding",
+      "gallery": true,
+      "count": 9,
+      "counter": "1 / 9",
+      "next": "2 / 9",
+      "swipe": "1 / 9",
+      "wrap": "1 / 9",
+      "frames": [
+       {
+        "src": "assets/images/city/004-lijiang-aw-01.jpg",
+        "naturalWidth": 1280,
+        "counter": "1 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-02.jpg",
+        "naturalWidth": 1024,
+        "counter": "2 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-03.jpg",
+        "naturalWidth": 1024,
+        "counter": "3 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-04.jpg",
+        "naturalWidth": 1025,
+        "counter": "4 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-05.jpg",
+        "naturalWidth": 1025,
+        "counter": "5 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-06.jpg",
+        "naturalWidth": 1080,
+        "counter": "6 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-07.jpg",
+        "naturalWidth": 862,
+        "counter": "7 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-08.jpg",
+        "naturalWidth": 862,
+        "counter": "8 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-09.jpg",
+        "naturalWidth": 862,
+        "counter": "9 / 9"
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": true
+     }
+    ],
+    "close": {
+     "innerWidth": 1024,
+     "frame": {
+      "left": 64,
+      "right": 960
+     },
+     "duo": {
+      "box": {
+       "left": 64,
+       "right": 960
+      },
+      "map": {
+       "left": 64,
+       "right": 480,
+       "width": 416,
+       "height": 486.5,
+       "centre": 272
+      },
+      "photo": {
+       "left": 544,
+       "right": 960,
+       "width": 416,
+       "height": 486.5,
+       "centre": 752
+      },
+      "caption": {
+       "left": 64,
+       "right": 960,
+       "width": 896,
+       "height": 14.5,
+       "centre": 512
+      }
+     },
+     "close": {
+      "box": {
+       "left": 64,
+       "right": 960
+      },
+      "hr": {
+       "left": 64,
+       "right": 960,
+       "width": 896,
+       "height": 1,
+       "centre": 512
+      },
+      "eyebrow": {
+       "left": 64,
+       "right": 960,
+       "width": 896,
+       "height": 16.8,
+       "centre": 512
+      },
+      "eyebrowText": {
+       "left": 64,
+       "right": 184.3
+      },
+      "h2": {
+       "left": 64,
+       "right": 544,
+       "width": 480,
+       "height": 41,
+       "centre": 304
+      },
+      "h2Text": {
+       "left": 64,
+       "right": 266.8
+      },
+      "cta": {
+       "left": 64,
+       "right": 484,
+       "width": 420,
+       "height": 55.9,
+       "centre": 274
+      }
+     },
+     "checks": {
+      "closeOnFrame": true,
+      "duoOnFrame": true,
+      "hrOnFrame": true,
+      "ctaStartsOnFrame": true,
+      "eyebrowStartsOnFrame": true,
+      "h2StartsOnFrame": true,
+      "captionStartsOnFrame": true,
+      "imagesOnAxis": true
+     }
+    },
+    "errors": [],
+    "images": [
+     {
+      "url": "/assets/images/city/004-lijiang-aw-01.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-chao-phraya-skyline.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/002-vientiane-card-poster.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-card-poster.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/052-ceremony-green-gateway.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-skytrain-king-power-mahanakhon.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/052-vow-ceremony-green-door.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/laos-map.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/002-vientiane-reclining-buddha.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-02.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-03.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-04.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-05.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-06.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-07.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-08.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-09.jpg",
+      "status": 200
+     }
+    ],
+    "imageFailures": []
+   },
+   {
+    "viewport": "ipad-1180x740-safari",
+    "engine": "webkit",
+    "overflow": {
+     "scrollWidth": 1180,
+     "innerWidth": 1180,
+     "ok": true
+    },
+    "cards": [
+     {
+      "title": "Before the Wedding",
+      "gallery": false,
+      "count": 0,
+      "counter": null,
+      "next": null,
+      "swipe": null,
+      "wrap": null,
+      "frames": [
+       {
+        "src": "url(\"http://127.0.0.1:8795/assets/images/city/001-bangkok-skytrain-king-power-mahanakhon.jpg\")",
+        "naturalWidth": null,
+        "counter": null
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": false
+     },
+     {
+      "title": "The Wedding",
+      "gallery": false,
+      "count": 0,
+      "counter": null,
+      "next": null,
+      "swipe": null,
+      "wrap": null,
+      "frames": [
+       {
+        "src": "url(\"http://127.0.0.1:8795/assets/images/event/052-vow-ceremony-green-door.jpg\")",
+        "naturalWidth": null,
+        "counter": null
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": false
+     },
+     {
+      "title": "After the Wedding",
+      "gallery": true,
+      "count": 9,
+      "counter": "1 / 9",
+      "next": "2 / 9",
+      "swipe": "1 / 9",
+      "wrap": "1 / 9",
+      "frames": [
+       {
+        "src": "assets/images/city/004-lijiang-aw-01.jpg",
+        "naturalWidth": 1280,
+        "counter": "1 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-02.jpg",
+        "naturalWidth": 1024,
+        "counter": "2 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-03.jpg",
+        "naturalWidth": 1024,
+        "counter": "3 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-04.jpg",
+        "naturalWidth": 1025,
+        "counter": "4 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-05.jpg",
+        "naturalWidth": 1025,
+        "counter": "5 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-06.jpg",
+        "naturalWidth": 1080,
+        "counter": "6 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-07.jpg",
+        "naturalWidth": 862,
+        "counter": "7 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-08.jpg",
+        "naturalWidth": 862,
+        "counter": "8 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-09.jpg",
+        "naturalWidth": 862,
+        "counter": "9 / 9"
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": true
+     }
+    ],
+    "close": {
+     "innerWidth": 1180,
+     "frame": {
+      "left": 64,
+      "right": 1116
+     },
+     "duo": {
+      "box": {
+       "left": 64,
+       "right": 1116
+      },
+      "map": {
+       "left": 70.5,
+       "right": 551.5,
+       "width": 480.9,
+       "height": 562.4,
+       "centre": 311
+      },
+      "photo": {
+       "left": 622,
+       "right": 1116,
+       "width": 494,
+       "height": 562.4,
+       "centre": 869
+      },
+      "caption": {
+       "left": 64,
+       "right": 1116,
+       "width": 1052,
+       "height": 14.5,
+       "centre": 590
+      }
+     },
+     "close": {
+      "box": {
+       "left": 64,
+       "right": 1116
+      },
+      "hr": {
+       "left": 64,
+       "right": 1116,
+       "width": 1052,
+       "height": 1,
+       "centre": 590
+      },
+      "eyebrow": {
+       "left": 64,
+       "right": 1116,
+       "width": 1052,
+       "height": 16.8,
+       "centre": 590
+      },
+      "eyebrowText": {
+       "left": 64,
+       "right": 184.3
+      },
+      "h2": {
+       "left": 64,
+       "right": 544,
+       "width": 480,
+       "height": 41,
+       "centre": 304
+      },
+      "h2Text": {
+       "left": 64,
+       "right": 266.8
+      },
+      "cta": {
+       "left": 64,
+       "right": 484,
+       "width": 420,
+       "height": 55.9,
+       "centre": 274
+      }
+     },
+     "checks": {
+      "closeOnFrame": true,
+      "duoOnFrame": true,
+      "hrOnFrame": true,
+      "ctaStartsOnFrame": true,
+      "eyebrowStartsOnFrame": true,
+      "h2StartsOnFrame": true,
+      "captionStartsOnFrame": true,
+      "imagesOnAxis": false
+     }
+    },
+    "errors": [],
+    "images": [
+     {
+      "url": "/assets/images/city/004-lijiang-aw-01.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-chao-phraya-skyline.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/002-vientiane-card-poster.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-card-poster.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/052-ceremony-green-gateway.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-skytrain-king-power-mahanakhon.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/052-vow-ceremony-green-door.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/laos-map.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/002-vientiane-reclining-buddha.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-02.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-03.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-04.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-05.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-06.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-07.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-08.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-09.jpg",
+      "status": 200
+     }
+    ],
+    "imageFailures": []
+   },
+   {
+    "viewport": "ipad-1194x760-safari",
+    "engine": "webkit",
+    "overflow": {
+     "scrollWidth": 1194,
+     "innerWidth": 1194,
+     "ok": true
+    },
+    "cards": [
+     {
+      "title": "Before the Wedding",
+      "gallery": false,
+      "count": 0,
+      "counter": null,
+      "next": null,
+      "swipe": null,
+      "wrap": null,
+      "frames": [
+       {
+        "src": "url(\"http://127.0.0.1:8795/assets/images/city/001-bangkok-skytrain-king-power-mahanakhon.jpg\")",
+        "naturalWidth": null,
+        "counter": null
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": false
+     },
+     {
+      "title": "The Wedding",
+      "gallery": false,
+      "count": 0,
+      "counter": null,
+      "next": null,
+      "swipe": null,
+      "wrap": null,
+      "frames": [
+       {
+        "src": "url(\"http://127.0.0.1:8795/assets/images/event/052-vow-ceremony-green-door.jpg\")",
+        "naturalWidth": null,
+        "counter": null
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": false
+     },
+     {
+      "title": "After the Wedding",
+      "gallery": true,
+      "count": 9,
+      "counter": "1 / 9",
+      "next": "2 / 9",
+      "swipe": "1 / 9",
+      "wrap": "1 / 9",
+      "frames": [
+       {
+        "src": "assets/images/city/004-lijiang-aw-01.jpg",
+        "naturalWidth": 1280,
+        "counter": "1 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-02.jpg",
+        "naturalWidth": 1024,
+        "counter": "2 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-03.jpg",
+        "naturalWidth": 1024,
+        "counter": "3 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-04.jpg",
+        "naturalWidth": 1025,
+        "counter": "4 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-05.jpg",
+        "naturalWidth": 1025,
+        "counter": "5 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-06.jpg",
+        "naturalWidth": 1080,
+        "counter": "6 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-07.jpg",
+        "naturalWidth": 862,
+        "counter": "7 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-08.jpg",
+        "naturalWidth": 862,
+        "counter": "8 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-09.jpg",
+        "naturalWidth": 862,
+        "counter": "9 / 9"
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": true
+     }
+    ],
+    "close": {
+     "innerWidth": 1194,
+     "frame": {
+      "left": 71,
+      "right": 1123
+     },
+     "duo": {
+      "box": {
+       "left": 71,
+       "right": 1123
+      },
+      "map": {
+       "left": 71,
+       "right": 565,
+       "width": 493.9,
+       "height": 577.6,
+       "centre": 318
+      },
+      "photo": {
+       "left": 629,
+       "right": 1123,
+       "width": 494,
+       "height": 577.6,
+       "centre": 876
+      },
+      "caption": {
+       "left": 71,
+       "right": 1123,
+       "width": 1052,
+       "height": 14.5,
+       "centre": 597
+      }
+     },
+     "close": {
+      "box": {
+       "left": 71,
+       "right": 1123
+      },
+      "hr": {
+       "left": 71,
+       "right": 1123,
+       "width": 1052,
+       "height": 1,
+       "centre": 597
+      },
+      "eyebrow": {
+       "left": 71,
+       "right": 1123,
+       "width": 1052,
+       "height": 16.8,
+       "centre": 597
+      },
+      "eyebrowText": {
+       "left": 71,
+       "right": 191.3
+      },
+      "h2": {
+       "left": 71,
+       "right": 551,
+       "width": 480,
+       "height": 41,
+       "centre": 311
+      },
+      "h2Text": {
+       "left": 71,
+       "right": 273.8
+      },
+      "cta": {
+       "left": 71,
+       "right": 491,
+       "width": 420,
+       "height": 55.9,
+       "centre": 281
+      }
+     },
+     "checks": {
+      "closeOnFrame": true,
+      "duoOnFrame": true,
+      "hrOnFrame": true,
+      "ctaStartsOnFrame": true,
+      "eyebrowStartsOnFrame": true,
+      "h2StartsOnFrame": true,
+      "captionStartsOnFrame": true,
+      "imagesOnAxis": true
+     }
+    },
+    "errors": [],
+    "images": [
+     {
+      "url": "/assets/images/city/004-lijiang-aw-01.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-chao-phraya-skyline.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/002-vientiane-card-poster.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-card-poster.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/052-ceremony-green-gateway.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-skytrain-king-power-mahanakhon.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/052-vow-ceremony-green-door.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/laos-map.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/002-vientiane-reclining-buddha.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-02.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-03.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-04.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-05.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-06.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-07.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-08.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-09.jpg",
+      "status": 200
+     }
+    ],
+    "imageFailures": []
+   },
+   {
+    "viewport": "desktop-1440x900",
+    "engine": "chromium",
+    "overflow": {
+     "scrollWidth": 1440,
+     "innerWidth": 1440,
+     "ok": true
+    },
+    "cards": [
+     {
+      "title": "Before the Wedding",
+      "gallery": false,
+      "count": 0,
+      "counter": null,
+      "next": null,
+      "swipe": null,
+      "wrap": null,
+      "frames": [
+       {
+        "src": "url(\"http://127.0.0.1:8795/assets/images/city/001-bangkok-skytrain-king-power-mahanakhon.jpg\")",
+        "naturalWidth": null,
+        "counter": null
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": false
+     },
+     {
+      "title": "The Wedding",
+      "gallery": false,
+      "count": 0,
+      "counter": null,
+      "next": null,
+      "swipe": null,
+      "wrap": null,
+      "frames": [
+       {
+        "src": "url(\"http://127.0.0.1:8795/assets/images/event/052-vow-ceremony-green-door.jpg\")",
+        "naturalWidth": null,
+        "counter": null
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": false
+     },
+     {
+      "title": "After the Wedding",
+      "gallery": true,
+      "count": 9,
+      "counter": "1 / 9",
+      "next": "2 / 9",
+      "swipe": "1 / 9",
+      "wrap": "1 / 9",
+      "frames": [
+       {
+        "src": "assets/images/city/004-lijiang-aw-01.jpg",
+        "naturalWidth": 1280,
+        "counter": "1 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-02.jpg",
+        "naturalWidth": 1024,
+        "counter": "2 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-03.jpg",
+        "naturalWidth": 1024,
+        "counter": "3 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-04.jpg",
+        "naturalWidth": 1025,
+        "counter": "4 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-05.jpg",
+        "naturalWidth": 1025,
+        "counter": "5 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-06.jpg",
+        "naturalWidth": 1080,
+        "counter": "6 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-07.jpg",
+        "naturalWidth": 862,
+        "counter": "7 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-08.jpg",
+        "naturalWidth": 862,
+        "counter": "8 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-09.jpg",
+        "naturalWidth": 862,
+        "counter": "9 / 9"
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": true
+     }
+    ],
+    "close": {
+     "innerWidth": 1440,
+     "frame": {
+      "left": 194,
+      "right": 1246
+     },
+     "duo": {
+      "box": {
+       "left": 194,
+       "right": 1246
+      },
+      "map": {
+       "left": 194,
+       "right": 688,
+       "width": 494,
+       "height": 577.7,
+       "centre": 441
+      },
+      "photo": {
+       "left": 752,
+       "right": 1246,
+       "width": 494,
+       "height": 577.7,
+       "centre": 999
+      },
+      "caption": {
+       "left": 194,
+       "right": 1246,
+       "width": 1052,
+       "height": 14.5,
+       "centre": 720
+      }
+     },
+     "close": {
+      "box": {
+       "left": 194,
+       "right": 1246
+      },
+      "hr": {
+       "left": 194,
+       "right": 1246,
+       "width": 1052,
+       "height": 1,
+       "centre": 720
+      },
+      "eyebrow": {
+       "left": 194,
+       "right": 1246,
+       "width": 1052,
+       "height": 16.8,
+       "centre": 720
+      },
+      "eyebrowText": {
+       "left": 194,
+       "right": 314.3
+      },
+      "h2": {
+       "left": 194,
+       "right": 674,
+       "width": 480,
+       "height": 41,
+       "centre": 434
+      },
+      "h2Text": {
+       "left": 194,
+       "right": 396.9
+      },
+      "cta": {
+       "left": 194,
+       "right": 614,
+       "width": 420,
+       "height": 55.9,
+       "centre": 404
+      }
+     },
+     "checks": {
+      "closeOnFrame": true,
+      "duoOnFrame": true,
+      "hrOnFrame": true,
+      "ctaStartsOnFrame": true,
+      "eyebrowStartsOnFrame": true,
+      "h2StartsOnFrame": true,
+      "captionStartsOnFrame": true,
+      "imagesOnAxis": true
+     }
+    },
+    "errors": [],
+    "images": [
+     {
+      "url": "/assets/images/city/004-lijiang-aw-01.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-chao-phraya-skyline.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/002-vientiane-card-poster.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-card-poster.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/052-ceremony-green-gateway.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-skytrain-king-power-mahanakhon.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/002-vientiane-reclining-buddha.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/laos-map.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/052-vow-ceremony-green-door.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-02.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-03.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-04.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-05.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-06.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-07.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-08.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-09.jpg",
+      "status": 200
+     }
+    ],
+    "imageFailures": []
+   }
+  ]
+ },
+ "after": {
+  "origin": "http://127.0.0.1:8795",
+  "at": "2026-09-24T00:48:27.814Z",
+  "verdict": {
+   "overflow": true,
+   "galleries": true,
+   "close": true
+  },
+  "runs": [
+   {
+    "viewport": "iphone-390x844",
+    "engine": "webkit",
+    "overflow": {
+     "scrollWidth": 390,
+     "innerWidth": 390,
+     "ok": true
+    },
+    "cards": [
+     {
+      "title": "Before the Wedding",
+      "gallery": true,
+      "count": 11,
+      "counter": "1 / 11",
+      "next": "2 / 11",
+      "swipe": "1 / 11",
+      "wrap": "1 / 11",
+      "frames": [
+       {
+        "src": "assets/images/city/001-bangkok-skytrain-king-power-mahanakhon.jpg",
+        "naturalWidth": 1500,
+        "counter": "1 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-01-iconsiam-skyline.jpg",
+        "naturalWidth": 1500,
+        "counter": "2 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-02-river-express-boat.jpg",
+        "naturalWidth": 1280,
+        "counter": "3 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-03-mahanakhon-skytrain.jpg",
+        "naturalWidth": 1200,
+        "counter": "4 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-04-train-and-monorail.jpg",
+        "naturalWidth": 1200,
+        "counter": "5 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-05-wires-and-train.jpg",
+        "naturalWidth": 1201,
+        "counter": "6 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-06-alley.jpg",
+        "naturalWidth": 1202,
+        "counter": "7 / 11"
+       },
+       {
+        "src": "assets/images/transport/train-no25-krung-thep-aphiwat.jpg",
+        "naturalWidth": 1600,
+        "counter": "8 / 11"
+       },
+       {
+        "src": "assets/images/transport/train-no25-terminal-aerial.jpg",
+        "naturalWidth": 1116,
+        "counter": "9 / 11"
+       },
+       {
+        "src": "assets/images/transport/train-no25-first-class-passenger-room.jpg",
+        "naturalWidth": 888,
+        "counter": "10 / 11"
+       },
+       {
+        "src": "assets/images/transport/train-no25-srt-train.jpg",
+        "naturalWidth": 1440,
+        "counter": "11 / 11"
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": true
+     },
+     {
+      "title": "The Wedding",
+      "gallery": true,
+      "count": 12,
+      "counter": "1 / 12",
+      "next": "2 / 12",
+      "swipe": "1 / 12",
+      "wrap": "1 / 12",
+      "frames": [
+       {
+        "src": "assets/images/event/052-vow-ceremony-green-door.jpg",
+        "naturalWidth": 1334,
+        "counter": "1 / 12"
+       },
+       {
+        "src": "assets/images/event/052-ceremony-green-gateway.jpg",
+        "naturalWidth": 1334,
+        "counter": "2 / 12"
+       },
+       {
+        "src": "assets/images/experiences/vte-ongteu-01.jpg",
+        "naturalWidth": 1920,
+        "counter": "3 / 12"
+       },
+       {
+        "src": "assets/images/experiences/vte-ongteu-03.jpg",
+        "naturalWidth": 1500,
+        "counter": "4 / 12"
+       },
+       {
+        "src": "assets/images/temple/takbat-couple-giving-novice.jpg",
+        "naturalWidth": 1365,
+        "counter": "5 / 12"
+       },
+       {
+        "src": "assets/images/temple/takbat-novices-with-bowls.jpg",
+        "naturalWidth": 768,
+        "counter": "6 / 12"
+       },
+       {
+        "src": "assets/images/temple/takbat-couple-offering-bowl.jpg",
+        "naturalWidth": 2048,
+        "counter": "7 / 12"
+       },
+       {
+        "src": "assets/images/temple/sangkhathan-prepared-offerings.jpg",
+        "naturalWidth": 939,
+        "counter": "8 / 12"
+       },
+       {
+        "src": "assets/images/event/051-coffee-and-cake-patisserie.jpg",
+        "naturalWidth": 1334,
+        "counter": "9 / 12"
+       },
+       {
+        "src": "assets/images/event/052-vow-ceremony-green-door-entrance.jpg",
+        "naturalWidth": 480,
+        "counter": "10 / 12"
+       },
+       {
+        "src": "assets/images/souphattra/heritage-arches-dusk.jpg",
+        "naturalWidth": 2000,
+        "counter": "11 / 12"
+       },
+       {
+        "src": "assets/images/souphattra/heritage-room.jpg",
+        "naturalWidth": 2000,
+        "counter": "12 / 12"
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": true
+     },
+     {
+      "title": "After the Wedding",
+      "gallery": true,
+      "count": 9,
+      "counter": "1 / 9",
+      "next": "2 / 9",
+      "swipe": "1 / 9",
+      "wrap": "1 / 9",
+      "frames": [
+       {
+        "src": "assets/images/city/004-lijiang-aw-01.jpg",
+        "naturalWidth": 1280,
+        "counter": "1 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-02.jpg",
+        "naturalWidth": 1024,
+        "counter": "2 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-03.jpg",
+        "naturalWidth": 1024,
+        "counter": "3 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-04.jpg",
+        "naturalWidth": 1025,
+        "counter": "4 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-05.jpg",
+        "naturalWidth": 1025,
+        "counter": "5 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-06.jpg",
+        "naturalWidth": 1080,
+        "counter": "6 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-07.jpg",
+        "naturalWidth": 862,
+        "counter": "7 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-08.jpg",
+        "naturalWidth": 862,
+        "counter": "8 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-09.jpg",
+        "naturalWidth": 862,
+        "counter": "9 / 9"
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": true
+     }
+    ],
+    "close": {
+     "innerWidth": 390,
+     "frame": {
+      "left": 24,
+      "right": 366
+     },
+     "duo": {
+      "box": {
+       "left": 24,
+       "right": 366
+      },
+      "map": {
+       "left": 24,
+       "right": 189,
+       "width": 165,
+       "height": 193,
+       "centre": 106.5
+      },
+      "photo": {
+       "left": 201,
+       "right": 366,
+       "width": 165,
+       "height": 193,
+       "centre": 283.5
+      },
+      "caption": {
+       "left": 24,
+       "right": 366,
+       "width": 342,
+       "height": 29,
+       "centre": 195
+      }
+     },
+     "close": {
+      "box": {
+       "left": 24,
+       "right": 366
+      },
+      "hr": {
+       "left": 24,
+       "right": 366,
+       "width": 342,
+       "height": 1,
+       "centre": 195
+      },
+      "eyebrow": {
+       "left": 24,
+       "right": 366,
+       "width": 342,
+       "height": 16.8,
+       "centre": 195
+      },
+      "eyebrowText": {
+       "left": 24,
+       "right": 144.3
+      },
+      "h2": {
+       "left": 24,
+       "right": 366,
+       "width": 342,
+       "height": 33.3,
+       "centre": 195
+      },
+      "h2Text": {
+       "left": 24,
+       "right": 190.3
+      },
+      "cta": {
+       "left": 24,
+       "right": 366,
+       "width": 342,
+       "height": 55.9,
+       "centre": 195
+      }
+     },
+     "checks": {
+      "closeOnFrame": true,
+      "duoOnFrame": true,
+      "hrOnFrame": true,
+      "ctaStartsOnFrame": true,
+      "eyebrowStartsOnFrame": true,
+      "h2StartsOnFrame": true,
+      "captionStartsOnFrame": true,
+      "imagesOnAxis": true
+     }
+    },
+    "errors": [],
+    "images": [
+     {
+      "url": "/assets/images/city/001-bangkok-skytrain-king-power-mahanakhon.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/052-vow-ceremony-green-door.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-01.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-chao-phraya-skyline.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/002-vientiane-card-poster.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-card-poster.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/052-ceremony-green-gateway.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/laos-map.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/002-vientiane-reclining-buddha.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-02.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-01-iconsiam-skyline.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-02-river-express-boat.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-03-mahanakhon-skytrain.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-04-train-and-monorail.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-05-wires-and-train.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-06-alley.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/transport/train-no25-krung-thep-aphiwat.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/transport/train-no25-terminal-aerial.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/transport/train-no25-first-class-passenger-room.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/transport/train-no25-srt-train.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/experiences/vte-ongteu-01.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/experiences/vte-ongteu-03.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/temple/takbat-couple-giving-novice.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/temple/takbat-novices-with-bowls.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/temple/takbat-couple-offering-bowl.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/temple/sangkhathan-prepared-offerings.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/051-coffee-and-cake-patisserie.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/052-vow-ceremony-green-door-entrance.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/souphattra/heritage-arches-dusk.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/souphattra/heritage-room.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-03.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-04.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-05.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-06.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-07.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-08.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-09.jpg",
+      "status": 200
+     }
+    ],
+    "imageFailures": []
+   },
+   {
+    "viewport": "iphone-430x932",
+    "engine": "webkit",
+    "overflow": {
+     "scrollWidth": 430,
+     "innerWidth": 430,
+     "ok": true
+    },
+    "cards": [
+     {
+      "title": "Before the Wedding",
+      "gallery": true,
+      "count": 11,
+      "counter": "1 / 11",
+      "next": "2 / 11",
+      "swipe": "1 / 11",
+      "wrap": "1 / 11",
+      "frames": [
+       {
+        "src": "assets/images/city/001-bangkok-skytrain-king-power-mahanakhon.jpg",
+        "naturalWidth": 1500,
+        "counter": "1 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-01-iconsiam-skyline.jpg",
+        "naturalWidth": 1500,
+        "counter": "2 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-02-river-express-boat.jpg",
+        "naturalWidth": 1280,
+        "counter": "3 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-03-mahanakhon-skytrain.jpg",
+        "naturalWidth": 1200,
+        "counter": "4 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-04-train-and-monorail.jpg",
+        "naturalWidth": 1200,
+        "counter": "5 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-05-wires-and-train.jpg",
+        "naturalWidth": 1201,
+        "counter": "6 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-06-alley.jpg",
+        "naturalWidth": 1202,
+        "counter": "7 / 11"
+       },
+       {
+        "src": "assets/images/transport/train-no25-krung-thep-aphiwat.jpg",
+        "naturalWidth": 1600,
+        "counter": "8 / 11"
+       },
+       {
+        "src": "assets/images/transport/train-no25-terminal-aerial.jpg",
+        "naturalWidth": 1116,
+        "counter": "9 / 11"
+       },
+       {
+        "src": "assets/images/transport/train-no25-first-class-passenger-room.jpg",
+        "naturalWidth": 888,
+        "counter": "10 / 11"
+       },
+       {
+        "src": "assets/images/transport/train-no25-srt-train.jpg",
+        "naturalWidth": 1440,
+        "counter": "11 / 11"
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": true
+     },
+     {
+      "title": "The Wedding",
+      "gallery": true,
+      "count": 12,
+      "counter": "1 / 12",
+      "next": "2 / 12",
+      "swipe": "1 / 12",
+      "wrap": "1 / 12",
+      "frames": [
+       {
+        "src": "assets/images/event/052-vow-ceremony-green-door.jpg",
+        "naturalWidth": 1334,
+        "counter": "1 / 12"
+       },
+       {
+        "src": "assets/images/event/052-ceremony-green-gateway.jpg",
+        "naturalWidth": 1334,
+        "counter": "2 / 12"
+       },
+       {
+        "src": "assets/images/experiences/vte-ongteu-01.jpg",
+        "naturalWidth": 1920,
+        "counter": "3 / 12"
+       },
+       {
+        "src": "assets/images/experiences/vte-ongteu-03.jpg",
+        "naturalWidth": 1500,
+        "counter": "4 / 12"
+       },
+       {
+        "src": "assets/images/temple/takbat-couple-giving-novice.jpg",
+        "naturalWidth": 1365,
+        "counter": "5 / 12"
+       },
+       {
+        "src": "assets/images/temple/takbat-novices-with-bowls.jpg",
+        "naturalWidth": 768,
+        "counter": "6 / 12"
+       },
+       {
+        "src": "assets/images/temple/takbat-couple-offering-bowl.jpg",
+        "naturalWidth": 2048,
+        "counter": "7 / 12"
+       },
+       {
+        "src": "assets/images/temple/sangkhathan-prepared-offerings.jpg",
+        "naturalWidth": 939,
+        "counter": "8 / 12"
+       },
+       {
+        "src": "assets/images/event/051-coffee-and-cake-patisserie.jpg",
+        "naturalWidth": 1334,
+        "counter": "9 / 12"
+       },
+       {
+        "src": "assets/images/event/052-vow-ceremony-green-door-entrance.jpg",
+        "naturalWidth": 480,
+        "counter": "10 / 12"
+       },
+       {
+        "src": "assets/images/souphattra/heritage-arches-dusk.jpg",
+        "naturalWidth": 2000,
+        "counter": "11 / 12"
+       },
+       {
+        "src": "assets/images/souphattra/heritage-room.jpg",
+        "naturalWidth": 2000,
+        "counter": "12 / 12"
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": true
+     },
+     {
+      "title": "After the Wedding",
+      "gallery": true,
+      "count": 9,
+      "counter": "1 / 9",
+      "next": "2 / 9",
+      "swipe": "1 / 9",
+      "wrap": "1 / 9",
+      "frames": [
+       {
+        "src": "assets/images/city/004-lijiang-aw-01.jpg",
+        "naturalWidth": 1280,
+        "counter": "1 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-02.jpg",
+        "naturalWidth": 1024,
+        "counter": "2 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-03.jpg",
+        "naturalWidth": 1024,
+        "counter": "3 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-04.jpg",
+        "naturalWidth": 1025,
+        "counter": "4 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-05.jpg",
+        "naturalWidth": 1025,
+        "counter": "5 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-06.jpg",
+        "naturalWidth": 1080,
+        "counter": "6 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-07.jpg",
+        "naturalWidth": 862,
+        "counter": "7 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-08.jpg",
+        "naturalWidth": 862,
+        "counter": "8 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-09.jpg",
+        "naturalWidth": 862,
+        "counter": "9 / 9"
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": true
+     }
+    ],
+    "close": {
+     "innerWidth": 430,
+     "frame": {
+      "left": 24,
+      "right": 406
+     },
+     "duo": {
+      "box": {
+       "left": 24,
+       "right": 406
+      },
+      "map": {
+       "left": 24,
+       "right": 209,
+       "width": 185,
+       "height": 216.3,
+       "centre": 116.5
+      },
+      "photo": {
+       "left": 221,
+       "right": 406,
+       "width": 185,
+       "height": 216.3,
+       "centre": 313.5
+      },
+      "caption": {
+       "left": 24,
+       "right": 406,
+       "width": 382,
+       "height": 29,
+       "centre": 215
+      }
+     },
+     "close": {
+      "box": {
+       "left": 24,
+       "right": 406
+      },
+      "hr": {
+       "left": 24,
+       "right": 406,
+       "width": 382,
+       "height": 1,
+       "centre": 215
+      },
+      "eyebrow": {
+       "left": 24,
+       "right": 406,
+       "width": 382,
+       "height": 16.8,
+       "centre": 215
+      },
+      "eyebrowText": {
+       "left": 24,
+       "right": 144.3
+      },
+      "h2": {
+       "left": 24,
+       "right": 406,
+       "width": 382,
+       "height": 33.3,
+       "centre": 215
+      },
+      "h2Text": {
+       "left": 24,
+       "right": 190.3
+      },
+      "cta": {
+       "left": 24,
+       "right": 406,
+       "width": 382,
+       "height": 55.9,
+       "centre": 215
+      }
+     },
+     "checks": {
+      "closeOnFrame": true,
+      "duoOnFrame": true,
+      "hrOnFrame": true,
+      "ctaStartsOnFrame": true,
+      "eyebrowStartsOnFrame": true,
+      "h2StartsOnFrame": true,
+      "captionStartsOnFrame": true,
+      "imagesOnAxis": true
+     }
+    },
+    "errors": [],
+    "images": [
+     {
+      "url": "/assets/images/city/001-bangkok-skytrain-king-power-mahanakhon.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/052-vow-ceremony-green-door.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-01.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-chao-phraya-skyline.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/002-vientiane-card-poster.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-card-poster.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/052-ceremony-green-gateway.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/laos-map.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/002-vientiane-reclining-buddha.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-02.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-01-iconsiam-skyline.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-02-river-express-boat.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-03-mahanakhon-skytrain.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-04-train-and-monorail.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-05-wires-and-train.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-06-alley.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/transport/train-no25-krung-thep-aphiwat.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/transport/train-no25-terminal-aerial.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/transport/train-no25-first-class-passenger-room.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/transport/train-no25-srt-train.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/experiences/vte-ongteu-01.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/experiences/vte-ongteu-03.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/temple/takbat-couple-giving-novice.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/temple/takbat-novices-with-bowls.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/temple/takbat-couple-offering-bowl.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/temple/sangkhathan-prepared-offerings.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/051-coffee-and-cake-patisserie.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/052-vow-ceremony-green-door-entrance.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/souphattra/heritage-arches-dusk.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/souphattra/heritage-room.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-03.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-04.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-05.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-06.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-07.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-08.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-09.jpg",
+      "status": 200
+     }
+    ],
+    "imageFailures": []
+   },
+   {
+    "viewport": "ipad-834x1194",
+    "engine": "webkit",
+    "overflow": {
+     "scrollWidth": 834,
+     "innerWidth": 834,
+     "ok": true
+    },
+    "cards": [
+     {
+      "title": "Before the Wedding",
+      "gallery": true,
+      "count": 11,
+      "counter": "1 / 11",
+      "next": "2 / 11",
+      "swipe": "1 / 11",
+      "wrap": "1 / 11",
+      "frames": [
+       {
+        "src": "assets/images/city/001-bangkok-skytrain-king-power-mahanakhon.jpg",
+        "naturalWidth": 1500,
+        "counter": "1 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-01-iconsiam-skyline.jpg",
+        "naturalWidth": 1500,
+        "counter": "2 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-02-river-express-boat.jpg",
+        "naturalWidth": 1280,
+        "counter": "3 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-03-mahanakhon-skytrain.jpg",
+        "naturalWidth": 1200,
+        "counter": "4 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-04-train-and-monorail.jpg",
+        "naturalWidth": 1200,
+        "counter": "5 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-05-wires-and-train.jpg",
+        "naturalWidth": 1201,
+        "counter": "6 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-06-alley.jpg",
+        "naturalWidth": 1202,
+        "counter": "7 / 11"
+       },
+       {
+        "src": "assets/images/transport/train-no25-krung-thep-aphiwat.jpg",
+        "naturalWidth": 1600,
+        "counter": "8 / 11"
+       },
+       {
+        "src": "assets/images/transport/train-no25-terminal-aerial.jpg",
+        "naturalWidth": 1116,
+        "counter": "9 / 11"
+       },
+       {
+        "src": "assets/images/transport/train-no25-first-class-passenger-room.jpg",
+        "naturalWidth": 888,
+        "counter": "10 / 11"
+       },
+       {
+        "src": "assets/images/transport/train-no25-srt-train.jpg",
+        "naturalWidth": 1440,
+        "counter": "11 / 11"
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": true
+     },
+     {
+      "title": "The Wedding",
+      "gallery": true,
+      "count": 12,
+      "counter": "1 / 12",
+      "next": "2 / 12",
+      "swipe": "1 / 12",
+      "wrap": "1 / 12",
+      "frames": [
+       {
+        "src": "assets/images/event/052-vow-ceremony-green-door.jpg",
+        "naturalWidth": 1334,
+        "counter": "1 / 12"
+       },
+       {
+        "src": "assets/images/event/052-ceremony-green-gateway.jpg",
+        "naturalWidth": 1334,
+        "counter": "2 / 12"
+       },
+       {
+        "src": "assets/images/experiences/vte-ongteu-01.jpg",
+        "naturalWidth": 1920,
+        "counter": "3 / 12"
+       },
+       {
+        "src": "assets/images/experiences/vte-ongteu-03.jpg",
+        "naturalWidth": 1500,
+        "counter": "4 / 12"
+       },
+       {
+        "src": "assets/images/temple/takbat-couple-giving-novice.jpg",
+        "naturalWidth": 1365,
+        "counter": "5 / 12"
+       },
+       {
+        "src": "assets/images/temple/takbat-novices-with-bowls.jpg",
+        "naturalWidth": 768,
+        "counter": "6 / 12"
+       },
+       {
+        "src": "assets/images/temple/takbat-couple-offering-bowl.jpg",
+        "naturalWidth": 2048,
+        "counter": "7 / 12"
+       },
+       {
+        "src": "assets/images/temple/sangkhathan-prepared-offerings.jpg",
+        "naturalWidth": 939,
+        "counter": "8 / 12"
+       },
+       {
+        "src": "assets/images/event/051-coffee-and-cake-patisserie.jpg",
+        "naturalWidth": 1334,
+        "counter": "9 / 12"
+       },
+       {
+        "src": "assets/images/event/052-vow-ceremony-green-door-entrance.jpg",
+        "naturalWidth": 480,
+        "counter": "10 / 12"
+       },
+       {
+        "src": "assets/images/souphattra/heritage-arches-dusk.jpg",
+        "naturalWidth": 2000,
+        "counter": "11 / 12"
+       },
+       {
+        "src": "assets/images/souphattra/heritage-room.jpg",
+        "naturalWidth": 2000,
+        "counter": "12 / 12"
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": true
+     },
+     {
+      "title": "After the Wedding",
+      "gallery": true,
+      "count": 9,
+      "counter": "1 / 9",
+      "next": "2 / 9",
+      "swipe": "1 / 9",
+      "wrap": "1 / 9",
+      "frames": [
+       {
+        "src": "assets/images/city/004-lijiang-aw-01.jpg",
+        "naturalWidth": 1280,
+        "counter": "1 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-02.jpg",
+        "naturalWidth": 1024,
+        "counter": "2 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-03.jpg",
+        "naturalWidth": 1024,
+        "counter": "3 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-04.jpg",
+        "naturalWidth": 1025,
+        "counter": "4 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-05.jpg",
+        "naturalWidth": 1025,
+        "counter": "5 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-06.jpg",
+        "naturalWidth": 1080,
+        "counter": "6 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-07.jpg",
+        "naturalWidth": 862,
+        "counter": "7 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-08.jpg",
+        "naturalWidth": 862,
+        "counter": "8 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-09.jpg",
+        "naturalWidth": 862,
+        "counter": "9 / 9"
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": true
+     }
+    ],
+    "close": {
+     "innerWidth": 834,
+     "frame": {
+      "left": 44,
+      "right": 790
+     },
+     "duo": {
+      "box": {
+       "left": 44,
+       "right": 790
+      },
+      "map": {
+       "left": 100.5,
+       "right": 733.5,
+       "width": 633,
+       "height": 740.3,
+       "centre": 417
+      },
+      "photo": {
+       "left": 44,
+       "right": 790,
+       "width": 746,
+       "height": 497.3,
+       "centre": 417
+      },
+      "caption": {
+       "left": 44,
+       "right": 790,
+       "width": 746,
+       "height": 14.5,
+       "centre": 417
+      }
+     },
+     "close": {
+      "box": {
+       "left": 44,
+       "right": 790
+      },
+      "hr": {
+       "left": 44,
+       "right": 790,
+       "width": 746,
+       "height": 1,
+       "centre": 417
+      },
+      "eyebrow": {
+       "left": 44,
+       "right": 790,
+       "width": 746,
+       "height": 16.8,
+       "centre": 417
+      },
+      "eyebrowText": {
+       "left": 44,
+       "right": 164.3
+      },
+      "h2": {
+       "left": 44,
+       "right": 434,
+       "width": 390,
+       "height": 33.3,
+       "centre": 239
+      },
+      "h2Text": {
+       "left": 44,
+       "right": 210.3
+      },
+      "cta": {
+       "left": 44,
+       "right": 464,
+       "width": 420,
+       "height": 55.9,
+       "centre": 254
+      }
+     },
+     "checks": {
+      "closeOnFrame": true,
+      "duoOnFrame": true,
+      "hrOnFrame": true,
+      "ctaStartsOnFrame": true,
+      "eyebrowStartsOnFrame": true,
+      "h2StartsOnFrame": true,
+      "captionStartsOnFrame": true,
+      "imagesOnAxis": true
+     }
+    },
+    "errors": [],
+    "images": [
+     {
+      "url": "/assets/images/event/052-vow-ceremony-green-door.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-skytrain-king-power-mahanakhon.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-01.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-chao-phraya-skyline.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/002-vientiane-card-poster.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-card-poster.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/052-ceremony-green-gateway.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/laos-map.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/002-vientiane-reclining-buddha.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-01-iconsiam-skyline.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-02.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-02-river-express-boat.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-03-mahanakhon-skytrain.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-04-train-and-monorail.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-05-wires-and-train.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-06-alley.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/transport/train-no25-krung-thep-aphiwat.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/transport/train-no25-terminal-aerial.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/transport/train-no25-first-class-passenger-room.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/transport/train-no25-srt-train.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/experiences/vte-ongteu-01.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/experiences/vte-ongteu-03.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/temple/takbat-couple-giving-novice.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/temple/takbat-novices-with-bowls.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/temple/takbat-couple-offering-bowl.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/temple/sangkhathan-prepared-offerings.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/051-coffee-and-cake-patisserie.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/052-vow-ceremony-green-door-entrance.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/souphattra/heritage-arches-dusk.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/souphattra/heritage-room.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-03.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-04.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-05.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-06.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-07.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-08.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-09.jpg",
+      "status": 200
+     }
+    ],
+    "imageFailures": []
+   },
+   {
+    "viewport": "ipad-820x1180",
+    "engine": "webkit",
+    "overflow": {
+     "scrollWidth": 820,
+     "innerWidth": 820,
+     "ok": true
+    },
+    "cards": [
+     {
+      "title": "Before the Wedding",
+      "gallery": true,
+      "count": 11,
+      "counter": "1 / 11",
+      "next": "2 / 11",
+      "swipe": "1 / 11",
+      "wrap": "1 / 11",
+      "frames": [
+       {
+        "src": "assets/images/city/001-bangkok-skytrain-king-power-mahanakhon.jpg",
+        "naturalWidth": 1500,
+        "counter": "1 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-01-iconsiam-skyline.jpg",
+        "naturalWidth": 1500,
+        "counter": "2 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-02-river-express-boat.jpg",
+        "naturalWidth": 1280,
+        "counter": "3 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-03-mahanakhon-skytrain.jpg",
+        "naturalWidth": 1200,
+        "counter": "4 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-04-train-and-monorail.jpg",
+        "naturalWidth": 1200,
+        "counter": "5 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-05-wires-and-train.jpg",
+        "naturalWidth": 1201,
+        "counter": "6 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-06-alley.jpg",
+        "naturalWidth": 1202,
+        "counter": "7 / 11"
+       },
+       {
+        "src": "assets/images/transport/train-no25-krung-thep-aphiwat.jpg",
+        "naturalWidth": 1600,
+        "counter": "8 / 11"
+       },
+       {
+        "src": "assets/images/transport/train-no25-terminal-aerial.jpg",
+        "naturalWidth": 1116,
+        "counter": "9 / 11"
+       },
+       {
+        "src": "assets/images/transport/train-no25-first-class-passenger-room.jpg",
+        "naturalWidth": 888,
+        "counter": "10 / 11"
+       },
+       {
+        "src": "assets/images/transport/train-no25-srt-train.jpg",
+        "naturalWidth": 1440,
+        "counter": "11 / 11"
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": true
+     },
+     {
+      "title": "The Wedding",
+      "gallery": true,
+      "count": 12,
+      "counter": "1 / 12",
+      "next": "2 / 12",
+      "swipe": "1 / 12",
+      "wrap": "1 / 12",
+      "frames": [
+       {
+        "src": "assets/images/event/052-vow-ceremony-green-door.jpg",
+        "naturalWidth": 1334,
+        "counter": "1 / 12"
+       },
+       {
+        "src": "assets/images/event/052-ceremony-green-gateway.jpg",
+        "naturalWidth": 1334,
+        "counter": "2 / 12"
+       },
+       {
+        "src": "assets/images/experiences/vte-ongteu-01.jpg",
+        "naturalWidth": 1920,
+        "counter": "3 / 12"
+       },
+       {
+        "src": "assets/images/experiences/vte-ongteu-03.jpg",
+        "naturalWidth": 1500,
+        "counter": "4 / 12"
+       },
+       {
+        "src": "assets/images/temple/takbat-couple-giving-novice.jpg",
+        "naturalWidth": 1365,
+        "counter": "5 / 12"
+       },
+       {
+        "src": "assets/images/temple/takbat-novices-with-bowls.jpg",
+        "naturalWidth": 768,
+        "counter": "6 / 12"
+       },
+       {
+        "src": "assets/images/temple/takbat-couple-offering-bowl.jpg",
+        "naturalWidth": 2048,
+        "counter": "7 / 12"
+       },
+       {
+        "src": "assets/images/temple/sangkhathan-prepared-offerings.jpg",
+        "naturalWidth": 939,
+        "counter": "8 / 12"
+       },
+       {
+        "src": "assets/images/event/051-coffee-and-cake-patisserie.jpg",
+        "naturalWidth": 1334,
+        "counter": "9 / 12"
+       },
+       {
+        "src": "assets/images/event/052-vow-ceremony-green-door-entrance.jpg",
+        "naturalWidth": 480,
+        "counter": "10 / 12"
+       },
+       {
+        "src": "assets/images/souphattra/heritage-arches-dusk.jpg",
+        "naturalWidth": 2000,
+        "counter": "11 / 12"
+       },
+       {
+        "src": "assets/images/souphattra/heritage-room.jpg",
+        "naturalWidth": 2000,
+        "counter": "12 / 12"
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": true
+     },
+     {
+      "title": "After the Wedding",
+      "gallery": true,
+      "count": 9,
+      "counter": "1 / 9",
+      "next": "2 / 9",
+      "swipe": "1 / 9",
+      "wrap": "1 / 9",
+      "frames": [
+       {
+        "src": "assets/images/city/004-lijiang-aw-01.jpg",
+        "naturalWidth": 1280,
+        "counter": "1 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-02.jpg",
+        "naturalWidth": 1024,
+        "counter": "2 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-03.jpg",
+        "naturalWidth": 1024,
+        "counter": "3 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-04.jpg",
+        "naturalWidth": 1025,
+        "counter": "4 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-05.jpg",
+        "naturalWidth": 1025,
+        "counter": "5 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-06.jpg",
+        "naturalWidth": 1080,
+        "counter": "6 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-07.jpg",
+        "naturalWidth": 862,
+        "counter": "7 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-08.jpg",
+        "naturalWidth": 862,
+        "counter": "8 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-09.jpg",
+        "naturalWidth": 862,
+        "counter": "9 / 9"
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": true
+     }
+    ],
+    "close": {
+     "innerWidth": 820,
+     "frame": {
+      "left": 44,
+      "right": 776
+     },
+     "duo": {
+      "box": {
+       "left": 44,
+       "right": 776
+      },
+      "map": {
+       "left": 97.2,
+       "right": 722.8,
+       "width": 625.6,
+       "height": 731.6,
+       "centre": 410
+      },
+      "photo": {
+       "left": 44,
+       "right": 776,
+       "width": 732,
+       "height": 488,
+       "centre": 410
+      },
+      "caption": {
+       "left": 44,
+       "right": 776,
+       "width": 732,
+       "height": 14.5,
+       "centre": 410
+      }
+     },
+     "close": {
+      "box": {
+       "left": 44,
+       "right": 776
+      },
+      "hr": {
+       "left": 44,
+       "right": 776,
+       "width": 732,
+       "height": 1,
+       "centre": 410
+      },
+      "eyebrow": {
+       "left": 44,
+       "right": 776,
+       "width": 732,
+       "height": 16.8,
+       "centre": 410
+      },
+      "eyebrowText": {
+       "left": 44,
+       "right": 164.3
+      },
+      "h2": {
+       "left": 44,
+       "right": 434,
+       "width": 390,
+       "height": 33.3,
+       "centre": 239
+      },
+      "h2Text": {
+       "left": 44,
+       "right": 210.3
+      },
+      "cta": {
+       "left": 44,
+       "right": 464,
+       "width": 420,
+       "height": 55.9,
+       "centre": 254
+      }
+     },
+     "checks": {
+      "closeOnFrame": true,
+      "duoOnFrame": true,
+      "hrOnFrame": true,
+      "ctaStartsOnFrame": true,
+      "eyebrowStartsOnFrame": true,
+      "h2StartsOnFrame": true,
+      "captionStartsOnFrame": true,
+      "imagesOnAxis": true
+     }
+    },
+    "errors": [],
+    "images": [
+     {
+      "url": "/assets/images/city/001-bangkok-skytrain-king-power-mahanakhon.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/052-vow-ceremony-green-door.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-01.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-chao-phraya-skyline.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/002-vientiane-card-poster.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-card-poster.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/052-ceremony-green-gateway.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/laos-map.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/002-vientiane-reclining-buddha.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-01-iconsiam-skyline.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-02.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-02-river-express-boat.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-03-mahanakhon-skytrain.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-04-train-and-monorail.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-05-wires-and-train.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-06-alley.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/transport/train-no25-krung-thep-aphiwat.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/transport/train-no25-terminal-aerial.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/transport/train-no25-first-class-passenger-room.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/transport/train-no25-srt-train.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/experiences/vte-ongteu-01.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/experiences/vte-ongteu-03.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/temple/takbat-couple-giving-novice.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/temple/takbat-novices-with-bowls.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/temple/takbat-couple-offering-bowl.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/temple/sangkhathan-prepared-offerings.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/051-coffee-and-cake-patisserie.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/052-vow-ceremony-green-door-entrance.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/souphattra/heritage-arches-dusk.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/souphattra/heritage-room.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-03.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-04.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-05.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-06.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-07.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-08.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-09.jpg",
+      "status": 200
+     }
+    ],
+    "imageFailures": []
+   },
+   {
+    "viewport": "ipad-768x1024",
+    "engine": "webkit",
+    "overflow": {
+     "scrollWidth": 768,
+     "innerWidth": 768,
+     "ok": true
+    },
+    "cards": [
+     {
+      "title": "Before the Wedding",
+      "gallery": true,
+      "count": 11,
+      "counter": "1 / 11",
+      "next": "2 / 11",
+      "swipe": "1 / 11",
+      "wrap": "1 / 11",
+      "frames": [
+       {
+        "src": "assets/images/city/001-bangkok-skytrain-king-power-mahanakhon.jpg",
+        "naturalWidth": 1500,
+        "counter": "1 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-01-iconsiam-skyline.jpg",
+        "naturalWidth": 1500,
+        "counter": "2 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-02-river-express-boat.jpg",
+        "naturalWidth": 1280,
+        "counter": "3 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-03-mahanakhon-skytrain.jpg",
+        "naturalWidth": 1200,
+        "counter": "4 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-04-train-and-monorail.jpg",
+        "naturalWidth": 1200,
+        "counter": "5 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-05-wires-and-train.jpg",
+        "naturalWidth": 1201,
+        "counter": "6 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-06-alley.jpg",
+        "naturalWidth": 1202,
+        "counter": "7 / 11"
+       },
+       {
+        "src": "assets/images/transport/train-no25-krung-thep-aphiwat.jpg",
+        "naturalWidth": 1600,
+        "counter": "8 / 11"
+       },
+       {
+        "src": "assets/images/transport/train-no25-terminal-aerial.jpg",
+        "naturalWidth": 1116,
+        "counter": "9 / 11"
+       },
+       {
+        "src": "assets/images/transport/train-no25-first-class-passenger-room.jpg",
+        "naturalWidth": 888,
+        "counter": "10 / 11"
+       },
+       {
+        "src": "assets/images/transport/train-no25-srt-train.jpg",
+        "naturalWidth": 1440,
+        "counter": "11 / 11"
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": true
+     },
+     {
+      "title": "The Wedding",
+      "gallery": true,
+      "count": 12,
+      "counter": "1 / 12",
+      "next": "2 / 12",
+      "swipe": "1 / 12",
+      "wrap": "1 / 12",
+      "frames": [
+       {
+        "src": "assets/images/event/052-vow-ceremony-green-door.jpg",
+        "naturalWidth": 1334,
+        "counter": "1 / 12"
+       },
+       {
+        "src": "assets/images/event/052-ceremony-green-gateway.jpg",
+        "naturalWidth": 1334,
+        "counter": "2 / 12"
+       },
+       {
+        "src": "assets/images/experiences/vte-ongteu-01.jpg",
+        "naturalWidth": 1920,
+        "counter": "3 / 12"
+       },
+       {
+        "src": "assets/images/experiences/vte-ongteu-03.jpg",
+        "naturalWidth": 1500,
+        "counter": "4 / 12"
+       },
+       {
+        "src": "assets/images/temple/takbat-couple-giving-novice.jpg",
+        "naturalWidth": 1365,
+        "counter": "5 / 12"
+       },
+       {
+        "src": "assets/images/temple/takbat-novices-with-bowls.jpg",
+        "naturalWidth": 768,
+        "counter": "6 / 12"
+       },
+       {
+        "src": "assets/images/temple/takbat-couple-offering-bowl.jpg",
+        "naturalWidth": 2048,
+        "counter": "7 / 12"
+       },
+       {
+        "src": "assets/images/temple/sangkhathan-prepared-offerings.jpg",
+        "naturalWidth": 939,
+        "counter": "8 / 12"
+       },
+       {
+        "src": "assets/images/event/051-coffee-and-cake-patisserie.jpg",
+        "naturalWidth": 1334,
+        "counter": "9 / 12"
+       },
+       {
+        "src": "assets/images/event/052-vow-ceremony-green-door-entrance.jpg",
+        "naturalWidth": 480,
+        "counter": "10 / 12"
+       },
+       {
+        "src": "assets/images/souphattra/heritage-arches-dusk.jpg",
+        "naturalWidth": 2000,
+        "counter": "11 / 12"
+       },
+       {
+        "src": "assets/images/souphattra/heritage-room.jpg",
+        "naturalWidth": 2000,
+        "counter": "12 / 12"
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": true
+     },
+     {
+      "title": "After the Wedding",
+      "gallery": true,
+      "count": 9,
+      "counter": "1 / 9",
+      "next": "2 / 9",
+      "swipe": "1 / 9",
+      "wrap": "1 / 9",
+      "frames": [
+       {
+        "src": "assets/images/city/004-lijiang-aw-01.jpg",
+        "naturalWidth": 1280,
+        "counter": "1 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-02.jpg",
+        "naturalWidth": 1024,
+        "counter": "2 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-03.jpg",
+        "naturalWidth": 1024,
+        "counter": "3 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-04.jpg",
+        "naturalWidth": 1025,
+        "counter": "4 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-05.jpg",
+        "naturalWidth": 1025,
+        "counter": "5 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-06.jpg",
+        "naturalWidth": 1080,
+        "counter": "6 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-07.jpg",
+        "naturalWidth": 862,
+        "counter": "7 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-08.jpg",
+        "naturalWidth": 862,
+        "counter": "8 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-09.jpg",
+        "naturalWidth": 862,
+        "counter": "9 / 9"
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": true
+     }
+    ],
+    "close": {
+     "innerWidth": 768,
+     "frame": {
+      "left": 44,
+      "right": 724
+     },
+     "duo": {
+      "box": {
+       "left": 44,
+       "right": 724
+      },
+      "map": {
+       "left": 112.6,
+       "right": 655.4,
+       "width": 542.9,
+       "height": 634.9,
+       "centre": 384
+      },
+      "photo": {
+       "left": 44,
+       "right": 724,
+       "width": 680,
+       "height": 453.3,
+       "centre": 384
+      },
+      "caption": {
+       "left": 44,
+       "right": 724,
+       "width": 680,
+       "height": 14.5,
+       "centre": 384
+      }
+     },
+     "close": {
+      "box": {
+       "left": 44,
+       "right": 724
+      },
+      "hr": {
+       "left": 44,
+       "right": 724,
+       "width": 680,
+       "height": 1,
+       "centre": 384
+      },
+      "eyebrow": {
+       "left": 44,
+       "right": 724,
+       "width": 680,
+       "height": 16.8,
+       "centre": 384
+      },
+      "eyebrowText": {
+       "left": 44,
+       "right": 164.3
+      },
+      "h2": {
+       "left": 44,
+       "right": 434,
+       "width": 390,
+       "height": 33.3,
+       "centre": 239
+      },
+      "h2Text": {
+       "left": 44,
+       "right": 210.3
+      },
+      "cta": {
+       "left": 44,
+       "right": 464,
+       "width": 420,
+       "height": 55.9,
+       "centre": 254
+      }
+     },
+     "checks": {
+      "closeOnFrame": true,
+      "duoOnFrame": true,
+      "hrOnFrame": true,
+      "ctaStartsOnFrame": true,
+      "eyebrowStartsOnFrame": true,
+      "h2StartsOnFrame": true,
+      "captionStartsOnFrame": true,
+      "imagesOnAxis": true
+     }
+    },
+    "errors": [],
+    "images": [
+     {
+      "url": "/assets/images/city/001-bangkok-skytrain-king-power-mahanakhon.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/052-vow-ceremony-green-door.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-01.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-chao-phraya-skyline.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/002-vientiane-card-poster.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-card-poster.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/052-ceremony-green-gateway.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/laos-map.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/002-vientiane-reclining-buddha.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-01-iconsiam-skyline.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-02.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-02-river-express-boat.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-03-mahanakhon-skytrain.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-04-train-and-monorail.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-05-wires-and-train.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-06-alley.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/transport/train-no25-krung-thep-aphiwat.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/transport/train-no25-terminal-aerial.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/transport/train-no25-first-class-passenger-room.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/transport/train-no25-srt-train.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/experiences/vte-ongteu-01.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/experiences/vte-ongteu-03.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/temple/takbat-couple-giving-novice.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/temple/takbat-novices-with-bowls.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/temple/takbat-couple-offering-bowl.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/temple/sangkhathan-prepared-offerings.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/051-coffee-and-cake-patisserie.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/052-vow-ceremony-green-door-entrance.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/souphattra/heritage-arches-dusk.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/souphattra/heritage-room.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-03.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-04.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-05.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-06.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-07.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-08.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-09.jpg",
+      "status": 200
+     }
+    ],
+    "imageFailures": []
+   },
+   {
+    "viewport": "ipad-1194x834",
+    "engine": "webkit",
+    "overflow": {
+     "scrollWidth": 1194,
+     "innerWidth": 1194,
+     "ok": true
+    },
+    "cards": [
+     {
+      "title": "Before the Wedding",
+      "gallery": true,
+      "count": 11,
+      "counter": "1 / 11",
+      "next": "2 / 11",
+      "swipe": "1 / 11",
+      "wrap": "1 / 11",
+      "frames": [
+       {
+        "src": "assets/images/city/001-bangkok-skytrain-king-power-mahanakhon.jpg",
+        "naturalWidth": 1500,
+        "counter": "1 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-01-iconsiam-skyline.jpg",
+        "naturalWidth": 1500,
+        "counter": "2 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-02-river-express-boat.jpg",
+        "naturalWidth": 1280,
+        "counter": "3 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-03-mahanakhon-skytrain.jpg",
+        "naturalWidth": 1200,
+        "counter": "4 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-04-train-and-monorail.jpg",
+        "naturalWidth": 1200,
+        "counter": "5 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-05-wires-and-train.jpg",
+        "naturalWidth": 1201,
+        "counter": "6 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-06-alley.jpg",
+        "naturalWidth": 1202,
+        "counter": "7 / 11"
+       },
+       {
+        "src": "assets/images/transport/train-no25-krung-thep-aphiwat.jpg",
+        "naturalWidth": 1600,
+        "counter": "8 / 11"
+       },
+       {
+        "src": "assets/images/transport/train-no25-terminal-aerial.jpg",
+        "naturalWidth": 1116,
+        "counter": "9 / 11"
+       },
+       {
+        "src": "assets/images/transport/train-no25-first-class-passenger-room.jpg",
+        "naturalWidth": 888,
+        "counter": "10 / 11"
+       },
+       {
+        "src": "assets/images/transport/train-no25-srt-train.jpg",
+        "naturalWidth": 1440,
+        "counter": "11 / 11"
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": true
+     },
+     {
+      "title": "The Wedding",
+      "gallery": true,
+      "count": 12,
+      "counter": "1 / 12",
+      "next": "2 / 12",
+      "swipe": "1 / 12",
+      "wrap": "1 / 12",
+      "frames": [
+       {
+        "src": "assets/images/event/052-vow-ceremony-green-door.jpg",
+        "naturalWidth": 1334,
+        "counter": "1 / 12"
+       },
+       {
+        "src": "assets/images/event/052-ceremony-green-gateway.jpg",
+        "naturalWidth": 1334,
+        "counter": "2 / 12"
+       },
+       {
+        "src": "assets/images/experiences/vte-ongteu-01.jpg",
+        "naturalWidth": 1920,
+        "counter": "3 / 12"
+       },
+       {
+        "src": "assets/images/experiences/vte-ongteu-03.jpg",
+        "naturalWidth": 1500,
+        "counter": "4 / 12"
+       },
+       {
+        "src": "assets/images/temple/takbat-couple-giving-novice.jpg",
+        "naturalWidth": 1365,
+        "counter": "5 / 12"
+       },
+       {
+        "src": "assets/images/temple/takbat-novices-with-bowls.jpg",
+        "naturalWidth": 768,
+        "counter": "6 / 12"
+       },
+       {
+        "src": "assets/images/temple/takbat-couple-offering-bowl.jpg",
+        "naturalWidth": 2048,
+        "counter": "7 / 12"
+       },
+       {
+        "src": "assets/images/temple/sangkhathan-prepared-offerings.jpg",
+        "naturalWidth": 939,
+        "counter": "8 / 12"
+       },
+       {
+        "src": "assets/images/event/051-coffee-and-cake-patisserie.jpg",
+        "naturalWidth": 1334,
+        "counter": "9 / 12"
+       },
+       {
+        "src": "assets/images/event/052-vow-ceremony-green-door-entrance.jpg",
+        "naturalWidth": 480,
+        "counter": "10 / 12"
+       },
+       {
+        "src": "assets/images/souphattra/heritage-arches-dusk.jpg",
+        "naturalWidth": 2000,
+        "counter": "11 / 12"
+       },
+       {
+        "src": "assets/images/souphattra/heritage-room.jpg",
+        "naturalWidth": 2000,
+        "counter": "12 / 12"
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": true
+     },
+     {
+      "title": "After the Wedding",
+      "gallery": true,
+      "count": 9,
+      "counter": "1 / 9",
+      "next": "2 / 9",
+      "swipe": "1 / 9",
+      "wrap": "1 / 9",
+      "frames": [
+       {
+        "src": "assets/images/city/004-lijiang-aw-01.jpg",
+        "naturalWidth": 1280,
+        "counter": "1 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-02.jpg",
+        "naturalWidth": 1024,
+        "counter": "2 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-03.jpg",
+        "naturalWidth": 1024,
+        "counter": "3 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-04.jpg",
+        "naturalWidth": 1025,
+        "counter": "4 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-05.jpg",
+        "naturalWidth": 1025,
+        "counter": "5 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-06.jpg",
+        "naturalWidth": 1080,
+        "counter": "6 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-07.jpg",
+        "naturalWidth": 862,
+        "counter": "7 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-08.jpg",
+        "naturalWidth": 862,
+        "counter": "8 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-09.jpg",
+        "naturalWidth": 862,
+        "counter": "9 / 9"
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": true
+     }
+    ],
+    "close": {
+     "innerWidth": 1194,
+     "frame": {
+      "left": 71,
+      "right": 1123
+     },
+     "duo": {
+      "box": {
+       "left": 71,
+       "right": 1123
+      },
+      "map": {
+       "left": 71,
+       "right": 565,
+       "width": 494,
+       "height": 577.7,
+       "centre": 318
+      },
+      "photo": {
+       "left": 629,
+       "right": 1123,
+       "width": 494,
+       "height": 577.7,
+       "centre": 876
+      },
+      "caption": {
+       "left": 71,
+       "right": 1123,
+       "width": 1052,
+       "height": 14.5,
+       "centre": 597
+      }
+     },
+     "close": {
+      "box": {
+       "left": 71,
+       "right": 1123
+      },
+      "hr": {
+       "left": 71,
+       "right": 1123,
+       "width": 1052,
+       "height": 1,
+       "centre": 597
+      },
+      "eyebrow": {
+       "left": 71,
+       "right": 1123,
+       "width": 1052,
+       "height": 16.8,
+       "centre": 597
+      },
+      "eyebrowText": {
+       "left": 71,
+       "right": 191.3
+      },
+      "h2": {
+       "left": 71,
+       "right": 551,
+       "width": 480,
+       "height": 41,
+       "centre": 311
+      },
+      "h2Text": {
+       "left": 71,
+       "right": 273.8
+      },
+      "cta": {
+       "left": 71,
+       "right": 491,
+       "width": 420,
+       "height": 55.9,
+       "centre": 281
+      }
+     },
+     "checks": {
+      "closeOnFrame": true,
+      "duoOnFrame": true,
+      "hrOnFrame": true,
+      "ctaStartsOnFrame": true,
+      "eyebrowStartsOnFrame": true,
+      "h2StartsOnFrame": true,
+      "captionStartsOnFrame": true,
+      "imagesOnAxis": true
+     }
+    },
+    "errors": [],
+    "images": [
+     {
+      "url": "/assets/images/city/001-bangkok-skytrain-king-power-mahanakhon.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/052-vow-ceremony-green-door.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-01.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-chao-phraya-skyline.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/002-vientiane-card-poster.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-card-poster.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/052-ceremony-green-gateway.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/laos-map.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/002-vientiane-reclining-buddha.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-01-iconsiam-skyline.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-02.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-02-river-express-boat.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-03-mahanakhon-skytrain.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-04-train-and-monorail.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-05-wires-and-train.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-06-alley.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/transport/train-no25-krung-thep-aphiwat.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/transport/train-no25-terminal-aerial.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/transport/train-no25-first-class-passenger-room.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/transport/train-no25-srt-train.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/experiences/vte-ongteu-01.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/experiences/vte-ongteu-03.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/temple/takbat-couple-giving-novice.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/temple/takbat-novices-with-bowls.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/temple/takbat-couple-offering-bowl.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/temple/sangkhathan-prepared-offerings.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/051-coffee-and-cake-patisserie.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/052-vow-ceremony-green-door-entrance.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/souphattra/heritage-arches-dusk.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/souphattra/heritage-room.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-03.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-04.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-05.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-06.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-07.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-08.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-09.jpg",
+      "status": 200
+     }
+    ],
+    "imageFailures": []
+   },
+   {
+    "viewport": "ipad-1180x820",
+    "engine": "webkit",
+    "overflow": {
+     "scrollWidth": 1180,
+     "innerWidth": 1180,
+     "ok": true
+    },
+    "cards": [
+     {
+      "title": "Before the Wedding",
+      "gallery": true,
+      "count": 11,
+      "counter": "1 / 11",
+      "next": "2 / 11",
+      "swipe": "1 / 11",
+      "wrap": "1 / 11",
+      "frames": [
+       {
+        "src": "assets/images/city/001-bangkok-skytrain-king-power-mahanakhon.jpg",
+        "naturalWidth": 1500,
+        "counter": "1 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-01-iconsiam-skyline.jpg",
+        "naturalWidth": 1500,
+        "counter": "2 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-02-river-express-boat.jpg",
+        "naturalWidth": 1280,
+        "counter": "3 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-03-mahanakhon-skytrain.jpg",
+        "naturalWidth": 1200,
+        "counter": "4 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-04-train-and-monorail.jpg",
+        "naturalWidth": 1200,
+        "counter": "5 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-05-wires-and-train.jpg",
+        "naturalWidth": 1201,
+        "counter": "6 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-06-alley.jpg",
+        "naturalWidth": 1202,
+        "counter": "7 / 11"
+       },
+       {
+        "src": "assets/images/transport/train-no25-krung-thep-aphiwat.jpg",
+        "naturalWidth": 1600,
+        "counter": "8 / 11"
+       },
+       {
+        "src": "assets/images/transport/train-no25-terminal-aerial.jpg",
+        "naturalWidth": 1116,
+        "counter": "9 / 11"
+       },
+       {
+        "src": "assets/images/transport/train-no25-first-class-passenger-room.jpg",
+        "naturalWidth": 888,
+        "counter": "10 / 11"
+       },
+       {
+        "src": "assets/images/transport/train-no25-srt-train.jpg",
+        "naturalWidth": 1440,
+        "counter": "11 / 11"
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": true
+     },
+     {
+      "title": "The Wedding",
+      "gallery": true,
+      "count": 12,
+      "counter": "1 / 12",
+      "next": "2 / 12",
+      "swipe": "1 / 12",
+      "wrap": "1 / 12",
+      "frames": [
+       {
+        "src": "assets/images/event/052-vow-ceremony-green-door.jpg",
+        "naturalWidth": 1334,
+        "counter": "1 / 12"
+       },
+       {
+        "src": "assets/images/event/052-ceremony-green-gateway.jpg",
+        "naturalWidth": 1334,
+        "counter": "2 / 12"
+       },
+       {
+        "src": "assets/images/experiences/vte-ongteu-01.jpg",
+        "naturalWidth": 1920,
+        "counter": "3 / 12"
+       },
+       {
+        "src": "assets/images/experiences/vte-ongteu-03.jpg",
+        "naturalWidth": 1500,
+        "counter": "4 / 12"
+       },
+       {
+        "src": "assets/images/temple/takbat-couple-giving-novice.jpg",
+        "naturalWidth": 1365,
+        "counter": "5 / 12"
+       },
+       {
+        "src": "assets/images/temple/takbat-novices-with-bowls.jpg",
+        "naturalWidth": 768,
+        "counter": "6 / 12"
+       },
+       {
+        "src": "assets/images/temple/takbat-couple-offering-bowl.jpg",
+        "naturalWidth": 2048,
+        "counter": "7 / 12"
+       },
+       {
+        "src": "assets/images/temple/sangkhathan-prepared-offerings.jpg",
+        "naturalWidth": 939,
+        "counter": "8 / 12"
+       },
+       {
+        "src": "assets/images/event/051-coffee-and-cake-patisserie.jpg",
+        "naturalWidth": 1334,
+        "counter": "9 / 12"
+       },
+       {
+        "src": "assets/images/event/052-vow-ceremony-green-door-entrance.jpg",
+        "naturalWidth": 480,
+        "counter": "10 / 12"
+       },
+       {
+        "src": "assets/images/souphattra/heritage-arches-dusk.jpg",
+        "naturalWidth": 2000,
+        "counter": "11 / 12"
+       },
+       {
+        "src": "assets/images/souphattra/heritage-room.jpg",
+        "naturalWidth": 2000,
+        "counter": "12 / 12"
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": true
+     },
+     {
+      "title": "After the Wedding",
+      "gallery": true,
+      "count": 9,
+      "counter": "1 / 9",
+      "next": "2 / 9",
+      "swipe": "1 / 9",
+      "wrap": "1 / 9",
+      "frames": [
+       {
+        "src": "assets/images/city/004-lijiang-aw-01.jpg",
+        "naturalWidth": 1280,
+        "counter": "1 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-02.jpg",
+        "naturalWidth": 1024,
+        "counter": "2 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-03.jpg",
+        "naturalWidth": 1024,
+        "counter": "3 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-04.jpg",
+        "naturalWidth": 1025,
+        "counter": "4 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-05.jpg",
+        "naturalWidth": 1025,
+        "counter": "5 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-06.jpg",
+        "naturalWidth": 1080,
+        "counter": "6 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-07.jpg",
+        "naturalWidth": 862,
+        "counter": "7 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-08.jpg",
+        "naturalWidth": 862,
+        "counter": "8 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-09.jpg",
+        "naturalWidth": 862,
+        "counter": "9 / 9"
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": true
+     }
+    ],
+    "close": {
+     "innerWidth": 1180,
+     "frame": {
+      "left": 64,
+      "right": 1116
+     },
+     "duo": {
+      "box": {
+       "left": 64,
+       "right": 1116
+      },
+      "map": {
+       "left": 64,
+       "right": 558,
+       "width": 494,
+       "height": 577.7,
+       "centre": 311
+      },
+      "photo": {
+       "left": 622,
+       "right": 1116,
+       "width": 494,
+       "height": 577.7,
+       "centre": 869
+      },
+      "caption": {
+       "left": 64,
+       "right": 1116,
+       "width": 1052,
+       "height": 14.5,
+       "centre": 590
+      }
+     },
+     "close": {
+      "box": {
+       "left": 64,
+       "right": 1116
+      },
+      "hr": {
+       "left": 64,
+       "right": 1116,
+       "width": 1052,
+       "height": 1,
+       "centre": 590
+      },
+      "eyebrow": {
+       "left": 64,
+       "right": 1116,
+       "width": 1052,
+       "height": 16.8,
+       "centre": 590
+      },
+      "eyebrowText": {
+       "left": 64,
+       "right": 184.3
+      },
+      "h2": {
+       "left": 64,
+       "right": 544,
+       "width": 480,
+       "height": 41,
+       "centre": 304
+      },
+      "h2Text": {
+       "left": 64,
+       "right": 266.8
+      },
+      "cta": {
+       "left": 64,
+       "right": 484,
+       "width": 420,
+       "height": 55.9,
+       "centre": 274
+      }
+     },
+     "checks": {
+      "closeOnFrame": true,
+      "duoOnFrame": true,
+      "hrOnFrame": true,
+      "ctaStartsOnFrame": true,
+      "eyebrowStartsOnFrame": true,
+      "h2StartsOnFrame": true,
+      "captionStartsOnFrame": true,
+      "imagesOnAxis": true
+     }
+    },
+    "errors": [],
+    "images": [
+     {
+      "url": "/assets/images/city/001-bangkok-skytrain-king-power-mahanakhon.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/052-vow-ceremony-green-door.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-01.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-chao-phraya-skyline.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/002-vientiane-card-poster.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-card-poster.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/052-ceremony-green-gateway.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/laos-map.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/002-vientiane-reclining-buddha.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-01-iconsiam-skyline.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-02.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-02-river-express-boat.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-03-mahanakhon-skytrain.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-04-train-and-monorail.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-05-wires-and-train.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-06-alley.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/transport/train-no25-krung-thep-aphiwat.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/transport/train-no25-terminal-aerial.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/transport/train-no25-first-class-passenger-room.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/transport/train-no25-srt-train.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/experiences/vte-ongteu-01.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/experiences/vte-ongteu-03.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/temple/takbat-couple-giving-novice.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/temple/takbat-novices-with-bowls.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/temple/takbat-couple-offering-bowl.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/temple/sangkhathan-prepared-offerings.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/051-coffee-and-cake-patisserie.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/052-vow-ceremony-green-door-entrance.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/souphattra/heritage-arches-dusk.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/souphattra/heritage-room.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-03.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-04.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-05.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-06.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-07.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-08.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-09.jpg",
+      "status": 200
+     }
+    ],
+    "imageFailures": []
+   },
+   {
+    "viewport": "ipad-1024x768",
+    "engine": "webkit",
+    "overflow": {
+     "scrollWidth": 1024,
+     "innerWidth": 1024,
+     "ok": true
+    },
+    "cards": [
+     {
+      "title": "Before the Wedding",
+      "gallery": true,
+      "count": 11,
+      "counter": "1 / 11",
+      "next": "2 / 11",
+      "swipe": "1 / 11",
+      "wrap": "1 / 11",
+      "frames": [
+       {
+        "src": "assets/images/city/001-bangkok-skytrain-king-power-mahanakhon.jpg",
+        "naturalWidth": 1500,
+        "counter": "1 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-01-iconsiam-skyline.jpg",
+        "naturalWidth": 1500,
+        "counter": "2 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-02-river-express-boat.jpg",
+        "naturalWidth": 1280,
+        "counter": "3 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-03-mahanakhon-skytrain.jpg",
+        "naturalWidth": 1200,
+        "counter": "4 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-04-train-and-monorail.jpg",
+        "naturalWidth": 1200,
+        "counter": "5 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-05-wires-and-train.jpg",
+        "naturalWidth": 1201,
+        "counter": "6 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-06-alley.jpg",
+        "naturalWidth": 1202,
+        "counter": "7 / 11"
+       },
+       {
+        "src": "assets/images/transport/train-no25-krung-thep-aphiwat.jpg",
+        "naturalWidth": 1600,
+        "counter": "8 / 11"
+       },
+       {
+        "src": "assets/images/transport/train-no25-terminal-aerial.jpg",
+        "naturalWidth": 1116,
+        "counter": "9 / 11"
+       },
+       {
+        "src": "assets/images/transport/train-no25-first-class-passenger-room.jpg",
+        "naturalWidth": 888,
+        "counter": "10 / 11"
+       },
+       {
+        "src": "assets/images/transport/train-no25-srt-train.jpg",
+        "naturalWidth": 1440,
+        "counter": "11 / 11"
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": true
+     },
+     {
+      "title": "The Wedding",
+      "gallery": true,
+      "count": 12,
+      "counter": "1 / 12",
+      "next": "2 / 12",
+      "swipe": "1 / 12",
+      "wrap": "1 / 12",
+      "frames": [
+       {
+        "src": "assets/images/event/052-vow-ceremony-green-door.jpg",
+        "naturalWidth": 1334,
+        "counter": "1 / 12"
+       },
+       {
+        "src": "assets/images/event/052-ceremony-green-gateway.jpg",
+        "naturalWidth": 1334,
+        "counter": "2 / 12"
+       },
+       {
+        "src": "assets/images/experiences/vte-ongteu-01.jpg",
+        "naturalWidth": 1920,
+        "counter": "3 / 12"
+       },
+       {
+        "src": "assets/images/experiences/vte-ongteu-03.jpg",
+        "naturalWidth": 1500,
+        "counter": "4 / 12"
+       },
+       {
+        "src": "assets/images/temple/takbat-couple-giving-novice.jpg",
+        "naturalWidth": 1365,
+        "counter": "5 / 12"
+       },
+       {
+        "src": "assets/images/temple/takbat-novices-with-bowls.jpg",
+        "naturalWidth": 768,
+        "counter": "6 / 12"
+       },
+       {
+        "src": "assets/images/temple/takbat-couple-offering-bowl.jpg",
+        "naturalWidth": 2048,
+        "counter": "7 / 12"
+       },
+       {
+        "src": "assets/images/temple/sangkhathan-prepared-offerings.jpg",
+        "naturalWidth": 939,
+        "counter": "8 / 12"
+       },
+       {
+        "src": "assets/images/event/051-coffee-and-cake-patisserie.jpg",
+        "naturalWidth": 1334,
+        "counter": "9 / 12"
+       },
+       {
+        "src": "assets/images/event/052-vow-ceremony-green-door-entrance.jpg",
+        "naturalWidth": 480,
+        "counter": "10 / 12"
+       },
+       {
+        "src": "assets/images/souphattra/heritage-arches-dusk.jpg",
+        "naturalWidth": 2000,
+        "counter": "11 / 12"
+       },
+       {
+        "src": "assets/images/souphattra/heritage-room.jpg",
+        "naturalWidth": 2000,
+        "counter": "12 / 12"
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": true
+     },
+     {
+      "title": "After the Wedding",
+      "gallery": true,
+      "count": 9,
+      "counter": "1 / 9",
+      "next": "2 / 9",
+      "swipe": "1 / 9",
+      "wrap": "1 / 9",
+      "frames": [
+       {
+        "src": "assets/images/city/004-lijiang-aw-01.jpg",
+        "naturalWidth": 1280,
+        "counter": "1 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-02.jpg",
+        "naturalWidth": 1024,
+        "counter": "2 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-03.jpg",
+        "naturalWidth": 1024,
+        "counter": "3 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-04.jpg",
+        "naturalWidth": 1025,
+        "counter": "4 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-05.jpg",
+        "naturalWidth": 1025,
+        "counter": "5 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-06.jpg",
+        "naturalWidth": 1080,
+        "counter": "6 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-07.jpg",
+        "naturalWidth": 862,
+        "counter": "7 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-08.jpg",
+        "naturalWidth": 862,
+        "counter": "8 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-09.jpg",
+        "naturalWidth": 862,
+        "counter": "9 / 9"
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": true
+     }
+    ],
+    "close": {
+     "innerWidth": 1024,
+     "frame": {
+      "left": 64,
+      "right": 960
+     },
+     "duo": {
+      "box": {
+       "left": 64,
+       "right": 960
+      },
+      "map": {
+       "left": 64,
+       "right": 480,
+       "width": 416,
+       "height": 486.5,
+       "centre": 272
+      },
+      "photo": {
+       "left": 544,
+       "right": 960,
+       "width": 416,
+       "height": 486.5,
+       "centre": 752
+      },
+      "caption": {
+       "left": 64,
+       "right": 960,
+       "width": 896,
+       "height": 14.5,
+       "centre": 512
+      }
+     },
+     "close": {
+      "box": {
+       "left": 64,
+       "right": 960
+      },
+      "hr": {
+       "left": 64,
+       "right": 960,
+       "width": 896,
+       "height": 1,
+       "centre": 512
+      },
+      "eyebrow": {
+       "left": 64,
+       "right": 960,
+       "width": 896,
+       "height": 16.8,
+       "centre": 512
+      },
+      "eyebrowText": {
+       "left": 64,
+       "right": 184.3
+      },
+      "h2": {
+       "left": 64,
+       "right": 544,
+       "width": 480,
+       "height": 41,
+       "centre": 304
+      },
+      "h2Text": {
+       "left": 64,
+       "right": 266.8
+      },
+      "cta": {
+       "left": 64,
+       "right": 484,
+       "width": 420,
+       "height": 55.9,
+       "centre": 274
+      }
+     },
+     "checks": {
+      "closeOnFrame": true,
+      "duoOnFrame": true,
+      "hrOnFrame": true,
+      "ctaStartsOnFrame": true,
+      "eyebrowStartsOnFrame": true,
+      "h2StartsOnFrame": true,
+      "captionStartsOnFrame": true,
+      "imagesOnAxis": true
+     }
+    },
+    "errors": [],
+    "images": [
+     {
+      "url": "/assets/images/city/001-bangkok-skytrain-king-power-mahanakhon.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/052-vow-ceremony-green-door.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-01.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-chao-phraya-skyline.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/002-vientiane-card-poster.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-card-poster.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/052-ceremony-green-gateway.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/laos-map.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/002-vientiane-reclining-buddha.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-01-iconsiam-skyline.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-02.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-02-river-express-boat.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-03-mahanakhon-skytrain.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-04-train-and-monorail.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-05-wires-and-train.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-06-alley.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/transport/train-no25-krung-thep-aphiwat.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/transport/train-no25-terminal-aerial.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/transport/train-no25-first-class-passenger-room.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/transport/train-no25-srt-train.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/experiences/vte-ongteu-01.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/experiences/vte-ongteu-03.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/temple/takbat-couple-giving-novice.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/temple/takbat-novices-with-bowls.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/temple/takbat-couple-offering-bowl.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/temple/sangkhathan-prepared-offerings.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/051-coffee-and-cake-patisserie.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/052-vow-ceremony-green-door-entrance.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/souphattra/heritage-arches-dusk.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/souphattra/heritage-room.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-03.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-04.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-05.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-06.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-07.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-08.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-09.jpg",
+      "status": 200
+     }
+    ],
+    "imageFailures": []
+   },
+   {
+    "viewport": "ipad-1180x740-safari",
+    "engine": "webkit",
+    "overflow": {
+     "scrollWidth": 1180,
+     "innerWidth": 1180,
+     "ok": true
+    },
+    "cards": [
+     {
+      "title": "Before the Wedding",
+      "gallery": true,
+      "count": 11,
+      "counter": "1 / 11",
+      "next": "2 / 11",
+      "swipe": "1 / 11",
+      "wrap": "1 / 11",
+      "frames": [
+       {
+        "src": "assets/images/city/001-bangkok-skytrain-king-power-mahanakhon.jpg",
+        "naturalWidth": 1500,
+        "counter": "1 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-01-iconsiam-skyline.jpg",
+        "naturalWidth": 1500,
+        "counter": "2 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-02-river-express-boat.jpg",
+        "naturalWidth": 1280,
+        "counter": "3 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-03-mahanakhon-skytrain.jpg",
+        "naturalWidth": 1200,
+        "counter": "4 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-04-train-and-monorail.jpg",
+        "naturalWidth": 1200,
+        "counter": "5 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-05-wires-and-train.jpg",
+        "naturalWidth": 1201,
+        "counter": "6 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-06-alley.jpg",
+        "naturalWidth": 1202,
+        "counter": "7 / 11"
+       },
+       {
+        "src": "assets/images/transport/train-no25-krung-thep-aphiwat.jpg",
+        "naturalWidth": 1600,
+        "counter": "8 / 11"
+       },
+       {
+        "src": "assets/images/transport/train-no25-terminal-aerial.jpg",
+        "naturalWidth": 1116,
+        "counter": "9 / 11"
+       },
+       {
+        "src": "assets/images/transport/train-no25-first-class-passenger-room.jpg",
+        "naturalWidth": 888,
+        "counter": "10 / 11"
+       },
+       {
+        "src": "assets/images/transport/train-no25-srt-train.jpg",
+        "naturalWidth": 1440,
+        "counter": "11 / 11"
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": true
+     },
+     {
+      "title": "The Wedding",
+      "gallery": true,
+      "count": 12,
+      "counter": "1 / 12",
+      "next": "2 / 12",
+      "swipe": "1 / 12",
+      "wrap": "1 / 12",
+      "frames": [
+       {
+        "src": "assets/images/event/052-vow-ceremony-green-door.jpg",
+        "naturalWidth": 1334,
+        "counter": "1 / 12"
+       },
+       {
+        "src": "assets/images/event/052-ceremony-green-gateway.jpg",
+        "naturalWidth": 1334,
+        "counter": "2 / 12"
+       },
+       {
+        "src": "assets/images/experiences/vte-ongteu-01.jpg",
+        "naturalWidth": 1920,
+        "counter": "3 / 12"
+       },
+       {
+        "src": "assets/images/experiences/vte-ongteu-03.jpg",
+        "naturalWidth": 1500,
+        "counter": "4 / 12"
+       },
+       {
+        "src": "assets/images/temple/takbat-couple-giving-novice.jpg",
+        "naturalWidth": 1365,
+        "counter": "5 / 12"
+       },
+       {
+        "src": "assets/images/temple/takbat-novices-with-bowls.jpg",
+        "naturalWidth": 768,
+        "counter": "6 / 12"
+       },
+       {
+        "src": "assets/images/temple/takbat-couple-offering-bowl.jpg",
+        "naturalWidth": 2048,
+        "counter": "7 / 12"
+       },
+       {
+        "src": "assets/images/temple/sangkhathan-prepared-offerings.jpg",
+        "naturalWidth": 939,
+        "counter": "8 / 12"
+       },
+       {
+        "src": "assets/images/event/051-coffee-and-cake-patisserie.jpg",
+        "naturalWidth": 1334,
+        "counter": "9 / 12"
+       },
+       {
+        "src": "assets/images/event/052-vow-ceremony-green-door-entrance.jpg",
+        "naturalWidth": 480,
+        "counter": "10 / 12"
+       },
+       {
+        "src": "assets/images/souphattra/heritage-arches-dusk.jpg",
+        "naturalWidth": 2000,
+        "counter": "11 / 12"
+       },
+       {
+        "src": "assets/images/souphattra/heritage-room.jpg",
+        "naturalWidth": 2000,
+        "counter": "12 / 12"
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": true
+     },
+     {
+      "title": "After the Wedding",
+      "gallery": true,
+      "count": 9,
+      "counter": "1 / 9",
+      "next": "2 / 9",
+      "swipe": "1 / 9",
+      "wrap": "1 / 9",
+      "frames": [
+       {
+        "src": "assets/images/city/004-lijiang-aw-01.jpg",
+        "naturalWidth": 1280,
+        "counter": "1 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-02.jpg",
+        "naturalWidth": 1024,
+        "counter": "2 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-03.jpg",
+        "naturalWidth": 1024,
+        "counter": "3 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-04.jpg",
+        "naturalWidth": 1025,
+        "counter": "4 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-05.jpg",
+        "naturalWidth": 1025,
+        "counter": "5 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-06.jpg",
+        "naturalWidth": 1080,
+        "counter": "6 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-07.jpg",
+        "naturalWidth": 862,
+        "counter": "7 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-08.jpg",
+        "naturalWidth": 862,
+        "counter": "8 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-09.jpg",
+        "naturalWidth": 862,
+        "counter": "9 / 9"
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": true
+     }
+    ],
+    "close": {
+     "innerWidth": 1180,
+     "frame": {
+      "left": 64,
+      "right": 1116
+     },
+     "duo": {
+      "box": {
+       "left": 64,
+       "right": 1116
+      },
+      "map": {
+       "left": 64,
+       "right": 558,
+       "width": 494,
+       "height": 577.7,
+       "centre": 311
+      },
+      "photo": {
+       "left": 622,
+       "right": 1116,
+       "width": 494,
+       "height": 577.7,
+       "centre": 869
+      },
+      "caption": {
+       "left": 64,
+       "right": 1116,
+       "width": 1052,
+       "height": 14.5,
+       "centre": 590
+      }
+     },
+     "close": {
+      "box": {
+       "left": 64,
+       "right": 1116
+      },
+      "hr": {
+       "left": 64,
+       "right": 1116,
+       "width": 1052,
+       "height": 1,
+       "centre": 590
+      },
+      "eyebrow": {
+       "left": 64,
+       "right": 1116,
+       "width": 1052,
+       "height": 16.8,
+       "centre": 590
+      },
+      "eyebrowText": {
+       "left": 64,
+       "right": 184.3
+      },
+      "h2": {
+       "left": 64,
+       "right": 544,
+       "width": 480,
+       "height": 41,
+       "centre": 304
+      },
+      "h2Text": {
+       "left": 64,
+       "right": 266.8
+      },
+      "cta": {
+       "left": 64,
+       "right": 484,
+       "width": 420,
+       "height": 55.9,
+       "centre": 274
+      }
+     },
+     "checks": {
+      "closeOnFrame": true,
+      "duoOnFrame": true,
+      "hrOnFrame": true,
+      "ctaStartsOnFrame": true,
+      "eyebrowStartsOnFrame": true,
+      "h2StartsOnFrame": true,
+      "captionStartsOnFrame": true,
+      "imagesOnAxis": true
+     }
+    },
+    "errors": [],
+    "images": [
+     {
+      "url": "/assets/images/city/001-bangkok-skytrain-king-power-mahanakhon.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/052-vow-ceremony-green-door.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-01.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-chao-phraya-skyline.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/002-vientiane-card-poster.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-card-poster.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/052-ceremony-green-gateway.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/laos-map.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/002-vientiane-reclining-buddha.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-01-iconsiam-skyline.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-02.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-02-river-express-boat.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-03-mahanakhon-skytrain.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-04-train-and-monorail.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-05-wires-and-train.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-06-alley.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/transport/train-no25-krung-thep-aphiwat.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/transport/train-no25-terminal-aerial.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/transport/train-no25-first-class-passenger-room.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/transport/train-no25-srt-train.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/experiences/vte-ongteu-01.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/experiences/vte-ongteu-03.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/temple/takbat-couple-giving-novice.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/temple/takbat-novices-with-bowls.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/temple/takbat-couple-offering-bowl.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/temple/sangkhathan-prepared-offerings.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/051-coffee-and-cake-patisserie.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/052-vow-ceremony-green-door-entrance.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/souphattra/heritage-arches-dusk.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/souphattra/heritage-room.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-03.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-04.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-05.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-06.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-07.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-08.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-09.jpg",
+      "status": 200
+     }
+    ],
+    "imageFailures": []
+   },
+   {
+    "viewport": "ipad-1194x760-safari",
+    "engine": "webkit",
+    "overflow": {
+     "scrollWidth": 1194,
+     "innerWidth": 1194,
+     "ok": true
+    },
+    "cards": [
+     {
+      "title": "Before the Wedding",
+      "gallery": true,
+      "count": 11,
+      "counter": "1 / 11",
+      "next": "2 / 11",
+      "swipe": "1 / 11",
+      "wrap": "1 / 11",
+      "frames": [
+       {
+        "src": "assets/images/city/001-bangkok-skytrain-king-power-mahanakhon.jpg",
+        "naturalWidth": 1500,
+        "counter": "1 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-01-iconsiam-skyline.jpg",
+        "naturalWidth": 1500,
+        "counter": "2 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-02-river-express-boat.jpg",
+        "naturalWidth": 1280,
+        "counter": "3 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-03-mahanakhon-skytrain.jpg",
+        "naturalWidth": 1200,
+        "counter": "4 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-04-train-and-monorail.jpg",
+        "naturalWidth": 1200,
+        "counter": "5 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-05-wires-and-train.jpg",
+        "naturalWidth": 1201,
+        "counter": "6 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-06-alley.jpg",
+        "naturalWidth": 1202,
+        "counter": "7 / 11"
+       },
+       {
+        "src": "assets/images/transport/train-no25-krung-thep-aphiwat.jpg",
+        "naturalWidth": 1600,
+        "counter": "8 / 11"
+       },
+       {
+        "src": "assets/images/transport/train-no25-terminal-aerial.jpg",
+        "naturalWidth": 1116,
+        "counter": "9 / 11"
+       },
+       {
+        "src": "assets/images/transport/train-no25-first-class-passenger-room.jpg",
+        "naturalWidth": 888,
+        "counter": "10 / 11"
+       },
+       {
+        "src": "assets/images/transport/train-no25-srt-train.jpg",
+        "naturalWidth": 1440,
+        "counter": "11 / 11"
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": true
+     },
+     {
+      "title": "The Wedding",
+      "gallery": true,
+      "count": 12,
+      "counter": "1 / 12",
+      "next": "2 / 12",
+      "swipe": "1 / 12",
+      "wrap": "1 / 12",
+      "frames": [
+       {
+        "src": "assets/images/event/052-vow-ceremony-green-door.jpg",
+        "naturalWidth": 1334,
+        "counter": "1 / 12"
+       },
+       {
+        "src": "assets/images/event/052-ceremony-green-gateway.jpg",
+        "naturalWidth": 1334,
+        "counter": "2 / 12"
+       },
+       {
+        "src": "assets/images/experiences/vte-ongteu-01.jpg",
+        "naturalWidth": 1920,
+        "counter": "3 / 12"
+       },
+       {
+        "src": "assets/images/experiences/vte-ongteu-03.jpg",
+        "naturalWidth": 1500,
+        "counter": "4 / 12"
+       },
+       {
+        "src": "assets/images/temple/takbat-couple-giving-novice.jpg",
+        "naturalWidth": 1365,
+        "counter": "5 / 12"
+       },
+       {
+        "src": "assets/images/temple/takbat-novices-with-bowls.jpg",
+        "naturalWidth": 768,
+        "counter": "6 / 12"
+       },
+       {
+        "src": "assets/images/temple/takbat-couple-offering-bowl.jpg",
+        "naturalWidth": 2048,
+        "counter": "7 / 12"
+       },
+       {
+        "src": "assets/images/temple/sangkhathan-prepared-offerings.jpg",
+        "naturalWidth": 939,
+        "counter": "8 / 12"
+       },
+       {
+        "src": "assets/images/event/051-coffee-and-cake-patisserie.jpg",
+        "naturalWidth": 1334,
+        "counter": "9 / 12"
+       },
+       {
+        "src": "assets/images/event/052-vow-ceremony-green-door-entrance.jpg",
+        "naturalWidth": 480,
+        "counter": "10 / 12"
+       },
+       {
+        "src": "assets/images/souphattra/heritage-arches-dusk.jpg",
+        "naturalWidth": 2000,
+        "counter": "11 / 12"
+       },
+       {
+        "src": "assets/images/souphattra/heritage-room.jpg",
+        "naturalWidth": 2000,
+        "counter": "12 / 12"
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": true
+     },
+     {
+      "title": "After the Wedding",
+      "gallery": true,
+      "count": 9,
+      "counter": "1 / 9",
+      "next": "2 / 9",
+      "swipe": "1 / 9",
+      "wrap": "1 / 9",
+      "frames": [
+       {
+        "src": "assets/images/city/004-lijiang-aw-01.jpg",
+        "naturalWidth": 1280,
+        "counter": "1 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-02.jpg",
+        "naturalWidth": 1024,
+        "counter": "2 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-03.jpg",
+        "naturalWidth": 1024,
+        "counter": "3 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-04.jpg",
+        "naturalWidth": 1025,
+        "counter": "4 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-05.jpg",
+        "naturalWidth": 1025,
+        "counter": "5 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-06.jpg",
+        "naturalWidth": 1080,
+        "counter": "6 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-07.jpg",
+        "naturalWidth": 862,
+        "counter": "7 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-08.jpg",
+        "naturalWidth": 862,
+        "counter": "8 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-09.jpg",
+        "naturalWidth": 862,
+        "counter": "9 / 9"
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": true
+     }
+    ],
+    "close": {
+     "innerWidth": 1194,
+     "frame": {
+      "left": 71,
+      "right": 1123
+     },
+     "duo": {
+      "box": {
+       "left": 71,
+       "right": 1123
+      },
+      "map": {
+       "left": 71,
+       "right": 565,
+       "width": 494,
+       "height": 577.7,
+       "centre": 318
+      },
+      "photo": {
+       "left": 629,
+       "right": 1123,
+       "width": 494,
+       "height": 577.7,
+       "centre": 876
+      },
+      "caption": {
+       "left": 71,
+       "right": 1123,
+       "width": 1052,
+       "height": 14.5,
+       "centre": 597
+      }
+     },
+     "close": {
+      "box": {
+       "left": 71,
+       "right": 1123
+      },
+      "hr": {
+       "left": 71,
+       "right": 1123,
+       "width": 1052,
+       "height": 1,
+       "centre": 597
+      },
+      "eyebrow": {
+       "left": 71,
+       "right": 1123,
+       "width": 1052,
+       "height": 16.8,
+       "centre": 597
+      },
+      "eyebrowText": {
+       "left": 71,
+       "right": 191.3
+      },
+      "h2": {
+       "left": 71,
+       "right": 551,
+       "width": 480,
+       "height": 41,
+       "centre": 311
+      },
+      "h2Text": {
+       "left": 71,
+       "right": 273.8
+      },
+      "cta": {
+       "left": 71,
+       "right": 491,
+       "width": 420,
+       "height": 55.9,
+       "centre": 281
+      }
+     },
+     "checks": {
+      "closeOnFrame": true,
+      "duoOnFrame": true,
+      "hrOnFrame": true,
+      "ctaStartsOnFrame": true,
+      "eyebrowStartsOnFrame": true,
+      "h2StartsOnFrame": true,
+      "captionStartsOnFrame": true,
+      "imagesOnAxis": true
+     }
+    },
+    "errors": [],
+    "images": [
+     {
+      "url": "/assets/images/city/001-bangkok-skytrain-king-power-mahanakhon.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/052-vow-ceremony-green-door.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-01.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-chao-phraya-skyline.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/002-vientiane-card-poster.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-card-poster.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/052-ceremony-green-gateway.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/laos-map.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/002-vientiane-reclining-buddha.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-02.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-01-iconsiam-skyline.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-02-river-express-boat.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-03-mahanakhon-skytrain.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-04-train-and-monorail.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-05-wires-and-train.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-06-alley.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/transport/train-no25-krung-thep-aphiwat.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/transport/train-no25-terminal-aerial.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/transport/train-no25-first-class-passenger-room.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/transport/train-no25-srt-train.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/experiences/vte-ongteu-01.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/experiences/vte-ongteu-03.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/temple/takbat-couple-giving-novice.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/temple/takbat-novices-with-bowls.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/temple/takbat-couple-offering-bowl.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/temple/sangkhathan-prepared-offerings.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/051-coffee-and-cake-patisserie.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/052-vow-ceremony-green-door-entrance.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/souphattra/heritage-arches-dusk.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/souphattra/heritage-room.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-03.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-04.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-05.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-06.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-07.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-08.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-09.jpg",
+      "status": 200
+     }
+    ],
+    "imageFailures": []
+   },
+   {
+    "viewport": "desktop-1440x900",
+    "engine": "chromium",
+    "overflow": {
+     "scrollWidth": 1440,
+     "innerWidth": 1440,
+     "ok": true
+    },
+    "cards": [
+     {
+      "title": "Before the Wedding",
+      "gallery": true,
+      "count": 11,
+      "counter": "1 / 11",
+      "next": "2 / 11",
+      "swipe": "1 / 11",
+      "wrap": "1 / 11",
+      "frames": [
+       {
+        "src": "assets/images/city/001-bangkok-skytrain-king-power-mahanakhon.jpg",
+        "naturalWidth": 1500,
+        "counter": "1 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-01-iconsiam-skyline.jpg",
+        "naturalWidth": 1500,
+        "counter": "2 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-02-river-express-boat.jpg",
+        "naturalWidth": 1280,
+        "counter": "3 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-03-mahanakhon-skytrain.jpg",
+        "naturalWidth": 1200,
+        "counter": "4 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-04-train-and-monorail.jpg",
+        "naturalWidth": 1200,
+        "counter": "5 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-05-wires-and-train.jpg",
+        "naturalWidth": 1201,
+        "counter": "6 / 11"
+       },
+       {
+        "src": "assets/images/city/001-bangkok-06-alley.jpg",
+        "naturalWidth": 1202,
+        "counter": "7 / 11"
+       },
+       {
+        "src": "assets/images/transport/train-no25-krung-thep-aphiwat.jpg",
+        "naturalWidth": 1600,
+        "counter": "8 / 11"
+       },
+       {
+        "src": "assets/images/transport/train-no25-terminal-aerial.jpg",
+        "naturalWidth": 1116,
+        "counter": "9 / 11"
+       },
+       {
+        "src": "assets/images/transport/train-no25-first-class-passenger-room.jpg",
+        "naturalWidth": 888,
+        "counter": "10 / 11"
+       },
+       {
+        "src": "assets/images/transport/train-no25-srt-train.jpg",
+        "naturalWidth": 1440,
+        "counter": "11 / 11"
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": true
+     },
+     {
+      "title": "The Wedding",
+      "gallery": true,
+      "count": 12,
+      "counter": "1 / 12",
+      "next": "2 / 12",
+      "swipe": "1 / 12",
+      "wrap": "1 / 12",
+      "frames": [
+       {
+        "src": "assets/images/event/052-vow-ceremony-green-door.jpg",
+        "naturalWidth": 1334,
+        "counter": "1 / 12"
+       },
+       {
+        "src": "assets/images/event/052-ceremony-green-gateway.jpg",
+        "naturalWidth": 1334,
+        "counter": "2 / 12"
+       },
+       {
+        "src": "assets/images/experiences/vte-ongteu-01.jpg",
+        "naturalWidth": 1920,
+        "counter": "3 / 12"
+       },
+       {
+        "src": "assets/images/experiences/vte-ongteu-03.jpg",
+        "naturalWidth": 1500,
+        "counter": "4 / 12"
+       },
+       {
+        "src": "assets/images/temple/takbat-couple-giving-novice.jpg",
+        "naturalWidth": 1365,
+        "counter": "5 / 12"
+       },
+       {
+        "src": "assets/images/temple/takbat-novices-with-bowls.jpg",
+        "naturalWidth": 768,
+        "counter": "6 / 12"
+       },
+       {
+        "src": "assets/images/temple/takbat-couple-offering-bowl.jpg",
+        "naturalWidth": 2048,
+        "counter": "7 / 12"
+       },
+       {
+        "src": "assets/images/temple/sangkhathan-prepared-offerings.jpg",
+        "naturalWidth": 939,
+        "counter": "8 / 12"
+       },
+       {
+        "src": "assets/images/event/051-coffee-and-cake-patisserie.jpg",
+        "naturalWidth": 1334,
+        "counter": "9 / 12"
+       },
+       {
+        "src": "assets/images/event/052-vow-ceremony-green-door-entrance.jpg",
+        "naturalWidth": 480,
+        "counter": "10 / 12"
+       },
+       {
+        "src": "assets/images/souphattra/heritage-arches-dusk.jpg",
+        "naturalWidth": 2000,
+        "counter": "11 / 12"
+       },
+       {
+        "src": "assets/images/souphattra/heritage-room.jpg",
+        "naturalWidth": 2000,
+        "counter": "12 / 12"
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": true
+     },
+     {
+      "title": "After the Wedding",
+      "gallery": true,
+      "count": 9,
+      "counter": "1 / 9",
+      "next": "2 / 9",
+      "swipe": "1 / 9",
+      "wrap": "1 / 9",
+      "frames": [
+       {
+        "src": "assets/images/city/004-lijiang-aw-01.jpg",
+        "naturalWidth": 1280,
+        "counter": "1 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-02.jpg",
+        "naturalWidth": 1024,
+        "counter": "2 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-03.jpg",
+        "naturalWidth": 1024,
+        "counter": "3 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-04.jpg",
+        "naturalWidth": 1025,
+        "counter": "4 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-05.jpg",
+        "naturalWidth": 1025,
+        "counter": "5 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-06.jpg",
+        "naturalWidth": 1080,
+        "counter": "6 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-07.jpg",
+        "naturalWidth": 862,
+        "counter": "7 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-08.jpg",
+        "naturalWidth": 862,
+        "counter": "8 / 9"
+       },
+       {
+        "src": "assets/images/city/004-lijiang-aw-09.jpg",
+        "naturalWidth": 862,
+        "counter": "9 / 9"
+       }
+      ],
+      "badImages": [],
+      "active": true,
+      "ok": true
+     }
+    ],
+    "close": {
+     "innerWidth": 1440,
+     "frame": {
+      "left": 194,
+      "right": 1246
+     },
+     "duo": {
+      "box": {
+       "left": 194,
+       "right": 1246
+      },
+      "map": {
+       "left": 194,
+       "right": 688,
+       "width": 494,
+       "height": 577.7,
+       "centre": 441
+      },
+      "photo": {
+       "left": 752,
+       "right": 1246,
+       "width": 494,
+       "height": 577.7,
+       "centre": 999
+      },
+      "caption": {
+       "left": 194,
+       "right": 1246,
+       "width": 1052,
+       "height": 14.5,
+       "centre": 720
+      }
+     },
+     "close": {
+      "box": {
+       "left": 194,
+       "right": 1246
+      },
+      "hr": {
+       "left": 194,
+       "right": 1246,
+       "width": 1052,
+       "height": 1,
+       "centre": 720
+      },
+      "eyebrow": {
+       "left": 194,
+       "right": 1246,
+       "width": 1052,
+       "height": 16.8,
+       "centre": 720
+      },
+      "eyebrowText": {
+       "left": 194,
+       "right": 314.3
+      },
+      "h2": {
+       "left": 194,
+       "right": 674,
+       "width": 480,
+       "height": 41,
+       "centre": 434
+      },
+      "h2Text": {
+       "left": 194,
+       "right": 396.9
+      },
+      "cta": {
+       "left": 194,
+       "right": 614,
+       "width": 420,
+       "height": 55.9,
+       "centre": 404
+      }
+     },
+     "checks": {
+      "closeOnFrame": true,
+      "duoOnFrame": true,
+      "hrOnFrame": true,
+      "ctaStartsOnFrame": true,
+      "eyebrowStartsOnFrame": true,
+      "h2StartsOnFrame": true,
+      "captionStartsOnFrame": true,
+      "imagesOnAxis": true
+     }
+    },
+    "errors": [],
+    "images": [
+     {
+      "url": "/assets/images/city/001-bangkok-skytrain-king-power-mahanakhon.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/052-vow-ceremony-green-door.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/002-vientiane-card-poster.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-chao-phraya-skyline.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-01.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-card-poster.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/052-ceremony-green-gateway.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/laos-map.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/002-vientiane-reclining-buddha.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-01-iconsiam-skyline.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-02.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-02-river-express-boat.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-03-mahanakhon-skytrain.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-04-train-and-monorail.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-05-wires-and-train.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/001-bangkok-06-alley.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/transport/train-no25-krung-thep-aphiwat.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/transport/train-no25-terminal-aerial.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/transport/train-no25-first-class-passenger-room.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/transport/train-no25-srt-train.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/experiences/vte-ongteu-01.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/experiences/vte-ongteu-03.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/temple/takbat-couple-giving-novice.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/temple/takbat-novices-with-bowls.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/temple/takbat-couple-offering-bowl.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/temple/sangkhathan-prepared-offerings.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/051-coffee-and-cake-patisserie.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/event/052-vow-ceremony-green-door-entrance.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/souphattra/heritage-arches-dusk.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/souphattra/heritage-room.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-03.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-04.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-05.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-06.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-07.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-08.jpg",
+      "status": 200
+     },
+     {
+      "url": "/assets/images/city/004-lijiang-aw-09.jpg",
+      "status": 200
+     }
+    ],
+    "imageFailures": []
+   }
+  ]
+ },
+ "unchangedPhoneDesktop": {
+  "iphone-390x844": {
+   "geometry": true,
+   "pixelsDifferent": 0
+  },
+  "iphone-430x932": {
+   "geometry": true,
+   "pixelsDifferent": 0
+  },
+  "desktop-1440x900": {
+   "geometry": true,
+   "pixelsDifferent": 0
+  }
+ }
+}

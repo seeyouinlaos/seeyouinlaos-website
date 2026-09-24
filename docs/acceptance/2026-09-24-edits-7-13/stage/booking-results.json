@@ -1,0 +1,92 @@
+[
+ {
+  "id": "7.1 every Souphattra room row shows its amount, a Select and a Details link — no Details needed to book",
+  "ok": true,
+  "d": "[{\"slug\":\"heritage\",\"select\":true,\"selectText\":\"Select\",\"details\":\"room.html?stay=souphattra&room=heritage\",\"price\":\"USD 290\",\"visible\":true},{\"slug\":\"heritage-executive\",\"select\":true,\"selectText\":\"Select\",\"details\":\"room.html?stay=souphattra&room=heritage-executive\",\"price\":\"USD 310\",\"visible\":true},{\"slug\":\"heritage-grand-premier\",\"select\":true,\"selectText\":\"Select\",\"details\":\"room.html?stay=souphattra&room=heritage-grand-premier\",\"price\":\"USD 340\",\"visible\":true}]"
+ },
+ {
+  "id": "7.2 the room page: \"Book this room\" (amount + action) comes before the details; the details are all still there",
+  "ok": true,
+  "d": "{\"buyTop\":417.84375,\"detTop\":2205.046875,\"storyTop\":2240.84375,\"cta\":true,\"facts\":true,\"amen\":true}"
+ },
+ {
+  "id": "9.1 Select opens the rooms of the category: each room with its places and its free places before anything is taken",
+  "ok": true,
+  "d": "[{\"unit\":\"A\",\"who\":\"2 places available\",\"btn\":\"Choose this room\"},{\"unit\":\"B\",\"who\":\"2 places available\",\"btn\":\"Choose this room\"},{\"unit\":\"C\",\"who\":\"2 places available\",\"btn\":\"Choose this room\"}]"
+ },
+ {
+  "id": "9.2 Ada (party of two) takes Room A: one person and one place kept for her party — not \"full\" for others by a person yet",
+  "ok": true,
+  "d": "{\"taken\":2,\"free\":0,\"places\":2}"
+ },
+ {
+  "id": "9.3 Ben sees Ada in Room A and the place kept for him, with a Join action",
+  "ok": true,
+  "d": "{\"who\":\"Ada · 1 place kept for you\",\"btn\":\"Join this room\"}"
+ },
+ {
+  "id": "9.4 Ben joins: Room A holds Ada and Ben and is Full",
+  "ok": true,
+  "d": "{\"full\":true,\"free\":0}"
+ },
+ {
+  "id": "9.5 My Trip names the room, its sleeping places, who holds them and that it is Full",
+  "ok": true,
+  "d": "YOUR ROOM · ROOM A 2 sleeping places · 2 taken (Ada · You) · Full 5 rooms in this category · 8 places still available in the category"
+ },
+ {
+  "id": "9.6 Cleo sees Room A as Full with Ada and Ben in it, and no Join",
+  "ok": true,
+  "d": "{\"who\":\"Ada · Ben · Full\",\"join\":false,\"full\":true}"
+ },
+ {
+  "id": "9.7 the engine refuses a place beyond capacity even when asked directly (no overbooking)",
+  "ok": true,
+  "d": "{\"status\":409,\"error\":\"full\"}"
+ },
+ {
+  "id": "9.8 after a reload and on a second device, Room A still holds Ada and Ben (the engine is the one truth)",
+  "ok": true,
+  "d": "[\"Ada\",\"Ben\"]"
+ },
+ {
+  "id": "9.9 Ben leaves: one place is available again in Room A",
+  "ok": true,
+  "d": "{\"free\":1,\"occupants\":[\"Ada\"]}"
+ },
+ {
+  "id": "9.10 Ada leaves too: Room A is back to its full capacity",
+  "ok": true,
+  "d": "{\"free\":2,\"places\":2}"
+ },
+ {
+  "id": "8.360 fare cards: two equal cards, the text column wide (no word-by-word), a clear action, no overflow",
+  "ok": true,
+  "d": "{\"n\":2,\"overflow\":false,\"cards\":[{\"w\":312,\"textW\":278,\"nameLines\":1,\"action\":true,\"right\":true},{\"w\":312,\"textW\":278,\"nameLines\":1,\"action\":true,\"right\":true}]}"
+ },
+ {
+  "id": "8.390 fare cards: two equal cards, the text column wide (no word-by-word), a clear action, no overflow",
+  "ok": true,
+  "d": "{\"n\":2,\"overflow\":false,\"cards\":[{\"w\":342,\"textW\":308,\"nameLines\":1,\"action\":true,\"right\":true},{\"w\":342,\"textW\":308,\"nameLines\":1,\"action\":true,\"right\":true}]}"
+ },
+ {
+  "id": "8.768 fare cards: two equal cards, the text column wide (no word-by-word), a clear action, no overflow",
+  "ok": true,
+  "d": "{\"n\":2,\"overflow\":false,\"cards\":[{\"w\":340,\"textW\":306,\"nameLines\":1,\"action\":true,\"right\":true},{\"w\":340,\"textW\":306,\"nameLines\":1,\"action\":true,\"right\":true}]}"
+ },
+ {
+  "id": "8.1024 fare cards: two equal cards, the text column wide (no word-by-word), a clear action, no overflow",
+  "ok": true,
+  "d": "{\"n\":2,\"overflow\":false,\"cards\":[{\"w\":484,\"textW\":450,\"nameLines\":1,\"action\":true,\"right\":true},{\"w\":484,\"textW\":450,\"nameLines\":1,\"action\":true,\"right\":true}]}"
+ },
+ {
+  "id": "8.1440 fare cards: two equal cards, the text column wide (no word-by-word), a clear action, no overflow",
+  "ok": true,
+  "d": "{\"n\":2,\"overflow\":false,\"cards\":[{\"w\":568,\"textW\":534,\"nameLines\":1,\"action\":true,\"right\":true},{\"w\":568,\"textW\":534,\"nameLines\":1,\"action\":true,\"right\":true}]}"
+ },
+ {
+  "id": "E0 no page error on any page of the run",
+  "ok": true,
+  "d": "none"
+ }
+]

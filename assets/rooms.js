@@ -22,7 +22,10 @@
   'use strict';
   var ORIGIN = 'https://seeyouinlaos-website.suthep-hrg.workers.dev';
   /* the Worker's own origin and a local `wrangler dev` answer at the same path; any other host (a stage) asks the Worker */
-  var API = (location.hostname === 'seeyouinlaos-website.suthep-hrg.workers.dev' || /^(localhost|127\.0\.0\.1)$/.test(location.hostname)) ? '/api/rooms' : ORIGIN + '/api/rooms';
+/* SAME ORIGIN, WHATEVER THE HOSTNAME (24 Sep 2026): the pages and the API are served by the one Worker on every hostname it answers
+     (workers.dev and seeyouinlaos.com), so every call stays on the page's own origin — the absolute workers.dev address belonged to
+     a retired second copy of the site, and from seeyouinlaos.com it became a cross-origin request the browser refused (the photo, and every save). */
+  var API = '/api/rooms';
 
   var view = null, loading = null, lastError = null;
   var STAGE_OF = { 'bkk-stay': 'bkk-stay', prewed: 'prewed', wedstay: 'wedstay', guesthouse: 'wedstay', stayext: 'stayext', kmg: 'kmg', ljg: 'ljg', kempinski: 'kempinski' };

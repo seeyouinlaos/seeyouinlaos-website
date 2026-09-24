@@ -14,9 +14,10 @@
    ========================================================================== */
 (function () {
   'use strict';
-  var API = !(location.hostname === 'seeyouinlaos-website.suthep-hrg.workers.dev' || /^(localhost|127\.0\.0\.1)$/.test(location.hostname))
-    ? 'https://seeyouinlaos-website.suthep-hrg.workers.dev/api/profile/photo'
-    : '/api/profile/photo';
+/* SAME ORIGIN, WHATEVER THE HOSTNAME (24 Sep 2026): the pages and the API are served by the one Worker on every hostname it answers
+     (workers.dev and seeyouinlaos.com), so every call stays on the page's own origin — the absolute workers.dev address belonged to
+     a retired second copy of the site, and from seeyouinlaos.com it became a cross-origin request the browser refused (the photo, and every save). */
+  var API = '/api/profile/photo';
   var SIDE = 512, MAX_IN = 12 * 1024 * 1024, MAX_OUT = 1024 * 1024;
   var ACCEPT = 'image/jpeg,image/png,image/webp,image/heic,image/heif';
   var cache = { inv: '', url: null, none: false };
@@ -89,12 +90,21 @@
       if (!/^image\//.test(file.type || '')) return Promise.resolve({ ok: false, error: 'not an image' });
       return reduce(file).then(function (blob) {
         if (blob.size > MAX_OUT) return { ok: false, error: 'too large' };
-        if (!same(s)) return { ok: false, error: 'session changed' };  /* the guest who chose the picture is gone: nothing is sent */
-        return fetch(API, { method: 'PUT', headers: headersFor(s, { 'content-type': 'image/jpeg' }), body: blob }).then(function (r) { return r.json().catch(function () { return { ok: false }; }).then(function (j) {
-          if (!r.ok || !j.ok) return { ok: false, error: (j && j.error) || 'not stored', status: r.status };
-          if (!same(s)) return { ok: false, error: 'session changed' };  /* stored under the guest who sent it; not shown to whoever is here now */
-          forget(); cache.inv = s.invitationId; cache.url = URL.createObjectURL(blob); announce(); return { ok: true, at: j.at };
-        }); });
+        /* A LOST REQUEST IS SENT ONCE MORE (Owner report, 24 Sep 2026): a phone coming back from its photo picker often finds
+           the connection it left behind gone, and the upload then dies on the way without any answer from the Worker. The
+           upload is idempotent (one key per guest, the same bytes), so exactly one more sending follows — for the same session
+           only; an answer of the Worker (a refusal included) is final and never repeated. */
+        function send(again) {
+          if (!same(s)) return { ok: false, error: 'session changed' };  /* the guest who chose the picture is gone: nothing is sent */
+          return fetch(API, { method: 'PUT', headers: headersFor(s, { 'content-type': 'image/jpeg' }), body: blob }).then(function (r) { return r.json().catch(function () { return null; }).then(function (j) {
+            if (!j && r.status >= 500 && again) return retry();          /* an edge error page, not the Worker's answer */
+            if (!r.ok || !j || !j.ok) return { ok: false, error: (j && j.error) || 'not stored', status: r.status };
+            if (!same(s)) return { ok: false, error: 'session changed' };  /* stored under the guest who sent it; not shown to whoever is here now */
+            forget(); cache.inv = s.invitationId; cache.url = URL.createObjectURL(blob); announce(); return { ok: true, at: j.at };
+          }); }, function () { return again ? retry() : { ok: false, error: 'failed' }; });
+        }
+        function retry() { return new Promise(function (res) { setTimeout(res, 700); }).then(function () { return send(false); }); }
+        return send(true);
       }).catch(function (e) { return { ok: false, error: e && e.message === 'decode' ? 'not an image' : 'failed' }; });
     },
     remove: function () {

@@ -28,7 +28,10 @@
   'use strict';
   var KEY = 'siyl.guest';
   var ORIGIN = 'https://seeyouinlaos-website.suthep-hrg.workers.dev';
-  var CONTACT_API = (typeof location !== 'undefined' && (location.hostname === 'seeyouinlaos-website.suthep-hrg.workers.dev' || /^(localhost|127\.0\.0\.1)$/.test(location.hostname))) ? '/api/contact' : ORIGIN + '/api/contact';
+/* SAME ORIGIN, WHATEVER THE HOSTNAME (24 Sep 2026): the pages and the API are served by the one Worker on every hostname it answers
+     (workers.dev and seeyouinlaos.com), so every call stays on the page's own origin — the absolute workers.dev address belonged to
+     a retired second copy of the site, and from seeyouinlaos.com it became a cross-origin request the browser refused (the photo, and every save). */
+  var CONTACT_API = '/api/contact';
 
   function auth() {
     try { return JSON.parse(localStorage.getItem('siyl.auth') || 'null'); } catch (e) { return null; }

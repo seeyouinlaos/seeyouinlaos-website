@@ -35,6 +35,10 @@ test('THE MAP OF LAOS · read, not decorated: the frame carries the map\'s own 8
   assert.match(tp.slice(0, 500), /\.a-duo \{ grid-template-columns: minmax\(0, 1fr\);/, 'upright: one column, the map at full width');
   assert.match(tp.slice(0, 500), /width: min\(100%, calc\(62vh \* 838 \/ 980\)\)/, 'and capped by the height of the screen, never by a device name');
   assert.match(css, /@media \(min-width: 768px\) and \(orientation: landscape\) \{\s*\.a-duo \.am\.a-map \{ justify-self: center; width: min\(100%, calc\(76vh \* 838 \/ 980\)\); \}/);
+  /* ITEM 13 (24 Sep 2026): on a tablet the duo is on the same frame as the closing invitation — no narrower column
+     re-centred inside it — and a tablet on its side never lets the height cap pull the map off its column's edges */
+  assert.doesNotMatch(tp.slice(0, 500), /max-width: 760px/, 'upright: the duo is not re-centred in a narrower column');
+  assert.match(css, /@media \(min-width: 768px\) and \(max-width: 1199px\) and \(orientation: landscape\) \{\s*\.a-duo \.am\.a-map \{ justify-self: stretch; width: 100%; \}/);
   assert.doesNotMatch(css.slice(css.indexOf('.a-duo .am.a-map'), css.indexOf('THE CARD GALLERY')), /background-size: cover|object-fit: fill|transform: scale/, 'never cropped, never stretched');
   /* the file the rules are built on */
   const map = join(ROOT, 'assets/images/city/laos-map.jpg');
@@ -83,7 +87,9 @@ test('THE VIENTIANE FILM · the Owner\'s "night of Vientiane" replaces the Buddh
 
 test('AFTER THE WEDDING · the whole Lijiang 02 folder in one card gallery: nine frames in the Owner\'s order, every frame on disk, chevrons · swipe · the arrow keys · "1 / 9" · wrapping, no autoplay, and the card keeps its title, its dates, its words and Discover more', () => {
   const h = src('index.html'), js = src('assets/cardgal.js'), css = src('assets/aman.css');
-  const card = h.slice(h.indexOf('<div class="cg am" data-cardgal'), h.indexOf('<div class="ac">', h.indexOf('<div class="cg am" data-cardgal')));
+  const at = h.indexOf('<div class="cg am" data-cardgal aria-roledescription="carousel" aria-label="After the Wedding');
+  assert.ok(at > 0, 'the After the Wedding gallery');
+  const card = h.slice(at, h.indexOf('<div class="ac">', at));
   const frames = [...card.matchAll(/(?:src|data-src)="assets\/images\/city\/(004-lijiang-aw-\d\d\.jpg)"/g)].map((m) => m[1]);
   assert.deepEqual(frames, Array.from({ length: 9 }, (_, i) => '004-lijiang-aw-' + String(i + 1).padStart(2, '0') + '.jpg'), 'nine, in a deterministic order');
   for (const f of frames) { const p = join(ROOT, 'assets/images/city/' + f); assert.ok(existsSync(p), f); assert.ok(statSync(p).size < 520000, f + ' is web-sized'); }
@@ -107,4 +113,25 @@ test('AFTER THE WEDDING · the whole Lijiang 02 folder in one card gallery: nine
   assert.match(css, /\.cg \.cg-count \{[\s\S]{0,200}font-size: 10px;/);
   assert.doesNotMatch(css.slice(css.indexOf('.cg-nav {'), css.indexOf('THE ACCOMMODATION BAR')), /border-radius: 50%|box-shadow: 0 2px 8px/, 'no heavy circles, no glossy buttons');
   assert.match(css, /\.cg \{ position: relative; overflow: hidden; touch-action: pan-y; \}/, 'a horizontal gesture belongs to the gallery, a vertical one to the page');
+});
+
+test('ITEM 12 (24 Sep 2026) · BEFORE THE WEDDING and THE WEDDING are the same card gallery as After the Wedding: the same module and markup, their complete sets from the images the site already gives those stages, every frame on disk, only the first fetched at once, no withdrawn product\'s imagery', () => {
+  const h = src('index.html');
+  const gal = (label) => { const at = h.indexOf('<div class="cg am" data-cardgal aria-roledescription="carousel" aria-label="' + label); assert.ok(at > 0, label); return h.slice(at, h.indexOf('<div class="ac">', at)); };
+  const frames = (card) => [...card.matchAll(/<div class="cg-frame(?: is-on)?"><a href="([^"]+)" tabindex="(?:0|-1)"><img (?:src|data-src)="(assets\/images\/[^"]+)"/g)].map((m) => [m[1], m[2]]);
+  const before = frames(gal('Before the Wedding')), wed = frames(gal('The Wedding'));
+  assert.deepEqual(before.map((f) => f[1]), ['city/001-bangkok-skytrain-king-power-mahanakhon.jpg', 'city/001-bangkok-01-iconsiam-skyline.jpg', 'city/001-bangkok-02-river-express-boat.jpg', 'city/001-bangkok-03-mahanakhon-skytrain.jpg', 'city/001-bangkok-04-train-and-monorail.jpg', 'city/001-bangkok-05-wires-and-train.jpg', 'city/001-bangkok-06-alley.jpg', 'transport/train-no25-krung-thep-aphiwat.jpg', 'transport/train-no25-terminal-aerial.jpg', 'transport/train-no25-first-class-passenger-room.jpg', 'transport/train-no25-srt-train.jpg'].map((f) => 'assets/images/' + f));
+  assert.deepEqual(wed.map((f) => f[1]), ['event/052-vow-ceremony-green-door.jpg', 'event/052-ceremony-green-gateway.jpg', 'experiences/vte-ongteu-01.jpg', 'experiences/vte-ongteu-03.jpg', 'temple/takbat-couple-giving-novice.jpg', 'temple/takbat-novices-with-bowls.jpg', 'temple/takbat-couple-offering-bowl.jpg', 'temple/sangkhathan-prepared-offerings.jpg', 'event/051-coffee-and-cake-patisserie.jpg', 'event/052-vow-ceremony-green-door-entrance.jpg', 'souphattra/heritage-arches-dusk.jpg', 'souphattra/heritage-room.jpg'].map((f) => 'assets/images/' + f));
+  for (const [, f] of [...before, ...wed]) assert.ok(existsSync(join(ROOT, f)), f);
+  for (const [href, f] of before) assert.equal(href, /\/transport\//.test(f) ? 'journeys.html#j-train' : 'journeys.html#j-bkk-stay', f);
+  for (const [href] of wed) assert.equal(href, 'voyage.html');
+  for (const card of [gal('Before the Wedding'), gal('The Wedding')]) {
+    assert.equal((card.match(/<div class="cg-frame is-on">/g) || []).length, 1, 'one frame on at first');
+    assert.equal((card.match(/ src="/g) || []).length, 1, 'only the first photograph is asked for at once');
+    assert.equal((card.match(/loading="lazy"/g) || []).length, (card.match(/data-src="/g) || []).length);
+    assert.doesNotMatch(card, /penthouse|shama|riverside|usathorn|u-sathorn/i, 'no withdrawn product and no hotel the card does not name');
+  }
+  assert.match(h, /<h3>Before the Wedding<\/h3>/); assert.match(h, /<h3>The Wedding<\/h3>/);
+  assert.match(h, /<a class="a-more" href="journeys\.html#j-bkk-stay">Discover more<\/a>/); assert.match(h, /<a class="a-more" href="voyage\.html">Discover more<\/a>/);
+  assert.equal((h.match(/<div class="cg am" data-cardgal /g) || []).length, 3, 'three journey cards, one gallery each');
 });

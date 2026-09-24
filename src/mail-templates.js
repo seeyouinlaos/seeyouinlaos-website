@@ -29,7 +29,7 @@ const EVENTS = [
 ];
 /* MY FAVORITE FLAVOR (Owner, 18 Sep 2026): one of six; an older record's snack answer counts only when it is one of the six */
 const FLAVORS = ['Coffee', 'Milk', 'Butter', 'Pandan', 'Matcha Green Tea', 'Strawberry Milk'];
-const PROFILE = [['coffeetea', 'Coffee or tea'], ['flavor', 'My Favorite Flavor'], ['drink', 'Favourite drink'], ['film', 'Favourite film'], ['genres', 'Your music (genres)'], ['music', 'A song, an album, an artist']];
+const PROFILE = [['coffeetea', 'Coffee or tea'], ['flavor', 'My Favorite Flavor'], ['drink', 'Favourite drink'], ['film', 'Favourite film'], ['genres', 'Your music (genres)'], ['music', 'Favourite karaoke song']];
 function profileValue(profile, k) {
   const p = profile || {};
   if (k === 'genres') return Array.isArray(p.genres) ? p.genres.join(' · ') : '';   /* the structured answer, listed — the record keeps the array (Owner, 22 Sep 2026) */

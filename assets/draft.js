@@ -20,7 +20,10 @@
   var KEYS = ['siyl.guest', 'siyl.bag', 'siyl.temple', 'siyl.docs', 'siyl.sent', 'siyl.skip', 'siyl.skip.by'];
   var LOCAL_ONLY = ['siyl.wait'];   /* the device's memory of the waiting list (assets/rooms.js) — dropped with the journey, never synced */
   var ORIGIN = 'https://seeyouinlaos-website.suthep-hrg.workers.dev';
-  var API = (location.hostname === 'seeyouinlaos-website.suthep-hrg.workers.dev' || /^(localhost|127\.0\.0\.1)$/.test(location.hostname)) ? '/api/draft' : ORIGIN + '/api/draft';
+/* SAME ORIGIN, WHATEVER THE HOSTNAME (24 Sep 2026): the pages and the API are served by the one Worker on every hostname it answers
+     (workers.dev and seeyouinlaos.com), so every call stays on the page's own origin — the absolute workers.dev address belonged to
+     a retired second copy of the site, and from seeyouinlaos.com it became a cross-origin request the browser refused (the photo, and every save). */
+  var API = '/api/draft';
   var META = 'siyl.draft.meta';   /* { invitationId, serverUpdatedAt, dirty, lastSavedAt, lastError } */
   var BASE = 'siyl.draft.base';   /* the keys as last read from / written to the server — the base of the three-way merge */
   var RESET = 'siyl.draft.reset'; /* the server's reset epoch this device has honoured (THE CLEAN RESET, Owner, 19 Sep 2026) */
