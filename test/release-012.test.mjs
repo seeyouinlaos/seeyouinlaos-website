@@ -69,14 +69,18 @@ test('THE JOURNEY · every accommodation card is a stay gallery from the record 
   assert.doesNotMatch(j, /sathornPenthouse|Sathorn Penthouse/, 'The Journey names no Penthouse');
   assert.doesNotMatch(j.replace(/<!--[\s\S]*?-->/g, ''), /shamaYenAkat|Shama/, 'The Journey names no Shama');
   assert.equal((j.match(/<div class="pgal" data-gal="/g) || []).length, 4, 'the four transport galleries stay (the train, MU9646, C86, the return)');
-  assert.match(j, /two addresses for this window: the Souphattra Heritage and the Guest House complimentary below/, 'Souphattra · Guest House (Owner, 23 Sep 2026: the Riverside is retired)');
+  /* TO-01290: the line, then one sentence naming the second address — Souphattra · Guest House (Owner, 23 Sep 2026: the Riverside is retired) */
+  assert.match(j, /<p class="pm">27 February – 1 March 2027 · 2 nights: 27 &rarr; 28 February and 28 February &rarr; 1 March · breakfast included<\/p><p class="pb">You pay the first night; the second night is complimentary, hosted by Haruthai &amp; Suthep\. For these two nights you can also take one of the four places in the Guest House complimentary, below\.<\/p>/, 'Souphattra · Guest House (Owner, 23 Sep 2026: the Riverside is retired)');
   /* D2 · Guest House complimentary (Owner, 19 Sep 2026): its card names the house, its status, four shared places (one bedroom, Edit 7), the room page; the invented label is gone */
-  assert.match(j, /<div class="p" id="j-guesthouse">[^]*?<p class="pn">Guest House complimentary<\/p>[^]*?<p class="pp" data-private>USD 0 · Complimentary<\/p><p class="pb" data-private>Both nights hosted by Haruthai &amp; Suthep · four shared places · nothing to pay<\/p><a class="vw" data-cta-swap href="room\.html\?stay=guesthouse&amp;room=guest-house">View the guest house<\/a>/);
+  /* TO-01292 / TO-01293 / TO-01295: the house, four guests, the engine's live count painted into [data-gh-line], the chooser in place, Details */
+  assert.match(j, /<div class="p" id="j-guesthouse">[^]*?<p class="pn">Guest House complimentary<\/p><p class="pm">27 February – 1 March 2027 · 2 nights · a one-bedroom guest house in downtown Vientiane, shared by four guests · you see who is already staying when you take your place<\/p><p class="pp" data-private>Complimentary<\/p><p class="pb" data-private data-gh-line>Both nights hosted by Haruthai &amp; Suthep<\/p><div class="ghact" data-private data-gh><\/div><a class="vw" data-cta-swap href="room\.html\?stay=guesthouse&amp;room=guest-house">Details<\/a>/);
   assert.doesNotMatch(j, /Private Residence|j-residence|privateResidence|airbnb-2br|up to 4/, 'no "Private Residence", no "up to 4" on The Journey');
   /* one grammar: frames name their hotel in a multi-hotel window; arrows, keyboard, lazy frames, the empty frame */
   assert.match(j, /out\.push\(\[im\.src,\(multi\?h\.name\+' · ':''\)\+im\.caption,h\.name,im\.kind\]\)/, 'a multi-hotel gallery names the hotel on every frame');
   assert.match(j, /aria-roledescription="carousel"/); assert.match(j, /e\.key==='ArrowRight'/); assert.match(j, /e\.key==='ArrowLeft'/); assert.match(j, /e\.key==='Home'/); assert.match(j, /e\.key==='End'/);
-  assert.match(j, /data-bg="'\+x\[0\]\+'"/, 'frames after the first two load when the guest moves'); assert.match(j, /Photography to follow/);
+  assert.match(j, /data-bg="'\+x\[0\]\+'"/, 'frames after the first two load when the guest moves');
+  /* the empty frame: its aria-label names the hotel (TO-00532); its visible words are KEPT as "Photography to follow" (TO-00533 KEEP) */
+  assert.match(j, /var pend=who\?'Photographs of '\+who\+' to follow':'Photographs to follow';/, 'TO-00532'); assert.match(j, /<span>Photography to follow<\/span>/, 'TO-00533 KEEP');
   assert.match(j, /\.pgal\.stay \.ph\{aspect-ratio:5\/4\}/, 'the card keeps the 5:4 photograph geometry on the phone'); assert.match(src("assets/desktop.css"), /\.gal \.ph, \.trk \.ph, \.pgal\.stay \.ph \{ aspect-ratio: 3 \/ 2; \}/, "and 3:2 on the desktop, as before");
   assert.match(j, /aria-label="Previous photograph"/); assert.match(j, /aria-label="Next photograph"/);
 });
@@ -199,9 +203,12 @@ test('ONE WEDDING STAY · switching between Souphattra and the Guest House compl
   assert.equal(J.isSkipped('wedstay'), true);
   /* the surfaces say what is replaced */
   assert.match(src('room.html'), /var ids = ST && ST\.stageIds \? ST\.stageIds\(w\.id\) : P\.ids\(w\.id\);/, 'the room page reads the stage');
-  assert.match(src('room.html'), /\(elsewhere \? ' at ' \+ ST\.houseOf\(other\) : ''\) \+ ' for this stay — adding this room replaces it\.'/);
+  /* TO-01351 / TO-01325: what the guest already holds is named — the Guest House as "a place at the Guest House complimentary", a room as "{Room A} ({The Heritage}) at the {house}" */
+  assert.match(src('room.html'), /swap\.textContent = 'You already hold ' \+ whatYouHold\(other\) \+ ' for these nights\. Choosing this room replaces it; you keep it until the new room is held\.';/);
+  assert.match(src('room.html'), /if \(line\.stay === 'guesthouse' \|\| line\.complimentary\) return 'a place at the Guest House complimentary';/);
+  assert.match(src('room.html'), /var what = unit && name \? unit \+ ' \(' \+ name \+ '\)' : \(name \|\| unit \|\| 'a room'\);\n\s*return what \+ \(house \? ' at the ' \+ house : ''\);/);
   assert.equal(ST.houseOf(P.items('wedstay', 'heritage')[0]), 'Souphattra Heritage Vientiane', 'the house is named, never the window'); /* the retired Riverside has no product to name */ assert.equal(P.items('riverside', 'superior-window').length, 0); assert.equal(ST.houseOf(P.items('guesthouse', 'guest-house')[0]), 'Guest House complimentary');
-  assert.match(src('journeys.html'), /var sib=ST\.sibling\?ST\.sibling\(win\):null;/); assert.match(src('journeys.html'), /for this stay — choosing a room here replaces it\./);
+  assert.match(src('journeys.html'), /var sib=ST\.sibling\?ST\.sibling\(win\):null;/); assert.match(src('journeys.html'), />You already hold '\+esc0\(holdWords\(sib\)\)\+' for these nights\. Choosing a room here replaces it; you keep it until the new room is held\.<\/p>'/, 'TO-01325');
 });
 
 /* CODEX 012-2 (confirming pass, 19 Sep 2026) · two orderings: (a) a device whose engine view is older than the guest's switch

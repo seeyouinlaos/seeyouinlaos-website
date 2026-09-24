@@ -5,12 +5,13 @@
      PASSPORT            a photograph or a PDF
      FLIGHT INFORMATION  the ticket or confirmation
 
-   FOUR STATES, and they mean exactly what they say:
-     NOT PROVIDED  nothing has arrived
-     RECEIVED      the file reached our store — receipt only, nothing more
-     REPLACED      a newer file arrived and superseded the earlier one
-     REVIEWED      a person has actually looked at it. NEVER set by this file:
-                   the guest surface can only ever report a receipt.
+   STATE KEYS, NOT WORDS (Window 007 · PRQ-06-11): state() returns a key —
+     'none'      nothing has arrived                  → “Not added yet”
+     'received'  the file reached our store — a receipt only, nothing more;
+                 a replacement is 'received' too (the server deletes the
+                 earlier copy, PRQ-06-12)             → “Received”
+   and stateWords(key) gives the guest's words. REVIEWED (a person has looked
+   at it) is NEVER set by this file: the guest surface only reports a receipt.
 
    Bytes go straight to the Worker over HTTPS and into a private store. This
    file keeps only the receipt — file name, size, type, digest, timestamp. No
@@ -43,6 +44,8 @@
     try { document.dispatchEvent(new CustomEvent('siyl:docs')); } catch (e) {}
     try { document.dispatchEvent(new CustomEvent('siyl:guest')); } catch (e) {}
   }
+  var MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  function dateWords(iso) { if (!iso) return ''; var d = new Date(iso); if (isNaN(d.getTime())) return ''; return d.getDate() + ' ' + MONTHS[d.getMonth()] + ' ' + d.getFullYear(); }
   function auth() {
     try { return JSON.parse(localStorage.getItem('siyl.auth') || 'null'); } catch (e) { return null; }
   }
@@ -57,12 +60,17 @@
       var g = (read().guests || {})[guestId] || {};
       return g[kind] || null;
     },
-    /* NOT PROVIDED · RECEIVED · REPLACED · (REVIEWED is never claimed here) */
-    state: function (guestId, kind) {
-      var r = this.get(guestId, kind);
-      if (!r) return 'Not provided';
-      return r.replaced ? 'Replaced' : 'Received';
+    /* 'none' · 'received' — compare on the key; print stateWords(key) (REVIEWED is never claimed here) */
+    state: function (guestId, kind) { return this.get(guestId, kind) ? 'received' : 'none'; },
+    stateKey: function (guestId, kind) { return this.state(guestId, kind); },
+    STATE_WORDS: { none: 'Not added yet', received: 'Received' },
+    stateWords: function (key) { return this.STATE_WORDS[key] || ''; },
+    /* the receipt in words: “Received · passport.jpg · 24 September 2026” (the date alone — no time, no zone) */
+    receiptWords: function (guestId, kind) {
+      var r = this.get(guestId, kind); if (!r) return this.STATE_WORDS.none;
+      return [this.STATE_WORDS.received, r.filename || '', dateWords(r.receivedAt)].filter(Boolean).join(' · ');
     },
+    dateWords: function (iso) { return dateWords(iso); },
     has: function (guestId, kind) { return !!this.get(guestId, kind); },
 
     /* what Guest Relations sees, per named guest */
@@ -70,7 +78,8 @@
       var self = this;
       return KINDS.map(function (k) {
         var r = self.get(guestId, k.key);
-        return { kind: k.key, label: k.label, state: self.state(guestId, k.key),
+        var key = self.state(guestId, k.key);
+        return { kind: k.key, label: k.label, state: key, stateWords: self.stateWords(key),
                  filename: r ? r.filename : '', receivedAt: r ? r.receivedAt : '',
                  bytes: r ? r.bytes : 0, sha256: r ? r.sha256 : '' };
       });

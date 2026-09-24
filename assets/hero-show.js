@@ -43,7 +43,7 @@
       var host = frame.parentNode && frame.parentNode.classList && frame.parentNode.classList.contains('a-hero-frame') ? frame.parentNode : null;
       if (!host || count < 2 || host.querySelector('.a-hero-dots')) return;
       var box = document.createElement('div');
-      box.className = 'a-hero-dots'; box.setAttribute('role', 'group'); box.setAttribute('aria-label', 'The photographs of this page');
+      box.className = 'a-hero-dots'; box.setAttribute('role', 'group'); box.setAttribute('aria-label', 'Slideshow');
       for (var k = 0; k < count; k++) {
         var b = document.createElement('button');
         b.type = 'button'; b.className = 'a-hero-dot';

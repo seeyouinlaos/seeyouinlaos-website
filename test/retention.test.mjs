@@ -38,7 +38,8 @@ test('THE POLICY is one frozen constant in the Worker, documented in the frozen 
   assert.match(wj, /"triggers": \{ "crons": \["0 3 \* \* \*"\] \}/, 'the daily trigger on the existing Worker'); assert.equal((wj.match(/"crons"/g) || []).length, 1);
   assert.equal((wj.match(/"name": "seeyouinlaos-website"/g) || []).length, 1, 'still the one Worker'); assert.doesNotMatch(wj, /"services"|"tail_consumers"|"queues"/, 'no second service beside it');
   assert.match(src('src/infra-guard.cjs'), /scheduled triggers changed/); assert.match(src('src/infra-guard.cjs'), /DOC_RETENTION does not match the documented policy/);
-  assert.match(src('about-you.html'), /They are kept until 7 April 2027 — thirty days after the journey ends — and then deleted\./);
+  /* TO-02327 (Window 007): the approved sentence carries the same date and the same thirty days */
+  assert.match(src('about-you.html'), /they are kept until 7 April 2027, thirty days after the journey ends, then deleted\./);
   /* the purge's reach, statically: the doc/ prefix of DOCS, an audit record, and nothing else */
   const fn = worker.slice(worker.indexOf('async function purgeDocuments'), worker.indexOf('async function handleGrRetention'));
   assert.match(fn, /env\.DOCS\.list\(\{ prefix: DOC_RETENTION\.prefix/); assert.match(fn, /if \(!obj\.key\.startsWith\(DOC_RETENTION\.prefix\)\) continue;/);

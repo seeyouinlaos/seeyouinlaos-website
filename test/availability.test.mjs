@@ -122,7 +122,7 @@ test('THE HOUSE IS THE PROJECT\'S OWN · "Guest House complimentary", and the in
   assert.doesNotMatch(RENDERED, /Private Residence/i, 'the object never renders the invented label');
   assert.doesNotMatch(src('assets/i18n/siyl-i18n.js'), /Private Residence/, 'and the dictionary no longer carries it');
   assert.doesNotMatch(INDEX, /Private Residence/, 'nor the page that holds the object');
-  assert.match(RENDERED, /Complimentary Wedding Stay<br>while places remain\./, 'the supporting line is the approved wording — and no second location label');
+  assert.match(RENDERED, /Hosted by Haruthai &amp; Suthep,<br>while places remain\./, 'the supporting line is the approved wording (TO-00738 · TO-00743) — and no second location label');
   assert.doesNotMatch(RENDERED, /Vientiane/, 'the object carries no location line of its own');
   assert.match(RENDERED, /See the Guest House/, 'the property link names the canonical house');
   /* and the booking engine's own naming is untouched */
@@ -135,13 +135,13 @@ test('THE WORDS · one sentence per state, and never the language of a sale', ()
   const head = (remaining) => A.headline({ max: 4, remaining, taken: 4 - remaining, full: remaining <= 0 }).replace('\n', ' ');
   assert.equal(head(4), 'All four places are open.');
   assert.equal(head(3), 'One place has gone.');
-  assert.equal(head(2), '2 places have gone.');
-  assert.equal(head(1), '3 places have gone.');
+  assert.equal(head(2), 'Two places have gone.'); /* TO-00725: numbers in words */
+  assert.equal(head(1), 'Three places have gone.');
+  assert.equal(A.headline({ max: 4, remaining: 2, taken: 2, full: false, mine: true }).replace('\n', ' '), 'One of the four is yours.', 'PRQ-03-06: the guest\'s own place is never counted as gone');
   assert.equal(head(0), 'Every place has gone.');
-  assert.equal(A.footnote({ closed: false, phase: 'open', days: 68 }), '68 days remaining · availability may close earlier');
-  assert.equal(A.footnote({ closed: false, phase: 'open', days: 1 }), '1 day remaining · availability may close earlier');
-  assert.equal(A.footnote({ closed: false, phase: 'last-day', days: 0 }), 'Last day · availability may close earlier');
-  assert.equal(A.footnote({ closed: true, phase: 'closed', days: 0 }), 'Accommodation planning closed');
+  /* TO-00735 / TO-00731: the day count lives in the stay bar alone; the foot states the rule, and after the closing what remains */
+  for (const [phase, days] of [['open', 68], ['open', 1], ['last-day', 0]]) assert.equal(A.footnote({ closed: false, phase, days, max: 4, deadlineWords: '30 November 2026' }), 'Until 30 November, or until the four places are taken.');
+  assert.equal(A.footnote({ closed: true, phase: 'closed', days: 0, max: 4, deadlineWords: '30 November 2026' }), 'Every other stay can still be chosen.');
   for (const w of ['Hurry', 'Almost gone', 'Book now', 'Last chance', 'Only', 'Don\'t miss', 'Act now']) {
     assert.doesNotMatch(AV, new RegExp('[\'">]\\s*' + w, 'i'), w + ' is not this site\'s language');
   }
@@ -188,5 +188,5 @@ test('THE TWO SIGNALS · the front page keeps both, unmerged, in the Owner\'s or
   assert.ok(INDEX.indexOf('assets/stay-bar.js') < INDEX.indexOf('assets/availability.js'));
   assert.equal((INDEX.match(/data-availability/g) || []).length, 1);
   assert.equal((INDEX.match(/data-stay-bar/g) || []).length, 1);
-  assert.match(RENDERED, /Your invitation shows what is still available for you\./);
+  assert.match(RENDERED, /Your invitation shows what is still open to you\./); /* TO-00744 */
 });

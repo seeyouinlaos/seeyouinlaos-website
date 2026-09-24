@@ -51,12 +51,12 @@ test('PHOTO UPLOAD · never a loop: two lost requests end in the refusal words, 
   const w = browser(() => { n++; return lost(); });
   const r = await w.SIYL_AVATAR.upload(PHOTO);
   assert.equal(r.ok, false); assert.equal(n, 2);
-  assert.equal(w.SIYL_AVATAR.refusal(r), 'The photo could not be saved. Nothing was stored — please try again.');
+  assert.equal(w.SIYL_AVATAR.refusal(r), 'We could not save your photo. Please try again in a moment.'); /* TO-00063 */
   assert.equal(w.SIYL_AVATAR.current(), null, 'nothing is shown as saved');
 });
 
 test('PHOTO UPLOAD · a refusal of the Worker is its answer — never repeated, still named in its own words', async () => {
-  for (const [status, body, words] of [[401, { ok: false, error: 'unauthorised' }, /open your invitation once more/], [503, { ok: false, error: 'photo could not be stored' }, /cannot keep a photo/], [415, { ok: false, error: 'unsupported file type' }, /JPEG, PNG or WebP/], [413, { ok: false, error: 'file too large' }, /could not be saved/]]) {
+  for (const [status, body, words] of [[401, { ok: false, error: 'unauthorised' }, /^You are no longer signed in, so the photo was not saved\. Please open your invitation again and choose the photo once more\.$/], [503, { ok: false, error: 'photo could not be stored' }, /^We cannot save photos just now, so nothing was saved\. Please try again a little later\.$/], [415, { ok: false, error: 'unsupported file type' }, /^That file is not a photo we can use, so it was not saved\. Please choose a JPEG, PNG or WebP image\.$/], [413, { ok: false, error: 'file too large' }, /^That photo is larger than 12 MB, so it was not saved\. Please choose a smaller one\.$/] /* the Worker's own 413 word names the size too (TO-00059) */, [413, { ok: false, error: 'too large' }, /^That photo is larger than 12 MB, so it was not saved\. Please choose a smaller one\.$/]] /* TO-00060…00063 */) {
     let n = 0;
     const w = browser(() => { n++; return Promise.resolve({ status, ok: false, json: async () => body }); });
     const r = await w.SIYL_AVATAR.upload(PHOTO);

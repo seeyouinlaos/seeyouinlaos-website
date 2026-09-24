@@ -18,8 +18,8 @@
    ========================================================================== */
 
 export const SCOPES = [
-  { key: 'bangkok', label: 'Bangkok', when: '21 – 24 February + 6 – 8 March', short: 'Bangkok' },
-  { key: 'vientianePreWedding', label: 'Vientiane · Before the Wedding', when: '25 – 27 February', short: 'Vientiane · before' },
+  { key: 'bangkok', label: 'Bangkok', when: '21 – 24 February and 6 – 8 March', short: 'Bangkok' },
+  { key: 'vientianePreWedding', label: 'Vientiane · Before the Wedding', when: '25 – 27 February' },
   { key: 'vientianeWedding', label: 'Vientiane · The Wedding', when: '27 February – 1 March', short: 'Vientiane · the wedding' },
   { key: 'china', label: 'China', when: '1 – 6 March', short: 'China' }
 ];
@@ -133,9 +133,9 @@ export function completion(input) {
   const scope = i.scope || null;
   const out = { answered: isAnswered(scope), notJoining: !!(scope && scope.none), relevant: [], resolved: [], unresolved: [], missing: [], canSend: false, next: null, wedding: { required: false, missing: [] } };
   const miss = (key, label, step, href) => { out.missing.push({ key, label, step, href }); };
-  if (!out.answered) { miss('scope', 'Where will you join us?', 'journey', 'your-journey.html#scope'); out.next = out.missing[0]; return out; }
+  if (!out.answered) { miss('scope', 'Tell us which parts of the journey you are joining', 'journey', 'your-journey.html#scope'); out.next = out.missing[0]; return out; }
   (i.contact && i.contact.missing || []).forEach((m) => miss(m.key || 'contact', m.label || 'Your contact details', 'you', m.href || 'invitation.html#contact'));
-  (i.stale || []).forEach((s) => miss(s.key || 'release', s.label || 'Something still held outside your trip', 'journey', s.href || 'your-journey.html#scope'));
+  (i.stale || []).forEach((s) => miss(s.key || 'release', s.label || 'Something still held for a part you are no longer joining', 'journey', s.href || 'your-journey.html#scope'));
   if (out.notJoining) { out.canSend = out.missing.length === 0; out.next = out.missing[0] || null; return out; }
   const states = i.stages || {};
   STAGES.forEach((s) => {
@@ -146,7 +146,7 @@ export function completion(input) {
     else {
       const why = st === 'declined' ? 'mandatory' : 'open';
       out.unresolved.push({ key: s.key, letter: s.letter, state: st, why });
-      miss('stage:' + s.key, s.key === 'c86' && why === 'mandatory' ? 'Kunming → Lijiang — the train is part of China' : 'stage ' + s.letter, 'journey', 'your-journey.html#s-' + s.key);
+      miss('stage:' + s.key, s.key === 'c86' && why === 'mandatory' ? 'The Kunming → Lijiang train, 4 March — needed while you are joining China' : 'stage ' + s.letter, 'journey', 'your-journey.html#s-' + s.key);
     }
   });
   if (scope.vientianeWedding) {
@@ -154,11 +154,12 @@ export function completion(input) {
     const w = i.wedding || {};
     const ev = w.events || {};
     ['temple', 'coffee', 'vows', 'dinner'].forEach((k) => { if (ev[k] !== 'yes' && ev[k] !== 'no') { out.wedding.missing.push('event:' + k); miss('event:' + k, k + ' — attending or not', 'wedding', 'wedding.html#ev-' + k); } });
-    if (ev.temple === 'yes' && w.sangkhathan === null) { out.wedding.missing.push('sangkhathan'); miss('sangkhathan', 'Sangkhathan — yes or no', 'wedding', 'wedding.html#sangkhathan'); }
-    /* A WISH FROM THE BRIDE & GROOM (Owner, 22 Sep 2026): the final act of the wedding night — the pool jump or BARON — required of
-       every guest who joins the wedding, never preselected, never defaulted (the words: src/questionnaire.js FINALE) */
-    if (w.finale !== 'pool' && w.finale !== 'baron') { out.wedding.missing.push('finale'); miss('finale', 'A wish from the Bride & Groom — the pool jump or BARON', 'wedding', 'wedding.html#finale'); }
-    if (w.dress !== true) { out.wedding.missing.push('dress'); miss('dress', 'Dress code acknowledgement', 'preparation', 'wedding-preparation.html#ack'); }
+    if (ev.temple === 'yes' && w.sangkhathan === null) { out.wedding.missing.push('sangkhathan'); miss('sangkhathan', 'Sangkhathan offering — yes or no', 'wedding', 'wedding.html#sangkhathan'); }
+    /* AFTER THE DINNER (Owner, 22 Sep 2026 · OQ-34, 24 Sep 2026): the final act of the wedding night — the pool jump or BARON —
+       is asked ONLY of a guest who attends the Wedding Dinner; never preselected, never defaulted (the words:
+       src/questionnaire.js FINALE). A guest not attending the dinner owes no answer, and one given earlier is ignored. */
+    if (ev.dinner === 'yes' && w.finale !== 'pool' && w.finale !== 'baron') { out.wedding.missing.push('finale'); miss('finale', 'After the dinner — the pool jump or BARON', 'wedding', 'wedding.html#finale'); }
+    if (w.dress !== true) { out.wedding.missing.push('dress'); miss('dress', 'Dress code', 'preparation', 'wedding-preparation.html#ack'); }
     const S = w.seating || {};
     if (S.open && !S.frozen) {
       if (ev.vows === 'yes' && !w.hosts && S.configured && S.configured.ceremony && !(S.seats && S.seats.ceremony)) { out.wedding.missing.push('seat:ceremony'); miss('seat:ceremony', 'Ceremony seat', 'preparation', 'wedding-preparation.html#seats'); }

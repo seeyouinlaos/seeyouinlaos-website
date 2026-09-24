@@ -44,7 +44,8 @@ const confirm = (w, plan) => { const J = w.SIYL_JOURNEY, B = w.SIYL_BAG; plan.un
 /* THE CANONICAL COUNTS hold their invariants in every state */
 const invariants = (w) => { const c = w.SIYL_JOURNEY.counts(); assert.equal(c.relevant, c.confirmed + c.waitlisted + c.declined + c.open, 'relevant = confirmed + waitlisted + declined + open'); assert.equal(c.resolved, c.confirmed + c.waitlisted + c.declined); assert.equal(c.excluded + c.relevant, w.SIYL_JOURNEY.SEGMENTS.length, 'excluded is outside relevant'); assert.equal(c.bagItems, w.SIYL_BAG.get().length, 'bagItems = the Bag\'s actual lines'); assert.equal(c.bagTotal, w.SIYL_BAG.total(), 'bagTotal = the Bag\'s one total'); return c; };
 /* the engine as one identity calls it, and the identity of a fixture session */
-const idOf = (s) => ({ invitationId: s.invitationId, guestId: s.guestId, partyId: s.partyId, hosts: !!s.hosts, name: s.preferredName || '' });
+/* the verified identity as the Worker hands it to the engine — with the holder's first name (PRQ-GAP-02: withFirstName in src/worker.js) */
+const idOf = (s) => ({ invitationId: s.invitationId, guestId: s.guestId, partyId: s.partyId, hosts: !!s.hosts, name: s.preferredName || '', firstName: s.preferredName || '' });
 const call = async (rooms, id, op, body) => { const r = await rooms.fetch(new Request('https://x/api/rooms/' + op, { method: 'POST', headers: { 'x-siyl-identity': JSON.stringify(id) }, body: JSON.stringify(body || {}) })); return { status: r.status, d: await r.json() }; };
 const hold = (rooms, id, key, label, need) => call(rooms, id, 'join', { invitationId: id.invitationId, guestId: id.guestId, key, label, name: id.name || 'Guest', need: need || 1 });
 /* the Owner's preferred rooms per stage (SIYL_FULL_EXPERIENCE) — a reference for these tests, no package */
@@ -82,7 +83,7 @@ test('THE HOSTS START AT ZERO · no room is anyone\'s before booking: no fixed a
   /* she books like every guest — and is seen by first name by the next guest */
   assert.deepEqual(plain(await ST.select('bkk-stay', 'u-sathorn-superior-garden', undefined, 2)), { ok: true, unit: 'A' });
   assert.deepEqual(plain(U.view().mine), { 'bkk-stay': { key: 'bkk-stay/u-sathorn-superior-garden', label: 'A' } }); assert.equal(B.get().length, 1); assert.equal(B.get()[0].unit, 'A');
-  await wp.SIYL_UNITS.load(true); assert.deepEqual(plain(wp.SIYL_UNITS.units('bkk-stay', 'u-sathorn-superior-garden')[0].occupants), [{ name: 'Haruthai', mine: false, party: false }, { name: 'Reserved', mine: false, party: false, placeholder: true }], 'her place and the place kept for her party member'); assert.equal(wp.SIYL_UNITS.summary('bkk-stay', 'u-sathorn-superior-garden').remainingPlaces, 10);
+  await wp.SIYL_UNITS.load(true); assert.deepEqual(plain(wp.SIYL_UNITS.units('bkk-stay', 'u-sathorn-superior-garden')[0].occupants), [{ name: 'Haruthai', mine: false, party: false }, { name: '', mine: false, party: false, placeholder: true }], 'her place and the place kept for her party member — a kept place carries no name, only its state (PRQ-GAP-02)'); assert.equal(wp.SIYL_UNITS.summary('bkk-stay', 'u-sathorn-superior-garden').remainingPlaces, 10);
   /* the emails: "Front centre" for a host without a seat comes from the record's host flag — a U Sathorn room proves nothing */
   const rec = (hosts, extra) => ({ invitationId: 'INV-G001', guestId: 'G001', submissionId: 'SYL-G001-0000AAAA', kind: 'initial', version: 1, submittedAt: '2026-09-19T10:00:00.000Z', firstSentAt: '2026-09-19T10:00:00.000Z', lastSentAt: '2026-09-19T10:00:00.000Z', hosts,
     recipient: { email: 'guest@example.org', phone: '+66 81 000 0000' }, rooms: { 'bkk-stay': { stage: 'bkk-stay', key: 'bkk-stay/u-sathorn-superior-garden', label: 'A', name: 'Superior Room With Garden View', stay: 'U Sathorn Bangkok', room: 'Room A' } },
@@ -96,22 +97,25 @@ test('THE HOSTS START AT ZERO · no room is anyone\'s before booking: no fixed a
 
 test('the journey page derives SELECTED from the bag and offers no second selection for it; the participation sheets replace the package drawer', () => {
   const yj = src('your-journey.html');
-  assert.match(yj, /var line=lineOf\(\{ids:\[win\]\}\),pick=line\?line\.room:null;/, 'the Bangkok rail reads the bag');
-  assert.match(yj, /on\?'<span class="p-act quiet is-current" aria-current="true">Current selection<\/span>'\s*:\(U&&U\.ready\(\)&&U\.ctaWords\(win,r\.slug\)\)\?'<span class="p-act quiet is-current" aria-disabled="true">'\+esc\(U\.ctaWords\(win,r\.slug\)\)\+'<\/span>'\s*:'<button type="button" class="p-act" data-choose="'\+r\.slug\+'">Select this stay<\/button>'/, 'chosen card: inert current control · sold out: the engine\'s word · otherwise: the action');
+  assert.match(yj, /var line=lineOf\(\{ids:\[win\]\}\),pick=line\?line\.room:null,many=stay\.rooms\.length>1;/, 'the Bangkok rail reads the bag (a single-address stay is no rail, PRQ-00-05)');
+  /* Window 007: “Current selection” becomes the line's state word (TO-01617 / TO-00552: Selected · Sent to us · Held for you), “Select this stay” becomes “Choose a room” (TO-01375) */
+  assert.match(yj, /on\?'<span class="p-act quiet is-current" aria-current="true">'\+esc\(onWord\)\+'<\/span>'\s*:\(U&&U\.ready\(\)&&U\.ctaWords\(win,r\.slug\)\)\?'<span class="p-act quiet is-current" aria-disabled="true">'\+esc\(U\.ctaWords\(win,r\.slug\)\)\+'<\/span>'\s*:'<button type="button" class="p-act" data-choose="'\+r\.slug\+'">Choose a room<\/button>'/, 'chosen card: inert current control · sold out: the engine\'s word · otherwise: the action');
+  assert.match(yj, /function stateWord\(x,held\)\{var D=window\.SIYL_DRAFT,ls=D&&D\.lineState\?D\.lineState\(x\):\{key:'selected',label:'Selected'\};\s*if\(held&&\(ls\.key==='selected'\|\|ls\.key==='unsent'\)\)return 'Held for you';return ls\.label\}/, 'the one state vocabulary');
   /* the flat travel is a ticket (Owner, 15 Sep 2026): selected → the pass, View details, Remove · otherwise → Select this travel */
-  assert.match(yj, /actions:\(sel\?\[TP\.button\(seg\.key,true\),'<a class="p-link mute" href="transport\.html\?id='\+seg\.key\+'">View details<\/a>','<button type="button" class="p-link mute" data-rm="'\+seg\.key\+'">Remove<\/button>'\]\s*:\['<button type="button" class="p-act" data-choose-flat="'\+seg\.key\+'">Select this travel<\/button>'/, 'Special Express and every flat travel: the same rule');
-  assert.match(yj, /\.concat\(mandatory\(seg\)\?\[\]:\['<button type="button" class="p-link mute" data-skip="'\+seg\.key\+'">Not joining this stage<\/button>'\]\)/, 'a stage that may be declined offers it — the mandatory Kunming → Lijiang train never');
-  assert.match(yj, /on\?'<span class="p-act quiet is-current" aria-current="true">Current selection<\/span>'\s*:'<button type="button" class="p-act" data-cls="'\+c\.slug\+'">/, 'fares too — one selection language');
-  assert.doesNotMatch(yj, /Change this day|Current fare|Current stay|Selected for your journey/, 'no second vocabulary');
+  assert.match(yj, /actions:\(sel\?\[TP\.button\(seg\.key,true\),'<a class="p-link mute" href="transport\.html\?id='\+seg\.key\+'">Details<\/a>','<button type="button" class="p-link mute" data-rm="'\+seg\.key\+'">Remove<\/button>'\]\s*:\['<button type="button" class="p-act" data-choose-flat="'\+seg\.key\+'">'\+t\.select\+'<\/button>'/, 'Special Express and every flat travel: the same rule (TO-01623 “Details”; the action names what it selects — “Select this train”, “Select these flights”)');
+  assert.match(yj, /\.concat\(mandatory\(seg\)\?\[\]:\['<button type="button" class="p-link mute" data-skip="'\+seg\.key\+'">'\+declineWords\(seg\)\+'<\/button>'\]\)/, 'a stage that may be declined offers it — the mandatory Kunming → Lijiang train never');
+  assert.match(yj, /function declineWords\(seg\)\{if\(seg\.cat==='Accommodation'\)return 'I won’t need this stay';if\(seg\.key==='train'\|\|seg\.key==='c86'\)return 'I won’t take this train';if\(seg\.key==='return'\)return 'I won’t take these flights';return 'I won’t take this flight'\}/, 'TO-00587: the decline names what is declined');
+  assert.match(yj, /on\?'<span class="p-act quiet is-current" aria-current="true">&#10003; Selected<\/span>'\s*:'<button type="button" class="p-act" data-cls="'\+c\.slug\+'">/, 'fares too — one selection language (TO-00548)');
+  assert.doesNotMatch(yj, /Change this day|Current fare|Current stay|Selected for your journey|Current selection|Not joining this stage/, 'no second vocabulary');
   /* THE PARTICIPATION CHECKBOXES (Owner, 24 Sep 2026 · replacing the sheets of 21 Sep): four independent checkbox rows and the decline
      as a row of the same component, the We'll-miss-you block, a release preview before a scope leaves; no "I'll join all", no
      "I'd like to reconsider"; no package card, no package drawer; the counts derived, never invented */
   assert.match(yj, /class="p-opt'\+\(exclusive\?' p-opt-x':''\)\+\(on\?' is-on':''\)\+'" '\+attr\+' role="checkbox" aria-checked="'\+\(on\?'true':'false'\)\+'"/, 'one checkbox component');
   assert.match(yj, /optHtml\('data-scope="'\+d\.key\+'"'/); assert.match(yj, /optHtml\('data-scope-none',none,'I won’t be joining this trip'/); assert.match(yj, /class="p-opt-or"/);
   assert.doesNotMatch(yj, /data-scope-all|I’ll join all|I'll join all|p-sel p-sheet|>I’d like to reconsider</, 'the join-all control, the sheets and the reconsider button are gone');
-  assert.match(yj, /We’ll miss you\./); assert.match(yj, /data-decline-send>Send my response</);
+  assert.match(yj, /<h3 class="t-h2">We will miss you\.<\/h3>/); assert.match(yj, /'<button type="button" class="p-act" data-decline-send'/); assert.match(yj, /actions\(\[sendBtn\('Send my reply'\)\]\)/); /* TO-00632 · TO-01695 · the decline is sent (PRQ-02-01) */
   assert.match(yj, /data-release-preview/); assert.match(yj, /data-release-confirm/); assert.doesNotMatch(yj, /p-pack|data-package|packagePlan|fxConfirm|FX_PLAN|Complete trip|Essential trip/, 'the packages are gone');
-  assert.match(yj, /data-counts>'\+esc\(J\.countsWords\(\)\)/); assert.match(yj, /'Not joining this stage'|Not joining this stage<\/p>/);
+  assert.match(yj, /data-counts>'\+esc\(J\.countsWords\(\)\)/); assert.match(yj, /Not needed in your trip/, 'the declined card\'s eyebrow (TO-00587)');
   assert.doesNotMatch(yj, /Every stage you have already chosen stays exactly as you chose it|Cost Saving|self-arranged|id="fxb"|id="csb"|fullExperience|costSaving|selfArranged|soldOutStages|Full Experience/, 'the retired planner and its words are gone');
   const css = src('assets/prep.css');
   assert.match(css, /\.p-act\.is-current \{[^}]*pointer-events: none/);
@@ -124,15 +128,15 @@ test('the journey page derives SELECTED from the bag and offers no second select
 test('ABOUT YOU: step 05 is required — the allergy answer and the photography acknowledgement; favourites and documents stay optional', () => {
   const g = src('assets/guest.js'), q = src('src/questionnaire.js');   /* the one schema (22 Sep 2026); guest.js reads its generated copy */
   assert.match(g, /key: 'about', n: '05', label: 'About You', href: 'about-you\.html', required: true/);
-  assert.match(q, /export const ALLERGY = \{ key: 'allergy', n: '01', q: 'Do you have any food allergies\?', required: true/);
+  assert.match(q, /export const ALLERGY = \{ key: 'allergy', n: '01', q: 'Do you have any food allergies\?', label: 'Food allergies', required: true/);
   assert.match(q, /key: 'drink', n: '04', q: 'Favourite drink'/);
-  assert.match(q, /key: 'film', n: '05', q: 'Favourite film'/); assert.match(q, /key: 'genres', n: '06', q: 'Thai favorite'[^}]*required: true, type: 'multi'/); assert.match(q, /key: 'music', n: '07', q: 'What’s your favourite karaoke song — the one you’d love to sing along to\?'[^}]*required: false/); assert.doesNotMatch(q, /A song, an album, an artist/, 'the karaoke question replaced the song line (Owner, 24 Sep 2026)');   /* Question 5 ("rather avoid") retired 19 Sep 2026; the genres required, the song line optional (22 Sep 2026) */
-  assert.match(g, /aboutMissing: function \(\) \{[\s\S]*?if \(!this\.photoAck\(\)\) out\.push/, 'the acknowledgement holds the step');
+  assert.match(q, /key: 'film', n: '05', q: 'Favourite film'/); assert.match(q, /key: 'genres', n: '06', q: 'What makes you dance\?', label: 'Your music', wedding: true, hint: 'The wedding playlist is built from your answers — choose every genre you would dance to\.', required: true, type: 'multi'/); /* the Owner's Q06 decision (OQ-45) */ assert.doesNotMatch(q, /Thai favorite/); assert.match(q, /key: 'music', n: '07', q: 'What’s your favourite karaoke song — the one you’d love to sing along to\?'[^}]*required: false/); assert.doesNotMatch(q, /A song, an album, an artist/, 'the karaoke question replaced the song line (Owner, 24 Sep 2026)');   /* Question 5 ("rather avoid") retired 19 Sep 2026; the genres required, the song line optional (22 Sep 2026) */
+  assert.match(g, /aboutMissing: function \(\) \{[\s\S]*?if \(this\.photoApplies\(\) && !this\.photoAck\(\)\) out\.push/, 'the acknowledgement holds the step — for a guest it applies to (PRQ-06-02)');
   assert.match(g, /if \(key === 'about'\) return this\.applicable\('about'\) \? this\.aboutMissing\(\) : \[\];/, 'documents and consent never hold the step; a guest not joining the trip owes no hospitality answer');
   const inv = src('invitation.html');
-  assert.match(inv, /about:'Food allergies, a few favourites, photography\.'/);
+  assert.match(inv, /about:photo\?'Food allergies, a few favourites and photography\.':'Food allergies and a few favourites\.'/); /* TO-00247 */
   const ab = src('about-you.html');
-  assert.match(ab, /Optional · can be added later<\/p><h2 class="t-h2">Travel documents/, 'documents remain optional');
+  assert.match(ab, /<h2 class="t-h2">Travel documents<\/h2>'\+\s*'<p class="t-b1 measure">Your passport and flight information help us arrange your trip\. Add them whenever they are ready — you can send your trip without them\./, 'documents remain optional (the eyebrow TO-02308 is removed; the sentence says it)');
   assert.match(ab, /data-allergy="yes">Yes</); assert.match(ab, /data-allergy="no">No</);
   assert.doesNotMatch(ab, /Required — for example: None|tick &ldquo;/, 'nobody types "None"');
   assert.match(ab, /data-photo-ack/); assert.match(ab, /data-consent=/, 'the publication consent stays a separate choice');
@@ -141,9 +145,14 @@ test('ABOUT YOU: step 05 is required — the allergy answer and the photography 
 test('SEATING: ceremony front-centre positions for the couple; dinner nothing fixed; the route is on The Wedding', async () => {
   const m = await import(join(ROOT, 'src/seating.js'));
   assert.deepEqual(m.RULES.ceremony.fixed, ['BRIDE', 'GROOM']); assert.equal(m.RULES.dinner.fixed, undefined);
-  assert.equal(m.CAPACITY.ceremony.fixed, 2); assert.equal(m.CAPACITY.dinner.guestSeats, 50);
+  assert.equal(m.CAPACITY.ceremony.fixed, 2); assert.equal(m.CAPACITY.dinner.guestSeats, 48);
+  /* THE DINNER IS 48 SEATS (Owner, 24 Sep 2026 · OQ-03): A13 and B13 are removed, nothing is renumbered — A1–A12, A14–A25 · B1–B12, B14–B25; B12 (the Bride's held seat) stays B12 */
+  { const { SEAT_FIXTURE } = await import('./fixtures.mjs'); const ids = m.seatsOf(m.validateGeometry(SEAT_FIXTURE).config, 'dinner').map((x) => x.seatId);
+    assert.equal(ids.length, 48); assert.ok(!ids.includes('D-T-13') && !ids.includes('D-B-13'), 'no seat 13 on either side');
+    for (const id of ['D-T-01', 'D-T-12', 'D-T-14', 'D-T-25', 'D-B-01', 'D-B-12', 'D-B-14', 'D-B-25']) assert.ok(ids.includes(id), id + ' keeps its number');
+    assert.equal(m.isRetiredSeat('D-B-13'), true); assert.equal(m.isRetiredSeat('D-T-13'), true); assert.equal(m.isRetiredSeat('D-B-12'), false, 'B12 is not retired'); }
   const wd = src('wedding.html');
-  assert.match(wd, /id="seats-route"/); assert.match(wd, /Choose your '\+ev\+' seat/); assert.match(wd, /data-state="booked">'\+\(frozen\?'View seat':'Change seat'\)/);
+  assert.match(wd, /id="seats-route"/); assert.match(wd, /Choose your '\+ev\+' seat/); assert.match(wd, /\(sid\?\(frozen\?'<p class="p-more"><a class="p-link" href="'\+to\+'" data-seat-cta="'\+ev\+'" data-state="booked">View seat<\/a><\/p>'\s*:open\?'<p class="p-more"><a class="p-link" href="'\+to\+'" data-seat-cta="'\+ev\+'" data-state="booked">Change seat<\/a><\/p>':''\)/, 'PRQ-04-13: “Change seat” only while seating is open');
   assert.match(wd, /if\(ev==='ceremony'&&p\.hosts\)/, 'the hosts have no ceremony chair to choose');
   const wp = src('wedding-preparation.html');
   assert.match(wp, /data-hosts="true"/); assert.match(wp, /'Choose your '\+ev\+' seat'/);
@@ -153,15 +162,18 @@ test('SEATING: ceremony front-centre positions for the couple; dinner nothing fi
   assert.match(src('src/build-invitations.cjs'), /p\.hosts === true \? \{ hosts: true \}/);
 });
 
-test('AUTH: leaving keeps the guest\'s draft aside, clears the session, and never hands it to the next guest', () => {
+test('AUTH: leaving saves first, leaves nothing of the guest on the device, clears the session, and never hands it to the next guest (PRQ-01-03)', () => {
   const inv = src('assets/invite.mjs');
   assert.match(inv, /const GUEST_KEYS = \['siyl\.guest', 'siyl\.bag', 'siyl\.temple', 'siyl\.docs', 'siyl\.sent', 'siyl\.skip', 'siyl\.skip\.by'\];/);
-  assert.match(inv, /leave\(\) \{[\s\S]*?localStorage\.setItem\('siyl\.party\.' \+ a\.invitationId[\s\S]*?GUEST_KEYS\.concat\(RETIRED_KEYS\)\.forEach\(\(k\) => localStorage\.removeItem\(k\)\);\s*localStorage\.removeItem\('siyl\.draft\.owner'\);\s*AUTH\.clear\(\);/);
+  assert.match(inv, /leave\(\) \{[\s\S]*?localStorage\.removeItem\('siyl\.party\.' \+ a\.invitationId\)[\s\S]*?GUEST_KEYS\.concat\(RETIRED_KEYS, DEVICE_KEYS\)\.forEach\(\(k\) => localStorage\.removeItem\(k\)\);\s*localStorage\.removeItem\('siyl\.draft\.owner'\);\s*AUTH\.clear\(\);/);
+  assert.doesNotMatch(inv, /localStorage\.setItem\('siyl\.party\./, 'no plain-text copy is set aside');
+  assert.match(inv, /D\.flush\('leave'\)/, 'the pending autosave first');
   assert.match(inv, /if \(owner && owner !== invitationId\) GUEST_KEYS\.concat\(RETIRED_KEYS\)\.forEach\(\(k\) => localStorage\.removeItem\(k\)\);/, 'another guest\'s draft is never inherited; the same guest re-entering keeps their own');
   const sh = src('assets/prep-shell.js');
   assert.match(sh, /data-leave="another">Open another invitation<\/button>/); assert.match(sh, /data-leave="out">Sign out<\/button>/);
   assert.match(sh, /if \(e\.persisted && window\.SIYL_AUTH && !SIYL_AUTH\.get\(\)\) location\.reload\(\);/, 'back after leaving shows no guest');
   assert.match(sh, /location\.replace\(hrefOf\('invitation\.html'\) \+ \(how === 'another' \? '\?open=1' : ''\)\)/);
+  assert.match(sh, /Promise\.resolve\(SIYL_INVITE\.leave\(\)\)\.then\(function \(r\) \{[\s\S]*?if \(r && r\.ok === false\) \{ if \(say\) say\.textContent = r\.words \|\| ''; return; \}/, 'a failed save keeps the guest signed in and says why');
 });
 
 test('WORDING: no 1 + 1 seating, no blue dress, dinner poolside, China card is the Lijiang file', () => {
@@ -170,7 +182,7 @@ test('WORDING: no 1 + 1 seating, no blue dress, dinner poolside, China card is t
   for (const f of ['wedding.html', 'review.html', 'voyage.html', 'wedding-preparation.html', 'dress.html']) assert.doesNotMatch(src(f), /Blue Lao Traditional Dress|in blue\b/i, f);
   assert.match(src('wedding.html'), /temple:'Lao Traditional Dress'/);
   for (const f of ['assets/journey.js', 'assets/temple.js', 'voyage.html', 'index.html', 'review.html', 'wedding.html']) assert.doesNotMatch(src(f), /courtyard garden/i, f);
-  assert.match(src('assets/journey.js'), /Souphattra Heritage Vientiane · poolside/); assert.match(src('voyage.html'), /19:30 · Poolside/);
+  assert.match(src('assets/journey.js'), /Souphattra Heritage Vientiane · poolside/); assert.match(src('voyage.html'), /<p class="a-eyebrow">19:30 · Souphattra Heritage · poolside<\/p>/); assert.match(src('voyage.html'), /An evening poolside/);
   /* 21 Sep 2026: the Owner's clip of Impression Lijiang on the China card, its own poster frame beneath (gate V1) */
   assert.match(src('index.html'), /destination\.html#china" data-video="assets\/video\/china-card\.mp4" style="background-image:url\(assets\/images\/city\/004-lijiang-card-poster\.jpg\)/);
   assert.match(src('assets/images/ASSET-MAP.md'), /1XBVp6qIwUSWfHpw4w3S0CH-apvsej154/, 'the Drive source is traceable');

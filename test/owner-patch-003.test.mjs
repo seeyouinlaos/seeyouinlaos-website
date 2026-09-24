@@ -47,7 +47,8 @@ test('TEMPLE CEREMONY · a separate morning event: Sunday, 28 February 2027 · 0
   assert.equal(ev.label, 'Temple Ceremony'); assert.equal(ev.when, '09:00 – approximately 12:00'); assert.equal(ev.place, 'Wat Ong Teu, Vientiane');
   const prog = src('assets/journey.js');
   assert.match(prog, /key: 'temple', title: 'Temple Ceremony', when: '09:00 – approximately 12:00'/);
-  for (const f of ['voyage.html', 'dress.html', 'wedding-preparation.html']) assert.match(src(f), /Temple Ceremony · 09:00 – approximately 12:00 · Wat Ong Teu, Vientiane|09:00 – approximately 12:00 · Wat Ong Teu, Vientiane/, f);
+  for (const f of ['dress.html', 'wedding-preparation.html']) assert.match(src(f), /Temple Ceremony · 09:00 – approximately 12:00 · Wat Ong Teu, Vientiane|09:00 – approximately 12:00 · Wat Ong Teu, Vientiane/, f);
+  assert.match(src('voyage.html'), /<p class="a-eyebrow">09:00 – about 12:00 · Wat Ong Teu, Vientiane<\/p>/, 'voyage.html: the eyebrow’s short form (B6), the same hours');
   for (const f of ACTIVE) assert.doesNotMatch(stripComments(src(f)), /\b08:00\b/, f + ' still carries the retired 08:00');
   assert.match(src('index.html') + src('voyage.html'), /Sunday, 28 February 2027/i);
   /* the temple has no seats of its own: attendance only */
@@ -77,14 +78,14 @@ test('WEDDING (VOW) CEREMONY · Souphattra Heritage · Sunday, 28 February 2027 
   for (const t of ['Vow Ceremony', 'Sunday, 28 February 2027 \\267 15:30', 'Souphattra Heritage, Vientiane', 'SYL-WC-E4-']) assert.ok(pdf.includes(t), 'PDF: ' + t);
   assert.doesNotMatch(pdf, /Temple|Wat Ong Teu|08:00|09:00/, 'no wedding seat ticket says Wat Ong Teu or a morning time');
   const card = PASS.card(doc);
-  assert.match(card, /Wedding Ceremony · Souphattra Heritage/); assert.match(card, /<h3 class="t-h1">Vow Ceremony<\/h3>/); assert.match(card, /15:30/); assert.doesNotMatch(card, /Temple|Wat Ong Teu|08:00|09:00/);
+  assert.match(card, /Vow Ceremony · Souphattra Heritage/); /* B3: the seat card head names the Vow Ceremony */ assert.doesNotMatch(card, /Wedding Ceremony/); assert.match(card, /<h3 class="t-h1">Vow Ceremony<\/h3>/); assert.match(card, /15:30/); assert.doesNotMatch(card, /Temple|Wat Ong Teu|08:00|09:00/);
   /* the hosts: Bride and Groom front centre — at the Wedding Ceremony */
   const hosts = { invitationId: 'INV-G048', partyName: 'Haruthai & Suthep', hosts: true, guests: [{ guestId: 'G048', fullName: 'Haruthai Amphai', preferredName: 'Haruthai', hostRole: 'BRIDE' }, { guestId: 'G049', fullName: 'Suthep Thongantang', preferredName: 'Suthep', hostRole: 'GROOM' }] };
   for (const [g, role] of [['G048', 'Bride'], ['G049', 'Groom']]) {
     const d = PASS.docFor(hosts, g, { ceremony: {}, dinner: {} }, ['ceremony'], '2026-09-15T10:00:00.000Z');
     assert.deepEqual(d.seats, [{ event: 'ceremony', fixed: role.toUpperCase() }]);
     const p = PASS.compose(d), c = PASS.card(d);
-    assert.ok(p.includes(role + ' \\267 Front Centre') && p.includes('Souphattra Heritage, Vientiane') && p.includes('15:30'), role + ' front centre at the Wedding Ceremony');
+    assert.ok(p.includes('(' + role + ') Tj') && p.includes('(At the front, between the two blocks) Tj') && p.includes('Souphattra Heritage, Vientiane') && p.includes('15:30'), role + ' front centre at the Vow Ceremony (B3: the seat reads the role, the detail line where it is)');
     assert.match(PASS.refOf(d, d.seats[0]), /^SYL-WC-FC-/); assert.doesNotMatch(p + c, /Temple|Wat Ong Teu|08:00|09:00/);
     assert.match(PASS.payload(d, d.seats[0]), /\nVow Ceremony\nSunday, 28 February 2027 · 15:30\n/);
   }
@@ -116,12 +117,13 @@ test('SATHORN PENTHOUSE · DELETED (Owner, 24 Sep 2026 · Edit 6): no room recor
   for (const f of ACTIVE) { const t = stripComments(src(f)); assert.doesNotMatch(t, /USD 90 per person|rate: 90\b/, f + ' carries the retired USD 90 rate'); assert.doesNotMatch(t, /Sathorn Penthouse|slug: 'penthouse'/, f + ' names the deleted Sathorn Penthouse'); }
 });
 
-test('EDIT 4 (Owner, 16 Sep 2026) · Luye Baisha and Siam Kempinski say self-pay everywhere the stay summary appears; Harudot sits in the existing Bangkok Cafés rail, never in a rail of its own; the stage never stays invisible', () => {
-  assert.match(src('accommodation.html'), /<span class="sn">Luye Baisha<\/span><span class="sw">4 – 6 Mar<\/span><span class="sc">Lijiang · 2 nights · breakfast included · self-pay<\/span>/);
-  assert.match(src('accommodation.html'), /<span class="sn">Siam Kempinski<\/span><span class="sw">6 – 8 Mar<\/span><span class="sc">Bangkok · 2 nights · breakfast included · self-pay<\/span>/);
-  assert.match(src('journeys.html'), /<p class="pm">04 – 06 March · 2 nights · breakfast included · self-pay<\/p>/);
-  assert.match(src('journeys.html'), /<p class="pm">06 – 08 March · 2 nights · breakfast included · self-pay<\/p>/);
-  for (const f of ['accommodation.html', 'journeys.html']) assert.doesNotMatch(src(f), /2 nights · breakfast included(?! · self-pay)/, f + ': no summary of the two stays without self-pay');
+test('EDIT 4 (Owner, 16 Sep 2026) · Luye Baisha and Siam Kempinski say “your cost” (was self-pay) everywhere the stay summary appears; Harudot sits in the existing Bangkok Cafés rail, never in a rail of its own; the stage never stays invisible', () => {
+  /* Window 007 (TO-00717 · TO-00719 · TO-01301 · TO-01305): “self-pay” is retired site-wide; the same rule now reads “your cost”, before the breakfast */
+  assert.match(src('accommodation.html'), /<span class="sn">Luye Baisha<\/span><span class="sw">4 – 6 Mar<\/span><span class="sc">Lijiang · 2 nights · your cost · breakfast included<\/span>/);
+  assert.match(src('accommodation.html'), /<span class="sn">Siam Kempinski<\/span><span class="sw">6 – 8 Mar<\/span><span class="sc">Bangkok · 2 nights · your cost · breakfast included<\/span>/);
+  assert.match(src('journeys.html'), /<p class="pm">4 – 6 March · 2 nights · your cost · breakfast included<\/p>/);
+  assert.match(src('journeys.html'), /<p class="pm">6 – 8 March · 2 nights · your cost · breakfast included<\/p>/);
+  for (const f of ['accommodation.html', 'journeys.html']) { assert.doesNotMatch(src(f), /2 nights · breakfast included/, f + ': no summary of the two stays without “your cost”'); assert.doesNotMatch(src(f), /self-pay/i, f + ': the retired word'); }
   /* the taxonomy (22 Sep 2026): Bangkok is one chapter with one Cafés rail in the order of the days — Harudot once, in it */
   const x = src('experiences.html');
   assert.match(x, /box\.innerHTML = D\.rails\(key\)\.map\(function \(r\) \{ return rail\(r, key\); \}\)\.join\(''\);/, 'one rail per category of the chapter, from the one taxonomy');

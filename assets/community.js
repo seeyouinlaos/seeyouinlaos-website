@@ -20,7 +20,6 @@
   var calm = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   function esc(t) { return String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
   function auth() { try { return JSON.parse(localStorage.getItem('siyl.auth') || 'null'); } catch (e) { return null; } }
-  function pad2(n) { return (n < 10 ? '0' : '') + n; }
   /* what has already been revealed on this page: a re-render (the Bag, a photo) never replays the movement */
   var shown = {};
 
@@ -28,17 +27,17 @@
   var JOURNEY = { start: [2027, 2, 21], wedding: [2027, 2, 28], end: [2027, 3, 8] };
   function local(y, m, d) { return new Date(y, m - 1, d); }
   function daysBetween(a, b) { return Math.round((local(b.getFullYear(), b.getMonth() + 1, b.getDate()) - local(a.getFullYear(), a.getMonth() + 1, a.getDate())) / 86400000); }
-  /* the state for one moment: never negative, never a clock — days, and the hours only on the eve */
+  /* the phase of one moment — before · start · journey · wedding · after · done; the words are countdowns()' (PRQ-01-09) */
   function countdown(now) {
     now = now || new Date();
     var start = local.apply(null, JOURNEY.start), wed = local.apply(null, JOURNEY.wedding), end = local.apply(null, JOURNEY.end);
     var toStart = daysBetween(now, start), toWed = daysBetween(now, wed), toEnd = daysBetween(now, end);
-    if (toStart > 0) return { phase: 'before', n: toStart, unit: toStart === 1 ? 'day' : 'days', lead: 'The journey begins in', tail: '21 February 2027 · Bangkok' };
-    if (toStart === 0) return { phase: 'start', n: 0, unit: 'today', lead: 'The journey begins', tail: 'Today · 21 February 2027 · Bangkok' };
-    if (toWed > 0) return { phase: 'journey', n: toWed, unit: toWed === 1 ? 'day' : 'days', lead: 'The wedding is in', tail: '28 February 2027 · Vientiane · day ' + pad2(1 - toStart) + ' of the journey' };
-    if (toWed === 0) return { phase: 'wedding', n: 0, unit: 'today', lead: 'The wedding', tail: 'Today · Sunday, 28 February 2027 · Vientiane' };
-    if (toEnd >= 0) return { phase: 'after', n: 1 - toStart, unit: 'of 16 days', lead: 'The journey continues · day', tail: 'Until 8 March 2027 · Bangkok' };
-    return { phase: 'done', n: 16, unit: 'days', lead: 'The journey', tail: '21 February – 8 March 2027 · Thailand · Laos · China' };
+    if (toStart > 0) return { phase: 'before', n: toStart };
+    if (toStart === 0) return { phase: 'start', n: 0 };
+    if (toWed > 0) return { phase: 'journey', n: toWed };
+    if (toWed === 0) return { phase: 'wedding', n: 0 };
+    if (toEnd >= 0) return { phase: 'after', n: 1 - toStart };
+    return { phase: 'done', n: 16 };
   }
   /* WEDDING FIRST (Owner, 22 Sep 2026): two countdowns, one hierarchy. THE WEDDING — Sunday, 28 February 2027, Vientiane — is the
      primary count; THE JOURNEY BEGINS — Sunday, 21 February 2027, Bangkok — the secondary. Both from the same local-day clock as
@@ -49,12 +48,12 @@
     now = now || new Date();
     var start = local.apply(null, JOURNEY.start), wed = local.apply(null, JOURNEY.wedding), end = local.apply(null, JOURNEY.end);
     var toStart = daysBetween(now, start), toWed = daysBetween(now, wed), toEnd = daysBetween(now, end), total = daysBetween(start, end) + 1;
-    var wedding = toWed > 0 ? { state: 'before', n: toWed, unit: toWed === 1 ? 'day' : 'days', eyebrow: 'The wedding · in', word: null, tail: 'Sunday, 28 February 2027 · Vientiane, Laos' }
+    var wedding = toWed > 0 ? { state: 'before', n: toWed, unit: toWed === 1 ? 'day' : 'days', eyebrow: 'The wedding is in', word: null, tail: 'Sunday, 28 February 2027 · Vientiane, Laos' }
       : toWed === 0 ? { state: 'today', n: 0, unit: '', eyebrow: 'The wedding', word: 'Today', tail: 'Sunday, 28 February 2027 · Vientiane, Laos' }
       : { state: 'after', n: 0, unit: '', eyebrow: 'The wedding', word: 'Married', tail: 'Sunday, 28 February 2027 · Vientiane, Laos' };
-    var journey = toStart > 0 ? { state: 'before', n: toStart, unit: toStart === 1 ? 'day' : 'days', eyebrow: 'The journey begins · in', word: null, tail: 'Sunday, 21 February 2027 · Bangkok, Thailand' }
+    var journey = toStart > 0 ? { state: 'before', n: toStart, unit: toStart === 1 ? 'day' : 'days', eyebrow: 'The journey begins in', word: null, tail: 'Sunday, 21 February 2027 · Bangkok, Thailand' }
       : toStart === 0 ? { state: 'today', n: 0, unit: '', eyebrow: 'The journey begins', word: 'Today', tail: 'Sunday, 21 February 2027 · Bangkok, Thailand' }
-      : toEnd >= 0 ? { state: 'journey', n: 1 - toStart, unit: 'of ' + total + ' days', eyebrow: 'The journey · day', word: null, tail: '21 February – 8 March 2027 · Thailand · Laos · China' }
+      : toEnd >= 0 ? { state: 'journey', n: 1 - toStart, unit: 'of ' + total, eyebrow: 'Journey day', word: null, tail: '21 February – 8 March 2027 · Thailand · Laos · China' }
       : { state: 'after', n: total, unit: 'days', eyebrow: 'The journey', word: null, tail: '21 February – 8 March 2027 · Thailand · Laos · China' };
     return { wedding: wedding, journey: journey, phase: countdown(now).phase };
   }
@@ -64,14 +63,19 @@
     var shownHere = !!shown['cd-' + key];
     var numeral = c.word
       ? '<p class="pf-num pf-num-word" data-key="cd-' + key + '"><span class="pf-num-v">' + esc(c.word) + '</span></p>'
-      : '<p class="pf-num" data-count-to="' + c.n + '" data-key="cd-' + key + '"' + (shownHere ? ' data-counted="1"' : '') + '><span class="pf-num-v pf-num-fixed"><span class="pf-num-size" aria-hidden="true">' + c.n + '</span><span class="pf-num-live">' + (calm || shownHere ? c.n : 0) + '</span></span><span class="pf-num-u">' + esc(c.unit) + '</span></p>';
+      : '<p class="pf-num" data-count-to="' + c.n + '" data-key="cd-' + key + '"' + (shownHere ? ' data-counted="1"' : '') + '><span class="pf-num-v pf-num-fixed"><span class="pf-num-size" aria-hidden="true">' + c.n + '</span><span class="pf-num-live">' + c.n + '</span></span><span class="pf-num-u">' + esc(c.unit) + '</span></p>';
     return '<div class="pf-cd pf-cd-' + role + '" data-cd="' + key + '" data-cd-state="' + esc(c.state) + '">' +
       '<p class="t-l1 pf-cd-eyebrow">' + esc(c.eyebrow) + '</p>' + numeral +
       '<p class="t-l1 mute pf-cd-tail">' + esc(c.tail) + '</p></div>';
   }
   function countdownHtml(now) {
     var c = countdowns(now);
-    var label = (c.wedding.word ? 'The wedding ' + c.wedding.word.toLowerCase() : 'The wedding in ' + c.wedding.n + ' ' + c.wedding.unit) + ' · ' + (c.journey.word ? 'The journey begins ' + c.journey.word.toLowerCase() : c.journey.state === 'before' ? 'The journey begins in ' + c.journey.n + ' ' + c.journey.unit : 'The journey, day ' + c.journey.n + ' ' + c.journey.unit);
+    /* two sentences, each naming its own state (PRQ-01-09): “The wedding is in 157 days. The journey begins in 150 days.” ·
+       on the day “The wedding is today.” · after it “Married on Sunday, 28 February 2027.” */
+    var w = c.wedding, j = c.journey;
+    var wS = w.state === 'before' ? 'The wedding is in ' + w.n + ' ' + w.unit + '.' : w.state === 'today' ? 'The wedding is today.' : 'Married on Sunday, 28 February 2027.';
+    var jS = j.state === 'before' ? 'The journey begins in ' + j.n + ' ' + j.unit + '.' : j.state === 'today' ? 'The journey begins today.' : j.state === 'journey' ? 'Journey day ' + j.n + ' ' + j.unit + '.' : 'The journey: 21 February – 8 March 2027.';
+    var label = wS + ' ' + jS;
     return '<section class="prep-sec pf-count' + (calm || shown.cd ? ' is-in' : '') + '" id="countdown" data-countdown="' + esc(c.phase) + '" data-wedding="' + esc(c.wedding.state) + '" data-journey="' + esc(c.journey.state) + '" data-cd-reveal aria-label="' + esc(label) + '">' +
       countHtml('wedding', c.wedding, 'primary') + countHtml('journey', c.journey, 'secondary') + '</section>';
   }
@@ -98,7 +102,7 @@
         if (win) { nights += Number(win.n || 0); var e = parseEnd(win.dates); if (e) ends.push(e); var st = /^(\d{1,2})/.exec(win.dates); if (st && e) starts.push(local(e.getFullYear(), e.getMonth() + 1, Number(st[1]))); }
       });
       var trainNights = T && T.train && /(\d+) – (\d+) \w+ \d{4}/.test(T.train.dates || '') ? 1 : 0;   /* the night train: one night on board */
-      if (nights) out.push({ key: 'nights', n: nights + trainNights, label: 'Nights', note: trainNights ? nights + ' in a house · ' + trainNights + ' on the night train' : '' });
+      if (nights) out.push({ key: 'nights', n: nights + trainNights, label: 'Nights', note: trainNights ? nights + ' in hotels and houses · ' + trainNights + ' on the night train' : '' });
       if (ends.length) { var last = ends.sort(function (a, b) { return b - a; })[0], first = local.apply(null, JOURNEY.start); var days = daysBetween(first, last) + 1; if (days > 0) out.push({ key: 'days', n: days, label: 'Days', note: '21 February – ' + last.getDate() + ' March 2027' }); }
     }
     if (T) {
@@ -127,7 +131,7 @@
     return '<section class="prep-sec pf-numbers" id="numbers" aria-label="The journey in numbers"><p class="t-l1">The journey in numbers</p>' +
       '<div class="pf-grid">' + list.map(function (x) {
         var k = 'stat:' + x.key;
-        return '<div class="pf-stat" data-stat="' + x.key + '"><p class="pf-num" data-count-to="' + x.n + '" data-key="' + k + '"' + (shown[k] ? ' data-counted="1"' : '') + '><span class="pf-num-v">' + (calm || shown[k] ? pad2(x.n) : '00') + '</span></p><p class="t-l1">' + esc(x.label) + '</p>' + (x.note ? '<p class="t-b2 mute">' + esc(x.note) + '</p>' : '') + '</div>';
+        return '<div class="pf-stat" data-stat="' + x.key + '"><p class="pf-num" data-count-to="' + x.n + '" data-key="' + k + '"' + (shown[k] ? ' data-counted="1"' : '') + '><span class="pf-num-v">' + x.n + '</span></p><p class="t-l1">' + esc(x.label) + '</p>' + (x.note ? '<p class="t-b2 mute">' + esc(x.note) + '</p>' : '') + '</div>';
       }).join('') + '</div></section>';
   }
 
@@ -143,7 +147,7 @@
   function initials(name) { var w = String(name || '').trim().split(/\s+/); return (w[0] ? w[0][0] : '') + (w[1] ? w[1][0] : ''); }
   function communityHtml(d, me) {
     var a = auth();
-    if (!d) return '<section class="prep-sec pf-community" id="community" data-community="loading"><p class="t-l1">Who’s joining us</p><div class="p-card flat"><p class="t-b2 measure">Reading who has joined…</p></div></section>';
+    if (!d) return '<section class="prep-sec pf-community" id="community" data-community="loading"><p class="t-l1">Who’s joining us</p><div class="p-card flat"><p class="t-b2 measure">Looking up who is joining us…</p></div></section>';
     var list = d.guests || [], n = d.count || list.length;
     var couple = list.filter(function (g) { return g.role; }), guests = list.filter(function (g) { return !g.role; });
     if (!n) return '<section class="prep-sec pf-community" id="community" data-community="0"><p class="t-l1">Who’s joining us</p><div class="p-card flat"><p class="t-b1 measure">Nobody has sent their trip yet — yours could be the first.</p></div></section>';
@@ -153,7 +157,7 @@
     var line = couple.length ? (n === 1 ? '1 of us is joining so far' : n + ' of us are joining so far') : (n === 1 ? '1 guest has joined so far' : n + ' guests have joined so far');
     return '<section class="prep-sec pf-community" id="community" data-community="' + n + '" data-couple="' + couple.length + '"><p class="t-l1">Who’s joining us</p>' +
       '<h2 class="t-h2">' + line + '</h2>' +
-      '<p class="t-b2 measure">' + (meIn ? 'You are among them. ' : '') + (couple.length ? 'Haruthai &amp; Suthep, and everyone whose trip has reached Guest Relations — new faces as they arrive.' : 'Everyone whose trip has reached Guest Relations — new faces as they arrive.') + '</p>' +
+      '<p class="t-b2 measure">' + (meIn ? 'You are among them. ' : '') + (couple.length ? 'Haruthai &amp; Suthep, and every guest who has sent us their trip.' : 'Every guest who has sent us their trip.') + '</p>' +
       '<div class="pf-people' + (shown.people ? ' is-in' : '') + '" data-people>' + list.map(function (g, i) {
         return '<div class="pf-person' + (g.role ? ' is-couple' : '') + '" data-person="' + esc(g.guestId) + '"' + (g.role ? ' data-role="' + esc(g.role) + '"' : '') + ' style="--i:' + i + '"><span class="pf-ava" data-ava="' + esc(g.guestId) + '" role="img" aria-label="' + esc(g.name) + (g.role ? ' · ' + esc(g.role) : '') + '"><i aria-hidden="true">' + esc(initials(g.name)) + '</i></span><span class="pf-person-n">' + esc(g.name) + '</span>' + (g.role ? '<span class="pf-person-r">' + esc(g.role) + '</span>' : '') + '</div>';
       }).join('') + '</div>' +
@@ -171,12 +175,11 @@
 
   /* --------------------------------------------------------- THE MOVEMENT */
   function countUp(el) {
-    var to = Number(el.getAttribute('data-count-to') || 0), v = el.querySelector('.pf-num-live') || el.querySelector('.pf-num-v'), padded = el.closest('.pf-stat') !== null;
+    /* THE REAL VALUE FROM THE FIRST PAINT (PRQ-01-09): a number is never shown as “0” or “00” before it counts — it is written
+       at its value, without a leading zero, and stays; the section's reveal is the only movement */
+    var to = Number(el.getAttribute('data-count-to') || 0), v = el.querySelector('.pf-num-live') || el.querySelector('.pf-num-v');
     if (el.getAttribute('data-key')) shown[el.getAttribute('data-key')] = true;
-    if (!v) return; if (calm || to === 0) { v.textContent = padded ? pad2(to) : String(to); return; }
-    var key = el.getAttribute('data-key') || '', delay = key === 'cd-journey' ? 450 : key === 'cd-wedding' ? 120 : 0;   /* the wedding counts first, the journey a beat later */
-    var t0 = null, dur = 900; function tick(t) { if (!t0) t0 = t; var k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 3), n = Math.round(to * e); v.textContent = padded ? pad2(n) : String(n); if (k < 1) requestAnimationFrame(tick); }
-    if (delay) setTimeout(function () { requestAnimationFrame(tick); }, delay); else requestAnimationFrame(tick);
+    if (v && v.textContent !== String(to)) v.textContent = String(to);
   }
   function wire(root) {
     root = root || document;

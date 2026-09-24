@@ -78,7 +78,8 @@ test('THE VIENTIANE FILM · the Owner\'s "night of Vientiane" replaces the Buddh
   assert.match(probe[0], /^h264,video,720,1280,yuv420p$/, 'the source geometry, untouched');
   for (const page of ['index.html', 'destination.html']) {
     const s = src(page);
-    assert.match(s, /data-video="assets\/video\/vientiane-card\.mp4" style="background-image:url\(assets\/images\/city\/002-vientiane-card-poster\.jpg\)" role="img" aria-label="A night of Vientiane — the train at the platform, the neon streets of the evening"/, page);
+    /* PRQ-07a-10: the index card is a link and no longer carries role="img" (announced as a link with its name); destination.html keeps it */
+    assert.match(s, page === 'index.html' ? /data-video="assets\/video\/vientiane-card\.mp4" style="background-image:url\(assets\/images\/city\/002-vientiane-card-poster\.jpg\)" aria-label="A night of Vientiane — the train at the platform, the neon streets of the evening"/ : /data-video="assets\/video\/vientiane-card\.mp4" style="background-image:url\(assets\/images\/city\/002-vientiane-card-poster\.jpg\)" role="img" aria-label="A night of Vientiane — the train at the platform, the neon streets of the evening"/, page);
     assert.doesNotMatch(s, /Wat Si Saket, Vientiane — the Buddhas in their niches/, page + ' no longer describes the retired clip');
   }
   assert.match(src('assets/images/ASSET-MAP.md'), /video\/vientiane-card\.mp4[^\n]*1UQn3L-tj4zpwB5n-MOZyxfRUfQ6LWAYI/, 'the Drive file is recorded');
@@ -101,7 +102,7 @@ test('AFTER THE WEDDING · the whole Lijiang 02 folder in one card gallery: nine
   assert.match(h, /<script src="assets\/cardgal\.js(\?v=[0-9a-f]{8})?"><\/script>/);
   /* the behaviour */
   assert.match(js, /function go\(k\) \{ i = \(k \+ n\) % n; paint\(\); \}/, 'the last frame wraps to the first and back');
-  assert.match(js, /prev\.setAttribute\('aria-label', 'The previous photograph'\); next\.setAttribute\('aria-label', 'The next photograph'\);/);
+  assert.match(js, /prev\.setAttribute\('aria-label', 'Previous photograph'\); next\.setAttribute\('aria-label', 'Next photograph'\);/); /* TO-02453 / TO-02454 */
   assert.match(js, /count\.textContent = \(i \+ 1\) \+ ' \/ ' \+ n;/, 'the quiet "1 / 9"');
   assert.match(js, /if \(e\.key !== 'ArrowLeft' && e\.key !== 'ArrowRight'\) return;/);
   assert.match(js, /addEventListener\('touchend'[\s\S]*go\(i \+ \(dx < 0 \? 1 : -1\)\)/, 'a swipe turns the photograph');

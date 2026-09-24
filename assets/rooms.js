@@ -46,7 +46,26 @@
   var seq = 0;   /* the order of reads and writes: only the latest answer becomes the view */
   function waitCache() { try { var v = JSON.parse(localStorage.getItem(WAIT_KEY) || 'null'); return v && typeof v === 'object' ? v : {}; } catch (e) { return {}; } }
   function rememberWaits(v) { try { var out = {}; Object.keys(v && v.waitlist || {}).forEach(function (k) { out[k] = { at: v.waitlist[k].at, size: v.waitlist[k].size }; }); if (Object.keys(out).length) localStorage.setItem(WAIT_KEY, JSON.stringify(out)); else localStorage.removeItem(WAIT_KEY); } catch (e) {} }
-  function firstName() { var G = window.SIYL_GUEST, a = auth(); return (G && G.nameOf && G.nameOf()) || (a && a.preferredName) || ''; }
+  /* FIRST NAMES ONLY (PRQ-GAP-02 · GAP-082): the engine names every occupant by the register's first name the Worker verified;
+     no name is sent from here any more. The viewer is "You", an unknown guest "A guest", a place kept for a party no one. */
+  var NUM = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight'];
+  function numWord(n) { return NUM[n] || String(n); }
+  function cap(t) { t = String(t || ''); return t.charAt(0).toUpperCase() + t.slice(1); }
+  function firstWord(t) { return String(t || '').trim().split(/\s+/)[0] || ''; }
+  /* "you" · "you and Ada" · "you, Ada and Ben" */
+  function andJoin(list) { return list.length <= 1 ? (list[0] || '') : list.slice(0, -1).join(', ') + ' and ' + list[list.length - 1]; }
+  function whoOf(o) { return !o || o.placeholder ? '' : (o.mine ? 'You' : (firstWord(o.name) || 'A guest')); }
+  /* the members of the viewer's party who hold no place in a stage yet — the people a kept place is for (their first names) */
+  function absentMembers(stage) {
+    var a = auth(), members = a && Array.isArray(a.members) ? a.members : [];
+    var here = [];
+    Object.keys((view && view.units) || {}).forEach(function (key) {
+      if (U.stageOf(key) !== stage) return;
+      view.units[key].forEach(function (u) { u.occupants.forEach(function (o) { if (o.party && !o.placeholder && !o.mine) here.push(firstWord(o.name)); }); });
+    });
+    return members.filter(function (m) { return m && m.guestId !== (a && a.guestId); }).map(function (m) { return firstWord(m.preferredName); })
+      .filter(function (n) { if (!n) return false; var i = here.indexOf(n); if (i >= 0) { here.splice(i, 1); return false; } return true; });
+  }
 
   var U = window.SIYL_UNITS = {
     API: API,
@@ -118,7 +137,8 @@
     fits: function (win, slug) {
       if (!this.tracked(win, slug)) return true;
       if (this.mineFor(win, slug)) return true;
-      return this.units(win, slug).some(function (u) { return !u.full && u.eligible; });
+      /* a unit full only by a place kept for this guest's party is theirs to join (PRQ-03-01) */
+      return this.units(win, slug).some(function (u) { return u.eligible && (!u.full || u.occupants.some(function (o) { return o.placeholder && o.party; })); });
     },
     /* the party's size (SIYL_JOURNEY.partySize — the members of the party, 1–6) */
     need: function () { var J = window.SIYL_JOURNEY; if (J && J.partySize) return J.partySize(); var a = auth(); var n = a && Array.isArray(a.members) ? a.members.length : 1; return Math.max(1, Math.min(6, n || 1)); },
@@ -130,7 +150,8 @@
       return need > 1 ? !!this.unitForParty(win, slug, need) : this.fits(win, slug);
     },
     /* SOLD OUT is the engine's word alone: remainingPlaces === 0 — never "this guest may not choose here" */
-    soldOut: function (win, slug) { var s = this.summary(win, slug); return this.tracked(win, slug) && !!s && s.soldOut === true; },
+    /* …and a place kept for the viewer's party is theirs: never "Sold out" for them (PRQ-03-01) */
+    soldOut: function (win, slug) { if (this.keptForMe(win, slug)) return false; var s = this.summary(win, slug); return this.tracked(win, slug) && !!s && s.soldOut === true; },
     /* the whole category is the Master's reservation (no room this guest may take) */
     reserved: function () { return false; },   /* nothing is reserved for anyone (Owner, 19 Sep 2026) */
     /* the unit to suggest: a unit a party member already holds with a place
@@ -141,45 +162,145 @@
       var withParty = list.filter(function (u) { return u.occupants.some(function (o) { return o.party && !o.mine; }); })[0];
       return withParty || list[0] || null;
     },
-    /* the words the guest reads about a category — rendered DIRECTLY from the engine's one canonical availability
-     * object (Owner, 16 Sep 2026): source inventory minus the Owner's reservations minus the real guest bookings.
-     * No second calculation here. soldOut = remainingPlaces === 0 and nothing else. "Your place is held" only when
-     * this guest holds one here; a category the Master reserves in full says RESERVED, never "booked". */
+    /* THE ONE COUNTING GRAMMAR (TO-01208 · PRQ-03-09 · PRQ-03-01) — the journeys row, the room page and the Other rooms
+     * cards read this one sentence, rendered from the engine's canonical availability object (never a second calculation):
+     * "left" counts inventory (EMPTY rooms), "free" describes a room, never "available".
+     *   "{E} of {N} rooms left" · "… · 1 free place in a shared room" / "… · {S} free places in shared rooms"
+     *   "No empty room left · {S} free places in shared rooms" · "One room only · free" · "One room only · 1 place free"
+     *   "Sold out" · "Held for you · Room A" · "A place is kept for you · Room A" · Guest House "{r} of {m} places left" */
     label: function (win, slug) {
       var s = this.summary(win, slug);
       if (!s) return '';
       var list = this.units(win, slug), mine = this.mineFor(win, slug);
-      if (mine) return 'Your place is held · ' + this.unitName(list.filter(function (u) { return u.label === mine.label; })[0] || { kind: 'room', label: mine.label });
-      /* THE COMPLIMENTARY ALLOCATION (Owner, 22 Sep 2026): the four places (Edit 7, 24 Sep 2026) are counted in the Owner's own words — how many are
-         left of how many, "fully allocated" when they are gone, "closed" once the planning date has passed. Factual only. */
+      if (mine) return 'Held for you · ' + this.unitName(list.filter(function (u) { return u.label === mine.label; })[0] || { kind: 'room', label: mine.label });
+      /* a place a party member kept is the viewer's own: it is never counted as gone */
+      var kept = this.keptForMe(win, slug);
+      if (kept) return 'A place is kept for you · ' + this.unitName(kept);
+      /* THE COMPLIMENTARY ALLOCATION (Owner, 22 Sep 2026 · four places, Edit 7): "{r} of {m} places left", "All four places
+         are taken", "Closed on 30 November 2026" — the one stay plan's words */
       var P = window.SIYL_STAY_PLAN;
       if (P && keyOf(win, slug) === P.COMPLIMENTARY.key) return P.complimentaryWords(s.remainingPlaces, s.sourcePlaces, new Date()).headline;
-      var free = s.remainingPlaces, rooms = s.remainingRooms;
+      var free = s.remainingPlaces, rooms = s.remainingRooms;   /* the engine's object, rendered — never recomputed */
       if (s.soldOut || free <= 0) return 'Sold out';
-      if (s.kind === 'property') return free === 1 ? '1 place available' : free + ' places available';
-      return (rooms === 1 ? '1 room' : rooms + ' rooms') + ' · ' + (free === 1 ? '1 place available' : free + ' places available');
+      if (s.kind === 'property') return free + ' of ' + s.sourcePlaces + ' places left';
+      var N = s.sourceRooms;
+      var E = typeof s.emptyRooms === 'number' ? s.emptyRooms : list.filter(function (u) { return !u.taken; }).length;
+      var S = typeof s.sharedFree === 'number' ? s.sharedFree : list.filter(function (u) { return u.taken > 0; }).reduce(function (n, u) { return n + u.free; }, 0);
+      if (N === 1) return E === 1 ? 'One room only · free' : 'One room only · ' + free + (free === 1 ? ' place free' : ' places free');
+      var shared = S === 1 ? '1 free place in a shared room' : S + ' free places in shared rooms';
+      if (E > 0) return E + ' of ' + N + ' rooms left' + (S > 0 ? ' · ' + shared : '');
+      return 'No empty room left · ' + shared;
+    },
+    /* the unit of a category where a place is KEPT for the viewer's party while the viewer holds nothing there — the
+       viewer's own place, never "full" (PRQ-03-01) */
+    keptForMe: function (win, slug) {
+      if (this.mine(this.stageOf(keyOf(win, slug)))) return null;
+      return this.units(win, slug).filter(function (u) { return u.occupants.some(function (o) { return o.placeholder && o.party; }); })[0] || null;
     },
     /* the category's exact numbers — the engine's object */
     count: function (win, slug) {
       var s = this.summary(win, slug);
       if (!s) return { rooms: 0, places: 0, reserved: 0, free: 0, open: 0 };
-      return { rooms: s.sourceRooms, places: s.sourcePlaces, reserved: s.ownerReservedRooms, free: s.remainingPlaces, open: s.remainingRooms };
+      return { rooms: s.sourceRooms, places: s.sourcePlaces, reserved: s.ownerReservedRooms, free: s.remainingPlaces, open: s.remainingRooms,
+               empty: typeof s.emptyRooms === 'number' ? s.emptyRooms : null, shared: typeof s.sharedFree === 'number' ? s.sharedFree : null };
     },
-    /* why this guest cannot choose here, in one word for a CTA — '' when they can */
+    /* why this guest cannot choose here, in words for a disabled CTA — '' when they can (a place kept for them: they can) */
     ctaWords: function (win, slug) {
+      /* canTake already counts a place kept for the viewer's party as theirs (fits / fitsParty) */
       if (!this.tracked(win, slug) || this.canTake(win, slug)) return '';
       if (this.soldOut(win, slug)) return 'Sold out';
-      if (this.fits(win, slug)) return 'Not enough places for your party of ' + this.need();
-      return 'Not available for you';
+      var n = this.need();
+      return n > 1 ? 'No room here for the ' + n + ' of you together' : 'Sold out';
     },
     scarce: function (win, slug) { var s = this.summary(win, slug); return !!s && s.free > 0 && s.free <= 2; },
     unitName: function (u) { return u ? (u.kind === 'property' ? u.name : 'Room ' + u.label) : ''; },
+    /* the category's own name (PRQ-03-03): "Luye Starry Sky Suite · Immersive View", never the last segment of a meta */
+    roomName: function (win, slug) {
+      var P = window.SIYL_PRICE, at = P && P.locate ? P.locate(win) : null, r = null;
+      if (at && at.stay && Array.isArray(at.stay.rooms)) r = at.stay.rooms.filter(function (x) { return x.slug === slug; })[0] || null;
+      if (r && r.name) return r.name;
+      var s = this.summary(win, slug); return s && s.name ? s.name : '';
+    },
+    /* the name one occupant is shown by: "You" · a first name · "A guest" · '' for a place kept for a party */
+    whoWords: function (o) { return whoOf(o); },
+    /* ONE ROOM'S WORDS (TO-01214 … TO-01218 · TO-01256 … TO-01258): who is there (first names, joined with "and") and the
+       state in lower case — "you and Ada" + "full" · "you" + "1 place free" · "you" + "1 place kept for Ben" · "Ada" +
+       "1 place free · 1 kept for Ben" · "Ada" + "1 place kept for you" · (nobody) + "empty · 2 places" · the Guest House
+       "you" + "3 of 4 places free". Returns { names: [...], who: 'you and Ada', state: '…' }. */
+    stateOf: function (u) {
+      if (!u) return { names: [], who: '', state: '' };
+      var real = u.occupants.filter(function (o) { return !o.placeholder; });
+      var mineIn = real.some(function (o) { return o.mine; });
+      var names = real.slice().sort(function (a, b) { return (b.mine ? 1 : 0) - (a.mine ? 1 : 0); }).map(whoOf);
+      var who = andJoin(names.map(function (n, i) { return i === 0 ? n : (n === 'You' ? 'you' : n); }));
+      var keptMine = u.occupants.filter(function (o) { return o.placeholder && o.party; }).length;
+      var stage = u.key ? U.stageOf(u.key) : null;
+      var free = u.free, parts = [];
+      var youHoldStage = mineIn || (stage ? !!U.mine(stage) : false);
+      if (!real.length && !keptMine) return { names: [], who: '', state: 'empty · ' + u.places + (u.places === 1 ? ' place' : ' places') };
+      if (u.kind === 'property') parts.push(free + ' of ' + u.places + ' places free');
+      else if (free > 0) parts.push(free + (free === 1 ? ' place free' : ' places free'));
+      if (keptMine) {
+        var forWhom = youHoldStage ? absentMembers(stage) : ['you'].concat(absentMembers(stage));
+        forWhom = forWhom.slice(0, keptMine);
+        var whom = forWhom.length ? andJoin(forWhom) : 'your party';
+        parts.push(parts.length ? keptMine + ' kept for ' + whom : (keptMine === 1 ? '1 place kept for ' : keptMine + ' places kept for ') + whom);
+      }
+      if (!parts.length) parts.push('full');
+      return { names: names, who: who, state: parts.join(' · ') };
+    },
     unitWords: function (u) {
+      var st = this.stateOf(u), who = andJoin(st.names.map(function (n) { return n === 'You' ? 'you' : n; }));
+      return who ? who + ' · ' + st.state : st.state;
+    },
+    /* THE OCCUPANCY SENTENCE of a held room (TO-01359 · TO-01360), from the engine's units — no second count:
+       "Room A has two sleeping places. You hold one; one is free." · "… You hold one; one is kept for Ben." ·
+       "… You and Ada hold them; the room is full." · "The Guest House has four sleeping places. You hold one; three are
+       free." · "… All four are taken, one of them by you." */
+    occupancySentence: function (u) {
       if (!u) return '';
-      var names = u.occupants.map(function (o) { return o.mine ? 'You' : (o.name || 'A guest'); });
-      if (u.full) return names.join(' · ') + ' · Full';
-      if (!names.length) return u.places + (u.places === 1 ? ' place' : ' places') + ' · Available';
-      return names.join(' · ') + ' · ' + u.free + (u.free === 1 ? ' place available' : ' places available');
+      var real = u.occupants.filter(function (o) { return !o.placeholder; });
+      if (!real.some(function (o) { return o.mine; })) return '';
+      var names = real.slice().sort(function (a, b) { return (b.mine ? 1 : 0) - (a.mine ? 1 : 0); }).map(whoOf);
+      var H = real.length, K = u.occupants.filter(function (o) { return o.placeholder; }).length, F = u.free;
+      var subject = u.kind === 'property' ? 'The Guest House' : this.unitName(u);
+      var head = subject + ' has ' + numWord(u.places) + ' sleeping ' + (u.places === 1 ? 'place' : 'places') + '. ';
+      if (!F && !K) {
+        if (u.kind === 'property') return head + 'All ' + numWord(u.places) + ' are taken, one of them by you.';
+        return head + (H === 1 ? 'You hold it.' : andJoin(names) + ' hold them; the room is full.');
+      }
+      var rest = [];
+      if (F) rest.push(numWord(F) + (F === 1 ? ' is free' : ' are free'));
+      if (K) {
+        var mineParty = u.occupants.filter(function (o) { return o.placeholder && o.party; }).length;
+        var whom = mineParty ? andJoin(absentMembers(u.key ? U.stageOf(u.key) : '').slice(0, mineParty)) : '';
+        rest.push(numWord(K) + (K === 1 ? ' is kept' : ' are kept') + (whom ? ' for ' + whom : ''));
+      }
+      return head + andJoin(names) + ' hold' + (H === 1 && names[0] !== 'You' ? 's' : '') + ' ' + numWord(H) + '; ' + rest.join(' and ') + '.';
+    },
+    /* THE WAITING LIST CONTROL (PRQ-02-07 · PRQ-03-04): can ANY category of a stage still take the guest's party? When it
+       cannot (and the guest holds nothing there), the page offers "Join the waiting list" → U.wait(stage, need, wanted) */
+    stageKeys: function (stage) { var self = this; return Object.keys((view && view.units) || {}).filter(function (k) { return self.stageOf(k) === stage; }); },
+    stageCanTake: function (stage, need) {
+      if (!view || !view.units) return true;             /* the engine unread: never offer the line on a guess */
+      if (this.mine(stage)) return true;
+      var self = this, P = window.SIYL_STAY_PLAN, c = this.complimentary();
+      need = need || this.need();
+      return this.stageKeys(stage).some(function (k) {
+        if (P && k === P.COMPLIMENTARY.key && c && !c.open) return false;   /* the Guest House after 30 November or full */
+        var i = k.indexOf('/'); return self.canTake(k.slice(0, i), k.slice(i + 1), need);
+      });
+    },
+    /* THE GUEST HOUSE BLOCK (PRQ-03-05): the live count, open / closed / full, and whether this guest can take a place */
+    guestHouse: function () {
+      var c = this.complimentary(), P = window.SIYL_STAY_PLAN; if (!c || !c.max) return null;
+      var key = c.key || (P && P.COMPLIMENTARY.key) || 'guesthouse/guest-house', i = key.indexOf('/');
+      var closed = c.phase === 'closed';
+      var words = P ? P.complimentaryWords(c.remaining, c.max, new Date()) : { headline: c.remaining + ' of ' + c.max + ' places left', detail: '' };
+      return { key: key, win: key.slice(0, i), slug: key.slice(i + 1), max: c.max, remaining: c.remaining, taken: c.taken,
+               mine: !!c.mine, open: !!c.open, closed: closed, full: !!c.full, count: c.remaining + ' of ' + c.max + ' places left',
+               headline: words.headline, detail: words.detail,
+               canTake: !c.mine && !!c.open && this.canTake(key.slice(0, i), key.slice(i + 1)) };
     },
 
     /* ---- write: the engine decides, never this file -------------------- */
@@ -188,7 +309,7 @@
       var a = auth();
       if (!a || !a.guestId) return Promise.resolve({ ok: false, error: 'not signed in' });
       return fetch(API + '/join', { method: 'POST', headers: headers(true),
-        body: JSON.stringify({ invitationId: a.invitationId, guestId: a.guestId, key: keyOf(win, slug), label: label, name: firstName(), need: need || 1 }) })
+        body: JSON.stringify({ invitationId: a.invitationId, guestId: a.guestId, key: keyOf(win, slug), label: label, need: need || 1 }) })
         .then(function (r) { return r.json().then(function (d) { d.status = r.status; return d; }); })
         .then(function (d) { if (d && d.units) { seq++; view = d; rememberWaits(d); announce(); } else U.load(true); return d; })
         .catch(function () { return { ok: false, error: 'unreachable' }; });
@@ -198,7 +319,7 @@
     wait: function (stage, size, wanted) {
       var a = auth();
       if (!a || !a.guestId) return Promise.resolve({ ok: false, error: 'not signed in' });
-      return fetch(API + '/wait', { method: 'POST', headers: headers(true), body: JSON.stringify({ invitationId: a.invitationId, guestId: a.guestId, stage: stage, size: size || 1, wanted: wanted || [], name: firstName() }) })
+      return fetch(API + '/wait', { method: 'POST', headers: headers(true), body: JSON.stringify({ invitationId: a.invitationId, guestId: a.guestId, stage: stage, size: size || U.need(), wanted: wanted || [] }) })
         .then(function (r) { return r.json().then(function (d) { d.status = r.status; return d; }); })
         .then(function (d) { if (d && d.units) { seq++; view = d; rememberWaits(d); announce(); } else U.load(true); return d; })
         .catch(function () { return { ok: false, error: 'unreachable' }; });

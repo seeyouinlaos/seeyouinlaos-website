@@ -35,7 +35,8 @@ function engine() {
   const call = async (op, body, as) => { const r = await R.fetch(new Request('https://x/api/rooms/' + op, { method: body ? 'POST' : 'GET', headers: as ? { 'x-siyl-identity': JSON.stringify(as) } : {}, body: body ? JSON.stringify(body) : undefined })); return { status: r.status, ...(await r.json()) }; };
   return { call, R };
 }
-const asId = (s) => ({ invitationId: s.invitationId, guestId: s.guestId, partyId: s.partyId, hosts: !!s.hosts });
+/* the Worker names the guest to the engine (PRQ-GAP-02): identity.firstName — the body's name is never trusted */
+const asId = (s) => ({ invitationId: s.invitationId, guestId: s.guestId, partyId: s.partyId, hosts: !!s.hosts, firstName: String(s.preferredName || '').split(/\s+/)[0] });
 const join = (E, s, key, label) => E.call('join', { invitationId: s.invitationId, guestId: s.guestId, key, label, name: s.preferredName }, asId(s));
 const other = (id, name) => ({ ...LIN, guestId: 'g-' + id, invitationId: 'INV-g-' + id, preferredName: name || 'Lin' });
 
@@ -97,14 +98,16 @@ test('NO RESERVATIONS, NO FIXED ARRANGEMENT (Owner, 15 Sep 2026 · reaffirmed 19
   assert.equal((html.match(/data-join="bkk-stay\|u-sathorn-superior-garden\|[A-F]"/g) || []).length, 6, 'six rooms, six Choose buttons'); assert.match(html, /data-join="bkk-stay\|u-sathorn-superior-garden\|A"/);
   assert.doesNotMatch(html, /Reserved|data-reserved|Arranged|Fixed/i); assert.equal((html.match(/Choose this room/g) || []).length, 6);
   const gh = ST.unitsHtml('guesthouse', 'guest-house');
-  assert.match(gh, /Guest House complimentary/); assert.match(gh, /4 places available/); assert.match(gh, /data-join="guesthouse\|guest-house\|A"/); assert.doesNotMatch(gh, /Private Residence|up to 4/i);
+  assert.match(gh, /Guest House complimentary/); assert.match(gh, /empty · 4 places</, 'API-A2 unitWords'); assert.match(gh, /data-join="guesthouse\|guest-house\|A">Take a place</, 'PRQ-03-05'); assert.doesNotMatch(gh, /Private Residence|up to 4/i);
 
   /* the words: the fixed arrangement, the reservation and the invented residence are gone from every guest surface and script */
   assert.ok(!fs.existsSync(path.join(ROOT, 'assets/arranged.js')), 'assets/arranged.js is deleted');
   for (const f of SURFACES) {
     const t = code(f);
     assert.doesNotMatch(t, /arranged\.js|SIYL_ARRANGED|Arranged for you|Fixed arrangement|fixedStagesOf|withoutFixed/i, f + ' carries no fixed arrangement');
-    assert.doesNotMatch(t, /Reserved for (bride|family)|held for you|This category is reserved|Reserved · Bride/i, f + ' carries no reservation wording');
+    /* "held for you" is approved copy for a place the guest really holds (TO-00543 "Held for you", TO-00942 "your place is held for you
+       as soon as you take it") — the ban stays on the reservation words for a place held in advance */
+    assert.doesNotMatch(t, /Reserved for (bride|family)|This category is reserved|Reserved · Bride|held for (the )?(bride|groom|family|hosts)/i, f + ' carries no reservation wording');
     /* "up to four" was the invented residence's capacity; since Edit 7 (Owner, 24 Sep 2026) the Guest House itself is one bedroom
        shared by up to four guests, so the ban is on the invented residence, never on the house's own true number */
     assert.doesNotMatch(t, /Private Residence|private-residence|airbnb-2br/i, f + ' never says Private Residence');
@@ -213,7 +216,7 @@ test('PRESETS · the approved rooms come from the open inventory; the Presidenti
   assert.ok(P.approved('prewed').slug); assert.ok(P.cheapest('prewed').slug);
 });
 
-test('THE WORDS · category lines are derived from the physical rooms the engine reports: rooms with a place left · unused places; a category full of real bookings says SOLD OUT (the engine\'s word, never a reservation); the Guest House counts its four shared places; a unit takes a whole party or not at all; "Your place is held" only for a real allocation; the waiting list has a position', async () => {
+test('THE WORDS · category lines are derived from the physical rooms the engine reports: rooms with a place left · unused places; a category full of real bookings says SOLD OUT (the engine\'s word, never a reservation); the Guest House counts its four shared places; a unit takes a whole party or not at all; "Held for you" only for a real allocation; the waiting list has a position', async () => {
   const E = engine();
   const NOOR = other('noor', 'Noor'), ADA = other('ada', 'Ada'), BEN = other('ben', 'Ben');
   /* real bookings by other guests: the Heritage A half taken, B full; the Presidential full; Steffie (Peggy's party) in the Guest House */
@@ -224,22 +227,23 @@ test('THE WORDS · category lines are derived from the physical rooms the engine
   /* the shipped client reads the shipped engine, as Peggy */
   const w = page({ auth: PEGGY, modules: ['assets/rooms-data.js', 'assets/pricing.js', 'assets/rooms.js'], fetch: await roomsFetch(E.R, asId(PEGGY)) });
   const U = w.SIYL_UNITS; await U.load(true); assert.equal(U.ready(), true); assert.equal(U.error(), null);
-  assert.equal(U.label('wedstay', 'heritage'), '4 rooms · 7 places available');
-  assert.deepEqual(plain(U.count('wedstay', 'heritage')), { rooms: 5, places: 10, reserved: 0, free: 7, open: 4 });
-  assert.equal(U.unitWords(U.units('wedstay', 'heritage')[0]), 'Haruthai · 1 place available');
-  assert.equal(U.unitWords(U.units('wedstay', 'heritage')[1]), 'Lin · Noor · Full');
-  assert.equal(U.unitWords(U.units('wedstay', 'heritage')[2]), '2 places · Available');
+  /* TO-01208 · PRQ-03-09: the one counting grammar — empty rooms of the category, then free places in shared rooms */
+  assert.equal(U.label('wedstay', 'heritage'), '3 of 5 rooms left · 1 free place in a shared room');
+  assert.deepEqual(plain(U.count('wedstay', 'heritage')), { rooms: 5, places: 10, reserved: 0, free: 7, open: 4, empty: 3, shared: 1 });
+  assert.equal(U.unitWords(U.units('wedstay', 'heritage')[0]), 'Haruthai · 1 place free', 'first names only');
+  assert.equal(U.unitWords(U.units('wedstay', 'heritage')[1]), 'Lin and Noor · full');
+  assert.equal(U.unitWords(U.units('wedstay', 'heritage')[2]), 'empty · 2 places');
   /* a category full of real bookings: SOLD OUT — remainingPlaces === 0 and nothing else; never RESERVED, never "booked" */
   assert.equal(U.label('wedstay', 'souphattra-presidential'), 'Sold out'); assert.equal(U.soldOut('wedstay', 'souphattra-presidential'), true); assert.equal(U.fits('wedstay', 'souphattra-presidential'), false); assert.equal(U.ctaWords('wedstay', 'souphattra-presidential'), 'Sold out');
   assert.equal(U.reserved('wedstay', 'souphattra-presidential'), false); assert.equal(U.reserved('bkk-stay', 'u-sathorn-superior-garden'), false);
-  assert.equal(U.unitWords(U.units('wedstay', 'souphattra-presidential')[0]), 'Ada · Ben · Full');
+  assert.equal(U.unitWords(U.units('wedstay', 'souphattra-presidential')[0]), 'Ada and Ben · full');
   /* U Sathorn: every room counts as available — Room A is nobody's */
-  assert.equal(U.label('bkk-stay', 'u-sathorn-superior-garden'), '6 rooms · 12 places available'); assert.equal(U.unitWords(U.units('bkk-stay', 'u-sathorn-superior-garden')[0]), '2 places · Available'); assert.equal(U.fits('bkk-stay', 'u-sathorn-superior-garden'), true); assert.equal(U.ctaWords('bkk-stay', 'u-sathorn-superior-garden'), '');
-  assert.deepEqual(plain(U.count('bkk-stay', 'u-sathorn-superior-garden')), { rooms: 6, places: 12, reserved: 0, free: 12, open: 6 });
+  assert.equal(U.label('bkk-stay', 'u-sathorn-superior-garden'), '6 of 6 rooms left'); assert.equal(U.unitWords(U.units('bkk-stay', 'u-sathorn-superior-garden')[0]), 'empty · 2 places'); assert.equal(U.fits('bkk-stay', 'u-sathorn-superior-garden'), true); assert.equal(U.ctaWords('bkk-stay', 'u-sathorn-superior-garden'), '');
+  assert.deepEqual(plain(U.count('bkk-stay', 'u-sathorn-superior-garden')), { rooms: 6, places: 12, reserved: 0, free: 12, open: 6, empty: 6, shared: 0 });
   /* D2 · the Guest House complimentary: four shared places, one taken, the first name visible */
   const gh = U.units('guesthouse', 'guest-house')[0];
-  assert.equal(U.label('guesthouse', 'guest-house'), '3 places available'); assert.equal(U.unitName(gh), 'Guest House complimentary'); assert.equal(U.unitWords(gh), 'Steffie · 3 places available');
-  assert.deepEqual(plain(U.count('guesthouse', 'guest-house')), { rooms: 1, places: 4, reserved: 0, free: 3, open: 1 });
+  assert.equal(U.label('guesthouse', 'guest-house'), '3 of 4 places left'); assert.equal(U.unitName(gh), 'Guest House complimentary'); assert.equal(U.unitWords(gh), 'Steffie · 3 of 4 places free');
+  assert.deepEqual(plain(U.count('guesthouse', 'guest-house')), { rooms: 1, places: 4, reserved: 0, free: 3, open: 1, empty: 0, shared: 3 });
   assert.deepEqual(gh.occupants.map((o) => [o.name, o.party, o.mine]), [['Steffie', true, false]], 'a party member already in the house');
   /* PARTY CAPACITY: a unit takes the whole party (the members already in it count) or not at all */
   const heritage = U.units('wedstay', 'heritage');
@@ -249,17 +253,17 @@ test('THE WORDS · category lines are derived from the physical rooms the engine
   assert.equal(U.unitForParty('wedstay', 'souphattra-presidential', 1), null);
   /* "Your place is held" only for a real allocation: Peggy holds Room C through the shipped join */
   const j = await U.join('wedstay', 'heritage', 'C'); assert.equal(j.ok, true); assert.equal(j.status, 200);
-  assert.equal(U.label('wedstay', 'heritage'), 'Your place is held · Room C'); assert.deepEqual(plain(U.mine('wedstay')), { key: 'wedstay/heritage', label: 'C' }); assert.equal(U.mineFor('wedstay', 'heritage').label, 'C'); assert.equal(U.mineFor('wedstay', 'souphattra-presidential'), null);
-  assert.equal(U.unitWords(U.units('wedstay', 'heritage')[2]), 'You · 1 place available');
-  assert.equal(U.label('bkk-stay', 'u-sathorn-superior-garden'), '6 rooms · 12 places available', 'another stage is untouched');
+  assert.equal(U.label('wedstay', 'heritage'), 'Held for you · Room C'); assert.deepEqual(plain(U.mine('wedstay')), { key: 'wedstay/heritage', label: 'C' }); assert.equal(U.mineFor('wedstay', 'heritage').label, 'C'); assert.equal(U.mineFor('wedstay', 'souphattra-presidential'), null);
+  assert.equal(U.unitWords(U.units('wedstay', 'heritage')[2]), 'you · 1 place free');
+  assert.equal(U.label('bkk-stay', 'u-sathorn-superior-garden'), '6 of 6 rooms left', 'another stage is untouched');
   /* THE WAITING LIST: a stage no room could take — one entry, positioned; a stage where a place is held refuses the line */
   const refused = await U.wait('wedstay', 2, ['wedstay/souphattra-presidential']); assert.equal(refused.ok, false); assert.equal(refused.status, 409); assert.equal(refused.error, 'a place is held in this stage');
   const waited = await U.wait('kmg', 2, ['kmg/solarium']); assert.equal(waited.ok, true);
   assert.equal(U.waitlisted('kmg').position, 1); assert.equal(U.waitlisted('kmg').size, 2); assert.deepEqual(plain(U.waitlisted('kmg').wanted), ['kmg/solarium']); assert.deepEqual(plain(U.waitlistedStages()), ['kmg']); assert.equal(U.waiting('kmg'), 1); assert.equal(U.waitlisted('wedstay'), null);
-  assert.equal(U.label('kmg', 'solarium'), '1 room · 2 places available', 'the line holds nothing');
+  assert.equal(U.label('kmg', 'solarium'), 'One room only · free', 'the line holds nothing');
   /* a place held in the stage resolves the entry */
   const k = await U.join('kmg', 'solarium', 'A'); assert.equal(k.ok, true);
-  assert.equal(U.waitlisted('kmg'), null); assert.deepEqual(plain(U.waitlistedStages()), []); assert.equal(U.waiting('kmg'), 0); assert.equal(U.label('kmg', 'solarium'), 'Your place is held · Room A');
+  assert.equal(U.waitlisted('kmg'), null); assert.deepEqual(plain(U.waitlistedStages()), []); assert.equal(U.waiting('kmg'), 0); assert.equal(U.label('kmg', 'solarium'), 'Held for you · Room A');
   const un = await U.unwait('kmg'); assert.equal(un.ok, true, 'leaving a line one is not in changes nothing');
 });
 
@@ -269,8 +273,10 @@ test('SURFACES · the room page shows every physical room of the category with i
   assert.doesNotMatch(room, /rsvline|P\.eligible\(room\)|P\.eligible\(r\)/);
   assert.doesNotMatch(journeys, /' rsvd'|yours to choose/);
   assert.match(inv, /h\['x-siyl-auth'\] = a\.bearer/);
-  assert.match(stay, /var state = reserved \? 'Reserved · ' \+ esc\(x\.reservedFor\) : fullForMe \? 'Full' : keptForMe && !x\.free \? \(/, 'the factual states: available · places available · Full · a place kept for the party (release 014)');
-  assert.doesNotMatch(stay, /Reserved for/);
+  /* the factual states come from the engine's units through ONE grammar (SIYL_UNITS.stateOf · TO-01214 / TO-01256 … TO-01258): no reservation branch exists any more */
+  assert.match(stay, /var words = u\.stateOf \? u\.stateOf\(x\) : \{ names: \[\], state: '' \};/); assert.match(stay, /var state = esc\(words\.state\);\n\s*if \(!fullForMe && !fits && !isMine\) state \+= ' — not enough for the ' \+ need \+ ' of you together';/, 'the factual states: free places · full · kept for the party · not enough for the party (TO-01259)');
+  assert.match(stay, /: fullForMe \? '<span class="t-l1">Full<\/span>'/);
+  assert.doesNotMatch(stay, /Reserved for|'Reserved · '|reservedFor\)/);
   const hostsFn = src('assets/pricing.js').match(/hosts: function \(\) \{[^}]*\}/)[0];
   assert.doesNotMatch(hostsFn, /Haruthai|Suthep|preferredName|fullName/, 'no name decides anything in the calculation source');
 });

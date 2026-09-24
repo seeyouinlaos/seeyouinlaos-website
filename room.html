@@ -10,12 +10,12 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 main{padding:0 0 70px;max-width:640px;margin:0 auto}
 .wrap{padding:0 24px}
 .ph{background:#E7E3DB center/cover no-repeat}
-.gal{position:relative;margin:0 24px}   /* measured: the Aman room photograph is framed 24 px from each edge, 16:10 */
+.gal{position:relative;margin:0 24px}@media (max-width:480px){.gal{margin-bottom:48px}}   /* measured: the Aman room photograph is framed 24 px from each edge, 16:10 */
 .trk{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;overscroll-behavior-x:contain}
 .trk::-webkit-scrollbar{display:none}
 .gal .ph{flex:0 0 100%;width:100%;aspect-ratio:16/10;scroll-snap-align:start;scroll-snap-stop:always}
 .gc{position:absolute;right:0;bottom:-30px;background:none;color:#313131;font-family:'PP Editorial Old',serif;font-size:13px;letter-spacing:1px;padding:0;z-index:2}   /* measured: the counter sits under the photograph */
-.gl{position:absolute;left:0;bottom:-30px;right:64px;color:#6B6964;font-size:10.5px;letter-spacing:2px;text-transform:uppercase;line-height:22px;z-index:2}
+.gl{position:absolute;left:0;top:calc(100% + 4px);bottom:auto;right:64px;color:#6B6964;font-size:10.5px;letter-spacing:2px;text-transform:uppercase;line-height:22px;z-index:2}
 .gn{position:absolute;top:50%;transform:translateY(-50%);background:none;border:0;font-size:24px;color:#F3EEE7;text-shadow:0 1px 6px rgba(0,0,0,.5);width:44px;height:44px;cursor:pointer;z-index:2}
 .gp{left:0}.gx{right:0}
 .pend{width:calc(100% - 48px);margin:0 24px;aspect-ratio:16/10;background:#E7E3DB;display:flex;align-items:center;justify-content:center;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#6B6964}
@@ -93,22 +93,23 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:24px;margin:44
 .note{font-size:11px;color:#6B6964;margin-top:16px;line-height:1.7}
 .backrow{text-align:center;margin-top:34px}
 .backrow a{font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:#313131;text-decoration:none;border-bottom:1px solid #313131;padding:8px 0 3px;display:inline-block;min-height:44px}
-</style><link rel="stylesheet" href="assets/prep.css?v=e192c878">
-<link rel="stylesheet" href="assets/desktop.css?v=f66b6e82"><link rel="stylesheet" href="assets/aman.css?v=b099d186"></head><body>
+</style><script src="assets/i18n/siyl-i18n.js?v=3a27503d"></script>
+<link rel="stylesheet" href="assets/prep.css?v=3b4d86a7">
+<link rel="stylesheet" href="assets/desktop.css?v=f66b6e82"><link rel="stylesheet" href="assets/aman.css?v=23c08c99"></head><body>
 <header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="cart.html" aria-label="My Bag"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main id="m"></main>
-<script src="assets/bag.js?v=fe0c8b93"></script>
-<script src="assets/draft.js?v=ac3ae4f8"></script>
-<script src="assets/shop-menu.js?v=1ff891bc"></script>
-<script src="assets/aman.js?v=d6c4adb4"></script>
-<script src="assets/rooms-data.js?v=3a8a998e"></script>
-<script src="assets/pricing.js?v=eb8a9bf3"></script>
-<script src="assets/stay-plan.js?v=1d6cb33c"></script>
-<script src="assets/rooms.js?v=f2c427e2"></script>
-<script src="assets/stay.js?v=51b302df"></script>
-<script src="assets/journey.js?v=275f56b0"></script>
-<script src="assets/wizard.js?v=2ffbd144"></script>
-<script type="module" src="assets/invite.mjs?v=c557d97c"></script>
+<script src="assets/bag.js?v=43bc40c1"></script>
+<script src="assets/draft.js?v=03e8b4bc"></script>
+<script src="assets/shop-menu.js?v=755a9271"></script>
+<script src="assets/aman.js?v=338fd10f"></script>
+<script src="assets/rooms-data.js?v=701dd9a2"></script>
+<script src="assets/pricing.js?v=6a4a85a2"></script>
+<script src="assets/stay-plan.js?v=5227fdc4"></script>
+<script src="assets/rooms.js?v=45bdf0e9"></script>
+<script src="assets/stay.js?v=d7bc46dc"></script>
+<script src="assets/journey.js?v=fbd99373"></script>
+<script src="assets/wizard.js?v=f9c66d86"></script>
+<script type="module" src="assets/invite.mjs?v=7d3552fb"></script>
 <script>
 (function () {
 'use strict';
@@ -119,24 +120,35 @@ if (!stay) { location.replace('journeys.html'); return; }
 var room = null;
 stay.rooms.forEach(function (r) { if (r.slug === roomSlug) room = r; });
 if (!room) room = stay.rooms[0];
-document.title = room.name + ' · ' + stay.name + ' · See You In Laos';
+/* THE TITLE AND THE EYEBROW (Window 007 · PRQ-03-11): built from the room and its hotel, never from the stage — the
+ * Guest House, whose room and house share one name, is named once; a room with its own property (U Sathorn Bangkok)
+ * names the property, not "Bangkok · Before the Wedding" */
+var hotel = room.property || stay.name;
+var isHouse = room.name === stay.name;
+document.title = (isHouse ? room.name : room.name + ' · ' + hotel) + ' · See You In Laos';
+var city = String(stay.place || '').split(',')[0];
+var SP = window.SIYL_STAY_PLAN;
+var eyebrowWords = isHouse ? ((room.complimentary && SP && SP.COMPLIMENTARY && SP.COMPLIMENTARY.eyebrow) || room.cat + ' · ' + city)
+  : room.property ? room.property + ' · ' + room.cat + ' · ' + stay.windows[0].label
+  : room.cat + ' · ' + stay.name;
 
 function esc(s) { return String(s).replace(/</g, '&lt;'); }
 /* every amount on this page comes from SIYL_PRICE — nothing is computed here */
 var P = window.SIYL_PRICE;
 var W0 = stay.windows[0];
 function priceLine(r) {
-  if (r.rate == null) return '<span class="rsv">' + esc(r.status || 'Amount on request · Guest Relations') + '</span>';
+  if (r.rate == null) return '<span class="rsv">' + esc(r.status || 'Amount on request') + '</span>';
   var qq = P.quote(W0.id, r.slug);
-  if (qq && qq.total != null) return '<span class="op">' + qq.amount + '</span> <span class="oe">' + esc(qq.totalLine.toLowerCase()) + '</span>';
-  return '<span class="op">USD ' + r.rate + '</span> <span class="oe">per person / night</span>';
+  if (qq && qq.total != null) return '<span class="op">' + qq.amount + '</span> <span class="oe">per person · ' + esc(qq.nightsLine) + '</span>';
+  return '<span class="op">USD ' + r.rate + '</span> <span class="oe">per person per night</span>';
 }
 
 /* the amount, what it covers, and the nights it covers — one block, every
- * window, so "2 nights" can never be mistaken for one */
+ * window, so "2 nights" can never be mistaken for one. The basis is said once: "USD 290 per person", then
+ * "2 nights · 25 – 27 February 2027" (Window 007 · TO-01330) */
 function amountBlock(q) {
-  var b = '<p class="price">' + q.amount + ' <span class="pu">total per person</span></p>';
-  b += '<p class="per">' + esc(q.totalLine) + ' · ' + esc(q.dates) + '</p>';
+  var b = '<p class="price">' + q.amount + ' <span class="pu">per person</span></p>';
+  b += '<p class="per">' + esc(q.nightsLine) + ' · ' + esc(q.dates) + '</p>';
   if (q.nightsCovered) b += '<p class="nn">' + esc(q.nightsCovered) + '</p>';
   if (q.contribution) b += '<p class="nn">' + esc(q.contribution) + '</p>';
   return b;
@@ -144,7 +156,7 @@ function amountBlock(q) {
 
 var h = '';
 /* ---- the name above the photograph (measured: the Aman room page reads title → photograph → caption → body) ---- */
-h += '<section class="intro intro-head"><p class="eyebrow">' + esc(room.cat) + ' · ' + esc(stay.name) + '</p><h1>' + esc(room.name) + '</h1></section>';
+h += '<section class="intro intro-head"><p class="eyebrow">' + esc(eyebrowWords) + '</p><h1>' + esc(room.name) + '</h1></section>';
 /* ---- room hero + real gallery (same concrete room, counter 1/N) ---- */
 if (room.gallery.length) {
   h += '<div class="gal" id="gal"><div class="trk" id="trk">';
@@ -152,7 +164,7 @@ if (room.gallery.length) {
     h += '<div class="ph" style="background-image:url(' + g[0] + ')" role="img" aria-label="' + esc(room.name) + ' — ' + esc(g[1]) + '"></div>';
   });
   h += '</div>';
-  if (room.gallery.length > 1) h += '<button class="gn gp" aria-label="Previous image">‹</button><button class="gn gx" aria-label="Next image">›</button>';
+  if (room.gallery.length > 1) h += '<button class="gn gp" aria-label="Previous photograph">‹</button><button class="gn gx" aria-label="Next photograph">›</button>';
   h += '<span class="gl" id="gl">' + esc(room.gallery[0][1]) + '</span>';
   h += '<span class="gc" id="gc">1 / ' + room.gallery.length + '</span></div>';
 } else {
@@ -161,51 +173,48 @@ if (room.gallery.length) {
 /* ---- BOOKING FIRST, DETAILS SECOND (Owner, 24 Sep 2026): the room, its amount and its one action — with the rooms of the
  *      category and who already holds a place in them — stand directly under the photographs; the story, the facts, the
  *      amenities and the other rooms follow as optional detail. (Formerly the last block of the page.) ---- */
-h += '<section class="buy" id="book"><p class="eyebrow" style="margin:0">Book this room · ' + esc(stay.place) + '</p>';
+/* nothing is booked on this website — a room is chosen and held, the Guest House is a place taken (Window 007 · TO-01332) */
+h += '<section class="buy" id="book"><p class="eyebrow" style="margin:0">' + (room.complimentary ? 'Take a place' : 'Choose your room') + ' · ' + esc(stay.place) + '</p>';
 stay.windows.forEach(function (w, wi) {
   var q = P.quote(w.id, room.slug);
   h += '<div class="win"><p class="wl">' + esc(w.label) + '</p><p class="wd">' + esc(w.dates) + '</p><p class="wn">' + esc(w.nights) + '</p>';
   if (room.complimentary) {
     /* THE GUEST HOUSE (Owner, 19 Sep 2026): complimentary, four shared places (one bedroom · Edit 7) held through the room engine like any room —
        the guest sees who already shares the house and takes as many places as the party has members */
-    h += '<p class="price">Complimentary</p><p class="per">' + esc(room.status) + ' · Guest Relations arranges the rest</p>';
+    h += '<p class="price">Complimentary</p><p class="per">One of four places in a shared house; Guest Relations looks after the keys, your arrival and everything around it.</p>';
     h += '<p class="av" data-av="' + w.id + '" hidden></p>';
     h += '<div class="rooms prep" data-rooms-box="' + w.id + '"></div>';
     h += '<button class="cta" data-win="' + wi + '" data-avwin="' + w.id + '">Add to My Bag</button><span class="swap" data-swap="' + wi + '" hidden></span>';
-  } else if (room.interest) {
-    h += '<p class="price">' + esc(room.status) + '</p><p class="per">Guest Relations arranges the rest</p>';
-    h += '<button class="cta" data-win="' + wi + '">Add to My Bag</button>';
   } else if (room.rate == null) {
-    /* real inventory without an approved guest amount — never an invented price */
-    h += '<p class="price">Amount on request</p><p class="per">Guest Relations confirms the amount</p>';
-    h += '<p class="enq">This room is part of the house but not yet released with an amount. Guest Relations will confirm it for you.</p>';
+    /* real inventory without an approved guest amount — never an invented price (dormant: every room carries a rate) */
+    h += '<p class="price">Amount on request</p><p class="per">Guest Relations will confirm the amount with you.</p>';
   } else {
     /* NO PRE-RESERVED ROOMS (Owner, 15 Sep 2026): every room is chosen like any other, available until booked.
      * ONE presentation for every window: the amount, exactly what it covers,
      * and the exact nights it covers. The nights are never left implicit. */
     h += amountBlock(q);
-    if (q.note) h += '<p class="hn2">' + esc(q.note) + '<span>' + esc(q.noteBy) + '</span></p>';
+    /* the hosted night is said once, by the amount block's own line (Window 007 · TO-00820) — no second note here */
     if ((room.breakfast || stay.breakfast)) h += '<p class="bf">' + esc((room.breakfast || stay.breakfast)) + '</p>';
     h += '<p class="av" data-av="' + w.id + '" hidden></p>';
     /* the physical rooms of this category, each with its two places — the primary picture of availability */
     h += '<div class="rooms prep" data-rooms-box="' + w.id + '"></div>';
     h += '<button class="cta" data-win="' + wi + '" data-avwin="' + w.id + '">Add to My Bag</button><span class="swap" data-swap="' + wi + '" hidden></span>';
-    if (P.hasVariants(w.id)) h += '<button type="button" class="chg" data-chg="' + wi + '" hidden>Change selection</button>';
+    if (P.hasVariants(w.id)) h += '<button type="button" class="chg" data-chg="' + wi + '" hidden>Choose another room</button>';
   }
   h += '</div>';
 });
-h += '<p class="note">Amounts are the total per person for the nights shown. Nothing is paid on this website — Guest Relations confirms every arrangement with you.</p></section>';
+h += '<p class="note">Nothing is paid on this website — Guest Relations confirms every arrangement with you.</p></section>';
 h += '<h2 class="detail-h" id="details">Details</h2>';
-h += '<section class="intro"><p class="body">' + esc(room.desc) + '</p>';
-/* the room's own paragraph — what the guest is actually buying */
-if (room.story) h += '<p class="body story">' + esc(room.story) + '</p>';
+/* the room's own paragraph — what the guest is actually buying; the one-line desc is the Other rooms card's, never printed
+ * above the story that says the same thing (Window 007 · PRQ-03-10) */
+h += '<section class="intro"><p class="body">' + esc(room.story || room.desc) + '</p>';
 if (room.galleryNote) h += '<p class="eyebrow" style="margin-top:10px">' + esc(room.galleryNote) + '</p>';
 h += '</section>';
 
 /* ---- amenities: only facts from register/data.mjs ---- */
 h += '<div class="wrap">';
 if (room.facts.length) {
-  h += '<h2>The Room</h2><div class="facts">';
+  h += '<h2>' + (isHouse ? 'The house' : 'The room') + '</h2><div class="facts">';
   room.facts.forEach(function (f) { h += '<div class="frow"><span class="fl">' + esc(f[0]) + '</span><span class="fv">' + esc(f[1]) + '</span></div>'; });
   h += '</div>';
 }
@@ -239,7 +248,7 @@ if (inc && inc.length) {
 if (stayKey === 'souphattra') {
   h += '<section class="ed"><div class="ph" style="background-image:url(assets/images/souphattra/heritage-courtyard-pool.jpg)" role="img" aria-label="Souphattra Heritage Vientiane — the courtyard and pool"></div>';
   h += '<p class="cap">Souphattra Heritage Vientiane</p>';
-  h += '<p class="body wrap" style="display:block;text-align:center">Souphattra Heritage Vientiane sits at the heart of our wedding stay: shared mornings, shared arrivals, and the rhythm of the weekend centred around one quiet place. Choose the stay that feels right for you.</p></section>';
+  h += '<p class="body wrap" style="display:block;text-align:center">Souphattra Heritage Vientiane is at the heart of our wedding weekend: we have breakfast together here on the wedding morning, and the vows and the dinner take place around its courtyard.</p></section>';
 } else if (room.gallery.length > 3) {
   var edImg = room.gallery[room.gallery.length - 1];
   h += '<section class="ed"><div class="ph" style="background-image:url(' + edImg[0] + ')" role="img" aria-label="' + esc(room.name) + ' — ' + esc(edImg[1]) + '"></div>';
@@ -328,6 +337,28 @@ function held(w) {
   return SIYL_BAG.get().filter(function (x) { return ids.indexOf(x.id) >= 0; })[0] || null;
 }
 var U = window.SIYL_UNITS, ST = window.SIYL_STAY;
+/* WHAT THE GUEST ALREADY HOLDS for these nights, named by its own room and house (Window 007 · PRQ-03-03 · TO-01351):
+ * never the last " · " segment of the product meta ("Immersive View"), never "four shared places" for one place */
+function whatYouHold(line) {
+  if (!line) return '';
+  if (line.stay === 'guesthouse' || line.complimentary) return 'a place at the Guest House complimentary';
+  var R = window.SIYL_ROOMS || {}, st = R[line.stay] || null, rec = null;
+  if (st) st.rooms.forEach(function (r) { if (r.slug === line.room) rec = r; });
+  var house = (rec && rec.property) || (st ? String(st.name).split(' · ')[0] : '') || line.name || '';
+  var unit = '';
+  try { var x = ST && ST.unitOf ? ST.unitOf(line) : null; unit = x && U && U.unitName ? U.unitName(x) : ''; } catch (e) { unit = ''; }
+  var name = rec ? rec.name : '';
+  var what = unit && name ? unit + ' (' + name + ')' : (name || unit || 'a room');
+  return what + (house ? ' at the ' + house : '');
+}
+/* A REFUSAL IS SEEN (Window 007 · PRQ-03-02): the words of a refused or failed action are kept per window and painted AFTER
+ * the live label, so the re-render that follows every engine event can no longer wipe them; the next action clears them */
+var refusals = {};
+function refuse(w, r, action) {
+  if (!r || r.ok) { delete refusals[w.id]; return; }
+  var words = ST ? ST.refusal(r, action) : '';
+  refusals[w.id] = words || '';
+}
 function paint() {
   /* the sibling cards carry the same live counts as the page they open */
   document.querySelectorAll('[data-oav]').forEach(function (el) {
@@ -342,7 +373,7 @@ function paint() {
     if (line) {
       b.textContent = 'Remove from My Bag';
       b.classList.add('sel');
-      if (swap) { var words = ST ? ST.unitWords(line) : ''; swap.hidden = !words; swap.textContent = words ? 'Current selection · ' + words : ''; }
+      if (swap) { swap.hidden = true; swap.textContent = ''; }   /* TO-03350 REMOVE: the state line above already says “Held for you · {room}” */
       if (chg) chg.hidden = false;
     } else {
       b.textContent = 'Add to My Bag';
@@ -351,8 +382,7 @@ function paint() {
       if (swap) {
         if (other) {
           /* the other hotel of the same stage is named with its house: one selection per stage, the new room replaces it */
-          var elsewhere = P.ids(w.id).indexOf(other.id) < 0;
-          swap.hidden = false; swap.textContent = 'Your trip currently holds ' + String(other.meta).split(' · ').pop() + (elsewhere ? ' at ' + ST.houseOf(other) : '') + ' for this stay — adding this room replaces it.';
+          swap.hidden = false; swap.textContent = 'You already hold ' + whatYouHold(other) + ' for these nights. Choosing this room replaces it; you keep it until the new room is held.';
         }
         else swap.hidden = true;
       }
@@ -364,11 +394,19 @@ function paint() {
       av.textContent = U.label(w.id, room.slug);
       av.classList.toggle('low', U.scarce(w.id, room.slug) || U.soldOut(w.id, room.slug));
       var need = ST ? ST.need() : 1;
-      var gone = !line && !(need > 1 && U.unitForParty ? U.unitForParty(w.id, room.slug, need) : U.fits(w.id, room.slug));
+      /* A PLACE KEPT FOR THE VIEWER IS THE VIEWER'S (Window 007 · PRQ-03-01): a party member kept it — the button joins that room,
+         and nothing on the page says "Sold out" or "full" to the guest it was kept for */
+      var kept = !line && U.keptForMe ? U.keptForMe(w.id, room.slug) : null;
+      if (kept && kept.label) b.setAttribute('data-kept', kept.label); else b.removeAttribute('data-kept');
+      var gone = !line && !kept && !(need > 1 && U.unitForParty ? U.unitForParty(w.id, room.slug, need) : U.fits(w.id, room.slug));
       b.disabled = gone;
-      if (gone) b.textContent = U.soldOut(w.id, room.slug) ? (U.ctaWords(w.id, room.slug) || 'Sold out') : (room.complimentary ? 'Not enough places for your party of ' + need : 'No room for your party of ' + need);
-      if (box && ST) { box.innerHTML = ST.unitsHtml(w.id, room.slug); ST.wire(box, function (r) { paint(); if (!r.ok) { av.hidden = false; av.textContent = ST.refusal(r); av.classList.add('low'); } else wizardDone(w); }); }
-    } else if (av) { av.hidden = true; b.disabled = false; if (box) box.innerHTML = ''; }
+      if (kept) b.textContent = 'Join this room';
+      /* the whole party must fit together — the refusal names that reason, never "your party" as the thing refused (TO-01352 · TO-01353) */
+      if (gone) b.textContent = U.soldOut(w.id, room.slug) ? (U.ctaWords(w.id, room.slug) || 'Sold out') : (room.complimentary ? 'The Guest House cannot take the ' + need + ' of you together' : 'No room of this kind for the ' + need + ' of you together');
+      if (box && ST) { box.innerHTML = ST.unitsHtml(w.id, room.slug); ST.wire(box, function (r) { refuse(w, r, 'hold'); paint(); if (r.ok) wizardDone(w); }); }
+    } else if (av) { av.hidden = true; b.disabled = false; b.removeAttribute('data-kept'); if (box) box.innerHTML = ''; }
+    /* the refusal, painted last so the re-render cannot wipe it */
+    if (av && refusals[w.id]) { av.hidden = false; av.textContent = refusals[w.id]; av.classList.add('low'); }
   });
 }
 function need() { return ST && ST.need ? ST.need() : 1; }
@@ -377,13 +415,15 @@ function wizardDone(w) { var Wz = window.SIYL_WIZARD; if (Wz && Wz.active) Wz.do
 document.querySelectorAll('[data-win]').forEach(function (b) {
   b.addEventListener('click', function () {
     var w = stay.windows[parseInt(b.getAttribute('data-win'), 10)];
-    if (mine(w)) { ST.remove(w.id).then(paint); return; }
+    delete refusals[w.id];
+    /* a network failure is a refusal like any other: nothing changed, and the guest is told (PRQ-03-02) */
+    var failed = function () { return { ok: false, error: 'unreachable' }; };
+    if (mine(w)) { ST.remove(w.id).then(function (r) { refuse(w, r, 'give back'); paint(); }, function () { refuse(w, failed(), 'give back'); paint(); }); return; }
     /* the place is held in the guest's own name first; only then the line */
     b.disabled = true; b.textContent = need(w) > 1 ? 'Holding your places…' : 'Holding your place…';
-    ST.select(w.id, room.slug, null, need(w)).then(function (r) {
+    ST.select(w.id, room.slug, b.getAttribute('data-kept') || null, need(w)).then(null, failed).then(function (r) {
+      refuse(w, r, 'hold');
       paint();
-      var av = document.querySelector('[data-av="' + w.id + '"]');
-      if (!r.ok && av) { av.hidden = false; av.textContent = ST.refusal(r); av.classList.add('low'); }
       if (r.ok) wizardDone(w);
     });
   });

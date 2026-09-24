@@ -8,59 +8,53 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 .bd{font-family:'PP Editorial Old',serif;font-weight:200;font-size:19px;text-align:center}.bd .dot{color:#8A5A55}
 .bag{width:44px;height:44px;display:flex;align-items:center;justify-content:center;position:relative;color:#313131;text-decoration:none}.bag .bgi{display:block}
 .bb{position:absolute;top:1px;right:0;min-width:14px;height:14px;padding:0 3px;background:#313131;color:#F3EEE7;font-size:8.5px;line-height:1;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;display:none;align-items:center;justify-content:center;box-shadow:0 0 0 2px #F3EEE7;border-radius:1px}
-.cart-foot{position:fixed;left:0;right:0;bottom:0;z-index:55;background:#FCFAF6;border-top:1px solid #DAD9D7;padding:12px 20px calc(12px + env(safe-area-inset-bottom));transform:translateY(100%);transition:transform .26s cubic-bezier(.4,0,.2,1)}
-.cart-foot:not([hidden]){transform:none}
-.cart-foot-in{max-width:640px;margin:0 auto;display:flex;align-items:center;gap:16px}
-.cart-foot-in .p-act{margin-left:auto;width:auto;min-width:0;padding:0 22px}
-.cart-total{font-family:'PP Editorial Old',serif;font-weight:200;font-size:22px;color:#313131}
-body.cart-on{padding-bottom:96px}
 .cart-line{transition:opacity .22s cubic-bezier(.4,0,.2,1),transform .22s cubic-bezier(.4,0,.2,1)}
 .cart-line.cart-out{opacity:0;transform:translateX(-6px)}
-@media (prefers-reduced-motion:reduce){.cart-foot,.cart-line{transition:none}}
+@media (prefers-reduced-motion:reduce){.cart-line{transition:none}}
+.cart-state{margin-top:var(--s3,12px)}
 </style>
-<link rel="stylesheet" href="assets/aman.css?v=b099d186"><link rel="stylesheet" href="assets/prep.css?v=e192c878"></head><body>
+<script src="assets/i18n/siyl-i18n.js?v=3a27503d"></script>
+<link rel="stylesheet" href="assets/aman.css?v=23c08c99"><link rel="stylesheet" href="assets/prep.css?v=3b4d86a7"></head><body>
 <header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="cart.html" aria-label="My Bag" aria-current="page"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main class="prep-page" id="cart">
 <div class="prep-head">
   <p class="t-l1" id="cart-own">My Bag</p>
   <h1 class="t-d1">My Bag</h1>
-  <p class="t-b1 measure" id="cart-lede">What you have chosen so far, with your cost. Change or remove anything here; your trip and Review &amp; Send follow at once.</p>
+  <p class="t-b1 measure" id="cart-lede">Everything you have chosen so far, with your cost.</p>
+  <p class="t-l1 cart-state" id="cart-state" role="status" hidden></p>
 </div>
 <div id="page"></div>
 </main>
-<!-- the sticky total is the one bag bar (assets/bag.js) — no second fixed footer (Owner, 17 Sep 2026); the page's own Review link lives in the summary card -->
-<div id="cart-foot" hidden><span id="cart-total" hidden>USD 0</span><a id="cart-review" hidden href="review.html">Review &amp; Send</a></div>
-<script src="assets/bag.js?v=fe0c8b93"></script>
-<script src="assets/shop-menu.js?v=1ff891bc"></script>
-<script src="assets/aman.js?v=d6c4adb4"></script>
-<script src="assets/rooms-data.js?v=3a8a998e"></script>
-<script src="assets/pricing.js?v=eb8a9bf3"></script>
-<script src="assets/stage-graph.js?v=82a28623"></script>
-<script src="assets/questionnaire.js?v=817b4a6f"></script>
-<script src="assets/guest.js?v=958b1655"></script>
-<script src="assets/draft.js?v=ac3ae4f8"></script>
-<script src="assets/temple.js?v=200ee67c"></script>
-<script src="assets/stay-plan.js?v=1d6cb33c"></script>
-<script src="assets/rooms.js?v=f2c427e2"></script>
-<script src="assets/stay.js?v=51b302df"></script>
-<script src="assets/seatlabels.js?v=4994e1f4"></script>
-<script src="assets/seating.js?v=e867530e"></script>
-<script src="assets/confirm.js?v=ff2a54e0"></script>
-<script src="assets/transport-data.js?v=a5d732d4"></script>
-<script src="assets/journey.js?v=275f56b0"></script>
-<script type="module" src="assets/invite.mjs?v=c557d97c"></script>
+<script src="assets/bag.js?v=43bc40c1"></script>
+<script src="assets/shop-menu.js?v=755a9271"></script>
+<script src="assets/aman.js?v=338fd10f"></script>
+<script src="assets/rooms-data.js?v=701dd9a2"></script>
+<script src="assets/pricing.js?v=6a4a85a2"></script>
+<script src="assets/stage-graph.js?v=8879f690"></script>
+<script src="assets/questionnaire.js?v=1dc3e01d"></script>
+<script src="assets/guest.js?v=9bb08cf5"></script>
+<script src="assets/draft.js?v=03e8b4bc"></script>
+<script src="assets/temple.js?v=a2f797fc"></script>
+<script src="assets/stay-plan.js?v=5227fdc4"></script>
+<script src="assets/rooms.js?v=45bdf0e9"></script>
+<script src="assets/stay.js?v=d7bc46dc"></script>
+<script src="assets/seatlabels.js?v=35f1a714"></script>
+<script src="assets/seating.js?v=e0a98e6e"></script>
+<script src="assets/confirm.js?v=d1b9a554"></script>
+<script src="assets/transport-data.js?v=8d46ce92"></script>
+<script src="assets/journey.js?v=fbd99373"></script>
+<script type="module" src="assets/invite.mjs?v=7d3552fb"></script>
 <script>
 /* ============================================================================
-   YOUR BAG — the cart (Owner decision, 14 Sep 2026). A utility outside the
-   six steps, opened from the bag icon on every page: what the authenticated
-   guest has chosen, grouped, with the date, the current selection, the cost
-   for this guest, and CHANGE · REMOVE · VIEW DETAILS. One total, from the
-   one pricing source. REVIEW YOUR JOURNEY opens 06 · Review & Send when
-   steps 01–05 are complete, and names the first missing item otherwise.
-   Nothing is paid on this website — this is never a payment step.
+   MY BAG — the cart (Owner decision, 14 Sep 2026). A utility outside the six
+   steps, opened from the bag icon on every page: what the authenticated guest
+   has chosen, grouped, with the date, the state of each line, the cost for
+   this guest, and CHANGE · REMOVE · DETAILS. One total, from the one pricing
+   source; the trip-state line under the lede is the step header's own
+   (SIYL_DRAFT.words — OQ-40). Nothing is paid on this website.
    ========================================================================== */
 (function(){
-var G=window.SIYL_GUEST,P=window.SIYL_PRICE,J=window.SIYL_JOURNEY,T=window.SIYL_TEMPLE,ST=window.SIYL_STAY,B=window.SIYL_BAG,page=document.getElementById('page');
+var G=window.SIYL_GUEST,P=window.SIYL_PRICE,J=window.SIYL_JOURNEY,T=window.SIYL_TEMPLE,ST=window.SIYL_STAY,B=window.SIYL_BAG,D=window.SIYL_DRAFT,page=document.getElementById('page');
 if(!G||!P||!J||!B||!page)return;
 function esc(t){return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 function money(n){return 'USD '+Number(n).toLocaleString('en-US')}
@@ -69,6 +63,17 @@ else document.addEventListener('siyl:invite-ready',function(){SIYL_INVITE.requir
 var calm=!!(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches);
 /* ACCESS (Owner, Edit 3): the bag is private — without a session the guest goes to the invitation page */
 gated(function(){});
+
+/* THE ONE TRIP-STATE LINE (PRQ-04-01 · TO-01610): the same words as the step header, under the lede */
+function paintTripState(){
+  var el=document.getElementById('cart-state');if(!el)return;
+  var w=D&&D.words?D.words():null;
+  if(!w||!w.line||!(G.party&&G.party())){el.hidden=true;el.innerHTML='';return}
+  el.hidden=false;
+  el.innerHTML='<b>'+esc(w.line)+'</b>'+(w.cta?' · <a class="p-link" href="review.html#send">'+esc(w.cta)+'</a>':'');
+}
+document.addEventListener('siyl:draft',paintTripState);
+document.addEventListener('siyl:confirm',function(){paintTripState();render()});
 
 function segOf(x){return J.SEGMENTS.filter(function(s){return s.ids.indexOf(x.id)>=0})[0]||null}
 function detailHref(x){
@@ -88,86 +93,113 @@ function changeHref(x){
   if(seg&&seg.cat==='Accommodation')return 'journeys.html?change='+P.windowOf(x.id)+'#j-'+P.windowOf(x.id);
   if(seg)return 'your-journey.html#s-'+seg.key;
   if(x.id==='suhring')return 'experience.html?id=bkk-suhring';
-  if(x.id==='tea1872')return '1872.html';
+  if(x.id==='tea1872'||x.id==='1872')return '1872.html';
   if(x.interest)return 'marsilea.html';
   return detailHref(x)}
+/* the group KEY stays the stored category; the heading is its display word (TO-01612 … TO-01615) */
+var GROUP_WORDS={Accommodation:'Stays',Transport:'Travel',Wedding:'The wedding','Experiences & additions':'Experiences'};
 function group(x){
   var m=J.meta(x);
   if(x.id==='sangkhathan'||m.cat==='Wedding programme')return 'Wedding';
   if(m.cat==='Accommodation')return 'Accommodation';
   if(m.cat==='Transportation')return 'Transport';
   return 'Experiences & additions'}
+/* THE STATE OF ONE LINE (PRQ-04-05 · PRQ-04-12): from the last sent snapshot — Selected → Sent to us → Confirmed by Guest
+   Relations; a line added or changed since reads "Selected · not sent yet". A room held reads its unit until it is sent. */
+function lineState(x){return D&&D.lineState?D.lineState(x):{key:'selected',label:'Selected'}}
+function lowerFirst(t){return t.charAt(0).toLowerCase()+t.slice(1)}
 function status(x){
-  var seg=segOf(x);
-  if(x.interest)return 'Interest · Guest Relations confirms times';
-  if(seg&&seg.cat==='Accommodation'){var w=ST.unitWords(x);if(!ST.held(x))return 'Room still to choose';return w||'Current selection'}
-  if(x.cls){var c=P.classOf(x.id,x.cls);return c?c.short+' · Current selection':'Current selection'}
-  if(x.request)return 'Requested through Guest Relations';
-  return 'Current selection'}
+  var seg=segOf(x),ls=lineState(x);
+  if(x.interest)return 'Interest · Guest Relations confirms your time · paid at the spa';
+  if(x.request)return ls.key==='confirmed'?ls.label:(ls.key==='sent'?'Request · Guest Relations will confirm your table':'Request · not sent yet');
+  if(seg&&seg.cat==='Accommodation'){if(!ST.held(x))return 'No room chosen yet';var w=ST.unitWords(x);return ls.key==='selected'?(w||ls.label):ls.label}
+  if(x.cls){var c=P.classOf(x.id,x.cls);return c?c.short+' · '+lowerFirst(ls.label):ls.label}
+  return ls.label}
+/* the amount with its basis (PRQ-04-11 · PRQ-04-20): per person, the 1872 tea for the table; a spa interest is not in the total */
+function amount(x){
+  if(x.interest)return '<p class="p-line-amt"><span class="t-l1">Not in your total</span></p>';
+  if(x.complimentary)return '<p class="p-line-amt"><span class="t-l1">Complimentary</span></p>';
+  return '<p class="p-line-amt">'+money(x.price||0)+'<span class="t-l1">'+(x.id==='1872'||x.id==='tea1872'?'for the table':'per person')+'</span></p>'}
 function item(x){
   var seg=segOf(x),when=J.when(x),m=J.meta(x),held=!(seg&&seg.cat==='Accommodation')||ST.held(x);
-  /* CART = CART (Owner, 15 Sep 2026): the line, its selection, its price, CHANGE · REMOVE · VIEW DETAILS — the ticket and its code live on the ticket, never here */
+  /* CART = CART (Owner, 15 Sep 2026): the line, its state, its price, CHANGE · REMOVE · DETAILS — the ticket and its code live on the ticket, never here */
   return '<div class="cart-line" data-line="'+esc(x.id)+'"><div class="p-line">'+
     '<a class="p-line-img" href="'+detailHref(x)+'" aria-label="Open '+esc(x.name)+'"'+(B.thumb(x)?' style="background-image:url('+B.thumb(x)+')"':'')+'></a>'+
-    '<div class="p-line-body"><p class="t-l1">'+(when?esc(when):esc(group(x)))+'</p>'+
+    '<div class="p-line-body"><p class="t-l1">'+(when?esc(when):esc(GROUP_WORDS[group(x)]))+'</p>'+
     '<h3 class="t-h2">'+esc(x.name)+'</h3><p class="t-b2">'+esc(x.meta||'')+'</p>'+
     '<p class="t-l1'+(held?' on':' open')+'">'+esc(status(x))+'</p>'+
     (m.basis&&!x.interest?'<p class="t-b2">'+esc(m.basis)+'</p>':'')+
-    '<div class="p-actions">'+
+    '<div class="p-actions" data-line-actions>'+
       '<a class="p-link" href="'+changeHref(x)+'" data-change="'+esc(x.id)+'">'+(seg&&seg.cat==='Accommodation'&&!held?'Choose your room':'Change')+'</a>'+
       '<button type="button" class="p-link mute" data-remove="'+esc(x.id)+'">Remove</button>'+
-      '<a class="p-link mute" href="'+detailHref(x)+'">View details</a>'+
-    '</div></div>'+
-    (x.interest?'<p class="p-line-amt"><span class="t-l1">Paid at the spa</span></p>':(x.complimentary?'<p class="p-line-amt"><span class="t-l1">Complimentary</span></p>':'<p class="p-line-amt">'+money(x.price||0)+'</p>'))+'</div></div>'}
+      '<a class="p-link mute" href="'+detailHref(x)+'">Details</a>'+
+    '</div></div>'+amount(x)+'</div></div>'}
+
+/* GIVE-BACK CONFIRMATION (PRQ-04-14 · TO-01622): a line that holds a room place, or a leg a joined part needs (C86), asks first */
+function askFirst(x){
+  if(P.locate(x.id)&&x.room&&!x.interest&&ST.held(x)&&(!ST.unitOf||ST.unitOf(x))){
+    var ro=ST.roomOf?ST.roomOf(x):{unit:''},where=ro.unit?ro.unit+' at '+x.name:x.name;
+    return {q:'Give back your place in '+where+'?',d:'Someone else may take it, and it may not be free again if you change your mind.',go:'Give it back'}}
+  if(x.id==='c86'&&J.relevant&&J.relevant({key:'ljg'}))
+    return {q:'Without C86 you have no travel from Kunming to Lijiang. My Trip will ask you to choose it again before you send.',d:'',go:'Remove'};
+  return null}
 
 var lastCount=null;
 function render(){
-  var p=G.party(),me=G.me(),foot=document.getElementById('cart-foot');
+  var p=G.party(),me=G.me();
   if(!p||!me){
-    page.innerHTML='<div class="p-card"><p class="t-l1">'+(G.stale()?'Once more':'Your invitation')+'</p><h2 class="t-h1">'+(G.stale()?'Open your invitation once more':'Open your invitation')+'</h2>'+
-      '<p class="t-b1 measure">'+(G.stale()?'Your invitation is now personal: every guest has their own code. Enter your code once more — what you chose before stays with you.':'Your bag belongs to your invitation, so we open it first.')+'</p>'+
-      '<p style="margin-top:16px"><button type="button" class="p-act" id="open">Open my invitation</button></p></div>';
+    page.innerHTML='<div class="p-card">'+(G.stale()?'':'<p class="t-l1">Your invitation</p>')+'<h2 class="t-h1">'+(G.stale()?'Open your invitation once more':'Open your invitation')+'</h2>'+
+      '<p class="t-b1 measure">'+(G.stale()?'Every guest now has their own invitation code. Please enter yours — everything you chose before is still here.':'My Bag belongs to your invitation, so we open your invitation first.')+'</p>'+
+      '<p style="margin-top:16px"><button type="button" class="p-act" id="open">Open your invitation</button></p></div>';
     document.getElementById('open').addEventListener('click',function(){gated(render)});
-    foot.hidden=true;return}
+    paintTripState();return}
   document.getElementById('cart-own').textContent='My Bag · '+G.nameOf();
-  var b=J.sorted(B.get()),arranged='';
+  paintTripState();
+  var b=J.sorted(B.get());
   if(!b.length){
     /* EMPTY BAG IS A REAL STATE (Owner, 17 Sep 2026): zero selections, USD 0 — the wedding and the review are not blocked by it */
     var ready0=G.readiness();
-    page.innerHTML=arranged+'<div class="p-card cart-empty"><p class="t-l1">Your bag is empty</p><h2 class="t-h1">No selections yet · USD 0</h2>'+
-      '<p class="t-b2 measure-w">Anything you choose in My Trip appears here. An empty bag is fine — your wedding answers stay as they are.</p>'+
+    page.innerHTML='<div class="p-card cart-empty"><h2 class="t-h1">Nothing chosen yet · USD 0</h2>'+
+      '<p class="t-b2 measure-w">Whatever you choose in My Trip appears here. An empty Bag is fine — your wedding answers stay as they are, and you can still send us your trip.</p>'+
       '<div class="p-actions" style="margin-top:var(--s4)"><a class="p-act" href="your-journey.html">Open My Trip</a>'+(ready0.ok?'<a class="p-link" href="review.html">Review &amp; Send</a>':'')+'</div></div>';
-    document.getElementById('cart-total').textContent=money(0);
-    foot.hidden=true;lastCount=0;return}
+    lastCount=0;B.badge();return}
   var groups=['Accommodation','Transport','Wedding','Experiences & additions'],h='';
   groups.forEach(function(gname){
     var lines=b.filter(function(x){return group(x)===gname});if(!lines.length)return;
-    h+='<section class="prep-sec cart-group"><p class="t-l1">'+esc(gname)+'</p>'+lines.map(item).join('')+'</section>'});
+    h+='<section class="prep-sec cart-group"><p class="t-l1">'+esc(GROUP_WORDS[gname])+'</p>'+lines.map(item).join('')+'</section>'});
   var ready=G.readiness(),first=ready.first;
   h+='<section class="prep-sec"><div class="p-card cart-sum"><div class="p-total"><span class="t-l1">Your total</span><b id="tt">'+money(B.total())+'</b></div>'+
-     '<p class="t-b2 measure-w">One calculation for the whole website — the same amount in My Trip, in this bag and on Review &amp; Send. Nothing is paid here.</p>'+
+     '<p class="t-b2 measure-w">Nothing is paid on this website.</p>'+
      (ready.ok?'<div class="p-actions" style="margin-top:var(--s4)"><a class="p-act" href="review.html">Review &amp; Send</a></div>'
-       :'<div class="p-card flat" style="margin-top:var(--s4)"><p class="t-l1 open">Not ready for Review &amp; Send yet</p>'+
-        (first?'<p class="t-b1"><b>'+esc(first.n)+' · '+esc(first.stepLabel)+'</b> · '+esc(first.label)+'</p><div class="p-actions"><a class="p-act quiet" href="'+first.href+'">Complete this step</a></div>':'')+'</div>')+
+       :'<div class="p-card flat" style="margin-top:var(--s4)"><p class="t-l1 open">Before you send</p>'+
+        (first?'<p class="t-b1"><b>'+esc(first.n)+' · '+esc(first.stepLabel)+'</b> · '+esc(first.label)+'</p><div class="p-actions"><a class="p-act quiet" href="'+first.href+'">Complete this</a></div>':'')+'</div>')+
      '</div></section>';
-  page.innerHTML=arranged+h;
+  page.innerHTML=h;
   if(lastCount!==null&&lastCount!==b.length){var sum=page.querySelector('.cart-sum');if(sum)sum.classList.add('p-reveal')}
   lastCount=b.length;
-  document.getElementById('cart-total').textContent=money(B.total());
-  var rv=document.getElementById('cart-review');
-  rv.setAttribute('href',ready.ok?'review.html':(first?first.href:'your-journey.html'));
-  rv.textContent=ready.ok?'Review & Send':'Complete this first';
-  foot.hidden=true;
   page.querySelectorAll('[data-remove]').forEach(function(bt){bt.addEventListener('click',function(){
-    var id=bt.getAttribute('data-remove'),line=page.querySelector('[data-line="'+id+'"]');
-    if(bt.disabled)return;   /* a second click while the first is in flight does nothing (idempotent) */
+    var id=bt.getAttribute('data-remove'),line=page.querySelector('[data-line="'+id+'"]'),x=B.get().filter(function(l){return l.id===id})[0];
+    if(bt.disabled||!x)return;   /* a second click while the first is in flight does nothing (idempotent) */
+    var ask=askFirst(x),acts=line&&line.querySelector('[data-line-actions]');
+    if(ask&&acts&&!bt.hasAttribute('data-confirmed')){
+      var box=document.createElement('div');box.className='p-card flat';box.setAttribute('role','group');box.setAttribute('data-giveback','');
+      box.innerHTML='<p class="t-b1"><b>'+esc(ask.q)+'</b></p>'+(ask.d?'<p class="t-b2">'+esc(ask.d)+'</p>':'')+
+        '<div class="p-actions"><button type="button" class="p-link" data-go>'+esc(ask.go)+'</button><button type="button" class="p-link mute" data-keep>Keep it</button></div>';
+      acts.hidden=true;acts.parentNode.insertBefore(box,acts.nextSibling);
+      box.querySelector('[data-keep]').addEventListener('click',function(){box.remove();acts.hidden=false;bt.focus()});
+      box.querySelector('[data-go]').addEventListener('click',function(){box.remove();acts.hidden=false;bt.setAttribute('data-confirmed','');bt.click()});
+      try{box.querySelector('[data-go]').focus()}catch(e){}
+      return}
+    bt.removeAttribute('data-confirmed');
     bt.disabled=true;bt.textContent='Removing…';
     var after=function(){if(line&&!calm){line.classList.add('cart-out');setTimeout(render,220)}else render()};
-    /* a removal that could not happen leaves everything as it was and says so — never an endless "Removing…" */
-    var failed=function(r){bt.disabled=false;bt.textContent='Remove';var n=line&&line.querySelector('[data-remove-note]');if(!n&&line){n=document.createElement('p');n.className='t-b2';n.setAttribute('data-remove-note','');n.setAttribute('role','status');line.querySelector('.p-line-body').appendChild(n)}if(n)n.textContent=ST.refusal(r)||'Nothing was removed — please try again.'};
+    /* a removal that could not happen leaves everything as it was and says so — never an endless "Removing…" (PRQ-03-02:
+       the refusal knows it was a give-back) */
+    var failed=function(r){bt.disabled=false;bt.textContent='Remove';var n=line&&line.querySelector('[data-remove-note]');if(!n&&line){n=document.createElement('p');n.className='t-b2';n.setAttribute('data-remove-note','');n.setAttribute('role','status');line.querySelector('.p-line-body').appendChild(n)}if(n)n.textContent=(ST.refusal&&ST.refusal(r,'give back'))||'We could not remove this just now — it is still in your trip. Please try again in a moment.'};
     if(id==='sangkhathan'&&T&&me){T.setOffering(me.guestId,null);after();return}
-    if(P.locate(id)){ST.remove(P.windowOf(id)).then(function(r){if(r&&r.ok===false)failed(r);else after()}).catch(function(){failed({ok:false,error:'unreachable'})});return}
+    if(P.locate(id)){ST.remove(P.windowOf(id)).then(function(r){if(r&&r.ok===false)failed(r);else after()}).catch(function(){failed({ok:false,error:'unreachable',action:'give back'})});return}
     B.remove(id);after()})});
+  B.badge();
 }
 if(window.SIYL_BAG&&SIYL_BAG.bar)SIYL_BAG.bar();
 document.addEventListener('siyl:bag',render);
@@ -175,10 +207,11 @@ document.addEventListener('siyl:guest',render);
 document.addEventListener('siyl:temple',render);
 document.addEventListener('siyl:units',render);
 document.addEventListener('siyl:seats',render);
-document.addEventListener('siyl:auth',render);
+document.addEventListener('siyl:auth',function(){render();if(window.SIYL_CONFIRM)SIYL_CONFIRM.load(true)});
 document.addEventListener('siyl:invite-ready',render);
 render();
 if(window.SIYL_SEATS&&G.party())SIYL_SEATS.load();
+if(window.SIYL_CONFIRM&&G.party())SIYL_CONFIRM.load();
 })();
 </script>
 </body></html>

@@ -1,0 +1,411 @@
+{
+ "results": [
+  {
+   "journey": "J19 404 page",
+   "id": "404-1440 status 404, “This page is not part of the journey.”, a way back, no overflow",
+   "ok": true,
+   "d": "{\"status\":404,\"title\":\"Page not found · See You In Laos\",\"h1\":\"This page is not part of the journey.\",\"body\":\"see you in laos. See You In Laos This page is not part of the journey. The link may be old or mistyped — everything else is where you left it. Back to The Journey Home see you in laos. Discover Destin\",\"links\":[\"Back to The Journey→journeys.html\",\"Home→index.html\"],\"overflow\":false}"
+  },
+  {
+   "journey": "J19 404 page",
+   "id": "404-1440 deep address still styled (root-relative assets)",
+   "ok": true,
+   "d": "status 404 · stylesheets 4"
+  },
+  {
+   "journey": "J19 404 page",
+   "id": "404-390 status 404, “This page is not part of the journey.”, a way back, no overflow",
+   "ok": true,
+   "d": "{\"status\":404,\"title\":\"Page not found · See You In Laos\",\"h1\":\"This page is not part of the journey.\",\"body\":\"see you in laos. See You In Laos This page is not part of the journey. The link may be old or mistyped — everything else is where you left it. Back to The Journey Home see you in laos. Discover Destin\",\"links\":[\"Back to The Journey→journeys.html\",\"Home→index.html\"],\"overflow\":false}"
+  },
+  {
+   "journey": "J19 404 page",
+   "id": "404-390 deep address still styled (root-relative assets)",
+   "ok": true,
+   "d": "status 404 · stylesheets 4"
+  },
+  {
+   "journey": "J01 first-time guest · step 01",
+   "id": "01.1-390 one quiet marker per field: “Required” on every required field, “Optional” only on Address line 2 and Region",
+   "ok": true,
+   "d": "[[\"p-email\",\"Required\"],[\"p-phone\",\"Required\"],[\"p-firstName\",\"Required\"],[\"p-lastName\",\"Required\"],[\"p-birthdate\",\"Required\"],[\"p-nationality\",\"Required\"],[\"p-address1\",\"Required\"],[\"p-address2\",\"Optional\"],[\"p-postal\",\"Required\"],[\"p-city\",\"Required\"],[\"p-region\",\"Optional\"],[\"p-country\",\"Required\"]]"
+  },
+  {
+   "journey": "J01 first-time guest · step 01",
+   "id": "01.2-390 Continue with empty fields stays on step 01, marks each missing field, focuses the first",
+   "ok": true,
+   "d": "{\"url\":\"/invitation\",\"needed\":[\"p-email\",\"p-phone\",\"p-birthdate\",\"p-nationality\",\"p-address1\",\"p-postal\",\"p-city\",\"p-country\"],\"focus\":\"p-email\"}"
+  },
+  {
+   "journey": "J01 first-time guest · step 01",
+   "id": "01.3-390 validation NAMES the field: “Please add your email address.”, “Please add your city.”; the foot names them all",
+   "ok": true,
+   "d": "{\"email\":\"Please add your email address.\",\"city\":\"City Required Please add your city.\",\"note\":\"8 details are still needed before you continue: Email address, Mobile number, Date of birth, Nationality, Street and house number, Postcode or ZIP code, City and Country.\"}"
+  },
+  {
+   "journey": "J01 first-time guest · step 01",
+   "id": "01.1-1440 one quiet marker per field: “Required” on every required field, “Optional” only on Address line 2 and Region",
+   "ok": true,
+   "d": "[[\"p-email\",\"Required\"],[\"p-phone\",\"Required\"],[\"p-firstName\",\"Required\"],[\"p-lastName\",\"Required\"],[\"p-birthdate\",\"Required\"],[\"p-nationality\",\"Required\"],[\"p-address1\",\"Required\"],[\"p-address2\",\"Optional\"],[\"p-postal\",\"Required\"],[\"p-city\",\"Required\"],[\"p-region\",\"Optional\"],[\"p-country\",\"Required\"]]"
+  },
+  {
+   "journey": "J01 first-time guest · step 01",
+   "id": "01.2-1440 Continue with empty fields stays on step 01, marks each missing field, focuses the first",
+   "ok": true,
+   "d": "{\"url\":\"/invitation\",\"needed\":[\"p-email\",\"p-phone\",\"p-birthdate\",\"p-nationality\",\"p-address1\",\"p-postal\",\"p-city\",\"p-country\"],\"focus\":\"p-email\"}"
+  },
+  {
+   "journey": "J01 first-time guest · step 01",
+   "id": "01.3-1440 validation NAMES the field: “Please add your email address.”, “Please add your city.”; the foot names them all",
+   "ok": true,
+   "d": "{\"email\":\"Please add your email address.\",\"city\":\"City Required Please add your city.\",\"note\":\"8 details are still needed before you continue: Email address, Mobile number, Date of birth, Nationality, Street and house number, Postcode or ZIP code, City and Country.\"}"
+  },
+  {
+   "journey": "J01 first-time guest · step 01",
+   "id": "01.4 one detail left → “One detail is still needed before you continue: Country.”",
+   "ok": true,
+   "d": "One detail is still needed before you continue: Country."
+  },
+  {
+   "journey": "J01 first-time guest · step 01",
+   "id": "01.5 complete → Continue opens My Trip",
+   "ok": true,
+   "d": "http://127.0.0.1:8788/your-journey"
+  },
+  {
+   "journey": "J02 returning unsent guest",
+   "id": "02.1 the step header reads “My Trip · not sent yet”, no send link",
+   "ok": true,
+   "d": "{\"h\":{\"state\":\"My Trip · not sent yet\",\"cta\":\"\"},\"key\":\"draft\"}"
+  },
+  {
+   "journey": "J02 returning unsent guest",
+   "id": "02.2 Review before the trip is complete leads to the first missing answer (the gate), not to a send button",
+   "ok": true,
+   "d": "http://127.0.0.1:8788/wedding-preparation?from=review#seats"
+  },
+  {
+   "journey": "J11 wedding seat hold / change",
+   "id": "11.1 dinner plan: 48 chairs, no A13 / B13, no A12A / B12B, “One long table · 48 seats”",
+   "ok": true,
+   "d": "{\"n\":48,\"has13\":[],\"table\":[\"One long table · 48 seats\"],\"first\":[\"A11\",\"A12\",\"A14\",\"A15\",\"A16\",\"A17\"]}"
+  },
+  {
+   "journey": "J11 wedding seat hold / change",
+   "id": "11.2 the two sides read “Side A · 24 seats · poolside” and “Side B · 24 seats · facing the pool”",
+   "ok": true,
+   "d": "Side A · 24 seats · poolsideSwimming poolA1A2A,Side B · 24 seats · facing the poolSwipe or sc,Side A is along the pool; side B faces it acro"
+  },
+  {
+   "journey": "J11 wedding seat hold / change",
+   "id": "11.3 before a choice the card asks “Choose your dinner seat” with “Tap an available seat on the plan, then “Hold this seat”.”",
+   "ok": true,
+   "d": "Required Choose your dinner seat Souphattra Heritage · poolside · 28 February · 19:30 Tap an available seat on the plan, then “Hold this seat”. Wedding Dinner · poolside Side A · 24 seats · poolside Swimming pool A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A14 A15 A16 A17 A18 A19 A20 A21 A22 A23 A24 A25 "
+  },
+  {
+   "journey": "J11 wedding seat hold / change",
+   "id": "11.4 a tapped chair: the bar names the seat, “not held yet”, and the action “Hold this seat” (Cancel beside it)",
+   "ok": true,
+   "d": "Your seat Haruthai. Wedding Dinner. Seat A5 Long table · side A · poolside · not held yet Hold this seat Cancel"
+  },
+  {
+   "journey": "J11 wedding seat hold / change",
+   "id": "11.5 “Hold this seat” → “Holding…” → the card “Held for you · Your dinner seat · A5”",
+   "ok": true,
+   "d": "{\"seq\":[\"Holding…\"],\"card\":\"Held for you Your dinner seat A5 Long table · side A · poolside Guest Haruthai Test Event Wedding Dinner Date Sunday, 28 February 2027 Venue Souphattra Heritage Vientiane · poolside Continue Download this ticket\"}"
+  },
+  {
+   "journey": "J11 wedding seat hold / change",
+   "id": "11.6 changing: “Seat A5 stays yours until you move.” and “Keep seat A5”",
+   "ok": true,
+   "d": "Changing your dinner seat Your dinner seat Souphattra Heritage · poolside · 28 February · 19:30 A5 Long table · side A · poolside Seat A5 stays yours until you move. Tap an available seat, then “Move to this seat”. Keep seat A5 Wedding Dinner · poolside Side A · 24 seats · poolside Swimming pool A1 "
+  },
+  {
+   "journey": "J11 wedding seat hold / change",
+   "id": "11.7 the bar reads “Change of seat”, A5 → A9, the action “Move to this seat”",
+   "ok": true,
+   "d": "Change of seat Haruthai. Wedding Dinner. A5 → A9 Current seat A5 · New seat A9 · Long table · side A · poolside Move to this seat Keep seat A5"
+  },
+  {
+   "journey": "J11 wedding seat hold / change",
+   "id": "11.8 moved: the card holds A9 (“Held for you”), the ledger holds exactly one dinner chair for G048",
+   "ok": true,
+   "d": "{\"card\":\"Held for you Your dinner seat A9 Long table · side A · poolside Guest Haruthai Test Event Wedding Dinner Date Sunday, 28 February 2027 Venue Souphattra Heritage Vientiane · poolside Continue Download \",\"mine\":{\"G048\":\"D-T-09\"}}"
+  },
+  {
+   "journey": "J12 About You",
+   "id": "12.1 Q06 heading “What makes you dance?” with the hint “The wedding playlist is built from your answers — choose every genre you would dance to.”, marker “06 · Required”",
+   "ok": true,
+   "d": "{\"state\":\"06 · Required\",\"h\":\"What makes you dance?\",\"hint\":\"The wedding playlist is built from your answers — choose every genre you would dance to.\"}"
+  },
+  {
+   "journey": "J12 About You",
+   "id": "12.2 Q03 “My favourite flavour”, the choice reads “Matcha green tea” (display form), “Thai & Lao favourites” is a genre",
+   "ok": true,
+   "d": "{\"flavor\":{\"state\":\"03 · Required\",\"h\":\"My favourite flavour\",\"hint\":\"Choose one.\"},\"choices\":[\"Coffee\",\"Milk\",\"Butter\",\"Pandan\",\"Matcha green tea\",\"Strawberry milk\"],\"thai\":[\"Thai & Lao favourites\"]}"
+  },
+  {
+   "journey": "J12 About You",
+   "id": "12.3 question 07 is the only “Optional” question marker",
+   "ok": true,
+   "d": "{\"state\":\"07 · Optional\",\"h\":\"What’s your favourite karaoke song — the one you’d love to sing along to?\",\"hint\":\"We will pass your song on to the DJ.\"}"
+  },
+  {
+   "journey": "J12 About You",
+   "id": "12.4 two genres pressed → “2 genres chosen”",
+   "ok": true,
+   "d": "2 genres chosen"
+  },
+  {
+   "journey": "J12 About You",
+   "id": "12.5 G048 is ready to send: Review opens (no gate) and nothing is still needed",
+   "ok": true,
+   "d": "{\"nd\":[],\"url\":\"http://127.0.0.1:8788/review\"}"
+  },
+  {
+   "journey": "J08 room hold / change / release",
+   "id": "08.1 The Journey · counting words “5 of 5 rooms left” (never “available”)",
+   "ok": true,
+   "d": "[\"heritage: 5 of 5 rooms left\",\"heritage-executive: 13 of 13 rooms left\",\"heritage-grand-premier: 3 of 3 rooms left\",\"noble-courtyard: One room only · free\",\"grand-majestic: 2 of 2 rooms left\",\"souphattra-majestic: One room only · free\",\"souphattra-presidential: One room only · free\"]"
+  },
+  {
+   "journey": "J08 room hold / change / release",
+   "id": "08.2 the chooser: “Who is already in each room”, each room “empty · 2 places” with “Choose this room”",
+   "ok": true,
+   "d": "{\"head\":\"Who is already in each room\",\"rows\":[\"Room A empty · 2 places Choose this room\",\"Room B empty · 2 places Choose this room\",\"Room C empty · 2 places Choose this room\",\"Room D empty · 2 places Choose this room\",\"Room E empty · 2 places Choose this room\"]}"
+  },
+  {
+   "journey": "J08 room hold / change / release",
+   "id": "08.3 Ada holds Room A for her party: the engine holds Ada + one kept place; The Journey says “Held for you · Room A”",
+   "ok": true,
+   "d": "{\"sel\":\"Held for you · Room A · you · 1 place kept for Ben\",\"stsel\":\"Selected · not sent yet The Heritage Room A · you · 1 place kept for Ben\",\"av\":[\"Held for you · Room A\",\"13 of 13 rooms left\",\"3 of 3 rooms left\",\"One room only · free\",\"2 of 2 rooms left\",\"One room only · free\",\"One room only · free\"]}"
+  },
+  {
+   "journey": "J08 room hold / change / release",
+   "id": "08.3b The Journey’s stay line names the held room with the same state word as its row and My Trip (“Held for you”)",
+   "ok": false,
+   "d": "{\"journeyStayLine\":\"Selected · not sent yet\",\"row\":\"Held for you · Room A · you · 1 place kept for Ben\",\"draftLineState\":\"Selected · not sent yet\"}"
+  },
+  {
+   "journey": "J08 room hold / change / release",
+   "id": "08.4 another guest now reads “4 of 5 rooms left”",
+   "ok": true,
+   "d": "4 of 5 rooms left"
+  },
+  {
+   "journey": "J08 room hold / change / release",
+   "id": "08.5 Cleo’s chooser: Room A shows “Ada” by first name only (never a surname), and is Full to her",
+   "ok": true,
+   "d": "{\"rowA\":\"Room A Ada · full Full\",\"surnames\":[\"Test\",\"Test\"]}"
+  },
+  {
+   "journey": "J08 room hold / change / release",
+   "id": "08.6 My Trip: “Held for you”, “Your room · Room A”, the occupancy sentence with the kept place for Ben (first name)",
+   "ok": true,
+   "d": "Held for you Pre-Wedding Stay · Souphattra Heritage 25 – 27 February 2027 · The Heritage Breakfast included Your room · Room A Room A has two sleeping places. You hold one; one is kept for Ben. 8 places still free in rooms of this kind USD 290 per person · 2 nights · USD 145 per person per night · your cost Details Change Change room Remove I won’t need this stay"
+  },
+  {
+   "journey": "J08 room hold / change / release",
+   "id": "08.7 My Trip · Change room opens “Move to another room” with the rooms and who is in them",
+   "ok": true,
+   "d": "Move to another room Each room has two sleeping places. Join someone you know, or choose an empty room. Room A You · 1 place kept for Ben Your room Room B empty · 2 places Choose this room Room C empty · 2 places Choose this room Room D empty · 2 places Choose this room Room E empty · 2 places Choos"
+  },
+  {
+   "journey": "J08 room hold / change / release",
+   "id": "08.8 moved to Room B: the engine holds B (with the kept place), A is empty again; My Trip says “Your room · Room B”",
+   "ok": true,
+   "d": "{\"A\":0,\"B\":2,\"card\":\"Held for you Pre-Wedding Stay · Souphattra Heritage 25 – 27 February 2027 · The Heritage Breakfast included Your room · Room B Room B has two sleeping places. You hold one; one is kept for Ben. 8 plac\"}"
+  },
+  {
+   "journey": "J08 room hold / change / release",
+   "id": "08.9 My Trip · Remove asks first: “Give back your place in Room B at … ? Someone else may take it, and it may not be free again if you change your mind.” · “Give it back” / “Keep it”",
+   "ok": true,
+   "d": "Give back your place in Room B at Souphattra Heritage Vientiane? Someone else may take it, and it may not be free again if you change your mind. Give it back Keep it"
+  },
+  {
+   "journey": "J08 room hold / change / release",
+   "id": "08.10 “Keep it” keeps the room",
+   "ok": true,
+   "d": "[\"A:0\",\"B:2\",\"C:0\",\"D:0\",\"E:0\"]"
+  },
+  {
+   "journey": "J08 room hold / change / release",
+   "id": "08.11 The Journey · Remove asks the same question, “Give it back”",
+   "ok": true,
+   "d": "Give back your place in Room B at Souphattra Heritage Vientiane? Someone else may take it, and it may not be free again if you change your mind. Give it back Keep it"
+  },
+  {
+   "journey": "J08 room hold / change / release",
+   "id": "08.12 given back: Room B empty, no kept place left for the party",
+   "ok": true,
+   "d": "[\"A:0\",\"B:0\",\"C:0\",\"D:0\",\"E:0\"]"
+  },
+  {
+   "journey": "J09 party kept place (Ada / Ben)",
+   "id": "09.1 Ben (Ada’s party) reads “A place is kept for you · Room A” on the row — never “Sold out”",
+   "ok": true,
+   "d": "{\"av\":\"A place is kept for you · Room A\",\"btn\":\"Select\",\"gone\":false}"
+  },
+  {
+   "journey": "J09 party kept place (Ada / Ben)",
+   "id": "09.2 Ben’s chooser: Room A “Ada · 1 place kept for you” with “Join this room” (first name only)",
+   "ok": true,
+   "d": "{\"who\":\"Ada · 1 place kept for you\",\"btn\":\"Join this room\",\"full\":false}"
+  },
+  {
+   "journey": "J09 party kept place (Ada / Ben)",
+   "id": "09.3 cleanup: Ada gives Room A back → the category is empty again",
+   "ok": true,
+   "d": "[\"A:0\",\"B:0\",\"C:0\",\"D:0\",\"E:0\"]"
+  },
+  {
+   "journey": "J10 sold out / waiting list",
+   "id": "10.1 The Journey · every room taken: rows read “Sold out”; “Every room here is taken. Join the waiting list and we will tell you as soon as a place frees up.” + “Join the waiting list” / “I won’t need this stay” (simulated full view)",
+   "ok": true,
+   "d": "{\"av\":[\"Sold out / Sold out\",\"Sold out / Sold out\",\"Sold out / Sold out\",\"Sold out / Sold out\",\"Sold out / Sold out\",\"Sold out / Sold out\",\"Sold out / Sold out\"],\"ask\":\"Every room here is taken. Join the waiting list and we will tell you as soon as a place frees up. Join the waiting list I won’t need this stay\"}"
+  },
+  {
+   "journey": "J10 sold out / waiting list",
+   "id": "10.2 My Trip · the same words and “Join the waiting list” (simulated full view)",
+   "ok": true,
+   "d": "Still to choose Pre-Wedding Stay Every room here is taken. Join the waiting list and we will tell you as soon as a place frees up. Join the waiting list I won’t need this stay"
+  },
+  {
+   "journey": "J10 sold out / waiting list",
+   "id": "10.3 the engine takes Ada (party of two) onto the waiting list for the stay (position known)",
+   "ok": true,
+   "d": "{\"at\":\"2026-09-24T17:22:34.855Z\",\"position\":1,\"size\":2,\"wanted\":[\"prewed/heritage\",\"prewed/heritage-executive\",\"prewed/heritage-grand-premier\",\"prewed/noble-courtyard\",\"prewed/grand-majestic\",\"prewed/souphattra-majestic\",\"prewed/souphattra-presidential\"]}"
+  },
+  {
+   "journey": "J10 sold out / waiting list",
+   "id": "10.4 My Trip: “On the waiting list — number 1” and “Leave the waiting list”",
+   "ok": true,
+   "d": "On the waiting list — number 1 Pre-Wedding Stay Every room was taken when you chose — for the 2 of you together. Nothing is held or charged. We will tell you as soon as a place frees up, and Guest Relations will find an arrangement with you. Choose another room Leave the waiting list I won’t need this stay"
+  },
+  {
+   "journey": "J10 sold out / waiting list",
+   "id": "10.5 “Leave the waiting list” leaves the engine’s line",
+   "ok": true,
+   "d": "{}"
+  },
+  {
+   "journey": "J18 1872 tea for Ada + Ben",
+   "id": "18.1 Ada · “See what will be added” → preview “Before it goes into My Bag”, “Add to My Bag” / “Cancel”",
+   "ok": true,
+   "d": "Before it goes into My Bag Your table at 1872 Champagne Afternoon Tea at 1872 One table for two guests USD 180 for the table · your cost. Champagne Afternoon Tea for two guests on Wednesday, 24 February 2027; afternoon tea is served 14:00 – 17:00. It is sent to us with your trip as a request; Guest Relations confirms the table with you. You can remove it from My Bag at any time. Add to My Bag Canc"
+  },
+  {
+   "journey": "J18 1872 tea for Ada + Ben",
+   "id": "18.2 Ada · the line reads “In My Bag”",
+   "ok": true,
+   "d": "In My Bag · USD 180 for the table Open My Bag Remove from My Bag"
+  },
+  {
+   "journey": "J18 1872 tea for Ada + Ben",
+   "id": "18.3 Ben · “Already in Ada’s trip — one table for the two of you.” and no second “See what will be added”",
+   "ok": true,
+   "d": "{\"party\":\"Already in Ada’s trip — one table for the two of you.\",\"box\":\"Already in Ada’s trip — one table for the two of you.\",\"preview\":false}"
+  },
+  {
+   "journey": "J18 1872 tea for Ada + Ben",
+   "id": "18.4 cleanup: Ada removes the tea — the Bag has no 1872 line",
+   "ok": true,
+   "d": "gone=true"
+  },
+  {
+   "journey": "J15 travel pass",
+   "id": "15.1 every travel pass says “Not a ticket — Guest Relations sends you the carrier’s ticket.”",
+   "ok": true,
+   "d": "[\"Train · State Railway of Thailand Sent to us Special Express No. 25 Not a ticket — Guest Relations sends you the carrier’s ticket. BKK 20:25 Bangkok Krung Thep Aphiwat Central Terminal 24 Feb 2027 About 10 hours on board NKI 06:25 Nong Khai then by road to Vie\",\"Flight · China Eastern Airlines Sent to us MU9646 · Vientiane → Kunming Not a ticket — Guest Relations sends you the carrier’s ticket. VTE 15:50 Vientiane Terminal 1 1 Mar 2027 1 h 35 min · non-stop KMG 18:25 Kunming 1 Mar 2027 Class Business Class Guest Cleo \",\"Train · China Railway Sent to us C86 · Kunming → Lijiang Not a ticket — Guest Relations sends you the carrier’s ticket. KMG 10:15 Kunming Kunming Railway Station 4 Mar 2027 3 h 29 min · direct LJG 13:44 Lijiang Lijiang Railway Station 4 Mar 2027 Class Business\",\"Flight · China Eastern Airlines Sent to us MU5922 + MU741 · Lijiang → Bangkok Not a ticket — Guest Relations sends you the carrier’s ticket. LJG 10:00 Lijiang MU5922 · then MU741 6 Mar 2027 5 h 55 min in all · 2 h 20 min in Kunming BKK 14:55 Bangkok via Kunmin\"]"
+  },
+  {
+   "journey": "J15 travel pass",
+   "id": "15.2 the state words are not ahead of reality: no pass says “Confirmed” (T003’s trip is not confirmed); each pass shows its line’s own state",
+   "ok": true,
+   "d": "{\"truth\":[{\"l\":\"train\",\"s\":\"Sent to us · 24 September 2026\",\"ls\":\"Sent to us\"},{\"l\":\"mu9646\",\"s\":\"Sent to us · 24 September 2026\",\"ls\":\"Sent to us\"},{\"l\":\"c86\",\"s\":\"Sent to us · 24 September 2026\",\"ls\":\"Sent to us\"},{\"l\":\"return\",\"s\":\"Sent to us · 24 September 2026\",\"ls\":\"Sent to us\"}],\"states\":[\"Sent to us \",\"Sent to us \",\"Sent to us \",\"Sent to us \"]}"
+  },
+  {
+   "journey": "J13 Review & Send (before sending)",
+   "id": "13.1 Review · About You shows “Your music” and “My favourite flavour” → “Matcha green tea”",
+   "ok": true,
+   "d": "Food allergies None Coffee or tea Tea, no sugar My favourite flavour Matcha green tea Favourite drink Lemonade Favourite film In the Mood for Love Your music’90s, Classics / Oldies Favourite karaoke song Not given — optional"
+  },
+  {
+   "journey": "J13 Review & Send (before sending)",
+   "id": "13.2 ready: “Ready to send · Everything we need is here”, the button “Send my trip” enabled, the clarification says sending is not a payment",
+   "ok": true,
+   "d": "{\"ready\":\"Ready to send Everything we need is here Anything optional can follow later.\",\"btn\":\"Send my trip\",\"off\":false}"
+  },
+  {
+   "journey": "J13 Review & Send (before sending)",
+   "id": "13.3 Your total: “Nothing is paid on this website.”",
+   "ok": true,
+   "d": "Your total Change Nothing is paid on this website. No deposit is required. Once your arrangements are confirmed, Guest Relations sends you an invoice with bank transfer or PayPal details; payment is d"
+  }
+ ],
+ "observations": [
+  {
+   "journey": "J01 first-time guest · step 01",
+   "id": "G048 header before any answer",
+   "d": "{\"state\":\"My Trip · not sent yet\",\"cta\":\"\"} · words \"draft\""
+  },
+  {
+   "journey": "J11 wedding seat hold / change",
+   "id": "G048 needs after scope (setup)",
+   "d": ""
+  },
+  {
+   "journey": "J11 wedding seat hold / change",
+   "id": "dinner card before choosing",
+   "d": "{\"state\":\"open\",\"card\":\"Required Choose your dinner seat Souphattra Heritage · poolside · 28 February · 19:30 Tap an available seat on the plan, then “Hold this seat”. Wedding Dinner ·\",\"alreadyHeld\":false}"
+  },
+  {
+   "journey": "J11 wedding seat hold / change",
+   "id": "seat button sequence",
+   "d": "[\"Holding…\"]"
+  },
+  {
+   "journey": "J09 party kept place (Ada / Ben)",
+   "id": "Ben’s own trip state is untouched (declined, reply sent): ",
+   "d": "{\"key\":\"sent\",\"label\":\"Sent to us\",\"line\":\"Sent to us · 24 September 2026\",\"cta\":null,\"at\":\"2026-09-24T06:21:25.965Z\",\"date\":\"24 September 2026\",\"declined\":true}"
+  }
+ ],
+ "cleanup": [
+  {
+   "what": "G048 dinner seat",
+   "taken": "A5"
+  },
+  {
+   "what": "T001 room prewed/heritage",
+   "taken": "A (+1 kept for Ben)"
+  },
+  {
+   "what": "T001 room prewed/heritage",
+   "released": true
+  },
+  {
+   "what": "T001 room prewed/heritage (J09)",
+   "taken": "A"
+  },
+  {
+   "what": "T001 room prewed/heritage (J09)",
+   "released": true
+  },
+  {
+   "what": "T001 waiting list prewed",
+   "taken": true
+  },
+  {
+   "what": "T001 waiting list prewed",
+   "released": true
+  },
+  {
+   "what": "T001 1872 tea line",
+   "taken": true
+  },
+  {
+   "what": "T001 1872 tea line",
+   "released": true
+  }
+ ]
+}

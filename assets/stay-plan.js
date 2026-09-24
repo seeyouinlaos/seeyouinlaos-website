@@ -38,7 +38,9 @@ const COMPLIMENTARY = {
   stage: 'wedstay',
   name: 'Guest House complimentary',
   where: 'Vientiane',
-  dates: '27 February – 01 March 2027',
+  /* the room page's eyebrow for the house (TO-00938 · PRQ-03-11): the kind of stay and the city, never the name twice */
+  eyebrow: 'Shared guest house · Vientiane',
+  dates: '27 February – 1 March 2027',
   nights: 2,
   price: 0,
   /* the last day a place may be claimed — the end of this day, the guest's own day */
@@ -64,7 +66,10 @@ function parseDay(iso) { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso |
 function toUTC(p) { return Date.UTC(p.y, p.mo - 1, p.d); }
 function fromUTC(ms) { const d = new Date(ms); return { y: d.getUTCFullYear(), mo: d.getUTCMonth() + 1, d: d.getUTCDate() }; }
 function iso(p) { return p.y + '-' + String(p.mo).padStart(2, '0') + '-' + String(p.d).padStart(2, '0'); }
-function dayWords(p, withYear) { return String(p.d).padStart(2, '0') + ' ' + MONTHS[p.mo - 1] + (withYear ? ' ' + p.y : ''); }
+function dayWords(p, withYear) { return String(p.d) + ' ' + MONTHS[p.mo - 1] + (withYear ? ' ' + p.y : ''); }   /* no leading zero: "1 March" */
+/* the number of places in words ("four"), so a sentence never types the capacity */
+const NUMBER_WORDS = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
+function numberWords(n) { return NUMBER_WORDS[n] || String(n); }
 
 /* ---- the deadline --------------------------------------------------------- */
 /* the guest's own day: a date is compared as a day, never as a timestamp, so a
@@ -84,10 +89,23 @@ function deadlineState(now) {
   return {
     phase, days: Math.max(0, days), deadline: COMPLIMENTARY.deadline, deadlineWords: COMPLIMENTARY.deadlineWords,
     open: phase !== 'closed',
-    words: phase === 'closed' ? 'Accommodation planning closed'
+    /* THE WORDS OF THE DATE (L-01, 24 Sep 2026): "{n} days left" · "1 day left" · "Last day" · "Closed on 30 November 2026" */
+    words: phase === 'closed' ? 'Closed on ' + COMPLIMENTARY.deadlineWords
       : phase === 'last-day' ? 'Last day'
-      : days === 1 ? '1 day remaining' : days + ' days remaining'
+      : days === 1 ? '1 day left' : days + ' days left'
   };
+}
+/* THE STAY BAR'S LINE (L-01): the eyebrow stays "Accommodation planning"; the date line says what closes, and when */
+function barLine(now) {
+  const d = deadlineState(now);
+  return 'Guest House places ' + (d.open ? 'close' : 'closed') + ' on ' + COMPLIMENTARY.deadlineWords;
+}
+/* THE RAIL, SPOKEN (TO-00745): the calendar hairline of the bar and of the availability object, in words */
+function railWords(now) {
+  const d = deadlineState(now);
+  if (d.phase === 'closed') return 'Closed on ' + COMPLIMENTARY.deadlineWords;
+  if (d.phase === 'last-day') return 'Last day: ' + COMPLIMENTARY.deadlineWords;
+  return (d.days === 1 ? '1 day left' : d.days + ' days left') + ' until ' + COMPLIMENTARY.deadlineWords;
 }
 /* WHERE TODAY STANDS IN THE PLANNING WINDOW (Owner, 23 Sep 2026): 0 before it
  * opens, 1 at the end of the deadline day, and the elapsed share of real days
@@ -123,14 +141,14 @@ function mayClaimComplimentary(now, remaining) {
  * factual, never scarcity marketing */
 function complimentaryWords(remaining, max, now) {
   const d = deadlineState(now);
-  if (!d.open) return { state: 'closed', headline: 'Complimentary accommodation planning closed', detail: 'Planning closed on ' + COMPLIMENTARY.deadlineWords + '.' };
-  if (!(remaining > 0)) return { state: 'full', headline: 'Complimentary stay fully allocated', detail: 'All ' + max + ' places are taken.' };
+  if (!d.open) return { state: 'closed', headline: 'Closed on ' + COMPLIMENTARY.deadlineWords, detail: 'New places can no longer be taken.' };
+  if (!(remaining > 0)) return { state: 'full', headline: 'All ' + numberWords(max) + ' places are taken', detail: '' };
   return {
     state: remaining === 1 ? 'one-left' : 'available',
-    headline: remaining + ' of ' + max + ' places remaining',
-    detail: 'Available until ' + COMPLIMENTARY.deadlineWords + ' or until fully allocated.'
+    headline: remaining + ' of ' + max + ' places left',
+    detail: 'Open until ' + COMPLIMENTARY.deadlineWords + ', or until the ' + numberWords(max) + ' places are taken.'
   };
 }
 
-window.SIYL_STAY_PLAN = { COMPLIMENTARY: COMPLIMENTARY, PLANNING: PLANNING, daysUntilDeadline: daysUntilDeadline, deadlineState: deadlineState, planningProgress: planningProgress, planningWindow: planningWindow, mayClaimComplimentary: mayClaimComplimentary, complimentaryWords: complimentaryWords };
+window.SIYL_STAY_PLAN = { COMPLIMENTARY: COMPLIMENTARY, PLANNING: PLANNING, daysUntilDeadline: daysUntilDeadline, deadlineState: deadlineState, barLine: barLine, railWords: railWords, planningProgress: planningProgress, planningWindow: planningWindow, mayClaimComplimentary: mayClaimComplimentary, complimentaryWords: complimentaryWords };
 })();

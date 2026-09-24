@@ -108,13 +108,17 @@
     if (done) {
       var land = function () {
         var J = window.SIYL_JOURNEY, card = document.getElementById(done === 'extras' ? 'extras' : 's-' + done); if (!card || card.hidden) return false;
-        if (done === 'extras') { if (!card.querySelector('.p-wizard-note')) { var ne = document.createElement('p'); ne.className = 't-l1 on p-wizard-note'; ne.setAttribute('role', 'status'); ne.innerHTML = '<i class="prep-tick" aria-hidden="true"></i> Added to your trip'; card.insertBefore(ne, card.firstChild); } card.classList.add('p-wizard-landed'); return true; }
+        if (done === 'extras') { if (!card.querySelector('.p-wizard-note')) { var ne = document.createElement('p'); ne.className = 't-l1 on p-wizard-note'; ne.setAttribute('role', 'status'); ne.innerHTML = '<i class="prep-tick" aria-hidden="true"></i> Added to My Bag'; card.insertBefore(ne, card.firstChild); } card.classList.add('p-wizard-landed'); return true; }
         var seg = J && J.SEGMENTS.filter(function (s) { return s.key === done; })[0];
-        var st = seg && J.state(seg), words = st === 'selected' ? 'Selected · in your trip' : st === 'waitlisted' ? 'On the waiting list' : st === 'declined' ? 'Not joining' : '';
+        /* the state in the ladder's words (OQ-40): a stay with a place held in the guest's name is “Held for you”, anything else
+           chosen is “Selected”; the waiting list names its number only when it is known; a stay or leg not taken is “Not needed” */
+        var U = window.SIYL_UNITS, held = !!(seg && seg.cat === 'Accommodation' && U && U.ready && U.ready() && U.view && U.view() && (U.view().mine || {})[seg.key]);
+        var pos = seg && J.waitPosition ? J.waitPosition(seg) : null;
+        var st = seg && J.state(seg), words = st === 'selected' ? (held ? 'Held for you' : 'Selected') : st === 'waitlisted' ? 'On the waiting list' + (pos ? ' — number ' + pos : '') : st === 'declined' ? 'Not needed in your trip' : '';
         if (!card.querySelector('.p-wizard-note')) {
           var n = document.createElement('p'); n.className = 't-l1 on p-wizard-note'; n.setAttribute('role', 'status'); n.setAttribute('aria-live', 'polite');
           var next = null; if (J) { var after = false; J.SEGMENTS.forEach(function (s) { if (s.key === done) { after = true; return; } if (after && !next && J.relevant(s) && J.state(s) === 'open') next = s; }); }
-          n.innerHTML = '<span><i class="prep-tick" aria-hidden="true"></i> ' + esc(words || 'Back in My Trip') + '</span>' + (next ? '<a href="#s-' + esc(next.key) + '">Next: ' + esc(next.label) + '</a>' : '<span>Every stage of your trip is answered</span>');
+          n.innerHTML = '<span><i class="prep-tick" aria-hidden="true"></i> ' + esc(words || 'Back in My Trip') + '</span>' + (next ? '<a href="#s-' + esc(next.key) + '">Next: ' + esc(next.label) + '</a>' : '<span>Nothing left to choose in My Trip</span>');
           var head = card.querySelector('.p-stage-h'); if (head) head.appendChild(n); else card.insertBefore(n, card.firstChild);
         }
         card.classList.add('p-wizard-landed');

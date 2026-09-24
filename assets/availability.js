@@ -11,15 +11,15 @@
      THE LINE says HOW MUCH OF THE PLANNING WINDOW HAS RUN — real calendar time
      from 23 September 2026 to the end of 30 November 2026, never the allocation.
 
-     WEDDING STAY · LIMITED AVAILABILITY
+     BOTH WEDDING NIGHTS · 27 FEBRUARY – 1 MARCH
      ╭─────╮   One place
-     │ 5/6 │   has gone.
-     ╰─────╯   Complimentary Wedding Stay
-       REM     while places remain.
+     │ 3/4 │   has gone.            (a guest holding a place: "One of the four / is yours.")
+     ╰─────╯   Hosted by Haruthai & Suthep,
+       LEFT    while places remain.
      Now ●──────────────────── 30 Nov
-     Your invitation shows what is still available for you.
+     Your invitation shows what is still open to you.
      OPEN YOUR INVITATION →      See the Guest House →
-     68 days remaining · availability may close earlier
+     Until 30 November, or until the four places are taken.   (closed: "Every other stay can still be chosen.")
 
    THE NAMES ARE THE PROJECT'S OWN (Owner, 23 Sep 2026): the house is the
    "Guest House complimentary" the booking engine knows. "Private Residence" was
@@ -55,23 +55,28 @@
       elapsed: w.progress,
       startWords: w.startWords, endWords: w.endWords,
       phase: w.phase, days: w.days, deadlineWords: P.COMPLIMENTARY.deadlineWords,
+      railWords: P.railWords ? P.railWords(new Date()) : w.words,
       closed: !w.open, full: c.remaining <= 0, mine: !!c.mine
     };
   }
   /* the one line that changes with the count — the Owner's sentence, spoken by the data.
      The break is a real line break kept by the stylesheet (white-space: pre-line), never a <br>: the sentence stays
      ONE text node, so the site's dictionary can translate it whole instead of in fragments that no grammar survives. */
+  var WORDS = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight'];
+  function num(n) { return WORDS[n] || String(n); }
+  function cap(t) { return t.charAt(0).toUpperCase() + t.slice(1); }
   function headline(f) {
+    /* THE GUEST'S OWN PLACE IS NEVER COUNTED AS GONE (PRQ-03-06 · W7-113): a guest who holds one of the places reads it */
+    if (f.mine) return 'One of the ' + num(f.max) + '\nis yours.';
     if (f.full) return 'Every place\nhas gone.';
-    if (f.taken === 0) return 'All ' + ({ 4: 'four', 6: 'six' }[f.max] || f.max) + ' places\nare open.';
+    if (f.taken === 0) return 'All ' + num(f.max) + ' places\nare open.';
     if (f.taken === 1) return 'One place\nhas gone.';
-    return f.taken + ' places\nhave gone.';
+    return cap(num(f.taken)) + ' places\nhave gone.';
   }
-  /* the foot: the time signal, never merged with the count */
+  /* the foot: the time signal, never merged with the count — the closing itself is said once, in the stay bar (L-01) */
   function footnote(f) {
-    if (f.closed) return 'Accommodation planning closed';
-    var days = f.phase === 'last-day' ? 'Last day' : (f.days === 1 ? '1 day remaining' : f.days + ' days remaining');
-    return days + ' · availability may close earlier';
+    if (f.closed) return 'Every other stay can still be chosen.';
+    return 'Until ' + String(f.deadlineWords || '').replace(/\s+\d{4}$/, '') + ', or until the ' + num(f.max) + ' places are taken.';
   }
   /* the action follows the guest: a guest already inside their journey is never sent back through the invitation */
   function action() {
@@ -87,29 +92,29 @@
     var a = action(), arc = f.max ? f.remaining / f.max : 0, p = Math.min(1, Math.max(0, f.elapsed));
     return '' +
       '<div class="av-in">' +
-        '<p class="t-l1 av-eyebrow">Wedding Stay · Limited availability</p>' +
+        '<p class="t-l1 av-eyebrow">Both wedding nights · 27 February – 1 March</p>' +
         '<div class="av-row">' +
-          '<div class="av-ring" role="img" aria-label="' + esc(f.remaining + ' of ' + f.max + ' complimentary places remaining') + '">' +
+          '<div class="av-ring" role="img" aria-label="' + esc(f.remaining + ' of ' + f.max + ' places left at the Guest House') + '">' +
             '<svg viewBox="0 0 60 60" aria-hidden="true" focusable="false">' +
               '<circle class="av-track" cx="30" cy="30" r="' + R + '"></circle>' +
               '<circle class="av-arc" cx="30" cy="30" r="' + R + '" stroke-dasharray="' + C.toFixed(2) + '" stroke-dashoffset="' + (C * (1 - arc)).toFixed(2) + '" style="--av-c:' + C.toFixed(2) + ';--av-o:' + (C * (1 - arc)).toFixed(2) + '"></circle>' +
             '</svg>' +
-            /* 5 / 6 on ONE line, the slash given room; REMAINING small beneath it */
-            '<span class="av-count"><span class="av-num"><b>' + f.remaining + '</b><s>/</s><b>' + f.max + '</b></span><i>Remaining</i></span>' +
+            /* 3 / 4 on ONE line, the slash given room; LEFT small beneath it */
+            '<span class="av-count"><span class="av-num"><b>' + f.remaining + '</b><s>/</s><b>' + f.max + '</b></span><i>Left</i></span>' +
           '</div>' +
           '<div class="av-words">' +
             '<p class="av-head">' + esc(headline(f)) + '</p>' +
-            '<p class="t-b2 av-sub">Complimentary Wedding Stay<br>while places remain.</p>' +
+            '<p class="t-b2 av-sub">Hosted by Haruthai &amp; Suthep,<br>while places remain.</p>' +
           '</div>' +
         '</div>' +
         '<div class="av-line">' +
           '<span class="t-l1 av-end">Now</span>' +
-          '<span class="av-rail" role="img" aria-label="' + esc(f.startWords + ' to ' + f.endWords + ' · ' + Math.round(p * 100) + ' per cent of the planning window has passed') + '">' +
+          '<span class="av-rail" role="img" aria-label="' + esc(f.railWords) + '">' +
             '<i class="av-run" style="--av-p:' + p.toFixed(4) + '"></i>' +
             '<i class="av-dot" style="--av-p:' + p.toFixed(4) + '"><b></b></i></span>' +
           '<span class="t-l1 av-end">' + esc(endLabel(f.endWords)) + '</span>' +
         '</div>' +
-        '<p class="t-b2 av-say">Your invitation shows what is still available for you.</p>' +
+        '<p class="t-b2 av-say">Your invitation shows what is still open to you.</p>' +
         '<p class="av-act">' +
           '<a class="av-cta" href="' + esc(a.href) + '" data-av-cta>' + esc(a.words) + ' <span aria-hidden="true">&rarr;</span></a>' +
           '<a class="av-explore" href="accommodation.html#residence" data-av-explore>See the Guest House <span aria-hidden="true">&rarr;</span></a>' +

@@ -31,23 +31,27 @@
       from: { code: 'BKK', name: 'Bangkok', place: 'Krung Thep Aphiwat Central Terminal', time: '20:25', date: '24 Feb 2027' },
       to: { code: 'NKI', name: 'Nong Khai', place: 'then by road to Vientiane', time: '06:25', date: '25 Feb 2027' },
       duration: 'About 10 hours on board', dates: '24 – 25 February 2027', route: 'Bangkok → Nong Khai → Vientiane',
-      cls: 'First Class Sleeper · private cabin', note: 'Van and border logistics to Souphattra Heritage included' },
+      cls: 'First Class Sleeper · private cabin', note: 'Includes the van across the border to the Souphattra Heritage' },
     mu9646: { id: 'mu9646', code: 'MU9646', kind: 'flight', title: 'MU9646 · Vientiane → Kunming', operator: 'China Eastern Airlines',
-      from: { code: 'VTE', name: 'Vientiane', place: 'Terminal 1', time: '15:50', date: '01 Mar 2027' },
-      to: { code: 'KMG', name: 'Kunming', place: 'Non-stop', time: '18:25', date: '01 Mar 2027' },
-      duration: '1h 35m · non-stop', dates: '01 March 2027', route: 'Vientiane → Kunming',
+      from: { code: 'VTE', name: 'Vientiane', place: 'Terminal 1', time: '15:50', date: '1 Mar 2027' },
+      to: { code: 'KMG', name: 'Kunming', place: '', time: '18:25', date: '1 Mar 2027' },
+      duration: '1 h 35 min · non-stop', dates: '1 March 2027', route: 'Vientiane → Kunming',
       cls: 'Business Class', classes: { business: 'Business Class', 'economy-flexible': 'Economy Flexible' } },
-    c86: { id: 'c86', code: 'C86', kind: 'train', title: 'C86 · Kunming → Lijiang', operator: 'High-speed train',
-      from: { code: 'KMG', name: 'Kunming', place: 'Kunming Railway Station', time: '10:15', date: '04 Mar 2027' },
-      to: { code: 'LJG', name: 'Lijiang', place: 'Lijiang Railway Station', time: '13:44', date: '04 Mar 2027' },
-      duration: '3h 29m · direct', dates: '04 March 2027', route: 'Kunming → Lijiang', cls: 'Business Class' },
+    c86: { id: 'c86', code: 'C86', kind: 'train', title: 'C86 · Kunming → Lijiang', operator: 'China Railway',
+      from: { code: 'KMG', name: 'Kunming', place: 'Kunming Railway Station', time: '10:15', date: '4 Mar 2027' },
+      to: { code: 'LJG', name: 'Lijiang', place: 'Lijiang Railway Station', time: '13:44', date: '4 Mar 2027' },
+      duration: '3 h 29 min · direct', dates: '4 March 2027', route: 'Kunming → Lijiang', cls: 'Business Class' },
     'return': { id: 'return', code: 'MU5922', kind: 'flight', title: 'MU5922 + MU741 · Lijiang → Bangkok', operator: 'China Eastern Airlines',
-      from: { code: 'LJG', name: 'Lijiang', place: 'MU5922 · then MU741', time: '10:00', date: '06 Mar 2027' },
-      to: { code: 'BKK', name: 'Bangkok', place: 'via Kunming · 2 h 20 m', time: '14:55', date: '06 Mar 2027' },
-      duration: '5h 55m door to door · 2h 20m in Kunming', dates: '06 March 2027', route: 'Lijiang → Kunming → Bangkok', cls: 'Economy flexible' }
+      from: { code: 'LJG', name: 'Lijiang', place: 'MU5922 · then MU741', time: '10:00', date: '6 Mar 2027' },
+      to: { code: 'BKK', name: 'Bangkok', place: 'via Kunming · 2 h 20 min', time: '14:55', date: '6 Mar 2027' },
+      duration: '5 h 55 min in all · 2 h 20 min in Kunming', dates: '6 March 2027', route: 'Lijiang → Kunming → Bangkok', cls: 'Economy Flexible' }
   };
   var ORDER = ['train', 'mu9646', 'c86', 'return'];
-  var STATE_WORDS = { selected: 'Selected · in My Bag', sent: 'Sent to Guest Relations', confirmed: 'Confirmed by Guest Relations' };
+  /* THE LINE STATE LADDER (OQ-40 · PRQ-02-09 · PRQ-04-05): Selected → Sent to us → Confirmed by Guest Relations; a line added or
+     changed after sending reads as not sent yet. A pass never implies a confirmation that does not exist. */
+  var STATE_WORDS = { selected: 'Selected', sent: 'Sent to us', confirmed: 'Confirmed by Guest Relations' };
+  /* the line under every pass title, on the card and on the PDF (OQ-28 · PRQ-04-23) */
+  var NOT_A_TICKET = 'Not a ticket \u2014 Guest Relations sends you the carrier\u2019s ticket.';
   var ALPHA = '23456789BCDFGHJKMNPQRSTVWXZ';
 
   function esc(t) { return String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
@@ -75,6 +79,24 @@
     var st = C && C.state ? C.state() : 'none';
     return st === 'confirmed' ? 'confirmed' : st === 'received' ? 'sent' : 'selected';
   }
+  /* the state of ONE line, from the last sent snapshot (SIYL_DRAFT.lineState) — { state, label, words }:
+     state is the code's key (selected · sent · confirmed); label the short word; words the same with its date */
+  function lineStateOf(line) {
+    var D = root && root.SIYL_DRAFT, C = root && root.SIYL_CONFIRM;
+    if (D && D.lineState) {
+      var ls = D.lineState(line) || { key: 'selected' }, dw = D.dateWords || function () { return ''; };
+      if (ls.key === 'confirmed') { var ca = D.confirmedAt ? dw(D.confirmedAt()) : ''; return { state: 'confirmed', label: STATE_WORDS.confirmed, words: STATE_WORDS.confirmed + (ca ? ' · ' + ca : '') }; }
+      if (ls.key === 'sent') { var sa = D.sentAt ? dw(D.sentAt()) : ''; return { state: 'sent', label: STATE_WORDS.sent, words: STATE_WORDS.sent + (sa ? ' · ' + sa : '') }; }
+      if (ls.key === 'unsent') {
+        var list = D.sentLines ? D.sentLines() : null, id = line && line.id;
+        var was = Array.isArray(list) && list.some(function (x) { return x && x.id === id; });
+        var w = was ? 'Changes not sent yet' : 'Selected · not sent yet';
+        return { state: 'selected', label: w, words: w };
+      }
+      return { state: 'selected', label: STATE_WORDS.selected, words: STATE_WORDS.selected };
+    }
+    var st = stateOf(C); return { state: st, label: STATE_WORDS[st], words: STATE_WORDS[st] };
+  }
   function docFor(legId, ctx) {
     var l = LEGS[legId]; if (!l) return null;
     ctx = ctx || {};
@@ -83,7 +105,7 @@
     var state = ctx.state || 'selected';
     var r = ref(guest.guestId, legId, ctx.cls || '');
     return { leg: l, guest: { guestId: guest.guestId, fullName: guest.fullName || guest.preferredName || '', preferredName: guest.preferredName || guest.fullName || '' },
-             cls: cls, price: ctx.price != null ? ctx.price : null, state: state, stateWords: STATE_WORDS[state], ref: r, sentAt: ctx.sentAt || null, downloadedAt: ctx.at || new Date().toISOString() };
+             cls: cls, price: ctx.price != null ? ctx.price : null, state: state, stateLabel: ctx.stateLabel || STATE_WORDS[state], stateWords: ctx.stateWords || STATE_WORDS[state], ref: r, sentAt: ctx.sentAt || null, downloadedAt: ctx.at || new Date().toISOString() };
   }
   /* the guest's own document, from the page: the session, the bag line, the journey status */
   function docFromPage(legId) {
@@ -91,8 +113,10 @@
     var me = G && G.me ? G.me() : null; if (!me) return null;
     var line = B ? B.get().filter(function (x) { return x.id === legId; })[0] : null;
     if (!line) return null;
-    var cls = line.cls || '';
-    return docFor(legId, { guest: { guestId: me.guestId, fullName: G.value(me.guestId, 'fullName') || me.fullName, preferredName: G.nameOf() }, cls: cls, price: line.price, state: stateOf(C), sentAt: C && C.receivedAt ? C.receivedAt() : null });
+    /* a leg with fares (MU9646) has no pass until its fare is chosen — never a Business Class by default */
+    if (LEGS[legId].classes && !(line.cls && LEGS[legId].classes[line.cls])) return null;
+    var cls = line.cls || '', st = lineStateOf(line);
+    return docFor(legId, { guest: { guestId: me.guestId, fullName: G.value(me.guestId, 'fullName') || me.fullName, preferredName: G.nameOf() }, cls: cls, price: line.price, state: st.state, stateLabel: st.label, stateWords: st.words, sentAt: C && C.receivedAt ? C.receivedAt() : null });
   }
 
   /* ---- the ticket card, one grammar on every surface ----
@@ -102,26 +126,26 @@
     var l = LEGS[legId]; if (!l) return '';
     var G = root && root.SIYL_GUEST, me = G && G.me ? G.me() : null;
     var doc = opts.doc || (opts.selected ? docFromPage(legId) : null);
-    var cls = doc ? doc.cls : classOf(legId, opts.cls);
+    var cls = doc ? doc.cls : (l.classes && !(opts.cls && l.classes[opts.cls]) ? 'Choose your fare' : classOf(legId, opts.cls));
     var state = doc ? doc.state : null;
     var head = '<div class="p-ticket-head"><p class="t-l1">' + esc(l.kind === 'train' ? 'Train' : 'Flight') + ' · ' + esc(l.operator) + '</p>' +
-      '<p class="t-l1 ' + (opts.selected ? 'on' : '') + '" data-ticket-state>' + (opts.selected ? '<i class="prep-tick" aria-hidden="true"></i>' + esc(state === 'confirmed' ? 'Confirmed' : state === 'sent' ? 'Sent' : 'Current selection') : 'Not selected') + '</p></div>';
+      '<p class="t-l1 ' + (opts.selected ? 'on' : '') + '" data-ticket-state>' + (opts.selected ? '<i class="prep-tick" aria-hidden="true"></i>' + esc(doc ? doc.stateLabel : STATE_WORDS.selected) : 'Not selected') + '</p></div>';
     /* the vehicle on the line: a plain glyph in ink, drawn inline so it needs no mask and no image */
     var glyph = l.kind === 'train'
       ? '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 2c-4 0-8 .5-8 4v9.5A3.5 3.5 0 0 0 7.5 19L6 20.5V21h12v-.5L16.5 19a3.5 3.5 0 0 0 3.5-3.5V6c0-3.5-4-4-8-4zm-3.5 15a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm2.5-6H6V7h5v4zm4.5 6a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm2.5-6h-5V7h5v4z"/></svg>'
       : '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false" style="transform:rotate(90deg)"><path fill="currentColor" d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z"/></svg>';
     var route = '<div class="p-ticket-route">' +
-      '<div class="p-ticket-end"><b class="p-ticket-code">' + esc(l.from.code) + '</b><span class="p-ticket-time">' + esc(l.from.time) + '</span><span class="t-b2">' + esc(l.from.name) + '<br>' + esc(l.from.place) + '</span><span class="t-l1">' + esc(l.from.date) + '</span></div>' +
+      '<div class="p-ticket-end"><b class="p-ticket-code">' + esc(l.from.code) + '</b><span class="p-ticket-time">' + esc(l.from.time) + '</span><span class="t-b2">' + esc(l.from.name) + (l.from.place ? '<br>' + esc(l.from.place) : '') + '</span><span class="t-l1">' + esc(l.from.date) + '</span></div>' +
       '<div class="p-ticket-mid" aria-hidden="true"><span class="p-ticket-line"><i class="p-ticket-glyph p-ticket-' + l.kind + '">' + glyph + '</i></span><span class="t-l1">' + esc(l.duration) + '</span></div>' +
-      '<div class="p-ticket-end to"><b class="p-ticket-code">' + esc(l.to.code) + '</b><span class="p-ticket-time">' + esc(l.to.time) + '</span><span class="t-b2">' + esc(l.to.name) + '<br>' + esc(l.to.place) + '</span><span class="t-l1">' + esc(l.to.date) + '</span></div></div>';
+      '<div class="p-ticket-end to"><b class="p-ticket-code">' + esc(l.to.code) + '</b><span class="p-ticket-time">' + esc(l.to.time) + '</span><span class="t-b2">' + esc(l.to.name) + (l.to.place ? '<br>' + esc(l.to.place) : '') + '</span><span class="t-l1">' + esc(l.to.date) + '</span></div></div>';
     var facts = '<div class="p-ticket-facts">' +
       '<div><p class="t-l1">Class</p><p class="t-b1">' + esc(cls) + '</p></div>' +
       '<div><p class="t-l1">Guest</p><p class="t-b1">' + esc(me ? (G.nameOf() || me.preferredName) : '—') + '</p></div>' +
-      (doc ? '<div><p class="t-l1">Travel pass</p><p class="t-b1"><span class="ref">' + esc(doc.ref) + '</span></p></div>' : '<div><p class="t-l1">Travel pass</p><p class="t-b2">Issued with your selection</p></div>') +
-      (opts.price ? '<div><p class="t-l1">Your cost</p><p class="t-b1">' + opts.price + '</p></div>' : '') + '</div>';
+      (doc ? '<div><p class="t-l1">Travel pass</p><p class="t-b1"><span class="ref">' + esc(doc.ref) + '</span></p></div>' : '<div><p class="t-l1">Travel pass</p><p class="t-b2">Appears once you choose this journey</p></div>') +
+      (opts.price ? '<div><p class="t-l1">Your total</p><p class="t-b1">' + opts.price + '</p></div>' : '') + '</div>';
     var code = doc ? '<div class="p-ticket-code-box">' + qrSvg(payload(doc), 96, 'Travel pass code ' + doc.ref) + '<p class="t-l1">' + esc(doc.stateWords) + '</p></div>' : '';
     return '<div class="p-ticket' + (opts.selected ? ' on' : '') + (opts.compact ? ' compact' : '') + '" data-ticket="' + esc(legId) + '">' + head +
-      '<h3 class="t-h1">' + esc(l.title) + '</h3>' + route + '<div class="p-ticket-tear" aria-hidden="true"></div>' +
+      '<h3 class="t-h1">' + esc(l.title) + '</h3><p class="t-b2 p-ticket-note">' + esc(NOT_A_TICKET) + '</p>' + route + '<div class="p-ticket-tear" aria-hidden="true"></div>' +
       '<div class="p-ticket-body">' + facts + code + '</div>' +
       (l.note && !opts.compact ? '<p class="t-b2">' + esc(l.note) + '</p>' : '') +
       (opts.actions ? '<div class="p-actions">' + opts.actions + '</div>' : '') + '</div>';
@@ -149,7 +173,7 @@
         if (b.getAttribute('aria-disabled') === 'true') return;
         var was = b.textContent; b.setAttribute('aria-disabled', 'true'); b.textContent = 'Preparing…';
         var r = deliver(b.getAttribute('data-travel-pass'));
-        b.removeAttribute('aria-disabled'); b.textContent = r && r.ok ? 'Downloaded · again?' : (r && r.error === 'not selected' ? 'Not in My Bag' : was);
+        b.removeAttribute('aria-disabled'); b.textContent = r && r.ok ? 'Downloaded \u2014 download again' : (r && r.error === 'not selected' ? 'Choose this journey first' : was);
       });
     });
   }
@@ -168,8 +192,10 @@
     p.line(x, top - 24, x + w, top - 24, INK, 0.7);
     /* the leg */
     p.label(x, top - 46, l.operator); p.text(x, top - 66, paper(l.title), 'F1', W.fit(paper(l.title), 17, 'F1', w, 12));
+    /* the pass is not the carrier's ticket — said directly under the title (PRQ-04-23) */
+    p.text(x, top - 81, NOT_A_TICKET, 'F3', W.fit(NOT_A_TICKET, 8.5, 'F3', w, 6.5), MUTE);
     /* the route: two ends, the line between, the duration above it */
-    var ry = top - 108;
+    var ry = top - 120;
     p.text(x, ry, l.from.code, 'F1', 30); p.text(x + w, ry, l.to.code, 'F1', 30, INK, 0, 'right');
     var lx1 = x + 92, lx2 = x + w - 92;
     p.line(lx1, ry + 10, lx2, ry + 10, LINE, 0.8); p.circle(lx1, ry + 10, 2.2, INK); p.circle(lx2, ry + 10, 2.2, INK);
@@ -179,7 +205,7 @@
     /* each end keeps to its half: the name, then the place beneath it */
     var half = w / 2 - 10;
     p.text(x, ry - 30, l.from.name, 'F2', 8.5, INK); p.text(x + w, ry - 30, l.to.name, 'F2', 8.5, INK, 0, 'right');
-    p.text(x, ry - 42, l.from.place, 'F2', W.fit(l.from.place, 8, 'F2', half, 6.5), MUTE); p.text(x + w, ry - 42, l.to.place, 'F2', W.fit(l.to.place, 8, 'F2', half, 6.5), MUTE, 0, 'right');
+    if (l.from.place) p.text(x, ry - 42, l.from.place, 'F2', W.fit(l.from.place, 8, 'F2', half, 6.5), MUTE); if (l.to.place) p.text(x + w, ry - 42, l.to.place, 'F2', W.fit(l.to.place, 8, 'F2', half, 6.5), MUTE, 0, 'right');
     p.label(x, ry - 56, l.from.date); p.label(x + w, ry - 56, l.to.date, 'right');
     p.line(x, ry - 70, x + w, ry - 70);
     /* the facts: two rows of two */
@@ -187,20 +213,21 @@
     p.label(c1, fy, 'Guest'); p.text(c1, fy - 18, doc.guest.fullName, 'F1', W.fit(doc.guest.fullName, 13, 'F1', c2 - c1 - 14, 9));
     p.label(c2, fy, 'Class'); p.text(c2, fy - 18, doc.cls, 'F1', W.fit(doc.cls, 13, 'F1', x + w - c2, 9));
     p.label(c1, fy - 38, 'Date'); p.text(c1, fy - 54, l.dates, 'F1', W.fit(l.dates, 12, 'F1', c2 - c1 - 14, 9));
-    p.label(c2, fy - 38, 'Your cost'); p.text(c2, fy - 54, doc.price != null ? 'USD ' + Number(doc.price).toLocaleString('en-US') + ' · per person' : 'Guest Relations confirms', 'F1', 12);
+    p.label(c2, fy - 38, 'Your total'); p.text(c2, fy - 54, doc.price != null ? 'USD ' + Number(doc.price).toLocaleString('en-US') + ' per person' : 'Amount on request', 'F1', 12);
     /* the foot of the body */
     var by = g.bottom;
     p.line(x, by + 14, x + w, by + 14);
     p.label(x, by, 'Wedding journey of Haruthai & Suthep');
-    p.label(x + w, by, doc.state, 'right');
     /* the stub */
     var st = g.stub, size = 96, qx = st.cx - size / 2, qy = top - 14 - size;
     p.qr(modules(payload(doc)), qx, qy, size);
     p.text(st.cx, qy - 18, doc.ref, 'F2', 8.6, INK, 1.4, 'center');
-    p.label(st.cx, qy - 32, doc.state, 'center', ACCENT);
-    p.label(st.cx, qy - 50, l.code + ' · ' + l.from.code + ' – ' + l.to.code, 'center');
-    p.label(st.cx, qy - 62, l.from.date + ' · ' + l.from.time, 'center');
-    p.label(st.cx, by, 'Show to Guest Relations', 'center');
+    /* the stamp: the line's own state in full words ("Confirmed by Guest Relations"), on as many lines as the stub needs */
+    var stamp = W.wrap(String(doc.stateLabel || doc.state).toUpperCase(), 7.2, 'F2', st.w), sy = qy - 32;
+    stamp.forEach(function (t) { p.label(st.cx, sy, t, 'center', ACCENT); sy -= 10; });
+    p.label(st.cx, sy - 8, l.code + ' · ' + l.from.code + ' – ' + l.to.code, 'center');
+    p.label(st.cx, sy - 20, l.from.date + ' · ' + l.from.time, 'center');
+    p.label(st.cx, by, 'For your records', 'center');
   }
   function compose(doc) {
     var W = W0(), p = new W.Page(), PAGE = W.PAGE, M = 48, Wd = PAGE.w - M * 2, y = PAGE.h - 72, INK = W.INK, MUTE = W.MUTE;
@@ -211,12 +238,12 @@
     p.text(M, y, doc.guest.fullName + ' · ' + paper(doc.leg.title), 'F2', 9.5, MUTE);
     y -= 28;
     drawPass(p, doc, { x: M, y: y - TICKET_H, w: Wd, h: TICKET_H }); y -= TICKET_H + 28;
-    var notes = ['This travel pass records your selection for the wedding journey of Haruthai & Suthep as it stands at the time of download.',
-      doc.state === 'confirmed' ? 'Guest Relations has confirmed this arrangement. The carrier\u2019s ticket follows from Guest Relations.' : doc.state === 'sent' ? 'Guest Relations has received your trip. The arrangement is confirmed with you personally; the carrier\u2019s ticket follows from Guest Relations.' : 'Nothing is paid on this website. Guest Relations confirms the arrangement with you personally; the carrier\u2019s ticket follows from Guest Relations.',
-      'The code carries this pass: the reference, your first name, the leg, the date and the class. It is not the carrier\u2019s ticket.',
-      'If you change your trip, download this pass again; the newer one is the one that counts.'];
+    var notes = ['This travel pass shows your choice for the wedding journey of Haruthai & Suthep, as it stood when you downloaded it.',
+      doc.state === 'confirmed' ? 'Guest Relations has confirmed this journey.' : doc.state === 'sent' ? 'We have your trip. Guest Relations will confirm this journey with you personally.' : 'You have not sent this choice to us yet. Nothing is paid on this website.',
+      'The code holds the details printed here: the reference, your first name, the journey, the date and the class.',
+      'If you change your trip, download a new pass \u2014 the latest one is the one that counts.'];
     notes.forEach(function (n) { W.wrap(n, 9.5, 'F3', Wd).forEach(function (line) { p.text(M, y, line, 'F3', 9.5, MUTE); y -= 14; }); });
-    p.label(M, W.SAFE.y + 14, 'Downloaded ' + doc.downloadedAt.replace('T', ' ').slice(0, 16) + ' UTC');
+    p.label(M, W.SAFE.y + 14, W.downloadedWords ? W.downloadedWords(doc.downloadedAt) : 'Downloaded ' + doc.downloadedAt.replace('T', ' ').slice(0, 16) + ' UTC');
     p.label(M + Wd, W.SAFE.y + 14, 'Thailand · Laos · China · 21 February – 8 March 2027', 'right');
     compose.lastPage = p;
     return W.build([p], { title: 'Travel pass · ' + paper(doc.leg.title) + ' · ' + doc.guest.preferredName, subject: 'Travel pass ' + doc.ref });
@@ -237,6 +264,6 @@
     try { return { ok: true, file: download(doc), doc: doc }; } catch (e) { return { ok: false, error: String(e && e.message || e) }; }
   }
 
-  return { LEGS: LEGS, ORDER: ORDER, STATE_WORDS: STATE_WORDS, isLeg: isLeg, classOf: classOf, ref: ref, payload: payload, modules: modules, qrSvg: qrSvg,
+  return { LEGS: LEGS, ORDER: ORDER, STATE_WORDS: STATE_WORDS, NOT_A_TICKET: NOT_A_TICKET, lineStateOf: lineStateOf, isLeg: isLeg, classOf: classOf, ref: ref, payload: payload, modules: modules, qrSvg: qrSvg,
            docFor: docFor, docFromPage: docFromPage, card: card, strip: strip, button: button, wire: wire, compose: compose, filename: filename, download: download, deliver: deliver };
 });

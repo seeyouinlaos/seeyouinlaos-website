@@ -16,13 +16,13 @@
     name: 'Wedding Dinner',
     date: 'Sunday, 28 February 2027',
     time: '19:30',
-    place: 'Poolside',
+    place: 'poolside',
     venue: 'Souphattra Heritage Vientiane',
     dress: 'Black Tie',
     dressHref: 'wedding-preparation.html#dress-code',
-    copy: 'An evening gathering poolside, bringing the wedding day to its final and longest chapter — a Chinese sharing menu at the table, and the night to follow.',
+    copy: 'An evening poolside, bringing the wedding day to its final and longest chapter — a Chinese sharing menu at the table, and the night to follow.',
     /* the seating of the one long table — the plan's words, never a second dinner */
-    seating: 'The long table beside the water: run A poolside, run B opposite the pool.',
+    seating: 'The long table beside the water — side A along the pool, side B facing it.',
     href: 'voyage.html#dinner',
     media: [
       { src: E + '056-wedding-dinner-01-poolside-from-above.jpg', alt: 'Poolside at Souphattra Heritage, seen from above', source: 'Drive 056' },

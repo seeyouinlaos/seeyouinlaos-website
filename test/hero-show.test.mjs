@@ -18,7 +18,7 @@ test('the markup: the courtyard first, then IMG_2584–2587 as home-hero-02..05,
   const hero = h.slice(h.indexOf('<section class="a-hero">'), h.indexOf('</section>', h.indexOf('<section class="a-hero">'))).replace(/<!--[\s\S]*?-->/g, '');
   assert.match(hero, /<div class="a-hero-frame">\s*<div class="am"/, 'the photograph sits in a frame of its own width — the dots are laid against its foot, never over the words');
   assert.doesNotMatch(hero, /<button|data-a=|caption/, 'no control is written into the page: the dots are the module\'s, so their number can never disagree with the slides');
-  assert.match(h, /<p class="a-eyebrow">Sunday, 28 February 2027 · Vientiane, Laos<\/p>\s*<h1>One invitation\.<br>Three countries\. One journey\.<\/h1>/, 'the words are untouched');
+  assert.match(h, /<p class="a-eyebrow">Sunday, 28 February 2027 · Vientiane, Laos<\/p>\s*<h1>Our wedding,<br>and the journey around it\.<\/h1>/, 'the words as approved (TO-03436 / TO-03437)');
   assert.match(h, /<script src="assets\/hero-show\.js(\?v=[0-9a-f]{8})?"><\/script>/);
   /* the frames carry no camera metadata (a private photograph published clean) */
   for (const p of layers.map((m) => m[1])) { const b = readFileSync(join(ROOT, p)); assert.equal(b.indexOf(Buffer.from('Exif')), -1, p + ' carries no EXIF'); }

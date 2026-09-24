@@ -15,8 +15,10 @@
      no chair on the plan can have)
    The ceremony has two fixed positions at the FRONT CENTRE — BRIDE and
    GROOM — that are not chairs, carry no seat id and are never selectable
-   (Owner, 13 Sep 2026). The dinner is fifty bookable chairs at one long
-   table, and the couple hold two of them like every other guest.
+   (Owner, 13 Sep 2026). The dinner is forty-eight bookable chairs at one long
+   table — side A and side B, 24 each; the two seats numbered 13 were removed
+   (Owner, 24 Sep 2026) and nothing was renumbered — and the couple hold two of
+   them like every other guest. Every count in the words is read from the plan.
 
    Until Guest Relations has configured the geometry and opened seating, the
    guest sees SEATING NOT OPEN YET, and this file draws nothing.
@@ -35,7 +37,6 @@
   function invitationId() { var a = auth(); return (a && a.invitationId) || ''; }
   /* the bearer on every request: a read then carries first names, a write is the guest's own */
   function headers(json) { var a = auth(), h = {}; if (json) h['content-type'] = 'application/json'; if (a && a.bearer) h['x-siyl-auth'] = a.bearer; return h; }
-  function firstName() { var G = window.SIYL_GUEST, a = auth(); return (G && G.nameOf && G.nameOf()) || (a && a.preferredName) || ''; }
   function announce() { try { document.dispatchEvent(new CustomEvent('siyl:seats')); } catch (e) {} }
   function esc(t) { return String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
 
@@ -65,7 +66,8 @@
     select: function (event, seatId, guestId) {
       var inv = invitationId();
       return fetch(API + '/select', { method: 'POST', headers: headers(true),
-        body: JSON.stringify({ invitationId: inv, guestId: guestId, event: event, seatId: seatId, name: firstName() }) })
+        /* no name travels: the ledger takes the register's first name from the verified identity (PRQ-GAP-02) */
+        body: JSON.stringify({ invitationId: inv, guestId: guestId, event: event, seatId: seatId }) })
         .then(function (r) { return r.json().then(function (d) { d.status = r.status; return d; }); })
         .then(function (d) { if (d && d.configured) { view = d; announce(); } else S.load(true); return d; })
         .catch(function () { return { ok: false, error: 'unreachable' }; });
@@ -84,10 +86,20 @@
      * rows and positions come from the configuration exactly as given. The
      * guest sees airline-style labels (A1 … F10 · A1 … B25, assets/seatlabels.js);
      * the ledger id stays inside data-seat and never reaches the words. */
-    STATES: { available: 'Available', selected: 'Selected by you', yours: 'Your seat', party: 'Your party', family: 'Reserved · family', taken: 'Taken' },
+    STATES: { available: 'Available', selected: 'Selected by you', yours: 'Your seat', party: 'Travelling with you', family: 'Reserved for family', taken: 'Taken' },
     LABELS: window.SIYL_SEATLABELS || null,
     /* the guest-facing label of a ledger id (E4, A17) */
     label: function (seatId) { var L = S.LABELS; return L ? (L.label(seatId) || '') : ''; },
+    /* THE COUNTS ARE THE PLAN'S (PRQ-05-06): how many seats an event — or one side of the dinner table — has, read from the
+       configured plan, never typed into a sentence (48 · 24 today) */
+    count: function (event, v) {
+      v = v || view; if (!v || !v[event]) return 0;
+      if (event === 'ceremony') return (v.ceremony.rows || []).reduce(function (n, r) { return n + (r.seats || []).length; }, 0);
+      return ((v.dinner.sides && v.dinner.sides.T) || []).length + ((v.dinner.sides && v.dinner.sides.B) || []).length;
+    },
+    sideCount: function (side, v) { v = v || view; return v && v.dinner && v.dinner.sides ? (v.dinner.sides[side] || []).length : 0; },
+    /* the name a seat holder is shown by: first name only; the viewer is "You"; unknown is "A guest" (GAP-082) */
+    whoWords: function (s, me) { if (!s) return ''; if (s.state === 'yours' && (!me || s.guestId === me)) return 'You'; return String(s.name || '').trim().split(' ')[0] || 'A guest'; },
     /* a chair, in words: label first, then where it stands */
     describe: function (seatId) {
       var L = S.LABELS, lab = S.label(seatId), where = L ? L.describe(seatId) : '';
@@ -98,7 +110,7 @@
       opts = opts || {};
       var w = Object.assign({}, S.STATES);
       if (opts.subjectName) { w.yours = opts.subjectName + '’s seat'; w.selected = 'Selected for ' + opts.subjectName; }
-      if (opts.partyName) { w.party = opts.partyName + '’s seat'; }
+      /* the seats held by the guests of the same invitation read "Travelling with you" — "Your party’s seat" is retired (TO-01925) */
       if (opts.frozen) { delete w.available; delete w.selected; }
       return w;
     },
@@ -118,7 +130,7 @@
         var selectable = choosing && (st === 'available' || st === 'selected');
         /* the spoken state names the guest being chosen for when that is not the person continuing */
         var who = s.name && st !== 'yours' && st !== 'selected' ? s.name : '';
-        var words = st === 'available' ? 'available' : st === 'selected' ? (opts.subjectName ? 'selected for ' + opts.subjectName : 'selected') : st === 'yours' ? (opts.subjectName ? opts.subjectName + '’s seat' : 'your seat') : st === 'party' ? (who ? who + ', your party' : WORDS.party) : st === 'family' ? 'reserved for family' : (who ? 'taken by ' + who : 'unavailable');
+        var words = st === 'available' ? 'available' : st === 'selected' ? (opts.subjectName ? 'selected for ' + opts.subjectName : 'selected') : st === 'yours' ? (opts.subjectName ? opts.subjectName + '’s seat' : 'your seat') : st === 'party' ? (who ? who + ', travelling with you' : 'travelling with you') : st === 'family' ? 'reserved for family' : (who ? 'taken by ' + who : 'unavailable');
         var aria = EV + ' seat ' + lab + ', ' + words;
         /* available = an outlined chair (rim 3.3:1 on the card) · unavailable = a filled chair, struck through, its label 4.3:1 on the fill */
         var pan = st === 'selected' ? '#313131' : st === 'yours' ? '#F3EEE7' : st === 'taken' ? '#E7E3DB' : st === 'family' ? '#EDEBE7' : '#FCFAF6';
@@ -155,12 +167,12 @@
         var h = '<svg class="p-seatmap p-seatmap-ceremony" viewBox="0 0 ' + W + ' ' + H + '" style="min-width:' + Math.round(W * 1.1) + 'px" role="group" aria-label="Ceremony seating plan: the front with the Bride and Groom, a left block of two seats and a right block of three seats per row, ten rows, a centre aisle">';
         /* the front: a fine rule the whole width, named */
         h += '<line x1="' + pad + '" y1="14" x2="' + (W - pad) + '" y2="14" stroke="#313131" stroke-width="1"/>' +
-             '<text x="' + cxC + '" y="27" text-anchor="middle" ' + T + '>CEREMONY · FRONT</text>';
+             '<text x="' + cxC + '" y="27" text-anchor="middle" ' + T + '>Ceremony · front</text>';
         /* the couple's place: front centre, between the two blocks, in front of
          * row 1 — marked, named, never a chair, no seat label */
         if (fixedC.length) {
           var yC = frontH + 6, TF = 'font-family="' + FONT + '" font-size="7.5" letter-spacing="1.4" fill="#313131"';
-          h += '<g class="fixed" aria-label="' + esc(fixedC.join(' and ')) + ', fixed positions at the front centre">' +
+          h += '<g class="fixed" aria-label="The Bride and the Groom, at the front centre">' +
                '<rect x="' + (cxC - 60) + '" y="' + yC + '" width="56" height="22" rx="11" fill="#F3EEE7" stroke="#313131" stroke-width="1"/>' +
                '<text x="' + (cxC - 32) + '" y="' + (yC + 14.5) + '" text-anchor="middle" ' + TF + '>' + esc(fixedC[0] || '') + '</text>' +
                '<rect x="' + (cxC + 4) + '" y="' + yC + '" width="56" height="22" rx="11" fill="#F3EEE7" stroke="#313131" stroke-width="1"/>' +
@@ -170,7 +182,7 @@
         var LC = (S.LABELS && S.LABELS.COLS) || { L: ['A', 'B'], R: ['D', 'E', 'F'] };
         for (var jl = 0; jl < maxL; jl++) h += '<text x="' + (pad + jl * U + seat / 2) + '" y="' + headY + '" text-anchor="middle" ' + TH + '>' + (LC.L[jl] || '') + '</text>';
         for (var jr = 0; jr < maxR; jr++) h += '<text x="' + (pad + maxL * U + aisle + jr * U + seat / 2) + '" y="' + headY + '" text-anchor="middle" ' + TH + '>' + (LC.R[jr] || '') + '</text>';
-        h += '<text x="' + cxC + '" y="' + headY + '" text-anchor="middle" ' + TH + '>AISLE</text>';
+        h += '<text x="' + cxC + '" y="' + headY + '" text-anchor="middle" ' + TH + '>Aisle</text>';
         nums.forEach(function (n, i) {
           var y = top + i * RH;
           var L = byRow[n].L, R = byRow[n].R;
@@ -181,18 +193,20 @@
         });
         var nL = rows.filter(function (r) { return r.side === 'L'; }).reduce(function (n, r) { return n + r.seats.length; }, 0);
         var nR = rows.filter(function (r) { return r.side === 'R'; }).reduce(function (n, r) { return n + r.seats.length; }, 0);
-        h += '<text x="' + (pad + (maxL * U) / 2) + '" y="' + (H - 8) + '" text-anchor="middle" ' + T + '>LEFT BLOCK · ' + nL + '</text>' +
-             '<text x="' + (pad + maxL * U + aisle + (maxR * U) / 2) + '" y="' + (H - 8) + '" text-anchor="middle" ' + T + '>RIGHT BLOCK · ' + nR + '</text>';
+        h += '<text x="' + (pad + (maxL * U) / 2) + '" y="' + (H - 8) + '" text-anchor="middle" ' + T + '>Left block · ' + nL + ' seats</text>' +
+             '<text x="' + (pad + maxL * U + aisle + (maxR * U) / 2) + '" y="' + (H - 8) + '" text-anchor="middle" ' + T + '>Right block · ' + nR + ' seats</text>';
         return h + '</svg>';
       }
 
-      /* the long table, seen from above: run A along the top, run B along the
-       * bottom — fifty places, no fixed position for anyone, poolside. THE
-       * POOL is the landmark: RUN A is the poolside run (Owner, 15 Sep 2026,
+      /* the long table, seen from above: side A along the top, side B along the
+       * bottom — forty-eight seats, no fixed position for anyone, poolside. THE
+       * POOL is the landmark: SIDE A is the poolside side (Owner, 15 Sep 2026,
        * source of truth from the venue plan; the geometry may record 'B' if
        * the venue ever changes the layout). The water is drawn as water —
-       * a calm band with a few ripples — and named; the other run is named
-       * as the run opposite the pool. Nothing childish, nothing bright. */
+       * a calm band with a few ripples — and named; the other side is named
+       * as the side facing the pool. Nothing childish, nothing bright.
+       * THE TWO RETIRED 13s (Owner, 24 Sep 2026) leave no hole: the chairs
+       * stand in the order of their numbers, side by side, and keep their labels. */
       var sides = (v && v.dinner && v.dinner.sides) || { T: [], B: [] };
       var top2s = sides.T || [], bottom = sides.B || [];
       var poolSide = v && v.dinner && v.dinner.poolSide === 'B' ? 'B' : 'T';
@@ -203,12 +217,13 @@
       var H2 = afterBot + (poolSide === 'B' ? POOL_H + GAP : 0) + 30;
       var total = top2s.length + bottom.length;
       var RN = (S.LABELS && S.LABELS.RUNS) || { T: 'A', B: 'B' };
-      var poolWords = 'the swimming pool along run ' + RN[poolSide];
-      var h2 = '<svg class="p-seatmap p-seatmap-table" viewBox="0 0 ' + W2 + ' ' + H2 + '" style="min-width:' + Math.round(W2 * 1.15) + 'px" role="group" aria-label="Wedding dinner seating plan, poolside: one long table with run A of ' + top2s.length + ' places along one side and run B of ' + bottom.length + ' along the other, ' + poolWords + '">';
+      var other = poolSide === 'B' ? 'T' : 'B', lenOf = { T: top2s.length, B: bottom.length };
+      var planWords = 'Wedding Dinner seating plan: one long table by the pool, with side ' + RN[poolSide] + ' of ' + lenOf[poolSide] + ' seats along the pool and side ' + RN[other] + ' of ' + lenOf[other] + ' seats facing it';
+      var h2 = '<svg class="p-seatmap p-seatmap-table" viewBox="0 0 ' + W2 + ' ' + H2 + '" style="min-width:' + Math.round(W2 * 1.15) + 'px" role="group" aria-label="' + esc(planWords) + '">';
       h2 += '<defs><linearGradient id="siyl-water" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#DCE5E2"/><stop offset="1" stop-color="#CCD9D5"/></linearGradient></defs>';
       h2 += '<line x1="' + pad2 + '" y1="14" x2="' + (W2 - pad2) + '" y2="14" stroke="#313131" stroke-width="1"/>' +
-            '<text x="' + pad2 + '" y="' + headY2 + '" ' + T + '>WEDDING DINNER · POOLSIDE</text>' +
-            '<text x="' + (W2 - pad2) + '" y="' + headY2 + '" text-anchor="end" ' + T + '>RUN ' + RN.T + ' · ' + top2s.length + ' PLACES' + (poolSide === 'T' ? ' · POOLSIDE' : ' · OPPOSITE THE POOL') + '</text>';
+            '<text x="' + pad2 + '" y="' + headY2 + '" ' + T + '>Wedding Dinner · poolside</text>' +
+            '<text x="' + (W2 - pad2) + '" y="' + headY2 + '" text-anchor="end" ' + T + '>Side ' + RN.T + ' · ' + top2s.length + ' seats' + (poolSide === 'T' ? ' · poolside' : ' · facing the pool') + '</text>';
       function pool(y) {
         var w = n * U, cx = pad2 + w / 2, ripple = '', k;
         for (k = 0; k < 3; k++) {
@@ -216,21 +231,24 @@
           ripple += '<path d="M' + rx + ' ' + ry + ' q 7 -4 14 0 t 14 0 t 14 0 t 14 0" fill="none" stroke="#FFFFFF" stroke-opacity=".7" stroke-width="1"/>';
           ripple += '<path d="M' + (pad2 + w - 60 - k * 30) + ' ' + (ry + 6) + ' q 7 -4 14 0 t 14 0 t 14 0" fill="none" stroke="#FFFFFF" stroke-opacity=".55" stroke-width="1"/>';
         }
-        return '<g class="pool" role="img" aria-label="The swimming pool, along run ' + RN[poolSide] + '">' +
+        return '<g class="pool" role="img" aria-label="The swimming pool, along side ' + RN[poolSide] + '">' +
                '<rect x="' + pad2 + '" y="' + y + '" width="' + w + '" height="' + POOL_H + '" rx="12" fill="url(#siyl-water)" stroke="#B9C7C2" stroke-width="1"/>' +
                '<rect x="' + (pad2 + 3) + '" y="' + (y + 3) + '" width="' + (w - 6) + '" height="' + (POOL_H - 6) + '" rx="10" fill="none" stroke="#FFFFFF" stroke-opacity=".5" stroke-width="1"/>' +
                ripple +
-               '<text x="' + cx + '" y="' + (y + POOL_H / 2 + 3) + '" text-anchor="middle" font-family="' + FONT + '" font-size="9" letter-spacing="3" fill="#3E5A54">SWIMMING POOL</text></g>';
+               '<text x="' + cx + '" y="' + (y + POOL_H / 2 + 3) + '" text-anchor="middle" font-family="' + FONT + '" font-size="9" letter-spacing="3" fill="#3E5A54">Swimming pool</text></g>';
       }
       if (poolSide === 'T') h2 += pool(44);
-      var placeOf = function (s, j) { var m = /-(\d\d)$/.exec(s.seatId || ''); return m ? Number(m[1]) - 1 : j; };
-      top2s.forEach(function (s, j) { h2 += chair(s, pad2 + placeOf(s, j) * U + (U - seat) / 2, yTop); });
+      /* each chair's column is its RANK among the numbers of its side (1 … 12, 14 … 25 → columns 1 … 24): the order and the
+         labels are the ledger's, the retired 13 leaves no gap and nothing is drawn beyond the table */
+      var numOf = function (s) { var m = /-(\d\d)$/.exec(s.seatId || ''); return m ? Number(m[1]) : 0; };
+      var rankIn = function (list) { var nums = list.map(numOf).sort(function (a, b) { return a - b; }); return function (s, j) { var k = nums.indexOf(numOf(s)); return k >= 0 ? k : j; }; };
+      var placeT = rankIn(top2s), placeB = rankIn(bottom);
+      top2s.forEach(function (s, j) { h2 += chair(s, pad2 + placeT(s, j) * U + (U - seat) / 2, yTop); });
       h2 += '<rect x="' + pad2 + '" y="' + ty + '" width="' + (n * U) + '" height="' + tableH + '" rx="6" fill="#F3EEE7" stroke="#313131" stroke-width="1"/>';
-      h2 += '<text x="' + (pad2 + (n * U) / 2) + '" y="' + (ty + tableH / 2 + 3) + '" text-anchor="middle" ' + T + '>ONE LONG TABLE · ' + total + ' PLACES</text>';
-      bottom.forEach(function (s, j) { h2 += chair(s, pad2 + placeOf(s, j) * U + (U - seat) / 2, yBot); });
+      h2 += '<text x="' + (pad2 + (n * U) / 2) + '" y="' + (ty + tableH / 2 + 3) + '" text-anchor="middle" ' + T + '>One long table · ' + total + ' seats</text>';
+      bottom.forEach(function (s, j) { h2 += chair(s, pad2 + placeB(s, j) * U + (U - seat) / 2, yBot); });
       if (poolSide === 'B') h2 += pool(afterBot);
-      h2 += '<text x="' + (W2 - pad2) + '" y="' + (H2 - 10) + '" text-anchor="end" ' + T + '>RUN ' + RN.B + ' · ' + bottom.length + ' PLACES' + (poolSide === 'B' ? ' · POOLSIDE' : ' · OPPOSITE THE POOL') + '</text>' +
-            '<text x="' + pad2 + '" y="' + (H2 - 10) + '" ' + T + '>' + total + ' GUEST SEATS · NO FIXED PLACES</text>';
+      h2 += '<text x="' + (W2 - pad2) + '" y="' + (H2 - 10) + '" text-anchor="end" ' + T + '>Side ' + RN.B + ' · ' + bottom.length + ' seats' + (poolSide === 'B' ? ' · poolside' : ' · facing the pool') + '</text>';
       return h2 + '</svg>';
     },
 
@@ -250,7 +268,7 @@
     legend: function (opts) {
       opts = opts || {};
       var w = S.words(opts), family = S.hasFamily(opts.view || view), party = S.hasParty(opts.view || view) || !!opts.partyName;
-      return '<ul class="p-seatlegend" aria-label="Seat states">' + ['available', 'selected', 'yours', 'party', 'family', 'taken'].filter(function (k) { return w[k] && (k !== 'family' || family) && (k !== 'party' || party); }).map(function (k) {
+      return '<ul class="p-seatlegend" aria-label="Key to the seating plan">' + ['available', 'selected', 'yours', 'party', 'family', 'taken'].filter(function (k) { return w[k] && (k !== 'family' || family) && (k !== 'party' || party); }).map(function (k) {
         return '<li class="t-l1"><span class="seat-' + k + '" aria-hidden="true"></span>' + esc(w[k]) + '</li>'; }).join('') + '</ul>';
     },
     /* the pool, in words, under the dinner plan: run A is poolside (Owner, 15 Sep 2026) */
@@ -258,7 +276,7 @@
       var d = view && view.dinner, RN = (S.LABELS && S.LABELS.RUNS) || { T: 'A', B: 'B' };
       if (!d) return '';
       var ps = d.poolSide === 'B' ? 'B' : 'T', other = ps === 'B' ? 'T' : 'B';
-      return 'Run ' + RN[ps] + ' sits beside the swimming pool; run ' + RN[other] + ' faces it across the table.';
+      return 'Side ' + RN[ps] + ' is along the pool; side ' + RN[other] + ' faces it across the table.';
     },
 
     /* draw one event into a container and wire the choice */
@@ -274,8 +292,10 @@
       held.sort(function (a, b) { return S.label(a.seatId).localeCompare(S.label(b.seatId), undefined, { numeric: true }); });
       var me = opts.guestId || null;
       return '<div class="p-seatrail" data-seatrail="' + esc(event) + '"><p class="t-l1">Who sits where · ' + held.length + (held.length === 1 ? ' seat' : ' seats') + ' held</p><ul>' + held.map(function (s) {
-        var gid = s.holder || s.guestId || '', name = s.state === 'yours' && (!me || s.guestId === me) ? 'You' : (s.name || 'A guest'), ini = String(s.name || 'G').trim().split(/\s+/).map(function (w) { return w.charAt(0); }).slice(0, 2).join('').toUpperCase();
-        return '<li' + (s.state === 'yours' ? ' class="me"' : '') + ' data-seat-of="' + esc(gid) + '"><span class="p-seatava" data-ava="' + esc(gid) + '" role="img" aria-label="' + esc(s.name || 'Guest') + '"><i aria-hidden="true">' + esc(ini) + '</i></span><span class="n">' + esc(name) + '</span><span class="s">' + esc(S.label(s.seatId)) + '</span></li>';
+        /* FIRST NAMES ONLY (GAP-082): the avatar is named by the first name ("A guest" when none is known), its initial taken
+           from the first name alone — never a surname's letter */
+        var gid = s.holder || s.guestId || '', first = String(s.name || '').trim().split(/\s+/)[0] || '', name = S.whoWords(s, me), ini = (first.charAt(0) || 'G').toUpperCase();
+        return '<li' + (s.state === 'yours' ? ' class="me"' : '') + ' data-seat-of="' + esc(gid) + '"><span class="p-seatava" data-ava="' + esc(gid) + '" role="img" aria-label="' + esc(first || 'A guest') + '"><i aria-hidden="true">' + esc(ini) + '</i></span><span class="n">' + esc(name) + '</span><span class="s">' + esc(S.label(s.seatId)) + '</span></li>';
       }).join('') + '</ul></div>';
     },
     /* the portraits of the rail, read with this session — a photo replaces the initials as it arrives */

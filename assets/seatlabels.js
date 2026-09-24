@@ -9,12 +9,15 @@
                 C-L-rr-01 → A rr    C-L-rr-02 → B rr
                 C-R-rr-01 → D rr    C-R-rr-02 → E rr    C-R-rr-03 → F rr
                 BRIDE and GROOM are front-centre positions with no seat label.
-     DINNER     the two 25-place runs of the one long table
-                D-T-nn → A nn (top run)      D-B-nn → B nn (bottom run)
+     DINNER     the two sides of the one long table, 24 seats each (Owner,
+                24 Sep 2026 · OQ-03): the seats numbered 13 are removed and
+                NOTHING is renumbered — A1–A12, A14–A25 · B1–B12, B14–B25
+                D-T-nn → A nn (side A)       D-B-nn → B nn (side B)
 
    The mapping is a pure function both ways, identical in the browser and in
-   Node (the tests pin every one of the 100 pairs), so a displayed label can
-   never point at a different ledger seat.
+   Node (the tests pin every pair: 50 ceremony + 48 dinner), so a displayed
+   label can never point at a different ledger seat. A hold that still names a
+   retired 13 stays readable through retiredLabel() — it is never re-pointed.
 
    THE SEAT REFERENCE is a harmless, deterministic display code derived from
    the confirmed booking (invitation id · guest id · event · internal seat id)
@@ -31,7 +34,12 @@
   var RUNS = { T: 'A', B: 'B' };
   var EVENT_CODE = { ceremony: 'WC', dinner: 'WD' };   /* WC = Wedding (Vow) Ceremony · WD = Wedding Dinner */
   var EVENT_NAME = { ceremony: 'Vow Ceremony', dinner: 'Wedding Dinner' };
-  var EVENT_VENUE = { ceremony: 'Souphattra Heritage, Vientiane', dinner: 'Souphattra Heritage, Vientiane · poolside' };
+  var EVENT_VENUE = { ceremony: 'Souphattra Heritage, Vientiane', dinner: 'Souphattra Heritage Vientiane · poolside' };
+  /* the two dinner seats removed from the plan (Owner, 24 Sep 2026): no label, no seat, never renumbered */
+  var RETIRED = ['D-T-13', 'D-B-13'];
+  function retired(seatId) { return RETIRED.indexOf(String(seatId || '')) >= 0; }
+  /* the label a kept hold on a retired seat is READ by (Guest Relations, a report) — never offered, never drawn */
+  function retiredLabel(seatId) { return retired(seatId) ? RUNS[String(seatId).charAt(2)] + '13' : null; }
   var EVENT_DATE = 'Sunday, 28 February 2027';
 
   /* internal id → guest-facing label; null for anything that is not a seat */
@@ -39,7 +47,7 @@
     var c = /^C-([LR])-(0[1-9]|10)-(0[1-3])$/.exec(seatId || '');
     if (c) { var col = COLS[c[1]][Number(c[3]) - 1]; return col ? col + Number(c[2]) : null; }
     var d = /^D-([TB])-(0[1-9]|1[0-9]|2[0-5])$/.exec(seatId || '');
-    if (d) return RUNS[d[1]] + Number(d[2]);
+    if (d) return retired(seatId) ? null : RUNS[d[1]] + Number(d[2]);
     return null;
   }
   /* guest-facing label → internal id, per event; null when no such seat */
@@ -56,7 +64,8 @@
     }
     if (event === 'dinner') {
       if (n < 1 || n > 25 || (m[1] !== 'A' && m[1] !== 'B')) return null;
-      return 'D-' + (m[1] === 'A' ? 'T' : 'B') + '-' + (n < 10 ? '0' : '') + n;
+      var id = 'D-' + (m[1] === 'A' ? 'T' : 'B') + '-' + (n < 10 ? '0' : '') + n;
+      return retired(id) ? null : id;
     }
     return null;
   }
@@ -65,7 +74,7 @@
     var c = /^C-([LR])-(\d+)-(\d+)$/.exec(seatId0 || '');
     if (c) return (c[1] === 'L' ? 'Left block' : 'Right block') + ' · row ' + Number(c[2]);
     var d = /^D-([TB])-(\d+)$/.exec(seatId0 || '');
-    if (d) return 'Long table · ' + (d[1] === 'T' ? 'run A · Poolside' : 'run B') + ' · place ' + Number(d[2]);
+    if (d) return 'Long table · ' + (d[1] === 'T' ? 'side A · poolside' : 'side B · facing the pool');
     return '';
   }
 
@@ -102,5 +111,6 @@
   }
 
   return { COLS: COLS, RUNS: RUNS, EVENT_CODE: EVENT_CODE, EVENT_NAME: EVENT_NAME, EVENT_VENUE: EVENT_VENUE, EVENT_DATE: EVENT_DATE,
+           RETIRED: RETIRED, retired: retired, retiredLabel: retiredLabel,
            label: label, seatId: seatId, describe: describe, ref: ref, sha256: sha256 };
 });

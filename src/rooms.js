@@ -41,12 +41,24 @@
    ========================================================================== */
 
 import { SEED } from './inventory-seed.js';
-import { displayName } from './auth.js';
 import { COMPLIMENTARY, deadlineState } from './stay-plan.js';
 
 export const PLACES = 2;
 const OCC = 'occ:';
 const WL = 'wl:';
+const FN = 'fn:';   /* fn:<guestId> → the guest's first name, as the Worker last verified it from the register (PRQ-GAP-02) */
+/* FIRST NAMES ONLY, FROM THE REGISTER (PRQ-GAP-02 · W7-140): the name an occupant is shown by is the first name the Worker
+   put on the verified identity — one word, never a surname, never the registered display name, never what a browser sent */
+export function firstNameOf(identity) {
+  const s = String(identity && identity.firstName || '').replace(/[^\p{L}\p{M}' \-.]/gu, '').trim().split(/\s+/)[0] || '';
+  return s.slice(0, 24);
+}
+/* the name shown for a stored place: the learned first name, else the first word of what the place stored — never more */
+function shownName(o, names) {
+  const learned = o && o.guestId && names[o.guestId];
+  if (learned) return learned;
+  return (String(o && o.name || '').trim().split(/\s+/)[0] || '').slice(0, 24);
+}
 const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
 /* a window (the first segment of a key) belongs to one stage of the journey */
@@ -94,12 +106,17 @@ export function mayJoin(unit, identity) {
 export function availabilityOf(key, list) {
   const sourcePlaces = list.reduce((n, u) => n + u.places, 0);
   const remainingPlaces = list.reduce((n, u) => n + u.free, 0), remainingRooms = list.filter((u) => u.free > 0).length;
+  /* THE COUNTING GRAMMAR (PRQ-03-09): an EMPTY room is one nobody holds a place in; a SHARED free place is a free place
+     inside a room someone already holds — "rooms left" counts the first, never a half-held room */
+  const emptyRooms = list.filter((u) => u.taken === 0).length;
+  const sharedFree = list.filter((u) => u.taken > 0).reduce((n, u) => n + u.free, 0);
   return {
     units: list.length, places: sourcePlaces,
     sourceRooms: list.length, sourcePlaces,
     ownerReservedRooms: 0, ownerReservedPlaces: 0,
     guestOccupiedRooms: list.filter((u) => u.taken > 0).length, guestOccupiedPlaces: list.reduce((n, u) => n + u.taken, 0),
     remainingRooms, remainingPlaces, soldOut: remainingPlaces === 0,
+    emptyRooms, sharedFree,
     reserved: 0, reservedFor: null,
     /* the largest number of places still free together in one unit — what a party can be booked into as one */
     largestFree: list.reduce((m, u) => Math.max(m, u.free), 0),
@@ -152,11 +169,24 @@ export class Rooms {
   wlKey(stage, guestId) { return WL + stage + '|' + guestId; }
   /* a place held in a stage resolves the guest's waiting-list entry for it */
   async resolveWait(stage, guestId) { await this.storage.delete(this.wlKey(stage, guestId)); }
+  /* every first name the engine has learned — a place taken before the rule is re-labelled on read, never rewritten */
+  async firstNames() {
+    const map = await this.storage.list({ prefix: FN });
+    const out = {};
+    for (const [k, v] of map) out[k.slice(FN.length)] = v;
+    return out;
+  }
+  async learnName(identity) {
+    const nm = firstNameOf(identity);
+    if (!nm || !identity.guestId) return;
+    if ((await this.storage.get(FN + identity.guestId)) !== nm) await this.storage.put(FN + identity.guestId, nm);
+  }
 
   /* the engine as one guest sees it. With an identity: first names and the
    * guest's own places; without one: counts only, no name, no id. */
   async view(identity) {
     const occ = await this.occupancies();
+    const names = identity ? await this.firstNames() : {};
     const units = {}, mine = {};
     for (const key of Object.keys(SEED)) {
       units[key] = unitsOf(key).map((u) => {
@@ -166,11 +196,12 @@ export class Rooms {
            name only; never an email, a phone number, a code */
         const occupants = identity
           ? here.map((o) => (o.placeholder
-              ? { name: identity.partyId && o.partyId === identity.partyId ? 'Your party' : 'Reserved', mine: false, party: !!(identity.partyId && o.partyId === identity.partyId), placeholder: true }
-              : { name: o.name || '', mine: o.guestId === identity.guestId, party: !!(identity.partyId && o.partyId === identity.partyId), ...(o.guestId === identity.guestId ? { guestId: o.guestId } : {}) }))
+              /* a place kept for a party is not a person: no name, the state words say it (GAP-082) */
+              ? { name: '', mine: false, party: !!(identity.partyId && o.partyId === identity.partyId), placeholder: true }
+              : { name: shownName(o, names), mine: o.guestId === identity.guestId, party: !!(identity.partyId && o.partyId === identity.partyId), ...(o.guestId === identity.guestId ? { guestId: o.guestId } : {}) }))
           : here.map(() => ({}));
         const elig = !identity ? { ok: false } : mayJoin(u, identity);
-        return { label: u.label, name: u.name, kind: u.kind, places: u.places, reservedFor: null,
+        return { key, label: u.label, name: u.name, kind: u.kind, places: u.places, reservedFor: null,
                  eligible: elig.ok, occupants, taken, free: Math.max(0, u.places - taken), full: taken >= u.places };
       });
     }
@@ -200,6 +231,7 @@ export class Rooms {
     let identity = null;
     try { identity = JSON.parse(request.headers.get('x-siyl-identity') || 'null'); } catch (e) { identity = null; }
 
+    if (identity) await this.learnName(identity);
     if (op === 'read') return json(await this.view(identity));
     if (op === 'mine') {
       const v = await this.view(identity);
@@ -214,7 +246,8 @@ export class Rooms {
       if (invitationId !== identity.invitationId || guestId !== identity.guestId) return json({ ok: false, error: 'not your guest' }, 403);
       const key = String(body && body.key || '').trim();
       const label = String(body && body.label || '').trim().toUpperCase();
-      const name = displayName(body && body.name);   /* letters, marks, spaces, ' - . — never markup; 24 characters */
+      /* the name a browser sends is not trusted (PRQ-GAP-02): the place carries the register's first name the Worker verified */
+      const name = firstNameOf(identity);
       return await this.state.blockConcurrencyWhile(async () => {
         if (op === 'leave') {
           const stage = key ? stageOf(key) : String(body && body.stage || '');

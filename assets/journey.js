@@ -13,34 +13,36 @@
   var SKIP = 'siyl.skip';
 
   /* Chronological stages of the shared journey. `ids` are the bag ids that
-   * answer the stage (a stage can be answered by an alternative product). */
+   * answer the stage (a stage can be answered by an alternative product).
+   * `when` is written in the eyebrow form ("1 Mar", no leading zero — the CSS uppercases it); `cat` is a KEY
+   * ('Accommodation' / 'Transportation'), shown through SIYL_JOURNEY.catWords() ("Travel"). */
   var SEG = [
-    { key: 'bkk-stay', when: '21 – 24 FEB', cat: 'Accommodation', place: 'Bangkok',
+    { key: 'bkk-stay', when: '21 – 24 Feb', cat: 'Accommodation', place: 'Bangkok',
       label: 'Bangkok · Before the Wedding', ids: ['bkk-stay'], anchor: 'j-bkk-stay', bookend: 'open' },
-    { key: 'train', when: '24 – 25 FEB', cat: 'Transportation', place: 'Bangkok → Vientiane',
+    { key: 'train', when: '24 – 25 Feb', cat: 'Transportation', place: 'Bangkok → Vientiane',
       label: 'Special Express No. 25', ids: ['train'], anchor: 'j-train' },
-    { key: 'prewed', when: '25 – 27 FEB', cat: 'Accommodation', place: 'Vientiane',
-      label: 'Pre-Wedding Vientiane', ids: ['prewed'], anchor: 'j-prewed' },
+    { key: 'prewed', when: '25 – 27 Feb', cat: 'Accommodation', place: 'Vientiane',
+      label: 'Pre-Wedding Stay', ids: ['prewed'], anchor: 'j-prewed' },
     /* ONE wedding stay selection: the Souphattra or the Guest House complimentary (the Riverside was retired 23 Sep 2026) */
-    { key: 'wedstay', when: '27 FEB – 01 MAR', cat: 'Accommodation', place: 'Vientiane',
+    { key: 'wedstay', when: '27 Feb – 1 Mar', cat: 'Accommodation', place: 'Vientiane',
       label: 'Wedding Stay', ids: ['wedstay', 'guesthouse'], anchor: 'j-wedstay' },
-    { key: 'mu9646', when: '01 MAR', cat: 'Transportation', place: 'Vientiane → Kunming',
+    { key: 'mu9646', when: '1 Mar', cat: 'Transportation', place: 'Vientiane → Kunming',
       label: 'MU9646', ids: ['mu9646'], anchor: 'j-mu9646' },
-    { key: 'kmg', when: '01 – 04 MAR', cat: 'Accommodation', place: 'Kunming',
+    { key: 'kmg', when: '1 – 4 Mar', cat: 'Accommodation', place: 'Kunming',
       label: 'Wanxiang Yueju', ids: ['kmg'], anchor: 'j-kmg' },
-    { key: 'c86', when: '04 MAR', cat: 'Transportation', place: 'Kunming → Lijiang',
+    { key: 'c86', when: '4 Mar', cat: 'Transportation', place: 'Kunming → Lijiang',
       label: 'C86', ids: ['c86'], anchor: 'j-c86' },
-    { key: 'ljg', when: '04 – 06 MAR', cat: 'Accommodation', place: 'Lijiang',
+    { key: 'ljg', when: '4 – 6 Mar', cat: 'Accommodation', place: 'Lijiang',
       label: 'Luye Baisha', ids: ['ljg'], anchor: 'j-ljg' },
-    { key: 'return', when: '06 MAR', cat: 'Transportation', place: 'Lijiang → Bangkok',
-      label: 'MU5922 + MU741', ids: ['return'], anchor: 'j-return' },
-    { key: 'kempinski', when: '06 – 08 MAR', cat: 'Accommodation', place: 'Bangkok',
+    { key: 'return', when: '6 Mar', cat: 'Transportation', place: 'Lijiang → Bangkok',
+      label: 'MU5922 + MU741 · Lijiang → Bangkok', ids: ['return'], anchor: 'j-return' },
+    { key: 'kempinski', when: '6 – 8 Mar', cat: 'Accommodation', place: 'Bangkok',
       label: 'Siam Kempinski Bangkok', ids: ['kempinski'], anchor: 'j-kempinski', bookend: 'close' }
   ];
 
   /* Chronological position of a line that is not itself a stage.
    * THE WEDDING happens on Sunday, 28 February 2027 — inside the Wedding Stay
-   * (27 FEB – 01 MAR) and before the flight to Kunming. A wedding line
+   * (27 Feb – 1 Mar) and before the flight to Kunming. A wedding line
    * therefore sorts between wedstay (3) and mu9646 (4); it is never appended
    * to the end of the journey because it happens to have been added last. */
   /* the Highlights (20 Sep 2026): Sühring on the first evening (before the Bangkok stay, 0.1), Baan Phraya in the Bangkok days
@@ -48,7 +50,7 @@
   var AT = { suhring: 0.1, baanphraya: 0.3, '1872': 0.5, tea1872: 0.5, 'sangkhathan': 3.5, cannubi: 8.5 };
   /* the dated extras (the current Operations Master, 19 Sep 2026): the Aman tea on the afternoon of 24 February, the
      Sühring dinner on the first evening, 21 February */
-  var AT_WHEN = { '1872': '24 FEB', tea1872: '24 FEB', 'sangkhathan': '28 FEB', 'suhring': '21 FEB', baanphraya: '23 FEB', cannubi: '07 MAR' };
+  var AT_WHEN = { '1872': '24 Feb', tea1872: '24 Feb', 'sangkhathan': '28 Feb', 'suhring': '21 Feb', baanphraya: '23 Feb', cannubi: '7 Mar' };
 
   /* the wedding programme, in the order the day itself runs. Only items that
    * exist as products carry an id; the day is described, not invented. */
@@ -59,17 +61,17 @@
       anchor: 'voyage.html#temple' },
     { key: 'sangkhathan', title: 'Sangkhathan Temple Offering', when: 'Within the Temple Ceremony',
       place: 'Wat Ong Teu, Vientiane', id: 'sangkhathan',
-      note: 'Optional · USD 15 per guest · a personal offering.',
+      note: 'Optional · USD 15 per person · a personal offering.',
       anchor: 'voyage.html#sangkhathan' },
-    { key: 'coffee', title: 'Coffee & Cake', when: 'From 12:00',
+    { key: 'coffee', title: 'Coffee & Cake', when: '12:00 – 15:30',
       place: 'Souphattra Heritage Vientiane',
-      note: 'Complimentary — hosted by Haruthai & Suthep.', anchor: 'voyage.html#coffee' },
+      note: 'Hosted by Haruthai & Suthep.', anchor: 'voyage.html#coffee' },
     { key: 'vows', title: 'Vow Ceremony', when: '15:30',
       place: 'Souphattra Heritage Vientiane',
-      note: 'Complimentary — hosted by Haruthai & Suthep.', anchor: 'voyage.html#vows' },
+      note: 'Hosted by Haruthai & Suthep.', anchor: 'voyage.html#vows' },
     { key: 'dinner', title: 'Wedding Dinner', when: '19:30',
       place: 'Souphattra Heritage Vientiane · poolside',
-      note: 'Complimentary — hosted by Haruthai & Suthep.', anchor: 'voyage.html#dinner' }
+      note: 'Hosted by Haruthai & Suthep.', anchor: 'voyage.html#dinner' }
   ];
 
   /* WHERE WILL YOU JOIN US (Owner, 21 Sep 2026 · the global My Trip rebuild): the ONE stage graph (assets/stage-graph.js)
@@ -88,8 +90,15 @@
     try { document.dispatchEvent(new CustomEvent('siyl:bag')); } catch (e) {}
   }
 
+  /* the Kunming → Lijiang train and every other leg the graph marks mandatory can never be declined (PRQ-02-05) */
+  function mandatoryKey(key) { var GR = window.SIYL_GRAPH; return !!(GR && GR.MANDATORY && GR.MANDATORY.indexOf(key) >= 0); }
+
   window.SIYL_JOURNEY = {
     SEGMENTS: SEG,
+    /* a stage the guest can never decline (the graph's MANDATORY) */
+    mandatory: function (seg) { return mandatoryKey(seg && seg.key ? seg.key : seg); },
+    /* the display word of a stage's category KEY: 'Transportation' → "Travel" (TO-00412); 'Accommodation' stays */
+    catWords: function (cat) { var P = window.SIYL_PRICE; return P && P.catWords ? P.catWords(cat) : (cat === 'Transportation' ? 'Travel' : cat || ''); },
     /* the sheet a stage sits under on My Trip (the graph's) */
     sheetOf: function (seg) { var GR = window.SIYL_GRAPH, st = GR && GR.stageOf ? GR.stageOf(seg.key) : null; return st ? st.sheet : ''; },
     /* is this stage part of the guest's trip (an unanswered scope keeps every stage, so nothing disappears before the guest has spoken) */
@@ -111,6 +120,7 @@
      * it is the same one action. Resolves once the stage reads as declined. */
     decline: function (seg) {
       var self = this, B = window.SIYL_BAG, ST = window.SIYL_STAY, P = window.SIYL_PRICE, U = window.SIYL_UNITS;
+      if (mandatoryKey(seg.key)) return Promise.resolve({ ok: false, error: 'mandatory' });
       var finish = function () { self.skip(seg.key, true, 'manual'); return { ok: true }; };
       if (!B) return Promise.resolve(finish());
       /* a stage the guest waits for: the waiting-list place is given back first (the engine's), then the stage is declined */
@@ -152,7 +162,7 @@
      * The wording comes from SIYL_PRICE: one calculation, one vocabulary. */
     meta: function (x) {
       var P = window.SIYL_PRICE;
-      if (x.interest && x.id !== 'guesthouse') return { cat: 'Wellness', basis: 'Interest · Marsilea Spa confirms the time · payable at the spa', unit: 'treatment' };
+      if (x.interest && x.id !== 'guesthouse') return { cat: 'Wellness', basis: 'Interest · Guest Relations confirms your time · paid at the spa', unit: 'treatment' };
       if (!P) return { cat: '', basis: '', unit: 'guest' };
       var f = P.FLAT[x.id];
       if (f) {
@@ -168,16 +178,16 @@
       return { cat: '', basis: '', unit: 'guest' };
     },
 
-    /* "USD 100 per person" / "1 experience · for two guests" — one guest, one line */
+    /* "USD 1,500 per person · your cost" / "For two guests" — one guest, one line */
     quantityLine: function (x) {
-      var m = this.meta(x), q = x.qty || 1;
+      var m = this.meta(x), q = x.qty || 1, P = window.SIYL_PRICE;
       if (x.interest) return '';
       if (x.price == null) return '';
+      /* the only USD 0 besides an empty Bag: the Guest House (OQ-44) */
       if (x.complimentary) return 'Complimentary';
-      if (m.unit === 'experience') {
-        return q + (q === 1 ? ' experience · for two guests' : ' experiences · for ' + (q * 2) + ' guests');
-      }
-      return 'USD ' + x.price + ' per person · your cost';
+      if (m.unit === 'experience') return q === 1 ? 'For two guests' : 'For ' + (q * 2) + ' guests';
+      var amt = P && P.money ? P.money(x.price) : 'USD ' + String(x.price).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      return amt + ' per person · your cost';
     },
 
     /* the bag reads like an itinerary: chronological position of a line */
@@ -272,17 +282,19 @@
     /* quiet editorial status line — never a progress meter */
     statusLine: function () {
       var c = this.counts();
-      if (!c.open) return c.waitlisted ? (c.waitlisted === 1 ? 'One stage on the waiting list.' : c.waitlisted + ' stages on the waiting list.') : 'Your trip is ready.';
-      return c.open === 1 ? 'One detail left to choose.' : c.open + ' details to choose.';
+      if (!c.open) return 'Nothing left to choose in My Trip' + (c.waitlisted ? (c.waitlisted === 1 ? ' · one stay on the waiting list' : ' · ' + c.waitlisted + ' stays on the waiting list') : '');
+      return c.open === 1 ? 'One choice still to make in My Trip' : c.open + ' choices still to make in My Trip';
     },
     /* the words of the trip's composition, derived — never a count invented to fill a sentence */
+    /* "Stays, trains and flights: 4 chosen · 1 on the waiting list · 5 not needed · 1 still open" — each part only when its
+       count is not zero (TO-00150); the page adds the full stop */
     countsWords: function () {
       var c = this.counts(), w = [];
-      if (c.confirmed) w.push(c.confirmed + (c.confirmed === 1 ? ' stage chosen' : ' stages chosen'));
+      if (c.confirmed) w.push(c.confirmed + ' chosen');
       if (c.waitlisted) w.push(c.waitlisted + ' on the waiting list');
-      if (c.declined) w.push(c.declined + ' not joining');
+      if (c.declined) w.push(c.declined + ' not needed');
       if (c.open) w.push(c.open + ' still open');
-      return w.join(' · ') + (c.relevant ? ' — of the ' + c.relevant + (c.relevant === 1 ? ' stage' : ' stages') + ' of your trip' : '');
+      return w.length ? 'Stays, trains and flights: ' + w.join(' · ') : '';
     }
   };
 })();

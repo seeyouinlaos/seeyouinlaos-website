@@ -1,0 +1,12 @@
+/* SEE YOU IN LAOS — THAI TYPE (loaded only when Thai is chosen, by assets/i18n/siyl-i18n.js).
+ * The site's own families gain Thai glyphs for the Thai range only (U+0E00–0E7F), from the Thai fonts the guest's device
+ * already has — Latin stays exactly as designed, nothing is downloaded. */
+@font-face { font-family: 'PP Editorial Old'; src: local('Noto Serif Thai'), local('NotoSerifThai-Regular'), local('Thonburi'), local('Leelawadee UI'), local('Tahoma'); unicode-range: U+0E00-0E7F; font-weight: 100 900; }
+@font-face { font-family: 'Hanken Grotesk'; src: local('Noto Sans Thai'), local('NotoSansThai-Regular'), local('Thonburi'), local('Leelawadee UI'), local('Tahoma'); unicode-range: U+0E00-0E7F; font-weight: 100 900; }
+@font-face { font-family: 'Georgia'; src: local('Noto Serif Thai'), local('Thonburi'), local('Leelawadee UI'), local('Tahoma'); unicode-range: U+0E00-0E7F; }
+/* Thai is never tracked like Latin capitals; tone marks need room above and below */
+html[lang="th"] body, html[lang="th"] body * { letter-spacing: normal !important; }
+html[lang="th"] body { line-height: 1.65; }
+html[lang="th"] h1, html[lang="th"] h2, html[lang="th"] h3, html[lang="th"] h4, html[lang="th"] .t-h1, html[lang="th"] .t-h2, html[lang="th"] .t-h3 { line-height: 1.4 !important; padding-top: .06em; }
+html[lang="th"] body * { overflow-wrap: break-word; word-break: normal; line-break: normal; }
+html[lang="th"] button, html[lang="th"] .x-cta, html[lang="th"] .cta, html[lang="th"] a.a-link { line-height: 1.5; height: auto; min-height: 44px; }

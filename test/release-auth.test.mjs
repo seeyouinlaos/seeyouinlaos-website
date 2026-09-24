@@ -54,8 +54,9 @@ test('REGISTER · (private register present) every active code opens exactly its
 test('ENGINE · one guest cannot edit another; the party gives no permission; a claimed identity in the request body is ignored', async () => {
   const rooms = new Rooms(doState());
   const call = async (op, body, as) => { const r = await rooms.fetch(new Request('https://x/api/rooms/' + op, { method: 'POST', headers: as ? { 'x-siyl-identity': JSON.stringify(as) } : {}, body: JSON.stringify(body) })); return { status: r.status, ...(await r.json()) }; };
-  const peggy = { invitationId: PEGGY.invitationId, guestId: PEGGY.guestId, partyId: PEGGY.partyId, hosts: false };
-  const steffie = { invitationId: STEFFIE.invitationId, guestId: STEFFIE.guestId, partyId: STEFFIE.partyId, hosts: false };
+  /* PRQ-GAP-02: the verified identity the Worker hands the engine carries the holder's first name (withFirstName in src/worker.js); the engine names a holder from it alone */
+  const peggy = { invitationId: PEGGY.invitationId, guestId: PEGGY.guestId, partyId: PEGGY.partyId, hosts: false, firstName: 'Peggy' };
+  const steffie = { invitationId: STEFFIE.invitationId, guestId: STEFFIE.guestId, partyId: STEFFIE.partyId, hosts: false, firstName: 'Steffie' };
   /* Peggy and Steffie share a party: Peggy still cannot book, move or release for Steffie */
   assert.equal((await call('join', { invitationId: STEFFIE.invitationId, guestId: STEFFIE.guestId, key: 'wedstay/heritage', label: 'A', name: 'x' }, peggy)).status, 403);
   assert.equal((await call('leave', { invitationId: STEFFIE.invitationId, guestId: STEFFIE.guestId, stage: 'wedstay' }, peggy)).status, 403);
@@ -63,9 +64,9 @@ test('ENGINE · one guest cannot edit another; the party gives no permission; a 
   assert.equal((await call('join', { invitationId: PEGGY.invitationId, guestId: PEGGY.guestId, key: 'wedstay/heritage', label: 'A', name: 'x' }, null)).status, 401, 'no bearer, no write');
   /* each guest edits only themself */
   assert.equal((await call('join', { invitationId: PEGGY.invitationId, guestId: PEGGY.guestId, key: 'wedstay/heritage', label: 'A', name: 'Peggy' }, peggy)).status, 200);
-  assert.equal((await call('join', { invitationId: STEFFIE.invitationId, guestId: STEFFIE.guestId, key: 'wedstay/heritage', label: 'A', name: 'Steffie' }, steffie)).status, 200);
+  assert.equal((await call('join', { invitationId: STEFFIE.invitationId, guestId: STEFFIE.guestId, key: 'wedstay/heritage', label: 'A', name: 'Mallory' }, steffie)).status, 200, 'a name claimed in the body is ignored');
   const v = await call('read', {}, steffie);
-  assert.deepEqual(v.units['wedstay/heritage'][0].occupants.map((o) => [o.name, o.mine]), [['Peggy', false], ['Steffie', true]]);
+  assert.deepEqual(v.units['wedstay/heritage'][0].occupants.map((o) => [o.name, o.mine]), [['Peggy', false], ['Steffie', true]], 'the names come from the verified identity, never the body');
   /* the Worker strips a client-sent identity header before it reaches an engine (the source says so) */
   assert.match(src('src/worker.js'), /x-siyl-identity/); assert.match(src('src/worker.js'), /x-gr-verified/);
   assert.match(src('src/auth.js'), /export function owns\(identity, invitationId, guestId\)/);
@@ -75,9 +76,12 @@ test('SESSION · a session is one guest; the retired party paths are gone; Sign 
   const inv = src('assets/invite.mjs'), shell = src('assets/prep-shell.js');
   assert.match(inv, /return !!\(v && v\.guestId && v\.bearer && v\.invitationId === 'INV-' \+ v\.guestId\);/, 'valid = one guest, its own invitation, a bearer');
   assert.match(inv, /stale\(\) \{ return !!AUTH\.get\(\) && !AUTH\.valid\(\); \}/, 'a party-era session is stale, never valid');
-  /* leaving sets the guest's own draft aside under the invitation id, clears the session and every guest key */
-  assert.match(inv, /localStorage\.setItem\('siyl\.party\.' \+ a\.invitationId, JSON\.stringify\(draft\)\)/);
-  assert.match(inv, /GUEST_KEYS\.concat\(RETIRED_KEYS\)\.forEach\(\(k\) => localStorage\.removeItem\(k\)\);/);
+  /* LEAVING LEAVES NOTHING BEHIND (PRQ-01-03): the pending autosave is flushed first; only on success is the session cleared with every
+     guest key — nothing is set aside in plain text under siyl.party.* any more (an older copy is removed); a failed flush keeps the guest signed in */
+  assert.doesNotMatch(inv, /localStorage\.setItem\('siyl\.party\./, 'no plain-text copy of a guest is left on the device');
+  assert.match(inv, /leave\(\) \{\s*const a = AUTH\.get\(\);\s*if \(a && a\.invitationId\) \{ try \{ localStorage\.removeItem\('siyl\.party\.' \+ a\.invitationId\); \} catch \(e\) \{\} \}\s*GUEST_KEYS\.concat\(RETIRED_KEYS, DEVICE_KEYS\)\.forEach\(\(k\) => localStorage\.removeItem\(k\)\);\s*localStorage\.removeItem\('siyl\.draft\.owner'\);\s*AUTH\.clear\(\);/);
+  assert.match(inv, /return Promise\.resolve\(\)\.then\(\(\) => D\.flush\('leave'\)\)\.then\(\(r\) => \(safe\(r\) \? finish\(\) : \{ ok: false, words: LEAVE_WORDS\.failed/, 'the flush first; a failure clears nothing');
+  assert.match(inv, /leave\(\) \{ return GUEST\.leaveSafely\(\); \}/, 'SIYL_INVITE.leave is the safe path');
   assert.match(shell, /data-leave="another"/); assert.match(shell, /data-leave="out"/);
   assert.match(shell, /open=1/, 'Open another invitation arrives at the code prompt (prep-shell leave("another") → invitation.html?open=1)');
   assert.match(src('invitation.html'), /open=1/);

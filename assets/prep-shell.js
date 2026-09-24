@@ -64,7 +64,7 @@
   function status(key) {
     var s = steps().filter(function (x) { return x.key === key; })[0];
     if (!s) return '';
-    return s.state === 'complete' ? 'Complete' : s.state === 'current' ? 'Current' : s.state === 'locked' ? 'Locked' : 'Needs attention';
+    return s.state === 'complete' ? 'Complete' : s.state === 'current' ? 'You are here' : s.state === 'locked' ? 'Opens later' : s.state === 'ready' ? 'Ready to send' : s.state === 'na' ? 'Not joining' : 'Still to complete';
   }
 
   /* ----------------------------------------------------------------- shell */
@@ -143,15 +143,22 @@
   }
 
   /* ------------------------------------------------------ leaving a guest */
+  /* LEAVING SAVES FIRST (PRQ-01-03): the pending autosave is flushed before the guest is signed out; if it cannot be saved the
+   * guest stays signed in and is told so — nothing is lost and nothing is left behind */
+  var leavingNow = false;
   function leave(how) {
-    if (!window.SIYL_INVITE || !SIYL_INVITE.leave) return;
-    layer.classList.remove('on'); document.body.classList.remove('prep-steps-open');
-    document.body.classList.add('p-leave');
-    var go = function () {
-      SIYL_INVITE.leave();
-      location.replace(hrefOf('invitation.html') + (how === 'another' ? '?open=1' : ''));
-    };
-    if (calm) go(); else setTimeout(go, 200);
+    if (!window.SIYL_INVITE || !SIYL_INVITE.leave || leavingNow) return;
+    leavingNow = true;
+    var say = layer ? layer.querySelector('[data-leave-state]') : null;
+    if (say) say.textContent = '';
+    Promise.resolve(SIYL_INVITE.leave()).then(function (r) {
+      leavingNow = false;
+      if (r && r.ok === false) { if (say) say.textContent = r.words || ''; return; }
+      layer.classList.remove('on'); document.body.classList.remove('prep-steps-open');
+      document.body.classList.add('p-leave');
+      var go = function () { location.replace(hrefOf('invitation.html') + (how === 'another' ? '?open=1' : '')); };
+      if (calm) go(); else setTimeout(go, 200);
+    }, function () { leavingNow = false; });
   }
   window.addEventListener('pageshow', function (e) {
     /* a page restored from the cache after the guest left it is not shown again */
@@ -222,28 +229,22 @@
         var toGate = function () { if (window.SIYL_INVITE && SIYL_INVITE.require) SIYL_INVITE.require(function () {}); };
         if (window.SIYL_INVITE) toGate(); else document.addEventListener('siyl:invite-ready', toGate, { once: true });
       }
-      bar.innerHTML = '<div class="prep-bar-in"><div class="prep-bar-l">' +
-        '<p class="prep-step">Open your invitation to begin</p>' +
-        '</div></div>';
+      /* nothing is said here: the page head and its one button carry the way in (W7-121) */
+      bar.innerHTML = '';
       layer.classList.remove('on');
       return;
     }
 
     var list = steps(), cur = list.filter(function (s) { return s.key === STEP.key; })[0];
-    var others = G().others ? G().others() : [];
-    /* THE STEP HEADER, calm (Owner, 18 Sep 2026): 1 the step and its title · 2 the guest and their party · 3 the draft / sent
-     * state · 4 Save My Progress · 5 View all steps — one system on every step; no eyebrow, the operational state never
-     * outweighs the title */
+    /* the party without the reader (PRQ-01-01): “Ada · with Ben” — the hosts “Suthep · with Haruthai” */
+    var withWords = G().withWords ? G().withWords() : '';
+    /* THE STEP HEADER, calm (Owner, 18 Sep 2026): 1 the step and its title · 2 the guest and who they are invited with · 3 the ONE
+     * trip-state line (draft module, OQ-40 — “Confirmed by Guest Relations · {date}” lapses into “Changes not sent yet” + “Send the
+     * update” after a change, OQ-27) · 4 Save my progress · 5 View all steps */
     bar.innerHTML = '<div class="prep-bar-in">' +
       '<div class="prep-bar-l">' +
         '<p class="prep-step"><b>' + STEP.n + ' / 06</b>' + STEP.label + '</p>' +
-        '<p class="prep-who"><b>' + esc(nameOf(m)) + '</b>' + (others.length ? ' · Your party · ' + esc(partyNames()) : '') + '</p>' +
-        /* once Guest Relations has confirmed, a change made here is not a
-         * change of the confirmed journey — said on every step, in words */
-        ((window.SIYL_CONFIRM && SIYL_CONFIRM.state() === 'confirmed' && STEP.key !== 'review')
-          ? '<p class="prep-for" role="status"><span class="prep-for-l">Journey confirmed</span>' +
-            '<b>Changes here are not sent</b>' +
-            '<a href="mailto:guest.relation.seeyouinlaos@gmail.com?subject=Journey%20' + encodeURIComponent(p.invitationId) + '">Write to Guest Relations to change anything</a></p>' : '') +
+        '<p class="prep-who"><b>' + esc(nameOf(m)) + '</b>' + (withWords ? ' · ' + esc(withWords) : '') + '</p>' +
       '</div>' +
       '</div>' +
       /* DRAFT · SENT · CHANGES NOT YET SENT and SAVE MY PROGRESS on every step (Owner, 16 Sep 2026) — painted by the draft module;
@@ -258,9 +259,9 @@
       var tag = locked ? 'div' : 'a';
       var h = '<' + tag + ' class="prep-srow is-' + s.state + '"' + (curRow ? ' aria-current="step"' : '') + (locked ? ' aria-disabled="true"' : ' href="' + hrefOf(s.href) + '"') + ' data-step="' + s.key + '" data-state="' + s.state + '">' +
         '<span class="n">' + s.n + '</span><span class="l">' + s.label + (s.note ? '<span class="prep-note">' + esc(s.note) + '</span>' : '') + '</span>' +
-        '<span class="s" data-state-label>' + (s.state === 'complete' ? '<i class="prep-tick" aria-hidden="true"></i>' : '') + esc(s.stateLabel.replace(/^✓\s*/, '')) + '</span></' + tag + '>';
-      /* what is missing, each item a way to the exact control */
-      if (s.state === 'attention' || (curRow && s.missing.length)) {
+        '<span class="s" data-state-label' + (s.state === 'ready' ? ' style="color:var(--p-ink)"' : '') + '>' + (s.state === 'complete' ? '<i class="prep-tick" aria-hidden="true"></i>' : '') + esc(s.stateLabel.replace(/^✓\s*/, '')) + '</span></' + tag + '>';
+      /* what is missing, each item a way to the exact control (step 06 “Ready to send” lists nothing: it is not an alarm) */
+      if (s.state === 'attention' || (curRow && s.missing.length && s.key !== 'review')) {
         h += '<ul class="prep-missing" aria-label="' + esc(s.label) + ' — still needed">' + s.missing.map(function (x) {
           return '<li><a href="' + hrefOf(x.href) + '" data-missing="' + esc(x.key) + '"><span class="prep-dot" aria-hidden="true"></span>' + esc(x.label) + '</a></li>';
         }).join('') + '</ul>';
@@ -268,9 +269,10 @@
       return h;
     }).join('') +
       /* leaving: two plain actions, on every step — the only way to another invitation */
-      '<div class="prep-leave"><span class="t-l1">' + esc(nameOf(m)) + (others.length ? ' · ' + esc(partyNames()) : '') + '</span>' +
+      '<div class="prep-leave"><span class="t-l1">' + esc(nameOf(m)) + (withWords ? ' · ' + esc(withWords) : '') + '</span>' +
       '<button type="button" class="p-link" data-leave="another">Open another invitation</button>' +
-      '<button type="button" class="p-link mute" data-leave="out">Sign out</button></div></div>';
+      '<button type="button" class="p-link mute" data-leave="out">Sign out</button>' +
+      '<p class="t-b2" data-leave-state role="status" aria-live="polite"></p></div></div>';
     layer.querySelectorAll('[data-leave]').forEach(function (b) { b.addEventListener('click', function () { leave(b.getAttribute('data-leave')); }); });
     layer.classList.toggle('on', indexOpen);
     layer.querySelectorAll('a.prep-srow').forEach(function (row) {
@@ -342,9 +344,15 @@
    * the first missing control is brought into view with the reason, and the
    * page does not move on. Complete → the step is marked, the check draws,
    * the next step opens. */
+  /* the next / previous step THAT APPLIES to this guest (PRQ-02-03): a guest not joining the wedding continues past 03 and 04; a
+   * guest not joining the trip gets no Continue on My Trip — the decline card's “Send my reply” is the page's one action */
+  function stepOf(def) { return def ? STEPS.filter(function (s) { return s.key === def.key; })[0] || null : null; }
+  function applicableNext() { var g = G(); if (!g || !g.nextStep || !party()) return STEPS[idx + 1]; return stepOf(g.nextStep(STEP.key)); }
+  function applicablePrev() { var g = G(); if (!g || !g.prevStep || !party()) return STEPS[idx - 1]; return stepOf(g.prevStep(STEP.key)); }
   function foot(el) {
     if (!el) return;
-    var prev = STEPS[idx - 1], next = STEPS[idx + 1];
+    var g = G(), prev = applicablePrev(), next = applicableNext();
+    if (g && party() && STEP.key === 'journey' && g.notJoining && g.notJoining()) next = null;
     el.className = 'prep-foot';
     el.innerHTML =
       (prev ? '<a class="p-link mute" href="' + hrefOf(prev.file) + '">Back to ' + prev.label + '</a>' : '<span></span>') +
@@ -359,7 +367,9 @@
     var missing = g.missingFor(STEP.key);
     if (missing.length) {
       var first = missing[0];
-      if (note) { note.hidden = false; note.textContent = 'Before you continue: ' + first.label.replace(/ — .*$/, '') + '.'; }
+      /* THE BLOCKING MESSAGE NAMES EVERY MISSING ITEM (PRQ-06-15 · TO-00483): each in full, by its short label, and the focus goes
+         to the first — “Before you continue: Food allergies, Coffee or tea and Photography & film.” */
+      if (note) { note.hidden = false; note.textContent = 'Before you continue: ' + andList(missing.map(function (x) { return x.label; })) + '.'; }
       b.classList.remove('p-shake'); void b.offsetWidth; b.classList.add('p-shake');
       if (samePage(first.href)) focusControl('#' + (first.href.split('#')[1] || ''));
       else goTo(hrefOf(first.href));
@@ -395,6 +405,7 @@
     status: status,
     focusControl: focusControl,
     hrefOf: hrefOf,
+    gateWords: gateWords,
     /* a page asks the shell whether it may show its content at all */
     ready: function () { return !!(party() && me()); }
   };
@@ -414,11 +425,22 @@
     return true;
   }
   /* arriving from a gate: say, once, why this page and not the one asked for */
+  /* THE GATE NAMES EVERY EARLIER OPEN STEP (PRQ-LEAD-02 · TO-00484): “05 · About You opens once 03 · The Wedding and
+     04 · Wedding Preparation are complete.” — one open step: “… opens once 04 · Wedding Preparation is complete.” */
+  function gateWords(key) {
+    var from = STEPS.filter(function (s) { return s.key === key; })[0], g = G(); if (!from) return '';
+    var open = g && g.openEarlier ? g.openEarlier(key) : [];
+    if (!open.length) { var here0 = STEP.key !== key ? STEP : null; open = here0 ? [here0] : []; }
+    if (!open.length) return '';
+    return from.n + ' · ' + from.label + ' opens once ' + andList(open.map(function (s) { return s.n + ' · ' + s.label; })) + (open.length === 1 ? ' is' : ' are') + ' complete.';
+  }
+  function andList(a) { return a.length <= 1 ? (a[0] || '') : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1]; }
   function arrivedFrom() {
     var m = /[?&]from=([a-z]+)/.exec(location.search); if (!m) return;
     var from = STEPS.filter(function (s) { return s.key === m[1]; })[0]; if (!from) return;
+    var words = gateWords(from.key); if (!words) return;
     var n = document.createElement('p'); n.className = 'prep-gate-note t-b2'; n.setAttribute('role', 'status');
-    n.textContent = from.n + ' · ' + from.label + ' opens once this is complete.';
+    n.textContent = words;
     var main = document.querySelector('main'); if (main) main.insertBefore(n, main.firstChild);
   }
 
@@ -448,6 +470,8 @@
       if (e.persisted) { closeIndex(false); unlockScroll(); }
     });
     ['siyl:guest', 'siyl:temple', 'siyl:bag', 'siyl:docs', 'siyl:confirm', 'siyl:seats', 'siyl:units'].forEach(function (ev) { document.addEventListener(ev, paint); });
+    /* the step list's notes read the one trip state: a change of it repaints the index (the header line repaints itself) */
+    var lastTrip = ''; document.addEventListener('siyl:draft', function () { var D = window.SIYL_DRAFT, k = D && D.words ? D.words().key : ''; if (k !== lastTrip) { lastTrip = k; paint(); } });
     /* the journey's status (none / received / confirmed) is one truth on every
      * step, not only on Review & Send: read it once the guest is known */
     if (window.SIYL_CONFIRM && party()) SIYL_CONFIRM.load();

@@ -1,0 +1,159 @@
+{
+ "T001": {
+  "words": {
+   "key": "changed",
+   "label": "Changes not sent yet",
+   "line": "Changes not sent yet",
+   "cta": "Send the update",
+   "at": "2026-09-24T06:44:47.642Z",
+   "date": "24 September 2026",
+   "declined": false
+  },
+  "scope": {
+   "bangkok": false,
+   "vientianePreWedding": true,
+   "vientianeWedding": false,
+   "china": false,
+   "none": false,
+   "at": "2026-09-24T06:12:23.396Z",
+   "by": "T001",
+   "migrated": false
+  },
+  "bag": [],
+  "rooms": {},
+  "wait": {},
+  "seats": {
+   "ceremony": {},
+   "dinner": {}
+  },
+  "fullName": "Ada Test"
+ },
+ "T002": {
+  "words": {
+   "key": "sent",
+   "label": "Sent to us",
+   "line": "Sent to us · 24 September 2026",
+   "cta": null,
+   "at": "2026-09-24T06:21:25.965Z",
+   "date": "24 September 2026",
+   "declined": true
+  },
+  "scope": {
+   "bangkok": false,
+   "vientianePreWedding": false,
+   "vientianeWedding": false,
+   "china": false,
+   "none": true,
+   "at": "2026-09-24T06:21:21.153Z",
+   "by": "T002",
+   "migrated": false
+  },
+  "bag": [],
+  "rooms": {},
+  "wait": {},
+  "seats": {
+   "ceremony": {},
+   "dinner": {}
+  },
+  "fullName": "Ben Test"
+ },
+ "T003": {
+  "words": {
+   "key": "changed",
+   "label": "Changes not sent yet",
+   "line": "Changes not sent yet",
+   "cta": "Send the update",
+   "at": "2026-09-24T08:17:20.673Z",
+   "date": "24 September 2026",
+   "declined": false
+  },
+  "scope": {
+   "bangkok": true,
+   "vientianePreWedding": true,
+   "vientianeWedding": true,
+   "china": true,
+   "none": false,
+   "at": "2026-09-24T05:43:47.450Z",
+   "by": "T003",
+   "migrated": false
+  },
+  "bag": [
+   "bkk-stay",
+   "train",
+   "guesthouse",
+   "mu9646",
+   "return",
+   "kmg",
+   "ljg",
+   "sangkhathan",
+   "prewed",
+   "kempinski",
+   "c86"
+  ],
+  "rooms": {},
+  "wait": {},
+  "seats": {
+   "ceremony": {},
+   "dinner": {}
+  },
+  "fullName": "Cleo Test"
+ },
+ "G048": {
+  "words": {
+   "key": "draft",
+   "label": "Not sent yet",
+   "line": "My Trip · not sent yet",
+   "cta": null,
+   "at": null,
+   "date": "",
+   "declined": false
+  },
+  "scope": {
+   "bangkok": false,
+   "vientianePreWedding": false,
+   "vientianeWedding": true,
+   "china": false,
+   "none": false,
+   "at": "2026-09-24T17:09:37.776Z",
+   "by": "G048",
+   "migrated": false
+  },
+  "bag": [],
+  "rooms": {},
+  "wait": {},
+  "seats": {
+   "ceremony": {},
+   "dinner": {}
+  },
+  "fullName": "Haruthai Test"
+ },
+ "G049": {
+  "words": {
+   "key": "changed",
+   "label": "Changes not sent yet",
+   "line": "Changes not sent yet",
+   "cta": "Send the update",
+   "at": "2026-09-24T06:51:22.435Z",
+   "date": "24 September 2026",
+   "declined": false
+  },
+  "scope": {
+   "bangkok": false,
+   "vientianePreWedding": false,
+   "vientianeWedding": true,
+   "china": false,
+   "none": false,
+   "at": "2026-09-24T06:47:05.144Z",
+   "by": "G049",
+   "migrated": false
+  },
+  "bag": [],
+  "rooms": {},
+  "wait": {},
+  "seats": {
+   "ceremony": {},
+   "dinner": {}
+  },
+  "fullName": "Suthep Test"
+ }
+}

@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script src="assets/i18n/siyl-i18n.js?v=3a27503d"></script>
 <script src="assets/invite-early.js?v=fab5da19"></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
 <title>Experience · See You In Laos</title>
 <link rel="stylesheet" href="assets/recon.css?v=05778142">
-<link rel="stylesheet" href="assets/aman.css?v=b099d186">
+<link rel="stylesheet" href="assets/aman.css?v=23c08c99">
 <style>
 /* ONE place: its photographs, its words, and — where the hosts offer it — the
    Journey action. Same grammar as every editorial page; nothing new is invented. */
@@ -17,7 +18,6 @@
 .x-head .a-eyebrow { margin-bottom: 14px; }
 .x-head h1 { font-family: 'PP Editorial Old', Georgia, serif; font-weight: 200; font-size: 31px; line-height: 1.22; letter-spacing: .3px; margin: 0 0 16px; }
 .x-lede { font-size: 14px; line-height: 1.85; color: #4A4A4A; max-width: 32em; }
-.x-ctx { font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 10px; letter-spacing: 2.2px; text-transform: uppercase; color: var(--a-mute); line-height: 1.9; margin-top: 22px; }
 .x-sec { padding: 0 var(--a-gut); max-width: 760px; margin-top: 52px; }
 .x-sec h2 { font-family: 'PP Editorial Old', Georgia, serif; font-weight: 200; font-size: 24px; line-height: 1.3; margin: 8px 0 14px; }
 .x-sec p { font-size: 13.5px; line-height: 1.85; color: #4A4A4A; max-width: 32em; margin-bottom: 12px; }
@@ -98,16 +98,17 @@
 <body>
 <div class="hd-space" aria-hidden="true"></div>
 <main class="x-wrap" id="x"></main>
-<script src="assets/experiences.js?v=fd18f186"></script>
-<script src="assets/experience-galleries.js?v=eddc55f2"></script>
-<script src="assets/pricing.js?v=eb8a9bf3"></script>
-<script src="assets/bag.js?v=fe0c8b93"></script>
-<script src="assets/wizard.js?v=2ffbd144"></script>
-<script src="assets/draft.js?v=ac3ae4f8"></script>
+<script src="assets/experiences.js?v=e9a3bac5"></script>
+<script src="assets/experience-galleries.js?v=bd2b8437"></script>
+<script src="assets/pricing.js?v=6a4a85a2"></script>
+<script src="assets/bag.js?v=43bc40c1"></script>
+<script src="assets/wizard.js?v=f9c66d86"></script>
+<script src="assets/draft.js?v=03e8b4bc"></script>
+<script src="assets/confirm.js?v=d1b9a554"></script>
 <script src="assets/gallery.js?v=85069204"></script>
-<script src="assets/highlight.js?v=b733ceb2"></script>
+<script src="assets/highlight.js?v=acbe299f"></script>
 <script src="assets/discover.js?v=566d844e"></script>
-<script src="assets/clip.js?v=1f0282b7"></script>
+<script src="assets/clip.js?v=3abb7900"></script>
 <script>
 (function () {
   var D = window.SIYL_DISCOVER;
@@ -125,10 +126,7 @@
   document.title = x.name + ' · See You In Laos';
   var roles = D.LABEL[D.categoryOf(x)] || '';   /* the category: what the place IS (Owner, 22 Sep 2026) */
   var when = D.dateWords(x), vis = D.visits(x);
-  var ctx = [];
-  if (x.row && x.row !== 'city' && (x.sheet !== 'FULL' || /^Day /.test(x.row))) ctx.push("From the hosts' itinerary · " + x.row);
-  if (x.row === 'city') ctx.push(x.chapter === 'bkk' ? 'From the hosts’ Bangkok days' : 'From the hosts’ Vientiane portrait');   /* Le Du Kaan is a Bangkok address of the city days (release 012) */
-  if (x.sheet === 'FULL') ctx.push('From the hosts’ notes on the place');
+  /* no provenance line (Window 007, PRQ-07a-02): the dated days are the header date and "On the itinerary" */
   var h = '';
   h += '<section class="x-gal">' + (window.SIYL_XGAL ? SIYL_XGAL.html(x) : '') + '</section>';
   var hl = x.highlight || null;
@@ -137,14 +135,13 @@
        '<h1>' + esc(x.name) + '</h1>' +
        (hl && hl.line ? '<p class="x-line">' + esc(hl.line) + '</p>' : '') +
        '<p class="x-lede">' + esc(x.intro || x.teaser || '') + '</p>' +
-       (hl && hl.house ? '<p class="x-house">' + esc(hl.house) + '</p>' : '') +
-       (ctx.length ? '<p class="x-ctx">' + ctx.map(esc).join('<br>') + '</p>' : '') + '</header>';
+       (hl && hl.house ? '<p class="x-house">' + esc(hl.house) + '</p>' : '') + '</header>';
   /* the itinerary: the day(s) this place is visited and what happens there — the date, never a clock (Owner, 22 Sep 2026) */
   if (vis.length) h += '<section class="x-sec x-visits" data-visits><p class="a-eyebrow">On the itinerary</p><div class="x-kv">' + vis.map(function (v) { return '<div><span class="k">' + esc(D.dateWords({ visits: [v] })) + '</span><span class="v">' + esc(v.what || '') + '</span></div>'; }).join('') + '</div></section>';
   /* THE FILMS WITH SOUND (BARON, 22 Sep 2026): the club's own clips — Play / Pause · Sound on / Mute (assets/clip.js): they start
      muted where the browser insists and with sound where it allows; the guest's tap on SOUND ON is what brings the music */
   if (x.clips && x.clips.length) {
-    h += '<section class="x-sec x-films" data-films><p class="a-eyebrow">The night, on film</p><h2>' + esc(x.name) + ' — with the sound on</h2><p class="x-films-note">Three short films from the club. Tap Sound on for the music.</p><div class="x-films-grid">' + x.clips.map(function (c, i) {
+    h += '<section class="x-sec x-films" data-films><p class="a-eyebrow">The night, on film</p><h2>' + esc(x.name) + ' — with the sound on</h2><p class="x-films-note">Three short films from the club.</p><div class="x-films-grid">' + x.clips.map(function (c, i) {
       return '<div class="am a-clip x-film' + (c.w >= c.h ? ' is-square' : ' is-tall') + '" data-clip="' + esc(x.id) + '-' + (i + 1) + '" data-clip-state="paused" data-clip-audio="off" style="background-image:url(' + esc(c.poster) + ')">' +
         '<video class="a-clip-video" playsinline loop preload="metadata" poster="' + esc(c.poster) + '" data-src="' + esc(c.src) + '" aria-label="' + esc(c.alt) + '"></video>' +
         '<div class="a-clip-ctl"><button type="button" class="a-clip-btn" data-clip-play aria-label="Play the film" aria-pressed="false"><i class="ic-play" aria-hidden="true"></i><i class="ic-pause" aria-hidden="true"></i><span class="t">Play</span></button>' +
@@ -174,7 +171,10 @@
   /* the Highlight's dress code (Owner, 20 Sep 2026): the dress-code page's own grammar — the label, the register, the words — only
      where the house supplied one; never invented */
   var pr = x.practical || {};
-  if (hl && pr.dress) h += '<section class="x-sec x-dress" data-dress><p class="a-eyebrow">Dress code · ' + esc(x.name) + '</p><h2>' + esc(hl.dressTitle || 'The dress code') + '</h2><p>' + esc(pr.dress) + '</p><p class="x-dresslink"><a class="a-link" href="dress.html">The dress codes of the journey</a></p></section>';
+  /* the dress code is printed once (PRQ-07a-09): a house's own dress section where it named one (hl.dressTitle), else the
+     Practical row (BARON: When · Dress code · Address) */
+  var dressShown = !!(hl && pr.dress && hl.dressTitle);
+  if (dressShown) h += '<section class="x-sec x-dress" data-dress><p class="a-eyebrow">Dress code · ' + esc(x.name) + '</p><h2>' + esc(hl.dressTitle || 'The dress code') + '</h2><p>' + esc(pr.dress) + '</p><p class="x-dresslink"><a class="a-link" href="dress.html">The dress codes of the journey</a></p></section>';
   /* practical information — only the fields the source actually carries */
   var ct = hl && hl.contact || null;
   if (pr.price || pr.hours || pr.when || pr.dress || pr.address || x.maps || x.link || ct) {
@@ -182,26 +182,17 @@
       (pr.price ? '<div data-private><span class="k">Price</span><span class="v"><span class="price">' + esc(pr.price) + '</span>' + (pr.priceNote ? '<small>' + esc(pr.priceNote) + '</small>' : '') + '</span></div>' : '') +
       (pr.when ? '<div><span class="k">When</span><span class="v">' + esc(pr.when) + '</span></div>' : '') +
       (pr.hours ? '<div><span class="k">Opening hours</span><span class="v">' + pr.hours.map(esc).join('<br>') + '</span></div>' : '') +
-      (pr.dress ? '<div><span class="k">Dress code</span><span class="v">' + esc(pr.dress) + '</span></div>' : '') +
+      (pr.dress && !dressShown ? '<div><span class="k">Dress code</span><span class="v">' + esc(pr.dress) + '</span></div>' : '') +
       (pr.address ? '<div><span class="k">Address</span><span class="v">' + pr.address.map(esc).join('<br>') + '</span></div>' : '') +
-      (ct ? '<div><span class="k">The house</span><span class="v x-contact">' + (ct.address ? ct.address.map(esc).join('<br>') + '<br>' : '') + (ct.where ? esc(ct.where) + '<br>' : '') + (ct.phone ? '<a href="tel:' + esc(ct.phone.replace(/[^+\d]/g, '')) + '">' + esc(ct.phone) + '</a><br>' : '') + (ct.email ? '<a href="mailto:' + esc(ct.email) + '">' + esc(ct.email) + '</a>' : '') + '</span></div>' : '') +
+      (ct ? '<div><span class="k">Contact</span><span class="v x-contact">' + (ct.address ? ct.address.map(esc).join('<br>') + '<br>' : '') + (ct.where ? esc(ct.where) + '<br>' : '') + (ct.phone ? '<a href="tel:' + esc(ct.phone.replace(/[^+\d]/g, '')) + '">' + esc(ct.phone) + '</a><br>' : '') + (ct.email ? '<a href="mailto:' + esc(ct.email) + '">' + esc(ct.email) + '</a>' : '') + '</span></div>' : '') +
       ((x.maps || x.link) ? '<div><span class="k">Where</span><span class="v"><span class="x-links" style="margin-top:0">' +
         (x.maps ? '<a class="a-link" href="' + esc(x.maps) + '" target="_blank" rel="noopener">Map</a>' : '') +
         (x.link ? '<a class="a-link" href="' + esc(x.link) + '" target="_blank" rel="noopener">Website</a>' : '') + '</span></span></div>' : '') +
       '</div></section>';
   }
-  /* the Journey action — one place carries it, by Owner decision: the Afternoon
-   * Tea pattern, priced per participating guest by the one calculation source */
-  if (x.select && hl && window.SIYL_HIGHLIGHT) {
-    h += SIYL_HIGHLIGHT.html(x);
-  } else if (x.select) {
-    var meal = (x.roles || []).indexOf('dinner') >= 0 ? 'Dinner' : (x.roles || []).indexOf('breakfast') >= 0 ? 'Breakfast' : 'Lunch';
-    h += '<section class="x-sel" id="sel"><p class="a-eyebrow">My Bag</p><h2>' + meal + ' at ' + esc(x.name) + (x.practical && x.practical.when ? ' <span class="a-eyebrow" style="display:block;margin-top:6px">' + esc(x.practical.when) + '</span>' : '') + '</h2>' +
-      '<p class="price" data-private>USD ' + x.select.price + ' <span class="a-eyebrow" style="display:inline">' + esc(x.select.unit) + '</span></p>' +
-      '<p>Optional. Adding ' + esc(x.name) + ' places a restaurant request in your bag for the guests who take part; Guest Relations arrange the table. It is a request, not a reservation — availability is not guaranteed by this page. No date or time to choose here.</p>' +
-      '<div id="selbox" data-private></div>' +
-      '<p class="x-way" data-private-cta><a class="a-link" data-private-cta href="invitation.html?open=1">Open your invitation</a></p></section>';
-  }
+  /* the Journey action: every selectable place is a Highlight (Window 007, PRQ-07a-03) — one booking grammar, assets/highlight.js */
+  var isHighlight = !!(x.select && hl && window.SIYL_HIGHLIGHT);
+  if (isHighlight) h += SIYL_HIGHLIGHT.html(x);
   h += '<p class="x-back"><a class="a-link" href="experiences.html#' + esc(x.chapter) + '">All experiences</a></p>';
   root.innerHTML = h;
   /* the Highlight's clip: the same-origin card clip of the data record (assets/experiences.js), mounted by the shared card-video module */
@@ -215,43 +206,18 @@
     });
   });
 
-  /* selection: the Journey Bag is the one truth — has() decides the state, the
-   * invitation gate decides who may add. ONE GUEST = ONE PRICE (Owner, 14 Sep
-   * 2026): the request is this guest's own, one price, never multiplied. */
-  function money(n) { return 'USD ' + Number(n).toLocaleString('en-US'); }
-  function paintSel() {
-    if (x.select && hl && window.SIYL_HIGHLIGHT) { SIYL_HIGHLIGHT.paint(x); return; }
-    var box = document.getElementById('selbox'); if (!box || !window.SIYL_BAG) return;
-    /* the price and the add exist for a signed-in guest only (Owner, 16 Sep 2026): signed out nothing is rendered here */
-    if (document.documentElement.getAttribute('data-session') !== 'in') { box.innerHTML = ''; return; }
-    var s = x.select, line = SIYL_BAG.get().filter(function (l) { return l.id === s.id; })[0];
-    box.innerHTML = '<p class="x-amt" id="selamt">' + money(s.price) + ' <span class="a-eyebrow">per person · your cost</span></p>' + (line
-      ? '<div class="x-cur"><span class="on" data-sel-state="current" aria-current="true">Current selection · ' + money(s.price) + '</span>' +
-        '<a class="a-link" href="cart.html">Open My Bag</a></div>' +
-        '<p style="margin-top:14px"><button type="button" class="a-link" id="sel-rm" style="background:none;border:0;cursor:pointer">Remove from My Bag</button></p>'
-      : '<button type="button" class="x-cta" id="sel-add" data-sel-state="open">Add to My Bag · ' + money(s.price) + '</button>');
-    var add = document.getElementById('sel-add'), rm = document.getElementById('sel-rm');
-    if (add) add.addEventListener('click', function () { gated(function () {
-      if (SIYL_BAG.has(s.id)) { paintSel(); return; }
-      var it = (window.SIYL_PRICE ? SIYL_PRICE.items(s.id)[0] : null) || { id: s.id, name: x.name, price: s.price, img: x.img };
-      it.qty = 1; it.request = true; it.exp = x.id;
-      SIYL_BAG.put(it);
-      paintSel();
-      var cur = document.querySelector('[data-sel-state="current"]'); if (cur) cur.focus();
-    }); });
-    if (rm) rm.addEventListener('click', function () { SIYL_BAG.remove(s.id); paintSel(); var a2 = document.getElementById('sel-add'); if (a2) a2.focus(); });
+  /* the Highlight's state: the Journey Bag is the one truth, the trip's send and Guest Relations' confirmation name its status
+   * (PRQ-07a-01) — assets/highlight.js paints it and repaints on every change of the Bag, the session, the draft or the status */
+  if (isHighlight) {
+    var paintSel = function () { SIYL_HIGHLIGHT.paint(x); };
+    paintSel();
+    ['siyl:bag', 'siyl:auth', 'siyl:draft', 'siyl:confirm'].forEach(function (ev) { document.addEventListener(ev, paintSel); });
+    if (window.SIYL_CONFIRM && SIYL_CONFIRM.load) document.addEventListener('siyl:auth', function () { SIYL_CONFIRM.load(true); });
   }
-  function gated(fn) {
-    if (window.SIYL_INVITE) { SIYL_INVITE.require(fn); }
-    else document.addEventListener('siyl:invite-ready', function () { SIYL_INVITE.require(fn); }, { once: true });
-  }
-  paintSel();
-  document.addEventListener('siyl:bag', paintSel);
-  document.addEventListener('siyl:auth', paintSel);
 })();
 </script>
-<script src="assets/recon.js?v=0e3f9951"></script>
-<script src="assets/aman.js?v=d6c4adb4"></script>
-<script type="module" src="assets/invite.mjs?v=c557d97c"></script>
+<script src="assets/recon.js?v=11bbd6d9"></script>
+<script src="assets/aman.js?v=338fd10f"></script>
+<script type="module" src="assets/invite.mjs?v=7d3552fb"></script>
 </body>
 </html>

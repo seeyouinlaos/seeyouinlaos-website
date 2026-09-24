@@ -21,7 +21,7 @@ const sha = (p) => createHash('sha256').update(fs.readFileSync(path.join(ROOT, p
 
 test('DATA · seven places in the Owner\'s order; the Owner\'s final mapping of 16 Sep 2026 (seven labels on the aerial: lobby, rooms × 3, ceremony, dinner, coffee & cake); every zone has its story, its time and real photographs', () => {
   assert.deepEqual(DATA.zones.map((z) => z.id), ['lobby', 'rooms', 'coffee', 'ceremony', 'dinner', 'pool', 'garden']);
-  assert.deepEqual(DATA.zones.map((z) => z.label), ['Lobby', 'Rooms', 'Coffee & Cake · Breakfast', 'Wedding Ceremony', 'Wedding Dinner · Poolside', 'Swimming pool', 'Courtyard garden']);
+  assert.deepEqual(DATA.zones.map((z) => z.label), ['Lobby', 'Rooms', 'Coffee & Cake · Breakfast', 'Vow Ceremony', 'Wedding Dinner · poolside', 'Swimming pool', 'Courtyard garden']);   /* TO-01984 · TO-01942 (Window 007) */
   const marked = DATA.zones.filter((z) => z.marks && z.marks.length).map((z) => z.id + '×' + z.marks.length);
   assert.deepEqual(marked, ['lobby×1', 'rooms×3', 'coffee×1', 'ceremony×1', 'dinner×1'], 'the Owner\'s seven labels: top left → Lobby, top right / lower right / lower centre → Rooms, left centre → Wedding Ceremony, centre pool → Dinner, lower left → Coffee & Cake · Breakfast');
   assert.equal(DATA.zones.reduce((n, z) => n + (z.marks ? z.marks.length : 0), 0), 7, 'seven labels on the photograph');
@@ -42,7 +42,7 @@ test('DATA · seven places in the Owner\'s order; the Owner\'s final mapping of 
   assert.deepEqual(M('rooms').map((m) => [m.x, m.y, m.w, m.h]), [[62, 0, 18, 40], [62, 50, 19, 40], [37.5, 71, 21, 29]]);
   assert.deepEqual(M('dinner')[0], { x: 39.5, y: 37, w: 20.5, h: 32, anchor: { x: 49.7, y: 43.5 }, tall: { x: 48.5, y: 57 } });
   assert.equal(DATA.first, 'dinner');
-  assert.match(DATA.zones.find((z) => z.id === 'dinner').story, /run A poolside, run B opposite the pool/);
+  assert.equal(DATA.zones.find((z) => z.id === 'dinner').story, 'The long table beside the water — side A along the pool, side B facing it.', 'TO-01990');
   assert.doesNotMatch(JSON.stringify(DATA), /\b(north|south|east|west)\b/i, 'no compass direction is invented');
 
   assert.match(DATA.zones.find((z) => z.id === 'ceremony').when, /15:30/); assert.match(DATA.zones.find((z) => z.id === 'dinner').when, /19:30/);
@@ -104,7 +104,7 @@ test('MARKUP · every label and legend item is a button with a name and a presse
   const labels = H.labels(DATA, fr);
   assert.equal((labels.match(/<button type="button" class="venue-label"/g) || []).length, 7, 'the Owner\'s seven labels');
   assert.equal((labels.match(/data-zone="rooms"/g) || []).length, 3, 'Rooms three times, one per house');
-  assert.match(labels, /aria-pressed="false" aria-controls="venue-detail"/); assert.match(labels, /<span class="venue-t">Wedding Dinner · Poolside<\/span>/); assert.match(labels, /<span class="venue-t">Coffee &amp; Cake · Breakfast<\/span>/);
+  assert.match(labels, /aria-pressed="false" aria-controls="venue-detail"/); assert.match(labels, /<span class="venue-t">Wedding Dinner · poolside<\/span>/); assert.match(labels, /<span class="venue-t">Coffee &amp; Cake · Breakfast<\/span>/);
   assert.doesNotMatch(labels, /data-align=/, 'on the full frame every label is centred on its anchor');
   /* on a phone (the tall crop, 26 – 71 % of the frame) the seven labels stay, each on the visible part of its own house: three hang from the crop's left edge, two from its right */
   const ph = load(['assets/venue-data.js']);
@@ -155,6 +155,7 @@ test('MOTION · one system, three timings, physical easing; reduced motion keeps
 test('NAVIGATION · the public menu and both footers are unchanged by the venue work: Sühring · Dinner and 1872 stay, the two footer lists stay equal', () => {
   const recon = src('assets/recon.js'), shop = src('assets/shop-menu.js');
   const links = (s) => [...s.slice(s.indexOf('sfoot-in'), s.indexOf('sf-legal')).matchAll(/<a href="([^"]+)">([^<]+)<\/a>/g)].map((m) => m[1] + '|' + m[2]);
-  assert.deepEqual(links(recon), links(shop)); assert.ok(links(recon).some((l) => /Sühring · Dinner/.test(l)) && links(recon).some((l) => /1872/.test(l)));
+  assert.deepEqual(links(recon), links(shop)); /* TO-00021 · TO-00026 (Window 007): the footer's Highlights column names them “Dinner at Sühring” and “Champagne Afternoon Tea at 1872” */
+  assert.ok(links(recon).includes('experience.html?id=bkk-suhring|Dinner at Sühring') && links(recon).includes('1872.html|Champagne Afternoon Tea at 1872'));
   assert.match(src('assets/aman.js'), /Sühring · Dinner in Bangkok/);
 });

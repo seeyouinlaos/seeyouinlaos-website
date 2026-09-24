@@ -90,6 +90,17 @@
     },
     /* the house a line belongs to, by its name (a window's bag name may carry the window's own words) */
     houseOf: function (line) { var R = window.SIYL_ROOMS || {}; return (line && line.stay && R[line.stay] && R[line.stay].name) || (line && line.name) || ''; },
+    /* THE HELD ROOM BY ITS OWN NAME (PRQ-03-03): the category's name from the stay data ("Luye Starry Sky Suite · Immersive
+       View", never the last segment of the product meta) and the unit ("Room A"); the Guest House hold is "a place".
+       Returns { room, unit, words } — words = "Luye Starry Sky Suite · Immersive View · Room A" / "a place". */
+    roomOf: function (line) {
+      var u = U(), p = P(); if (!line || !line.room) return { room: '', unit: '', words: '' };
+      var win = p ? p.windowOf(line.id) : line.id, x = this.unitOf(line);
+      if (x && x.kind === 'property') return { room: x.name, unit: '', words: 'a place' };
+      var room = (u && u.roomName ? u.roomName(win, line.room) : '') || '';
+      var unit = x && u ? u.unitName(x) : (line.unit ? 'Room ' + line.unit : '');
+      return { room: room, unit: unit, words: room + (unit ? ' · ' + unit : '') };
+    },
     /* the other hotel's line in this window's stage, if the Bag carries one (the room page and the Journey say it is replaced) */
     sibling: function (win) {
       var p = P(), b = B(); if (!p || !b) return null;
@@ -120,7 +131,8 @@
         /* the release is the engine's, and it names THIS window: only a released place leaves the bag; an idempotent second
            remove finds nothing to release; a stale view never releases another hotel the guest holds meanwhile */
         return u.leave(stageOf(win), win).then(function (d) {
-          if (d && d.ok === false) return d;   /* unreachable / refused: nothing changed, the line stays, the guest is told */
+          /* unreachable / refused: nothing changed, the line stays, the guest is told — in the GIVE-BACK words (PRQ-03-02) */
+          if (d && d.ok === false) return Object.assign({}, d, { action: 'give back' });
           done(); return { ok: true };
         });
       };
@@ -197,7 +209,8 @@
       /* PARTY CAPACITY (Owner, 19 Sep 2026): a unit is offered only where the whole party fits — the places the guest's own
          party already holds in it count for them; a unit too small for the party says so and carries no button */
       var need = opts.need || this.need();
-      var list = u.units(win, slug), mine = u.mineFor(win, slug), any = list.some(function (x) { return !x.full && x.eligible && (!u.fitsParty || u.fitsParty(win, slug, x, need)); });
+      var keptIn = function (x) { return x.occupants.some(function (o) { return o.placeholder && o.party; }); };
+      var list = u.units(win, slug), mine = u.mineFor(win, slug), any = list.some(function (x) { return (!x.full || keptIn(x)) && x.eligible && (!u.fitsParty || u.fitsParty(win, slug, x, need)); });
       var h = '<div class="p-units" data-units="' + esc(win) + '|' + esc(slug) + '" data-need="' + need + '">';
       list.forEach(function (x) {
         var isMine = !!(mine && mine.label === x.label);
@@ -206,27 +219,31 @@
         /* a unit full only by the places kept for this guest's party is theirs to join */
         var keptForMe = x.occupants.filter(function (o) { return o.placeholder && o.party; }).length;
         var fullForMe = x.full && !keptForMe;
-        /* the names of who is there; a place kept for a party is not a person and is said in the state words */
-        var names = x.occupants.filter(function (o) { return !o.placeholder; }).map(function (o) { return o.mine ? 'You' : (o.name || 'A guest'); });
+        /* the names of who is there (first names; "You"; "A guest"); a place kept for a party is not a person and is said in
+           the state words (GAP-082) */
+        var words = u.stateOf ? u.stateOf(x) : { names: [], state: '' };
+        var names = words.names;
         var dots = '';
         for (var i = 0; i < x.places; i++) { var o = x.occupants[i]; dots += '<i class="' + (o ? (o.mine ? 'on me' : 'on') : '') + '" aria-hidden="true"></i>'; }
-        var who = names.length ? names.map(function (n) { return '<b>' + esc(n) + '</b>'; }).join(' · ') : '';
-        /* factual states only (Owner, 15 Sep 2026): available · 1 place available · Full · Your room */
-        var reserved = !!(x.reservedFor && !x.eligible && !isMine);
-        var state = reserved ? 'Reserved · ' + esc(x.reservedFor) : fullForMe ? 'Full' : keptForMe && !x.free ? (keptForMe === 1 ? '1 place kept for you' : keptForMe + ' places kept for your party') : (x.free === 1 ? '1 place available' : x.free + ' places available') + (keptForMe ? ' · ' + keptForMe + ' kept for your party' : '');
-        if (!fullForMe && !fits && !isMine) state += ' · not enough for your party of ' + need;
+        /* names joined with "and" (TO-01214): "You and Ada" · "You, Ada and Ben" */
+        var bold = names.map(function (n) { return '<b>' + esc(n) + '</b>'; });
+        var who = bold.length <= 1 ? (bold[0] || '') : bold.slice(0, -1).join(', ') + ' and ' + bold[bold.length - 1];
+        /* ONE ROOM'S WORDS (TO-01214 · TO-01256 … TO-01258): "1 place free · 1 kept for Ben" · "1 place kept for you" ·
+           "2 places kept for you and Carla" · "full" · "empty · 2 places" — the engine's units, lower case */
+        var state = esc(words.state);
+        if (!fullForMe && !fits && !isMine) state += ' — not enough for the ' + need + ' of you together';
         var act = isMine ? '<span class="t-l1 on">' + (property ? 'Your place' : 'Your room') + '</span>'
-                : (reserved ? '<span class="t-l1">Reserved</span>'
                 : fullForMe ? '<span class="t-l1">Full</span>'
                 : !x.eligible || !fits ? ''
-                : '<button type="button" class="p-act quiet" data-join="' + esc(win) + '|' + esc(slug) + '|' + esc(x.label) + '">' + (property ? (names.length ? 'Join the house' : 'Take a place') : (names.length ? 'Join this room' : 'Choose this room')) + '</button>');
-        h += '<div class="p-unit' + (isMine ? ' mine' : '') + (fullForMe ? ' full' : '') + (reserved ? ' reserved' : '') + '" data-unit="' + esc(x.label) + '" data-free="' + (reserved ? 0 : x.free) + '"' + (reserved ? ' data-reserved="' + esc(x.reservedFor) + '"' : '') + '>' +
+                : '<button type="button" class="p-act quiet" data-join="' + esc(win) + '|' + esc(slug) + '|' + esc(x.label) + '">' + (property ? 'Take a place' : (names.length || keptForMe ? 'Join this room' : 'Choose this room')) + '</button>';
+        h += '<div class="p-unit' + (isMine ? ' mine' : '') + (fullForMe ? ' full' : '') + '" data-unit="' + esc(x.label) + '" data-free="' + x.free + '">' +
              '<div><p class="p-unit-name">' + esc(u.unitName(x)) + '</p><p class="p-unit-who"><span class="p-places">' + dots + '</span>' + (who ? who + ' · ' : '') + state + '</p></div>' + act + '</div>';
       });
       h += '</div>';
+      /* a category nobody can join says so once — the party case only; a full one needs no sentence beyond its rows */
       if (!any && !mine) {
-        var allFull = list.length && list.every(function (x) { return x.full; });
-        h += '<p class="t-b2 measure-w" style="margin-top:var(--s3)">' + (allFull ? (list[0].kind === 'property' ? 'Every place of the house is taken.' : 'Every room of this category is full.') : 'No ' + (list[0] && list[0].kind === 'property' ? 'place' : 'room') + ' here can take your party of ' + need + ' together.') + '</p>';
+        var allFull = list.length && list.every(function (x) { return x.full && !keptIn(x); });
+        if (!allFull) h += '<p class="t-b2 measure-w" style="margin-top:var(--s3)">' + (list[0] && list[0].kind === 'property' ? 'The Guest House does not have ' + need + ' places left for all of you together.' : 'No room of this kind can take the ' + need + ' of you together. Please try another room type.') + '</p>';
       }
       return h;
     },
@@ -244,14 +261,17 @@
         });
       });
     },
-    /* the words for a refusal */
-    refusal: function (r) {
+    /* THE WORDS FOR A REFUSAL (PRQ-03-02): they know whether the guest was HOLDING or GIVING BACK (`action`, or the
+       result's own `action` from remove()) — a failed Remove never says "We could not hold …". A page paints the sentence
+       AFTER it re-renders (or outside the re-rendered block), so the answer survives the engine's announcement. */
+    refusal: function (r, action) {
       if (!r || r.ok) return '';
-      if (r.error === 'full') return r.property ? 'The last place in the house was just taken.' : 'This room was just filled. Please choose another room.';
-      if (r.error === 'full for your party') return r.property ? 'The house cannot take your whole party together.' : 'This room cannot take your whole party. Please choose another room.';
-      if (r.error === 'unreachable') return 'Nothing was changed — we could not reach Guest Relations just now. Please try again.';
       if (r.error === 'not signed in') return 'Open your invitation to choose a room.';
-      return 'Your place could not be held right now — please try again in a moment.';
+      if ((action || r.action) === 'give back') return 'We could not give this back just now. It is still held for you — please try again in a moment.';
+      if (r.error === 'full') return r.property ? 'The last place in the house was taken a moment ago. Nothing in your trip has changed.' : 'Someone took the last place in this room a moment ago. Nothing in your trip has changed — please choose another room.';
+      if (r.error === 'full for your party') return r.property ? 'The Guest House cannot take your whole party together. Nothing in your trip has changed.' : 'This room cannot take your whole party together. Nothing in your trip has changed — please choose another room.';
+      if (r.error === 'not offered') return 'This room is no longer offered. Nothing in your trip has changed — please choose another.';
+      return 'We could not hold your place just now. Nothing in your trip has changed — please try again in a moment.';
     }
   };
 

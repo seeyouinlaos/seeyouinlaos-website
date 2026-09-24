@@ -9,201 +9,161 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 .bag{width:44px;height:44px;display:flex;align-items:center;justify-content:center;position:relative;color:#313131;text-decoration:none}.bag .bgi{display:block}
 .bb{position:absolute;top:1px;right:0;min-width:14px;height:14px;padding:0 3px;background:#313131;color:#F3EEE7;font-size:8.5px;line-height:1;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;display:none;align-items:center;justify-content:center;box-shadow:0 0 0 2px #F3EEE7;border-radius:1px}
 </style>
-<link rel="stylesheet" href="assets/aman.css?v=b099d186"><link rel="stylesheet" href="assets/prep.css?v=e192c878"></head><body>
+<script src="assets/i18n/siyl-i18n.js?v=3a27503d"></script>
+<link rel="stylesheet" href="assets/aman.css?v=23c08c99"><link rel="stylesheet" href="assets/prep.css?v=3b4d86a7"></head><body>
 <header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="cart.html" aria-label="My Bag"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main class="prep-page" id="review">
 <div class="prep-head">
-  <p class="t-l1" id="rv-own">My Trip · nothing is paid on this website</p>
+  <p class="t-l1" id="rv-own">Your trip</p>
   <h1 class="t-d1">Review &amp; Send</h1>
-  <p class="t-b1 measure">Everything you have told us, in one place. Nothing here is new: it is what you chose and what you answered. Sending shares it with Guest Relations — a request, never a payment, never a confirmation.</p>
+  <p class="t-b1 measure">Everything you have chosen and told us, in one place.</p>
 </div>
 
-<div id="journeystate" class="prep-col"></div>
 <div id="ready"></div>
 
 <section class="p-block" id="b1">
-<div class="p-block-h"><h2>You</h2><a class="p-link mute" href="invitation.html#contact">Edit</a></div>
+<div class="p-block-h"><h2>Your details</h2><a class="p-link mute" href="invitation.html#contact">Change</a></div>
 <div id="b1c"></div>
 </section>
 
 <section class="p-block" id="b2">
-<div class="p-block-h"><h2>My Trip</h2><a class="p-link mute" href="your-journey.html">Edit</a></div>
-<p class="t-l1" id="b2who">For you</p>
-<p class="t-b2 measure-w">Your travel, your stays and your experiences, in the order the journey happens.</p>
+<div class="p-block-h"><h2>My Trip</h2><a class="p-link mute" href="your-journey.html">Change</a></div>
+<p class="t-b2 measure-w">Travel, stays and experiences, in date order.</p>
 <div id="arranged"></div>
 <div id="items"></div>
 <div class="p-actions" style="margin-top:var(--s3)"><a class="p-link mute" href="tickets.html">Your tickets</a></div>
 </section>
 
 <section class="p-block" id="b3">
-<div class="p-block-h"><h2>The Wedding</h2><a class="p-link mute" href="wedding.html">Edit</a></div>
+<div class="p-block-h"><h2>The Wedding</h2><a class="p-link mute" href="wedding.html">Change</a></div>
 <div id="b3c"></div>
 </section>
 
 <section class="p-block" id="b6">
-<div class="p-block-h"><h2>About you</h2><a class="p-link mute" href="about-you.html">Edit</a></div>
+<div class="p-block-h"><h2>About You</h2><a class="p-link mute" href="about-you.html">Change</a></div>
 <div id="b6c"></div>
 </section>
 
 <section class="p-block" id="b4">
-<div class="p-block-h"><h2>Documents &amp; privacy</h2><a class="p-link mute" href="about-you.html#documents">Edit</a></div>
+<div class="p-block-h"><h2>Documents &amp; privacy</h2><a class="p-link mute" href="about-you.html#documents">Change</a></div>
 <div id="b4c"></div>
 </section>
 
 <section class="p-block" id="b5">
-<div class="p-block-h"><h2>Your cost</h2><a class="p-link mute" href="cart.html">Edit</a></div>
-<p class="t-l1" id="b5who">For you</p>
-<p class="t-b2 measure-w">One calculation for the whole website, and one amount — yours. Nothing is paid here, and no deposit is asked for.</p>
-<div class="p-total"><span class="t-l1">Your cost</span><b id="tt">USD 0</b></div>
-<p class="t-b2 measure-w">A spa interest is not part of your total — it is paid directly at the spa.</p>
+<div class="p-block-h"><h2>Your total</h2><a class="p-link mute" href="cart.html">Change</a></div>
+<p class="t-b2 measure-w">Nothing is paid on this website. No deposit is required. Once your arrangements are confirmed, Guest Relations sends you an invoice with bank transfer or PayPal details; payment is due within seven days.</p>
+<div class="p-total"><span class="t-l1">Your total</span><b id="tt">USD 0</b></div>
 </section>
 
+<!-- THE SEND AREA (PRQ-04-02 · PRQ-04-03): one card (#journeystate) once the trip is sent; one button that follows
+     SIYL_DRAFT.hasUnsentChanges — never a disabled "Sent" -->
 <div id="sendbox" class="prep-sec">
-<div id="sent" class="p-card" hidden data-state="" style="margin-bottom:var(--s4)"><p class="t-l1 on"><i class="prep-tick" aria-hidden="true"></i> Received · under review</p><h2 class="t-h1" id="sent-h">Your trip has been received by Guest Relations</h2><p class="t-b1" id="sent-at"></p><p class="t-b2 measure-w">Guest Relations will review your selections personally. Nothing is confirmed yet; we will confirm each arrangement with you once it is ready.</p></div>
-<p class="t-l1" id="srvstate" role="status" aria-live="polite" style="margin-bottom:var(--s3)"><b>My Trip</b> · saved as draft</p>
-<button type="button" class="p-act" id="send">Send to Guest Relations</button>
+<div id="journeystate" tabindex="-1"></div>
+<button type="button" class="p-act" id="send">Send my trip</button>
 <p class="t-b2" id="err" role="alert" aria-live="polite" style="margin-top:var(--s3)"></p>
-<p class="t-b2 measure-w" style="margin-top:var(--s3)">Sending shares your trip with Guest Relations so a person can look at it. It is a request, never a payment, and it is not a confirmation — Guest Relations confirms every arrangement with you personally.</p>
-</div>
-<div id="donebox" hidden class="p-card prep-sec">
-<p class="t-l1 on">What happens now</p>
-<p class="t-b1 measure" id="donemsg"></p>
-<div id="mailbox" hidden data-mail="" style="margin:var(--s3) 0"><p class="t-l1" id="mail-l"></p><p class="t-b1 measure" id="mail-msg"></p><div class="p-actions" style="display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;margin-top:var(--s2)"><button type="button" class="p-act quiet" id="mail-retry" hidden>Retry confirmation email</button></div></div>
-<p class="t-b2 measure-w"><b>Received</b> means your trip is safely with Guest Relations. <b>Confirmed</b> is something only Guest Relations can tell you, once each arrangement is held with the hotels, the railway and the airlines. Until you hear from them, nothing in your trip is final.</p>
-<p class="t-b2 measure-w">You can keep changing anything here. Change it, send it again, and the newer version replaces the earlier one.</p>
-<div class="p-actions" style="display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;margin-top:var(--s4)"><button type="button" class="p-act quiet" id="again">Change and send again</button><a class="p-link mute" href="journeys.html">Continue exploring</a></div>
+<p class="t-b2 measure-w" id="send-clar" style="margin-top:var(--s3)">Guest Relations will look through your trip and confirm each arrangement with you personally. Sending is not a payment, and you can still change anything afterwards.</p>
 </div>
 <div id="foot"></div>
 </main>
-<script src="assets/bag.js?v=fe0c8b93"></script>
-<script src="assets/shop-menu.js?v=1ff891bc"></script>
-<script src="assets/aman.js?v=d6c4adb4"></script>
-<script src="assets/rooms-data.js?v=3a8a998e"></script>
-<script src="assets/pricing.js?v=eb8a9bf3"></script>
-<script src="assets/stage-graph.js?v=82a28623"></script>
-<script src="assets/questionnaire.js?v=817b4a6f"></script>
-<script src="assets/guest.js?v=958b1655"></script>
-<script src="assets/draft.js?v=ac3ae4f8"></script>
-<script src="assets/docs.js?v=477eb1c8"></script>
-<script src="assets/confirm.js?v=ff2a54e0"></script>
-<script src="assets/seatlabels.js?v=4994e1f4"></script>
-<script src="assets/seating.js?v=e867530e"></script>
-<script src="assets/seatpass.js?v=528e9c24"></script>
+<script src="assets/bag.js?v=43bc40c1"></script>
+<script src="assets/shop-menu.js?v=755a9271"></script>
+<script src="assets/aman.js?v=338fd10f"></script>
+<script src="assets/rooms-data.js?v=701dd9a2"></script>
+<script src="assets/pricing.js?v=6a4a85a2"></script>
+<script src="assets/stage-graph.js?v=8879f690"></script>
+<script src="assets/questionnaire.js?v=1dc3e01d"></script>
+<script src="assets/guest.js?v=9bb08cf5"></script>
+<script src="assets/draft.js?v=03e8b4bc"></script>
+<script src="assets/docs.js?v=8cd51002"></script>
+<script src="assets/confirm.js?v=d1b9a554"></script>
+<script src="assets/seatlabels.js?v=35f1a714"></script>
+<script src="assets/seating.js?v=e0a98e6e"></script>
+<script src="assets/seatpass.js?v=223ee8b2"></script>
 <script src="assets/vendor/qrcode.js?v=18ae399f"></script>
-<script src="assets/travelpass.js?v=ed68e022"></script>
-<script src="assets/temple.js?v=200ee67c"></script>
-<script src="assets/stay-plan.js?v=1d6cb33c"></script>
-<script src="assets/rooms.js?v=f2c427e2"></script>
-<script src="assets/stay.js?v=51b302df"></script>
-<script src="assets/transport-data.js?v=a5d732d4"></script>
-<script src="assets/journey.js?v=275f56b0"></script>
-<script src="assets/prep-shell.js?v=830ee417"></script>
-<script type="module" src="assets/invite.mjs?v=c557d97c"></script>
+<script src="assets/travelpass.js?v=f1d5d89a"></script>
+<script src="assets/temple.js?v=a2f797fc"></script>
+<script src="assets/stay-plan.js?v=5227fdc4"></script>
+<script src="assets/rooms.js?v=45bdf0e9"></script>
+<script src="assets/stay.js?v=d7bc46dc"></script>
+<script src="assets/transport-data.js?v=8d46ce92"></script>
+<script src="assets/journey.js?v=fbd99373"></script>
+<script src="assets/prep-shell.js?v=f9ae0997"></script>
+<script type="module" src="assets/invite.mjs?v=7d3552fb"></script>
 <script>
 /* ============================================================================
    06 · REVIEW & SEND — one final truth surface for ONE guest (Owner, 14 Sep
-   2026). No new concept, no new decision: what this guest chose, what this
-   guest answered, the state of documents and privacy, one amount. Every block
-   has one way back to the concept's primary home. The step opens only when
-   steps 01–05 are complete (the shell's gate); anything that comes undone
-   afterwards is named here, with the exact control to complete it.
+   2026). What this guest chose, what this guest answered, the state of
+   documents and privacy, one amount. Every block has one way back to the
+   concept's primary home. The step opens only when steps 01–05 are complete
+   (the shell's gate); anything that comes undone afterwards is named here,
+   with the exact control to complete it.
+
+   THE ONE TRIP STATE (Window 007 · OQ-40 · CP-01/02/03): the words, the send
+   and the confirmation are SIYL_DRAFT's — words() for the state, send() /
+   sendReply() for the one send path, hasUnsentChanges() for the button. After
+   sending, the send area shows exactly one card; the step header above carries
+   the trip line ("Sent to us · 24 September 2026").
    ========================================================================== */
-/* same origin on every hostname the Worker answers (24 Sep 2026) */ var SUBMIT_URL='/api/register';
-var RETRY_URL=SUBMIT_URL+'/mail-retry';
+var RETRY_URL='/api/register/mail-retry';
+var GR='guest.relation.seeyouinlaos@gmail.com';
 function esc(t){return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
-function when(iso){try{return new Date(iso).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}catch(e){return ''}}
-function whenAt(iso){try{var d=new Date(iso);return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})+' · '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}catch(e){return ''}}
+var MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+/* "24 September 2026" — British, no leading zero, no time (SIYL_DRAFT.dateWords where the page has it) */
+function when(iso){if(!iso)return '';if(window.SIYL_DRAFT&&SIYL_DRAFT.dateWords)return SIYL_DRAFT.dateWords(iso);var d=new Date(iso);return isNaN(d.getTime())?'':d.getDate()+' '+MONTHS[d.getMonth()]+' '+d.getFullYear()}
 function bearer(){try{var a=JSON.parse(localStorage.getItem('siyl.auth')||'null');return (a&&a.bearer)||''}catch(e){return ''}}
-/* THE SEND AREA SAYS WHAT THE SERVER PROVED. 'sent' is painted only after the
- * Worker has answered that the record is stored — the received stamp is the
- * server's — and only while this device's draft is the version Guest
- * Relations holds. Anything else is 'ready': the button offers the send
- * (again). Nothing here claims an email was delivered. */
-/* THE EMAILS (Owner, 16 Sep 2026): the journey is saved first; the confirmation emails come after it. A provider that
-   refuses never loses the booking — the words say the journey is saved, the email could not be sent, and offer the retry
-   (the stored journey's emails once more, never another submission). */
-function paintMail(mail,ref,ans){
-  var box=document.getElementById('mailbox'),l=document.getElementById('mail-l'),m=document.getElementById('mail-msg'),rb=document.getElementById('mail-retry');
-  if(!box)return;box.hidden=false;
-  var ok=!!(mail&&mail.guest&&mail.guest.accepted),okOwner=!!(mail&&mail.owner&&mail.owner.accepted),upd=!!(ans&&ans.kind==='update'),sentAt=(ans&&(ans.lastSentAt||ans.submittedAt))||null;
-  box.setAttribute('data-mail',ok?'sent':'failed');
-  /* three separate truths (Owner, 16 Sep 2026): saved · Guest Relations notified · the confirmation to the guest's own address */
-  var lines=[upd?'✓ Changes saved':'✓ Trip saved',okOwner?(upd?'✓ Updated trip sent to Guest Relations':'✓ Sent to Guest Relations'):'! Guest Relations could not be notified — the retry sends both emails'];
-  var tail=(ref?'<br>Reference: '+esc(ref):'')+(sentAt?'<br>Sent: '+esc(whenAt(sentAt)):'');
-  if(ok){lines.push('✓ Confirmation email sent to '+(mail.guest.to||'your email address'));l.textContent=upd?'Updated trip sent':'Confirmation email sent';m.innerHTML=lines.map(esc).join('<br>')+tail;rb.hidden=true;return}
-  lines.push('! Confirmation email could not be sent'+(mail&&mail.guest&&mail.guest.error==='no valid guest email address in the journey'?' — please add your email address in <a class="p-link" href="invitation.html#p-email">Your Invitation</a>, then retry':''));
-  l.textContent='Your trip is saved';
-  m.innerHTML=lines.map(function(t,i){return i===2?t:esc(t)}).join('<br>')+tail;
-  rb.hidden=false;rb.disabled=false;rb.textContent='Retry confirmation email';
-  rb.onclick=function(){rb.disabled=true;m.textContent='Sending the confirmation email again…';
-    fetch(RETRY_URL,{method:'POST',headers:{'content-type':'application/json','x-siyl-auth':bearer()},body:JSON.stringify({invitationId:(function(){try{return JSON.parse(localStorage.getItem('siyl.auth')||'null').invitationId}catch(e){return ''}})()})})
-      .then(function(r){return r.json()}).then(function(d){if(d&&d.error==='email required'){rb.disabled=false;m.innerHTML=esc(d.message||'Please add your email address so we can send your confirmation.')+' <a class="p-link" href="invitation.html#p-email">Add your email address</a>';return}paintMail(d&&d.mail,d&&d.submissionId)})
-      .catch(function(){rb.disabled=false;m.textContent='The email could not be sent again just now. Your trip stays saved — try once more in a moment.'})}}
-function wireAgain(){
-var ag=document.getElementById('again');
-if(ag&&!ag.dataset.wired){ag.dataset.wired='1';
-ag.addEventListener('click',function(){
-  document.getElementById('sendbox').hidden=false;
-  document.getElementById('donebox').hidden=true;
-  paintSend('again');
-  paintReady();
-  document.getElementById('sendbox').scrollIntoView({behavior:'smooth',block:'center'})})}}
-function paintSend(mode,at){
-var box=document.getElementById('sent'),btn=document.getElementById('send'),G=window.SIYL_GUEST;
-if(!box||!btn)return;
-if(mode==='sent'){
-  box.hidden=false;box.setAttribute('data-state','sent');
-  document.getElementById('sent-at').innerHTML='<b>Sent</b> · '+esc(whenAt(at))+' · your time';
-  btn.textContent=(G&&G.notJoining&&G.notJoining())?'Not joining':'Sent to Guest Relations';btn.classList.add('sent');btn.setAttribute('aria-disabled','true');btn.setAttribute('data-state','sent');
-  var d=document.getElementById('donebox'),dm=document.getElementById('donemsg');
-  if(d&&d.hidden){if(dm&&!dm.textContent)dm.textContent='Nothing more is needed from you now.';d.hidden=false;wireAgain()}
-}else{
-  box.hidden=true;box.setAttribute('data-state','');
-  var sub=window.SIYL_DRAFT&&SIYL_DRAFT.submission(),upd=!!(sub&&sub.submissionId&&(sub.hasUnsentChanges||mode==='again'));
-  var nj=!!(G&&G.notJoining&&G.notJoining());btn.textContent=upd?'Send Updated Trip':(mode==='again'?(nj?'Send my response again':'Send to Guest Relations again'):(nj?'Send my response':'Send to Guest Relations'));btn.classList.remove('sent');btn.removeAttribute('aria-disabled');btn.setAttribute('data-state',mode==='again'?'again':'ready');
-}}
-/* the server's word on the state — DRAFT · SENT · CHANGES NOT YET SENT (Owner, 16 Sep 2026) */
-function paintServerState(){var sub=window.SIYL_DRAFT&&SIYL_DRAFT.submission(),el=document.getElementById('srvstate');if(!el)return;
-  if(!sub||sub.submissionStatus==='draft'){el.innerHTML='<b>My Trip</b> · saved as draft';return}
-  if(sub.hasUnsentChanges){el.innerHTML='<b>Changes saved</b> · not yet sent to Guest Relations · reference '+esc(sub.submissionId);var b=document.getElementById('send');if(b&&b.getAttribute('data-state')!=='ready'&&b.textContent!=='Send Updated Trip'){paintSend('again')}return}
-  el.innerHTML='<b>Sent to Guest Relations</b> · reference '+esc(sub.submissionId)+' · '+esc(whenAt(sub.lastSentAt))+(sub.version>1?' · version '+sub.version:'')}
-document.addEventListener('siyl:draft',paintServerState);document.addEventListener('DOMContentLoaded',paintServerState);
+function invitationOf(){try{return (JSON.parse(localStorage.getItem('siyl.auth')||'null')||{}).invitationId||''}catch(e){return ''}}
+function D(){return window.SIYL_DRAFT||null}
+function tripWords(){var d=D();return d&&d.words?d.words():{key:'none',label:'',line:'',cta:null,at:null,date:'',declined:false}}
+function notJoining(){var G=window.SIYL_GUEST;return !!(G&&G.notJoining&&G.notJoining())}
+function display(v){var Q=window.SIYL_QUESTIONNAIRE;if(Array.isArray(v))return Q&&Q.displayList?Q.displayList(v):v.join(', ');return Q&&Q.display?Q.display(v):String(v==null?'':v)}
+/* the amount with its basis (PRQ-04-11): per person, the 1872 tea for the table */
+function perOf(x){return x&&(x.id==='1872'||x.id==='tea1872')?'for the table':'per person'}
+var INTEREST_WORDS='Interest · Guest Relations confirms your time · paid at the spa';
+var REQUEST_WORDS='Request · Guest Relations will confirm your table';
+var NOT_AT_WEDDING='You are not joining us for the wedding in Vientiane.';
+
 function row(label,value,right,open){
 return '<div class="p-kv"><div><p class="t-b1"><b>'+label+'</b></p>'+(value?'<p class="t-b2">'+value+'</p>':'')+'</div>'+
   (right?'<p class="t-l1'+(open?' open':'')+'">'+right+'</p>':'')+'</div>'}
 
 /* ---------------------------------------------------------------- BLOCK 01
- * YOU — the guest, and how we reach them. Required means required. */
+ * YOUR DETAILS — the guest, and how we reach them. Required means required. */
 function paintYou(){
 var G=window.SIYL_GUEST,box=document.getElementById('b1c');if(!box)return;
 var p=G?G.party():null;
 if(!p){box.innerHTML='<p class="t-b2">Open your invitation and your details appear here.</p>'+
   '<p style="margin-top:10px"><a class="p-link" href="invitation.html">Open your invitation</a></p>';return}
 var me=G.me();
-var own=document.getElementById('rv-own');if(own)own.textContent=G.nameOf()+' · nothing is paid on this website';
-var b2=document.getElementById('b2who');if(b2)b2.textContent='For you · '+G.nameOf();
-var b5=document.getElementById('b5who');if(b5)b5.textContent='For you · '+G.nameOf();
+var own=document.getElementById('rv-own');if(own)own.textContent='Your trip · '+G.nameOf();
 var em=G.contact('email'),ph=G.contact('phone'),okE=G.validEmail(em),okP=G.validPhone(ph);
-var h='<div class="p-group"><p class="t-l1">Personal details · required</p>';
-h+=row('Name',esc(G.value(me.guestId,'fullName')||me.fullName)+(G.edited(me.guestId,'fullName')?' · corrected by you':''),'From your invitation',false);
-h+=row('Email',okE?esc(em):'Not given yet',okE?'Given':'<a class="p-link" href="invitation.html#p-email">Complete this</a>',!okE);
-h+=row('Mobile number',okP?esc(ph):'Not given yet',okP?'Given':'<a class="p-link" href="invitation.html#p-phone">Complete this</a>',!okP);
-if(G.others().length)h+=row('Your party',esc(G.partyNames()),'Context',false);
-/* WHERE WILL YOU JOIN US (Owner, 18 Sep 2026): the first decision, shown as sent — a decline is a proper answer too */
-if(G.scopeAnswered)h+=row('Where you join us',G.scopeAnswered()?esc(G.scopeWords()):'Not answered yet',G.scopeAnswered()?(G.notJoining()?'Not joining':'Answered'):'<a class="p-link" href="your-journey.html#scope">Complete this</a>',!G.scopeAnswered());
+var h='<div class="p-group"><p class="t-l1">Personal details</p>';
+h+=row('Name',esc(G.value(me.guestId,'fullName')||me.fullName),'',false);
+h+=row('Email',okE?esc(em):'Not added yet',okE?'':'<a class="p-link" href="invitation.html#p-email">Complete this</a>',!okE);
+h+=row('Mobile number',okP?esc(ph):'Not added yet',okP?'':'<a class="p-link" href="invitation.html#p-phone">Complete this</a>',!okP);
+if(G.others().length)h+=row('Invited together',esc(G.partyNames()),'',false);
+/* WHERE YOU JOIN US (Owner, 18 Sep 2026): the first decision — a decline is a proper answer too; "Not joining" is its answer word */
+if(G.scopeAnswered)h+=row('Where you join us',G.scopeAnswered()?esc(G.notJoining()?'Not joining':G.scopeWords()):'Not answered yet',G.scopeAnswered()?'':'<a class="p-link" href="your-journey.html#scope">Complete this</a>',!G.scopeAnswered());
 h+='</div>';
 box.innerHTML=h}
 
-/* ---------------------------------------------------------------- ABOUT YOU */
+/* ---------------------------------------------------------------- ABOUT YOU
+ * One short label per question (PRQ-06-01), the display form of each answer (PRQ-06-07), the genres joined with ", "
+ * (PRQ-06-06); an answered row carries no status word, a required unanswered one says so with the way to it, the optional
+ * question 07 is "Not given — optional" (PRQ-06-05). Only what this guest is asked (OQ-32). */
 function paintAbout(){
 var G=window.SIYL_GUEST,box=document.getElementById('b6c');if(!box||!G||!G.party())return;
-var a=G.allergy(),d=G.allergyDetails(),ack=G.photoAck();
-if(G.notJoining&&G.notJoining()){box.innerHTML='<p class="t-b2 measure">You are not joining this trip, so nothing is needed here.</p>';return}
+var a=G.allergy(),d=G.allergyDetails(),ack=G.photoAck(),scope=G.aboutScope?G.aboutScope():{wedding:true,photo:true};
 var h='<div class="p-group">';
-h+=row('Food allergies',a==='no'?'None':a==='yes'?(d?esc(d):'Details still needed'):'Not answered yet',a==='no'||(a==='yes'&&d)?'Answered':'<a class="p-link" href="about-you.html#allergy">Complete this</a>',!(a==='no'||(a==='yes'&&d)));
-/* every visible question is required (Owner, 15 Sep 2026): an unanswered one is named, with the way to it */
-G.PROFILE.forEach(function(q){var v=String(G.profile(G.me().guestId,q.key)||'').trim();h+=row(q.q,v?esc(v):'Not answered yet',v?'Answered':'<a class="p-link" href="about-you.html#q-'+q.key+'">Complete this</a>',!v)});
-h+=row('Photography &amp; film',ack?'Acknowledged on '+when(ack.at):'Not acknowledged yet',ack?'Acknowledged':'<a class="p-link" href="about-you.html#photo">Complete this</a>',!ack);
+var okA=a==='no'||(a==='yes'&&d);
+h+=row('Food allergies',a==='no'?'None':a==='yes'?(d?esc(d):'Details still needed'):'Not answered yet',okA?'':'<a class="p-link" href="about-you.html#allergy">Complete this</a>',!okA);
+G.PROFILE.forEach(function(q){
+  if(q.wedding&&scope.wedding===false)return;
+  var raw=G.profile(G.me().guestId,q.key),v=display(raw);v=String(v||'').trim();
+  var label=q.label||q.q;
+  if(v){h+=row(esc(label),esc(v),'',false);return}
+  if(q.required===false){h+=row(esc(label),'Not given — optional','',false);return}
+  h+=row(esc(label),'Not answered yet','<a class="p-link" href="about-you.html#q-'+q.key+'">Complete this</a>',true)});
+if(scope.photo!==false)h+=row('Photography &amp; film',ack?'Acknowledged on '+esc(when(ack.at)):'Not acknowledged yet',ack?'':'<a class="p-link" href="about-you.html#photo">Complete this</a>',!ack);
 box.innerHTML=h+'</div>'}
 
 /* ---------------------------------------------------------------- BLOCK 03
@@ -213,43 +173,45 @@ function paintWedding(){
 var box=document.getElementById('b3c'),J=window.SIYL_JOURNEY,T=window.SIYL_TEMPLE,G=window.SIYL_GUEST;
 if(!box||!J||!G||!G.party())return;
 var op=T?T.operational():null,me=G.me(),p=G.party();
-if(G.scopeAnswered&&G.scopeAnswered()&&!G.joins('vientianeWedding')){box.innerHTML='<p class="t-b2 measure">'+(G.notJoining()?'You are not joining this trip':'You are not joining the wedding')+', so the wedding days are not part of what is sent. <a class="p-link mute" href="your-journey.html#scope">Change where you join us</a></p>';return}
-var DRESS={temple:'Lao Traditional Dress',coffee:'Black Tie',vows:'Black Tie',dinner:'Black Tie'};
-var h='<p class="t-b2 measure-w">Sunday, 28 February 2027 · Vientiane · one day, four moments. Coffee &amp; Cake, the Vow Ceremony and the Wedding Dinner are hosted by Haruthai &amp; Suthep. Tak Bat remains a personal offering at the temple.</p>';
+if(G.scopeAnswered&&G.scopeAnswered()&&!G.joins('vientianeWedding')&&!p.hosts){box.innerHTML='<p class="t-b2 measure">'+NOT_AT_WEDDING+' <a class="p-link mute" href="your-journey.html#scope">Change where you join us</a></p>';return}
+/* the dress of each moment (OQ-06): Coffee & Cake is Resort Wear */
+var DRESS={temple:'Lao Traditional Dress',coffee:'Resort Wear',vows:'Black Tie',dinner:'Black Tie'};
+var h='<p class="t-b2 measure-w">Sunday, 28 February 2027 · Vientiane. Coffee &amp; Cake, the Vow Ceremony and the Wedding Dinner are hosted by Haruthai &amp; Suthep. Giving at the temple is personal, and your own.</p>';
 var g=op&&op.guests[0];
 if(g){
-  h+='<div class="p-group"><p class="t-l1 on">'+esc(G.nameOf())+' · you</p>';
+  h+='<div class="p-group">';
   (T.EVENTS||[]).forEach(function(e){
     var st=g.events[e.key],open=st==='Not decided';
-    h+='<div class="p-kv"><div><p class="t-b1"><b>'+e.label+'</b></p><p class="t-b2">'+e.when+' · '+e.place+' · Dress · '+DRESS[e.key]+'</p></div>'+
-       (open?'<a class="p-link" href="wedding.html#ev-'+e.key+'">Complete this</a>':'<p class="t-l1">'+st+'</p>')+'</div>'});
-  var sst=g.sangkhathanState,quiet=sst==='Not eligible'||sst==='Not available yet';
+    h+='<div class="p-kv"><div><p class="t-b1"><b>'+esc(e.label)+'</b></p><p class="t-b2">'+esc(e.when)+' · '+esc(e.place)+' · Dress: '+DRESS[e.key]+'</p></div>'+
+       (open?'<a class="p-link" href="wedding.html#ev-'+e.key+'">Complete this</a>':'<p class="t-l1">'+esc(st)+'</p>')+'</div>'});
+  var sst=g.sangkhathanState;
   h+='<div class="p-kv"><div><p class="t-b1"><b>Sangkhathan Temple Offering</b></p>'+
-     '<p class="t-b2">'+(g.sangkhathan?'A personal offering prepared in your name · USD 15 · your cost':
-       sst==='Not applicable'?'Available while you attend the Temple Ceremony':
-       sst==='Not eligible'?'Nothing to arrange for your invitation':
-       sst==='Not available yet'?'Guest Relations will let you know if there is anything to arrange':sst==='Not selected'?'Continuing without Sangkhathan':sst)+'</p></div>'+
-     (sst==='Decision required'?'<a class="p-link" href="wedding.html#sangkhathan">Complete this</a>':'<p class="t-l1'+(g.sangkhathan?' on':'')+'">'+(g.sangkhathan?'USD 15':(quiet?'':sst==='Not selected'?'No':'—'))+'</p>')+'</div>';
-  var Sx=window.SIYL_SEATS,Lx=window.SIYL_SEATLABELS,cs=Sx?Sx.seatOf('ceremony',me.guestId):null,ds=Sx?Sx.seatOf('dinner',me.guestId):null,openS=Sx&&Sx.open()&&!Sx.frozen();
+     '<p class="t-b2">'+(g.sangkhathan?'A personal offering, prepared in your name':
+       sst==='Not applicable'?'Only for guests at the Temple Ceremony':
+       sst==='Not eligible'?'Not part of your invitation':
+       sst==='Not available yet'?'Guest Relations will let you know if there is anything to arrange':
+       sst==='Not selected'?'You chose not to make this offering':
+       sst==='Decision required'?'Would you like a personal offering prepared in your name?':esc(sst))+'</p></div>'+
+     (sst==='Decision required'?'<a class="p-link" href="wedding.html#sangkhathan">Complete this</a>':(g.sangkhathan?'<p class="t-l1 on">USD 15</p>':''))+'</div>';
+  var Sx=window.SIYL_SEATS,Lx=window.SIYL_SEATLABELS,cs=Sx?Sx.seatOf('ceremony',me.guestId):null,ds=Sx?Sx.seatOf('dinner',me.guestId):null;
+  var ready=!!(Sx&&Sx.ready()),openS=ready&&Sx.open()&&!Sx.frozen();
   /* the plan not read yet (or unreadable) is never "not open": the words say what is true (Owner, 16 Sep 2026) */
-  var unread=!(Sx&&Sx.ready()),unreadWords=Sx&&Sx.error()?'Seats could not be loaded — open Wedding Preparation to try again':'Loading your seats…';
-  var lab=function(sid){return Lx&&Lx.label(sid)||''},hostWords=me.hostRole==='BRIDE'?'Bride':me.hostRole==='GROOM'?'Groom':'Bride &amp; Groom';
+  var unreadWords=Sx&&Sx.error&&Sx.error()?'We could not load your seats just now — please open Wedding Preparation to try again.':'Loading your seats…';
+  var lab=function(sid){return Lx&&Lx.label(sid)||(Lx&&Lx.retiredLabel?Lx.retiredLabel(sid):'')||''},hostWords=me.hostRole==='BRIDE'?'Bride':me.hostRole==='GROOM'?'Groom':'Bride &amp; Groom';
   var needC=!p.hosts&&T.joining(me.guestId,'vows'),needD=T.joining(me.guestId,'dinner');
-  h+=(p.hosts?'<div class="p-kv"><div><p class="t-b1"><b>Ceremony seat</b></p><p class="t-b2">'+hostWords+' · front centre</p></div><p class="t-l1 on">Front centre</p></div>'
-      :'<div class="p-kv"><div><p class="t-b1"><b>Ceremony seat</b></p><p class="t-b2">'+(cs?esc(Sx.describe(cs))+' · held in your name':(!needC?'Not attending · no seat needed':(openS?'Not selected yet':unread?unreadWords:'Seating is not open yet')))+'</p></div>'+
-       (cs?'<p class="t-l1 on">Seat '+esc(lab(cs))+'</p>':(needC&&openS?'<a class="p-link" href="wedding-preparation.html#seats">Complete this</a>':'<p class="t-l1">'+(needC?(unread?'—':'Not open yet'):'—')+'</p>'))+'</div>')+
-     '<div class="p-kv"><div><p class="t-b1"><b>Dinner seat</b></p><p class="t-b2">'+(ds?esc(Sx.describe(ds))+' · held in your name':(!needD?'Not attending · no seat needed':(openS?'Not selected yet':unread?unreadWords:'Seating is not open yet')))+'</p></div>'+
-     (ds?'<p class="t-l1 on">Seat '+esc(lab(ds))+'</p>':(needD&&openS?'<a class="p-link" href="wedding-preparation.html#seats">Complete this</a>':'<p class="t-l1">'+(needD?(unread?'—':'Not open yet'):'—')+'</p>'))+'</div>';
+  function seatRow(title,sid,need){
+    return '<div class="p-kv"><div><p class="t-b1"><b>'+title+'</b></p><p class="t-b2">'+(sid?esc(Sx.describe(sid))+' · held for you':(!need?'Not joining · no seat needed':(openS?'No seat chosen yet':!ready?unreadWords:'Seating is not open yet')))+'</p></div>'+
+      (sid?'<p class="t-l1 on">Seat '+esc(lab(sid))+'</p>':(need&&openS?'<a class="p-link" href="wedding-preparation.html#seats">Complete this</a>':(need&&ready?'<p class="t-l1">Not open yet</p>':'')))+'</div>'}
+  h+=(p.hosts?'<div class="p-kv"><div><p class="t-b1"><b>Ceremony seat</b></p><p class="t-b2">'+hostWords+' · at the front, between the two blocks</p></div><p class="t-l1 on">Front centre</p></div>'
+      :seatRow('Ceremony seat',cs,needC))+seatRow('Dinner seat',ds,needD);
   var a=G.dressAck();
-  h+='<div class="p-kv"><div><p class="t-b1"><b>Dress code</b></p><p class="t-b2">'+(a?'Acknowledged on '+when(a.at):'Not yet acknowledged')+'</p></div>'+(a?'<p class="t-l1 on">Acknowledged</p>':'<a class="p-link" href="wedding-preparation.html#ack">Complete this</a>')+'</div>';
+  h+=row('Dress code',a?'Acknowledged on '+esc(when(a.at)):'Not acknowledged yet',a?'':'<a class="p-link" href="wedding-preparation.html#ack">Complete this</a>',!a);
   if((cs||ds||p.hosts)&&window.SIYL_SEATPASS)h+='<div class="p-actions" style="margin-top:var(--s3)"><a class="p-link mute" href="tickets.html">Your tickets</a></div>';
   h+='</div>'}
-box.innerHTML=h;
-box.querySelectorAll('[data-seat-pass]').forEach(function(b){b.addEventListener('click',function(){
-  var PASS=window.SIYL_SEATPASS;if(!PASS||b.getAttribute('aria-disabled')==='true')return;b.setAttribute('aria-disabled','true');b.textContent='Preparing…';
-  PASS.deliver(['ceremony','dinner'],b.getAttribute('data-seat-pass-for')).then(function(r){b.removeAttribute('aria-disabled');b.textContent=r&&r.ok?'Downloaded · again?':(r&&r.error==='no seat'?'No seat to confirm yet':'Could not prepare the ticket — try again')})})})}
+box.innerHTML=h}
 
-/* ---------------------------------------------------------------- BLOCK 04 */
+/* ---------------------------------------------------------------- BLOCK 04
+ * Documents compare on the state KEY (PRQ-06-11); publication reads Yes / No (PRQ-06-17). */
 function paintDocs(){
 var box=document.getElementById('b4c'),G=window.SIYL_GUEST,D=window.SIYL_DOCS;
 if(!box)return;
@@ -259,173 +221,212 @@ if(!p||!D){box.innerHTML=h;return}
 var id=G.me().guestId;
 h+='<div class="p-group">';
 D.forGuest(id).forEach(function(d){
-  var got=d.state!=='Not provided';
-  h+='<div class="p-kv"><div><p class="t-b1"><b>'+d.label+'</b></p>'+
-     '<p class="t-b2">'+(got?esc(d.filename)+' · received '+when(d.receivedAt):'Can be added later')+'</p></div>'+
-     '<p class="t-l1'+(got?' on':'')+'">'+(got?d.state:'Optional · not added')+'</p></div>'});
+  var key=D.stateKey?D.stateKey(id,d.kind):d.state,got=key==='received'||(key!=='none'&&key!=='Not provided'&&!!d.filename);
+  h+=row(esc(d.label),got?esc(d.filename)+' · received '+esc(when(d.receivedAt)):'Not added yet — you can add it later',got?'Received':'',false)});
 var c=D.consent(id),decided=D.consentDecided(id);
-h+='<div class="p-kv"><div><p class="t-b1"><b>Publication of photographs</b></p>'+
-   '<p class="t-b2">'+(decided?(c?'Given on '+when(c.at):'Declined · nothing about the wedding changes'):'Optional · not answered')+'</p></div>'+
-   '<p class="t-l1'+(decided?' on':'')+'">'+(decided?(c?'Given':'Declined'):'Optional')+'</p></div></div>';
+/* the publication question is asked only where the photography section is (OQ-32 · PRQ-06-02) */
+var sc=G.aboutScope?G.aboutScope():{photo:true};
+if(sc.photo!==false)h+=row('Publication of photographs',decided&&c?'Yes'+(c.at?' · '+esc(when(c.at)):''):'No','',false);
+h+='</div>';
 box.innerHTML=h}
 
 function detailHref(x){
 if(x.stay&&x.room)return 'room.html?stay='+x.stay+'&room='+x.room;
-if(x.id==='1872')return '1872.html';
+if(x.id==='1872'||x.id==='tea1872')return '1872.html';
 if(x.exp)return 'experience.html?id='+encodeURIComponent(x.exp);
 if(x.interest&&x.id!=='guesthouse')return 'marsilea.html';
 if(window.SIYL_TRANSPORT&&window.SIYL_TRANSPORT[x.id])return 'transport.html?id='+x.id;
 var P=window.SIYL_PRICE,at=P&&P.locate(x.id);
 if(at&&x.room)return 'room.html?stay='+at.key+'&room='+x.room;
 return 'journeys.html#j-'+(P?P.windowOf(x.id):x.id)}
-function render(){var b=SIYL_BAG.get(),el=document.getElementById('items'),ST=window.SIYL_STAY;
-if(!b.length){el.innerHTML='<p class="t-b2">Your bag is empty — no selections, USD 0. Your arrangements, your wedding answers and your profile are sent as they stand.</p>'}
+function amountHtml(x){
+  if(x.interest)return '<p class="p-line-amt"><span class="t-l1">Not in your total</span></p>';
+  if(x.complimentary)return '<p class="p-line-amt"><span class="t-l1">Complimentary</span></p>';
+  return '<p class="p-line-amt">USD '+(x.price||0).toLocaleString('en-US')+'<span class="t-l1">'+perOf(x)+'</span></p>'}
+function render(){var b=SIYL_BAG.get(),el=document.getElementById('items'),ST=window.SIYL_STAY,P=window.SIYL_PRICE;
+if(!b.length){el.innerHTML='<p class="t-b2">Nothing is in My Bag — USD 0. Your wedding answers and your details are sent as they are.</p>'}
 else{
 el.innerHTML=(window.SIYL_JOURNEY?SIYL_JOURNEY.sorted(b):b)
 .filter(function(x){return !(window.SIYL_JOURNEY&&SIYL_JOURNEY.isWedding(x))})
 .map(function(x){
-var J=window.SIYL_JOURNEY,m=J?J.meta(x):{cat:'',basis:''},when2=J?J.when(x):'';
+var J=window.SIYL_JOURNEY,m=J?J.meta(x):{cat:'',basis:''},when2=J?J.when(x):'',cat=m.cat?(P&&P.catWords?P.catWords(m.cat):m.cat):'';
 var href=detailHref(x),unit=ST&&x.room&&!x.interest?ST.unitWords(x):'';
 /* REVIEW = REVIEW (Owner, 15 Sep 2026): the selection as it stands — the tickets and their codes live on the tickets page */
 return '<div class="p-line"><a class="p-line-img" href="'+href+'" aria-label="Open '+esc(x.name)+'"'+(SIYL_BAG.thumb(x)?' style="background-image:url('+SIYL_BAG.thumb(x)+')"':'')+'></a>'+
-'<div class="p-line-body"><p class="t-l1">'+(when2?when2:'')+(m.cat?' · '+m.cat:'')+'</p>'+
+'<div class="p-line-body"><p class="t-l1">'+esc(when2||'')+(cat?(when2?' · ':'')+esc(cat):'')+'</p>'+
 '<h3 class="t-h2"><a href="'+href+'">'+esc(x.name)+'</a></h3><p class="t-b2">'+esc(x.meta||'')+'</p>'+
 (unit?'<p class="t-l1 on">'+esc(unit)+'</p>':'')+
-(x.complimentary?'<p class="t-b2">Complimentary. A shared guest house of four places: the wedding programme is included as it stands; arrival, departure and transfers are arranged by you.</p>':'')+
-(J&&J.quantityLine(x)?'<p class="t-b2">'+esc(J.quantityLine(x))+'</p>':'')+((x.request||!(J&&J.quantityLine(x)))&&m.basis?'<p class="t-b2">'+esc(m.basis)+'</p>':'')+
+(x.complimentary?'<p class="t-b2">Complimentary. One of four places in a shared house; Guest Relations looks after the keys, your arrival and everything around it.</p>':'')+
+(x.interest?'<p class="t-l1">'+INTEREST_WORDS+'</p>':'')+
+(x.request?'<p class="t-l1">'+REQUEST_WORDS+'</p>':'')+
+(J&&J.quantityLine(x)?'<p class="t-b2">'+esc(J.quantityLine(x))+'</p>':'')+(!x.interest&&(x.request||!(J&&J.quantityLine(x)))&&m.basis?'<p class="t-b2">'+esc(m.basis)+'</p>':'')+
 (x.note?'<p class="t-l1 on">'+esc(x.note)+(x.noteBy?' · '+esc(x.noteBy):'')+'</p>':'')+
-(x.breakfast?'<p class="t-l1">'+esc(x.breakfast)+'</p>':'')+'</div>'+
-(x.interest?'<p class="p-line-amt"><span class="t-l1">Interest · request</span></p>':x.complimentary?'<p class="p-line-amt"><span class="t-l1">Complimentary</span></p>':'<p class="p-line-amt">USD '+((x.price||0)).toLocaleString('en-US')+'</p>')+'</div>'}).join('')}
+(x.breakfast?'<p class="t-l1">'+esc(x.breakfast)+'</p>':'')+'</div>'+amountHtml(x)+'</div>'}).join('')}
 document.getElementById('tt').textContent='USD '+SIYL_BAG.total().toLocaleString('en-US');
 paintReady();
 SIYL_BAG.badge()}
 
-/* ---- A FEW THINGS STILL NEED YOUR ANSWER — the one readiness engine, each
- * item with the exact control. Nothing optional ever appears here. */
+/* ---- BEFORE YOU SEND — the one readiness engine, each item with the exact control. Nothing optional ever appears here.
+ * Shown only while there is something to send (PRQ-04-03). */
+function hasSomethingToSend(){var k=tripWords().key;return k!=='sent'&&k!=='confirmed'}
 function paintReady(){
-var box=document.getElementById('ready'),G=window.SIYL_GUEST,btn=document.getElementById('send');
-if(!box||!btn)return;
+var box=document.getElementById('ready'),G=window.SIYL_GUEST;
+if(!box)return;
 if(!G||!G.party()){
   box.innerHTML='<div class="p-card prep-sec"><p class="t-l1 open">Required</p><h3 class="t-h1">Open your invitation</h3>'+
-    '<p class="t-b2 measure">Your trip is sent under your own invitation, so we open it first.</p>'+
+    '<p class="t-b2 measure">Your trip is sent with your own invitation, so please open it first.</p>'+
     '<div class="p-kv"><div><p class="t-b1">Your invitation</p></div><a class="p-link" href="invitation.html">Open</a></div></div>';
-  btn.disabled=false;btn.classList.add('off');btn.setAttribute('aria-describedby','ready');
-  btn.textContent='Send to Guest Relations — not ready yet';return}
+  paintButton();return}
+if(!hasSomethingToSend()){box.innerHTML='';paintButton();return}
 var r=G.readiness();
-if(r.ok){box.innerHTML='<div class="p-card prep-sec"><p class="t-l1 on"><i class="prep-tick" aria-hidden="true"></i> Everything we need is here</p><h3 class="t-h1">Your trip can be sent</h3>'+
-  '<p class="t-b2 measure-w">Anything optional can follow at any time — it never delays your trip.</p></div>'}
+if(r.ok){box.innerHTML='<div class="p-card prep-sec"><p class="t-l1 on"><i class="prep-tick" aria-hidden="true"></i> Ready to send</p><h3 class="t-h1">Everything we need is here</h3>'+
+  '<p class="t-b2 measure-w">Anything optional can follow later.</p></div>'}
 else{
-  var h='<div class="p-card prep-sec" id="needs"><p class="t-l1 open">Before you send</p><h3 class="t-h1">A few things still need your answer</h3>'+
-    '<p class="t-b2 measure-w">Required items cannot be answered for you afterwards. Complete each one and come back — this page stays exactly as it is.</p>';
+  var h='<div class="p-card prep-sec" id="needs"><p class="t-l1 open">Before you send</p><h3 class="t-h1">A few things still need your answer</h3>';
   r.need.forEach(function(x){
     h+='<div class="p-kv"><div><p class="t-l1 open">'+x.n+' · '+esc(x.stepLabel)+'</p><p class="t-b1"><b>'+esc(x.label)+'</b></p></div>'+
        '<a class="p-link" href="'+x.href+'">Complete this</a></div>'});
   box.innerHTML=h+'</div>'}
-/* EMPTY BAG IS VALID (Owner, 17 Sep 2026): the review may be sent when the required non-Bag answers are complete — zero selections is a real state */
-var ready=r.ok;
-btn.disabled=false;
-btn.removeAttribute('aria-disabled');
-btn.setAttribute('aria-describedby','ready');
-/* the send state (sent · again) painted by the server's truth is never overwritten here */
-if(btn.getAttribute('data-state')==='sent'){btn.classList.remove('off');btn.setAttribute('aria-disabled','true');return}
+paintButton()}
+
+/* THE SEND BUTTON FOLLOWS hasUnsentChanges ONLY (PRQ-04-02 · CP-02): "Send my trip" / "Send my reply" before the first send,
+ * "Send the update" after a real change, "Sending…" between the tap and the answer — and no button at all while nothing
+ * changed since the last send (no disabled "Sent"). It is muted while something required is missing; pressing it then
+ * names the first missing item. */
+function buttonWords(){
+  var w=tripWords(),nj=notJoining();
+  if(w.key==='changed')return nj&&!w.declined?'Send my reply':'Send the update';
+  return nj?'Send my reply':'Send my trip'}
+function paintButton(){
+var btn=document.getElementById('send'),clar=document.getElementById('send-clar'),G=window.SIYL_GUEST;if(!btn)return;
+var show=!(G&&G.party())||hasSomethingToSend();
+btn.hidden=!show;if(clar)clar.hidden=!show;
+if(!show)return;
+var d=D(),busy=!!(d&&d.sending&&d.sending());
+var ready=!!(G&&G.party()&&G.readiness().ok);
 btn.classList.toggle('off',!ready);
-var nj=!!(G.notJoining&&G.notJoining());btn.textContent=ready?(btn.getAttribute('data-state')==='again'?(nj?'Send my response again':'Send to Guest Relations again'):(nj?'Send my response':'Send to Guest Relations')):'Send to Guest Relations — not ready yet';
-}
+btn.setAttribute('aria-describedby','ready');
+btn.disabled=busy;
+btn.textContent=busy?'Sending…':buttonWords()}
 
 /* what to say when a guest presses SEND too early: the first missing item, and the way there */
 function blockSend(){
 var G=window.SIYL_GUEST,err=document.getElementById('err');
 var r=G&&G.party()?G.readiness():{need:[{label:'Open your invitation',href:'invitation.html',n:'01',stepLabel:'Your Invitation'}]};
 var first=(r.need||[])[0];
-if(!first)first={label:'Open My Trip',href:'your-journey.html',n:'02',stepLabel:'My Trip'};
-err.innerHTML=first?('Before you send: '+esc(first.label)+' ('+first.n+' · '+esc(first.stepLabel)+'). <a class="p-link" href="'+first.href+'" style="margin-left:8px">Complete this</a>'):'A few steps above are still needed before your trip can be sent.';
+err.innerHTML=first?('Before you send: '+esc(first.label)+' ('+first.n+' · '+esc(first.stepLabel)+'). <a class="p-link" href="'+first.href+'" style="margin-left:8px">Complete this</a>'):'A few answers above are still needed before you send.';
 var box=document.getElementById('ready');
 if(box)box.scrollIntoView({behavior:'smooth',block:'center'});
 }
-/* ---------------------------------------------------------------- STATE
- * JOURNEY RECEIVED after SEND; JOURNEY CONFIRMED only after Guest Relations'
- * authoritative act on the server. */
+
+/* ---------------------------------------------------------------- THE ONE CARD
+ * none / draft  → no card (the button and its clarification);
+ * sent          → "Thank you — we have your trip" (or the update, or the reply), the one email line, the small print, Back to My Trip;
+ * changed       → "You have changed your trip" and the one button, "Send the update";
+ * confirmed     → "Your trip is confirmed" — and, when this device sent it, what was confirmed.
+ * The email line says only what the Worker answered about the GUEST's copy; a Guest Relations notification that failed is
+ * the server's to retry (PRQ-04-07). */
+var lastAnswer=null;   /* the Worker's answer to this page's own send (the email result), until the next visit */
+var mailNote=null;     /* the words of a copy just re-sent */
+function mailState(){
+  var m=lastAnswer&&lastAnswer.mail,g=m&&m.guest;
+  if(g)return {ok:!!g.accepted,to:g.to||'',error:g.error||''};
+  var d=D(),s=d&&d.submission?d.submission():null,sm=s&&s.mail;
+  if(sm&&sm.guestMailStatus)return {ok:sm.guestMailStatus==='accepted',to:sm.guestTo||'',error:sm.mailLastError||''};
+  return null}
+function mailLine(){
+  if(mailNote)return '<p class="t-b1 measure" data-mail="note">'+mailNote+'</p>';
+  var st=mailState();if(!st)return '';
+  if(st.ok)return '<p class="t-b1 measure" data-mail="sent">A copy is on its way to '+esc(st.to||'your email address')+'.</p>';
+  if(/no valid guest email/.test(st.error))return '<p class="t-b1 measure" data-mail="failed">Please add your email address, so we can send you a copy of your trip. <a class="p-link" href="invitation.html#p-email">Add your email address</a></p>';
+  return '<p class="t-b1 measure" data-mail="failed">We could not send your copy by email just now. <button type="button" class="p-link" id="mail-retry">Send the copy again</button></p>'}
+function smallPrint(){
+  var d=D(),s=d&&d.submission?d.submission():null,w=tripWords();
+  var ref=(s&&s.submissionId)||(lastAnswer&&lastAnswer.submissionId)||'',upd=!!((s&&s.version>1)||(lastAnswer&&lastAnswer.kind==='update'));
+  var at=w.at||(d&&d.sentAt?d.sentAt():null);
+  if(w.key==='confirmed')at=d&&d.sentAt?d.sentAt():at;
+  return '<p class="t-b2">'+(upd?'Updated on ':'Sent on ')+esc(when(at))+(ref?' · your reference <span style="white-space:nowrap">'+esc(ref)+'</span>':'')+'</p>'}
+function backLink(){return '<div class="p-actions" style="margin-top:var(--s3)"><a class="p-link" href="your-journey.html">Back to My Trip</a></div>'}
 function paintState(){
-var box=document.getElementById('journeystate'),C=window.SIYL_CONFIRM,G=window.SIYL_GUEST,T=window.SIYL_TEMPLE,J=window.SIYL_JOURNEY,Sx=window.SIYL_SEATS;
-if(!box||!C||!G||!G.party()){if(box)box.innerHTML='';return}
-var st=C.state(),p=G.party(),send=document.getElementById('sendbox');
-document.body.classList.toggle('journey-confirmed',st==='confirmed');
-if(st==='none'){box.innerHTML='';if(send)send.hidden=false;paintSend('ready');return}
-if(st==='received'){
-  box.innerHTML='<div class="p-card"><p class="t-l1 on">We have your trip</p><h2 class="t-h1">Guest Relations has your trip</h2>'+
-    '<p class="t-b1 measure">Received on '+when(C.receivedAt())+'. Guest Relations will review your selections personally. Nothing is confirmed yet; we will confirm each arrangement with you once it is ready. You can still change anything below and send it again.</p></div>';
-  var sn=sentSnapshot();
-  var newer=!!(sn&&sn.invitationId===p.invitationId&&sn.at&&C.receivedAt()&&C.receivedAt()>sn.at);
-  if(newer)box.innerHTML+='<div class="p-card" style="margin-top:var(--s3)"><p class="t-l1 open">A newer version was sent from another device</p><p class="t-b2 measure">Guest Relations holds the trip sent on '+when(C.receivedAt())+' from another device, which replaced the one sent here on '+when(sn.at)+'. What you see below is this device\'s draft. Send again from here only if you want it to replace that newer version.</p></div>';
-  var changedHere=!!(sn&&sn.invitationId===p.invitationId&&fingerprint(snapshotNow())!==fingerprint(sn));
-  paintSend(sn&&sn.invitationId===p.invitationId&&!newer&&!changedHere?'sent':(sn&&sn.invitationId===p.invitationId?'again':'ready'),C.receivedAt());
-  if(!newer&&changedHere)box.innerHTML+='<div class="p-card" style="margin-top:var(--s3)"><p class="t-l1 open">Your trip has changed</p><p class="t-b2 measure">You have made changes since the last version was sent on '+when(sn.at)+'. Send the updated version whenever you are ready — the newer one replaces the earlier one.</p></div>';
-  if(send)send.hidden=false;return}
-/* CONFIRMED · painted from the snapshot taken when the journey was SENT from this device (siyl.sent) */
-if(send)send.hidden=true;
-var snap=sentSnapshot();
-var mine=!!(snap&&snap.invitationId===p.invitationId&&snap.at),held=C.receivedAt();
-var current=!!(mine&&held&&snap.at===held);
-if(!current){
-  var later=!!(mine&&held&&held>snap.at),elsewhere=!!(held&&!mine);
-  var said=later?'The details Guest Relations confirmed were sent again from another device after this one, so they are not shown here.'
-          :elsewhere?'The details Guest Relations confirmed were sent from another device, so they are not shown here.'
-          :'What Guest Relations confirmed is not shown here: this device cannot tell which copy it was.';
-  box.innerHTML='<div class="p-card"><p class="t-l1 on">Your trip is confirmed</p><h2 class="t-h1">Guest Relations confirmed your arrangements</h2>'+
-    '<p class="t-b1 measure">Confirmed on '+when(C.confirmedAt())+'. '+said+' For a copy, or to change anything, write to <a href="mailto:guest.relation.seeyouinlaos@gmail.com?subject=Journey%20'+encodeURIComponent(p.invitationId)+'">Guest Relations</a>.</p>'+
-    '<p class="t-b2 measure" style="margin-top:var(--s3)">The sections below show what this device holds — not what was confirmed.</p></div>';
-  return}
-var changed=fingerprint(snapshotNow())!==fingerprint(snap);
-var shared=snap.shared||[];
-var h='<div class="p-card"><p class="t-l1 on">Your trip is confirmed</p><h2 class="t-h1">Guest Relations confirmed your arrangements on '+when(C.confirmedAt())+'</h2>'+
-  '<p class="t-b1 measure">To change anything now, write to <a href="mailto:guest.relation.seeyouinlaos@gmail.com?subject=Journey%20'+encodeURIComponent(p.invitationId)+'">Guest Relations</a>.</p></div>';
-if(changed)h+='<div class="p-card" style="margin-top:var(--s3)"><p class="t-l1 open">Changed since confirmation · not sent</p><p class="t-b1 measure">Something in your trip has been changed on this device after Guest Relations confirmed it. What is shown below is what was confirmed. Changes made here are not sent — write to Guest Relations to change anything.</p></div>';
-h+='<section class="prep-sec"><p class="t-l1">Your confirmed trip</p><h2 class="t-h2">'+esc(G.nameOf())+'</h2><div class="p-card">';
+var box=document.getElementById('journeystate'),G=window.SIYL_GUEST,C=window.SIYL_CONFIRM;
+if(!box)return;
+if(!G||!G.party()){box.innerHTML='';paintButton();return}
+var d=D(),w=tripWords(),elsewhere=!!(d&&d.sentElsewhere&&d.sentElsewhere());
+document.body.classList.toggle('journey-confirmed',w.key==='confirmed');
+var h='';
+if(w.key==='sent'){
+  var s=d&&d.submission?d.submission():null,upd=!!((s&&s.version>1)||(lastAnswer&&lastAnswer.kind==='update'));
+  if(w.declined)h='<div class="p-card"><h2 class="t-h1">Reply sent · '+esc(w.date)+'</h2><p class="t-b1 measure">We will miss you, and we are grateful you let us know. If your plans change, simply tick the parts you can join in My Trip and send us the update.</p>';
+  else if(upd)h='<div class="p-card"><h2 class="t-h1">Thank you — we have your update</h2><p class="t-b1 measure">It replaces what you sent before. Guest Relations will look through the changes and confirm each arrangement with you personally.</p>';
+  else h='<div class="p-card"><h2 class="t-h1">Thank you — we have your trip</h2><p class="t-b1 measure">Khun Ket and Khun Paddy of Guest Relations will look through it and confirm each arrangement with you personally; until they do, nothing is booked. If anything changes, change it in My Trip and send us the update.</p>';
+  h+=mailLine();
+  if(elsewhere)h+='<p class="t-l1 open" style="margin-top:var(--s3)">Sent from your other device</p><p class="t-b2 measure">On '+esc(w.date)+' you sent an update from another device, and that is the trip we have. This page may show older choices — send from here only if it should replace that update.</p>';
+  h+=smallPrint()+backLink()+'</div>';
+}else if(w.key==='changed'){
+  var lapsed=!!(C&&C.lapsed&&C.lapsed());
+  h='<div class="p-card"><h2 class="t-h1">You have changed your trip</h2><p class="t-b1 measure">'+(lapsed?'You changed your trip after Guest Relations confirmed it. Send the update, and Guest Relations will confirm it with you again.':'We have what you sent on '+esc(w.date)+'. Send the update when you are ready — it replaces what you sent before.')+'</p></div>';
+}else if(w.key==='confirmed'){
+  h='<div class="p-card"><h2 class="t-h1">Your trip is confirmed</h2><p class="t-b1 measure">Guest Relations confirmed your arrangements on '+esc(w.date)+'. No deposit is required. Guest Relations sends you an invoice with bank transfer or PayPal details; payment is due within seven days.</p>'+
+    '<p class="t-b2 measure">If anything changes, change it in My Trip and send us the update — Guest Relations will confirm it with you again.</p>'+
+    (elsewhere?'<p class="t-b2 measure">Your confirmed trip was sent from another device, so it is not shown here. Guest Relations will gladly send you the details — just write to them. The sections below may differ from what Guest Relations confirmed.</p>':'')+
+    smallPrint()+backLink()+'</div>';
+  if(!elsewhere)h+=confirmedTrip();
+}
+box.innerHTML=h;
+var rb=document.getElementById('mail-retry');if(rb)rb.addEventListener('click',retryCopy);
+paintButton()}
+
+/* WHAT WAS CONFIRMED — a confirmation stands only while nothing changed since (OQ-27), so the trip as it stands IS the
+ * confirmed one: the lines and the wedding day, in the words the guest knows */
+function confirmedTrip(){
+var G=window.SIYL_GUEST,T=window.SIYL_TEMPLE,J=window.SIYL_JOURNEY,Sx=window.SIYL_SEATS,Lx=window.SIYL_SEATLABELS;
+var b=SIYL_BAG.get(),shared=(J?J.sorted(b):b).filter(function(x){return !(J&&J.isWedding(x))});
+var h='<section class="prep-sec"><p class="t-l1">Your confirmed trip</p><h2 class="t-h2">'+esc(G.nameOf())+'</h2><div class="p-card">';
 if(!shared.length)h+='<p class="t-b2">No stay or travel in this trip.</p>';
-shared.forEach(function(x){h+='<div class="p-kv"><div><p class="t-l1">'+esc(x.when||'')+'</p><p class="t-b1"><b>'+esc(x.name)+'</b></p><p class="t-b2">'+esc(x.meta||'')+(x.unit?' · Room '+esc(x.unit):'')+'</p></div><p class="t-l1 on">Confirmed</p></div>'});
-h+='<div class="p-kv"><div><p class="t-b1"><b>The Wedding</b></p><p class="t-b2">Sunday, 28 February 2027 · Vientiane · one day, four moments, hosted by Haruthai &amp; Suthep</p></div><p class="t-l1 on">Confirmed</p></div>';
+shared.forEach(function(x){h+='<div class="p-kv"><div><p class="t-l1">'+esc(J?J.when(x):'')+'</p><p class="t-b1"><b>'+esc(x.name)+'</b></p><p class="t-b2">'+esc(x.meta||'')+'</p></div><p class="t-l1 on">Confirmed by Guest Relations</p></div>'});
+if(G.joins&&(G.joins('vientianeWedding')||G.party().hosts))h+='<div class="p-kv"><div><p class="t-b1"><b>The Wedding</b></p><p class="t-b2">Sunday, 28 February 2027 · Vientiane</p></div><p class="t-l1 on">Confirmed by Guest Relations</p></div>';
 h+='</div></section>';
-var rowS=(snap.guests||[])[0]||null,id=G.me().guestId,a=rowS&&rowS.dress;
-var cs=(Sx&&Sx.ready())?Sx.seatOf('ceremony',id):(rowS?rowS.ceremonySeat:null),ds=(Sx&&Sx.ready())?Sx.seatOf('dinner',id):(rowS?rowS.dinnerSeat:null);
-function ev(k){return rowS&&rowS.events?rowS.events[k]:'Not decided'}
-h+='<section class="prep-sec"><p class="t-l1">Your wedding card</p><div class="p-card p-wcard"><h3 class="t-d1">'+esc(G.nameOf())+'</h3><p class="t-b2">'+esc(G.value(id,'fullName'))+'</p>'+
+var op=T?T.operational():null,g=op&&op.guests[0],id=G.me().guestId,a=G.dressAck();
+if(!g||!(G.joins&&(G.joins('vientianeWedding')||G.party().hosts)))return h;
+var cs=Sx&&Sx.ready()?Sx.seatOf('ceremony',id):null,ds=Sx&&Sx.ready()?Sx.seatOf('dinner',id):null;
+function ev(k){var v=g.events[k];return v==='Not decided'||!v?'Not answered':v}
+function kv(t,right,on,sub){return '<div class="p-kv"><div><p class="t-b1"><b>'+t+'</b></p>'+(sub?'<p class="t-b2">'+sub+'</p>':'')+'</div><p class="t-l1'+(on?' on':'')+'">'+right+'</p></div>'}
+h+='<section class="prep-sec"><p class="t-l1">Your wedding day</p><div class="p-card p-wcard"><h3 class="t-d1">'+esc(G.nameOf())+'</h3><p class="t-b2">'+esc(G.value(id,'fullName'))+'</p>'+
    '<p class="t-l1 on" style="margin-top:var(--s3)">28 February 2027 · Vientiane</p>'+
-   '<div class="p-kv"><div><p class="t-b1"><b>Temple Ceremony</b></p></div><p class="t-l1'+(ev('temple')==='Joining'?' on':'')+'">'+(ev('temple')==='Joining'?'Attending':ev('temple')==='Not joining'?'Not attending':'Not decided')+'</p></div>'+
-   (cs?'<div class="p-kv"><div><p class="t-b1"><b>Ceremony seat</b></p><p class="t-b2">'+esc(Sx.describe(cs))+'</p></div><p class="t-l1 on">Seat '+esc(window.SIYL_SEATLABELS?SIYL_SEATLABELS.label(cs):'')+'</p></div>':'')+
-   (rowS&&rowS.sangkhathan?'<div class="p-kv"><div><p class="t-b1"><b>Sangkhathan</b></p><p class="t-b2">A personal offering, prepared in your name</p></div><p class="t-l1 on">Prepared</p></div>':'')+
-   '<div class="p-kv"><div><p class="t-b1"><b>Coffee &amp; Cake</b></p></div><p class="t-l1'+(ev('coffee')==='Joining'?' on':'')+'">'+ev('coffee')+'</p></div>'+
-   '<div class="p-kv"><div><p class="t-b1"><b>Vow Ceremony</b></p></div><p class="t-l1'+(ev('vows')==='Joining'?' on':'')+'">'+ev('vows')+'</p></div>'+
-   '<div class="p-kv"><div><p class="t-b1"><b>Wedding Dinner</b></p></div><p class="t-l1'+(ev('dinner')==='Joining'?' on':'')+'">'+ev('dinner')+'</p></div>'+
-   (ds?'<div class="p-kv"><div><p class="t-b1"><b>Dinner seat</b></p><p class="t-b2">'+esc(Sx.describe(ds))+'</p></div><p class="t-l1 on">Seat '+esc(window.SIYL_SEATLABELS?SIYL_SEATLABELS.label(ds):'')+'</p></div>':'')+
-   '<div class="p-kv"><div><p class="t-b1"><b>Dress code</b></p></div><p class="t-l1'+(a?' on':'')+'">'+(a?'Acknowledged':'Not yet acknowledged')+'</p></div>'+
+   kv('Temple Ceremony',esc(ev('temple')),ev('temple')==='Joining')+
+   (cs?kv('Ceremony seat','Seat '+esc(Lx?Lx.label(cs):''),true,esc(Sx.describe(cs))):'')+
+   (g.sangkhathan?kv('Sangkhathan','Yes · USD 15',true,'A personal offering, prepared in your name'):'')+
+   kv('Coffee &amp; Cake',esc(ev('coffee')),ev('coffee')==='Joining')+
+   kv('Vow Ceremony',esc(ev('vows')),ev('vows')==='Joining')+
+   kv('Wedding Dinner',esc(ev('dinner')),ev('dinner')==='Joining')+
+   (ds?kv('Dinner seat','Seat '+esc(Lx?Lx.label(ds):''),true,esc(Sx.describe(ds))):'')+
+   kv('Dress code',a?'Acknowledged':'Not acknowledged yet',!!a)+
    '</div></section>';
-box.innerHTML=h}
+return h}
 
-/* the journey as it was SENT from this device — the only thing a confirmed view may show */
-function snapshotNow(){
-  var G=window.SIYL_GUEST,T=window.SIYL_TEMPLE,J=window.SIYL_JOURNEY,Sx=window.SIYL_SEATS,p=G&&G.party();
-  if(!p)return null;
-  var b=SIYL_BAG.get(),shared=(J?J.sorted(b):b).filter(function(x){return !(J&&J.isWedding(x))});
-  var op=T?T.operational():null,id=G.me().guestId,rowT=op?op.guests[0]:null,a=G.dressAck();
-  return {invitationId:p.invitationId,guestId:id,
-    shared:shared.map(function(x){return {id:x.id,when:J?J.when(x):'',name:x.name,meta:x.meta||'',price:x.price,qty:1,unit:x.unit||null}}),
-    total:SIYL_BAG.total(),
-    guests:[{guestId:id,name:G.nameOf(),fullName:G.value(id,'fullName'),events:rowT?rowT.events:null,sangkhathan:!!(rowT&&rowT.sangkhathan),
-      dress:a?{at:a.at,by:a.by}:null,ceremonySeat:Sx&&Sx.ready()?Sx.seatOf('ceremony',id):null,dinnerSeat:Sx&&Sx.ready()?Sx.seatOf('dinner',id):null,
-      ceremonySeatLabel:Sx&&Sx.ready()&&window.SIYL_SEATLABELS?SIYL_SEATLABELS.label(Sx.seatOf('ceremony',id)):null,dinnerSeatLabel:Sx&&Sx.ready()&&window.SIYL_SEATLABELS?SIYL_SEATLABELS.label(Sx.seatOf('dinner',id)):null,
-      contact:{email:G.contact('email'),phone:G.contact('phone')},allergy:{answer:G.allergy(),details:G.allergyDetails()},photo:!!G.photoAck(),
-      profile:(G.rec(id)||{}).profile||{},consent:(window.SIYL_DOCS&&SIYL_DOCS.consentDecided(id))?!!SIYL_DOCS.consent(id):null,documents:window.SIYL_DOCS?SIYL_DOCS.forGuest(id).map(function(d){return d.state}):[]}]}}
-function fingerprint(o){if(!o)return '';var c=JSON.parse(JSON.stringify(o));delete c.at;(c.guests||[]).forEach(function(g){delete g.ceremonySeat;delete g.dinnerSeat;delete g.ceremonySeatLabel;delete g.dinnerSeatLabel});return JSON.stringify(c)}
-function sentSnapshot(){try{return JSON.parse(localStorage.getItem('siyl.sent')||'null')}catch(e){return null}}
-function rememberSent(at){var o=snapshotNow();if(!o)return;o.at=at;try{localStorage.setItem('siyl.sent',JSON.stringify(o))}catch(e){}}
+/* SEND THE COPY AGAIN (PRQ-04-07): the guest's own copy only — the Guest Relations notification is the server's to retry */
+function retryCopy(){
+var rb=document.getElementById('mail-retry');if(rb)rb.disabled=true;
+mailNote='Sending your copy again…';paintState();
+fetch(RETRY_URL,{method:'POST',headers:{'content-type':'application/json','x-siyl-auth':bearer()},body:JSON.stringify({invitationId:invitationOf()})})
+  .then(function(r){return r.json()}).then(function(dd){
+    if(dd&&dd.error==='email required'){mailNote='Please add your email address, so we can send you a copy of your trip. <a class="p-link" href="invitation.html#p-email">Add your email address</a>';paintState();return}
+    mailNote=null;if(dd&&dd.mail)lastAnswer=Object.assign({},lastAnswer||{},{mail:dd.mail,submissionId:dd.submissionId});paintState()})
+  .catch(function(){mailNote='We could not send your copy just now — please try again in a moment. <button type="button" class="p-link" id="mail-retry">Send the copy again</button>';paintState()})}
 
-/* THE WAITING LIST on Review (Owner, 19 Sep 2026): a stage no room could take yet — named with its position, no amount */
+/* THE WAITING LIST on Review (Owner, 19 Sep 2026): a stage no room could take yet — the number only when it is known (CP-04) */
+var LONG={Jan:'January',Feb:'February',Mar:'March',Apr:'April',Sep:'September',Oct:'October',Nov:'November',Dec:'December'};
+function longWhen(t){return String(t||'').replace(/\b(Jan|Feb|Mar|Apr|Sep|Oct|Nov|Dec)\b/g,function(m){return LONG[m]})}
 function paintArranged(){var el=document.getElementById('arranged');if(!el)return;var U=window.SIYL_UNITS,J=window.SIYL_JOURNEY;if(!U||!U.ready||!U.ready()||!J){el.innerHTML='';return}
   var rows=J.SEGMENTS.filter(function(s){return J.relevant(s)&&J.state(s)==='waitlisted'});
-  el.innerHTML=rows.length?'<div class="p-card"><p class="t-l1 open">Waiting list</p>'+rows.map(function(s){var w=U.waitlisted(s.key);return '<p class="t-b1"><b>'+esc(s.when+' · '+s.place)+'</b> — number '+(w&&w.position||'?')+' on the waiting list'+(w&&w.size>1?' for '+w.size+' places':'')+' · no room yet, no cost until it is resolved</p>'}).join('')+'<p class="t-b2 measure-w">Guest Relations will find an arrangement with you. Your trip can be sent as it stands.</p></div>':''}
-function paintBlocks(){paintArranged();paintYou();paintAbout();paintWedding();paintDocs();paintReady();paintState();
+  el.innerHTML=rows.length?'<div class="p-card"><p class="t-l1 open">On the waiting list</p>'+rows.map(function(s){var w=U.waitlisted(s.key);return '<p class="t-b1"><b>'+esc(longWhen(s.when)+' · '+s.place)+'</b> — '+(w&&w.position?'number '+w.position+' on the waiting list':'on the waiting list')+(w&&w.size>1?', for '+w.size+' places together':'')+'. No room yet, and no cost.</p>'}).join('')+'<p class="t-b2 measure-w">We will tell you as soon as a place frees up, and Guest Relations will find an arrangement with you. You can send your trip as it is.</p></div>':''}
+
+/* A GUEST NOT JOINING THE TRIP (PRQ-04-09): Review is a reply — only Your details and the send area */
+function paintScope(){var nj=notJoining();['b2','b3','b6','b4','b5'].forEach(function(id){var el=document.getElementById(id);if(el)el.hidden=nj})}
+function paintBlocks(){paintScope();paintArranged();paintYou();paintAbout();paintWedding();paintDocs();paintReady();paintState();
   if(window.SIYL_PREP)SIYL_PREP.foot(document.getElementById('foot'))}
-document.addEventListener('siyl:confirm',function(){render();paintBlocks()});   /* the passes say Sent / Confirmed */
+document.addEventListener('siyl:confirm',function(){render();paintBlocks()});
+document.addEventListener('siyl:draft',function(){paintReady();paintState()});
 document.addEventListener('siyl:seats',paintBlocks);
 document.addEventListener('siyl:units',function(){render();paintBlocks()});
 if(window.SIYL_CONFIRM)SIYL_CONFIRM.load();
@@ -441,113 +442,127 @@ document.addEventListener('siyl:auth',paintBlocks);
 paintBlocks();
 render();
 
+/* THE COPY GUEST RELATIONS KEEPS WITH THE RECORD (internal: it travels with the send as `text`, never to the guest) */
 function buildText(auth){var b=SIYL_BAG.get(),G=window.SIYL_GUEST,ST=window.SIYL_STAY;
 var L=['SEE YOU IN LAOS — MY TRIP','Invitation: '+auth.invitationId+' · '+G.nameOf()+(auth.partyName?' · party: '+auth.partyName+' ('+auth.partyId+')':''),
 'Guest: '+G.nameOf()+' ('+auth.guestId+')',''];
 if(G.scopeAnswered&&G.scopeAnswered()){L.push('WHERE THEY JOIN US: '+(G.notJoining()?'NOT JOINING THIS TRIP':G.scopeWords().toUpperCase()),'')}
-L.push('WEDDING PROGRAMME (Sunday, 28 February 2027 · Vientiane):');
-if(window.SIYL_JOURNEY){SIYL_JOURNEY.WEDDING.forEach(function(w){
-L.push('- '+w.title+' · '+w.when+' · '+w.place+' · '+w.note.toUpperCase())})}
-L.push('','SELECTIONS (in the order the journey happens):');
+L.push('SELECTIONS (in date order):');
 (window.SIYL_JOURNEY?SIYL_JOURNEY.sorted(b):b)
 .filter(function(x){return !(window.SIYL_JOURNEY&&SIYL_JOURNEY.isWedding(x))})
 .forEach(function(x){var TP=window.SIYL_TRAVELPASS,pd=TP&&TP.isLeg(x.id)?TP.docFromPage(x.id):null;
 L.push('- '+x.name+' · '+(x.meta||'')+
 (pd?' · '+pd.leg.from.code+' '+pd.leg.from.time+' → '+pd.leg.to.code+' '+pd.leg.to.time+' · TRAVEL PASS '+pd.ref:'')+
 (x.unit?' · '+(x.unitName||('Room '+x.unit))+(ST?' ('+ST.unitWords(x)+')':''):'')+
-(x.rate!=null&&x.nights?' · USD '+x.rate+' per person / night · '+x.nights+(x.nights===1?' night':' nights'):'')+
-(x.note?' · '+x.note.toUpperCase()+(x.noteBy?' ('+x.noteBy+')':''):'')+
+(x.rate!=null&&x.nights?' · USD '+x.rate+' per person per night · '+x.nights+(x.nights===1?' night':' nights'):'')+
+(x.note?' · '+x.note+(x.noteBy?' ('+x.noteBy+')':''):'')+
 (x.request?' · RESTAURANT REQUEST (USD '+(x.price||0)+' per person; to be arranged through Guest Relations; not a reservation)':'')+
-(x.interest?' · INTEREST ONLY (not part of your total, payable at the spa)':' · USD '+(x.price||0)))});
+(x.interest?' · INTEREST ONLY (not part of the total, paid at the spa)':' · USD '+(x.price||0)+' '+perOf(x)))});
 if(window.SIYL_JOURNEY){var op=SIYL_JOURNEY.open(),sk=SIYL_JOURNEY.SEGMENTS.filter(function(g){return SIYL_JOURNEY.relevant(g)&&SIYL_JOURNEY.state(g)==='declined'}),wl=SIYL_JOURNEY.SEGMENTS.filter(function(g){return SIYL_JOURNEY.relevant(g)&&SIYL_JOURNEY.state(g)==='waitlisted'});
 if(wl.length){L.push('','WAITING LIST:');wl.forEach(function(g){var n=SIYL_JOURNEY.waitPosition(g);L.push('- '+g.when+' · '+g.cat+' · '+g.place+(n?' · number '+n:'')+' · no room yet, no cost until it is resolved')})}
-if(sk.length){L.push('','NOT JOINING:');sk.forEach(function(g){L.push('- '+g.when+' · '+g.cat+' · '+g.place)})}
+if(sk.length){L.push('','NOT NEEDED:');sk.forEach(function(g){L.push('- '+g.when+' · '+g.cat+' · '+g.place)})}
 if(op.length){L.push('','DECISION STILL OPEN:');op.forEach(function(g){L.push('- '+g.when+' · '+g.cat+' · '+g.place)})}}
 if(window.SIYL_TEMPLE){var t=SIYL_TEMPLE.operational();
 L.push('','WEDDING PARTICIPATION:');
 t.guests.forEach(function(g){
-  L.push('- '+g.name.toUpperCase()+':');
-  (SIYL_TEMPLE.EVENTS||[]).forEach(function(e){L.push('  · '+e.label+': '+g.events[e.key].toUpperCase())});
-  L.push('  · Sangkhathan: '+(g.sangkhathan?'TO PREPARE (USD 15)':g.sangkhathanState.toUpperCase()))});
+  L.push('- '+g.name+':');
+  (SIYL_TEMPLE.EVENTS||[]).forEach(function(e){L.push('  · '+e.label+': '+g.events[e.key])});
+  L.push('  · Sangkhathan: '+(g.sangkhathan?'Yes · USD 15':g.sangkhathanState))});
 L.push('- Sangkhathan eligibility: '+t.sangkhathanEligibility);
 L.push('- Morning alms-giving (Tak Bat): part of the Temple Ceremony for everyone joining it — a personal offering, arranged on the morning (no amount set)');
 L.push('- Sangkhathan offerings to prepare: '+t.offerings+(t.offerings?' (USD '+t.offeringsUsd+')':''))}
 var Sx=window.SIYL_SEATS,Lx=window.SIYL_SEATLABELS,id=auth.guestId;
 if(Sx&&Sx.ready()){var cs=Sx.seatOf('ceremony',id),ds=Sx.seatOf('dinner',id);
 L.push('','SEATS:');
-L.push('- Vow Ceremony (Souphattra Heritage, 15:30): '+(G.party().hosts?'FRONT CENTRE ('+(G.me().hostRole||'HOSTS')+')':cs?'seat '+Lx.label(cs):'none'));
-L.push('- Wedding Dinner: '+(ds?'seat '+Lx.label(ds):'none'))}
+L.push('- Vow Ceremony (Souphattra Heritage, 15:30): '+(G.party().hosts?'Front centre ('+(G.me().hostRole||'hosts')+')':cs?'seat '+Lx.label(cs):'none'));
+L.push('- Wedding Dinner: '+(ds?'seat '+(Lx.label(ds)||(Lx.retiredLabel?Lx.retiredLabel(ds):ds)):'none'))}
 if(window.SIYL_DOCS){var d=SIYL_DOCS.operational();
 if(d){L.push('','DOCUMENTS & PRIVACY (received only — nothing here is reviewed or verified):');
 d.guests.forEach(function(g){
-  g.documents.forEach(function(x){
-    L.push('- '+x.label+': '+x.state.toUpperCase()+(x.state!=='Not provided'?' ('+x.filename+', received '+when(x.receivedAt)+')':''))});
-  L.push('- Publication of photographs: '+g.publication.toUpperCase()+(g.publicationAt?' ('+when(g.publicationAt)+')':''))})}}
+  g.documents.forEach(function(x){var sw=window.SIYL_DOCS&&SIYL_DOCS.stateWords?(SIYL_DOCS.stateWords(x.state)||x.state):x.state;L.push('- '+x.label+': '+sw+(x.filename?' ('+x.filename+', received '+when(x.receivedAt)+')':''))});
+  L.push('- Publication of photographs: '+g.publication+(g.publicationAt?' ('+when(g.publicationAt)+')':''))})}}
 var gr=G.operational();
 if(gr){
   L.push('','GUEST:');
   L.push('- Name: '+(gr.guests[0].submitted.fullName||gr.guests[0].source.fullName)+(gr.guests[0].submitted.fullName&&gr.guests[0].submitted.fullName!==gr.guests[0].source.fullName?' (corrected; invitation had: '+gr.guests[0].source.fullName+')':''));
   L.push('- Contact: '+(gr.contact.email||'no email given')+' · '+(gr.contact.phone||'no telephone given'));
   L.push('- Party: '+(gr.party.names||'—'));
-  L.push('- Dress code: '+(gr.dress.all?'acknowledged '+when(gr.guests[0].dress.at):'NOT ACKNOWLEDGED'));
-  L.push('- Food allergies: '+(gr.allergy.answer==='no'?'NONE':gr.allergy.answer==='yes'?'YES — '+gr.allergy.details:'NOT ANSWERED'));
-  L.push('- Photography & film: '+(gr.photo?'acknowledged '+when(gr.photo.at):'NOT ACKNOWLEDGED'));
-  G.PROFILE.forEach(function(q){var v=gr.guests[0].profile[q.key];if(v)L.push('- '+q.q+': '+v)})}
-L.push('','YOUR COST: USD '+SIYL_BAG.total().toLocaleString('en-US'));
+  L.push('- Dress code: '+(gr.dress.all?'acknowledged '+when(gr.guests[0].dress.at):'not acknowledged'));
+  L.push('- Food allergies: '+(gr.allergy.answer==='no'?'none':gr.allergy.answer==='yes'?'yes — '+gr.allergy.details:'not answered'));
+  L.push('- Photography & film: '+(gr.photo?'acknowledged '+when(gr.photo.at):'not acknowledged'));
+  G.PROFILE.forEach(function(q){var v=gr.guests[0].profile[q.key];if(v&&(!Array.isArray(v)||v.length))L.push('- '+(q.label||q.q)+': '+display(v))})}
+L.push('','TOTAL: USD '+SIYL_BAG.total().toLocaleString('en-US'));
 L.push('Note: Tak Bat (morning alms-giving) is part of the Temple Ceremony and a personal offering. The Sangkhathan is a separate optional personal offering.');
-L.push('Sent via Review & Send · '+when(new Date().toISOString()));
 return L.join('\n')}
+
+/* THE EMAILED TRIP (PRQ-04-22 · TO-01807): when the website cannot send, the guest's own email — in the guest's voice, in
+ * date order, no internal id, no shouting capitals */
+function buildMailto(){var G=window.SIYL_GUEST,J=window.SIYL_JOURNEY,T=window.SIYL_TEMPLE,Sx=window.SIYL_SEATS,Lx=window.SIYL_SEATLABELS,Dc=window.SIYL_DOCS,ST=window.SIYL_STAY;
+var me=G.me(),name=G.nameOf(),b=SIYL_BAG.get(),nj=notJoining();
+var L=['Dear Guest Relations,',(nj?'here is my reply':'here is my trip')+', sent by email because the website could not send it just now.',''];
+var em=G.contact('email'),ph=G.contact('phone');
+L.push('Name: '+(G.value(me.guestId,'fullName')||me.fullName)+(em?' · Email: '+em:'')+(ph?' · Mobile: '+ph:''));
+if(G.scopeAnswered&&G.scopeAnswered())L.push('Where I join you: '+(nj?'I cannot join this time':G.scopeWords()));
+if(!nj){
+  L.push('','My trip, in date order:');
+  var lines=(J?J.sorted(b):b).filter(function(x){return !(J&&J.isWedding(x))});
+  if(!lines.length)L.push('· Nothing in My Bag');
+  lines.forEach(function(x){var unit=ST&&x.room&&!x.interest&&ST.unitOf?ST.unitOf(x):null,ro=unit&&ST.roomOf?ST.roomOf(x):null;
+    L.push('· '+x.name+(x.meta?' · '+x.meta:'')+(ro&&ro.unit?' · held for me in '+ro.unit:'')+(x.request?' · request — please confirm the table':'')+(x.interest?' · spa interest — paid at the spa':x.complimentary?' · Complimentary':' · USD '+(x.price||0).toLocaleString('en-US')+' '+perOf(x)))});
+  if(J){var wl=J.SEGMENTS.filter(function(g){return J.relevant(g)&&J.state(g)==='waitlisted'}),sk=J.SEGMENTS.filter(function(g){return J.relevant(g)&&J.state(g)==='declined'});
+    wl.forEach(function(g){var n=J.waitPosition(g);L.push('On the waiting list: '+g.place+(n?' — number '+n:''))});
+    if(sk.length)L.push('Not joining: '+sk.map(function(g){return g.place+' ('+longWhen(g.when)+')'}).join(', '))}
+  var op=T?T.operational():null,g=op&&op.guests[0];
+  if(g&&G.joins&&(G.joins('vientianeWedding')||G.party().hosts)){
+    var lower=function(v){return v==='Not decided'?'not answered yet':String(v||'').toLowerCase()};
+    L.push('','The wedding (Sunday, 28 February 2027):');
+    L.push('· '+(T.EVENTS||[]).map(function(e){return e.label+': '+lower(g.events[e.key])}).join(' · '));
+    if(g.sangkhathan)L.push('· Sangkhathan: yes, USD 15');else if(g.sangkhathanState==='Not selected')L.push('· Sangkhathan: no');
+    if(Sx&&Sx.ready()){var cs=Sx.seatOf('ceremony',me.guestId),ds=Sx.seatOf('dinner',me.guestId),seats=[];
+      if(G.party().hosts)seats.push('Vow Ceremony front centre');else if(cs)seats.push('Vow Ceremony '+Lx.label(cs));
+      if(ds)seats.push('Wedding Dinner '+(Lx.label(ds)||(Lx.retiredLabel?Lx.retiredLabel(ds):'')));
+      if(seats.length)L.push('· My seats: '+seats.join(', '))}
+  }else L.push('','I am not joining you for the wedding in Vientiane.');
+  var a=G.allergy(),about=['food allergies '+(a==='no'?'none':a==='yes'?(G.allergyDetails()||'yes'):'not answered yet')];
+  if(G.dressAck())about.push('dress code acknowledged');
+  if(G.photoAck())about.push('photography & film acknowledged');
+  L.push('','About me: '+about.join(' · '));
+  if(Dc){var docs=Dc.forGuest(me.guestId).map(function(d){var k=Dc.stateKey?Dc.stateKey(me.guestId,d.kind):d.state;return d.label.toLowerCase()+(k==='received'?' added':' not added yet')});if(docs.length)L.push('Documents: '+docs.join(', ')+' (optional)')}
+  L.push('','My total: USD '+SIYL_BAG.total().toLocaleString('en-US')+' — nothing paid on the website.')}
+L.push('','With thanks,',name);
+return 'mailto:'+GR+'?subject='+encodeURIComponent('My trip — '+name)+'&body='+encodeURIComponent(L.join('\n'))}
 
 function gated(fn){if(window.SIYL_INVITE){SIYL_INVITE.require(fn)}
 else document.addEventListener('siyl:invite-ready',function(){SIYL_INVITE.require(fn)},{once:true})}
 
+/* SEND — ONE PATH (CP-01 · PRQ-02-01): SIYL_DRAFT.send for a trip, SIYL_DRAFT.sendReply for a decline; the draft is flushed
+ * first (what is sent is what is saved). Each refusal has its own words (PRQ-04-08). */
 document.getElementById('send').addEventListener('click',function(){
-var G=window.SIYL_GUEST;
-if(this.getAttribute('aria-disabled')==='true')return;   /* already sent, nothing changed since */
+var G=window.SIYL_GUEST,d=D();
+if(d&&d.sending&&d.sending())return;
 if(!G||!G.party()||!G.readiness().ok){blockSend();return}
-gated(async function(auth){
-var btn=document.getElementById('send'),err=document.getElementById('err');
-btn.disabled=true;err.textContent='';
-/* the complete draft reaches the server first (Owner, 16 Sep 2026): what is sent is what is saved */
-if(window.SIYL_DRAFT){var fl=await SIYL_DRAFT.flush('send');if(!fl||!fl.ok){btn.disabled=false;err.textContent='Your trip could not be saved just now — please try again in a moment.';return}}
-var text=buildText(auth);
-var U=window.SIYL_UNITS,rooms=U&&U.view()?U.view().mine:null;
-var registration={channel:'journey-shop',guestId:auth.guestId,partyId:auth.partyId||null,selections:SIYL_BAG.get(),totalUsd:SIYL_BAG.total(),
-contact:{email:G.contact('email'),phone:G.contact('phone')},
-templeCeremony:window.SIYL_TEMPLE?SIYL_TEMPLE.operational():null,
-guestRecord:G.operational(),
-/* THE ONE VALIDATOR (Owner, 21 Sep 2026): every stage's state as this device knows it — the server re-derives the answer from its own holds, waiting list and seats and refuses an incomplete trip */
-stages:window.SIYL_JOURNEY&&SIYL_JOURNEY.states?SIYL_JOURNEY.states():null,
-waitlist:U&&U.view()?(U.view().waitlist||null):null,
-documents:window.SIYL_DOCS?SIYL_DOCS.operational():null,
-seats:window.SIYL_SEATS&&SIYL_SEATS.ready()?SIYL_SEATS.mine():null,
-rooms:rooms,
-inventory:rooms?'HELD — places held in your name, not yet confirmed':'UNKNOWN — rooms not read on this device',
-registration_submitted_at:new Date().toISOString()};
-try{
-var r=await fetch(SUBMIT_URL,{method:'POST',headers:{'content-type':'application/json','x-siyl-auth':bearer()},
-body:JSON.stringify({registration:registration,invitationId:auth.invitationId,text:text})});
-if(r.ok){
-var ans=null;try{ans=await r.json()}catch(e0){}
-var at=(ans&&ans.submittedAt)||registration.registration_submitted_at;
-rememberSent(at);
-paintMail(ans&&ans.mail,ans&&ans.submissionId,ans);
-if(window.SIYL_CONFIRM)SIYL_CONFIRM.noteReceived(at);
-btn.disabled=false;paintSend('sent',(ans&&ans.lastSentAt)||at);
-var d=document.getElementById('donebox');d.hidden=false;
-document.getElementById('donemsg').textContent=(ans&&ans.kind==='update')?'We have your updated trip — it replaces the earlier version. Guest Relations will review the changes personally. Nothing is confirmed yet; we will confirm each arrangement with you once it is ready.':'We have your trip. Guest Relations will review your selections personally. Nothing is confirmed yet; we will confirm each arrangement with you once it is ready.';
-if(window.SIYL_DRAFT){SIYL_DRAFT.flush('auto').then(function(){SIYL_DRAFT.refresh()})}
-document.getElementById('sent').classList.add('p-reveal');
-document.getElementById('sent').scrollIntoView({behavior:'smooth',block:'center'});
-try{document.getElementById('sent').setAttribute('tabindex','-1');document.getElementById('sent').focus({preventScroll:true})}catch(e1){}
-wireAgain();
-return}
-if(r.status===422){var inc=null;try{inc=await r.json()}catch(e2){}var m0=inc&&inc.missing&&inc.missing[0];btn.disabled=false;err.innerHTML='Your trip is not complete yet'+(m0?': '+esc(m0.label)+(m0.href?' <a class="p-link" href="'+esc(m0.href)+'" style="margin-left:8px">Complete this</a>':''):'. Please open My Trip and answer every stage of it.');paintReady();return}
-if(r.status===401){btn.disabled=false;err.innerHTML='Your invitation could not be verified. Please open your invitation once more with your code, then send again.';return}
-if(r.status===422){var e422=null;try{e422=await r.json()}catch(e2){}btn.disabled=false;err.innerHTML=esc((e422&&e422.message)||'Please add your email address so we can send your confirmation.')+' <a class="p-link" href="invitation.html#p-email" style="margin-left:8px">Add your email address</a>';try{err.scrollIntoView({behavior:'smooth',block:'center'})}catch(e3){}return}
-}catch(e){/* endpoint unreachable — emergency channel below */}
-btn.disabled=false;
-err.innerHTML='Your selection could not be stored right now. Please try again in a moment, or use the email backup channel: <a href="mailto:guest.relation.seeyouinlaos@gmail.com?subject='+encodeURIComponent('My Trip — '+G.nameOf())+'&body='+encodeURIComponent(text)+'" style="color:#313131">send via email</a>.'})});
+gated(function(auth){
+var err=document.getElementById('err');
+err.textContent='';
+if(!d||!d.send){err.textContent='We could not save your trip just now, so nothing was sent. Please try again in a moment.';return}
+var nj=notJoining();
+var p=nj&&d.sendReply?d.sendReply():d.send({registration:d.registration?d.registration():null,text:buildText(auth)});
+paintButton();
+p.then(function(r){
+  paintButton();
+  if(r&&r.ok){
+    lastAnswer=r.answer||null;mailNote=null;
+    paintReady();paintState();
+    var box=document.getElementById('journeystate');
+    if(box){box.classList.add('p-reveal');try{box.scrollIntoView({behavior:'smooth',block:'center'});box.focus({preventScroll:true})}catch(e1){}}
+    return}
+  var e=r&&r.error;
+  if(e==='not saved'){err.textContent='We could not save your trip just now, so nothing was sent. Please try again in a moment.';return}
+  if(e==='email required'){err.innerHTML=esc(r.message||'Please add your email address, so we can send you a copy of your trip.')+' <a class="p-link" href="invitation.html#p-email" style="margin-left:8px">Add your email address</a>';try{err.scrollIntoView({behavior:'smooth',block:'center'})}catch(e3){}return}
+  if(e==='incomplete'){var m0=r.missing&&r.missing[0];err.innerHTML=m0?'Still needed before you send: '+esc(m0.label)+'.'+(m0.href?' <a class="p-link" href="'+esc(m0.href)+'" style="margin-left:8px">Complete this</a>':''):'Something is still needed before you send — please open My Trip and answer each part you are joining.';paintReady();return}
+  if(e==='unauthorised'){err.textContent='We need to open your invitation once more before sending. Please sign in again with your code — your choices stay as they are.';return}
+  if(e==='session changed'){paintBlocks();return}
+  err.innerHTML='We could not send your trip just now. Your choices are saved — please try again in a moment, or <a class="p-link" href="'+esc(buildMailto())+'">email your trip to Guest Relations</a> instead.'})})});
 if(window.SIYL_BAG&&SIYL_BAG.bar)SIYL_BAG.bar();
 </script>
 </body></html>

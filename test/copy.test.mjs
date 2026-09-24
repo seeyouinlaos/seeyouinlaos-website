@@ -52,7 +52,10 @@ test('COPY · the emails speak of the guest\'s trip, carry the one Worker link a
     templeCeremony: { guests: [{ guestId: 'G777', events: { temple: 'Joining', coffee: 'Joining', vows: 'Joining', dinner: 'Joining' } }] }, guestRecord: { partyName: 'Sam & Alex', guests: [{ guestId: 'G777', name: 'Sam', source: { fullName: 'Sam Example', preferredName: 'Sam' } }] }, documents: { guests: [] }, seats: {} };
   const rec = (extra) => ({ invitationId: 'INV-G777', guestId: 'G777', submissionId: 'SYL-G777-34DBEFD3', registration: REG, recipient: { email: 'sam.example@example.org' }, rooms: {}, kind: 'initial', version: 1, submittedAt: '2026-09-16T17:52:41.404Z', lastSentAt: '2026-09-16T17:52:41.696Z', firstSentAt: '2026-09-16T17:52:41.404Z', ...(extra || {}) });
   const g = composeGuestMail(rec()), u = composeGuestMail(rec({ kind: 'update', version: 2 })), o = composeOwnerMail(rec(), SITE + '/register-landing.html');
-  assert.equal(g.subject, 'Your trip has been received — SYL-G777-34DBEFD3'); assert.equal(u.subject, 'Your trip has been updated — SYL-G777-34DBEFD3'); assert.equal(o.subject, 'Trip received — Sam Example · SYL-G777-34DBEFD3');
+  assert.equal(g.subject, 'Thank you — we have your trip (SYL-G777-34DBEFD3)'); assert.equal(u.subject, 'Thank you — we have your update (SYL-G777-34DBEFD3)'); /* TO-01864 / TO-01865 */
+  /* a decline is sent too, and answered in its own words (TO-01864 · TO-01868) */
+  const d = composeGuestMail(rec({ registration: { ...REG, guestRecord: { ...REG.guestRecord, scope: { none: true } } } }));
+  assert.equal(d.subject, 'Thank you for letting us know'); assert.match(d.text, /Thank you for letting us know/); assert.doesNotMatch(d.subject, /we have your trip/); assert.equal(o.subject, 'Trip received — Sam Example · SYL-G777-34DBEFD3');
   for (const m of [g, u]) { for (const body of [m.html, m.text]) { assert.doesNotMatch(body, /journey/i, 'no journey label in the guest email'); assert.match(body, /Open My Trip/); assert.match(body, new RegExp(SITE.replace(/[.\/]/g, '\\$&') + '\\/invitation')); } }
   assert.match(o.text, /^SEE YOU IN LAOS — GUEST RELATIONS\n\nNew trip received\n\nGuest: Sam Example\n/); assert.doesNotMatch(o.text.split('INTERNAL REFERENCE')[0], /(^|[^-A-Z0-9])G777(?![-A-Z0-9])/m, 'the guest id lives in the internal section only (the reference SYL-G777-… is not the id)');
 });

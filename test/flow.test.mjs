@@ -19,7 +19,8 @@ const stepOf = (G, key) => G.steps().find((s) => s.key === key);
 /* STEP 01 REQUIRED FIELDS (Owner, 24 Sep 2026): synthetic personal details — every required field except the ones named */
 const PERSONAL_OK = { birthdate: '1990-01-01', nationality: 'Testland', address1: '1 Test Street', postal: '10000', city: 'Testcity', country: 'Testland' };
 const fillPersonal = (G, except = []) => Object.entries(PERSONAL_OK).forEach(([k, v]) => { if (!except.includes(k)) G.setContact(k, v); });
-const identity = (s) => ({ invitationId: s.invitationId, guestId: s.guestId, partyId: s.partyId, hosts: !!s.hosts });
+/* the verified identity as the Worker hands it to the engine — with the holder's first name (PRQ-GAP-02) */
+const identity = (s) => ({ invitationId: s.invitationId, guestId: s.guestId, partyId: s.partyId, hosts: !!s.hosts, firstName: s.preferredName });
 
 /* a page with a live (in-memory) room engine behind fetch */
 async function livePage(auth, rooms, seed) {
@@ -67,7 +68,7 @@ test('FLOW · steps are sequential: 02 is locked until 01 is complete, 06 until 
   assert.equal(G.done('you'), false, 'a blank country is not an answer');
   G.setContact('country', 'Testland');
   G.setContact('birthdate', '1990-02-30');
-  deq(G.missingFor('you').map((m) => [m.key, m.label]), [['birthdate', 'Date of Birth (a valid date)']], 'the date of birth must be a real date');
+  deq(G.missingFor('you').map((m) => [m.key, m.label]), [['birthdate', 'Date of birth — please check it']], 'the date of birth must be a real date (TO-00143)');
   assert.equal(G.mayEnter('journey'), false);
   G.setContact('birthdate', '1990-01-01');
   /* First Name / Last Name: the invitation's name counts (nameField) */
@@ -77,9 +78,9 @@ test('FLOW · steps are sequential: 02 is locked until 01 is complete, 06 until 
   assert.equal(G.done('you'), true, 'an empty address2 / region never blocks');
   assert.equal(G.mayEnter('journey'), true); assert.equal(G.mayEnter('wedding'), false);
   assert.equal(stepOf(G, 'you').stateLabel, '✓ Complete');
-  assert.equal(stepOf(G, 'journey').stateLabel, 'Needs attention');
-  assert.equal(stepOf(G, 'wedding').stateLabel, 'Locked');
-  assert.deepEqual(Object.values(G.STATE_LABEL), ['✓ Complete', 'Current', 'Needs attention', 'Locked', 'Not joining'], 'five states, no generic OPEN — Not joining for a step outside the guest\'s scope');
+  assert.equal(stepOf(G, 'journey').stateLabel, 'Still to complete');
+  assert.equal(stepOf(G, 'wedding').stateLabel, 'Opens later');
+  assert.deepEqual(plain(G.STATE_LABEL), { complete: '✓ Complete', current: 'You are here', attention: 'Still to complete', locked: 'Opens later', na: 'Not joining', ready: 'Ready to send' }, 'no generic OPEN — Not joining for a step outside the guest\'s scope; step 06 “Ready to send” once it may be sent (TO-00252/253/254 · PRQ-01-18)');
 });
 
 test('FLOW · step 02 needs every stage answered AND a place in every chosen room; a declined stage is an answer', async () => {
@@ -110,13 +111,18 @@ test('FLOW · step 02 needs every stage answered AND a place in every chosen roo
 test('FLOW · step 03 is every event, and the Sangkhathan while attending the temple; 04 is the dress code and the seats of the events attended', () => {
   const w = page({ auth: PEGGY });
   const G = w.SIYL_GUEST, T = w.SIYL_TEMPLE, id = 'g-peggy';
-  deq(G.missingFor('wedding').map((m) => m.href), ['wedding.html#ev-temple', 'wedding.html#ev-coffee', 'wedding.html#ev-vows', 'wedding.html#ev-dinner', 'wedding.html#finale'], 'the four events and A WISH FROM THE BRIDE & GROOM (22 Sep 2026)');
+  deq(G.missingFor('wedding').map((m) => m.href), ['wedding.html#ev-temple', 'wedding.html#ev-coffee', 'wedding.html#ev-vows', 'wedding.html#ev-dinner'], 'the four events — A WISH FROM THE BRIDE & GROOM is asked only once the dinner is answered yes (PRQ-05-01 / OQ-34)');
   T.setAttendance(id, 'yes'); ['coffee', 'vows', 'dinner'].forEach((k) => T.setEvent(id, k, 'yes'));
   deq(G.missingFor('wedding').map((m) => m.href), ['wedding.html#sangkhathan', 'wedding.html#finale'], 'attending the temple, the Sangkhathan is a required yes/no; the final act stays required');
   T.setOffering(id, 'no');
   assert.equal(G.done('wedding'), false, 'the final act is never defaulted');
   assert.equal(T.finaleOf(id), null); T.setFinale(id, 'baron'); assert.equal(T.finaleOf(id), 'baron');
   assert.equal(G.done('wedding'), true);
+  /* not at the dinner: the finale is neither asked nor sent — an answer given earlier is ignored (PRQ-05-01) */
+  T.setEvent(id, 'dinner', 'no');
+  deq(G.missingFor('wedding').map((m) => m.href), []); { const row = T.operational().guests.find((g) => g.guestId === id); assert.equal(row.finale, 'Not applicable'); assert.equal(row.finaleKey, null); }
+  T.setEvent(id, 'dinner', 'yes'); T.setFinale(id, null); deq(G.missingFor('wedding').map((m) => m.href), ['wedding.html#finale'], 'back at the dinner: the finale is asked again');
+  T.setFinale(id, 'baron');
   T.setAttendance(id, 'no');
   assert.equal(G.done('wedding'), true, 'not attending: nothing to decide');
   deq(G.missingFor('preparation').map((m) => m.href), ['wedding-preparation.html#ack'], 'seats are asked only while seating is open');
@@ -134,7 +140,7 @@ test('FLOW · step 05: allergy NO completes; YES needs details; every visible qu
   G.setAllergy('yes', 'peanuts');
   deq(G.missingFor('about').map((m) => m.key), [...QS, 'photo']);
   /* each unanswered question is named exactly, with the way to its box; an empty or blank answer never counts */
-  deq(G.missingFor('about')[0], { key: 'profile:coffeetea', label: '02 · Coffee or tea', href: 'about-you.html#q-coffeetea' });
+  deq(G.missingFor('about')[0], { key: 'profile:coffeetea', label: 'Coffee or tea', href: 'about-you.html#q-coffeetea' }); /* one short label, no question number (PRQ-06-01 · TO-02339) */
   G.setProfile('g-peggy', 'coffeetea', '   ');
   assert.equal(G.missingFor('about')[0].key, 'profile:coffeetea', 'blank is not an answer');
   G.setProfile('g-peggy', 'coffeetea', 'Tea, black');
@@ -161,14 +167,14 @@ test('FLOW · step 05: allergy NO completes; YES needs details; every visible qu
     assert.doesNotMatch(s, /Travel comfort|Anything else we should know|Accessibility (&|&amp;|or) comfort|Nothing here needs a tick/, f);
     assert.doesNotMatch(s, /key: 'comfort'|key: 'anything'|key: 'access'/, f);
   }
-  assert.match(src('assets/guest.js'), /I understand and acknowledge this\./); assert.match(src('about-you.html'), /G\.PHOTO_TEXT/);
-  assert.match(src('about-you.html'), /Optional · not added/, 'documents stay optional');
+  assert.match(src('assets/guest.js'), /var PHOTO_TEXT = 'I understand that I may be photographed and filmed during the wedding\.';/); assert.match(src('about-you.html'), /G\.PHOTO_TEXT/); /* TO-00132 */
+  assert.match(src('about-you.html'), /Add them whenever they are ready — you can send your trip without them\./, 'documents stay optional (the “Optional · not added” marker is gone)'); assert.doesNotMatch(src('about-you.html'), /Optional · not added/);
   /* the label of a question is the schema's word (22 Sep 2026): Required on a required question, Optional only on the optional song line */
   const about = src('about-you.html');
   assert.doesNotMatch(about, /q\.n\+' · Optional'|<p class="t-l1">Optional<\/p><h2 class="t-h2">A little more/);
   assert.match(about, /aria-required="'\+\(q\.required\?'true':'false'\)\+'" aria-invalid="'\+\(ok\|\|!q\.required\?'false':'true'\)\+'"/);
-  assert.match(about, /Complete':\(q\.required\?'Required':'Optional'\)/);
-  assert.match(src('src/questionnaire.js'), /\{ key: 'flavor', n: '03', q: 'My Favorite Flavor', hint: 'Choose one\.', required: true, type: 'choice', choices: \['Coffee', 'Milk', 'Butter', 'Pandan', 'Matcha Green Tea', 'Strawberry Milk'\] \}/);
+  assert.match(about, /data-q-state="'\+q\.key\+'">'\+q\.n\+' · '\+\(q\.required\?'Required':'Optional'\)\+'<\/p>/, 'a static marker, never repainted on answering (PRQ-06-04)');
+  assert.match(src('src/questionnaire.js'), /\{ key: 'flavor', n: '03', q: 'My favourite flavour', label: 'My favourite flavour', hint: 'Choose one\.', required: true, type: 'choice', choices: \['Coffee', 'Milk', 'Butter', 'Pandan', 'Matcha Green Tea', 'Strawberry Milk'\] \}/);
   assert.match(src('assets/guest.js'), /var ALLERGY = Q\.ALLERGY, PROFILE = Q\.PROFILE, FINALE = Q\.FINALE;/, 'guest.js reads the one schema');
   /* Review names an unanswered question with the way to it */
   assert.match(src('review.html'), /about-you\.html#q-'\+q\.key/);
@@ -216,6 +222,10 @@ test('PRICING · one guest, one price: Sangkhathan USD 15 for this guest only, n
   assert.equal(T.offeringOf_('g-peggy'), null, 'not attending: the offering goes, and is asked again on return');
   assert.equal(B.has('sangkhathan'), false);
   assert.equal(P.FLAT.train.price, 100); assert.match(P.FLAT.train.basis, /USD 100 per person/);
+  /* the Souphattra Presidential (Owner, 24 Sep 2026): USD 750 per person per night — pre-wedding USD 1,500 per person for the 2 nights; the Wedding Stay pays its first night only */
+  { const pre = P.quote('prewed', 'souphattra-presidential'), wed = P.quote('wedstay', 'souphattra-presidential');
+    assert.equal(pre.rate, 750); assert.equal(pre.total, 1500); assert.equal(pre.amount, 'USD 1,500'); assert.equal(pre.nightly, 'USD 750 per person per night');
+    assert.equal(wed.rate, 750); assert.equal(wed.pay, 1); assert.equal(wed.hosted, 1); assert.equal(wed.total, 750); }
   assert.equal(P.FLAT.suhring.price, 294); assert.equal(P.FLAT.baanphraya.price, 114); assert.equal(P.FLAT.cannubi.price, 165); assert.equal(P.FLAT.sangkhathan.price, 15);
   P.items('train').forEach((it) => { it.qty = 1; B.put(it); });
   assert.equal(B.total(), 100);
@@ -228,7 +238,7 @@ test('PRICING · one guest, one price: Sangkhathan USD 15 for this guest only, n
 test('PRICING · the total is one number on every surface: sticky bar, cart, Your Journey, Review & Send, the sent text', () => {
   for (const f of ['cart.html', 'your-journey.html', 'review.html']) assert.match(src(f), /(SIYL_BAG|B)\.total\(\)/, f + ' reads the one total');
   assert.match(src('assets/bag.js'), /B\.money\(B\.total\(\)\)/);
-  assert.match(src('review.html'), /'YOUR COST: USD '\+SIYL_BAG\.total\(\)/);
+  assert.match(src('review.html'), /L\.push\('','TOTAL: USD '\+SIYL_BAG\.total\(\)\.toLocaleString\('en-US'\)\);/); assert.match(src('review.html'), /L\.push\('','My total: USD '\+SIYL_BAG\.total\(\)\.toLocaleString\('en-US'\)\+' — nothing paid on the website\.'\)/); /* Window 007: the internal text and the guest's own copy */
   assert.doesNotMatch(src('cart.html') + src('review.html') + src('assets/bag.js'), /checkout/i, 'never a checkout');
   const w = page({ auth: PEGGY });
   const B = w.SIYL_BAG, P = w.SIYL_PRICE;
@@ -247,9 +257,9 @@ test('CART · the navigation matrix: bag icon → cart; cart → Your Journey / 
     assert.doesNotMatch(src(f), /<a class="bag" href="your-journey\.html"/, f);
   }
   const c = src('cart.html');
-  assert.match(c, /Your bag is empty/); assert.match(c, /No selections yet · USD 0/); assert.match(c, /href="your-journey\.html">Open My Trip</);
-  assert.match(c, /Review (&amp;|&) Send/); assert.match(c, /Not ready for Review &amp; Send yet/); assert.match(c, /Complete this/);
-  assert.match(c, /ready\.ok\?'review\.html':\(first\?first\.href/);
+  assert.match(c, /<h2 class="t-h1">Nothing chosen yet · USD 0<\/h2>/); assert.doesNotMatch(c, /Your bag is empty|No selections yet/); assert.match(c, /href="your-journey\.html">Open My Trip</); /* TO-01632 · TO-01633 */
+  assert.match(c, /Review (&amp;|&) Send/); assert.match(c, /<p class="t-l1 open">Before you send<\/p>/); assert.match(c, /Complete this/); /* TO-01636 */
+  assert.match(c, /\(ready\.ok\?'<div class="p-actions" style="margin-top:var\(--s4\)"><a class="p-act" href="review\.html">Review &amp; Send<\/a><\/div>'/); assert.match(c, /<a class="p-act quiet" href="'\+first\.href\+'">Complete this<\/a>/, 'not ready: the first missing item with its control');
   assert.match(c, /journeys\.html\?change='\+P\.windowOf\(x\.id\)\+'#j-'/, 'accommodation CHANGE → the exact stay selector');
   assert.match(c, /wedding\.html#sangkhathan/, 'Sangkhathan CHANGE → the exact decision');
   assert.match(c, /'your-journey\.html#s-'\+seg\.key/, 'transport CHANGE → the exact section');
@@ -282,7 +292,7 @@ test('CART · one guest sees only their own cart; remove updates the authoritati
   assert.equal(w2.SIYL_BAG.get().length, 1, 'his cart is his own');
   assert.equal(w2.SIYL_BAG.total(), P.quote('wedstay', 'souphattra-presidential').total);
   await w.SIYL_UNITS.load(true);
-  assert.equal(ST.unitWords(ST.line('wedstay')), 'Room A · You · Suthep · Full');
+  assert.equal(ST.unitWords(ST.line('wedstay')), 'Room A · you and Suthep · full'); /* TO-01214: names joined with “and”, lower-case state */
   /* Haruthai removes her stay: the place is released, the stage needs attention */
   await ST.remove('wedstay');
   assert.equal(B.get().length, 2);

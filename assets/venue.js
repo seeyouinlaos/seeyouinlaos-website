@@ -124,7 +124,7 @@
         '<figure class="venue-stage" data-motion="stage" data-active="" aria-describedby="venue-stage-desc">' +
           baseHtml(data.base) +
           '<div class="venue-layer" data-layer></div>' +
-          '<figcaption class="venue-cap">' + esc(data.name) + ' from above · the real photograph · the labels on the real places</figcaption>' +
+          '<figcaption class="venue-cap">' + esc(data.name) + ' from above</figcaption>' +
           '<p class="vh" id="venue-stage-desc">On the photograph: ' + placed.map(function (z) { return z.label; }).join(', ') + '. Every place of the venue is listed below.</p>' +
         '</figure>' +
         '<div class="venue-side">' +

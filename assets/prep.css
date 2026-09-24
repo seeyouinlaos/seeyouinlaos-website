@@ -1024,3 +1024,12 @@ body.seatbar-on .prep-foot .prep-foot-note { display: none; }
   .p-sel, .p-link, .pf-card, .prep-srow { transition: none; }
   .p-act:not(.quiet)::after { transition: none; opacity: 1; }
 }
+
+/* ── Window 007 (24 Sep 2026) — rules moved out of the pages (gate P10: no page-local CSS) ── */
+/* ONE QUIET MARKER (NEW-01): its own element, the same size and place on every field — never glued to the label with a middle dot */
+.p-field>label.p-lab{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.p-mark{flex:none;font-size:9.5px;letter-spacing:1.4px;color:#6B6964;font-weight:300}
+/* a chosen value is printed in its own case (PRQ-06-07: “’90s”, “Matcha green tea” — never “’90S”) */
+#about-you .p-choice .p-sel{text-transform:none;letter-spacing:.3px;font-size:13px}
+/* PRQ-04-20: below 480 px a long amount (“USD 0 · Complimentary”, “Not in your total”) takes its own row under the line body */
+@media (max-width:479px){#items .p-line,.cart-line .p-line{flex-wrap:wrap}#items .p-line-amt,.cart-line .p-line-amt{flex-basis:calc(100% - 72px - var(--s4,16px));max-width:calc(100% - 72px - var(--s4,16px));margin-left:calc(72px + var(--s4,16px));text-align:left;white-space:normal}#items .p-line-amt .t-l1,.cart-line .p-line-amt .t-l1{text-align:left}}

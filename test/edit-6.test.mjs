@@ -74,7 +74,7 @@ test('WAT ONG TEU · the replacement pictures of Drive folder 195, the façade f
   for (const i of g.images) assert.ok(exists(i.src), i.src);
   const x = browser('assets/experiences.js').SIYL_EXPERIENCES || null;
   const src = read('assets/experiences.js');
-  assert.match(src, /id: 'vte-ongteu'[^\n]*visits: \[\{ day: 8, date: '2027-02-28', seq: 900, what: 'Alms Giving Ceremony' \}\]/);
+  assert.match(src, /id: 'vte-ongteu'[^\n]*visits: \[\{ day: 8, date: '2027-02-28', seq: 900, what: 'Temple Ceremony' \}\]/); /* TO-02979: the date unchanged, the approved name */
   assert.match(src, /id: 'vte-ongteu'[^\n]*img: 'assets\/images\/experiences\/vte-ongteu-01\.jpg'/);
   void x;
 });
@@ -82,8 +82,8 @@ test('WAT ONG TEU · the replacement pictures of Drive folder 195, the façade f
 test('LAO TRADITIONAL DRESS RENTAL · a Vientiane experience in the Operations Master\'s own words, price and hours', () => {
   const src = read('assets/experiences.js');
   assert.match(src, /\{ id: 'vte-laodress', category: 'experience', roles: \['experience'\], visits: \[\], row: 'city', chapter: 'laos'[^\n]*name: 'Lao Traditional Dress Rental', where: 'Vientiane'/);
-  assert.match(src, /practical: \{ price: 'USD 15\.00', hours: \['Everyday 09:00 – 18:00'\] \}/);
-  assert.match(src, /Please note: Guests are kindly asked to bring their own footwear\. The rental service will provide the traditional shirt, sinh or trousers, and accessories only\./);
+  assert.match(src, /practical: \{ price: 'USD 15', hours: \['Every day 09:00 – 18:00'\] \}/); /* TO-02994 · TO-02993 */
+  assert.ok(src.includes('Please bring your own footwear: the rental provides the traditional shirt, the sinh or trousers, and the accessories only.'), 'TO-02992');
   const g = JSON.parse(read('src/experience-galleries.json'))['vte-laodress'];
   assert.equal(g.folderId, '1YzeS_UGJJeTNMXS2mgRhqC9ZToc5xtxZ');
   assert.equal(g.images.length, 6);

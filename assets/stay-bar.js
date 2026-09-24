@@ -7,9 +7,9 @@
    the deadline. Nothing here is typed twice: no number, no date, no state.
 
      ACCOMMODATION PLANNING
-     Closes 30 November 2026            182 DAYS REMAINING
+     Guest House places close on 30 November 2026     67 DAYS LEFT
      ─────────●──────────────────       → the last day: "Last day"
-                                        → afterwards: "Accommodation planning closed"
+                                        → afterwards: "Guest House places closed on 30 November 2026" (no count)
 
    The count is computed from today, recomputed when the day turns, and never
    negative. This bar carries the DATE alone (Owner, 23 Sep 2026): the places
@@ -38,7 +38,10 @@
     var P = plan(); if (!P || !host) return;
     var w = P.planningWindow(new Date());
     var closed = !w.open;
-    var count = closed ? 'Accommodation planning closed' : (w.phase === 'last-day' ? 'Last day' : w.words);
+    /* L-01 (24 Sep 2026): the eyebrow stays "Accommodation planning"; the line says what closes — "Guest House places close on
+       30 November 2026", afterwards "… closed on …" — and the count is "{n} days left" / "Last day", none once closed */
+    var count = closed ? '' : (w.phase === 'last-day' ? 'Last day' : w.words);
+    var line = P.barLine ? P.barLine(new Date()) : 'Guest House places ' + (closed ? 'closed' : 'close') + ' on ' + P.COMPLIMENTARY.deadlineWords;
     var p = Math.min(1, Math.max(0, w.progress));
     host.setAttribute('data-stay-phase', closed ? 'closed' : w.phase);
     host.setAttribute('data-stay-days', String(w.days));
@@ -47,11 +50,11 @@
       '<div class="sbar-in">' +
         '<div class="sbar-words">' +
           '<p class="t-l1 sbar-eyebrow">Accommodation planning</p>' +
-          '<p class="sbar-line">' + (closed ? esc(count) : 'Closes ' + esc(P.COMPLIMENTARY.deadlineWords)) + '</p>' +
+          '<p class="sbar-line">' + esc(line) + '</p>' +
         '</div>' +
         (closed ? '' : '<p class="sbar-count" data-stay-count aria-live="polite">' + esc(count) + '</p>') +
         /* the one hairline: the same calendar window the availability object draws, never a second metric */
-        '<span class="sbar-rail" data-stay-rail role="img" aria-label="' + esc(w.startWords + ' to ' + w.endWords + ' · ' + Math.round(p * 100) + ' per cent of the planning window has passed') + '">' +
+        '<span class="sbar-rail" data-stay-rail role="img" aria-label="' + esc(P.railWords ? P.railWords(new Date()) : w.words) + '">' +
           '<i class="sbar-run" style="--sb-p:' + p.toFixed(4) + '"></i>' +
           '<i class="sbar-dot" style="--sb-p:' + p.toFixed(4) + '"></i>' +
         '</span>' +

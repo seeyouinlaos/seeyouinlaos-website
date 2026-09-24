@@ -76,16 +76,21 @@ test('NO GUEST READ ROUTE · GET / HEAD on /api/document 405; the stored key is 
 test('GUEST RELATIONS RETRIEVAL (Owner, 21 Sep 2026): the metadata of ONE invitation (never everyone), newest first; one object streamed through the Worker by its exact key — the bytes, the type, a download name, private no-store; a prefix or a wildcard is refused; a missing key is 404; no body and no token in any log', async () => {
   const h = await harness(true);
   try {
-    const a = await send(h, h.peggy, {}); const b = await send(h, h.peggy, { 'content-type': 'application/pdf', 'x-filename': 'passport.pdf' }, new TextEncoder().encode('%PDF-1.4 ' + 'x'.repeat(300)));
+    const a = await send(h, h.peggy, {}); await new Promise((ok) => setTimeout(ok, 5));   /* a is the earlier passport, b its replacement */
+    const b = await send(h, h.peggy, { 'content-type': 'application/pdf', 'x-filename': 'passport.pdf' }, new TextEncoder().encode('%PDF-1.4 ' + 'x'.repeat(300)));
     const f = await send(h, h.peggy, { 'x-kind': 'flight', 'x-filename': 'ticket.png', 'content-type': 'image/png' }, new Uint8Array([0x89, 0x50, 0x4e, 0x47, 1, 2, 3]));
     const gr = (p) => h.w.fetch(new Request(ORIGIN + p, { headers: { 'x-gr-token': 'gr-secret' } }), h.env);
     let r = await gr('/api/gr/documents?invitation=INV-G001'); assert.equal(r.status, 200); assert.equal(r.headers.get('cache-control'), 'private, no-store'); const d = await r.json();
-    assert.equal(d.count, 3); assert.deepEqual(d.documents.map((x) => x.key).sort(), [a.d.key, b.d.key, f.d.key].sort());
+    /* PRQ-06-12 (Window 007): a replacement supersedes — only the newest copy of each guest and kind is listed; ?all=1 audits every stored object */
+    assert.equal(d.count, 2); assert.deepEqual(d.documents.map((x) => x.key).sort(), [b.d.key, f.d.key].sort());
+    const all = await gr('/api/gr/documents?invitation=INV-G001&all=1').then((x) => x.json());
+    assert.equal(all.count, 3); assert.deepEqual(all.documents.map((x) => x.key).sort(), [a.d.key, b.d.key, f.d.key].sort());
     const pdf = d.documents.find((x) => x.key === b.d.key); assert.deepEqual({ ...pdf, receivedAt: '' }, { key: b.d.key, guestId: 'G001', kind: 'passport', filename: 'passport.pdf', type: 'application/pdf', bytes: 309, receivedAt: '', sha256: b.d.sha256 });
     assert.ok(!JSON.stringify(d).includes('%PDF') && !JSON.stringify(d).includes('JFIF'), 'metadata only — never a byte');
     assert.equal((await gr('/api/gr/documents?invitation=INV-G002').then((x) => x.json())).count, 0, 'the partner\'s invitation has nothing — documents belong to the guest');
     assert.equal((await gr('/api/gr/documents')).status, 400, 'no invitation, no listing of everyone'); assert.equal((await gr('/api/gr/documents?invitation=INV-')).status, 400);
-    r = await gr('/api/gr/document?key=' + encodeURIComponent(a.d.key)); assert.equal(r.status, 200); assert.equal(r.headers.get('content-type'), 'image/jpeg'); assert.equal(r.headers.get('cache-control'), 'private, no-store'); assert.match(r.headers.get('content-disposition'), /^attachment; filename="passport\.jpg"$/); assert.equal(r.headers.get('x-document-sha256'), a.d.sha256);
+    assert.equal((await gr('/api/gr/document?key=' + encodeURIComponent(a.d.key))).status, 404, 'a superseded copy is not the guest\'s document any more (PRQ-06-12)');
+    r = await gr('/api/gr/document?all=1&key=' + encodeURIComponent(a.d.key)); assert.equal(r.status, 200); assert.equal(r.headers.get('content-type'), 'image/jpeg'); assert.equal(r.headers.get('cache-control'), 'private, no-store'); assert.match(r.headers.get('content-disposition'), /^attachment; filename="passport\.jpg"$/); assert.equal(r.headers.get('x-document-sha256'), a.d.sha256);
     const bytes = new Uint8Array(await r.arrayBuffer()); assert.equal(bytes.length, JPEG.length); assert.equal(Buffer.compare(Buffer.from(bytes), Buffer.from(JPEG)), 0, 'the exact bytes, streamed');
     r = await gr('/api/gr/document?key=' + encodeURIComponent(b.d.key)); assert.equal(r.status, 200); assert.equal(r.headers.get('content-type'), 'application/pdf');
     for (const bad of ['doc/INV-G001/', 'doc/INV-G001/G001/passport/', 'doc/INV-G001/G001/passport/*', a.d.key + '/../x', '', 'reg:INV-G001']) assert.equal((await gr('/api/gr/document?key=' + encodeURIComponent(bad))).status, 400, 'refused: ' + JSON.stringify(bad));
@@ -103,7 +108,7 @@ test('WITHOUT THE STORE (a Worker without the binding): 503 · enabled:false, no
     assert.match(wj, /"r2_buckets": \[\s*\{ "binding": "DOCS", "bucket_name": "siyl-docs" \}\s*\]/, 'ONE private bucket, bound as DOCS, on the one Worker'); assert.equal((wj.match(/"binding": "DOCS"/g) || []).length, 1);
     const M = JSON.parse(readFileSync(join(ROOT, 'infra/PRODUCTION.json'), 'utf8')); assert.deepEqual({ ...M.r2[0], retention: undefined }, { binding: 'DOCS', bucket: 'siyl-docs', public: false, retention: undefined }, 'the frozen manifest documents it: private'); assert.deepEqual([M.r2[0].retention.journeyEnd, M.r2[0].retention.days, M.r2[0].retention.purgeFrom], ['2027-03-08', 30, '2027-04-07'], 'the Owner\'s retention decision (21 Sep 2026): thirty days after the journey ends — 7 April 2027');
     assert.match(src('src/infra-guard.cjs'), /R2 bindings changed/, 'the guard pins the binding');
-    assert.match(src('about-you.html'), /We cannot accept documents on the website yet\. Nothing was sent and nothing was stored\. Your trip can still be sent — Guest Relations will ask you for this directly\./);
+    assert.match(src('about-you.html'), /Documents cannot be added on this website at the moment, so nothing was stored\. You can still send your trip — Guest Relations will ask you for it directly\./, 'TO-02327');
     assert.match(src('assets/docs.js'), /var ACCEPT = 'image\/jpeg,image\/png,image\/heic,image\/heif,image\/webp,application\/pdf';/); assert.match(src('assets/docs.js'), /MAX: 12 \* 1024 \* 1024/);
     assert.match(src('about-you.html'), /<input type="file" accept="'\+D\.ACCEPT\+'" hidden>/, 'the iPhone picker: the file input with the accepted types');
     assert.doesNotMatch(src('assets/docs.js'), /localStorage\.setItem\([^)]*base64|readAsDataURL/, 'the file itself never enters the browser\'s storage');

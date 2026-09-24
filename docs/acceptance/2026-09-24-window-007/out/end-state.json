@@ -1,0 +1,144 @@
+{
+ "T001": {
+  "words": {
+   "key": "changed",
+   "label": "Changes not sent yet",
+   "line": "Changes not sent yet",
+   "cta": "Send the update",
+   "at": "2026-09-24T06:44:47.642Z",
+   "date": "24 September 2026",
+   "declined": false
+  },
+  "scope": {
+   "bangkok": false,
+   "vientianePreWedding": true,
+   "vientianeWedding": false,
+   "china": false,
+   "none": false,
+   "at": "2026-09-24T06:12:23.396Z",
+   "by": "T001",
+   "migrated": false
+  },
+  "bag": [],
+  "rooms": {},
+  "wait": {},
+  "seats": {
+   "ceremony": {},
+   "dinner": {}
+  }
+ },
+ "T002": {
+  "words": {
+   "key": "sent",
+   "label": "Sent to us",
+   "line": "Sent to us · 24 September 2026",
+   "cta": null,
+   "at": "2026-09-24T06:21:25.965Z",
+   "date": "24 September 2026",
+   "declined": true
+  },
+  "scope": {
+   "bangkok": false,
+   "vientianePreWedding": false,
+   "vientianeWedding": false,
+   "china": false,
+   "none": true,
+   "at": "2026-09-24T06:21:21.153Z",
+   "by": "T002",
+   "migrated": false
+  },
+  "bag": [],
+  "rooms": {},
+  "wait": {},
+  "seats": {
+   "ceremony": {},
+   "dinner": {}
+  }
+ },
+ "T003": {
+  "words": {
+   "key": "changed",
+   "label": "Changes not sent yet",
+   "line": "Changes not sent yet",
+   "cta": "Send the update",
+   "at": "2026-09-24T17:27:56.438Z",
+   "date": "24 September 2026",
+   "declined": true
+  },
+  "scope": {
+   "bangkok": true,
+   "vientianePreWedding": true,
+   "vientianeWedding": true,
+   "china": true,
+   "none": false,
+   "at": "2026-09-24T17:28:06.905Z",
+   "by": "T003",
+   "migrated": false
+  },
+  "bag": [
+   "sangkhathan"
+  ],
+  "rooms": {},
+  "wait": {},
+  "seats": {
+   "ceremony": {},
+   "dinner": {}
+  }
+ },
+ "G048": {
+  "words": {
+   "key": "changed",
+   "label": "Changes not sent yet",
+   "line": "Changes not sent yet",
+   "cta": "Send the update",
+   "at": "2026-09-24T17:26:45.264Z",
+   "date": "24 September 2026",
+   "declined": false
+  },
+  "scope": {
+   "bangkok": false,
+   "vientianePreWedding": false,
+   "vientianeWedding": true,
+   "china": false,
+   "none": false,
+   "at": "2026-09-24T17:09:37.776Z",
+   "by": "G048",
+   "migrated": false
+  },
+  "bag": [],
+  "rooms": {},
+  "wait": {},
+  "seats": {
+   "ceremony": {},
+   "dinner": {}
+  }
+ },
+ "G049": {
+  "words": {
+   "key": "changed",
+   "label": "Changes not sent yet",
+   "line": "Changes not sent yet",
+   "cta": "Send the update",
+   "at": "2026-09-24T06:51:22.435Z",
+   "date": "24 September 2026",
+   "declined": false
+  },
+  "scope": {
+   "bangkok": false,
+   "vientianePreWedding": false,
+   "vientianeWedding": true,
+   "china": false,
+   "none": false,
+   "at": "2026-09-24T06:47:05.144Z",
+   "by": "G049",
+   "migrated": false
+  },
+  "bag": [],
+  "rooms": {},
+  "wait": {},
+  "seats": {
+   "ceremony": {},
+   "dinner": {}
+  }
+ }
+}

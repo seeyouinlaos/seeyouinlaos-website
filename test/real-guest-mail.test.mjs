@@ -44,7 +44,7 @@ test('REAL PATH · the journey-shop payload: the guest email at registration.con
     assert.deepEqual(d.mailSummary, { ownerMailStatus: 'accepted', ownerMessageId: '<msg-1@brevo>', guestMailStatus: 'accepted', guestMessageId: '<msg-2@brevo>', guestTo: 's…@example.org', mailLastError: null, at: d.mailSummary.at });
     assert.equal(h.calls[1].body.to[0].email, 'sam.example@example.org'); assert.equal(h.calls[1].body.to[0].name, 'Sam Example');
     assert.match(h.calls[0].body.subject, /Trip received — Sam Example · SYL-G777-/);
-    assert.match(h.calls[0].body.textContent, /Guest: Sam Example\n/); assert.match(h.calls[0].body.textContent, /Wedding Ceremony: Seat E5\n· Wedding Dinner: Seat D-12-03/); assert.match(h.calls[0].body.textContent, /Email: sam.example@example.org\nMobile: \+66 81 000 0000/);
+    assert.match(h.calls[0].body.textContent, /Guest: Sam Example\n/); assert.match(h.calls[0].body.textContent, /Vow Ceremony: Seat E5\n· Wedding Dinner: Seat D-12-03/); assert.match(h.calls[0].body.textContent, /Email: sam.example@example.org\nMobile: \+66 81 000 0000/);
     assert.match(h.calls[0].body.textContent, /Ceremony seat record: C-R-05-02/, 'the internal id sits in the internal reference only');
     assert.match(h.calls[1].body.textContent, /Dear Sam,/); assert.doesNotMatch(h.calls[1].body.textContent, /C-R-05-02|(?<!SYL-)G777|INV-G777/, 'no internal id reaches the guest');
     const rec = JSON.parse(h.store.m.get('reg:INV-G777').v);
@@ -65,7 +65,7 @@ test('REAL PATH · a journey without an email is refused (422, the words for the
   try {
     const r = await h.w.fetch(req('/api/register', { 'x-siyl-auth': h.sam }, { invitationId: 'INV-G777', registration: complete(REAL('')), text: TEXT }), h.env);
     assert.equal(r.status, 422); const d = await r.json();
-    assert.equal(d.error, 'email required'); assert.equal(d.message, 'Please add your email address so we can send your confirmation.'); assert.equal(d.field, 'email');
+    assert.equal(d.error, 'email required'); assert.equal(d.message, 'Please add your email address, so we can send you a copy of your trip.');   /* TO-01691: a copy, never a confirmation */ assert.equal(d.field, 'email');
     assert.equal(h.store.m.has('reg:INV-G777'), false); assert.equal(h.calls.length, 0);
     /* another guest's bearer cannot set this guest's contact */
     const bad = await h.w.fetch(req('/api/contact', { 'x-siyl-auth': h.other }, { invitationId: 'INV-G777', email: 'x@example.org' }, 'PUT'), h.env);
@@ -105,20 +105,31 @@ test('RETRY · a stored journey whose guest email failed for want of an address:
     await h.w.fetch(req('/api/contact', { 'x-siyl-auth': h.sam }, { email: 'sam.example@example.org' }, 'PUT'), h.env);
     const yes = await h.w.fetch(req('/api/register/mail-retry', { 'x-siyl-auth': h.sam }, { invitationId: 'INV-G777' }), h.env);
     assert.equal(yes.status, 200); const d = await yes.json();
-    assert.equal(d.submissionId, 'SYL-G777-E64ABD3E'); assert.equal(d.mail.guest.accepted, true); assert.equal(d.mailSummary.guestMessageId, '<msg-2@brevo>');
-    assert.equal(h.calls[1].body.to[0].email, 'sam.example@example.org');
+    /* PRQ-04-07 (Window 007): the retry re-sends the guest's copy only — Guest Relations already had theirs (accepted), so it is not sent twice */
+    assert.equal(d.submissionId, 'SYL-G777-E64ABD3E'); assert.equal(d.mail.guest.accepted, true); assert.equal(d.mailSummary.guestMessageId, '<msg-1@brevo>');
+    assert.equal(h.calls.length, 1); assert.equal(h.calls[0].body.to[0].email, 'sam.example@example.org');
     const rec = JSON.parse(h.store.m.get('reg:INV-G777').v);
     assert.equal(rec.submissionId, 'SYL-G777-E64ABD3E'); assert.equal(rec.mailRetries, 1); assert.equal(rec.recipient.source, 'server contact');
     assert.equal([...h.store.m.keys()].filter((k) => k.startsWith('reg:INV-G777')).length, 1, 'no new record');
   } finally { h.done(); }
 });
 
-test('CLIENT · the guest store pushes the contact to the server and pulls it on sign-in; Review & Send shows the three truths and sends a 422 back to the email field', () => {
+test('CLIENT · the guest store pushes the contact to the server and pulls it on sign-in; Review & Send shows one card with the email line about the guest\'s copy and sends a 422 back to the email field', () => {
   const g = src('assets/guest.js'), rv = src('review.html');
   assert.match(g, /pushContact: function \(\)/); assert.match(g, /pullContact: function \(\)/); assert.match(g, /this\.pushContact\(\);/, 'setContact pushes');
   assert.match(g, /fetch\(CONTACT_API, \{ method: 'PUT', headers: \{ 'content-type': 'application\/json', 'x-siyl-auth': a\.bearer \}/);
   assert.match(g, /document\.addEventListener\('siyl:auth', pullOnce\)/);
-  assert.match(rv, /if\(r\.status===422\)/); assert.match(rv, /Please add your email address so we can send your confirmation\./); assert.match(rv, /invitation\.html#p-email/);
-  assert.match(rv, /'✓ Trip saved'/); assert.match(rv, /'✓ Sent to Guest Relations'/); assert.match(rv, /'✓ Confirmation email sent to '/); assert.match(rv, /'! Confirmation email could not be sent'/); assert.match(rv, /rb\.textContent='Retry confirmation email'/);
-  assert.match(rv, /'✓ Changes saved'/); assert.match(rv, /'✓ Updated trip sent to Guest Relations'/); assert.match(rv, /'Send Updated Trip'/);
+  /* Window 007: the send goes through SIYL_DRAFT.send; its 422 “email required” comes back to the email field (TO-01691) */
+  const dj = src('assets/draft.js');
+  assert.match(dj, /if \(r\.status === 422 && d\.error === 'email required'\) return \{ ok: false, status: 422, error: 'email required'/);
+  assert.match(rv, /if\(e==='email required'\)\{err\.innerHTML=esc\(r\.message\|\|'Please add your email address, so we can send you a copy of your trip\.'\)\+' <a class="p-link" href="invitation\.html#p-email"[^>]*>Add your email address<\/a>'/);
+  /* ONE card instead of three ticks: what we have, the one email line about the guest's COPY, and the way back */
+  assert.match(rv, /<h2 class="t-h1">Thank you — we have your trip<\/h2>/); assert.match(rv, /<h2 class="t-h1">Thank you — we have your update<\/h2>/);
+  assert.match(rv, /data-mail="sent">A copy is on its way to '\+esc\(st\.to\|\|'your email address'\)/); assert.match(rv, /data-mail="failed">We could not send your copy by email just now\. <button type="button" class="p-link" id="mail-retry">Send the copy again<\/button>/);
+  assert.doesNotMatch(rv, /Confirmation email|confirmation email|Retry confirmation/, 'the guest\'s copy is never called a confirmation');
+  /* the button: “Send my trip” before the first send, “Send the update” after a real change — and none while nothing changed (an unchanged trip cannot be sent again) */
+  assert.match(rv, /if\(w\.key==='changed'\)return nj&&!w\.declined\?'Send my reply':'Send the update';\s*return nj\?'Send my reply':'Send my trip'\}/);
+  assert.match(rv, /function hasSomethingToSend\(\)\{var k=tripWords\(\)\.key;return k!=='sent'&&k!=='confirmed'\}/); assert.match(rv, /var show=!\(G&&G\.party\(\)\)\|\|hasSomethingToSend\(\);\s*btn\.hidden=!show;/);
+  /* a confirmation lapses with a change: the card says Guest Relations will confirm it again */
+  assert.match(rv, /You changed your trip after Guest Relations confirmed it\. Send the update, and Guest Relations will confirm it with you again\./);
 });

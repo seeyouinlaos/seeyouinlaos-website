@@ -33,7 +33,8 @@ test('A · one guest, U Sathorn only → USD 192', () => {
   assert.equal(q.pay, 3);
   assert.equal(q.total, 192);
   assert.equal(total(pick('bkk-stay', 'u-sathorn-superior-garden')), 192);
-  assert.match(q.basis, /USD 192 total per person · 3 nights · USD 64 per person \/ night × 3 nights/);
+  /* TO-00540: “total” retired; the amount → for whom → how long (the approved My Bag basis is pinned in its own test below) */
+  assert.match(q.basis, /^USD 192 per person · 3 nights/); assert.doesNotMatch(q.basis, /total per person|\//);
   assert.equal(q.breakfast, 'Breakfast included');
   /* the deleted room no longer exists: a stale 'penthouse' slug resolves to a surviving room, never to itself */
   assert.notEqual(P.quote('bkk-stay', 'penthouse').roomSlug, 'penthouse');
@@ -84,15 +85,16 @@ test('Vientiane · the matrix is a per-person / per-night rate, not a window tot
 test('Vientiane · the guest is told exactly which nights an amount buys', () => {
   const pre = P.quote('prewed', 'heritage');
   assert.equal(pre.amount, 'USD 290');
-  assert.equal(pre.totalLine, 'Total per person · 2 nights');
-  assert.equal(pre.nightsCovered, 'Includes both nights: 25 → 26 February + 26 → 27 February');
-  assert.match(pre.basis, /USD 290 total per person/);
+  assert.equal(pre.totalLine, '2 nights · 25 – 27 February 2027'); /* TO-01466 */
+  assert.equal(pre.nightsCovered, '25 → 26 and 26 → 27 February'); /* TO-01464 */
+  assert.match(pre.basis, /^USD 290 per person · 2 nights/);
   assert.doesNotMatch(pre.basis, /complimentary/, 'the hosted night is the wedding stay only');
 
   const wed = P.quote('wedstay', 'heritage');
   assert.equal(wed.amount, 'USD 145');
-  assert.equal(wed.nightsCovered, 'Both nights: 27 → 28 February + 28 February → 01 March');
-  assert.match(wed.basis, /First night your room rate at USD 145 per person \/ night · second night hosted by Haruthai & Suthep/);
+  assert.equal(wed.nightsCovered, '27 → 28 and 28 February → 1 March'); /* TO-01463 */
+  assert.equal(wed.contribution, 'First night your cost, USD 145 per person · second night complimentary, hosted by Haruthai & Suthep'); /* TO-01467 */
+  assert.equal(wed.hostedBasis, 'per person · first night your cost · second night complimentary, hosted by Haruthai & Suthep'); /* TO-01366 */
 
   /* no night between 25 February and 1 March is uncovered, and 27 February is
    * the transition day shared by the two windows */
@@ -113,10 +115,14 @@ test('every stay multiplies its rate by its payable nights — one rule, no exce
   assert.equal(P.quote('kempinski', 'deluxe-balcony-king').total, 190 * 2);
 });
 
-test('the words "fixed two-night stay" are gone from every guest surface', () => {
+test('the words "fixed two-night stay" are gone from every guest surface — except the one approved Pre-Wedding line, where the nights are named beside it', () => {
+  /* LEAD RULING (Window 007): TO-01285 approves “25 – 27 February 2027 · 2 nights: 25 → 26 and 26 → 27 February · your cost ·
+     breakfast included · a fixed two-night stay” — the ban is narrowed to that one line; the bare, ambiguous use stays banned */
+  const APPROVED = '25 – 27 February 2027 · 2 nights: 25 &rarr; 26 and 26 &rarr; 27 February · your cost · breakfast included · a fixed two-night stay';
   for (const f of ['assets/pricing.js', 'assets/rooms-data.js', 'journeys.html',
                    'your-journey.html', 'review.html', 'room.html', 'accommodation.html']) {
-    const src = readFileSync(join(ROOT, f), 'utf8');
+    let src = readFileSync(join(ROOT, f), 'utf8');
+    if (f === 'journeys.html') { assert.equal(src.split(APPROVED).length - 1, 1, 'the approved Pre-Wedding line, once'); src = src.split(APPROVED).join(''); }
     assert.doesNotMatch(src, /fixed two-night stay/, f + ' still uses the ambiguous wording');
   }
 });
@@ -129,11 +135,11 @@ test('D2 · the Guest House complimentary is a USD 0 line of the wedding window,
   assert.equal(R.guesthouse.name, 'Guest House complimentary');
   assert.deepEqual(R.guesthouse.windows.map((w) => w.id), ['guesthouse']);
   assert.equal(R.guesthouse.windows[0].label, 'Wedding Stay');
-  assert.equal(R.guesthouse.windows[0].dates, '27 February – 01 March 2027');
+  assert.equal(R.guesthouse.windows[0].dates, '27 February – 1 March 2027'); /* TO-00818 */
   assert.deepEqual(R.guesthouse.rooms.map((r) => r.slug), ['guest-house']);
   const house = R.guesthouse.rooms[0];
   assert.equal(house.name, 'Guest House complimentary');
-  assert.equal(house.status, 'Complimentary · four shared places');
+  assert.equal(house.status, 'One of four places in a shared house'); /* TO-01478 */
   assert.equal(house.price, null);
   assert.equal(house.interest, true);
   assert.equal(house.complimentary, true);
@@ -149,7 +155,7 @@ test('D2 · the Guest House complimentary is a USD 0 line of the wedding window,
   assert.equal(line.stay, 'guesthouse');
   assert.equal(line.room, 'guest-house');
   assert.equal(line.name, 'Guest House complimentary · Vientiane');
-  assert.match(line.meta, /27 February – 01 March 2027 · Complimentary · four shared places/);
+  assert.equal(line.meta, '27 February – 1 March 2027 · One of four places in a shared house'); /* TO-00819 · TO-01478 */
   assert.equal(line.img, 'assets/images/guesthouse/guesthouse-01.jpg');
   assert.equal(line.price, 0);
   assert.equal(line.complimentary, true);
@@ -208,11 +214,11 @@ test('D · the Wedding Stay is ONE payable item, never two complimentary rows', 
   assert.equal(bag[0].price, 145, 'one payable night of the two-night window');
   assert.equal(bag[0].nights, 2);
   assert.equal(bag[0].pay, 1);
-  assert.equal(bag[0].note, 'Second night');
-  assert.equal(bag[0].noteBy, 'Hosted by Haruthai & Suthep');
+  assert.equal(bag[0].note, 'Second night complimentary, hosted by Haruthai & Suthep'); /* TO-00820: one string */
+  assert.equal(bag[0].noteBy, '');
   assert.equal(total(bag), 145);
   assert.equal(total(pick('wedstay', 'heritage', 1)), 145, 'one guest, one price — never a partner in the total');
-  assert.match(P.lineBasis(bag[0]), /USD 145 total per person · 2 nights · Both nights: 27 → 28 February \+ 28 February → 01 March/);
+  assert.match(P.lineBasis(bag[0]), /^USD 145 per person · 2 nights/); assert.doesNotMatch(P.lineBasis(bag[0]), /total per person|01 March/);
   const q = P.quote('wedstay', 'heritage');
   assert.doesNotMatch(q.basis, /^Complimentary/);
   assert.equal(q.breakfast, 'Breakfast included');
@@ -271,8 +277,8 @@ test('every accommodation window states rate, nights, total and breakfast', () =
     const q = P.quote(win, room.slug);
     assert.equal(q.nights, nights, win + ' nights');
     assert.equal(q.total, q.rate * q.pay, win + ' total = rate × payable nights');
-    assert.ok(q.nightly.includes('per person / night'), win + ' states its nightly rate');
-    assert.match(q.basis, /total per person · \d+ nights?/, win + ' basis');
+    assert.equal(q.nightly, 'USD ' + q.rate + ' per person per night', win + ' states its nightly rate (TO-01312: no slash notation)');
+    assert.match(q.basis, /^USD [\d,]+ per person · \d+ nights?/, win + ' basis');
     assert.ok(q.breakfast, win + ' breakfast status');
   }
 });
@@ -386,7 +392,8 @@ test('the private journey has one shell, one design system and a hard boundary',
 
   const shell = readFileSync(join(ROOT, 'assets/prep-shell.js'), 'utf8');
   /* the boundary: no 01–06 before an invitation is open */
-  assert.match(shell, /if \(!p \|\| !m\) \{[\s\S]{0,900}Open your invitation to begin/);
+  assert.match(shell, /if \(!p \|\| !m\) \{[\s\S]{0,900}bar\.innerHTML = '';\s*layer\.classList\.remove\('on'\);\s*return;/);
+  assert.doesNotMatch(shell, /Open your invitation to begin/, 'TO-00190: nothing is said there — the page head and its one button carry the way in');
   /* the code opens the guest's own invitation; the guest IS the session — no question, no switch */
   assert.doesNotMatch(shell, /Who are you\?|Who are you continuing as\?|data-switch/);
   const model = readFileSync(join(ROOT, 'assets/guest.js'), 'utf8');
@@ -453,19 +460,19 @@ test('Review & Send: the Temple Ceremony is optional, the other three hosted', (
   const prog = journey.slice(journey.indexOf('var WEDDING = ['), journey.indexOf('function skipped()'));
   ['Temple Ceremony', 'Sangkhathan Temple Offering', 'Coffee & Cake', 'Vow Ceremony', 'Wedding Dinner']
     .forEach((t) => assert.ok(prog.includes(t), t + ' missing from the wedding programme'));
-  assert.equal((prog.match(/Complimentary — hosted by Haruthai & Suthep\./g) || []).length, 3,
-    'exactly three complimentary parts beside the Temple Ceremony');
+  assert.equal((prog.match(/note: 'Hosted by Haruthai & Suthep\.'/g) || []).length, 3,
+    'exactly three hosted parts beside the Temple Ceremony (TO-00457)');
   assert.match(prog, /Tak Bat, the morning alms-giving — a personal offering, arranged individually on the morning/);
   /* the times the Owner's programme actually carries */
   assert.match(prog, /when: '09:00 – approximately 12:00'/, 'the Temple Ceremony (Owner, Edit 2 · 15 Sep 2026)');
-  assert.match(prog, /when: 'From 12:00'/);
+  assert.match(prog, /key: 'coffee', title: 'Coffee & Cake', when: '12:00 – 15:30'/); /* TO-01816 */
   assert.match(prog, /when: '15:30'/, 'the Vow Ceremony always starts at 15:30 (Owner, Edit 2)');
   assert.match(prog, /when: '19:30'/);
   assert.doesNotMatch(prog, /'08:00|'16:30'/, 'the retired times are gone from the programme');
-  assert.match(prog, /Optional · USD 15 per guest/);
+  assert.match(prog, /Optional · USD 15 per person · a personal offering\./); /* TO-00456 */
   /* the Temple Ceremony is never labelled Hosted, and only the Sangkhathan
    * carries an amount anywhere in the programme */
-  assert.doesNotMatch(prog, /'temple'[\s\S]{0,240}Complimentary — hosted/);
+  assert.doesNotMatch(prog.slice(prog.indexOf("key: 'temple'"), prog.indexOf("key: 'sangkhathan'")), /Hosted by|Complimentary/);
   assert.equal((prog.match(/USD/g) || []).length, 1, 'one amount only in the programme');
   /* Review & Send renders the ACTUAL answers, per named guest, per event —
    * it never describes the programme it is supposed to be summarising */
@@ -478,7 +485,13 @@ test('Review & Send: the Temple Ceremony is optional, the other three hosted', (
   assert.match(page, /WEDDING PARTICIPATION:/);
   assert.match(page, /Sangkhathan offerings to prepare/);
   assert.match(page, /DOCUMENTS & PRIVACY \(received only — nothing here is reviewed or verified\):/);
-  assert.match(page, /templeCeremony:window\.SIYL_TEMPLE\?SIYL_TEMPLE\.operational\(\):null/);
+  /* B3: the send is SIYL_DRAFT.send — the record carries the operational wedding answers from there */
+  assert.match(readFileSync(join(ROOT, 'assets/draft.js'), 'utf8'), /templeCeremony: window\.SIYL_TEMPLE \? SIYL_TEMPLE\.operational\(\) : null/);
+});
+
+/* kept apart so the rest of the Review test is evaluated: no object of the approved package removes this Guest Relations line */
+test('Review & Send · Guest Relations still reads that Tak Bat is part of the Temple Ceremony and carries no amount', () => {
+  const page = readFileSync(join(ROOT, 'review.html'), 'utf8');
   assert.match(page, /Morning alms-giving \(Tak Bat\): part of the Temple Ceremony for everyone joining it — a personal offering, arranged on the morning \(no amount set\)/);
 });
 
@@ -486,7 +499,7 @@ test('THE WEDDING sits at 28 FEB in the chronology — the Sangkhathan is never 
   const journey = readFileSync(join(ROOT, 'assets/journey.js'), 'utf8');
   /* the extended stay left the chronology with the feature itself (Owner, 23 Sep 2026) */
   assert.match(journey, /var AT = \{ suhring: 0\.1, baanphraya: 0\.3, '1872': 0\.5, tea1872: 0\.5, 'sangkhathan': 3\.5, cannubi: 8\.5 \}/);
-  assert.match(journey, /'sangkhathan': '28 FEB'/);
+  assert.match(journey, /'sangkhathan': '28 Feb'/); /* B4: short dates in sentence case */
   /* 3.5 lands between the Wedding Stay (index 3) and MU9646 (index 4) */
   const seg = journey.slice(journey.indexOf('var SEG = ['), journey.indexOf('/* Chronological position'));
   const keys = [...seg.matchAll(/\{ key: '([a-z0-9-]+)'/g)].map((m) => m[1]);
@@ -525,9 +538,9 @@ test('three states, never two: NOT DECIDED is not NOT ATTENDING', () => {
   assert.match(t, /sangkhathanState: a !== 'yes' \? 'Not applicable'/);
   const page = readFileSync(join(ROOT, 'wedding.html'), 'utf8');
   /* the guest is offered BOTH answers, so silence is never read as a refusal */
-  assert.match(page, /data-off="yes">Yes, I would like to take part/);
+  assert.match(page, /data-off="yes">Yes, please prepare one for me/); /* TO-02267 */
   assert.match(page, /data-off="no">No, thank you/);
-  assert.match(page, /Required · not decided/);
+  assert.match(page, /Required/); assert.doesNotMatch(page, /Required · not decided/); /* TO-02259 */
   /* and every active event carries both answers */
   assert.match(page, /data-ev="yes">Attending/);
   assert.match(page, /data-ev="no">Not attending/);
@@ -537,23 +550,24 @@ test('Tak Bat is explained before anyone is asked, and is never the Sangkhathan'
   const page = readFileSync(join(ROOT, 'wedding.html'), 'utf8');
   /* the explanation travels with the Temple row and opens in the shell's own
    * detail layer — the guest is never thrown back to the public website */
-  assert.match(page, /welcome to take part in Tak Bat, the traditional offering of food to Buddhist monks/);
-  assert.match(page, /The offering is personal and arranged individually on the morning/);
+  assert.match(page, /The Buddhist morning at Wat Ong Teu\. Guests who attend are welcome to take part in Tak Bat\./); /* TO-02276 */
+  assert.match(page, /Tak Bat is the traditional offering of food to Buddhist monks/);
+  assert.match(page, /Each guest arranges their own small offering of food on the morning, at their own cost — no amount is set, and Guest Relations will guide you\. Tak Bat is not the Sangkhathan\./); /* TO-02237 */
   assert.doesNotMatch(page, /no separate charge for Tak Bat|nothing is paid/);
   assert.doesNotMatch(page, /Everyone who comes takes part/);
-  assert.match(page, /It is <b>not<\/b> the alms-giving/);
+  assert.match(page, /It is <b>not<\/b> Tak Bat, the food offered during the ceremony\./);
   assert.match(page, /data-more="takbat"/);
   assert.match(page, /data-more="sang"/);
   assert.match(page, /P\.drawer\(/, 'the detail layer must be the shell drawer');
   const review = readFileSync(join(ROOT, 'review.html'), 'utf8');
-  assert.match(review, /Tak Bat remains a personal offering at the temple/);
+  assert.match(review, /Giving at the temple is personal, and your own\./); /* TO-01725 */
 });
 
 test('the wedding cost model is stated in words on both surfaces', () => {
   ['your-journey.html', 'review.html'].forEach((f) => {
     const page = readFileSync(join(ROOT, f), 'utf8');
     assert.match(page, /[Hh]osted by Haruthai &amp; Suthep/, f);
-    assert.match(page, /Tak Bat remains a personal offering at the temple/, f);
+    assert.match(page, /Giving at the temple is personal, and your own\./, f); /* TO-00611 · TO-01725 */
     assert.doesNotMatch(page, /No separate charge|self-pay/, f);
   });
 });
@@ -562,14 +576,18 @@ test('SEND is unavailable until the required steps are done — and never fails 
   const page = readFileSync(join(ROOT, 'review.html'), 'utf8');
   assert.match(page, /if\(!G\|\|!G\.party\(\)\|\|!G\.readiness\(\)\.ok\)\{blockSend\(\);return\}/, 'the readiness engine gates the send — an empty bag does not (Owner, 17 Sep 2026)');
   assert.match(page, /Before you send: '\+esc\(first\.label\)/, 'the first missing item is named');
-  assert.match(page, /Send to Guest Relations — not ready yet/);
+  /* TO-01757 / PRQ-04-02: one button “Send my trip”, muted (class off) while something is missing — never disabled for it */
+  assert.match(page, /return nj\?'Send my reply':'Send my trip'\}/);
+  assert.match(page, /var ready=!!\(G&&G\.party\(\)&&G\.readiness\(\)\.ok\);\s*btn\.classList\.toggle\('off',!ready\);/);
+  assert.match(page, /btn\.disabled=busy;/, 'only a send in flight disables it');
+  assert.doesNotMatch(page, /not ready yet/);
   const g = readFileSync(join(ROOT, 'assets/guest.js'), 'utf8');
   /* required vs optional: optional never blocks */
   const r = g.slice(g.indexOf('STEP_DEFS:'), g.indexOf('/* ---- what Guest Relations receives'));
   ['you', 'journey', 'wedding', 'preparation', 'about', 'review'].forEach((k) =>
     assert.ok(r.includes("key: '" + k + "'"), k + ' is not one of the six steps'));
   /* the five states, in words — never colour alone (Not joining: a step outside the guest's participation, 18 Sep 2026) */
-  assert.match(r, /STATE_LABEL: \{ complete: '✓ Complete', current: 'Current', attention: 'Needs attention', locked: 'Locked', na: 'Not joining' \}/);
+  assert.match(r, /STATE_LABEL: \{ complete: '✓ Complete', current: 'You are here', attention: 'Still to complete', locked: 'Opens later', na: 'Not joining', ready: 'Ready to send' \}/); /* TO-00252…00254 */
   /* required blocks, optional never does: readiness is the missing items of steps 01–05 */
   assert.match(r, /if \(s\.key !== 'review'\) s\.missing\.forEach/);
 });
@@ -594,7 +612,7 @@ test('a session stored without names is not an open invitation', () => {
     assert.match(page, /if\(!p\|\|!me\)\{/, f + ' can still crash without a guest');
     assert.match(page, /Open your invitation once more/, f + ' does not explain a stale session');
     /* recovery copy stays short, and never exposes how the thing is built */
-    assert.match(page, /Your invitation is now personal: every guest has their own code\./, f);
+    assert.match(page, /Every guest now has their own invitation code\. Please enter yours — everything you chose before is still here\./, f); /* TO-02296 */
     [/older build/i, /stored session/i, /payload/i, /guest array/i, /migration/i, /bearer/i]
       .forEach((bad) => assert.doesNotMatch(page, bad, f + ' leaks an implementation concept'));
   });
@@ -606,10 +624,11 @@ test('a session stored without names is not an open invitation', () => {
 
 test('the invitation briefing tells the guest who is invited and who they decide for', () => {
   const page = readFileSync(join(ROOT, 'invitation.html'), 'utf8');
-  assert.match(page, /', you are invited<\/h1>/);
+  /* B5: the heading names the guest, with a host branch; the party sentence and “From your invitation” were removed */
+  assert.match(page, /'<h1 class="t-d1">'\+esc\(G\.nameOf\(\)\)\+\(host\?', welcome to our wedding journey':', you are invited'\)\+'<\/h1>'/);
   assert.match(page, /Haruthai &amp; Suthep would love you to join them in Vientiane/);
-  assert.match(page, /Your party · '\+esc\(G\.partyNames\(\)\)/, 'the party as context');
-  assert.match(page, /Each of you has your own invitation and your own code; nothing here is answered for anyone else/);
+  assert.match(page, /You are invited together with '\+esc\(withO\)\+', and each of you answers on your own invitation\./, 'the party as context, and who decides for whom');
+  assert.doesNotMatch(page, /Your party · |From your invitation/);
   assert.match(page, /Six steps, in order/);
   /* and it is step one of the preparation, not a page nobody can find */
   const prep = readFileSync(join(ROOT, 'assets/prep-shell.js'), 'utf8');
@@ -663,16 +682,20 @@ test('Review & Send is five editorial blocks, each with its own way back', () =>
     assert.ok(i > at, id + ' is out of order in the page');
     at = i;
   });
-  [['b1', '<h2>You</h2>'], ['b2', '<h2>My Trip</h2>'], ['b3', '<h2>The Wedding</h2>'], ['b6', '<h2>About you</h2>'],
-   ['b4', '<h2>Documents &amp; privacy</h2>'], ['b5', '<h2>Your cost</h2>']]
+  /* B3: “Your details” · “About You” · “Your total”; each edit link reads “Change” */
+  [['b1', '<h2>Your details</h2>'], ['b2', '<h2>My Trip</h2>'], ['b3', '<h2>The Wedding</h2>'], ['b6', '<h2>About You</h2>'],
+   ['b4', '<h2>Documents &amp; privacy</h2>'], ['b5', '<h2>Your total</h2>']]
     .forEach(([id, heading]) => assert.ok(page.includes(heading), id + ' does not carry ' + heading));
   /* RECEIVED is not CONFIRMED, and a sent journey stays editable */
-  assert.match(page, /Nothing is confirmed yet/);
-  assert.match(page, /Confirmed<\/b> is something only Guest Relations can tell you/);
-  assert.match(page, /Change and send again/);
+  /* PRQ-04-03 / PRQ-04-02 (TO-01658 · TO-01666 · TO-01668 removed; TO-01766 the one card): the card says nothing is booked until
+     Guest Relations confirms, and the trip stays changeable — the update is sent with the one button */
+  assert.match(page, /until they do, nothing is booked\. If anything changes, change it in My Trip and send us the update\./);
+  assert.match(page, /Sending is not a payment, and you can still change anything afterwards\./);
+  assert.match(page, /if\(w\.key==='changed'\)return nj&&!w\.declined\?'Send my reply':'Send the update';/);
+  assert.equal((page.match(/<p class="t-l1 on">Confirmed by Guest Relations<\/p>/g) || []).length >= 1, true, 'Confirmed is only ever Guest Relations\' word');
   /* one guest, never a party headcount */
   assert.doesNotMatch(page, /p\.guests\.forEach|For your party|Total for your party/);
-  assert.equal(page.includes('YOUR COST'), true);
+  assert.match(page, /L\.push\('','TOTAL: USD '\+SIYL_BAG\.total\(\)/); /* B3: the internal text's total line */
   assert.doesNotMatch(page, /Contribution|Beitrag|Eigenanteil/);
 });
 
@@ -697,8 +720,8 @@ test('ABOUT YOU is one required question, six favourites and one required acknow
   const block = qs.slice(qs.indexOf('export const PROFILE = ['), qs.indexOf('/* A WISH FROM THE BRIDE & GROOM'));
   const keys = [...block.matchAll(/\{ key: '([a-z]+)'/g)].map((m) => m[1]);
   assert.deepEqual(keys, ['coffeetea', 'flavor', 'drink', 'film', 'genres', 'music'], 'the one schema (22 Sep 2026): five required, the song line optional');
-  /* My Favorite Flavor (Owner, 18 Sep 2026): one choice of exactly six, in this order */
-  assert.match(block, /key: 'flavor', n: '03', q: 'My Favorite Flavor', hint: 'Choose one\.', required: true, type: 'choice', choices: \['Coffee', 'Milk', 'Butter', 'Pandan', 'Matcha Green Tea', 'Strawberry Milk'\]/);
+  /* My favourite flavour (Owner, 18 Sep 2026 · TO-02365 wording): one choice of exactly six, in this order */
+  assert.match(block, /key: 'flavor', n: '03', q: 'My favourite flavour', label: 'My favourite flavour', hint: 'Choose one\.', required: true, type: 'choice', choices: \['Coffee', 'Milk', 'Butter', 'Pandan', 'Matcha Green Tea', 'Strawberry Milk'\]/);
   assert.doesNotMatch(block, /q: 'My Favorite Snack'|key: 'treat'/, 'the snack question is retired');
   assert.match(qs, /export const ALLERGY = \{ key: 'allergy'/); assert.match(g, /var ALLERGY = Q\.ALLERGY/);
   assert.doesNotMatch(g, /var ACCESS =|key: 'comfort'|key: 'anything'|key: 'dietary'/);
@@ -709,7 +732,7 @@ test('ABOUT YOU is one required question, six favourites and one required acknow
   assert.match(about, /G\.PROFILE\.forEach/);
   assert.match(about, /id="allergy-text" data-allergy-text aria-required="true"/);
   assert.doesNotMatch(about, /Who are you answering for\?/);
-  ['A little more about you', 'Travel documents', 'Photography &amp; film', 'Your publication choice']
+  ['A little more about you', 'Travel documents', 'Photography &amp; film', 'May we publish them?'] /* TO-02315 */
     .forEach((h) => assert.ok(about.includes(h), 'ABOUT YOU lacks the area ' + h));
   assert.match(about, /D\.KINDS\.map/, 'documents must live inside step 05');
   assert.match(about, /P\.foot\(/, 'the continuation is the shell foot');
@@ -719,7 +742,7 @@ test('ABOUT YOU is one required question, six favourites and one required acknow
   const you = readFileSync(join(ROOT, 'you.html'), 'utf8');
   assert.match(you, /url=invitation\.html#contact/);
   const inv = readFileSync(join(ROOT, 'invitation.html'), 'utf8');
-  assert.match(inv, /id="p-email"/); assert.match(inv, /id="p-phone"/); assert.match(inv, /From your invitation/);
+  assert.match(inv, /id="p-email"/); assert.match(inv, /id="p-phone"/); assert.doesNotMatch(inv, /From your invitation/); /* B5: removed */
 });
 
 test('every underlined title leads somewhere, and the Sangkhathan carries its own action', () => {
@@ -727,8 +750,8 @@ test('every underlined title leads somewhere, and the Sangkhathan carries its ow
   assert.match(review, /href="wedding\.html#sangkhathan">Complete this/, 'the offering action leads to its primary home, step 03');
   /* the journey keeps the wedding compact and sends the guest to step 03 */
   const journey = readFileSync(join(ROOT, 'your-journey.html'), 'utf8');
-  assert.match(journey, /Complete wedding decisions/);
-  assert.match(journey, /Review wedding details/);
+  assert.match(journey, /Answer in The Wedding/); /* TO-00621 */
+  assert.match(journey, /See your wedding answers/); /* TO-00622 */
   assert.doesNotMatch(journey, /data-ev=|data-off=|data-ack=/, 'no wedding control on the journey');
   /* every secondary action is the system's 44px target */
   const sys = readFileSync(join(ROOT, 'assets/prep.css'), 'utf8');
@@ -765,7 +788,7 @@ test('no rule is ever drawn through the word BLUE', () => {
   const wed = readFileSync(join(ROOT, 'wedding.html'), 'utf8');
   /* in the decision module the dress code is plain type, never a link label */
   assert.match(wed, /temple:'Lao Traditional Dress'/);
-  assert.match(wed, /Dress · '\+DRESS\[e\.key\]\+'/);
+  assert.match(wed, /Dress: '\+DRESS\[e\.key\]\+'/); /* B6 */
   /* and in the design system every secondary action is inline-flex, so a rule
    * can never be drawn through a wrapped line of type */
   const sys = readFileSync(join(ROOT, 'assets/prep.css'), 'utf8');
@@ -877,14 +900,18 @@ test('all four transport products carry the guest-facing sections', () => {
   const T = sandbox.window.SIYL_TRANSPORT;
   const order = sandbox.window.SIYL_TRANSPORT_ORDER;
   assert.deepEqual(order, ['train', 'mu9646', 'c86', 'return']);
+  /* the approved removals (B4, Window 007) left C86 three groups and one included line, MU9646 one included line, the return
+     three groups, two included lines (one per flight) and one transfer line — every other minimum stands */
+  const MIN = { train: { groups: 4, included: 3, transfer: 2 }, mu9646: { groups: 4, included: 1, transfer: 2 },
+                c86: { groups: 3, included: 1, transfer: 2 }, return: { groups: 3, included: 2, transfer: 1 } };
   for (const k of order) {
     const t = T[k];
     assert.ok(t.story && t.story.length > 80, k + ' has its own paragraph');
     assert.ok(t.facts.length >= 6, k + ' states the journey');
-    assert.ok(t.groups.length >= 4, k + ' describes cabin/seat, comfort and service');
-    assert.ok(t.included.length >= 3, k + ' says what is included');
+    assert.ok(t.groups.length >= MIN[k].groups, k + ' describes cabin/seat, comfort and service');
+    assert.ok(t.included.length >= MIN[k].included, k + ' says what is included');
     assert.ok(t.excluded.length >= 1, k + ' says what the guest arranges');
-    assert.ok(t.transfer.length >= 2, k + ' says how the guest arrives and moves on');
+    assert.ok(t.transfer.length >= MIN[k].transfer, k + ' says how the guest arrives and moves on');
     assert.ok(t.good.length >= 1, k + ' has a good-to-know');
     assert.ok(t.gallery.length >= 3, k + ' has verified photography');
     assert.ok(P.FLAT[k], k + ' is priced by the single calculation source');
@@ -922,7 +949,7 @@ test('the Owner-overridden transport facts are the ones on the page', () => {
   assert.match(JSON.stringify(T.c86.facts), /C86/);
   assert.match(JSON.stringify(T.c86.facts), /10:15/);
   assert.match(JSON.stringify(T.c86.facts), /13:44/);
-  assert.match(JSON.stringify(T.c86.facts), /3 hours 29 minutes/);
+  assert.match(JSON.stringify(T.c86.facts), /Direct · 3 h 29 min/); /* TO-03159 */
   assert.equal(P.FLAT.c86.price, 105, 'the current Operations Master (19 Sep 2026)');
   assert.match(P.FLAT.c86.basis, /^USD 105 per person · 1 seat · Business Class$/);
   assert.match(JSON.stringify(T.mu9646.facts), /MU9646/);
@@ -930,7 +957,7 @@ test('the Owner-overridden transport facts are the ones on the page', () => {
   assert.doesNotMatch(JSON.stringify(T.mu9646.facts), /14:00|16:40/);
   assert.match(JSON.stringify(T.mu9646.facts), /15:50/);
   assert.match(JSON.stringify(T.mu9646.facts), /18:25/);
-  assert.match(JSON.stringify(T.mu9646.facts), /1 hour 35 minutes/);
+  assert.match(JSON.stringify(T.mu9646.facts), /Non-stop · 1 h 35 min/); /* TO-03123 */
   assert.doesNotMatch(JSON.stringify(T.mu9646.facts), /Confirmed with your ticket/);
   assert.equal(P.FLAT.mu9646.price, 275);
   /* two approved fares, exactly one active, sharing the product's id */
@@ -938,7 +965,7 @@ test('the Owner-overridden transport facts are the ones on the page', () => {
   assert.equal(cls.length, 2);
   /* the baggage allowance is the source's, on both fares and in both places */
   assert.ok(cls[0].notes.includes('2 pieces of checked baggage'), 'Business baggage allowance');
-  assert.ok(cls[1].notes.includes('1 piece of free checked baggage'), 'Economy baggage allowance');
+  assert.ok(cls[1].notes.includes('1 piece of checked baggage'), 'Economy baggage allowance'); /* TO-01429 */
   assert.match(JSON.stringify(T.mu9646.groups), /Two pieces of checked baggage/);
   assert.equal(P.items('mu9646')[0].price, 275);
   assert.equal(P.items('mu9646')[0].cls, 'business');
@@ -1001,14 +1028,15 @@ test('every stay says what is included and what the guest arranges', () => {
     assert.ok(R[k].includes && R[k].includes.length >= 2, k + ' has no inclusions');
   }
   /* Bangkok: one address, its own truth (the Sathorn Penthouse deleted, Edit 6; Shama Yen-Akat deleted, 24 Sep 2026) —
-     U Sathorn says ONE ROOM PER COUPLE, CHECK-IN AT THE LOBBY, BREAKFAST INCLUDED, and nothing borrowed */
+     U Sathorn says its nights and BREAKFAST INCLUDED, and nothing borrowed */
   const byId = Object.fromEntries(R.sathorn.rooms.map(r => [r.slug, r]));
   assert.deepEqual(Object.keys(byId), ['u-sathorn-superior-garden']);
   assert.equal(byId['penthouse'], undefined, 'the Sathorn Penthouse is deleted');
   assert.equal(byId['shama-king-studio-balcony'], undefined, 'Shama Yen-Akat is deleted');
   for (const id of ['u-sathorn-superior-garden']) {
     const t = byId[id].includes.join(' ');
-    assert.match(t, /Breakfast included\./, id); assert.match(t, /Check-in at the lobby\./, id); assert.match(t, /per couple/, id);
+    /* TO-00990 removed “Check-in at the lobby.”, TO-00989 removed “per couple” (the nights sentence carries the stay) */
+    assert.match(t, /Breakfast included\./, id); assert.match(t, /^Three nights, 21 → 22, 22 → 23 and 23 → 24 February\./, id); assert.doesNotMatch(t, /Check-in at the lobby|per couple/, id);
     assert.doesNotMatch(t, /keybox|private entrance|private elevator|whole party|NOT included|groceries|Meals cooked|parking/, id + ' carries penthouse copy');
   }
   const grp = R.sathorn.includes.join(' ');
@@ -1019,7 +1047,7 @@ test('every stay says what is included and what the guest arranges', () => {
   assert.match(rh, /room\.breakfast \|\| stay\.breakfast/, 'breakfast is the room\'s own fact');
   assert.equal(byId['u-sathorn-superior-garden'].breakfast, 'Breakfast included');
   assert.match(R.kempinski.includes.join(' '), /Breakfast included/);
-  assert.match(R.souphattra.includes.join(' '), /no night between 25 February and 1 March is left uncovered/);
+  assert.match(R.souphattra.includes.join(' '), /The two stays run back to back: if you take both, every night from 25 February to 1 March is covered\./); /* TO-00824 */
 });
 
 /* ==========================================================================
@@ -1070,11 +1098,11 @@ test('the wedding page: four events, the Buddhist morning inside the ceremony', 
   /* Alms Giving is never a fifth event, and the food offering is never priced */
   assert.ok(!/Alms Giving/i.test(vy));
   assert.ok(!/<h2>Morning Alms-Giving<\/h2>[\s\S]{0,900}USD/.test(vy), 'the alms-giving must carry no price');
-  assert.match(vy, /Part of the Temple Ceremony · self-pay/);
+  assert.match(vy, /Part of the Temple Ceremony · your own offering/); /* B6: “self-pay” retired */ assert.doesNotMatch(vy, /self-pay/i);
   assert.doesNotMatch(vy, /USD \d+[^<]{0,40}(alms|Tak Bat)|Tak Bat[^<]{0,60}USD \d+/, 'no amount is ever invented for Tak Bat');
   /* only the Sangkhathan is USD 15 */
-  assert.match(vy, /Optional<span data-private> · USD 15 per guest<\/span>/);
-  assert.match(vy, /09:00 – approximately 12:00 · Wat Ong Teu, Vientiane/);
+  assert.match(vy, /Sangkhathan · optional<span data-private> · USD 15 per person<\/span>/); /* TO-02116 */
+  assert.match(vy, /09:00 – about 12:00 · Wat Ong Teu, Vientiane/); /* B6: the eyebrow's short form */
   assert.match(vy, /15:30 · Souphattra Heritage/);
   assert.doesNotMatch(vy, /08:00|16:30/, 'no retired time on the public wedding page');
   /* attendance is an explicit two-way decision — in the private journey */
@@ -1088,7 +1116,7 @@ test('the retired imagery and the pool-side dinner narrative are gone', () => {
   assert.ok(!/053-wedding-dinner-courtyard-garden/.test(vy), 'the fountain photograph is still there');
   /* Owner, 13 Sep 2026: the Wedding Dinner is POOLSIDE — said so, never "courtyard garden"; the pool stays out of the vow only */
   const dinnerSec = vy.slice(vy.indexOf('id="dinner"'), vy.indexOf('id="dinner"') + 900);
-  assert.match(dinnerSec, /19:30 · Poolside/); assert.match(dinnerSec, /gathering poolside/);
+  assert.match(dinnerSec, /19:30 · Souphattra Heritage · poolside/); assert.match(dinnerSec, /An evening poolside/); /* B6 */
   assert.ok(!/courtyard garden/i.test(vy), 'the dinner is poolside, not the courtyard garden');
   assert.ok(!/Sunset drinks/.test(vy));
   /* and the retired bride frame is not quietly moved to another event */
@@ -1113,4 +1141,21 @@ test('the retired imagery and the pool-side dinner narrative are gone', () => {
   assert.match(vy, /<div class="dgal" aria-label="The wedding dinner in photographs" data-wedding-dinner-gallery><\/div>/); assert.match(vy, /<script src="assets\/wedding-dinner\.js/); assert.match(vy, /<script src="assets\/refgal\.js/);
   assert.ok(!existsSync(join(ROOT, 'assets/images/event/053-wedding-dinner-courtyard-garden.jpg')), 'the fountain file (not from the Wedding Dinner folder) is retired');
   assert.match(vy, /souphattra\/heritage-room\.jpg/);
+});
+
+/* WINDOW 007 · resolved Owner decision: the Souphattra Presidential is USD 750 per person per night */
+test('PRESIDENTIAL · USD 750 per person per night — USD 1,500 for the Pre-Wedding Stay, USD 750 for the Wedding Stay (TO-00461 · TO-01310)', () => {
+  const pre = P.quote('prewed', 'souphattra-presidential'), wed = P.quote('wedstay', 'souphattra-presidential');
+  assert.equal(pre.rate, 750); assert.equal(pre.nightly, 'USD 750 per person per night');
+  assert.equal(pre.amount, 'USD 1,500'); assert.equal(pre.total, 1500);
+  assert.equal(wed.amount, 'USD 750'); assert.equal(wed.total, 750);
+});
+
+/* THE MY BAG BASIS (TO-01311 · TO-01312 · TO-01313): amount → for whom → how long, the nights named once, the nightly rate
+   without slash or ×. Kept apart so a divergence is reported on its own. */
+test('MY BAG BASIS · “USD 290 per person · 2 nights: 25 → 26 and 26 → 27 February · USD 145 per person per night”', () => {
+  const line = (win, slug) => { const it = P.items(win, slug)[0]; it.qty = 1; return it; };
+  assert.equal(P.lineBasis(line('prewed', 'heritage')), 'USD 290 per person · 2 nights: 25 → 26 and 26 → 27 February · USD 145 per person per night');
+  assert.match(P.lineBasis(line('kmg', 'left-bank')), /^USD 261 per person · 3 nights: .+ · USD 87 per person per night$/);
+  for (const [w, s] of [['prewed', 'heritage'], ['kmg', 'left-bank'], ['ljg', 'starry-sky']]) assert.doesNotMatch(P.lineBasis(line(w, s)), /total per person|\/ night|×/);
 });

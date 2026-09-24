@@ -43,16 +43,16 @@ test('B/C/D · stage D, 1 SOUPHATTRA HERITAGE: every category from The Heritage 
     const q = P.quote('wedstay', slug);
     assert.equal(q.rate, rate, slug + ' rate'); assert.equal(q.nights, 2); assert.equal(q.pay, 1); assert.equal(q.hosted, 1);
     assert.equal(q.total, rate, slug + ': the total for two nights is one nightly rate'); assert.notEqual(q.total, rate * 2, 'never charged twice');
-    assert.match(q.contribution, /second night hosted by Haruthai & Suthep/);
+    assert.equal(q.contribution, 'First night your cost, USD ' + rate + ' per person · second night complimentary, hosted by Haruthai & Suthep'); /* TO-01467 */
   }
   assert.equal(P.quote('wedstay', 'heritage').total, 145); assert.equal(P.quote('wedstay', 'heritage-executive').total, 155);
   assert.equal(P.quote('prewed', 'heritage-executive').total, 310, 'the Pre-Wedding Stay charges both nights — the rule is the wedding window\'s alone');
   assert.equal(P.quote('prewed', 'heritage-executive').total + P.quote('wedstay', 'heritage-executive').total, 465, 'C + D1 exists in arithmetic — and is composed by nobody');
-  assert.equal(R.souphattra.windows.find((x) => x.id === 'wedstay').dates, '27 February – 01 March 2027');
+  assert.equal(R.souphattra.windows.find((x) => x.id === 'wedstay').dates, '27 February – 1 March 2027'); /* TO-00818 */
   /* the journeys page: the order and the words */
   const jn = src('journeys.html');
   assert.ok(jn.indexOf('id="j-wedstay"') < jn.indexOf('id="j-guesthouse"'), 'Souphattra · Riverside · Guest House');
-  assert.match(jn, /Second night complimentary · You pay for the first night only/); assert.match(jn, /USD 0 · Complimentary<\/p><p class="pb" data-private>Both nights hosted by Haruthai &amp; Suthep/);
+  assert.ok(jn.includes('<p class="pb">You pay the first night; the second night is complimentary, hosted by Haruthai &amp; Suthep. For these two nights you can also take one of the four places in the Guest House complimentary, below.</p>'), 'TO-01290'); assert.match(jn, /Complimentary<\/p><p class="pb" data-private data-gh-line>Both nights hosted by Haruthai &amp; Suthep/);
 });
 
 test('E/F · 2 GUEST HOUSE: USD 0, complimentary, four shared places — one line for stage D, the previous place released, the amount the chosen alternative\'s own', async () => {

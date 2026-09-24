@@ -33,7 +33,7 @@
     var prev = document.createElement('button'), next = document.createElement('button');
     prev.type = next.type = 'button';
     prev.className = 'cg-nav cg-prev'; next.className = 'cg-nav cg-next';
-    prev.setAttribute('aria-label', 'The previous photograph'); next.setAttribute('aria-label', 'The next photograph');
+    prev.setAttribute('aria-label', 'Previous photograph'); next.setAttribute('aria-label', 'Next photograph');
     prev.innerHTML = '<i aria-hidden="true"></i>'; next.innerHTML = '<i aria-hidden="true"></i>';
     var count = document.createElement('p');
     count.className = 'cg-count'; count.setAttribute('aria-live', 'polite');

@@ -65,10 +65,11 @@
   function fit(t, size, font, maxW, floor) { while (size > (floor || 9) && width(t, size, font) > maxW * 0.9) size -= 0.5; return size; }   /* the estimate is rough: keep a tenth in hand */
 
   /* ---- one page of drawing operators ---- */
-  function Page() { this.ops = []; this.marks = []; }
+  function Page() { this.ops = []; this.marks = []; this.draw = []; }   /* draw: the same page as a list, for the Thai raster (buildRaster) */
   /* every drawn thing is remembered as a box, so a test can prove nothing leaves the safe area */
   Page.prototype.mark = function (x, y, w, h, what) { this.marks.push({ x: x, y: y, w: w, h: h, what: what || '' }); };
   Page.prototype.rect = function (x, y, w, h, fill, stroke, sw) {
+    this.draw.push(['rect', x, y, w, h, fill, stroke, sw]);
     var o = [];
     if (fill) o.push(fill + ' rg');
     if (stroke) o.push(stroke + ' RG ' + (sw || 0.6) + ' w');
@@ -76,11 +77,12 @@
     this.ops.push(o.join(' '));
     this.mark(x, y, w, h, 'rect');
   };
-  Page.prototype.line = function (x1, y1, x2, y2, color, sw) { this.ops.push((color || LINE) + ' RG ' + (sw || 0.6) + ' w ' + x1.toFixed(2) + ' ' + y1.toFixed(2) + ' m ' + x2.toFixed(2) + ' ' + y2.toFixed(2) + ' l S'); this.mark(Math.min(x1, x2), Math.min(y1, y2), Math.abs(x2 - x1), Math.abs(y2 - y1), 'line'); };
+  Page.prototype.line = function (x1, y1, x2, y2, color, sw) { this.draw.push(['line', x1, y1, x2, y2, color, sw, false]); this.ops.push((color || LINE) + ' RG ' + (sw || 0.6) + ' w ' + x1.toFixed(2) + ' ' + y1.toFixed(2) + ' m ' + x2.toFixed(2) + ' ' + y2.toFixed(2) + ' l S'); this.mark(Math.min(x1, x2), Math.min(y1, y2), Math.abs(x2 - x1), Math.abs(y2 - y1), 'line'); };
   /* a perforation: a dashed line, the dash pattern set and reset in the same operator */
-  Page.prototype.dashes = function (x1, y1, x2, y2, color, sw) { this.ops.push('[3 3] 0 d ' + (color || LINE) + ' RG ' + (sw || 0.7) + ' w ' + x1.toFixed(2) + ' ' + y1.toFixed(2) + ' m ' + x2.toFixed(2) + ' ' + y2.toFixed(2) + ' l S [] 0 d'); this.mark(Math.min(x1, x2), Math.min(y1, y2), Math.abs(x2 - x1), Math.abs(y2 - y1), 'dashes'); };
+  Page.prototype.dashes = function (x1, y1, x2, y2, color, sw) { this.draw.push(['line', x1, y1, x2, y2, color, sw, true]); this.ops.push('[3 3] 0 d ' + (color || LINE) + ' RG ' + (sw || 0.7) + ' w ' + x1.toFixed(2) + ' ' + y1.toFixed(2) + ' m ' + x2.toFixed(2) + ' ' + y2.toFixed(2) + ' l S [] 0 d'); this.mark(Math.min(x1, x2), Math.min(y1, y2), Math.abs(x2 - x1), Math.abs(y2 - y1), 'dashes'); };
   var K = 0.5523;
   Page.prototype.roundRect = function (x, y, w, h, r, fill, stroke, sw) {
+    this.draw.push(['roundRect', x, y, w, h, r, fill, stroke, sw]);
     var o = [], f = function (n) { return n.toFixed(2); };
     if (fill) o.push(fill + ' rg');
     if (stroke) o.push(stroke + ' RG ' + (sw || 0.6) + ' w');
@@ -96,6 +98,7 @@
     this.mark(x, y, w, h, 'roundRect');
   };
   Page.prototype.circle = function (cx, cy, r, fill, stroke, sw) {
+    this.draw.push(['circle', cx, cy, r, fill, stroke, sw]);
     var o = [], f = function (n) { return n.toFixed(2); }, k = r * K;
     if (fill) o.push(fill + ' rg');
     if (stroke) o.push(stroke + ' RG ' + (sw || 0.6) + ' w');
@@ -107,12 +110,13 @@
     this.ops.push(o.join(' '));
   };
   Page.prototype.text = function (x, y, t, font, size, color, spacing, align) {
+    this.draw.push(['text', x, y, t, font, size, color, spacing, align]);
     var w = width(t, size, font) + (spacing || 0) * String(t).length;
     if (align === 'center') x -= w / 2; else if (align === 'right') x -= w;
     this.ops.push('BT ' + (color || INK) + ' rg /' + font + ' ' + size + ' Tf ' + (spacing || 0) + ' Tc ' + x.toFixed(2) + ' ' + y.toFixed(2) + ' Td ' + enc(t) + ' Tj ET');
     this.mark(x, y - size * 0.22, w, size, 'text:' + String(t).slice(0, 24));
   };
-  Page.prototype.label = function (x, y, t, align, color) { this.text(x, y, String(t).toUpperCase(), 'F2', 7.2, color || MUTE, 1.6, align); };
+  Page.prototype.label = function (x, y, t, align, color) { this.text(x, y, String(t).toUpperCase(), 'F2', 7.2, color || MUTE, 1.6, align); this.draw[this.draw.length - 1].push(String(t)); };
   /* the QR code, module by module, quiet zone kept */
   Page.prototype.qr = function (modules, x, y, size, ink) {
     if (!modules) return;
@@ -136,8 +140,63 @@
     return { x: box.x + pad, y: box.y + box.h - pad, w: px - box.x - pad * 2, bottom: box.y + pad, stub: { x: px + 18, w: box.stub - 36, cx: px + box.stub / 2 } };
   };
 
+
+  /* ---- THE THAI TICKET (Owner, 24 Sep 2026): the PDF's own fonts carry Latin only, so a ticket in Thai is the same page drawn
+   * in the browser — the same frame, the same positions, the words in Thai from assets/i18n/siyl-i18n.js — and embedded as one
+   * image per page. English tickets are unchanged (text PDF). ---- */
+  function thai() { return typeof document !== 'undefined' && root && root.SIYL_I18N && root.SIYL_I18N.lang === 'th'; }
+  function rgb(c) { var p = String(c || INK).split(/\s+/).map(Number); return 'rgb(' + Math.round(p[0] * 255) + ',' + Math.round(p[1] * 255) + ',' + Math.round(p[2] * 255) + ')'; }
+  var FACE = { F1: "'PP Editorial Old','Noto Serif Thai','Thonburi','Leelawadee UI',Georgia,serif", F2: "'Hanken Grotesk','Noto Sans Thai','Thonburi','Leelawadee UI',Tahoma,sans-serif", F3: "italic 'PP Editorial Old','Noto Serif Thai','Thonburi',Georgia,serif" };
+  function paint(page, S) {
+    var cv = document.createElement('canvas'); cv.width = Math.round(PAGE.w * S); cv.height = Math.round(PAGE.h * S);
+    var g = cv.getContext('2d'), Y = function (y) { return (PAGE.h - y) * S; };
+    g.fillStyle = rgb(GROUND); g.fillRect(0, 0, cv.width, cv.height);
+    var tr = function (t) { return root.SIYL_I18N.tr(String(t)); };
+    function shape(fill, stroke, sw) { if (fill) { g.fillStyle = rgb(fill); g.fill(); } if (stroke) { g.strokeStyle = rgb(stroke); g.lineWidth = (sw || 0.6) * S; g.stroke(); } }
+    page.draw.forEach(function (d) {
+      var k = d[0];
+      if (k === 'rect') { g.beginPath(); g.rect(d[1] * S, Y(d[2] + d[4]), d[3] * S, d[4] * S); shape(d[5], d[6], d[7]); }
+      else if (k === 'roundRect') { var x = d[1] * S, y = Y(d[2] + d[4]), w = d[3] * S, h = d[4] * S, r = d[5] * S; g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); shape(d[6], d[7], d[8]); }
+      else if (k === 'circle') { g.beginPath(); g.arc(d[1] * S, Y(d[2]), d[3] * S, 0, Math.PI * 2); shape(d[4], d[5], d[6]); }
+      else if (k === 'line') { g.beginPath(); g.setLineDash(d[7] ? [3 * S, 3 * S] : []); g.moveTo(d[1] * S, Y(d[2])); g.lineTo(d[3] * S, Y(d[4])); g.strokeStyle = rgb(d[5] || LINE); g.lineWidth = (d[6] || 0.6) * S; g.stroke(); g.setLineDash([]); }
+      else if (k === 'text') {
+        var words = tr(d[9] != null ? d[9] : d[3]), size = d[5] * S, font = d[4];
+        if (d[9] != null && !/[\u0E00-\u0E7F]/.test(words)) words = String(words).toUpperCase();
+        g.font = (font === 'F3' ? FACE.F3.replace('italic ', 'italic ' + size + 'px ') : size + 'px ' + (FACE[font] || FACE.F2));
+        g.fillStyle = rgb(d[6]); g.textBaseline = 'alphabetic';
+        var x = d[1] * S, w = g.measureText(words).width, room = (PAGE.w - SAFE.x) * S - x;
+        if (d[8] === 'center') { x -= w / 2; room = Math.min(x, (PAGE.w - SAFE.x) * S - x) * 2 + w; } else if (d[8] === 'right') { x -= w; room = w; }
+        g.fillText(words, x, Y(d[2]), Math.max(room, 40));
+      }
+    });
+    return cv;
+  }
+  function buildRaster(pages, meta) {
+    var objs = [], S = 3;
+    function add(s) { objs.push(s); return objs.length; }
+    var pagesIdx = pages.length * 3 + 1, kids = [];
+    pages.forEach(function (p) {
+      var cv = paint(p, S), bin = atob(cv.toDataURL('image/jpeg', 0.9).split(',')[1]);
+      var im = add('<< /Type /XObject /Subtype /Image /Width ' + cv.width + ' /Height ' + cv.height + ' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ' + bin.length + ' >>\nstream\n' + bin + '\nendstream');
+      var content = 'q ' + PAGE.w + ' 0 0 ' + PAGE.h + ' 0 0 cm /Im' + im + ' Do Q';
+      var c = add('<< /Length ' + content.length + ' >>\nstream\n' + content + '\nendstream');
+      var pg = add('<< /Type /Page /Parent ' + pagesIdx + ' 0 R /MediaBox [0 0 ' + PAGE.w + ' ' + PAGE.h + '] /Resources << /XObject << /Im' + im + ' ' + im + ' 0 R >> >> /Contents ' + c + ' 0 R >>');
+      kids.push(pg + ' 0 R');
+    });
+    var pagesObj = add('<< /Type /Pages /Kids [' + kids.join(' ') + '] /Count ' + kids.length + ' >>');
+    var info = add('<< /Title ' + enc(meta.title) + ' /Author (see you in laos.) /Producer (see you in laos.) >>');
+    var catalog = add('<< /Type /Catalog /Pages ' + pagesObj + ' 0 R >>');
+    var out = '%PDF-1.4\n%\u00e2\u00e3\u00cf\u00d3\n', offsets = [];
+    objs.forEach(function (o, i) { offsets.push(out.length); out += (i + 1) + ' 0 obj\n' + o + '\nendobj\n'; });
+    var xref = out.length;
+    out += 'xref\n0 ' + (objs.length + 1) + '\n0000000000 65535 f \n';
+    offsets.forEach(function (o) { out += ('0000000000' + o).slice(-10) + ' 00000 n \n'; });
+    out += 'trailer\n<< /Size ' + (objs.length + 1) + ' /Root ' + catalog + ' 0 R /Info ' + info + ' 0 R >>\nstartxref\n' + xref + '\n%%EOF\n';
+    return out;
+  }
   /* ---- the document: pages → bytes ---- */
   function build(pages, meta) {
+    if (thai()) return buildRaster(pages, meta);
     var objs = [];
     function add(s) { objs.push(s); return objs.length; }
     var fonts = add('<< /Type /Font /Subtype /Type1 /BaseFont /Times-Roman /Encoding /WinAnsiEncoding >>');
@@ -162,6 +221,13 @@
     offsets.forEach(function (o) { out += ('0000000000' + o).slice(-10) + ' 00000 n \n'; });
     out += 'trailer\n<< /Size ' + (objs.length + 1) + ' /Root ' + catalog + ' 0 R /Info ' + info + ' 0 R >>\nstartxref\n' + xref + '\n%%EOF\n';
     return out;
+  }
+  /* "Downloaded on 24 September 2026, 08:07 UTC" (TO-01531) — the stamp every ticket prints at its foot */
+  var MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  function downloadedWords(iso) {
+    var d = new Date(iso); if (isNaN(d.getTime())) return 'Downloaded';
+    var hh = ('0' + d.getUTCHours()).slice(-2), mm = ('0' + d.getUTCMinutes()).slice(-2);
+    return 'Downloaded on ' + d.getUTCDate() + ' ' + MONTHS[d.getUTCMonth()] + ' ' + d.getUTCFullYear() + ', ' + hh + ':' + mm + ' UTC';
   }
   function byteLen(s) { var n = 0; for (var i = 0; i < s.length; i++) n += s.charCodeAt(i) > 255 ? 1 : 1; return n; }   /* latin-1 bytes, one per char */
   function toBytes(s) { var b = new Uint8Array(s.length); for (var i = 0; i < s.length; i++) b[i] = s.charCodeAt(i) & 255; return b; }
@@ -193,12 +259,13 @@
   /* ---- the seat ticket ---------------------------------------------------- */
   /* Owner, Edit 2 (15 Sep 2026): the Wedding (Vow) Ceremony at Souphattra Heritage, 15:30; the dinner poolside, 19:30 */
   var EVENT_TIME = { ceremony: '15:30', dinner: '19:30' };
-  var EVENT_HEAD = { ceremony: 'Wedding Ceremony · Souphattra Heritage', dinner: 'Wedding Dinner · Poolside' };
+  var EVENT_HEAD = { ceremony: 'Vow Ceremony · Souphattra Heritage', dinner: 'Wedding Dinner · poolside' };
   var ALPHA = '23456789BCDFGHJKMNPQRSTVWXZ';
   /* the hosts' ceremony place, in words: their role when the record names it */
   function fixedWords(role) { return role === 'BRIDE' ? 'Bride' : role === 'GROOM' ? 'Groom' : 'Bride & Groom'; }
-  function seatWords(s) { return s.fixed ? fixedWords(s.fixed) + ' · Front Centre' : L.label(s.seatId); }
-  function seatDetail(s) { return s.fixed ? 'Front · between the two blocks' : L.describe(s.seatId); }
+  /* the hosts' place (TO-01736): who, then where — “{Groom} · at the front, between the two blocks”; the status says “Front centre” */
+  function seatWords(s) { return s.fixed ? fixedWords(s.fixed) : L.label(s.seatId); }
+  function seatDetail(s) { return s.fixed ? 'At the front, between the two blocks' : L.describe(s.seatId); }
   /* the ticket reference: the ledger's own for a held chair; for a fixed position a digest of the position — never a code, never an id */
   function refOf(doc, s) {
     if (!s.fixed) return L.ref(doc.party.invitationId, doc.guest.guestId, s.event, s.seatId);
@@ -209,7 +276,7 @@
   function stateOf(s) { return s.fixed ? 'FRONT CENTRE' : 'HELD'; }
   /* the words inside the code: the ticket, readable by any scanner, secret to nobody */
   function payload(doc, s) {
-    return ['SEE YOU IN LAOS', 'SEAT TICKET ' + refOf(doc, s), doc.guest.preferredName, L.EVENT_NAME[s.event], L.EVENT_DATE + ' · ' + EVENT_TIME[s.event], (s.fixed ? seatWords(s) : 'Seat ' + L.label(s.seatId) + ' · ' + L.describe(s.seatId)), stateOf(s)].join('\n');
+    return ['SEE YOU IN LAOS', 'SEAT TICKET ' + refOf(doc, s), doc.guest.preferredName, L.EVENT_NAME[s.event], L.EVENT_DATE + ' · ' + EVENT_TIME[s.event], (s.fixed ? fixedWords(s.fixed) + ' · Front centre' : 'Seat ' + L.label(s.seatId) + ' · ' + L.describe(s.seatId)), stateOf(s)].join('\n');
   }
 
   /* one seat ticket drawn on a page: box = { x, y (bottom), w, h } — h is TICKET_H */
@@ -229,11 +296,10 @@
     /* the guest, the seat, the status — three columns */
     var c1 = x, c2 = x + w * 0.40, c3 = x + w * 0.75, fy = top - 134;
     p.label(c1, fy, 'Guest'); p.text(c1, fy - 20, doc.guest.fullName, 'F1', fit(doc.guest.fullName, 15, 'F1', c2 - c1 - 14, 10));
-    p.label(c1, fy - 42, 'Held for'); p.text(c1, fy - 56, doc.guest.preferredName || doc.guest.fullName, 'F2', 10, INK, 0.8);
     p.label(c2, fy, 'Seat'); p.text(c2, fy - 27, seatWords(s), 'F1', s.fixed ? fit(seatWords(s), 15, 'F1', c3 - c2 - 12, 10) : 28);
     var detail = seatDetail(s); p.text(c2, fy - 42, detail, 'F2', fit(detail, 8, 'F2', c3 - c2 - 12, 6.5), MUTE, 0);
     p.label(c3, fy, 'Status'); p.text(c3, fy - 20, stateOf(s), 'F2', 8.5, INK, 1.8);
-    p.label(c3, fy - 42, 'Date'); p.text(c3, fy - 56, '28 Feb 2027 · ' + EVENT_TIME[s.event], 'F2', 9, INK, 0.4);
+    p.label(c3, fy - 42, 'Date'); p.text(c3, fy - 56, '28 February 2027 · ' + EVENT_TIME[s.event], 'F2', fit('28 February 2027 · ' + EVENT_TIME[s.event], 9, 'F2', x + w - c3, 6.5), INK, 0.2);
     /* the foot of the body */
     var by = g.bottom;
     p.line(x, by + 14, x + w, by + 14);
@@ -245,8 +311,7 @@
     p.text(st.cx, qy - 18, refOf(doc, s), 'F2', 8.6, INK, 1.4, 'center');
     p.label(st.cx, qy - 32, stateOf(s), 'center', ACCENT);
     p.label(st.cx, qy - 50, L.EVENT_NAME[s.event], 'center');
-    p.label(st.cx, qy - 62, '28 Feb 2027 · ' + EVENT_TIME[s.event], 'center');
-    p.label(st.cx, by, 'Scan at the door', 'center');
+    p.label(st.cx, qy - 62, '28 February 2027 · ' + EVENT_TIME[s.event], 'center');
   }
 
   /* ---- the confirmation itself ---------------------------------------
@@ -267,10 +332,10 @@
     doc.seats.forEach(function (s) { drawSeatTicket(p, doc, s, { x: M, y: y - H, w: W, h: H }); y -= H + GAP; });
     /* the words at the foot */
     y -= 6;
-    p.text(M, y, 'This ticket shows your seat exactly as Guest Relations hold it at the time of download.', 'F3', 9.5, MUTE); y -= 14;
-    p.text(M, y, 'It is a seat ticket for the wedding of Haruthai & Suthep; nothing here is charged.', 'F3', 9.5, MUTE); y -= 14;
-    p.text(M, y, 'If you change a seat, download this ticket again; the newer one is the one that counts.', 'F3', 9.5, MUTE);
-    p.label(M, SAFE.y + 14, 'Downloaded ' + doc.downloadedAt.replace('T', ' ').slice(0, 16) + ' UTC');
+    p.text(M, y, 'This ticket shows the seat held for you when you downloaded it.', 'F3', 9.5, MUTE); y -= 14;
+    p.text(M, y, 'There is nothing to pay for your seat at the wedding of Haruthai & Suthep.', 'F3', 9.5, MUTE); y -= 14;
+    p.text(M, y, 'If you change a seat, download a new ticket \u2014 the latest one is the one that counts.', 'F3', 9.5, MUTE);
+    p.label(M, SAFE.y + 14, downloadedWords(doc.downloadedAt));
     p.label(M + W, SAFE.y + 14, 'Sunday, 28 February 2027 · Vientiane, Laos', 'right');
     var title = (doc.seats.length > 1 ? 'Your wedding seats' : L.EVENT_NAME[doc.seats[0].event] + ' seat ticket') + ' · ' + doc.guest.preferredName;
     var out = build([p], { title: title, subject: 'Seat ticket · ' + (doc.guest.preferredName || doc.guest.fullName) });
@@ -332,7 +397,7 @@
     if (!doc || !doc.seats || !doc.seats.length) return '';
     var s = doc.seats[0], ref = refOf(doc, s), e = escH;
     return '<div class="p-ticket on p-ticket-seat" data-ticket="seat:' + e(s.event) + '" data-ticket-ref="' + e(ref) + '">' +
-      '<div class="p-ticket-head"><p class="t-l1">' + e(EVENT_HEAD[s.event]) + '</p><p class="t-l1 on" data-ticket-state><i class="prep-tick" aria-hidden="true"></i>' + e(s.fixed ? 'Front centre' : 'Held in your name') + '</p></div>' +
+      '<div class="p-ticket-head"><p class="t-l1">' + e(EVENT_HEAD[s.event]) + '</p><p class="t-l1 on" data-ticket-state><i class="prep-tick" aria-hidden="true"></i>' + e('Held for you') + '</p></div>' +   /* TO-00352: the hosts’ tickets too; “Front centre” is said once, in Status */
       '<h3 class="t-h1">' + e(L.EVENT_NAME[s.event]) + '</h3>' +
       '<div class="p-ticket-route p-ticket-event">' +
         '<div class="p-ticket-end"><b class="p-ticket-code' + (s.fixed ? ' small' : '') + '">' + e(seatWords(s)) + '</b><span class="t-b2">' + e(seatDetail(s)) + '</span></div>' +
@@ -341,15 +406,14 @@
       '<div class="p-ticket-tear" aria-hidden="true"></div>' +
       '<div class="p-ticket-body"><div class="p-ticket-facts">' +
         '<div><p class="t-l1">Guest</p><p class="t-b1">' + e(doc.guest.fullName) + '</p></div>' +
-        '<div><p class="t-l1">Held for</p><p class="t-b1">' + e(doc.guest.preferredName || doc.guest.fullName) + '</p></div>' +
-        '<div><p class="t-l1">Status</p><p class="t-b1">' + e(s.fixed ? 'Front centre' : 'Held in your name') + '</p></div>' +
+        '<div><p class="t-l1">Status</p><p class="t-b1">' + e(s.fixed ? 'Front centre' : 'Held for you') + '</p></div>' +
         '<div><p class="t-l1">Ticket reference</p><p class="t-b1"><span class="ref">' + e(ref) + '</span></p></div></div>' +
-        '<div class="p-ticket-code-box">' + qrSvg(payload(doc, s), 96, 'Seat ticket code ' + ref) + '<p class="t-l1">' + e(s.fixed ? 'Front centre' : 'Held in your name') + '</p></div></div>' +
+        '<div class="p-ticket-code-box">' + qrSvg(payload(doc, s), 96, 'Seat ticket code ' + ref) + '<p class="t-l1">' + e('Held for you') + '</p></div></div>' +
       (opts.actions ? '<div class="p-actions">' + opts.actions + '</div>' : '') + '</div>';
   }
 
   /* the writer, shared with the travel pass (assets/travelpass.js): one PDF grammar, one ticket frame, one code for every ticket */
-  var writer = { Page: Page, build: build, toBytes: toBytes, width: width, fit: fit, wrap: wrap, within: within, modules: modules, qrSvg: qrSvg, PAGE: PAGE, SAFE: SAFE, INK: INK, MUTE: MUTE, LINE: LINE, GROUND: GROUND, PAPER: PAPER, SHADE: SHADE, ACCENT: ACCENT };
+  var writer = { Page: Page, build: build, downloadedWords: downloadedWords, toBytes: toBytes, width: width, fit: fit, wrap: wrap, within: within, modules: modules, qrSvg: qrSvg, PAGE: PAGE, SAFE: SAFE, INK: INK, MUTE: MUTE, LINE: LINE, GROUND: GROUND, PAPER: PAPER, SHADE: SHADE, ACCENT: ACCENT };
   return { compose: compose, filename: filename, download: download, docFor: docFor, deliver: deliver, toBytes: toBytes, PAGE: PAGE, fixedWords: fixedWords,
            refOf: refOf, payload: payload, card: card, seatWords: seatWords, EVENT_TIME: EVENT_TIME, writer: writer };
 });

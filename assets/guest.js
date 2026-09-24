@@ -64,8 +64,11 @@
   /* REQUIRED: the guest knows that photography and filming take place. It is
    * an acknowledgement — never a consent to publication, which stays a
    * separate, optional, withdrawable choice (assets/docs.js). */
-  var PHOTO_TEXT = 'I understand and acknowledge this.';
-  var PHOTO_VERSION = '2026-09-20';   /* the acknowledgement's words: 20 Sep 2026 — filming and the possible publication named together */
+  /* THE ACKNOWLEDGEMENT'S WORDS (OQ-49 · PRQ-01-16 / 06-08, 24 Sep 2026): being photographed and filmed, and nothing else — publication
+   * stays its own optional choice. A new text is a new version: an acknowledgement given earlier keeps its own version ('2026-09-20',
+   * when filming and the possible publication were named together) and is never rewritten. */
+  var PHOTO_TEXT = 'I understand that I may be photographed and filmed during the wedding.';
+  var PHOTO_VERSION = '2026-09-24';
 
   var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
   function validEmail(v) { return EMAIL_RE.test(String(v || '').trim()); }
@@ -78,7 +81,12 @@
     return d.length >= 7 && d.length <= 20;
   }
 
+  /* “21 – 24 FEB” → “21 – 24 February”, “27 FEB – 01 MAR” → “27 February – 1 March”, “06 MAR” → “6 March” (the date in prose, no leading zero) */
+  var MON = { JAN: 'January', FEB: 'February', MAR: 'March', APR: 'April', MAY: 'May', JUN: 'June', JUL: 'July', AUG: 'August', SEP: 'September', OCT: 'October', NOV: 'November', DEC: 'December' };
+  function proseWhen(w) { return String(w || '').replace(/\b0(\d)\b/g, '$1').replace(/\b(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)\b/gi, function (m) { return MON[m.toUpperCase()]; }); }
+
   var G = window.SIYL_GUEST = {
+    proseWhen: proseWhen,
     ALLERGY: ALLERGY,
     PROFILE: PROFILE,
     FINALE: FINALE,
@@ -130,7 +138,16 @@
       var n = (p.members || []).map(function (g) { return self.nameOf(g.guestId); }).filter(Boolean);
       return n.length > 1 ? n.slice(0, -1).join(', ') + ' & ' + n[n.length - 1] : (n[0] || p.partyName);
     },
-    partyLabel: function () { var p = this.party(); return p ? 'Your party · ' + this.partyNames() : ''; },
+    /* PARTY NAMES WITHOUT THE READER (PRQ-01-01): the members other than the signed-in guest — “Ben”, “Ben and Carla”,
+       “Ben, Carla and Dan”. partyNames() stays for the Guest Relations record. */
+    othersNames: function () {
+      var self = this, n = this.others().map(function (g) { return self.nameOf(g.guestId); }).filter(Boolean);
+      return n.length > 1 ? n.slice(0, -1).join(', ') + ' and ' + n[n.length - 1] : (n[0] || '');
+    },
+    /* “with Ben” / “with Ben and Carla” — the step header's who line (“Ada · with Ben”); '' for a guest invited alone */
+    withWords: function () { var o = this.othersNames(); return o ? 'with ' + o : ''; },
+    /* the My Profile party line (OQ-35): guests “Invited together with {Ben}”, the hosts “With {Haruthai}” */
+    partyLabel: function () { var p = this.party(), o = this.othersNames(); if (!p || !o) return ''; return p.hosts ? 'With ' + o : 'Invited together with ' + o; },
     labelFor: function (id) { return 'For ' + this.nameOf(id); },
     others: function () { var p = this.party(), me = this.me(); return p ? (p.members || []).filter(function (g) { return g.guestId !== me.guestId; }) : []; },
 
@@ -189,7 +206,7 @@
      * wedding scope from "vientiane", the pre-wedding scope from the guest's REAL Pre-Wedding Stay (declined → not joined) —
      * deterministic, idempotent, never a rebooking. The hosts join everything by definition. */
     DESTINATIONS: (window.SIYL_GRAPH ? window.SIYL_GRAPH.SCOPES : [
-      { key: 'bangkok', label: 'Bangkok', when: '21 – 24 February + 6 – 8 March' },
+      { key: 'bangkok', label: 'Bangkok', when: '21 – 24 February and 6 – 8 March' },
       { key: 'vientianePreWedding', label: 'Vientiane · Before the Wedding', when: '25 – 27 February' },
       { key: 'vientianeWedding', label: 'Vientiane · The Wedding', when: '27 February – 1 March' },
       { key: 'china', label: 'China', when: '1 – 6 March' }
@@ -262,19 +279,21 @@
     PERSONAL: [
       /* THE GUEST'S OWN NAME (Owner, 21 Sep 2026): editable, prefilled from the invitation; a correction changes the words,
          never the identity (guestId · CONxxx · COUPLxxx · the code) */
-      { key: 'firstName', label: 'First Name', name: true }, { key: 'lastName', label: 'Last Name', name: true },
-      { key: 'birthdate', label: 'Date of Birth' }, { key: 'nationality', label: 'Nationality' }, { key: 'phone', label: 'Phone Number' }, { key: 'email', label: 'Email Address' },
-      { key: 'address1', label: 'Street and house number', group: 'address' }, { key: 'address2', label: 'Address line 2', group: 'address', optional: true }, { key: 'postal', label: 'Postal / ZIP code', group: 'address' },
-      { key: 'city', label: 'City', group: 'address' }, { key: 'region', label: 'State / Province / Region', group: 'address', optional: true }, { key: 'country', label: 'Country', group: 'address' }
+      { key: 'firstName', label: 'First name', name: true }, { key: 'lastName', label: 'Last name', name: true },
+      { key: 'birthdate', label: 'Date of birth' }, { key: 'nationality', label: 'Nationality' }, { key: 'phone', label: 'Mobile number' }, { key: 'email', label: 'Email address' },
+      { key: 'address1', label: 'Street and house number', group: 'address' }, { key: 'address2', label: 'Address line 2', group: 'address', optional: true }, { key: 'postal', label: 'Postcode or ZIP code', group: 'address' },
+      { key: 'city', label: 'City', group: 'address' }, { key: 'region', label: 'State, province or region', group: 'address', optional: true }, { key: 'country', label: 'Country', group: 'address' }
     ],
-    ADDRESS_WORDS: 'Please share the address where you can reliably receive personal mail. We may use it for wedding correspondence, invitations and occasional post related to your trip with us, including after the trip.',
+    ADDRESS_WORDS: 'The address where post reliably reaches you. We may use it for wedding letters, invitations and the occasional post about your trip — also once it is over.',
     /* the address as one line, for the record and the profile */
     addressWords: function () { var c = this; var parts = [c.contact('address1'), c.contact('address2'), [c.contact('postal'), c.contact('city')].filter(Boolean).join(' '), c.contact('region'), c.contact('country')].filter(Boolean); return parts.join(', '); },
     addressComplete: function () { return !!(this.contact('address1') && this.contact('postal') && this.contact('city') && this.contact('country')); },
     birthdateWords: function () { var v = this.contact('birthdate'); var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v); if (!m) return v || ''; var M = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']; return String(parseInt(m[3], 10)) + ' ' + M[parseInt(m[2], 10) - 1] + ' ' + m[1]; },
     validBirthdate: function (v) { var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(v || '').trim()); if (!m) return false; var y = +m[1]; var d = new Date(Date.UTC(y, +m[2] - 1, +m[3])); return y >= 1900 && y <= new Date().getUTCFullYear() && d.getUTCMonth() === +m[2] - 1 && d.getUTCDate() === +m[3] && d.getTime() < Date.now(); },
-    /* the fields still empty — asked for, never blocking the journey */
-    personalMissing: function () { var self = this; return this.PERSONAL.filter(function (f) { return !f.optional && !f.name && !self.contact(f.key); }).map(function (f) { return { key: f.key, label: f.label, href: 'invitation.html#p-' + f.key }; }); },
+    /* ONE COUNT FOR THE PERSONAL DETAILS (PRQ-01-08): the personal fields step 01 still needs — the names, the date of birth, the
+       nationality and the address — never the email and mobile number, which are the Contact card's; the same items, and so the same
+       number, as step 01 */
+    personalMissing: function () { return this.youMissing().filter(function (m) { return m.key !== 'email' && m.key !== 'phone'; }); },
     /* the guest list's own data, taken once into empty fields of this guest's record — prefilled to review, never overwriting
        what the guest or the server already holds; recorded in the history as the list's */
     /* the invitation's name as First Name · Last Name: the preferred name first (the register's), the rest of the full name last */
@@ -287,7 +306,9 @@
       return { first: first, last: last };
     },
     /* the two name fields as the guest sees them: their own correction, else the invitation's words — nothing is written until the guest edits */
-    nameField: function (key) { var v = this.contact(key); if (v) return v; var np = this.nameParts(); return key === 'firstName' ? np.first : key === 'lastName' ? np.last : ''; },
+    /* A CLEARED NAME STAYS CLEARED (PRQ-01-20): a name the guest emptied is stored as an explicit '' and is never refilled from the
+       invitation — so “Please add your first name.” can appear and the step stays incomplete */
+    nameField: function (key) { var st = read(), c = st.contact || {}; if (Object.prototype.hasOwnProperty.call(c, key) && (key === 'firstName' || key === 'lastName')) return c[key] || ''; var v = this.contact(key); if (v) return v; var np = this.nameParts(); return key === 'firstName' ? np.first : key === 'lastName' ? np.last : ''; },
     prefillFromInvitation: function () {
       var me = this.me(), a = auth(); if (!me || !a || !a.profile || typeof a.profile !== 'object') return false;
       var st = read(), c = st.contact || {}, pr = a.profile, changed = false, me2 = me.guestId;
@@ -305,7 +326,9 @@
       var st = read();
       st.contact = st.contact || {};
       var from = st.contact[f] || '';
-      if (from === v) return;
+      var isName = f === 'firstName' || f === 'lastName';
+      /* a name emptied for the first time is still a change: it replaces the invitation's words with an explicit '' */
+      if (from === v && !(isName && v === '' && !Object.prototype.hasOwnProperty.call(st.contact, f))) return;
       st.contact[f] = v;
       st.history = st.history || [];
       st.history.push({ field: 'contact.' + f, from: from, to: v, at: stamp(), by: me.guestId });
@@ -356,10 +379,11 @@
         return d;
       }).catch(function () { return null; });
     },
+    /* INVALID IS NOT MISSING (PRQ-01-19): a filled but invalid field reads “{field} — please check it”, an empty one its name */
     contactMissing: function () {
-      var out = [];
-      if (!validEmail(this.contact('email'))) out.push({ key: 'email', label: 'Email address', href: 'invitation.html#p-email' });
-      if (!validPhone(this.contact('phone'))) out.push({ key: 'phone', label: 'Mobile number', href: 'invitation.html#p-phone' });
+      var out = [], em = String(this.contact('email') || '').trim(), ph = String(this.contact('phone') || '').trim();
+      if (!validEmail(em)) out.push(em ? { key: 'email', label: 'Email address — please check it', href: 'invitation.html#p-email', invalid: true } : { key: 'email', label: 'Email address', href: 'invitation.html#p-email' });
+      if (!validPhone(ph)) out.push(ph ? { key: 'phone', label: 'Mobile number — please check it', href: 'invitation.html#p-phone', invalid: true } : { key: 'phone', label: 'Mobile number', href: 'invitation.html#p-phone' });
       return out;
     },
     contactComplete: function () { return this.contactMissing().length === 0; },
@@ -374,7 +398,7 @@
         if (f.optional || seen[f.key]) return;
         var v = f.name ? self.nameField(f.key) : self.contact(f.key);
         if (!String(v || '').trim()) out.push({ key: f.key, label: f.label, href: 'invitation.html#p-' + f.key });
-        else if (f.key === 'birthdate' && !self.validBirthdate(v)) out.push({ key: f.key, label: 'Date of Birth (a valid date)', href: 'invitation.html#p-birthdate' });
+        else if (f.key === 'birthdate' && !self.validBirthdate(v)) out.push({ key: f.key, label: 'Date of birth — please check it', href: 'invitation.html#p-birthdate', invalid: true });
       });
       return out;
     },
@@ -436,8 +460,8 @@
     },
     allergyMissing: function () {
       var a = this.allergy();
-      if (a === null) return [{ key: 'allergy', label: 'Food allergy answer', href: 'about-you.html#allergy' }];
-      if (a === 'yes' && !this.allergyDetails()) return [{ key: 'allergy-details', label: 'Food allergy details', href: 'about-you.html#allergy-details' }];
+      if (a === null) return [{ key: 'allergy', label: ALLERGY.label || 'Food allergies', href: 'about-you.html#allergy' }];
+      if (a === 'yes' && !this.allergyDetails()) return [{ key: 'allergy-details', label: Q.ALLERGY_DETAILS_LABEL || 'Food allergies — which ones', href: 'about-you.html#allergy-details' }];
       return [];
     },
     allergyComplete: function () { return this.allergyMissing().length === 0; },
@@ -452,14 +476,22 @@
       write(st);
       return true;
     },
-    /* every visible question, unanswered → named, with the way to its box */
+    /* ---- WHAT ABOUT YOU ASKS THIS GUEST (OQ-32 · PRQ-06-02 / CP-06 / CP-07) ----
+     * A guest not joining “Vientiane · The Wedding” is not asked questions 06 and 07 nor the Photography & film section; the hosts
+     * are not asked Photography & film (06 and 07 stay); a guest not joining the trip is asked nothing here. */
+    isHost: function () { var p = this.party(); return !!(p && p.hosts); },
+    atWedding: function () { return this.isHost() || this.joins('vientianeWedding'); },
+    weddingQuestionsApply: function () { return !this.scopeAnswered() || this.atWedding(); },
+    photoApplies: function () { return !this.isHost() && (!this.scopeAnswered() || this.atWedding()); },
+    aboutScope: function () { return { none: this.notJoining(), wedding: this.weddingQuestionsApply(), host: this.isHost(), photo: this.photoApplies() }; },
+    /* every visible question, unanswered → named by its short label, with the way to its box */
     profileMissing: function () {
-      var me = this.me(), self = this; if (!me) return [];
-      return Q.profileMissing(this.rec(me.guestId).profile);   /* the one schema decides what is required (src/questionnaire.js) */
+      var me = this.me(); if (!me) return [];
+      return Q.profileMissing(this.rec(me.guestId).profile, { wedding: this.weddingQuestionsApply() });   /* the one schema decides what is required (src/questionnaire.js) */
     },
     aboutMissing: function () {
       var out = this.allergyMissing().concat(this.profileMissing());
-      if (!this.photoAck()) out.push({ key: 'photo', label: 'Photography acknowledgement', href: 'about-you.html#photo' });
+      if (this.photoApplies() && !this.photoAck()) out.push({ key: 'photo', label: Q.PHOTO_LABEL || 'Photography & film', href: 'about-you.html#photo' });
       return out;
     },
     aboutComplete: function () { return this.aboutMissing().length === 0; },
@@ -471,8 +503,9 @@
     accessAll: function () { return this.aboutComplete(); },
 
     /* ---- the dress-code acknowledgement — first person only ------------- */
-    DRESS_TEXT: "I've reviewed the dress code and know what to prepare for the wedding journey.",
-    DRESS_VERSION: '2026-09-09',
+    /* the dress code acknowledgement's words (PRQ-06-09, 24 Sep 2026) — a new text is a new version; earlier answers keep theirs */
+    DRESS_TEXT: 'I have read the dress code and know what to wear on the wedding day and the travelling days.',
+    DRESS_VERSION: '2026-09-24',
     dressAck: function (id) {
       var me = this.me(); if (!me || (id && id !== me.guestId)) return null;
       return this.rec(me.guestId).dress || null;
@@ -503,7 +536,9 @@
       { key: 'about', n: '05', label: 'About You', href: 'about-you.html', required: true },
       { key: 'review', n: '06', label: 'Review & Send', href: 'review.html', required: true }
     ],
-    STATE_LABEL: { complete: '✓ Complete', current: 'Current', attention: 'Needs attention', locked: 'Locked', na: 'Not joining' },
+    /* the step states in the guest's words (Window 007): You are here · Opens later · Still to complete · Complete — and step 06,
+       when it may be sent, “Ready to send” (a state of its own, styled in Ink, never the Cherry of an open step — PRQ-01-18) */
+    STATE_LABEL: { complete: '✓ Complete', current: 'You are here', attention: 'Still to complete', locked: 'Opens later', na: 'Not joining', ready: 'Ready to send' },
 
     /* what each step still needs, in order, with the exact control */
     missingFor: function (key) {
@@ -515,7 +550,7 @@
       if (key === 'journey') {
         if (!J || !B) return [];
         /* the scope first: nothing else is asked until the guest has said where they join us; a guest who is not joining is asked nothing more here */
-        if (!this.scopeAnswered()) return [{ key: 'scope', label: 'Where will you join us?', href: 'your-journey.html#scope' }];
+        if (!this.scopeAnswered()) return [{ key: 'scope', label: 'Tell us which parts of the journey you are joining', href: 'your-journey.html#scope' }];
         /* WHAT IS OUTSIDE THE TRIP MUST HAVE LEFT (Codex final pass, 18 Sep 2026): a room, a seat or a line still held for a
            destination the guest is not joining blocks Review & Send until it is released — a failed release is never sent */
         out = out.concat(this.staleFor());
@@ -526,7 +561,13 @@
           var st = J.state(seg);
           if (st === 'waitlisted') return;                /* a stage on the waiting list is answered — visibly unresolved, never a missing item (Owner, 19 Sep 2026) */
           /* the ONE graph decides what counts as an answer: a declined mandatory stage (Kunming → Lijiang inside China) is not one */
-          if (st === 'open' || (GR && GR.resolved && !GR.resolved(seg.key, st))) { out.push({ key: 'stage:' + seg.key, label: seg.when + ' · ' + seg.place + (st === 'declined' ? ' — this train is part of China: choose it' : (GR && GR.MANDATORY && GR.MANDATORY.indexOf(seg.key) >= 0 ? ' — choose your travel, it is part of China' : ' — choose or say you are not joining')), href: 'your-journey.html#s-' + seg.key }); return; }
+          /* the item says what to do, in the guest's words (TO-00146 / TO-00152): the place and the date in prose, then the action */
+          if (st === 'open' || (GR && GR.resolved && !GR.resolved(seg.key, st))) {
+            var mandatory = st === 'declined' || (GR && GR.MANDATORY && GR.MANDATORY.indexOf(seg.key) >= 0);
+            var what = seg.place + ', ' + proseWhen(seg.when);
+            out.push({ key: 'stage:' + seg.key, label: what + (mandatory ? ' — please select it; it is needed for the China part of your trip' : seg.cat === 'Accommodation' ? ' — choose a stay, or tell us you won’t need it' : ' — select it, or tell us you won’t take it'), href: 'your-journey.html#s-' + seg.key });
+            return;
+          }
           /* a chosen stay is complete only once the guest holds a place in a room of it */
           if (st === 'selected' && seg.cat === 'Accommodation' && U && U.ready()) {
             var line = B.get().filter(function (x) { return seg.ids.indexOf(x.id) >= 0; })[0];
@@ -541,14 +582,15 @@
         if (!T) return [];
         if (!this.applicable('wedding')) return [];
         T.EVENTS.forEach(function (e) { if (T.eventOf(me.guestId, e.key) === null) out.push({ key: 'event:' + e.key, label: e.label + ' — attending or not', href: 'wedding.html#ev-' + e.key }); });
-        if (T.attendingOf(me.guestId) && T.canOffer(me.guestId) && T.offeringOf_(me.guestId) === null) out.push({ key: 'sangkhathan', label: 'Sangkhathan — yes or no', href: 'wedding.html#sangkhathan' });
-        /* A WISH FROM THE BRIDE & GROOM (Owner, 22 Sep 2026): the final act of the wedding night — required, never preselected */
-        if (T.finaleOf && T.finaleOf(me.guestId) === null) out.push({ key: 'finale', label: FINALE.eyebrow + ' — the pool jump or BARON', href: 'wedding.html#finale' });
+        if (T.attendingOf(me.guestId) && T.canOffer(me.guestId) && T.offeringOf_(me.guestId) === null) out.push({ key: 'sangkhathan', label: 'Sangkhathan offering — yes or no', href: 'wedding.html#sangkhathan' });
+        /* A WISH FROM THE BRIDE & GROOM (Owner, 22 Sep 2026): the final act of the wedding night — asked only of a guest who attends
+           the Wedding Dinner (OQ-34 · PRQ-05-01); required there, never preselected */
+        if (T.finaleOf && (!T.joining || T.joining(me.guestId, 'dinner')) && T.finaleOf(me.guestId) === null) out.push({ key: 'finale', label: 'After the dinner — the pool jump or BARON', href: 'wedding.html#finale' });
         return out;
       }
       if (key === 'preparation') {
         if (!this.applicable('preparation')) return [];
-        if (!this.dressAck()) out.push({ key: 'dress', label: 'Dress code acknowledgement', href: 'wedding-preparation.html#ack' });
+        if (!this.dressAck()) out.push({ key: 'dress', label: 'Dress code', href: 'wedding-preparation.html#ack' });
         /* seats: required for the events the guest attends, while seating is open to choose */
         if (T && S && S.ready() && S.open() && !S.frozen()) {
           if (T.joining(me.guestId, 'vows') && !p.hosts && S.configured('ceremony') && !S.seatOf('ceremony', me.guestId)) out.push({ key: 'seat:ceremony', label: 'Ceremony seat', href: 'wedding-preparation.html#seats' });
@@ -561,7 +603,7 @@
         var C = window.SIYL_CONFIRM;
         /* a sent journey is complete only while steps 01–05 still are: what came undone comes first */
         if (!this.mayEnter('review')) { var fm = this.firstMissing(); out.push({ key: 'steps', label: 'Complete ' + (fm ? fm.step.n + ' · ' + fm.step.label : 'the earlier steps'), href: fm ? fm.href : 'invitation.html' }); }
-        else if (!(C && C.state() !== 'none')) out.push({ key: 'send', label: 'Send your trip to Guest Relations', href: 'review.html#send' });
+        else if (!(C && C.state() !== 'none') && !(window.SIYL_DRAFT && SIYL_DRAFT.sent && SIYL_DRAFT.sent())) out.push({ key: 'send', label: 'Send your trip', href: 'review.html#send' });
         return out;
       }
       return out;
@@ -575,7 +617,7 @@
       if (B) B.get().forEach(function (x) {
         if (J.lineRelevant(x)) return;
         seen[x.id] = true;
-        out.push({ key: 'release:' + x.id, label: (x.name || x.id) + ' — outside your trip now, still to be released', href: 'your-journey.html#scope' });
+        out.push({ key: 'release:' + x.id, label: (x.name || x.id) + ' — still held for a part you are no longer joining', href: 'your-journey.html#scope' });
       });
       if (U && U.ready && U.ready() && U.view()) {
         var mine = U.view().mine || {};
@@ -584,19 +626,19 @@
           var relevant = seg ? J.relevant(seg) : J.lineRelevant({ id: stage });
           if (relevant) return;
           if (seg && seg.ids.some(function (id) { return seen[id]; })) return;   /* already named through its Bag line */
-          out.push({ key: 'release:room:' + stage, label: (seg ? seg.when + ' · ' + seg.place : stage) + ' — a room is still held for a stage outside your trip', href: 'your-journey.html#scope' });
+          out.push({ key: 'release:room:' + stage, label: (seg ? 'Your room in ' + seg.place + ', ' + proseWhen(seg.when) : 'Your room') + ' — still held for a part you are no longer joining', href: 'your-journey.html#scope' });
         });
         /* a waiting-list place for a stage outside the trip is given back as well (release 014) */
         var waits = U.view().waitlist || {};
         Object.keys(waits).forEach(function (stage) {
           var seg = J.SEGMENTS.filter(function (s) { return s.key === stage; })[0];
           if (!seg || J.relevant(seg)) return;
-          out.push({ key: 'release:wait:' + stage, label: seg.when + ' · ' + seg.place + ' — still on the waiting list for a stage outside your trip', href: 'your-journey.html#scope' });
+          out.push({ key: 'release:wait:' + stage, label: 'Your place on the waiting list in ' + seg.place + ', ' + proseWhen(seg.when) + ' — still open for a part you are no longer joining', href: 'your-journey.html#scope' });
         });
       }
       /* a seat while the ledger is open to the guest; a frozen ledger is Guest Relations' to change — the decline is sent, the seat is theirs to release */
       if (S && S.ready && S.ready() && S.open() && !S.frozen() && me && !this.joins('vientianeWedding')) ['ceremony', 'dinner'].forEach(function (ev) {
-        if (S.seatOf(ev, me.guestId)) out.push({ key: 'release:seat:' + ev, label: (ev === 'ceremony' ? 'Ceremony' : 'Dinner') + ' seat — still held although you are not joining the wedding', href: 'your-journey.html#scope' });
+        if (S.seatOf(ev, me.guestId)) out.push({ key: 'release:seat:' + ev, label: 'Your ' + (ev === 'ceremony' ? 'ceremony' : 'dinner') + ' seat — still held, although you are no longer joining the wedding', href: 'your-journey.html#scope' });
       });
       return out;
     },
@@ -607,11 +649,27 @@
       if (key === 'about') return !this.notJoining();
       return true;
     },
+    /* ---- THE STEPS THAT APPLY (PRQ-02-03 · PRQ-LEAD-02) ---- */
+    applicableSteps: function () { var self = this; return this.STEP_DEFS.filter(function (d) { return self.applicable(d.key); }); },
+    /* the next / previous step that applies to this guest (a guest not joining the wedding continues past 03 and 04) */
+    nextStep: function (key) { var d = this.STEP_DEFS, i = d.map(function (x) { return x.key; }).indexOf(key); for (var j = i + 1; j < d.length; j++) if (this.applicable(d[j].key)) return d[j]; return null; },
+    prevStep: function (key) { var d = this.STEP_DEFS, i = d.map(function (x) { return x.key; }).indexOf(key); for (var j = i - 1; j >= 0; j--) if (this.applicable(d[j].key)) return d[j]; return null; },
+    /* the earlier applicable steps that are not complete — the gate names each of them */
+    openEarlier: function (key) { var self = this, d = this.STEP_DEFS, i = d.map(function (x) { return x.key; }).indexOf(key), out = []; for (var j = 0; j < i; j++) if (d[j].required && self.applicable(d[j].key) && !self.done(d[j].key)) out.push(d[j]); return out; },
+    /* the note of a completed step, scoped to what the step asked this guest (PRQ-01-15) */
+    doneNote: function (key) {
+      if (key === 'you') return 'Name, contact and personal details';
+      if (key === 'journey') return this.notJoining() ? 'Not joining this trip' : 'Every part of your trip answered';
+      if (key === 'wedding') return 'Every part of the day answered';
+      if (key === 'preparation') return 'Dress code and seats';
+      if (key === 'about') return this.photoApplies() ? 'Allergies, favourites and photography answered' : 'Allergies and favourites answered';
+      return '';
+    },
     /* may the guest enter this step: every earlier required step is done */
     mayEnter: function (key) {
       var self = this, defs = this.STEP_DEFS, i = defs.map(function (d) { return d.key; }).indexOf(key);
       if (i < 0) return false;
-      for (var j = 0; j < i; j++) if (defs[j].required && !self.done(defs[j].key)) return false;
+      for (var j = 0; j < i; j++) if (defs[j].required && self.applicable(defs[j].key) && !self.done(defs[j].key)) return false;
       return true;
     },
     /* the first thing still needed across steps 01–05, with its step */
@@ -627,24 +685,28 @@
     nextHref: function () { var fm = this.firstMissing(); return fm ? fm.href : 'review.html'; },
 
     steps: function (currentKey) {
-      var self = this, C = window.SIYL_CONFIRM;
+      var self = this, D = window.SIYL_DRAFT;
       var p = this.party();
       return this.STEP_DEFS.map(function (d) {
         var missing = p ? self.missingFor(d.key) : [], done = !!p && missing.length === 0, may = !!p && self.mayEnter(d.key), applies = !p || self.applicable(d.key);
         var state = done ? 'complete' : (d.key === currentKey ? 'current' : (may ? 'attention' : 'locked'));
         if (d.key === currentKey && !done) state = 'current';
+        /* step 06, open and not yet sent: “Ready to send” — a normal state, not an alarm */
+        if (d.key === 'review' && !done && may && d.key !== currentKey) state = 'ready';
         if (p && !applies && d.key !== currentKey) state = 'na';
         var note = '';
         if (!p) note = 'Open your invitation';
         else if (!applies) note = self.notJoining() ? 'Not joining this trip' : 'Not joining the wedding';
-        else if (d.key === 'review') note = done ? (C && C.state() === 'confirmed' ? 'Confirmed by Guest Relations' : 'Received by Guest Relations') : (may ? 'Ready to send' : 'Available once steps 01–05 are complete');
-        else if (done) note = ({ you: 'Name, email and mobile number', journey: self.notJoining() ? 'Not joining this trip' : 'Every stage answered', wedding: 'Every part of the day answered', preparation: 'Dress code and seats', about: 'Allergies and photography answered' })[d.key] || '';
-        else if (!may) note = 'Complete the earlier steps first';
-        else note = missing.length === 1 ? '1 item to complete' : missing.length + ' items to complete';
+        else if (d.key === 'review') {
+          /* the one trip state (OQ-40): the draft module's words */
+          var w = D && D.words ? D.words() : null;
+          note = done ? (w && (w.key === 'confirmed' || w.key === 'changed') ? w.label : 'Sent to us') : (may ? 'Ready to send' : 'Opens once steps 01–05 are complete');
+        }
+        else if (done) note = self.doneNote(d.key);
+        else if (!may) note = 'Opens once the earlier steps are complete';
+        else note = missing.length === 1 ? '1 thing still needed' : missing.length + ' things still needed';
         return { key: d.key, n: d.n, label: d.label, href: d.href, required: d.required, done: done, state: state, stateLabel: self.STATE_LABEL[state],
-                 missing: missing, may: may, note: note, deep: missing.length ? missing[0].href : d.href,
-                 /* the retired vocabulary, for readers that still ask for it */
-                 action: done ? 'Review' : 'Complete this', legacyState: done ? 'Completed' : 'Action needed' };
+                 missing: missing, may: may, note: note, deep: missing.length ? missing[0].href : d.href };
       });
     },
     stepState: function (key) { var s = this.steps().filter(function (x) { return x.key === key; })[0]; return s ? s.state : ''; },
@@ -668,7 +730,7 @@
         guestId: me.guestId,
         partyId: p.partyId,
         partyName: p.partyName,
-        party: { label: this.partyLabel(), names: this.partyNames(), members: (p.members || []).map(function (m) { return m.guestId; }) },
+        party: { label: this.partyNames() ? 'Party · ' + this.partyNames() : '', names: this.partyNames(), members: (p.members || []).map(function (m) { return m.guestId; }) },
         contact: { email: this.contact('email'), phone: this.contact('phone'), birthdate: this.contact('birthdate'), nationality: this.contact('nationality'),
           address: { line1: this.contact('address1'), line2: this.contact('address2'), postal: this.contact('postal'), city: this.contact('city'), region: this.contact('region'), country: this.contact('country'), words: this.addressWords() } },
         ...(me.contactId ? { contactId: me.contactId } : {}), ...(me.couple ? { couple: me.couple } : {}),

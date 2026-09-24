@@ -13,10 +13,12 @@ import { PROFILE, GENRES, FINALE, profileMissing, finaleOf, REQUIRED } from '../
 test('THE SCHEMA · one source, its generated copy byte-current, every guest page loads it before guest.js; the genres are the Owner\'s ten plus three broad ones; the song line optional; the passport and the flight never required', () => {
   const r = execFileSync('node', [ROOT + '/src/build-questionnaire.cjs', '--check'], { encoding: 'utf8', cwd: ROOT }); assert.match(r, /questionnaire: current/);
   assert.deepEqual(GENRES.slice(0, 10), ['90s', 'Classics / Oldies', 'Blues', 'Jazz', 'R&B', 'Hip-Hop', 'Pop', 'Rock', 'EDM / Electronic', 'Latin']); assert.ok(GENRES.length <= 14, 'no encyclopaedia');
+  const q06 = PROFILE.find((q) => q.key === 'genres'); assert.deepEqual([q06.n, q06.q, q06.label, q06.hint], ['06', 'What makes you dance?', 'Your music', 'The wedding playlist is built from your answers — choose every genre you would dance to.'], 'Q06, the Owner decision (Window 007)');
+  assert.ok(GENRES.includes('Thai & Lao favourites'), '“Thai & Lao favourites” stays a genre');
   assert.deepEqual(PROFILE.map((q) => [q.key, q.required, q.type]), [['coffeetea', true, 'text'], ['flavor', true, 'choice'], ['drink', true, 'text'], ['film', true, 'text'], ['genres', true, 'multi'], ['music', false, 'text']]);
   assert.deepEqual(REQUIRED.optional, ['music', 'passport', 'flight', 'consent']); assert.ok(REQUIRED.wedding.includes('finale'));
-  assert.deepEqual(FINALE.options.map((o) => o.key), ['pool', 'baron']); assert.match(FINALE.options[0].line, /pool jump/i); assert.match(FINALE.options[1].line, /BARON Vientiane · VIP after party/);
-  assert.equal(finaleOf('pool'), 'pool'); assert.equal(finaleOf('BARON Vientiane · VIP after party'), 'baron'); assert.equal(finaleOf(''), null); assert.equal(finaleOf('both'), null); assert.equal(finaleOf(undefined), null);
+  assert.deepEqual(FINALE.options.map((o) => o.key), ['pool', 'baron']); assert.match(FINALE.options[0].line, /pool jump/i); assert.match(FINALE.options[1].line, /BARON Vientiane · VIP after-party/, 'TO-02387/TO-02389');
+  assert.equal(finaleOf('pool'), 'pool'); assert.equal(finaleOf('BARON Vientiane · VIP after-party'), 'baron'); assert.equal(finaleOf('BARON Vientiane · VIP after party'), 'baron', 'the words an older device stored are still read'); assert.equal(finaleOf(''), null); assert.equal(finaleOf('both'), null); assert.equal(finaleOf(undefined), null);
   for (const f of ['about-you.html', 'wedding.html', 'review.html', 'your-journey.html', 'profile.html', 'invitation.html']) { const h = src(f); assert.ok(h.indexOf('assets/questionnaire.js') < h.indexOf('assets/guest.js') && h.indexOf('assets/questionnaire.js') > 0, f + ' loads the questionnaire before guest.js'); }
   assert.match(src('assets/guest.js'), /if \(!Q\) throw new Error\('assets\/questionnaire\.js must load before guest\.js'\);/);
   assert.deepEqual(profileMissing({}).map((m) => m.key), ['profile:coffeetea', 'profile:flavor', 'profile:drink', 'profile:film', 'profile:genres']);
@@ -36,7 +38,7 @@ test('THE PAGE · the final act: null until the guest chooses, one of two, eithe
   assert.equal(JSON.parse(w.localStorage.getItem('siyl.temple')).by['g-steffie'], undefined);
   /* in the record for Guest Relations: the words and the key */
   T.setAttendance(id, 'no'); ['coffee', 'vows', 'dinner'].forEach((k) => T.setEvent(id, k, 'yes'));
-  const rec = plain(T.operational()); const me = rec.guests.find((g) => g.guestId === id); assert.equal(me.finale, 'BARON Vientiane · VIP after party'); assert.equal(me.finaleKey, 'baron');
+  const rec = plain(T.operational()); const me = rec.guests.find((g) => g.guestId === id); assert.equal(me.finale, 'BARON Vientiane · VIP after-party'); assert.equal(me.finaleKey, 'baron');
   /* the genres */
   assert.deepEqual(plain(G.profile(id, 'genres')), [], 'nothing pressed until the guest presses');
   assert.deepEqual(plain(G.toggleGenre(id, 'Jazz')), ['Jazz']); assert.deepEqual(plain(G.toggleGenre(id, '90s')), ['90s', 'Jazz'], 'the Owner\'s order, not the click order'); assert.deepEqual(plain(G.toggleGenre(id, 'Latin')), ['90s', 'Jazz', 'Latin']);
@@ -50,7 +52,7 @@ test('THE PAGE · the final act: null until the guest chooses, one of two, eithe
   G.setProfile(id, 'genres', []); assert.deepEqual(plain(G.missingFor('about').map((m) => m.key)), ['profile:genres']);
   G.setProfile(id, 'music', 'Blue in Green'); assert.deepEqual(plain(G.missingFor('about').map((m) => m.key)), ['profile:genres'], 'the song line does not stand in for the genres');
   /* the markup: nothing preselected, the two acts, the genres as checkboxes */
-  const wh = src('wedding.html'); assert.match(wh, /data-finale="'\+o\.key\+'"/, 'one control per act of the schema (pool · baron)'); assert.match(wh, /aria-pressed="'\+\(v===o\.key\)\+'"/, 'pressed only when chosen'); assert.match(wh, /Required · not decided/); assert.match(wh, /page\.querySelectorAll\('#finale \[data-finale\]'\)/);
+  const wh = src('wedding.html'); assert.match(wh, /data-finale="'\+o\.key\+'"/, 'one control per act of the schema (pool · baron)'); assert.match(wh, /aria-pressed="'\+\(v===o\.key\)\+'"/, 'pressed only when chosen'); assert.match(wh, /\(v===null\?'<p class="t-l1 open">Required<\/p>'/, 'TO-02259: open until chosen reads Required'); assert.match(wh, /page\.querySelectorAll\('#finale \[data-finale\]'\)/);
   const ah = src('about-you.html'); assert.match(ah, /role="checkbox" aria-checked="'\+\(on\?'true':'false'\)\+'"/); assert.match(ah, /Choose at least one/); assert.match(ah, /G\.toggleGenre\(/);
 });
 
@@ -76,7 +78,7 @@ test('THE WORKER · the same rule: a trip without the final act is refused (422,
   const h = await harness();
   const base = withWedding(); base.templeCeremony.guests[0].finale = 'Not decided'; base.templeCeremony.guests[0].finaleKey = null;
   let r = await h.send(base); assert.equal(r.status, 422); assert.equal(r.d.error, 'incomplete');
-  assert.deepEqual(r.d.missing.filter((m) => m.key === 'finale'), [{ key: 'finale', label: 'A wish from the Bride & Groom — the pool jump or BARON', step: 'wedding', href: 'wedding.html#finale' }]);
+  assert.deepEqual(r.d.missing.filter((m) => m.key === 'finale'), [{ key: 'finale', label: 'After the dinner — the pool jump or BARON' /* TO-00491 */, step: 'wedding', href: 'wedding.html#finale' }]);
   assert.equal(h.env.REG_KV.m.has('reg:INV-G001'), false, 'nothing stored');
   const pool = withWedding(); r = await h.send(pool); assert.ok(r.status === 200 || r.status === 202, JSON.stringify(r.d).slice(0, 200));
   let rec = JSON.parse(h.env.REG_KV.m.get('reg:INV-G001').v); const recPool = rec; assert.equal(rec.registration.templeCeremony.guests[0].finale, 'The pool jump'); assert.deepEqual(rec.registration.guestRecord.guests[0].profile.genres, ['Jazz', 'Latin'], 'the array, kept');
@@ -92,21 +94,27 @@ test('THE WORKER · the same rule: a trip without the final act is refused (422,
   const noFlavor = withWedding(); noFlavor.guestRecord.guests[0].profile.flavor = ''; r = await h.send(noFlavor); assert.equal(r.status, 422); assert.deepEqual(r.d.missing.map((m) => m.key), ['profile:flavor']);
   /* a guest not joining the trip owes no answer */
   const away = complete(REG(), { scope: { none: true } }); r = await h.send(away); assert.ok(r.status === 200 || r.status === 202, JSON.stringify(r.d).slice(0, 200));
-  /* a Bangkok-only guest: no wedding, so no final act — but the genres still */
+  /* a Bangkok-only guest: no wedding, so no final act — and (PRQ-06-02 · OQ-32, Window 007) no questions 06 and 07 either: the genres are asked of wedding guests only */
   const bkk = complete(REG(), { scope: { bangkok: true }, stages: { 'bkk-stay': 'declined', kempinski: 'declined' } }); r = await h.send(bkk); assert.ok(r.status === 200 || r.status === 202, JSON.stringify(r.d).slice(0, 200));
-  const bkkNoGenres = complete(REG(), { scope: { bangkok: true }, stages: { 'bkk-stay': 'declined', kempinski: 'declined' } }); bkkNoGenres.guestRecord.guests[0].profile.genres = []; r = await h.send(bkkNoGenres); assert.equal(r.status, 422);
+  const bkkNoGenres = complete(REG(), { scope: { bangkok: true }, stages: { 'bkk-stay': 'declined', kempinski: 'declined' } }); bkkNoGenres.guestRecord.guests[0].profile.genres = []; r = await h.send(bkkNoGenres); assert.ok(r.status === 200 || r.status === 202, JSON.stringify(r.d).slice(0, 200)); assert.ok(!(r.d.missing || []).some((m) => m.key === 'profile:genres'), 'never listed missing outside the wedding');
   /* the emails carry the answers */
   const { composeGuestMail, composeOwnerMail } = await import('../src/mail-templates.js');
   const gm = composeGuestMail(recPool), om = composeOwnerMail(recPool, ORIGIN + '/api/status?invitation=INV-G001');
-  assert.match(gm.text, /After the dinner: The pool jump/); assert.match(gm.text, /Your music \(genres\): Jazz · Latin/); assert.match(om.text, /After the dinner: The pool jump/); assert.match(om.text, /Jazz · Latin/);
+  assert.match(gm.text, /After the dinner: The pool jump/); assert.match(om.text, /After the dinner: The pool jump/);
+  /* Q06 (Owner decision, Window 007): the heading “What makes you dance?”, the short label “Your music” in BOTH emails; the genres listed with ", " (PRQ-06-06) */
+  for (const m of [gm, om]) { assert.match(m.text, /^· Your music: Jazz, Latin$/m); assert.doesNotMatch(m.text + m.html, /Your music \(genres\)/); }
   /* THE KARAOKE QUESTION (Owner, 24 Sep 2026): the same key, the new label in both emails */
   const recSong = JSON.parse(JSON.stringify(recPool)); recSong.registration.guestRecord.guests[0].profile.music = 'Dancing Queen';
   for (const m of [composeGuestMail(recSong), composeOwnerMail(recSong, ORIGIN + '/api/status?invitation=INV-G001')]) { assert.match(m.text, /Favourite karaoke song: Dancing Queen/); assert.doesNotMatch(m.text + m.html, /A song, an album, an artist/); }
 });
 
 test('THE REVIEW PAGE · a refused SEND says what is missing and where, and leaves the draft untouched (the other answers stand); the client checks readiness before it sends', () => {
-  const rv = src('review.html');
-  assert.match(rv, /if\(r\.status===422\)\{var inc=null;try\{inc=await r\.json\(\)\}catch\(e2\)\{\}var m0=inc&&inc\.missing&&inc\.missing\[0\];btn\.disabled=false;err\.innerHTML='Your trip is not complete yet'/, 'the first missing item, named, with its way');
-  assert.doesNotMatch(rv.slice(rv.indexOf('if(r.status===422)'), rv.indexOf('if(r.status===422)') + 600), /localStorage\.removeItem|SIYL_BAG\.set\(\[\]\)|clear\(/, 'a refusal destroys nothing');
+  /* the send goes through SIYL_DRAFT.send (Window 007): the draft maps the Worker's 422 to 'incomplete' with the missing list; the page names the first item and its way */
+  const rv = src('review.html'), dj = src('assets/draft.js');
+  assert.match(dj, /if \(r\.status === 422\) return \{ ok: false, status: 422, error: 'incomplete', message: d\.message \|\| '', missing: d\.missing \|\| \[\], answer: d \};/, 'the 422 keeps the missing list');
+  assert.match(rv, /if\(e==='incomplete'\)\{var m0=r\.missing&&r\.missing\[0\];err\.innerHTML=m0\?'Still needed before you send: '\+esc\(m0\.label\)\+'\.'\+\(m0\.href\?' <a class="p-link" href="'\+esc\(m0\.href\)\+'"[^>]*>Complete this<\/a>'/, 'the first missing item, named, with its way');
+  assert.doesNotMatch(rv.slice(rv.indexOf("if(e==='incomplete')"), rv.indexOf("if(e==='incomplete')") + 600), /localStorage\.removeItem|SIYL_BAG\.set\(\[\]\)|clear\(/, 'a refusal destroys nothing');
+  const d422 = dj.slice(dj.indexOf("if (r.status === 422 && d.error === 'email required')"), dj.indexOf("if (r.status === 401)"));
+  assert.doesNotMatch(d422, /localStorage\.(removeItem|setItem)|state\.submission|clear\(/, 'the draft is left untouched by a refusal');
   assert.match(src('assets/guest.js'), /if \(!this\.mayEnter\('review'\)\) \{ var fm = this\.firstMissing\(\);/, 'Review & Send opens only when every step is complete');
 });

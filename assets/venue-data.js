@@ -34,7 +34,7 @@
     name: 'Souphattra Heritage Vientiane',
     first: 'dinner',
     kicker: 'The venue',
-    lede: 'One address for the wedding day and the wedding stay: the heritage houses around the courtyard, the garden, the pool. Seen from above, then close.',
+    lede: 'Coffee & Cake, the vows, the dinner and the Wedding Stay are all here: the heritage houses around the courtyard, the garden and the pool.',
     /* the base photograph: the real aerial, two art directions of the same file */
     base: {
       alt: 'Souphattra Heritage Vientiane from above: the heritage houses with their tiled roofs around the courtyard garden and the swimming pool',
@@ -45,39 +45,39 @@
       drive: '1VIz9oIZDOUlktJD7pase7e4UilhvsO9j'   /* Copy of Heritage_0631.jpg · 003 - Hotel - Pool & Garden — see docs/venue/asset-manifest.json */
     },
     zones: [
-      { id: 'lobby', n: '01', label: 'Lobby', title: 'The lobby', when: 'Arrival · 27 February',
+      { id: 'lobby', n: '01', label: 'Lobby', title: 'The lobby', when: 'Arrival · 25 or 27 February',
         marks: [{ x: 12.5, y: 0, w: 21, h: 31, anchor: { x: 23, y: 15 }, tall: { x: 28.5, y: 15, align: 'left' } }],   /* the top left building */
-        story: 'Where the weekend begins: the heritage salon with its chandelier and its clock, the lounge with its lamps and its books. Check-in, a first drink, the first faces.',
+        story: 'The heritage salon with its chandelier and its clock, and the lounge with its lamps and its books — where you check in.',
         photos: [
           { pic: pic('lobby-lounge', [1000, 1600], 1600, 1067, 'The heritage lounge: sofas, lamps and books under tall windows'), drive: '1XVYr1DrvJ4CAafFrL1B-9BvPfsUYTltz' },
           { pic: pic('lobby-clock', [800, 1200], 1200, 1200, 'The chandelier and the clock above the lobby bar'), drive: '1CMdx_ytO_Uy6oDJkYNdf-iMv0kQv00Ha' },
           { pic: pic('lobby-gallery-wall', [1000, 1600], 1600, 1066, 'A wall of framed botanical prints under the chandelier'), drive: '1pTzQswtYwQv_nL6NTXtNRQyHlkKvmr-6' }
         ] },
-      { id: 'rooms', n: '02', label: 'Rooms', title: 'The rooms', when: 'Two nights · 27 February – 1 March',
+      { id: 'rooms', n: '02', label: 'Rooms', title: 'The rooms', when: 'Up to four nights · 25 February – 1 March',
         marks: [   /* three houses: top right, lower right, lower centre */
           { x: 62, y: 0, w: 18, h: 40, anchor: { x: 71, y: 20 }, tall: { x: 68.5, y: 20, align: 'right' } },
           { x: 62, y: 50, w: 19, h: 40, anchor: { x: 71.5, y: 70 }, tall: { x: 68.5, y: 86, align: 'right' } },
           { x: 37.5, y: 71, w: 21, h: 29, anchor: { x: 52, y: 85 }, tall: { x: 44, y: 93 } }
         ],
-        story: 'Twenty-six rooms in the heritage houses, from The Heritage to the Presidential. The first night is your contribution, the second is hosted by Haruthai & Suthep.',
+        story: 'Twenty-six rooms in the heritage houses, from The Heritage to the Presidential. On the Wedding Stay, the first night is your cost and the second night is complimentary, hosted by Haruthai & Suthep.',
         href: 'journeys.html#j-wedstay', cta: 'Choose your room', swap: true,   /* private planning: signed out the link reads Open your invitation */
         photos: [
           { single: one(H + 'heritage-balconies.jpg', 2000, 1334, 'The balconies of the heritage houses over the courtyard'), drive: '1TCozr65dNM7EIdesnPLMpJ4lPwevmzpf' },
           { single: one(H + 'heritage-room.jpg', 2000, 1334, 'A room at Souphattra Heritage Vientiane') },
           { single: one(H + 'heritage-lao-reading.jpg', 2000, 1334, 'A book and a folded throw on the bed') }
         ] },
-      { id: 'coffee', n: '03', label: 'Coffee & Cake · Breakfast', title: 'Coffee & Cake · Breakfast', when: 'From 12:00 on the wedding day · breakfast every morning',
+      { id: 'coffee', n: '03', label: 'Coffee & Cake · Breakfast', title: 'Coffee & Cake · Breakfast', when: 'From 12:00 until the ceremony · breakfast every morning',
         marks: [{ x: 12.5, y: 60, w: 21, h: 40, anchor: { x: 23, y: 80 }, tall: { x: 28.5, y: 72, align: 'left' } }],   /* the lower left building */
-        story: 'Back from the temple, coffee and cake in the salon — hosted, unhurried, time to breathe before the vows. Breakfast, on every morning of the stay.',
+        story: 'Back from the temple, coffee and cake from 12:00 until the ceremony, hosted by Haruthai & Suthep — time to breathe before the vows. Breakfast is served here every morning of the stay.',
         photos: [
           { single: one(E + '051-coffee-and-cake-patisserie.jpg', 1334, 2000, 'Cakes and pastries on a tiered stand') },
           { single: one(E + '051-coffee-and-cake-salon.jpg', 2000, 1334, 'The salon where coffee and cake are served') },
           { pic: pic('breakfast-01', [700, 1100], 1100, 1466, 'Breakfast at Souphattra Heritage: eggs, fruit and tea from above'), drive: '1Eaxqak_sWkVphdVeqGD7daO9Jzxzn2zb' },
           { pic: pic('breakfast-02', [700, 1100], 1100, 1466, 'Eggs Benedict and a breakfast setting'), drive: '1Zrjx_EeCDOtdXRpb8AG46h1cgmKR8s7i' }
         ] },
-      { id: 'ceremony', n: '04', label: 'Wedding Ceremony', title: 'Wedding Ceremony', when: 'Sunday, 28 February 2027 · 15:30',
+      { id: 'ceremony', n: '04', label: 'Vow Ceremony', title: 'Vow Ceremony', when: 'Sunday, 28 February 2027 · 15:30',
         marks: [{ x: 12.5, y: 33, w: 21, h: 26, anchor: { x: 22, y: 56 }, tall: { x: 28.5, y: 40, align: 'left' } }],   /* the left centre event area */
-        story: 'The vows, at the green door, in front of everyone who matters. The Bride and the Groom at the front centre; every guest on the chair they chose.',
+        story: 'The vows, at the green door, in front of everyone who matters — the Bride and the Groom at the front centre, and every guest in the seat they chose.',
         href: 'voyage.html#vows', cta: 'The Vow Ceremony',
         photos: [
           { single: one(E + '052-vow-ceremony-green-door-entrance.jpg', 480, 960, 'The green door of Souphattra Heritage, open, with its steps and lanterns'), drive: '1LHfLS0Ys4QV7Jds4PVmoMsvkCSlaAXXG' },
@@ -87,9 +87,9 @@
       /* THE WEDDING DINNER on the map is an INDEX ENTRY (Owner, 21 Sep 2026 · the consolidation): the place, the time, the seating
          of the one long table, and the way to the one detail (#dinner) — no photographs here; the dinner's photographs live in the
          one record, assets/wedding-dinner.js, and are shown once, in the detail's gallery */
-      { id: 'dinner', n: '05', label: 'Wedding Dinner · Poolside', title: 'Wedding Dinner · Poolside', when: 'Sunday, 28 February 2027 · 19:30',
+      { id: 'dinner', n: '05', label: 'Wedding Dinner · poolside', title: 'Wedding Dinner · poolside', when: 'Sunday, 28 February 2027 · 19:30',
         marks: [{ x: 39.5, y: 37, w: 20.5, h: 32, anchor: { x: 49.7, y: 43.5 }, tall: { x: 48.5, y: 57 } }],   /* the centre pool / poolside area */
-        story: 'The long table beside the water: run A poolside, run B opposite the pool. The dinner itself — the evening, the menu, the photographs — is above, under 04.',
+        story: 'The long table beside the water — side A along the pool, side B facing it.',
         href: '#dinner', cta: 'The Wedding Dinner', index: true,
         photos: [] },
       { id: 'pool', n: '06', label: 'Swimming pool', title: 'The swimming pool', when: 'Every day of the stay', marks: null,

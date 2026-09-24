@@ -79,7 +79,8 @@ gate(2, 'Inventory display decision recorded',
   if (!/fitsParty: function \(win, slug, u, need\)/.test(client) || !/unitForParty: function \(win, slug, need\)/.test(client)) inv.push('the client offers units that cannot take the whole party');
   if (/capacity: 38|capacity: 27/.test(seed)) inv.push('the retired U Sathorn / Shama counts (38 / 27) are still in the seed');
   if (!/'bkk-stay\/u-sathorn-superior-garden':\s*\{ unit: 'room', capacity: 6,/.test(seed) ) inv.push('U Sathorn / Shama are not six rooms as the Master says');
-  if (!/This room was just filled\. Please choose another room\./.test(stay)) inv.push('the oversell refusal does not carry the Owner\'s words');
+  /* TO-01271 · PRQ-03-02 (Window 007): the approved oversell refusal reassures the guest their trip is unchanged; the retired wording must not return */
+  if (!/Someone took the last place in this room a moment ago\. Nothing in your trip has changed — please choose another room\./.test(stay) || /This room was just filled/.test(stay)) inv.push('the oversell refusal does not carry the Owner\'s words');
   const seedSrc = seed;
   if (/penthouse/i.test(seedSrc.replace(/\/\*[\s\S]*?\*\//g, ''))) inv.push('the deleted Sathorn Penthouse Bangkok (Edit 6, 24 Sep 2026) is back in the seed');
   if (/shama/i.test(seedSrc.replace(/\/\*[\s\S]*?\*\//g, ''))) inv.push('the deleted Shama Yen-Akat Bangkok (24 Sep 2026) is back in the seed');
@@ -281,7 +282,8 @@ gate('P3', 'MASTER-02 programme truth (four events, no active Alms, no pool in v
   const vowSec = vy.slice(vy.indexOf('id="vows"'), vy.indexOf('id="vows"') + 700);
   if (/pool/i.test(vowSec)) bad.push('no pool narrative in the vow ceremony');
   if (/courtyard garden/i.test(vy)) bad.push('the Wedding Dinner is poolside, never "courtyard garden"');
-  if (!/19:30 · Poolside/.test(vy)) bad.push('the Wedding Dinner must say Poolside');
+  /* TO-03604 / TO-02009 (Window 007): the dinner eyebrow names the house and a lower-case "poolside" — never the mid-label capital "Poolside" */
+  if (!/19:30 · Souphattra Heritage · poolside/.test(vy) || /19:30 · Poolside/.test(vy)) bad.push('the Wedding Dinner must say "19:30 · Souphattra Heritage · poolside"');
   if (/052-temple-ceremony-bride/.test(vy)) bad.push('the retired bride photograph is still on the page');
   if (/053-wedding-dinner-courtyard-garden/.test(vy)) bad.push('the fountain photograph is still the wedding dinner image');
   /* participation is an explicit two-way decision for EVERY active event —
@@ -386,9 +388,11 @@ gate('P3', 'MASTER-02 programme truth (four events, no active Alms, no pool in v
     if (/seatId:\s*'[CD]-[LRTB]-\d|'C-[LR]-\d+-\d+'|'D-[LRTB]-\d+'/.test(read(f))) bad.push(f + ' carries production geometry');
   }
   if (!/new_sqlite_classes": \["Seating"\]/.test(read('wrangler.jsonc'))) bad.push('the seating object is not migrated');
-  /* the Owner geometry: ceremony 50 guest seats (20 + 30); dinner 50 bookable chairs (25 + 25), nothing fixed for anyone (Owner decision 13 Sep 2026 — no Bride/Groom position, no family chair); the retired 40 / 20+20 truth must not be active */
+  /* the Owner geometry: ceremony 50 guest seats (20 + 30); dinner 48 bookable chairs (24 + 24 — Owner, 24 Sep 2026 · OQ-03: A13 and B13 removed from the plan, nothing renumbered, the id space stays 01–25 per side), nothing fixed for anyone (Owner decision 13 Sep 2026 — no Bride/Groom position, no family chair); the retired 40 / 20+20 and 50 / 25+25 dinner truths must not be active */
   const led = read('src/seating.js');
-  if (!/guestSeats: 50, left: 20, right: 30, fixed: 2/.test(led) || !/ceremony: \{ rows: 10, perRow: \{ L: 2, R: 3 \}, guestSeats: 50, fixed: \['BRIDE', 'GROOM'\]/.test(led) || !/guestSeats: 50, top: 25, bottom: 25, totalPeople: 50/.test(led) || /dinner:\s*\{[^}]*fixed:/.test(led)) bad.push('the seating capacity contract is not the Owner geometry (ceremony 50 + BRIDE/GROOM front centre; dinner 50 bookable, nothing fixed)');
+  if (!/guestSeats: 50, left: 20, right: 30, fixed: 2/.test(led) || !/ceremony: \{ rows: 10, perRow: \{ L: 2, R: 3 \}, guestSeats: 50, fixed: \['BRIDE', 'GROOM'\]/.test(led)
+    || !/guestSeats: 48, top: 24, bottom: 24, totalPeople: 48/.test(led) || !/perSide: 24, guestSeats: 48, totalPeople: 48, retired: \{ T: \[13\], B: \[13\] \}, id: \/\^D-\(\[TB\]\)-\(0\[1-9\]\|1\[0-9\]\|2\[0-5\]\)\$\//.test(led)
+    || /guestSeats: 50, top: 25, bottom: 25|totalPeople: 50/.test(led) || /dinner:\s*\{[^}]*fixed:/.test(led)) bad.push('the seating capacity contract is not the Owner geometry (ceremony 50 + BRIDE/GROOM front centre; dinner 48 bookable — A13/B13 removed, nothing renumbered, nothing fixed)');
   if (/perSide: 20|40 guest|20 \+ 20|34 selectable/.test(led + read('assets/seating.js'))) bad.push('retired 40-seat truth is still active');
   gate('P11', 'E/F/G: explicit eligibility, protected confirmation, geometry-free seating ledger',
     bad.length === 0, bad.length ? bad.join(' · ') : 'PAIR/NONE/unresolved only · GR token gate with constant-time compare · no geometry in code · token never in assets or git');
@@ -493,21 +497,16 @@ gate('P7', 'Dress Code imagery real (23 — resort-01 retired by the owner), no 
   execSync('node ' + path.join(__dirname, 'i18n-catalog.cjs'), { stdio: 'pipe' });
   const catSrc = fs.readFileSync(path.join(ROOT, 'assets/i18n/catalog.js'), 'utf8');
   const catalog = JSON.parse(catSrc.slice(catSrc.indexOf('['), catSrc.lastIndexOf(']') + 1));
-  const dict = fs.readFileSync(path.join(ROOT, 'assets/i18n/siyl-i18n.js'), 'utf8');
-  const patternOK = [
-    /^[\d–-]+ sq\.m\.$/, /^\d+ of \d+ (available|seats remaining)$/, /^\d+ (rooms?|seats?) allocated$/,
-    /^(Up to )?\d+ adults?( · \d+ child(ren)?( sharing bedding)?)?$/, /^\d+ details? still needed$/,
-    /^(Black Tie|Elegant Resort Wear|Lao Traditional Dress) dress reference \d+, open larger$/,
-    /^.+ photos — swipe, or press Enter for a larger view$/,
-  ];
-  const missing = catalog.filter((t) => {
-    if (dict.indexOf(JSON.stringify(t).slice(1, -1)) > -1) return false; // dict-covered (escaped form)
-    if (dict.indexOf('E("' + t) > -1) return false;
-    return !patternOK.some((r) => r.test(t));
-  });
-  gate('L1', 'Localization completeness (catalog-driven, fail-closed)',
-    missing.length === 0,
-    missing.length ? missing.length + ' required strings lack DE/TH/JA coverage: ' + missing.slice(0, 6).map((x) => JSON.stringify(x.slice(0, 40))).join(', ') : catalog.length + ' required strings covered by dictionary or localization patterns');
+  /* EN / TH (Owner, 24 Sep 2026): every required public string has authored Thai in src/i18n-th.json, read through the ONE locale
+     core the pages and the guest email use; the runtime offers English and Thai only (no DE / JA exposed). */
+  const CORE = require('./i18n-core.js');
+  const TH = CORE.translator(JSON.parse(fs.readFileSync(path.join(__dirname, 'i18n-th.json'), 'utf8')));
+  const rt = fs.readFileSync(path.join(ROOT, 'assets/i18n/siyl-i18n.js'), 'utf8');
+  const langsOK = /var LANGS = \['en', 'th'\]/.test(rt) && !/data-lang-btn="(de|ja)"/.test(rt);
+  const missing = catalog.filter((t) => TH.lookup(t) == null);
+  gate('L1', 'Localization completeness EN / TH (catalog-driven, fail-closed)',
+    missing.length === 0 && langsOK,
+    !langsOK ? 'the runtime must offer English and Thai only' : missing.length ? missing.length + ' required strings lack authored Thai: ' + missing.slice(0, 6).map((x) => JSON.stringify(x.slice(0, 40))).join(', ') : catalog.length + ' required strings have authored Thai; EN / TH only');
 }
 
 /* GATE C1 — asset fingerprints (Owner, Edit 4 · 16 Sep 2026): every stylesheet and script a page references

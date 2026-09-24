@@ -13,8 +13,8 @@ const load = () => { const w = {}; const sb = { window: w, document: undefined, 
 const W = load(), WD = W.SIYL_WEDDING_DINNER;
 
 test('THE RECORD · the facts once (Sunday 28 Feb 2027 · 19:30 · Poolside · Souphattra Heritage · Black Tie · the Chinese sharing menu); thirteen approved photographs, each on disk, none twice, the candlelit table and the dim sum among them', () => {
-  assert.equal(WD.date, 'Sunday, 28 February 2027'); assert.equal(WD.time, '19:30'); assert.equal(WD.place, 'Poolside'); assert.equal(WD.venue, 'Souphattra Heritage Vientiane'); assert.equal(WD.dress, 'Black Tie');
-  assert.match(WD.copy, /Chinese sharing menu/); assert.match(WD.seating, /run A poolside, run B opposite the pool/); assert.doesNotMatch(WD.copy + WD.seating, /cocktail|second dinner|two dinners/i);
+  assert.equal(WD.date, 'Sunday, 28 February 2027'); assert.equal(WD.time, '19:30'); assert.equal(WD.place, 'poolside'); assert.equal(WD.venue, 'Souphattra Heritage Vientiane'); assert.equal(WD.dress, 'Black Tie');
+  assert.match(WD.copy, /Chinese sharing menu/); assert.equal(WD.seating, 'The long table beside the water — side A along the pool, side B facing it.', 'TO-02011'); assert.doesNotMatch(WD.copy + WD.seating, /cocktail|second dinner|two dinners/i);
   assert.equal(WD.href, 'voyage.html#dinner'); assert.equal(WD.dressHref, 'wedding-preparation.html#dress-code');
   const srcs = WD.media.map((m) => m.src);
   assert.equal(srcs.length, 13); assert.equal(new Set(srcs).size, 13, 'no photograph twice');
@@ -32,14 +32,14 @@ test('ONE DETAIL under The Wedding: #dinner with the eyebrow, the title, the cop
   const vy = src('voyage.html');
   assert.equal((vy.match(/id="dinner"/g) || []).length, 1, 'one anchor'); assert.equal((vy.match(/<h2>Wedding Dinner<\/h2>/g) || []).length, 1, 'one title');
   const sec = vy.slice(vy.indexOf('<section class="a-sec a-pair rev" id="dinner"'), vy.indexOf('<!-- THE VENUE'));
-  assert.match(sec, /<p class="a-eyebrow">Sunday, 28 February 2027 · 19:30 · Poolside<\/p>/); assert.match(sec, /An evening gathering poolside, bringing the wedding day to its final and longest chapter — a Chinese sharing menu at the table, and the night to follow\./);
-  assert.match(sec, /Dress · Black Tie/); assert.match(sec, /href="wedding-preparation\.html#dress-code">View dress code</);
+  assert.match(sec, /<p class="a-eyebrow">19:30 · Souphattra Heritage · poolside<\/p>/); assert.match(sec, /An evening poolside, bringing the wedding day to its final and longest chapter — a Chinese sharing menu at the table, and the night to follow\./);
+  assert.match(sec, /<p class="a-eyebrow"[^>]*>Dress: Black Tie<\/p>/); assert.match(sec, /href="wedding-preparation\.html#dress-code">View dress code</);
   assert.match(sec, /<section class="a-sec a-dest a-wdgal" aria-label="The wedding dinner in photographs" data-wedding-dinner-media>\s*<div class="dgal" aria-label="The wedding dinner in photographs" data-wedding-dinner-gallery><\/div>/, 'the gallery is the record\'s, right under the detail');
   assert.doesNotMatch(sec, /<img /, 'no image list written into the page'); assert.doesNotMatch(sec, /data-motion="reveal"[^>]*data-wedding-dinner-media|a-wdgal" data-motion/, 'the gallery never waits hidden');
   assert.equal((vy.match(/wedding-dinner-\d\d-/g) || []).length, 1, 'the page names one dinner frame: the lead of the pair');
   assert.ok(vy.indexOf('<script src="assets/wedding-dinner.js') < vy.indexOf('<script src="assets/refgal.js'), 'the record fills the gallery before the carousel upgrades it');
   const dz = W.SIYL_VENUE_DATA.zones.find((z) => z.id === 'dinner');
-  assert.equal(dz.index, true); assert.deepEqual(plain(dz.photos), []); assert.equal(dz.href, '#dinner'); assert.equal(dz.cta, 'The Wedding Dinner'); assert.match(dz.story, /run A poolside, run B opposite the pool/); assert.match(dz.story, /under 04/);
+  assert.equal(dz.index, true); assert.deepEqual(plain(dz.photos), []); assert.equal(dz.href, '#dinner'); assert.equal(dz.cta, 'The Wedding Dinner'); assert.equal(dz.story, 'The long table beside the water — side A along the pool, side B facing it.', 'TO-01990: the pointer “under 04” is gone, the index entry’s call is the way'); assert.doesNotMatch(dz.story, /under 04/);
   assert.equal(W.SIYL_VENUE_DATA.zones.filter((z) => /dinner/i.test(z.label)).length, 1, 'one dinner on the map');
   assert.match(src('assets/venue.js'), /\(photo \? '<div class="venue-photo/, 'the map renders an index entry without a photograph'); assert.match(src('assets/venue.js'), /if \(!z\.photos \|\| !z\.photos\[k\]\) return;/);
 });
@@ -47,7 +47,7 @@ test('ONE DETAIL under The Wedding: #dinner with the eyebrow, the title, the cop
 test('EVERY OTHER SURFACE is a teaser or a link — never a second presentation; the facts and the frame come from the record; event media stays apart from accommodation media', () => {
   const ix = src('index.html');
   assert.doesNotMatch(ix, /Wedding Dinner<\/h[123]>|056-wedding-dinner|053-wedding-dinner|data-wedding-dinner/, 'the home page tells the day and links to The Wedding — no dinner detail, no dinner gallery');
-  assert.match(ix, /<a class="a-link" href="voyage\.html">The wedding days<\/a>/);
+  assert.match(ix, /<a class="a-link" href="voyage\.html">Discover The Wedding<\/a>/);
   assert.match(src('profile.html'), /dinner:\(window\.SIYL_WEDDING_DINNER\?SIYL_WEDDING_DINNER\.lead:/); assert.match(src('profile.html'), /<script src="assets\/wedding-dinner\.js/);
   for (const f of ['index.html', 'wedding.html', 'wedding-preparation.html', 'profile.html', 'review.html', 'journeys.html', 'your-journey.html', 'tickets.html']) assert.doesNotMatch(src(f), /class="dgal"[^>]*dinner|data-wedding-dinner-gallery/, f + ' has no dinner gallery of its own');
   for (const f of ['assets/aman.js', 'assets/journey.js']) for (const m of src(f).matchAll(/voyage\.html#([a-z]+)/g)) if (/dinner/.test(m[0])) assert.equal(m[1], 'dinner');

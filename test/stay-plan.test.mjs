@@ -18,7 +18,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Rooms, stageOf } from '../src/rooms.js';
 import { SEED } from '../src/inventory-seed.js';
-import { COMPLIMENTARY, deadlineState, daysUntilDeadline, complimentaryWords, mayClaimComplimentary } from '../src/stay-plan.js';
+import { COMPLIMENTARY, deadlineState, daysUntilDeadline, complimentaryWords, mayClaimComplimentary, barLine } from '../src/stay-plan.js';
 import { doState, src } from './sandbox.mjs';
 
 const G = (n, party) => ({ invitationId: 'INV-G' + n, guestId: 'G' + n, partyId: party || null, hosts: false });
@@ -36,23 +36,26 @@ test('THE DEADLINE · counted from today, never hard-coded and never negative: d
   assert.equal(COMPLIMENTARY.deadline, '2026-11-30');
   assert.equal(daysUntilDeadline(day('2026-11-20')), 10);
   assert.equal(deadlineState(day('2026-09-22')).phase, 'open');
-  assert.match(deadlineState(day('2026-11-29')).words, /^1 day remaining$/);
+  assert.match(deadlineState(day('2026-11-29')).words, /^1 day left$/); /* TO-00733 */ assert.equal(deadlineState(day('2026-11-28')).words, '2 days left'); /* TO-00732 */
   const last = deadlineState(day('2026-11-30'));
   assert.equal(last.phase, 'last-day'); assert.equal(last.days, 0); assert.equal(last.words, 'Last day'); assert.equal(last.open, true);
   for (const d of ['2026-12-01', '2027-01-15', '2027-03-08']) {
     const s = deadlineState(day(d));
     assert.equal(s.phase, 'closed'); assert.equal(s.open, false);
     assert.equal(s.days, 0, 'a day count is never negative');
-    assert.equal(s.words, 'Accommodation planning closed');
+    assert.equal(s.words, 'Closed on 30 November 2026'); /* TO-00731 */
+    assert.equal(barLine(day(d)), 'Guest House places closed on 30 November 2026'); /* TO-00731 / L-01 */
   }
   /* the words the guest reads about the allocation — factual, never scarcity marketing */
-  assert.deepEqual(complimentaryWords(4, 4, day('2026-10-01')), { state: 'available', headline: '4 of 4 places remaining', detail: 'Available until 30 November 2026 or until fully allocated.' });
-  assert.deepEqual(complimentaryWords(3, 4, day('2026-10-01')), { state: 'available', headline: '3 of 4 places remaining', detail: 'Available until 30 November 2026 or until fully allocated.' });
-  assert.equal(complimentaryWords(2, 4, day('2026-10-01')).headline, '2 of 4 places remaining');
+  /* TO-01253 / TO-01254 / TO-01252 / TO-01249 / TO-01250 */
+  assert.equal(barLine(day('2026-10-01')), 'Guest House places close on 30 November 2026');
+  assert.deepEqual(complimentaryWords(4, 4, day('2026-10-01')), { state: 'available', headline: '4 of 4 places left', detail: 'Open until 30 November 2026, or until the four places are taken.' });
+  assert.deepEqual(complimentaryWords(3, 4, day('2026-10-01')), { state: 'available', headline: '3 of 4 places left', detail: 'Open until 30 November 2026, or until the four places are taken.' });
+  assert.equal(complimentaryWords(2, 4, day('2026-10-01')).headline, '2 of 4 places left');
   assert.equal(complimentaryWords(1, 4, day('2026-10-01')).state, 'one-left');
-  assert.equal(complimentaryWords(1, 4, day('2026-10-01')).headline, '1 of 4 places remaining');
-  assert.deepEqual(complimentaryWords(0, 4, day('2026-10-01')), { state: 'full', headline: 'Complimentary stay fully allocated', detail: 'All 4 places are taken.' });
-  assert.equal(complimentaryWords(3, 4, day('2026-12-02')).headline, 'Complimentary accommodation planning closed');
+  assert.equal(complimentaryWords(1, 4, day('2026-10-01')).headline, '1 of 4 places left');
+  assert.deepEqual(complimentaryWords(0, 4, day('2026-10-01')), { state: 'full', headline: 'All four places are taken', detail: '' });
+  assert.deepEqual(complimentaryWords(3, 4, day('2026-12-02')), { state: 'closed', headline: 'Closed on 30 November 2026', detail: 'New places can no longer be taken.' });
   for (const w of ['Hurry', 'Almost gone', 'Book now', 'Last chance', 'Only']) {
     for (const r of [4, 3, 1, 0]) assert.doesNotMatch(JSON.stringify(complimentaryWords(r, 4, day('2026-10-01'))), new RegExp(w, 'i'), w + ' is not this site\'s language');
   }
@@ -144,14 +147,15 @@ test('THE SURFACES · the front page counts the days and follows the guest; My P
   /* TWO DECISION SIGNALS, NEVER MERGED (Owner approved, 23 Sep 2026): the bar carries the DATE alone, the object beneath it
      carries the live count, the property and the one action — in that order, with one call to action between them. */
   assert.match(idx, /<section class="a-sec a-staybar" aria-label="Accommodation planning" data-stay-bar><\/section>/);
-  assert.match(idx, /<section class="a-sec a-avail" aria-label="Complimentary Wedding Stay · availability" data-availability><\/section>/);
+  assert.match(idx, /<section class="a-sec a-avail" aria-label="Guest House complimentary · places left" data-availability><\/section>/);
   assert.ok(idx.indexOf('data-stay-bar') < idx.indexOf('data-availability'), 'planning and its closing date first, the object after it');
   assert.match(idx, /<script src="assets\/stay-plan\.js(\?v=[0-9a-f]{8})?"><\/script>/);
   assert.match(idx, /<script src="assets\/stay-bar\.js(\?v=[0-9a-f]{8})?"><\/script>/);
   assert.match(idx, /<script src="assets\/availability\.js(\?v=[0-9a-f]{8})?"><\/script>/);
   assert.match(bar, /P\.planningWindow\(new Date\(\)\)/, 'the count and the hairline are computed from today, never written into the page');
   assert.match(bar, /data-stay-rail/, 'and the date carries its own calendar hairline (Owner, 23 Sep 2026)');
-  assert.match(bar, /closed \? 'Accommodation planning closed'/, 'after the deadline the state replaces the count');
+  assert.match(bar, /var count = closed \? '' :/, 'after the deadline the state replaces the count (TO-00731: no count once closed)');
+  assert.match(bar, /P\.barLine \? P\.barLine\(new Date\(\)\)/, 'the date line is the plan\'s own words (L-01)');
   assert.doesNotMatch(bar, /Hurry|Book now|Almost gone|Last chance/i);
   assert.doesNotMatch(bar, /places remaining|data-stay-cta/, 'the first signal states the date alone — the count and the action belong to the object');
   /* the object: the engine's count, and one action that follows the guest */
@@ -166,7 +170,7 @@ test('THE SURFACES · the front page counts the days and follows the guest; My P
   assert.doesNotMatch(prof, /Riverside/, 'and it names no hotel for them');
   /* what survives is the record: every confirmed stay, in the order they happen, in one card system */
   assert.match(prof, /function stayLines\(\)/);
-  assert.match(prof, /kicker:st\.complimentary\?'Complimentary stay':'Your stay'/);
+  assert.match(prof, /stays\.forEach\(function\(x\)\{n\+\+;[\s\S]*?h\+=stayCard\(\{data:/); /* TO-00312 / PRQ-01-04: one stayCard per stay, no 'Complimentary stay' kicker */
   /* the engine's own words for the allocation reach every surface that shows the category */
   assert.match(rooms, /P\.complimentaryWords\(s\.remainingPlaces, s\.sourcePlaces, new Date\(\)\)\.headline/);
 });

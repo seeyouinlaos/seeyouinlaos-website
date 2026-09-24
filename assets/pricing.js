@@ -32,57 +32,61 @@
   var CLASSES = {
     'mu9646': [
       { slug: 'business', name: 'MU9646 · Vientiane → Kunming', short: 'Business Class',
-        meta: '01 March 2027 · Business Class', price: 275, preferred: true,
+        meta: '1 March 2027 · Business Class', price: 275, preferred: true,
         img: 'assets/images/transport/mu9632-business-1.jpg',
-        basis: 'USD 275 per person · Business Class',
-        notes: ['1 seat per guest', '2 pieces of checked baggage', 'Meal service on board'] },
+        basis: 'USD 275 per person · 1 seat · Business Class',
+        notes: ['2 pieces of checked baggage', 'A meal on board', 'Free rescheduling before departure',
+                'Refund possible before departure, under conditions'] },
       { slug: 'economy-flexible', name: 'MU9646 · Vientiane → Kunming', short: 'Economy Flexible',
-        meta: '01 March 2027 · Economy Flexible', price: 155,
+        meta: '1 March 2027 · Economy Flexible', price: 155,
         img: 'assets/images/transport/mu9632-business-1.jpg',
-        basis: 'USD 155 per person · Economy Class, flexible fare',
-        notes: ['1 piece of free checked baggage', 'No meals',
-                'Conditional ticket refund before departure',
-                'Free rescheduling before departure'] }
+        basis: 'USD 155 per person · 1 seat · Economy Flexible',
+        notes: ['1 piece of checked baggage', 'No meal on board', 'Free rescheduling before departure',
+                'Refund possible before departure, under conditions'] }
     ]
   };
 
   var FLAT = {
     'train':  { price: 100, cat: 'Transportation', name: 'Special Express No. 25',
                 meta: '24 – 25 February 2027 · First Class Sleeper', img: 'assets/images/transport/train-no25-srt-train.jpg',
-                basis: 'USD 100 per person · package · First Class Sleeper, van and border logistics' },
+                basis: 'USD 100 per person · a First Class Sleeper berth and the van across the border to Vientiane' },
     'mu9646': { price: 275, cat: 'Transportation', name: 'MU9646 · Vientiane → Kunming',
-                meta: '01 March 2027 · Business Class', img: 'assets/images/transport/mu9632-business-1.jpg',
+                meta: '1 March 2027 · Business Class', img: 'assets/images/transport/mu9632-business-1.jpg',
                 basis: 'USD 275 per person · 1 seat · Business Class' },
     /* C86 · USD 105 per person — the CURRENT Operations Master (Overview, Accommodation and Rooming, Budget "Approve by
      * Suthep, 18.09.2026") wins over the earlier website override of 85 (Owner instruction, 19 Sep 2026: the current master
      * is the source of truth for every price) */
     'c86':    { price: 105, cat: 'Transportation', name: 'C86 · Kunming → Lijiang',
-                meta: '04 March 2027 · Business Class', img: 'assets/images/transport/c642-train-snow-mountain.jpg',
+                meta: '4 March 2027 · Business Class', img: 'assets/images/transport/c642-train-snow-mountain.jpg',
                 basis: 'USD 105 per person · 1 seat · Business Class' },
     'return': { price: 200, cat: 'Transportation', name: 'MU5922 + MU741 · Lijiang → Bangkok',
-                meta: '06 March 2027 · Economy flexible', img: 'assets/images/transport/mu5924-economy-cabin-1.jpg',
-                basis: 'USD 200 per person · 1 seat · Economy flexible · via Kunming' },
+                meta: '6 March 2027 · Economy Flexible', img: 'assets/images/transport/mu5924-economy-cabin-1.jpg',
+                basis: 'USD 200 per person · 1 seat · Economy Flexible · via Kunming' },
     /* THE HIGHLIGHTS (Owner, 20 Sep 2026): the premium tables are optional restaurant REQUESTS — one line per guest, the
      * chosen menu's own price, in the journey total like every other per-person line. The request is arranged through the
      * Journey workflow — never a confirmed reservation, no availability promised. The USD amounts are the Owner's rounded
      * website prices of the houses' menu prices; beverages, pairings and supplements are not products here, and the houses'
-     * service charge and tax are theirs (the basis says so). */
+     * service charge and tax are theirs (the basis says so). The basis carries the price only (PRQ-04-12): the request state
+     * ("Guest Relations will confirm your table") is said by the surfaces, once. */
     'suhring': { price: 294, cat: 'Restaurant', name: 'Sühring',
-                meta: 'Dinner · 21 February 2027 · Three MICHELIN Stars · Bangkok', img: 'assets/images/experiences/bkk-suhring-01.jpg',
-                basis: 'USD 294 per person · the Erlebnis menu (THB 9,800) · beverages not included · a table requested through Guest Relations · a request, not a reservation',
+                meta: 'Dinner · Sunday, 21 February 2027 · Bangkok', img: 'assets/images/experiences/bkk-suhring-01.jpg',
+                basis: 'USD 294 per person · the Erlebnis menu (THB 9,800) · beverages not included',
                 /* the two menu prices of the house's own menu card (the Owner's upload): the complete Erlebnis and the shorter sequence */
                 menus: [
-                  { slug: 'erlebnis', name: 'Erlebnis · the complete menu', thb: 'THB 9,800', price: 294, preferred: true, basis: 'USD 294 per person · Erlebnis, the complete menu (THB 9,800) · beverages not included · a request, not a reservation' },
-                  { slug: 'erlebnis-short', name: 'Erlebnis · the shorter sequence', thb: 'THB 7,800', price: 234, basis: 'USD 234 per person · Erlebnis, the shorter sequence (THB 7,800) · beverages not included · a request, not a reservation' }
+                  { slug: 'erlebnis', name: 'Erlebnis · the complete menu', thb: 'THB 9,800', price: 294, preferred: true, basis: 'USD 294 per person · Erlebnis, the complete menu (THB 9,800) · beverages not included' },
+                  { slug: 'erlebnis-short', name: 'Erlebnis · the shorter sequence', thb: 'THB 7,800', price: 234, basis: 'USD 234 per person · Erlebnis, the shorter sequence (THB 7,800) · beverages not included' }
                 ] },
     'baanphraya': { price: 114, cat: 'Restaurant', name: 'Baan Phraya',
-                meta: 'Dinner · 23 February 2027 · Thai heritage · the River of Kings · Bangkok', img: 'assets/images/experiences/bkk-baanphraya-01.jpg',
-                basis: 'USD 114 per person · the eight-course Thai set menu (THB 3,800; the house adds 10% service charge and government tax) · a table requested through Guest Relations · a request, not a reservation' },
+                meta: 'Dinner · Tuesday, 23 February 2027 · Bangkok', img: 'assets/images/experiences/bkk-baanphraya-01.jpg',
+                basis: 'USD 114 per person · plus 10% service charge and government tax · the eight-course Thai set menu (THB 3,800)' },
     'cannubi': { price: 165, cat: 'Restaurant', name: 'Cannubi by Umberto Bombana',
-                meta: 'Dinner · 07 March 2027 · One MICHELIN Star · Dusit Thani Bangkok', img: 'assets/images/experiences/bkk-cannubi-01.jpg',
-                basis: 'USD 165 per person · the set menu (THB 5,500; the house adds 7% VAT and 10% service charge) · a table requested through Guest Relations · a request, not a reservation' },
-    '1872':   { price: 180, cat: 'Experience', unit: 'experience',
-                basis: 'USD 180 per experience · for two guests' },
+                meta: 'Dinner · Sunday, 7 March 2027 · Dusit Thani Bangkok', img: 'assets/images/experiences/bkk-cannubi-01.jpg',
+                basis: 'USD 165 per person · plus 10% service charge and government tax · the set menu (THB 5,500)' },
+    /* THE 1872 TEA (PRQ-07a-06): one canonical product — priced per TABLE, never per person; one line covers two guests.
+       name / meta / img make SIYL_PRICE.items('1872') a real line (tea.html wrote a hard-coded 'tea1872' before) */
+    '1872':   { price: 180, cat: 'Experience', unit: 'experience', name: 'Champagne Afternoon Tea at 1872',
+                meta: 'One table for two guests', img: 'assets/images/1872/tea-1.jpg',
+                basis: 'USD 180 for the table · two guests' },
     /* The Sangkhathan is NOT an admission, a ticket or a hosted wedding cost.
      * It is the guest's own offering, prepared by the hosts and presented by
      * the guest personally. It is priced per guest and it never touches the
@@ -95,15 +99,38 @@
   };
 
   function money(n) { return 'USD ' + Number(n).toLocaleString('en-US'); }
+  /* no leading zero in a date: "06 – 08 March 2027" → "6 – 8 March 2027" */
+  function unpad(t) { return String(t == null ? '' : t).replace(/(^|[^\d])0(\d)(?!\d)/g, '$1$2'); }
+  var MONTH_RE = /\s+(January|February|March|April|May|June|July|August|September|October|November|December)$/;
 
-  /* "Includes both nights: 25 → 26 February + 26 → 27 February" — the exact
-   * nights an amount buys, so "two-night stay" can never be read as one night. */
-  function nightsCovered(q) {
-    if (!q.nightsList || !q.nightsList.length) return '';
-    var all = q.nightsList.join(' + ');
-    if (q.hosted > 0) return 'Both nights: ' + all;
-    return (q.nightsList.length === 2 ? 'Includes both nights: ' : 'Includes: ') + all;
+  /* "25 → 26 and 26 → 27 February" · "27 → 28 and 28 February → 1 March" — the exact nights an amount buys, so a
+   * two-night stay can never be read as one night; a month said by the next night is not said twice (TO-01463/1464) */
+  /* the nights a window covers, from its own dates when the data lists none ("1 – 4 March 2027" → 1 → 2, 2 → 3 and 3 → 4 March) */
+  var MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  function nightsFromDates(dates, n) {
+    var m = /^(\d{1,2})(?: (\w+))? – (\d{1,2}) (\w+) (\d{4})$/.exec(String(dates || '').trim());
+    if (!m || !n) return null;
+    var mi = MONTHS.indexOf(m[2] || m[4]); if (mi < 0) return null;
+    var start = new Date(Date.UTC(+m[5], mi, +m[1])), out = [];
+    for (var i = 0; i < n; i++) {
+      var a = new Date(start.getTime() + i * 864e5), b = new Date(start.getTime() + (i + 1) * 864e5);
+      out.push(a.getUTCMonth() === b.getUTCMonth() ? a.getUTCDate() + ' → ' + b.getUTCDate() + ' ' + MONTHS[b.getUTCMonth()] : a.getUTCDate() + ' ' + MONTHS[a.getUTCMonth()] + ' → ' + b.getUTCDate() + ' ' + MONTHS[b.getUTCMonth()]);
+    }
+    return out;
   }
+  function nightsCovered(q) {
+    if ((!q.nightsList || !q.nightsList.length) && q.dates) q.nightsList = nightsFromDates(q.dates, q.nights);
+    if (!q.nightsList || !q.nightsList.length) return '';
+    var list = q.nightsList.map(unpad);
+    return list.map(function (n, i) {
+      var next = list[i + 1], m = MONTH_RE.exec(n);
+      return next && m && next.indexOf(m[1]) >= 0 ? n.replace(MONTH_RE, '') : n;
+    }).join(' and ');
+  }
+  /* the display word of a category — the `cat` value itself stays the key every surface compares (TO-00405 … TO-00412) */
+  var CAT_WORDS = { Transportation: 'Travel' };
+  /* legacy ids of products that still exist under their canonical id */
+  var ALIAS = { tea1872: '1872' };
 
   /* which stay and which window an id belongs to. LEGACY holds the two ids the
    * retired two-row wedding model wrote, so an old bag can still be migrated. */
@@ -162,23 +189,21 @@
         noteBy: at.win.noteBy || '',
         total: rate == null ? null : rate * pay
       };
-      q.nightly = rate == null ? '' : money(rate) + ' per person / night';
+      q.nightly = rate == null ? '' : money(rate) + ' per person per night';
       q.nightsLine = nights + (nights === 1 ? ' night' : ' nights');
       /* the unmistakable presentation: the amount, what it covers, and the
        * exact nights it covers — never the bare words "two-night stay" */
       q.amount = q.total == null ? '' : money(q.total);
-      q.totalLine = 'Total per person · ' + q.nightsLine;
+      /* under the amount line ("USD 380" + "per person"): "2 nights · 6 – 8 March 2027" (TO-01466) */
+      q.totalLine = q.nightsLine + (q.dates ? ' · ' + unpad(q.dates) : '');
       q.nightsCovered = nightsCovered(q);
+      /* THE HOSTED NIGHT (PRQ-03-08 · TO-01467): the first night is the guest's, the second the couple's */
       q.contribution = q.hosted > 0
-        ? 'First night your room rate at ' + q.nightly + ' · second night hosted by Haruthai & Suthep'
+        ? 'First night your cost, ' + money(rate) + ' per person · second night complimentary, hosted by Haruthai & Suthep'
         : (rate == null ? '' : q.nightly + ' × ' + q.nightsLine);
-      if (rate == null) {
-        q.basis = 'Amount on request · Guest Relations';
-      } else {
-        q.basis = q.amount + ' total per person · ' + q.nightsLine +
-                  (q.nightsCovered ? ' · ' + q.nightsCovered : '') +
-                  (q.contribution ? ' · ' + q.contribution : '');
-      }
+      q.hostedBasis = q.hosted > 0 ? 'per person · first night your cost · second night complimentary, hosted by Haruthai & Suthep' : '';
+      /* TO-01311–01313: the amount, what it covers, the exact nights, and the rate per night */
+      q.basis = rate == null ? 'Amount on request' : q.amount + ' per person · ' + q.nightsLine + (q.nightsCovered ? ': ' + q.nightsCovered : '') + (q.nightly ? ' · ' + q.nightly : '');
       return q;
     },
 
@@ -204,7 +229,8 @@
                        img: c.img, cls: c.slug }];
       var f = FLAT[windowId];
       /* a house with several menus (Sühring): the chosen menu's own price and name travel on the line — one line per house */
-      if (f && f.name && f.menus) { var m = this.menuOf(windowId, slug); return [{ id: windowId, name: f.name, meta: f.meta + ' · ' + m.name, price: m.price, img: f.img, menu: m.slug }]; }
+      /* the menu is named in the line as "Erlebnis, the shorter sequence" (TO-01447; the menu's own name stays as it is) */
+      if (f && f.name && f.menus) { var m = this.menuOf(windowId, slug); return [{ id: windowId, name: f.name, meta: f.meta + ' · ' + String(m.name).replace(' · ', ', '), price: m.price, img: f.img, menu: m.slug }]; }
       if (f && f.name) return [{ id: windowId, name: f.name, meta: f.meta, price: f.price, img: f.img }];
       var at = locate(windowId);
       if (!at) return [];
@@ -332,9 +358,13 @@
 
     /* display for one bag line — reads the line, never recalculates it */
     lineBasis: function (x) {
-      var f = FLAT[x.id];
+      /* a classed product (MU9646) reads the CHOSEN fare's basis, never the default class's */
+      if (CLASSES[x.id]) { var c = this.classOf(x.id, x.cls); if (c) return c.basis; }
+      var mn = FLAT[x.id] && FLAT[x.id].menus && x.menu ? this.menuOf(x.id, x.menu) : null;
+      if (mn) return mn.basis;
+      var f = FLAT[ALIAS[x.id] || x.id];
       if (f) return f.basis;
-      if (x.interest) return 'Interest · Marsilea Spa confirms the time · payable at the spa';
+      if (x.interest) return 'Interest · Guest Relations confirms your time · paid at the spa';
       /* a hosted line carries its own COMPLIMENTARY note — it must never also
        * read "Amount on request", which would suggest the price is unknown */
       if (x.complimentary) return '';
@@ -344,10 +374,55 @@
         if (q && q.basis) return q.basis;
       }
       if (x.rate != null && x.nights) {
-        return money(x.rate) + ' per person / night · ' + x.nights + (x.nights === 1 ? ' night' : ' nights') +
+        return money(x.rate) + ' per person per night · ' + x.nights + (x.nights === 1 ? ' night' : ' nights') +
                ' · ' + money(x.price) + ' per person';
       }
       return x.price != null ? money(x.price) + ' per person' : '';
+    },
+
+    /* ---- the catalogue (PRQ-LEAD-01 · W7-026) -------------------------------------------------------------------
+     * Does a product exist? `x` is an id or a Bag line. true — the catalogue has it (a stay line also needs its room);
+     * false — withdrawn or unknown (My Bag drops it); null — this page cannot tell (the room data SIYL_ROOMS is not
+     * loaded): never drop a line on a null. */
+    known: function (x) {
+      var id = x && typeof x === 'object' ? x.id : x, room = x && typeof x === 'object' ? x.room : null;
+      if (!id) return false;
+      id = ALIAS[id] || id;
+      if (FLAT[id] || CLASSES[id]) return true;
+      if (!window.SIYL_ROOMS) return null;
+      var at = locate(id);
+      if (!at) return false;
+      return room ? !!roomOf(at.stay, room) : true;
+    },
+    canonical: function (id) { return ALIAS[id] || id; },
+    /* the amount column of a line (OQ-21 · TO-01616): a spa interest is not a cost of the trip — "Not in your total" */
+    amountWords: function (x) {
+      if (!x) return '';
+      if (x.interest) return 'Not in your total';
+      return x.price != null ? money(x.price) : '';
+    },
+    /* the display word of a line's category ("Travel" for the key 'Transportation') */
+    catWords: function (cat) { return CAT_WORDS[cat] || cat || ''; },
+    /* the lowest fare of a classed product (MU9646 → 155): "From USD 155 per person" before a fare is chosen */
+    fromPrice: function (id) {
+      var list = CLASSES[id] || []; if (!list.length) return FLAT[id] ? FLAT[id].price : null;
+      return list.reduce(function (m, c) { return c.price < m ? c.price : m; }, list[0].price);
+    },
+    /* the basis WITHOUT its leading amount — the Highlight sheet prints the amount once (PRQ-07a-05) */
+    terms: function (basis) { return String(basis || '').replace(/^USD [\d,]+ (per person|for the table)( · )?/, ''); },
+    /* THE "FROM" LINE under a paid stay (TO-01317) — the nights are already in the stay line:
+     *   several room types  "From USD 290 per person · from USD 145 per person per night"
+     *   the Wedding Stay    "From USD 145 per person"   (the hosted night is said once, in its own sentence)
+     *   one room type       "USD 192 per person · USD 64 per person per night" */
+    fromLine: function (windowId) {
+      var at = locate(windowId); if (!at) return '';
+      var self = this, open = at.stay.rooms.filter(function (r) { return r.rate != null && !r.interest; });
+      if (!open.length) return '';
+      var low = open.reduce(function (m, r) { return r.rate < m.rate ? r : m; }, open[0]);
+      var q = self.quote(at.win.id, low.slug); if (!q || q.total == null) return '';
+      if (q.hosted > 0) return 'From ' + money(q.total) + ' per person';
+      if (open.length === 1) return money(q.total) + ' per person · ' + money(q.rate) + ' per person per night';
+      return 'From ' + money(q.total) + ' per person · from ' + money(q.rate) + ' per person per night';
     }
   };
 

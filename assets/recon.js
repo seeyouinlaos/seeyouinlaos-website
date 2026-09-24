@@ -38,17 +38,24 @@
       '<div><p class="sf-brand">see you in laos<span class="dot">.</span></p></div>' +
       '<div><h4>Discover</h4>' +
         '<a href="destination.html">Destinations</a><a href="journeys.html">The Journey</a>' +
-        '<a href="accommodation.html">Stays</a><a href="experiences.html">Experiences</a></div>' +
+        '<a href="accommodation.html">Stays</a><a href="experiences.html">Experiences</a>' +
+        '<a href="marsilea.html">Wellness</a></div>' +
+      /* THE HIGHLIGHTS, in the order of the days (Window 007, TO-00021): Bangkok tables before and after the wedding — never under The Wedding */
+      '<div><h4>Highlights</h4>' +
+        '<a href="experience.html?id=bkk-suhring">Dinner at Sühring</a>' +
+        '<a href="experience.html?id=bkk-baanphraya">Dinner at Baan Phraya</a>' +
+        '<a href="1872.html">Champagne Afternoon Tea at 1872</a>' +
+        '<a href="experience.html?id=bkk-cannubi">Dinner at Cannubi</a></div>' +
       '<div><h4>The Wedding</h4>' +
-        '<a href="voyage.html">The wedding days</a><a href="marsilea.html">Wellness</a>' +
-        '<a href="1872.html">1872 · Afternoon Tea</a>' +
-        '<a href="experience.html?id=bkk-suhring">Sühring · Dinner</a>' +
-        '<a href="experience.html?id=bkk-baanphraya">Baan Phraya · Dinner</a>' +
-        '<a href="experience.html?id=bkk-cannubi">Cannubi · Dinner</a></div>' +
-      '<div><h4>Guest Relations</h4>' +
+        '<a href="voyage.html#temple">Temple Ceremony</a>' +
+        '<a href="voyage.html#coffee">Coffee &amp; Cake</a>' +
+        '<a href="voyage.html#vows">Vow Ceremony</a>' +
+        '<a href="voyage.html#dinner">Wedding Dinner</a></div>' +
+      '<div><h4>Your invitation</h4>' +
         '<a href="your-journey.html">My Trip</a>' +
         '<a href="cart.html">My Bag</a>' +
-        '<a href="tickets.html">Your tickets</a>' +
+        '<a href="tickets.html">Your tickets</a></div>' +
+      '<div><h4>Guest Relations</h4>' +
         '<a href="mailto:guest.relation.seeyouinlaos@gmail.com">guest.relation.seeyouinlaos@gmail.com</a></div>' +
     '</div>' +
     '<p class="sf-legal">Sunday, 28 February 2027 · Vientiane, Laos</p>';
@@ -86,25 +93,5 @@
     });
   }
 
-  /* ---------- planning pattern: multi-select options + running summary ---------- */
-  var wiz = document.querySelector('.wizard');
-  if (wiz) {
-    var sum = wiz.querySelector('.w-summary');
-    function refresh() {
-      var picked = Array.prototype.map.call(
-        wiz.querySelectorAll('.w-opt[aria-pressed="true"]'),
-        function (b) { return b.textContent.trim(); });
-      sum.textContent = picked.length
-        ? 'Your selection — ' + picked.join(' · ')
-        : 'Your selection — nothing chosen yet';
-    }
-    wiz.querySelectorAll('.w-opt').forEach(function (b) {
-      b.setAttribute('aria-pressed', 'false');
-      b.addEventListener('click', function () {
-        b.setAttribute('aria-pressed', b.getAttribute('aria-pressed') === 'true' ? 'false' : 'true');
-        refresh();
-      });
-    });
-    refresh();
-  }
+  /* the retired planning pattern (.wizard / .w-summary) is gone: no page carries it (PRQ-07B-05) */
 })();

@@ -14,15 +14,16 @@
    ========================================================================== */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { Rooms, unitsOf, unitOf, allUnits, mayJoin, stageOf, STAGES, PLACES } from '../src/rooms.js';
+import { Rooms, unitsOf, unitOf, allUnits, mayJoin, stageOf, STAGES, PLACES, firstNameOf } from '../src/rooms.js';
 import { SEED, FIXED } from '../src/inventory-seed.js';
 import { doState } from './sandbox.mjs';
 
-const HAR = { invitationId: 'INV-G048', guestId: 'G048', partyId: 'INV-001', hosts: true };
-const SUT = { invitationId: 'INV-G049', guestId: 'G049', partyId: 'INV-001', hosts: true };
-const PEG = { invitationId: 'INV-G001', guestId: 'G001', partyId: 'INV-002', hosts: false };
-const STE = { invitationId: 'INV-G002', guestId: 'G002', partyId: 'INV-002', hosts: false };
-const LIN = { invitationId: 'INV-G003', guestId: 'G003', partyId: 'INV-003', hosts: false };
+/* firstName: what the Worker derives from the register and puts on the engine identity (PRQ-GAP-02) — a body's name is never trusted */
+const HAR = { invitationId: 'INV-G048', guestId: 'G048', partyId: 'INV-001', hosts: true, firstName: 'Haruthai' };
+const SUT = { invitationId: 'INV-G049', guestId: 'G049', partyId: 'INV-001', hosts: true, firstName: 'Suthep' };
+const PEG = { invitationId: 'INV-G001', guestId: 'G001', partyId: 'INV-002', hosts: false, firstName: 'Peggy' };
+const STE = { invitationId: 'INV-G002', guestId: 'G002', partyId: 'INV-002', hosts: false, firstName: 'Steffie' };
+const LIN = { invitationId: 'INV-G003', guestId: 'G003', partyId: 'INV-003', hosts: false, firstName: 'Lin' };
 
 function req(op, body, identity, gr) {
   return { url: 'https://x/api/rooms/' + op, method: body ? 'POST' : 'GET',
@@ -124,7 +125,7 @@ test('ROOMS · guest 1 joins A → 1/2; guest 2 joins A → 2/2 with both first 
   assert.deepEqual(r.d.mine.wedstay, { key: 'wedstay/heritage', label: 'B' }, 'a refused change leaves her where she was'); assert.equal(unit(r.d, 'wedstay/heritage', 'A').taken, 1);
   r = await call(rooms, 'join', { invitationId: LIN.invitationId, guestId: LIN.guestId, key: 'wedstay/heritage', label: 'C', name: 'Lin', need: 3 }, LIN);
   assert.equal(r.status, 200, 'a party of three is larger than a room: it fills Room C and keeps its third place in the next room (release 014)');
-  assert.deepEqual(r.d.mine.wedstay, { key: 'wedstay/heritage', label: 'C' }); assert.equal(unit(r.d, 'wedstay/heritage', 'C').taken, 2); assert.ok(unit(r.d, 'wedstay/heritage', 'A').occupants.every((o) => o.placeholder && o.name === 'Your party'), 'her own place in A is gone; what stands in A is a place kept for her party');
+  assert.deepEqual(r.d.mine.wedstay, { key: 'wedstay/heritage', label: 'C' }); assert.equal(unit(r.d, 'wedstay/heritage', 'C').taken, 2); assert.ok(unit(r.d, 'wedstay/heritage', 'A').occupants.every((o) => o.placeholder && o.name === ''), 'her own place in A is gone; what stands in A is a place kept for her party (unnamed, API-A2)');
   assert.equal(r.d.units['wedstay/heritage'].filter((u) => u.occupants.some((o) => o.placeholder)).length, 2, 'two rooms carry places kept for her party');
   assert.equal((await call(rooms, 'join', { invitationId: LIN.invitationId, guestId: LIN.guestId, key: 'wedstay/heritage', label: 'A', name: 'Lin', need: 3 }, LIN)).status, 200, 'she may move again');
   r = await call(rooms, 'join', { invitationId: LIN.invitationId, guestId: LIN.guestId, key: 'wedstay/souphattra-majestic', label: 'A', name: 'Lin', need: 3 }, LIN);
@@ -132,7 +133,7 @@ test('ROOMS · guest 1 joins A → 1/2; guest 2 joins A → 2/2 with both first 
   /* the Guest House takes a party among its four shared places — the same wedding stage, so the hotel place goes */
   r = await call(rooms, 'join', { invitationId: PEG.invitationId, guestId: PEG.guestId, key: 'guesthouse/guest-house', label: 'A', name: 'Peggy', need: 2 }, PEG);
   assert.equal(r.status, 200); assert.equal(unit(r.d, 'guesthouse/guest-house', 'A').taken, 2, 'her place and the place kept for her party member'); assert.equal(unit(r.d, 'guesthouse/guest-house', 'A').free, 2);
-  assert.deepEqual(unit(r.d, 'guesthouse/guest-house', 'A').occupants.map((o) => o.name), ['Peggy', 'Your party']);
+  assert.deepEqual(unit(r.d, 'guesthouse/guest-house', 'A').occupants.map((o) => [o.name, !!o.placeholder]), [['Peggy', false], ['', true]], 'a kept place carries no name');
   assert.deepEqual(r.d.mine.wedstay, { key: 'guesthouse/guest-house', label: 'A' }); assert.equal(unit(r.d, 'wedstay/heritage', 'B').taken, 1, 'Steffie stays in Room B');
 });
 
@@ -329,4 +330,18 @@ test('WAITING LIST · a place held resolves the line: a join clears the guest\'s
   assert.deepEqual(r.d.mine, {}); assert.deepEqual(r.d.waitlist, {}); assert.deepEqual(r.d.waiting, {});
   assert.ok(Object.values(r.d.summary).every((s) => s.free === s.places && s.soldOut === false), 'every place of every category is free again — nothing was held in advance, so nothing remains');
   assert.equal((await call(rooms, 'plan', null, null, true)).d.waitlist.length, 0);
+});
+
+/* FIRST NAMES ONLY (PRQ-GAP-02 · Window 007): the engine names a place by the first name the Worker puts on the identity —
+   never by what a client sends in the body, never a surname; a hold whose guest the Worker has not named reads no name */
+test('NAMES · a place is named by the identity\'s first name only; a body\'s name is never trusted; an unnamed identity shows no name', async () => {
+  assert.equal(firstNameOf({ firstName: 'Peggy Demo' }), 'Peggy', 'the first word only'); assert.doesNotMatch(firstNameOf({ firstName: '<b>Ada</b>' }), /[<>\/]/, 'no markup survives'); assert.equal(firstNameOf({}), '');
+  const rooms = new Rooms(doState()), key = 'wedstay/heritage';
+  const r1 = await call(rooms, 'join', { invitationId: PEG.invitationId, guestId: PEG.guestId, key, label: 'A', name: 'Mallory Impostor' }, { ...PEG, firstName: 'Peggy Demo' });
+  assert.equal(r1.status, 200); assert.deepEqual(unit(r1.d, key, 'A').occupants.map((o) => o.name), ['Peggy'], 'the identity\'s first name — not the body, not the surname');
+  const anon = { invitationId: 'INV-Z1', guestId: 'Z1', partyId: 'INV-Z1', hosts: false };
+  const r2 = await call(rooms, 'join', { invitationId: anon.invitationId, guestId: anon.guestId, key, label: 'A', name: 'Mallory' }, anon);
+  assert.equal(r2.status, 200); assert.ok(!unit(r2.d, key, 'A').occupants.some((o) => o.name === 'Mallory'), 'a name in the body is never stored or shown');
+  const seen = unit((await call(rooms, 'read', null, LIN)).d, key, 'A').occupants.map((o) => o.name);
+  assert.ok(seen.includes('Peggy') && !seen.some((n) => /Demo|Mallory|Impostor/.test(n || '')), 'another guest sees first names only');
 });

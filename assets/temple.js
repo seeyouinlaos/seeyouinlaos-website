@@ -33,6 +33,8 @@
 (function () {
   'use strict';
   var KEY = 'siyl.temple';
+  /* the finale's record words come from the one schema (assets/questionnaire.js); the fallback is the same text */
+  var FINALE_WORDS = (window.SIYL_QUESTIONNAIRE && window.SIYL_QUESTIONNAIRE.FINALE && window.SIYL_QUESTIONNAIRE.FINALE.words) || { pool: 'The pool jump', baron: 'BARON Vientiane · VIP after-party' };
 
   function read() {
     try { return JSON.parse(localStorage.getItem(KEY) || 'null') || {}; }
@@ -70,13 +72,14 @@
    * Four events, all complimentary, hosted by Haruthai & Suthep. Each named
    * guest answers each one: joining, not joining, or not yet decided. */
   var EVENTS = [
-    { key: 'temple', label: 'Temple Ceremony', when: '09:00 – approximately 12:00',
+    /* `whenShort` is the page's time (TO-03588 · “about”); `when` stays the record's and the emails' (“approximately”) */
+    { key: 'temple', label: 'Temple Ceremony', when: '09:00 – approximately 12:00', whenShort: '09:00 – about 12:00',
       place: 'Wat Ong Teu, Vientiane' },
-    { key: 'coffee', label: 'Coffee & Cake', when: 'From 12:00',
+    { key: 'coffee', label: 'Coffee & Cake', when: '12:00 – 15:30', whenShort: '12:00 – 15:30',
       place: 'Souphattra Heritage Vientiane' },
-    { key: 'vows', label: 'Vow Ceremony', when: '15:30',
+    { key: 'vows', label: 'Vow Ceremony', when: '15:30', whenShort: '15:30',
       place: 'Souphattra Heritage Vientiane' },
-    { key: 'dinner', label: 'Wedding Dinner', when: '19:30',
+    { key: 'dinner', label: 'Wedding Dinner', when: '19:30', whenShort: '19:30',
       place: 'Souphattra Heritage Vientiane · poolside' }
   ];
 
@@ -255,8 +258,10 @@
             : o === 'yes' ? 'Selected' : o === 'no' ? 'Not selected' : 'Decision required',
           participation: away || 'Joining Vientiane',
           /* the final act, in the record's words (the Worker reads the key or the words) */
-          finale: away ? 'Not applicable' : (self.finaleOf(g.guestId) === 'pool' ? 'The pool jump' : self.finaleOf(g.guestId) === 'baron' ? 'BARON Vientiane · VIP after party' : 'Not decided'),
-          finaleKey: away ? null : self.finaleOf(g.guestId)
+          /* the finale is asked only of a guest at the Wedding Dinner (OQ-34 · PRQ-05-01): for every other guest the record carries no
+             answer — one given earlier is ignored once the dinner answer is “Not attending”. The words are the schema's (after-party). */
+          finale: (away || !self.joining(g.guestId, 'dinner')) ? 'Not applicable' : (self.finaleOf(g.guestId) === 'pool' ? FINALE_WORDS.pool : self.finaleOf(g.guestId) === 'baron' ? FINALE_WORDS.baron : 'Not decided'),
+          finaleKey: (away || !self.joining(g.guestId, 'dinner')) ? null : self.finaleOf(g.guestId)
         };
       });
       var n = away ? 0 : this.offerings();

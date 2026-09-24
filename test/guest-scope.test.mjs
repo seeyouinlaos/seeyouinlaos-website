@@ -24,7 +24,7 @@ test('AUTH · the session IS the guest: one guest, own invitation id, party as c
   assert.equal(G.nameOf(), 'Peggy');
   assert.equal(G.nameOf('g-steffie'), 'Steffie', 'a party member by first name — context');
   assert.equal(G.partyNames(), 'Peggy & Steffie');
-  assert.equal(G.partyLabel(), 'Your party · Peggy & Steffie');
+  assert.equal(G.partyLabel(), 'Invited together with Steffie', 'TO-00292');
   deq(G.others().map((g) => g.guestId), ['g-steffie']);
   assert.equal(G.isParty(), false);
   assert.equal(G.answeringFor(), false);
@@ -98,6 +98,7 @@ async function inviteHarness(store) {
   const listeners = {};
   const sb = {
     console, localStorage: { getItem: (k) => (store.has(k) ? store.get(k) : null), setItem: (k, v) => store.set(k, String(v)), removeItem: (k) => store.delete(k) },
+    sessionStorage: (() => { const ss = new Map(); return { getItem: (k) => (ss.has(k) ? ss.get(k) : null), setItem: (k, v) => ss.set(k, String(v)), removeItem: (k) => ss.delete(k) }; })(),
     document: { addEventListener: (t, fn) => { (listeners[t] = listeners[t] || []).push(fn); }, dispatchEvent: (e) => { (listeners[e.type] || []).forEach((fn) => fn(e)); return true; }, createElement: () => ({ style: {}, appendChild() {}, setAttribute() {}, querySelector: () => null, querySelectorAll: () => [], addEventListener() {} }), head: { appendChild() {} }, body: { append() {}, classList: { add() {}, remove() {}, contains: () => false } }, querySelector: () => null },
     CustomEvent: class { constructor(type, init) { this.type = type; this.detail = init && init.detail; } },
     setTimeout: (fn) => fn(), fetch: () => Promise.reject(new Error('no network')),
@@ -115,7 +116,9 @@ async function inviteHarness(store) {
 }
 const hasSTM = typeof vm.SourceTextModule === 'function';
 
-test('AUTH · leaving keeps this guest\'s draft aside and hands nothing to the next guest; the same guest gets it back', { skip: !hasSTM && 'run with --experimental-vm-modules' }, async () => {
+/* PRQ-01-03 (Window 007): leaving saves first and leaves nothing behind — the guest's choices live with the invitation on the
+   server (assets/draft.js); nothing is set aside on the device in plain text any more (the earlier siyl.party.* copy is retired) */
+test('AUTH · leaving flushes the draft first, then clears this guest\'s keys and sets nothing aside; the next guest inherits nothing; a failed save keeps the guest signed in', { skip: !hasSTM && 'run with --experimental-vm-modules' }, async () => {
   const store = new Map();
   const w = await inviteHarness(store);
   await w.SIYL_AUTH.set({ ...PEGGY, token: 'demo-peggy-code' });
@@ -125,20 +128,32 @@ test('AUTH · leaving keeps this guest\'s draft aside and hands nothing to the n
   assert.equal(w.SIYL_AUTH.valid(), true);
   store.set('siyl.bag', JSON.stringify([{ id: 'train', qty: 1, price: 100 }]));
   store.set('siyl.guest', JSON.stringify({ contact: { email: 'p@example.com' } }));
-  w.SIYL_INVITE.leave();
+  /* the save fails: the guest stays signed in, nothing is cleared, and the words say why */
+  const order = [];
+  w.SIYL_DRAFT = { flush: (why) => { order.push('flush:' + why); return Promise.resolve({ ok: false, error: 'unreachable' }); } };
+  const bad = await w.SIYL_INVITE.leave();
+  assert.equal(bad.ok, false); assert.equal(bad.words, 'We could not save your latest change, so you are still signed in. Please try again in a moment.');
+  assert.equal(w.SIYL_AUTH.get().guestId, 'g-peggy', 'still signed in'); assert.equal(store.has('siyl.bag'), true, 'nothing cleared');
+  /* the save succeeds: then — and only then — the device is cleared; nothing is set aside */
+  w.SIYL_DRAFT = { flush: (why) => { order.push('flush:' + why); assert.equal(store.has('siyl.bag'), true, 'the flush runs before anything is cleared'); return Promise.resolve({ ok: true }); } };
+  store.set('siyl.party.INV-g-peggy', '{"siyl.bag":"[]"}');   /* a copy an earlier release set aside goes too */
+  const ok = await w.SIYL_INVITE.leave();
+  assert.equal(ok.ok, true); assert.equal(ok.words, 'You have signed out. Your choices are saved with your invitation.');
+  assert.deepEqual(order, ['flush:leave', 'flush:leave']);
   assert.equal(w.SIYL_AUTH.get(), null);
   assert.equal(store.has('siyl.bag'), false); assert.equal(store.has('siyl.guest'), false);
-  assert.ok(store.has('siyl.party.INV-g-peggy'), 'the draft is set aside under the guest\'s own id');
+  assert.deepEqual([...store.keys()].filter((k) => k.startsWith('siyl.party.')), [], 'nothing is set aside in plain text');
+  assert.equal(w.SIYL_INVITE.signedOutLine(), 'You have signed out. Your choices are saved with your invitation.', 'the one-time line for invitation.html'); assert.equal(w.SIYL_INVITE.signedOutLine(), '', 'once');
   /* Steffie opens hers on the same device: nothing of Peggy's */
+  delete w.SIYL_DRAFT;
   await w.SIYL_AUTH.set({ ...STEFFIE, token: 'demo-steffie-code' });
-  assert.equal(store.has('siyl.bag'), false, 'Steffie inherits no bag');
+  assert.equal(store.has('siyl.bag'), false, 'Steffie inherits no bag'); assert.equal(store.has('siyl.guest'), false);
   assert.equal(w.SIYL_AUTH.get().guestId, 'g-steffie');
   store.set('siyl.bag', JSON.stringify([{ id: 'c86', qty: 1, price: 105 }]));
-  w.SIYL_INVITE.leave();
-  /* Peggy again: her own bag, not Steffie's */
+  await w.SIYL_INVITE.leave();
+  /* Peggy again: never Steffie's bag — her own comes back from the server copy of her invitation, not from this device */
   await w.SIYL_AUTH.set({ ...PEGGY, token: 'demo-peggy-code' });
-  assert.deepEqual(JSON.parse(store.get('siyl.bag')).map((x) => x.id), ['train']);
-  assert.equal(JSON.parse(store.get('siyl.guest')).contact.email, 'p@example.com');
+  assert.equal(store.has('siyl.bag'), false, 'nothing of Steffie\'s');
   assert.equal(store.has('siyl.who'), false, 'no identity switch state exists');
 });
 

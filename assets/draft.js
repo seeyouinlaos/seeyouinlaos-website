@@ -14,6 +14,15 @@
    The answer carries the submission state — DRAFT · SENT · CHANGES NOT YET
    SENT — computed on the server by comparing what was sent with what is saved;
    the words on every step come from it, never from a guess.
+
+   ONE TRIP STATE (Window 007 · OQ-40 · CP-01/02/03): words() is the one source
+   of the trip-state line on every surface — nothing before the first own answer ·
+   “My Trip · not sent yet” · “Sent to us · {date}” · “Changes not sent yet” +
+   “Send the update” (only after a real CONTENT change) · “Confirmed by Guest
+   Relations · {date}” (only while Guest Relations' confirmation names the latest
+   sent version — it lapses after a change, OQ-27). Lines read their own state
+   from the last sent snapshot (lineState). A trip and a “not joining” reply are
+   sent through ONE path (send / sendReply).
    ========================================================================== */
 (function () {
   'use strict';
@@ -27,7 +36,10 @@
   var META = 'siyl.draft.meta';   /* { invitationId, serverUpdatedAt, dirty, lastSavedAt, lastError } */
   var BASE = 'siyl.draft.base';   /* the keys as last read from / written to the server — the base of the three-way merge */
   var RESET = 'siyl.draft.reset'; /* the server's reset epoch this device has honoured (THE CLEAN RESET, Owner, 19 Sep 2026) */
-  var state = { phase: 'idle', at: null, error: null, submission: null, applying: false, ready: false, notice: null };   /* ready: the server copy has been read once for this sign-in; notice: a conflict the guest should see until their next own change */
+  var NOTICE = 'siyl.draft.notice';   /* a two-device merge that dropped this device's edits — kept until the guest taps OK (PRQ-04-17) */
+  var DEVICE_SENT = 'siyl.sent.device';   /* THIS device's own last send { invitationId, version, at } — never synced (PRQ-04-06) */
+  var state = { phase: 'idle', at: null, error: null, offline: false, submission: null, applying: false, ready: false, notice: null, lost: null };
+  try { var kept = JSON.parse(sessionStorage.getItem(NOTICE) || 'null'); if (kept && kept.kind) { state.notice = 'stale'; state.lost = kept.lost || []; } } catch (e) {}   /* ready: the server copy has been read once for this sign-in; notice: a conflict the guest should see until their next own change */
   var timer = null, inflight = null, pulled = '', pending = false, queued = null;
   function base() { try { return JSON.parse(localStorage.getItem(BASE) || 'null') || {}; } catch (e) { return {}; } }
   function setBase(keys) { try { localStorage.setItem(BASE, JSON.stringify(keys || {})); } catch (e) {} }
@@ -165,6 +177,8 @@
     /* the reset rule, for every other channel that learns the epoch (the contact) */
     honourReset: honourReset, seenReset: seenReset,
     submission: function () { return state.submission; },
+    /* PRQ-07a-06: the first name of a party member whose trip already holds this table product, or null */
+    partyTable: function (id) { return (state.party && state.party[id]) || null; },
     /* PUSH: this device's complete draft to the server. reason: 'auto' | 'save' | 'continue' | 'send' */
     push: function (reason) {
       /* one request at a time (Codex P1-2): a push while another is in flight waits for it and then sends the current snapshot */
@@ -190,18 +204,19 @@
           if (d && d.status === 409 && d.error === 'stale' && d.draft && d.draft.keys) {
             /* the merge reads THIS MOMENT's keys, not the request's snapshot (Codex final review): an answer typed while
                the save was in flight is a local edit against the same base and is kept, never rolled back to the old value */
-            var m3 = merge(snapshot(), base(), d.draft.keys, localStorage.getItem(BASE) !== null);
+            var before409 = snapshot();
+            var m3 = merge(before409, base(), d.draft.keys, localStorage.getItem(BASE) !== null);
             apply(m3.keys); setBase(d.draft.keys); state.submission = d.submission || state.submission;
             setMeta({ invitationId: a.invitationId, serverUpdatedAt: d.draft.updatedAt, dirty: m3.keep.length > 0, lastSavedAt: d.draft.savedAt, lastError: null });
             state.at = d.draft.savedAt; state.error = null;
-            if (m3.lost.length) { state.notice = 'stale'; state.phase = 'stale'; }
+            if (m3.lost.length) { keepNotice(lostNames(m3.lost, before409, d.draft.keys)); state.phase = 'stale'; }
             else { state.phase = m3.keep.length ? 'saving' : 'saved'; }
             announce();
             inflight = null;
             if (m3.keep.length) return D.push(reason).then(function (r2) { return { ok: !!(r2 && r2.ok), error: r2 && r2.ok ? null : 'stale', merged: true, kept: m3.keep, lost: m3.lost }; });
             return { ok: false, error: 'stale', applied: true, lost: m3.lost };
           }
-          if (!d || !d.ok) { state.phase = 'failed'; state.error = (d && d.error) || 'save failed'; announce(); setMeta({ lastError: state.error }); return d || { ok: false }; }
+          if (!d || !d.ok) { state.phase = 'failed'; state.offline = false; state.error = (d && d.error) || 'save failed'; announce(); setMeta({ lastError: state.error }); return d || { ok: false }; }
           /* THE PUT IS ACKNOWLEDGED (Codex final review): the revision it returned and the keys it stored are this device's base
              from this moment — before any read-back, whatever the read-back says — so a later push never names an older
              revision and never mistakes this device's own saved answer for another device's change */
@@ -217,12 +232,12 @@
           }
           return done(d, d.submission);
         })
-        .catch(function () { if (!same(s)) return { ok: false, error: 'session changed' }; state.phase = 'failed'; state.error = 'unreachable'; announce(); setMeta({ lastError: 'unreachable' }); return { ok: false, error: 'unreachable' }; })
+        .catch(function () { if (!same(s)) return { ok: false, error: 'session changed' }; state.phase = 'failed'; state.error = 'unreachable'; state.offline = true; announce(); setMeta({ lastError: 'unreachable' }); return { ok: false, error: 'unreachable' }; })
         .then(function (d) { inflight = null; return d; });
       inflight = req;
       return req;
       /* dirty stays true when something was typed while this request was in flight — that edit is not on the server yet */
-      function done(d, submission) { state.phase = state.notice === 'stale' ? 'stale' : 'saved'; state.at = d.savedAt; state.submission = submission || state.submission; setBase(keys); setMeta({ serverUpdatedAt: d.updatedAt, dirty: !unchangedSince(keys), lastSavedAt: d.savedAt, lastError: null }); announce(); return d; }
+      function done(d, submission) { state.phase = state.notice === 'stale' ? 'stale' : 'saved'; state.offline = false; state.error = null; state.at = d.savedAt; state.submission = submission || state.submission; setBase(keys); setMeta({ serverUpdatedAt: d.updatedAt, dirty: !unchangedSince(keys), lastSavedAt: d.savedAt, lastError: null }); announce(); return d; }
     },
     /* PULL: the server copy. A device with unsent local changes pushes them first; otherwise a newer server copy wins. */
     pull: function () {
@@ -249,10 +264,11 @@
          and sent again, never rolled back to the server's older value */
       var before = snapshot();
       return fetch(API, { headers: headers() }).then(function (r) { return r.json(); }).then(function (g) {
+        state.offline = false;
         if (!same(s)) return null;
         if (!g || !g.ok) return g;
         if (g.resetAt && honourReset(g.resetAt)) { before = snapshot(); m = meta(); pending = false; }
-        state.submission = g.submission || null;
+        state.submission = g.submission || null; state.party = g.party || null;
         if (g.draft && g.draft.keys) {
           var local = snapshot(), localEmpty = !Object.keys(local).length;
           var newer = (m.invitationId !== a.invitationId) || localEmpty || !m.serverUpdatedAt || g.draft.updatedAt > m.serverUpdatedAt;
@@ -270,12 +286,15 @@
             });
             apply(m3.keys); setBase(g.draft.keys);
             if (m3.keep.length) pending = true;
-            if (m3.lost.length) state.notice = 'stale';   /* the same key changed elsewhere meanwhile: the server's stands, the guest is told */
+            if (m3.lost.length) keepNotice(lostNames(m3.lost, local, g.draft.keys));   /* the same key changed elsewhere meanwhile: the server's stands, the guest is told what */
           }
           /* a device that already holds this revision but has no merge base yet (a browser upgraded from an older release):
              the server copy of this very revision IS the base (Codex release review) — otherwise a later conflict would
              mistake the unchanged server answer for a competing edit */
           else if (!localStorage.getItem(BASE)) setBase(g.draft.keys);
+          /* A CHANGE MADE ON A PAGE WITHOUT THE DRAFT MODULE (a Marsilea interest, PRQ-07a-07): this device's keys differ from the
+             revision it last read and nothing newer is on the server — the change is this guest's own and is sent now */
+          else { var bk = base(), here = snapshot(); if (KEYS.some(function (k) { return here[k] !== bk[k] && !(here[k] === undefined && bk[k] === undefined); })) pending = true; }
           setMeta({ invitationId: a.invitationId, serverUpdatedAt: g.draft.updatedAt, dirty: false });
           state.phase = 'saved'; state.at = g.draft.savedAt;
           state.ready = true;
@@ -290,18 +309,18 @@
         } else { state.ready = true; }
         announce();
         return g;
-      }).catch(function () { return null; });
+      }).catch(function () { if (same(s) && m.dirty) { state.offline = true; state.phase = 'failed'; state.error = 'unreachable'; announce(); } return null; });
     },
     /* the submission state alone (after a send) */
     refresh: function () {
       if (!signedIn()) return Promise.resolve(null);
       var s = session();
-      return fetch(API, { headers: headers() }).then(function (r) { return r.json(); }).then(function (g) { if (!same(s)) return null; if (g && g.ok) { state.submission = g.submission || null; announce(); } return g; }).catch(function () { return null; });
+      return fetch(API, { headers: headers() }).then(function (r) { return r.json(); }).then(function (g) { if (!same(s)) return null; if (g && g.ok) { state.submission = g.submission || null; state.party = g.party || null; announce(); } return g; }).catch(function () { return null; });
     },
     /* autosave: any change on this device, debounced */
     touch: function () {
       if (state.applying || !signedIn()) return;
-      state.notice = null;
+      /* the merge notice stays until the guest taps OK (PRQ-04-17) — a later edit does not hide what was not kept */
       setMeta({ invitationId: auth().invitationId, dirty: true });
       if (timer) clearTimeout(timer);
       /* never before the server copy has been read for this sign-in: a fresh device must not overwrite the journey with its empty cache */
@@ -309,30 +328,237 @@
     },
     /* flush now (Continue, Review & Send): the pending autosave first */
     flush: function (reason) { if (timer) { clearTimeout(timer); timer = null; } pending = false; var go = function () { return D.push(reason || 'continue'); }; if (!state.ready && signedIn()) return D.pull().then(go); return inflight ? inflight.then(go) : go(); },
-    /* the words of the state, for any surface */
+    /* ---- THE ONE TRIP STATE (OQ-40 · PRQ-04-01) ---------------------------------------------------------------------- */
+    /* the words of the state, for any surface: { key, label, line, cta, at, date, declined } — see API-A1.md */
     words: function () {
-      var s = state.submission;
-      if (!s || s.submissionStatus === 'draft') return { key: 'draft', label: 'Saved as draft', line: 'My Trip · saved as draft', cta: null };
-      if (s.hasUnsentChanges) return { key: 'changed', label: 'Changes saved · not yet sent to Guest Relations', line: 'Changes saved · not yet sent to Guest Relations', cta: 'Send Updated Trip' };
-      return { key: 'sent', label: 'Sent to Guest Relations', line: 'Sent to Guest Relations · Reference ' + s.submissionId, cta: null };
+      var s = state.submission, C = window.SIYL_CONFIRM;
+      var sent = !!(s && s.submissionId && s.submissionStatus !== 'draft') || !!(!s && C && C.state && C.state() !== 'none');
+      if (!sent) {
+        /* nothing is said before the guest's own first answer (W7-074) — a prefilled invitation is not a trip yet */
+        if (!hasOwnContent()) return { key: 'none', label: '', line: '', cta: null, at: null, date: '', declined: false };
+        return { key: 'draft', label: 'Not sent yet', line: 'My Trip · not sent yet', cta: null, at: null, date: '', declined: false };
+      }
+      var declined = !!(s && s.declined);
+      if (D.hasUnsentChanges()) return { key: 'changed', label: 'Changes not sent yet', line: 'Changes not sent yet', cta: 'Send the update', at: D.sentAt(), date: dateWords(D.sentAt()), declined: declined };
+      if (D.confirmed()) { var ca = D.confirmedAt(); return { key: 'confirmed', label: 'Confirmed by Guest Relations', line: 'Confirmed by Guest Relations' + (ca ? ' · ' + dateWords(ca) : ''), cta: null, at: ca, date: dateWords(ca), declined: declined }; }
+      var at = D.sentAt();
+      return { key: 'sent', label: 'Sent to us', line: 'Sent to us' + (at ? ' · ' + dateWords(at) : ''), cta: null, at: at, date: dateWords(at), declined: declined };
     },
-    /* the SAVE MY PROGRESS control: paint it into a host element */
+    tripState: function () { return D.words().key; },
+    /* a real CONTENT difference between the saved trip and the last send (the server's content fingerprint) */
+    hasUnsentChanges: function () { var s = state.submission; return !!(s && s.submissionId && s.hasUnsentChanges); },
+    sent: function () { var s = state.submission, C = window.SIYL_CONFIRM; return !!(s && s.submissionId) || !!(!s && C && C.state && C.state() !== 'none'); },
+    sentAt: function () { var s = state.submission, C = window.SIYL_CONFIRM; return (s && s.submissionId && (s.lastSentAt || s.submittedAt)) || (C && C.sentAt ? C.sentAt() : null) || null; },
+    firstSentAt: function () { var s = state.submission, C = window.SIYL_CONFIRM; return (s && s.submissionId && s.submittedAt) || (C && C.receivedAt ? C.receivedAt() : null) || null; },
+    /* the confirmation stands: Guest Relations confirmed exactly the latest sent version and nothing changed since (OQ-27) */
+    confirmed: function () {
+      if (D.hasUnsentChanges()) return false;
+      var s = state.submission, C = window.SIYL_CONFIRM;
+      if (s && s.confirmed === true) return true;
+      return !!(C && C.state && C.state() === 'confirmed');
+    },
+    confirmedAt: function () {
+      if (!D.confirmed()) return null;
+      var s = state.submission, C = window.SIYL_CONFIRM;
+      return (s && s.confirmed && s.confirmedAt) || (C && C.lastConfirmedAt ? C.lastConfirmedAt() : null) || null;
+    },
+    dateWords: function (iso) { return dateWords(iso); },
+    /* THE DECLINE CARD (OQ-42 · PRQ-02-02): 'none' (D1) · 'sent' — the last send was this decline, nothing changed since (D2) ·
+       'changed' — a sent trip or reply was changed and not sent (D3) */
+    reply: function () {
+      var s = state.submission;
+      if (!s || !s.submissionId) return { state: 'none', at: null, date: '' };
+      if (s.hasUnsentChanges) return { state: 'changed', at: s.lastSentAt || null, date: dateWords(s.lastSentAt) };
+      if (s.declined) return { state: 'sent', at: s.lastSentAt || null, date: dateWords(s.lastSentAt) };
+      return { state: 'none', at: null, date: '' };
+    },
+    /* “another device” only when another device really sent the latest version (PRQ-04-06) */
+    sentElsewhere: function () {
+      var s = state.submission, a = auth(); if (!s || !s.submissionId || !a) return false;
+      var mine = deviceSent(); if (!mine || mine.invitationId !== a.invitationId) return true;
+      return Number(mine.version || 0) !== Number(s.version || 0);
+    },
+    /* ---- PER LINE, FROM THE LAST SENT SNAPSHOT (PRQ-01-07 · PRQ-04-05) ---- */
+    sentLines: function () { var s = state.submission; return s && s.submissionId && Array.isArray(s.sentSelections) ? s.sentSelections : (s && s.submissionId ? null : []); },
+    lineState: function (line) {
+      var s = state.submission, id = typeof line === 'string' ? line : (line && line.id), cur = typeof line === 'string' ? null : line;
+      if (!cur && id && window.SIYL_BAG) cur = SIYL_BAG.get().filter(function (x) { return x.id === id; })[0] || null;
+      if (!D.sent()) return { key: 'selected', label: 'Selected' };
+      var list = D.sentLines(), was = null;
+      if (list === null) { if (D.hasUnsentChanges()) return { key: 'unsent', label: 'Selected · not sent yet' }; }
+      else { was = list.filter(function (x) { return x && x.id === id; })[0] || null; if (!was || (cur && !sameLine(was, cur))) return { key: 'unsent', label: 'Selected · not sent yet' }; }
+      return D.confirmed() ? { key: 'confirmed', label: 'Confirmed by Guest Relations' } : { key: 'sent', label: 'Sent to us' };
+    },
+    /* ---- SENDING — ONE PATH FOR A TRIP AND A REPLY (CP-01 · PRQ-02-01) ---- */
+    registration: function () { return registrationNow(); },
+    sending: function () { return !!sendingNow; },
+    send: function (opts) {
+      if (sendingNow) return sendingNow;
+      opts = opts || {};
+      var a = auth(); if (!signedIn()) return Promise.resolve({ ok: false, error: 'unauthorised' });
+      var s = session();
+      announce();
+      sendingNow = D.flush('send').then(function (fl) {
+        if (!fl || !fl.ok) return { ok: false, error: 'not saved' };
+        if (!same(s)) return { ok: false, error: 'session changed' };
+        var reg = opts.registration || registrationNow(), text = opts.text || textOf(reg);
+        if (!reg) return { ok: false, error: 'unauthorised' };
+        return fetch(SUBMIT, { method: 'POST', headers: headers(), body: JSON.stringify({ registration: reg, invitationId: a.invitationId, text: text }) })
+          .then(function (r) { return r.json().catch(function () { return null; }).then(function (d) { return { r: r, d: d }; }); })
+          .then(function (x) {
+            var r = x.r, d = x.d || {};
+            if (!same(s)) return { ok: false, error: 'session changed' };
+            if (r.ok) {
+              try { localStorage.setItem(DEVICE_SENT, JSON.stringify({ invitationId: a.invitationId, version: d.version || null, at: d.lastSentAt || d.submittedAt || null })); } catch (e) {}
+              if (d.submission) state.submission = d.submission;
+              if (window.SIYL_CONFIRM && SIYL_CONFIRM.noteReceived) SIYL_CONFIRM.noteReceived(d.lastSentAt || d.submittedAt, d);
+              announce();
+              D.flush('auto').then(function () { return D.refresh(); });
+              return { ok: true, status: r.status, answer: d };
+            }
+            if (r.status === 422 && d.error === 'email required') return { ok: false, status: 422, error: 'email required', message: d.message || '', answer: d };
+            if (r.status === 422) return { ok: false, status: 422, error: 'incomplete', message: d.message || '', missing: d.missing || [], answer: d };
+            if (r.status === 401) return { ok: false, status: 401, error: 'unauthorised', answer: d };
+            return { ok: false, status: r.status, error: 'failed', message: d.error || '', answer: d };
+          }, function () { return { ok: false, error: 'unreachable' }; });
+      }).then(function (res) { sendingNow = null; announce(); return res; }, function () { sendingNow = null; announce(); return { ok: false, error: 'unreachable' }; });
+      return sendingNow;
+    },
+    /* the decline, sent in place through the same path — only for a guest whose answer is “I won’t be joining this trip” */
+    sendReply: function () {
+      var G = window.SIYL_GUEST;
+      if (!G || !G.notJoining || !G.notJoining()) return Promise.resolve({ ok: false, error: 'not a decline' });
+      return D.send({});
+    },
+    /* ---- SAVING (PRQ-04-16 · PRQ-04-17) ---- */
+    /* the quiet save stamp — never a trip word */
+    saveWords: function () {
+      var ph = state.phase, t = state.at ? new Date(state.at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : '';
+      if (ph === 'saving') return 'Saving…';
+      if (ph === 'failed') return offline() ? 'Not saved yet — we will try again as soon as you are back online.' : 'Not saved yet — please try again in a moment.';
+      if ((ph === 'saved' || ph === 'stale') && t) return 'Saved · ' + t;
+      return '';
+    },
+    notice: function () {
+      if (state.notice !== 'stale') return null;
+      var lost = state.lost || [];
+      return { kind: 'merged', lost: lost.slice(), words: noticeWords(lost) };
+    },
+    dismissNotice: function () { state.notice = null; state.lost = null; if (state.phase === 'stale') state.phase = 'saved'; try { sessionStorage.removeItem(NOTICE); } catch (e) {} announce(); },
+    /* the header's trip state and SAVE MY PROGRESS: paint them into a host element (one listener per host) */
     mount: function (host) {
       if (!host) return;
       function paint() {
-        var w = D.words(), ph = state.phase, t = state.at ? new Date(state.at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : '';
-        var status = ph === 'saving' ? 'Saving…' : ph === 'failed' ? 'Not saved · try again' : ph === 'stale' ? 'This device was out of date — showing your latest saved trip' : ph === 'saved' && t ? 'Saved · ' + t : '';
-        host.innerHTML = '<p class="prep-state is-' + w.key + '" role="status"><b>' + esc(w.line) + '</b></p>' +
-          (w.cta ? '<a class="prep-send-upd" href="' + (window.SIYL_PREP && SIYL_PREP.hrefOf ? SIYL_PREP.hrefOf('review.html') : 'review.html') + '">' + esc(w.cta) + '</a>' : '') +
-          '<button type="button" class="prep-save-btn" data-save-progress' + (ph === 'saving' ? ' disabled' : '') + '>Save My Progress</button>' +
-          '<p class="prep-save-state' + (ph === 'failed' ? ' is-failed' : '') + '" aria-live="polite">' + esc(status) + '</p>';
+        var w = D.words(), n = D.notice(), stamp = D.saveWords();
+        host.innerHTML = (w.line ? '<p class="prep-state is-' + w.key + '" role="status"><b>' + esc(w.line) + '</b></p>' : '') +
+          (w.cta ? '<a class="prep-send-upd" href="' + (window.SIYL_PREP && SIYL_PREP.hrefOf ? SIYL_PREP.hrefOf('review.html') : 'review.html') + '#send">' + esc(w.cta) + '</a>' : '') +
+          '<button type="button" class="prep-save-btn" data-save-progress' + (state.phase === 'saving' ? ' disabled' : '') + '>Save my progress</button>' +
+          '<p class="prep-save-state' + (state.phase === 'failed' ? ' is-failed' : '') + '" aria-live="polite">' + esc(stamp) + '</p>' +
+          (n ? '<p class="prep-save-state prep-merge" role="status">' + esc(n.words) + ' <button type="button" class="p-link" data-notice-ok>OK</button></p>' : '');
         var b = host.querySelector('[data-save-progress]');
         if (b) b.addEventListener('click', function () { flushForms(); D.flush('save'); });
+        var ok = host.querySelector('[data-notice-ok]');
+        if (ok) ok.addEventListener('click', function () { D.dismissNotice(); });
       }
-      document.addEventListener('siyl:draft', paint);
+      /* one listener for every mounted host; a host that left the page (the shell repaints its bar) is dropped */
+      mounts = mounts.filter(function (x) { return x.host !== host && (x.host.isConnected !== false); });
+      mounts.push({ host: host, paint: paint });
       paint();
     },
   };
+  var mounts = [];
+  document.addEventListener('siyl:draft', function () { mounts = mounts.filter(function (x) { return x.host.isConnected !== false; }); mounts.forEach(function (x) { try { x.paint(); } catch (e) {} }); });
+  var SUBMIT = '/api/register';
+  var sendingNow = null;
+  var MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  /* “24 September 2026” — British, no leading zero, no time (the time was Berlin time without saying so) */
+  function dateWords(iso) { if (!iso) return ''; var d = new Date(iso); if (isNaN(d.getTime())) return ''; return d.getDate() + ' ' + MONTHS[d.getMonth()] + ' ' + d.getFullYear(); }
+  function offline() { try { if (typeof navigator !== 'undefined' && navigator.onLine === false) return true; } catch (e) {} return !!state.offline; }
+  function deviceSent() { try { return JSON.parse(localStorage.getItem(DEVICE_SENT) || 'null'); } catch (e) { return null; } }
+  /* a line as sent vs as it stands: what the guest chose, not how it is displayed */
+  var LINE_FIELDS = ['id', 'price', 'qty', 'unit', 'room', 'nights', 'rate', 'variant', 'interest', 'request', 'date', 'party'];
+  function sameLine(a, b) { return LINE_FIELDS.every(function (k) { var x = a ? a[k] : undefined, y = b ? b[k] : undefined; if (k === 'qty') { x = x || 1; y = y || 1; } return JSON.stringify(x === undefined ? null : x) === JSON.stringify(y === undefined ? null : y); }); }
+  /* the guest's own answers — anything beyond what the invitation prefilled (W7-074: no trip line before the first own answer) */
+  function hasOwnContent() {
+    var keys = snapshot(), j = function (k) { return parseJson(keys[k]); };
+    var bag = j('siyl.bag'); if (Array.isArray(bag) && bag.length) return true;
+    var skip = j('siyl.skip'); if (Array.isArray(skip) && skip.length) return true;
+    var t = j('siyl.temple'); if (t && typeof t === 'object' && t.by && Object.keys(t.by).length) return true;
+    var dk = j('siyl.docs'); if (dk && typeof dk === 'object' && Object.keys(dk).some(function (k) { var v = dk[k]; return v && typeof v === 'object' && Object.keys(v).length; })) return true;
+    var g = j('siyl.guest'); if (!g || typeof g !== 'object') return false;
+    if (g.scope) return true;
+    if ((g.history || []).some(function (h) { return h && h.by !== 'guest-list'; })) return true;
+    return Object.keys(g.guests || {}).some(function (id) { var r = g.guests[id] || {}; return !!(r.allergy || r.photo || r.dress || Object.keys(r.profile || {}).length || Object.keys(r.submitted || {}).length); });
+  }
+  /* WHAT A TWO-DEVICE MERGE DID NOT KEEP (PRQ-04-17): the answers of this device that differ from the server's in the keys the
+     server's copy won — named the way the guest knows them; nothing named → the general sentence */
+  function lostNames(keysLost, local, server) {
+    var out = [], add = function (n) { if (n && out.indexOf(n) < 0) out.push(n); };
+    var Q = window.SIYL_QUESTIONNAIRE, G = window.SIYL_GUEST, me = G && G.me ? G.me() : null;
+    (keysLost || []).forEach(function (k) {
+      var L = parseJson(local && local[k]), S = parseJson(server && server[k]);
+      if (k === 'siyl.bag' && Array.isArray(L)) {
+        var Sa = Array.isArray(S) ? S : [];
+        L.forEach(function (x) { var y = Sa.filter(function (z) { return z && x && z.id === x.id; })[0]; if (!y || !sameLine(x, y)) add(x && x.name); });
+        return;
+      }
+      if (k === 'siyl.guest' && isObj(L)) {
+        var Sg = isObj(S) ? S : {}, id = me ? me.guestId : Object.keys(L.guests || {})[0];
+        var lr = (L.guests || {})[id] || {}, sr = (Sg.guests || {})[id] || {};
+        Object.keys(lr.profile || {}).forEach(function (q) { if (!sameJson((lr.profile || {})[q], (sr.profile || {})[q])) add(Q && Q.labelOf ? Q.labelOf(q) : q); });
+        if (!sameJson(stripAt(lr.allergy), stripAt(sr.allergy))) add(Q && Q.ALLERGY ? Q.ALLERGY.label : 'Food allergies');
+        if (!sameJson(!!(lr.photo && lr.photo.acknowledged), !!(sr.photo && sr.photo.acknowledged))) add(Q && Q.PHOTO_LABEL ? Q.PHOTO_LABEL : 'Photography & film');
+        if (!sameJson(!!(lr.dress && lr.dress.acknowledged), !!(sr.dress && sr.dress.acknowledged))) add('Dress code');
+        if (!sameJson(stripAt(L.scope), stripAt(Sg.scope))) add('Which parts of the journey you are joining');
+        var lc = L.contact || {}, sc = Sg.contact || {};
+        ((G && G.PERSONAL) || []).forEach(function (f) { if (lc[f.key] !== undefined && lc[f.key] !== sc[f.key]) add(f.label); });
+        return;
+      }
+      if (k === 'siyl.temple') add('your answers for The Wedding');
+      if (k === 'siyl.skip') add('the parts of your trip you said you won’t need');
+    });
+    return out;
+  }
+  function stripAt(o) { if (!isObj(o)) return o || null; var c = {}; Object.keys(o).forEach(function (k) { if (k !== 'at' && k !== 'by') c[k] = o[k]; }); return c; }
+  function andList(a) { return a.length <= 1 ? (a[0] || '') : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1]; }
+  function noticeWords(lost) {
+    if (!lost || !lost.length) return 'Updated from your other device — please check your latest changes before you send.';
+    return lost.length === 1
+      ? 'Updated from your other device. Your change to ' + lost[0] + ' could not be kept — you changed it there first. Please check it before you send.'
+      : 'Updated from your other device. Your changes to ' + andList(lost) + ' could not be kept — you changed them there first. Please check them before you send.';
+  }
+  function keepNotice(lost) {
+    state.notice = 'stale'; state.lost = lost || [];
+    try { sessionStorage.setItem(NOTICE, JSON.stringify({ kind: 'merged', lost: state.lost })); } catch (e) {}
+  }
+  /* the registration Review & Send posts — the same fields, built from the same modules */
+  function registrationNow() {
+    var a = auth(), G = window.SIYL_GUEST, B = window.SIYL_BAG, U = window.SIYL_UNITS;
+    if (!a || !G || !G.party || !G.party()) return null;
+    var rooms = U && U.view && U.view() ? U.view().mine : null;
+    return { channel: 'journey-shop', lang: window.SIYL_I18N ? window.SIYL_I18N.lang : 'en', guestId: a.guestId, partyId: a.partyId || null, selections: B ? B.get() : [], totalUsd: B ? B.total() : 0,
+      contact: { email: G.contact('email'), phone: G.contact('phone') },
+      templeCeremony: window.SIYL_TEMPLE ? SIYL_TEMPLE.operational() : null,
+      guestRecord: G.operational(),
+      stages: window.SIYL_JOURNEY && SIYL_JOURNEY.states ? SIYL_JOURNEY.states() : null,
+      waitlist: U && U.view && U.view() ? (U.view().waitlist || null) : null,
+      documents: window.SIYL_DOCS ? SIYL_DOCS.operational() : null,
+      seats: window.SIYL_SEATS && SIYL_SEATS.ready() ? SIYL_SEATS.mine() : null,
+      rooms: rooms,
+      inventory: rooms ? 'HELD — places held in your name, not yet confirmed' : 'UNKNOWN — rooms not read on this device',
+      registration_submitted_at: new Date().toISOString() };
+  }
+  /* the plain-text copy that travels with a send made outside Review & Send (a reply from My Trip) */
+  function textOf(reg) {
+    var a = auth() || {}, G = window.SIYL_GUEST, name = G && G.nameOf ? G.nameOf() : '';
+    var L = ['SEE YOU IN LAOS — MY TRIP', 'Invitation: ' + (a.invitationId || '') + ' · ' + name, 'Guest: ' + name + ' (' + (a.guestId || '') + ')', ''];
+    if (G && G.scopeAnswered && G.scopeAnswered()) L.push('WHERE THEY JOIN US: ' + (G.notJoining() ? 'NOT JOINING THIS TRIP' : String(G.scopeWords()).toUpperCase()), '');
+    var gr = reg && reg.guestRecord;
+    if (gr) L.push('GUEST:', '- Contact: ' + ((gr.contact && gr.contact.email) || 'no email given') + ' · ' + ((gr.contact && gr.contact.phone) || 'no telephone given'));
+    if (!(G && G.notJoining && G.notJoining())) L.push('', 'YOUR COST: USD ' + (reg && reg.totalUsd || 0).toLocaleString('en-US'));
+    L.push('Sent via My Trip · ' + dateWords(new Date().toISOString()));
+    return L.join('\n');
+  }
   function esc(t) { return String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
   /* every form value on this page is committed before a save (a field still focused has not fired its change yet) */
   function flushForms() { try { var el = document.activeElement; if (el && /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName)) { el.dispatchEvent(new Event('change', { bubbles: true })); el.blur(); } } catch (e) {} }
@@ -341,7 +567,15 @@
   ['siyl:guest', 'siyl:bag', 'siyl:temple', 'siyl:docs'].forEach(function (ev) { document.addEventListener(ev, function () { D.touch(); }); });
   function pullOnce() { var a = auth(); if (!signedIn()) return; if (pulled === a.invitationId) return; pulled = a.invitationId; D.pull(); }
   document.addEventListener('siyl:auth', pullOnce); document.addEventListener('siyl:invite-ready', pullOnce);
-  document.addEventListener('siyl:signout', function () { sessionChanged(); pulled = ''; state.notice = null; state.submission = null; state.phase = 'idle'; try { localStorage.removeItem(META); localStorage.removeItem(BASE); } catch (e) {} });
+  document.addEventListener('siyl:signout', function () { sessionChanged(); pulled = ''; state.notice = null; state.lost = null; state.submission = null; state.phase = 'idle'; state.offline = false; try { localStorage.removeItem(META); localStorage.removeItem(BASE); localStorage.removeItem(DEVICE_SENT); sessionStorage.removeItem(NOTICE); } catch (e) {} });
+  /* SAVE RETRIES ON RECONNECT (PRQ-04-16): a save that failed while offline is tried again as soon as the connection returns (and on
+     the next page, where the pull pushes a dirty draft first) — so “we will try again as soon as you are back online” is true */
+  if (typeof window.addEventListener === 'function') window.addEventListener('online', function () {
+    if (!signedIn()) return; var m = meta();
+    state.offline = false;
+    if (!state.ready) { pulled = ''; pullOnce(); return; }
+    if (m.dirty || state.phase === 'failed') D.push('auto');
+  });
   /* another tab of this browser signed out or signed in as someone else: whatever this tab still had in flight belongs to the guest before */
   if (typeof window.addEventListener === 'function') window.addEventListener('storage', function (e) { if (e && e.key === 'siyl.auth') { sessionChanged(); pulled = ''; } });
   /* Continue buttons flush the draft on their way */

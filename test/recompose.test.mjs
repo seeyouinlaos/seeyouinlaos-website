@@ -78,8 +78,8 @@ test('the journey is the authoritative chronology, never insertion order', () =>
   const j = read('assets/journey.js');
   const keys = [...j.slice(j.indexOf('var SEG = ['), j.indexOf('/* Chronological position')).matchAll(/\{ key: '([a-z0-9-]+)'/g)].map((m) => m[1]);
   assert.deepEqual(keys, ['bkk-stay', 'train', 'prewed', 'wedstay', 'mu9646', 'kmg', 'c86', 'ljg', 'return', 'kempinski']);
-  /* every shared product says whose it is, once — never per person */
-  assert.match(yj, /data-party-label/);
+  /* every shared product says whose it is, once — never per person. The "For you" party label is removed (TO-01653) */
+  assert.doesNotMatch(yj, /data-party-label|>For you</, 'TO-01653: the "For you" label is gone');
   assert.doesNotMatch(yj, /labelFor\(g\.guestId\)\)\+'<\/b><\/p><p class="t-b2">Wedding decisions[\s\S]{0,400}data-choose/, 'no personal product duplication');
 });
 
@@ -113,8 +113,10 @@ test('the Bangkok choice is exactly one address (the Sathorn Penthouse deleted, 
     ['U Sathorn Bangkok']);
   assert.doesNotMatch(sathorn, /slug: 'penthouse'|property: 'Sathorn Penthouse Bangkok'/, 'no Penthouse room record');
   assert.doesNotMatch(sathorn, /shama-king-studio-balcony|Shama Yen-Akat/, 'no Shama room record');
-  assert.match(yj, /Select this stay/);
-  assert.match(yj, /Current selection/);
+  assert.match(yj, /data-choose="'\+r\.slug\+'">Choose a room<\/button>/, 'TO-01375');
+  /* the chosen address says its state in a word (TO-00543): Held for you while the engine holds the place, else the line's state */
+  assert.match(yj, /if\(held&&\(ls\.key==='selected'\|\|ls\.key==='unsent'\)\)return 'Held for you';return ls\.label\}/);
+  assert.doesNotMatch(yj, /Select this stay|Current selection/i);
   assert.doesNotMatch(yj, /CHOOSE THIS ADDRESS|Choose this address|SEE THE ROOMS|See the rooms/i);
 });
 
@@ -123,14 +125,14 @@ test('MU9646 and C86 are preserved exactly, with decision-critical benefits only
   assert.match(yj, /MU9646 · Vientiane &rarr; Kunming/);
   /* the times live on the ticket (assets/travelpass.js) since 15 Sep 2026 — the flight product keeps the summary line */
   const tp = read('assets/travelpass.js');
-  assert.match(tp, /mu9646: \{ id: 'mu9646', code: 'MU9646', kind: 'flight'[\s\S]{0,400}from: \{ code: 'VTE', name: 'Vientiane', place: 'Terminal 1', time: '15:50', date: '01 Mar 2027' \}/);
-  assert.match(tp, /to: \{ code: 'KMG', name: 'Kunming', place: 'Non-stop', time: '18:25', date: '01 Mar 2027' \}/);
-  assert.match(yj, /01 March 2027 · non-stop · 1h 35m · Boeing 738/);
+  assert.match(tp, /mu9646: \{ id: 'mu9646', code: 'MU9646', kind: 'flight'[\s\S]{0,400}from: \{ code: 'VTE', name: 'Vientiane', place: 'Terminal 1', time: '15:50', date: '1 Mar 2027' \}/, 'TO-01545');
+  assert.match(tp, /to: \{ code: 'KMG', name: 'Kunming', place: '', time: '18:25', date: '1 Mar 2027' \}/, 'TO-01554 (the place "Non-stop" removed) · TO-01545');
+  assert.match(yj, /1 March 2027 · non-stop · 1 h 35 min</, 'TO-00606');
   const p = read('assets/pricing.js');
   assert.match(p, /slug: 'business'[\s\S]{0,120}price: 275/);
   assert.match(p, /slug: 'economy-flexible'[\s\S]{0,120}price: 155/);
   assert.match(p, /'c86':\s*\{ price: 105/);   /* the current Operations Master (release 014, 19 Sep 2026) supersedes the Edit 2 override of 85 */
-  assert.match(yj, /dep:\['10:15','Kunming'\],arr:\['13:44','Lijiang'\],dur:'3h 29m · direct',cls:'Business Class'/);
+  assert.match(yj, /dep:\['10:15','Kunming'\],arr:\['13:44','Lijiang'\],dur:'3 h 29 min · direct',cls:'Business Class'/);
   const c86 = yj.slice(yj.indexOf("c86:{"), yj.indexOf("'return':{"));
   assert.ok((c86.match(/ben:\[([^\]]+)\]/)[1].split("','").length) <= 4, 'C86 carries at most four benefits in the selector');
 });

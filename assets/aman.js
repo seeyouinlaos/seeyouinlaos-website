@@ -33,7 +33,7 @@
     ['Experiences', 'experiences.html', [
       ['Bangkok', 'experiences.html#bkk'],
       ['Vientiane', 'experiences.html#laos'],
-      ['Kunming &amp; Lijiang', 'experiences.html#china'],
+      ['Kunming', 'experiences.html#china'],
       ['1872 · Champagne Afternoon Tea', '1872.html'],
       ['Sühring · Dinner in Bangkok', 'experience.html?id=bkk-suhring']
     ]],
@@ -54,6 +54,18 @@
     ]],
     ['My Trip', 'your-journey.html', null]
   ];
+
+  /* THE MENU FOOT (Window 007 · PRQ-07B-06): signed in — the six steps in their names, then Guest Relations; signed out — only
+     Guest Relations (the steps cannot be opened without an invitation) */
+  var STEP_LINKS = [['01', 'Your Invitation', 'invitation.html'], ['02', 'My Trip', 'your-journey.html'], ['03', 'The Wedding', 'wedding.html'],
+    ['04', 'Wedding Preparation', 'wedding-preparation.html'], ['05', 'About You', 'about-you.html'], ['06', 'Review &amp; Send', 'review.html']];
+  function signedIn() { try { var a = JSON.parse(localStorage.getItem('siyl.auth') || 'null'); return !!(a && a.guestId && a.bearer && a.invitationId === 'INV-' + a.guestId); } catch (e) { return false; } }
+  function footHtml() {
+    return (signedIn() ? '<nav class="a-msteps" aria-label="The six steps" style="display:block;margin-bottom:24px">' + STEP_LINKS.map(function (s) { return '<a href="' + s[2] + '">' + s[0] + ' · ' + s[1] + '</a>'; }).join('') + '</nav>' : '') +
+      (window.SIYL_I18N ? '<div data-prefs>' + window.SIYL_I18N.prefsHtml() + '</div>' : '') +   /* EN · TH and USD · EUR · THB (assets/i18n/siyl-i18n.js) */
+      '<p>Guest Relations</p>' +
+      '<a href="mailto:guest.relation.seeyouinlaos@gmail.com">guest.relation.seeyouinlaos@gmail.com</a>';
+  }
 
   /* clean paths on one deployment, file names on the other — same page */
   var here = (location.pathname.split('/').pop() || 'index.html').replace(/\.html$/, '') + '.html';
@@ -90,16 +102,11 @@
       /* THE ACCOUNT (Owner, 18 Sep 2026 · Aman): signed in · name, My Trip · My Profile · Sign out — in the drawer, never a second row under the wordmark; filled by assets/invite.mjs */
       '<div class="a-macct" data-account data-state="out"><span class="a-macct-who">Not signed in</span><nav class="a-macct-nav" aria-label="Your account"><a href="invitation.html?open=1" data-access-nav="in">Open your invitation</a></nav></div>' +
       '<nav class="a-mnav" aria-label="Primary">' + rows + '</nav>' +
-      '<div class="a-mfoot">' +
-        '<p>Guest Relations</p>' +
-        '<a href="mailto:guest.relation.seeyouinlaos@gmail.com">guest.relation.seeyouinlaos@gmail.com</a>' +
-        '<a href="invitation.html">Your invitation</a>' +
-        '<a href="you.html">You &amp; your party</a>' +
-        '<a href="about-you.html">About You</a>' +
-        '<a href="wedding-preparation.html#dress-code">Dress code</a>' +
-        '<a href="review.html">Review &amp; Send</a>' +
-      '</div>';
+      '<div class="a-mfoot" data-mfoot>' + footHtml() + '</div>';
     document.body.append(scrim, menu);
+    /* the foot follows the session: the six steps only for a guest who can open them (PRQ-07B-06) */
+    var repaintFoot = function () { var f = menu.querySelector('[data-mfoot]'); if (f) { var h = footHtml(); if (f.innerHTML !== h) f.innerHTML = h; } };
+    document.addEventListener('siyl:auth', repaintFoot); document.addEventListener('siyl:signout', repaintFoot);
     /* the account block is the invitation module's to fill (assets/invite.mjs) — tell it the drawer exists */
     try { document.dispatchEvent(new CustomEvent('siyl:menu')); } catch (e) { /* an old browser: the module fills it on load */ }
 
@@ -143,6 +150,7 @@
      Active slide is full colour and in focus; every neighbour carries the pale
      veil. The state follows the actual scroll position and changes discretely
      at the snap, never as a continuous gradient. */
+  var carSeq = 0;
   function wire(car) {
     var trk = car.querySelector('.atrk');
     var slides = Array.prototype.slice.call(car.querySelectorAll('.aslide'));
@@ -157,8 +165,20 @@
     if (bar) bar.style.width = (100 / slides.length) + '%';
     trk.setAttribute('tabindex', '0');
     trk.setAttribute('role', 'group');
-    trk.setAttribute('aria-label', 'Use the arrow keys to move between slides');
-    if (rail) { rail.setAttribute('role', 'button'); rail.setAttribute('tabindex', '0'); rail.setAttribute('aria-label', 'Carousel position'); }
+    /* THE TRACK TAKES THE CAROUSEL'S OWN NAME (PRQ-00-01): labelled by its visible heading, or unnamed where the enclosing section
+       is already named — never an instruction; the arrow keys keep working */
+    if (trk.getAttribute('aria-label') === 'Use the arrow keys to move between slides') trk.removeAttribute('aria-label');
+    if (!trk.hasAttribute('aria-label') && !trk.hasAttribute('aria-labelledby')) {
+      var named = car.closest ? car.closest('[aria-label], [aria-labelledby]') : null;
+      if (!named) {
+        var host = car.closest ? (car.closest('section') || car) : car;
+        var hd = car.querySelector('h2, h3') || (host !== car ? host.querySelector('h2, h3') : null);
+        if (hd) { if (!hd.id) hd.id = 'acar-h-' + (++carSeq); trk.setAttribute('aria-labelledby', hd.id); }
+      }
+    }
+    /* THE POSITION RAIL IS DECORATIVE (PRQ-00-02 · W7-122): hidden from assistive technology and never focusable; a pointer click
+       on it may still jump */
+    if (rail) { rail.removeAttribute('role'); rail.removeAttribute('tabindex'); rail.removeAttribute('aria-label'); rail.setAttribute('aria-hidden', 'true'); }
 
     /* the scrollLeft at which slide k rests on its snap point — start-aligned on
      * the phone, centred on wide screens; the ends are clamped by the browser
@@ -209,15 +229,11 @@
         go(k);
       });
     });
-    /* the track is a control, not a decoration: click or key to jump */
+    /* a pointer click on the (decorative) rail jumps; the keyboard moves on the track */
     if (rail) {
       rail.addEventListener('click', function (e) {
         var r = rail.getBoundingClientRect();
         go(Math.floor(((e.clientX - r.left) / r.width) * slides.length));
-      });
-      rail.addEventListener('keydown', function (e) {
-        if (e.key === 'ArrowRight') { e.preventDefault(); go(index() + 1); }
-        if (e.key === 'ArrowLeft') { e.preventDefault(); go(index() - 1); }
       });
     }
     window.addEventListener('resize', function () { i = -1; paint(); });

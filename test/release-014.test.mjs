@@ -20,7 +20,8 @@ import { Rooms, unitsOf, mayJoin, STAGES, stageOf } from '../src/rooms.js';
 import { SEED, FIXED } from '../src/inventory-seed.js';
 import { journeyModel, composeGuestMail, composeOwnerMail } from '../src/mail-templates.js';
 
-const ID = (g) => ({ invitationId: g.invitationId, guestId: g.guestId, partyId: g.partyId, hosts: !!g.hosts });
+/* the Worker names the guest to the engine (PRQ-GAP-02): identity.firstName — the body's name is never trusted */
+const ID = (g) => ({ invitationId: g.invitationId, guestId: g.guestId, partyId: g.partyId, hosts: !!g.hosts, firstName: String(g.preferredName || '').split(/\s+/)[0] });
 function req(op, body, identity, gr) {
   return { url: 'https://x/api/rooms/' + op, method: body ? 'POST' : 'GET',
     headers: { get: (k) => (k === 'x-siyl-identity' ? (identity ? JSON.stringify(identity) : null) : k === 'x-gr-verified' ? (gr ? 'yes' : null) : null) },
@@ -83,7 +84,7 @@ test('PARTY CAPACITY · a two-place room with one stranger cannot take a party o
   assert.equal((await call(rooms, 'leave', { invitationId: STE.invitationId, guestId: STE.guestId, stage: 'wedstay' }, STE)).status, 200, 'Steffie steps out of B first');
   assert.equal((await join(rooms, PEG, key, 'C', 2, 'Peggy')).status, 200);
   let c = unit((await call(rooms, 'read', null, PEG)).d, key, 'C');
-  assert.equal(c.taken, 2); assert.equal(c.free, 0); assert.deepEqual(plain(c.occupants.map((o) => o.name)), ['Peggy', 'Your party']);
+  assert.equal(c.taken, 2); assert.equal(c.free, 0); assert.deepEqual(plain(c.occupants.map((o) => o.name)), ['Peggy', ''], 'a kept place carries no name (API-A2: placeholders name \'\')'); assert.deepEqual(plain(c.occupants.map((o) => !!o.placeholder)), [false, true]);
   assert.equal((await join(rooms, stranger(11), key, 'C', 1)).status, 409, 'the kept place is the party\'s');
   assert.equal((await join(rooms, STE, key, 'C', 2, 'Steffie')).status, 200, 'the partner takes the kept place');
   c = unit((await call(rooms, 'read', null, PEG)).d, key, 'C'); assert.deepEqual(plain(c.occupants.map((o) => o.name)), ['Peggy', 'Steffie']); assert.equal(c.free, 0);
@@ -106,7 +107,7 @@ test('PARTY CAPACITY · the client offers only units that take the whole party, 
   assert.equal(U.unitForParty('wedstay', 'heritage', 2).label, 'B');
   assert.equal(U.canTake('wedstay', 'heritage'), true);
   const html = ST.unitsHtml('wedstay', 'heritage');
-  assert.match(html, /data-need="2"/); assert.match(html, /1 place available · not enough for your party of 2/);
+  assert.match(html, /data-need="2"/); assert.match(html, /<b>Lin<\/b> · 1 place free — not enough for the 2 of you together/, 'TO-01259; the stranger by first name only');
   assert.doesNotMatch(html, /data-join="wedstay\|heritage\|A"/, 'no button on the unit that cannot take the party');
   assert.match(html, /data-join="wedstay\|heritage\|B"/);
   const r = await ST.select('wedstay', 'heritage', null, 2);
@@ -117,7 +118,7 @@ test('PARTY CAPACITY · the client offers only units that take the whole party, 
   await fill(rooms, 'wedstay/noble-courtyard', 1);
   await U.load(true);
   assert.equal(U.canTake('wedstay', 'noble-courtyard'), false); assert.equal(U.soldOut('wedstay', 'noble-courtyard'), false);
-  assert.equal(U.ctaWords('wedstay', 'noble-courtyard'), 'Not enough places for your party of 2');
+  assert.equal(U.ctaWords('wedstay', 'noble-courtyard'), 'No room here for the 2 of you together', 'TO-01353');
 });
 
 /* ────────────────────────────── 3 · THE WAITING LIST ────────────────────────────── */
@@ -195,7 +196,8 @@ test('COUNTS · relevant = confirmed + waitlisted + declined + open; excluded ar
   assert.equal(c.bagItems, 2, 'the guest house line and the flight'); assert.equal(c.bagTotal, 275, 'the complimentary line and the waiting list are USD 0');
   assert.equal(B.total(), c.bagTotal);
   const words = J.countsWords();
-  assert.match(words, /2 stages chosen/); assert.match(words, /1 on the waiting list/); assert.match(words, /1 not joining/); assert.match(words, /2 still open/);
+  /* TO-00150: each part only when its count is not zero */
+  assert.match(words, /^Stays, trains and flights: 2 chosen · 1 on the waiting list · 1 not needed · 2 still open\.?$/);
 });
 
 /* ────────────────────────────── 6 · D2 · THE GUEST HOUSE ────────────────────────────── */
@@ -207,10 +209,10 @@ test('GUEST HOUSE COMPLIMENTARY · one shared unit of four places (one bedroom, 
   const rooms = new Rooms(doState());
   assert.equal((await join(rooms, LINI, 'guesthouse/guest-house', 'A', 1, 'Lin')).status, 200);
   const r = await join(rooms, PEG, 'guesthouse/guest-house', 'A', 2, 'Peggy');
-  assert.equal(r.status, 200); assert.deepEqual(plain(unit(r.d, 'guesthouse/guest-house', 'A').occupants.map((o) => o.name)), ['Lin', 'Peggy', 'Your party'], 'who shares the house, by first name — and the place kept for her party');
+  assert.equal(r.status, 200); assert.deepEqual(plain(unit(r.d, 'guesthouse/guest-house', 'A').occupants.map((o) => [o.name, !!o.placeholder])), [['Lin', false], ['Peggy', false], ['', true]], 'who shares the house, by first name — and the place kept for her party');
   assert.equal(unit(r.d, 'guesthouse/guest-house', 'A').free, 1, 'Lin + Peggy + her kept place: one of four left');
   const asLin = unit((await call(rooms, 'read', null, LINI)).d, 'guesthouse/guest-house', 'A');
-  assert.deepEqual(plain(asLin.occupants.map((o) => o.name)), ['Lin', 'Peggy', 'Reserved'], 'a stranger sees the kept place as reserved, never a name');
+  assert.deepEqual(plain(asLin.occupants.map((o) => [o.name, !!o.placeholder])), [['Lin', false], ['Peggy', false], ['', true]], 'a stranger sees the kept place as a place, never a name');
   const st = await join(rooms, STE, 'guesthouse/guest-house', 'A', 2, 'Steffie');
   assert.equal(st.status, 200); assert.deepEqual(plain(unit(st.d, 'guesthouse/guest-house', 'A').occupants.map((o) => o.name)), ['Lin', 'Peggy', 'Steffie'], 'the partner takes the kept place'); assert.equal(unit(st.d, 'guesthouse/guest-house', 'A').free, 1, 'the kept place was already counted');
   assert.equal(unit((await call(rooms, 'read', null, null)).d, 'guesthouse/guest-house', 'A').occupants[0].name, undefined, 'never to the public');
@@ -245,7 +247,7 @@ test('MAIL · the waiting list is a section of both emails without an amount; th
   assert.equal(m.waitlisted.length, 1); assert.match(m.waitlisted[0].words || JSON.stringify(m.waitlisted[0]), /Kunming|kmg/); assert.equal(m.waitlisted[0].position, 2);
   assert.equal(m.total, 145, 'the waiting list carries no amount');
   const g = composeGuestMail(base), o = composeOwnerMail(base, 'https://x/api/status?invitation=INV-G001');
-  assert.match(g.html, /Waiting list/); assert.match(g.text, /WAITING LIST/); assert.match(g.text, /number 2/); assert.match(o.text, /WAITING LIST/);
+  assert.match(g.html, /On the waiting list/); assert.match(g.text, /ON THE WAITING LIST/); assert.match(g.text, /number 2 on the waiting list, for 2 places together · no room yet, and no cost/); assert.match(o.text, /WAITING LIST/);
   assert.doesNotMatch(g.html + g.text + o.text, /Arranged for you|ARRANGED FOR YOU|Fixed arrangement/);
   assert.equal(journeyModel({ ...base, hosts: true }).hosts, true);
   assert.equal(journeyModel({ ...base, registration: { ...base.registration, guestRecord: { ...base.registration.guestRecord, hosts: true } } }).hosts, false, 'a submission cannot claim to be the hosts');
@@ -267,19 +269,19 @@ test('THE CURRENT MASTER · C86 USD 105 at the one price source; Lijiang and Kem
 test('THE CURRENT MASTER · the dated venues: 21.02 Sühring dinner; the Aman tea on 24.02; 23.02 Baan Phraya (The Commons the mall); 07.03 Cannubi and Harudot (a café, its second day); 08.03 Petits Plats with its own photographs; Thong Smith dated by the schedule (24.02); no duplicates', () => {
   const w = {}; new Function('window', src('assets/experiences.js'))(w); new Function('window', src('assets/experience-galleries.js'))(w);
   const by = Object.fromEntries(w.SIYL_EXP.map((x) => [x.id, x]));
-  assert.deepEqual(by['bkk-suhring'].roles, ['dinner']); assert.equal(by['bkk-suhring'].row, 'Day 01 · 21.02.2027'); assert.equal(by['bkk-suhring'].day, '21 FEB 2027');
-  assert.deepEqual(by['bkk-baanphraya'].roles, ['dinner']); assert.equal(by['bkk-baanphraya'].row, 'Day 03 · 23.02.2027'); assert.match(by['bkk-baanphraya'].detail.join(' '), /Phraya Mahai Savan/);
+  assert.deepEqual(by['bkk-suhring'].roles, ['dinner']); assert.equal(by['bkk-suhring'].row, 'Day 01 · 21.02.2027'); assert.equal(by['bkk-suhring'].day, '21 February 2027');
+  assert.deepEqual(by['bkk-baanphraya'].roles, ['dinner']); assert.equal(by['bkk-baanphraya'].row, 'Day 03 · 23.02.2027'); assert.match(by['bkk-baanphraya'].highlight.house, /Phraya Mahai Savan/, 'the house history lives in the highlight since TO-02781');
   assert.deepEqual(by['bkk-commons'].roles, ['place'], 'The Commons is no longer a dinner');
   assert.deepEqual(by['bkk-harudot'].roles, ['cafe'], 'a café only (Owner, 22 Sep 2026)'); assert.equal(by['bkk-harudot'].category, 'cafe'); assert.match(by['bkk-harudot'].row, /23\.02\.2027/); assert.match(by['bkk-harudot'].row, /07\.03\.2027/); assert.deepEqual(by['bkk-harudot'].visits.map((v) => v.date), ['2027-02-23', '2027-03-07'], 'one card, two days');
-  assert.deepEqual(by['bkk-cannubi'].roles, ['dinner']); assert.equal(by['bkk-cannubi'].row, 'Day 15 · 07.03.2027'); assert.equal(by['bkk-cannubi'].leg, 'return'); assert.match(by['bkk-cannubi'].detail.join(' '), /One MICHELIN Star/);
+  assert.deepEqual(by['bkk-cannubi'].roles, ['dinner']); assert.equal(by['bkk-cannubi'].row, 'Day 15 · 07.03.2027'); assert.equal(by['bkk-cannubi'].leg, 'return'); assert.equal(by['bkk-cannubi'].detail, undefined, 'the About section is retired (TO-02849/02850)'); assert.match(by['bkk-cannubi'].highlight.distinction, /One MICHELIN Star/);
   assert.deepEqual(by['bkk-petitsplats'].roles, ['dinner']); assert.equal(by['bkk-petitsplats'].row, 'Day 16 · 08.03.2027'); assert.equal(by['bkk-petitsplats'].img, 'assets/images/experiences/bkk-petitsplats-01.jpg', 'the Owner\'s own photographs (22 Sep 2026)'); assert.equal(w.SIYL_EXP_GALLERY['bkk-petitsplats'].images.length, 5);
   assert.equal(by['bkk-thongsmith'].row, 'Day 04 · 24.02.2027', 'the 13:00 lunch of the Day 04 schedule (the tea holds the overview cell)');
   const ids = w.SIYL_EXP.map((x) => x.id); assert.equal(new Set(ids).size, ids.length, 'no duplicate place');
   assert.equal(w.SIYL_EXP.filter((x) => /suhring|sühring/i.test(x.id + x.name)).length, 1);
   for (const id of ['bkk-baanphraya', 'bkk-cannubi']) { const g = w.SIYL_EXP_GALLERY[id]; assert.ok(g && g.images.length >= 4, id + ' gallery'); for (const im of g.images) { assert.ok(existsSync(im.src), im.src); assert.ok(!/food|drink/.test(im.kind), im.src + ' is never a dish'); } assert.equal(g.images[0].src, by[id].img); }
-  assert.match(src('assets/journey.js'), /AT_WHEN = \{ '1872': '24 FEB', tea1872: '24 FEB', 'sangkhathan': '28 FEB', 'suhring': '21 FEB', baanphraya: '23 FEB', cannubi: '07 MAR' \}/);
-  assert.match(src('tea.html'), /on the afternoon of 24 February/);
-  assert.match(src('assets/pricing.js'), /meta: 'Dinner · 21 February 2027 · Three MICHELIN Stars · Bangkok'/);
+  assert.match(src('assets/journey.js'), /AT_WHEN = \{ '1872': '24 Feb', tea1872: '24 Feb', 'sangkhathan': '28 Feb', 'suhring': '21 Feb', baanphraya: '23 Feb', cannubi: '7 Mar' \}/);
+  assert.match(src('tea.html'), /Wednesday, 24 February, before the night train\./);
+  assert.match(src('assets/pricing.js'), /meta: 'Dinner · Sunday, 21 February 2027 · Bangkok'/, 'TO-01447');
 });
 
 /* ────────────────────────────── 9 · THE REGISTER ────────────────────────────── */
@@ -294,12 +296,12 @@ test('THE REGISTER · the builder skips a relationship placeholder and a "." sur
 
 test('PARTY CAPACITY · a party larger than a room: the family fills one room and keeps the rest of its places in the next rooms of the category — or is refused as a whole; the kept places go with the party', async () => {
   const rooms = new Rooms(doState()), key = 'ljg/viewing-270';
-  const FAM = { invitationId: 'INV-F001', guestId: 'F001', partyId: 'INV-FAM', hosts: false }, FAM2 = { invitationId: 'INV-F002', guestId: 'F002', partyId: 'INV-FAM', hosts: false };
+  const FAM = { invitationId: 'INV-F001', guestId: 'F001', partyId: 'INV-FAM', hosts: false, firstName: 'Mira' }, FAM2 = { invitationId: 'INV-F002', guestId: 'F002', partyId: 'INV-FAM', hosts: false, firstName: 'Nok' };
   const r = await join(rooms, FAM, key, 'A', 3, 'Mira');
   assert.equal(r.status, 200);
   const A = unit(r.d, key, 'A'), B = unit(r.d, key, 'B');
-  assert.deepEqual(plain(A.occupants.map((o) => o.name)), ['Mira', 'Your party'], 'Room A: her place and one kept');
-  assert.deepEqual(plain(B.occupants.map((o) => o.name)), ['Your party'], 'Room B: the third place kept'); assert.equal(B.free, 1);
+  assert.deepEqual(plain(A.occupants.map((o) => [o.name, !!o.placeholder])), [['Mira', false], ['', true]], 'Room A: her place and one kept (a kept place carries no name)');
+  assert.deepEqual(plain(B.occupants.map((o) => [o.name, !!o.placeholder])), [['', true]], 'Room B: the third place kept'); assert.equal(B.free, 1);
   assert.equal(r.d.summary[key].remainingPlaces, 6 * 2 - 3);
   assert.equal((await join(rooms, stranger('f1'), key, 'A', 1)).status, 409, 'the kept place in A is the family\'s');
   const r2 = await join(rooms, FAM2, key, 'B', 3, 'Nok');

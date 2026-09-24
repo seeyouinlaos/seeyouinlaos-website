@@ -19,10 +19,11 @@ import { Drafts } from '../src/drafts.js';
 import { composeGuestMail, composeOwnerMail, journeyModel } from '../src/mail-templates.js';
 import { complete } from './complete.mjs';
 
-const HOST = { invitationId: 'INV-G049', guestId: 'G049', partyId: 'INV-001', hosts: true, preferredName: 'Suthep', fullName: 'Suthep Test', bearer: 'x' };
+/* firstName: what the Worker puts on the engine identity (PRQ-GAP-02) — the engines never trust a body's name */
+const HOST = { invitationId: 'INV-G049', guestId: 'G049', partyId: 'INV-001', hosts: true, preferredName: 'Suthep', fullName: 'Suthep Test', bearer: 'x', firstName: 'Suthep' };
 const call = async (rooms, op, body, as) => { const r = await rooms.fetch(new Request('https://x/api/rooms/' + op, { method: 'POST', headers: as ? { 'x-siyl-identity': JSON.stringify(as) } : {}, body: JSON.stringify(body || {}) })); return { status: r.status, d: await r.json() }; };
 /* the engine identity of a sandbox session (what the Worker derives from the bearer) */
-const ident = (s) => ({ invitationId: s.invitationId, guestId: s.guestId, partyId: s.partyId, hosts: !!s.hosts });
+const ident = (s) => ({ invitationId: s.invitationId, guestId: s.guestId, partyId: s.partyId, hosts: !!s.hosts, firstName: String(s.preferredName || '').split(/\s+/)[0] });
 const segOf = (w, key) => w.SIYL_JOURNEY.SEGMENTS.filter((s) => s.key === key)[0];
 /* Guest Relations fills every place of every unit of the given engine keys with synthetic guests (one `assign`) */
 async function fillAll(rooms, keys) {
@@ -95,7 +96,7 @@ test('CLIENT · THE BAG = actual selections only: nothing chosen is USD 0 with n
     ST.sync();
     const bag = B.get(); assert.equal(bag.length, 1); const x = bag[0];
     assert.equal(x.id, 'bkk-stay'); assert.equal(x.room, 'u-sathorn-superior-garden'); assert.equal(x.unit, 'A'); assert.equal(x.unitName, 'Room A'); assert.equal(x.price, P.quote('bkk-stay', 'u-sathorn-superior-garden').total); assert.ok(x.price > 0, 'a hold has its amount');
-    assert.equal(B.total(), x.price); assert.equal(J.state(segOf(w, 'bkk-stay')), 'selected'); assert.equal(ST.held(x), true); assert.equal(ST.unitWords(x), 'Room A · You · 1 place available');
+    assert.equal(B.total(), x.price); assert.equal(J.state(segOf(w, 'bkk-stay')), 'selected'); assert.equal(ST.held(x), true); assert.equal(ST.unitWords(x), 'Room A · you · 1 place free');
     const c1 = J.counts(); assert.equal(c1.bagItems, 1); assert.equal(c1.bagTotal, x.price); assert.equal(c1.confirmed, 1);
     ST.sync(); assert.equal(B.get().length, 1, 'the sync is idempotent'); assert.equal(B.total(), x.price);
     lines[who.guestId] = JSON.stringify(x);
@@ -154,7 +155,7 @@ test('CLIENT · a hold is a Bag line with its amount and the guest\'s to give ba
   assert.equal(B.get().length, 3); assert.equal(B.total(), bagStays, 'a complimentary line adds nothing');
   assert.equal(J.state(segOf(w, 'wedstay')), 'selected'); const c = J.counts(); assert.equal(c.bagItems, 3); assert.equal(c.confirmed, 3); assert.equal(c.bagTotal, B.total());
   assert.deepEqual((await rooms.view(ident(PEGGY))).mine.wedstay, { key: 'guesthouse/guest-house', label: 'A' });
-  const lin = await rooms.view(ident(LIN)); assert.deepEqual(lin.units['guesthouse/guest-house'][0].occupants.map((o) => o.name), ['Peggy', 'Reserved'], 'who shares the house is visible by first name — and the place kept for her party as reserved'); assert.equal(lin.units['guesthouse/guest-house'][0].free, 2, 'a party of two takes two of the four places');
+  const lin = await rooms.view(ident(LIN)); assert.deepEqual(lin.units['guesthouse/guest-house'][0].occupants.map((o) => [o.name, !!o.placeholder]), [['Peggy', false], ['', true]], 'who shares the house is visible by first name — and the place kept for her party, unnamed'); assert.equal(lin.units['guesthouse/guest-house'][0].free, 2, 'a party of two takes two of the four places');
   /* a Souphattra room in the same stage replaces the Guest House (one selection per stage) */
   const s3 = await ST.select('wedstay', 'heritage'); assert.equal(s3.ok, true);
   assert.equal(B.get().filter((x) => x.id === 'guesthouse').length, 0); assert.equal(B.get().filter((x) => x.id === 'wedstay').length, 1);
@@ -170,25 +171,26 @@ test('CLIENT · a hold is a Bag line with its amount and the guest\'s to give ba
   await U.load(true); assert.equal(U.soldOut('prewed', 'noble-courtyard'), true); assert.equal(U.label('prewed', 'noble-courtyard'), 'Sold out');
   const f1 = await ST.select('prewed', 'noble-courtyard', 'A'); assert.deepEqual(plain(f1), { ok: false, error: 'full' });
   const f2 = await ST.select('prewed', 'noble-courtyard'); assert.deepEqual(plain(f2), { ok: false, error: 'full' });
-  assert.equal(ST.refusal(f1), 'This room was just filled. Please choose another room.'); assert.deepEqual(plain(B.get()), [], 'a refusal writes nothing');
+  assert.equal(ST.refusal(f1), 'Someone took the last place in this room a moment ago. Nothing in your trip has changed — please choose another room.', 'TO-01272'); assert.deepEqual(plain(B.get()), [], 'a refusal writes nothing');
   /* A ROOM TOO SMALL FOR THE PARTY: one place left, a party of two — refused, nothing partial */
   assert.equal((await call(rooms, 'join', { invitationId: LIN.invitationId, guestId: LIN.guestId, key: 'wedstay/souphattra-majestic', label: 'A', name: 'Lin' }, ident(LIN))).status, 200);
   await U.load(true); assert.equal(U.fitsParty('wedstay', 'souphattra-majestic', U.units('wedstay', 'souphattra-majestic')[0], 2), false); assert.equal(U.unitForParty('wedstay', 'souphattra-majestic', 2), null);
   const p1 = await ST.select('wedstay', 'souphattra-majestic', 'A', 2); assert.deepEqual(plain(p1), { ok: false, error: 'full for your party' });
   const p2 = await ST.select('wedstay', 'souphattra-majestic', null, 2); assert.deepEqual(plain(p2), { ok: false, error: 'full for your party' });
-  assert.equal(ST.refusal(p1), 'This room cannot take your whole party. Please choose another room.'); assert.deepEqual(plain(B.get()), []); assert.deepEqual((await rooms.view(ident(PEGGY))).mine, {});
-  assert.equal(ST.refusal({ ok: false, error: 'unreachable' }), 'Nothing was changed — we could not reach Guest Relations just now. Please try again.');
+  assert.equal(ST.refusal(p1), 'This room cannot take your whole party together. Nothing in your trip has changed — please choose another room.'); assert.deepEqual(plain(B.get()), []); assert.deepEqual((await rooms.view(ident(PEGGY))).mine, {});
+  assert.equal(ST.refusal({ ok: false, error: 'unreachable' }), 'We could not hold your place just now. Nothing in your trip has changed — please try again in a moment.');
+  assert.equal(ST.refusal({ ok: false, error: 'unreachable' }, 'give back'), 'We could not give this back just now. It is still held for you — please try again in a moment.', 'PRQ-03-02: a failed give-back says the place is still held');
   for (const e of ['full', 'full for your party', 'unreachable', 'not signed in', 'fixed', 'reserved']) assert.doesNotMatch(ST.refusal({ ok: false, error: e }), /arranged|Arranged|fixed|Fixed/, 'no refusal names an arrangement');
 });
 
 test('SURFACES · the sticky bar says My Bag and stands at USD 0 for a signed-in guest; the account links are on it; NO arranged renderer on My Trip, the cart, Review or My Profile (assets/arranged.js is gone); Review\'s #arranged paints the WAITING LIST; the drawer names My Trip · My Profile · Sign out (the bag icon is My Bag)', () => {
   const b = src('assets/bag.js'), c = src('cart.html'), yj = src('your-journey.html'), rv = src('review.html'), pf = src('profile.html'), inv = src('assets/invite.mjs');
-  assert.match(b, /<span class="jb-l">My Bag<\/span>/); assert.match(b, /data-bag-view>Open My Bag</); assert.match(b, /var on=B\.authed\(\);/, 'the bar stands whenever a guest is signed in — an empty bag is a real state');
+  assert.match(b, /<span class="jb-l">My Bag<\/span>/); assert.match(b, /data-bag-view aria-label="Open My Bag">Open</, 'TO-00038'); assert.match(b, /var on=B\.authed\(\);/, 'the bar stands whenever a guest is signed in — an empty bag is a real state');
   assert.match(b, /data-nav="top"/); assert.doesNotMatch(b, /data-nav="trip"/, 'the account surfaces moved into the sticky header shell (Owner, 18 Sep 2026)');
-  assert.match(c, /No selections yet · USD 0/); assert.match(c, /if\(bt\.disabled\)return;/, 'double remove is idempotent'); assert.match(c, /never an endless "Removing…"/);
+  assert.match(c, /Nothing chosen yet · USD 0/); assert.match(c, /if\(bt\.disabled\|\|!x\)return;/, 'double remove is idempotent'); assert.match(c, /never an endless "Removing…"/);
   assert.match(yj, /<h1 class="t-d1">My Trip<\/h1>/); assert.match(yj, /data-scope="'\+d\.key\+'"/, 'the participation sheets (no package card, 21 Sep 2026)'); assert.match(yj, /data-counts/, 'the counts of the trip'); assert.match(yj, /data-waitlisted="'\+seg\.key\+'"/, 'the waiting-list card'); assert.match(yj, /data-unwait=/);
-  assert.match(yj, /Not joining this stage/); assert.doesNotMatch(yj, /Every stage you have already chosen stays exactly as you chose it|Cost Saving|self-arranged|#fxb|#csb|id="fxb"|id="csb"/, 'the old planner is gone');
-  assert.match(rv, /function paintArranged\(\)/); assert.match(rv, /<div id="arranged"><\/div>/); assert.match(rv, /Waiting list/, 'the kept id paints the waiting list, never a fixed arrangement');
+  for (const w of ['I won’t need this stay', 'I won’t take this train', 'I won’t take this flight', 'I won’t take these flights', 'Not needed in your trip']) assert.ok(yj.includes(w), 'TO-00587 · ' + w); assert.doesNotMatch(yj, /Every stage you have already chosen stays exactly as you chose it|Cost Saving|self-arranged|#fxb|#csb|id="fxb"|id="csb"/, 'the old planner is gone');
+  assert.match(rv, /function paintArranged\(\)/); assert.match(rv, /<div id="arranged"><\/div>/); assert.match(rv, /On the waiting list/, 'the kept id paints the waiting list, never a fixed arrangement');
   assert.match(pf, /data:'waitlist:'\+seg\.key/, 'My Profile carries the waiting-list card with the position');
   assert.match(inv, /data-access-nav="trip">My Trip<\/a>/); assert.doesNotMatch(inv, /data-access-nav="bag"/); assert.match(inv, /data-access-nav="profile">My Profile<\/a>' \+ \(window\.SIYL_DRAFT \? '<button type="button" class="a-macct-save" data-access-save>Save my progress<\/button>' : ''\) \+ '<button type="button" class="a-macct-out" data-access-out>Sign out<\/button>/); assert.match(inv, /let el = inMenu \|\| document\.querySelector\('\[data-account\]'\);/, 'the account block lives in the menu drawer (Aman header, 18 Sep 2026)');
   /* THE ABSENCE: no page loads an arranged renderer, no page knows the words */
@@ -254,9 +256,9 @@ test('WORKER · a host\'s draft is stored exactly as sent — nothing is strippe
   assert.equal(M.seats.ceremony.label, 'Front centre', 'a host without a seat: front centre, from record.hosts'); assert.equal(journeyModel({ ...rec, hosts: false }).seats.ceremony.label, '', 'a guest without a seat: no label — the room says nothing about who the hosts are');
   const g = composeGuestMail(rec), o = composeOwnerMail(rec, 'https://x/s');
   for (const t of [g.text, g.html, o.text, o.html]) { assert.doesNotMatch(t, /Arranged for you|ARRANGED FOR YOU|fixed arrangement|Fixed arrangement|not part of your bag|Waiting list|WAITING LIST/); assert.match(t, /U Sathorn Bangkok/); assert.match(t, /Room A/); assert.match(t, /USD 192/); assert.match(t, /USD 292/); }
-  assert.match(g.text, /STAYS\n· U Sathorn Bangkok — 21 – 24 February 2027 — Superior Room With Garden View — Room A — USD 192/);
-  assert.match(g.text, /YOUR COST\nUSD 292/); assert.match(o.text, /COST\nUSD 292/);
-  assert.match(g.text, /· Wedding Ceremony · Souphattra Heritage · 15:30: Front centre/); assert.doesNotMatch(composeGuestMail({ ...rec, hosts: false }).text, /Front centre/);
+  assert.match(g.text, /STAYS\n· U Sathorn Bangkok — 21 – 24 February 2027 — Superior Room With Garden View — Room A, held for you — USD 192 per person/);
+  assert.match(g.text, /YOUR TOTAL\nUSD 292/); assert.match(o.text, /COST\nUSD 292/);
+  assert.match(g.text, /· Vow Ceremony · Souphattra Heritage · 15:30: Front centre/); assert.doesNotMatch(composeGuestMail({ ...rec, hosts: false }).text, /Front centre/);
 });
 
 test('SIGNED OUT · the private surfaces render no private state and hand over to the invitation', () => {
@@ -296,7 +298,11 @@ test('CODEX P1-2 · the three-way merge on the device: a removal elsewhere stand
   /* a key this device never held follows the server */
   const m3 = merge({}, {}, { 'siyl.skip': '["kmg"]' }); assert.equal(m3.keys['siyl.skip'], '["kmg"]');
   const d = src('assets/draft.js');
-  assert.match(d, /if \(inflight\) \{ if \(!queued\) \{ var qs = session\(\); var again = function \(\) \{ queued = null; return same\(qs\) \? D\.push\(reason\)/, 'pushes are serialised, a queued push runs only for the session that queued it'); assert.match(d, /\} finally \{ state\.applying = false; \}/, 'no autosave while a server copy is applied'); assert.match(d, /state\.notice = 'stale'; state\.phase = 'stale';/, 'a lost edit is named until the guest\'s next own change');
+  assert.match(d, /if \(inflight\) \{ if \(!queued\) \{ var qs = session\(\); var again = function \(\) \{ queued = null; return same\(qs\) \? D\.push\(reason\)/, 'pushes are serialised, a queued push runs only for the session that queued it'); assert.match(d, /\} finally \{ state\.applying = false; \}/, 'no autosave while a server copy is applied'); /* PRQ-04-17 / TO-01411: the notice names what was lost and stays — across a reload of the tab — until the guest taps OK */
+  assert.match(d, /function keepNotice\(lost\) \{\n\s*state\.notice = 'stale'; state\.lost = lost \|\| \[\];\n\s*try \{ sessionStorage\.setItem\(NOTICE,/, 'a lost edit is kept as a notice');
+  assert.match(d, /dismissNotice: function \(\) \{ state\.notice = null; state\.lost = null;/, 'only OK clears it');
+  assert.match(d, /'Updated from your other device\. Your change to ' \+ lost\[0\] \+ ' could not be kept — you changed it there first\. Please check it before you send\.'/);
+  assert.match(d, /'Updated from your other device — please check your latest changes before you send\.'/);
 });
 
 test('WORKER · a submission is stored as sent (Owner, 19 Sep 2026): a host\'s Bag lines reach the record unchanged with the guest\'s own total, the record carries `hosts` and the engine\'s holds without any `fixed` flag, a waitlisted stage is recorded with its position and adds nothing; both emails list the held room under STAYS with its amount, the waiting list with its position, and no Arranged section', async () => {
@@ -328,11 +334,11 @@ test('WORKER · a submission is stored as sent (Owner, 19 Sep 2026): a host\'s B
       assert.match(c.textContent, /USD 192/); assert.match(c.textContent, /USD 397/); assert.match(c.textContent, /U Sathorn Bangkok/); assert.match(c.textContent, /Room A/);
       assert.match(c.textContent, /WAITING LIST\n· Kunming — /); assert.match(c.textContent, /number 1/); assert.match(c.textContent, /for 2 places/);
       assert.doesNotMatch(c.textContent + c.htmlContent, /ARRANGED FOR YOU|Arranged for you|fixed arrangement|Fixed arrangement|not part of your bag/);
-      assert.match(c.htmlContent, /Waiting list/); assert.match(c.htmlContent, /Stays/);
+      assert.match(c.htmlContent, /On the waiting list/); assert.match(c.htmlContent, /Stays/);
     }
     /* the guest's email, composed again from the stored record: the same facts */
-    const g = composeGuestMail(rec); assert.match(g.text, /STAYS\n· U Sathorn Bangkok — 21 – 24 February 2027 — Superior Room With Garden View — Room A — USD 192/); assert.match(g.text, /WAITING LIST\n· Kunming — no room could be confirmed yet · number 1 on the waiting list for 2 places/); assert.match(g.text, /YOUR COST\nUSD 397/);
-    const o = composeOwnerMail(rec, 'https://x/s'); assert.match(o.text, /WAITING LIST\n· Kunming — number 1 for 2 places — to resolve/); assert.match(o.text, /COST\nUSD 397/);
+    const g = composeGuestMail(rec); assert.match(g.text, /STAYS\n· U Sathorn Bangkok — 21 – 24 February 2027 — Superior Room With Garden View — Room A, held for you — USD 192 per person/); assert.match(g.text, /ON THE WAITING LIST\n· Kunming — number 1 on the waiting list, for 2 places together · no room yet, and no cost/); assert.match(g.text, /YOUR TOTAL\nUSD 397/);
+    const o = composeOwnerMail(rec, 'https://x/s'); assert.match(o.text, /WAITING LIST\n· Kunming — number 1, for 2 places together — to resolve/); assert.match(o.text, /COST\nUSD 397/);
     /* the draft read after the send says sent, and the stored draft is untouched by the send */
     const d = await (await h.w.fetch(req('/api/draft', { 'x-siyl-auth': h.host }), h.env)).json(); assert.equal(d.submission.submissionStatus, 'sent'); assert.equal(d.submission.version, 1);
   } finally { globalThis.fetch = realFetch; }

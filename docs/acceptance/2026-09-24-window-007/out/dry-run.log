@@ -1,0 +1,101 @@
+start state recorded
+
+=== J19 404 page
+PASS [J19 404 page] 404-1440 status 404, “This page is not part of the journey.”, a way back, no overflow — {"status":404,"title":"Page not found · See You In Laos","h1":"This page is not part of the journey.","body":"see you in laos. SEE YOU IN LAOS This page is not part of the journey. The link may be old or mistyped — every
+PASS [J19 404 page] 404-1440 deep address still styled (root-relative assets) — status 404 · stylesheets 4
+PASS [J19 404 page] 404-390 status 404, “This page is not part of the journey.”, a way back, no overflow — {"status":404,"title":"Page not found · See You In Laos","h1":"This page is not part of the journey.","body":"see you in laos. SEE YOU IN LAOS This page is not part of the journey. The link may be old or mistyped — every
+PASS [J19 404 page] 404-390 deep address still styled (root-relative assets) — status 404 · stylesheets 4
+
+=== J01 first-time guest · step 01
+PASS [J01 first-time guest · step 01] 01.1-390 one quiet marker per field: “Required” on every required field, “Optional” only on Address line 2 and Region — [["p-email","Required"],["p-phone","Required"],["p-firstName","Required"],["p-lastName","Required"],["p-birthdate","Required"],["p-nationality","Required"],["p-address1","Required"],["p-address2","Optional"],["p-postal",
+PASS [J01 first-time guest · step 01] 01.2-390 Continue with empty fields stays on step 01, marks each missing field, focuses the first — {"url":"/invitation","needed":["p-email","p-phone","p-birthdate","p-nationality","p-address1","p-postal","p-city","p-country"],"focus":"p-email"}
+FAIL [J01 first-time guest · step 01] 01.3-390 validation NAMES the field: “Please add your email address.”, “Please add your city.”; the foot names them all — {"email":"Please add your email address.","city":"CITY\nREQUIRED\n\n\nPLEASE ADD YOUR CITY.","note":"8 details are still needed before you continue: Email address, Mobile number, Date of birth, Nationality, Street and house number, Postcode or ZIP code, City and Country."}
+NOTE [J01 first-time guest · step 01] G048 header before any answer — {"state":"My Trip · not sent yet","cta":""} · words "draft"
+PASS [J01 first-time guest · step 01] 01.1-1440 one quiet marker per field: “Required” on every required field, “Optional” only on Address line 2 and Region — [["p-email","Required"],["p-phone","Required"],["p-firstName","Required"],["p-lastName","Required"],["p-birthdate","Required"],["p-nationality","Required"],["p-address1","Required"],["p-address2","Optional"],["p-postal",
+PASS [J01 first-time guest · step 01] 01.2-1440 Continue with empty fields stays on step 01, marks each missing field, focuses the first — {"url":"/invitation","needed":["p-email","p-phone","p-birthdate","p-nationality","p-address1","p-postal","p-city","p-country"],"focus":"p-email"}
+FAIL [J01 first-time guest · step 01] 01.3-1440 validation NAMES the field: “Please add your email address.”, “Please add your city.”; the foot names them all — {"email":"Please add your email address.","city":"CITY\nREQUIRED\n\nPLEASE ADD YOUR CITY.","note":"8 details are still needed before you continue: Email address, Mobile number, Date of birth, Nationality, Street and house number, Postcode or ZIP code, City and Country."}
+PASS [J01 first-time guest · step 01] 01.4 one detail left → “One detail is still needed before you continue: Country.” — One detail is still needed before you continue: Country.
+PASS [J01 first-time guest · step 01] 01.5 complete → Continue opens My Trip — http://127.0.0.1:8788/your-journey
+
+=== J02 returning unsent guest
+PASS [J02 returning unsent guest] 02.1 the step header reads “My Trip · not sent yet”, no send link — {"h":{"state":"My Trip · not sent yet","cta":""},"key":"draft"}
+FAIL [J02 returning unsent guest] EXCEPTION — page.evaluate: TypeError: Cannot read properties of null (reading 'hidden')
+    at eval (eval at evaluate (:303:30), <anonymous>:1:107)
+    at UtilityScript.evaluate (<anonymous>:305:16)
+    at UtilityScript.<anonymous> (<anonymous>:1:44)
+    at /Users/thongantang/peoject.claude.skill.canva/seeyouinlaos-website/docs/acceptance/2026-09-24-window-007/e2e.mjs:149:21
+    at async journey (/Users/thongantang/peoject.claude.skill.canva/seeyouinlaos-website/docs/acceptance/2026-09-24-window-007/e2e.mjs:68:9)
+    at async file:///Users/thongantang/peoject.claude.skill.canva/seeyouinlaos-website/docs/acceptance/2026-09-24-window-007/e2e.mjs:142:1
+
+=== J11 wedding seat hold / change
+NOTE [J11 wedding seat hold / change] G048 needs after scope (setup) — event:temple, event:coffee, event:vows, event:dinner, dress, allergy, profile:coffeetea, profile:flavor, profile:drink, profile:film, profile:genres
+FAIL [J11 wedding seat hold / change] EXCEPTION — elementHandle.check: Element is not attached to the DOM
+Call log:
+[2m  - attempting click action[22m
+[2m    - waiting for element to be visible, enabled and stable[22m
+[2m    - element is visible, enabled and stable[22m
+[2m    - scrolling into view if needed[22m
+[2m    - done scrolling[22m
+[2m    - performing click action[22m
+[2m    - click action done[22m
+[2m    - waiting for scheduled navigations to finish[22m
+[2m    - navigations have finished[22m
+
+    at /Users/thongantang/peoject.claude.skill.canva/seeyouinlaos-website/docs/acceptance/2026-09-24-window-007/e2e.mjs:171:89
+    at async journey (/Users/thongantang/peoject.claude.skill.canva/seeyouinlaos-website/docs/acceptance/2026-09-24-window-007/e2e.mjs:68:9)
+    at async file:///Users/thongantang/peoject.claude.skill.canva/seeyouinlaos-website/docs/acceptance/2026-09-24-window-007/e2e.mjs:156:1
+
+=== J12 About You
+PASS [J12 About You] 12.1 Q06 heading “What makes you dance?” with the hint “The wedding playlist is built from your answers — choose every genre you would dance to.”, marker “06 · Required” — {"state":"06 · Required","h":"What makes you dance?","hint":"The wedding playlist is built from your answers — choose every genre you would dance to."}
+PASS [J12 About You] 12.2 Q03 “My favourite flavour”, the choice reads “Matcha green tea” (display form), “Thai & Lao favourites” is a genre — {"flavor":{"state":"03 · Required","h":"My favourite flavour","hint":"Choose one."},"choices":["Coffee","Milk","Butter","Pandan","Matcha green tea","Strawberry milk"],"thai":["Thai & Lao favourites"]}
+PASS [J12 About You] 12.3 question 07 is the only “Optional” question marker — {"state":"07 · Optional","h":"What’s your favourite karaoke song — the one you’d love to sing along to?","hint":"We will pass your song on to the DJ."}
+FAIL [J12 About You] 12.4 two genres pressed → “2 genres chosen” — 2 GENRES CHOSEN
+PASS [J12 About You] 12.5 G048 is ready to send (nothing still needed) — []
+
+=== J08 room hold / change / release
+PASS [J08 room hold / change / release] 08.1 The Journey · counting words “5 of 5 rooms left” (never “available”) — ["heritage: 5 of 5 rooms left","heritage-executive: 13 of 13 rooms left","heritage-grand-premier: 3 of 3 rooms left","noble-courtyard: One room only · free","grand-majestic: 2 of 2 rooms left","souphattra-majestic: One r
+FAIL [J08 room hold / change / release] 08.2 the chooser: “Who is already in each room”, each room “empty · 2 places” with “Choose this room” — {"head":"Who is already in each room","rows":["Room A empty · 2 places CHOOSE THIS ROOM","Room B empty · 2 places CHOOSE THIS ROOM","Room C empty · 2 places CHOOSE THIS ROOM","Room D empty · 2 places CHOOSE THIS ROOM","Room E empty · 2 places CHOOSE THIS ROOM"]}
+PASS [J08 room hold / change / release] 08.3 Ada holds Room A for her party: the engine holds Ada + one kept place; The Journey says “Held for you · Room A” — {"sel":"Held for you · Room A · you · 1 place kept for Ben","stsel":"SELECTED · NOT SENT YET The Heritage ROOM A · YOU · 1 PLACE KEPT FOR BEN","av":["Held for you · Room A","13 of 13 rooms left","3 of 3 rooms left","One 
+PASS [J08 room hold / change / release] 08.4 another guest now reads “4 of 5 rooms left” — 4 of 5 rooms left
+FAIL [J08 room hold / change / release] 08.5 Cleo’s chooser: Room A shows “Ada” by first name only (never a surname), and is Full to her — {"rowA":"Room A Ada · full FULL","surnames":["Test","Test"]}
+FAIL [J08 room hold / change / release] 08.6 My Trip: “Held for you”, “Your room · Room A”, the occupancy sentence with the kept place for Ben (first name) — HELD FOR YOU Pre-Wedding Stay · Souphattra Heritage 25 – 27 February 2027 · The Heritage Breakfast included YOUR ROOM · ROOM A Room A has two sleeping places. You hold one; one is kept for Ben. 8 places still free in rooms of this kind USD 290 PER PERSON · 2 NIGHTS · USD 145 PER PERSON PER NIGHT · YOUR COST DETAILS CHANGE CHANGE ROOM REMOVE I WON’T NEED THIS STAY
+FAIL [J08 room hold / change / release] 08.7 My Trip · Change room opens “Move to another room” with the rooms and who is in them — MOVE TO ANOTHER ROOM Each room has two sleeping places. Join someone you know, or choose an empty room. Room A You · 1 place kept for Ben YOUR ROOM Room B empty · 2 places CHOOSE THIS ROOM Room C empty · 2 places CHOOSE THIS ROOM Room D empty · 2 places CHOOSE THIS ROOM Room E empty · 2 places CHOOS
+FAIL [J08 room hold / change / release] 08.8 moved to Room B: the engine holds B (with the kept place), A is empty again; My Trip says “Your room · Room B” — {"A":0,"B":2,"card":"HELD FOR YOU Pre-Wedding Stay · Souphattra Heritage 25 – 27 February 2027 · The Heritage Breakfast included YOUR ROOM · ROOM B Room B has two sleeping places. You hold one; one is kept for Ben. 8 plac"}
+FAIL [J08 room hold / change / release] 08.9 My Trip · Remove asks first: “Give back your place in Room B at … ? Someone else may take it, and it may not be free again if you change your mind.” · “Give it back” / “Keep it” — Give back your place in Room B at Souphattra Heritage Vientiane? Someone else may take it, and it may not be free again if you change your mind. GIVE IT BACK KEEP IT
+PASS [J08 room hold / change / release] 08.10 “Keep it” keeps the room — ["A:0","B:2","C:0","D:0","E:0"]
+FAIL [J08 room hold / change / release] 08.11 The Journey · Remove asks the same question, “Give it back” — Give back your place in Room B at Souphattra Heritage Vientiane? Someone else may take it, and it may not be free again if you change your mind. GIVE IT BACK KEEP IT
+PASS [J08 room hold / change / release] 08.12 given back: Room B empty, no kept place left for the party — ["A:0","B:0","C:0","D:0","E:0"]
+
+=== J09 party kept place (Ada / Ben)
+PASS [J09 party kept place (Ada / Ben)] 09.1 Ben (Ada’s party) reads “A place is kept for you · Room A” on the row — never “Sold out” — {"av":"A place is kept for you · Room A","btn":"Select","gone":false}
+PASS [J09 party kept place (Ada / Ben)] 09.2 Ben’s chooser: Room A “Ada · 1 place kept for you” with “Join this room” (first name only) — {"who":"Ada · 1 place kept for you","btn":"Join this room","full":false}
+NOTE [J09 party kept place (Ada / Ben)] Ben’s own trip state is untouched (declined, reply sent):  — {"key":"sent","label":"Sent to us","line":"Sent to us · 24 September 2026","cta":null,"at":"2026-09-24T06:21:25.965Z","date":"24 September 2026","declined":true}
+PASS [J09 party kept place (Ada / Ben)] 09.3 cleanup: Ada gives Room A back → the category is empty again — ["A:0","B:0","C:0","D:0","E:0"]
+
+=== J10 sold out / waiting list
+FAIL [J10 sold out / waiting list] 10.1 The Journey · every room taken: rows read “Sold out”; “Every room here is taken. Join the waiting list and we will tell you as soon as a place frees up.” + “Join the waiting list” / “I won’t need this stay” (simulated full view) — {"av":["Sold out / Change room","Sold out / Sold out","Sold out / Sold out","Sold out / Sold out","Sold out / Sold out","Sold out / Sold out","Sold out / Sold out"],"ask":""}
+FAIL [J10 sold out / waiting list] 10.2 My Trip · the same words and “Join the waiting list” (simulated full view) — null
+FAIL [J10 sold out / waiting list] 10.3 the engine takes Cleo onto the waiting list for the stay (position known) — undefined
+FAIL [J10 sold out / waiting list] 10.4 My Trip: “On the waiting list — number undefined” and “Leave the waiting list” — null
+PASS [J10 sold out / waiting list] 10.5 “Leave the waiting list” leaves the engine’s line — {}
+
+=== J18 1872 tea for Ada + Ben
+FAIL [J18 1872 tea for Ada + Ben] 18.1 Ada · “See what will be added” → preview “Before it goes into My Bag”, “Add to My Bag” / “Cancel” — BEFORE IT GOES INTO MY BAG Your table at 1872 Champagne Afternoon Tea at 1872 One table for two guests USD 180 for the table · your cost. Champagne Afternoon Tea for two guests on Wednesday, 24 February 2027; afternoon tea is served 14:00 – 17:00. It is sent to us with your trip as a request; Guest Relations confirms the table with you. You can remove it from My Bag at any time. ADD TO MY BAG CANC
+FAIL [J18 1872 tea for Ada + Ben] 18.2 Ada · the line reads “In My Bag” — IN MY BAG · USD 180 FOR THE TABLE OPEN MY BAG REMOVE FROM MY BAG
+PASS [J18 1872 tea for Ada + Ben] 18.3 Ben · “Already in Ada’s trip — one table for the two of you.” and no second “See what will be added” — {"party":"Already in Ada’s trip — one table for the two of you.","box":"Already in Ada’s trip — one table for the two of you.","preview":false}
+PASS [J18 1872 tea for Ada + Ben] 18.4 cleanup: Ada removes the tea — the Bag has no 1872 line — gone=true
+
+=== J15 travel pass
+FAIL [J15 travel pass] 15.1 every travel pass says “Not a ticket — Guest Relations sends you the carrier’s ticket.” — []
+FAIL [J15 travel pass] 15.2 the state words are not ahead of reality: no pass says “Confirmed” (T003’s trip is not confirmed); each pass shows its line’s own state — {"truth":[{"l":"train","s":"Sent to us · 24 September 2026","ls":"Sent to us"},{"l":"mu9646","s":"Sent to us · 24 September 2026","ls":"Sent to us"},{"l":"c86","s":"Sent to us · 24 September 2026","ls":"Sent to us"},{"l":"return","s":"Sent to us · 24 September 2026","ls":"Sent to us"}],"states":[]}
+
+=== J13 Review & Send (before sending)
+FAIL [J13 Review & Send (before sending)] EXCEPTION — page.evaluate: TypeError: Cannot read properties of null (reading 'textContent')
+    at eval (eval at evaluate (:303:30), <anonymous>:1:174)
+    at UtilityScript.evaluate (<anonymous>:305:16)
+    at UtilityScript.<anonymous> (<anonymous>:1:44)
+    at /Users/thongantang/peoject.claude.skill.canva/seeyouinlaos-website/docs/acceptance/2026-09-24-window-007/e2e.mjs:443:22
+    at async journey (/Users/thongantang/peoject.claude.skill.canva/seeyouinlaos-website/docs/acceptance/2026-09-24-window-007/e2e.mjs:68:9)
+    at async file:///Users/thongantang/peoject.claude.skill.canva/seeyouinlaos-website/docs/acceptance/2026-09-24-window-007/e2e.mjs:438:1
+
+DRY 26/47 pass

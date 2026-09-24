@@ -99,7 +99,12 @@ test('THE GUEST\'S SURFACES · no control, no line, no placeholder, and no hotel
   const prof = read('profile.html');
   assert.match(prof, /function stayLines\(\)/);
   assert.match(prof, /J\.sorted\(B\.get\(\)\.filter\(function\(x\)\{return group\(x\)==='stay'\}\)\)/, 'the stays are sorted by when they happen');
-  assert.match(prof, /kicker:st\.complimentary\?'Complimentary stay':'Your stay'/);
+  /* TO-00312 / PRQ-01-04 / OQ-44: one stayCard per stay; the Guest House card has no kicker and reads “Your cost · Complimentary”;
+     the kicker “Guest House complimentary” only on the offer shown before any stay is chosen */
+  assert.match(prof, /stays\.forEach\(function\(x\)\{n\+\+;[\s\S]*?h\+=stayCard\(\{data:/);
+  assert.match(prof, /rows:\[gh\?\['Your cost','Complimentary'\]:\['Your total',/);
+  assert.match(prof, /stayCard\(\{kicker:'Guest House complimentary',name:cw\.headline/);
+  assert.doesNotMatch(prof, /'Complimentary stay'/);
   assert.doesNotMatch(code('profile.html'), /Riverside/, 'My Profile names no hotel for extra nights');
   /* the bag is the guest's own lines again, and the total is their sum */
   const bag = src('assets/bag.js');

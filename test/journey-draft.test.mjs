@@ -5,7 +5,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { bearerOf, authIdOf } from '../register/crypto.mjs';
-import { src, doState } from './sandbox.mjs';
+import { src, doState, page, PEGGY } from './sandbox.mjs';
 import { complete } from './complete.mjs';
 import { Rooms } from '../src/rooms.js';
 import { Drafts } from '../src/drafts.js';
@@ -71,7 +71,7 @@ test('ONE LOGICAL JOURNEY · the first send sets the reference; a change afterwa
     const r1 = await h.w.fetch(req('/api/register', { 'x-siyl-auth': h.sam }, { invitationId: 'INV-G777', registration: complete(REG('sam.example@example.org')), text: TEXT }), h.env);
     assert.equal(r1.status, 202); const d1 = await r1.json();
     assert.equal(d1.kind, 'initial'); assert.equal(d1.version, 1); assert.match(d1.submissionId, /^SYL-G777-[0-9A-F]{8}$/); assert.equal(d1.submission.submissionStatus, 'sent'); assert.equal(d1.submission.hasUnsentChanges, false);
-    assert.match(h.calls[0].body.subject, /^Trip received — Sam Example/); assert.match(h.calls[1].body.subject, /^Your trip has been received — /);
+    assert.match(h.calls[0].body.subject, /^Trip received — Sam Example · SYL-G777-/); assert.match(h.calls[1].body.subject, /^Thank you — we have your trip \(SYL-G777-[0-9A-F]{8}\)$/, 'TO-01865 family');
     let s = await state(); assert.equal(s.submissionStatus, 'sent'); assert.equal(s.submissionId, d1.submissionId);
     /* the same draft saved again (history stamps differ) is not a change */
     await put({ 'siyl.guest': GUEST({ coffeetea: 'Oolong' }).replace('"at":"x"', '"at":"z"'), 'siyl.bag': JSON.stringify([{ id: 'train' }]) });
@@ -83,8 +83,8 @@ test('ONE LOGICAL JOURNEY · the first send sets the reference; a change afterwa
     const r2 = await h.w.fetch(req('/api/register', { 'x-siyl-auth': h.sam }, { invitationId: 'INV-G777', registration: complete(REG('sam.example@example.org', { registration_submitted_at: '2026-09-16T10:30:00.000Z' })), text: TEXT + '\n- Espresso' }), h.env);
     const d2 = await r2.json();
     assert.equal(d2.kind, 'update'); assert.equal(d2.version, 2); assert.equal(d2.submissionId, d1.submissionId, 'the same logical journey'); assert.equal(d2.submission.hasUnsentChanges, false); assert.equal(d2.submission.submissionStatus, 'sent');
-    assert.match(h.calls[2].body.subject, /^Trip updated — Sam Example · SYL-G777-/); assert.match(h.calls[3].body.subject, /^Your trip has been updated — SYL-G777-/);
-    assert.match(h.calls[2].body.textContent, /Trip updated\n\nLatest version received .* \(replaces the version first sent 16 September 2026 · 12:00\)/); assert.match(h.calls[3].body.textContent, /replaces the previous version for review/); assert.doesNotMatch(h.calls[3].body.textContent, /version 2|2026-09-16T/, 'versioning stays internal for the guest');
+    assert.match(h.calls[2].body.subject, /^Trip updated — Sam Example · SYL-G777-/); assert.match(h.calls[3].body.subject, /^Thank you — we have your update \(SYL-G777-[0-9A-F]{8}\)$/, 'TO-01865');
+    assert.match(h.calls[2].body.textContent, /Trip updated\n\nLatest version received .* \(replaces the version first sent 16 September 2026 · 12:00\)/); assert.match(h.calls[3].body.textContent, /Your changes have reached us and replace what you sent before — below is your updated copy\. Guest Relations will look through them and confirm each arrangement with you personally\./, 'TO-01866'); assert.doesNotMatch(h.calls[3].body.textContent, /version 2|2026-09-16T/, 'versioning stays internal for the guest');
     assert.equal(d2.mailSummary.guestMessageId, '<msg-4@brevo>');
     const rec = JSON.parse(h.store.m.get('reg:INV-G777').v); assert.equal(rec.version, 2); assert.equal(rec.firstSentAt, '2026-09-16T10:00:00.000Z'); assert.ok(rec.lastSentAt > rec.firstSentAt);
     assert.equal([...h.store.m.keys()].filter((k) => k.startsWith('reg:INV-G777:prev:')).length, 1, 'the previous version is kept');
@@ -95,12 +95,14 @@ test('ONE LOGICAL JOURNEY · the first send sets the reference; a change afterwa
     s = await state(); assert.equal(s.hasUnsentChanges, true, 'a new room is a change not yet sent');
     /* the retry mails the stored (version 2) journey and makes no submission */
     const rt = await (await h.w.fetch(req('/api/register/mail-retry', { 'x-siyl-auth': h.sam }, { invitationId: 'INV-G777' }), h.env)).json();
-    assert.equal(rt.submissionId, d1.submissionId); assert.equal(JSON.parse(h.store.m.get('reg:INV-G777').v).version, 2); assert.equal(h.calls.length, 6);
+    assert.equal(rt.submissionId, d1.submissionId); assert.equal(JSON.parse(h.store.m.get('reg:INV-G777').v).version, 2);
+    /* PRQ-04-07: the retry re-sends the guest's copy only — Guest Relations already accepted theirs */
+    assert.equal(h.calls.length, 5); assert.match(h.calls[4].body.subject, /^Thank you — we have your update \(SYL-G777-/);
     /* Guest Relations sees the canonical data */
     const gr = await (await h.w.fetch(req('/api/gr/journeys', { 'x-gr-token': 'gr-secret' }), h.env)).json();
     assert.equal(gr.ok, true); const j = gr.journeys.find((x) => x.invitationId === 'INV-G777');
     assert.equal(j.guestId, 'G777'); assert.equal(j.submissionId, d1.submissionId); assert.equal(j.version, 2); assert.equal(j.status, 'changes-not-sent'); assert.equal(j.hasUnsentChanges, true);
-    assert.equal(j.contact.email, 'sam.example@example.org'); assert.deepEqual(j.bag, [{ id: 'train' }]); assert.equal(j.aboutYou[0].profile.coffeetea, 'Espresso'); assert.equal(j.rooms.wedstay.room, 'Room B'); assert.equal(j.mail.guestMessageId, '<msg-6@brevo>');
+    assert.equal(j.contact.email, 'sam.example@example.org'); assert.deepEqual(j.bag, [{ id: 'train' }]); assert.equal(j.aboutYou[0].profile.coffeetea, 'Espresso'); assert.equal(j.rooms.wedstay.room, 'Room B'); assert.equal(j.mail.guestMessageId, '<msg-5@brevo>'); assert.equal(j.mail.ownerMessageId, '<msg-3@brevo>', 'Guest Relations\' own copy is not re-sent');
     assert.equal((await h.w.fetch(req('/api/gr/journeys', { 'x-siyl-auth': h.sam }), h.env)).status, 401, 'a guest bearer is not Guest Relations');
   } finally { h.done(); }
 });
@@ -110,9 +112,36 @@ test('CLIENT · the draft module: autosave on every change, pull on sign-in, Sav
   assert.match(d, /var KEYS = \['siyl\.guest', 'siyl\.bag', 'siyl\.temple', 'siyl\.docs', 'siyl\.sent', 'siyl\.skip', 'siyl\.skip\.by'\];/);
   assert.match(d, /\['siyl:guest', 'siyl:bag', 'siyl:temple', 'siyl:docs'\]\.forEach\(function \(ev\) \{ document\.addEventListener\(ev, function \(\) \{ D\.touch\(\); \}\); \}\);/, 'autosave');
   assert.match(d, /document\.addEventListener\('siyl:auth', pullOnce\)/); assert.match(d, /if \(reason === 'save'\) \{/); assert.match(d, /the saved copy differs/);
-  assert.match(d, /closest\('\[data-continue\]'\)/); assert.match(d, /Save My Progress</); assert.match(d, /'Saving…'/); assert.match(d, /'Not saved · try again'/); assert.match(d, /'Saved · ' \+ t/);
-  assert.match(d, /Changes saved · not yet sent to Guest Relations/); assert.match(d, /'Send Updated Trip'/); assert.match(d, /'Sent to Guest Relations · Reference ' \+ s\.submissionId/); assert.match(d, /saved as draft/);
+  assert.match(d, /closest\('\[data-continue\]'\)/); assert.match(d, />Save my progress</, 'TO-01412'); assert.match(d, /'Saving…'/);
+  /* TO-01408: the failure says why, offline or not */
+  assert.match(d, /offline\(\) \? 'Not saved yet — we will try again as soon as you are back online\.' : 'Not saved yet — please try again in a moment\.'/); assert.match(d, /'Saved · ' \+ t/);
+  /* the trip words (PRQ-04-02 / OQ-40): Not sent yet · Changes not sent yet → Send the update · Sent to us · {date} · Confirmed by Guest Relations */
+  assert.match(d, /return \{ key: 'draft', label: 'Not sent yet', line: 'My Trip · not sent yet'/); assert.match(d, /key: 'changed', label: 'Changes not sent yet', line: 'Changes not sent yet', cta: 'Send the update'/);
+  assert.match(d, /key: 'sent', label: 'Sent to us', line: 'Sent to us' \+ \(at \? ' · ' \+ dateWords\(at\) : ''\)/); assert.match(d, /key: 'confirmed', label: 'Confirmed by Guest Relations'/);
+  assert.doesNotMatch(d, /Send Updated Trip|saved as draft|Sent to Guest Relations · Reference/);
   assert.match(sh, /SIYL_DRAFT\.mount\(bar\.querySelector\('\[data-prep-save\]'\)\)/);
   for (const f of ['about-you.html', 'cart.html', 'invitation.html', 'review.html', 'tickets.html', 'transport.html', 'wedding-preparation.html', 'wedding.html', 'your-journey.html', 'room.html', 'journeys.html']) assert.match(src(f), /assets\/draft\.js/, f + ' loads the draft module');
-  assert.match(rv, /var fl=await SIYL_DRAFT\.flush\('send'\);/); assert.match(rv, /id="srvstate"/);
+  /* Review & Send sends through the one path, SIYL_DRAFT.send, which flushes first and sends nothing it could not save */
+  assert.match(d, /sendingNow = D\.flush\('send'\)\.then\(function \(fl\) \{\n\s*if \(!fl \|\| !fl\.ok\) return \{ ok: false, error: 'not saved' \};/);
+  assert.match(rv, /var p=nj&&d\.sendReply\?d\.sendReply\(\):d\.send\(\{registration:d\.registration\?d\.registration\(\):null,text:buildText\(auth\)\}\);/);
+});
+
+/* PRQ-04-02 · OQ-27 (Window 007): an unchanged trip cannot be sent again — Review shows no button while the trip reads Sent to us
+   or Confirmed; a real change reads "Changes not sent yet" with the one action "Send the update"; a confirmation lapses on a change */
+test('CLIENT · the trip words follow the server: Sent to us (nothing to send), a change → Send the update, a confirmation lapses on a change', async () => {
+  let sub = null;
+  const w = page({ auth: PEGGY, modules: ['assets/bag.js', 'assets/guest.js', 'assets/confirm.js', 'assets/draft.js'],
+    fetch: () => Promise.resolve({ ok: true, status: 200, json: async () => ({ ok: true, draft: { keys: {}, updatedAt: '2026-09-20T10:00:00.000Z', savedAt: '2026-09-20T10:00:00.000Z' }, submission: sub }) }) });
+  const D = w.SIYL_DRAFT;
+  sub = { submissionId: 'SYL-G777-00000001', submissionStatus: 'sent', hasUnsentChanges: false, submittedAt: '2026-09-20T09:00:00.000Z', lastSentAt: '2026-09-20T09:00:00.000Z', version: 1 };
+  await D.refresh();
+  let t = D.words(); assert.equal(t.key, 'sent'); assert.equal(t.label, 'Sent to us'); assert.equal(t.cta, null, 'nothing to send'); assert.match(t.line, /^Sent to us · 20 September 2026$/);
+  assert.equal(D.hasUnsentChanges(), false);
+  sub = { ...sub, submissionStatus: 'changes-not-sent', hasUnsentChanges: true };
+  await D.refresh();
+  t = D.words(); assert.equal(t.key, 'changed'); assert.equal(t.label, 'Changes not sent yet'); assert.equal(t.cta, 'Send the update');
+  assert.equal(D.confirmed(), false, 'a confirmation never stands beside a change not yet sent (OQ-27)');
+  const rv = src('review.html');
+  assert.match(rv, /function hasSomethingToSend\(\)\{var k=tripWords\(\)\.key;return k!=='sent'&&k!=='confirmed'\}/, 'no button while nothing changed since the last send');
+  assert.match(rv, /var show=!\(G&&G\.party\(\)\)\|\|hasSomethingToSend\(\);\nbtn\.hidden=!show;/);
 });

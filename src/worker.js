@@ -54,7 +54,7 @@ import { SEED } from './inventory-seed.js';
 import { stageOf } from './rooms.js';
 import { composeGuestMail, composeOwnerMail } from './mail-templates.js';
 import { completion as graphCompletion, normalizeScope as graphScope, isRelevant as graphRelevant, STAGES as GRAPH_STAGES, STAGE_IDS as GRAPH_IDS } from './stage-graph.js';
-import { profileMissing as questionnaireMissing, finaleOf } from './questionnaire.js';   /* the one questionnaire: what About You and the wedding night require (Owner, 22 Sep 2026) */
+import { profileMissing as questionnaireMissing, finaleOf, PHOTO_LABEL } from './questionnaire.js';   /* the one questionnaire: what About You and the wedding night require (Owner, 22 Sep 2026) */
 
 /* ---- the Guest Relations gate (F + G) ------------------------------------
  * A secret set with `wrangler secret put GR_TOKEN`, compared in constant
@@ -76,6 +76,7 @@ const GR_ROOMS_OPS = ['plan', 'migrate', 'assign', 'unassign', 'reset'];
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    lastOrigin = url.origin;
 
     /* THE RETIRED CATEGORY LEDGER: replaced by the room occupancy engine */
     if (url.pathname === '/api/inventory' || url.pathname.startsWith('/api/inventory/')) {
@@ -97,7 +98,7 @@ export default {
         headers.set('x-gr-verified', 'yes');
       } else {
         const who = await identify(request, env);
-        if (who) headers.set('x-siyl-identity', JSON.stringify(who));
+        if (who) headers.set('x-siyl-identity', JSON.stringify(await withFirstName(env, who, url.origin, request)));
         else if (GUEST_ROOMS_WRITES.includes(op)) return json({ ok: false, error: 'unauthorised' }, 401, corsHeaders(request));
         if (GUEST_ROOMS_WRITES.includes(op) && await resetLocked(env)) return json({ ok: false, error: 'the room engine is being reset — try again in a moment', retry: true }, 503, corsHeaders(request));
       }
@@ -225,7 +226,7 @@ export default {
         headers.set('x-gr-verified', 'yes');
       } else {
         const who = await identify(request, env);
-        if (who) headers.set('x-siyl-identity', JSON.stringify(who));
+        if (who) headers.set('x-siyl-identity', JSON.stringify(await withFirstName(env, who, url.origin, request)));
         else if (op === 'select' || op === 'release') return json({ ok: false, error: 'unauthorised' }, 401, corsHeaders(request));
         if ((op === 'select' || op === 'release') && await resetLocked(env)) return json({ ok: false, error: 'the seating ledger is being reset — try again in a moment', retry: true }, 503, corsHeaders(request));
       }
@@ -265,7 +266,15 @@ export default {
       if (!keep) return Response.redirect(url.origin + '/invitation.html', 302);
     }
 
-    return env.ASSETS.fetch(request);
+    const res = await env.ASSETS.fetch(request);
+    /* THE PAGE FOR AN UNKNOWN ADDRESS (OQ-39 · PRQ-00-06 / PRQ-07B-03): when the assets answer 404 for a page address, the site's
+       own 404.html is served with status 404 — no configuration change (not_found_handling stays untouched); an asset that is
+       not a page (an image, a script) keeps its plain 404 */
+    if (res.status === 404 && (request.method === 'GET' || request.method === 'HEAD') && (!/\.[a-z0-9]{1,8}$/i.test(url.pathname) || /\.html?$/i.test(url.pathname))) {
+      const nf = await notFoundPage(env, url, request);
+      if (nf) return nf;
+    }
+    return res;
   },
   /* THE DOCUMENT RETENTION CLOCK (Owner, 21 Sep 2026): the one scheduled trigger of the one Worker. Before the approved
      date it does nothing at all; from that date it purges the private passport / travel documents — the doc/ objects of
@@ -277,6 +286,48 @@ export default {
     return run;
   },
 };
+
+/* THE HOLDER'S FIRST NAME (PRQ-GAP-02): the engines name a room or seat holder only from the verified identity, never from a
+   request body — the Worker adds `firstName`: the couple by the register's role (Bride → Haruthai, Groom → Suthep), otherwise the
+   guest's own first name as the server knows it (the contact → the sent record's preferred name → its source name). Computed
+   once per identity object; nothing is written. */
+let lastOrigin = '';
+async function withFirstName(env, who, origin, request) {
+  if (!who || typeof who !== 'object' || who.firstName) return who;
+  let name = '';
+  try {
+    const entries = await loadIndex(env, origin || lastOrigin);
+    for (const e of Object.values(entries || {})) { if (e && e.i === who.invitationId && e.h === 1 && (e.r === 'B' || e.r === 'G')) { name = e.r === 'B' ? 'Haruthai' : 'Suthep'; break; } }
+  } catch (e) { name = ''; }
+  if (!name && env.REG_KV) {
+    let c = null, rec = null;
+    try { c = await storedContact(env, who.invitationId); } catch (e) { c = null; }
+    try { rec = JSON.parse(await env.REG_KV.get('reg:' + who.invitationId) || 'null'); } catch (e) { rec = null; }
+    const gr = (rec && rec.registration && rec.registration.guestRecord) || {};
+    const g0 = Array.isArray(gr.guests) && gr.guests[0] ? gr.guests[0] : {};
+    name = firstWord(c && c.firstName) || firstWord(g0.submitted && g0.submitted.preferredName) || firstWord(g0.source && g0.source.preferredName) || firstWord(g0.name);
+  }
+  /* a guest the server knows no name for yet (nothing corrected, nothing sent): the first name their own invitation gave the page,
+     as sent with their own write — it names only themselves (their identity is the bearer's) */
+  if (!name && request && request.method === 'POST') { try { const body = await request.clone().json(); name = firstWord(body && body.name); } catch (e) { /* no body name */ } }
+  name = String(name || '').replace(/[^\p{L}\p{M}' \-.]/gu, '').replace(/\s+/g, ' ').trim().split(' ')[0].slice(0, 24);   /* auth.js displayName's rule, one word */
+  if (name) who.firstName = name;
+  return who;
+}
+
+/* the 404 page itself: /404 (the assets' own clean address for 404.html), else /404.html — followed only when it answers 200 */
+async function notFoundPage(env, url, request) {
+  for (const p of ['/404', '/404.html']) {
+    try {
+      const r = await env.ASSETS.fetch(new Request(url.origin + p, { method: 'GET', headers: request.headers }));
+      if (r && r.status === 200) {
+        const h = new Headers(r.headers); h.set('cache-control', 'no-store');
+        return new Response(request.method === 'HEAD' ? null : r.body, { status: 404, headers: h });
+      }
+    } catch (e) { /* the plain 404 stands */ }
+  }
+  return null;
+}
 
 /* ---- THE DOCUMENT RETENTION POLICY (Owner, 21 Sep 2026 · FINAL) ------------------------------------------------------
  * The journey ends on 8 March 2027. Passport and travel documents are kept for thirty days after it and deleted from
@@ -358,6 +409,9 @@ async function handleDocument(request, env) {
   } catch (e) {
     return json({ ok: false, error: 'document could not be stored' }, 503, corsHeaders(request));
   }
+  /* A REPLACEMENT SUPERSEDES THE EARLIER COPY (W7-175 · PRQ-06-12): the new object is the guest's document; every earlier object of
+     the same guest and kind is hidden from every Guest Relations read (handleGrDocuments / handleGrDocument) and removed by the
+     retention clock — no guest request ever deletes or reads the store */
   // RECEIVED means received. Never reviewed, verified or approved.
   return json({ ok: true, status: 'RECEIVED', key, sha256: digest, receivedAt, bytes: bytes.byteLength },
     201, corsHeaders(request));
@@ -380,6 +434,11 @@ async function handleGrDocuments(url, env) {
     } while (cursor);
   } catch (e) { return json({ ok: false, error: 'document store unavailable' }, 503); }
   documents.sort((a, b) => (a.receivedAt < b.receivedAt ? 1 : a.receivedAt > b.receivedAt ? -1 : 0));
+  /* only the newest object of each guest and kind is the guest's document; an earlier copy a replacement superseded is never
+     shown (PRQ-06-12) — ?all=1 lists every stored object for an audit */
+  if (url.searchParams.get('all') !== '1') { const seen = new Set();   /* the list is newest first: the first of each guest and kind is kept */
+    const kept = documents.filter((d) => { const k = d.guestId + '/' + d.kind; if (seen.has(k)) return false; seen.add(k); return true; });
+    documents.length = 0; kept.forEach((d) => documents.push(d)); }
   return json({ ok: true, invitationId: inv, count: documents.length, documents }, 200, { 'cache-control': 'private, no-store' });
 }
 /* one object, streamed through the Worker: the exact key only (its shape is pinned — no prefix, no wildcard, no listing) */
@@ -388,6 +447,10 @@ async function handleGrDocument(url, env) {
   if (!DOC_KEY.test(key)) return json({ ok: false, error: 'a document key is required' }, 400);
   let obj = null; try { obj = await env.DOCS.get(key); } catch (e) { return json({ ok: false, error: 'document store unavailable' }, 503); }
   if (!obj) return json({ ok: false, error: 'no such document' }, 404);
+  /* a copy a later replacement superseded is not the guest's document any more (PRQ-06-12) — ?all=1 for an audit */
+  if (url.searchParams.get('all') !== '1') {
+    try { const parts = key.split('/'), prefix = parts.slice(0, 4).join('/') + '/'; const l = await env.DOCS.list({ prefix }); if ((l.objects || []).some((o) => o.key !== key && o.key > key)) return json({ ok: false, error: 'superseded by a newer copy' }, 404); } catch (e) { /* the read stands */ }
+  }
   const cm = obj.customMetadata || {}, type = (obj.httpMetadata && obj.httpMetadata.contentType) || 'application/octet-stream';
   const name = String(cm.filename || key.split('/').pop() || 'document').replace(/[^\w.-]+/g, '_').slice(0, 120);
   return new Response(obj.body, { status: 200, headers: { 'content-type': DOC_TYPES.includes(type) ? type : 'application/octet-stream', 'content-length': String(obj.size), 'content-disposition': 'attachment; filename="' + name + '"', 'cache-control': 'private, no-store', 'x-content-type-options': 'nosniff', 'x-document-received': cm.receivedAt || '', 'x-document-sha256': cm.sha256 || '' } });
@@ -432,7 +495,7 @@ async function handleRegister(request, env) {
      the email field; the email they add is persisted server-side and Review & Send is open again. */
   const recipient = await resolveRecipient(env, who, registration);
   if (!recipient.email) {
-    return json({ ok: false, error: 'email required', message: 'Please add your email address so we can send your confirmation.', field: 'email' }, 422, corsHeaders(request));
+    return json({ ok: false, error: 'email required', message: 'Please add your email address, so we can send you a copy of your trip.', field: 'email' }, 422, corsHeaders(request));
   }
   /* THE PERSISTED ROOMS (Owner, 16 Sep 2026): the rooms this guest holds are read from the room engine on the server —
      the emails name the room the engine persists, never a room the client claims */
@@ -443,16 +506,20 @@ async function handleRegister(request, env) {
      About You. A guest not joining the trip sends a complete response with nothing else. An incomplete trip is refused. */
   const done = await completionOf(env, who, registration, rooms);
   if (!done.canSend) {
-    return json({ ok: false, error: 'incomplete', message: 'Your trip is not complete yet.', missing: done.missing, unresolved: done.unresolved }, 422, corsHeaders(request));
+    return json({ ok: false, error: 'incomplete', message: 'Something is still needed before you send.', missing: done.missing, unresolved: done.unresolved }, 422, corsHeaders(request));
   }
   let record = null;
   if (env.REG_KV) {
     try {
-      const draftFingerprint = await journeyFingerprint(env, who);
+      /* two fingerprints of what was sent: the historical one (kept, so every earlier record keeps comparing as before) and the
+         CONTENT one (PRQ-01-06) — stamps (at · by · history) left out, so a save that changes nothing, or a change undone, never
+         reads as a change */
+      const fps = await journeyFingerprints(env, who);
+      const draftFingerprint = fps.v1, contentFingerprint = fps.v2;
       const now = new Date().toISOString();
       record = { invitationId, submittedAt: isUpdate ? existing.submittedAt : submittedAt, submissionId, version, kind: isUpdate ? 'update' : 'initial',
         firstSentAt: isUpdate ? (existing.firstSentAt || existing.submittedAt) : submittedAt, lastSentAt: now, updatedAt: now,
-        guestId: who.guestId, hosts: !!who.hosts, registration, text, rooms, recipient, draftFingerprint, mail: null };
+        guestId: who.guestId, hosts: !!who.hosts, registration, text, rooms, recipient, draftFingerprint, contentFingerprint, fingerprintVersion: 2, mail: null };
       /* THE PERMANENT PERSON ID (Owner, 20 Sep 2026): CONxxx and COUPLxxx are the register's — stamped from the auth index, never taken from the body */
       if (registration && typeof registration === 'object') { const person = await personOf(env, new URL(request.url).origin, who); if (person.contactId) registration.contactId = person.contactId; else delete registration.contactId; if (person.couple) registration.couple = person.couple; else delete registration.couple; }
       const prev = await env.REG_KV.get(regKey);
@@ -478,7 +545,10 @@ async function handleRegister(request, env) {
   //    stored record. An email failure never loses the booking: the journey is
   //    saved, the client says so and offers the retry.
   const mail = await sendJourneyMail(env, record, request);
-  try { await env.REG_KV.put(regKey, JSON.stringify({ ...record, mail, mailSummary: mailSummary(mail) }), { metadata: { invitationId, submittedAt, submissionId } }); } catch (e) { /* the record stands; the mail result is in the response */ }
+  /* THE GUEST RELATIONS NOTIFICATION IS THE SERVER'S TO RETRY (PRQ-04-07): a failed notification is tried once more at once and
+     again with the guest's next copy request — the guest is never asked to resend for it */
+  if (mail.owner && !mail.owner.accepted && mail.owner.provider !== 'none') { const again = await sendJourneyMail(env, record, request, { guest: false }); if (again.owner && again.owner.accepted) mail.owner = again.owner; }
+  try { await env.REG_KV.put(regKey, JSON.stringify({ ...record, mail, mailSummary: mailSummary(mail) }), { metadata: { invitationId, submittedAt: record.submittedAt, submissionId, version, lastSentAt: record.lastSentAt } }); } catch (e) { /* the record stands; the mail result is in the response */ }
   return json({ ok: true, status: 'UNDER_REVIEW', stored, mailed: !!(mail.owner && mail.owner.accepted), submittedAt: record.submittedAt, lastSentAt: record.lastSentAt, submissionId, version, kind: record.kind, mail: publicMail(mail), mailSummary: mailSummary(mail), submission: submissionStateOf(record, false) }, 202, corsHeaders(request));
 }
 /* ---- THE JOURNEY DRAFT ------------------------------------------------------------------------------------------
@@ -544,23 +614,27 @@ async function completionOf(env, who, registration, rooms) {
   const seats = seatView && seatView.mine ? { ceremony: (seatView.mine.ceremony || {})[who.guestId] || null, dinner: (seatView.mine.dinner || {})[who.guestId] || null } : {};
   const about = [];
   const allergy = gr.allergy || {};
-  if (allergy.answer !== 'no' && !(allergy.answer === 'yes' && String(allergy.details || '').trim())) about.push({ key: 'allergy', label: 'Food allergies', href: 'about-you.html#allergy' });
-  if (!gr.photo) about.push({ key: 'photo', label: 'Photography acknowledgement', href: 'about-you.html#photo' });
+  if (allergy.answer === 'yes' && !String(allergy.details || '').trim()) about.push({ key: 'allergy', label: 'Food allergies — which ones', href: 'about-you.html#allergy-details' });
+  else if (allergy.answer !== 'no' && allergy.answer !== 'yes') about.push({ key: 'allergy', label: 'Food allergies', href: 'about-you.html#allergy' });
+  /* WEDDING SCOPE AND THE HOST FLAG (OQ-32 · PRQ-06-02): the photography acknowledgement is asked of wedding guests who are not
+     the hosts; questions 06 and 07 of wedding guests only — read from the stored scope and the register's host flag */
+  const atWedding = !!who.hosts || !!(scope && scope.vientianeWedding);
+  if (atWedding && !who.hosts && !gr.photo) about.push({ key: 'photo', label: PHOTO_LABEL, href: 'about-you.html#photo' });
   /* the questionnaire's required answers — the sender's own guest record (src/questionnaire.js is the one schema) */
   const g0 = Array.isArray(gr.guests) ? (gr.guests.find((g) => g && g.guestId === who.guestId) || gr.guests[0] || {}) : {};
-  questionnaireMissing(g0.profile).forEach((m) => about.push(m));
+  questionnaireMissing(g0.profile, { wedding: atWedding }).forEach((m) => about.push(m));
   /* a room or a waiting-list place the engine still holds for a stage outside the trip must have been released first */
-  const stale = scope ? Object.keys(rooms || {}).filter((stage) => GRAPH_IDS[stage] && !graphRelevant(stage, scope)).map((stage) => ({ key: 'release:' + stage, label: 'A place still held for a stage outside your trip', href: 'your-journey.html#scope' })) : [];
+  const stale = scope ? Object.keys(rooms || {}).filter((stage) => GRAPH_IDS[stage] && !graphRelevant(stage, scope)).map((stage) => ({ key: 'release:' + stage, label: 'A place is still held for a part of the trip you are not joining', href: 'your-journey.html#scope' })) : [];
   /* STEP 01 IS REQUIRED ON THE SERVER TOO (Owner, 24 Sep 2026): the contact and the personal details the form does not mark
      optional, read from what the Worker itself stores for this invitation — never from the client's claim. The name stays the
      invitation's unless the guest corrected it, so it is not asked here. */
   const sc = await storedContact(env, who.invitationId) || {};
   const contactMissing = [];
   const blank = (v) => !String(v || '').trim();
-  if (!validEmail(sc.email || '')) contactMissing.push({ key: 'email', label: 'Email address', href: 'invitation.html#p-email' });
-  if (String(sc.phone || '').replace(/\D/g, '').length < 6) contactMissing.push({ key: 'phone', label: 'Mobile number', href: 'invitation.html#p-phone' });
-  if (!validBirthdate(sc.birthdate)) contactMissing.push({ key: 'birthdate', label: 'Date of Birth', href: 'invitation.html#p-birthdate' });
-  [['nationality', 'Nationality'], ['address1', 'Street and house number'], ['postal', 'Postal / ZIP code'], ['city', 'City'], ['country', 'Country']]
+  if (!validEmail(sc.email || '')) contactMissing.push({ key: 'email', label: blank(sc.email) ? 'Email address' : 'Email address — please check it', href: 'invitation.html#p-email' });
+  if (String(sc.phone || '').replace(/\D/g, '').length < 6) contactMissing.push({ key: 'phone', label: blank(sc.phone) ? 'Mobile number' : 'Mobile number — please check it', href: 'invitation.html#p-phone' });
+  if (!validBirthdate(sc.birthdate)) contactMissing.push({ key: 'birthdate', label: blank(sc.birthdate) ? 'Date of birth' : 'Date of birth — please check it', href: 'invitation.html#p-birthdate' });
+  [['nationality', 'Nationality'], ['address1', 'Street and house number'], ['postal', 'Postcode or ZIP code'], ['city', 'City'], ['country', 'Country']]
     .forEach(([k, label]) => { if (blank(sc[k])) contactMissing.push({ key: k, label, href: 'invitation.html#p-' + k }); });
   return graphCompletion({
     scope, stages, stale,
@@ -572,28 +646,82 @@ async function completionOf(env, who, registration, rooms) {
 }
 async function engineSeatView(env, who) {
   if (!env.SEATING || !who) return null;
-  try { const stub = env.SEATING.get(env.SEATING.idFromName('seating')); const r = await stub.fetch(new Request('https://seating/api/seating/mine?invitation=' + encodeURIComponent(who.invitationId), { headers: { 'x-siyl-identity': JSON.stringify(who) } })); const v = await r.json(); return v && v.ok ? v : null; } catch (e) { return null; }
+  try { const stub = env.SEATING.get(env.SEATING.idFromName('seating')); const r = await stub.fetch(new Request('https://seating/api/seating/mine?invitation=' + encodeURIComponent(who.invitationId), { headers: { 'x-siyl-identity': JSON.stringify(await withFirstName(env, who)) } })); const v = await r.json(); return v && v.ok ? v : null; } catch (e) { return null; }
 }
 async function engineSeats(env, who) {
   if (!env.SEATING || !who) return null;
-  try { const stub = env.SEATING.get(env.SEATING.idFromName('seating')); const r = await stub.fetch(new Request('https://seating/api/seating/mine?invitation=' + encodeURIComponent(who.invitationId), { headers: { 'x-siyl-identity': JSON.stringify(who) } })); const v = await r.json(); return v && v.mine ? v.mine : null; } catch (e) { return null; }
+  try { const stub = env.SEATING.get(env.SEATING.idFromName('seating')); const r = await stub.fetch(new Request('https://seating/api/seating/mine?invitation=' + encodeURIComponent(who.invitationId), { headers: { 'x-siyl-identity': JSON.stringify(await withFirstName(env, who)) } })); const v = await r.json(); return v && v.mine ? v.mine : null; } catch (e) { return null; }
 }
-async function journeyFingerprint(env, who, draft) {
+async function journeyFingerprint(env, who, draft) { return (await journeyFingerprints(env, who, draft)).v1; }
+/* THE CONTENT OF A TRIP (PRQ-01-06): what the guest chose and answered, without the stamps that record WHEN or BY WHOM an answer
+   was given — re-giving the same answer, or undoing a change, leaves the content as it was */
+const STAMP_KEYS = new Set(['at', 'by', 'offAt', 'history', 'contactSyncedAt', 'updatedAt', 'savedAt']);
+function contentOf(v) {
+  if (Array.isArray(v)) return v.map(contentOf);
+  if (v && typeof v === 'object') { const out = {}; for (const k of Object.keys(v).sort()) { if (STAMP_KEYS.has(k)) continue; out[k] = contentOf(v[k]); } return out; }
+  return v;
+}
+/* v1: the historical fingerprint (every stored record carries it) · v2: the content fingerprint (records sent from now on) */
+async function journeyFingerprints(env, who, draft) {
   const d = draft === undefined ? await storedDraft(env, who.invitationId) : draft;
   const [rooms, seats] = await Promise.all([engineRooms(env, who), engineSeats(env, who)]);
   /* the fingerprint is the guest's OWN journey: a waiting-list position moves when others leave the line — not a change of theirs */
   const own = rooms ? Object.fromEntries(Object.entries(rooms).map(([k, v]) => [k, v && v.waitlisted ? { stage: v.stage, waitlisted: true, size: v.size } : v])) : rooms;
-  return sha256Hex(JSON.stringify({ draft: draftContent(d && d.keys), rooms: own, seats }));
+  const content = draftContent(d && d.keys);
+  const [v1, v2] = await Promise.all([sha256Hex(JSON.stringify({ draft: content, rooms: own, seats })), sha256Hex(JSON.stringify(contentOf({ draft: content, rooms: own, seats })))]);
+  return { v1, v2 };
 }
-function submissionStateOf(record, hasUnsentChanges) {
-  if (!record || !record.submissionId) return { submissionStatus: 'draft', submissionId: null, submittedAt: null, lastSentAt: null, version: 0, hasUnsentChanges: false };
-  return { submissionStatus: hasUnsentChanges ? 'changes-not-sent' : 'sent', submissionId: record.submissionId, submittedAt: record.submittedAt, lastSentAt: record.lastSentAt || record.submittedAt, version: record.version || 1, hasUnsentChanges: !!hasUnsentChanges, mail: record.mailSummary || null };
+/* A CONFIRMATION STANDS for the version Guest Relations confirmed (OQ-27 · PRQ-01-05 / 02-04 / 04-04): a confirmation that names
+   its version stands while that version is the latest sent; an older confirmation (no version recorded) stands while nothing was
+   sent after it */
+function confirmationStands(conf, record) {
+  if (!conf || !conf.confirmedAt) return false;
+  if (!record || !record.submissionId) return true;   /* nothing sent to compare with: the confirmation as stored */
+  if (conf.version != null) return Number(conf.version) === Number(record.version || 1);
+  const last = record.lastSentAt || record.submittedAt || '';
+  return !last || String(conf.confirmedAt) >= String(last);
+}
+function submissionStateOf(record, hasUnsentChanges, conf) {
+  if (!record || !record.submissionId) return { submissionStatus: 'draft', submissionId: null, submittedAt: null, lastSentAt: null, version: 0, hasUnsentChanges: false, declined: false, sentSelections: null, confirmed: false, confirmedAt: null, confirmedVersion: null, lapsed: false };
+  const reg = record.registration && typeof record.registration === 'object' ? record.registration : {};
+  const gr = reg.guestRecord && typeof reg.guestRecord === 'object' ? reg.guestRecord : {};
+  const stands = confirmationStands(conf, record), confirmed = stands && !hasUnsentChanges;
+  return { submissionStatus: hasUnsentChanges ? 'changes-not-sent' : 'sent', submissionId: record.submissionId, submittedAt: record.submittedAt, lastSentAt: record.lastSentAt || record.submittedAt, version: record.version || 1, hasUnsentChanges: !!hasUnsentChanges, mail: record.mailSummary || null,
+    /* the last send as the guest's own pages read it: a "not joining" reply or a trip, and the Bag lines it carried */
+    declined: !!(gr.scope && gr.scope.none), sentSelections: Array.isArray(reg.selections) ? reg.selections : [],
+    confirmed, confirmedAt: confirmed ? conf.confirmedAt : null, confirmedVersion: conf && conf.confirmedAt ? (conf.version != null ? conf.version : null) : null, lapsed: !!(conf && conf.confirmedAt) && !confirmed };
 }
 async function submissionFor(env, who, draft) {
   let record = null; try { record = JSON.parse(await env.REG_KV.get('reg:' + who.invitationId) || 'null'); } catch (e) { record = null; }
   if (!record) return submissionStateOf(null, false);
-  const fp = await journeyFingerprint(env, who, draft === undefined ? undefined : draft);
-  return submissionStateOf(record, !!record.draftFingerprint && record.draftFingerprint !== fp);
+  let conf = null; try { conf = JSON.parse(await env.REG_KV.get('conf:' + who.invitationId) || 'null'); } catch (e) { conf = null; }
+  const fps = await journeyFingerprints(env, who, draft === undefined ? undefined : draft);
+  /* a record sent with the content fingerprint compares content; an older record keeps its historical comparison */
+  const unsent = record.contentFingerprint ? record.contentFingerprint !== fps.v2 : (!!record.draftFingerprint && record.draftFingerprint !== fps.v1);
+  return submissionStateOf(record, unsent, conf);
+}
+/* ONE TABLE FOR TWO (PRQ-07a-06, Window 007): the 1872 afternoon tea is one table for a party of two — when another member of the
+   guest's own party already has it in their trip, the draft read says so (their first name only), and the page offers no second
+   table. Read-only; nothing of the other guest's trip is returned but that one fact. */
+const TABLE_PRODUCTS = { '1872': ['1872', 'tea1872'] };
+async function partyTables(env, who, origin) {
+  if (!who || !who.partyId || !env.REG_KV) return null;
+  let entries = null; try { entries = await loadIndex(env, origin || lastOrigin); } catch (e) { return null; }
+  const mates = Object.values(entries || {}).filter((e) => e && e.p === who.partyId && e.i && e.i !== who.invitationId);
+  if (!mates.length) return null;
+  const out = {};
+  for (const m of mates) {
+    let d = null; try { d = await storedDraft(env, m.i); } catch (e) { d = null; }
+    let bag = []; try { bag = JSON.parse((d && d.keys && d.keys['siyl.bag']) || '[]'); } catch (e) { bag = []; }
+    if (!Array.isArray(bag)) continue;
+    for (const [id, ids] of Object.entries(TABLE_PRODUCTS)) {
+      if (out[id] || !bag.some((l) => l && ids.includes(String(l.id)))) continue;
+      const mate = { invitationId: m.i, guestId: m.g };
+      try { await withFirstName(env, mate, origin); } catch (e) { /* no name */ }
+      out[id] = mate.firstName || 'A guest';
+    }
+  }
+  return Object.keys(out).length ? out : null;
 }
 async function handleDraft(request, env) {
   const who = await identify(request, env);
@@ -603,7 +731,8 @@ async function handleDraft(request, env) {
     let d, actorEpoch = null; try { const r = env.DRAFTS ? await draftOp(env, who.invitationId, 'get') : null; if (r) { if (!r.ok) throw new Error(r.error || 'draft could not be read'); d = r.draft || null; actorEpoch = r.epoch || null; } else d = await storedDraft(env, who.invitationId, true); } catch (e) { return json({ ok: false, error: 'draft store unavailable', retry: true }, 503, corsHeaders(request)); }
     const submission = await submissionFor(env, who, d);
     let resetAt = actorEpoch; if (!resetAt) { try { resetAt = await resetEpoch(env); } catch (e) { return json({ ok: false, error: 'draft store unavailable', retry: true }, 503, corsHeaders(request)); } }
-    return json({ ok: true, invitationId: who.invitationId, guestId: who.guestId, draft: d ? { keys: d.keys, updatedAt: d.updatedAt, savedAt: d.savedAt, clientUpdatedAt: d.clientUpdatedAt || null } : null, submission, ...(resetAt ? { resetAt } : {}) }, 200, corsHeaders(request));
+    const party = await partyTables(env, who, new URL(request.url).origin);
+    return json({ ok: true, invitationId: who.invitationId, guestId: who.guestId, draft: d ? { keys: d.keys, updatedAt: d.updatedAt, savedAt: d.savedAt, clientUpdatedAt: d.clientUpdatedAt || null } : null, submission, ...(party ? { party } : {}), ...(resetAt ? { resetAt } : {}) }, 200, corsHeaders(request));
   }
   if (request.method !== 'PUT' && request.method !== 'POST') return json({ ok: false, error: 'method not allowed' }, 405, corsHeaders(request));
   let body; try { const raw = await request.text(); if (raw.length > MAX_BODY) return json({ ok: false, error: 'payload too large' }, 413, corsHeaders(request)); body = JSON.parse(raw); } catch (e) { return json({ ok: false, error: 'invalid JSON' }, 400, corsHeaders(request)); }
@@ -924,7 +1053,7 @@ async function engineRooms(env, who) {
   if (!env.ROOMS || !who) return null;
   try {
     const stub = env.ROOMS.get(env.ROOMS.idFromName('rooms'));
-    const r = await stub.fetch(new Request('https://rooms/api/rooms/mine', { headers: { 'x-siyl-identity': JSON.stringify(who) } }));
+    const r = await stub.fetch(new Request('https://rooms/api/rooms/mine', { headers: { 'x-siyl-identity': JSON.stringify(await withFirstName(env, who)) } }));
     const v = await r.json();
     if (!v || !v.ok || !v.mine) return null;
     const out = {};
@@ -939,15 +1068,17 @@ async function engineRooms(env, who) {
   } catch (e) { return null; }
 }
 /* both emails for one stored record — the content is the journey as sent, never an access code */
-async function sendJourneyMail(env, record, request) {
+async function sendJourneyMail(env, record, request, only) {
   const origin = new URL(request.url).origin;
   const name = guestNameOf(record);
+  const o = only || {}, sendOwner = o.owner !== false, sendGuest = o.guest !== false;
+  const skipped = { provider: 'none', accepted: false, id: null, status: 0, error: 'not sent in this attempt', skipped: true, at: new Date().toISOString() };
   /* the words and the look come from src/mail-templates.js (See You In Laos CI); the facts are the stored record's */
-  const ownerMail = composeOwnerMail(record, origin + '/api/status?invitation=' + encodeURIComponent(record.invitationId));
-  const owner = await sendMail(env, GR_EMAIL, 'Guest Relations', ownerMail.subject, ownerMail.text, ownerMail.html);
+  const ownerMail = sendOwner ? composeOwnerMail(record, origin + '/api/status?invitation=' + encodeURIComponent(record.invitationId)) : null;
+  const owner = sendOwner ? await sendMail(env, GR_EMAIL, 'Guest Relations', ownerMail.subject, ownerMail.text, ownerMail.html) : skipped;
   const guestTo = guestEmailOf(record);
-  const guestMail = composeGuestMail(record);
-  const guest = guestTo ? await sendMail(env, guestTo, name, guestMail.subject, guestMail.text, guestMail.html) : { provider: 'none', accepted: false, id: null, status: 0, error: 'no valid guest email address in the journey', at: new Date().toISOString() };
+  const guestMail = sendGuest ? composeGuestMail(record) : null;
+  const guest = !sendGuest ? skipped : guestTo ? await sendMail(env, guestTo, name, guestMail.subject, guestMail.text, guestMail.html) : { provider: 'none', accepted: false, id: null, status: 0, error: 'no valid guest email address in the journey', at: new Date().toISOString() };
   return { owner, guest: { ...guest, to: guestTo ? guestTo.replace(/^(.).*(@.*)$/, '$1…$2') : null }, at: new Date().toISOString() };
 }
 function publicMail(mail) { const pick = (m) => m ? { provider: m.provider, accepted: !!m.accepted, id: m.id || null, error: m.error || null, to: m.to || undefined } : null; return { owner: pick(mail.owner), guest: pick(mail.guest), at: mail.at }; }
@@ -965,10 +1096,15 @@ async function handleMailRetry(request, env) {
   if (!record.guestId) record.guestId = who.guestId;
   /* the recipient is resolved again — the contact the guest has since added on the server is the one used */
   const recipient = await resolveRecipient(env, who, record.registration);
-  if (!recipient.email) return json({ ok: false, error: 'email required', message: 'Please add your email address so we can send your confirmation.', field: 'email', submissionId: record.submissionId }, 422, corsHeaders(request));
+  if (!recipient.email) return json({ ok: false, error: 'email required', message: 'Please add your email address, so we can send you a copy of your trip.', field: 'email', submissionId: record.submissionId }, 422, corsHeaders(request));
   record.recipient = recipient;
-  const mail = await sendJourneyMail(env, record, request);
-  try { await env.REG_KV.put('reg:' + invitationId, JSON.stringify({ ...record, mail, mailSummary: mailSummary(mail), mailRetries: (record.mailRetries || 0) + 1 }), { metadata: { invitationId, submittedAt: record.submittedAt, submissionId: record.submissionId } }); } catch (e) {}
+  /* RETRY ONLY THE FAILED EMAIL (PRQ-04-07): "Send the copy again" sends the guest's copy only; the Guest Relations notification is
+     sent again by the server only when it had failed (the guest never resends for it). `which: "both"` keeps the old behaviour. */
+  const which = body && body.which === 'both' ? 'both' : 'guest';
+  const ownerFailed = !(record.mail && record.mail.owner && record.mail.owner.accepted);
+  const sent = await sendJourneyMail(env, record, request, { guest: true, owner: which === 'both' || ownerFailed });
+  const mail = { owner: sent.owner && !sent.owner.skipped ? sent.owner : (record.mail && record.mail.owner) || sent.owner, guest: sent.guest, at: sent.at };
+  try { await env.REG_KV.put('reg:' + invitationId, JSON.stringify({ ...record, mail, mailSummary: mailSummary(mail), mailRetries: (record.mailRetries || 0) + 1 }), { metadata: { invitationId, submittedAt: record.submittedAt, submissionId: record.submissionId, version: record.version || 1, lastSentAt: record.lastSentAt || record.submittedAt } }); } catch (e) {}
   return json({ ok: true, submissionId: record.submissionId, submittedAt: record.submittedAt, mailed: !!(mail.owner && mail.owner.accepted), mail: publicMail(mail), mailSummary: mailSummary(mail) }, 200, corsHeaders(request));
 }
 
@@ -1027,7 +1163,7 @@ async function handleCommunity(request, env) {
       couple.push({ guestId: String(e.g), name: await nameOf(e.i, rec, COUPLE_FIRST_NAMES[e.r]), photo: photos.has(e.i), joinedAt: at ? String(at).slice(0, 10) : null, role });
     }
   } catch (err) { /* the register unreadable: the guests stand alone */ }
-  couple.sort((a, b) => (a.role === 'Groom' ? 0 : 1) - (b.role === 'Groom' ? 0 : 1));
+  couple.sort((a, b) => (a.role === 'Bride' ? 0 : 1) - (b.role === 'Bride' ? 0 : 1));   /* Haruthai (Bride) first, then Suthep (Groom) — PRQ-01-10 */
   const out = couple.concat(guests.map(({ _t, ...g }) => g));
   return json({ ok: true, count: out.length, guests: out, couple: couple.length, at: new Date().toISOString() }, 200, Object.assign({ 'cache-control': 'private, max-age=60' }, corsHeaders(request)));
 }
@@ -1040,11 +1176,18 @@ async function handleStatus(request, env) {
   const conf = await env.REG_KV.get('conf:' + invitationId, 'json');
   const received = !!(reg && reg.value);
   const receivedAt = received ? ((reg.metadata && reg.metadata.submittedAt) || null) : null;
+  let record = null; if (received) { try { record = JSON.parse(reg.value); } catch (e) { record = null; } }
+  /* the confirmation stands only for the version it confirmed (OQ-27): a later send lapses it until Guest Relations confirms again */
+  const stands = confirmationStands(conf, record);
   return json({
     ok: true,
     received, receivedAt,
-    confirmed: !!(conf && conf.confirmedAt),
+    lastSentAt: record ? (record.lastSentAt || record.submittedAt || null) : null,
+    version: record ? (record.version || 1) : 0,
+    confirmed: stands,
     confirmedAt: conf && conf.confirmedAt || null,
+    confirmedVersion: conf && conf.confirmedAt && conf.version != null ? conf.version : null,
+    lapsed: !!(conf && conf.confirmedAt) && !stands,
   }, 200, corsHeaders(request));
 }
 
@@ -1060,9 +1203,14 @@ async function handleConfirm(request, env) {
   const key = 'conf:' + invitationId;
   const now = new Date().toISOString();
   const current = (await env.REG_KV.get(key, 'json')) || { invitationId, confirmedAt: null, history: [] };
-  /* idempotent: confirming a confirmed journey changes nothing */
-  if (action === 'confirm' && current.confirmedAt) {
-    return json({ ok: true, invitationId, confirmedAt: current.confirmedAt, unchanged: true }, 200);
+  /* GUEST RELATIONS CONFIRMS A SENT VERSION (OQ-27 · PRQ-04-04): the confirmation records which version of the trip it confirms,
+     so a later send lapses it; confirming again after an update confirms the new version */
+  let record = null; try { record = JSON.parse(await env.REG_KV.get('reg:' + invitationId) || 'null'); } catch (e) { record = null; }
+  const version = record && record.submissionId ? (record.version || 1) : null;
+  const sentAt = record ? (record.lastSentAt || record.submittedAt || null) : null;
+  /* idempotent: confirming the version already confirmed changes nothing */
+  if (action === 'confirm' && current.confirmedAt && confirmationStands(current, record)) {
+    return json({ ok: true, invitationId, confirmedAt: current.confirmedAt, version: current.version != null ? current.version : version, unchanged: true }, 200);
   }
   if (action === 'unconfirm' && !current.confirmedAt) {
     return json({ ok: true, invitationId, confirmedAt: null, unchanged: true }, 200);
@@ -1070,11 +1218,12 @@ async function handleConfirm(request, env) {
   const next = {
     invitationId,
     confirmedAt: action === 'confirm' ? now : null,
+    version: action === 'confirm' ? version : null, sentAt: action === 'confirm' ? sentAt : null,
     actor, source: 'gr-endpoint', note,
-    history: (current.history || []).concat([{ action, at: now, actor, note }]).slice(-20),
+    history: (current.history || []).concat([{ action, at: now, actor, note, version: action === 'confirm' ? version : null }]).slice(-20),
   };
-  await env.REG_KV.put(key, JSON.stringify(next), { metadata: { invitationId, confirmedAt: next.confirmedAt } });
-  return json({ ok: true, invitationId, confirmedAt: next.confirmedAt, actor, at: now }, 200);
+  await env.REG_KV.put(key, JSON.stringify(next), { metadata: { invitationId, confirmedAt: next.confirmedAt, version: next.version } });
+  return json({ ok: true, invitationId, confirmedAt: next.confirmedAt, version: next.version, actor, at: now }, 200);
 }
 
 function json(obj, status, extra) {

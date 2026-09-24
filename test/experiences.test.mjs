@@ -94,14 +94,17 @@ test('detail content exists where the source carries it; discovery places carry 
   for (const x of EXP) {
     const e = byId[x.id];
     if (e.sheet === 'FULL') {
-      assert.ok(x.intro && x.sections && x.sections.length >= 5, x.id + ' full record structured');
+      assert.ok(x.intro && x.sections && x.sections.length >= 3, x.id + ' full record structured (Window 007: Sühring About = three sections, TO-02697…02706)');
       assert.ok(x.practical && x.practical.price && (x.practical.hours || x.practical.sourceHours), x.id + ' practical fields');
     } else if (e.sheet === 'DETAIL') {
       /* Edit 5 (Owner, 18 Sep 2026): the Operations Master carries a description and the practical facts, not the full structured record */
-      assert.ok(x.teaser && Array.isArray(x.detail) && x.detail.length >= 1 && x.detail.every((p) => p.length > 40), x.id + ' description from the source');
+      /* a Highlight's About section was retired (TO-02849 · TO-02850, Cannubi): its description is the Highlight's own line and house */
+      if (x.highlight && !x.detail) assert.ok(x.teaser && x.highlight.line && x.highlight.house && x.highlight.house.length > 40, x.id + ' description from the source, in the Highlight');
+      else assert.ok(x.teaser && Array.isArray(x.detail) && x.detail.length >= 1 && x.detail.every((p) => p.length > 40), x.id + ' description from the source');
       assert.ok(x.practical && Array.isArray(x.practical.hours) && x.practical.hours.length, x.id + ' hours from the source');
       assert.equal(!!x.practical.price, !!e.price, x.id + ' a price only where the source carries one');
-      assert.ok(!x.sections && !x.intro, x.id + ' no invented structured record');
+      /* TO-02780: the one approved detail-page lede (field intro) of a DETAIL record — Baan Phraya's; no other intro, never sections */
+      assert.ok(!x.sections && (!x.intro || (x.id === 'bkk-baanphraya' && x.intro === 'A century-old riverside house, restored with care.')), x.id + ' no invented structured record');
     } else if (e.sheet === 'OWNER') {
       /* BARON (Owner, 22 Sep 2026): the Owner's own words and address — a detail and the practical facts the Owner gave (when · dress · address), no invented hours or price */
       assert.ok(x.teaser && Array.isArray(x.detail) && x.detail.length >= 1, x.id + ' the Owner\'s description');
@@ -124,7 +127,7 @@ test('SÜHRING — canonical entity, Bangkok, restaurant, source category, Drive
   assert.ok(s && e);
   assert.equal(s.where, 'Bangkok');
   assert.deepEqual(s.roles, ['dinner'], 'the current Operations Master (19 Sep 2026): Day 01 · 21.02.2027 · Dinner');
-  assert.equal(s.row, 'Day 01 · 21.02.2027'); assert.equal(s.day, '21 FEB 2027');
+  assert.equal(s.row, 'Day 01 · 21.02.2027'); assert.equal(s.day, '21 February 2027'); /* TO-02683 */
   assert.match(s.cats, /German fine dining/);
   assert.equal(e.drive, '090 - Restaurant - Suhring');
   assert.deepEqual(e.driveIds, ['12BzWDhI4pN5reUWdsgbgMiD4tCWp5I4N']);
@@ -136,12 +139,13 @@ test('SÜHRING — canonical entity, Bangkok, restaurant, source category, Drive
 test('SÜHRING — the full source record is rendered, the price per person by Owner decision, the hours verbatim, the dinner dated 21 February', () => {
   const s = EXP.find((x) => x.id === 'bkk-suhring');
   assert.equal(s.sheet, 'FULL');
-  assert.deepEqual(s.sections.map((k) => k.k), ['The philosophy', 'The founders', 'The foundation', 'The first mentor', 'Contemporary heritage']);
-  assert.match(s.sections[3].p.join(' '), /grandmother Christa/);
-  assert.equal(s.practical.price, 'USD 294 · USD 234 per person', 'the house\'s two menu prices, the Owner\'s rounded website amounts (20 Sep 2026)');
-  assert.equal(s.practical.when, 'Dinner · Sunday, 21 February 2027 · the first evening in Bangkok');
+  /* Window 007 (Sühring STRUCTURE, TO-02697…02706): the About reads three sections */
+  assert.deepEqual(s.sections.map((k) => k.k), ['Their family', 'Their grandmother', 'Their kitchen today']);
+  assert.match(s.sections[1].p.join(' '), /grandmother Christa/);
+  assert.equal(s.practical.price, 'USD 294 or USD 234 per person · plus 10% service charge and government tax', 'the house\'s two menu prices, the Owner\'s rounded website amounts (20 Sep 2026) — TO-02729');
+  assert.equal(s.practical.when, 'Sunday, 21 February 2027 · the first evening in Bangkok'); /* TO-02731 */
   assert.equal(s.practical.hours, undefined, 'no meal-hours copy beside the dated dinner (Owner, 19 Sep 2026)');
-  assert.deepEqual(s.practical.sourceHours, ['Lunch', 'Thursday to Sunday', '12:30 pm to 13:00 pm (last seating)', 'Closed on Monday and Tuesday'], 'the sheet record stays as the source, verbatim');
+  assert.deepEqual(s.practical.sourceHours, ['Lunch', 'Thursday to Sunday', '12:30 – 13:00 (last seating)', 'Closed on Monday and Tuesday'], 'the sheet record stays as the source (TO-02732: the time written once, the site\'s way)');
   assert.equal(s.maps, 'https://maps.app.goo.gl/2b4whggW3YCnxN6u5?g_st=ic');
   assert.equal(s.link, 'https://www.restaurantsuhring.com/menu.html');
   assert.deepEqual(s.select, { id: 'suhring', unit: 'per person' }, 'the price lives in the one calculation source (its menus)');
@@ -171,7 +175,7 @@ test('SÜHRING — the Erlebnis menu is priced PER PERSON by the one calculation
   assert.deepEqual(P.menusOf('suhring').map((m) => [m.slug, m.price, m.thb]), [['erlebnis', 294, 'THB 9,800'], ['erlebnis-short', 234, 'THB 7,800']]);
   assert.equal(P.quote('suhring').unit, 'guest');
   const line = P.items('suhring')[0];
-  assert.equal(line.price, 294); assert.equal(line.name, 'Sühring'); assert.equal(line.menu, 'erlebnis'); assert.match(line.meta, /Erlebnis · the complete menu$/);
+  assert.equal(line.price, 294); assert.equal(line.name, 'Sühring'); assert.equal(line.menu, 'erlebnis'); assert.equal(line.meta, 'Dinner · Sunday, 21 February 2027 · Bangkok · Erlebnis, the complete menu'); /* TO-01447 */
   const short = P.items('suhring', 'erlebnis-short')[0]; assert.equal(short.price, 234); assert.equal(short.menu, 'erlebnis-short');
   assert.equal(W.SIYL_JOURNEY.meta({ ...line, qty: 2, request: true }).cat, 'Restaurant');
   assert.match(W.SIYL_JOURNEY.meta({ ...short, qty: 1, request: true }).basis, /USD 234 per person/, 'the basis of the menu the guest chose');
@@ -202,7 +206,10 @@ test('SÜHRING — Your Journey and Review & Send carry the request with its cal
   assert.match(yj, /if\(x\.exp\)return 'experience\.html\?id='/);
   assert.match(rv, /RESTAURANT REQUEST \(USD '\+\(x\.price\|\|0\)\+' per person; to be arranged through Guest Relations; not a reservation\)/, 'the line\'s own amount, never a hard-coded one');
   assert.doesNotMatch(rv, /not in the journey total/);
-  assert.match(src('assets/highlight.js'), /data-sel-state="current" aria-current="true">Current selection · /);
+  /* PRQ-07a-01: the status follows the trip — In My Bag · Sent to us · Confirmed by Guest Relations (never “Current selection”) */
+  assert.match(src('assets/highlight.js'), /data-sel-state="current" data-line-state="' \+ esc\(lineKey\(cur\)\) \+ '" tabindex="-1">' \+ esc\(WORDS\[lineKey\(cur\)\] \|\| 'In My Bag'\)/);
+  assert.match(src('assets/highlight.js'), /var WORDS = \{ sent: 'Sent to us', confirmed: 'Confirmed by Guest Relations' \};/);
+  assert.doesNotMatch(src('assets/highlight.js'), /Current selection/);
   assert.match(page, /SIYL_HIGHLIGHT\.html\(x\)/); assert.match(page, /SIYL_HIGHLIGHT\.paint\(x\)/);
 });
 
@@ -211,20 +218,23 @@ test('SÜHRING — never described as a confirmed reservation, a confirmed table
     const t = src(f);
     assert.doesNotMatch(t, /reservation confirmed|table confirmed|availability (is )?guaranteed|confirmed table|guaranteed availability/i, f);
   }
-  assert.match(src('experience.html'), /not a reservation — availability is not guaranteed by this page/);
-  assert.match(src('assets/pricing.js'), /a request, not a reservation/);
+  /* TO-03026 / TO-03349 / PRQ-04-12: the page says it once, in the Highlight grammar; the product basis carries the amount only */
+  assert.ok(src('assets/highlight.js').includes('Optional — a request, not a reservation: Guest Relations asks the restaurant for your table and confirms it with you.'));
+  assert.doesNotMatch(src('experience.html') + src('assets/highlight.js'), /availability is not guaranteed/);
 });
 
 /* ONE FOOTER, TWO BUILDERS (15 Sep 2026): the public pages build their footer in assets/recon.js, the
    private pages in assets/shop-menu.js — the two lists must be the same list, and both must feature
    Sühring beside 1872 and the way to the tickets. */
-test('FOOTER · recon.js and shop-menu.js list exactly the same links; Sühring · Dinner and Your tickets are in both', () => {
+test('FOOTER · recon.js and shop-menu.js list exactly the same links; Dinner at Sühring and Your tickets are in both', () => {
   const links = (f) => { const seg = src(f); const foot = seg.slice(seg.indexOf('sfoot-in'), seg.indexOf('sf-legal')); return [...foot.matchAll(/<a href="([^"]+)">([^<]+)<\/a>/g)].map((m) => m[1] + ' · ' + m[2]); };
   const a = links('assets/recon.js'), b = links('assets/shop-menu.js');
   assert.deepEqual(a, b, 'the two footers diverged');
-  assert.ok(a.includes('experience.html?id=bkk-suhring · Sühring · Dinner'), 'Sühring is featured');
   assert.ok(a.includes('tickets.html · Your tickets'), 'the tickets are in the footer');
-  assert.ok(a.indexOf('1872.html · 1872 · Afternoon Tea') + 1 === a.indexOf('experience.html?id=bkk-suhring · Sühring · Dinner'), 'Sühring stands directly beside 1872');
+  /* TO-00021…00026 (B8): the Highlights column — the four houses in the order of the days, each named by what it is */
+  const hl = ['experience.html?id=bkk-suhring · Dinner at Sühring', 'experience.html?id=bkk-baanphraya · Dinner at Baan Phraya', '1872.html · Champagne Afternoon Tea at 1872', 'experience.html?id=bkk-cannubi · Dinner at Cannubi'];
+  const at = a.indexOf(hl[0]); assert.ok(at >= 0, 'Sühring is featured'); assert.deepEqual(a.slice(at, at + 4), hl, 'Sühring, Baan Phraya, 1872 and Cannubi stand together');
+  assert.ok(!a.some((l) => /The wedding days/.test(l)), 'TO-00033: “The wedding days” left the footer');
   /* every page that builds a footer builds it from one of the two */
   for (const f of ['index.html', 'destination.html', 'accommodation.html', 'experiences.html', 'experience.html', 'voyage.html']) assert.match(src(f), /assets\/recon\.js/, f);
   for (const f of ['cart.html', 'tickets.html', 'journeys.html', 'transport.html', 'room.html', '1872.html', 'tea.html', 'marsilea.html', 'invitation.html', 'your-journey.html', 'wedding.html', 'wedding-preparation.html', 'about-you.html', 'review.html']) assert.match(src(f), /assets\/shop-menu\.js/, f);

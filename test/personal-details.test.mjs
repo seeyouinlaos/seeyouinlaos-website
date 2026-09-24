@@ -42,8 +42,8 @@ test('THE MODEL · five personal fields of the signed-in person; the sheet\'s re
   const w = page({ auth: withProfile(PEGGY, PROFILE, { contactId: 'CON003', couple: 'COUPL002' }) }); const G = w.SIYL_GUEST;
   assert.deepEqual(plain(G.PERSONAL.map((f) => f.key)), ['firstName', 'lastName', 'birthdate', 'nationality', 'phone', 'email', 'address1', 'address2', 'postal', 'city', 'region', 'country']);
   assert.ok(G.PERSONAL.filter((f) => f.name).every((f) => !f.optional) && G.personalMissing().every((m) => !/Name/.test(m.key)), 'the name fields are never "still needed" — the invitation\'s words stand until corrected');
-  assert.deepEqual(plain(G.PERSONAL.filter((f) => !f.optional && !f.name).map((f) => f.label)), ['Date of Birth', 'Nationality', 'Phone Number', 'Email Address', 'Street and house number', 'Postal / ZIP code', 'City', 'Country']);
-  assert.match(G.ADDRESS_WORDS, /^Please share the address where you can reliably receive personal mail\./); assert.doesNotMatch(G.ADDRESS_WORDS, /gift|surprise/i, 'the purpose is correspondence — no gift is promised');
+  assert.deepEqual(plain(G.PERSONAL.filter((f) => !f.optional && !f.name).map((f) => f.label)), ['Date of birth', 'Nationality', 'Mobile number', 'Email address', 'Street and house number', 'Postcode or ZIP code', 'City', 'Country'] /* TO-00307 / TO-00309 / TO-00308 / TO-00238 */);
+  assert.equal(G.ADDRESS_WORDS, 'The address where post reliably reaches you. We may use it for wedding letters, invitations and the occasional post about your trip — also once it is over.'); /* TO-00142 */ assert.doesNotMatch(G.ADDRESS_WORDS, /gift|surprise/i, 'the purpose is correspondence — no gift is promised');
   assert.equal(G.me().contactId, 'CON003'); assert.equal(G.me().couple, 'COUPL002');
   assert.ok(!G.PERSONAL.some((f) => /contact|couple|con|guest/i.test(f.key)), 'the person id and the couple id are never editable fields');
   /* the guest wrote her own email first: the list's copy never replaces it */
@@ -75,8 +75,8 @@ test('A COUPLE IS TWO PEOPLE · Steffie\'s session never carries Peggy\'s list d
   /* the invitation page and the profile page render the fields for the signed-in person only */
   const inv = src('invitation.html'), prof = src('profile.html');
   assert.match(inv, /id="p-birthdate"/); for (const key of ['nationality', 'address1', 'address2', 'postal', 'city', 'region', 'country']) assert.match(inv, new RegExp("fld\\('" + key + "'"), key);
-  assert.match(inv, /type="date"/); assert.match(inv, /Private Mailing Address/); assert.match(inv, /review their own on their own invitation/);
-  assert.match(prof, /data-profile-personal/); assert.match(prof, /Date of Birth/); assert.match(prof, /Private Mailing Address/); assert.match(prof, /invitation\.html#personal/);
+  assert.match(inv, /type="date"/); assert.match(inv, /Private postal address/); assert.match(inv, /' You are invited together with '\+esc\(withO\)\+', and each of you answers on your own invitation\./); assert.doesNotMatch(inv, /review their own on their own invitation|Private Mailing Address/); /* TO-00230 · TO-00229 · TO-00232 removed */
+  assert.match(prof, /data-profile-personal/); assert.match(prof, /row\('Date of birth',bd,'birthdate'\)/); assert.match(prof, /row\('Private postal address',addr,'address'\)/); assert.match(prof, /invitation\.html#personal/);
   assert.ok(!/data-c="contactId"|data-c="couple"/.test(inv), 'no input for the person id or the couple id');
 });
 

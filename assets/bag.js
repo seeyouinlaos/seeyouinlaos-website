@@ -4,9 +4,34 @@
  * 01–05 are complete and to the first missing item otherwise. */
 (function(){
 function authed(){try{var a=JSON.parse(localStorage.getItem('siyl.auth')||'null');return !!(a&&a.guestId&&a.bearer)}catch(e){return false}}
+/* MY BAG READS ONLY PRODUCTS THAT EXIST (W7-026 · PRQ-LEAD-01): a stored line is kept only while the pricing catalogue
+ * (assets/pricing.js) still knows its product — a withdrawn product is never shown, totalled, synced or sent. The decision is made
+ * only when the catalogue can decide: without SIYL_PRICE nothing is filtered, and a stay is judged only with the room data
+ * (SIYL_ROOMS) on the page. A line judged unknown also leaves the stored Bag (and so the server draft). */
+var KNOWN={tea1872:1,c642:1,mu9632:1};   /* the 1872 tea's own line id; two retired ids renamed on load (below) */
+function known(x){
+  if(!x||!x.id)return false;
+  var P=window.SIYL_PRICE;if(!P)return true;
+  /* the catalogue's own answer (assets/pricing.js · known): true · false (withdrawn / unknown — dropped) · null (this page cannot tell — kept) */
+  /* a spa interest is not a catalogue product (Marsilea's menu lives on its page) and a retired id is renamed below: both are kept */
+  if(x.interest||KNOWN[x.id])return true;
+  if(typeof P.known==='function'){var k=P.known(x);return k!==false}
+  if(P.FLAT&&P.FLAT[x.id])return true;
+  if(P.classesOf&&P.classesOf(x.id).length)return true;
+  if(!window.SIYL_ROOMS||!P.locate)return true;
+  var at=P.locate(x.id);if(!at)return false;
+  if(x.room&&at.stay&&Array.isArray(at.stay.rooms)&&!at.stay.rooms.some(function(r){return r.slug===x.room}))return false;
+  return true}
+var pruning=false;
+function raw(){try{var b=JSON.parse(localStorage.getItem('siyl.bag')||'[]');return Array.isArray(b)?b:[]}catch(e){return[]}}
 window.SIYL_BAG={
 authed:authed,
-get:function(){try{return JSON.parse(localStorage.getItem('siyl.bag')||'[]')}catch(e){return[]}},
+known:known,
+/* the stored list as it is, unfiltered (diagnostics only) */
+getRaw:raw,
+get:function(){var b=raw(),k=b.filter(known);
+if(k.length!==b.length&&window.SIYL_PRICE&&!pruning){pruning=true;setTimeout(function(){try{var now=raw(),kept=now.filter(known);if(kept.length!==now.length){localStorage.setItem('siyl.bag',JSON.stringify(kept));window.SIYL_BAG.badge();try{document.dispatchEvent(new CustomEvent('siyl:bag'))}catch(e){}}}finally{pruning=false}},0)}
+return k},
 set:function(b){localStorage.setItem('siyl.bag',JSON.stringify(b));this.badge();
 try{document.dispatchEvent(new CustomEvent('siyl:bag'))}catch(e){}},
 add:function(it){var b=this.get(),f=b.find(function(x){return x.id===it.id});
@@ -27,7 +52,10 @@ THUMBS:{train:'assets/images/transport/train-no25-srt-train.jpg',mu9632:'assets/
 thumb:function(x){return x.img||this.THUMBS[x.id]||''},
 /* the badge counts the authenticated guest's own cart lines — nothing else */
 badge:function(){var n=authed()?this.get().length:0,el=document.querySelector('[data-bag-badge]');
-if(el){var was=el.textContent;el.textContent=n>0?n:'';el.style.display=n>0?'flex':'none';if(was!==el.textContent&&n>0){el.classList.remove('bb-tick');void el.offsetWidth;el.classList.add('bb-tick')}}}};
+if(el){var was=el.textContent;el.textContent=n>0?n:'';el.style.display=n>0?'flex':'none';if(was!==el.textContent&&n>0){el.classList.remove('bb-tick');void el.offsetWidth;el.classList.add('bb-tick')}}
+/* the header link's accessible name follows the count (PRQ-00-03): “My Bag” · “My Bag, 1 item” · “My Bag, {n} items” */
+var name=n===0?'My Bag':n===1?'My Bag, 1 item':'My Bag, '+n+' items';
+try{document.querySelectorAll('a.bag, [data-bag-link]').forEach(function(a){if(a.getAttribute('aria-label')!==name)a.setAttribute('aria-label',name)})}catch(e){}}};
 /* RETIRED PRODUCTS. C86 replaces C642 and MU9646 replaces MU9632 by Owner
  * order; the class is unchanged and the amount is re-derived from the one
  * pricing source (assets/pricing.js) on load. A journey chosen before the
@@ -57,7 +85,7 @@ css.textContent='.jbar{position:fixed;left:0;right:0;bottom:0;z-index:55;backgro
 '.jb-a{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#313131;text-decoration:none;border-bottom:1px solid #313131;padding:6px 0 3px;margin-left:16px}';
 document.head.appendChild(css);
 var el=document.createElement('div');el.className='jbar';
-el.innerHTML='<div class="jb-in"><span class="jb-l">My Bag</span><span class="jb-t"></span><a class="jb-a" href="cart.html" data-bag-view>Open My Bag</a></div>'+
+el.innerHTML='<div class="jb-in"><span class="jb-l">My Bag</span><span class="jb-t"></span><a class="jb-a" href="cart.html" data-bag-view aria-label="Open My Bag">Open</a></div>'+
  /* the account surfaces (My Trip · My Bag · My Profile · Sign out) live in the sticky header shell (Owner, 18 Sep 2026); this layer is the Bag summary and the way back to the top */
  '<div class="jb-nav"><button type="button" class="jb-top" data-nav="top" aria-label="Back to top">Top ↑</button></div>';
 document.body.appendChild(el);

@@ -39,8 +39,8 @@
       frame.classList.toggle('is-playing', playing);
       frame.setAttribute('data-clip-state', playing ? 'playing' : 'paused');
       frame.setAttribute('data-clip-audio', v.muted ? 'off' : 'on');
-      if (play) { play.setAttribute('aria-label', playing ? 'Pause the film' : 'Play the film'); play.setAttribute('aria-pressed', playing ? 'true' : 'false'); play.querySelector('.t').textContent = playing ? 'Pause' : 'Play'; }
-      if (sound) { sound.setAttribute('aria-label', v.muted ? 'Sound on' : 'Mute'); sound.setAttribute('aria-pressed', v.muted ? 'false' : 'true'); sound.querySelector('.t').textContent = v.muted ? 'Sound on' : 'Mute'; }
+      if (play) { play.removeAttribute('aria-pressed'); play.setAttribute('aria-label', playing ? 'Pause the film' : 'Play the film'); play.querySelector('.t').textContent = playing ? 'Pause' : 'Play'; }
+      if (sound) { sound.removeAttribute('aria-pressed'); sound.setAttribute('aria-label', v.muted ? 'Sound on' : 'Mute'); sound.querySelector('.t').textContent = v.muted ? 'Sound on' : 'Mute'; }
     }
     /* start: with sound where the browser allows it, muted where it does not.
        ONE FILM AT A TIME (22 Sep 2026 · the BARON films): a frame that starts silences the others — never two sound tracks over

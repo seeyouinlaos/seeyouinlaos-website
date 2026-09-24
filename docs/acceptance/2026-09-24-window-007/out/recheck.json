@@ -1,0 +1,12 @@
+[
+ {
+  "id": "16.2 (recheck)",
+  "ok": true,
+  "d": "[\"A9\",\"STATUS\",\"HELD\",\"HELD\",\"This ticket shows the seat held for you when you downloaded it.\"]"
+ },
+ {
+  "id": "07.4 (recheck)",
+  "ok": true,
+  "d": "{\"declined\":true,\"version\":5,\"lastSentAt\":\"2026-09-24T17:27:56.438Z\",\"status\":\"changes-not-sent\"}"
+ }
+]

@@ -27,7 +27,7 @@
     });
     var row = document.createElement('div'); row.className = 'arow';
     row.innerHTML = '<div class="arail" aria-hidden="true"><i></i></div><span class="refgal-count" aria-live="polite"></span>' +
-      '<div class="anav"><button type="button" data-a="prev" aria-label="Previous reference"></button><button type="button" data-a="next" aria-label="Next reference"></button></div>';
+      '<div class="anav"><button type="button" data-a="prev" aria-label="Previous photograph"></button><button type="button" data-a="next" aria-label="Next photograph"></button></div>';
     car.appendChild(trk); car.appendChild(row);
     rail.parentNode.insertBefore(car, rail);
     rail.remove();

@@ -21,12 +21,12 @@ async function harness() {
 }
 const get = (h, bearer, path) => h.w.fetch(new Request(ORIGIN + (path || '/api/community'), { headers: bearer ? { 'x-siyl-auth': bearer } : {} }), h.env).then(async (r) => ({ status: r.status, d: await r.json().catch(() => null), h: r.headers }));
 
-test('WHO\'S JOINING US · the Worker: an authenticated read only; the Groom and the Bride always first (by the register\'s role, named as they spell themselves, a day only when a trip was genuinely sent); then every guest whose trip was sent and who is joining — first names as currently spelled, a portrait flag, the day; declines are not guests; the hosts are never counted as guests; newest first; nothing private; nothing written', async () => {
+test('WHO\'S JOINING US · the Worker: an authenticated read only; the Bride and the Groom always first (PRQ-01-10) (by the register\'s role, named as they spell themselves, a day only when a trip was genuinely sent); then every guest whose trip was sent and who is joining — first names as currently spelled, a portrait flag, the day; declines are not guests; the hosts are never counted as guests; newest first; nothing private; nothing written', async () => {
   const h = await harness();
   assert.equal((await get(h, null)).status, 401);
   assert.equal((await h.w.fetch(new Request(ORIGIN + '/api/community', { method: 'POST', headers: { 'x-siyl-auth': h.peggy } }), h.env)).status, 405);
   let r = await get(h, h.peggy); assert.equal(r.status, 200);
-  assert.deepEqual(r.d.guests, [{ guestId: 'G049', name: 'Suthep', photo: false, joinedAt: null, role: 'Groom' }, { guestId: 'G048', name: 'Haruthai', photo: false, joinedAt: null, role: 'Bride' }], 'before anyone has sent a trip the couple already stands there — no record, no day, the first names every page prints');
+  assert.deepEqual(r.d.guests, [{ guestId: 'G048', name: 'Haruthai', photo: false, joinedAt: null, role: 'Bride' }, { guestId: 'G049', name: 'Suthep', photo: false, joinedAt: null, role: 'Groom' }], 'PRQ-01-10: the Bride first, then the Groom · before anyone has sent a trip the couple already stands there — no record, no day, the first names every page prints');
   assert.equal(r.d.count, 2); assert.equal(r.d.couple, 2);
   const m = h.store.m;
   m.set('reg:INV-G010', { v: reg('INV-G010', 'G010', { name: 'Peggy', at: '2026-09-18T10:00:00.000Z' }) });
@@ -41,7 +41,7 @@ test('WHO\'S JOINING US · the Worker: an authenticated read only; the Groom and
   m.set('draft:INV-G099', { v: JSON.stringify({ keys: {} }) });                                                    /* a draft alone is no answer */
   m.set('reg:INV-G010:prev:2026-09-17T10:00:00.000Z', { v: reg('INV-G010', 'G010', { name: 'Peggy', at: '2026-09-17T10:00:00.000Z' }) });   /* an earlier version of a sent trip — never a second guest */
   r = await get(h, h.peggy); assert.equal(r.status, 200); assert.equal(r.d.count, 5, 'the count is the visible population: the couple and three guests'); assert.equal(r.d.couple, 2);
-  assert.deepEqual(r.d.guests.slice(0, 2), [{ guestId: 'G049', name: 'Thep', photo: true, joinedAt: null, role: 'Groom' }, { guestId: 'G048', name: 'Haruthai', photo: false, joinedAt: '2026-09-15', role: 'Bride' }], 'Groom then Bride; his portrait and his own spelling; her genuine day');
+  assert.deepEqual(r.d.guests.slice(0, 2), [{ guestId: 'G048', name: 'Haruthai', photo: false, joinedAt: '2026-09-15', role: 'Bride' }, { guestId: 'G049', name: 'Thep', photo: true, joinedAt: null, role: 'Groom' }], 'Bride then Groom (PRQ-01-10); his portrait and his own spelling; her genuine day');
   assert.deepEqual(r.d.guests.slice(2), [{ guestId: 'G011', name: 'Linnea', photo: false, joinedAt: '2026-09-20' }, { guestId: 'G012', name: 'Samuel', photo: true, joinedAt: '2026-09-19' }, { guestId: 'G010', name: 'Peggy', photo: false, joinedAt: '2026-09-18' }], 'the contact\'s first name wins, then the submitted one, then the invitation\'s; newest first');
   const text = JSON.stringify(r.d); for (const bad of ['@example.org', '+66', 'birthdate', 'Acker', 'wedstay', 'heritage', 'INV-', 'selections', 'email']) assert.ok(!text.includes(bad), 'never ' + bad);
   assert.match(r.h.get('cache-control') || '', /private/);
@@ -51,20 +51,21 @@ test('WHO\'S JOINING US · the Worker: an authenticated read only; the Groom and
   assert.match(src('register/auth-index.json'), /"i":"INV-G049","g":"G049","p":"INV-001","h":1,"r":"G"/); assert.match(src('register/auth-index.json'), /"i":"INV-G048","g":"G048","p":"INV-001","h":1,"r":"B"/, 'the register names the roles'); assert.equal((src('register/auth-index.json').match(/"r":/g) || []).length, 2, 'two roles, no more');
 });
 
-test('THE COUNTDOWN · days to 21 February 2027 from the clock; the wedding once the journey has begun; never negative; the hours are never a clock', () => {
+test('THE COUNTDOWN · the section\'s phase from the clock (PRQ-01-09c: countdown() is reduced to { phase, n } — its lead, tail and unit strings are deleted, the words live in countdowns()); never negative; the hours are never a clock', () => {
   const w = page({ auth: PEGGY, modules: ['assets/community.js'] }); const C = w.SIYL_COMMUNITY;
   const at = (y, mo, d, h) => new Date(y, mo - 1, d, h == null ? 12 : h);
-  assert.deepEqual(plain(C.countdown(at(2026, 9, 21))), { phase: 'before', n: 153, unit: 'days', lead: 'The journey begins in', tail: '21 February 2027 · Bangkok' });
+  assert.deepEqual(plain(C.countdown(at(2026, 9, 21))), { phase: 'before', n: 153 });
   assert.equal(C.countdown(at(2026, 9, 21, 23)).n, 153, 'a day is a day, whatever the hour'); assert.equal(C.countdown(at(2026, 9, 22, 0)).n, 152);
-  assert.equal(C.countdown(at(2027, 2, 20)).n, 1); assert.equal(C.countdown(at(2027, 2, 20)).unit, 'day');
-  assert.deepEqual(plain(C.countdown(at(2027, 2, 21))), { phase: 'start', n: 0, unit: 'today', lead: 'The journey begins', tail: 'Today · 21 February 2027 · Bangkok' });
-  const j = C.countdown(at(2027, 2, 24)); assert.equal(j.phase, 'journey'); assert.equal(j.n, 4); assert.match(j.tail, /28 February 2027 · Vientiane · day 04 of the journey/);
+  assert.equal(C.countdown(at(2027, 2, 20)).n, 1);
+  assert.deepEqual(plain(C.countdown(at(2027, 2, 21))), { phase: 'start', n: 0 });
+  const j = C.countdown(at(2027, 2, 24)); assert.equal(j.phase, 'journey'); assert.equal(j.n, 4);
   assert.equal(C.countdown(at(2027, 2, 28)).phase, 'wedding'); assert.equal(C.countdown(at(2027, 2, 28)).n, 0);
-  const a = C.countdown(at(2027, 3, 4)); assert.equal(a.phase, 'after'); assert.equal(a.n, 12); assert.equal(a.unit, 'of 16 days');
+  const a = C.countdown(at(2027, 3, 4)); assert.equal(a.phase, 'after'); assert.equal(a.n, 12);
   const d = C.countdown(at(2027, 4, 1)); assert.equal(d.phase, 'done'); assert.equal(d.n, 16);
   for (const t of [at(2026, 1, 1), at(2027, 2, 21), at(2027, 2, 28), at(2027, 3, 8), at(2028, 1, 1)]) assert.ok(C.countdown(t).n >= 0, 'never negative');
-  assert.doesNotMatch(src('assets/community.js'), /\b15[0-9]\b\s*(days|,)/, 'no remaining-days value is written into the code'); assert.doesNotMatch(src('assets/community.js'), /setInterval/, 'no ticking clock');
-  const html = C.countdownHtml(at(2026, 9, 21)); assert.match(html, /data-countdown="before"/); assert.match(html, /data-count-to="153"/); assert.match(html, /The journey begins · in/); assert.match(html, /21 February 2027 · Bangkok/); assert.match(html, /data-count-to="160"/, 'the wedding count, 22 Sep 2026: wedding first');
+  assert.doesNotMatch(src('assets/community.js').replace(/\/\*[\s\S]*?\*\//g, ''), /\b15[0-9]\b\s*(days|,)/, 'no remaining-days value is written into the code'); assert.doesNotMatch(src('assets/community.js'), /setInterval/, 'no ticking clock');
+  assert.doesNotMatch(src('assets/community.js'), /day 0\d of the journey|pad2/, 'no leading zero (PRQ-01-09b)');
+  const html = C.countdownHtml(at(2026, 9, 21)); assert.match(html, /data-countdown="before"/); assert.match(html, /data-count-to="153"/); assert.match(html, /The journey begins in</); assert.match(html, /21 February 2027 · Bangkok/); assert.match(html, /data-count-to="160"/, 'the wedding count, 22 Sep 2026: wedding first');
 });
 
 test('THE JOURNEY IN NUMBERS · every number counted from the canonical data on the page; nothing invented; a category that cannot be counted is absent', () => {
@@ -114,5 +115,7 @@ test('WHO\'S JOINING US · the page: the count, the names, initials where no pho
 test('THE STRIKETHROUGH (the Owner\'s iPhone): a .p-link inside running prose is an inline word with its own underline — never the 44 px action box whose border ran through the next line', () => {
   const css = src('assets/prep.css');
   assert.match(css, /\.t-b1 \.p-link, \.t-b2 \.p-link, \.p-prose \.p-link \{ display: inline; min-height: 0; padding: 0 0 1px; line-height: inherit; vertical-align: baseline; \}/);
-  assert.match(src('invitation.html'), /<p class="t-b2 measure-w">'\+\(G\.edited\(me\.guestId,'fullName'\)\?'Corrected by you':'From your invitation'\)\+' · <a class="p-link" href="#p-firstName">correct your name<\/a>/, 'the link stays a link inside the sentence');
+  /* the invitation's “Your name” block with its in-prose “correct your name” link is removed as a whole (TO-00200 / TO-00203 / TO-00204); the rule is pinned on the in-prose link that remains, Review's email request */
+  assert.doesNotMatch(src('invitation.html'), /correct your name|Corrected by you/);
+  assert.match(src('review.html'), /<p class="t-b1 measure" data-mail="failed">Please add your email address, so we can send you a copy of your trip\. <a class="p-link" href="invitation\.html#p-email">Add your email address<\/a>/, 'the link stays a link inside the sentence');
 });

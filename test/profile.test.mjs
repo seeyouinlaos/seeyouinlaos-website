@@ -59,7 +59,7 @@ test('5 · no textual MY BAG in the account block or the bottom bar navigation',
 test('6 · ABOUT YOU stays step 05 and still gates Review & Send', () => {
   assert.match(shell, /\{ n: '05', key: 'about',\s+label: 'About You',\s+file: 'about-you\.html' \}/);
   assert.match(guest, /\{ key: 'about', n: '05', label: 'About You', href: 'about-you\.html', required: true \}/);
-  assert.match(src('about-you.html'), /<title>About You · See You In Laos<\/title>/); assert.match(src('about-you.html'), /<h1 class="t-d1">About You<\/h1>/); assert.match(src('about-you.html'), /05 \/ 06 · About You/);
+  assert.match(src('about-you.html'), /<title>About You · See You In Laos<\/title>/); assert.match(src('about-you.html'), /<h1 class="t-d1">About You<\/h1>/); /* TO-02280: the page's own “05 / 06 · About You” eyebrow is deleted — the step shell carries the step number */ assert.doesNotMatch(src('about-you.html'), /05 \/ 06 · About You/); assert.match(shell, /'<p class="prep-step"><b>' \+ STEP\.n \+ ' \/ 06<\/b>' \+ STEP\.label \+ '<\/p>'/);
   const w = page({ auth: PEGGY }); const G = w.SIYL_GUEST, T = w.SIYL_TEMPLE, id = G.me().guestId;
   G.setContact('email', 'guest@example.com'); G.setContact('phone', '+66 81 234 5678'); T.setAttendance(id, 'no'); ['coffee', 'vows', 'dinner'].forEach((k) => T.setEvent(id, k, 'yes')); T.setFinale(id, 'pool'); G.setDressAck(true);
   assert.equal(G.mayEnter('review'), false, 'About You incomplete: Review & Send is locked');
@@ -75,13 +75,13 @@ test('7 · MY PROFILE never affects readiness: it writes nothing the engine read
   /* THE GUEST'S OWN NAME (Owner, 21 Sep 2026): the one thing the profile writes — First Name · Last Name through the contact record, never a readiness input */
   assert.deepEqual([...profile.matchAll(/data-c="([a-zA-Z]+)"/g)].map((m) => m[1]), ['firstName', 'lastName'], 'the profile edits the name and nothing else');
   assert.match(profile, /G\.readiness\(\)/, 'it reads the one engine for the trip status');
-  assert.match(profile, /href="about-you\.html">Edit About You<\/a>/, 'About You is edited on its own step');
+  assert.match(profile, /href="about-you\.html">Open About You<\/a>/, 'About You is edited on its own step (TO-00383)');
   assert.match(avatar, /localStorage\.getItem\('siyl\.auth'\)/); assert.doesNotMatch(avatar, /localStorage\.setItem/, 'the photo is never written to the browser store');
 });
 
 /* ---- the dashboard, rendered: profile.html's own script run in the sandbox against a #page element the test reads. The
  * rooms engine (src/rooms.js) answers as the server would for this guest; every other network read fails open ---- */
-const ID = (g) => ({ invitationId: g.invitationId, guestId: g.guestId, partyId: g.partyId, hosts: !!g.hosts });
+const ID = (g) => ({ invitationId: g.invitationId, guestId: g.guestId, partyId: g.partyId, hosts: !!g.hosts, firstName: g.preferredName });   /* the verified identity with the holder's first name (PRQ-GAP-02) */
 async function dashboard(rooms, who, setup) {
   const rf = await roomsFetch(rooms, ID(who));
   const w = page({ auth: who, path: 'profile.html', fetch: (url, init) => (/\/api\/rooms/.test(String(url)) ? rf(url, init) : Promise.reject(new Error('no network in tests'))) });
@@ -102,10 +102,11 @@ test('8 · the overview reflects selections, holds and the waiting list — noth
   assert.doesNotMatch(code, /SIYL_ARRANGED|arranged\.js|A&&A\.ready\(\)|Arranged for you|Fixed arrangement|not part of your bag/, 'the deleted concept is gone from the dashboard');
   assert.match(profile, /lines=J\.sorted\(B\.get\(\)\)/, 'the selections are the bag lines, read only');
   assert.match(profile, /if\(!J\.relevant\(seg\)\|\|J\.state\(seg\)!=='waitlisted'\)return;var w=U\.waitlisted\(seg\.key\)/, 'a waiting-list card per waitlisted stage of the guest\'s own trip, from the engine');
-  assert.match(profile, /data:'waitlist:'\+seg\.key/); assert.match(profile, /'Waiting list · number '\+\(w&&w\.position\|\|'\?'\)/); assert.match(profile, /state:'On the waiting list'/);
-  assert.match(profile, /ST\.held\(x\)/); assert.match(profile, /'Your place is held'\+\(w\?' · '\+w:''\)/, 'a held room says so in the contract words');
-  assert.match(profile, /S\.seatOf\(ev,id\)/); assert.match(profile, /'Seat '\+S\.label\(sid\)\+' · Held in your name'/);
-  assert.match(profile, /'Selected · in My Bag'/); assert.match(profile, /'Sent to Guest Relations'/); assert.match(profile, /'Confirmed by Guest Relations'/);
+  /* Window 007 (TO-00279 · TO-00322 · TO-00334 · TO-00542 · PRQ-01-13): one list of stays in “Your stay”; a held room reads “{room words} · held for you”; the waiting list “On the waiting list — number {n}”; a seat “Seat {A4} · held for you”; the lines Selected → Sent to us → Confirmed by Guest Relations */
+  assert.match(profile, /data:'waitlist:'\+seg\.key/); assert.match(profile, /state:'On the waiting list'\+\(w&&w\.position\?' — number '\+w\.position:''\)/); assert.doesNotMatch(profile, /'Waiting list · number '/);
+  assert.match(profile, /ST\.held\(x\)/); assert.match(profile, /return \{t:w\?w\+' · held for you':'Held for you',on:true\}/, 'a held room says so in the contract words');
+  assert.match(profile, /S\.seatOf\(ev,id\)/); assert.match(profile, /'Seat '\+seatLabel\(sid\)\+' · held for you'/);
+  assert.match(profile, /var LINE_WORDS=\{selected:'Selected',unsent:'Selected · not sent yet',sent:'Sent to us',confirmed:'Confirmed by Guest Relations'\};/); assert.doesNotMatch(profile, /'Selected · in My Bag'|'Sent to Guest Relations'/);
   assert.match(profile, /data-profile-ticket="seat:'\+ev\+'"/); assert.match(profile, /data-profile-ticket="pass:'\+esc\(l\)\+'"/);
   assert.doesNotMatch(profile, /B\.total\(\)/, 'no total of its own — My Bag is the one cart');
   const words = profile.slice(profile.indexOf('<script>'));
@@ -119,16 +120,19 @@ test('8 · the overview reflects selections, holds and the waiting list — noth
   });
   const J = p.w.SIYL_JOURNEY, B = p.w.SIYL_BAG, seg = (k) => J.SEGMENTS.find((s) => s.key === k), html = p.el.innerHTML;
   assert.equal(J.state(seg('wedstay')), 'selected'); assert.equal(J.state(seg('kmg')), 'waitlisted'); assert.equal(J.waitPosition(seg('kmg')), 1);
-  const cards = html.match(/<article class="pf-card[^"]*" data-profile-item="[^"]+">[\s\S]*?<\/article>/g) || [];
-  const item = (d) => cards.find((c) => c.includes('data-profile-item="' + d + '"'));
+  /* PRQ-01-13: one list of stays — the stay cards and the waiting-list cards live inside “Your stay” (#your-stay), no Stays rail */
+  const cards = html.match(/<div class="p-card pf-stay[^"]*" data-stay="[^"]+">[\s\S]*?<\/div><\/div>/g) || [];
+  const item = (d) => cards.find((c) => c.includes('data-stay="' + d + '"'));
+  assert.ok(html.indexOf('data-stay="stay:wedstay"') > html.indexOf('id="your-stay"'), 'inside Your stay');
   const wl = item('waitlist:kmg'); assert.ok(wl, 'the waiting-list card of the one waitlisted stage');
-  assert.match(wl, /Wanxiang Yueju/); assert.match(wl, /Waiting list · number 1 for 2 places/); assert.match(wl, /On the waiting list/); assert.match(wl, /href="your-journey\.html#s-kmg"/);
+  assert.match(wl, /Wanxiang Yueju/); assert.match(wl, /· 2 places together</); assert.match(wl, /On the waiting list — number 1</); assert.match(wl, /href="your-journey\.html#s-kmg"/);
   assert.doesNotMatch(wl, /USD|pf-cost/, 'a waiting-list stage carries no amount');
-  const st = item('line:wedstay'); assert.ok(st, 'the held stay is a card of the Stays rail');
-  assert.match(st, new RegExp('Your place is held · Room ' + held.unit + ' · You'), 'the held place in the contract words, the unit the engine gave');
-  assert.match(st, /USD [\d,]+ · your cost/);
-  assert.equal(cards.filter((c) => /data-profile-item="waitlist:/.test(c)).length, 1, 'one waiting-list card — the one stage');
-  assert.equal(cards.filter((c) => /data-profile-item="line:/.test(c)).length, B.get().length, 'a card per Bag line and no other arrangement');
+  const st = item('stay:wedstay'); assert.ok(st, 'the held stay is a card of Your stay');
+  assert.match(st, new RegExp('>Room ' + held.unit + ' · you · 1 place kept for Steffie · held for you<'), 'the held place in the contract words, the unit the engine gave, the party member by first name');
+  assert.match(st, /<span>Your total<\/span><span>USD 145<\/span>/);
+  assert.equal(cards.filter((c) => /data-stay="waitlist:/.test(c)).length, 1, 'one waiting-list card — the one stage');
+  assert.equal(cards.filter((c) => /data-stay="(stay:|base)/.test(c)).length, B.get().length, 'a card per Bag stay line and no other arrangement');
+  assert.doesNotMatch(html, /data-profile-item="(line|waitlist):/, 'no second list of stays');
   assert.doesNotMatch(html, /Arranged for you|Fixed arrangement|not part of your bag/);
   assert.equal(B.get().length, 1, 'the Bag carries the one actual selection: a waiting-list stage adds no line');
   const c = J.counts(); assert.equal(c.confirmed, 1); assert.equal(c.waitlisted, 1); assert.equal(c.bagItems, 1); assert.equal(c.bagTotal, B.total()); assert.ok(B.total() > 0);
@@ -136,8 +140,8 @@ test('8 · the overview reflects selections, holds and the waiting list — noth
   /* the hosts start at zero like every guest: no room, no arrangement, nothing in the Bag */
   const h = await dashboard(rooms, HARUTHAI);
   assert.deepEqual(plain(h.w.SIYL_UNITS.view().mine), {}); assert.deepEqual(plain(h.w.SIYL_UNITS.view().waitlist), {});
-  assert.match(h.el.innerHTML, /No stay is chosen yet\. Rooms are chosen in My Trip\./);
-  assert.doesNotMatch(h.el.innerHTML, /data-profile-item="(line|waitlist):/);
+  assert.match(h.el.innerHTML, /<a class="p-link" href="your-journey\.html#stays">Choose your stay in My Trip<\/a>/); assert.doesNotMatch(h.el.innerHTML, /No stay is chosen yet/); /* TO-00324 removed */
+  assert.doesNotMatch(h.el.innerHTML, /data-stay="(stay:|base|waitlist:)|data-profile-item="(line|waitlist):/);
   assert.equal(h.w.SIYL_BAG.get().length, 0); assert.equal(h.w.SIYL_BAG.total(), 0);
   /* the Sathorn Penthouse (Edit 6) and Shama Yen-Akat (Owner, 24 Sep 2026) are deleted: Bangkok is U Sathorn alone */
   const HU = h.w.SIYL_UNITS.view().units; assert.equal(HU['bkk-stay/penthouse'], undefined, 'no Penthouse units'); assert.equal(HU['bkk-stay/shama-king-studio-balcony'], undefined, 'no Shama units');
@@ -146,8 +150,9 @@ test('8 · the overview reflects selections, holds and the waiting list — noth
 });
 
 test('9 · Sign out is visible and functional: the header control leaves the session and returns to the invitation; the dashboard offers it too', () => {
-  assert.match(inv, /const out = el\.querySelector\('\[data-access-out\]'\); if \(out\) out\.addEventListener\('click', \(\) => \{ GUEST\.leave\(\); LOC\.replace\(hrefOf\('invitation\.html'\)\); \}\);/);
-  assert.match(profile, /data-signout>Sign out<\/button>/); assert.match(profile, /var I=window\.SIYL_INVITE;if\(I&&I\.leave\)I\.leave\(\);/);
+  /* PRQ-01-03: Sign out saves first — on success it leaves and returns to the invitation; on failure the guest stays signed in and reads why */
+  assert.match(inv, /const out = el\.querySelector\('\[data-access-out\]'\); if \(out\) out\.addEventListener\('click', \(\) => \{ out\.disabled = true; GUEST\.leaveSafely\(\)\.then\(\(r\) => \{ if \(r\.ok\) \{ LOC\.replace\(hrefOf\('invitation\.html'\)\); return; \} out\.disabled = false; const st = el\.querySelector\('\[data-access-saved\]'\); if \(st\) st\.textContent = r\.words; \}\); \}\);/);
+  assert.match(profile, /data-signout>Sign out<\/button>/); assert.match(profile, /var I=window\.SIYL_INVITE,note=page\.querySelector\('\[data-signout-note\]'\)/); assert.match(profile, /Promise\.resolve\(I\.leave\(\)\)\.then\(function\(r\)\{so\.disabled=false;if\(r&&r\.ok===false\)\{if\(note\)note\.textContent=r\.words\|\|'';return\}location\.replace\('invitation\.html'\)\}/);
 });
 
 /* ---- the profile photo: the guest's own bearer, a small image, no public URL ---- */

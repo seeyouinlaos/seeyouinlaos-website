@@ -44,10 +44,13 @@ test('EMAIL · the journey is stored first with a submission id, then Guest Rela
     assert.equal(h.calls.length, 2);
     const owner = h.calls[0].body, guest = h.calls[1].body;
     assert.equal(owner.to[0].email, 'guest.relation.seeyouinlaos@gmail.com'); assert.match(owner.subject, /Trip received — Peggy Berger · SYL-G001-/);
-    for (const k of ['Guest: Peggy Berger', 'Invitation: INV-G001', 'Reference: ' + d.submissionId, 'Sent: ', 'Wedding Ceremony: Seat R2 · 3', 'Wedding Dinner: Seat B12', 'Email: peggy.test@example.com', 'COST\nUSD 355', 'Status: ' + ORIGIN + '/api/status?invitation=INV-G001', 'Special Express No. 25']) assert.ok(owner.textContent.includes(k), 'owner email carries ' + k);
-    assert.equal(guest.to[0].email, 'peggy.test@example.com'); assert.match(guest.subject, /^Your trip has been received — SYL-G001-/);
-    for (const k of ['Your trip has been received', 'Dear Peggy,', 'Reference: ' + d.submissionId, 'Sent: ', 'Seat B12', 'Special Express No. 25', ORIGIN + '/invitation', 'never sent by email', 'guest.relation.seeyouinlaos@gmail.com']) assert.ok(guest.textContent.includes(k), 'guest email carries ' + k);
-    assert.ok(owner.htmlContent && guest.htmlContent, 'both emails carry the CI HTML'); assert.match(guest.htmlContent, /see you in laos<span style="color:#8a5a55;">\.<\/span>/); assert.doesNotMatch(guest.textContent + guest.htmlContent, /2026-09-16T|INV-G001|(?<!SYL-)G001\b|ledger|engine/); assert.match(guest.textContent, /Sent: \d+ \w+ 2026 · \d\d:\d\d/);
+    for (const k of ['Guest: Peggy Berger', 'Invitation: INV-G001', 'Reference: ' + d.submissionId, 'Sent: ', 'Vow Ceremony: Seat R2 · 3', 'Wedding Dinner: Seat B12', 'Email: peggy.test@example.com', 'COST\nUSD 355', 'Status: ' + ORIGIN + '/api/status?invitation=INV-G001', 'Special Express No. 25']) assert.ok(owner.textContent.includes(k), 'owner email carries ' + k);
+    /* the guest's copy (Window 007 · B3): “Thank you — we have your trip”, “Your reference”, “Sent on {date}” — a copy of what was sent, never called a confirmation */
+    assert.equal(guest.to[0].email, 'peggy.test@example.com'); assert.match(guest.subject, /^Thank you — we have your trip \(SYL-G001-[0-9A-F]{8}\)$/);
+    for (const k of ['Thank you — we have your trip', 'Dear Peggy,', 'Your reference: ' + d.submissionId, 'Sent on ', 'Seat B12 · held for you', 'Special Express No. 25', ORIGIN + '/invitation', 'we never send codes by email', 'guest.relation.seeyouinlaos@gmail.com']) assert.ok(guest.textContent.includes(k), 'guest email carries ' + k);
+    assert.doesNotMatch(guest.subject + guest.textContent + guest.htmlContent, /confirmation|booking confirmed|is confirmed/i, 'the guest email is a copy of the trip, never a confirmation');
+    assert.match(guest.textContent, /until they do, nothing is booked/);
+    assert.ok(owner.htmlContent && guest.htmlContent, 'both emails carry the CI HTML'); assert.match(guest.htmlContent, /see you in laos<span style="color:#8a5a55;">\.<\/span>/); assert.doesNotMatch(guest.textContent + guest.htmlContent, /2026-09-16T|INV-G001|(?<!SYL-)G001\b|ledger|engine/); assert.match(guest.textContent, /^Sent on \d+ \w+ 2026$/m, 'the date only (B3)');
     assert.doesNotMatch(owner.textContent + guest.textContent, /demo-peggy|x-siyl-auth|bearer/i);
     assert.equal(h.calls[0].auth, 'x'); assert.equal(h.calls[0].body.sender.email, 'guest.relation.seeyouinlaos@gmail.com');
   } finally { h.done(); }
@@ -88,7 +91,11 @@ test('EMAIL · a provider that refuses (or none configured) never loses the book
     const keysBefore = [...h.store.m.keys()].length, at = JSON.parse(h.store.m.get('reg:INV-G001').v).submittedAt;
     /* the retry, by the guest's own bearer: the same record, both emails again, no new record */
     const r2 = await h.w.fetch(req('/api/register/mail-retry', { 'x-siyl-auth': h.peggy }, { invitationId: 'INV-G001' }), h.env);
-    const d2 = await r2.json(); assert.equal(r2.status, 200); assert.equal(d2.submissionId, d.submissionId); assert.equal(d2.submittedAt, at); assert.equal(h.calls.length, 4);
+    /* PRQ-04-07 (Window 007): the send tried Guest Relations, the guest, then Guest Relations once more (the server retries its own notification);
+       the guest's retry re-sends the guest's copy, and the still-failed notification is retried by the server beside it */
+    const d2 = await r2.json(); assert.equal(r2.status, 200); assert.equal(d2.submissionId, d.submissionId); assert.equal(d2.submittedAt, at); assert.equal(h.calls.length, 5);
+    const GR = 'guest.relation.seeyouinlaos@gmail.com', PG = 'peggy.test@example.com';
+    assert.deepEqual(h.calls.map((c) => c.body.to[0].email), [GR, PG, GR, GR, PG]);
     assert.equal([...h.store.m.keys()].length, keysBefore, 'no new submission'); assert.equal(JSON.parse(h.store.m.get('reg:INV-G001').v).mailRetries, 1);
     /* another guest's bearer, no bearer: refused */
     assert.equal((await h.w.fetch(req('/api/register/mail-retry', { 'x-siyl-auth': h.steffie }, { invitationId: 'INV-G001' }), h.env)).status, 401);
@@ -102,8 +109,11 @@ test('EMAIL · a provider that refuses (or none configured) never loses the book
   } finally { n.done(); }
   /* the client: the saved-but-not-mailed words and the retry that never re-submits */
   const rv = src('review.html');
-  assert.match(rv, /l\.textContent='Your trip is saved';/); assert.match(rv, /'! Confirmation email could not be sent'/); assert.match(rv, /id="mail-retry" hidden>Retry confirmation email<\/button>/);
-  assert.match(rv, /var RETRY_URL=SUBMIT_URL\+'\/mail-retry';/); assert.match(rv, /paintMail\(ans&&ans\.mail,ans&&ans\.submissionId,ans\);/);
+  /* Window 007 (PRQ-04-07 · TO-01665…TO-01692): the words are about the guest's COPY, never a “confirmation email” */
+  assert.match(rv, /We could not send your copy by email just now\. <button type="button" class="p-link" id="mail-retry">Send the copy again<\/button>/);
+  assert.match(rv, /A copy is on its way to '\+esc\(st\.to\|\|'your email address'\)\+'\./);
+  assert.doesNotMatch(rv, /Confirmation email|confirmation email/, 'the copy is never called a confirmation');
+  assert.match(rv, /var RETRY_URL='\/api\/register\/mail-retry';/); assert.match(rv, /fetch\(RETRY_URL,\{method:'POST'/); assert.match(rv, /var rb=document\.getElementById\('mail-retry'\);if\(rb\)rb\.addEventListener\('click',retryCopy\);/);
   assert.doesNotMatch(src('src/worker.js'), /mailchannels/i, 'the retired provider is gone');
 });
 
@@ -111,11 +121,13 @@ test('SEATS · the words are truthful: the placeholder loads, a plan that cannot
   const wp = src('wedding-preparation.html');
   assert.match(wp, /data-seat-loading>Loading your seats…<\/p>/); assert.doesNotMatch(wp, /<p class="t-l1">Not open yet<\/p>/, 'no static NOT OPEN YET');
   assert.match(wp, /if\(!S\.ready\(\)\)\{\s*if\(!S\.error\(\)\)return;/); assert.match(wp, /data-seat-retry>Try again<\/button>/); assert.match(wp, /rb\.addEventListener\('click',function\(\)\{rb\.disabled=true;S\.load\(true\)\}\)/);
-  assert.match(wp, /mode\.err='This seat was just taken\. Please choose another\.'/);
+  assert.match(wp, /mode\.err='Another guest has just taken this seat\. Please choose another\.'/);
   /* the hosts' rule is the party flag, never a guest id: both hosts get the fixed front centre at the ceremony and the same dinner chooser */
   assert.doesNotMatch(wp + src('assets/seating.js') + src('src/seating.js') + src('assets/guest.js'), /G048|G049/, 'no guest-specific hardcoding');
   assert.match(wp, /if\(ev==='ceremony'&&p\.hosts\)\{/); assert.match(wp, /function needs\(ev\)\{var p=P\.party\(\),id=P\.me\(\)\.guestId;if\(!T\)return true;if\(ev==='ceremony'\)return !p\.hosts&&T\.joining\(id,'vows'\);return T\.joining\(id,'dinner'\)\}/);
-  const rv = src('review.html'); assert.match(rv, /var unread=!\(Sx&&Sx\.ready\(\)\),unreadWords=/); assert.equal((rv.match(/unread\?unreadWords/g) || []).length, 2);
+  /* Review & Send: one row builder for both seats (Window 007) — not read yet is never "not open" */
+  const rv = src('review.html'); assert.match(rv, /var ready=!!\(Sx&&Sx\.ready\(\)\),openS=ready&&Sx\.open\(\)&&!Sx\.frozen\(\);/); assert.match(rv, /var unreadWords=Sx&&Sx\.error&&Sx\.error\(\)\?'We could not load your seats just now — please open Wedding Preparation to try again\.':'Loading your seats…';/);
+  assert.match(rv, /\(openS\?'No seat chosen yet':!ready\?unreadWords:'Seating is not open yet'\)/); assert.match(rv, /seatRow\('Ceremony seat',cs,needC\)\)\+seatRow\('Dinner seat',ds,needD\)/);
   const wd = src('wedding.html'); assert.match(wd, /unread\?unreadWords:'not open yet'/);
   /* the engine: one actor, the seat decided once; a taken chair answers 409 taken; another guest's chair answers 403 */
   const eng = src('src/seating.js');

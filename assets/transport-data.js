@@ -23,77 +23,69 @@
     /* ---------------------------------------------------------------- 02 */
     train: {
       id: 'train',
-      cat: 'Transportation',
+      cat: 'Travel',
       operator: 'State Railway of Thailand',
       name: 'Special Express No. 25',
       place: 'Bangkok → Nong Khai → Vientiane',
       dates: '24 – 25 February 2027',
       anchor: 'j-train',
-      story: 'The whole party leaves Bangkok together at dusk and wakes on the ' +
-        'Mekong. First Class on the State Railway of Thailand means a private ' +
-        'lockable cabin rather than a seat: two berths, a door you close behind ' +
-        'you, and a lower bed that folds back into two facing seats for the ' +
-        'evening. It is the one night of the journey that is also the journey.',
+      story: 'We leave Bangkok together in the evening and wake up on the Mekong. ' +
+        'First Class on the State Railway of Thailand is a private cabin rather ' +
+        'than a seat: two berths behind a door you can lock.',
       facts: [
         ['Service', 'Special Express No. 25 · State Railway of Thailand'],
         ['Route', 'Bangkok (Krung Thep Aphiwat) → Nong Khai, then onward to Vientiane by road'],
         ['Departure', '24 February 2027 · 20:25 · Krung Thep Aphiwat Central Terminal'],
         ['Arrival', '25 February 2027 · 06:25 · Nong Khai'],
-        ['On board', 'Approximately 10 hours'],
+        ['On board', '10 h'],
         ['Class', 'First Class Sleeper · private cabin'],
         ['Cabin', '2 berths · upper and lower']
       ],
       groups: [
         ['Your cabin', [
           'A private cabin with a lockable door',
-          'Two berths — one upper, one lower',
-          'The lower berth converts into two facing seats by day',
-          'Single occupancy where the carriage allows it',
+          'The lower berth folds back into two facing seats',
           'Compartments for bags and personal items']],
         ['Comfort', [
           'Air conditioning with individual control',
           'Reading lights',
-          'Foldable table and mirror',
-          'In-suite washbasin in every cabin',
-          'Power and USB outlets']],
+          'A foldable table',
+          'A washbasin in some cabins, and shared washbasins nearby',
+          'Power outlets']],
         ['Sleep', [
           'Bedding and pillows',
-          'Clean linen',
+          'Fresh linen',
           'Blankets',
-          'The berth is made up for you by the attendant']],
+          'The attendant makes up your berth']],
         ['Bathrooms', [
           'Shared western-style toilets, just outside the cabins',
-          'A shared hot-water shower in the CNR First Class carriage']],
+          'A shared hot-water shower in the First Class carriage']],
         ['Dining', [
           'Meals ordered from the cabin and brought to you by the train staff',
           'A dining car on board',
           'Thai and international selections',
           'Vegetarian options']],
-        ['Service & support', [
+        ['Service', [
           'Attendant service throughout the night',
-          'Bedding set up and cleared for you',
-          'Staff on hand for assistance for the length of the journey',
-          'Guest Relations travels with the party']]
+          'Guest Relations travels with us']]
       ],
       included: [
         'One berth in a First Class Sleeper cabin, Bangkok to Nong Khai.',
-        'Dinner on board and breakfast the next morning.',
         'The border-crossing documentation prepared for you.',
-        'The coordinated onward transfer from Nong Khai across the border to Souphattra Heritage in Vientiane.'
+        'The van from Nong Khai across the border to Souphattra Heritage in Vientiane.'
       ],
       excluded: [
-        'Anything ordered on board beyond the included dinner and breakfast.',
+        'Meals on board — ordered from your cabin and paid on the train.',
         'Personal expenses at the terminal or at the border.'
       ],
       transfer: [
-        'Nong Khai, early morning: the party is met and travels on together by road.',
-        'The border formalities at the Thai–Lao Friendship Bridge are prepared in advance; each guest still presents themselves in person.',
+        'At Nong Khai, early in the morning, we are met and continue together by road.',
+        'The border formalities at the Thai–Lao Friendship Bridge are prepared in advance; everyone still crosses in person.',
         'The road continues to Souphattra Heritage Vientiane, where the Pre-Wedding Stay begins.'
       ],
       good: [
-        'The train carries a single First Class carriage of twelve lockable cabins — twenty-four berths in total. Cabins are held for the party.',
-        'This is an overnight service: the evening is spent on board and the arrival is at daybreak.',
-        'Guests travelling as a pair share one cabin; the arrangement is made with Guest Relations.'
+        'The train has one First Class carriage: 12 cabins, 24 berths.',
+        'If you are travelling as a pair, you share one cabin; Guest Relations arranges the cabins with you.'
       ],
       gallery: [
         [T + 'train-no25-srt-train.jpg', 'State Railway of Thailand'],
@@ -111,48 +103,41 @@
     /* ---------------------------------------------------------------- 05 */
     mu9646: {
       id: 'mu9646',
-      cat: 'Transportation',
+      cat: 'Travel',
       operator: 'China Eastern Airlines',
       name: 'MU9646 · Vientiane → Kunming',
       place: 'Vientiane → Kunming',
-      dates: '01 March 2027',
+      dates: '1 March 2027',
       anchor: 'j-mu9646',
-      story: 'The wedding days end and the journey turns north. One non-stop ' +
-        'flight out of Vientiane at ten to four, an hour and thirty-five ' +
-        'minutes in the air, and the party is in Kunming before dinner — the ' +
-        'city that calls itself eternal spring, and means it. Business Class ' +
-        'is the arrangement we hold; an Economy Flexible fare is offered ' +
-        'beside it for anyone who would rather spend the difference elsewhere.',
+      story: 'After the wedding days, the journey turns north: one non-stop ' +
+        'flight from Vientiane at 15:50, 1 h 35 min in the air, and we are in ' +
+        'Kunming at 18:25, in time for dinner. You choose your fare: Business ' +
+        'Class or Economy Flexible.',
       facts: [
         ['Flight', 'MU9646 · China Eastern Airlines'],
         ['Route', 'Vientiane (VTE) → Kunming (KMG)'],
-        ['Date', '01 March 2027'],
+        ['Date', '1 March 2027'],
         ['Departure', '15:50 · Vientiane (VTE) Terminal 1'],
         ['Arrival', '18:25 · Kunming (KMG)'],
-        ['Routing', 'Non-stop · 1 hour 35 minutes'],
-        ['Aircraft', 'Boeing 738 narrowbody'],
-        ['Class', 'Business Class, or Economy Flexible']
+        ['Duration', 'Non-stop · 1 h 35 min'],
+        ['Aircraft', 'Boeing 737-800'],
+        ['Class', 'Business Class or Economy Flexible']
       ],
       groups: [
         ['Your seat', [
-          'One Business Class seat per guest',
-          'Business Class check-in and boarding',
           'Times shown are local at each airport']],
         ['On board', [
-          'A meal is served in Business Class on this service',
-          'Cabin service throughout the flight']],
+          'A meal in Business Class; no meal in Economy Flexible']],
         ['Baggage', [
-          'Two pieces of checked baggage, included',
-          'Cabin baggage to the operator’s Business Class allowance']],
+          'Two pieces of checked baggage in Business Class, one in Economy Flexible',
+          'Cabin baggage as the airline allows for your fare']],
         ['Fare conditions', [
           'Free rescheduling before departure',
-          'Conditional ticket refund before departure',
-          'Changes are made through Guest Relations, never on this website']]
+          'Refund possible before departure, under conditions',
+          'Any change goes through Guest Relations.']]
       ],
       included: [
-        'One Business Class seat, Vientiane to Kunming, non-stop.',
-        'Two pieces of checked baggage.',
-        'The meal service carried in Business Class on this flight.'
+        'One seat in the fare you choose, Vientiane to Kunming, non-stop.'
       ],
       excluded: [
         'Airport transfers at either end.',
@@ -160,16 +145,15 @@
       ],
       transfer: [
         'Departure from Vientiane is at 15:50 on 1 March, after the Wedding Stay ends.',
-        'Arrival in Kunming is the same afternoon, in time for the first night at Wanxiang Yueju.',
-        'Transfers between the airports and the hotels are arranged by each guest.'
+        'Arrival in Kunming is at 18:25 the same evening, in time for the first night at Wanxiang Yueju.'
       ],
       good: [
-        'The flight number, times and fare shown here are the Owner’s confirmed production arrangement for the party.',
-        'Seats are held as a block; Guest Relations confirms each name.'
+        'The flight, the times and both fares are the ones we have planned for everyone.',
+        'Guest Relations confirms each seat with you by name.'
       ],
       gallery: [
         [T + 'mu9632-business-1.jpg', 'Business Class · China Eastern'],
-        [T + 'mu9632-business-2.jpg', 'Business Class · lie-flat'],
+        [T + 'mu9632-business-2.jpg', 'Business Class · the cabin'],
         [T + 'mu9632-business-3.jpg', 'Business Class seat']
       ]
     },
@@ -177,28 +161,27 @@
     /* ---------------------------------------------------------------- 07 */
     c86: {
       id: 'c86',
-      cat: 'Transportation',
+      cat: 'Travel',
       operator: 'China Railway',
       name: 'C86 · Kunming → Lijiang',
       place: 'Kunming → Lijiang',
-      dates: '04 March 2027',
+      dates: '4 March 2027',
       anchor: 'j-c86',
-      story: 'Five hundred and twenty-seven kilometres of Yunnan in one ' +
-        'morning: out of Kunming at a quarter past ten, across the gorges, and ' +
-        'into Lijiang in the early afternoon, in Business Class.',
+      story: 'Across Yunnan and its gorges by high-speed train, from Kunming ' +
+        'in the morning to Lijiang by early afternoon, in Business Class.',
       facts: [
         ['Service', 'C86 · high-speed train'],
         ['Route', 'Kunming Railway Station → Lijiang Railway Station'],
-        ['Date', '04 March 2027'],
+        ['Date', '4 March 2027'],
         ['Departure', '10:15 · Kunming'],
         ['Arrival', '13:44 · Lijiang'],
-        ['Routing', 'Direct · 3 hours 29 minutes'],
+        ['Duration', 'Direct · 3 h 29 min'],
         ['Distance', 'About 527 kilometres'],
         ['Class', 'Business Class']
       ],
       groups: [
         ['Your seat', [
-          'Spacious seat pitch',
+          'Generous legroom',
           'Adjustable backrest',
           'Tray table',
           'Luggage rack']],
@@ -206,31 +189,26 @@
           'Wireless charging',
           'Power outlet at the seat',
           'Air conditioning',
-          'Bathroom and hot-water supply on board',
+          'A bathroom and hot water on board',
           'Slippers, blanket and eye mask, subject to availability']],
         ['Dining', [
-          'Complimentary snacks and drinks served at the seat',
-          'Availability follows the service on the day']],
-        ['Priority Ticketing', [
-          'Expedited ticketing and shorter wait times.']]
+          'Snacks and drinks at your seat, included in Business Class, as available on the day']]
       ],
       included: [
-        'One Business Class seat, Kunming to Lijiang, direct.',
-        'Complimentary drinks and snacks at the seat.',
-        'Priority Ticketing: expedited ticketing and shorter wait times.'
+        'One Business Class seat, Kunming to Lijiang, direct.'
       ],
       excluded: [
         'Transfers to Kunming Railway Station and from Lijiang Railway Station.',
-        'Anything purchased on board beyond the included service.'
+        'Anything else you buy on board.'
       ],
       transfer: [
-        'Kunming Railway Station is in Guandu District; guests make their own way there from the hotel.',
-        'The train arrives at Lijiang Railway Station at 13:44; the road on to Baisha is arranged by each guest.',
+        'Kunming Railway Station is in Guandu District.',
+        'From Lijiang Railway Station, the road continues to Baisha and the hotel.',
         'Seating arrangements can vary by train set.'
       ],
       good: [
         'The line cut the Kunming–Lijiang journey from about seven hours to about three and a half; this service runs at up to 200 km/h.',
-        'The train number, times and fare shown here are the Owner’s confirmed production arrangement for the party.'
+        'The train, the times and the fare are the ones we have planned for everyone. Guest Relations confirms each seat with you by name.'
       ],
       gallery: [
         [T + 'c642-train-snow-mountain.jpg', 'Below Jade Dragon Snow Mountain'],
@@ -245,60 +223,51 @@
     /* ---------------------------------------------------------------- 09 */
     'return': {
       id: 'return',
-      cat: 'Transportation',
+      cat: 'Travel',
       operator: 'China Eastern Airlines',
       /* THE RETURN FLIGHTS (Owner / Haruthai confirmed, 20 Sep 2026, with the airline's own search as evidence): MU5922 + MU741 via
          Kunming on 06.03.2027, 10:00 → 14:55 — every earlier flight number for this leg is superseded; the amount stays the
          approved USD 200 */
       name: 'MU5922 + MU741 · Lijiang → Bangkok',
       place: 'Lijiang → Kunming → Bangkok',
-      dates: '06 March 2027',
+      dates: '6 March 2027',
       anchor: 'j-return',
-      story: 'The way home, in two hops and one morning. Out of Lijiang at ' +
-        'ten, two hours and twenty minutes on the ground in Kunming, and into ' +
-        'Bangkok early in the afternoon — with two closing nights still to come.',
+      story: 'Back to Bangkok in two flights, with a change of plane in ' +
+        'Kunming — and two last nights still to come.',
       facts: [
         ['Flights', 'MU5922, then MU741 · China Eastern Airlines'],
         ['Route', 'Lijiang (LJG) → Kunming (KMG) → Bangkok (BKK)'],
-        ['Date', '06 March 2027'],
+        ['Date', '6 March 2027'],
         ['First leg', 'MU5922 · Boeing 737 · 10:00 → 11:00 · 1 h'],
-        ['Transfer', 'Kunming · 2 h 20 m'],
-        ['Second leg', 'MU741 · Boeing 738 · 13:20 → 14:55 · 2 h 35 m'],
-        ['Door to door', '10:00 → 14:55 · 5 h 55 m'],
-        ['Class', 'Economy flexible · 1 seat per guest']
+        ['Connection', 'Kunming · 2 h 20 min'],
+        ['Second leg', 'MU741 · Boeing 737-800 · 13:20 → 14:55 · 2 h 35 min'],
+        ['In total', '10:00 → 14:55 · 5 h 55 min'],
+        ['Class', 'Economy Flexible · 1 seat per guest']
       ],
       groups: [
         ['Your seat', [
-          'One Economy flexible seat per guest, on both legs',
           'Times shown are local at each airport']],
         ['Baggage', [
           'Two pieces of checked baggage, included',
           'Baggage is checked through to Bangkok']],
         ['Fare conditions', [
           'Free rescheduling before departure',
-          'Conditional ticket refund before departure',
-          'Changes are made through Guest Relations, never on this website']],
-        ['The transfer', [
-          'Two hours and twenty minutes in Kunming between the two flights',
-          'Both flights are operated by China Eastern Airlines']]
+          'Refund possible before departure, under conditions',
+          'Any change goes through Guest Relations.']]
       ],
       included: [
-        'One Economy flexible seat on MU5922, Lijiang to Kunming.',
-        'One Economy flexible seat on MU741, Kunming to Bangkok.',
-        'Two pieces of checked baggage.'
+        'One Economy Flexible seat on MU5922, Lijiang to Kunming.',
+        'One Economy Flexible seat on MU741, Kunming to Bangkok.'
       ],
       excluded: [
         'Airport transfers at either end.',
-        'Meals and anything purchased on board or at the airport.'
+        'Anything you buy on board or at the airport.'
       ],
       transfer: [
-        'Departure from Lijiang is mid-morning on 6 March; the road to the airport is arranged by each guest.',
-        'The connection in Kunming is one hour thirty minutes, within the same airline.',
-        'Arrival in Bangkok is 14:55, in time to check in at the Siam Kempinski the same afternoon.'
+        'Arrival in Bangkok is at 14:55, in time to check in at the Siam Kempinski the same afternoon.'
       ],
       good: [
-        'The flight numbers, times and fare shown here are the Owner’s confirmed production arrangement for the party.',
-        'This is the flexible Economy fare: it can be rescheduled before departure.'
+        'The flights, the times and the fare are the ones we have planned for everyone. Guest Relations confirms each seat with you by name.'
       ],
       gallery: [
         [T + 'mu5924-economy-cabin-1.jpg', 'Economy Class · China Eastern'],

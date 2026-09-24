@@ -84,25 +84,36 @@ const AUTH = {
 
 /* LEAVING (Owner, 13/14 Sep 2026). "Open another invitation" and "Sign out"
  * both end the session of the guest that is open. What Guest Relations
- * already received stays received on the server; the guest's local draft is
- * set aside on this device under their own invitation id — never shown to
- * another guest, restored when that same guest opens their code again — and
- * the session itself is cleared, so nothing of one guest can reach the next.
+ * already received stays received on the server; the guest's draft is saved
+ * to the server first (Window 007, PRQ-01-03) and only then cleared from this
+ * device — nothing is set aside locally — so nothing of one guest can reach
+ * the next. If the save fails, the guest stays signed in.
  * No second code is ever kept: there is nothing to switch to. */
 const GUEST_KEYS = ['siyl.guest', 'siyl.bag', 'siyl.temple', 'siyl.docs', 'siyl.sent', 'siyl.skip', 'siyl.skip.by'];
 const RETIRED_KEYS = ['siyl.who'];
+/* this guest's other device-only memories: the waiting list, the migration note, the device's own last send */
+const DEVICE_KEYS = ['siyl.wait', 'siyl.migrated', 'siyl.sent.device'];
+const SIGNED_OUT = 'siyl.signedout';
+const LEAVE_WORDS = { done: 'You have signed out. Your choices are saved with your invitation.', failed: 'We could not save your latest change, so you are still signed in. Please try again in a moment.' };
 const GUEST = {
+  /* LEAVING LEAVES NOTHING BEHIND (PRQ-01-03): the guest's choices live with their invitation on the server (assets/draft.js), so
+     nothing is set aside on this device in plain text — the personal keys are cleared, and a copy set aside by an earlier release
+     under siyl.party.<invitation> goes too. Call it only after the draft was flushed (SIYL_INVITE.leave does that). */
   leave() {
     const a = AUTH.get();
-    if (a && a.invitationId && a.guestId) {
-      const draft = {};
-      GUEST_KEYS.forEach((k) => { const v = localStorage.getItem(k); if (v !== null) draft[k] = v; });
-      try { localStorage.setItem('siyl.party.' + a.invitationId, JSON.stringify(draft)); } catch (e) {}
-    }
-    GUEST_KEYS.concat(RETIRED_KEYS).forEach((k) => localStorage.removeItem(k));
+    if (a && a.invitationId) { try { localStorage.removeItem('siyl.party.' + a.invitationId); } catch (e) {} }
+    GUEST_KEYS.concat(RETIRED_KEYS, DEVICE_KEYS).forEach((k) => localStorage.removeItem(k));
     localStorage.removeItem('siyl.draft.owner');
     AUTH.clear();
     try { document.dispatchEvent(new CustomEvent('siyl:signout')); } catch (e) {}
+  },
+  /* the pending autosave first; only when it reached the server is the device cleared — otherwise the guest stays signed in */
+  leaveSafely() {
+    const D = window.SIYL_DRAFT, a = AUTH.get();
+    const finish = () => { GUEST.leave(); try { sessionStorage.setItem(SIGNED_OUT, '1'); } catch (e) {} return { ok: true, words: LEAVE_WORDS.done }; };
+    if (!a || !AUTH.valid() || !D || !D.flush) return Promise.resolve(finish());
+    const safe = (r) => !!r && (r.ok || r.error === 'nothing to save' || r.error === 'not signed in' || r.error === 'reset' || (r.error === 'stale' && !(r.kept && r.kept.length)));
+    return Promise.resolve().then(() => D.flush('leave')).then((r) => (safe(r) ? finish() : { ok: false, words: LEAVE_WORDS.failed, error: r && r.error }), () => ({ ok: false, words: LEAVE_WORDS.failed, error: 'unreachable' }));
   },
   restore(invitationId, partyId, guestId) {
     let draft = null;
@@ -213,14 +224,14 @@ function build() {
   ov.className = 'siyl-inv';
   ov.setAttribute('role', 'dialog');
   ov.setAttribute('aria-modal', 'true');
-  ov.setAttribute('aria-label', 'Your Invitation');
+  ov.setAttribute('aria-label', 'Your invitation');
   ov.innerHTML =
-    '<p class="ie">Your Invitation</p>' +
+    '<p class="ie">Your invitation</p>' +
     '<h2>Enter your private invitation code.</h2>' +
     '<input type="text" autocomplete="one-time-code" autocapitalize="none" spellcheck="false" aria-label="Invitation code">' +
     '<p class="ierr" role="alert" aria-live="polite"></p>' +
     '<button type="button" class="igo">Continue</button>' +
-    '<p class="ilost">Lost your code? <a href="mailto:guest.relation.seeyouinlaos@gmail.com">guest.relation.seeyouinlaos@gmail.com</a></p>';
+    '<p class="ilost">Lost your code? Write to Guest Relations at <a href="mailto:guest.relation.seeyouinlaos@gmail.com">guest.relation.seeyouinlaos@gmail.com</a>.</p>';
   document.body.append(scrim, ov);
   scrim.addEventListener('click', close);
   document.addEventListener('keydown', (e) => {
@@ -229,9 +240,11 @@ function build() {
   const input = ov.querySelector('input');
   const err = ov.querySelector('.ierr');
   const go = ov.querySelector('.igo');
+  /* A WRONG OR EMPTY CODE KEEPS THE KEYBOARD (PRQ-01-02): the focus returns to the code field with its text selected */
+  const refocus = () => { try { input.focus({ preventScroll: true }); if (input.select) input.select(); } catch (e) {} };
   async function attempt() {
     const code = input.value;
-    if (!code.trim()) { err.textContent = 'Please enter the private code from your invitation letter.'; return; }
+    if (!code.trim()) { err.textContent = 'Please enter the private code from your invitation letter.'; refocus(); return; }
     go.disabled = true;
     try {
       const inv = await lookupByToken(code, await loadRecords());
@@ -248,10 +261,11 @@ function build() {
         const nx = safeNext(decodeURIComponent((LOC.search.match(/[?&]next=([^&]+)/) || [, ''])[1]));
         if (nx) { LOC.replace(hrefOf(nx)); return; }
       } else {
-        err.textContent = 'We could not find that invitation code. Please use the private code from your invitation letter — or write to Guest Relations and we will help right away.';
+        err.textContent = 'We could not find an invitation with that code. Please check it against your invitation letter and try again, or write to Guest Relations.';
+        go.disabled = false; refocus(); return;
       }
     } catch (e) {
-      err.textContent = 'The invitation check is unavailable right now. Please try again in a moment.';
+      err.textContent = 'We could not open your invitation just now. Please try again in a moment.';
     }
     go.disabled = false;
   }
@@ -295,13 +309,14 @@ function renderAccess() {
   const a = AUTH.get(), ok = !!(a && AUTH.valid());
   el.setAttribute('data-state', ok ? 'in' : 'out');
   el.innerHTML = ok
-    ? '<span class="a-macct-who">Signed in · ' + esc((window.SIYL_GUEST && window.SIYL_GUEST.nameOf && window.SIYL_GUEST.nameOf()) || a.preferredName || a.fullName || 'you') + '</span><nav class="a-macct-nav" aria-label="Your account"><a href="' + hrefOf('your-journey.html') + '" data-access-nav="trip">My Trip</a><a href="' + hrefOf('profile.html') + '" data-access-nav="profile">My Profile</a>' + (window.SIYL_DRAFT ? '<button type="button" class="a-macct-save" data-access-save>Save my progress</button>' : '') + '<button type="button" class="a-macct-out" data-access-out>Sign out</button></nav><p class="a-macct-state t-b2" data-access-saved aria-live="polite"></p>'
+    ? '<span class="a-macct-who">Signed in as ' + esc((window.SIYL_GUEST && window.SIYL_GUEST.nameOf && window.SIYL_GUEST.nameOf()) || a.preferredName || a.fullName || 'you') + '</span><nav class="a-macct-nav" aria-label="Your account"><a href="' + hrefOf('your-journey.html') + '" data-access-nav="trip">My Trip</a><a href="' + hrefOf('profile.html') + '" data-access-nav="profile">My Profile</a>' + (window.SIYL_DRAFT ? '<button type="button" class="a-macct-save" data-access-save>Save my progress</button>' : '') + '<button type="button" class="a-macct-out" data-access-out>Sign out</button></nav><p class="a-macct-state t-b2" data-access-saved aria-live="polite"></p>'
     : '<span class="a-macct-who">Not signed in</span><nav class="a-macct-nav" aria-label="Your account"><a href="' + gateUrl('') + '" data-access-nav="in">Open your invitation</a></nav>';
-  const out = el.querySelector('[data-access-out]'); if (out) out.addEventListener('click', () => { GUEST.leave(); LOC.replace(hrefOf('invitation.html')); });
+  const out = el.querySelector('[data-access-out]'); if (out) out.addEventListener('click', () => { out.disabled = true; GUEST.leaveSafely().then((r) => { if (r.ok) { LOC.replace(hrefOf('invitation.html')); return; } out.disabled = false; const st = el.querySelector('[data-access-saved]'); if (st) st.textContent = r.words; }); });
   /* SAVE MY PROGRESS in the account menu (Owner, 20 Sep 2026): the one existing save (assets/draft.js flush) — the state in words beside it */
   const save = el.querySelector('[data-access-save]'), saved = el.querySelector('[data-access-saved]');
   if (save && window.SIYL_DRAFT) {
-    const paintSaved = () => { const D = window.SIYL_DRAFT, st = D.state ? D.state() : {}; const t = st.at ? new Date(st.at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : ''; if (saved) saved.textContent = st.phase === 'saving' ? 'Saving…' : st.phase === 'failed' ? 'Not saved · try again' : (st.phase === 'saved' && t) ? 'Saved · ' + t : (D.words ? D.words().line : ''); };
+    /* the one save stamp of the draft module (never a trip word), else the one trip-state line */
+    const paintSaved = () => { const D = window.SIYL_DRAFT; if (saved) saved.textContent = (D.saveWords && D.saveWords()) || (D.words ? D.words().line : ''); };
     save.addEventListener('click', () => { try { const f = document.activeElement; if (f && /^(INPUT|TEXTAREA|SELECT)$/.test(f.tagName)) { f.dispatchEvent(new Event('change', { bubbles: true })); f.blur(); } } catch (e) {} window.SIYL_DRAFT.flush('menu'); });
     document.addEventListener('siyl:draft', paintSaved); paintSaved();
   }
@@ -390,8 +405,11 @@ window.SIYL_INVITE = {
   authed() { const a = AUTH.get(); return !!(a && AUTH.valid()); },
   /* true when a stored session predates the guest-scoped invitations */
   stale() { return !!AUTH.get() && !AUTH.valid(); },
-  /* leave: the code screen, clean; this guest's draft kept aside */
-  leave() { GUEST.leave(); },
+  /* leave: the pending autosave first (PRQ-01-03); on success the device is cleared and the one-time line is set for
+     invitation.html; resolves { ok, words } — on failure the guest stays signed in and `words` says why */
+  leave() { return GUEST.leaveSafely(); },
+  /* the one-time line after signing out — returned once, then forgotten */
+  signedOutLine() { let v = null; try { v = sessionStorage.getItem(SIGNED_OUT); sessionStorage.removeItem(SIGNED_OUT); } catch (e) { v = null; } return v ? LEAVE_WORDS.done : ''; },
   /* the bearer for an authenticated write — never the code */
   bearer() { const a = AUTH.get(); return a && a.bearer ? a.bearer : ''; },
   open,

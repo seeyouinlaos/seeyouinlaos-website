@@ -52,11 +52,15 @@ test('THE SURFACES · the profile and the invitation page carry the two editable
   const pf = src('profile.html'), inv = src('invitation.html');
   for (const f of [pf, inv]) { assert.match(f, /type="text" autocomplete="given-name"(?:'\+inv\('firstName'\)\+')? value="'\+esc\(G\.nameField\('firstName'\)\)\+'" data-c="firstName"/); assert.match(f, /type="text" autocomplete="family-name"(?:'\+inv\('lastName'\)\+')? value="'\+esc\(G\.nameField\('lastName'\)\)\+'" data-c="lastName"/); assert.match(f, /G\.setContact\(i\.getAttribute\('data-c'\),i\.value\.trim\(\)\)/); }
   /* STEP 01 REQUIRED (Owner, 24 Sep 2026): on the invitation page First Name and Last Name are required fields, marked when missing */
-  assert.match(inv, /for="p-firstName">First Name'\+req\(\)\+'<\/label>/); assert.match(inv, /for="p-lastName">Last Name'\+req\(\)\+'<\/label>/); assert.match(inv, /TRIED&&need\.firstName\?' is-needed'/);
-  assert.match(inv, /correct your name/); assert.match(inv, /Corrected by you/);
-  assert.match(pf, /Your invitation, your code and your arrangements stay exactly as they are/);
-  for (const [f, rx] of [['review.html', /G\.value\(me\.guestId,'fullName'\)/], ['tickets.html', /G\.value\(id,'fullName'\)/], ['wedding-preparation.html', /function fullName\(id\)\{return G\.value\(id,'fullName'\)\|\|G\.nameOf\(id\)\}/], ['assets/seatpass.js', /G\.value\(guestId, 'fullName'\)/], ['assets/travelpass.js', /G\.value\(me\.guestId, 'fullName'\)/], ['assets/prep-shell.js', /m\.nameOf\(g\.guestId\)/], ['assets/seating.js', /G\.nameOf\(\)/], ['assets/rooms.js', /G\.nameOf\(\)/]]) assert.match(src(f), rx, f);
-  assert.match(src('assets/invite.mjs'), /Signed in · ' \+ esc\(\(window\.SIYL_GUEST && window\.SIYL_GUEST\.nameOf && window\.SIYL_GUEST\.nameOf\(\)\) \|\| a\.preferredName/);
+  assert.match(inv, /for="p-firstName">First name'\+mark\(\)\+'<\/label>/); assert.match(inv, /for="p-lastName">Last name'\+mark\(\)\+'<\/label>/); assert.match(inv, /TRIED&&need\.firstName\?' is-needed'/);
+  /* Window 007: the “Your name” block (its “correct your name” link and “Corrected by you”) is removed as a whole (TO-00200 / TO-00203) — the name lives in the two fields */
+  assert.doesNotMatch(inv, /correct your name|Corrected by you/); assert.doesNotMatch(pf, /Corrected by you/);
+  assert.match(pf, /Both names exactly as in your passport\./); /* TO-00294 */
+  for (const [f, rx] of [['review.html', /G\.value\(me\.guestId,'fullName'\)/], ['tickets.html', /G\.value\(id,'fullName'\)/], ['wedding-preparation.html', /function fullName\(id\)\{return G\.value\(id,'fullName'\)\|\|G\.nameOf\(id\)\}/], ['assets/seatpass.js', /G\.value\(guestId, 'fullName'\)/], ['assets/travelpass.js', /G\.value\(me\.guestId, 'fullName'\)/], ['assets/prep-shell.js', /m\.nameOf\(g\.guestId\)/]]) assert.match(src(f), rx, f);
+  /* PRQ-GAP-02: the engines derive the holder's first name server-side from the register — the seat and room requests no longer send a free-text name */
+  assert.match(src('assets/seating.js'), /body: JSON\.stringify\(\{ invitationId: inv, guestId: guestId, event: event, seatId: seatId \}\)/); assert.match(src('assets/rooms.js'), /body: JSON\.stringify\(\{ invitationId: a\.invitationId, guestId: a\.guestId, key: keyOf\(win, slug\), label: label, need: need \|\| 1 \}\)/);
+  for (const f of ['assets/seating.js', 'assets/rooms.js']) assert.doesNotMatch(src(f), /G\.nameOf\(\)/, f + ' sends no name of its own');
+  assert.match(src('assets/invite.mjs'), /Signed in as ' \+ esc\(\(window\.SIYL_GUEST && window\.SIYL_GUEST\.nameOf && window\.SIYL_GUEST\.nameOf\(\)\) \|\| a\.preferredName/);
   /* the guest module: the seat holds follow a correction under the same identity — the same seats, re-selected with the new first name */
   const g = src('assets/guest.js'); assert.match(g, /if \(f === 'firstName' \|\| f === 'lastName'\) this\.renameHolds\(\);/); assert.match(g, /invitationId: a\.invitationId, guestId: a\.guestId, event: ev, seatId: seatId, name: name/);
 });

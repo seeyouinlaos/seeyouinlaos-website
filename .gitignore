@@ -32,3 +32,8 @@ docs/REVIEW-VIENTIANE-PASS.md
 
 # local dev tooling (launch config)
 .claude/
+
+# Window 007 QA evidence (local only — screenshots and PDFs of synthetic guests)
+docs/acceptance/2026-09-24-window-007/visual/
+docs/acceptance/2026-09-24-window-007/out/*.png
+docs/acceptance/2026-09-24-window-007/out/*.pdf

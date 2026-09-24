@@ -19,25 +19,31 @@
    ========================================================================== */
 export const GENRES = ['90s', 'Classics / Oldies', 'Blues', 'Jazz', 'R&B', 'Hip-Hop', 'Pop', 'Rock', 'EDM / Electronic', 'Latin', 'Soul & Funk', 'Indie & Alternative', 'Thai & Lao favourites'];
 
-export const ALLERGY = { key: 'allergy', n: '01', q: 'Do you have any food allergies?', required: true, details: 'Please tell us which — the kitchens read this.' };
+/* ONE SHORT LABEL PER QUESTION (PRQ-06-01, Window 007): `label` is how a question is named everywhere outside its own heading —
+ * the missing lists, Review, the Worker's refusal and both emails. `wedding: true` marks a question asked only of guests who join
+ * "Vientiane · The Wedding" (OQ-32). */
+export const ALLERGY = { key: 'allergy', n: '01', q: 'Do you have any food allergies?', label: 'Food allergies', required: true, details: 'Please list each one — we make sure the kitchens know.' };
+export const ALLERGY_DETAILS_LABEL = 'Food allergies — which ones';
+export const PHOTO_LABEL = 'Photography & film';
 
 export const PROFILE = [
-  { key: 'coffeetea', n: '02', q: 'Coffee or tea', hint: 'And how you like it.', required: true, type: 'text' },
+  { key: 'coffeetea', n: '02', q: 'Coffee or tea', label: 'Coffee or tea', hint: 'And how you like it.', required: true, type: 'text' },
   /* MY FAVORITE FLAVOR (Owner, 18 Sep 2026): one choice of six — replaces the free-text snack question; an older answer under
    * `treat` is kept in the record's history and never read as a flavour unless it is one of the six */
-  { key: 'flavor', n: '03', q: 'My Favorite Flavor', hint: 'Choose one.', required: true, type: 'choice', choices: ['Coffee', 'Milk', 'Butter', 'Pandan', 'Matcha Green Tea', 'Strawberry Milk'] },
-  { key: 'drink', n: '04', q: 'Favourite drink', hint: 'The one you would choose without looking at the menu.', required: true, type: 'text' },
+  { key: 'flavor', n: '03', q: 'My favourite flavour', label: 'My favourite flavour', hint: 'Choose one.', required: true, type: 'choice', choices: ['Coffee', 'Milk', 'Butter', 'Pandan', 'Matcha Green Tea', 'Strawberry Milk'] },
+  { key: 'drink', n: '04', q: 'Favourite drink', label: 'Favourite drink', hint: 'The one you would choose without looking at the menu.', required: true, type: 'text' },
   /* QUESTION 5 REMOVED (Owner, 19 Sep 2026): "Anything you would rather avoid?" (`avoid`) is obsolete — an older answer
    * under that key stays in a draft's record untouched, is never rendered and never required */
-  { key: 'film', n: '05', q: 'Favourite film', hint: 'The one you could happily watch again.', required: true, type: 'text' },
+  { key: 'film', n: '05', q: 'Favourite film', label: 'Favourite film', hint: 'The one you could happily watch again.', required: true, type: 'text' },
   /* THE MUSIC (Owner, 22 Sep 2026): the genres are the required, structured answer — as many as the guest likes, at least one;
    * the song / artist line stays, optional, for the DJ's notes */
-  /* THE LABEL (Owner, 22 Sep 2026): question 06 reads "Thai favorite" — the Owner's wording, exactly as given; the question itself
-   * (the required, structured genre multi-select, its choices, its persistence and the words both emails print) is untouched */
-  { key: 'genres', n: '06', q: 'Thai favorite', hint: 'The wedding playlist is built from your answers — choose every genre you would dance to.', required: true, type: 'multi', min: 1, choices: GENRES },
+  /* THE LABEL (Owner, 24 Sep 2026 · OQ-45 B): question 06 reads "What makes you dance?", named "Your music" everywhere else;
+   * "Thai & Lao favourites" stays one of the genres. The question itself (the required, structured genre multi-select, its choices
+   * and its persistence) is untouched. */
+  { key: 'genres', n: '06', q: 'What makes you dance?', label: 'Your music', wedding: true, hint: 'The wedding playlist is built from your answers — choose every genre you would dance to.', required: true, type: 'multi', min: 1, choices: GENRES },
   /* THE KARAOKE QUESTION (Owner, 24 Sep 2026): the song line now asks for the guest's karaoke song — the same key, so every answer
    * already given stays where it is */
-  { key: 'music', n: '07', q: 'What’s your favourite karaoke song — the one you’d love to sing along to?', hint: 'Optional — for the DJ’s notes.', required: false, type: 'text' }
+  { key: 'music', n: '07', q: 'What’s your favourite karaoke song — the one you’d love to sing along to?', label: 'Favourite karaoke song', wedding: true, hint: 'We will pass your song on to the DJ.', required: false, type: 'text' }
 ];
 
 /* A WISH FROM THE BRIDE & GROOM — the final act of the wedding night (Owner, 22 Sep 2026) */
@@ -47,11 +53,21 @@ export const FINALE = {
   q: 'How will you end the wedding night with us?',
   lede: 'When the last course is cleared and the speeches are done, the night is not over. We would love to know where we will find you — choose one; it is our wish that nobody sits this out.',
   options: [
-    { key: 'pool', label: 'The pool jump', line: 'Join the Bride & Groom for the pool jump', copy: 'Black tie, loosened. When the couple go in, so do their friends — the courtyard pool at Souphattra Heritage, a towel waiting on every lounger.' },
-    { key: 'baron', label: 'BARON Vientiane', line: 'Join the Bride & Groom at BARON Vientiane · VIP after party', copy: 'The club on the second floor above Starbucks: the couple’s VIP after party, the DJ, the floor, music until the last of us leaves.' }
+    { key: 'pool', label: 'The pool jump', line: 'Join the Bride & Groom for the pool jump', copy: 'When the couple go into the pool, their friends follow — black tie and all, in the courtyard pool at the Souphattra Heritage.' },
+    { key: 'baron', label: 'BARON Vientiane', line: 'Join the Bride & Groom at BARON Vientiane · VIP after-party', copy: 'The club on the second floor above Starbucks — the couple’s VIP after-party, with the DJ and music until the last of us leaves.' }
   ],
-  words: { pool: 'The pool jump', baron: 'BARON Vientiane · VIP after party' }
+  words: { pool: 'The pool jump', baron: 'BARON Vientiane · VIP after-party' },
+  /* the record words written before 24 Sep 2026 — still read as the same answer (PRQ-06-14) */
+  oldWords: { baron: ['BARON Vientiane · VIP after party'] }
 };
+
+/* DISPLAY FORMS OF STORED CHOICE VALUES (PRQ-06-07): the value a guest chose is stored exactly as before; only the words printed
+ * change — chips, Review, the mailto body and both emails read display() */
+export const DISPLAY = { 'Matcha Green Tea': 'Matcha green tea', 'Strawberry Milk': 'Strawberry milk', '90s': '’90s' };
+export function display(v) { const s = v == null ? '' : String(v); return Object.prototype.hasOwnProperty.call(DISPLAY, s) ? DISPLAY[s] : s; }
+export function displayList(list) { return (Array.isArray(list) ? list : (list ? [list] : [])).map(display).join(', '); }
+/* the short label of a question by key ('allergy', 'photo', a PROFILE key) */
+export function labelOf(key) { if (key === 'allergy') return ALLERGY.label; if (key === 'photo') return PHOTO_LABEL; const q = PROFILE.find((x) => x.key === key); return q ? q.label : ''; }
 
 /* ---- the reading of an answer set (the guest record's `profile`, per named guest) ---- */
 export function profileValue(profile, q) {
@@ -66,19 +82,24 @@ export function profileAnswered(profile, q) {
   if (q.type === 'multi') return v.length >= (q.min || 1);
   return !!v;
 }
-/* the required About You questions still unanswered — each with the way to its box */
-export function profileMissing(profile) {
-  return PROFILE.filter((q) => q.required && !profileAnswered(profile, q)).map((q) => ({ key: 'profile:' + q.key, label: q.n + ' · ' + q.q, href: 'about-you.html#q-' + q.key }));
+/* the required About You questions still unanswered — each with the way to its box, named by its short label. `opts.wedding ===
+ * false` (a guest not joining the wedding, OQ-32): the wedding-only questions are not asked, so never missing. */
+export function profileMissing(profile, opts) {
+  const wedding = !(opts && opts.wedding === false);
+  return PROFILE.filter((q) => q.required && (wedding || !q.wedding) && !profileAnswered(profile, q)).map((q) => ({ key: 'profile:' + q.key, label: q.label, href: 'about-you.html#q-' + q.key }));
 }
 /* the finale: the stored key, the record's words, or nothing */
 export function finaleOf(v) {
   const s = String(v == null ? '' : v).trim();
   if (s === 'pool' || s === FINALE.words.pool) return 'pool';
-  if (s === 'baron' || s === FINALE.words.baron) return 'baron';
+  if (s === 'baron' || s === FINALE.words.baron || FINALE.oldWords.baron.includes(s)) return 'baron';
   return null;
 }
 export const REQUIRED = Object.freeze({
   about: ['allergy'].concat(PROFILE.filter((q) => q.required).map((q) => q.key)).concat(['photo']),
+  /* OQ-32: a guest not joining the wedding is not asked the wedding-only questions (06, 07) nor photography; the hosts are not
+     asked photography */
+  aboutScope: { notAtWedding: PROFILE.filter((q) => q.wedding).map((q) => q.key).concat(['photo']), hosts: ['photo'] },
   wedding: ['event:temple', 'event:coffee', 'event:vows', 'event:dinner', 'sangkhathan (where it applies)', 'finale'],
   preparation: ['dress', 'seat:ceremony (where it applies)', 'seat:dinner (where it applies)'],
   optional: ['music', 'passport', 'flight', 'consent']

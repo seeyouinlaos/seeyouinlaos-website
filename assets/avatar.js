@@ -118,11 +118,11 @@
     /* the words for a refusal, for the guest */
     refusal: function (r) {
       if (!r || r.ok) return '';
-      if (r.error === 'too large') return 'That picture is too large. Please choose one under 12 MB.';
-      if (r.error === 'not an image' || r.error === 'unsupported file type') return 'Please choose a photograph (JPEG, PNG or WebP).';
-      if (r.status === 401) return 'Please open your invitation once more, then try again.';
-      if (r.status === 503) return 'We cannot keep a photo on the website just now. Nothing was stored — please try again later.';
-      return 'The photo could not be saved. Nothing was stored — please try again.';
+      if (r.error === 'too large' || r.error === 'file too large') return 'That photo is larger than 12 MB, so it was not saved. Please choose a smaller one.';
+      if (r.error === 'not an image' || r.error === 'unsupported file type') return 'That file is not a photo we can use, so it was not saved. Please choose a JPEG, PNG or WebP image.';
+      if (r.status === 401) return 'You are no longer signed in, so the photo was not saved. Please open your invitation again and choose the photo once more.';
+      if (r.status === 503) return 'We cannot save photos just now, so nothing was saved. Please try again a little later.';
+      return 'We could not save your photo. Please try again in a moment.';
     }
   };
   function moved() { gen++; forget(); }

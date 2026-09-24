@@ -77,7 +77,7 @@ test('THE SUB-VIEWS · room, journeys, transport, the Highlight and tea pages lo
   assert.match(src('room.html'), /function wizardDone\(w\)/); assert.match(src('room.html'), /SIYL_WIZARD\.href/);
   assert.match(src('journeys.html'), /if\(Wz&&Wz\.active\)\{Wz\.done\(Wz\.stageOfWindow\(win\)\);return\}/);
   assert.match(src('transport.html'), /Wz\.done\(Wz\.stageOfWindow\(id\)\)/);
-  assert.match(src('assets/highlight.js'), /Continue My Trip/); assert.match(src('assets/highlight.js'), /Wz\.done\('extras'\)/); assert.match(src('tea.html'), /Wz\.done\('extras'\)/);
+  assert.match(src('assets/highlight.js'), /a\.textContent = 'Back to My Trip'; a\.setAttribute\('href', 'your-journey\.html\?done=extras#extras'\); \} Wz\.done\('extras'\);/); /* TO-03047 */ assert.match(src('tea.html'), /SIYL_HIGHLIGHT\.confirm\(TEA\)/, 'tea.html returns through the shared Highlight confirm (its own Wz.done moved into highlight.js)');
   assert.match(yj, /J\.order\(x\)===99\|\|x\.id==='1872'\|\|x\.request\|\|x\.exp/);
   const css = src('assets/prep.css'); assert.match(css, /\.p-wizard-note \{/); assert.match(css, /\.p-stage\.p-wizard-landed \{ animation: p-wizard-land/);
   /* the stage of a window: guesthouse and riverside belong to the wedding stay */
@@ -177,16 +177,18 @@ test('CONFIRM SEAT FIRST · while a chair is chosen but unconfirmed the Continue
   assert.match(src('wedding-preparation.html'), /seatbar-on/);
   /* the photography words */
   const ay = src('about-you.html');
-  assert.match(ay, /Photography and filming take place during the wedding day, and selected photographs and films may be published on our wedding website and social media\./);
-  const g = page({ auth: PEGGY }).SIYL_GUEST; assert.equal(g.PHOTO_TEXT, 'I understand and acknowledge this.'); assert.equal(g.PHOTO_VERSION, '2026-09-20');
+  assert.match(ay, /Our photographers and film-makers are with us throughout the wedding day, so you may appear in photographs and film\. Whether any of it may be published is your own choice, just below\./); /* TO-02312 */
+  const g = page({ auth: PEGGY }).SIYL_GUEST; assert.equal(g.PHOTO_TEXT, 'I understand that I may be photographed and filmed during the wedding.'); assert.equal(g.PHOTO_VERSION, '2026-09-24', 'a new text is a new version (TO-00132 · PRQ-01-16 / 06-08)');
+  /* an acknowledgement given under the earlier words still counts — it keeps its own version and is never rewritten */
+  { const w = page({ auth: PEGGY, seed: { 'siyl.guest': { guests: { 'g-peggy': { photo: { acknowledged: true, at: '2026-09-21T10:00:00.000Z', textVersion: '2026-09-20', by: 'g-peggy' } } } } } }); const a = w.SIYL_GUEST.photoAck(); assert.ok(a, 'still acknowledged'); assert.equal(a.textVersion, '2026-09-20'); }
   assert.match(ay, /data-photo-ack/);
   /* Coffee & Cake: its own complimentary card, the approved time (venue data: from 12:00 on the wedding day) */
   const pf = src('profile.html');
-  assert.match(pf, /data:'wedding:coffee'[^\n]*when:'Sunday, 28 February 2027 · from 12:00',name:'Coffee & Cake'[^\n]*cost:'Complimentary'/);
-  assert.match(src('assets/venue-data.js'), /id: 'coffee'[^\n]*when: 'From 12:00 on the wedding day/);
+  assert.match(pf, /data:'wedding:coffee'[^\n]*when:'Sunday, 28 February 2027 · 12:00 – 15:30',name:'Coffee & Cake'[^\n]*cost:'Complimentary'/);
+  assert.match(src('assets/venue-data.js'), /id: 'coffee'[^\n]*when: 'From 12:00 until the ceremony · breakfast every morning'/);
   /* the photo: a button, a dashed ring, the CTA, the note */
   assert.match(pf, /<button type="button" class="pf-avatar" data-avatar data-photo-add aria-label="Add your profile photo">/);
-  assert.match(pf, /<button type="button" class="pf-photo-cta" data-photo-add>Add profile photo<\/button>/);
+  assert.match(pf, /<button type="button" class="pf-photo-cta" data-photo-add>Add a photo<\/button>/);
   assert.match(pf, /\.pf-photo-cta\{display:inline-flex/);
   /* Save my progress: the existing draft mechanism, surfaced in the account block */
   const inv = src('assets/invite.mjs');
@@ -198,7 +200,7 @@ test('CONFIRM SEAT FIRST · while a chair is chosen but unconfirmed the Continue
 test('THE REFERENCE GALLERIES · one carousel for the dress references (3:4 cards, previous / next, the count), every reference reachable; the Highlight dress codes in the same language, none invented; the train ticket\'s breathing room; the Snow Mountain frame labelled as the view', () => {
   const rg = src('assets/refgal.js');
   assert.match(rg, /car\.className = 'acar refgal'/); assert.match(rg, /s\.className = 'aslide'/); assert.match(rg, /frame\.className = 'am'/);
-  assert.match(rg, /data-a="prev" aria-label="Previous reference"/); assert.match(rg, /data-a="next" aria-label="Next reference"/); assert.match(rg, /refgal-count/);
+  assert.match(rg, /data-a="prev" aria-label="Previous photograph"/); assert.match(rg, /data-a="next" aria-label="Next photograph"/); /* TO-00018 / TO-00019 */ assert.match(rg, /refgal-count/);
   assert.match(rg, /if \(window\.SIYL_AMAN && SIYL_AMAN\.wire\) SIYL_AMAN\.wire\(car\);/, 'wired by the one carousel');
   assert.match(rg, /if \(imgs\.length < 2\) return;/, 'a single photograph stays as it is');
   for (const f of ['dress.html', 'wedding-preparation.html']) { assert.match(src(f), /<script src="assets\/refgal\.js/, f); assert.match(src(f), /<script src="assets\/aman\.js/, f + ' has the carousel'); }
@@ -206,7 +208,7 @@ test('THE REFERENCE GALLERIES · one carousel for the dress references (3:4 card
   /* the Highlight dress codes: from the houses' own practical information, titled — nothing invented */
   const exp = {}; new Function('window', src('assets/experiences.js'))(exp); const byId = Object.fromEntries(exp.SIYL_EXP.map((x) => [x.id, x]));
   assert.equal(byId['bkk-baanphraya'].highlight.dressTitle, 'Elegant attire'); assert.equal(byId['bkk-cannubi'].highlight.dressTitle, 'Smart casual');
-  assert.match(byId['bkk-baanphraya'].practical.dress, /sleeveless shirts for gentlemen are not permitted/i); assert.match(byId['bkk-cannubi'].practical.dress, /Smart casual/);
+  assert.equal(byId['bkk-baanphraya'].practical.dress, 'Women in elegant attire and proper footwear; men in long trousers and closed shoes — sleeveless shirts are not permitted for men.'); /* TO-02806 */ assert.match(byId['bkk-cannubi'].practical.dress, /Smart casual/);
   assert.equal(byId['bkk-suhring'].highlight.dressTitle, undefined, 'no dress code invented for a house that names none');
   const ex = src('experience.html'); assert.match(ex, /<section class="x-sec x-dress" data-dress>/); assert.match(ex, /Dress code · /); assert.match(ex, /hl\.dressTitle/); assert.match(ex, /dress\.html/);
   /* the ticket panel: padding at the shared component, at the phone and the desktop */

@@ -1,0 +1,87 @@
+start state recorded
+
+=== J19 404 page
+PASS [J19 404 page] 404-1440 status 404, “This page is not part of the journey.”, a way back, no overflow — {"status":404,"title":"Page not found · See You In Laos","h1":"This page is not part of the journey.","body":"see you in laos. See You In Laos This page is not part of the journey. The link may be old or mistyped — every
+PASS [J19 404 page] 404-1440 deep address still styled (root-relative assets) — status 404 · stylesheets 4
+PASS [J19 404 page] 404-390 status 404, “This page is not part of the journey.”, a way back, no overflow — {"status":404,"title":"Page not found · See You In Laos","h1":"This page is not part of the journey.","body":"see you in laos. See You In Laos This page is not part of the journey. The link may be old or mistyped — every
+PASS [J19 404 page] 404-390 deep address still styled (root-relative assets) — status 404 · stylesheets 4
+
+=== J01 first-time guest · step 01
+PASS [J01 first-time guest · step 01] 01.1-390 one quiet marker per field: “Required” on every required field, “Optional” only on Address line 2 and Region — [["p-email","Required"],["p-phone","Required"],["p-firstName","Required"],["p-lastName","Required"],["p-birthdate","Required"],["p-nationality","Required"],["p-address1","Required"],["p-address2","Optional"],["p-postal",
+PASS [J01 first-time guest · step 01] 01.2-390 Continue with empty fields stays on step 01, marks each missing field, focuses the first — {"url":"/invitation","needed":["p-email","p-phone","p-birthdate","p-nationality","p-address1","p-postal","p-city","p-country"],"focus":"p-email"}
+PASS [J01 first-time guest · step 01] 01.3-390 validation NAMES the field: “Please add your email address.”, “Please add your city.”; the foot names them all — {"email":"Please add your email address.","city":"City Required Please add your city.","note":"8 details are still needed before you continue: Email address, Mobile number, Date of birth, Nationality, Street and house nu
+NOTE [J01 first-time guest · step 01] G048 header before any answer — {"state":"My Trip · not sent yet","cta":""} · words "draft"
+PASS [J01 first-time guest · step 01] 01.1-1440 one quiet marker per field: “Required” on every required field, “Optional” only on Address line 2 and Region — [["p-email","Required"],["p-phone","Required"],["p-firstName","Required"],["p-lastName","Required"],["p-birthdate","Required"],["p-nationality","Required"],["p-address1","Required"],["p-address2","Optional"],["p-postal",
+PASS [J01 first-time guest · step 01] 01.2-1440 Continue with empty fields stays on step 01, marks each missing field, focuses the first — {"url":"/invitation","needed":["p-email","p-phone","p-birthdate","p-nationality","p-address1","p-postal","p-city","p-country"],"focus":"p-email"}
+PASS [J01 first-time guest · step 01] 01.3-1440 validation NAMES the field: “Please add your email address.”, “Please add your city.”; the foot names them all — {"email":"Please add your email address.","city":"City Required Please add your city.","note":"8 details are still needed before you continue: Email address, Mobile number, Date of birth, Nationality, Street and house nu
+PASS [J01 first-time guest · step 01] 01.4 one detail left → “One detail is still needed before you continue: Country.” — One detail is still needed before you continue: Country.
+PASS [J01 first-time guest · step 01] 01.5 complete → Continue opens My Trip — http://127.0.0.1:8788/your-journey
+
+=== J02 returning unsent guest
+PASS [J02 returning unsent guest] 02.1 the step header reads “My Trip · not sent yet”, no send link — {"h":{"state":"My Trip · not sent yet","cta":""},"key":"draft"}
+PASS [J02 returning unsent guest] 02.2 Review before the trip is complete leads to the first missing answer (the gate), not to a send button — http://127.0.0.1:8788/wedding-preparation?from=review#seats
+
+=== J11 wedding seat hold / change
+NOTE [J11 wedding seat hold / change] G048 needs after scope (setup) — 
+PASS [J11 wedding seat hold / change] 11.1 dinner plan: 48 chairs, no A13 / B13, no A12A / B12B, “One long table · 48 seats” — {"n":48,"has13":[],"table":["One long table · 48 seats"],"first":["A11","A12","A14","A15","A16","A17"]}
+PASS [J11 wedding seat hold / change] 11.2 the two sides read “Side A · 24 seats · poolside” and “Side B · 24 seats · facing the pool” — Side A · 24 seats · poolsideSwimming poolA1A2A,Side B · 24 seats · facing the poolSwipe or sc,Side A is along the pool; side B faces it acro
+NOTE [J11 wedding seat hold / change] dinner card before choosing — {"state":"open","card":"Required Choose your dinner seat Souphattra Heritage · poolside · 28 February · 19:30 Tap an available seat on the plan, then “Hold this seat”. Wedding Dinner ·","alreadyHeld":false}
+PASS [J11 wedding seat hold / change] 11.3 before a choice the card asks “Choose your dinner seat” with “Tap an available seat on the plan, then “Hold this seat”.” — Required Choose your dinner seat Souphattra Heritage · poolside · 28 February · 19:30 Tap an available seat on the plan, then “Hold this seat”. Wedding Dinner · poolside Side A · 24 seats · poolside Swimming pool A1 A2 A
+PASS [J11 wedding seat hold / change] 11.4 a tapped chair: the bar names the seat, “not held yet”, and the action “Hold this seat” (Cancel beside it) — Your seat Haruthai. Wedding Dinner. Seat A5 Long table · side A · poolside · not held yet Hold this seat Cancel
+PASS [J11 wedding seat hold / change] 11.5 “Hold this seat” → “Holding…” → the card “Held for you · Your dinner seat · A5” — {"seq":["Holding…"],"card":"Held for you Your dinner seat A5 Long table · side A · poolside Guest Haruthai Test Event Wedding Dinner Date Sunday, 28 February 2027 Venue Souphattra Heritage Vientiane · poolside Continue D
+NOTE [J11 wedding seat hold / change] seat button sequence — ["Holding…"]
+PASS [J11 wedding seat hold / change] 11.6 changing: “Seat A5 stays yours until you move.” and “Keep seat A5” — Changing your dinner seat Your dinner seat Souphattra Heritage · poolside · 28 February · 19:30 A5 Long table · side A · poolside Seat A5 stays yours until you move. Tap an available seat, then “Move to this seat”. Keep 
+PASS [J11 wedding seat hold / change] 11.7 the bar reads “Change of seat”, A5 → A9, the action “Move to this seat” — Change of seat Haruthai. Wedding Dinner. A5 → A9 Current seat A5 · New seat A9 · Long table · side A · poolside Move to this seat Keep seat A5
+PASS [J11 wedding seat hold / change] 11.8 moved: the card holds A9 (“Held for you”), the ledger holds exactly one dinner chair for G048 — {"card":"Held for you Your dinner seat A9 Long table · side A · poolside Guest Haruthai Test Event Wedding Dinner Date Sunday, 28 February 2027 Venue Souphattra Heritage Vientiane · poolside Continue Download ","mine":{"
+
+=== J12 About You
+PASS [J12 About You] 12.1 Q06 heading “What makes you dance?” with the hint “The wedding playlist is built from your answers — choose every genre you would dance to.”, marker “06 · Required” — {"state":"06 · Required","h":"What makes you dance?","hint":"The wedding playlist is built from your answers — choose every genre you would dance to."}
+PASS [J12 About You] 12.2 Q03 “My favourite flavour”, the choice reads “Matcha green tea” (display form), “Thai & Lao favourites” is a genre — {"flavor":{"state":"03 · Required","h":"My favourite flavour","hint":"Choose one."},"choices":["Coffee","Milk","Butter","Pandan","Matcha green tea","Strawberry milk"],"thai":["Thai & Lao favourites"]}
+PASS [J12 About You] 12.3 question 07 is the only “Optional” question marker — {"state":"07 · Optional","h":"What’s your favourite karaoke song — the one you’d love to sing along to?","hint":"We will pass your song on to the DJ."}
+PASS [J12 About You] 12.4 two genres pressed → “2 genres chosen” — 2 genres chosen
+PASS [J12 About You] 12.5 G048 is ready to send: Review opens (no gate) and nothing is still needed — {"nd":[],"url":"http://127.0.0.1:8788/review"}
+
+=== J08 room hold / change / release
+PASS [J08 room hold / change / release] 08.1 The Journey · counting words “5 of 5 rooms left” (never “available”) — ["heritage: 5 of 5 rooms left","heritage-executive: 13 of 13 rooms left","heritage-grand-premier: 3 of 3 rooms left","noble-courtyard: One room only · free","grand-majestic: 2 of 2 rooms left","souphattra-majestic: One r
+PASS [J08 room hold / change / release] 08.2 the chooser: “Who is already in each room”, each room “empty · 2 places” with “Choose this room” — {"head":"Who is already in each room","rows":["Room A empty · 2 places Choose this room","Room B empty · 2 places Choose this room","Room C empty · 2 places Choose this room","Room D empty · 2 places Choose this room","R
+PASS [J08 room hold / change / release] 08.3 Ada holds Room A for her party: the engine holds Ada + one kept place; The Journey says “Held for you · Room A” — {"sel":"Held for you · Room A · you · 1 place kept for Ben","stsel":"Selected · not sent yet The Heritage Room A · you · 1 place kept for Ben","av":["Held for you · Room A","13 of 13 rooms left","3 of 3 rooms left","One 
+FAIL [J08 room hold / change / release] 08.3b The Journey’s stay line names the held room with the same state word as its row and My Trip (“Held for you”) — {"journeyStayLine":"Selected · not sent yet","row":"Held for you · Room A · you · 1 place kept for Ben","draftLineState":"Selected · not sent yet"}
+PASS [J08 room hold / change / release] 08.4 another guest now reads “4 of 5 rooms left” — 4 of 5 rooms left
+PASS [J08 room hold / change / release] 08.5 Cleo’s chooser: Room A shows “Ada” by first name only (never a surname), and is Full to her — {"rowA":"Room A Ada · full Full","surnames":["Test","Test"]}
+PASS [J08 room hold / change / release] 08.6 My Trip: “Held for you”, “Your room · Room A”, the occupancy sentence with the kept place for Ben (first name) — Held for you Pre-Wedding Stay · Souphattra Heritage 25 – 27 February 2027 · The Heritage Breakfast included Your room · Room A Room A has two sleeping places. You hold one; one is kept for Ben. 8 places still free in roo
+PASS [J08 room hold / change / release] 08.7 My Trip · Change room opens “Move to another room” with the rooms and who is in them — Move to another room Each room has two sleeping places. Join someone you know, or choose an empty room. Room A You · 1 place kept for Ben Your room Room B empty · 2 places Choose this room Room C empty · 2 places Choose 
+PASS [J08 room hold / change / release] 08.8 moved to Room B: the engine holds B (with the kept place), A is empty again; My Trip says “Your room · Room B” — {"A":0,"B":2,"card":"Held for you Pre-Wedding Stay · Souphattra Heritage 25 – 27 February 2027 · The Heritage Breakfast included Your room · Room B Room B has two sleeping places. You hold one; one is kept for Ben. 8 pla
+PASS [J08 room hold / change / release] 08.9 My Trip · Remove asks first: “Give back your place in Room B at … ? Someone else may take it, and it may not be free again if you change your mind.” · “Give it back” / “Keep it” — Give back your place in Room B at Souphattra Heritage Vientiane? Someone else may take it, and it may not be free again if you change your mind. Give it back Keep it
+PASS [J08 room hold / change / release] 08.10 “Keep it” keeps the room — ["A:0","B:2","C:0","D:0","E:0"]
+PASS [J08 room hold / change / release] 08.11 The Journey · Remove asks the same question, “Give it back” — Give back your place in Room B at Souphattra Heritage Vientiane? Someone else may take it, and it may not be free again if you change your mind. Give it back Keep it
+PASS [J08 room hold / change / release] 08.12 given back: Room B empty, no kept place left for the party — ["A:0","B:0","C:0","D:0","E:0"]
+
+=== J09 party kept place (Ada / Ben)
+PASS [J09 party kept place (Ada / Ben)] 09.1 Ben (Ada’s party) reads “A place is kept for you · Room A” on the row — never “Sold out” — {"av":"A place is kept for you · Room A","btn":"Select","gone":false}
+PASS [J09 party kept place (Ada / Ben)] 09.2 Ben’s chooser: Room A “Ada · 1 place kept for you” with “Join this room” (first name only) — {"who":"Ada · 1 place kept for you","btn":"Join this room","full":false}
+NOTE [J09 party kept place (Ada / Ben)] Ben’s own trip state is untouched (declined, reply sent):  — {"key":"sent","label":"Sent to us","line":"Sent to us · 24 September 2026","cta":null,"at":"2026-09-24T06:21:25.965Z","date":"24 September 2026","declined":true}
+PASS [J09 party kept place (Ada / Ben)] 09.3 cleanup: Ada gives Room A back → the category is empty again — ["A:0","B:0","C:0","D:0","E:0"]
+
+=== J10 sold out / waiting list
+PASS [J10 sold out / waiting list] 10.1 The Journey · every room taken: rows read “Sold out”; “Every room here is taken. Join the waiting list and we will tell you as soon as a place frees up.” + “Join the waiting list” / “I won’t need this stay” (simulated full view) — {"av":["Sold out / Sold out","Sold out / Sold out","Sold out / Sold out","Sold out / Sold out","Sold out / Sold out","Sold out / Sold out","Sold out / Sold out"],"ask":"Every room here is taken. Join the waiting list and
+PASS [J10 sold out / waiting list] 10.2 My Trip · the same words and “Join the waiting list” (simulated full view) — Still to choose Pre-Wedding Stay Every room here is taken. Join the waiting list and we will tell you as soon as a place frees up. Join the waiting list I won’t need this stay
+PASS [J10 sold out / waiting list] 10.3 the engine takes Ada (party of two) onto the waiting list for the stay (position known) — {"at":"2026-09-24T17:22:34.855Z","position":1,"size":2,"wanted":["prewed/heritage","prewed/heritage-executive","prewed/heritage-grand-premier","prewed/noble-courtyard","prewed/grand-majestic","prewed/souphattra-majestic"
+PASS [J10 sold out / waiting list] 10.4 My Trip: “On the waiting list — number 1” and “Leave the waiting list” — On the waiting list — number 1 Pre-Wedding Stay Every room was taken when you chose — for the 2 of you together. Nothing is held or charged. We will tell you as soon as a place frees up, and Guest Relations will find an 
+PASS [J10 sold out / waiting list] 10.5 “Leave the waiting list” leaves the engine’s line — {}
+
+=== J18 1872 tea for Ada + Ben
+PASS [J18 1872 tea for Ada + Ben] 18.1 Ada · “See what will be added” → preview “Before it goes into My Bag”, “Add to My Bag” / “Cancel” — Before it goes into My Bag Your table at 1872 Champagne Afternoon Tea at 1872 One table for two guests USD 180 for the table · your cost. Champagne Afternoon Tea for two guests on Wednesday, 24 February 2027; afternoon t
+PASS [J18 1872 tea for Ada + Ben] 18.2 Ada · the line reads “In My Bag” — In My Bag · USD 180 for the table Open My Bag Remove from My Bag
+PASS [J18 1872 tea for Ada + Ben] 18.3 Ben · “Already in Ada’s trip — one table for the two of you.” and no second “See what will be added” — {"party":"Already in Ada’s trip — one table for the two of you.","box":"Already in Ada’s trip — one table for the two of you.","preview":false}
+PASS [J18 1872 tea for Ada + Ben] 18.4 cleanup: Ada removes the tea — the Bag has no 1872 line — gone=true
+
+=== J15 travel pass
+PASS [J15 travel pass] 15.1 every travel pass says “Not a ticket — Guest Relations sends you the carrier’s ticket.” — ["Train · State Railway of Thailand Sent to us Special Express No. 25 Not a ticket — Guest Relations sends you the carrier’s ticket. BKK 20:25 Bangkok Krung Thep Aphiwat Central Terminal 24 Feb 2027 About 10 hours on boa
+PASS [J15 travel pass] 15.2 the state words are not ahead of reality: no pass says “Confirmed” (T003’s trip is not confirmed); each pass shows its line’s own state — {"truth":[{"l":"train","s":"Sent to us · 24 September 2026","ls":"Sent to us"},{"l":"mu9646","s":"Sent to us · 24 September 2026","ls":"Sent to us"},{"l":"c86","s":"Sent to us · 24 September 2026","ls":"Sent to us"},{"l"
+
+=== J13 Review & Send (before sending)
+PASS [J13 Review & Send (before sending)] 13.1 Review · About You shows “Your music” and “My favourite flavour” → “Matcha green tea” — Food allergies None Coffee or tea Tea, no sugar My favourite flavour Matcha green tea Favourite drink Lemonade Favourite film In the Mood for Love Your music’90s, Classics / Oldies Favourite karaoke song Not given — opti
+PASS [J13 Review & Send (before sending)] 13.2 ready: “Ready to send · Everything we need is here”, the button “Send my trip” enabled, the clarification says sending is not a payment — {"ready":"Ready to send Everything we need is here Anything optional can follow later.","btn":"Send my trip","off":false}
+PASS [J13 Review & Send (before sending)] 13.3 Your total: “Nothing is paid on this website.” — Your total Change Nothing is paid on this website. No deposit is required. Once your arrangements are confirmed, Guest Relations sends you an invoice with bank transfer or PayPal details; payment is d
+
+DRY 56/57 pass
