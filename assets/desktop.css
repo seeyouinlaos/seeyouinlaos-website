@@ -38,9 +38,7 @@
   .bd { font-size: 21px; }
   h1 { font-size: 40px; line-height: 1.15; }
   h2 { font-size: 27px; }
-  /* the sticky Journey bar reads on the same axes as the page behind it */
-  .jbar { padding-left: var(--a-gut); padding-right: var(--a-gut); }
-  .jbar .jb-in { max-width: calc(var(--a-frame) - 2 * var(--a-gut)); }
+  /* the sticky Journey bar reads on the same axes as the page behind it: its padding is the content wall (bag.js) */
 
   /* ---------- STAGE: one grammar for all ten journey products ----------
    * Predictable slots, in this order, always in the content column:
@@ -95,11 +93,16 @@
   .facts { margin-top: 6px; }
   .frow { padding: 15px 2px; }
 
-  /* PLANE — a light surface across the frame, with its reading column on the
-     same left axis as everything else */
+  /* PLANE — a light surface across the screen, with its reading column on the
+     same left axis as everything else. THE WALL (Owner, 24 Sep 2026): the box
+     itself stays on the content wall; the white is painted out to the screen's
+     edges as a band (a spread shadow, clipped to the band's own height), so it
+     never becomes a panel one gutter wider than every other section. */
   .plane {
-    margin: 80px calc(-1 * var(--a-gut)) 0;
-    padding: 76px var(--a-gut) 68px;
+    margin: 80px 0 0;
+    padding: 76px 0 68px;
+    box-shadow: 0 0 0 100vmax #FFFFFF;
+    clip-path: inset(0 -100vmax);
   }
   .plane h2 { margin-bottom: 30px; }
   .amen { max-width: 34em; margin: 0; padding-left: 6px; }

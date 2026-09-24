@@ -9,8 +9,8 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 .bag{width:44px;height:44px;display:flex;align-items:center;justify-content:center;position:relative;color:#313131;text-decoration:none}.bag .bgi{display:block}
 .bb{position:absolute;top:1px;right:0;min-width:14px;height:14px;padding:0 3px;background:#313131;color:#F3EEE7;font-size:8.5px;line-height:1;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;display:none;align-items:center;justify-content:center;box-shadow:0 0 0 2px #F3EEE7;border-radius:1px}
 </style>
-<script src="assets/i18n/siyl-i18n.js?v=3a27503d"></script>
-<link rel="stylesheet" href="assets/aman.css?v=23c08c99"><link rel="stylesheet" href="assets/prep.css?v=3b4d86a7"></head><body>
+<script src="assets/i18n/siyl-i18n.js?v=f27c8cbe"></script>
+<link rel="stylesheet" href="assets/aman.css?v=8f9e3895"><link rel="stylesheet" href="assets/prep.css?v=7d14f9af"></head><body>
 <header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="cart.html" aria-label="My Bag"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main class="prep-page" id="wedding-preparation">
 <div class="prep-head">
@@ -65,16 +65,16 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 
 <div id="foot"></div>
 </main>
-<script src="assets/bag.js?v=43bc40c1"></script>
+<script src="assets/bag.js?v=be955404"></script>
 <script src="assets/shop-menu.js?v=755a9271"></script>
 <script src="assets/aman.js?v=338fd10f"></script>
 <script src="assets/refgal.js?v=73109f3f"></script>
 <script src="assets/stage-graph.js?v=8879f690"></script>
 <script src="assets/questionnaire.js?v=1dc3e01d"></script>
 <script src="assets/guest.js?v=9bb08cf5"></script>
-<script src="assets/draft.js?v=03e8b4bc"></script>
+<script src="assets/draft.js?v=dc38e681"></script>
 <script src="assets/temple.js?v=a2f797fc"></script>
-<script src="assets/seatlabels.js?v=35f1a714"></script>
+<script src="assets/seatlabels.js?v=47afa185"></script>
 <script src="assets/avatar.js?v=248739ed"></script>
 <script src="assets/seating.js?v=e0a98e6e"></script>
 <script src="assets/seatpass.js?v=223ee8b2"></script>
@@ -86,8 +86,8 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/stay-plan.js?v=5227fdc4"></script>
 <script src="assets/rooms.js?v=45bdf0e9"></script>
 <script src="assets/journey.js?v=fbd99373"></script>
-<script src="assets/prep-shell.js?v=f9ae0997"></script>
-<script type="module" src="assets/invite.mjs?v=7d3552fb"></script>
+<script src="assets/prep-shell.js?v=2d51e568"></script>
+<script type="module" src="assets/invite.mjs?v=4ee706e4"></script>
 <script>
 /* One acknowledgement, in the first person only — the guest's own. Never
    pre-ticked, never ticked for anyone, never repeated on another surface. */
@@ -107,7 +107,8 @@ function render(){
     return;
   }
   /* WHERE WILL YOU JOIN US (Owner, 18 Sep 2026): a guest who is not joining Vientiane is asked nothing here — the step reads Not joining */
-  var G0=window.SIYL_GUEST;if(G0&&G0.scopeAnswered&&G0.scopeAnswered()&&!G0.joins('vientianeWedding')){box.innerHTML='<div class="p-card flat"><p class="t-l1">'+(G0.notJoining()?'Not joining this trip':'Not joining the wedding')+'</p><h2 class="t-h1">Nothing to answer here</h2><p class="t-b2 measure">You are not joining us for the wedding in Vientiane.</p><div class="p-actions"><a class="p-link" href="your-journey.html#scope">Change where you join us</a></div></div>';return}
+  var G0=window.SIYL_GUEST;if(G0&&G0.scopeAnswered&&G0.scopeAnswered()&&!G0.joins('vientianeWedding')){box.innerHTML='<div class="p-card flat"><p class="t-l1">'+(G0.notJoining()?'Not joining this trip':'Not joining the wedding')+'</p><h2 class="t-h1">Nothing to answer here</h2><p class="t-b2 measure">You are not joining us for the wedding in Vientiane.</p><div class="p-actions"><a class="p-link" href="your-journey.html#scope">Change where you join us</a></div></div>';P.foot(document.getElementById('foot'));   /* never a dead end: the step footer continues to the next step that applies */
+    return}
   /* STATIC MARKER, NO STATE LINE (the About You pattern, TO-02316): the section's "01 · Required" is the marker and the ticked
    * box is the state; the date is shown on Review. The acknowledgement records G.DRESS_VERSION with it (assets/guest.js). */
   var me=P.me(),a=G.dressAck();

@@ -162,7 +162,8 @@ export function journeyModel(record) {
   /* the hosts are known from the record's authenticated identity (the Worker stores the register's host flag on the
      record) — never from a room, never from anything the client submitted */
   const hosts = record.hosts === true;
-  const labelOf = (ev) => { if (away) return ''; const id = seatId(ev); if (id) return seatLabel(id) || retiredLabel(id) || (legacy && legacy[ev + 'SeatLabel']) || id; return (legacy && legacy[ev + 'SeatLabel']) || (ev === 'ceremony' && hosts ? 'Front centre' : ''); };
+  const labelOf = (ev) => { if (away) return ''; const id = seatId(ev); if (id) { if (retiredLabel(id)) return '';   /* D-29: a hold on a removed 13 is never shown as a seat number — Guest Relations reassigns it */
+      return seatLabel(id) || (legacy && !/13$/.test(String(legacy[ev + 'SeatLabel'] || '')) && legacy[ev + 'SeatLabel']) || (/13$/.test(id) ? '' : id); } return (legacy && legacy[ev + 'SeatLabel']) || (ev === 'ceremony' && hosts ? 'Front centre' : ''); };
   const seats = { ceremony: { id: seatId('ceremony'), label: labelOf('ceremony'), when: '15:30', place: 'Souphattra Heritage' },
     dinner: { id: seatId('dinner'), label: labelOf('dinner'), when: '19:30', place: 'Souphattra Heritage · poolside' } };
   /* about you */

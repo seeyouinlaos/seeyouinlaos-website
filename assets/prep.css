@@ -43,9 +43,11 @@
   --f-ed: 'PP Editorial Old', Georgia, serif;
   --f-ui: 'Hanken Grotesk', Helvetica, Arial, sans-serif;
 
-  /* frame */
-  --p-frame: 1180px;
-  --p-gut:   24px;
+  /* frame — THE ONE WALL (Owner, 24 Sep 2026): the step shell shares the editorial frame and gutter (aman.css) instead
+     of keeping a second scale of its own. The second scale (40 px from 768, 56 px and a 1280 frame from 1280) put every
+     step page's content up to 58 px outside the header's edges on a tablet and a laptop. */
+  --p-frame: var(--a-frame, 1180px);
+  --p-gut:   var(--a-gut, 24px);
   --p-read:  34em;   /* reading measure */
   --p-wide:  44em;   /* wide measure    */
 
@@ -53,8 +55,6 @@
   --p-act-h: 52px;
   --p-tap:   44px;
 }
-@media (min-width: 768px)  { :root { --p-gut: 40px; } }
-@media (min-width: 1280px) { :root { --p-gut: 56px; --p-frame: 1280px; } }
 
 /* ------------------------------------------------------------------ type */
 .t-d1 { font-family: var(--f-ed); font-weight: 200; font-size: 32px; line-height: 1.12; letter-spacing: -.01em; color: var(--p-ink); }
@@ -239,6 +239,11 @@ body.prep button, body.prep input, body.prep textarea, body.prep select { font-f
 .p-kv:first-child { border-top: 0; }
 .p-kv > div { flex: 1; min-width: 0; }
 .p-kv > .t-l1 { margin-left: auto; white-space: nowrap; text-align: right; }
+/* THE WALL (Owner, 24 Sep 2026): a long value — an address, an e-mail, a Thai sentence — wraps inside its own column; a label
+   that leads its row may wrap too, so neither is ever pushed past the card's edge on the narrowest phones */
+.p-kv > p, .p-kv > div { min-width: 0; overflow-wrap: break-word; }
+.p-kv > .t-l1:first-child { white-space: normal; min-width: 0; }
+@media (max-width: 359px) { .p-kv > .t-l1 { white-space: normal; max-width: 45%; } }
 
 /* --------------------------------------------------------- product grids
    Responsive means CHANGE THE LAYOUT — never squeeze the desktop columns.
@@ -296,7 +301,9 @@ body.p-drawer-open .p-drawer { transform: translateY(0); }
 body.p-drawer-open .p-drawer { opacity: 1; }
 
 /* ============================================================ THE SHELL */
-.prep-bar { position: sticky; top: var(--hd-h, 0px); z-index: 59; background: var(--p-paper); border-bottom: 1px solid var(--p-line); }
+.prep-bar { position: sticky; top: var(--hd-h, 0px); z-index: 59; background: var(--p-paper); }
+/* the bar's closing hairline sits on the content wall, like the header's above it — never a viewport-wide rule */
+.prep-bar::after { content: ''; position: absolute; left: var(--a-edge, var(--p-gut)); right: var(--a-edge, var(--p-gut)); bottom: 0; height: 1px; background: var(--p-line); pointer-events: none; }
 .prep-bar-in { box-sizing: border-box; max-width: var(--p-frame); margin: 0 auto; padding: var(--s4) var(--p-gut) var(--s2); display: flex; align-items: flex-start; gap: var(--s4); }
 .prep-bar-l { min-width: 0; flex: 1; }
 /* Perceptual order in the bar: the STEP first, the party and person second,
@@ -379,7 +386,7 @@ body.prep-steps-open { overflow: hidden; }   /* the page is held while the index
   transition: opacity var(--p-t) var(--p-ease), transform var(--p-t) var(--p-ease), visibility 0s linear var(--p-t); }
 .prep-steps.on { visibility: visible; opacity: 1; transform: none; transition: opacity var(--p-t) var(--p-ease), transform var(--p-t) var(--p-ease), visibility 0s; }
 .prep-steps-in { box-sizing: border-box; max-width: var(--p-frame); margin: 0 auto; padding: var(--s4) var(--p-gut) calc(var(--s7) + env(safe-area-inset-bottom, 0px)); }
-.prep-srow { display: flex; align-items: baseline; gap: var(--s4); border-top: 1px solid var(--p-hair); padding: var(--s3) var(--s2); margin: 0 calc(-1 * var(--s2)); text-decoration: none; min-height: var(--p-tap);
+.prep-srow { display: flex; align-items: baseline; gap: var(--s4); border-top: 1px solid var(--p-hair); padding: var(--s3) 0; margin: 0; text-decoration: none; min-height: var(--p-tap);   /* rows and their hairlines on the content wall (Owner, 24 Sep 2026) */
   -webkit-tap-highlight-color: transparent; transition: background-color var(--p-t-fast) var(--p-ease), opacity var(--p-t-fast) var(--p-ease); }
 .prep-srow:first-of-type { border-top: 0; }
 .prep-srow:hover { background: rgba(30,28,26,.035); }
@@ -580,7 +587,8 @@ body.prep-steps-open { overflow: hidden; }   /* the page is held while the index
 /* a hero photograph at the head of a surface */
 .p-media { display: block; width: 100%; aspect-ratio: 3/2; background: #E7E3DB center/cover no-repeat; }
 .prep-head .p-media { margin: 0 calc(-1 * var(--p-gut)) var(--s6); width: calc(100% + 2 * var(--p-gut)); }
-@media (min-width: 768px) { .prep-head .p-media { margin: 0 0 var(--s6); width: 100%; aspect-ratio: 16/7; } }
+@media (min-width: 600px) { .prep-head .p-media { margin: 0 0 var(--s6); width: 100%; } }   /* the phone keeps its edge-to-edge photograph; from the tablet on it stands inside the wall */
+@media (min-width: 768px) { .prep-head .p-media { aspect-ratio: 16/7; } }
 
 /* a list of the six steps, on the invitation */
 .p-steps .p-kv > .t-l1 { flex: none; }
@@ -726,11 +734,13 @@ body.seatbar-on .jbar { display: none; }
 .prep-srow.is-locked .l { color: var(--p-mute); }
 .prep-srow.is-locked:hover { background: none; }
 .prep-srow.is-complete .n { color: var(--p-ink); }
-/* the check: an 8 × 12 tick drawn from its own line, once, when it appears */
-.prep-tick { position: relative; display: inline-block; width: 9px; height: 13px; flex: none; }
-.prep-tick::before { content: ''; position: absolute; left: 0; bottom: 3px; width: 8px; height: 13px; border-right: 1.4px solid currentColor; border-bottom: 1.4px solid currentColor; transform: rotate(40deg) scale(1); transform-origin: 70% 90%; animation: prep-tick-draw .28s var(--p-ease) both; }
-.prep-tick.big { width: 12px; height: 17px; margin-right: 10px; vertical-align: -3px; }
-.prep-tick.big::before { width: 10px; height: 17px; border-width: 1.6px; }
+/* the check: a drawn tick — a short arm and a long arm of one hairline, turned — sized to the capitals it stands beside and
+   drawn once when it appears. It is a MARK, never a filled square (Owner, 24 Sep 2026): the box has no background, and the
+   stroke is the only thing painted */
+.prep-tick { position: relative; display: inline-block; width: 9px; height: 10px; margin-right: 6px; vertical-align: -1px; flex: none; background: none; }
+.prep-tick::before { content: ''; position: absolute; left: 2.5px; top: -1px; width: 4px; height: 8.5px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(42deg); transform-origin: 50% 50%; animation: prep-tick-draw .28s var(--p-ease) both; }
+.prep-tick.big { width: 12px; height: 14px; margin-right: 10px; vertical-align: -2px; }
+.prep-tick.big::before { left: 3px; top: -1px; width: 5.5px; height: 12px; border-width: 1.6px; }
 @keyframes prep-tick-draw { from { clip-path: inset(0 0 100% 0); opacity: 0; } to { clip-path: inset(0); opacity: 1; } }
 /* what is missing, under the step, each line a way to the exact control */
 .prep-missing { list-style: none; margin: 0 0 var(--s2) 26px; padding: 0 0 var(--s2); }
@@ -896,6 +906,46 @@ body.seatbar-on .jbar { display: none; }
 .prep-save-state { margin: 0; font-family: var(--f-ui); font-size: 8.5px; letter-spacing: 1.6px; text-transform: uppercase; color: var(--p-mute); min-height: 1em; }
 .prep-save-state.is-failed { color: #8A5A55; }
 
+/* THE STEP HEADER (Owner, 24 Sep 2026 · QA finding A): with trip changes unsent, the header, this bar and the Bag bar used to
+   hold ~40 % of a 390 × 844 phone and ~38 % of a 1024 × 768 tablet on its side. Two decisions bring the pinned chrome to about
+   a fifth of the screen:
+   1 · the step title and the party (the first block) scroll away beneath the header like the page they introduce — the bar's
+       sticky edge sits that block's measured height (--prep-lead-h, prep-shell.js) above the header's foot, so only the trip
+       state and its actions stay pinned. Opening the step index brings the whole bar back.
+   2 · the pinned block is compact: on a phone the trip state and its saved time beside VIEW ALL STEPS, then SEND THE UPDATE and
+       SAVE MY PROGRESS; from 768 px all of it on one line. Every state and every action is still there, at the same size. */
+.prep-bar { top: calc(var(--hd-h, 0px) - var(--prep-lead-h, 0px)); }
+body.prep-steps-open .prep-bar { top: var(--hd-h, 0px); }
+@media (min-width: 768px) {
+  .prep-bar-foot { grid-template-areas: none; grid-template-columns: auto auto auto minmax(0, 1fr) auto; column-gap: var(--s4); row-gap: 0; align-items: center; padding-bottom: var(--s3); }
+  .prep-bar-foot .prep-state { grid-row: 1; grid-column: 1; }
+  .prep-bar-foot .prep-save-state { grid-row: 2; grid-column: 1; justify-self: start; text-align: left; }
+  .prep-bar-foot .prep-send-upd { grid-row: 1 / span 2; grid-column: 2; }
+  .prep-bar-foot .prep-save-btn { grid-row: 1 / span 2; grid-column: 3; }
+  .prep-bar-foot:not(:has(.prep-send-upd)) .prep-save-btn { grid-column: 2; }
+  .prep-bar-foot .prep-bar-r { grid-row: 1 / span 2; grid-column: 5; justify-self: end; }
+  .prep-bar-foot .prep-save-state.is-failed, .prep-bar-foot .prep-merge { grid-row: 3; grid-column: 1 / -1; }
+}
+@media (max-width: 767px) {
+  .prep-bar-in { padding-top: var(--s3); padding-bottom: var(--s2); }
+  .prep-who { margin-top: var(--s1); }
+  .prep-bar-foot { grid-template-areas: none; grid-template-columns: auto auto minmax(0, 1fr); column-gap: var(--s2); row-gap: 6px; padding-bottom: var(--s2); }
+  .prep-bar-foot .prep-state { grid-row: 1; grid-column: 1 / 3; align-self: center; }
+  .prep-bar-foot .prep-bar-r { grid-row: 1; grid-column: 3; justify-self: end; align-self: center; }
+  .prep-bar-foot .prep-all { min-height: 36px; padding-top: var(--s2); margin: -6px 0; }
+  .prep-bar-foot .prep-send-upd { grid-row: 2; grid-column: 1; justify-self: start; }
+  .prep-bar-foot .prep-save-btn { grid-row: 2; grid-column: 2; justify-self: start; }
+  html[lang="th"] .prep-bar-foot .prep-save-btn { margin: -4px 0; }   /* the Thai 44 px target stays; it no longer adds height to the line */
+  .prep-bar-foot:not(:has(.prep-send-upd)) .prep-save-btn { grid-column: 1; }
+  .prep-bar-foot .prep-save-state { grid-row: 2; grid-column: 3; justify-self: end; align-self: center; }
+  .prep-bar-foot:not(:has(.prep-send-upd)) .prep-save-state { grid-column: 2 / -1; }
+  /* with an update to send, the saved time reads under the trip state and the two actions have the whole second line */
+  .prep-bar-foot:has(.prep-send-upd) .prep-bar-r { grid-row: 1 / span 2; }
+  .prep-bar-foot:has(.prep-send-upd) .prep-save-state { grid-row: 2; grid-column: 1 / 3; justify-self: start; text-align: left; margin-top: -4px; }
+  .prep-bar-foot:has(.prep-send-upd) .prep-send-upd, .prep-bar-foot:has(.prep-send-upd) .prep-save-btn { grid-row: 3; }
+  .prep-bar-foot .prep-save-state.is-failed, .prep-bar-foot .prep-merge { grid-row: 4; grid-column: 1 / -1; justify-self: start; text-align: left; }
+}
+
 /* COMPLETE TRIP · THE PREVIEW (Owner, 19 Sep 2026): what confirming selects, one row per stage of the guest's trip —
    the stage, the product with its amount, and a plain note when a room is replaced or a stage has no place left */
 .fxl { list-style: none; margin: 8px 0 0; padding: 0; border-top: 1px solid var(--p-hair); }
@@ -1003,7 +1053,8 @@ body.seatbar-on .prep-foot .prep-foot-note { display: none; }
 }
 /* the tick the site already uses becomes the full stop: one mark, one meaning */
 .p-link.on::before { content: ''; display: inline-block; width: 4px; height: 4px; border-radius: 50%; background: var(--p-accent); margin-right: 8px; vertical-align: middle; }
-.prep-tick { background: var(--p-accent); }
+/* B · SELECTED: the confirmed tick is drawn in Cherry — a small stroke, never a filled Cherry block */
+.prep-tick { color: var(--p-accent); }
 
 /* ---- C · PROGRESS · a rule that has actually run ------------------------ */
 .p-rule-current { display: block; height: 1px; background: var(--p-accent); }

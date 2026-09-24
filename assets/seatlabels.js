@@ -37,7 +37,14 @@
   var EVENT_VENUE = { ceremony: 'Souphattra Heritage, Vientiane', dinner: 'Souphattra Heritage Vientiane · poolside' };
   /* the two dinner seats removed from the plan (Owner, 24 Sep 2026): no label, no seat, never renumbered */
   var RETIRED = ['D-T-13', 'D-B-13'];
-  function retired(seatId) { return RETIRED.indexOf(String(seatId || '')) >= 0; }
+  /* THE PERMANENT RULE (Owner, 24 Sep 2026 · D-29): 13 is never a guest-facing seat number — not at the dinner, not at the
+     ceremony, not in any future plan. A seat whose number would be 13 does not exist; the numbering jumps (12 → 14) and is
+     never closed up or hidden by a substitute (no 12A). */
+  var NEVER = 13;
+  function retired(seatId) {
+    var s = String(seatId || ''), d = /^D-[TB]-(\d{2})$/.exec(s), c = /^C-[LR]-(\d{2})-\d{2}$/.exec(s);
+    return RETIRED.indexOf(s) >= 0 || !!(d && Number(d[1]) === NEVER) || !!(c && Number(c[1]) === NEVER);
+  }
   /* the label a kept hold on a retired seat is READ by (Guest Relations, a report) — never offered, never drawn */
   function retiredLabel(seatId) { return retired(seatId) ? RUNS[String(seatId).charAt(2)] + '13' : null; }
   var EVENT_DATE = 'Sunday, 28 February 2027';
@@ -45,7 +52,7 @@
   /* internal id → guest-facing label; null for anything that is not a seat */
   function label(seatId) {
     var c = /^C-([LR])-(0[1-9]|10)-(0[1-3])$/.exec(seatId || '');
-    if (c) { var col = COLS[c[1]][Number(c[3]) - 1]; return col ? col + Number(c[2]) : null; }
+    if (c) { var col = COLS[c[1]][Number(c[3]) - 1]; return col && !retired(seatId) ? col + Number(c[2]) : null; }
     var d = /^D-([TB])-(0[1-9]|1[0-9]|2[0-5])$/.exec(seatId || '');
     if (d) return retired(seatId) ? null : RUNS[d[1]] + Number(d[2]);
     return null;
@@ -55,6 +62,7 @@
     var m = /^([A-F])(\d{1,2})$/.exec(String(lab || '').toUpperCase().replace(/\s+/g, ''));
     if (!m) return null;
     var n = Number(m[2]);
+    if (n === NEVER) return null;   /* D-29: there is no seat 13 */
     if (event === 'ceremony') {
       if (n < 1 || n > 10) return null;
       var pad2 = (n < 10 ? '0' : '') + n;
@@ -110,7 +118,7 @@
     return 'SYL-' + EVENT_CODE[event] + '-' + label(seatId0) + '-' + tail;
   }
 
-  return { COLS: COLS, RUNS: RUNS, EVENT_CODE: EVENT_CODE, EVENT_NAME: EVENT_NAME, EVENT_VENUE: EVENT_VENUE, EVENT_DATE: EVENT_DATE,
+  return { NEVER: NEVER, COLS: COLS, RUNS: RUNS, EVENT_CODE: EVENT_CODE, EVENT_NAME: EVENT_NAME, EVENT_VENUE: EVENT_VENUE, EVENT_DATE: EVENT_DATE,
            RETIRED: RETIRED, retired: retired, retiredLabel: retiredLabel,
            label: label, seatId: seatId, describe: describe, ref: ref, sha256: sha256 };
 });

@@ -178,7 +178,12 @@
     honourReset: honourReset, seenReset: seenReset,
     submission: function () { return state.submission; },
     /* PRQ-07a-06: the first name of a party member whose trip already holds this table product, or null */
-    partyTable: function (id) { return (state.party && state.party[id]) || null; },
+    partyTable: function (id) {
+      var v = state.party && state.party[id]; if (!v) return null;
+      if (typeof v === 'string') return v;
+      var G = window.SIYL_GUEST, n = v.name || (G && G.nameOf ? G.nameOf(v.guestId) : '');
+      return String(n || '').split(/\s+/)[0] || 'the other guest';
+    },
     /* PUSH: this device's complete draft to the server. reason: 'auto' | 'save' | 'continue' | 'send' */
     push: function (reason) {
       /* one request at a time (Codex P1-2): a push while another is in flight waits for it and then sends the current snapshot */

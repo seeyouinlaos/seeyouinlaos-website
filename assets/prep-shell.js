@@ -127,7 +127,7 @@
       }
     });
     /* anchors and deep links land below the sticky bar, never under it */
-    measureBar = function () { document.documentElement.style.setProperty('--prep-bar-h', bar.offsetHeight + 'px'); };
+    measureBar = function () { var st = document.documentElement.style, lead = bar.querySelector('.prep-bar-in'); st.setProperty('--prep-bar-h', bar.offsetHeight + 'px'); st.setProperty('--prep-lead-h', (lead ? lead.offsetHeight : 0) + 'px'); };   /* --prep-lead-h: the step title and the party, which a phone lets slide under the header (prep.css) */
     if (window.ResizeObserver) new ResizeObserver(measureBar).observe(bar); else window.addEventListener('resize', measureBar);
     measureBar();
   }

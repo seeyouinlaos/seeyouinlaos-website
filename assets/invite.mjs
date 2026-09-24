@@ -197,7 +197,8 @@ function migrateLegacy(legacy, partyId, guestId) {
 /* ---------------- overlay (tea.html visual grammar, shared) ---------------- */
 const CSS = `
 .siyl-inv-scrim{position:fixed;inset:0;background:rgba(30,30,30,.45);display:none;z-index:80}
-.siyl-inv{position:fixed;left:0;right:0;bottom:0;background:#FCFAF6;padding:34px 26px calc(38px + env(safe-area-inset-bottom));display:none;z-index:81}
+.siyl-inv{position:fixed;left:0;right:0;bottom:0;background:#FCFAF6;padding:34px max(26px, var(--a-edge, 26px)) calc(38px + env(safe-area-inset-bottom));display:none;z-index:81}
+.siyl-inv>*{max-width:560px}
 body.siyl-inv-open .siyl-inv-scrim,body.siyl-inv-open .siyl-inv{display:block}
 .siyl-inv .ie{font-size:10px;letter-spacing:2.2px;text-transform:uppercase;color:#7C7A75;margin-bottom:10px;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif}
 .siyl-inv h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:23px;margin-bottom:14px;color:#313131}

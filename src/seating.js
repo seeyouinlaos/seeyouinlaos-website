@@ -58,9 +58,15 @@ export const CAPACITY = {
 /* THE TWO RETIRED DINNER SEATS (Owner, 24 Sep 2026 · OQ-03): the seats numbered 13 on side A and side B are not on the plan.
    A hold that still names one is NEVER deleted or moved by this ledger: it stays readable, is reported (`retired` in the
    read, `events.dinner.retired` in the Guest Relations plan) and is logged, so Guest Relations can resolve it by hand. */
+/* THE PERMANENT RULE (Owner, 24 Sep 2026 · D-29 in docs/DECISION-REGISTER.md): 13 is never a guest-facing seat number, for
+   any event and any future geometry. No generator, configuration or migration may produce a selectable seat 13; the numbering
+   jumps (12 → 14) and is never renumbered or hidden behind a substitute such as 12A. */
+export const NEVER_SEAT_NUMBER = 13;
 export function isRetiredSeat(seatId) {
-  const m = RULES.dinner.id.exec(String(seatId || ''));
-  return !!m && (RULES.dinner.retired[m[1]] || []).indexOf(Number(m[2])) >= 0;
+  const s = String(seatId || ''), m = RULES.dinner.id.exec(s);
+  if (m && ((RULES.dinner.retired[m[1]] || []).indexOf(Number(m[2])) >= 0 || Number(m[2]) === NEVER_SEAT_NUMBER)) return true;
+  const c = /^C-[LR]-(\d{2})-\d{2}$/.exec(s);
+  return !!(c && Number(c[1]) === NEVER_SEAT_NUMBER);
 }
 function retiredLabel(seatId) { const m = RULES.dinner.id.exec(String(seatId || '')); return m ? (m[1] === 'T' ? 'A' : 'B') + Number(m[2]) : ''; }
 export const EVENTS = ['ceremony', 'dinner'];
@@ -164,7 +170,7 @@ export function seatsOf(config, event) {
   if (event === 'ceremony') {
     const c = config && config.ceremony;
     if (!c) return [];
-    return c.rows.flatMap((r) => r.seats.map((s, i) => ({ seatId: s.seatId, family: s.family, side: r.side, row: r.row, position: i + 1 })));
+    return c.rows.filter((r) => Number(r.row) !== NEVER_SEAT_NUMBER).flatMap((r) => r.seats.filter((s) => !isRetiredSeat(s.seatId)).map((s, i) => ({ seatId: s.seatId, family: s.family, side: r.side, row: r.row, position: i + 1 })));
   }
   const d = config && config.dinner;
   if (!d) return [];

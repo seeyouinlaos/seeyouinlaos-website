@@ -91,8 +91,8 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 @media(min-width:768px){.pf-people{margin:0;padding-left:0;padding-right:0;flex-wrap:wrap;overflow:visible}.pf-grid{grid-template-columns:repeat(4,1fr)}.pf-stat:nth-child(odd){padding-right:20px}.pf-stat:nth-child(even){padding-left:20px}.pf-stat:nth-child(4n+3){padding-left:20px;border-left:1px solid #DAD9D7}.pf-stat:nth-child(4n+1){border-left:0;padding-left:0}.pf-num-v{font-size:120px}.pf-stat .pf-num-v{font-size:64px}}
 @media(prefers-reduced-motion:reduce){.pf-person{opacity:1;transform:none;transition:none}}
 </style>
-<script src="assets/i18n/siyl-i18n.js?v=3a27503d"></script>
-<link rel="stylesheet" href="assets/aman.css?v=23c08c99"><link rel="stylesheet" href="assets/prep.css?v=3b4d86a7"></head><body class="prep p-in">
+<script src="assets/i18n/siyl-i18n.js?v=f27c8cbe"></script>
+<link rel="stylesheet" href="assets/aman.css?v=8f9e3895"><link rel="stylesheet" href="assets/prep.css?v=7d14f9af"></head><body class="prep p-in">
 <header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="cart.html" aria-label="My Bag"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main class="prep-page" id="profile">
 <div class="prep-head">
@@ -101,7 +101,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 </div>
 <div id="page"></div>
 </main>
-<script src="assets/bag.js?v=43bc40c1"></script>
+<script src="assets/bag.js?v=be955404"></script>
 <script src="assets/shop-menu.js?v=755a9271"></script>
 <script src="assets/aman.js?v=338fd10f"></script>
 <script src="assets/rooms-data.js?v=701dd9a2"></script>
@@ -109,12 +109,12 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/stage-graph.js?v=8879f690"></script>
 <script src="assets/questionnaire.js?v=1dc3e01d"></script>
 <script src="assets/guest.js?v=9bb08cf5"></script>
-<script src="assets/draft.js?v=03e8b4bc"></script>
+<script src="assets/draft.js?v=dc38e681"></script>
 <script src="assets/temple.js?v=a2f797fc"></script>
 <script src="assets/stay-plan.js?v=5227fdc4"></script>
 <script src="assets/rooms.js?v=45bdf0e9"></script>
 <script src="assets/stay.js?v=d7bc46dc"></script>
-<script src="assets/seatlabels.js?v=35f1a714"></script>
+<script src="assets/seatlabels.js?v=47afa185"></script>
 <script src="assets/seating.js?v=e0a98e6e"></script>
 <script src="assets/confirm.js?v=d1b9a554"></script>
 <script src="assets/transport-data.js?v=8d46ce92"></script>
@@ -126,7 +126,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/discover.js?v=566d844e"></script>
 <script src="assets/wedding-dinner.js?v=46fee33d"></script>
 <script src="assets/community.js?v=fb713917"></script>
-<script type="module" src="assets/invite.mjs?v=7d3552fb"></script>
+<script type="module" src="assets/invite.mjs?v=4ee706e4"></script>
 <script>
 /* ============================================================================
    MY PROFILE (Owner, 18 Sep 2026) — the guest's account dashboard.
@@ -324,7 +324,7 @@ function arrangements(me){
   h+='<section class="prep-sec" id="experiences"><h2 class="t-h2">Experiences</h2>'+(exps.length?rail(exps):empty('No experience is chosen yet.','your-journey.html','Open My Trip'))+'</section>';
   return h}
 /* a seat's label, also for a hold kept on a retired dinner seat (A13 / B13 are not on the plan any more — OQ-03) */
-function seatLabel(sid){var L=window.SIYL_SEATLABELS;return S.label(sid)||(L&&L.retiredLabel?L.retiredLabel(sid):'')||''}
+function seatLabel(sid){return S.label(sid)||''}   /* D-29: a removed 13 is never shown — Guest Relations reassigns it */
 function seatWhere(sid){var L=window.SIYL_SEATLABELS;return L&&L.describe?L.describe(sid):''}
 function wedding(me,p){
   var id=me.guestId,cards=[],temple=T?T.attendanceOf(id):null,ready=S&&S.ready(),hosts=isHost(me,p);

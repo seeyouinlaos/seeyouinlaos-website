@@ -50,6 +50,14 @@
      band visibly ends before the next section begins. A caption-tight
      relationship is never what an editorial page wants here. */
   --a-gap-media: 96px;
+  /* THE CONTENT WALL (Owner, 24 Sep 2026): the ONE horizontal boundary of the site. Used as the inline padding of any
+     full-width band, it puts the band's content on the frame's inner edges — the header's, the hero's, the footer's —
+     at every width: the gutter on a phone, the centred frame minus its gutter on a wide screen. The percentage resolves
+     against the band's own containing block, so it holds for sticky, fixed and in-flow bands alike. */
+  --a-edge: max(var(--a-gut), calc((100% - var(--a-frame)) / 2 + var(--a-gut)));
+  /* the destination chapter's column: 1000 px, never closer to the screen than the gutter (it used to be a bare 1000 px
+     with no padding, so between 900 and 1128 px every chapter ran from the screen's own edge) */
+  --a-dest-w: min(1000px, calc(100% - 2 * var(--a-gut)));
 }
 
 /* ---------------------------------------------------------------- header
@@ -219,7 +227,7 @@ input:focus-visible, .siyl-inv input:focus { outline: 1px solid var(--a-ink); ou
   .atrk { gap: 32px; max-width: 1180px; margin: 0 auto; padding-left: var(--a-gut); scroll-padding-left: var(--a-gut); }
   .aslide h3 { font-size: 25px; }
   .arow { max-width: 1180px; margin: 34px auto 0; padding: 0 var(--a-gut); }
-  .sfoot-in { grid-template-columns: 1.5fr 1fr 1fr 1.4fr; gap: 48px; align-items: start; padding: 66px var(--a-gut) 50px; }
+  .sfoot-in { row-gap: 44px; padding: 66px var(--a-gut) 50px; }
   .sfoot .sf-legal { padding: 0 var(--a-gut) 48px; }
 }
 @media (min-width: 1600px) {
@@ -308,7 +316,7 @@ a.am { display: block; text-decoration: none; }
 .a-band { width: 100%; height: 300px; background: #E7E3DB center/cover no-repeat; }
 
 /* DUO — two supporting photographs, deliberately smaller than the anchors */
-.a-duo { padding: 0 var(--a-gut); display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.a-duo { padding: 0 var(--a-gut); display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .a-duo .am { width: 100%; aspect-ratio: 4 / 5; background: #E7E3DB center/cover no-repeat; }
 .a-duo .cap { grid-column: 1 / -1; font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--a-mute); }
 
@@ -365,6 +373,18 @@ a.am { display: block; text-decoration: none; }
   .a-duo .am { aspect-ratio: 4 / 3; }
   .a-close, .slist { max-width: 640px; margin-left: auto; margin-right: auto; }
   .a-band { height: 360px; }
+}
+/* THE WALL ON A SMALL TABLET (Owner, 24 Sep 2026 · iPad mini upright is 744 px). Below 600 px the approved iPhone
+   composition stands — the rail's neighbour peeking to the screen's edge, the transition band edge to edge. From 600 px
+   the tablet grammar begins, and with it the wall: a rail's scrollport begins and ends on the gutters exactly as it does
+   from 768 px (its neighbour is clipped by the right gutter, never by the glass), and the transition band is framed. */
+@media (min-width: 600px) and (max-width: 767px) {
+  .acar .atrk {
+    width: calc(100% - 2 * var(--a-gut)); margin-left: auto; margin-right: auto;
+    padding-left: 0; padding-right: 0; scroll-padding-left: 0;
+  }
+  .aslide { flex-basis: 82%; }
+  .a-sec.tight { padding-left: var(--a-gut); padding-right: var(--a-gut); }
 }
 
 
@@ -507,7 +527,7 @@ a.am { display: block; text-decoration: none; }
   .a-pair.rev .ac { padding: 0; order: 1; }
 
   /* DUO — two supporting photographs across the same frame */
-  .a-duo { display: grid; grid-template-columns: 1fr 1fr; column-gap: var(--a-col); }
+  .a-duo { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--a-col); }
   .a-duo .am { aspect-ratio: 4 / 3; }
 
   /* MEASURE — reading columns start on the frame's LEFT edge; alignment is
@@ -589,6 +609,9 @@ a.am { display: block; text-decoration: none; }
 /* ---- the account-access row of the shell (filled by assets/invite.mjs) — inside the sticky header, on every page ---- */
 /* THE ACCOUNT IN THE DRAWER (Owner, 18 Sep 2026): who is signed in, then My Trip · My Profile · Sign out as quiet rows */
 .a-macct { padding: 6px var(--a-gut) 0; }
+/* on a wide screen the account block reads in the menu's own 760 px column, above the rows it belongs to — it used to keep the
+   bare gutter and so began left of the header's edge from ~1180 px (Owner, 24 Sep 2026 · the wall) */
+@media (min-width: 900px) { .a-macct { max-width: 760px; margin: 0 auto; } }
 .a-macct-who { display: block; font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 10px; letter-spacing: 2.2px; text-transform: uppercase; color: var(--a-mute); padding: 6px 0 10px; }
 .a-macct[data-state="in"] .a-macct-who { color: var(--a-ink); }
 .a-macct-nav { display: flex; flex-wrap: wrap; gap: 0 22px; border-top: 1px solid var(--a-line); padding: 12px 0 10px; }
@@ -622,16 +645,16 @@ html[data-session="in"] [data-private-cta] { display: none !important; }
 .a-dest-foot hr { border: 0; border-top: 1px solid var(--a-rule, #E1DCD3); margin: 0 0 18px; }
 @media (min-width: 768px) { .a-dest .am { aspect-ratio: 16 / 10; } }
 @media (min-width: 900px) {
-  .a-dest .am { max-width: 1000px; margin: 0 auto; aspect-ratio: 16 / 9; }
-  .a-dest-text, .a-dest-foot { max-width: 1000px; margin-left: auto; margin-right: auto; padding-left: 0; padding-right: 0; }
+  .a-dest .am { max-width: var(--a-dest-w); margin: 0 auto; aspect-ratio: 16 / 9; }
+  .a-dest-text, .a-dest-foot { max-width: var(--a-dest-w); margin-left: auto; margin-right: auto; padding-left: 0; padding-right: 0; }
   .a-dest-text { padding-top: 34px; }
 }
 .refgal .aslide .am img[data-contain] { object-fit: contain; background: #E7E3DB; }
 .a-dest-map { margin: 26px var(--a-gut) 0; aspect-ratio: 1 / 1; background: #E7E3DB; }
 .a-dest-map img { width: 100%; height: 100%; object-fit: cover; display: block; }
-@media (min-width: 900px) { .a-dest-map { max-width: 1000px; margin-left: auto; margin-right: auto; } }
+@media (min-width: 900px) { .a-dest-map { max-width: var(--a-dest-w); margin-left: auto; margin-right: auto; } }
 .a-dest .refgal .atrk, .a-dest .refgal .arow, .a-dest .acar .atrk { width: 100%; max-width: none; margin-left: 0; margin-right: 0; padding-left: 0; padding-right: 0; scroll-padding-left: 0; }
-@media (min-width: 900px) { .a-dest > .refgal, .a-dest > .a-galcap { max-width: 1000px; padding: 0; } }
+@media (min-width: 900px) { .a-dest > .refgal, .a-dest > .a-galcap { max-width: var(--a-dest-w); padding: 0; } }
 .a-galcap { padding: 0 var(--a-gut); margin-top: 12px; font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--a-mute); }
 @media (min-width: 900px) { .a-sec > .refgal, .a-galcap { max-width: 1000px; margin-left: auto; margin-right: auto; } }
 .refgal .atrk { padding-left: 0; scroll-padding-left: 0; }
@@ -664,7 +687,7 @@ html[data-session="in"] [data-private-cta] { display: none !important; }
    photograph rests on the chapter's own left edge, the words' edge; stated last, as shorthand, so no earlier rule can leak in */
 .a-dest .refgal .atrk, .a-dest .acar .atrk { width: 100% !important; max-width: none !important; margin: 0 !important; padding: 0 !important; scroll-padding: 0 !important; scroll-padding-left: 0 !important; transform: none; }
 .a-dest > .refgal, .a-dest > .acar { margin-left: var(--a-gut); margin-right: var(--a-gut); padding: 0 !important; max-width: none; }
-@media (min-width: 900px) { .a-dest > .refgal, .a-dest > .acar { max-width: 1000px; margin-left: auto; margin-right: auto; } }
+@media (min-width: 900px) { .a-dest > .refgal, .a-dest > .acar { max-width: var(--a-dest-w); margin-left: auto; margin-right: auto; } }
 .a-dest .refgal .aslide:first-child { margin-left: 0; scroll-margin-left: 0; }
 .a-dest .refgal .aslide { scroll-snap-align: start; margin: 0; }
 
@@ -799,7 +822,10 @@ html[data-session="in"] [data-private-cta] { display: none !important; }
    line above and below, the count in the editorial serif, one quiet link. It
    never colours itself red, never pulses and never grows on a phone.
    ========================================================================== */
-.a-staybar { padding-left: var(--a-gut); padding-right: var(--a-gut); }
+/* THE WALL (Owner, 24 Sep 2026): the bar used to be padded by the gutter and then bounded by the WHOLE frame, so from
+   ~1180 px its words, its rule and "67 days left" ran one gutter past the header, the hero and every section around it.
+   It now sits on the one content wall like every other band; nothing inside it carries an outer edge of its own. */
+.a-staybar { padding-left: var(--a-edge); padding-right: var(--a-edge); }
 .a-staybar[data-stay-bar]:empty { display: none; }
 .sbar-in {
   max-width: var(--a-frame); margin: 0 auto; padding: 16px 0;
@@ -845,7 +871,7 @@ html[data-session="in"] [data-private-cta] { display: none !important; }
    ========================================================================== */
 /* THE TWO SIGNALS ARE ONE SEQUENCE (Owner, 23 Sep 2026): the object sits directly under the date it belongs to — a
    section's full rhythm between them would read as two unrelated announcements, and the pair would eat the phone. */
-.a-avail { padding-left: var(--a-gut); padding-right: var(--a-gut); }
+.a-avail { padding-left: var(--a-edge); padding-right: var(--a-edge); }
 .a-avail[data-availability]:empty { display: none; }
 .a-staybar { margin-bottom: 0; }
 .a-staybar + .a-avail { margin-top: calc(var(--a-rhythm) * .34); }
@@ -854,7 +880,7 @@ html[data-session="in"] [data-private-cta] { display: none !important; }
   --av-ink: #211F1C;              /* H&S Ink · the object's own numerals and sentence */
   --av-ring: 74px;                /* the instrument, never the hero */
   --av-col: 460px;                /* the column the instrument reads in — the page may be wider, it is not */
-  /* the object shares the page's frame, so its left edge is the date's left edge above it */
+  /* shares the page frame; the band is padded to the wall */
   max-width: var(--a-frame); margin: 0 auto; padding: 0; text-align: left;
 }
 .av-eyebrow { color: var(--a-mute); margin: 0 0 12px; }
@@ -1041,3 +1067,23 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px
 .a-pref button:focus-visible{outline:2px solid #74070E;outline-offset:2px}
 .a-pref-n{font-size:12px;line-height:1.5;color:#6B6964;margin:0;max-width:34ch}
 .a-mfoot .a-pref-n{text-transform:none;letter-spacing:normal;font-size:12px;color:#6B6964}
+
+/* THE FOOTER'S COMPOSITIONS (Owner, 24 Sep 2026). Six blocks — the wordmark, four columns of places, Guest Relations —
+   used to be poured into a four-track grid from 900 px, so two of them always fell onto a stray second row. Each width
+   now has a composition of its own, and the type never shrinks to make it fit:
+     phone        one column, as approved
+     600–767      the wordmark above; the four columns two by two; Guest Relations as the closing line
+     768–1199     the wordmark above; the four columns on ONE row; Guest Relations as the closing line
+     1200 +       ONE band: the wordmark with Guest Relations beneath it on the left, the four columns beside them */
+.sfoot a[href^="mailto:"] { overflow-wrap: anywhere; }
+@media (min-width: 600px) {
+  .sfoot-in { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 32px; row-gap: 36px; align-items: start; }
+  .sfoot-in > :first-child, .sfoot-in > :last-child { grid-column: 1 / -1; }
+}
+@media (min-width: 768px) { .sfoot-in { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (min-width: 1200px) {
+  .sfoot-in { grid-template-columns: minmax(290px, 1.3fr) repeat(4, minmax(0, 1fr)); grid-template-rows: auto 1fr; column-gap: 32px; row-gap: 30px; }
+  .sfoot-in > :first-child { grid-column: 1; grid-row: 1; }
+  .sfoot-in > :last-child { grid-column: 1; grid-row: 2; }
+  .sfoot-in > :not(:first-child):not(:last-child) { grid-row: 1 / span 2; }
+}

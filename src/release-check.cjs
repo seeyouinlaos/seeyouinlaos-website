@@ -509,6 +509,26 @@ gate('P7', 'Dress Code imagery real (23 — resort-01 retired by the owner), no 
     !langsOK ? 'the runtime must offer English and Thai only' : missing.length ? missing.length + ' required strings lack authored Thai: ' + missing.slice(0, 6).map((x) => JSON.stringify(x.slice(0, 40))).join(', ') : catalog.length + ' required strings have authored Thai; EN / TH only');
 }
 
+/* GATE R13 — THE NUMBER 13 (Owner, 24 Sep 2026 · D-29, permanent): 13 is never a guest-facing seat number, for any event and any
+ * future geometry; the dinner has 48 seats (A1–A12, A14–A25 · B1–B12, B14–B25), nothing renumbered, no substitute such as 12A. */
+{
+  const L = require('../assets/seatlabels.js');
+  const seatSrc = fs.readFileSync(path.join(__dirname, 'seating.js'), 'utf8');
+  const bad = [];
+  const two = (n) => (n < 10 ? '0' : '') + n;
+  for (const side of ['T', 'B']) for (let n = 1; n <= 30; n++) { const lab = L.label('D-' + side + '-' + two(n)); if (lab && /13$/.test(lab)) bad.push(lab); }
+  for (const side of ['L', 'R']) for (let r = 1; r <= 20; r++) for (let c = 1; c <= 3; c++) { const lab = L.label('C-' + side + '-' + two(r) + '-0' + c); if (lab && /\D13$/.test(lab)) bad.push(lab); }
+  for (const [ev, lab] of [['dinner', 'A13'], ['dinner', 'B13'], ['ceremony', 'A13'], ['ceremony', 'F13']]) if (L.seatId(ev, lab)) bad.push(ev + ' ' + lab + ' resolves');
+  const dinner = []; for (const side of ['T', 'B']) for (let n = 1; n <= 25; n++) { const lab = L.label('D-' + side + '-' + two(n)); if (lab) dinner.push(lab); }
+  const want = [...Array(25).keys()].map((i) => i + 1).filter((n) => n !== 13);
+  const exact = JSON.stringify(dinner) === JSON.stringify(want.map((n) => 'A' + n).concat(want.map((n) => 'B' + n)));
+  const engine = /export const NEVER_SEAT_NUMBER = 13;/.test(seatSrc) && /dinner:\s*\{ guestSeats: 48, top: 24, bottom: 24/.test(seatSrc);
+  const subst = ['*.html', 'assets', 'src'].length && require('child_process').execSync("grep -rlE '\\b[AB]12[AB]\\b' --include=*.html --include=*.js . 2>/dev/null | grep -v node_modules | grep -v '^./test/' | grep -v '^./docs/' || true", { cwd: ROOT, encoding: 'utf8' }).trim();
+  gate('R13', 'The number 13 is never a guest-facing seat number (D-29, permanent)',
+    !bad.length && exact && engine && !subst,
+    bad.length ? 'seat 13 reachable: ' + bad.join(', ') : !exact ? 'the dinner labels are not A1–A12, A14–A25 · B1–B12, B14–B25' : !engine ? 'src/seating.js lost NEVER_SEAT_NUMBER or the 48-seat capacity' : subst ? 'a substitute seat label (12A/12B) appears in ' + subst : '48 dinner seats, no 13 anywhere, no substitute, nothing renumbered');
+}
+
 /* GATE C1 — asset fingerprints (Owner, Edit 4 · 16 Sep 2026): every stylesheet and script a page references
  * carries the content hash of the file it names (src/asset-versions.cjs), so a fresh page can never pair
  * with a stale cached asset behind an edge cache. */

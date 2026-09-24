@@ -718,7 +718,8 @@ async function partyTables(env, who, origin) {
       if (out[id] || !bag.some((l) => l && ids.includes(String(l.id)))) continue;
       const mate = { invitationId: m.i, guestId: m.g };
       try { await withFirstName(env, mate, origin); } catch (e) { /* no name */ }
-      out[id] = mate.firstName || 'A guest';
+      /* the page names the party member from its own invitation when the server knows no name yet */
+      out[id] = { guestId: m.g, name: mate.firstName || '' };
     }
   }
   return Object.keys(out).length ? out : null;

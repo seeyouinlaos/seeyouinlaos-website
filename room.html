@@ -8,9 +8,9 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 .bag{width:44px;height:44px;display:flex;align-items:center;justify-content:center;position:relative;color:#313131;text-decoration:none}.bag .bgi{display:block}
 .bb{position:absolute;top:1px;right:0;min-width:14px;height:14px;padding:0 3px;background:#313131;color:#F3EEE7;font-size:8.5px;line-height:1;letter-spacing:0;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;display:none;align-items:center;justify-content:center;box-shadow:0 0 0 2px #F3EEE7;border-radius:1px}
 main{padding:0 0 70px;max-width:640px;margin:0 auto}
-.wrap{padding:0 24px}
+.wrap{padding:0 var(--a-gut,24px)}
 .ph{background:#E7E3DB center/cover no-repeat}
-.gal{position:relative;margin:0 24px}@media (max-width:480px){.gal{margin-bottom:48px}}   /* measured: the Aman room photograph is framed 24 px from each edge, 16:10 */
+.gal{position:relative;margin:0 var(--a-gut,24px)}@media (max-width:480px){.gal{margin-bottom:48px}}   /* measured: the Aman room photograph is framed 24 px from each edge, 16:10 */
 .trk{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;overscroll-behavior-x:contain}
 .trk::-webkit-scrollbar{display:none}
 .gal .ph{flex:0 0 100%;width:100%;aspect-ratio:16/10;scroll-snap-align:start;scroll-snap-stop:always}
@@ -18,8 +18,8 @@ main{padding:0 0 70px;max-width:640px;margin:0 auto}
 .gl{position:absolute;left:0;top:calc(100% + 4px);bottom:auto;right:64px;color:#6B6964;font-size:10.5px;letter-spacing:2px;text-transform:uppercase;line-height:22px;z-index:2}
 .gn{position:absolute;top:50%;transform:translateY(-50%);background:none;border:0;font-size:24px;color:#F3EEE7;text-shadow:0 1px 6px rgba(0,0,0,.5);width:44px;height:44px;cursor:pointer;z-index:2}
 .gp{left:0}.gx{right:0}
-.pend{width:calc(100% - 48px);margin:0 24px;aspect-ratio:16/10;background:#E7E3DB;display:flex;align-items:center;justify-content:center;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#6B6964}
-.intro{text-align:center;padding:38px 24px 6px}.intro-head{padding:28px 24px 22px}.intro-head h1{margin-bottom:0}
+.pend{width:calc(100% - 2 * var(--a-gut,24px));margin:0 var(--a-gut,24px);aspect-ratio:16/10;background:#E7E3DB;display:flex;align-items:center;justify-content:center;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#6B6964}
+.intro{text-align:center;padding:38px var(--a-gut,24px) 6px}.intro-head{padding:28px var(--a-gut,24px) 22px}.intro-head h1{margin-bottom:0}
 .eyebrow{font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:#6B6964;margin-bottom:8px}
 h1{font-family:'PP Editorial Old',serif;font-weight:200;font-size:26px;line-height:1.25;margin-bottom:12px}   /* measured: the Aman room title is 26 px */
 .body{font-size:14px;line-height:1.6;color:#4A4A4A;max-width:30em;margin:0 auto 8px}
@@ -36,12 +36,12 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:24px;margin:44
 .inc{border-top:1px solid #DAD9D7}
 .inc p{border-bottom:1px solid #DAD9D7;padding:13px 2px;font-size:14px;color:#4A4A4A;line-height:1.6}
 .ed{margin-top:46px}
-.ed .ph{width:calc(100% - 48px);margin:0 24px;aspect-ratio:16/10}
-.ed .cap{font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:#6B6964;margin:10px 24px 0}
+.ed .ph{width:calc(100% - 2 * var(--a-gut,24px));margin:0 var(--a-gut,24px);aspect-ratio:16/10}
+.ed .cap{font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:#6B6964;margin:10px var(--a-gut,24px) 0}
 .ed .body{margin-top:16px}
 .others{margin-top:56px;padding-bottom:8px}
-.others h2{margin:0 24px 22px}
-.oc{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-left:24px;padding:2px 24px 6px;-webkit-overflow-scrolling:touch;scrollbar-width:none;overscroll-behavior-x:contain}
+.others h2{margin:0 var(--a-gut,24px) 22px}
+.oc{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-left:var(--a-gut,24px);padding:2px var(--a-gut,24px) 6px;-webkit-overflow-scrolling:touch;scrollbar-width:none;overscroll-behavior-x:contain}
 .oc::-webkit-scrollbar{display:none}
 .occard{flex:0 0 calc(100% - 24px);   /* measured: 318 of 342 */scroll-snap-align:start;text-decoration:none;color:#313131;background:#FAF7F2;display:block}
 .occard .ph{width:100%;aspect-ratio:5/4}
@@ -51,13 +51,13 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:24px;margin:44
 .occard .od{font-size:14px;line-height:1.5;color:#4A4A4A;margin:0 0 12px}
 .occard .op{font-family:'PP Editorial Old',serif;font-size:16px}
 .occard .rsv{font-size:10.5px;letter-spacing:1.6px;text-transform:uppercase;color:#6B6964;display:block;margin-top:4px}
-.rnav{display:flex;align-items:center;gap:6px;padding:16px 24px 0}
+.rnav{display:flex;align-items:center;gap:6px;padding:16px var(--a-gut,24px) 0}
 .rail{position:relative;flex:1;height:1px;background:#DAD9D7;margin-right:14px}
 .rail i{position:absolute;left:0;top:-1px;height:3px;background:#313131;width:40%;transition:transform .12s linear}
 .rnav .rc{font-family:'PP Editorial Old',serif;font-size:13px;letter-spacing:1px;margin-right:2px}
 .rnav button{background:none;border:0;width:36px;height:36px;font-size:20px;color:#313131;cursor:pointer;padding:0}
 .buy{background:#FCFAF6;margin-top:24px;padding:28px 26px 32px}
-.detail-h{margin:48px 24px 0;font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:#6B6964;font-family:inherit;font-weight:400;border-top:1px solid #DAD9D7;padding-top:18px}
+.detail-h{margin:48px var(--a-gut,24px) 0;font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:#6B6964;font-family:inherit;font-weight:400;border-top:1px solid #DAD9D7;padding-top:18px}
 .buy h2{margin:0 0 4px;font-size:24px}
 .buy .win{border-top:1px solid #DAD9D7;padding:18px 0 22px;margin-top:16px}
 .buy .win:first-of-type{margin-top:20px}
@@ -92,14 +92,15 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:24px;margin:44
 [hidden]{display:none!important}
 .note{font-size:11px;color:#6B6964;margin-top:16px;line-height:1.7}
 .backrow{text-align:center;margin-top:34px}
+@media (min-width:600px) and (max-width:767px){.buy{margin-left:var(--a-gut);margin-right:var(--a-gut)}.plane{margin-left:var(--a-gut);margin-right:var(--a-gut);padding-left:0;padding-right:0;box-shadow:0 0 0 100vmax #FFFFFF;clip-path:inset(0 -100vmax)}.oc{margin-left:var(--a-gut);margin-right:var(--a-gut);padding-left:0;padding-right:0;scroll-padding-left:0}.ed .ph{width:auto;margin-left:var(--a-gut);margin-right:var(--a-gut)}}   /* the small tablet: the panels and the rail inside the wall (Owner, 24 Sep 2026) */
 .backrow a{font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:#313131;text-decoration:none;border-bottom:1px solid #313131;padding:8px 0 3px;display:inline-block;min-height:44px}
-</style><script src="assets/i18n/siyl-i18n.js?v=3a27503d"></script>
-<link rel="stylesheet" href="assets/prep.css?v=3b4d86a7">
-<link rel="stylesheet" href="assets/desktop.css?v=f66b6e82"><link rel="stylesheet" href="assets/aman.css?v=23c08c99"></head><body>
+</style><script src="assets/i18n/siyl-i18n.js?v=f27c8cbe"></script>
+<link rel="stylesheet" href="assets/prep.css?v=7d14f9af">
+<link rel="stylesheet" href="assets/desktop.css?v=f5b102ff"><link rel="stylesheet" href="assets/aman.css?v=8f9e3895"></head><body>
 <header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="cart.html" aria-label="My Bag"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main id="m"></main>
-<script src="assets/bag.js?v=43bc40c1"></script>
-<script src="assets/draft.js?v=03e8b4bc"></script>
+<script src="assets/bag.js?v=be955404"></script>
+<script src="assets/draft.js?v=dc38e681"></script>
 <script src="assets/shop-menu.js?v=755a9271"></script>
 <script src="assets/aman.js?v=338fd10f"></script>
 <script src="assets/rooms-data.js?v=701dd9a2"></script>
@@ -109,7 +110,7 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:24px;margin:44
 <script src="assets/stay.js?v=d7bc46dc"></script>
 <script src="assets/journey.js?v=fbd99373"></script>
 <script src="assets/wizard.js?v=f9c66d86"></script>
-<script type="module" src="assets/invite.mjs?v=7d3552fb"></script>
+<script type="module" src="assets/invite.mjs?v=4ee706e4"></script>
 <script>
 (function () {
 'use strict';

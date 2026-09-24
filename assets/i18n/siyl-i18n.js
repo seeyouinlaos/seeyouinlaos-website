@@ -92,6 +92,7 @@
       if ((depth || 0) > 2) return null;
       var dt = date(n); if (dt != null) return dt;
       var tailSep = / ·$/.exec(n); if (tailSep) { var tb = tr(n.slice(0, -2), (depth || 0) + 1); if (tb != null) return tb + ' ·'; }
+      if (/^· /.test(n)) { var hb = tr(n.slice(2), (depth || 0) + 1); if (hb != null) return '· ' + hb; }
       for (var i = 0; i < tpls.length; i++) {
         var m = tpls[i].re.exec(n); if (!m) continue;
         var out = tpls[i].th, bad = false;
@@ -103,6 +104,13 @@
         }
         if (bad) continue;
         return out;
+      }
+      /* several sentences built one after another: each an authored sentence, or no Thai at all */
+      var sents = n.match(/[^.!?]+[.!?]+(\s+|$)/g);
+      if (sents && sents.length > 1 && sents.join('').trim() === n) {
+        var ts = [], all = true;
+        for (var q = 0; q < sents.length && all; q++) { var one = tr(sents[q].trim(), (depth || 0) + 1); if (one == null) all = false; else ts.push(one); }
+        if (all) return ts.join(' ');
       }
       /* a composed label ("Bangkok · Restaurant", "· Travel · Bangkok → Vientiane", "Sühring, Bangkok — 4 photographs"):
          the pieces, each an authored string or a name kept as it is */
@@ -164,7 +172,7 @@
   de.setAttribute('data-lang', lang);
   de.setAttribute('data-cur', cur);
   if (lang === 'th' && document.readyState === 'loading') {
-    document.write('<link rel="stylesheet" href="assets/i18n/th.css?v=a34186fd"><script src="assets/i18n/th.js?v=0bdd0c5f"><\/script>');
+    document.write('<link rel="stylesheet" href="assets/i18n/th.css?v=a34186fd"><script src="assets/i18n/th.js?v=6d1c6d48"><\/script>');
   }
   var revealed = false;
   function reveal() { if (revealed) return; revealed = true; de.style.visibility = ''; }

@@ -74,14 +74,14 @@ B.money=function(n){return 'USD '+n.toLocaleString('en-US')};
 B.bar=function(){
 if(document.querySelector('.jbar'))return;
 var css=document.createElement('style');
-css.textContent='.jbar{position:fixed;left:0;right:0;bottom:0;z-index:55;background:#FCFAF6;border-top:1px solid #DAD9D7;padding:12px 20px calc(12px + env(safe-area-inset-bottom));display:none;transform:translateY(100%);transition:transform .26s cubic-bezier(.4,0,.2,1)}'+
-'.jbar.on{display:block}.jbar.in{transform:none}body.jbar-on{padding-bottom:92px}'+
+css.textContent='.jbar{position:fixed;left:0;right:0;bottom:0;z-index:55;background:#FCFAF6;border-top:1px solid #DAD9D7;padding:8px var(--a-edge,24px) calc(8px + env(safe-area-inset-bottom));display:none;transform:translateY(100%);transition:transform .26s cubic-bezier(.4,0,.2,1)}'+
+'.jbar.on{display:flex;align-items:center;gap:16px}.jbar.in{transform:none}body.jbar-on{padding-bottom:92px}'+
 '.jb-t{transition:opacity .2s}.jb-t.tick{opacity:.35}'+
 '@media (prefers-reduced-motion:reduce){.jbar,.jb-t{transition:none}}'+
-'.jb-in{max-width:640px;margin:0 auto;display:flex;align-items:baseline;gap:12px}'+
-'.jb-nav{max-width:640px;margin:0 auto;display:flex;justify-content:flex-end;min-height:0}.jb-nav a,.jb-nav button{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#6B6964;text-decoration:none;background:none;border:0;padding:4px 0;cursor:pointer;min-height:24px}.jb-nav a.on{color:#313131}.jb-top{margin-left:auto;color:#313131;visibility:hidden}.jb-top.show{visibility:visible}'+
-'.jb-l{font-size:10px;letter-spacing:2.2px;text-transform:uppercase;color:#6B6964}'+
-'.jb-t{font-family:"PP Editorial Old",serif;font-size:19px;margin-left:auto}'+
+'.jb-in{flex:1;min-width:0;display:flex;align-items:baseline;gap:12px}'+
+'.jb-nav{flex:none;display:flex;justify-content:flex-end;min-height:0;margin:-10px 0}.jb-nav a,.jb-nav button{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#6B6964;text-decoration:none;background:none;border:0;padding:4px 0;cursor:pointer;min-height:24px}.jb-nav a.on{color:#313131}.jb-top{margin-left:auto;color:#313131;visibility:hidden}.jb-top.show{visibility:visible}'+
+'.jb-l{font-size:10px;letter-spacing:2.2px;text-transform:uppercase;color:#6B6964;min-width:0}'+
+'.jb-t{font-family:"PP Editorial Old",serif;font-size:19px;line-height:1.2;margin-left:auto;white-space:nowrap}'+
 '.jb-a{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#313131;text-decoration:none;border-bottom:1px solid #313131;padding:6px 0 3px;margin-left:16px}';
 document.head.appendChild(css);
 var el=document.createElement('div');el.className='jbar';
