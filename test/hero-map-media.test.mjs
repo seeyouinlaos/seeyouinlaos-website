@@ -20,10 +20,18 @@ import { join } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { ROOT, src } from './sandbox.mjs';
 
-const VTE = ['002-vientiane-10-aerial-dusk.jpg', '002-vientiane-03-street.jpg', '002-vientiane-04-reclining-buddha.jpg',
-  '002-vientiane-05-patuxai.jpg', '002-vientiane-11-patuxai-from-above.jpg', '002-vientiane-06-temple-dusk.jpg',
-  '002-vientiane-07-pha-that-luang-dusk.jpg', '002-vientiane-08-pha-that-luang-gate.jpg', '002-vientiane-09-storm-sky.jpg'];
-const GONE = ['002-vientiane-01-cathedral-nave.jpg', '002-vientiane-02-sacred-heart.jpg'];
+/* EDIT 7 (Owner, 25 Sep 2026): the Bangkok and Vientiane galleries are the two Drive folders as they stand, in their own numbering */
+const VTE = ['002-vientiane-g01-aerial-dusk.jpg', '002-vientiane-g02-patuxai-from-above.jpg', '002-vientiane-g03-patuxai.jpg',
+  '002-vientiane-g04-reclining-buddha.jpg', '002-vientiane-g05-pha-that-luang-gate.jpg', '002-vientiane-g06-street.jpg'];
+const BKK = ['001-bangkok-g01-chao-phraya-express-boat.jpg', '001-bangkok-g02-iconsiam-skyline.jpg', '001-bangkok-g03-wires-and-train.jpg',
+  '001-bangkok-g04-alley-train.jpg', '001-bangkok-g05-mahanakhon-skytrain.jpg'];
+const GONE = ['002-vientiane-01-cathedral-nave.jpg', '002-vientiane-02-sacred-heart.jpg',
+  /* the frames Edit 7 replaced — deleted, not merely unlinked */
+  '001-bangkok-01-iconsiam-skyline.jpg', '001-bangkok-02-river-express-boat.jpg', '001-bangkok-03-mahanakhon-skytrain.jpg',
+  '001-bangkok-04-train-and-monorail.jpg', '001-bangkok-05-wires-and-train.jpg', '001-bangkok-06-alley.jpg',
+  '002-vientiane-03-street.jpg', '002-vientiane-04-reclining-buddha.jpg', '002-vientiane-05-patuxai.jpg', '002-vientiane-06-temple-dusk.jpg',
+  '002-vientiane-07-pha-that-luang-dusk.jpg', '002-vientiane-08-pha-that-luang-gate.jpg', '002-vientiane-09-storm-sky.jpg',
+  '002-vientiane-10-aerial-dusk.jpg', '002-vientiane-11-patuxai-from-above.jpg'];
 
 test('THE MAP OF LAOS · read, not decorated: the frame carries the map\'s own 838 × 980, contained, never cropped or stretched; a tablet held upright gives it the whole column; the photograph beside it takes the same height; no width overflows', () => {
   const css = src('assets/aman.css'), h = src('index.html');
@@ -47,27 +55,32 @@ test('THE MAP OF LAOS · read, not decorated: the frame carries the map\'s own 8
   assert.equal(dim, '838x980', 'the ratio in the stylesheet is the file\'s own');
 });
 
-test('VIENTIANE · the Drive folder 002 - City - Vientiane as it stands today: nine photographs, the two Sacred Heart cathedral frames gone from the page and from the disk, the aerial and Patuxai from above in place, every frame on disk and clean', () => {
+test('EDIT 7 · BANGKOK AND VIENTIANE: each destination gallery is its Drive folder as it stands (5 and 6 frames, the folders\' own order), every replaced frame deleted from the disk and from every page, the 4:3 originals scaled proportionally and cropped by the card, never stretched, no metadata published', () => {
   const d = src('destination.html');
-  const gal = d.slice(d.indexOf('<div class="dgal" aria-label="Vientiane">'), d.indexOf('<p class="a-galcap">Vientiane</p>'));
-  const frames = [...gal.matchAll(/<img src="assets\/images\/city\/([^"]+)"/g)].map((m) => m[1]);
-  assert.deepEqual(frames, VTE, 'the current folder, in the chapter\'s reading order');
-  for (const f of frames) { const p = join(ROOT, 'assets/images/city/' + f); assert.ok(existsSync(p), f); assert.ok(statSync(p).size < 900000, f + ' is web-sized'); }
+  const galOf = (label) => d.slice(d.indexOf('<div class="dgal" aria-label="' + label + '">'), d.indexOf('<p class="a-galcap">' + label + '</p>'));
+  const framesOf = (label) => [...galOf(label).matchAll(/<img src="assets\/images\/city\/([^"]+)"/g)].map((m) => m[1]);
+  assert.deepEqual(framesOf('Vientiane'), VTE, 'Vientiane_001 … Vientiane_006');
+  assert.deepEqual(framesOf('Bangkok'), BKK, 'bangkok_001 … bangkok_005');
+  const map = src('assets/images/ASSET-MAP.md');
+  for (const f of [...VTE, ...BKK]) {
+    const p = join(ROOT, 'assets/images/city/' + f);
+    assert.ok(existsSync(p), f); assert.ok(statSync(p).size < 900000, f + ' is web-sized');
+    assert.equal(readFileSync(p).indexOf(Buffer.from('Exif')), -1, f + ' carries no EXIF');
+    const [w, h] = execFileSync('magick', ['identify', '-format', '%w %h', p], { encoding: 'utf8' }).split(' ').map(Number);
+    if (f !== '002-vientiane-g02-patuxai-from-above.jpg') { assert.ok(Math.abs(w / h - 4 / 3) < 0.01, f + ' keeps the 4:3 of its original (' + w + ' × ' + h + ')'); assert.ok(w >= 1024, f + ' is not a thumbnail'); }
+    assert.match(map, new RegExp('\\| city/' + f.replace(/\./g, '\\.') + ' \\|[^\\n]*Drive file `[\\w-]{25,}`'), f + ' is traced to its Drive file');
+  }
+  assert.match(map, /17Yvh83Qs-SVs5JiCE9nDsgH0toFcBncr/); assert.match(map, /16LFuHoV3FUA7WFz_kph9Ehw68biDg061/);
   for (const g of GONE) {
     assert.ok(!existsSync(join(ROOT, 'assets/images/city/' + g)), g + ' is deleted, not merely unlinked');
     for (const page of ['index.html', 'destination.html', 'journeys.html', 'voyage.html']) assert.doesNotMatch(src(page), new RegExp(g.replace(/\./g, '\\.')), g + ' is not referenced by ' + page);
   }
-  assert.doesNotMatch(gal, /cathedral|Sacred Heart/i, 'no church remains among the photographs of the chapter');
-  /* the two new frames are the Owner's, and recorded as such */
-  const map = src('assets/images/ASSET-MAP.md');
-  assert.match(map, /002-vientiane-10-aerial-dusk\.jpg[^\n]*1wfsga36ChOFV4bXoItW3pWm-HXIAhFVr[^\n]*IMG_2778\.JPG/);
-  assert.match(map, /002-vientiane-11-patuxai-from-above\.jpg[^\n]*1CWnns9YFS1CHPIDzcRPvs6IzlFaHsLEJ/);
-  assert.match(map, /17Yvh83Qs-SVs5JiCE9nDsgH0toFcBncr/, 'the folder itself is traceable');
-  /* no camera metadata is published with a private photograph */
-  for (const f of ['002-vientiane-10-aerial-dusk.jpg', '002-vientiane-11-patuxai-from-above.jpg']) {
-    const b = readFileSync(join(ROOT, 'assets/images/city/' + f));
-    assert.equal(b.indexOf(Buffer.from('Exif')), -1, f + ' carries no EXIF');
-  }
+  assert.doesNotMatch(galOf('Vientiane'), /cathedral|Sacred Heart/i, 'no church remains among the photographs of the chapter');
+  /* cropped, never distorted: the card covers, nothing fills or stretches */
+  const css = src('assets/aman.css');
+  assert.match(css, /\.refgal \.aslide \.am img \{ position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;/);
+  assert.match(css, /\.cg-frame img \{ display: block; width: 100%; height: 100%; object-fit: cover; \}/);
+  assert.doesNotMatch(css, /object-fit: fill/);
 });
 
 test('THE VIENTIANE FILM · the Owner\'s "night of Vientiane" replaces the Buddha-statue clip everywhere, silent, local, small, with its own poster; no page still names the cloister', () => {
@@ -121,7 +134,7 @@ test('ITEM 12 (24 Sep 2026) · BEFORE THE WEDDING and THE WEDDING are the same c
   const gal = (label) => { const at = h.indexOf('<div class="cg am" data-cardgal aria-roledescription="carousel" aria-label="' + label); assert.ok(at > 0, label); return h.slice(at, h.indexOf('<div class="ac">', at)); };
   const frames = (card) => [...card.matchAll(/<div class="cg-frame(?: is-on)?"><a href="([^"]+)" tabindex="(?:0|-1)"><img (?:src|data-src)="(assets\/images\/[^"]+)"/g)].map((m) => [m[1], m[2]]);
   const before = frames(gal('Before the Wedding')), wed = frames(gal('The Wedding'));
-  assert.deepEqual(before.map((f) => f[1]), ['city/001-bangkok-skytrain-king-power-mahanakhon.jpg', 'city/001-bangkok-01-iconsiam-skyline.jpg', 'city/001-bangkok-02-river-express-boat.jpg', 'city/001-bangkok-03-mahanakhon-skytrain.jpg', 'city/001-bangkok-04-train-and-monorail.jpg', 'city/001-bangkok-05-wires-and-train.jpg', 'city/001-bangkok-06-alley.jpg', 'transport/train-no25-krung-thep-aphiwat.jpg', 'transport/train-no25-terminal-aerial.jpg', 'transport/train-no25-first-class-passenger-room.jpg', 'transport/train-no25-srt-train.jpg'].map((f) => 'assets/images/' + f));
+  assert.deepEqual(before.map((f) => f[1]), ['city/001-bangkok-skytrain-king-power-mahanakhon.jpg', ...BKK.map((f) => 'city/' + f), 'transport/train-no25-krung-thep-aphiwat.jpg', 'transport/train-no25-terminal-aerial.jpg', 'transport/train-no25-first-class-passenger-room.jpg', 'transport/train-no25-srt-train.jpg'].map((f) => 'assets/images/' + f));
   assert.deepEqual(wed.map((f) => f[1]), ['event/052-vow-ceremony-green-door.jpg', 'event/052-ceremony-green-gateway.jpg', 'experiences/vte-ongteu-01.jpg', 'experiences/vte-ongteu-03.jpg', 'temple/takbat-couple-giving-novice.jpg', 'temple/takbat-novices-with-bowls.jpg', 'temple/takbat-couple-offering-bowl.jpg', 'temple/sangkhathan-prepared-offerings.jpg', 'event/051-coffee-and-cake-patisserie.jpg', 'event/052-vow-ceremony-green-door-entrance.jpg', 'souphattra/heritage-arches-dusk.jpg', 'souphattra/heritage-room.jpg'].map((f) => 'assets/images/' + f));
   for (const [, f] of [...before, ...wed]) assert.ok(existsSync(join(ROOT, f)), f);
   for (const [href, f] of before) assert.equal(href, /\/transport\//.test(f) ? 'journeys.html#j-train' : 'journeys.html#j-bkk-stay', f);

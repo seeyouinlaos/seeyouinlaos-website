@@ -668,6 +668,8 @@ html[data-session="in"] [data-private-cta] { display: none !important; }
 .refgal .aslide .am { aspect-ratio: 3 / 4; background: #E7E3DB; }
 .refgal .aslide .am::after { display: none; }
 .refgal .aslide .am img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 12%; display: block; }
+/* EDIT 7 (25 Sep 2026): a 4:3 frame in the 3:4 card keeps its middle; the one whose subject stands off-centre is aimed, never stretched */
+.refgal .aslide .am img[src$="001-bangkok-g04-alley-train.jpg"] { object-position: 72% 50%; }
 .refgal .arow { margin-left: 0; margin-right: 0; padding: 0; }
 .refgal .refgal-count { font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 10px; letter-spacing: 2px; color: var(--a-mute); white-space: nowrap; }
 @media (min-width: 768px) { .refgal .aslide { flex: 0 0 calc(50% - 8px); } }
