@@ -15,6 +15,7 @@
 /* THE ONE QUESTIONNAIRE (PRQ-06-01 · 06-06 · 06-07 · 06-14): the short labels, the display forms and the after-dinner words
    come from the schema every page reads — this file keeps no copy of its own */
 import { PROFILE as Q_PROFILE, display, displayList, FINALE } from './questionnaire.js';
+import { isRelevant as stageRelevant, normalizeScope as scopeOf } from './stage-graph.js';
 /* THE GUEST'S LANGUAGE (Owner, 24 Sep 2026 · EN / TH): a guest who chose Thai receives their copy in Thai — the same authored
    dictionary as the pages (src/i18n-th.json → src/i18n-th.dict.js), the same locale core. The Guest Relations email stays English. */
 import I18N_CORE from './i18n-core.js';
@@ -99,6 +100,13 @@ export function dayWords(iso) {
 const esc = (t) => String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const money = (n) => 'USD ' + Number(n || 0).toLocaleString('en-US');
 
+const PART_WORDS = [['bangkok', 'Bangkok'], ['vientianePreWedding', 'Vientiane · Before the Wedding'], ['vientianeWedding', 'Vientiane · The Wedding'], ['china', 'China']];
+/* a date of birth as nobody can misread it: "4 September 1984 (1984-09-04)" — the stored value itself stays untouched */
+function birthWords(v) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(v || '').trim()); if (!m) return String(v || '').trim();
+  const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  return parseInt(m[3], 10) + ' ' + MONTHS[parseInt(m[2], 10) - 1] + ' ' + m[1] + ' (' + m[0] + ')';
+}
 /* ---- what the record says, in one readable model ---- */
 export function journeyModel(record) {
   const r = record && record.registration || {};
@@ -108,10 +116,19 @@ export function journeyModel(record) {
   const fullName = (g0.source && g0.source.fullName) || (legacy && (legacy.fullName || legacy.name)) || g0.name || guestId || 'Guest';
   const firstName = (g0.source && g0.source.preferredName) || g0.name || (legacy && legacy.name) || fullName.split(' ')[0];
   const partyName = gr.partyName || r.partyName || '';
+  /* THE PERSONAL DETAILS (Owner, 20 Sep 2026) — Guest Relations' email only, never the guest's. THE RECOVERY SNAPSHOT (Owner,
+     25 Sep 2026): the page sends them inside the guest record (guestRecord.contact), and the Worker stamps the server's own
+     stored copy on the record at the moment of sending (registration.personal) — read from there, never from
+     registration.contact (email and mobile only), which is why the date of birth never reached Guest Relations before */
+  const pers = r.personal && typeof r.personal === 'object' ? r.personal : {}, gc = gr.contact && typeof gr.contact === 'object' ? gr.contact : {}, rc = r.contact || {};
+  const ga = gc.address && typeof gc.address === 'object' ? gc.address : {};
+  const pv = (k, alt) => String(pers[k] || alt || '').trim();
+  const personal = { firstName: pv('firstName', gc.firstName), lastName: pv('lastName', gc.lastName), birthdate: pv('birthdate', gc.birthdate || rc.birthdate), nationality: pv('nationality', gc.nationality || rc.nationality),
+    address1: pv('address1', ga.line1), address2: pv('address2', ga.line2), postal: pv('postal', ga.postal), city: pv('city', ga.city), region: pv('region', ga.region), country: pv('country', ga.country) };
+  const addressLine = [personal.address1, personal.address2, [personal.postal, personal.city].filter(Boolean).join(' '), personal.region, personal.country].filter(Boolean).join(', ') || (ga.words || (rc.address && rc.address.words) || '');
   const contact = { email: (record.recipient && record.recipient.email) || (r.contact && r.contact.email) || (gr.contact && gr.contact.email) || (legacy && legacy.contact && legacy.contact.email) || '',
     phone: (record.recipient && record.recipient.phone) || (r.contact && r.contact.phone) || (gr.contact && gr.contact.phone) || (legacy && legacy.contact && legacy.contact.phone) || '',
-    /* THE PERSONAL DETAILS (Owner, 20 Sep 2026) — Guest Relations' email only, never the guest's */
-    birthdate: (r.contact && r.contact.birthdate) || '', nationality: (r.contact && r.contact.nationality) || '', address: (r.contact && r.contact.address && r.contact.address.words) || '' };
+    birthdate: birthWords(personal.birthdate), nationality: personal.nationality, address: addressLine };
   const personId = [r.contactId, r.couple].filter(Boolean).join(' · ');
   const rooms0 = record.rooms || null;
   /* NO FIXED ARRANGEMENT (Owner, 19 Sep 2026): every line is the guest's own selection — but the engine is the truth of a
@@ -186,9 +203,19 @@ export function journeyModel(record) {
   const total0 = stated == null ? null : ((dropped || withdrawn) ? linesTotal : stated);
   const total = total0;
   const upd = record.kind === 'update' && (record.version || 1) > 1;
-  return { guestId, fullName, firstName, partyName, contact, personId, stays, arranged, waitlisted, travel, experiences, wedding, finale, sangkhathan, sangkhathanState, templeJoining, away, seats, profile, allergy, allergyDetails, acks, docs, publication, total, hosts,
+  /* THE RECOVERY SNAPSHOT (Owner, 25 Sep 2026): everything else the guest submitted that Guest Relations needs to rebuild the
+     record after a reset — the identities, the name as the guest wrote it, the answer per journey part and per stage, the
+     party's own participation at the moment of sending, and every selection with its product code */
+  const scopeParts = gr.scope && typeof gr.scope === 'object' ? gr.scope : null;
+  const stageStates = r.stages && typeof r.stages === 'object' ? r.stages : null;
+  const partyMembers = Array.isArray(r.partyParticipation) ? r.partyParticipation : null;
+  const selections = lines0.map((x) => ({ id: x.id, name: x.name || x.id, variant: x.cls || x.variant || x.room || '', stay: x.stay || '', unit: x.unit || '', qty: Number(x.qty) || 1, price: x.price, date: x.date || '', party: x.party || '', request: !!x.request, interest: !!x.interest, complimentary: !!x.complimentary, deleted: deleted(x) || (STAGE_OF_STAY[x.id] && engineWaits.includes(STAGE_OF_STAY[x.id])) }));
+  const profileAll = Q_PROFILE.map((q) => ({ label: q.label, value: profileValue(g0.profile, q.key) })).filter((p) => p.value);
+  const recovery = { profileAll, personal, partyId: gr.partyId || r.partyId || '', contactId: r.contactId || '', couple: r.couple || '', lang: r.lang || '', scopeParts, stageStates, partyMembers, selections,
+    nameWritten: [personal.firstName, personal.lastName].filter(Boolean).join(' ') || (g0.submitted && g0.submitted.fullName) || '' };
+  return { recovery, guestId, fullName, firstName, partyName, contact, personId, stays, arranged, waitlisted, travel, experiences, wedding, finale, sangkhathan, sangkhathanState, templeJoining, away, seats, profile, allergy, allergyDetails, acks, docs, publication, total, hosts,
     /* WHERE THEY JOIN US (Owner, 18 Sep 2026): the guest's participation scope as sent — the words the guest chose, or a decline */
-    scope: typeof gr.scopeWords === 'string' && gr.scopeWords ? gr.scopeWords : (gr.scope && gr.scope.none ? 'Not joining this trip' : ''),
+    scope: typeof gr.scopeWords === 'string' && gr.scopeWords ? gr.scopeWords : (gr.scope && gr.scope.none ? 'Not joining this trip' : gr.scope ? PART_WORDS.filter(([k]) => gr.scope[k]).map(([, w]) => w).join(' · ') : ''),
     notJoining: !!(gr.scope && gr.scope.none),
     reference: record.submissionId || '', sentAt: record.lastSentAt || record.submittedAt || '', firstSentAt: record.firstSentAt || record.submittedAt || '', version: record.version || 1, upd, invitationId: record.invitationId || '' };
 }
@@ -315,6 +342,37 @@ function composeGuestMailEn(record) {
 }
 
 /* ---- THE GUEST RELATIONS EMAIL ---- */
+/* THE RECOVERY SNAPSHOT (Owner, 25 Sep 2026): Guest Relations' email is also the human-readable copy from which a guest's
+   submitted record can be rebuilt after a reset — every field the guest submitted, attributed to the person who submitted it,
+   in sections an operator reads top to bottom. Never a code, a bearer or a secret: none of them is ever part of a record. */
+const STAGE_NAMES = { 'bkk-stay': 'Bangkok · Before the Wedding (stay)', train: 'Special Express No. 25', prewed: 'Vientiane · Pre-Wedding Stay', wedstay: 'Vientiane · Wedding Stay', mu9646: 'MU9646 · Vientiane → Kunming', kmg: 'Kunming (stay)', c86: 'C86 · Kunming → Lijiang', ljg: 'Lijiang (stay)', return: 'Lijiang → Bangkok (return flights)', kempinski: 'Bangkok · Siam Kempinski (stay)' };
+const STATE_WORDS = { selected: 'Chosen', waitlisted: 'On the waiting list', declined: 'Not needed (the guest said so)', open: 'Not answered', excluded: 'Not part of the trip' };
+const PARTICIPATION_WORDS = { joining: 'Joining', 'not-joining': 'Not joining', unanswered: 'Not answered yet' };
+export function recoverySections(M) {
+  const R = M.recovery || {}, P = R.personal || {};
+  const row = (k, v) => [k, v == null || v === '' ? '—' : String(v)];
+  const identity = [row('Guest (invitation)', M.fullName), row('Name as the guest wrote it', R.nameWritten || '—'), row('First name', P.firstName), row('Last name', P.lastName),
+    row('Date of birth', M.contact.birthdate), row('Nationality', P.nationality), row('Person ID', M.guestId), row('Contact ID', R.contactId), row('Couple', R.couple),
+    row('Party', M.partyName), row('Party ID', R.partyId), row('Invitation', M.invitationId), row('Language', R.lang === 'th' ? 'Thai' : R.lang === 'en' ? 'English' : R.lang)];
+  const contact = [row('Email', M.contact.email), row('Mobile', M.contact.phone), row('Postal address', M.contact.address), row('Street and house number', P.address1), row('Address line 2', P.address2),
+    row('Postcode', P.postal), row('City', P.city), row('State, province or region', P.region), row('Country', P.country)];
+  const sc = R.scopeParts;
+  const participation = [row('Where they join us', M.scope || (sc ? '' : 'Not answered'))].concat(sc ? [row('Not joining this trip', sc.none ? 'Yes' : 'No')].concat(PART_WORDS.map(([k, w]) => row(w, sc.none ? 'No' : sc[k] ? 'Yes' : 'No'))) : [])
+    .concat((R.partyMembers || []).map((m) => row('Party member ' + (m.name ? m.name + ' ' : '') + '(' + m.guestId + ')', PARTICIPATION_WORDS[m.state] || m.state)));
+  /* a stage outside the parts the guest joins is not part of the trip — never "not answered" */
+  const nsc = sc ? scopeOf(sc) : null;
+  const stages = R.stageStates ? Object.keys(STAGE_NAMES).filter((k) => R.stageStates[k]).map((k) => row(STAGE_NAMES[k], nsc && !stageRelevant(k, nsc) ? STATE_WORDS.excluded : (STATE_WORDS[R.stageStates[k]] || R.stageStates[k]))) : [];
+  const selections = (R.selections || []).map((x) => row(x.name, ['code ' + x.id + (x.variant ? ' · ' + x.variant : '') + (x.unit ? ' · unit ' + x.unit : ''), 'quantity ' + x.qty, x.price != null ? money(x.price) + ' each' : 'no amount',
+    x.date ? 'date ' + x.date : '', x.party ? 'party ' + x.party : '', x.request ? 'request' : '', x.interest ? 'interest' : '', x.complimentary ? 'complimentary' : '', x.deleted ? 'not counted (withdrawn or on the waiting list)' : ''].filter(Boolean).join(' · ')));
+  /* every About You answer the record carries, whether or not the guest is at the wedding (the guest's email shows only those
+     that apply; the recovery copy keeps what was submitted) */
+  const about = [row('Food allergies', M.allergy ? (M.allergy === 'yes' ? 'Yes · ' + (M.allergyDetails || 'no details') : 'None') : 'Not answered')]
+    .concat((R.profileAll || []).map((p) => row(p.label, p.value))).concat((M.acks || []).map(([k, v]) => row(k, v)))
+    .concat((M.docs || []).map((d) => row('Document · ' + d.label, d.state))).concat(M.publication ? [row('Publication of photographs', M.publication)] : []);
+  const submission = [row('Reference', M.reference), row('Status', M.upd ? 'Updated trip' : M.notJoining ? 'Reply · not joining' : 'Initial submission'), row('Version', M.version),
+    row(M.upd ? 'Latest version sent' : 'Sent', whenWords(M.sentAt)), row('First sent', whenWords(M.firstSentAt))];
+  return [['Identity', identity], ['Contact', contact], ['Participation', participation], ['Stage answers', stages], ['Selections as submitted', selections], ['About You as submitted', about], ['Submission', submission]].filter(([, rows]) => rows.length);
+}
 export function composeOwnerMail(record, statusUrl) {
   const M = journeyModel(record);
   const subject = (M.upd ? 'Trip updated — ' : 'Trip received — ') + M.fullName + ' · ' + M.reference;
@@ -324,19 +382,22 @@ export function composeOwnerMail(record, statusUrl) {
     h1(M.upd ? 'Trip updated' : 'New trip received') + '</td></tr>' +
     (M.upd ? '<tr><td>' + label('Updated trip') + para('Latest version received ' + esc(whenWords(M.sentAt)) + '. It replaces the version first sent ' + esc(whenWords(M.firstSentAt)) + '.') + '</td></tr>' : '') +
     '<tr><td>' + kvTable([kvRow('Guest', M.fullName), M.partyName ? kvRow('Party', M.partyName) : '', M.personId ? kvRow('Person', M.personId) : '', kvRow('Email', M.contact.email || '—'), kvRow('Mobile', M.contact.phone || '—'),
-      M.contact.birthdate ? kvRow('Date of birth', M.contact.birthdate) : '', M.contact.nationality ? kvRow('Nationality', M.contact.nationality) : '', M.contact.address ? kvRow('Mailing address', M.contact.address) : '',
-      kvRow('Reference', M.reference), kvRow('Status', M.upd ? 'Updated trip' : 'Initial submission'), kvRow(M.upd ? 'Updated' : 'Sent', whenWords(M.sentAt)), M.scope ? kvRow('Where they join us', M.scope) : ''].filter(Boolean)) + '</td></tr>' + gap(14) + rule() +
+      kvRow('Date of birth', M.contact.birthdate || '—'), M.contact.nationality ? kvRow('Nationality', M.contact.nationality) : '', M.contact.address ? kvRow('Mailing address', M.contact.address) : '',
+      kvRow('Reference', M.reference), kvRow('Status', M.upd ? 'Updated trip' : M.notJoining ? 'Reply · not joining' : 'Initial submission'), kvRow(M.upd ? 'Updated' : 'Sent', whenWords(M.sentAt)), M.scope ? kvRow('Where they join us', M.scope) : ''].filter(Boolean)) + '</td></tr>' + gap(14) + rule() +
     journeySections(M, true);
+  const REC = recoverySections(M);
   if (docsRows.length) inner += section('Documents', kvTable(docsRows) + (missing.length ? '<p style="margin:10px 0 0;font-family:' + SANS + ';font-size:13px;color:' + INK + ';">Still needed: ' + esc(missing.join(', ')) + '</p>' : ''));
   if (M.total != null) inner += section('Cost', '<p style="margin:4px 0 6px;font-family:' + SERIF + ';font-size:26px;color:' + INK + ';">' + esc(money(M.total)) + '</p>' + small('The guest’s contribution as the website calculates it — nothing paid on the website.'));
   inner += section('Internal reference', kvTable([kvRow('Guest', M.guestId), kvRow('Invitation', M.invitationId), M.seats.ceremony.id ? kvRow('Ceremony seat record', M.seats.ceremony.id) : '', M.seats.dinner.id ? kvRow('Dinner seat record', M.seats.dinner.id) : '',
     kvRow('Submission', M.reference + ' · version ' + M.version), statusUrl ? kvRow('Status', statusUrl) : ''].filter(Boolean)));
+  /* the complete submitted record, section by section — the copy Guest Relations rebuilds from after a reset (last: it names the ids) */
+  inner += section('Recovery snapshot · the complete submitted record', REC.map(([title, rows]) => label(title) + kvTable(rows.map(([k, v]) => kvRow(k, v)))).join(gap(10)));
   inner += '</table>';
   const html = shell(subject, inner, 'Guest Relations');
   const T = [];
   T.push('SEE YOU IN LAOS — GUEST RELATIONS', '', M.upd ? 'Trip updated' : 'New trip received', '');
   if (M.upd) T.push('Latest version received ' + whenWords(M.sentAt) + ' (replaces the version first sent ' + whenWords(M.firstSentAt) + ')', '');
-  T.push('Guest: ' + M.fullName, M.partyName ? 'Party: ' + M.partyName : '', M.personId ? 'Person: ' + M.personId : '', 'Email: ' + (M.contact.email || '—'), 'Mobile: ' + (M.contact.phone || '—'), M.contact.birthdate ? 'Date of birth: ' + M.contact.birthdate : '', M.contact.nationality ? 'Nationality: ' + M.contact.nationality : '', M.contact.address ? 'Mailing address: ' + M.contact.address : '', 'Reference: ' + M.reference, 'Status: ' + (M.upd ? 'Updated trip' : 'Initial submission'), (M.upd ? 'Updated: ' : 'Sent: ') + whenWords(M.sentAt), M.scope ? 'Where they join us: ' + M.scope : '', '');
+  T.push('Guest: ' + M.fullName, M.partyName ? 'Party: ' + M.partyName : '', M.personId ? 'Person: ' + M.personId : '', 'Email: ' + (M.contact.email || '—'), 'Mobile: ' + (M.contact.phone || '—'), 'Date of birth: ' + (M.contact.birthdate || '—'), M.contact.nationality ? 'Nationality: ' + M.contact.nationality : '', M.contact.address ? 'Mailing address: ' + M.contact.address : '', 'Reference: ' + M.reference, 'Status: ' + (M.upd ? 'Updated trip' : M.notJoining ? 'Reply · not joining' : 'Initial submission'), (M.upd ? 'Updated: ' : 'Sent: ') + whenWords(M.sentAt), M.scope ? 'Where they join us: ' + M.scope : '', '');
   if (M.travel.length) { T.push('TRAVEL'); M.travel.forEach((t) => T.push('· ' + t.name + ' — ' + t.meta + ' — ' + money(t.price))); T.push(''); }
   if (M.waitlisted && M.waitlisted.length) { T.push('WAITING LIST'); M.waitlisted.forEach((w) => T.push('· ' + w.name + ' — ' + (w.position ? 'number ' + w.position : 'position not known yet') + (w.size > 1 ? ', for ' + w.size + ' places together' : '') + ' — to resolve')); T.push(''); }
   if (M.stays.length) { T.push('STAYS'); M.stays.forEach((x) => T.push('· ' + x.name + ' — ' + x.dates + (x.category ? ' — ' + x.category : '') + (x.room ? ' — ' + x.room : '') + ' — ' + money(x.price) + (x.note ? ' (' + x.note + ')' : ''))); T.push(''); }
@@ -347,5 +408,7 @@ export function composeOwnerMail(record, statusUrl) {
   if (M.docs.length || M.publication) { T.push('DOCUMENTS'); M.docs.forEach((d) => T.push('· ' + d.label + ': ' + d.state)); if (M.publication) T.push('· Publication of photographs: ' + M.publication); if (missing.length) T.push('Still needed: ' + missing.join(', ')); T.push(''); }
   if (M.total != null) T.push('COST', money(M.total), '');
   T.push('INTERNAL REFERENCE', 'Guest: ' + M.guestId, 'Invitation: ' + M.invitationId); if (M.seats.ceremony.id) T.push('Ceremony seat record: ' + M.seats.ceremony.id); if (M.seats.dinner.id) T.push('Dinner seat record: ' + M.seats.dinner.id); T.push('Submission: ' + M.reference + ' · version ' + M.version); if (statusUrl) T.push('Status: ' + statusUrl);
+  T.push('', 'RECOVERY SNAPSHOT · THE COMPLETE SUBMITTED RECORD', '');
+  REC.forEach(([title, rows]) => { T.push(title.toUpperCase()); rows.forEach(([k, v]) => T.push('· ' + k + ': ' + v)); T.push(''); });
   return { subject, html, text: T.filter((l, i) => l !== '' || (i > 0 && T[i - 1] !== '')).join('\n') };
 }

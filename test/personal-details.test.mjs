@@ -102,7 +102,7 @@ test('THE WORKER · the personal details are stored with the contact under the g
   const rec = JSON.parse(h.env.REG_KV.m.get('reg:INV-G001').v);
   assert.equal(rec.registration.contactId, 'CON003', 'the index\'s person id'); assert.equal(rec.registration.couple, 'COUPL002');
   const om = composeOwnerMail(rec), gm = composeGuestMail(rec);
-  assert.match(om.text, /Person: CON003 · COUPL002/); assert.match(om.text, /Date of birth: 1990-05-17/); assert.match(om.text, /Nationality: Thai, German/); assert.match(om.text, /Mailing address: Musterstraße 1, 10115 Hamburg, Germany/);
+  assert.match(om.text, /Person: CON003 · COUPL002/); assert.match(om.text, /Date of birth: 17 May 1990 \(1990-05-17\)/, 'unambiguous: the month in words, the stored value beside it'); assert.match(om.text, /Nationality: Thai, German/); assert.match(om.text, /Mailing address: Musterstraße 1, 10115 Hamburg, Berlin, Germany/, 'the address as the server stores it for this person (the recovery snapshot, 25 Sep 2026)');
   assert.ok(!/1990-05-17|Musterstraße|CON003|COUPL002/.test(gm.text + gm.html), 'the guest\'s own email carries no personal details and no register id');
   const gj = await h.w.fetch(req('/api/gr/journeys', { 'x-gr-token': 'secret-token-of-guest-relations' }, {}, 'POST'), h.env).then((x) => x.json());
   const mine = gj.journeys.find((j) => j.invitationId === 'INV-G001'); assert.equal(mine.contactId, 'CON003'); assert.equal(mine.couple, 'COUPL002'); assert.equal(mine.contact.nationality, 'Thai, German');

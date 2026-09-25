@@ -730,8 +730,10 @@
         guestId: me.guestId,
         partyId: p.partyId,
         partyName: p.partyName,
-        party: { label: this.partyNames() ? 'Party · ' + this.partyNames() : '', names: this.partyNames(), members: (p.members || []).map(function (m) { return m.guestId; }) },
-        contact: { email: this.contact('email'), phone: this.contact('phone'), birthdate: this.contact('birthdate'), nationality: this.contact('nationality'),
+        party: { label: this.partyNames() ? 'Party · ' + this.partyNames() : '', names: this.partyNames(), members: (p.members || []).map(function (m) { return m.guestId; }),
+          /* each member by the invitation's first name — the recovery copy names the partner even before they write anything */
+          people: (p.members || []).map(function (m) { return { guestId: m.guestId, name: m.preferredName || '' }; }) },
+        contact: { email: this.contact('email'), phone: this.contact('phone'), firstName: this.contact('firstName'), lastName: this.contact('lastName'), birthdate: this.contact('birthdate'), nationality: this.contact('nationality'),
           address: { line1: this.contact('address1'), line2: this.contact('address2'), postal: this.contact('postal'), city: this.contact('city'), region: this.contact('region'), country: this.contact('country'), words: this.addressWords() } },
         ...(me.contactId ? { contactId: me.contactId } : {}), ...(me.couple ? { couple: me.couple } : {}),
         scope: this.scope(),

@@ -527,6 +527,20 @@ async function handleRegister(request, env) {
         guestId: who.guestId, hosts: !!who.hosts, registration, text, rooms, recipient, draftFingerprint, contentFingerprint, fingerprintVersion: 2, mail: null };
       /* THE PERMANENT PERSON ID (Owner, 20 Sep 2026): CONxxx and COUPLxxx are the register's — stamped from the auth index, never taken from the body */
       if (registration && typeof registration === 'object') { const person = await personOf(env, new URL(request.url).origin, who); if (person.contactId) registration.contactId = person.contactId; else delete registration.contactId; if (person.couple) registration.couple = person.couple; else delete registration.couple; }
+      /* THE RECOVERY SNAPSHOT (Owner, 25 Sep 2026): the personal details as the server stores them for THIS person (the page's
+         copy fills only what the store lacks), and each other party member's participation at this moment — stamped on the
+         record so Guest Relations' email can rebuild the submitted record after a reset. Never a code, never a bearer. */
+      if (registration && typeof registration === 'object') {
+        const sc = await storedContact(env, who.invitationId), gcx = registration.guestRecord && registration.guestRecord.contact && typeof registration.guestRecord.contact === 'object' ? registration.guestRecord.contact : {};
+        const ga = gcx.address && typeof gcx.address === 'object' ? gcx.address : {}, fromPage = { firstName: gcx.firstName, lastName: gcx.lastName, birthdate: gcx.birthdate, nationality: gcx.nationality, address1: ga.line1, address2: ga.line2, postal: ga.postal, city: ga.city, region: ga.region, country: ga.country };
+        const personal = { guestId: who.guestId };
+        for (const k of PERSONAL_KEYS) { const v = (sc && typeof sc[k] === 'string' && sc[k].trim()) || (typeof fromPage[k] === 'string' ? fromPage[k].trim().slice(0, PERSONAL_MAX[k] || 120) : ''); personal[k] = k === 'birthdate' && v && !validBirthdate(v) ? '' : v; }
+        registration.personal = personal;
+        try { const tr = await partyTravel(env, who, new URL(request.url).origin); if (tr) { const names = {}; try { const entries = await loadIndex(env, new URL(request.url).origin); for (const e of Object.values(entries || {})) if (e && e.p === who.partyId && e.g !== who.guestId) { const mate = { invitationId: e.i, guestId: e.g }; try { await withFirstName(env, mate, new URL(request.url).origin); } catch (x) { /* no name */ } names[e.g] = mate.firstName || ''; } } catch (x) { /* names are a courtesy */ }
+          const people = registration.guestRecord && registration.guestRecord.party && Array.isArray(registration.guestRecord.party.people) ? registration.guestRecord.party.people : [];
+          const inviteName = (g) => { const x = people.find((m) => m && m.guestId === g); return x && typeof x.name === 'string' ? x.name.slice(0, 80) : ''; };
+          registration.partyParticipation = Object.entries(tr.members).map(([g, state]) => ({ guestId: g, name: names[g] || inviteName(g), state })); } } catch (e) { /* unknown: the email says nothing about the party's answers */ }
+      }
       const prev = await env.REG_KV.get(regKey);
       await env.REG_KV.put(regKey, JSON.stringify(record), { metadata: { invitationId, submittedAt: record.submittedAt, submissionId, version, lastSentAt: now } });
       if (prev) {
@@ -741,7 +755,8 @@ async function mateScope(env, invitationId) {
   const fromDraft = g && g.scope ? graphScope(g.scope) : null;
   if (fromDraft) return fromDraft;
   let rec = null; try { rec = JSON.parse(await env.REG_KV.get('reg:' + invitationId) || 'null'); } catch (e) { rec = null; }
-  const gr = rec && rec.guestRecord;
+  /* the sent record keeps the page's guest record under its registration */
+  const gr = rec && ((rec.registration && rec.registration.guestRecord) || rec.guestRecord);
   return gr && gr.scope ? graphScope(gr.scope) : null;
 }
 async function partyTravel(env, who, origin) {
