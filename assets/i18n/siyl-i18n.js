@@ -172,7 +172,7 @@
   de.setAttribute('data-lang', lang);
   de.setAttribute('data-cur', cur);
   if (lang === 'th' && document.readyState === 'loading') {
-    document.write('<link rel="stylesheet" href="assets/i18n/th.css?v=a34186fd"><script src="assets/i18n/th.js?v=6d1c6d48"><\/script>');
+    document.write('<link rel="stylesheet" href="assets/i18n/th.css?v=39573186"><script src="assets/i18n/th.js?v=6d1c6d48"><\/script>');
   }
   var revealed = false;
   function reveal() { if (revealed) return; revealed = true; de.style.visibility = ''; }
@@ -301,5 +301,26 @@
     prefsHtml: prefsHtml, paintPrefs: paintPrefs, setLang: setLang, setCurrency: setCurrency,
     misses: function () { return Object.keys(MISSES); }
   };
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
+  /* A PAGE NEVER STAYS ON AN OLD RELEASE (Owner, 25 Sep 2026): a tab restored from the back/forward cache, or brought back after
+     a while, may still show an earlier release (the iPhone at 01:58 showed the page of the day before). The versions of the
+     page's own assets are its signature: when the page the server serves now carries another signature, it is reloaded —
+     once per release, never in a loop, and only for the page's own address. */
+  function sigOf(list) { var out = []; for (var i = 0; i < list.length; i++) { var m = /[?&]v=([0-9a-f]{8})/.exec(list[i] || ''); if (m) out.push(m[1]); } return out.sort().join('.'); }
+  function sigHere() { var l = []; var els = document.querySelectorAll('script[src],link[href]'); for (var i = 0; i < els.length; i++) l.push(els[i].getAttribute('src') || els[i].getAttribute('href')); return sigOf(l); }
+  var SIG = null;
+  function fresh() {
+    if (!window.fetch || !SIG) return;
+    fetch(location.pathname + location.search, { cache: 'no-store', credentials: 'same-origin' }).then(function (r) { return r.ok ? r.text() : null; }).then(function (t) {
+      if (!t) return;
+      var now = sigOf(t.match(/(?:src|href)="[^"]*\?v=[0-9a-f]{8}"/g) || []);
+      if (!now || now === SIG) return;
+      try { if (sessionStorage.getItem('siyl.reloaded') === now) return; sessionStorage.setItem('siyl.reloaded', now); } catch (e) { /* no storage: reload once anyway */ }
+      location.reload();
+    }).catch(function () { /* offline: the page stays as it is */ });
+  }
+  var hiddenAt = 0;
+  document.addEventListener('visibilitychange', function () { if (document.hidden) hiddenAt = Date.now(); else if (hiddenAt && Date.now() - hiddenAt > 5 * 60 * 1000) fresh(); });
+  window.addEventListener('pageshow', function (e) { if (e.persisted) fresh(); });
+  function start0() { SIG = sigHere(); start(); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start0); else start0();
 })();

@@ -182,6 +182,8 @@
       var v = state.party && state.party[id]; if (!v) return null;
       if (typeof v === 'string') return v;
       var G = window.SIYL_GUEST, n = v.name || (G && G.nameOf ? G.nameOf(v.guestId) : '');
+      /* a page without the guest module (tea, experiences): the party as the invitation itself carries it */
+      if (!n) { try { var au = JSON.parse(localStorage.getItem('siyl.auth') || 'null'), mm = (au && au.members) || []; for (var i = 0; i < mm.length; i++) if (mm[i].guestId === v.guestId) n = mm[i].preferredName || ''; } catch (e) { /* no name */ } }
       return String(n || '').split(/\s+/)[0] || 'the other guest';
     },
     /* PUSH: this device's complete draft to the server. reason: 'auto' | 'save' | 'continue' | 'send' */

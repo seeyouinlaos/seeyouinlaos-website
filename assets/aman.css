@@ -80,6 +80,12 @@ header.hd::after {
   bottom: 0; height: 1px; background: var(--a-line); opacity: .8;
 }
 header.hd { border-bottom: 0 !important; }
+/* TEXT NEVER SLICED BY THE HEADER (Owner, 25 Sep 2026): content passing under the sticky header fades out over a short ivory
+   band instead of being cut at the hairline — the header stays sticky, nothing is hidden at rest (scroll-padding below) */
+header.hd::before {
+  content: ''; position: absolute; left: 0; right: 0; top: 100%; height: 20px; pointer-events: none;
+  background: linear-gradient(to bottom, #F2ECE1 0%, rgba(242, 236, 225, 0) 100%);
+}
 /* THE ANCHOR UNDER THE STICKY HEADER (Owner, 21 Sep 2026 · the iPad): a same-page link — the venue's way to #dinner, the
    anchor rail — lands its section below the header band, never beneath it: the header's ~56 px, the 14 px a revealing
    section still travels at the moment of the jump, and a quiet gap. Native anchor navigation, no script scroll. */
@@ -279,7 +285,7 @@ a.am { display: block; text-decoration: none; }
 .a-hero .am { width: 100%; height: auto; aspect-ratio: 1 / 1; background: #E7E3DB center/cover no-repeat; }   /* measured: the Aman mobile references frame a square photograph (341 × 341), never full-bleed */
 .a-hero .ah {
   position: static; padding: 18px 0 0; color: var(--a-ink);
-  text-shadow: 0 1px 20px rgba(0,0,0,.45);
+  text-shadow: none;   /* W7-061: the headline now sits on the ivory below the photograph — the old over-image shadow only smudged it */
 }
 .a-hero .ah .a-eyebrow { color: var(--a-mute); opacity: 1; margin-bottom: 8px; }
 .a-hero h1 {
@@ -1087,3 +1093,5 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px
   .sfoot-in > :last-child { grid-column: 1; grid-row: 2; }
   .sfoot-in > :not(:first-child):not(:last-child) { grid-row: 1 / span 2; }
 }
+/* the step pages carry their own sticky step bar under the header: the fade sits under that bar instead (prep.css) */
+body:has(.prep-bar) header.hd::before { display: none; }

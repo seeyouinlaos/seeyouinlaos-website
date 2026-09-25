@@ -1084,3 +1084,5 @@ body.seatbar-on .prep-foot .prep-foot-note { display: none; }
 #about-you .p-choice .p-sel{text-transform:none;letter-spacing:.3px;font-size:13px}
 /* PRQ-04-20: below 480 px a long amount (“USD 0 · Complimentary”, “Not in your total”) takes its own row under the line body */
 @media (max-width:479px){#items .p-line,.cart-line .p-line{flex-wrap:wrap}#items .p-line-amt,.cart-line .p-line-amt{flex-basis:calc(100% - 72px - var(--s4,16px));max-width:calc(100% - 72px - var(--s4,16px));margin-left:calc(72px + var(--s4,16px));text-align:left;white-space:normal}#items .p-line-amt .t-l1,.cart-line .p-line-amt .t-l1{text-align:left}}
+/* content passing under the sticky step bar fades out over a short band instead of being cut (Owner, 25 Sep 2026) */
+.prep-bar::before { content: ''; position: absolute; left: 0; right: 0; top: 100%; height: 16px; pointer-events: none; background: linear-gradient(to bottom, var(--p-paper), transparent); }

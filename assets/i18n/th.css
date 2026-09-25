@@ -10,3 +10,5 @@ html[lang="th"] body { line-height: 1.65; }
 html[lang="th"] h1, html[lang="th"] h2, html[lang="th"] h3, html[lang="th"] h4, html[lang="th"] .t-h1, html[lang="th"] .t-h2, html[lang="th"] .t-h3 { line-height: 1.4 !important; padding-top: .06em; }
 html[lang="th"] body * { overflow-wrap: break-word; word-break: normal; line-break: normal; }
 html[lang="th"] button, html[lang="th"] .x-cta, html[lang="th"] .cta, html[lang="th"] a.a-link { line-height: 1.5; height: auto; min-height: 44px; }
+/* Thai headings break into balanced lines — never one short word left alone on the last line (วัน / งาน) */
+html[lang="th"] h1, html[lang="th"] h2, html[lang="th"] h3, html[lang="th"] .t-h1, html[lang="th"] .t-h2 { text-wrap: balance; }

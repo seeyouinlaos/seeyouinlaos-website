@@ -110,12 +110,16 @@
     /* the account block is the invitation module's to fill (assets/invite.mjs) — tell it the drawer exists */
     try { document.dispatchEvent(new CustomEvent('siyl:menu')); } catch (e) { /* an old browser: the module fills it on load */ }
 
+    /* opening and closing the menu never moves the page: the scroll position is kept and restored, and focus moves without
+       scrolling (WebKit scrolled to the focused menu button in the sticky header, 86 px up) */
+    var keptY = null;
     function set(open) {
+      if (open && keptY === null) keptY = window.scrollY;
       document.body.classList.toggle('a-open', open);
       var t = document.querySelector('.hb, #menu-open');
       if (t) t.setAttribute('aria-expanded', String(open));
-      if (open) menu.querySelector('.a-mx').focus();
-      else if (t) t.focus();
+      try { if (open) menu.querySelector('.a-mx').focus({ preventScroll: true }); else if (t) t.focus({ preventScroll: true }); } catch (e) { /* an old browser: focus as before */ }
+      if (!open && keptY !== null) { var y = keptY; keptY = null; if (Math.abs(window.scrollY - y) > 1) window.scrollTo(0, y); requestAnimationFrame(function () { if (Math.abs(window.scrollY - y) > 1) window.scrollTo(0, y); }); }
     }
     menu.querySelector('.a-mx').addEventListener('click', function () { set(false); });
     scrim.addEventListener('click', function () { set(false); });
