@@ -140,11 +140,11 @@
       /* a unit full only by a place kept for this guest's party is theirs to join (PRQ-03-01) */
       return this.units(win, slug).some(function (u) { return u.eligible && (!u.full || u.occupants.some(function (o) { return o.placeholder && o.party; })); });
     },
-    /* the party's size (SIYL_JOURNEY.partySize — the members of the party, 1–6) */
-    need: function () { var J = window.SIYL_JOURNEY; if (J && J.partySize) return J.partySize(); var a = auth(); var n = a && Array.isArray(a.members) ? a.members.length : 1; return Math.max(1, Math.min(6, n || 1)); },
+    /* the places a booking of this stage takes (SIYL_JOURNEY.partySize — the guest and the party members who travel in it, 1–6) */
+    need: function (stage) { var J = window.SIYL_JOURNEY; if (J && J.partySize) return J.partySize(stage); var D = window.SIYL_DRAFT, k = stage && D && D.partyNeed ? D.partyNeed(this.stageOf(stage)) : null; if (k) return k; var a = auth(); var n = a && Array.isArray(a.members) ? a.members.length : 1; return Math.max(1, Math.min(6, n || 1)); },
     /* can this category take the guest's WHOLE party (Owner, 19 Sep 2026)? — the one question every Choose button asks */
     canTake: function (win, slug, need) {
-      need = need || this.need();
+      need = need || this.need(win);
       if (!this.tracked(win, slug)) return true;
       if (this.mineFor(win, slug)) return true;
       return need > 1 ? !!this.unitForParty(win, slug, need) : this.fits(win, slug);
@@ -209,7 +209,7 @@
       /* canTake already counts a place kept for the viewer's party as theirs (fits / fitsParty) */
       if (!this.tracked(win, slug) || this.canTake(win, slug)) return '';
       if (this.soldOut(win, slug)) return 'Sold out';
-      var n = this.need();
+      var n = this.need(win);
       return n > 1 ? 'No room here for the ' + n + ' of you together' : 'Sold out';
     },
     scarce: function (win, slug) { var s = this.summary(win, slug); return !!s && s.free > 0 && s.free <= 2; },
@@ -285,7 +285,7 @@
       if (!view || !view.units) return true;             /* the engine unread: never offer the line on a guess */
       if (this.mine(stage)) return true;
       var self = this, P = window.SIYL_STAY_PLAN, c = this.complimentary();
-      need = need || this.need();
+      need = need || this.need(stage);
       return this.stageKeys(stage).some(function (k) {
         if (P && k === P.COMPLIMENTARY.key && c && !c.open) return false;   /* the Guest House after 30 November or full */
         var i = k.indexOf('/'); return self.canTake(k.slice(0, i), k.slice(i + 1), need);
@@ -319,7 +319,7 @@
     wait: function (stage, size, wanted) {
       var a = auth();
       if (!a || !a.guestId) return Promise.resolve({ ok: false, error: 'not signed in' });
-      return fetch(API + '/wait', { method: 'POST', headers: headers(true), body: JSON.stringify({ invitationId: a.invitationId, guestId: a.guestId, stage: stage, size: size || U.need(), wanted: wanted || [] }) })
+      return fetch(API + '/wait', { method: 'POST', headers: headers(true), body: JSON.stringify({ invitationId: a.invitationId, guestId: a.guestId, stage: stage, size: size || U.need(stage), wanted: wanted || [] }) })
         .then(function (r) { return r.json().then(function (d) { d.status = r.status; return d; }); })
         .then(function (d) { if (d && d.units) { seq++; view = d; rememberWaits(d); announce(); } else U.load(true); return d; })
         .catch(function () { return { ok: false, error: 'unreachable' }; });

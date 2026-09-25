@@ -53,7 +53,7 @@ import { identify, owns, loadIndex } from './auth.js';
 import { SEED } from './inventory-seed.js';
 import { stageOf } from './rooms.js';
 import { composeGuestMail, composeOwnerMail } from './mail-templates.js';
-import { completion as graphCompletion, normalizeScope as graphScope, isRelevant as graphRelevant, STAGES as GRAPH_STAGES, STAGE_IDS as GRAPH_IDS } from './stage-graph.js';
+import { completion as graphCompletion, normalizeScope as graphScope, isRelevant as graphRelevant, STAGES as GRAPH_STAGES, STAGE_IDS as GRAPH_IDS, participationOf as graphParticipation, partyNeed as graphPartyNeed, travelsIn as graphTravels } from './stage-graph.js';
 import { profileMissing as questionnaireMissing, finaleOf, PHOTO_LABEL } from './questionnaire.js';   /* the one questionnaire: what About You and the wedding night require (Owner, 22 Sep 2026) */
 
 /* ---- the Guest Relations gate (F + G) ------------------------------------
@@ -98,7 +98,12 @@ export default {
         headers.set('x-gr-verified', 'yes');
       } else {
         const who = await identify(request, env);
-        if (who) headers.set('x-siyl-identity', JSON.stringify(await withFirstName(env, who, url.origin, request)));
+        if (who) {
+          const id = await withFirstName(env, who, url.origin, request);
+          /* the engine books only the members who travel in a stage (never a member who is not joining) */
+          try { const tr = await partyTravel(env, who, url.origin); if (tr) { id.partyNeed = tr.need; id.partyTravels = tr.travels; } } catch (e) { /* unknown: the engine keeps its own rule */ }
+          headers.set('x-siyl-identity', JSON.stringify(id));
+        }
         else if (GUEST_ROOMS_WRITES.includes(op)) return json({ ok: false, error: 'unauthorised' }, 401, corsHeaders(request));
         if (GUEST_ROOMS_WRITES.includes(op) && await resetLocked(env)) return json({ ok: false, error: 'the room engine is being reset — try again in a moment', retry: true }, 503, corsHeaders(request));
       }
@@ -724,6 +729,36 @@ async function partyTables(env, who, origin) {
   }
   return Object.keys(out).length ? out : null;
 }
+/* WHO OF THE PARTY TRAVELS (Owner, 25 Sep 2026 · mixed attendance — a guest reported that a booking counted her husband,
+   who is not coming): the other members of the guest's own party and their CURRENT answer — their draft first (their latest
+   word), else what they sent, else unanswered. Returned per member as a participation word and, per stay stage, the places
+   a booking of the guest needs (src/stage-graph.js · partyNeed). The couple stays a couple; only the count of those
+   travelling follows the answers. Read-only; nothing of another guest's trip is returned but their participation. */
+const TRAVEL_STAGES = GRAPH_STAGES.filter((s) => s.kind === 'stay').map((s) => s.key);
+async function mateScope(env, invitationId) {
+  let d = null; try { d = await storedDraft(env, invitationId); } catch (e) { d = null; }
+  let g = null; try { g = JSON.parse((d && d.keys && d.keys['siyl.guest']) || 'null'); } catch (e) { g = null; }
+  const fromDraft = g && g.scope ? graphScope(g.scope) : null;
+  if (fromDraft) return fromDraft;
+  let rec = null; try { rec = JSON.parse(await env.REG_KV.get('reg:' + invitationId) || 'null'); } catch (e) { rec = null; }
+  const gr = rec && rec.guestRecord;
+  return gr && gr.scope ? graphScope(gr.scope) : null;
+}
+async function partyTravel(env, who, origin) {
+  if (!who || !who.partyId || !env.REG_KV) return null;
+  let entries = null; try { entries = await loadIndex(env, origin || lastOrigin); } catch (e) { return null; }
+  const mates = Object.values(entries || {}).filter((e) => e && e.p === who.partyId && e.i && e.i !== who.invitationId);
+  const scopes = [], members = {};
+  for (const m of mates) { const sc = await mateScope(env, m.i); scopes.push(sc); members[m.g] = graphParticipation(sc); }
+  const own = await mateScope(env, who.invitationId);
+  /* need: the places a booking by this guest takes (the guest and the others who travel) · travels: per member of the party
+     (the guest by their own answer), the stay stages they travel in — what the engine may keep places for */
+  const need = {}, travels = {};
+  for (const k of TRAVEL_STAGES) need[k] = graphPartyNeed(k, scopes);
+  const everyone = [[who.guestId, own]].concat(mates.map((m, i) => [m.g, scopes[i]]));
+  for (const [g, sc] of everyone) { travels[g] = {}; for (const k of TRAVEL_STAGES) travels[g][k] = graphTravels(k, sc); }
+  return { members, need, travels };
+}
 async function handleDraft(request, env) {
   const who = await identify(request, env);
   if (!who) return json({ ok: false, error: 'unauthorised' }, 401, corsHeaders(request));
@@ -733,7 +768,8 @@ async function handleDraft(request, env) {
     const submission = await submissionFor(env, who, d);
     let resetAt = actorEpoch; if (!resetAt) { try { resetAt = await resetEpoch(env); } catch (e) { return json({ ok: false, error: 'draft store unavailable', retry: true }, 503, corsHeaders(request)); } }
     const party = await partyTables(env, who, new URL(request.url).origin);
-    return json({ ok: true, invitationId: who.invitationId, guestId: who.guestId, draft: d ? { keys: d.keys, updatedAt: d.updatedAt, savedAt: d.savedAt, clientUpdatedAt: d.clientUpdatedAt || null } : null, submission, ...(party ? { party } : {}), ...(resetAt ? { resetAt } : {}) }, 200, corsHeaders(request));
+    let travel = null; try { travel = await partyTravel(env, who, new URL(request.url).origin); } catch (e) { travel = null; }
+    return json({ ok: true, invitationId: who.invitationId, guestId: who.guestId, ...(travel ? { travel } : {}), draft: d ? { keys: d.keys, updatedAt: d.updatedAt, savedAt: d.savedAt, clientUpdatedAt: d.clientUpdatedAt || null } : null, submission, ...(party ? { party } : {}), ...(resetAt ? { resetAt } : {}) }, 200, corsHeaders(request));
   }
   if (request.method !== 'PUT' && request.method !== 'POST') return json({ ok: false, error: 'method not allowed' }, 405, corsHeaders(request));
   let body; try { const raw = await request.text(); if (raw.length > MAX_BODY) return json({ ok: false, error: 'payload too large' }, 413, corsHeaders(request)); body = JSON.parse(raw); } catch (e) { return json({ ok: false, error: 'invalid JSON' }, 400, corsHeaders(request)); }

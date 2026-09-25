@@ -67,6 +67,11 @@ const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 const STAGE_OF = { 'bkk-stay': 'bkk-stay', prewed: 'prewed', wedstay: 'wedstay', guesthouse: 'wedstay', kmg: 'kmg', ljg: 'ljg', kempinski: 'kempinski' };
 export function stageOf(key) { const w = String(key || '').split('/')[0]; return STAGE_OF[w] || w; }
 export const STAGES = ['bkk-stay', 'prewed', 'wedstay', 'kmg', 'ljg', 'kempinski'];
+/* the places a party booking of a stage may take: never more than the members who travel in it (the Worker's partyNeed) */
+export function capNeed(identity, stage, asked) {
+  const cap = identity && identity.partyNeed && Number(identity.partyNeed[stage]);
+  return cap >= 1 ? Math.max(1, Math.min(asked, cap)) : asked;
+}
 
 /* the persistent units of one category — pure, deterministic, seed-derived; nothing is reserved for anyone */
 export function unitsOf(key) {
@@ -145,6 +150,32 @@ export class Rooms {
   /* PARTY PLACES (Owner, 19 Sep 2026 · never partially booked): when a guest of a party of N takes a unit with `need` N, the
      places the absent members will take are KEPT in the unit as party places — a stranger cannot take them; each party
      member's own join consumes one; they leave with the last party member, and a member who says "not joining" gives one back */
+  /* the places kept for this guest's party in a stage, trimmed to the members who still travel there: one kept place for each
+     member who travels in the stage (by their own answer) and holds no place of their own in it; the surplus goes (newest
+     first). Only anonymous kept places — never a guest's own hold. A waiting-list entry of this guest asks for no more places
+     than travel. */
+  async trimParty(identity) {
+    const occ = await this.occupancies(), trimmed = [], T = identity.partyTravels && typeof identity.partyTravels === 'object' ? identity.partyTravels : null;
+    for (const stage of STAGES) {
+      if (T) {
+        const inStage = occ.filter((o) => stageOf(o.key) === stage && o.partyId === identity.partyId);
+        const holders = new Set(inStage.filter((o) => !o.placeholder).map((o) => o.guestId));
+        /* places are kept only beside a member who holds one — a stage the party holds nothing in is left as it is */
+        if (holders.size) {
+          /* a place is kept for each member who travels in this stage and holds no place of their own in it */
+          const owed = Object.keys(T).filter((g) => T[g] && T[g][stage] === true && !holders.has(g)).length;
+          const kept = inStage.filter((o) => o.placeholder).sort((a, b) => String(b.at || '').localeCompare(String(a.at || '')));
+          for (const ph of kept.slice(0, Math.max(0, kept.length - owed))) { await this.storage.delete(this.keyOf(ph.key, ph.label, ph.guestId)); trimmed.push(ph.key + '|' + ph.label); }
+        }
+      }
+      const need = Number(identity.partyNeed[stage]);
+      if (need >= 1) {
+        const w = await this.storage.get(this.wlKey(stage, identity.guestId));
+        if (w && (w.size || 1) > need) await this.storage.put(this.wlKey(stage, identity.guestId), { ...w, size: need });
+      }
+    }
+    return trimmed;
+  }
   partyKey(key, label, partyId, n) { return this.keyOf(key, label, '~' + partyId + '~' + n); }
   async partyPlaces(key, label, partyId, occ) {
     const list = occ || await this.occupancies();
@@ -232,6 +263,11 @@ export class Rooms {
     try { identity = JSON.parse(request.headers.get('x-siyl-identity') || 'null'); } catch (e) { identity = null; }
 
     if (identity) await this.learnName(identity);
+    /* WHO OF THE PARTY TRAVELS (Owner, 25 Sep 2026 · mixed attendance): the Worker names, per stay stage, the places a booking
+       of this guest may take — the guest and the members whose own answer keeps that stage (src/stage-graph.js · partyNeed).
+       A place kept for a member who is not travelling there is given back — the rule a member who says "not joining" always
+       had, now applied whoever of the party is on the page, so an answer given earlier never leaves a phantom traveller. */
+    if (identity && identity.partyId && identity.partyNeed && typeof identity.partyNeed === 'object') await this.state.blockConcurrencyWhile(() => this.trimParty(identity));
     if (op === 'read') return json(await this.view(identity));
     if (op === 'mine') {
       const v = await this.view(identity);
@@ -285,7 +321,7 @@ export class Rooms {
           if (op === 'unwait') { await this.storage.delete(this.wlKey(stage, guestId)); return json({ ok: true, ...(await this.view(identity)) }); }
           if ((await this.mineIn(stage, guestId)).length) return json({ ...(await this.view(identity)), ok: false, error: 'a place is held in this stage' }, 409);
           const cur = await this.storage.get(this.wlKey(stage, guestId));
-          const size = Math.max(1, Math.min(6, parseInt(body && body.size, 10) || 1));
+          const size = capNeed(identity, stage, Math.max(1, Math.min(6, parseInt(body && body.size, 10) || 1)));
           const wanted = (Array.isArray(body && body.wanted) ? body.wanted : []).map((x) => String(x).slice(0, 64)).filter((x) => SEED[x]).slice(0, 12);
           /* a second wait keeps the place in the line (`at`) and updates what is asked for (a party that grew, another chain) */
           await this.storage.put(this.wlKey(stage, guestId), { invitationId, partyId: identity.partyId || null, name, at: cur && cur.at ? cur.at : new Date().toISOString(), size, wanted });
@@ -314,7 +350,7 @@ export class Rooms {
         /* PARTY CAPACITY (Owner, 19 Sep 2026 · never partially booked): `need` = the party's size. A party that fits ONE unit
            takes it whole (the members already here and the places kept for them count). A party larger than a unit fills
            this unit and keeps the rest of its places in the other units of the category — or is refused as a whole. */
-        const need = Math.max(1, Math.min(6, parseInt(body && body.need, 10) || 1));
+        const need = capNeed(identity, stageOf(key), Math.max(1, Math.min(6, parseInt(body && body.need, 10) || 1)));
         const partyHere = identity.partyId ? occ.filter((o) => o.key === key && o.label === label && myParty(o) && o.guestId !== guestId).length : 0;
         const freeForMe = unit.places - others;
         const catUnits = unitsOf(key);

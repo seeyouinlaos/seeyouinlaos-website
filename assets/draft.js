@@ -27,7 +27,7 @@
 (function () {
   'use strict';
   var KEYS = ['siyl.guest', 'siyl.bag', 'siyl.temple', 'siyl.docs', 'siyl.sent', 'siyl.skip', 'siyl.skip.by'];
-  var LOCAL_ONLY = ['siyl.wait'];   /* the device's memory of the waiting list (assets/rooms.js) — dropped with the journey, never synced */
+  var LOCAL_ONLY = ['siyl.wait', 'siyl.party'];   /* the device's memory of the waiting list (assets/rooms.js) and of who of the party travels — dropped with the journey, never synced */
   var ORIGIN = 'https://seeyouinlaos-website.suthep-hrg.workers.dev';
 /* SAME ORIGIN, WHATEVER THE HOSTNAME (24 Sep 2026): the pages and the API are served by the one Worker on every hostname it answers
      (workers.dev and seeyouinlaos.com), so every call stays on the page's own origin — the absolute workers.dev address belonged to
@@ -170,7 +170,23 @@
     return changed;
   }
 
+  /* WHO OF THE PARTY TRAVELS (Owner, 25 Sep 2026 · mixed attendance): the server's answer, per stay stage, of the places a
+     booking takes — the guest and the members whose own answer keeps that stage. Remembered on this device for the pages
+     that book before the copy is read; never synced. */
+  function keepTravel(g) {
+    var a = auth(); if (!a || !g) return;
+    state.travel = g.travel || null;
+    try { if (g.travel) localStorage.setItem('siyl.party', JSON.stringify({ guestId: a.guestId, travel: g.travel })); else localStorage.removeItem('siyl.party'); } catch (e) {}
+  }
+  function travelNow() {
+    if (state.travel) return state.travel;
+    try { var a = auth(), s = JSON.parse(localStorage.getItem('siyl.party') || 'null'); return s && a && s.guestId === a.guestId ? s.travel : null; } catch (e) { return null; }
+  }
   var D = window.SIYL_DRAFT = {
+    /* the places a booking of this stay stage takes (null: not known yet — the invitation's party is used) */
+    partyNeed: function (stage) { var tr = travelNow(); var n = tr && tr.need ? Number(tr.need[stage]) : NaN; return n >= 1 ? n : null; },
+    /* a member of the party by their current answer: 'joining' | 'not-joining' | 'unanswered' (null: not known) */
+    partyMember: function (guestId) { var tr = travelNow(); return tr && tr.members ? tr.members[guestId] || null : null; },
     KEYS: KEYS,
     state: function () { return state; },
     _merge: merge, _replay: replayKey,
@@ -275,7 +291,7 @@
         if (!same(s)) return null;
         if (!g || !g.ok) return g;
         if (g.resetAt && honourReset(g.resetAt)) { before = snapshot(); m = meta(); pending = false; }
-        state.submission = g.submission || null; state.party = g.party || null;
+        state.submission = g.submission || null; state.party = g.party || null; keepTravel(g);
         if (g.draft && g.draft.keys) {
           var local = snapshot(), localEmpty = !Object.keys(local).length;
           var newer = (m.invitationId !== a.invitationId) || localEmpty || !m.serverUpdatedAt || g.draft.updatedAt > m.serverUpdatedAt;
@@ -322,7 +338,7 @@
     refresh: function () {
       if (!signedIn()) return Promise.resolve(null);
       var s = session();
-      return fetch(API, { headers: headers() }).then(function (r) { return r.json(); }).then(function (g) { if (!same(s)) return null; if (g && g.ok) { state.submission = g.submission || null; state.party = g.party || null; announce(); } return g; }).catch(function () { return null; });
+      return fetch(API, { headers: headers() }).then(function (r) { return r.json(); }).then(function (g) { if (!same(s)) return null; if (g && g.ok) { state.submission = g.submission || null; state.party = g.party || null; keepTravel(g); announce(); } return g; }).catch(function () { return null; });
     },
     /* autosave: any change on this device, debounced */
     touch: function () {

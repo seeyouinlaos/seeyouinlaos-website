@@ -208,7 +208,7 @@
       var u = U(); if (!u || !u.ready() || !u.tracked(win, slug)) return '';
       /* PARTY CAPACITY (Owner, 19 Sep 2026): a unit is offered only where the whole party fits — the places the guest's own
          party already holds in it count for them; a unit too small for the party says so and carries no button */
-      var need = opts.need || this.need();
+      var need = opts.need || this.need(win);
       var keptIn = function (x) { return x.occupants.some(function (o) { return o.placeholder && o.party; }); };
       var list = u.units(win, slug), mine = u.mineFor(win, slug), any = list.some(function (x) { return (!x.full || keptIn(x)) && x.eligible && (!u.fitsParty || u.fitsParty(win, slug, x, need)); });
       var h = '<div class="p-units" data-units="' + esc(win) + '|' + esc(slug) + '" data-need="' + need + '">';
@@ -247,15 +247,15 @@
       }
       return h;
     },
-    /* the party's size — how many places one selection must take (SIYL_JOURNEY.partySize: the members of the party, 1–6) */
-    need: function () { var J = window.SIYL_JOURNEY; return J && J.partySize ? J.partySize() : 1; },
+    /* how many places one selection of this stay takes (SIYL_JOURNEY.partySize: the guest and the party members who travel in it, 1–6) */
+    need: function (win) { var J = window.SIYL_JOURNEY; return J && J.partySize ? J.partySize(win) : 1; },
     wire: function (root, onDone) {
       var self = this;
       root.querySelectorAll('[data-join]').forEach(function (b) {
         b.addEventListener('click', function () {
           var v = b.getAttribute('data-join').split('|');
           b.setAttribute('aria-disabled', 'true'); b.textContent = 'Holding your place…';
-          self.select(v[0], v[1], v[2], self.need()).then(function (r) {
+          self.select(v[0], v[1], v[2], self.need(v[0])).then(function (r) {
             if (onDone) onDone(r, v[0], v[1], v[2]);
           });
         });

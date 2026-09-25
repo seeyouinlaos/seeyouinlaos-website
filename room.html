@@ -100,15 +100,15 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:24px;margin:44
 <header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="cart.html" aria-label="My Bag"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main id="m"></main>
 <script src="assets/bag.js?v=be955404"></script>
-<script src="assets/draft.js?v=4c75e07e"></script>
+<script src="assets/draft.js?v=311024c1"></script>
 <script src="assets/shop-menu.js?v=03047fbc"></script>
 <script src="assets/aman.js?v=3aed41db"></script>
 <script src="assets/rooms-data.js?v=701dd9a2"></script>
 <script src="assets/pricing.js?v=6a4a85a2"></script>
 <script src="assets/stay-plan.js?v=5227fdc4"></script>
-<script src="assets/rooms.js?v=45bdf0e9"></script>
-<script src="assets/stay.js?v=d7bc46dc"></script>
-<script src="assets/journey.js?v=fbd99373"></script>
+<script src="assets/rooms.js?v=6b03be1c"></script>
+<script src="assets/stay.js?v=0d15179f"></script>
+<script src="assets/journey.js?v=424340d2"></script>
 <script src="assets/wizard.js?v=f9c66d86"></script>
 <script type="module" src="assets/invite.mjs?v=4ee706e4"></script>
 <script>
@@ -394,7 +394,7 @@ function paint() {
       av.hidden = false;
       av.textContent = U.label(w.id, room.slug);
       av.classList.toggle('low', U.scarce(w.id, room.slug) || U.soldOut(w.id, room.slug));
-      var need = ST ? ST.need() : 1;
+      var need = ST ? ST.need(w.id) : 1;
       /* A PLACE KEPT FOR THE VIEWER IS THE VIEWER'S (Window 007 · PRQ-03-01): a party member kept it — the button joins that room,
          and nothing on the page says "Sold out" or "full" to the guest it was kept for */
       var kept = !line && U.keptForMe ? U.keptForMe(w.id, room.slug) : null;
@@ -410,7 +410,7 @@ function paint() {
     if (av && refusals[w.id]) { av.hidden = false; av.textContent = refusals[w.id]; av.classList.add('low'); }
   });
 }
-function need() { return ST && ST.need ? ST.need() : 1; }
+function need(w) { return ST && ST.need ? ST.need(w && w.id) : 1; }
 /* THE BOOKING CONTEXT (Owner, 20 Sep 2026): opened from 02 / 06, a room chosen here returns the guest to My Trip by itself */
 function wizardDone(w) { var Wz = window.SIYL_WIZARD; if (Wz && Wz.active) Wz.done(Wz.stageOfWindow(w.id)); }
 document.querySelectorAll('[data-win]').forEach(function (b) {

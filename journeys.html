@@ -151,17 +151,17 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:26px;margin:40
 <div class="p" id="j-kempinski" data-vprod="kempinski"><div class="pgal stay" data-stay-gal="kempinski" aria-label="Photographs of the Siam Kempinski Bangkok"></div><p class="pw"><b>6 – 8 Mar</b> · Accommodation · Bangkok</p><p class="pn">Siam Kempinski Bangkok</p><p class="pm">6 – 8 March · 2 nights · your cost · breakfast included</p><p class="pp" data-private>USD 380 per person</p><p class="pb" data-private>2 nights: 6 &rarr; 7 and 7 &rarr; 8 March · USD 190 per person per night</p><p class="vl" data-private>Rooms &amp; suites</p><div class="vars" data-private data-rooms="kempinski"></div><a class="vw jcta" data-private-cta href="invitation.html?open=1">Open your invitation</a></div>
 </main>
 <script src="assets/bag.js?v=be955404"></script>
-<script src="assets/draft.js?v=4c75e07e"></script>
+<script src="assets/draft.js?v=311024c1"></script>
 <script src="assets/shop-menu.js?v=03047fbc"></script>
 <script src="assets/aman.js?v=3aed41db"></script>
 <script src="assets/rooms-data.js?v=701dd9a2"></script>
 <script src="assets/stay-media.js?v=d3c6dc2c"></script>
 <script src="assets/pricing.js?v=6a4a85a2"></script>
 <script src="assets/stay-plan.js?v=5227fdc4"></script>
-<script src="assets/rooms.js?v=45bdf0e9"></script>
-<script src="assets/stay.js?v=d7bc46dc"></script>
-<script src="assets/stage-graph.js?v=8879f690"></script>
-<script src="assets/journey.js?v=fbd99373"></script>
+<script src="assets/rooms.js?v=6b03be1c"></script>
+<script src="assets/stay.js?v=0d15179f"></script>
+<script src="assets/stage-graph.js?v=f5f4dc76"></script>
+<script src="assets/journey.js?v=424340d2"></script>
 <script src="assets/wizard.js?v=f9c66d86"></script>
 <script type="module" src="assets/invite.mjs?v=4ee706e4"></script>
 <script>
@@ -469,7 +469,7 @@ setTimeout(function(){t.scrollIntoView({block:'start'});window.scrollBy(0,-90)},
  * only then does the line replace whatever this window held — never a duplicate */
 function select(win, stay, slug, back){
 /* the party takes as many places as it has members (Owner, 19 Sep 2026) */
-ST.select(win, slug, null, ST.need ? ST.need() : 1).then(function(r){
+ST.select(win, slug, null, ST.need ? ST.need(win) : 1).then(function(r){
   paintAll();
   if(!r.ok){note(win, ST.refusal(r));return}
   /* THE BOOKING CONTEXT (Owner, 20 Sep 2026): from 02 / 06 — or the CHANGE deep link — a room chosen here returns to My Trip */
@@ -548,7 +548,7 @@ act.querySelectorAll('[data-stay-remove]').forEach(function(b){b.addEventListene
   go()})});
 act.querySelectorAll('[data-wait]').forEach(function(b){b.addEventListener('click',function(){
   var stage=b.getAttribute('data-wait');b.disabled=true;b.textContent='Joining…';
-  U.wait(stage,U.need(),U.stageKeys?U.stageKeys(stage):[]).then(function(r){paintAll();if(r&&r.ok===false)note(win,ST.refusal(r))})})});
+  U.wait(stage,U.need(stage),U.stageKeys?U.stageKeys(stage):[]).then(function(r){paintAll();if(r&&r.ok===false)note(win,ST.refusal(r))})})});
 act.querySelectorAll('[data-wait-no]').forEach(function(b){b.addEventListener('click',function(){
   var J=window.SIYL_JOURNEY,seg=J.SEGMENTS.filter(function(s){return s.key===b.getAttribute('data-wait-no')})[0];
   if(seg)Promise.resolve(J.decline(seg)).then(function(){paintAll()})})});

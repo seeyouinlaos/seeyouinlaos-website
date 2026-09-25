@@ -249,8 +249,15 @@
     },
     /* THE PACKAGES ARE GONE (Owner, 21 Sep 2026): one booking model for every guest — the scopes, the stage graph, each
        required component chosen. The party's need for one unit stays the engine's fact. */
-    /* the places the guest's party needs in one unit */
-    partySize: function () {
+    /* the places a booking needs in one unit: the guest and the members of the party who TRAVEL in that stay (Owner, 25 Sep
+       2026 · mixed attendance — a member who is not joining is never counted; the server's answer, src/stage-graph.js ·
+       partyNeed). `stage` is a stay stage or window key; without it, or before the answer is read, the invitation's party. */
+    partySize: function (stage) {
+      var D = window.SIYL_DRAFT, U = window.SIYL_UNITS, st = stage && U && U.stageOf ? U.stageOf(stage) : stage;
+      var known = st && D && D.partyNeed ? D.partyNeed(st) : null;
+      /* a page without the draft module reads the same remembered answer (assets/draft.js writes it, for this guest only) */
+      if (!known && st && !(D && D.partyNeed)) { try { var au = JSON.parse(localStorage.getItem('siyl.auth') || 'null'), pm = JSON.parse(localStorage.getItem('siyl.party') || 'null'); var n0 = pm && au && pm.guestId === au.guestId && pm.travel && pm.travel.need ? Number(pm.travel.need[st]) : NaN; if (n0 >= 1) known = n0; } catch (e) { /* not known */ } }
+      if (known) return Math.max(1, Math.min(6, known));
       var G = window.SIYL_GUEST, p = G && G.party ? G.party() : null, n = p && Array.isArray(p.members) ? p.members.length : 0;
       /* a page without the guest module (the room page, The Journey) reads the party from the session itself */
       if (!n) { try { var a = JSON.parse(localStorage.getItem('siyl.auth') || 'null'); n = a && Array.isArray(a.members) ? a.members.length : 1; } catch (e) { n = 1; } }

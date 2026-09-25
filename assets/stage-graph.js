@@ -95,6 +95,15 @@ function isRelevant(key, scope) {
   if (st.connector) return st.connector.every((k) => !!scope[k]);
   return !!scope[st.scope];
 }
+/* ---- who travels together (Owner, 25 Sep 2026 · mixed attendance) --------------------------------------------------
+   The invitation's party (a couple, a family) never changes; who TRAVELS in a stage does. A party member counts for a stage
+   only while their own current answer keeps that stage: joining it → counted; not joining (the whole trip, or that part) →
+   never counted; not answered yet → counted (a place is kept for them, as before). A booking never takes places for a member
+   who is not travelling in that stage. */
+function participationOf(scope) { const s = normalizeScope(scope); return !s ? 'unanswered' : s.none ? 'not-joining' : 'joining'; }
+function travelsIn(stageKey, scope) { return isRelevant(stageKey, normalizeScope(scope)); }
+/* the places a booking of this stage needs: the guest and every OTHER member who travels in it (1–6) */
+function partyNeed(stageKey, otherScopes) { return Math.max(1, Math.min(6, 1 + (otherScopes || []).filter((sc) => travelsIn(stageKey, sc)).length)); }
 function relevantStages(scope) { return STAGES.filter((s) => isRelevant(s.key, scope)).map((s) => s.key); }
 function relevantLetters(scope) { return STAGES.filter((s) => isRelevant(s.key, scope)).map((s) => s.letter).join(''); }
 /* the scopes a guest's REAL state implies (the migration of a former package guest): a stage selected, held or waitlisted
@@ -175,5 +184,5 @@ function completion(input) {
   return out;
 }
 
-window.SIYL_GRAPH = { SCOPES: SCOPES, SCOPE_KEYS: SCOPE_KEYS, STAGES: STAGES, STAGE_KEYS: STAGE_KEYS, LETTER: LETTER, STAGE_IDS: STAGE_IDS, MANDATORY: MANDATORY, SHEETS: SHEETS, emptyScope: emptyScope, isAnswered: isAnswered, joinsAll: joinsAll, normalizeScope: normalizeScope, stageOf: stageOf, isRelevant: isRelevant, relevantStages: relevantStages, relevantLetters: relevantLetters, scopeFromStates: scopeFromStates, resolved: resolved, completion: completion };
+window.SIYL_GRAPH = { SCOPES: SCOPES, SCOPE_KEYS: SCOPE_KEYS, STAGES: STAGES, STAGE_KEYS: STAGE_KEYS, LETTER: LETTER, STAGE_IDS: STAGE_IDS, MANDATORY: MANDATORY, SHEETS: SHEETS, emptyScope: emptyScope, isAnswered: isAnswered, joinsAll: joinsAll, normalizeScope: normalizeScope, stageOf: stageOf, isRelevant: isRelevant, participationOf: participationOf, travelsIn: travelsIn, partyNeed: partyNeed, relevantStages: relevantStages, relevantLetters: relevantLetters, scopeFromStates: scopeFromStates, resolved: resolved, completion: completion };
 })();
