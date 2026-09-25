@@ -1102,3 +1102,31 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px
 }
 /* the step pages carry their own sticky step bar under the header: the fade sits under that bar instead (prep.css) */
 body:has(.prep-bar) header.hd::before { display: none; }
+
+/* ============================================================================
+   THE FIRST PAGE AS ONE SYSTEM (Owner, 25 Sep 2026 · the hero and the vertical rhythm)
+   Three connected defects, one cause each, corrected together for the first page (main.a-home):
+   · WIDTH — from 768 px the hero's frame was capped (720 · 880 · 1000 px) and centred inside the page frame, a second
+     inset within the content wall. The frame now takes the page frame's content width: the same edges as the header's
+     menu and bag, never the browser's width.
+   · CROP — four of the five photographs are portrait (3 : 4); the 3 : 2 frame kept half of their height and cut the hands
+     and faces. Landscape tablets and desktops now frame 4 : 3 (portrait tablets keep 4 : 5, phones their square), bounded
+     by the screen's height so a short window never pushes the words away; the focal points are the same.
+   · RHYTHM — the page's tokens (--a-rhythm 150 px, --a-gap-media 150–168 px from 900 px, plus each section's own
+     margins) put nearly a screen of Ivory between the headline and the planning bar, the Guest House and the invitation,
+     "Discover the journey" and the destinations. The first page now carries a scale of its own on the same tokens —
+     every section of the page reads them — bounded at both ends so a tall monitor never grows the gaps.
+   ========================================================================== */
+main.a-home { --a-rhythm: 56px; --a-gap-media: 64px; }
+@media (min-width: 600px) { main.a-home { --a-rhythm: 64px; --a-gap-media: 72px; } }
+@media (min-width: 768px) { main.a-home { --a-rhythm: 72px; --a-gap-media: 80px; } }
+@media (min-width: 900px) { main.a-home { --a-rhythm: clamp(80px, 6vw, 104px); --a-gap-media: clamp(88px, 6.5vw, 112px); } }
+@media (min-width: 768px) {
+  main.a-home .a-hero .am, main.a-home .a-hero .ah { max-width: none; }
+  /* never shallower than the former 3 : 2 (the frame's own width × 2 / 3), up to 4 : 3 where the screen is tall enough */
+  main.a-home .a-hero .am { max-height: max(480px, calc((min(100vw, var(--a-frame)) - 2 * var(--a-gut)) * 2 / 3), calc(100svh - 160px)); }
+}
+@media (min-width: 768px) and (orientation: landscape), (min-width: 1200px) {
+  main.a-home .a-hero .am { aspect-ratio: 4 / 3; }
+}
+
