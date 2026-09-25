@@ -606,6 +606,8 @@ body.prep-steps-open { overflow: hidden; }   /* the page is held while the index
 .p-seatwrap::-webkit-scrollbar { display: none; }
 .p-seatmap { display: block; width: 100%; height: auto; max-width: 620px; }
 .p-seatwrap.wide .p-seatmap { max-width: none; }
+.p-seatmap-table { min-width: var(--plan-min, 0); }
+@media (min-width: 900px) { .p-seatmap-table { min-width: 0; } }   /* the fifty fit the column from 900 px (Owner, 25 Sep 2026) */
 .p-seatmap-ceremony { width: auto; max-width: 620px; }
 @media (min-width: 420px) { .p-seatmap-ceremony { width: 100%; } }
 .p-seatmap .seat[role="button"] { cursor: pointer; }

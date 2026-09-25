@@ -48,26 +48,26 @@ test('LABELS · ceremony: A/B | aisle | D/E/F × rows 1–10 = 50 unique labels,
   assert.equal(L.seatId('ceremony', 'BRIDE'), null);
 });
 
-test('LABELS · dinner (Owner, 24 Sep 2026 · OQ-03): 48 seats — A1–A12, A14–A25 along side A (top), B1–B12, B14–B25 along side B (bottom); the two 13s are removed and NOTHING is renumbered; B12 stays B12', () => {
-  assert.equal(DINNER.length, 48, 'one long table · 48 seats');
-  assert.equal(cfg.dinner.sides.T.length, 24, 'side A · 24 seats'); assert.equal(cfg.dinner.sides.B.length, 24, 'side B · 24 seats');
+test('LABELS · dinner (Owner override, 25 Sep 2026): 50 seats — A1–A12, A14–A26 along side A (top), B1–B12, B14–B26 along side B (bottom); never a 13, NOTHING renumbered; B12 stays B12', () => {
+  assert.equal(DINNER.length, 50, 'one long table · 50 seats');
+  assert.equal(cfg.dinner.sides.T.length, 25, 'side A · 25 seats'); assert.equal(cfg.dinner.sides.B.length, 25, 'side B · 25 seats');
   assert.ok(!DINNER.includes('D-T-13') && !DINNER.includes('D-B-13'), 'the retired 13s are not on the plan');
   const labels = DINNER.map((id) => L.label(id));
-  assert.equal(new Set(labels).size, 48);
+  assert.equal(new Set(labels).size, 50);
   const expected = [];
-  for (let n = 1; n <= 25; n++) if (n !== 13) expected.push('A' + n, 'B' + n);
+  for (let n = 1; n <= 26; n++) if (n !== 13) expected.push('A' + n, 'B' + n);
   assert.deepEqual([...labels].sort(), [...expected].sort());
   assert.ok(!labels.includes('A13') && !labels.includes('B13'), 'no A13, no B13');
   assert.ok(!labels.some((l) => /^[AB]1[23][AB]$/.test(l)), 'no A12A / B12B');
   /* nothing renumbered: every surviving seat keeps its number — the neighbours of 13 and the Bride's B12 above all */
-  for (let n = 1; n <= 25; n++) if (n !== 13) { const p2 = (n < 10 ? '0' : '') + n; assert.equal(L.label('D-T-' + p2), 'A' + n); assert.equal(L.label('D-B-' + p2), 'B' + n); }
+  for (let n = 1; n <= 26; n++) if (n !== 13) { const p2 = (n < 10 ? '0' : '') + n; assert.equal(L.label('D-T-' + p2), 'A' + n); assert.equal(L.label('D-B-' + p2), 'B' + n); }
   assert.equal(L.label('D-B-12'), 'B12'); assert.equal(L.seatId('dinner', 'B12'), 'D-B-12', 'B12 unchanged');
   assert.equal(L.label('D-T-14'), 'A14'); assert.equal(L.label('D-B-14'), 'B14');
   assert.equal(L.label('D-T-13'), null); assert.equal(L.label('D-B-13'), null); assert.equal(L.seatId('dinner', 'A13'), null); assert.equal(L.seatId('dinner', 'B13'), null);
   assert.equal(L.retiredLabel('D-B-13'), 'B13', 'a kept hold on a retired 13 is still readable — never re-pointed'); assert.equal(L.retiredLabel('D-B-12'), null);
-  assert.equal(L.label('D-T-01'), 'A1'); assert.equal(L.label('D-T-25'), 'A25'); assert.equal(L.label('D-B-01'), 'B1'); assert.equal(L.label('D-B-25'), 'B25');
+  assert.equal(L.label('D-T-01'), 'A1'); assert.equal(L.label('D-T-25'), 'A25'); assert.equal(L.label('D-B-01'), 'B1'); assert.equal(L.label('D-B-25'), 'B25'); assert.equal(L.label('D-T-26'), 'A26'); assert.equal(L.label('D-B-26'), 'B26'); assert.equal(L.label('D-T-27'), null);
   assert.deepEqual(L.RUNS, { T: 'A', B: 'B' });
-  assert.deepEqual([RULES.dinner.guestSeats, RULES.dinner.perSide], [48, 24]);
+  assert.deepEqual([RULES.dinner.guestSeats, RULES.dinner.perSide], [50, 25]);
 });
 
 test('LABELS · the mapping is a bijection over the ledger, in both directions, and refuses what is not a seat', () => {
@@ -75,11 +75,12 @@ test('LABELS · the mapping is a bijection over the ledger, in both directions, 
   for (const id of DINNER) assert.equal(L.seatId('dinner', L.label(id)), id, id);
   /* every label resolves to exactly one ledger seat and no other */
   const all = [...CEREMONY.map((id) => 'ceremony:' + L.label(id)), ...DINNER.map((id) => 'dinner:' + L.label(id))];
-  assert.equal(new Set(all).size, 98, '50 ceremony + 48 dinner');
+  assert.equal(new Set(all).size, 100, '50 ceremony + 50 dinner');
   for (const bad of ['C4', 'G1', 'A0', 'A11', 'E11', 'A4B', '', null]) assert.equal(L.seatId('ceremony', bad), null, String(bad));
   assert.equal(L.seatId('ceremony', 'a4'), 'C-L-04-01', 'case and spaces are forgiven, the seat is the same');
-  for (const bad of ['C1', 'A0', 'A26', 'B26', 'D1']) assert.equal(L.seatId('dinner', bad), null, String(bad));
-  for (const bad of ['C-L-00-01', 'C-L-11-01', 'C-L-04-03', 'C-R-04-04', 'D-T-00', 'D-T-26', 'D-X-01', 'X', null]) assert.equal(L.label(bad), null, String(bad));
+  for (const bad of ['C1', 'A0', 'A27', 'B27', 'D1']) assert.equal(L.seatId('dinner', bad), null, String(bad));
+  assert.equal(L.seatId('dinner', 'A26'), 'D-T-26'); assert.equal(L.seatId('dinner', 'B26'), 'D-B-26');
+  for (const bad of ['C-L-00-01', 'C-L-11-01', 'C-L-04-03', 'C-R-04-04', 'D-T-00', 'D-T-27', 'D-X-01', 'X', null]) assert.equal(L.label(bad), null, String(bad));
   /* the same ids drawn by the Worker's rules are the ids the labels know */
   const drawn = seatsOf(cfg, 'ceremony').map((s) => s.seatId); assert.deepEqual(drawn.sort(), [...CEREMONY].sort());
   const drawnD = seatsOf(cfg, 'dinner').map((s) => s.seatId); assert.deepEqual(drawnD.sort(), [...DINNER].sort());

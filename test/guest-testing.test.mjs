@@ -145,11 +145,11 @@ test('ABOUT YOU: step 05 is required — the allergy answer and the photography 
 test('SEATING: ceremony front-centre positions for the couple; dinner nothing fixed; the route is on The Wedding', async () => {
   const m = await import(join(ROOT, 'src/seating.js'));
   assert.deepEqual(m.RULES.ceremony.fixed, ['BRIDE', 'GROOM']); assert.equal(m.RULES.dinner.fixed, undefined);
-  assert.equal(m.CAPACITY.ceremony.fixed, 2); assert.equal(m.CAPACITY.dinner.guestSeats, 48);
-  /* THE DINNER IS 48 SEATS (Owner, 24 Sep 2026 · OQ-03): A13 and B13 are removed, nothing is renumbered — A1–A12, A14–A25 · B1–B12, B14–B25; B12 (the Bride's held seat) stays B12 */
+  assert.equal(m.CAPACITY.ceremony.fixed, 2); assert.equal(m.CAPACITY.dinner.guestSeats, 50);
+  /* THE DINNER IS 50 SEATS (Owner override, 25 Sep 2026): never a 13, nothing is renumbered — A1–A12, A14–A26 · B1–B12, B14–B26; B12 (the Bride's held seat) stays B12 */
   { const { SEAT_FIXTURE } = await import('./fixtures.mjs'); const ids = m.seatsOf(m.validateGeometry(SEAT_FIXTURE).config, 'dinner').map((x) => x.seatId);
-    assert.equal(ids.length, 48); assert.ok(!ids.includes('D-T-13') && !ids.includes('D-B-13'), 'no seat 13 on either side');
-    for (const id of ['D-T-01', 'D-T-12', 'D-T-14', 'D-T-25', 'D-B-01', 'D-B-12', 'D-B-14', 'D-B-25']) assert.ok(ids.includes(id), id + ' keeps its number');
+    assert.equal(ids.length, 50); assert.ok(!ids.includes('D-T-13') && !ids.includes('D-B-13'), 'no seat 13 on either side');
+    for (const id of ['D-T-01', 'D-T-12', 'D-T-14', 'D-T-25', 'D-T-26', 'D-B-01', 'D-B-12', 'D-B-14', 'D-B-25', 'D-B-26']) assert.ok(ids.includes(id), id + ' keeps its number');
     assert.equal(m.isRetiredSeat('D-B-13'), true); assert.equal(m.isRetiredSeat('D-T-13'), true); assert.equal(m.isRetiredSeat('D-B-12'), false, 'B12 is not retired'); }
   const wd = src('wedding.html');
   assert.match(wd, /id="seats-route"/); assert.match(wd, /Choose your '\+ev\+' seat/); assert.match(wd, /\(sid\?\(frozen\?'<p class="p-more"><a class="p-link" href="'\+to\+'" data-seat-cta="'\+ev\+'" data-state="booked">View seat<\/a><\/p>'\s*:open\?'<p class="p-more"><a class="p-link" href="'\+to\+'" data-seat-cta="'\+ev\+'" data-state="booked">Change seat<\/a><\/p>':''\)/, 'PRQ-04-13: “Change seat” only while seating is open');

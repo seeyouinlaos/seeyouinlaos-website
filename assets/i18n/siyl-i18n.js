@@ -172,7 +172,7 @@
   de.setAttribute('data-lang', lang);
   de.setAttribute('data-cur', cur);
   if (lang === 'th' && document.readyState === 'loading') {
-    document.write('<link rel="stylesheet" href="assets/i18n/th.css?v=39573186"><script src="assets/i18n/th.js?v=a7a283f9"><\/script>');
+    document.write('<link rel="stylesheet" href="assets/i18n/th.css?v=39573186"><script src="assets/i18n/th.js?v=2ab1eda8"><\/script>');
   }
   var revealed = false;
   function reveal() { if (revealed) return; revealed = true; de.style.visibility = ''; }
@@ -226,7 +226,7 @@
     var kids = el.querySelectorAll('*'); for (var i = 0; i < kids.length; i++) if (!INLINE.test(kids[i].nodeName) || kids[i].children.length) return false;
     var full = CORE.norm(el.textContent); if (!full || !LATIN.test(full)) return false;
     var th = dict().lookup(full); if (th == null) return false;
-    el.textContent = CORE.moneyText(th, cur); done.set(el.firstChild, el.firstChild.data);
+    el.textContent = CORE.moneyText(th, cur); if (el.firstChild) done.set(el.firstChild, el.firstChild.data);
     return true;
   }
   function walk(root) {
@@ -239,13 +239,23 @@
     while ((n = w.nextNode())) list.push(n);
     if (lang === 'th') { var wholeDone = []; for (var k = 0; k < list.length; k++) if (list[k].nodeType === 1 && whole(list[k])) wholeDone.push(list[k]);
       if (wholeDone.length) list = list.filter(function (x) { return x.isConnected && !wholeDone.some(function (e) { return e !== x && e.contains(x); }); }); }
-    for (var i = 0; i < list.length; i++) { if (list[i].nodeType === 3) textNode(list[i]); else attrs(list[i]); }
+    /* ONE NODE NEVER STOPS THE PASS (Owner, 25 Sep 2026 · a device showed THB chosen and USD amounts): each node is converted on
+       its own; a node that fails is skipped, every other amount still follows the chosen currency */
+    for (var i = 0; i < list.length; i++) { try { if (list[i].nodeType === 3) textNode(list[i]); else attrs(list[i]); } catch (e) { /* this node only */ } }
   }
   var titleDone = null;
   function title() { if (document.title && document.title !== titleDone) { var o = conv(document.title); titleDone = o; if (o !== document.title) document.title = o; } }
 
   var queue = [], scheduled = false;
-  function flush() { scheduled = false; var q = queue; queue = []; for (var i = 0; i < q.length; i++) walk(q[i]); title(); }
+  function flush() { scheduled = false; var q = queue; queue = []; for (var i = 0; i < q.length; i++) { try { walk(q[i]); } catch (e) { /* the next record still runs */ } } try { title(); } catch (e) {} verify(); }
+  /* THE INVARIANT (Owner, 25 Sep 2026): while a currency other than USD is chosen, no visible amount may still read "USD n" —
+     an amount the pass could not reach (a node added outside the observer's view, an interrupted pass) is converted here */
+  var USD_LEFT = /USD\s?[1-9]/;
+  function verify() {
+    if (cur === 'USD' || !document.body || !USD_LEFT.test(document.body.textContent || '')) return;
+    var w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null), n;
+    while ((n = w.nextNode())) { if (USD_LEFT.test(n.data) && !skipEl(n.parentNode)) { try { done.delete(n); textNode(n); } catch (e) { /* next */ } } }
+  }
   function schedule(n) { queue.push(n); if (!scheduled) { scheduled = true; (window.requestAnimationFrame || setTimeout)(flush); } }
   var mo = active ? new MutationObserver(function (records) {
     for (var i = 0; i < records.length; i++) {
@@ -259,12 +269,13 @@
   var walk0 = walk; walk = function (x) { if (x && x.nodeType === 0 && x.el) { attrs(x.el); return; } walk0(x); };
 
   function start() {
-    if (active) {
-      walk(document.body); title();
-      mo.observe(document.documentElement, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ATTRS });
-    }
-    paintPrefs();
-    reveal();
+    try {
+      if (active) {
+        try { walk(document.body); title(); } catch (e) { /* the observer and the check below still run */ }
+        mo.observe(document.documentElement, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ATTRS });
+        verify();
+      }
+    } finally { paintPrefs(); reveal(); }
   }
 
   /* ---- the choice: EN · TH and USD · EUR · THB, in the menu (assets/aman.js) and wherever [data-prefs] stands ---- */
@@ -320,7 +331,13 @@
   }
   var hiddenAt = 0;
   document.addEventListener('visibilitychange', function () { if (document.hidden) hiddenAt = Date.now(); else if (hiddenAt && Date.now() - hiddenAt > 5 * 60 * 1000) fresh(); });
-  window.addEventListener('pageshow', function (e) { if (e.persisted) fresh(); });
+  window.addEventListener('pageshow', function (e) { if (e.persisted) { if (!follow()) fresh(); } });
+  /* A RESTORED PAGE FOLLOWS THE CHOICE (Owner, 25 Sep 2026): Safari restores a page from the back/forward cache, or brings a
+     tab back, exactly as it was — in the language and currency of its first load. When the choice stored on this device has
+     changed meanwhile (on another page or tab), the page is reloaded once so what it shows and what its controls say agree. */
+  function stored() { var l = 'en', c = 'USD'; try { var a = localStorage.getItem(KEY); if (LANGS.indexOf(a) > -1) l = a; var b = localStorage.getItem(CKEY); if (CORE.CURRENCIES.indexOf(b) > -1) c = b; } catch (e) { return null; } return { lang: l, cur: c }; }
+  function follow() { var s = stored(); if (!s || (s.lang === lang && s.cur === cur)) return false; location.reload(); return true; }
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) follow(); });
   function start0() { SIG = sigHere(); start(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start0); else start0();
 })();

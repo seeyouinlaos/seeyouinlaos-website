@@ -241,7 +241,9 @@ window.SIYL_EXP = [
   { id: 'vte-ongteu', category: 'experience', roles: ['experience'], visits: [{ day: 8, date: '2027-02-28', seq: 900, what: 'Temple Ceremony' }], row: 'Day 08 · 28.02.2027', chapter: 'laos', featured: true, day: '28 February 2027', name: 'Wat Ong Teu', where: 'Vientiane', cats: 'Temple · The wedding morning · Sacred', img: 'assets/images/experiences/vte-ongteu-01.jpg', teaser: 'The temple where the wedding day begins — the morning alms-giving, novices with their bowls, the city still quiet.', detail: ['The wedding day begins here at 09:00 with the Temple Ceremony: an unhurried Buddhist morning, with time to take part in the alms-giving. Afterwards we return together to the Souphattra Heritage for Coffee & Cake.', 'One of the oldest temples in Vientiane, a few minutes on foot from the riverside.'] },
   /* LAO TRADITIONAL DRESS RENTAL (Owner, 24 Sep 2026 · Edit 6): the attire of the wedding morning — Day 08 is Lao Traditional
      Dress from breakfast to the cake. Every word, the price and the hours are the Operations Master's own (Experience column
-     "Lao Traditional Dress Rental"); the photographs are Drive folder 196. No address or link is published: the Master gives none. */
+     "Lao Traditional Dress Rental"); the photographs are Drive folder 196. THE SHOP AND THE BOOKING (Owner, 25 Sep 2026): the
+     rental is the guest's own cost, paid at the shop — never hosted, never complimentary; Guest Relations can book the fitting
+     appointment with the shop; the shop's own page is linked. No terms beyond these are stated. */
   { id: 'vte-laodress', category: 'experience', roles: ['experience'], visits: [], row: 'city', chapter: 'laos', day: 'Traditional attire', name: 'Lao Traditional Dress Rental', where: 'Vientiane', cats: 'Traditional attire · Lao silk',
     img: 'assets/images/experiences/vte-laodress-01.jpg',
     teaser: 'For the wedding morning we all wear classic Lao attire in fine Lao silk — timeless and elegant, yet relaxed and easy.',
@@ -249,9 +251,11 @@ window.SIYL_EXP = [
       'Women wear beautifully patterned sinh (the traditional Lao wrap-around skirt), paired with elegant silk blouses and gracefully draped sashes. Simple flat or low-heeled leather sandals in neutral tones such as tan, brown, black, nude or cream are encouraged.',
       'Men wear traditional Lao silk shirts, paired with sinh or traditional trousers, complemented by coordinating silk sashes where appropriate. Simple leather sandals or relaxed leather loafers in brown, tan or black are recommended.',
       'The overall styling should feel natural, refined and understated, with coordinated yet individual variations in traditional patterns, textures and colours. Footwear should remain simple and comfortable, complementing the traditional silk attire without making the look overly formal or theatrical.',
-      'Please bring your own footwear: the rental provides the traditional shirt, the sinh or trousers, and the accessories only.'
+      'Please bring your own footwear: the rental provides the traditional shirt, the sinh or trousers, and the accessories only.',
+      'The rental is your own cost, paid directly at the shop. If you would like, Guest Relations will book your fitting appointment with the shop for you.'
     ],
-    practical: { price: 'USD 15', hours: ['Every day 09:00 – 18:00'] } },
+    link: 'https://www.facebook.com/profile.php?id=61573790998776', linkLabel: 'The rental shop on Facebook',
+    practical: { price: 'USD 15', priceNote: 'Your own cost, paid at the shop', hours: ['Every day 09:00 – 18:00'] } },
   /* BARON VIENTIANE (Owner, 22 Sep 2026): the club of the wedding night — the VIP after party, the release after the formal day.
      Approved media: the Owner's BARON folder (seven photographs, three films with sound). A club, never a bar card. */
   { id: 'vte-baron', category: 'club', roles: ['club'], visits: [{ day: 8, date: '2027-02-28', seq: 2230, what: 'VIP After Party' }], row: 'Day 08 · 28.02.2027', sheet: 'OWNER', chapter: 'laos', featured: true, day: '28 February 2027', name: 'BARON Vientiane', where: 'Vientiane', cats: 'Club · The wedding night · After party', maps: 'https://maps.google.com/?q=BARON+Vientiane', img: 'assets/images/experiences/vte-baron-01.jpg',

@@ -9,13 +9,13 @@
                 C-L-rr-01 → A rr    C-L-rr-02 → B rr
                 C-R-rr-01 → D rr    C-R-rr-02 → E rr    C-R-rr-03 → F rr
                 BRIDE and GROOM are front-centre positions with no seat label.
-     DINNER     the two sides of the one long table, 24 seats each (Owner,
-                24 Sep 2026 · OQ-03): the seats numbered 13 are removed and
-                NOTHING is renumbered — A1–A12, A14–A25 · B1–B12, B14–B25
+     DINNER     the two sides of the one long table, 25 seats each (Owner,
+                25 Sep 2026, superseding the 48 of OQ-03): 13 is never a seat and
+                NOTHING is renumbered — A1–A12, A14–A26 · B1–B12, B14–B26
                 D-T-nn → A nn (side A)       D-B-nn → B nn (side B)
 
    The mapping is a pure function both ways, identical in the browser and in
-   Node (the tests pin every pair: 50 ceremony + 48 dinner), so a displayed
+   Node (the tests pin every pair: 50 ceremony + 50 dinner), so a displayed
    label can never point at a different ledger seat. A hold that still names a
    retired 13 stays readable through retiredLabel() — it is never re-pointed.
 
@@ -53,7 +53,7 @@
   function label(seatId) {
     var c = /^C-([LR])-(0[1-9]|10)-(0[1-3])$/.exec(seatId || '');
     if (c) { var col = COLS[c[1]][Number(c[3]) - 1]; return col && !retired(seatId) ? col + Number(c[2]) : null; }
-    var d = /^D-([TB])-(0[1-9]|1[0-9]|2[0-5])$/.exec(seatId || '');
+    var d = /^D-([TB])-(0[1-9]|1[0-9]|2[0-6])$/.exec(seatId || '');
     if (d) return retired(seatId) ? null : RUNS[d[1]] + Number(d[2]);
     return null;
   }
@@ -71,7 +71,7 @@
       return null;   /* C is the aisle */
     }
     if (event === 'dinner') {
-      if (n < 1 || n > 25 || (m[1] !== 'A' && m[1] !== 'B')) return null;
+      if (n < 1 || n > 26 || (m[1] !== 'A' && m[1] !== 'B')) return null;   /* A1–A26 · B1–B26, never 13 (Owner, 25 Sep 2026) */
       var id = 'D-' + (m[1] === 'A' ? 'T' : 'B') + '-' + (n < 10 ? '0' : '') + n;
       return retired(id) ? null : id;
     }

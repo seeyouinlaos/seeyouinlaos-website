@@ -82,7 +82,7 @@ test('WAT ONG TEU · the replacement pictures of Drive folder 195, the façade f
 test('LAO TRADITIONAL DRESS RENTAL · a Vientiane experience in the Operations Master\'s own words, price and hours', () => {
   const src = read('assets/experiences.js');
   assert.match(src, /\{ id: 'vte-laodress', category: 'experience', roles: \['experience'\], visits: \[\], row: 'city', chapter: 'laos'[^\n]*name: 'Lao Traditional Dress Rental', where: 'Vientiane'/);
-  assert.match(src, /practical: \{ price: 'USD 15', hours: \['Every day 09:00 – 18:00'\] \}/); /* TO-02994 · TO-02993 */
+  assert.match(src, /practical: \{ price: 'USD 15', priceNote: 'Your own cost, paid at the shop', hours: \['Every day 09:00 – 18:00'\] \}/); /* TO-02994 · TO-02993 · the Owner's self-pay note, 25 Sep 2026 */
   assert.ok(src.includes('Please bring your own footwear: the rental provides the traditional shirt, the sinh or trousers, and the accessories only.'), 'TO-02992');
   const g = JSON.parse(read('src/experience-galleries.json'))['vte-laodress'];
   assert.equal(g.folderId, '1YzeS_UGJJeTNMXS2mgRhqC9ZToc5xtxZ');

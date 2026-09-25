@@ -25,9 +25,9 @@
                BRIDE and GROOM two fixed positions at the FRONT CENTRE (Owner,
                13 Sep 2026): not guest chairs, no seat id, never selectable,
                never counted as inventory — the couple's ceremony place
-     DINNER    one long table · 48 guest seats (Owner, 24 Sep 2026 · OQ-03): TOP 24 · BOTTOM 24 —
-               the seats numbered 13 on both sides (A13, B13) are removed from the plan and
-               NOTHING is renumbered: A1–A12, A14–A25 · B1–B12, B14–B25, every one bookable
+     DINNER    one long table · 50 guest seats (Owner override, 25 Sep 2026 — supersedes the 48 of
+               OQ-03): TOP 25 · BOTTOM 25 — the seats numbered 13 are never on the plan and NOTHING is
+               renumbered: A1–A12, A14–A26 · B1–B12, B14–B26, every one bookable (A26 and B26 are ordinary seats)
    NO CHAIR IS PREASSIGNED TO ANYONE (Owner decisions, 13 Sep 2026): there is
    no family-seat mechanism and no fixed Bride/Groom position. Every guest —
    the couple, hosts and family included — holds a chair through this same
@@ -47,14 +47,23 @@
 export const RULES = {
   /* C-L-[ROW]-[SEAT] · C-R-[ROW]-[SEAT] · rows 01–10 · left seats 01–02 · right seats 01–03 */
   ceremony: { rows: 10, perRow: { L: 2, R: 3 }, guestSeats: 50, fixed: ['BRIDE', 'GROOM'], id: /^C-([LR])-(0[1-9]|10)-(0[1-3])$/ },
-  /* D-T-01 … D-T-25 · D-B-01 … D-B-25 minus the two retired 13s · forty-eight chairs, no fixed position for anyone.
+  /* D-T-01 … D-T-26 · D-B-01 … D-B-26 minus the two 13s · fifty chairs, no fixed position for anyone (Owner, 25 Sep 2026).
      The id pattern still RECOGNISES a 13 so a stored geometry or hold that names one can be read and reported. */
-  dinner:   { perSide: 24, guestSeats: 48, totalPeople: 48, retired: { T: [13], B: [13] }, id: /^D-([TB])-(0[1-9]|1[0-9]|2[0-5])$/ },
+  dinner:   { perSide: 25, guestSeats: 50, totalPeople: 50, lastNumber: 26, retired: { T: [13], B: [13] }, id: /^D-([TB])-(0[1-9]|1[0-9]|2[0-6])$/ },
 };
 export const CAPACITY = {
   ceremony: { guestSeats: 50, left: 20, right: 30, fixed: 2 },
-  dinner: { guestSeats: 48, top: 24, bottom: 24, totalPeople: 48 },
+  dinner: { guestSeats: 50, top: 25, bottom: 25, totalPeople: 50 },
 };
+/* THE DINNER PLAN IS THE CODE'S (Owner, 25 Sep 2026): the fifty chairs of the long table, in the order of their numbers —
+   1 … 12, 14 … 26 on each side. 13 can never be produced: the list skips NEVER_SEAT_NUMBER by construction. A geometry Guest
+   Relations uploaded earlier (the 48, or the 50 with the 13s) is read through this list, so the two new chairs A26 and B26
+   exist on the plan without any write to the stored configuration, and every existing hold keeps its id. */
+export function dinnerSeatIds(side) {
+  const out = [];
+  for (let n = 1; n <= RULES.dinner.lastNumber; n++) if (n !== NEVER_SEAT_NUMBER) out.push('D-' + side + '-' + String(n).padStart(2, '0'));
+  return out;
+}
 /* THE TWO RETIRED DINNER SEATS (Owner, 24 Sep 2026 · OQ-03): the seats numbered 13 on side A and side B are not on the plan.
    A hold that still names one is NEVER deleted or moved by this ledger: it stays readable, is reported (`retired` in the
    read, `events.dinner.retired` in the Guest Relations plan) and is logged, so Guest Relations can resolve it by hand. */
@@ -142,7 +151,7 @@ export function validateGeometry(input) {
       for (const s of list) {
         const seatId = String(s && s.seatId || '');
         const m = RULES.dinner.id.exec(seatId);
-        if (!m) { errors.push('dinner seat id ' + seatId + ' does not follow D-T-[01–25] / D-B-[01–25]'); continue; }
+        if (!m) { errors.push('dinner seat id ' + seatId + ' does not follow D-T-[01–26] / D-B-[01–26]'); continue; }
         if (m[1] !== side) errors.push('dinner seat ' + seatId + ' is not on its own side');
         if (ids.has(seatId)) errors.push('duplicate seat ' + seatId);
         ids.add(seatId);
@@ -150,6 +159,10 @@ export function validateGeometry(input) {
         if (isRetiredSeat(seatId)) continue;
         norm[side].push({ seatId, family: !!s.family });
       }
+      /* the plan is the code's fifty (dinnerSeatIds): an upload may name fewer (the earlier 48) — the chairs it does not name
+         are added in their places; a family flag it carries is kept */
+      const fam = new Set(norm[side].filter((s) => s.family).map((s) => s.seatId));
+      norm[side] = dinnerSeatIds(side).map((id) => ({ seatId: id, family: fam.has(id) }));
       if (norm[side].length !== RULES.dinner.perSide) errors.push('dinner ' + (side === 'T' ? 'top' : 'bottom') + ' must hold ' + RULES.dinner.perSide + ' guest seats, has ' + norm[side].length);
     }
     if (sides.L || sides.R) errors.push('dinner sides are T (top) and B (bottom); the retired L/R model is not accepted');
@@ -159,7 +172,7 @@ export function validateGeometry(input) {
      * ever changes the layout; null means the default, never "unknown". */
     const ps = cfg.dinner.poolSide;
     if (ps != null && ps !== 'T' && ps !== 'B') errors.push('dinner.poolSide must be T, B or null');
-    /* the couple hold two of these forty-eight like everyone else — nothing is fixed */
+    /* the couple hold two of these fifty like everyone else — nothing is fixed */
     out.dinner = { sides: norm, totalPeople: RULES.dinner.totalPeople, poolSide: ps === 'B' ? 'B' : 'T' };
   }
   return { ok: errors.length === 0, errors, config: out };
@@ -174,8 +187,12 @@ export function seatsOf(config, event) {
   }
   const d = config && config.dinner;
   if (!d) return [];
-  /* a stored geometry from before 24 Sep 2026 still lists the two 13s: they are never part of the plan */
-  return ['T', 'B'].flatMap((side) => d.sides[side].filter((s) => !isRetiredSeat(s.seatId)).map((s, i) => ({ seatId: s.seatId, family: s.family, side, position: i + 1 })));
+  /* the stored geometry (the 48 of 24 Sep, or an older one still listing the 13s) is read through the code's fifty: every
+     chair in the order of its number, A26 and B26 included, never a 13; a family flag the stored geometry carries is kept */
+  return ['T', 'B'].flatMap((side) => {
+    const fam = new Set(((d.sides && d.sides[side]) || []).filter((s) => s && s.family).map((s) => s.seatId));
+    return dinnerSeatIds(side).map((id, i) => ({ seatId: id, family: fam.has(id), side, position: i + 1 }));
+  });
 }
 /* the holds that sit on a retired seat — kept, reported, never dropped */
 function retiredHolds(event, holds) {

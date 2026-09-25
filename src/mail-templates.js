@@ -37,7 +37,14 @@ export function localiseGuestMail(mail, record) {
 
 export const SITE = 'https://seeyouinlaos-website.suthep-hrg.workers.dev';
 export const GR_EMAIL = 'guest.relation.seeyouinlaos@gmail.com';
-const IVORY = '#f4eee5', PAPER = '#faf7f2', INK = '#313131', MUTE = '#6b6964', LINE = '#ddd6cb';
+/* THE H&S IDENTITY IN EMAIL (Owner, 25 Sep 2026): the canonical Warm Ivory ground and the Cherry of the wordmark's full stop
+   (docs/DESIGN.md) — the retired near-Ivory and #8a5a55 are gone; Ink and Mute for the words */
+const IVORY = '#F2ECE1', PAPER = '#FBF8F3', INK = '#313131', MUTE = '#6b6964', LINE = '#ddd6cb', LOGO_INK = '#211F1C';
+/* the official wordmark (SEE_YOU_IN_LAOS_LOGO_ORIGINAL, the Owner's Drive folder of the brand) — the original artwork scaled,
+   never redrawn: email clients do not show SVG, so the PNG on the Ivory ground is served by the one Worker's own assets. With
+   images off, the alt text reads the wordmark in the same serif. The ?v= is the file's content hash. */
+export const LOGO_URL = SITE + '/assets/brand/see-you-in-laos-email.png?v=723f999e';
+const logo = (w, h) => '<img src="' + LOGO_URL + '" width="' + w + '" height="' + h + '" alt="see you in laos." style="display:block;margin:0 auto;border:0;outline:none;text-decoration:none;width:' + w + 'px;max-width:72%;height:auto;max-height:' + h + 'px;font-family:' + SERIF + ';font-size:' + Math.round(w / 11) + 'px;line-height:1.2;color:' + LOGO_INK + ';">';
 const SERIF = "Georgia, 'Times New Roman', Times, serif", SANS = "'Helvetica Neue', Helvetica, Arial, sans-serif";
 
 /* ---- facts of the journey (the same words as the website) ---- */
@@ -74,7 +81,7 @@ const NOT_AT_WEDDING = 'You are not joining us for the wedding in Vientiane.';
 export function seatLabel(seatId) {
   const c = /^C-([LR])-(0[1-9]|10)-(0[1-3])$/.exec(seatId || '');
   if (c) { const col = ({ L: ['A', 'B'], R: ['D', 'E', 'F'] })[c[1]][Number(c[3]) - 1]; return col ? col + Number(c[2]) : null; }
-  const d = /^D-([TB])-(0[1-9]|1[0-9]|2[0-5])$/.exec(seatId || '');
+  const d = /^D-([TB])-(0[1-9]|1[0-9]|2[0-6])$/.exec(seatId || '');
   if (d) return Number(d[2]) === 13 ? null : ({ T: 'A', B: 'B' })[d[1]] + Number(d[2]);   /* A13 / B13 are not on the plan (OQ-03) */
   return null;
 }
@@ -238,22 +245,25 @@ const kvTable = (rows) => '<table role="presentation" width="100%" cellpadding="
 const button = (href, text) => '<table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td style="background:' + INK + ';"><a href="' + esc(href) + '" style="display:inline-block;padding:15px 26px;font-family:' + SANS + ';font-size:11px;letter-spacing:2.2px;text-transform:uppercase;color:' + IVORY + ';text-decoration:none;">' + esc(text) + '</a></td></tr></table>';
 
 function shell(title, inner, eyebrow) {
-  return '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="x-apple-disable-message-reformatting"><title>' + esc(title) + '</title>' +
-    '<style>body{margin:0;padding:0;background:' + IVORY + ';-webkit-text-size-adjust:100%;} table{border-collapse:collapse;} img{border:0;} @media only screen and (max-width:640px){.wrap{width:100% !important;} .pad{padding:24px 18px !important;} h1{font-size:26px !important;}}</style></head>' +
+  return '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="x-apple-disable-message-reformatting">' +
+    /* light only: the ground is Ivory by design — a client that darkens on its own keeps the logo on its own Ivory */
+    '<meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light only"><title>' + esc(title) + '</title>' +
+    '<style>:root{color-scheme:light only;} body{margin:0;padding:0;background:' + IVORY + ';-webkit-text-size-adjust:100%;} table{border-collapse:collapse;} img{border:0;} @media only screen and (max-width:640px){.wrap{width:100% !important;} .pad{padding:26px 20px !important;} .head{padding:30px 20px 22px !important;} h1{font-size:26px !important;}}</style></head>' +
     '<body style="margin:0;padding:0;background:' + IVORY + ';">' +
-    '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:' + IVORY + ';"><tr><td align="center" style="padding:28px 12px;">' +
-    '<table role="presentation" class="wrap" width="640" cellpadding="0" cellspacing="0" border="0" style="width:640px;max-width:640px;background:' + PAPER + ';">' +
-    '<tr><td class="pad" style="padding:36px 40px 32px;">' +
-    /* the header: the wordmark, YOUR JOURNEY, a thin rule */
-    '<p style="margin:0 0 4px;font-family:' + SERIF + ';font-size:22px;line-height:1.2;color:' + INK + ';">see you in laos<span style="color:#8a5a55;">.</span></p>' +
+    '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:' + IVORY + ';"><tr><td align="center" style="padding:0 12px 28px;">' +
+    /* the masthead: the wordmark alone on the Ivory ground, with air around it */
+    '<table role="presentation" class="wrap" width="640" cellpadding="0" cellspacing="0" border="0" style="width:640px;max-width:640px;"><tr><td class="head" align="center" style="padding:44px 40px 30px;text-align:center;">' + logo(280, 65) + '</td></tr></table>' +
+    '<table role="presentation" class="wrap" width="640" cellpadding="0" cellspacing="0" border="0" style="width:640px;max-width:640px;background:' + PAPER + ';border-top:1px solid ' + LINE + ';">' +
+    '<tr><td class="pad" style="padding:38px 44px 36px;">' +
+    /* whose letter it is, a thin rule */
     '<p style="margin:0 0 22px;font-family:' + SANS + ';font-size:10px;letter-spacing:2.4px;text-transform:uppercase;color:' + MUTE + ';">' + esc(eyebrow || 'My Trip') + '</p>' +
     '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">' + rule() + gap(22) + '</table>' +
     inner +
     '</td></tr></table>' +
-    /* the footer */
-    '<table role="presentation" class="wrap" width="640" cellpadding="0" cellspacing="0" border="0" style="width:640px;max-width:640px;"><tr><td style="padding:22px 40px 8px;text-align:center;">' +
-    '<p style="margin:0 0 4px;font-family:' + SERIF + ';font-size:16px;color:' + INK + ';">see you in laos<span style="color:#8a5a55;">.</span></p>' +
-    '<p style="margin:0;font-family:' + SANS + ';font-size:10px;letter-spacing:2px;text-transform:uppercase;color:' + MUTE + ';">Vientiane · 28 February 2027</p>' +
+    /* the footer: the wordmark again, small, and the day */
+    '<table role="presentation" class="wrap" width="640" cellpadding="0" cellspacing="0" border="0" style="width:640px;max-width:640px;"><tr><td align="center" style="padding:30px 40px 8px;text-align:center;">' +
+    logo(150, 35) +
+    '<p style="margin:10px 0 0;font-family:' + SANS + ';font-size:10px;letter-spacing:2px;text-transform:uppercase;color:' + MUTE + ';">Vientiane · 28 February 2027</p>' +
     '</td></tr></table>' +
     '</td></tr></table></body></html>';
 }
@@ -391,7 +401,9 @@ export function composeOwnerMail(record, statusUrl) {
   inner += section('Internal reference', kvTable([kvRow('Guest', M.guestId), kvRow('Invitation', M.invitationId), M.seats.ceremony.id ? kvRow('Ceremony seat record', M.seats.ceremony.id) : '', M.seats.dinner.id ? kvRow('Dinner seat record', M.seats.dinner.id) : '',
     kvRow('Submission', M.reference + ' · version ' + M.version), statusUrl ? kvRow('Status', statusUrl) : ''].filter(Boolean)));
   /* the complete submitted record, section by section — the copy Guest Relations rebuilds from after a reset (last: it names the ids) */
-  inner += section('Recovery snapshot · the complete submitted record', REC.map(([title, rows]) => label(title) + kvTable(rows.map(([k, v]) => kvRow(k, v)))).join(gap(10)));
+  /* each part a label and its own table — the space between them a block of its own, never a table row outside a table (a
+     stray row is moved by every browser and email client: the labels ended up above the email) */
+  inner += section('Recovery snapshot · the complete submitted record', REC.map(([title, rows]) => '<div style="padding:14px 0 0;">' + label(title) + kvTable(rows.map(([k, v]) => kvRow(k, v))) + '</div>').join(''));
   inner += '</table>';
   const html = shell(subject, inner, 'Guest Relations');
   const T = [];

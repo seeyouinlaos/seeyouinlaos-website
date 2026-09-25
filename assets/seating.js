@@ -15,7 +15,7 @@
      no chair on the plan can have)
    The ceremony has two fixed positions at the FRONT CENTRE — BRIDE and
    GROOM — that are not chairs, carry no seat id and are never selectable
-   (Owner, 13 Sep 2026). The dinner is forty-eight bookable chairs at one long
+   (Owner, 13 Sep 2026). The dinner is fifty bookable chairs at one long
    table — side A and side B, 24 each; the two seats numbered 13 were removed
    (Owner, 24 Sep 2026) and nothing was renumbered — and the couple hold two of
    them like every other guest. Every count in the words is read from the plan.
@@ -199,7 +199,7 @@
       }
 
       /* the long table, seen from above: side A along the top, side B along the
-       * bottom — forty-eight seats, no fixed position for anyone, poolside. THE
+       * bottom — fifty seats (25 + 25, Owner 25 Sep 2026), no fixed position for anyone, poolside. THE
        * POOL is the landmark: SIDE A is the poolside side (Owner, 15 Sep 2026,
        * source of truth from the venue plan; the geometry may record 'B' if
        * the venue ever changes the layout). The water is drawn as water —
@@ -219,7 +219,9 @@
       var RN = (S.LABELS && S.LABELS.RUNS) || { T: 'A', B: 'B' };
       var other = poolSide === 'B' ? 'T' : 'B', lenOf = { T: top2s.length, B: bottom.length };
       var planWords = 'Wedding Dinner seating plan: one long table by the pool, with side ' + RN[poolSide] + ' of ' + lenOf[poolSide] + ' seats along the pool and side ' + RN[other] + ' of ' + lenOf[other] + ' seats facing it';
-      var h2 = '<svg class="p-seatmap p-seatmap-table" viewBox="0 0 ' + W2 + ' ' + H2 + '" style="min-width:' + Math.round(W2 * 1.15) + 'px" role="group" aria-label="' + esc(planWords) + '">';
+      /* THE FIFTY (Owner, 25 Sep 2026): on a phone and a tablet the chairs keep a real tapping size and the plan scrolls sideways
+         (the page says so); from 900 px the whole table fits the column — prep.css reads the width as --plan-min */
+      var h2 = '<svg class="p-seatmap p-seatmap-table" viewBox="0 0 ' + W2 + ' ' + H2 + '" style="--plan-min:' + Math.round(W2 * 1.15) + 'px" role="group" aria-label="' + esc(planWords) + '">';
       h2 += '<defs><linearGradient id="siyl-water" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#DCE5E2"/><stop offset="1" stop-color="#CCD9D5"/></linearGradient></defs>';
       h2 += '<line x1="' + pad2 + '" y1="14" x2="' + (W2 - pad2) + '" y2="14" stroke="#313131" stroke-width="1"/>' +
             '<text x="' + pad2 + '" y="' + headY2 + '" ' + T + '>Wedding Dinner · poolside</text>' +
@@ -239,7 +241,7 @@
       }
       if (poolSide === 'T') h2 += pool(44);
       /* each chair's column is its RANK among the numbers of its side (1 … 12, 14 … 25 → columns 1 … 24): the order and the
-         labels are the ledger's, the retired 13 leaves no gap and nothing is drawn beyond the table */
+         labels are the ledger's, the retired 13 leaves no gap and nothing is drawn beyond the table; 14 … 26 → columns 13 … 25 */
       var numOf = function (s) { var m = /-(\d\d)$/.exec(s.seatId || ''); return m ? Number(m[1]) : 0; };
       var rankIn = function (list) { var nums = list.map(numOf).sort(function (a, b) { return a - b; }); return function (s, j) { var k = nums.indexOf(numOf(s)); return k >= 0 ? k : j; }; };
       var placeT = rankIn(top2s), placeB = rankIn(bottom);
@@ -320,7 +322,14 @@
       /* on a narrow screen the plan keeps its chairs at a real size and
        * scrolls sideways — the guest is told so, in words */
       var wrap = container.querySelector('.p-seatwrap'), hint = container.querySelector('.p-seathint');
-      if (wrap && hint) hint.hidden = !(wrap.scrollWidth > wrap.clientWidth + 2);
+      /* measured again once the card has its width, and whenever the window changes — never read from a layout in progress */
+      var syncHint = function () { if (wrap && hint && wrap.isConnected) hint.hidden = !(wrap.scrollWidth > wrap.clientWidth + 2); };
+      syncHint();
+      if (wrap && hint) {
+        if (window.requestAnimationFrame) requestAnimationFrame(function () { requestAnimationFrame(syncHint); });
+        if (window.ResizeObserver) { try { new ResizeObserver(syncHint).observe(wrap); } catch (e) { /* the resize listener below */ } }
+        window.addEventListener('resize', syncHint);
+      }
       /* and it opens on the guest's own chair when there is one */
       var own = container.querySelector('.seat-selected rect, .seat-yours rect');
       if (wrap && own && wrap.scrollWidth > wrap.clientWidth + 2) {

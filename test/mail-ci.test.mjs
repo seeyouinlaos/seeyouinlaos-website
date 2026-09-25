@@ -44,7 +44,7 @@ test('the guest email · CI, human words, the Worker CTA, no system term, no id,
     assert.doesNotMatch(body, /Passport/, 'an optional document not provided is omitted for the guest');
     assert.match(body, /Wat Ong Teu/); assert.match(body, /09:00 – approximately 12:00/); assert.match(body, /12:00 – 15:30/); assert.match(body, /15:30/); assert.match(body, /19:30/); assert.match(body, /poolside/); assert.match(body, /Not joining/);
   }
-  assert.match(m.html, /background:#f4eee5/); assert.match(m.html, /Georgia, 'Times New Roman'/); assert.match(m.html, /letter-spacing:2px;text-transform:uppercase/); assert.match(m.html, /max-width:640px/); assert.match(m.html, /Open My Trip/);
+  assert.match(m.html, /background:#F2ECE1/, 'the canonical Warm Ivory'); assert.doesNotMatch(m.html, /#8a5a55|#f4eee5/i, 'no retired colour'); assert.match(m.html, /Georgia, 'Times New Roman'/); assert.match(m.html, /letter-spacing:2px;text-transform:uppercase/); assert.match(m.html, /max-width:640px/); assert.match(m.html, /Open My Trip/);
   assert.match(m.html, /<meta name="viewport"/); assert.doesNotMatch(m.html, /display:\s*grid|display:\s*flex|<script/);
   assert.match(m.text, /^SEE YOU IN LAOS — MY TRIP\n\nThank you — we have your trip\n\nDear Sam,/);
   assert.match(m.text, /^· Vow Ceremony · 15:30 · Souphattra Heritage: Joining$/m); assert.doesNotMatch(m.text + m.html, /Wedding Ceremony/, 'TO-01819: the Vow Ceremony');
